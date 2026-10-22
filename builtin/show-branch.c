@@ -1,38 +1,38 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "pretty.h"
-#include "refs.h"
-#include "color.h"
-#include "strvec.h"
-#include "object-name.h"
-#include "parse-options.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hash.h"
+#ضمن "hex.h"
+#ضمن "pretty.h"
+#ضمن "refs.h"
+#ضمن "color.h"
+#ضمن "strvec.h"
+#ضمن "object-name.h"
+#ضمن "parse-options.h"
 
-#include "dir.h"
-#include "commit-slab.h"
-#include "date.h"
-#include "wildmatch.h"
-#include "prio-queue.h"
+#ضمن "dir.h"
+#ضمن "commit-slab.h"
+#ضمن "date.h"
+#ضمن "wildmatch.h"
+#ضمن "prio-queue.h"
 
-static const char*const show_branch_usage[] = {
+ساكن ثابت حرف*ثابت show_branch_usage[] = {
     N_("git show-branch [-a | --all] [-r | --remotes] [--topo-order | --date-order]\n"
        "                [--current] [--color[=<when>] | --no-color] [--sparse]\n"
        "                [--more=<n> | --list | --independent | --merge-base]\n"
        "                [--no-name | --sha1-name] [--topics]\n"
        "                [(<rev> | <glob>)...]"),
     N_("git show-branch (-g | --reflog)[=<n>[,<base>]] [--list] [<ref>]"),
-    NULL
+    عدم
 };
 
-static enum git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
+ساكن تعداد git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
 
-static struct strvec default_args = STRVEC_INIT;
+ساكن بنية strvec default_args = STRVEC_INIT;
 
 /*
  * TODO: convert this use of commit->object.flags to commit-slab
@@ -46,54 +46,54 @@ static struct strvec default_args = STRVEC_INIT;
 
 #define DEFAULT_REFLOG	4
 
-static const char *get_color_code(int idx)
+ساكن ثابت حرف *get_color_code(صحيح idx)
 {
-	if (want_color(showbranch_use_color))
-		return column_colors_ansi[idx % column_colors_ansi_max];
-	return "";
+	אם (want_color(showbranch_use_color))
+		החזר column_colors_ansi[idx % column_colors_ansi_max];
+	החזר "";
 }
 
-static const char *get_color_reset_code(void)
+ساكن ثابت حرف *get_color_reset_code(فراغ)
 {
-	if (want_color(showbranch_use_color))
-		return GIT_COLOR_RESET;
-	return "";
+	אם (want_color(showbranch_use_color))
+		החזר GIT_COLOR_RESET;
+	החזר "";
 }
 
-static struct commit *interesting(struct prio_queue *queue)
+ساكن بنية commit *interesting(بنية prio_queue *queue)
 {
-	struct commit *commit;
+	بنية commit *commit;
 	prio_queue_for_each(queue, commit) {
-		if (!(commit->object.flags & UNINTERESTING))
-			return commit;
+		אם (!(commit->object.flags & UNINTERESTING))
+			החזר commit;
 	}
-	return NULL;
+	החזר عدم;
 }
 
-struct commit_name {
-	const char *head_name; /* which head's ancestor? */
-	int generation; /* how many parents away from head_name */
+بنية commit_name {
+	ثابت حرف *head_name; /* which head's ancestor? */
+	صحيح generation; /* how many parents away from head_name */
 };
 
-define_commit_slab(commit_name_slab, struct commit_name *);
-static struct commit_name_slab name_slab;
+define_commit_slab(commit_name_slab, بنية commit_name *);
+ساكن بنية commit_name_slab name_slab;
 
-static struct commit_name *commit_to_name(struct commit *commit)
+ساكن بنية commit_name *commit_to_name(بنية commit *commit)
 {
-	return *commit_name_slab_at(&name_slab, commit);
+	החזר *commit_name_slab_at(&name_slab, commit);
 }
 
 
 /* Name the commit as nth generation ancestor of head_name;
  * we count only the first-parent relationship for naming purposes.
  */
-static void name_commit(struct commit *commit, const char *head_name, int nth)
+ساكن فراغ name_commit(بنية commit *commit, ثابت حرف *head_name, صحيح nth)
 {
-	struct commit_name *name;
+	بنية commit_name *name;
 
 	name = *commit_name_slab_at(&name_slab, commit);
-	if (!name) {
-		name = xmalloc(sizeof(*name));
+	אם (!name) {
+		name = xmalloc(حجم(*name));
 		*commit_name_slab_at(&name_slab, commit) = name;
 	}
 	name->head_name = head_name;
@@ -105,153 +105,153 @@ static void name_commit(struct commit *commit, const char *head_name, int nth)
  * commit is nth generation ancestor of, if that generation
  * number is better than the name it already has.
  */
-static void name_parent(struct commit *commit, struct commit *parent)
+ساكن فراغ name_parent(بنية commit *commit, بنية commit *parent)
 {
-	struct commit_name *commit_name = commit_to_name(commit);
-	struct commit_name *parent_name = commit_to_name(parent);
-	if (!commit_name)
-		return;
-	if (!parent_name ||
+	بنية commit_name *commit_name = commit_to_name(commit);
+	بنية commit_name *parent_name = commit_to_name(parent);
+	אם (!commit_name)
+		החזר;
+	אם (!parent_name ||
 	    commit_name->generation + 1 < parent_name->generation)
 		name_commit(parent, commit_name->head_name,
 			    commit_name->generation + 1);
 }
 
-static int name_first_parent_chain(struct commit *c)
+ساكن صحيح name_first_parent_chain(بنية commit *c)
 {
-	int i = 0;
-	while (c) {
-		struct commit *p;
-		if (!commit_to_name(c))
-			break;
-		if (!c->parents)
-			break;
+	صحيح i = 0;
+	כלעוד (c) {
+		بنية commit *p;
+		אם (!commit_to_name(c))
+			اكسر;
+		אם (!c->parents)
+			اكسر;
 		p = c->parents->item;
-		if (!commit_to_name(p)) {
+		אם (!commit_to_name(p)) {
 			name_parent(c, p);
 			i++;
 		}
-		else
-			break;
+		אחרת
+			اكسر;
 		c = p;
 	}
-	return i;
+	החזר i;
 }
 
-static void name_commits(struct commit_list *list,
-			 struct commit **rev,
-			 char **ref_name,
-			 int num_rev)
+ساكن فراغ name_commits(بنية commit_list *list,
+			 بنية commit **rev,
+			 حرف **ref_name,
+			 صحيح num_rev)
 {
-	struct commit_list *cl;
-	struct commit *c;
-	int i;
+	بنية commit_list *cl;
+	بنية commit *c;
+	صحيح i;
 
 	/* First give names to the given heads */
-	for (cl = list; cl; cl = cl->next) {
+	עבור (cl = list; cl; cl = cl->next) {
 		c = cl->item;
-		if (commit_to_name(c))
-			continue;
-		for (i = 0; i < num_rev; i++) {
-			if (rev[i] == c) {
+		אם (commit_to_name(c))
+			استمر;
+		עבור (i = 0; i < num_rev; i++) {
+			אם (rev[i] == c) {
 				name_commit(c, ref_name[i], 0);
-				break;
+				اكسر;
 			}
 		}
 	}
 
 	/* Then commits on the first parent ancestry chain */
-	do {
+	עשה {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
+		עבור (cl = list; cl; cl = cl->next) {
 			i += name_first_parent_chain(cl->item);
 		}
-	} while (i);
+	} כלעוד (i);
 
 	/* Finally, any unnamed commits */
-	do {
+	עשה {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
-			struct commit_list *parents;
-			struct commit_name *n;
-			int nth;
+		עבור (cl = list; cl; cl = cl->next) {
+			بنية commit_list *parents;
+			بنية commit_name *n;
+			صحيح nth;
 			c = cl->item;
-			if (!commit_to_name(c))
-				continue;
+			אם (!commit_to_name(c))
+				استمر;
 			n = commit_to_name(c);
 			parents = c->parents;
 			nth = 0;
-			while (parents) {
-				struct commit *p = parents->item;
-				struct strbuf newname = STRBUF_INIT;
+			כלעוד (parents) {
+				بنية commit *p = parents->item;
+				بنية strbuf newname = STRBUF_INIT;
 				parents = parents->next;
 				nth++;
-				if (commit_to_name(p))
-					continue;
-				switch (n->generation) {
-				case 0:
+				אם (commit_to_name(p))
+					استمر;
+				بدل (n->generation) {
+				حالة 0:
 					strbuf_addstr(&newname, n->head_name);
-					break;
-				case 1:
+					اكسر;
+				حالة 1:
 					strbuf_addf(&newname, "%s^", n->head_name);
-					break;
-				default:
+					اكسر;
+				افتراضي:
 					strbuf_addf(&newname, "%s~%d",
 						    n->head_name, n->generation);
-					break;
+					اكسر;
 				}
-				if (nth == 1)
+				אם (nth == 1)
 					strbuf_addch(&newname, '^');
-				else
+				אחרת
 					strbuf_addf(&newname, "^%d", nth);
-				name_commit(p, strbuf_detach(&newname, NULL), 0);
+				name_commit(p, strbuf_detach(&newname, عدم), 0);
 				i++;
 				name_first_parent_chain(p);
 			}
 		}
-	} while (i);
+	} כלעוד (i);
 }
 
-static int mark_seen(struct commit *commit, struct commit_list **seen_p)
+ساكن صحيح mark_seen(بنية commit *commit, بنية commit_list **seen_p)
 {
-	if (!commit->object.flags) {
+	אם (!commit->object.flags) {
 		commit_list_insert(commit, seen_p);
-		return 1;
+		החזר 1;
 	}
-	return 0;
+	החזר 0;
 }
 
-static void join_revs(struct prio_queue *queue,
-		      struct commit_list **seen_p,
-		      int num_rev, int extra)
+ساكن فراغ join_revs(بنية prio_queue *queue,
+		      بنية commit_list **seen_p,
+		      صحيح num_rev, صحيح extra)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	struct commit *commit;
+	صحيح all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	صحيح all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	بنية commit *commit;
 
-	while ((commit = prio_queue_peek(queue))) {
-		struct commit_list *parents;
-		int still_interesting = !!interesting(queue);
-		int flags = commit->object.flags & all_mask;
+	כלעוד ((commit = prio_queue_peek(queue))) {
+		بنية commit_list *parents;
+		صحيح still_interesting = !!interesting(queue);
+		صحيح flags = commit->object.flags & all_mask;
 
-		if (!still_interesting && extra <= 0)
-			break;
+		אם (!still_interesting && extra <= 0)
+			اكسر;
 
 		prio_queue_get(queue);
 
 		mark_seen(commit, seen_p);
-		if ((flags & all_revs) == all_revs)
+		אם ((flags & all_revs) == all_revs)
 			flags |= UNINTERESTING;
 		parents = commit->parents;
 
-		while (parents) {
-			struct commit *p = parents->item;
-			int this_flag = p->object.flags;
+		כלעוד (parents) {
+			بنية commit *p = parents->item;
+			صحيح this_flag = p->object.flags;
 			parents = parents->next;
-			if ((this_flag & flags) == flags)
-				continue;
+			אם ((this_flag & flags) == flags)
+				استمر;
 			repo_parse_commit(the_repository, p);
-			if (mark_seen(p, seen_p) && !still_interesting)
+			אם (mark_seen(p, seen_p) && !still_interesting)
 				extra--;
 			p->object.flags |= flags;
 			prio_queue_put(queue, p);
@@ -265,16 +265,16 @@ static void join_revs(struct prio_queue *queue,
 	 * seen_p list.  Mark anything that can be reached from
 	 * uninteresting commits not interesting.
 	 */
-	for (;;) {
-		int changed = 0;
-		struct commit_list *s;
-		for (s = *seen_p; s; s = s->next) {
-			struct commit *c = s->item;
-			struct commit_list *parents;
+	עבור (;;) {
+		صحيح changed = 0;
+		بنية commit_list *s;
+		עבור (s = *seen_p; s; s = s->next) {
+			بنية commit *c = s->item;
+			بنية commit_list *parents;
 
-			if (((c->object.flags & all_revs) != all_revs) &&
+			אם (((c->object.flags & all_revs) != all_revs) &&
 			    !(c->object.flags & UNINTERESTING))
-				continue;
+				استمر;
 
 			/* The current commit is either a merge base or
 			 * already uninteresting one.  Mark its parents
@@ -283,44 +283,44 @@ static void join_revs(struct prio_queue *queue,
 			 * here.
 			 */
 			parents = c->parents;
-			while (parents) {
-				struct commit *p = parents->item;
+			כלעוד (parents) {
+				بنية commit *p = parents->item;
 				parents = parents->next;
-				if (!(p->object.flags & UNINTERESTING)) {
+				אם (!(p->object.flags & UNINTERESTING)) {
 					p->object.flags |= UNINTERESTING;
 					changed = 1;
 				}
 			}
 		}
-		if (!changed)
-			break;
+		אם (!changed)
+			اكسر;
 	}
 }
 
-static void show_one_commit(struct commit *commit, int no_name)
+ساكن فراغ show_one_commit(بنية commit *commit, صحيح no_name)
 {
-	struct strbuf pretty = STRBUF_INIT;
-	const char *pretty_str = "(unavailable)";
-	struct commit_name *name = commit_to_name(commit);
+	بنية strbuf pretty = STRBUF_INIT;
+	ثابت حرف *pretty_str = "(unavailable)";
+	بنية commit_name *name = commit_to_name(commit);
 
-	if (commit->object.parsed) {
+	אם (commit->object.parsed) {
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &pretty);
 		pretty_str = pretty.buf;
 	}
 	skip_prefix(pretty_str, "[PATCH] ", &pretty_str);
 
-	if (!no_name) {
-		if (name && name->head_name) {
+	אם (!no_name) {
+		אם (name && name->head_name) {
 			printf("[%s", name->head_name);
-			if (name->generation) {
-				if (name->generation == 1)
+			אם (name->generation) {
+				אם (name->generation == 1)
 					printf("^");
-				else
+				אחרת
 					printf("~%d", name->generation);
 			}
 			printf("] ");
 		}
-		else
+		אחרת
 			printf("[%s] ",
 			       repo_find_unique_abbrev(the_repository, &commit->object.oid,
 						       DEFAULT_ABBREV));
@@ -329,337 +329,337 @@ static void show_one_commit(struct commit *commit, int no_name)
 	strbuf_release(&pretty);
 }
 
-static char *ref_name[MAX_REVS + 1];
-static int ref_name_cnt;
+ساكن حرف *ref_name[MAX_REVS + 1];
+ساكن صحيح ref_name_cnt;
 
-static const char *find_digit_prefix(const char *s, int *v)
+ساكن ثابت حرف *find_digit_prefix(ثابت حرف *s, صحيح *v)
 {
-	const char *p;
-	int ver;
-	char ch;
+	ثابت حرف *p;
+	صحيح ver;
+	حرف ch;
 
-	for (p = s, ver = 0;
+	עבור (p = s, ver = 0;
 	     '0' <= (ch = *p) && ch <= '9';
 	     p++)
 		ver = ver * 10 + ch - '0';
 	*v = ver;
-	return p;
+	החזר p;
 }
 
 
-static int version_cmp(const char *a, const char *b)
+ساكن صحيح version_cmp(ثابت حرف *a, ثابت حرف *b)
 {
-	while (1) {
-		int va, vb;
+	כלעוד (1) {
+		صحيح va, vb;
 
 		a = find_digit_prefix(a, &va);
 		b = find_digit_prefix(b, &vb);
-		if (va != vb)
-			return va - vb;
+		אם (va != vb)
+			החזר va - vb;
 
-		while (1) {
-			int ca = *a;
-			int cb = *b;
-			if ('0' <= ca && ca <= '9')
+		כלעוד (1) {
+			صحيح ca = *a;
+			صحيح cb = *b;
+			אם ('0' <= ca && ca <= '9')
 				ca = 0;
-			if ('0' <= cb && cb <= '9')
+			אם ('0' <= cb && cb <= '9')
 				cb = 0;
-			if (ca != cb)
-				return ca - cb;
-			if (!ca)
-				break;
+			אם (ca != cb)
+				החזר ca - cb;
+			אם (!ca)
+				اكسر;
 			a++;
 			b++;
 		}
-		if (!*a && !*b)
-			return 0;
+		אם (!*a && !*b)
+			החזר 0;
 	}
 }
 
-static int compare_ref_name(const void *a_, const void *b_)
+ساكن صحيح compare_ref_name(ثابت فراغ *a_, ثابت فراغ *b_)
 {
-	const char * const*a = a_, * const*b = b_;
-	return version_cmp(*a, *b);
+	ثابت حرف * ثابت*a = a_, * ثابت*b = b_;
+	החזר version_cmp(*a, *b);
 }
 
-static void sort_ref_range(int bottom, int top)
+ساكن فراغ sort_ref_range(صحيح bottom, صحيح top)
 {
 	QSORT(ref_name + bottom, top - bottom, compare_ref_name);
 }
 
-static int append_ref(const char *refname, const struct object_id *oid,
-		      int allow_dups)
+ساكن صحيح append_ref(ثابت حرف *refname, ثابت بنية object_id *oid,
+		      صحيح allow_dups)
 {
-	struct commit *commit = lookup_commit_reference_gently(the_repository,
+	بنية commit *commit = lookup_commit_reference_gently(the_repository,
 							       oid, 1);
-	int i;
+	صحيح i;
 
-	if (!commit)
-		return 0;
+	אם (!commit)
+		החזר 0;
 
-	if (!allow_dups) {
+	אם (!allow_dups) {
 		/* Avoid adding the same thing twice */
-		for (i = 0; i < ref_name_cnt; i++)
-			if (!strcmp(refname, ref_name[i]))
-				return 0;
+		עבור (i = 0; i < ref_name_cnt; i++)
+			אם (!strcmp(refname, ref_name[i]))
+				החזר 0;
 	}
-	if (MAX_REVS <= ref_name_cnt) {
+	אם (MAX_REVS <= ref_name_cnt) {
 		warning(Q_("ignoring %s; cannot handle more than %d ref",
 			   "ignoring %s; cannot handle more than %d refs",
 			   MAX_REVS), refname, MAX_REVS);
-		return 0;
+		החזר 0;
 	}
 	ref_name[ref_name_cnt++] = xstrdup(refname);
-	ref_name[ref_name_cnt] = NULL;
-	return 0;
+	ref_name[ref_name_cnt] = عدم;
+	החזר 0;
 }
 
-static int append_head_ref(const struct reference *ref, void *cb_data UNUSED)
+ساكن صحيح append_head_ref(ثابت بنية reference *ref, فراغ *cb_data UNUSED)
 {
-	struct object_id tmp;
-	int ofs = 11;
-	if (!starts_with(ref->name, "refs/heads/"))
-		return 0;
+	بنية object_id tmp;
+	صحيح ofs = 11;
+	אם (!starts_with(ref->name, "refs/heads/"))
+		החזר 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	אם (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	החזר append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_remote_ref(const struct reference *ref, void *cb_data UNUSED)
+ساكن صحيح append_remote_ref(ثابت بنية reference *ref, فراغ *cb_data UNUSED)
 {
-	struct object_id tmp;
-	int ofs = 13;
-	if (!starts_with(ref->name, "refs/remotes/"))
-		return 0;
+	بنية object_id tmp;
+	صحيح ofs = 13;
+	אם (!starts_with(ref->name, "refs/remotes/"))
+		החזר 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	אם (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	החזר append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_tag_ref(const char *refname, const struct object_id *oid,
-			  int flag UNUSED, void *cb_data UNUSED)
+ساكن صحيح append_tag_ref(ثابت حرف *refname, ثابت بنية object_id *oid,
+			  صحيح flag UNUSED, فراغ *cb_data UNUSED)
 {
-	if (!starts_with(refname, "refs/tags/"))
-		return 0;
-	return append_ref(refname + 5, oid, 0);
+	אם (!starts_with(refname, "refs/tags/"))
+		החזר 0;
+	החזר append_ref(refname + 5, oid, 0);
 }
 
-static const char *match_ref_pattern = NULL;
-static int match_ref_slash = 0;
+ساكن ثابت حرف *match_ref_pattern = عدم;
+ساكن صحيح match_ref_slash = 0;
 
-static int append_matching_ref(const struct reference *ref, void *cb_data)
+ساكن صحيح append_matching_ref(ثابت بنية reference *ref, فراغ *cb_data)
 {
 	/* we want to allow pattern hold/<asterisk> to show all
 	 * branches under refs/heads/hold/, and v0.99.9? to show
 	 * refs/tags/v0.99.9a and friends.
 	 */
-	const char *tail;
-	int slash = count_slashes(ref->name);
-	for (tail = ref->name; *tail && match_ref_slash < slash; )
-		if (*tail++ == '/')
+	ثابت حرف *tail;
+	صحيح slash = count_slashes(ref->name);
+	עבור (tail = ref->name; *tail && match_ref_slash < slash; )
+		אם (*tail++ == '/')
 			slash--;
-	if (!*tail)
-		return 0;
-	if (wildmatch(match_ref_pattern, tail, 0))
-		return 0;
-	if (starts_with(ref->name, "refs/heads/"))
-		return append_head_ref(ref, cb_data);
-	if (starts_with(ref->name, "refs/tags/"))
-		return append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
-	return append_ref(ref->name, ref->oid, 0);
+	אם (!*tail)
+		החזר 0;
+	אם (wildmatch(match_ref_pattern, tail, 0))
+		החזר 0;
+	אם (starts_with(ref->name, "refs/heads/"))
+		החזר append_head_ref(ref, cb_data);
+	אם (starts_with(ref->name, "refs/tags/"))
+		החזר append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
+	החזר append_ref(ref->name, ref->oid, 0);
 }
 
-static void snarf_refs(int head, int remotes)
+ساكن فراغ snarf_refs(صحيح head, صحيح remotes)
 {
-	if (head) {
-		int orig_cnt = ref_name_cnt;
+	אם (head) {
+		صحيح orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_head_ref, NULL);
+				  append_head_ref, عدم);
 		sort_ref_range(orig_cnt, ref_name_cnt);
 	}
-	if (remotes) {
-		int orig_cnt = ref_name_cnt;
+	אם (remotes) {
+		صحيح orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_remote_ref, NULL);
+				  append_remote_ref, عدم);
 		sort_ref_range(orig_cnt, ref_name_cnt);
 	}
 }
 
-static int rev_is_head(const char *head, const char *name)
+ساكن صحيح rev_is_head(ثابت حرف *head, ثابت حرف *name)
 {
-	if (!head)
-		return 0;
+	אם (!head)
+		החזר 0;
 	skip_prefix(head, "refs/heads/", &head);
-	if (!skip_prefix(name, "refs/heads/", &name))
+	אם (!skip_prefix(name, "refs/heads/", &name))
 		skip_prefix(name, "heads/", &name);
-	return !strcmp(head, name);
+	החזר !strcmp(head, name);
 }
 
-static int show_merge_base(const struct commit_list *seen, int num_rev)
+ساكن صحيح show_merge_base(ثابت بنية commit_list *seen, صحيح num_rev)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	int exit_status = 1;
+	صحيح all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	صحيح all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	صحيح exit_status = 1;
 
-	for (const struct commit_list *s = seen; s; s = s->next) {
-		struct commit *commit = s->item;
-		int flags = commit->object.flags & all_mask;
-		if (!(flags & UNINTERESTING) &&
+	עבור (ثابت بنية commit_list *s = seen; s; s = s->next) {
+		بنية commit *commit = s->item;
+		صحيح flags = commit->object.flags & all_mask;
+		אם (!(flags & UNINTERESTING) &&
 		    ((flags & all_revs) == all_revs)) {
 			puts(oid_to_hex(&commit->object.oid));
 			exit_status = 0;
 			commit->object.flags |= UNINTERESTING;
 		}
 	}
-	return exit_status;
+	החזר exit_status;
 }
 
-static int show_independent(struct commit **rev,
-			    int num_rev,
-			    unsigned int *rev_mask)
+ساكن صحيح show_independent(بنية commit **rev,
+			    صحيح num_rev,
+			    unsigned صحيح *rev_mask)
 {
-	int i;
+	صحيح i;
 
-	for (i = 0; i < num_rev; i++) {
-		struct commit *commit = rev[i];
-		unsigned int flag = rev_mask[i];
+	עבור (i = 0; i < num_rev; i++) {
+		بنية commit *commit = rev[i];
+		unsigned صحيح flag = rev_mask[i];
 
-		if (commit->object.flags == flag)
+		אם (commit->object.flags == flag)
 			puts(oid_to_hex(&commit->object.oid));
 		commit->object.flags |= UNINTERESTING;
 	}
-	return 0;
+	החזר 0;
 }
 
-static void append_one_rev(const char *av)
+ساكن فراغ append_one_rev(ثابت حرف *av)
 {
-	struct object_id revkey;
-	if (!repo_get_oid(the_repository, av, &revkey)) {
+	بنية object_id revkey;
+	אם (!repo_get_oid(the_repository, av, &revkey)) {
 		append_ref(av, &revkey, 0);
-		return;
+		החזר;
 	}
-	if (strpbrk(av, "*?[")) {
+	אם (strpbrk(av, "*?[")) {
 		/* glob style match */
-		int saved_matches = ref_name_cnt;
+		صحيح saved_matches = ref_name_cnt;
 
 		match_ref_pattern = av;
 		match_ref_slash = count_slashes(av);
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_matching_ref, NULL);
-		if (saved_matches == ref_name_cnt &&
+				  append_matching_ref, عدم);
+		אם (saved_matches == ref_name_cnt &&
 		    ref_name_cnt < MAX_REVS)
 			error(_("no matching refs with %s"), av);
 		sort_ref_range(saved_matches, ref_name_cnt);
-		return;
+		החזר;
 	}
 	die("bad sha1 reference %s", av);
 }
 
-static int git_show_branch_config(const char *var, const char *value,
-				  const struct config_context *ctx, void *cb)
+ساكن صحيح git_show_branch_config(ثابت حرف *var, ثابت حرف *value,
+				  ثابت بنية config_context *ctx, فراغ *cb)
 {
-	if (!strcmp(var, "showbranch.default")) {
-		if (!value)
-			return config_error_nonbool(var);
+	אם (!strcmp(var, "showbranch.default")) {
+		אם (!value)
+			החזר config_error_nonbool(var);
 		/*
 		 * default_arg is now passed to parse_options(), so we need to
 		 * mimic the real argv a bit better.
 		 */
-		if (!default_args.nr)
+		אם (!default_args.nr)
 			strvec_push(&default_args, "show-branch");
 		strvec_push(&default_args, value);
-		return 0;
+		החזר 0;
 	}
 
-	if (!strcmp(var, "color.showbranch")) {
+	אם (!strcmp(var, "color.showbranch")) {
 		showbranch_use_color = git_config_colorbool(var, value);
-		return 0;
+		החזר 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	אם (git_color_config(var, value, cb) < 0)
+		החזר -1;
 
-	return git_default_config(var, value, ctx, cb);
+	החזר git_default_config(var, value, ctx, cb);
 }
 
-static int omit_in_dense(struct commit *commit, struct commit **rev, int n)
+ساكن صحيح omit_in_dense(بنية commit *commit, بنية commit **rev, صحيح n)
 {
 	/* If the commit is tip of the named branches, do not
 	 * omit it.
 	 * Otherwise, if it is a merge that is reachable from only one
 	 * tip, it is not that interesting.
 	 */
-	int i, flag, count;
-	for (i = 0; i < n; i++)
-		if (rev[i] == commit)
-			return 0;
+	صحيح i, flag, count;
+	עבור (i = 0; i < n; i++)
+		אם (rev[i] == commit)
+			החזר 0;
 	flag = commit->object.flags;
-	for (i = count = 0; i < n; i++) {
-		if (flag & (1u << (i + REV_SHIFT)))
+	עבור (i = count = 0; i < n; i++) {
+		אם (flag & (1u << (i + REV_SHIFT)))
 			count++;
 	}
-	if (count == 1)
-		return 1;
-	return 0;
+	אם (count == 1)
+		החזר 1;
+	החזר 0;
 }
 
-static int reflog = 0;
+ساكن صحيح reflog = 0;
 
-static int parse_reflog_param(const struct option *opt, const char *arg,
-			      int unset)
+ساكن صحيح parse_reflog_param(ثابت بنية option *opt, ثابت حرف *arg,
+			      صحيح unset)
 {
-	char *ep;
-	const char **base = (const char **)opt->value;
+	حرف *ep;
+	ثابت حرف **base = (ثابت حرف **)opt->value;
 	BUG_ON_OPT_NEG(unset);
-	if (!arg)
+	אם (!arg)
 		arg = "";
 	reflog = strtoul(arg, &ep, 10);
-	if (*ep == ',')
+	אם (*ep == ',')
 		*base = ep + 1;
-	else if (*ep)
-		return error("unrecognized reflog param '%s'", arg);
-	else
-		*base = NULL;
-	if (reflog <= 0)
+	אחרת אם (*ep)
+		החזר error("unrecognized reflog param '%s'", arg);
+	אחרת
+		*base = عدم;
+	אם (reflog <= 0)
 		reflog = DEFAULT_REFLOG;
-	return 0;
+	החזר 0;
 }
 
-int cmd_show_branch(int ac,
-		const char **av,
-		const char *prefix,
-		struct repository *repo UNUSED)
+صحيح cmd_show_branch(صحيح ac,
+		ثابت حرف **av,
+		ثابت حرف *prefix,
+		بنية repository *repo UNUSED)
 {
-	struct commit *rev[MAX_REVS], *commit;
-	char *reflog_msg[MAX_REVS] = {0};
-	struct commit_list *seen = NULL;
-	struct prio_queue queue = { compare_commits_by_commit_date };
-	unsigned int rev_mask[MAX_REVS];
-	int num_rev, i, extra = 0;
-	int all_heads = 0, all_remotes = 0;
-	int all_mask, all_revs;
-	enum rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
-	char *head;
-	struct object_id head_oid;
-	int merge_base = 0;
-	int independent = 0;
-	int no_name = 0;
-	int sha1_name = 0;
-	int shown_merge_point = 0;
-	int with_current_branch = 0;
-	int head_at = -1;
-	int topics = 0;
-	int sparse = 0;
-	const char *reflog_base = NULL;
-	struct option builtin_show_branch_options[] = {
+	بنية commit *rev[MAX_REVS], *commit;
+	حرف *reflog_msg[MAX_REVS] = {0};
+	بنية commit_list *seen = عدم;
+	بنية prio_queue queue = { compare_commits_by_commit_date };
+	unsigned صحيح rev_mask[MAX_REVS];
+	صحيح num_rev, i, extra = 0;
+	صحيح all_heads = 0, all_remotes = 0;
+	صحيح all_mask, all_revs;
+	تعداد rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
+	حرف *head;
+	بنية object_id head_oid;
+	صحيح merge_base = 0;
+	صحيح independent = 0;
+	صحيح no_name = 0;
+	صحيح sha1_name = 0;
+	صحيح shown_merge_point = 0;
+	صحيح with_current_branch = 0;
+	صحيح head_at = -1;
+	صحيح topics = 0;
+	صحيح sparse = 0;
+	ثابت حرف *reflog_base = عدم;
+	بنية option builtin_show_branch_options[] = {
 		OPT_BOOL('a', "all", &all_heads,
 			 N_("show remote-tracking and local branches")),
 		OPT_BOOL('r', "remotes", &all_remotes,
@@ -670,7 +670,7 @@ int cmd_show_branch(int ac,
 			.type = OPTION_INTEGER,
 			.long_name = "more",
 			.value = &extra,
-			.precision = sizeof(extra),
+			.precision = حجم(extra),
 			.argh = N_("n"),
 			.help = N_("show <n> more commits after the common ancestor"),
 			.flags = PARSE_OPT_OPTARG,
@@ -704,15 +704,15 @@ int cmd_show_branch(int ac,
 			    parse_reflog_param),
 		OPT_END()
 	};
-	const char **args_copy = NULL;
-	int ret;
+	ثابت حرف **args_copy = عدم;
+	صحيح ret;
 
 	init_commit_name_slab(&name_slab);
 
-	repo_config(the_repository, git_show_branch_config, NULL);
+	repo_config(the_repository, git_show_branch_config, عدم);
 
 	/* If nothing is specified, try the default first */
-	if (ac == 1 && default_args.nr) {
+	אם (ac == 1 && default_args.nr) {
 		DUP_ARRAY(args_copy, default_args.v, default_args.nr);
 		ac = default_args.nr;
 		av = args_copy;
@@ -720,17 +720,17 @@ int cmd_show_branch(int ac,
 
 	ac = parse_options(ac, av, prefix, builtin_show_branch_options,
 			   show_branch_usage, PARSE_OPT_STOP_AT_NON_OPTION);
-	if (all_heads)
+	אם (all_heads)
 		all_remotes = 1;
 
-	if (extra || reflog) {
+	אם (extra || reflog) {
 		/* "listing" mode is incompatible with
 		 * independent nor merge-base modes.
 		 */
-		if (independent || merge_base)
+		אם (independent || merge_base)
 			usage_with_options(show_branch_usage,
 					   builtin_show_branch_options);
-		if (reflog && ((0 < extra) || all_heads || all_remotes))
+		אם (reflog && ((0 < extra) || all_heads || all_remotes))
 			/*
 			 * Asking for --more in reflog mode does not
 			 * make sense.  --list is Ok.
@@ -741,77 +741,77 @@ int cmd_show_branch(int ac,
 				"--all/--remotes/--independent/--merge-base");
 	}
 
-	if (with_current_branch && reflog)
+	אם (with_current_branch && reflog)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--reflog", "--current");
 
 	/* If nothing is specified, show all branches by default */
-	if (ac <= topics && all_heads + all_remotes == 0)
+	אם (ac <= topics && all_heads + all_remotes == 0)
 		all_heads = 1;
 
-	if (reflog) {
-		struct object_id oid;
-		char *ref;
-		int base = 0;
-		unsigned int flags = 0;
+	אם (reflog) {
+		بنية object_id oid;
+		حرف *ref;
+		صحيح base = 0;
+		unsigned صحيح flags = 0;
 
-		if (ac == 0) {
-			static const char *fake_av[2];
+		אם (ac == 0) {
+			ساكن ثابت حرف *fake_av[2];
 
 			fake_av[0] = refs_resolve_refdup(get_main_ref_store(the_repository),
 							 "HEAD",
 							 RESOLVE_REF_READING,
 							 &oid,
-							 NULL);
-			fake_av[1] = NULL;
+							 عدم);
+			fake_av[1] = عدم;
 			av = fake_av;
 			ac = 1;
-			if (!*av)
+			אם (!*av)
 				die(_("no branches given, and HEAD is not valid"));
 		}
-		if (ac != 1)
+		אם (ac != 1)
 			die(_("--reflog option needs one branch name"));
 
-		if (MAX_REVS < reflog)
+		אם (MAX_REVS < reflog)
 			die(Q_("only %d entry can be shown at one time.",
 			       "only %d entries can be shown at one time.",
 			       MAX_REVS), MAX_REVS);
-		if (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
+		אם (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
 				   &ref, 0))
 			die(_("no such ref %s"), *av);
 
 		/* Has the base been specified? */
-		if (reflog_base) {
-			char *ep;
+		אם (reflog_base) {
+			حرف *ep;
 			base = strtoul(reflog_base, &ep, 10);
-			if (*ep) {
+			אם (*ep) {
 				/* Ah, that is a date spec... */
 				timestamp_t at;
 				at = approxidate(reflog_base);
 				read_ref_at(get_main_ref_store(the_repository),
-					    ref, flags, at, -1, &oid, NULL,
-					    NULL, NULL, &base);
+					    ref, flags, at, -1, &oid, عدم,
+					    عدم, عدم, &base);
 			}
 		}
 
-		for (i = 0; i < reflog; i++) {
-			char *logmsg = NULL;
-			char *nth_desc;
-			const char *msg;
-			char *end;
+		עבור (i = 0; i < reflog; i++) {
+			حرف *logmsg = عدم;
+			حرف *nth_desc;
+			ثابت حرف *msg;
+			حرف *end;
 			timestamp_t timestamp;
-			int tz;
+			صحيح tz;
 
-			if (read_ref_at(get_main_ref_store(the_repository),
+			אם (read_ref_at(get_main_ref_store(the_repository),
 					ref, flags, 0, base + i, &oid, &logmsg,
-					&timestamp, &tz, NULL)) {
-				free(logmsg);
+					&timestamp, &tz, عدم)) {
+				حرر(logmsg);
 				reflog = i;
-				break;
+				اكسر;
 			}
 
 			end = strchr(logmsg, '\n');
-			if (end)
+			אם (end)
 				*end = '\0';
 
 			msg = (*logmsg == '\0') ? "(none)" : logmsg;
@@ -819,61 +819,61 @@ int cmd_show_branch(int ac,
 						show_date(timestamp, tz,
 							  DATE_MODE(RELATIVE)),
 						msg);
-			free(logmsg);
+			حرر(logmsg);
 
 			nth_desc = xstrfmt("%s@{%d}", *av, base+i);
 			append_ref(nth_desc, &oid, 1);
-			free(nth_desc);
+			حرر(nth_desc);
 		}
-		free(ref);
+		حرر(ref);
 	}
-	else {
-		while (0 < ac) {
+	אחרת {
+		כלעוד (0 < ac) {
 			append_one_rev(*av);
 			ac--; av++;
 		}
-		if (all_heads + all_remotes)
+		אם (all_heads + all_remotes)
 			snarf_refs(all_heads, all_remotes);
 	}
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
 				   RESOLVE_REF_READING,
-				   &head_oid, NULL);
+				   &head_oid, عدم);
 
-	if (with_current_branch && head) {
-		int has_head = 0;
-		for (i = 0; !has_head && i < ref_name_cnt; i++) {
+	אם (with_current_branch && head) {
+		صحيح has_head = 0;
+		עבור (i = 0; !has_head && i < ref_name_cnt; i++) {
 			/* We are only interested in adding the branch
 			 * HEAD points at.
 			 */
-			if (rev_is_head(head, ref_name[i]))
+			אם (rev_is_head(head, ref_name[i]))
 				has_head++;
 		}
-		if (!has_head) {
-			const char *name = head;
+		אם (!has_head) {
+			ثابت حرف *name = head;
 			skip_prefix(name, "refs/heads/", &name);
 			append_one_rev(name);
 		}
 	}
 
-	if (!ref_name_cnt) {
+	אם (!ref_name_cnt) {
 		fprintf(stderr, "No revs to be shown.\n");
 		ret = 0;
-		goto out;
+		اذهب out;
 	}
 
-	for (num_rev = 0; ref_name[num_rev]; num_rev++) {
-		struct object_id revkey;
-		unsigned int flag = 1u << (num_rev + REV_SHIFT);
+	עבור (num_rev = 0; ref_name[num_rev]; num_rev++) {
+		بنية object_id revkey;
+		unsigned صحيح flag = 1u << (num_rev + REV_SHIFT);
 
-		if (MAX_REVS <= num_rev)
+		אם (MAX_REVS <= num_rev)
 			die(Q_("cannot handle more than %d rev.",
 			       "cannot handle more than %d revs.",
 			       MAX_REVS), MAX_REVS);
-		if (repo_get_oid(the_repository, ref_name[num_rev], &revkey))
+		אם (repo_get_oid(the_repository, ref_name[num_rev], &revkey))
 			die(_("'%s' is not a valid ref."), ref_name[num_rev]);
 		commit = lookup_commit_reference(the_repository, &revkey);
-		if (!commit)
+		אם (!commit)
 			die(_("cannot find commit %s (%s)"),
 			    ref_name[num_rev], oid_to_hex(&revkey));
 		repo_parse_commit(the_repository, commit);
@@ -884,39 +884,39 @@ int cmd_show_branch(int ac,
 		 * internal bookkeeping.
 		 */
 		commit->object.flags |= flag;
-		if (commit->object.flags == flag)
+		אם (commit->object.flags == flag)
 			prio_queue_put(&queue, commit);
 		rev[num_rev] = commit;
 	}
-	for (i = 0; i < num_rev; i++)
+	עבור (i = 0; i < num_rev; i++)
 		rev_mask[i] = rev[i]->object.flags;
 
-	if (0 <= extra)
+	אם (0 <= extra)
 		join_revs(&queue, &seen, num_rev, extra);
 
 	commit_list_sort_by_date(&seen);
 
-	if (merge_base) {
+	אם (merge_base) {
 		ret = show_merge_base(seen, num_rev);
-		goto out;
+		اذهب out;
 	}
 
-	if (independent) {
+	אם (independent) {
 		ret = show_independent(rev, num_rev, rev_mask);
-		goto out;
+		اذهب out;
 	}
 
 	/* Show list; --more=-1 means list-only */
-	if (1 < num_rev || extra < 0) {
-		for (i = 0; i < num_rev; i++) {
-			int j;
-			int is_head = rev_is_head(head, ref_name[i]) &&
+	אם (1 < num_rev || extra < 0) {
+		עבור (i = 0; i < num_rev; i++) {
+			صحيح j;
+			صحيح is_head = rev_is_head(head, ref_name[i]) &&
 				      oideq(&head_oid, &rev[i]->object.oid);
-			if (extra < 0)
+			אם (extra < 0)
 				printf("%c [%s] ",
 				       is_head ? '*' : ' ', ref_name[i]);
-			else {
-				for (j = 0; j < i; j++)
+			אחרת {
+				עבור (j = 0; j < i; j++)
 					putchar(' ');
 				printf("%s%c%s [%s] ",
 				       get_color_code(i),
@@ -924,67 +924,67 @@ int cmd_show_branch(int ac,
 				       get_color_reset_code(), ref_name[i]);
 			}
 
-			if (!reflog) {
+			אם (!reflog) {
 				/* header lines never need name */
 				show_one_commit(rev[i], 1);
 			}
-			else
+			אחרת
 				puts(reflog_msg[i]);
 
-			if (is_head)
+			אם (is_head)
 				head_at = i;
 		}
-		if (0 <= extra) {
-			for (i = 0; i < num_rev; i++)
+		אם (0 <= extra) {
+			עבור (i = 0; i < num_rev; i++)
 				putchar('-');
 			putchar('\n');
 		}
 	}
-	if (extra < 0) {
+	אם (extra < 0) {
 		ret = 0;
-		goto out;
+		اذهب out;
 	}
 
 	/* Sort topologically */
 	sort_in_topological_order(&seen, sort_order);
 
 	/* Give names to commits */
-	if (!sha1_name && !no_name)
+	אם (!sha1_name && !no_name)
 		name_commits(seen, rev, ref_name, num_rev);
 
 	all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
 	all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
 
-	for (struct commit_list *l = seen; l; l = l->next) {
-		struct commit *commit = l->item;
-		int this_flag = commit->object.flags;
-		int is_merge_point = ((this_flag & all_revs) == all_revs);
+	עבור (بنية commit_list *l = seen; l; l = l->next) {
+		بنية commit *commit = l->item;
+		صحيح this_flag = commit->object.flags;
+		صحيح is_merge_point = ((this_flag & all_revs) == all_revs);
 
 		shown_merge_point |= is_merge_point;
 
-		if (1 < num_rev) {
-			int is_merge = !!(commit->parents &&
+		אם (1 < num_rev) {
+			صحيح is_merge = !!(commit->parents &&
 					  commit->parents->next);
-			if (topics &&
+			אם (topics &&
 			    !is_merge_point &&
 			    (this_flag & (1u << REV_SHIFT)))
-				continue;
-			if (!sparse && is_merge &&
+				استمر;
+			אם (!sparse && is_merge &&
 			    omit_in_dense(commit, rev, num_rev))
-				continue;
-			for (i = 0; i < num_rev; i++) {
-				int mark;
-				if (!(this_flag & (1u << (i + REV_SHIFT))))
+				استمر;
+			עבור (i = 0; i < num_rev; i++) {
+				صحيح mark;
+				אם (!(this_flag & (1u << (i + REV_SHIFT))))
 					mark = ' ';
-				else if (is_merge)
+				אחרת אם (is_merge)
 					mark = '-';
-				else if (i == head_at)
+				אחרת אם (i == head_at)
 					mark = '*';
-				else
+				אחרת
 					mark = '+';
-				if (mark == ' ')
+				אם (mark == ' ')
 					putchar(mark);
-				else
+				אחרת
 					printf("%s%c%s",
 					       get_color_code(i),
 					       mark, get_color_reset_code());
@@ -993,18 +993,18 @@ int cmd_show_branch(int ac,
 		}
 		show_one_commit(commit, no_name);
 
-		if (shown_merge_point && --extra < 0)
-			break;
+		אם (shown_merge_point && --extra < 0)
+			اكسر;
 	}
 
 	ret = 0;
 
 out:
-	for (size_t i = 0; i < ARRAY_SIZE(reflog_msg); i++)
-		free(reflog_msg[i]);
+	עבור (size_t i = 0; i < ARRAY_SIZE(reflog_msg); i++)
+		حرر(reflog_msg[i]);
 	commit_list_free(seen);
 	clear_prio_queue(&queue);
-	free(args_copy);
-	free(head);
-	return ret;
+	حرر(args_copy);
+	حرر(head);
+	החזר ret;
 }

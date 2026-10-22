@@ -1,23 +1,23 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "color.h"
-#include "date.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "urlmatch.h"
-#include "path.h"
-#include "quote.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "worktree.h"
+#ضمن "builtin.h"
+#ضمن "abspath.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "color.h"
+#ضمن "date.h"
+#ضمن "editor.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "ident.h"
+#ضمن "parse-options.h"
+#ضمن "urlmatch.h"
+#ضمن "path.h"
+#ضمن "quote.h"
+#ضمن "setup.h"
+#ضمن "strbuf.h"
+#ضمن "worktree.h"
 
-static const char *const builtin_config_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>"),
 	N_("git config set [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
@@ -26,42 +26,42 @@ static const char *const builtin_config_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
 	N_("git config edit [<file-option>]"),
 	N_("git config [<file-option>] --get-colorbool <name> [<stdout-is-tty>]"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_list_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_list_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_get_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_get_usage[] = {
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp=<regexp>] [--value=<pattern>] [--fixed-value] [--default=<default>] <name>"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_set_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_set_usage[] = {
 	N_("git config set [<file-option>] [--type=<type>] [--comment=<message>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_unset_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_unset_usage[] = {
 	N_("git config unset [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_rename_section_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_rename_section_usage[] = {
 	N_("git config rename-section [<file-option>] <old-name> <new-name>"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_remove_section_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_remove_section_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
-	NULL
+	عدم
 };
 
-static const char *const builtin_config_edit_usage[] = {
+ساكن ثابت حرف *ثابت builtin_config_edit_usage[] = {
 	N_("git config edit [<file-option>]"),
-	NULL
+	عدم
 };
 
 #define CONFIG_LOCATION_OPTIONS(opts) \
@@ -73,21 +73,21 @@ static const char *const builtin_config_edit_usage[] = {
 	OPT_STRING('f', "file", &opts.source.file, N_("file"), N_("use given config file")), \
 	OPT_STRING(0, "blob", &opts.source.blob, N_("blob-id"), N_("read config from given blob object"))
 
-struct config_location_options {
-	struct git_config_source source;
-	struct config_options options;
-	char *file_to_free;
-	int use_global_config;
-	int use_system_config;
-	int use_local_config;
-	int use_worktree_config;
-	int respect_includes_opt;
+بنية config_location_options {
+	بنية git_config_source source;
+	بنية config_options options;
+	حرف *file_to_free;
+	صحيح use_global_config;
+	صحيح use_system_config;
+	صحيح use_local_config;
+	صحيح use_worktree_config;
+	صحيح respect_includes_opt;
 };
 #define CONFIG_LOCATION_OPTIONS_INIT { \
 	.respect_includes_opt = -1, \
 }
 
-enum config_type {
+تعداد config_type {
 	TYPE_NONE = 0,
 	TYPE_BOOL,
 	TYPE_INT,
@@ -117,18 +117,18 @@ enum config_type {
 	OPT_BOOL(0, "show-names", &opts.show_keys, N_("show config keys in addition to their values")), \
 	CONFIG_TYPE_OPTIONS(opts.type)
 
-struct config_display_options {
-	int end_nul;
-	int omit_values;
-	int show_origin;
-	int show_scope;
-	int show_keys;
-	enum config_type type;
-	char *default_value;
+بنية config_display_options {
+	صحيح end_nul;
+	صحيح omit_values;
+	صحيح show_origin;
+	صحيح show_scope;
+	صحيح show_keys;
+	تعداد config_type type;
+	حرف *default_value;
 	/* Populated via `display_options_init()`. */
-	int term;
-	int delim;
-	int key_delim;
+	صحيح term;
+	صحيح delim;
+	صحيح key_delim;
 };
 #define CONFIG_DISPLAY_OPTIONS_INIT { \
 	.term = '\n', \
@@ -148,14 +148,14 @@ struct config_display_options {
 	.defval = (i), \
 }
 
-static int option_parse_type(const struct option *opt, const char *arg,
-			     int unset)
+ساكن صحيح option_parse_type(ثابت بنية option *opt, ثابت حرف *arg,
+			     صحيح unset)
 {
-	int new_type, *to_type;
+	صحيح new_type, *to_type;
 
-	if (unset) {
-		*((int *) opt->value) = 0;
-		return 0;
+	אם (unset) {
+		*((صحيح *) opt->value) = 0;
+		החזר 0;
 	}
 
 	/*
@@ -163,27 +163,27 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	 * opt->defval.
 	 */
 	new_type = opt->defval;
-	if (!new_type) {
-		if (!strcmp(arg, "bool"))
+	אם (!new_type) {
+		אם (!strcmp(arg, "bool"))
 			new_type = TYPE_BOOL;
-		else if (!strcmp(arg, "int"))
+		אחרת אם (!strcmp(arg, "int"))
 			new_type = TYPE_INT;
-		else if (!strcmp(arg, "bool-or-int"))
+		אחרת אם (!strcmp(arg, "bool-or-int"))
 			new_type = TYPE_BOOL_OR_INT;
-		else if (!strcmp(arg, "bool-or-str"))
+		אחרת אם (!strcmp(arg, "bool-or-str"))
 			new_type = TYPE_BOOL_OR_STR;
-		else if (!strcmp(arg, "path"))
+		אחרת אם (!strcmp(arg, "path"))
 			new_type = TYPE_PATH;
-		else if (!strcmp(arg, "expiry-date"))
+		אחרת אם (!strcmp(arg, "expiry-date"))
 			new_type = TYPE_EXPIRY_DATE;
-		else if (!strcmp(arg, "color"))
+		אחרת אם (!strcmp(arg, "color"))
 			new_type = TYPE_COLOR;
-		else
+		אחרת
 			die(_("unrecognized --type argument, %s"), arg);
 	}
 
 	to_type = opt->value;
-	if (*to_type && *to_type != new_type) {
+	אם (*to_type && *to_type != new_type) {
 		/*
 		 * Complain when there is a new type not equal to the old type.
 		 * This allows for combinations like '--int --type=int' and
@@ -196,202 +196,202 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	}
 	*to_type = new_type;
 
-	return 0;
+	החזר 0;
 }
 
-static void check_argc(int argc, int min, int max)
+ساكن فراغ check_argc(صحيح argc, صحيح min, صحيح max)
 {
-	if (argc >= min && argc <= max)
-		return;
-	if (min == max)
+	אם (argc >= min && argc <= max)
+		החזר;
+	אם (min == max)
 		error(_("wrong number of arguments, should be %d"), min);
-	else
+	אחרת
 		error(_("wrong number of arguments, should be from %d to %d"),
 		      min, max);
 	exit(129);
 }
 
-static NORETURN void die_missing_set_value(const char *arg)
+ساكن NORETURN فراغ die_missing_set_value(ثابت حرف *arg)
 {
-	const char *last_dot = strrchr(arg, '.');
-	const char *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
-	char *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
+	ثابت حرف *last_dot = strrchr(arg, '.');
+	ثابت حرف *eq = last_dot ? strchr(last_dot + 1, '=') : عدم;
+	حرف *prefix = eq ? xstrndup(arg, eq - arg) : عدم;
 
-	if (prefix && git_config_key_is_valid(prefix)) {
+	אם (prefix && git_config_key_is_valid(prefix)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 		advise(_("did you mean \"git config set %s %s\"?"),
 		       prefix, eq + 1);
-	} else if (git_config_key_is_valid(arg)) {
+	} אחרת אם (git_config_key_is_valid(arg)) {
 		error(_("missing value to set to the variable '%s'"), arg);
-	} else {
+	} אחרת {
 		error(_("missing value to set to a variable with an invalid name '%s'"),
 		      arg);
 	}
-	free(prefix);
+	حرر(prefix);
 	exit(129);
 }
 
-static void show_config_origin(const struct config_display_options *opts,
-			       const struct key_value_info *kvi,
-			       struct strbuf *buf)
+ساكن فراغ show_config_origin(ثابت بنية config_display_options *opts,
+			       ثابت بنية key_value_info *kvi,
+			       بنية strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
+	ثابت حرف term = opts->end_nul ? '\0' : '\t';
 
 	strbuf_addstr(buf, config_origin_type_name(kvi->origin_type));
 	strbuf_addch(buf, ':');
-	if (opts->end_nul)
+	אם (opts->end_nul)
 		strbuf_addstr(buf, kvi->filename ? kvi->filename : "");
-	else
-		quote_c_style(kvi->filename ? kvi->filename : "", buf, NULL, 0);
+	אחרת
+		quote_c_style(kvi->filename ? kvi->filename : "", buf, عدم, 0);
 	strbuf_addch(buf, term);
 }
 
-static void show_config_scope(const struct config_display_options *opts,
-			      const struct key_value_info *kvi,
-			      struct strbuf *buf)
+ساكن فراغ show_config_scope(ثابت بنية config_display_options *opts,
+			      ثابت بنية key_value_info *kvi,
+			      بنية strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
-	const char *scope = config_scope_name(kvi->scope);
+	ثابت حرف term = opts->end_nul ? '\0' : '\t';
+	ثابت حرف *scope = config_scope_name(kvi->scope);
 
 	strbuf_addstr(buf, N_(scope));
 	strbuf_addch(buf, term);
 }
 
-struct strbuf_list {
-	struct strbuf *items;
-	int nr;
-	int alloc;
+بنية strbuf_list {
+	بنية strbuf *items;
+	صحيح nr;
+	صحيح alloc;
 };
 
-static int format_config_int64(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       const struct key_value_info *kvi,
-			       int gently)
+ساكن صحيح format_config_int64(بنية strbuf *buf,
+			       ثابت حرف *key_,
+			       ثابت حرف *value_,
+			       ثابت بنية key_value_info *kvi,
+			       صحيح gently)
 {
 	int64_t v = 0;
-	if (gently) {
-		if (!git_parse_int64(value_, &v))
-			return -1;
-	} else {
+	אם (gently) {
+		אם (!git_parse_int64(value_, &v))
+			החזר -1;
+	} אחרת {
 		/* may die() */
 		v = git_config_int64(key_, value_ ? value_ : "", kvi);
 	}
 
 	strbuf_addf(buf, "%"PRId64, v);
-	return 0;
+	החזר 0;
 }
 
-static int format_config_bool(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+ساكن صحيح format_config_bool(بنية strbuf *buf,
+			      ثابت حرف *key_,
+			      ثابت حرف *value_,
+			      صحيح gently)
 {
-	int v = 0;
-	if (gently) {
-		if ((v = git_parse_maybe_bool(value_)) < 0)
-			return -1;
-	} else {
+	صحيح v = 0;
+	אם (gently) {
+		אם ((v = git_parse_maybe_bool(value_)) < 0)
+			החזר -1;
+	} אחרת {
 		/* may die() */
 		v = git_config_bool(key_, value_);
 	}
 
 	strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	החזר 0;
 }
 
-static int format_config_bool_or_int(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     const struct key_value_info *kvi,
-				     int gently)
+ساكن صحيح format_config_bool_or_int(بنية strbuf *buf,
+				     ثابت حرف *key_,
+				     ثابت حرف *value_,
+				     ثابت بنية key_value_info *kvi,
+				     صحيح gently)
 {
-	int v, is_bool = 0;
+	صحيح v, is_bool = 0;
 
-	if (gently) {
+	אם (gently) {
 		v = git_parse_maybe_bool_text(value_);
 
-		if (v >= 0)
+		אם (v >= 0)
 			is_bool = 1;
-		else if (!git_parse_int(value_, &v))
-			return -1;
-	} else {
+		אחרת אם (!git_parse_int(value_, &v))
+			החזר -1;
+	} אחרת {
 		v = git_config_bool_or_int(key_, value_, kvi,
 					   &is_bool);
 	}
 
-	if (is_bool)
+	אם (is_bool)
 		strbuf_addstr(buf, v ? "true" : "false");
-	else
+	אחרת
 		strbuf_addf(buf, "%d", v);
 
-	return 0;
+	החזר 0;
 }
 
 /* This mode is always gentle. */
-static int format_config_bool_or_str(struct strbuf *buf,
-				     const char *value_)
+ساكن صحيح format_config_bool_or_str(بنية strbuf *buf,
+				     ثابت حرف *value_)
 {
-	int v = git_parse_maybe_bool(value_);
-	if (v < 0)
+	صحيح v = git_parse_maybe_bool(value_);
+	אם (v < 0)
 		strbuf_addstr(buf, value_);
-	else
+	אחרת
 		strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	החזר 0;
 }
 
-static int format_config_path(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+ساكن صحيح format_config_path(بنية strbuf *buf,
+			      ثابت حرف *key_,
+			      ثابت حرف *value_,
+			      صحيح gently)
 {
-	char *v;
+	حرف *v;
 
-	if (git_config_pathname(&v, key_, value_) < 0)
-		return -1;
+	אם (git_config_pathname(&v, key_, value_) < 0)
+		החזר -1;
 
-	if (v)
+	אם (v)
 		strbuf_addstr(buf, v);
-	else
-		return gently ? -1 : 1; /* :(optional)no-such-file */
+	אחרת
+		החזר gently ? -1 : 1; /* :(optional)no-such-file */
 
-	free(v);
-	return 0;
+	حرر(v);
+	החזר 0;
 }
 
-static int format_config_expiry_date(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     int quietly)
+ساكن صحيح format_config_expiry_date(بنية strbuf *buf,
+				     ثابت حرف *key_,
+				     ثابت حرف *value_,
+				     صحيح quietly)
 {
 	timestamp_t t;
-	if (quietly) {
-		if (parse_expiry_date(value_, &t))
-			return -1;
-	} else if (git_config_expiry_date(&t, key_, value_) < 0) {
-		return -1;
+	אם (quietly) {
+		אם (parse_expiry_date(value_, &t))
+			החזר -1;
+	} אחרת אם (git_config_expiry_date(&t, key_, value_) < 0) {
+		החזר -1;
 	}
 
 	strbuf_addf(buf, "%"PRItime, t);
-	return 0;
+	החזר 0;
 }
 
-static int format_config_color(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       int gently)
+ساكن صحيح format_config_color(بنية strbuf *buf,
+			       ثابت حرف *key_,
+			       ثابت حرف *value_,
+			       صحيح gently)
 {
-	char v[COLOR_MAXLEN];
+	حرف v[COLOR_MAXLEN];
 
-	if (gently) {
-		if (color_parse_quietly(value_, v) < 0)
-			return -1;
-	} else if (git_config_color(v, key_, value_) < 0) {
-		return -1;
+	אם (gently) {
+		אם (color_parse_quietly(value_, v) < 0)
+			החזר -1;
+	} אחרת אם (git_config_color(v, key_, value_) < 0) {
+		החזר -1;
 	}
 
 	strbuf_addstr(buf, v);
-	return 0;
+	החזר 0;
 }
 
 /*
@@ -403,156 +403,156 @@ static int format_config_color(struct strbuf *buf,
  * Note: 'gently' is currently ignored, but will be implemented in
  * a future change.
  */
-static int format_config(const struct config_display_options *opts,
-			 struct strbuf *buf, const char *key_,
-			 const char *value_, const struct key_value_info *kvi,
-			 int gently)
+ساكن صحيح format_config(ثابت بنية config_display_options *opts,
+			 بنية strbuf *buf, ثابت حرف *key_,
+			 ثابت حرف *value_, ثابت بنية key_value_info *kvi,
+			 صحيح gently)
 {
-	int res = 0;
-	if (opts->show_scope)
+	صحيح res = 0;
+	אם (opts->show_scope)
 		show_config_scope(opts, kvi, buf);
-	if (opts->show_origin)
+	אם (opts->show_origin)
 		show_config_origin(opts, kvi, buf);
-	if (opts->show_keys)
+	אם (opts->show_keys)
 		strbuf_addstr(buf, key_);
 
-	if (opts->omit_values)
-		goto terminator;
+	אם (opts->omit_values)
+		اذهب terminator;
 
-	if (opts->show_keys)
+	אם (opts->show_keys)
 		strbuf_addch(buf, opts->key_delim);
 
-	switch (opts->type) {
-	case TYPE_INT:
+	بدل (opts->type) {
+	حالة TYPE_INT:
 		res = format_config_int64(buf, key_, value_, kvi, gently);
-		break;
+		اكسر;
 
-	case TYPE_BOOL:
+	حالة TYPE_BOOL:
 		res = format_config_bool(buf, key_, value_, gently);
-		break;
+		اكسر;
 
-	case TYPE_BOOL_OR_INT:
+	حالة TYPE_BOOL_OR_INT:
 		res = format_config_bool_or_int(buf, key_, value_, kvi, gently);
-		break;
+		اكسر;
 
-	case TYPE_BOOL_OR_STR:
+	حالة TYPE_BOOL_OR_STR:
 		res = format_config_bool_or_str(buf, value_);
-		break;
+		اكسر;
 
-	case TYPE_PATH:
+	حالة TYPE_PATH:
 		res = format_config_path(buf, key_, value_, gently);
-		break;
+		اكسر;
 
-	case TYPE_EXPIRY_DATE:
+	حالة TYPE_EXPIRY_DATE:
 		res = format_config_expiry_date(buf, key_, value_, gently);
-		break;
+		اكسر;
 
-	case TYPE_COLOR:
+	حالة TYPE_COLOR:
 		res = format_config_color(buf, key_, value_, gently);
-		break;
+		اكسر;
 
-	case TYPE_NONE:
-		if (value_) {
+	حالة TYPE_NONE:
+		אם (value_) {
 			strbuf_addstr(buf, value_);
-		} else {
+		} אחרת {
 			/* Just show the key name; back out delimiter */
-			if (opts->show_keys)
+			אם (opts->show_keys)
 				strbuf_setlen(buf, buf->len - 1);
 		}
-		break;
+		اكسر;
 
-	default:
+	افتراضي:
 		BUG("undefined type %d", opts->type);
 	}
 
 terminator:
 	strbuf_addch(buf, opts->term);
-	return res;
+	החזר res;
 }
 
-static int show_all_config(const char *key_, const char *value_,
-			   const struct config_context *ctx,
-			   void *cb)
+ساكن صحيح show_all_config(ثابت حرف *key_, ثابت حرف *value_,
+			   ثابت بنية config_context *ctx,
+			   فراغ *cb)
 {
-	const struct config_display_options *opts = cb;
-	const struct key_value_info *kvi = ctx->kvi;
-	struct strbuf formatted = STRBUF_INIT;
+	ثابت بنية config_display_options *opts = cb;
+	ثابت بنية key_value_info *kvi = ctx->kvi;
+	بنية strbuf formatted = STRBUF_INIT;
 
-	if (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
+	אם (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
 		fwrite(formatted.buf, 1, formatted.len, stdout);
 
 	strbuf_release(&formatted);
-	return 0;
+	החזר 0;
 }
 
 #define GET_VALUE_ALL        (1 << 0)
 #define GET_VALUE_KEY_REGEXP (1 << 1)
 
-struct collect_config_data {
-	const struct config_display_options *display_opts;
-	struct strbuf_list *values;
-	const char *value_pattern;
-	const char *key;
+بنية collect_config_data {
+	ثابت بنية config_display_options *display_opts;
+	بنية strbuf_list *values;
+	ثابت حرف *value_pattern;
+	ثابت حرف *key;
 	regex_t *regexp;
 	regex_t *key_regexp;
-	int do_not_match;
+	صحيح do_not_match;
 	unsigned get_value_flags;
 	unsigned flags;
 };
 
-static int collect_config(const char *key_, const char *value_,
-			  const struct config_context *ctx, void *cb)
+ساكن صحيح collect_config(ثابت حرف *key_, ثابت حرف *value_,
+			  ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct collect_config_data *data = cb;
-	struct strbuf_list *values = data->values;
-	const struct key_value_info *kvi = ctx->kvi;
-	int status;
+	بنية collect_config_data *data = cb;
+	بنية strbuf_list *values = data->values;
+	ثابت بنية key_value_info *kvi = ctx->kvi;
+	صحيح status;
 
-	if (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
+	אם (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
 	    strcmp(key_, data->key))
-		return 0;
-	if ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    regexec(data->key_regexp, key_, 0, NULL, 0))
-		return 0;
-	if ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
+		החזר 0;
+	אם ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
+	    regexec(data->key_regexp, key_, 0, عدم, 0))
+		החזר 0;
+	אם ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
 	    strcmp(data->value_pattern, (value_?value_:"")))
-		return 0;
-	if (data->regexp &&
-	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, NULL, 0)))
-		return 0;
+		החזר 0;
+	אם (data->regexp &&
+	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, عدم, 0)))
+		החזר 0;
 
 	ALLOC_GROW(values->items, values->nr + 1, values->alloc);
 	strbuf_init(&values->items[values->nr], 0);
 
 	status = format_config(data->display_opts, &values->items[values->nr++],
 			       key_, value_, kvi, 0);
-	if (status < 0)
-		return status;
-	if (status) {
+	אם (status < 0)
+		החזר status;
+	אם (status) {
 		strbuf_release(&values->items[--values->nr]);
 		status = 0;
 	}
-	return status;
+	החזר status;
 }
 
-static int get_value(const struct config_location_options *opts,
-		     const struct config_display_options *display_opts,
-		     const char *key_, const char *regex_,
+ساكن صحيح get_value(ثابت بنية config_location_options *opts,
+		     ثابت بنية config_display_options *display_opts,
+		     ثابت حرف *key_, ثابت حرف *regex_,
 		     unsigned get_value_flags, unsigned flags)
 {
-	int ret = CONFIG_GENERIC_ERROR;
-	struct strbuf_list values = {NULL};
-	struct collect_config_data data = {
+	صحيح ret = CONFIG_GENERIC_ERROR;
+	بنية strbuf_list values = {عدم};
+	بنية collect_config_data data = {
 		.display_opts = display_opts,
 		.values = &values,
 		.get_value_flags = get_value_flags,
 		.flags = flags,
 	};
-	char *key = NULL;
-	int i;
+	حرف *key = عدم;
+	صحيح i;
 
-	if (get_value_flags & GET_VALUE_KEY_REGEXP) {
-		char *tl;
+	אם (get_value_flags & GET_VALUE_KEY_REGEXP) {
+		حرف *tl;
 
 		/*
 		 * NEEDSWORK: this naive pattern lowercasing obviously does not
@@ -561,43 +561,43 @@ static int get_value(const struct config_location_options *opts,
 		 */
 
 		key = xstrdup(key_);
-		for (tl = key + strlen(key) - 1;
+		עבור (tl = key + strlen(key) - 1;
 		     tl >= key && *tl != '.';
 		     tl--)
 			*tl = tolower(*tl);
-		for (tl = key; *tl && *tl != '.'; tl++)
+		עבור (tl = key; *tl && *tl != '.'; tl++)
 			*tl = tolower(*tl);
 
-		data.key_regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.key_regexp, key, REG_EXTENDED)) {
+		data.key_regexp = (regex_t*)xmalloc(حجم(regex_t));
+		אם (regcomp(data.key_regexp, key, REG_EXTENDED)) {
 			error(_("invalid key pattern: %s"), key_);
 			FREE_AND_NULL(data.key_regexp);
 			ret = CONFIG_INVALID_PATTERN;
-			goto free_strings;
+			اذهب free_strings;
 		}
-	} else {
-		if (git_config_parse_key(key_, &key, NULL)) {
+	} אחרת {
+		אם (git_config_parse_key(key_, &key, عدم)) {
 			ret = CONFIG_INVALID_KEY;
-			goto free_strings;
+			اذهب free_strings;
 		}
 
 		data.key = key;
 	}
 
-	if (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
+	אם (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
 		data.value_pattern = regex_;
-	else if (regex_) {
-		if (regex_[0] == '!') {
+	אחרת אם (regex_) {
+		אם (regex_[0] == '!') {
 			data.do_not_match = 1;
 			regex_++;
 		}
 
-		data.regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.regexp, regex_, REG_EXTENDED)) {
+		data.regexp = (regex_t*)xmalloc(حجم(regex_t));
+		אם (regcomp(data.regexp, regex_, REG_EXTENDED)) {
 			error(_("invalid pattern: %s"), regex_);
 			FREE_AND_NULL(data.regexp);
 			ret = CONFIG_INVALID_PATTERN;
-			goto free_strings;
+			اذهب free_strings;
 		}
 	}
 
@@ -605,10 +605,10 @@ static int get_value(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!values.nr && display_opts->default_value) {
-		struct key_value_info kvi = KVI_INIT;
-		struct strbuf *item;
-		int status;
+	אם (!values.nr && display_opts->default_value) {
+		بنية key_value_info kvi = KVI_INIT;
+		بنية strbuf *item;
+		صحيح status;
 
 		kvi_from_param(&kvi);
 		ALLOC_GROW(values.items, values.nr + 1, values.alloc);
@@ -617,10 +617,10 @@ static int get_value(const struct config_location_options *opts,
 
 		status = format_config(display_opts, item, key_,
 				       display_opts->default_value, &kvi, 0);
-		if (status < 0)
+		אם (status < 0)
 			die(_("failed to format default config value: %s"),
 			    display_opts->default_value);
-		if (status) {
+		אם (status) {
 			/* default was a missing optional value */
 			values.nr--;
 			strbuf_release(item);
@@ -629,35 +629,35 @@ static int get_value(const struct config_location_options *opts,
 
 	ret = !values.nr;
 
-	for (i = 0; i < values.nr; i++) {
-		struct strbuf *buf = values.items + i;
-		if ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
+	עבור (i = 0; i < values.nr; i++) {
+		بنية strbuf *buf = values.items + i;
+		אם ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
 			fwrite(buf->buf, 1, buf->len, stdout);
 		strbuf_release(buf);
 	}
-	free(values.items);
+	حرر(values.items);
 
 free_strings:
-	free(key);
-	if (data.key_regexp) {
+	حرر(key);
+	אם (data.key_regexp) {
 		regfree(data.key_regexp);
-		free(data.key_regexp);
+		حرر(data.key_regexp);
 	}
-	if (data.regexp) {
+	אם (data.regexp) {
 		regfree(data.regexp);
-		free(data.regexp);
+		حرر(data.regexp);
 	}
 
-	return ret;
+	החזר ret;
 }
 
-static char *normalize_value(const char *key, const char *value,
-			     int type, struct key_value_info *kvi)
+ساكن حرف *normalize_value(ثابت حرف *key, ثابت حرف *value,
+			     صحيح type, بنية key_value_info *kvi)
 {
-	if (!value)
-		return NULL;
+	אם (!value)
+		החזר عدم;
 
-	if (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
+	אם (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
 		/*
 		 * We don't do normalization for TYPE_PATH here: If
 		 * the path is like ~/foobar/, we prefer to store
@@ -665,29 +665,29 @@ static char *normalize_value(const char *key, const char *value,
 		 * when retrieving the value.
 		 * Also don't do normalization for expiry dates.
 		 */
-		return xstrdup(value);
-	if (type == TYPE_INT)
-		return xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
-	if (type == TYPE_BOOL)
-		return xstrdup(git_config_bool(key, value) ?  "true" : "false");
-	if (type == TYPE_BOOL_OR_INT) {
-		int is_bool, v;
+		החזר xstrdup(value);
+	אם (type == TYPE_INT)
+		החזר xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
+	אם (type == TYPE_BOOL)
+		החזר xstrdup(git_config_bool(key, value) ?  "true" : "false");
+	אם (type == TYPE_BOOL_OR_INT) {
+		صحيح is_bool, v;
 		v = git_config_bool_or_int(key, value, kvi, &is_bool);
-		if (!is_bool)
-			return xstrfmt("%d", v);
-		else
-			return xstrdup(v ? "true" : "false");
+		אם (!is_bool)
+			החזר xstrfmt("%d", v);
+		אחרת
+			החזר xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_BOOL_OR_STR) {
-		int v = git_parse_maybe_bool(value);
-		if (v < 0)
-			return xstrdup(value);
-		else
-			return xstrdup(v ? "true" : "false");
+	אם (type == TYPE_BOOL_OR_STR) {
+		صحيح v = git_parse_maybe_bool(value);
+		אם (v < 0)
+			החזר xstrdup(value);
+		אחרת
+			החזר xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_COLOR) {
-		char v[COLOR_MAXLEN];
-		if (git_config_color(v, key, value))
+	אם (type == TYPE_COLOR) {
+		حرف v[COLOR_MAXLEN];
+		אם (git_config_color(v, key, value))
 			die(_("cannot parse color '%s'"), value);
 
 		/*
@@ -697,51 +697,51 @@ static char *normalize_value(const char *key, const char *value,
 		 * "sanity-check", and return the given value, which we
 		 * know is representable as valid color code.
 		 */
-		return xstrdup(value);
+		החזר xstrdup(value);
 	}
 
 	BUG("cannot normalize type %d", type);
 }
 
-struct get_color_config_data {
-	int get_color_found;
-	const char *get_color_slot;
-	char parsed_color[COLOR_MAXLEN];
+بنية get_color_config_data {
+	صحيح get_color_found;
+	ثابت حرف *get_color_slot;
+	حرف parsed_color[COLOR_MAXLEN];
 };
 
-static int git_get_color_config(const char *var, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *cb)
+ساكن صحيح git_get_color_config(ثابت حرف *var, ثابت حرف *value,
+				ثابت بنية config_context *ctx UNUSED,
+				فراغ *cb)
 {
-	struct get_color_config_data *data = cb;
+	بنية get_color_config_data *data = cb;
 
-	if (!strcmp(var, data->get_color_slot)) {
-		if (!value)
+	אם (!strcmp(var, data->get_color_slot)) {
+		אם (!value)
 			config_error_nonbool(var);
-		if (color_parse(value, data->parsed_color) < 0)
-			return -1;
+		אם (color_parse(value, data->parsed_color) < 0)
+			החזר -1;
 		data->get_color_found = 1;
 	}
-	return 0;
+	החזר 0;
 }
 
-static int get_color(const struct config_location_options *opts,
-		      const char *var, const char *def_color)
+ساكن صحيح get_color(ثابت بنية config_location_options *opts,
+		      ثابت حرف *var, ثابت حرف *def_color)
 {
-	struct get_color_config_data data = {
+	بنية get_color_config_data data = {
 		.get_color_slot = var,
 		.parsed_color[0] = '\0',
 	};
-	int ret;
+	صحيح ret;
 
 	config_with_options(git_get_color_config, &data,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!data.get_color_found && def_color) {
-		if (color_parse(def_color, data.parsed_color) < 0) {
+	אם (!data.get_color_found && def_color) {
+		אם (color_parse(def_color, data.parsed_color) < 0) {
 			ret = error(_("unable to parse default color value"));
-			goto out;
+			اذهب out;
 		}
 	}
 
@@ -749,35 +749,35 @@ static int get_color(const struct config_location_options *opts,
 
 out:
 	fputs(data.parsed_color, stdout);
-	return ret;
+	החזר ret;
 }
 
-struct get_colorbool_config_data {
-	enum git_colorbool get_colorbool_found;
-	enum git_colorbool get_diff_color_found;
-	enum git_colorbool get_color_ui_found;
-	const char *get_colorbool_slot;
+بنية get_colorbool_config_data {
+	تعداد git_colorbool get_colorbool_found;
+	تعداد git_colorbool get_diff_color_found;
+	تعداد git_colorbool get_color_ui_found;
+	ثابت حرف *get_colorbool_slot;
 };
 
-static int git_get_colorbool_config(const char *var, const char *value,
-				    const struct config_context *ctx UNUSED,
-				    void *cb)
+ساكن صحيح git_get_colorbool_config(ثابت حرف *var, ثابت حرف *value,
+				    ثابت بنية config_context *ctx UNUSED,
+				    فراغ *cb)
 {
-	struct get_colorbool_config_data *data = cb;
+	بنية get_colorbool_config_data *data = cb;
 
-	if (!strcmp(var, data->get_colorbool_slot))
+	אם (!strcmp(var, data->get_colorbool_slot))
 		data->get_colorbool_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "diff.color"))
+	אחרת אם (!strcmp(var, "diff.color"))
 		data->get_diff_color_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "color.ui"))
+	אחרת אם (!strcmp(var, "color.ui"))
 		data->get_color_ui_found = git_config_colorbool(var, value);
-	return 0;
+	החזר 0;
 }
 
-static int get_colorbool(const struct config_location_options *opts,
-			 const char *var, int print)
+ساكن صحيح get_colorbool(ثابت بنية config_location_options *opts,
+			 ثابت حرف *var, صحيح print)
 {
-	struct get_colorbool_config_data data = {
+	بنية get_colorbool_config_data data = {
 		.get_colorbool_slot = var,
 		.get_colorbool_found = GIT_COLOR_UNKNOWN,
 		.get_diff_color_found = GIT_COLOR_UNKNOWN,
@@ -789,98 +789,98 @@ static int get_colorbool(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
-		if (!strcmp(data.get_colorbool_slot, "color.diff"))
+	אם (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
+		אם (!strcmp(data.get_colorbool_slot, "color.diff"))
 			data.get_colorbool_found = data.get_diff_color_found;
-		if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+		אם (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
 			data.get_colorbool_found = data.get_color_ui_found;
 	}
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+	אם (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
 		/* default value if none found in config */
 		data.get_colorbool_found = GIT_COLOR_AUTO;
 
 	result = want_color(data.get_colorbool_found);
 
-	if (print) {
+	אם (print) {
 		printf("%s\n", result ? "true" : "false");
-		return 0;
-	} else
-		return result ? 0 : 1;
+		החזר 0;
+	} אחרת
+		החזר result ? 0 : 1;
 }
 
-static void check_write(const struct git_config_source *source)
+ساكن فراغ check_write(ثابت بنية git_config_source *source)
 {
-	if (!source->file && !startup_info->have_repository)
+	אם (!source->file && !startup_info->have_repository)
 		die(_("not in a git directory"));
 
-	if (source->use_stdin)
+	אם (source->use_stdin)
 		die(_("writing to stdin is not supported"));
 
-	if (source->blob)
+	אם (source->blob)
 		die(_("writing config blobs is not supported"));
 }
 
-struct urlmatch_current_candidate_value {
-	char value_is_null;
-	struct strbuf value;
-	struct key_value_info kvi;
+بنية urlmatch_current_candidate_value {
+	حرف value_is_null;
+	بنية strbuf value;
+	بنية key_value_info kvi;
 };
 
-static int urlmatch_collect_fn(const char *var, const char *value,
-			       const struct config_context *ctx,
-			       void *cb)
+ساكن صحيح urlmatch_collect_fn(ثابت حرف *var, ثابت حرف *value,
+			       ثابت بنية config_context *ctx,
+			       فراغ *cb)
 {
-	struct string_list *values = cb;
-	struct string_list_item *item = string_list_insert(values, var);
-	struct urlmatch_current_candidate_value *matched = item->util;
-	const struct key_value_info *kvi = ctx->kvi;
+	بنية string_list *values = cb;
+	بنية string_list_item *item = string_list_insert(values, var);
+	بنية urlmatch_current_candidate_value *matched = item->util;
+	ثابت بنية key_value_info *kvi = ctx->kvi;
 
-	if (!matched) {
-		matched = xmalloc(sizeof(*matched));
+	אם (!matched) {
+		matched = xmalloc(حجم(*matched));
 		strbuf_init(&matched->value, 0);
 		item->util = matched;
-	} else {
+	} אחרת {
 		strbuf_reset(&matched->value);
 	}
 	matched->kvi = *kvi;
 
-	if (value) {
+	אם (value) {
 		strbuf_addstr(&matched->value, value);
 		matched->value_is_null = 0;
-	} else {
+	} אחרת {
 		matched->value_is_null = 1;
 	}
-	return 0;
+	החזר 0;
 }
 
-static int get_urlmatch(const struct config_location_options *opts,
-			const struct config_display_options *_display_opts,
-			const char *var, const char *url)
+ساكن صحيح get_urlmatch(ثابت بنية config_location_options *opts,
+			ثابت بنية config_display_options *_display_opts,
+			ثابت حرف *var, ثابت حرف *url)
 {
-	int ret;
-	char *section;
-	char *section_tail;
-	struct config_display_options display_opts = *_display_opts;
-	struct string_list_item *item;
-	struct urlmatch_config config = URLMATCH_CONFIG_INIT;
-	struct string_list values = STRING_LIST_INIT_DUP;
+	صحيح ret;
+	حرف *section;
+	حرف *section_tail;
+	بنية config_display_options display_opts = *_display_opts;
+	بنية string_list_item *item;
+	بنية urlmatch_config config = URLMATCH_CONFIG_INIT;
+	بنية string_list values = STRING_LIST_INIT_DUP;
 
 	config.collect_fn = urlmatch_collect_fn;
-	config.cascade_fn = NULL;
+	config.cascade_fn = عدم;
 	config.cb = &values;
 
-	if (!url_normalize(url, &config.url))
+	אם (!url_normalize(url, &config.url))
 		die("%s", config.url.err);
 
 	config.section = section = xstrdup_tolower(var);
 	section_tail = strchr(section, '.');
-	if (section_tail) {
+	אם (section_tail) {
 		*section_tail = '\0';
 		config.key = section_tail + 1;
 		display_opts.show_keys = 0;
-	} else {
-		config.key = NULL;
+	} אחרת {
+		config.key = عدم;
 		display_opts.show_keys = 1;
 	}
 
@@ -891,14 +891,14 @@ static int get_urlmatch(const struct config_location_options *opts,
 	ret = !values.nr;
 
 	for_each_string_list_item(item, &values) {
-		struct urlmatch_current_candidate_value *matched = item->util;
-		struct strbuf buf = STRBUF_INIT;
-		int status;
+		بنية urlmatch_current_candidate_value *matched = item->util;
+		بنية strbuf buf = STRBUF_INIT;
+		صحيح status;
 
 		status = format_config(&display_opts, &buf, item->string,
-				       matched->value_is_null ? NULL : matched->value.buf,
+				       matched->value_is_null ? عدم : matched->value.buf,
 				       &matched->kvi, 0);
-		if (!status)
+		אם (!status)
 			fwrite(buf.buf, 1, buf.len, stdout);
 		strbuf_release(&buf);
 
@@ -906,15 +906,15 @@ static int get_urlmatch(const struct config_location_options *opts,
 	}
 	urlmatch_config_release(&config);
 	string_list_clear(&values, 1);
-	free(config.url.url);
+	حرر(config.url.url);
 
-	free(section);
-	return ret;
+	حرر(section);
+	החזר ret;
 }
 
-static char *default_user_config(void)
+ساكن حرف *default_user_config(فراغ)
 {
-	struct strbuf buf = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf,
 		    _("# This is Git's per-user configuration file.\n"
 		      "[user]\n"
@@ -923,42 +923,42 @@ static char *default_user_config(void)
 		      "#	email = %s\n"),
 		    ident_default_name(),
 		    ident_default_email());
-	return strbuf_detach(&buf, NULL);
+	החזר strbuf_detach(&buf, عدم);
 }
 
-static void location_options_init(struct config_location_options *opts,
-				  const char *prefix)
+ساكن فراغ location_options_init(بنية config_location_options *opts,
+				  ثابت حرف *prefix)
 {
-	if (!opts->source.file)
+	אם (!opts->source.file)
 		opts->source.file = opts->file_to_free =
 			xstrdup_or_null(getenv(CONFIG_ENVIRONMENT));
 
-	if (opts->use_global_config + opts->use_system_config +
+	אם (opts->use_global_config + opts->use_system_config +
 	    opts->use_local_config + opts->use_worktree_config +
 	    !!opts->source.file + !!opts->source.blob > 1) {
 		error(_("only one config file at a time"));
 		exit(129);
 	}
 
-	if (!startup_info->have_repository) {
-		if (opts->use_local_config)
+	אם (!startup_info->have_repository) {
+		אם (opts->use_local_config)
 			die(_("--local can only be used inside a git repository"));
-		if (opts->source.blob)
+		אם (opts->source.blob)
 			die(_("--blob can only be used inside a git repository"));
-		if (opts->use_worktree_config)
+		אם (opts->use_worktree_config)
 			die(_("--worktree can only be used inside a git repository"));
 	}
 
-	if (opts->source.file &&
+	אם (opts->source.file &&
 			!strcmp(opts->source.file, "-")) {
-		opts->source.file = NULL;
+		opts->source.file = عدم;
 		opts->source.use_stdin = 1;
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->use_global_config) {
+	אם (opts->use_global_config) {
 		opts->source.file = opts->file_to_free = git_global_config();
-		if (!opts->source.file)
+		אם (!opts->source.file)
 			/*
 			 * It is unknown if HOME/.gitconfig exists, so
 			 * we do not know if we should write to XDG
@@ -967,80 +967,80 @@ static void location_options_init(struct config_location_options *opts,
 			 */
 			die(_("$HOME not set"));
 		opts->source.scope = CONFIG_SCOPE_GLOBAL;
-	} else if (opts->use_system_config) {
+	} אחרת אם (opts->use_system_config) {
 		opts->source.file = opts->file_to_free = git_system_config();
 		opts->source.scope = CONFIG_SCOPE_SYSTEM;
-	} else if (opts->use_local_config) {
+	} אחרת אם (opts->use_local_config) {
 		opts->source.file = opts->file_to_free = repo_git_path(the_repository, "config");
 		opts->source.scope = CONFIG_SCOPE_LOCAL;
-	} else if (opts->use_worktree_config) {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		if (the_repository->repository_format_worktree_config)
+	} אחרת אם (opts->use_worktree_config) {
+		بنية worktree **worktrees = get_worktrees(the_repository);
+		אם (the_repository->repository_format_worktree_config)
 			opts->source.file = opts->file_to_free =
 				repo_git_path(the_repository, "config.worktree");
-		else if (worktrees[0] && worktrees[1])
+		אחרת אם (worktrees[0] && worktrees[1])
 			die(_("--worktree cannot be used with multiple "
 			      "working trees unless the config\n"
 			      "extension worktreeConfig is enabled. "
 			      "Please read \"CONFIGURATION FILE\"\n"
 			      "section in \"git help worktree\" for details"));
-		else
+		אחרת
 			opts->source.file = opts->file_to_free =
 				repo_git_path(the_repository, "config");
 		opts->source.scope = CONFIG_SCOPE_LOCAL;
 		free_worktrees(worktrees);
-	} else if (opts->source.file) {
-		if (!is_absolute_path(opts->source.file) && prefix)
+	} אחרת אם (opts->source.file) {
+		אם (!is_absolute_path(opts->source.file) && prefix)
 			opts->source.file = opts->file_to_free =
 				prefix_filename(prefix, opts->source.file);
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
-	} else if (opts->source.blob) {
+	} אחרת אם (opts->source.blob) {
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->respect_includes_opt == -1)
+	אם (opts->respect_includes_opt == -1)
 		opts->options.respect_includes = !opts->source.file;
-	else
+	אחרת
 		opts->options.respect_includes = opts->respect_includes_opt;
-	if (startup_info->have_repository) {
+	אם (startup_info->have_repository) {
 		opts->options.commondir = repo_get_common_dir(the_repository);
 		opts->options.git_dir = repo_get_git_dir(the_repository);
 	}
 }
 
-static void location_options_release(struct config_location_options *opts)
+ساكن فراغ location_options_release(بنية config_location_options *opts)
 {
-	free(opts->file_to_free);
+	حرر(opts->file_to_free);
 }
 
-static void display_options_init(struct config_display_options *opts)
+ساكن فراغ display_options_init(بنية config_display_options *opts)
 {
-	if (opts->end_nul) {
+	אם (opts->end_nul) {
 		opts->term = '\0';
 		opts->delim = '\n';
 		opts->key_delim = '\n';
 	}
 }
 
-static void display_options_init_list(struct config_display_options *opts)
+ساكن فراغ display_options_init_list(بنية config_display_options *opts)
 {
 	opts->show_keys = 1;
 
-	if (opts->end_nul) {
+	אם (opts->end_nul) {
 		display_options_init(opts);
-	} else {
+	} אחרת {
 		opts->term = '\n';
 		opts->delim = ' ';
 		opts->key_delim = '=';
 	}
 }
 
-static int cmd_config_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+ساكن صحيح cmd_config_list(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			   بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	struct option opts[] = {
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	بنية config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
 		OPT_GROUP(N_("Other")),
@@ -1057,29 +1057,29 @@ static int cmd_config_list(int argc, const char **argv, const char *prefix,
 
 	setup_auto_pager("config", 1);
 
-	if (config_with_options(show_all_config, &display_opts,
+	אם (config_with_options(show_all_config, &display_opts,
 				&location_opts.source, the_repository,
 				&location_opts.options) < 0) {
-		if (location_opts.source.file)
+		אם (location_opts.source.file)
 			die_errno(_("unable to read config file '%s'"),
 				  location_opts.source.file);
-		else
+		אחרת
 			die(_("error processing config file(s)"));
 	}
 
 	location_options_release(&location_opts);
-	return 0;
+	החזר 0;
 }
 
-static int cmd_config_get(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ساكن صحيح cmd_config_get(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			  بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *value_pattern = NULL, *url = NULL;
-	int flags = 0;
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	بنية config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	ثابت حرف *value_pattern = عدم, *url = عدم;
+	صحيح flags = 0;
 	unsigned get_value_flags = 0;
-	struct option opts[] = {
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter options")),
 		OPT_BIT(0, "all", &get_value_flags, N_("return all values for multi-valued config options"), GET_VALUE_ALL),
@@ -1095,18 +1095,18 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 			   N_("value"), N_("use default value when missing entry")),
 		OPT_END(),
 	};
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_get_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	אם ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
-	if (display_opts.default_value &&
+	אם (display_opts.default_value &&
 	    ((get_value_flags & GET_VALUE_ALL) || url))
 		die(_("--default= cannot be used with --all or --url="));
-	if (url && ((get_value_flags & GET_VALUE_ALL) ||
+	אם (url && ((get_value_flags & GET_VALUE_ALL) ||
 		    (get_value_flags & GET_VALUE_KEY_REGEXP) ||
 		    value_pattern))
 		die(_("--url= cannot be used with --all, --regexp or --value"));
@@ -1114,29 +1114,29 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 	location_options_init(&location_opts, prefix);
 	display_options_init(&display_opts);
 
-	if (display_opts.type != TYPE_COLOR)
+	אם (display_opts.type != TYPE_COLOR)
 		setup_auto_pager("config", 1);
 
-	if (url)
+	אם (url)
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], url);
-	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
+	אחרת אם (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
 		ret = get_color(&location_opts, "", display_opts.default_value);
-	else
+	אחרת
 		ret = get_value(&location_opts, &display_opts, argv[0], value_pattern,
 				get_value_flags, flags);
 
 	location_options_release(&location_opts);
-	return ret;
+	החזר ret;
 }
 
-static int cmd_config_set(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ساكن صحيح cmd_config_set(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			  بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL, *comment_arg = NULL;
-	char *comment = NULL;
-	int flags = 0, append = 0, type = 0;
-	struct option opts[] = {
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ثابت حرف *value_pattern = عدم, *comment_arg = عدم;
+	حرف *comment = عدم;
+	صحيح flags = 0, append = 0, type = 0;
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_TYPE_OPTIONS(type),
 		OPT_GROUP(N_("Filter")),
@@ -1148,21 +1148,21 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 		OPT_BOOL(0, "append", &append, N_("add a new line without altering any existing values")),
 		OPT_END(),
 	};
-	struct key_value_info default_kvi = KVI_INIT;
-	char *value;
-	int ret;
+	بنية key_value_info default_kvi = KVI_INIT;
+	حرف *value;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_set_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc == 1)
+	אם (argc == 1)
 		die_missing_set_value(argv[0]);
 	check_argc(argc, 2, 2);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	אם ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with --value=<pattern>"));
-	if (append && value_pattern)
+	אם (append && value_pattern)
 		die(_("--append cannot be used with --value=<pattern>"));
-	if (append)
+	אם (append)
 		value_pattern = CONFIG_REGEX_NONE;
 
 	comment = git_config_prepare_comment_string(comment_arg);
@@ -1172,31 +1172,31 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 
 	value = normalize_value(argv[0], argv[1], type, &default_kvi);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
+	אם ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], value, value_pattern,
 							      comment, flags);
-	} else {
+	} אחרת {
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
 						     argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		אם (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use --value=<pattern>, --append or --all to change %s."), argv[0]);
 	}
 
 	location_options_release(&location_opts);
-	free(comment);
-	free(value);
-	return ret;
+	حرر(comment);
+	حرر(value);
+	החזר ret;
 }
 
-static int cmd_config_unset(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+ساكن صحيح cmd_config_unset(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			    بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL;
-	int flags = 0;
-	struct option opts[] = {
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ثابت حرف *value_pattern = عدم;
+	صحيح flags = 0;
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter")),
 		OPT_BIT(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
@@ -1204,39 +1204,39 @@ static int cmd_config_unset(int argc, const char **argv, const char *prefix,
 		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
 		OPT_END(),
 	};
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_unset_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	אם ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
 
 	location_options_init(&location_opts, prefix);
 	check_write(&location_opts.source);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
+	אם ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, value_pattern,
-							      NULL, flags);
-	else
+							      argv[0], عدم, value_pattern,
+							      عدم, flags);
+	אחרת
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0],
-						     NULL, NULL);
+						     عدم, عدم);
 
 	location_options_release(&location_opts);
-	return ret;
+	החזר ret;
 }
 
-static int cmd_config_rename_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+ساكن صحيح cmd_config_rename_section(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+				     بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_rename_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -1247,26 +1247,26 @@ static int cmd_config_rename_section(int argc, const char **argv, const char *pr
 
 	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 						 argv[0], argv[1]);
-	if (ret < 0)
-		goto out;
-	else if (!ret)
+	אם (ret < 0)
+		اذهب out;
+	אחרת אם (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
 out:
 	location_options_release(&location_opts);
-	return ret;
+	החזר ret;
 }
 
-static int cmd_config_remove_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+ساكن صحيح cmd_config_remove_section(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+				     بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_remove_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -1276,61 +1276,61 @@ static int cmd_config_remove_section(int argc, const char **argv, const char *pr
 	check_write(&location_opts.source);
 
 	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
-						 argv[0], NULL);
-	if (ret < 0)
-		goto out;
-	else if (!ret)
+						 argv[0], عدم);
+	אם (ret < 0)
+		اذهب out;
+	אחרת אם (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
 out:
 	location_options_release(&location_opts);
-	return ret;
+	החזר ret;
 }
 
-static int show_editor(struct config_location_options *opts)
+ساكن صحيح show_editor(بنية config_location_options *opts)
 {
-	char *config_file;
+	حرف *config_file;
 
-	if (!opts->source.file && !startup_info->have_repository)
+	אם (!opts->source.file && !startup_info->have_repository)
 		die(_("not in a git directory"));
-	if (opts->source.use_stdin)
+	אם (opts->source.use_stdin)
 		die(_("editing stdin is not supported"));
-	if (opts->source.blob)
+	אם (opts->source.blob)
 		die(_("editing blobs is not supported"));
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 	config_file = opts->source.file ?
 			xstrdup(opts->source.file) :
 			repo_git_path(the_repository, "config");
-	if (opts->use_global_config) {
-		int fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
-		if (fd >= 0) {
-			char *content = default_user_config();
+	אם (opts->use_global_config) {
+		صحيح fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
+		אם (fd >= 0) {
+			حرف *content = default_user_config();
 			write_str_in_full(fd, content);
-			free(content);
+			حرر(content);
 			close(fd);
 		}
-		else if (errno != EEXIST)
+		אחרת אם (errno != EEXIST)
 			die_errno(_("cannot create configuration file %s"), config_file);
 	}
-	if (launch_editor(config_file, NULL, NULL)) {
-		free(config_file);
-		return -1;
+	אם (launch_editor(config_file, عدم, عدم)) {
+		حرر(config_file);
+		החזר -1;
 	}
-	free(config_file);
+	حرر(config_file);
 
-	return 0;
+	החזר 0;
 }
 
-static int cmd_config_edit(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+ساكن صحيح cmd_config_edit(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix,
+			   بنية repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	صحيح ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_edit_usage, 0);
 	check_argc(argc, 0, 0);
@@ -1340,12 +1340,12 @@ static int cmd_config_edit(int argc, const char **argv, const char *prefix,
 
 	ret = show_editor(&location_opts);
 	location_options_release(&location_opts);
-	return ret;
+	החזר ret;
 }
 
-static int cmd_config_actions(int argc, const char **argv, const char *prefix)
+ساكن صحيح cmd_config_actions(صحيح argc, ثابت حرف **argv, ثابت حرف *prefix)
 {
-	enum {
+	تعداد {
 		ACTION_GET = (1<<0),
 		ACTION_GET_ALL = (1<<1),
 		ACTION_GET_REGEXP = (1<<2),
@@ -1363,12 +1363,12 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		ACTION_GET_COLORBOOL = (1<<14),
 		ACTION_GET_URLMATCH = (1<<15),
 	};
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *comment_arg = NULL;
-	int actions = 0;
+	بنية config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	بنية config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	ثابت حرف *comment_arg = عدم;
+	صحيح actions = 0;
 	unsigned flags = 0;
-	struct option opts[] = {
+	بنية option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Action")),
 		OPT_CMDMODE(0, "get", &actions, N_("get value: name [<value-pattern>]"), ACTION_GET),
@@ -1395,10 +1395,10 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 			 N_("respect include directives on lookup")),
 		OPT_END(),
 	};
-	char *value = NULL, *comment = NULL;
-	int ret = 0;
-	int actions_implicit;
-	struct key_value_info default_kvi = KVI_INIT;
+	حرف *value = عدم, *comment = عدم;
+	صحيح ret = 0;
+	صحيح actions_implicit;
+	بنية key_value_info default_kvi = KVI_INIT;
 
 	argc = parse_options(argc, argv, prefix, opts,
 			     builtin_config_usage,
@@ -1407,79 +1407,79 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	location_options_init(&location_opts, prefix);
 	display_options_init(&display_opts);
 
-	if ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
+	אם ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
 		error(_("--get-color and variable type are incoherent"));
 		exit(129);
 	}
 
 	actions_implicit = (actions == 0);
-	if (actions_implicit)
-		switch (argc) {
-		case 1: actions = ACTION_GET; break;
-		case 2: actions = ACTION_SET; break;
-		case 3: actions = ACTION_SET_ALL; break;
-		default:
+	אם (actions_implicit)
+		بدل (argc) {
+		حالة 1: actions = ACTION_GET; اكسر;
+		حالة 2: actions = ACTION_SET; اكسر;
+		حالة 3: actions = ACTION_SET_ALL; اكسر;
+		افتراضي:
 			error(_("no action specified"));
 			exit(129);
 		}
-	if (actions_implicit && argc == 1) {
-		const char *last_dot = strrchr(argv[0], '.');
-		if (last_dot && strchr(last_dot + 1, '='))
+	אם (actions_implicit && argc == 1) {
+		ثابت حرف *last_dot = strrchr(argv[0], '.');
+		אם (last_dot && strchr(last_dot + 1, '='))
 			die_missing_set_value(argv[0]);
 	}
-	if (display_opts.omit_values &&
+	אם (display_opts.omit_values &&
 	    !(actions == ACTION_LIST || actions == ACTION_GET_REGEXP)) {
 		error(_("--name-only is only applicable to --list or --get-regexp"));
 		exit(129);
 	}
 
-	if (display_opts.show_origin && !(actions &
+	אם (display_opts.show_origin && !(actions &
 		(ACTION_GET|ACTION_GET_ALL|ACTION_GET_REGEXP|ACTION_LIST))) {
 		error(_("--show-origin is only applicable to --get, --get-all, "
 			"--get-regexp, and --list"));
 		exit(129);
 	}
 
-	if (display_opts.default_value && !(actions & ACTION_GET)) {
+	אם (display_opts.default_value && !(actions & ACTION_GET)) {
 		error(_("--default is only applicable to --get"));
 		exit(129);
 	}
 
-	if (comment_arg &&
+	אם (comment_arg &&
 	    !(actions & (ACTION_ADD|ACTION_SET|ACTION_SET_ALL|ACTION_REPLACE_ALL))) {
 		error(_("--comment is only applicable to add/set/replace operations"));
 		exit(129);
 	}
 
 	/* check usage of --fixed-value */
-	if (flags & CONFIG_FLAGS_FIXED_VALUE) {
-		int allowed_usage = 0;
+	אם (flags & CONFIG_FLAGS_FIXED_VALUE) {
+		صحيح allowed_usage = 0;
 
-		switch (actions) {
+		بدل (actions) {
 		/* git config --get <name> <value-pattern> */
-		case ACTION_GET:
+		حالة ACTION_GET:
 		/* git config --get-all <name> <value-pattern> */
-		case ACTION_GET_ALL:
+		حالة ACTION_GET_ALL:
 		/* git config --get-regexp <name-pattern> <value-pattern> */
-		case ACTION_GET_REGEXP:
+		حالة ACTION_GET_REGEXP:
 		/* git config --unset <name> <value-pattern> */
-		case ACTION_UNSET:
+		حالة ACTION_UNSET:
 		/* git config --unset-all <name> <value-pattern> */
-		case ACTION_UNSET_ALL:
+		حالة ACTION_UNSET_ALL:
 			allowed_usage = argc > 1 && !!argv[1];
-			break;
+			اكسر;
 
 		/* git config <name> <value> <value-pattern> */
-		case ACTION_SET_ALL:
+		حالة ACTION_SET_ALL:
 		/* git config --replace-all <name> <value> <value-pattern> */
-		case ACTION_REPLACE_ALL:
+		حالة ACTION_REPLACE_ALL:
 			allowed_usage = argc > 2 && !!argv[2];
-			break;
+			اكسر;
 
 		/* other options don't allow --fixed-value */
 		}
 
-		if (!allowed_usage) {
+		אם (!allowed_usage) {
 			error(_("--fixed-value only applies with 'value-pattern'"));
 			exit(129);
 		}
@@ -1491,35 +1491,35 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	 * The following actions may produce more than one line of output and
 	 * should therefore be paged.
 	 */
-	if (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
+	אם (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
 		setup_auto_pager("config", 1);
 
-	if (actions == ACTION_LIST) {
+	אם (actions == ACTION_LIST) {
 		check_argc(argc, 0, 0);
 		display_options_init_list(&display_opts);
-		if (config_with_options(show_all_config, &display_opts,
+		אם (config_with_options(show_all_config, &display_opts,
 					&location_opts.source, the_repository,
 					&location_opts.options) < 0) {
-			if (location_opts.source.file)
+			אם (location_opts.source.file)
 				die_errno(_("unable to read config file '%s'"),
 					  location_opts.source.file);
-			else
+			אחרת
 				die(_("error processing config file(s)"));
 		}
 	}
-	else if (actions == ACTION_EDIT) {
+	אחרת אם (actions == ACTION_EDIT) {
 		ret = show_editor(&location_opts);
 	}
-	else if (actions == ACTION_SET) {
+	אחרת אם (actions == ACTION_SET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		אם (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use a regexp, --add or --replace-all to change %s."), argv[0]);
 	}
-	else if (actions == ACTION_SET_ALL) {
+	אחרת אם (actions == ACTION_SET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1527,7 +1527,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      argv[0], value, argv[2],
 							      comment, flags);
 	}
-	else if (actions == ACTION_ADD) {
+	אחרת אם (actions == ACTION_ADD) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1536,7 +1536,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      CONFIG_REGEX_NONE,
 							      comment, flags);
 	}
-	else if (actions == ACTION_REPLACE_ALL) {
+	אחרת אם (actions == ACTION_REPLACE_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1544,93 +1544,93 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      argv[0], value, argv[2],
 							      comment, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_GET) {
+	אחרת אם (actions == ACTION_GET) {
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				0, flags);
 	}
-	else if (actions == ACTION_GET_ALL) {
+	אחרת אם (actions == ACTION_GET_ALL) {
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				GET_VALUE_ALL, flags);
 	}
-	else if (actions == ACTION_GET_REGEXP) {
+	אחרת אם (actions == ACTION_GET_REGEXP) {
 		display_opts.show_keys = 1;
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				GET_VALUE_ALL|GET_VALUE_KEY_REGEXP, flags);
 	}
-	else if (actions == ACTION_GET_URLMATCH) {
+	אחרת אם (actions == ACTION_GET_URLMATCH) {
 		check_argc(argc, 2, 2);
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_UNSET) {
+	אחרת אם (actions == ACTION_UNSET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		אם (argc == 2)
 			ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-								      argv[0], NULL, argv[1],
-								      NULL, flags);
-		else
+								      argv[0], عدم, argv[1],
+								      عدم, flags);
+		אחרת
 			ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
-							     argv[0], NULL, NULL);
+							     argv[0], عدم, عدم);
 	}
-	else if (actions == ACTION_UNSET_ALL) {
+	אחרת אם (actions == ACTION_UNSET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 2);
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, argv[1],
-							      NULL, flags | CONFIG_FLAGS_MULTI_REPLACE);
+							      argv[0], عدم, argv[1],
+							      عدم, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_RENAME_SECTION) {
+	אחרת אם (actions == ACTION_RENAME_SECTION) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 							 argv[0], argv[1]);
-		if (ret < 0)
-			goto out;
-		else if (!ret)
+		אם (ret < 0)
+			اذهب out;
+		אחרת אם (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		אחרת
 			ret = 0;
 	}
-	else if (actions == ACTION_REMOVE_SECTION) {
+	אחרת אם (actions == ACTION_REMOVE_SECTION) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 1);
 		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
-							 argv[0], NULL);
-		if (ret < 0)
-			goto out;
-		else if (!ret)
+							 argv[0], عدم);
+		אם (ret < 0)
+			اذهب out;
+		אחרת אם (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		אחרת
 			ret = 0;
 	}
-	else if (actions == ACTION_GET_COLOR) {
+	אחרת אם (actions == ACTION_GET_COLOR) {
 		check_argc(argc, 1, 2);
 		ret = get_color(&location_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_GET_COLORBOOL) {
+	אחרת אם (actions == ACTION_GET_COLORBOOL) {
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		אם (argc == 2)
 			color_stdout_is_tty = git_config_bool("command line", argv[1]);
 		ret = get_colorbool(&location_opts, argv[0], argc == 2);
 	}
 
 out:
 	location_options_release(&location_opts);
-	free(comment);
-	free(value);
-	return ret;
+	حرر(comment);
+	حرر(value);
+	החזר ret;
 }
 
-int cmd_config(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+صحيح cmd_config(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *prefix,
+	       بنية repository *repo)
 {
-	parse_opt_subcommand_fn *subcommand = NULL;
-	struct option subcommand_opts[] = {
+	parse_opt_subcommand_fn *subcommand = عدم;
+	بنية option subcommand_opts[] = {
 		OPT_SUBCOMMAND("list", &subcommand, cmd_config_list),
 		OPT_SUBCOMMAND("get", &subcommand, cmd_config_get),
 		OPT_SUBCOMMAND("set", &subcommand, cmd_config_set),
@@ -1651,11 +1651,11 @@ int cmd_config(int argc,
 	 */
 	argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_ARGV0|PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (subcommand) {
+	אם (subcommand) {
 		argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
 		       PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_UNKNOWN_OPT);
-		return subcommand(argc, argv, prefix, repo);
+		החזר subcommand(argc, argv, prefix, repo);
 	}
 
-	return cmd_config_actions(argc, argv, prefix);
+	החזר cmd_config_actions(argc, argv, prefix);
 }

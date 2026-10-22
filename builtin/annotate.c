@@ -4,21 +4,21 @@
  * Copyright (C) 2006 Ryan Anderson
  */
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "strvec.h"
+#ضمن "git-compat-util.h"
+#ضمن "builtin.h"
+#ضمن "strvec.h"
 
-int cmd_annotate(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+صحيح cmd_annotate(صحيح argc,
+		 ثابت حرف **argv,
+		 ثابت حرف *prefix,
+		 بنية repository *repo)
 {
-	struct strvec args = STRVEC_INIT;
-	const char **args_copy;
-	int ret;
+	بنية strvec args = STRVEC_INIT;
+	ثابت حرف **args_copy;
+	صحيح ret;
 
-	strvec_pushl(&args, "annotate", "-c", NULL);
-	for (int i = 1; i < argc; i++)
+	strvec_pushl(&args, "annotate", "-c", عدم);
+	עבור (صحيح i = 1; i < argc; i++)
 		strvec_push(&args, argv[i]);
 
 	/*
@@ -31,6 +31,6 @@ int cmd_annotate(int argc,
 	ret = cmd_blame(args.nr, args_copy, prefix, repo);
 
 	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	حرر(args_copy);
+	החזר ret;
 }
