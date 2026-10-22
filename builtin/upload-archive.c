@@ -18,34 +18,34 @@ static const char deadchild[] =
 
 #define MAX_ARGS (64)
 
-int cmd_upload_archive_writer(int argc,
+정수 cmd_upload_archive_writer(정수 argc,
 			      const char **argv,
 			      const char *prefix,
 			      struct repository *repo UNUSED)
 {
 	struct strvec sent_argv = STRVEC_INIT;
 	const char *arg_cmd = "argument ";
-	int ret;
+	정수 ret;
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
-	if (argc != 2)
+	만약 (argc != 2)
 		usage(upload_archive_usage);
 
-	if (!enter_repo(the_repository, argv[1], 0))
+	만약 (!enter_repo(the_repository, argv[1], 0))
 		die("'%s' does not appear to be a git repository", argv[1]);
 
 	init_archivers();
 
 	/* put received options in sent_argv[] */
 	strvec_push(&sent_argv, "git-upload-archive");
-	for (;;) {
+	위해 (;;) {
 		char *buf = packet_read_line(0, NULL);
-		if (!buf)
+		만약 (!buf)
 			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
+		만약 (sent_argv.nr > MAX_ARGS)
 			die("Too many options (>%d)", MAX_ARGS - 1);
 
-		if (!starts_with(buf, arg_cmd))
+		만약 (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
 		strvec_push(&sent_argv, buf + strlen(arg_cmd));
 	}
@@ -55,7 +55,7 @@ int cmd_upload_archive_writer(int argc,
 			    the_repository, NULL, 1);
 
 	strvec_clear(&sent_argv);
-	return ret;
+	반환 ret;
 }
 
 __attribute__((format (printf, 1, 2)))
@@ -71,20 +71,20 @@ static void error_clnt(const char *fmt, ...)
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+static ssize_t process_input(정수 child_fd, 정수 band)
 {
 	char buf[16384];
 	ssize_t sz = read(child_fd, buf, sizeof(buf));
-	if (sz < 0) {
-		if (errno != EAGAIN && errno != EINTR)
+	만약 (sz < 0) {
+		만약 (errno != EAGAIN && errno != EINTR)
 			error_clnt("read error: %s\n", strerror(errno));
-		return sz;
+		반환 sz;
 	}
 	send_sideband(1, band, buf, sz, LARGE_PACKET_MAX);
-	return sz;
+	반환 sz;
 }
 
-int cmd_upload_archive(int argc,
+정수 cmd_upload_archive(정수 argc,
 const char **argv,
 const char *prefix,
 struct repository *repo UNUSED)
@@ -106,8 +106,8 @@ struct repository *repo UNUSED)
 	writer.git_cmd = 1;
 	strvec_push(&writer.args, "upload-archive--writer");
 	strvec_pushv(&writer.args, argv + 1);
-	if (start_command(&writer)) {
-		int err = errno;
+	만약 (start_command(&writer)) {
+		정수 err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
 		die("upload-archive: %s", strerror(err));
 	}
@@ -115,33 +115,33 @@ struct repository *repo UNUSED)
 	packet_write_fmt(1, "ACK\n");
 	packet_flush(1);
 
-	while (1) {
+	동안 (1) {
 		struct pollfd pfd[2];
 
 		pfd[0].fd = writer.out;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = writer.err;
 		pfd[1].events = POLLIN;
-		if (poll(pfd, 2, -1) < 0) {
-			if (errno != EINTR) {
+		만약 (poll(pfd, 2, -1) < 0) {
+			만약 (errno != EINTR) {
 				error_errno("poll failed resuming");
 				sleep(1);
 			}
 			continue;
 		}
-		if (pfd[1].revents & POLLIN)
+		만약 (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
+			만약 (process_input(pfd[1].fd, 2))
 				continue;
-		if (pfd[0].revents & POLLIN)
+		만약 (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
+			만약 (process_input(pfd[0].fd, 1))
 				continue;
 
-		if (finish_command(&writer))
+		만약 (finish_command(&writer))
 			error_clnt("%s", deadchild);
 		packet_flush(1);
 		break;
 	}
-	return 0;
+	반환 0;
 }

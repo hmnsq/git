@@ -40,16 +40,16 @@
  * like "git update-index *" and suddenly having all the object
  * files be revision controlled.
  */
-static int allow_add;
-static int allow_remove;
-static int allow_replace;
-static int info_only;
-static int force_remove;
-static int verbose;
-static int mark_valid_only;
-static int mark_skip_worktree_only;
-static int mark_fsmonitor_only;
-static int ignore_skip_worktree_entries;
+static 정수 allow_add;
+static 정수 allow_remove;
+static 정수 allow_replace;
+static 정수 info_only;
+static 정수 force_remove;
+static 정수 verbose;
+static 정수 mark_valid_only;
+static 정수 mark_skip_worktree_only;
+static 정수 mark_fsmonitor_only;
+static 정수 ignore_skip_worktree_entries;
 #define MARK_FLAG 1
 #define UNMARK_FLAG 2
 static struct strbuf mtime_dir = STRBUF_INIT;
@@ -68,8 +68,8 @@ static void report(const char *fmt, ...)
 {
 	va_list vp;
 
-	if (!verbose)
-		return;
+	만약 (!verbose)
+		반환;
 
 	va_start(vp, fmt);
 	vprintf(fmt, vp);
@@ -79,7 +79,7 @@ static void report(const char *fmt, ...)
 
 static void remove_test_directory(void)
 {
-	if (mtime_dir.len)
+	만약 (mtime_dir.len)
 		remove_dir_recursively(&mtime_dir, 0);
 }
 
@@ -88,42 +88,42 @@ static const char *get_mtime_path(const char *path)
 	static struct strbuf sb = STRBUF_INIT;
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/%s", mtime_dir.buf, path);
-	return sb.buf;
+	반환 sb.buf;
 }
 
 static void xmkdir(const char *path)
 {
 	path = get_mtime_path(path);
-	if (mkdir(path, 0700))
+	만약 (mkdir(path, 0700))
 		die_errno(_("failed to create directory %s"), path);
 }
 
-static int xstat_mtime_dir(struct stat *st)
+static 정수 xstat_mtime_dir(struct stat *st)
 {
-	if (stat(mtime_dir.buf, st))
+	만약 (stat(mtime_dir.buf, st))
 		die_errno(_("failed to stat %s"), mtime_dir.buf);
-	return 0;
+	반환 0;
 }
 
-static int create_file(const char *path)
+static 정수 create_file(const char *path)
 {
-	int fd;
+	정수 fd;
 	path = get_mtime_path(path);
 	fd = xopen(path, O_CREAT | O_RDWR, 0644);
-	return fd;
+	반환 fd;
 }
 
 static void xunlink(const char *path)
 {
 	path = get_mtime_path(path);
-	if (unlink(path))
+	만약 (unlink(path))
 		die_errno(_("failed to delete file %s"), path);
 }
 
 static void xrmdir(const char *path)
 {
 	path = get_mtime_path(path);
-	if (rmdir(path))
+	만약 (rmdir(path))
 		die_errno(_("failed to delete directory %s"), path);
 }
 
@@ -137,15 +137,15 @@ static void avoid_racy(void)
 	sleep(1);
 }
 
-static int test_if_untracked_cache_is_supported(void)
+static 정수 test_if_untracked_cache_is_supported(void)
 {
 	struct stat st;
 	struct stat_data base;
-	int fd, ret = 0;
+	정수 fd, ret = 0;
 	char *cwd;
 
 	strbuf_addstr(&mtime_dir, "mtime-test-XXXXXX");
-	if (!mkdtemp(mtime_dir.buf))
+	만약 (!mkdtemp(mtime_dir.buf))
 		die_errno("Could not make temporary directory");
 
 	cwd = xgetcwd();
@@ -160,7 +160,7 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	fd = create_file("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	만약 (!match_stat_data(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr,_("directory stat info does not "
@@ -173,7 +173,7 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	xmkdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	만약 (!match_stat_data(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not change "
@@ -187,7 +187,7 @@ static int test_if_untracked_cache_is_supported(void)
 	write_or_die(fd, "data", 4);
 	close(fd);
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	만약 (match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes "
 				     "after updating a file"));
@@ -198,7 +198,7 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	close(create_file("new-dir/new"));
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	만약 (match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes after "
 				     "adding a file inside subdirectory"));
@@ -209,7 +209,7 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	xunlink("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	만약 (!match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a file"));
@@ -222,48 +222,48 @@ static int test_if_untracked_cache_is_supported(void)
 	xunlink("new-dir/new");
 	xrmdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	만약 (!match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a directory"));
 		goto done;
 	}
 
-	if (rmdir(mtime_dir.buf))
+	만약 (rmdir(mtime_dir.buf))
 		die_errno(_("failed to delete directory %s"), mtime_dir.buf);
 	fprintf_ln(stderr, _(" OK"));
 	ret = 1;
 
 done:
 	strbuf_release(&mtime_dir);
-	return ret;
+	반환 ret;
 }
 
-static int mark_ce_flags(const char *path, int flag, int mark)
+static 정수 mark_ce_flags(const char *path, 정수 flag, 정수 mark)
 {
-	int namelen = strlen(path);
-	int pos = index_name_pos(the_repository->index, path, namelen);
-	if (0 <= pos) {
+	정수 namelen = strlen(path);
+	정수 pos = index_name_pos(the_repository->index, path, namelen);
+	만약 (0 <= pos) {
 		mark_fsmonitor_invalid(the_repository->index, the_repository->index->cache[pos]);
-		if (mark)
+		만약 (mark)
 			the_repository->index->cache[pos]->ce_flags |= flag;
-		else
+		아니면
 			the_repository->index->cache[pos]->ce_flags &= ~flag;
 		the_repository->index->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
 		cache_tree_invalidate_path(the_repository->index, path);
 		the_repository->index->cache_changed |= CE_ENTRY_CHANGED;
-		return 0;
+		반환 0;
 	}
-	return -1;
+	반환 -1;
 }
 
-static int remove_one_path(const char *path)
+static 정수 remove_one_path(const char *path)
 {
-	if (!allow_remove)
-		return error("%s: does not exist and --remove not passed", path);
-	if (remove_file_from_index(the_repository->index, path))
-		return error("%s: cannot remove from the index", path);
-	return 0;
+	만약 (!allow_remove)
+		반환 error("%s: does not exist and --remove not passed", path);
+	만약 (remove_file_from_index(the_repository->index, path))
+		반환 error("%s: cannot remove from the index", path);
+	반환 0;
 }
 
 /*
@@ -273,21 +273,21 @@ static int remove_one_path(const char *path)
  *    succeeds.
  *  - permission error. That's never ok.
  */
-static int process_lstat_error(const char *path, int err)
+static 정수 process_lstat_error(const char *path, 정수 err)
 {
-	if (is_missing_file_error(err))
-		return remove_one_path(path);
-	return error("lstat(\"%s\"): %s", path, strerror(err));
+	만약 (is_missing_file_error(err))
+		반환 remove_one_path(path);
+	반환 error("lstat(\"%s\"): %s", path, strerror(err));
 }
 
-static int add_one_path(const struct cache_entry *old, const char *path, int len, struct stat *st)
+static 정수 add_one_path(const struct cache_entry *old, const char *path, 정수 len, struct stat *st)
 {
-	int option;
+	정수 option;
 	struct cache_entry *ce;
 
 	/* Was the old index entry already up-to-date? */
-	if (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
-		return 0;
+	만약 (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
+		반환 0;
 
 	ce = make_empty_cache_entry(the_repository->index, len);
 	memcpy(ce->name, path, len);
@@ -296,18 +296,18 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
 	fill_stat_cache_info(the_repository->index, ce, st);
 	ce->ce_mode = ce_mode_from_stat(the_repository, old, st->st_mode);
 
-	if (index_path(the_repository->index, &ce->oid, path, st,
+	만약 (index_path(the_repository->index, &ce->oid, path, st,
 		       info_only ? 0 : INDEX_WRITE_OBJECT)) {
 		discard_cache_entry(ce);
-		return -1;
+		반환 -1;
 	}
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option)) {
+	만약 (add_index_entry(the_repository->index, ce, option)) {
 		discard_cache_entry(ce);
-		return error("%s: cannot add to the index - missing --add option?", path);
+		반환 error("%s: cannot add to the index - missing --add option?", path);
 	}
-	return 0;
+	반환 0;
 }
 
 /*
@@ -333,95 +333,95 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
  *  - it doesn't exist at all in the index, but it is a valid
  *    git directory, and it should be *added* as a gitlink.
  */
-static int process_directory(const char *path, int len, struct stat *st)
+static 정수 process_directory(const char *path, 정수 len, struct stat *st)
 {
 	struct object_id oid;
-	int pos = index_name_pos(the_repository->index, path, len);
+	정수 pos = index_name_pos(the_repository->index, path, len);
 
 	/* Exact match: file or existing gitlink */
-	if (pos >= 0) {
+	만약 (pos >= 0) {
 		const struct cache_entry *ce = the_repository->index->cache[pos];
-		if (S_ISGITLINK(ce->ce_mode)) {
+		만약 (S_ISGITLINK(ce->ce_mode)) {
 
 			/* Do nothing to the index if there is no HEAD! */
-			if (repo_resolve_gitlink_ref(the_repository, path,
+			만약 (repo_resolve_gitlink_ref(the_repository, path,
 						     "HEAD", &oid) < 0)
-				return 0;
+				반환 0;
 
-			return add_one_path(ce, path, len, st);
+			반환 add_one_path(ce, path, len, st);
 		}
 		/* Should this be an unconditional error? */
-		return remove_one_path(path);
+		반환 remove_one_path(path);
 	}
 
 	/* Inexact match: is there perhaps a subdirectory match? */
 	pos = -pos-1;
-	while (pos < the_repository->index->cache_nr) {
+	동안 (pos < the_repository->index->cache_nr) {
 		const struct cache_entry *ce = the_repository->index->cache[pos++];
 
-		if (strncmp(ce->name, path, len))
+		만약 (strncmp(ce->name, path, len))
 			break;
-		if (ce->name[len] > '/')
+		만약 (ce->name[len] > '/')
 			break;
-		if (ce->name[len] < '/')
+		만약 (ce->name[len] < '/')
 			continue;
 
 		/* Subdirectory match - error out */
-		return error("%s: is a directory - add individual files instead", path);
+		반환 error("%s: is a directory - add individual files instead", path);
 	}
 
 	/* No match - should we add it as a gitlink? */
-	if (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
-		return add_one_path(NULL, path, len, st);
+	만약 (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
+		반환 add_one_path(NULL, path, len, st);
 
 	/* Error out. */
-	return error("%s: is a directory - add files inside instead", path);
+	반환 error("%s: is a directory - add files inside instead", path);
 }
 
-static int process_path(const char *path, struct stat *st, int stat_errno)
+static 정수 process_path(const char *path, struct stat *st, 정수 stat_errno)
 {
-	int pos, len;
+	정수 pos, len;
 	const struct cache_entry *ce;
 
 	len = strlen(path);
-	if (has_symlink_leading_path(path, len))
-		return error("'%s' is beyond a symbolic link", path);
+	만약 (has_symlink_leading_path(path, len))
+		반환 error("'%s' is beyond a symbolic link", path);
 
 	pos = index_name_pos(the_repository->index, path, len);
 	ce = pos < 0 ? NULL : the_repository->index->cache[pos];
-	if (ce && ce_skip_worktree(ce)) {
+	만약 (ce && ce_skip_worktree(ce)) {
 		/*
 		 * working directory version is assumed "good"
 		 * so updating it does not make sense.
 		 * On the other hand, removing it from index should work
 		 */
-		if (!ignore_skip_worktree_entries && allow_remove &&
+		만약 (!ignore_skip_worktree_entries && allow_remove &&
 		    remove_file_from_index(the_repository->index, path))
-			return error("%s: cannot remove from the index", path);
-		return 0;
+			반환 error("%s: cannot remove from the index", path);
+		반환 0;
 	}
 
 	/*
 	 * First things first: get the stat information, to decide
 	 * what to do about the pathname!
 	 */
-	if (stat_errno)
-		return process_lstat_error(path, stat_errno);
+	만약 (stat_errno)
+		반환 process_lstat_error(path, stat_errno);
 
-	if (S_ISDIR(st->st_mode))
-		return process_directory(path, len, st);
+	만약 (S_ISDIR(st->st_mode))
+		반환 process_directory(path, len, st);
 
-	return add_one_path(ce, path, len, st);
+	반환 add_one_path(ce, path, len, st);
 }
 
-static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
-			 const char *path, int stage)
+static 정수 add_cacheinfo(unsigned 정수 mode, const struct object_id *oid,
+			 const char *path, 정수 stage)
 {
-	int len, option;
+	정수 len, option;
 	struct cache_entry *ce;
 
-	if (!verify_path(path, mode))
-		return error("Invalid path '%s'", path);
+	만약 (!verify_path(path, mode))
+		반환 error("Invalid path '%s'", path);
 
 	len = strlen(path);
 	ce = make_empty_cache_entry(the_repository->index, len);
@@ -431,94 +431,94 @@ static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = len;
 	ce->ce_mode = create_ce_mode(mode);
-	if (assume_unchanged)
+	만약 (assume_unchanged)
 		ce->ce_flags |= CE_VALID;
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option))
-		return error("%s: cannot add to the index - missing --add option?",
+	만약 (add_index_entry(the_repository->index, ce, option))
+		반환 error("%s: cannot add to the index - missing --add option?",
 			     path);
 	report("add '%s'", path);
-	return 0;
+	반환 0;
 }
 
 static void chmod_path(char flip, const char *path)
 {
-	int pos;
+	정수 pos;
 	struct cache_entry *ce;
 
 	pos = index_name_pos(the_repository->index, path, strlen(path));
-	if (pos < 0)
+	만약 (pos < 0)
 		goto fail;
 	ce = the_repository->index->cache[pos];
-	if (chmod_index_entry(the_repository->index, ce, flip) < 0)
+	만약 (chmod_index_entry(the_repository->index, ce, flip) < 0)
 		goto fail;
 
 	report("chmod %cx '%s'", flip, path);
-	return;
+	반환;
  fail:
 	die("git update-index: cannot chmod %cx '%s'", flip, path);
 }
 
 static void update_one(const char *path)
 {
-	int stat_errno = 0;
+	정수 stat_errno = 0;
 	struct stat st;
 
-	if (mark_valid_only || mark_skip_worktree_only || force_remove ||
+	만약 (mark_valid_only || mark_skip_worktree_only || force_remove ||
 	    mark_fsmonitor_only)
 		st.st_mode = 0;
-	else if (lstat(path, &st) < 0) {
+	아니면 만약 (lstat(path, &st) < 0) {
 		st.st_mode = 0;
 		stat_errno = errno;
 	} /* else stat is valid */
 
-	if (!verify_path(path, st.st_mode)) {
+	만약 (!verify_path(path, st.st_mode)) {
 		fprintf(stderr, "Ignoring path %s\n", path);
-		return;
+		반환;
 	}
-	if (mark_valid_only) {
-		if (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
+	만약 (mark_valid_only) {
+		만약 (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		반환;
 	}
-	if (mark_skip_worktree_only) {
-		if (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
+	만약 (mark_skip_worktree_only) {
+		만약 (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		반환;
 	}
-	if (mark_fsmonitor_only) {
-		if (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
+	만약 (mark_fsmonitor_only) {
+		만약 (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		반환;
 	}
 
-	if (force_remove) {
-		if (remove_file_from_index(the_repository->index, path))
+	만약 (force_remove) {
+		만약 (remove_file_from_index(the_repository->index, path))
 			die("git update-index: unable to remove %s", path);
 		report("remove '%s'", path);
-		return;
+		반환;
 	}
-	if (process_path(path, &st, stat_errno))
+	만약 (process_path(path, &st, stat_errno))
 		die("Unable to process path %s", path);
 	report("add '%s'", path);
 }
 
-static void read_index_info(int nul_term_line)
+static void read_index_info(정수 nul_term_line)
 {
-	const int hexsz = the_hash_algo->hexsz;
+	const 정수 hexsz = the_hash_algo->hexsz;
 	struct strbuf buf = STRBUF_INIT;
 	struct strbuf uq = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
+	동안 (getline_fn(&buf, stdin) != EOF) {
 		char *ptr, *tab;
 		char *path_name;
 		struct object_id oid;
-		unsigned int mode;
+		unsigned 정수 mode;
 		unsigned long ul;
-		int stage;
+		정수 stage;
 
 		/* This reads lines formatted in one of three formats:
 		 *
@@ -538,56 +538,56 @@ static void read_index_info(int nul_term_line)
 		 */
 		errno = 0;
 		ul = strtoul(buf.buf, &ptr, 8);
-		if (ptr == buf.buf || *ptr != ' '
-		    || errno || (unsigned int) ul != ul)
+		만약 (ptr == buf.buf || *ptr != ' '
+		    || errno || (unsigned 정수) ul != ul)
 			goto bad_line;
 		mode = ul;
 
 		tab = strchr(ptr, '\t');
-		if (!tab || tab - ptr < hexsz + 1)
+		만약 (!tab || tab - ptr < hexsz + 1)
 			goto bad_line;
 
-		if (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
+		만약 (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
 			stage = tab[-1] - '0';
 			ptr = tab + 1; /* point at the head of path */
 			tab = tab - 2; /* point at tail of sha1 */
 		}
-		else {
+		아니면 {
 			stage = 0;
 			ptr = tab + 1; /* point at the head of path */
 		}
 
-		if (get_oid_hex(tab - hexsz, &oid) ||
+		만약 (get_oid_hex(tab - hexsz, &oid) ||
 			tab[-(hexsz + 1)] != ' ')
 			goto bad_line;
 
 		path_name = ptr;
-		if (!nul_term_line && path_name[0] == '"') {
+		만약 (!nul_term_line && path_name[0] == '"') {
 			strbuf_reset(&uq);
-			if (unquote_c_style(&uq, path_name, NULL)) {
+			만약 (unquote_c_style(&uq, path_name, NULL)) {
 				die("git update-index: bad quoting of path name");
 			}
 			path_name = uq.buf;
 		}
 
-		if (!verify_path(path_name, mode)) {
+		만약 (!verify_path(path_name, mode)) {
 			fprintf(stderr, "Ignoring path %s\n", path_name);
 			continue;
 		}
 
-		if (!mode) {
+		만약 (!mode) {
 			/* mode == 0 means there is no such path -- remove */
-			if (remove_file_from_index(the_repository->index, path_name))
+			만약 (remove_file_from_index(the_repository->index, path_name))
 				die("git update-index: unable to remove %s",
 				    ptr);
 		}
-		else {
+		아니면 {
 			/* mode ' ' sha1 '\t' name
 			 * ptr[-1] points at tab,
 			 * ptr[-41] is at the beginning of sha1
 			 */
 			ptr[-(hexsz + 2)] = ptr[-1] = 0;
-			if (add_cacheinfo(mode, &oid, path_name, stage))
+			만약 (add_cacheinfo(mode, &oid, path_name, stage))
 				die("git update-index: unable to update %s",
 				    path_name);
 		}
@@ -607,21 +607,21 @@ static const char * const update_index_usage[] = {
 
 static struct cache_entry *read_one_ent(const char *which,
 					struct object_id *ent, const char *path,
-					int namelen, int stage)
+					정수 namelen, 정수 stage)
 {
 	unsigned short mode;
 	struct object_id oid;
 	struct cache_entry *ce;
 
-	if (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
-		if (which)
+	만약 (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
+		만약 (which)
 			error("%s: not in %s branch.", path, which);
-		return NULL;
+		반환 NULL;
 	}
-	if (!the_repository->index->sparse_index && mode == S_IFDIR) {
-		if (which)
+	만약 (!the_repository->index->sparse_index && mode == S_IFDIR) {
+		만약 (which)
 			error("%s: not a blob in %s branch.", path, which);
-		return NULL;
+		반환 NULL;
 	}
 	ce = make_empty_cache_entry(the_repository->index, namelen);
 
@@ -630,47 +630,47 @@ static struct cache_entry *read_one_ent(const char *which,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = namelen;
 	ce->ce_mode = create_ce_mode(mode);
-	return ce;
+	반환 ce;
 }
 
-static int unresolve_one(const char *path)
+static 정수 unresolve_one(const char *path)
 {
 	struct string_list_item *item;
-	int res = 0;
+	정수 res = 0;
 
-	if (!the_repository->index->resolve_undo)
-		return res;
+	만약 (!the_repository->index->resolve_undo)
+		반환 res;
 	item = string_list_lookup(the_repository->index->resolve_undo, path);
-	if (!item)
-		return res; /* no resolve-undo record for the path */
+	만약 (!item)
+		반환 res; /* no resolve-undo record for the path */
 	res = unmerge_index_entry(the_repository->index, path, item->util, 0);
 	FREE_AND_NULL(item->util);
-	return res;
+	반환 res;
 }
 
-static int do_unresolve(int ac, const char **av,
-			const char *prefix, int prefix_length)
+static 정수 do_unresolve(정수 ac, const char **av,
+			const char *prefix, 정수 prefix_length)
 {
-	int i;
-	int err = 0;
+	정수 i;
+	정수 err = 0;
 
-	for (i = 1; i < ac; i++) {
+	위해 (i = 1; i < ac; i++) {
 		const char *arg = av[i];
 		char *p = prefix_path(the_repository, prefix, prefix_length, arg);
 		err |= unresolve_one(p);
 		free(p);
 	}
-	return err;
+	반환 err;
 }
 
-static int do_reupdate(const char **paths,
+static 정수 do_reupdate(const char **paths,
 		       const char *prefix)
 {
 	/* Read HEAD and run update-index on paths that are
 	 * merged and already different between index and HEAD.
 	 */
-	int pos;
-	int has_head = 1;
+	정수 pos;
+	정수 has_head = 1;
 	struct pathspec pathspec;
 	struct object_id head_oid;
 
@@ -678,24 +678,24 @@ static int do_reupdate(const char **paths,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, paths);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
+	만약 (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
 		/* If there is no HEAD, that means it is an initial
 		 * commit.  Update everything in the index.
 		 */
 		has_head = 0;
  redo:
-	for (pos = 0; pos < the_repository->index->cache_nr; pos++) {
+	위해 (pos = 0; pos < the_repository->index->cache_nr; pos++) {
 		const struct cache_entry *ce = the_repository->index->cache[pos];
 		struct cache_entry *old = NULL;
-		int save_nr;
+		정수 save_nr;
 		char *path;
 
-		if (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, NULL))
+		만약 (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, NULL))
 			continue;
-		if (has_head)
+		만약 (has_head)
 			old = read_one_ent(NULL, &head_oid,
 					   ce->name, ce_namelen(ce), 0);
-		if (old && ce->ce_mode == old->ce_mode &&
+		만약 (old && ce->ce_mode == old->ce_mode &&
 		    oideq(&ce->oid, &old->oid)) {
 			discard_cache_entry(old);
 			continue; /* unchanged */
@@ -705,7 +705,7 @@ static int do_reupdate(const char **paths,
 		 * modified with respect to HEAD, so we expand the index and restart
 		 * to process each path individually
 		 */
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
+		만약 (S_ISSPARSEDIR(ce->ce_mode)) {
 			ensure_full_index(the_repository->index);
 			goto redo;
 		}
@@ -719,25 +719,25 @@ static int do_reupdate(const char **paths,
 		update_one(path);
 		free(path);
 		discard_cache_entry(old);
-		if (save_nr != the_repository->index->cache_nr)
+		만약 (save_nr != the_repository->index->cache_nr)
 			goto redo;
 	}
 	clear_pathspec(&pathspec);
-	return 0;
+	반환 0;
 }
 
 struct refresh_params {
-	unsigned int flags;
-	int *has_errors;
+	unsigned 정수 flags;
+	정수 *has_errors;
 };
 
-static int refresh(struct refresh_params *o, unsigned int flag)
+static 정수 refresh(struct refresh_params *o, unsigned 정수 flag)
 {
 	setup_work_tree(the_repository);
 	repo_read_index(the_repository);
 	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, NULL,
 					NULL, NULL);
-	if (has_racy_timestamp(the_repository->index)) {
+	만약 (has_racy_timestamp(the_repository->index)) {
 		/*
 		 * Even if nothing else has changed, updating the file
 		 * increases the chance that racy timestamps become
@@ -748,47 +748,47 @@ static int refresh(struct refresh_params *o, unsigned int flag)
 		 */
 		the_repository->index->cache_changed |= SOMETHING_CHANGED;
 	}
-	return 0;
+	반환 0;
 }
 
-static int refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+static 정수 refresh_callback(const struct option *opt,
+				const char *arg, 정수 unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, 0);
+	반환 refresh(opt->value, 0);
 }
 
-static int really_refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+static 정수 really_refresh_callback(const struct option *opt,
+				const char *arg, 정수 unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, REFRESH_REALLY);
+	반환 refresh(opt->value, REFRESH_REALLY);
 }
 
-static int chmod_callback(const struct option *opt,
-				const char *arg, int unset)
+static 정수 chmod_callback(const struct option *opt,
+				const char *arg, 정수 unset)
 {
 	char *flip = opt->value;
 	BUG_ON_OPT_NEG(unset);
-	if ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
-		return error("option 'chmod' expects \"+x\" or \"-x\"");
+	만약 ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
+		반환 error("option 'chmod' expects \"+x\" or \"-x\"");
 	*flip = arg[0];
-	return 0;
+	반환 0;
 }
 
-static int resolve_undo_clear_callback(const struct option *opt UNUSED,
-				const char *arg, int unset)
+static 정수 resolve_undo_clear_callback(const struct option *opt UNUSED,
+				const char *arg, 정수 unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	resolve_undo_clear_index(the_repository->index);
-	return 0;
+	반환 0;
 }
 
-static int parse_new_style_cacheinfo(const char *arg,
-				     unsigned int *mode,
+static 정수 parse_new_style_cacheinfo(const char *arg,
+				     unsigned 정수 *mode,
 				     struct object_id *oid,
 				     const char **path)
 {
@@ -796,85 +796,85 @@ static int parse_new_style_cacheinfo(const char *arg,
 	char *endp;
 	const char *p;
 
-	if (!arg)
-		return -1;
+	만약 (!arg)
+		반환 -1;
 
 	errno = 0;
 	ul = strtoul(arg, &endp, 8);
-	if (errno || endp == arg || *endp != ',' || (unsigned int) ul != ul)
-		return -1; /* not a new-style cacheinfo */
+	만약 (errno || endp == arg || *endp != ',' || (unsigned 정수) ul != ul)
+		반환 -1; /* not a new-style cacheinfo */
 	*mode = ul;
 	endp++;
-	if (parse_oid_hex(endp, oid, &p) || *p != ',')
-		return -1;
+	만약 (parse_oid_hex(endp, oid, &p) || *p != ',')
+		반환 -1;
 	*path = p + 1;
-	return 0;
+	반환 0;
 }
 
 static enum parse_opt_result cacheinfo_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt UNUSED,
-	const char *arg, int unset)
+	const char *arg, 정수 unset)
 {
 	struct object_id oid;
-	unsigned int mode;
+	unsigned 정수 mode;
 	const char *path;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
-		if (add_cacheinfo(mode, &oid, path, 0))
+	만약 (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
+		만약 (add_cacheinfo(mode, &oid, path, 0))
 			die("git update-index: --cacheinfo cannot add %s", path);
 		ctx->argv++;
 		ctx->argc--;
-		return 0;
+		반환 0;
 	}
-	if (ctx->argc <= 3)
-		return error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
-	if (strtoul_ui(*++ctx->argv, 8, &mode) ||
+	만약 (ctx->argc <= 3)
+		반환 error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
+	만약 (strtoul_ui(*++ctx->argv, 8, &mode) ||
 	    get_oid_hex(*++ctx->argv, &oid) ||
 	    add_cacheinfo(mode, &oid, *++ctx->argv, 0))
 		die("git update-index: --cacheinfo cannot add %s", *ctx->argv);
 	ctx->argc -= 3;
-	return 0;
+	반환 0;
 }
 
 static enum parse_opt_result stdin_cacheinfo_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+	const char *arg, 정수 unset)
 {
-	int *nul_term_line = opt->value;
+	정수 *nul_term_line = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	만약 (ctx->argc != 1)
+		반환 error("option '%s' must be the last argument", opt->long_name);
 	allow_add = allow_replace = allow_remove = 1;
 	read_index_info(*nul_term_line);
-	return 0;
+	반환 0;
 }
 
 static enum parse_opt_result stdin_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+	const char *arg, 정수 unset)
 {
-	int *read_from_stdin = opt->value;
+	정수 *read_from_stdin = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	만약 (ctx->argc != 1)
+		반환 error("option '%s' must be the last argument", opt->long_name);
 	*read_from_stdin = 1;
-	return 0;
+	반환 0;
 }
 
 static enum parse_opt_result unresolve_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+	const char *arg, 정수 unset)
 {
-	int *has_errors = opt->value;
+	정수 *has_errors = opt->value;
 	const char *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
@@ -883,19 +883,19 @@ static enum parse_opt_result unresolve_callback(
 	/* consume remaining arguments. */
 	*has_errors = do_unresolve(ctx->argc, ctx->argv,
 				prefix, prefix ? strlen(prefix) : 0);
-	if (*has_errors)
+	만약 (*has_errors)
 		the_repository->index->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	반환 0;
 }
 
 static enum parse_opt_result reupdate_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+	const char *arg, 정수 unset)
 {
-	int *has_errors = opt->value;
+	정수 *has_errors = opt->value;
 	const char *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
@@ -904,34 +904,34 @@ static enum parse_opt_result reupdate_callback(
 	/* consume remaining arguments. */
 	setup_work_tree(the_repository);
 	*has_errors = do_reupdate(ctx->argv + 1, prefix);
-	if (*has_errors)
+	만약 (*has_errors)
 		the_repository->index->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	반환 0;
 }
 
-int cmd_update_index(int argc,
+정수 cmd_update_index(정수 argc,
 		     const char **argv,
 		     const char *prefix,
 		     struct repository *repo UNUSED)
 {
-	int newfd, entries, has_errors = 0, nul_term_line = 0;
+	정수 newfd, entries, has_errors = 0, nul_term_line = 0;
 	enum uc_mode untracked_cache = UC_UNSPECIFIED;
-	int read_from_stdin = 0;
-	int prefix_length = prefix ? strlen(prefix) : 0;
-	int preferred_index_format = 0;
+	정수 read_from_stdin = 0;
+	정수 prefix_length = prefix ? strlen(prefix) : 0;
+	정수 preferred_index_format = 0;
 	char set_executable_bit = 0;
 	struct refresh_params refresh_args = {0, &has_errors};
-	int lock_error = 0;
-	int split_index = -1;
-	int force_write = 0;
-	int fsmonitor = -1;
+	정수 lock_error = 0;
+	정수 split_index = -1;
+	정수 force_write = 0;
+	정수 fsmonitor = -1;
 	struct lock_file lock_file = LOCK_INIT;
 	struct parse_opt_ctx_t ctx;
 	strbuf_getline_fn getline_fn;
-	int parseopt_state = PARSE_OPT_UNKNOWN;
+	정수 parseopt_state = PARSE_OPT_UNKNOWN;
 	struct repository *r = the_repository;
 	struct odb_transaction *transaction;
 	struct option options[] = {
@@ -1104,11 +1104,11 @@ int cmd_update_index(int argc,
 
 	/* we will diagnose later if it turns out that we need to update it */
 	newfd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (newfd < 0)
+	만약 (newfd < 0)
 		lock_error = errno;
 
 	entries = repo_read_index(the_repository);
-	if (entries < 0)
+	만약 (entries < 0)
 		die("cache corrupted");
 
 	the_repository->index->updated_skipworktree = 1;
@@ -1125,11 +1125,11 @@ int cmd_update_index(int argc,
 	 * a batch.
 	 */
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	while (ctx.argc) {
-		if (parseopt_state != PARSE_OPT_DONE)
+	동안 (ctx.argc) {
+		만약 (parseopt_state != PARSE_OPT_DONE)
 			parseopt_state = parse_options_step(&ctx, options,
 							    update_index_usage);
-		if (!ctx.argc)
+		만약 (!ctx.argc)
 			break;
 		switch (parseopt_state) {
 		case PARSE_OPT_HELP:
@@ -1155,7 +1155,7 @@ int cmd_update_index(int argc,
 			 * update. All further updates are performed outside of
 			 * a transaction.
 			 */
-			if (transaction && verbose) {
+			만약 (transaction && verbose) {
 				odb_transaction_commit_and_finalize_or_die(transaction);
 				transaction = NULL;
 			}
@@ -1163,7 +1163,7 @@ int cmd_update_index(int argc,
 			setup_work_tree(the_repository);
 			p = prefix_path(the_repository, prefix, prefix_length, path);
 			update_one(p);
-			if (set_executable_bit)
+			만약 (set_executable_bit)
 				chmod_path(set_executable_bit, p);
 			free(p);
 			ctx.argc--;
@@ -1171,9 +1171,9 @@ int cmd_update_index(int argc,
 			break;
 		}
 		case PARSE_OPT_UNKNOWN:
-			if (ctx.argv[0][1] == '-')
+			만약 (ctx.argv[0][1] == '-')
 				error("unknown option '%s'", ctx.argv[0] + 2);
-			else
+			아니면
 				error("unknown switch '%c'", *ctx.opt);
 			usage_with_options(update_index_usage, options);
 		}
@@ -1181,16 +1181,16 @@ int cmd_update_index(int argc,
 	argc = parse_options_end(&ctx);
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	if (preferred_index_format) {
-		if (preferred_index_format < 0) {
+	만약 (preferred_index_format) {
+		만약 (preferred_index_format < 0) {
 			printf(_("%d\n"), the_repository->index->version);
-		} else if (preferred_index_format < INDEX_FORMAT_LB ||
+		} 아니면 만약 (preferred_index_format < INDEX_FORMAT_LB ||
 			   INDEX_FORMAT_UB < preferred_index_format) {
 			die("index-version %d not in range: %d..%d",
 			    preferred_index_format,
 			    INDEX_FORMAT_LB, INDEX_FORMAT_UB);
-		} else {
-			if (the_repository->index->version != preferred_index_format)
+		} 아니면 {
+			만약 (the_repository->index->version != preferred_index_format)
 				the_repository->index->cache_changed |= SOMETHING_CHANGED;
 			report(_("index-version: was %d, set to %d"),
 			       the_repository->index->version, preferred_index_format);
@@ -1198,22 +1198,22 @@ int cmd_update_index(int argc,
 		}
 	}
 
-	if (read_from_stdin) {
+	만약 (read_from_stdin) {
 		struct strbuf buf = STRBUF_INIT;
 		struct strbuf unquoted = STRBUF_INIT;
 
 		setup_work_tree(the_repository);
-		while (getline_fn(&buf, stdin) != EOF) {
+		동안 (getline_fn(&buf, stdin) != EOF) {
 			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+			만약 (!nul_term_line && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				만약 (unquote_c_style(&unquoted, buf.buf, NULL))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
 			p = prefix_path(the_repository, prefix, prefix_length, buf.buf);
 			update_one(p);
-			if (set_executable_bit)
+			만약 (set_executable_bit)
 				chmod_path(set_executable_bit, p);
 			free(p);
 		}
@@ -1226,17 +1226,17 @@ int cmd_update_index(int argc,
 	 */
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
-	if (split_index > 0) {
-		if (repo_config_get_split_index(the_repository) == 0)
+	만약 (split_index > 0) {
+		만약 (repo_config_get_split_index(the_repository) == 0)
 			warning(_("core.splitIndex is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable split index"));
-		if (the_repository->index->split_index)
+		만약 (the_repository->index->split_index)
 			the_repository->index->cache_changed |= SPLIT_INDEX_ORDERED;
-		else
+		아니면
 			add_split_index(the_repository->index);
-	} else if (!split_index) {
-		if (repo_config_get_split_index(the_repository) == 1)
+	} 아니면 만약 (!split_index) {
+		만약 (repo_config_get_split_index(the_repository) == 1)
 			warning(_("core.splitIndex is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable split index"));
@@ -1248,7 +1248,7 @@ int cmd_update_index(int argc,
 	case UC_UNSPECIFIED:
 		break;
 	case UC_DISABLE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
+		만약 (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
 			warning(_("core.untrackedCache is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable the untracked cache"));
@@ -1257,10 +1257,10 @@ int cmd_update_index(int argc,
 		break;
 	case UC_TEST:
 		setup_work_tree(the_repository);
-		return !test_if_untracked_cache_is_supported();
+		반환 !test_if_untracked_cache_is_supported();
 	case UC_ENABLE:
 	case UC_FORCE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
+		만약 (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
 			warning(_("core.untrackedCache is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable the untracked cache"));
@@ -1271,7 +1271,7 @@ int cmd_update_index(int argc,
 		BUG("bad untracked_cache value: %d", untracked_cache);
 	}
 
-	if (fsmonitor > 0) {
+	만약 (fsmonitor > 0) {
 		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
 		enum fsmonitor_reason reason = fsm_settings__get_reason(r);
 
@@ -1285,20 +1285,20 @@ int cmd_update_index(int argc,
 		 * whether the file system is compatible so that we can stop
 		 * here with a nice error message.
 		 */
-		if (reason > FSMONITOR_REASON_OK)
+		만약 (reason > FSMONITOR_REASON_OK)
 			die("%s",
 			    fsm_settings__get_incompatible_msg(r, reason));
 
-		if (fsm_mode == FSMONITOR_MODE_DISABLED) {
+		만약 (fsm_mode == FSMONITOR_MODE_DISABLED) {
 			warning(_("core.fsmonitor is unset; "
 				"set it if you really want to "
 				"enable fsmonitor"));
 		}
 		add_fsmonitor(the_repository->index);
 		report(_("fsmonitor enabled"));
-	} else if (!fsmonitor) {
+	} 아니면 만약 (!fsmonitor) {
 		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		if (fsm_mode > FSMONITOR_MODE_DISABLED)
+		만약 (fsm_mode > FSMONITOR_MODE_DISABLED)
 			warning(_("core.fsmonitor is set; "
 				"remove it if you really want to "
 				"disable fsmonitor"));
@@ -1306,17 +1306,17 @@ int cmd_update_index(int argc,
 		report(_("fsmonitor disabled"));
 	}
 
-	if (the_repository->index->cache_changed || force_write) {
-		if (newfd < 0) {
-			if (refresh_args.flags & REFRESH_QUIET)
+	만약 (the_repository->index->cache_changed || force_write) {
+		만약 (newfd < 0) {
+			만약 (refresh_args.flags & REFRESH_QUIET)
 				exit(128);
 			unable_to_lock_die(repo_get_index_file(the_repository), lock_error);
 		}
-		if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		만약 (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 			die("Unable to write new index file");
 	}
 
 	rollback_lock_file(&lock_file);
 
-	return has_errors ? 1 : 0;
+	반환 has_errors ? 1 : 0;
 }

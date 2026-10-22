@@ -58,90 +58,90 @@
  */
 
 struct clone_opts {
-	int wants_head;
-	int detach;
+	정수 wants_head;
+	정수 detach;
 };
 #define CLONE_OPTS_INIT { \
 	.wants_head = 1 /* default enabled */ \
 }
 
-static int option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
-static int option_local = -1, option_no_hardlinks, option_shared;
-static int option_tags = 1; /* default enabled */
-static int option_shallow_submodules;
-static int config_reject_shallow = -1;    /* unspecified */
+static 정수 option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
+static 정수 option_local = -1, option_no_hardlinks, option_shared;
+static 정수 option_tags = 1; /* default enabled */
+static 정수 option_shallow_submodules;
+static 정수 config_reject_shallow = -1;    /* unspecified */
 static char *remote_name = NULL;
 static char *option_branch = NULL;
-static int option_verbosity;
+static 정수 option_verbosity;
 static struct string_list option_required_reference = STRING_LIST_INIT_NODUP;
 static struct string_list option_optional_reference = STRING_LIST_INIT_NODUP;
-static int max_jobs = -1;
+static 정수 max_jobs = -1;
 static struct string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
-static int config_filter_submodules = -1;    /* unspecified */
-static int option_remote_submodules;
+static 정수 config_filter_submodules = -1;    /* unspecified */
+static 정수 option_remote_submodules;
 
-static int recurse_submodules_cb(const struct option *opt,
-				 const char *arg, int unset)
+static 정수 recurse_submodules_cb(const struct option *opt,
+				 const char *arg, 정수 unset)
 {
-	if (unset)
+	만약 (unset)
 		string_list_clear((struct string_list *)opt->value, 0);
-	else if (arg)
+	아니면 만약 (arg)
 		string_list_append((struct string_list *)opt->value, arg);
-	else
+	아니면
 		string_list_append((struct string_list *)opt->value,
 				   (const char *)opt->defval);
 
-	return 0;
+	반환 0;
 }
 
-static const char *get_repo_path_1(struct strbuf *path, int *is_bundle)
+static const char *get_repo_path_1(struct strbuf *path, 정수 *is_bundle)
 {
 	static const char *suffix[] = { "/.git", "", ".git/.git", ".git" };
 	static const char *bundle_suffix[] = { ".bundle", "" };
 	size_t baselen = path->len;
 	struct stat st;
-	int i;
+	정수 i;
 
-	for (i = 0; i < ARRAY_SIZE(suffix); i++) {
+	위해 (i = 0; i < ARRAY_SIZE(suffix); i++) {
 		strbuf_setlen(path, baselen);
 		strbuf_addstr(path, suffix[i]);
-		if (stat(path->buf, &st))
+		만약 (stat(path->buf, &st))
 			continue;
-		if (S_ISDIR(st.st_mode) && is_git_directory(path->buf)) {
+		만약 (S_ISDIR(st.st_mode) && is_git_directory(path->buf)) {
 			*is_bundle = 0;
-			return path->buf;
-		} else if (S_ISREG(st.st_mode) && st.st_size > 8) {
+			반환 path->buf;
+		} 아니면 만약 (S_ISREG(st.st_mode) && st.st_size > 8) {
 			/* Is it a "gitfile"? */
 			char signature[8];
 			const char *dst;
-			int len, fd = open(path->buf, O_RDONLY);
-			if (fd < 0)
+			정수 len, fd = open(path->buf, O_RDONLY);
+			만약 (fd < 0)
 				continue;
 			len = read_in_full(fd, signature, 8);
 			close(fd);
-			if (len != 8 || strncmp(signature, "gitdir: ", 8))
+			만약 (len != 8 || strncmp(signature, "gitdir: ", 8))
 				continue;
 			dst = read_gitfile(path->buf);
-			if (dst) {
+			만약 (dst) {
 				*is_bundle = 0;
-				return dst;
+				반환 dst;
 			}
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bundle_suffix); i++) {
+	위해 (i = 0; i < ARRAY_SIZE(bundle_suffix); i++) {
 		strbuf_setlen(path, baselen);
 		strbuf_addstr(path, bundle_suffix[i]);
-		if (!stat(path->buf, &st) && S_ISREG(st.st_mode)) {
+		만약 (!stat(path->buf, &st) && S_ISREG(st.st_mode)) {
 			*is_bundle = 1;
-			return path->buf;
+			반환 path->buf;
 		}
 	}
 
-	return NULL;
+	반환 NULL;
 }
 
-static char *get_repo_path(const char *repo, int *is_bundle)
+static char *get_repo_path(const char *repo, 정수 *is_bundle)
 {
 	struct strbuf path = STRBUF_INIT;
 	const char *raw;
@@ -151,7 +151,7 @@ static char *get_repo_path(const char *repo, int *is_bundle)
 	raw = get_repo_path_1(&path, is_bundle);
 	canon = raw ? absolute_pathdup(raw) : NULL;
 	strbuf_release(&path);
-	return canon;
+	반환 canon;
 }
 
 struct collect_alternates_data {
@@ -159,26 +159,26 @@ struct collect_alternates_data {
 	bool required;
 };
 
-static int collect_one_alternate(struct string_list_item *item, void *cb_data)
+static 정수 collect_one_alternate(struct string_list_item *item, void *cb_data)
 {
 	struct collect_alternates_data *data = cb_data;
 	struct strbuf err = STRBUF_INIT;
 	char *ref_git = compute_alternate_path(item->string, &err);
 
-	if (!ref_git) {
-		if (data->required)
+	만약 (!ref_git) {
+		만약 (data->required)
 			die("%s", err.buf);
-		else
+		아니면
 			fprintf(stderr,
 				_("info: Could not add alternate for '%s': %s\n"),
 				item->string, err.buf);
-	} else {
+	} 아니면 {
 		strvec_pushf(data->alternates, "%s/objects", ref_git);
 	}
 
 	strbuf_release(&err);
 	free(ref_git);
-	return 0;
+	반환 0;
 }
 
 static void read_alternates(struct strvec *alternates, const char *src_repo)
@@ -202,24 +202,24 @@ static void read_alternates(struct strvec *alternates, const char *src_repo)
 	strbuf_addf(&path, "%s/objects/info/alternates", src_repo);
 
 	in = fopen(path.buf, "r");
-	if (!in) {
-		if (errno == ENOENT)
+	만약 (!in) {
+		만약 (errno == ENOENT)
 			goto out;
 		die_errno("could not read alternates file '%s'", path.buf);
 	}
 
-	while (strbuf_getline(&line, in) != EOF) {
+	동안 (strbuf_getline(&line, in) != EOF) {
 		char *abs_path;
-		if (!line.len || line.buf[0] == '#')
+		만약 (!line.len || line.buf[0] == '#')
 			continue;
-		if (is_absolute_path(line.buf)) {
+		만약 (is_absolute_path(line.buf)) {
 			strvec_push(alternates, line.buf);
 			continue;
 		}
 		abs_path = mkpathdup("%s/objects/%s", src_repo, line.buf);
-		if (!normalize_path_copy(abs_path, abs_path))
+		만약 (!normalize_path_copy(abs_path, abs_path))
 			strvec_push(alternates, abs_path);
-		else
+		아니면
 			warning("skipping invalid relative alternate: %s/%s",
 				src_repo, line.buf);
 		free(abs_path);
@@ -228,14 +228,14 @@ static void read_alternates(struct strvec *alternates, const char *src_repo)
 out:
 	strbuf_release(&path);
 	strbuf_release(&line);
-	if (in)
+	만약 (in)
 		fclose(in);
 }
 
 static void collect_alternates(struct strvec *alternates,
 			       const char *local_source_repo)
 {
-	if (option_required_reference.nr || option_optional_reference.nr) {
+	만약 (option_required_reference.nr || option_optional_reference.nr) {
 		struct collect_alternates_data data = {
 			.alternates = alternates,
 			.required = true,
@@ -248,13 +248,13 @@ static void collect_alternates(struct strvec *alternates,
 				     collect_one_alternate, &data);
 	}
 
-	if (local_source_repo) {
+	만약 (local_source_repo) {
 		struct strbuf commondir = STRBUF_INIT;
 
 		get_common_dir(&commondir, local_source_repo);
-		if (option_shared)
+		만약 (option_shared)
 			strvec_pushf(alternates, "%s/objects", commondir.buf);
-		else
+		아니면
 			read_alternates(alternates, commondir.buf);
 
 		strbuf_release(&commondir);
@@ -265,23 +265,23 @@ static void mkdir_if_missing(const char *pathname, mode_t mode)
 {
 	struct stat st;
 
-	if (!mkdir(pathname, mode))
-		return;
+	만약 (!mkdir(pathname, mode))
+		반환;
 
-	if (errno != EEXIST)
+	만약 (errno != EEXIST)
 		die_errno(_("failed to create directory '%s'"), pathname);
-	else if (stat(pathname, &st))
+	아니면 만약 (stat(pathname, &st))
 		die_errno(_("failed to stat '%s'"), pathname);
-	else if (!S_ISDIR(st.st_mode))
+	아니면 만약 (!S_ISDIR(st.st_mode))
 		die(_("%s exists and is not a directory"), pathname);
 }
 
 static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 				   const char *src_repo)
 {
-	int src_len, dest_len;
+	정수 src_len, dest_len;
 	struct dir_iterator *iter;
-	int iter_status;
+	정수 iter_status;
 
 	/*
 	 * Refuse copying directories by default which aren't owned by us. The
@@ -301,12 +301,12 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 
 	iter = dir_iterator_begin(src->buf, DIR_ITERATOR_PEDANTIC);
 
-	if (!iter) {
-		if (errno == ENOTDIR) {
-			int saved_errno = errno;
+	만약 (!iter) {
+		만약 (errno == ENOTDIR) {
+			정수 saved_errno = errno;
 			struct stat st;
 
-			if (!lstat(src->buf, &st) && S_ISLNK(st.st_mode))
+			만약 (!lstat(src->buf, &st) && S_ISLNK(st.st_mode))
 				die(_("'%s' is a symlink, refusing to clone with --local"),
 				    src->buf);
 			errno = saved_errno;
@@ -319,29 +319,29 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	strbuf_addch(dest, '/');
 	dest_len = dest->len;
 
-	while ((iter_status = dir_iterator_advance(iter)) == ITER_OK) {
+	동안 ((iter_status = dir_iterator_advance(iter)) == ITER_OK) {
 		strbuf_setlen(src, src_len);
 		strbuf_addstr(src, iter->relative_path);
 		strbuf_setlen(dest, dest_len);
 		strbuf_addstr(dest, iter->relative_path);
 
-		if (S_ISLNK(iter->st.st_mode))
+		만약 (S_ISLNK(iter->st.st_mode))
 			die(_("symlink '%s' exists, refusing to clone with --local"),
 			    iter->relative_path);
 
-		if (S_ISDIR(iter->st.st_mode)) {
+		만약 (S_ISDIR(iter->st.st_mode)) {
 			mkdir_if_missing(dest->buf, 0777);
 			continue;
 		}
 
 		/* Alternates were already handled earlier. */
-		if (!fspathcmp(iter->relative_path, "info/alternates"))
+		만약 (!fspathcmp(iter->relative_path, "info/alternates"))
 			continue;
 
-		if (unlink(dest->buf) && errno != ENOENT)
+		만약 (unlink(dest->buf) && errno != ENOENT)
 			die_errno(_("failed to unlink '%s'"), dest->buf);
-		if (!option_no_hardlinks) {
-			if (!link(src->buf, dest->buf)) {
+		만약 (!option_no_hardlinks) {
+			만약 (!link(src->buf, dest->buf)) {
 				struct stat st;
 
 				/*
@@ -350,9 +350,9 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 				 * catches time-of-check-time-of-use bugs in
 				 * case the source file was meanwhile swapped.
 				 */
-				if (lstat(dest->buf, &st))
+				만약 (lstat(dest->buf, &st))
 					die(_("hardlink cannot be checked at '%s'"), dest->buf);
-				if (st.st_mode != iter->st.st_mode ||
+				만약 (st.st_mode != iter->st.st_mode ||
 				    st.st_ino != iter->st.st_ino ||
 				    st.st_dev != iter->st.st_dev ||
 				    st.st_size != iter->st.st_size ||
@@ -362,15 +362,15 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 
 				continue;
 			}
-			if (option_local > 0)
+			만약 (option_local > 0)
 				die_errno(_("failed to create link '%s'"), dest->buf);
 			option_no_hardlinks = 1;
 		}
-		if (copy_file_with_time(the_repository, dest->buf, src->buf, 0666))
+		만약 (copy_file_with_time(the_repository, dest->buf, src->buf, 0666))
 			die_errno(_("failed to copy file to '%s'"), dest->buf);
 	}
 
-	if (iter_status != ITER_DONE) {
+	만약 (iter_status != ITER_DONE) {
 		strbuf_setlen(src, src_len);
 		die(_("failed to iterate over '%s'"), src->buf);
 	}
@@ -380,7 +380,7 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 
 static void clone_local(const char *src_repo, const char *dest_repo)
 {
-	if (!option_shared) {
+	만약 (!option_shared) {
 		struct strbuf src = STRBUF_INIT;
 		struct strbuf dest = STRBUF_INIT;
 		get_common_dir(&src, src_repo);
@@ -392,14 +392,14 @@ static void clone_local(const char *src_repo, const char *dest_repo)
 		strbuf_release(&dest);
 	}
 
-	if (0 <= option_verbosity)
+	만약 (0 <= option_verbosity)
 		fprintf(stderr, _("done.\n"));
 }
 
 static const char *junk_work_tree;
-static int junk_work_tree_flags;
+static 정수 junk_work_tree_flags;
 static const char *junk_git_dir;
-static int junk_git_dir_flags;
+static 정수 junk_git_dir_flags;
 static enum {
 	JUNK_LEAVE_NONE,
 	JUNK_LEAVE_REPO,
@@ -420,25 +420,25 @@ static void remove_junk(void)
 		warning("%s", _(junk_leave_repo_msg));
 		/* fall-through */
 	case JUNK_LEAVE_ALL:
-		return;
+		반환;
 	default:
 		/* proceed to removal */
 		break;
 	}
 
-	if (junk_git_dir) {
+	만약 (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, junk_git_dir_flags);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
+	만약 (junk_work_tree) {
 		strbuf_addstr(&sb, junk_work_tree);
 		remove_dir_recursively(&sb, junk_work_tree_flags);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+static void remove_junk_on_signal(정수 signo)
 {
 	remove_junk();
 	sigchain_pop(signo);
@@ -454,15 +454,15 @@ static struct ref *find_remote_branch(const struct ref *refs, const char *branch
 	ref = find_ref_by_name(refs, head.buf);
 	strbuf_release(&head);
 
-	if (ref)
-		return ref;
+	만약 (ref)
+		반환 ref;
 
 	strbuf_addstr(&head, "refs/tags/");
 	strbuf_addstr(&head, branch);
 	ref = find_ref_by_name(refs, head.buf);
 	strbuf_release(&head);
 
-	return ref;
+	반환 ref;
 }
 
 static struct ref *wanted_peer_refs(struct clone_opts *opts,
@@ -473,26 +473,26 @@ static struct ref *wanted_peer_refs(struct clone_opts *opts,
 	struct ref **tail = &local_refs;
 	struct ref *to_free = NULL;
 
-	if (opts->wants_head) {
+	만약 (opts->wants_head) {
 		struct ref *head = copy_ref(find_ref_by_name(refs, "HEAD"));
-		if (head)
+		만약 (head)
 			tail_link_ref(head, &tail);
-		if (option_single_branch)
+		만약 (option_single_branch)
 			refs = to_free =
 				guess_remote_head(head, refs,
 						  REMOTE_GUESS_HEAD_QUIET);
-	} else if (option_single_branch) {
+	} 아니면 만약 (option_single_branch) {
 		local_refs = NULL;
 		tail = &local_refs;
 		refs = to_free = copy_ref(find_remote_branch(refs, option_branch));
 	}
 
-	for (size_t i = 0; i < refspec->nr; i++)
+	위해 (size_t i = 0; i < refspec->nr; i++)
 		get_fetch_map(refs, &refspec->items[i], &tail, 0);
 
 	free_one_ref(to_free);
 
-	return local_refs;
+	반환 local_refs;
 }
 
 static void write_remote_refs(const struct ref *local_refs)
@@ -504,18 +504,18 @@ static void write_remote_refs(const struct ref *local_refs)
 
 	t = ref_store_transaction_begin(get_main_ref_store(the_repository),
 					REF_TRANSACTION_FLAG_INITIAL, &err);
-	if (!t)
+	만약 (!t)
 		die("%s", err.buf);
 
-	for (r = local_refs; r; r = r->next) {
-		if (!r->peer_ref)
+	위해 (r = local_refs; r; r = r->next) {
+		만약 (!r->peer_ref)
 			continue;
-		if (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
+		만약 (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
 					   NULL, 0, NULL, &err))
 			die("%s", err.buf);
 	}
 
-	if (ref_transaction_commit(t, &err))
+	만약 (ref_transaction_commit(t, &err))
 		die("%s", err.buf);
 
 	strbuf_release(&err);
@@ -525,12 +525,12 @@ static void write_remote_refs(const struct ref *local_refs)
 static void write_followtags(const struct ref *refs, const char *msg)
 {
 	const struct ref *ref;
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
+	위해 (ref = refs; ref; ref = ref->next) {
+		만약 (!starts_with(ref->name, "refs/tags/"))
 			continue;
-		if (ends_with(ref->name, "^{}"))
+		만약 (ends_with(ref->name, "^{}"))
 			continue;
-		if (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
+		만약 (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
 			continue;
 		refs_update_ref(get_main_ref_store(the_repository), msg,
 				ref->name, &ref->old_oid, NULL, 0,
@@ -547,13 +547,13 @@ static const struct object_id *iterate_ref_map(void *cb_data)
 	 * Skip anything missing a peer_ref, which we are not
 	 * actually going to write a ref for.
 	 */
-	while (ref && !ref->peer_ref)
+	동안 (ref && !ref->peer_ref)
 		ref = ref->next;
-	if (!ref)
-		return NULL;
+	만약 (!ref)
+		반환 NULL;
 
 	*rm = ref->next;
-	return &ref->old_oid;
+	반환 &ref->old_oid;
 }
 
 static void update_remote_refs(const struct ref *refs,
@@ -562,31 +562,31 @@ static void update_remote_refs(const struct ref *refs,
 			       const char *branch_top,
 			       const char *msg,
 			       struct transport *transport,
-			       int check_connectivity)
+			       정수 check_connectivity)
 {
 	const struct ref *rm = mapped_refs;
 
-	if (check_connectivity) {
+	만약 (check_connectivity) {
 		struct check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.transport = transport;
 		opt.progress = transport->progress;
 
-		if (check_connected(iterate_ref_map, &rm, &opt))
+		만약 (check_connected(iterate_ref_map, &rm, &opt))
 			die(_("remote did not send all necessary objects"));
 	}
 
-	if (refs) {
+	만약 (refs) {
 		write_remote_refs(mapped_refs);
-		if (option_single_branch && option_tags)
+		만약 (option_single_branch && option_tags)
 			write_followtags(refs, msg);
 	}
 
-	if (remote_head_points_at && remote_head_points_at->peer_ref && !option_bare) {
+	만약 (remote_head_points_at && remote_head_points_at->peer_ref && !option_bare) {
 		struct strbuf head_ref = STRBUF_INIT;
 		strbuf_addstr(&head_ref, branch_top);
 		strbuf_addstr(&head_ref, "HEAD");
-		if (refs_update_symref(get_main_ref_store(the_repository), head_ref.buf,
+		만약 (refs_update_symref(get_main_ref_store(the_repository), head_ref.buf,
 				       remote_head_points_at->peer_ref->name,
 				       msg) < 0)
 			die(_("unable to update %s"), head_ref.buf);
@@ -598,17 +598,17 @@ static void update_head(struct clone_opts *opts, const struct ref *our, const st
 			const char *unborn, const char *msg)
 {
 	const char *head;
-	if (our && !opts->detach && skip_prefix(our->name, "refs/heads/", &head)) {
+	만약 (our && !opts->detach && skip_prefix(our->name, "refs/heads/", &head)) {
 		/* Local default branch link */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, NULL) < 0)
+		만약 (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, NULL) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare) {
+		만약 (!option_bare) {
 			refs_update_ref(get_main_ref_store(the_repository),
 					msg, "HEAD", &our->old_oid, NULL, 0,
 					UPDATE_REFS_DIE_ON_ERR);
 			install_branch_config(0, head, remote_name, our->name);
 		}
-	} else if (our) {
+	} 아니면 만약 (our) {
 		struct commit *c = lookup_commit_or_die(&our->old_oid,
 							our->name);
 
@@ -616,7 +616,7 @@ static void update_head(struct clone_opts *opts, const struct ref *our, const st
 		refs_update_ref(get_main_ref_store(the_repository), msg,
 				"HEAD", &c->object.oid, NULL, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (remote) {
+	} 아니면 만약 (remote) {
 		/*
 		 * We know remote HEAD points to a non-branch, or
 		 * HEAD points to a branch but we don't know which one.
@@ -625,22 +625,22 @@ static void update_head(struct clone_opts *opts, const struct ref *our, const st
 		refs_update_ref(get_main_ref_store(the_repository), msg,
 				"HEAD", &remote->old_oid, NULL, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (unborn && skip_prefix(unborn, "refs/heads/", &head)) {
+	} 아니면 만약 (unborn && skip_prefix(unborn, "refs/heads/", &head)) {
 		/*
 		 * Unborn head from remote; same as "our" case above except
 		 * that we have no ref to update.
 		 */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, NULL) < 0)
+		만약 (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, NULL) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare)
+		만약 (!option_bare)
 			install_branch_config(0, head, remote_name, unborn);
 	}
 }
 
-static int git_sparse_checkout_init(const char *repo)
+static 정수 git_sparse_checkout_init(const char *repo)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
-	int result = 0;
+	정수 result = 0;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	strvec_pushl(&cmd.args, "-C", repo, "sparse-checkout", "set", NULL);
@@ -652,17 +652,17 @@ static int git_sparse_checkout_init(const char *repo)
 	cfg->apply_sparse_checkout = 1;
 
 	cmd.git_cmd = 1;
-	if (run_command(&cmd)) {
+	만약 (run_command(&cmd)) {
 		error(_("failed to initialize sparse-checkout"));
 		result = 1;
 	}
 
-	return result;
+	반환 result;
 }
 
-static int checkout(int submodule_progress,
+static 정수 checkout(정수 submodule_progress,
 		    struct list_objects_filter_options *filter_options,
-		    int filter_submodules,
+		    정수 filter_submodules,
 		    enum ref_storage_format ref_storage_format)
 {
 	struct object_id oid;
@@ -671,25 +671,25 @@ static int checkout(int submodule_progress,
 	struct unpack_trees_options opts;
 	struct tree *tree;
 	struct tree_desc t;
-	int err = 0;
+	정수 err = 0;
 	struct run_hooks_opt hook_opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-	if (option_no_checkout)
-		return 0;
+	만약 (option_no_checkout)
+		반환 0;
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
 				   RESOLVE_REF_READING, &oid, NULL);
-	if (!head) {
+	만약 (!head) {
 		warning(_("remote HEAD refers to nonexistent ref, "
 			  "unable to checkout"));
-		return 0;
+		반환 0;
 	}
-	if (!strcmp(head, "HEAD")) {
-		if (advice_enabled(ADVICE_DETACHED_HEAD))
+	만약 (!strcmp(head, "HEAD")) {
+		만약 (advice_enabled(ADVICE_DETACHED_HEAD))
 			detach_advice(oid_to_hex(&oid));
 		FREE_AND_NULL(head);
-	} else {
-		if (!starts_with(head, "refs/heads/"))
+	} 아니면 {
+		만약 (!starts_with(head, "refs/heads/"))
 			die(_("HEAD not found below refs/heads!"));
 	}
 
@@ -710,54 +710,54 @@ static int checkout(int submodule_progress,
 	init_checkout_metadata(&opts.meta, head, &oid, NULL);
 
 	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	만약 (!tree)
 		die(_("unable to parse commit %s"), oid_to_hex(&oid));
-	if (repo_parse_tree(the_repository, tree) < 0)
+	만약 (repo_parse_tree(the_repository, tree) < 0)
 		exit(128);
 	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts) < 0)
+	만약 (unpack_trees(1, &t, &opts) < 0)
 		die(_("unable to checkout working tree"));
 
 	free(head);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	만약 (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
 
 	strvec_pushl(&hook_opt.args, oid_to_hex(null_oid(the_hash_algo)),
 		     oid_to_hex(&oid), "1", NULL);
 	err |= run_hooks_opt(the_repository, "post-checkout", &hook_opt);
 
-	if (!err && (option_recurse_submodules.nr > 0)) {
+	만약 (!err && (option_recurse_submodules.nr > 0)) {
 		struct child_process cmd = CHILD_PROCESS_INIT;
 		strvec_pushl(&cmd.args, "submodule", "update", "--require-init",
 			     "--recursive", NULL);
 
-		if (option_shallow_submodules == 1)
+		만약 (option_shallow_submodules == 1)
 			strvec_push(&cmd.args, "--depth=1");
 
-		if (max_jobs != -1)
+		만약 (max_jobs != -1)
 			strvec_pushf(&cmd.args, "--jobs=%d", max_jobs);
 
-		if (submodule_progress)
+		만약 (submodule_progress)
 			strvec_push(&cmd.args, "--progress");
 
-		if (option_verbosity < 0)
+		만약 (option_verbosity < 0)
 			strvec_push(&cmd.args, "--quiet");
 
-		if (option_remote_submodules) {
+		만약 (option_remote_submodules) {
 			strvec_push(&cmd.args, "--remote");
 			strvec_push(&cmd.args, "--no-fetch");
 		}
 
-		if (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+		만약 (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 			strvec_pushf(&cmd.args, "--ref-storage-format=%s",
 				     ref_storage_format_to_name(ref_storage_format));
 
-		if (filter_submodules && filter_options->choice)
+		만약 (filter_submodules && filter_options->choice)
 			strvec_pushf(&cmd.args, "--filter=%s",
 				     expand_list_objects_filter_spec(filter_options));
 
-		if (option_single_branch >= 0)
+		만약 (option_single_branch >= 0)
 			strvec_push(&cmd.args, option_single_branch ?
 					       "--single-branch" :
 					       "--no-single-branch");
@@ -766,27 +766,27 @@ static int checkout(int submodule_progress,
 		err = run_command(&cmd);
 	}
 
-	return err;
+	반환 err;
 }
 
-static int git_clone_config(const char *k, const char *v,
+static 정수 git_clone_config(const char *k, const char *v,
 			    const struct config_context *ctx, void *cb)
 {
-	if (!strcmp(k, "clone.defaultremotename")) {
-		if (!v)
-			return config_error_nonbool(k);
+	만약 (!strcmp(k, "clone.defaultremotename")) {
+		만약 (!v)
+			반환 config_error_nonbool(k);
 		free(remote_name);
 		remote_name = xstrdup(v);
 	}
-	if (!strcmp(k, "clone.rejectshallow"))
+	만약 (!strcmp(k, "clone.rejectshallow"))
 		config_reject_shallow = git_config_bool(k, v);
-	if (!strcmp(k, "clone.filtersubmodules"))
+	만약 (!strcmp(k, "clone.filtersubmodules"))
 		config_filter_submodules = git_config_bool(k, v);
 
-	return git_default_config(k, v, ctx, cb);
+	반환 git_default_config(k, v, ctx, cb);
 }
 
-static int write_one_config(const char *key, const char *value,
+static 정수 write_one_config(const char *key, const char *value,
 			    const struct config_context *ctx,
 			    void *data)
 {
@@ -795,21 +795,21 @@ static int write_one_config(const char *key, const char *value,
 	 * environment, since repo_config_set_multivar_gently only deals with
 	 * config-file writes
 	 */
-	int apply_failed = git_clone_config(key, value, ctx, data);
-	if (apply_failed)
-		return apply_failed;
+	정수 apply_failed = git_clone_config(key, value, ctx, data);
+	만약 (apply_failed)
+		반환 apply_failed;
 
-	return repo_config_set_multivar_gently(the_repository, key,
+	반환 repo_config_set_multivar_gently(the_repository, key,
 					       value ? value : "true",
 					       CONFIG_REGEX_NONE, 0);
 }
 
 static void write_config(struct string_list *config)
 {
-	int i;
+	정수 i;
 
-	for (i = 0; i < config->nr; i++) {
-		if (git_config_parse_parameter(config->items[i].string,
+	위해 (i = 0; i < config->nr; i++) {
+		만약 (git_config_parse_parameter(config->items[i].string,
 					       write_one_config, NULL) < 0)
 			die(_("unable to write parameters to config file"));
 	}
@@ -823,18 +823,18 @@ static void write_refspec_config(const char *src_ref_prefix,
 	struct strbuf key = STRBUF_INIT;
 	struct strbuf value = STRBUF_INIT;
 
-	if (option_mirror || !option_bare) {
-		if (option_single_branch && !option_mirror) {
-			if (option_branch) {
-				if (starts_with(our_head_points_at->name, "refs/tags/"))
+	만약 (option_mirror || !option_bare) {
+		만약 (option_single_branch && !option_mirror) {
+			만약 (option_branch) {
+				만약 (starts_with(our_head_points_at->name, "refs/tags/"))
 					strbuf_addf(&value, "+%s:%s", our_head_points_at->name,
 						our_head_points_at->name);
-				else
+				아니면
 					strbuf_addf(&value, "+%s:%s%s", our_head_points_at->name,
 						branch_top->buf, option_branch);
-			} else if (remote_head_points_at) {
+			} 아니면 만약 (remote_head_points_at) {
 				const char *head = remote_head_points_at->name;
-				if (!skip_prefix(head, "refs/heads/", &head))
+				만약 (!skip_prefix(head, "refs/heads/", &head))
 					BUG("remote HEAD points at non-head?");
 
 				strbuf_addf(&value, "+%s:%s%s", remote_head_points_at->name,
@@ -846,16 +846,16 @@ static void write_refspec_config(const char *src_ref_prefix,
 			 * any remote-tracking branch, which is what
 			 * we want.
 			 */
-		} else {
+		} 아니면 {
 			strbuf_addf(&value, "+%s*:%s*", src_ref_prefix, branch_top->buf);
 		}
 		/* Configure the remote */
-		if (value.len) {
+		만약 (value.len) {
 			strbuf_addf(&key, "remote.%s.fetch", remote_name);
 			repo_config_set_multivar(the_repository, key.buf, value.buf, "^$", 0);
 			strbuf_reset(&key);
 
-			if (option_mirror) {
+			만약 (option_mirror) {
 				strbuf_addf(&key, "remote.%s.mirror", remote_name);
 				repo_config_set(the_repository, key.buf, "true");
 				strbuf_reset(&key);
@@ -871,37 +871,37 @@ static void dissociate_from_references(void)
 {
 	char *alternates = repo_git_path(the_repository, "objects/info/alternates");
 
-	if (!access(alternates, F_OK)) {
+	만약 (!access(alternates, F_OK)) {
 		struct child_process cmd = CHILD_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
 		cmd.no_stdin = 1;
 		strvec_pushl(&cmd.args, "repack", "-a", "-d", NULL);
-		if (run_command(&cmd))
+		만약 (run_command(&cmd))
 			die(_("cannot repack to clean up"));
-		if (unlink(alternates) && errno != ENOENT)
+		만약 (unlink(alternates) && errno != ENOENT)
 			die_errno(_("cannot unlink temporary alternates file"));
 	}
 	free(alternates);
 }
 
-static int path_exists(const char *path)
+static 정수 path_exists(const char *path)
 {
 	struct stat sb;
-	return !stat(path, &sb);
+	반환 !stat(path, &sb);
 }
 
-int cmd_clone(int argc,
+정수 cmd_clone(정수 argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repository UNUSED)
 {
-	int is_bundle = 0, is_local;
-	int reject_shallow = 0;
+	정수 is_bundle = 0, is_local;
+	정수 reject_shallow = 0;
 	const char *repo_name, *repo, *work_tree, *git_dir;
 	char *repo_to_free = NULL;
 	char *path = NULL, *dir, *display_repo = NULL;
-	int dest_exists, real_dest_exists = 0;
+	정수 dest_exists, real_dest_exists = 0;
 	const struct ref *refs, *remote_head;
 	struct ref *remote_head_points_at = NULL;
 	const struct ref *our_head_points_at;
@@ -914,27 +914,27 @@ int cmd_clone(int argc,
 	struct transport *transport = NULL;
 	const char *src_ref_prefix = "refs/heads/";
 	struct remote *remote;
-	int err = 0, complete_refs_before_fetch = 1;
-	int submodule_progress;
-	int filter_submodules = 0;
-	int hash_algo;
+	정수 err = 0, complete_refs_before_fetch = 1;
+	정수 submodule_progress;
+	정수 filter_submodules = 0;
+	정수 hash_algo;
 	enum ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
-	const int do_not_override_repo_unix_permissions = -1;
-	int option_reject_shallow = -1; /* unspecified */
-	int deepen = 0;
+	const 정수 do_not_override_repo_unix_permissions = -1;
+	정수 option_reject_shallow = -1; /* unspecified */
+	정수 deepen = 0;
 	char *option_template = NULL, *option_depth = NULL, *option_since = NULL;
 	char *option_origin = NULL;
 	struct string_list option_not = STRING_LIST_INIT_NODUP;
 	const char *real_git_dir = NULL;
 	const char *ref_storage_format_uri = NULL;
 	const char *option_upload_pack = "git-upload-pack";
-	int option_progress = -1;
-	int option_sparse_checkout = 0;
+	정수 option_progress = -1;
+	정수 option_sparse_checkout = 0;
 	enum transport_family family = TRANSPORT_FAMILY_ALL;
 	struct string_list option_config = STRING_LIST_INIT_DUP;
-	int option_dissociate = 0;
+	정수 option_dissociate = 0;
 	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	int option_filter_submodules = -1; /* unspecified */
+	정수 option_filter_submodules = -1; /* unspecified */
 	struct string_list server_options = STRING_LIST_INIT_NODUP;
 	const char *bundle_uri = NULL;
 	char *option_rev = NULL;
@@ -1041,37 +1041,37 @@ int cmd_clone(int argc,
 	argc = parse_options(argc, argv, prefix, builtin_clone_options,
 			     builtin_clone_usage, 0);
 
-	if (argc > 2)
+	만약 (argc > 2)
 		usage_msg_opt(_("Too many arguments."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (argc == 0)
+	만약 (argc == 0)
 		usage_msg_opt(_("You must specify a repository to clone."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (option_depth || option_since || option_not.nr)
+	만약 (option_depth || option_since || option_not.nr)
 		deepen = 1;
-	if (option_single_branch == -1)
+	만약 (option_single_branch == -1)
 		option_single_branch = deepen ? 1 : 0;
 
-	if (ref_storage_format_uri) {
+	만약 (ref_storage_format_uri) {
 		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, NULL);
-		if (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+		만약 (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format_uri);
 	}
 
-	if (option_mirror) {
+	만약 (option_mirror) {
 		option_bare = 1;
 		option_tags = 0;
 	}
 
-	if (option_bare) {
-		if (real_git_dir)
+	만약 (option_bare) {
+		만약 (real_git_dir)
 			die(_("options '%s' and '%s' cannot be used together"), "--bare", "--separate-git-dir");
 		option_no_checkout = 1;
 	}
 
-	if (bundle_uri && deepen)
+	만약 (bundle_uri && deepen)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--bundle-uri",
 		    "--depth/--shallow-since/--shallow-exclude");
@@ -1079,33 +1079,33 @@ int cmd_clone(int argc,
 	repo_name = argv[0];
 
 	path = get_repo_path(repo_name, &is_bundle);
-	if (path) {
+	만약 (path) {
 		FREE_AND_NULL(path);
 		repo = repo_to_free = absolute_pathdup(repo_name);
-	} else if (strchr(repo_name, ':')) {
+	} 아니면 만약 (strchr(repo_name, ':')) {
 		repo = repo_name;
 		display_repo = transport_anonymize_url(repo);
-	} else
+	} 아니면
 		die(_("repository '%s' does not exist"), repo_name);
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (option_depth && atoi(option_depth) < 1)
+	만약 (option_depth && atoi(option_depth) < 1)
 		die(_("depth %s is not a positive number"), option_depth);
 
-	if (argc == 2)
+	만약 (argc == 2)
 		dir = xstrdup(argv[1]);
-	else
+	아니면
 		dir = git_url_basename(repo_name, is_bundle, option_bare);
 	strip_dir_trailing_slashes(dir);
 
 	dest_exists = path_exists(dir);
-	if (dest_exists && !is_empty_dir(dir))
+	만약 (dest_exists && !is_empty_dir(dir))
 		die(_("destination path '%s' already exists and is not "
 			"an empty directory."), dir);
 
-	if (real_git_dir) {
+	만약 (real_git_dir) {
 		real_dest_exists = path_exists(real_git_dir);
-		if (real_dest_exists && !is_empty_dir(real_git_dir))
+		만약 (real_dest_exists && !is_empty_dir(real_git_dir))
 			die(_("repository path '%s' already exists and is not "
 				"an empty directory."), real_git_dir);
 	}
@@ -1115,17 +1115,17 @@ int cmd_clone(int argc,
 		    display_repo ? display_repo : repo);
 	free(display_repo);
 
-	if (option_bare)
+	만약 (option_bare)
 		work_tree = NULL;
-	else {
+	아니면 {
 		work_tree = getenv("GIT_WORK_TREE");
-		if (work_tree && path_exists(work_tree))
+		만약 (work_tree && path_exists(work_tree))
 			die(_("working tree '%s' already exists."), work_tree);
 	}
 
-	if (option_bare || work_tree)
+	만약 (option_bare || work_tree)
 		git_dir = xstrdup(dir);
-	else {
+	아니면 {
 		work_tree = dir;
 		git_dir = mkpathdup("%s/.git", dir);
 	}
@@ -1133,41 +1133,41 @@ int cmd_clone(int argc,
 	atexit(remove_junk);
 	sigchain_push_common(remove_junk_on_signal);
 
-	if (!option_bare) {
-		if (safe_create_leading_directories_const(the_repository, work_tree) < 0)
+	만약 (!option_bare) {
+		만약 (safe_create_leading_directories_const(the_repository, work_tree) < 0)
 			die_errno(_("could not create leading directories of '%s'"),
 				  work_tree);
-		if (dest_exists)
+		만약 (dest_exists)
 			junk_work_tree_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
-		else if (mkdir(work_tree, 0777))
+		아니면 만약 (mkdir(work_tree, 0777))
 			die_errno(_("could not create work tree dir '%s'"),
 				  work_tree);
 		junk_work_tree = work_tree;
 	}
 
-	if (real_git_dir) {
-		if (real_dest_exists)
+	만약 (real_git_dir) {
+		만약 (real_dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = real_git_dir;
-	} else {
-		if (dest_exists)
+	} 아니면 {
+		만약 (dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = git_dir;
 	}
-	if (safe_create_leading_directories_const(the_repository, git_dir) < 0)
+	만약 (safe_create_leading_directories_const(the_repository, git_dir) < 0)
 		die(_("could not create leading directories of '%s'"), git_dir);
 
-	if (0 <= option_verbosity) {
-		if (option_bare)
+	만약 (0 <= option_verbosity) {
+		만약 (option_bare)
 			fprintf(stderr, _("Cloning into bare repository '%s'...\n"), dir);
-		else
+		아니면
 			fprintf(stderr, _("Cloning into '%s'...\n"), dir);
 	}
 
-	if (option_recurse_submodules.nr > 0) {
+	만약 (option_recurse_submodules.nr > 0) {
 		struct string_list_item *item;
 		struct strbuf sb = STRBUF_INIT;
-		int val;
+		정수 val;
 
 		/* remove duplicates */
 		string_list_sort_u(&option_recurse_submodules, 0);
@@ -1183,20 +1183,20 @@ int cmd_clone(int argc,
 			strbuf_reset(&sb);
 		}
 
-		if (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
+		만약 (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
 		    val)
 			string_list_append(&option_config, "submodule.recurse=true");
 
-		if (option_required_reference.nr &&
+		만약 (option_required_reference.nr &&
 		    option_optional_reference.nr)
 			die(_("clone --recursive is not compatible with "
 			      "both --reference and --reference-if-able"));
-		else if (option_required_reference.nr) {
+		아니면 만약 (option_required_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
 				"submodule.alternateErrorStrategy=die");
-		} else if (option_optional_reference.nr) {
+		} 아니면 만약 (option_optional_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
@@ -1216,7 +1216,7 @@ int cmd_clone(int argc,
 			  option_template, GIT_HASH_UNKNOWN, ref_storage_format_uri,
 			  do_not_override_repo_unix_permissions, NULL);
 
-	if (real_git_dir) {
+	만약 (real_git_dir) {
 		free((char *)git_dir);
 		git_dir = real_git_dir;
 	}
@@ -1276,18 +1276,18 @@ int cmd_clone(int argc,
 	 * If option_reject_shallow is specified from CLI option,
 	 * ignore config_reject_shallow from git_clone_config.
 	 */
-	if (config_reject_shallow != -1)
+	만약 (config_reject_shallow != -1)
 		reject_shallow = config_reject_shallow;
-	if (option_reject_shallow != -1)
+	만약 (option_reject_shallow != -1)
 		reject_shallow = option_reject_shallow;
 
 	/*
 	 * If option_filter_submodules is specified from CLI option,
 	 * ignore config_filter_submodules from git_clone_config.
 	 */
-	if (config_filter_submodules != -1)
+	만약 (config_filter_submodules != -1)
 		filter_submodules = config_filter_submodules;
-	if (option_filter_submodules != -1)
+	만약 (option_filter_submodules != -1)
 		filter_submodules = option_filter_submodules;
 
 	/*
@@ -1295,10 +1295,10 @@ int cmd_clone(int argc,
 	 * filter flags (but not with filter configs, as those should be
 	 * set-and-forget).
 	 */
-	if (option_filter_submodules > 0 && !filter_options.choice)
+	만약 (option_filter_submodules > 0 && !filter_options.choice)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--filter");
-	if (option_filter_submodules > 0 && !option_recurse_submodules.nr)
+	만약 (option_filter_submodules > 0 && !option_recurse_submodules.nr)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--recurse-submodules");
 
@@ -1306,24 +1306,24 @@ int cmd_clone(int argc,
 	 * apply the remote name provided by --origin only after this second
 	 * call to git_config, to ensure it overrides all config-based values.
 	 */
-	if (option_origin) {
+	만약 (option_origin) {
 		free(remote_name);
 		remote_name = xstrdup(option_origin);
 	}
 
-	if (!remote_name)
+	만약 (!remote_name)
 		remote_name = xstrdup("origin");
 
-	if (!valid_remote_name(remote_name))
+	만약 (!valid_remote_name(remote_name))
 		die(_("'%s' is not a valid remote name"), remote_name);
 
-	if (option_bare) {
-		if (option_mirror)
+	만약 (option_bare) {
+		만약 (option_mirror)
 			src_ref_prefix = "refs/";
 		strbuf_addstr(&branch_top, src_ref_prefix);
 
 		repo_config_set(the_repository, "core.bare", "true");
-	} else if (!option_rev) {
+	} 아니면 만약 (!option_rev) {
 		strbuf_addf(&branch_top, "refs/remotes/%s/", remote_name);
 	}
 
@@ -1331,7 +1331,7 @@ int cmd_clone(int argc,
 	repo_config_set(the_repository, key.buf, repo);
 	strbuf_reset(&key);
 
-	if (!option_tags) {
+	만약 (!option_tags) {
 		strbuf_addf(&key, "remote.%s.tagOpt", remote_name);
 		repo_config_set(the_repository, key.buf, "--no-tags");
 		strbuf_reset(&key);
@@ -1339,30 +1339,30 @@ int cmd_clone(int argc,
 
 	remote = remote_get_early(remote_name);
 
-	if (!option_rev)
+	만약 (!option_rev)
 		refspec_appendf(&remote->fetch, "+%s*:%s*", src_ref_prefix,
 				branch_top.buf);
 
 	path = get_repo_path(remote->url.v[0], &is_bundle);
 	is_local = option_local != 0 && path && !is_bundle;
-	if (is_local) {
-		if (option_depth)
+	만약 (is_local) {
+		만약 (option_depth)
 			warning(_("--depth is ignored in local clones; use file:// instead."));
-		if (option_since)
+		만약 (option_since)
 			warning(_("--shallow-since is ignored in local clones; use file:// instead."));
-		if (option_not.nr)
+		만약 (option_not.nr)
 			warning(_("--shallow-exclude is ignored in local clones; use file:// instead."));
-		if (filter_options.choice)
+		만약 (filter_options.choice)
 			warning(_("--filter is ignored in local clones; use file:// instead."));
-		if (!access(mkpath("%s/shallow", path), F_OK)) {
-			if (reject_shallow)
+		만약 (!access(mkpath("%s/shallow", path), F_OK)) {
+			만약 (reject_shallow)
 				die(_("source repository is shallow, reject to clone."));
-			if (option_local > 0)
+			만약 (option_local > 0)
 				warning(_("source repository is shallow, ignoring --local"));
 			is_local = 0;
 		}
 	}
-	if (option_local > 0 && !is_local)
+	만약 (option_local > 0 && !is_local)
 		warning(_("--local is ignored"));
 
 	collect_alternates(&alternates, is_local ? path : NULL);
@@ -1373,15 +1373,15 @@ int cmd_clone(int argc,
 	transport->family = family;
 	transport->cloning = 1;
 
-	if (is_bundle) {
+	만약 (is_bundle) {
 		struct bundle_header header = BUNDLE_HEADER_INIT;
-		int fd = read_bundle_header(path, &header);
-		int has_filter = header.filter.choice != LOFC_DISABLED;
+		정수 fd = read_bundle_header(path, &header);
+		정수 has_filter = header.filter.choice != LOFC_DISABLED;
 
-		if (fd > 0)
+		만약 (fd > 0)
 			close(fd);
 		bundle_header_release(&header);
-		if (has_filter)
+		만약 (has_filter)
 			die(_("cannot clone from filtered bundle"));
 	}
 
@@ -1392,32 +1392,32 @@ int cmd_clone(int argc,
 	die_for_incompatible_opt2(!!option_rev, "--revision",
 				  option_mirror, "--mirror");
 
-	if (reject_shallow)
+	만약 (reject_shallow)
 		transport_set_option(transport, TRANS_OPT_REJECT_SHALLOW, "1");
-	if (option_depth)
+	만약 (option_depth)
 		transport_set_option(transport, TRANS_OPT_DEPTH,
 				     option_depth);
-	if (option_since)
+	만약 (option_since)
 		transport_set_option(transport, TRANS_OPT_DEEPEN_SINCE,
 				     option_since);
-	if (option_not.nr)
+	만약 (option_not.nr)
 		transport_set_option(transport, TRANS_OPT_DEEPEN_NOT,
 				     (const char *)&option_not);
-	if (option_single_branch) {
+	만약 (option_single_branch) {
 		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
 
-		if (option_branch)
+		만약 (option_branch)
 			opts.wants_head = 0;
 	}
 
-	if (option_upload_pack)
+	만약 (option_upload_pack)
 		transport_set_option(transport, TRANS_OPT_UPLOADPACK,
 				     option_upload_pack);
 
-	if (server_options.nr)
+	만약 (server_options.nr)
 		transport->server_options = &server_options;
 
-	if (filter_options.choice) {
+	만약 (filter_options.choice) {
 		const char *spec =
 			expand_list_objects_filter_spec(&filter_options);
 		transport_set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER,
@@ -1425,10 +1425,10 @@ int cmd_clone(int argc,
 		transport_set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
 
-	if (transport->smart_options && !deepen && !filter_options.choice)
+	만약 (transport->smart_options && !deepen && !filter_options.choice)
 		transport->smart_options->check_self_contained_and_connected = 1;
 
-	if (option_rev) {
+	만약 (option_rev) {
 		option_tags = 0;
 		option_single_branch = 0;
 		opts.wants_head = 0;
@@ -1437,7 +1437,7 @@ int cmd_clone(int argc,
 		refspec_append(&remote->fetch, option_rev);
 	}
 
-	if (option_tags || option_branch)
+	만약 (option_tags || option_branch)
 		/*
 		 * Add tags refspec when user asked for tags (implicitly) or
 		 * specified --branch, whose argument might be a tag.
@@ -1446,7 +1446,7 @@ int cmd_clone(int argc,
 
 	refspec_ref_prefixes(&remote->fetch,
 			     &transport_ls_refs_options.ref_prefixes);
-	if (option_branch)
+	만약 (option_branch)
 		expand_ref_prefix(&transport_ls_refs_options.ref_prefixes,
 				  option_branch);
 
@@ -1458,7 +1458,7 @@ int cmd_clone(int argc,
 	 * ref_prefixes will be empty so we fall back to asking about HEAD to
 	 * reduce traffic from the server.
 	 */
-	if (opts.wants_head || transport_ls_refs_options.ref_prefixes.nr == 0)
+	만약 (opts.wants_head || transport_ls_refs_options.ref_prefixes.nr == 0)
 		strvec_push(&transport_ls_refs_options.ref_prefixes, "HEAD");
 
 	refs = transport_get_remote_refs(transport, &transport_ls_refs_options);
@@ -1477,9 +1477,9 @@ int cmd_clone(int argc,
 	 * Before fetching from the remote, download and install bundle
 	 * data from the --bundle-uri option.
 	 */
-	if (bundle_uri) {
+	만약 (bundle_uri) {
 		struct remote_state *state;
-		int has_heuristic = 0;
+		정수 has_heuristic = 0;
 
 		/*
 		 * We need to save the remote state as our remote's lifetime is
@@ -1490,25 +1490,25 @@ int cmd_clone(int argc,
 		repo_clear(the_repository);
 
 		/* At this point, we need the_repository to match the cloned repo. */
-		if (repo_init(the_repository, git_dir, work_tree))
+		만약 (repo_init(the_repository, git_dir, work_tree))
 			warning(_("failed to initialize the repo, skipping bundle URI"));
-		else if (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
+		아니면 만약 (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
 			warning(_("failed to fetch objects from bundle URI '%s'"),
 				bundle_uri);
-		else if (has_heuristic)
+		아니면 만약 (has_heuristic)
 			repo_config_set_gently(the_repository, "fetch.bundleuri", bundle_uri);
 
 		remote_state_clear(the_repository->remote_state);
 		free(the_repository->remote_state);
 		the_repository->remote_state = state;
-	} else {
+	} 아니면 {
 		/*
 		* Populate transport->got_remote_bundle_uri and
 		* transport->bundle_uri. We might get nothing.
 		*/
 		transport_get_remote_bundle_uri(transport);
 
-		if (transport->bundles &&
+		만약 (transport->bundles &&
 		    hashmap_get_size(&transport->bundles->bundles)) {
 			struct remote_state *state;
 
@@ -1521,25 +1521,25 @@ int cmd_clone(int argc,
 			repo_clear(the_repository);
 
 			/* At this point, we need the_repository to match the cloned repo. */
-			if (repo_init(the_repository, git_dir, work_tree))
+			만약 (repo_init(the_repository, git_dir, work_tree))
 				warning(_("failed to initialize the repo, skipping bundle URI"));
-			else if (fetch_bundle_list(the_repository,
+			아니면 만약 (fetch_bundle_list(the_repository,
 						   transport->bundles))
 				warning(_("failed to fetch advertised bundles"));
 
 			remote_state_clear(the_repository->remote_state);
 			free(the_repository->remote_state);
 			the_repository->remote_state = state;
-		} else {
+		} 아니면 {
 			clear_bundle_list(transport->bundles);
 			FREE_AND_NULL(transport->bundles);
 		}
 	}
 
-	if (refs)
+	만약 (refs)
 		mapped_refs = wanted_peer_refs(&opts, refs, &remote->fetch);
 
-	if (mapped_refs) {
+	만약 (mapped_refs) {
 		/*
 		 * transport_get_remote_refs() may return refs with null sha-1
 		 * in mapped_refs (see struct transport->get_refs_list
@@ -1550,14 +1550,14 @@ int cmd_clone(int argc,
 		 * return reliable ref set, we can delay cloning until after
 		 * remote HEAD check.
 		 */
-		for (ref = refs; ref; ref = ref->next)
-			if (is_null_oid(&ref->old_oid)) {
+		위해 (ref = refs; ref; ref = ref->next)
+			만약 (is_null_oid(&ref->old_oid)) {
 				complete_refs_before_fetch = 0;
 				break;
 			}
 
-		if (!is_local && !complete_refs_before_fetch) {
-			if (transport_fetch_refs(transport, mapped_refs))
+		만약 (!is_local && !complete_refs_before_fetch) {
+			만약 (transport_fetch_refs(transport, mapped_refs))
 				die(_("remote transport reported error"));
 		}
 	}
@@ -1566,34 +1566,34 @@ int cmd_clone(int argc,
 	remote_head_points_at = guess_remote_head(remote_head, mapped_refs,
 						  REMOTE_GUESS_HEAD_QUIET);
 
-	if (option_branch) {
+	만약 (option_branch) {
 		our_head_points_at = find_remote_branch(mapped_refs, option_branch);
-		if (!our_head_points_at)
+		만약 (!our_head_points_at)
 			die(_("Remote branch %s not found in upstream %s"),
 			    option_branch, remote_name);
-	} else if (option_rev) {
+	} 아니면 만약 (option_rev) {
 		our_head_points_at = mapped_refs;
-		if (!our_head_points_at)
+		만약 (!our_head_points_at)
 			die(_("Remote revision %s not found in upstream %s"),
 			    option_rev, remote_name);
-	} else if (remote_head_points_at) {
+	} 아니면 만약 (remote_head_points_at) {
 		our_head_points_at = remote_head_points_at;
-	} else if (remote_head) {
+	} 아니면 만약 (remote_head) {
 		our_head_points_at = NULL;
-	} else {
+	} 아니면 {
 		char *to_free = NULL;
 		const char *branch;
 
-		if (!mapped_refs) {
+		만약 (!mapped_refs) {
 			warning(_("You appear to have cloned an empty repository."));
 			option_no_checkout = 1;
 		}
 
-		if (transport_ls_refs_options.unborn_head_target &&
+		만약 (transport_ls_refs_options.unborn_head_target &&
 		    skip_prefix(transport_ls_refs_options.unborn_head_target,
 				"refs/heads/", &branch)) {
 			unborn_head  = xstrdup(transport_ls_refs_options.unborn_head_target);
-		} else {
+		} 아니면 {
 			branch = to_free = repo_default_branch_name(the_repository, 0);
 			unborn_head = xstrfmt("refs/heads/%s", branch);
 		}
@@ -1614,17 +1614,17 @@ int cmd_clone(int argc,
 		free(to_free);
 	}
 
-	if (!option_rev)
+	만약 (!option_rev)
 		write_refspec_config(src_ref_prefix, our_head_points_at,
 				     remote_head_points_at, &branch_top);
 
-	if (filter_options.choice)
+	만약 (filter_options.choice)
 		partial_clone_register(remote_name, &filter_options);
 
-	if (is_local)
+	만약 (is_local)
 		clone_local(path, git_dir);
-	else if (mapped_refs && complete_refs_before_fetch) {
-		if (transport_fetch_refs(transport, mapped_refs))
+	아니면 만약 (mapped_refs && complete_refs_before_fetch) {
+		만약 (transport_fetch_refs(transport, mapped_refs))
 			die(_("remote transport reported error"));
 	}
 
@@ -1645,13 +1645,13 @@ int cmd_clone(int argc,
 	transport_unlock_pack(transport, 0);
 	transport_disconnect(transport);
 
-	if (option_dissociate) {
+	만약 (option_dissociate) {
 		odb_close(the_repository->objects);
 		dissociate_from_references();
 	}
 
-	if (option_sparse_checkout && git_sparse_checkout_init(dir))
-		return 1;
+	만약 (option_sparse_checkout && git_sparse_checkout_init(dir))
+		반환 1;
 
 	junk_mode = JUNK_LEAVE_REPO;
 	err = checkout(submodule_progress,
@@ -1680,5 +1680,5 @@ int cmd_clone(int argc,
 	junk_mode = JUNK_LEAVE_ALL;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
-	return err;
+	반환 err;
 }

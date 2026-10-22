@@ -30,33 +30,33 @@
 #include "hex.h"
 
 
-static int abbrev;
-static int show_deleted;
-static int show_cached;
-static int show_others;
-static int show_stage;
-static int show_unmerged;
-static int show_resolve_undo;
-static int show_modified;
-static int show_killed;
-static int show_valid_bit;
-static int show_fsmonitor_bit;
-static int line_terminator = '\n';
-static int debug_mode;
-static int show_eol;
-static int recurse_submodules;
-static int skipping_duplicates;
-static int show_sparse_dirs;
+static 정수 abbrev;
+static 정수 show_deleted;
+static 정수 show_cached;
+static 정수 show_others;
+static 정수 show_stage;
+static 정수 show_unmerged;
+static 정수 show_resolve_undo;
+static 정수 show_modified;
+static 정수 show_killed;
+static 정수 show_valid_bit;
+static 정수 show_fsmonitor_bit;
+static 정수 line_terminator = '\n';
+static 정수 debug_mode;
+static 정수 show_eol;
+static 정수 recurse_submodules;
+static 정수 skipping_duplicates;
+static 정수 show_sparse_dirs;
 
 static const char *prefix;
-static int max_prefix_len;
-static int prefix_len;
+static 정수 max_prefix_len;
+static 정수 prefix_len;
 static struct pathspec pathspec;
-static int error_unmatch;
+static 정수 error_unmatch;
 static char *ps_matched;
 static const char *with_tree;
-static int exc_given;
-static int exclude_args;
+static 정수 exc_given;
+static 정수 exclude_args;
 static const char *format;
 
 static const char *tag_cached = "";
@@ -71,15 +71,15 @@ static const char *tag_resolve_undo = "";
 static void write_eolinfo(struct index_state *istate,
 			  const struct cache_entry *ce, const char *path)
 {
-	if (show_eol) {
+	만약 (show_eol) {
 		struct stat st;
 		const char *i_txt = "";
 		const char *w_txt = "";
 		const char *a_txt = get_convert_attr_ascii(istate, path);
-		if (ce && S_ISREG(ce->ce_mode))
+		만약 (ce && S_ISREG(ce->ce_mode))
 			i_txt = get_cached_convert_stats_ascii(istate,
 							       ce->name);
-		if (!lstat(path, &st) && S_ISREG(st.st_mode))
+		만약 (!lstat(path, &st) && S_ISREG(st.st_mode))
 			w_txt = get_wt_convert_stats_ascii(path);
 		printf("i/%-5s w/%-5s attr/%-17s\t", i_txt, w_txt, a_txt);
 	}
@@ -100,9 +100,9 @@ static void write_name_to_buf(struct strbuf *sb, const char *name)
 	struct strbuf buf = STRBUF_INIT;
 	const char *rel = relative_path(name, prefix_len ? prefix : NULL, &buf);
 
-	if (line_terminator)
+	만약 (line_terminator)
 		quote_c_style(rel, sb, NULL, 0);
-	else
+	아니면
 		strbuf_addstr(sb, rel);
 
 	strbuf_release(&buf);
@@ -112,15 +112,15 @@ static const char *get_tag(const struct cache_entry *ce, const char *tag)
 {
 	static char alttag[4];
 
-	if (tag && *tag && ((show_valid_bit && (ce->ce_flags & CE_VALID)) ||
+	만약 (tag && *tag && ((show_valid_bit && (ce->ce_flags & CE_VALID)) ||
 		(show_fsmonitor_bit && (ce->ce_flags & CE_FSMONITOR_VALID)))) {
 		memcpy(alttag, tag, 3);
 
-		if (isalpha(tag[0])) {
+		만약 (isalpha(tag[0])) {
 			alttag[0] = tolower(tag[0]);
-		} else if (tag[0] == '?') {
+		} 아니면 만약 (tag[0] == '?') {
 			alttag[0] = '!';
-		} else {
+		} 아니면 {
 			alttag[0] = 'v';
 			alttag[1] = tag[0];
 			alttag[2] = ' ';
@@ -130,12 +130,12 @@ static const char *get_tag(const struct cache_entry *ce, const char *tag)
 		tag = alttag;
 	}
 
-	return tag;
+	반환 tag;
 }
 
 static void print_debug(const struct cache_entry *ce)
 {
-	if (debug_mode) {
+	만약 (debug_mode) {
 		const struct stat_data *sd = &ce->ce_stat_data;
 
 		printf("  ctime: %u:%u\n", sd->sd_ctime.sec, sd->sd_ctime.nsec);
@@ -149,13 +149,13 @@ static void print_debug(const struct cache_entry *ce)
 static void show_dir_entry(struct index_state *istate,
 			   const char *tag, struct dir_entry *ent)
 {
-	int len = max_prefix_len;
+	정수 len = max_prefix_len;
 
-	if (len > ent->len)
+	만약 (len > ent->len)
 		die("git ls-files: internal error - directory entry not superset of prefix");
 
 	/* If ps_matches is non-NULL, figure out which pathspec(s) match. */
-	if (ps_matched)
+	만약 (ps_matched)
 		dir_path_match(istate, ent, &pathspec, len, ps_matched);
 
 	fputs(tag, stdout);
@@ -166,11 +166,11 @@ static void show_dir_entry(struct index_state *istate,
 static void show_other_files(struct index_state *istate,
 			     const struct dir_struct *dir)
 {
-	int i;
+	정수 i;
 
-	for (i = 0; i < dir->nr; i++) {
+	위해 (i = 0; i < dir->nr; i++) {
 		struct dir_entry *ent = dir->entries[i];
-		if (!index_name_is_other(istate, ent->name, ent->len))
+		만약 (!index_name_is_other(istate, ent->name, ent->len))
 			continue;
 		show_dir_entry(istate, tag_other, ent);
 	}
@@ -179,41 +179,41 @@ static void show_other_files(struct index_state *istate,
 static void show_killed_files(struct index_state *istate,
 			      const struct dir_struct *dir)
 {
-	int i;
-	for (i = 0; i < dir->nr; i++) {
+	정수 i;
+	위해 (i = 0; i < dir->nr; i++) {
 		struct dir_entry *ent = dir->entries[i];
 		char *cp, *sp;
-		int pos, len, killed = 0;
+		정수 pos, len, killed = 0;
 
-		for (cp = ent->name; cp - ent->name < ent->len; cp = sp + 1) {
+		위해 (cp = ent->name; cp - ent->name < ent->len; cp = sp + 1) {
 			sp = strchr(cp, '/');
-			if (!sp) {
+			만약 (!sp) {
 				/* If ent->name is prefix of an entry in the
 				 * cache, it will be killed.
 				 */
 				pos = index_name_pos(istate, ent->name, ent->len);
-				if (0 <= pos)
+				만약 (0 <= pos)
 					BUG("killed-file %.*s not found",
 						ent->len, ent->name);
 				pos = -pos - 1;
-				while (pos < istate->cache_nr &&
+				동안 (pos < istate->cache_nr &&
 				       ce_stage(istate->cache[pos]))
 					pos++; /* skip unmerged */
-				if (istate->cache_nr <= pos)
+				만약 (istate->cache_nr <= pos)
 					break;
 				/* pos points at a name immediately after
 				 * ent->name in the cache.  Does it expect
 				 * ent->name to be a directory?
 				 */
 				len = ce_namelen(istate->cache[pos]);
-				if ((ent->len < len) &&
+				만약 ((ent->len < len) &&
 				    !strncmp(istate->cache[pos]->name,
 					     ent->name, ent->len) &&
 				    istate->cache[pos]->name[ent->len] == '/')
 					killed = 1;
 				break;
 			}
-			if (0 <= index_name_pos(istate, ent->name, sp - ent->name)) {
+			만약 (0 <= index_name_pos(istate, ent->name, sp - ent->name)) {
 				/* If any of the leading directories in
 				 * ent->name is registered in the cache,
 				 * ent->name will be killed.
@@ -222,7 +222,7 @@ static void show_killed_files(struct index_state *istate,
 				break;
 			}
 		}
-		if (killed)
+		만약 (killed)
 			show_dir_entry(istate, tag_killed, dir->entries[i]);
 	}
 }
@@ -234,11 +234,11 @@ static void show_submodule(struct repository *superproject,
 {
 	struct repository subrepo;
 
-	if (repo_submodule_init(&subrepo, superproject, path,
+	만약 (repo_submodule_init(&subrepo, superproject, path,
 				null_oid(superproject->hash_algo)))
-		return;
+		반환;
 
-	if (repo_read_index(&subrepo) < 0)
+	만약 (repo_read_index(&subrepo) < 0)
 		die("index file corrupt");
 
 	show_files(&subrepo, dir);
@@ -248,24 +248,24 @@ static void show_submodule(struct repository *superproject,
 
 static void expand_objectsize(struct repository *repo, struct strbuf *line,
 			      const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+			      const enum object_type type, unsigned 정수 padded)
 {
 	static const char padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
 	size_t orig_len = line->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	만약 (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(repo->objects, oid, &size) < 0)
+		만약 (odb_read_object_info(repo->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
 		strbuf_add_uint(line, size);
-	} else {
+	} 아니면 {
 		strbuf_addstr(line, "-");
 	}
 	len = line->len - orig_len;
-	if (len < min_len)
+	만약 (len < min_len)
 		strbuf_insert(line, orig_len, padding, min_len - len);
 }
 
@@ -273,42 +273,42 @@ static void show_ce_fmt(struct repository *repo, const struct cache_entry *ce,
 			const char *format, const char *fullname) {
 	struct strbuf sb = STRBUF_INIT;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	동안 (strbuf_expand_step(&sb, &format)) {
 		size_t len;
 		struct stat st;
 
-		if (skip_prefix(format, "%", &format))
+		만약 (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		아니면 만약 ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		아니면 만약 (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", ce->ce_mode);
-		else if (skip_prefix(format, "(objectname)", &format))
+		아니면 만약 (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, &ce->oid, abbrev);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		아니면 만약 (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(object_type(ce->ce_mode)));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		아니면 만약 (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(repo, &sb, &ce->oid,
 					  object_type(ce->ce_mode), 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		아니면 만약 (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(repo, &sb, &ce->oid,
 					  object_type(ce->ce_mode), 0);
-		else if (skip_prefix(format, "(stage)", &format))
+		아니면 만약 (skip_prefix(format, "(stage)", &format))
 			strbuf_addf(&sb, "%d", ce_stage(ce));
-		else if (skip_prefix(format, "(eolinfo:index)", &format))
+		아니면 만약 (skip_prefix(format, "(eolinfo:index)", &format))
 			strbuf_addstr(&sb, S_ISREG(ce->ce_mode) ?
 				      get_cached_convert_stats_ascii(repo->index,
 				      ce->name) : "");
-		else if (skip_prefix(format, "(eolinfo:worktree)", &format))
+		아니면 만약 (skip_prefix(format, "(eolinfo:worktree)", &format))
 			strbuf_addstr(&sb, !lstat(fullname, &st) &&
 				      S_ISREG(st.st_mode) ?
 				      get_wt_convert_stats_ascii(fullname) : "");
-		else if (skip_prefix(format, "(eolattr)", &format))
+		아니면 만약 (skip_prefix(format, "(eolattr)", &format))
 			strbuf_addstr(&sb, get_convert_attr_ascii(repo->index,
 								 fullname));
-		else if (skip_prefix(format, "(path)", &format))
+		아니면 만약 (skip_prefix(format, "(path)", &format))
 			write_name_to_buf(&sb, fullname);
-		else
+		아니면
 			strbuf_expand_bad_format(format, "ls-files");
 	}
 	strbuf_addch(&sb, line_terminator);
@@ -320,27 +320,27 @@ static void show_ce(struct repository *repo, struct dir_struct *dir,
 		    const struct cache_entry *ce, const char *fullname,
 		    const char *tag)
 {
-	if (max_prefix_len > strlen(fullname))
+	만약 (max_prefix_len > strlen(fullname))
 		die("git ls-files: internal error - cache entry not superset of prefix");
 
-	if (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
+	만약 (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
 	    is_submodule_active(repo, ce->name)) {
 		show_submodule(repo, dir, ce->name);
-	} else if (match_pathspec(repo->index, &pathspec, fullname, strlen(fullname),
+	} 아니면 만약 (match_pathspec(repo->index, &pathspec, fullname, strlen(fullname),
 				  max_prefix_len, ps_matched,
 				  S_ISDIR(ce->ce_mode) ||
 				  S_ISGITLINK(ce->ce_mode))) {
-		if (format) {
+		만약 (format) {
 			show_ce_fmt(repo, ce, format, fullname);
 			print_debug(ce);
-			return;
+			반환;
 		}
 
 		tag = get_tag(ce, tag);
 
-		if (!show_stage) {
+		만약 (!show_stage) {
 			fputs(tag, stdout);
-		} else {
+		} 아니면 {
 			printf("%s%06o %s %d\t",
 			       tag,
 			       ce->ce_mode,
@@ -357,22 +357,22 @@ static void show_ru_info(struct repository *repo, struct index_state *istate)
 {
 	struct string_list_item *item;
 
-	if (!istate->resolve_undo)
-		return;
+	만약 (!istate->resolve_undo)
+		반환;
 
 	for_each_string_list_item(item, istate->resolve_undo) {
 		const char *path = item->string;
 		struct resolve_undo_info *ui = item->util;
-		int i, len;
+		정수 i, len;
 
 		len = strlen(path);
-		if (len < max_prefix_len)
+		만약 (len < max_prefix_len)
 			continue; /* outside of the prefix */
-		if (!match_pathspec(istate, &pathspec, path, len,
+		만약 (!match_pathspec(istate, &pathspec, path, len,
 				    max_prefix_len, ps_matched, 0))
 			continue; /* uninterested */
-		for (i = 0; i < 3; i++) {
-			if (!ui->mode[i])
+		위해 (i = 0; i < 3; i++) {
+			만약 (!ui->mode[i])
 				continue;
 			printf("%s%06o %s %d\t", tag_resolve_undo, ui->mode[i],
 			       repo_find_unique_abbrev(repo, &ui->oid[i], abbrev),
@@ -382,47 +382,47 @@ static void show_ru_info(struct repository *repo, struct index_state *istate)
 	}
 }
 
-static int ce_excluded(struct dir_struct *dir, struct index_state *istate,
+static 정수 ce_excluded(struct dir_struct *dir, struct index_state *istate,
 		       const char *fullname, const struct cache_entry *ce)
 {
-	int dtype = ce_to_dtype(ce);
-	return is_excluded(dir, istate, fullname, &dtype);
+	정수 dtype = ce_to_dtype(ce);
+	반환 is_excluded(dir, istate, fullname, &dtype);
 }
 
 static void construct_fullname(struct strbuf *out, const struct repository *repo,
 			       const struct cache_entry *ce)
 {
 	strbuf_reset(out);
-	if (repo->submodule_prefix)
+	만약 (repo->submodule_prefix)
 		strbuf_addstr(out, repo->submodule_prefix);
 	strbuf_addstr(out, ce->name);
 }
 
 static void show_files(struct repository *repo, struct dir_struct *dir)
 {
-	int i;
+	정수 i;
 	struct strbuf fullname = STRBUF_INIT;
 
 	/* For cached/deleted files we don't need to even do the readdir */
-	if (show_others || show_killed) {
-		if (!show_others)
+	만약 (show_others || show_killed) {
+		만약 (!show_others)
 			dir->flags |= DIR_COLLECT_KILLED_ONLY;
 		fill_directory(dir, repo->index, &pathspec);
-		if (show_others)
+		만약 (show_others)
 			show_other_files(repo->index, dir);
-		if (show_killed)
+		만약 (show_killed)
 			show_killed_files(repo->index, dir);
 	}
 
-	if (!(show_cached || show_stage || show_deleted || show_modified))
-		return;
+	만약 (!(show_cached || show_stage || show_deleted || show_modified))
+		반환;
 
-	for (i = 0; i < repo->index->cache_nr; i++) {
+	위해 (i = 0; i < repo->index->cache_nr; i++) {
 		const struct cache_entry *ce = repo->index->cache[i];
 		struct stat st;
-		int stat_err;
+		정수 stat_err;
 
-		if (S_ISSPARSEDIR(ce->ce_mode) && !show_sparse_dirs) {
+		만약 (S_ISSPARSEDIR(ce->ce_mode) && !show_sparse_dirs) {
 			/*
 			 * This is the first time we've hit a sparse dir,
 			 * so expansion will leave the first 'i' entries
@@ -434,58 +434,58 @@ static void show_files(struct repository *repo, struct dir_struct *dir)
 
 		construct_fullname(&fullname, repo, ce);
 
-		if ((dir->flags & DIR_SHOW_IGNORED) &&
+		만약 ((dir->flags & DIR_SHOW_IGNORED) &&
 			!ce_excluded(dir, repo->index, fullname.buf, ce))
 			continue;
-		if (ce->ce_flags & CE_UPDATE)
+		만약 (ce->ce_flags & CE_UPDATE)
 			continue;
-		if ((show_cached || show_stage) &&
+		만약 ((show_cached || show_stage) &&
 		    (!show_unmerged || ce_stage(ce))) {
 			show_ce(repo, dir, ce, fullname.buf,
 				ce_stage(ce) ? tag_unmerged :
 				(ce_skip_worktree(ce) ? tag_skip_worktree :
 				 tag_cached));
-			if (skipping_duplicates)
+			만약 (skipping_duplicates)
 				goto skip_to_next_name;
 		}
 
-		if (!(show_deleted || show_modified))
+		만약 (!(show_deleted || show_modified))
 			continue;
-		if (ce_skip_worktree(ce))
+		만약 (ce_skip_worktree(ce))
 			continue;
 		/*
 		 * match_pathspec() is linear in pathspec.nr, so prefilter only
 		 * the single-pathspec case. Only entries shown by show_ce()
 		 * satisfy --error-unmatch.
 		 */
-		if (pathspec.nr == 1 &&
+		만약 (pathspec.nr == 1 &&
 		    !match_pathspec(repo->index, &pathspec, fullname.buf,
 				    fullname.len, max_prefix_len, NULL,
 				    S_ISDIR(ce->ce_mode) ||
 				    S_ISGITLINK(ce->ce_mode)))
 			continue;
 		stat_err = lstat(fullname.buf, &st);
-		if (stat_err && (errno != ENOENT && errno != ENOTDIR))
+		만약 (stat_err && (errno != ENOENT && errno != ENOTDIR))
 			error_errno("cannot lstat '%s'", fullname.buf);
-		if (stat_err && show_deleted) {
+		만약 (stat_err && show_deleted) {
 			show_ce(repo, dir, ce, fullname.buf, tag_removed);
-			if (skipping_duplicates)
+			만약 (skipping_duplicates)
 				goto skip_to_next_name;
 		}
-		if (show_modified &&
+		만약 (show_modified &&
 		    (stat_err || ie_modified(repo->index, ce, &st, 0))) {
 			show_ce(repo, dir, ce, fullname.buf, tag_modified);
-			if (skipping_duplicates)
+			만약 (skipping_duplicates)
 				goto skip_to_next_name;
 		}
 		continue;
 
 skip_to_next_name:
 		{
-			int j;
+			정수 j;
 			struct cache_entry **cache = repo->index->cache;
-			for (j = i + 1; j < repo->index->cache_nr; j++)
-				if (strcmp(ce->name, cache[j]->name))
+			위해 (j = i + 1; j < repo->index->cache_nr; j++)
+				만약 (strcmp(ce->name, cache[j]->name))
 					break;
 			i = j - 1; /* compensate for the for loop */
 		}
@@ -500,20 +500,20 @@ skip_to_next_name:
 static void prune_index(struct index_state *istate,
 			const char *prefix, size_t prefixlen)
 {
-	int pos;
-	unsigned int first, last;
+	정수 pos;
+	unsigned 정수 first, last;
 
-	if (!prefix || !istate->cache_nr)
-		return;
+	만약 (!prefix || !istate->cache_nr)
+		반환;
 	pos = index_name_pos(istate, prefix, prefixlen);
-	if (pos < 0)
+	만약 (pos < 0)
 		pos = -pos-1;
 	first = pos;
 	last = istate->cache_nr;
-	while (last > first) {
-		int next = first + ((last - first) >> 1);
+	동안 (last > first) {
+		정수 next = first + ((last - first) >> 1);
 		const struct cache_entry *ce = istate->cache[next];
-		if (!strncmp(ce->name, prefix, prefixlen)) {
+		만약 (!strncmp(ce->name, prefix, prefixlen)) {
 			first = next+1;
 			continue;
 		}
@@ -523,12 +523,12 @@ static void prune_index(struct index_state *istate,
 	istate->cache_nr = last - pos;
 }
 
-static int get_common_prefix_len(const char *common_prefix)
+static 정수 get_common_prefix_len(const char *common_prefix)
 {
-	int common_prefix_len;
+	정수 common_prefix_len;
 
-	if (!common_prefix)
-		return 0;
+	만약 (!common_prefix)
+		반환 0;
 
 	common_prefix_len = strlen(common_prefix);
 
@@ -536,10 +536,10 @@ static int get_common_prefix_len(const char *common_prefix)
 	 * If the prefix has a trailing slash, strip it so that submodules won't
 	 * be pruned from the index.
 	 */
-	if (common_prefix[common_prefix_len - 1] == '/')
+	만약 (common_prefix[common_prefix_len - 1] == '/')
 		common_prefix_len--;
 
-	return common_prefix_len;
+	반환 common_prefix_len;
 }
 
 static const char * const ls_files_usage[] = {
@@ -547,8 +547,8 @@ static const char * const ls_files_usage[] = {
 	NULL
 };
 
-static int option_parse_exclude(const struct option *opt,
-				const char *arg, int unset)
+static 정수 option_parse_exclude(const struct option *opt,
+				const char *arg, 정수 unset)
 {
 	struct string_list *exclude_list = opt->value;
 
@@ -557,11 +557,11 @@ static int option_parse_exclude(const struct option *opt,
 	exc_given = 1;
 	string_list_append(exclude_list, arg);
 
-	return 0;
+	반환 0;
 }
 
-static int option_parse_exclude_from(const struct option *opt,
-				     const char *arg, int unset)
+static 정수 option_parse_exclude_from(const struct option *opt,
+				     const char *arg, 정수 unset)
 {
 	struct dir_struct *dir = opt->value;
 
@@ -570,11 +570,11 @@ static int option_parse_exclude_from(const struct option *opt,
 	exc_given = 1;
 	add_patterns_from_file(dir, arg);
 
-	return 0;
+	반환 0;
 }
 
-static int option_parse_exclude_standard(const struct option *opt,
-					 const char *arg, int unset)
+static 정수 option_parse_exclude_standard(const struct option *opt,
+					 const char *arg, 정수 unset)
 {
 	struct dir_struct *dir = opt->value;
 
@@ -584,15 +584,15 @@ static int option_parse_exclude_standard(const struct option *opt,
 	exc_given = 1;
 	setup_standard_excludes(dir);
 
-	return 0;
+	반환 0;
 }
 
-int cmd_ls_files(int argc,
+정수 cmd_ls_files(정수 argc,
 		 const char **argv,
 		 const char *cmd_prefix,
 		 struct repository *repo)
 {
-	int require_work_tree = 0, show_tag = 0, i;
+	정수 require_work_tree = 0, show_tag = 0, i;
 	char *max_prefix;
 	struct dir_struct dir = DIR_INIT;
 	struct pattern_list *pl;
@@ -665,7 +665,7 @@ int cmd_ls_files(int argc,
 			     PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	int ret = 0;
+	정수 ret = 0;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 ls_files_usage, builtin_ls_files_options);
@@ -674,27 +674,27 @@ int cmd_ls_files(int argc,
 	repo->settings.command_requires_full_index = 0;
 
 	prefix = cmd_prefix;
-	if (prefix)
+	만약 (prefix)
 		prefix_len = strlen(prefix);
 	repo_config(repo, git_default_config, NULL);
 
-	if (repo_read_index(repo) < 0)
+	만약 (repo_read_index(repo) < 0)
 		die("index file corrupt");
 
 	argc = parse_options(argc, argv, prefix, builtin_ls_files_options,
 			ls_files_usage, 0);
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
-	for (i = 0; i < exclude_list.nr; i++) {
+	위해 (i = 0; i < exclude_list.nr; i++) {
 		add_pattern(exclude_list.items[i].string, "", 0, pl, --exclude_args);
 	}
 
-	if (format && (show_stage || show_others || show_killed ||
+	만약 (format && (show_stage || show_others || show_killed ||
 		show_resolve_undo || skipping_duplicates || show_eol || show_tag))
 			usage_msg_opt(_("--format cannot be used with -s, -o, -k, -t, "
 				      "--resolve-undo, --deduplicate, --eol"),
 				      ls_files_usage, builtin_ls_files_options);
 
-	if (show_tag || show_valid_bit || show_fsmonitor_bit) {
+	만약 (show_tag || show_valid_bit || show_fsmonitor_bit) {
 		tag_cached = "H ";
 		tag_unmerged = "M ";
 		tag_removed = "R ";
@@ -704,28 +704,28 @@ int cmd_ls_files(int argc,
 		tag_skip_worktree = "S ";
 		tag_resolve_undo = "U ";
 	}
-	if (show_modified || show_others || show_deleted || (dir.flags & DIR_SHOW_IGNORED) || show_killed)
+	만약 (show_modified || show_others || show_deleted || (dir.flags & DIR_SHOW_IGNORED) || show_killed)
 		require_work_tree = 1;
-	if (show_unmerged)
+	만약 (show_unmerged)
 		/*
 		 * There's no point in showing unmerged unless
 		 * you also show the stage information.
 		 */
 		show_stage = 1;
-	if (show_tag || show_stage)
+	만약 (show_tag || show_stage)
 		skipping_duplicates = 0;
-	if (dir.exclude_per_dir)
+	만약 (dir.exclude_per_dir)
 		exc_given = 1;
 
-	if (require_work_tree && !is_inside_work_tree(repo))
+	만약 (require_work_tree && !is_inside_work_tree(repo))
 		setup_work_tree(repo);
 
-	if (recurse_submodules &&
+	만약 (recurse_submodules &&
 	    (show_deleted || show_others || show_unmerged ||
 	     show_killed || show_modified || show_resolve_undo || with_tree))
 		die("ls-files --recurse-submodules unsupported mode");
 
-	if (recurse_submodules && error_unmatch)
+	만약 (recurse_submodules && error_unmatch)
 		die("ls-files --recurse-submodules does not support "
 		    "--error-unmatch");
 
@@ -741,45 +741,45 @@ int cmd_ls_files(int argc,
 	 * submodule entry because the pathspec may match something inside the
 	 * submodule.
 	 */
-	if (recurse_submodules)
+	만약 (recurse_submodules)
 		max_prefix = NULL;
-	else
+	아니면
 		max_prefix = common_prefix(&pathspec);
 	max_prefix_len = get_common_prefix_len(max_prefix);
 
 	prune_index(repo->index, max_prefix, max_prefix_len);
 
 	/* Treat unmatching pathspec elements as errors */
-	if (pathspec.nr && error_unmatch)
+	만약 (pathspec.nr && error_unmatch)
 		ps_matched = xcalloc(pathspec.nr, 1);
 
-	if ((dir.flags & DIR_SHOW_IGNORED) && !show_others && !show_cached)
+	만약 ((dir.flags & DIR_SHOW_IGNORED) && !show_others && !show_cached)
 		die("ls-files -i must be used with either -o or -c");
 
-	if ((dir.flags & DIR_SHOW_IGNORED) && !exc_given)
+	만약 ((dir.flags & DIR_SHOW_IGNORED) && !exc_given)
 		die("ls-files --ignored needs some exclude pattern");
 
 	/* With no flags, we default to showing the cached files */
-	if (!(show_stage || show_deleted || show_others || show_unmerged ||
+	만약 (!(show_stage || show_deleted || show_others || show_unmerged ||
 	      show_killed || show_modified || show_resolve_undo))
 		show_cached = 1;
 
-	if (with_tree) {
+	만약 (with_tree) {
 		/*
 		 * Basic sanity check; show-stages and show-unmerged
 		 * would not make any sense with this option.
 		 */
-		if (show_stage || show_unmerged)
+		만약 (show_stage || show_unmerged)
 			die(_("options '%s' and '%s' cannot be used together"), "ls-files --with-tree", "-s/-u");
 		overlay_tree_on_index(repo->index, with_tree, max_prefix);
 	}
 
 	show_files(repo, &dir);
 
-	if (show_resolve_undo)
+	만약 (show_resolve_undo)
 		show_ru_info(repo, repo->index);
 
-	if (ps_matched && report_path_error(ps_matched, &pathspec)) {
+	만약 (ps_matched && report_path_error(ps_matched, &pathspec)) {
 		fprintf(stderr, "Did you forget to 'git add'?\n");
 		ret = 1;
 	}
@@ -787,5 +787,5 @@ int cmd_ls_files(int argc,
 	string_list_clear(&exclude_list, 0);
 	dir_clear(&dir);
 	free(max_prefix);
-	return ret;
+	반환 ret;
 }

@@ -24,10 +24,10 @@ static const char * const show_ref_usage[] = {
 };
 
 struct show_one_options {
-	int quiet;
-	int hash_only;
-	int abbrev;
-	int deref_tags;
+	정수 quiet;
+	정수 hash_only;
+	정수 abbrev;
+	정수 deref_tags;
 };
 
 static void show_one(const struct show_one_options *opts,
@@ -36,24 +36,24 @@ static void show_one(const struct show_one_options *opts,
 	const char *hex;
 	struct object_id peeled;
 
-	if (!odb_has_object(the_repository->objects, ref->oid,
+	만약 (!odb_has_object(the_repository->objects, ref->oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die("git show-ref: bad ref %s (%s)", ref->name,
 		    oid_to_hex(ref->oid));
 
-	if (opts->quiet)
-		return;
+	만약 (opts->quiet)
+		반환;
 
 	hex = repo_find_unique_abbrev(the_repository, ref->oid, opts->abbrev);
-	if (opts->hash_only)
+	만약 (opts->hash_only)
 		printf("%s\n", hex);
-	else
+	아니면
 		printf("%s %s\n", hex, ref->name);
 
-	if (!opts->deref_tags)
-		return;
+	만약 (!opts->deref_tags)
+		반환;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	만약 (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		hex = repo_find_unique_abbrev(the_repository, &peeled, opts->abbrev);
 		printf("%s %s^{}\n", hex, ref->name);
 	}
@@ -62,32 +62,32 @@ static void show_one(const struct show_one_options *opts,
 struct show_ref_data {
 	const struct show_one_options *show_one_opts;
 	const char **patterns;
-	int found_match;
-	int show_head;
+	정수 found_match;
+	정수 show_head;
 };
 
-static int show_ref(const struct reference *ref, void *cbdata)
+static 정수 show_ref(const struct reference *ref, void *cbdata)
 {
 	struct show_ref_data *data = cbdata;
 
-	if (data->show_head && !strcmp(ref->name, "HEAD"))
+	만약 (data->show_head && !strcmp(ref->name, "HEAD"))
 		goto match;
 
-	if (data->patterns) {
-		int reflen = strlen(ref->name);
+	만약 (data->patterns) {
+		정수 reflen = strlen(ref->name);
 		const char **p = data->patterns, *m;
-		while ((m = *p++) != NULL) {
-			int len = strlen(m);
-			if (len > reflen)
+		동안 ((m = *p++) != NULL) {
+			정수 len = strlen(m);
+			만약 (len > reflen)
 				continue;
-			if (memcmp(m, ref->name + reflen - len, len))
+			만약 (memcmp(m, ref->name + reflen - len, len))
 				continue;
-			if (len == reflen)
+			만약 (len == reflen)
 				goto match;
-			if (ref->name[reflen - len - 1] == '/')
+			만약 (ref->name[reflen - len - 1] == '/')
 				goto match;
 		}
-		return 0;
+		반환 0;
 	}
 
 match:
@@ -95,14 +95,14 @@ match:
 
 	show_one(data->show_one_opts, ref);
 
-	return 0;
+	반환 0;
 }
 
-static int add_existing(const struct reference *ref, void *cbdata)
+static 정수 add_existing(const struct reference *ref, void *cbdata)
 {
 	struct string_list *list = (struct string_list *)cbdata;
 	string_list_insert(list, ref->name);
-	return 0;
+	반환 0;
 }
 
 struct exclude_existing_options {
@@ -110,7 +110,7 @@ struct exclude_existing_options {
 	 * We need an explicit `enabled` field because it is perfectly valid
 	 * for `pattern` to be `NULL` even if `--exclude-existing` was given.
 	 */
-	int enabled;
+	정수 enabled;
 	const char *pattern;
 };
 
@@ -123,57 +123,57 @@ struct exclude_existing_options {
  * (4) ignore if refname is a ref that exists in the local repository;
  * (5) otherwise output the line.
  */
-static int cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
+static 정수 cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
 {
 	struct string_list existing_refs = STRING_LIST_INIT_DUP;
 	char buf[1024];
-	int patternlen = opts->pattern ? strlen(opts->pattern) : 0;
+	정수 patternlen = opts->pattern ? strlen(opts->pattern) : 0;
 
 	refs_for_each_ref(get_main_ref_store(the_repository), add_existing,
 			  &existing_refs);
-	while (fgets(buf, sizeof(buf), stdin)) {
+	동안 (fgets(buf, sizeof(buf), stdin)) {
 		char *ref;
-		int len = strlen(buf);
+		정수 len = strlen(buf);
 
-		if (len > 0 && buf[len - 1] == '\n')
+		만약 (len > 0 && buf[len - 1] == '\n')
 			buf[--len] = '\0';
-		if (3 <= len && !strcmp(buf + len - 3, "^{}")) {
+		만약 (3 <= len && !strcmp(buf + len - 3, "^{}")) {
 			len -= 3;
 			buf[len] = '\0';
 		}
-		for (ref = buf + len; buf < ref; ref--)
-			if (isspace(ref[-1]))
+		위해 (ref = buf + len; buf < ref; ref--)
+			만약 (isspace(ref[-1]))
 				break;
-		if (opts->pattern) {
-			int reflen = buf + len - ref;
-			if (reflen < patternlen)
+		만약 (opts->pattern) {
+			정수 reflen = buf + len - ref;
+			만약 (reflen < patternlen)
 				continue;
-			if (strncmp(ref, opts->pattern, patternlen))
+			만약 (strncmp(ref, opts->pattern, patternlen))
 				continue;
 		}
-		if (check_refname_format(ref, 0)) {
+		만약 (check_refname_format(ref, 0)) {
 			warning("ref '%s' ignored", ref);
 			continue;
 		}
-		if (!string_list_has_string(&existing_refs, ref)) {
+		만약 (!string_list_has_string(&existing_refs, ref)) {
 			printf("%s\n", buf);
 		}
 	}
 
 	string_list_clear(&existing_refs, 0);
-	return 0;
+	반환 0;
 }
 
-static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
+static 정수 cmd_show_ref__verify(const struct show_one_options *show_one_opts,
 				const char **refs)
 {
-	if (!refs || !*refs)
+	만약 (!refs || !*refs)
 		die("--verify requires a reference");
 
-	while (*refs) {
+	동안 (*refs) {
 		struct object_id oid;
 
-		if ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
+		만약 ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
 		    !refs_read_ref(get_main_ref_store(the_repository), *refs, &oid)) {
 			struct reference ref = {
 				.name = *refs,
@@ -181,25 +181,25 @@ static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
 			};
 
 			show_one(show_one_opts, &ref);
-		} else if (!show_one_opts->quiet) {
+		} 아니면 만약 (!show_one_opts->quiet) {
 			die("'%s' - not a valid ref", *refs);
-		} else {
-			return 1;
+		} 아니면 {
+			반환 1;
 		}
 
 		refs++;
 	}
 
-	return 0;
+	반환 0;
 }
 
 struct patterns_options {
-	int show_head;
-	int branches_only;
-	int tags_only;
+	정수 show_head;
+	정수 branches_only;
+	정수 tags_only;
 };
 
-static int cmd_show_ref__patterns(const struct patterns_options *opts,
+static 정수 cmd_show_ref__patterns(const struct patterns_options *opts,
 				  const struct show_one_options *show_one_opts,
 				  const char **patterns)
 {
@@ -208,58 +208,58 @@ static int cmd_show_ref__patterns(const struct patterns_options *opts,
 		.show_head = opts->show_head,
 	};
 
-	if (patterns && *patterns)
+	만약 (patterns && *patterns)
 		show_ref_data.patterns = patterns;
 
-	if (opts->show_head)
+	만약 (opts->show_head)
 		refs_head_ref(get_main_ref_store(the_repository), show_ref,
 			      &show_ref_data);
-	if (opts->branches_only || opts->tags_only) {
+	만약 (opts->branches_only || opts->tags_only) {
 		struct refs_for_each_ref_options for_each_ref_opts = { 0 };
 
-		if (opts->branches_only) {
+		만약 (opts->branches_only) {
 			for_each_ref_opts.prefix = "refs/heads/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
 
-		if (opts->tags_only) {
+		만약 (opts->tags_only) {
 			for_each_ref_opts.prefix = "refs/tags/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
-	} else {
+	} 아니면 {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  show_ref, &show_ref_data);
 	}
-	if (!show_ref_data.found_match)
-		return 1;
+	만약 (!show_ref_data.found_match)
+		반환 1;
 
-	return 0;
+	반환 0;
 }
 
-static int cmd_show_ref__exists(const char **refs)
+static 정수 cmd_show_ref__exists(const char **refs)
 {
 	struct strbuf unused_referent = STRBUF_INIT;
 	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
+	unsigned 정수 unused_type;
+	정수 failure_errno = 0;
 	const char *ref;
-	int ret = 0;
+	정수 ret = 0;
 
-	if (!refs || !*refs)
+	만약 (!refs || !*refs)
 		die("--exists requires a reference");
 	ref = *refs++;
-	if (*refs)
+	만약 (*refs)
 		die("--exists requires exactly one reference");
 
-	if (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
+	만약 (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
 			      &unused_oid, &unused_referent, &unused_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		만약 (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} 아니면 {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
@@ -270,34 +270,34 @@ static int cmd_show_ref__exists(const char **refs)
 
 out:
 	strbuf_release(&unused_referent);
-	return ret;
+	반환 ret;
 }
 
-static int hash_callback(const struct option *opt, const char *arg, int unset)
+static 정수 hash_callback(const struct option *opt, const char *arg, 정수 unset)
 {
 	struct show_one_options *opts = opt->value;
 	struct option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
 	/* Use full length SHA1 if no argument */
-	if (!arg)
-		return 0;
+	만약 (!arg)
+		반환 0;
 
 	abbrev_opt.value = &opts->abbrev;
-	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
+	반환 parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
-static int exclude_existing_callback(const struct option *opt, const char *arg,
-				     int unset)
+static 정수 exclude_existing_callback(const struct option *opt, const char *arg,
+				     정수 unset)
 {
 	struct exclude_existing_options *opts = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
 	opts->pattern = arg;
-	return 0;
+	반환 0;
 }
 
-int cmd_show_ref(int argc,
+정수 cmd_show_ref(정수 argc,
 const char **argv,
 const char *prefix,
 struct repository *repo UNUSED)
@@ -305,7 +305,7 @@ struct repository *repo UNUSED)
 	struct exclude_existing_options exclude_existing_opts = {0};
 	struct patterns_options patterns_opts = {0};
 	struct show_one_options show_one_opts = {0};
-	int verify = 0, exists = 0;
+	정수 verify = 0, exists = 0;
 	const struct option show_ref_options[] = {
 		OPT_BOOL(0, "tags", &patterns_opts.tags_only, N_("only show tags (can be combined with --branches)")),
 		OPT_BOOL(0, "branches", &patterns_opts.branches_only, N_("only show branches (can be combined with --tags)")),
@@ -341,12 +341,12 @@ struct repository *repo UNUSED)
 				  verify, "--verify",
 				  exists, "--exists");
 
-	if (exclude_existing_opts.enabled)
-		return cmd_show_ref__exclude_existing(&exclude_existing_opts);
-	else if (verify)
-		return cmd_show_ref__verify(&show_one_opts, argv);
-	else if (exists)
-		return cmd_show_ref__exists(argv);
-	else
-		return cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
+	만약 (exclude_existing_opts.enabled)
+		반환 cmd_show_ref__exclude_existing(&exclude_existing_opts);
+	아니면 만약 (verify)
+		반환 cmd_show_ref__verify(&show_one_opts, argv);
+	아니면 만약 (exists)
+		반환 cmd_show_ref__exists(argv);
+	아니면
+		반환 cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
 }

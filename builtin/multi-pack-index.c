@@ -70,29 +70,29 @@ static struct opts_multi_pack_index {
 	char *refs_snapshot;
 	unsigned long batch_size;
 	unsigned flags;
-	int stdin_packs;
+	정수 stdin_packs;
 } opts;
 
 
-static int parse_object_dir(const struct option *opt, const char *arg,
-			    int unset)
+static 정수 parse_object_dir(const struct option *opt, const char *arg,
+			    정수 unset)
 {
 	char **value = opt->value;
 	free(*value);
-	if (unset)
+	만약 (unset)
 		*value = xstrdup(the_repository->objects->source->path);
-	else
+	아니면
 		*value = real_pathdup(arg, 1);
-	return 0;
+	반환 0;
 }
 
 static struct odb_source_packed *handle_object_dir_option(struct repository *repo)
 {
 	struct odb_files_dir *dir = odb_source_files_find_dir(repo->objects, opts.object_dir);
-	if (!dir)
+	만약 (!dir)
 		die(_("object directory is not an alternate of the current repository: '%s'"),
 		    opts.object_dir);
-	return dir->packed;
+	반환 dir->packed;
 }
 
 static struct option common_opts[] = {
@@ -107,24 +107,24 @@ static struct option common_opts[] = {
 
 static struct option *add_common_options(struct option *prev)
 {
-	return parse_options_concat(common_opts, prev);
+	반환 parse_options_concat(common_opts, prev);
 }
 
-static int git_multi_pack_index_write_config(const char *var, const char *value,
+static 정수 git_multi_pack_index_write_config(const char *var, const char *value,
 					     const struct config_context *ctx UNUSED,
 					     void *cb UNUSED)
 {
-	if (!strcmp(var, "pack.writebitmaphashcache")) {
-		if (git_config_bool(var, value))
+	만약 (!strcmp(var, "pack.writebitmaphashcache")) {
+		만약 (git_config_bool(var, value))
 			opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
-		else
+		아니면
 			opts.flags &= ~MIDX_WRITE_BITMAP_HASH_CACHE;
 	}
 
-	if (!strcmp(var, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(var, value))
+	만약 (!strcmp(var, "pack.writebitmaplookuptable")) {
+		만약 (git_config_bool(var, value))
 			opts.flags |= MIDX_WRITE_BITMAP_LOOKUP_TABLE;
-		else
+		아니면
 			opts.flags &= ~MIDX_WRITE_BITMAP_LOOKUP_TABLE;
 	}
 
@@ -132,20 +132,20 @@ static int git_multi_pack_index_write_config(const char *var, const char *value,
 	 * We should never make a fall-back call to 'git_default_config', since
 	 * this was already called in 'cmd_multi_pack_index()'.
 	 */
-	return 0;
+	반환 0;
 }
 
 static void read_packs_from_stdin(struct string_list *to)
 {
 	struct strbuf buf = STRBUF_INIT;
-	while (strbuf_getline(&buf, stdin) != EOF)
+	동안 (strbuf_getline(&buf, stdin) != EOF)
 		string_list_append(to, buf.buf);
 	string_list_sort(to);
 
 	strbuf_release(&buf);
 }
 
-static int cmd_multi_pack_index_write(int argc, const char **argv,
+static 정수 cmd_multi_pack_index_write(정수 argc, const char **argv,
 				      const char *prefix,
 				      struct repository *repo)
 {
@@ -170,7 +170,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 		OPT_END(),
 	};
 	struct odb_source_packed *packed_source;
-	int ret;
+	정수 ret;
 
 	opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
 
@@ -180,16 +180,16 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	만약 (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_write_usage,
 			     0);
-	if (argc)
+	만약 (argc)
 		usage_with_options(builtin_multi_pack_index_write_usage,
 				   options);
 
-	if (opts.flags & MIDX_WRITE_NO_CHAIN &&
+	만약 (opts.flags & MIDX_WRITE_NO_CHAIN &&
 	    !(opts.flags & MIDX_WRITE_INCREMENTAL)) {
 		error(_("cannot use %s without %s"),
 		      "--no-write-chain-file", "--incremental");
@@ -197,7 +197,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 				   options);
 	}
 
-	if (opts.incremental_base &&
+	만약 (opts.incremental_base &&
 	    !(opts.flags & MIDX_WRITE_NO_CHAIN)) {
 		error(_("cannot use --base without --no-write-chain-file"));
 		usage_with_options(builtin_multi_pack_index_write_usage,
@@ -208,7 +208,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 
 	FREE_AND_NULL(options);
 
-	if (opts.stdin_packs) {
+	만약 (opts.stdin_packs) {
 		struct string_list packs = STRING_LIST_INIT_DUP;
 
 		read_packs_from_stdin(&packs);
@@ -221,7 +221,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 		string_list_clear(&packs, 0);
 		free(opts.refs_snapshot);
 
-		return ret;
+		반환 ret;
 
 	}
 
@@ -229,10 +229,10 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 			      opts.refs_snapshot, opts.flags);
 
 	free(opts.refs_snapshot);
-	return ret;
+	반환 ret;
 }
 
-static int cmd_multi_pack_index_compact(int argc, const char **argv,
+static 정수 cmd_multi_pack_index_compact(정수 argc, const char **argv,
 					const char *prefix,
 					struct repository *repo)
 {
@@ -240,7 +240,7 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 	struct multi_pack_index *from_midx = NULL;
 	struct multi_pack_index *to_midx = NULL;
 	struct odb_source_packed *packed_source;
-	int ret;
+	정수 ret;
 
 	struct option *options;
 	static struct option builtin_multi_pack_index_compact_options[] = {
@@ -262,17 +262,17 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	만약 (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_compact_usage,
 			     0);
 
-	if (argc != 2)
+	만약 (argc != 2)
 		usage_with_options(builtin_multi_pack_index_compact_usage,
 				   options);
 
-	if (opts.flags & MIDX_WRITE_NO_CHAIN &&
+	만약 (opts.flags & MIDX_WRITE_NO_CHAIN &&
 	    !(opts.flags & MIDX_WRITE_INCREMENTAL)) {
 		error(_("cannot use %s without %s"),
 		      "--no-write-chain-file", "--incremental");
@@ -286,34 +286,34 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 
 	m = get_multi_pack_index(packed_source);
 
-	for (cur = m; cur && !(from_midx && to_midx); cur = cur->base_midx) {
+	위해 (cur = m; cur && !(from_midx && to_midx); cur = cur->base_midx) {
 		const char *midx_csum = midx_get_checksum_hex(cur);
 
-		if (!from_midx && !strcmp(midx_csum, argv[0]))
+		만약 (!from_midx && !strcmp(midx_csum, argv[0]))
 			from_midx = cur;
-		if (!to_midx && !strcmp(midx_csum, argv[1]))
+		만약 (!to_midx && !strcmp(midx_csum, argv[1]))
 			to_midx = cur;
 	}
 
-	if (!from_midx)
+	만약 (!from_midx)
 		die(_("could not find MIDX: %s"), argv[0]);
-	if (!to_midx)
+	만약 (!to_midx)
 		die(_("could not find MIDX: %s"), argv[1]);
-	if (from_midx == to_midx)
+	만약 (from_midx == to_midx)
 		die(_("MIDX compaction endpoints must be unique"));
 
-	for (m = from_midx; m; m = m->base_midx) {
-		if (m == to_midx)
+	위해 (m = from_midx; m; m = m->base_midx) {
+		만약 (m == to_midx)
 			die(_("MIDX %s must be an ancestor of %s"), argv[0], argv[1]);
 	}
 
 	ret = write_midx_file_compact(packed_source, from_midx, to_midx,
 				      opts.incremental_base, opts.flags);
 
-	return ret;
+	반환 ret;
 }
 
-static int cmd_multi_pack_index_verify(int argc, const char **argv,
+static 정수 cmd_multi_pack_index_verify(정수 argc, const char **argv,
 				       const char *prefix,
 				       struct repository *repo UNUSED)
 {
@@ -327,22 +327,22 @@ static int cmd_multi_pack_index_verify(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	만약 (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_verify_usage,
 			     0);
-	if (argc)
+	만약 (argc)
 		usage_with_options(builtin_multi_pack_index_verify_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return verify_midx_file(packed_source, opts.flags);
+	반환 verify_midx_file(packed_source, opts.flags);
 }
 
-static int cmd_multi_pack_index_expire(int argc, const char **argv,
+static 정수 cmd_multi_pack_index_expire(정수 argc, const char **argv,
 				       const char *prefix,
 				       struct repository *repo UNUSED)
 {
@@ -356,22 +356,22 @@ static int cmd_multi_pack_index_expire(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	만약 (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_expire_usage,
 			     0);
-	if (argc)
+	만약 (argc)
 		usage_with_options(builtin_multi_pack_index_expire_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return expire_midx_packs(packed_source, opts.flags);
+	반환 expire_midx_packs(packed_source, opts.flags);
 }
 
-static int cmd_multi_pack_index_repack(int argc, const char **argv,
+static 정수 cmd_multi_pack_index_repack(정수 argc, const char **argv,
 				       const char *prefix,
 				       struct repository *repo UNUSED)
 {
@@ -387,28 +387,28 @@ static int cmd_multi_pack_index_repack(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	만약 (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_multi_pack_index_repack_usage,
 			     0);
-	if (argc)
+	만약 (argc)
 		usage_with_options(builtin_multi_pack_index_repack_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return midx_repack(packed_source, (size_t)opts.batch_size, opts.flags);
+	반환 midx_repack(packed_source, (size_t)opts.batch_size, opts.flags);
 }
 
-int cmd_multi_pack_index(int argc,
+정수 cmd_multi_pack_index(정수 argc,
 			 const char **argv,
 			 const char *prefix,
 			 struct repository *repo)
 {
-	int res;
+	정수 res;
 	parse_opt_subcommand_fn *fn = NULL;
 	struct option builtin_multi_pack_index_options[] = {
 		OPT_SUBCOMMAND("repack", &fn, cmd_multi_pack_index_repack),
@@ -424,7 +424,7 @@ int cmd_multi_pack_index(int argc,
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	if (the_repository &&
+	만약 (the_repository &&
 	    the_repository->objects &&
 	    the_repository->objects->source)
 		opts.object_dir = xstrdup(the_repository->objects->source->path);
@@ -436,5 +436,5 @@ int cmd_multi_pack_index(int argc,
 	res = fn(argc, argv, prefix, repo);
 
 	free(opts.object_dir);
-	return res;
+	반환 res;
 }

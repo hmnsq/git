@@ -14,76 +14,76 @@
 
 static struct rev_info log_tree_opt;
 
-static int diff_tree_commit_oid(const struct object_id *oid)
+static 정수 diff_tree_commit_oid(const struct object_id *oid)
 {
 	struct commit *commit = lookup_commit_reference(the_repository, oid);
-	if (!commit)
-		return -1;
-	return log_tree_commit(&log_tree_opt, commit);
+	만약 (!commit)
+		반환 -1;
+	반환 log_tree_commit(&log_tree_opt, commit);
 }
 
 /* Diff one or more commits. */
-static int stdin_diff_commit(struct commit *commit, const char *p)
+static 정수 stdin_diff_commit(struct commit *commit, const char *p)
 {
 	struct object_id oid;
 	struct commit_list **pptr = NULL;
 
 	/* Graft the fake parents locally to the commit */
-	while (isspace(*p++) && !parse_oid_hex(p, &oid, &p)) {
+	동안 (isspace(*p++) && !parse_oid_hex(p, &oid, &p)) {
 		struct commit *parent = lookup_commit(the_repository, &oid);
-		if (!pptr) {
+		만약 (!pptr) {
 			/* Free the real parent list */
 			commit_list_free(commit->parents);
 			commit->parents = NULL;
 			pptr = &(commit->parents);
 		}
-		if (parent) {
+		만약 (parent) {
 			pptr = &commit_list_insert(parent, pptr)->next;
 		}
 	}
-	return log_tree_commit(&log_tree_opt, commit);
+	반환 log_tree_commit(&log_tree_opt, commit);
 }
 
 /* Diff two trees. */
-static int stdin_diff_trees(struct tree *tree1, const char *p)
+static 정수 stdin_diff_trees(struct tree *tree1, const char *p)
 {
 	struct object_id oid;
 	struct tree *tree2;
-	if (!isspace(*p++) || parse_oid_hex(p, &oid, &p) || *p)
-		return error("Need exactly two trees, separated by a space");
+	만약 (!isspace(*p++) || parse_oid_hex(p, &oid, &p) || *p)
+		반환 error("Need exactly two trees, separated by a space");
 	tree2 = lookup_tree(the_repository, &oid);
-	if (!tree2 || repo_parse_tree(the_repository, tree2))
-		return -1;
+	만약 (!tree2 || repo_parse_tree(the_repository, tree2))
+		반환 -1;
 	printf("%s %s\n", oid_to_hex(&tree1->object.oid),
 			  oid_to_hex(&tree2->object.oid));
 	diff_tree_oid(&tree1->object.oid, &tree2->object.oid,
 		      "", &log_tree_opt.diffopt);
 	log_tree_diff_flush(&log_tree_opt);
-	return 0;
+	반환 0;
 }
 
-static int diff_tree_stdin(char *line)
+static 정수 diff_tree_stdin(char *line)
 {
-	int len = strlen(line);
+	정수 len = strlen(line);
 	struct object_id oid;
 	struct object *obj;
 	const char *p;
 
-	if (!len || line[len-1] != '\n')
-		return -1;
+	만약 (!len || line[len-1] != '\n')
+		반환 -1;
 	line[len-1] = 0;
-	if (parse_oid_hex(line, &oid, &p))
-		return -1;
+	만약 (parse_oid_hex(line, &oid, &p))
+		반환 -1;
 	obj = parse_object(the_repository, &oid);
-	if (!obj)
-		return -1;
-	if (obj->type == OBJ_COMMIT)
-		return stdin_diff_commit((struct commit *)obj, p);
-	if (obj->type == OBJ_TREE)
-		return stdin_diff_trees((struct tree *)obj, p);
+	만약 (!obj)
+		반환 -1;
+	만약 (obj->type == OBJ_COMMIT)
+		반환 stdin_diff_commit((struct commit *)obj, p);
+	만약 (obj->type == OBJ_TREE)
+		반환 stdin_diff_trees((struct tree *)obj, p);
 	error("Object %s is a %s, not a commit or tree",
 	      oid_to_hex(&oid), type_name(obj->type));
-	return -1;
+	반환 -1;
 }
 
 static const char diff_tree_usage[] =
@@ -101,15 +101,15 @@ COMMON_DIFF_OPTIONS_HELP;
 
 static void diff_tree_tweak_rev(struct rev_info *rev)
 {
-	if (!rev->diffopt.output_format) {
-		if (rev->dense_combined_merges)
+	만약 (!rev->diffopt.output_format) {
+		만약 (rev->dense_combined_merges)
 			rev->diffopt.output_format = DIFF_FORMAT_PATCH;
-		else
+		아니면
 			rev->diffopt.output_format = DIFF_FORMAT_RAW;
 	}
 }
 
-int cmd_diff_tree(int argc,
+정수 cmd_diff_tree(정수 argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
@@ -119,8 +119,8 @@ int cmd_diff_tree(int argc,
 	static struct rev_info *opt = &log_tree_opt;
 	struct setup_revision_opt s_r_opt;
 	struct userformat_want w;
-	int read_stdin = 0;
-	int merge_base = 0;
+	정수 read_stdin = 0;
+	정수 merge_base = 0;
 
 	show_usage_if_asked(argc, argv, diff_tree_usage);
 
@@ -130,7 +130,7 @@ int cmd_diff_tree(int argc,
 	the_repository->settings.command_requires_full_index = 0;
 
 	repo_init_revisions(the_repository, opt, prefix);
-	if (repo_read_index(the_repository) < 0)
+	만약 (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 	opt->abbrev = 0;
 	opt->diff = 1;
@@ -144,28 +144,28 @@ int cmd_diff_tree(int argc,
 	memset(&w, 0, sizeof(w));
 	userformat_find_requirements(NULL, &w);
 
-	if (!opt->show_notes_given && w.notes)
+	만약 (!opt->show_notes_given && w.notes)
 		opt->show_notes = 1;
-	if (opt->show_notes)
+	만약 (opt->show_notes)
 		load_display_notes(&opt->notes_opt);
 
-	while (--argc > 0) {
+	동안 (--argc > 0) {
 		const char *arg = *++argv;
 
-		if (!strcmp(arg, "--stdin")) {
+		만약 (!strcmp(arg, "--stdin")) {
 			read_stdin = 1;
 			continue;
 		}
-		if (!strcmp(arg, "--merge-base")) {
+		만약 (!strcmp(arg, "--merge-base")) {
 			merge_base = 1;
 			continue;
 		}
 		usage(diff_tree_usage);
 	}
 
-	if (read_stdin && merge_base)
+	만약 (read_stdin && merge_base)
 		die(_("options '%s' and '%s' cannot be used together"), "--stdin", "--merge-base");
-	if (merge_base && opt->pending.nr != 2)
+	만약 (merge_base && opt->pending.nr != 2)
 		die(_("--merge-base only works with two commits"));
 
 	opt->diffopt.rotate_to_strict = 1;
@@ -179,7 +179,7 @@ int cmd_diff_tree(int argc,
 	 */
 	switch (opt->pending.nr) {
 	case 0:
-		if (!read_stdin)
+		만약 (!read_stdin)
 			usage(diff_tree_usage);
 		break;
 	case 1:
@@ -189,12 +189,12 @@ int cmd_diff_tree(int argc,
 	case 2:
 		tree1 = opt->pending.objects[0].item;
 		tree2 = opt->pending.objects[1].item;
-		if (merge_base) {
+		만약 (merge_base) {
 			struct object_id oid;
 
 			diff_get_merge_base(opt, &oid);
 			tree1 = lookup_object(the_repository, &oid);
-		} else if (tree2->flags & UNINTERESTING) {
+		} 아니면 만약 (tree2->flags & UNINTERESTING) {
 			SWAP(tree2, tree1);
 		}
 		diff_tree_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
@@ -202,29 +202,29 @@ int cmd_diff_tree(int argc,
 		break;
 	}
 
-	if (read_stdin) {
-		int saved_nrl = 0;
-		int saved_dcctc = 0;
+	만약 (read_stdin) {
+		정수 saved_nrl = 0;
+		정수 saved_dcctc = 0;
 
 		opt->diffopt.rotate_to_strict = 0;
 		opt->diffopt.no_free = 1;
-		if (opt->diffopt.detect_rename) {
-			if (the_repository->index->cache)
+		만약 (opt->diffopt.detect_rename) {
+			만약 (the_repository->index->cache)
 				repo_read_index(the_repository);
 			opt->diffopt.setup |= DIFF_SETUP_USE_SIZE_CACHE;
 		}
-		while (fgets(line, sizeof(line), stdin)) {
+		동안 (fgets(line, sizeof(line), stdin)) {
 			struct object_id oid;
 
-			if (get_oid_hex(line, &oid)) {
+			만약 (get_oid_hex(line, &oid)) {
 				fputs(line, stdout);
 				fflush(stdout);
 			}
-			else {
+			아니면 {
 				diff_tree_stdin(line);
-				if (saved_nrl < opt->diffopt.needed_rename_limit)
+				만약 (saved_nrl < opt->diffopt.needed_rename_limit)
 					saved_nrl = opt->diffopt.needed_rename_limit;
-				if (opt->diffopt.degraded_cc_to_c)
+				만약 (opt->diffopt.degraded_cc_to_c)
 					saved_dcctc = 1;
 			}
 		}
@@ -234,5 +234,5 @@ int cmd_diff_tree(int argc,
 		diff_free(&opt->diffopt);
 	}
 
-	return diff_result_code(opt);
+	반환 diff_result_code(opt);
 }

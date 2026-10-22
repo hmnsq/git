@@ -15,51 +15,51 @@
 static const char git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+static 정수 is_from_line(const char *line, 정수 len)
 {
 	const char *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	만약 (len < 20 || memcmp("From ", line, 5))
+		반환 0;
 
 	colon = line + len - 2;
 	line += 5;
-	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
+	위해 (;;) {
+		만약 (colon < line)
+			반환 0;
+		만약 (*--colon == ':')
 			break;
 	}
 
-	if (!isdigit(colon[-4]) ||
+	만약 (!isdigit(colon[-4]) ||
 	    !isdigit(colon[-2]) ||
 	    !isdigit(colon[-1]) ||
 	    !isdigit(colon[ 1]) ||
 	    !isdigit(colon[ 2]))
-		return 0;
+		반환 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	만약 (strtol(colon+3, NULL, 10) <= 90)
+		반환 0;
 
 	/* Ok, close enough */
-	return 1;
+	반환 1;
 }
 
 static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+static 정수 keep_cr;
+static 정수 mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+static 정수 is_gtfrom(const struct strbuf *buf)
 {
 	size_t min = strlen(">From ");
 	size_t ngt;
 
-	if (buf->len < min)
-		return 0;
+	만약 (buf->len < min)
+		반환 0;
 
 	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	반환 ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,14 +67,14 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+static 정수 split_one(FILE *mbox, const char *name, 정수 allow_bare)
 {
 	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	정수 fd;
+	정수 status = 0;
+	정수 is_bare = !is_from_line(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
+	만약 (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
 		exit(1);
 	}
@@ -84,54 +84,54 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	/* Copy it out, while searching for a line that begins with
 	 * "From " and having something that looks like a date format.
 	 */
-	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+	위해 (;;) {
+		만약 (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		만약 (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		만약 (fwrite(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
+		만약 (strbuf_getwholeline(&buf, mbox, '\n')) {
+			만약 (feof(mbox)) {
 				status = 1;
 				break;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
+		만약 (!is_bare && is_from_line(buf.buf, buf.len))
 			break; /* done with one message */
 	}
 	fclose(output);
-	return status;
+	반환 status;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+static 정수 populate_maildir_list(struct string_list *list, const char *path)
 {
 	DIR *dir;
 	struct dirent *dent;
 	char *name = NULL;
 	const char *subs[] = { "cur", "new", NULL };
 	const char **sub;
-	int ret = -1;
+	정수 ret = -1;
 
-	for (sub = subs; *sub; ++sub) {
+	위해 (sub = subs; *sub; ++sub) {
 		free(name);
 		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
+		만약 (!(dir = opendir(name))) {
+			만약 (errno == ENOENT)
 				continue;
 			error_errno("cannot opendir %s", name);
 			goto out;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
+		동안 ((dent = readdir(dir)) != NULL) {
+			만약 (dent->d_name[0] == '.')
 				continue;
 			free(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
@@ -145,56 +145,56 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 
 out:
 	free(name);
-	return ret;
+	반환 ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+static 정수 maildir_filename_cmp(const char *a, const char *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
+	동안 (*a && *b) {
+		만약 (isdigit(*a) && isdigit(*b)) {
+			long 정수 na, nb;
 			na = strtol(a, (char **)&a, 10);
 			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+			만약 (na != nb)
+				반환 na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		아니면 {
+			만약 (*a != *b)
+				반환 (unsigned char)*a - (unsigned char)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	반환 (unsigned char)*a - (unsigned char)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+static 정수 split_maildir(const char *maildir, const char *dir,
+	정수 nr_prec, 정수 skip)
 {
 	char *file = NULL;
 	FILE *f = NULL;
-	int ret = -1;
+	정수 ret = -1;
 	struct string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
+	만약 (populate_maildir_list(&list, maildir) < 0)
 		goto out;
 
-	for (size_t i = 0; i < list.nr; i++) {
+	위해 (size_t i = 0; i < list.nr; i++) {
 		char *name;
 
 		free(file);
 		file = xstrfmt("%s/%s", maildir, list.items[i].string);
 
 		f = fopen(file, "r");
-		if (!f) {
+		만약 (!f) {
 			error_errno("cannot open mail %s", file);
 			goto out;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		만약 (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
 			goto out;
 		}
@@ -209,75 +209,75 @@ static int split_maildir(const char *maildir, const char *dir,
 
 	ret = skip;
 out:
-	if (f)
+	만약 (f)
 		fclose(f);
 	free(file);
 	string_list_clear(&list, 1);
-	return ret;
+	반환 ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+static 정수 split_mbox(const char *file, const char *dir, 정수 allow_bare,
+		      정수 nr_prec, 정수 skip)
 {
-	int ret = -1;
-	int peek;
+	정수 ret = -1;
+	정수 peek;
 
 	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	정수 file_done = 0;
 
-	if (!f) {
+	만약 (!f) {
 		error_errno("cannot open mbox %s", file);
 		goto out;
 	}
 
-	if (isatty(fileno(f)))
+	만약 (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
 	do {
 		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+		만약 (peek == EOF) {
+			만약 (f == stdin)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
+			아니면 {
 				fclose(f);
 				error(_("empty mbox: '%s'"), file);
 			}
 			goto out;
 		}
-	} while (isspace(peek));
+	} 동안 (isspace(peek));
 	ungetc(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	만약 (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		만약 (f != stdin) {
 			error("cannot read mbox %s", file);
 			goto out;
 		}
 		file_done = 1;
 	}
 
-	while (!file_done) {
+	동안 (!file_done) {
 		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		file_done = split_one(f, name, allow_bare);
 		free(name);
 	}
 
-	if (f != stdin)
+	만약 (f != stdin)
 		fclose(f);
 
 	ret = skip;
 out:
-	return ret;
+	반환 ret;
 }
 
-int cmd_mailsplit(int argc,
+정수 cmd_mailsplit(정수 argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
+	정수 nr = 0, nr_prec = 4, num = 0;
+	정수 allow_bare = 0;
 	const char *dir = NULL;
 	const char **argp;
 	static const char *stdin_only[] = { "-", NULL };
@@ -286,36 +286,36 @@ int cmd_mailsplit(int argc,
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
-	for (argp = argv+1; *argp; argp++) {
+	위해 (argp = argv+1; *argp; argp++) {
 		const char *arg = *argp;
 
-		if (arg[0] != '-')
+		만약 (arg[0] != '-')
 			break;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
+		만약 ( arg[1] == 'd' ) {
 			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+			만약 (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
 			continue;
-		} else if ( arg[1] == 'f' ) {
+		} 아니면 만약 ( arg[1] == 'f' ) {
 			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+		} 아니면 만약 ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} 아니면 만약 (!strcmp(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} 아니면 만약 ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} 아니면 만약 (!strcmp(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} 아니면 만약 ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
 			break;
-		} else {
+		} 아니면 {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	만약 ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
 		switch (argc - (argp-argv)) {
@@ -331,41 +331,41 @@ int cmd_mailsplit(int argc,
 		default:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} 아니면 {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		만약 ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
+	동안 (*argp) {
 		const char *arg = *argp++;
 		struct stat argstat;
-		int ret = 0;
+		정수 ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
+		만약 (arg[0] == '-' && arg[1] == 0) {
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+			만약 (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				반환 1;
 			}
 			num += (ret - nr);
 			nr = ret;
 			continue;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		만약 (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			반환 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
+		만약 (S_ISDIR(argstat.st_mode))
 			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
+		아니면
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		만약 (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			반환 1;
 		}
 		num += (ret - nr);
 		nr = ret;
@@ -373,5 +373,5 @@ int cmd_mailsplit(int argc,
 
 	printf("%d\n", num);
 
-	return 0;
+	반환 0;
 }

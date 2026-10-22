@@ -40,28 +40,28 @@ enum color_push {
 	PUSH_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+static 정수 parse_push_color_slot(const char *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	만약 (!strcasecmp(slot, "reset"))
+		반환 PUSH_COLOR_RESET;
+	만약 (!strcasecmp(slot, "error"))
+		반환 PUSH_COLOR_ERROR;
+	반환 -1;
 }
 
 static const char *push_get_color(enum color_push ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	만약 (want_color_stderr(push_use_color))
+		반환 push_colors[ix];
+	반환 "";
 }
 
-static int thin = 1;
-static int deleterefs;
+static 정수 thin = 1;
+static 정수 deleterefs;
 static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+static 정수 verbosity;
+static 정수 progress = -1;
+static 정수 recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
 static enum transport_family family;
 
 static struct push_cas_option cas;
@@ -76,65 +76,65 @@ static void refspec_append_mapped(struct refspec *refspec, const char *ref,
 	const char *branch_name;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	if (remote->push.nr) {
+	만약 (remote->push.nr) {
 		struct refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		만약 (!refspec_find_match(&remote->push, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
 			free(query.dst);
-			return;
+			반환;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	만약 (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
 		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		만약 (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			반환;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+static void set_refspecs(const char **refs, 정수 nr, struct remote *remote)
 {
 	struct ref *local_refs = NULL;
-	int i;
+	정수 i;
 
-	for (i = 0; i < nr; i++) {
+	위해 (i = 0; i < nr; i++) {
 		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+		만약 (!strcmp("tag", ref)) {
+			만약 (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			만약 (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			아니면
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} 아니면 만약 (deleterefs) {
+			만약 (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
+		} 아니면 만약 (!strchr(ref, ':')) {
 			struct ref *matched = NULL;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			만약 (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			만약 (count_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			아니면
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} 아니면
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	만약 (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	만약 (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -195,16 +195,16 @@ static const char message_detached_head_die[] =
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+static const char *get_upstream_ref(정수 flags, struct branch *branch, const char *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	만약 (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		반환 branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+	만약 (!branch->merge_nr || !branch->merge || !branch->remote_name) {
 		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+		만약 (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,35 +221,35 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	만약 (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	반환 branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+static void setup_default_push_refspecs(정수 *flags, struct remote *remote)
 {
 	struct branch *branch;
 	const char *dst;
-	int same_remote;
+	정수 same_remote;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	switch (cfg->push_default) {
 	case PUSH_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		반환;
 
 	case PUSH_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
+		반환;
 	default:
 		break;
 	}
 
 	branch = branch_get(NULL);
-	if (!branch)
+	만약 (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
@@ -259,14 +259,14 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	default:
 	case PUSH_DEFAULT_UNSPECIFIED:
 	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
+		만약 (!same_remote)
 			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+		만약 (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
 			die_push_simple(branch, remote);
 		break;
 
 	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+		만약 (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
@@ -283,7 +283,7 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
+	만약 ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
 		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
@@ -324,75 +324,75 @@ static const char message_advice_ref_needs_update[] =
 
 static void advise_pull_before_push(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	만약 (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		반환;
 	advise(_(message_advice_pull_before_push));
 }
 
 static void advise_checkout_pull_push(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	만약 (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		반환;
 	advise(_(message_advice_checkout_pull_push));
 }
 
 static void advise_ref_already_exists(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	만약 (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		반환;
 	advise(_(message_advice_ref_already_exists));
 }
 
 static void advise_ref_fetch_first(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	만약 (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		반환;
 	advise(_(message_advice_ref_fetch_first));
 }
 
 static void advise_ref_needs_force(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	만약 (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		반환;
 	advise(_(message_advice_ref_needs_force));
 }
 
 static void advise_ref_needs_update(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	만약 (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		반환;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+static 정수 push_with_options(struct transport *transport, struct refspec *rs,
+			     정수 flags)
 {
-	int err;
-	unsigned int reject_reasons;
+	정수 err;
+	unsigned 정수 reject_reasons;
 	char *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	만약 (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
 	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	만약 (!is_empty_cas(&cas)) {
+		만약 (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	만약 (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
 	err = transport_push(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
+	만약 (err != 0) {
 		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
 		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
@@ -400,78 +400,78 @@ static int push_with_options(struct transport *transport, struct refspec *rs,
 
 	err |= transport_disconnect(transport);
 	free(anon_url);
-	if (!err)
-		return 0;
+	만약 (!err)
+		반환 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
+	만약 (reject_reasons & REJECT_NON_FF_HEAD) {
 		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
+	} 아니면 만약 (reject_reasons & REJECT_NON_FF_OTHER) {
 		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	} 아니면 만약 (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} 아니면 만약 (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} 아니면 만약 (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} 아니면 만약 (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	반환 1;
 }
 
-static int do_push(int flags,
+static 정수 do_push(정수 flags,
 		   const struct string_list *push_options,
 		   struct remote *remote)
 {
-	int errs;
+	정수 errs;
 	struct strvec *url;
 	struct refspec *push_refspec = &rs;
 
-	if (push_options->nr)
+	만약 (push_options->nr)
 		flags |= TRANSPORT_PUSH_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
+	만약 (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
+		만약 (remote->push.nr) {
 			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
+		} 아니면 만약 (!(flags & TRANSPORT_PUSH_MIRROR))
 			setup_default_push_refspecs(&flags, remote);
 	}
 	errs = 0;
 	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+	위해 (size_t i = 0; i < url->nr; i++) {
 		struct transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
+		만약 (flags & TRANSPORT_PUSH_OPTIONS)
 			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		만약 (push_with_options(transport, push_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	반환 !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+static 정수 option_parse_recurse_submodules(const struct option *opt,
+				   const char *arg, 정수 unset)
 {
-	int *recurse_submodules = opt->value;
+	정수 *recurse_submodules = opt->value;
 
-	if (unset)
+	만약 (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	아니면 {
+		만약 (!strcmp(arg, "only-is-on-demand")) {
+			만약 (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
+		} 아니면 {
 			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	반환 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+static void set_push_cert_flags(정수 *flags, 정수 v)
 {
 	switch (v) {
 	case SEND_PACK_PUSH_CERT_NEVER:
@@ -489,23 +489,23 @@ static void set_push_cert_flags(int *flags, int v)
 }
 
 
-static int git_push_config(const char *k, const char *v,
+static 정수 git_push_config(const char *k, const char *v,
 			   const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
-	int *flags = cb;
+	정수 *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
+	만약 (!strcmp(k, "push.followtags")) {
+		만약 (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
+		아니면
 			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
+		반환 0;
+	} 아니면 만약 (!strcmp(k, "push.autosetupremote")) {
+		만약 (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
+		반환 0;
+	} 아니면 만약 (!strcmp(k, "push.gpgsign")) {
 		switch (git_parse_maybe_bool(v)) {
 		case 0:
 			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
@@ -514,170 +514,170 @@ static int git_push_config(const char *k, const char *v,
 			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
 			break;
 		default:
-			if (!strcasecmp(v, "if-asked"))
+			만약 (!strcasecmp(v, "if-asked"))
 				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+			아니면
+				반환 error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
+	} 아니면 만약 (!strcmp(k, "push.recursesubmodules")) {
 		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} 아니면 만약 (!strcmp(k, "submodule.recurse")) {
+		정수 val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
+	} 아니면 만약 (!strcmp(k, "push.pushoption")) {
+		반환 parse_transport_option(k, v, &push_options_config);
+	} 아니면 만약 (!strcmp(k, "color.push")) {
 		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
+		반환 0;
+	} 아니면 만약 (skip_prefix(k, "color.push.", &slot_name)) {
+		정수 slot = parse_push_color_slot(slot_name);
+		만약 (slot < 0)
+			반환 0;
+		만약 (!v)
+			반환 config_error_nonbool(k);
+		반환 color_parse(v, push_colors[slot]);
+	} 아니면 만약 (!strcmp(k, "push.useforceifincludes")) {
+		만약 (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
+		아니면
 			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+		반환 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	반환 git_default_config(k, v, ctx, NULL);
 }
 
-static int push_multiple(struct string_list *list,
+static 정수 push_multiple(struct string_list *list,
 			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
+			 정수 flags,
+			 정수 tags,
 			 const char **refspecs,
-			 int refspec_nr)
+			 정수 refspec_nr)
 {
-	int result = 0;
+	정수 result = 0;
 	size_t i;
 	struct strvec argv = STRVEC_INIT;
 
 	strvec_push(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
+	만약 (flags & TRANSPORT_PUSH_FORCE)
 		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
+	만약 (flags & TRANSPORT_PUSH_DRY_RUN)
 		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
+	만약 (flags & TRANSPORT_PUSH_PORCELAIN)
 		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
+	만약 (flags & TRANSPORT_PUSH_PRUNE)
 		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
+	만약 (flags & TRANSPORT_PUSH_NO_HOOK)
 		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
+	만약 (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
 		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
+	만약 (flags & TRANSPORT_PUSH_SET_UPSTREAM)
 		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
+	만약 (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
 		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
+	만약 (flags & TRANSPORT_PUSH_ALL)
 		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
+	만약 (flags & TRANSPORT_PUSH_MIRROR)
 		strvec_push(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
+	만약 (flags & TRANSPORT_PUSH_CERT_ALWAYS)
 		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
+	아니면 만약 (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
 		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
+	만약 (!thin)
 		strvec_push(&argv, "--no-thin");
 
-	if (deleterefs)
+	만약 (deleterefs)
 		strvec_push(&argv, "--delete");
 
-	if (receivepack)
+	만약 (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
+	만약 (verbosity >= 2)
 		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
+	만약 (verbosity >= 1)
 		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
+	아니면 만약 (verbosity < 0)
 		strvec_push(&argv, "-q");
-	if (progress > 0)
+	만약 (progress > 0)
 		strvec_push(&argv, "--progress");
-	else if (progress == 0)
+	아니면 만약 (progress == 0)
 		strvec_push(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
+	만약 (family == TRANSPORT_FAMILY_IPV4)
 		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
+	아니면 만약 (family == TRANSPORT_FAMILY_IPV6)
 		strvec_push(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	만약 (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	아니면 만약 (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	아니면 만약 (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
+	아니면 만약 (recurse_submodules == RECURSE_SUBMODULES_OFF)
 		strvec_push(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
+	만약 (tags)
 		strvec_push(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	위해 (i = 0; i < push_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
 			     push_options->items[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	위해 (i = 0; i < cas.nr; i++) {
+		만약 (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} 아니면 만약 (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
+		} 아니면 {
 			strvec_push(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
+	위해 (i = 0; i < list->nr; i++) {
 		const char *name = list->items[i].string;
 		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+		정수 j;
 
 		strvec_pushv(&cmd.args, argv.v);
 		strvec_push(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
+		위해 (j = 0; j < refspec_nr; j++)
 			strvec_push(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		만약 (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		만약 (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	반환 result;
 }
 
 static void die_if_repo_looks_like_ref(const char *repo)
 {
 	const char *slash = strchr(repo, '/');
 	struct strbuf name = STRBUF_INIT;
-	int code;
+	정수 code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	만약 (!slash || !slash[1] || file_exists(repo))
+		반환;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	만약 (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		반환;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
@@ -688,16 +688,16 @@ static void die_if_repo_looks_like_ref(const char *repo)
 	exit(code);
 }
 
-int cmd_push(int argc,
+정수 cmd_push(정수 argc,
 	     const char **argv,
 	     const char *prefix,
 	     struct repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
+	정수 flags = 0;
+	정수 tags = 0;
+	정수 push_cert = -1;
+	정수 rc = 0;
+	정수 base_flags;
 	const char *repo = NULL;	/* default repository */
 	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
 	struct string_list remote_group = STRING_LIST_INIT_DUP;
@@ -757,21 +757,21 @@ int cmd_push(int argc,
 				  tags, "--tags",
 				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
 				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+	만약 (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	만약 (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	아니면 만약 (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	아니면 만약 (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	만약 (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
+	만약 (repo) {
+		만약 (!add_remote_or_group(repo, &remote_group)) {
 			struct remote *r;
 
 			/*
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			만약 (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			만약 (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
+	} 아니면 {
 		struct remote *r = pushremote_get(NULL);
-		if (!r)
+		만약 (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	만약 (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
 	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+		만약 (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	만약 (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
+			정수 inner_flags = base_flags;
 			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			만약 (!r)
 				die(_("no such remote or remote group: %s"),
 				    remote_group.items[0].string);
 
-			if (r->mirror)
+			만약 (r->mirror)
 				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			만약 (inner_flags & TRANSPORT_PUSH_ALL) {
+				만약 (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			만약 (inner_flags & TRANSPORT_PUSH_MIRROR) {
+				만약 (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
 			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
 
-			if (tags)
+			만약 (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			만약 (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
 			rc = do_push(inner_flags, push_options, r);
 		}
-	} else {
+	} 아니면 {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,7 +876,7 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		만약 (flags & TRANSPORT_PUSH_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
 		rc = push_multiple(&remote_group, push_options, flags,
@@ -890,8 +890,8 @@ int cmd_push(int argc,
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
+	만약 (rc == -1)
 		usage_with_options(push_usage, options);
-	else
-		return rc;
+	아니면
+		반환 rc;
 }

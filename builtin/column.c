@@ -11,15 +11,15 @@ static const char * const builtin_column_usage[] = {
 	N_("git column [<options>]"),
 	NULL
 };
-static unsigned int colopts;
+static unsigned 정수 colopts;
 
-static int column_config(const char *var, const char *value,
+static 정수 column_config(const char *var, const char *value,
 			 const struct config_context *ctx UNUSED, void *cb)
 {
-	return git_column_config(var, value, cb, &colopts);
+	반환 git_column_config(var, value, cb, &colopts);
 }
 
-int cmd_column(int argc,
+정수 cmd_column(정수 argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo UNUSED)
@@ -40,29 +40,29 @@ int cmd_column(int argc,
 	};
 
 	/* This one is special and must be the first one */
-	if (argc > 1 && starts_with(argv[1], "--command=")) {
+	만약 (argc > 1 && starts_with(argv[1], "--command=")) {
 		command = argv[1] + 10;
 		repo_config(the_repository, column_config, (void *)command);
-	} else
+	} 아니면
 		repo_config(the_repository, column_config, NULL);
 
 	memset(&copts, 0, sizeof(copts));
 	copts.padding = 1;
 	argc = parse_options(argc, argv, prefix, options, builtin_column_usage, 0);
-	if (copts.padding < 0)
+	만약 (copts.padding < 0)
 		die(_("%s must be non-negative"), "--padding");
-	if (argc)
+	만약 (argc)
 		usage_with_options(builtin_column_usage, options);
-	if (real_command || command) {
-		if (!real_command || !command || strcmp(real_command, command))
+	만약 (real_command || command) {
+		만약 (!real_command || !command || strcmp(real_command, command))
 			die(_("--command must be the first argument"));
 	}
 	finalize_colopts(&colopts, -1);
-	while (!strbuf_getline(&sb, stdin))
+	동안 (!strbuf_getline(&sb, stdin))
 		string_list_append(&list, sb.buf);
 
 	print_columns(&list, colopts, &copts);
 	strbuf_release(&sb);
 	string_list_clear(&list, 0);
-	return 0;
+	반환 0;
 }

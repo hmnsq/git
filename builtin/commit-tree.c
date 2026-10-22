@@ -28,71 +28,71 @@ static void new_parent(struct commit *parent, struct commit_list **parents_p)
 {
 	struct object_id *oid = &parent->object.oid;
 	struct commit_list *parents;
-	for (parents = *parents_p; parents; parents = parents->next) {
-		if (parents->item == parent) {
+	위해 (parents = *parents_p; parents; parents = parents->next) {
+		만약 (parents->item == parent) {
 			error(_("duplicate parent %s ignored"), oid_to_hex(oid));
-			return;
+			반환;
 		}
 		parents_p = &parents->next;
 	}
 	commit_list_insert(parent, parents_p);
 }
 
-static int parse_parent_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+static 정수 parse_parent_arg_callback(const struct option *opt,
+		const char *arg, 정수 unset)
 {
 	struct object_id oid;
 	struct commit_list **parents = opt->value;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (repo_get_oid_commit(the_repository, arg, &oid))
+	만약 (repo_get_oid_commit(the_repository, arg, &oid))
 		die(_("not a valid object name %s"), arg);
 
 	odb_assert_oid_type(the_repository->objects, &oid, OBJ_COMMIT);
 	new_parent(lookup_commit(the_repository, &oid), parents);
-	return 0;
+	반환 0;
 }
 
-static int parse_message_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+static 정수 parse_message_arg_callback(const struct option *opt,
+		const char *arg, 정수 unset)
 {
 	struct strbuf *buf = opt->value;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (buf->len)
+	만약 (buf->len)
 		strbuf_addch(buf, '\n');
 	strbuf_addstr(buf, arg);
 	strbuf_complete_line(buf);
 
-	return 0;
+	반환 0;
 }
 
-static int parse_file_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+static 정수 parse_file_arg_callback(const struct option *opt,
+		const char *arg, 정수 unset)
 {
-	int fd;
+	정수 fd;
 	struct strbuf *buf = opt->value;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (buf->len)
+	만약 (buf->len)
 		strbuf_addch(buf, '\n');
-	if (!strcmp(arg, "-"))
+	만약 (!strcmp(arg, "-"))
 		fd = 0;
-	else {
+	아니면 {
 		fd = xopen(arg, O_RDONLY);
 	}
-	if (strbuf_read(buf, fd, 0) < 0)
+	만약 (strbuf_read(buf, fd, 0) < 0)
 		die_errno(_("git commit-tree: failed to read '%s'"), arg);
-	if (fd && close(fd))
+	만약 (fd && close(fd))
 		die_errno(_("git commit-tree: failed to close '%s'"), arg);
 
-	return 0;
+	반환 0;
 }
 
-int cmd_commit_tree(int argc,
+정수 cmd_commit_tree(정수 argc,
 		    const char **argv,
 		    const char *prefix,
 		    struct repository *repo UNUSED)
@@ -124,7 +124,7 @@ int cmd_commit_tree(int argc,
 		},
 		OPT_END()
 	};
-	int ret;
+	정수 ret;
 
 	repo_config(the_repository, git_default_config, NULL);
 
@@ -133,18 +133,18 @@ int cmd_commit_tree(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, commit_tree_usage, 0);
 
-	if (argc != 1)
+	만약 (argc != 1)
 		die(_("must give exactly one tree"));
 
-	if (repo_get_oid_tree(the_repository, argv[0], &tree_oid))
+	만약 (repo_get_oid_tree(the_repository, argv[0], &tree_oid))
 		die(_("not a valid object name %s"), argv[0]);
 
-	if (!buffer.len) {
-		if (strbuf_read(&buffer, 0, 0) < 0)
+	만약 (!buffer.len) {
+		만약 (strbuf_read(&buffer, 0, 0) < 0)
 			die_errno(_("git commit-tree: failed to read"));
 	}
 
-	if (commit_tree(buffer.buf, buffer.len, &tree_oid, parents, &commit_oid,
+	만약 (commit_tree(buffer.buf, buffer.len, &tree_oid, parents, &commit_oid,
 			NULL, sign_commit)) {
 		ret = 1;
 		goto out;
@@ -156,5 +156,5 @@ int cmd_commit_tree(int argc,
 out:
 	commit_list_free(parents);
 	strbuf_release(&buffer);
-	return ret;
+	반환 ret;
 }

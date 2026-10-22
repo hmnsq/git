@@ -34,8 +34,8 @@ struct backfill_context {
 	struct repository *repo;
 	struct oid_array current_batch;
 	size_t min_batch_size;
-	int sparse;
-	int include_edges;
+	정수 sparse;
+	정수 include_edges;
 	struct rev_info revs;
 };
 
@@ -58,68 +58,68 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
+static 정수 fill_missing_blobs(const char *path UNUSED,
 			      struct oid_array *list,
 			      enum object_type type,
 			      void *data)
 {
 	struct backfill_context *ctx = data;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	만약 (type != OBJ_BLOB)
+		반환 0;
 
-	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+	위해 (size_t i = 0; i < list->nr; i++) {
+		만약 (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	만약 (ctx->current_batch.nr >= ctx->min_batch_size)
 		download_batch(ctx);
 
-	return 0;
+	반환 0;
 }
 
 static void reject_unsupported_rev_list_options(struct rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	만약 (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	만약 (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	만약 (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	만약 (revs->line_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	만약 (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	만약 (!path_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	만약 (revs->filter.blob_limit_value)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+static 정수 do_backfill(struct backfill_context *ctx)
 {
 	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	정수 ret;
 
-	if (ctx->sparse) {
+	만약 (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
+		만약 (get_sparse_checkout_patterns(info.pl)) {
 			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+			반환 error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
+	만약 (!ctx->revs.pending.nr)
 		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
+	만약 (ctx->include_edges)
 		ctx->revs.edge_hint = 1;
 
 	info.blobs = 1;
@@ -132,16 +132,16 @@ static int do_backfill(struct backfill_context *ctx)
 	ret = walk_objects_by_path(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	만약 (!ret)
 		download_batch(ctx);
 
 	path_walk_info_clear(&info);
-	return ret;
+	반환 ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+정수 cmd_backfill(정수 argc, const char **argv, const char *prefix, struct repository *repo)
 {
-	int result;
+	정수 result;
 	struct backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
@@ -172,17 +172,17 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 	repo_init_revisions(repo, &ctx.revs, prefix);
 	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
 
-	if (argc > 1)
+	만약 (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
 	repo_config(repo, git_default_config, NULL);
 
-	if (ctx.sparse < 0)
+	만약 (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
 	result = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	반환 result;
 }

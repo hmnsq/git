@@ -33,7 +33,7 @@
 #define REFS_RENAME_USAGE \
 	N_("git refs rename [--message=<reason>] <old-ref> <new-ref>")
 
-static int cmd_refs_migrate(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_migrate(정수 argc, const char **argv, const char *prefix,
 			    struct repository *repo)
 {
 	const char * const migrate_usage[] = {
@@ -42,7 +42,7 @@ static int cmd_refs_migrate(int argc, const char **argv, const char *prefix,
 	};
 	const char *format_str = NULL;
 	enum ref_storage_format format;
-	unsigned int flags = 0;
+	unsigned 정수 flags = 0;
 	struct option options[] = {
 		OPT_STRING_F(0, "ref-storage-format", &format_str, N_("format"),
 			N_("specify the reference storage format to convert to"),
@@ -57,27 +57,27 @@ static int cmd_refs_migrate(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 	struct strbuf errbuf = STRBUF_INIT;
-	int err;
+	정수 err;
 
 	argc = parse_options(argc, argv, prefix, options, migrate_usage, 0);
-	if (argc)
+	만약 (argc)
 		usage(_("too many arguments"));
-	if (!format_str)
+	만약 (!format_str)
 		usage(_("missing --ref-storage-format=<format>"));
 
 	format = ref_storage_format_by_name(format_str);
-	if (format == REF_STORAGE_FORMAT_UNKNOWN) {
+	만약 (format == REF_STORAGE_FORMAT_UNKNOWN) {
 		err = error(_("unknown ref storage format '%s'"), format_str);
 		goto out;
 	}
 
-	if (repo->ref_storage_format == format) {
+	만약 (repo->ref_storage_format == format) {
 		err = error(_("repository already uses '%s' format"),
 			    ref_storage_format_to_name(format));
 		goto out;
 	}
 
-	if (repo_migrate_ref_storage_format(repo, format, flags, &errbuf) < 0) {
+	만약 (repo_migrate_ref_storage_format(repo, format, flags, &errbuf) < 0) {
 		err = error("%s", errbuf.buf);
 		goto out;
 	}
@@ -86,10 +86,10 @@ static int cmd_refs_migrate(int argc, const char **argv, const char *prefix,
 
 out:
 	strbuf_release(&errbuf);
-	return err;
+	반환 err;
 }
 
-static int cmd_refs_verify(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_verify(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	struct fsck_options fsck_refs_options;
@@ -103,28 +103,28 @@ static int cmd_refs_verify(int argc, const char **argv, const char *prefix,
 		OPT_BOOL(0, "strict", &fsck_refs_options.strict, N_("enable strict checking")),
 		OPT_END(),
 	};
-	int ret = 0;
+	정수 ret = 0;
 
 	fsck_options_init(&fsck_refs_options, repo, FSCK_OPTIONS_REFS);
 
 	argc = parse_options(argc, argv, prefix, options, verify_usage, 0);
-	if (argc)
+	만약 (argc)
 		usage(_("'git refs verify' takes no arguments"));
 
 	repo_config(repo, git_fsck_config, &fsck_refs_options);
 	prepare_repo_settings(repo);
 
 	worktrees = get_worktrees_without_reading_head(repo);
-	for (size_t i = 0; worktrees[i]; i++)
+	위해 (size_t i = 0; worktrees[i]; i++)
 		ret |= refs_fsck(get_worktree_ref_store(worktrees[i]),
 				 &fsck_refs_options, worktrees[i]);
 
 	fsck_options_clear(&fsck_refs_options);
 	free_worktrees(worktrees);
-	return ret;
+	반환 ret;
 }
 
-static int cmd_refs_list(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_list(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	static char const * const refs_list_usage[] = {
@@ -132,18 +132,18 @@ static int cmd_refs_list(int argc, const char **argv, const char *prefix,
 		NULL
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, refs_list_usage);
+	반환 for_each_ref_core(argc, argv, prefix, repo, refs_list_usage);
 }
 
-static int cmd_refs_exists(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_exists(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	struct strbuf unused_referent = STRBUF_INIT;
 	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
+	unsigned 정수 unused_type;
+	정수 failure_errno = 0;
 	const char *ref;
-	int ret = 0;
+	정수 ret = 0;
 	const char * const exists_usage[] = {
 		REFS_EXISTS_USAGE,
 		NULL,
@@ -153,17 +153,17 @@ static int cmd_refs_exists(int argc, const char **argv, const char *prefix,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, exists_usage, 0);
-	if (argc != 1)
+	만약 (argc != 1)
 		die(_("'git refs exists' requires a reference"));
 
 	ref = *argv++;
-	if (refs_read_raw_ref(get_main_ref_store(repo), ref,
+	만약 (refs_read_raw_ref(get_main_ref_store(repo), ref,
 			      &unused_oid, &unused_referent, &unused_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		만약 (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} 아니면 {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
@@ -174,10 +174,10 @@ static int cmd_refs_exists(int argc, const char **argv, const char *prefix,
 
 out:
 	strbuf_release(&unused_referent);
-	return ret;
+	반환 ret;
 }
 
-static int cmd_refs_optimize(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_optimize(정수 argc, const char **argv, const char *prefix,
 			     struct repository *repo)
 {
 	static char const * const refs_optimize_usage[] = {
@@ -185,10 +185,10 @@ static int cmd_refs_optimize(int argc, const char **argv, const char *prefix,
 		NULL
 	};
 
-	return pack_refs_core(argc, argv, prefix, repo, refs_optimize_usage);
+	반환 pack_refs_core(argc, argv, prefix, repo, refs_optimize_usage);
 }
 
-static int cmd_refs_create(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_create(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	static char const * const refs_create_usage[] = {
@@ -209,33 +209,33 @@ static int cmd_refs_create(int argc, const char **argv, const char *prefix,
 	};
 	struct object_id newoid;
 	const char *refname;
-	int ret;
+	정수 ret;
 
 	argc = parse_options(argc, argv, prefix, opts, refs_create_usage, 0);
-	if (argc != 2)
+	만약 (argc != 2)
 		usage(_("create requires reference name and an object ID"));
 
-	if (message && !*message)
+	만약 (message && !*message)
 		die(_("refusing to perform update with empty message"));
 
 	repo_config(repo, git_default_config, NULL);
 
 	refname = argv[0];
-	if (repo_get_oid_with_flags(repo, argv[1], &newoid, GET_OID_SKIP_AMBIGUITY_CHECK))
+	만약 (repo_get_oid_with_flags(repo, argv[1], &newoid, GET_OID_SKIP_AMBIGUITY_CHECK))
 		die(_("invalid object ID: '%s'"), argv[1]);
-	if (is_null_oid(&newoid))
+	만약 (is_null_oid(&newoid))
 		die(_("cannot create reference with null new object ID"));
 
 	ret = refs_update_ref(get_main_ref_store(repo), message, refname,
 			      &newoid, null_oid(repo->hash_algo), flags,
 			      UPDATE_REFS_MSG_ON_ERR);
 
-	if (ret < 0)
+	만약 (ret < 0)
 		ret = 1;
-	return ret;
+	반환 ret;
 }
 
-static int cmd_refs_delete(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_delete(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	static char const * const refs_delete_usage[] = {
@@ -254,34 +254,34 @@ static int cmd_refs_delete(int argc, const char **argv, const char *prefix,
 	};
 	struct object_id oldoid;
 	const char *refname;
-	int ret;
+	정수 ret;
 
 	argc = parse_options(argc, argv, prefix, opts, refs_delete_usage, 0);
-	if (argc < 1 || argc > 2)
+	만약 (argc < 1 || argc > 2)
 		usage(_("delete requires reference name and an optional old object ID"));
 
-	if (message && !*message)
+	만약 (message && !*message)
 		die(_("refusing to perform update with empty message"));
 
 	repo_config(repo, git_default_config, NULL);
 
 	refname = argv[0];
-	if (argc == 2) {
-		if (repo_get_oid_with_flags(repo, argv[1], &oldoid, GET_OID_SKIP_AMBIGUITY_CHECK))
+	만약 (argc == 2) {
+		만약 (repo_get_oid_with_flags(repo, argv[1], &oldoid, GET_OID_SKIP_AMBIGUITY_CHECK))
 			die(_("invalid old object ID: '%s'"), argv[1]);
-		if (is_null_oid(&oldoid))
+		만약 (is_null_oid(&oldoid))
 			die(_("cannot delete reference with null old object ID"));
 	}
 
 	ret = refs_delete_ref(get_main_ref_store(repo), message, refname,
 			      argc == 2 ? &oldoid : NULL, flags);
 
-	if (ret < 0)
+	만약 (ret < 0)
 		ret = 1;
-	return ret;
+	반환 ret;
 }
 
-static int cmd_refs_update(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_update(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	static char const * const refs_update_usage[] = {
@@ -302,22 +302,22 @@ static int cmd_refs_update(int argc, const char **argv, const char *prefix,
 	};
 	struct object_id newoid, oldoid;
 	const char *refname;
-	int ret;
+	정수 ret;
 
 	argc = parse_options(argc, argv, prefix, opts, refs_update_usage, 0);
-	if (argc < 2 || argc > 3)
+	만약 (argc < 2 || argc > 3)
 		usage(_("update requires reference name, new value and an optional old value"));
 
-	if (message && !*message)
+	만약 (message && !*message)
 		die(_("refusing to perform update with empty message"));
 
 	repo_config(repo, git_default_config, NULL);
 
 	refname = argv[0];
-	if (repo_get_oid_with_flags(repo, argv[1], &newoid,
+	만약 (repo_get_oid_with_flags(repo, argv[1], &newoid,
 				    GET_OID_SKIP_AMBIGUITY_CHECK))
 		die(_("invalid new object ID: '%s'"), argv[1]);
-	if (argc == 3 &&
+	만약 (argc == 3 &&
 	    repo_get_oid_with_flags(repo, argv[2], &oldoid,
 				    GET_OID_SKIP_AMBIGUITY_CHECK))
 		die(_("invalid old object ID: '%s'"), argv[2]);
@@ -326,12 +326,12 @@ static int cmd_refs_update(int argc, const char **argv, const char *prefix,
 			      &newoid, argc == 3 ? &oldoid : NULL, flags,
 			      UPDATE_REFS_MSG_ON_ERR);
 
-	if (ret < 0)
+	만약 (ret < 0)
 		ret = 1;
-	return ret;
+	반환 ret;
 }
 
-static int cmd_refs_rename(int argc, const char **argv, const char *prefix,
+static 정수 cmd_refs_rename(정수 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
 	static char const * const refs_rename_usage[] = {
@@ -345,12 +345,12 @@ static int cmd_refs_rename(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 	const char *oldref, *newref;
-	int ret;
+	정수 ret;
 
 	argc = parse_options(argc, argv, prefix, opts, refs_rename_usage, 0);
-	if (argc != 2)
+	만약 (argc != 2)
 		usage(_("rename requires old and new reference name"));
-	if (message && !*message)
+	만약 (message && !*message)
 		die(_("refusing to perform update with empty message"));
 
 	repo_config(repo, git_default_config, NULL);
@@ -358,24 +358,24 @@ static int cmd_refs_rename(int argc, const char **argv, const char *prefix,
 	oldref = argv[0];
 	newref = argv[1];
 
-	if (check_refname_format(oldref, 0))
+	만약 (check_refname_format(oldref, 0))
 		die(_("invalid ref format: '%s'"), oldref);
-	if (check_refname_format(newref, 0))
+	만약 (check_refname_format(newref, 0))
 		die(_("invalid ref format: '%s'"), newref);
 
-	if (!refs_ref_exists(get_main_ref_store(repo), oldref))
+	만약 (!refs_ref_exists(get_main_ref_store(repo), oldref))
 		die(_("reference does not exist: '%s'"), oldref);
-	if (refs_ref_exists(get_main_ref_store(repo), newref))
+	만약 (refs_ref_exists(get_main_ref_store(repo), newref))
 		die(_("reference already exists: '%s'"), newref);
 
 	ret = refs_rename_ref(get_main_ref_store(repo), oldref, newref, message);
 
-	if (ret < 0)
+	만약 (ret < 0)
 		ret = 1;
-	return ret;
+	반환 ret;
 }
 
-int cmd_refs(int argc,
+정수 cmd_refs(정수 argc,
 	     const char **argv,
 	     const char *prefix,
 	     struct repository *repo)
@@ -419,5 +419,5 @@ int cmd_refs(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, opts, refs_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	반환 fn(argc, argv, prefix, repo);
 }

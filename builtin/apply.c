@@ -9,17 +9,17 @@ static const char * const apply_usage[] = {
 	NULL
 };
 
-int cmd_apply(int argc,
+정수 cmd_apply(정수 argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo)
 {
-	int force_apply = 0;
-	int options = 0;
-	int ret;
+	정수 force_apply = 0;
+	정수 options = 0;
+	정수 ret;
 	struct apply_state state;
 
-	if (init_apply_state(&state, the_repository, prefix))
+	만약 (init_apply_state(&state, the_repository, prefix))
 		exit(128);
 
 	/*
@@ -28,24 +28,24 @@ int cmd_apply(int argc,
 	 * is worth the effort.
 	 * cf. https://lore.kernel.org/git/xmqqcypfcmn4.fsf@gitster.g/
 	 */
-	if (!the_hash_algo)
+	만약 (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	argc = apply_parse_options(argc, argv,
 				   &state, &force_apply, &options,
 				   apply_usage);
 
-	if (repo) {
+	만약 (repo) {
 		prepare_repo_settings(repo);
 		repo->settings.command_requires_full_index = 0;
 	}
 
-	if (check_apply_state(&state, force_apply))
+	만약 (check_apply_state(&state, force_apply))
 		exit(128);
 
 	ret = apply_all_patches(&state, argc, argv, options);
 
 	clear_apply_state(&state);
 
-	return ret;
+	반환 ret;
 }
