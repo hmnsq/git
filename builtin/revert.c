@@ -1,16 +1,16 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "parse-options.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "revision.h"
-#include "rerere.h"
-#include "run-command.h"
-#include "sequencer.h"
-#include "branch.h"
+#অন্তর্ভাব "git-compat-util.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "diff.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "revision.h"
+#অন্তর্ভাব "rerere.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "sequencer.h"
+#অন্তর্ভাব "branch.h"
 
 /*
  * This implements the builtins revert and cherry-pick.
@@ -23,102 +23,102 @@
  * Copyright (c) 2005 Junio C Hamano
  */
 
-static const char * const revert_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক revert_usage[] = {
 	N_("git revert [--[no-]edit] [-n] [-m <parent-number>] [-s] [-S[<keyid>]] <commit>..."),
 	N_("git revert (--continue | --skip | --abort | --quit)"),
-	NULL
+	ফাঁকা
 };
 
-static const char * const cherry_pick_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক cherry_pick_usage[] = {
 	N_("git cherry-pick [--edit] [-n] [-m <parent-number>] [-s] [-x] [--ff]\n"
 	   "                [-S[<keyid>]] <commit>..."),
 	N_("git cherry-pick (--continue | --skip | --abort | --quit)"),
-	NULL
+	ফাঁকা
 };
 
-static const char *action_name(const struct replay_opts *opts)
+স্থির ধ্রুবক অক্ষর *action_name(ধ্রুবক কাঠামো replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
+	ফেরত opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
 }
 
-static const char * const *revert_or_cherry_pick_usage(struct replay_opts *opts)
+স্থির ধ্রুবক অক্ষর * ধ্রুবক *revert_or_cherry_pick_usage(কাঠামো replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
+	ফেরত opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
 }
 
-enum empty_action {
+গণনা empty_action {
 	EMPTY_COMMIT_UNSPECIFIED = -1,
 	STOP_ON_EMPTY_COMMIT,      /* output errors and stop in the middle of a cherry-pick */
 	DROP_EMPTY_COMMIT,         /* skip with a notice message */
 	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
 };
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণসংখ্যা parse_opt_empty(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	int *opt_value = opt->value;
+	পূর্ণসংখ্যা *opt_মান = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
-		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
-		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
-		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	যদি (!strcmp(arg, "stop"))
+		*opt_মান = STOP_ON_EMPTY_COMMIT;
+	অন্যথা যদি (!strcmp(arg, "drop"))
+		*opt_মান = DROP_EMPTY_COMMIT;
+	অন্যথা যদি (!strcmp(arg, "keep"))
+		*opt_মান = KEEP_EMPTY_COMMIT;
+	অন্যথা
+		ফেরত error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	ফেরত 0;
 }
 
-static int option_parse_m(const struct option *opt,
-			  const char *arg, int unset)
+স্থির পূর্ণসংখ্যা option_parse_m(ধ্রুবক কাঠামো option *opt,
+			  ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	struct replay_opts *replay = opt->value;
-	char *end;
+	কাঠামো replay_opts *replay = opt->মান;
+	অক্ষর *end;
 
-	if (unset) {
+	যদি (unset) {
 		replay->mainline = 0;
-		return 0;
+		ফেরত 0;
 	}
 
 	replay->mainline = strtol(arg, &end, 10);
-	if (*end || replay->mainline <= 0)
-		return error(_("option `%s' expects a number greater than zero"),
+	যদি (*end || replay->mainline <= 0)
+		ফেরত error(_("option `%s' expects a number greater than zero"),
 			     opt->long_name);
 
-	return 0;
+	ফেরত 0;
 }
 
 LAST_ARG_MUST_BE_NULL
-static void verify_opt_compatible(const char *me, const char *base_opt, ...)
+স্থির শূন্য verify_opt_compatible(ধ্রুবক অক্ষর *me, ধ্রুবক অক্ষর *base_opt, ...)
 {
-	const char *this_opt;
+	ধ্রুবক অক্ষর *this_opt;
 	va_list ap;
 
 	va_start(ap, base_opt);
-	while ((this_opt = va_arg(ap, const char *))) {
-		if (va_arg(ap, int))
-			break;
+	যখন ((this_opt = va_arg(ap, ধ্রুবক অক্ষর *))) {
+		যদি (va_arg(ap, পূর্ণসংখ্যা))
+			বিরতি;
 	}
 	va_end(ap);
 
-	if (this_opt)
+	যদি (this_opt)
 		die(_("%s: %s cannot be used with %s"), me, this_opt, base_opt);
 }
 
-static int run_sequencer(int argc, const char **argv, const char *prefix,
-			 struct replay_opts *opts)
+স্থির পূর্ণসংখ্যা run_sequencer(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+			 কাঠামো replay_opts *opts)
 {
-	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
-	const char *me = action_name(opts);
-	const char *cleanup_arg = NULL;
-	const char sentinel_value = 0; /* value not important */
-	const char *strategy = &sentinel_value;
-	const char *gpg_sign = &sentinel_value;
-	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
-	int cmd = 0, ret;
-	struct option base_options[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক * usage_str = revert_or_cherry_pick_usage(opts);
+	ধ্রুবক অক্ষর *me = action_name(opts);
+	ধ্রুবক অক্ষর *cleanup_arg = ফাঁকা;
+	ধ্রুবক অক্ষর sentinel_মান = 0; /* value not important */
+	ধ্রুবক অক্ষর *strategy = &sentinel_মান;
+	ধ্রুবক অক্ষর *gpg_sign = &sentinel_মান;
+	গণনা empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
+	পূর্ণসংখ্যা cmd = 0, ret;
+	কাঠামো option base_options[] = {
 		OPT_CMDMODE(0, "quit", &cmd, N_("end revert or cherry-pick sequence"), 'q'),
 		OPT_CMDMODE(0, "continue", &cmd, N_("resume revert or cherry-pick sequence"), 'c'),
 		OPT_CMDMODE(0, "abort", &cmd, N_("cancel revert or cherry-pick sequence"), 'a'),
@@ -126,7 +126,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		OPT_CLEANUP(&cleanup_arg),
 		OPT_BOOL('n', "no-commit", &opts->no_commit, N_("don't automatically commit")),
 		OPT_BOOL('e', "edit", &opts->edit, N_("edit the commit message")),
-		OPT_NOOP_NOARG('r', NULL),
+		OPT_NOOP_NOARG('r', ফাঁকা),
 		OPT_BOOL('s', "signoff", &opts->signoff, N_("add a Signed-off-by trailer")),
 		OPT_CALLBACK('m', "mainline", opts, N_("parent-number"),
 			     N_("select mainline parent"), option_parse_m),
@@ -138,7 +138,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &gpg_sign,
+			.মান = &gpg_sign,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -146,11 +146,11 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		},
 		OPT_END()
 	};
-	struct option *options = base_options;
+	কাঠামো option *options = base_options;
 
-	if (opts->action == REPLAY_PICK) {
-		struct option cp_extra[] = {
-			OPT_BOOL('x', NULL, &opts->record_origin, N_("append commit name")),
+	যদি (opts->action == REPLAY_PICK) {
+		কাঠামো option cp_extra[] = {
+			OPT_BOOL('x', ফাঁকা, &opts->record_origin, N_("append commit name")),
 			OPT_BOOL(0, "ff", &opts->allow_ff, N_("allow fast-forward")),
 			OPT_BOOL(0, "allow-empty", &opts->allow_empty, N_("preserve initially empty commits")),
 			OPT_BOOL(0, "allow-empty-message", &opts->allow_empty_message, N_("allow commits with empty messages")),
@@ -161,8 +161,8 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			OPT_END(),
 		};
 		options = parse_options_concat(options, cp_extra);
-	} else if (opts->action == REPLAY_REVERT) {
-		struct option cp_extra[] = {
+	} অন্যথা যদি (opts->action == REPLAY_REVERT) {
+		কাঠামো option cp_extra[] = {
 			OPT_BOOL(0, "reference", &opts->commit_use_reference,
 				 N_("use the 'reference' format to refer to commits")),
 			OPT_END(),
@@ -175,33 +175,33 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_full_সূচক = 0;
 
-	if (opts->action == REPLAY_PICK) {
+	যদি (opts->action == REPLAY_PICK) {
 		opts->drop_redundant_commits = (empty_opt == DROP_EMPTY_COMMIT);
 		opts->keep_redundant_commits = opts->keep_redundant_commits || (empty_opt == KEEP_EMPTY_COMMIT);
 	}
 
 	/* implies allow_empty */
-	if (opts->keep_redundant_commits)
+	যদি (opts->keep_redundant_commits)
 		opts->allow_empty = 1;
 
-	if (cleanup_arg) {
-		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
+	যদি (cleanup_arg) {
+		opts->default_বার্তা_cleanup = get_cleanup_mode(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
 	/* Check for incompatible command line arguments */
-	if (cmd) {
-		const char *this_operation;
-		if (cmd == 'q')
+	যদি (cmd) {
+		ধ্রুবক অক্ষর *this_operation;
+		যদি (cmd == 'q')
 			this_operation = "--quit";
-		else if (cmd == 'c')
+		অন্যথা যদি (cmd == 'c')
 			this_operation = "--continue";
-		else if (cmd == 's')
+		অন্যথা যদি (cmd == 's')
 			this_operation = "--skip";
-		else {
-			assert(cmd == 'a');
+		অন্যথা {
+			প্রতিজ্ঞা(cmd == 'a');
 			this_operation = "--abort";
 		}
 
@@ -217,79 +217,79 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				"--no-rerere-autoupdate", opts->allow_rerere_auto == RERERE_NOAUTOUPDATE,
 				"--keep-redundant-commits", opts->keep_redundant_commits,
 				"--empty", empty_opt != EMPTY_COMMIT_UNSPECIFIED,
-				NULL);
+				ফাঁকা);
 	}
 
-	if (!opts->strategy && opts->default_strategy) {
+	যদি (!opts->strategy && opts->default_strategy) {
 		opts->strategy = opts->default_strategy;
-		opts->default_strategy = NULL;
+		opts->default_strategy = ফাঁকা;
 	}
 
-	if (opts->allow_ff)
+	যদি (opts->allow_ff)
 		verify_opt_compatible(me, "--ff",
 				"--signoff", opts->signoff,
 				"--no-commit", opts->no_commit,
 				"-x", opts->record_origin,
 				"--edit", opts->edit > 0,
-				NULL);
+				ফাঁকা);
 
-	if (cmd) {
-		opts->revs = NULL;
-	} else {
-		struct setup_revision_opt s_r_opt;
-		opts->revs = xmalloc(sizeof(*opts->revs));
-		repo_init_revisions(the_repository, opts->revs, NULL);
+	যদি (cmd) {
+		opts->revs = ফাঁকা;
+	} অন্যথা {
+		কাঠামো setup_revision_opt s_r_opt;
+		opts->revs = xmalloc(আকার(*opts->revs));
+		repo_init_revisions(the_repository, opts->revs, ফাঁকা);
 		opts->revs->no_walk = 1;
-		opts->revs->unsorted_input = 1;
-		if (argc < 2)
+		opts->revs->unsorted_প্রবেশ = 1;
+		যদি (argc < 2)
 			usage_with_options(usage_str, options);
-		if (!strcmp(argv[1], "-"))
+		যদি (!strcmp(argv[1], "-"))
 			argv[1] = "@{-1}";
-		memset(&s_r_opt, 0, sizeof(s_r_opt));
+		memset(&s_r_opt, 0, আকার(s_r_opt));
 		s_r_opt.assume_dashdash = 1;
 		argc = setup_revisions(argc, argv, opts->revs, &s_r_opt);
 	}
 
-	if (argc > 1)
+	যদি (argc > 1)
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
-		free(opts->gpg_sign);
+	যদি (gpg_sign != &sentinel_মান) {
+		মুক্ত(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
-		free(opts->strategy);
+	যদি (strategy != &sentinel_মান) {
+		মুক্ত(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}
-	free(options);
+	মুক্ত(options);
 
-	if (cmd == 'q') {
+	যদি (cmd == 'q') {
 		ret = sequencer_remove_state(opts);
-		if (!ret)
+		যদি (!ret)
 			remove_branch_state(the_repository, 0);
-		return ret;
+		ফেরত ret;
 	}
-	if (cmd == 'a')
-		return sequencer_rollback(the_repository, opts);
-	if (cmd == 'c')
+	যদি (cmd == 'a')
+		ফেরত sequencer_rollback(the_repository, opts);
+	যদি (cmd == 'c')
 		ret = sequencer_continue(the_repository, opts);
-	else if (cmd == 's')
+	অন্যথা যদি (cmd == 's')
 		ret = sequencer_skip(the_repository, opts);
-	else
+	অন্যথা
 		ret = sequencer_pick_revisions(the_repository, opts);
-	if (!ret)
+	যদি (!ret)
 		run_auto_maintenance(the_repository, opts->quiet);
-	return ret;
+	ফেরত ret;
 }
 
-int cmd_revert(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_revert(পূর্ণসংখ্যা argc,
+	       ধ্রুবক অক্ষর **argv,
+	       ধ্রুবক অক্ষর *prefix,
+	       কাঠামো repository *repo UNUSED)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	কাঠামো replay_opts opts = REPLAY_OPTS_INIT;
+	পূর্ণসংখ্যা res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -297,19 +297,19 @@ int cmd_revert(int argc,
 	opts.action = REPLAY_REVERT;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	যদি (res < 0)
 		die(_("revert failed"));
 	replay_opts_release(&opts);
-	return res;
+	ফেরত res;
 }
 
-int cmd_cherry_pick(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_cherry_pick(পূর্ণসংখ্যা argc,
+ধ্রুবক অক্ষর **argv,
+ধ্রুবক অক্ষর *prefix,
+কাঠামো repository *repo UNUSED)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	কাঠামো replay_opts opts = REPLAY_OPTS_INIT;
+	পূর্ণসংখ্যা res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -317,8 +317,8 @@ struct repository *repo UNUSED)
 	opts.action = REPLAY_PICK;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	যদি (res < 0)
 		die(_("cherry-pick failed"));
 	replay_opts_release(&opts);
-	return res;
+	ফেরত res;
 }

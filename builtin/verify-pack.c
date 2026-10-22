@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "strbuf.h"
 
 #define VERIFY_PACK_VERBOSE 01
 #define VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+স্থির পূর্ণসংখ্যা verify_one_pack(ধ্রুবক অক্ষর *path, unsigned পূর্ণসংখ্যা flags, ধ্রুবক অক্ষর *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	কাঠামো child_process সূচক_pack = CHILD_PROCESS_INIT;
+	কাঠামো strvec *argv = &সূচক_pack.args;
+	কাঠামো strbuf arg = STRBUF_INIT;
+	পূর্ণসংখ্যা verbose = flags & VERIFY_PACK_VERBOSE;
+	পূর্ণসংখ্যা stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	পূর্ণসংখ্যা err;
 
-	strvec_push(argv, "index-pack");
+	strvec_ঠেলো(argv, "index-pack");
 
-	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
-		strvec_push(argv, "--verify-stat");
-	else
-		strvec_push(argv, "--verify");
+	যদি (stat_only)
+		strvec_ঠেলো(argv, "--verify-stat-only");
+	অন্যথা যদি (verbose)
+		strvec_ঠেলো(argv, "--verify-stat");
+	অন্যথা
+		strvec_ঠেলো(argv, "--verify");
 
-	if (hash_algo)
+	যদি (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
@@ -36,43 +36,43 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
 	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
+	যদি (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_ঠেলো(argv, arg.buf);
 
-	index_pack.git_cmd = 1;
+	সূচক_pack.git_cmd = 1;
 
-	err = run_command(&index_pack);
+	err = run_command(&সূচক_pack);
 
-	if (verbose || stat_only) {
-		if (err)
+	যদি (verbose || stat_only) {
+		যদি (err)
 			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
+		অন্যথা {
+			যদি (!stat_only)
 				printf("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	ফেরত err;
 }
 
-static const char * const verify_pack_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
-	NULL
+	ফাঁকা
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_verify_pack(পূর্ণসংখ্যা argc,
+		    ধ্রুবক অক্ষর **argv,
+		    ধ্রুবক অক্ষর *prefix,
+		    কাঠামো repository *repo UNUSED)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
+	পূর্ণসংখ্যা err = 0;
+	unsigned পূর্ণসংখ্যা flags = 0;
+	ধ্রুবক অক্ষর *object_format = ফাঁকা;
+	পূর্ণসংখ্যা i;
+	ধ্রুবক কাঠামো option verify_pack_options[] = {
 		OPT_BIT('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
 		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
@@ -82,15 +82,15 @@ int cmd_verify_pack(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 	argc = parse_options(argc, argv, prefix, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	যদি (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	জন্য (i = 0; i < argc; i++) {
+		যদি (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	ফেরত err;
 }

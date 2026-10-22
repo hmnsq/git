@@ -1,32 +1,32 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "fsmonitor-ll.h"
-#include "fsmonitor-ipc.h"
-#include "fsmonitor-settings.h"
-#include "compat/fsmonitor/fsm-health.h"
-#include "compat/fsmonitor/fsm-listen.h"
-#include "fsmonitor--daemon.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "abspath.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "dir.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "fsmonitor-ll.h"
+#অন্তর্ভাব "fsmonitor-ipc.h"
+#অন্তর্ভাব "fsmonitor-settings.h"
+#অন্তর্ভাব "compat/fsmonitor/fsm-health.h"
+#অন্তর্ভাব "compat/fsmonitor/fsm-listen.h"
+#অন্তর্ভাব "fsmonitor--daemon.h"
 
-#include "simple-ipc.h"
-#include "strmap.h"
-#include "run-command.h"
-#include "trace.h"
-#include "trace2.h"
+#অন্তর্ভাব "simple-ipc.h"
+#অন্তর্ভাব "strmap.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "trace.h"
+#অন্তর্ভাব "trace2.h"
 
-static const char * const builtin_fsmonitor__daemon_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক builtin_fsmonitor__daemon_usage[] = {
 	N_("git fsmonitor--daemon start [<options>]"),
 	N_("git fsmonitor--daemon run [<options>]"),
 	"git fsmonitor--daemon stop",
 	"git fsmonitor--daemon status",
-	NULL
+	ফাঁকা
 };
 
 #ifdef HAVE_FSMONITOR_DAEMON_BACKEND
@@ -34,46 +34,46 @@ static const char * const builtin_fsmonitor__daemon_usage[] = {
  * Global state loaded from config.
  */
 #define FSMONITOR__IPC_THREADS "fsmonitor.ipcthreads"
-static int fsmonitor__ipc_threads = 8;
+স্থির পূর্ণসংখ্যা fsmonitor__ipc_threads = 8;
 
 #define FSMONITOR__START_TIMEOUT "fsmonitor.starttimeout"
-static int fsmonitor__start_timeout_sec = 60;
+স্থির পূর্ণসংখ্যা fsmonitor__start_timeout_sec = 60;
 
 #define FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
-static int fsmonitor__announce_startup = 0;
+স্থির পূর্ণসংখ্যা fsmonitor__announce_startup = 0;
 
-static int fsmonitor_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+স্থির পূর্ণসংখ্যা fsmonitor_config(ধ্রুবক অক্ষর *var, ধ্রুবক অক্ষর *মান,
+			    ধ্রুবক কাঠামো config_context *ctx, শূন্য *cb)
 {
-	if (!strcmp(var, FSMONITOR__IPC_THREADS)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 1)
-			return error(_("value of '%s' out of range: %d"),
+	যদি (!strcmp(var, FSMONITOR__IPC_THREADS)) {
+		পূর্ণসংখ্যা i = git_config_int(var, মান, ctx->kvi);
+		যদি (i < 1)
+			ফেরত error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__IPC_THREADS, i);
 		fsmonitor__ipc_threads = i;
-		return 0;
+		ফেরত 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 0)
-			return error(_("value of '%s' out of range: %d"),
+	যদি (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
+		পূর্ণসংখ্যা i = git_config_int(var, মান, ctx->kvi);
+		যদি (i < 0)
+			ফেরত error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__START_TIMEOUT, i);
 		fsmonitor__start_timeout_sec = i;
-		return 0;
+		ফেরত 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
-		int is_bool;
-		int i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
-		if (i < 0)
-			return error(_("value of '%s' not bool or int: %d"),
+	যদি (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
+		পূর্ণসংখ্যা is_bool;
+		পূর্ণসংখ্যা i = git_config_bool_or_int(var, মান, ctx->kvi, &is_bool);
+		যদি (i < 0)
+			ফেরত error(_("value of '%s' not bool or int: %d"),
 				     var, i);
 		fsmonitor__announce_startup = i;
-		return 0;
+		ফেরত 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ফেরত git_default_config(var, মান, ctx, cb);
 }
 
 /*
@@ -82,90 +82,90 @@ static int fsmonitor_config(const char *var, const char *value,
  * Send a "quit" command to the `git-fsmonitor--daemon` (if running)
  * and wait for it to shutdown.
  */
-static int do_as_client__send_stop(void)
+স্থির পূর্ণসংখ্যা do_as_client__send_stop(শূন্য)
 {
-	struct strbuf answer = STRBUF_INIT;
-	int ret;
-	int max_wait_ms = 30000;
-	int elapsed_ms = 0;
+	কাঠামো strbuf answer = STRBUF_INIT;
+	পূর্ণসংখ্যা ret;
+	পূর্ণসংখ্যা max_wait_ms = 30000;
+	পূর্ণসংখ্যা elapsed_ms = 0;
 
 	ret = fsmonitor_ipc__send_command("quit", &answer);
 
 	/* The quit command does not return any response data. */
 	strbuf_release(&answer);
 
-	if (ret)
-		return ret;
+	যদি (ret)
+		ফেরত ret;
 
-	trace2_region_enter("fsm_client", "polling-for-daemon-exit", NULL);
-	while (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
-		if (elapsed_ms >= max_wait_ms) {
+	trace2_region_enter("fsm_client", "polling-for-daemon-exit", ফাঁকা);
+	যখন (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
+		যদি (elapsed_ms >= max_wait_ms) {
 			trace2_region_leave("fsm_client",
-					    "polling-for-daemon-exit", NULL);
-			return error(_("daemon did not stop within %d seconds"),
+					    "polling-for-daemon-exit", ফাঁকা);
+			ফেরত error(_("daemon did not stop within %d seconds"),
 				     max_wait_ms / 1000);
 		}
 		sleep_millisec(50);
 		elapsed_ms += 50;
 	}
-	trace2_region_leave("fsm_client", "polling-for-daemon-exit", NULL);
+	trace2_region_leave("fsm_client", "polling-for-daemon-exit", ফাঁকা);
 
-	return 0;
+	ফেরত 0;
 }
 
-static int do_as_client__status(void)
+স্থির পূর্ণসংখ্যা do_as_client__status(শূন্য)
 {
-	enum ipc_active_state state = fsmonitor_ipc__get_state();
+	গণনা ipc_active_state state = fsmonitor_ipc__get_state();
 
-	switch (state) {
-	case IPC_STATE__LISTENING:
+	নির্বাচন (state) {
+	ক্ষেত্র IPC_STATE__LISTENING:
 		printf(_("fsmonitor-daemon is watching '%s'\n"),
 		       the_repository->worktree);
-		return 0;
+		ফেরত 0;
 
-	default:
+	পূর্বনির্ধারিত:
 		printf(_("fsmonitor-daemon is not watching '%s'\n"),
 		       the_repository->worktree);
-		return 1;
+		ফেরত 1;
 	}
 }
 
-enum fsmonitor_cookie_item_result {
+গণনা fsmonitor_cookie_item_ফলাফল {
 	FCIR_ERROR = -1, /* could not create cookie file ? */
 	FCIR_INIT,
 	FCIR_SEEN,
 	FCIR_ABORT,
 };
 
-struct fsmonitor_cookie_item {
-	struct hashmap_entry entry;
-	char *name;
-	enum fsmonitor_cookie_item_result result;
+কাঠামো fsmonitor_cookie_item {
+	কাঠামো hashmap_entry entry;
+	অক্ষর *name;
+	গণনা fsmonitor_cookie_item_ফলাফল ফলাফল;
 };
 
-static int cookies_cmp(const void *data UNUSED,
-		       const struct hashmap_entry *he1,
-		       const struct hashmap_entry *he2, const void *keydata)
+স্থির পূর্ণসংখ্যা cookies_cmp(ধ্রুবক শূন্য *তথ্য UNUSED,
+		       ধ্রুবক কাঠামো hashmap_entry *he1,
+		       ধ্রুবক কাঠামো hashmap_entry *he2, ধ্রুবক শূন্য *keydata)
 {
-	const struct fsmonitor_cookie_item *a =
-		container_of(he1, const struct fsmonitor_cookie_item, entry);
-	const struct fsmonitor_cookie_item *b =
-		container_of(he2, const struct fsmonitor_cookie_item, entry);
+	ধ্রুবক কাঠামো fsmonitor_cookie_item *a =
+		container_of(he1, ধ্রুবক কাঠামো fsmonitor_cookie_item, entry);
+	ধ্রুবক কাঠামো fsmonitor_cookie_item *b =
+		container_of(he2, ধ্রুবক কাঠামো fsmonitor_cookie_item, entry);
 
-	return strcmp(a->name, keydata ? keydata : b->name);
+	ফেরত strcmp(a->name, keydata ? keydata : b->name);
 }
 
-static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
-	struct fsmonitor_daemon_state *state)
+স্থির গণনা fsmonitor_cookie_item_ফলাফল with_lock__wait_for_cookie(
+	কাঠামো fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	int fd;
-	struct fsmonitor_cookie_item *cookie;
-	struct strbuf cookie_pathname = STRBUF_INIT;
-	struct strbuf cookie_filename = STRBUF_INIT;
-	enum fsmonitor_cookie_item_result result;
-	int my_cookie_seq;
+	পূর্ণসংখ্যা fd;
+	কাঠামো fsmonitor_cookie_item *cookie;
+	কাঠামো strbuf cookie_pathname = STRBUF_INIT;
+	কাঠামো strbuf cookie_filename = STRBUF_INIT;
+	গণনা fsmonitor_cookie_item_ফলাফল ফলাফল;
+	পূর্ণসংখ্যা my_cookie_seq;
 
 	CALLOC_ARRAY(cookie, 1);
 
@@ -176,13 +176,13 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	strbuf_addbuf(&cookie_pathname, &state->path_cookie_prefix);
 	strbuf_addbuf(&cookie_pathname, &cookie_filename);
 
-	cookie->name = strbuf_detach(&cookie_filename, NULL);
-	cookie->result = FCIR_INIT;
+	cookie->name = strbuf_detach(&cookie_filename, ফাঁকা);
+	cookie->ফলাফল = FCIR_INIT;
 	hashmap_entry_init(&cookie->entry, strhash(cookie->name));
 
 	hashmap_add(&state->cookies, &cookie->entry);
 
-	trace_printf_key(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
+	trace_printf_চাবি(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
 			 cookie->name, cookie_pathname.buf);
 
 	/*
@@ -190,12 +190,12 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * that the listener thread has seen it.
 	 */
 	fd = open(cookie_pathname.buf, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (fd < 0) {
+	যদি (fd < 0) {
 		error_errno(_("could not create fsmonitor cookie '%s'"),
 			    cookie->name);
 
-		cookie->result = FCIR_ERROR;
-		goto done;
+		cookie->ফলাফল = FCIR_ERROR;
+		যাও done;
 	}
 
 	/*
@@ -214,87 +214,87 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * where inotify watches succeed but events never arrive).
 	 */
 	{
-		struct timeval now;
-		struct timespec ts;
-		int err = 0;
+		কাঠামো timeval now;
+		কাঠামো timespec ts;
+		পূর্ণসংখ্যা err = 0;
 
-		gettimeofday(&now, NULL);
+		gettimeofday(&now, ফাঁকা);
 		ts.tv_sec = now.tv_sec + 1;
 		ts.tv_nsec = now.tv_usec * 1000;
 
-		while (cookie->result == FCIR_INIT && !err)
+		যখন (cookie->ফলাফল == FCIR_INIT && !err)
 			err = pthread_cond_timedwait(&state->cookies_cond,
 						     &state->main_lock,
 						     &ts);
-		if (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
-			trace_printf_key(&trace_fsmonitor,
+		যদি (err == ETIMEDOUT && cookie->ফলাফল == FCIR_INIT) {
+			trace_printf_চাবি(&trace_fsmonitor,
 					 "cookie_wait timed out");
-			cookie->result = FCIR_ERROR;
+			cookie->ফলাফল = FCIR_ERROR;
 		}
 	}
 
 done:
-	hashmap_remove(&state->cookies, &cookie->entry, NULL);
+	hashmap_remove(&state->cookies, &cookie->entry, ফাঁকা);
 
-	result = cookie->result;
+	ফলাফল = cookie->ফলাফল;
 
-	free(cookie->name);
-	free(cookie);
+	মুক্ত(cookie->name);
+	মুক্ত(cookie);
 	strbuf_release(&cookie_pathname);
 
-	return result;
+	ফেরত ফলাফল;
 }
 
 /*
  * Mark these cookies as _SEEN and wake up the corresponding client threads.
  */
-static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
-					 const struct string_list *cookie_names)
+স্থির শূন্য with_lock__mark_cookies_seen(কাঠামো fsmonitor_daemon_state *state,
+					 ধ্রুবক কাঠামো string_list *cookie_names)
 {
 	/* assert current thread holding state->main_lock */
 
-	int k;
-	int nr_seen = 0;
+	পূর্ণসংখ্যা k;
+	পূর্ণসংখ্যা nr_seen = 0;
 
-	for (k = 0; k < cookie_names->nr; k++) {
-		struct fsmonitor_cookie_item key;
-		struct fsmonitor_cookie_item *cookie;
+	জন্য (k = 0; k < cookie_names->nr; k++) {
+		কাঠামো fsmonitor_cookie_item চাবি;
+		কাঠামো fsmonitor_cookie_item *cookie;
 
-		key.name = cookie_names->items[k].string;
-		hashmap_entry_init(&key.entry, strhash(key.name));
+		চাবি.name = cookie_names->বস্তুসমূহ[k].string;
+		hashmap_entry_init(&চাবি.entry, strhash(চাবি.name));
 
-		cookie = hashmap_get_entry(&state->cookies, &key, entry, NULL);
-		if (cookie) {
-			trace_printf_key(&trace_fsmonitor, "cookie-seen: '%s'",
+		cookie = hashmap_get_entry(&state->cookies, &চাবি, entry, ফাঁকা);
+		যদি (cookie) {
+			trace_printf_চাবি(&trace_fsmonitor, "cookie-seen: '%s'",
 					 cookie->name);
-			cookie->result = FCIR_SEEN;
+			cookie->ফলাফল = FCIR_SEEN;
 			nr_seen++;
 		}
 	}
 
-	if (nr_seen)
+	যদি (nr_seen)
 		pthread_cond_broadcast(&state->cookies_cond);
 }
 
 /*
  * Set _ABORT on all pending cookies and wake up all client threads.
  */
-static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
+স্থির শূন্য with_lock__abort_all_cookies(কাঠামো fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct hashmap_iter iter;
-	struct fsmonitor_cookie_item *cookie;
-	int nr_aborted = 0;
+	কাঠামো hashmap_iter iter;
+	কাঠামো fsmonitor_cookie_item *cookie;
+	পূর্ণসংখ্যা nr_aborted = 0;
 
 	hashmap_for_each_entry(&state->cookies, &iter, cookie, entry) {
-		trace_printf_key(&trace_fsmonitor, "cookie-abort: '%s'",
+		trace_printf_চাবি(&trace_fsmonitor, "cookie-abort: '%s'",
 				 cookie->name);
-		cookie->result = FCIR_ABORT;
+		cookie->ফলাফল = FCIR_ABORT;
 		nr_aborted++;
 	}
 
-	if (nr_aborted)
+	যদি (nr_aborted)
 		pthread_cond_broadcast(&state->cookies_cond);
 }
 
@@ -366,57 +366,57 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
  * Therefore, clients that present a token with a stale (non-current)
  * token_id will always be given a trivial response.
  */
-struct fsmonitor_token_data {
-	struct strbuf token_id;
-	struct fsmonitor_batch *batch_head;
-	struct fsmonitor_batch *batch_tail;
-	uint64_t client_ref_count;
+কাঠামো fsmonitor_token_তথ্য {
+	কাঠামো strbuf token_id;
+	কাঠামো fsmonitor_batch *batch_শীর্ষ;
+	কাঠামো fsmonitor_batch *batch_লেজ;
+	uint64_t client_ref_গুনতি;
 };
 
-struct fsmonitor_batch {
-	struct fsmonitor_batch *next;
+কাঠামো fsmonitor_batch {
+	কাঠামো fsmonitor_batch *পরবর্তী;
 	uint64_t batch_seq_nr;
-	const char **interned_paths;
-	size_t nr, alloc;
+	ধ্রুবক অক্ষর **interned_paths;
+	আকার_t nr, alloc;
 	time_t pinned_time;
 };
 
-static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
+স্থির কাঠামো fsmonitor_token_তথ্য *fsmonitor_new_token_তথ্য(শূন্য)
 {
-	static int test_env_value = -1;
-	static uint64_t flush_count = 0;
-	struct fsmonitor_token_data *token;
-	struct fsmonitor_batch *batch;
+	স্থির পূর্ণসংখ্যা test_env_মান = -1;
+	স্থির uint64_t flush_গুনতি = 0;
+	কাঠামো fsmonitor_token_তথ্য *token;
+	কাঠামো fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(token, 1);
 	batch = fsmonitor_batch__new();
 
 	strbuf_init(&token->token_id, 0);
-	token->batch_head = batch;
-	token->batch_tail = batch;
-	token->client_ref_count = 0;
+	token->batch_শীর্ষ = batch;
+	token->batch_লেজ = batch;
+	token->client_ref_গুনতি = 0;
 
-	if (test_env_value < 0)
-		test_env_value = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
+	যদি (test_env_মান < 0)
+		test_env_মান = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
 
-	if (!test_env_value) {
-		struct timeval tv;
-		struct tm tm;
+	যদি (!test_env_মান) {
+		কাঠামো timeval tv;
+		কাঠামো tm tm;
 		time_t secs;
 
-		gettimeofday(&tv, NULL);
+		gettimeofday(&tv, ফাঁকা);
 		secs = tv.tv_sec;
 		gmtime_r(&secs, &tm);
 
 		strbuf_addf(&token->token_id,
 			    "%"PRIu64".%d.%4d%02d%02dT%02d%02d%02d.%06ldZ",
-			    flush_count++,
+			    flush_গুনতি++,
 			    getpid(),
 			    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			    tm.tm_hour, tm.tm_min, tm.tm_sec,
 			    (long)tv.tv_usec);
-	} else {
-		strbuf_addf(&token->token_id, "test_%08x", test_env_value++);
+	} অন্যথা {
+		strbuf_addf(&token->token_id, "test_%08x", test_env_মান++);
 	}
 
 	/*
@@ -446,59 +446,59 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	 * reference point set.  Pin batch 0 to force early file system
 	 * events to accumulate.
 	 */
-	if (test_env_value)
-		batch->pinned_time = time(NULL);
+	যদি (test_env_মান)
+		batch->pinned_time = time(ফাঁকা);
 
-	return token;
+	ফেরত token;
 }
 
-struct fsmonitor_batch *fsmonitor_batch__new(void)
+কাঠামো fsmonitor_batch *fsmonitor_batch__new(শূন্য)
 {
-	struct fsmonitor_batch *batch;
+	কাঠামো fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(batch, 1);
 
-	return batch;
+	ফেরত batch;
 }
 
-void fsmonitor_batch__free_list(struct fsmonitor_batch *batch)
+শূন্য fsmonitor_batch__free_list(কাঠামো fsmonitor_batch *batch)
 {
-	while (batch) {
-		struct fsmonitor_batch *next = batch->next;
+	যখন (batch) {
+		কাঠামো fsmonitor_batch *পরবর্তী = batch->পরবর্তী;
 
 		/*
 		 * The actual strings within the array of this batch
 		 * are interned, so we don't own them.  We only own
 		 * the array.
 		 */
-		free(batch->interned_paths);
-		free(batch);
+		মুক্ত(batch->interned_paths);
+		মুক্ত(batch);
 
-		batch = next;
+		batch = পরবর্তী;
 	}
 }
 
-void fsmonitor_batch__add_path(struct fsmonitor_batch *batch,
-			       const char *path)
+শূন্য fsmonitor_batch__add_path(কাঠামো fsmonitor_batch *batch,
+			       ধ্রুবক অক্ষর *path)
 {
-	const char *interned_path = strintern(path);
+	ধ্রুবক অক্ষর *interned_path = strintern(path);
 
-	trace_printf_key(&trace_fsmonitor, "event: %s", interned_path);
+	trace_printf_চাবি(&trace_fsmonitor, "event: %s", interned_path);
 
 	ALLOC_GROW(batch->interned_paths, batch->nr + 1, batch->alloc);
 	batch->interned_paths[batch->nr++] = interned_path;
 }
 
-static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
-				     const struct fsmonitor_batch *batch_src)
+স্থির শূন্য fsmonitor_batch__combine(কাঠামো fsmonitor_batch *batch_dest,
+				     ধ্রুবক কাঠামো fsmonitor_batch *batch_src)
 {
-	size_t k;
+	আকার_t k;
 
 	ALLOC_GROW(batch_dest->interned_paths,
 		   batch_dest->nr + batch_src->nr + 1,
 		   batch_dest->alloc);
 
-	for (k = 0; k < batch_src->nr; k++)
+	জন্য (k = 0; k < batch_src->nr; k++)
 		batch_dest->interned_paths[batch_dest->nr++] =
 			batch_src->interned_paths[k];
 }
@@ -532,58 +532,58 @@ static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
  */
 #define MY_TIME_DELAY_SECONDS (5 * 60) /* seconds */
 
-static struct fsmonitor_batch *with_lock__truncate_old_batches(
-	struct fsmonitor_daemon_state *state,
-	const struct fsmonitor_batch *batch_marker)
+স্থির কাঠামো fsmonitor_batch *with_lock__truncate_old_batches(
+	কাঠামো fsmonitor_daemon_state *state,
+	ধ্রুবক কাঠামো fsmonitor_batch *batch_marker)
 {
 	/* assert current thread holding state->main_lock */
 
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder;
+	ধ্রুবক কাঠামো fsmonitor_batch *batch;
+	কাঠামো fsmonitor_batch *remainder;
 
-	if (!batch_marker)
-		return NULL;
+	যদি (!batch_marker)
+		ফেরত ফাঁকা;
 
-	trace_printf_key(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
+	trace_printf_চাবি(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
 			 batch_marker->batch_seq_nr,
 			 (uint64_t)batch_marker->pinned_time);
 
-	for (batch = batch_marker; batch; batch = batch->next) {
+	জন্য (batch = batch_marker; batch; batch = batch->পরবর্তী) {
 		time_t t;
 
-		if (!batch->pinned_time) /* an overflow batch */
-			continue;
+		যদি (!batch->pinned_time) /* an overflow batch */
+			চালু;
 
 		t = batch->pinned_time + MY_TIME_DELAY_SECONDS;
-		if (t > batch_marker->pinned_time) /* too close to marker */
-			continue;
+		যদি (t > batch_marker->pinned_time) /* too close to marker */
+			চালু;
 
-		goto truncate_past_here;
+		যাও truncate_past_here;
 	}
 
-	return NULL;
+	ফেরত ফাঁকা;
 
 truncate_past_here:
-	state->current_token_data->batch_tail = (struct fsmonitor_batch *)batch;
+	state->current_token_তথ্য->batch_লেজ = (কাঠামো fsmonitor_batch *)batch;
 
-	remainder = ((struct fsmonitor_batch *)batch)->next;
-	((struct fsmonitor_batch *)batch)->next = NULL;
+	remainder = ((কাঠামো fsmonitor_batch *)batch)->পরবর্তী;
+	((কাঠামো fsmonitor_batch *)batch)->পরবর্তী = ফাঁকা;
 
-	return remainder;
+	ফেরত remainder;
 }
 
-static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
+স্থির শূন্য fsmonitor_free_token_তথ্য(কাঠামো fsmonitor_token_তথ্য *token)
 {
-	if (!token)
-		return;
+	যদি (!token)
+		ফেরত;
 
-	assert(token->client_ref_count == 0);
+	প্রতিজ্ঞা(token->client_ref_গুনতি == 0);
 
 	strbuf_release(&token->token_id);
 
-	fsmonitor_batch__free_list(token->batch_head);
+	fsmonitor_batch__free_list(token->batch_শীর্ষ);
 
-	free(token);
+	মুক্ত(token);
 }
 
 /*
@@ -605,25 +605,25 @@ static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
  * Either way, the old token data series is no longer associated with
  * our state data.
  */
-static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
+স্থির শূন্য with_lock__do_force_resync(কাঠামো fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct fsmonitor_token_data *free_me = NULL;
-	struct fsmonitor_token_data *new_one = NULL;
+	কাঠামো fsmonitor_token_তথ্য *free_me = ফাঁকা;
+	কাঠামো fsmonitor_token_তথ্য *new_one = ফাঁকা;
 
-	new_one = fsmonitor_new_token_data();
+	new_one = fsmonitor_new_token_তথ্য();
 
-	if (state->current_token_data->client_ref_count == 0)
-		free_me = state->current_token_data;
-	state->current_token_data = new_one;
+	যদি (state->current_token_তথ্য->client_ref_গুনতি == 0)
+		free_me = state->current_token_তথ্য;
+	state->current_token_তথ্য = new_one;
 
-	fsmonitor_free_token_data(free_me);
+	fsmonitor_free_token_তথ্য(free_me);
 
 	with_lock__abort_all_cookies(state);
 }
 
-void fsmonitor_force_resync(struct fsmonitor_daemon_state *state)
+শূন্য fsmonitor_force_resync(কাঠামো fsmonitor_daemon_state *state)
 {
 	pthread_mutex_lock(&state->main_lock);
 	with_lock__do_force_resync(state);
@@ -633,10 +633,10 @@ void fsmonitor_force_resync(struct fsmonitor_daemon_state *state)
 /*
  * Format an opaque token string to send to the client.
  */
-static void with_lock__format_response_token(
-	struct strbuf *response_token,
-	const struct strbuf *response_token_id,
-	const struct fsmonitor_batch *batch)
+স্থির শূন্য with_lock__format_response_token(
+	কাঠামো strbuf *response_token,
+	ধ্রুবক কাঠামো strbuf *response_token_id,
+	ধ্রুবক কাঠামো fsmonitor_batch *batch)
 {
 	/* assert current thread holding state->main_lock */
 
@@ -649,52 +649,52 @@ static void with_lock__format_response_token(
  * Parse an opaque token from the client.
  * Returns -1 on error.
  */
-static int fsmonitor_parse_client_token(const char *buf_token,
-					struct strbuf *requested_token_id,
+স্থির পূর্ণসংখ্যা fsmonitor_parse_client_token(ধ্রুবক অক্ষর *buf_token,
+					কাঠামো strbuf *requested_token_id,
 					uint64_t *seq_nr)
 {
-	const char *p;
-	char *p_end;
+	ধ্রুবক অক্ষর *p;
+	অক্ষর *p_end;
 
 	strbuf_reset(requested_token_id);
 	*seq_nr = 0;
 
-	if (!skip_prefix(buf_token, "builtin:", &p))
-		return -1;
+	যদি (!skip_prefix(buf_token, "builtin:", &p))
+		ফেরত -1;
 
-	while (*p && *p != ':')
+	যখন (*p && *p != ':')
 		strbuf_addch(requested_token_id, *p++);
-	if (!*p++)
-		return -1;
+	যদি (!*p++)
+		ফেরত -1;
 
 	*seq_nr = (uint64_t)strtoumax(p, &p_end, 10);
-	if (*p_end)
-		return -1;
+	যদি (*p_end)
+		ফেরত -1;
 
-	return 0;
+	ফেরত 0;
 }
 
-static int do_handle_client(struct fsmonitor_daemon_state *state,
-			    const char *command,
+স্থির পূর্ণসংখ্যা do_handle_client(কাঠামো fsmonitor_daemon_state *state,
+			    ধ্রুবক অক্ষর *command,
 			    ipc_server_reply_cb *reply,
-			    struct ipc_server_reply_data *reply_data)
+			    কাঠামো ipc_server_reply_তথ্য *reply_তথ্য)
 {
-	struct fsmonitor_token_data *token_data = NULL;
-	struct strbuf response_token = STRBUF_INIT;
-	struct strbuf requested_token_id = STRBUF_INIT;
-	struct strbuf payload = STRBUF_INIT;
+	কাঠামো fsmonitor_token_তথ্য *token_তথ্য = ফাঁকা;
+	কাঠামো strbuf response_token = STRBUF_INIT;
+	কাঠামো strbuf requested_token_id = STRBUF_INIT;
+	কাঠামো strbuf payload = STRBUF_INIT;
 	uint64_t requested_oldest_seq_nr = 0;
-	uint64_t total_response_len = 0;
-	const char *p;
-	const struct fsmonitor_batch *batch_head;
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder = NULL;
-	intmax_t count = 0, duplicates = 0;
-	struct strset shown = STRSET_INIT;
-	int do_trivial = 0;
-	int do_flush = 0;
-	int do_cookie = 0;
-	enum fsmonitor_cookie_item_result cookie_result;
+	uint64_t যোগ_response_len = 0;
+	ধ্রুবক অক্ষর *p;
+	ধ্রুবক কাঠামো fsmonitor_batch *batch_শীর্ষ;
+	ধ্রুবক কাঠামো fsmonitor_batch *batch;
+	কাঠামো fsmonitor_batch *remainder = ফাঁকা;
+	intmax_t গুনতি = 0, duplicates = 0;
+	কাঠামো strset shown = STRSET_INIT;
+	পূর্ণসংখ্যা do_trivial = 0;
+	পূর্ণসংখ্যা do_flush = 0;
+	পূর্ণসংখ্যা do_cookie = 0;
+	গণনা fsmonitor_cookie_item_ফলাফল cookie_ফলাফল;
 
 	/*
 	 * We expect `command` to be of the form:
@@ -705,7 +705,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 *            | <V2-opaque-fsmonitor-token> NUL
 	 */
 
-	if (!strcmp(command, "quit")) {
+	যদি (!strcmp(command, "quit")) {
 		/*
 		 * A client has requested over the socket/pipe that the
 		 * daemon shutdown.
@@ -716,9 +716,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		 *
 		 * There is no reply to the client.
 		 */
-		return SIMPLE_IPC_QUIT;
+		ফেরত SIMPLE_IPC_QUIT;
 
-	} else if (!strcmp(command, "flush")) {
+	} অন্যথা যদি (!strcmp(command, "flush")) {
 		/*
 		 * Flush all of our cached data and generate a new token
 		 * just like if we lost sync with the filesystem.
@@ -728,13 +728,13 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_flush = 1;
 		do_trivial = 1;
 
-	} else if (!skip_prefix(command, "builtin:", &p)) {
+	} অন্যথা যদি (!skip_prefix(command, "builtin:", &p)) {
 		/* assume V1 timestamp or garbage */
 
-		char *p_end;
+		অক্ষর *p_end;
 
 		strtoumax(command, &p_end, 10);
-		trace_printf_key(&trace_fsmonitor,
+		trace_printf_চাবি(&trace_fsmonitor,
 				 ((*p_end) ?
 				  "fsmonitor: invalid command line '%s'" :
 				  "fsmonitor: unsupported V1 protocol '%s'"),
@@ -742,17 +742,17 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_trivial = 1;
 		do_cookie = 1;
 
-	} else {
+	} অন্যথা {
 		/* We have "builtin:*" */
-		if (fsmonitor_parse_client_token(command, &requested_token_id,
+		যদি (fsmonitor_parse_client_token(command, &requested_token_id,
 						 &requested_oldest_seq_nr)) {
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_চাবি(&trace_fsmonitor,
 					 "fsmonitor: invalid V2 protocol token '%s'",
 					 command);
 			do_trivial = 1;
 			do_cookie = 1;
 
-		} else {
+		} অন্যথা {
 			/*
 			 * We have a V2 valid token:
 			 *     "builtin:<token_id>:<seq_nr>"
@@ -763,7 +763,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (!state->current_token_data)
+	যদি (!state->current_token_তথ্য)
 		BUG("fsmonitor state does not have a current token");
 
 	/*
@@ -781,16 +781,16 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * assume that there might be some very, very recent activity
 	 * on the FS still in flight.
 	 */
-	if (do_cookie) {
-		cookie_result = with_lock__wait_for_cookie(state);
-		if (cookie_result != FCIR_SEEN) {
+	যদি (do_cookie) {
+		cookie_ফলাফল = with_lock__wait_for_cookie(state);
+		যদি (cookie_ফলাফল != FCIR_SEEN) {
 			error(_("fsmonitor: cookie_result '%d' != SEEN"),
-			      cookie_result);
+			      cookie_ফলাফল);
 			do_trivial = 1;
 		}
 	}
 
-	if (do_flush)
+	যদি (do_flush)
 		with_lock__do_force_resync(state);
 
 	/*
@@ -799,9 +799,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * (and prevent any more paths from being added to it) from
 	 * now on.
 	 */
-	token_data = state->current_token_data;
-	batch_head = token_data->batch_head;
-	((struct fsmonitor_batch *)batch_head)->pinned_time = time(NULL);
+	token_তথ্য = state->current_token_তথ্য;
+	batch_শীর্ষ = token_তথ্য->batch_শীর্ষ;
+	((কাঠামো fsmonitor_batch *)batch_শীর্ষ)->pinned_time = time(ফাঁকা);
 
 	/*
 	 * FSMonitor Protocol V2 requires that we send a response header
@@ -811,29 +811,29 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * to it.
 	 */
 	with_lock__format_response_token(&response_token,
-					 &token_data->token_id, batch_head);
+					 &token_তথ্য->token_id, batch_শীর্ষ);
 
-	reply(reply_data, response_token.buf, response_token.len + 1);
-	total_response_len += response_token.len + 1;
+	reply(reply_তথ্য, response_token.buf, response_token.len + 1);
+	যোগ_response_len += response_token.len + 1;
 
-	trace2_data_string("fsmonitor", the_repository, "response/token",
+	trace2_তথ্য_string("fsmonitor", the_repository, "response/token",
 			   response_token.buf);
-	trace_printf_key(&trace_fsmonitor, "response token: %s",
+	trace_printf_চাবি(&trace_fsmonitor, "response token: %s",
 			 response_token.buf);
 
-	if (!do_trivial) {
-		if (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
+	যদি (!do_trivial) {
+		যদি (strcmp(requested_token_id.buf, token_তথ্য->token_id.buf)) {
 			/*
 			 * The client last spoke to a different daemon
 			 * instance -OR- the daemon had to resync with
 			 * the filesystem (and lost events), so reject.
 			 */
-			trace2_data_string("fsmonitor", the_repository,
+			trace2_তথ্য_string("fsmonitor", the_repository,
 					   "response/token", "different");
 			do_trivial = 1;
 
-		} else if (requested_oldest_seq_nr <
-			   token_data->batch_tail->batch_seq_nr) {
+		} অন্যথা যদি (requested_oldest_seq_nr <
+			   token_তথ্য->batch_লেজ->batch_seq_nr) {
 			/*
 			 * The client wants older events than we have for
 			 * this token_id.  This means that the end of our
@@ -841,21 +841,21 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * client a complete snapshot relative to their
 			 * request.
 			 */
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_চাবি(&trace_fsmonitor,
 					 "client requested truncated data");
 			do_trivial = 1;
 		}
 	}
 
-	if (do_trivial) {
+	যদি (do_trivial) {
 		pthread_mutex_unlock(&state->main_lock);
 
-		reply(reply_data, "/", 2);
+		reply(reply_তথ্য, "/", 2);
 
-		trace2_data_intmax("fsmonitor", the_repository,
+		trace2_তথ্য_intmax("fsmonitor", the_repository,
 				   "response/trivial", 1);
 
-		goto cleanup;
+		যাও cleanup;
 	}
 
 	/*
@@ -870,7 +870,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * AND it allows the listener thread to do a token-reset
 	 * (and install a new `current_token_data`).
 	 */
-	token_data->client_ref_count++;
+	token_তথ্য->client_ref_গুনতি++;
 
 	pthread_mutex_unlock(&state->main_lock);
 
@@ -886,52 +886,52 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * hash table.  Currently, we're still comparing the string
 	 * values.
 	 */
-	strset_init_with_options(&shown, NULL, 0);
-	for (batch = batch_head;
+	strset_init_with_options(&shown, ফাঁকা, 0);
+	জন্য (batch = batch_শীর্ষ;
 	     batch && batch->batch_seq_nr > requested_oldest_seq_nr;
-	     batch = batch->next) {
-		size_t k;
+	     batch = batch->পরবর্তী) {
+		আকার_t k;
 
-		for (k = 0; k < batch->nr; k++) {
-			const char *s = batch->interned_paths[k];
-			size_t s_len;
+		জন্য (k = 0; k < batch->nr; k++) {
+			ধ্রুবক অক্ষর *s = batch->interned_paths[k];
+			আকার_t s_len;
 
-			if (!strset_add(&shown, s))
+			যদি (!strset_add(&shown, s))
 				duplicates++;
-			else {
-				trace_printf_key(&trace_fsmonitor,
+			অন্যথা {
+				trace_printf_চাবি(&trace_fsmonitor,
 						 "send[%"PRIuMAX"]: %s",
-						 count, s);
+						 গুনতি, s);
 
 				/* Each path gets written with a trailing NUL */
 				s_len = strlen(s) + 1;
 
-				if (payload.len + s_len >=
-				    LARGE_PACKET_DATA_MAX) {
-					reply(reply_data, payload.buf,
+				যদি (payload.len + s_len >=
+				    LARGE_PACKET_তথ্য_MAX) {
+					reply(reply_তথ্য, payload.buf,
 					      payload.len);
-					total_response_len += payload.len;
+					যোগ_response_len += payload.len;
 					strbuf_reset(&payload);
 				}
 
 				strbuf_add(&payload, s, s_len);
-				count++;
+				গুনতি++;
 			}
 		}
 	}
 
-	if (payload.len) {
-		reply(reply_data, payload.buf, payload.len);
-		total_response_len += payload.len;
+	যদি (payload.len) {
+		reply(reply_তথ্য, payload.buf, payload.len);
+		যোগ_response_len += payload.len;
 	}
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (token_data->client_ref_count > 0)
-		token_data->client_ref_count--;
+	যদি (token_তথ্য->client_ref_গুনতি > 0)
+		token_তথ্য->client_ref_গুনতি--;
 
-	if (token_data->client_ref_count == 0) {
-		if (token_data != state->current_token_data) {
+	যদি (token_তথ্য->client_ref_গুনতি == 0) {
+		যদি (token_তথ্য != state->current_token_তথ্য) {
 			/*
 			 * The listener thread did a token-reset while we were
 			 * walking the batch list.  Therefore, this token is
@@ -939,8 +939,8 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * the last reader thread using this token, we own
 			 * that work.
 			 */
-			fsmonitor_free_token_data(token_data);
-		} else if (batch) {
+			fsmonitor_free_token_তথ্য(token_তথ্য);
+		} অন্যথা যদি (batch) {
 			/*
 			 * We are holding the lock and are the only
 			 * reader of the ref-counted portion of the
@@ -960,12 +960,12 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_unlock(&state->main_lock);
 
-	if (remainder)
+	যদি (remainder)
 		fsmonitor_batch__free_list(remainder);
 
-	trace2_data_intmax("fsmonitor", the_repository, "response/length", total_response_len);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/files", count);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
+	trace2_তথ্য_intmax("fsmonitor", the_repository, "response/length", যোগ_response_len);
+	trace2_তথ্য_intmax("fsmonitor", the_repository, "response/count/files", গুনতি);
+	trace2_তথ্য_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
 
 cleanup:
 	strset_clear(&shown);
@@ -973,120 +973,120 @@ cleanup:
 	strbuf_release(&requested_token_id);
 	strbuf_release(&payload);
 
-	return 0;
+	ফেরত 0;
 }
 
-static ipc_server_application_cb handle_client;
+স্থির ipc_server_application_cb handle_client;
 
-static int handle_client(void *data,
-			 const char *command, size_t command_len,
+স্থির পূর্ণসংখ্যা handle_client(শূন্য *তথ্য,
+			 ধ্রুবক অক্ষর *command, আকার_t command_len,
 			 ipc_server_reply_cb *reply,
-			 struct ipc_server_reply_data *reply_data)
+			 কাঠামো ipc_server_reply_তথ্য *reply_তথ্য)
 {
-	struct fsmonitor_daemon_state *state = data;
-	int result;
+	কাঠামো fsmonitor_daemon_state *state = তথ্য;
+	পূর্ণসংখ্যা ফলাফল;
 
 	/*
 	 * The Simple IPC API now supports {char*, len} arguments, but
 	 * FSMonitor always uses proper null-terminated strings, so
 	 * we can ignore the command_len argument.  (Trust, but verify.)
 	 */
-	if (command_len != strlen(command))
+	যদি (command_len != strlen(command))
 		BUG("FSMonitor assumes text messages");
 
-	trace_printf_key(&trace_fsmonitor, "requested token: %s", command);
+	trace_printf_চাবি(&trace_fsmonitor, "requested token: %s", command);
 
 	trace2_region_enter("fsmonitor", "handle_client", the_repository);
-	trace2_data_string("fsmonitor", the_repository, "request", command);
+	trace2_তথ্য_string("fsmonitor", the_repository, "request", command);
 
-	result = do_handle_client(state, command, reply, reply_data);
+	ফলাফল = do_handle_client(state, command, reply, reply_তথ্য);
 
 	trace2_region_leave("fsmonitor", "handle_client", the_repository);
 
-	return result;
+	ফেরত ফলাফল;
 }
 
 #define FSMONITOR_DIR           "fsmonitor--daemon"
 #define FSMONITOR_COOKIE_DIR    "cookies"
 #define FSMONITOR_COOKIE_PREFIX (FSMONITOR_DIR "/" FSMONITOR_COOKIE_DIR "/")
 
-enum fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
-	const char *rel)
+গণনা fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
+	ধ্রুবক অক্ষর *rel)
 {
-	if (fspathncmp(rel, ".git", 4))
-		return IS_WORKDIR_PATH;
+	যদি (fspathncmp(rel, ".git", 4))
+		ফেরত IS_WORKDIR_PATH;
 	rel += 4;
 
-	if (!*rel)
-		return IS_DOT_GIT;
-	if (*rel != '/')
-		return IS_WORKDIR_PATH; /* e.g. .gitignore */
+	যদি (!*rel)
+		ফেরত IS_DOT_GIT;
+	যদি (*rel != '/')
+		ফেরত IS_WORKDIR_PATH; /* e.g. .gitignore */
 	rel++;
 
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
+	যদি (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
 			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
+		ফেরত IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
 
-	return IS_INSIDE_DOT_GIT;
+	ফেরত IS_INSIDE_DOT_GIT;
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
-	const char *rel)
+গণনা fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
+	ধ্রুবক অক্ষর *rel)
 {
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
+	যদি (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
 			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
+		ফেরত IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
 
-	return IS_INSIDE_GITDIR;
+	ফেরত IS_INSIDE_GITDIR;
 }
 
-static enum fsmonitor_path_type try_classify_workdir_abs_path(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+স্থির গণনা fsmonitor_path_type try_classify_workdir_abs_path(
+	কাঠামো fsmonitor_daemon_state *state,
+	ধ্রুবক অক্ষর *path)
 {
-	const char *rel;
+	ধ্রুবক অক্ষর *rel;
 
-	if (fspathncmp(path, state->path_worktree_watch.buf,
+	যদি (fspathncmp(path, state->path_worktree_watch.buf,
 		       state->path_worktree_watch.len))
-		return IS_OUTSIDE_CONE;
+		ফেরত IS_OUTSIDE_CONE;
 
 	rel = path + state->path_worktree_watch.len;
 
-	if (!*rel)
-		return IS_WORKDIR_PATH; /* it is the root dir exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	যদি (!*rel)
+		ফেরত IS_WORKDIR_PATH; /* it is the root dir exactly */
+	যদি (*rel != '/')
+		ফেরত IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_workdir_relative(rel);
+	ফেরত fsmonitor_classify_path_workdir_relative(rel);
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_absolute(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+গণনা fsmonitor_path_type fsmonitor_classify_path_absolute(
+	কাঠামো fsmonitor_daemon_state *state,
+	ধ্রুবক অক্ষর *path)
 {
-	const char *rel;
-	enum fsmonitor_path_type t;
+	ধ্রুবক অক্ষর *rel;
+	গণনা fsmonitor_path_type t;
 
 	t = try_classify_workdir_abs_path(state, path);
-	if (state->nr_paths_watching == 1)
-		return t;
-	if (t != IS_OUTSIDE_CONE)
-		return t;
+	যদি (state->nr_paths_watching == 1)
+		ফেরত t;
+	যদি (t != IS_OUTSIDE_CONE)
+		ফেরত t;
 
-	if (fspathncmp(path, state->path_gitdir_watch.buf,
+	যদি (fspathncmp(path, state->path_gitdir_watch.buf,
 		       state->path_gitdir_watch.len))
-		return IS_OUTSIDE_CONE;
+		ফেরত IS_OUTSIDE_CONE;
 
 	rel = path + state->path_gitdir_watch.len;
 
-	if (!*rel)
-		return IS_GITDIR; /* it is the <gitdir> exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	যদি (!*rel)
+		ফেরত IS_GITDIR; /* it is the <gitdir> exactly */
+	যদি (*rel != '/')
+		ফেরত IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_gitdir_relative(rel);
+	ফেরত fsmonitor_classify_path_gitdir_relative(rel);
 }
 
 /*
@@ -1098,22 +1098,22 @@ enum fsmonitor_path_type fsmonitor_classify_path_absolute(
  */
 #define MY_COMBINE_LIMIT (1024)
 
-void fsmonitor_publish(struct fsmonitor_daemon_state *state,
-		       struct fsmonitor_batch *batch,
-		       const struct string_list *cookie_names)
+শূন্য fsmonitor_publish(কাঠামো fsmonitor_daemon_state *state,
+		       কাঠামো fsmonitor_batch *batch,
+		       ধ্রুবক কাঠামো string_list *cookie_names)
 {
-	if (!batch && !cookie_names->nr)
-		return;
+	যদি (!batch && !cookie_names->nr)
+		ফেরত;
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (batch) {
-		struct fsmonitor_batch *head;
+	যদি (batch) {
+		কাঠামো fsmonitor_batch *শীর্ষ;
 
-		head = state->current_token_data->batch_head;
-		if (!head) {
+		শীর্ষ = state->current_token_তথ্য->batch_শীর্ষ;
+		যদি (!শীর্ষ) {
 			BUG("token does not have batch");
-		} else if (head->pinned_time) {
+		} অন্যথা যদি (শীর্ষ->pinned_time) {
 			/*
 			 * We cannot alter the current batch list
 			 * because:
@@ -1130,17 +1130,17 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			 * So, we can only prepend a new batch onto
 			 * the front of the list.
 			 */
-			batch->batch_seq_nr = head->batch_seq_nr + 1;
-			batch->next = head;
-			state->current_token_data->batch_head = batch;
-		} else if (!head->batch_seq_nr) {
+			batch->batch_seq_nr = শীর্ষ->batch_seq_nr + 1;
+			batch->পরবর্তী = শীর্ষ;
+			state->current_token_তথ্য->batch_শীর্ষ = batch;
+		} অন্যথা যদি (!শীর্ষ->batch_seq_nr) {
 			/*
 			 * Batch 0 is unpinned.  See the note in
 			 * `fsmonitor_new_token_data()` about why we
 			 * don't need to accumulate these paths.
 			 */
 			fsmonitor_batch__free_list(batch);
-		} else if (head->nr + batch->nr > MY_COMBINE_LIMIT) {
+		} অন্যথা যদি (শীর্ষ->nr + batch->nr > MY_COMBINE_LIMIT) {
 			/*
 			 * The head batch in the list has never been
 			 * transmitted to a client, but folding the
@@ -1148,65 +1148,65 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			 * exceed our arbitrary limit, so just prepend
 			 * the new batch onto the list.
 			 */
-			batch->batch_seq_nr = head->batch_seq_nr + 1;
-			batch->next = head;
-			state->current_token_data->batch_head = batch;
-		} else {
+			batch->batch_seq_nr = শীর্ষ->batch_seq_nr + 1;
+			batch->পরবর্তী = শীর্ষ;
+			state->current_token_তথ্য->batch_শীর্ষ = batch;
+		} অন্যথা {
 			/*
 			 * We are free to add the paths in the given
 			 * batch onto the end of the current head batch.
 			 */
-			fsmonitor_batch__combine(head, batch);
+			fsmonitor_batch__combine(শীর্ষ, batch);
 			fsmonitor_batch__free_list(batch);
 		}
 	}
 
-	if (cookie_names->nr)
+	যদি (cookie_names->nr)
 		with_lock__mark_cookies_seen(state, cookie_names);
 
 	pthread_mutex_unlock(&state->main_lock);
 }
 
-static void *fsm_health__thread_proc(void *_state)
+স্থির শূন্য *fsm_health__thread_proc(শূন্য *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	কাঠামো fsmonitor_daemon_state *state = _state;
 
 	trace2_thread_start("fsm-health");
 
 	fsm_health__loop(state);
 
 	trace2_thread_exit();
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-static void *fsm_listen__thread_proc(void *_state)
+স্থির শূন্য *fsm_listen__thread_proc(শূন্য *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	কাঠামো fsmonitor_daemon_state *state = _state;
 
 	trace2_thread_start("fsm-listen");
 
-	trace_printf_key(&trace_fsmonitor, "Watching: worktree '%s'",
+	trace_printf_চাবি(&trace_fsmonitor, "Watching: worktree '%s'",
 			 state->path_worktree_watch.buf);
-	if (state->nr_paths_watching > 1)
-		trace_printf_key(&trace_fsmonitor, "Watching: gitdir '%s'",
+	যদি (state->nr_paths_watching > 1)
+		trace_printf_চাবি(&trace_fsmonitor, "Watching: gitdir '%s'",
 				 state->path_gitdir_watch.buf);
 
 	fsm_listen__loop(state);
 
 	pthread_mutex_lock(&state->main_lock);
-	if (state->current_token_data &&
-	    state->current_token_data->client_ref_count == 0)
-		fsmonitor_free_token_data(state->current_token_data);
-	state->current_token_data = NULL;
+	যদি (state->current_token_তথ্য &&
+	    state->current_token_তথ্য->client_ref_গুনতি == 0)
+		fsmonitor_free_token_তথ্য(state->current_token_তথ্য);
+	state->current_token_তথ্য = ফাঁকা;
 	pthread_mutex_unlock(&state->main_lock);
 
 	trace2_thread_exit();
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
+স্থির পূর্ণসংখ্যা fsmonitor_run_daemon_1(কাঠামো fsmonitor_daemon_state *state)
 {
-	struct ipc_server_opts ipc_opts = {
+	কাঠামো ipc_server_opts ipc_opts = {
 		.nr_threads = fsmonitor__ipc_threads,
 
 		/*
@@ -1217,19 +1217,19 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 		 */
 		.uds_disallow_chdir = 0
 	};
-	int health_started = 0;
-	int listener_started = 0;
-	int err = 0;
+	পূর্ণসংখ্যা health_started = 0;
+	পূর্ণসংখ্যা listener_started = 0;
+	পূর্ণসংখ্যা err = 0;
 
 	/*
 	 * Start the IPC thread pool before the we've started the file
 	 * system event listener thread so that we have the IPC handle
 	 * before we need it.
 	 */
-	if (ipc_server_init_async(&state->ipc_server_data,
+	যদি (ipc_server_init_async(&state->ipc_server_তথ্য,
 				  state->path_ipc.buf, &ipc_opts,
 				  handle_client, state))
-		return error_errno(
+		ফেরত error_errno(
 			_("could not start IPC thread pool on '%s'"),
 			state->path_ipc.buf);
 
@@ -1237,22 +1237,22 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 	 * Start the fsmonitor listener thread to collect filesystem
 	 * events.
 	 */
-	if (pthread_create(&state->listener_thread, NULL,
+	যদি (pthread_create(&state->listener_thread, ফাঁকা,
 			   fsm_listen__thread_proc, state)) {
-		ipc_server_stop_async(state->ipc_server_data);
+		ipc_server_stop_async(state->ipc_server_তথ্য);
 		err = error(_("could not start fsmonitor listener thread"));
-		goto cleanup;
+		যাও cleanup;
 	}
 	listener_started = 1;
 
 	/*
 	 * Start the health thread to watch over our process.
 	 */
-	if (pthread_create(&state->health_thread, NULL,
+	যদি (pthread_create(&state->health_thread, ফাঁকা,
 			   fsm_health__thread_proc, state)) {
-		ipc_server_stop_async(state->ipc_server_data);
+		ipc_server_stop_async(state->ipc_server_তথ্য);
 		err = error(_("could not start fsmonitor health thread"));
-		goto cleanup;
+		যাও cleanup;
 	}
 	health_started = 1;
 
@@ -1266,57 +1266,57 @@ cleanup:
 	 * Wait for the IPC thread pool to shutdown (whether by client
 	 * request, from filesystem activity, or an error).
 	 */
-	ipc_server_await(state->ipc_server_data);
+	ipc_server_await(state->ipc_server_তথ্য);
 
 	/*
 	 * The fsmonitor listener thread may have received a shutdown
 	 * event from the IPC thread pool, but it doesn't hurt to tell
 	 * it again.  And wait for it to shutdown.
 	 */
-	if (listener_started) {
+	যদি (listener_started) {
 		fsm_listen__stop_async(state);
-		pthread_join(state->listener_thread, NULL);
+		pthread_join(state->listener_thread, ফাঁকা);
 	}
 
-	if (health_started) {
+	যদি (health_started) {
 		fsm_health__stop_async(state);
-		pthread_join(state->health_thread, NULL);
+		pthread_join(state->health_thread, ফাঁকা);
 	}
 
-	if (err)
-		return err;
-	if (state->listen_error_code)
-		return state->listen_error_code;
-	if (state->health_error_code)
-		return state->health_error_code;
-	return 0;
+	যদি (err)
+		ফেরত err;
+	যদি (state->listen_error_code)
+		ফেরত state->listen_error_code;
+	যদি (state->health_error_code)
+		ফেরত state->health_error_code;
+	ফেরত 0;
 }
 
-static int fsmonitor_run_daemon(void)
+স্থির পূর্ণসংখ্যা fsmonitor_run_daemon(শূন্য)
 {
-	struct fsmonitor_daemon_state state;
-	const char *home;
-	int err;
+	কাঠামো fsmonitor_daemon_state state;
+	ধ্রুবক অক্ষর *home;
+	পূর্ণসংখ্যা err;
 
-	memset(&state, 0, sizeof(state));
+	memset(&state, 0, আকার(state));
 
-	hashmap_init(&state.cookies, cookies_cmp, NULL, 0);
-	pthread_mutex_init(&state.main_lock, NULL);
-	pthread_cond_init(&state.cookies_cond, NULL);
+	hashmap_init(&state.cookies, cookies_cmp, ফাঁকা, 0);
+	pthread_mutex_init(&state.main_lock, ফাঁকা);
+	pthread_cond_init(&state.cookies_cond, ফাঁকা);
 	state.listen_error_code = 0;
 	state.health_error_code = 0;
-	state.current_token_data = fsmonitor_new_token_data();
+	state.current_token_তথ্য = fsmonitor_new_token_তথ্য();
 
 	/* Prepare to (recursively) watch the <worktree-root> directory. */
 	strbuf_init(&state.path_worktree_watch, 0);
 	strbuf_addstr(&state.path_worktree_watch,
-		      absolute_path(repo_get_work_tree(the_repository)));
+		      absolute_path(repo_get_work_বৃক্ষ(the_repository)));
 	state.nr_paths_watching = 1;
 
 	strbuf_init(&state.alias.alias, 0);
 	strbuf_init(&state.alias.points_to, 0);
-	if ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
-		goto done;
+	যদি ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
+		যাও done;
 
 	/*
 	 * We create and delete cookie files somewhere inside the .git
@@ -1328,7 +1328,7 @@ static int fsmonitor_run_daemon(void)
 	strbuf_init(&state.path_gitdir_watch, 0);
 	strbuf_addbuf(&state.path_gitdir_watch, &state.path_worktree_watch);
 	strbuf_addstr(&state.path_gitdir_watch, "/.git");
-	if (!is_directory(state.path_gitdir_watch.buf)) {
+	যদি (!is_directory(state.path_gitdir_watch.buf)) {
 		strbuf_reset(&state.path_gitdir_watch);
 		strbuf_addstr(&state.path_gitdir_watch,
 			      absolute_path(repo_get_git_dir(the_repository)));
@@ -1388,14 +1388,14 @@ static int fsmonitor_run_daemon(void)
 	 * Confirm that we can create platform-specific resources for the
 	 * filesystem listener before we bother starting all the threads.
 	 */
-	if (fsm_listen__ctor(&state)) {
+	যদি (fsm_listen__ctor(&state)) {
 		err = error(_("could not initialize listener thread"));
-		goto done;
+		যাও done;
 	}
 
-	if (fsm_health__ctor(&state)) {
+	যদি (fsm_health__ctor(&state)) {
 		err = error(_("could not initialize health thread"));
-		goto done;
+		যাও done;
 	}
 
 	/*
@@ -1412,29 +1412,29 @@ static int fsmonitor_run_daemon(void)
 	 * everything using absolute paths.
 	 */
 	home = getenv("HOME");
-	if (home && *home && chdir(home))
+	যদি (home && *home && chdir(home))
 		die_errno(_("could not cd home '%s'"), home);
 
 	err = fsmonitor_run_daemon_1(&state);
 
 done:
-	fsmonitor_free_token_data(state.current_token_data);
-	state.current_token_data = NULL;
+	fsmonitor_free_token_তথ্য(state.current_token_তথ্য);
+	state.current_token_তথ্য = ফাঁকা;
 	pthread_cond_destroy(&state.cookies_cond);
 	pthread_mutex_destroy(&state.main_lock);
 	{
-		struct hashmap_iter iter;
-		struct fsmonitor_cookie_item *cookie;
+		কাঠামো hashmap_iter iter;
+		কাঠামো fsmonitor_cookie_item *cookie;
 
 		hashmap_for_each_entry(&state.cookies, &iter, cookie, entry)
-			free(cookie->name);
+			মুক্ত(cookie->name);
 		hashmap_clear_and_free(&state.cookies,
-				       struct fsmonitor_cookie_item, entry);
+				       কাঠামো fsmonitor_cookie_item, entry);
 	}
 	fsm_listen__dtor(&state);
 	fsm_health__dtor(&state);
 
-	ipc_server_free(state.ipc_server_data);
+	ipc_server_free(state.ipc_server_তথ্য);
 
 	strbuf_release(&state.path_worktree_watch);
 	strbuf_release(&state.path_gitdir_watch);
@@ -1443,10 +1443,10 @@ done:
 	strbuf_release(&state.alias.alias);
 	strbuf_release(&state.alias.points_to);
 
-	return err;
+	ফেরত err;
 }
 
-static int try_to_run_foreground_daemon(int detach_console)
+স্থির পূর্ণসংখ্যা try_to_run_foreground_daemon(পূর্ণসংখ্যা detach_console)
 {
 	/*
 	 * Technically, we don't need to probe for an existing daemon
@@ -1456,20 +1456,20 @@ static int try_to_run_foreground_daemon(int detach_console)
 	 * However, this method gives us a nicer error message for a
 	 * common error case.
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	যদি (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	যদি (fsmonitor__announce_startup) {
 		fprintf(stderr, _("running fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
 	}
 
-	if (detach_console) {
+	যদি (detach_console) {
 #ifdef GIT_WINDOWS_NATIVE
 		FreeConsole();
-#else
+#অন্যথা
 		/*
 		 * Create a new session so that the daemon is detached
 		 * from the parent's process group.  This prevents
@@ -1477,43 +1477,43 @@ static int try_to_run_foreground_daemon(int detach_console)
 		 * from waiting on the daemon when they wait for a
 		 * foreground command that implicitly spawned it.
 		 */
-		if (setsid() == -1)
+		যদি (setsid() == -1)
 			warning_errno(_("setsid failed"));
 #endif
 	}
 
-	return !!fsmonitor_run_daemon();
+	ফেরত !!fsmonitor_run_daemon();
 }
 
-static start_bg_wait_cb bg_wait_cb;
+স্থির start_bg_wait_cb bg_wait_cb;
 
-static int bg_wait_cb(const struct child_process *cp UNUSED,
-		      void *cb_data UNUSED)
+স্থির পূর্ণসংখ্যা bg_wait_cb(ধ্রুবক কাঠামো child_process *cp UNUSED,
+		      শূন্য *cb_তথ্য UNUSED)
 {
-	enum ipc_active_state s = fsmonitor_ipc__get_state();
+	গণনা ipc_active_state s = fsmonitor_ipc__get_state();
 
-	switch (s) {
-	case IPC_STATE__LISTENING:
+	নির্বাচন (s) {
+	ক্ষেত্র IPC_STATE__LISTENING:
 		/* child is "ready" */
-		return 0;
+		ফেরত 0;
 
-	case IPC_STATE__NOT_LISTENING:
-	case IPC_STATE__PATH_NOT_FOUND:
+	ক্ষেত্র IPC_STATE__NOT_LISTENING:
+	ক্ষেত্র IPC_STATE__PATH_NOT_FOUND:
 		/* give child more time */
-		return 1;
+		ফেরত 1;
 
-	default:
-	case IPC_STATE__INVALID_PATH:
-	case IPC_STATE__OTHER_ERROR:
+	পূর্বনির্ধারিত:
+	ক্ষেত্র IPC_STATE__INVALID_PATH:
+	ক্ষেত্র IPC_STATE__OTHER_ERROR:
 		/* all the time in world won't help */
-		return -1;
+		ফেরত -1;
 	}
 }
 
-static int try_to_start_background_daemon(void)
+স্থির পূর্ণসংখ্যা try_to_start_background_daemon(শূন্য)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	enum start_bg_result sbgr;
+	কাঠামো child_process cp = CHILD_PROCESS_INIT;
+	গণনা start_bg_ফলাফল sbgr;
 
 	/*
 	 * Before we try to create a background daemon process, see
@@ -1523,11 +1523,11 @@ static int try_to_start_background_daemon(void)
 	 * of creating the background process (and not whether it
 	 * immediately exited).
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	যদি (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	যদি (fsmonitor__announce_startup) {
 		fprintf(stderr, _("starting fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
@@ -1535,9 +1535,9 @@ static int try_to_start_background_daemon(void)
 
 	cp.git_cmd = 1;
 
-	strvec_push(&cp.args, "fsmonitor--daemon");
-	strvec_push(&cp.args, "run");
-	strvec_push(&cp.args, "--detach");
+	strvec_ঠেলো(&cp.args, "fsmonitor--daemon");
+	strvec_ঠেলো(&cp.args, "run");
+	strvec_ঠেলো(&cp.args, "--detach");
 	strvec_pushf(&cp.args, "--ipc-threads=%d", fsmonitor__ipc_threads);
 
 	cp.no_stdin = 1;
@@ -1545,36 +1545,36 @@ static int try_to_start_background_daemon(void)
 	cp.no_stderr = 1;
 	cp.close_fd_above_stderr = 1;
 
-	sbgr = start_bg_command(&cp, bg_wait_cb, NULL,
+	sbgr = start_bg_command(&cp, bg_wait_cb, ফাঁকা,
 				fsmonitor__start_timeout_sec);
 
-	switch (sbgr) {
-	case SBGR_READY:
-		return 0;
+	নির্বাচন (sbgr) {
+	ক্ষেত্র SBGR_READY:
+		ফেরত 0;
 
-	default:
-	case SBGR_ERROR:
-	case SBGR_CB_ERROR:
-		return error(_("daemon failed to start"));
+	পূর্বনির্ধারিত:
+	ক্ষেত্র SBGR_ERROR:
+	ক্ষেত্র SBGR_CB_ERROR:
+		ফেরত error(_("daemon failed to start"));
 
-	case SBGR_TIMEOUT:
-		return error(_("daemon not online yet"));
+	ক্ষেত্র SBGR_TIMEOUT:
+		ফেরত error(_("daemon not online yet"));
 
-	case SBGR_DIED:
-		return error(_("daemon terminated"));
+	ক্ষেত্র SBGR_DIED:
+		ফেরত error(_("daemon terminated"));
 	}
 }
 
-int cmd_fsmonitor__daemon(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_fsmonitor__daemon(পূর্ণসংখ্যা argc,
+			  ধ্রুবক অক্ষর **argv,
+			  ধ্রুবক অক্ষর *prefix,
+			  কাঠামো repository *repo UNUSED)
 {
-	const char *subcmd;
-	enum fsmonitor_reason reason;
-	int detach_console = 0;
+	ধ্রুবক অক্ষর *subcmd;
+	গণনা fsmonitor_reason reason;
+	পূর্ণসংখ্যা detach_console = 0;
 
-	struct option options[] = {
+	কাঠামো option options[] = {
 		OPT_BOOL(0, "detach", &detach_console, N_("detach from console")),
 		OPT_INTEGER(0, "ipc-threads",
 			    &fsmonitor__ipc_threads,
@@ -1586,15 +1586,15 @@ int cmd_fsmonitor__daemon(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, fsmonitor_config, NULL);
+	repo_config(the_repository, fsmonitor_config, ফাঁকা);
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_fsmonitor__daemon_usage, 0);
-	if (argc != 1)
+	যদি (argc != 1)
 		usage_with_options(builtin_fsmonitor__daemon_usage, options);
 	subcmd = argv[0];
 
-	if (fsmonitor__ipc_threads < 1)
+	যদি (fsmonitor__ipc_threads < 1)
 		die(_("invalid 'ipc-threads' value (%d)"),
 		    fsmonitor__ipc_threads);
 
@@ -1610,30 +1610,30 @@ int cmd_fsmonitor__daemon(int argc,
 	fsm_settings__set_ipc(the_repository);
 
 	reason = fsm_settings__get_reason(the_repository);
-	if (reason > FSMONITOR_REASON_OK)
+	যদি (reason > FSMONITOR_REASON_OK)
 		die("%s",
-		    fsm_settings__get_incompatible_msg(the_repository,
+		    fsm_settings_get_incompatible_বার্তা(the_repository,
 						       reason));
 
-	if (!strcmp(subcmd, "start"))
-		return !!try_to_start_background_daemon();
+	যদি (!strcmp(subcmd, "start"))
+		ফেরত !!try_to_start_background_daemon();
 
-	if (!strcmp(subcmd, "run"))
-		return !!try_to_run_foreground_daemon(detach_console);
+	যদি (!strcmp(subcmd, "run"))
+		ফেরত !!try_to_run_foreground_daemon(detach_console);
 
-	if (!strcmp(subcmd, "stop"))
-		return !!do_as_client__send_stop();
+	যদি (!strcmp(subcmd, "stop"))
+		ফেরত !!do_as_client__send_stop();
 
-	if (!strcmp(subcmd, "status"))
-		return !!do_as_client__status();
+	যদি (!strcmp(subcmd, "status"))
+		ফেরত !!do_as_client__status();
 
 	die(_("Unhandled subcommand '%s'"), subcmd);
 }
 
-#else
-int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED)
+#অন্যথা
+পূর্ণসংখ্যা cmd_fsmonitor__daemon(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix UNUSED, কাঠামো repository *repo UNUSED)
 {
-	struct option options[] = {
+	কাঠামো option options[] = {
 		OPT_END()
 	};
 

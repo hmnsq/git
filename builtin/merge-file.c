@@ -1,74 +1,74 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "diff.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "config.h"
-#include "gettext.h"
-#include "setup.h"
-#include "xdiff/xdiff.h"
-#include "xdiff-interface.h"
-#include "parse-options.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "abspath.h"
+#অন্তর্ভাব "diff.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "object-name.h"
+#অন্তর্ভাব "odb.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "xdiff/xdiff.h"
+#অন্তর্ভাব "xdiff-interface.h"
+#অন্তর্ভাব "parse-options.h"
 
-static const char *const merge_file_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক merge_file_usage[] = {
 	N_("git merge-file [<options>] [-L <name1> [-L <orig> [-L <name2>]]] <file1> <orig-file> <file2>"),
-	NULL
+	ফাঁকা
 };
 
-static int label_cb(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণসংখ্যা label_cb(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	static int label_count = 0;
-	const char **names = (const char **)opt->value;
+	স্থির পূর্ণসংখ্যা label_গুনতি = 0;
+	ধ্রুবক অক্ষর **names = (ধ্রুবক অক্ষর **)opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (label_count >= 3)
-		return error("too many labels on the command line");
-	names[label_count++] = arg;
-	return 0;
+	যদি (label_গুনতি >= 3)
+		ফেরত error("too many labels on the command line");
+	names[label_গুনতি++] = arg;
+	ফেরত 0;
 }
 
-static int set_diff_algorithm(xpparam_t *xpp,
-			      const char *alg)
+স্থির পূর্ণসংখ্যা set_diff_algorithm(xpparam_t *xpp,
+			      ধ্রুবক অক্ষর *alg)
 {
-	long diff_algorithm = parse_algorithm_value(alg);
-	if (diff_algorithm < 0)
-		return -1;
+	long diff_algorithm = parse_algorithm_মান(alg);
+	যদি (diff_algorithm < 0)
+		ফেরত -1;
 	xpp->flags = (xpp->flags & ~XDF_DIFF_ALGORITHM_MASK) | diff_algorithm;
-	return 0;
+	ফেরত 0;
 }
 
-static int diff_algorithm_cb(const struct option *opt,
-				const char *arg, int unset)
+স্থির পূর্ণসংখ্যা diff_algorithm_cb(ধ্রুবক কাঠামো option *opt,
+				ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	xpparam_t *xpp = opt->value;
+	xpparam_t *xpp = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (set_diff_algorithm(xpp, arg))
-		return error(_("option diff-algorithm accepts \"myers\", "
+	যদি (set_diff_algorithm(xpp, arg))
+		ফেরত error(_("option diff-algorithm accepts \"myers\", "
 			       "\"minimal\", \"patience\" and \"histogram\""));
 
-	return 0;
+	ফেরত 0;
 }
 
-int cmd_merge_file(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+পূর্ণসংখ্যা cmd_merge_file(পূর্ণসংখ্যা argc,
+		   ধ্রুবক অক্ষর **argv,
+		   ধ্রুবক অক্ষর *prefix,
+		   কাঠামো repository *repo)
 {
-	const char *names[3] = { 0 };
+	ধ্রুবক অক্ষর *names[3] = { 0 };
 	mmfile_t mmfs[3] = { 0 };
-	mmfile_t result = { 0 };
+	mmfile_t ফলাফল = { 0 };
 	xmparam_t xmp = { 0 };
-	int ret = 0, i = 0, to_stdout = 0, object_id = 0;
-	int quiet = 0;
-	struct option options[] = {
+	পূর্ণসংখ্যা ret = 0, i = 0, to_stdout = 0, object_id = 0;
+	পূর্ণসংখ্যা quiet = 0;
+	কাঠামো option options[] = {
 		OPT_BOOL('p', "stdout", &to_stdout, N_("send results to standard output")),
 		OPT_BOOL(0,   "object-id", &object_id, N_("use object IDs instead of filenames")),
 		OPT_SET_INT(0, "diff3", &xmp.style, N_("use a diff3 based merge"), XDL_MERGE_DIFF3),
@@ -83,10 +83,10 @@ int cmd_merge_file(int argc,
 		OPT_CALLBACK_F(0, "diff-algorithm", &xmp.xpp, N_("<algorithm>"),
 			     N_("choose a diff algorithm"),
 			     PARSE_OPT_NONEG, diff_algorithm_cb),
-		OPT_INTEGER(0, "marker-size", &xmp.marker_size,
+		OPT_INTEGER(0, "marker-size", &xmp.marker_আকার,
 			    N_("for conflicts, use this marker size")),
 		OPT__QUIET(&quiet, N_("do not warn about conflicts")),
-		OPT_CALLBACK('L', NULL, names, N_("name"),
+		OPT_CALLBACK('L', ফাঁকা, names, N_("name"),
 			     N_("set labels for file1/orig-file/file2"), &label_cb),
 		OPT_END(),
 	};
@@ -96,96 +96,96 @@ int cmd_merge_file(int argc,
 	xmp.favor = 0;
 
 	/* Read the configuration file */
-	repo_config(repo, git_xmerge_config, NULL);
-	if (0 <= git_xmerge_style)
+	repo_config(repo, git_xmerge_config, ফাঁকা);
+	যদি (0 <= git_xmerge_style)
 		xmp.style = git_xmerge_style;
 
 	argc = parse_options(argc, argv, prefix, options, merge_file_usage, 0);
-	if (argc != 3)
+	যদি (argc != 3)
 		usage_with_options(merge_file_usage, options);
-	if (quiet) {
-		if (!freopen("/dev/null", "w", stderr))
-			return error_errno("failed to redirect stderr to /dev/null");
+	যদি (quiet) {
+		যদি (!freopen("/dev/null", "w", stderr))
+			ফেরত error_errno("failed to redirect stderr to /dev/null");
 	}
 
-	if (!repo && object_id)
+	যদি (!repo && object_id)
 		/* emit the correct "not a git repo" error in this case */
 		setup_git_directory(the_repository);
 
-	for (i = 0; i < 3; i++) {
-		char *fname;
-		struct object_id oid;
+	জন্য (i = 0; i < 3; i++) {
+		অক্ষর *fname;
+		কাঠামো object_id oid;
 		mmfile_t *mmf = mmfs + i;
 
-		if (!names[i])
+		যদি (!names[i])
 			names[i] = argv[i];
 
 		fname = prefix_filename(prefix, argv[i]);
 
-		if (object_id) {
-			if (repo_get_oid(the_repository, argv[i], &oid))
+		যদি (object_id) {
+			যদি (repo_get_oid(the_repository, argv[i], &oid))
 				ret = error(_("object '%s' does not exist"),
 					      argv[i]);
-			else if (!oideq(&oid, the_hash_algo->empty_blob))
+			অন্যথা যদি (!oideq(&oid, the_hash_algo->empty_blob))
 				read_mmblob(mmf, the_repository->objects, &oid);
-			else
+			অন্যথা
 				read_mmfile(mmf, "/dev/null");
-		} else if (read_mmfile(mmf, fname)) {
+		} অন্যথা যদি (read_mmfile(mmf, fname)) {
 			ret = -1;
 		}
-		if (ret != -1 && (mmf->size > MAX_XDIFF_SIZE ||
-		    buffer_is_binary(mmf->ptr, mmf->size))) {
+		যদি (ret != -1 && (mmf->আকার_2 > MAX_XDIFF_আকার ||
+		    বাফার_is_দ্বিমিক(mmf->ptr, mmf->আকার_2))) {
 			ret = error("Cannot merge binary files: %s",
 				    argv[i]);
 		}
 
-		free(fname);
-		if (ret)
-			goto cleanup;
+		মুক্ত(fname);
+		যদি (ret)
+			যাও cleanup;
 
 	}
 
 	xmp.ancestor = names[1];
 	xmp.file1 = names[0];
 	xmp.file2 = names[2];
-	ret = xdl_merge(mmfs + 1, mmfs + 0, mmfs + 2, &xmp, &result);
+	ret = xdl_merge(mmfs + 1, mmfs + 0, mmfs + 2, &xmp, &ফলাফল);
 
-	if (ret >= 0) {
-		if (object_id && !to_stdout) {
-			struct object_id oid;
-			if (result.size) {
-				if (odb_write_object(the_repository->objects, result.ptr,
-						     result.size, OBJ_BLOB, &oid) < 0)
+	যদি (ret >= 0) {
+		যদি (object_id && !to_stdout) {
+			কাঠামো object_id oid;
+			যদি (ফলাফল.আকার_2) {
+				যদি (odb_write_object(the_repository->objects, ফলাফল.ptr,
+						     ফলাফল.আকার_2, OBJ_BLOB, &oid) < 0)
 					ret = error(_("Could not write object file"));
-			} else {
+			} অন্যথা {
 				oidcpy(&oid, the_hash_algo->empty_blob);
 			}
-			if (ret >= 0)
+			যদি (ret >= 0)
 				printf("%s\n", oid_to_hex(&oid));
-		} else {
-			const char *filename = argv[0];
-			char *fpath = prefix_filename(prefix, argv[0]);
+		} অন্যথা {
+			ধ্রুবক অক্ষর *filename = argv[0];
+			অক্ষর *fpath = prefix_filename(prefix, argv[0]);
 			FILE *f = to_stdout ? stdout : fopen(fpath, "wb");
 
-			if (!f)
+			যদি (!f)
 				ret = error_errno("Could not open %s for writing",
 						  filename);
-			else if (result.size &&
-				 fwrite(result.ptr, result.size, 1, f) != 1)
+			অন্যথা যদি (ফলাফল.আকার_2 &&
+				 fwrite(ফলাফল.ptr, ফলাফল.আকার_2, 1, f) != 1)
 				ret = error_errno("Could not write to %s", filename);
-			else if (fclose(f))
+			অন্যথা যদি (fclose(f))
 				ret = error_errno("Could not close %s", filename);
-			free(fpath);
+			মুক্ত(fpath);
 		}
-		free(result.ptr);
+		মুক্ত(ফলাফল.ptr);
 	}
 
-	if (ret > 127)
+	যদি (ret > 127)
 		ret = 127;
 
 cleanup:
-	for (i = 0; i < 3; i++)
-		free(mmfs[i].ptr);
+	জন্য (i = 0; i < 3; i++)
+		মুক্ত(mmfs[i].ptr);
 
-	return ret;
+	ফেরত ret;
 }

@@ -1,76 +1,76 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "transport.h"
-#include "pkt-line.h"
-#include "ref-filter.h"
-#include "remote.h"
-#include "parse-options.h"
-#include "wildmatch.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "transport.h"
+#অন্তর্ভাব "pkt-line.h"
+#অন্তর্ভাব "ref-filter.h"
+#অন্তর্ভাব "remote.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "wildmatch.h"
 
-static const char * const ls_remote_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক ls_remote_usage[] = {
 	N_("git ls-remote [--branches] [--tags] [--refs] [--upload-pack=<exec>]\n"
 	   "              [-q | --quiet] [--exit-code] [--get-url] [--sort=<key>]\n"
 	   "              [--symref] [<repository> [<patterns>...]]"),
-	NULL
+	ফাঁকা
 };
 
 /*
  * Is there one among the list of patterns that match the tail part
  * of the path?
  */
-static int tail_match(const struct strvec *pattern, const char *path)
+স্থির পূর্ণসংখ্যা লেজ_match(ধ্রুবক কাঠামো strvec *pattern, ধ্রুবক অক্ষর *path)
 {
-	char *pathbuf;
+	অক্ষর *pathbuf;
 
-	if (!pattern->nr)
-		return 1; /* no restriction */
+	যদি (!pattern->nr)
+		ফেরত 1; /* no restriction */
 
 	pathbuf = xstrfmt("/%s", path);
-	for (size_t i = 0; i < pattern->nr; i++) {
-		if (!wildmatch(pattern->v[i], pathbuf, 0)) {
-			free(pathbuf);
-			return 1;
+	জন্য (আকার_t i = 0; i < pattern->nr; i++) {
+		যদি (!wildmatch(pattern->v[i], pathbuf, 0)) {
+			মুক্ত(pathbuf);
+			ফেরত 1;
 		}
 	}
-	free(pathbuf);
-	return 0;
+	মুক্ত(pathbuf);
+	ফেরত 0;
 }
 
-int cmd_ls_remote(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_ls_remote(পূর্ণসংখ্যা argc,
+		  ধ্রুবক অক্ষর **argv,
+		  ধ্রুবক অক্ষর *prefix,
+		  কাঠামো repository *repo UNUSED)
 {
-	const char *dest = NULL;
+	ধ্রুবক অক্ষর *dest = ফাঁকা;
 	unsigned flags = 0;
-	int get_url = 0;
-	int quiet = 0;
-	int status = 0;
-	int show_symref_target = 0;
-	const char *uploadpack = NULL;
-	struct strvec pattern = STRVEC_INIT;
-	struct transport_ls_refs_options transport_options =
+	পূর্ণসংখ্যা get_url = 0;
+	পূর্ণসংখ্যা quiet = 0;
+	পূর্ণসংখ্যা status = 0;
+	পূর্ণসংখ্যা show_symref_target = 0;
+	ধ্রুবক অক্ষর *uploadpack = ফাঁকা;
+	কাঠামো strvec pattern = STRVEC_INIT;
+	কাঠামো transport_ls_refs_options transport_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	int i;
-	struct string_list server_options = STRING_LIST_INIT_DUP;
+	পূর্ণসংখ্যা i;
+	কাঠামো string_list server_options = STRING_LIST_INIT_DUP;
 
-	struct remote *remote;
-	struct transport *transport;
-	const struct ref *ref;
-	struct ref_array ref_array;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
+	কাঠামো remote *remote;
+	কাঠামো transport *transport;
+	ধ্রুবক কাঠামো ref *ref;
+	কাঠামো ref_array ref_array;
+	কাঠামো ref_sorting *sorting;
+	কাঠামো string_list sorting_options = STRING_LIST_INIT_DUP;
 
-	struct option options[] = {
+	কাঠামো option options[] = {
 		OPT__QUIET(&quiet, N_("do not print remote URL")),
 		OPT_STRING(0, "upload-pack", &uploadpack, N_("exec"),
 			   N_("path of git-upload-pack on the remote host")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "exec",
-			.value = &uploadpack,
+			.মান = &uploadpack,
 			.argh = N_("exec"),
 			.help = N_("path of git-upload-pack on the remote host"),
 			.flags = PARSE_OPT_HIDDEN,
@@ -93,7 +93,7 @@ int cmd_ls_remote(int argc,
 		OPT_END()
 	};
 
-	memset(&ref_array, 0, sizeof(ref_array));
+	memset(&ref_array, 0, আকার(ref_array));
 
 	argc = parse_options(argc, argv, prefix, options, ls_remote_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -111,61 +111,61 @@ int cmd_ls_remote(int argc,
 	 * remote's object format. Otherwise, we may end up misparsing refspecs
 	 * depending on what object hash the remote uses.
 	 */
-	if (!the_repository->hash_algo)
+	যদি (!the_repository->hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	packet_trace_identity("ls-remote");
 
-	for (int i = 1; i < argc; i++)
+	জন্য (পূর্ণসংখ্যা i = 1; i < argc; i++)
 		strvec_pushf(&pattern, "*/%s", argv[i]);
 
-	if (flags & REF_TAGS)
-		strvec_push(&transport_options.ref_prefixes, "refs/tags/");
-	if (flags & REF_BRANCHES)
-		strvec_push(&transport_options.ref_prefixes, "refs/heads/");
+	যদি (flags & REF_TAGS)
+		strvec_ঠেলো(&transport_options.ref_prefixes, "refs/tags/");
+	যদি (flags & REF_BRANCHES)
+		strvec_ঠেলো(&transport_options.ref_prefixes, "refs/heads/");
 
 	remote = remote_get(dest);
-	if (!remote) {
-		if (dest)
+	যদি (!remote) {
+		যদি (dest)
 			die("bad repository '%s'", dest);
 		die("No remote configured to list refs from.");
 	}
 
-	if (get_url) {
+	যদি (get_url) {
 		printf("%s\n", remote->url.v[0]);
-		return 0;
+		ফেরত 0;
 	}
 
-	transport = transport_get(remote, NULL);
-	if (uploadpack)
+	transport = transport_get(remote, ফাঁকা);
+	যদি (uploadpack)
 		transport_set_option(transport, TRANS_OPT_UPLOADPACK, uploadpack);
-	if (server_options.nr)
+	যদি (server_options.nr)
 		transport->server_options = &server_options;
 
 	ref = transport_get_remote_refs(transport, &transport_options);
-	if (ref) {
-		int hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
+	যদি (ref) {
+		পূর্ণসংখ্যা hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
 		repo_set_hash_algo(the_repository, hash_algo);
 	}
 
-	if (!dest && !quiet)
+	যদি (!dest && !quiet)
 		fprintf(stderr, "From %s\n", remote->url.v[0]);
-	for ( ; ref; ref = ref->next) {
-		struct ref_array_item *item;
-		if (!check_ref_type(ref, flags))
-			continue;
-		if (!tail_match(&pattern, ref->name))
-			continue;
-		item = ref_array_push(&ref_array, ref->name, &ref->old_oid, NULL);
+	জন্য ( ; ref; ref = ref->পরবর্তী) {
+		কাঠামো ref_array_item *item;
+		যদি (!check_ref_type(ref, flags))
+			চালু;
+		যদি (!লেজ_match(&pattern, ref->name))
+			চালু;
+		item = ref_array_ঠেলো(&ref_array, ref->name, &ref->old_oid, ফাঁকা);
 		item->symref = xstrdup_or_null(ref->symref);
 	}
 
 	sorting = ref_sorting_options(&sorting_options);
 	ref_array_sort(sorting, &ref_array);
 
-	for (i = 0; i < ref_array.nr; i++) {
-		const struct ref_array_item *ref = ref_array.items[i];
-		if (show_symref_target && ref->symref)
+	জন্য (i = 0; i < ref_array.nr; i++) {
+		ধ্রুবক কাঠামো ref_array_item *ref = ref_array.বস্তুসমূহ[i];
+		যদি (show_symref_target && ref->symref)
 			printf("ref: %s\t%s\n", ref->symref, ref->refname);
 		printf("%s\t%s\n", oid_to_hex(&ref->objectname), ref->refname);
 		status = 0; /* we found something */
@@ -174,11 +174,11 @@ int cmd_ls_remote(int argc,
 	string_list_clear(&server_options, 0);
 	ref_sorting_release(sorting);
 	ref_array_clear(&ref_array);
-	if (transport_disconnect(transport))
+	যদি (transport_disconnect(transport))
 		status = 1;
 	transport_ls_refs_options_release(&transport_options);
 
 	strvec_clear(&pattern);
 	string_list_clear(&server_options, 0);
-	return status;
+	ফেরত status;
 }

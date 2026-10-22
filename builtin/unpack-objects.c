@@ -1,62 +1,62 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "git-zlib.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "odb/transaction.h"
-#include "object.h"
-#include "delta.h"
-#include "pack.h"
-#include "blob.h"
-#include "replace-object.h"
-#include "strbuf.h"
-#include "progress.h"
-#include "decorate.h"
-#include "fsck.h"
-#include "packfile.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "git-zlib.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "odb.h"
+#অন্তর্ভাব "odb/streaming.h"
+#অন্তর্ভাব "odb/transaction.h"
+#অন্তর্ভাব "object.h"
+#অন্তর্ভাব "delta.h"
+#অন্তর্ভাব "pack.h"
+#অন্তর্ভাব "blob.h"
+#অন্তর্ভাব "replace-object.h"
+#অন্তর্ভাব "strbuf.h"
+#অন্তর্ভাব "progress.h"
+#অন্তর্ভাব "decorate.h"
+#অন্তর্ভাব "fsck.h"
+#অন্তর্ভাব "packfile.h"
 
-static int dry_run, quiet, recover, has_errors, strict;
-static const char unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
+স্থির পূর্ণসংখ্যা dry_run, quiet, recover, has_errors, strict;
+স্থির ধ্রুবক অক্ষর unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
 
-static unsigned char buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int offset, len;
-static off_t consumed_bytes;
-static off_t max_input_size;
-static struct git_hash_ctx ctx;
-static struct fsck_options fsck_options;
-static struct progress *progress;
+স্থির unsigned অক্ষর বাফার[DEFAULT_IO_বাফার_আকার];
+স্থির unsigned পূর্ণসংখ্যা offset, len;
+স্থির off_t consumed_bytes;
+স্থির off_t max_প্রবেশ_আকার;
+স্থির কাঠামো git_hash_ctx ctx;
+স্থির কাঠামো fsck_options fsck_options;
+স্থির কাঠামো progress *progress;
 
 /*
  * When running under --strict mode, objects whose reachability are
  * suspect are kept in core without getting written in the object
  * store.
  */
-struct obj_buffer {
-	char *buffer;
-	unsigned long size;
+কাঠামো obj_বাফার {
+	অক্ষর *বাফার;
+	unsigned long আকার_2;
 };
 
-static struct decoration obj_decorate;
+স্থির কাঠামো decoration obj_decorate;
 
-static struct obj_buffer *lookup_object_buffer(struct object *base)
+স্থির কাঠামো obj_বাফার *lookup_object_বাফার(কাঠামো object *base)
 {
-	return lookup_decoration(&obj_decorate, base);
+	ফেরত lookup_decoration(&obj_decorate, base);
 }
 
-static void add_object_buffer(struct object *object, char *buffer, unsigned long size)
+স্থির শূন্য add_object_বাফার(কাঠামো object *object, অক্ষর *বাফার, unsigned long আকার_2)
 {
-	struct obj_buffer *obj;
+	কাঠামো obj_বাফার *obj;
 	CALLOC_ARRAY(obj, 1);
-	obj->buffer = buffer;
-	obj->size = size;
-	if (add_decoration(&obj_decorate, object, obj))
+	obj->বাফার = বাফার;
+	obj->আকার_2 = আকার_2;
+	যদি (add_decoration(&obj_decorate, object, obj))
 		die("object %s tried to add buffer twice!", oid_to_hex(&object->oid));
 }
 
@@ -64,41 +64,41 @@ static void add_object_buffer(struct object *object, char *buffer, unsigned long
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+স্থির শূন্য *fill(পূর্ণসংখ্যা min)
 {
-	if (min <= len)
-		return buffer + offset;
-	if (min > sizeof(buffer))
+	যদি (min <= len)
+		ফেরত বাফার + offset;
+	যদি (min > আকার(বাফার))
 		die("cannot fill %d bytes", min);
-	if (offset) {
-		git_hash_update(&ctx, buffer, offset);
-		memmove(buffer, buffer + offset, len);
+	যদি (offset) {
+		git_hash_update(&ctx, বাফার, offset);
+		memmove(বাফার, বাফার + offset, len);
 		offset = 0;
 	}
-	do {
-		ssize_t ret = xread(0, buffer + len, sizeof(buffer) - len);
-		if (ret <= 0) {
-			if (!ret)
+	করো {
+		ssize_t ret = xread(0, বাফার + len, আকার(বাফার) - len);
+		যদি (ret <= 0) {
+			যদি (!ret)
 				die("early EOF");
 			die_errno("read error on input");
 		}
 		len += ret;
-	} while (len < min);
-	return buffer;
+	} যখন (len < min);
+	ফেরত বাফার;
 }
 
-static void use(int bytes)
+স্থির শূন্য use(পূর্ণসংখ্যা bytes)
 {
-	if (bytes > len)
+	যদি (bytes > len)
 		die("used more bytes than were available");
 	len -= bytes;
 	offset += bytes;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	যদি (signed_add_overflows(consumed_bytes, bytes))
 		die("pack too large for current definition of off_t");
 	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size)
+	যদি (max_প্রবেশ_আকার && consumed_bytes > max_প্রবেশ_আকার)
 		die(_("pack exceeds maximum allowed size"));
 	display_throughput(progress, consumed_bytes);
 }
@@ -114,97 +114,97 @@ static void use(int bytes)
  * allocated buffer which is reused to hold temporary zstream output
  * and return NULL instead of returning garbage data.
  */
-static void *get_data(unsigned long size)
+স্থির শূন্য *get_তথ্য(unsigned long আকার_2)
 {
 	git_zstream stream;
-	unsigned long bufsize = dry_run && size > 8192 ? 8192 : size;
-	void *buf = xmallocz(bufsize);
+	unsigned long bufsize = dry_run && আকার_2 > 8192 ? 8192 : আকার_2;
+	শূন্য *buf = xmallocz(bufsize);
 
-	memset(&stream, 0, sizeof(stream));
+	memset(&stream, 0, আকার(stream));
 
-	stream.next_out = buf;
+	stream.পরবর্তী_out = buf;
 	stream.avail_out = bufsize;
-	stream.next_in = fill(1);
+	stream.পরবর্তী_in = fill(1);
 	stream.avail_in = len;
 	git_inflate_init(&stream);
 
-	for (;;) {
-		int ret = git_inflate(&stream, 0);
+	জন্য (;;) {
+		পূর্ণসংখ্যা ret = git_inflate(&stream, 0);
 		use(len - stream.avail_in);
-		if (stream.total_out == size && ret == Z_STREAM_END)
-			break;
-		if (ret != Z_OK) {
+		যদি (stream.যোগ_out == আকার_2 && ret == Z_STREAM_END)
+			বিরতি;
+		যদি (ret != Z_OK) {
 			error("inflate returned %d", ret);
 			FREE_AND_NULL(buf);
-			if (!recover)
+			যদি (!recover)
 				exit(1);
 			has_errors = 1;
-			break;
+			বিরতি;
 		}
-		stream.next_in = fill(1);
+		stream.পরবর্তী_in = fill(1);
 		stream.avail_in = len;
-		if (dry_run) {
+		যদি (dry_run) {
 			/* reuse the buffer in dry_run mode */
-			stream.next_out = buf;
-			stream.avail_out = bufsize > size - stream.total_out ?
-						   size - stream.total_out :
+			stream.পরবর্তী_out = buf;
+			stream.avail_out = bufsize > আকার_2 - stream.যোগ_out ?
+						   আকার_2 - stream.যোগ_out :
 						   bufsize;
 		}
 	}
 	git_inflate_end(&stream);
-	if (dry_run)
+	যদি (dry_run)
 		FREE_AND_NULL(buf);
-	return buf;
+	ফেরত buf;
 }
 
-struct delta_info {
-	struct object_id base_oid;
+কাঠামো delta_info {
+	কাঠামো object_id base_oid;
 	unsigned nr;
 	off_t base_offset;
-	unsigned long size;
-	void *delta;
-	struct delta_info *next;
+	unsigned long আকার_2;
+	শূন্য *delta;
+	কাঠামো delta_info *পরবর্তী;
 };
 
-static struct delta_info *delta_list;
+স্থির কাঠামো delta_info *delta_list;
 
-static void add_delta_to_list(unsigned nr, const struct object_id *base_oid,
+স্থির শূন্য add_delta_to_list(unsigned nr, ধ্রুবক কাঠামো object_id *base_oid,
 			      off_t base_offset,
-			      void *delta, unsigned long size)
+			      শূন্য *delta, unsigned long আকার_2)
 {
-	struct delta_info *info = xmalloc(sizeof(*info));
+	কাঠামো delta_info *info = xmalloc(আকার(*info));
 
 	oidcpy(&info->base_oid, base_oid);
 	info->base_offset = base_offset;
-	info->size = size;
+	info->আকার_2 = আকার_2;
 	info->delta = delta;
 	info->nr = nr;
-	info->next = delta_list;
+	info->পরবর্তী = delta_list;
 	delta_list = info;
 }
 
-struct obj_info {
+কাঠামো obj_info {
 	off_t offset;
-	struct object_id oid;
-	struct object *obj;
+	কাঠামো object_id oid;
+	কাঠামো object *obj;
 };
 
 /* Remember to update object flag allocation in object.h */
 #define FLAG_OPEN (1u<<20)
 #define FLAG_WRITTEN (1u<<21)
 
-static struct obj_info *obj_list;
-static unsigned nr_objects;
+স্থির কাঠামো obj_info *obj_list;
+স্থির unsigned nr_objects;
 
 /*
  * Called only from check_object() after it verified this object
  * is Ok.
  */
-static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
+স্থির শূন্য write_cached_object(কাঠামো object *obj, কাঠামো obj_বাফার *obj_buf)
 {
-	struct object_id oid;
+	কাঠামো object_id oid;
 
-	if (odb_write_object(the_repository->objects, obj_buf->buffer, obj_buf->size,
+	যদি (odb_write_object(the_repository->objects, obj_buf->বাফার, obj_buf->আকার_2,
 			     obj->type, &oid) < 0)
 		die("failed to write object %s", oid_to_hex(&obj->oid));
 	obj->flags |= FLAG_WRITTEN;
@@ -215,255 +215,255 @@ static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
  * that have reachability requirements and calls this function.
  * Verify its reachability and validity recursively and write it out.
  */
-static int check_object(struct object *obj, enum object_type type,
-			void *data UNUSED,
-			struct fsck_options *options UNUSED)
+স্থির পূর্ণসংখ্যা check_object(কাঠামো object *obj, গণনা object_type type,
+			শূন্য *তথ্য UNUSED,
+			কাঠামো fsck_options *options UNUSED)
 {
-	struct obj_buffer *obj_buf;
+	কাঠামো obj_বাফার *obj_buf;
 
-	if (!obj)
-		return 1;
+	যদি (!obj)
+		ফেরত 1;
 
-	if (obj->flags & FLAG_WRITTEN)
-		return 0;
+	যদি (obj->flags & FLAG_WRITTEN)
+		ফেরত 0;
 
-	if (type != OBJ_ANY && obj->type != type)
+	যদি (type != OBJ_ANY && obj->type != type)
 		die("object type mismatch");
 
-	if (!(obj->flags & FLAG_OPEN)) {
-		size_t size;
-		int type = odb_read_object_info(the_repository->objects, &obj->oid, &size);
-		if (type != obj->type || type <= 0)
+	যদি (!(obj->flags & FLAG_OPEN)) {
+		আকার_t আকার_2;
+		পূর্ণসংখ্যা type = odb_read_object_info(the_repository->objects, &obj->oid, &আকার_2);
+		যদি (type != obj->type || type <= 0)
 			die("object of unexpected type");
 		obj->flags |= FLAG_WRITTEN;
-		return 0;
+		ফেরত 0;
 	}
 
-	obj_buf = lookup_object_buffer(obj);
-	if (!obj_buf)
+	obj_buf = lookup_object_বাফার(obj);
+	যদি (!obj_buf)
 		die("Whoops! Cannot find object '%s'", oid_to_hex(&obj->oid));
-	if (fsck_object(obj, obj_buf->buffer, obj_buf->size, &fsck_options))
+	যদি (fsck_object(obj, obj_buf->বাফার, obj_buf->আকার_2, &fsck_options))
 		die("fsck error in packed object");
 	fsck_options.walk = check_object;
-	if (fsck_walk(obj, NULL, &fsck_options))
+	যদি (fsck_walk(obj, ফাঁকা, &fsck_options))
 		die("Error on reachable objects of %s", oid_to_hex(&obj->oid));
 	write_cached_object(obj, obj_buf);
-	return 0;
+	ফেরত 0;
 }
 
-static void write_rest(void)
+স্থির শূন্য write_rest(শূন্য)
 {
 	unsigned i;
-	for (i = 0; i < nr_objects; i++) {
-		if (obj_list[i].obj)
-			check_object(obj_list[i].obj, OBJ_ANY, NULL, NULL);
+	জন্য (i = 0; i < nr_objects; i++) {
+		যদি (obj_list[i].obj)
+			check_object(obj_list[i].obj, OBJ_ANY, ফাঁকা, ফাঁকা);
 	}
 }
 
-static void added_object(unsigned nr, enum object_type type,
-			 void *data, unsigned long size);
+স্থির শূন্য added_object(unsigned nr, গণনা object_type type,
+			 শূন্য *তথ্য, unsigned long আকার_2);
 
 /*
  * Write out nr-th object from the list, now we know the contents
  * of it.  Under --strict, this buffers structured objects in-core,
  * to be checked at the end.
  */
-static void write_object(unsigned nr, enum object_type type,
-			 void *buf, unsigned long size)
+স্থির শূন্য write_object(unsigned nr, গণনা object_type type,
+			 শূন্য *buf, unsigned long আকার_2)
 {
-	if (!strict) {
-		if (odb_write_object(the_repository->objects, buf, size, type,
+	যদি (!strict) {
+		যদি (odb_write_object(the_repository->objects, buf, আকার_2, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
-		added_object(nr, type, buf, size);
-		free(buf);
-		obj_list[nr].obj = NULL;
-	} else if (type == OBJ_BLOB) {
-		struct blob *blob;
-		if (odb_write_object(the_repository->objects, buf, size, type,
+		added_object(nr, type, buf, আকার_2);
+		মুক্ত(buf);
+		obj_list[nr].obj = ফাঁকা;
+	} অন্যথা যদি (type == OBJ_BLOB) {
+		কাঠামো blob *blob;
+		যদি (odb_write_object(the_repository->objects, buf, আকার_2, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
-		added_object(nr, type, buf, size);
-		free(buf);
+		added_object(nr, type, buf, আকার_2);
+		মুক্ত(buf);
 
 		blob = lookup_blob(the_repository, &obj_list[nr].oid);
-		if (blob)
+		যদি (blob)
 			blob->object.flags |= FLAG_WRITTEN;
-		else
+		অন্যথা
 			die("invalid blob object");
-		obj_list[nr].obj = NULL;
-	} else {
-		struct object *obj;
-		int eaten;
-		hash_object_file(the_hash_algo, buf, size, type,
+		obj_list[nr].obj = ফাঁকা;
+	} অন্যথা {
+		কাঠামো object *obj;
+		পূর্ণসংখ্যা eaten;
+		hash_object_file(the_hash_algo, buf, আকার_2, type,
 				 &obj_list[nr].oid);
-		added_object(nr, type, buf, size);
-		obj = parse_object_buffer(the_repository, &obj_list[nr].oid,
-					  type, size, buf,
+		added_object(nr, type, buf, আকার_2);
+		obj = parse_object_বাফার(the_repository, &obj_list[nr].oid,
+					  type, আকার_2, buf,
 					  &eaten);
-		if (!obj)
+		যদি (!obj)
 			die("invalid %s", type_name(type));
-		add_object_buffer(obj, buf, size);
+		add_object_বাফার(obj, buf, আকার_2);
 		obj->flags |= FLAG_OPEN;
 		obj_list[nr].obj = obj;
 	}
 }
 
-static void resolve_delta(unsigned nr, enum object_type type,
-			  void *base, unsigned long base_size,
-			  void *delta, unsigned long delta_size)
+স্থির শূন্য resolve_delta(unsigned nr, গণনা object_type type,
+			  শূন্য *base, unsigned long base_আকার,
+			  শূন্য *delta, unsigned long delta_আকার_2)
 {
-	void *result;
-	size_t result_size;
+	শূন্য *ফলাফল;
+	আকার_t ফলাফল_আকার;
 
-	result = patch_delta(base, base_size,
-			     delta, delta_size,
-			     &result_size);
-	if (!result)
+	ফলাফল = patch_delta(base, base_আকার,
+			     delta, delta_আকার_2,
+			     &ফলাফল_আকার);
+	যদি (!ফলাফল)
 		die("failed to apply delta");
-	free(delta);
-	write_object(nr, type, result, result_size);
+	মুক্ত(delta);
+	write_object(nr, type, ফলাফল, ফলাফল_আকার);
 }
 
 /*
  * We now know the contents of an object (which is nr-th in the pack);
  * resolve all the deltified objects that are based on it.
  */
-static void added_object(unsigned nr, enum object_type type,
-			 void *data, unsigned long size)
+স্থির শূন্য added_object(unsigned nr, গণনা object_type type,
+			 শূন্য *তথ্য, unsigned long আকার_2)
 {
-	struct delta_info **p = &delta_list;
-	struct delta_info *info;
+	কাঠামো delta_info **p = &delta_list;
+	কাঠামো delta_info *info;
 
-	while ((info = *p) != NULL) {
-		if (oideq(&info->base_oid, &obj_list[nr].oid) ||
+	যখন ((info = *p) != ফাঁকা) {
+		যদি (oideq(&info->base_oid, &obj_list[nr].oid) ||
 		    info->base_offset == obj_list[nr].offset) {
-			*p = info->next;
+			*p = info->পরবর্তী;
 			p = &delta_list;
-			resolve_delta(info->nr, type, data, size,
-				      info->delta, info->size);
-			free(info);
-			continue;
+			resolve_delta(info->nr, type, তথ্য, আকার_2,
+				      info->delta, info->আকার_2);
+			মুক্ত(info);
+			চালু;
 		}
-		p = &info->next;
+		p = &info->পরবর্তী;
 	}
 }
 
-static void unpack_non_delta_entry(enum object_type type, unsigned long size,
+স্থির শূন্য unpack_non_delta_entry(গণনা object_type type, unsigned long আকার_2,
 				   unsigned nr)
 {
-	void *buf = get_data(size);
+	শূন্য *buf = get_তথ্য(আকার_2);
 
-	if (buf)
-		write_object(nr, type, buf, size);
+	যদি (buf)
+		write_object(nr, type, buf, আকার_2);
 }
 
-struct zlib_stream {
-	struct odb_stream base;
+কাঠামো zlib_stream {
+	কাঠামো odb_stream base;
 	git_zstream *zstream;
-	int status;
+	পূর্ণসংখ্যা status;
 };
 
-static ssize_t zlib_stream_read(struct odb_stream *in_stream,
-				char *buf, size_t buf_len)
+স্থির ssize_t zlib_stream_read(কাঠামো odb_stream *in_stream,
+				অক্ষর *buf, আকার_t buf_len)
 {
-	struct zlib_stream *data = container_of(in_stream, struct zlib_stream, base);
-	git_zstream *zstream = data->zstream;
+	কাঠামো zlib_stream *তথ্য = container_of(in_stream, কাঠামো zlib_stream, base);
+	git_zstream *zstream = তথ্য->zstream;
 
-	if (data->status != Z_OK)
-		return 0;
+	যদি (তথ্য->status != Z_OK)
+		ফেরত 0;
 
-	zstream->next_out = (unsigned char *) buf;
+	zstream->পরবর্তী_out = (unsigned অক্ষর *) buf;
 	zstream->avail_out = buf_len;
 
-	while (data->status == Z_OK && zstream->avail_out == buf_len) {
-		zstream->next_in = fill(1);
+	যখন (তথ্য->status == Z_OK && zstream->avail_out == buf_len) {
+		zstream->পরবর্তী_in = fill(1);
 		zstream->avail_in = len;
-		data->status = git_inflate(zstream, 0);
+		তথ্য->status = git_inflate(zstream, 0);
 		use(len - zstream->avail_in);
 	}
 
-	return buf_len - zstream->avail_out;
+	ফেরত buf_len - zstream->avail_out;
 }
 
-static void stream_blob(unsigned long size, unsigned nr)
+স্থির শূন্য stream_blob(unsigned long আকার_2, unsigned nr)
 {
 	git_zstream zstream = { 0 };
-	struct zlib_stream in_stream = {
+	কাঠামো zlib_stream in_stream = {
 		.base = {
-			.read = zlib_stream_read,
-			.size = size,
+			.পঠ = zlib_stream_read,
+			.আকার_2 = আকার_2,
 			.type = OBJ_BLOB,
 		},
 		.zstream = &zstream,
 		.status = Z_OK,
 	};
-	struct obj_info *info = &obj_list[nr];
+	কাঠামো obj_info *info = &obj_list[nr];
 
 	git_inflate_init(&zstream);
 
-	if (odb_write_object_stream(the_repository->objects, &in_stream.base, &info->oid))
+	যদি (odb_write_object_stream(the_repository->objects, &in_stream.base, &info->oid))
 		die(_("failed to write object in stream"));
 
-	if (in_stream.status != Z_STREAM_END)
+	যদি (in_stream.status != Z_STREAM_END)
 		die(_("inflate returned (%d)"), in_stream.status);
 	git_inflate_end(&zstream);
 
-	if (strict) {
-		struct blob *blob = lookup_blob(the_repository, &info->oid);
+	যদি (strict) {
+		কাঠামো blob *blob = lookup_blob(the_repository, &info->oid);
 
-		if (!blob)
+		যদি (!blob)
 			die(_("invalid blob object from stream"));
 		blob->object.flags |= FLAG_WRITTEN;
 	}
-	info->obj = NULL;
+	info->obj = ফাঁকা;
 }
 
-static int resolve_against_held(unsigned nr, const struct object_id *base,
-				void *delta_data, unsigned long delta_size)
+স্থির পূর্ণসংখ্যা resolve_against_held(unsigned nr, ধ্রুবক কাঠামো object_id *base,
+				শূন্য *delta_তথ্য, unsigned long delta_আকার_2)
 {
-	struct object *obj;
-	struct obj_buffer *obj_buffer;
+	কাঠামো object *obj;
+	কাঠামো obj_বাফার *obj_বাফার;
 	obj = lookup_object(the_repository, base);
-	if (!obj)
-		return 0;
-	obj_buffer = lookup_object_buffer(obj);
-	if (!obj_buffer)
-		return 0;
-	resolve_delta(nr, obj->type, obj_buffer->buffer,
-		      obj_buffer->size, delta_data, delta_size);
-	return 1;
+	যদি (!obj)
+		ফেরত 0;
+	obj_বাফার = lookup_object_বাফার(obj);
+	যদি (!obj_বাফার)
+		ফেরত 0;
+	resolve_delta(nr, obj->type, obj_বাফার->বাফার,
+		      obj_বাফার->আকার_2, delta_তথ্য, delta_আকার_2);
+	ফেরত 1;
 }
 
-static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
+স্থির শূন্য unpack_delta_entry(গণনা object_type type, unsigned long delta_আকার_2,
 			       unsigned nr)
 {
-	void *delta_data, *base;
-	unsigned long base_size;
-	size_t base_size_st = 0;
-	struct object_id base_oid;
+	শূন্য *delta_তথ্য, *base;
+	unsigned long base_আকার;
+	আকার_t base_আকার_st = 0;
+	কাঠামো object_id base_oid;
 
-	if (type == OBJ_REF_DELTA) {
+	যদি (type == OBJ_REF_DELTA) {
 		oidread(&base_oid, fill(the_hash_algo->rawsz), the_repository->hash_algo);
 		use(the_hash_algo->rawsz);
-		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
-		if (odb_has_object(the_repository->objects, &base_oid,
+		delta_তথ্য = get_তথ্য(delta_আকার_2);
+		যদি (!delta_তথ্য)
+			ফেরত;
+		যদি (odb_has_object(the_repository->objects, &base_oid,
 				   ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 			; /* Ok we have this one */
-		else if (resolve_against_held(nr, &base_oid,
-					      delta_data, delta_size))
-			return; /* we are done */
-		else {
+		অন্যথা যদি (resolve_against_held(nr, &base_oid,
+					      delta_তথ্য, delta_আকার_2))
+			ফেরত; /* we are done */
+		অন্যথা {
 			/* cannot resolve yet --- queue it */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
-			add_delta_to_list(nr, &base_oid, 0, delta_data, delta_size);
-			return;
+			add_delta_to_list(nr, &base_oid, 0, delta_তথ্য, delta_আকার_2);
+			ফেরত;
 		}
-	} else {
+	} অন্যথা {
 		unsigned base_found = 0;
-		unsigned char *pack, c;
+		unsigned অক্ষর *pack, c;
 		off_t base_offset;
 		unsigned lo, mid, hi;
 
@@ -471,9 +471,9 @@ static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
 		c = *pack;
 		use(1);
 		base_offset = c & 127;
-		while (c & 128) {
+		যখন (c & 128) {
 			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
+			যদি (!base_offset || MSB(base_offset, 7))
 				die("offset value overflow for delta base object");
 			pack = fill(1);
 			c = *pack;
@@ -481,62 +481,62 @@ static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
 			base_offset = (base_offset << 7) + (c & 127);
 		}
 		base_offset = obj_list[nr].offset - base_offset;
-		if (base_offset <= 0 || base_offset >= obj_list[nr].offset)
+		যদি (base_offset <= 0 || base_offset >= obj_list[nr].offset)
 			die("offset value out of bound for delta base object");
 
-		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
+		delta_তথ্য = get_তথ্য(delta_আকার_2);
+		যদি (!delta_তথ্য)
+			ফেরত;
 		lo = 0;
 		hi = nr;
-		while (lo < hi) {
+		যখন (lo < hi) {
 			mid = lo + (hi - lo) / 2;
-			if (base_offset < obj_list[mid].offset) {
+			যদি (base_offset < obj_list[mid].offset) {
 				hi = mid;
-			} else if (base_offset > obj_list[mid].offset) {
+			} অন্যথা যদি (base_offset > obj_list[mid].offset) {
 				lo = mid + 1;
-			} else {
+			} অন্যথা {
 				oidcpy(&base_oid, &obj_list[mid].oid);
 				base_found = !is_null_oid(&base_oid);
-				break;
+				বিরতি;
 			}
 		}
-		if (!base_found) {
+		যদি (!base_found) {
 			/*
 			 * The delta base object is itself a delta that
 			 * has not been resolved yet.
 			 */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
 			add_delta_to_list(nr, null_oid(the_hash_algo), base_offset,
-					  delta_data, delta_size);
-			return;
+					  delta_তথ্য, delta_আকার_2);
+			ফেরত;
 		}
 	}
 
-	if (resolve_against_held(nr, &base_oid, delta_data, delta_size))
-		return;
+	যদি (resolve_against_held(nr, &base_oid, delta_তথ্য, delta_আকার_2))
+		ফেরত;
 
 	base = odb_read_object(the_repository->objects, &base_oid,
-			       &type, &base_size_st);
-	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base) {
+			       &type, &base_আকার_st);
+	base_আকার = cast_আকার_t_to_ulong(base_আকার_st);
+	যদি (!base) {
 		error("failed to read delta-pack base object %s",
 		      oid_to_hex(&base_oid));
-		if (!recover)
+		যদি (!recover)
 			exit(1);
 		has_errors = 1;
-		return;
+		ফেরত;
 	}
-	resolve_delta(nr, type, base, base_size, delta_data, delta_size);
-	free(base);
+	resolve_delta(nr, type, base, base_আকার, delta_তথ্য, delta_আকার_2);
+	মুক্ত(base);
 }
 
-static void unpack_one(unsigned nr)
+স্থির শূন্য unpack_one(unsigned nr)
 {
 	unsigned shift;
-	unsigned char *pack;
-	size_t size, c;
-	enum object_type type;
+	unsigned অক্ষর *pack;
+	আকার_t আকার_2, c;
+	গণনা object_type type;
 
 	obj_list[nr].offset = consumed_bytes;
 
@@ -544,88 +544,88 @@ static void unpack_one(unsigned nr)
 	c = *pack;
 	use(1);
 	type = (c >> 4) & 7;
-	size = (c & 15);
+	আকার_2 = (c & 15);
 	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	যখন (c & 0x80) {
+		যদি ((bitsizeof(আকার_t) - 7) < shift)
 			die(_("object size too large for this platform"));
 		pack = fill(1);
 		c = *pack;
 		use(1);
-		size += (c & 0x7f) << shift;
+		আকার_2 += (c & 0x7f) << shift;
 		shift += 7;
 	}
 
-	switch (type) {
-	case OBJ_BLOB:
-		if (!dry_run &&
-		    size > repo_settings_get_big_file_threshold(the_repository)) {
-			stream_blob(size, nr);
-			return;
+	নির্বাচন (type) {
+	ক্ষেত্র OBJ_BLOB:
+		যদি (!dry_run &&
+		    আকার_2 > repo_settings_get_big_file_threshold(the_repository)) {
+			stream_blob(আকার_2, nr);
+			ফেরত;
 		}
 		/* fallthrough */
-	case OBJ_COMMIT:
-	case OBJ_TREE:
-	case OBJ_TAG:
-		unpack_non_delta_entry(type, size, nr);
-		return;
-	case OBJ_REF_DELTA:
-	case OBJ_OFS_DELTA:
-		unpack_delta_entry(type, size, nr);
-		return;
-	default:
+	ক্ষেত্র OBJ_COMMIT:
+	ক্ষেত্র OBJ_বৃক্ষ:
+	ক্ষেত্র OBJ_TAG:
+		unpack_non_delta_entry(type, আকার_2, nr);
+		ফেরত;
+	ক্ষেত্র OBJ_REF_DELTA:
+	ক্ষেত্র OBJ_OFS_DELTA:
+		unpack_delta_entry(type, আকার_2, nr);
+		ফেরত;
+	পূর্বনির্ধারিত:
 		error("bad object type %d", type);
 		has_errors = 1;
-		if (recover)
-			return;
+		যদি (recover)
+			ফেরত;
 		exit(1);
 	}
 }
 
-static void unpack_all(void)
+স্থির শূন্য unpack_all(শূন্য)
 {
-	int i;
-	unsigned char *hdr = fill(sizeof(struct pack_header));
-	struct odb_transaction *transaction;
+	পূর্ণসংখ্যা i;
+	unsigned অক্ষর *hdr = fill(আকার(কাঠামো pack_header));
+	কাঠামো odb_transaction *transaction;
 
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	যদি (get_be32(hdr) != PACK_SIGNATURE)
 		die("bad pack file");
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	যদি (!pack_version_ok_native(get_be32(hdr)))
 		die("unknown pack file version %"PRIu32,
 		    get_be32(hdr));
 	hdr += 4;
 	nr_objects = get_be32(hdr);
-	use(sizeof(struct pack_header));
+	use(আকার(কাঠামো pack_header));
 
-	if (!quiet)
+	যদি (!quiet)
 		progress = start_progress(the_repository,
 					  _("Unpacking objects"), nr_objects);
 	CALLOC_ARRAY(obj_list, nr_objects);
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	for (i = 0; i < nr_objects; i++) {
+	জন্য (i = 0; i < nr_objects; i++) {
 		unpack_one(i);
 		display_progress(progress, i + 1);
 	}
 	odb_transaction_commit_and_finalize_or_die(transaction);
 	stop_progress(&progress);
 
-	if (delta_list)
+	যদি (delta_list)
 		die("unresolved deltas left after unpacking");
 }
 
-int cmd_unpack_objects(int argc,
-		       const char **argv,
-		       const char *prefix UNUSED,
-		       struct repository *repo)
+পূর্ণসংখ্যা cmd_unpack_objects(পূর্ণসংখ্যা argc,
+		       ধ্রুবক অক্ষর **argv,
+		       ধ্রুবক অক্ষর *prefix UNUSED,
+		       কাঠামো repository *repo)
 {
-	int i;
-	struct object_id oid;
-	struct git_hash_ctx tmp_ctx;
+	পূর্ণসংখ্যা i;
+	কাঠামো object_id oid;
+	কাঠামো git_hash_ctx tmp_ctx;
 
 	disable_replace_refs();
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 
 	quiet = !isatty(2);
 
@@ -633,40 +633,40 @@ int cmd_unpack_objects(int argc,
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
 
-	for (i = 1 ; i < argc; i++) {
-		const char *arg = argv[i];
+	জন্য (i = 1 ; i < argc; i++) {
+		ধ্রুবক অক্ষর *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "-n")) {
+		যদি (*arg == '-') {
+			যদি (!strcmp(arg, "-n")) {
 				dry_run = 1;
-				continue;
+				চালু;
 			}
-			if (!strcmp(arg, "-q")) {
+			যদি (!strcmp(arg, "-q")) {
 				quiet = 1;
-				continue;
+				চালু;
 			}
-			if (!strcmp(arg, "-r")) {
+			যদি (!strcmp(arg, "-r")) {
 				recover = 1;
-				continue;
+				চালু;
 			}
-			if (!strcmp(arg, "--strict")) {
+			যদি (!strcmp(arg, "--strict")) {
 				strict = 1;
-				continue;
+				চালু;
 			}
-			if (skip_prefix(arg, "--strict=", &arg)) {
+			যদি (skip_prefix(arg, "--strict=", &arg)) {
 				strict = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-				continue;
+				fsck_set_বার্তা_types(&fsck_options, arg);
+				চালু;
 			}
-			if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
-							     buffer, &len) < 0)
+			যদি (skip_prefix(arg, "--pack_header=", &arg)) {
+				যদি (parse_pack_header_option(arg,
+							     বাফার, &len) < 0)
 					die(_("bad --pack_header: %s"), arg);
-				continue;
+				চালু;
 			}
-			if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
-				continue;
+			যদি (skip_prefix(arg, "--max-input-size=", &arg)) {
+				max_প্রবেশ_আকার = strtoumax(arg, ফাঁকা, 10);
+				চালু;
 			}
 			usage(unpack_usage);
 		}
@@ -676,23 +676,23 @@ int cmd_unpack_objects(int argc,
 	}
 	git_hash_init(&ctx, the_hash_algo);
 	unpack_all();
-	git_hash_update(&ctx, buffer, offset);
+	git_hash_update(&ctx, বাফার, offset);
 	git_hash_init(&tmp_ctx, the_hash_algo);
 	git_hash_clone(&tmp_ctx, &ctx);
 	git_hash_final_oid(&oid, &tmp_ctx);
-	if (strict) {
+	যদি (strict) {
 		write_rest();
-		if (fsck_finish(&fsck_options))
+		যদি (fsck_finish(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
-	if (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
+	যদি (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
 		    the_repository->hash_algo))
 		die("final sha1 did not match");
 	use(the_hash_algo->rawsz);
 
 	/* Write the last part of the buffer to stdout */
-	write_in_full(1, buffer + offset, len);
+	write_in_full(1, বাফার + offset, len);
 
 	/* All done */
-	return has_errors;
+	ফেরত has_errors;
 }

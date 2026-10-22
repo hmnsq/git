@@ -4,131 +4,131 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "object.h"
-#include "object-name.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "parse-options.h"
-#include "resolve-undo.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "lockfile.h"
+#অন্তর্ভাব "object.h"
+#অন্তর্ভাব "object-name.h"
+#অন্তর্ভাব "tree.h"
+#অন্তর্ভাব "tree-walk.h"
+#অন্তর্ভাব "cache-tree.h"
+#অন্তর্ভাব "unpack-trees.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "resolve-undo.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "sparse-index.h"
+#অন্তর্ভাব "submodule.h"
 
-static int nr_trees;
-static int read_empty;
-static struct tree *trees[MAX_UNPACK_TREES];
+স্থির পূর্ণসংখ্যা nr_trees;
+স্থির পূর্ণসংখ্যা read_empty;
+স্থির কাঠামো বৃক্ষ *trees[MAX_UNPACK_TREES];
 
-static int list_tree(struct object_id *oid)
+স্থির পূর্ণসংখ্যা list_বৃক্ষ(কাঠামো object_id *oid)
 {
-	struct tree *tree;
+	কাঠামো বৃক্ষ *বৃক্ষ;
 
-	if (nr_trees >= MAX_UNPACK_TREES)
+	যদি (nr_trees >= MAX_UNPACK_TREES)
 		die("I cannot read more than %d trees", MAX_UNPACK_TREES);
-	tree = repo_parse_tree_indirect(the_repository, oid);
-	if (!tree)
-		return -1;
-	trees[nr_trees++] = tree;
-	return 0;
+	বৃক্ষ = repo_parse_বৃক্ষ_indirect(the_repository, oid);
+	যদি (!বৃক্ষ)
+		ফেরত -1;
+	trees[nr_trees++] = বৃক্ষ;
+	ফেরত 0;
 }
 
-static const char * const read_tree_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক read_বৃক্ষ_usage[] = {
 	N_("git read-tree [(-m [--trivial] [--aggressive] | --reset | --prefix=<prefix>)\n"
 	   "              [-u | -i]] [--index-output=<file>] [--no-sparse-checkout]\n"
 	   "              (--empty | <tree-ish1> [<tree-ish2> [<tree-ish3>]])"),
-	NULL
+	ফাঁকা
 };
 
-static int index_output_cb(const struct option *opt UNUSED, const char *arg,
-				 int unset)
+স্থির পূর্ণসংখ্যা সূচক_output_cb(ধ্রুবক কাঠামো option *opt UNUSED, ধ্রুবক অক্ষর *arg,
+				 পূর্ণসংখ্যা unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	set_alternate_index_output(arg);
-	return 0;
+	set_alternate_সূচক_output(arg);
+	ফেরত 0;
 }
 
-static int exclude_per_directory_cb(const struct option *opt, const char *arg,
-				    int unset)
+স্থির পূর্ণসংখ্যা exclude_per_directory_cb(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *arg,
+				    পূর্ণসংখ্যা unset)
 {
-	struct unpack_trees_options *opts;
+	কাঠামো unpack_trees_options *opts;
 
 	BUG_ON_OPT_NEG(unset);
 
-	opts = (struct unpack_trees_options *)opt->value;
+	opts = (কাঠামো unpack_trees_options *)opt->মান;
 
-	if (!opts->update)
+	যদি (!opts->update)
 		die("--exclude-per-directory is meaningless unless -u");
-	if (strcmp(arg, ".gitignore"))
+	যদি (strcmp(arg, ".gitignore"))
 		die("--exclude-per-directory argument must be .gitignore");
-	return 0;
+	ফেরত 0;
 }
 
-static void debug_stage(const char *label, const struct cache_entry *ce,
-			struct unpack_trees_options *o)
+স্থির শূন্য debug_stage(ধ্রুবক অক্ষর *label, ধ্রুবক কাঠামো cache_entry *ce,
+			কাঠামো unpack_trees_options *o)
 {
 	printf("%s ", label);
-	if (!ce)
+	যদি (!ce)
 		printf("(missing)\n");
-	else if (ce == o->df_conflict_entry)
+	অন্যথা যদি (ce == o->df_conflict_entry)
 		printf("(conflict)\n");
-	else
+	অন্যথা
 		printf("%06o #%d %s %.8s\n",
 		       ce->ce_mode, ce_stage(ce), ce->name,
 		       oid_to_hex(&ce->oid));
 }
 
-static int debug_merge(const struct cache_entry * const *stages,
-		       struct unpack_trees_options *o)
+স্থির পূর্ণসংখ্যা debug_merge(ধ্রুবক কাঠামো cache_entry * ধ্রুবক *stages,
+		       কাঠামো unpack_trees_options *o)
 {
-	int i;
+	পূর্ণসংখ্যা i;
 
-	printf("* %d-way merge\n", o->internal.merge_size);
+	printf("* %d-way merge\n", o->internal.merge_আকার);
 	debug_stage("index", stages[0], o);
-	for (i = 1; i <= o->internal.merge_size; i++) {
-		char buf[24];
-		xsnprintf(buf, sizeof(buf), "ent#%d", i);
+	জন্য (i = 1; i <= o->internal.merge_আকার; i++) {
+		অক্ষর buf[24];
+		xsnprintf(buf, আকার(buf), "ent#%d", i);
 		debug_stage(buf, stages[i], o);
 	}
-	return 0;
+	ফেরত 0;
 }
 
-static int git_read_tree_config(const char *var, const char *value,
-				const struct config_context *ctx, void *cb)
+স্থির পূর্ণসংখ্যা git_read_বৃক্ষ_config(ধ্রুবক অক্ষর *var, ধ্রুবক অক্ষর *মান,
+				ধ্রুবক কাঠামো config_context *ctx, শূন্য *cb)
 {
-	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+	যদি (!strcmp(var, "submodule.recurse"))
+		ফেরত git_default_submodule_config(var, মান, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	ফেরত git_default_config(var, মান, ctx, cb);
 }
 
-int cmd_read_tree(int argc,
-		  const char **argv,
-		  const char *cmd_prefix,
-		  struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_read_বৃক্ষ(পূর্ণসংখ্যা argc,
+		  ধ্রুবক অক্ষর **argv,
+		  ধ্রুবক অক্ষর *cmd_prefix,
+		  কাঠামো repository *repo UNUSED)
 {
-	int i, stage = 0;
-	struct object_id oid;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct unpack_trees_options opts;
-	int prefix_set = 0;
-	struct lock_file lock_file = LOCK_INIT;
-	const struct option read_tree_options[] = {
+	পূর্ণসংখ্যা i, stage = 0;
+	কাঠামো object_id oid;
+	কাঠামো বৃক্ষ_desc t[MAX_UNPACK_TREES];
+	কাঠামো unpack_trees_options opts;
+	পূর্ণসংখ্যা prefix_set = 0;
+	কাঠামো lock_file lock_file = LOCK_INIT;
+	ধ্রুবক কাঠামো option read_বৃক্ষ_options[] = {
 		OPT__SUPER_PREFIX(&opts.super_prefix),
-		OPT_CALLBACK_F(0, "index-output", NULL, N_("file"),
+		OPT_CALLBACK_F(0, "index-output", ফাঁকা, N_("file"),
 		  N_("write resulting index to <file>"),
-		  PARSE_OPT_NONEG, index_output_cb),
+		  PARSE_OPT_NONEG, সূচক_output_cb),
 		OPT_BOOL(0, "empty", &read_empty,
 			    N_("only empty the index")),
 		OPT__VERBOSE(&opts.verbose_update, N_("be verbose")),
 		OPT_GROUP(N_("Merging")),
-		OPT_BOOL('m', NULL, &opts.merge,
+		OPT_BOOL('m', ফাঁকা, &opts.merge,
 			 N_("perform a merge in addition to a read")),
 		OPT_BOOL(0, "trivial", &opts.trivial_merges_only,
 			 N_("3-way merge if no file level merging required")),
@@ -139,56 +139,56 @@ int cmd_read_tree(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "prefix",
-			.value = &opts.prefix,
+			.মান = &opts.prefix,
 			.argh = N_("<subdirectory>/"),
 			.help = N_("read the tree into the index under <subdirectory>/"),
 			.flags = PARSE_OPT_NONEG,
 		},
-		OPT_BOOL('u', NULL, &opts.update,
+		OPT_BOOL('u', ফাঁকা, &opts.update,
 			 N_("update working tree with merge result")),
 		OPT_CALLBACK_F(0, "exclude-per-directory", &opts,
 		  N_("gitignore"),
 		  N_("allow explicitly ignored files to be overwritten"),
 		  PARSE_OPT_NONEG, exclude_per_directory_cb),
-		OPT_BOOL('i', NULL, &opts.index_only,
+		OPT_BOOL('i', ফাঁকা, &opts.সূচক_only,
 			 N_("don't check the working tree after merging")),
 		OPT__DRY_RUN(&opts.dry_run, N_("don't update the index or the work tree")),
 		OPT_BOOL(0, "no-sparse-checkout", &opts.skip_sparse_checkout,
 			 N_("skip applying sparse checkout filter")),
 		OPT_BOOL(0, "debug-unpack", &opts.internal.debug_unpack,
 			 N_("debug unpack-trees")),
-		OPT_CALLBACK_F(0, "recurse-submodules", NULL,
+		OPT_CALLBACK_F(0, "recurse-submodules", ফাঁকা,
 			    "checkout", "control recursive updating of submodules",
 			    PARSE_OPT_OPTARG, option_parse_recurse_submodules_worktree_updater),
 		OPT__QUIET(&opts.quiet, N_("suppress feedback messages")),
 		OPT_END()
 	};
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = -1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
+	memset(&opts, 0, আকার(opts));
+	opts.শীর্ষ_idx = -1;
+	opts.src_সূচক = the_repository->সূচক;
+	opts.dst_সূচক = the_repository->সূচক;
 
-	repo_config(the_repository, git_read_tree_config, NULL);
+	repo_config(the_repository, git_read_বৃক্ষ_config, ফাঁকা);
 
-	argc = parse_options(argc, argv, cmd_prefix, read_tree_options,
-			     read_tree_usage, 0);
+	argc = parse_options(argc, argv, cmd_prefix, read_বৃক্ষ_options,
+			     read_বৃক্ষ_usage, 0);
 
 	prefix_set = opts.prefix ? 1 : 0;
-	if (1 < opts.merge + opts.reset + prefix_set)
+	যদি (1 < opts.merge + opts.reset + prefix_set)
 		die("Which one? -m, --reset, or --prefix?");
 
 	/* Prefix should not start with a directory separator */
-	if (opts.prefix && opts.prefix[0] == '/')
+	যদি (opts.prefix && opts.prefix[0] == '/')
 		die("Invalid prefix, prefix cannot start with '/'");
 
-	if (opts.reset)
+	যদি (opts.reset)
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_full_সূচক = 0;
 
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_সূচক(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
 	/*
 	 * NEEDSWORK
@@ -199,84 +199,84 @@ int cmd_read_tree(int argc,
 	 * mode.
 	 */
 
-	if (opts.reset || opts.merge || opts.prefix) {
-		if (repo_read_index_unmerged(the_repository) && (opts.prefix || opts.merge))
+	যদি (opts.reset || opts.merge || opts.prefix) {
+		যদি (repo_read_সূচক_unmerged(the_repository) && (opts.prefix || opts.merge))
 			die(_("You need to resolve your current index first"));
 		stage = opts.merge = 1;
 	}
-	resolve_undo_clear_index(the_repository->index);
+	resolve_undo_clear_সূচক(the_repository->সূচক);
 
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
+	জন্য (i = 0; i < argc; i++) {
+		ধ্রুবক অক্ষর *arg = argv[i];
 
-		if (repo_get_oid(the_repository, arg, &oid))
+		যদি (repo_get_oid(the_repository, arg, &oid))
 			die("Not a valid object name %s", arg);
-		if (list_tree(&oid) < 0)
+		যদি (list_বৃক্ষ(&oid) < 0)
 			die("failed to unpack tree object %s", arg);
 		stage++;
 	}
-	if (!nr_trees && !read_empty && !opts.merge)
+	যদি (!nr_trees && !read_empty && !opts.merge)
 		warning("read-tree: emptying the index with no arguments is deprecated; use --empty");
-	else if (nr_trees > 0 && read_empty)
+	অন্যথা যদি (nr_trees > 0 && read_empty)
 		die("passing trees as arguments contradicts --empty");
 
-	if (1 < opts.index_only + opts.update)
+	যদি (1 < opts.সূচক_only + opts.update)
 		die("-u and -i at the same time makes no sense");
-	if ((opts.update || opts.index_only) && !opts.merge)
+	যদি ((opts.update || opts.সূচক_only) && !opts.merge)
 		die("%s is meaningless without -m, --reset, or --prefix",
 		    opts.update ? "-u" : "-i");
-	if (opts.update && !opts.reset)
+	যদি (opts.update && !opts.reset)
 		opts.preserve_ignored = 0;
 	/* otherwise, opts.preserve_ignored is irrelevant */
-	if (opts.merge && !opts.index_only)
-		setup_work_tree(the_repository);
+	যদি (opts.merge && !opts.সূচক_only)
+		setup_work_বৃক্ষ(the_repository);
 
-	if (opts.skip_sparse_checkout)
-		ensure_full_index(the_repository->index);
+	যদি (opts.skip_sparse_checkout)
+		ensure_full_সূচক(the_repository->সূচক);
 
-	if (opts.merge) {
-		switch (stage - 1) {
-		case 0:
+	যদি (opts.merge) {
+		নির্বাচন (stage - 1) {
+		ক্ষেত্র 0:
 			die("you must specify at least one tree to merge");
-			break;
-		case 1:
+			বিরতি;
+		ক্ষেত্র 1:
 			opts.fn = opts.prefix ? bind_merge : oneway_merge;
-			break;
-		case 2:
+			বিরতি;
+		ক্ষেত্র 2:
 			opts.fn = twoway_merge;
-			opts.initial_checkout = is_index_unborn(the_repository->index);
-			break;
-		case 3:
-		default:
+			opts.initial_checkout = is_সূচক_unborn(the_repository->সূচক);
+			বিরতি;
+		ক্ষেত্র 3:
+		পূর্বনির্ধারিত:
 			opts.fn = threeway_merge;
-			break;
+			বিরতি;
 		}
 
-		if (stage - 1 >= 3)
-			opts.head_idx = stage - 2;
-		else
-			opts.head_idx = 1;
+		যদি (stage - 1 >= 3)
+			opts.শীর্ষ_idx = stage - 2;
+		অন্যথা
+			opts.শীর্ষ_idx = 1;
 	}
 
-	if (opts.internal.debug_unpack)
+	যদি (opts.internal.debug_unpack)
 		opts.fn = debug_merge;
 
 	/* If we're going to prime_cache_tree later, skip cache tree update */
-	if (nr_trees == 1 && !opts.prefix)
-		opts.skip_cache_tree_update = 1;
+	যদি (nr_trees == 1 && !opts.prefix)
+		opts.skip_cache_বৃক্ষ_update = 1;
 
-	cache_tree_free(&the_repository->index->cache_tree);
-	for (i = 0; i < nr_trees; i++) {
-		struct tree *tree = trees[i];
-		if (repo_parse_tree(the_repository, tree) < 0)
-			return 128;
-		init_tree_desc(t+i, &tree->object.oid, tree->buffer, tree->size);
+	cache_বৃক্ষ_free(&the_repository->সূচক->cache_বৃক্ষ);
+	জন্য (i = 0; i < nr_trees; i++) {
+		কাঠামো বৃক্ষ *বৃক্ষ = trees[i];
+		যদি (repo_parse_বৃক্ষ(the_repository, বৃক্ষ) < 0)
+			ফেরত 128;
+		init_বৃক্ষ_desc(t+i, &বৃক্ষ->object.oid, বৃক্ষ->বাফার, বৃক্ষ->আকার_2);
 	}
-	if (unpack_trees(nr_trees, t, &opts))
-		return 128;
+	যদি (unpack_trees(nr_trees, t, &opts))
+		ফেরত 128;
 
-	if (opts.internal.debug_unpack || opts.dry_run)
-		return 0; /* do not write the index out */
+	যদি (opts.internal.debug_unpack || opts.dry_run)
+		ফেরত 0; /* do not write the index out */
 
 	/*
 	 * When reading only one tree (either the most basic form,
@@ -284,12 +284,12 @@ int cmd_read_tree(int argc,
 	 * valid cache-tree because the index must match exactly
 	 * what came from the tree.
 	 */
-	if (nr_trees == 1 && !opts.prefix)
-		prime_cache_tree(the_repository,
-				 the_repository->index,
+	যদি (nr_trees == 1 && !opts.prefix)
+		মৌলিক_cache_বৃক্ষ(the_repository,
+				 the_repository->সূচক,
 				 trees[0]);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	যদি (write_locked_সূচক(the_repository->সূচক, &lock_file, COMMIT_LOCK))
 		die("unable to write new index file");
-	return 0;
+	ফেরত 0;
 }

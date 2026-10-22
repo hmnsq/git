@@ -7,107 +7,107 @@
 
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "parse-options.h"
-#include "entry.h"
-#include "parallel-checkout.h"
-#include "read-cache-ll.h"
-#include "setup.h"
-#include "sparse-index.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "lockfile.h"
+#অন্তর্ভাব "quote.h"
+#অন্তর্ভাব "cache-tree.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "entry.h"
+#অন্তর্ভাব "parallel-checkout.h"
+#অন্তর্ভাব "read-cache-ll.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "sparse-index.h"
 
 #define CHECKOUT_ALL 4
-static int nul_term_line;
-static int checkout_stage; /* default to checkout stage0 */
-static int ignore_skip_worktree; /* default to 0 */
-static int to_tempfile = -1;
-static char topath[4][TEMPORARY_FILENAME_LENGTH + 1];
+স্থির পূর্ণসংখ্যা nul_term_সারি;
+স্থির পূর্ণসংখ্যা checkout_stage; /* default to checkout stage0 */
+স্থির পূর্ণসংখ্যা ignore_skip_worktree; /* default to 0 */
+স্থির পূর্ণসংখ্যা to_tempfile = -1;
+স্থির অক্ষর topath[4][TEMPORARY_FILENAME_দৈর্ঘ্য + 1];
 
-static struct checkout state = CHECKOUT_INIT;
+স্থির কাঠামো checkout state = CHECKOUT_INIT;
 
-static void write_tempfile_record(const char *name, const char *prefix)
+স্থির শূন্য write_tempfile_record(ধ্রুবক অক্ষর *name, ধ্রুবক অক্ষর *prefix)
 {
-	int i;
-	int have_tempname = 0;
+	পূর্ণসংখ্যা i;
+	পূর্ণসংখ্যা have_tempname = 0;
 
-	if (CHECKOUT_ALL == checkout_stage) {
-		for (i = 1; i < 4; i++)
-			if (topath[i][0]) {
+	যদি (CHECKOUT_ALL == checkout_stage) {
+		জন্য (i = 1; i < 4; i++)
+			যদি (topath[i][0]) {
 				have_tempname = 1;
-				break;
+				বিরতি;
 			}
 
-		if (have_tempname) {
-			for (i = 1; i < 4; i++) {
-				if (i > 1)
+		যদি (have_tempname) {
+			জন্য (i = 1; i < 4; i++) {
+				যদি (i > 1)
 					putchar(' ');
-				if (topath[i][0])
+				যদি (topath[i][0])
 					fputs(topath[i], stdout);
-				else
+				অন্যথা
 					putchar('.');
 			}
 		}
-	} else if (topath[checkout_stage][0]) {
+	} অন্যথা যদি (topath[checkout_stage][0]) {
 		have_tempname = 1;
 		fputs(topath[checkout_stage], stdout);
 	}
 
-	if (have_tempname) {
+	যদি (have_tempname) {
 		putchar('\t');
 		write_name_quoted_relative(name, prefix, stdout,
-					   nul_term_line ? '\0' : '\n');
+					   nul_term_সারি ? '\0' : '\n');
 	}
 
-	for (i = 0; i < 4; i++) {
+	জন্য (i = 0; i < 4; i++) {
 		topath[i][0] = 0;
 	}
 }
 
-static int checkout_file(struct index_state *index, const char *name, const char *prefix)
+স্থির পূর্ণসংখ্যা checkout_file(কাঠামো সূচক_state *সূচক, ধ্রুবক অক্ষর *name, ধ্রুবক অক্ষর *prefix)
 {
-	int namelen = strlen(name);
-	int pos = index_name_pos(index, name, namelen);
-	int has_same_name = 0;
-	int is_file = 0;
-	int is_skipped = 1;
-	int did_checkout = 0;
-	int errs = 0;
+	পূর্ণসংখ্যা namelen = strlen(name);
+	পূর্ণসংখ্যা pos = সূচক_name_pos(সূচক, name, namelen);
+	পূর্ণসংখ্যা has_same_name = 0;
+	পূর্ণসংখ্যা is_file = 0;
+	পূর্ণসংখ্যা is_skipped = 1;
+	পূর্ণসংখ্যা did_checkout = 0;
+	পূর্ণসংখ্যা errs = 0;
 
-	if (pos < 0)
+	যদি (pos < 0)
 		pos = -pos - 1;
 
-	while (pos < index->cache_nr) {
-		struct cache_entry *ce = index->cache[pos];
-		if (ce_namelen(ce) != namelen ||
+	যখন (pos < সূচক->cache_nr) {
+		কাঠামো cache_entry *ce = সূচক->cache[pos];
+		যদি (ce_namelen(ce) != namelen ||
 		    memcmp(ce->name, name, namelen))
-			break;
+			বিরতি;
 		has_same_name = 1;
 		pos++;
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			break;
+		যদি (S_ISSPARSEDIR(ce->ce_mode))
+			বিরতি;
 		is_file = 1;
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			break;
+		যদি (!ignore_skip_worktree && ce_skip_worktree(ce))
+			বিরতি;
 		is_skipped = 0;
-		if (ce_stage(ce) != checkout_stage
+		যদি (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
+			চালু;
 		did_checkout = 1;
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		যদি (checkout_entry(ce, &state,
+				   to_tempfile ? topath[ce_stage(ce)] : ফাঁকা,
+				   ফাঁকা) < 0)
 			errs++;
 	}
 
-	if (did_checkout) {
-		if (to_tempfile)
+	যদি (did_checkout) {
+		যদি (to_tempfile)
 			write_tempfile_record(name, prefix);
-		return errs > 0 ? -1 : 0;
+		ফেরত errs > 0 ? -1 : 0;
 	}
 
 	/*
@@ -115,38 +115,38 @@ static int checkout_file(struct index_state *index, const char *name, const char
 	 * because we did find an entry but it was stage 0, that's not an
 	 * error.
 	 */
-	if (has_same_name && checkout_stage == CHECKOUT_ALL)
-		return 0;
+	যদি (has_same_name && checkout_stage == CHECKOUT_ALL)
+		ফেরত 0;
 
-	if (!state.quiet) {
+	যদি (!state.quiet) {
 		fprintf(stderr, "git checkout-index: %s ", name);
-		if (!has_same_name)
+		যদি (!has_same_name)
 			fprintf(stderr, "is not in the cache");
-		else if (!is_file)
+		অন্যথা যদি (!is_file)
 			fprintf(stderr, "is a sparse directory");
-		else if (is_skipped)
+		অন্যথা যদি (is_skipped)
 			fprintf(stderr, "has skip-worktree enabled; "
 					"use '--ignore-skip-worktree-bits' to checkout");
-		else if (checkout_stage)
+		অন্যথা যদি (checkout_stage)
 			fprintf(stderr, "does not exist at stage %d",
 				checkout_stage);
-		else
+		অন্যথা
 			fprintf(stderr, "is unmerged");
 		fputc('\n', stderr);
 	}
-	return -1;
+	ফেরত -1;
 }
 
-static int checkout_all(struct index_state *index, const char *prefix, int prefix_length)
+স্থির পূর্ণসংখ্যা checkout_all(কাঠামো সূচক_state *সূচক, ধ্রুবক অক্ষর *prefix, পূর্ণসংখ্যা prefix_দৈর্ঘ্য)
 {
-	int i, errs = 0;
-	struct cache_entry *last_ce = NULL;
+	পূর্ণসংখ্যা i, errs = 0;
+	কাঠামো cache_entry *last_ce = ফাঁকা;
 
-	for (i = 0; i < index->cache_nr ; i++) {
-		struct cache_entry *ce = index->cache[i];
+	জন্য (i = 0; i < সূচক->cache_nr ; i++) {
+		কাঠামো cache_entry *ce = সূচক->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			if (!ce_skip_worktree(ce))
+		যদি (S_ISSPARSEDIR(ce->ce_mode)) {
+			যদি (!ce_skip_worktree(ce))
 				BUG("sparse directory '%s' does not have skip-worktree set", ce->name);
 
 			/*
@@ -155,76 +155,76 @@ static int checkout_all(struct index_state *index, const char *prefix, int prefi
 			 * the loop on the current index position (now pointing to the
 			 * first entry inside the expanded sparse directory).
 			 */
-			if (ignore_skip_worktree) {
-				ensure_full_index(index);
-				ce = index->cache[i];
+			যদি (ignore_skip_worktree) {
+				ensure_full_সূচক(সূচক);
+				ce = সূচক->cache[i];
 			}
 		}
 
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			continue;
-		if (ce_stage(ce) != checkout_stage
+		যদি (!ignore_skip_worktree && ce_skip_worktree(ce))
+			চালু;
+		যদি (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
-		if (prefix && *prefix &&
-		    (ce_namelen(ce) <= prefix_length ||
-		     memcmp(prefix, ce->name, prefix_length)))
-			continue;
-		if (last_ce && to_tempfile) {
-			if (ce_namelen(last_ce) != ce_namelen(ce)
+			চালু;
+		যদি (prefix && *prefix &&
+		    (ce_namelen(ce) <= prefix_দৈর্ঘ্য ||
+		     memcmp(prefix, ce->name, prefix_দৈর্ঘ্য)))
+			চালু;
+		যদি (last_ce && to_tempfile) {
+			যদি (ce_namelen(last_ce) != ce_namelen(ce)
 			    || memcmp(last_ce->name, ce->name, ce_namelen(ce)))
 				write_tempfile_record(last_ce->name, prefix);
 		}
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		যদি (checkout_entry(ce, &state,
+				   to_tempfile ? topath[ce_stage(ce)] : ফাঁকা,
+				   ফাঁকা) < 0)
 			errs++;
 		last_ce = ce;
 	}
-	if (last_ce && to_tempfile)
+	যদি (last_ce && to_tempfile)
 		write_tempfile_record(last_ce->name, prefix);
-	return !!errs;
+	ফেরত !!errs;
 }
 
-static const char * const builtin_checkout_index_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক builtin_checkout_সূচক_usage[] = {
 	N_("git checkout-index [<options>] [--] [<file>...]"),
-	NULL
+	ফাঁকা
 };
 
-static int option_parse_stage(const struct option *opt,
-			      const char *arg, int unset)
+স্থির পূর্ণসংখ্যা option_parse_stage(ধ্রুবক কাঠামো option *opt,
+			      ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	int *stage = opt->value;
+	পূর্ণসংখ্যা *stage = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "all")) {
+	যদি (!strcmp(arg, "all")) {
 		*stage = CHECKOUT_ALL;
-	} else {
-		int ch = arg[0];
-		if ('1' <= ch && ch <= '3')
+	} অন্যথা {
+		পূর্ণসংখ্যা ch = arg[0];
+		যদি ('1' <= ch && ch <= '3')
 			*stage = arg[0] - '0';
-		else
+		অন্যথা
 			die(_("stage should be between 1 and 3 or all"));
 	}
-	return 0;
+	ফেরত 0;
 }
 
-int cmd_checkout_index(int argc,
-		       const char **argv,
-		       const char *prefix,
-		       struct repository *repo)
+পূর্ণসংখ্যা cmd_checkout_সূচক(পূর্ণসংখ্যা argc,
+		       ধ্রুবক অক্ষর **argv,
+		       ধ্রুবক অক্ষর *prefix,
+		       কাঠামো repository *repo)
 {
-	int i;
-	struct lock_file lock_file = LOCK_INIT;
-	int all = 0;
-	int read_from_stdin = 0;
-	int prefix_length;
-	int force = 0, quiet = 0, not_new = 0;
-	int index_opt = 0;
-	int err = 0;
-	int pc_workers, pc_threshold;
-	struct option builtin_checkout_index_options[] = {
+	পূর্ণসংখ্যা i;
+	কাঠামো lock_file lock_file = LOCK_INIT;
+	পূর্ণসংখ্যা all = 0;
+	পূর্ণসংখ্যা read_from_stdin = 0;
+	পূর্ণসংখ্যা prefix_দৈর্ঘ্য;
+	পূর্ণসংখ্যা force = 0, quiet = 0, not_new = 0;
+	পূর্ণসংখ্যা সূচক_opt = 0;
+	পূর্ণসংখ্যা err = 0;
+	পূর্ণসংখ্যা pc_workers, pc_threshold;
+	কাঠামো option builtin_checkout_সূচক_options[] = {
 		OPT_BOOL('a', "all", &all,
 			N_("check out all files in the index")),
 		OPT_BOOL(0, "ignore-skip-worktree-bits", &ignore_skip_worktree,
@@ -234,9 +234,9 @@ int cmd_checkout_index(int argc,
 			N_("no warning for existing files and files not in index")),
 		OPT_BOOL('n', "no-create", &not_new,
 			N_("don't checkout new files")),
-		OPT_BOOL('u', "index", &index_opt,
+		OPT_BOOL('u', "index", &সূচক_opt,
 			 N_("update stat information in the index file")),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', ফাঁকা, &nul_term_সারি,
 			N_("paths are separated with NUL character")),
 		OPT_BOOL(0, "stdin", &read_from_stdin,
 			N_("read list of paths from the standard input")),
@@ -251,100 +251,100 @@ int cmd_checkout_index(int argc,
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_checkout_index_usage,
-					 builtin_checkout_index_options);
-	repo_config(repo, git_default_config, NULL);
-	prefix_length = prefix ? strlen(prefix) : 0;
+					 builtin_checkout_সূচক_usage,
+					 builtin_checkout_সূচক_options);
+	repo_config(repo, git_default_config, ফাঁকা);
+	prefix_দৈর্ঘ্য = prefix ? strlen(prefix) : 0;
 
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_full_সূচক = 0;
 
-	if (repo_read_index(repo) < 0) {
+	যদি (repo_read_সূচক(repo) < 0) {
 		die("invalid cache");
 	}
 
-	argc = parse_options(argc, argv, prefix, builtin_checkout_index_options,
-			builtin_checkout_index_usage, 0);
-	state.istate = repo->index;
+	argc = parse_options(argc, argv, prefix, builtin_checkout_সূচক_options,
+			builtin_checkout_সূচক_usage, 0);
+	state.istate = repo->সূচক;
 	state.force = force;
 	state.quiet = quiet;
 	state.not_new = not_new;
 
-	if (!state.base_dir)
+	যদি (!state.base_dir)
 		state.base_dir = "";
 	state.base_dir_len = strlen(state.base_dir);
 
-	if (to_tempfile < 0)
+	যদি (to_tempfile < 0)
 		to_tempfile = (checkout_stage == CHECKOUT_ALL);
-	if (!to_tempfile && checkout_stage == CHECKOUT_ALL)
+	যদি (!to_tempfile && checkout_stage == CHECKOUT_ALL)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--stage=all", "--no-temp");
 
 	/*
 	 * when --prefix is specified we do not want to update cache.
 	 */
-	if (index_opt && !state.base_dir_len && !to_tempfile) {
+	যদি (সূচক_opt && !state.base_dir_len && !to_tempfile) {
 		state.refresh_cache = 1;
-		state.istate = repo->index;
-		repo_hold_locked_index(repo, &lock_file,
+		state.istate = repo->সূচক;
+		repo_hold_locked_সূচক(repo, &lock_file,
 				       LOCK_DIE_ON_ERROR);
 	}
 
 	get_parallel_checkout_configs(&pc_workers, &pc_threshold);
-	if (pc_workers > 1)
+	যদি (pc_workers > 1)
 		init_parallel_checkout();
 
 	/* Check out named files first */
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		char *p;
+	জন্য (i = 0; i < argc; i++) {
+		ধ্রুবক অক্ষর *arg = argv[i];
+		অক্ষর *p;
 
-		if (all)
+		যদি (all)
 			die("git checkout-index: don't mix '--all' and explicit filenames");
-		if (read_from_stdin)
+		যদি (read_from_stdin)
 			die("git checkout-index: don't mix '--stdin' and explicit filenames");
-		p = prefix_path(repo, prefix, prefix_length, arg);
-		err |= checkout_file(repo->index, p, prefix);
-		free(p);
+		p = prefix_path(repo, prefix, prefix_দৈর্ঘ্য, arg);
+		err |= checkout_file(repo->সূচক, p, prefix);
+		মুক্ত(p);
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	যদি (read_from_stdin) {
+		কাঠামো strbuf buf = STRBUF_INIT;
+		কাঠামো strbuf unquoted = STRBUF_INIT;
 		strbuf_getline_fn getline_fn;
 
-		if (all)
+		যদি (all)
 			die("git checkout-index: don't mix '--all' and '--stdin'");
 
-		getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		getline_fn = nul_term_সারি ? strbuf_getline_nul : strbuf_getline_lf;
+		যখন (getline_fn(&buf, stdin) != EOF) {
+			অক্ষর *p;
+			যদি (!nul_term_সারি && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				যদি (unquote_c_style(&unquoted, buf.buf, ফাঁকা))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
-			p = prefix_path(repo, prefix, prefix_length, buf.buf);
-			err |= checkout_file(repo->index, p, prefix);
-			free(p);
+			p = prefix_path(repo, prefix, prefix_দৈর্ঘ্য, buf.buf);
+			err |= checkout_file(repo->সূচক, p, prefix);
+			মুক্ত(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
 	}
 
-	if (all)
-		err |= checkout_all(repo->index, prefix, prefix_length);
+	যদি (all)
+		err |= checkout_all(repo->সূচক, prefix, prefix_দৈর্ঘ্য);
 
-	if (pc_workers > 1)
+	যদি (pc_workers > 1)
 		err |= run_parallel_checkout(&state, pc_workers, pc_threshold,
-					     NULL, NULL);
+					     ফাঁকা, ফাঁকা);
 
-	if (err)
-		return 1;
+	যদি (err)
+		ফেরত 1;
 
-	if (is_lock_file_locked(&lock_file) &&
-	    write_locked_index(repo->index, &lock_file, COMMIT_LOCK))
+	যদি (is_lock_file_locked(&lock_file) &&
+	    write_locked_সূচক(repo->সূচক, &lock_file, COMMIT_LOCK))
 		die("Unable to write new index file");
-	return 0;
+	ফেরত 0;
 }

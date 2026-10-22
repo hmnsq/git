@@ -6,248 +6,248 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
+#অন্তর্ভাব "builtin.h"
 
-#include "attr.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "ident.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "string-list.h"
+#অন্তর্ভাব "attr.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "editor.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "ident.h"
+#অন্তর্ভাব "pager.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "path.h"
+#অন্তর্ভাব "refs.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "strbuf.h"
+#অন্তর্ভাব "string-list.h"
 
-static const char * const var_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
-	NULL
+	ফাঁকা
 };
 
-enum ident_part {
+গণনা ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+স্থির অক্ষর *ident_part(ধ্রুবক অক্ষর *ident, গণনা ident_part part)
 {
-	struct ident_split split;
+	কাঠামো ident_split split;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	যদি (!ident)
+		ফেরত ফাঁকা;
+	যদি (split_ident_সারি(&split, ident, strlen(ident)))
+		ফেরত ফাঁকা;
 
-	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	নির্বাচন (part) {
+	ক্ষেত্র IDENT_NAME:
+		যদি (!split.name_begin || !split.name_end)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
+		ফেরত xmemdupz(split.name_begin,
 				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+	ক্ষেত্র IDENT_MAIL:
+		যদি (!split.mail_begin || !split.mail_end)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
+		ফেরত xmemdupz(split.mail_begin,
 				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+	ক্ষেত্র IDENT_DATE:
+		যদি (!split.date_begin || !split.tz_end)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
+		ফেরত xmemdupz(split.date_begin,
 				split.tz_end - split.date_begin);
-	default:
+	পূর্বনির্ধারিত:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+স্থির অক্ষর *committer(পূর্ণসংখ্যা ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	ফেরত xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+স্থির অক্ষর *committer_name(পূর্ণসংখ্যা ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	ফেরত ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+স্থির অক্ষর *committer_email(পূর্ণসংখ্যা ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	ফেরত ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+স্থির অক্ষর *committer_date(পূর্ণসংখ্যা ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	ফেরত ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+স্থির অক্ষর *author(পূর্ণসংখ্যা ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	ফেরত xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+স্থির অক্ষর *author_name(পূর্ণসংখ্যা ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	ফেরত ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+স্থির অক্ষর *author_email(পূর্ণসংখ্যা ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	ফেরত ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+স্থির অক্ষর *author_date(পূর্ণসংখ্যা ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	ফেরত ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+স্থির অক্ষর *editor(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_editor());
+	ফেরত xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+স্থির অক্ষর *sequence_editor(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	ফেরত xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+স্থির অক্ষর *pager(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	ধ্রুবক অক্ষর *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	যদি (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	ফেরত xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+স্থির অক্ষর *default_branch(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	return repo_default_branch_name(the_repository, 1);
+	ফেরত repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+স্থির অক্ষর *shell_path(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	return git_shell_path();
+	ফেরত git_shell_path();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+স্থির অক্ষর *git_attr_val_system(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
+	যদি (git_attr_system_is_enabled()) {
+		অক্ষর *file = xstrdup(git_attr_system_file());
 		normalize_path_copy(file, file);
-		return file;
+		ফেরত file;
 	}
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+স্থির অক্ষর *git_attr_val_global(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
+	অক্ষর *file = xstrdup_or_null(git_attr_global_file());
+	যদি (file) {
 		normalize_path_copy(file, file);
-		return file;
+		ফেরত file;
 	}
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+স্থির অক্ষর *git_config_val_system(পূর্ণসংখ্যা ident_flag UNUSED)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
+	যদি (git_config_system()) {
+		অক্ষর *file = git_system_config();
 		normalize_path_copy(file, file);
-		return file;
+		ফেরত file;
 	}
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-static void git_config_val_global(struct string_list *list)
+স্থির শূন্য git_config_val_global(কাঠামো string_list *list)
 {
-	char *user, *xdg;
+	অক্ষর *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
+	যদি (xdg && *xdg) {
 		normalize_path_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
+	যদি (user && *user) {
 		normalize_path_copy(user, user);
 		string_list_append(list, user);
 	}
-	free(xdg);
-	free(user);
+	মুক্ত(xdg);
+	মুক্ত(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+কাঠামো git_var {
+	ধ্রুবক অক্ষর *name;
+	অক্ষর *(*পঠ)(পূর্ণসংখ্যা);
+	শূন্য (*multiread)(কাঠামো string_list *);
 };
-static struct git_var git_vars[] = {
+স্থির কাঠামো git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
-		.read = committer,
+		.পঠ = committer,
 	},
 	{
 		.name = "GIT_COMMITTER_NAME",
-		.read = committer_name,
+		.পঠ = committer_name,
 	},
 	{
 		.name = "GIT_COMMITTER_EMAIL",
-		.read = committer_email,
+		.পঠ = committer_email,
 	},
 	{
 		.name = "GIT_COMMITTER_DATE",
-		.read = committer_date,
+		.পঠ = committer_date,
 	},
 	{
 		.name = "GIT_AUTHOR_IDENT",
-		.read = author,
+		.পঠ = author,
 	},
 	{
 		.name = "GIT_AUTHOR_NAME",
-		.read = author_name,
+		.পঠ = author_name,
 	},
 	{
 		.name = "GIT_AUTHOR_EMAIL",
-		.read = author_email,
+		.পঠ = author_email,
 	},
 	{
 		.name = "GIT_AUTHOR_DATE",
-		.read = author_date,
+		.পঠ = author_date,
 	},
 	{
 		.name = "GIT_EDITOR",
-		.read = editor,
+		.পঠ = editor,
 	},
 	{
 		.name = "GIT_SEQUENCE_EDITOR",
-		.read = sequence_editor,
+		.পঠ = sequence_editor,
 	},
 	{
 		.name = "GIT_PAGER",
-		.read = pager,
+		.পঠ = pager,
 	},
 	{
 		.name = "GIT_DEFAULT_BRANCH",
-		.read = default_branch,
+		.পঠ = default_branch,
 	},
 	{
 		.name = "GIT_SHELL_PATH",
-		.read = shell_path,
+		.পঠ = shell_path,
 	},
 	{
 		.name = "GIT_ATTR_SYSTEM",
-		.read = git_attr_val_system,
+		.পঠ = git_attr_val_system,
 	},
 	{
 		.name = "GIT_ATTR_GLOBAL",
-		.read = git_attr_val_global,
+		.পঠ = git_attr_val_global,
 	},
 	{
 		.name = "GIT_CONFIG_SYSTEM",
-		.read = git_config_val_system,
+		.পঠ = git_config_val_system,
 	},
 	{
 		.name = "GIT_CONFIG_GLOBAL",
@@ -255,74 +255,74 @@ static struct git_var git_vars[] = {
 	},
 	{
 		.name = "",
-		.read = NULL,
+		.পঠ = ফাঁকা,
 	},
 };
 
-static void list_vars(int nul_term)
+স্থির শূন্য list_vars(পূর্ণসংখ্যা nul_term)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	কাঠামো git_var *ptr;
+	অক্ষর delim = nul_term ? '\n' : '=';
+	অক্ষর term = nul_term ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	জন্য (ptr = git_vars; ptr->পঠ || ptr->multiread; ptr++) {
+		যদি (ptr->পঠ) {
+			অক্ষর *val = ptr->পঠ(0);
 
-			if (val) {
+			যদি (val) {
 				printf("%s%c%s%c", ptr->name, delim, val, term);
-				free(val);
+				মুক্ত(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} অন্যথা {
+			কাঠামো string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
+			জন্য (আকার_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+				       list.বস্তুসমূহ[i].string, term);
 			string_list_clear(&list, 0);
 		}
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+স্থির ধ্রুবক কাঠামো git_var *get_git_var(ধ্রুবক অক্ষর *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	কাঠামো git_var *ptr;
+	জন্য (ptr = git_vars; ptr->পঠ || ptr->multiread; ptr++) {
+		যদি (strcmp(var, ptr->name) == 0) {
+			ফেরত ptr;
 		}
 	}
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+স্থির পূর্ণসংখ্যা show_config(ধ্রুবক অক্ষর *var, ধ্রুবক অক্ষর *মান,
+		       ধ্রুবক কাঠামো config_context *ctx, শূন্য *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	পূর্ণসংখ্যা *nul_term = cb;
+	অক্ষর delim = *nul_term ? '\n' : '=';
+	অক্ষর term = *nul_term ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
-	else
+	যদি (মান)
+		printf("%s%c%s%c", var, delim, মান, term);
+	অন্যথা
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	ফেরত git_default_config(var, মান, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_var(পূর্ণসংখ্যা argc,
+	    ধ্রুবক অক্ষর **argv,
+	    ধ্রুবক অক্ষর *prefix,
+	    কাঠামো repository *repo UNUSED)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
-		OPT_BOOL('l', NULL, &list,
+	পূর্ণসংখ্যা list = 0;
+	পূর্ণসংখ্যা nul_term = 0;
+	অক্ষর delim;
+	অক্ষর term;
+	কাঠামো option options[] = {
+		OPT_BOOL('l', ফাঁকা, &list,
 			 N_("list all variables")),
-		OPT_BOOL('z', NULL, &nul_term,
+		OPT_BOOL('z', ফাঁকা, &nul_term,
 			 N_("terminate entries with NUL")),
 		OPT_END(),
 	};
@@ -330,61 +330,61 @@ int cmd_var(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	যদি (list) {
+		যদি (argc)
 			usage_with_options(var_usage, options);
 		repo_config(the_repository, show_config, &nul_term);
 		list_vars(nul_term);
-		return 0;
+		ফেরত 0;
 	}
 
-	if (!argc)
+	যদি (!argc)
 		usage_with_options(var_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 
 	delim = nul_term ? '\n' : '=';
 	term = nul_term ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	জন্য (পূর্ণসংখ্যা i = 0; i < argc; i++) {
+		ধ্রুবক কাঠামো git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		যদি (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		যদি (git_var->পঠ) {
+			অক্ষর *val = git_var->পঠ(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
-				continue;
+			যদি (!val) {
+				যদি (argc == 1)
+					ফেরত 1;
+				চালু;
 			}
-			if (argc == 1)
+			যদি (argc == 1)
 				printf("%s%c", val, term);
-			else
+			অন্যথা
 				printf("%s%c%s%c", git_var->name, delim,
 				       val, term);
-			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+			মুক্ত(val);
+		} অন্যথা {
+			কাঠামো string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			যদি (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				ফেরত 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
-					printf("%s%c", list.items[j].string,
+			জন্য (আকার_t j = 0; j < list.nr; j++) {
+				যদি (argc == 1)
+					printf("%s%c", list.বস্তুসমূহ[j].string,
 					       term);
-				else
+				অন্যথা
 					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+					       list.বস্তুসমূহ[j].string, term);
 			}
 			string_list_clear(&list, 0);
 		}
 	}
 
-	return 0;
+	ফেরত 0;
 }

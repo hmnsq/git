@@ -7,31 +7,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "tree-walk.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/transaction.h"
-#include "refs.h"
-#include "resolve-undo.h"
-#include "parse-options.h"
-#include "pathspec.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "split-index.h"
-#include "symlinks.h"
-#include "fsmonitor.h"
-#include "write-or-die.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hash.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "lockfile.h"
+#অন্তর্ভাব "quote.h"
+#অন্তর্ভাব "cache-tree.h"
+#অন্তর্ভাব "tree-walk.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "odb.h"
+#অন্তর্ভাব "odb/transaction.h"
+#অন্তর্ভাব "refs.h"
+#অন্তর্ভাব "resolve-undo.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "pathspec.h"
+#অন্তর্ভাব "dir.h"
+#অন্তর্ভাব "read-cache.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "sparse-index.h"
+#অন্তর্ভাব "split-index.h"
+#অন্তর্ভাব "symlinks.h"
+#অন্তর্ভাব "fsmonitor.h"
+#অন্তর্ভাব "write-or-die.h"
 
 /*
  * Default to not allowing changes to the list of files. The
@@ -40,22 +40,22 @@
  * like "git update-index *" and suddenly having all the object
  * files be revision controlled.
  */
-static int allow_add;
-static int allow_remove;
-static int allow_replace;
-static int info_only;
-static int force_remove;
-static int verbose;
-static int mark_valid_only;
-static int mark_skip_worktree_only;
-static int mark_fsmonitor_only;
-static int ignore_skip_worktree_entries;
+স্থির পূর্ণসংখ্যা allow_add;
+স্থির পূর্ণসংখ্যা allow_remove;
+স্থির পূর্ণসংখ্যা allow_replace;
+স্থির পূর্ণসংখ্যা info_only;
+স্থির পূর্ণসংখ্যা force_remove;
+স্থির পূর্ণসংখ্যা verbose;
+স্থির পূর্ণসংখ্যা mark_valid_only;
+স্থির পূর্ণসংখ্যা mark_skip_worktree_only;
+স্থির পূর্ণসংখ্যা mark_fsmonitor_only;
+স্থির পূর্ণসংখ্যা ignore_skip_worktree_entries;
 #define MARK_FLAG 1
 #define UNMARK_FLAG 2
-static struct strbuf mtime_dir = STRBUF_INIT;
+স্থির কাঠামো strbuf mtime_dir = STRBUF_INIT;
 
 /* Untracked cache mode */
-enum uc_mode {
+গণনা uc_mode {
 	UC_UNSPECIFIED = -1,
 	UC_DISABLE = 0,
 	UC_ENABLE,
@@ -64,12 +64,12 @@ enum uc_mode {
 };
 
 __attribute__((format (printf, 1, 2)))
-static void report(const char *fmt, ...)
+স্থির শূন্য report(ধ্রুবক অক্ষর *fmt, ...)
 {
 	va_list vp;
 
-	if (!verbose)
-		return;
+	যদি (!verbose)
+		ফেরত;
 
 	va_start(vp, fmt);
 	vprintf(fmt, vp);
@@ -77,57 +77,57 @@ static void report(const char *fmt, ...)
 	va_end(vp);
 }
 
-static void remove_test_directory(void)
+স্থির শূন্য remove_test_directory(শূন্য)
 {
-	if (mtime_dir.len)
+	যদি (mtime_dir.len)
 		remove_dir_recursively(&mtime_dir, 0);
 }
 
-static const char *get_mtime_path(const char *path)
+স্থির ধ্রুবক অক্ষর *get_mtime_path(ধ্রুবক অক্ষর *path)
 {
-	static struct strbuf sb = STRBUF_INIT;
+	স্থির কাঠামো strbuf sb = STRBUF_INIT;
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/%s", mtime_dir.buf, path);
-	return sb.buf;
+	ফেরত sb.buf;
 }
 
-static void xmkdir(const char *path)
+স্থির শূন্য xmkdir(ধ্রুবক অক্ষর *path)
 {
 	path = get_mtime_path(path);
-	if (mkdir(path, 0700))
+	যদি (mkdir(path, 0700))
 		die_errno(_("failed to create directory %s"), path);
 }
 
-static int xstat_mtime_dir(struct stat *st)
+স্থির পূর্ণসংখ্যা xstat_mtime_dir(কাঠামো stat *st)
 {
-	if (stat(mtime_dir.buf, st))
+	যদি (stat(mtime_dir.buf, st))
 		die_errno(_("failed to stat %s"), mtime_dir.buf);
-	return 0;
+	ফেরত 0;
 }
 
-static int create_file(const char *path)
+স্থির পূর্ণসংখ্যা create_file(ধ্রুবক অক্ষর *path)
 {
-	int fd;
+	পূর্ণসংখ্যা fd;
 	path = get_mtime_path(path);
 	fd = xopen(path, O_CREAT | O_RDWR, 0644);
-	return fd;
+	ফেরত fd;
 }
 
-static void xunlink(const char *path)
+স্থির শূন্য xunlink(ধ্রুবক অক্ষর *path)
 {
 	path = get_mtime_path(path);
-	if (unlink(path))
+	যদি (unlink(path))
 		die_errno(_("failed to delete file %s"), path);
 }
 
-static void xrmdir(const char *path)
+স্থির শূন্য xrmdir(ধ্রুবক অক্ষর *path)
 {
 	path = get_mtime_path(path);
-	if (rmdir(path))
+	যদি (rmdir(path))
 		die_errno(_("failed to delete directory %s"), path);
 }
 
-static void avoid_racy(void)
+স্থির শূন্য avoid_racy(শূন্য)
 {
 	/*
 	 * not use if we could usleep(10) if core.useNanosec is enabled. The
@@ -137,133 +137,133 @@ static void avoid_racy(void)
 	sleep(1);
 }
 
-static int test_if_untracked_cache_is_supported(void)
+স্থির পূর্ণসংখ্যা test_if_untracked_cache_is_supported(শূন্য)
 {
-	struct stat st;
-	struct stat_data base;
-	int fd, ret = 0;
-	char *cwd;
+	কাঠামো stat st;
+	কাঠামো stat_তথ্য base;
+	পূর্ণসংখ্যা fd, ret = 0;
+	অক্ষর *cwd;
 
 	strbuf_addstr(&mtime_dir, "mtime-test-XXXXXX");
-	if (!mkdtemp(mtime_dir.buf))
+	যদি (!mkdtemp(mtime_dir.buf))
 		die_errno("Could not make temporary directory");
 
 	cwd = xgetcwd();
 	fprintf(stderr, _("Testing mtime in '%s' "), cwd);
-	free(cwd);
+	মুক্ত(cwd);
 
 	atexit(remove_test_directory);
 	xstat_mtime_dir(&st);
-	fill_stat_data(&base, &st);
+	fill_stat_তথ্য(&base, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	fd = create_file("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	যদি (!match_stat_তথ্য(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr,_("directory stat info does not "
 				    "change after adding a new file"));
-		goto done;
+		যাও done;
 	}
-	fill_stat_data(&base, &st);
+	fill_stat_তথ্য(&base, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	xmkdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	যদি (!match_stat_তথ্য(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not change "
 				     "after adding a new directory"));
-		goto done;
+		যাও done;
 	}
-	fill_stat_data(&base, &st);
+	fill_stat_তথ্য(&base, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	write_or_die(fd, "data", 4);
 	close(fd);
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	যদি (match_stat_তথ্য(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes "
 				     "after updating a file"));
-		goto done;
+		যাও done;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	close(create_file("new-dir/new"));
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	যদি (match_stat_তথ্য(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes after "
 				     "adding a file inside subdirectory"));
-		goto done;
+		যাও done;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	xunlink("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	যদি (!match_stat_তথ্য(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a file"));
-		goto done;
+		যাও done;
 	}
-	fill_stat_data(&base, &st);
+	fill_stat_তথ্য(&base, &st);
 	fputc('.', stderr);
 
 	avoid_racy();
 	xunlink("new-dir/new");
 	xrmdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	যদি (!match_stat_তথ্য(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a directory"));
-		goto done;
+		যাও done;
 	}
 
-	if (rmdir(mtime_dir.buf))
+	যদি (rmdir(mtime_dir.buf))
 		die_errno(_("failed to delete directory %s"), mtime_dir.buf);
 	fprintf_ln(stderr, _(" OK"));
 	ret = 1;
 
 done:
 	strbuf_release(&mtime_dir);
-	return ret;
+	ফেরত ret;
 }
 
-static int mark_ce_flags(const char *path, int flag, int mark)
+স্থির পূর্ণসংখ্যা mark_ce_flags(ধ্রুবক অক্ষর *path, পূর্ণসংখ্যা flag, পূর্ণসংখ্যা mark)
 {
-	int namelen = strlen(path);
-	int pos = index_name_pos(the_repository->index, path, namelen);
-	if (0 <= pos) {
-		mark_fsmonitor_invalid(the_repository->index, the_repository->index->cache[pos]);
-		if (mark)
-			the_repository->index->cache[pos]->ce_flags |= flag;
-		else
-			the_repository->index->cache[pos]->ce_flags &= ~flag;
-		the_repository->index->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
-		cache_tree_invalidate_path(the_repository->index, path);
-		the_repository->index->cache_changed |= CE_ENTRY_CHANGED;
-		return 0;
+	পূর্ণসংখ্যা namelen = strlen(path);
+	পূর্ণসংখ্যা pos = সূচক_name_pos(the_repository->সূচক, path, namelen);
+	যদি (0 <= pos) {
+		mark_fsmonitor_invalid(the_repository->সূচক, the_repository->সূচক->cache[pos]);
+		যদি (mark)
+			the_repository->সূচক->cache[pos]->ce_flags |= flag;
+		অন্যথা
+			the_repository->সূচক->cache[pos]->ce_flags &= ~flag;
+		the_repository->সূচক->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
+		cache_বৃক্ষ_invalidate_path(the_repository->সূচক, path);
+		the_repository->সূচক->cache_changed |= CE_ENTRY_CHANGED;
+		ফেরত 0;
 	}
-	return -1;
+	ফেরত -1;
 }
 
-static int remove_one_path(const char *path)
+স্থির পূর্ণসংখ্যা remove_one_path(ধ্রুবক অক্ষর *path)
 {
-	if (!allow_remove)
-		return error("%s: does not exist and --remove not passed", path);
-	if (remove_file_from_index(the_repository->index, path))
-		return error("%s: cannot remove from the index", path);
-	return 0;
+	যদি (!allow_remove)
+		ফেরত error("%s: does not exist and --remove not passed", path);
+	যদি (remove_file_from_সূচক(the_repository->সূচক, path))
+		ফেরত error("%s: cannot remove from the index", path);
+	ফেরত 0;
 }
 
 /*
@@ -273,41 +273,41 @@ static int remove_one_path(const char *path)
  *    succeeds.
  *  - permission error. That's never ok.
  */
-static int process_lstat_error(const char *path, int err)
+স্থির পূর্ণসংখ্যা process_lstat_error(ধ্রুবক অক্ষর *path, পূর্ণসংখ্যা err)
 {
-	if (is_missing_file_error(err))
-		return remove_one_path(path);
-	return error("lstat(\"%s\"): %s", path, strerror(err));
+	যদি (is_missing_file_error(err))
+		ফেরত remove_one_path(path);
+	ফেরত error("lstat(\"%s\"): %s", path, strerror(err));
 }
 
-static int add_one_path(const struct cache_entry *old, const char *path, int len, struct stat *st)
+স্থির পূর্ণসংখ্যা add_one_path(ধ্রুবক কাঠামো cache_entry *old, ধ্রুবক অক্ষর *path, পূর্ণসংখ্যা len, কাঠামো stat *st)
 {
-	int option;
-	struct cache_entry *ce;
+	পূর্ণসংখ্যা option;
+	কাঠামো cache_entry *ce;
 
 	/* Was the old index entry already up-to-date? */
-	if (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
-		return 0;
+	যদি (old && !ce_stage(old) && !ie_match_stat(the_repository->সূচক, old, st, 0))
+		ফেরত 0;
 
-	ce = make_empty_cache_entry(the_repository->index, len);
+	ce = make_empty_cache_entry(the_repository->সূচক, len);
 	memcpy(ce->name, path, len);
 	ce->ce_flags = create_ce_flags(0);
 	ce->ce_namelen = len;
-	fill_stat_cache_info(the_repository->index, ce, st);
+	fill_stat_cache_info(the_repository->সূচক, ce, st);
 	ce->ce_mode = ce_mode_from_stat(the_repository, old, st->st_mode);
 
-	if (index_path(the_repository->index, &ce->oid, path, st,
-		       info_only ? 0 : INDEX_WRITE_OBJECT)) {
+	যদি (সূচক_path(the_repository->সূচক, &ce->oid, path, st,
+		       info_only ? 0 : সূচক_WRITE_OBJECT)) {
 		discard_cache_entry(ce);
-		return -1;
+		ফেরত -1;
 	}
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option)) {
+	যদি (add_সূচক_entry(the_repository->সূচক, ce, option)) {
 		discard_cache_entry(ce);
-		return error("%s: cannot add to the index - missing --add option?", path);
+		ফেরত error("%s: cannot add to the index - missing --add option?", path);
 	}
-	return 0;
+	ফেরত 0;
 }
 
 /*
@@ -333,192 +333,192 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
  *  - it doesn't exist at all in the index, but it is a valid
  *    git directory, and it should be *added* as a gitlink.
  */
-static int process_directory(const char *path, int len, struct stat *st)
+স্থির পূর্ণসংখ্যা process_directory(ধ্রুবক অক্ষর *path, পূর্ণসংখ্যা len, কাঠামো stat *st)
 {
-	struct object_id oid;
-	int pos = index_name_pos(the_repository->index, path, len);
+	কাঠামো object_id oid;
+	পূর্ণসংখ্যা pos = সূচক_name_pos(the_repository->সূচক, path, len);
 
 	/* Exact match: file or existing gitlink */
-	if (pos >= 0) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		if (S_ISGITLINK(ce->ce_mode)) {
+	যদি (pos >= 0) {
+		ধ্রুবক কাঠামো cache_entry *ce = the_repository->সূচক->cache[pos];
+		যদি (S_ISGITLINK(ce->ce_mode)) {
 
 			/* Do nothing to the index if there is no HEAD! */
-			if (repo_resolve_gitlink_ref(the_repository, path,
+			যদি (repo_resolve_gitlink_ref(the_repository, path,
 						     "HEAD", &oid) < 0)
-				return 0;
+				ফেরত 0;
 
-			return add_one_path(ce, path, len, st);
+			ফেরত add_one_path(ce, path, len, st);
 		}
 		/* Should this be an unconditional error? */
-		return remove_one_path(path);
+		ফেরত remove_one_path(path);
 	}
 
 	/* Inexact match: is there perhaps a subdirectory match? */
 	pos = -pos-1;
-	while (pos < the_repository->index->cache_nr) {
-		const struct cache_entry *ce = the_repository->index->cache[pos++];
+	যখন (pos < the_repository->সূচক->cache_nr) {
+		ধ্রুবক কাঠামো cache_entry *ce = the_repository->সূচক->cache[pos++];
 
-		if (strncmp(ce->name, path, len))
-			break;
-		if (ce->name[len] > '/')
-			break;
-		if (ce->name[len] < '/')
-			continue;
+		যদি (strncmp(ce->name, path, len))
+			বিরতি;
+		যদি (ce->name[len] > '/')
+			বিরতি;
+		যদি (ce->name[len] < '/')
+			চালু;
 
 		/* Subdirectory match - error out */
-		return error("%s: is a directory - add individual files instead", path);
+		ফেরত error("%s: is a directory - add individual files instead", path);
 	}
 
 	/* No match - should we add it as a gitlink? */
-	if (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
-		return add_one_path(NULL, path, len, st);
+	যদি (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
+		ফেরত add_one_path(ফাঁকা, path, len, st);
 
 	/* Error out. */
-	return error("%s: is a directory - add files inside instead", path);
+	ফেরত error("%s: is a directory - add files inside instead", path);
 }
 
-static int process_path(const char *path, struct stat *st, int stat_errno)
+স্থির পূর্ণসংখ্যা process_path(ধ্রুবক অক্ষর *path, কাঠামো stat *st, পূর্ণসংখ্যা stat_errno)
 {
-	int pos, len;
-	const struct cache_entry *ce;
+	পূর্ণসংখ্যা pos, len;
+	ধ্রুবক কাঠামো cache_entry *ce;
 
 	len = strlen(path);
-	if (has_symlink_leading_path(path, len))
-		return error("'%s' is beyond a symbolic link", path);
+	যদি (has_symlink_leading_path(path, len))
+		ফেরত error("'%s' is beyond a symbolic link", path);
 
-	pos = index_name_pos(the_repository->index, path, len);
-	ce = pos < 0 ? NULL : the_repository->index->cache[pos];
-	if (ce && ce_skip_worktree(ce)) {
+	pos = সূচক_name_pos(the_repository->সূচক, path, len);
+	ce = pos < 0 ? ফাঁকা : the_repository->সূচক->cache[pos];
+	যদি (ce && ce_skip_worktree(ce)) {
 		/*
 		 * working directory version is assumed "good"
 		 * so updating it does not make sense.
 		 * On the other hand, removing it from index should work
 		 */
-		if (!ignore_skip_worktree_entries && allow_remove &&
-		    remove_file_from_index(the_repository->index, path))
-			return error("%s: cannot remove from the index", path);
-		return 0;
+		যদি (!ignore_skip_worktree_entries && allow_remove &&
+		    remove_file_from_সূচক(the_repository->সূচক, path))
+			ফেরত error("%s: cannot remove from the index", path);
+		ফেরত 0;
 	}
 
 	/*
 	 * First things first: get the stat information, to decide
 	 * what to do about the pathname!
 	 */
-	if (stat_errno)
-		return process_lstat_error(path, stat_errno);
+	যদি (stat_errno)
+		ফেরত process_lstat_error(path, stat_errno);
 
-	if (S_ISDIR(st->st_mode))
-		return process_directory(path, len, st);
+	যদি (S_ISDIR(st->st_mode))
+		ফেরত process_directory(path, len, st);
 
-	return add_one_path(ce, path, len, st);
+	ফেরত add_one_path(ce, path, len, st);
 }
 
-static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
-			 const char *path, int stage)
+স্থির পূর্ণসংখ্যা add_cacheinfo(unsigned পূর্ণসংখ্যা mode, ধ্রুবক কাঠামো object_id *oid,
+			 ধ্রুবক অক্ষর *path, পূর্ণসংখ্যা stage)
 {
-	int len, option;
-	struct cache_entry *ce;
+	পূর্ণসংখ্যা len, option;
+	কাঠামো cache_entry *ce;
 
-	if (!verify_path(path, mode))
-		return error("Invalid path '%s'", path);
+	যদি (!verify_path(path, mode))
+		ফেরত error("Invalid path '%s'", path);
 
 	len = strlen(path);
-	ce = make_empty_cache_entry(the_repository->index, len);
+	ce = make_empty_cache_entry(the_repository->সূচক, len);
 
 	oidcpy(&ce->oid, oid);
 	memcpy(ce->name, path, len);
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = len;
 	ce->ce_mode = create_ce_mode(mode);
-	if (assume_unchanged)
+	যদি (assume_unchanged)
 		ce->ce_flags |= CE_VALID;
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option))
-		return error("%s: cannot add to the index - missing --add option?",
+	যদি (add_সূচক_entry(the_repository->সূচক, ce, option))
+		ফেরত error("%s: cannot add to the index - missing --add option?",
 			     path);
 	report("add '%s'", path);
-	return 0;
+	ফেরত 0;
 }
 
-static void chmod_path(char flip, const char *path)
+স্থির শূন্য chmod_path(অক্ষর flip, ধ্রুবক অক্ষর *path)
 {
-	int pos;
-	struct cache_entry *ce;
+	পূর্ণসংখ্যা pos;
+	কাঠামো cache_entry *ce;
 
-	pos = index_name_pos(the_repository->index, path, strlen(path));
-	if (pos < 0)
-		goto fail;
-	ce = the_repository->index->cache[pos];
-	if (chmod_index_entry(the_repository->index, ce, flip) < 0)
-		goto fail;
+	pos = সূচক_name_pos(the_repository->সূচক, path, strlen(path));
+	যদি (pos < 0)
+		যাও fail;
+	ce = the_repository->সূচক->cache[pos];
+	যদি (chmod_সূচক_entry(the_repository->সূচক, ce, flip) < 0)
+		যাও fail;
 
 	report("chmod %cx '%s'", flip, path);
-	return;
+	ফেরত;
  fail:
 	die("git update-index: cannot chmod %cx '%s'", flip, path);
 }
 
-static void update_one(const char *path)
+স্থির শূন্য update_one(ধ্রুবক অক্ষর *path)
 {
-	int stat_errno = 0;
-	struct stat st;
+	পূর্ণসংখ্যা stat_errno = 0;
+	কাঠামো stat st;
 
-	if (mark_valid_only || mark_skip_worktree_only || force_remove ||
+	যদি (mark_valid_only || mark_skip_worktree_only || force_remove ||
 	    mark_fsmonitor_only)
 		st.st_mode = 0;
-	else if (lstat(path, &st) < 0) {
+	অন্যথা যদি (lstat(path, &st) < 0) {
 		st.st_mode = 0;
 		stat_errno = errno;
 	} /* else stat is valid */
 
-	if (!verify_path(path, st.st_mode)) {
+	যদি (!verify_path(path, st.st_mode)) {
 		fprintf(stderr, "Ignoring path %s\n", path);
-		return;
+		ফেরত;
 	}
-	if (mark_valid_only) {
-		if (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
+	যদি (mark_valid_only) {
+		যদি (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		ফেরত;
 	}
-	if (mark_skip_worktree_only) {
-		if (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
+	যদি (mark_skip_worktree_only) {
+		যদি (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		ফেরত;
 	}
-	if (mark_fsmonitor_only) {
-		if (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
+	যদি (mark_fsmonitor_only) {
+		যদি (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		ফেরত;
 	}
 
-	if (force_remove) {
-		if (remove_file_from_index(the_repository->index, path))
+	যদি (force_remove) {
+		যদি (remove_file_from_সূচক(the_repository->সূচক, path))
 			die("git update-index: unable to remove %s", path);
 		report("remove '%s'", path);
-		return;
+		ফেরত;
 	}
-	if (process_path(path, &st, stat_errno))
+	যদি (process_path(path, &st, stat_errno))
 		die("Unable to process path %s", path);
 	report("add '%s'", path);
 }
 
-static void read_index_info(int nul_term_line)
+স্থির শূন্য read_সূচক_info(পূর্ণসংখ্যা nul_term_সারি)
 {
-	const int hexsz = the_hash_algo->hexsz;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf uq = STRBUF_INIT;
+	ধ্রুবক পূর্ণসংখ্যা hexsz = the_hash_algo->hexsz;
+	কাঠামো strbuf buf = STRBUF_INIT;
+	কাঠামো strbuf uq = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		char *ptr, *tab;
-		char *path_name;
-		struct object_id oid;
-		unsigned int mode;
+	getline_fn = nul_term_সারি ? strbuf_getline_nul : strbuf_getline_lf;
+	যখন (getline_fn(&buf, stdin) != EOF) {
+		অক্ষর *ptr, *tab;
+		অক্ষর *path_name;
+		কাঠামো object_id oid;
+		unsigned পূর্ণসংখ্যা mode;
 		unsigned long ul;
-		int stage;
+		পূর্ণসংখ্যা stage;
 
 		/* This reads lines formatted in one of three formats:
 		 *
@@ -538,206 +538,206 @@ static void read_index_info(int nul_term_line)
 		 */
 		errno = 0;
 		ul = strtoul(buf.buf, &ptr, 8);
-		if (ptr == buf.buf || *ptr != ' '
-		    || errno || (unsigned int) ul != ul)
-			goto bad_line;
+		যদি (ptr == buf.buf || *ptr != ' '
+		    || errno || (unsigned পূর্ণসংখ্যা) ul != ul)
+			যাও bad_সারি;
 		mode = ul;
 
 		tab = strchr(ptr, '\t');
-		if (!tab || tab - ptr < hexsz + 1)
-			goto bad_line;
+		যদি (!tab || tab - ptr < hexsz + 1)
+			যাও bad_সারি;
 
-		if (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
+		যদি (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
 			stage = tab[-1] - '0';
 			ptr = tab + 1; /* point at the head of path */
 			tab = tab - 2; /* point at tail of sha1 */
 		}
-		else {
+		অন্যথা {
 			stage = 0;
 			ptr = tab + 1; /* point at the head of path */
 		}
 
-		if (get_oid_hex(tab - hexsz, &oid) ||
+		যদি (get_oid_hex(tab - hexsz, &oid) ||
 			tab[-(hexsz + 1)] != ' ')
-			goto bad_line;
+			যাও bad_সারি;
 
 		path_name = ptr;
-		if (!nul_term_line && path_name[0] == '"') {
+		যদি (!nul_term_সারি && path_name[0] == '"') {
 			strbuf_reset(&uq);
-			if (unquote_c_style(&uq, path_name, NULL)) {
+			যদি (unquote_c_style(&uq, path_name, ফাঁকা)) {
 				die("git update-index: bad quoting of path name");
 			}
 			path_name = uq.buf;
 		}
 
-		if (!verify_path(path_name, mode)) {
+		যদি (!verify_path(path_name, mode)) {
 			fprintf(stderr, "Ignoring path %s\n", path_name);
-			continue;
+			চালু;
 		}
 
-		if (!mode) {
+		যদি (!mode) {
 			/* mode == 0 means there is no such path -- remove */
-			if (remove_file_from_index(the_repository->index, path_name))
+			যদি (remove_file_from_সূচক(the_repository->সূচক, path_name))
 				die("git update-index: unable to remove %s",
 				    ptr);
 		}
-		else {
+		অন্যথা {
 			/* mode ' ' sha1 '\t' name
 			 * ptr[-1] points at tab,
 			 * ptr[-41] is at the beginning of sha1
 			 */
 			ptr[-(hexsz + 2)] = ptr[-1] = 0;
-			if (add_cacheinfo(mode, &oid, path_name, stage))
+			যদি (add_cacheinfo(mode, &oid, path_name, stage))
 				die("git update-index: unable to update %s",
 				    path_name);
 		}
-		continue;
+		চালু;
 
-	bad_line:
+	bad_সারি:
 		die("malformed index info %s", buf.buf);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&uq);
 }
 
-static const char * const update_index_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক update_সূচক_usage[] = {
 	N_("git update-index [<options>] [--] [<file>...]"),
-	NULL
+	ফাঁকা
 };
 
-static struct cache_entry *read_one_ent(const char *which,
-					struct object_id *ent, const char *path,
-					int namelen, int stage)
+স্থির কাঠামো cache_entry *read_one_ent(ধ্রুবক অক্ষর *which,
+					কাঠামো object_id *ent, ধ্রুবক অক্ষর *path,
+					পূর্ণসংখ্যা namelen, পূর্ণসংখ্যা stage)
 {
 	unsigned short mode;
-	struct object_id oid;
-	struct cache_entry *ce;
+	কাঠামো object_id oid;
+	কাঠামো cache_entry *ce;
 
-	if (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
-		if (which)
+	যদি (get_বৃক্ষ_entry(the_repository, ent, path, &oid, &mode)) {
+		যদি (which)
 			error("%s: not in %s branch.", path, which);
-		return NULL;
+		ফেরত ফাঁকা;
 	}
-	if (!the_repository->index->sparse_index && mode == S_IFDIR) {
-		if (which)
+	যদি (!the_repository->সূচক->sparse_সূচক && mode == S_IFDIR) {
+		যদি (which)
 			error("%s: not a blob in %s branch.", path, which);
-		return NULL;
+		ফেরত ফাঁকা;
 	}
-	ce = make_empty_cache_entry(the_repository->index, namelen);
+	ce = make_empty_cache_entry(the_repository->সূচক, namelen);
 
 	oidcpy(&ce->oid, &oid);
 	memcpy(ce->name, path, namelen);
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = namelen;
 	ce->ce_mode = create_ce_mode(mode);
-	return ce;
+	ফেরত ce;
 }
 
-static int unresolve_one(const char *path)
+স্থির পূর্ণসংখ্যা unresolve_one(ধ্রুবক অক্ষর *path)
 {
-	struct string_list_item *item;
-	int res = 0;
+	কাঠামো string_list_item *item;
+	পূর্ণসংখ্যা res = 0;
 
-	if (!the_repository->index->resolve_undo)
-		return res;
-	item = string_list_lookup(the_repository->index->resolve_undo, path);
-	if (!item)
-		return res; /* no resolve-undo record for the path */
-	res = unmerge_index_entry(the_repository->index, path, item->util, 0);
+	যদি (!the_repository->সূচক->resolve_undo)
+		ফেরত res;
+	item = string_list_lookup(the_repository->সূচক->resolve_undo, path);
+	যদি (!item)
+		ফেরত res; /* no resolve-undo record for the path */
+	res = unmerge_সূচক_entry(the_repository->সূচক, path, item->util, 0);
 	FREE_AND_NULL(item->util);
-	return res;
+	ফেরত res;
 }
 
-static int do_unresolve(int ac, const char **av,
-			const char *prefix, int prefix_length)
+স্থির পূর্ণসংখ্যা do_unresolve(পূর্ণসংখ্যা ac, ধ্রুবক অক্ষর **av,
+			ধ্রুবক অক্ষর *prefix, পূর্ণসংখ্যা prefix_দৈর্ঘ্য)
 {
-	int i;
-	int err = 0;
+	পূর্ণসংখ্যা i;
+	পূর্ণসংখ্যা err = 0;
 
-	for (i = 1; i < ac; i++) {
-		const char *arg = av[i];
-		char *p = prefix_path(the_repository, prefix, prefix_length, arg);
+	জন্য (i = 1; i < ac; i++) {
+		ধ্রুবক অক্ষর *arg = av[i];
+		অক্ষর *p = prefix_path(the_repository, prefix, prefix_দৈর্ঘ্য, arg);
 		err |= unresolve_one(p);
-		free(p);
+		মুক্ত(p);
 	}
-	return err;
+	ফেরত err;
 }
 
-static int do_reupdate(const char **paths,
-		       const char *prefix)
+স্থির পূর্ণসংখ্যা do_reupdate(ধ্রুবক অক্ষর **paths,
+		       ধ্রুবক অক্ষর *prefix)
 {
 	/* Read HEAD and run update-index on paths that are
 	 * merged and already different between index and HEAD.
 	 */
-	int pos;
-	int has_head = 1;
-	struct pathspec pathspec;
-	struct object_id head_oid;
+	পূর্ণসংখ্যা pos;
+	পূর্ণসংখ্যা has_শীর্ষ = 1;
+	কাঠামো pathspec pathspec;
+	কাঠামো object_id শীর্ষ_oid;
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, paths);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
+	যদি (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &শীর্ষ_oid))
 		/* If there is no HEAD, that means it is an initial
 		 * commit.  Update everything in the index.
 		 */
-		has_head = 0;
+		has_শীর্ষ = 0;
  redo:
-	for (pos = 0; pos < the_repository->index->cache_nr; pos++) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		struct cache_entry *old = NULL;
-		int save_nr;
-		char *path;
+	জন্য (pos = 0; pos < the_repository->সূচক->cache_nr; pos++) {
+		ধ্রুবক কাঠামো cache_entry *ce = the_repository->সূচক->cache[pos];
+		কাঠামো cache_entry *old = ফাঁকা;
+		পূর্ণসংখ্যা save_nr;
+		অক্ষর *path;
 
-		if (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, NULL))
-			continue;
-		if (has_head)
-			old = read_one_ent(NULL, &head_oid,
+		যদি (ce_stage(ce) || !ce_path_match(the_repository->সূচক, ce, &pathspec, ফাঁকা))
+			চালু;
+		যদি (has_শীর্ষ)
+			old = read_one_ent(ফাঁকা, &শীর্ষ_oid,
 					   ce->name, ce_namelen(ce), 0);
-		if (old && ce->ce_mode == old->ce_mode &&
+		যদি (old && ce->ce_mode == old->ce_mode &&
 		    oideq(&ce->oid, &old->oid)) {
 			discard_cache_entry(old);
-			continue; /* unchanged */
+			চালু; /* unchanged */
 		}
 
 		/* At this point, we know the contents of the sparse directory are
 		 * modified with respect to HEAD, so we expand the index and restart
 		 * to process each path individually
 		 */
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			ensure_full_index(the_repository->index);
-			goto redo;
+		যদি (S_ISSPARSEDIR(ce->ce_mode)) {
+			ensure_full_সূচক(the_repository->সূচক);
+			যাও redo;
 		}
 
 		/* Be careful.  The working tree may not have the
 		 * path anymore, in which case, under 'allow_remove',
 		 * or worse yet 'allow_replace', active_nr may decrease.
 		 */
-		save_nr = the_repository->index->cache_nr;
+		save_nr = the_repository->সূচক->cache_nr;
 		path = xstrdup(ce->name);
 		update_one(path);
-		free(path);
+		মুক্ত(path);
 		discard_cache_entry(old);
-		if (save_nr != the_repository->index->cache_nr)
-			goto redo;
+		যদি (save_nr != the_repository->সূচক->cache_nr)
+			যাও redo;
 	}
 	clear_pathspec(&pathspec);
-	return 0;
+	ফেরত 0;
 }
 
-struct refresh_params {
-	unsigned int flags;
-	int *has_errors;
+কাঠামো refresh_params {
+	unsigned পূর্ণসংখ্যা flags;
+	পূর্ণসংখ্যা *has_errors;
 };
 
-static int refresh(struct refresh_params *o, unsigned int flag)
+স্থির পূর্ণসংখ্যা refresh(কাঠামো refresh_params *o, unsigned পূর্ণসংখ্যা flag)
 {
-	setup_work_tree(the_repository);
-	repo_read_index(the_repository);
-	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, NULL,
-					NULL, NULL);
-	if (has_racy_timestamp(the_repository->index)) {
+	setup_work_বৃক্ষ(the_repository);
+	repo_read_সূচক(the_repository);
+	*o->has_errors |= refresh_সূচক(the_repository->সূচক, o->flags | flag, ফাঁকা,
+					ফাঁকা, ফাঁকা);
+	যদি (has_racy_timestamp(the_repository->সূচক)) {
 		/*
 		 * Even if nothing else has changed, updating the file
 		 * increases the chance that racy timestamps become
@@ -746,136 +746,136 @@ static int refresh(struct refresh_params *o, unsigned int flag)
 		 * refresh_index() as these are no actual errors.
 		 * cmd_status() does the same.
 		 */
-		the_repository->index->cache_changed |= SOMETHING_CHANGED;
+		the_repository->সূচক->cache_changed |= SOMETHING_CHANGED;
 	}
-	return 0;
+	ফেরত 0;
 }
 
-static int refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+স্থির পূর্ণসংখ্যা refresh_callback(ধ্রুবক কাঠামো option *opt,
+				ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, 0);
+	ফেরত refresh(opt->মান, 0);
 }
 
-static int really_refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+স্থির পূর্ণসংখ্যা really_refresh_callback(ধ্রুবক কাঠামো option *opt,
+				ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, REFRESH_REALLY);
+	ফেরত refresh(opt->মান, REFRESH_REALLY);
 }
 
-static int chmod_callback(const struct option *opt,
-				const char *arg, int unset)
+স্থির পূর্ণসংখ্যা chmod_callback(ধ্রুবক কাঠামো option *opt,
+				ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	char *flip = opt->value;
+	অক্ষর *flip = opt->মান;
 	BUG_ON_OPT_NEG(unset);
-	if ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
-		return error("option 'chmod' expects \"+x\" or \"-x\"");
+	যদি ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
+		ফেরত error("option 'chmod' expects \"+x\" or \"-x\"");
 	*flip = arg[0];
-	return 0;
+	ফেরত 0;
 }
 
-static int resolve_undo_clear_callback(const struct option *opt UNUSED,
-				const char *arg, int unset)
+স্থির পূর্ণসংখ্যা resolve_undo_clear_callback(ধ্রুবক কাঠামো option *opt UNUSED,
+				ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	resolve_undo_clear_index(the_repository->index);
-	return 0;
+	resolve_undo_clear_সূচক(the_repository->সূচক);
+	ফেরত 0;
 }
 
-static int parse_new_style_cacheinfo(const char *arg,
-				     unsigned int *mode,
-				     struct object_id *oid,
-				     const char **path)
+স্থির পূর্ণসংখ্যা parse_new_style_cacheinfo(ধ্রুবক অক্ষর *arg,
+				     unsigned পূর্ণসংখ্যা *mode,
+				     কাঠামো object_id *oid,
+				     ধ্রুবক অক্ষর **path)
 {
 	unsigned long ul;
-	char *endp;
-	const char *p;
+	অক্ষর *endp;
+	ধ্রুবক অক্ষর *p;
 
-	if (!arg)
-		return -1;
+	যদি (!arg)
+		ফেরত -1;
 
 	errno = 0;
 	ul = strtoul(arg, &endp, 8);
-	if (errno || endp == arg || *endp != ',' || (unsigned int) ul != ul)
-		return -1; /* not a new-style cacheinfo */
+	যদি (errno || endp == arg || *endp != ',' || (unsigned পূর্ণসংখ্যা) ul != ul)
+		ফেরত -1; /* not a new-style cacheinfo */
 	*mode = ul;
 	endp++;
-	if (parse_oid_hex(endp, oid, &p) || *p != ',')
-		return -1;
+	যদি (parse_oid_hex(endp, oid, &p) || *p != ',')
+		ফেরত -1;
 	*path = p + 1;
-	return 0;
+	ফেরত 0;
 }
 
-static enum parse_opt_result cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt UNUSED,
-	const char *arg, int unset)
+স্থির গণনা parse_opt_ফলাফল cacheinfo_callback(
+	কাঠামো parse_opt_ctx_t *ctx, ধ্রুবক কাঠামো option *opt UNUSED,
+	ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	struct object_id oid;
-	unsigned int mode;
-	const char *path;
+	কাঠামো object_id oid;
+	unsigned পূর্ণসংখ্যা mode;
+	ধ্রুবক অক্ষর *path;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
-		if (add_cacheinfo(mode, &oid, path, 0))
+	যদি (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
+		যদি (add_cacheinfo(mode, &oid, path, 0))
 			die("git update-index: --cacheinfo cannot add %s", path);
 		ctx->argv++;
 		ctx->argc--;
-		return 0;
+		ফেরত 0;
 	}
-	if (ctx->argc <= 3)
-		return error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
-	if (strtoul_ui(*++ctx->argv, 8, &mode) ||
+	যদি (ctx->argc <= 3)
+		ফেরত error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
+	যদি (strtoul_ui(*++ctx->argv, 8, &mode) ||
 	    get_oid_hex(*++ctx->argv, &oid) ||
 	    add_cacheinfo(mode, &oid, *++ctx->argv, 0))
 		die("git update-index: --cacheinfo cannot add %s", *ctx->argv);
 	ctx->argc -= 3;
-	return 0;
+	ফেরত 0;
 }
 
-static enum parse_opt_result stdin_cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+স্থির গণনা parse_opt_ফলাফল stdin_cacheinfo_callback(
+	কাঠামো parse_opt_ctx_t *ctx, ধ্রুবক কাঠামো option *opt,
+	ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	int *nul_term_line = opt->value;
+	পূর্ণসংখ্যা *nul_term_সারি = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	যদি (ctx->argc != 1)
+		ফেরত error("option '%s' must be the last argument", opt->long_name);
 	allow_add = allow_replace = allow_remove = 1;
-	read_index_info(*nul_term_line);
-	return 0;
+	read_সূচক_info(*nul_term_সারি);
+	ফেরত 0;
 }
 
-static enum parse_opt_result stdin_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+স্থির গণনা parse_opt_ফলাফল stdin_callback(
+	কাঠামো parse_opt_ctx_t *ctx, ধ্রুবক কাঠামো option *opt,
+	ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	int *read_from_stdin = opt->value;
+	পূর্ণসংখ্যা *read_from_stdin = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	যদি (ctx->argc != 1)
+		ফেরত error("option '%s' must be the last argument", opt->long_name);
 	*read_from_stdin = 1;
-	return 0;
+	ফেরত 0;
 }
 
-static enum parse_opt_result unresolve_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+স্থির গণনা parse_opt_ফলাফল unresolve_callback(
+	কাঠামো parse_opt_ctx_t *ctx, ধ্রুবক কাঠামো option *opt,
+	ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	পূর্ণসংখ্যা *has_errors = opt->মান;
+	ধ্রুবক অক্ষর *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -883,59 +883,59 @@ static enum parse_opt_result unresolve_callback(
 	/* consume remaining arguments. */
 	*has_errors = do_unresolve(ctx->argc, ctx->argv,
 				prefix, prefix ? strlen(prefix) : 0);
-	if (*has_errors)
-		the_repository->index->cache_changed = 0;
+	যদি (*has_errors)
+		the_repository->সূচক->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	ফেরত 0;
 }
 
-static enum parse_opt_result reupdate_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+স্থির গণনা parse_opt_ফলাফল reupdate_callback(
+	কাঠামো parse_opt_ctx_t *ctx, ধ্রুবক কাঠামো option *opt,
+	ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	পূর্ণসংখ্যা *has_errors = opt->মান;
+	ধ্রুবক অক্ষর *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
 	/* consume remaining arguments. */
-	setup_work_tree(the_repository);
+	setup_work_বৃক্ষ(the_repository);
 	*has_errors = do_reupdate(ctx->argv + 1, prefix);
-	if (*has_errors)
-		the_repository->index->cache_changed = 0;
+	যদি (*has_errors)
+		the_repository->সূচক->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	ফেরত 0;
 }
 
-int cmd_update_index(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_update_সূচক(পূর্ণসংখ্যা argc,
+		     ধ্রুবক অক্ষর **argv,
+		     ধ্রুবক অক্ষর *prefix,
+		     কাঠামো repository *repo UNUSED)
 {
-	int newfd, entries, has_errors = 0, nul_term_line = 0;
-	enum uc_mode untracked_cache = UC_UNSPECIFIED;
-	int read_from_stdin = 0;
-	int prefix_length = prefix ? strlen(prefix) : 0;
-	int preferred_index_format = 0;
-	char set_executable_bit = 0;
-	struct refresh_params refresh_args = {0, &has_errors};
-	int lock_error = 0;
-	int split_index = -1;
-	int force_write = 0;
-	int fsmonitor = -1;
-	struct lock_file lock_file = LOCK_INIT;
-	struct parse_opt_ctx_t ctx;
+	পূর্ণসংখ্যা newfd, entries, has_errors = 0, nul_term_সারি = 0;
+	গণনা uc_mode untracked_cache = UC_UNSPECIFIED;
+	পূর্ণসংখ্যা read_from_stdin = 0;
+	পূর্ণসংখ্যা prefix_দৈর্ঘ্য = prefix ? strlen(prefix) : 0;
+	পূর্ণসংখ্যা preferred_সূচক_format = 0;
+	অক্ষর set_executable_bit = 0;
+	কাঠামো refresh_params refresh_args = {0, &has_errors};
+	পূর্ণসংখ্যা lock_error = 0;
+	পূর্ণসংখ্যা split_সূচক = -1;
+	পূর্ণসংখ্যা force_write = 0;
+	পূর্ণসংখ্যা fsmonitor = -1;
+	কাঠামো lock_file lock_file = LOCK_INIT;
+	কাঠামো parse_opt_ctx_t ctx;
 	strbuf_getline_fn getline_fn;
-	int parseopt_state = PARSE_OPT_UNKNOWN;
-	struct repository *r = the_repository;
-	struct odb_transaction *transaction;
-	struct option options[] = {
-		OPT_BIT('q', NULL, &refresh_args.flags,
+	পূর্ণসংখ্যা parseopt_state = PARSE_OPT_UNKNOWN;
+	কাঠামো repository *r = the_repository;
+	কাঠামো odb_transaction *transaction;
+	কাঠামো option options[] = {
+		OPT_BIT('q', ফাঁকা, &refresh_args.flags,
 			N_("continue refresh even when index needs update"),
 			REFRESH_QUIET),
 		OPT_BIT(0, "ignore-submodules", &refresh_args.flags,
@@ -950,11 +950,11 @@ int cmd_update_index(int argc,
 		OPT_BIT(0, "unmerged", &refresh_args.flags,
 			N_("refresh even if index contains unmerged entries"),
 			REFRESH_UNMERGED),
-		OPT_CALLBACK_F(0, "refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "refresh", &refresh_args, ফাঁকা,
 			N_("refresh stat information"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			refresh_callback),
-		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, ফাঁকা,
 			N_("like --refresh, but ignore assume-unchanged setting"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			really_refresh_callback),
@@ -974,8 +974,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "assume-unchanged",
-			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.মান = &mark_valid_only,
+			.precision = আকার(mark_valid_only),
 			.help = N_("mark files as \"not changing\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -983,8 +983,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-assume-unchanged",
-			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.মান = &mark_valid_only,
+			.precision = আকার(mark_valid_only),
 			.help = N_("clear assumed-unchanged bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -992,8 +992,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "skip-worktree",
-			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.মান = &mark_skip_worktree_only,
+			.precision = আকার(mark_skip_worktree_only),
 			.help = N_("mark files as \"index-only\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -1001,8 +1001,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-skip-worktree",
-			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.মান = &mark_skip_worktree_only,
+			.precision = আকার(mark_skip_worktree_only),
 			.help = N_("clear skip-worktree bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -1013,12 +1013,12 @@ int cmd_update_index(int argc,
 			N_("add to index only; do not add content to object database"), 1),
 		OPT_SET_INT(0, "force-remove", &force_remove,
 			N_("remove named paths even if present in worktree"), 1),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', ফাঁকা, &nul_term_সারি,
 			 N_("with --stdin: input lines are terminated by null bytes")),
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "stdin",
-			.value = &read_from_stdin,
+			.মান = &read_from_stdin,
 			.help = N_("read list of paths to be updated from standard input"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_callback,
@@ -1026,7 +1026,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "index-info",
-			.value = &nul_term_line,
+			.মান = &nul_term_সারি,
 			.help = N_("add entries from standard input to the index"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_cacheinfo_callback,
@@ -1034,7 +1034,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "unresolve",
-			.value = &has_errors,
+			.মান = &has_errors,
 			.help = N_("repopulate stages #2 and #3 for the listed paths"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = unresolve_callback,
@@ -1043,7 +1043,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.short_name = 'g',
 			.long_name = "again",
-			.value = &has_errors,
+			.মান = &has_errors,
 			.help = N_("only update entries that differ from HEAD"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = reupdate_callback,
@@ -1053,15 +1053,15 @@ int cmd_update_index(int argc,
 			REFRESH_IGNORE_MISSING),
 		OPT_SET_INT(0, "verbose", &verbose,
 			N_("report actions to standard output"), 1),
-		OPT_CALLBACK_F(0, "clear-resolve-undo", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-resolve-undo", ফাঁকা, ফাঁকা,
 			N_("(for porcelains) forget saved unresolved conflicts"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			resolve_undo_clear_callback),
-		OPT_INTEGER(0, "index-version", &preferred_index_format,
+		OPT_INTEGER(0, "index-version", &preferred_সূচক_format,
 			N_("write index in this format")),
-		OPT_SET_INT(0, "show-index-version", &preferred_index_format,
+		OPT_SET_INT(0, "show-index-version", &preferred_সূচক_format,
 			    N_("report on-disk index format version"), -1),
-		OPT_BOOL(0, "split-index", &split_index,
+		OPT_BOOL(0, "split-index", &split_সূচক,
 			N_("enable or disable split index")),
 		OPT_BOOL(0, "untracked-cache", &untracked_cache,
 			N_("enable/disable untracked cache")),
@@ -1076,8 +1076,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.মান = &mark_fsmonitor_only,
+			.precision = আকার(mark_fsmonitor_only),
 			.help = N_("mark files as fsmonitor valid"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -1085,8 +1085,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.মান = &mark_fsmonitor_only,
+			.precision = আকার(mark_fsmonitor_only),
 			.help = N_("clear fsmonitor valid bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -1095,23 +1095,23 @@ int cmd_update_index(int argc,
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 update_index_usage, options);
+					 update_সূচক_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 
 	prepare_repo_settings(r);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_full_সূচক = 0;
 
 	/* we will diagnose later if it turns out that we need to update it */
-	newfd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (newfd < 0)
+	newfd = repo_hold_locked_সূচক(the_repository, &lock_file, 0);
+	যদি (newfd < 0)
 		lock_error = errno;
 
-	entries = repo_read_index(the_repository);
-	if (entries < 0)
+	entries = repo_read_সূচক(the_repository);
+	যদি (entries < 0)
 		die("cache corrupted");
 
-	the_repository->index->updated_skipworktree = 1;
+	the_repository->সূচক->updated_skipworktree = 1;
 
 	/*
 	 * Custom copy of parse_options() because we want to handle
@@ -1125,25 +1125,25 @@ int cmd_update_index(int argc,
 	 * a batch.
 	 */
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	while (ctx.argc) {
-		if (parseopt_state != PARSE_OPT_DONE)
+	যখন (ctx.argc) {
+		যদি (parseopt_state != PARSE_OPT_DONE)
 			parseopt_state = parse_options_step(&ctx, options,
-							    update_index_usage);
-		if (!ctx.argc)
-			break;
-		switch (parseopt_state) {
-		case PARSE_OPT_HELP:
+							    update_সূচক_usage);
+		যদি (!ctx.argc)
+			বিরতি;
+		নির্বাচন (parseopt_state) {
+		ক্ষেত্র PARSE_OPT_HELP:
 			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
+		ক্ষেত্র PARSE_OPT_HELP_ERROR:
+		ক্ষেত্র PARSE_OPT_ERROR:
 			exit(129);
-		case PARSE_OPT_COMPLETE:
+		ক্ষেত্র PARSE_OPT_COMPLETE:
 			exit(0);
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_DONE:
+		ক্ষেত্র PARSE_OPT_NON_OPTION:
+		ক্ষেত্র PARSE_OPT_DONE:
 		{
-			const char *path = ctx.argv[0];
-			char *p;
+			ধ্রুবক অক্ষর *path = ctx.argv[0];
+			অক্ষর *p;
 
 			/*
 			 * It is possible, though unlikely, that a caller could
@@ -1155,67 +1155,67 @@ int cmd_update_index(int argc,
 			 * update. All further updates are performed outside of
 			 * a transaction.
 			 */
-			if (transaction && verbose) {
+			যদি (transaction && verbose) {
 				odb_transaction_commit_and_finalize_or_die(transaction);
-				transaction = NULL;
+				transaction = ফাঁকা;
 			}
 
-			setup_work_tree(the_repository);
-			p = prefix_path(the_repository, prefix, prefix_length, path);
+			setup_work_বৃক্ষ(the_repository);
+			p = prefix_path(the_repository, prefix, prefix_দৈর্ঘ্য, path);
 			update_one(p);
-			if (set_executable_bit)
+			যদি (set_executable_bit)
 				chmod_path(set_executable_bit, p);
-			free(p);
+			মুক্ত(p);
 			ctx.argc--;
 			ctx.argv++;
-			break;
+			বিরতি;
 		}
-		case PARSE_OPT_UNKNOWN:
-			if (ctx.argv[0][1] == '-')
+		ক্ষেত্র PARSE_OPT_UNKNOWN:
+			যদি (ctx.argv[0][1] == '-')
 				error("unknown option '%s'", ctx.argv[0] + 2);
-			else
+			অন্যথা
 				error("unknown switch '%c'", *ctx.opt);
-			usage_with_options(update_index_usage, options);
+			usage_with_options(update_সূচক_usage, options);
 		}
 	}
 	argc = parse_options_end(&ctx);
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	if (preferred_index_format) {
-		if (preferred_index_format < 0) {
-			printf(_("%d\n"), the_repository->index->version);
-		} else if (preferred_index_format < INDEX_FORMAT_LB ||
-			   INDEX_FORMAT_UB < preferred_index_format) {
+	getline_fn = nul_term_সারি ? strbuf_getline_nul : strbuf_getline_lf;
+	যদি (preferred_সূচক_format) {
+		যদি (preferred_সূচক_format < 0) {
+			printf(_("%d\n"), the_repository->সূচক->version);
+		} অন্যথা যদি (preferred_সূচক_format < সূচক_FORMAT_LB ||
+			   সূচক_FORMAT_UB < preferred_সূচক_format) {
 			die("index-version %d not in range: %d..%d",
-			    preferred_index_format,
-			    INDEX_FORMAT_LB, INDEX_FORMAT_UB);
-		} else {
-			if (the_repository->index->version != preferred_index_format)
-				the_repository->index->cache_changed |= SOMETHING_CHANGED;
+			    preferred_সূচক_format,
+			    সূচক_FORMAT_LB, সূচক_FORMAT_UB);
+		} অন্যথা {
+			যদি (the_repository->সূচক->version != preferred_সূচক_format)
+				the_repository->সূচক->cache_changed |= SOMETHING_CHANGED;
 			report(_("index-version: was %d, set to %d"),
-			       the_repository->index->version, preferred_index_format);
-			the_repository->index->version = preferred_index_format;
+			       the_repository->সূচক->version, preferred_সূচক_format);
+			the_repository->সূচক->version = preferred_সূচক_format;
 		}
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	যদি (read_from_stdin) {
+		কাঠামো strbuf buf = STRBUF_INIT;
+		কাঠামো strbuf unquoted = STRBUF_INIT;
 
-		setup_work_tree(the_repository);
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		setup_work_বৃক্ষ(the_repository);
+		যখন (getline_fn(&buf, stdin) != EOF) {
+			অক্ষর *p;
+			যদি (!nul_term_সারি && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				যদি (unquote_c_style(&unquoted, buf.buf, ফাঁকা))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
-			p = prefix_path(the_repository, prefix, prefix_length, buf.buf);
+			p = prefix_path(the_repository, prefix, prefix_দৈর্ঘ্য, buf.buf);
 			update_one(p);
-			if (set_executable_bit)
+			যদি (set_executable_bit)
 				chmod_path(set_executable_bit, p);
-			free(p);
+			মুক্ত(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
@@ -1226,54 +1226,54 @@ int cmd_update_index(int argc,
 	 */
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
-	if (split_index > 0) {
-		if (repo_config_get_split_index(the_repository) == 0)
+	যদি (split_সূচক > 0) {
+		যদি (repo_config_get_split_সূচক(the_repository) == 0)
 			warning(_("core.splitIndex is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable split index"));
-		if (the_repository->index->split_index)
-			the_repository->index->cache_changed |= SPLIT_INDEX_ORDERED;
-		else
-			add_split_index(the_repository->index);
-	} else if (!split_index) {
-		if (repo_config_get_split_index(the_repository) == 1)
+		যদি (the_repository->সূচক->split_সূচক)
+			the_repository->সূচক->cache_changed |= SPLIT_সূচক_ORDERED;
+		অন্যথা
+			add_split_সূচক(the_repository->সূচক);
+	} অন্যথা যদি (!split_সূচক) {
+		যদি (repo_config_get_split_সূচক(the_repository) == 1)
 			warning(_("core.splitIndex is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable split index"));
-		remove_split_index(the_repository->index);
+		remove_split_সূচক(the_repository->সূচক);
 	}
 
 	prepare_repo_settings(r);
-	switch (untracked_cache) {
-	case UC_UNSPECIFIED:
-		break;
-	case UC_DISABLE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
+	নির্বাচন (untracked_cache) {
+	ক্ষেত্র UC_UNSPECIFIED:
+		বিরতি;
+	ক্ষেত্র UC_DISABLE:
+		যদি (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
 			warning(_("core.untrackedCache is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable the untracked cache"));
-		remove_untracked_cache(the_repository->index);
+		remove_untracked_cache(the_repository->সূচক);
 		report(_("Untracked cache disabled"));
-		break;
-	case UC_TEST:
-		setup_work_tree(the_repository);
-		return !test_if_untracked_cache_is_supported();
-	case UC_ENABLE:
-	case UC_FORCE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
+		বিরতি;
+	ক্ষেত্র UC_TEST:
+		setup_work_বৃক্ষ(the_repository);
+		ফেরত !test_if_untracked_cache_is_supported();
+	ক্ষেত্র UC_ENABLE:
+	ক্ষেত্র UC_FORCE:
+		যদি (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
 			warning(_("core.untrackedCache is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable the untracked cache"));
-		add_untracked_cache(the_repository->index);
-		report(_("Untracked cache enabled for '%s'"), repo_get_work_tree(the_repository));
-		break;
-	default:
+		add_untracked_cache(the_repository->সূচক);
+		report(_("Untracked cache enabled for '%s'"), repo_get_work_বৃক্ষ(the_repository));
+		বিরতি;
+	পূর্বনির্ধারিত:
 		BUG("bad untracked_cache value: %d", untracked_cache);
 	}
 
-	if (fsmonitor > 0) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		enum fsmonitor_reason reason = fsm_settings__get_reason(r);
+	যদি (fsmonitor > 0) {
+		গণনা fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
+		গণনা fsmonitor_reason reason = fsm_settings__get_reason(r);
 
 		/*
 		 * The user wants to turn on FSMonitor using the command
@@ -1285,38 +1285,38 @@ int cmd_update_index(int argc,
 		 * whether the file system is compatible so that we can stop
 		 * here with a nice error message.
 		 */
-		if (reason > FSMONITOR_REASON_OK)
+		যদি (reason > FSMONITOR_REASON_OK)
 			die("%s",
-			    fsm_settings__get_incompatible_msg(r, reason));
+			    fsm_settings_get_incompatible_বার্তা(r, reason));
 
-		if (fsm_mode == FSMONITOR_MODE_DISABLED) {
+		যদি (fsm_mode == FSMONITOR_MODE_DISABLED) {
 			warning(_("core.fsmonitor is unset; "
 				"set it if you really want to "
 				"enable fsmonitor"));
 		}
-		add_fsmonitor(the_repository->index);
+		add_fsmonitor(the_repository->সূচক);
 		report(_("fsmonitor enabled"));
-	} else if (!fsmonitor) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		if (fsm_mode > FSMONITOR_MODE_DISABLED)
+	} অন্যথা যদি (!fsmonitor) {
+		গণনা fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
+		যদি (fsm_mode > FSMONITOR_MODE_DISABLED)
 			warning(_("core.fsmonitor is set; "
 				"remove it if you really want to "
 				"disable fsmonitor"));
-		remove_fsmonitor(the_repository->index);
+		remove_fsmonitor(the_repository->সূচক);
 		report(_("fsmonitor disabled"));
 	}
 
-	if (the_repository->index->cache_changed || force_write) {
-		if (newfd < 0) {
-			if (refresh_args.flags & REFRESH_QUIET)
+	যদি (the_repository->সূচক->cache_changed || force_write) {
+		যদি (newfd < 0) {
+			যদি (refresh_args.flags & REFRESH_QUIET)
 				exit(128);
-			unable_to_lock_die(repo_get_index_file(the_repository), lock_error);
+			unable_to_lock_die(repo_get_সূচক_file(the_repository), lock_error);
 		}
-		if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		যদি (write_locked_সূচক(the_repository->সূচক, &lock_file, COMMIT_LOCK))
 			die("Unable to write new index file");
 	}
 
 	rollback_lock_file(&lock_file);
 
-	return has_errors ? 1 : 0;
+	ফেরত has_errors ? 1 : 0;
 }

@@ -13,123 +13,123 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "date.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "config.h"
-#include "tempfile.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "sigchain.h"
-#include "strvec.h"
-#include "commit.h"
-#include "commit-graph.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "odb.h"
-#include "path.h"
-#include "reflog.h"
-#include "rerere.h"
-#include "revision.h"
-#include "refs.h"
-#include "remote.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "hook.h"
-#include "setup.h"
-#include "trace2.h"
-#include "worktree.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "abspath.h"
+#অন্তর্ভাব "date.h"
+#অন্তর্ভাব "dir.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "tempfile.h"
+#অন্তর্ভাব "lockfile.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "sigchain.h"
+#অন্তর্ভাব "strvec.h"
+#অন্তর্ভাব "commit.h"
+#অন্তর্ভাব "commit-graph.h"
+#অন্তর্ভাব "packfile.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "odb.h"
+#অন্তর্ভাব "path.h"
+#অন্তর্ভাব "reflog.h"
+#অন্তর্ভাব "rerere.h"
+#অন্তর্ভাব "revision.h"
+#অন্তর্ভাব "refs.h"
+#অন্তর্ভাব "remote.h"
+#অন্তর্ভাব "exec-cmd.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hook.h"
+#অন্তর্ভাব "setup.h"
+#অন্তর্ভাব "trace2.h"
+#অন্তর্ভাব "worktree.h"
 
 #define FAILED_RUN "failed to run %s"
 
-static const char * const builtin_gc_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক builtin_gc_usage[] = {
 	N_("git gc [<options>]"),
-	NULL
+	ফাঁকা
 };
 
-static timestamp_t gc_log_expire_time;
-static struct tempfile *pidfile;
-static struct lock_file log_lock;
-static struct string_list pack_garbage = STRING_LIST_INIT_DUP;
+স্থির timestamp_t gc_log_expire_time;
+স্থির কাঠামো tempfile *pidfile;
+স্থির কাঠামো lock_file log_lock;
+স্থির কাঠামো string_list pack_garbage = STRING_LIST_INIT_DUP;
 
-static void clean_pack_garbage(void)
+স্থির শূন্য clean_pack_garbage(শূন্য)
 {
-	int i;
-	for (i = 0; i < pack_garbage.nr; i++)
-		unlink_or_warn(pack_garbage.items[i].string);
+	পূর্ণসংখ্যা i;
+	জন্য (i = 0; i < pack_garbage.nr; i++)
+		unlink_or_warn(pack_garbage.বস্তুসমূহ[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
-static void report_pack_garbage(unsigned seen_bits, const char *path)
+স্থির শূন্য report_pack_garbage(unsigned seen_bits, ধ্রুবক অক্ষর *path)
 {
-	if (seen_bits == PACKDIR_FILE_IDX)
+	যদি (seen_bits == PACKDIR_FILE_IDX)
 		string_list_append(&pack_garbage, path);
 }
 
-static void process_log_file(void)
+স্থির শূন্য process_log_file(শূন্য)
 {
-	struct stat st;
-	if (fstat(get_lock_file_fd(&log_lock), &st)) {
+	কাঠামো stat st;
+	যদি (fstat(get_lock_file_fd(&log_lock), &st)) {
 		/*
 		 * Perhaps there was an i/o error or another
 		 * unlikely situation.  Try to make a note of
 		 * this in gc.log along with any existing
 		 * messages.
 		 */
-		int saved_errno = errno;
+		পূর্ণসংখ্যা saved_errno = errno;
 		fprintf(stderr, _("Failed to fstat %s: %s"),
 			get_lock_file_path(&log_lock),
 			strerror(saved_errno));
 		fflush(stderr);
 		commit_lock_file(&log_lock);
 		errno = saved_errno;
-	} else if (st.st_size) {
+	} অন্যথা যদি (st.st_আকার) {
 		/* There was some error recorded in the lock file */
 		commit_lock_file(&log_lock);
-	} else {
-		char *path = repo_git_path(the_repository, "gc.log");
+	} অন্যথা {
+		অক্ষর *path = repo_git_path(the_repository, "gc.log");
 		/* No error, clean up any old gc.log */
 		unlink(path);
 		rollback_lock_file(&log_lock);
-		free(path);
+		মুক্ত(path);
 	}
 }
 
-static void process_log_file_at_exit(void)
+স্থির শূন্য process_log_file_at_exit(শূন্য)
 {
 	fflush(stderr);
 	process_log_file();
 }
 
-static int gc_config_is_timestamp_never(const char *var)
+স্থির পূর্ণসংখ্যা gc_config_is_timestamp_never(ধ্রুবক অক্ষর *var)
 {
-	const char *value;
+	ধ্রুবক অক্ষর *মান;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
-			die(_("failed to parse '%s' value '%s'"), var, value);
-		return expire == 0;
+	যদি (!repo_config_get_মান(the_repository, var, &মান) && মান) {
+		যদি (parse_expiry_date(মান, &expire))
+			die(_("failed to parse '%s' value '%s'"), var, মান);
+		ফেরত expire == 0;
 	}
-	return 0;
+	ফেরত 0;
 }
 
-struct gc_config {
-	int pack_refs;
-	int prune_reflogs;
-	int cruft_packs;
-	unsigned long max_cruft_size;
-	int aggressive_depth;
-	int aggressive_window;
-	int detach_auto;
-	char *gc_log_expire;
-	char *prune_expire;
-	char *prune_worktrees_expire;
-	char *repack_expire_to;
+কাঠামো gc_config {
+	পূর্ণসংখ্যা pack_refs;
+	পূর্ণসংখ্যা prune_reflogs;
+	পূর্ণসংখ্যা cruft_packs;
+	unsigned long max_cruft_আকার;
+	পূর্ণসংখ্যা aggressive_depth;
+	পূর্ণসংখ্যা aggressive_window;
+	পূর্ণসংখ্যা detach_auto;
+	অক্ষর *gc_log_expire;
+	অক্ষর *prune_expire;
+	অক্ষর *prune_worktrees_expire;
+	অক্ষর *repack_expire_to;
 };
 
 #define GC_CONFIG_INIT { \
@@ -144,26 +144,26 @@ struct gc_config {
 	.prune_worktrees_expire = xstrdup("3.months.ago"), \
 }
 
-static void gc_config_release(struct gc_config *cfg)
+স্থির শূন্য gc_config_release(কাঠামো gc_config *cfg)
 {
-	free(cfg->gc_log_expire);
-	free(cfg->prune_expire);
-	free(cfg->prune_worktrees_expire);
+	মুক্ত(cfg->gc_log_expire);
+	মুক্ত(cfg->prune_expire);
+	মুক্ত(cfg->prune_worktrees_expire);
 }
 
-static void gc_config(struct gc_config *cfg)
+স্থির শূন্য gc_config(কাঠামো gc_config *cfg)
 {
-	const char *value;
-	char *owned = NULL;
+	ধ্রুবক অক্ষর *মান;
+	অক্ষর *owned = ফাঁকা;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	যদি (!repo_config_get_মান(the_repository, "gc.packrefs", &মান)) {
+		যদি (মান && !strcmp(মান, "notbare"))
 			cfg->pack_refs = -1;
-		else
-			cfg->pack_refs = git_config_bool("gc.packrefs", value);
+		অন্যথা
+			cfg->pack_refs = git_config_bool("gc.packrefs", মান);
 	}
 
-	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
+	যদি (gc_config_is_timestamp_never("gc.reflogexpire") &&
 	    gc_config_is_timestamp_never("gc.reflogexpireunreachable"))
 		cfg->prune_reflogs = 0;
 
@@ -171,47 +171,47 @@ static void gc_config(struct gc_config *cfg)
 	repo_config_get_int(the_repository, "gc.aggressivedepth", &cfg->aggressive_depth);
 	repo_config_get_bool(the_repository, "gc.autodetach", &cfg->detach_auto);
 	repo_config_get_bool(the_repository, "gc.cruftpacks", &cfg->cruft_packs);
-	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_size);
+	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_আকার);
 
-	if (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
-		free(cfg->prune_expire);
+	যদি (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
+		মুক্ত(cfg->prune_expire);
 		cfg->prune_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
-		free(cfg->prune_worktrees_expire);
+	যদি (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
+		মুক্ত(cfg->prune_worktrees_expire);
 		cfg->prune_worktrees_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
-		free(cfg->gc_log_expire);
+	যদি (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
+		মুক্ত(cfg->gc_log_expire);
 		cfg->gc_log_expire = owned;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 }
 
-enum schedule_priority {
+গণনা schedule_priority {
 	SCHEDULE_NONE = 0,
 	SCHEDULE_WEEKLY = 1,
 	SCHEDULE_DAILY = 2,
 	SCHEDULE_HOURLY = 3,
 };
 
-static enum schedule_priority parse_schedule(const char *value)
+স্থির গণনা schedule_priority parse_schedule(ধ্রুবক অক্ষর *মান)
 {
-	if (!value)
-		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
-		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
-		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
-		return SCHEDULE_WEEKLY;
-	return SCHEDULE_NONE;
+	যদি (!মান)
+		ফেরত SCHEDULE_NONE;
+	যদি (!strcasecmp(মান, "hourly"))
+		ফেরত SCHEDULE_HOURLY;
+	যদি (!strcasecmp(মান, "daily"))
+		ফেরত SCHEDULE_DAILY;
+	যদি (!strcasecmp(মান, "weekly"))
+		ফেরত SCHEDULE_WEEKLY;
+	ফেরত SCHEDULE_NONE;
 }
 
-enum maintenance_task_label {
+গণনা maintenance_task_label {
 	TASK_PREFETCH,
 	TASK_LOOSE_OBJECTS,
 	TASK_INCREMENTAL_REPACK,
@@ -224,31 +224,31 @@ enum maintenance_task_label {
 	TASK_RERERE_GC,
 
 	/* Leave as final value */
-	TASK__COUNT
+	TASK_গুনতি
 };
 
-struct maintenance_run_opts {
-	enum maintenance_task_label *tasks;
-	size_t tasks_nr, tasks_alloc;
-	int auto_flag;
-	int detach;
-	int quiet;
-	enum schedule_priority schedule;
+কাঠামো maintenance_run_opts {
+	গণনা maintenance_task_label *tasks;
+	আকার_t tasks_nr, tasks_alloc;
+	পূর্ণসংখ্যা auto_flag;
+	পূর্ণসংখ্যা detach;
+	পূর্ণসংখ্যা quiet;
+	গণনা schedule_priority schedule;
 };
 #define MAINTENANCE_RUN_OPTS_INIT { \
 	.detach = -1, \
 }
 
-static void maintenance_run_opts_release(struct maintenance_run_opts *opts)
+স্থির শূন্য maintenance_run_opts_release(কাঠামো maintenance_run_opts *opts)
 {
-	free(opts->tasks);
+	মুক্ত(opts->tasks);
 }
 
-static int pack_refs_condition(UNUSED struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা pack_refs_condition(UNUSED কাঠামো gc_config *cfg)
 {
-	struct string_list included_refs = STRING_LIST_INIT_NODUP;
-	struct ref_exclusions excludes = REF_EXCLUSIONS_INIT;
-	struct refs_optimize_opts optimize_opts = {
+	কাঠামো string_list included_refs = STRING_LIST_INIT_NODUP;
+	কাঠামো ref_exclusions excludes = REF_EXCLUSIONS_INIT;
+	কাঠামো refs_optimize_opts optimize_opts = {
 		.exclusions = &excludes,
 		.includes = &included_refs,
 		.flags = REFS_OPTIMIZE_PRUNE | REFS_OPTIMIZE_AUTO,
@@ -258,196 +258,196 @@ static int pack_refs_condition(UNUSED struct gc_config *cfg)
 	/* Check for all refs, similar to 'git refs optimize --all'. */
 	string_list_append(optimize_opts.includes, "*");
 
-	if (refs_optimize_required(get_main_ref_store(the_repository),
+	যদি (refs_optimize_required(get_main_ref_store(the_repository),
 				   &optimize_opts, &required))
-		return 0;
+		ফেরত 0;
 
 	clear_ref_exclusions(&excludes);
 	string_list_clear(&included_refs, 0);
 
-	return required;
+	ফেরত required;
 }
 
-static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
-				      UNUSED struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা maintenance_task_pack_refs(কাঠামো maintenance_run_opts *opts,
+				      UNUSED কাঠামো gc_config *cfg)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	কাঠামো child_process cmd = CHILD_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
-	if (opts->auto_flag)
-		strvec_push(&cmd.args, "--auto");
+	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", ফাঁকা);
+	যদি (opts->auto_flag)
+		strvec_ঠেলো(&cmd.args, "--auto");
 
-	return run_command(&cmd);
+	ফেরত run_command(&cmd);
 }
 
-struct count_reflog_entries_data {
-	struct expire_reflog_policy_cb policy;
-	size_t count;
-	size_t limit;
+কাঠামো গুনতি_reflog_entries_তথ্য {
+	কাঠামো expire_reflog_policy_cb policy;
+	আকার_t গুনতি;
+	আকার_t limit;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
-				struct object_id *old_oid, struct object_id *new_oid,
-				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+স্থির পূর্ণসংখ্যা গুনতি_reflog_entries(ধ্রুবক অক্ষর *refname UNUSED,
+				কাঠামো object_id *old_oid, কাঠামো object_id *new_oid,
+				ধ্রুবক অক্ষর *committer, timestamp_t timestamp,
+				পূর্ণসংখ্যা tz, ধ্রুবক অক্ষর *বার্তা, শূন্য *cb_তথ্য)
 {
-	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
-		data->count++;
-	return data->count >= data->limit;
+	কাঠামো গুনতি_reflog_entries_তথ্য *তথ্য = cb_তথ্য;
+	যদি (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, বার্তা, &তথ্য->policy))
+		তথ্য->গুনতি++;
+	ফেরত তথ্য->গুনতি >= তথ্য->limit;
 }
 
-static int reflog_expire_condition(struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা reflog_expire_condition(কাঠামো gc_config *cfg UNUSED)
 {
-	timestamp_t now = time(NULL);
-	struct count_reflog_entries_data data = {
+	timestamp_t now = time(ফাঁকা);
+	কাঠামো গুনতি_reflog_entries_তথ্য তথ্য = {
 		.policy = {
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
 	};
-	int limit = 100;
+	পূর্ণসংখ্যা limit = 100;
 
 	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &limit);
-	if (!limit)
-		return 0;
-	if (limit < 0)
-		return 1;
-	data.limit = limit;
+	যদি (!limit)
+		ফেরত 0;
+	যদি (limit < 0)
+		ফেরত 1;
+	তথ্য.limit = limit;
 
-	repo_config(the_repository, reflog_expire_config, &data.policy.opts);
+	repo_config(the_repository, reflog_expire_config, &তথ্য.policy.opts);
 
-	reflog_expire_options_set_refname(&data.policy.opts, "HEAD");
+	reflog_expire_options_set_refname(&তথ্য.policy.opts, "HEAD");
 	refs_for_each_reflog_ent(get_main_ref_store(the_repository), "HEAD",
-				 count_reflog_entries, &data);
+				 গুনতি_reflog_entries, &তথ্য);
 
-	reflog_expiry_cleanup(&data.policy);
-	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	reflog_expiry_cleanup(&তথ্য.policy);
+	reflog_clear_expire_config(&তথ্য.policy.opts);
+	ফেরত তথ্য.গুনতি >= তথ্য.limit;
 }
 
-static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
-					  struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_reflog_expire(কাঠামো maintenance_run_opts *opts UNUSED,
+					  কাঠামো gc_config *cfg UNUSED)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	কাঠামো child_process cmd = CHILD_PROCESS_INIT;
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
-	return run_command(&cmd);
+	strvec_pushl(&cmd.args, "reflog", "expire", "--all", ফাঁকা);
+	ফেরত run_command(&cmd);
 }
 
-static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
-					   struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা maintenance_task_worktree_prune(কাঠামো maintenance_run_opts *opts UNUSED,
+					   কাঠামো gc_config *cfg)
 {
-	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
+	কাঠামো child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
 
 	prune_worktrees_cmd.git_cmd = 1;
-	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
-	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
+	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", ফাঁকা);
+	strvec_ঠেলো(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
 
-	return run_command(&prune_worktrees_cmd);
+	ফেরত run_command(&prune_worktrees_cmd);
 }
 
-static int worktree_prune_condition(struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা worktree_prune_condition(কাঠামো gc_config *cfg)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int should_prune = 0, limit = 1;
+	কাঠামো strbuf buf = STRBUF_INIT;
+	পূর্ণসংখ্যা should_prune = 0, limit = 1;
 	timestamp_t expiry_date;
-	struct dirent *d;
-	DIR *dir = NULL;
+	কাঠামো dirent *d;
+	DIR *dir = ফাঁকা;
 
 	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &limit);
-	if (limit <= 0) {
+	যদি (limit <= 0) {
 		should_prune = limit < 0;
-		goto out;
+		যাও out;
 	}
 
-	if (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
-		goto out;
+	যদি (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
+		যাও out;
 
 	dir = opendir(repo_git_path_replace(the_repository, &buf, "worktrees"));
-	if (!dir)
-		goto out;
+	যদি (!dir)
+		যাও out;
 
-	while (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
-		char *wtpath;
+	যখন (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
+		অক্ষর *wtpath;
 		strbuf_reset(&buf);
-		if (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
+		যদি (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
 			limit--;
-		free(wtpath);
+		মুক্ত(wtpath);
 	}
 
 	should_prune = !limit;
 
 out:
-	if (dir)
+	যদি (dir)
 		closedir(dir);
 	strbuf_release(&buf);
-	return should_prune;
+	ফেরত should_prune;
 }
 
-static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
-				      struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_rerere_gc(কাঠামো maintenance_run_opts *opts UNUSED,
+				      কাঠামো gc_config *cfg UNUSED)
 {
-	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
+	কাঠামো child_process rerere_cmd = CHILD_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
-	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
-	return run_command(&rerere_cmd);
+	strvec_pushl(&rerere_cmd.args, "rerere", "gc", ফাঁকা);
+	ফেরত run_command(&rerere_cmd);
 }
 
-static int rerere_gc_condition(struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা rerere_gc_condition(কাঠামো gc_config *cfg UNUSED)
 {
-	int limit = 512;
+	পূর্ণসংখ্যা limit = 512;
 
 	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &limit);
-	if (!limit)
-		return 0; /* never prune */
-	if (limit < 0)
-		return 1; /* always prune */
+	যদি (!limit)
+		ফেরত 0; /* never prune */
+	যদি (limit < 0)
+		ফেরত 1; /* always prune */
 
-	return rerere_gc_needed(the_repository, (size_t)limit);
+	ফেরত rerere_gc_needed(the_repository, (আকার_t)limit);
 }
 
 #define OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
 	.prune_expire = (cfg)->prune_expire, \
 	.expire_to = (cfg)->repack_expire_to, \
 	.cruft_packs = (cfg)->cruft_packs, \
-	.max_cruft_size = (cfg)->max_cruft_size, \
+	.max_cruft_আকার = (cfg)->max_cruft_আকার, \
 	.window = (aggressive) ? (cfg)->aggressive_window : 0, \
 	.depth = (aggressive) ? (cfg)->aggressive_depth : 0
 
 /* return NULL on success, else hostname running the gc */
-static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
+স্থির ধ্রুবক অক্ষর *lock_repo_for_gc(পূর্ণসংখ্যা force, pid_t* ret_pid)
 {
-	struct lock_file lock = LOCK_INIT;
-	char my_host[HOST_NAME_MAX + 1];
-	struct strbuf sb = STRBUF_INIT;
-	struct stat st;
+	কাঠামো lock_file lock = LOCK_INIT;
+	অক্ষর my_host[HOST_NAME_MAX + 1];
+	কাঠামো strbuf sb = STRBUF_INIT;
+	কাঠামো stat st;
 	uintmax_t pid;
 	FILE *fp;
-	int fd;
-	char *pidfile_path;
+	পূর্ণসংখ্যা fd;
+	অক্ষর *pidfile_path;
 
-	if (is_tempfile_active(pidfile))
+	যদি (is_tempfile_active(pidfile))
 		/* already locked */
-		return NULL;
+		ফেরত ফাঁকা;
 
-	if (xgethostname(my_host, sizeof(my_host)))
-		xsnprintf(my_host, sizeof(my_host), "unknown");
+	যদি (xgethostname(my_host, আকার(my_host)))
+		xsnprintf(my_host, আকার(my_host), "unknown");
 
 	pidfile_path = repo_git_path(the_repository, "gc.pid");
 	fd = hold_lock_file_for_update(&lock, pidfile_path,
 				       LOCK_DIE_ON_ERROR);
-	if (!force) {
-		static char locking_host[HOST_NAME_MAX + 1];
-		static char *scan_fmt;
-		int should_exit;
+	যদি (!force) {
+		স্থির অক্ষর locking_host[HOST_NAME_MAX + 1];
+		স্থির অক্ষর *scan_fmt;
+		পূর্ণসংখ্যা should_exit;
 
-		if (!scan_fmt)
+		যদি (!scan_fmt)
 			scan_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
 		fp = fopen(pidfile_path, "r");
-		memset(locking_host, 0, sizeof(locking_host));
+		memset(locking_host, 0, আকার(locking_host));
 		should_exit =
-			fp != NULL &&
+			fp != ফাঁকা &&
 			!fstat(fileno(fp), &st) &&
 			/*
 			 * 12 hour limit is very generous as gc should
@@ -458,18 +458,18 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 			 * after the user verifies that no gc is
 			 * running.
 			 */
-			time(NULL) - st.st_mtime <= 12 * 3600 &&
+			time(ফাঁকা) - st.st_mtime <= 12 * 3600 &&
 			fscanf(fp, scan_fmt, &pid, locking_host) == 2 &&
 			/* be gentle to concurrent "gc" on remote hosts */
 			(strcmp(locking_host, my_host) || !kill(pid, 0) || errno == EPERM);
-		if (fp)
+		যদি (fp)
 			fclose(fp);
-		if (should_exit) {
-			if (fd >= 0)
+		যদি (should_exit) {
+			যদি (fd >= 0)
 				rollback_lock_file(&lock);
 			*ret_pid = pid;
-			free(pidfile_path);
-			return locking_host;
+			মুক্ত(pidfile_path);
+			ফেরত locking_host;
 		}
 	}
 
@@ -479,8 +479,8 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 	strbuf_release(&sb);
 	commit_lock_file(&lock);
 	pidfile = register_tempfile(pidfile_path);
-	free(pidfile_path);
-	return NULL;
+	মুক্ত(pidfile_path);
+	ফেরত ফাঁকা;
 }
 
 /*
@@ -489,29 +489,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
  * message and returns with a non-[01] status code if an error occurred
  * while reading gc.log
  */
-static int report_last_gc_error(void)
+স্থির পূর্ণসংখ্যা report_last_gc_error(শূন্য)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	কাঠামো strbuf sb = STRBUF_INIT;
+	পূর্ণসংখ্যা ret = 0;
 	ssize_t len;
-	struct stat st;
-	char *gc_log_path = repo_git_path(the_repository, "gc.log");
+	কাঠামো stat st;
+	অক্ষর *gc_log_path = repo_git_path(the_repository, "gc.log");
 
-	if (stat(gc_log_path, &st)) {
-		if (errno == ENOENT)
-			goto done;
+	যদি (stat(gc_log_path, &st)) {
+		যদি (errno == ENOENT)
+			যাও done;
 
 		ret = die_message_errno(_("cannot stat '%s'"), gc_log_path);
-		goto done;
+		যাও done;
 	}
 
-	if (st.st_mtime < gc_log_expire_time)
-		goto done;
+	যদি (st.st_mtime < gc_log_expire_time)
+		যাও done;
 
 	len = strbuf_read_file(&sb, gc_log_path, 0);
-	if (len < 0)
+	যদি (len < 0)
 		ret = die_message_errno(_("cannot read '%s'"), gc_log_path);
-	else if (len > 0) {
+	অন্যথা যদি (len > 0) {
 		/*
 		 * A previous gc failed.  Report the error, and don't
 		 * bother with an automatic gc run since it is likely
@@ -528,72 +528,72 @@ static int report_last_gc_error(void)
 	}
 	strbuf_release(&sb);
 done:
-	free(gc_log_path);
-	return ret;
+	মুক্ত(gc_log_path);
+	ফেরত ret;
 }
 
-static int gc_foreground_tasks(struct maintenance_run_opts *opts,
-			       struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা gc_foreground_tasks(কাঠামো maintenance_run_opts *opts,
+			       কাঠামো gc_config *cfg)
 {
-	if (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
-		return error(FAILED_RUN, "pack-refs");
-	if (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
-		return error(FAILED_RUN, "reflog");
-	return 0;
+	যদি (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
+		ফেরত error(FAILED_RUN, "pack-refs");
+	যদি (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
+		ফেরত error(FAILED_RUN, "reflog");
+	ফেরত 0;
 }
 
-static int maintenance_task_odb(struct maintenance_run_opts *opts,
-				struct gc_config *cfg,
-				int keep_largest_pack,
-				int aggressive)
+স্থির পূর্ণসংখ্যা maintenance_task_odb(কাঠামো maintenance_run_opts *opts,
+				কাঠামো gc_config *cfg,
+				পূর্ণসংখ্যা keep_largest_pack,
+				পূর্ণসংখ্যা aggressive)
 {
-	struct odb_optimize_options odb_opts = {
+	কাঠামো odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		.keep_largest_pack = keep_largest_pack,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive),
 	};
 
-	if (opts->auto_flag)
+	যদি (opts->auto_flag)
 		odb_opts.flags |= ODB_OPTIMIZE_AUTO;
-	if (!opts->quiet)
+	যদি (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
-	if (aggressive)
+	যদি (aggressive)
 		odb_opts.flags |= ODB_OPTIMIZE_NO_REUSE_DELTAS;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	ফেরত odb_optimize(the_repository->objects, &odb_opts);
 }
 
-int cmd_gc(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_gc(পূর্ণসংখ্যা argc,
+	   ধ্রুবক অক্ষর **argv,
+	   ধ্রুবক অক্ষর *prefix,
+	   কাঠামো repository *repo UNUSED)
 {
-	int aggressive = 0;
-	int force = 0;
-	const char *name;
+	পূর্ণসংখ্যা aggressive = 0;
+	পূর্ণসংখ্যা force = 0;
+	ধ্রুবক অক্ষর *name;
 	pid_t pid;
-	int daemonized = 0;
-	int keep_largest_pack = -1;
-	int skip_foreground_tasks = 0;
+	পূর্ণসংখ্যা daemonized = 0;
+	পূর্ণসংখ্যা keep_largest_pack = -1;
+	পূর্ণসংখ্যা skip_foreground_tasks = 0;
 	timestamp_t dummy;
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	const char *prune_expire_sentinel = "sentinel";
-	const char *prune_expire_arg = prune_expire_sentinel;
-	int ret;
-	struct option builtin_gc_options[] = {
+	কাঠামো maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	কাঠামো gc_config cfg = GC_CONFIG_INIT;
+	ধ্রুবক অক্ষর *prune_expire_sentinel = "sentinel";
+	ধ্রুবক অক্ষর *prune_expire_arg = prune_expire_sentinel;
+	পূর্ণসংখ্যা ret;
+	কাঠামো option builtin_gc_options[] = {
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "prune",
-			.value = &prune_expire_arg,
+			.মান = &prune_expire_arg,
 			.argh = N_("date"),
 			.help = N_("prune unreferenced objects"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t)prune_expire_arg,
 		},
 		OPT_BOOL(0, "cruft", &cfg.cruft_packs, N_("pack unreferenced objects separately")),
-		OPT_UNSIGNED(0, "max-cruft-size", &cfg.max_cruft_size,
+		OPT_UNSIGNED(0, "max-cruft-size", &cfg.max_cruft_আকার,
 			     N_("with --cruft, limit the size of new cruft packs")),
 		OPT_BOOL(0, "aggressive", &aggressive, N_("be more thorough (increased runtime)")),
 		OPT_BOOL_F(0, "auto", &opts.auto_flag, N_("enable auto-gc mode"),
@@ -617,71 +617,71 @@ int cmd_gc(int argc,
 
 	gc_config(&cfg);
 
-	if (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
+	যদি (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
 		die(_("failed to parse gc.logExpiry value %s"), cfg.gc_log_expire);
 
-	if (cfg.pack_refs < 0)
+	যদি (cfg.pack_refs < 0)
 		cfg.pack_refs = !is_bare_repository(the_repository);
 
 	argc = parse_options(argc, argv, prefix, builtin_gc_options,
 			     builtin_gc_usage, 0);
-	if (argc > 0)
+	যদি (argc > 0)
 		usage_with_options(builtin_gc_usage, builtin_gc_options);
 
-	if (prune_expire_arg != prune_expire_sentinel) {
-		free(cfg.prune_expire);
+	যদি (prune_expire_arg != prune_expire_sentinel) {
+		মুক্ত(cfg.prune_expire);
 		cfg.prune_expire = xstrdup_or_null(prune_expire_arg);
 	}
-	if (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
+	যদি (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
 		die(_("failed to parse prune expiry value %s"), cfg.prune_expire);
 
-	if (opts.auto_flag) {
-		struct odb_optimize_options optimize_opts = {
+	যদি (opts.auto_flag) {
+		কাঠামো odb_optimize_options optimize_opts = {
 			.strategy = ODB_OPTIMIZE_INCREMENTAL,
 			OPTIMIZE_FIELDS_FROM_GC_CONFIG(&cfg, 0),
 		};
 
-		if (cfg.detach_auto && opts.detach < 0)
+		যদি (cfg.detach_auto && opts.detach < 0)
 			opts.detach = 1;
 
 		/*
 		 * Auto-gc should be least intrusive as possible.
 		 */
-		if (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
+		যদি (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
 		    run_hooks(the_repository, "pre-auto-gc")) {
 			ret = 0;
-			goto out;
+			যাও out;
 		}
 
-		if (!opts.quiet) {
-			if (opts.detach > 0)
+		যদি (!opts.quiet) {
+			যদি (opts.detach > 0)
 				fprintf(stderr, _("Auto packing the repository in background for optimum performance.\n"));
-			else
+			অন্যথা
 				fprintf(stderr, _("Auto packing the repository for optimum performance.\n"));
 			fprintf(stderr, _("See \"git help gc\" for manual housekeeping.\n"));
 		}
 	}
 
-	if (opts.detach > 0) {
+	যদি (opts.detach > 0) {
 		ret = report_last_gc_error();
-		if (ret == 1) {
+		যদি (ret == 1) {
 			/* Last gc --auto failed. Skip this one. */
 			ret = 0;
-			goto out;
+			যাও out;
 
-		} else if (ret) {
+		} অন্যথা যদি (ret) {
 			/* an I/O error occurred, already reported */
-			goto out;
+			যাও out;
 		}
 
-		if (!skip_foreground_tasks) {
-			if (lock_repo_for_gc(force, &pid)) {
+		যদি (!skip_foreground_tasks) {
+			যদি (lock_repo_for_gc(force, &pid)) {
 				ret = 0;
-				goto out;
+				যাও out;
 			}
 
-			if (gc_foreground_tasks(&opts, &cfg) < 0)
-				die(NULL);
+			যদি (gc_foreground_tasks(&opts, &cfg) < 0)
+				die(ফাঁকা);
 			delete_tempfile(&pidfile);
 		}
 
@@ -693,358 +693,358 @@ int cmd_gc(int argc,
 	}
 
 	name = lock_repo_for_gc(force, &pid);
-	if (name) {
-		if (opts.auto_flag) {
+	যদি (name) {
+		যদি (opts.auto_flag) {
 			ret = 0;
-			goto out; /* be quiet on --auto */
+			যাও out; /* be quiet on --auto */
 		}
 
 		die(_("gc is already running on machine '%s' pid %"PRIuMAX" (use --force if not)"),
 		    name, (uintmax_t)pid);
 	}
 
-	if (daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
+	যদি (daemonized) {
+		অক্ষর *path = repo_git_path(the_repository, "gc.log");
 		hold_lock_file_for_update(&log_lock, path,
 					  LOCK_DIE_ON_ERROR);
 		dup2(get_lock_file_fd(&log_lock), 2);
 		atexit(process_log_file_at_exit);
-		free(path);
+		মুক্ত(path);
 	}
 
-	if (opts.detach <= 0 && !skip_foreground_tasks)
+	যদি (opts.detach <= 0 && !skip_foreground_tasks)
 		gc_foreground_tasks(&opts, &cfg);
 
-	if (cfg.prune_worktrees_expire &&
+	যদি (cfg.prune_worktrees_expire &&
 	    maintenance_task_worktree_prune(&opts, &cfg))
 		die(FAILED_RUN, "worktree");
 
-	if (maintenance_task_rerere_gc(&opts, &cfg))
+	যদি (maintenance_task_rerere_gc(&opts, &cfg))
 		die(FAILED_RUN, "rerere");
 
-	if (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
-		die(NULL);
+	যদি (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
+		die(ফাঁকা);
 
 	report_garbage = report_pack_garbage;
 	odb_reprepare(the_repository->objects);
-	if (pack_garbage.nr > 0) {
+	যদি (pack_garbage.nr > 0) {
 		odb_close(the_repository->objects);
 		clean_pack_garbage();
 	}
 
-	if (the_repository->settings.gc_write_commit_graph == 1)
+	যদি (the_repository->settings.gc_write_commit_graph == 1)
 		write_commit_graph_reachable(the_repository,
 					     the_repository->objects->source->path,
 					     !opts.quiet && !daemonized ? COMMIT_GRAPH_WRITE_PROGRESS : 0,
-					     NULL);
+					     ফাঁকা);
 
-	if (!daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
+	যদি (!daemonized) {
+		অক্ষর *path = repo_git_path(the_repository, "gc.log");
 		unlink(path);
-		free(path);
+		মুক্ত(path);
 	}
 
 out:
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return 0;
+	ফেরত 0;
 }
 
-static const char *const builtin_maintenance_run_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক builtin_maintenance_run_usage[] = {
 	N_("git maintenance run [--auto] [--[no-]quiet] [--task=<task>] [--schedule]"),
-	NULL
+	ফাঁকা
 };
 
-static int maintenance_opt_schedule(const struct option *opt, const char *arg,
-				    int unset)
+স্থির পূর্ণসংখ্যা maintenance_opt_schedule(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *arg,
+				    পূর্ণসংখ্যা unset)
 {
-	enum schedule_priority *priority = opt->value;
+	গণনা schedule_priority *priority = opt->মান;
 
-	if (unset)
+	যদি (unset)
 		die(_("--no-schedule is not allowed"));
 
 	*priority = parse_schedule(arg);
 
-	if (!*priority)
+	যদি (!*priority)
 		die(_("unrecognized --schedule argument '%s'"), arg);
 
-	return 0;
+	ফেরত 0;
 }
 
-struct cg_auto_data {
-	int num_not_in_graph;
-	int limit;
+কাঠামো cg_auto_তথ্য {
+	পূর্ণসংখ্যা অঙ্ক_not_in_graph;
+	পূর্ণসংখ্যা limit;
 };
 
-static int dfs_on_ref(const struct reference *ref, void *cb_data)
+স্থির পূর্ণসংখ্যা dfs_on_ref(ধ্রুবক কাঠামো reference *ref, শূন্য *cb_তথ্য)
 {
-	struct cg_auto_data *data = (struct cg_auto_data *)cb_data;
-	int result = 0;
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct commit_list *stack = NULL;
-	struct commit *commit;
+	কাঠামো cg_auto_তথ্য *তথ্য = (কাঠামো cg_auto_তথ্য *)cb_তথ্য;
+	পূর্ণসংখ্যা ফলাফল = 0;
+	ধ্রুবক কাঠামো object_id *maybe_peeled = ref->oid;
+	কাঠামো object_id peeled;
+	কাঠামো commit_list *স্তূপ = ফাঁকা;
+	কাঠামো commit *commit;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	যদি (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
-	if (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
-		return 0;
+	যদি (odb_read_object_info(the_repository->objects, maybe_peeled, ফাঁকা) != OBJ_COMMIT)
+		ফেরত 0;
 
 	commit = lookup_commit(the_repository, maybe_peeled);
-	if (!commit || commit->object.flags & SEEN)
-		return 0;
+	যদি (!commit || commit->object.flags & SEEN)
+		ফেরত 0;
 	commit->object.flags |= SEEN;
 
-	if (repo_parse_commit(the_repository, commit) ||
+	যদি (repo_parse_commit(the_repository, commit) ||
 	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
-		return 0;
+		ফেরত 0;
 
-	data->num_not_in_graph++;
+	তথ্য->অঙ্ক_not_in_graph++;
 
-	if (data->num_not_in_graph >= data->limit)
-		return 1;
+	যদি (তথ্য->অঙ্ক_not_in_graph >= তথ্য->limit)
+		ফেরত 1;
 
-	commit_list_insert(commit, &stack);
+	commit_list_ঢোকাও(commit, &স্তূপ);
 
-	while (!result && stack) {
-		struct commit_list *parent;
+	যখন (!ফলাফল && স্তূপ) {
+		কাঠামো commit_list *parent;
 
-		commit = pop_commit(&stack);
+		commit = বের_করো_commit(&স্তূপ);
 
-		for (parent = commit->parents; parent; parent = parent->next) {
-			if (repo_parse_commit(the_repository, parent->item) ||
+		জন্য (parent = commit->parents; parent; parent = parent->পরবর্তী) {
+			যদি (repo_parse_commit(the_repository, parent->item) ||
 			    commit_graph_position(parent->item) != COMMIT_NOT_FROM_GRAPH ||
 			    parent->item->object.flags & SEEN)
-				continue;
+				চালু;
 
 			parent->item->object.flags |= SEEN;
-			data->num_not_in_graph++;
+			তথ্য->অঙ্ক_not_in_graph++;
 
-			if (data->num_not_in_graph >= data->limit) {
-				result = 1;
-				break;
+			যদি (তথ্য->অঙ্ক_not_in_graph >= তথ্য->limit) {
+				ফলাফল = 1;
+				বিরতি;
 			}
 
-			commit_list_insert(parent->item, &stack);
+			commit_list_ঢোকাও(parent->item, &স্তূপ);
 		}
 	}
 
-	commit_list_free(stack);
-	return result;
+	commit_list_free(স্তূপ);
+	ফেরত ফলাফল;
 }
 
-static int should_write_commit_graph(struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা should_write_commit_graph(কাঠামো gc_config *cfg UNUSED)
 {
-	int result;
-	struct cg_auto_data data;
+	পূর্ণসংখ্যা ফলাফল;
+	কাঠামো cg_auto_তথ্য তথ্য;
 
-	data.num_not_in_graph = 0;
-	data.limit = 100;
+	তথ্য.অঙ্ক_not_in_graph = 0;
+	তথ্য.limit = 100;
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
-			    &data.limit);
+			    &তথ্য.limit);
 
-	if (!data.limit)
-		return 0;
-	if (data.limit < 0)
-		return 1;
+	যদি (!তথ্য.limit)
+		ফেরত 0;
+	যদি (তথ্য.limit < 0)
+		ফেরত 1;
 
-	result = refs_for_each_ref(get_main_ref_store(the_repository),
-				   dfs_on_ref, &data);
+	ফলাফল = refs_for_each_ref(get_main_ref_store(the_repository),
+				   dfs_on_ref, &তথ্য);
 
 	repo_clear_commit_marks(the_repository, SEEN);
 
-	return result;
+	ফেরত ফলাফল;
 }
 
-static int run_write_commit_graph(struct maintenance_run_opts *opts)
+স্থির পূর্ণসংখ্যা run_write_commit_graph(কাঠামো maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "commit-graph", "write",
-		     "--split", "--reachable", NULL);
+		     "--split", "--reachable", ফাঁকা);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--no-progress");
+	অন্যথা
+		strvec_ঠেলো(&child.args, "--progress");
 
-	return !!run_command(&child);
+	ফেরত !!run_command(&child);
 }
 
-static int maintenance_task_commit_graph(struct maintenance_run_opts *opts,
-					 struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_commit_graph(কাঠামো maintenance_run_opts *opts,
+					 কাঠামো gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_commit_graph)
-		return 0;
+	যদি (!the_repository->settings.core_commit_graph)
+		ফেরত 0;
 
-	if (run_write_commit_graph(opts)) {
+	যদি (run_write_commit_graph(opts)) {
 		error(_("failed to write commit-graph"));
-		return 1;
+		ফেরত 1;
 	}
 
-	return 0;
+	ফেরত 0;
 }
 
-static int fetch_remote(struct remote *remote, void *cbdata)
+স্থির পূর্ণসংখ্যা fetch_remote(কাঠামো remote *remote, শূন্য *cbdata)
 {
-	struct maintenance_run_opts *opts = cbdata;
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো maintenance_run_opts *opts = cbdata;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
-	if (remote->skip_default_update)
-		return 0;
+	যদি (remote->skip_default_update)
+		ফেরত 0;
 
 	child.git_cmd = 1;
 	strvec_pushl(&child.args, "fetch", remote->name,
 		     "--prefetch", "--prune", "--no-tags",
 		     "--no-write-fetch-head", "--recurse-submodules=no",
-		     NULL);
+		     ফাঁকা);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	ফেরত !!run_command(&child);
 }
 
-static int maintenance_task_prefetch(struct maintenance_run_opts *opts,
-				     struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_prefetch(কাঠামো maintenance_run_opts *opts,
+				     কাঠামো gc_config *cfg UNUSED)
 {
-	if (for_each_remote(fetch_remote, opts)) {
+	যদি (for_each_remote(fetch_remote, opts)) {
 		error(_("failed to prefetch remotes"));
-		return 1;
+		ফেরত 1;
 	}
 
-	return 0;
+	ফেরত 0;
 }
 
-static int maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা maintenance_task_gc_foreground(কাঠামো maintenance_run_opts *opts,
+					  কাঠামো gc_config *cfg)
 {
-	return gc_foreground_tasks(opts, cfg);
+	ফেরত gc_foreground_tasks(opts, cfg);
 }
 
-static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_gc_background(কাঠামো maintenance_run_opts *opts,
+					  কাঠামো gc_config *cfg UNUSED)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_push(&child.args, "gc");
+	strvec_ঠেলো(&child.args, "gc");
 
-	if (opts->auto_flag)
-		strvec_push(&child.args, "--auto");
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
-	else
-		strvec_push(&child.args, "--no-quiet");
-	strvec_push(&child.args, "--no-detach");
-	strvec_push(&child.args, "--skip-foreground-tasks");
+	যদি (opts->auto_flag)
+		strvec_ঠেলো(&child.args, "--auto");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--quiet");
+	অন্যথা
+		strvec_ঠেলো(&child.args, "--no-quiet");
+	strvec_ঠেলো(&child.args, "--no-detach");
+	strvec_ঠেলো(&child.args, "--skip-foreground-tasks");
 
-	return run_command(&child);
+	ফেরত run_command(&child);
 }
 
-static int gc_condition(struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা gc_condition(কাঠামো gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	কাঠামো odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	ফেরত odb_optimize_required(the_repository->objects, &opts);
 }
 
-static int prune_packed(struct maintenance_run_opts *opts)
+স্থির পূর্ণসংখ্যা prune_packed(কাঠামো maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
-	strvec_push(&child.args, "prune-packed");
+	strvec_ঠেলো(&child.args, "prune-packed");
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	ফেরত !!run_command(&child);
 }
 
-struct write_loose_object_data {
+কাঠামো write_loose_object_তথ্য {
 	FILE *in;
-	int count;
-	int batch_size;
+	পূর্ণসংখ্যা গুনতি;
+	পূর্ণসংখ্যা batch_আকার;
 };
 
-static int loose_object_auto_limit = 100;
+স্থির পূর্ণসংখ্যা loose_object_auto_limit = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
-			      const char *path UNUSED,
-			      void *data)
+স্থির পূর্ণসংখ্যা loose_object_গুনতি(ধ্রুবক কাঠামো object_id *oid UNUSED,
+			      ধ্রুবক অক্ষর *path UNUSED,
+			      শূন্য *তথ্য)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
-		return 1;
-	return 0;
+	পূর্ণসংখ্যা *গুনতি = (পূর্ণসংখ্যা*)তথ্য;
+	যদি (++(*গুনতি) >= loose_object_auto_limit)
+		ফেরত 1;
+	ফেরত 0;
 }
 
-static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা loose_object_auto_condition(কাঠামো gc_config *cfg UNUSED)
 {
-	int count = 0;
+	পূর্ণসংখ্যা গুনতি = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
 			    &loose_object_auto_limit);
 
-	if (!loose_object_auto_limit)
-		return 0;
-	if (loose_object_auto_limit < 0)
-		return 1;
+	যদি (!loose_object_auto_limit)
+		ফেরত 0;
+	যদি (loose_object_auto_limit < 0)
+		ফেরত 1;
 
-	return for_each_loose_file_in_source(the_repository->objects->source,
-					     loose_object_count,
-					     NULL, NULL, &count);
+	ফেরত for_each_loose_file_in_source(the_repository->objects->source,
+					     loose_object_গুনতি,
+					     ফাঁকা, ফাঁকা, &গুনতি);
 }
 
-static int bail_on_loose(const struct object_id *oid UNUSED,
-			 const char *path UNUSED,
-			 void *data UNUSED)
+স্থির পূর্ণসংখ্যা bail_on_loose(ধ্রুবক কাঠামো object_id *oid UNUSED,
+			 ধ্রুবক অক্ষর *path UNUSED,
+			 শূন্য *তথ্য UNUSED)
 {
-	return 1;
+	ফেরত 1;
 }
 
-static int write_loose_object_to_stdin(const struct object_id *oid,
-				       const char *path UNUSED,
-				       void *data)
+স্থির পূর্ণসংখ্যা write_loose_object_to_stdin(ধ্রুবক কাঠামো object_id *oid,
+				       ধ্রুবক অক্ষর *path UNUSED,
+				       শূন্য *তথ্য)
 {
-	struct write_loose_object_data *d = (struct write_loose_object_data *)data;
+	কাঠামো write_loose_object_তথ্য *d = (কাঠামো write_loose_object_তথ্য *)তথ্য;
 
 	fprintf(d->in, "%s\n", oid_to_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	ফেরত ++(d->গুনতি) > d->batch_আকার;
 }
 
-static int pack_loose(struct maintenance_run_opts *opts)
+স্থির পূর্ণসংখ্যা pack_loose(কাঠামো maintenance_run_opts *opts)
 {
-	struct repository *r = the_repository;
-	int result = 0;
-	struct write_loose_object_data data;
-	struct child_process pack_proc = CHILD_PROCESS_INIT;
+	কাঠামো repository *r = the_repository;
+	পূর্ণসংখ্যা ফলাফল = 0;
+	কাঠামো write_loose_object_তথ্য তথ্য;
+	কাঠামো child_process pack_proc = CHILD_PROCESS_INIT;
 
 	/*
 	 * Do not start pack-objects process
 	 * if there are no loose objects.
 	 */
-	if (!for_each_loose_file_in_source(r->objects->source,
+	যদি (!for_each_loose_file_in_source(r->objects->source,
 					   bail_on_loose,
-					   NULL, NULL, NULL))
-		return 0;
+					   ফাঁকা, ফাঁকা, ফাঁকা))
+		ফেরত 0;
 
 	pack_proc.git_cmd = 1;
 
-	strvec_push(&pack_proc.args, "pack-objects");
-	if (opts->quiet)
-		strvec_push(&pack_proc.args, "--quiet");
-	else
-		strvec_push(&pack_proc.args, "--no-quiet");
+	strvec_ঠেলো(&pack_proc.args, "pack-objects");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&pack_proc.args, "--quiet");
+	অন্যথা
+		strvec_ঠেলো(&pack_proc.args, "--no-quiet");
 	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
 
 	pack_proc.in = -1;
@@ -1055,112 +1055,112 @@ static int pack_loose(struct maintenance_run_opts *opts)
 	 */
 	pack_proc.out = -1;
 
-	if (start_command(&pack_proc)) {
+	যদি (start_command(&pack_proc)) {
 		error(_("failed to start 'git pack-objects' process"));
-		return 1;
+		ফেরত 1;
 	}
 
-	data.in = xfdopen(pack_proc.in, "w");
-	data.count = 0;
-	data.batch_size = 50000;
+	তথ্য.in = xfdopen(pack_proc.in, "w");
+	তথ্য.গুনতি = 0;
+	তথ্য.batch_আকার = 50000;
 
 	repo_config_get_int(r, "maintenance.loose-objects.batchSize",
-			    &data.batch_size);
+			    &তথ্য.batch_আকার);
 
 	/* If configured as 0, then remove limit. */
-	if (!data.batch_size)
-		data.batch_size = INT_MAX;
-	else if (data.batch_size > 0)
-		data.batch_size--; /* Decrease for equality on limit. */
+	যদি (!তথ্য.batch_আকার)
+		তথ্য.batch_আকার = INT_MAX;
+	অন্যথা যদি (তথ্য.batch_আকার > 0)
+		তথ্য.batch_আকার--; /* Decrease for equality on limit. */
 
 	for_each_loose_file_in_source(r->objects->source,
 				      write_loose_object_to_stdin,
-				      NULL, NULL, &data);
+				      ফাঁকা, ফাঁকা, &তথ্য);
 
-	fclose(data.in);
+	fclose(তথ্য.in);
 
-	if (finish_command(&pack_proc)) {
+	যদি (finish_command(&pack_proc)) {
 		error(_("failed to finish 'git pack-objects' process"));
-		result = 1;
+		ফলাফল = 1;
 	}
 
-	return result;
+	ফেরত ফলাফল;
 }
 
-static int maintenance_task_loose_objects(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_loose_objects(কাঠামো maintenance_run_opts *opts,
+					  কাঠামো gc_config *cfg UNUSED)
 {
-	return prune_packed(opts) || pack_loose(opts);
+	ফেরত prune_packed(opts) || pack_loose(opts);
 }
 
-static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা incremental_repack_auto_condition(কাঠামো gc_config *cfg UNUSED)
 {
-	struct packed_git *p;
-	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	কাঠামো packed_git *p;
+	পূর্ণসংখ্যা incremental_repack_auto_limit = 10;
+	পূর্ণসংখ্যা গুনতি = 0;
 
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index)
-		return 0;
+	যদি (!the_repository->settings.core_multi_pack_সূচক)
+		ফেরত 0;
 
 	repo_config_get_int(the_repository, "maintenance.incremental-repack.auto",
 			    &incremental_repack_auto_limit);
 
-	if (!incremental_repack_auto_limit)
-		return 0;
-	if (incremental_repack_auto_limit < 0)
-		return 1;
+	যদি (!incremental_repack_auto_limit)
+		ফেরত 0;
+	যদি (incremental_repack_auto_limit < 0)
+		ফেরত 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
-			break;
-		if (!p->multi_pack_index)
-			count++;
+		যদি (গুনতি >= incremental_repack_auto_limit)
+			বিরতি;
+		যদি (!p->multi_pack_সূচক)
+			গুনতি++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	ফেরত গুনতি >= incremental_repack_auto_limit;
 }
 
-static int multi_pack_index_write(struct maintenance_run_opts *opts)
+স্থির পূর্ণসংখ্যা multi_pack_সূচক_write(কাঠামো maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
-	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
+	strvec_pushl(&child.args, "multi-pack-index", "write", ফাঁকা);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--no-progress");
+	অন্যথা
+		strvec_ঠেলো(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("failed to write multi-pack-index"));
+	যদি (run_command(&child))
+		ফেরত error(_("failed to write multi-pack-index"));
 
-	return 0;
+	ফেরত 0;
 }
 
-static int multi_pack_index_expire(struct maintenance_run_opts *opts)
+স্থির পূর্ণসংখ্যা multi_pack_সূচক_expire(কাঠামো maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
+	strvec_pushl(&child.args, "multi-pack-index", "expire", ফাঁকা);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--no-progress");
+	অন্যথা
+		strvec_ঠেলো(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index expire' failed"));
+	যদি (run_command(&child))
+		ফেরত error(_("'git multi-pack-index expire' failed"));
 
-	return 0;
+	ফেরত 0;
 }
 
 #define TWO_GIGABYTES (INT32_MAX)
 
-static off_t get_auto_pack_size(void)
+স্থির off_t get_auto_pack_আকার(শূন্য)
 {
 	/*
 	 * The "auto" value is special: we optimize for
@@ -1174,99 +1174,99 @@ static off_t get_auto_pack_size(void)
 	 * at least two packs if there are three or more
 	 * packs.
 	 */
-	off_t max_size = 0;
-	off_t second_largest_size = 0;
-	off_t result_size;
-	struct packed_git *p;
-	struct repository *r = the_repository;
+	off_t max_আকার = 0;
+	off_t second_largest_আকার = 0;
+	off_t ফলাফল_আকার;
+	কাঠামো packed_git *p;
+	কাঠামো repository *r = the_repository;
 
 	odb_reprepare(r->objects);
 	repo_for_each_pack(r, p) {
-		if (p->pack_size > max_size) {
-			second_largest_size = max_size;
-			max_size = p->pack_size;
-		} else if (p->pack_size > second_largest_size)
-			second_largest_size = p->pack_size;
+		যদি (p->pack_আকার > max_আকার) {
+			second_largest_আকার = max_আকার;
+			max_আকার = p->pack_আকার;
+		} অন্যথা যদি (p->pack_আকার > second_largest_আকার)
+			second_largest_আকার = p->pack_আকার;
 	}
 
-	result_size = second_largest_size + 1;
+	ফলাফল_আকার = second_largest_আকার + 1;
 
 	/* But limit ourselves to a batch size of 2g */
-	if (result_size > TWO_GIGABYTES)
-		result_size = TWO_GIGABYTES;
+	যদি (ফলাফল_আকার > TWO_GIGABYTES)
+		ফলাফল_আকার = TWO_GIGABYTES;
 
-	return result_size;
+	ফেরত ফলাফল_আকার;
 }
 
-static int multi_pack_index_repack(struct maintenance_run_opts *opts)
+স্থির পূর্ণসংখ্যা multi_pack_সূচক_repack(কাঠামো maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
+	strvec_pushl(&child.args, "multi-pack-index", "repack", ফাঁকা);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	যদি (opts->quiet)
+		strvec_ঠেলো(&child.args, "--no-progress");
+	অন্যথা
+		strvec_ঠেলো(&child.args, "--progress");
 
 	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
-				  (uintmax_t)get_auto_pack_size());
+				  (uintmax_t)get_auto_pack_আকার());
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index repack' failed"));
+	যদি (run_command(&child))
+		ফেরত error(_("'git multi-pack-index repack' failed"));
 
-	return 0;
+	ফেরত 0;
 }
 
-static int maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
-					       struct gc_config *cfg UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_task_incremental_repack(কাঠামো maintenance_run_opts *opts,
+					       কাঠামো gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index) {
+	যদি (!the_repository->settings.core_multi_pack_সূচক) {
 		warning(_("skipping incremental-repack task because core.multiPackIndex is disabled"));
-		return 0;
+		ফেরত 0;
 	}
 
-	if (multi_pack_index_write(opts))
-		return 1;
-	if (multi_pack_index_expire(opts))
-		return 1;
-	if (multi_pack_index_repack(opts))
-		return 1;
-	return 0;
+	যদি (multi_pack_সূচক_write(opts))
+		ফেরত 1;
+	যদি (multi_pack_সূচক_expire(opts))
+		ফেরত 1;
+	যদি (multi_pack_সূচক_repack(opts))
+		ফেরত 1;
+	ফেরত 0;
 }
 
-static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
-					     struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা maintenance_task_geometric_repack(কাঠামো maintenance_run_opts *opts,
+					     কাঠামো gc_config *cfg)
 {
-	struct odb_optimize_options odb_opts = {
+	কাঠামো odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
 
-	if (!opts->quiet)
+	যদি (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	ফেরত odb_optimize(the_repository->objects, &odb_opts);
 }
 
-static int geometric_repack_auto_condition(struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা geometric_repack_auto_condition(কাঠামো gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	কাঠামো odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	ফেরত odb_optimize_required(the_repository->objects, &opts);
 }
 
-typedef int (*maintenance_task_fn)(struct maintenance_run_opts *opts,
-				   struct gc_config *cfg);
-typedef int (*maintenance_auto_fn)(struct gc_config *cfg);
+প্রকারলেখ পূর্ণসংখ্যা (*maintenance_task_fn)(কাঠামো maintenance_run_opts *opts,
+				   কাঠামো gc_config *cfg);
+প্রকারলেখ পূর্ণসংখ্যা (*maintenance_auto_fn)(কাঠামো gc_config *cfg);
 
-struct maintenance_task {
-	const char *name;
+কাঠামো maintenance_task {
+	ধ্রুবক অক্ষর *name;
 
 	/*
 	 * Work that will be executed before detaching. This should not include
@@ -1288,7 +1288,7 @@ struct maintenance_task {
 	maintenance_auto_fn auto_condition;
 };
 
-static const struct maintenance_task tasks[] = {
+স্থির ধ্রুবক কাঠামো maintenance_task tasks[] = {
 	[TASK_PREFETCH] = {
 		.name = "prefetch",
 		.background = maintenance_task_prefetch,
@@ -1341,65 +1341,65 @@ static const struct maintenance_task tasks[] = {
 	},
 };
 
-enum task_phase {
+গণনা task_phase {
 	TASK_PHASE_FOREGROUND,
 	TASK_PHASE_BACKGROUND,
 };
 
-enum auto_gc_hook_result {
+গণনা auto_gc_hook_ফলাফল {
 	AUTO_GC_HOOK_UNDECIDED = 0,
 	AUTO_GC_HOOK_RUN = 1,
 	AUTO_GC_HOOK_SKIP = 2,
 };
 
-static int maybe_run_task(const struct maintenance_task *task,
-			  struct repository *repo,
-			  struct maintenance_run_opts *opts,
-			  struct gc_config *cfg,
-			  enum task_phase phase,
-			  enum auto_gc_hook_result *auto_gc_hook_result)
+স্থির পূর্ণসংখ্যা maybe_run_task(ধ্রুবক কাঠামো maintenance_task *task,
+			  কাঠামো repository *repo,
+			  কাঠামো maintenance_run_opts *opts,
+			  কাঠামো gc_config *cfg,
+			  গণনা task_phase phase,
+			  গণনা auto_gc_hook_ফলাফল *auto_gc_hook_ফলাফল)
 {
-	int foreground = (phase == TASK_PHASE_FOREGROUND);
+	পূর্ণসংখ্যা foreground = (phase == TASK_PHASE_FOREGROUND);
 	maintenance_task_fn fn = foreground ? task->foreground : task->background;
-	const char *region = foreground ? "maintenance foreground" : "maintenance";
-	int ret = 0;
+	ধ্রুবক অক্ষর *region = foreground ? "maintenance foreground" : "maintenance";
+	পূর্ণসংখ্যা ret = 0;
 
-	if (!fn)
-		return 0;
-	if (opts->auto_flag) {
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+	যদি (!fn)
+		ফেরত 0;
+	যদি (opts->auto_flag) {
+		যদি (*auto_gc_hook_ফলাফল == AUTO_GC_HOOK_SKIP)
+			ফেরত 0;
 
-		if (!task->auto_condition || !task->auto_condition(cfg))
-			return 0;
+		যদি (!task->auto_condition || !task->auto_condition(cfg))
+			ফেরত 0;
 
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
-			*auto_gc_hook_result = run_hooks(repo, "pre-auto-gc") ?
+		যদি (*auto_gc_hook_ফলাফল == AUTO_GC_HOOK_UNDECIDED)
+			*auto_gc_hook_ফলাফল = run_hooks(repo, "pre-auto-gc") ?
 				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_RUN;
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+		যদি (*auto_gc_hook_ফলাফল == AUTO_GC_HOOK_SKIP)
+			ফেরত 0;
 	}
 
 	trace2_region_enter(region, task->name, repo);
-	if (fn(opts, cfg)) {
+	যদি (fn(opts, cfg)) {
 		error(_("task '%s' failed"), task->name);
 		ret = 1;
 	}
 	trace2_region_leave(region, task->name, repo);
 
-	return ret;
+	ফেরত ret;
 }
 
-static int maintenance_run_tasks(struct maintenance_run_opts *opts,
-				 struct gc_config *cfg)
+স্থির পূর্ণসংখ্যা maintenance_run_tasks(কাঠামো maintenance_run_opts *opts,
+				 কাঠামো gc_config *cfg)
 {
-	int result = 0;
-	struct lock_file lk;
-	struct repository *r = the_repository;
-	char *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
-	enum auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
+	পূর্ণসংখ্যা ফলাফল = 0;
+	কাঠামো lock_file lk;
+	কাঠামো repository *r = the_repository;
+	অক্ষর *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
+	গণনা auto_gc_hook_ফলাফল auto_gc_hook_ফলাফল = AUTO_GC_HOOK_UNDECIDED;
 
-	if (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
+	যদি (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
 		/*
 		 * Another maintenance command is running.
 		 *
@@ -1407,52 +1407,52 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 		 * recursive process stack. Do not report an error in
 		 * that case.
 		 */
-		if (!opts->auto_flag && !opts->quiet)
+		যদি (!opts->auto_flag && !opts->quiet)
 			warning(_("lock file '%s' exists, skipping maintenance"),
 				lock_path);
-		free(lock_path);
-		return 0;
+		মুক্ত(lock_path);
+		ফেরত 0;
 	}
-	free(lock_path);
+	মুক্ত(lock_path);
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
-				   TASK_PHASE_FOREGROUND, &auto_gc_hook_result))
-			result = 1;
+	জন্য (আকার_t i = 0; i < opts->tasks_nr; i++)
+		যদি (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+				   TASK_PHASE_FOREGROUND, &auto_gc_hook_ফলাফল))
+			ফলাফল = 1;
 
 	/* Failure to daemonize is ok, we'll continue in foreground. */
-	if (opts->detach > 0) {
+	যদি (opts->detach > 0) {
 		trace2_region_enter("maintenance", "detach", the_repository);
 		daemonize();
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
-				   TASK_PHASE_BACKGROUND, &auto_gc_hook_result))
-			result = 1;
+	জন্য (আকার_t i = 0; i < opts->tasks_nr; i++)
+		যদি (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+				   TASK_PHASE_BACKGROUND, &auto_gc_hook_ফলাফল))
+			ফলাফল = 1;
 
 	rollback_lock_file(&lk);
-	return result;
+	ফেরত ফলাফল;
 }
 
-enum maintenance_type {
+গণনা maintenance_type {
 	/* As invoked via `git maintenance run --schedule=`. */
 	MAINTENANCE_TYPE_SCHEDULED = (1 << 0),
 	/* As invoked via `git maintenance run` and with `--auto`. */
 	MAINTENANCE_TYPE_MANUAL    = (1 << 1),
 };
 
-struct maintenance_strategy {
-	struct {
+কাঠামো maintenance_strategy {
+	কাঠামো {
 		unsigned type;
-		enum schedule_priority schedule;
-	} tasks[TASK__COUNT];
+		গণনা schedule_priority schedule;
+	} tasks[TASK_গুনতি];
 };
 
-static const struct maintenance_strategy none_strategy = { 0 };
+স্থির ধ্রুবক কাঠামো maintenance_strategy none_strategy = { 0 };
 
-static const struct maintenance_strategy gc_strategy = {
+স্থির ধ্রুবক কাঠামো maintenance_strategy gc_strategy = {
 	.tasks = {
 		[TASK_GC] = {
 			.type = MAINTENANCE_TYPE_MANUAL | MAINTENANCE_TYPE_SCHEDULED,
@@ -1461,7 +1461,7 @@ static const struct maintenance_strategy gc_strategy = {
 	},
 };
 
-static const struct maintenance_strategy incremental_strategy = {
+স্থির ধ্রুবক কাঠামো maintenance_strategy incremental_strategy = {
 	.tasks = {
 		[TASK_COMMIT_GRAPH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
@@ -1500,7 +1500,7 @@ static const struct maintenance_strategy incremental_strategy = {
 	},
 };
 
-static const struct maintenance_strategy geometric_strategy = {
+স্থির ধ্রুবক কাঠামো maintenance_strategy geometric_strategy = {
 	.tasks = {
 		[TASK_COMMIT_GRAPH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
@@ -1529,38 +1529,38 @@ static const struct maintenance_strategy geometric_strategy = {
 	},
 };
 
-static struct maintenance_strategy parse_maintenance_strategy(const char *name)
+স্থির কাঠামো maintenance_strategy parse_maintenance_strategy(ধ্রুবক অক্ষর *name)
 {
-	if (!strcasecmp(name, "incremental"))
-		return incremental_strategy;
-	if (!strcasecmp(name, "gc"))
-		return gc_strategy;
-	if (!strcasecmp(name, "geometric"))
-		return geometric_strategy;
+	যদি (!strcasecmp(name, "incremental"))
+		ফেরত incremental_strategy;
+	যদি (!strcasecmp(name, "gc"))
+		ফেরত gc_strategy;
+	যদি (!strcasecmp(name, "geometric"))
+		ফেরত geometric_strategy;
 	die(_("unknown maintenance strategy: '%s'"), name);
 }
 
-static void initialize_task_config(struct maintenance_run_opts *opts,
-				   const struct string_list *selected_tasks)
+স্থির শূন্য initialize_task_config(কাঠামো maintenance_run_opts *opts,
+				   ধ্রুবক কাঠামো string_list *selected_tasks)
 {
-	struct strbuf config_name = STRBUF_INIT;
-	struct maintenance_strategy strategy;
-	enum maintenance_type type;
-	const char *config_str;
+	কাঠামো strbuf config_name = STRBUF_INIT;
+	কাঠামো maintenance_strategy strategy;
+	গণনা maintenance_type type;
+	ধ্রুবক অক্ষর *config_str;
 
 	/*
 	 * In case the user has asked us to run tasks explicitly we only use
 	 * those specified tasks. Specifically, we do _not_ want to consult the
 	 * config or maintenance strategy.
 	 */
-	if (selected_tasks->nr) {
-		for (size_t i = 0; i < selected_tasks->nr; i++) {
-			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
+	যদি (selected_tasks->nr) {
+		জন্য (আকার_t i = 0; i < selected_tasks->nr; i++) {
+			গণনা maintenance_task_label label = (intptr_t)selected_tasks->বস্তুসমূহ[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
 
-		return;
+		ফেরত;
 	}
 
 	/*
@@ -1576,36 +1576,36 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * override specific aspects of our strategy. Furthermore, both
 	 * strategies can be overridden by setting "maintenance.strategy".
 	 */
-	if (opts->schedule) {
+	যদি (opts->schedule) {
 		strategy = none_strategy;
 		type = MAINTENANCE_TYPE_SCHEDULED;
-	} else {
+	} অন্যথা {
 		strategy = geometric_strategy;
 		type = MAINTENANCE_TYPE_MANUAL;
 	}
 
-	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
+	যদি (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	জন্য (আকার_t i = 0; i < TASK_গুনতি; i++) {
+		পূর্ণসংখ্যা config_মান;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
-			strategy.tasks[i].type = config_value ? type : 0;
-		if (!(strategy.tasks[i].type & type))
-			continue;
+		যদি (!repo_config_get_bool(the_repository, config_name.buf, &config_মান))
+			strategy.tasks[i].type = config_মান ? type : 0;
+		যদি (!(strategy.tasks[i].type & type))
+			চালু;
 
-		if (opts->schedule) {
+		যদি (opts->schedule) {
 			strbuf_reset(&config_name);
 			strbuf_addf(&config_name, "maintenance.%s.schedule",
 				    tasks[i].name);
-			if (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
+			যদি (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
 				strategy.tasks[i].schedule = parse_schedule(config_str);
-			if (strategy.tasks[i].schedule < opts->schedule)
-				continue;
+			যদি (strategy.tasks[i].schedule < opts->schedule)
+				চালু;
 		}
 
 		ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
@@ -1615,39 +1615,39 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	strbuf_release(&config_name);
 }
 
-static int task_option_parse(const struct option *opt,
-			     const char *arg, int unset)
+স্থির পূর্ণসংখ্যা task_option_parse(ধ্রুবক কাঠামো option *opt,
+			     ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	struct string_list *selected_tasks = opt->value;
-	size_t i;
+	কাঠামো string_list *selected_tasks = opt->মান;
+	আকার_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
-		if (!strcasecmp(tasks[i].name, arg))
-			break;
-	if (i >= TASK__COUNT) {
+	জন্য (i = 0; i < TASK_গুনতি; i++)
+		যদি (!strcasecmp(tasks[i].name, arg))
+			বিরতি;
+	যদি (i >= TASK_গুনতি) {
 		error(_("'%s' is not a valid task"), arg);
-		return 1;
+		ফেরত 1;
 	}
 
-	if (unsorted_string_list_has_string(selected_tasks, arg)) {
+	যদি (unsorted_string_list_has_string(selected_tasks, arg)) {
 		error(_("task '%s' cannot be selected multiple times"), arg);
-		return 1;
+		ফেরত 1;
 	}
 
-	string_list_append(selected_tasks, arg)->util = (void *)(intptr_t)i;
+	string_list_append(selected_tasks, arg)->util = (শূন্য *)(intptr_t)i;
 
-	return 0;
+	ফেরত 0;
 }
 
-static int maintenance_run(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_run(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+			   কাঠামো repository *repo UNUSED)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option builtin_maintenance_run_options[] = {
+	কাঠামো maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	কাঠামো string_list selected_tasks = STRING_LIST_INIT_DUP;
+	কাঠামো gc_config cfg = GC_CONFIG_INIT;
+	কাঠামো option builtin_maintenance_run_options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_BOOL(0, "detach", &opts.detach,
@@ -1662,7 +1662,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 			PARSE_OPT_NONEG, task_option_parse),
 		OPT_END()
 	};
-	int ret;
+	পূর্ণসংখ্যা ret;
 
 	opts.quiet = !isatty(2);
 
@@ -1679,7 +1679,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (argc != 0)
+	যদি (argc != 0)
 		usage_with_options(builtin_maintenance_run_usage,
 				   builtin_maintenance_run_options);
 
@@ -1688,41 +1688,41 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	string_list_clear(&selected_tasks, 0);
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return ret;
+	ফেরত ret;
 }
 
-static char *get_maintpath(void)
+স্থির অক্ষর *get_maintpath(শূন্য)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *p = the_repository->worktree ?
+	কাঠামো strbuf sb = STRBUF_INIT;
+	ধ্রুবক অক্ষর *p = the_repository->worktree ?
 		the_repository->worktree : the_repository->gitdir;
 
 	strbuf_realpath(&sb, p, 1);
-	return strbuf_detach(&sb, NULL);
+	ফেরত strbuf_detach(&sb, ফাঁকা);
 }
 
-static char const * const builtin_maintenance_register_usage[] = {
+স্থির অক্ষর ধ্রুবক * ধ্রুবক builtin_maintenance_register_usage[] = {
 	"git maintenance register [--config-file <path>]",
-	NULL
+	ফাঁকা
 };
 
-static int maintenance_register(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_register(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+				কাঠামো repository *repo UNUSED)
 {
-	char *config_file = NULL;
-	struct option options[] = {
+	অক্ষর *config_file = ফাঁকা;
+	কাঠামো option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT_END(),
 	};
-	int found = 0;
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	struct string_list_item *item;
-	const struct string_list *list;
+	পূর্ণসংখ্যা found = 0;
+	ধ্রুবক অক্ষর *চাবি = "maintenance.repo";
+	অক্ষর *maintpath = get_maintpath();
+	কাঠামো string_list_item *item;
+	ধ্রুবক কাঠামো string_list *list;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_register_usage, 0);
-	if (argc)
+	যদি (argc)
 		usage_with_options(builtin_maintenance_register_usage,
 				   options);
 
@@ -1730,163 +1730,163 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 	repo_config_set(the_repository, "maintenance.auto", "false");
 
 	/* Set maintenance strategy, if unset */
-	if (repo_config_get(the_repository, "maintenance.strategy"))
+	যদি (repo_config_get(the_repository, "maintenance.strategy"))
 		repo_config_set(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
+	যদি (!repo_config_get_string_multi(the_repository, চাবি, &list)) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			যদি (!strcmp(maintpath, item->string)) {
 				found = 1;
-				break;
+				বিরতি;
 			}
 		}
 	}
 
-	if (!found) {
-		int rc;
-		char *global_config_file = NULL;
+	যদি (!found) {
+		পূর্ণসংখ্যা rc;
+		অক্ষর *global_config_file = ফাঁকা;
 
-		if (!config_file) {
+		যদি (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		যদি (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
 			config_file, "maintenance.repo", maintpath,
-			CONFIG_REGEX_NONE, NULL, 0);
-		free(global_config_file);
+			CONFIG_REGEX_NONE, ফাঁকা, 0);
+		মুক্ত(global_config_file);
 
-		if (rc)
+		যদি (rc)
 			die(_("unable to add '%s' value of '%s'"),
-			    key, maintpath);
+			    চাবি, maintpath);
 	}
 
-	free(maintpath);
-	return 0;
+	মুক্ত(maintpath);
+	ফেরত 0;
 }
 
-static char const * const builtin_maintenance_unregister_usage[] = {
+স্থির অক্ষর ধ্রুবক * ধ্রুবক builtin_maintenance_unregister_usage[] = {
 	"git maintenance unregister [--config-file <path>] [--force]",
-	NULL
+	ফাঁকা
 };
 
-static int maintenance_unregister(int argc, const char **argv, const char *prefix,
-				  struct repository *repo UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_unregister(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+				  কাঠামো repository *repo UNUSED)
 {
-	int force = 0;
-	char *config_file = NULL;
-	struct option options[] = {
+	পূর্ণসংখ্যা force = 0;
+	অক্ষর *config_file = ফাঁকা;
+	কাঠামো option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT__FORCE(&force,
 			   N_("return success even if repository was not registered"),
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_END(),
 	};
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	int found = 0;
-	struct string_list_item *item;
-	const struct string_list *list;
-	struct config_set cs = { { 0 } };
+	ধ্রুবক অক্ষর *চাবি = "maintenance.repo";
+	অক্ষর *maintpath = get_maintpath();
+	পূর্ণসংখ্যা found = 0;
+	কাঠামো string_list_item *item;
+	ধ্রুবক কাঠামো string_list *list;
+	কাঠামো config_set cs = { { 0 } };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_unregister_usage, 0);
-	if (argc)
+	যদি (argc)
 		usage_with_options(builtin_maintenance_unregister_usage,
 				   options);
 
-	if (config_file) {
+	যদি (config_file) {
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, config_file);
 	}
-	if (!(config_file
-	      ? git_configset_get_string_multi(&cs, key, &list)
-	      : repo_config_get_string_multi(the_repository, key, &list))) {
+	যদি (!(config_file
+	      ? git_configset_get_string_multi(&cs, চাবি, &list)
+	      : repo_config_get_string_multi(the_repository, চাবি, &list))) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			যদি (!strcmp(maintpath, item->string)) {
 				found = 1;
-				break;
+				বিরতি;
 			}
 		}
 	}
 
-	if (found) {
-		int rc;
-		char *global_config_file = NULL;
+	যদি (found) {
+		পূর্ণসংখ্যা rc;
+		অক্ষর *global_config_file = ফাঁকা;
 
-		if (!config_file) {
+		যদি (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		যদি (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
-			config_file, key, NULL, maintpath, NULL,
-			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
-		free(global_config_file);
+			config_file, চাবি, ফাঁকা, maintpath, ফাঁকা,
+			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_মান);
+		মুক্ত(global_config_file);
 
-		if (rc &&
+		যদি (rc &&
 		    (!force || rc == CONFIG_NOTHING_SET))
 			die(_("unable to unset '%s' value of '%s'"),
-			    key, maintpath);
-	} else if (!force) {
+			    চাবি, maintpath);
+	} অন্যথা যদি (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
 
 	git_configset_clear(&cs);
-	free(maintpath);
-	return 0;
+	মুক্ত(maintpath);
+	ফেরত 0;
 }
 
-static const char *get_frequency(enum schedule_priority schedule)
+স্থির ধ্রুবক অক্ষর *get_frequency(গণনা schedule_priority schedule)
 {
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		return "hourly";
-	case SCHEDULE_DAILY:
-		return "daily";
-	case SCHEDULE_WEEKLY:
-		return "weekly";
-	default:
+	নির্বাচন (schedule) {
+	ক্ষেত্র SCHEDULE_HOURLY:
+		ফেরত "hourly";
+	ক্ষেত্র SCHEDULE_DAILY:
+		ফেরত "daily";
+	ক্ষেত্র SCHEDULE_WEEKLY:
+		ফেরত "weekly";
+	পূর্বনির্ধারিত:
 		BUG("invalid schedule %d", schedule);
 	}
 }
 
-static const char *extraconfig[] = {
+স্থির ধ্রুবক অক্ষর *extraconfig[] = {
 	"credential.interactive=false",
 	"core.askPass=true", /* 'true' returns success, but no output. */
-	NULL
+	ফাঁকা
 };
 
-static const char *get_extra_config_parameters(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+স্থির ধ্রুবক অক্ষর *get_extra_config_parameters(শূন্য) {
+	স্থির ধ্রুবক অক্ষর *ফলাফল = ফাঁকা;
+	কাঠামো strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	যদি (ফলাফল)
+		ফেরত ফলাফল;
 
-	for (const char **s = extraconfig; s && *s; s++)
+	জন্য (ধ্রুবক অক্ষর **s = extraconfig; s && *s; s++)
 		strbuf_addf(&builder, "-c %s ", *s);
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	ফলাফল = strbuf_detach(&builder, ফাঁকা);
+	ফেরত ফলাফল;
 }
 
-static const char *get_extra_launchctl_strings(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+স্থির ধ্রুবক অক্ষর *get_extra_launchctl_strings(শূন্য) {
+	স্থির ধ্রুবক অক্ষর *ফলাফল = ফাঁকা;
+	কাঠামো strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	যদি (ফলাফল)
+		ফেরত ফলাফল;
 
-	for (const char **s = extraconfig; s && *s; s++) {
+	জন্য (ধ্রুবক অক্ষর **s = extraconfig; s && *s; s++) {
 		strbuf_addstr(&builder, "<string>-c</string>\n");
 		strbuf_addf(&builder, "<string>%s</string>\n", *s);
 	}
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	ফলাফল = strbuf_detach(&builder, ফাঁকা);
+	ফেরত ফলাফল;
 }
 
 /*
@@ -1929,173 +1929,173 @@ static const char *get_extra_launchctl_strings(void) {
  *     | "qux" |    true     | "qux" (allocated) |     false     |
  *     +-------+-------------+-------------------+---------------+
  */
-static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
+স্থির পূর্ণসংখ্যা get_schedule_cmd(ধ্রুবক অক্ষর *cmd, পূর্ণসংখ্যা *is_available, অক্ষর **out)
 {
-	char *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
-	struct string_list_item *item;
-	struct string_list list = STRING_LIST_INIT_NODUP;
+	অক্ষর *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
+	কাঠামো string_list_item *item;
+	কাঠামো string_list list = STRING_LIST_INIT_NODUP;
 
-	if (!testing) {
-		if (out)
+	যদি (!testing) {
+		যদি (out)
 			*out = xstrdup(cmd);
-		return 0;
+		ফেরত 0;
 	}
 
-	if (is_available)
+	যদি (is_available)
 		*is_available = 0;
 
 	string_list_split_in_place(&list, testing, ",", -1);
 	for_each_string_list_item(item, &list) {
-		struct string_list pair = STRING_LIST_INIT_NODUP;
+		কাঠামো string_list pair = STRING_LIST_INIT_NODUP;
 
-		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
-			continue;
+		যদি (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
+			চালু;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
-			if (out)
-				*out = xstrdup(pair.items[1].string);
-			if (is_available)
+		যদি (!strcmp(cmd, pair.বস্তুসমূহ[0].string)) {
+			যদি (out)
+				*out = xstrdup(pair.বস্তুসমূহ[1].string);
+			যদি (is_available)
 				*is_available = 1;
 			string_list_clear(&pair, 0);
-			goto out;
+			যাও out;
 		}
 
 		string_list_clear(&pair, 0);
 	}
 
-	if (out)
+	যদি (out)
 		*out = xstrdup(cmd);
 
 out:
 	string_list_clear(&list, 0);
-	free(testing);
-	return 1;
+	মুক্ত(testing);
+	ফেরত 1;
 }
 
-static int get_random_minute(void)
+স্থির পূর্ণসংখ্যা get_random_minute(শূন্য)
 {
 	/* Use a static value when under tests. */
-	if (getenv("GIT_TEST_MAINT_SCHEDULER"))
-		return 13;
+	যদি (getenv("GIT_TEST_MAINT_SCHEDULER"))
+		ফেরত 13;
 
-	return git_rand(0) % 60;
+	ফেরত git_rand(0) % 60;
 }
 
-static int is_launchctl_available(void)
+স্থির পূর্ণসংখ্যা is_launchctl_available(শূন্য)
 {
-	int is_available;
-	if (get_schedule_cmd("launchctl", &is_available, NULL))
-		return is_available;
+	পূর্ণসংখ্যা is_available;
+	যদি (get_schedule_cmd("launchctl", &is_available, ফাঁকা))
+		ফেরত is_available;
 
 #ifdef __APPLE__
-	return 1;
-#else
-	return 0;
+	ফেরত 1;
+#অন্যথা
+	ফেরত 0;
 #endif
 }
 
-static char *launchctl_service_name(const char *frequency)
+স্থির অক্ষর *launchctl_service_name(ধ্রুবক অক্ষর *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	কাঠামো strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "org.git-scm.git.%s", frequency);
-	return strbuf_detach(&label, NULL);
+	ফেরত strbuf_detach(&label, ফাঁকা);
 }
 
-static char *launchctl_service_filename(const char *name)
+স্থির অক্ষর *launchctl_service_filename(ধ্রুবক অক্ষর *name)
 {
-	char *expanded;
-	struct strbuf filename = STRBUF_INIT;
+	অক্ষর *expanded;
+	কাঠামো strbuf filename = STRBUF_INIT;
 	strbuf_addf(&filename, "~/Library/LaunchAgents/%s.plist", name);
 
 	expanded = interpolate_path(filename.buf, 1);
-	if (!expanded)
+	যদি (!expanded)
 		die(_("failed to expand path '%s'"), filename.buf);
 
 	strbuf_release(&filename);
-	return expanded;
+	ফেরত expanded;
 }
 
-static char *launchctl_get_uid(void)
+স্থির অক্ষর *launchctl_get_uid(শূন্য)
 {
-	return xstrfmt("gui/%d", getuid());
+	ফেরত xstrfmt("gui/%d", getuid());
 }
 
-static int launchctl_boot_plist(int enable, const char *filename)
+স্থির পূর্ণসংখ্যা launchctl_boot_plist(পূর্ণসংখ্যা enable, ধ্রুবক অক্ষর *filename)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *uid = launchctl_get_uid();
+	অক্ষর *cmd;
+	পূর্ণসংখ্যা ফলাফল;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
+	অক্ষর *uid = launchctl_get_uid();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
+	get_schedule_cmd("launchctl", ফাঁকা, &cmd);
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, enable ? "bootstrap" : "bootout", uid,
-		     filename, NULL);
+		     filename, ফাঁকা);
 
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	যদি (start_command(&child))
 		die(_("failed to start launchctl"));
 
-	result = finish_command(&child);
+	ফলাফল = finish_command(&child);
 
-	free(cmd);
-	free(uid);
-	return result;
+	মুক্ত(cmd);
+	মুক্ত(uid);
+	ফেরত ফলাফল;
 }
 
-static int launchctl_remove_plist(enum schedule_priority schedule)
+স্থির পূর্ণসংখ্যা launchctl_remove_plist(গণনা schedule_priority schedule)
 {
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	int result = launchctl_boot_plist(0, filename);
+	ধ্রুবক অক্ষর *frequency = get_frequency(schedule);
+	অক্ষর *name = launchctl_service_name(frequency);
+	অক্ষর *filename = launchctl_service_filename(name);
+	পূর্ণসংখ্যা ফলাফল = launchctl_boot_plist(0, filename);
 	unlink(filename);
-	free(filename);
-	free(name);
-	return result;
+	মুক্ত(filename);
+	মুক্ত(name);
+	ফেরত ফলাফল;
 }
 
-static int launchctl_remove_plists(void)
+স্থির পূর্ণসংখ্যা launchctl_remove_plists(শূন্য)
 {
-	return launchctl_remove_plist(SCHEDULE_HOURLY) ||
+	ফেরত launchctl_remove_plist(SCHEDULE_HOURLY) ||
 	       launchctl_remove_plist(SCHEDULE_DAILY) ||
 	       launchctl_remove_plist(SCHEDULE_WEEKLY);
 }
 
-static int launchctl_list_contains_plist(const char *name, const char *cmd)
+স্থির পূর্ণসংখ্যা launchctl_list_contains_plist(ধ্রুবক অক্ষর *name, ধ্রুবক অক্ষর *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "list", name, NULL);
+	strvec_pushl(&child.args, "list", name, ফাঁকা);
 
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	যদি (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	/* Returns failure if 'name' doesn't exist. */
-	return !finish_command(&child);
+	ফেরত !finish_command(&child);
 }
 
-static int launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
+স্থির পূর্ণসংখ্যা launchctl_schedule_plist(ধ্রুবক অক্ষর *exec_path, গণনা schedule_priority schedule)
 {
-	int i, fd;
-	const char *preamble, *repeat;
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	struct lock_file lk = LOCK_INIT;
-	static unsigned long lock_file_timeout_ms = ULONG_MAX;
-	struct strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
-	struct stat st;
-	char *cmd;
-	int minute = get_random_minute();
+	পূর্ণসংখ্যা i, fd;
+	ধ্রুবক অক্ষর *preamble, *repeat;
+	ধ্রুবক অক্ষর *frequency = get_frequency(schedule);
+	অক্ষর *name = launchctl_service_name(frequency);
+	অক্ষর *filename = launchctl_service_filename(name);
+	কাঠামো lock_file lk = LOCK_INIT;
+	স্থির unsigned long lock_file_timeout_ms = ULONG_MAX;
+	কাঠামো strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
+	কাঠামো stat st;
+	অক্ষর *cmd;
+	পূর্ণসংখ্যা minute = get_random_minute();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
+	get_schedule_cmd("launchctl", ফাঁকা, &cmd);
 	preamble = "<?xml version=\"1.0\"?>\n"
 		   "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
 		   "<plist version=\"1.0\">"
@@ -2118,27 +2118,27 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	strbuf_addf(&plist, preamble, name, exec_path, exec_path,
 		    get_extra_launchctl_strings(), frequency);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	নির্বাচন (schedule) {
+	ক্ষেত্র SCHEDULE_HOURLY:
 		repeat = "<dict>\n"
 			 "<key>Hour</key><integer>%d</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 23; i++)
+		জন্য (i = 1; i <= 23; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		বিরতি;
 
-	case SCHEDULE_DAILY:
+	ক্ষেত্র SCHEDULE_DAILY:
 		repeat = "<dict>\n"
 			 "<key>Weekday</key><integer>%d</integer>\n"
 			 "<key>Hour</key><integer>0</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 6; i++)
+		জন্য (i = 1; i <= 6; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		বিরতি;
 
-	case SCHEDULE_WEEKLY:
+	ক্ষেত্র SCHEDULE_WEEKLY:
 		strbuf_addf(&plist,
 			    "<dict>\n"
 			    "<key>Weekday</key><integer>0</integer>\n"
@@ -2146,18 +2146,18 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			    "<key>Minute</key><integer>%d</integer>\n"
 			    "</dict>\n",
 			    minute);
-		break;
+		বিরতি;
 
-	default:
+	পূর্বনির্ধারিত:
 		/* unreachable */
-		break;
+		বিরতি;
 	}
 	strbuf_addstr(&plist, "</array>\n</dict>\n</plist>\n");
 
-	if (safe_create_leading_directories(the_repository, filename))
+	যদি (safe_create_leading_directories(the_repository, filename))
 		die(_("failed to create directories for '%s'"), filename);
 
-	if ((long)lock_file_timeout_ms < 0 &&
+	যদি ((long)lock_file_timeout_ms < 0 &&
 	    repo_config_get_ulong(the_repository, "gc.launchctlplistlocktimeoutms",
 				 &lock_file_timeout_ms))
 		lock_file_timeout_ms = 150;
@@ -2169,110 +2169,110 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	 * Does this file already exist? With the intended contents? Is it
 	 * registered already? Then it does not need to be re-registered.
 	 */
-	if (!stat(filename, &st) && st.st_size == plist.len &&
+	যদি (!stat(filename, &st) && st.st_আকার == plist.len &&
 	    strbuf_read_file(&plist2, filename, plist.len) == plist.len &&
 	    !strbuf_cmp(&plist, &plist2) &&
 	    launchctl_list_contains_plist(name, cmd))
 		rollback_lock_file(&lk);
-	else {
-		if (write_in_full(fd, plist.buf, plist.len) < 0 ||
+	অন্যথা {
+		যদি (write_in_full(fd, plist.buf, plist.len) < 0 ||
 		    commit_lock_file(&lk))
 			die_errno(_("could not write '%s'"), filename);
 
 		/* bootout might fail if not already running, so ignore */
 		launchctl_boot_plist(0, filename);
-		if (launchctl_boot_plist(1, filename))
+		যদি (launchctl_boot_plist(1, filename))
 			die(_("failed to bootstrap service %s"), filename);
 	}
 
-	free(filename);
-	free(name);
-	free(cmd);
+	মুক্ত(filename);
+	মুক্ত(name);
+	মুক্ত(cmd);
 	strbuf_release(&plist);
 	strbuf_release(&plist2);
-	return 0;
+	ফেরত 0;
 }
 
-static int launchctl_add_plists(void)
+স্থির পূর্ণসংখ্যা launchctl_add_plists(শূন্য)
 {
-	const char *exec_path = git_exec_path();
+	ধ্রুবক অক্ষর *exec_path = git_exec_path();
 
-	return launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
+	ফেরত launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_DAILY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int launchctl_update_schedule(int run_maintenance, int fd UNUSED)
+স্থির পূর্ণসংখ্যা launchctl_update_schedule(পূর্ণসংখ্যা run_maintenance, পূর্ণসংখ্যা fd UNUSED)
 {
-	if (run_maintenance)
-		return launchctl_add_plists();
-	else
-		return launchctl_remove_plists();
+	যদি (run_maintenance)
+		ফেরত launchctl_add_plists();
+	অন্যথা
+		ফেরত launchctl_remove_plists();
 }
 
-static int is_schtasks_available(void)
+স্থির পূর্ণসংখ্যা is_schtasks_available(শূন্য)
 {
-	int is_available;
-	if (get_schedule_cmd("schtasks", &is_available, NULL))
-		return is_available;
+	পূর্ণসংখ্যা is_available;
+	যদি (get_schedule_cmd("schtasks", &is_available, ফাঁকা))
+		ফেরত is_available;
 
 #ifdef GIT_WINDOWS_NATIVE
-	return 1;
-#else
-	return 0;
+	ফেরত 1;
+#অন্যথা
+	ফেরত 0;
 #endif
 }
 
-static char *schtasks_task_name(const char *frequency)
+স্থির অক্ষর *schtasks_task_name(ধ্রুবক অক্ষর *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	কাঠামো strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "Git Maintenance (%s)", frequency);
-	return strbuf_detach(&label, NULL);
+	ফেরত strbuf_detach(&label, ফাঁকা);
 }
 
-static int schtasks_remove_task(enum schedule_priority schedule)
+স্থির পূর্ণসংখ্যা schtasks_remove_task(গণনা schedule_priority schedule)
 {
-	char *cmd;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
+	অক্ষর *cmd;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
+	ধ্রুবক অক্ষর *frequency = get_frequency(schedule);
+	অক্ষর *name = schtasks_task_name(frequency);
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
+	get_schedule_cmd("schtasks", ফাঁকা, &cmd);
 	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", NULL);
-	free(name);
-	free(cmd);
+	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", ফাঁকা);
+	মুক্ত(name);
+	মুক্ত(cmd);
 
-	return run_command(&child);
+	ফেরত run_command(&child);
 }
 
-static int schtasks_remove_tasks(void)
+স্থির পূর্ণসংখ্যা schtasks_remove_tasks(শূন্য)
 {
-	return schtasks_remove_task(SCHEDULE_HOURLY) ||
+	ফেরত schtasks_remove_task(SCHEDULE_HOURLY) ||
 	       schtasks_remove_task(SCHEDULE_DAILY) ||
 	       schtasks_remove_task(SCHEDULE_WEEKLY);
 }
 
-static int schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
+স্থির পূর্ণসংখ্যা schtasks_schedule_task(ধ্রুবক অক্ষর *exec_path, গণনা schedule_priority schedule)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *xml;
-	struct tempfile *tfile;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
-	struct strbuf tfilename = STRBUF_INIT;
-	int minute = get_random_minute();
+	অক্ষর *cmd;
+	পূর্ণসংখ্যা ফলাফল;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
+	ধ্রুবক অক্ষর *xml;
+	কাঠামো tempfile *tfile;
+	ধ্রুবক অক্ষর *frequency = get_frequency(schedule);
+	অক্ষর *name = schtasks_task_name(frequency);
+	কাঠামো strbuf tfilename = STRBUF_INIT;
+	পূর্ণসংখ্যা minute = get_random_minute();
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
+	get_schedule_cmd("schtasks", ফাঁকা, &cmd);
 
 	strbuf_addf(&tfilename, "%s/schedule_%s_XXXXXX",
 		    repo_get_common_dir(the_repository), frequency);
 	tfile = xmks_tempfile(tfilename.buf);
 	strbuf_release(&tfilename);
 
-	if (!fdopen_tempfile(tfile, "w"))
+	যদি (!fdopen_tempfile(tfile, "w"))
 		die(_("failed to create temp xml file"));
 
 	xml = "<?xml version=\"1.0\" ?>\n"
@@ -2281,8 +2281,8 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "<CalendarTrigger>\n";
 	fputs(xml, tfile->fp);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	নির্বাচন (schedule) {
+	ক্ষেত্র SCHEDULE_HOURLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T01:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2295,9 +2295,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<StopAtDurationEnd>false</StopAtDurationEnd>\n"
 			"</Repetition>\n",
 			minute);
-		break;
+		বিরতি;
 
-	case SCHEDULE_DAILY:
+	ক্ষেত্র SCHEDULE_DAILY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2313,9 +2313,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		বিরতি;
 
-	case SCHEDULE_WEEKLY:
+	ক্ষেত্র SCHEDULE_WEEKLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2326,10 +2326,10 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		বিরতি;
 
-	default:
-		break;
+	পূর্বনির্ধারিত:
+		বিরতি;
 	}
 
 	xml = "</CalendarTrigger>\n"
@@ -2360,67 +2360,67 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 		get_extra_config_parameters(), frequency);
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, "/create", "/tn", name, "/f", "/xml",
-				  get_tempfile_path(tfile), NULL);
+				  get_tempfile_path(tfile), ফাঁকা);
 	close_tempfile_gently(tfile);
 
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 
-	if (start_command(&child))
+	যদি (start_command(&child))
 		die(_("failed to start schtasks"));
-	result = finish_command(&child);
+	ফলাফল = finish_command(&child);
 
 	delete_tempfile(&tfile);
-	free(name);
-	free(cmd);
-	return result;
+	মুক্ত(name);
+	মুক্ত(cmd);
+	ফেরত ফলাফল;
 }
 
-static int schtasks_schedule_tasks(void)
+স্থির পূর্ণসংখ্যা schtasks_schedule_tasks(শূন্য)
 {
-	const char *exec_path = git_exec_path();
+	ধ্রুবক অক্ষর *exec_path = git_exec_path();
 
-	return schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
+	ফেরত schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_DAILY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int schtasks_update_schedule(int run_maintenance, int fd UNUSED)
+স্থির পূর্ণসংখ্যা schtasks_update_schedule(পূর্ণসংখ্যা run_maintenance, পূর্ণসংখ্যা fd UNUSED)
 {
-	if (run_maintenance)
-		return schtasks_schedule_tasks();
-	else
-		return schtasks_remove_tasks();
+	যদি (run_maintenance)
+		ফেরত schtasks_schedule_tasks();
+	অন্যথা
+		ফেরত schtasks_remove_tasks();
 }
 
 MAYBE_UNUSED
-static int check_crontab_process(const char *cmd)
+স্থির পূর্ণসংখ্যা check_crontab_process(ধ্রুবক অক্ষর *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	strvec_split(&child.args, cmd);
-	strvec_push(&child.args, "-l");
+	strvec_ঠেলো(&child.args, "-l");
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
+	যদি (start_command(&child))
+		ফেরত 0;
 	/* Ignore exit code, as an empty crontab will return error. */
 	finish_command(&child);
-	return 1;
+	ফেরত 1;
 }
 
-static int is_crontab_available(void)
+স্থির পূর্ণসংখ্যা is_crontab_available(শূন্য)
 {
-	char *cmd;
-	int is_available;
-	int ret;
+	অক্ষর *cmd;
+	পূর্ণসংখ্যা is_available;
+	পূর্ণসংখ্যা ret;
 
-	if (get_schedule_cmd("crontab", &is_available, &cmd)) {
+	যদি (get_schedule_cmd("crontab", &is_available, &cmd)) {
 		ret = is_available;
-		goto out;
+		যাও out;
 	}
 
 #ifdef __APPLE__
@@ -2429,54 +2429,54 @@ static int is_crontab_available(void)
 	 * create a UI alert when attempting to run this command.
 	 */
 	ret = 0;
-#else
+#অন্যথা
 	ret = check_crontab_process(cmd);
 #endif
 
 out:
-	free(cmd);
-	return ret;
+	মুক্ত(cmd);
+	ফেরত ret;
 }
 
-#define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
-#define END_LINE "# END GIT MAINTENANCE SCHEDULE"
+#define BEGIN_সারি "# BEGIN GIT MAINTENANCE SCHEDULE"
+#define END_সারি "# END GIT MAINTENANCE SCHEDULE"
 
-static int crontab_update_schedule(int run_maintenance, int fd)
+স্থির পূর্ণসংখ্যা crontab_update_schedule(পূর্ণসংখ্যা run_maintenance, পূর্ণসংখ্যা fd)
 {
-	char *cmd;
-	int result = 0;
-	int in_old_region = 0;
-	struct child_process crontab_list = CHILD_PROCESS_INIT;
-	struct child_process crontab_edit = CHILD_PROCESS_INIT;
+	অক্ষর *cmd;
+	পূর্ণসংখ্যা ফলাফল = 0;
+	পূর্ণসংখ্যা in_old_region = 0;
+	কাঠামো child_process crontab_list = CHILD_PROCESS_INIT;
+	কাঠামো child_process crontab_edit = CHILD_PROCESS_INIT;
 	FILE *cron_list, *cron_in;
-	struct strbuf line = STRBUF_INIT;
-	struct tempfile *tmpedit = NULL;
-	int minute = get_random_minute();
+	কাঠামো strbuf সারি = STRBUF_INIT;
+	কাঠামো tempfile *tmpedit = ফাঁকা;
+	পূর্ণসংখ্যা minute = get_random_minute();
 
-	get_schedule_cmd("crontab", NULL, &cmd);
+	get_schedule_cmd("crontab", ফাঁকা, &cmd);
 	strvec_split(&crontab_list.args, cmd);
-	strvec_push(&crontab_list.args, "-l");
+	strvec_ঠেলো(&crontab_list.args, "-l");
 	crontab_list.in = -1;
 	crontab_list.out = dup(fd);
 	crontab_list.git_cmd = 0;
 
-	if (start_command(&crontab_list)) {
-		result = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
-		goto out;
+	যদি (start_command(&crontab_list)) {
+		ফলাফল = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
+		যাও out;
 	}
 
 	/* Ignore exit code, as an empty crontab will return error. */
 	finish_command(&crontab_list);
 
 	tmpedit = mks_tempfile_t(".git_cron_edit_tmpXXXXXX");
-	if (!tmpedit) {
-		result = error(_("failed to create crontab temporary file"));
-		goto out;
+	যদি (!tmpedit) {
+		ফলাফল = error(_("failed to create crontab temporary file"));
+		যাও out;
 	}
 	cron_in = fdopen_tempfile(tmpedit, "w");
-	if (!cron_in) {
-		result = error(_("failed to open temporary file"));
-		goto out;
+	যদি (!cron_in) {
+		ফলাফল = error(_("failed to open temporary file"));
+		যাও out;
 	}
 
 	/*
@@ -2486,120 +2486,120 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
+	যখন (!strbuf_getline_lf(&সারি, cron_list)) {
+		যদি (!in_old_region && !strcmp(সারি.buf, BEGIN_সারি))
 			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
+		অন্যথা যদি (in_old_region && !strcmp(সারি.buf, END_সারি))
 			in_old_region = 0;
-		else if (!in_old_region)
-			fprintf(cron_in, "%s\n", line.buf);
+		অন্যথা যদি (!in_old_region)
+			fprintf(cron_in, "%s\n", সারি.buf);
 	}
-	strbuf_release(&line);
+	strbuf_release(&সারি);
 
-	if (run_maintenance) {
-		struct strbuf line_format = STRBUF_INIT;
-		const char *exec_path = git_exec_path();
+	যদি (run_maintenance) {
+		কাঠামো strbuf সারি_format = STRBUF_INIT;
+		ধ্রুবক অক্ষর *exec_path = git_exec_path();
 
-		fprintf(cron_in, "%s\n", BEGIN_LINE);
+		fprintf(cron_in, "%s\n", BEGIN_সারি);
 		fprintf(cron_in,
 			"# The following schedule was created by Git\n");
 		fprintf(cron_in, "# Any edits made in this region might be\n");
 		fprintf(cron_in,
 			"# replaced in the future by a Git command.\n\n");
 
-		strbuf_addf(&line_format,
+		strbuf_addf(&সারি_format,
 			    "%%d %%s * * %%s \"%s/git\" --exec-path=\"%s\" %s for-each-repo --keep-going --config=maintenance.repo maintenance run --schedule=%%s\n",
 			    exec_path, exec_path, get_extra_config_parameters());
-		fprintf(cron_in, line_format.buf, minute, "1-23", "*", "hourly");
-		fprintf(cron_in, line_format.buf, minute, "0", "1-6", "daily");
-		fprintf(cron_in, line_format.buf, minute, "0", "0", "weekly");
-		strbuf_release(&line_format);
+		fprintf(cron_in, সারি_format.buf, minute, "1-23", "*", "hourly");
+		fprintf(cron_in, সারি_format.buf, minute, "0", "1-6", "daily");
+		fprintf(cron_in, সারি_format.buf, minute, "0", "0", "weekly");
+		strbuf_release(&সারি_format);
 
-		fprintf(cron_in, "\n%s\n", END_LINE);
+		fprintf(cron_in, "\n%s\n", END_সারি);
 	}
 
 	fflush(cron_in);
 
 	strvec_split(&crontab_edit.args, cmd);
-	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
+	strvec_ঠেলো(&crontab_edit.args, get_tempfile_path(tmpedit));
 	crontab_edit.git_cmd = 0;
 
-	if (start_command(&crontab_edit)) {
-		result = error(_("failed to run 'crontab'; your system might not support 'cron'"));
-		goto out;
+	যদি (start_command(&crontab_edit)) {
+		ফলাফল = error(_("failed to run 'crontab'; your system might not support 'cron'"));
+		যাও out;
 	}
 
-	if (finish_command(&crontab_edit))
-		result = error(_("'crontab' died"));
-	else
+	যদি (finish_command(&crontab_edit))
+		ফলাফল = error(_("'crontab' died"));
+	অন্যথা
 		fclose(cron_list);
 
 out:
 	delete_tempfile(&tmpedit);
-	free(cmd);
-	return result;
+	মুক্ত(cmd);
+	ফেরত ফলাফল;
 }
 
-static int real_is_systemd_timer_available(void)
+স্থির পূর্ণসংখ্যা real_is_systemd_timer_available(শূন্য)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", NULL);
+	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", ফাঁকা);
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
-	if (finish_command(&child))
-		return 0;
-	return 1;
+	যদি (start_command(&child))
+		ফেরত 0;
+	যদি (finish_command(&child))
+		ফেরত 0;
+	ফেরত 1;
 }
 
-static int is_systemd_timer_available(void)
+স্থির পূর্ণসংখ্যা is_systemd_timer_available(শূন্য)
 {
-	int is_available;
+	পূর্ণসংখ্যা is_available;
 
-	if (get_schedule_cmd("systemctl", &is_available, NULL))
-		return is_available;
+	যদি (get_schedule_cmd("systemctl", &is_available, ফাঁকা))
+		ফেরত is_available;
 
-	return real_is_systemd_timer_available();
+	ফেরত real_is_systemd_timer_available();
 }
 
-static char *xdg_config_home_systemd(const char *filename)
+স্থির অক্ষর *xdg_config_home_systemd(ধ্রুবক অক্ষর *filename)
 {
-	return xdg_config_home_for("systemd/user", filename);
+	ফেরত xdg_config_home_for("systemd/user", filename);
 }
 
 #define SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
 
-static int systemd_timer_delete_timer_file(enum schedule_priority priority)
+স্থির পূর্ণসংখ্যা systemd_timer_delete_timer_file(গণনা schedule_priority priority)
 {
-	int ret = 0;
-	const char *frequency = get_frequency(priority);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
-	char *filename = xdg_config_home_systemd(local_timer_name);
+	পূর্ণসংখ্যা ret = 0;
+	ধ্রুবক অক্ষর *frequency = get_frequency(priority);
+	অক্ষর *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	অক্ষর *filename = xdg_config_home_systemd(local_timer_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	যদি (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_timer_name);
-	return ret;
+	মুক্ত(filename);
+	মুক্ত(local_timer_name);
+	ফেরত ret;
 }
 
-static int systemd_timer_delete_service_template(void)
+স্থির পূর্ণসংখ্যা systemd_timer_delete_service_template(শূন্য)
 {
-	int ret = 0;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
-	char *filename = xdg_config_home_systemd(local_service_name);
-	if (unlink(filename) && !is_missing_file_error(errno))
+	পূর্ণসংখ্যা ret = 0;
+	অক্ষর *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	অক্ষর *filename = xdg_config_home_systemd(local_service_name);
+	যদি (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_service_name);
-	return ret;
+	মুক্ত(filename);
+	মুক্ত(local_service_name);
+	ফেরত ret;
 }
 
 /*
@@ -2607,41 +2607,41 @@ static int systemd_timer_delete_service_template(void)
  * file using a custom minute. This timer file cannot use the templating
  * system, so we generate a specific file for each.
  */
-static int systemd_timer_write_timer_file(enum schedule_priority schedule,
-					  int minute)
+স্থির পূর্ণসংখ্যা systemd_timer_write_timer_file(গণনা schedule_priority schedule,
+					  পূর্ণসংখ্যা minute)
 {
-	int res = -1;
-	char *filename;
+	পূর্ণসংখ্যা res = -1;
+	অক্ষর *filename;
 	FILE *file;
-	const char *unit;
-	char *schedule_pattern = NULL;
-	const char *frequency = get_frequency(schedule);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	ধ্রুবক অক্ষর *unit;
+	অক্ষর *schedule_pattern = ফাঁকা;
+	ধ্রুবক অক্ষর *frequency = get_frequency(schedule);
+	অক্ষর *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
 	filename = xdg_config_home_systemd(local_timer_name);
 
-	if (safe_create_leading_directories(the_repository, filename)) {
+	যদি (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		যাও error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	যদি (!file)
+		যাও error;
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	নির্বাচন (schedule) {
+	ক্ষেত্র SCHEDULE_HOURLY:
 		schedule_pattern = xstrfmt("*-*-* 1..23:%02d:00", minute);
-		break;
+		বিরতি;
 
-	case SCHEDULE_DAILY:
+	ক্ষেত্র SCHEDULE_DAILY:
 		schedule_pattern = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
-		break;
+		বিরতি;
 
-	case SCHEDULE_WEEKLY:
+	ক্ষেত্র SCHEDULE_WEEKLY:
 		schedule_pattern = xstrfmt("Mon 0:%02d:00", minute);
-		break;
+		বিরতি;
 
-	default:
+	পূর্বনির্ধারিত:
 		BUG("Unhandled schedule_priority");
 	}
 
@@ -2658,23 +2658,23 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 	       "\n"
 	       "[Install]\n"
 	       "WantedBy=timers.target\n";
-	if (fprintf(file, unit, schedule_pattern) < 0) {
+	যদি (fprintf(file, unit, schedule_pattern) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		যাও error;
 	}
-	if (fclose(file) == EOF) {
+	যদি (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		যাও error;
 	}
 
 	res = 0;
 
 error:
-	free(schedule_pattern);
-	free(local_timer_name);
-	free(filename);
-	return res;
+	মুক্ত(schedule_pattern);
+	মুক্ত(local_timer_name);
+	মুক্ত(filename);
+	ফেরত res;
 }
 
 /*
@@ -2684,22 +2684,22 @@ error:
  * and will use this file and insert the <schedule> into the template at
  * the position of "%i".
  */
-static int systemd_timer_write_service_template(const char *exec_path)
+স্থির পূর্ণসংখ্যা systemd_timer_write_service_template(ধ্রুবক অক্ষর *exec_path)
 {
-	int res = -1;
-	char *filename;
+	পূর্ণসংখ্যা res = -1;
+	অক্ষর *filename;
 	FILE *file;
-	const char *unit;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	ধ্রুবক অক্ষর *unit;
+	অক্ষর *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 
 	filename = xdg_config_home_systemd(local_service_name);
-	if (safe_create_leading_directories(the_repository, filename)) {
+	যদি (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		যাও error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	যদি (!file)
+		যাও error;
 
 	unit = "# This file was created and is maintained by Git.\n"
 	       "# Any edits made in this file might be replaced in the future\n"
@@ -2720,32 +2720,32 @@ static int systemd_timer_write_service_template(const char *exec_path)
 	       "RestrictSUIDSGID=yes\n"
 	       "SystemCallArchitectures=native\n"
 	       "SystemCallFilter=@system-service\n";
-	if (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
+	যদি (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		যাও error;
 	}
-	if (fclose(file) == EOF) {
+	যদি (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		যাও error;
 	}
 
 	res = 0;
 
 error:
-	free(local_service_name);
-	free(filename);
-	return res;
+	মুক্ত(local_service_name);
+	মুক্ত(filename);
+	ফেরত res;
 }
 
-static int systemd_timer_enable_unit(int enable,
-				     enum schedule_priority schedule,
-				     int minute)
+স্থির পূর্ণসংখ্যা systemd_timer_enable_unit(পূর্ণসংখ্যা enable,
+				     গণনা schedule_priority schedule,
+				     পূর্ণসংখ্যা minute)
 {
-	char *cmd = NULL;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	int ret;
+	অক্ষর *cmd = ফাঁকা;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
+	ধ্রুবক অক্ষর *frequency = get_frequency(schedule);
+	পূর্ণসংখ্যা ret;
 
 	/*
 	 * Disabling the systemd unit while it is already disabled makes
@@ -2756,25 +2756,25 @@ static int systemd_timer_enable_unit(int enable,
 	 * On the other hand, enabling a systemd unit which is already enabled
 	 * produces no error.
 	 */
-	if (!enable) {
+	যদি (!enable) {
 		child.no_stderr = 1;
-	} else if (systemd_timer_write_timer_file(schedule, minute)) {
+	} অন্যথা যদি (systemd_timer_write_timer_file(schedule, minute)) {
 		ret = -1;
-		goto out;
+		যাও out;
 	}
 
-	get_schedule_cmd("systemctl", NULL, &cmd);
+	get_schedule_cmd("systemctl", ফাঁকা, &cmd);
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, "--user", enable ? "enable" : "disable",
-		     "--now", NULL);
+		     "--now", ফাঁকা);
 	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
-	if (start_command(&child)) {
+	যদি (start_command(&child)) {
 		ret = error(_("failed to start systemctl"));
-		goto out;
+		যাও out;
 	}
 
-	if (finish_command(&child)) {
+	যদি (finish_command(&child)) {
 		/*
 		 * Disabling an already disabled systemd unit makes
 		 * systemctl fail.
@@ -2782,83 +2782,83 @@ static int systemd_timer_enable_unit(int enable,
 		 *
 		 * Enabling an enabled systemd unit doesn't fail.
 		 */
-		if (enable) {
+		যদি (enable) {
 			ret = error(_("failed to run systemctl"));
-			goto out;
+			যাও out;
 		}
 	}
 
 	ret = 0;
 
 out:
-	free(cmd);
-	return ret;
+	মুক্ত(cmd);
+	ফেরত ret;
 }
 
 /*
  * A previous version of Git wrote the timer units as template files.
  * Clean these up, if they exist.
  */
-static void systemd_timer_delete_stale_timer_templates(void)
+স্থির শূন্য systemd_timer_delete_stale_timer_templates(শূন্য)
 {
-	char *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
-	char *filename = xdg_config_home_systemd(timer_template_name);
+	অক্ষর *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
+	অক্ষর *filename = xdg_config_home_systemd(timer_template_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	যদি (unlink(filename) && !is_missing_file_error(errno))
 		warning(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(timer_template_name);
+	মুক্ত(filename);
+	মুক্ত(timer_template_name);
 }
 
-static int systemd_timer_delete_unit_files(void)
+স্থির পূর্ণসংখ্যা systemd_timer_delete_unit_files(শূন্য)
 {
 	systemd_timer_delete_stale_timer_templates();
 
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
+	ফেরত systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_DAILY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_WEEKLY) |
 	       systemd_timer_delete_service_template();
 }
 
-static int systemd_timer_delete_units(void)
+স্থির পূর্ণসংখ্যা systemd_timer_delete_units(শূন্য)
 {
-	int minute = get_random_minute();
+	পূর্ণসংখ্যা minute = get_random_minute();
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
+	ফেরত systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_DAILY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_WEEKLY, minute) |
 	       systemd_timer_delete_unit_files();
 }
 
-static int systemd_timer_setup_units(void)
+স্থির পূর্ণসংখ্যা systemd_timer_setup_units(শূন্য)
 {
-	int minute = get_random_minute();
-	const char *exec_path = git_exec_path();
+	পূর্ণসংখ্যা minute = get_random_minute();
+	ধ্রুবক অক্ষর *exec_path = git_exec_path();
 
-	int ret = systemd_timer_write_service_template(exec_path) ||
+	পূর্ণসংখ্যা ret = systemd_timer_write_service_template(exec_path) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_HOURLY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_DAILY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_WEEKLY, minute);
 
-	if (ret)
+	যদি (ret)
 		systemd_timer_delete_units();
-	else
+	অন্যথা
 		systemd_timer_delete_stale_timer_templates();
 
-	return ret;
+	ফেরত ret;
 }
 
-static int systemd_timer_update_schedule(int run_maintenance, int fd UNUSED)
+স্থির পূর্ণসংখ্যা systemd_timer_update_schedule(পূর্ণসংখ্যা run_maintenance, পূর্ণসংখ্যা fd UNUSED)
 {
-	if (run_maintenance)
-		return systemd_timer_setup_units();
-	else
-		return systemd_timer_delete_units();
+	যদি (run_maintenance)
+		ফেরত systemd_timer_setup_units();
+	অন্যথা
+		ফেরত systemd_timer_delete_units();
 }
 
-enum scheduler {
+গণনা scheduler {
 	SCHEDULER_INVALID = -1,
 	SCHEDULER_AUTO,
 	SCHEDULER_CRON,
@@ -2867,10 +2867,10 @@ enum scheduler {
 	SCHEDULER_SCHTASKS,
 };
 
-static const struct {
-	const char *name;
-	int (*is_available)(void);
-	int (*update_schedule)(int run_maintenance, int fd);
+স্থির ধ্রুবক কাঠামো {
+	ধ্রুবক অক্ষর *name;
+	পূর্ণসংখ্যা (*is_available)(শূন্য);
+	পূর্ণসংখ্যা (*update_schedule)(পূর্ণসংখ্যা run_maintenance, পূর্ণসংখ্যা fd);
 } scheduler_fn[] = {
 	[SCHEDULER_CRON] = {
 		.name = "crontab",
@@ -2894,182 +2894,182 @@ static const struct {
 	},
 };
 
-static enum scheduler parse_scheduler(const char *value)
+স্থির গণনা scheduler parse_scheduler(ধ্রুবক অক্ষর *মান)
 {
-	if (!value)
-		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
-		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
-		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
-		 !strcasecmp(value, "systemd-timer"))
-		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
-		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
-		return SCHEDULER_SCHTASKS;
-	else
-		return SCHEDULER_INVALID;
+	যদি (!মান)
+		ফেরত SCHEDULER_INVALID;
+	অন্যথা যদি (!strcasecmp(মান, "auto"))
+		ফেরত SCHEDULER_AUTO;
+	অন্যথা যদি (!strcasecmp(মান, "cron") || !strcasecmp(মান, "crontab"))
+		ফেরত SCHEDULER_CRON;
+	অন্যথা যদি (!strcasecmp(মান, "systemd") ||
+		 !strcasecmp(মান, "systemd-timer"))
+		ফেরত SCHEDULER_SYSTEMD;
+	অন্যথা যদি (!strcasecmp(মান, "launchctl"))
+		ফেরত SCHEDULER_LAUNCHCTL;
+	অন্যথা যদি (!strcasecmp(মান, "schtasks"))
+		ফেরত SCHEDULER_SCHTASKS;
+	অন্যথা
+		ফেরত SCHEDULER_INVALID;
 }
 
-static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
-				     int unset)
+স্থির পূর্ণসংখ্যা maintenance_opt_scheduler(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *arg,
+				     পূর্ণসংখ্যা unset)
 {
-	enum scheduler *scheduler = opt->value;
+	গণনা scheduler *scheduler = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*scheduler = parse_scheduler(arg);
-	if (*scheduler == SCHEDULER_INVALID)
-		return error(_("unrecognized --scheduler argument '%s'"), arg);
-	return 0;
+	যদি (*scheduler == SCHEDULER_INVALID)
+		ফেরত error(_("unrecognized --scheduler argument '%s'"), arg);
+	ফেরত 0;
 }
 
-struct maintenance_start_opts {
-	enum scheduler scheduler;
+কাঠামো maintenance_start_opts {
+	গণনা scheduler scheduler;
 };
 
-static enum scheduler resolve_scheduler(enum scheduler scheduler)
+স্থির গণনা scheduler resolve_scheduler(গণনা scheduler scheduler)
 {
-	if (scheduler != SCHEDULER_AUTO)
-		return scheduler;
+	যদি (scheduler != SCHEDULER_AUTO)
+		ফেরত scheduler;
 
-#if defined(__APPLE__)
-	return SCHEDULER_LAUNCHCTL;
+#যদি defined(__APPLE__)
+	ফেরত SCHEDULER_LAUNCHCTL;
 
-#elif defined(GIT_WINDOWS_NATIVE)
-	return SCHEDULER_SCHTASKS;
+#নতুবা_যদি defined(GIT_WINDOWS_NATIVE)
+	ফেরত SCHEDULER_SCHTASKS;
 
-#elif defined(__linux__)
-	if (is_systemd_timer_available())
-		return SCHEDULER_SYSTEMD;
-	else if (is_crontab_available())
-		return SCHEDULER_CRON;
-	else
+#নতুবা_যদি defined(__linux__)
+	যদি (is_systemd_timer_available())
+		ফেরত SCHEDULER_SYSTEMD;
+	অন্যথা যদি (is_crontab_available())
+		ফেরত SCHEDULER_CRON;
+	অন্যথা
 		die(_("neither systemd timers nor crontab are available"));
 
-#else
-	return SCHEDULER_CRON;
+#অন্যথা
+	ফেরত SCHEDULER_CRON;
 #endif
 }
 
-static void validate_scheduler(enum scheduler scheduler)
+স্থির শূন্য validate_scheduler(গণনা scheduler scheduler)
 {
-	if (scheduler == SCHEDULER_INVALID)
+	যদি (scheduler == SCHEDULER_INVALID)
 		BUG("invalid scheduler");
-	if (scheduler == SCHEDULER_AUTO)
+	যদি (scheduler == SCHEDULER_AUTO)
 		BUG("resolve_scheduler should have been called before");
 
-	if (!scheduler_fn[scheduler].is_available())
+	যদি (!scheduler_fn[scheduler].is_available())
 		die(_("%s scheduler is not available"),
 		    scheduler_fn[scheduler].name);
 }
 
-static int update_background_schedule(const struct maintenance_start_opts *opts,
-				      int enable)
+স্থির পূর্ণসংখ্যা update_background_schedule(ধ্রুবক কাঠামো maintenance_start_opts *opts,
+				      পূর্ণসংখ্যা enable)
 {
-	unsigned int i;
-	int result = 0;
-	struct lock_file lk;
-	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
+	unsigned পূর্ণসংখ্যা i;
+	পূর্ণসংখ্যা ফলাফল = 0;
+	কাঠামো lock_file lk;
+	অক্ষর *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
 
-	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
-		if (errno == EEXIST)
+	যদি (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
+		যদি (errno == EEXIST)
 			error(_("unable to create '%s.lock': %s.\n\n"
 			    "Another scheduled git-maintenance(1) process seems to be running in this\n"
 			    "repository. Please make sure no other maintenance processes are running and\n"
 			    "then try again. If it still fails, a git-maintenance(1) process may have\n"
 			    "crashed in this repository earlier: remove the file manually to continue."),
 			    absolute_path(lock_path), strerror(errno));
-		else
+		অন্যথা
 			error_errno(_("cannot acquire lock for scheduled background maintenance"));
-		free(lock_path);
-		return -1;
+		মুক্ত(lock_path);
+		ফেরত -1;
 	}
 
-	for (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
-		if (enable && opts->scheduler == i)
-			continue;
-		if (!scheduler_fn[i].is_available())
-			continue;
+	জন্য (i = 1; i < ARRAY_আকার(scheduler_fn); i++) {
+		যদি (enable && opts->scheduler == i)
+			চালু;
+		যদি (!scheduler_fn[i].is_available())
+			চালু;
 		scheduler_fn[i].update_schedule(0, get_lock_file_fd(&lk));
 	}
 
-	if (enable)
-		result = scheduler_fn[opts->scheduler].update_schedule(
+	যদি (enable)
+		ফলাফল = scheduler_fn[opts->scheduler].update_schedule(
 			1, get_lock_file_fd(&lk));
 
 	rollback_lock_file(&lk);
 
-	free(lock_path);
-	return result;
+	মুক্ত(lock_path);
+	ফেরত ফলাফল;
 }
 
-static const char *const builtin_maintenance_start_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক builtin_maintenance_start_usage[] = {
 	N_("git maintenance start [--scheduler=<scheduler>]"),
-	NULL
+	ফাঁকা
 };
 
-static int maintenance_start(int argc, const char **argv, const char *prefix,
-			     struct repository *repo)
+স্থির পূর্ণসংখ্যা maintenance_start(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+			     কাঠামো repository *repo)
 {
-	struct maintenance_start_opts opts = { 0 };
-	struct option options[] = {
+	কাঠামো maintenance_start_opts opts = { 0 };
+	কাঠামো option options[] = {
 		OPT_CALLBACK_F(
 			0, "scheduler", &opts.scheduler, N_("scheduler"),
 			N_("scheduler to trigger git maintenance run"),
 			PARSE_OPT_NONEG, maintenance_opt_scheduler),
 		OPT_END()
 	};
-	const char *register_args[] = { "register", NULL };
+	ধ্রুবক অক্ষর *register_args[] = { "register", ফাঁকা };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_start_usage, 0);
-	if (argc)
+	যদি (argc)
 		usage_with_options(builtin_maintenance_start_usage, options);
 
 	opts.scheduler = resolve_scheduler(opts.scheduler);
 	validate_scheduler(opts.scheduler);
 
-	if (update_background_schedule(&opts, 1))
+	যদি (update_background_schedule(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	যদি (maintenance_register(ARRAY_আকার(register_args)-1, register_args, ফাঁকা, repo))
 		warning(_("failed to add repo to global config"));
-	return 0;
+	ফেরত 0;
 }
 
-static const char *const builtin_maintenance_stop_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক builtin_maintenance_stop_usage[] = {
 	"git maintenance stop",
-	NULL
+	ফাঁকা
 };
 
-static int maintenance_stop(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_stop(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+			    কাঠামো repository *repo UNUSED)
 {
-	struct option options[] = {
+	কাঠামো option options[] = {
 		OPT_END()
 	};
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_stop_usage, 0);
-	if (argc)
+	যদি (argc)
 		usage_with_options(builtin_maintenance_stop_usage, options);
-	return update_background_schedule(NULL, 0);
+	ফেরত update_background_schedule(ফাঁকা, 0);
 }
 
-static const char *const builtin_maintenance_is_needed_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক builtin_maintenance_is_needed_usage[] = {
 	"git maintenance is-needed [--task=<task>] [--schedule]",
-	NULL
+	ফাঁকা
 };
 
-static int maintenance_is_needed(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED)
+স্থির পূর্ণসংখ্যা maintenance_is_needed(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+				 কাঠামো repository *repo UNUSED)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option options[] = {
+	কাঠামো maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	কাঠামো string_list selected_tasks = STRING_LIST_INIT_DUP;
+	কাঠামো gc_config cfg = GC_CONFIG_INIT;
+	কাঠামো option options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
@@ -3082,21 +3082,21 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_is_needed_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc)
+	যদি (argc)
 		usage_with_options(builtin_maintenance_is_needed_usage, options);
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (opts.auto_flag) {
-		for (size_t i = 0; i < opts.tasks_nr; i++) {
-			if (tasks[opts.tasks[i]].auto_condition &&
+	যদি (opts.auto_flag) {
+		জন্য (আকার_t i = 0; i < opts.tasks_nr; i++) {
+			যদি (tasks[opts.tasks[i]].auto_condition &&
 			    tasks[opts.tasks[i]].auto_condition(&cfg)) {
 				is_needed = true;
-				break;
+				বিরতি;
 			}
 		}
-	} else {
+	} অন্যথা {
 		/*
 		 * When not using --auto we always require maintenance right now.
 		 *
@@ -3113,23 +3113,23 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
 
-	if (is_needed)
-		return 0;
-	return 1;
+	যদি (is_needed)
+		ফেরত 0;
+	ফেরত 1;
 }
 
-static const char *const builtin_maintenance_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক builtin_maintenance_usage[] = {
 	N_("git maintenance <subcommand> [<options>]"),
-	NULL,
+	ফাঁকা,
 };
 
-int cmd_maintenance(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+পূর্ণসংখ্যা cmd_maintenance(পূর্ণসংখ্যা argc,
+		    ধ্রুবক অক্ষর **argv,
+		    ধ্রুবক অক্ষর *prefix,
+		    কাঠামো repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_maintenance_options[] = {
+	parse_opt_subcommand_fn *fn = ফাঁকা;
+	কাঠামো option builtin_maintenance_options[] = {
 		OPT_SUBCOMMAND("run", &fn, maintenance_run),
 		OPT_SUBCOMMAND("start", &fn, maintenance_start),
 		OPT_SUBCOMMAND("stop", &fn, maintenance_stop),
@@ -3141,5 +3141,5 @@ int cmd_maintenance(int argc,
 
 	argc = parse_options(argc, argv, prefix, builtin_maintenance_options,
 			     builtin_maintenance_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	ফেরত fn(argc, argv, prefix, repo);
 }

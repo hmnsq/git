@@ -1,88 +1,88 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "quote.h"
-#include "pathspec.h"
-#include "parse-options.h"
-#include "submodule.h"
-#include "write-or-die.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "dir.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "quote.h"
+#অন্তর্ভাব "pathspec.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "submodule.h"
+#অন্তর্ভাব "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
-static const char * const check_ignore_usage[] = {
+স্থির পূর্ণসংখ্যা quiet, verbose, stdin_paths, show_non_matching, no_সূচক;
+স্থির ধ্রুবক অক্ষর * ধ্রুবক check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
-NULL
+ফাঁকা
 };
 
-static int nul_term_line;
+স্থির পূর্ণসংখ্যা nul_term_সারি;
 
-static const struct option check_ignore_options[] = {
+স্থির ধ্রুবক কাঠামো option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
 	OPT_BOOL(0, "stdin", &stdin_paths,
 		 N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', ফাঁকা, &nul_term_সারি,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_BOOL('n', "non-matching", &show_non_matching,
 		 N_("show non-matching input paths")),
-	OPT_BOOL(0, "no-index", &no_index,
+	OPT_BOOL(0, "no-index", &no_সূচক,
 		 N_("ignore index when checking")),
 	OPT_END()
 };
 
-static void output_pattern(const char *path, struct path_pattern *pattern)
+স্থির শূন্য output_pattern(ধ্রুবক অক্ষর *path, কাঠামো path_pattern *pattern)
 {
-	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
-	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
+	ধ্রুবক অক্ষর *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
+	ধ্রুবক অক্ষর *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
+	যদি (!nul_term_সারি) {
+		যদি (!verbose) {
 			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
-				quote_c_style(pattern->pl->src, NULL, stdout, 0);
+		} অন্যথা {
+			যদি (pattern) {
+				quote_c_style(pattern->pl->src, ফাঁকা, stdout, 0);
 				printf(":%d:%s%s%s\t",
 				       pattern->srcpos,
 				       bang, pattern->pattern, slash);
 			}
-			else {
+			অন্যথা {
 				printf("::\t");
 			}
-			quote_c_style(path, NULL, stdout, 0);
+			quote_c_style(path, ফাঁকা, stdout, 0);
 			fputc('\n', stdout);
 		}
-	} else {
-		if (!verbose) {
+	} অন্যথা {
+		যদি (!verbose) {
 			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
+		} অন্যথা {
+			যদি (pattern)
 				printf("%s%c%d%c%s%s%s%c%s%c",
 				       pattern->pl->src, '\0',
 				       pattern->srcpos, '\0',
 				       bang, pattern->pattern, slash, '\0',
 				       path, '\0');
-			else
+			অন্যথা
 				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+স্থির পূর্ণসংখ্যা check_ignore(কাঠামো dir_struct *dir,
+			ধ্রুবক অক্ষর *prefix, পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv)
 {
-	const char *full_path;
-	char *seen;
-	int num_ignored = 0, i;
-	struct path_pattern *pattern;
-	struct pathspec pathspec;
+	ধ্রুবক অক্ষর *full_path;
+	অক্ষর *seen;
+	পূর্ণসংখ্যা অঙ্ক_ignored = 0, i;
+	কাঠামো path_pattern *pattern;
+	কাঠামো pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
+	যদি (!argc) {
+		যদি (!quiet)
 			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+		ফেরত 0;
 	}
 
 	/*
@@ -95,108 +95,108 @@ static int check_ignore(struct dir_struct *dir,
 		       PATHSPEC_KEEP_ORDER,
 		       prefix, argv);
 
-	die_path_inside_submodule(the_repository->index, &pathspec);
+	die_path_inside_submodule(the_repository->সূচক, &pathspec);
 
 	/*
 	 * look for pathspecs matching entries in the index, since these
 	 * should not be ignored, in order to be consistent with
 	 * 'git status', 'git add' etc.
 	 */
-	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
+	seen = find_pathspecs_matching_against_সূচক(&pathspec, the_repository->সূচক,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
-		full_path = pathspec.items[i].match;
-		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
-			pattern = last_matching_pattern(dir, the_repository->index,
+	জন্য (i = 0; i < pathspec.nr; i++) {
+		full_path = pathspec.বস্তুসমূহ[i].match;
+		pattern = ফাঁকা;
+		যদি (!seen[i]) {
+			পূর্ণসংখ্যা dtype = DT_UNKNOWN;
+			pattern = last_matching_pattern(dir, the_repository->সূচক,
 							full_path, &dtype);
-			if (!verbose && pattern &&
+			যদি (!verbose && pattern &&
 			    pattern->flags & PATTERN_FLAG_NEGATIVE)
-				pattern = NULL;
+				pattern = ফাঁকা;
 		}
-		if (!quiet && (pattern || show_non_matching))
-			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
-			num_ignored++;
+		যদি (!quiet && (pattern || show_non_matching))
+			output_pattern(pathspec.বস্তুসমূহ[i].original, pattern);
+		যদি (pattern)
+			অঙ্ক_ignored++;
 	}
-	free(seen);
+	মুক্ত(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	ফেরত অঙ্ক_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+স্থির পূর্ণসংখ্যা check_ignore_stdin_paths(কাঠামো dir_struct *dir, ধ্রুবক অক্ষর *prefix)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *pathspec[2] = { NULL, NULL };
+	কাঠামো strbuf buf = STRBUF_INIT;
+	কাঠামো strbuf unquoted = STRBUF_INIT;
+	অক্ষর *pathspec[2] = { ফাঁকা, ফাঁকা };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	পূর্ণসংখ্যা অঙ্ক_ignored = 0;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_term_সারি ? strbuf_getline_nul : strbuf_getline_lf;
+	যখন (getline_fn(&buf, stdin) != EOF) {
+		যদি (!nul_term_সারি && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			যদি (unquote_c_style(&unquoted, buf.buf, ফাঁকা))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
-		num_ignored += check_ignore(dir, prefix,
-					    1, (const char **)pathspec);
+		অঙ্ক_ignored += check_ignore(dir, prefix,
+					    1, (ধ্রুবক অক্ষর **)pathspec);
 		maybe_flush_or_die(stdout, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	ফেরত অঙ্ক_ignored;
 }
 
-int cmd_check_ignore(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_check_ignore(পূর্ণসংখ্যা argc,
+		     ধ্রুবক অক্ষর **argv,
+		     ধ্রুবক অক্ষর *prefix,
+		     কাঠামো repository *repo UNUSED)
 {
-	int num_ignored;
-	struct dir_struct dir = DIR_INIT;
+	পূর্ণসংখ্যা অঙ্ক_ignored;
+	কাঠামো dir_struct dir = DIR_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 
 	argc = parse_options(argc, argv, prefix, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	যদি (stdin_paths) {
+		যদি (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} অন্যথা {
+		যদি (nul_term_সারি)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		যদি (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	যদি (quiet) {
+		যদি (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		যদি (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	যদি (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	যদি (!no_সূচক && repo_read_সূচক(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	setup_standard_excludes(&dir);
 
-	if (stdin_paths) {
-		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
-		num_ignored = check_ignore(&dir, prefix, argc, argv);
+	যদি (stdin_paths) {
+		অঙ্ক_ignored = check_ignore_stdin_paths(&dir, prefix);
+	} অন্যথা {
+		অঙ্ক_ignored = check_ignore(&dir, prefix, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	ফেরত !অঙ্ক_ignored;
 }

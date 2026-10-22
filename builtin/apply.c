@@ -1,25 +1,25 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hash.h"
-#include "apply.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hash.h"
+#অন্তর্ভাব "apply.h"
 
-static const char * const apply_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক apply_usage[] = {
 	N_("git apply [<options>] [<patch>...]"),
-	NULL
+	ফাঁকা
 };
 
-int cmd_apply(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+পূর্ণসংখ্যা cmd_apply(পূর্ণসংখ্যা argc,
+	      ধ্রুবক অক্ষর **argv,
+	      ধ্রুবক অক্ষর *prefix,
+	      কাঠামো repository *repo)
 {
-	int force_apply = 0;
-	int options = 0;
-	int ret;
-	struct apply_state state;
+	পূর্ণসংখ্যা force_apply = 0;
+	পূর্ণসংখ্যা options = 0;
+	পূর্ণসংখ্যা ret;
+	কাঠামো apply_state state;
 
-	if (init_apply_state(&state, the_repository, prefix))
+	যদি (init_apply_state(&state, the_repository, prefix))
 		exit(128);
 
 	/*
@@ -28,24 +28,24 @@ int cmd_apply(int argc,
 	 * is worth the effort.
 	 * cf. https://lore.kernel.org/git/xmqqcypfcmn4.fsf@gitster.g/
 	 */
-	if (!the_hash_algo)
+	যদি (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	argc = apply_parse_options(argc, argv,
 				   &state, &force_apply, &options,
 				   apply_usage);
 
-	if (repo) {
+	যদি (repo) {
 		prepare_repo_settings(repo);
-		repo->settings.command_requires_full_index = 0;
+		repo->settings.command_requires_full_সূচক = 0;
 	}
 
-	if (check_apply_state(&state, force_apply))
+	যদি (check_apply_state(&state, force_apply))
 		exit(128);
 
 	ret = apply_all_patches(&state, argc, argv, options);
 
 	clear_apply_state(&state);
 
-	return ret;
+	ফেরত ret;
 }

@@ -1,98 +1,98 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "refs.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "refs.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "strbuf.h"
 
-static const char * const git_symbolic_ref_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক git_symbolic_ref_usage[] = {
 	N_("git symbolic-ref [-m <reason>] <name> <ref>"),
 	N_("git symbolic-ref [-q] [--short] [--no-recurse] <name>"),
 	N_("git symbolic-ref --delete [-q] <name>"),
-	NULL
+	ফাঁকা
 };
 
-static int check_symref(const char *HEAD, int quiet, int shorten, int recurse, int print)
+স্থির পূর্ণসংখ্যা check_symref(ধ্রুবক অক্ষর *শীর্ষ_3, পূর্ণসংখ্যা quiet, পূর্ণসংখ্যা shorten, পূর্ণসংখ্যা recurse, পূর্ণসংখ্যা print)
 {
-	int resolve_flags, flag;
-	const char *refname;
+	পূর্ণসংখ্যা resolve_flags, flag;
+	ধ্রুবক অক্ষর *refname;
 
 	resolve_flags = (recurse ? 0 : RESOLVE_REF_NO_RECURSE);
 	refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					  HEAD, resolve_flags, NULL, &flag);
+					  শীর্ষ_3, resolve_flags, ফাঁকা, &flag);
 
-	if (!refname)
-		die("No such ref: %s", HEAD);
-	else if (!(flag & REF_ISSYMREF)) {
-		if (!quiet)
-			die("ref %s is not a symbolic ref", HEAD);
-		else
-			return 1;
+	যদি (!refname)
+		die("No such ref: %s", শীর্ষ_3);
+	অন্যথা যদি (!(flag & REF_ISSYMREF)) {
+		যদি (!quiet)
+			die("ref %s is not a symbolic ref", শীর্ষ_3);
+		অন্যথা
+			ফেরত 1;
 	}
-	if (print) {
-		char *to_free = NULL;
-		if (shorten)
+	যদি (print) {
+		অক্ষর *to_free = ফাঁকা;
+		যদি (shorten)
 			refname = to_free = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 									 refname,
 									 0);
 		puts(refname);
-		free(to_free);
+		মুক্ত(to_free);
 	}
-	return 0;
+	ফেরত 0;
 }
 
-int cmd_symbolic_ref(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_symbolic_ref(পূর্ণসংখ্যা argc,
+		     ধ্রুবক অক্ষর **argv,
+		     ধ্রুবক অক্ষর *prefix,
+		     কাঠামো repository *repo UNUSED)
 {
-	int quiet = 0, delete = 0, shorten = 0, recurse = 1, ret = 0;
-	const char *msg = NULL;
-	struct option options[] = {
+	পূর্ণসংখ্যা quiet = 0, delete = 0, shorten = 0, recurse = 1, ret = 0;
+	ধ্রুবক অক্ষর *বার্তা = ফাঁকা;
+	কাঠামো option options[] = {
 		OPT__QUIET(&quiet,
 			N_("suppress error message for non-symbolic (detached) refs")),
 		OPT_BOOL('d', "delete", &delete, N_("delete symbolic ref")),
 		OPT_BOOL(0, "short", &shorten, N_("shorten ref output")),
 		OPT_BOOL(0, "recurse", &recurse, N_("recursively dereference (default)")),
-		OPT_STRING('m', NULL, &msg, N_("reason"), N_("reason of the update")),
+		OPT_STRING('m', ফাঁকা, &বার্তা, N_("reason"), N_("reason of the update")),
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 	argc = parse_options(argc, argv, prefix, options,
 			     git_symbolic_ref_usage, 0);
-	if (msg && !*msg)
+	যদি (বার্তা && !*বার্তা)
 		die("Refusing to perform update with empty message");
 
-	if (delete) {
-		if (argc != 1)
+	যদি (delete) {
+		যদি (argc != 1)
 			usage_with_options(git_symbolic_ref_usage, options);
 		ret = check_symref(argv[0], 1, 0, 0, 0);
-		if (ret)
+		যদি (ret)
 			die("Cannot delete %s, not a symbolic ref", argv[0]);
-		if (!strcmp(argv[0], "HEAD"))
+		যদি (!strcmp(argv[0], "HEAD"))
 			die("deleting '%s' is not allowed", argv[0]);
-		return refs_delete_ref(get_main_ref_store(the_repository),
-				       NULL, argv[0], NULL, REF_NO_DEREF);
+		ফেরত refs_delete_ref(get_main_ref_store(the_repository),
+				       ফাঁকা, argv[0], ফাঁকা, REF_NO_DEREF);
 	}
 
-	switch (argc) {
-	case 1:
+	নির্বাচন (argc) {
+	ক্ষেত্র 1:
 		ret = check_symref(argv[0], quiet, shorten, recurse, 1);
-		break;
-	case 2:
-		if (!strcmp(argv[0], "HEAD") &&
+		বিরতি;
+	ক্ষেত্র 2:
+		যদি (!strcmp(argv[0], "HEAD") &&
 		    !starts_with(argv[1], "refs/"))
 			die("Refusing to point HEAD outside of refs/");
-		if (check_refname_format(argv[1], REFNAME_ALLOW_ONELEVEL) < 0)
+		যদি (check_refname_format(argv[1], REFNAME_ALLOW_ONELEVEL) < 0)
 			die("Refusing to set '%s' to invalid ref '%s'", argv[0], argv[1]);
 		ret = !!refs_update_symref(get_main_ref_store(the_repository),
-					   argv[0], argv[1], msg);
-		break;
-	default:
+					   argv[0], argv[1], বার্তা);
+		বিরতি;
+	পূর্বনির্ধারিত:
 		usage_with_options(git_symbolic_ref_usage, options);
 	}
-	return ret;
+	ফেরত ret;
 }

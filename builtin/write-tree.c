@@ -4,69 +4,69 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "tree.h"
-#include "cache-tree.h"
-#include "parse-options.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "tree.h"
+#অন্তর্ভাব "cache-tree.h"
+#অন্তর্ভাব "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+স্থির ধ্রুবক অক্ষর * ধ্রুবক write_বৃক্ষ_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
-	NULL
+	ফাঁকা
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_write_বৃক্ষ(পূর্ণসংখ্যা argc,
+		   ধ্রুবক অক্ষর **argv,
+		   ধ্রুবক অক্ষর *cmd_prefix,
+		   কাঠামো repository *repo UNUSED)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
+	পূর্ণসংখ্যা flags = 0, ret;
+	ধ্রুবক অক্ষর *বৃক্ষ_prefix = ফাঁকা;
+	কাঠামো object_id oid;
+	ধ্রুবক অক্ষর *me = "git-write-tree";
+	কাঠামো option write_বৃক্ষ_options[] = {
 		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
-			WRITE_TREE_MISSING_OK),
-		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
+			WRITE_বৃক্ষ_MISSING_OK),
+		OPT_STRING(0, "prefix", &বৃক্ষ_prefix, N_("<prefix>/"),
 			   N_("write tree object for a subdirectory <prefix>")),
 		{
 			.type = OPTION_BIT,
 			.long_name = "ignore-cache-tree",
-			.value = &flags,
-			.precision = sizeof(flags),
+			.মান = &flags,
+			.precision = আকার(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
-			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
+			.defval = WRITE_বৃক্ষ_IGNORE_CACHE_বৃক্ষ,
 		},
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
-			     write_tree_usage, 0);
+	repo_config(the_repository, git_default_config, ফাঁকা);
+	argc = parse_options(argc, argv, cmd_prefix, write_বৃক্ষ_options,
+			     write_বৃক্ষ_usage, 0);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_full_সূচক = 0;
 
-	ret = write_index_as_tree(&oid, the_repository->index,
-				  repo_get_index_file(the_repository),
-				  flags, tree_prefix);
-	switch (ret) {
-	case 0:
+	ret = write_সূচক_as_বৃক্ষ(&oid, the_repository->সূচক,
+				  repo_get_সূচক_file(the_repository),
+				  flags, বৃক্ষ_prefix);
+	নির্বাচন (ret) {
+	ক্ষেত্র 0:
 		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+		বিরতি;
+	ক্ষেত্র WRITE_বৃক্ষ_UNREADABLE_সূচক:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		বিরতি;
+	ক্ষেত্র WRITE_বৃক্ষ_UNMERGED_সূচক:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
-		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		বিরতি;
+	ক্ষেত্র WRITE_বৃক্ষ_PREFIX_ERROR:
+		die("%s: prefix %s not found", me, বৃক্ষ_prefix);
+		বিরতি;
 	}
-	return ret;
+	ফেরত ret;
 }

@@ -7,166 +7,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "commit.h"
-#include "object.h"
-#include "tag.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "log-tree.h"
-#include "revision.h"
-#include "decorate.h"
-#include "string-list.h"
-#include "utf8.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "remote.h"
-#include "blob.h"
-#include "gpg-interface.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "refs.h"
+#অন্তর্ভাব "refspec.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "odb.h"
+#অন্তর্ভাব "commit.h"
+#অন্তর্ভাব "object.h"
+#অন্তর্ভাব "tag.h"
+#অন্তর্ভাব "diff.h"
+#অন্তর্ভাব "diffcore.h"
+#অন্তর্ভাব "log-tree.h"
+#অন্তর্ভাব "revision.h"
+#অন্তর্ভাব "decorate.h"
+#অন্তর্ভাব "string-list.h"
+#অন্তর্ভাব "utf8.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "quote.h"
+#অন্তর্ভাব "remote.h"
+#অন্তর্ভাব "blob.h"
+#অন্তর্ভাব "gpg-interface.h"
 
-static const char *const fast_export_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক fast_export_usage[] = {
 	N_("git fast-export [<options>] [<revision-range>] [[--] <path>...]"),
-	NULL
+	ফাঁকা
 };
 
-static int progress;
-static enum sign_mode signed_tag_mode = SIGN_ABORT;
-static enum sign_mode signed_commit_mode = SIGN_STRIP;
-static enum tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
-static enum reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
-static int fake_missing_tagger;
-static int use_done_feature;
-static int no_data;
-static int full_tree;
-static int reference_excluded_commits;
-static int show_original_ids;
-static int mark_tags;
-static struct string_list extra_refs = STRING_LIST_INIT_DUP;
-static struct string_list tag_refs = STRING_LIST_INIT_DUP;
-static struct refspec refspecs;
-static int anonymize;
-static struct hashmap anonymized_seeds;
-static struct revision_sources revision_sources;
+স্থির পূর্ণসংখ্যা progress;
+স্থির গণনা sign_mode signed_tag_mode = SIGN_ABORT;
+স্থির গণনা sign_mode signed_commit_mode = SIGN_STRIP;
+স্থির গণনা tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
+স্থির গণনা reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
+স্থির পূর্ণসংখ্যা fake_missing_tagger;
+স্থির পূর্ণসংখ্যা use_done_feature;
+স্থির পূর্ণসংখ্যা no_তথ্য;
+স্থির পূর্ণসংখ্যা full_বৃক্ষ;
+স্থির পূর্ণসংখ্যা reference_excluded_commits;
+স্থির পূর্ণসংখ্যা show_original_ids;
+স্থির পূর্ণসংখ্যা mark_tags;
+স্থির কাঠামো string_list extra_refs = STRING_LIST_INIT_DUP;
+স্থির কাঠামো string_list tag_refs = STRING_LIST_INIT_DUP;
+স্থির কাঠামো refspec refspecs;
+স্থির পূর্ণসংখ্যা anonymize;
+স্থির কাঠামো hashmap anonymized_seeds;
+স্থির কাঠামো revision_sources revision_sources;
 
-static int parse_opt_sign_mode(const struct option *opt,
-			       const char *arg, int unset)
+স্থির পূর্ণসংখ্যা parse_opt_sign_mode(ধ্রুবক কাঠামো option *opt,
+			       ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	enum sign_mode *val = opt->value;
+	গণনা sign_mode *val = opt->মান;
 
-	if (unset)
-		return 0;
+	যদি (unset)
+		ফেরত 0;
 
-	if (parse_sign_mode(arg, val, NULL) || (*val == SIGN_STRIP_IF_INVALID) ||
+	যদি (parse_sign_mode(arg, val, ফাঁকা) || (*val == SIGN_STRIP_IF_INVALID) ||
 	    (*val == SIGN_SIGN_IF_INVALID) || (*val == SIGN_ABORT_IF_INVALID))
-		return error(_("unknown %s mode: %s"), opt->long_name, arg);
+		ফেরত error(_("unknown %s mode: %s"), opt->long_name, arg);
 
-	return 0;
+	ফেরত 0;
 }
 
-static int parse_opt_tag_of_filtered_mode(const struct option *opt,
-					  const char *arg, int unset)
+স্থির পূর্ণসংখ্যা parse_opt_tag_of_filtered_mode(ধ্রুবক কাঠামো option *opt,
+					  ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	enum tag_of_filtered_mode *val = opt->value;
+	গণনা tag_of_filtered_mode *val = opt->মান;
 
-	if (unset || !strcmp(arg, "abort"))
+	যদি (unset || !strcmp(arg, "abort"))
 		*val = TAG_FILTERING_ABORT;
-	else if (!strcmp(arg, "drop"))
+	অন্যথা যদি (!strcmp(arg, "drop"))
 		*val = DROP;
-	else if (!strcmp(arg, "rewrite"))
+	অন্যথা যদি (!strcmp(arg, "rewrite"))
 		*val = REWRITE;
-	else
-		return error(_("unknown tag-of-filtered mode: %s"), arg);
-	return 0;
+	অন্যথা
+		ফেরত error(_("unknown tag-of-filtered mode: %s"), arg);
+	ফেরত 0;
 }
 
-static int parse_opt_reencode_mode(const struct option *opt,
-				   const char *arg, int unset)
+স্থির পূর্ণসংখ্যা parse_opt_reencode_mode(ধ্রুবক কাঠামো option *opt,
+				   ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	enum reencode_mode *val = opt->value;
+	গণনা reencode_mode *val = opt->মান;
 
-	if (unset) {
+	যদি (unset) {
 		*val = REENCODE_ABORT;
-		return 0;
+		ফেরত 0;
 	}
 
-	switch (git_parse_maybe_bool(arg)) {
-	case 0:
+	নির্বাচন (git_parse_maybe_bool(arg)) {
+	ক্ষেত্র 0:
 		*val = REENCODE_NO;
-		break;
-	case 1:
+		বিরতি;
+	ক্ষেত্র 1:
 		*val = REENCODE_YES;
-		break;
-	default:
-		if (!strcasecmp(arg, "abort"))
+		বিরতি;
+	পূর্বনির্ধারিত:
+		যদি (!strcasecmp(arg, "abort"))
 			*val = REENCODE_ABORT;
-		else
-			return error(_("unknown reencoding mode: %s"), arg);
+		অন্যথা
+			ফেরত error(_("unknown reencoding mode: %s"), arg);
 	}
 
-	return 0;
+	ফেরত 0;
 }
 
-static struct decoration idnums;
-static uint32_t last_idnum;
-struct anonymized_entry {
-	struct hashmap_entry hash;
-	char *anon;
-	const char orig[FLEX_ARRAY];
+স্থির কাঠামো decoration idnums;
+স্থির uint32_t last_idnum;
+কাঠামো anonymized_entry {
+	কাঠামো hashmap_entry hash;
+	অক্ষর *anon;
+	ধ্রুবক অক্ষর orig[FLEX_ARRAY];
 };
 
-struct anonymized_entry_key {
-	struct hashmap_entry hash;
-	const char *orig;
-	size_t orig_len;
+কাঠামো anonymized_entry_চাবি {
+	কাঠামো hashmap_entry hash;
+	ধ্রুবক অক্ষর *orig;
+	আকার_t orig_len;
 };
 
-static int anonymized_entry_cmp(const void *cmp_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+স্থির পূর্ণসংখ্যা anonymized_entry_cmp(ধ্রুবক শূন্য *cmp_তথ্য UNUSED,
+				ধ্রুবক কাঠামো hashmap_entry *eptr,
+				ধ্রুবক কাঠামো hashmap_entry *entry_or_চাবি,
+				ধ্রুবক শূন্য *keydata)
 {
-	const struct anonymized_entry *a, *b;
+	ধ্রুবক কাঠামো anonymized_entry *a, *b;
 
-	a = container_of(eptr, const struct anonymized_entry, hash);
-	if (keydata) {
-		const struct anonymized_entry_key *key = keydata;
-		int equal = !xstrncmpz(a->orig, key->orig, key->orig_len);
-		return !equal;
+	a = container_of(eptr, ধ্রুবক কাঠামো anonymized_entry, hash);
+	যদি (keydata) {
+		ধ্রুবক কাঠামো anonymized_entry_চাবি *চাবি = keydata;
+		পূর্ণসংখ্যা equal = !xstrncmpz(a->orig, চাবি->orig, চাবি->orig_len);
+		ফেরত !equal;
 	}
 
-	b = container_of(entry_or_key, const struct anonymized_entry, hash);
-	return strcmp(a->orig, b->orig);
+	b = container_of(entry_or_চাবি, ধ্রুবক কাঠামো anonymized_entry, hash);
+	ফেরত strcmp(a->orig, b->orig);
 }
 
-static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
+স্থির কাঠামো anonymized_entry *add_anonymized_entry(কাঠামো hashmap *map,
 						     unsigned hash,
-						     const char *orig, size_t len,
-						     char *anon)
+						     ধ্রুবক অক্ষর *orig, আকার_t len,
+						     অক্ষর *anon)
 {
-	struct anonymized_entry *ret, *old;
+	কাঠামো anonymized_entry *ret, *old;
 
-	if (!map->cmpfn)
-		hashmap_init(map, anonymized_entry_cmp, NULL, 0);
+	যদি (!map->cmpfn)
+		hashmap_init(map, anonymized_entry_cmp, ফাঁকা, 0);
 
 	FLEX_ALLOC_MEM(ret, orig, orig, len);
 	hashmap_entry_init(&ret->hash, hash);
 	ret->anon = anon;
 	old = hashmap_put_entry(map, ret, hash);
 
-	if (old) {
-		free(old->anon);
-		free(old);
+	যদি (old) {
+		মুক্ত(old->anon);
+		মুক্ত(old);
 	}
 
-	return ret;
+	ফেরত ret;
 }
 
 /*
@@ -174,30 +174,30 @@ static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
  * the same anonymized string with another. The actual generation
  * is farmed out to the generate function.
  */
-static const char *anonymize_str(struct hashmap *map,
-				 char *(*generate)(void),
-				 const char *orig, size_t len)
+স্থির ধ্রুবক অক্ষর *anonymize_str(কাঠামো hashmap *map,
+				 অক্ষর *(*generate)(শূন্য),
+				 ধ্রুবক অক্ষর *orig, আকার_t len)
 {
-	struct anonymized_entry_key key;
-	struct anonymized_entry *ret;
+	কাঠামো anonymized_entry_চাবি চাবি;
+	কাঠামো anonymized_entry *ret;
 
-	hashmap_entry_init(&key.hash, memhash(orig, len));
-	key.orig = orig;
-	key.orig_len = len;
+	hashmap_entry_init(&চাবি.hash, memhash(orig, len));
+	চাবি.orig = orig;
+	চাবি.orig_len = len;
 
 	/* First check if it's a token the user configured manually... */
-	ret = hashmap_get_entry(&anonymized_seeds, &key, hash, &key);
+	ret = hashmap_get_entry(&anonymized_seeds, &চাবি, hash, &চাবি);
 
 	/* ...otherwise check if we've already seen it in this context... */
-	if (!ret)
-		ret = hashmap_get_entry(map, &key, hash, &key);
+	যদি (!ret)
+		ret = hashmap_get_entry(map, &চাবি, hash, &চাবি);
 
 	/* ...and finally generate a new mapping if necessary */
-	if (!ret)
-		ret = add_anonymized_entry(map, key.hash.hash,
+	যদি (!ret)
+		ret = add_anonymized_entry(map, চাবি.hash.hash,
 					   orig, len, generate());
 
-	return ret->anon;
+	ফেরত ret->anon;
 }
 
 /*
@@ -206,72 +206,72 @@ static const char *anonymize_str(struct hashmap *map,
  * The paths are cached via anonymize_mem so that repeated
  * lookups for "a" will yield the same value.
  */
-static void anonymize_path(struct strbuf *out, const char *path,
-			   struct hashmap *map,
-			   char *(*generate)(void))
+স্থির শূন্য anonymize_path(কাঠামো strbuf *out, ধ্রুবক অক্ষর *path,
+			   কাঠামো hashmap *map,
+			   অক্ষর *(*generate)(শূন্য))
 {
-	while (*path) {
-		const char *end_of_component = strchrnul(path, '/');
-		size_t len = end_of_component - path;
-		const char *c = anonymize_str(map, generate, path, len);
+	যখন (*path) {
+		ধ্রুবক অক্ষর *end_of_component = strchrnul(path, '/');
+		আকার_t len = end_of_component - path;
+		ধ্রুবক অক্ষর *c = anonymize_str(map, generate, path, len);
 		strbuf_addstr(out, c);
 		path = end_of_component;
-		if (*path)
+		যদি (*path)
 			strbuf_addch(out, *path++);
 	}
 }
 
-static inline void *mark_to_ptr(uint32_t mark)
+স্থির অন্তঃরেখ শূন্য *mark_to_ptr(uint32_t mark)
 {
-	return (void *)(uintptr_t)mark;
+	ফেরত (শূন্য *)(uintptr_t)mark;
 }
 
-static inline uint32_t ptr_to_mark(void * mark)
+স্থির অন্তঃরেখ uint32_t ptr_to_mark(শূন্য * mark)
 {
-	return (uint32_t)(uintptr_t)mark;
+	ফেরত (uint32_t)(uintptr_t)mark;
 }
 
-static inline void mark_object(struct object *object, uint32_t mark)
+স্থির অন্তঃরেখ শূন্য mark_object(কাঠামো object *object, uint32_t mark)
 {
 	add_decoration(&idnums, object, mark_to_ptr(mark));
 }
 
-static inline void mark_next_object(struct object *object)
+স্থির অন্তঃরেখ শূন্য mark_পরবর্তী_object(কাঠামো object *object)
 {
 	mark_object(object, ++last_idnum);
 }
 
-static int get_object_mark(struct object *object)
+স্থির পূর্ণসংখ্যা get_object_mark(কাঠামো object *object)
 {
-	void *decoration = lookup_decoration(&idnums, object);
-	if (!decoration)
-		return 0;
-	return ptr_to_mark(decoration);
+	শূন্য *decoration = lookup_decoration(&idnums, object);
+	যদি (!decoration)
+		ফেরত 0;
+	ফেরত ptr_to_mark(decoration);
 }
 
-static struct commit *rewrite_commit(struct commit *p)
+স্থির কাঠামো commit *rewrite_commit(কাঠামো commit *p)
 {
-	for (;;) {
-		if (p->parents && p->parents->next)
-			break;
-		if (p->object.flags & UNINTERESTING)
-			break;
-		if (!(p->object.flags & TREESAME))
-			break;
-		if (!p->parents)
-			return NULL;
+	জন্য (;;) {
+		যদি (p->parents && p->parents->পরবর্তী)
+			বিরতি;
+		যদি (p->object.flags & UNINTERESTING)
+			বিরতি;
+		যদি (!(p->object.flags & TREESAME))
+			বিরতি;
+		যদি (!p->parents)
+			ফেরত ফাঁকা;
 		p = p->parents->item;
 	}
-	return p;
+	ফেরত p;
 }
 
-static void show_progress(void)
+স্থির শূন্য show_progress(শূন্য)
 {
-	static int counter = 0;
-	if (!progress)
-		return;
-	if ((++counter % progress) == 0)
-		printf("progress %d objects\n", counter);
+	স্থির পূর্ণসংখ্যা গণক = 0;
+	যদি (!progress)
+		ফেরত;
+	যদি ((++গণক % progress) == 0)
+		printf("progress %d objects\n", গণক);
 }
 
 /*
@@ -285,78 +285,78 @@ static void show_progress(void)
  * There's no need to cache this result with anonymize_mem, since
  * we already handle blob content caching with marks.
  */
-static char *anonymize_blob(unsigned long *size)
+স্থির অক্ষর *anonymize_blob(unsigned long *আকার_2)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "anonymous blob %d", counter++);
-	*size = out.len;
-	return strbuf_detach(&out, NULL);
+	স্থির পূর্ণসংখ্যা গণক;
+	কাঠামো strbuf out = STRBUF_INIT;
+	strbuf_addf(&out, "anonymous blob %d", গণক++);
+	*আকার_2 = out.len;
+	ফেরত strbuf_detach(&out, ফাঁকা);
 }
 
-static void export_blob(const struct object_id *oid)
+স্থির শূন্য export_blob(ধ্রুবক কাঠামো object_id *oid)
 {
-	unsigned long size;
-	enum object_type type;
-	char *buf;
-	struct object *object;
-	int eaten;
+	unsigned long আকার_2;
+	গণনা object_type type;
+	অক্ষর *buf;
+	কাঠামো object *object;
+	পূর্ণসংখ্যা eaten;
 
-	if (no_data)
-		return;
+	যদি (no_তথ্য)
+		ফেরত;
 
-	if (is_null_oid(oid))
-		return;
+	যদি (is_null_oid(oid))
+		ফেরত;
 
 	object = lookup_object(the_repository, oid);
-	if (object && object->flags & SHOWN)
-		return;
+	যদি (object && object->flags & SHOWN)
+		ফেরত;
 
-	if (anonymize) {
-		buf = anonymize_blob(&size);
-		object = (struct object *)lookup_blob(the_repository, oid);
+	যদি (anonymize) {
+		buf = anonymize_blob(&আকার_2);
+		object = (কাঠামো object *)lookup_blob(the_repository, oid);
 		eaten = 0;
-	} else {
-		size_t size_st = 0;
+	} অন্যথা {
+		আকার_t আকার_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
-				      &size_st);
-		size = cast_size_t_to_ulong(size_st);
-		if (!buf)
+				      &আকার_st);
+		আকার_2 = cast_আকার_t_to_ulong(আকার_st);
+		যদি (!buf)
 			die(_("could not read blob %s"), oid_to_hex(oid));
-		if (check_object_signature(the_repository, oid, buf, size,
+		যদি (check_object_signature(the_repository, oid, buf, আকার_2,
 					   type) < 0)
 			die(_("oid mismatch in blob %s"), oid_to_hex(oid));
-		object = parse_object_buffer(the_repository, oid, type,
-					     size, buf, &eaten);
+		object = parse_object_বাফার(the_repository, oid, type,
+					     আকার_2, buf, &eaten);
 	}
 
-	if (!object)
+	যদি (!object)
 		die(_("could not read blob %s"), oid_to_hex(oid));
 
-	mark_next_object(object);
+	mark_পরবর্তী_object(object);
 
 	printf("blob\nmark :%"PRIu32"\n", last_idnum);
-	if (show_original_ids)
+	যদি (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(oid));
-	printf("data %"PRIuMAX"\n", (uintmax_t)size);
-	if (size && fwrite(buf, size, 1, stdout) != 1)
+	printf("data %"PRIuMAX"\n", (uintmax_t)আকার_2);
+	যদি (আকার_2 && fwrite(buf, আকার_2, 1, stdout) != 1)
 		die_errno(_("could not write blob '%s'"), oid_to_hex(oid));
 	printf("\n");
 
 	show_progress();
 
 	object->flags |= SHOWN;
-	if (!eaten)
-		free(buf);
+	যদি (!eaten)
+		মুক্ত(buf);
 }
 
-static int depth_first(const void *a_, const void *b_)
+স্থির পূর্ণসংখ্যা depth_first(ধ্রুবক শূন্য *a_, ধ্রুবক শূন্য *b_)
 {
-	const struct diff_filepair *a = *((const struct diff_filepair **)a_);
-	const struct diff_filepair *b = *((const struct diff_filepair **)b_);
-	const char *name_a, *name_b;
-	int len_a, len_b, len;
-	int cmp;
+	ধ্রুবক কাঠামো diff_filepair *a = *((ধ্রুবক কাঠামো diff_filepair **)a_);
+	ধ্রুবক কাঠামো diff_filepair *b = *((ধ্রুবক কাঠামো diff_filepair **)b_);
+	ধ্রুবক অক্ষর *name_a, *name_b;
+	পূর্ণসংখ্যা len_a, len_b, len;
+	পূর্ণসংখ্যা cmp;
 
 	name_a = a->one ? a->one->path : a->two->path;
 	name_b = b->one ? b->one->path : b->two->path;
@@ -367,45 +367,45 @@ static int depth_first(const void *a_, const void *b_)
 
 	/* strcmp will sort 'd' before 'd/e', we want 'd/e' before 'd' */
 	cmp = memcmp(name_a, name_b, len);
-	if (cmp)
-		return cmp;
+	যদি (cmp)
+		ফেরত cmp;
 	cmp = len_b - len_a;
-	if (cmp)
-		return cmp;
+	যদি (cmp)
+		ফেরত cmp;
 	/*
 	 * Move 'R'ename entries last so that all references of the file
 	 * appear in the output before it is renamed (e.g., when a file
 	 * was copied and renamed in the same commit).
 	 */
-	return (a->status == 'R') - (b->status == 'R');
+	ফেরত (a->status == 'R') - (b->status == 'R');
 }
 
-static void print_path_1(const char *path)
+স্থির শূন্য print_path_1(ধ্রুবক অক্ষর *path)
 {
-	int need_quote = quote_c_style(path, NULL, NULL, 0);
-	if (need_quote)
-		quote_c_style(path, NULL, stdout, 0);
-	else if (strchr(path, ' '))
+	পূর্ণসংখ্যা need_quote = quote_c_style(path, ফাঁকা, ফাঁকা, 0);
+	যদি (need_quote)
+		quote_c_style(path, ফাঁকা, stdout, 0);
+	অন্যথা যদি (strchr(path, ' '))
 		printf("\"%s\"", path);
-	else
+	অন্যথা
 		printf("%s", path);
 }
 
-static char *anonymize_path_component(void)
+স্থির অক্ষর *anonymize_path_component(শূন্য)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "path%d", counter++);
-	return strbuf_detach(&out, NULL);
+	স্থির পূর্ণসংখ্যা গণক;
+	কাঠামো strbuf out = STRBUF_INIT;
+	strbuf_addf(&out, "path%d", গণক++);
+	ফেরত strbuf_detach(&out, ফাঁকা);
 }
 
-static void print_path(const char *path)
+স্থির শূন্য print_path(ধ্রুবক অক্ষর *path)
 {
-	if (!anonymize)
+	যদি (!anonymize)
 		print_path_1(path);
-	else {
-		static struct hashmap paths;
-		static struct strbuf anon = STRBUF_INIT;
+	অন্যথা {
+		স্থির কাঠামো hashmap paths;
+		স্থির কাঠামো strbuf anon = STRBUF_INIT;
 
 		anonymize_path(&anon, path, &paths, anonymize_path_component);
 		print_path_1(anon.buf);
@@ -413,30 +413,30 @@ static void print_path(const char *path)
 	}
 }
 
-static char *generate_fake_oid(void)
+স্থির অক্ষর *generate_fake_oid(শূন্য)
 {
-	static uint32_t counter = 1; /* avoid null oid */
-	const unsigned hashsz = the_hash_algo->rawsz;
-	struct object_id oid;
-	char *hex = xmallocz(GIT_MAX_HEXSZ);
+	স্থির uint32_t গণক = 1; /* avoid null oid */
+	ধ্রুবক unsigned hashsz = the_hash_algo->rawsz;
+	কাঠামো object_id oid;
+	অক্ষর *hex = xmallocz(GIT_MAX_HEXSZ);
 
 	oidclr(&oid, the_repository->hash_algo);
-	put_be32(oid.hash + hashsz - 4, counter++);
-	return oid_to_hex_r(hex, &oid);
+	put_be32(oid.hash + hashsz - 4, গণক++);
+	ফেরত oid_to_hex_r(hex, &oid);
 }
 
-static const char *anonymize_oid(const char *oid_hex)
+স্থির ধ্রুবক অক্ষর *anonymize_oid(ধ্রুবক অক্ষর *oid_hex)
 {
-	static struct hashmap objs;
-	size_t len = strlen(oid_hex);
-	return anonymize_str(&objs, generate_fake_oid, oid_hex, len);
+	স্থির কাঠামো hashmap objs;
+	আকার_t len = strlen(oid_hex);
+	ফেরত anonymize_str(&objs, generate_fake_oid, oid_hex, len);
 }
 
-static void show_filemodify(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED, void *data)
+স্থির শূন্য show_filemodify(কাঠামো diff_queue_struct *q,
+			    কাঠামো diff_options *options UNUSED, শূন্য *তথ্য)
 {
-	int i;
-	struct string_list *changed = data;
+	পূর্ণসংখ্যা i;
+	কাঠামো string_list *changed = তথ্য;
 
 	/*
 	 * Handle files below a directory first, in case they are all deleted
@@ -444,20 +444,20 @@ static void show_filemodify(struct diff_queue_struct *q,
 	 */
 	QSORT(q->queue, q->nr, depth_first);
 
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filespec *ospec = q->queue[i]->one;
-		struct diff_filespec *spec = q->queue[i]->two;
+	জন্য (i = 0; i < q->nr; i++) {
+		কাঠামো diff_filespec *ospec = q->queue[i]->one;
+		কাঠামো diff_filespec *spec = q->queue[i]->two;
 
-		switch (q->queue[i]->status) {
-		case DIFF_STATUS_DELETED:
+		নির্বাচন (q->queue[i]->status) {
+		ক্ষেত্র DIFF_STATUS_DELETED:
 			printf("D ");
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			string_list_ঢোকাও(changed, spec->path);
 			putchar('\n');
-			break;
+			বিরতি;
 
-		case DIFF_STATUS_COPIED:
-		case DIFF_STATUS_RENAMED:
+		ক্ষেত্র DIFF_STATUS_COPIED:
+		ক্ষেত্র DIFF_STATUS_RENAMED:
 			/*
 			 * If a change in the file corresponding to ospec->path
 			 * has been observed, we cannot trust its contents
@@ -465,44 +465,44 @@ static void show_filemodify(struct diff_queue_struct *q,
 			 * contents, not the current contents.  So, declare a
 			 * copy or rename only if there was no change observed.
 			 */
-			if (!string_list_has_string(changed, ospec->path)) {
+			যদি (!string_list_has_string(changed, ospec->path)) {
 				printf("%c ", q->queue[i]->status);
 				print_path(ospec->path);
 				putchar(' ');
 				print_path(spec->path);
-				string_list_insert(changed, spec->path);
+				string_list_ঢোকাও(changed, spec->path);
 				putchar('\n');
 
-				if (oideq(&ospec->oid, &spec->oid) &&
+				যদি (oideq(&ospec->oid, &spec->oid) &&
 				    ospec->mode == spec->mode)
-					break;
+					বিরতি;
 			}
 			/* fallthrough */
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
-		case DIFF_STATUS_ADDED:
+		ক্ষেত্র DIFF_STATUS_TYPE_CHANGED:
+		ক্ষেত্র DIFF_STATUS_MODIFIED:
+		ক্ষেত্র DIFF_STATUS_ADDED:
 			/*
 			 * Links refer to objects in another repositories;
 			 * output the SHA-1 verbatim.
 			 */
-			if (no_data || S_ISGITLINK(spec->mode))
+			যদি (no_তথ্য || S_ISGITLINK(spec->mode))
 				printf("M %06o %s ", spec->mode,
 				       anonymize ?
 				       anonymize_oid(oid_to_hex(&spec->oid)) :
 				       oid_to_hex(&spec->oid));
-			else {
-				struct object *object = lookup_object(the_repository,
+			অন্যথা {
+				কাঠামো object *object = lookup_object(the_repository,
 								      &spec->oid);
 				printf("M %06o :%d ", spec->mode,
 				       get_object_mark(object));
 			}
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			string_list_ঢোকাও(changed, spec->path);
 			putchar('\n');
-			break;
+			বিরতি;
 
-		default:
+		পূর্বনির্ধারিত:
 			die(_("unexpected comparison status '%c' for %s, %s"),
 			    q->queue[i]->status,
 			    ospec->path ? ospec->path : _("none"),
@@ -511,59 +511,59 @@ static void show_filemodify(struct diff_queue_struct *q,
 	}
 }
 
-static char *anonymize_ref_component(void)
+স্থির অক্ষর *anonymize_ref_component(শূন্য)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "ref%d", counter++);
-	return strbuf_detach(&out, NULL);
+	স্থির পূর্ণসংখ্যা গণক;
+	কাঠামো strbuf out = STRBUF_INIT;
+	strbuf_addf(&out, "ref%d", গণক++);
+	ফেরত strbuf_detach(&out, ফাঁকা);
 }
 
-static const char *anonymize_refname(const char *refname)
+স্থির ধ্রুবক অক্ষর *anonymize_refname(ধ্রুবক অক্ষর *refname)
 {
 	/*
 	 * If any of these prefixes is found, we will leave it intact
 	 * so that tags remain tags and so forth.
 	 */
-	static const char *prefixes[] = {
+	স্থির ধ্রুবক অক্ষর *prefixes[] = {
 		"refs/heads/",
 		"refs/tags/",
 		"refs/remotes/",
 		"refs/"
 	};
-	static struct hashmap refs;
-	static struct strbuf anon = STRBUF_INIT;
-	int i;
+	স্থির কাঠামো hashmap refs;
+	স্থির কাঠামো strbuf anon = STRBUF_INIT;
+	পূর্ণসংখ্যা i;
 
 	strbuf_reset(&anon);
-	for (i = 0; i < ARRAY_SIZE(prefixes); i++) {
-		if (skip_prefix(refname, prefixes[i], &refname)) {
+	জন্য (i = 0; i < ARRAY_আকার(prefixes); i++) {
+		যদি (skip_prefix(refname, prefixes[i], &refname)) {
 			strbuf_addstr(&anon, prefixes[i]);
-			break;
+			বিরতি;
 		}
 	}
 
 	anonymize_path(&anon, refname, &refs, anonymize_ref_component);
-	return anon.buf;
+	ফেরত anon.buf;
 }
 
 /*
  * We do not even bother to cache commit messages, as they are unlikely
  * to be repeated verbatim, and it is not that interesting when they are.
  */
-static char *anonymize_commit_message(void)
+স্থির অক্ষর *anonymize_commit_message(শূন্য)
 {
-	static int counter;
-	return xstrfmt("subject %d\n\nbody\n", counter++);
+	স্থির পূর্ণসংখ্যা গণক;
+	ফেরত xstrfmt("subject %d\n\nbody\n", গণক++);
 }
 
-static char *anonymize_ident(void)
+স্থির অক্ষর *anonymize_ident(শূন্য)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "User %d <user%d@example.com>", counter, counter);
-	counter++;
-	return strbuf_detach(&out, NULL);
+	স্থির পূর্ণসংখ্যা গণক;
+	কাঠামো strbuf out = STRBUF_INIT;
+	strbuf_addf(&out, "User %d <user%d@example.com>", গণক, গণক);
+	গণক++;
+	ফেরত strbuf_detach(&out, ফাঁকা);
 }
 
 /*
@@ -571,32 +571,32 @@ static char *anonymize_ident(void)
  * but keep timestamps intact, as they influence things like traversal
  * order (and by themselves should not be too revealing).
  */
-static void anonymize_ident_line(const char **beg, const char **end)
+স্থির শূন্য anonymize_ident_সারি(ধ্রুবক অক্ষর **beg, ধ্রুবক অক্ষর **end)
 {
-	static struct hashmap idents;
-	static struct strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
-	static unsigned which_buffer;
+	স্থির কাঠামো hashmap idents;
+	স্থির কাঠামো strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
+	স্থির unsigned which_বাফার;
 
-	struct strbuf *out;
-	struct ident_split split;
-	const char *end_of_header;
+	কাঠামো strbuf *out;
+	কাঠামো ident_split split;
+	ধ্রুবক অক্ষর *end_of_header;
 
-	out = &buffers[which_buffer++];
-	which_buffer %= ARRAY_SIZE(buffers);
+	out = &buffers[which_বাফার++];
+	which_বাফার %= ARRAY_আকার(buffers);
 	strbuf_reset(out);
 
 	/* skip "committer", "author", "tagger", etc */
 	end_of_header = strchr(*beg, ' ');
-	if (!end_of_header)
+	যদি (!end_of_header)
 		BUG("malformed line fed to anonymize_ident_line: %.*s",
-		    (int)(*end - *beg), *beg);
+		    (পূর্ণসংখ্যা)(*end - *beg), *beg);
 	end_of_header++;
 	strbuf_add(out, *beg, end_of_header - *beg);
 
-	if (!split_ident_line(&split, end_of_header, *end - end_of_header) &&
+	যদি (!split_ident_সারি(&split, end_of_header, *end - end_of_header) &&
 	    split.date_begin) {
-		const char *ident;
-		size_t len;
+		ধ্রুবক অক্ষর *ident;
+		আকার_t len;
 
 		len = split.mail_end - split.name_begin;
 		ident = anonymize_str(&idents, anonymize_ident,
@@ -604,7 +604,7 @@ static void anonymize_ident_line(const char **beg, const char **end)
 		strbuf_addstr(out, ident);
 		strbuf_addch(out, ' ');
 		strbuf_add(out, split.date_begin, split.tz_end - split.date_begin);
-	} else {
+	} অন্যথা {
 		strbuf_addstr(out, "Malformed Ident <malformed@example.com> 0 -0000");
 	}
 
@@ -624,21 +624,21 @@ static void anonymize_ident_line(const char **beg, const char **end)
  * If the header is found, then *end is set to point at the '\n' in
  * msg that immediately follows the header value.
  */
-static const char *find_commit_multiline_header(const char *msg,
-						const char *key,
-						const char **end)
+স্থির ধ্রুবক অক্ষর *find_commit_multiline_header(ধ্রুবক অক্ষর *বার্তা,
+						ধ্রুবক অক্ষর *চাবি,
+						ধ্রুবক অক্ষর **end)
 {
-	struct strbuf val = STRBUF_INIT;
-	const char *bol, *eol;
-	size_t len;
+	কাঠামো strbuf val = STRBUF_INIT;
+	ধ্রুবক অক্ষর *bol, *eol;
+	আকার_t len;
 
-	bol = find_commit_header(msg, key, &len);
-	if (!bol)
-		return NULL;
+	bol = find_commit_header(বার্তা, চাবি, &len);
+	যদি (!bol)
+		ফেরত ফাঁকা;
 	eol = bol + len;
 	strbuf_add(&val, bol, len);
 
-	while (eol[0] == '\n' && eol[1] == ' ') {
+	যখন (eol[0] == '\n' && eol[1] == ' ') {
 		bol = eol + 2;
 		eol = strchrnul(bol, '\n');
 		strbuf_addch(&val, '\n');
@@ -646,13 +646,13 @@ static const char *find_commit_multiline_header(const char *msg,
 	}
 
 	*end = eol;
-	return strbuf_detach(&val, NULL);
+	ফেরত strbuf_detach(&val, ফাঁকা);
 }
 
-static void print_signature(const char *signature, const char *object_hash)
+স্থির শূন্য print_signature(ধ্রুবক অক্ষর *signature, ধ্রুবক অক্ষর *object_hash)
 {
-	if (!signature)
-		return;
+	যদি (!signature)
+		ফেরত;
 
 	printf("gpgsig %s %s\ndata %u\n%s\n",
 	       object_hash,
@@ -661,59 +661,59 @@ static void print_signature(const char *signature, const char *object_hash)
 	       signature);
 }
 
-static const char *append_signatures_for_header(struct string_list *signatures,
-						const char *pos,
-						const char *header,
-						const char *object_hash)
+স্থির ধ্রুবক অক্ষর *append_signatures_for_header(কাঠামো string_list *signatures,
+						ধ্রুবক অক্ষর *pos,
+						ধ্রুবক অক্ষর *header,
+						ধ্রুবক অক্ষর *object_hash)
 {
-	const char *signature;
-	const char *start = pos;
-	const char *end = pos;
+	ধ্রুবক অক্ষর *signature;
+	ধ্রুবক অক্ষর *start = pos;
+	ধ্রুবক অক্ষর *end = pos;
 
-	while ((signature = find_commit_multiline_header(start + 1,
+	যখন ((signature = find_commit_multiline_header(start + 1,
 							 header,
 							 &end))) {
-		string_list_append(signatures, signature)->util = (void *)object_hash;
-		free((char *)signature);
+		string_list_append(signatures, signature)->util = (শূন্য *)object_hash;
+		মুক্ত((অক্ষর *)signature);
 		start = end;
 	}
 
-	return end;
+	ফেরত end;
 }
 
-static void handle_commit(struct commit *commit, struct rev_info *rev,
-			  struct string_list *paths_of_changed_objects)
+স্থির শূন্য handle_commit(কাঠামো commit *commit, কাঠামো rev_info *rev,
+			  কাঠামো string_list *paths_of_changed_objects)
 {
-	int saved_output_format = rev->diffopt.output_format;
-	const char *commit_buffer, *commit_buffer_cursor;
-	const char *author, *author_end, *committer, *committer_end;
-	const char *encoding = NULL;
-	size_t encoding_len;
-	struct string_list signatures = STRING_LIST_INIT_DUP;
-	const char *message;
-	char *reencoded = NULL;
-	struct commit_list *p;
-	const char *refname;
-	int i;
+	পূর্ণসংখ্যা saved_output_format = rev->diffopt.output_format;
+	ধ্রুবক অক্ষর *commit_বাফার, *commit_বাফার_cursor;
+	ধ্রুবক অক্ষর *author, *author_end, *committer, *committer_end;
+	ধ্রুবক অক্ষর *encoding = ফাঁকা;
+	আকার_t encoding_len;
+	কাঠামো string_list signatures = STRING_LIST_INIT_DUP;
+	ধ্রুবক অক্ষর *message;
+	অক্ষর *reencoded = ফাঁকা;
+	কাঠামো commit_list *p;
+	ধ্রুবক অক্ষর *refname;
+	পূর্ণসংখ্যা i;
 
 	rev->diffopt.output_format = DIFF_FORMAT_CALLBACK;
 
 	parse_commit_or_die(commit);
-	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, NULL);
+	commit_বাফার_cursor = commit_বাফার = repo_get_commit_বাফার(the_repository, commit, ফাঁকা);
 
-	author = strstr(commit_buffer_cursor, "\nauthor ");
-	if (!author)
+	author = strstr(commit_বাফার_cursor, "\nauthor ");
+	যদি (!author)
 		die(_("could not find author in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	author++;
-	commit_buffer_cursor = author_end = strchrnul(author, '\n');
+	commit_বাফার_cursor = author_end = strchrnul(author, '\n');
 
-	committer = strstr(commit_buffer_cursor, "\ncommitter ");
-	if (!committer)
+	committer = strstr(commit_বাফার_cursor, "\ncommitter ");
+	যদি (!committer)
 		die(_("could not find committer in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	committer++;
-	commit_buffer_cursor = committer_end = strchrnul(committer, '\n');
+	commit_বাফার_cursor = committer_end = strchrnul(committer, '\n');
 
 	/*
 	 * find_commit_header() and find_commit_multiline_header() get
@@ -722,39 +722,39 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * pointer to the beginning of the next line.
 	 */
 
-	if (*commit_buffer_cursor == '\n') {
-		encoding = find_commit_header(commit_buffer_cursor + 1, "encoding", &encoding_len);
-		if (encoding)
-			commit_buffer_cursor = encoding + encoding_len;
+	যদি (*commit_বাফার_cursor == '\n') {
+		encoding = find_commit_header(commit_বাফার_cursor + 1, "encoding", &encoding_len);
+		যদি (encoding)
+			commit_বাফার_cursor = encoding + encoding_len;
 	}
 
-	if (*commit_buffer_cursor == '\n') {
-		const char *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+	যদি (*commit_বাফার_cursor == '\n') {
+		ধ্রুবক অক্ষর *after_sha1 = append_signatures_for_header(&signatures, commit_বাফার_cursor,
 								      "gpgsig", "sha1");
-		const char *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+		ধ্রুবক অক্ষর *after_sha256 = append_signatures_for_header(&signatures, commit_বাফার_cursor,
 									"gpgsig-sha256", "sha256");
-		commit_buffer_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
+		commit_বাফার_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
 	}
 
-	message = strstr(commit_buffer_cursor, "\n\n");
-	if (message)
+	message = strstr(commit_বাফার_cursor, "\n\n");
+	যদি (message)
 		message += 2;
 
-	if (commit->parents &&
+	যদি (commit->parents &&
 	    (get_object_mark(&commit->parents->item->object) != 0 ||
 	     reference_excluded_commits) &&
-	    !full_tree) {
+	    !full_বৃক্ষ) {
 		parse_commit_or_die(commit->parents->item);
-		diff_tree_oid(get_commit_tree_oid(commit->parents->item),
-			      get_commit_tree_oid(commit), "", &rev->diffopt);
+		diff_বৃক্ষ_oid(get_commit_বৃক্ষ_oid(commit->parents->item),
+			      get_commit_বৃক্ষ_oid(commit), "", &rev->diffopt);
 	}
-	else
-		diff_root_tree_oid(get_commit_tree_oid(commit),
+	অন্যথা
+		diff_মূল_বৃক্ষ_oid(get_commit_বৃক্ষ_oid(commit),
 				   "", &rev->diffopt);
 
 	/* Export the referenced blobs, and remember the marks. */
-	for (i = 0; i < diff_queued_diff.nr; i++)
-		if (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
+	জন্য (i = 0; i < diff_queued_diff.nr; i++)
+		যদি (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
 			export_blob(&diff_queued_diff.queue[i]->two->oid);
 
 	refname = *revision_sources_at(&revision_sources, commit);
@@ -765,95 +765,95 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * repo may have enough refs for this to become slow.
 	 */
 	string_list_remove(&extra_refs, refname, 0);
-	if (anonymize) {
+	যদি (anonymize) {
 		refname = anonymize_refname(refname);
-		anonymize_ident_line(&committer, &committer_end);
-		anonymize_ident_line(&author, &author_end);
+		anonymize_ident_সারি(&committer, &committer_end);
+		anonymize_ident_সারি(&author, &author_end);
 	}
 
-	mark_next_object(&commit->object);
-	if (anonymize) {
+	mark_পরবর্তী_object(&commit->object);
+	যদি (anonymize) {
 		reencoded = anonymize_commit_message();
-	} else if (encoding) {
-		char *buf;
-		switch (reencode_mode) {
-		case REENCODE_YES:
-			buf = xstrfmt("%.*s", (int)encoding_len, encoding);
+	} অন্যথা যদি (encoding) {
+		অক্ষর *buf;
+		নির্বাচন (reencode_mode) {
+		ক্ষেত্র REENCODE_YES:
+			buf = xstrfmt("%.*s", (পূর্ণসংখ্যা)encoding_len, encoding);
 			reencoded = reencode_string(message, "UTF-8", buf);
-			free(buf);
-			break;
-		case REENCODE_NO:
-			break;
-		case REENCODE_ABORT:
+			মুক্ত(buf);
+			বিরতি;
+		ক্ষেত্র REENCODE_NO:
+			বিরতি;
+		ক্ষেত্র REENCODE_ABORT:
 			die(_("encountered commit-specific encoding %.*s in commit "
 			      "%s; use --reencode=[yes|no] to handle it"),
-			    (int)encoding_len, encoding,
+			    (পূর্ণসংখ্যা)encoding_len, encoding,
 			    oid_to_hex(&commit->object.oid));
 		}
 	}
-	if (!commit->parents)
+	যদি (!commit->parents)
 		printf("reset %s\n", refname);
 	printf("commit %s\nmark :%"PRIu32"\n", refname, last_idnum);
-	if (show_original_ids)
+	যদি (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(&commit->object.oid));
 	printf("%.*s\n%.*s\n",
-	       (int)(author_end - author), author,
-	       (int)(committer_end - committer), committer);
-	if (signatures.nr) {
-		switch (signed_commit_mode) {
+	       (পূর্ণসংখ্যা)(author_end - author), author,
+	       (পূর্ণসংখ্যা)(committer_end - committer), committer);
+	যদি (signatures.nr) {
+		নির্বাচন (signed_commit_mode) {
 		/* Exporting modes */
-		case SIGN_WARN_VERBATIM:
+		ক্ষেত্র SIGN_WARN_VERBATIM:
 			warning(_("exporting %"PRIuMAX" signature(s) for commit %s"),
 				(uintmax_t)signatures.nr, oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_VERBATIM:
-			for (size_t i = 0; i < signatures.nr; i++) {
-				struct string_list_item *item = &signatures.items[i];
+		ক্ষেত্র SIGN_VERBATIM:
+			জন্য (আকার_t i = 0; i < signatures.nr; i++) {
+				কাঠামো string_list_item *item = &signatures.বস্তুসমূহ[i];
 				print_signature(item->string, item->util);
 			}
-			break;
+			বিরতি;
 
 		/* Stripping modes */
-		case SIGN_WARN_STRIP:
+		ক্ষেত্র SIGN_WARN_STRIP:
 			warning(_("stripping signature(s) from commit %s"),
 				oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_STRIP:
-			break;
+		ক্ষেত্র SIGN_STRIP:
+			বিরতি;
 
 		/* Aborting modes */
-		case SIGN_ABORT:
+		ক্ষেত্র SIGN_ABORT:
 			die(_("encountered signed commit %s; use "
 			      "--signed-commits=<mode> to handle it"),
 			    oid_to_hex(&commit->object.oid));
-		default:
+		পূর্বনির্ধারিত:
 			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 		}
 		string_list_clear(&signatures, 0);
 	}
-	if (!reencoded && encoding)
-		printf("encoding %.*s\n", (int)encoding_len, encoding);
+	যদি (!reencoded && encoding)
+		printf("encoding %.*s\n", (পূর্ণসংখ্যা)encoding_len, encoding);
 	printf("data %u\n%s",
 	       (unsigned)(reencoded
 			  ? strlen(reencoded) : message
 			  ? strlen(message) : 0),
 	       reencoded ? reencoded : message ? message : "");
-	free(reencoded);
-	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
+	মুক্ত(reencoded);
+	repo_unuse_commit_বাফার(the_repository, commit, commit_বাফার);
 
-	for (i = 0, p = commit->parents; p; p = p->next) {
-		struct object *obj = &p->item->object;
-		int mark = get_object_mark(obj);
+	জন্য (i = 0, p = commit->parents; p; p = p->পরবর্তী) {
+		কাঠামো object *obj = &p->item->object;
+		পূর্ণসংখ্যা mark = get_object_mark(obj);
 
-		if (!mark && !reference_excluded_commits)
-			continue;
-		if (i == 0)
+		যদি (!mark && !reference_excluded_commits)
+			চালু;
+		যদি (i == 0)
 			printf("from ");
-		else
+		অন্যথা
 			printf("merge ");
-		if (mark)
+		যদি (mark)
 			printf(":%d\n", mark);
-		else
+		অন্যথা
 			printf("%s\n",
 			       anonymize ?
 			       anonymize_oid(oid_to_hex(&obj->oid)) :
@@ -861,9 +861,9 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 		i++;
 	}
 
-	if (full_tree)
+	যদি (full_বৃক্ষ)
 		printf("deleteall\n");
-	log_tree_diff_flush(rev);
+	log_বৃক্ষ_diff_flush(rev);
 	string_list_clear(paths_of_changed_objects, 0);
 	rev->diffopt.output_format = saved_output_format;
 
@@ -872,103 +872,103 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	show_progress();
 }
 
-static char *anonymize_tag(void)
+স্থির অক্ষর *anonymize_tag(শূন্য)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
-	strbuf_addf(&out, "tag message %d", counter++);
-	return strbuf_detach(&out, NULL);
+	স্থির পূর্ণসংখ্যা গণক;
+	কাঠামো strbuf out = STRBUF_INIT;
+	strbuf_addf(&out, "tag message %d", গণক++);
+	ফেরত strbuf_detach(&out, ফাঁকা);
 }
 
 
-static void handle_tag(const char *name, struct tag *tag)
+স্থির শূন্য handle_tag(ধ্রুবক অক্ষর *name, কাঠামো tag *tag)
 {
-	size_t size;
-	enum object_type type;
-	char *buf;
-	const char *tagger, *tagger_end, *message;
-	size_t message_size = 0;
-	struct object *tagged;
-	int tagged_mark;
-	struct commit *p;
+	আকার_t আকার_2;
+	গণনা object_type type;
+	অক্ষর *buf;
+	ধ্রুবক অক্ষর *tagger, *tagger_end, *message;
+	আকার_t message_আকার = 0;
+	কাঠামো object *tagged;
+	পূর্ণসংখ্যা tagged_mark;
+	কাঠামো commit *p;
 
 	/* Trees have no identifier in fast-export output, thus we have no way
 	 * to output tags of trees, tags of tags of trees, etc.  Simply omit
 	 * such tags.
 	 */
 	tagged = tag->tagged;
-	while (tagged->type == OBJ_TAG) {
-		tagged = ((struct tag *)tagged)->tagged;
+	যখন (tagged->type == OBJ_TAG) {
+		tagged = ((কাঠামো tag *)tagged)->tagged;
 	}
-	if (tagged->type == OBJ_TREE) {
+	যদি (tagged->type == OBJ_বৃক্ষ) {
 		warning(_("omitting tag %s,\nsince tags of trees (or tags "
 			  "of tags of trees, etc.) are not supported."),
 			oid_to_hex(&tag->object.oid));
-		return;
+		ফেরত;
 	}
 
 	buf = odb_read_object(the_repository->objects, &tag->object.oid,
-			      &type, &size);
-	if (!buf)
+			      &type, &আকার_2);
+	যদি (!buf)
 		die(_("could not read tag %s"), oid_to_hex(&tag->object.oid));
-	message = memmem(buf, size, "\n\n", 2);
-	if (message) {
+	message = memmem(buf, আকার_2, "\n\n", 2);
+	যদি (message) {
 		message += 2;
-		message_size = strlen(message);
+		message_আকার = strlen(message);
 	}
-	tagger = memmem(buf, message ? message - buf : size, "\ntagger ", 8);
-	if (!tagger) {
-		if (fake_missing_tagger)
+	tagger = memmem(buf, message ? message - buf : আকার_2, "\ntagger ", 8);
+	যদি (!tagger) {
+		যদি (fake_missing_tagger)
 			tagger = "tagger Unspecified Tagger "
 				"<unspecified-tagger> 0 +0000";
-		else
+		অন্যথা
 			tagger = "";
 		tagger_end = tagger + strlen(tagger);
-	} else {
+	} অন্যথা {
 		tagger++;
 		tagger_end = strchrnul(tagger, '\n');
-		if (anonymize)
-			anonymize_ident_line(&tagger, &tagger_end);
+		যদি (anonymize)
+			anonymize_ident_সারি(&tagger, &tagger_end);
 	}
 
-	if (anonymize) {
+	যদি (anonymize) {
 		name = anonymize_refname(name);
-		if (message) {
-			static struct hashmap tags;
+		যদি (message) {
+			স্থির কাঠামো hashmap tags;
 			message = anonymize_str(&tags, anonymize_tag,
-						message, message_size);
-			message_size = strlen(message);
+						message, message_আকার);
+			message_আকার = strlen(message);
 		}
 	}
 
 	/* handle signed tags */
-	if (message) {
-		size_t sig_offset = parse_signed_buffer(message, message_size);
-		if (sig_offset < message_size)
-			switch (signed_tag_mode) {
+	যদি (message) {
+		আকার_t sig_offset = parse_signed_বাফার(message, message_আকার);
+		যদি (sig_offset < message_আকার)
+			নির্বাচন (signed_tag_mode) {
 			/* Exporting modes */
-			case SIGN_WARN_VERBATIM:
+			ক্ষেত্র SIGN_WARN_VERBATIM:
 				warning(_("exporting signed tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_VERBATIM:
-				break;
+			ক্ষেত্র SIGN_VERBATIM:
+				বিরতি;
 
 			/* Stripping modes */
-			case SIGN_WARN_STRIP:
+			ক্ষেত্র SIGN_WARN_STRIP:
 				warning(_("stripping signature from tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_STRIP:
-				message_size = sig_offset;
-				break;
+			ক্ষেত্র SIGN_STRIP:
+				message_আকার = sig_offset;
+				বিরতি;
 
 			/* Aborting modes */
-			case SIGN_ABORT:
+			ক্ষেত্র SIGN_ABORT:
 				die(_("encountered signed tag %s; use "
 				      "--signed-tags=<mode> to handle it"),
 				    oid_to_hex(&tag->object.oid));
-			default:
+			পূর্বনির্ধারিত:
 				BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 			}
 	}
@@ -976,169 +976,169 @@ static void handle_tag(const char *name, struct tag *tag)
 	/* handle tag->tagged having been filtered out due to paths specified */
 	tagged = tag->tagged;
 	tagged_mark = get_object_mark(tagged);
-	if (!tagged_mark) {
-		switch (tag_of_filtered_mode) {
-		case TAG_FILTERING_ABORT:
+	যদি (!tagged_mark) {
+		নির্বাচন (tag_of_filtered_mode) {
+		ক্ষেত্র TAG_FILTERING_ABORT:
 			die(_("tag %s tags unexported object; use "
 			      "--tag-of-filtered-object=<mode> to handle it"),
 			    oid_to_hex(&tag->object.oid));
-		case DROP:
+		ক্ষেত্র DROP:
 			/* Ignore this tag altogether */
-			free(buf);
-			return;
-		case REWRITE:
-			if (tagged->type == OBJ_TAG && !mark_tags) {
+			মুক্ত(buf);
+			ফেরত;
+		ক্ষেত্র REWRITE:
+			যদি (tagged->type == OBJ_TAG && !mark_tags) {
 				die(_("cannot export nested tags unless --mark-tags is specified."));
-			} else if (tagged->type == OBJ_COMMIT) {
-				p = rewrite_commit((struct commit *)tagged);
-				if (!p) {
+			} অন্যথা যদি (tagged->type == OBJ_COMMIT) {
+				p = rewrite_commit((কাঠামো commit *)tagged);
+				যদি (!p) {
 					printf("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					free(buf);
-					return;
+					মুক্ত(buf);
+					ফেরত;
 				}
 				tagged_mark = get_object_mark(&p->object);
-			} else {
+			} অন্যথা {
 				/* tagged->type is either OBJ_BLOB or OBJ_TAG */
 				tagged_mark = get_object_mark(tagged);
 			}
 		}
 	}
 
-	if (tagged->type == OBJ_TAG) {
+	যদি (tagged->type == OBJ_TAG) {
 		printf("reset %s\nfrom %s\n\n",
 		       name, oid_to_hex(null_oid(the_hash_algo)));
 	}
 	skip_prefix(name, "refs/tags/", &name);
 	printf("tag %s\n", name);
-	if (mark_tags) {
-		mark_next_object(&tag->object);
+	যদি (mark_tags) {
+		mark_পরবর্তী_object(&tag->object);
 		printf("mark :%"PRIu32"\n", last_idnum);
 	}
-	if (tagged_mark)
+	যদি (tagged_mark)
 		printf("from :%d\n", tagged_mark);
-	else
+	অন্যথা
 		printf("from %s\n", oid_to_hex(&tagged->oid));
 
-	if (show_original_ids)
+	যদি (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(&tag->object.oid));
 	printf("%.*s%sdata %d\n%.*s\n",
-	       (int)(tagger_end - tagger), tagger,
+	       (পূর্ণসংখ্যা)(tagger_end - tagger), tagger,
 	       tagger == tagger_end ? "" : "\n",
-	       (int)message_size, (int)message_size, message ? message : "");
-	free(buf);
+	       (পূর্ণসংখ্যা)message_আকার, (পূর্ণসংখ্যা)message_আকার, message ? message : "");
+	মুক্ত(buf);
 }
 
-static struct commit *get_commit(struct rev_cmdline_entry *e, const char *full_name)
+স্থির কাঠামো commit *get_commit(কাঠামো rev_cmdline_entry *e, ধ্রুবক অক্ষর *full_name)
 {
-	switch (e->item->type) {
-	case OBJ_COMMIT:
-		return (struct commit *)e->item;
-	case OBJ_TAG: {
-		struct tag *tag = (struct tag *)e->item;
+	নির্বাচন (e->item->type) {
+	ক্ষেত্র OBJ_COMMIT:
+		ফেরত (কাঠামো commit *)e->item;
+	ক্ষেত্র OBJ_TAG: {
+		কাঠামো tag *tag = (কাঠামো tag *)e->item;
 
 		/* handle nested tags */
-		while (tag && tag->object.type == OBJ_TAG) {
+		যখন (tag && tag->object.type == OBJ_TAG) {
 			parse_object(the_repository, &tag->object.oid);
 			string_list_append(&tag_refs, full_name)->util = tag;
-			tag = (struct tag *)tag->tagged;
+			tag = (কাঠামো tag *)tag->tagged;
 		}
-		if (!tag)
+		যদি (!tag)
 			die(_("tag %s points nowhere?"), e->name);
-		return (struct commit *)tag;
+		ফেরত (কাঠামো commit *)tag;
 	}
-	default:
-		return NULL;
+	পূর্বনির্ধারিত:
+		ফেরত ফাঁকা;
 	}
 }
 
-static void get_tags_and_duplicates(struct rev_cmdline_info *info)
+স্থির শূন্য get_tags_and_duplicates(কাঠামো rev_cmdline_info *info)
 {
-	int i;
+	পূর্ণসংখ্যা i;
 
-	for (i = 0; i < info->nr; i++) {
-		struct rev_cmdline_entry *e = info->rev + i;
-		struct object_id oid;
-		struct commit *commit;
-		char *full_name = NULL;
+	জন্য (i = 0; i < info->nr; i++) {
+		কাঠামো rev_cmdline_entry *e = info->rev + i;
+		কাঠামো object_id oid;
+		কাঠামো commit *commit;
+		অক্ষর *full_name = ফাঁকা;
 
-		if (e->flags & UNINTERESTING)
-			continue;
+		যদি (e->flags & UNINTERESTING)
+			চালু;
 
-		if (repo_dwim_ref(the_repository, e->name, strlen(e->name),
+		যদি (repo_dwim_ref(the_repository, e->name, strlen(e->name),
 				  &oid, &full_name, 0) != 1) {
-			free(full_name);
-			continue;
+			মুক্ত(full_name);
+			চালু;
 		}
 
-		if (refspecs.nr) {
-			char *private;
-			private = apply_refspecs(&refspecs, full_name);
-			if (private) {
-				free(full_name);
-				full_name = private;
+		যদি (refspecs.nr) {
+			অক্ষর *ব্যক্তিগত;
+			ব্যক্তিগত = apply_refspecs(&refspecs, full_name);
+			যদি (ব্যক্তিগত) {
+				মুক্ত(full_name);
+				full_name = ব্যক্তিগত;
 			}
 		}
 
 		commit = get_commit(e, full_name);
-		if (!commit) {
+		যদি (!commit) {
 			warning(_("%s: unexpected object of type %s, skipping."),
 				e->name,
 				type_name(e->item->type));
-			free(full_name);
-			continue;
+			মুক্ত(full_name);
+			চালু;
 		}
 
-		switch (commit->object.type) {
-		case OBJ_COMMIT:
-			break;
-		case OBJ_BLOB:
+		নির্বাচন (commit->object.type) {
+		ক্ষেত্র OBJ_COMMIT:
+			বিরতি;
+		ক্ষেত্র OBJ_BLOB:
 			export_blob(&commit->object.oid);
-			free(full_name);
-			continue;
-		default: /* OBJ_TAG (nested tags) is already handled */
+			মুক্ত(full_name);
+			চালু;
+		পূর্বনির্ধারিত: /* OBJ_TAG (nested tags) is already handled */
 			warning(_("tag points to object of unexpected type %s, skipping."),
 				type_name(commit->object.type));
-			free(full_name);
-			continue;
+			মুক্ত(full_name);
+			চালু;
 		}
 
 		/*
 		 * Make sure this ref gets properly updated eventually, whether
 		 * through a commit or manually at the end.
 		 */
-		if (e->item->type != OBJ_TAG)
+		যদি (e->item->type != OBJ_TAG)
 			string_list_append(&extra_refs, full_name)->util = commit;
 
-		if (!*revision_sources_at(&revision_sources, commit))
+		যদি (!*revision_sources_at(&revision_sources, commit))
 			*revision_sources_at(&revision_sources, commit) = full_name;
-		else
-			free(full_name);
+		অন্যথা
+			মুক্ত(full_name);
 	}
 
 	string_list_sort_u(&extra_refs, 0);
 }
 
-static void handle_tags_and_duplicates(struct string_list *extras)
+স্থির শূন্য handle_tags_and_duplicates(কাঠামো string_list *extras)
 {
-	struct commit *commit;
-	int i;
+	কাঠামো commit *commit;
+	পূর্ণসংখ্যা i;
 
-	for (i = extras->nr - 1; i >= 0; i--) {
-		const char *name = extras->items[i].string;
-		struct object *object = extras->items[i].util;
-		int mark;
+	জন্য (i = extras->nr - 1; i >= 0; i--) {
+		ধ্রুবক অক্ষর *name = extras->বস্তুসমূহ[i].string;
+		কাঠামো object *object = extras->বস্তুসমূহ[i].util;
+		পূর্ণসংখ্যা mark;
 
-		switch (object->type) {
-		case OBJ_TAG:
-			handle_tag(name, (struct tag *)object);
-			break;
-		case OBJ_COMMIT:
-			if (anonymize)
+		নির্বাচন (object->type) {
+		ক্ষেত্র OBJ_TAG:
+			handle_tag(name, (কাঠামো tag *)object);
+			বিরতি;
+		ক্ষেত্র OBJ_COMMIT:
+			যদি (anonymize)
 				name = anonymize_refname(name);
 			/* create refs pointing to already seen commits */
-			commit = rewrite_commit((struct commit *)object);
-			if (!commit) {
+			commit = rewrite_commit((কাঠামো commit *)object);
+			যদি (!commit) {
 				/*
 				 * Neither this object nor any of its
 				 * ancestors touch any relevant paths, so
@@ -1147,11 +1147,11 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 */
 				printf("reset %s\nfrom %s\n\n",
 				       name, oid_to_hex(null_oid(the_hash_algo)));
-				continue;
+				চালু;
 			}
 
 			mark = get_object_mark(&commit->object);
-			if (!mark) {
+			যদি (!mark) {
 				/*
 				 * Getting here means we have a commit which
 				 * was excluded by a negative refspec (e.g.
@@ -1162,45 +1162,45 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 * in its history to be deleted, which basically
 				 * just means deletion of the ref.
 				 */
-				if (!reference_excluded_commits) {
+				যদি (!reference_excluded_commits) {
 					/* delete the ref */
 					printf("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					continue;
+					চালু;
 				}
 				/* set ref to commit using oid, not mark */
 				printf("reset %s\nfrom %s\n\n", name,
 				       oid_to_hex(&commit->object.oid));
-				continue;
+				চালু;
 			}
 
 			printf("reset %s\nfrom :%d\n\n", name, mark
 			       );
 			show_progress();
-			break;
+			বিরতি;
 		}
 	}
 }
 
-static void export_marks(char *file)
+স্থির শূন্য export_marks(অক্ষর *file)
 {
-	unsigned int i;
+	unsigned পূর্ণসংখ্যা i;
 	uint32_t mark;
-	struct decoration_entry *deco = idnums.entries;
+	কাঠামো decoration_entry *deco = idnums.entries;
 	FILE *f;
-	int e = 0;
+	পূর্ণসংখ্যা e = 0;
 
 	f = fopen_for_writing(file);
-	if (!f)
+	যদি (!f)
 		die_errno(_("unable to open marks file %s for writing."), file);
 
-	for (i = 0; i < idnums.size; i++) {
-		if (deco->base && deco->base->type == 1) {
+	জন্য (i = 0; i < idnums.আকার_2; i++) {
+		যদি (deco->base && deco->base->type == 1) {
 			mark = ptr_to_mark(deco->decoration);
-			if (fprintf(f, ":%"PRIu32" %s\n", mark,
+			যদি (fprintf(f, ":%"PRIu32" %s\n", mark,
 				oid_to_hex(&deco->base->oid)) < 0) {
 			    e = 1;
-			    break;
+			    বিরতি;
 			}
 		}
 		deco++;
@@ -1208,56 +1208,56 @@ static void export_marks(char *file)
 
 	e |= ferror(f);
 	e |= fclose(f);
-	if (e)
+	যদি (e)
 		error(_("unable to write marks file %s."), file);
 }
 
-static void import_marks(char *input_file, int check_exists)
+স্থির শূন্য import_marks(অক্ষর *প্রবেশ_file, পূর্ণসংখ্যা check_exists)
 {
-	char line[512];
+	অক্ষর সারি[512];
 	FILE *f;
-	struct stat sb;
+	কাঠামো stat sb;
 
-	if (check_exists && stat(input_file, &sb))
-		return;
+	যদি (check_exists && stat(প্রবেশ_file, &sb))
+		ফেরত;
 
-	f = xfopen(input_file, "r");
-	while (fgets(line, sizeof(line), f)) {
+	f = xfopen(প্রবেশ_file, "r");
+	যখন (fgets(সারি, আকার(সারি), f)) {
 		uint32_t mark;
-		char *line_end, *mark_end;
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
-		enum object_type type;
+		অক্ষর *সারি_end, *mark_end;
+		কাঠামো object_id oid;
+		কাঠামো object *object;
+		কাঠামো commit *commit;
+		গণনা object_type type;
 
-		line_end = strchr(line, '\n');
-		if (line[0] != ':' || !line_end)
-			die(_("corrupt mark line: %s"), line);
-		*line_end = '\0';
+		সারি_end = strchr(সারি, '\n');
+		যদি (সারি[0] != ':' || !সারি_end)
+			die(_("corrupt mark line: %s"), সারি);
+		*সারি_end = '\0';
 
-		mark = strtoumax(line + 1, &mark_end, 10);
-		if (!mark || mark_end == line + 1
+		mark = strtoumax(সারি + 1, &mark_end, 10);
+		যদি (!mark || mark_end == সারি + 1
 			|| *mark_end != ' ' || get_oid_hex(mark_end + 1, &oid))
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), সারি);
 
-		if (last_idnum < mark)
+		যদি (last_idnum < mark)
 			last_idnum = mark;
 
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+		type = odb_read_object_info(the_repository->objects, &oid, ফাঁকা);
+		যদি (type < 0)
 			die(_("object not found: %s"), oid_to_hex(&oid));
 
-		if (type != OBJ_COMMIT)
+		যদি (type != OBJ_COMMIT)
 			/* only commits */
-			continue;
+			চালু;
 
 		commit = lookup_commit(the_repository, &oid);
-		if (!commit)
+		যদি (!commit)
 			die(_("not a commit? can't happen: %s"), oid_to_hex(&oid));
 
 		object = &commit->object;
 
-		if (object->flags & SHOWN)
+		যদি (object->flags & SHOWN)
 			error(_("object %s already has a mark"), oid_to_hex(&oid));
 
 		mark_object(object, mark);
@@ -1267,60 +1267,60 @@ static void import_marks(char *input_file, int check_exists)
 	fclose(f);
 }
 
-static void handle_deletes(void)
+স্থির শূন্য handle_deletes(শূন্য)
 {
-	int i;
-	for (i = 0; i < refspecs.nr; i++) {
-		struct refspec_item *refspec = &refspecs.items[i];
-		if (*refspec->src)
-			continue;
+	পূর্ণসংখ্যা i;
+	জন্য (i = 0; i < refspecs.nr; i++) {
+		কাঠামো refspec_item *refspec = &refspecs.বস্তুসমূহ[i];
+		যদি (*refspec->src)
+			চালু;
 
 		printf("reset %s\nfrom %s\n\n",
 				refspec->dst, oid_to_hex(null_oid(the_hash_algo)));
 	}
 }
 
-static int parse_opt_anonymize_map(const struct option *opt,
-				   const char *arg, int unset)
+স্থির পূর্ণসংখ্যা parse_opt_anonymize_map(ধ্রুবক কাঠামো option *opt,
+				   ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	struct hashmap *map = opt->value;
-	const char *delim, *value;
-	size_t keylen;
+	কাঠামো hashmap *map = opt->মান;
+	ধ্রুবক অক্ষর *delim, *মান;
+	আকার_t keylen;
 
 	BUG_ON_OPT_NEG(unset);
 
 	delim = strchr(arg, ':');
-	if (delim) {
+	যদি (delim) {
 		keylen = delim - arg;
-		value = delim + 1;
-	} else {
+		মান = delim + 1;
+	} অন্যথা {
 		keylen = strlen(arg);
-		value = arg;
+		মান = arg;
 	}
 
-	if (!keylen || !*value)
-		return error(_("--anonymize-map token cannot be empty"));
+	যদি (!keylen || !*মান)
+		ফেরত error(_("--anonymize-map token cannot be empty"));
 
 	add_anonymized_entry(map, memhash(arg, keylen), arg, keylen,
-			     xstrdup(value));
+			     xstrdup(মান));
 
-	return 0;
+	ফেরত 0;
 }
 
-int cmd_fast_export(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_fast_export(পূর্ণসংখ্যা argc,
+		    ধ্রুবক অক্ষর **argv,
+		    ধ্রুবক অক্ষর *prefix,
+		    কাঠামো repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	char *export_filename = NULL,
-	     *import_filename = NULL,
-	     *import_filename_if_exists = NULL;
+	কাঠামো rev_info revs;
+	কাঠামো commit *commit;
+	অক্ষর *export_filename = ফাঁকা,
+	     *import_filename = ফাঁকা,
+	     *import_filename_if_exists = ফাঁকা;
 	uint32_t lastimportid;
-	struct string_list refspecs_list = STRING_LIST_INIT_NODUP;
-	struct string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
-	struct option options[] = {
+	কাঠামো string_list refspecs_list = STRING_LIST_INIT_NODUP;
+	কাঠামো string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
+	কাঠামো option options[] = {
 		OPT_INTEGER(0, "progress", &progress,
 			    N_("show progress after <n> objects")),
 		OPT_CALLBACK(0, "signed-tags", &signed_tag_mode, N_("mode"),
@@ -1345,11 +1345,11 @@ int cmd_fast_export(int argc,
 			     N_("import marks from this file if it exists")),
 		OPT_BOOL(0, "fake-missing-tagger", &fake_missing_tagger,
 			 N_("fake a tagger when tags lack one")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_বৃক্ষ,
 			 N_("output full tree for each commit")),
 		OPT_BOOL(0, "use-done-feature", &use_done_feature,
 			     N_("use the done feature to terminate the stream")),
-		OPT_BOOL(0, "no-data", &no_data, N_("skip output of blob data")),
+		OPT_BOOL(0, "no-data", &no_তথ্য, N_("skip output of blob data")),
 		OPT_STRING_LIST(0, "refspec", &refspecs_list, N_("refspec"),
 			     N_("apply refspec to exported refs")),
 		OPT_BOOL(0, "anonymize", &anonymize, N_("anonymize output")),
@@ -1366,11 +1366,11 @@ int cmd_fast_export(int argc,
 		OPT_END()
 	};
 
-	if (argc == 1)
+	যদি (argc == 1)
 		usage_with_options (fast_export_usage, options);
 
 	/* we handle encodings */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ফাঁকা);
 
 	refspec_init_fetch(&refspecs, the_hash_algo);
 
@@ -1381,48 +1381,48 @@ int cmd_fast_export(int argc,
 	revs.rewrite_parents = 1;
 	argc = parse_options(argc, argv, prefix, options, fast_export_usage,
 			PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1)
+	argc = setup_revisions(argc, argv, &revs, ফাঁকা);
+	যদি (argc > 1)
 		usage_with_options (fast_export_usage, options);
 
-	if (anonymized_seeds.cmpfn && !anonymize)
+	যদি (anonymized_seeds.cmpfn && !anonymize)
 		die(_("the option '%s' requires '%s'"), "--anonymize-map", "--anonymize");
 
-	if (refspecs_list.nr) {
-		int i;
+	যদি (refspecs_list.nr) {
+		পূর্ণসংখ্যা i;
 
-		for (i = 0; i < refspecs_list.nr; i++)
-			refspec_append(&refspecs, refspecs_list.items[i].string);
+		জন্য (i = 0; i < refspecs_list.nr; i++)
+			refspec_append(&refspecs, refspecs_list.বস্তুসমূহ[i].string);
 
 		string_list_clear(&refspecs_list, 1);
 	}
 
-	if (use_done_feature)
+	যদি (use_done_feature)
 		printf("feature done\n");
 
-	if (import_filename && import_filename_if_exists)
+	যদি (import_filename && import_filename_if_exists)
 		die(_("options '%s' and '%s' cannot be used together"), "--import-marks", "--import-marks-if-exists");
-	if (import_filename)
+	যদি (import_filename)
 		import_marks(import_filename, 0);
-	else if (import_filename_if_exists)
+	অন্যথা যদি (import_filename_if_exists)
 		import_marks(import_filename_if_exists, 1);
 	lastimportid = last_idnum;
 
-	if (import_filename && revs.prune_data.nr)
-		full_tree = 1;
+	যদি (import_filename && revs.prune_তথ্য.nr)
+		full_বৃক্ষ = 1;
 
 	get_tags_and_duplicates(&revs.cmdline);
 
-	if (prepare_revision_walk(&revs))
+	যদি (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 
 	revs.reverse = 1;
 	revs.diffopt.format_callback = show_filemodify;
-	revs.diffopt.format_callback_data = &paths_of_changed_objects;
+	revs.diffopt.format_callback_তথ্য = &paths_of_changed_objects;
 	revs.diffopt.flags.recursive = 1;
 
 	revs.diffopt.no_free = 1;
-	while ((commit = get_revision(&revs)))
+	যখন ((commit = get_revision(&revs)))
 		handle_commit(commit, &revs, &paths_of_changed_objects);
 	revs.diffopt.no_free = 0;
 
@@ -1430,14 +1430,14 @@ int cmd_fast_export(int argc,
 	handle_tags_and_duplicates(&tag_refs);
 	handle_deletes();
 
-	if (export_filename && lastimportid != last_idnum)
+	যদি (export_filename && lastimportid != last_idnum)
 		export_marks(export_filename);
 
-	if (use_done_feature)
+	যদি (use_done_feature)
 		printf("done\n");
 
 	refspec_clear(&refspecs);
 	release_revisions(&revs);
 
-	return 0;
+	ফেরত 0;
 }

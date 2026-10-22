@@ -1,48 +1,48 @@
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object.h"
-#include "parse-options.h"
-#include "revision.h"
-#include "strbuf.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "diff.h"
+#অন্তর্ভাব "diffcore.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hash.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "object.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "revision.h"
+#অন্তর্ভাব "strbuf.h"
 
-static unsigned parse_mode_or_die(const char *mode, const char **end)
+স্থির unsigned parse_mode_or_die(ধ্রুবক অক্ষর *mode, ধ্রুবক অক্ষর **end)
 {
 	uint16_t ret;
 
 	*end = parse_mode(mode, &ret);
-	if (!*end)
+	যদি (!*end)
 		die(_("unable to parse mode: %s"), mode);
-	return ret;
+	ফেরত ret;
 }
 
-static void parse_oid_or_die(const char *hex, struct object_id *oid,
-			     const char **end, const struct git_hash_algo *algop)
+স্থির শূন্য parse_oid_or_die(ধ্রুবক অক্ষর *hex, কাঠামো object_id *oid,
+			     ধ্রুবক অক্ষর **end, ধ্রুবক কাঠামো git_hash_algo *algop)
 {
-	if (parse_oid_hex_algop(hex, oid, end, algop) || *(*end)++ != ' ')
+	যদি (parse_oid_hex_algop(hex, oid, end, algop) || *(*end)++ != ' ')
 		die(_("unable to parse object id: %s"), hex);
 }
 
-int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
-		   struct repository *repo)
+পূর্ণসংখ্যা cmd_diff_pairs(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix,
+		   কাঠামো repository *repo)
 {
-	struct strbuf path_dst = STRBUF_INIT;
-	struct strbuf path = STRBUF_INIT;
-	struct strbuf meta = STRBUF_INIT;
-	struct option *parseopts;
-	struct rev_info revs;
-	int line_term = '\0';
-	int ret;
+	কাঠামো strbuf path_dst = STRBUF_INIT;
+	কাঠামো strbuf path = STRBUF_INIT;
+	কাঠামো strbuf meta = STRBUF_INIT;
+	কাঠামো option *parseopts;
+	কাঠামো rev_info revs;
+	পূর্ণসংখ্যা সারি_term = '\0';
+	পূর্ণসংখ্যা ret;
 
-	const char * const builtin_diff_pairs_usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক builtin_diff_pairs_usage[] = {
 		N_("git diff-pairs -z [<diff-options>]"),
-		NULL
+		ফাঁকা
 	};
-	struct option builtin_diff_pairs_options[] = {
+	কাঠামো option builtin_diff_pairs_options[] = {
 		OPT_END()
 	};
 
@@ -56,7 +56,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	parseopts = add_diff_options(builtin_diff_pairs_options, &revs.diffopt);
 	show_usage_with_options_if_asked(argc, argv, builtin_diff_pairs_usage, parseopts);
 
-	repo_config(repo, git_diff_basic_config, NULL);
+	repo_config(repo, git_diff_basic_config, ফাঁকা);
 	revs.diffopt.no_free = 1;
 	revs.disable_stdin = 1;
 	revs.abbrev = 0;
@@ -65,7 +65,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, parseopts, builtin_diff_pairs_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_DASHDASH);
 
-	if (setup_revisions(argc, argv, &revs, NULL) > 1)
+	যদি (setup_revisions(argc, argv, &revs, ফাঁকা) > 1)
 		usagef(_("unrecognized argument: %s"), argv[0]);
 
 	/*
@@ -73,18 +73,18 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	 * NUL-delimited (this mode does not affect patch output). At present
 	 * only NUL-delimited raw diff formatted input is supported.
 	 */
-	if (revs.diffopt.line_termination)
+	যদি (revs.diffopt.সারি_termination)
 		usage(_("working without -z is not supported"));
 
-	if (revs.prune_data.nr)
+	যদি (revs.prune_তথ্য.nr)
 		usage(_("pathspec arguments not supported"));
 
-	if (revs.pending.nr || revs.max_count != -1 ||
+	যদি (revs.pending.nr || revs.max_গুনতি != -1 ||
 	    revs.min_age != (timestamp_t)-1 ||
 	    revs.max_age != (timestamp_t)-1)
 		usage(_("revision arguments not allowed"));
 
-	if (!revs.diffopt.output_format)
+	যদি (!revs.diffopt.output_format)
 		revs.diffopt.output_format = DIFF_FORMAT_PATCH;
 
 	/*
@@ -93,21 +93,21 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	 * diffcore_std() does not mess with rename information already present
 	 * in queued filepairs.
 	 */
-	if (!revs.diffopt.detect_rename)
+	যদি (!revs.diffopt.detect_rename)
 		revs.diffopt.skip_resolving_statuses = 1;
 
-	while (1) {
-		struct object_id oid_a, oid_b;
-		struct diff_filepair *pair;
+	যখন (1) {
+		কাঠামো object_id oid_a, oid_b;
+		কাঠামো diff_filepair *pair;
 		unsigned mode_a, mode_b;
-		const char *p;
-		char status;
+		ধ্রুবক অক্ষর *p;
+		অক্ষর status;
 
-		if (strbuf_getwholeline(&meta, stdin, line_term) == EOF)
-			break;
+		যদি (strbuf_getwholeline(&meta, stdin, সারি_term) == EOF)
+			বিরতি;
 
 		p = meta.buf;
-		if (!*p) {
+		যদি (!*p) {
 			diffcore_std(&revs.diffopt);
 			diff_flush(&revs.diffopt);
 			/*
@@ -116,17 +116,17 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 			 */
 			fputc('\0', revs.diffopt.file);
 			fflush(revs.diffopt.file);
-			continue;
+			চালু;
 		}
 
-		if (*p != ':')
+		যদি (*p != ':')
 			die(_("invalid raw diff input"));
 		p++;
 
 		mode_a = parse_mode_or_die(p, &p);
 		mode_b = parse_mode_or_die(p, &p);
 
-		if (S_ISDIR(mode_a) || S_ISDIR(mode_b))
+		যদি (S_ISDIR(mode_a) || S_ISDIR(mode_b))
 			die(_("tree objects not supported"));
 
 		parse_oid_or_die(p, &oid_a, &p, repo->hash_algo);
@@ -134,41 +134,41 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 
 		status = *p++;
 
-		if (strbuf_getwholeline(&path, stdin, line_term) == EOF)
+		যদি (strbuf_getwholeline(&path, stdin, সারি_term) == EOF)
 			die(_("got EOF while reading path"));
 
-		switch (status) {
-		case DIFF_STATUS_ADDED:
+		নির্বাচন (status) {
+		ক্ষেত্র DIFF_STATUS_ADDED:
 			pair = diff_queue_addremove(&diff_queued_diff,
 						    &revs.diffopt, '+', mode_b,
 						    &oid_b, 1, path.buf, 0);
-			if (pair)
+			যদি (pair)
 				pair->status = status;
-			break;
+			বিরতি;
 
-		case DIFF_STATUS_DELETED:
+		ক্ষেত্র DIFF_STATUS_DELETED:
 			pair = diff_queue_addremove(&diff_queued_diff,
 						    &revs.diffopt, '-', mode_a,
 						    &oid_a, 1, path.buf, 0);
-			if (pair)
+			যদি (pair)
 				pair->status = status;
-			break;
+			বিরতি;
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
+		ক্ষেত্র DIFF_STATUS_TYPE_CHANGED:
+		ক্ষেত্র DIFF_STATUS_MODIFIED:
 			pair = diff_queue_change(&diff_queued_diff, &revs.diffopt,
 						 mode_a, mode_b, &oid_a, &oid_b,
 						 1, 1, path.buf, 0, 0);
-			if (pair)
+			যদি (pair)
 				pair->status = status;
-			break;
+			বিরতি;
 
-		case DIFF_STATUS_RENAMED:
-		case DIFF_STATUS_COPIED: {
-				struct diff_filespec *a, *b;
-				unsigned int score;
+		ক্ষেত্র DIFF_STATUS_RENAMED:
+		ক্ষেত্র DIFF_STATUS_COPIED: {
+				কাঠামো diff_filespec *a, *b;
+				unsigned পূর্ণসংখ্যা score;
 
-				if (strbuf_getwholeline(&path_dst, stdin, line_term) == EOF)
+				যদি (strbuf_getwholeline(&path_dst, stdin, সারি_term) == EOF)
 					die(_("got EOF while reading destination path"));
 
 				a = alloc_filespec(path.buf);
@@ -178,16 +178,16 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 
 				pair = diff_queue(&diff_queued_diff, a, b);
 
-				if (strtoul_ui(p, 10, &score))
+				যদি (strtoul_ui(p, 10, &score))
 					die(_("unable to parse rename/copy score: %s"), p);
 
 				pair->score = score * MAX_SCORE / 100;
 				pair->status = status;
 				pair->renamed_pair = 1;
 			}
-			break;
+			বিরতি;
 
-		default:
+		পূর্বনির্ধারিত:
 			die(_("unknown diff status: %c"), status);
 		}
 	}
@@ -195,7 +195,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	revs.diffopt.no_free = 0;
 	diffcore_std(&revs.diffopt);
 	diff_flush(&revs.diffopt);
-	ret = diff_result_code(&revs);
+	ret = diff_ফলাফল_code(&revs);
 
 	strbuf_release(&path_dst);
 	strbuf_release(&path);
@@ -203,5 +203,5 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	release_revisions(&revs);
 	FREE_AND_NULL(parseopts);
 
-	return ret;
+	ফেরত ret;
 }

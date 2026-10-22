@@ -8,280 +8,280 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
 
-#include "packfile.h"
-#include "odb.h"
-#include "strbuf.h"
+#অন্তর্ভাব "packfile.h"
+#অন্তর্ভাব "odb.h"
+#অন্তর্ভাব "strbuf.h"
 
 #define BLKSIZE 512
 
-static const char pack_redundant_usage[] =
+স্থির ধ্রুবক অক্ষর pack_redundant_usage[] =
 "git pack-redundant [--verbose] [--alt-odb] (--all | <pack-filename>...)";
 
-static int load_all_packs, verbose, alt_odb;
+স্থির পূর্ণসংখ্যা load_all_packs, verbose, alt_odb;
 
-struct llist_item {
-	struct llist_item *next;
-	struct object_id oid;
+কাঠামো llist_item {
+	কাঠামো llist_item *পরবর্তী;
+	কাঠামো object_id oid;
 };
-static struct llist {
-	struct llist_item *front;
-	struct llist_item *back;
-	size_t size;
+স্থির কাঠামো llist {
+	কাঠামো llist_item *front;
+	কাঠামো llist_item *back;
+	আকার_t আকার_2;
 } *all_objects; /* all objects which must be present in local packfiles */
 
-static struct pack_list {
-	struct pack_list *next;
-	struct packed_git *pack;
-	struct llist *unique_objects;
-	struct llist *remaining_objects;
-	size_t all_objects_size;
-} *local_packs = NULL, *altodb_packs = NULL;
+স্থির কাঠামো pack_list {
+	কাঠামো pack_list *পরবর্তী;
+	কাঠামো packed_git *pack;
+	কাঠামো llist *unique_objects;
+	কাঠামো llist *remaining_objects;
+	আকার_t all_objects_আকার;
+} *local_packs = ফাঁকা, *altodb_packs = ফাঁকা;
 
-static struct llist_item *free_nodes;
+স্থির কাঠামো llist_item *free_nodes;
 
-static inline void llist_item_put(struct llist_item *item)
+স্থির অন্তঃরেখ শূন্য llist_item_put(কাঠামো llist_item *item)
 {
-	item->next = free_nodes;
+	item->পরবর্তী = free_nodes;
 	free_nodes = item;
 }
 
-static inline struct llist_item *llist_item_get(void)
+স্থির অন্তঃরেখ কাঠামো llist_item *llist_item_get(শূন্য)
 {
-	struct llist_item *new_item;
-	if ( free_nodes ) {
+	কাঠামো llist_item *new_item;
+	যদি ( free_nodes ) {
 		new_item = free_nodes;
-		free_nodes = free_nodes->next;
-	} else {
-		int i = 1;
+		free_nodes = free_nodes->পরবর্তী;
+	} অন্যথা {
+		পূর্ণসংখ্যা i = 1;
 		ALLOC_ARRAY(new_item, BLKSIZE);
-		for (; i < BLKSIZE; i++)
+		জন্য (; i < BLKSIZE; i++)
 			llist_item_put(&new_item[i]);
 	}
-	return new_item;
+	ফেরত new_item;
 }
 
-static inline void llist_init(struct llist **list)
+স্থির অন্তঃরেখ শূন্য llist_init(কাঠামো llist **list)
 {
-	*list = xmalloc(sizeof(struct llist));
-	(*list)->front = (*list)->back = NULL;
-	(*list)->size = 0;
+	*list = xmalloc(আকার(কাঠামো llist));
+	(*list)->front = (*list)->back = ফাঁকা;
+	(*list)->আকার_2 = 0;
 }
 
-static void llist_free(struct llist *list)
+স্থির শূন্য llist_free(কাঠামো llist *list)
 {
-	for (struct llist_item *i = list->front, *next; i; i = next) {
-		next = i->next;
+	জন্য (কাঠামো llist_item *i = list->front, *পরবর্তী; i; i = পরবর্তী) {
+		পরবর্তী = i->পরবর্তী;
 		llist_item_put(i);
 	}
-	free(list);
+	মুক্ত(list);
 }
 
-static struct llist * llist_copy(struct llist *list)
+স্থির কাঠামো llist * llist_copy(কাঠামো llist *list)
 {
-	struct llist *ret;
-	struct llist_item *new_item, *old_item, *prev;
+	কাঠামো llist *ret;
+	কাঠামো llist_item *new_item, *old_item, *পূর্ব;
 
 	llist_init(&ret);
 
-	if ((ret->size = list->size) == 0)
-		return ret;
+	যদি ((ret->আকার_2 = list->আকার_2) == 0)
+		ফেরত ret;
 
 	new_item = ret->front = llist_item_get();
 	new_item->oid = list->front->oid;
 
-	old_item = list->front->next;
-	while (old_item) {
-		prev = new_item;
+	old_item = list->front->পরবর্তী;
+	যখন (old_item) {
+		পূর্ব = new_item;
 		new_item = llist_item_get();
-		prev->next = new_item;
+		পূর্ব->পরবর্তী = new_item;
 		new_item->oid = old_item->oid;
-		old_item = old_item->next;
+		old_item = old_item->পরবর্তী;
 	}
-	new_item->next = NULL;
+	new_item->পরবর্তী = ফাঁকা;
 	ret->back = new_item;
 
-	return ret;
+	ফেরত ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
-					      struct llist_item *after,
-					      const unsigned char *oid)
+স্থির অন্তঃরেখ কাঠামো llist_item *llist_ঢোকাও(কাঠামো llist *list,
+					      কাঠামো llist_item *after,
+					      ধ্রুবক unsigned অক্ষর *oid)
 {
-	struct llist_item *new_item = llist_item_get();
+	কাঠামো llist_item *new_item = llist_item_get();
 	oidread(&new_item->oid, oid, the_repository->hash_algo);
-	new_item->next = NULL;
+	new_item->পরবর্তী = ফাঁকা;
 
-	if (after) {
-		new_item->next = after->next;
-		after->next = new_item;
-		if (after == list->back)
+	যদি (after) {
+		new_item->পরবর্তী = after->পরবর্তী;
+		after->পরবর্তী = new_item;
+		যদি (after == list->back)
 			list->back = new_item;
-	} else {/* insert in front */
-		if (list->size == 0)
+	} অন্যথা {/* insert in front */
+		যদি (list->আকার_2 == 0)
 			list->back = new_item;
-		else
-			new_item->next = list->front;
+		অন্যথা
+			new_item->পরবর্তী = list->front;
 		list->front = new_item;
 	}
-	list->size++;
-	return new_item;
+	list->আকার_2++;
+	ফেরত new_item;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
-						   const unsigned char *oid)
+স্থির অন্তঃরেখ কাঠামো llist_item *llist_ঢোকাও_back(কাঠামো llist *list,
+						   ধ্রুবক unsigned অক্ষর *oid)
 {
-	return llist_insert(list, list->back, oid);
+	ফেরত llist_ঢোকাও(list, list->back, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
-			const struct object_id *oid, struct llist_item *hint)
+স্থির অন্তঃরেখ কাঠামো llist_item *llist_ঢোকাও_sorted_unique(কাঠামো llist *list,
+			ধ্রুবক কাঠামো object_id *oid, কাঠামো llist_item *hint)
 {
-	struct llist_item *prev = NULL, *l;
+	কাঠামো llist_item *পূর্ব = ফাঁকা, *l;
 
-	l = (hint == NULL) ? list->front : hint;
-	while (l) {
-		int cmp = oidcmp(&l->oid, oid);
-		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+	l = (hint == ফাঁকা) ? list->front : hint;
+	যখন (l) {
+		পূর্ণসংখ্যা cmp = oidcmp(&l->oid, oid);
+		যদি (cmp > 0) { /* we insert before this entry */
+			ফেরত llist_ঢোকাও(list, পূর্ব, oid->hash);
 		}
-		if (!cmp) { /* already exists */
-			return l;
+		যদি (!cmp) { /* already exists */
+			ফেরত l;
 		}
-		prev = l;
-		l = l->next;
+		পূর্ব = l;
+		l = l->পরবর্তী;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	ফেরত llist_ঢোকাও_back(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
-static inline struct llist_item * llist_sorted_remove(struct llist *list, const unsigned char *oid, struct llist_item *hint)
+স্থির অন্তঃরেখ কাঠামো llist_item * llist_sorted_remove(কাঠামো llist *list, ধ্রুবক unsigned অক্ষর *oid, কাঠামো llist_item *hint)
 {
-	struct llist_item *prev, *l;
+	কাঠামো llist_item *পূর্ব, *l;
 
 redo_from_start:
-	l = (hint == NULL) ? list->front : hint;
-	prev = NULL;
-	while (l) {
-		const int cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
-		if (cmp > 0) /* not in list, since sorted */
-			return prev;
-		if (!cmp) { /* found */
-			if (!prev) {
-				if (hint != NULL && hint != list->front) {
+	l = (hint == ফাঁকা) ? list->front : hint;
+	পূর্ব = ফাঁকা;
+	যখন (l) {
+		ধ্রুবক পূর্ণসংখ্যা cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
+		যদি (cmp > 0) /* not in list, since sorted */
+			ফেরত পূর্ব;
+		যদি (!cmp) { /* found */
+			যদি (!পূর্ব) {
+				যদি (hint != ফাঁকা && hint != list->front) {
 					/* we don't know the previous element */
-					hint = NULL;
-					goto redo_from_start;
+					hint = ফাঁকা;
+					যাও redo_from_start;
 				}
-				list->front = l->next;
-			} else
-				prev->next = l->next;
-			if (l == list->back)
-				list->back = prev;
+				list->front = l->পরবর্তী;
+			} অন্যথা
+				পূর্ব->পরবর্তী = l->পরবর্তী;
+			যদি (l == list->back)
+				list->back = পূর্ব;
 			llist_item_put(l);
-			list->size--;
-			return prev;
+			list->আকার_2--;
+			ফেরত পূর্ব;
 		}
-		prev = l;
-		l = l->next;
+		পূর্ব = l;
+		l = l->পরবর্তী;
 	}
-	return prev;
+	ফেরত পূর্ব;
 }
 
 /* computes A\B */
-static void llist_sorted_difference_inplace(struct llist *A,
-				     struct llist *B)
+স্থির শূন্য llist_sorted_difference_inplace(কাঠামো llist *A,
+				     কাঠামো llist *B)
 {
-	struct llist_item *hint, *b;
+	কাঠামো llist_item *hint, *b;
 
-	hint = NULL;
+	hint = ফাঁকা;
 	b = B->front;
 
-	while (b) {
+	যখন (b) {
 		hint = llist_sorted_remove(A, b->oid.hash, hint);
-		b = b->next;
+		b = b->পরবর্তী;
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
-					   struct pack_list *entry)
+স্থির অন্তঃরেখ কাঠামো pack_list * pack_list_ঢোকাও(কাঠামো pack_list **pl,
+					   কাঠামো pack_list *entry)
 {
-	struct pack_list *p = xmalloc(sizeof(struct pack_list));
-	memcpy(p, entry, sizeof(struct pack_list));
-	p->next = *pl;
+	কাঠামো pack_list *p = xmalloc(আকার(কাঠামো pack_list));
+	memcpy(p, entry, আকার(কাঠামো pack_list));
+	p->পরবর্তী = *pl;
 	*pl = p;
-	return p;
+	ফেরত p;
 }
 
-static void pack_list_free(struct pack_list *pl)
+স্থির শূন্য pack_list_free(কাঠামো pack_list *pl)
 {
-	for (struct pack_list *next; pl; pl = next) {
-		next = pl->next;
-		free(pl);
+	জন্য (কাঠামো pack_list *পরবর্তী; pl; pl = পরবর্তী) {
+		পরবর্তী = pl->পরবর্তী;
+		মুক্ত(pl);
 	}
 }
 
-static inline size_t pack_list_size(struct pack_list *pl)
+স্থির অন্তঃরেখ আকার_t pack_list_আকার(কাঠামো pack_list *pl)
 {
-	size_t ret = 0;
-	while (pl) {
+	আকার_t ret = 0;
+	যখন (pl) {
 		ret++;
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
-	return ret;
+	ফেরত ret;
 }
 
-static struct pack_list * pack_list_difference(const struct pack_list *A,
-					       const struct pack_list *B)
+স্থির কাঠামো pack_list * pack_list_difference(ধ্রুবক কাঠামো pack_list *A,
+					       ধ্রুবক কাঠামো pack_list *B)
 {
-	struct pack_list *ret;
-	const struct pack_list *pl;
+	কাঠামো pack_list *ret;
+	ধ্রুবক কাঠামো pack_list *pl;
 
-	if (!A)
-		return NULL;
+	যদি (!A)
+		ফেরত ফাঁকা;
 
 	pl = B;
-	while (pl != NULL) {
-		if (A->pack == pl->pack)
-			return pack_list_difference(A->next, B);
-		pl = pl->next;
+	যখন (pl != ফাঁকা) {
+		যদি (A->pack == pl->pack)
+			ফেরত pack_list_difference(A->পরবর্তী, B);
+		pl = pl->পরবর্তী;
 	}
-	ret = xmalloc(sizeof(struct pack_list));
-	memcpy(ret, A, sizeof(struct pack_list));
-	ret->next = pack_list_difference(A->next, B);
-	return ret;
+	ret = xmalloc(আকার(কাঠামো pack_list));
+	memcpy(ret, A, আকার(কাঠামো pack_list));
+	ret->পরবর্তী = pack_list_difference(A->পরবর্তী, B);
+	ফেরত ret;
 }
 
-static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
+স্থির শূন্য cmp_two_packs(কাঠামো pack_list *p1, কাঠামো pack_list *p2)
 {
-	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	struct llist_item *p1_hint = NULL, *p2_hint = NULL;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	আকার_t p1_off = 0, p2_off = 0, p1_step, p2_step;
+	ধ্রুবক unsigned অক্ষর *p1_base, *p2_base;
+	কাঠামো llist_item *p1_hint = ফাঁকা, *p2_hint = ফাঁকা;
+	ধ্রুবক unsigned পূর্ণসংখ্যা hashsz = the_hash_algo->rawsz;
 
-	if (!p1->unique_objects)
+	যদি (!p1->unique_objects)
 		p1->unique_objects = llist_copy(p1->remaining_objects);
-	if (!p2->unique_objects)
+	যদি (!p2->unique_objects)
 		p2->unique_objects = llist_copy(p2->remaining_objects);
 
-	p1_base = p1->pack->index_data;
-	p2_base = p2->pack->index_data;
-	p1_base += 256 * 4 + ((p1->pack->index_version < 2) ? 4 : 8);
-	p2_base += 256 * 4 + ((p2->pack->index_version < 2) ? 4 : 8);
-	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
-	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
+	p1_base = p1->pack->সূচক_তথ্য;
+	p2_base = p2->pack->সূচক_তথ্য;
+	p1_base += 256 * 4 + ((p1->pack->সূচক_version < 2) ? 4 : 8);
+	p2_base += 256 * 4 + ((p2->pack->সূচক_version < 2) ? 4 : 8);
+	p1_step = hashsz + ((p1->pack->সূচক_version < 2) ? 4 : 0);
+	p2_step = hashsz + ((p2->pack->সূচক_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
-	       p2_off < p2->pack->num_objects * p2_step)
+	যখন (p1_off < p1->pack->অঙ্ক_objects * p1_step &&
+	       p2_off < p2->pack->অঙ্ক_objects * p2_step)
 	{
-		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		ধ্রুবক পূর্ণসংখ্যা cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 					the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		যদি (cmp == 0) {
 			p1_hint = llist_sorted_remove(p1->unique_objects,
 					p1_base + p1_off,
 					p1_hint);
@@ -290,156 +290,156 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 					p2_hint);
 			p1_off += p1_step;
 			p2_off += p2_step;
-			continue;
+			চালু;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		যদি (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} অন্যথা { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
 }
 
-static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
+স্থির আকার_t sizeof_union(কাঠামো packed_git *p1, কাঠামো packed_git *p2)
 {
-	size_t ret = 0;
-	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	আকার_t ret = 0;
+	আকার_t p1_off = 0, p2_off = 0, p1_step, p2_step;
+	ধ্রুবক unsigned অক্ষর *p1_base, *p2_base;
+	ধ্রুবক unsigned পূর্ণসংখ্যা hashsz = the_hash_algo->rawsz;
 
-	p1_base = p1->index_data;
-	p2_base = p2->index_data;
-	p1_base += 256 * 4 + ((p1->index_version < 2) ? 4 : 8);
-	p2_base += 256 * 4 + ((p2->index_version < 2) ? 4 : 8);
-	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
-	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
+	p1_base = p1->সূচক_তথ্য;
+	p2_base = p2->সূচক_তথ্য;
+	p1_base += 256 * 4 + ((p1->সূচক_version < 2) ? 4 : 8);
+	p2_base += 256 * 4 + ((p2->সূচক_version < 2) ? 4 : 8);
+	p1_step = hashsz + ((p1->সূচক_version < 2) ? 4 : 0);
+	p2_step = hashsz + ((p2->সূচক_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
-	       p2_off < p2->num_objects * p2_step)
+	যখন (p1_off < p1->অঙ্ক_objects * p1_step &&
+	       p2_off < p2->অঙ্ক_objects * p2_step)
 	{
-		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		পূর্ণসংখ্যা cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 				  the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		যদি (cmp == 0) {
 			ret++;
 			p1_off += p1_step;
 			p2_off += p2_step;
-			continue;
+			চালু;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		যদি (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} অন্যথা { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
-	return ret;
+	ফেরত ret;
 }
 
 /* another O(n^2) function ... */
-static size_t get_pack_redundancy(struct pack_list *pl)
+স্থির আকার_t get_pack_redundancy(কাঠামো pack_list *pl)
 {
-	struct pack_list *subset;
-	size_t ret = 0;
+	কাঠামো pack_list *subset;
+	আকার_t ret = 0;
 
-	if (!pl)
-		return 0;
+	যদি (!pl)
+		ফেরত 0;
 
-	while ((subset = pl->next)) {
-		while (subset) {
+	যখন ((subset = pl->পরবর্তী)) {
+		যখন (subset) {
 			ret += sizeof_union(pl->pack, subset->pack);
-			subset = subset->next;
+			subset = subset->পরবর্তী;
 		}
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
-	return ret;
+	ফেরত ret;
 }
 
-static inline off_t pack_set_bytecount(struct pack_list *pl)
+স্থির অন্তঃরেখ off_t pack_set_bytecount(কাঠামো pack_list *pl)
 {
 	off_t ret = 0;
-	while (pl) {
-		ret += pl->pack->pack_size;
-		ret += pl->pack->index_size;
-		pl = pl->next;
+	যখন (pl) {
+		ret += pl->pack->pack_আকার;
+		ret += pl->pack->সূচক_আকার;
+		pl = pl->পরবর্তী;
 	}
-	return ret;
+	ফেরত ret;
 }
 
-static int cmp_remaining_objects(const void *a, const void *b)
+স্থির পূর্ণসংখ্যা cmp_remaining_objects(ধ্রুবক শূন্য *a, ধ্রুবক শূন্য *b)
 {
-	struct pack_list *pl_a = *((struct pack_list **)a);
-	struct pack_list *pl_b = *((struct pack_list **)b);
+	কাঠামো pack_list *pl_a = *((কাঠামো pack_list **)a);
+	কাঠামো pack_list *pl_b = *((কাঠামো pack_list **)b);
 
-	if (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
+	যদি (pl_a->remaining_objects->আকার_2 == pl_b->remaining_objects->আকার_2) {
 		/* have the same remaining_objects, big pack first */
-		if (pl_a->all_objects_size == pl_b->all_objects_size)
-			return 0;
-		else if (pl_a->all_objects_size < pl_b->all_objects_size)
-			return 1;
-		else
-			return -1;
-	} else if (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
+		যদি (pl_a->all_objects_আকার == pl_b->all_objects_আকার)
+			ফেরত 0;
+		অন্যথা যদি (pl_a->all_objects_আকার < pl_b->all_objects_আকার)
+			ফেরত 1;
+		অন্যথা
+			ফেরত -1;
+	} অন্যথা যদি (pl_a->remaining_objects->আকার_2 < pl_b->remaining_objects->আকার_2) {
 		/* sort by remaining objects, more objects first */
-		return 1;
-	} else {
-		return -1;
+		ফেরত 1;
+	} অন্যথা {
+		ফেরত -1;
 	}
 }
 
 /* Sort pack_list, greater size of remaining_objects first */
-static void sort_pack_list(struct pack_list **pl)
+স্থির শূন্য sort_pack_list(কাঠামো pack_list **pl)
 {
-	struct pack_list **ary, *p;
-	size_t n = pack_list_size(*pl);
+	কাঠামো pack_list **ary, *p;
+	আকার_t n = pack_list_আকার(*pl);
 
-	if (n < 2)
-		return;
+	যদি (n < 2)
+		ফেরত;
 
 	/* prepare an array of packed_list for easier sorting */
 	CALLOC_ARRAY(ary, n);
-	for (n = 0, p = *pl; p; p = p->next)
+	জন্য (n = 0, p = *pl; p; p = p->পরবর্তী)
 		ary[n++] = p;
 
 	QSORT(ary, n, cmp_remaining_objects);
 
 	/* link them back again */
-	for (size_t i = 0; i < n - 1; i++)
-		ary[i]->next = ary[i + 1];
-	ary[n - 1]->next = NULL;
+	জন্য (আকার_t i = 0; i < n - 1; i++)
+		ary[i]->পরবর্তী = ary[i + 1];
+	ary[n - 1]->পরবর্তী = ফাঁকা;
 	*pl = ary[0];
 
-	free(ary);
+	মুক্ত(ary);
 }
 
 
-static void minimize(struct pack_list **min)
+স্থির শূন্য minimize(কাঠামো pack_list **min)
 {
-	struct pack_list *pl, *unique = NULL, *non_unique = NULL;
-	struct llist *missing, *unique_pack_objects;
+	কাঠামো pack_list *pl, *unique = ফাঁকা, *non_unique = ফাঁকা;
+	কাঠামো llist *missing, *unique_pack_objects;
 
 	pl = local_packs;
-	while (pl) {
-		if (pl->unique_objects->size)
-			pack_list_insert(&unique, pl);
-		else
-			pack_list_insert(&non_unique, pl);
-		pl = pl->next;
+	যখন (pl) {
+		যদি (pl->unique_objects->আকার_2)
+			pack_list_ঢোকাও(&unique, pl);
+		অন্যথা
+			pack_list_ঢোকাও(&non_unique, pl);
+		pl = pl->পরবর্তী;
 	}
 	/* find out which objects are missing from the set of unique packs */
 	missing = llist_copy(all_objects);
 	pl = unique;
-	while (pl) {
+	যখন (pl) {
 		llist_sorted_difference_inplace(missing, pl->remaining_objects);
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
 
 	*min = unique;
 
 	/* return if there are no objects missing from the unique set */
-	if (missing->size == 0) {
+	যদি (missing->আকার_2 == 0) {
 		llist_free(missing);
 		pack_list_free(non_unique);
-		return;
+		ফেরত;
 	}
 
 	unique_pack_objects = llist_copy(all_objects);
@@ -447,27 +447,27 @@ static void minimize(struct pack_list **min)
 
 	/* remove unique pack objects from the non_unique packs */
 	pl = non_unique;
-	while (pl) {
+	যখন (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, unique_pack_objects);
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
 
-	while (non_unique) {
-		struct pack_list *next;
+	যখন (non_unique) {
+		কাঠামো pack_list *পরবর্তী;
 
 		/* sort the non_unique packs, greater size of remaining_objects first */
 		sort_pack_list(&non_unique);
-		if (non_unique->remaining_objects->size == 0)
-			break;
+		যদি (non_unique->remaining_objects->আকার_2 == 0)
+			বিরতি;
 
-		pack_list_insert(min, non_unique);
+		pack_list_ঢোকাও(min, non_unique);
 
-		for (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
+		জন্য (pl = non_unique->পরবর্তী; pl && pl->remaining_objects->আকার_2 > 0;  pl = pl->পরবর্তী)
 			llist_sorted_difference_inplace(pl->remaining_objects, non_unique->remaining_objects);
 
-		next = non_unique->next;
-		free(non_unique);
-		non_unique = next;
+		পরবর্তী = non_unique->পরবর্তী;
+		মুক্ত(non_unique);
+		non_unique = পরবর্তী;
 	}
 
 	pack_list_free(non_unique);
@@ -475,217 +475,217 @@ static void minimize(struct pack_list **min)
 	llist_free(missing);
 }
 
-static void load_all_objects(void)
+স্থির শূন্য load_all_objects(শূন্য)
 {
-	struct pack_list *pl = local_packs;
-	struct llist_item *hint, *l;
+	কাঠামো pack_list *pl = local_packs;
+	কাঠামো llist_item *hint, *l;
 
 	llist_init(&all_objects);
 
-	while (pl) {
-		hint = NULL;
+	যখন (pl) {
+		hint = ফাঁকা;
 		l = pl->remaining_objects->front;
-		while (l) {
-			hint = llist_insert_sorted_unique(all_objects,
+		যখন (l) {
+			hint = llist_ঢোকাও_sorted_unique(all_objects,
 							  &l->oid, hint);
-			l = l->next;
+			l = l->পরবর্তী;
 		}
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
 	/* remove objects present in remote packs */
 	pl = altodb_packs;
-	while (pl) {
+	যখন (pl) {
 		llist_sorted_difference_inplace(all_objects, pl->remaining_objects);
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
 }
 
 /* this scales like O(n^2) */
-static void cmp_local_packs(void)
+স্থির শূন্য cmp_local_packs(শূন্য)
 {
-	struct pack_list *subset, *pl = local_packs;
+	কাঠামো pack_list *subset, *pl = local_packs;
 
 	/* only one packfile */
-	if (!pl->next) {
+	যদি (!pl->পরবর্তী) {
 		llist_init(&pl->unique_objects);
-		return;
+		ফেরত;
 	}
 
-	while ((subset = pl)) {
-		while ((subset = subset->next))
+	যখন ((subset = pl)) {
+		যখন ((subset = subset->পরবর্তী))
 			cmp_two_packs(pl, subset);
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
 }
 
-static void scan_alt_odb_packs(void)
+স্থির শূন্য scan_alt_odb_packs(শূন্য)
 {
-	struct pack_list *local, *alt;
+	কাঠামো pack_list *local, *alt;
 
 	alt = altodb_packs;
-	while (alt) {
+	যখন (alt) {
 		local = local_packs;
-		while (local) {
+		যখন (local) {
 			llist_sorted_difference_inplace(local->remaining_objects,
 							alt->remaining_objects);
-			local = local->next;
+			local = local->পরবর্তী;
 		}
-		alt = alt->next;
+		alt = alt->পরবর্তী;
 	}
 }
 
-static struct pack_list * add_pack(struct packed_git *p)
+স্থির কাঠামো pack_list * add_pack(কাঠামো packed_git *p)
 {
-	struct pack_list l;
-	size_t off = 0, step;
-	const unsigned char *base;
+	কাঠামো pack_list l;
+	আকার_t off = 0, step;
+	ধ্রুবক unsigned অক্ষর *base;
 
-	if (!p->pack_local && !(alt_odb || verbose))
-		return NULL;
+	যদি (!p->pack_local && !(alt_odb || verbose))
+		ফেরত ফাঁকা;
 
 	l.pack = p;
 	llist_init(&l.remaining_objects);
 
-	if (open_pack_index(p)) {
+	যদি (open_pack_সূচক(p)) {
 		llist_free(l.remaining_objects);
-		return NULL;
+		ফেরত ফাঁকা;
 	}
 
-	base = p->index_data;
-	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
-	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
-		llist_insert_back(l.remaining_objects, base + off);
+	base = p->সূচক_তথ্য;
+	base += 256 * 4 + ((p->সূচক_version < 2) ? 4 : 8);
+	step = the_hash_algo->rawsz + ((p->সূচক_version < 2) ? 4 : 0);
+	যখন (off < p->অঙ্ক_objects * step) {
+		llist_ঢোকাও_back(l.remaining_objects, base + off);
 		off += step;
 	}
-	l.all_objects_size = l.remaining_objects->size;
-	l.unique_objects = NULL;
-	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
-	else
-		return pack_list_insert(&altodb_packs, &l);
+	l.all_objects_আকার = l.remaining_objects->আকার_2;
+	l.unique_objects = ফাঁকা;
+	যদি (p->pack_local)
+		ফেরত pack_list_ঢোকাও(&local_packs, &l);
+	অন্যথা
+		ফেরত pack_list_ঢোকাও(&altodb_packs, &l);
 }
 
-static struct pack_list * add_pack_file(const char *filename)
+স্থির কাঠামো pack_list * add_pack_file(ধ্রুবক অক্ষর *filename)
 {
-	struct packed_git *p;
+	কাঠামো packed_git *p;
 
-	if (strlen(filename) < 40)
+	যদি (strlen(filename) < 40)
 		die("Bad pack filename: %s", filename);
 
 	repo_for_each_pack(the_repository, p)
-		if (strstr(p->pack_name, filename))
-			return add_pack(p);
+		যদি (strstr(p->pack_name, filename))
+			ফেরত add_pack(p);
 	die("Filename %s not found in packed_git", filename);
 }
 
-static void load_all(void)
+স্থির শূন্য load_all(শূন্য)
 {
-	struct packed_git *p;
+	কাঠামো packed_git *p;
 
 	repo_for_each_pack(the_repository, p)
 		add_pack(p);
 }
 
-int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED) {
-	int i; int i_still_use_this = 0; struct pack_list *min = NULL, *red, *pl;
-	struct llist *ignore;
-	struct strbuf idx_name = STRBUF_INIT;
-	char buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
+পূর্ণসংখ্যা cmd_pack_redundant(পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv, ধ্রুবক অক্ষর *prefix UNUSED, কাঠামো repository *repo UNUSED) {
+	পূর্ণসংখ্যা i; পূর্ণসংখ্যা i_still_use_this = 0; কাঠামো pack_list *min = ফাঁকা, *red, *pl;
+	কাঠামো llist *ignore;
+	কাঠামো strbuf idx_name = STRBUF_INIT;
+	অক্ষর buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
 
 	show_usage_if_asked(argc, argv, pack_redundant_usage);
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--")) {
+	জন্য (i = 1; i < argc; i++) {
+		ধ্রুবক অক্ষর *arg = argv[i];
+		যদি (!strcmp(arg, "--")) {
 			i++;
-			break;
+			বিরতি;
 		}
-		if (!strcmp(arg, "--all")) {
+		যদি (!strcmp(arg, "--all")) {
 			load_all_packs = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp(arg, "--verbose")) {
+		যদি (!strcmp(arg, "--verbose")) {
 			verbose = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp(arg, "--alt-odb")) {
+		যদি (!strcmp(arg, "--alt-odb")) {
 			alt_odb = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp(arg, "--i-still-use-this")) {
+		যদি (!strcmp(arg, "--i-still-use-this")) {
 			i_still_use_this = 1;
-			continue;
+			চালু;
 		}
-		if (*arg == '-')
+		যদি (*arg == '-')
 			usage(pack_redundant_usage);
-		else
-			break;
+		অন্যথা
+			বিরতি;
 	}
 
-	if (!i_still_use_this)
-		you_still_use_that("git pack-redundant", NULL);
+	যদি (!i_still_use_this)
+		you_still_use_that("git pack-redundant", ফাঁকা);
 
-	if (load_all_packs)
+	যদি (load_all_packs)
 		load_all();
-	else
-		while (*(argv + i) != NULL)
+	অন্যথা
+		যখন (*(argv + i) != ফাঁকা)
 			add_pack_file(*(argv + i++));
 
-	if (!local_packs)
+	যদি (!local_packs)
 		die("Zero packs found!");
 
 	load_all_objects();
 
-	if (alt_odb)
+	যদি (alt_odb)
 		scan_alt_odb_packs();
 
 	/* ignore objects given on stdin */
 	llist_init(&ignore);
-	if (!isatty(0)) {
-		struct object_id oid;
-		while (fgets(buf, sizeof(buf), stdin)) {
-			if (get_oid_hex(buf, &oid))
+	যদি (!isatty(0)) {
+		কাঠামো object_id oid;
+		যখন (fgets(buf, আকার(buf), stdin)) {
+			যদি (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
-			llist_insert_sorted_unique(ignore, &oid, NULL);
+			llist_ঢোকাও_sorted_unique(ignore, &oid, ফাঁকা);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);
 	pl = local_packs;
-	while (pl) {
+	যখন (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, ignore);
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
 
 	cmp_local_packs();
 
 	minimize(&min);
 
-	if (verbose) {
+	যদি (verbose) {
 		fprintf(stderr, "There are %lu packs available in alt-odbs.\n",
-			(unsigned long)pack_list_size(altodb_packs));
+			(unsigned long)pack_list_আকার(altodb_packs));
 		fprintf(stderr, "The smallest (bytewise) set of packs is:\n");
 		pl = min;
-		while (pl) {
+		যখন (pl) {
 			fprintf(stderr, "\t%s\n", pl->pack->pack_name);
-			pl = pl->next;
+			pl = pl->পরবর্তী;
 		}
 		fprintf(stderr, "containing %lu duplicate objects "
 				"with a total size of %lukb.\n",
 			(unsigned long)get_pack_redundancy(min),
 			(unsigned long)pack_set_bytecount(min)/1024);
 		fprintf(stderr, "A total of %lu unique objects were considered.\n",
-			(unsigned long)all_objects->size);
+			(unsigned long)all_objects->আকার_2);
 		fprintf(stderr, "Redundant packs (with indexes):\n");
 	}
 	pl = red = pack_list_difference(local_packs, min);
-	while (pl) {
+	যখন (pl) {
 		printf("%s\n%s\n",
 		       odb_pack_name(pl->pack->repo, &idx_name, pl->pack->hash, "idx"),
 		       pl->pack->pack_name);
-		pl = pl->next;
+		pl = pl->পরবর্তী;
 	}
-	if (verbose)
+	যদি (verbose)
 		fprintf(stderr, "%luMB of redundant packs in total.\n",
 			(unsigned long)pack_set_bytecount(red)/(1024*1024));
 
@@ -693,5 +693,5 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 	pack_list_free(min);
 	llist_free(ignore);
 	strbuf_release(&idx_name);
-	return 0;
+	ফেরত 0;
 }

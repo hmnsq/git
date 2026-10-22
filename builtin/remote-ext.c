@@ -1,9 +1,9 @@
-#include "builtin.h"
-#include "transport.h"
-#include "run-command.h"
-#include "pkt-line.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "transport.h"
+#অন্তর্ভাব "run-command.h"
+#অন্তর্ভাব "pkt-line.h"
 
-static const char usage_msg[] =
+স্থির ধ্রুবক অক্ষর usage_বার্তা[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+স্থির অক্ষর *git_req;
+স্থির অক্ষর *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+স্থির অক্ষর *strip_escapes(ধ্রুবক অক্ষর *str, ধ্রুবক অক্ষর *service,
+	ধ্রুবক অক্ষর **পরবর্তী)
 {
-	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	আকার_t rpos = 0;
+	পূর্ণসংখ্যা escape = 0;
+	অক্ষর special = 0;
+	ধ্রুবক অক্ষর *service_noprefix = service;
+	কাঠামো strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,34 +44,34 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+	যখন (str[rpos] && (escape || str[rpos] != ' ')) {
+		যদি (escape) {
+			নির্বাচন (str[rpos]) {
+			ক্ষেত্র ' ':
+			ক্ষেত্র '%':
+			ক্ষেত্র 's':
+			ক্ষেত্র 'S':
+				বিরতি;
+			ক্ষেত্র 'G':
+			ক্ষেত্র 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				যদি (rpos == 1)
+					বিরতি;
 				/* fallthrough */
-			default:
+			পূর্বনির্ধারিত:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} অন্যথা
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	যদি (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
-	*next = str + rpos;
-	if (**next == ' ')
-		++*next;	/* Skip over space */
+	*পরবর্তী = str + rpos;
+	যদি (**পরবর্তী == ' ')
+		++*পরবর্তী;	/* Skip over space */
 
 	/*
 	 * Do the actual placeholder substitution. The string will be short
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
+	যখন (str[rpos] && (escape || str[rpos] != ' ')) {
+		যদি (escape) {
+			নির্বাচন (str[rpos]) {
+			ক্ষেত্র ' ':
+			ক্ষেত্র '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				বিরতি;
+			ক্ষেত্র 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				বিরতি;
+			ক্ষেত্র 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				বিরতি;
 			}
 			escape = 0;
-		} else
-			switch (str[rpos]) {
-			case '%':
+		} অন্যথা
+			নির্বাচন (str[rpos]) {
+			ক্ষেত্র '%':
 				escape = 1;
-				break;
-			default:
+				বিরতি;
+			পূর্বনির্ধারিত:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				বিরতি;
 			}
 		rpos++;
 	}
-	switch (special) {
-	case 'G':
-		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
-		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
-	default:
-		return strbuf_detach(&ret, NULL);
+	নির্বাচন (special) {
+	ক্ষেত্র 'G':
+		git_req = strbuf_detach(&ret, ফাঁকা);
+		ফেরত ফাঁকা;
+	ক্ষেত্র 'V':
+		git_req_vhost = strbuf_detach(&ret, ফাঁকা);
+		ফেরত ফাঁকা;
+	পূর্বনির্ধারিত:
+		ফেরত strbuf_detach(&ret, ফাঁকা);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+স্থির শূন্য parse_argv(কাঠামো strvec *out, ধ্রুবক অক্ষর *arg, ধ্রুবক অক্ষর *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
-			strvec_push(out, expanded);
-		free(expanded);
+	যখন (*arg) {
+		অক্ষর *expanded = strip_escapes(arg, service, &arg);
+		যদি (expanded)
+			strvec_ঠেলো(out, expanded);
+		মুক্ত(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+স্থির শূন্য send_git_request(পূর্ণসংখ্যা stdin_fd, ধ্রুবক অক্ষর *serv, ধ্রুবক অক্ষর *repo,
+	ধ্রুবক অক্ষর *vhost)
 {
-	if (!vhost)
+	যদি (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	অন্যথা
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+স্থির পূর্ণসংখ্যা run_child(ধ্রুবক অক্ষর *arg, ধ্রুবক অক্ষর *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	পূর্ণসংখ্যা r;
+	কাঠামো child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	যদি (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	যদি (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	যদি (!r)
 		r = finish_command(&child);
-	else
+	অন্যথা
 		finish_command(&child);
-	return r;
+	ফেরত r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+স্থির পূর্ণসংখ্যা command_loop(ধ্রুবক অক্ষর *child)
 {
-	char buffer[MAXCOMMAND];
+	অক্ষর বাফার[MAXCOMMAND];
 
-	while (1) {
-		size_t i;
-		const char *arg;
+	যখন (1) {
+		আকার_t i;
+		ধ্রুবক অক্ষর *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		যদি (!fgets(বাফার, MAXCOMMAND - 1, stdin)) {
+			যদি (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
-		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
-			buffer[--i] = 0;
+		i = strlen(বাফার);
+		যখন (i > 0 && isspace(বাফার[i - 1]))
+			বাফার[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		যদি (!strcmp(বাফার, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} অন্যথা যদি (skip_prefix(বাফার, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			ফেরত run_child(child, arg);
+		} অন্যথা {
 			fprintf(stderr, "Bad command");
-			return 1;
+			ফেরত 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+পূর্ণসংখ্যা cmd_remote_ext(পূর্ণসংখ্যা argc,
+		   ধ্রুবক অক্ষর **argv,
+		   ধ্রুবক অক্ষর *prefix,
+		   কাঠামো repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_বার্তা);
 
-	if (argc != 3)
-		usage(usage_msg);
+	যদি (argc != 3)
+		usage(usage_বার্তা);
 
-	return command_loop(argv[2]);
+	ফেরত command_loop(argv[2]);
 }

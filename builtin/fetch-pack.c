@@ -1,40 +1,40 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "pkt-line.h"
-#include "fetch-pack.h"
-#include "remote.h"
-#include "connect.h"
-#include "oid-array.h"
-#include "protocol.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "pkt-line.h"
+#অন্তর্ভাব "fetch-pack.h"
+#অন্তর্ভাব "remote.h"
+#অন্তর্ভাব "connect.h"
+#অন্তর্ভাব "oid-array.h"
+#অন্তর্ভাব "protocol.h"
 
-static const char fetch_pack_usage[] =
+স্থির ধ্রুবক অক্ষর fetch_pack_usage[] =
 "git fetch-pack [--all] [--stdin] [--quiet | -q] [--keep | -k] [--thin] "
 "[--include-tag] [--upload-pack=<git-upload-pack>] [--depth=<n>] "
 "[--no-progress] [--diag-url] [-v] [<host>:]<directory> [<refs>...]";
 
-static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
-			     const char *name)
+স্থির শূন্য add_sought_entry(কাঠামো ref ***sought, পূর্ণসংখ্যা *nr, পূর্ণসংখ্যা *alloc,
+			     ধ্রুবক অক্ষর *name)
 {
-	struct ref *ref;
-	struct object_id oid;
-	const char *p;
+	কাঠামো ref *ref;
+	কাঠামো object_id oid;
+	ধ্রুবক অক্ষর *p;
 
-	if (!parse_oid_hex(name, &oid, &p)) {
-		if (*p == ' ') {
+	যদি (!parse_oid_hex(name, &oid, &p)) {
+		যদি (*p == ' ') {
 			/* <oid> <ref>, find refname */
 			name = p + 1;
-		} else if (*p == '\0') {
+		} অন্যথা যদি (*p == '\0') {
 			; /* <oid>, leave oid as name */
-		} else {
+		} অন্যথা {
 			/* <ref>, clear cruft from oid */
 			oidclr(&oid, the_repository->hash_algo);
 		}
-	} else {
+	} অন্যথা {
 		/* <ref>, clear cruft from get_oid_hex */
 		oidclr(&oid, the_repository->hash_algo);
 	}
@@ -46,30 +46,30 @@ static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
 	(*sought)[*nr - 1] = ref;
 }
 
-int cmd_fetch_pack(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+পূর্ণসংখ্যা cmd_fetch_pack(পূর্ণসংখ্যা argc,
+		   ধ্রুবক অক্ষর **argv,
+		   ধ্রুবক অক্ষর *prefix UNUSED,
+		   কাঠামো repository *repo)
 {
-	int i, ret;
-	struct ref *fetched_refs = NULL, *remote_refs = NULL;
-	const char *dest = NULL;
-	struct ref **sought = NULL;
-	struct ref **sought_to_free = NULL;
-	int nr_sought = 0, alloc_sought = 0;
-	int fd[2];
-	struct string_list pack_lockfiles = STRING_LIST_INIT_DUP;
-	struct string_list *pack_lockfiles_ptr = NULL;
-	struct child_process *conn;
-	struct fetch_pack_args args;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct string_list deepen_not = STRING_LIST_INIT_DUP;
-	struct packet_reader reader;
-	enum protocol_version version;
+	পূর্ণসংখ্যা i, ret;
+	কাঠামো ref *fetched_refs = ফাঁকা, *remote_refs = ফাঁকা;
+	ধ্রুবক অক্ষর *dest = ফাঁকা;
+	কাঠামো ref **sought = ফাঁকা;
+	কাঠামো ref **sought_to_free = ফাঁকা;
+	পূর্ণসংখ্যা nr_sought = 0, alloc_sought = 0;
+	পূর্ণসংখ্যা fd[2];
+	কাঠামো string_list pack_lockfiles = STRING_LIST_INIT_DUP;
+	কাঠামো string_list *pack_lockfiles_ptr = ফাঁকা;
+	কাঠামো child_process *conn;
+	কাঠামো fetch_pack_args args;
+	কাঠামো oid_array shallow = OID_ARRAY_INIT;
+	কাঠামো string_list deepen_not = STRING_LIST_INIT_DUP;
+	কাঠামো packet_reader reader;
+	গণনা protocol_version version;
 
 	packet_trace_identity("fetch-pack");
 
-	memset(&args, 0, sizeof(args));
+	memset(&args, 0, আকার(args));
 	list_objects_filter_init(&args.filter_options);
 	args.uploadpack = "git-upload-pack";
 
@@ -77,174 +77,174 @@ int cmd_fetch_pack(int argc,
 
 	repo->fetch_if_missing = 0;
 
-	for (i = 1; i < argc && *argv[i] == '-'; i++) {
-		const char *arg = argv[i];
+	জন্য (i = 1; i < argc && *argv[i] == '-'; i++) {
+		ধ্রুবক অক্ষর *arg = argv[i];
 
-		if (skip_prefix(arg, "--upload-pack=", &arg)) {
+		যদি (skip_prefix(arg, "--upload-pack=", &arg)) {
 			args.uploadpack = arg;
-			continue;
+			চালু;
 		}
-		if (skip_prefix(arg, "--exec=", &arg)) {
+		যদি (skip_prefix(arg, "--exec=", &arg)) {
 			args.uploadpack = arg;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
+		যদি (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
 			args.quiet = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
+		যদি (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
 			args.lock_pack = args.keep_pack;
 			args.keep_pack = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--thin", arg)) {
+		যদি (!strcmp("--thin", arg)) {
 			args.use_thin_pack = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--include-tag", arg)) {
+		যদি (!strcmp("--include-tag", arg)) {
 			args.include_tag = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--all", arg)) {
+		যদি (!strcmp("--all", arg)) {
 			args.fetch_all = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--stdin", arg)) {
+		যদি (!strcmp("--stdin", arg)) {
 			args.stdin_refs = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--diag-url", arg)) {
+		যদি (!strcmp("--diag-url", arg)) {
 			args.diag_url = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("-v", arg)) {
+		যদি (!strcmp("-v", arg)) {
 			args.verbose = 1;
-			continue;
+			চালু;
 		}
-		if (skip_prefix(arg, "--depth=", &arg)) {
-			args.depth = strtol(arg, NULL, 0);
-			continue;
+		যদি (skip_prefix(arg, "--depth=", &arg)) {
+			args.depth = strtol(arg, ফাঁকা, 0);
+			চালু;
 		}
-		if (skip_prefix(arg, "--shallow-since=", &arg)) {
+		যদি (skip_prefix(arg, "--shallow-since=", &arg)) {
 			args.deepen_since = xstrdup(arg);
-			continue;
+			চালু;
 		}
-		if (skip_prefix(arg, "--shallow-exclude=", &arg)) {
+		যদি (skip_prefix(arg, "--shallow-exclude=", &arg)) {
 			string_list_append(&deepen_not, arg);
-			continue;
+			চালু;
 		}
-		if (!strcmp(arg, "--deepen-relative")) {
+		যদি (!strcmp(arg, "--deepen-relative")) {
 			args.deepen_relative = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--no-progress", arg)) {
+		যদি (!strcmp("--no-progress", arg)) {
 			args.no_progress = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--stateless-rpc", arg)) {
+		যদি (!strcmp("--stateless-rpc", arg)) {
 			args.stateless_rpc = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--lock-pack", arg)) {
+		যদি (!strcmp("--lock-pack", arg)) {
 			args.lock_pack = 1;
 			pack_lockfiles_ptr = &pack_lockfiles;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--check-self-contained-and-connected", arg)) {
+		যদি (!strcmp("--check-self-contained-and-connected", arg)) {
 			args.check_self_contained_and_connected = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--cloning", arg)) {
+		যদি (!strcmp("--cloning", arg)) {
 			args.cloning = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--update-shallow", arg)) {
+		যদি (!strcmp("--update-shallow", arg)) {
 			args.update_shallow = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--from-promisor", arg)) {
+		যদি (!strcmp("--from-promisor", arg)) {
 			args.from_promisor = 1;
-			continue;
+			চালু;
 		}
-		if (!strcmp("--refetch", arg)) {
+		যদি (!strcmp("--refetch", arg)) {
 			args.refetch = 1;
-			continue;
+			চালু;
 		}
-		if (skip_prefix(arg, ("--filter="), &arg)) {
+		যদি (skip_prefix(arg, ("--filter="), &arg)) {
 			parse_list_objects_filter(&args.filter_options, arg);
-			continue;
+			চালু;
 		}
-		if (!strcmp(arg, ("--no-filter"))) {
+		যদি (!strcmp(arg, ("--no-filter"))) {
 			list_objects_filter_set_no_filter(&args.filter_options);
-			continue;
+			চালু;
 		}
 		usage(fetch_pack_usage);
 	}
-	if (deepen_not.nr)
+	যদি (deepen_not.nr)
 		args.deepen_not = &deepen_not;
 
-	if (i < argc)
+	যদি (i < argc)
 		dest = argv[i++];
-	else
+	অন্যথা
 		usage(fetch_pack_usage);
 
 	/*
 	 * Copy refs from cmdline to growable list, then append any
 	 * refs from the standard input:
 	 */
-	for (; i < argc; i++)
+	জন্য (; i < argc; i++)
 		add_sought_entry(&sought, &nr_sought, &alloc_sought, argv[i]);
-	if (args.stdin_refs) {
-		if (args.stateless_rpc) {
+	যদি (args.stdin_refs) {
+		যদি (args.stateless_rpc) {
 			/* in stateless RPC mode we use pkt-line to read
 			 * from stdin, until we get a flush packet
 			 */
-			for (;;) {
-				char *line = packet_read_line(0, NULL);
-				if (!line)
-					break;
-				add_sought_entry(&sought, &nr_sought,  &alloc_sought, line);
+			জন্য (;;) {
+				অক্ষর *সারি = packet_read_সারি(0, ফাঁকা);
+				যদি (!সারি)
+					বিরতি;
+				add_sought_entry(&sought, &nr_sought,  &alloc_sought, সারি);
 			}
 		}
-		else {
+		অন্যথা {
 			/* read from stdin one ref per line, until EOF */
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline_lf(&line, stdin) != EOF)
-				add_sought_entry(&sought, &nr_sought, &alloc_sought, line.buf);
-			strbuf_release(&line);
+			কাঠামো strbuf সারি = STRBUF_INIT;
+			যখন (strbuf_getline_lf(&সারি, stdin) != EOF)
+				add_sought_entry(&sought, &nr_sought, &alloc_sought, সারি.buf);
+			strbuf_release(&সারি);
 		}
 	}
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	যদি (args.stateless_rpc) {
+		conn = ফাঁকা;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
-		int flags = args.verbose ? CONNECT_VERBOSE : 0;
-		if (args.diag_url)
+	} অন্যথা {
+		পূর্ণসংখ্যা flags = args.verbose ? CONNECT_VERBOSE : 0;
+		যদি (args.diag_url)
 			flags |= CONNECT_DIAG_URL;
 		conn = git_connect(fd, dest, GIT_CONNECT_UPLOAD_PACK,
 				   args.uploadpack, flags);
-		if (!conn)
-			return args.diag_url ? 0 : 1;
+		যদি (!conn)
+			ফেরত args.diag_url ? 0 : 1;
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], ফাঁকা, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
 	version = discover_version(&reader);
-	switch (version) {
-	case protocol_v2:
-		get_remote_refs(fd[1], &reader, &remote_refs, 0, NULL, NULL,
+	নির্বাচন (version) {
+	ক্ষেত্র protocol_v2:
+		get_remote_refs(fd[1], &reader, &remote_refs, 0, ফাঁকা, ফাঁকা,
 				args.stateless_rpc);
-		break;
-	case protocol_v1:
-	case protocol_v0:
-		get_remote_heads(&reader, &remote_refs, 0, NULL, &shallow);
-		break;
-	case protocol_unknown_version:
+		বিরতি;
+	ক্ষেত্র protocol_v1:
+	ক্ষেত্র protocol_v0:
+		get_remote_heads(&reader, &remote_refs, 0, ফাঁকা, &shallow);
+		বিরতি;
+	ক্ষেত্র protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
@@ -258,25 +258,25 @@ int cmd_fetch_pack(int argc,
 	fetched_refs = fetch_pack(&args, fd, remote_refs, sought, nr_sought,
 			 &shallow, pack_lockfiles_ptr, version);
 
-	if (pack_lockfiles.nr) {
-		int i;
+	যদি (pack_lockfiles.nr) {
+		পূর্ণসংখ্যা i;
 
-		printf("lock %s\n", pack_lockfiles.items[0].string);
+		printf("lock %s\n", pack_lockfiles.বস্তুসমূহ[0].string);
 		fflush(stdout);
-		for (i = 1; i < pack_lockfiles.nr; i++)
+		জন্য (i = 1; i < pack_lockfiles.nr; i++)
 			warning(_("Lockfile created but not reported: %s"),
-				pack_lockfiles.items[i].string);
+				pack_lockfiles.বস্তুসমূহ[i].string);
 	}
-	if (args.check_self_contained_and_connected &&
+	যদি (args.check_self_contained_and_connected &&
 	    args.self_contained_and_connected) {
 		printf("connectivity-ok\n");
 		fflush(stdout);
 	}
 	close(fd[0]);
 	close(fd[1]);
-	if (finish_connect(conn)) {
+	যদি (finish_connect(conn)) {
 		ret = 1;
-		goto cleanup;
+		যাও cleanup;
 	}
 
 	ret = !fetched_refs;
@@ -289,19 +289,19 @@ int cmd_fetch_pack(int argc,
 	 */
 	ret |= report_unmatched_refs(sought, nr_sought);
 
-	for (struct ref *ref = fetched_refs; ref; ref = ref->next)
+	জন্য (কাঠামো ref *ref = fetched_refs; ref; ref = ref->পরবর্তী)
 		printf("%s %s\n",
 		       oid_to_hex(&ref->old_oid), ref->name);
 
 cleanup:
-	for (size_t i = 0; i < nr_sought; i++)
+	জন্য (আকার_t i = 0; i < nr_sought; i++)
 		free_one_ref(sought_to_free[i]);
-	free(sought_to_free);
-	free(sought);
+	মুক্ত(sought_to_free);
+	মুক্ত(sought);
 	free_refs(fetched_refs);
 	free_refs(remote_refs);
 	list_objects_filter_release(&args.filter_options);
 	oid_array_clear(&shallow);
 	string_list_clear(&pack_lockfiles, 0);
-	return ret;
+	ফেরত ret;
 }

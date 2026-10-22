@@ -3,29 +3,29 @@
  *
  * Copyright (c) Junio C Hamano, 2006, 2009
  */
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "quote.h"
-#include "strbuf.h"
-#include "tree.h"
-#include "parse-options.h"
-#include "object-file.h"
-#include "odb.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "quote.h"
+#অন্তর্ভাব "strbuf.h"
+#অন্তর্ভাব "tree.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "object-file.h"
+#অন্তর্ভাব "odb.h"
 
-static struct treeent {
+স্থির কাঠামো treeent {
 	unsigned mode;
-	struct object_id oid;
-	int len;
-	char name[FLEX_ARRAY];
+	কাঠামো object_id oid;
+	পূর্ণসংখ্যা len;
+	অক্ষর name[FLEX_ARRAY];
 } **entries;
-static int alloc, used;
+স্থির পূর্ণসংখ্যা alloc, used;
 
-static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
+স্থির শূন্য append_to_বৃক্ষ(unsigned mode, কাঠামো object_id *oid, অক্ষর *path)
 {
-	struct treeent *ent;
-	size_t len = strlen(path);
-	if (strchr(path, '/'))
+	কাঠামো treeent *ent;
+	আকার_t len = strlen(path);
+	যদি (strchr(path, '/'))
 		die("path %s contains slash", path);
 
 	FLEX_ALLOC_MEM(ent, name, path, len);
@@ -37,50 +37,50 @@ static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
 	entries[used++] = ent;
 }
 
-static int ent_compare(const void *a_, const void *b_)
+স্থির পূর্ণসংখ্যা ent_compare(ধ্রুবক শূন্য *a_, ধ্রুবক শূন্য *b_)
 {
-	struct treeent *a = *(struct treeent **)a_;
-	struct treeent *b = *(struct treeent **)b_;
-	return base_name_compare(a->name, a->len, a->mode,
+	কাঠামো treeent *a = *(কাঠামো treeent **)a_;
+	কাঠামো treeent *b = *(কাঠামো treeent **)b_;
+	ফেরত base_name_compare(a->name, a->len, a->mode,
 				 b->name, b->len, b->mode);
 }
 
-static void write_tree(struct repository *repo, struct object_id *oid)
+স্থির শূন্য write_বৃক্ষ(কাঠামো repository *repo, কাঠামো object_id *oid)
 {
-	struct strbuf buf;
-	size_t size;
-	int i;
+	কাঠামো strbuf buf;
+	আকার_t আকার_2;
+	পূর্ণসংখ্যা i;
 
 	QSORT(entries, used, ent_compare);
-	for (size = i = 0; i < used; i++)
-		size += 32 + entries[i]->len;
+	জন্য (আকার_2 = i = 0; i < used; i++)
+		আকার_2 += 32 + entries[i]->len;
 
-	strbuf_init(&buf, size);
-	for (i = 0; i < used; i++) {
-		struct treeent *ent = entries[i];
+	strbuf_init(&buf, আকার_2);
+	জন্য (i = 0; i < used; i++) {
+		কাঠামো treeent *ent = entries[i];
 		strbuf_addf(&buf, "%o %s%c", ent->mode, ent->name, '\0');
 		strbuf_add(&buf, ent->oid.hash, repo->hash_algo->rawsz);
 	}
 
-	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_TREE, oid);
+	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_বৃক্ষ, oid);
 	strbuf_release(&buf);
 }
 
-static const char *const mktree_usage[] = {
+স্থির ধ্রুবক অক্ষর *ধ্রুবক mktree_usage[] = {
 	"git mktree [-z] [--missing] [--batch]",
-	NULL
+	ফাঁকা
 };
 
-static void mktree_line(struct repository *repo, char *buf, int nul_term_line, int allow_missing)
+স্থির শূন্য mktree_সারি(কাঠামো repository *repo, অক্ষর *buf, পূর্ণসংখ্যা nul_term_সারি, পূর্ণসংখ্যা allow_missing)
 {
-	char *ptr, *ntr;
-	const char *p;
+	অক্ষর *ptr, *ntr;
+	ধ্রুবক অক্ষর *p;
 	unsigned mode;
-	enum object_type mode_type; /* object type derived from mode */
-	enum object_type obj_type; /* object type derived from sha */
-	struct object_info oi = OBJECT_INFO_INIT;
-	char *path, *to_free = NULL;
-	struct object_id oid;
+	গণনা object_type mode_type; /* object type derived from mode */
+	গণনা object_type obj_type; /* object type derived from sha */
+	কাঠামো object_info oi = OBJECT_INFO_INIT;
+	অক্ষর *path, *to_free = ফাঁকা;
+	কাঠামো object_id oid;
 
 	ptr = buf;
 	/*
@@ -88,27 +88,27 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	 *     mode SP type SP sha1 TAB name
 	 */
 	mode = strtoul(ptr, &ntr, 8);
-	if (ptr == ntr || !ntr || *ntr != ' ')
+	যদি (ptr == ntr || !ntr || *ntr != ' ')
 		die("input format error: %s", buf);
 	ptr = ntr + 1; /* type */
 	ntr = strchr(ptr, ' ');
-	if (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
+	যদি (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
 	    *p != '\t')
 		die("input format error: %s", buf);
 
 	/* It is perfectly normal if we do not have a commit from a submodule */
-	if (S_ISGITLINK(mode))
+	যদি (S_ISGITLINK(mode))
 		allow_missing = 1;
 
 
 	*ntr++ = 0; /* now at the beginning of SHA1 */
 
-	path = (char *)p + 1;  /* at the beginning of name */
-	if (!nul_term_line && path[0] == '"') {
-		struct strbuf p_uq = STRBUF_INIT;
-		if (unquote_c_style(&p_uq, path, NULL))
+	path = (অক্ষর *)p + 1;  /* at the beginning of name */
+	যদি (!nul_term_সারি && path[0] == '"') {
+		কাঠামো strbuf p_uq = STRBUF_INIT;
+		যদি (unquote_c_style(&p_uq, path, ফাঁকা))
 			die("invalid quoting");
-		path = to_free = strbuf_detach(&p_uq, NULL);
+		path = to_free = strbuf_detach(&p_uq, ফাঁকা);
 	}
 
 	/*
@@ -116,26 +116,26 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	 * These should all agree.
 	 */
 	mode_type = object_type(mode);
-	if (mode_type != type_from_string(ptr)) {
+	যদি (mode_type != type_from_string(ptr)) {
 		die("entry '%s' object type (%s) doesn't match mode type (%s)",
 			path, ptr, type_name(mode_type));
 	}
 
 	/* Check the type of object identified by oid without fetching objects */
 	oi.typep = &obj_type;
-	if (odb_read_object_info_extended(repo->objects, &oid, &oi,
+	যদি (odb_read_object_info_extended(repo->objects, &oid, &oi,
 					  OBJECT_INFO_LOOKUP_REPLACE |
 					  OBJECT_INFO_SKIP_FETCH_OBJECT) < 0)
 		obj_type = -1;
 
-	if (obj_type < 0) {
-		if (allow_missing) {
+	যদি (obj_type < 0) {
+		যদি (allow_missing) {
 			; /* no problem - missing objects are presumed to be of the right type */
-		} else {
+		} অন্যথা {
 			die("entry '%s' object %s is unavailable", path, oid_to_hex(&oid));
 		}
-	} else {
-		if (obj_type != mode_type) {
+	} অন্যথা {
+		যদি (obj_type != mode_type) {
 			/*
 			 * The object exists but is of the wrong type.
 			 * This is a problem regardless of allow_missing
@@ -146,65 +146,65 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 		}
 	}
 
-	append_to_tree(mode, &oid, path);
-	free(to_free);
+	append_to_বৃক্ষ(mode, &oid, path);
+	মুক্ত(to_free);
 }
 
-int cmd_mktree(int ac,
-	       const char **av,
-	       const char *prefix,
-	       struct repository *repo)
+পূর্ণসংখ্যা cmd_mktree(পূর্ণসংখ্যা ac,
+	       ধ্রুবক অক্ষর **av,
+	       ধ্রুবক অক্ষর *prefix,
+	       কাঠামো repository *repo)
 {
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
-	int nul_term_line = 0;
-	int allow_missing = 0;
-	int is_batch_mode = 0;
-	int got_eof = 0;
+	কাঠামো strbuf sb = STRBUF_INIT;
+	কাঠামো object_id oid;
+	পূর্ণসংখ্যা nul_term_সারি = 0;
+	পূর্ণসংখ্যা allow_missing = 0;
+	পূর্ণসংখ্যা is_batch_mode = 0;
+	পূর্ণসংখ্যা got_eof = 0;
 	strbuf_getline_fn getline_fn;
 
-	const struct option option[] = {
-		OPT_BOOL('z', NULL, &nul_term_line, N_("input is NUL terminated")),
+	ধ্রুবক কাঠামো option option[] = {
+		OPT_BOOL('z', ফাঁকা, &nul_term_সারি, N_("input is NUL terminated")),
 		OPT_SET_INT( 0 , "missing", &allow_missing, N_("allow missing objects"), 1),
 		OPT_SET_INT( 0 , "batch", &is_batch_mode, N_("allow creation of more than one tree"), 1),
 		OPT_END()
 	};
 
 	ac = parse_options(ac, av, prefix, option, mktree_usage, 0);
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_সারি ? strbuf_getline_nul : strbuf_getline_lf;
 
-	while (!got_eof) {
-		while (1) {
-			if (getline_fn(&sb, stdin) == EOF) {
+	যখন (!got_eof) {
+		যখন (1) {
+			যদি (getline_fn(&sb, stdin) == EOF) {
 				got_eof = 1;
-				break;
+				বিরতি;
 			}
-			if (sb.buf[0] == '\0') {
+			যদি (sb.buf[0] == '\0') {
 				/* empty lines denote tree boundaries in batch mode */
-				if (is_batch_mode)
-					break;
+				যদি (is_batch_mode)
+					বিরতি;
 				die("input format error: (blank line only valid in batch mode)");
 			}
-			mktree_line(repo, sb.buf, nul_term_line, allow_missing);
+			mktree_সারি(repo, sb.buf, nul_term_সারি, allow_missing);
 		}
-		if (is_batch_mode && got_eof && used < 1) {
+		যদি (is_batch_mode && got_eof && used < 1) {
 			/*
 			 * Execution gets here if the last tree entry is terminated with a
 			 * new-line.  The final new-line has been made optional to be
 			 * consistent with the original non-batch behaviour of mktree.
 			 */
 			; /* skip creating an empty tree */
-		} else {
-			write_tree(repo, &oid);
+		} অন্যথা {
+			write_বৃক্ষ(repo, &oid);
 			puts(oid_to_hex(&oid));
 			fflush(stdout);
 		}
-		for (int i = 0; i < used; i++)
-			free(entries[i]);
+		জন্য (পূর্ণসংখ্যা i = 0; i < used; i++)
+			মুক্ত(entries[i]);
 		used=0; /* reset tree entry buffer for re-use in batch mode */
 	}
-	free(entries);
+	মুক্ত(entries);
 	strbuf_release(&sb);
 
-	return 0;
+	ফেরত 0;
 }

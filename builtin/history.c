@@ -1,33 +1,33 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "cache-tree.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "merge-ort.h"
-#include "oidmap.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache.h"
-#include "refs.h"
-#include "ref-filter.h"
-#include "replay.h"
-#include "reset.h"
-#include "revision.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "strvec.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "wt-status.h"
+#অন্তর্ভাব "builtin.h"
+#অন্তর্ভাব "advice.h"
+#অন্তর্ভাব "cache-tree.h"
+#অন্তর্ভাব "commit.h"
+#অন্তর্ভাব "commit-reach.h"
+#অন্তর্ভাব "config.h"
+#অন্তর্ভাব "editor.h"
+#অন্তর্ভাব "environment.h"
+#অন্তর্ভাব "gettext.h"
+#অন্তর্ভাব "hex.h"
+#অন্তর্ভাব "lockfile.h"
+#অন্তর্ভাব "merge-ort.h"
+#অন্তর্ভাব "oidmap.h"
+#অন্তর্ভাব "parse-options.h"
+#অন্তর্ভাব "path.h"
+#অন্তর্ভাব "read-cache.h"
+#অন্তর্ভাব "refs.h"
+#অন্তর্ভাব "ref-filter.h"
+#অন্তর্ভাব "replay.h"
+#অন্তর্ভাব "reset.h"
+#অন্তর্ভাব "revision.h"
+#অন্তর্ভাব "sequencer.h"
+#অন্তর্ভাব "string-list.h"
+#অন্তর্ভাব "strvec.h"
+#অন্তর্ভাব "tree.h"
+#অন্তর্ভাব "tree-walk.h"
+#অন্তর্ভাব "unpack-trees.h"
+#অন্তর্ভাব "wt-status.h"
 
 #define GIT_HISTORY_DROP_USAGE \
 	N_("git history drop <commit> [--dry-run] [--update-refs=(branches|head)] [--empty=(drop|keep|abort)]")
@@ -40,26 +40,26 @@
 #define GIT_HISTORY_SQUASH_USAGE \
 	N_("git history squash [--dry-run] [--update-refs=(branches|head)] [--[no-]edit] <revision-range>")
 
-static void change_data_free(void *util, const char *str UNUSED)
+স্থির শূন্য change_তথ্য_free(শূন্য *util, ধ্রুবক অক্ষর *str UNUSED)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	কাঠামো wt_status_change_তথ্য *d = util;
+	মুক্ত(d->rename_source);
+	মুক্ত(d);
 }
 
-static int fill_commit_message(struct repository *repo,
-			       const struct object_id *old_tree,
-			       const struct object_id *new_tree,
-			       const char *default_message,
-			       const char *action,
-			       struct strbuf *out)
+স্থির পূর্ণসংখ্যা fill_commit_message(কাঠামো repository *repo,
+			       ধ্রুবক কাঠামো object_id *old_বৃক্ষ,
+			       ধ্রুবক কাঠামো object_id *new_বৃক্ষ,
+			       ধ্রুবক অক্ষর *default_message,
+			       ধ্রুবক অক্ষর *action,
+			       কাঠামো strbuf *out)
 {
-	const char *path = git_path_commit_editmsg();
-	const char *hint =
+	ধ্রুবক অক্ষর *path = git_path_commit_editmsg();
+	ধ্রুবক অক্ষর *hint =
 		_("Please enter the commit message for the %s changes."
 		  " Lines starting\nwith '%s' will be ignored, and an"
 		  " empty message aborts the commit.\n");
-	struct wt_status s;
+	কাঠামো wt_status s;
 
 	wt_status_prepare(repo, &s);
 	FREE_AND_NULL(s.branch);
@@ -73,190 +73,190 @@ static int fill_commit_message(struct repository *repo,
 	s.committable = 1;
 
 	s.fp = fopen(path, "w");
-	if (!s.fp)
-		return error_errno(_("could not open '%s'"), path);
+	যদি (!s.fp)
+		ফেরত error_errno(_("could not open '%s'"), path);
 
 	strbuf_addstr(out, default_message);
 	strbuf_addch(out, '\n');
-	strbuf_commented_addf(out, comment_line_str, hint, action, comment_line_str);
-	if (fwrite(out->buf, 1, out->len, s.fp) != out->len)
+	strbuf_commented_addf(out, comment_সারি_str, hint, action, comment_সারি_str);
+	যদি (fwrite(out->buf, 1, out->len, s.fp) != out->len)
 		die_errno(_("could not write to '%s'"), path);
 
-	wt_status_collect_changes_trees(&s, old_tree, new_tree);
+	wt_status_collect_changes_trees(&s, old_বৃক্ষ, new_বৃক্ষ);
 	wt_status_print(&s);
 	wt_status_collect_free_buffers(&s);
-	string_list_clear_func(&s.change, change_data_free);
-	if (fclose(s.fp))
+	string_list_clear_func(&s.change, change_তথ্য_free);
+	যদি (fclose(s.fp))
 		die_errno(_("could not write to '%s'"), path);
 
 	strbuf_reset(out);
-	if (launch_editor(path, out, NULL)) {
+	যদি (launch_editor(path, out, ফাঁকা)) {
 		fprintf(stderr, _("Aborting commit as launching the editor failed.\n"));
-		return -1;
+		ফেরত -1;
 	}
-	strbuf_stripspace(out, comment_line_str);
+	strbuf_stripspace(out, comment_সারি_str);
 
-	cleanup_message(out, COMMIT_MSG_CLEANUP_ALL, 0);
+	cleanup_message(out, COMMIT_বার্তা_CLEANUP_ALL, 0);
 
-	if (!out->len) {
+	যদি (!out->len) {
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		return -1;
+		ফেরত -1;
 	}
 
-	return 0;
+	ফেরত 0;
 }
 
-enum commit_tree_flags {
-	COMMIT_TREE_EDIT_MESSAGE = (1 << 0),
+গণনা commit_বৃক্ষ_flags {
+	COMMIT_বৃক্ষ_EDIT_MESSAGE = (1 << 0),
 };
 
-static int commit_tree_ext(struct repository *repo,
-			   const char *action,
-			   struct commit *commit_with_message,
-			   const char *message_template,
-			   const struct commit_list *parents,
-			   const struct object_id *old_tree,
-			   const struct object_id *new_tree,
-			   struct commit **out,
-			   enum commit_tree_flags flags)
+স্থির পূর্ণসংখ্যা commit_বৃক্ষ_ext(কাঠামো repository *repo,
+			   ধ্রুবক অক্ষর *action,
+			   কাঠামো commit *commit_with_message,
+			   ধ্রুবক অক্ষর *message_template,
+			   ধ্রুবক কাঠামো commit_list *parents,
+			   ধ্রুবক কাঠামো object_id *old_বৃক্ষ,
+			   ধ্রুবক কাঠামো object_id *new_বৃক্ষ,
+			   কাঠামো commit **out,
+			   গণনা commit_বৃক্ষ_flags flags)
 {
-	const char *exclude_gpgsig[] = {
+	ধ্রুবক অক্ষর *exclude_gpgsig[] = {
 		/* We reencode the message, so the encoding needs to be stripped. */
 		"encoding",
 		/* We need to strip signatures as those will become invalid. */
 		"gpgsig",
 		"gpgsig-sha256",
-		NULL,
+		ফাঁকা,
 	};
-	const char *original_message, *original_body, *ptr;
-	struct commit_extra_header *original_extra_headers = NULL;
-	struct strbuf commit_message = STRBUF_INIT;
-	struct object_id rewritten_commit_oid;
-	char *original_author = NULL;
-	size_t len;
-	int ret;
+	ধ্রুবক অক্ষর *original_message, *original_body, *ptr;
+	কাঠামো commit_extra_header *original_extra_headers = ফাঁকা;
+	কাঠামো strbuf commit_message = STRBUF_INIT;
+	কাঠামো object_id rewritten_commit_oid;
+	অক্ষর *original_author = ফাঁকা;
+	আকার_t len;
+	পূর্ণসংখ্যা ret;
 
 	/* We retain authorship of the original commit. */
-	original_message = repo_logmsg_reencode(repo, commit_with_message, NULL, NULL);
+	original_message = repo_logmsg_reencode(repo, commit_with_message, ফাঁকা, ফাঁকা);
 	ptr = find_commit_header(original_message, "author", &len);
-	if (ptr)
+	যদি (ptr)
 		original_author = xmemdupz(ptr, len);
 	find_commit_subject(original_message, &original_body);
 
-	if (!message_template)
+	যদি (!message_template)
 		message_template = original_body;
 
-	if (flags & COMMIT_TREE_EDIT_MESSAGE) {
-		ret = fill_commit_message(repo, old_tree, new_tree,
+	যদি (flags & COMMIT_বৃক্ষ_EDIT_MESSAGE) {
+		ret = fill_commit_message(repo, old_বৃক্ষ, new_বৃক্ষ,
 					  message_template, action, &commit_message);
-		if (ret < 0)
-			goto out;
-	} else {
+		যদি (ret < 0)
+			যাও out;
+	} অন্যথা {
 		strbuf_addstr(&commit_message, message_template);
 	}
 
 	original_extra_headers = read_commit_extra_headers(commit_with_message,
 							   exclude_gpgsig);
 
-	ret = commit_tree_extended(commit_message.buf, commit_message.len, new_tree,
+	ret = commit_বৃক্ষ_extended(commit_message.buf, commit_message.len, new_বৃক্ষ,
 				   parents, &rewritten_commit_oid, original_author,
-				   NULL, NULL, original_extra_headers);
-	if (ret < 0)
-		goto out;
+				   ফাঁকা, ফাঁকা, original_extra_headers);
+	যদি (ret < 0)
+		যাও out;
 
 	*out = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
 
 out:
 	free_commit_extra_headers(original_extra_headers);
 	strbuf_release(&commit_message);
-	free(original_author);
-	repo_unuse_commit_buffer(repo, commit_with_message, original_message);
-	return ret;
+	মুক্ত(original_author);
+	repo_unuse_commit_বাফার(repo, commit_with_message, original_message);
+	ফেরত ret;
 }
 
-static int first_parent_tree_oid(struct repository *repo,
-				 struct commit *commit,
-				 struct object_id *out)
+স্থির পূর্ণসংখ্যা first_parent_বৃক্ষ_oid(কাঠামো repository *repo,
+				 কাঠামো commit *commit,
+				 কাঠামো object_id *out)
 {
-	struct commit *parent = commit->parents ? commit->parents->item : NULL;
+	কাঠামো commit *parent = commit->parents ? commit->parents->item : ফাঁকা;
 
-	if (!parent) {
-		oidcpy(out, repo->hash_algo->empty_tree);
-		return 0;
+	যদি (!parent) {
+		oidcpy(out, repo->hash_algo->empty_বৃক্ষ);
+		ফেরত 0;
 	}
 
-	if (repo_parse_commit(repo, parent))
-		return error(_("unable to parse parent commit %s"),
+	যদি (repo_parse_commit(repo, parent))
+		ফেরত error(_("unable to parse parent commit %s"),
 			     oid_to_hex(&parent->object.oid));
 
-	oidcpy(out, &repo_get_commit_tree(repo, parent)->object.oid);
-	return 0;
+	oidcpy(out, &repo_get_commit_বৃক্ষ(repo, parent)->object.oid);
+	ফেরত 0;
 }
 
-static int commit_tree_with_edited_message(struct repository *repo,
-					   const char *action,
-					   struct commit *original,
-					   struct commit **out)
+স্থির পূর্ণসংখ্যা commit_বৃক্ষ_with_edited_message(কাঠামো repository *repo,
+					   ধ্রুবক অক্ষর *action,
+					   কাঠামো commit *original,
+					   কাঠামো commit **out)
 {
-	struct object_id parent_tree_oid;
-	const struct object_id *tree_oid;
+	কাঠামো object_id parent_বৃক্ষ_oid;
+	ধ্রুবক কাঠামো object_id *বৃক্ষ_oid;
 
-	tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
+	বৃক্ষ_oid = &repo_get_commit_বৃক্ষ(repo, original)->object.oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	যদি (first_parent_বৃক্ষ_oid(repo, original, &parent_বৃক্ষ_oid) < 0)
+		ফেরত -1;
 
-	return commit_tree_ext(repo, action, original, NULL, original->parents,
-			       &parent_tree_oid, tree_oid, out, COMMIT_TREE_EDIT_MESSAGE);
+	ফেরত commit_বৃক্ষ_ext(repo, action, original, ফাঁকা, original->parents,
+			       &parent_বৃক্ষ_oid, বৃক্ষ_oid, out, COMMIT_বৃক্ষ_EDIT_MESSAGE);
 }
 
-enum ref_action {
+গণনা ref_action {
 	REF_ACTION_DEFAULT,
 	REF_ACTION_BRANCHES,
-	REF_ACTION_HEAD,
+	REF_ACTION_শীর্ষ,
 };
 
-static int parse_ref_action(const struct option *opt, const char *value, int unset)
+স্থির পূর্ণসংখ্যা parse_ref_action(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *মান, পূর্ণসংখ্যা unset)
 {
-	enum ref_action *action = opt->value;
+	গণনা ref_action *action = opt->মান;
 
-	BUG_ON_OPT_NEG_NOARG(unset, value);
-	if (!strcmp(value, "branches")) {
+	BUG_ON_OPT_NEG_NOARG(unset, মান);
+	যদি (!strcmp(মান, "branches")) {
 		*action = REF_ACTION_BRANCHES;
-	} else if (!strcmp(value, "head")) {
-		*action = REF_ACTION_HEAD;
-	} else {
-		return error(_("%s expects one of 'branches' or 'head'"),
+	} অন্যথা যদি (!strcmp(মান, "head")) {
+		*action = REF_ACTION_শীর্ষ;
+	} অন্যথা {
+		ফেরত error(_("%s expects one of 'branches' or 'head'"),
 			     opt->long_name);
 	}
 
-	return 0;
+	ফেরত 0;
 }
 
-static int revwalk_contains_merges(struct repository *repo,
-				   const struct strvec *revwalk_args)
+স্থির পূর্ণসংখ্যা revwalk_contains_merges(কাঠামো repository *repo,
+				   ধ্রুবক কাঠামো strvec *revwalk_args)
 {
-	struct strvec args = STRVEC_INIT;
-	struct rev_info revs;
-	int ret;
+	কাঠামো strvec args = STRVEC_INIT;
+	কাঠামো rev_info revs;
+	পূর্ণসংখ্যা ret;
 
 	strvec_pushv(&args, revwalk_args->v);
-	strvec_push(&args, "--min-parents=2");
+	strvec_ঠেলো(&args, "--min-parents=2");
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, ফাঁকা);
 
-	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr != 1)
+	setup_revisions_from_strvec(&args, &revs, ফাঁকা);
+	যদি (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
-	if (prepare_revision_walk(&revs) < 0) {
+	যদি (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		যাও out;
 	}
 
-	if (get_revision(&revs)) {
+	যদি (get_revision(&revs)) {
 		ret = error(_("replaying merge commits is not supported yet!"));
-		goto out;
+		যাও out;
 	}
 
 	reset_revision_walk();
@@ -265,22 +265,22 @@ static int revwalk_contains_merges(struct repository *repo,
 out:
 	release_revisions(&revs);
 	strvec_clear(&args);
-	return ret;
+	ফেরত ret;
 }
 
-static int setup_revwalk(struct repository *repo,
-			 enum ref_action action,
-			 struct commit *original,
-			 struct rev_info *revs)
+স্থির পূর্ণসংখ্যা setup_revwalk(কাঠামো repository *repo,
+			 গণনা ref_action action,
+			 কাঠামো commit *original,
+			 কাঠামো rev_info *revs)
 {
-	struct strvec args = STRVEC_INIT;
-	int ret;
+	কাঠামো strvec args = STRVEC_INIT;
+	পূর্ণসংখ্যা ret;
 
-	repo_init_revisions(repo, revs, NULL);
-	strvec_push(&args, "ignored");
-	strvec_push(&args, "--reverse");
-	strvec_push(&args, "--topo-order");
-	strvec_push(&args, "--full-history");
+	repo_init_revisions(repo, revs, ফাঁকা);
+	strvec_ঠেলো(&args, "ignored");
+	strvec_ঠেলো(&args, "--reverse");
+	strvec_ঠেলো(&args, "--topo-order");
+	strvec_ঠেলো(&args, "--full-history");
 
 	/* We only want to see commits that are descendants of the old commit. */
 	strvec_pushf(&args, "--ancestry-path=%s",
@@ -298,94 +298,94 @@ static int setup_revwalk(struct repository *repo,
 	 * update it. Otherwise we'll update (or print) all descendant
 	 * branches.
 	 */
-	if (action == REF_ACTION_HEAD) {
-		struct commit_list *from_list = NULL;
-		struct commit *head;
+	যদি (action == REF_ACTION_শীর্ষ) {
+		কাঠামো commit_list *from_list = ফাঁকা;
+		কাঠামো commit *শীর্ষ;
 
-		head = lookup_commit_reference_by_name("HEAD");
-		if (!head) {
+		শীর্ষ = lookup_commit_reference_by_name("HEAD");
+		যদি (!শীর্ষ) {
 			ret = error(_("cannot look up HEAD"));
-			goto out;
+			যাও out;
 		}
 
-		commit_list_insert(original, &from_list);
-		ret = repo_is_descendant_of(repo, head, from_list);
+		commit_list_ঢোকাও(original, &from_list);
+		ret = repo_is_descendant_of(repo, শীর্ষ, from_list);
 		commit_list_free(from_list);
 
-		if (ret < 0) {
+		যদি (ret < 0) {
 			ret = error(_("cannot determine descendance"));
-			goto out;
-		} else if (!ret) {
+			যাও out;
+		} অন্যথা যদি (!ret) {
 			ret = error(_("rewritten commit must be an ancestor "
 				      "of HEAD when using --update-refs=head"));
-			goto out;
+			যাও out;
 		}
 
-		strvec_push(&args, "HEAD");
-	} else {
-		strvec_push(&args, "--branches");
-		strvec_push(&args, "HEAD");
+		strvec_ঠেলো(&args, "HEAD");
+	} অন্যথা {
+		strvec_ঠেলো(&args, "--branches");
+		strvec_ঠেলো(&args, "HEAD");
 	}
 
 	ret = revwalk_contains_merges(repo, &args);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
-	setup_revisions_from_strvec(&args, revs, NULL);
-	if (args.nr != 1)
+	setup_revisions_from_strvec(&args, revs, ফাঁকা);
+	যদি (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
 	ret = 0;
 
 out:
 	strvec_clear(&args);
-	return ret;
+	ফেরত ret;
 }
 
-static int handle_ref_update(struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+স্থির পূর্ণসংখ্যা handle_ref_update(কাঠামো ref_transaction *transaction,
+			     ধ্রুবক অক্ষর *refname,
+			     ধ্রুবক কাঠামো object_id *new_oid,
+			     ধ্রুবক কাঠামো object_id *old_oid,
+			     ধ্রুবক অক্ষর *reflog_বার্তা,
+			     কাঠামো strbuf *err)
 {
-	if (!transaction) {
+	যদি (!transaction) {
 		printf("update %s %s %s\n",
 		       refname, oid_to_hex(new_oid), oid_to_hex(old_oid));
-		return 0;
+		ফেরত 0;
 	}
 
-	return ref_transaction_update(transaction, refname, new_oid, old_oid,
-				      NULL, NULL, 0, reflog_msg, err);
+	ফেরত ref_transaction_update(transaction, refname, new_oid, old_oid,
+				      ফাঁকা, ফাঁকা, 0, reflog_বার্তা, err);
 }
 
-static int compute_pending_ref_updates(struct rev_info *revs,
-				       enum ref_action action,
-				       struct commit *original,
-				       struct commit *rewritten,
-				       enum replay_empty_commit_action empty,
-				       struct replay_result *result)
+স্থির পূর্ণসংখ্যা compute_pending_ref_updates(কাঠামো rev_info *revs,
+				       গণনা ref_action action,
+				       কাঠামো commit *original,
+				       কাঠামো commit *rewritten,
+				       গণনা replay_empty_commit_action empty,
+				       কাঠামো replay_ফলাফল *ফলাফল)
 {
-	const struct name_decoration *decoration;
-	struct replay_revisions_options opts = {
+	ধ্রুবক কাঠামো name_decoration *decoration;
+	কাঠামো replay_revisions_options opts = {
 		.empty = empty,
 	};
-	char hex[GIT_MAX_HEXSZ + 1];
-	bool detached_head;
-	int head_flags = 0;
-	int ret;
+	অক্ষর hex[GIT_MAX_HEXSZ + 1];
+	bool detached_শীর্ষ;
+	পূর্ণসংখ্যা শীর্ষ_flags = 0;
+	পূর্ণসংখ্যা ret;
 
 	refs_read_ref_full(get_main_ref_store(revs->repo), "HEAD",
-			   RESOLVE_REF_NO_RECURSE, NULL, &head_flags);
-	detached_head = !(head_flags & REF_ISSYMREF);
+			   RESOLVE_REF_NO_RECURSE, ফাঁকা, &শীর্ষ_flags);
+	detached_শীর্ষ = !(শীর্ষ_flags & REF_ISSYMREF);
 
 	opts.onto = oid_to_hex_r(hex, &rewritten->object.oid);
 
-	ret = replay_revisions(revs, &opts, result);
-	if (ret)
-		return ret;
+	ret = replay_revisions(revs, &opts, ফলাফল);
+	যদি (ret)
+		ফেরত ret;
 
-	if (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
+	যদি (action != REF_ACTION_BRANCHES && action != REF_ACTION_শীর্ষ)
 		BUG("unsupported ref action %d", action);
 
 	/*
@@ -393,70 +393,70 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	 * ancestors of `rewritten`, so we need to manually
 	 * handle updating references that point to `original`.
 	 */
-	for (decoration = get_name_decoration(&original->object);
+	জন্য (decoration = get_name_decoration(&original->object);
 	     decoration;
-	     decoration = decoration->next)
+	     decoration = decoration->পরবর্তী)
 	{
-		if (decoration->type != DECORATION_REF_LOCAL &&
-		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+		যদি (decoration->type != DECORATION_REF_LOCAL &&
+		    decoration->type != DECORATION_REF_শীর্ষ)
+			চালু;
 
-		if (action == REF_ACTION_HEAD &&
-		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+		যদি (action == REF_ACTION_শীর্ষ &&
+		    decoration->type != DECORATION_REF_শীর্ষ)
+			চালু;
 
 		/*
 		 * We only need to update HEAD separately in case it's
 		 * detached. If it's not we'd already update the branch
 		 * it is pointing to.
 		 */
-		if (action == REF_ACTION_BRANCHES &&
-		    decoration->type == DECORATION_REF_HEAD &&
-		    !detached_head)
-			continue;
+		যদি (action == REF_ACTION_BRANCHES &&
+		    decoration->type == DECORATION_REF_শীর্ষ &&
+		    !detached_শীর্ষ)
+			চালু;
 
-		replay_result_queue_update(result, decoration->name,
+		replay_ফলাফল_queue_update(ফলাফল, decoration->name,
 					   &original->object.oid,
 					   &rewritten->object.oid);
 	}
 
-	return 0;
+	ফেরত 0;
 }
 
-static int apply_pending_ref_updates(struct repository *repo,
-				     const struct replay_result *result,
-				     const char *reflog_msg,
-				     int dry_run)
+স্থির পূর্ণসংখ্যা apply_pending_ref_updates(কাঠামো repository *repo,
+				     ধ্রুবক কাঠামো replay_ফলাফল *ফলাফল,
+				     ধ্রুবক অক্ষর *reflog_বার্তা,
+				     পূর্ণসংখ্যা dry_run)
 {
-	struct ref_transaction *transaction = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	কাঠামো ref_transaction *transaction = ফাঁকা;
+	কাঠামো strbuf err = STRBUF_INIT;
+	পূর্ণসংখ্যা ret;
 
-	if (!dry_run) {
+	যদি (!dry_run) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &err);
-		if (!transaction) {
+		যদি (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"), err.buf);
-			goto out;
+			যাও out;
 		}
 	}
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
+	জন্য (আকার_t i = 0; i < ফলাফল->updates_nr; i++) {
 		ret = handle_ref_update(transaction,
-					result->updates[i].refname,
-					&result->updates[i].new_oid,
-					&result->updates[i].old_oid,
-					reflog_msg, &err);
-		if (ret) {
+					ফলাফল->updates[i].refname,
+					&ফলাফল->updates[i].new_oid,
+					&ফলাফল->updates[i].old_oid,
+					reflog_বার্তা, &err);
+		যদি (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
-				    result->updates[i].refname, err.buf);
-			goto out;
+				    ফলাফল->updates[i].refname, err.buf);
+			যাও out;
 		}
 	}
 
-	if (transaction && ref_transaction_commit(transaction, &err)) {
+	যদি (transaction && ref_transaction_commit(transaction, &err)) {
 		ret = error(_("failed to commit ref transaction: %s"), err.buf);
-		goto out;
+		যাও out;
 	}
 
 	ret = 0;
@@ -464,77 +464,77 @@ static int apply_pending_ref_updates(struct repository *repo,
 out:
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return ret;
+	ফেরত ret;
 }
 
-static int handle_reference_updates(struct rev_info *revs,
-				    enum ref_action action,
-				    struct commit *original,
-				    struct commit *rewritten,
-				    const char *reflog_msg,
-				    int dry_run,
-				    enum replay_empty_commit_action empty)
+স্থির পূর্ণসংখ্যা handle_reference_updates(কাঠামো rev_info *revs,
+				    গণনা ref_action action,
+				    কাঠামো commit *original,
+				    কাঠামো commit *rewritten,
+				    ধ্রুবক অক্ষর *reflog_বার্তা,
+				    পূর্ণসংখ্যা dry_run,
+				    গণনা replay_empty_commit_action empty)
 {
-	struct replay_result result = { 0 };
-	int ret;
+	কাঠামো replay_ফলাফল ফলাফল = { 0 };
+	পূর্ণসংখ্যা ret;
 
 	ret = compute_pending_ref_updates(revs, action, original, rewritten,
-					  empty, &result);
-	if (ret)
-		goto out;
+					  empty, &ফলাফল);
+	যদি (ret)
+		যাও out;
 
-	ret = apply_pending_ref_updates(revs->repo, &result, reflog_msg, dry_run);
+	ret = apply_pending_ref_updates(revs->repo, &ফলাফল, reflog_বার্তা, dry_run);
 
 out:
-	replay_result_release(&result);
-	return ret;
+	replay_ফলাফল_release(&ফলাফল);
+	ফেরত ret;
 }
 
-static int commit_became_empty(struct repository *repo,
-			       struct commit *original,
-			       struct tree *result)
+স্থির পূর্ণসংখ্যা commit_became_empty(কাঠামো repository *repo,
+			       কাঠামো commit *original,
+			       কাঠামো বৃক্ষ *ফলাফল)
 {
-	struct object_id parent_tree_oid;
+	কাঠামো object_id parent_বৃক্ষ_oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	যদি (first_parent_বৃক্ষ_oid(repo, original, &parent_বৃক্ষ_oid) < 0)
+		ফেরত -1;
 
-	return oideq(&result->object.oid, &parent_tree_oid);
+	ফেরত oideq(&ফলাফল->object.oid, &parent_বৃক্ষ_oid);
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+স্থির পূর্ণসংখ্যা parse_opt_empty(ধ্রুবক কাঠামো option *opt, ধ্রুবক অক্ষর *arg, পূর্ণসংখ্যা unset)
 {
-	enum replay_empty_commit_action *value = opt->value;
+	গণনা replay_empty_commit_action *মান = opt->মান;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "drop"))
-		*value = REPLAY_EMPTY_COMMIT_DROP;
-	else if (!strcmp(arg, "keep"))
-		*value = REPLAY_EMPTY_COMMIT_KEEP;
-	else if (!strcmp(arg, "abort"))
-		*value = REPLAY_EMPTY_COMMIT_ABORT;
-	else
+	যদি (!strcmp(arg, "drop"))
+		*মান = REPLAY_EMPTY_COMMIT_DROP;
+	অন্যথা যদি (!strcmp(arg, "keep"))
+		*মান = REPLAY_EMPTY_COMMIT_KEEP;
+	অন্যথা যদি (!strcmp(arg, "abort"))
+		*মান = REPLAY_EMPTY_COMMIT_ABORT;
+	অন্যথা
 		die(_("unrecognized '--empty=' action '%s'; "
 		      "valid values are \"drop\", \"keep\", and \"abort\"."), arg);
 
-	return 0;
+	ফেরত 0;
 }
 
-static int cmd_history_fixup(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+স্থির পূর্ণসংখ্যা cmd_history_fixup(পূর্ণসংখ্যা argc,
+			     ধ্রুবক অক্ষর **argv,
+			     ধ্রুবক অক্ষর *prefix,
+			     কাঠামো repository *repo)
 {
-	const char * const usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক usage[] = {
 		GIT_HISTORY_FIXUP_USAGE,
-		NULL,
+		ফাঁকা,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	enum commit_tree_flags flags = 0;
-	int dry_run = 0;
-	struct option options[] = {
+	গণনা replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	গণনা ref_action action = REF_ACTION_DEFAULT;
+	গণনা commit_বৃক্ষ_flags flags = 0;
+	পূর্ণসংখ্যা dry_run = 0;
+	কাঠামো option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -542,83 +542,83 @@ static int cmd_history_fixup(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_BIT(0, "reedit-message", &flags,
 			N_("open an editor to modify the commit message"),
-			COMMIT_TREE_EDIT_MESSAGE),
+			COMMIT_বৃক্ষ_EDIT_MESSAGE),
 		OPT_CALLBACK_F(0, "empty", &empty, "(drop|keep|abort)",
 			       N_("how to handle commits that become empty"),
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct merge_result merge_result = { 0 };
-	struct merge_options merge_opts = { 0 };
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *head_commit, *original, *rewritten;
-	struct tree *head_tree, *original_tree, *index_tree;
-	struct rev_info revs = { 0 };
+	কাঠামো merge_ফলাফল merge_ফলাফল = { 0 };
+	কাঠামো merge_options merge_opts = { 0 };
+	কাঠামো strbuf reflog_বার্তা = STRBUF_INIT;
+	কাঠামো commit *শীর্ষ_commit, *original, *rewritten;
+	কাঠামো বৃক্ষ *শীর্ষ_বৃক্ষ, *original_বৃক্ষ, *সূচক_বৃক্ষ;
+	কাঠামো rev_info revs = { 0 };
 	bool skip_commit = false;
-	int ret;
+	পূর্ণসংখ্যা ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	যদি (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		যাও out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ফাঁকা);
 
-	if (action == REF_ACTION_DEFAULT)
+	যদি (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	if (is_bare_repository(repo)) {
+	যদি (is_bare_repository(repo)) {
 		ret = error(_("cannot run fixup in a bare repository"));
-		goto out;
+		যাও out;
 	}
 
 	/* Resolve the original commit, which is the one we want to fix up. */
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	যদি (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		যাও out;
 	}
 
 	/*
 	 * Resolve HEAD so we can use its tree as the merge base: the staged
 	 * changes are expressed as a diff from HEAD's tree to the index tree.
 	 */
-	head_commit = lookup_commit_reference_by_name("HEAD");
-	if (!head_commit) {
+	শীর্ষ_commit = lookup_commit_reference_by_name("HEAD");
+	যদি (!শীর্ষ_commit) {
 		ret = error(_("cannot look up HEAD"));
-		goto out;
+		যাও out;
 	}
 
-	head_tree = repo_get_commit_tree(repo, head_commit);
-	if (!head_tree) {
+	শীর্ষ_বৃক্ষ = repo_get_commit_বৃক্ষ(repo, শীর্ষ_commit);
+	যদি (!শীর্ষ_বৃক্ষ) {
 		ret = error(_("cannot get tree for HEAD"));
-		goto out;
+		যাও out;
 	}
 
-	if (repo_read_index(repo) < 0) {
+	যদি (repo_read_সূচক(repo) < 0) {
 		ret = error(_("unable to read index"));
-		goto out;
+		যাও out;
 	}
 
-	if (!repo_index_has_changes(repo, head_tree, NULL)) {
+	যদি (!repo_সূচক_has_changes(repo, শীর্ষ_বৃক্ষ, ফাঁকা)) {
 		ret = error(_("nothing to fixup: no staged changes"));
-		goto out;
+		যাও out;
 	}
 
 	/*
 	 * Write the index as a tree object. This is the "theirs" side of the
 	 * three-way merge: it is HEAD's tree with the staged changes applied.
 	 */
-	index_tree = write_in_core_index_as_tree(repo, repo->index);
-	if (!index_tree) {
+	সূচক_বৃক্ষ = write_in_core_সূচক_as_বৃক্ষ(repo, repo->সূচক);
+	যদি (!সূচক_বৃক্ষ) {
 		ret = error(_("unable to write index as a tree"));
-		goto out;
+		যাও out;
 	}
 
-	original_tree = repo_get_commit_tree(repo, original);
-	if (!original_tree) {
+	original_বৃক্ষ = repo_get_commit_বৃক্ষ(repo, original);
+	যদি (!original_বৃক্ষ) {
 		ret = error(_("cannot get tree for commit %s"), argv[0]);
-		goto out;
+		যাও out;
 	}
 
 	/*
@@ -631,30 +631,30 @@ static int cmd_history_fixup(int argc,
 	merge_opts.ancestor = "HEAD";
 	merge_opts.branch1 = argv[0];
 	merge_opts.branch2 = "staged";
-	merge_incore_nonrecursive(&merge_opts, head_tree,
-				  original_tree, index_tree, &merge_result);
+	merge_incore_nonrecursive(&merge_opts, শীর্ষ_বৃক্ষ,
+				  original_বৃক্ষ, সূচক_বৃক্ষ, &merge_ফলাফল);
 
-	if (merge_result.clean < 0) {
+	যদি (merge_ফলাফল.clean < 0) {
 		ret = error(_("merge failed while applying fixup"));
-		goto out;
+		যাও out;
 	}
 
-	if (!merge_result.clean) {
+	যদি (!merge_ফলাফল.clean) {
 		ret = error(_("fixup would produce conflicts; aborting"));
-		goto out;
+		যাও out;
 	}
 
-	ret = commit_became_empty(repo, original, merge_result.tree);
-	if (ret < 0)
-		goto out;
-	if (ret > 0) {
-		switch (empty) {
-		case REPLAY_EMPTY_COMMIT_DROP:
+	ret = commit_became_empty(repo, original, merge_ফলাফল.বৃক্ষ);
+	যদি (ret < 0)
+		যাও out;
+	যদি (ret > 0) {
+		নির্বাচন (empty) {
+		ক্ষেত্র REPLAY_EMPTY_COMMIT_DROP:
 			/*
 			 * Drop the target commit by replaying its descendants
 			 * directly onto its parent.
 			 */
-			rewritten = original->parents ? original->parents->item : NULL;
+			rewritten = original->parents ? original->parents->item : ফাঁকা;
 
 			/*
 			 * TODO: we don't yet have the ability to drop root
@@ -662,68 +662,68 @@ static int cmd_history_fixup(int argc,
 			 * this restriction to exist other than a technical
 			 * limitation.
 			 */
-			if (!rewritten) {
+			যদি (!rewritten) {
 				ret = error(_("cannot drop root commit %s: "
 					      "it has no parent to replay onto"),
 					    argv[0]);
-				goto out;
+				যাও out;
 			}
 
 			skip_commit = true;
-			break;
-		case REPLAY_EMPTY_COMMIT_KEEP:
+			বিরতি;
+		ক্ষেত্র REPLAY_EMPTY_COMMIT_KEEP:
 			/* Proceed and record the empty commit. */
-			break;
-		case REPLAY_EMPTY_COMMIT_ABORT:
+			বিরতি;
+		ক্ষেত্র REPLAY_EMPTY_COMMIT_ABORT:
 			ret = error(_("fixup makes commit %s empty"), argv[0]);
-			goto out;
+			যাও out;
 		}
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	যদি (ret)
+		যাও out;
 
-	if (!skip_commit) {
-		ret = commit_tree_ext(repo, "fixup", original, NULL, original->parents,
-				      &original_tree->object.oid, &merge_result.tree->object.oid,
+	যদি (!skip_commit) {
+		ret = commit_বৃক্ষ_ext(repo, "fixup", original, ফাঁকা, original->parents,
+				      &original_বৃক্ষ->object.oid, &merge_ফলাফল.বৃক্ষ->object.oid,
 				      &rewritten, flags);
-		if (ret < 0) {
+		যদি (ret < 0) {
 			ret = error(_("failed writing fixed-up commit"));
-			goto out;
+			যাও out;
 		}
 	}
 
-	strbuf_addf(&reflog_msg, "fixup: updating %s", argv[0]);
+	strbuf_addf(&reflog_বার্তা, "fixup: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, empty);
-	if (ret < 0) {
+				       reflog_বার্তা.buf, dry_run, empty);
+	যদি (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		যাও out;
 	}
 
 	ret = 0;
 
 out:
-	merge_finalize(&merge_opts, &merge_result);
-	strbuf_release(&reflog_msg);
+	merge_finalize(&merge_opts, &merge_ফলাফল);
+	strbuf_release(&reflog_বার্তা);
 	release_revisions(&revs);
-	return ret;
+	ফেরত ret;
 }
 
-static int cmd_history_reword(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+স্থির পূর্ণসংখ্যা cmd_history_reword(পূর্ণসংখ্যা argc,
+			      ধ্রুবক অক্ষর **argv,
+			      ধ্রুবক অক্ষর *prefix,
+			      কাঠামো repository *repo)
 {
-	const char * const usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক usage[] = {
 		GIT_HISTORY_REWORD_USAGE,
-		NULL,
+		ফাঁকা,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	গণনা ref_action action = REF_ACTION_DEFAULT;
+	পূর্ণসংখ্যা dry_run = 0;
+	কাঠামো option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -731,180 +731,180 @@ static int cmd_history_reword(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	int ret;
+	কাঠামো strbuf reflog_বার্তা = STRBUF_INIT;
+	কাঠামো commit *original, *rewritten;
+	কাঠামো rev_info revs = { 0 };
+	পূর্ণসংখ্যা ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	যদি (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		যাও out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ফাঁকা);
 
-	if (action == REF_ACTION_DEFAULT)
+	যদি (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	যদি (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		যাও out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	যদি (ret)
+		যাও out;
 
-	ret = commit_tree_with_edited_message(repo, "reworded", original, &rewritten);
-	if (ret < 0) {
+	ret = commit_বৃক্ষ_with_edited_message(repo, "reworded", original, &rewritten);
+	যদি (ret < 0) {
 		ret = error(_("failed writing reworded commit"));
-		goto out;
+		যাও out;
 	}
 
-	strbuf_addf(&reflog_msg, "reword: updating %s", argv[0]);
+	strbuf_addf(&reflog_বার্তা, "reword: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_বার্তা.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
+	যদি (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		যাও out;
 	}
 
 	ret = 0;
 
 out:
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_বার্তা);
 	release_revisions(&revs);
-	return ret;
+	ফেরত ret;
 }
 
-static int write_ondisk_index(struct repository *repo,
-			      struct object_id *oid,
-			      const char *path)
+স্থির পূর্ণসংখ্যা write_ondisk_সূচক(কাঠামো repository *repo,
+			      কাঠামো object_id *oid,
+			      ধ্রুবক অক্ষর *path)
 {
-	struct unpack_trees_options opts = { 0 };
-	struct lock_file lock = LOCK_INIT;
-	struct tree_desc tree_desc;
-	struct index_state index;
-	struct tree *tree;
-	int ret;
+	কাঠামো unpack_trees_options opts = { 0 };
+	কাঠামো lock_file lock = LOCK_INIT;
+	কাঠামো বৃক্ষ_desc বৃক্ষ_desc;
+	কাঠামো সূচক_state সূচক;
+	কাঠামো বৃক্ষ *বৃক্ষ;
+	পূর্ণসংখ্যা ret;
 
-	index_state_init(&index, repo);
+	সূচক_state_init(&সূচক, repo);
 
-	opts.head_idx = -1;
-	opts.src_index = &index;
-	opts.dst_index = &index;
+	opts.শীর্ষ_idx = -1;
+	opts.src_সূচক = &সূচক;
+	opts.dst_সূচক = &সূচক;
 
-	tree = repo_parse_tree_indirect(repo, oid);
-	if (!tree) {
+	বৃক্ষ = repo_parse_বৃক্ষ_indirect(repo, oid);
+	যদি (!বৃক্ষ) {
 		ret = error(_("unable to parse tree %s"), oid_to_hex(oid));
-		goto out;
+		যাও out;
 	}
-	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
+	init_বৃক্ষ_desc(&বৃক্ষ_desc, &বৃক্ষ->object.oid, বৃক্ষ->বাফার, বৃক্ষ->আকার_2);
 
-	if (unpack_trees(1, &tree_desc, &opts)) {
+	যদি (unpack_trees(1, &বৃক্ষ_desc, &opts)) {
 		ret = error(_("unable to populate index with tree"));
-		goto out;
+		যাও out;
 	}
 
-	prime_cache_tree(repo, &index, tree);
+	মৌলিক_cache_বৃক্ষ(repo, &সূচক, বৃক্ষ);
 
-	if (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
+	যদি (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
 		ret = error_errno(_("unable to acquire index lock"));
-		goto out;
+		যাও out;
 	}
 
-	if (write_locked_index(&index, &lock, COMMIT_LOCK)) {
+	যদি (write_locked_সূচক(&সূচক, &lock, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto out;
+		যাও out;
 	}
 
 	ret = 0;
 
 out:
 	rollback_lock_file(&lock);
-	release_index(&index);
-	return ret;
+	release_সূচক(&সূচক);
+	ফেরত ret;
 }
 
-static int split_commit(struct repository *repo,
-			struct commit *original,
-			struct pathspec *pathspec,
-			struct commit **out)
+স্থির পূর্ণসংখ্যা split_commit(কাঠামো repository *repo,
+			কাঠামো commit *original,
+			কাঠামো pathspec *pathspec,
+			কাঠামো commit **out)
 {
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct strbuf index_file = STRBUF_INIT;
-	struct index_state index = INDEX_STATE_INIT(repo);
-	const struct object_id *original_commit_tree_oid;
-	const struct object_id *old_tree_oid, *new_tree_oid;
-	struct object_id parent_tree_oid;
-	char original_commit_oid[GIT_MAX_HEXSZ + 1];
-	struct commit *first_commit, *second_commit;
-	struct commit_list *parents = NULL;
-	struct tree *split_tree;
-	int ret;
+	কাঠামো interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	কাঠামো strbuf সূচক_file = STRBUF_INIT;
+	কাঠামো সূচক_state সূচক = সূচক_STATE_INIT(repo);
+	ধ্রুবক কাঠামো object_id *original_commit_বৃক্ষ_oid;
+	ধ্রুবক কাঠামো object_id *old_বৃক্ষ_oid, *new_বৃক্ষ_oid;
+	কাঠামো object_id parent_বৃক্ষ_oid;
+	অক্ষর original_commit_oid[GIT_MAX_HEXSZ + 1];
+	কাঠামো commit *first_commit, *second_commit;
+	কাঠামো commit_list *parents = ফাঁকা;
+	কাঠামো বৃক্ষ *split_বৃক্ষ;
+	পূর্ণসংখ্যা ret;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
+	যদি (first_parent_বৃক্ষ_oid(repo, original, &parent_বৃক্ষ_oid) < 0) {
 		ret = -1;
-		goto out;
+		যাও out;
 	}
-	original_commit_tree_oid = get_commit_tree_oid(original);
+	original_commit_বৃক্ষ_oid = get_commit_বৃক্ষ_oid(original);
 
 	/*
 	 * Construct the first commit. This is done by taking the original
 	 * commit parent's tree and selectively patching changes from the diff
 	 * between that parent and its child.
 	 */
-	repo_git_path_replace(repo, &index_file, "%s", "history-split.index");
+	repo_git_path_replace(repo, &সূচক_file, "%s", "history-split.index");
 
-	ret = write_ondisk_index(repo, &parent_tree_oid, index_file.buf);
-	if (ret < 0)
-		goto out;
+	ret = write_ondisk_সূচক(repo, &parent_বৃক্ষ_oid, সূচক_file.buf);
+	যদি (ret < 0)
+		যাও out;
 
-	ret = read_index_from(&index, index_file.buf, repo->gitdir);
-	if (ret < 0) {
+	ret = read_সূচক_from(&সূচক, সূচক_file.buf, repo->gitdir);
+	যদি (ret < 0) {
 		ret = error(_("failed reading temporary index"));
-		goto out;
+		যাও out;
 	}
 
 	oid_to_hex_r(original_commit_oid, &original->object.oid);
-	ret = run_add_p_index(repo, &index, index_file.buf, &interactive_opts,
+	ret = run_add_p_সূচক(repo, &সূচক, সূচক_file.buf, &interactive_opts,
 			      original_commit_oid, pathspec, ADD_P_DISALLOW_EDIT);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
-	split_tree = write_in_core_index_as_tree(repo, &index);
-	if (!split_tree) {
+	split_বৃক্ষ = write_in_core_সূচক_as_বৃক্ষ(repo, &সূচক);
+	যদি (!split_বৃক্ষ) {
 		ret = error(_("failed split tree"));
-		goto out;
+		যাও out;
 	}
 
-	unlink(index_file.buf);
-	strbuf_release(&index_file);
+	unlink(সূচক_file.buf);
+	strbuf_release(&সূচক_file);
 
 	/*
 	 * We disallow the cases where either the split-out commit or the
 	 * original commit would become empty. Consequently, if we see that the
 	 * new tree ID matches either of those trees we abort.
 	 */
-	if (oideq(&split_tree->object.oid, &parent_tree_oid)) {
+	যদি (oideq(&split_বৃক্ষ->object.oid, &parent_বৃক্ষ_oid)) {
 		ret = error(_("split commit is empty"));
-		goto out;
-	} else if (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
+		যাও out;
+	} অন্যথা যদি (oideq(&split_বৃক্ষ->object.oid, original_commit_বৃক্ষ_oid)) {
 		ret = error(_("split commit tree matches original commit"));
-		goto out;
+		যাও out;
 	}
 
 	/*
 	 * The first commit is constructed from the split-out tree. The base
 	 * that shall be diffed against is the parent of the original commit.
 	 */
-	ret = commit_tree_ext(repo, "split-out", original, NULL, original->parents, &parent_tree_oid,
-			      &split_tree->object.oid, &first_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ret = commit_বৃক্ষ_ext(repo, "split-out", original, ফাঁকা, original->parents, &parent_বৃক্ষ_oid,
+			      &split_বৃক্ষ->object.oid, &first_commit, COMMIT_বৃক্ষ_EDIT_MESSAGE);
+	যদি (ret < 0) {
 		ret = error(_("failed writing first commit"));
-		goto out;
+		যাও out;
 	}
 
 	/*
@@ -914,40 +914,40 @@ static int split_commit(struct repository *repo,
 	 */
 	commit_list_append(first_commit, &parents);
 
-	old_tree_oid = &repo_get_commit_tree(repo, first_commit)->object.oid;
-	new_tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
+	old_বৃক্ষ_oid = &repo_get_commit_বৃক্ষ(repo, first_commit)->object.oid;
+	new_বৃক্ষ_oid = &repo_get_commit_বৃক্ষ(repo, original)->object.oid;
 
-	ret = commit_tree_ext(repo, "split-out", original, NULL, parents, old_tree_oid,
-			      new_tree_oid, &second_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ret = commit_বৃক্ষ_ext(repo, "split-out", original, ফাঁকা, parents, old_বৃক্ষ_oid,
+			      new_বৃক্ষ_oid, &second_commit, COMMIT_বৃক্ষ_EDIT_MESSAGE);
+	যদি (ret < 0) {
 		ret = error(_("failed writing second commit"));
-		goto out;
+		যাও out;
 	}
 
 	*out = second_commit;
 	ret = 0;
 
 out:
-	if (index_file.len)
-		unlink(index_file.buf);
-	strbuf_release(&index_file);
+	যদি (সূচক_file.len)
+		unlink(সূচক_file.buf);
+	strbuf_release(&সূচক_file);
 	commit_list_free(parents);
-	release_index(&index);
-	return ret;
+	release_সূচক(&সূচক);
+	ফেরত ret;
 }
 
-static int cmd_history_split(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+স্থির পূর্ণসংখ্যা cmd_history_split(পূর্ণসংখ্যা argc,
+			     ধ্রুবক অক্ষর **argv,
+			     ধ্রুবক অক্ষর *prefix,
+			     কাঠামো repository *repo)
 {
-	const char * const usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক usage[] = {
 		GIT_HISTORY_SPLIT_USAGE,
-		NULL,
+		ফাঁকা,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	গণনা ref_action action = REF_ACTION_DEFAULT;
+	পূর্ণসংখ্যা dry_run = 0;
+	কাঠামো option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control ref update behavior"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -955,20 +955,20 @@ static int cmd_history_split(int argc,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_END(),
 	};
-	struct commit *original, *rewritten = NULL;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct pathspec pathspec = { 0 };
-	struct rev_info revs = { 0 };
-	int ret;
+	কাঠামো commit *original, *rewritten = ফাঁকা;
+	কাঠামো strbuf reflog_বার্তা = STRBUF_INIT;
+	কাঠামো pathspec pathspec = { 0 };
+	কাঠামো rev_info revs = { 0 };
+	পূর্ণসংখ্যা ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc < 1) {
+	যদি (argc < 1) {
 		ret = error(_("command expects a committish"));
-		goto out;
+		যাও out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ফাঁকা);
 
-	if (action == REF_ACTION_DEFAULT)
+	যদি (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	parse_pathspec(&pathspec, 0,
@@ -978,203 +978,203 @@ static int cmd_history_split(int argc,
 		       prefix, argv + 1);
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	যদি (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		যাও out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
-	if (original->parents && original->parents->next) {
+	যদি (original->parents && original->parents->পরবর্তী) {
 		ret = error(_("cannot split up merge commit"));
-		goto out;
+		যাও out;
 	}
 
 	ret = split_commit(repo, original, &pathspec, &rewritten);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
-	strbuf_addf(&reflog_msg, "split: updating %s", argv[0]);
+	strbuf_addf(&reflog_বার্তা, "split: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_বার্তা.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
+	যদি (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		যাও out;
 	}
 
 	ret = 0;
 
 out:
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_বার্তা);
 	clear_pathspec(&pathspec);
 	release_revisions(&revs);
-	return ret;
+	ফেরত ret;
 }
 
 #define SQUASH_SEEN (1u << 11)
 #define SQUASH_TIP (1u << 12)
 #define SQUASH_AMEND_TARGET (1u << 13)
 
-static bool is_autosquash_subject(const char *s)
+স্থির bool is_autosquash_subject(ধ্রুবক অক্ষর *s)
 {
-	return starts_with(s, "amend!") || starts_with(s, "fixup!") ||
+	ফেরত starts_with(s, "amend!") || starts_with(s, "fixup!") ||
 		starts_with(s, "squash!");
 }
 
-static bool skip_one_autosquash_prefix(const char *s, const char **out)
+স্থির bool skip_one_autosquash_prefix(ধ্রুবক অক্ষর *s, ধ্রুবক অক্ষর **out)
 {
-	if (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
+	যদি (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
 	    skip_prefix(s, "squash!", out)) {
-		while (**out == ' ')
+		যখন (**out == ' ')
 			(*out)++;
-		return true;
+		ফেরত true;
 	}
-	return false;
+	ফেরত false;
 }
 
-static void truncate_message_to_subject(struct strbuf *msg)
+স্থির শূন্য truncate_message_to_subject(কাঠামো strbuf *বার্তা)
 {
-	const char *eos = strstr(msg->buf, "\n\n");
+	ধ্রুবক অক্ষর *eos = strstr(বার্তা->buf, "\n\n");
 
-	if (eos)
-		strbuf_setlen(msg, eos - msg->buf + 1);
+	যদি (eos)
+		strbuf_setlen(বার্তা, eos - বার্তা->buf + 1);
 }
 
-struct subject_data {
-	struct strintmap subjects;
-	struct strbuf subject;
-	struct strbuf squash_message;
-	const char *message;
+কাঠামো subject_তথ্য {
+	কাঠামো strintmap subjects;
+	কাঠামো strbuf subject;
+	কাঠামো strbuf squash_message;
+	ধ্রুবক অক্ষর *message;
 	bool edit_message;
 };
 
-#define SUBJECT_DATA_INIT {		\
+#define SUBJECT_তথ্য_INIT {		\
 	.subjects = STRINTMAP_INIT,	\
 	.subject = STRBUF_INIT,		\
 	.squash_message = STRBUF_INIT,	\
 }
 
-static void subject_data_clear(struct subject_data *data)
+স্থির শূন্য subject_তথ্য_clear(কাঠামো subject_তথ্য *তথ্য)
 {
-	strintmap_clear(&data->subjects);
-	strbuf_release(&data->subject);
-	strbuf_release(&data->squash_message);
+	strintmap_clear(&তথ্য->subjects);
+	strbuf_release(&তথ্য->subject);
+	strbuf_release(&তথ্য->squash_message);
 }
 
-static int squash_amend_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+স্থির পূর্ণসংখ্যা squash_amend_message(কাঠামো repository *repo,
+				কাঠামো commit *commit,
+				কাঠামো subject_তথ্য *তথ্য,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	ধ্রুবক অক্ষর *body = তথ্য->message + তথ্য->subject.len;
 
-	while (isspace(*body))
+	যখন (isspace(*body))
 		body++;
 
-	if (!*body) {
+	যদি (!*body) {
 		warning(_("ignoring %s (%s): message body is empty"),
 			repo_find_unique_abbrev(repo, &commit->object.oid,
 						DEFAULT_ABBREV),
-			data->subject.buf);
-		return 0;
+			তথ্য->subject.buf);
+		ফেরত 0;
 	}
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "squash!"))
-			return error(_("squashing %s (%s) would overwrite "
+	যদি (তথ্য->edit_message) {
+		ফেরত 0;
+	} অন্যথা যদি (flags & SQUASH_AMEND_TARGET) {
+		যদি (starts_with(তথ্য->squash_message.buf, "squash!"))
+			ফেরত error(_("squashing %s (%s) would overwrite "
 				       "'squash!' message, please combine them "
 				       "using '--edit'"),
 				     repo_find_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
-				     data->subject.buf);
-		if (starts_with(data->squash_message.buf, "fixup!"))
-			strbuf_splice(&data->squash_message, 0, 5, "amend!", 5);
-		if (starts_with(data->squash_message.buf, "amend!")) {
-			truncate_message_to_subject(&data->squash_message);
-			strbuf_addch(&data->squash_message, '\n');
-		} else {
-			strbuf_reset(&data->squash_message);
+				     তথ্য->subject.buf);
+		যদি (starts_with(তথ্য->squash_message.buf, "fixup!"))
+			strbuf_splice(&তথ্য->squash_message, 0, 5, "amend!", 5);
+		যদি (starts_with(তথ্য->squash_message.buf, "amend!")) {
+			truncate_message_to_subject(&তথ্য->squash_message);
+			strbuf_addch(&তথ্য->squash_message, '\n');
+		} অন্যথা {
+			strbuf_reset(&তথ্য->squash_message);
 		}
-		strbuf_addstr(&data->squash_message, body);
-		strbuf_complete_line(&data->squash_message);
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+		strbuf_addstr(&তথ্য->squash_message, body);
+		strbuf_complete_সারি(&তথ্য->squash_message);
+	} অন্যথা {
+		ফেরত error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			     repo_find_unique_abbrev(repo, &commit->object.oid,
 						     DEFAULT_ABBREV),
-			     data->subject.buf);
+			     তথ্য->subject.buf);
 	}
-	return 0;
+	ফেরত 0;
 }
 
-static int squash_squash_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
+স্থির পূর্ণসংখ্যা squash_squash_message(কাঠামো repository *repo,
+				কাঠামো commit *commit,
+				কাঠামো subject_তথ্য *তথ্য,
 				unsigned flags)
 {
-	const char *body = data->message + data->subject.len;
+	ধ্রুবক অক্ষর *body = তথ্য->message + তথ্য->subject.len;
 
-	while (isspace(*body))
+	যখন (isspace(*body))
 		body++;
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "fixup!")) {
-			truncate_message_to_subject(&data->squash_message);
-			strbuf_splice(&data->squash_message, 0, 5, "squash", 6);
+	যদি (তথ্য->edit_message) {
+		ফেরত 0;
+	} অন্যথা যদি (flags & SQUASH_AMEND_TARGET) {
+		যদি (starts_with(তথ্য->squash_message.buf, "fixup!")) {
+			truncate_message_to_subject(&তথ্য->squash_message);
+			strbuf_splice(&তথ্য->squash_message, 0, 5, "squash", 6);
 		}
-		if (starts_with(data->squash_message.buf, "squash!")) {
-			strbuf_addch(&data->squash_message, '\n');
-			strbuf_addstr(&data->squash_message, body);
-			strbuf_complete_line(&data->squash_message);
-		} else {
-			return error(_("squashing %s (%s) would discard its "
+		যদি (starts_with(তথ্য->squash_message.buf, "squash!")) {
+			strbuf_addch(&তথ্য->squash_message, '\n');
+			strbuf_addstr(&তথ্য->squash_message, body);
+			strbuf_complete_সারি(&তথ্য->squash_message);
+		} অন্যথা {
+			ফেরত error(_("squashing %s (%s) would discard its "
 				       "message, please combine them using "
 				       "'--edit'"),
 				     repo_find_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
-				     data->subject.buf);
+				     তথ্য->subject.buf);
 		}
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} অন্যথা {
+		ফেরত error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			      repo_find_unique_abbrev(repo, &commit->object.oid,
 						      DEFAULT_ABBREV),
-			      data->subject.buf);
+			      তথ্য->subject.buf);
 	}
-	return 0;
+	ফেরত 0;
 }
 
-static int squash_check_can_autosquash(struct repository *repo,
-				       struct commit *commit,
-				       struct subject_data *data,
+স্থির পূর্ণসংখ্যা squash_check_can_autosquash(কাঠামো repository *repo,
+				       কাঠামো commit *commit,
+				       কাঠামো subject_তথ্য *তথ্য,
 				       unsigned flags)
 {
 	commit->object.flags |= flags & SQUASH_AMEND_TARGET;
-	if (starts_with(data->subject.buf, "amend!"))
-		return squash_amend_message(repo, commit, data, flags);
-	else if (starts_with(data->subject.buf, "squash!"))
-		return squash_squash_message(repo, commit, data, flags);
+	যদি (starts_with(তথ্য->subject.buf, "amend!"))
+		ফেরত squash_amend_message(repo, commit, তথ্য, flags);
+	অন্যথা যদি (starts_with(তথ্য->subject.buf, "squash!"))
+		ফেরত squash_squash_message(repo, commit, তথ্য, flags);
 
-	return 0;
+	ফেরত 0;
 }
 
-static int squash_check_autosquash_subject(struct repository *repo,
-					   struct commit *commit,
-					   struct subject_data *data)
+স্থির পূর্ণসংখ্যা squash_check_autosquash_subject(কাঠামো repository *repo,
+					   কাঠামো commit *commit,
+					   কাঠামো subject_তথ্য *তথ্য)
 {
-	const char* s = data->subject.buf;
-	struct commit *target;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	ধ্রুবক অক্ষর* s = তথ্য->subject.buf;
+	কাঠামো commit *target;
+	কাঠামো hashmap_iter iter;
+	কাঠামো strmap_entry *entry;
 	/* Try skipping autosquash prefixes one at a time to allow
 	 * squashing
 	 *     a commit
@@ -1187,10 +1187,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 *
 	 * and squashed the first fixup separately from the second
 	 */
-	while (skip_one_autosquash_prefix(s, &s)) {
-		unsigned flags = strintmap_get(&data->subjects, s);
-		if (flags)
-			return squash_check_can_autosquash(repo, commit, data, flags);
+	যখন (skip_one_autosquash_prefix(s, &s)) {
+		unsigned flags = strintmap_get(&তথ্য->subjects, s);
+		যদি (flags)
+			ফেরত squash_check_can_autosquash(repo, commit, তথ্য, flags);
 	}
 	/*
 	 * Allow "fixup! <hex object id>", but not "fixup! HEAD^" or
@@ -1199,87 +1199,87 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 * squashed together.
 	 */
 	target = lookup_commit_reference_by_name(s);
-	if (target && starts_with(oid_to_hex(&target->object.oid), s)) {
+	যদি (target && starts_with(oid_to_hex(&target->object.oid), s)) {
 		unsigned flags =
 			target->object.flags & (SQUASH_SEEN | SQUASH_AMEND_TARGET);
-		if (!flags) {
-			const char *subject_start;
-			const char *buffer = repo_logmsg_reencode(repo, target,
-								  NULL, NULL);
-			size_t subject_len = find_commit_subject(buffer,
+		যদি (!flags) {
+			ধ্রুবক অক্ষর *subject_start;
+			ধ্রুবক অক্ষর *বাফার = repo_logmsg_reencode(repo, target,
+								  ফাঁকা, ফাঁকা);
+			আকার_t subject_len = find_commit_subject(বাফার,
 								 &subject_start);
-			char *subject = xmemdupz(subject_start, subject_len);
+			অক্ষর *subject = xmemdupz(subject_start, subject_len);
 
-			flags = strintmap_get(&data->subjects, subject);
-			free(subject);
-			repo_unuse_commit_buffer(repo, target, buffer);
+			flags = strintmap_get(&তথ্য->subjects, subject);
+			মুক্ত(subject);
+			repo_unuse_commit_বাফার(repo, target, বাফার);
 		}
-		if (flags)
-			return squash_check_can_autosquash(repo, commit,
-							   data, flags);
+		যদি (flags)
+			ফেরত squash_check_can_autosquash(repo, commit,
+							   তথ্য, flags);
 	}
 	/* Try subject prefix matches */
-	strintmap_for_each_entry(&data->subjects, &iter, entry) {
-		s = data->subject.buf;
-		while(skip_one_autosquash_prefix(s, &s)) {
-			if (starts_with(entry->key, s)) {
-				unsigned value = (intptr_t)entry->value;
+	strintmap_for_each_entry(&তথ্য->subjects, &iter, entry) {
+		s = তথ্য->subject.buf;
+		যখন(skip_one_autosquash_prefix(s, &s)) {
+			যদি (starts_with(entry->চাবি, s)) {
+				unsigned মান = (intptr_t)entry->মান;
 
-				return squash_check_can_autosquash(repo, commit,
-								   data, value);
+				ফেরত squash_check_can_autosquash(repo, commit,
+								   তথ্য, মান);
 			}
 		}
 	}
-	return error(_("cannot squash %s (%s): its target is not being "
+	ফেরত error(_("cannot squash %s (%s): its target is not being "
 		       "squashed"),
 		       repo_find_unique_abbrev(repo, &commit->object.oid,
 					       DEFAULT_ABBREV),
-		       data->subject.buf);
+		       তথ্য->subject.buf);
 }
 
-static int squash_check_subject(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data)
+স্থির পূর্ণসংখ্যা squash_check_subject(কাঠামো repository *repo,
+				কাঠামো commit *commit,
+				কাঠামো subject_তথ্য *তথ্য)
 {
-	int ret = 0;
-	const char *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
-	size_t subject_len = find_commit_subject(buf, &data->message);
+	পূর্ণসংখ্যা ret = 0;
+	ধ্রুবক অক্ষর *buf = repo_logmsg_reencode(repo, commit, ফাঁকা, ফাঁকা);
+	আকার_t subject_len = find_commit_subject(buf, &তথ্য->message);
 
-	strbuf_reset(&data->subject);
-	strbuf_add(&data->subject, data->message, subject_len);
+	strbuf_reset(&তথ্য->subject);
+	strbuf_add(&তথ্য->subject, তথ্য->message, subject_len);
 
-	if (!strintmap_get_size(&data->subjects)) {
-		const char *s;
+	যদি (!strintmap_get_আকার(&তথ্য->subjects)) {
+		ধ্রুবক অক্ষর *s;
 
-		strbuf_addstr(&data->squash_message, data->message);
-		strbuf_complete_line(&data->squash_message);
+		strbuf_addstr(&তথ্য->squash_message, তথ্য->message);
+		strbuf_complete_সারি(&তথ্য->squash_message);
 		/*
 		 * Strip a single autosquash prefix to allow squashing
 		 *     fixup! base
 		 *     amend! base
 		 */
-		s = data->subject.buf;
+		s = তথ্য->subject.buf;
 		skip_one_autosquash_prefix(s, &s);
-		strintmap_set(&data->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
+		strintmap_set(&তথ্য->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
 		commit->object.flags |= SQUASH_AMEND_TARGET;
-	} else if (is_autosquash_subject(data->subject.buf)) {
-		ret = squash_check_autosquash_subject(repo, commit, data);
-	} else {
-		strintmap_set(&data->subjects, data->subject.buf, SQUASH_SEEN);
+	} অন্যথা যদি (is_autosquash_subject(তথ্য->subject.buf)) {
+		ret = squash_check_autosquash_subject(repo, commit, তথ্য);
+	} অন্যথা {
+		strintmap_set(&তথ্য->subjects, তথ্য->subject.buf, SQUASH_SEEN);
 	}
-	repo_unuse_commit_buffer(repo, commit, buf);
-	return ret;
+	repo_unuse_commit_বাফার(repo, commit, buf);
+	ফেরত ret;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out);
+স্থির পূর্ণসংখ্যা build_squash_message(কাঠামো repository *repo,
+				ধ্রুবক কাঠামো strbuf *todo_buf,
+				কাঠামো strbuf *out);
 
-static int setup_squash_revisions(struct repository *repo,
-				  int argc, const char **argv,
-				  struct rev_info *revs)
+স্থির পূর্ণসংখ্যা setup_squash_revisions(কাঠামো repository *repo,
+				  পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv,
+				  কাঠামো rev_info *revs)
 {
-	repo_init_revisions(repo, revs, NULL);
+	repo_init_revisions(repo, revs, ফাঁকা);
 	revs->reverse = 1;
 	revs->topo_order = 1;
 	revs->sort_order = REV_SORT_IN_GRAPH_ORDER;
@@ -1288,11 +1288,11 @@ static int setup_squash_revisions(struct repository *repo,
 	revs->limited = 1;
 	revs->ancestry_path_implicit_bottoms = 1;
 
-	argc = setup_revisions(argc, argv, revs, NULL);
-	if (argc > 1)
-		return error(_("unrecognized argument: %s"), argv[1]);
+	argc = setup_revisions(argc, argv, revs, ফাঁকা);
+	যদি (argc > 1)
+		ফেরত error(_("unrecognized argument: %s"), argv[1]);
 
-	if (revs->reverse != 1 || revs->topo_order != 1 ||
+	যদি (revs->reverse != 1 || revs->topo_order != 1 ||
 	    revs->sort_order != REV_SORT_IN_GRAPH_ORDER ||
 	    revs->simplify_history != 0 || revs->boundary == 1 ||
 	    revs->ancestry_path != 1 || revs->limited != 1 ||
@@ -1314,11 +1314,11 @@ static int setup_squash_revisions(struct repository *repo,
 	 * something, as in "<base>..<tip>". A revision range with no such
 	 * bottom commit cannot be squashed.
 	 */
-	for (size_t i = 0; i < revs->cmdline.nr; i++)
-		if (revs->cmdline.rev[i].flags & BOTTOM)
-			return 0;
+	জন্য (আকার_t i = 0; i < revs->cmdline.nr; i++)
+		যদি (revs->cmdline.rev[i].flags & BOTTOM)
+			ফেরত 0;
 
-	return error(_("not a '<base>..<tip>' revision range"));
+	ফেরত error(_("not a '<base>..<tip>' revision range"));
 }
 
 /*
@@ -1326,52 +1326,52 @@ static int setup_squash_revisions(struct repository *repo,
  * parent after the oldest commit must either be selected or also be a parent
  * of the oldest commit.
  */
-static int resolve_squash_range(struct repository *repo,
+স্থির পূর্ণসংখ্যা resolve_squash_range(কাঠামো repository *repo,
 				bool update_branches,
 				bool edit_message,
-				int argc, const char **argv,
-				struct commit **oldest_out,
-				struct commit **tip_out,
-				char **message_out)
+				পূর্ণসংখ্যা argc, ধ্রুবক অক্ষর **argv,
+				কাঠামো commit **oldest_out,
+				কাঠামো commit **tip_out,
+				অক্ষর **message_out)
 {
-	struct rev_info revs;
-	struct subject_data subject_data = SUBJECT_DATA_INIT;
-	struct commit *commit, *oldest = NULL, *tip = NULL;
-	struct strbuf todo_buf = STRBUF_INIT;
-	int ret, tip_count = 0;
+	কাঠামো rev_info revs;
+	কাঠামো subject_তথ্য subject_তথ্য = SUBJECT_তথ্য_INIT;
+	কাঠামো commit *commit, *oldest = ফাঁকা, *tip = ফাঁকা;
+	কাঠামো strbuf todo_buf = STRBUF_INIT;
+	পূর্ণসংখ্যা ret, tip_গুনতি = 0;
 	bool walk_started = false;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array refs = { 0 };
+	কাঠামো ref_filter filter = REF_FILTER_INIT;
+	কাঠামো ref_array refs = { 0 };
 
-	subject_data.edit_message = edit_message;
+	subject_তথ্য.edit_message = edit_message;
 	ret = setup_squash_revisions(repo, argc, argv, &revs);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
-	if (prepare_revision_walk(&revs) < 0) {
+	যদি (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		যাও out;
 	}
 	walk_started = true;
-	while ((commit = get_revision(&revs))) {
-		struct commit_list *p;
+	যখন ((commit = get_revision(&revs))) {
+		কাঠামো commit_list *p;
 
-		if (edit_message)
+		যদি (edit_message)
 			strbuf_addf(&todo_buf, "pick %s\n",
 				    oid_to_hex(&commit->object.oid));
 
-		if (!commit->parents) {
+		যদি (!commit->parents) {
 			ret = error(_("cannot squash down to root commit"));
-			goto out;
+			যাও out;
 		}
-		for (p = commit->parents; oldest && p; p = p->next) {
-			struct commit_list *q;
-			struct object *o;
+		জন্য (p = commit->parents; oldest && p; p = p->পরবর্তী) {
+			কাঠামো commit_list *q;
+			কাঠামো object *o;
 			bool seen;
 
-			if (repo_parse_commit(repo, p->item)) {
+			যদি (repo_parse_commit(repo, p->item)) {
 				ret = error(_("cannot parse commit"));
-				goto out;
+				যাও out;
 			}
 			o = &p->item->object;
 			seen = o->flags & SQUASH_SEEN;
@@ -1379,13 +1379,13 @@ static int resolve_squash_range(struct repository *repo,
 			 * Allow parents that match the parents of the
 			 * squashed commit.
 			 */
-			for (q = oldest->parents; !seen && q; q = q->next) {
-				if (p->item == q->item) {
+			জন্য (q = oldest->parents; !seen && q; q = q->পরবর্তী) {
+				যদি (p->item == q->item) {
 					seen = true;
-					commit_list_insert(commit, &filter.with_commit);
+					commit_list_ঢোকাও(commit, &filter.with_commit);
 				}
 			}
-			if (!seen) {
+			যদি (!seen) {
 				ret = error(_("parent %s of commit %s is "
 					      "outside the revision range"),
 					    repo_find_unique_abbrev(repo, &o->oid,
@@ -1393,68 +1393,68 @@ static int resolve_squash_range(struct repository *repo,
 					    repo_find_unique_abbrev(repo,
 								    &commit->object.oid,
 								    DEFAULT_ABBREV));
-				goto out;
+				যাও out;
 			}
-			if (o->flags & SQUASH_TIP) {
-				tip_count--;
+			যদি (o->flags & SQUASH_TIP) {
+				tip_গুনতি--;
 				o->flags &= ~SQUASH_TIP;
 			}
 		}
-		if (!oldest) {
-			commit_list_insert(commit, &filter.with_commit);
+		যদি (!oldest) {
+			commit_list_ঢোকাও(commit, &filter.with_commit);
 			oldest = commit;
 		}
-		if (squash_check_subject(repo, commit, &subject_data)) {
+		যদি (squash_check_subject(repo, commit, &subject_তথ্য)) {
 			ret = -1;
-			goto out;
+			যাও out;
 		}
 		tip = commit;
 		tip->object.flags |= SQUASH_SEEN | SQUASH_TIP;
-		tip_count++;
+		tip_গুনতি++;
 	}
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP);
 	reset_revision_walk();
 	walk_started = false;
 
-	if (!tip_count) {
+	যদি (!tip_গুনতি) {
 		ret = error(_("the revision range is empty"));
-		goto out;
-	} else if (tip_count != 1) {
+		যাও out;
+	} অন্যথা যদি (tip_গুনতি != 1) {
 		ret = error(_("the revision range contains more than one tip "
 			      "commit"));
-		goto out;
-	} else if (oldest == tip) {
+		যাও out;
+	} অন্যথা যদি (oldest == tip) {
 		ret = error(_("the revision range holds a single commit; "
 			      "nothing to squash"));
-		goto out;
-	} else if (!oldest->parents) {
+		যাও out;
+	} অন্যথা যদি (!oldest->parents) {
 		BUG("an in-range commit must have a parent");
 	}
 
-	commit_list_insert(tip, &filter.no_commit);
+	commit_list_ঢোকাও(tip, &filter.no_commit);
 	filter.kind = FILTER_REFS_BRANCHES;
-	if (update_branches &&
+	যদি (update_branches &&
 	    filter_refs(&refs, &filter, filter.kind)) {
 		ret = error(_("could not filter refs"));
-		goto out;
+		যাও out;
 	}
-	if (refs.nr) {
-		struct ref_format format = REF_FORMAT_INIT;
-		struct ref_sorting *sorting;
-		struct string_list sorting_options = STRING_LIST_INIT_DUP;
-		struct strbuf branches = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	যদি (refs.nr) {
+		কাঠামো ref_format format = REF_FORMAT_INIT;
+		কাঠামো ref_sorting *sorting;
+		কাঠামো string_list sorting_options = STRING_LIST_INIT_DUP;
+		কাঠামো strbuf branches = STRBUF_INIT;
+		কাঠামো strbuf err = STRBUF_INIT;
 
 		format.format = "%(refname:short)";
-		if (verify_ref_format(&format))
+		যদি (verify_ref_format(&format))
 			BUG("invalid branch format");
 		string_list_append(&sorting_options, "refname");
 		sorting = ref_sorting_options(&sorting_options);
 		ref_array_sort(sorting, &refs);
-		for (int i = 0; i < refs.nr; i++) {
+		জন্য (পূর্ণসংখ্যা i = 0; i < refs.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_addstr(&branches, "\n  ");
-			if (format_ref_array_item(refs.items[i], &format,
+			যদি (format_ref_array_item(refs.বস্তুসমূহ[i], &format,
 						  &branches, &err))
 				BUG("could not format branch name: %s", err.buf);
 		}
@@ -1471,94 +1471,94 @@ static int resolve_squash_range(struct repository *repo,
 		strbuf_release(&branches);
 		ref_sorting_release(sorting);
 		string_list_clear(&sorting_options, 0);
-		goto out;
+		যাও out;
 	}
-	if (edit_message) {
-		strbuf_reset(&subject_data.squash_message);
+	যদি (edit_message) {
+		strbuf_reset(&subject_তথ্য.squash_message);
 		ret = build_squash_message(repo, &todo_buf,
-					   &subject_data.squash_message);
-		if (ret < 0)
-			goto out;
+					   &subject_তথ্য.squash_message);
+		যদি (ret < 0)
+			যাও out;
 	}
 
 	*oldest_out = oldest;
 	*tip_out = tip;
-	*message_out = strbuf_detach(&subject_data.squash_message, NULL);
+	*message_out = strbuf_detach(&subject_তথ্য.squash_message, ফাঁকা);
 	ret = 0;
 
 out:
 	strbuf_release(&todo_buf);
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP |
 			   SQUASH_AMEND_TARGET);
-	if (walk_started)
+	যদি (walk_started)
 		reset_revision_walk();
-	subject_data_clear(&subject_data);
+	subject_তথ্য_clear(&subject_তথ্য);
 	release_revisions(&revs);
 	ref_filter_clear(&filter);
 	ref_array_clear(&refs);
-	return ret;
+	ফেরত ret;
 }
 
-static bool amend_replaces_target(struct todo_list *todo, int target)
+স্থির bool amend_replaces_target(কাঠামো todo_list *todo, পূর্ণসংখ্যা target)
 {
-	for (int i = target + 1; i < todo->nr &&
-				 todo->items[i].command != TODO_PICK; i++) {
-		if (todo->items[i].command == TODO_SQUASH)
-			return false;
-		if (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
-			return true;
+	জন্য (পূর্ণসংখ্যা i = target + 1; i < todo->nr &&
+				 todo->বস্তুসমূহ[i].command != TODO_PICK; i++) {
+		যদি (todo->বস্তুসমূহ[i].command == TODO_SQUASH)
+			ফেরত false;
+		যদি (todo->বস্তুসমূহ[i].flags & TODO_REPLACE_FIXUP_বার্তা)
+			ফেরত true;
 	}
-	return false;
+	ফেরত false;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out)
+স্থির পূর্ণসংখ্যা build_squash_message(কাঠামো repository *repo,
+				ধ্রুবক কাঠামো strbuf *todo_buf,
+				কাঠামো strbuf *out)
 {
-	struct todo_list todo = TODO_LIST_INIT;
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int nr_commits, ret;
+	কাঠামো todo_list todo = TODO_LIST_INIT;
+	কাঠামো replay_opts opts = REPLAY_OPTS_INIT;
+	পূর্ণসংখ্যা nr_commits, ret;
 
-	if (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
+	যদি (todo_list_parse_insn_বাফার(repo, &opts, todo_buf->buf, &todo) < 0 ||
 	    todo_list_rearrange_squash(&todo) < 0) {
 		ret = error(_("could not prepare the squash message"));
-		goto out;
+		যাও out;
 	}
 
 	nr_commits = todo.nr;
-	for (int i = 0; i < nr_commits; i++) {
-		struct todo_item *item = &todo.items[i];
-		const char *message, *body;
-		size_t commented_len;
+	জন্য (পূর্ণসংখ্যা i = 0; i < nr_commits; i++) {
+		কাঠামো todo_item *item = &todo.বস্তুসমূহ[i];
+		ধ্রুবক অক্ষর *message, *body;
+		আকার_t commented_len;
 		bool skip, squashing;
 
 		squashing = item->command == TODO_SQUASH ||
-			    (item->flags & TODO_REPLACE_FIXUP_MSG);
-		if (item->command == TODO_PICK)
+			    (item->flags & TODO_REPLACE_FIXUP_বার্তা);
+		যদি (item->command == TODO_PICK)
 			skip = amend_replaces_target(&todo, i);
-		else
+		অন্যথা
 			skip = !squashing;
 
-		message = repo_logmsg_reencode(repo, item->commit, NULL, NULL);
+		message = repo_logmsg_reencode(repo, item->commit, ফাঁকা, ফাঁকা);
 		find_commit_subject(message, &body);
 
-		if (skip)
+		যদি (skip)
 			commented_len = strlen(body);
-		else if (squashing)
+		অন্যথা যদি (squashing)
 			commented_len = squash_subject_comment_len(body, 1);
-		else
+		অন্যথা
 			commented_len = 0;
 
-		if (!i)
+		যদি (!i)
 			add_squash_combination_header(out, nr_commits);
 		strbuf_addch(out, '\n');
 		add_squash_message_header(out, i + 1, skip);
 		strbuf_addstr(out, "\n\n");
-		strbuf_add_commented_lines(out, body, commented_len, comment_line_str);
+		strbuf_add_commented_সারিগুলি(out, body, commented_len, comment_সারি_str);
 		strbuf_addstr(out, body + commented_len);
-		strbuf_complete_line(out);
+		strbuf_complete_সারি(out);
 
-		repo_unuse_commit_buffer(repo, item->commit, message);
+		repo_unuse_commit_বাফার(repo, item->commit, message);
 	}
 
 	ret = 0;
@@ -1566,22 +1566,22 @@ static int build_squash_message(struct repository *repo,
 out:
 	todo_list_release(&todo);
 	replay_opts_release(&opts);
-	return ret;
+	ফেরত ret;
 }
 
-static int cmd_history_squash(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+স্থির পূর্ণসংখ্যা cmd_history_squash(পূর্ণসংখ্যা argc,
+			      ধ্রুবক অক্ষর **argv,
+			      ধ্রুবক অক্ষর *prefix,
+			      কাঠামো repository *repo)
 {
-	const char * const usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক usage[] = {
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		ফাঁকা,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	int edit = 1;
-	struct option options[] = {
+	গণনা ref_action action = REF_ACTION_DEFAULT;
+	পূর্ণসংখ্যা dry_run = 0;
+	পূর্ণসংখ্যা edit = 1;
+	কাঠামো option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1591,145 +1591,145 @@ static int cmd_history_squash(int argc,
 			 N_("edit the commit message")),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *oldest, *tip, *rewritten;
-	const struct object_id *base_tree_oid, *tip_tree_oid;
-	char *message_template = NULL;
-	struct rev_info revs = { 0 };
-	int ret;
+	কাঠামো strbuf reflog_বার্তা = STRBUF_INIT;
+	কাঠামো commit *oldest, *tip, *rewritten;
+	ধ্রুবক কাঠামো object_id *base_বৃক্ষ_oid, *tip_বৃক্ষ_oid;
+	অক্ষর *message_template = ফাঁকা;
+	কাঠামো rev_info revs = { 0 };
+	পূর্ণসংখ্যা ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_ARGV0);
-	if (argc < 2) {
+	যদি (argc < 2) {
 		ret = error(_("command expects a revision range"));
-		goto out;
+		যাও out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ফাঁকা);
 
-	if (action == REF_ACTION_DEFAULT)
+	যদি (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	strbuf_addstr(&reflog_msg, "squash: updating ");
-	strbuf_join_argv(&reflog_msg, argc - 1, argv + 1, ' ');
+	strbuf_addstr(&reflog_বার্তা, "squash: updating ");
+	strbuf_join_argv(&reflog_বার্তা, argc - 1, argv + 1, ' ');
 
 	ret = resolve_squash_range(repo, action == REF_ACTION_BRANCHES,
 				   edit,
 				   argc, argv, &oldest, &tip,
 				   &message_template);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
 	ret = setup_revwalk(repo, action, tip, &revs);
-	if (ret < 0)
-		goto out;
+	যদি (ret < 0)
+		যাও out;
 
-	base_tree_oid = &repo_get_commit_tree(repo,
+	base_বৃক্ষ_oid = &repo_get_commit_বৃক্ষ(repo,
 					oldest->parents->item)->object.oid;
-	tip_tree_oid = &repo_get_commit_tree(repo, tip)->object.oid;
+	tip_বৃক্ষ_oid = &repo_get_commit_বৃক্ষ(repo, tip)->object.oid;
 
-	ret = commit_tree_ext(repo, "squash", oldest, message_template,
-			      oldest->parents, base_tree_oid, tip_tree_oid,
+	ret = commit_বৃক্ষ_ext(repo, "squash", oldest, message_template,
+			      oldest->parents, base_বৃক্ষ_oid, tip_বৃক্ষ_oid,
 			      &rewritten,
-			      edit ? COMMIT_TREE_EDIT_MESSAGE : 0);
-	if (ret < 0) {
+			      edit ? COMMIT_বৃক্ষ_EDIT_MESSAGE : 0);
+	যদি (ret < 0) {
 		ret = error(_("failed writing squashed commit"));
-		goto out;
+		যাও out;
 	}
 
 	ret = handle_reference_updates(&revs, action, tip, rewritten,
-				       reflog_msg.buf, dry_run,
+				       reflog_বার্তা.buf, dry_run,
 				       REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	যদি (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		যাও out;
 	}
 
 	ret = 0;
 
 out:
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_বার্তা);
 	release_revisions(&revs);
-	free(message_template);
-	return ret;
+	মুক্ত(message_template);
+	ফেরত ret;
 }
 
-static int update_worktree(struct repository *repo,
-			   const struct commit *old_head,
-			   const struct commit *new_head,
+স্থির পূর্ণসংখ্যা update_worktree(কাঠামো repository *repo,
+			   ধ্রুবক কাঠামো commit *old_শীর্ষ,
+			   ধ্রুবক কাঠামো commit *new_শীর্ষ,
 			   bool dry_run)
 {
-	struct reset_working_tree_options opts = {
-		.oid_from = &old_head->object.oid,
-		.oid = &new_head->object.oid,
+	কাঠামো reset_working_বৃক্ষ_options opts = {
+		.oid_from = &old_শীর্ষ->object.oid,
+		.oid = &new_শীর্ষ->object.oid,
 	};
-	if (dry_run)
-		opts.flags |= RESET_WORKING_TREE_DRY_RUN;
-	return reset_working_tree(repo, &opts);
+	যদি (dry_run)
+		opts.flags |= RESET_WORKING_বৃক্ষ_DRY_RUN;
+	ফেরত reset_working_বৃক্ষ(repo, &opts);
 }
 
-static int find_head_tree_change(struct repository *repo,
-				 const struct replay_result *result,
-				 struct commit **old_head,
-				 struct commit **new_head,
+স্থির পূর্ণসংখ্যা find_শীর্ষ_বৃক্ষ_change(কাঠামো repository *repo,
+				 ধ্রুবক কাঠামো replay_ফলাফল *ফলাফল,
+				 কাঠামো commit **old_শীর্ষ,
+				 কাঠামো commit **new_শীর্ষ,
 				 bool *changed)
 {
-	const struct replay_ref_update *head_update = NULL;
-	struct commit *old_head_commit, *new_head_commit;
-	struct tree *old_head_tree, *new_head_tree;
-	const char *head_target;
-	int head_flags;
+	ধ্রুবক কাঠামো replay_ref_update *শীর্ষ_update = ফাঁকা;
+	কাঠামো commit *old_শীর্ষ_commit, *new_শীর্ষ_commit;
+	কাঠামো বৃক্ষ *old_শীর্ষ_বৃক্ষ, *new_শীর্ষ_বৃক্ষ;
+	ধ্রুবক অক্ষর *শীর্ষ_target;
+	পূর্ণসংখ্যা শীর্ষ_flags;
 
 	*changed = false;
 
-	head_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
+	শীর্ষ_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
 					      RESOLVE_REF_NO_RECURSE | RESOLVE_REF_READING,
-					      NULL, &head_flags);
-	if (!head_target)
-		return error(_("cannot look up HEAD"));
+					      ফাঁকা, &শীর্ষ_flags);
+	যদি (!শীর্ষ_target)
+		ফেরত error(_("cannot look up HEAD"));
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
-		if (!strcmp(result->updates[i].refname, head_target)) {
-			head_update = &result->updates[i];
-			break;
+	জন্য (আকার_t i = 0; i < ফলাফল->updates_nr; i++) {
+		যদি (!strcmp(ফলাফল->updates[i].refname, শীর্ষ_target)) {
+			শীর্ষ_update = &ফলাফল->updates[i];
+			বিরতি;
 		}
 	}
 
-	if (!head_update)
-		return 0;
+	যদি (!শীর্ষ_update)
+		ফেরত 0;
 
-	old_head_commit = lookup_commit_reference(repo, &head_update->old_oid);
-	new_head_commit = lookup_commit_reference(repo, &head_update->new_oid);
-	if (!old_head_commit || !new_head_commit)
-		return error(_("cannot resolve HEAD commit"));
+	old_শীর্ষ_commit = lookup_commit_reference(repo, &শীর্ষ_update->old_oid);
+	new_শীর্ষ_commit = lookup_commit_reference(repo, &শীর্ষ_update->new_oid);
+	যদি (!old_শীর্ষ_commit || !new_শীর্ষ_commit)
+		ফেরত error(_("cannot resolve HEAD commit"));
 
-	old_head_tree = repo_get_commit_tree(repo, old_head_commit);
-	new_head_tree = repo_get_commit_tree(repo, new_head_commit);
-	if (!old_head_tree || !new_head_tree)
-		return error(_("cannot resolve tree for HEAD"));
+	old_শীর্ষ_বৃক্ষ = repo_get_commit_বৃক্ষ(repo, old_শীর্ষ_commit);
+	new_শীর্ষ_বৃক্ষ = repo_get_commit_বৃক্ষ(repo, new_শীর্ষ_commit);
+	যদি (!old_শীর্ষ_বৃক্ষ || !new_শীর্ষ_বৃক্ষ)
+		ফেরত error(_("cannot resolve tree for HEAD"));
 
-	if (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
-		return 0;
+	যদি (oideq(&old_শীর্ষ_বৃক্ষ->object.oid, &new_শীর্ষ_বৃক্ষ->object.oid))
+		ফেরত 0;
 
-	*old_head = old_head_commit;
-	*new_head = new_head_commit;
+	*old_শীর্ষ = old_শীর্ষ_commit;
+	*new_শীর্ষ = new_শীর্ষ_commit;
 	*changed = true;
 
-	return 0;
+	ফেরত 0;
 }
 
-static int cmd_history_drop(int argc,
-			    const char **argv,
-			    const char *prefix,
-			    struct repository *repo)
+স্থির পূর্ণসংখ্যা cmd_history_drop(পূর্ণসংখ্যা argc,
+			    ধ্রুবক অক্ষর **argv,
+			    ধ্রুবক অক্ষর *prefix,
+			    কাঠামো repository *repo)
 {
-	const char * const usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক usage[] = {
 		GIT_HISTORY_DROP_USAGE,
-		NULL,
+		ফাঁকা,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	গণনা replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
+	গণনা ref_action action = REF_ACTION_DEFAULT;
+	পূর্ণসংখ্যা dry_run = 0;
+	কাঠামো option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
@@ -1740,51 +1740,51 @@ static int cmd_history_drop(int argc,
 			       PARSE_OPT_NONEG, parse_opt_empty),
 		OPT_END(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	struct replay_result result = { 0 };
-	struct commit *old_head, *new_head;
-	bool head_moves = false;
-	int ret;
+	কাঠামো strbuf reflog_বার্তা = STRBUF_INIT;
+	কাঠামো commit *original, *rewritten;
+	কাঠামো rev_info revs = { 0 };
+	কাঠামো replay_ফলাফল ফলাফল = { 0 };
+	কাঠামো commit *old_শীর্ষ, *new_শীর্ষ;
+	bool শীর্ষ_moves = false;
+	পূর্ণসংখ্যা ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	যদি (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		যাও out;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ফাঁকা);
 
-	if (action == REF_ACTION_DEFAULT)
+	যদি (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	যদি (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		যাও out;
 	}
 
-	if (!original->parents) {
+	যদি (!original->parents) {
 		ret = error(_("cannot drop root commit %s: "
 			      "it has no parent to replay onto"),
 			    argv[0]);
-		goto out;
-	} else if (original->parents->next) {
+		যাও out;
+	} অন্যথা যদি (original->parents->পরবর্তী) {
 		ret = error(_("cannot drop merge commit: %s"), argv[0]);
-		goto out;
+		যাও out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	যদি (ret)
+		যাও out;
 
 	rewritten = original->parents->item;
 
 	ret = compute_pending_ref_updates(&revs, action, original, rewritten,
-					  empty, &result);
-	if (ret) {
+					  empty, &ফলাফল);
+	যদি (ret) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		যাও out;
 	}
 
 	/*
@@ -1796,56 +1796,56 @@ static int cmd_history_drop(int argc,
 	 * inconsistent repository state. So we first perform a dry-run merge
 	 * here before updating refs.
 	 */
-	if (!is_bare_repository(repo)) {
-		ret = find_head_tree_change(repo, &result, &old_head,
-					    &new_head, &head_moves);
-		if (ret < 0)
-			goto out;
+	যদি (!is_bare_repository(repo)) {
+		ret = find_শীর্ষ_বৃক্ষ_change(repo, &ফলাফল, &old_শীর্ষ,
+					    &new_শীর্ষ, &শীর্ষ_moves);
+		যদি (ret < 0)
+			যাও out;
 
-		if (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
+		যদি (শীর্ষ_moves && update_worktree(repo, old_শীর্ষ, new_শীর্ষ, true) < 0) {
 			ret = error(_("dropping this commit would "
 				      "overwrite local changes; aborting"));
-			goto out;
+			যাও out;
 		}
 	}
 
-	strbuf_addf(&reflog_msg, "drop: dropping %s", argv[0]);
-	ret = apply_pending_ref_updates(repo, &result, reflog_msg.buf, dry_run);
-	if (ret < 0) {
+	strbuf_addf(&reflog_বার্তা, "drop: dropping %s", argv[0]);
+	ret = apply_pending_ref_updates(repo, &ফলাফল, reflog_বার্তা.buf, dry_run);
+	যদি (ret < 0) {
 		ret = error(_("failed to update references"));
-		goto out;
+		যাও out;
 	}
 
-	if (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
+	যদি (!dry_run && শীর্ষ_moves && update_worktree(repo, old_শীর্ষ, new_শীর্ষ, false) < 0) {
 		ret = error(_("could not update working tree to new commit %s"),
-			    oid_to_hex(&new_head->object.oid));
-		goto out;
+			    oid_to_hex(&new_শীর্ষ->object.oid));
+		যাও out;
 	}
 
 	ret = 0;
 
 out:
-	replay_result_release(&result);
-	strbuf_release(&reflog_msg);
+	replay_ফলাফল_release(&ফলাফল);
+	strbuf_release(&reflog_বার্তা);
 	release_revisions(&revs);
-	return ret;
+	ফেরত ret;
 }
 
-int cmd_history(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+পূর্ণসংখ্যা cmd_history(পূর্ণসংখ্যা argc,
+		ধ্রুবক অক্ষর **argv,
+		ধ্রুবক অক্ষর *prefix,
+		কাঠামো repository *repo)
 {
-	const char * const usage[] = {
+	ধ্রুবক অক্ষর * ধ্রুবক usage[] = {
 		GIT_HISTORY_DROP_USAGE,
 		GIT_HISTORY_FIXUP_USAGE,
 		GIT_HISTORY_REWORD_USAGE,
 		GIT_HISTORY_SPLIT_USAGE,
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		ফাঁকা,
 	};
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ফাঁকা;
+	কাঠামো option options[] = {
 		OPT_SUBCOMMAND("drop", &fn, cmd_history_drop),
 		OPT_SUBCOMMAND("fixup", &fn, cmd_history_fixup),
 		OPT_SUBCOMMAND("reword", &fn, cmd_history_reword),
@@ -1855,5 +1855,5 @@ int cmd_history(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	return fn(argc, argv, prefix, repo);
+	ফেরত fn(argc, argv, prefix, repo);
 }
