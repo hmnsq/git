@@ -25,26 +25,26 @@
 #include "packfile.h"
 #include "path-walk.h"
 
-static const char * const builtin_backfill_usage[] = {
+static const var_na * const builtin_backfill_usage[] = {
 	N_("git backfill [--min-batch-size=<n>] [--[no-]sparse] [--[no-]include-edges] [<revision-range>]"),
 	NULL
 };
 
-struct backfill_context {
-	struct repository *repo;
-	struct oid_array current_batch;
+sa_nracanaa backfill_context {
+	sa_nracanaa repository *repo;
+	sa_nracanaa oid_array current_batch;
 	size_t min_batch_size;
-	int sparse;
-	int include_edges;
-	struct rev_info revs;
+	puur_naa_nka sparse;
+	puur_naa_nka include_edges;
+	sa_nracanaa rev_info revs;
 };
 
-static void backfill_context_clear(struct backfill_context *ctx)
+static void backfill_context_clear(sa_nracanaa backfill_context *ctx)
 {
 	oid_array_clear(&ctx->current_batch);
 }
 
-static void download_batch(struct backfill_context *ctx)
+static void download_batch(sa_nracanaa backfill_context *ctx)
 {
 	promisor_remote_get_direct(ctx->repo,
 				   ctx->current_batch.oid,
@@ -58,68 +58,68 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
-			      struct oid_array *list,
-			      enum object_type type,
+static puur_naa_nka fill_missing_blobs(const var_na *path UNUSED,
+			      sa_nracanaa oid_array *list,
+			      ga_nanaa object_type type,
 			      void *data)
 {
-	struct backfill_context *ctx = data;
+	sa_nracanaa backfill_context *ctx = data;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	ᬬᬾᬦ᭄ (type != OBJ_BLOB)
+		ᬯᬮᬶ 0;
 
 	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+		ᬬᬾᬦ᭄ (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	ᬬᬾᬦ᭄ (ctx->current_batch.nr >= ctx->min_batch_size)
 		download_batch(ctx);
 
-	return 0;
+	ᬯᬮᬶ 0;
 }
 
-static void reject_unsupported_rev_list_options(struct rev_info *revs)
+static void reject_unsupported_rev_list_options(sa_nracanaa rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	ᬬᬾᬦ᭄ (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	ᬬᬾᬦ᭄ (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	ᬬᬾᬦ᭄ (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	ᬬᬾᬦ᭄ (revs->line_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	ᬬᬾᬦ᭄ (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	ᬬᬾᬦ᭄ (!path_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	ᬬᬾᬦ᭄ (revs->filter.blob_limit_value)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+static puur_naa_nka do_backfill(sa_nracanaa backfill_context *ctx)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	sa_nracanaa path_walk_info info = PATH_WALK_INFO_INIT;
+	puur_naa_nka ret;
 
-	if (ctx->sparse) {
+	ᬬᬾᬦ᭄ (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
+		ᬬᬾᬦ᭄ (get_sparse_checkout_patterns(info.pl)) {
 			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+			ᬯᬮᬶ error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
+	ᬬᬾᬦ᭄ (!ctx->revs.pending.nr)
 		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
+	ᬬᬾᬦ᭄ (ctx->include_edges)
 		ctx->revs.edge_hint = 1;
 
 	info.blobs = 1;
@@ -132,17 +132,17 @@ static int do_backfill(struct backfill_context *ctx)
 	ret = walk_objects_by_path(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	ᬬᬾᬦ᭄ (!ret)
 		download_batch(ctx);
 
 	path_walk_info_clear(&info);
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+puur_naa_nka cmd_backfill(puur_naa_nka argc, const var_na **argv, const var_na *prefix, sa_nracanaa repository *repo)
 {
-	int result;
-	struct backfill_context ctx = {
+	puur_naa_nka result;
+	sa_nracanaa backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
 		.min_batch_size = 50000,
@@ -150,7 +150,7 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 		.revs = REV_INFO_INIT,
 		.include_edges = 1,
 	};
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_size,
 			     N_("Minimum number of objects to request at a time")),
 		OPT_BOOL(0, "sparse", &ctx.sparse,
@@ -159,7 +159,7 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 			 N_("Include blobs from boundary commits in the backfill")),
 		OPT_END(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	sa_nracanaa repo_config_values *cfg = repo_config_values(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);
@@ -172,17 +172,17 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 	repo_init_revisions(repo, &ctx.revs, prefix);
 	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
 
-	if (argc > 1)
+	ᬬᬾᬦ᭄ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
 	repo_config(repo, git_default_config, NULL);
 
-	if (ctx.sparse < 0)
+	ᬬᬾᬦ᭄ (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
 	result = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	ᬯᬮᬶ result;
 }

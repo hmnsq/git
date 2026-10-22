@@ -29,7 +29,7 @@
 #define DIFF_NO_INDEX_EXPLICIT 1
 #define DIFF_NO_INDEX_IMPLICIT 2
 
-static const char builtin_diff_usage[] =
+static const var_na builtin_diff_usage[] =
 "git diff [<options>] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] --cached [--merge-base] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] [--merge-base] <commit> [<commit>...] <commit> [--] [<path>...]\n"
@@ -39,36 +39,36 @@ static const char builtin_diff_usage[] =
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static const char *blob_path(struct object_array_entry *entry)
+static const var_na *blob_path(sa_nracanaa object_array_entry *entry)
 {
-	return entry->path ? entry->path : entry->name;
+	ᬯᬮᬶ entry->path ? entry->path : entry->name;
 }
 
-static void stuff_change(struct diff_options *opt,
+static void stuff_change(sa_nracanaa diff_options *opt,
 			 unsigned old_mode, unsigned new_mode,
-			 const struct object_id *old_oid,
-			 const struct object_id *new_oid,
-			 int old_oid_valid,
-			 int new_oid_valid,
-			 const char *old_path,
-			 const char *new_path)
+			 const sa_nracanaa object_id *old_oid,
+			 const sa_nracanaa object_id *new_oid,
+			 puur_naa_nka old_oid_valid,
+			 puur_naa_nka new_oid_valid,
+			 const var_na *old_path,
+			 const var_na *new_path)
 {
-	struct diff_filespec *one, *two;
+	sa_nracanaa diff_filespec *one, *two;
 
-	if (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
+	ᬬᬾᬦ᭄ (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
 	    oideq(old_oid, new_oid) && (old_mode == new_mode))
-		return;
+		ᬯᬮᬶ;
 
-	if (opt->flags.reverse_diff) {
+	ᬬᬾᬦ᭄ (opt->flags.reverse_diff) {
 		SWAP(old_mode, new_mode);
 		SWAP(old_oid, new_oid);
 		SWAP(old_path, new_path);
 	}
 
-	if (opt->prefix &&
+	ᬬᬾᬦ᭄ (opt->prefix &&
 	    (strncmp(old_path, opt->prefix, opt->prefix_length) ||
 	     strncmp(new_path, opt->prefix, opt->prefix_length)))
-		return;
+		ᬯᬮᬶ;
 
 	one = alloc_filespec(old_path);
 	two = alloc_filespec(new_path);
@@ -78,28 +78,28 @@ static void stuff_change(struct diff_options *opt,
 	diff_queue(&diff_queued_diff, one, two);
 }
 
-static void builtin_diff_b_f(struct rev_info *revs,
-			     int argc, const char **argv UNUSED,
-			     struct object_array_entry **blob)
+static void builtin_diff_b_f(sa_nracanaa rev_info *revs,
+			     puur_naa_nka argc, const var_na **argv UNUSED,
+			     sa_nracanaa object_array_entry **blob)
 {
 	/* Blob vs file in the working tree*/
-	struct stat st;
-	const char *path;
+	sa_nracanaa stat st;
+	const var_na *path;
 
-	if (argc > 1)
+	ᬬᬾᬦ᭄ (argc > 1)
 		usage(builtin_diff_usage);
 
 	GUARD_PATHSPEC(&revs->prune_data, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
 	path = revs->prune_data.items[0].match;
 
-	if (lstat(path, &st))
+	ᬬᬾᬦ᭄ (lstat(path, &st))
 		die_errno(_("failed to stat '%s'"), path);
-	if (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
+	ᬬᬾᬦ᭄ (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
 		die(_("'%s': not a regular file or symlink"), path);
 
 	diff_set_mnemonic_prefix(&revs->diffopt, "o/", "w/");
 
-	if (blob[0]->mode == S_IFINVALID)
+	ᬬᬾᬦ᭄ (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = canon_mode(st.st_mode);
 
 	stuff_change(&revs->diffopt,
@@ -112,19 +112,19 @@ static void builtin_diff_b_f(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_blobs(struct rev_info *revs,
-			       int argc, const char **argv UNUSED,
-			       struct object_array_entry **blob)
+static void builtin_diff_blobs(sa_nracanaa rev_info *revs,
+			       puur_naa_nka argc, const var_na **argv UNUSED,
+			       sa_nracanaa object_array_entry **blob)
 {
 	const unsigned mode = canon_mode(S_IFREG | 0644);
 
-	if (argc > 1)
+	ᬬᬾᬦ᭄ (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (blob[0]->mode == S_IFINVALID)
+	ᬬᬾᬦ᭄ (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = mode;
 
-	if (blob[1]->mode == S_IFINVALID)
+	ᬬᬾᬦ᭄ (blob[1]->mode == S_IFINVALID)
 		blob[1]->mode = mode;
 
 	stuff_change(&revs->diffopt,
@@ -136,17 +136,17 @@ static void builtin_diff_blobs(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_index(struct rev_info *revs,
-			       int argc, const char **argv)
+static void builtin_diff_index(sa_nracanaa rev_info *revs,
+			       puur_naa_nka argc, const var_na **argv)
 {
-	unsigned int option = 0;
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
+	unsigned puur_naa_nka option = 0;
+	ᬲᭂᬤᭂᬮ (1 < argc) {
+		const var_na *arg = argv[1];
+		ᬬᬾᬦ᭄ (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else
+		ᬮᬶᬬ
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
@@ -154,52 +154,52 @@ static void builtin_diff_index(struct rev_info *revs,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (revs->pending.nr != 1 ||
+	ᬬᬾᬦ᭄ (revs->pending.nr != 1 ||
 	    revs->max_count != -1 || revs->min_age != -1 ||
 	    revs->max_age != -1)
 		usage(builtin_diff_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
+	ᬬᬾᬦ᭄ (!(option & DIFF_INDEX_CACHED)) {
 		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository,
+		ᬬᬾᬦ᭄ (repo_read_index_preload(the_repository,
 					    &revs->diffopt.pathspec, 0) < 0) {
 			die_errno("repo_read_index_preload");
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} ᬮᬶᬬ ᬬᬾᬦ᭄ (repo_read_index(the_repository) < 0) {
 		die_errno("repo_read_cache");
 	}
 	run_diff_index(revs, option);
 }
 
-static void builtin_diff_tree(struct rev_info *revs,
-			      int argc, const char **argv,
-			      struct object_array_entry *ent0,
-			      struct object_array_entry *ent1)
+static void builtin_diff_tree(sa_nracanaa rev_info *revs,
+			      puur_naa_nka argc, const var_na **argv,
+			      sa_nracanaa object_array_entry *ent0,
+			      sa_nracanaa object_array_entry *ent1)
 {
-	const struct object_id *(oid[2]);
-	struct object_id mb_oid;
-	int merge_base = 0;
+	const sa_nracanaa object_id *(oid[2]);
+	sa_nracanaa object_id mb_oid;
+	puur_naa_nka merge_base = 0;
 
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--merge-base"))
+	ᬲᭂᬤᭂᬮ (1 < argc) {
+		const var_na *arg = argv[1];
+		ᬬᬾᬦ᭄ (!strcmp(arg, "--merge-base"))
 			merge_base = 1;
-		else
+		ᬮᬶᬬ
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
 
-	if (merge_base) {
+	ᬬᬾᬦ᭄ (merge_base) {
 		diff_get_merge_base(revs, &mb_oid);
 		oid[0] = &mb_oid;
 		oid[1] = &revs->pending.objects[1].item->oid;
-	} else {
-		int swap = 0;
+	} ᬮᬶᬬ {
+		puur_naa_nka swap = 0;
 
 		/*
 		 * We saw two trees, ent0 and ent1.  If ent1 is uninteresting,
 		 * swap them.
 		 */
-		if (ent1->item->flags & UNINTERESTING)
+		ᬬᬾᬦ᭄ (ent1->item->flags & UNINTERESTING)
 			swap = 1;
 		oid[swap] = &ent0->item->oid;
 		oid[1 - swap] = &ent1->item->oid;
@@ -208,26 +208,26 @@ static void builtin_diff_tree(struct rev_info *revs,
 	log_tree_diff_flush(revs);
 }
 
-static void builtin_diff_combined(struct rev_info *revs,
-				  int argc, const char **argv UNUSED,
-				  struct object_array_entry *ent,
-				  int ents, int first_non_parent)
+static void builtin_diff_combined(sa_nracanaa rev_info *revs,
+				  puur_naa_nka argc, const var_na **argv UNUSED,
+				  sa_nracanaa object_array_entry *ent,
+				  puur_naa_nka ents, puur_naa_nka first_non_parent)
 {
-	struct oid_array parents = OID_ARRAY_INIT;
-	int i;
+	sa_nracanaa oid_array parents = OID_ARRAY_INIT;
+	puur_naa_nka i;
 
-	if (argc > 1)
+	ᬬᬾᬦ᭄ (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (first_non_parent < 0)
+	ᬬᬾᬦ᭄ (first_non_parent < 0)
 		die(_("no merge given, only parents."));
-	if (first_non_parent >= ents)
+	ᬬᬾᬦ᭄ (first_non_parent >= ents)
 		BUG("first_non_parent out of range: %d", first_non_parent);
 
 	diff_merges_set_dense_combined_if_unset(revs);
 
 	for (i = 0; i < ents; i++) {
-		if (i != first_non_parent)
+		ᬬᬾᬦ᭄ (i != first_non_parent)
 			oid_array_append(&parents, &ent[i].item->oid);
 	}
 	diff_tree_combined(&ent[first_non_parent].item->oid, &parents, revs);
@@ -236,12 +236,12 @@ static void builtin_diff_combined(struct rev_info *revs,
 
 static void refresh_index_quietly(void)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
+	sa_nracanaa lock_file lock_file = LOCK_INIT;
+	puur_naa_nka fd;
 
 	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (fd < 0)
-		return;
+	ᬬᬾᬦ᭄ (fd < 0)
+		ᬯᬮᬶ;
 	discard_index(the_repository->index);
 	repo_read_index(the_repository);
 	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, NULL, NULL,
@@ -249,22 +249,22 @@ static void refresh_index_quietly(void)
 	repo_update_index_if_able(the_repository, &lock_file);
 }
 
-static void builtin_diff_files(struct rev_info *revs, int argc, const char **argv)
+static void builtin_diff_files(sa_nracanaa rev_info *revs, puur_naa_nka argc, const var_na **argv)
 {
-	unsigned int options = 0;
+	unsigned puur_naa_nka options = 0;
 
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
+	ᬲᭂᬤᭂᬮ (1 < argc && argv[1][0] == '-') {
+		ᬬᬾᬦ᭄ (!strcmp(argv[1], "--base"))
 			revs->max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(argv[1], "--ours"))
 			revs->max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(argv[1], "--theirs"))
 			revs->max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else if (!strcmp(argv[1], "-h"))
+		ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(argv[1], "-h"))
 			usage(builtin_diff_usage);
-		else {
+		ᬮᬶᬬ {
 			error(_("invalid option: %s"), argv[1]);
 			usage(builtin_diff_usage);
 		}
@@ -277,22 +277,22 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 	 * dense one, --cc can be explicitly asked for, or just rely
 	 * on the default).
 	 */
-	if (revs->max_count == -1 &&
+	ᬬᬾᬦ᭄ (revs->max_count == -1 &&
 	    (revs->diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(revs);
 
 	setup_work_tree(the_repository);
-	if (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
+	ᬬᬾᬦ᭄ (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
 				    0) < 0) {
 		die_errno("repo_read_index_preload");
 	}
 	run_diff_files(revs, options);
 }
 
-struct symdiff {
-	struct bitmap *skip;
-	int warn;
-	const char *base, *left, *right;
+sa_nracanaa symdiff {
+	sa_nracanaa bitmap *skip;
+	puur_naa_nka warn;
+	const var_na *base, *left, *right;
 };
 
 /*
@@ -314,11 +314,11 @@ struct symdiff {
  * If there is no symmetric diff argument, sym->skip is NULL and
  * sym->warn is cleared.  The remaining fields are not set.
  */
-static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
+static void symdiff_prepare(sa_nracanaa rev_info *rev, sa_nracanaa symdiff *sym)
 {
-	int i, is_symdiff = 0, basecount = 0, othercount = 0;
-	int lpos = -1, rpos = -1, basepos = -1;
-	struct bitmap *map = NULL;
+	puur_naa_nka i, is_symdiff = 0, basecount = 0, othercount = 0;
+	puur_naa_nka lpos = -1, rpos = -1, basepos = -1;
+	sa_nracanaa bitmap *map = NULL;
 
 	/*
 	 * Use the whence fields to find merge bases and left and
@@ -336,34 +336,34 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	 * rev->pending.objects and rev->cmdline.rev are parallel.
 	 */
 	for (i = 0; i < rev->cmdline.nr; i++) {
-		struct object *obj = rev->pending.objects[i].item;
+		sa_nracanaa object *obj = rev->pending.objects[i].item;
 		switch (rev->cmdline.rev[i].whence) {
-		case REV_CMD_MERGE_BASE:
-			if (basepos < 0)
+		pak_sa REV_CMD_MERGE_BASE:
+			ᬬᬾᬦ᭄ (basepos < 0)
 				basepos = i;
 			basecount++;
-			break;		/* do mark all bases */
-		case REV_CMD_LEFT:
-			if (lpos >= 0)
+			bha_nga;		/* do mark all bases */
+		pak_sa REV_CMD_LEFT:
+			ᬬᬾᬦ᭄ (lpos >= 0)
 				usage(builtin_diff_usage);
 			lpos = i;
-			if (obj->flags & SYMMETRIC_LEFT) {
+			ᬬᬾᬦ᭄ (obj->flags & SYMMETRIC_LEFT) {
 				is_symdiff = 1;
-				break;	/* do mark A */
+				bha_nga;	/* do mark A */
 			}
 			continue;
-		case REV_CMD_RIGHT:
-			if (rpos >= 0)
+		pak_sa REV_CMD_RIGHT:
+			ᬬᬾᬦ᭄ (rpos >= 0)
 				usage(builtin_diff_usage);
 			rpos = i;
 			continue;	/* don't mark B */
-		case REV_CMD_PARENTS_ONLY:
-		case REV_CMD_REF:
-		case REV_CMD_REV:
+		pak_sa REV_CMD_PARENTS_ONLY:
+		pak_sa REV_CMD_REF:
+		pak_sa REV_CMD_REV:
 			othercount++;
 			continue;
 		}
-		if (!map)
+		ᬬᬾᬦ᭄ (!map)
 			map = bitmap_new();
 		bitmap_set(map, i);
 	}
@@ -371,19 +371,19 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	/*
 	 * Forbid any additional revs for both A...B and A..B.
 	 */
-	if (lpos >= 0 && othercount > 0)
+	ᬬᬾᬦ᭄ (lpos >= 0 && othercount > 0)
 		usage(builtin_diff_usage);
 
-	if (!is_symdiff) {
+	ᬬᬾᬦ᭄ (!is_symdiff) {
 		bitmap_free(map);
 		sym->warn = 0;
 		sym->skip = NULL;
-		return;
+		ᬯᬮᬶ;
 	}
 
 	sym->left = rev->pending.objects[lpos].name;
 	sym->right = rev->pending.objects[rpos].name;
-	if (basecount == 0)
+	ᬬᬾᬦ᭄ (basecount == 0)
 		die(_("%s...%s: no merge base"), sym->left, sym->right);
 	sym->base = rev->pending.objects[basepos].name;
 	bitmap_unset(map, basepos);	/* unmark the base we want */
@@ -391,25 +391,25 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	sym->skip = map;
 }
 
-static void symdiff_release(struct symdiff *sdiff)
+static void symdiff_release(sa_nracanaa symdiff *sdiff)
 {
 	bitmap_free(sdiff->skip);
 }
 
-int cmd_diff(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+puur_naa_nka cmd_diff(puur_naa_nka argc,
+	     const var_na **argv,
+	     const var_na *prefix,
+	     sa_nracanaa repository *repo UNUSED)
 {
-	int i;
-	struct rev_info rev;
-	struct object_array ent = OBJECT_ARRAY_INIT;
-	int first_non_parent = -1;
-	int blobs = 0, paths = 0;
-	struct object_array_entry *blob[2];
-	int nongit = 0, no_index = 0;
-	int result;
-	struct symdiff sdiff;
+	puur_naa_nka i;
+	sa_nracanaa rev_info rev;
+	sa_nracanaa object_array ent = OBJECT_ARRAY_INIT;
+	puur_naa_nka first_non_parent = -1;
+	puur_naa_nka blobs = 0, paths = 0;
+	sa_nracanaa object_array_entry *blob[2];
+	puur_naa_nka nongit = 0, no_index = 0;
+	puur_naa_nka result;
+	sa_nracanaa symdiff sdiff;
 
 	/*
 	 * We could get N tree-ish in the rev.pending_objects list.
@@ -445,24 +445,24 @@ int cmd_diff(int argc,
 
 	/* Were we asked to do --no-index explicitly? */
 	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+		ᬬᬾᬦ᭄ (!strcmp(argv[i], "--")) {
 			i++;
-			break;
+			bha_nga;
 		}
-		if (!strcmp(argv[i], "--no-index"))
+		ᬬᬾᬦ᭄ (!strcmp(argv[i], "--no-index"))
 			no_index = DIFF_NO_INDEX_EXPLICIT;
-		if (argv[i][0] != '-')
-			break;
+		ᬬᬾᬦ᭄ (argv[i][0] != '-')
+			bha_nga;
 	}
 
 	prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (!nongit) {
+	ᬬᬾᬦ᭄ (!nongit) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	if (!no_index) {
+	ᬬᬾᬦ᭄ (!no_index) {
 		/*
 		 * Treat git diff with at least one path outside of the
 		 * repo the same as if the command would have been executed
@@ -470,7 +470,7 @@ int cmd_diff(int argc,
 		 * the same way as "git diff --no-index <a> <b>", which acts
 		 * as a colourful "diff" replacement.
 		 */
-		if (nongit || ((argc == i + 2) &&
+		ᬬᬾᬦ᭄ (nongit || ((argc == i + 2) &&
 			       (!path_inside_repo(the_repository, prefix, argv[i]) ||
 				!path_inside_repo(the_repository, prefix, argv[i + 1]))))
 			no_index = DIFF_NO_INDEX_IMPLICIT;
@@ -482,7 +482,7 @@ int cmd_diff(int argc,
 	 * default to SHA1 here, but may eventually want to change this to be
 	 * configurable via a command line option.
 	 */
-	if (nongit)
+	ᬬᬾᬦ᭄ (nongit)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	init_diff_ui_defaults();
@@ -496,8 +496,8 @@ int cmd_diff(int argc,
 	 * the working tree.  Where we came from is recorded in the
 	 * prefix.
 	 */
-	if (no_index && prefix) {
-		if (chdir(prefix))
+	ᬬᬾᬦ᭄ (no_index && prefix) {
+		ᬬᬾᬦ᭄ (chdir(prefix))
 			die(_("cannot come back to cwd"));
 		prefix = NULL;
 	}
@@ -512,7 +512,7 @@ int cmd_diff(int argc,
 	rev.diffopt.flags.allow_textconv = 1;
 
 	/* If this is a no-index diff, just run it and exit there. */
-	if (no_index)
+	ᬬᬾᬦ᭄ (no_index)
 		exit(diff_no_index(&rev, the_repository->hash_algo,
 				   no_index == DIFF_NO_INDEX_IMPLICIT,
 				   argc, argv));
@@ -531,10 +531,10 @@ int cmd_diff(int argc,
 	 */
 	rev.diffopt.ita_invisible_in_index = 1;
 
-	if (nongit)
+	ᬬᬾᬦ᭄ (nongit)
 		die(_("Not a git repository"));
 	argc = setup_revisions(argc, argv, &rev, NULL);
-	if (!rev.diffopt.output_format) {
+	ᬬᬾᬦ᭄ (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
@@ -548,108 +548,108 @@ int cmd_diff(int argc,
 	 * Do we have --cached and not have a pending object, then
 	 * default to HEAD by hand.  Eek.
 	 */
-	if (!rev.pending.nr) {
-		int i;
+	ᬬᬾᬦ᭄ (!rev.pending.nr) {
+		puur_naa_nka i;
 		for (i = 1; i < argc; i++) {
-			const char *arg = argv[i];
-			if (!strcmp(arg, "--"))
-				break;
-			else if (!strcmp(arg, "--cached") ||
+			const var_na *arg = argv[i];
+			ᬬᬾᬦ᭄ (!strcmp(arg, "--"))
+				bha_nga;
+			ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(arg, "--cached") ||
 				 !strcmp(arg, "--staged")) {
 				add_head_to_pending(&rev);
-				if (!rev.pending.nr) {
-					struct tree *tree;
+				ᬬᬾᬦ᭄ (!rev.pending.nr) {
+					sa_nracanaa tree *tree;
 					tree = lookup_tree(the_repository,
 							   the_repository->hash_algo->empty_tree);
 					add_pending_object(&rev, &tree->object, "HEAD");
 				}
-				break;
+				bha_nga;
 			}
 		}
 	}
 
 	symdiff_prepare(&rev, &sdiff);
 	for (i = 0; i < rev.pending.nr; i++) {
-		struct object_array_entry *entry = &rev.pending.objects[i];
-		struct object *obj = entry->item;
-		const char *name = entry->name;
-		int flags = (obj->flags & UNINTERESTING);
-		if (!obj->parsed)
+		sa_nracanaa object_array_entry *entry = &rev.pending.objects[i];
+		sa_nracanaa object *obj = entry->item;
+		const var_na *name = entry->name;
+		puur_naa_nka flags = (obj->flags & UNINTERESTING);
+		ᬬᬾᬦ᭄ (!obj->parsed)
 			obj = parse_object(the_repository, &obj->oid);
 		obj = deref_tag(the_repository, obj, NULL, 0);
-		if (!obj)
+		ᬬᬾᬦ᭄ (!obj)
 			die(_("invalid object '%s' given."), name);
-		if (obj->type == OBJ_COMMIT) {
-			struct tree *tree = repo_get_commit_tree(
-				the_repository, (struct commit *)obj);
-			if (!tree)
+		ᬬᬾᬦ᭄ (obj->type == OBJ_COMMIT) {
+			sa_nracanaa tree *tree = repo_get_commit_tree(
+				the_repository, (sa_nracanaa commit *)obj);
+			ᬬᬾᬦ᭄ (!tree)
 				die(_("unable to read tree object for commit '%s'"), name);
 			obj = &tree->object;
 		}
 
-		if (obj->type == OBJ_TREE) {
-			if (sdiff.skip && bitmap_get(sdiff.skip, i))
+		ᬬᬾᬦ᭄ (obj->type == OBJ_TREE) {
+			ᬬᬾᬦ᭄ (sdiff.skip && bitmap_get(sdiff.skip, i))
 				continue;
 			obj->flags |= flags;
 			add_object_array(obj, name, &ent);
-			if (first_non_parent < 0 &&
+			ᬬᬾᬦ᭄ (first_non_parent < 0 &&
 			    (i >= rev.cmdline.nr || /* HEAD by hand. */
 			     rev.cmdline.rev[i].whence != REV_CMD_PARENTS_ONLY))
 				first_non_parent = ent.nr - 1;
-		} else if (obj->type == OBJ_BLOB) {
-			if (2 <= blobs)
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ (obj->type == OBJ_BLOB) {
+			ᬬᬾᬦ᭄ (2 <= blobs)
 				die(_("more than two blobs given: '%s'"), name);
 			blob[blobs] = entry;
 			blobs++;
 
-		} else {
+		} ᬮᬶᬬ {
 			die(_("unhandled object '%s' given."), name);
 		}
 	}
-	if (rev.prune_data.nr)
+	ᬬᬾᬦ᭄ (rev.prune_data.nr)
 		paths += rev.prune_data.nr;
 
 	/*
 	 * Now, do the arguments look reasonable?
 	 */
-	if (!ent.nr) {
+	ᬬᬾᬦ᭄ (!ent.nr) {
 		switch (blobs) {
-		case 0:
+		pak_sa 0:
 			builtin_diff_files(&rev, argc, argv);
-			break;
-		case 1:
-			if (paths != 1)
+			bha_nga;
+		pak_sa 1:
+			ᬬᬾᬦ᭄ (paths != 1)
 				usage(builtin_diff_usage);
 			builtin_diff_b_f(&rev, argc, argv, blob);
-			break;
-		case 2:
-			if (paths)
+			bha_nga;
+		pak_sa 2:
+			ᬬᬾᬦ᭄ (paths)
 				usage(builtin_diff_usage);
 			builtin_diff_blobs(&rev, argc, argv, blob);
-			break;
+			bha_nga;
 		default:
 			usage(builtin_diff_usage);
 		}
 	}
-	else if (blobs)
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (blobs)
 		usage(builtin_diff_usage);
-	else if (ent.nr == 1)
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (ent.nr == 1)
 		builtin_diff_index(&rev, argc, argv);
-	else if (ent.nr == 2) {
-		if (sdiff.warn)
+	ᬮᬶᬬ ᬬᬾᬦ᭄ (ent.nr == 2) {
+		ᬬᬾᬦ᭄ (sdiff.warn)
 			warning(_("%s...%s: multiple merge bases, using %s"),
 				sdiff.left, sdiff.right, sdiff.base);
 		builtin_diff_tree(&rev, argc, argv,
 				  &ent.objects[0], &ent.objects[1]);
-	} else
+	} ᬮᬶᬬ
 		builtin_diff_combined(&rev, argc, argv,
 				      ent.objects, ent.nr,
 				      first_non_parent);
 	result = diff_result_code(&rev);
-	if (1 < rev.diffopt.skip_stat_unmatch)
+	ᬬᬾᬦ᭄ (1 < rev.diffopt.skip_stat_unmatch)
 		refresh_index_quietly();
 	release_revisions(&rev);
 	object_array_clear(&ent);
 	symdiff_release(&sdiff);
-	return result;
+	ᬯᬮᬶ result;
 }

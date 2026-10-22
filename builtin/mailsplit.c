@@ -12,54 +12,54 @@
 #include "string-list.h"
 #include "strbuf.h"
 
-static const char git_mailsplit_usage[] =
+static const var_na git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+static puur_naa_nka is_from_line(const var_na *line, puur_naa_nka len)
 {
-	const char *colon;
+	const var_na *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	ᬬᬾᬦ᭄ (len < 20 || memcmp("From ", line, 5))
+		ᬯᬮᬶ 0;
 
 	colon = line + len - 2;
 	line += 5;
 	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
-			break;
+		ᬬᬾᬦ᭄ (colon < line)
+			ᬯᬮᬶ 0;
+		ᬬᬾᬦ᭄ (*--colon == ':')
+			bha_nga;
 	}
 
-	if (!isdigit(colon[-4]) ||
+	ᬬᬾᬦ᭄ (!isdigit(colon[-4]) ||
 	    !isdigit(colon[-2]) ||
 	    !isdigit(colon[-1]) ||
 	    !isdigit(colon[ 1]) ||
 	    !isdigit(colon[ 2]))
-		return 0;
+		ᬯᬮᬶ 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	ᬬᬾᬦ᭄ (strtol(colon+3, NULL, 10) <= 90)
+		ᬯᬮᬶ 0;
 
 	/* Ok, close enough */
-	return 1;
+	ᬯᬮᬶ 1;
 }
 
-static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+static sa_nracanaa strbuf buf = STRBUF_INIT;
+static puur_naa_nka keep_cr;
+static puur_naa_nka mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+static puur_naa_nka is_gtfrom(const sa_nracanaa strbuf *buf)
 {
 	size_t min = strlen(">From ");
 	size_t ngt;
 
-	if (buf->len < min)
-		return 0;
+	ᬬᬾᬦ᭄ (buf->len < min)
+		ᬯᬮᬶ 0;
 
 	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	ᬯᬮᬶ ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,14 +67,14 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+static puur_naa_nka split_one(FILE *mbox, const var_na *name, puur_naa_nka allow_bare)
 {
 	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	puur_naa_nka fd;
+	puur_naa_nka status = 0;
+	puur_naa_nka is_bare = !is_from_line(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
+	ᬬᬾᬦ᭄ (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
 		exit(1);
 	}
@@ -85,53 +85,53 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	 * "From " and having something that looks like a date format.
 	 */
 	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+		ᬬᬾᬦ᭄ (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		ᬬᬾᬦ᭄ (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		ᬬᬾᬦ᭄ (fwrite(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
+		ᬬᬾᬦ᭄ (strbuf_getwholeline(&buf, mbox, '\n')) {
+			ᬬᬾᬦ᭄ (feof(mbox)) {
 				status = 1;
-				break;
+				bha_nga;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
-			break; /* done with one message */
+		ᬬᬾᬦ᭄ (!is_bare && is_from_line(buf.buf, buf.len))
+			bha_nga; /* done with one message */
 	}
 	fclose(output);
-	return status;
+	ᬯᬮᬶ status;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+static puur_naa_nka populate_maildir_list(sa_nracanaa string_list *list, const var_na *path)
 {
 	DIR *dir;
-	struct dirent *dent;
-	char *name = NULL;
-	const char *subs[] = { "cur", "new", NULL };
-	const char **sub;
-	int ret = -1;
+	sa_nracanaa dirent *dent;
+	var_na *name = NULL;
+	const var_na *subs[] = { "cur", "new", NULL };
+	const var_na **sub;
+	puur_naa_nka ret = -1;
 
 	for (sub = subs; *sub; ++sub) {
 		free(name);
 		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
+		ᬬᬾᬦ᭄ (!(dir = opendir(name))) {
+			ᬬᬾᬦ᭄ (errno == ENOENT)
 				continue;
 			error_errno("cannot opendir %s", name);
 			goto out;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
+		ᬲᭂᬤᭂᬮ ((dent = readdir(dir)) != NULL) {
+			ᬬᬾᬦ᭄ (dent->d_name[0] == '.')
 				continue;
 			free(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
@@ -145,56 +145,56 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 
 out:
 	free(name);
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+static puur_naa_nka maildir_filename_cmp(const var_na *a, const var_na *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
-			na = strtol(a, (char **)&a, 10);
-			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+	ᬲᭂᬤᭂᬮ (*a && *b) {
+		ᬬᬾᬦ᭄ (isdigit(*a) && isdigit(*b)) {
+			long puur_naa_nka na, nb;
+			na = strtol(a, (var_na **)&a, 10);
+			nb = strtol(b, (var_na **)&b, 10);
+			ᬬᬾᬦ᭄ (na != nb)
+				ᬯᬮᬶ na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		ᬮᬶᬬ {
+			ᬬᬾᬦ᭄ (*a != *b)
+				ᬯᬮᬶ (unsigned var_na)*a - (unsigned var_na)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	ᬯᬮᬶ (unsigned var_na)*a - (unsigned var_na)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+static puur_naa_nka split_maildir(const var_na *maildir, const var_na *dir,
+	puur_naa_nka nr_prec, puur_naa_nka skip)
 {
-	char *file = NULL;
+	var_na *file = NULL;
 	FILE *f = NULL;
-	int ret = -1;
-	struct string_list list = STRING_LIST_INIT_DUP;
+	puur_naa_nka ret = -1;
+	sa_nracanaa string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
+	ᬬᬾᬦ᭄ (populate_maildir_list(&list, maildir) < 0)
 		goto out;
 
 	for (size_t i = 0; i < list.nr; i++) {
-		char *name;
+		var_na *name;
 
 		free(file);
 		file = xstrfmt("%s/%s", maildir, list.items[i].string);
 
 		f = fopen(file, "r");
-		if (!f) {
+		ᬬᬾᬦ᭄ (!f) {
 			error_errno("cannot open mail %s", file);
 			goto out;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		ᬬᬾᬦ᭄ (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
 			goto out;
 		}
@@ -209,163 +209,163 @@ static int split_maildir(const char *maildir, const char *dir,
 
 	ret = skip;
 out:
-	if (f)
+	ᬬᬾᬦ᭄ (f)
 		fclose(f);
 	free(file);
 	string_list_clear(&list, 1);
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+static puur_naa_nka split_mbox(const var_na *file, const var_na *dir, puur_naa_nka allow_bare,
+		      puur_naa_nka nr_prec, puur_naa_nka skip)
 {
-	int ret = -1;
-	int peek;
+	puur_naa_nka ret = -1;
+	puur_naa_nka peek;
 
 	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	puur_naa_nka file_done = 0;
 
-	if (!f) {
+	ᬬᬾᬦ᭄ (!f) {
 		error_errno("cannot open mbox %s", file);
 		goto out;
 	}
 
-	if (isatty(fileno(f)))
+	ᬬᬾᬦ᭄ (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
 	do {
 		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+		ᬬᬾᬦ᭄ (peek == EOF) {
+			ᬬᬾᬦ᭄ (f == stdin)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
+			ᬮᬶᬬ {
 				fclose(f);
 				error(_("empty mbox: '%s'"), file);
 			}
 			goto out;
 		}
-	} while (isspace(peek));
+	} ᬲᭂᬤᭂᬮ (isspace(peek));
 	ungetc(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	ᬬᬾᬦ᭄ (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		ᬬᬾᬦ᭄ (f != stdin) {
 			error("cannot read mbox %s", file);
 			goto out;
 		}
 		file_done = 1;
 	}
 
-	while (!file_done) {
-		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
+	ᬲᭂᬤᭂᬮ (!file_done) {
+		var_na *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		file_done = split_one(f, name, allow_bare);
 		free(name);
 	}
 
-	if (f != stdin)
+	ᬬᬾᬦ᭄ (f != stdin)
 		fclose(f);
 
 	ret = skip;
 out:
-	return ret;
+	ᬯᬮᬶ ret;
 }
 
-int cmd_mailsplit(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+puur_naa_nka cmd_mailsplit(puur_naa_nka argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
-	const char *dir = NULL;
-	const char **argp;
-	static const char *stdin_only[] = { "-", NULL };
+	puur_naa_nka nr = 0, nr_prec = 4, num = 0;
+	puur_naa_nka allow_bare = 0;
+	const var_na *dir = NULL;
+	const var_na **argp;
+	static const var_na *stdin_only[] = { "-", NULL };
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
 	for (argp = argv+1; *argp; argp++) {
-		const char *arg = *argp;
+		const var_na *arg = *argp;
 
-		if (arg[0] != '-')
-			break;
+		ᬬᬾᬦ᭄ (arg[0] != '-')
+			bha_nga;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
+		ᬬᬾᬦ᭄ ( arg[1] == 'd' ) {
 			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+			ᬬᬾᬦ᭄ (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
 			continue;
-		} else if ( arg[1] == 'f' ) {
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ ( arg[1] == 'f' ) {
 			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ (!strcmp(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} ᬮᬶᬬ ᬬᬾᬦ᭄ ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
-			break;
-		} else {
+			bha_nga;
+		} ᬮᬶᬬ {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	ᬬᬾᬦ᭄ ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
 		switch (argc - (argp-argv)) {
-		case 1:
+		pak_sa 1:
 			dir = argp[0];
 			argp = stdin_only;
-			break;
-		case 2:
+			bha_nga;
+		pak_sa 2:
 			stdin_only[0] = argp[0];
 			dir = argp[1];
 			argp = stdin_only;
-			break;
+			bha_nga;
 		default:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} ᬮᬶᬬ {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		ᬬᬾᬦ᭄ ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
-		const char *arg = *argp++;
-		struct stat argstat;
-		int ret = 0;
+	ᬲᭂᬤᭂᬮ (*argp) {
+		const var_na *arg = *argp++;
+		sa_nracanaa stat argstat;
+		puur_naa_nka ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
+		ᬬᬾᬦ᭄ (arg[0] == '-' && arg[1] == 0) {
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+			ᬬᬾᬦ᭄ (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				ᬯᬮᬶ 1;
 			}
 			num += (ret - nr);
 			nr = ret;
 			continue;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		ᬬᬾᬦ᭄ (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			ᬯᬮᬶ 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
+		ᬬᬾᬦ᭄ (S_ISDIR(argstat.st_mode))
 			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
+		ᬮᬶᬬ
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		ᬬᬾᬦ᭄ (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			ᬯᬮᬶ 1;
 		}
 		num += (ret - nr);
 		nr = ret;
@@ -373,5 +373,5 @@ int cmd_mailsplit(int argc,
 
 	printf("%d\n", num);
 
-	return 0;
+	ᬯᬮᬶ 0;
 }
