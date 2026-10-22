@@ -1,225 +1,225 @@
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#وصف_ڪريو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "server-info.h"
-#include "string-list.h"
-#include "midx.h"
-#include "packfile.h"
-#include "prune-packed.h"
-#include "promisor-remote.h"
-#include "repack.h"
-#include "shallow.h"
-#include "list-objects-filter-options.h"
-#include "oidset.h"
-#include "hex.h"
-#include "wt-status.h"
-#include "read-cache-ll.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "run-command.h"
+#ضمن "server-info.h"
+#ضمن "string-list.h"
+#ضمن "midx.h"
+#ضمن "packfile.h"
+#ضمن "prune-packed.h"
+#ضمن "promisor-remote.h"
+#ضمن "repack.h"
+#ضمن "shallow.h"
+#ضمن "list-objects-filter-options.h"
+#ضمن "oidset.h"
+#ضمن "hex.h"
+#ضمن "wt-status.h"
+#ضمن "read-cache-ll.h"
 
-#define ALL_INTO_ONE 1
-#define LOOSEN_UNREACHABLE 2
-#define PACK_CRUFT 4
+#وصف_ڪريو ALL_INTO_ONE 1
+#وصف_ڪريو LOOSEN_UNREACHABLE 2
+#وصف_ڪريو PACK_CRUFT 4
 
-#define DELETE_PACK 1
-#define RETAIN_PACK 2
+#وصف_ڪريو DELETE_PACK 1
+#وصف_ڪريو RETAIN_PACK 2
 
-static int pack_everything;
-static int write_bitmaps = -1;
-static int use_delta_islands;
-static int run_update_server_info = 1;
-static char *packdir, *packtmp_name, *packtmp;
-static int midx_must_contain_cruft = 1;
-static int drop_filtered;
-static int dry_run;
-static int write_bitmaps_given;
+ساكن صحيح pack_everything;
+ساكن صحيح write_bitmaps = -1;
+ساكن صحيح use_delta_islands;
+ساكن صحيح لاڳيتو_update_server_info = 1;
+ساكن حرف *packdir, *packtmp_name, *packtmp;
+ساكن صحيح midx_must_contain_cruft = 1;
+ساكن صحيح drop_filtered;
+ساكن صحيح dry_لاڳيتو;
+ساكن صحيح write_bitmaps_given;
 
-static const char *const git_repack_usage[] = {
+ساكن ثابت حرف *ثابت git_repack_usage[] = {
 	N_("git repack [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m]\n"
 	   "[--window=<n>] [--depth=<n>] [--threads=<n>] [--keep-pack=<pack-name>]\n"
 	   "[--write-midx[=<mode>]] [--name-hash-version=<n>] [--path-walk]\n"
 	   "[--filter=<filter-spec>] [--drop-filtered [--dry-run]]"),
-	NULL
+	عدم
 };
 
-static const char incremental_bitmap_conflict_error[] = N_(
+ساكن ثابت حرف incremental_bitmap_conflict_error[] = N_(
 "Incremental repacks are incompatible with bitmap indexes.  Use\n"
 "--no-write-bitmap-index or disable the pack.writeBitmaps configuration."
 );
 
-#define DEFAULT_MIDX_SPLIT_FACTOR 2
-#define DEFAULT_MIDX_NEW_LAYER_THRESHOLD 8
+#وصف_ڪريو DEFAULT_MIDX_ورهايو_ضرب_ڪندڙ 2
+#وصف_ڪريو DEFAULT_MIDX_NEW_LAYER_حد 8
 
-struct repack_config_ctx {
-	struct pack_objects_args *po_args;
-	struct pack_objects_args *cruft_po_args;
-	int midx_split_factor;
-	int midx_new_layer_threshold;
+بنية repack_config_ctx {
+	بنية pack_objects_دليلون *po_دليلون;
+	بنية pack_objects_دليلون *cruft_po_دليلون;
+	صحيح midx_ورهايو_ضرب_ڪندڙ;
+	صحيح midx_new_layer_حد;
 };
 
-static int repack_config(const char *var, const char *value,
-			 const struct config_context *ctx, void *cb)
+ساكن صحيح repack_config(ثابت حرف *var, ثابت حرف *قدر,
+			 ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct repack_config_ctx *repack_ctx = cb;
-	struct pack_objects_args *po_args = repack_ctx->po_args;
-	struct pack_objects_args *cruft_po_args = repack_ctx->cruft_po_args;
-	if (!strcmp(var, "repack.usedeltabaseoffset")) {
-		po_args->delta_base_offset = git_config_bool(var, value);
-		return 0;
+	بنية repack_config_ctx *repack_ctx = cb;
+	بنية pack_objects_دليلون *po_دليلون = repack_ctx->po_دليلون;
+	بنية pack_objects_دليلون *cruft_po_دليلون = repack_ctx->cruft_po_دليلون;
+	إذا (!strcmp(var, "repack.usedeltabaseoffset")) {
+		po_دليلون->delta_بنياد_وٿي = git_config_bool(var, قدر);
+		أرجع 0;
 	}
-	if (!strcmp(var, "repack.packkeptobjects")) {
-		po_args->pack_kept_objects = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "repack.packkeptobjects")) {
+		po_دليلون->pack_kept_objects = git_config_bool(var, قدر);
+		أرجع 0;
 	}
-	if (!strcmp(var, "repack.writebitmaps") ||
+	إذا (!strcmp(var, "repack.writebitmaps") ||
 	    !strcmp(var, "pack.writebitmaps")) {
-		write_bitmaps = git_config_bool(var, value);
-		return 0;
+		write_bitmaps = git_config_bool(var, قدر);
+		أرجع 0;
 	}
-	if (!strcmp(var, "repack.usedeltaislands")) {
-		use_delta_islands = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "repack.usedeltaislands")) {
+		use_delta_islands = git_config_bool(var, قدر);
+		أرجع 0;
 	}
-	if (strcmp(var, "repack.updateserverinfo") == 0) {
-		run_update_server_info = git_config_bool(var, value);
-		return 0;
+	إذا (strcmp(var, "repack.updateserverinfo") == 0) {
+		لاڳيتو_update_server_info = git_config_bool(var, قدر);
+		أرجع 0;
 	}
-	if (!strcmp(var, "repack.cruftwindow")) {
-		free(cruft_po_args->window);
-		return git_config_string(&cruft_po_args->window, var, value);
+	إذا (!strcmp(var, "repack.cruftwindow")) {
+		حرر(cruft_po_دليلون->دري);
+		أرجع git_config_string(&cruft_po_دليلون->دري, var, قدر);
 	}
-	if (!strcmp(var, "repack.cruftwindowmemory")) {
-		free(cruft_po_args->window_memory);
-		return git_config_string(&cruft_po_args->window_memory, var, value);
+	إذا (!strcmp(var, "repack.cruftwindowmemory")) {
+		حرر(cruft_po_دليلون->دري_يادگيري);
+		أرجع git_config_string(&cruft_po_دليلون->دري_يادگيري, var, قدر);
 	}
-	if (!strcmp(var, "repack.cruftdepth")) {
-		free(cruft_po_args->depth);
-		return git_config_string(&cruft_po_args->depth, var, value);
+	إذا (!strcmp(var, "repack.cruftdepth")) {
+		حرر(cruft_po_دليلون->اونهائي);
+		أرجع git_config_string(&cruft_po_دليلون->اونهائي, var, قدر);
 	}
-	if (!strcmp(var, "repack.cruftthreads")) {
-		free(cruft_po_args->threads);
-		return git_config_string(&cruft_po_args->threads, var, value);
+	إذا (!strcmp(var, "repack.cruftthreads")) {
+		حرر(cruft_po_دليلون->ڌاڳا);
+		أرجع git_config_string(&cruft_po_دليلون->ڌاڳا, var, قدر);
 	}
-	if (!strcmp(var, "repack.midxmustcontaincruft")) {
-		midx_must_contain_cruft = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "repack.midxmustcontaincruft")) {
+		midx_must_contain_cruft = git_config_bool(var, قدر);
+		أرجع 0;
 	}
-	if (!strcmp(var, "repack.midxsplitfactor")) {
-		repack_ctx->midx_split_factor = git_config_int(var, value,
+	إذا (!strcmp(var, "repack.midxsplitfactor")) {
+		repack_ctx->midx_ورهايو_ضرب_ڪندڙ = git_config_int(var, قدر,
 							       ctx->kvi);
-		return 0;
+		أرجع 0;
 	}
-	if (!strcmp(var, "repack.midxnewlayerthreshold")) {
-		repack_ctx->midx_new_layer_threshold = git_config_int(var, value,
+	إذا (!strcmp(var, "repack.midxnewlayerthreshold")) {
+		repack_ctx->midx_new_layer_حد = git_config_int(var, قدر,
 								      ctx->kvi);
-		return 0;
+		أرجع 0;
 	}
-	return git_default_config(var, value, ctx, cb);
+	أرجع git_default_config(var, قدر, ctx, cb);
 }
 
-static int option_parse_write_bitmaps(const struct option *opt, const char *arg,
-				      int unset)
+ساكن صحيح option_parse_write_bitmaps(ثابت بنية option *opt, ثابت حرف *arg,
+				      صحيح unset)
 {
-	int *value = opt->value;
+	صحيح *قدر = opt->قدر;
 
 	BUG_ON_OPT_ARG(arg);
-	if (unset)
-		*value = 0;
-	else
-		*value = 1;
+	إذا (unset)
+		*قدر = 0;
+	وإلا
+		*قدر = 1;
 
 	write_bitmaps_given = 1;
-	return 0;
+	أرجع 0;
 }
 
-static int option_parse_write_midx(const struct option *opt, const char *arg,
-				   int unset)
+ساكن صحيح option_parse_write_midx(ثابت بنية option *opt, ثابت حرف *arg,
+				   صحيح unset)
 {
-	enum repack_write_midx_mode *cfg = opt->value;
+	تعداد repack_write_midx_گهڻائي *cfg = opt->قدر;
 
-	if (unset) {
+	إذا (unset) {
 		*cfg = REPACK_WRITE_MIDX_NONE;
-		return 0;
+		أرجع 0;
 	}
 
-	if (!arg || !*arg)
+	إذا (!arg || !*arg)
 		*cfg = REPACK_WRITE_MIDX_DEFAULT;
-	else if (!strcmp(arg, "incremental"))
+	وإلا إذا (!strcmp(arg, "incremental"))
 		*cfg = REPACK_WRITE_MIDX_INCREMENTAL;
-	else
-		return error(_("unknown value for %s: %s"), opt->long_name, arg);
+	وإلا
+		أرجع error(_("unknown value for %s: %s"), opt->long_name, arg);
 
-	return 0;
+	أرجع 0;
 }
 
-int cmd_repack(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+صحيح cmd_repack(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *اڳياڙي,
+	       بنية repository *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct string_list_item *item;
-	struct string_list names = STRING_LIST_INIT_DUP;
-	struct existing_packs existing = EXISTING_PACKS_INIT;
-	struct oidset drop_oids = OIDSET_INIT;
-	struct pack_geometry geometry = { 0 };
-	struct tempfile *refs_snapshot = NULL;
-	int i, ret;
-	int show_progress;
+	بنية ٻار_process cmd = ٻار_PROCESS_INIT;
+	بنية string_list_شي *شي;
+	بنية string_list نالا = STRING_LIST_INIT_DUP;
+	بنية existing_packs existing = EXISTING_PACKS_INIT;
+	بنية oidset drop_oids = OIDSET_INIT;
+	بنية pack_geometry geometry = { 0 };
+	بنية tempfile *refs_snapshot = عدم;
+	صحيح i, ret;
+	صحيح show_ترقي;
 
 	/* variables to be filled by option parsing */
-	struct repack_config_ctx config_ctx;
-	int delete_redundant = 0;
-	const char *unpack_unreachable = NULL;
-	int keep_unreachable = 0;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct pack_objects_args po_args = PACK_OBJECTS_ARGS_INIT;
-	struct pack_objects_args cruft_po_args = PACK_OBJECTS_ARGS_INIT;
-	enum repack_write_midx_mode write_midx = REPACK_WRITE_MIDX_NONE;
-	const char *cruft_expiration = NULL;
-	const char *expire_to = NULL;
-	const char *filter_to = NULL;
-	const char *opt_window = NULL;
-	const char *opt_window_memory = NULL;
-	const char *opt_depth = NULL;
-	const char *opt_threads = NULL;
-	unsigned long combine_cruft_below_size = 0ul;
+	بنية repack_config_ctx config_ctx;
+	صحيح delete_redundant = 0;
+	ثابت حرف *unpack_unreachable = عدم;
+	صحيح keep_unreachable = 0;
+	بنية string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	بنية pack_objects_دليلون po_دليلون = PACK_OBJECTS_دليلون_INIT;
+	بنية pack_objects_دليلون cruft_po_دليلون = PACK_OBJECTS_دليلون_INIT;
+	تعداد repack_write_midx_گهڻائي write_midx = REPACK_WRITE_MIDX_NONE;
+	ثابت حرف *cruft_expiration = عدم;
+	ثابت حرف *expire_منزل = عدم;
+	ثابت حرف *filter_منزل = عدم;
+	ثابت حرف *opt_دري = عدم;
+	ثابت حرف *opt_دري_يادگيري = عدم;
+	ثابت حرف *opt_اونهائي = عدم;
+	ثابت حرف *opt_ڌاڳا = عدم;
+	بنانشان ڊگهو combine_cruft_هيٺ_سائيز = 0ul;
 
-	struct option builtin_repack_options[] = {
-		OPT_BIT('a', NULL, &pack_everything,
+	بنية option builtin_repack_options[] = {
+		OPT_ٻٽو_انگ('a', عدم, &pack_everything,
 				N_("pack everything in a single pack"), ALL_INTO_ONE),
-		OPT_BIT('A', NULL, &pack_everything,
+		OPT_ٻٽو_انگ('A', عدم, &pack_everything,
 				N_("same as -a, and turn unreachable objects loose"),
 				   LOOSEN_UNREACHABLE | ALL_INTO_ONE),
-		OPT_BIT(0, "cruft", &pack_everything,
+		OPT_ٻٽو_انگ(0, "cruft", &pack_everything,
 				N_("same as -a, pack unreachable cruft objects separately"),
 				   PACK_CRUFT),
 		OPT_STRING(0, "cruft-expiration", &cruft_expiration, N_("approxidate"),
 				N_("with --cruft, expire objects older than this")),
 		OPT_UNSIGNED(0, "combine-cruft-below-size",
-			     &combine_cruft_below_size,
+			     &combine_cruft_هيٺ_سائيز,
 			     N_("with --cruft, only repack cruft packs smaller than this")),
-		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_args.max_pack_size,
+		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_دليلون.max_pack_سائيز,
 			     N_("with --cruft, limit the size of new cruft packs")),
-		OPT_BOOL('d', NULL, &delete_redundant,
+		OPT_BOOL('d', عدم, &delete_redundant,
 				N_("remove redundant packs, and run git-prune-packed")),
-		OPT_BOOL('f', NULL, &po_args.no_reuse_delta,
+		OPT_BOOL('f', عدم, &po_دليلون.no_reuse_delta,
 				N_("pass --no-reuse-delta to git-pack-objects")),
-		OPT_BOOL('F', NULL, &po_args.no_reuse_object,
+		OPT_BOOL('F', عدم, &po_دليلون.no_reuse_object,
 				N_("pass --no-reuse-object to git-pack-objects")),
-		OPT_INTEGER(0, "name-hash-version", &po_args.name_hash_version,
+		OPT_INTEGER(0, "name-hash-version", &po_دليلون.name_hash_نسخو,
 				N_("specify the name hash version to use for grouping similar objects by path")),
-		OPT_BOOL(0, "path-walk", &po_args.path_walk,
+		OPT_BOOL(0, "path-walk", &po_دليلون.رستو_walk,
 				N_("pass --path-walk to git-pack-objects")),
-		OPT_NEGBIT('n', NULL, &run_update_server_info,
+		OPT_NEGBIT('n', عدم, &لاڳيتو_update_server_info,
 				N_("do not run git-update-server-info"), 1),
-		OPT__QUIET(&po_args.quiet, N_("be quiet")),
-		OPT_BOOL('l', "local", &po_args.local,
+		OPT__QUIET(&po_دليلون.quiet, N_("be quiet")),
+		OPT_BOOL('l', "local", &po_دليلون.local,
 				N_("pass --local to git-pack-objects")),
-		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, NULL,
+		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, عدم,
 				N_("write bitmap index"),
 				PARSE_OPT_NOARG, option_parse_write_bitmaps),
 		OPT_BOOL('i', "delta-islands", &use_delta_islands,
@@ -228,78 +228,78 @@ int cmd_repack(int argc,
 				N_("with -A, do not loosen objects older than this")),
 		OPT_BOOL('k', "keep-unreachable", &keep_unreachable,
 				N_("with -a, repack unreachable objects")),
-		OPT_STRING(0, "window", &opt_window, N_("n"),
+		OPT_STRING(0, "window", &opt_دري, N_("n"),
 				N_("size of the window used for delta compression")),
-		OPT_STRING(0, "window-memory", &opt_window_memory, N_("bytes"),
+		OPT_STRING(0, "window-memory", &opt_دري_يادگيري, N_("bytes"),
 				N_("same as the above, but limit memory size instead of entries count")),
-		OPT_STRING(0, "depth", &opt_depth, N_("n"),
+		OPT_STRING(0, "depth", &opt_اونهائي, N_("n"),
 				N_("limits the maximum delta depth")),
-		OPT_STRING(0, "threads", &opt_threads, N_("n"),
+		OPT_STRING(0, "threads", &opt_ڌاڳا, N_("n"),
 				N_("limits the maximum number of threads")),
-		OPT_UNSIGNED(0, "max-pack-size", &po_args.max_pack_size,
+		OPT_UNSIGNED(0, "max-pack-size", &po_دليلون.max_pack_سائيز,
 			     N_("maximum size of each packfile")),
-		OPT_PARSE_LIST_OBJECTS_FILTER(&po_args.filter_options),
-		OPT_BOOL(0, "pack-kept-objects", &po_args.pack_kept_objects,
+		OPT_PARSE_LIST_OBJECTS_FILTER(&po_دليلون.filter_options),
+		OPT_BOOL(0, "pack-kept-objects", &po_دليلون.pack_kept_objects,
 				N_("repack objects in packs marked with .keep")),
 		OPT_STRING_LIST(0, "keep-pack", &keep_pack_list, N_("name"),
 				N_("do not repack this pack")),
-		OPT_INTEGER('g', "geometric", &geometry.split_factor,
+		OPT_INTEGER('g', "geometric", &geometry.ورهايو_ضرب_ڪندڙ,
 			    N_("find a geometric progression with factor <N>")),
 		OPT_CALLBACK_F(0, "write-midx", &write_midx,
 			   N_("mode"),
 			   N_("write a multi-pack index of the resulting packs"),
 			   PARSE_OPT_OPTARG, option_parse_write_midx),
-		OPT_SET_INT_F('m', NULL, &write_midx,
+		OPT_سيٽ_INT_F('m', عدم, &write_midx,
 			   N_("write a multi-pack index of the resulting packs"),
 			   REPACK_WRITE_MIDX_DEFAULT,
 			   PARSE_OPT_HIDDEN),
-		OPT_STRING(0, "expire-to", &expire_to, N_("dir"),
+		OPT_STRING(0, "expire-to", &expire_منزل, N_("dir"),
 			   N_("pack prefix to store a pack containing pruned objects")),
-		OPT_STRING(0, "filter-to", &filter_to, N_("dir"),
+		OPT_STRING(0, "filter-to", &filter_منزل, N_("dir"),
 			   N_("pack prefix to store a pack containing filtered out objects")),
 		OPT_BOOL(0, "drop-filtered", &drop_filtered,
 				N_("delete filtered out objects (requires --filter)")),
-		OPT_BOOL(0, "dry-run", &dry_run,
+		OPT_BOOL(0, "dry-run", &dry_لاڳيتو,
 				N_("only show which objects would be dropped")),
-		OPT_END()
+		OPT_پڇاڙي()
 	};
 
-	list_objects_filter_init(&po_args.filter_options);
+	list_objects_filter_init(&po_دليلون.filter_options);
 
-	memset(&config_ctx, 0, sizeof(config_ctx));
-	config_ctx.po_args = &po_args;
-	config_ctx.cruft_po_args = &cruft_po_args;
-	config_ctx.midx_split_factor = DEFAULT_MIDX_SPLIT_FACTOR;
-	config_ctx.midx_new_layer_threshold = DEFAULT_MIDX_NEW_LAYER_THRESHOLD;
+	memset(&config_ctx, 0, حجم(config_ctx));
+	config_ctx.po_دليلون = &po_دليلون;
+	config_ctx.cruft_po_دليلون = &cruft_po_دليلون;
+	config_ctx.midx_ورهايو_ضرب_ڪندڙ = DEFAULT_MIDX_ورهايو_ضرب_ڪندڙ;
+	config_ctx.midx_new_layer_حد = DEFAULT_MIDX_NEW_LAYER_حد;
 
 	repo_config(repo, repack_config, &config_ctx);
 
-	argc = parse_options(argc, argv, prefix, builtin_repack_options,
+	argc = parse_options(argc, argv, اڳياڙي, builtin_repack_options,
 				git_repack_usage, 0);
 
-	po_args.window = xstrdup_or_null(opt_window);
-	po_args.window_memory = xstrdup_or_null(opt_window_memory);
-	po_args.depth = xstrdup_or_null(opt_depth);
-	po_args.threads = xstrdup_or_null(opt_threads);
+	po_دليلون.دري = xstrdup_or_null(opt_دري);
+	po_دليلون.دري_يادگيري = xstrdup_or_null(opt_دري_يادگيري);
+	po_دليلون.اونهائي = xstrdup_or_null(opt_اونهائي);
+	po_دليلون.ڌاڳا = xstrdup_or_null(opt_ڌاڳا);
 
 	die_for_incompatible_opt2(drop_filtered, "--drop-filtered",
-		!!filter_to, "--filter-to");
+		!!filter_منزل, "--filter-to");
 
-	if (dry_run && !drop_filtered)
+	إذا (dry_لاڳيتو && !drop_filtered)
 		die(_("--dry-run only takes effect with --drop-filtered"));
 
-	if (drop_filtered) {
-		if (!po_args.filter_options.choice)
+	إذا (drop_filtered) {
+		إذا (!po_دليلون.filter_options.choice)
 			die(_("--drop-filtered requires --filter"));
 
-		if (!(pack_everything & ALL_INTO_ONE))
+		إذا (!(pack_everything & ALL_INTO_ONE))
 			die(_("--drop-filtered requires -a"));
 
 		/*
 		 * Only blob:limit=<n> is supported for now. Reject other
 		 * filter choices early, before walking the object database.
 		 */
-		if (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
+		إذا (po_دليلون.filter_options.choice != LOFC_BLOB_حد_بندي)
 			die(_("--drop-filtered only supports --filter=blob:limit=<n> for now"));
 
 		/*
@@ -307,7 +307,7 @@ int cmd_repack(int argc,
 		 * report; a bitmap setting from config is silently overridden
 		 * for the duration of the command.
 		 */
-		if (write_bitmaps_given && write_bitmaps > 0)
+		إذا (write_bitmaps_given && write_bitmaps > 0)
 			die(_("options '%s' and '%s' cannot be used together"),
 				"--drop-filtered", "--write-bitmap-index");
 
@@ -316,7 +316,7 @@ int cmd_repack(int argc,
 		 * dropped objects from, so dropping them would be permanent
 		 * data loss.
 		 */
-		if (!repo_has_promisor_remote(repo))
+		إذا (!repo_has_promisor_remote(repo))
 			die(_("--drop-filtered requires a promisor remote"));
 
 		/*
@@ -329,21 +329,21 @@ int cmd_repack(int argc,
 		 * safety measure. Bare repositories have no such state, so
 		 * the check is skipped there.
 		 */
-		if (!is_bare_repository(repo)) {
-			struct wt_status_state state = { 0 };
+		إذا (!is_bare_repository(repo)) {
+			بنية wt_حالت_state state = { 0 };
 
-			wt_status_get_state(repo, &state, 0);
-			if (state.merge_in_progress || state.revert_in_progress ||
-			    state.rebase_in_progress || state.bisect_in_progress ||
-			    state.cherry_pick_in_progress || state.am_in_progress ||
-			    state.rebase_interactive_in_progress) {
-				wt_status_state_free_buffers(&state);
+			wt_حالت_get_state(repo, &state, 0);
+			إذا (state.ملايو_اندريون_ترقي || state.revert_اندريون_ترقي ||
+			    state.rebase_اندريون_ترقي || state.bisect_اندريون_ترقي ||
+			    state.cherry_pick_اندريون_ترقي || state.am_اندريون_ترقي ||
+			    state.rebase_interactive_اندريون_ترقي) {
+				wt_حالت_state_free_buffers(&state);
 				die(_("--drop-filtered cannot be used while "
 				      "another operation (merge, rebase, am, "
 				      "cherry-pick, revert, or bisect) is in "
 				      "progress"));
 			}
-			wt_status_state_free_buffers(&state);
+			wt_حالت_state_free_buffers(&state);
 		}
 
 		write_bitmaps = 0;
@@ -353,13 +353,13 @@ int cmd_repack(int argc,
 		 * without them and then removing the old packs, so the
 		 * redundant packs must be deleted. Imply -d on a real run.
 		 */
-		if (!dry_run)
+		إذا (!dry_لاڳيتو)
 			delete_redundant = 1;
 
-		ret = enumerate_promisor_blobs(repo, &po_args.filter_options, &drop_oids);
+		ret = enumerate_promisor_blobs(repo, &po_دليلون.filter_options, &drop_oids);
 
-		if (ret)
-			goto cleanup;
+		إذا (ret)
+			اذهب cleanup;
 
 		/*
 		 * Refuse to drop blobs that the current index references.
@@ -368,56 +368,56 @@ int cmd_repack(int argc,
 		 * nothing. This guard just avoids that churn. Bare
 		 * repositories have no index, so the check is skipped there.
 		 */
-		if (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
-			struct index_state *istate = repo->index;
-			unsigned int i;
+		إذا (!is_bare_repository(repo) && oidset_سائيز(&drop_oids)) {
+			بنية اشاريو_state *istate = repo->اشاريو;
+			بنانشان صحيح i;
 
-			if (repo_read_index(repo) < 0)
+			إذا (repo_read_اشاريو(repo) < 0)
 				die(_("could not read the index"));
 
-			for (i = 0; i < istate->cache_nr; i++) {
-				const struct cache_entry *ce = istate->cache[i];
+			لكل (i = 0; i < istate->cache_nr; i++) {
+				ثابت بنية cache_داخلا *ce = istate->cache[i];
 
-				if (oidset_contains(&drop_oids, &ce->oid))
+				إذا (oidset_شامل_آهي(&drop_oids, &ce->oid))
 					die(_("cannot drop '%s' (%s): it is referenced by the current index"),
-						ce->name, oid_to_hex(&ce->oid));
+						ce->name, oid_منزل_hex(&ce->oid));
 			}
 		}
 
-		if (dry_run) {
-			struct oidset_iter iter;
-			const struct object_id *oid;
+		إذا (dry_لاڳيتو) {
+			بنية oidset_iter iter;
+			ثابت بنية object_id *oid;
 
 			oidset_iter_init(&drop_oids, &iter);
-			while ((oid = oidset_iter_next(&iter)))
-				printf("%s\n", oid_to_hex(oid));
+			طالما ((oid = oidset_iter_ايندڙ(&iter)))
+				لکو("%s\n", oid_منزل_hex(oid));
 		}
 	}
 
-	if (delete_redundant && repo->repository_format_precious_objects)
+	إذا (delete_redundant && repo->repository_format_precious_objects)
 		die(_("cannot delete packs in a precious-objects repo"));
 
 	die_for_incompatible_opt3(unpack_unreachable || (pack_everything & LOOSEN_UNREACHABLE), "-A",
 				  keep_unreachable, "-k/--keep-unreachable",
 				  pack_everything & PACK_CRUFT, "--cruft");
 
-	if (pack_everything & PACK_CRUFT)
+	إذا (pack_everything & PACK_CRUFT)
 		pack_everything |= ALL_INTO_ONE;
 
-	if (write_bitmaps < 0) {
-		if (write_midx == REPACK_WRITE_MIDX_NONE &&
+	إذا (write_bitmaps < 0) {
+		إذا (write_midx == REPACK_WRITE_MIDX_NONE &&
 		    (!(pack_everything & ALL_INTO_ONE) || !is_bare_repository(repo)))
 			write_bitmaps = 0;
 	}
-	if (po_args.pack_kept_objects < 0)
-		po_args.pack_kept_objects = write_bitmaps > 0 &&
+	إذا (po_دليلون.pack_kept_objects < 0)
+		po_دليلون.pack_kept_objects = write_bitmaps > 0 &&
 			write_midx == REPACK_WRITE_MIDX_NONE;
 
-	if (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
+	إذا (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
 	    write_midx == REPACK_WRITE_MIDX_NONE)
 		die(_(incremental_bitmap_conflict_error));
 
-	if (write_bitmaps && po_args.local &&
+	إذا (write_bitmaps && po_دليلون.local &&
 	    odb_has_alternates(repo->objects)) {
 		/*
 		 * When asked to do a local repack, but we have
@@ -430,54 +430,54 @@ int cmd_repack(int argc,
 		write_bitmaps = 0;
 	}
 
-	if (config_ctx.midx_split_factor < 2)
+	إذا (config_ctx.midx_ورهايو_ضرب_ڪندڙ < 2)
 		die(_("invalid value for %s: %d"), "--midx-split-factor",
-		    config_ctx.midx_split_factor);
-	if (config_ctx.midx_new_layer_threshold < 1)
+		    config_ctx.midx_ورهايو_ضرب_ڪندڙ);
+	إذا (config_ctx.midx_new_layer_حد < 1)
 		die(_("invalid value for %s: %d"), "--midx-new-layer-threshold",
-		    config_ctx.midx_new_layer_threshold);
+		    config_ctx.midx_new_layer_حد);
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
-		struct strbuf path = STRBUF_INIT;
+	إذا (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
+		بنية strbuf رستو = STRBUF_INIT;
 
-		strbuf_addf(&path, "%s/%s_XXXXXX",
+		strbuf_addf(&رستو, "%s/%s_XXXXXX",
 			    repo_get_object_directory(repo),
 			    "bitmap-ref-tips");
 
-		refs_snapshot = xmks_tempfile(path.buf);
+		refs_snapshot = xmks_tempfile(رستو.buf);
 		midx_snapshot_refs(repo, refs_snapshot);
 
-		strbuf_release(&path);
+		strbuf_release(&رستو);
 	}
 
 	packdir = mkpathdup("%s/pack", repo_get_object_directory(repo));
-	packtmp_name = xstrfmt(".tmp-%d-pack", (int)getpid());
+	packtmp_name = xstrfmt(".tmp-%d-pack", (صحيح)getpid());
 	packtmp = mkpathdup("%s/%s", packdir, packtmp_name);
 
 	existing.repo = repo;
 	existing_packs_collect(&existing, &keep_pack_list);
 
-	if (geometry.split_factor) {
-		if (pack_everything)
+	إذا (geometry.ورهايو_ضرب_ڪندڙ) {
+		إذا (pack_everything)
 			die(_("options '%s' and '%s' cannot be used together"), "--geometric", "-A/-a");
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
-			geometry.midx_layer_threshold = config_ctx.midx_new_layer_threshold;
-			geometry.midx_layer_threshold_set = true;
+		إذا (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
+			geometry.midx_layer_حد = config_ctx.midx_new_layer_حد;
+			geometry.midx_layer_حد_سيٽ = true;
 		}
-		pack_geometry_init(&geometry, &existing, &po_args);
-		pack_geometry_split(&geometry);
+		pack_geometry_init(&geometry, &existing, &po_دليلون);
+		pack_geometry_ورهايو(&geometry);
 	}
 
-	prepare_pack_objects(&cmd, &po_args, packtmp);
+	prepare_pack_objects(&cmd, &po_دليلون, packtmp);
 
-	show_progress = !po_args.quiet && isatty(2);
+	show_ترقي = !po_دليلون.quiet && isatty(2);
 
-	strvec_push(&cmd.args, "--keep-true-parents");
-	for (i = 0; i < keep_pack_list.nr; i++)
-		strvec_pushf(&cmd.args, "--keep-pack=%s",
-			     keep_pack_list.items[i].string);
-	strvec_push(&cmd.args, "--non-empty");
-	if (!geometry.split_factor) {
+	strvec_ڌڪو(&cmd.دليلون, "--keep-true-parents");
+	لكل (i = 0; i < keep_pack_list.nr; i++)
+		strvec_pushf(&cmd.دليلون, "--keep-pack=%s",
+			     keep_pack_list.شيون[i].string);
+	strvec_ڌڪو(&cmd.دليلون, "--non-empty");
+	إذا (!geometry.ورهايو_ضرب_ڪندڙ) {
 		/*
 		 * We need to grab all reachable objects, including those that
 		 * are reachable from reflogs and the index.
@@ -488,90 +488,90 @@ int cmd_repack(int argc,
 		 * repacking all the objects in specified packs and loose ones
 		 * (indeed, --stdin-packs is incompatible with these options).
 		 */
-		strvec_push(&cmd.args, "--all");
-		strvec_push(&cmd.args, "--reflog");
-		strvec_push(&cmd.args, "--indexed-objects");
+		strvec_ڌڪو(&cmd.دليلون, "--all");
+		strvec_ڌڪو(&cmd.دليلون, "--reflog");
+		strvec_ڌڪو(&cmd.دليلون, "--indexed-objects");
 	}
-	if (repo_has_promisor_remote(repo))
-		strvec_push(&cmd.args, "--exclude-promisor-objects");
-	if (write_midx == REPACK_WRITE_MIDX_NONE) {
-		if (write_bitmaps > 0)
-			strvec_push(&cmd.args, "--write-bitmap-index");
-		else if (write_bitmaps < 0)
-			strvec_push(&cmd.args, "--write-bitmap-index-quiet");
+	إذا (repo_has_promisor_remote(repo))
+		strvec_ڌڪو(&cmd.دليلون, "--exclude-promisor-objects");
+	إذا (write_midx == REPACK_WRITE_MIDX_NONE) {
+		إذا (write_bitmaps > 0)
+			strvec_ڌڪو(&cmd.دليلون, "--write-bitmap-index");
+		وإلا إذا (write_bitmaps < 0)
+			strvec_ڌڪو(&cmd.دليلون, "--write-bitmap-index-quiet");
 	}
-	if (use_delta_islands)
-		strvec_push(&cmd.args, "--delta-islands");
+	إذا (use_delta_islands)
+		strvec_ڌڪو(&cmd.دليلون, "--delta-islands");
 
-	if (pack_everything & ALL_INTO_ONE) {
-		repack_promisor_objects(repo, &po_args, &names, packtmp,
-			(drop_filtered && !dry_run) ? &drop_oids : NULL);
+	إذا (pack_everything & ALL_INTO_ONE) {
+		repack_promisor_objects(repo, &po_دليلون, &نالا, packtmp,
+			(drop_filtered && !dry_لاڳيتو) ? &drop_oids : عدم);
 
-		if (existing_packs_has_non_kept(&existing) &&
+		إذا (existing_packs_has_non_kept(&existing) &&
 		    delete_redundant &&
 		    !(pack_everything & PACK_CRUFT)) {
-			for_each_string_list_item(item, &names) {
-				strvec_pushf(&cmd.args, "--keep-pack=%s-%s.pack",
-					     packtmp_name, item->string);
+			for_each_string_list_شي(شي, &نالا) {
+				strvec_pushf(&cmd.دليلون, "--keep-pack=%s-%s.pack",
+					     packtmp_name, شي->string);
 			}
-			if (unpack_unreachable) {
-				strvec_pushf(&cmd.args,
+			إذا (unpack_unreachable) {
+				strvec_pushf(&cmd.دليلون,
 					     "--unpack-unreachable=%s",
 					     unpack_unreachable);
-			} else if (pack_everything & LOOSEN_UNREACHABLE) {
-				strvec_push(&cmd.args,
+			} وإلا إذا (pack_everything & LOOSEN_UNREACHABLE) {
+				strvec_ڌڪو(&cmd.دليلون,
 					    "--unpack-unreachable");
-			} else if (keep_unreachable) {
-				strvec_push(&cmd.args, "--keep-unreachable");
+			} وإلا إذا (keep_unreachable) {
+				strvec_ڌڪو(&cmd.دليلون, "--keep-unreachable");
 			}
 		}
 
-		if (keep_unreachable && delete_redundant &&
+		إذا (keep_unreachable && delete_redundant &&
 		    !(pack_everything & PACK_CRUFT))
-			strvec_push(&cmd.args, "--pack-loose-unreachable");
-	} else if (geometry.split_factor) {
-		pack_geometry_repack_promisors(repo, &po_args, &geometry,
-					       &names, packtmp);
+			strvec_ڌڪو(&cmd.دليلون, "--pack-loose-unreachable");
+	} وإلا إذا (geometry.ورهايو_ضرب_ڪندڙ) {
+		pack_geometry_repack_promisors(repo, &po_دليلون, &geometry,
+					       &نالا, packtmp);
 
-		if (midx_must_contain_cruft)
-			strvec_push(&cmd.args, "--stdin-packs");
-		else
-			strvec_push(&cmd.args, "--stdin-packs=follow");
-		strvec_push(&cmd.args, "--unpacked");
-	} else {
-		strvec_push(&cmd.args, "--unpacked");
-		strvec_push(&cmd.args, "--incremental");
+		إذا (midx_must_contain_cruft)
+			strvec_ڌڪو(&cmd.دليلون, "--stdin-packs");
+		وإلا
+			strvec_ڌڪو(&cmd.دليلون, "--stdin-packs=follow");
+		strvec_ڌڪو(&cmd.دليلون, "--unpacked");
+	} وإلا {
+		strvec_ڌڪو(&cmd.دليلون, "--unpacked");
+		strvec_ڌڪو(&cmd.دليلون, "--incremental");
 	}
 
-	if (po_args.filter_options.choice)
-		strvec_pushf(&cmd.args, "--filter=%s",
-			     expand_list_objects_filter_spec(&po_args.filter_options));
-	else if (filter_to)
+	إذا (po_دليلون.filter_options.choice)
+		strvec_pushf(&cmd.دليلون, "--filter=%s",
+			     expand_list_objects_filter_spec(&po_دليلون.filter_options));
+	وإلا إذا (filter_منزل)
 		die(_("option '%s' can only be used along with '%s'"), "--filter-to", "--filter");
 
-	if (geometry.split_factor)
-		cmd.in = -1;
-	else
+	إذا (geometry.ورهايو_ضرب_ڪندڙ)
+		cmd.اندريون = -1;
+	وإلا
 		cmd.no_stdin = 1;
 
-	ret = start_command(&cmd);
-	if (ret)
-		goto cleanup;
+	ret = شروعات_command(&cmd);
+	إذا (ret)
+		اذهب cleanup;
 
-	if (geometry.split_factor) {
-		FILE *in = xfdopen(cmd.in, "w");
+	إذا (geometry.ورهايو_ضرب_ڪندڙ) {
+		FILE *اندريون = xfdopen(cmd.اندريون, "w");
 		/*
 		 * The resulting pack should contain all objects in packs that
 		 * are going to be rolled up, but exclude objects in packs which
 		 * are being left alone.
 		 */
-		for (i = 0; i < geometry.split; i++)
-			fprintf(in, "%s\n", pack_basename(geometry.pack[i]));
-		for (i = geometry.split; i < geometry.pack_nr; i++) {
-			const char *basename = pack_basename(geometry.pack[i]);
-			char marker = '^';
+		لكل (i = 0; i < geometry.ورهايو; i++)
+			fprintf(اندريون, "%s\n", pack_basename(geometry.pack[i]));
+		لكل (i = geometry.ورهايو; i < geometry.pack_nr; i++) {
+			ثابت حرف *basename = pack_basename(geometry.pack[i]);
+			حرف marker = '^';
 
-			if (!midx_must_contain_cruft &&
+			إذا (!midx_must_contain_cruft &&
 			    !string_list_has_string(&existing.midx_packs,
 						    basename)) {
 				/*
@@ -582,27 +582,27 @@ int cmd_repack(int argc,
 				marker = '!';
 			}
 
-			fprintf(in, "%c%s\n", marker, basename);
+			fprintf(اندريون, "%c%s\n", marker, basename);
 		}
-		fclose(in);
+		fclose(اندريون);
 	}
 
 	{
-		struct write_pack_opts opts = {
+		بنية write_pack_opts opts = {
 			.packdir = packdir,
 			.destination = packdir,
 			.packtmp = packtmp,
 		};
-		ret = finish_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
-					      &names);
-		if (ret)
-			goto cleanup;
+		ret = پڄاڻي_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
+					      &نالا);
+		إذا (ret)
+			اذهب cleanup;
 	}
 
-	if (!names.nr) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
+	إذا (!نالا.nr) {
+		بنية odb_ذريعو_files *files = odb_ذريعو_files_downcast(existing.ذريعو);
 
-		if (!po_args.quiet)
+		إذا (!po_دليلون.quiet)
 			printf_ln(_("Nothing new to pack."));
 		/*
 		 * If we didn't write any new packs, the non-cruft packs
@@ -617,41 +617,41 @@ int cmd_repack(int argc,
 		 * midx_has_unknown_packs() will make the decision for
 		 * us.
 		 */
-		if (!get_multi_pack_index(files->dirs->packed))
+		إذا (!get_multi_pack_اشاريو(files->dirs->packed))
 			midx_must_contain_cruft = 1;
 	}
 
-	if (pack_everything & PACK_CRUFT) {
-		struct write_pack_opts opts = {
-			.po_args = &cruft_po_args,
+	إذا (pack_everything & PACK_CRUFT) {
+		بنية write_pack_opts opts = {
+			.po_دليلون = &cruft_po_دليلون,
 			.destination = packtmp,
 			.packtmp = packtmp,
 			.packdir = packdir,
 		};
 
-		if (!cruft_po_args.window)
-			cruft_po_args.window = xstrdup_or_null(po_args.window);
-		if (!cruft_po_args.window_memory)
-			cruft_po_args.window_memory = xstrdup_or_null(po_args.window_memory);
-		if (!cruft_po_args.depth)
-			cruft_po_args.depth = xstrdup_or_null(po_args.depth);
-		if (!cruft_po_args.threads)
-			cruft_po_args.threads = xstrdup_or_null(po_args.threads);
-		if (!cruft_po_args.max_pack_size)
-			cruft_po_args.max_pack_size = po_args.max_pack_size;
+		إذا (!cruft_po_دليلون.دري)
+			cruft_po_دليلون.دري = xstrdup_or_null(po_دليلون.دري);
+		إذا (!cruft_po_دليلون.دري_يادگيري)
+			cruft_po_دليلون.دري_يادگيري = xstrdup_or_null(po_دليلون.دري_يادگيري);
+		إذا (!cruft_po_دليلون.اونهائي)
+			cruft_po_دليلون.اونهائي = xstrdup_or_null(po_دليلون.اونهائي);
+		إذا (!cruft_po_دليلون.ڌاڳا)
+			cruft_po_دليلون.ڌاڳا = xstrdup_or_null(po_دليلون.ڌاڳا);
+		إذا (!cruft_po_دليلون.max_pack_سائيز)
+			cruft_po_دليلون.max_pack_سائيز = po_دليلون.max_pack_سائيز;
 
-		cruft_po_args.local = po_args.local;
-		cruft_po_args.quiet = po_args.quiet;
-		cruft_po_args.delta_base_offset = po_args.delta_base_offset;
-		cruft_po_args.pack_kept_objects = 0;
+		cruft_po_دليلون.local = po_دليلون.local;
+		cruft_po_دليلون.quiet = po_دليلون.quiet;
+		cruft_po_دليلون.delta_بنياد_وٿي = po_دليلون.delta_بنياد_وٿي;
+		cruft_po_دليلون.pack_kept_objects = 0;
 
 		ret = write_cruft_pack(&opts, cruft_expiration,
-				       combine_cruft_below_size, &names,
+				       combine_cruft_هيٺ_سائيز, &نالا,
 				       &existing);
-		if (ret)
-			goto cleanup;
+		إذا (ret)
+			اذهب cleanup;
 
-		if (delete_redundant && expire_to) {
+		إذا (delete_redundant && expire_منزل) {
 			/*
 			 * If `--expire-to` is given with `-d`, it's possible
 			 * that we're about to prune some objects. With cruft
@@ -680,112 +680,112 @@ int cmd_repack(int argc,
 			 * pack, but rather removing all cruft packs from the
 			 * main repository regardless of size.
 			 */
-			opts.destination = expire_to;
-			ret = write_cruft_pack(&opts, NULL, 0ul, &names,
+			opts.destination = expire_منزل;
+			ret = write_cruft_pack(&opts, عدم, 0ul, &نالا,
 					       &existing);
-			if (ret)
-				goto cleanup;
+			إذا (ret)
+				اذهب cleanup;
 		}
 	}
 
-	if (po_args.filter_options.choice && !drop_filtered) {
-		struct write_pack_opts opts = {
-			.po_args = &po_args,
-			.destination = filter_to,
+	إذا (po_دليلون.filter_options.choice && !drop_filtered) {
+		بنية write_pack_opts opts = {
+			.po_دليلون = &po_دليلون,
+			.destination = filter_منزل,
 			.packdir = packdir,
 			.packtmp = packtmp,
 		};
 
-		if (!opts.destination)
+		إذا (!opts.destination)
 			opts.destination = packtmp;
 
-		ret = write_filtered_pack(&opts, &existing, &names);
-		if (ret)
-			goto cleanup;
+		ret = write_filtered_pack(&opts, &existing, &نالا);
+		إذا (ret)
+			اذهب cleanup;
 	}
 
-	string_list_sort(&names);
+	string_list_ترتيب_ڏيو(&نالا);
 
 	odb_close(repo->objects);
 
 	/*
 	 * Ok we have prepared all new packfiles.
 	 */
-	for_each_string_list_item(item, &names)
-		generated_pack_install(item->util, item->string, packdir,
+	for_each_string_list_شي(شي, &نالا)
+		generated_pack_install(شي->util, شي->string, packdir,
 				       packtmp);
 	/* End of pack replacement. */
 
-	if (delete_redundant && pack_everything & ALL_INTO_ONE) {
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
+	إذا (delete_redundant && pack_everything & ALL_INTO_ONE) {
+		إذا (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
 			existing_packs_retain_midx_packs(&existing);
-		existing_packs_mark_for_deletion(&existing, &names);
+		existing_packs_mark_for_deletion(&existing, &نالا);
 	}
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE) {
-		struct repack_write_midx_opts opts = {
+	إذا (write_midx != REPACK_WRITE_MIDX_NONE) {
+		بنية repack_write_midx_opts opts = {
 			.existing = &existing,
 			.geometry = &geometry,
-			.names = &names,
-			.refs_snapshot = refs_snapshot ? get_tempfile_path(refs_snapshot) : NULL,
+			.نالا = &نالا,
+			.refs_snapshot = refs_snapshot ? get_tempfile_رستو(refs_snapshot) : عدم,
 			.packdir = packdir,
-			.show_progress = show_progress,
+			.show_ترقي = show_ترقي,
 			.write_bitmaps = write_bitmaps > 0,
 			.midx_must_contain_cruft = midx_must_contain_cruft,
-			.midx_split_factor = config_ctx.midx_split_factor,
-			.midx_new_layer_threshold = config_ctx.midx_new_layer_threshold,
-			.mode = write_midx,
+			.midx_ورهايو_ضرب_ڪندڙ = config_ctx.midx_ورهايو_ضرب_ڪندڙ,
+			.midx_new_layer_حد = config_ctx.midx_new_layer_حد,
+			.گهڻائي = write_midx,
 		};
 
 		ret = repack_write_midx(&opts);
-		if (ret)
-			goto cleanup;
+		إذا (ret)
+			اذهب cleanup;
 	}
 
 	odb_reprepare(repo->objects);
 
-	if (delete_redundant) {
-		int opts = 0;
+	إذا (delete_redundant) {
+		صحيح opts = 0;
 		bool wrote_incremental_midx = write_midx == REPACK_WRITE_MIDX_INCREMENTAL;
 
 		existing_packs_remove_redundant(&existing, packdir,
 						wrote_incremental_midx);
 
-		if (geometry.split_factor)
-			pack_geometry_remove_redundant(&geometry, &names,
+		إذا (geometry.ورهايو_ضرب_ڪندڙ)
+			pack_geometry_remove_redundant(&geometry, &نالا,
 						       &existing, packdir,
 						       wrote_incremental_midx);
-		if (show_progress)
+		إذا (show_ترقي)
 			opts |= PRUNE_PACKED_VERBOSE;
 		prune_packed_objects(opts);
 
-		if (!keep_unreachable &&
+		إذا (!keep_unreachable &&
 		    (!(pack_everything & LOOSEN_UNREACHABLE) ||
 		     unpack_unreachable) &&
 		    is_repository_shallow(repo))
-			prune_shallow(PRUNE_QUICK);
+			prune_shallow(PRUNE_تيز);
 	}
 
-	if (run_update_server_info)
+	إذا (لاڳيتو_update_server_info)
 		update_server_info(repo, 0);
 
-	if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
-		unsigned flags = 0;
+	إذا (git_env_bool(GIT_TEST_MULTI_PACK_اشاريو, 0)) {
+		بنية odb_ذريعو_files *files = odb_ذريعو_files_downcast(existing.ذريعو);
+		بنانشان flags = 0;
 
-		if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
+		إذا (git_env_bool(GIT_TEST_MULTI_PACK_اشاريو_WRITE_INCREMENTAL, 0))
 			flags |= MIDX_WRITE_INCREMENTAL;
-		write_midx_file(files->dirs->packed, NULL, NULL, flags);
+		write_midx_file(files->dirs->packed, عدم, عدم, flags);
 	}
 
 cleanup:
 	string_list_clear(&keep_pack_list, 0);
-	string_list_clear(&names, 1);
+	string_list_clear(&نالا, 1);
 	oidset_clear(&drop_oids);
 	existing_packs_release(&existing);
 	pack_geometry_release(&geometry);
-	pack_objects_args_release(&po_args);
-	pack_objects_args_release(&cruft_po_args);
+	pack_objects_دليلون_release(&po_دليلون);
+	pack_objects_دليلون_release(&cruft_po_دليلون);
 
-	return ret;
+	أرجع ret;
 }

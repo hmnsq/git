@@ -6,440 +6,440 @@
 *
 */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#وصف_ڪريو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
 
-#include "packfile.h"
-#include "odb.h"
-#include "strbuf.h"
+#ضمن "packfile.h"
+#ضمن "odb.h"
+#ضمن "strbuf.h"
 
-#define BLKSIZE 512
+#وصف_ڪريو BLKSIZE 512
 
-static const char pack_redundant_usage[] =
+ساكن ثابت حرف pack_redundant_usage[] =
 "git pack-redundant [--verbose] [--alt-odb] (--all | <pack-filename>...)";
 
-static int load_all_packs, verbose, alt_odb;
+ساكن صحيح ڀريو_all_packs, verbose, alt_odb;
 
-struct llist_item {
-	struct llist_item *next;
-	struct object_id oid;
+بنية llist_شي {
+	بنية llist_شي *ايندڙ;
+	بنية object_id oid;
 };
-static struct llist {
-	struct llist_item *front;
-	struct llist_item *back;
-	size_t size;
+ساكن بنية llist {
+	بنية llist_شي *front;
+	بنية llist_شي *پٺ;
+	سائيز_t سائيز;
 } *all_objects; /* all objects which must be present in local packfiles */
 
-static struct pack_list {
-	struct pack_list *next;
-	struct packed_git *pack;
-	struct llist *unique_objects;
-	struct llist *remaining_objects;
-	size_t all_objects_size;
-} *local_packs = NULL, *altodb_packs = NULL;
+ساكن بنية pack_list {
+	بنية pack_list *ايندڙ;
+	بنية packed_git *pack;
+	بنية llist *unique_objects;
+	بنية llist *بچيل_objects;
+	سائيز_t all_objects_سائيز;
+} *local_packs = عدم, *altodb_packs = عدم;
 
-static struct llist_item *free_nodes;
+ساكن بنية llist_شي *free_nodes;
 
-static inline void llist_item_put(struct llist_item *item)
+ساكن مضمن فراغ llist_شي_put(بنية llist_شي *شي)
 {
-	item->next = free_nodes;
-	free_nodes = item;
+	شي->ايندڙ = free_nodes;
+	free_nodes = شي;
 }
 
-static inline struct llist_item *llist_item_get(void)
+ساكن مضمن بنية llist_شي *llist_شي_get(فراغ)
 {
-	struct llist_item *new_item;
-	if ( free_nodes ) {
-		new_item = free_nodes;
-		free_nodes = free_nodes->next;
-	} else {
-		int i = 1;
-		ALLOC_ARRAY(new_item, BLKSIZE);
-		for (; i < BLKSIZE; i++)
-			llist_item_put(&new_item[i]);
+	بنية llist_شي *new_شي;
+	إذا ( free_nodes ) {
+		new_شي = free_nodes;
+		free_nodes = free_nodes->ايندڙ;
+	} وإلا {
+		صحيح i = 1;
+		ALLOC_ARRAY(new_شي, BLKSIZE);
+		لكل (; i < BLKSIZE; i++)
+			llist_شي_put(&new_شي[i]);
 	}
-	return new_item;
+	أرجع new_شي;
 }
 
-static inline void llist_init(struct llist **list)
+ساكن مضمن فراغ llist_init(بنية llist **list)
 {
-	*list = xmalloc(sizeof(struct llist));
-	(*list)->front = (*list)->back = NULL;
-	(*list)->size = 0;
+	*list = xmalloc(حجم(بنية llist));
+	(*list)->front = (*list)->پٺ = عدم;
+	(*list)->سائيز = 0;
 }
 
-static void llist_free(struct llist *list)
+ساكن فراغ llist_free(بنية llist *list)
 {
-	for (struct llist_item *i = list->front, *next; i; i = next) {
-		next = i->next;
-		llist_item_put(i);
+	لكل (بنية llist_شي *i = list->front, *ايندڙ; i; i = ايندڙ) {
+		ايندڙ = i->ايندڙ;
+		llist_شي_put(i);
 	}
-	free(list);
+	حرر(list);
 }
 
-static struct llist * llist_copy(struct llist *list)
+ساكن بنية llist * llist_copy(بنية llist *list)
 {
-	struct llist *ret;
-	struct llist_item *new_item, *old_item, *prev;
+	بنية llist *ret;
+	بنية llist_شي *new_شي, *old_شي, *prev;
 
 	llist_init(&ret);
 
-	if ((ret->size = list->size) == 0)
-		return ret;
+	إذا ((ret->سائيز = list->سائيز) == 0)
+		أرجع ret;
 
-	new_item = ret->front = llist_item_get();
-	new_item->oid = list->front->oid;
+	new_شي = ret->front = llist_شي_get();
+	new_شي->oid = list->front->oid;
 
-	old_item = list->front->next;
-	while (old_item) {
-		prev = new_item;
-		new_item = llist_item_get();
-		prev->next = new_item;
-		new_item->oid = old_item->oid;
-		old_item = old_item->next;
+	old_شي = list->front->ايندڙ;
+	طالما (old_شي) {
+		prev = new_شي;
+		new_شي = llist_شي_get();
+		prev->ايندڙ = new_شي;
+		new_شي->oid = old_شي->oid;
+		old_شي = old_شي->ايندڙ;
 	}
-	new_item->next = NULL;
-	ret->back = new_item;
+	new_شي->ايندڙ = عدم;
+	ret->پٺ = new_شي;
 
-	return ret;
+	أرجع ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
-					      struct llist_item *after,
-					      const unsigned char *oid)
+ساكن مضمن بنية llist_شي *llist_وجهو(بنية llist *list,
+					      بنية llist_شي *after,
+					      ثابت بنانشان حرف *oid)
 {
-	struct llist_item *new_item = llist_item_get();
-	oidread(&new_item->oid, oid, the_repository->hash_algo);
-	new_item->next = NULL;
+	بنية llist_شي *new_شي = llist_شي_get();
+	oidread(&new_شي->oid, oid, the_repository->hash_algo);
+	new_شي->ايندڙ = عدم;
 
-	if (after) {
-		new_item->next = after->next;
-		after->next = new_item;
-		if (after == list->back)
-			list->back = new_item;
-	} else {/* insert in front */
-		if (list->size == 0)
-			list->back = new_item;
-		else
-			new_item->next = list->front;
-		list->front = new_item;
+	إذا (after) {
+		new_شي->ايندڙ = after->ايندڙ;
+		after->ايندڙ = new_شي;
+		إذا (after == list->پٺ)
+			list->پٺ = new_شي;
+	} وإلا {/* insert in front */
+		إذا (list->سائيز == 0)
+			list->پٺ = new_شي;
+		وإلا
+			new_شي->ايندڙ = list->front;
+		list->front = new_شي;
 	}
-	list->size++;
-	return new_item;
+	list->سائيز++;
+	أرجع new_شي;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
-						   const unsigned char *oid)
+ساكن مضمن بنية llist_شي *llist_وجهو_پٺ(بنية llist *list,
+						   ثابت بنانشان حرف *oid)
 {
-	return llist_insert(list, list->back, oid);
+	أرجع llist_وجهو(list, list->پٺ, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
-			const struct object_id *oid, struct llist_item *hint)
+ساكن مضمن بنية llist_شي *llist_وجهو_sorted_unique(بنية llist *list,
+			ثابت بنية object_id *oid, بنية llist_شي *hint)
 {
-	struct llist_item *prev = NULL, *l;
+	بنية llist_شي *prev = عدم, *l;
 
-	l = (hint == NULL) ? list->front : hint;
-	while (l) {
-		int cmp = oidcmp(&l->oid, oid);
-		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+	l = (hint == عدم) ? list->front : hint;
+	طالما (l) {
+		صحيح cmp = oidcmp(&l->oid, oid);
+		إذا (cmp > 0) { /* we insert before this entry */
+			أرجع llist_وجهو(list, prev, oid->hash);
 		}
-		if (!cmp) { /* already exists */
-			return l;
+		إذا (!cmp) { /* already exists */
+			أرجع l;
 		}
 		prev = l;
-		l = l->next;
+		l = l->ايندڙ;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	أرجع llist_وجهو_پٺ(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
-static inline struct llist_item * llist_sorted_remove(struct llist *list, const unsigned char *oid, struct llist_item *hint)
+ساكن مضمن بنية llist_شي * llist_sorted_remove(بنية llist *list, ثابت بنانشان حرف *oid, بنية llist_شي *hint)
 {
-	struct llist_item *prev, *l;
+	بنية llist_شي *prev, *l;
 
-redo_from_start:
-	l = (hint == NULL) ? list->front : hint;
-	prev = NULL;
-	while (l) {
-		const int cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
-		if (cmp > 0) /* not in list, since sorted */
-			return prev;
-		if (!cmp) { /* found */
-			if (!prev) {
-				if (hint != NULL && hint != list->front) {
+redo_from_شروعات:
+	l = (hint == عدم) ? list->front : hint;
+	prev = عدم;
+	طالما (l) {
+		ثابت صحيح cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
+		إذا (cmp > 0) /* not in list, since sorted */
+			أرجع prev;
+		إذا (!cmp) { /*مليو*/
+			إذا (!prev) {
+				إذا (hint != عدم && hint != list->front) {
 					/* we don't know the previous element */
-					hint = NULL;
-					goto redo_from_start;
+					hint = عدم;
+					اذهب redo_from_شروعات;
 				}
-				list->front = l->next;
-			} else
-				prev->next = l->next;
-			if (l == list->back)
-				list->back = prev;
-			llist_item_put(l);
-			list->size--;
-			return prev;
+				list->front = l->ايندڙ;
+			} وإلا
+				prev->ايندڙ = l->ايندڙ;
+			إذا (l == list->پٺ)
+				list->پٺ = prev;
+			llist_شي_put(l);
+			list->سائيز--;
+			أرجع prev;
 		}
 		prev = l;
-		l = l->next;
+		l = l->ايندڙ;
 	}
-	return prev;
+	أرجع prev;
 }
 
 /* computes A\B */
-static void llist_sorted_difference_inplace(struct llist *A,
-				     struct llist *B)
+ساكن فراغ llist_sorted_difference_inplace(بنية llist *A,
+				     بنية llist *B)
 {
-	struct llist_item *hint, *b;
+	بنية llist_شي *hint, *b;
 
-	hint = NULL;
+	hint = عدم;
 	b = B->front;
 
-	while (b) {
+	طالما (b) {
 		hint = llist_sorted_remove(A, b->oid.hash, hint);
-		b = b->next;
+		b = b->ايندڙ;
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
-					   struct pack_list *entry)
+ساكن مضمن بنية pack_list * pack_list_وجهو(بنية pack_list **pl,
+					   بنية pack_list *داخلا)
 {
-	struct pack_list *p = xmalloc(sizeof(struct pack_list));
-	memcpy(p, entry, sizeof(struct pack_list));
-	p->next = *pl;
+	بنية pack_list *p = xmalloc(حجم(بنية pack_list));
+	يادگيري_نقل(p, داخلا, حجم(بنية pack_list));
+	p->ايندڙ = *pl;
 	*pl = p;
-	return p;
+	أرجع p;
 }
 
-static void pack_list_free(struct pack_list *pl)
+ساكن فراغ pack_list_free(بنية pack_list *pl)
 {
-	for (struct pack_list *next; pl; pl = next) {
-		next = pl->next;
-		free(pl);
+	لكل (بنية pack_list *ايندڙ; pl; pl = ايندڙ) {
+		ايندڙ = pl->ايندڙ;
+		حرر(pl);
 	}
 }
 
-static inline size_t pack_list_size(struct pack_list *pl)
+ساكن مضمن سائيز_t pack_list_سائيز(بنية pack_list *pl)
 {
-	size_t ret = 0;
-	while (pl) {
+	سائيز_t ret = 0;
+	طالما (pl) {
 		ret++;
-		pl = pl->next;
+		pl = pl->ايندڙ;
 	}
-	return ret;
+	أرجع ret;
 }
 
-static struct pack_list * pack_list_difference(const struct pack_list *A,
-					       const struct pack_list *B)
+ساكن بنية pack_list * pack_list_difference(ثابت بنية pack_list *A,
+					       ثابت بنية pack_list *B)
 {
-	struct pack_list *ret;
-	const struct pack_list *pl;
+	بنية pack_list *ret;
+	ثابت بنية pack_list *pl;
 
-	if (!A)
-		return NULL;
+	إذا (!A)
+		أرجع عدم;
 
 	pl = B;
-	while (pl != NULL) {
-		if (A->pack == pl->pack)
-			return pack_list_difference(A->next, B);
-		pl = pl->next;
+	طالما (pl != عدم) {
+		إذا (A->pack == pl->pack)
+			أرجع pack_list_difference(A->ايندڙ, B);
+		pl = pl->ايندڙ;
 	}
-	ret = xmalloc(sizeof(struct pack_list));
-	memcpy(ret, A, sizeof(struct pack_list));
-	ret->next = pack_list_difference(A->next, B);
-	return ret;
+	ret = xmalloc(حجم(بنية pack_list));
+	يادگيري_نقل(ret, A, حجم(بنية pack_list));
+	ret->ايندڙ = pack_list_difference(A->ايندڙ, B);
+	أرجع ret;
 }
 
-static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
+ساكن فراغ cmp_two_packs(بنية pack_list *p1, بنية pack_list *p2)
 {
-	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	struct llist_item *p1_hint = NULL, *p2_hint = NULL;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	سائيز_t p1_off = 0, p2_off = 0, p1_قدم, p2_قدم;
+	ثابت بنانشان حرف *p1_بنياد, *p2_بنياد;
+	بنية llist_شي *p1_hint = عدم, *p2_hint = عدم;
+	ثابت بنانشان صحيح hashsz = the_hash_algo->rawsz;
 
-	if (!p1->unique_objects)
-		p1->unique_objects = llist_copy(p1->remaining_objects);
-	if (!p2->unique_objects)
-		p2->unique_objects = llist_copy(p2->remaining_objects);
+	إذا (!p1->unique_objects)
+		p1->unique_objects = llist_copy(p1->بچيل_objects);
+	إذا (!p2->unique_objects)
+		p2->unique_objects = llist_copy(p2->بچيل_objects);
 
-	p1_base = p1->pack->index_data;
-	p2_base = p2->pack->index_data;
-	p1_base += 256 * 4 + ((p1->pack->index_version < 2) ? 4 : 8);
-	p2_base += 256 * 4 + ((p2->pack->index_version < 2) ? 4 : 8);
-	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
-	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
+	p1_بنياد = p1->pack->اشاريو_معلومات;
+	p2_بنياد = p2->pack->اشاريو_معلومات;
+	p1_بنياد += 256 * 4 + ((p1->pack->اشاريو_نسخو < 2) ? 4 : 8);
+	p2_بنياد += 256 * 4 + ((p2->pack->اشاريو_نسخو < 2) ? 4 : 8);
+	p1_قدم = hashsz + ((p1->pack->اشاريو_نسخو < 2) ? 4 : 0);
+	p2_قدم = hashsz + ((p2->pack->اشاريو_نسخو < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
-	       p2_off < p2->pack->num_objects * p2_step)
+	طالما (p1_off < p1->pack->انگ_objects * p1_قدم &&
+	       p2_off < p2->pack->انگ_objects * p2_قدم)
 	{
-		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		ثابت صحيح cmp = hashcmp(p1_بنياد + p1_off, p2_بنياد + p2_off,
 					the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		إذا (cmp == 0) {
 			p1_hint = llist_sorted_remove(p1->unique_objects,
-					p1_base + p1_off,
+					p1_بنياد + p1_off,
 					p1_hint);
 			p2_hint = llist_sorted_remove(p2->unique_objects,
-					p1_base + p1_off,
+					p1_بنياد + p1_off,
 					p2_hint);
-			p1_off += p1_step;
-			p2_off += p2_step;
-			continue;
+			p1_off += p1_قدم;
+			p2_off += p2_قدم;
+			استمر;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
-			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
-			p2_off += p2_step;
+		إذا (cmp < 0) { /* p1 has the object, p2 doesn't */
+			p1_off += p1_قدم;
+		} وإلا { /* p2 has the object, p1 doesn't */
+			p2_off += p2_قدم;
 		}
 	}
 }
 
-static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
+ساكن سائيز_t sizeof_union(بنية packed_git *p1, بنية packed_git *p2)
 {
-	size_t ret = 0;
-	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	سائيز_t ret = 0;
+	سائيز_t p1_off = 0, p2_off = 0, p1_قدم, p2_قدم;
+	ثابت بنانشان حرف *p1_بنياد, *p2_بنياد;
+	ثابت بنانشان صحيح hashsz = the_hash_algo->rawsz;
 
-	p1_base = p1->index_data;
-	p2_base = p2->index_data;
-	p1_base += 256 * 4 + ((p1->index_version < 2) ? 4 : 8);
-	p2_base += 256 * 4 + ((p2->index_version < 2) ? 4 : 8);
-	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
-	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
+	p1_بنياد = p1->اشاريو_معلومات;
+	p2_بنياد = p2->اشاريو_معلومات;
+	p1_بنياد += 256 * 4 + ((p1->اشاريو_نسخو < 2) ? 4 : 8);
+	p2_بنياد += 256 * 4 + ((p2->اشاريو_نسخو < 2) ? 4 : 8);
+	p1_قدم = hashsz + ((p1->اشاريو_نسخو < 2) ? 4 : 0);
+	p2_قدم = hashsz + ((p2->اشاريو_نسخو < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
-	       p2_off < p2->num_objects * p2_step)
+	طالما (p1_off < p1->انگ_objects * p1_قدم &&
+	       p2_off < p2->انگ_objects * p2_قدم)
 	{
-		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		صحيح cmp = hashcmp(p1_بنياد + p1_off, p2_بنياد + p2_off,
 				  the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		إذا (cmp == 0) {
 			ret++;
-			p1_off += p1_step;
-			p2_off += p2_step;
-			continue;
+			p1_off += p1_قدم;
+			p2_off += p2_قدم;
+			استمر;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
-			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
-			p2_off += p2_step;
+		إذا (cmp < 0) { /* p1 has the object, p2 doesn't */
+			p1_off += p1_قدم;
+		} وإلا { /* p2 has the object, p1 doesn't */
+			p2_off += p2_قدم;
 		}
 	}
-	return ret;
+	أرجع ret;
 }
 
 /* another O(n^2) function ... */
-static size_t get_pack_redundancy(struct pack_list *pl)
+ساكن سائيز_t get_pack_redundancy(بنية pack_list *pl)
 {
-	struct pack_list *subset;
-	size_t ret = 0;
+	بنية pack_list *subset;
+	سائيز_t ret = 0;
 
-	if (!pl)
-		return 0;
+	إذا (!pl)
+		أرجع 0;
 
-	while ((subset = pl->next)) {
-		while (subset) {
+	طالما ((subset = pl->ايندڙ)) {
+		طالما (subset) {
 			ret += sizeof_union(pl->pack, subset->pack);
-			subset = subset->next;
+			subset = subset->ايندڙ;
 		}
-		pl = pl->next;
+		pl = pl->ايندڙ;
 	}
-	return ret;
+	أرجع ret;
 }
 
-static inline off_t pack_set_bytecount(struct pack_list *pl)
+ساكن مضمن off_t pack_سيٽ_bytecount(بنية pack_list *pl)
 {
 	off_t ret = 0;
-	while (pl) {
-		ret += pl->pack->pack_size;
-		ret += pl->pack->index_size;
-		pl = pl->next;
+	طالما (pl) {
+		ret += pl->pack->pack_سائيز;
+		ret += pl->pack->اشاريو_سائيز;
+		pl = pl->ايندڙ;
 	}
-	return ret;
+	أرجع ret;
 }
 
-static int cmp_remaining_objects(const void *a, const void *b)
+ساكن صحيح cmp_بچيل_objects(ثابت فراغ *a, ثابت فراغ *b)
 {
-	struct pack_list *pl_a = *((struct pack_list **)a);
-	struct pack_list *pl_b = *((struct pack_list **)b);
+	بنية pack_list *pl_a = *((بنية pack_list **)a);
+	بنية pack_list *pl_b = *((بنية pack_list **)b);
 
-	if (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
+	إذا (pl_a->بچيل_objects->سائيز == pl_b->بچيل_objects->سائيز) {
 		/* have the same remaining_objects, big pack first */
-		if (pl_a->all_objects_size == pl_b->all_objects_size)
-			return 0;
-		else if (pl_a->all_objects_size < pl_b->all_objects_size)
-			return 1;
-		else
-			return -1;
-	} else if (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
+		إذا (pl_a->all_objects_سائيز == pl_b->all_objects_سائيز)
+			أرجع 0;
+		وإلا إذا (pl_a->all_objects_سائيز < pl_b->all_objects_سائيز)
+			أرجع 1;
+		وإلا
+			أرجع -1;
+	} وإلا إذا (pl_a->بچيل_objects->سائيز < pl_b->بچيل_objects->سائيز) {
 		/* sort by remaining objects, more objects first */
-		return 1;
-	} else {
-		return -1;
+		أرجع 1;
+	} وإلا {
+		أرجع -1;
 	}
 }
 
 /* Sort pack_list, greater size of remaining_objects first */
-static void sort_pack_list(struct pack_list **pl)
+ساكن فراغ ترتيب_ڏيو_pack_list(بنية pack_list **pl)
 {
-	struct pack_list **ary, *p;
-	size_t n = pack_list_size(*pl);
+	بنية pack_list **ary, *p;
+	سائيز_t n = pack_list_سائيز(*pl);
 
-	if (n < 2)
-		return;
+	إذا (n < 2)
+		أرجع;
 
 	/* prepare an array of packed_list for easier sorting */
 	CALLOC_ARRAY(ary, n);
-	for (n = 0, p = *pl; p; p = p->next)
+	لكل (n = 0, p = *pl; p; p = p->ايندڙ)
 		ary[n++] = p;
 
-	QSORT(ary, n, cmp_remaining_objects);
+	QSORT(ary, n, cmp_بچيل_objects);
 
 	/* link them back again */
-	for (size_t i = 0; i < n - 1; i++)
-		ary[i]->next = ary[i + 1];
-	ary[n - 1]->next = NULL;
+	لكل (سائيز_t i = 0; i < n - 1; i++)
+		ary[i]->ايندڙ = ary[i + 1];
+	ary[n - 1]->ايندڙ = عدم;
 	*pl = ary[0];
 
-	free(ary);
+	حرر(ary);
 }
 
 
-static void minimize(struct pack_list **min)
+ساكن فراغ minimize(بنية pack_list **min)
 {
-	struct pack_list *pl, *unique = NULL, *non_unique = NULL;
-	struct llist *missing, *unique_pack_objects;
+	بنية pack_list *pl, *unique = عدم, *non_unique = عدم;
+	بنية llist *missing, *unique_pack_objects;
 
 	pl = local_packs;
-	while (pl) {
-		if (pl->unique_objects->size)
-			pack_list_insert(&unique, pl);
-		else
-			pack_list_insert(&non_unique, pl);
-		pl = pl->next;
+	طالما (pl) {
+		إذا (pl->unique_objects->سائيز)
+			pack_list_وجهو(&unique, pl);
+		وإلا
+			pack_list_وجهو(&non_unique, pl);
+		pl = pl->ايندڙ;
 	}
 	/* find out which objects are missing from the set of unique packs */
 	missing = llist_copy(all_objects);
 	pl = unique;
-	while (pl) {
-		llist_sorted_difference_inplace(missing, pl->remaining_objects);
-		pl = pl->next;
+	طالما (pl) {
+		llist_sorted_difference_inplace(missing, pl->بچيل_objects);
+		pl = pl->ايندڙ;
 	}
 
 	*min = unique;
 
 	/* return if there are no objects missing from the unique set */
-	if (missing->size == 0) {
+	إذا (missing->سائيز == 0) {
 		llist_free(missing);
 		pack_list_free(non_unique);
-		return;
+		أرجع;
 	}
 
 	unique_pack_objects = llist_copy(all_objects);
@@ -447,27 +447,27 @@ static void minimize(struct pack_list **min)
 
 	/* remove unique pack objects from the non_unique packs */
 	pl = non_unique;
-	while (pl) {
-		llist_sorted_difference_inplace(pl->remaining_objects, unique_pack_objects);
-		pl = pl->next;
+	طالما (pl) {
+		llist_sorted_difference_inplace(pl->بچيل_objects, unique_pack_objects);
+		pl = pl->ايندڙ;
 	}
 
-	while (non_unique) {
-		struct pack_list *next;
+	طالما (non_unique) {
+		بنية pack_list *ايندڙ;
 
 		/* sort the non_unique packs, greater size of remaining_objects first */
-		sort_pack_list(&non_unique);
-		if (non_unique->remaining_objects->size == 0)
-			break;
+		ترتيب_ڏيو_pack_list(&non_unique);
+		إذا (non_unique->بچيل_objects->سائيز == 0)
+			اكسر;
 
-		pack_list_insert(min, non_unique);
+		pack_list_وجهو(min, non_unique);
 
-		for (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
-			llist_sorted_difference_inplace(pl->remaining_objects, non_unique->remaining_objects);
+		لكل (pl = non_unique->ايندڙ; pl && pl->بچيل_objects->سائيز > 0;  pl = pl->ايندڙ)
+			llist_sorted_difference_inplace(pl->بچيل_objects, non_unique->بچيل_objects);
 
-		next = non_unique->next;
-		free(non_unique);
-		non_unique = next;
+		ايندڙ = non_unique->ايندڙ;
+		حرر(non_unique);
+		non_unique = ايندڙ;
 	}
 
 	pack_list_free(non_unique);
@@ -475,223 +475,223 @@ static void minimize(struct pack_list **min)
 	llist_free(missing);
 }
 
-static void load_all_objects(void)
+ساكن فراغ ڀريو_all_objects(فراغ)
 {
-	struct pack_list *pl = local_packs;
-	struct llist_item *hint, *l;
+	بنية pack_list *pl = local_packs;
+	بنية llist_شي *hint, *l;
 
 	llist_init(&all_objects);
 
-	while (pl) {
-		hint = NULL;
-		l = pl->remaining_objects->front;
-		while (l) {
-			hint = llist_insert_sorted_unique(all_objects,
+	طالما (pl) {
+		hint = عدم;
+		l = pl->بچيل_objects->front;
+		طالما (l) {
+			hint = llist_وجهو_sorted_unique(all_objects,
 							  &l->oid, hint);
-			l = l->next;
+			l = l->ايندڙ;
 		}
-		pl = pl->next;
+		pl = pl->ايندڙ;
 	}
 	/* remove objects present in remote packs */
 	pl = altodb_packs;
-	while (pl) {
-		llist_sorted_difference_inplace(all_objects, pl->remaining_objects);
-		pl = pl->next;
+	طالما (pl) {
+		llist_sorted_difference_inplace(all_objects, pl->بچيل_objects);
+		pl = pl->ايندڙ;
 	}
 }
 
 /* this scales like O(n^2) */
-static void cmp_local_packs(void)
+ساكن فراغ cmp_local_packs(فراغ)
 {
-	struct pack_list *subset, *pl = local_packs;
+	بنية pack_list *subset, *pl = local_packs;
 
 	/* only one packfile */
-	if (!pl->next) {
+	إذا (!pl->ايندڙ) {
 		llist_init(&pl->unique_objects);
-		return;
+		أرجع;
 	}
 
-	while ((subset = pl)) {
-		while ((subset = subset->next))
+	طالما ((subset = pl)) {
+		طالما ((subset = subset->ايندڙ))
 			cmp_two_packs(pl, subset);
-		pl = pl->next;
+		pl = pl->ايندڙ;
 	}
 }
 
-static void scan_alt_odb_packs(void)
+ساكن فراغ جاچ_alt_odb_packs(فراغ)
 {
-	struct pack_list *local, *alt;
+	بنية pack_list *local, *alt;
 
 	alt = altodb_packs;
-	while (alt) {
+	طالما (alt) {
 		local = local_packs;
-		while (local) {
-			llist_sorted_difference_inplace(local->remaining_objects,
-							alt->remaining_objects);
-			local = local->next;
+		طالما (local) {
+			llist_sorted_difference_inplace(local->بچيل_objects,
+							alt->بچيل_objects);
+			local = local->ايندڙ;
 		}
-		alt = alt->next;
+		alt = alt->ايندڙ;
 	}
 }
 
-static struct pack_list * add_pack(struct packed_git *p)
+ساكن بنية pack_list * جوڙيو_pack(بنية packed_git *p)
 {
-	struct pack_list l;
-	size_t off = 0, step;
-	const unsigned char *base;
+	بنية pack_list l;
+	سائيز_t off = 0, قدم;
+	ثابت بنانشان حرف *بنياد;
 
-	if (!p->pack_local && !(alt_odb || verbose))
-		return NULL;
+	إذا (!p->pack_local && !(alt_odb || verbose))
+		أرجع عدم;
 
 	l.pack = p;
-	llist_init(&l.remaining_objects);
+	llist_init(&l.بچيل_objects);
 
-	if (open_pack_index(p)) {
-		llist_free(l.remaining_objects);
-		return NULL;
+	إذا (open_pack_اشاريو(p)) {
+		llist_free(l.بچيل_objects);
+		أرجع عدم;
 	}
 
-	base = p->index_data;
-	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
-	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
-		llist_insert_back(l.remaining_objects, base + off);
-		off += step;
+	بنياد = p->اشاريو_معلومات;
+	بنياد += 256 * 4 + ((p->اشاريو_نسخو < 2) ? 4 : 8);
+	قدم = the_hash_algo->rawsz + ((p->اشاريو_نسخو < 2) ? 4 : 0);
+	طالما (off < p->انگ_objects * قدم) {
+		llist_وجهو_پٺ(l.بچيل_objects, بنياد + off);
+		off += قدم;
 	}
-	l.all_objects_size = l.remaining_objects->size;
-	l.unique_objects = NULL;
-	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
-	else
-		return pack_list_insert(&altodb_packs, &l);
+	l.all_objects_سائيز = l.بچيل_objects->سائيز;
+	l.unique_objects = عدم;
+	إذا (p->pack_local)
+		أرجع pack_list_وجهو(&local_packs, &l);
+	وإلا
+		أرجع pack_list_وجهو(&altodb_packs, &l);
 }
 
-static struct pack_list * add_pack_file(const char *filename)
+ساكن بنية pack_list * جوڙيو_pack_file(ثابت حرف *filename)
 {
-	struct packed_git *p;
+	بنية packed_git *p;
 
-	if (strlen(filename) < 40)
+	إذا (لڙي_ڊيگهه(filename) < 40)
 		die("Bad pack filename: %s", filename);
 
 	repo_for_each_pack(the_repository, p)
-		if (strstr(p->pack_name, filename))
-			return add_pack(p);
+		إذا (لڙي_ڳولا(p->pack_name, filename))
+			أرجع جوڙيو_pack(p);
 	die("Filename %s not found in packed_git", filename);
 }
 
-static void load_all(void)
+ساكن فراغ ڀريو_all(فراغ)
 {
-	struct packed_git *p;
+	بنية packed_git *p;
 
 	repo_for_each_pack(the_repository, p)
-		add_pack(p);
+		جوڙيو_pack(p);
 }
 
-int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED) {
-	int i; int i_still_use_this = 0; struct pack_list *min = NULL, *red, *pl;
-	struct llist *ignore;
-	struct strbuf idx_name = STRBUF_INIT;
-	char buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
+صحيح cmd_pack_redundant(صحيح argc, ثابت حرف **argv, ثابت حرف *اڳياڙي اڻ_استعمال_ٿيل, بنية repository *repo اڻ_استعمال_ٿيل) {
+	صحيح i; صحيح i_still_use_this = 0; بنية pack_list *min = عدم, *red, *pl;
+	بنية llist *ignore;
+	بنية strbuf idx_name = STRBUF_INIT;
+	حرف buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
 
 	show_usage_if_asked(argc, argv, pack_redundant_usage);
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--")) {
+	لكل (i = 1; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
+		إذا (!strcmp(arg, "--")) {
 			i++;
-			break;
+			اكسر;
 		}
-		if (!strcmp(arg, "--all")) {
-			load_all_packs = 1;
-			continue;
+		إذا (!strcmp(arg, "--all")) {
+			ڀريو_all_packs = 1;
+			استمر;
 		}
-		if (!strcmp(arg, "--verbose")) {
+		إذا (!strcmp(arg, "--verbose")) {
 			verbose = 1;
-			continue;
+			استمر;
 		}
-		if (!strcmp(arg, "--alt-odb")) {
+		إذا (!strcmp(arg, "--alt-odb")) {
 			alt_odb = 1;
-			continue;
+			استمر;
 		}
-		if (!strcmp(arg, "--i-still-use-this")) {
+		إذا (!strcmp(arg, "--i-still-use-this")) {
 			i_still_use_this = 1;
-			continue;
+			استمر;
 		}
-		if (*arg == '-')
+		إذا (*arg == '-')
 			usage(pack_redundant_usage);
-		else
-			break;
+		وإلا
+			اكسر;
 	}
 
-	if (!i_still_use_this)
-		you_still_use_that("git pack-redundant", NULL);
+	إذا (!i_still_use_this)
+		you_still_use_that("git pack-redundant", عدم);
 
-	if (load_all_packs)
-		load_all();
-	else
-		while (*(argv + i) != NULL)
-			add_pack_file(*(argv + i++));
+	إذا (ڀريو_all_packs)
+		ڀريو_all();
+	وإلا
+		طالما (*(argv + i) != عدم)
+			جوڙيو_pack_file(*(argv + i++));
 
-	if (!local_packs)
+	إذا (!local_packs)
 		die("Zero packs found!");
 
-	load_all_objects();
+	ڀريو_all_objects();
 
-	if (alt_odb)
-		scan_alt_odb_packs();
+	إذا (alt_odb)
+		جاچ_alt_odb_packs();
 
 	/* ignore objects given on stdin */
 	llist_init(&ignore);
-	if (!isatty(0)) {
-		struct object_id oid;
-		while (fgets(buf, sizeof(buf), stdin)) {
-			if (get_oid_hex(buf, &oid))
+	إذا (!isatty(0)) {
+		بنية object_id oid;
+		طالما (fgets(buf, حجم(buf), stdin)) {
+			إذا (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
-			llist_insert_sorted_unique(ignore, &oid, NULL);
+			llist_وجهو_sorted_unique(ignore, &oid, عدم);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);
 	pl = local_packs;
-	while (pl) {
-		llist_sorted_difference_inplace(pl->remaining_objects, ignore);
-		pl = pl->next;
+	طالما (pl) {
+		llist_sorted_difference_inplace(pl->بچيل_objects, ignore);
+		pl = pl->ايندڙ;
 	}
 
 	cmp_local_packs();
 
 	minimize(&min);
 
-	if (verbose) {
+	إذا (verbose) {
 		fprintf(stderr, "There are %lu packs available in alt-odbs.\n",
-			(unsigned long)pack_list_size(altodb_packs));
+			(بنانشان ڊگهو)pack_list_سائيز(altodb_packs));
 		fprintf(stderr, "The smallest (bytewise) set of packs is:\n");
 		pl = min;
-		while (pl) {
+		طالما (pl) {
 			fprintf(stderr, "\t%s\n", pl->pack->pack_name);
-			pl = pl->next;
+			pl = pl->ايندڙ;
 		}
 		fprintf(stderr, "containing %lu duplicate objects "
 				"with a total size of %lukb.\n",
-			(unsigned long)get_pack_redundancy(min),
-			(unsigned long)pack_set_bytecount(min)/1024);
+			(بنانشان ڊگهو)get_pack_redundancy(min),
+			(بنانشان ڊگهو)pack_سيٽ_bytecount(min)/1024);
 		fprintf(stderr, "A total of %lu unique objects were considered.\n",
-			(unsigned long)all_objects->size);
+			(بنانشان ڊگهو)all_objects->سائيز);
 		fprintf(stderr, "Redundant packs (with indexes):\n");
 	}
 	pl = red = pack_list_difference(local_packs, min);
-	while (pl) {
-		printf("%s\n%s\n",
+	طالما (pl) {
+		لکو("%s\n%s\n",
 		       odb_pack_name(pl->pack->repo, &idx_name, pl->pack->hash, "idx"),
 		       pl->pack->pack_name);
-		pl = pl->next;
+		pl = pl->ايندڙ;
 	}
-	if (verbose)
+	إذا (verbose)
 		fprintf(stderr, "%luMB of redundant packs in total.\n",
-			(unsigned long)pack_set_bytecount(red)/(1024*1024));
+			(بنانشان ڊگهو)pack_سيٽ_bytecount(red)/(1024*1024));
 
 	pack_list_free(red);
 	pack_list_free(min);
 	llist_free(ignore);
 	strbuf_release(&idx_name);
-	return 0;
+	أرجع 0;
 }

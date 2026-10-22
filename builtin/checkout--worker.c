@@ -1,34 +1,34 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#وصف_ڪريو USE_THE_REPOSITORY_VARIABLE
+#وصف_ڪريو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "entry.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parallel-checkout.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "read-cache-ll.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "entry.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "parallel-checkout.h"
+#ضمن "parse-options.h"
+#ضمن "pkt-line.h"
+#ضمن "read-cache-ll.h"
 
-static void packet_to_pc_item(const char *buffer, int len,
-			      struct parallel_checkout_item *pc_item)
+ساكن فراغ packet_منزل_pc_شي(ثابت حرف *بفر, صحيح len,
+			      بنية parallel_checkout_شي *pc_شي)
 {
-	const struct pc_item_fixed_portion *fixed_portion;
-	const char *variant;
-	char *encoding;
+	ثابت بنية pc_شي_fixed_portion *fixed_portion;
+	ثابت حرف *variant;
+	حرف *encoding;
 
-	if (len < sizeof(struct pc_item_fixed_portion))
+	إذا (len < حجم(بنية pc_شي_fixed_portion))
 		BUG("checkout worker received too short item (got %dB, exp %dB)",
-		    len, (int)sizeof(struct pc_item_fixed_portion));
+		    len, (صحيح)حجم(بنية pc_شي_fixed_portion));
 
-	fixed_portion = (struct pc_item_fixed_portion *)buffer;
+	fixed_portion = (بنية pc_شي_fixed_portion *)بفر;
 
-	if (len - sizeof(struct pc_item_fixed_portion) !=
-		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
+	إذا (len - حجم(بنية pc_شي_fixed_portion) !=
+		fixed_portion->name_len + fixed_portion->working_وڻ_encoding_len)
 		BUG("checkout worker received corrupted item");
 
-	variant = buffer + sizeof(struct pc_item_fixed_portion);
+	variant = بفر + حجم(بنية pc_شي_fixed_portion);
 
 	/*
 	 * Note: the main process uses zero length to communicate that the
@@ -36,111 +36,111 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	إذا (fixed_portion->working_وڻ_encoding_len) {
 		encoding = xmemdupz(variant,
-				    fixed_portion->working_tree_encoding_len);
-		variant += fixed_portion->working_tree_encoding_len;
-	} else {
-		encoding = NULL;
+				    fixed_portion->working_وڻ_encoding_len);
+		variant += fixed_portion->working_وڻ_encoding_len;
+	} وإلا {
+		encoding = عدم;
 	}
 
-	memset(pc_item, 0, sizeof(*pc_item));
-	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, NULL);
-	pc_item->ce->ce_namelen = fixed_portion->name_len;
-	pc_item->ce->ce_mode = fixed_portion->ce_mode;
-	memcpy(pc_item->ce->name, variant, pc_item->ce->ce_namelen);
-	oidcpy(&pc_item->ce->oid, &fixed_portion->oid);
+	memset(pc_شي, 0, حجم(*pc_شي));
+	pc_شي->ce = make_خالي_جايون_transient_cache_داخلا(fixed_portion->name_len, عدم);
+	pc_شي->ce->ce_namelen = fixed_portion->name_len;
+	pc_شي->ce->ce_گهڻائي = fixed_portion->ce_گهڻائي;
+	يادگيري_نقل(pc_شي->ce->name, variant, pc_شي->ce->ce_namelen);
+	oidcpy(&pc_شي->ce->oid, &fixed_portion->oid);
 
-	pc_item->id = fixed_portion->id;
-	pc_item->ca.crlf_action = fixed_portion->crlf_action;
-	pc_item->ca.ident = fixed_portion->ident;
-	pc_item->ca.working_tree_encoding = encoding;
+	pc_شي->id = fixed_portion->id;
+	pc_شي->ca.crlf_action = fixed_portion->crlf_action;
+	pc_شي->ca.ident = fixed_portion->ident;
+	pc_شي->ca.working_وڻ_encoding = encoding;
 }
 
-static void report_result(struct parallel_checkout_item *pc_item)
+ساكن فراغ report_نتيجو(بنية parallel_checkout_شي *pc_شي)
 {
-	struct pc_item_result res = { 0 };
-	size_t size;
+	بنية pc_شي_نتيجو res = { 0 };
+	سائيز_t سائيز;
 
-	res.id = pc_item->id;
-	res.status = pc_item->status;
+	res.id = pc_شي->id;
+	res.حالت = pc_شي->حالت;
 
-	if (pc_item->status == PC_ITEM_WRITTEN) {
-		res.st = pc_item->st;
-		size = sizeof(res);
-	} else {
-		size = PC_ITEM_RESULT_BASE_SIZE;
+	إذا (pc_شي->حالت == PC_شي_WRITTEN) {
+		res.st = pc_شي->st;
+		سائيز = حجم(res);
+	} وإلا {
+		سائيز = PC_شي_نتيجو_بنياد_سائيز;
 	}
 
-	packet_write(1, (const char *)&res, size);
+	packet_write(1, (ثابت حرف *)&res, سائيز);
 }
 
 /* Free the worker-side malloced data, but not pc_item itself. */
-static void release_pc_item_data(struct parallel_checkout_item *pc_item)
+ساكن فراغ release_pc_شي_معلومات(بنية parallel_checkout_شي *pc_شي)
 {
-	free((char *)pc_item->ca.working_tree_encoding);
-	discard_cache_entry(pc_item->ce);
+	حرر((حرف *)pc_شي->ca.working_وڻ_encoding);
+	discard_cache_داخلا(pc_شي->ce);
 }
 
-static void worker_loop(struct checkout *state)
+ساكن فراغ ڪم_ڪندڙ_loop(بنية checkout *state)
 {
-	struct parallel_checkout_item *items = NULL;
-	size_t i, nr = 0, alloc = 0;
+	بنية parallel_checkout_شي *شيون = عدم;
+	سائيز_t i, nr = 0, alloc = 0;
 
-	while (1) {
-		int len = packet_read(0, packet_buffer, sizeof(packet_buffer),
+	طالما (1) {
+		صحيح len = packet_read(0, packet_بفر, حجم(packet_بفر),
 				      0);
 
-		if (len < 0)
+		إذا (len < 0)
 			BUG("packet_read() returned negative value");
-		else if (!len)
-			break;
+		وإلا إذا (!len)
+			اكسر;
 
-		ALLOC_GROW(items, nr + 1, alloc);
-		packet_to_pc_item(packet_buffer, len, &items[nr++]);
+		ALLOC_GROW(شيون, nr + 1, alloc);
+		packet_منزل_pc_شي(packet_بفر, len, &شيون[nr++]);
 	}
 
-	for (i = 0; i < nr; i++) {
-		struct parallel_checkout_item *pc_item = &items[i];
-		write_pc_item(pc_item, state);
-		report_result(pc_item);
-		release_pc_item_data(pc_item);
+	لكل (i = 0; i < nr; i++) {
+		بنية parallel_checkout_شي *pc_شي = &شيون[i];
+		write_pc_شي(pc_شي, state);
+		report_نتيجو(pc_شي);
+		release_pc_شي_معلومات(pc_شي);
 	}
 
 	packet_flush(1);
 
-	free(items);
+	حرر(شيون);
 }
 
-static const char * const checkout_worker_usage[] = {
+ساكن ثابت حرف * ثابت checkout_ڪم_ڪندڙ_usage[] = {
 	N_("git checkout--worker [<options>]"),
-	NULL
+	عدم
 };
 
-int cmd_checkout__worker(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+صحيح cmd_checkout_ڪم_ڪندڙ(صحيح argc,
+			 ثابت حرف **argv,
+			 ثابت حرف *اڳياڙي,
+			 بنية repository *repo اڻ_استعمال_ٿيل)
 {
-	struct checkout state = CHECKOUT_INIT;
-	struct option checkout_worker_options[] = {
-		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
+	بنية checkout state = CHECKOUT_INIT;
+	بنية option checkout_ڪم_ڪندڙ_options[] = {
+		OPT_STRING(0, "prefix", &state.بنياد_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
-		OPT_END()
+		OPT_پڇاڙي()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 checkout_worker_usage,
-					 checkout_worker_options);
+					 checkout_ڪم_ڪندڙ_usage,
+					 checkout_ڪم_ڪندڙ_options);
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, checkout_worker_options,
-			     checkout_worker_usage, 0);
-	if (argc > 0)
-		usage_with_options(checkout_worker_usage, checkout_worker_options);
+	repo_config(the_repository, git_default_config, عدم);
+	argc = parse_options(argc, argv, اڳياڙي, checkout_ڪم_ڪندڙ_options,
+			     checkout_ڪم_ڪندڙ_usage, 0);
+	إذا (argc > 0)
+		usage_with_options(checkout_ڪم_ڪندڙ_usage, checkout_ڪم_ڪندڙ_options);
 
-	if (state.base_dir)
-		state.base_dir_len = strlen(state.base_dir);
+	إذا (state.بنياد_dir)
+		state.بنياد_dir_len = لڙي_ڊيگهه(state.بنياد_dir);
 
 	/*
 	 * Setting this on a worker won't actually update the index. We just
@@ -149,6 +149,6 @@ int cmd_checkout__worker(int argc,
 	 */
 	state.refresh_cache = 1;
 
-	worker_loop(&state);
-	return 0;
+	ڪم_ڪندڙ_loop(&state);
+	أرجع 0;
 }

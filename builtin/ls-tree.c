@@ -3,411 +3,411 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
+#وصف_ڪريو USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
 
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
-#include "tree.h"
-#include "path.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "pathspec.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "tree.h"
+#ضمن "path.h"
+#ضمن "quote.h"
+#ضمن "parse-options.h"
+#ضمن "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+ساكن ثابت حرف * ثابت ls_وڻ_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
-	NULL
+	عدم
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+ساكن فراغ expand_objectsize(بنية strbuf *سٽ, ثابت بنية object_id *oid,
+			      ثابت تعداد object_type type, بنانشان صحيح padded)
 {
-	static const char padding[] = "       ";
-	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
-	size_t len;
+	ساكن ثابت حرف padding[] = "       ";
+	سائيز_t min_len = padded ? لڙي_ڊيگهه(padding) : 0;
+	سائيز_t orig_len = سٽ->len;
+	سائيز_t len;
 
-	if (type == OBJ_BLOB) {
-		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+	إذا (type == OBJ_BLOB) {
+		سائيز_t سائيز;
+		إذا (odb_read_object_info(the_repository->objects, oid, &سائيز) < 0)
 			die(_("could not get object info about '%s'"),
-			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
-	} else {
-		strbuf_addstr(line, "-");
+			    oid_منزل_hex(oid));
+		strbuf_جوڙيو_uint(سٽ, سائيز);
+	} وإلا {
+		strbuf_addstr(سٽ, "-");
 	}
-	len = line->len - orig_len;
-	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+	len = سٽ->len - orig_len;
+	إذا (len < min_len)
+		strbuf_وجهو(سٽ, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
-	unsigned null_termination:1;
-	int abbrev;
-	enum ls_tree_path_options {
+بنية ls_وڻ_options {
+	بنانشان null_termination:1;
+	صحيح abbrev;
+	تعداد ls_وڻ_رستو_options {
 		LS_RECURSIVE = 1 << 0,
-		LS_TREE_ONLY = 1 << 1,
+		LS_وڻ_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
-	struct pathspec pathspec;
-	const char *prefix;
-	const char *format;
+	بنية pathspec pathspec;
+	ثابت حرف *اڳياڙي;
+	ثابت حرف *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
-			  size_t baselen, const char *pathname)
+ساكن صحيح show_recursive(بنية ls_وڻ_options *options, ثابت حرف *بنياد,
+			  سائيز_t baselen, ثابت حرف *pathname)
 {
-	int i;
+	صحيح i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	إذا (options->ls_options & LS_RECURSIVE)
+		أرجع 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	إذا (!options->pathspec.nr)
+		أرجع 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
-		size_t len, speclen;
+	لكل (i = 0; i < options->pathspec.nr; i++) {
+		ثابت حرف *spec = options->pathspec.شيون[i].ميلاپ;
+		سائيز_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
-			continue;
-		len = strlen(pathname);
+		إذا (لڙي_ڀيٽ(بنياد, spec, baselen))
+			استمر;
+		len = لڙي_ڊيگهه(pathname);
 		spec += baselen;
-		speclen = strlen(spec);
-		if (speclen <= len)
-			continue;
-		if (spec[len] && spec[len] != '/')
-			continue;
-		if (memcmp(pathname, spec, len))
-			continue;
-		return 1;
+		speclen = لڙي_ڊيگهه(spec);
+		إذا (speclen <= len)
+			استمر;
+		إذا (spec[len] && spec[len] != '/')
+			استمر;
+		إذا (memcmp(pathname, spec, len))
+			استمر;
+		أرجع 1;
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
-			 const char *pathname, unsigned mode, void *context)
+ساكن صحيح show_وڻ_fmt(ثابت بنية object_id *oid, بنية strbuf *بنياد,
+			 ثابت حرف *pathname, بنانشان گهڻائي, فراغ *context)
 {
-	struct ls_tree_options *options = context;
-	int recurse = 0;
-	struct strbuf sb = STRBUF_INIT;
-	enum object_type type = object_type(mode);
-	const char *format = options->format;
+	بنية ls_وڻ_options *options = context;
+	صحيح recurse = 0;
+	بنية strbuf sb = STRBUF_INIT;
+	تعداد object_type type = object_type(گهڻائي);
+	ثابت حرف *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
-		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	إذا (type == OBJ_وڻ && show_recursive(options, بنياد->buf, بنياد->len, pathname))
+		recurse = READ_وڻ_RECURSIVE;
+	إذا (type == OBJ_وڻ && recurse && !(options->ls_options & LS_SHOW_TREES))
+		أرجع recurse;
+	إذا (type == OBJ_BLOB && (options->ls_options & LS_وڻ_ONLY))
+		أرجع 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
-		size_t len;
+	طالما (strbuf_expand_قدم(&sb, &format)) {
+		سائيز_t len;
 
-		if (skip_prefix(format, "%", &format))
+		إذا (skip_اڳياڙي(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		وإلا إذا ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
-			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		وإلا إذا (skip_اڳياڙي(format, "(objectmode)", &format))
+			strbuf_addf(&sb, "%06o", گهڻائي);
+		وإلا إذا (skip_اڳياڙي(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		وإلا إذا (skip_اڳياڙي(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		وإلا إذا (skip_اڳياڙي(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
-			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
-			const char *name;
-			const char *prefix = options->prefix;
-			struct strbuf sbuf = STRBUF_INIT;
-			size_t baselen = base->len;
+		وإلا إذا (skip_اڳياڙي(format, "(objectname)", &format))
+			strbuf_جوڙيو_unique_abbrev(&sb, oid, options->abbrev);
+		وإلا إذا (skip_اڳياڙي(format, "(path)", &format)) {
+			ثابت حرف *name;
+			ثابت حرف *اڳياڙي = options->اڳياڙي;
+			بنية strbuf sbuf = STRBUF_INIT;
+			سائيز_t baselen = بنياد->len;
 
-			strbuf_addstr(base, pathname);
-			name = relative_path(base->buf, prefix, &sbuf);
-			quote_c_style(name, &sb, NULL, 0);
-			strbuf_setlen(base, baselen);
+			strbuf_addstr(بنياد, pathname);
+			name = relative_رستو(بنياد->buf, اڳياڙي, &sbuf);
+			quote_c_style(name, &sb, عدم, 0);
+			strbuf_setlen(بنياد, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} وإلا
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	أرجع recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
-			    struct strbuf *base, const char *pathname,
-			    enum object_type type)
+ساكن صحيح show_وڻ_common(بنية ls_وڻ_options *options, صحيح *recurse,
+			    بنية strbuf *بنياد, ثابت حرف *pathname,
+			    تعداد object_type type)
 {
-	int ret = -1;
+	صحيح ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	إذا (type == OBJ_BLOB) {
+		إذا (options->ls_options & LS_وڻ_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
-		   show_recursive(options, base->buf, base->len, pathname)) {
-		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+	} وإلا إذا (type == OBJ_وڻ &&
+		   show_recursive(options, بنياد->buf, بنياد->len, pathname)) {
+		*recurse = READ_وڻ_RECURSIVE;
+		إذا (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	أرجع ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
-					  struct strbuf *base,
-					  const char *pathname,
-					  const size_t baselen)
+ساكن فراغ show_وڻ_common_default_long(بنية ls_وڻ_options *options,
+					  بنية strbuf *بنياد,
+					  ثابت حرف *pathname,
+					  ثابت سائيز_t baselen)
 {
-	const char *prefix = options->prefix;
+	ثابت حرف *اڳياڙي = options->اڳياڙي;
 
-	strbuf_addstr(base, pathname);
+	strbuf_addstr(بنياد, pathname);
 
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	إذا (options->null_termination) {
+		بنية strbuf sb = STRBUF_INIT;
+		ثابت حرف *name = relative_رستو(بنياد->buf, اڳياڙي, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
-		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
+	} وإلا {
+		write_name_quoted_relative(بنياد->buf, اڳياڙي, stdout, '\n');
 	}
 
-	strbuf_setlen(base, baselen);
+	strbuf_setlen(بنياد, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
-			     const char *pathname, unsigned mode,
-			     void *context)
+ساكن صحيح show_وڻ_default(ثابت بنية object_id *oid, بنية strbuf *بنياد,
+			     ثابت حرف *pathname, بنانشان گهڻائي,
+			     فراغ *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
+	بنية ls_وڻ_options *options = context;
+	صحيح early;
+	صحيح recurse;
+	تعداد object_type type = object_type(گهڻائي);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_وڻ_common(options, &recurse, بنياد, pathname, type);
+	إذا (early >= 0)
+		أرجع early;
 
-	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
-	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	لکو("%06o %s %s\t", گهڻائي, type_name(object_type(گهڻائي)),
+	       repo_ڳوليو_unique_abbrev(the_repository, oid, options->abbrev));
+	show_وڻ_common_default_long(options, بنياد, pathname, بنياد->len);
+	أرجع recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
-			  const char *pathname, unsigned mode,
-			  void *context)
+ساكن صحيح show_وڻ_long(ثابت بنية object_id *oid, بنية strbuf *بنياد,
+			  ثابت حرف *pathname, بنانشان گهڻائي,
+			  فراغ *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	char size_text[24];
-	enum object_type type = object_type(mode);
+	بنية ls_وڻ_options *options = context;
+	صحيح early;
+	صحيح recurse;
+	حرف سائيز_متن[24];
+	تعداد object_type type = object_type(گهڻائي);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_وڻ_common(options, &recurse, بنياد, pathname, type);
+	إذا (early >= 0)
+		أرجع early;
 
-	if (type == OBJ_BLOB) {
-		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
-			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
-			xsnprintf(size_text, sizeof(size_text),
-				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
-		xsnprintf(size_text, sizeof(size_text), "-");
+	إذا (type == OBJ_BLOB) {
+		سائيز_t سائيز;
+		إذا (odb_read_object_info(the_repository->objects, oid, &سائيز) == OBJ_BAD)
+			xsnprintf(سائيز_متن, حجم(سائيز_متن), "BAD");
+		وإلا
+			xsnprintf(سائيز_متن, حجم(سائيز_متن),
+				  "%" PRIuMAX, (uintmax_t)سائيز);
+	} وإلا {
+		xsnprintf(سائيز_متن, حجم(سائيز_متن), "-");
 	}
 
-	printf("%06o %s %s %7s\t", mode, type_name(type),
-	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
-	       size_text);
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	لکو("%06o %s %s %7s\t", گهڻائي, type_name(type),
+	       repo_ڳوليو_unique_abbrev(the_repository, oid, options->abbrev),
+	       سائيز_متن);
+	show_وڻ_common_default_long(options, بنياد, pathname, بنياد->len);
+	أرجع recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
-			       struct strbuf *base,
-			       const char *pathname, unsigned mode,
-			       void *context)
+ساكن صحيح show_وڻ_name_only(ثابت بنية object_id *oid اڻ_استعمال_ٿيل,
+			       بنية strbuf *بنياد,
+			       ثابت حرف *pathname, بنانشان گهڻائي,
+			       فراغ *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	const size_t baselen = base->len;
-	enum object_type type = object_type(mode);
-	const char *prefix;
+	بنية ls_وڻ_options *options = context;
+	صحيح early;
+	صحيح recurse;
+	ثابت سائيز_t baselen = بنياد->len;
+	تعداد object_type type = object_type(گهڻائي);
+	ثابت حرف *اڳياڙي;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_وڻ_common(options, &recurse, بنياد, pathname, type);
+	إذا (early >= 0)
+		أرجع early;
 
-	prefix = options->prefix;
-	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	اڳياڙي = options->اڳياڙي;
+	strbuf_addstr(بنياد, pathname);
+	إذا (options->null_termination) {
+		بنية strbuf sb = STRBUF_INIT;
+		ثابت حرف *name = relative_رستو(بنياد->buf, اڳياڙي, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
-		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
+	} وإلا {
+		write_name_quoted_relative(بنياد->buf, اڳياڙي, stdout, '\n');
 	}
-	strbuf_setlen(base, baselen);
-	return recurse;
+	strbuf_setlen(بنياد, baselen);
+	أرجع recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
-			    const char *pathname, unsigned mode,
-			    void *context)
+ساكن صحيح show_وڻ_object(ثابت بنية object_id *oid, بنية strbuf *بنياد,
+			    ثابت حرف *pathname, بنانشان گهڻائي,
+			    فراغ *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
-	const char *str;
+	بنية ls_وڻ_options *options = context;
+	صحيح early;
+	صحيح recurse;
+	تعداد object_type type = object_type(گهڻائي);
+	ثابت حرف *str;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_وڻ_common(options, &recurse, بنياد, pathname, type);
+	إذا (early >= 0)
+		أرجع early;
 
-	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	str = repo_ڳوليو_unique_abbrev(the_repository, oid, options->abbrev);
+	إذا (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} وإلا  {
 		puts(str);
 	}
-	return recurse;
+	أرجع recurse;
 }
 
-enum ls_tree_cmdmode {
-	MODE_DEFAULT = 0,
-	MODE_LONG,
-	MODE_NAME_ONLY,
-	MODE_NAME_STATUS,
-	MODE_OBJECT_ONLY,
+تعداد ls_وڻ_cmdmode {
+	گهڻائي_DEFAULT = 0,
+	گهڻائي_LONG,
+	گهڻائي_NAME_ONLY,
+	گهڻائي_NAME_حالت,
+	گهڻائي_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
-	const char *const fmt;
-	read_tree_fn_t fn;
+بنية ls_وڻ_cmdmode_منزل_fmt {
+	تعداد ls_وڻ_cmdmode گهڻائي;
+	ثابت حرف *ثابت fmt;
+	read_وڻ_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+ساكن بنية ls_وڻ_cmdmode_منزل_fmt ls_وڻ_cmdmode_format[] = {
 	{
-		.mode = MODE_DEFAULT,
+		.گهڻائي = گهڻائي_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
-		.fn = show_tree_default,
+		.fn = show_وڻ_default,
 	},
 	{
-		.mode = MODE_LONG,
+		.گهڻائي = گهڻائي_LONG,
 		.fmt = "%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)",
-		.fn = show_tree_long,
+		.fn = show_وڻ_long,
 	},
 	{
-		.mode = MODE_NAME_ONLY, /* And MODE_NAME_STATUS */
+		.گهڻائي = گهڻائي_NAME_ONLY, /* And MODE_NAME_STATUS */
 		.fmt = "%(path)",
-		.fn = show_tree_name_only,
+		.fn = show_وڻ_name_only,
 	},
 	{
-		.mode = MODE_OBJECT_ONLY,
+		.گهڻائي = گهڻائي_OBJECT_ONLY,
 		.fmt = "%(objectname)",
-		.fn = show_tree_object
+		.fn = show_وڻ_object
 	},
 	{
 		/* fallback */
-		.fn = show_tree_default,
+		.fn = show_وڻ_default,
 	},
 };
 
-int cmd_ls_tree(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+صحيح cmd_ls_وڻ(صحيح argc,
+		ثابت حرف **argv,
+		ثابت حرف *اڳياڙي,
+		بنية repository *repo اڻ_استعمال_ٿيل)
 {
-	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
-	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
-		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
-			LS_TREE_ONLY),
-		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
+	بنية object_id oid;
+	بنية وڻ *وڻ;
+	صحيح i, ڀريل_وڻ = 0;
+	صحيح ڀريل_name = !اڳياڙي || !*اڳياڙي;
+	read_وڻ_fn_t fn = عدم;
+	تعداد ls_وڻ_cmdmode cmdmode = گهڻائي_DEFAULT;
+	صحيح null_termination = 0;
+	بنية ls_وڻ_options options = { 0 };
+	ثابت بنية option ls_وڻ_options[] = {
+		OPT_ٻٽو_انگ('d', عدم, &options.ls_options, N_("only show trees"),
+			LS_وڻ_ONLY),
+		OPT_ٻٽو_انگ('r', عدم, &options.ls_options, N_("recurse into subtrees"),
 			LS_RECURSIVE),
-		OPT_BIT('t', NULL, &options.ls_options, N_("show trees when recursing"),
+		OPT_ٻٽو_انگ('t', عدم, &options.ls_options, N_("show trees when recursing"),
 			LS_SHOW_TREES),
-		OPT_BOOL('z', NULL, &null_termination,
+		OPT_BOOL('z', عدم, &null_termination,
 			 N_("terminate entries with NUL byte")),
 		OPT_CMDMODE('l', "long", &cmdmode, N_("include object size"),
-			    MODE_LONG),
+			    گهڻائي_LONG),
 		OPT_CMDMODE(0, "name-only", &cmdmode, N_("list only filenames"),
-			    MODE_NAME_ONLY),
+			    گهڻائي_NAME_ONLY),
 		OPT_CMDMODE(0, "name-status", &cmdmode, N_("list only filenames"),
-			    MODE_NAME_STATUS),
+			    گهڻائي_NAME_حالت),
 		OPT_CMDMODE(0, "object-only", &cmdmode, N_("list only objects"),
-			    MODE_OBJECT_ONLY),
-		OPT_BOOL(0, "full-name", &full_name, N_("use full path names")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+			    گهڻائي_OBJECT_ONLY),
+		OPT_BOOL(0, "full-name", &ڀريل_name, N_("use full path names")),
+		OPT_BOOL(0, "full-tree", &ڀريل_وڻ,
 			 N_("list entire tree; not just current directory "
 			    "(implies --full-name)")),
 		OPT_STRING_F(0, "format", &options.format, N_("format"),
 					 N_("format to use for the output"),
 					 PARSE_OPT_NONEG),
 		OPT__ABBREV(&options.abbrev),
-		OPT_END()
+		OPT_پڇاڙي()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	بنية ls_وڻ_cmdmode_منزل_fmt *m2f = ls_وڻ_cmdmode_format;
+	صحيح ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
-	argc = parse_options(argc, argv, prefix, ls_tree_options,
-			     ls_tree_usage, 0);
+	argc = parse_options(argc, argv, اڳياڙي, ls_وڻ_options,
+			     ls_وڻ_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
-		prefix = NULL;
-	options.prefix = full_name ? NULL : prefix;
+	إذا (ڀريل_وڻ)
+		اڳياڙي = عدم;
+	options.اڳياڙي = ڀريل_name ? عدم : اڳياڙي;
 
 	/*
 	 * We wanted to detect conflicts between --name-only and
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
-		cmdmode = MODE_NAME_ONLY;
+	إذا (cmdmode == گهڻائي_NAME_حالت)
+		cmdmode = گهڻائي_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
-	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
+	إذا ( (LS_وڻ_ONLY|LS_RECURSIVE) ==
+	    ((LS_وڻ_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
-		usage_msg_opt(
+	إذا (options.format && cmdmode)
+		usage_نياپو_opt(
 			_("--format can't be combined with other format-altering options"),
-			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
-		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+			ls_وڻ_usage, ls_وڻ_options);
+	إذا (argc < 1)
+		usage_with_options(ls_وڻ_usage, ls_وڻ_options);
+	إذا (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -420,33 +420,33 @@ int cmd_ls_tree(int argc,
 	parse_pathspec(&options.pathspec, PATHSPEC_ALL_MAGIC &
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
-		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
-		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
+		       اڳياڙي, argv + 1);
+	لكل (i = 0; i < options.pathspec.nr; i++)
+		options.pathspec.شيون[i].nowildcard_len = options.pathspec.شيون[i].len;
 	options.pathspec.has_wildcard = 0;
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	وڻ = repo_parse_وڻ_اڻسڌو(the_repository, &oid);
+	إذا (!وڻ)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
-			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
-			cmdmode = m2f->mode;
+	طالما (m2f) {
+		إذا (!m2f->fmt) {
+			fn = options.format ? show_وڻ_fmt : show_وڻ_default;
+		} وإلا إذا (options.format && !strcmp(options.format, m2f->fmt)) {
+			cmdmode = m2f->گهڻائي;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} وإلا إذا (!options.format && cmdmode == m2f->گهڻائي) {
 			fn = m2f->fn;
-		} else {
+		} وإلا {
 			m2f++;
-			continue;
+			استمر;
 		}
-		break;
+		اكسر;
 	}
 
-	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
+	ret = !!read_وڻ(the_repository, وڻ, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	أرجع ret;
 }

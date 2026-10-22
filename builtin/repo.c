@@ -1,767 +1,767 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#وصف_ڪريو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "commit.h"
-#include "environment.h"
-#include "hash.h"
-#include "hex.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "path.h"
-#include "path-walk.h"
-#include "progress.h"
-#include "quote.h"
-#include "ref-filter.h"
-#include "refs.h"
-#include "revision.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "shallow.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "utf8.h"
+#ضمن "builtin.h"
+#ضمن "commit.h"
+#ضمن "environment.h"
+#ضمن "hash.h"
+#ضمن "hex.h"
+#ضمن "odb.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "path-walk.h"
+#ضمن "progress.h"
+#ضمن "quote.h"
+#ضمن "ref-filter.h"
+#ضمن "refs.h"
+#ضمن "revision.h"
+#ضمن "setup.h"
+#ضمن "strbuf.h"
+#ضمن "string-list.h"
+#ضمن "shallow.h"
+#ضمن "tree.h"
+#ضمن "tree-walk.h"
+#ضمن "utf8.h"
 
-#define REPO_INFO_USAGE \
+#وصف_ڪريو REPO_INFO_USAGE \
 	"git repo info [--format=(lines|nul) | -z] [--all | <key>...]", \
 	"git repo info --keys [--format=(lines|nul) | -z]"
 
-#define REPO_STRUCTURE_USAGE \
+#وصف_ڪريو REPO_STRUCTURE_USAGE \
 	"git repo structure [--format=(table|lines|nul) | -z]"
 
-static const char *const repo_usage[] = {
+ساكن ثابت حرف *ثابت repo_usage[] = {
 	REPO_INFO_USAGE,
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	عدم,
 };
 
-static const char *const repo_info_usage[] = {
+ساكن ثابت حرف *ثابت repo_info_usage[] = {
 	REPO_INFO_USAGE,
-	NULL,
+	عدم,
 };
 
-static const char *const repo_structure_usage[] = {
+ساكن ثابت حرف *ثابت repo_structure_usage[] = {
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	عدم,
 };
 
-typedef int get_value_fn(struct repository *repo, struct strbuf *buf);
+تعريفنوع صحيح get_قدر_fn(بنية repository *repo, بنية strbuf *buf);
 
-enum output_format {
-	FORMAT_TABLE,
+تعداد output_format {
+	FORMAT_جدول,
 	FORMAT_NEWLINE_TERMINATED,
 	FORMAT_NUL_TERMINATED,
 };
 
-struct repo_info_field {
-	const char *key;
-	get_value_fn *get_value;
+بنية repo_info_ميدان {
+	ثابت حرف *ڪنجي;
+	get_قدر_fn *get_قدر;
 };
 
-static int get_layout_bare(struct repository *repo UNUSED, struct strbuf *buf)
+ساكن صحيح get_layout_bare(بنية repository *repo اڻ_استعمال_ٿيل, بنية strbuf *buf)
 {
 	strbuf_addstr(buf, is_bare_repository(the_repository) ? "true" : "false");
-	return 0;
+	أرجع 0;
 }
 
-static int get_layout_shallow(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_layout_shallow(بنية repository *repo, بنية strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      is_repository_shallow(repo) ? "true" : "false");
-	return 0;
+	أرجع 0;
 }
 
-static int get_object_format(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_object_format(بنية repository *repo, بنية strbuf *buf)
 {
 	strbuf_addstr(buf, repo->hash_algo->name);
-	return 0;
+	أرجع 0;
 }
 
-static int get_path_commondir_absolute(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_رستو_commondir_absolute(بنية repository *repo, بنية strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	ثابت حرف *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	إذا (!common_dir)
+		أرجع error(_("unable to get common directory"));
 
-	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	format_رستو(buf, common_dir, repo->اڳياڙي, رستو_FORMAT_CANONICAL);
+	أرجع 0;
 }
 
-static int get_path_commondir_relative(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_رستو_commondir_relative(بنية repository *repo, بنية strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	ثابت حرف *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	إذا (!common_dir)
+		أرجع error(_("unable to get common directory"));
 
-	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	format_رستو(buf, common_dir, repo->اڳياڙي, رستو_FORMAT_RELATIVE);
+	أرجع 0;
 }
 
-static int get_path_gitdir_absolute(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_رستو_gitdir_absolute(بنية repository *repo, بنية strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	ثابت حرف *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	إذا (!git_dir)
+		أرجع error(_("unable to get git directory"));
 
-	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	format_رستو(buf, git_dir, repo->اڳياڙي, رستو_FORMAT_CANONICAL);
+	أرجع 0;
 }
 
-static int get_path_gitdir_relative(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_رستو_gitdir_relative(بنية repository *repo, بنية strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	ثابت حرف *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	إذا (!git_dir)
+		أرجع error(_("unable to get git directory"));
 
-	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	format_رستو(buf, git_dir, repo->اڳياڙي, رستو_FORMAT_RELATIVE);
+	أرجع 0;
 }
 
-static int get_references_format(struct repository *repo, struct strbuf *buf)
+ساكن صحيح get_references_format(بنية repository *repo, بنية strbuf *buf)
 {
 	strbuf_addstr(buf,
-		      ref_storage_format_to_name(repo->ref_storage_format));
-	return 0;
+		      ref_storage_format_منزل_name(repo->ref_storage_format));
+	أرجع 0;
 }
 
 /* repo_info_field keys must be in lexicographical order */
-static const struct repo_info_field repo_info_field[] = {
+ساكن ثابت بنية repo_info_ميدان repo_info_ميدان[] = {
 	{ "layout.bare", get_layout_bare },
 	{ "layout.shallow", get_layout_shallow },
 	{ "object.format", get_object_format },
-	{ "path.commondir.absolute", get_path_commondir_absolute },
-	{ "path.commondir.relative", get_path_commondir_relative },
-	{ "path.gitdir.absolute", get_path_gitdir_absolute },
-	{ "path.gitdir.relative", get_path_gitdir_relative },
+	{ "path.commondir.absolute", get_رستو_commondir_absolute },
+	{ "path.commondir.relative", get_رستو_commondir_relative },
+	{ "path.gitdir.absolute", get_رستو_gitdir_absolute },
+	{ "path.gitdir.relative", get_رستو_gitdir_relative },
 	{ "references.format", get_references_format },
 };
 
-static int repo_info_field_cmp(const void *va, const void *vb)
+ساكن صحيح repo_info_ميدان_cmp(ثابت فراغ *va, ثابت فراغ *vb)
 {
-	const struct repo_info_field *a = va;
-	const struct repo_info_field *b = vb;
+	ثابت بنية repo_info_ميدان *a = va;
+	ثابت بنية repo_info_ميدان *b = vb;
 
-	return strcmp(a->key, b->key);
+	أرجع strcmp(a->ڪنجي, b->ڪنجي);
 }
 
-static const struct repo_info_field *get_repo_info_field(const char *key)
+ساكن ثابت بنية repo_info_ميدان *get_repo_info_ميدان(ثابت حرف *ڪنجي)
 {
-	const struct repo_info_field search_key = { key, NULL };
-	const struct repo_info_field *found = bsearch(&search_key,
-						      repo_info_field,
-						      ARRAY_SIZE(repo_info_field),
-						      sizeof(*found),
-						      repo_info_field_cmp);
+	ثابت بنية repo_info_ميدان ڳولا_ڪنجي = { ڪنجي, عدم };
+	ثابت بنية repo_info_ميدان *مليو_2 = bsearch(&ڳولا_ڪنجي,
+						      repo_info_ميدان,
+						      ARRAY_سائيز(repo_info_ميدان),
+						      حجم(*مليو_2),
+						      repo_info_ميدان_cmp);
 
-	return found;
+	أرجع مليو_2;
 }
 
-static void print_field(enum output_format format, const char *key,
-			const char *value)
+ساكن فراغ print_ميدان(تعداد output_format format, ثابت حرف *ڪنجي,
+			ثابت حرف *قدر)
 {
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
-		printf("%s=", key);
-		quote_c_style(value, NULL, stdout, 0);
-		putchar('\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
-		printf("%s\n%s%c", key, value, '\0');
-		break;
-	default:
+	بدل (format) {
+	حالة FORMAT_NEWLINE_TERMINATED:
+		لکو("%s=", ڪنجي);
+		quote_c_style(قدر, عدم, stdout, 0);
+		اکر_لکو('\n');
+		اكسر;
+	حالة FORMAT_NUL_TERMINATED:
+		لکو("%s\n%s%c", ڪنجي, قدر, '\0');
+		اكسر;
+	افتراضي:
 		BUG("not a valid output format: %d", format);
 	}
 }
 
-static int print_fields(int argc, const char **argv,
-			struct repository *repo,
-			enum output_format format)
+ساكن صحيح print_fields(صحيح argc, ثابت حرف **argv,
+			بنية repository *repo,
+			تعداد output_format format)
 {
-	int ret = 0;
-	struct strbuf valbuf = STRBUF_INIT;
+	صحيح ret = 0;
+	بنية strbuf valbuf = STRBUF_INIT;
 
-	for (int i = 0; i < argc; i++) {
-		const char *key = argv[i];
-		const struct repo_info_field *field = get_repo_info_field(key);
+	لكل (صحيح i = 0; i < argc; i++) {
+		ثابت حرف *ڪنجي = argv[i];
+		ثابت بنية repo_info_ميدان *ميدان = get_repo_info_ميدان(ڪنجي);
 
-		if (!field) {
-			ret = error(_("key '%s' not found"), key);
-			continue;
+		إذا (!ميدان) {
+			ret = error(_("key '%s' not found"), ڪنجي);
+			استمر;
 		}
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, key, valbuf.buf);
+		ميدان->get_قدر(repo, &valbuf);
+		print_ميدان(format, ڪنجي, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return ret;
+	أرجع ret;
 }
 
-static int print_all_fields(struct repository *repo,
-			    enum output_format format)
+ساكن صحيح print_all_fields(بنية repository *repo,
+			    تعداد output_format format)
 {
-	struct strbuf valbuf = STRBUF_INIT;
+	بنية strbuf valbuf = STRBUF_INIT;
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
+	لكل (سائيز_t i = 0; i < ARRAY_سائيز(repo_info_ميدان); i++) {
+		ثابت بنية repo_info_ميدان *ميدان = &repo_info_ميدان[i];
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, field->key, valbuf.buf);
+		ميدان->get_قدر(repo, &valbuf);
+		print_ميدان(format, ميدان->ڪنجي, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return 0;
+	أرجع 0;
 }
 
-static int print_keys(enum output_format format)
+ساكن صحيح print_ڪنجيون(تعداد output_format format)
 {
-	char sep;
+	حرف sep;
 
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
+	بدل (format) {
+	حالة FORMAT_NEWLINE_TERMINATED:
 		sep = '\n';
-		break;
-	case FORMAT_NUL_TERMINATED:
+		اكسر;
+	حالة FORMAT_NUL_TERMINATED:
 		sep = '\0';
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		die(_("--keys can only be used with --format=lines or --format=nul"));
 	}
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
-		printf("%s%c", field->key, sep);
+	لكل (سائيز_t i = 0; i < ARRAY_سائيز(repo_info_ميدان); i++) {
+		ثابت بنية repo_info_ميدان *ميدان = &repo_info_ميدان[i];
+		لکو("%s%c", ميدان->ڪنجي, sep);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int parse_format_cb(const struct option *opt,
-			   const char *arg, int unset UNUSED)
+ساكن صحيح parse_format_cb(ثابت بنية option *opt,
+			   ثابت حرف *arg, صحيح unset اڻ_استعمال_ٿيل)
 {
-	enum output_format *format = opt->value;
+	تعداد output_format *format = opt->قدر;
 
-	if (opt->short_name == 'z')
+	إذا (opt->short_name == 'z')
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "nul"))
+	وإلا إذا (!strcmp(arg, "nul"))
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "lines"))
+	وإلا إذا (!strcmp(arg, "lines"))
 		*format = FORMAT_NEWLINE_TERMINATED;
-	else if (!strcmp(arg, "table"))
-		*format = FORMAT_TABLE;
-	else
+	وإلا إذا (!strcmp(arg, "table"))
+		*format = FORMAT_جدول;
+	وإلا
 		die(_("invalid format '%s'"), arg);
 
-	return 0;
+	أرجع 0;
 }
 
-static int cmd_repo_info(int argc, const char **argv, const char *prefix,
-			 struct repository *repo)
+ساكن صحيح cmd_repo_info(صحيح argc, ثابت حرف **argv, ثابت حرف *اڳياڙي,
+			 بنية repository *repo)
 {
-	enum output_format format = FORMAT_NEWLINE_TERMINATED;
-	int all_keys = 0;
-	int show_keys = 0;
-	struct option options[] = {
+	تعداد output_format format = FORMAT_NEWLINE_TERMINATED;
+	صحيح all_ڪنجيون = 0;
+	صحيح show_ڪنجيون = 0;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', عدم, &format, عدم,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "all", &all_keys, N_("print all keys/values")),
-		OPT_BOOL(0, "keys", &show_keys, N_("show keys")),
-		OPT_END()
+		OPT_BOOL(0, "all", &all_ڪنجيون, N_("print all keys/values")),
+		OPT_BOOL(0, "keys", &show_ڪنجيون, N_("show keys")),
+		OPT_پڇاڙي()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_info_usage, 0);
+	argc = parse_options(argc, argv, اڳياڙي, options, repo_info_usage, 0);
 
-	if (show_keys && (all_keys || argc))
+	إذا (show_ڪنجيون && (all_ڪنجيون || argc))
 		die(_("--keys cannot be used with a <key> or --all"));
 
-	if (show_keys)
-		return print_keys(format);
+	إذا (show_ڪنجيون)
+		أرجع print_ڪنجيون(format);
 
-	if (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
+	إذا (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
 		die(_("unsupported output format"));
 
-	if (all_keys && argc)
+	إذا (all_ڪنجيون && argc)
 		die(_("--all and <key> cannot be used together"));
 
-	if (all_keys)
-		return print_all_fields(repo, format);
-	else
-		return print_fields(argc, argv, repo, format);
+	إذا (all_ڪنجيون)
+		أرجع print_all_fields(repo, format);
+	وإلا
+		أرجع print_fields(argc, argv, repo, format);
 }
 
-struct object_data {
-	struct object_id oid;
-	size_t value;
+بنية object_معلومات {
+	بنية object_id oid;
+	سائيز_t قدر;
 };
 
-struct largest_objects {
-	struct object_data tag_size;
-	struct object_data commit_size;
-	struct object_data tree_size;
-	struct object_data blob_size;
+بنية سڀ_کان_وڏو_objects {
+	بنية object_معلومات ٽيگ_سائيز;
+	بنية object_معلومات commit_سائيز;
+	بنية object_معلومات وڻ_سائيز;
+	بنية object_معلومات blob_سائيز;
 
-	struct object_data parent_count;
-	struct object_data tree_entries;
+	بنية object_معلومات والد_ڳڻپ;
+	بنية object_معلومات وڻ_entries;
 };
 
-struct ref_stats {
-	size_t branches;
-	size_t remotes;
-	size_t tags;
-	size_t others;
+بنية ref_stats {
+	سائيز_t branches;
+	سائيز_t remotes;
+	سائيز_t ٽيگ_فهرست;
+	سائيز_t others;
 };
 
-struct object_values {
-	size_t tags;
-	size_t commits;
-	size_t trees;
-	size_t blobs;
+بنية object_قدرون {
+	سائيز_t ٽيگ_فهرست;
+	سائيز_t commits;
+	سائيز_t trees;
+	سائيز_t blobs;
 };
 
-struct object_stats {
-	struct object_values type_counts;
-	struct object_values inflated_sizes;
-	struct object_values disk_sizes;
-	struct largest_objects largest;
+بنية object_stats {
+	بنية object_قدرون type_counts;
+	بنية object_قدرون inflated_sizes;
+	بنية object_قدرون disk_sizes;
+	بنية سڀ_کان_وڏو_objects سڀ_کان_وڏو;
 };
 
-struct repo_structure {
-	struct ref_stats refs;
-	struct object_stats objects;
+بنية repo_structure {
+	بنية ref_stats refs;
+	بنية object_stats objects;
 };
 
-struct stats_table {
-	struct string_list rows;
-	struct string_list annotations;
+بنية stats_جدول {
+	بنية string_list صفون;
+	بنية string_list annotations;
 
-	int name_col_width;
-	int value_col_width;
-	int unit_col_width;
+	صحيح name_کانو_ويڪر;
+	صحيح قدر_کانو_ويڪر;
+	صحيح unit_کانو_ويڪر;
 };
 
 /*
  * Holds column data that gets stored for each row.
  */
-struct stats_table_entry {
-	char *value;
-	const char *unit;
-	size_t index;
-	struct object_id *oid;
+بنية stats_جدول_داخلا {
+	حرف *قدر;
+	ثابت حرف *unit;
+	سائيز_t اشاريو;
+	بنية object_id *oid;
 };
 
-static void stats_table_vaddf(struct stats_table *table,
-			      struct stats_table_entry *entry,
-			      const char *format, va_list ap)
+ساكن فراغ stats_جدول_vaddf(بنية stats_جدول *جدول,
+			      بنية stats_جدول_داخلا *داخلا,
+			      ثابت حرف *format, va_list ap)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
-	char *formatted_name;
-	int name_width;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية string_list_شي *شي;
+	حرف *formatted_name;
+	صحيح name_ويڪر;
 
 	strbuf_vaddf(&buf, format, ap);
-	formatted_name = strbuf_detach(&buf, NULL);
-	name_width = utf8_strwidth(formatted_name);
+	formatted_name = strbuf_detach(&buf, عدم);
+	name_ويڪر = utf8_strwidth(formatted_name);
 
-	item = string_list_append_nodup(&table->rows, formatted_name);
-	item->util = entry;
+	شي = string_list_append_nodup(&جدول->صفون, formatted_name);
+	شي->util = داخلا;
 
-	if (name_width > table->name_col_width)
-		table->name_col_width = name_width;
-	if (!entry)
-		return;
-	if (entry->oid) {
-		entry->index = table->annotations.nr + 1;
-		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)entry->index,
-			    oid_to_hex(entry->oid));
-		string_list_append_nodup(&table->annotations, strbuf_detach(&buf, NULL));
+	إذا (name_ويڪر > جدول->name_کانو_ويڪر)
+		جدول->name_کانو_ويڪر = name_ويڪر;
+	إذا (!داخلا)
+		أرجع;
+	إذا (داخلا->oid) {
+		داخلا->اشاريو = جدول->annotations.nr + 1;
+		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)داخلا->اشاريو,
+			    oid_منزل_hex(داخلا->oid));
+		string_list_append_nodup(&جدول->annotations, strbuf_detach(&buf, عدم));
 	}
-	if (entry->value) {
-		int value_width = utf8_strwidth(entry->value);
-		if (value_width > table->value_col_width)
-			table->value_col_width = value_width;
+	إذا (داخلا->قدر) {
+		صحيح قدر_ويڪر = utf8_strwidth(داخلا->قدر);
+		إذا (قدر_ويڪر > جدول->قدر_کانو_ويڪر)
+			جدول->قدر_کانو_ويڪر = قدر_ويڪر;
 	}
-	if (entry->unit) {
-		int unit_width = utf8_strwidth(entry->unit);
-		if (unit_width > table->unit_col_width)
-			table->unit_col_width = unit_width;
+	إذا (داخلا->unit) {
+		صحيح unit_ويڪر = utf8_strwidth(داخلا->unit);
+		إذا (unit_ويڪر > جدول->unit_کانو_ويڪر)
+			جدول->unit_کانو_ويڪر = unit_ويڪر;
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_addf(struct stats_table *table, const char *format, ...)
+ساكن فراغ stats_جدول_addf(بنية stats_جدول *جدول, ثابت حرف *format, ...)
 {
 	va_list ap;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, NULL, format, ap);
-	va_end(ap);
+	va_شروعات(ap, format);
+	stats_جدول_vaddf(جدول, عدم, format, ap);
+	va_پڇاڙي(ap);
 }
 
-static void stats_table_count_addf(struct stats_table *table, size_t value,
-				   const char *format, ...)
+ساكن فراغ stats_جدول_ڳڻپ_addf(بنية stats_جدول *جدول, سائيز_t قدر,
+				   ثابت حرف *format, ...)
 {
-	struct stats_table_entry *entry;
+	بنية stats_جدول_داخلا *داخلا;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	CALLOC_ARRAY(داخلا, 1);
+	humanise_ڳڻپ(قدر, &داخلا->قدر, &داخلا->unit);
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_شروعات(ap, format);
+	stats_جدول_vaddf(جدول, داخلا, format, ap);
+	va_پڇاڙي(ap);
 }
 
-static void stats_table_object_count_addf(struct stats_table *table,
-					  struct object_id *oid, size_t value,
-					  const char *format, ...)
+ساكن فراغ stats_جدول_object_ڳڻپ_addf(بنية stats_جدول *جدول,
+					  بنية object_id *oid, سائيز_t قدر,
+					  ثابت حرف *format, ...)
 {
-	struct stats_table_entry *entry;
+	بنية stats_جدول_داخلا *داخلا;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	CALLOC_ARRAY(داخلا, 1);
+	humanise_ڳڻپ(قدر, &داخلا->قدر, &داخلا->unit);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
-		entry->oid = oid;
+	إذا (!is_null_oid(oid))
+		داخلا->oid = oid;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_شروعات(ap, format);
+	stats_جدول_vaddf(جدول, داخلا, format, ap);
+	va_پڇاڙي(ap);
 }
 
-static void stats_table_size_addf(struct stats_table *table, size_t value,
-				  const char *format, ...)
+ساكن فراغ stats_جدول_سائيز_addf(بنية stats_جدول *جدول, سائيز_t قدر,
+				  ثابت حرف *format, ...)
 {
-	struct stats_table_entry *entry;
+	بنية stats_جدول_داخلا *داخلا;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	CALLOC_ARRAY(داخلا, 1);
+	humanise_بائيٽون(قدر, &داخلا->قدر, &داخلا->unit, HUMANISE_COMPACT);
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_شروعات(ap, format);
+	stats_جدول_vaddf(جدول, داخلا, format, ap);
+	va_پڇاڙي(ap);
 }
 
-static void stats_table_object_size_addf(struct stats_table *table,
-					 struct object_id *oid, size_t value,
-					 const char *format, ...)
+ساكن فراغ stats_جدول_object_سائيز_addf(بنية stats_جدول *جدول,
+					 بنية object_id *oid, سائيز_t قدر,
+					 ثابت حرف *format, ...)
 {
-	struct stats_table_entry *entry;
+	بنية stats_جدول_داخلا *داخلا;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	CALLOC_ARRAY(داخلا, 1);
+	humanise_بائيٽون(قدر, &داخلا->قدر, &داخلا->unit, HUMANISE_COMPACT);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
-		entry->oid = oid;
+	إذا (!is_null_oid(oid))
+		داخلا->oid = oid;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_شروعات(ap, format);
+	stats_جدول_vaddf(جدول, داخلا, format, ap);
+	va_پڇاڙي(ap);
 }
 
-static inline size_t get_total_reference_count(struct ref_stats *stats)
+ساكن مضمن سائيز_t get_ڪل_reference_ڳڻپ(بنية ref_stats *stats)
 {
-	return stats->branches + stats->remotes + stats->tags + stats->others;
+	أرجع stats->branches + stats->remotes + stats->ٽيگ_فهرست + stats->others;
 }
 
-static inline size_t get_total_object_values(struct object_values *values)
+ساكن مضمن سائيز_t get_ڪل_object_قدرون(بنية object_قدرون *قدرون)
 {
-	return values->tags + values->commits + values->trees + values->blobs;
+	أرجع قدرون->ٽيگ_فهرست + قدرون->commits + قدرون->trees + قدرون->blobs;
 }
 
-static void stats_table_setup_structure(struct stats_table *table,
-					struct repo_structure *stats)
+ساكن فراغ stats_جدول_تياري_structure(بنية stats_جدول *جدول,
+					بنية repo_structure *stats)
 {
-	struct object_stats *objects = &stats->objects;
-	struct ref_stats *refs = &stats->refs;
-	size_t inflated_object_total;
-	size_t object_count_total;
-	size_t disk_object_total;
-	size_t ref_total;
+	بنية object_stats *objects = &stats->objects;
+	بنية ref_stats *refs = &stats->refs;
+	سائيز_t inflated_object_ڪل;
+	سائيز_t object_ڳڻپ_ڪل;
+	سائيز_t disk_object_ڪل;
+	سائيز_t ref_ڪل;
 
-	ref_total = get_total_reference_count(refs);
-	stats_table_addf(table, "* %s", _("References"));
-	stats_table_count_addf(table, ref_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, refs->branches, "    * %s", _("Branches"));
-	stats_table_count_addf(table, refs->tags, "    * %s", _("Tags"));
-	stats_table_count_addf(table, refs->remotes, "    * %s", _("Remotes"));
-	stats_table_count_addf(table, refs->others, "    * %s", _("Others"));
+	ref_ڪل = get_ڪل_reference_ڳڻپ(refs);
+	stats_جدول_addf(جدول, "* %s", _("References"));
+	stats_جدول_ڳڻپ_addf(جدول, ref_ڪل, "  * %s", _("Count"));
+	stats_جدول_ڳڻپ_addf(جدول, refs->branches, "    * %s", _("Branches"));
+	stats_جدول_ڳڻپ_addf(جدول, refs->ٽيگ_فهرست, "    * %s", _("Tags"));
+	stats_جدول_ڳڻپ_addf(جدول, refs->remotes, "    * %s", _("Remotes"));
+	stats_جدول_ڳڻپ_addf(جدول, refs->others, "    * %s", _("Others"));
 
-	object_count_total = get_total_object_values(&objects->type_counts);
-	stats_table_addf(table, "");
-	stats_table_addf(table, "* %s", _("Reachable objects"));
-	stats_table_count_addf(table, object_count_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, objects->type_counts.commits,
+	object_ڳڻپ_ڪل = get_ڪل_object_قدرون(&objects->type_counts);
+	stats_جدول_addf(جدول, "");
+	stats_جدول_addf(جدول, "* %s", _("Reachable objects"));
+	stats_جدول_ڳڻپ_addf(جدول, object_ڳڻپ_ڪل, "  * %s", _("Count"));
+	stats_جدول_ڳڻپ_addf(جدول, objects->type_counts.commits,
 			       "    * %s", _("Commits"));
-	stats_table_count_addf(table, objects->type_counts.trees,
+	stats_جدول_ڳڻپ_addf(جدول, objects->type_counts.trees,
 			       "    * %s", _("Trees"));
-	stats_table_count_addf(table, objects->type_counts.blobs,
+	stats_جدول_ڳڻپ_addf(جدول, objects->type_counts.blobs,
 			       "    * %s", _("Blobs"));
-	stats_table_count_addf(table, objects->type_counts.tags,
+	stats_جدول_ڳڻپ_addf(جدول, objects->type_counts.ٽيگ_فهرست,
 			       "    * %s", _("Tags"));
 
-	inflated_object_total = get_total_object_values(&objects->inflated_sizes);
-	stats_table_size_addf(table, inflated_object_total,
+	inflated_object_ڪل = get_ڪل_object_قدرون(&objects->inflated_sizes);
+	stats_جدول_سائيز_addf(جدول, inflated_object_ڪل,
 			      "  * %s", _("Inflated size"));
-	stats_table_size_addf(table, objects->inflated_sizes.commits,
+	stats_جدول_سائيز_addf(جدول, objects->inflated_sizes.commits,
 			      "    * %s", _("Commits"));
-	stats_table_size_addf(table, objects->inflated_sizes.trees,
+	stats_جدول_سائيز_addf(جدول, objects->inflated_sizes.trees,
 			      "    * %s", _("Trees"));
-	stats_table_size_addf(table, objects->inflated_sizes.blobs,
+	stats_جدول_سائيز_addf(جدول, objects->inflated_sizes.blobs,
 			      "    * %s", _("Blobs"));
-	stats_table_size_addf(table, objects->inflated_sizes.tags,
+	stats_جدول_سائيز_addf(جدول, objects->inflated_sizes.ٽيگ_فهرست,
 			      "    * %s", _("Tags"));
 
-	disk_object_total = get_total_object_values(&objects->disk_sizes);
-	stats_table_size_addf(table, disk_object_total,
+	disk_object_ڪل = get_ڪل_object_قدرون(&objects->disk_sizes);
+	stats_جدول_سائيز_addf(جدول, disk_object_ڪل,
 			      "  * %s", _("Disk size"));
-	stats_table_size_addf(table, objects->disk_sizes.commits,
+	stats_جدول_سائيز_addf(جدول, objects->disk_sizes.commits,
 			      "    * %s", _("Commits"));
-	stats_table_size_addf(table, objects->disk_sizes.trees,
+	stats_جدول_سائيز_addf(جدول, objects->disk_sizes.trees,
 			      "    * %s", _("Trees"));
-	stats_table_size_addf(table, objects->disk_sizes.blobs,
+	stats_جدول_سائيز_addf(جدول, objects->disk_sizes.blobs,
 			      "    * %s", _("Blobs"));
-	stats_table_size_addf(table, objects->disk_sizes.tags,
+	stats_جدول_سائيز_addf(جدول, objects->disk_sizes.ٽيگ_فهرست,
 			      "    * %s", _("Tags"));
 
-	stats_table_addf(table, "");
-	stats_table_addf(table, "* %s", _("Largest objects"));
-	stats_table_addf(table, "  * %s", _("Commits"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.commit_size.oid,
-				     objects->largest.commit_size.value,
+	stats_جدول_addf(جدول, "");
+	stats_جدول_addf(جدول, "* %s", _("Largest objects"));
+	stats_جدول_addf(جدول, "  * %s", _("Commits"));
+	stats_جدول_object_سائيز_addf(جدول,
+				     &objects->سڀ_کان_وڏو.commit_سائيز.oid,
+				     objects->سڀ_کان_وڏو.commit_سائيز.قدر,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.parent_count.oid,
-				      objects->largest.parent_count.value,
+	stats_جدول_object_ڳڻپ_addf(جدول,
+				      &objects->سڀ_کان_وڏو.والد_ڳڻپ.oid,
+				      objects->سڀ_کان_وڏو.والد_ڳڻپ.قدر,
 				      "    * %s", _("Maximum parents"));
-	stats_table_addf(table, "  * %s", _("Trees"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.tree_size.oid,
-				     objects->largest.tree_size.value,
+	stats_جدول_addf(جدول, "  * %s", _("Trees"));
+	stats_جدول_object_سائيز_addf(جدول,
+				     &objects->سڀ_کان_وڏو.وڻ_سائيز.oid,
+				     objects->سڀ_کان_وڏو.وڻ_سائيز.قدر,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.tree_entries.oid,
-				      objects->largest.tree_entries.value,
+	stats_جدول_object_ڳڻپ_addf(جدول,
+				      &objects->سڀ_کان_وڏو.وڻ_entries.oid,
+				      objects->سڀ_کان_وڏو.وڻ_entries.قدر,
 				      "    * %s", _("Maximum entries"));
-	stats_table_addf(table, "  * %s", _("Blobs"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.blob_size.oid,
-				     objects->largest.blob_size.value,
+	stats_جدول_addf(جدول, "  * %s", _("Blobs"));
+	stats_جدول_object_سائيز_addf(جدول,
+				     &objects->سڀ_کان_وڏو.blob_سائيز.oid,
+				     objects->سڀ_کان_وڏو.blob_سائيز.قدر,
 				     "    * %s", _("Maximum size"));
-	stats_table_addf(table, "  * %s", _("Tags"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.tag_size.oid,
-				     objects->largest.tag_size.value,
+	stats_جدول_addf(جدول, "  * %s", _("Tags"));
+	stats_جدول_object_سائيز_addf(جدول,
+				     &objects->سڀ_کان_وڏو.ٽيگ_سائيز.oid,
+				     objects->سڀ_کان_وڏو.ٽيگ_سائيز.قدر,
 				     "    * %s", _("Maximum size"));
 }
 
-#define INDEX_WIDTH 4
+#وصف_ڪريو اشاريو_ويڪر 4
 
-static void stats_table_print_structure(const struct stats_table *table)
+ساكن فراغ stats_جدول_print_structure(ثابت بنية stats_جدول *جدول)
 {
-	const char *name_col_title = _("Repository structure");
-	const char *value_col_title = _("Value");
-	int title_name_width = utf8_strwidth(name_col_title);
-	int title_value_width = utf8_strwidth(value_col_title);
-	int name_col_width = table->name_col_width;
-	int value_col_width = table->value_col_width;
-	int unit_col_width = table->unit_col_width;
-	struct string_list_item *item;
-	struct strbuf buf = STRBUF_INIT;
+	ثابت حرف *name_کانو_title = _("Repository structure");
+	ثابت حرف *قدر_کانو_title = _("Value");
+	صحيح title_name_ويڪر = utf8_strwidth(name_کانو_title);
+	صحيح title_قدر_ويڪر = utf8_strwidth(قدر_کانو_title);
+	صحيح name_کانو_ويڪر = جدول->name_کانو_ويڪر;
+	صحيح قدر_کانو_ويڪر = جدول->قدر_کانو_ويڪر;
+	صحيح unit_کانو_ويڪر = جدول->unit_کانو_ويڪر;
+	بنية string_list_شي *شي;
+	بنية strbuf buf = STRBUF_INIT;
 
-	if (title_name_width > name_col_width)
-		name_col_width = title_name_width;
-	if (title_value_width > value_col_width + unit_col_width + 1)
-		value_col_width = title_value_width - unit_col_width;
+	إذا (title_name_ويڪر > name_کانو_ويڪر)
+		name_کانو_ويڪر = title_name_ويڪر;
+	إذا (title_قدر_ويڪر > قدر_کانو_ويڪر + unit_کانو_ويڪر + 1)
+		قدر_کانو_ويڪر = title_قدر_ويڪر - unit_کانو_ويڪر;
 
 	strbuf_addstr(&buf, "| ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width + INDEX_WIDTH,
-			  name_col_title);
+	strbuf_utf8_align(&buf, ALIGN_کاٻو, name_کانو_ويڪر + اشاريو_ويڪر,
+			  name_کانو_title);
 	strbuf_addstr(&buf, " | ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT,
-			  value_col_width + unit_col_width + 1, value_col_title);
+	strbuf_utf8_align(&buf, ALIGN_کاٻو,
+			  قدر_کانو_ويڪر + unit_کانو_ويڪر + 1, قدر_کانو_title);
 	strbuf_addstr(&buf, " |");
-	printf("%s\n", buf.buf);
+	لکو("%s\n", buf.buf);
 
-	printf("| ");
-	for (int i = 0; i < name_col_width + INDEX_WIDTH; i++)
-		putchar('-');
-	printf(" | ");
-	for (int i = 0; i < value_col_width + unit_col_width + 1; i++)
-		putchar('-');
-	printf(" |\n");
+	لکو("| ");
+	لكل (صحيح i = 0; i < name_کانو_ويڪر + اشاريو_ويڪر; i++)
+		اکر_لکو('-');
+	لکو(" | ");
+	لكل (صحيح i = 0; i < قدر_کانو_ويڪر + unit_کانو_ويڪر + 1; i++)
+		اکر_لکو('-');
+	لکو(" |\n");
 
-	for_each_string_list_item(item, &table->rows) {
-		struct stats_table_entry *entry = item->util;
-		const char *value = "";
-		const char *unit = "";
+	for_each_string_list_شي(شي, &جدول->صفون) {
+		بنية stats_جدول_داخلا *داخلا = شي->util;
+		ثابت حرف *قدر = "";
+		ثابت حرف *unit = "";
 
-		if (entry) {
-			value = entry->value;
-			if (entry->unit)
-				unit = entry->unit;
+		إذا (داخلا) {
+			قدر = داخلا->قدر;
+			إذا (داخلا->unit)
+				unit = داخلا->unit;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addstr(&buf, "| ");
-		strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width, item->string);
+		strbuf_utf8_align(&buf, ALIGN_کاٻو, name_کانو_ويڪر, شي->string);
 
-		if (entry && entry->oid)
+		إذا (داخلا && داخلا->oid)
 			strbuf_addf(&buf, " [%" PRIuMAX "]",
-				    (uintmax_t)entry->index);
-		else
-			strbuf_addchars(&buf, ' ', INDEX_WIDTH);
+				    (uintmax_t)داخلا->اشاريو);
+		وإلا
+			strbuf_addchars(&buf, ' ', اشاريو_ويڪر);
 
 		strbuf_addstr(&buf, " | ");
-		strbuf_utf8_align(&buf, ALIGN_RIGHT, value_col_width, value);
+		strbuf_utf8_align(&buf, ALIGN_ساڄو, قدر_کانو_ويڪر, قدر);
 		strbuf_addch(&buf, ' ');
-		strbuf_utf8_align(&buf, ALIGN_LEFT, unit_col_width, unit);
+		strbuf_utf8_align(&buf, ALIGN_کاٻو, unit_کانو_ويڪر, unit);
 		strbuf_addstr(&buf, " |");
-		printf("%s\n", buf.buf);
+		لکو("%s\n", buf.buf);
 	}
 
-	if (table->annotations.nr) {
-		printf("\n");
-		for_each_string_list_item(item, &table->annotations)
-			printf("%s\n", item->string);
+	إذا (جدول->annotations.nr) {
+		لکو("\n");
+		for_each_string_list_شي(شي, &جدول->annotations)
+			لکو("%s\n", شي->string);
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_clear(struct stats_table *table)
+ساكن فراغ stats_جدول_clear(بنية stats_جدول *جدول)
 {
-	struct stats_table_entry *entry;
-	struct string_list_item *item;
+	بنية stats_جدول_داخلا *داخلا;
+	بنية string_list_شي *شي;
 
-	for_each_string_list_item(item, &table->rows) {
-		entry = item->util;
-		if (entry)
-			free(entry->value);
+	for_each_string_list_شي(شي, &جدول->صفون) {
+		داخلا = شي->util;
+		إذا (داخلا)
+			حرر(داخلا->قدر);
 	}
 
-	string_list_clear(&table->rows, 1);
-	string_list_clear(&table->annotations, 1);
+	string_list_clear(&جدول->صفون, 1);
+	string_list_clear(&جدول->annotations, 1);
 }
 
-static inline void print_keyvalue(const char *key, char key_delim, size_t value,
-				  char value_delim)
+ساكن مضمن فراغ print_keyvalue(ثابت حرف *ڪنجي, حرف ڪنجي_delim, سائيز_t قدر,
+				  حرف قدر_delim)
 {
-	printf("%s%c%" PRIuMAX "%c", key, key_delim, (uintmax_t)value,
-	       value_delim);
+	لکو("%s%c%" PRIuMAX "%c", ڪنجي, ڪنجي_delim, (uintmax_t)قدر,
+	       قدر_delim);
 }
 
-static void print_object_data(const char *key, char key_delim,
-			      struct object_data *data, char value_delim)
+ساكن فراغ print_object_معلومات(ثابت حرف *ڪنجي, حرف ڪنجي_delim,
+			      بنية object_معلومات *معلومات, حرف قدر_delim)
 {
-	print_keyvalue(key, key_delim, data->value, value_delim);
-	printf("%s_oid%c%s%c", key, key_delim, oid_to_hex(&data->oid),
-	       value_delim);
+	print_keyvalue(ڪنجي, ڪنجي_delim, معلومات->قدر, قدر_delim);
+	لکو("%s_oid%c%s%c", ڪنجي, ڪنجي_delim, oid_منزل_hex(&معلومات->oid),
+	       قدر_delim);
 }
 
-static void structure_keyvalue_print(struct repo_structure *stats,
-				     char key_delim, char value_delim)
+ساكن فراغ structure_keyvalue_print(بنية repo_structure *stats,
+				     حرف ڪنجي_delim, حرف قدر_delim)
 {
-	print_keyvalue("references.branches.count", key_delim,
-		       stats->refs.branches, value_delim);
-	print_keyvalue("references.tags.count", key_delim,
-		       stats->refs.tags, value_delim);
-	print_keyvalue("references.remotes.count", key_delim,
-		       stats->refs.remotes, value_delim);
-	print_keyvalue("references.others.count", key_delim,
-		       stats->refs.others, value_delim);
+	print_keyvalue("references.branches.count", ڪنجي_delim,
+		       stats->refs.branches, قدر_delim);
+	print_keyvalue("references.tags.count", ڪنجي_delim,
+		       stats->refs.ٽيگ_فهرست, قدر_delim);
+	print_keyvalue("references.remotes.count", ڪنجي_delim,
+		       stats->refs.remotes, قدر_delim);
+	print_keyvalue("references.others.count", ڪنجي_delim,
+		       stats->refs.others, قدر_delim);
 
-	print_keyvalue("objects.commits.count", key_delim,
-		       stats->objects.type_counts.commits, value_delim);
-	print_keyvalue("objects.trees.count", key_delim,
-		       stats->objects.type_counts.trees, value_delim);
-	print_keyvalue("objects.blobs.count", key_delim,
-		       stats->objects.type_counts.blobs, value_delim);
-	print_keyvalue("objects.tags.count", key_delim,
-		       stats->objects.type_counts.tags, value_delim);
+	print_keyvalue("objects.commits.count", ڪنجي_delim,
+		       stats->objects.type_counts.commits, قدر_delim);
+	print_keyvalue("objects.trees.count", ڪنجي_delim,
+		       stats->objects.type_counts.trees, قدر_delim);
+	print_keyvalue("objects.blobs.count", ڪنجي_delim,
+		       stats->objects.type_counts.blobs, قدر_delim);
+	print_keyvalue("objects.tags.count", ڪنجي_delim,
+		       stats->objects.type_counts.ٽيگ_فهرست, قدر_delim);
 
-	print_keyvalue("objects.commits.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.inflated_size", ڪنجي_delim,
+		       stats->objects.inflated_sizes.commits, قدر_delim);
+	print_keyvalue("objects.trees.inflated_size", ڪنجي_delim,
+		       stats->objects.inflated_sizes.trees, قدر_delim);
+	print_keyvalue("objects.blobs.inflated_size", ڪنجي_delim,
+		       stats->objects.inflated_sizes.blobs, قدر_delim);
+	print_keyvalue("objects.tags.inflated_size", ڪنجي_delim,
+		       stats->objects.inflated_sizes.ٽيگ_فهرست, قدر_delim);
 
-	print_keyvalue("objects.commits.disk_size", key_delim,
-		       stats->objects.disk_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.disk_size", key_delim,
-		       stats->objects.disk_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.disk_size", key_delim,
-		       stats->objects.disk_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.disk_size", key_delim,
-		       stats->objects.disk_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.disk_size", ڪنجي_delim,
+		       stats->objects.disk_sizes.commits, قدر_delim);
+	print_keyvalue("objects.trees.disk_size", ڪنجي_delim,
+		       stats->objects.disk_sizes.trees, قدر_delim);
+	print_keyvalue("objects.blobs.disk_size", ڪنجي_delim,
+		       stats->objects.disk_sizes.blobs, قدر_delim);
+	print_keyvalue("objects.tags.disk_size", ڪنجي_delim,
+		       stats->objects.disk_sizes.ٽيگ_فهرست, قدر_delim);
 
-	print_object_data("objects.commits.max_size", key_delim,
-			  &stats->objects.largest.commit_size, value_delim);
-	print_object_data("objects.trees.max_size", key_delim,
-			  &stats->objects.largest.tree_size, value_delim);
-	print_object_data("objects.blobs.max_size", key_delim,
-			  &stats->objects.largest.blob_size, value_delim);
-	print_object_data("objects.tags.max_size", key_delim,
-			  &stats->objects.largest.tag_size, value_delim);
+	print_object_معلومات("objects.commits.max_size", ڪنجي_delim,
+			  &stats->objects.سڀ_کان_وڏو.commit_سائيز, قدر_delim);
+	print_object_معلومات("objects.trees.max_size", ڪنجي_delim,
+			  &stats->objects.سڀ_کان_وڏو.وڻ_سائيز, قدر_delim);
+	print_object_معلومات("objects.blobs.max_size", ڪنجي_delim,
+			  &stats->objects.سڀ_کان_وڏو.blob_سائيز, قدر_delim);
+	print_object_معلومات("objects.tags.max_size", ڪنجي_delim,
+			  &stats->objects.سڀ_کان_وڏو.ٽيگ_سائيز, قدر_delim);
 
-	print_object_data("objects.commits.max_parents", key_delim,
-			  &stats->objects.largest.parent_count, value_delim);
-	print_object_data("objects.trees.max_entries", key_delim,
-			  &stats->objects.largest.tree_entries, value_delim);
+	print_object_معلومات("objects.commits.max_parents", ڪنجي_delim,
+			  &stats->objects.سڀ_کان_وڏو.والد_ڳڻپ, قدر_delim);
+	print_object_معلومات("objects.trees.max_entries", ڪنجي_delim,
+			  &stats->objects.سڀ_کان_وڏو.وڻ_entries, قدر_delim);
 
 	fflush(stdout);
 }
 
-struct count_references_data {
-	struct ref_stats *stats;
-	struct rev_info *revs;
-	struct progress *progress;
+بنية ڳڻپ_references_معلومات {
+	بنية ref_stats *stats;
+	بنية rev_info *revs;
+	بنية ترقي *ترقي;
 };
 
-static int count_references(const struct reference *ref, void *cb_data)
+ساكن صحيح ڳڻپ_references(ثابت بنية reference *ref, فراغ *cb_معلومات)
 {
-	struct count_references_data *data = cb_data;
-	struct ref_stats *stats = data->stats;
-	size_t ref_count;
+	بنية ڳڻپ_references_معلومات *معلومات = cb_معلومات;
+	بنية ref_stats *stats = معلومات->stats;
+	سائيز_t ref_ڳڻپ;
 
-	switch (ref_kind_from_refname(ref->name)) {
-	case FILTER_REFS_BRANCHES:
+	بدل (ref_قسم_from_refname(ref->name)) {
+	حالة FILTER_REFS_BRANCHES:
 		stats->branches++;
-		break;
-	case FILTER_REFS_REMOTES:
+		اكسر;
+	حالة FILTER_REFS_REMOTES:
 		stats->remotes++;
-		break;
-	case FILTER_REFS_TAGS:
-		stats->tags++;
-		break;
-	case FILTER_REFS_OTHERS:
+		اكسر;
+	حالة FILTER_REFS_ٽيگ_فهرست:
+		stats->ٽيگ_فهرست++;
+		اكسر;
+	حالة FILTER_REFS_OTHERS:
 		stats->others++;
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		BUG("unexpected reference type");
 	}
 
@@ -769,228 +769,228 @@ static int count_references(const struct reference *ref, void *cb_data)
 	 * While iterating through references for counting, also add OIDs in
 	 * preparation for the path walk.
 	 */
-	add_pending_oid(data->revs, NULL, ref->oid, 0);
+	جوڙيو_pending_oid(معلومات->revs, عدم, ref->oid, 0);
 
-	ref_count = get_total_reference_count(stats);
-	display_progress(data->progress, ref_count);
+	ref_ڳڻپ = get_ڪل_reference_ڳڻپ(stats);
+	display_ترقي(معلومات->ترقي, ref_ڳڻپ);
 
-	return 0;
+	أرجع 0;
 }
 
-static void structure_count_references(struct ref_stats *stats,
-				       struct rev_info *revs,
-				       struct repository *repo,
-				       int show_progress)
+ساكن فراغ structure_ڳڻپ_references(بنية ref_stats *stats,
+				       بنية rev_info *revs,
+				       بنية repository *repo,
+				       صحيح show_ترقي)
 {
-	struct count_references_data data = {
+	بنية ڳڻپ_references_معلومات معلومات = {
 		.stats = stats,
 		.revs = revs,
 	};
 
-	if (show_progress)
-		data.progress = start_delayed_progress(repo,
+	إذا (show_ترقي)
+		معلومات.ترقي = شروعات_delayed_ترقي(repo,
 						       _("Counting references"), 0);
 
-	refs_for_each_ref(get_main_ref_store(repo), count_references, &data);
-	stop_progress(&data.progress);
+	refs_for_each_ref(get_main_ref_store(repo), ڳڻپ_references, &معلومات);
+	stop_ترقي(&معلومات.ترقي);
 }
 
-struct count_objects_data {
-	struct object_database *odb;
-	struct object_stats *stats;
-	struct progress *progress;
+بنية ڳڻپ_objects_معلومات {
+	بنية object_database *odb;
+	بنية object_stats *stats;
+	بنية ترقي *ترقي;
 };
 
-static void check_largest(struct object_data *data, struct object_id *oid,
-			  size_t value)
+ساكن فراغ check_سڀ_کان_وڏو(بنية object_معلومات *معلومات, بنية object_id *oid,
+			  سائيز_t قدر)
 {
-	if (value > data->value || is_null_oid(&data->oid)) {
-		oidcpy(&data->oid, oid);
-		data->value = value;
+	إذا (قدر > معلومات->قدر || is_null_oid(&معلومات->oid)) {
+		oidcpy(&معلومات->oid, oid);
+		معلومات->قدر = قدر;
 	}
 }
 
-static size_t count_tree_entries(struct object *obj)
+ساكن سائيز_t ڳڻپ_وڻ_entries(بنية object *obj)
 {
-	struct tree *t = object_as_type(obj, OBJ_TREE, 0);
-	struct name_entry entry;
-	struct tree_desc desc;
-	size_t count = 0;
+	بنية وڻ *t = object_as_type(obj, OBJ_وڻ, 0);
+	بنية name_داخلا داخلا;
+	بنية وڻ_desc desc;
+	سائيز_t ڳڻپ = 0;
 
-	init_tree_desc(&desc, &t->object.oid, t->buffer, t->size);
-	while (tree_entry(&desc, &entry))
-		count++;
+	init_وڻ_desc(&desc, &t->object.oid, t->بفر, t->سائيز);
+	طالما (وڻ_داخلا(&desc, &داخلا))
+		ڳڻپ++;
 
-	return count;
+	أرجع ڳڻپ;
 }
 
-static int count_objects(const char *path UNUSED, struct oid_array *oids,
-			 enum object_type type, void *cb_data)
+ساكن صحيح ڳڻپ_objects(ثابت حرف *رستو اڻ_استعمال_ٿيل, بنية oid_array *oids,
+			 تعداد object_type type, فراغ *cb_معلومات)
 {
-	struct count_objects_data *data = cb_data;
-	struct object_stats *stats = data->stats;
-	size_t object_count;
+	بنية ڳڻپ_objects_معلومات *معلومات = cb_معلومات;
+	بنية object_stats *stats = معلومات->stats;
+	سائيز_t object_ڳڻپ;
 
-	for (size_t i = 0; i < oids->nr; i++) {
-		struct object_info oi = OBJECT_INFO_INIT;
-		unsigned long inflated;
-		size_t inflated_st = 0;
-		struct commit *commit;
-		struct object *obj;
-		void *content;
+	لكل (سائيز_t i = 0; i < oids->nr; i++) {
+		بنية object_info oi = OBJECT_INFO_INIT;
+		بنانشان ڊگهو inflated;
+		سائيز_t inflated_st = 0;
+		بنية commit *commit;
+		بنية object *obj;
+		فراغ *content;
 		off_t disk;
-		int eaten;
+		صحيح eaten;
 
 		oi.sizep = &inflated_st;
 		oi.disk_sizep = &disk;
 		oi.contentp = &content;
 
-		if (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
+		إذا (odb_read_object_info_extended(معلومات->odb, &oids->oid[i], &oi,
 						  OBJECT_INFO_SKIP_FETCH_OBJECT |
-						  OBJECT_INFO_QUICK) < 0)
-			continue;
-		inflated = cast_size_t_to_ulong(inflated_st);
+						  OBJECT_INFO_تيز) < 0)
+			استمر;
+		inflated = cast_سائيز_t_منزل_ulong(inflated_st);
 
-		obj = parse_object_buffer(the_repository, &oids->oid[i], type,
+		obj = parse_object_بفر(the_repository, &oids->oid[i], type,
 					  inflated, content, &eaten);
 
-		switch (type) {
-		case OBJ_TAG:
-			stats->type_counts.tags++;
-			stats->inflated_sizes.tags += inflated;
-			stats->disk_sizes.tags += disk;
-			check_largest(&stats->largest.tag_size, &oids->oid[i],
+		بدل (type) {
+		حالة OBJ_ٽيگ:
+			stats->type_counts.ٽيگ_فهرست++;
+			stats->inflated_sizes.ٽيگ_فهرست += inflated;
+			stats->disk_sizes.ٽيگ_فهرست += disk;
+			check_سڀ_کان_وڏو(&stats->سڀ_کان_وڏو.ٽيگ_سائيز, &oids->oid[i],
 				      inflated);
-			break;
-		case OBJ_COMMIT:
+			اكسر;
+		حالة OBJ_COMMIT:
 			commit = object_as_type(obj, OBJ_COMMIT, 0);
 			stats->type_counts.commits++;
 			stats->inflated_sizes.commits += inflated;
 			stats->disk_sizes.commits += disk;
-			check_largest(&stats->largest.commit_size, &oids->oid[i],
+			check_سڀ_کان_وڏو(&stats->سڀ_کان_وڏو.commit_سائيز, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.parent_count, &oids->oid[i],
-				      commit_list_count(commit->parents));
-			break;
-		case OBJ_TREE:
+			check_سڀ_کان_وڏو(&stats->سڀ_کان_وڏو.والد_ڳڻپ, &oids->oid[i],
+				      commit_list_ڳڻپ(commit->parents));
+			اكسر;
+		حالة OBJ_وڻ:
 			stats->type_counts.trees++;
 			stats->inflated_sizes.trees += inflated;
 			stats->disk_sizes.trees += disk;
-			check_largest(&stats->largest.tree_size, &oids->oid[i],
+			check_سڀ_کان_وڏو(&stats->سڀ_کان_وڏو.وڻ_سائيز, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.tree_entries, &oids->oid[i],
-				      count_tree_entries(obj));
-			break;
-		case OBJ_BLOB:
+			check_سڀ_کان_وڏو(&stats->سڀ_کان_وڏو.وڻ_entries, &oids->oid[i],
+				      ڳڻپ_وڻ_entries(obj));
+			اكسر;
+		حالة OBJ_BLOB:
 			stats->type_counts.blobs++;
 			stats->inflated_sizes.blobs += inflated;
 			stats->disk_sizes.blobs += disk;
-			check_largest(&stats->largest.blob_size, &oids->oid[i],
+			check_سڀ_کان_وڏو(&stats->سڀ_کان_وڏو.blob_سائيز, &oids->oid[i],
 				      inflated);
-			break;
-		default:
+			اكسر;
+		افتراضي:
 			BUG("invalid object type");
 		}
 
-		if (!eaten)
-			free(content);
+		إذا (!eaten)
+			حرر(content);
 	}
 
-	object_count = get_total_object_values(&stats->type_counts);
-	display_progress(data->progress, object_count);
+	object_ڳڻپ = get_ڪل_object_قدرون(&stats->type_counts);
+	display_ترقي(معلومات->ترقي, object_ڳڻپ);
 
-	return 0;
+	أرجع 0;
 }
 
-static void structure_count_objects(struct object_stats *stats,
-				    struct rev_info *revs,
-				    struct repository *repo, int show_progress)
+ساكن فراغ structure_ڳڻپ_objects(بنية object_stats *stats,
+				    بنية rev_info *revs,
+				    بنية repository *repo, صحيح show_ترقي)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	struct count_objects_data data = {
+	بنية رستو_walk_info info = رستو_WALK_INFO_INIT;
+	بنية ڳڻپ_objects_معلومات معلومات = {
 		.odb = repo->objects,
 		.stats = stats,
 	};
 
 	info.revs = revs;
-	info.path_fn = count_objects;
-	info.path_fn_data = &data;
+	info.رستو_fn = ڳڻپ_objects;
+	info.رستو_fn_معلومات = &معلومات;
 
-	if (show_progress)
-		data.progress = start_delayed_progress(repo, _("Counting objects"), 0);
+	إذا (show_ترقي)
+		معلومات.ترقي = شروعات_delayed_ترقي(repo, _("Counting objects"), 0);
 
-	walk_objects_by_path(&info);
-	path_walk_info_clear(&info);
-	stop_progress(&data.progress);
+	walk_objects_by_رستو(&info);
+	رستو_walk_info_clear(&info);
+	stop_ترقي(&معلومات.ترقي);
 }
 
-static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
-			      struct repository *repo)
+ساكن صحيح cmd_repo_structure(صحيح argc, ثابت حرف **argv, ثابت حرف *اڳياڙي,
+			      بنية repository *repo)
 {
-	struct stats_table table = {
-		.rows = STRING_LIST_INIT_DUP,
+	بنية stats_جدول جدول = {
+		.صفون = STRING_LIST_INIT_DUP,
 		.annotations = STRING_LIST_INIT_DUP,
 	};
-	enum output_format format = FORMAT_TABLE;
-	struct repo_structure stats = { 0 };
-	struct rev_info revs;
-	int show_progress = -1;
-	struct option options[] = {
+	تعداد output_format format = FORMAT_جدول;
+	بنية repo_structure stats = { 0 };
+	بنية rev_info revs;
+	صحيح show_ترقي = -1;
+	بنية option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', عدم, &format, عدم,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
-		OPT_END()
+		OPT_BOOL(0, "progress", &show_ترقي, N_("show progress")),
+		OPT_پڇاڙي()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_structure_usage, 0);
-	if (argc)
+	argc = parse_options(argc, argv, اڳياڙي, options, repo_structure_usage, 0);
+	إذا (argc)
 		usage(_("too many arguments"));
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, اڳياڙي);
 
-	if (show_progress < 0)
-		show_progress = isatty(2);
+	إذا (show_ترقي < 0)
+		show_ترقي = isatty(2);
 
-	structure_count_references(&stats.refs, &revs, repo, show_progress);
-	structure_count_objects(&stats.objects, &revs, repo, show_progress);
+	structure_ڳڻپ_references(&stats.refs, &revs, repo, show_ترقي);
+	structure_ڳڻپ_objects(&stats.objects, &revs, repo, show_ترقي);
 
-	switch (format) {
-	case FORMAT_TABLE:
-		stats_table_setup_structure(&table, &stats);
-		stats_table_print_structure(&table);
-		break;
-	case FORMAT_NEWLINE_TERMINATED:
+	بدل (format) {
+	حالة FORMAT_جدول:
+		stats_جدول_تياري_structure(&جدول, &stats);
+		stats_جدول_print_structure(&جدول);
+		اكسر;
+	حالة FORMAT_NEWLINE_TERMINATED:
 		structure_keyvalue_print(&stats, '=', '\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
+		اكسر;
+	حالة FORMAT_NUL_TERMINATED:
 		structure_keyvalue_print(&stats, '\n', '\0');
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		BUG("invalid output format");
 	}
 
-	stats_table_clear(&table);
+	stats_جدول_clear(&جدول);
 	release_revisions(&revs);
 
-	return 0;
+	أرجع 0;
 }
 
-int cmd_repo(int argc, const char **argv, const char *prefix,
-	     struct repository *repo)
+صحيح cmd_repo(صحيح argc, ثابت حرف **argv, ثابت حرف *اڳياڙي,
+	     بنية repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option options[] = {
 		OPT_SUBCOMMAND("info", &fn, cmd_repo_info),
 		OPT_SUBCOMMAND("structure", &fn, cmd_repo_structure),
-		OPT_END()
+		OPT_پڇاڙي()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_usage, 0);
+	argc = parse_options(argc, argv, اڳياڙي, options, repo_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	أرجع fn(argc, argv, اڳياڙي, repo);
 }

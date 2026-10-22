@@ -1,131 +1,131 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#وصف_ڪريو USE_THE_REPOSITORY_VARIABLE
+#وصف_ڪريو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "hex.h"
-#include "read-cache-ll.h"
-#include "run-command.h"
-#include "sparse-index.h"
+#ضمن "builtin.h"
+#ضمن "hex.h"
+#ضمن "read-cache-ll.h"
+#ضمن "run-command.h"
+#ضمن "sparse-index.h"
 
-static const char *pgm;
-static int one_shot, quiet;
-static int err;
+ساكن ثابت حرف *pgm;
+ساكن صحيح one_shot, quiet;
+ساكن صحيح err;
 
-static int merge_entry(int pos, const char *path)
+ساكن صحيح ملايو_داخلا(صحيح pos, ثابت حرف *رستو)
 {
-	int found;
-	const char *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
-	char hexbuf[4][GIT_MAX_HEXSZ + 1];
-	char ownbuf[4][60];
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	صحيح مليو_2;
+	ثابت حرف *arguments[] = { pgm, "", "", "", رستو, "", "", "", عدم };
+	حرف hexbuf[4][GIT_MAX_HEXSZ + 1];
+	حرف ownbuf[4][60];
+	بنية ٻار_process cmd = ٻار_PROCESS_INIT;
 
-	if (pos >= the_repository->index->cache_nr)
-		die("git merge-index: %s not in the cache", path);
-	found = 0;
-	do {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		int stage = ce_stage(ce);
+	إذا (pos >= the_repository->اشاريو->cache_nr)
+		die("git merge-index: %s not in the cache", رستو);
+	مليو_2 = 0;
+	افعل {
+		ثابت بنية cache_داخلا *ce = the_repository->اشاريو->cache[pos];
+		صحيح stage = ce_stage(ce);
 
-		if (strcmp(ce->name, path))
-			break;
-		found++;
-		oid_to_hex_r(hexbuf[stage], &ce->oid);
-		xsnprintf(ownbuf[stage], sizeof(ownbuf[stage]), "%o", ce->ce_mode);
+		إذا (strcmp(ce->name, رستو))
+			اكسر;
+		مليو_2++;
+		oid_منزل_hex_r(hexbuf[stage], &ce->oid);
+		xsnprintf(ownbuf[stage], حجم(ownbuf[stage]), "%o", ce->ce_گهڻائي);
 		arguments[stage] = hexbuf[stage];
 		arguments[stage + 4] = ownbuf[stage];
-	} while (++pos < the_repository->index->cache_nr);
-	if (!found)
-		die("git merge-index: %s not in the cache", path);
+	} طالما (++pos < the_repository->اشاريو->cache_nr);
+	إذا (!مليو_2)
+		die("git merge-index: %s not in the cache", رستو);
 
-	strvec_pushv(&cmd.args, arguments);
-	if (run_command(&cmd)) {
-		if (one_shot)
+	strvec_pushv(&cmd.دليلون, arguments);
+	إذا (لاڳيتو_command(&cmd)) {
+		إذا (one_shot)
 			err++;
-		else {
-			if (!quiet)
+		وإلا {
+			إذا (!quiet)
 				die("merge program failed");
-			exit(1);
+			ٻاهر_نڪرو(1);
 		}
 	}
-	return found;
+	أرجع مليو_2;
 }
 
-static void merge_one_path(const char *path)
+ساكن فراغ ملايو_one_رستو(ثابت حرف *رستو)
 {
-	int pos = index_name_pos(the_repository->index, path, strlen(path));
+	صحيح pos = اشاريو_name_pos(the_repository->اشاريو, رستو, لڙي_ڊيگهه(رستو));
 
 	/*
 	 * If it already exists in the cache as stage0, it's
 	 * already merged and there is nothing to do.
 	 */
-	if (pos < 0)
-		merge_entry(-pos-1, path);
+	إذا (pos < 0)
+		ملايو_داخلا(-pos-1, رستو);
 }
 
-static void merge_all(void)
+ساكن فراغ ملايو_all(فراغ)
 {
-	int i;
+	صحيح i;
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		if (!ce_stage(ce))
-			continue;
-		i += merge_entry(i, ce->name)-1;
+	ensure_ڀريل_اشاريو(the_repository->اشاريو);
+	لكل (i = 0; i < the_repository->اشاريو->cache_nr; i++) {
+		ثابت بنية cache_داخلا *ce = the_repository->اشاريو->cache[i];
+		إذا (!ce_stage(ce))
+			استمر;
+		i += ملايو_داخلا(i, ce->name)-1;
 	}
 }
 
-static const char usage_string[] =
+ساكن ثابت حرف usage_string[] =
 "git merge-index [-o] [-q] <merge-program> (-a | [--] [<filename>...])";
 
-int cmd_merge_index(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+صحيح cmd_ملايو_اشاريو(صحيح argc,
+		    ثابت حرف **argv,
+		    ثابت حرف *اڳياڙي اڻ_استعمال_ٿيل,
+		    بنية repository *repo اڻ_استعمال_ٿيل)
 {
-	int i, force_file = 0;
+	صحيح i, force_file = 0;
 
 	/* Without this we cannot rely on waitpid() to tell
 	 * what happened to our children.
 	 */
-	signal(SIGCHLD, SIG_DFL);
+	إشارة(SIGCHLD, SIG_DFL);
 
 	show_usage_if_asked(argc, argv, usage_string);
 
-	if (argc < 3)
+	إذا (argc < 3)
 		usage(usage_string);
 
-	repo_read_index(the_repository);
+	repo_read_اشاريو(the_repository);
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
+	ensure_ڀريل_اشاريو(the_repository->اشاريو);
 
 	i = 1;
-	if (!strcmp(argv[i], "-o")) {
+	إذا (!strcmp(argv[i], "-o")) {
 		one_shot = 1;
 		i++;
 	}
-	if (!strcmp(argv[i], "-q")) {
+	إذا (!strcmp(argv[i], "-q")) {
 		quiet = 1;
 		i++;
 	}
 	pgm = argv[i++];
-	for (; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!force_file && *arg == '-') {
-			if (!strcmp(arg, "--")) {
+	لكل (; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
+		إذا (!force_file && *arg == '-') {
+			إذا (!strcmp(arg, "--")) {
 				force_file = 1;
-				continue;
+				استمر;
 			}
-			if (!strcmp(arg, "-a")) {
-				merge_all();
-				continue;
+			إذا (!strcmp(arg, "-a")) {
+				ملايو_all();
+				استمر;
 			}
 			die("git merge-index: unknown option %s", arg);
 		}
-		merge_one_path(arg);
+		ملايو_one_رستو(arg);
 	}
-	if (err && !quiet)
+	إذا (err && !quiet)
 		die("merge program failed");
-	return err;
+	أرجع err;
 }

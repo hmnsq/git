@@ -1,43 +1,43 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#وصف_ڪريو USE_THE_REPOSITORY_VARIABLE
+#وصف_ڪريو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "pack.h"
-#include "parse-options.h"
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "hash.h"
+#ضمن "hex.h"
+#ضمن "pack.h"
+#ضمن "parse-options.h"
 
-static const char *const show_index_usage[] = {
+ساكن ثابت حرف *ثابت show_اشاريو_usage[] = {
 	"git show-index [--object-format=<hash-algorithm>] < <pack-idx-file>",
-	NULL
+	عدم
 };
 
-int cmd_show_index(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_show_اشاريو(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *اڳياڙي,
+		   بنية repository *repo اڻ_استعمال_ٿيل)
 {
-	int i;
-	unsigned nr;
-	unsigned int version;
-	static unsigned int top_index[256];
-	unsigned hashsz;
-	const char *hash_name = NULL;
-	int hash_algo;
-	const struct option show_index_options[] = {
+	صحيح i;
+	بنانشان nr;
+	بنانشان صحيح نسخو;
+	ساكن بنانشان صحيح چوٽي_اشاريو[256];
+	بنانشان hashsz;
+	ثابت حرف *hash_name = عدم;
+	صحيح hash_algo;
+	ثابت بنية option show_اشاريو_options[] = {
 		OPT_STRING(0, "object-format", &hash_name, N_("hash-algorithm"),
 			   N_("specify the hash algorithm to use")),
-		OPT_END()
+		OPT_پڇاڙي()
 	};
 
-	argc = parse_options(argc, argv, prefix, show_index_options, show_index_usage, 0);
+	argc = parse_options(argc, argv, اڳياڙي, show_اشاريو_options, show_اشاريو_usage, 0);
 
-	if (hash_name) {
+	إذا (hash_name) {
 		hash_algo = hash_algo_by_name(hash_name);
-		if (hash_algo == GIT_HASH_UNKNOWN)
+		إذا (hash_algo == GIT_HASH_UNKNOWN)
 			die(_("Unknown hash algorithm"));
-		repo_set_hash_algo(the_repository, hash_algo);
+		repo_سيٽ_hash_algo(the_repository, hash_algo);
 	}
 
 	/*
@@ -47,82 +47,82 @@ int cmd_show_index(int argc,
 	 *       algorithm in its header, enable show-index to infer it from the
 	 *       header rather than relying on repository context or a default fallback.
 	 */
-	if (!the_hash_algo) {
+	إذا (!the_hash_algo) {
 		warning(_("assuming SHA-1; use --object-format to override"));
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+		repo_سيٽ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 	}
 
 	hashsz = the_hash_algo->rawsz;
 
-	if (fread(top_index, 2 * 4, 1, stdin) != 1)
+	إذا (fread(چوٽي_اشاريو, 2 * 4, 1, stdin) != 1)
 		die(_("unable to read header"));
-	if (top_index[0] == htonl(PACK_IDX_SIGNATURE)) {
-		version = ntohl(top_index[1]);
-		if (version < 2 || version > 2)
+	إذا (چوٽي_اشاريو[0] == htonl(PACK_IDX_SIGNATURE)) {
+		نسخو = ntohl(چوٽي_اشاريو[1]);
+		إذا (نسخو < 2 || نسخو > 2)
 			die(_("unknown index version"));
-		if (fread(top_index, 256 * 4, 1, stdin) != 1)
+		إذا (fread(چوٽي_اشاريو, 256 * 4, 1, stdin) != 1)
 			die(_("unable to read index"));
-	} else {
-		version = 1;
-		if (fread(&top_index[2], 254 * 4, 1, stdin) != 1)
+	} وإلا {
+		نسخو = 1;
+		إذا (fread(&چوٽي_اشاريو[2], 254 * 4, 1, stdin) != 1)
 			die(_("unable to read index"));
 	}
 	nr = 0;
-	for (i = 0; i < 256; i++) {
-		unsigned n = ntohl(top_index[i]);
-		if (n < nr)
+	لكل (i = 0; i < 256; i++) {
+		بنانشان n = ntohl(چوٽي_اشاريو[i]);
+		إذا (n < nr)
 			die(_("corrupt index file"));
 		nr = n;
 	}
-	if (version == 1) {
-		for (i = 0; i < nr; i++) {
-			unsigned int offset, entry[(GIT_MAX_RAWSZ + 4) / sizeof(unsigned int)];
+	إذا (نسخو == 1) {
+		لكل (i = 0; i < nr; i++) {
+			بنانشان صحيح وٿي, داخلا[(GIT_MAX_RAWSZ + 4) / حجم(بنانشان صحيح)];
 
-			if (fread(entry, 4 + hashsz, 1, stdin) != 1)
+			إذا (fread(داخلا, 4 + hashsz, 1, stdin) != 1)
 				die(_("unable to read entry %u/%u"), i, nr);
-			offset = ntohl(entry[0]);
-			printf("%u %s\n", offset, hash_to_hex((void *)(entry+1)));
+			وٿي = ntohl(داخلا[0]);
+			لکو("%u %s\n", وٿي, hash_منزل_hex((فراغ *)(داخلا+1)));
 		}
-	} else {
-		unsigned off64_nr = 0;
-		struct {
-			struct object_id oid;
-			uint32_t crc;
+	} وإلا {
+		بنانشان off64_nr = 0;
+		بنية {
+			بنية object_id oid;
+			uint32_t چڪري_جاچ;
 			uint32_t off;
 		} *entries;
 		ALLOC_ARRAY(entries, nr);
-		for (i = 0; i < nr; i++) {
-			if (fread(entries[i].oid.hash, hashsz, 1, stdin) != 1)
+		لكل (i = 0; i < nr; i++) {
+			إذا (fread(entries[i].oid.hash, hashsz, 1, stdin) != 1)
 				die(_("unable to read sha1 %u/%u"), i, nr);
 			entries[i].oid.algo = hash_algo_by_ptr(the_hash_algo);
 		}
-		for (i = 0; i < nr; i++)
-			if (fread(&entries[i].crc, 4, 1, stdin) != 1)
+		لكل (i = 0; i < nr; i++)
+			إذا (fread(&entries[i].چڪري_جاچ, 4, 1, stdin) != 1)
 				die(_("unable to read crc %u/%u"), i, nr);
-		for (i = 0; i < nr; i++)
-			if (fread(&entries[i].off, 4, 1, stdin) != 1)
+		لكل (i = 0; i < nr; i++)
+			إذا (fread(&entries[i].off, 4, 1, stdin) != 1)
 				die(_("unable to read 32b offset %u/%u"), i, nr);
-		for (i = 0; i < nr; i++) {
-			uint64_t offset;
+		لكل (i = 0; i < nr; i++) {
+			uint64_t وٿي;
 			uint32_t off = ntohl(entries[i].off);
-			if (!(off & 0x80000000)) {
-				offset = off;
-			} else {
+			إذا (!(off & 0x80000000)) {
+				وٿي = off;
+			} وإلا {
 				uint32_t off64[2];
-				if ((off & 0x7fffffff) != off64_nr)
+				إذا ((off & 0x7fffffff) != off64_nr)
 					die(_("inconsistent 64b offset index"));
-				if (fread(off64, 8, 1, stdin) != 1)
+				إذا (fread(off64, 8, 1, stdin) != 1)
 					die(_("unable to read 64b offset %u"), off64_nr);
-				offset = (((uint64_t)ntohl(off64[0])) << 32) |
+				وٿي = (((uint64_t)ntohl(off64[0])) << 32) |
 						     ntohl(off64[1]);
 				off64_nr++;
 			}
-			printf("%" PRIuMAX " %s (%08"PRIx32")\n",
-			       (uintmax_t) offset,
-			       oid_to_hex(&entries[i].oid),
-			       ntohl(entries[i].crc));
+			لکو("%" PRIuMAX " %s (%08"PRIx32")\n",
+			       (uintmax_t) وٿي,
+			       oid_منزل_hex(&entries[i].oid),
+			       ntohl(entries[i].چڪري_جاچ));
 		}
-		free(entries);
+		حرر(entries);
 	}
-	return 0;
+	أرجع 0;
 }
