@@ -1,37 +1,37 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "stash.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "merge-ort-wrappers.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "dir.h"
-#include "entry.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "rerere.h"
-#include "revision.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "log-tree.h"
-#include "diffcore.h"
-#include "reflog.h"
-#include "reflog-walk.h"
-#include "add-interactive.h"
-#include "commit.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "abspath.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hash.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "refs.h"
+#अन्तर्भाव "stash.h"
+#अन्तर्भाव "lockfile.h"
+#अन्तर्भाव "cache-tree.h"
+#अन्तर्भाव "unpack-trees.h"
+#अन्तर्भाव "merge-ort-wrappers.h"
+#अन्तर्भाव "strvec.h"
+#अन्तर्भाव "run-command.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "entry.h"
+#अन्तर्भाव "preload-index.h"
+#अन्तर्भाव "read-cache.h"
+#अन्तर्भाव "repository.h"
+#अन्तर्भाव "rerere.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "sparse-index.h"
+#अन्तर्भाव "log-tree.h"
+#अन्तर्भाव "diffcore.h"
+#अन्तर्भाव "reflog.h"
+#अन्तर्भाव "reflog-walk.h"
+#अन्तर्भाव "add-interactive.h"
+#अन्तर्भाव "commit.h"
 
 #define INCLUDE_ALL_FILES 2
 
@@ -41,7 +41,7 @@
 	N_("git stash show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]")
 #define BUILTIN_STASH_DROP_USAGE \
 	N_("git stash drop [-q | --quiet] [<stash>]")
-#define BUILTIN_STASH_POP_USAGE \
+#define BUILTIN_STASH_निकालो_USAGE \
 	N_("git stash pop [--index] [-q | --quiet] [<stash>]")
 #define BUILTIN_STASH_APPLY_USAGE \
 	N_("git stash apply [--index] [-q | --quiet] [--label-ours=<label>] [--label-theirs=<label>] [--label-base=<label>] [<stash>]")
@@ -49,7 +49,7 @@
 	N_("git stash branch <branchname> [<stash>]")
 #define BUILTIN_STASH_STORE_USAGE \
 	N_("git stash store [(-m | --message) <message>] [-q | --quiet] <commit>")
-#define BUILTIN_STASH_PUSH_USAGE \
+#define BUILTIN_STASH_धकेलो_USAGE \
 	N_("git stash [push] [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]\n" \
 	   "          [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]\n" \
 	   "          [--pathspec-from-file=<file> [--pathspec-file-nul]]\n" \
@@ -66,90 +66,90 @@
 #define BUILTIN_STASH_CLEAR_USAGE \
 	"git stash clear"
 
-static const char * const git_stash_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
 	BUILTIN_STASH_SHOW_USAGE,
 	BUILTIN_STASH_DROP_USAGE,
-	BUILTIN_STASH_POP_USAGE,
+	BUILTIN_STASH_निकालो_USAGE,
 	BUILTIN_STASH_APPLY_USAGE,
 	BUILTIN_STASH_BRANCH_USAGE,
-	BUILTIN_STASH_PUSH_USAGE,
+	BUILTIN_STASH_धकेलो_USAGE,
 	BUILTIN_STASH_SAVE_USAGE,
 	BUILTIN_STASH_CLEAR_USAGE,
 	BUILTIN_STASH_CREATE_USAGE,
 	BUILTIN_STASH_STORE_USAGE,
 	BUILTIN_STASH_EXPORT_USAGE,
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_list_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_list_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_show_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_show_usage[] = {
 	BUILTIN_STASH_SHOW_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_drop_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_drop_usage[] = {
 	BUILTIN_STASH_DROP_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_pop_usage[] = {
-	BUILTIN_STASH_POP_USAGE,
-	NULL
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_निकालो_usage[] = {
+	BUILTIN_STASH_निकालो_USAGE,
+	रिक्त
 };
 
-static const char * const git_stash_apply_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_apply_usage[] = {
 	BUILTIN_STASH_APPLY_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_branch_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_branch_usage[] = {
 	BUILTIN_STASH_BRANCH_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_clear_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_clear_usage[] = {
 	BUILTIN_STASH_CLEAR_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_store_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_store_usage[] = {
 	BUILTIN_STASH_STORE_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_push_usage[] = {
-	BUILTIN_STASH_PUSH_USAGE,
-	NULL
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_धकेलो_usage[] = {
+	BUILTIN_STASH_धकेलो_USAGE,
+	रिक्त
 };
 
-static const char * const git_stash_save_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_save_usage[] = {
 	BUILTIN_STASH_SAVE_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_export_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_export_usage[] = {
 	BUILTIN_STASH_EXPORT_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char * const git_stash_import_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_stash_import_usage[] = {
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	रिक्त
 };
 
-static const char ref_stash[] = "refs/stash";
-static struct strbuf stash_index_path = STRBUF_INIT;
+स्थिर ध्रुव वर्ण ref_stash[] = "refs/stash";
+स्थिर संरचना strbuf stash_index_path = STRBUF_INIT;
 
-static int show_stat = 1;
-static int show_patch;
-static int show_include_untracked;
-static int use_index;
+स्थिर पूर्णाङ्क show_stat = 1;
+स्थिर पूर्णाङ्क show_patch;
+स्थिर पूर्णाङ्क show_include_untracked;
+स्थिर पूर्णाङ्क use_index;
 
 /*
  * w_commit is set to the commit containing the working tree
@@ -162,125 +162,125 @@ static int use_index;
  * i_tree is set to the index tree
  * u_tree is set to the untracked files tree
  */
-struct stash_info {
-	struct object_id w_commit;
-	struct object_id b_commit;
-	struct object_id i_commit;
-	struct object_id u_commit;
-	struct object_id c_commit;
-	struct object_id w_tree;
-	struct object_id b_tree;
-	struct object_id i_tree;
-	struct object_id u_tree;
-	struct strbuf revision;
-	int is_stash_ref;
-	int has_u;
+संरचना stash_info {
+	संरचना object_id w_commit;
+	संरचना object_id b_commit;
+	संरचना object_id i_commit;
+	संरचना object_id u_commit;
+	संरचना object_id c_commit;
+	संरचना object_id w_वृक्ष;
+	संरचना object_id b_वृक्ष;
+	संरचना object_id i_वृक्ष;
+	संरचना object_id u_वृक्ष;
+	संरचना strbuf revision;
+	पूर्णाङ्क is_stash_ref;
+	पूर्णाङ्क has_u;
 };
 
 #define STASH_INFO_INIT { \
 	.revision = STRBUF_INIT, \
 }
 
-static void free_stash_info(struct stash_info *info)
+स्थिर शून्य free_stash_info(संरचना stash_info *info)
 {
 	strbuf_release(&info->revision);
 }
 
-static int check_stash_topology(struct repository *r, struct commit *stash)
+स्थिर पूर्णाङ्क check_stash_topology(संरचना repository *r, संरचना commit *stash)
 {
-	struct commit *p1, *p2, *p3 = NULL;
+	संरचना commit *p1, *p2, *p3 = रिक्त;
 
 	/* stash must have two or three parents */
-	if (!stash->parents || !stash->parents->next ||
+	यदि (!stash->parents || !stash->parents->next ||
 			(stash->parents->next->next && stash->parents->next->next->next))
-		return -1;
+		प्रत्यागम -1;
 	p1 = stash->parents->item;
 	p2 = stash->parents->next->item;
-	if (stash->parents->next->next)
+	यदि (stash->parents->next->next)
 		p3 = stash->parents->next->next->item;
-	if (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
+	यदि (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
 			(p3 && repo_parse_commit(r, p3)))
-		return -1;
+		प्रत्यागम -1;
 	/* p2 must have a single parent, p3 must have no parents */
-	if (!p2->parents || p2->parents->next || (p3 && p3->parents))
-		return -1;
-	if (repo_parse_commit(r, p2->parents->item))
-		return -1;
+	यदि (!p2->parents || p2->parents->next || (p3 && p3->parents))
+		प्रत्यागम -1;
+	यदि (repo_parse_commit(r, p2->parents->item))
+		प्रत्यागम -1;
 	/* p2^1 must equal p1 */
-	if (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
-		return -1;
+	यदि (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
+		प्रत्यागम -1;
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void assert_stash_like(struct stash_info *info, const char *revision)
+स्थिर शून्य assert_stash_like(संरचना stash_info *info, ध्रुव वर्ण *revision)
 {
-	if (get_oidf(&info->b_commit, "%s^1", revision) ||
-	    get_oidf(&info->w_tree, "%s:", revision) ||
-	    get_oidf(&info->b_tree, "%s^1:", revision) ||
-	    get_oidf(&info->i_tree, "%s^2:", revision))
+	यदि (get_oidf(&info->b_commit, "%s^1", revision) ||
+	    get_oidf(&info->w_वृक्ष, "%s:", revision) ||
+	    get_oidf(&info->b_वृक्ष, "%s^1:", revision) ||
+	    get_oidf(&info->i_वृक्ष, "%s^2:", revision))
 		die(_("'%s' is not a stash-like commit"), revision);
 }
 
-static int parse_stash_revision(struct strbuf *revision, const char *commit, int quiet)
+स्थिर पूर्णाङ्क parse_stash_revision(संरचना strbuf *revision, ध्रुव वर्ण *commit, पूर्णाङ्क quiet)
 {
 	strbuf_reset(revision);
-	if (!commit) {
-		if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
-			if (!quiet)
+	यदि (!commit) {
+		यदि (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
+			यदि (!quiet)
 				fprintf_ln(stderr, _("No stash entries found."));
-			return -1;
+			प्रत्यागम -1;
 		}
 
 		strbuf_addf(revision, "%s@{0}", ref_stash);
-	} else if (strspn(commit, "0123456789") == strlen(commit)) {
+	} अन्यथा यदि (strspn(commit, "0123456789") == strlen(commit)) {
 		strbuf_addf(revision, "%s@{%s}", ref_stash, commit);
-	} else {
+	} अन्यथा {
 		strbuf_addstr(revision, commit);
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int get_stash_info(struct stash_info *info, int argc, const char **argv)
+स्थिर पूर्णाङ्क get_stash_info(संरचना stash_info *info, पूर्णाङ्क argc, ध्रुव वर्ण **argv)
 {
-	int ret;
-	char *end_of_rev;
-	char *expanded_ref;
-	const char *revision;
-	const char *commit = NULL;
-	struct object_id dummy;
-	struct strbuf symbolic = STRBUF_INIT;
+	पूर्णाङ्क ret;
+	वर्ण *end_of_rev;
+	वर्ण *expanded_ref;
+	ध्रुव वर्ण *revision;
+	ध्रुव वर्ण *commit = रिक्त;
+	संरचना object_id dummy;
+	संरचना strbuf symbolic = STRBUF_INIT;
 
-	if (argc > 1) {
-		int i;
-		struct strbuf refs_msg = STRBUF_INIT;
+	यदि (argc > 1) {
+		पूर्णाङ्क i;
+		संरचना strbuf refs_संदेश = STRBUF_INIT;
 
-		for (i = 0; i < argc; i++)
-			strbuf_addf(&refs_msg, " '%s'", argv[i]);
+		प्रति (i = 0; i < argc; i++)
+			strbuf_addf(&refs_संदेश, " '%s'", argv[i]);
 
 		fprintf_ln(stderr, _("Too many revisions specified:%s"),
-			   refs_msg.buf);
-		strbuf_release(&refs_msg);
+			   refs_संदेश.buf);
+		strbuf_release(&refs_संदेश);
 
-		return -1;
+		प्रत्यागम -1;
 	}
 
-	if (argc == 1)
+	यदि (argc == 1)
 		commit = argv[0];
 
 	strbuf_init(&info->revision, 0);
-	if (parse_stash_revision(&info->revision, commit, 0)) {
-		return -1;
+	यदि (parse_stash_revision(&info->revision, commit, 0)) {
+		प्रत्यागम -1;
 	}
 
 	revision = info->revision.buf;
 
-	if (repo_get_oid(the_repository, revision, &info->w_commit))
-		return error(_("%s is not a valid reference"), revision);
+	यदि (repo_get_oid(the_repository, revision, &info->w_commit))
+		प्रत्यागम error(_("%s is not a valid reference"), revision);
 
 	assert_stash_like(info, revision);
 
-	info->has_u = !get_oidf(&info->u_tree, "%s^3:", revision);
+	info->has_u = !get_oidf(&info->u_वृक्ष, "%s^3:", revision);
 
 	end_of_rev = strchrnul(revision, '@');
 	strbuf_add(&symbolic, revision, end_of_rev - revision);
@@ -288,35 +288,35 @@ static int get_stash_info(struct stash_info *info, int argc, const char **argv)
 	ret = repo_dwim_ref(the_repository, symbolic.buf, symbolic.len,
 			    &dummy, &expanded_ref, 0);
 	strbuf_release(&symbolic);
-	switch (ret) {
-	case 0: /* Not found, but valid ref */
+	विकल्प (ret) {
+	पक्ष 0: /* Not found, but valid ref */
 		info->is_stash_ref = 0;
-		break;
-	case 1:
+		भङ्ग;
+	पक्ष 1:
 		info->is_stash_ref = !strcmp(expanded_ref, ref_stash);
-		break;
-	default: /* Invalid or ambiguous */
-		break;
+		भङ्ग;
+	स्वभाव: /* Invalid or ambiguous */
+		भङ्ग;
 	}
 
-	free(expanded_ref);
-	return !(ret == 0 || ret == 1);
+	मुक्त(expanded_ref);
+	प्रत्यागम !(ret == 0 || ret == 1);
 }
 
-static int do_clear_stash(void)
+स्थिर पूर्णाङ्क do_clear_stash(शून्य)
 {
-	struct object_id obj;
-	if (repo_get_oid(the_repository, ref_stash, &obj))
-		return 0;
+	संरचना object_id obj;
+	यदि (repo_get_oid(the_repository, ref_stash, &obj))
+		प्रत्यागम 0;
 
-	return refs_delete_ref(get_main_ref_store(the_repository), NULL,
+	प्रत्यागम refs_delete_ref(get_main_ref_store(the_repository), रिक्त,
 			       ref_stash, &obj, 0);
 }
 
-static int clear_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क clear_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		       संरचना repository *repo UNUSED)
 {
-	struct option options[] = {
+	संरचना option options[] = {
 		OPT_END()
 	};
 
@@ -324,34 +324,34 @@ static int clear_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_clear_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (argc)
-		return error(_("git stash clear with arguments is "
+	यदि (argc)
+		प्रत्यागम error(_("git stash clear with arguments is "
 			       "unimplemented"));
 
-	return do_clear_stash();
+	प्रत्यागम do_clear_stash();
 }
 
-static int reset_tree(struct object_id *i_tree, int update, int reset)
+स्थिर पूर्णाङ्क reset_वृक्ष(संरचना object_id *i_वृक्ष, पूर्णाङ्क update, पूर्णाङ्क reset)
 {
-	int nr_trees = 1;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct lock_file lock_file = LOCK_INIT;
+	पूर्णाङ्क nr_trees = 1;
+	संरचना unpack_trees_options opts;
+	संरचना वृक्ष_desc t[MAX_UNPACK_TREES];
+	संरचना वृक्ष *वृक्ष;
+	संरचना lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL))
-		return -1;
+	repo_read_index_preload(the_repository, रिक्त, 0);
+	यदि (refresh_index(the_repository->index, REFRESH_QUIET, रिक्त, रिक्त, रिक्त))
+		प्रत्यागम -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, परिमाण(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, i_tree);
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	वृक्ष = repo_parse_वृक्ष_indirect(the_repository, i_वृक्ष);
+	यदि (repo_parse_वृक्ष(the_repository, वृक्ष))
+		प्रत्यागम -1;
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_वृक्ष_desc(t, &वृक्ष->object.oid, वृक्ष->buffer, वृक्ष->size);
 
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
@@ -359,44 +359,44 @@ static int reset_tree(struct object_id *i_tree, int update, int reset)
 	opts.merge = 1;
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.update = update;
-	if (update)
+	यदि (update)
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
+	यदि (unpack_trees(nr_trees, t, &opts))
+		प्रत्यागम -1;
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
-		return error(_("unable to write new index file"));
+	यदि (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		प्रत्यागम error(_("unable to write new index file"));
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int create_index_from_tree(const struct object_id *tree_id,
-				  const char *index_path)
+स्थिर पूर्णाङ्क create_index_from_वृक्ष(ध्रुव संरचना object_id *वृक्ष_id,
+				  ध्रुव वर्ण *index_path)
 {
-	int nr_trees = 1;
-	int ret = 0;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct index_state dst_istate = INDEX_STATE_INIT(the_repository);
-	struct lock_file lock_file = LOCK_INIT;
+	पूर्णाङ्क nr_trees = 1;
+	पूर्णाङ्क ret = 0;
+	संरचना unpack_trees_options opts;
+	संरचना वृक्ष_desc t[MAX_UNPACK_TREES];
+	संरचना वृक्ष *वृक्ष;
+	संरचना index_state dst_istate = INDEX_STATE_INIT(the_repository);
+	संरचना lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	repo_read_index_preload(the_repository, रिक्त, 0);
+	refresh_index(the_repository->index, REFRESH_QUIET, रिक्त, रिक्त, रिक्त);
 
 	hold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, परिमाण(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, tree_id);
-	if (!tree || repo_parse_tree(the_repository, tree)) {
+	वृक्ष = repo_parse_वृक्ष_indirect(the_repository, वृक्ष_id);
+	यदि (!वृक्ष || repo_parse_वृक्ष(the_repository, वृक्ष)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_वृक्ष_desc(t, &वृक्ष->object.oid, वृक्ष->buffer, वृक्ष->size);
 
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
@@ -405,43 +405,43 @@ static int create_index_from_tree(const struct object_id *tree_id,
 	opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts)) {
+	यदि (unpack_trees(nr_trees, t, &opts)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
+	यदि (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto done;
+		गच्छ done;
 	}
 
 done:
 	release_index(&dst_istate);
-	if (ret)
+	यदि (ret)
 		rollback_lock_file(&lock_file);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int is_path_a_directory(const char *path)
+स्थिर पूर्णाङ्क is_path_a_directory(ध्रुव वर्ण *path)
 {
 	/*
 	 * This function differs from abspath.c:is_directory() in that
 	 * here we use lstat() instead of stat(); we do not want to
 	 * follow symbolic links here.
 	 */
-	struct stat st;
-	return (!lstat(path, &st) && S_ISDIR(st.st_mode));
+	संरचना stat st;
+	प्रत्यागम (!lstat(path, &st) && S_ISDIR(st.st_mode));
 }
 
-static void add_diff_to_buf(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED,
-			    void *data)
+स्थिर शून्य add_diff_to_buf(संरचना diff_queue_struct *q,
+			    संरचना diff_options *options UNUSED,
+			    शून्य *data)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	for (i = 0; i < q->nr; i++) {
-		if (is_path_a_directory(q->queue[i]->one->path))
-			continue;
+	प्रति (i = 0; i < q->nr; i++) {
+		यदि (is_path_a_directory(q->queue[i]->one->path))
+			अनुवर्त;
 
 		strbuf_addstr(data, q->queue[i]->one->path);
 
@@ -450,10 +450,10 @@ static void add_diff_to_buf(struct diff_queue_struct *q,
 	}
 }
 
-static int restore_untracked(struct object_id *u_tree)
+स्थिर पूर्णाङ्क restore_untracked(संरचना object_id *u_वृक्ष)
 {
-	int res;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	पूर्णाङ्क res;
+	संरचना child_process cp = CHILD_PROCESS_INIT;
 
 	/*
 	 * We need to run restore files from a given index, but without
@@ -461,27 +461,27 @@ static int restore_untracked(struct object_id *u_tree)
 	 * run_command to fork processes that will not interfere.
 	 */
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "read-tree");
-	strvec_push(&cp.args, oid_to_hex(u_tree));
+	strvec_धकेलो(&cp.args, "read-tree");
+	strvec_धकेलो(&cp.args, oid_to_hex(u_वृक्ष));
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
-	if (run_command(&cp)) {
+	यदि (run_command(&cp)) {
 		remove_path(stash_index_path.buf);
-		return -1;
+		प्रत्यागम -1;
 	}
 
 	child_process_init(&cp);
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout-index", "--all", NULL);
+	strvec_pushl(&cp.args, "checkout-index", "--all", रिक्त);
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
 	res = run_command(&cp);
 	remove_path(stash_index_path.buf);
-	return res;
+	प्रत्यागम res;
 }
 
-static void unstage_changes_unless_new(struct object_id *orig_tree)
+स्थिर शून्य unstage_changes_unless_new(संरचना object_id *orig_वृक्ष)
 {
 	/*
 	 * When we enter this function, there has been a clean merge of
@@ -494,10 +494,10 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * it to the worktree before unstaging.
 	 */
 
-	struct checkout state = CHECKOUT_INIT;
-	struct diff_options diff_opts;
-	struct lock_file lock = LOCK_INIT;
-	int i;
+	संरचना checkout state = CHECKOUT_INIT;
+	संरचना diff_options diff_opts;
+	संरचना lock_file lock = LOCK_INIT;
+	पूर्णाङ्क i;
 
 	/* If any entries have skip_worktree set, we'll have to check 'em out */
 	state.force = 1;
@@ -516,14 +516,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	diff_opts.output_format = DIFF_FORMAT_NO_OUTPUT;
 	diff_setup_done(&diff_opts);
 
-	do_diff_cache(orig_tree, &diff_opts);
+	do_diff_cache(orig_वृक्ष, &diff_opts);
 	diffcore_std(&diff_opts);
 
 	/* Iterate over the paths that changed due to the merge... */
-	for (i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *p;
-		struct cache_entry *ce;
-		int pos;
+	प्रति (i = 0; i < diff_queued_diff.nr; i++) {
+		संरचना diff_filepair *p;
+		संरचना cache_entry *ce;
+		पूर्णाङ्क pos;
 
 		/* Look up the path's position in the current index. */
 		p = diff_queued_diff.queue[i];
@@ -538,14 +538,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 		 * path, but left it out of the working tree, then clear the
 		 * SKIP_WORKTREE bit and write it to the working tree.
 		 */
-		if (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
-			struct stat st;
+		यदि (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
+			संरचना stat st;
 
 			ce = the_repository->index->cache[pos];
-			if (!lstat(ce->name, &st)) {
+			यदि (!lstat(ce->name, &st)) {
 				/* Conflicting path present; relocate it */
-				struct strbuf new_path = STRBUF_INIT;
-				int fd;
+				संरचना strbuf new_path = STRBUF_INIT;
+				पूर्णाङ्क fd;
 
 				strbuf_addf(&new_path,
 					    "%s.stash.XXXXXX", ce->name);
@@ -556,25 +556,25 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 					 "           %s -> %s\n"
 					 "         to make room.\n"),
 				       ce->name, new_path.buf);
-				if (rename(ce->name, new_path.buf))
+				यदि (rename(ce->name, new_path.buf))
 					die("Failed to move %s to %s",
 					    ce->name, new_path.buf);
 				strbuf_release(&new_path);
 			}
-			checkout_entry(ce, &state, NULL, NULL);
+			checkout_entry(ce, &state, रिक्त, रिक्त);
 			ce->ce_flags &= ~CE_SKIP_WORKTREE;
 		}
 
 		/*
 		 * Step 3: "unstage" changes, as long as they are still tracked
 		 */
-		if (p->one->oid_valid) {
+		यदि (p->one->oid_valid) {
 			/*
 			 * Path existed in orig_tree; restore index entry
 			 * from that tree in order to "unstage" the changes.
 			 */
-			int option = ADD_CACHE_OK_TO_REPLACE;
-			if (pos < 0)
+			पूर्णाङ्क option = ADD_CACHE_OK_TO_REPLACE;
+			यदि (pos < 0)
 				option = ADD_CACHE_OK_TO_ADD;
 
 			ce = make_cache_entry(the_repository->index,
@@ -591,67 +591,67 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * Step 4: write the new index to disk
 	 */
 	repo_hold_locked_index(the_repository, &lock, LOCK_DIE_ON_ERROR);
-	if (write_locked_index(the_repository->index, &lock,
+	यदि (write_locked_index(the_repository->index, &lock,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("could not write index"));
 }
 
-static enum stash_apply_result do_apply_stash(const char *prefix,
-					      struct stash_info *info,
-					      int index, int quiet,
-					      const char *label_ours,
-					      const char *label_theirs,
-					      const char *label_base)
+स्थिर गणना stash_apply_result do_apply_stash(ध्रुव वर्ण *prefix,
+					      संरचना stash_info *info,
+					      पूर्णाङ्क index, पूर्णाङ्क quiet,
+					      ध्रुव वर्ण *label_ours,
+					      ध्रुव वर्ण *label_theirs,
+					      ध्रुव वर्ण *label_base)
 {
-	int clean, ret;
-	int has_index = index;
-	struct merge_options o;
-	struct object_id c_tree;
-	struct object_id index_tree;
-	struct tree *head, *merge, *merge_base;
-	struct lock_file lock = LOCK_INIT;
+	पूर्णाङ्क clean, ret;
+	पूर्णाङ्क has_index = index;
+	संरचना merge_options o;
+	संरचना object_id c_वृक्ष;
+	संरचना object_id index_वृक्ष;
+	संरचना वृक्ष *head, *merge, *merge_base;
+	संरचना lock_file lock = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL))
-		return error(_("could not write index"));
+	repo_read_index_preload(the_repository, रिक्त, 0);
+	यदि (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 रिक्त, रिक्त, रिक्त))
+		प्रत्यागम error(_("could not write index"));
 
-	if (write_index_as_tree(&c_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL))
-		return error(_("cannot apply a stash in the middle of a merge"));
+	यदि (write_index_as_वृक्ष(&c_वृक्ष, the_repository->index,
+				repo_get_index_file(the_repository), 0, रिक्त))
+		प्रत्यागम error(_("cannot apply a stash in the middle of a merge"));
 
 	init_ui_merge_options(&o, the_repository);
 
-	if (quiet)
+	यदि (quiet)
 		o.verbosity = 0;
 
-	if (index) {
-		if (oideq(&info->b_tree, &info->i_tree) ||
-		    oideq(&c_tree, &info->i_tree)) {
+	यदि (index) {
+		यदि (oideq(&info->b_वृक्ष, &info->i_वृक्ष) ||
+		    oideq(&c_वृक्ष, &info->i_वृक्ष)) {
 			has_index = 0;
-		} else {
-			struct merge_result result = { 0 };
+		} अन्यथा {
+			संरचना merge_result result = { 0 };
 
 			o.branch1 = "Current index";
 			o.branch2 = "Stashed index changes";
 			o.ancestor = "Stash base";
 
-			head = lookup_tree(o.repo, &c_tree);
-			merge = lookup_tree(o.repo, &info->i_tree);
-			merge_base = lookup_tree(o.repo, &info->b_tree);
+			head = lookup_वृक्ष(o.repo, &c_वृक्ष);
+			merge = lookup_वृक्ष(o.repo, &info->i_वृक्ष);
+			merge_base = lookup_वृक्ष(o.repo, &info->b_वृक्ष);
 
 			merge_incore_nonrecursive(&o, merge_base, head, merge,
 						  &result);
 
-			if (result.clean < 0) {
+			यदि (result.clean < 0) {
 				merge_finalize(&o, &result);
-				return error(_("index merge failed"));
-			} else if (!result.clean) {
+				प्रत्यागम error(_("index merge failed"));
+			} अन्यथा यदि (!result.clean) {
 				merge_finalize(&o, &result);
-				return error(_("conflicts in index. "
+				प्रत्यागम error(_("conflicts in index. "
 					       "Try without --index."));
-			} else {
-				oidcpy(&index_tree, &result.tree->object.oid);
+			} अन्यथा {
+				oidcpy(&index_वृक्ष, &result.वृक्ष->object.oid);
 				merge_finalize(&o, &result);
 			}
 		}
@@ -661,15 +661,15 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	o.branch2 = label_theirs ? label_theirs : "Stashed changes";
 	o.ancestor = label_base ? label_base : "Stash base";
 
-	if (oideq(&info->b_tree, &c_tree))
+	यदि (oideq(&info->b_वृक्ष, &c_वृक्ष))
 		o.branch1 = "Version stash was based on";
 
-	if (o.verbosity >= 3)
+	यदि (o.verbosity >= 3)
 		printf_ln(_("Merging %s with %s"), o.branch1, o.branch2);
 
-	head = lookup_tree(o.repo, &c_tree);
-	merge = lookup_tree(o.repo, &info->w_tree);
-	merge_base = lookup_tree(o.repo, &info->b_tree);
+	head = lookup_वृक्ष(o.repo, &c_वृक्ष);
+	merge = lookup_वृक्ष(o.repo, &info->w_वृक्ष);
+	merge_base = lookup_वृक्ष(o.repo, &info->b_वृक्ष);
 
 	repo_hold_locked_index(o.repo, &lock, LOCK_DIE_ON_ERROR);
 	clean = merge_ort_nonrecursive(&o, head, merge, merge_base);
@@ -681,34 +681,34 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	 */
 	ret = clean >= 0 ? !clean : clean;
 
-	if (ret < 0)
+	यदि (ret < 0)
 		rollback_lock_file(&lock);
-	else if (write_locked_index(o.repo->index, &lock,
+	अन्यथा यदि (write_locked_index(o.repo->index, &lock,
 				      COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		ret = error(_("could not write index"));
 
-	if (ret) {
+	यदि (ret) {
 		repo_rerere(the_repository, 0);
 
-		if (index)
+		यदि (index)
 			fprintf_ln(stderr, _("Index was not unstashed."));
 
-		goto restore_untracked;
+		गच्छ restore_untracked;
 	}
 
-	if (has_index) {
-		if (reset_tree(&index_tree, 0, 0))
+	यदि (has_index) {
+		यदि (reset_वृक्ष(&index_वृक्ष, 0, 0))
 			ret = -1;
-	} else {
-		unstage_changes_unless_new(&c_tree);
+	} अन्यथा {
+		unstage_changes_unless_new(&c_वृक्ष);
 	}
 
 restore_untracked:
-	if (info->has_u && restore_untracked(&info->u_tree))
+	यदि (info->has_u && restore_untracked(&info->u_वृक्ष))
 		ret = error(_("could not restore untracked files from stash"));
 
-	if (!quiet) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	यदि (!quiet) {
+		संरचना child_process cp = CHILD_PROCESS_INIT;
 
 		/*
 		 * Status is quite simple and could be replaced with calls to
@@ -717,26 +717,26 @@ restore_untracked:
 		 */
 		cp.git_cmd = 1;
 		cp.dir = prefix;
-		strvec_pushf(&cp.env, GIT_WORK_TREE_ENVIRONMENT"=%s",
-			     absolute_path(repo_get_work_tree(the_repository)));
+		strvec_pushf(&cp.env, GIT_WORK_वृक्ष_ENVIRONMENT"=%s",
+			     absolute_path(repo_get_work_वृक्ष(the_repository)));
 		strvec_pushf(&cp.env, GIT_DIR_ENVIRONMENT"=%s",
 			     absolute_path(repo_get_git_dir(the_repository)));
-		strvec_push(&cp.args, "status");
+		strvec_धकेलो(&cp.args, "status");
 		run_command(&cp);
 	}
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int apply_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क apply_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		       संरचना repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	int index = use_index;
-	const char *label_ours = NULL, *label_theirs = NULL, *label_base = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	पूर्णाङ्क ret = -1;
+	पूर्णाङ्क quiet = 0;
+	पूर्णाङ्क index = use_index;
+	ध्रुव वर्ण *label_ours = रिक्त, *label_theirs = रिक्त, *label_base = रिक्त;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -752,73 +752,73 @@ static int apply_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_apply_usage, 0);
 
-	if (get_stash_info(&info, argc, argv))
-		goto cleanup;
+	यदि (get_stash_info(&info, argc, argv))
+		गच्छ cleanup;
 
 	ret = do_apply_stash(prefix, &info, index, quiet,
 			     label_ours, label_theirs, label_base);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int reject_reflog_ent(const char *refname UNUSED,
-			     struct object_id *ooid UNUSED,
-			     struct object_id *noid UNUSED,
-			     const char *email UNUSED,
+स्थिर पूर्णाङ्क reject_reflog_ent(ध्रुव वर्ण *refname UNUSED,
+			     संरचना object_id *ooid UNUSED,
+			     संरचना object_id *noid UNUSED,
+			     ध्रुव वर्ण *email UNUSED,
 			     timestamp_t timestamp UNUSED,
-			     int tz UNUSED, const char *message UNUSED,
-			     void *cb_data UNUSED)
+			     पूर्णाङ्क tz UNUSED, ध्रुव वर्ण *message UNUSED,
+			     शून्य *cb_data UNUSED)
 {
-	return 1;
+	प्रत्यागम 1;
 }
 
-static int reflog_is_empty(const char *refname)
+स्थिर पूर्णाङ्क reflog_is_empty(ध्रुव वर्ण *refname)
 {
-	return !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 refname, reject_reflog_ent, NULL);
+	प्रत्यागम !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
+					 refname, reject_reflog_ent, रिक्त);
 }
 
-static int do_drop_stash(struct stash_info *info, int quiet)
+स्थिर पूर्णाङ्क do_drop_stash(संरचना stash_info *info, पूर्णाङ्क quiet)
 {
-	if (!reflog_delete(info->revision.buf,
+	यदि (!reflog_delete(info->revision.buf,
 			   EXPIRE_REFLOGS_REWRITE | EXPIRE_REFLOGS_UPDATE_REF,
 			   0)) {
-		if (!quiet)
+		यदि (!quiet)
 			printf_ln(_("Dropped %s (%s)"), info->revision.buf,
 				  oid_to_hex(&info->w_commit));
-	} else {
-		return error(_("%s: Could not drop stash entry"),
+	} अन्यथा {
+		प्रत्यागम error(_("%s: Could not drop stash entry"),
 			     info->revision.buf);
 	}
 
-	if (reflog_is_empty(ref_stash))
+	यदि (reflog_is_empty(ref_stash))
 		do_clear_stash();
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int get_stash_info_assert(struct stash_info *info, int argc,
-				 const char **argv)
+स्थिर पूर्णाङ्क get_stash_info_assert(संरचना stash_info *info, पूर्णाङ्क argc,
+				 ध्रुव वर्ण **argv)
 {
-	int ret = get_stash_info(info, argc, argv);
+	पूर्णाङ्क ret = get_stash_info(info, argc, argv);
 
-	if (ret < 0)
-		return ret;
+	यदि (ret < 0)
+		प्रत्यागम ret;
 
-	if (!info->is_stash_ref)
-		return error(_("'%s' is not a stash reference"), info->revision.buf);
+	यदि (!info->is_stash_ref)
+		प्रत्यागम error(_("'%s' is not a stash reference"), info->revision.buf);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int drop_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क drop_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		      संरचना repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	पूर्णाङ्क ret = -1;
+	पूर्णाङ्क quiet = 0;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_END()
 	};
@@ -826,23 +826,23 @@ static int drop_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_drop_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	यदि (get_stash_info_assert(&info, argc, argv))
+		गच्छ cleanup;
 
 	ret = do_drop_stash(&info, quiet);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int pop_stash(int argc, const char **argv, const char *prefix,
-		     struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क निकालो_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		     संरचना repository *repo UNUSED)
 {
-	int ret = -1;
-	int index = use_index;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	पूर्णाङ्क ret = -1;
+	पूर्णाङ्क index = use_index;
+	पूर्णाङ्क quiet = 0;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -850,68 +850,68 @@ static int pop_stash(int argc, const char **argv, const char *prefix,
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
-			     git_stash_pop_usage, 0);
+			     git_stash_निकालो_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	यदि (get_stash_info_assert(&info, argc, argv))
+		गच्छ cleanup;
 
-	if ((ret = do_apply_stash(prefix, &info, index, quiet,
-				  NULL, NULL, NULL)))
+	यदि ((ret = do_apply_stash(prefix, &info, index, quiet,
+				  रिक्त, रिक्त, रिक्त)))
 		printf_ln(_("The stash entry is kept in case "
 			    "you need it again."));
-	else
+	अन्यथा
 		ret = do_drop_stash(&info, quiet);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int branch_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क branch_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+			संरचना repository *repo UNUSED)
 {
-	int ret = -1;
-	const char *branch = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	पूर्णाङ्क ret = -1;
+	ध्रुव वर्ण *branch = रिक्त;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना child_process cp = CHILD_PROCESS_INIT;
+	संरचना option options[] = {
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_branch_usage, 0);
 
-	if (!argc) {
+	यदि (!argc) {
 		fprintf_ln(stderr, _("No branch name specified"));
-		return -1;
+		प्रत्यागम -1;
 	}
 
 	branch = argv[0];
 
-	if (get_stash_info(&info, argc - 1, argv + 1))
-		goto cleanup;
+	यदि (get_stash_info(&info, argc - 1, argv + 1))
+		गच्छ cleanup;
 
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout", "-b", NULL);
-	strvec_push(&cp.args, branch);
-	strvec_push(&cp.args, oid_to_hex(&info.b_commit));
+	strvec_pushl(&cp.args, "checkout", "-b", रिक्त);
+	strvec_धकेलो(&cp.args, branch);
+	strvec_धकेलो(&cp.args, oid_to_hex(&info.b_commit));
 	ret = run_command(&cp);
-	if (!ret)
+	यदि (!ret)
 		ret = do_apply_stash(prefix, &info, 1, 0,
-				     NULL, NULL, NULL);
-	if (!ret && info.is_stash_ref)
+				     रिक्त, रिक्त, रिक्त);
+	यदि (!ret && info.is_stash_ref)
 		ret = do_drop_stash(&info, 0);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int list_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क list_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		      संरचना repository *repo UNUSED)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	संरचना child_process cp = CHILD_PROCESS_INIT;
+	संरचना option options[] = {
 		OPT_END()
 	};
 
@@ -919,82 +919,82 @@ static int list_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_list_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
-		return 0;
+	यदि (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
+		प्रत्यागम 0;
 
 	cp.git_cmd = 1;
 	strvec_pushl(&cp.args, "log", "--format=%gd: %gs", "-g",
-		     "--first-parent", NULL);
+		     "--first-parent", रिक्त);
 	strvec_pushv(&cp.args, argv);
-	strvec_push(&cp.args, ref_stash);
-	strvec_push(&cp.args, "--");
-	return run_command(&cp);
+	strvec_धकेलो(&cp.args, ref_stash);
+	strvec_धकेलो(&cp.args, "--");
+	प्रत्यागम run_command(&cp);
 }
 
-static int git_stash_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क git_stash_config(ध्रुव वर्ण *var, ध्रुव वर्ण *मूल्य,
+			    ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	if (!strcmp(var, "stash.showstat")) {
-		show_stat = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "stash.showstat")) {
+		show_stat = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "stash.showpatch")) {
-		show_patch = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "stash.showpatch")) {
+		show_patch = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "stash.showincludeuntracked")) {
-		show_include_untracked = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "stash.showincludeuntracked")) {
+		show_include_untracked = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(var, "stash.index")) {
-		use_index = git_config_bool(var, value);
-		return 0;
+	यदि (!strcmp(var, "stash.index")) {
+		use_index = git_config_bool(var, मूल्य);
+		प्रत्यागम 0;
 	}
-	return git_diff_basic_config(var, value, ctx, cb);
+	प्रत्यागम git_diff_basic_config(var, मूल्य, ctx, cb);
 }
 
-static void diff_include_untracked(const struct stash_info *info, struct diff_options *diff_opt)
+स्थिर शून्य diff_include_untracked(ध्रुव संरचना stash_info *info, संरचना diff_options *diff_opt)
 {
-	const struct object_id *oid[] = { &info->w_commit, &info->u_tree };
-	struct tree *tree[ARRAY_SIZE(oid)];
-	struct tree_desc tree_desc[ARRAY_SIZE(oid)];
-	struct unpack_trees_options unpack_tree_opt = { 0 };
+	ध्रुव संरचना object_id *oid[] = { &info->w_commit, &info->u_वृक्ष };
+	संरचना वृक्ष *वृक्ष[ARRAY_SIZE(oid)];
+	संरचना वृक्ष_desc वृक्ष_desc[ARRAY_SIZE(oid)];
+	संरचना unpack_trees_options unpack_वृक्ष_opt = { 0 };
 
-	for (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
-		tree[i] = repo_parse_tree_indirect(the_repository, oid[i]);
-		if (repo_parse_tree(the_repository, tree[i]) < 0)
+	प्रति (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
+		वृक्ष[i] = repo_parse_वृक्ष_indirect(the_repository, oid[i]);
+		यदि (repo_parse_वृक्ष(the_repository, वृक्ष[i]) < 0)
 			die(_("failed to parse tree"));
-		init_tree_desc(&tree_desc[i], &tree[i]->object.oid,
-			       tree[i]->buffer, tree[i]->size);
+		init_वृक्ष_desc(&वृक्ष_desc[i], &वृक्ष[i]->object.oid,
+			       वृक्ष[i]->buffer, वृक्ष[i]->size);
 	}
 
-	unpack_tree_opt.head_idx = -1;
-	unpack_tree_opt.src_index = the_repository->index;
-	unpack_tree_opt.dst_index = the_repository->index;
-	unpack_tree_opt.merge = 1;
-	unpack_tree_opt.fn = stash_worktree_untracked_merge;
+	unpack_वृक्ष_opt.head_idx = -1;
+	unpack_वृक्ष_opt.src_index = the_repository->index;
+	unpack_वृक्ष_opt.dst_index = the_repository->index;
+	unpack_वृक्ष_opt.merge = 1;
+	unpack_वृक्ष_opt.fn = stash_worktree_untracked_merge;
 
-	if (unpack_trees(ARRAY_SIZE(tree_desc), tree_desc, &unpack_tree_opt))
+	यदि (unpack_trees(ARRAY_SIZE(वृक्ष_desc), वृक्ष_desc, &unpack_वृक्ष_opt))
 		die(_("failed to unpack trees"));
 
 	do_diff_cache(&info->b_commit, diff_opt);
 }
 
-static int show_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क show_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		      संरचना repository *repo UNUSED)
 {
-	int i;
-	int ret = -1;
-	struct stash_info info = STASH_INFO_INIT;
-	struct rev_info rev;
-	struct strvec stash_args = STRVEC_INIT;
-	struct strvec revision_args = STRVEC_INIT;
-	enum {
+	पूर्णाङ्क i;
+	पूर्णाङ्क ret = -1;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना rev_info rev;
+	संरचना strvec stash_args = STRVEC_INIT;
+	संरचना strvec revision_args = STRVEC_INIT;
+	गणना {
 		UNTRACKED_NONE,
 		UNTRACKED_INCLUDE,
 		UNTRACKED_ONLY
 	} show_untracked = show_include_untracked ? UNTRACKED_INCLUDE : UNTRACKED_NONE;
-	struct option options[] = {
+	संरचना option options[] = {
 		OPT_SET_INT('u', "include-untracked", &show_untracked,
 			    N_("include untracked files in the stash"),
 			    UNTRACKED_INCLUDE),
@@ -1003,70 +1003,70 @@ static int show_stash(int argc, const char **argv, const char *prefix,
 			      UNTRACKED_ONLY, PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	int do_usage = 0;
+	पूर्णाङ्क do_usage = 0;
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, रिक्त);
 	repo_init_revisions(the_repository, &rev, prefix);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_show_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	strvec_push(&revision_args, argv[0]);
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] != '-')
-			strvec_push(&stash_args, argv[i]);
-		else
-			strvec_push(&revision_args, argv[i]);
+	strvec_धकेलो(&revision_args, argv[0]);
+	प्रति (i = 1; i < argc; i++) {
+		यदि (argv[i][0] != '-')
+			strvec_धकेलो(&stash_args, argv[i]);
+		अन्यथा
+			strvec_धकेलो(&revision_args, argv[i]);
 	}
 
-	if (get_stash_info(&info, stash_args.nr, stash_args.v))
-		goto cleanup;
+	यदि (get_stash_info(&info, stash_args.nr, stash_args.v))
+		गच्छ cleanup;
 
 	/*
 	 * The config settings are applied only if there are not passed
 	 * any options.
 	 */
-	if (revision_args.nr == 1) {
-		if (show_stat)
+	यदि (revision_args.nr == 1) {
+		यदि (show_stat)
 			rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT;
 
-		if (show_patch)
+		यदि (show_patch)
 			rev.diffopt.output_format |= DIFF_FORMAT_PATCH;
 
-		if (!show_stat && !show_patch) {
+		यदि (!show_stat && !show_patch) {
 			ret = 0;
-			goto cleanup;
+			गच्छ cleanup;
 		}
 	}
 
-	setup_revisions_from_strvec(&revision_args, &rev, NULL);
-	if (revision_args.nr > 1)
-		goto usage;
-	if (!rev.diffopt.output_format) {
+	setup_revisions_from_strvec(&revision_args, &rev, रिक्त);
+	यदि (revision_args.nr > 1)
+		गच्छ usage;
+	यदि (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
 
 	rev.diffopt.flags.recursive = 1;
 	setup_diff_pager(&rev.diffopt);
-	switch (show_untracked) {
-	case UNTRACKED_NONE:
-		diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
-	case UNTRACKED_ONLY:
-		if (info.has_u)
-			diff_root_tree_oid(&info.u_tree, "", &rev.diffopt);
-		break;
-	case UNTRACKED_INCLUDE:
-		if (info.has_u)
+	विकल्प (show_untracked) {
+	पक्ष UNTRACKED_NONE:
+		diff_वृक्ष_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		भङ्ग;
+	पक्ष UNTRACKED_ONLY:
+		यदि (info.has_u)
+			diff_मूल_वृक्ष_oid(&info.u_वृक्ष, "", &rev.diffopt);
+		भङ्ग;
+	पक्ष UNTRACKED_INCLUDE:
+		यदि (info.has_u)
 			diff_include_untracked(&info, &rev.diffopt);
-		else
-			diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
+		अन्यथा
+			diff_वृक्ष_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		भङ्ग;
 	}
-	log_tree_diff_flush(&rev);
+	log_वृक्ष_diff_flush(&rev);
 
 	ret = diff_result_code(&rev);
 
@@ -1075,86 +1075,86 @@ cleanup:
 	strvec_clear(&stash_args);
 	free_stash_info(&info);
 	release_revisions(&rev);
-	if (do_usage)
+	यदि (do_usage)
 		usage_with_options(git_stash_show_usage, options);
-	return ret;
+	प्रत्यागम ret;
 usage:
 	do_usage = 1;
-	goto cleanup;
+	गच्छ cleanup;
 }
 
-static int do_store_stash(const struct object_id *w_commit, const char *stash_msg,
-			  int quiet)
+स्थिर पूर्णाङ्क do_store_stash(ध्रुव संरचना object_id *w_commit, ध्रुव वर्ण *stash_संदेश,
+			  पूर्णाङ्क quiet)
 {
-	struct stash_info info;
-	char revision[GIT_MAX_HEXSZ];
+	संरचना stash_info info;
+	वर्ण revision[GIT_MAX_HEXSZ];
 
 	oid_to_hex_r(revision, w_commit);
 	assert_stash_like(&info, revision);
 
-	if (!stash_msg)
-		stash_msg = "Created via \"git stash store\".";
+	यदि (!stash_संदेश)
+		stash_संदेश = "Created via \"git stash store\".";
 
-	if (refs_update_ref(get_main_ref_store(the_repository), stash_msg, ref_stash, w_commit, NULL,
+	यदि (refs_update_ref(get_main_ref_store(the_repository), stash_संदेश, ref_stash, w_commit, रिक्त,
 			    REF_FORCE_CREATE_REFLOG,
 			    quiet ? UPDATE_REFS_QUIET_ON_ERR :
-			    UPDATE_REFS_MSG_ON_ERR)) {
-		if (!quiet) {
+			    UPDATE_REFS_संदेश_ON_ERR)) {
+		यदि (!quiet) {
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 				   ref_stash, oid_to_hex(w_commit));
 		}
-		return -1;
+		प्रत्यागम -1;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int store_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क store_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		       संरचना repository *repo UNUSED)
 {
-	int quiet = 0;
-	const char *stash_msg = NULL;
-	struct object_id obj;
-	struct option options[] = {
+	पूर्णाङ्क quiet = 0;
+	ध्रुव वर्ण *stash_संदेश = रिक्त;
+	संरचना object_id obj;
+	संरचना option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet")),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_संदेश, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
-	int ret;
+	पूर्णाङ्क ret;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_store_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (argc != 1) {
-		if (!quiet)
+	यदि (argc != 1) {
+		यदि (!quiet)
 			fprintf_ln(stderr, _("\"git stash store\" requires one "
 					     "<commit> argument"));
-		return -1;
+		प्रत्यागम -1;
 	}
 
-	if (repo_get_oid_with_flags(the_repository, argv[0], &obj,
+	यदि (repo_get_oid_with_flags(the_repository, argv[0], &obj,
 				    quiet ? GET_OID_QUIETLY : 0)) {
-		if (!quiet)
+		यदि (!quiet)
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 					     ref_stash, argv[0]);
 		ret = -1;
-		goto out;
+		गच्छ out;
 	}
 
-	ret = do_store_stash(&obj, stash_msg, quiet);
+	ret = do_store_stash(&obj, stash_संदेश, quiet);
 
 out:
-	return ret;
+	प्रत्यागम ret;
 }
 
-static void add_pathspecs(struct strvec *args,
-			  const struct pathspec *ps) {
-	int i;
+स्थिर शून्य add_pathspecs(संरचना strvec *args,
+			  ध्रुव संरचना pathspec *ps) {
+	पूर्णाङ्क i;
 
-	for (i = 0; i < ps->nr; i++)
-		strvec_push(args, ps->items[i].original);
+	प्रति (i = 0; i < ps->nr; i++)
+		strvec_धकेलो(args, ps->वस्तुएँ[i].original);
 }
 
 /*
@@ -1164,19 +1164,19 @@ static void add_pathspecs(struct strvec *args,
  * = 0 if there are not any untracked files
  * > 0 if there are untracked files
  */
-static int get_untracked_files(const struct pathspec *ps, int include_untracked,
-			       struct strbuf *untracked_files)
+स्थिर पूर्णाङ्क get_untracked_files(ध्रुव संरचना pathspec *ps, पूर्णाङ्क include_untracked,
+			       संरचना strbuf *untracked_files)
 {
-	int i;
-	int found = 0;
-	struct dir_struct dir = DIR_INIT;
+	पूर्णाङ्क i;
+	पूर्णाङ्क found = 0;
+	संरचना dir_struct dir = DIR_INIT;
 
-	if (include_untracked != INCLUDE_ALL_FILES)
+	यदि (include_untracked != INCLUDE_ALL_FILES)
 		setup_standard_excludes(&dir);
 
 	fill_directory(&dir, the_repository->index, ps);
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
+	प्रति (i = 0; i < dir.nr; i++) {
+		संरचना dir_entry *ent = dir.entries[i];
 		found++;
 		strbuf_addstr(untracked_files, ent->name);
 		/* NUL-terminate: will be fed to update-index -z */
@@ -1184,7 +1184,7 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
 	}
 
 	dir_clear(&dir);
-	return found;
+	प्रत्यागम found;
 }
 
 /*
@@ -1194,20 +1194,20 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
  * = 0 if there are no changes.
  * > 0 if there are changes.
  */
-static int check_changes_tracked_files(const struct pathspec *ps)
+स्थिर पूर्णाङ्क check_changes_tracked_files(ध्रुव संरचना pathspec *ps)
 {
-	struct rev_info rev;
-	struct object_id dummy;
-	int ret = 0;
+	संरचना rev_info rev;
+	संरचना object_id dummy;
+	पूर्णाङ्क ret = 0;
 
 	/* No initial commit. */
-	if (repo_get_oid(the_repository, "HEAD", &dummy))
-		return -1;
+	यदि (repo_get_oid(the_repository, "HEAD", &dummy))
+		प्रत्यागम -1;
 
-	if (repo_read_index(the_repository) < 0)
-		return -1;
+	यदि (repo_read_index(the_repository) < 0)
+		प्रत्यागम -1;
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, रिक्त);
 	copy_pathspec(&rev.prune_data, ps);
 
 	rev.diffopt.flags.quick = 1;
@@ -1218,140 +1218,140 @@ static int check_changes_tracked_files(const struct pathspec *ps)
 	diff_setup_done(&rev.diffopt);
 
 	run_diff_index(&rev, DIFF_INDEX_CACHED);
-	if (diff_result_code(&rev)) {
+	यदि (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		गच्छ done;
 	}
 
 	run_diff_files(&rev, 0);
-	if (diff_result_code(&rev)) {
+	यदि (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		गच्छ done;
 	}
 
 done:
 	release_revisions(&rev);
-	return ret;
+	प्रत्यागम ret;
 }
 
 /*
  * The function will fill `untracked_files` with the names of untracked files
  * It will return 1 if there were any changes and 0 if there were not.
  */
-static int check_changes(const struct pathspec *ps, int include_untracked,
-			 struct strbuf *untracked_files)
+स्थिर पूर्णाङ्क check_changes(ध्रुव संरचना pathspec *ps, पूर्णाङ्क include_untracked,
+			 संरचना strbuf *untracked_files)
 {
-	int ret = 0;
-	if (check_changes_tracked_files(ps))
+	पूर्णाङ्क ret = 0;
+	यदि (check_changes_tracked_files(ps))
 		ret = 1;
 
-	if (include_untracked && get_untracked_files(ps, include_untracked,
+	यदि (include_untracked && get_untracked_files(ps, include_untracked,
 						     untracked_files))
 		ret = 1;
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int save_untracked_files(struct stash_info *info, struct strbuf *msg,
-				struct strbuf *files)
+स्थिर पूर्णाङ्क save_untracked_files(संरचना stash_info *info, संरचना strbuf *संदेश,
+				संरचना strbuf *files)
 {
-	int ret = 0;
-	struct strbuf untracked_msg = STRBUF_INIT;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	पूर्णाङ्क ret = 0;
+	संरचना strbuf untracked_संदेश = STRBUF_INIT;
+	संरचना child_process cp_upd_index = CHILD_PROCESS_INIT;
+	संरचना index_state istate = INDEX_STATE_INIT(the_repository);
 
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index", "-z", "--add",
-		     "--remove", "--stdin", NULL);
+		     "--remove", "--stdin", रिक्त);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 			 stash_index_path.buf);
 
-	strbuf_addf(&untracked_msg, "untracked files on %s\n", msg->buf);
-	if (pipe_command(&cp_upd_index, files->buf, files->len, NULL, 0,
-			 NULL, 0)) {
+	strbuf_addf(&untracked_संदेश, "untracked files on %s\n", संदेश->buf);
+	यदि (pipe_command(&cp_upd_index, files->buf, files->len, रिक्त, 0,
+			 रिक्त, 0)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (write_index_as_tree(&info->u_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	यदि (write_index_as_वृक्ष(&info->u_वृक्ष, &istate, stash_index_path.buf, 0,
+				रिक्त)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (commit_tree(untracked_msg.buf, untracked_msg.len,
-			&info->u_tree, NULL, &info->u_commit, NULL, NULL)) {
+	यदि (commit_वृक्ष(untracked_संदेश.buf, untracked_संदेश.len,
+			&info->u_वृक्ष, रिक्त, &info->u_commit, रिक्त, रिक्त)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 done:
 	release_index(&istate);
-	strbuf_release(&untracked_msg);
+	strbuf_release(&untracked_संदेश);
 	remove_path(stash_index_path.buf);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int stash_staged(struct stash_info *info, struct strbuf *out_patch,
-			int quiet)
+स्थिर पूर्णाङ्क stash_staged(संरचना stash_info *info, संरचना strbuf *out_patch,
+			पूर्णाङ्क quiet)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	पूर्णाङ्क ret = 0;
+	संरचना child_process cp_diff_वृक्ष = CHILD_PROCESS_INIT;
+	संरचना index_state istate = INDEX_STATE_INIT(the_repository);
 
-	if (write_index_as_tree(&info->w_tree, &istate, the_repository->index_file,
-				0, NULL)) {
+	यदि (write_index_as_वृक्ष(&info->w_वृक्ष, &istate, the_repository->index_file,
+				0, रिक्त)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "--binary",
+	cp_diff_वृक्ष.git_cmd = 1;
+	strvec_pushl(&cp_diff_वृक्ष.args, "diff-tree", "-p", "--binary",
 		     "--no-color",
-		     "-U1", "HEAD", oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     "-U1", "HEAD", oid_to_hex(&info->w_वृक्ष), "--", रिक्त);
+	यदि (pipe_command(&cp_diff_वृक्ष, रिक्त, 0, out_patch, 0, रिक्त, 0)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	यदि (!out_patch->len) {
+		यदि (!quiet)
 			fprintf_ln(stderr, _("No staged changes"));
 		ret = 1;
 	}
 
 done:
 	release_index(&istate);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int stash_patch(struct stash_info *info, const struct pathspec *ps,
-		       struct strbuf *out_patch, int quiet,
-		       struct interactive_options *interactive_opts)
+स्थिर पूर्णाङ्क stash_patch(संरचना stash_info *info, ध्रुव संरचना pathspec *ps,
+		       संरचना strbuf *out_patch, पूर्णाङ्क quiet,
+		       संरचना interactive_options *interactive_opts)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct commit *head_commit;
-	const struct object_id *head_tree;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	char *old_index_env = NULL, *old_repo_index_file;
+	पूर्णाङ्क ret = 0;
+	संरचना child_process cp_diff_वृक्ष = CHILD_PROCESS_INIT;
+	संरचना commit *head_commit;
+	ध्रुव संरचना object_id *head_वृक्ष;
+	संरचना index_state istate = INDEX_STATE_INIT(the_repository);
+	वर्ण *old_index_env = रिक्त, *old_repo_index_file;
 
 	remove_path(stash_index_path.buf);
 
 	head_commit = lookup_commit(the_repository, &info->b_commit);
-	if (!head_commit || repo_parse_commit(the_repository, head_commit)) {
+	यदि (!head_commit || repo_parse_commit(the_repository, head_commit)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
-	head_tree = get_commit_tree_oid(head_commit);
-	if (!head_tree) {
+	head_वृक्ष = get_commit_वृक्ष_oid(head_commit);
+	यदि (!head_वृक्ष) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (create_index_from_tree(head_tree, stash_index_path.buf)) {
+	यदि (create_index_from_वृक्ष(head_वृक्ष, stash_index_path.buf)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 	/* Find out what the user wants. */
@@ -1360,33 +1360,33 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 	old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
 	setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
 
-	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, NULL, ps, 0);
+	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, रिक्त, ps, 0);
 
 	the_repository->index_file = old_repo_index_file;
-	if (old_index_env && *old_index_env)
+	यदि (old_index_env && *old_index_env)
 		setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-	else
+	अन्यथा
 		unsetenv(INDEX_ENVIRONMENT);
 	FREE_AND_NULL(old_index_env);
 
 	/* State of the working tree. */
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	यदि (write_index_as_वृक्ष(&info->w_वृक्ष, &istate, stash_index_path.buf, 0,
+				रिक्त)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "-U1", "HEAD",
+	cp_diff_वृक्ष.git_cmd = 1;
+	strvec_pushl(&cp_diff_वृक्ष.args, "diff-tree", "-p", "-U1", "HEAD",
 		     "--no-color",
-		     oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     oid_to_hex(&info->w_वृक्ष), "--", रिक्त);
+	यदि (pipe_command(&cp_diff_वृक्ष, रिक्त, 0, out_patch, 0, रिक्त, 0)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	यदि (!out_patch->len) {
+		यदि (!quiet)
 			fprintf_ln(stderr, _("No changes selected"));
 		ret = 1;
 	}
@@ -1394,34 +1394,34 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 done:
 	release_index(&istate);
 	remove_path(stash_index_path.buf);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int stash_working_tree(struct stash_info *info, const struct pathspec *ps)
+स्थिर पूर्णाङ्क stash_working_वृक्ष(संरचना stash_info *info, ध्रुव संरचना pathspec *ps)
 {
-	int ret = 0;
-	struct rev_info rev;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct strbuf diff_output = STRBUF_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	पूर्णाङ्क ret = 0;
+	संरचना rev_info rev;
+	संरचना child_process cp_upd_index = CHILD_PROCESS_INIT;
+	संरचना strbuf diff_output = STRBUF_INIT;
+	संरचना index_state istate = INDEX_STATE_INIT(the_repository);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, रिक्त);
 	copy_pathspec(&rev.prune_data, ps);
 
 	set_alternate_index_output(stash_index_path.buf);
-	if (reset_tree(&info->i_tree, 0, 0)) {
+	यदि (reset_वृक्ष(&info->i_वृक्ष, 0, 0)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
-	set_alternate_index_output(NULL);
+	set_alternate_index_output(रिक्त);
 
 	rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = add_diff_to_buf;
 	rev.diffopt.format_callback_data = &diff_output;
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	यदि (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 	add_pending_object(&rev, parse_object(the_repository, &info->b_commit),
@@ -1431,20 +1431,20 @@ static int stash_working_tree(struct stash_info *info, const struct pathspec *ps
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index",
 		     "--ignore-skip-worktree-entries",
-		     "-z", "--add", "--remove", "--stdin", NULL);
+		     "-z", "--add", "--remove", "--stdin", रिक्त);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
-	if (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
-			 NULL, 0, NULL, 0)) {
+	यदि (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
+			 रिक्त, 0, रिक्त, 0)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	यदि (write_index_as_वृक्ष(&info->w_वृक्ष, &istate, stash_index_path.buf, 0,
+				रिक्त)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 done:
@@ -1452,335 +1452,335 @@ done:
 	release_revisions(&rev);
 	strbuf_release(&diff_output);
 	remove_path(stash_index_path.buf);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_buf,
-			   int include_untracked, int patch_mode,
-			   struct interactive_options *interactive_opts,
-			   int only_staged, struct stash_info *info, struct strbuf *patch,
-			   int quiet)
+स्थिर पूर्णाङ्क do_create_stash(ध्रुव संरचना pathspec *ps, संरचना strbuf *stash_संदेश_buf,
+			   पूर्णाङ्क include_untracked, पूर्णाङ्क patch_mode,
+			   संरचना interactive_options *interactive_opts,
+			   पूर्णाङ्क only_staged, संरचना stash_info *info, संरचना strbuf *patch,
+			   पूर्णाङ्क quiet)
 {
-	int ret = 0;
-	int flags = 0;
-	int untracked_commit_option = 0;
-	const char *head_short_sha1 = NULL;
-	const char *branch_ref = NULL;
-	const char *branch_name = "(no branch)";
-	char *branch_name_buf = NULL;
-	struct commit *head_commit = NULL;
-	struct commit_list *parents = NULL;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf commit_tree_label = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
+	पूर्णाङ्क ret = 0;
+	पूर्णाङ्क flags = 0;
+	पूर्णाङ्क untracked_commit_option = 0;
+	ध्रुव वर्ण *head_short_sha1 = रिक्त;
+	ध्रुव वर्ण *branch_ref = रिक्त;
+	ध्रुव वर्ण *branch_name = "(no branch)";
+	वर्ण *branch_name_buf = रिक्त;
+	संरचना commit *head_commit = रिक्त;
+	संरचना commit_list *parents = रिक्त;
+	संरचना strbuf संदेश = STRBUF_INIT;
+	संरचना strbuf commit_वृक्ष_label = STRBUF_INIT;
+	संरचना strbuf untracked_files = STRBUF_INIT;
 
 	prepare_fallback_ident("git stash", "git@stash");
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL) < 0) {
+	repo_read_index_preload(the_repository, रिक्त, 0);
+	यदि (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 रिक्त, रिक्त, रिक्त) < 0) {
 		ret = error(_("could not write index"));
-		goto done;
+		गच्छ done;
 	}
 
-	if (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
-		if (!quiet)
+	यदि (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
+		यदि (!quiet)
 			fprintf_ln(stderr, _("You do not have "
 					     "the initial commit yet"));
 		ret = -1;
-		goto done;
-	} else {
+		गच्छ done;
+	} अन्यथा {
 		head_commit = lookup_commit(the_repository, &info->b_commit);
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
+	यदि (!check_changes(ps, include_untracked, &untracked_files)) {
 		ret = 1;
-		goto done;
+		गच्छ done;
 	}
 
 	branch_ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					     "HEAD", 0, NULL, &flags);
+					     "HEAD", 0, रिक्त, &flags);
 
-	if (flags & REF_ISSYMREF) {
-		if (skip_prefix(branch_ref, "refs/heads/", &branch_name))
+	यदि (flags & REF_ISSYMREF) {
+		यदि (skip_prefix(branch_ref, "refs/heads/", &branch_name))
 			branch_name = branch_name_buf = xstrdup(branch_name);
 	}
 
 	head_short_sha1 = repo_find_unique_abbrev(the_repository,
 						  &head_commit->object.oid,
 						  DEFAULT_ABBREV);
-	strbuf_addf(&msg, "%s: %s ", branch_name, head_short_sha1);
-	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &msg);
+	strbuf_addf(&संदेश, "%s: %s ", branch_name, head_short_sha1);
+	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &संदेश);
 
-	strbuf_addf(&commit_tree_label, "index on %s\n", msg.buf);
-	commit_list_insert(head_commit, &parents);
-	if (write_index_as_tree(&info->i_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL) ||
-	    commit_tree(commit_tree_label.buf, commit_tree_label.len,
-			&info->i_tree, parents, &info->i_commit, NULL, NULL)) {
-		if (!quiet)
+	strbuf_addf(&commit_वृक्ष_label, "index on %s\n", संदेश.buf);
+	commit_list_जोड़ो(head_commit, &parents);
+	यदि (write_index_as_वृक्ष(&info->i_वृक्ष, the_repository->index,
+				repo_get_index_file(the_repository), 0, रिक्त) ||
+	    commit_वृक्ष(commit_वृक्ष_label.buf, commit_वृक्ष_label.len,
+			&info->i_वृक्ष, parents, &info->i_commit, रिक्त, रिक्त)) {
+		यदि (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current "
 					     "index state"));
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 	commit_list_free(parents);
-	parents = NULL;
+	parents = रिक्त;
 
-	if (include_untracked) {
-		if (save_untracked_files(info, &msg, &untracked_files)) {
-			if (!quiet)
+	यदि (include_untracked) {
+		यदि (save_untracked_files(info, &संदेश, &untracked_files)) {
+			यदि (!quiet)
 				fprintf_ln(stderr, _("Cannot save "
 						     "the untracked files"));
 			ret = -1;
-			goto done;
+			गच्छ done;
 		}
 		untracked_commit_option = 1;
 	}
-	if (patch_mode) {
+	यदि (patch_mode) {
 		ret = stash_patch(info, ps, patch, quiet, interactive_opts);
-		if (ret < 0) {
-			if (!quiet)
+		यदि (ret < 0) {
+			यदि (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			गच्छ done;
+		} अन्यथा यदि (ret > 0) {
+			गच्छ done;
 		}
-	} else if (only_staged) {
+	} अन्यथा यदि (only_staged) {
 		ret = stash_staged(info, patch, quiet);
-		if (ret < 0) {
-			if (!quiet)
+		यदि (ret < 0) {
+			यदि (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "staged state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			गच्छ done;
+		} अन्यथा यदि (ret > 0) {
+			गच्छ done;
 		}
-	} else {
-		if (stash_working_tree(info, ps)) {
-			if (!quiet)
+	} अन्यथा {
+		यदि (stash_working_वृक्ष(info, ps)) {
+			यदि (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
 			ret = -1;
-			goto done;
+			गच्छ done;
 		}
 	}
 
-	if (!stash_msg_buf->len)
-		strbuf_addf(stash_msg_buf, "WIP on %s", msg.buf);
-	else
-		strbuf_insertf(stash_msg_buf, 0, "On %s: ", branch_name);
+	यदि (!stash_संदेश_buf->len)
+		strbuf_addf(stash_संदेश_buf, "WIP on %s", संदेश.buf);
+	अन्यथा
+		strbuf_insertf(stash_संदेश_buf, 0, "On %s: ", branch_name);
 
-	if (untracked_commit_option)
-		commit_list_insert(lookup_commit(the_repository,
+	यदि (untracked_commit_option)
+		commit_list_जोड़ो(lookup_commit(the_repository,
 						 &info->u_commit),
 				   &parents);
-	commit_list_insert(lookup_commit(the_repository, &info->i_commit),
+	commit_list_जोड़ो(lookup_commit(the_repository, &info->i_commit),
 			   &parents);
-	commit_list_insert(head_commit, &parents);
+	commit_list_जोड़ो(head_commit, &parents);
 
-	if (commit_tree(stash_msg_buf->buf, stash_msg_buf->len, &info->w_tree,
-			parents, &info->w_commit, NULL, NULL)) {
-		if (!quiet)
+	यदि (commit_वृक्ष(stash_संदेश_buf->buf, stash_संदेश_buf->len, &info->w_वृक्ष,
+			parents, &info->w_commit, रिक्त, रिक्त)) {
+		यदि (!quiet)
 			fprintf_ln(stderr, _("Cannot record "
 					     "working tree state"));
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 done:
-	strbuf_release(&commit_tree_label);
-	strbuf_release(&msg);
+	strbuf_release(&commit_वृक्ष_label);
+	strbuf_release(&संदेश);
 	strbuf_release(&untracked_files);
 	commit_list_free(parents);
-	free(branch_name_buf);
-	return ret;
+	मुक्त(branch_name_buf);
+	प्रत्यागम ret;
 }
 
-static int create_stash(int argc, const char **argv, const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क create_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix UNUSED,
+			संरचना repository *repo UNUSED)
 {
-	int ret;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct stash_info info = STASH_INFO_INIT;
-	struct pathspec ps;
+	पूर्णाङ्क ret;
+	संरचना strbuf stash_संदेश_buf = STRBUF_INIT;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना pathspec ps;
 
 	/* Starting with argv[1], since argv[0] is "create" */
-	strbuf_join_argv(&stash_msg_buf, argc - 1, ++argv, ' ');
+	strbuf_join_argv(&stash_संदेश_buf, argc - 1, ++argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
-	if (!check_changes_tracked_files(&ps))
-		return 0;
+	memset(&ps, 0, परिमाण(ps));
+	यदि (!check_changes_tracked_files(&ps))
+		प्रत्यागम 0;
 
-	ret = do_create_stash(&ps, &stash_msg_buf, 0, 0, NULL, 0, &info,
-			      NULL, 0);
-	if (!ret)
+	ret = do_create_stash(&ps, &stash_संदेश_buf, 0, 0, रिक्त, 0, &info,
+			      रिक्त, 0);
+	यदि (!ret)
 		printf_ln("%s", oid_to_hex(&info.w_commit));
 
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_संदेश_buf);
+	प्रत्यागम ret;
 }
 
-static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int quiet,
-			 int keep_index, int patch_mode,
-			 struct interactive_options *interactive_opts,
-			 int include_untracked, int only_staged)
+स्थिर पूर्णाङ्क do_धकेलो_stash(ध्रुव संरचना pathspec *ps, ध्रुव वर्ण *stash_संदेश, पूर्णाङ्क quiet,
+			 पूर्णाङ्क keep_index, पूर्णाङ्क patch_mode,
+			 संरचना interactive_options *interactive_opts,
+			 पूर्णाङ्क include_untracked, पूर्णाङ्क only_staged)
 {
-	int ret = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct strbuf patch = STRBUF_INIT;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
+	पूर्णाङ्क ret = 0;
+	संरचना stash_info info = STASH_INFO_INIT;
+	संरचना strbuf patch = STRBUF_INIT;
+	संरचना strbuf stash_संदेश_buf = STRBUF_INIT;
+	संरचना strbuf untracked_files = STRBUF_INIT;
+	संरचना strbuf out = STRBUF_INIT;
 
-	if (patch_mode && keep_index == -1)
+	यदि (patch_mode && keep_index == -1)
 		keep_index = 1;
 
-	if (patch_mode && include_untracked) {
+	यदि (patch_mode && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --patch and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
 	/* --patch overrides --staged */
-	if (patch_mode)
+	यदि (patch_mode)
 		only_staged = 0;
 
-	if (only_staged && include_untracked) {
+	यदि (only_staged && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --staged and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (!include_untracked && ps->nr) {
-		char *ps_matched = xcalloc(ps->nr, 1);
+	repo_read_index_preload(the_repository, रिक्त, 0);
+	यदि (!include_untracked && ps->nr) {
+		वर्ण *ps_matched = xcalloc(ps->nr, 1);
 
-		if (pathspec_needs_expanded_index(the_repository->index, ps))
+		यदि (pathspec_needs_expanded_index(the_repository->index, ps))
 			ensure_full_index(the_repository->index);
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++)
+		प्रति (size_t i = 0; i < the_repository->index->cache_nr; i++)
 			ce_path_match(the_repository->index, the_repository->index->cache[i], ps,
 				      ps_matched);
 
-		if (report_path_error(ps_matched, ps)) {
+		यदि (report_path_error(ps_matched, ps)) {
 			fprintf_ln(stderr, _("Did you forget to 'git add'?"));
 			ret = -1;
-			free(ps_matched);
-			goto done;
+			मुक्त(ps_matched);
+			गच्छ done;
 		}
-		free(ps_matched);
+		मुक्त(ps_matched);
 	}
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL)) {
+	यदि (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 रिक्त, रिक्त, रिक्त)) {
 		ret = error(_("could not write index"));
-		goto done;
+		गच्छ done;
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
-		if (!quiet)
+	यदि (!check_changes(ps, include_untracked, &untracked_files)) {
+		यदि (!quiet)
 			printf_ln(_("No local changes to save"));
-		goto done;
+		गच्छ done;
 	}
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
+	यदि (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
 		ret = -1;
-		if (!quiet)
+		यदि (!quiet)
 			fprintf_ln(stderr, _("Cannot initialize stash"));
-		goto done;
+		गच्छ done;
 	}
 
-	if (stash_msg)
-		strbuf_addstr(&stash_msg_buf, stash_msg);
-	if (do_create_stash(ps, &stash_msg_buf, include_untracked, patch_mode,
+	यदि (stash_संदेश)
+		strbuf_addstr(&stash_संदेश_buf, stash_संदेश);
+	यदि (do_create_stash(ps, &stash_संदेश_buf, include_untracked, patch_mode,
 			    interactive_opts, only_staged, &info, &patch, quiet)) {
 		ret = -1;
-		goto done;
+		गच्छ done;
 	}
 
-	if (do_store_stash(&info.w_commit, stash_msg_buf.buf, 1)) {
+	यदि (do_store_stash(&info.w_commit, stash_संदेश_buf.buf, 1)) {
 		ret = -1;
-		if (!quiet)
+		यदि (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current status"));
-		goto done;
+		गच्छ done;
 	}
 
-	if (!quiet)
+	यदि (!quiet)
 		printf_ln(_("Saved working directory and index state %s"),
-			  stash_msg_buf.buf);
+			  stash_संदेश_buf.buf);
 
-	if (!(patch_mode || only_staged)) {
-		if (include_untracked && !ps->nr) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	यदि (!(patch_mode || only_staged)) {
+		यदि (include_untracked && !ps->nr) {
+			संरचना child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			if (startup_info->original_cwd) {
+			यदि (startup_info->original_cwd) {
 				cp.dir = startup_info->original_cwd;
 				strvec_pushf(&cp.env, "%s=%s",
-					     GIT_WORK_TREE_ENVIRONMENT,
+					     GIT_WORK_वृक्ष_ENVIRONMENT,
 					     the_repository->worktree);
 			}
 			strvec_pushl(&cp.args, "clean", "--force",
-				     "--quiet", "-d", ":/", NULL);
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp.args, "-x");
-			if (run_command(&cp)) {
+				     "--quiet", "-d", ":/", रिक्त);
+			यदि (include_untracked == INCLUDE_ALL_FILES)
+				strvec_धकेलो(&cp.args, "-x");
+			यदि (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
 		}
 		discard_index(the_repository->index);
-		if (ps->nr) {
-			struct child_process cp_add = CHILD_PROCESS_INIT;
-			struct child_process cp_diff = CHILD_PROCESS_INIT;
-			struct child_process cp_apply = CHILD_PROCESS_INIT;
+		यदि (ps->nr) {
+			संरचना child_process cp_add = CHILD_PROCESS_INIT;
+			संरचना child_process cp_diff = CHILD_PROCESS_INIT;
+			संरचना child_process cp_apply = CHILD_PROCESS_INIT;
 
 			cp_add.git_cmd = 1;
-			strvec_push(&cp_add.args, "add");
-			if (!include_untracked)
-				strvec_push(&cp_add.args, "-u");
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp_add.args, "--force");
-			strvec_push(&cp_add.args, "--");
+			strvec_धकेलो(&cp_add.args, "add");
+			यदि (!include_untracked)
+				strvec_धकेलो(&cp_add.args, "-u");
+			यदि (include_untracked == INCLUDE_ALL_FILES)
+				strvec_धकेलो(&cp_add.args, "--force");
+			strvec_धकेलो(&cp_add.args, "--");
 			add_pathspecs(&cp_add.args, ps);
-			if (run_command(&cp_add)) {
+			यदि (run_command(&cp_add)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
 
 			cp_diff.git_cmd = 1;
 			strvec_pushl(&cp_diff.args, "diff-index", "-p",
 				     "--no-color",
 				     "--cached", "--binary", "HEAD", "--",
-				     NULL);
+				     रिक्त);
 			add_pathspecs(&cp_diff.args, ps);
-			if (pipe_command(&cp_diff, NULL, 0, &out, 0, NULL, 0)) {
+			यदि (pipe_command(&cp_diff, रिक्त, 0, &out, 0, रिक्त, 0)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
 
 			cp_apply.git_cmd = 1;
 			strvec_pushl(&cp_apply.args, "apply", "--index",
-				     "-R", NULL);
-			if (pipe_command(&cp_apply, out.buf, out.len, NULL, 0,
-					 NULL, 0)) {
+				     "-R", रिक्त);
+			यदि (pipe_command(&cp_apply, out.buf, out.len, रिक्त, 0,
+					 रिक्त, 0)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
-		} else {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		} अन्यथा {
+			संरचना child_process cp = CHILD_PROCESS_INIT;
 			cp.git_cmd = 1;
 			/* BUG: this nukes untracked files in the way */
 			strvec_pushl(&cp.args, "reset", "--hard", "-q",
-				     "--no-recurse-submodules", NULL);
-			if (run_command(&cp)) {
+				     "--no-recurse-submodules", रिक्त);
+			यदि (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
 		}
 
@@ -1804,76 +1804,76 @@ static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int q
 		 * because running it on an empty tree will cause it to fail
 		 * due to the pathspec not matching anything.
 		 */
-		if (keep_index == 1 && !is_null_oid(&info.i_tree) &&
-		    !is_empty_tree_oid(&info.i_tree, the_repository->hash_algo)) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		यदि (keep_index == 1 && !is_null_oid(&info.i_वृक्ष) &&
+		    !is_empty_वृक्ष_oid(&info.i_वृक्ष, the_repository->hash_algo)) {
+			संरचना child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "checkout", "--no-overlay",
-				     oid_to_hex(&info.i_tree), "--", NULL);
-			if (!ps->nr)
-				strvec_push(&cp.args, ":/");
-			else
+				     oid_to_hex(&info.i_वृक्ष), "--", रिक्त);
+			यदि (!ps->nr)
+				strvec_धकेलो(&cp.args, ":/");
+			अन्यथा
 				add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			यदि (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
 		}
-		goto done;
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
+		गच्छ done;
+	} अन्यथा {
+		संरचना child_process cp = CHILD_PROCESS_INIT;
 
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "apply", "-R", NULL);
+		strvec_pushl(&cp.args, "apply", "-R", रिक्त);
 
-		if (pipe_command(&cp, patch.buf, patch.len, NULL, 0, NULL, 0)) {
-			if (!quiet)
+		यदि (pipe_command(&cp, patch.buf, patch.len, रिक्त, 0, रिक्त, 0)) {
+			यदि (!quiet)
 				fprintf_ln(stderr, _("Cannot remove "
 						     "worktree changes"));
 			ret = -1;
-			goto done;
+			गच्छ done;
 		}
 
-		if (keep_index < 1) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		यदि (keep_index < 1) {
+			संरचना child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "reset", "-q", "--refresh", "--",
-				     NULL);
+				     रिक्त);
 			add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			यदि (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				गच्छ done;
 			}
 		}
-		goto done;
+		गच्छ done;
 	}
 
 done:
 	strbuf_release(&patch);
 	strbuf_release(&out);
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
+	strbuf_release(&stash_संदेश_buf);
 	strbuf_release(&untracked_files);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int push_stash(int argc, const char **argv, const char *prefix,
-		      int push_assumed)
+स्थिर पूर्णाङ्क धकेलो_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		      पूर्णाङ्क धकेलो_assumed)
 {
-	int force_assume = 0;
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int pathspec_file_nul = 0;
-	const char *stash_msg = NULL;
-	char *pathspec_from_file = NULL;
-	struct pathspec ps;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	पूर्णाङ्क force_assume = 0;
+	पूर्णाङ्क keep_index = -1;
+	पूर्णाङ्क only_staged = 0;
+	पूर्णाङ्क patch_mode = 0;
+	पूर्णाङ्क include_untracked = 0;
+	पूर्णाङ्क quiet = 0;
+	पूर्णाङ्क pathspec_file_nul = 0;
+	ध्रुव वर्ण *stash_संदेश = रिक्त;
+	वर्ण *pathspec_from_file = रिक्त;
+	संरचना pathspec ps;
+	संरचना interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	संरचना option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1889,31 +1889,31 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 			 N_("include untracked files in stash")),
 		OPT_SET_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, N_("message"),
+		OPT_STRING('m', "message", &stash_संदेश, N_("message"),
 			   N_("stash message")),
 		OPT_PATHSPEC_FROM_FILE(&pathspec_from_file),
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
 		OPT_END()
 	};
-	int ret;
+	पूर्णाङ्क ret;
 
-	if (argc) {
-		int flags = PARSE_OPT_KEEP_DASHDASH;
+	यदि (argc) {
+		पूर्णाङ्क flags = PARSE_OPT_KEEP_DASHDASH;
 
-		if (push_assumed)
+		यदि (धकेलो_assumed)
 			flags |= PARSE_OPT_STOP_AT_NON_OPTION;
 
 		argc = parse_options(argc, argv, prefix, options,
-				     push_assumed ? git_stash_usage :
-				     git_stash_push_usage, flags);
+				     धकेलो_assumed ? git_stash_usage :
+				     git_stash_धकेलो_usage, flags);
 		force_assume |= patch_mode;
 	}
 
-	if (argc) {
-		if (!strcmp(argv[0], "--")) {
+	यदि (argc) {
+		यदि (!strcmp(argv[0], "--")) {
 			argc--;
 			argv++;
-		} else if (push_assumed && !force_assume) {
+		} अन्यथा यदि (धकेलो_assumed && !force_assume) {
 			die("subcommand wasn't specified; 'push' can't be assumed due to unexpected token '%s'",
 			    argv[0]);
 		}
@@ -1922,65 +1922,65 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 	parse_pathspec(&ps, 0, PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	यदि (pathspec_from_file) {
+		यदि (patch_mode)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (only_staged)
+		यदि (only_staged)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--staged");
 
-		if (ps.nr)
+		यदि (ps.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&ps, 0,
 				    PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} अन्यथा यदि (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	यदि (!patch_mode) {
+		यदि (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		यदि (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		यदि (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	if (interactive_opts.context < -1)
+	यदि (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	यदि (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index, patch_mode,
+	ret = do_धकेलो_stash(&ps, stash_संदेश, quiet, keep_index, patch_mode,
 			    &interactive_opts, include_untracked, only_staged);
 
 	clear_pathspec(&ps);
-	free(pathspec_from_file);
-	return ret;
+	मुक्त(pathspec_from_file);
+	प्रत्यागम ret;
 }
 
-static int push_stash_unassumed(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क धकेलो_stash_unassumed(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+				संरचना repository *repo UNUSED)
 {
-	return push_stash(argc, argv, prefix, 0);
+	प्रत्यागम धकेलो_stash(argc, argv, prefix, 0);
 }
 
-static int save_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+स्थिर पूर्णाङ्क save_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+		      संरचना repository *repo UNUSED)
 {
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int ret = 0;
-	const char *stash_msg = NULL;
-	struct pathspec ps;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	पूर्णाङ्क keep_index = -1;
+	पूर्णाङ्क only_staged = 0;
+	पूर्णाङ्क patch_mode = 0;
+	पूर्णाङ्क include_untracked = 0;
+	पूर्णाङ्क quiet = 0;
+	पूर्णाङ्क ret = 0;
+	ध्रुव वर्ण *stash_संदेश = रिक्त;
+	संरचना pathspec ps;
+	संरचना strbuf stash_संदेश_buf = STRBUF_INIT;
+	संरचना interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	संरचना option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1996,7 +1996,7 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			 N_("include untracked files in stash")),
 		OPT_SET_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_संदेश, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
@@ -2005,132 +2005,132 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_save_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc)
-		stash_msg = strbuf_join_argv(&stash_msg_buf, argc, argv, ' ');
+	यदि (argc)
+		stash_संदेश = strbuf_join_argv(&stash_संदेश_buf, argc, argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
+	memset(&ps, 0, परिमाण(ps));
 
-	if (interactive_opts.context < -1)
+	यदि (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	यदि (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	यदि (!patch_mode) {
+		यदि (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		यदि (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		यदि (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index,
+	ret = do_धकेलो_stash(&ps, stash_संदेश, quiet, keep_index,
 			    patch_mode, &interactive_opts, include_untracked,
 			    only_staged);
 
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_संदेश_buf);
+	प्रत्यागम ret;
 }
 
-static int write_commit_with_parents(struct repository *r,
-				     struct object_id *out,
-				     const struct object_id *oid,
-				     struct commit_list *parents)
+स्थिर पूर्णाङ्क write_commit_with_parents(संरचना repository *r,
+				     संरचना object_id *out,
+				     ध्रुव संरचना object_id *oid,
+				     संरचना commit_list *parents)
 {
 	size_t author_len, committer_len;
-	struct commit *this;
-	const char *orig_author, *orig_committer;
-	char *author = NULL, *committer = NULL;
-	const char *buffer;
+	संरचना commit *this;
+	ध्रुव वर्ण *orig_author, *orig_committer;
+	वर्ण *author = रिक्त, *committer = रिक्त;
+	ध्रुव वर्ण *buffer;
 	unsigned long bufsize;
-	const char *p;
-	struct strbuf msg = STRBUF_INIT;
-	int ret = 0;
-	struct ident_split id;
+	ध्रुव वर्ण *p;
+	संरचना strbuf संदेश = STRBUF_INIT;
+	पूर्णाङ्क ret = 0;
+	संरचना ident_split id;
 
 	this = lookup_commit_reference(r, oid);
 	buffer = repo_get_commit_buffer(r, this, &bufsize);
 	orig_author = find_commit_header(buffer, "author", &author_len);
 	orig_committer = find_commit_header(buffer, "committer", &committer_len);
 
-	if (!orig_author || !orig_committer) {
+	यदि (!orig_author || !orig_committer) {
 		ret = error(_("cannot parse commit %s"), oid_to_hex(oid));
-		goto out;
+		गच्छ out;
 	}
 
-	if (split_ident_line(&id, orig_author, author_len) < 0 ||
-	    split_ident_line(&id, orig_committer, committer_len) < 0) {
+	यदि (split_ident_पंक्ति(&id, orig_author, author_len) < 0 ||
+	    split_ident_पंक्ति(&id, orig_committer, committer_len) < 0) {
 		ret = error(_("invalid author or committer for %s"), oid_to_hex(oid));
-		goto out;
+		गच्छ out;
 	}
 
 	p = strstr(buffer, "\n\n");
-	strbuf_addstr(&msg, "git stash: ");
+	strbuf_addstr(&संदेश, "git stash: ");
 
-	if (p)
-		strbuf_add(&msg, p + 2, bufsize - (p + 2 - buffer));
-	strbuf_complete_line(&msg);
+	यदि (p)
+		strbuf_add(&संदेश, p + 2, bufsize - (p + 2 - buffer));
+	strbuf_complete_पंक्ति(&संदेश);
 
 	author = xmemdupz(orig_author, author_len);
 	committer = xmemdupz(orig_committer, committer_len);
 
-	if (commit_tree_extended(msg.buf, msg.len,
-				 r->hash_algo->empty_tree, parents,
+	यदि (commit_वृक्ष_extended(संदेश.buf, संदेश.len,
+				 r->hash_algo->empty_वृक्ष, parents,
 				 out, author, committer,
-				 NULL, NULL)) {
+				 रिक्त, रिक्त)) {
 		ret = error(_("could not write commit"));
-		goto out;
+		गच्छ out;
 	}
 out:
-	strbuf_release(&msg);
+	strbuf_release(&संदेश);
 	repo_unuse_commit_buffer(r, this, buffer);
-	free(author);
-	free(committer);
-	return ret;
+	मुक्त(author);
+	मुक्त(committer);
+	प्रत्यागम ret;
 }
 
-static int do_import_stash(struct repository *r, const char *rev)
+स्थिर पूर्णाङ्क do_import_stash(संरचना repository *r, ध्रुव वर्ण *rev)
 {
-	struct object_id chain;
-	int res = 0;
-	const char *buffer = NULL;
+	संरचना object_id chain;
+	पूर्णाङ्क res = 0;
+	ध्रुव वर्ण *buffer = रिक्त;
 	unsigned long bufsize;
-	struct commit *this = NULL;
-	struct commit_list *items = NULL, *cur;
-	char *msg = NULL;
+	संरचना commit *this = रिक्त;
+	संरचना commit_list *वस्तुएँ = रिक्त, *cur;
+	वर्ण *संदेश = रिक्त;
 
-	if (repo_get_oid(r, rev, &chain))
-		return error(_("not a valid revision: %s"), rev);
+	यदि (repo_get_oid(r, rev, &chain))
+		प्रत्यागम error(_("not a valid revision: %s"), rev);
 
 	this = lookup_commit_reference(r, &chain);
-	if (!this)
-		return error(_("not a commit: %s"), rev);
+	यदि (!this)
+		प्रत्यागम error(_("not a commit: %s"), rev);
 
 	/*
 	 * Walk the commit history, finding each stash entry, and load data into
 	 * the array.
 	 */
-	for (;;) {
-		const char *author, *committer;
+	प्रति (;;) {
+		ध्रुव वर्ण *author, *committer;
 		size_t author_len, committer_len;
-		const char *p;
-		const char *expected = "git stash <git@stash> 1000684800 +0000";
-		const char *prefix = "git stash: ";
-		struct commit *stash;
-		struct tree *tree = repo_get_commit_tree(r, this);
+		ध्रुव वर्ण *p;
+		ध्रुव वर्ण *expected = "git stash <git@stash> 1000684800 +0000";
+		ध्रुव वर्ण *prefix = "git stash: ";
+		संरचना commit *stash;
+		संरचना वृक्ष *वृक्ष = repo_get_commit_वृक्ष(r, this);
 
-		if (!tree ||
-		    !oideq(&tree->object.oid, r->hash_algo->empty_tree) ||
+		यदि (!वृक्ष ||
+		    !oideq(&वृक्ष->object.oid, r->hash_algo->empty_वृक्ष) ||
 		    (this->parents &&
 		     (!this->parents->next || this->parents->next->next))) {
 			res = error(_("%s is not a valid exported stash commit"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			गच्छ out;
 		}
 
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
 
-		if (!this->parents) {
+		यदि (!this->parents) {
 			/*
 			 * We don't have any parents.  Make sure this is our
 			 * root commit.
@@ -2138,52 +2138,52 @@ static int do_import_stash(struct repository *r, const char *rev)
 			author = find_commit_header(buffer, "author", &author_len);
 			committer = find_commit_header(buffer, "committer", &committer_len);
 
-			if (!author || !committer) {
+			यदि (!author || !committer) {
 				error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-				goto out;
+				गच्छ out;
 			}
 
-			if (author_len != strlen(expected) ||
+			यदि (author_len != strlen(expected) ||
 			    committer_len != strlen(expected) ||
 			    memcmp(author, expected, author_len) ||
 			    memcmp(committer, expected, committer_len)) {
 				res = error(_("found root commit %s with invalid data"), oid_to_hex(&this->object.oid));
-				goto out;
+				गच्छ out;
 			}
-			break;
+			भङ्ग;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		यदि (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-			goto out;
+			गच्छ out;
 		}
 
 		p += 2;
-		if (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
+		यदि (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
 		    memcmp(prefix, p, strlen(prefix))) {
 			res = error(_("found stash commit %s without expected prefix"), oid_to_hex(&this->object.oid));
-			goto out;
+			गच्छ out;
 		}
 
 		stash = this->parents->next->item;
 
-		if (repo_parse_commit(r, this->parents->item) ||
+		यदि (repo_parse_commit(r, this->parents->item) ||
 		    repo_parse_commit(r, stash)) {
 			res = error(_("cannot parse parents of commit: %s"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			गच्छ out;
 		}
 
-		if (check_stash_topology(r, stash)) {
+		यदि (check_stash_topology(r, stash)) {
 			res = error(_("%s does not look like a stash commit"),
 					oid_to_hex(&stash->object.oid));
-			goto out;
+			गच्छ out;
 		}
 
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
-		items = commit_list_insert(stash, &items);
+		buffer = रिक्त;
+		वस्तुएँ = commit_list_जोड़ो(stash, &वस्तुएँ);
 		this = this->parents->item;
 	}
 
@@ -2191,48 +2191,48 @@ static int do_import_stash(struct repository *r, const char *rev)
 	 * Now, walk each entry, adding it to the stash as a normal stash
 	 * commit.
 	 */
-	for (cur = items; cur; cur = cur->next) {
-		const char *p;
-		struct object_id *oid;
+	प्रति (cur = वस्तुएँ; cur; cur = cur->next) {
+		ध्रुव वर्ण *p;
+		संरचना object_id *oid;
 
 		this = cur->item;
 		oid = &this->object.oid;
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
-		if (!buffer) {
+		यदि (!buffer) {
 			res = error(_("cannot read commit buffer for %s"), oid_to_hex(oid));
-			goto out;
+			गच्छ out;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		यदि (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(oid));
-			goto out;
+			गच्छ out;
 		}
 
 		p += 2;
-		msg = xmemdupz(p, bufsize - (p - buffer));
+		संदेश = xmemdupz(p, bufsize - (p - buffer));
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
+		buffer = रिक्त;
 
-		if (do_store_stash(oid, msg, 1)) {
+		यदि (do_store_stash(oid, संदेश, 1)) {
 			res = error(_("cannot save the stash for %s"), oid_to_hex(oid));
-			goto out;
+			गच्छ out;
 		}
-		FREE_AND_NULL(msg);
+		FREE_AND_NULL(संदेश);
 	}
 out:
-	if (this && buffer)
+	यदि (this && buffer)
 		repo_unuse_commit_buffer(r, this, buffer);
-	commit_list_free(items);
-	free(msg);
+	commit_list_free(वस्तुएँ);
+	मुक्त(संदेश);
 
-	return res;
+	प्रत्यागम res;
 }
 
-static int import_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo)
+स्थिर पूर्णाङ्क import_stash(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *prefix,
+			संरचना repository *repo)
 {
-	struct option options[] = {
+	संरचना option options[] = {
 		OPT_END()
 	};
 
@@ -2240,51 +2240,51 @@ static int import_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_import_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc != 1)
-		usage_msg_opt("a revision is required", git_stash_import_usage, options);
+	यदि (argc != 1)
+		usage_संदेश_opt("a revision is required", git_stash_import_usage, options);
 
-	return do_import_stash(repo, argv[0]);
+	प्रत्यागम do_import_stash(repo, argv[0]);
 }
 
-struct stash_entry_data {
-	struct repository *r;
-	struct commit_list **items;
-	size_t count;
+संरचना stash_entry_data {
+	संरचना repository *r;
+	संरचना commit_list **वस्तुएँ;
+	size_t गिनती;
 };
 
-static int collect_stash_entries(const char *refname UNUSED,
-				 struct object_id *old_oid UNUSED,
-				 struct object_id *new_oid,
-				 const char *committer UNUSED,
+स्थिर पूर्णाङ्क collect_stash_entries(ध्रुव वर्ण *refname UNUSED,
+				 संरचना object_id *old_oid UNUSED,
+				 संरचना object_id *new_oid,
+				 ध्रुव वर्ण *committer UNUSED,
 				 timestamp_t timestamp UNUSED,
-				 int tz UNUSED, const char *msg UNUSED,
-				 void *cb_data)
+				 पूर्णाङ्क tz UNUSED, ध्रुव वर्ण *संदेश UNUSED,
+				 शून्य *cb_data)
 {
-	struct stash_entry_data *data = cb_data;
-	struct commit *stash;
+	संरचना stash_entry_data *data = cb_data;
+	संरचना commit *stash;
 
-	data->count++;
+	data->गिनती++;
 	stash = lookup_commit_reference(data->r, new_oid);
-	if (!stash || check_stash_topology(data->r, stash)) {
-		return error(_("%s does not look like a stash commit"),
+	यदि (!stash || check_stash_topology(data->r, stash)) {
+		प्रत्यागम error(_("%s does not look like a stash commit"),
 			     oid_to_hex(new_oid));
 	}
-	data->items = commit_list_append(stash, data->items);
-	return 0;
+	data->वस्तुएँ = commit_list_append(stash, data->वस्तुएँ);
+	प्रत्यागम 0;
 }
 
-static int do_export_stash(struct repository *r,
-			   const char *ref,
-			   int argc,
-			   const char **argv)
+स्थिर पूर्णाङ्क do_export_stash(संरचना repository *r,
+			   ध्रुव वर्ण *ref,
+			   पूर्णाङ्क argc,
+			   ध्रुव वर्ण **argv)
 {
-	struct object_id base;
-	struct commit *prev;
-	struct commit_list *items = NULL, **iter = &items, *cur;
-	int res = 0;
-	int i;
-	struct strbuf revision = STRBUF_INIT;
-	const char *author, *committer;
+	संरचना object_id base;
+	संरचना commit *prev;
+	संरचना commit_list *वस्तुएँ = रिक्त, **iter = &वस्तुएँ, *cur;
+	पूर्णाङ्क res = 0;
+	पूर्णाङ्क i;
+	संरचना strbuf revision = STRBUF_INIT;
+	ध्रुव वर्ण *author, *committer;
 
 	/*
 	 * This is an arbitrary, fixed date, specifically the one used by git
@@ -2297,49 +2297,49 @@ static int do_export_stash(struct repository *r,
 			      "2001-09-17T00:00:00Z", 0);
 
 	/* First, we create a single empty commit. */
-	if (commit_tree_extended("", 0, r->hash_algo->empty_tree, NULL,
-				 &base, author, committer, NULL, NULL))
-		return error(_("unable to write base commit"));
+	यदि (commit_वृक्ष_extended("", 0, r->hash_algo->empty_वृक्ष, रिक्त,
+				 &base, author, committer, रिक्त, रिक्त))
+		प्रत्यागम error(_("unable to write base commit"));
 
 	prev = lookup_commit_reference(r, &base);
 
-	if (argc) {
+	यदि (argc) {
 		/*
 		 * Find each specified stash, and load data into the array.
 		 */
-		for (i = 0; i < argc; i++) {
-			struct object_id oid;
-			struct commit *stash;
+		प्रति (i = 0; i < argc; i++) {
+			संरचना object_id oid;
+			संरचना commit *stash;
 
-			if (parse_stash_revision(&revision, argv[i], 1) ||
+			यदि (parse_stash_revision(&revision, argv[i], 1) ||
 			    repo_get_oid_with_flags(r, revision.buf, &oid,
 						    GET_OID_QUIETLY |
 						    GET_OID_GENTLY)) {
 				res = error(_("unable to find stash entry %s"), argv[i]);
-				goto out;
+				गच्छ out;
 			}
 
 			stash = lookup_commit_reference(r, &oid);
-			if (!stash || check_stash_topology(r, stash)) {
+			यदि (!stash || check_stash_topology(r, stash)) {
 				res = error(_("%s does not look like a stash commit"),
 						revision.buf);
-				goto out;
+				गच्छ out;
 			}
 			iter = commit_list_append(stash, iter);
 		}
-	} else {
+	} अन्यथा {
 		/*
 		 * Walk the reflog, finding each stash entry, and load data into the
 		 * array.
 		 */
-		struct stash_entry_data cb_data = {
-			.r = r, .items = iter,
+		संरचना stash_entry_data cb_data = {
+			.r = r, .वस्तुएँ = iter,
 		};
-		if (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
+		यदि (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
 						     "refs/stash",
 						     collect_stash_entries,
-						     &cb_data) && cb_data.count)
-			goto out;
+						     &cb_data) && cb_data.गिनती)
+			गच्छ out;
 	}
 
 	/*
@@ -2347,47 +2347,47 @@ static int do_export_stash(struct repository *r,
 	 * but where their first parents form a chain to our original empty
 	 * base commit.
 	 */
-	items = commit_list_reverse(items);
-	for (cur = items; cur; cur = cur->next) {
-		struct commit_list *parents = NULL;
-		struct commit_list **next = &parents;
-		struct object_id out;
-		struct commit *stash = cur->item;
+	वस्तुएँ = commit_list_reverse(वस्तुएँ);
+	प्रति (cur = वस्तुएँ; cur; cur = cur->next) {
+		संरचना commit_list *parents = रिक्त;
+		संरचना commit_list **next = &parents;
+		संरचना object_id out;
+		संरचना commit *stash = cur->item;
 
 		next = commit_list_append(prev, next);
 		next = commit_list_append(stash, next);
 		res = write_commit_with_parents(r, &out, &stash->object.oid, parents);
 		commit_list_free(parents);
-		if (res)
-			goto out;
+		यदि (res)
+			गच्छ out;
 		prev = lookup_commit_reference(r, &out);
 	}
-	if (ref)
-		refs_update_ref(get_main_ref_store(r), NULL, ref,
-				&prev->object.oid, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
-	else
+	यदि (ref)
+		refs_update_ref(get_main_ref_store(r), रिक्त, ref,
+				&prev->object.oid, रिक्त, 0, UPDATE_REFS_DIE_ON_ERR);
+	अन्यथा
 		puts(oid_to_hex(&prev->object.oid));
 out:
 	strbuf_release(&revision);
-	commit_list_free(items);
+	commit_list_free(वस्तुएँ);
 
-	return res;
+	प्रत्यागम res;
 }
 
-enum export_action {
+गणना export_action {
 	ACTION_NONE,
 	ACTION_PRINT,
 	ACTION_TO_REF,
 };
 
-static int export_stash(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+स्थिर पूर्णाङ्क export_stash(पूर्णाङ्क argc,
+			ध्रुव वर्ण **argv,
+			ध्रुव वर्ण *prefix,
+			संरचना repository *repo)
 {
-	const char *ref = NULL;
-	enum export_action action = ACTION_NONE;
-	struct option options[] = {
+	ध्रुव वर्ण *ref = रिक्त;
+	गणना export_action action = ACTION_NONE;
+	संरचना option options[] = {
 		OPT_CMDMODE(0, "print", &action,
 			    N_("print the object ID instead of writing it to a ref"),
 			    ACTION_PRINT),
@@ -2400,44 +2400,44 @@ static int export_stash(int argc,
 			     git_stash_export_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (ref && action == ACTION_NONE)
+	यदि (ref && action == ACTION_NONE)
 		action = ACTION_TO_REF;
 
-	if (action == ACTION_NONE || (ref && action == ACTION_PRINT))
-		return error(_("exactly one of --print and --to-ref is required"));
+	यदि (action == ACTION_NONE || (ref && action == ACTION_PRINT))
+		प्रत्यागम error(_("exactly one of --print and --to-ref is required"));
 
-	return do_export_stash(repo, ref, argc, argv);
+	प्रत्यागम do_export_stash(repo, ref, argc, argv);
 }
 
-int cmd_stash(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+पूर्णाङ्क cmd_stash(पूर्णाङ्क argc,
+	      ध्रुव वर्ण **argv,
+	      ध्रुव वर्ण *prefix,
+	      संरचना repository *repo)
 {
 	pid_t pid = getpid();
-	const char *index_file;
-	struct strvec args = STRVEC_INIT;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	ध्रुव वर्ण *index_file;
+	संरचना strvec args = STRVEC_INIT;
+	parse_opt_subcommand_fn *fn = रिक्त;
+	संरचना option options[] = {
 		OPT_SUBCOMMAND("apply", &fn, apply_stash),
 		OPT_SUBCOMMAND("clear", &fn, clear_stash),
 		OPT_SUBCOMMAND("drop", &fn, drop_stash),
-		OPT_SUBCOMMAND("pop", &fn, pop_stash),
+		OPT_SUBCOMMAND("pop", &fn, निकालो_stash),
 		OPT_SUBCOMMAND("branch", &fn, branch_stash),
 		OPT_SUBCOMMAND("list", &fn, list_stash),
 		OPT_SUBCOMMAND("show", &fn, show_stash),
 		OPT_SUBCOMMAND("store", &fn, store_stash),
 		OPT_SUBCOMMAND("create", &fn, create_stash),
-		OPT_SUBCOMMAND("push", &fn, push_stash_unassumed),
+		OPT_SUBCOMMAND("push", &fn, धकेलो_stash_unassumed),
 		OPT_SUBCOMMAND("export", &fn, export_stash),
 		OPT_SUBCOMMAND("import", &fn, import_stash),
-		OPT_SUBCOMMAND_F("save", &fn, save_stash, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("save", &fn, save_stash, रिक्त, PARSE_OPT_NOCOMPLETE),
 		OPT_END()
 	};
-	const char **args_copy;
-	int ret;
+	ध्रुव वर्ण **args_copy;
+	पूर्णाङ्क ret;
 
-	repo_config(the_repository, git_stash_config, NULL);
+	repo_config(the_repository, git_stash_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
@@ -2451,7 +2451,7 @@ int cmd_stash(int argc,
 	strbuf_addf(&stash_index_path, "%s.stash.%" PRIuMAX, index_file,
 		    (uintmax_t)pid);
 
-	if (fn) {
+	यदि (fn) {
 		ret = fn(argc, argv, prefix, repo);
 
 		/*
@@ -2461,15 +2461,15 @@ int cmd_stash(int argc,
 		 * Map failures to 128, the status die() uses, so that
 		 * exit status 1 unambiguously indicates conflicts.
 		 */
-		if (ret < 0)
-			return 128;
-		return ret;
-	} else if (!argc) {
-		return !!push_stash_unassumed(0, NULL, prefix, repo);
+		यदि (ret < 0)
+			प्रत्यागम 128;
+		प्रत्यागम ret;
+	} अन्यथा यदि (!argc) {
+		प्रत्यागम !!धकेलो_stash_unassumed(0, रिक्त, prefix, repo);
 	}
 
 	/* Assume 'stash push' */
-	strvec_push(&args, "push");
+	strvec_धकेलो(&args, "push");
 	strvec_pushv(&args, argv);
 
 	/*
@@ -2478,9 +2478,9 @@ int cmd_stash(int argc,
 	 */
 	DUP_ARRAY(args_copy, args.v, args.nr);
 
-	ret = !!push_stash(args.nr, args_copy, prefix, 1);
+	ret = !!धकेलो_stash(args.nr, args_copy, prefix, 1);
 
 	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	मुक्त(args_copy);
+	प्रत्यागम ret;
 }
