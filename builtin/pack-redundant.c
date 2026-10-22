@@ -18,83 +18,83 @@
 
 #define BLKSIZE 512
 
-static const char pack_redundant_usage[] =
+static const var_na pack_redundant_usage[] =
 "git pack-redundant [--verbose] [--alt-odb] (--all | <pack-filename>...)";
 
-static int load_all_packs, verbose, alt_odb;
+static puur_naa_nka load_all_packs, verbose, alt_odb;
 
-struct llist_item {
-	struct llist_item *next;
-	struct object_id oid;
+sa_nracanaa llist_item {
+	sa_nracanaa llist_item *next;
+	sa_nracanaa object_id oid;
 };
-static struct llist {
-	struct llist_item *front;
-	struct llist_item *back;
+static sa_nracanaa llist {
+	sa_nracanaa llist_item *front;
+	sa_nracanaa llist_item *back;
 	size_t size;
 } *all_objects; /* all objects which must be present in local packfiles */
 
-static struct pack_list {
-	struct pack_list *next;
-	struct packed_git *pack;
-	struct llist *unique_objects;
-	struct llist *remaining_objects;
+static sa_nracanaa pack_list {
+	sa_nracanaa pack_list *next;
+	sa_nracanaa packed_git *pack;
+	sa_nracanaa llist *unique_objects;
+	sa_nracanaa llist *remaining_objects;
 	size_t all_objects_size;
 } *local_packs = NULL, *altodb_packs = NULL;
 
-static struct llist_item *free_nodes;
+static sa_nracanaa llist_item *free_nodes;
 
-static inline void llist_item_put(struct llist_item *item)
+static anta_hstha void llist_item_put(sa_nracanaa llist_item *item)
 {
 	item->next = free_nodes;
 	free_nodes = item;
 }
 
-static inline struct llist_item *llist_item_get(void)
+static anta_hstha sa_nracanaa llist_item *llist_item_get(void)
 {
-	struct llist_item *new_item;
-	if ( free_nodes ) {
+	sa_nracanaa llist_item *new_item;
+	ᮚᮦᮔ᮪ ( free_nodes ) {
 		new_item = free_nodes;
 		free_nodes = free_nodes->next;
-	} else {
-		int i = 1;
+	} ᮜᮤᮚ {
+		puur_naa_nka i = 1;
 		ALLOC_ARRAY(new_item, BLKSIZE);
 		for (; i < BLKSIZE; i++)
 			llist_item_put(&new_item[i]);
 	}
-	return new_item;
+	ᮝᮜᮤ new_item;
 }
 
-static inline void llist_init(struct llist **list)
+static anta_hstha void llist_init(sa_nracanaa llist **list)
 {
-	*list = xmalloc(sizeof(struct llist));
+	*list = xmalloc(parimaa_na(sa_nracanaa llist));
 	(*list)->front = (*list)->back = NULL;
 	(*list)->size = 0;
 }
 
-static void llist_free(struct llist *list)
+static void llist_free(sa_nracanaa llist *list)
 {
-	for (struct llist_item *i = list->front, *next; i; i = next) {
+	for (sa_nracanaa llist_item *i = list->front, *next; i; i = next) {
 		next = i->next;
 		llist_item_put(i);
 	}
 	free(list);
 }
 
-static struct llist * llist_copy(struct llist *list)
+static sa_nracanaa llist * llist_copy(sa_nracanaa llist *list)
 {
-	struct llist *ret;
-	struct llist_item *new_item, *old_item, *prev;
+	sa_nracanaa llist *ret;
+	sa_nracanaa llist_item *new_item, *old_item, *prev;
 
 	llist_init(&ret);
 
-	if ((ret->size = list->size) == 0)
-		return ret;
+	ᮚᮦᮔ᮪ ((ret->size = list->size) == 0)
+		ᮝᮜᮤ ret;
 
 	new_item = ret->front = llist_item_get();
 	new_item->oid = list->front->oid;
 
 	old_item = list->front->next;
-	while (old_item) {
+	ᮞᮨᮓᮨᮜ (old_item) {
 		prev = new_item;
 		new_item = llist_item_get();
 		prev->next = new_item;
@@ -104,168 +104,168 @@ static struct llist * llist_copy(struct llist *list)
 	new_item->next = NULL;
 	ret->back = new_item;
 
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
-					      struct llist_item *after,
-					      const unsigned char *oid)
+static anta_hstha sa_nracanaa llist_item *llist_insert(sa_nracanaa llist *list,
+					      sa_nracanaa llist_item *after,
+					      const unsigned var_na *oid)
 {
-	struct llist_item *new_item = llist_item_get();
+	sa_nracanaa llist_item *new_item = llist_item_get();
 	oidread(&new_item->oid, oid, the_repository->hash_algo);
 	new_item->next = NULL;
 
-	if (after) {
+	ᮚᮦᮔ᮪ (after) {
 		new_item->next = after->next;
 		after->next = new_item;
-		if (after == list->back)
+		ᮚᮦᮔ᮪ (after == list->back)
 			list->back = new_item;
-	} else {/* insert in front */
-		if (list->size == 0)
+	} ᮜᮤᮚ {/* insert in front */
+		ᮚᮦᮔ᮪ (list->size == 0)
 			list->back = new_item;
-		else
+		ᮜᮤᮚ
 			new_item->next = list->front;
 		list->front = new_item;
 	}
 	list->size++;
-	return new_item;
+	ᮝᮜᮤ new_item;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
-						   const unsigned char *oid)
+static anta_hstha sa_nracanaa llist_item *llist_insert_back(sa_nracanaa llist *list,
+						   const unsigned var_na *oid)
 {
-	return llist_insert(list, list->back, oid);
+	ᮝᮜᮤ llist_insert(list, list->back, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
-			const struct object_id *oid, struct llist_item *hint)
+static anta_hstha sa_nracanaa llist_item *llist_insert_sorted_unique(sa_nracanaa llist *list,
+			const sa_nracanaa object_id *oid, sa_nracanaa llist_item *hint)
 {
-	struct llist_item *prev = NULL, *l;
+	sa_nracanaa llist_item *prev = NULL, *l;
 
 	l = (hint == NULL) ? list->front : hint;
-	while (l) {
-		int cmp = oidcmp(&l->oid, oid);
-		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+	ᮞᮨᮓᮨᮜ (l) {
+		puur_naa_nka cmp = oidcmp(&l->oid, oid);
+		ᮚᮦᮔ᮪ (cmp > 0) { /* we insert before this entry */
+			ᮝᮜᮤ llist_insert(list, prev, oid->hash);
 		}
-		if (!cmp) { /* already exists */
-			return l;
+		ᮚᮦᮔ᮪ (!cmp) { /* already exists */
+			ᮝᮜᮤ l;
 		}
 		prev = l;
 		l = l->next;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	ᮝᮜᮤ llist_insert_back(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
-static inline struct llist_item * llist_sorted_remove(struct llist *list, const unsigned char *oid, struct llist_item *hint)
+static anta_hstha sa_nracanaa llist_item * llist_sorted_remove(sa_nracanaa llist *list, const unsigned var_na *oid, sa_nracanaa llist_item *hint)
 {
-	struct llist_item *prev, *l;
+	sa_nracanaa llist_item *prev, *l;
 
 redo_from_start:
 	l = (hint == NULL) ? list->front : hint;
 	prev = NULL;
-	while (l) {
-		const int cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
-		if (cmp > 0) /* not in list, since sorted */
-			return prev;
-		if (!cmp) { /* found */
-			if (!prev) {
-				if (hint != NULL && hint != list->front) {
+	ᮞᮨᮓᮨᮜ (l) {
+		const puur_naa_nka cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
+		ᮚᮦᮔ᮪ (cmp > 0) /* not in list, since sorted */
+			ᮝᮜᮤ prev;
+		ᮚᮦᮔ᮪ (!cmp) { /* found */
+			ᮚᮦᮔ᮪ (!prev) {
+				ᮚᮦᮔ᮪ (hint != NULL && hint != list->front) {
 					/* we don't know the previous element */
 					hint = NULL;
 					goto redo_from_start;
 				}
 				list->front = l->next;
-			} else
+			} ᮜᮤᮚ
 				prev->next = l->next;
-			if (l == list->back)
+			ᮚᮦᮔ᮪ (l == list->back)
 				list->back = prev;
 			llist_item_put(l);
 			list->size--;
-			return prev;
+			ᮝᮜᮤ prev;
 		}
 		prev = l;
 		l = l->next;
 	}
-	return prev;
+	ᮝᮜᮤ prev;
 }
 
 /* computes A\B */
-static void llist_sorted_difference_inplace(struct llist *A,
-				     struct llist *B)
+static void llist_sorted_difference_inplace(sa_nracanaa llist *A,
+				     sa_nracanaa llist *B)
 {
-	struct llist_item *hint, *b;
+	sa_nracanaa llist_item *hint, *b;
 
 	hint = NULL;
 	b = B->front;
 
-	while (b) {
+	ᮞᮨᮓᮨᮜ (b) {
 		hint = llist_sorted_remove(A, b->oid.hash, hint);
 		b = b->next;
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
-					   struct pack_list *entry)
+static anta_hstha sa_nracanaa pack_list * pack_list_insert(sa_nracanaa pack_list **pl,
+					   sa_nracanaa pack_list *entry)
 {
-	struct pack_list *p = xmalloc(sizeof(struct pack_list));
-	memcpy(p, entry, sizeof(struct pack_list));
+	sa_nracanaa pack_list *p = xmalloc(parimaa_na(sa_nracanaa pack_list));
+	memcpy(p, entry, parimaa_na(sa_nracanaa pack_list));
 	p->next = *pl;
 	*pl = p;
-	return p;
+	ᮝᮜᮤ p;
 }
 
-static void pack_list_free(struct pack_list *pl)
+static void pack_list_free(sa_nracanaa pack_list *pl)
 {
-	for (struct pack_list *next; pl; pl = next) {
+	for (sa_nracanaa pack_list *next; pl; pl = next) {
 		next = pl->next;
 		free(pl);
 	}
 }
 
-static inline size_t pack_list_size(struct pack_list *pl)
+static anta_hstha size_t pack_list_size(sa_nracanaa pack_list *pl)
 {
 	size_t ret = 0;
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		ret++;
 		pl = pl->next;
 	}
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
-static struct pack_list * pack_list_difference(const struct pack_list *A,
-					       const struct pack_list *B)
+static sa_nracanaa pack_list * pack_list_difference(const sa_nracanaa pack_list *A,
+					       const sa_nracanaa pack_list *B)
 {
-	struct pack_list *ret;
-	const struct pack_list *pl;
+	sa_nracanaa pack_list *ret;
+	const sa_nracanaa pack_list *pl;
 
-	if (!A)
-		return NULL;
+	ᮚᮦᮔ᮪ (!A)
+		ᮝᮜᮤ NULL;
 
 	pl = B;
-	while (pl != NULL) {
-		if (A->pack == pl->pack)
-			return pack_list_difference(A->next, B);
+	ᮞᮨᮓᮨᮜ (pl != NULL) {
+		ᮚᮦᮔ᮪ (A->pack == pl->pack)
+			ᮝᮜᮤ pack_list_difference(A->next, B);
 		pl = pl->next;
 	}
-	ret = xmalloc(sizeof(struct pack_list));
-	memcpy(ret, A, sizeof(struct pack_list));
+	ret = xmalloc(parimaa_na(sa_nracanaa pack_list));
+	memcpy(ret, A, parimaa_na(sa_nracanaa pack_list));
 	ret->next = pack_list_difference(A->next, B);
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
-static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
+static void cmp_two_packs(sa_nracanaa pack_list *p1, sa_nracanaa pack_list *p2)
 {
 	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	struct llist_item *p1_hint = NULL, *p2_hint = NULL;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	const unsigned var_na *p1_base, *p2_base;
+	sa_nracanaa llist_item *p1_hint = NULL, *p2_hint = NULL;
+	const unsigned puur_naa_nka hashsz = the_hash_algo->rawsz;
 
-	if (!p1->unique_objects)
+	ᮚᮦᮔ᮪ (!p1->unique_objects)
 		p1->unique_objects = llist_copy(p1->remaining_objects);
-	if (!p2->unique_objects)
+	ᮚᮦᮔ᮪ (!p2->unique_objects)
 		p2->unique_objects = llist_copy(p2->remaining_objects);
 
 	p1_base = p1->pack->index_data;
@@ -275,13 +275,13 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
+	ᮞᮨᮓᮨᮜ (p1_off < p1->pack->num_objects * p1_step &&
 	       p2_off < p2->pack->num_objects * p2_step)
 	{
-		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		const puur_naa_nka cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 					the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		ᮚᮦᮔ᮪ (cmp == 0) {
 			p1_hint = llist_sorted_remove(p1->unique_objects,
 					p1_base + p1_off,
 					p1_hint);
@@ -292,20 +292,20 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 			p2_off += p2_step;
 			continue;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		ᮚᮦᮔ᮪ (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} ᮜᮤᮚ { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
 }
 
-static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
+static size_t sizeof_union(sa_nracanaa packed_git *p1, sa_nracanaa packed_git *p2)
 {
 	size_t ret = 0;
 	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	const unsigned var_na *p1_base, *p2_base;
+	const unsigned puur_naa_nka hashsz = the_hash_algo->rawsz;
 
 	p1_base = p1->index_data;
 	p2_base = p2->index_data;
@@ -314,86 +314,86 @@ static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
 	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
+	ᮞᮨᮓᮨᮜ (p1_off < p1->num_objects * p1_step &&
 	       p2_off < p2->num_objects * p2_step)
 	{
-		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		puur_naa_nka cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 				  the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		ᮚᮦᮔ᮪ (cmp == 0) {
 			ret++;
 			p1_off += p1_step;
 			p2_off += p2_step;
 			continue;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		ᮚᮦᮔ᮪ (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} ᮜᮤᮚ { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
 /* another O(n^2) function ... */
-static size_t get_pack_redundancy(struct pack_list *pl)
+static size_t get_pack_redundancy(sa_nracanaa pack_list *pl)
 {
-	struct pack_list *subset;
+	sa_nracanaa pack_list *subset;
 	size_t ret = 0;
 
-	if (!pl)
-		return 0;
+	ᮚᮦᮔ᮪ (!pl)
+		ᮝᮜᮤ 0;
 
-	while ((subset = pl->next)) {
-		while (subset) {
+	ᮞᮨᮓᮨᮜ ((subset = pl->next)) {
+		ᮞᮨᮓᮨᮜ (subset) {
 			ret += sizeof_union(pl->pack, subset->pack);
 			subset = subset->next;
 		}
 		pl = pl->next;
 	}
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
-static inline off_t pack_set_bytecount(struct pack_list *pl)
+static anta_hstha off_t pack_set_bytecount(sa_nracanaa pack_list *pl)
 {
 	off_t ret = 0;
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		ret += pl->pack->pack_size;
 		ret += pl->pack->index_size;
 		pl = pl->next;
 	}
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
-static int cmp_remaining_objects(const void *a, const void *b)
+static puur_naa_nka cmp_remaining_objects(const void *a, const void *b)
 {
-	struct pack_list *pl_a = *((struct pack_list **)a);
-	struct pack_list *pl_b = *((struct pack_list **)b);
+	sa_nracanaa pack_list *pl_a = *((sa_nracanaa pack_list **)a);
+	sa_nracanaa pack_list *pl_b = *((sa_nracanaa pack_list **)b);
 
-	if (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
+	ᮚᮦᮔ᮪ (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
 		/* have the same remaining_objects, big pack first */
-		if (pl_a->all_objects_size == pl_b->all_objects_size)
-			return 0;
-		else if (pl_a->all_objects_size < pl_b->all_objects_size)
-			return 1;
-		else
-			return -1;
-	} else if (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
+		ᮚᮦᮔ᮪ (pl_a->all_objects_size == pl_b->all_objects_size)
+			ᮝᮜᮤ 0;
+		ᮜᮤᮚ ᮚᮦᮔ᮪ (pl_a->all_objects_size < pl_b->all_objects_size)
+			ᮝᮜᮤ 1;
+		ᮜᮤᮚ
+			ᮝᮜᮤ -1;
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
 		/* sort by remaining objects, more objects first */
-		return 1;
-	} else {
-		return -1;
+		ᮝᮜᮤ 1;
+	} ᮜᮤᮚ {
+		ᮝᮜᮤ -1;
 	}
 }
 
 /* Sort pack_list, greater size of remaining_objects first */
-static void sort_pack_list(struct pack_list **pl)
+static void sort_pack_list(sa_nracanaa pack_list **pl)
 {
-	struct pack_list **ary, *p;
+	sa_nracanaa pack_list **ary, *p;
 	size_t n = pack_list_size(*pl);
 
-	if (n < 2)
-		return;
+	ᮚᮦᮔ᮪ (n < 2)
+		ᮝᮜᮤ;
 
 	/* prepare an array of packed_list for easier sorting */
 	CALLOC_ARRAY(ary, n);
@@ -412,23 +412,23 @@ static void sort_pack_list(struct pack_list **pl)
 }
 
 
-static void minimize(struct pack_list **min)
+static void minimize(sa_nracanaa pack_list **min)
 {
-	struct pack_list *pl, *unique = NULL, *non_unique = NULL;
-	struct llist *missing, *unique_pack_objects;
+	sa_nracanaa pack_list *pl, *unique = NULL, *non_unique = NULL;
+	sa_nracanaa llist *missing, *unique_pack_objects;
 
 	pl = local_packs;
-	while (pl) {
-		if (pl->unique_objects->size)
+	ᮞᮨᮓᮨᮜ (pl) {
+		ᮚᮦᮔ᮪ (pl->unique_objects->size)
 			pack_list_insert(&unique, pl);
-		else
+		ᮜᮤᮚ
 			pack_list_insert(&non_unique, pl);
 		pl = pl->next;
 	}
 	/* find out which objects are missing from the set of unique packs */
 	missing = llist_copy(all_objects);
 	pl = unique;
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		llist_sorted_difference_inplace(missing, pl->remaining_objects);
 		pl = pl->next;
 	}
@@ -436,10 +436,10 @@ static void minimize(struct pack_list **min)
 	*min = unique;
 
 	/* return if there are no objects missing from the unique set */
-	if (missing->size == 0) {
+	ᮚᮦᮔ᮪ (missing->size == 0) {
 		llist_free(missing);
 		pack_list_free(non_unique);
-		return;
+		ᮝᮜᮤ;
 	}
 
 	unique_pack_objects = llist_copy(all_objects);
@@ -447,18 +447,18 @@ static void minimize(struct pack_list **min)
 
 	/* remove unique pack objects from the non_unique packs */
 	pl = non_unique;
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, unique_pack_objects);
 		pl = pl->next;
 	}
 
-	while (non_unique) {
-		struct pack_list *next;
+	ᮞᮨᮓᮨᮜ (non_unique) {
+		sa_nracanaa pack_list *next;
 
 		/* sort the non_unique packs, greater size of remaining_objects first */
 		sort_pack_list(&non_unique);
-		if (non_unique->remaining_objects->size == 0)
-			break;
+		ᮚᮦᮔ᮪ (non_unique->remaining_objects->size == 0)
+			bha_nga;
 
 		pack_list_insert(min, non_unique);
 
@@ -477,15 +477,15 @@ static void minimize(struct pack_list **min)
 
 static void load_all_objects(void)
 {
-	struct pack_list *pl = local_packs;
-	struct llist_item *hint, *l;
+	sa_nracanaa pack_list *pl = local_packs;
+	sa_nracanaa llist_item *hint, *l;
 
 	llist_init(&all_objects);
 
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		hint = NULL;
 		l = pl->remaining_objects->front;
-		while (l) {
+		ᮞᮨᮓᮨᮜ (l) {
 			hint = llist_insert_sorted_unique(all_objects,
 							  &l->oid, hint);
 			l = l->next;
@@ -494,7 +494,7 @@ static void load_all_objects(void)
 	}
 	/* remove objects present in remote packs */
 	pl = altodb_packs;
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		llist_sorted_difference_inplace(all_objects, pl->remaining_objects);
 		pl = pl->next;
 	}
@@ -503,16 +503,16 @@ static void load_all_objects(void)
 /* this scales like O(n^2) */
 static void cmp_local_packs(void)
 {
-	struct pack_list *subset, *pl = local_packs;
+	sa_nracanaa pack_list *subset, *pl = local_packs;
 
 	/* only one packfile */
-	if (!pl->next) {
+	ᮚᮦᮔ᮪ (!pl->next) {
 		llist_init(&pl->unique_objects);
-		return;
+		ᮝᮜᮤ;
 	}
 
-	while ((subset = pl)) {
-		while ((subset = subset->next))
+	ᮞᮨᮓᮨᮜ ((subset = pl)) {
+		ᮞᮨᮓᮨᮜ ((subset = subset->next))
 			cmp_two_packs(pl, subset);
 		pl = pl->next;
 	}
@@ -520,12 +520,12 @@ static void cmp_local_packs(void)
 
 static void scan_alt_odb_packs(void)
 {
-	struct pack_list *local, *alt;
+	sa_nracanaa pack_list *local, *alt;
 
 	alt = altodb_packs;
-	while (alt) {
+	ᮞᮨᮓᮨᮜ (alt) {
 		local = local_packs;
-		while (local) {
+		ᮞᮨᮓᮨᮜ (local) {
 			llist_sorted_difference_inplace(local->remaining_objects,
 							alt->remaining_objects);
 			local = local->next;
@@ -534,125 +534,125 @@ static void scan_alt_odb_packs(void)
 	}
 }
 
-static struct pack_list * add_pack(struct packed_git *p)
+static sa_nracanaa pack_list * add_pack(sa_nracanaa packed_git *p)
 {
-	struct pack_list l;
+	sa_nracanaa pack_list l;
 	size_t off = 0, step;
-	const unsigned char *base;
+	const unsigned var_na *base;
 
-	if (!p->pack_local && !(alt_odb || verbose))
-		return NULL;
+	ᮚᮦᮔ᮪ (!p->pack_local && !(alt_odb || verbose))
+		ᮝᮜᮤ NULL;
 
 	l.pack = p;
 	llist_init(&l.remaining_objects);
 
-	if (open_pack_index(p)) {
+	ᮚᮦᮔ᮪ (open_pack_index(p)) {
 		llist_free(l.remaining_objects);
-		return NULL;
+		ᮝᮜᮤ NULL;
 	}
 
 	base = p->index_data;
 	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
 	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
+	ᮞᮨᮓᮨᮜ (off < p->num_objects * step) {
 		llist_insert_back(l.remaining_objects, base + off);
 		off += step;
 	}
 	l.all_objects_size = l.remaining_objects->size;
 	l.unique_objects = NULL;
-	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
-	else
-		return pack_list_insert(&altodb_packs, &l);
+	ᮚᮦᮔ᮪ (p->pack_local)
+		ᮝᮜᮤ pack_list_insert(&local_packs, &l);
+	ᮜᮤᮚ
+		ᮝᮜᮤ pack_list_insert(&altodb_packs, &l);
 }
 
-static struct pack_list * add_pack_file(const char *filename)
+static sa_nracanaa pack_list * add_pack_file(const var_na *filename)
 {
-	struct packed_git *p;
+	sa_nracanaa packed_git *p;
 
-	if (strlen(filename) < 40)
+	ᮚᮦᮔ᮪ (strlen(filename) < 40)
 		die("Bad pack filename: %s", filename);
 
 	repo_for_each_pack(the_repository, p)
-		if (strstr(p->pack_name, filename))
-			return add_pack(p);
+		ᮚᮦᮔ᮪ (strstr(p->pack_name, filename))
+			ᮝᮜᮤ add_pack(p);
 	die("Filename %s not found in packed_git", filename);
 }
 
 static void load_all(void)
 {
-	struct packed_git *p;
+	sa_nracanaa packed_git *p;
 
 	repo_for_each_pack(the_repository, p)
 		add_pack(p);
 }
 
-int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED) {
-	int i; int i_still_use_this = 0; struct pack_list *min = NULL, *red, *pl;
-	struct llist *ignore;
-	struct strbuf idx_name = STRBUF_INIT;
-	char buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
+puur_naa_nka cmd_pack_redundant(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED, sa_nracanaa repository *repo UNUSED) {
+	puur_naa_nka i; puur_naa_nka i_still_use_this = 0; sa_nracanaa pack_list *min = NULL, *red, *pl;
+	sa_nracanaa llist *ignore;
+	sa_nracanaa strbuf idx_name = STRBUF_INIT;
+	var_na buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
 
 	show_usage_if_asked(argc, argv, pack_redundant_usage);
 
 	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--")) {
+		const var_na *arg = argv[i];
+		ᮚᮦᮔ᮪ (!strcmp(arg, "--")) {
 			i++;
-			break;
+			bha_nga;
 		}
-		if (!strcmp(arg, "--all")) {
+		ᮚᮦᮔ᮪ (!strcmp(arg, "--all")) {
 			load_all_packs = 1;
 			continue;
 		}
-		if (!strcmp(arg, "--verbose")) {
+		ᮚᮦᮔ᮪ (!strcmp(arg, "--verbose")) {
 			verbose = 1;
 			continue;
 		}
-		if (!strcmp(arg, "--alt-odb")) {
+		ᮚᮦᮔ᮪ (!strcmp(arg, "--alt-odb")) {
 			alt_odb = 1;
 			continue;
 		}
-		if (!strcmp(arg, "--i-still-use-this")) {
+		ᮚᮦᮔ᮪ (!strcmp(arg, "--i-still-use-this")) {
 			i_still_use_this = 1;
 			continue;
 		}
-		if (*arg == '-')
+		ᮚᮦᮔ᮪ (*arg == '-')
 			usage(pack_redundant_usage);
-		else
-			break;
+		ᮜᮤᮚ
+			bha_nga;
 	}
 
-	if (!i_still_use_this)
+	ᮚᮦᮔ᮪ (!i_still_use_this)
 		you_still_use_that("git pack-redundant", NULL);
 
-	if (load_all_packs)
+	ᮚᮦᮔ᮪ (load_all_packs)
 		load_all();
-	else
-		while (*(argv + i) != NULL)
+	ᮜᮤᮚ
+		ᮞᮨᮓᮨᮜ (*(argv + i) != NULL)
 			add_pack_file(*(argv + i++));
 
-	if (!local_packs)
+	ᮚᮦᮔ᮪ (!local_packs)
 		die("Zero packs found!");
 
 	load_all_objects();
 
-	if (alt_odb)
+	ᮚᮦᮔ᮪ (alt_odb)
 		scan_alt_odb_packs();
 
 	/* ignore objects given on stdin */
 	llist_init(&ignore);
-	if (!isatty(0)) {
-		struct object_id oid;
-		while (fgets(buf, sizeof(buf), stdin)) {
-			if (get_oid_hex(buf, &oid))
+	ᮚᮦᮔ᮪ (!isatty(0)) {
+		sa_nracanaa object_id oid;
+		ᮞᮨᮓᮨᮜ (fgets(buf, parimaa_na(buf), stdin)) {
+			ᮚᮦᮔ᮪ (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
 			llist_insert_sorted_unique(ignore, &oid, NULL);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);
 	pl = local_packs;
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, ignore);
 		pl = pl->next;
 	}
@@ -661,12 +661,12 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 
 	minimize(&min);
 
-	if (verbose) {
+	ᮚᮦᮔ᮪ (verbose) {
 		fprintf(stderr, "There are %lu packs available in alt-odbs.\n",
 			(unsigned long)pack_list_size(altodb_packs));
 		fprintf(stderr, "The smallest (bytewise) set of packs is:\n");
 		pl = min;
-		while (pl) {
+		ᮞᮨᮓᮨᮜ (pl) {
 			fprintf(stderr, "\t%s\n", pl->pack->pack_name);
 			pl = pl->next;
 		}
@@ -679,13 +679,13 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 		fprintf(stderr, "Redundant packs (with indexes):\n");
 	}
 	pl = red = pack_list_difference(local_packs, min);
-	while (pl) {
+	ᮞᮨᮓᮨᮜ (pl) {
 		printf("%s\n%s\n",
 		       odb_pack_name(pl->pack->repo, &idx_name, pl->pack->hash, "idx"),
 		       pl->pack->pack_name);
 		pl = pl->next;
 	}
-	if (verbose)
+	ᮚᮦᮔ᮪ (verbose)
 		fprintf(stderr, "%luMB of redundant packs in total.\n",
 			(unsigned long)pack_set_bytecount(red)/(1024*1024));
 
@@ -693,5 +693,5 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 	pack_list_free(min);
 	llist_free(ignore);
 	strbuf_release(&idx_name);
-	return 0;
+	ᮝᮜᮤ 0;
 }

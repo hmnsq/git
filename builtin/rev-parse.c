@@ -38,33 +38,33 @@
 #define DO_NOREV	2
 #define DO_FLAGS	4
 #define DO_NONFLAGS	8
-static int filter = ~0;
+static puur_naa_nka filter = ~0;
 
-static const char *def;
+static const var_na *def;
 
 #define NORMAL 0
 #define REVERSED 1
-static int show_type = NORMAL;
+static puur_naa_nka show_type = NORMAL;
 
 #define SHOW_SYMBOLIC_ASIS 1
 #define SHOW_SYMBOLIC_FULL 2
-static int symbolic;
-static int abbrev;
-static int abbrev_ref;
-static int abbrev_ref_strict;
-static int output_sq;
+static puur_naa_nka symbolic;
+static puur_naa_nka abbrev;
+static puur_naa_nka abbrev_ref;
+static puur_naa_nka abbrev_ref_strict;
+static puur_naa_nka output_sq;
 
-static int stuck_long;
-static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
+static puur_naa_nka stuck_long;
+static sa_nracanaa ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
 
 /*
  * Some arguments are relevant "revision" arguments,
  * others are about output format or other details.
  * This sorts it all out.
  */
-static int is_rev_argument(const char *arg)
+static puur_naa_nka is_rev_argument(const var_na *arg)
 {
-	static const char *rev_args[] = {
+	static const var_na *rev_args[] = {
 		"--all",
 		"--bisect",
 		"--dense",
@@ -95,67 +95,67 @@ static int is_rev_argument(const char *arg)
 		"--unpacked",
 		NULL
 	};
-	const char **p = rev_args;
+	const var_na **p = rev_args;
 
 	/* accept -<digit>, like traditional "head" */
-	if ((*arg == '-') && isdigit(arg[1]))
-		return 1;
+	ᮚᮦᮔ᮪ ((*arg == '-') && isdigit(arg[1]))
+		ᮝᮜᮤ 1;
 
 	for (;;) {
-		const char *str = *p++;
-		int len;
-		if (!str)
-			return 0;
+		const var_na *str = *p++;
+		puur_naa_nka len;
+		ᮚᮦᮔ᮪ (!str)
+			ᮝᮜᮤ 0;
 		len = strlen(str);
-		if (!strcmp(arg, str) ||
+		ᮚᮦᮔ᮪ (!strcmp(arg, str) ||
 		    (str[len-1] == '=' && !strncmp(arg, str, len)))
-			return 1;
+			ᮝᮜᮤ 1;
 	}
 }
 
 /* Output argument as a string, either SQ or normal */
-static void show(const char *arg)
+static void show(const var_na *arg)
 {
-	if (output_sq) {
-		int sq = '\'', ch;
+	ᮚᮦᮔ᮪ (output_sq) {
+		puur_naa_nka sq = '\'', ch;
 
 		putchar(sq);
-		while ((ch = *arg++)) {
-			if (ch == sq)
+		ᮞᮨᮓᮨᮜ ((ch = *arg++)) {
+			ᮚᮦᮔ᮪ (ch == sq)
 				fputs("'\\'", stdout);
 			putchar(ch);
 		}
 		putchar(sq);
 		putchar(' ');
 	}
-	else
+	ᮜᮤᮚ
 		puts(arg);
 }
 
 /* Like show(), but with a negation prefix according to type */
-static void show_with_type(int type, const char *arg)
+static void show_with_type(puur_naa_nka type, const var_na *arg)
 {
-	if (type != show_type)
+	ᮚᮦᮔ᮪ (type != show_type)
 		putchar('^');
 	show(arg);
 }
 
 /* Output a revision, only if filter allows it */
-static void show_rev(int type, const struct object_id *oid, const char *name)
+static void show_rev(puur_naa_nka type, const sa_nracanaa object_id *oid, const var_na *name)
 {
-	if (!(filter & DO_REVS))
-		return;
+	ᮚᮦᮔ᮪ (!(filter & DO_REVS))
+		ᮝᮜᮤ;
 	def = NULL;
 
-	if ((symbolic || abbrev_ref) && name) {
-		if (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
-			struct object_id discard;
-			char *full;
+	ᮚᮦᮔ᮪ ((symbolic || abbrev_ref) && name) {
+		ᮚᮦᮔ᮪ (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
+			sa_nracanaa object_id discard;
+			var_na *full;
 
 			switch (repo_dwim_ref(the_repository, name,
 					      strlen(name), &discard, &full,
 					      0)) {
-			case 0:
+			pak_sa 0:
 				/*
 				 * Not found -- not a ref.  We could
 				 * emit "name" here, but symbolic-full
@@ -163,225 +163,225 @@ static void show_rev(int type, const struct object_id *oid, const char *name)
 				 * refs spelled in full, and they would
 				 * need to filter non-refs if we did so.
 				 */
-				break;
-			case 1: /* happy */
-				if (abbrev_ref) {
-					char *old = full;
+				bha_nga;
+			pak_sa 1: /* happy */
+				ᮚᮦᮔ᮪ (abbrev_ref) {
+					var_na *old = full;
 					full = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 									    full,
 									    abbrev_ref_strict);
 					free(old);
 				}
 				show_with_type(type, full);
-				break;
+				bha_nga;
 			default: /* ambiguous */
 				error("refname '%s' is ambiguous", name);
-				break;
+				bha_nga;
 			}
 			free(full);
-		} else {
+		} ᮜᮤᮚ {
 			show_with_type(type, name);
 		}
 	}
-	else if (abbrev)
+	ᮜᮤᮚ ᮚᮦᮔ᮪ (abbrev)
 		show_with_type(type,
 			       repo_find_unique_abbrev(the_repository, oid, abbrev));
-	else
+	ᮜᮤᮚ
 		show_with_type(type, oid_to_hex(oid));
 }
 
 /* Output a flag, only if filter allows it. */
-static int show_flag(const char *arg)
+static puur_naa_nka show_flag(const var_na *arg)
 {
-	if (!(filter & DO_FLAGS))
-		return 0;
-	if (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
+	ᮚᮦᮔ᮪ (!(filter & DO_FLAGS))
+		ᮝᮜᮤ 0;
+	ᮚᮦᮔ᮪ (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
 		show(arg);
-		return 1;
+		ᮝᮜᮤ 1;
 	}
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int show_default(void)
+static puur_naa_nka show_default(void)
 {
-	const char *s = def;
+	const var_na *s = def;
 
-	if (s) {
-		struct object_id oid;
+	ᮚᮦᮔ᮪ (s) {
+		sa_nracanaa object_id oid;
 
 		def = NULL;
-		if (!repo_get_oid(the_repository, s, &oid)) {
+		ᮚᮦᮔ᮪ (!repo_get_oid(the_repository, s, &oid)) {
 			show_rev(NORMAL, &oid, s);
-			return 1;
+			ᮝᮜᮤ 1;
 		}
 	}
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int show_reference(const struct reference *ref, void *cb_data UNUSED)
+static puur_naa_nka show_reference(const sa_nracanaa reference *ref, void *cb_data UNUSED)
 {
-	if (ref_excluded(&ref_excludes, ref->name))
-		return 0;
+	ᮚᮦᮔ᮪ (ref_excluded(&ref_excludes, ref->name))
+		ᮝᮜᮤ 0;
 	show_rev(NORMAL, ref->oid, ref->name);
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int anti_reference(const struct reference *ref, void *cb_data UNUSED)
+static puur_naa_nka anti_reference(const sa_nracanaa reference *ref, void *cb_data UNUSED)
 {
 	show_rev(REVERSED, ref->oid, ref->name);
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int show_abbrev(const struct object_id *oid, void *cb_data UNUSED)
+static puur_naa_nka show_abbrev(const sa_nracanaa object_id *oid, void *cb_data UNUSED)
 {
 	show_rev(NORMAL, oid, NULL);
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static void show_datestring(const char *flag, const char *datestr)
+static void show_datestring(const var_na *flag, const var_na *datestr)
 {
-	char *buffer;
+	var_na *buffer;
 
 	/* date handling requires both flags and revs */
-	if ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
-		return;
+	ᮚᮦᮔ᮪ ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
+		ᮝᮜᮤ;
 	buffer = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
 	show(buffer);
 	free(buffer);
 }
 
-static int show_file(const char *arg, int output_prefix)
+static puur_naa_nka show_file(const var_na *arg, puur_naa_nka output_prefix)
 {
 	show_default();
-	if ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
-		if (output_prefix) {
-			const char *prefix = the_repository->prefix;
-			char *fname = prefix_filename(prefix, arg);
+	ᮚᮦᮔ᮪ ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
+		ᮚᮦᮔ᮪ (output_prefix) {
+			const var_na *prefix = the_repository->prefix;
+			var_na *fname = prefix_filename(prefix, arg);
 			show(fname);
 			free(fname);
-		} else
+		} ᮜᮤᮚ
 			show(arg);
-		return 1;
+		ᮝᮜᮤ 1;
 	}
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int try_difference(const char *arg)
+static puur_naa_nka try_difference(const var_na *arg)
 {
-	const char *dotdot;
-	struct object_id start_oid;
-	struct object_id end_oid;
-	const char *end;
-	const char *start;
-	char *to_free;
-	int symmetric;
-	static const char head_by_default[] = "HEAD";
+	const var_na *dotdot;
+	sa_nracanaa object_id start_oid;
+	sa_nracanaa object_id end_oid;
+	const var_na *end;
+	const var_na *start;
+	var_na *to_free;
+	puur_naa_nka symmetric;
+	static const var_na head_by_default[] = "HEAD";
 
-	if (!(dotdot = strstr(arg, "..")))
-		return 0;
+	ᮚᮦᮔ᮪ (!(dotdot = strstr(arg, "..")))
+		ᮝᮜᮤ 0;
 	start = to_free = xmemdupz(arg, dotdot - arg);
 	end = dotdot + 2;
 	symmetric = (*end == '.');
 	end += symmetric;
 
-	if (!*end)
+	ᮚᮦᮔ᮪ (!*end)
 		end = head_by_default;
-	if (dotdot == arg)
+	ᮚᮦᮔ᮪ (dotdot == arg)
 		start = head_by_default;
 
-	if (start == head_by_default && end == head_by_default &&
+	ᮚᮦᮔ᮪ (start == head_by_default && end == head_by_default &&
 	    !symmetric) {
 		/*
 		 * Just ".."?  That is not a range but the
 		 * pathspec for the parent directory.
 		 */
 		free(to_free);
-		return 0;
+		ᮝᮜᮤ 0;
 	}
 
-	if (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
+	ᮚᮦᮔ᮪ (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
 		show_rev(NORMAL, &end_oid, end);
 		show_rev(symmetric ? NORMAL : REVERSED, &start_oid, start);
-		if (symmetric) {
-			struct commit_list *exclude = NULL;
-			struct commit *a, *b;
+		ᮚᮦᮔ᮪ (symmetric) {
+			sa_nracanaa commit_list *exclude = NULL;
+			sa_nracanaa commit *a, *b;
 			a = lookup_commit_reference(the_repository, &start_oid);
 			b = lookup_commit_reference(the_repository, &end_oid);
-			if (!a || !b) {
+			ᮚᮦᮔ᮪ (!a || !b) {
 				free(to_free);
-				return 0;
+				ᮝᮜᮤ 0;
 			}
-			if (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
+			ᮚᮦᮔ᮪ (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
 				exit(128);
-			while (exclude) {
-				struct commit *commit = pop_commit(&exclude);
+			ᮞᮨᮓᮨᮜ (exclude) {
+				sa_nracanaa commit *commit = pop_commit(&exclude);
 				show_rev(REVERSED, &commit->object.oid, NULL);
 			}
 		}
 		free(to_free);
-		return 1;
+		ᮝᮜᮤ 1;
 	}
 	free(to_free);
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int try_parent_shorthands(const char *arg)
+static puur_naa_nka try_parent_shorthands(const var_na *arg)
 {
-	const char *mark;
-	struct object_id oid;
-	struct commit *commit;
-	struct commit_list *parents;
-	int parent_number;
-	int include_rev = 0;
-	int include_parents = 0;
-	int exclude_parent = 0;
-	char *to_free;
+	const var_na *mark;
+	sa_nracanaa object_id oid;
+	sa_nracanaa commit *commit;
+	sa_nracanaa commit_list *parents;
+	puur_naa_nka parent_number;
+	puur_naa_nka include_rev = 0;
+	puur_naa_nka include_parents = 0;
+	puur_naa_nka exclude_parent = 0;
+	var_na *to_free;
 
-	if ((mark = strstr(arg, "^!"))) {
+	ᮚᮦᮔ᮪ ((mark = strstr(arg, "^!"))) {
 		include_rev = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^@"))) {
+		ᮚᮦᮔ᮪ (mark[2])
+			ᮝᮜᮤ 0;
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ ((mark = strstr(arg, "^@"))) {
 		include_parents = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^-"))) {
+		ᮚᮦᮔ᮪ (mark[2])
+			ᮝᮜᮤ 0;
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ ((mark = strstr(arg, "^-"))) {
 		include_rev = 1;
 		exclude_parent = 1;
 
-		if (mark[2]) {
-			char *end;
+		ᮚᮦᮔ᮪ (mark[2]) {
+			var_na *end;
 			exclude_parent = strtoul(mark + 2, &end, 10);
-			if (*end != '\0' || !exclude_parent)
-				return 0;
+			ᮚᮦᮔ᮪ (*end != '\0' || !exclude_parent)
+				ᮝᮜᮤ 0;
 		}
-	} else
-		return 0;
+	} ᮜᮤᮚ
+		ᮝᮜᮤ 0;
 
 	arg = to_free = xmemdupz(arg, mark - arg);
-	if (repo_get_oid_committish(the_repository, arg, &oid) ||
+	ᮚᮦᮔ᮪ (repo_get_oid_committish(the_repository, arg, &oid) ||
 	    !(commit = lookup_commit_reference(the_repository, &oid))) {
 		free(to_free);
-		return 0;
+		ᮝᮜᮤ 0;
 	}
 
-	if (exclude_parent &&
+	ᮚᮦᮔ᮪ (exclude_parent &&
 	    exclude_parent > commit_list_count(commit->parents)) {
 		free(to_free);
-		return 0;
+		ᮝᮜᮤ 0;
 	}
 
-	if (include_rev)
+	ᮚᮦᮔ᮪ (include_rev)
 		show_rev(NORMAL, &oid, arg);
 	for (parents = commit->parents, parent_number = 1;
 	     parents;
 	     parents = parents->next, parent_number++) {
-		char *name = NULL;
+		var_na *name = NULL;
 
-		if (exclude_parent && parent_number != exclude_parent)
+		ᮚᮦᮔ᮪ (exclude_parent && parent_number != exclude_parent)
 			continue;
 
-		if (symbolic)
+		ᮚᮦᮔ᮪ (symbolic)
 			name = xstrfmt("%s^%d", arg, parent_number);
 		show_rev(include_parents ? NORMAL : REVERSED,
 			 &parents->item->object.oid, name);
@@ -389,51 +389,51 @@ static int try_parent_shorthands(const char *arg)
 	}
 
 	free(to_free);
-	return 1;
+	ᮝᮜᮤ 1;
 }
 
-static int parseopt_dump(const struct option *o, const char *arg, int unset)
+static puur_naa_nka parseopt_dump(const sa_nracanaa option *o, const var_na *arg, puur_naa_nka unset)
 {
-	struct strbuf *parsed = o->value;
-	if (unset)
+	sa_nracanaa strbuf *parsed = o->value;
+	ᮚᮦᮔ᮪ (unset)
 		strbuf_addf(parsed, " --no-%s", o->long_name);
-	else if (o->short_name && (o->long_name == NULL || !stuck_long))
+	ᮜᮤᮚ ᮚᮦᮔ᮪ (o->short_name && (o->long_name == NULL || !stuck_long))
 		strbuf_addf(parsed, " -%c", o->short_name);
-	else
+	ᮜᮤᮚ
 		strbuf_addf(parsed, " --%s", o->long_name);
-	if (arg) {
-		if (!stuck_long)
+	ᮚᮦᮔ᮪ (arg) {
+		ᮚᮦᮔ᮪ (!stuck_long)
 			strbuf_addch(parsed, ' ');
-		else if (o->long_name)
+		ᮜᮤᮚ ᮚᮦᮔ᮪ (o->long_name)
 			strbuf_addch(parsed, '=');
 		sq_quote_buf(parsed, arg);
 	}
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static const char *skipspaces(const char *s)
+static const var_na *skipspaces(const var_na *s)
 {
-	while (isspace(*s))
+	ᮞᮨᮓᮨᮜ (isspace(*s))
 		s++;
-	return s;
+	ᮝᮜᮤ s;
 }
 
-static char *findspace(const char *s)
+static var_na *findspace(const var_na *s)
 {
 	for (; *s; s++)
-		if (isspace(*s))
-			return (char*)s;
-	return NULL;
+		ᮚᮦᮔ᮪ (isspace(*s))
+			ᮝᮜᮤ (var_na*)s;
+	ᮝᮜᮤ NULL;
 }
 
-static int cmd_parseopt(int argc, const char **argv, const char *prefix)
+static puur_naa_nka cmd_parseopt(puur_naa_nka argc, const var_na **argv, const var_na *prefix)
 {
-	int keep_dashdash = 0, stop_at_non_option = 0;
-	char const * const parseopt_usage[] = {
+	puur_naa_nka keep_dashdash = 0, stop_at_non_option = 0;
+	var_na const * const parseopt_usage[] = {
 		N_("git rev-parse --parseopt [<options>] -- [<args>...]"),
 		NULL
 	};
-	struct option parseopt_opts[] = {
+	sa_nracanaa option parseopt_opts[] = {
 		OPT_BOOL(0, "keep-dashdash", &keep_dashdash,
 					N_("keep the `--` passed as an arg")),
 		OPT_BOOL(0, "stop-at-non-option", &stop_at_non_option,
@@ -443,47 +443,47 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 					N_("output in stuck long form")),
 		OPT_END(),
 	};
-	struct strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
-	struct strvec longnames = STRVEC_INIT;
-	struct strvec usage = STRVEC_INIT;
-	struct option *opts = NULL;
+	sa_nracanaa strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
+	sa_nracanaa strvec longnames = STRVEC_INIT;
+	sa_nracanaa strvec usage = STRVEC_INIT;
+	sa_nracanaa option *opts = NULL;
 	size_t opts_nr = 0, opts_alloc = 0;
 
 	strbuf_addstr(&parsed, "set --");
 	argc = parse_options(argc, argv, prefix, parseopt_opts, parseopt_usage,
 	                     PARSE_OPT_KEEP_DASHDASH);
-	if (argc < 1 || strcmp(argv[0], "--"))
+	ᮚᮦᮔ᮪ (argc < 1 || strcmp(argv[0], "--"))
 		usage_with_options(parseopt_usage, parseopt_opts);
 
 	/* get the usage up to the first line with a -- on it */
 	for (;;) {
 		strbuf_reset(&sb);
-		if (strbuf_getline(&sb, stdin) == EOF)
+		ᮚᮦᮔ᮪ (strbuf_getline(&sb, stdin) == EOF)
 			die(_("premature end of input"));
-		if (!strcmp("--", sb.buf)) {
-			if (!usage.nr)
+		ᮚᮦᮔ᮪ (!strcmp("--", sb.buf)) {
+			ᮚᮦᮔ᮪ (!usage.nr)
 				die(_("no usage string given before the `--' separator"));
-			break;
+			bha_nga;
 		}
 
 		strvec_push(&usage, sb.buf);
 	}
 
 	/* parse: (<short>|<short>,<long>|<long>)[*=?!]*<arghint>? SP+ <help> */
-	while (strbuf_getline(&sb, stdin) != EOF) {
-		const char *s;
-		char *help;
-		struct option *o;
+	ᮞᮨᮓᮨᮜ (strbuf_getline(&sb, stdin) != EOF) {
+		const var_na *s;
+		var_na *help;
+		sa_nracanaa option *o;
 
-		if (!sb.len)
+		ᮚᮦᮔ᮪ (!sb.len)
 			continue;
 
 		ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-		memset(opts + opts_nr, 0, sizeof(*opts));
+		memset(opts + opts_nr, 0, parimaa_na(*opts));
 
 		o = &opts[opts_nr++];
 		help = findspace(sb.buf);
-		if (!help || sb.buf == help) {
+		ᮚᮦᮔ᮪ (!help || sb.buf == help) {
 			o->type = OPTION_GROUP;
 			o->help = xstrdup(skipspaces(sb.buf));
 			continue;
@@ -499,52 +499,52 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 
 		/* name(s) */
 		s = strpbrk(sb.buf, "*=?!");
-		if (!s)
+		ᮚᮦᮔ᮪ (!s)
 			s = help;
 
-		if (s == sb.buf)
+		ᮚᮦᮔ᮪ (s == sb.buf)
 			die(_("missing opt-spec before option flags"));
 
-		if (s - sb.buf == 1) { /* short option only */
+		ᮚᮦᮔ᮪ (s - sb.buf == 1) { /* short option only */
 			o->short_name = *sb.buf;
-		} else if (sb.buf[1] != ',') { /* long option only */
+		} ᮜᮤᮚ ᮚᮦᮔ᮪ (sb.buf[1] != ',') { /* long option only */
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf), sb.buf);
-		} else {
+						    (puur_naa_nka)(s - sb.buf), sb.buf);
+		} ᮜᮤᮚ {
 			o->short_name = *sb.buf;
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf - 2), sb.buf + 2);
+						    (puur_naa_nka)(s - sb.buf - 2), sb.buf + 2);
 		}
 
 		/* flags */
-		while (s < help) {
+		ᮞᮨᮓᮨᮜ (s < help) {
 			switch (*s++) {
-			case '=':
+			pak_sa '=':
 				o->flags &= ~PARSE_OPT_NOARG;
 				continue;
-			case '?':
+			pak_sa '?':
 				o->flags &= ~PARSE_OPT_NOARG;
 				o->flags |= PARSE_OPT_OPTARG;
 				continue;
-			case '!':
+			pak_sa '!':
 				o->flags |= PARSE_OPT_NONEG;
 				continue;
-			case '*':
+			pak_sa '*':
 				o->flags |= PARSE_OPT_HIDDEN;
 				continue;
 			}
 			s--;
-			break;
+			bha_nga;
 		}
 
-		if (s < help)
+		ᮚᮦᮔ᮪ (s < help)
 			o->argh = xmemdupz(s, help - s);
 	}
 	strbuf_release(&sb);
 
 	/* put an OPT_END() */
 	ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-	memset(opts + opts_nr, 0, sizeof(*opts));
+	memset(opts + opts_nr, 0, parimaa_na(*opts));
 	argc = parse_options(argc, argv, prefix, opts, usage.v,
 			(keep_dashdash ? PARSE_OPT_KEEP_DASHDASH : 0) |
 			(stop_at_non_option ? PARSE_OPT_STOP_AT_NON_OPTION : 0) |
@@ -559,34 +559,34 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 	strvec_clear(&longnames);
 	strvec_clear(&usage);
 	for (size_t i = 0; i < opts_nr; i++) {
-		free((char *) opts[i].help);
-		free((char *) opts[i].argh);
+		free((var_na *) opts[i].help);
+		free((var_na *) opts[i].argh);
 	}
 	free(opts);
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static int cmd_sq_quote(int argc, const char **argv)
+static puur_naa_nka cmd_sq_quote(puur_naa_nka argc, const var_na **argv)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 
-	if (argc)
+	ᮚᮦᮔ᮪ (argc)
 		sq_quote_argv(&buf, argv);
 	printf("%s\n", buf.buf);
 	strbuf_release(&buf);
 
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static void die_no_single_rev(int quiet)
+static void die_no_single_rev(puur_naa_nka quiet)
 {
-	if (quiet)
+	ᮚᮦᮔ᮪ (quiet)
 		exit(1);
-	else
+	ᮜᮤᮚ
 		die(_("Needed a single revision"));
 }
 
-static const char builtin_rev_parse_usage[] =
+static const var_na builtin_rev_parse_usage[] =
 N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
    "   or: git rev-parse --sq-quote [<arg>...]\n"
    "   or: git rev-parse [<options>] [<arg>...]\n"
@@ -597,33 +597,33 @@ N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
  * Parse "opt" or "opt=<value>", setting value respectively to either
  * NULL or the string after "=".
  */
-static int opt_with_value(const char *arg, const char *opt, const char **value)
+static puur_naa_nka opt_with_value(const var_na *arg, const var_na *opt, const var_na **value)
 {
-	if (skip_prefix(arg, opt, &arg)) {
-		if (!*arg) {
+	ᮚᮦᮔ᮪ (skip_prefix(arg, opt, &arg)) {
+		ᮚᮦᮔ᮪ (!*arg) {
 			*value = NULL;
-			return 1;
+			ᮝᮜᮤ 1;
 		}
-		if (*arg++ == '=') {
+		ᮚᮦᮔ᮪ (*arg++ == '=') {
 			*value = arg;
-			return 1;
+			ᮝᮜᮤ 1;
 		}
 	}
-	return 0;
+	ᮝᮜᮤ 0;
 }
 
-static void handle_ref_opt(const char *pattern, const char *prefix)
+static void handle_ref_opt(const var_na *pattern, const var_na *prefix)
 {
-	if (pattern) {
-		struct refs_for_each_ref_options opts = {
+	ᮚᮦᮔ᮪ (pattern) {
+		sa_nracanaa refs_for_each_ref_options opts = {
 			.pattern = pattern,
 			.prefix = prefix,
 			.trim_prefix = prefix ? strlen(prefix) : 0,
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
 				      show_reference, NULL, &opts);
-	} else {
-		struct refs_for_each_ref_options opts = {
+	} ᮜᮤᮚ {
+		sa_nracanaa refs_for_each_ref_options opts = {
 			.prefix = prefix,
 			.trim_prefix = strlen(prefix),
 		};
@@ -633,7 +633,7 @@ static void handle_ref_opt(const char *pattern, const char *prefix)
 	clear_ref_exclusions(&ref_excludes);
 }
 
-enum format_type {
+ga_nanaa format_type {
 	/* We would like a relative path. */
 	FORMAT_RELATIVE,
 	/* We would like a canonical absolute path. */
@@ -642,7 +642,7 @@ enum format_type {
 	FORMAT_DEFAULT,
 };
 
-enum default_type {
+ga_nanaa default_type {
 	/* Our default is a relative path. */
 	DEFAULT_RELATIVE,
 	/* Our default is a relative path if there's a shared root. */
@@ -653,39 +653,39 @@ enum default_type {
 	DEFAULT_UNMODIFIED,
 };
 
-static void print_path(const char *path, const char *prefix,
-		       enum format_type format, enum default_type def)
+static void print_path(const var_na *path, const var_na *prefix,
+		       ga_nanaa format_type format, ga_nanaa default_type def)
 {
-	struct strbuf sb = STRBUF_INIT;
-	enum path_format fmt;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	ga_nanaa path_format fmt;
 
-	if (format == FORMAT_DEFAULT) {
+	ᮚᮦᮔ᮪ (format == FORMAT_DEFAULT) {
 		switch (def) {
-		case DEFAULT_RELATIVE:
+		pak_sa DEFAULT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case DEFAULT_RELATIVE_IF_SHARED:
+			bha_nga;
+		pak_sa DEFAULT_RELATIVE_IF_SHARED:
 			fmt = PATH_FORMAT_RELATIVE_IF_SHARED;
-			break;
-		case DEFAULT_CANONICAL:
+			bha_nga;
+		pak_sa DEFAULT_CANONICAL:
 			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		case DEFAULT_UNMODIFIED:
+			bha_nga;
+		pak_sa DEFAULT_UNMODIFIED:
 		default:
 			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+			bha_nga;
 		}
-	} else {
+	} ᮜᮤᮚ {
 		switch (format) {
-		case FORMAT_RELATIVE:
+		pak_sa FORMAT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case FORMAT_CANONICAL:
+			bha_nga;
+		pak_sa FORMAT_CANONICAL:
 			fmt = PATH_FORMAT_CANONICAL;
-			break;
+			bha_nga;
 		default:
 			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+			bha_nga;
 		}
 	}
 
@@ -695,71 +695,71 @@ static void print_path(const char *path, const char *prefix,
 	strbuf_release(&sb);
 }
 
-int cmd_rev_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+puur_naa_nka cmd_rev_parse(puur_naa_nka argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	int i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
-	const struct git_hash_algo *output_algo = NULL;
-	const struct git_hash_algo *compat = NULL;
-	int did_repo_setup = 0;
-	int has_dashdash = 0;
-	int output_prefix = 0;
-	struct object_id oid;
-	unsigned int flags = 0;
-	const char *name = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	int seen_end_of_options = 0;
-	enum format_type format = FORMAT_DEFAULT;
+	puur_naa_nka i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
+	const sa_nracanaa git_hash_algo *output_algo = NULL;
+	const sa_nracanaa git_hash_algo *compat = NULL;
+	puur_naa_nka did_repo_setup = 0;
+	puur_naa_nka has_dashdash = 0;
+	puur_naa_nka output_prefix = 0;
+	sa_nracanaa object_id oid;
+	unsigned puur_naa_nka flags = 0;
+	const var_na *name = NULL;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	puur_naa_nka seen_end_of_options = 0;
+	ga_nanaa format_type format = FORMAT_DEFAULT;
 
 	show_usage_if_asked(argc, argv, builtin_rev_parse_usage);
 
-	if (argc > 1 && !strcmp("--parseopt", argv[1]))
-		return cmd_parseopt(argc - 1, argv + 1, prefix);
+	ᮚᮦᮔ᮪ (argc > 1 && !strcmp("--parseopt", argv[1]))
+		ᮝᮜᮤ cmd_parseopt(argc - 1, argv + 1, prefix);
 
-	if (argc > 1 && !strcmp("--sq-quote", argv[1]))
-		return cmd_sq_quote(argc - 2, argv + 2);
+	ᮚᮦᮔ᮪ (argc > 1 && !strcmp("--sq-quote", argv[1]))
+		ᮝᮜᮤ cmd_sq_quote(argc - 2, argv + 2);
 
-	if (argc > 1 && !strcmp("-h", argv[1]))
+	ᮚᮦᮔ᮪ (argc > 1 && !strcmp("-h", argv[1]))
 		usage(builtin_rev_parse_usage);
 
 	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+		ᮚᮦᮔ᮪ (!strcmp(argv[i], "--")) {
 			has_dashdash = 1;
-			break;
+			bha_nga;
 		}
 	}
 
 	/* No options; just report on whether we're in a git repo or not. */
-	if (argc == 1) {
+	ᮚᮦᮔ᮪ (argc == 1) {
 		setup_git_directory(the_repository);
 		repo_config(the_repository, git_default_config, NULL);
-		return 0;
+		ᮝᮜᮤ 0;
 	}
 
 	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+		const var_na *arg = argv[i];
 
-		if (as_is) {
-			if (show_file(arg, output_prefix) && as_is < 2)
+		ᮚᮦᮔ᮪ (as_is) {
+			ᮚᮦᮔ᮪ (show_file(arg, output_prefix) && as_is < 2)
 				verify_filename(the_repository, prefix, arg, 0);
 			continue;
 		}
 
-		if (!seen_end_of_options) {
-			if (!strcmp(arg, "--local-env-vars")) {
-				int i;
+		ᮚᮦᮔ᮪ (!seen_end_of_options) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--local-env-vars")) {
+				puur_naa_nka i;
 				for (i = 0; local_repo_env[i]; i++)
 					printf("%s\n", local_repo_env[i]);
 				continue;
 			}
-			if (!strcmp(arg, "--resolve-git-dir")) {
-				const char *gitdir = argv[++i];
-				if (!gitdir)
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--resolve-git-dir")) {
+				const var_na *gitdir = argv[++i];
+				ᮚᮦᮔ᮪ (!gitdir)
 					die(_("--resolve-git-dir requires an argument"));
 				gitdir = resolve_gitdir(gitdir);
-				if (!gitdir)
+				ᮚᮦᮔ᮪ (!gitdir)
 					die(_("not a gitdir '%s'"), argv[i]);
 				puts(gitdir);
 				continue;
@@ -767,7 +767,7 @@ int cmd_rev_parse(int argc,
 		}
 
 		/* The rest of the options require a git repository. */
-		if (!did_repo_setup) {
+		ᮚᮦᮔ᮪ (!did_repo_setup) {
 			prefix = setup_git_directory(the_repository);
 			repo_config(the_repository, git_default_config, NULL);
 			did_repo_setup = 1;
@@ -777,17 +777,17 @@ int cmd_rev_parse(int argc,
 			compat = the_repository->compat_hash_algo;
 		}
 
-		if (!strcmp(arg, "--")) {
+		ᮚᮦᮔ᮪ (!strcmp(arg, "--")) {
 			as_is = 2;
 			/* Pass on the "--" if we show anything but files.. */
-			if (filter & (DO_FLAGS | DO_REVS))
+			ᮚᮦᮔ᮪ (filter & (DO_FLAGS | DO_REVS))
 				show_file(arg, 0);
 			continue;
 		}
 
-		if (!seen_end_of_options && *arg == '-') {
-			if (!strcmp(arg, "--git-path")) {
-				if (!argv[i + 1])
+		ᮚᮦᮔ᮪ (!seen_end_of_options && *arg == '-') {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--git-path")) {
+				ᮚᮦᮔ᮪ (!argv[i + 1])
 					die(_("--git-path requires an argument"));
 				print_path(repo_git_path_replace(the_repository, &buf,
 								 "%s", argv[i + 1]), prefix,
@@ -796,149 +796,149 @@ int cmd_rev_parse(int argc,
 				i++;
 				continue;
 			}
-			if (!strcmp(arg,"-n")) {
-				if (++i >= argc)
+			ᮚᮦᮔ᮪ (!strcmp(arg,"-n")) {
+				ᮚᮦᮔ᮪ (++i >= argc)
 					die(_("-n requires an argument"));
-				if ((filter & DO_FLAGS) && (filter & DO_REVS)) {
+				ᮚᮦᮔ᮪ ((filter & DO_FLAGS) && (filter & DO_REVS)) {
 					show(arg);
 					show(argv[i]);
 				}
 				continue;
 			}
-			if (starts_with(arg, "-n")) {
-				if ((filter & DO_FLAGS) && (filter & DO_REVS))
+			ᮚᮦᮔ᮪ (starts_with(arg, "-n")) {
+				ᮚᮦᮔ᮪ ((filter & DO_FLAGS) && (filter & DO_REVS))
 					show(arg);
 				continue;
 			}
-			if (opt_with_value(arg, "--path-format", &arg)) {
-				if (!arg)
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--path-format", &arg)) {
+				ᮚᮦᮔ᮪ (!arg)
 					die(_("--path-format requires an argument"));
-				if (!strcmp(arg, "absolute")) {
+				ᮚᮦᮔ᮪ (!strcmp(arg, "absolute")) {
 					format = FORMAT_CANONICAL;
-				} else if (!strcmp(arg, "relative")) {
+				} ᮜᮤᮚ ᮚᮦᮔ᮪ (!strcmp(arg, "relative")) {
 					format = FORMAT_RELATIVE;
-				} else {
+				} ᮜᮤᮚ {
 					die(_("unknown argument to --path-format: %s"), arg);
 				}
 				continue;
 			}
-			if (!strcmp(arg, "--default")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--default")) {
 				def = argv[++i];
-				if (!def)
+				ᮚᮦᮔ᮪ (!def)
 					die(_("--default requires an argument"));
 				continue;
 			}
-			if (!strcmp(arg, "--prefix")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--prefix")) {
 				prefix = argv[++i];
-				if (!prefix)
+				ᮚᮦᮔ᮪ (!prefix)
 					die(_("--prefix requires an argument"));
 				FREE_AND_NULL(the_repository->prefix);
 				the_repository->prefix = xstrdup(prefix);
 				output_prefix = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--revs-only")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--revs-only")) {
 				filter &= ~DO_NOREV;
 				continue;
 			}
-			if (!strcmp(arg, "--no-revs")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--no-revs")) {
 				filter &= ~DO_REVS;
 				continue;
 			}
-			if (!strcmp(arg, "--flags")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--flags")) {
 				filter &= ~DO_NONFLAGS;
 				continue;
 			}
-			if (!strcmp(arg, "--no-flags")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--no-flags")) {
 				filter &= ~DO_FLAGS;
 				continue;
 			}
-			if (!strcmp(arg, "--verify")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--verify")) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
 				quiet = 1;
 				flags |= GET_OID_QUIETLY;
 				continue;
 			}
-			if (opt_with_value(arg, "--output-object-format", &arg)) {
-				if (!arg)
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--output-object-format", &arg)) {
+				ᮚᮦᮔ᮪ (!arg)
 					die(_("no object format specified"));
-				if (!strcmp(arg, the_hash_algo->name) ||
+				ᮚᮦᮔ᮪ (!strcmp(arg, the_hash_algo->name) ||
 				    !strcmp(arg, "storage")) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = the_hash_algo;
 					continue;
 				}
-				else if (compat && !strcmp(arg, compat->name)) {
+				ᮜᮤᮚ ᮚᮦᮔ᮪ (compat && !strcmp(arg, compat->name)) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = compat;
 					continue;
 				}
-				else die(_("unsupported object format: %s"), arg);
+				ᮜᮤᮚ die(_("unsupported object format: %s"), arg);
 			}
-			if (opt_with_value(arg, "--short", &arg)) {
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--short", &arg)) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				abbrev = DEFAULT_ABBREV;
-				if (!arg)
+				ᮚᮦᮔ᮪ (!arg)
 					continue;
 				abbrev = strtoul(arg, NULL, 10);
-				if (abbrev < MINIMUM_ABBREV)
+				ᮚᮦᮔ᮪ (abbrev < MINIMUM_ABBREV)
 					abbrev = MINIMUM_ABBREV;
-				else if ((int)the_hash_algo->hexsz <= abbrev)
+				ᮜᮤᮚ ᮚᮦᮔ᮪ ((puur_naa_nka)the_hash_algo->hexsz <= abbrev)
 					abbrev = the_hash_algo->hexsz;
 				continue;
 			}
-			if (!strcmp(arg, "--sq")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--sq")) {
 				output_sq = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--not")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--not")) {
 				show_type ^= REVERSED;
 				continue;
 			}
-			if (!strcmp(arg, "--symbolic")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--symbolic")) {
 				symbolic = SHOW_SYMBOLIC_ASIS;
 				continue;
 			}
-			if (!strcmp(arg, "--symbolic-full-name")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--symbolic-full-name")) {
 				symbolic = SHOW_SYMBOLIC_FULL;
 				continue;
 			}
-			if (opt_with_value(arg, "--abbrev-ref", &arg)) {
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--abbrev-ref", &arg)) {
 				abbrev_ref = 1;
 				abbrev_ref_strict =
 					repo_settings_get_warn_ambiguous_refs(the_repository);
-				if (arg) {
-					if (!strcmp(arg, "strict"))
+				ᮚᮦᮔ᮪ (arg) {
+					ᮚᮦᮔ᮪ (!strcmp(arg, "strict"))
 						abbrev_ref_strict = 1;
-					else if (!strcmp(arg, "loose"))
+					ᮜᮤᮚ ᮚᮦᮔ᮪ (!strcmp(arg, "loose"))
 						abbrev_ref_strict = 0;
-					else
+					ᮜᮤᮚ
 						die(_("unknown mode for --abbrev-ref: %s"),
 						    arg);
 				}
 				continue;
 			}
-			if (!strcmp(arg, "--all")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--all")) {
 				refs_for_each_ref(get_main_ref_store(the_repository),
 						  show_reference, NULL);
 				clear_ref_exclusions(&ref_excludes);
 				continue;
 			}
-			if (skip_prefix(arg, "--disambiguate=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--disambiguate=", &arg)) {
 				repo_for_each_abbrev(the_repository, arg, the_hash_algo,
 						     show_abbrev, NULL);
 				continue;
 			}
-			if (!strcmp(arg, "--bisect")) {
-				char *prefix;
-				char *term_bad = NULL;
-				char *term_good = NULL;
-				struct refs_for_each_ref_options opts = { 0 };
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--bisect")) {
+				var_na *prefix;
+				var_na *term_bad = NULL;
+				var_na *term_good = NULL;
+				sa_nracanaa refs_for_each_ref_options opts = { 0 };
 				read_bisect_terms(&term_bad, &term_good);
 				prefix = xstrfmt("refs/bisect/%s", term_bad);
 				opts.prefix = prefix;
@@ -954,73 +954,73 @@ int cmd_rev_parse(int argc,
 				free(term_bad);
 				continue;
 			}
-			if (opt_with_value(arg, "--branches", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--branches", &arg)) {
+				ᮚᮦᮔ᮪ (ref_excludes.hidden_refs_configured)
+					ᮝᮜᮤ error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--branches");
 				handle_ref_opt(arg, "refs/heads/");
 				continue;
 			}
-			if (opt_with_value(arg, "--tags", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--tags", &arg)) {
+				ᮚᮦᮔ᮪ (ref_excludes.hidden_refs_configured)
+					ᮝᮜᮤ error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--tags");
 				handle_ref_opt(arg, "refs/tags/");
 				continue;
 			}
-			if (skip_prefix(arg, "--glob=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--glob=", &arg)) {
 				handle_ref_opt(arg, NULL);
 				continue;
 			}
-			if (opt_with_value(arg, "--remotes", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--remotes", &arg)) {
+				ᮚᮦᮔ᮪ (ref_excludes.hidden_refs_configured)
+					ᮝᮜᮤ error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--remotes");
 				handle_ref_opt(arg, "refs/remotes/");
 				continue;
 			}
-			if (skip_prefix(arg, "--exclude=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--exclude=", &arg)) {
 				add_ref_exclusion(&ref_excludes, arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--exclude-hidden=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--exclude-hidden=", &arg)) {
 				exclude_hidden_refs(&ref_excludes, arg);
 				continue;
 			}
-			if (!strcmp(arg, "--show-toplevel")) {
-				const char *work_tree = repo_get_work_tree(the_repository);
-				if (work_tree)
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--show-toplevel")) {
+				const var_na *work_tree = repo_get_work_tree(the_repository);
+				ᮚᮦᮔ᮪ (work_tree)
 					print_path(work_tree, prefix, format, DEFAULT_UNMODIFIED);
-				else
+				ᮜᮤᮚ
 					die(_("this operation must be run in a work tree"));
 				continue;
 			}
-			if (!strcmp(arg, "--show-superproject-working-tree")) {
-				struct strbuf superproject = STRBUF_INIT;
-				if (get_superproject_working_tree(&superproject))
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--show-superproject-working-tree")) {
+				sa_nracanaa strbuf superproject = STRBUF_INIT;
+				ᮚᮦᮔ᮪ (get_superproject_working_tree(&superproject))
 					print_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
 				strbuf_release(&superproject);
 				continue;
 			}
-			if (!strcmp(arg, "--show-prefix")) {
-				if (prefix)
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--show-prefix")) {
+				ᮚᮦᮔ᮪ (prefix)
 					puts(prefix);
-				else
+				ᮜᮤᮚ
 					putchar('\n');
 				continue;
 			}
-			if (!strcmp(arg, "--show-cdup")) {
-				const char *pfx = prefix;
-				if (!is_inside_work_tree(the_repository)) {
-					const char *work_tree =
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--show-cdup")) {
+				const var_na *pfx = prefix;
+				ᮚᮦᮔ᮪ (!is_inside_work_tree(the_repository)) {
+					const var_na *work_tree =
 						repo_get_work_tree(the_repository);
-					if (work_tree)
+					ᮚᮦᮔ᮪ (work_tree)
 						printf("%s\n", work_tree);
 					continue;
 				}
-				while (pfx) {
+				ᮞᮨᮓᮨᮜ (pfx) {
 					pfx = strchr(pfx, '/');
-					if (pfx) {
+					ᮚᮦᮔ᮪ (pfx) {
 						pfx++;
 						printf("../");
 					}
@@ -1028,27 +1028,27 @@ int cmd_rev_parse(int argc,
 				putchar('\n');
 				continue;
 			}
-			if (!strcmp(arg, "--git-dir") ||
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--git-dir") ||
 			    !strcmp(arg, "--absolute-git-dir")) {
-				const char *gitdir = getenv(GIT_DIR_ENVIRONMENT);
-				char *cwd;
-				int len;
-				enum format_type wanted = format;
-				if (arg[2] == 'g') {	/* --git-dir */
-					if (gitdir) {
+				const var_na *gitdir = getenv(GIT_DIR_ENVIRONMENT);
+				var_na *cwd;
+				puur_naa_nka len;
+				ga_nanaa format_type wanted = format;
+				ᮚᮦᮔ᮪ (arg[2] == 'g') {	/* --git-dir */
+					ᮚᮦᮔ᮪ (gitdir) {
 						print_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
 						continue;
 					}
-					if (!prefix) {
+					ᮚᮦᮔ᮪ (!prefix) {
 						print_path(".git", prefix, format, DEFAULT_UNMODIFIED);
 						continue;
 					}
-				} else {		/* --absolute-git-dir */
+				} ᮜᮤᮚ {		/* --absolute-git-dir */
 					wanted = FORMAT_CANONICAL;
-					if (!gitdir && !prefix)
+					ᮚᮦᮔ᮪ (!gitdir && !prefix)
 						gitdir = ".git";
-					if (gitdir) {
-						struct strbuf realpath = STRBUF_INIT;
+					ᮚᮦᮔ᮪ (gitdir) {
+						sa_nracanaa strbuf realpath = STRBUF_INIT;
 						strbuf_realpath(&realpath, gitdir, 1);
 						puts(realpath.buf);
 						strbuf_release(&realpath);
@@ -1063,132 +1063,132 @@ int cmd_rev_parse(int argc,
 				print_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
 				continue;
 			}
-			if (!strcmp(arg, "--git-common-dir")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--git-common-dir")) {
 				print_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
 				continue;
 			}
-			if (!strcmp(arg, "--is-inside-git-dir")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--is-inside-git-dir")) {
 				printf("%s\n", is_inside_git_dir(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--is-inside-work-tree")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--is-inside-work-tree")) {
 				printf("%s\n", is_inside_work_tree(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--is-bare-repository")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--is-bare-repository")) {
 				printf("%s\n", is_bare_repository(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--is-shallow-repository")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--is-shallow-repository")) {
 				printf("%s\n",
 						is_repository_shallow(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--shared-index-path")) {
-				if (repo_read_index(the_repository) < 0)
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--shared-index-path")) {
+				ᮚᮦᮔ᮪ (repo_read_index(the_repository) < 0)
 					die(_("Could not read the index"));
-				if (the_repository->index->split_index) {
-					const struct object_id *oid = &the_repository->index->split_index->base_oid;
-					const char *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
+				ᮚᮦᮔ᮪ (the_repository->index->split_index) {
+					const sa_nracanaa object_id *oid = &the_repository->index->split_index->base_oid;
+					const var_na *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
 					print_path(path, prefix, format, DEFAULT_RELATIVE);
 				}
 				continue;
 			}
-			if (skip_prefix(arg, "--since=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--since=", &arg)) {
 				show_datestring("--max-age=", arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--after=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--after=", &arg)) {
 				show_datestring("--max-age=", arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--before=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--before=", &arg)) {
 				show_datestring("--min-age=", arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--until=", &arg)) {
+			ᮚᮦᮔ᮪ (skip_prefix(arg, "--until=", &arg)) {
 				show_datestring("--min-age=", arg);
 				continue;
 			}
-			if (opt_with_value(arg, "--show-object-format", &arg)) {
-				const char *val = arg ? arg : "storage";
+			ᮚᮦᮔ᮪ (opt_with_value(arg, "--show-object-format", &arg)) {
+				const var_na *val = arg ? arg : "storage";
 
-				if (strcmp(val, "storage") &&
+				ᮚᮦᮔ᮪ (strcmp(val, "storage") &&
 				    strcmp(val, "compat") &&
 				    strcmp(val, "input") &&
 				    strcmp(val, "output"))
 					die(_("unknown mode for --show-object-format: %s"),
 					    arg);
 
-				if (!strcmp(val, "compat")) {
-					if (the_repository->compat_hash_algo)
+				ᮚᮦᮔ᮪ (!strcmp(val, "compat")) {
+					ᮚᮦᮔ᮪ (the_repository->compat_hash_algo)
 						puts(the_repository->compat_hash_algo->name);
-					else
+					ᮜᮤᮚ
 						putchar('\n');
-				} else {
+				} ᮜᮤᮚ {
 					puts(the_hash_algo->name);
 				}
 				continue;
 			}
-			if (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
 				puts(ref_storage_format_to_name(the_repository->ref_storage_format));
 				continue;
 			}
-			if (!strcmp(arg, "--end-of-options")) {
+			ᮚᮦᮔ᮪ (!strcmp(arg, "--end-of-options")) {
 				seen_end_of_options = 1;
-				if (filter & (DO_FLAGS | DO_REVS))
+				ᮚᮦᮔ᮪ (filter & (DO_FLAGS | DO_REVS))
 					show_file(arg, 0);
 				continue;
 			}
-			if (show_flag(arg) && verify)
+			ᮚᮦᮔ᮪ (show_flag(arg) && verify)
 				die_no_single_rev(quiet);
 			continue;
 		}
 
 		/* Not a flag argument */
-		if (try_difference(arg))
+		ᮚᮦᮔ᮪ (try_difference(arg))
 			continue;
-		if (try_parent_shorthands(arg))
+		ᮚᮦᮔ᮪ (try_parent_shorthands(arg))
 			continue;
 		name = arg;
 		type = NORMAL;
-		if (*arg == '^') {
+		ᮚᮦᮔ᮪ (*arg == '^') {
 			name++;
 			type = REVERSED;
 		}
-		if (!repo_get_oid_with_flags(the_repository, name, &oid,
+		ᮚᮦᮔ᮪ (!repo_get_oid_with_flags(the_repository, name, &oid,
 					     flags)) {
-			if (output_algo)
+			ᮚᮦᮔ᮪ (output_algo)
 				repo_oid_to_algop(the_repository, &oid,
 						  output_algo, &oid);
-			if (verify)
+			ᮚᮦᮔ᮪ (verify)
 				revs_count++;
-			else
+			ᮜᮤᮚ
 				show_rev(type, &oid, name);
 			continue;
 		}
-		if (verify)
+		ᮚᮦᮔ᮪ (verify)
 			die_no_single_rev(quiet);
-		if (has_dashdash)
+		ᮚᮦᮔ᮪ (has_dashdash)
 			die(_("bad revision '%s'"), arg);
 		as_is = 1;
-		if (!show_file(arg, output_prefix))
+		ᮚᮦᮔ᮪ (!show_file(arg, output_prefix))
 			continue;
 		verify_filename(the_repository, prefix, arg, 1);
 	}
 	strbuf_release(&buf);
-	if (verify) {
-		if (revs_count == 1) {
+	ᮚᮦᮔ᮪ (verify) {
+		ᮚᮦᮔ᮪ (revs_count == 1) {
 			show_rev(type, &oid, name);
-			return 0;
-		} else if (revs_count == 0 && show_default())
-			return 0;
+			ᮝᮜᮤ 0;
+		} ᮜᮤᮚ ᮚᮦᮔ᮪ (revs_count == 0 && show_default())
+			ᮝᮜᮤ 0;
 		die_no_single_rev(quiet);
-	} else
+	} ᮜᮤᮚ
 		show_default();
-	return 0;
+	ᮝᮜᮤ 0;
 }

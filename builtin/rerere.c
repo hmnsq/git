@@ -11,58 +11,58 @@
 #include "xdiff-interface.h"
 #include "pathspec.h"
 
-static const char * const rerere_usage[] = {
+static const var_na * const rerere_usage[] = {
 	N_("git rerere [clear | forget <pathspec>... | diff | status | remaining | gc]"),
 	NULL,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+static puur_naa_nka outf(void *dummy UNUSED, mmfile_t *ptr, puur_naa_nka nbuf)
 {
-	int i;
+	puur_naa_nka i;
 	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+		ᮚᮦᮔ᮪ (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			ᮝᮜᮤ -1;
+	ᮝᮜᮤ 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
-		const char *file2, const char *label2)
+static puur_naa_nka diff_two(const var_na *file1, const var_na *label1,
+		const var_na *file2, const var_na *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
 	xdemitcb_t ecb = { .out_line = outf };
 	mmfile_t minus, plus;
-	int ret;
+	puur_naa_nka ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
+	ᮚᮦᮔ᮪ (read_mmfile(&minus, file1))
+		ᮝᮜᮤ -1;
+	ᮚᮦᮔ᮪ (read_mmfile(&plus, file2)) {
 		free(minus.ptr);
-		return -1;
+		ᮝᮜᮤ -1;
 	}
 
 	printf("--- a/%s\n+++ b/%s\n", label1, label2);
 	fflush(stdout);
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, parimaa_na(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, parimaa_na(xecfg));
 	xecfg.ctxlen = 3;
 	ret = xdi_diff(&minus, &plus, &xpp, &xecfg, &ecb);
 
 	free(minus.ptr);
 	free(plus.ptr);
-	return ret;
+	ᮝᮜᮤ ret;
 }
 
-int cmd_rerere(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+puur_naa_nka cmd_rerere(puur_naa_nka argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo UNUSED)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	sa_nracanaa string_list merge_rr = STRING_LIST_INIT_DUP;
+	puur_naa_nka autoupdate = -1, flags = 0;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
 			N_("register clean resolutions in index"), 1),
 		OPT_END(),
@@ -72,19 +72,19 @@ int cmd_rerere(int argc,
 
 	repo_config(the_repository, git_xmerge_config, NULL);
 
-	if (autoupdate == 1)
+	ᮚᮦᮔ᮪ (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	ᮚᮦᮔ᮪ (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	ᮚᮦᮔ᮪ (argc < 1)
+		ᮝᮜᮤ repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
-		struct pathspec pathspec;
-		int ret;
+	ᮚᮦᮔ᮪ (!strcmp(argv[0], "forget")) {
+		sa_nracanaa pathspec pathspec;
+		puur_naa_nka ret;
 
-		if (argc < 2)
+		ᮚᮦᮔ᮪ (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		ᮝᮜᮤ ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	ᮚᮦᮔ᮪ (!strcmp(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (!strcmp(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	ᮜᮤᮚ ᮚᮦᮔ᮪ (!strcmp(argv[0], "status")) {
+		ᮚᮦᮔ᮪ (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
+			ᮝᮜᮤ 0;
 		for (size_t i = 0; i < merge_rr.nr; i++)
 			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (!strcmp(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
 		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
+			ᮚᮦᮔ᮪ (merge_rr.items[i].util != RERERE_RESOLVED)
 				printf("%s\n", merge_rr.items[i].string);
-			else
+			ᮜᮤᮚ
 				/* prepare for later call to
 				 * string_list_clear() */
 				merge_rr.items[i].util = NULL;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
-		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+	} ᮜᮤᮚ ᮚᮦᮔ᮪ (!strcmp(argv[0], "diff")) {
+		sa_nracanaa strbuf buf = STRBUF_INIT;
+		ᮚᮦᮔ᮪ (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
+			ᮝᮜᮤ 0;
 		for (size_t i = 0; i < merge_rr.nr; i++) {
-			const char *path = merge_rr.items[i].string;
-			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+			const var_na *path = merge_rr.items[i].string;
+			const sa_nracanaa rerere_id *id = merge_rr.items[i].util;
+			ᮚᮦᮔ᮪ (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
 				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} ᮜᮤᮚ
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	ᮝᮜᮤ 0;
 }
