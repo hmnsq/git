@@ -10,17 +10,17 @@
 #include "strbuf.h"
 #include "strvec.h"
 
-int for_each_ref_core(int argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
+පූර්ණ_සංඛ්‍යා for_each_ref_core(පූර්ණ_සංඛ්‍යා argc, const var_na **argv, const var_na *prefix, sa_nracanaa repository *repo, const var_na *const *usage)
 {
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_format format = REF_FORMAT_INIT;
-	unsigned int flags = FILTER_REFS_REGULAR;
-	struct strvec vec = STRVEC_INIT;
+	sa_nracanaa ref_sorting *sorting;
+	sa_nracanaa string_list sorting_options = STRING_LIST_INIT_DUP;
+	පූර්ණ_සංඛ්‍යා icase = 0, include_root_refs = 0, from_stdin = 0;
+	sa_nracanaa ref_filter filter = REF_FILTER_INIT;
+	sa_nracanaa ref_format format = REF_FORMAT_INIT;
+	unsigned පූර්ණ_සංඛ්‍යා flags = FILTER_REFS_REGULAR;
+	sa_nracanaa strvec vec = STRVEC_INIT;
 
-	struct option opts[] = {
+	sa_nracanaa option opts[] = {
 		OPT_BIT('s', "shell", &format.quote_style,
 			N_("quote placeholders suitably for shells"), QUOTE_SHELL),
 		OPT_BIT('p', "perl",  &format.quote_style,
@@ -60,45 +60,45 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	string_list_append(&sorting_options, "refname");
 
 	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
+	නම් (format.array_opts.max_count < 0) {
 		error("invalid --count argument: `%d'", format.array_opts.max_count);
 		usage_with_options(usage, opts);
 	}
-	if (HAS_MULTI_BITS(format.quote_style)) {
+	නම් (HAS_MULTI_BITS(format.quote_style)) {
 		error("more than one quoting style?");
 		usage_with_options(usage, opts);
 	}
-	if (verify_ref_format(&format))
+	නම් (verify_ref_format(&format))
 		usage_with_options(usage, opts);
 
-	if (filter.start_after && sorting_options.nr > 1)
+	නම් (filter.start_after && sorting_options.nr > 1)
 		die(_("cannot use --start-after with custom sort options"));
 
 	sorting = ref_sorting_options(&sorting_options);
 	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
 	filter.ignore_case = icase;
 
-	if (from_stdin) {
-		struct strbuf line = STRBUF_INIT;
+	නම් (from_stdin) {
+		sa_nracanaa strbuf line = STRBUF_INIT;
 
-		if (argv[0])
+		නම් (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
+		අතරතුර (strbuf_getline(&line, stdin) != EOF)
 			strvec_push(&vec, line.buf);
 
 		strbuf_release(&line);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
-	} else {
+	} නැතහොත් {
 		filter.name_patterns = argv;
 	}
 
-	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
+	නම් (filter.start_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
+	නම් (include_root_refs)
 		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
 
 	filter.match_as_path = 1;
@@ -107,18 +107,18 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	ref_filter_clear(&filter);
 	ref_sorting_release(sorting);
 	strvec_clear(&vec);
-	return 0;
+	ආපසු 0;
 }
 
-int cmd_for_each_ref(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+පූර්ණ_සංඛ්‍යා cmd_for_each_ref(පූර්ණ_සංඛ්‍යා argc,
+		     const var_na **argv,
+		     const var_na *prefix,
+		     sa_nracanaa repository *repo)
 {
-	static char const * const for_each_ref_usage[] = {
+	static var_na const * const for_each_ref_usage[] = {
 		N_("git for-each-ref " COMMON_USAGE_FOR_EACH_REF),
 		NULL
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
+	ආපසු for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
 }

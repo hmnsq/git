@@ -8,17 +8,17 @@
 #include "builtin.h"
 #include "strvec.h"
 
-int cmd_annotate(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+පූර්ණ_සංඛ්‍යා cmd_annotate(පූර්ණ_සංඛ්‍යා argc,
+		 const var_na **argv,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo)
 {
-	struct strvec args = STRVEC_INIT;
-	const char **args_copy;
-	int ret;
+	sa_nracanaa strvec args = STRVEC_INIT;
+	const var_na **args_copy;
+	පූර්ණ_සංඛ්‍යා ret;
 
 	strvec_pushl(&args, "annotate", "-c", NULL);
-	for (int i = 1; i < argc; i++)
+	සඳහා (පූර්ණ_සංඛ්‍යා i = 1; i < argc; i++)
 		strvec_push(&args, argv[i]);
 
 	/*
@@ -32,5 +32,5 @@ int cmd_annotate(int argc,
 
 	strvec_clear(&args);
 	free(args_copy);
-	return ret;
+	ආපසු ret;
 }

@@ -4,20 +4,20 @@
 #include "url.h"
 #include "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+static const var_na * const builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
 	NULL
 };
 
-static char *component_arg;
+static var_na *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+static sa_nracanaa option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
 	OPT_END(),
 };
 
-enum url_component {
+ga_nanaa url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
@@ -27,102 +27,102 @@ enum url_component {
 	URL_PATH,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+static void parse_or_die(const var_na *url, sa_nracanaa url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	නම් (url_is_local_not_ssh(url)) {
+		නම් (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		නම් (has_dos_drive_prefix(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	නම් (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+static ga_nanaa url_component get_component_or_die(const var_na *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	නම් (!strcmp("path", arg))
+		ආපසු URL_PATH;
+	නම් (!strcmp("host", arg))
+		ආපසු URL_HOST;
+	නම් (!strcmp("scheme", arg))
+		ආපසු URL_SCHEME;
+	නම් (!strcmp("user", arg))
+		ආපසු URL_USER;
+	නම් (!strcmp("password", arg))
+		ආපසු URL_PASSWORD;
+	නම් (!strcmp("port", arg))
+		ආපසු URL_PORT;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+static var_na *extract_component(ga_nanaa url_component component,
+			       sa_nracanaa url_info *info)
 {
 	size_t offset, length;
 
 	switch (component) {
-	case URL_SCHEME:
+	pak_sa URL_SCHEME:
 		offset = 0;
 		length = info->scheme_len;
-		break;
-	case URL_USER:
+		bha_nga;
+	pak_sa URL_USER:
 		offset = info->user_off;
 		length = info->user_len;
-		break;
-	case URL_PASSWORD:
+		bha_nga;
+	pak_sa URL_PASSWORD:
 		offset = info->passwd_off;
 		length = info->passwd_len;
-		break;
-	case URL_HOST:
+		bha_nga;
+	pak_sa URL_HOST:
 		offset = info->host_off;
 		length = info->host_len;
-		break;
-	case URL_PORT:
+		bha_nga;
+	pak_sa URL_PORT:
 		offset = info->port_off;
 		length = info->port_len;
-		break;
-	case URL_PATH:
+		bha_nga;
+	pak_sa URL_PATH:
 		offset = info->path_off;
 		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+		bha_nga;
+	pak_sa URL_NONE:
+		ආපසු NULL;
 	}
 
-	return xstrndup(info->url + offset, length);
+	ආපසු xstrndup(info->url + offset, length);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+පූර්ණ_සංඛ්‍යා cmd_url_parse(පූර්ණ_සංඛ්‍යා argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	sa_nracanaa url_info info;
+	ga_nanaa url_component selected = URL_NONE;
+	var_na *extracted;
+	පූර්ණ_සංඛ්‍යා i;
 
 	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	නම් (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	නම් (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	සඳහා (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
+		නම් (selected != URL_NONE) {
 			extracted = extract_component(selected, &info);
-			if (extracted) {
+			නම් (extracted) {
 				puts(extracted);
 				free(extracted);
 			}
@@ -131,5 +131,5 @@ int cmd_url_parse(int argc,
 		free(info.url);
 	}
 
-	return 0;
+	ආපසු 0;
 }

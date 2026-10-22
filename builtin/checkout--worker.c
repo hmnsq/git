@@ -11,24 +11,24 @@
 #include "pkt-line.h"
 #include "read-cache-ll.h"
 
-static void packet_to_pc_item(const char *buffer, int len,
-			      struct parallel_checkout_item *pc_item)
+static void packet_to_pc_item(const var_na *buffer, පූර්ණ_සංඛ්‍යා len,
+			      sa_nracanaa parallel_checkout_item *pc_item)
 {
-	const struct pc_item_fixed_portion *fixed_portion;
-	const char *variant;
-	char *encoding;
+	const sa_nracanaa pc_item_fixed_portion *fixed_portion;
+	const var_na *variant;
+	var_na *encoding;
 
-	if (len < sizeof(struct pc_item_fixed_portion))
+	නම් (len < parimaa_na(sa_nracanaa pc_item_fixed_portion))
 		BUG("checkout worker received too short item (got %dB, exp %dB)",
-		    len, (int)sizeof(struct pc_item_fixed_portion));
+		    len, (පූර්ණ_සංඛ්‍යා)parimaa_na(sa_nracanaa pc_item_fixed_portion));
 
-	fixed_portion = (struct pc_item_fixed_portion *)buffer;
+	fixed_portion = (sa_nracanaa pc_item_fixed_portion *)buffer;
 
-	if (len - sizeof(struct pc_item_fixed_portion) !=
+	නම් (len - parimaa_na(sa_nracanaa pc_item_fixed_portion) !=
 		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
 		BUG("checkout worker received corrupted item");
 
-	variant = buffer + sizeof(struct pc_item_fixed_portion);
+	variant = buffer + parimaa_na(sa_nracanaa pc_item_fixed_portion);
 
 	/*
 	 * Note: the main process uses zero length to communicate that the
@@ -36,15 +36,15 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	නම් (fixed_portion->working_tree_encoding_len) {
 		encoding = xmemdupz(variant,
 				    fixed_portion->working_tree_encoding_len);
 		variant += fixed_portion->working_tree_encoding_len;
-	} else {
+	} නැතහොත් {
 		encoding = NULL;
 	}
 
-	memset(pc_item, 0, sizeof(*pc_item));
+	memset(pc_item, 0, parimaa_na(*pc_item));
 	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, NULL);
 	pc_item->ce->ce_namelen = fixed_portion->name_len;
 	pc_item->ce->ce_mode = fixed_portion->ce_mode;
@@ -57,51 +57,51 @@ static void packet_to_pc_item(const char *buffer, int len,
 	pc_item->ca.working_tree_encoding = encoding;
 }
 
-static void report_result(struct parallel_checkout_item *pc_item)
+static void report_result(sa_nracanaa parallel_checkout_item *pc_item)
 {
-	struct pc_item_result res = { 0 };
+	sa_nracanaa pc_item_result res = { 0 };
 	size_t size;
 
 	res.id = pc_item->id;
 	res.status = pc_item->status;
 
-	if (pc_item->status == PC_ITEM_WRITTEN) {
+	නම් (pc_item->status == PC_ITEM_WRITTEN) {
 		res.st = pc_item->st;
-		size = sizeof(res);
-	} else {
+		size = parimaa_na(res);
+	} නැතහොත් {
 		size = PC_ITEM_RESULT_BASE_SIZE;
 	}
 
-	packet_write(1, (const char *)&res, size);
+	packet_write(1, (const var_na *)&res, size);
 }
 
 /* Free the worker-side malloced data, but not pc_item itself. */
-static void release_pc_item_data(struct parallel_checkout_item *pc_item)
+static void release_pc_item_data(sa_nracanaa parallel_checkout_item *pc_item)
 {
-	free((char *)pc_item->ca.working_tree_encoding);
+	free((var_na *)pc_item->ca.working_tree_encoding);
 	discard_cache_entry(pc_item->ce);
 }
 
-static void worker_loop(struct checkout *state)
+static void worker_loop(sa_nracanaa checkout *state)
 {
-	struct parallel_checkout_item *items = NULL;
+	sa_nracanaa parallel_checkout_item *items = NULL;
 	size_t i, nr = 0, alloc = 0;
 
-	while (1) {
-		int len = packet_read(0, packet_buffer, sizeof(packet_buffer),
+	අතරතුර (1) {
+		පූර්ණ_සංඛ්‍යා len = packet_read(0, packet_buffer, parimaa_na(packet_buffer),
 				      0);
 
-		if (len < 0)
+		නම් (len < 0)
 			BUG("packet_read() returned negative value");
-		else if (!len)
-			break;
+		නැතහොත් නම් (!len)
+			bha_nga;
 
 		ALLOC_GROW(items, nr + 1, alloc);
 		packet_to_pc_item(packet_buffer, len, &items[nr++]);
 	}
 
-	for (i = 0; i < nr; i++) {
-		struct parallel_checkout_item *pc_item = &items[i];
+	සඳහා (i = 0; i < nr; i++) {
+		sa_nracanaa parallel_checkout_item *pc_item = &items[i];
 		write_pc_item(pc_item, state);
 		report_result(pc_item);
 		release_pc_item_data(pc_item);
@@ -112,18 +112,18 @@ static void worker_loop(struct checkout *state)
 	free(items);
 }
 
-static const char * const checkout_worker_usage[] = {
+static const var_na * const checkout_worker_usage[] = {
 	N_("git checkout--worker [<options>]"),
 	NULL
 };
 
-int cmd_checkout__worker(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+පූර්ණ_සංඛ්‍යා cmd_checkout__worker(පූර්ණ_සංඛ්‍යා argc,
+			 const var_na **argv,
+			 const var_na *prefix,
+			 sa_nracanaa repository *repo UNUSED)
 {
-	struct checkout state = CHECKOUT_INIT;
-	struct option checkout_worker_options[] = {
+	sa_nracanaa checkout state = CHECKOUT_INIT;
+	sa_nracanaa option checkout_worker_options[] = {
 		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
 		OPT_END()
@@ -136,10 +136,10 @@ int cmd_checkout__worker(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, checkout_worker_options,
 			     checkout_worker_usage, 0);
-	if (argc > 0)
+	නම් (argc > 0)
 		usage_with_options(checkout_worker_usage, checkout_worker_options);
 
-	if (state.base_dir)
+	නම් (state.base_dir)
 		state.base_dir_len = strlen(state.base_dir);
 
 	/*
@@ -150,5 +150,5 @@ int cmd_checkout__worker(int argc,
 	state.refresh_cache = 1;
 
 	worker_loop(&state);
-	return 0;
+	ආපසු 0;
 }
