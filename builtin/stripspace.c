@@ -1,73 +1,73 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+ಸ್ಥಿರ ಶೂನ್ಯ comment_ಸಾಲುಗಳು(ಸಂರಚನಾ strbuf *buf)
 {
-	char *msg;
+	ವರ್ಣ *ಸಂದೇಶ;
 	size_t len;
 
-	msg = strbuf_detach(buf, &len);
-	strbuf_add_commented_lines(buf, msg, len, comment_line_str);
-	free(msg);
+	ಸಂದೇಶ = strbuf_detach(buf, &len);
+	strbuf_add_commented_ಸಾಲುಗಳು(buf, ಸಂದೇಶ, len, comment_ಸಾಲು_str);
+	ಮುಕ್ತ(ಸಂದೇಶ);
 }
 
-static const char * const stripspace_usage[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ stripspace_usage[] = {
 	"git stripspace [-s | --strip-comments]",
 	"git stripspace [-c | --comment-lines]",
-	NULL
+	ರಿಕ್ತ
 };
 
-enum stripspace_mode {
+ಗಣನಾ stripspace_mode {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
-	COMMENT_LINES
+	COMMENT_ಸಾಲುಗಳು
 };
 
-int cmd_stripspace(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_stripspace(ಪೂರ್ಣಾಙ್ಕ argc,
+		   ಧ್ರುವ ವರ್ಣ **argv,
+		   ಧ್ರುವ ವರ್ಣ *prefix,
+		   ಸಂರಚನಾ repository *repo UNUSED)
 {
-	struct strbuf buf = STRBUF_INIT;
-	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	ಸಂರಚನಾ strbuf buf = STRBUF_INIT;
+	ಗಣನಾ stripspace_mode mode = STRIP_DEFAULT;
+	ಪೂರ್ಣಾಙ್ಕ nongit;
 
-	const struct option options[] = {
+	ಧ್ರುವ ಸಂರಚನಾ option options[] = {
 		OPT_CMDMODE('s', "strip-comments", &mode,
 			    N_("skip and remove all lines starting with comment character"),
 			    STRIP_COMMENTS),
 		OPT_CMDMODE('c', "comment-lines", &mode,
 			    N_("prepend comment character and space to each line"),
-			    COMMENT_LINES),
+			    COMMENT_ಸಾಲುಗಳು),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	ಯದಿ (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	ಯದಿ (mode == STRIP_COMMENTS || mode == COMMENT_ಸಾಲುಗಳು) {
 		setup_git_directory_gently(the_repository, &nongit);
-		repo_config(the_repository, git_default_config, NULL);
+		repo_config(the_repository, git_default_config, ರಿಕ್ತ);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	ಯದಿ (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	ಯದಿ (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
-			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
-		comment_lines(&buf);
+			  mode == STRIP_COMMENTS ? comment_ಸಾಲು_str : ರಿಕ್ತ);
+	ಅನ್ಯಥಾ
+		comment_ಸಾಲುಗಳು(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }

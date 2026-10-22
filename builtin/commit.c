@@ -8,43 +8,43 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "color.h"
-#include "dir.h"
-#include "editor.h"
-#include "environment.h"
-#include "diff.h"
-#include "commit.h"
-#include "add-interactive.h"
-#include "gettext.h"
-#include "revision.h"
-#include "wt-status.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "string-list.h"
-#include "rerere.h"
-#include "unpack-trees.h"
-#include "column.h"
-#include "sequencer.h"
-#include "sparse-index.h"
-#include "mailmap.h"
-#include "help.h"
-#include "commit-reach.h"
-#include "commit-graph.h"
-#include "pretty.h"
-#include "trailer.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "advice.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "lockfile.h"
+#ಅನ್ತರ್ಭಾವ "cache-tree.h"
+#ಅನ್ತರ್ಭಾವ "color.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "editor.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "add-interactive.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "wt-status.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "preload-index.h"
+#ಅನ್ತರ್ಭಾವ "read-cache.h"
+#ಅನ್ತರ್ಭಾವ "repository.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "rerere.h"
+#ಅನ್ತರ್ಭಾವ "unpack-trees.h"
+#ಅನ್ತರ್ಭಾವ "column.h"
+#ಅನ್ತರ್ಭಾವ "sequencer.h"
+#ಅನ್ತರ್ಭಾವ "sparse-index.h"
+#ಅನ್ತರ್ಭಾವ "mailmap.h"
+#ಅನ್ತರ್ಭಾವ "help.h"
+#ಅನ್ತರ್ಭಾವ "commit-reach.h"
+#ಅನ್ತರ್ಭಾವ "commit-graph.h"
+#ಅನ್ತರ್ಭಾವ "pretty.h"
+#ಅನ್ತರ್ಭಾವ "trailer.h"
 
-static const char * const builtin_commit_usage[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ builtin_commit_usage[] = {
 	N_("git commit [-a | --interactive | --patch] [-s] [-v] [-u[<mode>]] [--amend]\n"
 	   "           [--dry-run] [(-c | -C | --squash) <commit> | --fixup [(amend|reword):]<commit>]\n"
 	   "           [-F <file> | -m <msg>] [--reset-author] [--allow-empty]\n"
@@ -53,33 +53,33 @@ static const char * const builtin_commit_usage[] = {
 	   "           [-i | -o] [--pathspec-from-file=<file> [--pathspec-file-nul]]\n"
 	   "           [(--trailer <token>[(=|:)<value>])...] [-S[<keyid>]]\n"
 	   "           [--] [<pathspec>...]"),
-	NULL
+	ರಿಕ್ತ
 };
 
-static const char * const builtin_status_usage[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ builtin_status_usage[] = {
 	N_("git status [<options>] [--] [<pathspec>...]"),
-	NULL
+	ರಿಕ್ತ
 };
 
-static const char empty_amend_advice[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ empty_amend_advice[] =
 N_("You asked to amend the most recent commit, but doing so would make\n"
 "it empty. You can repeat your command with --allow-empty, or you can\n"
 "remove the commit entirely with \"git reset HEAD^\".\n");
 
-static const char empty_cherry_pick_advice[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ empty_cherry_pick_advice[] =
 N_("The previous cherry-pick is now empty, possibly due to conflict resolution.\n"
 "If you wish to commit it anyway, use:\n"
 "\n"
 "    git commit --allow-empty\n"
 "\n");
 
-static const char empty_rebase_pick_advice[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ empty_rebase_pick_advice[] =
 N_("Otherwise, please use 'git rebase --skip'\n");
 
-static const char empty_cherry_pick_advice_single[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ empty_cherry_pick_advice_single[] =
 N_("Otherwise, please use 'git cherry-pick --skip'\n");
 
-static const char empty_cherry_pick_advice_multi[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ empty_cherry_pick_advice_multi[] =
 N_("and then use:\n"
 "\n"
 "    git cherry-pick --continue\n"
@@ -90,7 +90,7 @@ N_("and then use:\n"
 "    git cherry-pick --skip\n"
 "\n");
 
-static const char *color_status_slots[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *color_status_slots[] = {
 	[WT_STATUS_HEADER]	  = "header",
 	[WT_STATUS_UPDATED]	  = "updated",
 	[WT_STATUS_CHANGED]	  = "changed",
@@ -102,35 +102,35 @@ static const char *color_status_slots[] = {
 	[WT_STATUS_ONBRANCH]	  = "branch",
 };
 
-static const char *use_message_buffer;
-static struct lock_file index_lock; /* real index */
-static struct lock_file false_lock; /* used only for partial commits */
-static enum {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *use_message_buffer;
+ಸ್ಥಿರ ಸಂರಚನಾ lock_file index_lock; /* real index */
+ಸ್ಥಿರ ಸಂರಚನಾ lock_file false_lock; /* used only for partial commits */
+ಸ್ಥಿರ ಗಣನಾ {
 	COMMIT_AS_IS = 1,
 	COMMIT_NORMAL,
 	COMMIT_PARTIAL
 } commit_style;
 
-static const char *force_author;
-static char *logfile;
-static char *template_file;
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *force_author;
+ಸ್ಥಿರ ವರ್ಣ *logfile;
+ಸ್ಥಿರ ವರ್ಣ *template_file;
 /*
  * The _message variables are commit names from which to take
  * the commit message and/or authorship.
  */
-static const char *author_message, *author_message_buffer;
-static const char *edit_message, *use_message;
-static char *fixup_message, *fixup_commit, *squash_message;
-static const char *fixup_prefix;
-static int all, also, interactive, patch_interactive, only, amend, signoff;
-static struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-static int edit_flag = -1; /* unspecified */
-static int quiet, verbose, no_verify, allow_empty, dry_run, renew_authorship;
-static int config_commit_verbose = -1; /* unspecified */
-static int no_post_rewrite, allow_empty_message, pathspec_file_nul;
-static const char *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
-static const char *sign_commit, *pathspec_from_file;
-static struct strvec trailer_args = STRVEC_INIT;
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *author_message, *author_message_buffer;
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *edit_message, *use_message;
+ಸ್ಥಿರ ವರ್ಣ *fixup_message, *fixup_commit, *squash_message;
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *fixup_prefix;
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ all, also, interactive, patch_interactive, only, amend, signoff;
+ಸ್ಥಿರ ಸಂರಚನಾ interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ edit_flag = -1; /* unspecified */
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ quiet, verbose, no_verify, allow_empty, dry_run, renew_authorship;
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ config_commit_verbose = -1; /* unspecified */
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ no_post_rewrite, allow_empty_message, pathspec_file_nul;
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *sign_commit, *pathspec_from_file;
+ಸ್ಥಿರ ಸಂರಚನಾ strvec trailer_args = STRVEC_INIT;
 
 /*
  * The default commit message cleanup mode will remove the lines
@@ -139,73 +139,73 @@ static struct strvec trailer_args = STRVEC_INIT;
  * if editor is used, and only the whitespaces if the message
  * is specified explicitly.
  */
-static enum commit_msg_cleanup_mode cleanup_mode;
-static char *cleanup_config;
+ಸ್ಥಿರ ಗಣನಾ commit_ಸಂದೇಶ_cleanup_mode cleanup_mode;
+ಸ್ಥಿರ ವರ್ಣ *cleanup_config;
 
-static enum commit_whence whence;
-static int use_editor = 1, include_status = 1;
-static int have_option_m;
-static struct strbuf message = STRBUF_INIT;
+ಸ್ಥಿರ ಗಣನಾ commit_whence whence;
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ use_editor = 1, include_status = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ have_option_m;
+ಸ್ಥಿರ ಸಂರಚನಾ strbuf message = STRBUF_INIT;
 
-static enum wt_status_format status_format = STATUS_FORMAT_UNSPECIFIED;
+ಸ್ಥಿರ ಗಣನಾ wt_status_format status_format = STATUS_FORMAT_UNSPECIFIED;
 
-static int opt_parse_porcelain(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ opt_parse_porcelain(ಧ್ರುವ ಸಂರಚನಾ option *opt, ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
-	enum wt_status_format *value = (enum wt_status_format *)opt->value;
-	if (unset)
-		*value = STATUS_FORMAT_NONE;
-	else if (!arg)
-		*value = STATUS_FORMAT_PORCELAIN;
-	else if (!strcmp(arg, "v1") || !strcmp(arg, "1"))
-		*value = STATUS_FORMAT_PORCELAIN;
-	else if (!strcmp(arg, "v2") || !strcmp(arg, "2"))
-		*value = STATUS_FORMAT_PORCELAIN_V2;
-	else
+	ಗಣನಾ wt_status_format *ಮೌಲ್ಯ = (ಗಣನಾ wt_status_format *)opt->ಮೌಲ್ಯ;
+	ಯದಿ (unset)
+		*ಮೌಲ್ಯ = STATUS_FORMAT_NONE;
+	ಅನ್ಯಥಾ ಯದಿ (!arg)
+		*ಮೌಲ್ಯ = STATUS_FORMAT_PORCELAIN;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "v1") || !strcmp(arg, "1"))
+		*ಮೌಲ್ಯ = STATUS_FORMAT_PORCELAIN;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "v2") || !strcmp(arg, "2"))
+		*ಮೌಲ್ಯ = STATUS_FORMAT_PORCELAIN_V2;
+	ಅನ್ಯಥಾ
 		die("unsupported porcelain version '%s'", arg);
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static int opt_parse_m(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ opt_parse_m(ಧ್ರುವ ಸಂರಚನಾ option *opt, ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
-	struct strbuf *buf = opt->value;
-	if (unset) {
+	ಸಂರಚನಾ strbuf *buf = opt->ಮೌಲ್ಯ;
+	ಯದಿ (unset) {
 		have_option_m = 0;
 		strbuf_setlen(buf, 0);
-	} else {
+	} ಅನ್ಯಥಾ {
 		have_option_m = 1;
-		if (buf->len)
+		ಯದಿ (buf->len)
 			strbuf_addch(buf, '\n');
 		strbuf_addstr(buf, arg);
-		strbuf_complete_line(buf);
+		strbuf_complete_ಸಾಲು(buf);
 	}
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static int opt_parse_rename_score(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ opt_parse_rename_score(ಧ್ರುವ ಸಂರಚನಾ option *opt, ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
-	const char **value = opt->value;
+	ಧ್ರುವ ವರ್ಣ **ಮೌಲ್ಯ = opt->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (arg != NULL && *arg == '=')
+	ಯದಿ (arg != ರಿಕ್ತ && *arg == '=')
 		arg = arg + 1;
 
-	*value = arg;
-	return 0;
+	*ಮೌಲ್ಯ = arg;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static void determine_whence(struct wt_status *s)
+ಸ್ಥಿರ ಶೂನ್ಯ determine_whence(ಸಂರಚನಾ wt_status *s)
 {
-	if (file_exists(git_path_merge_head(the_repository)))
+	ಯದಿ (file_exists(git_path_merge_head(the_repository)))
 		whence = FROM_MERGE;
-	else if (!sequencer_determine_whence(the_repository, &whence))
+	ಅನ್ಯಥಾ ಯದಿ (!sequencer_determine_whence(the_repository, &whence))
 		whence = FROM_COMMIT;
-	if (s)
+	ಯದಿ (s)
 		s->whence = whence;
 }
 
-static void status_init_config(struct wt_status *s, config_fn_t fn)
+ಸ್ಥಿರ ಶೂನ್ಯ status_init_config(ಸಂರಚನಾ wt_status *s, config_fn_t fn)
 {
 	wt_status_prepare(the_repository, s);
 	init_diff_ui_defaults();
@@ -214,112 +214,112 @@ static void status_init_config(struct wt_status *s, config_fn_t fn)
 	s->hints = advice_enabled(ADVICE_STATUS_HINTS); /* must come after repo_config() */
 }
 
-static void rollback_index_files(void)
+ಸ್ಥಿರ ಶೂನ್ಯ rollback_index_files(ಶೂನ್ಯ)
 {
-	switch (commit_style) {
-	case COMMIT_AS_IS:
-		break; /* nothing to do */
-	case COMMIT_NORMAL:
+	ವಿಕಲ್ಪ (commit_style) {
+	ಪಕ್ಷ COMMIT_AS_IS:
+		ಭಙ್ಗ; /* nothing to do */
+	ಪಕ್ಷ COMMIT_NORMAL:
 		rollback_lock_file(&index_lock);
-		break;
-	case COMMIT_PARTIAL:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ COMMIT_PARTIAL:
 		rollback_lock_file(&index_lock);
 		rollback_lock_file(&false_lock);
-		break;
+		ಭಙ್ಗ;
 	}
 }
 
-static int commit_index_files(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ commit_index_files(ಶೂನ್ಯ)
 {
-	int err = 0;
+	ಪೂರ್ಣಾಙ್ಕ err = 0;
 
-	switch (commit_style) {
-	case COMMIT_AS_IS:
-		break; /* nothing to do */
-	case COMMIT_NORMAL:
+	ವಿಕಲ್ಪ (commit_style) {
+	ಪಕ್ಷ COMMIT_AS_IS:
+		ಭಙ್ಗ; /* nothing to do */
+	ಪಕ್ಷ COMMIT_NORMAL:
 		err = commit_lock_file(&index_lock);
-		break;
-	case COMMIT_PARTIAL:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ COMMIT_PARTIAL:
 		err = commit_lock_file(&index_lock);
 		rollback_lock_file(&false_lock);
-		break;
+		ಭಙ್ಗ;
 	}
 
-	return err;
+	ಪ್ರತ್ಯಾಗಮ err;
 }
 
 /*
  * Take a union of paths in the index and the named tree (typically, "HEAD"),
  * and return the paths that match the given pattern in list.
  */
-static int list_paths(struct string_list *list, const char *with_tree,
-		      const struct pathspec *pattern)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ list_paths(ಸಂರಚನಾ string_list *list, ಧ್ರುವ ವರ್ಣ *with_ವೃಕ್ಷ,
+		      ಧ್ರುವ ಸಂರಚನಾ pathspec *pattern)
 {
-	int i, ret;
-	char *m;
+	ಪೂರ್ಣಾಙ್ಕ i, ret;
+	ವರ್ಣ *m;
 
-	if (!pattern->nr)
-		return 0;
+	ಯದಿ (!pattern->nr)
+		ಪ್ರತ್ಯಾಗಮ 0;
 
 	m = xcalloc(1, pattern->nr);
 
-	if (with_tree) {
-		char *max_prefix = common_prefix(pattern);
-		overlay_tree_on_index(the_repository->index, with_tree, max_prefix);
-		free(max_prefix);
+	ಯದಿ (with_ವೃಕ್ಷ) {
+		ವರ್ಣ *max_prefix = common_prefix(pattern);
+		overlay_ವೃಕ್ಷ_on_index(the_repository->index, with_ವೃಕ್ಷ, max_prefix);
+		ಮುಕ್ತ(max_prefix);
 	}
 
 	/* TODO: audit for interaction with sparse-index. */
 	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		struct string_list_item *item;
+	ಪ್ರತಿ (i = 0; i < the_repository->index->cache_nr; i++) {
+		ಧ್ರುವ ಸಂರಚನಾ cache_entry *ce = the_repository->index->cache[i];
+		ಸಂರಚನಾ string_list_item *item;
 
-		if (ce->ce_flags & CE_UPDATE)
-			continue;
-		if (!ce_path_match(the_repository->index, ce, pattern, m))
-			continue;
-		item = string_list_insert(list, ce->name);
-		if (ce_skip_worktree(ce))
+		ಯದಿ (ce->ce_flags & CE_UPDATE)
+			ಅನುವರ್ತ;
+		ಯದಿ (!ce_path_match(the_repository->index, ce, pattern, m))
+			ಅನುವರ್ತ;
+		item = string_list_ಸೇರಿಸು(list, ce->name);
+		ಯದಿ (ce_skip_worktree(ce))
 			item->util = item; /* better a valid pointer than a fake one */
 	}
 
 	ret = report_path_error(m, pattern);
-	free(m);
-	return ret;
+	ಮುಕ್ತ(m);
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
-static void add_remove_files(struct string_list *list)
+ಸ್ಥಿರ ಶೂನ್ಯ add_remove_files(ಸಂರಚನಾ string_list *list)
 {
-	int i;
-	for (i = 0; i < list->nr; i++) {
-		struct stat st;
-		struct string_list_item *p = &(list->items[i]);
+	ಪೂರ್ಣಾಙ್ಕ i;
+	ಪ್ರತಿ (i = 0; i < list->nr; i++) {
+		ಸಂರಚನಾ stat st;
+		ಸಂರಚನಾ string_list_item *p = &(list->ವಸ್ತುಗಳು[i]);
 
 		/* p->util is skip-worktree */
-		if (p->util)
-			continue;
+		ಯದಿ (p->util)
+			ಅನುವರ್ತ;
 
-		if (!lstat(p->string, &st)) {
-			if (add_to_index(the_repository->index, p->string, &st, 0))
+		ಯದಿ (!lstat(p->string, &st)) {
+			ಯದಿ (add_to_index(the_repository->index, p->string, &st, 0))
 				die(_("updating files failed"));
-		} else
+		} ಅನ್ಯಥಾ
 			remove_file_from_index(the_repository->index, p->string);
 	}
 }
 
-static void create_base_index(const struct commit *current_head)
+ಸ್ಥಿರ ಶೂನ್ಯ create_base_index(ಧ್ರುವ ಸಂರಚನಾ commit *current_head)
 {
-	struct tree *tree;
-	struct unpack_trees_options opts;
-	struct tree_desc t;
+	ಸಂರಚನಾ ವೃಕ್ಷ *ವೃಕ್ಷ;
+	ಸಂರಚನಾ unpack_trees_options opts;
+	ಸಂರಚನಾ ವೃಕ್ಷ_desc t;
 
-	if (!current_head) {
+	ಯದಿ (!current_head) {
 		discard_index(the_repository->index);
-		return;
+		ಪ್ರತ್ಯಾಗಮ;
 	}
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, ಪರಿಮಾಣ(opts));
 	opts.head_idx = 1;
 	opts.index_only = 1;
 	opts.merge = 1;
@@ -327,115 +327,115 @@ static void create_base_index(const struct commit *current_head)
 	opts.dst_index = the_repository->index;
 
 	opts.fn = oneway_merge;
-	tree = repo_parse_tree_indirect(the_repository,
+	ವೃಕ್ಷ = repo_parse_ವೃಕ್ಷ_indirect(the_repository,
 					&current_head->object.oid);
-	if (!tree)
+	ಯದಿ (!ವೃಕ್ಷ)
 		die(_("failed to unpack HEAD tree object"));
-	if (repo_parse_tree(the_repository, tree) < 0)
+	ಯದಿ (repo_parse_ವೃಕ್ಷ(the_repository, ವೃಕ್ಷ) < 0)
 		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts))
+	init_ವೃಕ್ಷ_desc(&t, &ವೃಕ್ಷ->object.oid, ವೃಕ್ಷ->buffer, ವೃಕ್ಷ->size);
+	ಯದಿ (unpack_trees(1, &t, &opts))
 		exit(128); /* We've already reported the error, finish dying */
 }
 
-static void refresh_cache_or_die(int refresh_flags)
+ಸ್ಥಿರ ಶೂನ್ಯ refresh_cache_or_die(ಪೂರ್ಣಾಙ್ಕ refresh_flags)
 {
 	/*
 	 * refresh_flags contains REFRESH_QUIET, so the only errors
 	 * are for unmerged entries.
 	 */
-	if (refresh_index(the_repository->index, refresh_flags | REFRESH_IN_PORCELAIN, NULL, NULL, NULL))
+	ಯದಿ (refresh_index(the_repository->index, refresh_flags | REFRESH_IN_PORCELAIN, ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ))
 		die_resolve_conflict("commit");
 }
 
-static const char *prepare_index(const char **argv, const char *prefix,
-				 const struct commit *current_head, int is_status)
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *prepare_index(ಧ್ರುವ ವರ್ಣ **argv, ಧ್ರುವ ವರ್ಣ *prefix,
+				 ಧ್ರುವ ಸಂರಚನಾ commit *current_head, ಪೂರ್ಣಾಙ್ಕ is_status)
 {
-	struct string_list partial = STRING_LIST_INIT_DUP;
-	struct pathspec pathspec;
-	int refresh_flags = REFRESH_QUIET;
-	const char *ret;
-	char *path = NULL;
+	ಸಂರಚನಾ string_list partial = STRING_LIST_INIT_DUP;
+	ಸಂರಚನಾ pathspec pathspec;
+	ಪೂರ್ಣಾಙ್ಕ refresh_flags = REFRESH_QUIET;
+	ಧ್ರುವ ವರ್ಣ *ret;
+	ವರ್ಣ *path = ರಿಕ್ತ;
 
-	if (interactive_opts.context < -1)
+	ಯದಿ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	ಯದಿ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (is_status)
+	ಯದಿ (is_status)
 		refresh_flags |= REFRESH_UNMERGED;
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_FULL,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (interactive)
+	ಯದಿ (pathspec_from_file) {
+		ಯದಿ (interactive)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--interactive/--patch");
 
-		if (all)
+		ಯದಿ (all)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "-a");
 
-		if (pathspec.nr)
+		ಯದಿ (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_FULL,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} ಅನ್ಯಥಾ ಯದಿ (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!pathspec.nr && (also || (only && !allow_empty &&
+	ಯದಿ (!pathspec.nr && (also || (only && !allow_empty &&
 	    (!amend || (fixup_message && strcmp(fixup_prefix, "amend"))))))
 		die(_("No paths with --include/--only does not make sense."));
 
-	if (repo_read_index_preload(the_repository, &pathspec, 0) < 0)
+	ಯದಿ (repo_read_index_preload(the_repository, &pathspec, 0) < 0)
 		die(_("index file corrupt"));
 
-	if (interactive) {
-		char *old_index_env = NULL, *old_repo_index_file;
+	ಯದಿ (interactive) {
+		ವರ್ಣ *old_index_env = ರಿಕ್ತ, *old_repo_index_file;
 		repo_hold_locked_index(the_repository, &index_lock,
 				       LOCK_DIE_ON_ERROR);
 
 		refresh_cache_or_die(refresh_flags);
 
-		if (write_locked_index(the_repository->index, &index_lock, 0))
+		ಯದಿ (write_locked_index(the_repository->index, &index_lock, 0))
 			die(_("unable to create temporary index"));
 
 		old_repo_index_file = the_repository->index_file;
 		the_repository->index_file =
-			(char *)get_lock_file_path(&index_lock);
+			(ವರ್ಣ *)get_lock_file_path(&index_lock);
 		old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
 		setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
 
-		if (interactive_add(the_repository, argv, prefix, patch_interactive, &interactive_opts) != 0)
+		ಯದಿ (interactive_add(the_repository, argv, prefix, patch_interactive, &interactive_opts) != 0)
 			die(_("interactive add failed"));
 
 		the_repository->index_file = old_repo_index_file;
-		if (old_index_env && *old_index_env)
+		ಯದಿ (old_index_env && *old_index_env)
 			setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-		else
+		ಅನ್ಯಥಾ
 			unsetenv(INDEX_ENVIRONMENT);
 		FREE_AND_NULL(old_index_env);
 
 		discard_index(the_repository->index);
 		read_index_from(the_repository->index, get_lock_file_path(&index_lock),
 				repo_get_git_dir(the_repository));
-		if (cache_tree_update(the_repository->index, WRITE_TREE_SILENT) == 0) {
-			if (reopen_lock_file(&index_lock) < 0)
+		ಯದಿ (cache_ವೃಕ್ಷ_update(the_repository->index, WRITE_ವೃಕ್ಷ_SILENT) == 0) {
+			ಯದಿ (reopen_lock_file(&index_lock) < 0)
 				die(_("unable to write index file"));
-			if (write_locked_index(the_repository->index, &index_lock, 0))
+			ಯದಿ (write_locked_index(the_repository->index, &index_lock, 0))
 				die(_("unable to update temporary index"));
-		} else
+		} ಅನ್ಯಥಾ
 			warning(_("Failed to update main cache tree"));
 
 		commit_style = COMMIT_NORMAL;
 		ret = get_lock_file_path(&index_lock);
-		goto out;
-	} else {
-		if (interactive_opts.context != -1)
+		ಗಚ್ಛ out;
+	} ಅನ್ಯಥಾ {
+		ಯದಿ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--interactive/--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		ಯದಿ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--interactive/--patch");
 	}
 
@@ -451,23 +451,23 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 * (A) if all goes well, commit the real index;
 	 * (B) on failure, rollback the real index.
 	 */
-	if (all || (also && pathspec.nr)) {
-		char *ps_matched = xcalloc(pathspec.nr, 1);
+	ಯದಿ (all || (also && pathspec.nr)) {
+		ವರ್ಣ *ps_matched = xcalloc(pathspec.nr, 1);
 		repo_hold_locked_index(the_repository, &index_lock,
 				       LOCK_DIE_ON_ERROR);
-		add_files_to_cache(the_repository, also ? prefix : NULL,
+		add_files_to_cache(the_repository, also ? prefix : ರಿಕ್ತ,
 				   &pathspec, ps_matched, 0, 0, 0 );
-		if (!all && report_path_error(ps_matched, &pathspec))
+		ಯದಿ (!all && report_path_error(ps_matched, &pathspec))
 			exit(128);
 
 		refresh_cache_or_die(refresh_flags);
-		cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-		if (write_locked_index(the_repository->index, &index_lock, 0))
+		cache_ವೃಕ್ಷ_update(the_repository->index, WRITE_ವೃಕ್ಷ_SILENT);
+		ಯದಿ (write_locked_index(the_repository->index, &index_lock, 0))
 			die(_("unable to write new index file"));
 		commit_style = COMMIT_NORMAL;
 		ret = get_lock_file_path(&index_lock);
-		free(ps_matched);
-		goto out;
+		ಮುಕ್ತ(ps_matched);
+		ಗಚ್ಛ out;
 	}
 
 	/*
@@ -479,19 +479,19 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 * and create commit from the_index.
 	 * We still need to refresh the index here.
 	 */
-	if (!only && !pathspec.nr) {
+	ಯದಿ (!only && !pathspec.nr) {
 		repo_hold_locked_index(the_repository, &index_lock,
 				       LOCK_DIE_ON_ERROR);
 		refresh_cache_or_die(refresh_flags);
-		if (the_repository->index->cache_changed
-		    || !cache_tree_fully_valid(the_repository->index))
-			cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-		if (write_locked_index(the_repository->index, &index_lock,
+		ಯದಿ (the_repository->index->cache_changed
+		    || !cache_ವೃಕ್ಷ_fully_valid(the_repository->index))
+			cache_ವೃಕ್ಷ_update(the_repository->index, WRITE_ವೃಕ್ಷ_SILENT);
+		ಯದಿ (write_locked_index(the_repository->index, &index_lock,
 				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 			die(_("unable to write new index file"));
 		commit_style = COMMIT_AS_IS;
 		ret = repo_get_index_file(the_repository);
-		goto out;
+		ಗಚ್ಛ out;
 	}
 
 	/*
@@ -515,27 +515,27 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 */
 	commit_style = COMMIT_PARTIAL;
 
-	if (whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+	ಯದಿ (whence != FROM_COMMIT) {
+		ಯದಿ (whence == FROM_MERGE)
 			die(_("cannot do a partial commit during a merge."));
-		else if (is_from_cherry_pick(whence))
+		ಅನ್ಯಥಾ ಯದಿ (is_from_cherry_pick(whence))
 			die(_("cannot do a partial commit during a cherry-pick."));
-		else if (is_from_rebase(whence))
+		ಅನ್ಯಥಾ ಯದಿ (is_from_rebase(whence))
 			die(_("cannot do a partial commit during a rebase."));
 	}
 
-	if (list_paths(&partial, !current_head ? NULL : "HEAD", &pathspec))
+	ಯದಿ (list_paths(&partial, !current_head ? ರಿಕ್ತ : "HEAD", &pathspec))
 		exit(1);
 
 	discard_index(the_repository->index);
-	if (repo_read_index(the_repository) < 0)
+	ಯದಿ (repo_read_index(the_repository) < 0)
 		die(_("cannot read the index"));
 
 	repo_hold_locked_index(the_repository, &index_lock, LOCK_DIE_ON_ERROR);
 	add_remove_files(&partial);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-	if (write_locked_index(the_repository->index, &index_lock, 0))
+	refresh_index(the_repository->index, REFRESH_QUIET, ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ);
+	cache_ವೃಕ್ಷ_update(the_repository->index, WRITE_ವೃಕ್ಷ_SILENT);
+	ಯದಿ (write_locked_index(the_repository->index, &index_lock, 0))
 		die(_("unable to write new index file"));
 
 	path = repo_git_path(the_repository, "next-index-%"PRIuMAX,
@@ -545,9 +545,9 @@ static const char *prepare_index(const char **argv, const char *prefix,
 
 	create_base_index(current_head);
 	add_remove_files(&partial);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET, ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ);
 
-	if (write_locked_index(the_repository->index, &false_lock, 0))
+	ಯದಿ (write_locked_index(the_repository->index, &false_lock, 0))
 		die(_("unable to write temporary index file"));
 
 	discard_index(the_repository->index);
@@ -556,19 +556,19 @@ static const char *prepare_index(const char **argv, const char *prefix,
 out:
 	string_list_clear(&partial, 0);
 	clear_pathspec(&pathspec);
-	free(path);
-	return ret;
+	ಮುಕ್ತ(path);
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
-static int run_status(FILE *fp, const char *index_file, const char *prefix, int nowarn,
-		      struct wt_status *s)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ run_status(FILE *fp, ಧ್ರುವ ವರ್ಣ *index_file, ಧ್ರುವ ವರ್ಣ *prefix, ಪೂರ್ಣಾಙ್ಕ nowarn,
+		      ಸಂರಚನಾ wt_status *s)
 {
-	struct object_id oid;
+	ಸಂರಚನಾ object_id oid;
 
-	if (s->relative_paths)
+	ಯದಿ (s->relative_paths)
 		s->prefix = prefix;
 
-	if (amend) {
+	ಯದಿ (amend) {
 		s->amend = 1;
 		s->reference = "HEAD^1";
 	}
@@ -577,7 +577,7 @@ static int run_status(FILE *fp, const char *index_file, const char *prefix, int 
 	s->fp = fp;
 	s->nowarn = nowarn;
 	s->is_initial = repo_get_oid(the_repository, s->reference, &oid) ? 1 : 0;
-	if (!s->is_initial)
+	ಯದಿ (!s->is_initial)
 		oidcpy(&s->oid_commit, &oid);
 	s->status_format = status_format;
 	s->ignore_submodule_arg = ignore_submodule_arg;
@@ -586,98 +586,98 @@ static int run_status(FILE *fp, const char *index_file, const char *prefix, int 
 	wt_status_print(s);
 	wt_status_collect_free_buffers(s);
 
-	return s->committable;
+	ಪ್ರತ್ಯಾಗಮ s->committable;
 }
 
-static int is_a_merge(const struct commit *current_head)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ is_a_merge(ಧ್ರುವ ಸಂರಚನಾ commit *current_head)
 {
-	return !!(current_head->parents && current_head->parents->next);
+	ಪ್ರತ್ಯಾಗಮ !!(current_head->parents && current_head->parents->next);
 }
 
-static void assert_split_ident(struct ident_split *id, const struct strbuf *buf)
+ಸ್ಥಿರ ಶೂನ್ಯ assert_split_ident(ಸಂರಚನಾ ident_split *id, ಧ್ರುವ ಸಂರಚನಾ strbuf *buf)
 {
-	if (split_ident_line(id, buf->buf, buf->len) || !id->date_begin)
+	ಯದಿ (split_ident_ಸಾಲು(id, buf->buf, buf->len) || !id->date_begin)
 		BUG("unable to parse our own ident: %s", buf->buf);
 }
 
-static void export_one(const char *var, const char *s, const char *e, int hack)
+ಸ್ಥಿರ ಶೂನ್ಯ export_one(ಧ್ರುವ ವರ್ಣ *var, ಧ್ರುವ ವರ್ಣ *s, ಧ್ರುವ ವರ್ಣ *e, ಪೂರ್ಣಾಙ್ಕ hack)
 {
-	struct strbuf buf = STRBUF_INIT;
-	if (hack)
+	ಸಂರಚನಾ strbuf buf = STRBUF_INIT;
+	ಯದಿ (hack)
 		strbuf_addch(&buf, hack);
 	strbuf_add(&buf, s, e - s);
 	setenv(var, buf.buf, 1);
 	strbuf_release(&buf);
 }
 
-static int parse_force_date(const char *in, struct strbuf *out)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_force_date(ಧ್ರುವ ವರ್ಣ *in, ಸಂರಚನಾ strbuf *out)
 {
 	strbuf_addch(out, '@');
 
-	if (parse_date(in, out) < 0) {
-		int errors = 0;
+	ಯದಿ (parse_date(in, out) < 0) {
+		ಪೂರ್ಣಾಙ್ಕ errors = 0;
 		unsigned long t = approxidate_careful(in, &errors);
-		if (errors)
-			return -1;
+		ಯದಿ (errors)
+			ಪ್ರತ್ಯಾಗಮ -1;
 		strbuf_addf(out, "%lu", t);
 	}
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static void set_ident_var(char **buf, char *val)
+ಸ್ಥಿರ ಶೂನ್ಯ set_ident_var(ವರ್ಣ **buf, ವರ್ಣ *val)
 {
-	free(*buf);
+	ಮುಕ್ತ(*buf);
 	*buf = val;
 }
 
-static void determine_author_info(struct strbuf *author_ident)
+ಸ್ಥಿರ ಶೂನ್ಯ determine_author_info(ಸಂರಚನಾ strbuf *author_ident)
 {
-	char *name, *email, *date;
-	struct ident_split author;
+	ವರ್ಣ *name, *email, *date;
+	ಸಂರಚನಾ ident_split author;
 
 	name = xstrdup_or_null(getenv("GIT_AUTHOR_NAME"));
 	email = xstrdup_or_null(getenv("GIT_AUTHOR_EMAIL"));
 	date = xstrdup_or_null(getenv("GIT_AUTHOR_DATE"));
 
-	if (author_message) {
-		struct ident_split ident;
+	ಯದಿ (author_message) {
+		ಸಂರಚನಾ ident_split ident;
 		size_t len;
-		const char *a;
+		ಧ್ರುವ ವರ್ಣ *a;
 
 		a = find_commit_header(author_message_buffer, "author", &len);
-		if (!a)
+		ಯದಿ (!a)
 			die(_("commit '%s' lacks author header"), author_message);
-		if (split_ident_line(&ident, a, len) < 0)
+		ಯದಿ (split_ident_ಸಾಲು(&ident, a, len) < 0)
 			die(_("commit '%s' has malformed author line"), author_message);
 
 		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
 		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
 
-		if (ident.date_begin) {
-			struct strbuf date_buf = STRBUF_INIT;
+		ಯದಿ (ident.date_begin) {
+			ಸಂರಚನಾ strbuf date_buf = STRBUF_INIT;
 			strbuf_addch(&date_buf, '@');
 			strbuf_add(&date_buf, ident.date_begin, ident.date_end - ident.date_begin);
 			strbuf_addch(&date_buf, ' ');
 			strbuf_add(&date_buf, ident.tz_begin, ident.tz_end - ident.tz_begin);
-			set_ident_var(&date, strbuf_detach(&date_buf, NULL));
+			set_ident_var(&date, strbuf_detach(&date_buf, ರಿಕ್ತ));
 		}
 	}
 
-	if (force_author) {
-		struct ident_split ident;
+	ಯದಿ (force_author) {
+		ಸಂರಚನಾ ident_split ident;
 
-		if (split_ident_line(&ident, force_author, strlen(force_author)) < 0)
+		ಯದಿ (split_ident_ಸಾಲು(&ident, force_author, strlen(force_author)) < 0)
 			die(_("malformed --author parameter"));
 		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
 		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
 	}
 
-	if (force_date) {
-		struct strbuf date_buf = STRBUF_INIT;
-		if (parse_force_date(force_date, &date_buf))
+	ಯದಿ (force_date) {
+		ಸಂರಚನಾ strbuf date_buf = STRBUF_INIT;
+		ಯದಿ (parse_force_date(force_date, &date_buf))
 			die(_("invalid date format: %s"), force_date);
-		set_ident_var(&date, strbuf_detach(&date_buf, NULL));
+		set_ident_var(&date, strbuf_detach(&date_buf, ರಿಕ್ತ));
 	}
 
 	strbuf_addstr(author_ident, fmt_ident(name, email, WANT_AUTHOR_IDENT, date,
@@ -686,62 +686,62 @@ static void determine_author_info(struct strbuf *author_ident)
 	export_one("GIT_AUTHOR_NAME", author.name_begin, author.name_end, 0);
 	export_one("GIT_AUTHOR_EMAIL", author.mail_begin, author.mail_end, 0);
 	export_one("GIT_AUTHOR_DATE", author.date_begin, author.tz_end, '@');
-	free(name);
-	free(email);
-	free(date);
+	ಮುಕ್ತ(name);
+	ಮುಕ್ತ(email);
+	ಮುಕ್ತ(date);
 }
 
-static int author_date_is_interesting(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ author_date_is_interesting(ಶೂನ್ಯ)
 {
-	return author_message || force_date;
+	ಪ್ರತ್ಯಾಗಮ author_message || force_date;
 }
 
 #ifndef WITH_BREAKING_CHANGES
-static void adjust_comment_line_char(const struct strbuf *sb)
+ಸ್ಥಿರ ಶೂನ್ಯ adjust_comment_ಸಾಲು_char(ಧ್ರುವ ಸಂರಚನಾ strbuf *sb)
 {
-	char candidates[] = "#;@!$%^&|:";
-	char *candidate;
-	const char *p;
+	ವರ್ಣ candidates[] = "#;@!$%^&|:";
+	ವರ್ಣ *candidate;
+	ಧ್ರುವ ವರ್ಣ *p;
 	size_t cutoff;
 
 	/* Ignore comment chars in trailing comments (e.g., Conflicts:) */
 	cutoff = sb->len - ignored_log_message_bytes(sb->buf, sb->len);
 
-	if (!memchr(sb->buf, candidates[0], sb->len)) {
-		free(comment_line_str_to_free);
-		comment_line_str = comment_line_str_to_free =
+	ಯದಿ (!memchr(sb->buf, candidates[0], sb->len)) {
+		ಮುಕ್ತ(comment_ಸಾಲು_str_to_free);
+		comment_ಸಾಲು_str = comment_ಸಾಲು_str_to_free =
 			xstrfmt("%c", candidates[0]);
-		return;
+		ಪ್ರತ್ಯಾಗಮ;
 	}
 
 	p = sb->buf;
 	candidate = strchr(candidates, *p);
-	if (candidate)
+	ಯದಿ (candidate)
 		*candidate = ' ';
-	for (p = sb->buf; p + 1 < sb->buf + cutoff; p++) {
-		if ((p[0] == '\n' || p[0] == '\r') && p[1]) {
+	ಪ್ರತಿ (p = sb->buf; p + 1 < sb->buf + cutoff; p++) {
+		ಯದಿ ((p[0] == '\n' || p[0] == '\r') && p[1]) {
 			candidate = strchr(candidates, p[1]);
-			if (candidate)
+			ಯದಿ (candidate)
 				*candidate = ' ';
 		}
 	}
 
-	for (p = candidates; *p == ' '; p++)
+	ಪ್ರತಿ (p = candidates; *p == ' '; p++)
 		;
-	if (!*p)
+	ಯದಿ (!*p)
 		die(_("unable to select a comment character that is not used\n"
 		      "in the current commit message"));
-	free(comment_line_str_to_free);
-	comment_line_str = comment_line_str_to_free = xstrfmt("%c", *p);
+	ಮುಕ್ತ(comment_ಸಾಲು_str_to_free);
+	comment_ಸಾಲು_str = comment_ಸಾಲು_str_to_free = xstrfmt("%c", *p);
 }
 #endif /* !WITH_BREAKING_CHANGES */
 
-static void prepare_amend_commit(struct commit *commit, struct strbuf *sb,
-				struct pretty_print_context *ctx)
+ಸ್ಥಿರ ಶೂನ್ಯ prepare_amend_commit(ಸಂರಚನಾ commit *commit, ಸಂರಚನಾ strbuf *sb,
+				ಸಂರಚನಾ pretty_print_context *ctx)
 {
-	const char *buffer, *subject, *fmt;
+	ಧ್ರುವ ವರ್ಣ *buffer, *subject, *fmt;
 
-	buffer = repo_get_commit_buffer(the_repository, commit, NULL);
+	buffer = repo_get_commit_buffer(the_repository, commit, ರಿಕ್ತ);
 	find_commit_subject(buffer, &subject);
 	/*
 	 * If we amend the 'amend!' commit then we don't want to
@@ -752,47 +752,47 @@ static void prepare_amend_commit(struct commit *commit, struct strbuf *sb,
 	repo_unuse_commit_buffer(the_repository, commit, buffer);
 }
 
-static void change_data_free(void *util, const char *str UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ change_data_free(ಶೂನ್ಯ *util, ಧ್ರುವ ವರ್ಣ *str UNUSED)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	ಸಂರಚನಾ wt_status_change_data *d = util;
+	ಮುಕ್ತ(d->rename_source);
+	ಮುಕ್ತ(d);
 }
 
-static int prepare_to_commit(const char *index_file, const char *prefix,
-			     struct commit *current_head,
-			     struct wt_status *s,
-			     struct strbuf *author_ident)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ prepare_to_commit(ಧ್ರುವ ವರ್ಣ *index_file, ಧ್ರುವ ವರ್ಣ *prefix,
+			     ಸಂರಚನಾ commit *current_head,
+			     ಸಂರಚನಾ wt_status *s,
+			     ಸಂರಚನಾ strbuf *author_ident)
 {
-	struct stat statbuf;
-	struct strbuf committer_ident = STRBUF_INIT;
-	int committable;
-	struct strbuf sb = STRBUF_INIT;
-	const char *hook_arg1 = NULL;
-	const char *hook_arg2 = NULL;
-	int clean_message_contents = (cleanup_mode != COMMIT_MSG_CLEANUP_NONE);
-	int old_display_comment_prefix;
-	int invoked_hook;
+	ಸಂರಚನಾ stat statbuf;
+	ಸಂರಚನಾ strbuf committer_ident = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ committable;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಧ್ರುವ ವರ್ಣ *hook_arg1 = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *hook_arg2 = ರಿಕ್ತ;
+	ಪೂರ್ಣಾಙ್ಕ clean_message_contents = (cleanup_mode != COMMIT_ಸಂದೇಶ_CLEANUP_NONE);
+	ಪೂರ್ಣಾಙ್ಕ old_display_comment_prefix;
+	ಪೂರ್ಣಾಙ್ಕ invoked_hook;
 
 	/* This checks and barfs if author is badly specified */
 	determine_author_info(author_ident);
 
-	if (!no_verify && run_commit_hook(use_editor, index_file, &invoked_hook,
-					  "pre-commit", NULL))
-		return 0;
+	ಯದಿ (!no_verify && run_commit_hook(use_editor, index_file, &invoked_hook,
+					  "pre-commit", ರಿಕ್ತ))
+		ಪ್ರತ್ಯಾಗಮ 0;
 
-	if (squash_message) {
+	ಯದಿ (squash_message) {
 		/*
 		 * Insert the proper subject line before other commit
 		 * message options add their content.
 		 */
-		if (use_message && !strcmp(use_message, squash_message))
+		ಯದಿ (use_message && !strcmp(use_message, squash_message))
 			strbuf_addstr(&sb, "squash! ");
-		else {
-			struct pretty_print_context ctx = {0};
-			struct commit *c;
+		ಅನ್ಯಥಾ {
+			ಸಂರಚನಾ pretty_print_context ctx = {0};
+			ಸಂರಚನಾ commit *c;
 			c = lookup_commit_reference_by_name(squash_message);
-			if (!c)
+			ಯದಿ (!c)
 				die(_("could not lookup commit '%s'"), squash_message);
 			ctx.output_encoding = get_commit_output_encoding();
 			repo_format_commit_message(the_repository, c,
@@ -801,39 +801,39 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		}
 	}
 
-	if (have_option_m && !fixup_message) {
+	ಯದಿ (have_option_m && !fixup_message) {
 		strbuf_addbuf(&sb, &message);
 		hook_arg1 = "message";
-	} else if (logfile && !strcmp(logfile, "-")) {
-		if (isatty(0))
+	} ಅನ್ಯಥಾ ಯದಿ (logfile && !strcmp(logfile, "-")) {
+		ಯದಿ (isatty(0))
 			fprintf(stderr, _("(reading log message from standard input)\n"));
-		if (strbuf_read(&sb, 0, 0) < 0)
+		ಯದಿ (strbuf_read(&sb, 0, 0) < 0)
 			die_errno(_("could not read log from standard input"));
 		hook_arg1 = "message";
-	} else if (logfile) {
-		if (strbuf_read_file(&sb, logfile, 0) < 0)
+	} ಅನ್ಯಥಾ ಯದಿ (logfile) {
+		ಯದಿ (strbuf_read_file(&sb, logfile, 0) < 0)
 			die_errno(_("could not read log file '%s'"),
 				  logfile);
 		hook_arg1 = "message";
-	} else if (use_message) {
-		const char *buffer;
+	} ಅನ್ಯಥಾ ಯದಿ (use_message) {
+		ಧ್ರುವ ವರ್ಣ *buffer;
 		buffer = strstr(use_message_buffer, "\n\n");
-		if (buffer)
-			strbuf_addstr(&sb, skip_blank_lines(buffer + 2));
+		ಯದಿ (buffer)
+			strbuf_addstr(&sb, skip_blank_ಸಾಲುಗಳು(buffer + 2));
 		hook_arg1 = "commit";
 		hook_arg2 = use_message;
-	} else if (fixup_message) {
-		struct pretty_print_context ctx = {0};
-		struct commit *commit;
-		char *fmt;
+	} ಅನ್ಯಥಾ ಯದಿ (fixup_message) {
+		ಸಂರಚನಾ pretty_print_context ctx = {0};
+		ಸಂರಚನಾ commit *commit;
+		ವರ್ಣ *fmt;
 		commit = lookup_commit_reference_by_name(fixup_commit);
-		if (!commit)
+		ಯದಿ (!commit)
 			die(_("could not lookup commit '%s'"), fixup_commit);
 		ctx.output_encoding = get_commit_output_encoding();
 		fmt = xstrfmt("%s! %%s\n\n", fixup_prefix);
 		repo_format_commit_message(the_repository, commit, fmt, &sb,
 					   &ctx);
-		free(fmt);
+		ಮುಕ್ತ(fmt);
 		hook_arg1 = "message";
 
 		/*
@@ -845,43 +845,43 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		 * have already errored out while parsing the `git commit`
 		 * options.
 		 */
-		if (have_option_m && !strcmp(fixup_prefix, "fixup"))
+		ಯದಿ (have_option_m && !strcmp(fixup_prefix, "fixup"))
 			strbuf_addbuf(&sb, &message);
 
-		if (!strcmp(fixup_prefix, "amend")) {
-			if (have_option_m)
+		ಯದಿ (!strcmp(fixup_prefix, "amend")) {
+			ಯದಿ (have_option_m)
 				die(_("options '%s' and '%s:%s' cannot be used together"), "-m", "--fixup", fixup_message);
 			prepare_amend_commit(commit, &sb, &ctx);
 		}
-	} else if (!stat(git_path_merge_msg(the_repository), &statbuf)) {
-		size_t merge_msg_start;
+	} ಅನ್ಯಥಾ ಯದಿ (!stat(git_path_merge_ಸಂದೇಶ(the_repository), &statbuf)) {
+		size_t merge_ಸಂದೇಶ_start;
 
 		/*
 		 * prepend SQUASH_MSG here if it exists and a
 		 * "merge --squash" was originally performed
 		 */
-		if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		ಯದಿ (!stat(git_path_squash_ಸಂದೇಶ(the_repository), &statbuf)) {
+			ಯದಿ (strbuf_read_file(&sb, git_path_squash_ಸಂದೇಶ(the_repository), 0) < 0)
 				die_errno(_("could not read SQUASH_MSG"));
 			hook_arg1 = "squash";
-		} else
+		} ಅನ್ಯಥಾ
 			hook_arg1 = "merge";
 
-		merge_msg_start = sb.len;
-		if (strbuf_read_file(&sb, git_path_merge_msg(the_repository), 0) < 0)
+		merge_ಸಂದೇಶ_start = sb.len;
+		ಯದಿ (strbuf_read_file(&sb, git_path_merge_ಸಂದೇಶ(the_repository), 0) < 0)
 			die_errno(_("could not read MERGE_MSG"));
 
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS &&
-		    wt_status_locate_end(sb.buf + merge_msg_start,
-					 sb.len - merge_msg_start) <
-				sb.len - merge_msg_start)
-			s->added_cut_line = 1;
-	} else if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-		if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		ಯದಿ (cleanup_mode == COMMIT_ಸಂದೇಶ_CLEANUP_SCISSORS &&
+		    wt_status_locate_end(sb.buf + merge_ಸಂದೇಶ_start,
+					 sb.len - merge_ಸಂದೇಶ_start) <
+				sb.len - merge_ಸಂದೇಶ_start)
+			s->added_cut_ಸಾಲು = 1;
+	} ಅನ್ಯಥಾ ಯದಿ (!stat(git_path_squash_ಸಂದೇಶ(the_repository), &statbuf)) {
+		ಯದಿ (strbuf_read_file(&sb, git_path_squash_ಸಂದೇಶ(the_repository), 0) < 0)
 			die_errno(_("could not read SQUASH_MSG"));
 		hook_arg1 = "squash";
-	} else if (template_file) {
-		if (strbuf_read_file(&sb, template_file, 0) < 0)
+	} ಅನ್ಯಥಾ ಯದಿ (template_file) {
+		ಯದಿ (strbuf_read_file(&sb, template_file, 0) < 0)
 			die_errno(_("could not read '%s'"), template_file);
 		hook_arg1 = "template";
 		clean_message_contents = 0;
@@ -891,14 +891,14 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 * The remaining cases don't modify the template message, but
 	 * just set the argument(s) to the prepare-commit-msg hook.
 	 */
-	else if (whence == FROM_MERGE)
+	ಅನ್ಯಥಾ ಯದಿ (whence == FROM_MERGE)
 		hook_arg1 = "merge";
-	else if (is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) {
+	ಅನ್ಯಥಾ ಯದಿ (is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) {
 		hook_arg1 = "commit";
 		hook_arg2 = "CHERRY_PICK_HEAD";
 	}
 
-	if (squash_message) {
+	ಯದಿ (squash_message) {
 		/*
 		 * If squash_commit was used for the commit subject,
 		 * then we're possibly hijacking other commit log options.
@@ -909,7 +909,7 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	}
 
 	s->fp = fopen_for_writing(git_path_commit_editmsg());
-	if (!s->fp)
+	ಯದಿ (!s->fp)
 		die_errno(_("could not open '%s'"), git_path_commit_editmsg());
 
 	/* Ignore status.displayCommentPrefix: we do need comments in COMMIT_EDITMSG. */
@@ -922,34 +922,34 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 */
 	s->hints = 0;
 
-	if (clean_message_contents)
-		strbuf_stripspace(&sb, NULL);
+	ಯದಿ (clean_message_contents)
+		strbuf_stripspace(&sb, ರಿಕ್ತ);
 
-	if (signoff)
+	ಯದಿ (signoff)
 		append_signoff(&sb, ignored_log_message_bytes(sb.buf, sb.len), 0);
 
-	if (fwrite(sb.buf, 1, sb.len, s->fp) < sb.len)
+	ಯದಿ (fwrite(sb.buf, 1, sb.len, s->fp) < sb.len)
 		die_errno(_("could not write commit template"));
 
 #ifndef WITH_BREAKING_CHANGES
-	if (auto_comment_line_char)
-		adjust_comment_line_char(&sb);
+	ಯದಿ (auto_comment_ಸಾಲು_char)
+		adjust_comment_ಸಾಲು_char(&sb);
 #endif /* !WITH_BREAKING_CHANGES */
 	strbuf_release(&sb);
 
 	/* This checks if committer ident is explicitly given */
 	strbuf_addstr(&committer_ident, git_committer_info(IDENT_STRICT));
-	if (use_editor && include_status) {
-		int ident_shown = 0;
-		enum git_colorbool saved_color_setting;
-		struct ident_split ci, ai;
-		const char *hint_cleanup_all = allow_empty_message ?
+	ಯದಿ (use_editor && include_status) {
+		ಪೂರ್ಣಾಙ್ಕ ident_shown = 0;
+		ಗಣನಾ git_colorbool saved_color_setting;
+		ಸಂರಚನಾ ident_split ci, ai;
+		ಧ್ರುವ ವರ್ಣ *hint_cleanup_all = allow_empty_message ?
 			_("Please enter the commit message for your changes."
 			  " Lines starting\nwith '%s' will be ignored.\n") :
 			_("Please enter the commit message for your changes."
 			  " Lines starting\nwith '%s' will be ignored, and an empty"
 			  " message aborts the commit.\n");
-		const char *hint_cleanup_space = allow_empty_message ?
+		ಧ್ರುವ ವರ್ಣ *hint_cleanup_space = allow_empty_message ?
 			_("Please enter the commit message for your changes."
 			  " Lines starting\n"
 			  "with '%s' will be kept; you may remove them"
@@ -959,9 +959,9 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			  "with '%s' will be kept; you may remove them"
 			  " yourself if you want to.\n"
 			  "An empty message aborts the commit.\n");
-		if (whence != FROM_COMMIT) {
-			if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-				wt_status_add_cut_line(s);
+		ಯದಿ (whence != FROM_COMMIT) {
+			ಯದಿ (cleanup_mode == COMMIT_ಸಂದೇಶ_CLEANUP_SCISSORS)
+				wt_status_add_cut_ಸಾಲು(s);
 			status_printf_ln(
 				s, GIT_COLOR_NORMAL,
 				whence == FROM_MERGE ?
@@ -978,13 +978,13 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		}
 
 		fprintf(s->fp, "\n");
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_ALL)
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_all, comment_line_str);
-		else if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			if (whence == FROM_COMMIT)
-				wt_status_add_cut_line(s);
-		} else /* COMMIT_MSG_CLEANUP_SPACE, that is. */
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_space, comment_line_str);
+		ಯದಿ (cleanup_mode == COMMIT_ಸಂದೇಶ_CLEANUP_ALL)
+			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_all, comment_ಸಾಲು_str);
+		ಅನ್ಯಥಾ ಯದಿ (cleanup_mode == COMMIT_ಸಂದೇಶ_CLEANUP_SCISSORS) {
+			ಯದಿ (whence == FROM_COMMIT)
+				wt_status_add_cut_ಸಾಲು(s);
+		} ಅನ್ಯಥಾ /* COMMIT_MSG_CLEANUP_SPACE, that is. */
+			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_space, comment_ಸಾಲು_str);
 
 		/*
 		 * These should never fail because they come from our own
@@ -995,28 +995,28 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		assert_split_ident(&ai, author_ident);
 		assert_split_ident(&ci, &committer_ident);
 
-		if (ident_cmp(&ai, &ci))
+		ಯದಿ (ident_cmp(&ai, &ci))
 			status_printf_ln(s, GIT_COLOR_NORMAL,
 				_("%s"
 				"Author:    %.*s <%.*s>"),
 				ident_shown++ ? "" : "\n",
-				(int)(ai.name_end - ai.name_begin), ai.name_begin,
-				(int)(ai.mail_end - ai.mail_begin), ai.mail_begin);
+				(ಪೂರ್ಣಾಙ್ಕ)(ai.name_end - ai.name_begin), ai.name_begin,
+				(ಪೂರ್ಣಾಙ್ಕ)(ai.mail_end - ai.mail_begin), ai.mail_begin);
 
-		if (author_date_is_interesting())
+		ಯದಿ (author_date_is_interesting())
 			status_printf_ln(s, GIT_COLOR_NORMAL,
 				_("%s"
 				"Date:      %s"),
 				ident_shown++ ? "" : "\n",
 				show_ident_date(&ai, DATE_MODE(NORMAL)));
 
-		if (!committer_ident_sufficiently_given())
+		ಯದಿ (!committer_ident_sufficiently_given())
 			status_printf_ln(s, GIT_COLOR_NORMAL,
 				_("%s"
 				"Committer: %.*s <%.*s>"),
 				ident_shown++ ? "" : "\n",
-				(int)(ci.name_end - ci.name_begin), ci.name_begin,
-				(int)(ci.mail_end - ci.mail_begin), ci.mail_begin);
+				(ಪೂರ್ಣಾಙ್ಕ)(ci.name_end - ci.name_begin), ci.name_begin,
+				(ಪೂರ್ಣಾಙ್ಕ)(ci.mail_end - ci.mail_begin), ci.mail_begin);
 
 		status_printf_ln(s, GIT_COLOR_NORMAL, "%s", ""); /* Add new line for clarity */
 
@@ -1025,26 +1025,26 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		committable = run_status(s->fp, index_file, prefix, 1, s);
 		s->use_color = saved_color_setting;
 		string_list_clear_func(&s->change, change_data_free);
-	} else {
-		struct object_id oid;
-		const char *parent = "HEAD";
+	} ಅನ್ಯಥಾ {
+		ಸಂರಚನಾ object_id oid;
+		ಧ್ರುವ ವರ್ಣ *parent = "HEAD";
 
-		if (!the_repository->index->initialized && repo_read_index(the_repository) < 0)
+		ಯದಿ (!the_repository->index->initialized && repo_read_index(the_repository) < 0)
 			die(_("Cannot read index"));
 
-		if (amend)
+		ಯದಿ (amend)
 			parent = "HEAD^1";
 
-		if (repo_get_oid(the_repository, parent, &oid)) {
-			int i, ita_nr = 0;
+		ಯದಿ (repo_get_oid(the_repository, parent, &oid)) {
+			ಪೂರ್ಣಾಙ್ಕ i, ita_nr = 0;
 
 			/* TODO: audit for interaction with sparse-index. */
 			ensure_full_index(the_repository->index);
-			for (i = 0; i < the_repository->index->cache_nr; i++)
-				if (ce_intent_to_add(the_repository->index->cache[i]))
+			ಪ್ರತಿ (i = 0; i < the_repository->index->cache_nr; i++)
+				ಯದಿ (ce_intent_to_add(the_repository->index->cache[i]))
 					ita_nr++;
 			committable = the_repository->index->cache_nr > ita_nr;
-		} else {
+		} ಅನ್ಯಥಾ {
 			/*
 			 * Unless the user did explicitly request a submodule
 			 * ignore mode by passing a command line option we do
@@ -1054,9 +1054,9 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			 * submodules which were manually staged, which would
 			 * be really confusing.
 			 */
-			struct diff_flags flags = DIFF_FLAGS_INIT;
+			ಸಂರಚನಾ diff_flags flags = DIFF_FLAGS_INIT;
 			flags.override_submodule_config = 1;
-			if (ignore_submodule_arg &&
+			ಯದಿ (ignore_submodule_arg &&
 			    !strcmp(ignore_submodule_arg, "all"))
 				flags.ignore_submodules = 1;
 			committable = index_differs_from(the_repository,
@@ -1067,8 +1067,8 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 
 	fclose(s->fp);
 
-	if (trailer_args.nr) {
-		if (amend_file_with_trailers(git_path_commit_editmsg(), &trailer_args))
+	ಯದಿ (trailer_args.nr) {
+		ಯದಿ (amend_file_with_trailers(git_path_commit_editmsg(), &trailer_args))
 			die(_("unable to pass trailers to --trailers"));
 		strvec_clear(&trailer_args);
 	}
@@ -1078,27 +1078,27 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 * explicit --allow-empty. In the cherry-pick case, it may be
 	 * empty due to conflict resolution, which the user should okay.
 	 */
-	if (!committable && whence != FROM_MERGE && !allow_empty &&
+	ಯದಿ (!committable && whence != FROM_MERGE && !allow_empty &&
 	    !(amend && is_a_merge(current_head))) {
 		s->hints = advice_enabled(ADVICE_STATUS_HINTS);
 		s->display_comment_prefix = old_display_comment_prefix;
 		run_status(stdout, index_file, prefix, 0, s);
-		if (amend)
+		ಯದಿ (amend)
 			fputs(_(empty_amend_advice), stderr);
-		else if (is_from_cherry_pick(whence) ||
+		ಅನ್ಯಥಾ ಯದಿ (is_from_cherry_pick(whence) ||
 			 whence == FROM_REBASE_PICK) {
 			fputs(_(empty_cherry_pick_advice), stderr);
-			if (whence == FROM_CHERRY_PICK_SINGLE)
+			ಯದಿ (whence == FROM_CHERRY_PICK_SINGLE)
 				fputs(_(empty_cherry_pick_advice_single), stderr);
-			else if (whence == FROM_CHERRY_PICK_MULTI)
+			ಅನ್ಯಥಾ ಯದಿ (whence == FROM_CHERRY_PICK_MULTI)
 				fputs(_(empty_cherry_pick_advice_multi), stderr);
-			else
+			ಅನ್ಯಥಾ
 				fputs(_(empty_rebase_pick_advice), stderr);
 		}
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	if (!no_verify && invoked_hook) {
+	ಯದಿ (!no_verify && invoked_hook) {
 		/*
 		 * Re-read the index as the pre-commit-commit hook was invoked
 		 * and could have updated it. We must do this before we invoke
@@ -1108,20 +1108,20 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	}
 	read_index_from(the_repository->index, index_file, repo_get_git_dir(the_repository));
 
-	if (cache_tree_update(the_repository->index, 0)) {
+	ಯದಿ (cache_ವೃಕ್ಷ_update(the_repository->index, 0)) {
 		error(_("Error building trees"));
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	if (run_commit_hook(use_editor, index_file, NULL, "prepare-commit-msg",
-			    git_path_commit_editmsg(), hook_arg1, hook_arg2, NULL))
-		return 0;
+	ಯದಿ (run_commit_hook(use_editor, index_file, ರಿಕ್ತ, "prepare-commit-msg",
+			    git_path_commit_editmsg(), hook_arg1, hook_arg2, ರಿಕ್ತ))
+		ಪ್ರತ್ಯಾಗಮ 0;
 
-	if (use_editor) {
-		struct strvec env = STRVEC_INIT;
+	ಯದಿ (use_editor) {
+		ಸಂರಚನಾ strvec env = STRVEC_INIT;
 
 		strvec_pushf(&env, "GIT_INDEX_FILE=%s", index_file);
-		if (launch_editor(git_path_commit_editmsg(), NULL, env.v)) {
+		ಯದಿ (launch_editor(git_path_commit_editmsg(), ರಿಕ್ತ, env.v)) {
 			fprintf(stderr,
 			_("Please supply the message using either -m or -F option.\n"));
 			exit(1);
@@ -1129,152 +1129,152 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		strvec_clear(&env);
 	}
 
-	if (!no_verify &&
-	    run_commit_hook(use_editor, index_file, NULL, "commit-msg",
-			    git_path_commit_editmsg(), NULL)) {
-		return 0;
+	ಯದಿ (!no_verify &&
+	    run_commit_hook(use_editor, index_file, ರಿಕ್ತ, "commit-msg",
+			    git_path_commit_editmsg(), ರಿಕ್ತ)) {
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	return 1;
+	ಪ್ರತ್ಯಾಗಮ 1;
 }
 
-static const char *find_author_by_nickname(const char *name)
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *find_author_by_nickname(ಧ್ರುವ ವರ್ಣ *name)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	struct strbuf buf = STRBUF_INIT;
-	const char *av[20];
-	int ac = 0;
+	ಸಂರಚನಾ rev_info revs;
+	ಸಂರಚನಾ commit *commit;
+	ಸಂರಚನಾ strbuf buf = STRBUF_INIT;
+	ಧ್ರುವ ವರ್ಣ *av[20];
+	ಪೂರ್ಣಾಙ್ಕ ac = 0;
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, ರಿಕ್ತ);
 	strbuf_addf(&buf, "--author=%s", name);
 	av[++ac] = "--all";
 	av[++ac] = "-i";
 	av[++ac] = buf.buf;
-	av[++ac] = NULL;
-	setup_revisions(ac, av, &revs, NULL);
-	revs.mailmap = xmalloc(sizeof(struct string_list));
+	av[++ac] = ರಿಕ್ತ;
+	setup_revisions(ac, av, &revs, ರಿಕ್ತ);
+	revs.mailmap = xmalloc(ಪರಿಮಾಣ(ಸಂರಚನಾ string_list));
 	string_list_init_nodup(revs.mailmap);
 	read_mailmap(the_repository, revs.mailmap);
 
-	if (prepare_revision_walk(&revs))
+	ಯದಿ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	commit = get_revision(&revs);
-	if (commit) {
-		struct pretty_print_context ctx = {0};
+	ಯದಿ (commit) {
+		ಸಂರಚನಾ pretty_print_context ctx = {0};
 		ctx.date_mode.type = DATE_NORMAL;
 		strbuf_release(&buf);
 		repo_format_commit_message(the_repository, commit,
 					   "%aN <%aE>", &buf, &ctx);
 		release_revisions(&revs);
-		return strbuf_detach(&buf, NULL);
+		ಪ್ರತ್ಯಾಗಮ strbuf_detach(&buf, ರಿಕ್ತ);
 	}
 	die(_("--author '%s' is not 'Name <email>' and matches no existing author"), name);
 }
 
-static void handle_ignored_arg(struct wt_status *s)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_ignored_arg(ಸಂರಚನಾ wt_status *s)
 {
-	if (!ignored_arg)
+	ಯದಿ (!ignored_arg)
 		; /* default already initialized */
-	else if (!strcmp(ignored_arg, "traditional"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(ignored_arg, "traditional"))
 		s->show_ignored_mode = SHOW_TRADITIONAL_IGNORED;
-	else if (!strcmp(ignored_arg, "no"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(ignored_arg, "no"))
 		s->show_ignored_mode = SHOW_NO_IGNORED;
-	else if (!strcmp(ignored_arg, "matching"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(ignored_arg, "matching"))
 		s->show_ignored_mode = SHOW_MATCHING_IGNORED;
-	else
+	ಅನ್ಯಥಾ
 		die(_("Invalid ignored mode '%s'"), ignored_arg);
 }
 
-static enum untracked_status_type parse_untracked_setting_name(const char *u)
+ಸ್ಥಿರ ಗಣನಾ untracked_status_type parse_untracked_setting_name(ಧ್ರುವ ವರ್ಣ *u)
 {
 	/*
 	 * Please update $__git_untracked_file_modes in
 	 * git-completion.bash when you add new options
 	 */
-	switch (git_parse_maybe_bool(u)) {
-	case 0:
+	ವಿಕಲ್ಪ (git_parse_maybe_bool(u)) {
+	ಪಕ್ಷ 0:
 		u = "no";
-		break;
-	case 1:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ 1:
 		u = "normal";
-		break;
-	default:
-		break;
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
+		ಭಙ್ಗ;
 	}
 
-	if (!strcmp(u, "no"))
-		return SHOW_NO_UNTRACKED_FILES;
-	else if (!strcmp(u, "normal"))
-		return SHOW_NORMAL_UNTRACKED_FILES;
-	else if (!strcmp(u, "all"))
-		return SHOW_ALL_UNTRACKED_FILES;
-	else
-		return SHOW_UNTRACKED_FILES_ERROR;
+	ಯದಿ (!strcmp(u, "no"))
+		ಪ್ರತ್ಯಾಗಮ SHOW_NO_UNTRACKED_FILES;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(u, "normal"))
+		ಪ್ರತ್ಯಾಗಮ SHOW_NORMAL_UNTRACKED_FILES;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(u, "all"))
+		ಪ್ರತ್ಯಾಗಮ SHOW_ALL_UNTRACKED_FILES;
+	ಅನ್ಯಥಾ
+		ಪ್ರತ್ಯಾಗಮ SHOW_UNTRACKED_FILES_ERROR;
 }
 
-static void handle_untracked_files_arg(struct wt_status *s)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_untracked_files_arg(ಸಂರಚನಾ wt_status *s)
 {
-	enum untracked_status_type u;
+	ಗಣನಾ untracked_status_type u;
 
-	if (!untracked_files_arg)
-		return; /* default already initialized */
+	ಯದಿ (!untracked_files_arg)
+		ಪ್ರತ್ಯಾಗಮ; /* default already initialized */
 
 	u = parse_untracked_setting_name(untracked_files_arg);
-	if (u == SHOW_UNTRACKED_FILES_ERROR)
+	ಯದಿ (u == SHOW_UNTRACKED_FILES_ERROR)
 		die(_("Invalid untracked files mode '%s'"),
 		    untracked_files_arg);
 	s->show_untracked_files = u;
 }
 
-static const char *read_commit_message(const char *name)
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *read_commit_message(ಧ್ರುವ ವರ್ಣ *name)
 {
-	const char *out_enc;
-	struct commit *commit;
+	ಧ್ರುವ ವರ್ಣ *out_enc;
+	ಸಂರಚನಾ commit *commit;
 
 	commit = lookup_commit_reference_by_name(name);
-	if (!commit)
+	ಯದಿ (!commit)
 		die(_("could not lookup commit '%s'"), name);
 	out_enc = get_commit_output_encoding();
-	return repo_logmsg_reencode(the_repository, commit, NULL, out_enc);
+	ಪ್ರತ್ಯಾಗಮ repo_logmsg_reencode(the_repository, commit, ರಿಕ್ತ, out_enc);
 }
 
 /*
  * Enumerate what needs to be propagated when --porcelain
  * is not in effect here.
  */
-static struct status_deferred_config {
-	enum wt_status_format status_format;
-	int show_branch;
-	enum ahead_behind_flags ahead_behind;
+ಸ್ಥಿರ ಸಂರಚನಾ status_deferred_config {
+	ಗಣನಾ wt_status_format status_format;
+	ಪೂರ್ಣಾಙ್ಕ show_branch;
+	ಗಣನಾ ahead_behind_flags ahead_behind;
 } status_deferred_config = {
 	STATUS_FORMAT_UNSPECIFIED,
 	-1, /* unspecified */
 	AHEAD_BEHIND_UNSPECIFIED,
 };
 
-static void finalize_deferred_config(struct wt_status *s)
+ಸ್ಥಿರ ಶೂನ್ಯ finalize_deferred_config(ಸಂರಚನಾ wt_status *s)
 {
-	int use_deferred_config = (status_format != STATUS_FORMAT_PORCELAIN &&
+	ಪೂರ್ಣಾಙ್ಕ use_deferred_config = (status_format != STATUS_FORMAT_PORCELAIN &&
 				   status_format != STATUS_FORMAT_PORCELAIN_V2 &&
 				   !s->null_termination);
 
-	if (s->null_termination) {
-		if (status_format == STATUS_FORMAT_NONE ||
+	ಯದಿ (s->null_termination) {
+		ಯದಿ (status_format == STATUS_FORMAT_NONE ||
 		    status_format == STATUS_FORMAT_UNSPECIFIED)
 			status_format = STATUS_FORMAT_PORCELAIN;
-		else if (status_format == STATUS_FORMAT_LONG)
+		ಅನ್ಯಥಾ ಯದಿ (status_format == STATUS_FORMAT_LONG)
 			die(_("options '%s' and '%s' cannot be used together"), "--long", "-z");
 	}
 
-	if (use_deferred_config && status_format == STATUS_FORMAT_UNSPECIFIED)
+	ಯದಿ (use_deferred_config && status_format == STATUS_FORMAT_UNSPECIFIED)
 		status_format = status_deferred_config.status_format;
-	if (status_format == STATUS_FORMAT_UNSPECIFIED)
+	ಯದಿ (status_format == STATUS_FORMAT_UNSPECIFIED)
 		status_format = STATUS_FORMAT_NONE;
 
-	if (use_deferred_config && s->show_branch < 0)
+	ಯದಿ (use_deferred_config && s->show_branch < 0)
 		s->show_branch = status_deferred_config.show_branch;
-	if (s->show_branch < 0)
+	ಯದಿ (s->show_branch < 0)
 		s->show_branch = 0;
 
 	/*
@@ -1284,59 +1284,59 @@ static void finalize_deferred_config(struct wt_status *s)
 	 * config setting.  In all other cases (and porcelain V[12] formats
 	 * in particular), we inherit _FULL for backwards compatibility.
 	 */
-	if (use_deferred_config &&
+	ಯದಿ (use_deferred_config &&
 	    s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
 		s->ahead_behind_flags = status_deferred_config.ahead_behind;
 
-	if (s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
+	ಯದಿ (s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
 		s->ahead_behind_flags = AHEAD_BEHIND_FULL;
 }
 
-static void check_fixup_reword_options(int argc, const char *argv[]) {
-	if (whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+ಸ್ಥಿರ ಶೂನ್ಯ check_fixup_reword_options(ಪೂರ್ಣಾಙ್ಕ argc, ಧ್ರುವ ವರ್ಣ *argv[]) {
+	ಯದಿ (whence != FROM_COMMIT) {
+		ಯದಿ (whence == FROM_MERGE)
 			die(_("You are in the middle of a merge -- cannot reword."));
-		else if (is_from_cherry_pick(whence))
+		ಅನ್ಯಥಾ ಯದಿ (is_from_cherry_pick(whence))
 			die(_("You are in the middle of a cherry-pick -- cannot reword."));
 	}
-	if (argc)
+	ಯದಿ (argc)
 		die(_("reword option of '%s' and path '%s' cannot be used together"), "--fixup", *argv);
-	if (patch_interactive || interactive || all || also || only)
+	ಯದಿ (patch_interactive || interactive || all || also || only)
 		die(_("reword option of '%s' and '%s' cannot be used together"),
 			"--fixup", "--patch/--interactive/--all/--include/--only");
 }
 
-static int parse_and_validate_options(int argc, const char *argv[],
-				      const struct option *options,
-				      const char * const usage[],
-				      const char *prefix,
-				      struct commit *current_head,
-				      struct wt_status *s)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_and_validate_options(ಪೂರ್ಣಾಙ್ಕ argc, ಧ್ರುವ ವರ್ಣ *argv[],
+				      ಧ್ರುವ ಸಂರಚನಾ option *options,
+				      ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ usage[],
+				      ಧ್ರುವ ವರ್ಣ *prefix,
+				      ಸಂರಚನಾ commit *current_head,
+				      ಸಂರಚನಾ wt_status *s)
 {
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 	finalize_deferred_config(s);
 
-	if (force_author && !strchr(force_author, '>'))
+	ಯದಿ (force_author && !strchr(force_author, '>'))
 		force_author = find_author_by_nickname(force_author);
 
-	if (force_author && renew_authorship)
+	ಯದಿ (force_author && renew_authorship)
 		die(_("options '%s' and '%s' cannot be used together"), "--reset-author", "--author");
 
-	if (logfile || have_option_m || use_message)
+	ಯದಿ (logfile || have_option_m || use_message)
 		use_editor = 0;
 
 	/* Sanity check options */
-	if (amend && !current_head)
+	ಯದಿ (amend && !current_head)
 		die(_("You have nothing to amend."));
-	if (amend && whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+	ಯದಿ (amend && whence != FROM_COMMIT) {
+		ಯದಿ (whence == FROM_MERGE)
 			die(_("You are in the middle of a merge -- cannot amend."));
-		else if (is_from_cherry_pick(whence))
+		ಅನ್ಯಥಾ ಯದಿ (is_from_cherry_pick(whence))
 			die(_("You are in the middle of a cherry-pick -- cannot amend."));
-		else if (whence == FROM_REBASE_PICK)
+		ಅನ್ಯಥಾ ಯದಿ (whence == FROM_REBASE_PICK)
 			die(_("You are in the middle of a rebase -- cannot amend."));
 	}
-	if (fixup_message && squash_message)
+	ಯದಿ (fixup_message && squash_message)
 		die(_("options '%s' and '%s' cannot be used together"), "--squash", "--fixup");
 	die_for_incompatible_opt4(!!use_message, "-C",
 				  !!edit_message, "-c",
@@ -1346,36 +1346,36 @@ static int parse_and_validate_options(int argc, const char *argv[],
 				  !!edit_message, "-c",
 				  !!use_message, "-C",
 				  !!logfile, "-F");
-	if (use_message || edit_message || logfile ||fixup_message || have_option_m)
+	ಯದಿ (use_message || edit_message || logfile ||fixup_message || have_option_m)
 		FREE_AND_NULL(template_file);
-	if (edit_message)
+	ಯದಿ (edit_message)
 		use_message = edit_message;
-	if (amend && !use_message && !fixup_message)
+	ಯದಿ (amend && !use_message && !fixup_message)
 		use_message = "HEAD";
-	if (!use_message && !is_from_cherry_pick(whence) &&
+	ಯದಿ (!use_message && !is_from_cherry_pick(whence) &&
 	    !is_from_rebase(whence) && renew_authorship)
 		die(_("--reset-author can be used only with -C, -c or --amend."));
-	if (use_message) {
+	ಯದಿ (use_message) {
 		use_message_buffer = read_commit_message(use_message);
-		if (!renew_authorship) {
+		ಯದಿ (!renew_authorship) {
 			author_message = use_message;
 			author_message_buffer = use_message_buffer;
 		}
 	}
-	if ((is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) &&
+	ಯದಿ ((is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) &&
 	    !renew_authorship) {
 		author_message = "CHERRY_PICK_HEAD";
 		author_message_buffer = read_commit_message(author_message);
 	}
 
-	if (patch_interactive)
+	ಯದಿ (patch_interactive)
 		interactive = 1;
 
 	die_for_incompatible_opt4(also, "-i/--include",
 				  only, "-o/--only",
 				  all, "-a/--all",
 				  interactive, "--interactive/-p/--patch");
-	if (fixup_message) {
+	ಯದಿ (fixup_message) {
 		/*
 		 * We limit --fixup's suboptions to only alpha characters.
 		 * If the first character after a run of alpha is colon,
@@ -1386,166 +1386,166 @@ static int parse_and_validate_options(int argc, const char *argv[],
 		 *
 		 * Otherwise, we are dealing with --fixup=<commit>.
 		 */
-		char *p = fixup_message;
-		while (isalpha(*p))
+		ವರ್ಣ *p = fixup_message;
+		ಯಾವತ್ (isalpha(*p))
 			p++;
-		if (p > fixup_message && *p == ':') {
+		ಯದಿ (p > fixup_message && *p == ':') {
 			*p = '\0';
 			fixup_commit = p + 1;
-			if (!strcmp("amend", fixup_message) ||
+			ಯದಿ (!strcmp("amend", fixup_message) ||
 			    !strcmp("reword", fixup_message)) {
 				fixup_prefix = "amend";
 				allow_empty = 1;
-				if (*fixup_message == 'r') {
+				ಯದಿ (*fixup_message == 'r') {
 					check_fixup_reword_options(argc, argv);
 					only = 1;
 				}
-			} else {
+			} ಅನ್ಯಥಾ {
 				die(_("unknown option: --fixup=%s:%s"), fixup_message, fixup_commit);
 			}
-		} else {
+		} ಅನ್ಯಥಾ {
 			fixup_commit = fixup_message;
 			fixup_prefix = "fixup";
 			use_editor = 0;
 		}
 	}
 
-	if (0 <= edit_flag)
+	ಯದಿ (0 <= edit_flag)
 		use_editor = edit_flag;
 
 	handle_untracked_files_arg(s);
 
-	if (all && argc > 0)
+	ಯದಿ (all && argc > 0)
 		die(_("paths '%s ...' with -a does not make sense"),
 		    argv[0]);
 
-	if (status_format != STATUS_FORMAT_NONE)
+	ಯದಿ (status_format != STATUS_FORMAT_NONE)
 		dry_run = 1;
 
-	return argc;
+	ಪ್ರತ್ಯಾಗಮ argc;
 }
 
-static int dry_run_commit(const char **argv, const char *prefix,
-			  const struct commit *current_head, struct wt_status *s)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ dry_run_commit(ಧ್ರುವ ವರ್ಣ **argv, ಧ್ರುವ ವರ್ಣ *prefix,
+			  ಧ್ರುವ ಸಂರಚನಾ commit *current_head, ಸಂರಚನಾ wt_status *s)
 {
-	int committable;
-	const char *index_file;
+	ಪೂರ್ಣಾಙ್ಕ committable;
+	ಧ್ರುವ ವರ್ಣ *index_file;
 
 	index_file = prepare_index(argv, prefix, current_head, 1);
 	committable = run_status(stdout, index_file, prefix, 0, s);
 	rollback_index_files();
 
-	return committable ? 0 : 1;
+	ಪ್ರತ್ಯಾಗಮ committable ? 0 : 1;
 }
 
 define_list_config_array_extra(color_status_slots, {"added"});
 
-static int parse_status_slot(const char *slot)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_status_slot(ಧ್ರುವ ವರ್ಣ *slot)
 {
-	if (!strcasecmp(slot, "added"))
-		return WT_STATUS_UPDATED;
+	ಯದಿ (!strcasecmp(slot, "added"))
+		ಪ್ರತ್ಯಾಗಮ WT_STATUS_UPDATED;
 
-	return LOOKUP_CONFIG(color_status_slots, slot);
+	ಪ್ರತ್ಯಾಗಮ LOOKUP_CONFIG(color_status_slots, slot);
 }
 
-static int git_status_config(const char *k, const char *v,
-			     const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ git_status_config(ಧ್ರುವ ವರ್ಣ *k, ಧ್ರುವ ವರ್ಣ *v,
+			     ಧ್ರುವ ಸಂರಚನಾ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	struct wt_status *s = cb;
-	const char *slot_name;
+	ಸಂರಚನಾ wt_status *s = cb;
+	ಧ್ರುವ ವರ್ಣ *slot_name;
 
-	if (starts_with(k, "column."))
-		return git_column_config(k, v, "status", &s->colopts);
-	if (!strcmp(k, "status.submodulesummary")) {
-		int is_bool;
+	ಯದಿ (starts_with(k, "column."))
+		ಪ್ರತ್ಯಾಗಮ git_column_config(k, v, "status", &s->colopts);
+	ಯದಿ (!strcmp(k, "status.submodulesummary")) {
+		ಪೂರ್ಣಾಙ್ಕ is_bool;
 		s->submodule_summary = git_config_bool_or_int(k, v, ctx->kvi,
 							      &is_bool);
-		if (is_bool && s->submodule_summary)
+		ಯದಿ (is_bool && s->submodule_summary)
 			s->submodule_summary = -1;
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.short")) {
-		if (git_config_bool(k, v))
+	ಯದಿ (!strcmp(k, "status.short")) {
+		ಯದಿ (git_config_bool(k, v))
 			status_deferred_config.status_format = STATUS_FORMAT_SHORT;
-		else
+		ಅನ್ಯಥಾ
 			status_deferred_config.status_format = STATUS_FORMAT_NONE;
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.branch")) {
+	ಯದಿ (!strcmp(k, "status.branch")) {
 		status_deferred_config.show_branch = git_config_bool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.aheadbehind")) {
+	ಯದಿ (!strcmp(k, "status.aheadbehind")) {
 		status_deferred_config.ahead_behind = git_config_bool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.showstash")) {
+	ಯದಿ (!strcmp(k, "status.showstash")) {
 		s->show_stash = git_config_bool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.color") || !strcmp(k, "color.status")) {
+	ಯದಿ (!strcmp(k, "status.color") || !strcmp(k, "color.status")) {
 		s->use_color = git_config_colorbool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.displaycommentprefix")) {
+	ಯದಿ (!strcmp(k, "status.displaycommentprefix")) {
 		s->display_comment_prefix = git_config_bool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (skip_prefix(k, "status.color.", &slot_name) ||
+	ಯದಿ (skip_prefix(k, "status.color.", &slot_name) ||
 	    skip_prefix(k, "color.status.", &slot_name)) {
-		int slot = parse_status_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, s->color_palette[slot]);
+		ಪೂರ್ಣಾಙ್ಕ slot = parse_status_slot(slot_name);
+		ಯದಿ (slot < 0)
+			ಪ್ರತ್ಯಾಗಮ 0;
+		ಯದಿ (!v)
+			ಪ್ರತ್ಯಾಗಮ config_error_nonbool(k);
+		ಪ್ರತ್ಯಾಗಮ color_parse(v, s->color_palette[slot]);
 	}
-	if (!strcmp(k, "status.relativepaths")) {
+	ಯದಿ (!strcmp(k, "status.relativepaths")) {
 		s->relative_paths = git_config_bool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.showuntrackedfiles")) {
-		enum untracked_status_type u;
+	ಯದಿ (!strcmp(k, "status.showuntrackedfiles")) {
+		ಗಣನಾ untracked_status_type u;
 
 		u = parse_untracked_setting_name(v);
-		if (u == SHOW_UNTRACKED_FILES_ERROR)
-			return error(_("Invalid untracked files mode '%s'"), v);
+		ಯದಿ (u == SHOW_UNTRACKED_FILES_ERROR)
+			ಪ್ರತ್ಯಾಗಮ error(_("Invalid untracked files mode '%s'"), v);
 		s->show_untracked_files = u;
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "diff.renamelimit")) {
-		if (s->rename_limit == -1)
+	ಯದಿ (!strcmp(k, "diff.renamelimit")) {
+		ಯದಿ (s->rename_limit == -1)
 			s->rename_limit = git_config_int(k, v, ctx->kvi);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.renamelimit")) {
+	ಯದಿ (!strcmp(k, "status.renamelimit")) {
 		s->rename_limit = git_config_int(k, v, ctx->kvi);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "diff.renames")) {
-		if (s->detect_rename == -1)
+	ಯದಿ (!strcmp(k, "diff.renames")) {
+		ಯದಿ (s->detect_rename == -1)
 			s->detect_rename = git_config_rename(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "status.renames")) {
+	ಯದಿ (!strcmp(k, "status.renames")) {
 		s->detect_rename = git_config_rename(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	return git_diff_ui_config(k, v, ctx, NULL);
+	ಪ್ರತ್ಯಾಗಮ git_diff_ui_config(k, v, ctx, ರಿಕ್ತ);
 }
 
-int cmd_status(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_status(ಪೂರ್ಣಾಙ್ಕ argc,
+ಧ್ರುವ ವರ್ಣ **argv,
+ಧ್ರುವ ವರ್ಣ *prefix,
+ಸಂರಚನಾ repository *repo UNUSED)
 {
-	static int no_renames = -1;
-	static const char *rename_score_arg = (const char *)-1;
-	static struct wt_status s;
-	unsigned int progress_flag = 0;
-	int fd;
-	struct object_id oid;
-	static struct option builtin_status_options[] = {
+	ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ no_renames = -1;
+	ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *rename_score_arg = (ಧ್ರುವ ವರ್ಣ *)-1;
+	ಸ್ಥಿರ ಸಂರಚನಾ wt_status s;
+	unsigned ಪೂರ್ಣಾಙ್ಕ progress_flag = 0;
+	ಪೂರ್ಣಾಙ್ಕ fd;
+	ಸಂರಚನಾ object_id oid;
+	ಸ್ಥಿರ ಸಂರಚನಾ option builtin_status_options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_SET_INT('s', "short", &status_format,
 			    N_("show status concisely"), STATUS_FORMAT_SHORT),
@@ -1567,7 +1567,7 @@ struct repository *repo UNUSED)
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.ಮೌಲ್ಯ = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1576,7 +1576,7 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignored",
-			.value = &ignored_arg,
+			.ಮೌಲ್ಯ = &ignored_arg,
 			.argh = N_("mode"),
 			.help = N_("show ignored files, optional modes: traditional, matching, no. (Default: traditional)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1585,7 +1585,7 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignore-submodules",
-			.value = &ignore_submodule_arg,
+			.ಮೌಲ್ಯ = &ignore_submodule_arg,
 			.argh = N_("when"),
 			.help = N_("ignore changes to submodules, optional when: all, dirty, untracked. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1615,7 +1615,7 @@ struct repository *repo UNUSED)
 	handle_untracked_files_arg(&s);
 	handle_ignored_arg(&s);
 
-	if (s.show_ignored_mode == SHOW_MATCHING_IGNORED &&
+	ಯದಿ (s.show_ignored_mode == SHOW_MATCHING_IGNORED &&
 	    s.show_untracked_files == SHOW_NO_UNTRACKED_FILES)
 		die(_("Unsupported combination of ignored and untracked-files arguments"));
 
@@ -1623,86 +1623,86 @@ struct repository *repo UNUSED)
 		       PATHSPEC_PREFER_FULL,
 		       prefix, argv);
 
-	if (status_format != STATUS_FORMAT_PORCELAIN &&
+	ಯದಿ (status_format != STATUS_FORMAT_PORCELAIN &&
 	    status_format != STATUS_FORMAT_PORCELAIN_V2)
 		progress_flag = REFRESH_PROGRESS;
 	repo_read_index(the_repository);
 	refresh_index(the_repository->index,
 		      REFRESH_QUIET|REFRESH_UNMERGED|progress_flag,
-		      &s.pathspec, NULL, NULL);
+		      &s.pathspec, ರಿಕ್ತ, ರಿಕ್ತ);
 
-	if (use_optional_locks())
+	ಯದಿ (use_optional_locks())
 		fd = repo_hold_locked_index(the_repository, &index_lock, 0);
-	else
+	ಅನ್ಯಥಾ
 		fd = -1;
 
 	s.is_initial = repo_get_oid(the_repository, s.reference, &oid) ? 1 : 0;
-	if (!s.is_initial)
+	ಯದಿ (!s.is_initial)
 		oidcpy(&s.oid_commit, &oid);
 
 	s.ignore_submodule_arg = ignore_submodule_arg;
 	s.status_format = status_format;
 	s.verbose = verbose;
-	if (no_renames != -1)
+	ಯದಿ (no_renames != -1)
 		s.detect_rename = !no_renames;
-	if ((intptr_t)rename_score_arg != -1) {
-		if (s.detect_rename < DIFF_DETECT_RENAME)
+	ಯದಿ ((intptr_t)rename_score_arg != -1) {
+		ಯದಿ (s.detect_rename < DIFF_DETECT_RENAME)
 			s.detect_rename = DIFF_DETECT_RENAME;
-		if (rename_score_arg)
+		ಯದಿ (rename_score_arg)
 			s.rename_score = parse_rename_score(&rename_score_arg);
 	}
 
 	wt_status_collect(&s);
 
-	if (0 <= fd)
+	ಯದಿ (0 <= fd)
 		repo_update_index_if_able(the_repository, &index_lock);
 
-	if (s.relative_paths)
+	ಯದಿ (s.relative_paths)
 		s.prefix = prefix;
 
 	wt_status_print(&s);
 	wt_status_collect_free_buffers(&s);
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static int git_commit_config(const char *k, const char *v,
-			     const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ git_commit_config(ಧ್ರುವ ವರ್ಣ *k, ಧ್ರುವ ವರ್ಣ *v,
+			     ಧ್ರುವ ಸಂರಚನಾ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	struct wt_status *s = cb;
+	ಸಂರಚನಾ wt_status *s = cb;
 
-	if (!strcmp(k, "commit.template"))
-		return git_config_pathname(&template_file, k, v);
-	if (!strcmp(k, "commit.status")) {
+	ಯದಿ (!strcmp(k, "commit.template"))
+		ಪ್ರತ್ಯಾಗಮ git_config_pathname(&template_file, k, v);
+	ಯದಿ (!strcmp(k, "commit.status")) {
 		include_status = git_config_bool(k, v);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "commit.cleanup")) {
+	ಯದಿ (!strcmp(k, "commit.cleanup")) {
 		FREE_AND_NULL(cleanup_config);
-		return git_config_string(&cleanup_config, k, v);
+		ಪ್ರತ್ಯಾಗಮ git_config_string(&cleanup_config, k, v);
 	}
-	if (!strcmp(k, "commit.gpgsign")) {
-		sign_commit = git_config_bool(k, v) ? "" : NULL;
-		return 0;
+	ಯದಿ (!strcmp(k, "commit.gpgsign")) {
+		sign_commit = git_config_bool(k, v) ? "" : ರಿಕ್ತ;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
-	if (!strcmp(k, "commit.verbose")) {
-		int is_bool;
+	ಯದಿ (!strcmp(k, "commit.verbose")) {
+		ಪೂರ್ಣಾಙ್ಕ is_bool;
 		config_commit_verbose = git_config_bool_or_int(k, v, ctx->kvi,
 							       &is_bool);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	return git_status_config(k, v, ctx, s);
+	ಪ್ರತ್ಯಾಗಮ git_status_config(k, v, ctx, s);
 }
 
-int cmd_commit(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_commit(ಪೂರ್ಣಾಙ್ಕ argc,
+	       ಧ್ರುವ ವರ್ಣ **argv,
+	       ಧ್ರುವ ವರ್ಣ *prefix,
+	       ಸಂರಚನಾ repository *repo UNUSED)
 {
-	static struct wt_status s;
-	static const char *cleanup_arg = NULL;
-	static struct option builtin_commit_options[] = {
+	ಸ್ಥಿರ ಸಂರಚನಾ wt_status s;
+	ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *cleanup_arg = ರಿಕ್ತ;
+	ಸ್ಥಿರ ಸಂರಚನಾ option builtin_commit_options[] = {
 		OPT__QUIET(&quiet, N_("suppress summary after successful commit")),
 		OPT__VERBOSE(&verbose, N_("show diff in commit message template")),
 
@@ -1731,7 +1731,7 @@ int cmd_commit(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.ಮೌಲ್ಯ = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1767,7 +1767,7 @@ int cmd_commit(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.ಮೌಲ್ಯ = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1785,16 +1785,16 @@ int cmd_commit(int argc,
 		OPT_END()
 	};
 
-	struct strbuf sb = STRBUF_INIT;
-	struct strbuf author_ident = STRBUF_INIT;
-	const char *index_file, *reflog_msg;
-	struct object_id oid;
-	struct commit_list *parents = NULL;
-	struct stat statbuf;
-	struct commit *current_head = NULL;
-	struct commit_extra_header *extra = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret = 0;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf author_ident = STRBUF_INIT;
+	ಧ್ರುವ ವರ್ಣ *index_file, *reflog_ಸಂದೇಶ;
+	ಸಂರಚನಾ object_id oid;
+	ಸಂರಚನಾ commit_list *parents = ರಿಕ್ತ;
+	ಸಂರಚನಾ stat statbuf;
+	ಸಂರಚನಾ commit *current_head = ರಿಕ್ತ;
+	ಸಂರಚನಾ commit_extra_header *extra = ರಿಕ್ತ;
+	ಸಂರಚನಾ strbuf err = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_commit_usage, builtin_commit_options);
@@ -1810,116 +1810,116 @@ int cmd_commit(int argc,
 	status_format = STATUS_FORMAT_NONE; /* Ignore status.short */
 	s.colopts = 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &oid))
-		current_head = NULL;
-	else {
+	ಯದಿ (repo_get_oid(the_repository, "HEAD", &oid))
+		current_head = ರಿಕ್ತ;
+	ಅನ್ಯಥಾ {
 		current_head = lookup_commit_or_die(&oid, "HEAD");
-		if (repo_parse_commit(the_repository, current_head))
+		ಯದಿ (repo_parse_commit(the_repository, current_head))
 			die(_("could not parse HEAD commit"));
 	}
 	verbose = -1; /* unspecified */
 	argc = parse_and_validate_options(argc, argv, builtin_commit_options,
 					  builtin_commit_usage,
 					  prefix, current_head, &s);
-	if (trailer_args.nr)
+	ಯದಿ (trailer_args.nr)
 		trailer_config_init();
 
-	if (verbose == -1)
+	ಯದಿ (verbose == -1)
 		verbose = (config_commit_verbose < 0) ? 0 : config_commit_verbose;
 
-	if (cleanup_arg) {
-		free(cleanup_config);
+	ಯದಿ (cleanup_arg) {
+		ಮುಕ್ತ(cleanup_config);
 		cleanup_config = xstrdup(cleanup_arg);
 	}
 	cleanup_mode = get_cleanup_mode(cleanup_config, use_editor);
 
-	if (dry_run)
-		return dry_run_commit(argv, prefix, current_head, &s);
+	ಯದಿ (dry_run)
+		ಪ್ರತ್ಯಾಗಮ dry_run_commit(argv, prefix, current_head, &s);
 	index_file = prepare_index(argv, prefix, current_head, 0);
 
 	/* Set up everything for writing the commit object.  This includes
 	   running hooks, writing the trees, and interacting with the user.  */
-	if (!prepare_to_commit(index_file, prefix,
+	ಯದಿ (!prepare_to_commit(index_file, prefix,
 			       current_head, &s, &author_ident)) {
 		ret = 1;
 		rollback_index_files();
-		goto cleanup;
+		ಗಚ್ಛ cleanup;
 	}
 
 	/* Determine parents */
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!current_head) {
-		if (!reflog_msg)
-			reflog_msg = "commit (initial)";
-	} else if (amend) {
-		if (!reflog_msg)
-			reflog_msg = "commit (amend)";
+	reflog_ಸಂದೇಶ = getenv("GIT_REFLOG_ACTION");
+	ಯದಿ (!current_head) {
+		ಯದಿ (!reflog_ಸಂದೇಶ)
+			reflog_ಸಂದೇಶ = "commit (initial)";
+	} ಅನ್ಯಥಾ ಯದಿ (amend) {
+		ಯದಿ (!reflog_ಸಂದೇಶ)
+			reflog_ಸಂದೇಶ = "commit (amend)";
 		parents = commit_list_copy(current_head->parents);
-	} else if (whence == FROM_MERGE) {
-		struct strbuf m = STRBUF_INIT;
+	} ಅನ್ಯಥಾ ಯದಿ (whence == FROM_MERGE) {
+		ಸಂರಚನಾ strbuf m = STRBUF_INIT;
 		FILE *fp;
-		int allow_fast_forward = 1;
-		struct commit_list **pptr = &parents;
+		ಪೂರ್ಣಾಙ್ಕ allow_fast_forward = 1;
+		ಸಂರಚನಾ commit_list **pptr = &parents;
 
-		if (!reflog_msg)
-			reflog_msg = "commit (merge)";
+		ಯದಿ (!reflog_ಸಂದೇಶ)
+			reflog_ಸಂದೇಶ = "commit (merge)";
 		pptr = commit_list_append(current_head, pptr);
 		fp = xfopen(git_path_merge_head(the_repository), "r");
-		while (strbuf_getline_lf(&m, fp) != EOF) {
-			struct commit *parent;
+		ಯಾವತ್ (strbuf_getline_lf(&m, fp) != EOF) {
+			ಸಂರಚನಾ commit *parent;
 
 			parent = get_merge_parent(m.buf);
-			if (!parent)
+			ಯದಿ (!parent)
 				die(_("Corrupt MERGE_HEAD file (%s)"), m.buf);
 			pptr = commit_list_append(parent, pptr);
 		}
 		fclose(fp);
 		strbuf_release(&m);
-		if (!stat(git_path_merge_mode(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_merge_mode(the_repository), 0) < 0)
+		ಯದಿ (!stat(git_path_merge_mode(the_repository), &statbuf)) {
+			ಯದಿ (strbuf_read_file(&sb, git_path_merge_mode(the_repository), 0) < 0)
 				die_errno(_("could not read MERGE_MODE"));
-			if (!strcmp(sb.buf, "no-ff"))
+			ಯದಿ (!strcmp(sb.buf, "no-ff"))
 				allow_fast_forward = 0;
 		}
-		if (allow_fast_forward)
+		ಯದಿ (allow_fast_forward)
 			reduce_heads_replace(&parents);
-	} else {
-		if (!reflog_msg)
-			reflog_msg = is_from_cherry_pick(whence)
+	} ಅನ್ಯಥಾ {
+		ಯದಿ (!reflog_ಸಂದೇಶ)
+			reflog_ಸಂದೇಶ = is_from_cherry_pick(whence)
 					? "commit (cherry-pick)"
 					: is_from_rebase(whence)
 					? "commit (rebase)"
 					: "commit";
-		commit_list_insert(current_head, &parents);
+		commit_list_ಸೇರಿಸು(current_head, &parents);
 	}
 
 	/* Finally, get the commit message */
 	strbuf_reset(&sb);
-	if (strbuf_read_file(&sb, git_path_commit_editmsg(), 0) < 0) {
-		int saved_errno = errno;
+	ಯದಿ (strbuf_read_file(&sb, git_path_commit_editmsg(), 0) < 0) {
+		ಪೂರ್ಣಾಙ್ಕ saved_errno = errno;
 		rollback_index_files();
 		die(_("could not read commit message: %s"), strerror(saved_errno));
 	}
 
 	cleanup_message(&sb, cleanup_mode, verbose);
 
-	if (message_is_empty(&sb, cleanup_mode) && !allow_empty_message) {
+	ಯದಿ (message_is_empty(&sb, cleanup_mode) && !allow_empty_message) {
 		rollback_index_files();
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
 		exit(1);
 	}
-	if (template_untouched(&sb, template_file, cleanup_mode) && !allow_empty_message) {
+	ಯದಿ (template_untouched(&sb, template_file, cleanup_mode) && !allow_empty_message) {
 		rollback_index_files();
 		fprintf(stderr, _("Aborting commit; you did not edit the message.\n"));
 		exit(1);
 	}
 
-	if (fixup_message && starts_with(sb.buf, "amend! ") &&
+	ಯದಿ (fixup_message && starts_with(sb.buf, "amend! ") &&
 	    !allow_empty_message) {
-		struct strbuf body = STRBUF_INIT;
+		ಸಂರಚನಾ strbuf body = STRBUF_INIT;
 		size_t len = commit_subject_length(sb.buf);
 		strbuf_addstr(&body, sb.buf + len);
-		if (message_is_empty(&body, cleanup_mode)) {
+		ಯದಿ (message_is_empty(&body, cleanup_mode)) {
 			rollback_index_files();
 			fprintf(stderr, _("Aborting commit due to empty commit message body.\n"));
 			exit(1);
@@ -1927,22 +1927,22 @@ int cmd_commit(int argc,
 		strbuf_release(&body);
 	}
 
-	if (amend) {
-		const char *exclude_gpgsig[3] = { "gpgsig", "gpgsig-sha256", NULL };
+	ಯದಿ (amend) {
+		ಧ್ರುವ ವರ್ಣ *exclude_gpgsig[3] = { "gpgsig", "gpgsig-sha256", ರಿಕ್ತ };
 		extra = read_commit_extra_headers(current_head, exclude_gpgsig);
-	} else {
-		struct commit_extra_header **tail = &extra;
+	} ಅನ್ಯಥಾ {
+		ಸಂರಚನಾ commit_extra_header **tail = &extra;
 		append_merge_tag_headers(parents, &tail);
 	}
 
-	if (commit_tree_extended(sb.buf, sb.len, &the_repository->index->cache_tree->oid,
-				 parents, &oid, author_ident.buf, NULL,
+	ಯದಿ (commit_ವೃಕ್ಷ_extended(sb.buf, sb.len, &the_repository->index->cache_ವೃಕ್ಷ->oid,
+				 parents, &oid, author_ident.buf, ರಿಕ್ತ,
 				 sign_commit, extra)) {
 		rollback_index_files();
 		die(_("failed to write commit object"));
 	}
 
-	if (update_head_with_reflog(current_head, &oid, reflog_msg, &sb,
+	ಯದಿ (update_head_with_reflog(current_head, &oid, reflog_ಸಂದೇಶ, &sb,
 				    &err)) {
 		rollback_index_files();
 		die("%s", err.buf);
@@ -1950,11 +1950,11 @@ int cmd_commit(int argc,
 
 	sequencer_post_commit_cleanup(the_repository, 0);
 	unlink(git_path_merge_head(the_repository));
-	unlink(git_path_merge_msg(the_repository));
+	unlink(git_path_merge_ಸಂದೇಶ(the_repository));
 	unlink(git_path_merge_mode(the_repository));
-	unlink(git_path_squash_msg(the_repository));
+	unlink(git_path_squash_ಸಂದೇಶ(the_repository));
 
-	if (commit_index_files())
+	ಯದಿ (commit_index_files())
 		die(_("repository has been updated, but unable to write\n"
 		      "new index file. Check that disk is not full and quota is\n"
 		      "not exceeded, and then \"git restore --staged :/\" to recover."));
@@ -1964,23 +1964,23 @@ int cmd_commit(int argc,
 	repo_rerere(the_repository, 0);
 	run_auto_maintenance(the_repository, quiet);
 	run_commit_hook(use_editor, repo_get_index_file(the_repository),
-			NULL, "post-commit", NULL);
-	if (amend && !no_post_rewrite) {
+			ರಿಕ್ತ, "post-commit", ರಿಕ್ತ);
+	ಯದಿ (amend && !no_post_rewrite) {
 		commit_post_rewrite(the_repository, current_head, &oid);
 	}
-	if (!quiet) {
-		unsigned int flags = 0;
+	ಯದಿ (!quiet) {
+		unsigned ಪೂರ್ಣಾಙ್ಕ flags = 0;
 
-		if (!current_head)
+		ಯದಿ (!current_head)
 			flags |= SUMMARY_INITIAL_COMMIT;
-		if (author_date_is_interesting())
+		ಯದಿ (author_date_is_interesting())
 			flags |= SUMMARY_SHOW_AUTHOR_DATE;
 		print_commit_summary(the_repository, prefix,
 				     &oid, flags);
 	}
 
 	apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-			    NULL, NULL, NULL, NULL);
+			    ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ);
 
 cleanup:
 	free_commit_extra_headers(extra);
@@ -1988,7 +1988,7 @@ cleanup:
 	strbuf_release(&author_ident);
 	strbuf_release(&err);
 	strbuf_release(&sb);
-	free(logfile);
-	free(template_file);
-	return ret;
+	ಮುಕ್ತ(logfile);
+	ಮುಕ್ತ(template_file);
+	ಪ್ರತ್ಯಾಗಮ ret;
 }

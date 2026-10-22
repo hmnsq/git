@@ -2,93 +2,93 @@
  * "git replay" builtin command
  */
 
-#include "git-compat-util.h"
+#ಅನ್ತರ್ಭಾವ "git-compat-util.h"
 
-#include "builtin.h"
-#include "config.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "replay.h"
-#include "revision.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "replay.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
 
-enum ref_action_mode {
+ಗಣನಾ ref_action_mode {
 	REF_ACTION_UPDATE,
 	REF_ACTION_PRINT,
 };
 
-static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const char *source)
+ಸ್ಥಿರ ಗಣನಾ ref_action_mode parse_ref_action_mode(ಧ್ರುವ ವರ್ಣ *ref_action, ಧ್ರುವ ವರ್ಣ *source)
 {
-	if (!ref_action || !strcmp(ref_action, "update"))
-		return REF_ACTION_UPDATE;
-	if (!strcmp(ref_action, "print"))
-		return REF_ACTION_PRINT;
+	ಯದಿ (!ref_action || !strcmp(ref_action, "update"))
+		ಪ್ರತ್ಯಾಗಮ REF_ACTION_UPDATE;
+	ಯದಿ (!strcmp(ref_action, "print"))
+		ಪ್ರತ್ಯಾಗಮ REF_ACTION_PRINT;
 	die(_("invalid %s value: '%s'"), source, ref_action);
 }
 
-static enum ref_action_mode get_ref_action_mode(struct repository *repo, const char *ref_action)
+ಸ್ಥಿರ ಗಣನಾ ref_action_mode get_ref_action_mode(ಸಂರಚನಾ repository *repo, ಧ್ರುವ ವರ್ಣ *ref_action)
 {
-	const char *config_value = NULL;
+	ಧ್ರುವ ವರ್ಣ *config_ಮೌಲ್ಯ = ರಿಕ್ತ;
 
 	/* Command line option takes precedence */
-	if (ref_action)
-		return parse_ref_action_mode(ref_action, "--ref-action");
+	ಯದಿ (ref_action)
+		ಪ್ರತ್ಯಾಗಮ parse_ref_action_mode(ref_action, "--ref-action");
 
 	/* Check config value */
-	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
-		return parse_ref_action_mode(config_value, "replay.refAction");
+	ಯದಿ (!repo_config_get_string_tmp(repo, "replay.refAction", &config_ಮೌಲ್ಯ))
+		ಪ್ರತ್ಯಾಗಮ parse_ref_action_mode(config_ಮೌಲ್ಯ, "replay.refAction");
 
 	/* Default to update mode */
-	return REF_ACTION_UPDATE;
+	ಪ್ರತ್ಯಾಗಮ REF_ACTION_UPDATE;
 }
 
-static int handle_ref_update(enum ref_action_mode mode,
-			     struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ handle_ref_update(ಗಣನಾ ref_action_mode mode,
+			     ಸಂರಚನಾ ref_transaction *transaction,
+			     ಧ್ರುವ ವರ್ಣ *refname,
+			     ಧ್ರುವ ಸಂರಚನಾ object_id *new_oid,
+			     ಧ್ರುವ ಸಂರಚನಾ object_id *old_oid,
+			     ಧ್ರುವ ವರ್ಣ *reflog_ಸಂದೇಶ,
+			     ಸಂರಚನಾ strbuf *err)
 {
-	switch (mode) {
-	case REF_ACTION_PRINT:
+	ವಿಕಲ್ಪ (mode) {
+	ಪಕ್ಷ REF_ACTION_PRINT:
 		printf("update %s %s %s\n",
 		       refname,
 		       oid_to_hex(new_oid),
 		       oid_to_hex(old_oid));
-		return 0;
-	case REF_ACTION_UPDATE:
-		return ref_transaction_update(transaction, refname, new_oid, old_oid,
-					      NULL, NULL, 0, reflog_msg, err);
-	default:
+		ಪ್ರತ್ಯಾಗಮ 0;
+	ಪಕ್ಷ REF_ACTION_UPDATE:
+		ಪ್ರತ್ಯಾಗಮ ref_transaction_update(transaction, refname, new_oid, old_oid,
+					      ರಿಕ್ತ, ರಿಕ್ತ, 0, reflog_ಸಂದೇಶ, err);
+	ಸ್ವಭಾವ:
 		BUG("unknown ref_action_mode %d", mode);
 	}
 }
 
-int cmd_replay(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ಪೂರ್ಣಾಙ್ಕ cmd_replay(ಪೂರ್ಣಾಙ್ಕ argc,
+	       ಧ್ರುವ ವರ್ಣ **argv,
+	       ಧ್ರುವ ವರ್ಣ *prefix,
+	       ಸಂರಚನಾ repository *repo)
 {
-	struct replay_revisions_options opts = { 0 };
-	struct replay_result result = { 0 };
-	const char *ref_action = NULL;
-	enum ref_action_mode ref_mode;
-	struct rev_info revs;
-	struct ref_transaction *transaction = NULL;
-	struct strbuf transaction_err = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	int desired_reverse;
-	int ret = 0;
+	ಸಂರಚನಾ replay_revisions_options opts = { 0 };
+	ಸಂರಚನಾ replay_result result = { 0 };
+	ಧ್ರುವ ವರ್ಣ *ref_action = ರಿಕ್ತ;
+	ಗಣನಾ ref_action_mode ref_mode;
+	ಸಂರಚನಾ rev_info revs;
+	ಸಂರಚನಾ ref_transaction *transaction = ರಿಕ್ತ;
+	ಸಂರಚನಾ strbuf transaction_err = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf reflog_ಸಂದೇಶ = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ desired_reverse;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
 
-	const char *const replay_usage[] = {
+	ಧ್ರುವ ವರ್ಣ *ಧ್ರುವ replay_usage[] = {
 		N_("(EXPERIMENTAL!) git replay "
 		   "([--contained] --onto=<newbase> | --advance=<branch> | --revert=<branch>)\n"
 		   "[--ref=<ref>] [--ref-action=<mode>] [--linearize] <revision-range>"),
-		NULL
+		ರಿಕ್ತ
 	};
-	struct option replay_options[] = {
+	ಸಂರಚನಾ option replay_options[] = {
 		OPT_BOOL(0, "contained", &opts.contained,
 			 N_("update all branches that point at commits in <revision-range>")),
 		OPT_STRING_F(0, "onto", &opts.onto,
@@ -120,7 +120,7 @@ int cmd_replay(int argc,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	/* Exactly one mode must be specified */
-	if (!opts.onto && !opts.advance && !opts.revert) {
+	ಯದಿ (!opts.onto && !opts.advance && !opts.revert) {
 		error(_("exactly one of --onto, --advance, or --revert is required"));
 		usage_with_options(replay_usage, replay_options);
 	}
@@ -164,35 +164,35 @@ int cmd_replay(int argc,
 	revs.topo_order = 1;
 	revs.simplify_history = 0;
 
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1) {
+	argc = setup_revisions(argc, argv, &revs, ರಿಕ್ತ);
+	ಯದಿ (argc > 1) {
 		ret = error(_("unrecognized argument: %s"), argv[1]);
-		goto cleanup;
+		ಗಚ್ಛ cleanup;
 	}
 
 	/*
 	 * Detect and warn if we override some user specified rev
 	 * walking options.
 	 */
-	if (revs.reverse != desired_reverse) {
+	ಯದಿ (revs.reverse != desired_reverse) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"reverse");
 		revs.reverse = desired_reverse;
 	}
-	if (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
+	ಯದಿ (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"sort_order");
 		revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
 	}
-	if (revs.topo_order != 1) {
+	ಯದಿ (revs.topo_order != 1) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"topo_order");
 		revs.topo_order = 1;
 	}
-	if (revs.simplify_history != 0) {
+	ಯದಿ (revs.simplify_history != 0) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"simplify_history");
@@ -200,64 +200,64 @@ int cmd_replay(int argc,
 	}
 
 	ret = replay_revisions(&revs, &opts, &result);
-	if (ret)
-		goto cleanup;
+	ಯದಿ (ret)
+		ಗಚ್ಛ cleanup;
 
 	/* Build reflog message */
-	if (opts.revert) {
-		strbuf_addf(&reflog_msg, "replay --revert %s", opts.revert);
-	} else if (opts.advance) {
-		strbuf_addf(&reflog_msg, "replay --advance %s", opts.advance);
-	} else {
-		struct object_id oid;
-		if (repo_get_oid_committish(repo, opts.onto, &oid))
+	ಯದಿ (opts.revert) {
+		strbuf_addf(&reflog_ಸಂದೇಶ, "replay --revert %s", opts.revert);
+	} ಅನ್ಯಥಾ ಯದಿ (opts.advance) {
+		strbuf_addf(&reflog_ಸಂದೇಶ, "replay --advance %s", opts.advance);
+	} ಅನ್ಯಥಾ {
+		ಸಂರಚನಾ object_id oid;
+		ಯದಿ (repo_get_oid_committish(repo, opts.onto, &oid))
 			BUG("--onto commit should have been resolved beforehand already");
-		strbuf_addf(&reflog_msg, "replay --onto %s", oid_to_hex(&oid));
+		strbuf_addf(&reflog_ಸಂದೇಶ, "replay --onto %s", oid_to_hex(&oid));
 	}
 
 	/* Initialize ref transaction if using update mode */
-	if (ref_mode == REF_ACTION_UPDATE) {
+	ಯದಿ (ref_mode == REF_ACTION_UPDATE) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &transaction_err);
-		if (!transaction) {
+		ಯದಿ (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			ಗಚ್ಛ cleanup;
 		}
 	}
 
-	for (size_t i = 0; i < result.updates_nr; i++) {
+	ಪ್ರತಿ (size_t i = 0; i < result.updates_nr; i++) {
 		ret = handle_ref_update(ref_mode, transaction, result.updates[i].refname,
 					&result.updates[i].new_oid, &result.updates[i].old_oid,
-					reflog_msg.buf, &transaction_err);
-		if (ret) {
+					reflog_ಸಂದೇಶ.buf, &transaction_err);
+		ಯದಿ (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result.updates[i].refname, transaction_err.buf);
-			goto cleanup;
+			ಗಚ್ಛ cleanup;
 		}
 	}
 
 	/* Commit the ref transaction if we have one */
-	if (transaction) {
-		if (ref_transaction_commit(transaction, &transaction_err)) {
+	ಯದಿ (transaction) {
+		ಯದಿ (ref_transaction_commit(transaction, &transaction_err)) {
 			ret = error(_("failed to commit ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			ಗಚ್ಛ cleanup;
 		}
 	}
 
 	ret = 0;
 
 cleanup:
-	if (transaction)
+	ಯದಿ (transaction)
 		ref_transaction_free(transaction);
 	replay_result_release(&result);
 	strbuf_release(&transaction_err);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_ಸಂದೇಶ);
 	release_revisions(&revs);
 
 	/* Return */
-	if (ret < 0)
+	ಯದಿ (ret < 0)
 		exit(128);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }

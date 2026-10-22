@@ -1,9 +1,9 @@
-#include "builtin.h"
-#include "transport.h"
-#include "run-command.h"
-#include "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "transport.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
 
-static const char usage_msg[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ usage_ಸಂದೇಶ[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+ಸ್ಥಿರ ವರ್ಣ *git_req;
+ಸ್ಥಿರ ವರ್ಣ *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+ಸ್ಥಿರ ವರ್ಣ *strip_escapes(ಧ್ರುವ ವರ್ಣ *str, ಧ್ರುವ ವರ್ಣ *service,
+	ಧ್ರುವ ವರ್ಣ **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ escape = 0;
+	ವರ್ಣ special = 0;
+	ಧ್ರುವ ವರ್ಣ *service_noprefix = service;
+	ಸಂರಚನಾ strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,33 +44,33 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+	ಯಾವತ್ (str[rpos] && (escape || str[rpos] != ' ')) {
+		ಯದಿ (escape) {
+			ವಿಕಲ್ಪ (str[rpos]) {
+			ಪಕ್ಷ ' ':
+			ಪಕ್ಷ '%':
+			ಪಕ್ಷ 's':
+			ಪಕ್ಷ 'S':
+				ಭಙ್ಗ;
+			ಪಕ್ಷ 'G':
+			ಪಕ್ಷ 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				ಯದಿ (rpos == 1)
+					ಭಙ್ಗ;
 				/* fallthrough */
-			default:
+			ಸ್ವಭಾವ:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} ಅನ್ಯಥಾ
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	ಯದಿ (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	ಯದಿ (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
+	ಯಾವತ್ (str[rpos] && (escape || str[rpos] != ' ')) {
+		ಯದಿ (escape) {
+			ವಿಕಲ್ಪ (str[rpos]) {
+			ಪಕ್ಷ ' ':
+			ಪಕ್ಷ '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				ಭಙ್ಗ;
+			ಪಕ್ಷ 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				ಭಙ್ಗ;
+			ಪಕ್ಷ 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				ಭಙ್ಗ;
 			}
 			escape = 0;
-		} else
-			switch (str[rpos]) {
-			case '%':
+		} ಅನ್ಯಥಾ
+			ವಿಕಲ್ಪ (str[rpos]) {
+			ಪಕ್ಷ '%':
 				escape = 1;
-				break;
-			default:
+				ಭಙ್ಗ;
+			ಸ್ವಭಾವ:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				ಭಙ್ಗ;
 			}
 		rpos++;
 	}
-	switch (special) {
-	case 'G':
-		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
-		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
-	default:
-		return strbuf_detach(&ret, NULL);
+	ವಿಕಲ್ಪ (special) {
+	ಪಕ್ಷ 'G':
+		git_req = strbuf_detach(&ret, ರಿಕ್ತ);
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
+	ಪಕ್ಷ 'V':
+		git_req_vhost = strbuf_detach(&ret, ರಿಕ್ತ);
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
+	ಸ್ವಭಾವ:
+		ಪ್ರತ್ಯಾಗಮ strbuf_detach(&ret, ರಿಕ್ತ);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_argv(ಸಂರಚನಾ strvec *out, ಧ್ರುವ ವರ್ಣ *arg, ಧ್ರುವ ವರ್ಣ *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
-			strvec_push(out, expanded);
-		free(expanded);
+	ಯಾವತ್ (*arg) {
+		ವರ್ಣ *expanded = strip_escapes(arg, service, &arg);
+		ಯದಿ (expanded)
+			strvec_ತಳ್ಳು(out, expanded);
+		ಮುಕ್ತ(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+ಸ್ಥಿರ ಶೂನ್ಯ send_git_request(ಪೂರ್ಣಾಙ್ಕ stdin_fd, ಧ್ರುವ ವರ್ಣ *serv, ಧ್ರುವ ವರ್ಣ *repo,
+	ಧ್ರುವ ವರ್ಣ *vhost)
 {
-	if (!vhost)
+	ಯದಿ (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	ಅನ್ಯಥಾ
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ run_child(ಧ್ರುವ ವರ್ಣ *arg, ಧ್ರುವ ವರ್ಣ *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	ಪೂರ್ಣಾಙ್ಕ r;
+	ಸಂರಚನಾ child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	ಯದಿ (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	ಯದಿ (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	ಯದಿ (!r)
 		r = finish_command(&child);
-	else
+	ಅನ್ಯಥಾ
 		finish_command(&child);
-	return r;
+	ಪ್ರತ್ಯಾಗಮ r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ command_loop(ಧ್ರುವ ವರ್ಣ *child)
 {
-	char buffer[MAXCOMMAND];
+	ವರ್ಣ buffer[MAXCOMMAND];
 
-	while (1) {
+	ಯಾವತ್ (1) {
 		size_t i;
-		const char *arg;
+		ಧ್ರುವ ವರ್ಣ *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		ಯದಿ (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			ಯದಿ (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ಯಾವತ್ (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		ಯದಿ (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} ಅನ್ಯಥಾ ಯದಿ (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			ಪ್ರತ್ಯಾಗಮ run_child(child, arg);
+		} ಅನ್ಯಥಾ {
 			fprintf(stderr, "Bad command");
-			return 1;
+			ಪ್ರತ್ಯಾಗಮ 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_remote_ext(ಪೂರ್ಣಾಙ್ಕ argc,
+		   ಧ್ರುವ ವರ್ಣ **argv,
+		   ಧ್ರುವ ವರ್ಣ *prefix,
+		   ಸಂರಚನಾ repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_ಸಂದೇಶ);
 
-	if (argc != 3)
-		usage(usage_msg);
+	ಯದಿ (argc != 3)
+		usage(usage_ಸಂದೇಶ);
 
-	return command_loop(argv[2]);
+	ಪ್ರತ್ಯಾಗಮ command_loop(argv[2]);
 }

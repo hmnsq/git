@@ -1,52 +1,52 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "git-compat-util.h"
-#include "credential.h"
-#include "builtin.h"
-#include "environment.h"
-#include "config.h"
+#ಅನ್ತರ್ಭಾವ "git-compat-util.h"
+#ಅನ್ತರ್ಭಾವ "credential.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
 
-static const char usage_msg[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ usage_ಸಂದೇಶ[] =
 	"git credential (fill|approve|reject)";
 
-int cmd_credential(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_credential(ಪೂರ್ಣಾಙ್ಕ argc,
+		   ಧ್ರುವ ವರ್ಣ **argv,
+		   ಧ್ರುವ ವರ್ಣ *prefix UNUSED,
+		   ಸಂರಚನಾ repository *repo UNUSED)
 {
-	const char *op;
-	struct credential c = CREDENTIAL_INIT;
+	ಧ್ರುವ ವರ್ಣ *op;
+	ಸಂರಚನಾ credential c = CREDENTIAL_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ರಿಕ್ತ);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_ಸಂದೇಶ);
+	ಯದಿ (argc != 2)
+		usage(usage_ಸಂದೇಶ);
 	op = argv[1];
 
-	if (!strcmp(op, "capability")) {
+	ಯದಿ (!strcmp(op, "capability")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_INITIAL);
 		credential_announce_capabilities(&c, stdout);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	if (credential_read(&c, stdin, CREDENTIAL_OP_INITIAL) < 0)
+	ಯದಿ (credential_read(&c, stdin, CREDENTIAL_OP_INITIAL) < 0)
 		die("unable to read credential from stdin");
 
-	if (!strcmp(op, "fill")) {
+	ಯದಿ (!strcmp(op, "fill")) {
 		credential_fill(the_repository, &c, 0);
 		credential_next_state(&c);
 		credential_write(&c, stdout, CREDENTIAL_OP_RESPONSE);
-	} else if (!strcmp(op, "approve")) {
+	} ಅನ್ಯಥಾ ಯದಿ (!strcmp(op, "approve")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_approve(the_repository, &c);
-	} else if (!strcmp(op, "reject")) {
+	} ಅನ್ಯಥಾ ಯದಿ (!strcmp(op, "reject")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_reject(the_repository, &c);
-	} else {
-		usage(usage_msg);
+	} ಅನ್ಯಥಾ {
+		usage(usage_ಸಂದೇಶ);
 	}
 
 	credential_clear(&c);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }

@@ -1,124 +1,124 @@
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "pkt-line.h"
-#include "run-command.h"
-#include "remote.h"
-#include "connect.h"
-#include "send-pack.h"
-#include "quote.h"
-#include "transport.h"
-#include "oid-array.h"
-#include "gettext.h"
-#include "protocol.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "remote.h"
+#ಅನ್ತರ್ಭಾವ "connect.h"
+#ಅನ್ತರ್ಭಾವ "send-pack.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "transport.h"
+#ಅನ್ತರ್ಭಾವ "oid-array.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "protocol.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
-static const char * const send_pack_usage[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ send_pack_usage[] = {
 	N_("git send-pack [--mirror] [--dry-run] [--force]\n"
 	   "              [--receive-pack=<git-receive-pack>]\n"
 	   "              [--verbose] [--thin] [--atomic]\n"
 	   "              [--[no-]signed | --signed=(true|false|if-asked)]\n"
 	   "              [<host>:]<directory> (--all | <ref>...)"),
-	NULL,
+	ರಿಕ್ತ,
 };
 
-static struct send_pack_args args;
+ಸ್ಥಿರ ಸಂರಚನಾ send_pack_args args;
 
-static void print_helper_status(struct ref *ref)
+ಸ್ಥಿರ ಶೂನ್ಯ print_helper_status(ಸಂರಚನಾ ref *ref)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct ref_push_report *report;
+	ಸಂರಚನಾ strbuf buf = STRBUF_INIT;
+	ಸಂರಚನಾ ref_ತಳ್ಳು_report *report;
 
-	for (; ref; ref = ref->next) {
-		const char *msg = NULL;
-		const char *res;
-		int count = 0;
+	ಪ್ರತಿ (; ref; ref = ref->next) {
+		ಧ್ರುವ ವರ್ಣ *ಸಂದೇಶ = ರಿಕ್ತ;
+		ಧ್ರುವ ವರ್ಣ *res;
+		ಪೂರ್ಣಾಙ್ಕ ಎಣಿಕೆ = 0;
 
-		switch(ref->status) {
-		case REF_STATUS_NONE:
+		ವಿಕಲ್ಪ(ref->status) {
+		ಪಕ್ಷ REF_STATUS_NONE:
 			res = "error";
-			msg = "no match";
-			break;
+			ಸಂದೇಶ = "no match";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_OK:
+		ಪಕ್ಷ REF_STATUS_OK:
 			res = "ok";
-			break;
+			ಭಙ್ಗ;
 
-		case REF_STATUS_UPTODATE:
+		ಪಕ್ಷ REF_STATUS_UPTODATE:
 			res = "ok";
-			msg = "up to date";
-			break;
+			ಸಂದೇಶ = "up to date";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_NONFASTFORWARD:
+		ಪಕ್ಷ REF_STATUS_REJECT_NONFASTFORWARD:
 			res = "error";
-			msg = "non-fast forward";
-			break;
+			ಸಂದೇಶ = "non-fast forward";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_FETCH_FIRST:
+		ಪಕ್ಷ REF_STATUS_REJECT_FETCH_FIRST:
 			res = "error";
-			msg = "fetch first";
-			break;
+			ಸಂದೇಶ = "fetch first";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_NEEDS_FORCE:
+		ಪಕ್ಷ REF_STATUS_REJECT_NEEDS_FORCE:
 			res = "error";
-			msg = "needs force";
-			break;
+			ಸಂದೇಶ = "needs force";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_STALE:
+		ಪಕ್ಷ REF_STATUS_REJECT_STALE:
 			res = "error";
-			msg = "stale info";
-			break;
+			ಸಂದೇಶ = "stale info";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_REMOTE_UPDATED:
+		ಪಕ್ಷ REF_STATUS_REJECT_REMOTE_UPDATED:
 			res = "error";
-			msg = "remote ref updated since checkout";
-			break;
+			ಸಂದೇಶ = "remote ref updated since checkout";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_ALREADY_EXISTS:
+		ಪಕ್ಷ REF_STATUS_REJECT_ALREADY_EXISTS:
 			res = "error";
-			msg = "already exists";
-			break;
+			ಸಂದೇಶ = "already exists";
+			ಭಙ್ಗ;
 
-		case REF_STATUS_REJECT_NODELETE:
-		case REF_STATUS_REMOTE_REJECT:
+		ಪಕ್ಷ REF_STATUS_REJECT_NODELETE:
+		ಪಕ್ಷ REF_STATUS_REMOTE_REJECT:
 			res = "error";
-			break;
+			ಭಙ್ಗ;
 
-		case REF_STATUS_EXPECTING_REPORT:
+		ಪಕ್ಷ REF_STATUS_EXPECTING_REPORT:
 			res = "error";
-			msg = "expecting report";
-			break;
+			ಸಂದೇಶ = "expecting report";
+			ಭಙ್ಗ;
 
-		default:
-			continue;
+		ಸ್ವಭಾವ:
+			ಅನುವರ್ತ;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "%s %s", res, ref->name);
-		if (ref->remote_status)
-			msg = ref->remote_status;
-		if (msg) {
+		ಯದಿ (ref->remote_status)
+			ಸಂದೇಶ = ref->remote_status;
+		ಯದಿ (ಸಂದೇಶ) {
 			strbuf_addch(&buf, ' ');
-			quote_two_c_style(&buf, "", msg, 0);
+			quote_two_c_style(&buf, "", ಸಂದೇಶ, 0);
 		}
 		strbuf_addch(&buf, '\n');
 
-		if (ref->status == REF_STATUS_OK) {
-			for (report = ref->report; report; report = report->next) {
-				if (count++ > 0)
+		ಯದಿ (ref->status == REF_STATUS_OK) {
+			ಪ್ರತಿ (report = ref->report; report; report = report->next) {
+				ಯದಿ (ಎಣಿಕೆ++ > 0)
 					strbuf_addf(&buf, "ok %s\n", ref->name);
-				if (report->ref_name)
+				ಯದಿ (report->ref_name)
 					strbuf_addf(&buf, "option refname %s\n",
 						report->ref_name);
-				if (report->old_oid)
+				ಯದಿ (report->old_oid)
 					strbuf_addf(&buf, "option old-oid %s\n",
 						oid_to_hex(report->old_oid));
-				if (report->new_oid)
+				ಯದಿ (report->new_oid)
 					strbuf_addf(&buf, "option new-oid %s\n",
 						oid_to_hex(report->new_oid));
-				if (report->forced_update)
+				ಯದಿ (report->forced_update)
 					strbuf_addstr(&buf, "option forced-update\n");
 			}
 		}
@@ -127,64 +127,64 @@ static void print_helper_status(struct ref *ref)
 	strbuf_release(&buf);
 }
 
-static int send_pack_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ send_pack_config(ಧ್ರುವ ವರ್ಣ *k, ಧ್ರುವ ವರ್ಣ *v,
+			    ಧ್ರುವ ಸಂರಚನಾ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			args.push_cert = SEND_PACK_PUSH_CERT_NEVER;
-			break;
-		case 1:
-			args.push_cert = SEND_PACK_PUSH_CERT_ALWAYS;
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				args.push_cert = SEND_PACK_PUSH_CERT_IF_ASKED;
-			else
-				return error(_("invalid value for '%s'"), k);
+	ಯದಿ (!strcmp(k, "push.gpgsign")) {
+		ವಿಕಲ್ಪ (git_parse_maybe_bool(v)) {
+		ಪಕ್ಷ 0:
+			args.ತಳ್ಳು_cert = SEND_PACK_ತಳ್ಳು_CERT_NEVER;
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 1:
+			args.ತಳ್ಳು_cert = SEND_PACK_ತಳ್ಳು_CERT_ALWAYS;
+			ಭಙ್ಗ;
+		ಸ್ವಭಾವ:
+			ಯದಿ (!strcasecmp(v, "if-asked"))
+				args.ತಳ್ಳು_cert = SEND_PACK_ತಳ್ಳು_CERT_IF_ASKED;
+			ಅನ್ಯಥಾ
+				ಪ್ರತ್ಯಾಗಮ error(_("invalid value for '%s'"), k);
 		}
 	}
-	return git_default_config(k, v, ctx, cb);
+	ಪ್ರತ್ಯಾಗಮ git_default_config(k, v, ctx, cb);
 }
 
-int cmd_send_pack(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo)
+ಪೂರ್ಣಾಙ್ಕ cmd_send_pack(ಪೂರ್ಣಾಙ್ಕ argc,
+		  ಧ್ರುವ ವರ್ಣ **argv,
+		  ಧ್ರುವ ವರ್ಣ *prefix,
+		  ಸಂರಚನಾ repository *repo)
 {
-	struct refspec rs;
-	const char *remote_name = NULL;
-	struct remote *remote = NULL;
-	const char *dest = NULL;
-	int fd[2];
-	struct child_process *conn;
-	struct oid_array extra_have = OID_ARRAY_INIT;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct ref *remote_refs, *local_refs;
-	int ret;
-	int helper_status = 0;
-	int send_all = 0;
-	int verbose = 0;
-	const char *receivepack = "git-receive-pack";
+	ಸಂರಚನಾ refspec rs;
+	ಧ್ರುವ ವರ್ಣ *remote_name = ರಿಕ್ತ;
+	ಸಂರಚನಾ remote *remote = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *dest = ರಿಕ್ತ;
+	ಪೂರ್ಣಾಙ್ಕ fd[2];
+	ಸಂರಚನಾ child_process *conn;
+	ಸಂರಚನಾ oid_array extra_have = OID_ARRAY_INIT;
+	ಸಂರಚನಾ oid_array shallow = OID_ARRAY_INIT;
+	ಸಂರಚನಾ ref *remote_refs, *local_refs;
+	ಪೂರ್ಣಾಙ್ಕ ret;
+	ಪೂರ್ಣಾಙ್ಕ helper_status = 0;
+	ಪೂರ್ಣಾಙ್ಕ send_all = 0;
+	ಪೂರ್ಣಾಙ್ಕ verbose = 0;
+	ಧ್ರುವ ವರ್ಣ *receivepack = "git-receive-pack";
 	unsigned dry_run = 0;
 	unsigned send_mirror = 0;
 	unsigned force_update = 0;
 	unsigned quiet = 0;
-	int push_cert = 0;
-	struct string_list push_options = STRING_LIST_INIT_NODUP;
+	ಪೂರ್ಣಾಙ್ಕ ತಳ್ಳು_cert = 0;
+	ಸಂರಚನಾ string_list ತಳ್ಳು_options = STRING_LIST_INIT_NODUP;
 	unsigned use_thin_pack = 0;
 	unsigned atomic = 0;
 	unsigned stateless_rpc = 0;
-	int flags;
-	unsigned int reject_reasons;
-	int progress = -1;
-	int from_stdin = 0;
-	struct push_cas_option cas = {0};
-	int force_if_includes = 0;
-	struct packet_reader reader;
+	ಪೂರ್ಣಾಙ್ಕ flags;
+	unsigned ಪೂರ್ಣಾಙ್ಕ reject_reasons;
+	ಪೂರ್ಣಾಙ್ಕ progress = -1;
+	ಪೂರ್ಣಾಙ್ಕ from_stdin = 0;
+	ಸಂರಚನಾ ತಳ್ಳು_cas_option cas = {0};
+	ಪೂರ್ಣಾಙ್ಕ force_if_includes = 0;
+	ಸಂರಚನಾ packet_reader reader;
 
-	struct option options[] = {
+	ಸಂರಚನಾ option options[] = {
 		OPT__VERBOSITY(&verbose),
 		OPT_STRING(0, "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING(0, "exec", &receivepack, "receive-pack", N_("receive pack program")),
@@ -193,9 +193,9 @@ int cmd_send_pack(int argc,
 		OPT_BOOL('n' , "dry-run", &dry_run, N_("dry run")),
 		OPT_BOOL(0, "mirror", &send_mirror, N_("mirror all refs")),
 		OPT_BOOL('f', "force", &force_update, N_("force updates")),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-		  PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_STRING_LIST(0, "push-option", &push_options,
+		OPT_CALLBACK_F(0, "signed", &ತಳ್ಳು_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+		  PARSE_OPT_OPTARG, option_parse_ತಳ್ಳು_signed),
+		OPT_STRING_LIST(0, "push-option", &ತಳ್ಳು_options,
 				N_("server-specific"),
 				N_("option to transmit")),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
@@ -206,23 +206,23 @@ int cmd_send_pack(int argc,
 		OPT_BOOL(0, "helper-status", &helper_status, N_("print status from remote helper")),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 		  N_("require old value of ref to be at this value"),
-		  PARSE_OPT_OPTARG, parseopt_push_cas_option),
+		  PARSE_OPT_OPTARG, parseopt_ತಳ್ಳು_cas_option),
 		OPT_BOOL(0, TRANS_OPT_FORCE_IF_INCLUDES, &force_if_includes,
 			 N_("require remote updates to be integrated locally")),
 		OPT_END()
 	};
 
-	repo_config(repo, send_pack_config, NULL);
+	repo_config(repo, send_pack_config, ರಿಕ್ತ);
 	argc = parse_options(argc, argv, prefix, options, send_pack_usage, 0);
 
-	refspec_init_push(&rs, repo->hash_algo);
+	refspec_init_ತಳ್ಳು(&rs, repo->hash_algo);
 
-	if (argc > 0) {
+	ಯದಿ (argc > 0) {
 		dest = argv[0];
 		refspec_appendn(&rs, argv + 1, argc - 1);
 	}
 
-	if (!dest)
+	ಯದಿ (!dest)
 		usage_with_options(send_pack_usage, options);
 
 	args.verbose = verbose;
@@ -230,24 +230,24 @@ int cmd_send_pack(int argc,
 	args.send_mirror = send_mirror;
 	args.force_update = force_update;
 	args.quiet = quiet;
-	args.push_cert = push_cert;
+	args.ತಳ್ಳು_cert = ತಳ್ಳು_cert;
 	args.progress = progress;
 	args.use_thin_pack = use_thin_pack;
 	args.atomic = atomic;
 	args.stateless_rpc = stateless_rpc;
-	args.push_options = push_options.nr ? &push_options : NULL;
+	args.ತಳ್ಳು_options = ತಳ್ಳು_options.nr ? &ತಳ್ಳು_options : ರಿಕ್ತ;
 	args.url = dest;
 
-	if (from_stdin) {
-		if (args.stateless_rpc) {
-			const char *buf;
-			while ((buf = packet_read_line(0, NULL)))
+	ಯದಿ (from_stdin) {
+		ಯದಿ (args.stateless_rpc) {
+			ಧ್ರುವ ವರ್ಣ *buf;
+			ಯಾವತ್ ((buf = packet_read_ಸಾಲು(0, ರಿಕ್ತ)))
 				refspec_append(&rs, buf);
-		} else {
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline(&line, stdin) != EOF)
-				refspec_append(&rs, line.buf);
-			strbuf_release(&line);
+		} ಅನ್ಯಥಾ {
+			ಸಂರಚನಾ strbuf ಸಾಲು = STRBUF_INIT;
+			ಯಾವತ್ (strbuf_getline(&ಸಾಲು, stdin) != EOF)
+				refspec_append(&rs, ಸಾಲು.buf);
+			strbuf_release(&ಸಾಲು);
 		}
 	}
 
@@ -255,47 +255,47 @@ int cmd_send_pack(int argc,
 	 * --all and --mirror are incompatible; neither makes sense
 	 * with any refspecs.
 	 */
-	if ((rs.nr > 0 && (send_all || args.send_mirror)) ||
+	ಯದಿ ((rs.nr > 0 && (send_all || args.send_mirror)) ||
 	    (send_all && args.send_mirror))
 		usage_with_options(send_pack_usage, options);
 
-	if (remote_name) {
+	ಯದಿ (remote_name) {
 		remote = remote_get(remote_name);
-		if (!remote_has_url(remote, dest)) {
+		ಯದಿ (!remote_has_url(remote, dest)) {
 			die("Destination %s is not a uri for %s",
 			    dest, remote_name);
 		}
 	}
 
-	if (progress == -1)
+	ಯದಿ (progress == -1)
 		progress = !args.quiet && isatty(2);
 	args.progress = progress;
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	ಯದಿ (args.stateless_rpc) {
+		conn = ರಿಕ್ತ;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
+	} ಅನ್ಯಥಾ {
 		conn = git_connect(fd, dest, GIT_CONNECT_RECEIVE_PACK,
 				   receivepack,
 				   args.verbose ? CONNECT_VERBOSE : 0);
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], ರಿಕ್ತ, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	switch (discover_version(&reader)) {
-	case protocol_v2:
+	ವಿಕಲ್ಪ (discover_version(&reader)) {
+	ಪಕ್ಷ protocol_v2:
 		die("support for protocol v2 not implemented yet");
-		break;
-	case protocol_v1:
-	case protocol_v0:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ protocol_v1:
+	ಪಕ್ಷ protocol_v0:
 		get_remote_heads(&reader, &remote_refs, REF_NORMAL,
 				 &extra_have, &shallow);
-		break;
-	case protocol_unknown_version:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
@@ -303,28 +303,28 @@ int cmd_send_pack(int argc,
 
 	flags = MATCH_REFS_NONE;
 
-	if (send_all)
+	ಯದಿ (send_all)
 		flags |= MATCH_REFS_ALL;
-	if (args.send_mirror)
+	ಯದಿ (args.send_mirror)
 		flags |= MATCH_REFS_MIRROR;
 
 	/* match them up */
-	if (match_push_refs(local_refs, &remote_refs, &rs, flags)) {
+	ಯದಿ (match_ತಳ್ಳು_refs(local_refs, &remote_refs, &rs, flags)) {
 		ret = -1;
-		goto cleanup;
+		ಗಚ್ಛ cleanup;
 	}
-	if (!is_empty_cas(&cas))
-		apply_push_cas(&cas, remote, remote_refs);
+	ಯದಿ (!is_empty_cas(&cas))
+		apply_ತಳ್ಳು_cas(&cas, remote, remote_refs);
 
-	if (!is_empty_cas(&cas) && force_if_includes)
+	ಯದಿ (!is_empty_cas(&cas) && force_if_includes)
 		cas.use_force_if_includes = 1;
 
-	set_ref_status_for_push(remote_refs, args.send_mirror,
+	set_ref_status_for_ತಳ್ಳು(remote_refs, args.send_mirror,
 		args.force_update);
 
 	ret = send_pack(repo, &args, fd, conn, remote_refs, &extra_have);
 
-	if (helper_status)
+	ಯದಿ (helper_status)
 		print_helper_status(remote_refs);
 
 	close(fd[1]);
@@ -332,26 +332,26 @@ int cmd_send_pack(int argc,
 
 	ret |= finish_connect(conn);
 
-	if (!helper_status)
-		transport_print_push_status(dest, remote_refs, args.verbose, 0, &reject_reasons);
+	ಯದಿ (!helper_status)
+		transport_print_ತಳ್ಳು_status(dest, remote_refs, args.verbose, 0, &reject_reasons);
 
-	if (!args.dry_run && remote) {
-		struct ref *ref;
-		for (ref = remote_refs; ref; ref = ref->next)
+	ಯದಿ (!args.dry_run && remote) {
+		ಸಂರಚನಾ ref *ref;
+		ಪ್ರತಿ (ref = remote_refs; ref; ref = ref->next)
 			transport_update_tracking_ref(remote, ref, args.verbose);
 	}
 
-	if (!ret && !transport_refs_pushed(remote_refs))
+	ಯದಿ (!ret && !transport_refs_pushed(remote_refs))
 		/* stable plumbing output; do not modify or localize */
 		fprintf(stderr, "Everything up-to-date\n");
 
 cleanup:
-	string_list_clear(&push_options, 0);
+	string_list_clear(&ತಳ್ಳು_options, 0);
 	free_refs(remote_refs);
 	free_refs(local_refs);
 	refspec_clear(&rs);
 	oid_array_clear(&extra_have);
 	oid_array_clear(&shallow);
 	clear_cas_option(&cas);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }

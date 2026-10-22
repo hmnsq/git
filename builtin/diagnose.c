@@ -1,32 +1,32 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diagnose.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "diagnose.h"
 
-static const char * const diagnose_usage[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ diagnose_usage[] = {
 	N_("git diagnose [(-o | --output-directory) <path>] [(-s | --suffix) <format>]\n"
 	   "             [--mode=<mode>]"),
-	NULL
+	ರಿಕ್ತ
 };
 
-int cmd_diagnose(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_diagnose(ಪೂರ್ಣಾಙ್ಕ argc,
+		 ಧ್ರುವ ವರ್ಣ **argv,
+		 ಧ್ರುವ ವರ್ಣ *prefix,
+		 ಸಂರಚನಾ repository *repo UNUSED)
 {
-	struct strbuf zip_path = STRBUF_INIT;
-	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode mode = DIAGNOSE_STATS;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	char *prefixed_filename;
+	ಸಂರಚನಾ strbuf zip_path = STRBUF_INIT;
+	time_t now = time(ರಿಕ್ತ);
+	ಸಂರಚನಾ tm tm;
+	ಗಣನಾ diagnose_mode mode = DIAGNOSE_STATS;
+	ವರ್ಣ *option_output = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *option_suffix = "%Y-%m-%d-%H%M";
+	ವರ್ಣ *prefixed_filename;
 
-	const struct option diagnose_options[] = {
+	ಧ್ರುವ ಸಂರಚನಾ option diagnose_options[] = {
 		OPT_STRING('o', "output-directory", &option_output, N_("path"),
 			   N_("specify a destination for the diagnostics archive")),
 		OPT_STRING('s', "suffix", &option_suffix, N_("format"),
@@ -50,21 +50,21 @@ int cmd_diagnose(int argc,
 	strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
 	strbuf_addstr(&zip_path, ".zip");
 
-	switch (safe_create_leading_directories(the_repository, zip_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
-	default:
+	ವಿಕಲ್ಪ (safe_create_leading_directories(the_repository, zip_path.buf)) {
+	ಪಕ್ಷ SCLD_OK:
+	ಪಕ್ಷ SCLD_EXISTS:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		die_errno(_("could not create leading directories for '%s'"),
 			  zip_path.buf);
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	ಯದಿ (create_diagnostics_archive(the_repository, &zip_path, mode))
 		die_errno(_("unable to create diagnostics archive %s"),
 			  zip_path.buf);
 
-	free(prefixed_filename);
+	ಮುಕ್ತ(prefixed_filename);
 	strbuf_release(&zip_path);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }

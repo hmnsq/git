@@ -6,63 +6,63 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "dir.h"
-#include "run-command.h"
-#include "hook.h"
-#include "quote.h"
-#include "tempfile.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "refs.h"
-#include "commit.h"
-#include "diff.h"
-#include "unpack-trees.h"
-#include "branch.h"
-#include "object-name.h"
-#include "preload-index.h"
-#include "sequencer.h"
-#include "revision.h"
-#include "merge-ort-wrappers.h"
-#include "log-tree.h"
-#include "notes-utils.h"
-#include "rerere.h"
-#include "mailinfo.h"
-#include "apply.h"
-#include "string-list.h"
-#include "pager.h"
-#include "path.h"
-#include "pretty.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "advice.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "editor.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "hook.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "tempfile.h"
+#ಅನ್ತರ್ಭಾವ "lockfile.h"
+#ಅನ್ತರ್ಭಾವ "cache-tree.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
+#ಅನ್ತರ್ಭಾವ "unpack-trees.h"
+#ಅನ್ತರ್ಭಾವ "branch.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "preload-index.h"
+#ಅನ್ತರ್ಭಾವ "sequencer.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "merge-ort-wrappers.h"
+#ಅನ್ತರ್ಭಾವ "log-tree.h"
+#ಅನ್ತರ್ಭಾವ "notes-utils.h"
+#ಅನ್ತರ್ಭಾವ "rerere.h"
+#ಅನ್ತರ್ಭಾವ "mailinfo.h"
+#ಅನ್ತರ್ಭಾವ "apply.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "pager.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "pretty.h"
 
 /**
  * Returns the length of the first line of msg.
  */
-static int linelen(const char *msg)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ linelen(ಧ್ರುವ ವರ್ಣ *ಸಂದೇಶ)
 {
-	return strchrnul(msg, '\n') - msg;
+	ಪ್ರತ್ಯಾಗಮ strchrnul(ಸಂದೇಶ, '\n') - ಸಂದೇಶ;
 }
 
 /**
  * Returns true if `str` consists of only whitespace, false otherwise.
  */
-static int str_isspace(const char *str)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ str_isspace(ಧ್ರುವ ವರ್ಣ *str)
 {
-	for (; *str; str++)
-		if (!isspace(*str))
-			return 0;
+	ಪ್ರತಿ (; *str; str++)
+		ಯದಿ (!isspace(*str))
+			ಪ್ರತ್ಯಾಗಮ 0;
 
-	return 1;
+	ಪ್ರತ್ಯಾಗಮ 1;
 }
 
-enum patch_format {
+ಗಣನಾ patch_format {
 	PATCH_FORMAT_UNKNOWN = 0,
 	PATCH_FORMAT_MBOX,
 	PATCH_FORMAT_STGIT,
@@ -71,25 +71,25 @@ enum patch_format {
 	PATCH_FORMAT_MBOXRD
 };
 
-enum keep_type {
+ಗಣನಾ keep_type {
 	KEEP_FALSE = 0,
 	KEEP_TRUE,      /* pass -k flag to git-mailinfo */
 	KEEP_NON_PATCH  /* pass -b flag to git-mailinfo */
 };
 
-enum scissors_type {
+ಗಣನಾ scissors_type {
 	SCISSORS_UNSET = -1,
 	SCISSORS_FALSE = 0,  /* pass --no-scissors to git-mailinfo */
 	SCISSORS_TRUE        /* pass --scissors to git-mailinfo */
 };
 
-enum signoff_type {
+ಗಣನಾ signoff_type {
 	SIGNOFF_FALSE = 0,
 	SIGNOFF_TRUE = 1,
 	SIGNOFF_EXPLICIT /* --signoff was set on the command-line */
 };
 
-enum resume_type {
+ಗಣನಾ resume_type {
 	RESUME_FALSE = 0,
 	RESUME_APPLY,
 	RESUME_RESOLVED,
@@ -101,62 +101,62 @@ enum resume_type {
 	RESUME_ALLOW_EMPTY,
 };
 
-enum empty_action {
+ಗಣನಾ empty_action {
 	STOP_ON_EMPTY_COMMIT = 0,  /* output errors and stop in the middle of an am session */
 	DROP_EMPTY_COMMIT,         /* skip with a notice message, unless "--quiet" has been passed */
 	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
 };
 
-struct am_state {
+ಸಂರಚನಾ am_state {
 	/* state directory path */
-	char *dir;
+	ವರ್ಣ *dir;
 
 	/* current and last patch numbers, 1-indexed */
-	int cur;
-	int last;
+	ಪೂರ್ಣಾಙ್ಕ cur;
+	ಪೂರ್ಣಾಙ್ಕ last;
 
 	/* commit metadata and message */
-	char *author_name;
-	char *author_email;
-	char *author_date;
-	char *msg;
-	size_t msg_len;
+	ವರ್ಣ *author_name;
+	ವರ್ಣ *author_email;
+	ವರ್ಣ *author_date;
+	ವರ್ಣ *ಸಂದೇಶ;
+	size_t ಸಂದೇಶ_len;
 
 	/* when --rebasing, records the original commit the patch came from */
-	struct object_id orig_commit;
+	ಸಂರಚನಾ object_id orig_commit;
 
 	/* number of digits in patch filename */
-	int prec;
+	ಪೂರ್ಣಾಙ್ಕ prec;
 
 	/* various operating modes and command line options */
-	int interactive;
-	int no_verify;
-	int threeway;
-	int quiet;
-	int signoff; /* enum signoff_type */
-	int utf8;
-	int keep; /* enum keep_type */
-	int message_id;
-	int scissors; /* enum scissors_type */
-	int quoted_cr; /* enum quoted_cr_action */
-	int empty_type; /* enum empty_action */
-	struct strvec git_apply_opts;
-	const char *resolvemsg;
-	int committer_date_is_author_date;
-	int ignore_date;
-	int allow_rerere_autoupdate;
-	const char *sign_commit;
-	int rebasing;
+	ಪೂರ್ಣಾಙ್ಕ interactive;
+	ಪೂರ್ಣಾಙ್ಕ no_verify;
+	ಪೂರ್ಣಾಙ್ಕ threeway;
+	ಪೂರ್ಣಾಙ್ಕ quiet;
+	ಪೂರ್ಣಾಙ್ಕ signoff; /* enum signoff_type */
+	ಪೂರ್ಣಾಙ್ಕ utf8;
+	ಪೂರ್ಣಾಙ್ಕ keep; /* enum keep_type */
+	ಪೂರ್ಣಾಙ್ಕ message_id;
+	ಪೂರ್ಣಾಙ್ಕ scissors; /* enum scissors_type */
+	ಪೂರ್ಣಾಙ್ಕ quoted_cr; /* enum quoted_cr_action */
+	ಪೂರ್ಣಾಙ್ಕ empty_type; /* enum empty_action */
+	ಸಂರಚನಾ strvec git_apply_opts;
+	ಧ್ರುವ ವರ್ಣ *resolvemsg;
+	ಪೂರ್ಣಾಙ್ಕ committer_date_is_author_date;
+	ಪೂರ್ಣಾಙ್ಕ ignore_date;
+	ಪೂರ್ಣಾಙ್ಕ allow_rerere_autoupdate;
+	ಧ್ರುವ ವರ್ಣ *sign_commit;
+	ಪೂರ್ಣಾಙ್ಕ rebasing;
 };
 
 /**
  * Initializes am_state with the default values.
  */
-static void am_state_init(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_state_init(ಸಂರಚನಾ am_state *state)
 {
-	int gpgsign;
+	ಪೂರ್ಣಾಙ್ಕ gpgsign;
 
-	memset(state, 0, sizeof(*state));
+	memset(state, 0, ಪರಿಮಾಣ(*state));
 
 	state->dir = repo_git_path(the_repository, "rebase-apply");
 
@@ -173,79 +173,79 @@ static void am_state_init(struct am_state *state)
 
 	strvec_init(&state->git_apply_opts);
 
-	if (!repo_config_get_bool(the_repository, "commit.gpgsign", &gpgsign))
-		state->sign_commit = gpgsign ? "" : NULL;
+	ಯದಿ (!repo_config_get_bool(the_repository, "commit.gpgsign", &gpgsign))
+		state->sign_commit = gpgsign ? "" : ರಿಕ್ತ;
 }
 
 /**
  * Releases memory allocated by an am_state.
  */
-static void am_state_release(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_state_release(ಸಂರಚನಾ am_state *state)
 {
-	free(state->dir);
-	free(state->author_name);
-	free(state->author_email);
-	free(state->author_date);
-	free(state->msg);
+	ಮುಕ್ತ(state->dir);
+	ಮುಕ್ತ(state->author_name);
+	ಮುಕ್ತ(state->author_email);
+	ಮುಕ್ತ(state->author_date);
+	ಮುಕ್ತ(state->ಸಂದೇಶ);
 	strvec_clear(&state->git_apply_opts);
 }
 
-static int am_option_parse_quoted_cr(const struct option *opt,
-				     const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ am_option_parse_quoted_cr(ಧ್ರುವ ಸಂರಚನಾ option *opt,
+				     ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	ಯದಿ (mailinfo_parse_quoted_cr_action(arg, opt->ಮೌಲ್ಯ) != 0)
+		ಪ್ರತ್ಯಾಗಮ error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static int am_option_parse_empty(const struct option *opt,
-				     const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ am_option_parse_empty(ಧ್ರುವ ಸಂರಚನಾ option *opt,
+				     ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
-	int *opt_value = opt->value;
+	ಪೂರ್ಣಾಙ್ಕ *opt_ಮೌಲ್ಯ = opt->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
-		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
-		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
-		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	ಯದಿ (!strcmp(arg, "stop"))
+		*opt_ಮೌಲ್ಯ = STOP_ON_EMPTY_COMMIT;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "drop"))
+		*opt_ಮೌಲ್ಯ = DROP_EMPTY_COMMIT;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "keep"))
+		*opt_ಮೌಲ್ಯ = KEEP_EMPTY_COMMIT;
+	ಅನ್ಯಥಾ
+		ಪ್ರತ್ಯಾಗಮ error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Returns path relative to the am_state directory.
  */
-static inline const char *am_path(const struct am_state *state, const char *path)
+ಸ್ಥಿರ ಅನ್ತಃಸ್ಥ ಧ್ರುವ ವರ್ಣ *am_path(ಧ್ರುವ ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ *path)
 {
-	return mkpath("%s/%s", state->dir, path);
+	ಪ್ರತ್ಯಾಗಮ mkpath("%s/%s", state->dir, path);
 }
 
 /**
  * For convenience to call write_file()
  */
-static void write_state_text(const struct am_state *state,
-			     const char *name, const char *string)
+ಸ್ಥಿರ ಶೂನ್ಯ write_state_text(ಧ್ರುವ ಸಂರಚನಾ am_state *state,
+			     ಧ್ರುವ ವರ್ಣ *name, ಧ್ರುವ ವರ್ಣ *string)
 {
 	write_file(am_path(state, name), "%s", string);
 }
 
-static void write_state_count(const struct am_state *state,
-			      const char *name, int value)
+ಸ್ಥಿರ ಶೂನ್ಯ write_state_ಎಣಿಕೆ(ಧ್ರುವ ಸಂರಚನಾ am_state *state,
+			      ಧ್ರುವ ವರ್ಣ *name, ಪೂರ್ಣಾಙ್ಕ ಮೌಲ್ಯ)
 {
-	write_file(am_path(state, name), "%d", value);
+	write_file(am_path(state, name), "%d", ಮೌಲ್ಯ);
 }
 
-static void write_state_bool(const struct am_state *state,
-			     const char *name, int value)
+ಸ್ಥಿರ ಶೂನ್ಯ write_state_bool(ಧ್ರುವ ಸಂರಚನಾ am_state *state,
+			     ಧ್ರುವ ವರ್ಣ *name, ಪೂರ್ಣಾಙ್ಕ ಮೌಲ್ಯ)
 {
-	write_state_text(state, name, value ? "t" : "f");
+	write_state_text(state, name, ಮೌಲ್ಯ ? "t" : "f");
 }
 
 /**
@@ -253,12 +253,12 @@ static void write_state_bool(const struct am_state *state,
  * at the end.
  */
 __attribute__((format (printf, 3, 4)))
-static void say(const struct am_state *state, FILE *fp, const char *fmt, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ say(ಧ್ರುವ ಸಂರಚನಾ am_state *state, FILE *fp, ಧ್ರುವ ವರ್ಣ *fmt, ...)
 {
 	va_list ap;
 
 	va_start(ap, fmt);
-	if (!state->quiet) {
+	ಯದಿ (!state->quiet) {
 		vfprintf(fp, fmt, ap);
 		putc('\n', fp);
 	}
@@ -268,17 +268,17 @@ static void say(const struct am_state *state, FILE *fp, const char *fmt, ...)
 /**
  * Returns 1 if there is an am session in progress, 0 otherwise.
  */
-static int am_in_progress(const struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ am_in_progress(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct stat st;
+	ಸಂರಚನಾ stat st;
 
-	if (lstat(state->dir, &st) < 0 || !S_ISDIR(st.st_mode))
-		return 0;
-	if (lstat(am_path(state, "last"), &st) || !S_ISREG(st.st_mode))
-		return 0;
-	if (lstat(am_path(state, "next"), &st) || !S_ISREG(st.st_mode))
-		return 0;
-	return 1;
+	ಯದಿ (lstat(state->dir, &st) < 0 || !S_ISDIR(st.st_mode))
+		ಪ್ರತ್ಯಾಗಮ 0;
+	ಯದಿ (lstat(am_path(state, "last"), &st) || !S_ISREG(st.st_mode))
+		ಪ್ರತ್ಯಾಗಮ 0;
+	ಯದಿ (lstat(am_path(state, "next"), &st) || !S_ISREG(st.st_mode))
+		ಪ್ರತ್ಯಾಗಮ 0;
+	ಪ್ರತ್ಯಾಗಮ 1;
 }
 
 /**
@@ -286,20 +286,20 @@ static int am_in_progress(const struct am_state *state)
  * number of bytes read on success, -1 if the file does not exist. If `trim` is
  * set, trailing whitespace will be removed.
  */
-static int read_state_file(struct strbuf *sb, const struct am_state *state,
-			const char *file, int trim)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ read_state_file(ಸಂರಚನಾ strbuf *sb, ಧ್ರುವ ಸಂರಚನಾ am_state *state,
+			ಧ್ರುವ ವರ್ಣ *file, ಪೂರ್ಣಾಙ್ಕ trim)
 {
 	strbuf_reset(sb);
 
-	if (strbuf_read_file(sb, am_path(state, file), 0) >= 0) {
-		if (trim)
+	ಯದಿ (strbuf_read_file(sb, am_path(state, file), 0) >= 0) {
+		ಯದಿ (trim)
 			strbuf_trim(sb);
 
-		return sb->len;
+		ಪ್ರತ್ಯಾಗಮ sb->len;
 	}
 
-	if (errno == ENOENT)
-		return -1;
+	ಯದಿ (errno == ENOENT)
+		ಪ್ರತ್ಯಾಗಮ -1;
 
 	die_errno(_("could not read '%s'"), am_path(state, file));
 }
@@ -320,15 +320,15 @@ static int read_state_file(struct strbuf *sb, const struct am_state *state,
  * script, and thus if the file differs from what this function expects, it is
  * better to bail out than to do something that the user does not expect.
  */
-static int read_am_author_script(struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ read_am_author_script(ಸಂರಚನಾ am_state *state)
 {
-	const char *filename = am_path(state, "author-script");
+	ಧ್ರುವ ವರ್ಣ *filename = am_path(state, "author-script");
 
-	assert(!state->author_name);
-	assert(!state->author_email);
-	assert(!state->author_date);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_name);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_email);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_date);
 
-	return read_author_script(filename, &state->author_name,
+	ಪ್ರತ್ಯಾಗಮ read_author_script(filename, &state->author_name,
 				  &state->author_email, &state->author_date, 1);
 }
 
@@ -336,9 +336,9 @@ static int read_am_author_script(struct am_state *state)
  * Saves state->author_name, state->author_email and state->author_date in the
  * state directory's "author-script" file.
  */
-static void write_author_script(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ write_author_script(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
 	strbuf_addstr(&sb, "GIT_AUTHOR_NAME=");
 	sq_quote_buf(&sb, state->author_name);
@@ -364,53 +364,53 @@ static void write_author_script(const struct am_state *state)
  *
  * Returns 0 on success, -1 if the file does not exist.
  */
-static int read_commit_msg(struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ read_commit_ಸಂದೇಶ(ಸಂರಚನಾ am_state *state)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
-	assert(!state->msg);
+	ಪ್ರತಿಜ್ಞಾ(!state->ಸಂದೇಶ);
 
-	if (read_state_file(&sb, state, "final-commit", 0) < 0) {
+	ಯದಿ (read_state_file(&sb, state, "final-commit", 0) < 0) {
 		strbuf_release(&sb);
-		return -1;
+		ಪ್ರತ್ಯಾಗಮ -1;
 	}
 
-	state->msg = strbuf_detach(&sb, &state->msg_len);
-	return 0;
+	state->ಸಂದೇಶ = strbuf_detach(&sb, &state->ಸಂದೇಶ_len);
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Saves state->msg in the state directory's "final-commit" file.
  */
-static void write_commit_msg(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ write_commit_ಸಂದೇಶ(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	const char *filename = am_path(state, "final-commit");
-	write_file_buf(filename, state->msg, state->msg_len);
+	ಧ್ರುವ ವರ್ಣ *filename = am_path(state, "final-commit");
+	write_file_buf(filename, state->ಸಂದೇಶ, state->ಸಂದೇಶ_len);
 }
 
 /**
  * Loads state from disk.
  */
-static void am_load(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_load(ಸಂರಚನಾ am_state *state)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
-	if (read_state_file(&sb, state, "next", 1) < 0)
+	ಯದಿ (read_state_file(&sb, state, "next", 1) < 0)
 		BUG("state file 'next' does not exist");
-	state->cur = strtol(sb.buf, NULL, 10);
+	state->cur = strtol(sb.buf, ರಿಕ್ತ, 10);
 
-	if (read_state_file(&sb, state, "last", 1) < 0)
+	ಯದಿ (read_state_file(&sb, state, "last", 1) < 0)
 		BUG("state file 'last' does not exist");
-	state->last = strtol(sb.buf, NULL, 10);
+	state->last = strtol(sb.buf, ರಿಕ್ತ, 10);
 
-	if (read_am_author_script(state) < 0)
+	ಯದಿ (read_am_author_script(state) < 0)
 		die(_("could not parse author script"));
 
-	read_commit_msg(state);
+	read_commit_ಸಂದೇಶ(state);
 
-	if (read_state_file(&sb, state, "original-commit", 1) < 0)
+	ಯದಿ (read_state_file(&sb, state, "original-commit", 1) < 0)
 		oidclr(&state->orig_commit, the_repository->hash_algo);
-	else if (get_oid_hex(sb.buf, &state->orig_commit) < 0)
+	ಅನ್ಯಥಾ ಯದಿ (get_oid_hex(sb.buf, &state->orig_commit) < 0)
 		die(_("could not parse %s"), am_path(state, "original-commit"));
 
 	read_state_file(&sb, state, "threeway", 1);
@@ -425,42 +425,42 @@ static void am_load(struct am_state *state)
 	read_state_file(&sb, state, "utf8", 1);
 	state->utf8 = !strcmp(sb.buf, "t");
 
-	if (file_exists(am_path(state, "rerere-autoupdate"))) {
+	ಯದಿ (file_exists(am_path(state, "rerere-autoupdate"))) {
 		read_state_file(&sb, state, "rerere-autoupdate", 1);
 		state->allow_rerere_autoupdate = strcmp(sb.buf, "t") ?
 			RERERE_NOAUTOUPDATE : RERERE_AUTOUPDATE;
-	} else {
+	} ಅನ್ಯಥಾ {
 		state->allow_rerere_autoupdate = 0;
 	}
 
 	read_state_file(&sb, state, "keep", 1);
-	if (!strcmp(sb.buf, "t"))
+	ಯದಿ (!strcmp(sb.buf, "t"))
 		state->keep = KEEP_TRUE;
-	else if (!strcmp(sb.buf, "b"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(sb.buf, "b"))
 		state->keep = KEEP_NON_PATCH;
-	else
+	ಅನ್ಯಥಾ
 		state->keep = KEEP_FALSE;
 
 	read_state_file(&sb, state, "messageid", 1);
 	state->message_id = !strcmp(sb.buf, "t");
 
 	read_state_file(&sb, state, "scissors", 1);
-	if (!strcmp(sb.buf, "t"))
+	ಯದಿ (!strcmp(sb.buf, "t"))
 		state->scissors = SCISSORS_TRUE;
-	else if (!strcmp(sb.buf, "f"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(sb.buf, "f"))
 		state->scissors = SCISSORS_FALSE;
-	else
+	ಅನ್ಯಥಾ
 		state->scissors = SCISSORS_UNSET;
 
 	read_state_file(&sb, state, "quoted-cr", 1);
-	if (!*sb.buf)
+	ಯದಿ (!*sb.buf)
 		state->quoted_cr = quoted_cr_unset;
-	else if (mailinfo_parse_quoted_cr_action(sb.buf, &state->quoted_cr) != 0)
+	ಅನ್ಯಥಾ ಯದಿ (mailinfo_parse_quoted_cr_action(sb.buf, &state->quoted_cr) != 0)
 		die(_("could not parse %s"), am_path(state, "quoted-cr"));
 
 	read_state_file(&sb, state, "apply-opt", 1);
 	strvec_clear(&state->git_apply_opts);
-	if (sq_dequote_to_strvec(sb.buf, &state->git_apply_opts) < 0)
+	ಯದಿ (sq_dequote_to_strvec(sb.buf, &state->git_apply_opts) < 0)
 		die(_("could not parse %s"), am_path(state, "apply-opt"));
 
 	state->rebasing = !!file_exists(am_path(state, "rebasing"));
@@ -472,9 +472,9 @@ static void am_load(struct am_state *state)
  * Removes the am_state directory, forcefully terminating the current am
  * session.
  */
-static void am_destroy(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_destroy(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
 	strbuf_addstr(&sb, state->dir);
 	remove_dir_recursively(&sb, 0);
@@ -484,39 +484,39 @@ static void am_destroy(const struct am_state *state)
 /**
  * Runs applypatch-msg hook. Returns its exit code.
  */
-static int run_applypatch_msg_hook(struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ run_applypatch_ಸಂದೇಶ_hook(ಸಂರಚನಾ am_state *state)
 {
-	int ret = 0;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
 
-	assert(state->msg);
+	ಪ್ರತಿಜ್ಞಾ(state->ಸಂದೇಶ);
 
-	if (!state->no_verify) {
-		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
-		strvec_push(&opt.args, am_path(state, "final-commit"));
+	ಯದಿ (!state->no_verify) {
+		ಸಂರಚನಾ run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+		strvec_ತಳ್ಳು(&opt.args, am_path(state, "final-commit"));
 		ret = run_hooks_opt(the_repository, "applypatch-msg", &opt);
 	}
 
-	if (!ret) {
-		FREE_AND_NULL(state->msg);
-		if (read_commit_msg(state) < 0)
+	ಯದಿ (!ret) {
+		FREE_AND_NULL(state->ಸಂದೇಶ);
+		ಯದಿ (read_commit_ಸಂದೇಶ(state) < 0)
 			die(_("'%s' was deleted by the applypatch-msg hook"),
 				am_path(state, "final-commit"));
 	}
 
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
  * Runs post-rewrite hook. Returns it exit code.
  */
-static int run_post_rewrite_hook(const struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ run_post_rewrite_hook(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
+	ಸಂರಚನಾ run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
 
-	strvec_push(&opt.args, "rebase");
+	strvec_ತಳ್ಳು(&opt.args, "rebase");
 	opt.path_to_stdin = am_path(state, "rewritten");
 
-	return run_hooks_opt(the_repository, "post-rewrite", &opt);
+	ಪ್ರತ್ಯಾಗಮ run_hooks_opt(the_repository, "post-rewrite", &opt);
 }
 
 /**
@@ -525,57 +525,57 @@ static int run_post_rewrite_hook(const struct am_state *state)
  *
  * Returns 0 on success, -1 on failure.
  */
-static int copy_notes_for_rebase(const struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ copy_notes_for_rebase(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct notes_rewrite_cfg *c;
-	struct strbuf sb = STRBUF_INIT;
-	const char *invalid_line = _("Malformed input line: '%s'.");
-	const char *msg = "Notes added by 'git rebase'";
+	ಸಂರಚನಾ notes_rewrite_cfg *c;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಧ್ರುವ ವರ್ಣ *invalid_ಸಾಲು = _("Malformed input line: '%s'.");
+	ಧ್ರುವ ವರ್ಣ *ಸಂದೇಶ = "Notes added by 'git rebase'";
 	FILE *fp;
-	int ret = 0;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
 
-	assert(state->rebasing);
+	ಪ್ರತಿಜ್ಞಾ(state->rebasing);
 
 	c = init_copy_notes_for_rewrite("rebase");
-	if (!c)
-		return 0;
+	ಯದಿ (!c)
+		ಪ್ರತ್ಯಾಗಮ 0;
 
 	fp = xfopen(am_path(state, "rewritten"), "r");
 
-	while (!strbuf_getline_lf(&sb, fp)) {
-		struct object_id from_obj, to_obj;
-		const char *p;
+	ಯಾವತ್ (!strbuf_getline_lf(&sb, fp)) {
+		ಸಂರಚನಾ object_id from_obj, to_obj;
+		ಧ್ರುವ ವರ್ಣ *p;
 
-		if (sb.len != the_hash_algo->hexsz * 2 + 1) {
-			ret = error(invalid_line, sb.buf);
-			goto finish;
+		ಯದಿ (sb.len != the_hash_algo->hexsz * 2 + 1) {
+			ret = error(invalid_ಸಾಲು, sb.buf);
+			ಗಚ್ಛ finish;
 		}
 
-		if (parse_oid_hex(sb.buf, &from_obj, &p)) {
-			ret = error(invalid_line, sb.buf);
-			goto finish;
+		ಯದಿ (parse_oid_hex(sb.buf, &from_obj, &p)) {
+			ret = error(invalid_ಸಾಲು, sb.buf);
+			ಗಚ್ಛ finish;
 		}
 
-		if (*p != ' ') {
-			ret = error(invalid_line, sb.buf);
-			goto finish;
+		ಯದಿ (*p != ' ') {
+			ret = error(invalid_ಸಾಲು, sb.buf);
+			ಗಚ್ಛ finish;
 		}
 
-		if (get_oid_hex(p + 1, &to_obj)) {
-			ret = error(invalid_line, sb.buf);
-			goto finish;
+		ಯದಿ (get_oid_hex(p + 1, &to_obj)) {
+			ret = error(invalid_ಸಾಲು, sb.buf);
+			ಗಚ್ಛ finish;
 		}
 
-		if (copy_note_for_rewrite(c, &from_obj, &to_obj))
+		ಯದಿ (copy_note_for_rewrite(c, &from_obj, &to_obj))
 			ret = error(_("Failed to copy notes from '%s' to '%s'"),
 					oid_to_hex(&from_obj), oid_to_hex(&to_obj));
 	}
 
 finish:
-	finish_copy_notes_for_rewrite(the_repository, c, msg);
+	finish_copy_notes_for_rewrite(the_repository, c, ಸಂದೇಶ);
 	fclose(fp);
 	strbuf_release(&sb);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
@@ -585,38 +585,38 @@ finish:
  *
  * Returns 1 if the file looks like a piece of mail, 0 otherwise.
  */
-static int is_mail(FILE *fp)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ is_mail(FILE *fp)
 {
-	const char *header_regex = "^[!-9;-~]+:";
-	struct strbuf sb = STRBUF_INIT;
+	ಧ್ರುವ ವರ್ಣ *header_regex = "^[!-9;-~]+:";
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 	regex_t regex;
-	int ret = 1;
+	ಪೂರ್ಣಾಙ್ಕ ret = 1;
 
-	if (fseek(fp, 0L, SEEK_SET))
+	ಯದಿ (fseek(fp, 0L, SEEK_SET))
 		die_errno(_("fseek failed"));
 
-	if (regcomp(&regex, header_regex, REG_NOSUB | REG_EXTENDED))
+	ಯದಿ (regcomp(&regex, header_regex, REG_NOSUB | REG_EXTENDED))
 		die("invalid pattern: %s", header_regex);
 
-	while (!strbuf_getline(&sb, fp)) {
-		if (!sb.len)
-			break; /* End of header */
+	ಯಾವತ್ (!strbuf_getline(&sb, fp)) {
+		ಯದಿ (!sb.len)
+			ಭಙ್ಗ; /* End of header */
 
 		/* Ignore indented folded lines */
-		if (*sb.buf == '\t' || *sb.buf == ' ')
-			continue;
+		ಯದಿ (*sb.buf == '\t' || *sb.buf == ' ')
+			ಅನುವರ್ತ;
 
 		/* It's a header if it matches header_regex */
-		if (regexec(&regex, sb.buf, 0, NULL, 0)) {
+		ಯದಿ (regexec(&regex, sb.buf, 0, ರಿಕ್ತ, 0)) {
 			ret = 0;
-			goto done;
+			ಗಚ್ಛ done;
 		}
 	}
 
 done:
 	regfree(&regex);
 	strbuf_release(&sb);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
@@ -624,19 +624,19 @@ done:
  * returning the PATCH_FORMAT_* enum value. Returns PATCH_FORMAT_UNKNOWN if
  * detection fails.
  */
-static int detect_patch_format(const char **paths)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ detect_patch_format(ಧ್ರುವ ವರ್ಣ **paths)
 {
-	enum patch_format ret = PATCH_FORMAT_UNKNOWN;
-	struct strbuf l1 = STRBUF_INIT;
-	struct strbuf l2 = STRBUF_INIT;
-	struct strbuf l3 = STRBUF_INIT;
+	ಗಣನಾ patch_format ret = PATCH_FORMAT_UNKNOWN;
+	ಸಂರಚನಾ strbuf l1 = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf l2 = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf l3 = STRBUF_INIT;
 	FILE *fp;
 
 	/*
 	 * We default to mbox format if input is from stdin and for directories
 	 */
-	if (!*paths || !strcmp(*paths, "-") || is_directory(*paths))
-		return PATCH_FORMAT_MBOX;
+	ಯದಿ (!*paths || !strcmp(*paths, "-") || is_directory(*paths))
+		ಪ್ರತ್ಯಾಗಮ PATCH_FORMAT_MBOX;
 
 	/*
 	 * Otherwise, check the first few lines of the first patch, starting
@@ -645,24 +645,24 @@ static int detect_patch_format(const char **paths)
 
 	fp = xfopen(*paths, "r");
 
-	while (!strbuf_getline(&l1, fp)) {
-		if (l1.len)
-			break;
+	ಯಾವತ್ (!strbuf_getline(&l1, fp)) {
+		ಯದಿ (l1.len)
+			ಭಙ್ಗ;
 	}
 
-	if (starts_with(l1.buf, "From ") || starts_with(l1.buf, "From: ")) {
+	ಯದಿ (starts_with(l1.buf, "From ") || starts_with(l1.buf, "From: ")) {
 		ret = PATCH_FORMAT_MBOX;
-		goto done;
+		ಗಚ್ಛ done;
 	}
 
-	if (starts_with(l1.buf, "# This series applies on GIT commit")) {
+	ಯದಿ (starts_with(l1.buf, "# This series applies on GIT commit")) {
 		ret = PATCH_FORMAT_STGIT_SERIES;
-		goto done;
+		ಗಚ್ಛ done;
 	}
 
-	if (!strcmp(l1.buf, "# HG changeset patch")) {
+	ಯದಿ (!strcmp(l1.buf, "# HG changeset patch")) {
 		ret = PATCH_FORMAT_HG;
-		goto done;
+		ಗಚ್ಛ done;
 	}
 
 	strbuf_getline(&l2, fp);
@@ -672,17 +672,17 @@ static int detect_patch_format(const char **paths)
 	 * If the second line is empty and the third is a From, Author or Date
 	 * entry, this is likely an StGit patch.
 	 */
-	if (l1.len && !l2.len &&
+	ಯದಿ (l1.len && !l2.len &&
 		(starts_with(l3.buf, "From:") ||
 		 starts_with(l3.buf, "Author:") ||
 		 starts_with(l3.buf, "Date:"))) {
 		ret = PATCH_FORMAT_STGIT;
-		goto done;
+		ಗಚ್ಛ done;
 	}
 
-	if (l1.len && is_mail(fp)) {
+	ಯದಿ (l1.len && is_mail(fp)) {
 		ret = PATCH_FORMAT_MBOX;
-		goto done;
+		ಗಚ್ಛ done;
 	}
 
 done:
@@ -690,42 +690,42 @@ done:
 	strbuf_release(&l1);
 	strbuf_release(&l2);
 	strbuf_release(&l3);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
  * Splits out individual email patches from `paths`, where each path is either
  * a mbox file or a Maildir. Returns 0 on success, -1 on failure.
  */
-static int split_mail_mbox(struct am_state *state, const char **paths,
-				int keep_cr, int mboxrd)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ split_mail_mbox(ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ **paths,
+				ಪೂರ್ಣಾಙ್ಕ keep_cr, ಪೂರ್ಣಾಙ್ಕ mboxrd)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf last = STRBUF_INIT;
-	int ret;
+	ಸಂರಚನಾ child_process cp = CHILD_PROCESS_INIT;
+	ಸಂರಚನಾ strbuf last = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ ret;
 
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "mailsplit");
+	strvec_ತಳ್ಳು(&cp.args, "mailsplit");
 	strvec_pushf(&cp.args, "-d%d", state->prec);
 	strvec_pushf(&cp.args, "-o%s", state->dir);
-	strvec_push(&cp.args, "-b");
-	if (keep_cr)
-		strvec_push(&cp.args, "--keep-cr");
-	if (mboxrd)
-		strvec_push(&cp.args, "--mboxrd");
-	strvec_push(&cp.args, "--");
+	strvec_ತಳ್ಳು(&cp.args, "-b");
+	ಯದಿ (keep_cr)
+		strvec_ತಳ್ಳು(&cp.args, "--keep-cr");
+	ಯದಿ (mboxrd)
+		strvec_ತಳ್ಳು(&cp.args, "--mboxrd");
+	strvec_ತಳ್ಳು(&cp.args, "--");
 	strvec_pushv(&cp.args, paths);
 
 	ret = capture_command(&cp, &last, 8);
-	if (ret)
-		goto exit;
+	ಯದಿ (ret)
+		ಗಚ್ಛ exit;
 
 	state->cur = 1;
-	state->last = strtol(last.buf, NULL, 10);
+	state->last = strtol(last.buf, ರಿಕ್ತ, 10);
 
 exit:
 	strbuf_release(&last);
-	return ret ? -1 : 0;
+	ಪ್ರತ್ಯಾಗಮ ret ? -1 : 0;
 }
 
 /**
@@ -733,7 +733,7 @@ exit:
  * read from `in`, and the converted patch (in RFC2822 mail format) should be
  * written to `out`. Return 0 on success, or -1 on failure.
  */
-typedef int (*mail_conv_fn)(FILE *out, FILE *in, int keep_cr);
+ಪ್ರಕಾರನಿರ್ದೇಶ ಪೂರ್ಣಾಙ್ಕ (*mail_conv_fn)(FILE *out, FILE *in, ಪೂರ್ಣಾಙ್ಕ keep_cr);
 
 /**
  * Calls `fn` for each file in `paths` to convert the foreign patch to the
@@ -741,89 +741,89 @@ typedef int (*mail_conv_fn)(FILE *out, FILE *in, int keep_cr);
  *
  * Returns 0 on success, -1 on failure.
  */
-static int split_mail_conv(mail_conv_fn fn, struct am_state *state,
-			const char **paths, int keep_cr)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ split_mail_conv(mail_conv_fn fn, ಸಂರಚನಾ am_state *state,
+			ಧ್ರುವ ವರ್ಣ **paths, ಪೂರ್ಣಾಙ್ಕ keep_cr)
 {
-	static const char *stdin_only[] = {"-", NULL};
-	int i;
+	ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *stdin_only[] = {"-", ರಿಕ್ತ};
+	ಪೂರ್ಣಾಙ್ಕ i;
 
-	if (!*paths)
+	ಯದಿ (!*paths)
 		paths = stdin_only;
 
-	for (i = 0; *paths; paths++, i++) {
+	ಪ್ರತಿ (i = 0; *paths; paths++, i++) {
 		FILE *in, *out;
-		const char *mail;
-		int ret;
+		ಧ್ರುವ ವರ್ಣ *mail;
+		ಪೂರ್ಣಾಙ್ಕ ret;
 
-		if (!strcmp(*paths, "-"))
+		ಯದಿ (!strcmp(*paths, "-"))
 			in = stdin;
-		else
+		ಅನ್ಯಥಾ
 			in = fopen(*paths, "r");
 
-		if (!in)
-			return error_errno(_("could not open '%s' for reading"),
+		ಯದಿ (!in)
+			ಪ್ರತ್ಯಾಗಮ error_errno(_("could not open '%s' for reading"),
 					   *paths);
 
 		mail = mkpath("%s/%0*d", state->dir, state->prec, i + 1);
 
 		out = fopen(mail, "w");
-		if (!out) {
-			if (in != stdin)
+		ಯದಿ (!out) {
+			ಯದಿ (in != stdin)
 				fclose(in);
-			return error_errno(_("could not open '%s' for writing"),
+			ಪ್ರತ್ಯಾಗಮ error_errno(_("could not open '%s' for writing"),
 					   mail);
 		}
 
 		ret = fn(out, in, keep_cr);
 
 		fclose(out);
-		if (in != stdin)
+		ಯದಿ (in != stdin)
 			fclose(in);
 
-		if (ret)
-			return error(_("could not parse patch '%s'"), *paths);
+		ಯದಿ (ret)
+			ಪ್ರತ್ಯಾಗಮ error(_("could not parse patch '%s'"), *paths);
 	}
 
 	state->cur = 1;
 	state->last = i;
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * A split_mail_conv() callback that converts an StGit patch to an RFC2822
  * message suitable for parsing with git-mailinfo.
  */
-static int stgit_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ stgit_patch_to_mail(FILE *out, FILE *in, ಪೂರ್ಣಾಙ್ಕ keep_cr UNUSED)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int subject_printed = 0;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ subject_printed = 0;
 
-	while (!strbuf_getline_lf(&sb, in)) {
-		const char *str;
+	ಯಾವತ್ (!strbuf_getline_lf(&sb, in)) {
+		ಧ್ರುವ ವರ್ಣ *str;
 
-		if (str_isspace(sb.buf))
-			continue;
-		else if (skip_prefix(sb.buf, "Author:", &str))
+		ಯದಿ (str_isspace(sb.buf))
+			ಅನುವರ್ತ;
+		ಅನ್ಯಥಾ ಯದಿ (skip_prefix(sb.buf, "Author:", &str))
 			fprintf(out, "From:%s\n", str);
-		else if (starts_with(sb.buf, "From") || starts_with(sb.buf, "Date"))
+		ಅನ್ಯಥಾ ಯದಿ (starts_with(sb.buf, "From") || starts_with(sb.buf, "Date"))
 			fprintf(out, "%s\n", sb.buf);
-		else if (!subject_printed) {
+		ಅನ್ಯಥಾ ಯದಿ (!subject_printed) {
 			fprintf(out, "Subject: %s\n", sb.buf);
 			subject_printed = 1;
-		} else {
+		} ಅನ್ಯಥಾ {
 			fprintf(out, "\n%s\n", sb.buf);
-			break;
+			ಭಙ್ಗ;
 		}
 	}
 
 	strbuf_reset(&sb);
-	while (strbuf_fread(&sb, 8192, in) > 0) {
+	ಯಾವತ್ (strbuf_fread(&sb, 8192, in) > 0) {
 		fwrite(sb.buf, 1, sb.len, out);
 		strbuf_reset(&sb);
 	}
 
 	strbuf_release(&sb);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
@@ -835,86 +835,86 @@ static int stgit_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
  *
  * Returns 0 on success, -1 on failure.
  */
-static int split_mail_stgit_series(struct am_state *state, const char **paths,
-					int keep_cr)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ split_mail_stgit_series(ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ **paths,
+					ಪೂರ್ಣಾಙ್ಕ keep_cr)
 {
-	const char *series_dir;
-	char *series_dir_buf;
+	ಧ್ರುವ ವರ್ಣ *series_dir;
+	ವರ್ಣ *series_dir_buf;
 	FILE *fp;
-	struct strvec patches = STRVEC_INIT;
-	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	ಸಂರಚನಾ strvec patches = STRVEC_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ ret;
 
-	if (!paths[0] || paths[1])
-		return error(_("Only one StGIT patch series can be applied at once"));
+	ಯದಿ (!paths[0] || paths[1])
+		ಪ್ರತ್ಯಾಗಮ error(_("Only one StGIT patch series can be applied at once"));
 
 	series_dir_buf = xstrdup(*paths);
 	series_dir = dirname(series_dir_buf);
 
 	fp = fopen(*paths, "r");
-	if (!fp) {
-		free(series_dir_buf);
-		return error_errno(_("could not open '%s' for reading"), *paths);
+	ಯದಿ (!fp) {
+		ಮುಕ್ತ(series_dir_buf);
+		ಪ್ರತ್ಯಾಗಮ error_errno(_("could not open '%s' for reading"), *paths);
 	}
 
-	while (!strbuf_getline_lf(&sb, fp)) {
-		if (*sb.buf == '#')
-			continue; /* skip comment lines */
+	ಯಾವತ್ (!strbuf_getline_lf(&sb, fp)) {
+		ಯದಿ (*sb.buf == '#')
+			ಅನುವರ್ತ; /* skip comment lines */
 
-		strvec_push(&patches, mkpath("%s/%s", series_dir, sb.buf));
+		strvec_ತಳ್ಳು(&patches, mkpath("%s/%s", series_dir, sb.buf));
 	}
 
 	fclose(fp);
 	strbuf_release(&sb);
-	free(series_dir_buf);
+	ಮುಕ್ತ(series_dir_buf);
 
 	ret = split_mail_conv(stgit_patch_to_mail, state, patches.v, keep_cr);
 
 	strvec_clear(&patches);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
  * A split_patches_conv() callback that converts a mercurial patch to a RFC2822
  * message suitable for parsing with git-mailinfo.
  */
-static int hg_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ hg_patch_to_mail(FILE *out, FILE *in, ಪೂರ್ಣಾಙ್ಕ keep_cr UNUSED)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int rc = 0;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ rc = 0;
 
-	while (!strbuf_getline_lf(&sb, in)) {
-		const char *str;
+	ಯಾವತ್ (!strbuf_getline_lf(&sb, in)) {
+		ಧ್ರುವ ವರ್ಣ *str;
 
-		if (skip_prefix(sb.buf, "# User ", &str))
+		ಯದಿ (skip_prefix(sb.buf, "# User ", &str))
 			fprintf(out, "From: %s\n", str);
-		else if (skip_prefix(sb.buf, "# Date ", &str)) {
+		ಅನ್ಯಥಾ ಯದಿ (skip_prefix(sb.buf, "# Date ", &str)) {
 			timestamp_t timestamp;
 			long tz, tz2;
-			char *end;
+			ವರ್ಣ *end;
 
 			errno = 0;
 			timestamp = parse_timestamp(str, &end, 10);
-			if (errno) {
+			ಯದಿ (errno) {
 				rc = error(_("invalid timestamp"));
-				goto exit;
+				ಗಚ್ಛ exit;
 			}
 
-			if (!skip_prefix(end, " ", &str)) {
+			ಯದಿ (!skip_prefix(end, " ", &str)) {
 				rc = error(_("invalid Date line"));
-				goto exit;
+				ಗಚ್ಛ exit;
 			}
 
 			errno = 0;
 			tz = strtol(str, &end, 10);
-			if (errno) {
+			ಯದಿ (errno) {
 				rc = error(_("invalid timezone offset"));
-				goto exit;
+				ಗಚ್ಛ exit;
 			}
 
-			if (*end) {
+			ಯದಿ (*end) {
 				rc = error(_("invalid Date line"));
-				goto exit;
+				ಗಚ್ಛ exit;
 			}
 
 			/*
@@ -923,26 +923,26 @@ static int hg_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
 			 * UTC. Convert it.
 			 */
 			tz2 = labs(tz) / 3600 * 100 + labs(tz) % 3600 / 60;
-			if (tz > 0)
+			ಯದಿ (tz > 0)
 				tz2 = -tz2;
 
 			fprintf(out, "Date: %s\n", show_date(timestamp, tz2, DATE_MODE(RFC2822)));
-		} else if (starts_with(sb.buf, "# ")) {
-			continue;
-		} else {
+		} ಅನ್ಯಥಾ ಯದಿ (starts_with(sb.buf, "# ")) {
+			ಅನುವರ್ತ;
+		} ಅನ್ಯಥಾ {
 			fprintf(out, "\n%s\n", sb.buf);
-			break;
+			ಭಙ್ಗ;
 		}
 	}
 
 	strbuf_reset(&sb);
-	while (strbuf_fread(&sb, 8192, in) > 0) {
+	ಯಾವತ್ (strbuf_fread(&sb, 8192, in) > 0) {
 		fwrite(sb.buf, 1, sb.len, out);
 		strbuf_reset(&sb);
 	}
 exit:
 	strbuf_release(&sb);
-	return rc;
+	ಪ್ರತ್ಯಾಗಮ rc;
 }
 
 /**
@@ -962,60 +962,60 @@ exit:
  *
  * Returns 0 on success, -1 on failure.
  */
-static int split_mail(struct am_state *state, enum patch_format patch_format,
-			const char **paths, int keep_cr)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ split_mail(ಸಂರಚನಾ am_state *state, ಗಣನಾ patch_format patch_format,
+			ಧ್ರುವ ವರ್ಣ **paths, ಪೂರ್ಣಾಙ್ಕ keep_cr)
 {
-	if (keep_cr < 0) {
+	ಯದಿ (keep_cr < 0) {
 		keep_cr = 0;
 		repo_config_get_bool(the_repository, "am.keepcr", &keep_cr);
 	}
 
-	switch (patch_format) {
-	case PATCH_FORMAT_MBOX:
-		return split_mail_mbox(state, paths, keep_cr, 0);
-	case PATCH_FORMAT_STGIT:
-		return split_mail_conv(stgit_patch_to_mail, state, paths, keep_cr);
-	case PATCH_FORMAT_STGIT_SERIES:
-		return split_mail_stgit_series(state, paths, keep_cr);
-	case PATCH_FORMAT_HG:
-		return split_mail_conv(hg_patch_to_mail, state, paths, keep_cr);
-	case PATCH_FORMAT_MBOXRD:
-		return split_mail_mbox(state, paths, keep_cr, 1);
-	default:
+	ವಿಕಲ್ಪ (patch_format) {
+	ಪಕ್ಷ PATCH_FORMAT_MBOX:
+		ಪ್ರತ್ಯಾಗಮ split_mail_mbox(state, paths, keep_cr, 0);
+	ಪಕ್ಷ PATCH_FORMAT_STGIT:
+		ಪ್ರತ್ಯಾಗಮ split_mail_conv(stgit_patch_to_mail, state, paths, keep_cr);
+	ಪಕ್ಷ PATCH_FORMAT_STGIT_SERIES:
+		ಪ್ರತ್ಯಾಗಮ split_mail_stgit_series(state, paths, keep_cr);
+	ಪಕ್ಷ PATCH_FORMAT_HG:
+		ಪ್ರತ್ಯಾಗಮ split_mail_conv(hg_patch_to_mail, state, paths, keep_cr);
+	ಪಕ್ಷ PATCH_FORMAT_MBOXRD:
+		ಪ್ರತ್ಯಾಗಮ split_mail_mbox(state, paths, keep_cr, 1);
+	ಸ್ವಭಾವ:
 		BUG("invalid patch_format");
 	}
-	return -1;
+	ಪ್ರತ್ಯಾಗಮ -1;
 }
 
 /**
  * Setup a new am session for applying patches
  */
-static void am_setup(struct am_state *state, enum patch_format patch_format,
-			const char **paths, int keep_cr)
+ಸ್ಥಿರ ಶೂನ್ಯ am_setup(ಸಂರಚನಾ am_state *state, ಗಣನಾ patch_format patch_format,
+			ಧ್ರುವ ವರ್ಣ **paths, ಪೂರ್ಣಾಙ್ಕ keep_cr)
 {
-	struct object_id curr_head;
-	const char *str;
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ object_id curr_head;
+	ಧ್ರುವ ವರ್ಣ *str;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
-	if (!patch_format)
+	ಯದಿ (!patch_format)
 		patch_format = detect_patch_format(paths);
 
-	if (!patch_format) {
+	ಯದಿ (!patch_format) {
 		fprintf_ln(stderr, _("Patch format detection failed."));
-		die(NULL);
+		die(ರಿಕ್ತ);
 	}
 
-	if (mkdir(state->dir, 0777) < 0 && errno != EEXIST)
+	ಯದಿ (mkdir(state->dir, 0777) < 0 && errno != EEXIST)
 		die_errno(_("failed to create directory '%s'"), state->dir);
-	refs_delete_ref(get_main_ref_store(the_repository), NULL,
-			"REBASE_HEAD", NULL, REF_NO_DEREF);
+	refs_delete_ref(get_main_ref_store(the_repository), ರಿಕ್ತ,
+			"REBASE_HEAD", ರಿಕ್ತ, REF_NO_DEREF);
 
-	if (split_mail(state, patch_format, paths, keep_cr) < 0) {
+	ಯದಿ (split_mail(state, patch_format, paths, keep_cr) < 0) {
 		am_destroy(state);
 		die(_("Failed to split patches."));
 	}
 
-	if (state->rebasing)
+	ಯದಿ (state->rebasing)
 		state->threeway = 1;
 
 	write_state_bool(state, "threeway", state->threeway);
@@ -1023,56 +1023,56 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
 	write_state_bool(state, "sign", state->signoff);
 	write_state_bool(state, "utf8", state->utf8);
 
-	if (state->allow_rerere_autoupdate)
+	ಯದಿ (state->allow_rerere_autoupdate)
 		write_state_bool(state, "rerere-autoupdate",
 			 state->allow_rerere_autoupdate == RERERE_AUTOUPDATE);
 
-	switch (state->keep) {
-	case KEEP_FALSE:
+	ವಿಕಲ್ಪ (state->keep) {
+	ಪಕ್ಷ KEEP_FALSE:
 		str = "f";
-		break;
-	case KEEP_TRUE:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ KEEP_TRUE:
 		str = "t";
-		break;
-	case KEEP_NON_PATCH:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ KEEP_NON_PATCH:
 		str = "b";
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid value for state->keep");
 	}
 
 	write_state_text(state, "keep", str);
 	write_state_bool(state, "messageid", state->message_id);
 
-	switch (state->scissors) {
-	case SCISSORS_UNSET:
+	ವಿಕಲ್ಪ (state->scissors) {
+	ಪಕ್ಷ SCISSORS_UNSET:
 		str = "";
-		break;
-	case SCISSORS_FALSE:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ SCISSORS_FALSE:
 		str = "f";
-		break;
-	case SCISSORS_TRUE:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ SCISSORS_TRUE:
 		str = "t";
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid value for state->scissors");
 	}
 	write_state_text(state, "scissors", str);
 
-	switch (state->quoted_cr) {
-	case quoted_cr_unset:
+	ವಿಕಲ್ಪ (state->quoted_cr) {
+	ಪಕ್ಷ quoted_cr_unset:
 		str = "";
-		break;
-	case quoted_cr_nowarn:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ quoted_cr_nowarn:
 		str = "nowarn";
-		break;
-	case quoted_cr_warn:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ quoted_cr_warn:
 		str = "warn";
-		break;
-	case quoted_cr_strip:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ quoted_cr_strip:
 		str = "strip";
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid value for state->quoted_cr");
 	}
 	write_state_text(state, "quoted-cr", str);
@@ -1080,23 +1080,23 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
 	sq_quote_argv(&sb, state->git_apply_opts.v);
 	write_state_text(state, "apply-opt", sb.buf);
 
-	if (state->rebasing)
+	ಯದಿ (state->rebasing)
 		write_state_text(state, "rebasing", "");
-	else
+	ಅನ್ಯಥಾ
 		write_state_text(state, "applying", "");
 
-	if (!repo_get_oid(the_repository, "HEAD", &curr_head)) {
+	ಯದಿ (!repo_get_oid(the_repository, "HEAD", &curr_head)) {
 		write_state_text(state, "abort-safety", oid_to_hex(&curr_head));
-		if (!state->rebasing)
+		ಯದಿ (!state->rebasing)
 			refs_update_ref(get_main_ref_store(the_repository),
-					"am", "ORIG_HEAD", &curr_head, NULL,
+					"am", "ORIG_HEAD", &curr_head, ರಿಕ್ತ,
 					0,
 					UPDATE_REFS_DIE_ON_ERR);
-	} else {
+	} ಅನ್ಯಥಾ {
 		write_state_text(state, "abort-safety", "");
-		if (!state->rebasing)
+		ಯದಿ (!state->rebasing)
 			refs_delete_ref(get_main_ref_store(the_repository),
-					NULL, "ORIG_HEAD", NULL, 0);
+					ರಿಕ್ತ, "ORIG_HEAD", ರಿಕ್ತ, 0);
 	}
 
 	/*
@@ -1104,8 +1104,8 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
 	 * session is in progress, they should be written last.
 	 */
 
-	write_state_count(state, "next", state->cur);
-	write_state_count(state, "last", state->last);
+	write_state_ಎಣಿಕೆ(state, "next", state->cur);
+	write_state_ಎಣಿಕೆ(state, "last", state->last);
 
 	strbuf_release(&sb);
 }
@@ -1114,64 +1114,64 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
  * Increments the patch pointer, and cleans am_state for the application of the
  * next patch.
  */
-static void am_next(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_next(ಸಂರಚನಾ am_state *state)
 {
-	struct object_id head;
+	ಸಂರಚನಾ object_id head;
 
 	FREE_AND_NULL(state->author_name);
 	FREE_AND_NULL(state->author_email);
 	FREE_AND_NULL(state->author_date);
-	FREE_AND_NULL(state->msg);
-	state->msg_len = 0;
+	FREE_AND_NULL(state->ಸಂದೇಶ);
+	state->ಸಂದೇಶ_len = 0;
 
 	unlink(am_path(state, "author-script"));
 	unlink(am_path(state, "final-commit"));
 
 	oidclr(&state->orig_commit, the_repository->hash_algo);
 	unlink(am_path(state, "original-commit"));
-	refs_delete_ref(get_main_ref_store(the_repository), NULL,
-			"REBASE_HEAD", NULL, REF_NO_DEREF);
+	refs_delete_ref(get_main_ref_store(the_repository), ರಿಕ್ತ,
+			"REBASE_HEAD", ರಿಕ್ತ, REF_NO_DEREF);
 
-	if (!repo_get_oid(the_repository, "HEAD", &head))
+	ಯದಿ (!repo_get_oid(the_repository, "HEAD", &head))
 		write_state_text(state, "abort-safety", oid_to_hex(&head));
-	else
+	ಅನ್ಯಥಾ
 		write_state_text(state, "abort-safety", "");
 
 	state->cur++;
-	write_state_count(state, "next", state->cur);
+	write_state_ಎಣಿಕೆ(state, "next", state->cur);
 }
 
 /**
  * Returns the filename of the current patch email.
  */
-static const char *msgnum(const struct am_state *state)
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ *msgnum(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	static struct strbuf sb = STRBUF_INIT;
+	ಸ್ಥಿರ ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%0*d", state->prec, state->cur);
 
-	return sb.buf;
+	ಪ್ರತ್ಯಾಗಮ sb.buf;
 }
 
 /**
  * Dies with a user-friendly message on how to proceed after resolving the
  * problem. This message can be overridden with state->resolvemsg.
  */
-static void NORETURN die_user_resolve(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ NORETURN die_user_resolve(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	if (state->resolvemsg) {
+	ಯದಿ (state->resolvemsg) {
 		advise_if_enabled(ADVICE_MERGE_CONFLICT, "%s", state->resolvemsg);
-	} else {
-		const char *cmdline = state->interactive ? "git am -i" : "git am";
-		struct strbuf sb = STRBUF_INIT;
+	} ಅನ್ಯಥಾ {
+		ಧ್ರುವ ವರ್ಣ *cmdline = state->interactive ? "git am -i" : "git am";
+		ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
 		strbuf_addf(&sb, _("When you have resolved this problem, run \"%s --continue\".\n"), cmdline);
 		strbuf_addf(&sb, _("If you prefer to skip this patch, run \"%s --skip\" instead.\n"), cmdline);
 
-		if (advice_enabled(ADVICE_AM_WORK_DIR) &&
+		ಯದಿ (advice_enabled(ADVICE_AM_WORK_DIR) &&
 		    is_empty_or_missing_file(am_path(state, "patch")) &&
-		    !repo_index_has_changes(the_repository, NULL, NULL))
+		    !repo_index_has_changes(the_repository, ರಿಕ್ತ, ರಿಕ್ತ))
 			strbuf_addf(&sb, _("To record the empty patch as an empty commit, run \"%s --allow-empty\".\n"), cmdline);
 
 		strbuf_addf(&sb, _("To restore the original branch and stop patching, run \"%s --abort\"."), cmdline);
@@ -1180,19 +1180,19 @@ static void NORETURN die_user_resolve(const struct am_state *state)
 		strbuf_release(&sb);
 	}
 
-	die(NULL);
+	die(ರಿಕ್ತ);
 }
 
 /**
  * Appends signoff to the "msg" field of the am_state.
  */
-static void am_append_signoff(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_append_signoff(ಸಂರಚನಾ am_state *state)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
-	strbuf_attach(&sb, state->msg, state->msg_len, state->msg_len + 1);
+	strbuf_attach(&sb, state->ಸಂದೇಶ, state->ಸಂದೇಶ_len, state->ಸಂದೇಶ_len + 1);
 	append_signoff(&sb, 0, 0);
-	state->msg = strbuf_detach(&sb, &state->msg_len);
+	state->ಸಂದೇಶ = strbuf_detach(&sb, &state->ಸಂದೇಶ_len);
 }
 
 /**
@@ -1204,218 +1204,218 @@ static void am_append_signoff(struct am_state *state)
  *
  * Returns 1 if the patch should be skipped, 0 otherwise.
  */
-static int parse_mail(struct am_state *state, const char *mail)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_mail(ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ *mail)
 {
 	FILE *fp;
-	struct strbuf sb = STRBUF_INIT;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf author_name = STRBUF_INIT;
-	struct strbuf author_date = STRBUF_INIT;
-	struct strbuf author_email = STRBUF_INIT;
-	int ret = 0;
-	struct mailinfo mi;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf ಸಂದೇಶ = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf author_name = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf author_date = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf author_email = STRBUF_INIT;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
+	ಸಂರಚನಾ mailinfo mi;
 
 	setup_mailinfo(the_repository, &mi);
 
-	if (state->utf8)
+	ಯದಿ (state->utf8)
 		mi.metainfo_charset = get_commit_output_encoding();
-	else
-		mi.metainfo_charset = NULL;
+	ಅನ್ಯಥಾ
+		mi.metainfo_charset = ರಿಕ್ತ;
 
-	switch (state->keep) {
-	case KEEP_FALSE:
-		break;
-	case KEEP_TRUE:
+	ವಿಕಲ್ಪ (state->keep) {
+	ಪಕ್ಷ KEEP_FALSE:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ KEEP_TRUE:
 		mi.keep_subject = 1;
-		break;
-	case KEEP_NON_PATCH:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ KEEP_NON_PATCH:
 		mi.keep_non_patch_brackets_in_subject = 1;
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid value for state->keep");
 	}
 
-	if (state->message_id)
+	ಯದಿ (state->message_id)
 		mi.add_message_id = 1;
 
-	switch (state->scissors) {
-	case SCISSORS_UNSET:
-		break;
-	case SCISSORS_FALSE:
+	ವಿಕಲ್ಪ (state->scissors) {
+	ಪಕ್ಷ SCISSORS_UNSET:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ SCISSORS_FALSE:
 		mi.use_scissors = 0;
-		break;
-	case SCISSORS_TRUE:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ SCISSORS_TRUE:
 		mi.use_scissors = 1;
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid value for state->scissors");
 	}
 
-	switch (state->quoted_cr) {
-	case quoted_cr_unset:
-		break;
-	case quoted_cr_nowarn:
-	case quoted_cr_warn:
-	case quoted_cr_strip:
+	ವಿಕಲ್ಪ (state->quoted_cr) {
+	ಪಕ್ಷ quoted_cr_unset:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ quoted_cr_nowarn:
+	ಪಕ್ಷ quoted_cr_warn:
+	ಪಕ್ಷ quoted_cr_strip:
 		mi.quoted_cr = state->quoted_cr;
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid value for state->quoted_cr");
 	}
 
-	mi.input = xfopen(mail, "r");
+	mi.ಒಳಹರಿವು = xfopen(mail, "r");
 	mi.output = xfopen(am_path(state, "info"), "w");
-	if (mailinfo(&mi, am_path(state, "msg"), am_path(state, "patch")))
+	ಯದಿ (mailinfo(&mi, am_path(state, "msg"), am_path(state, "patch")))
 		die("could not parse patch");
 
-	fclose(mi.input);
+	fclose(mi.ಒಳಹರಿವು);
 	fclose(mi.output);
 
-	if (mi.format_flowed)
+	ಯದಿ (mi.format_flowed)
 		warning(_("Patch sent with format=flowed; "
 			  "space at the end of lines might be lost."));
 
 	/* Extract message and author information */
 	fp = xfopen(am_path(state, "info"), "r");
-	while (!strbuf_getline_lf(&sb, fp)) {
-		const char *x;
+	ಯಾವತ್ (!strbuf_getline_lf(&sb, fp)) {
+		ಧ್ರುವ ವರ್ಣ *x;
 
-		if (skip_prefix(sb.buf, "Subject: ", &x)) {
-			if (msg.len)
-				strbuf_addch(&msg, '\n');
-			strbuf_addstr(&msg, x);
-		} else if (skip_prefix(sb.buf, "Author: ", &x))
+		ಯದಿ (skip_prefix(sb.buf, "Subject: ", &x)) {
+			ಯದಿ (ಸಂದೇಶ.len)
+				strbuf_addch(&ಸಂದೇಶ, '\n');
+			strbuf_addstr(&ಸಂದೇಶ, x);
+		} ಅನ್ಯಥಾ ಯದಿ (skip_prefix(sb.buf, "Author: ", &x))
 			strbuf_addstr(&author_name, x);
-		else if (skip_prefix(sb.buf, "Email: ", &x))
+		ಅನ್ಯಥಾ ಯದಿ (skip_prefix(sb.buf, "Email: ", &x))
 			strbuf_addstr(&author_email, x);
-		else if (skip_prefix(sb.buf, "Date: ", &x))
+		ಅನ್ಯಥಾ ಯದಿ (skip_prefix(sb.buf, "Date: ", &x))
 			strbuf_addstr(&author_date, x);
 	}
 	fclose(fp);
 
 	/* Skip pine's internal folder data */
-	if (!strcmp(author_name.buf, "Mail System Internal Data")) {
+	ಯದಿ (!strcmp(author_name.buf, "Mail System Internal Data")) {
 		ret = 1;
-		goto finish;
+		ಗಚ್ಛ finish;
 	}
 
-	strbuf_addstr(&msg, "\n\n");
-	strbuf_addbuf(&msg, &mi.log_message);
-	strbuf_stripspace(&msg, NULL);
+	strbuf_addstr(&ಸಂದೇಶ, "\n\n");
+	strbuf_addbuf(&ಸಂದೇಶ, &mi.log_message);
+	strbuf_stripspace(&ಸಂದೇಶ, ರಿಕ್ತ);
 
-	assert(!state->author_name);
-	state->author_name = strbuf_detach(&author_name, NULL);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_name);
+	state->author_name = strbuf_detach(&author_name, ರಿಕ್ತ);
 
-	assert(!state->author_email);
-	state->author_email = strbuf_detach(&author_email, NULL);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_email);
+	state->author_email = strbuf_detach(&author_email, ರಿಕ್ತ);
 
-	assert(!state->author_date);
-	state->author_date = strbuf_detach(&author_date, NULL);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_date);
+	state->author_date = strbuf_detach(&author_date, ರಿಕ್ತ);
 
-	assert(!state->msg);
-	state->msg = strbuf_detach(&msg, &state->msg_len);
+	ಪ್ರತಿಜ್ಞಾ(!state->ಸಂದೇಶ);
+	state->ಸಂದೇಶ = strbuf_detach(&ಸಂದೇಶ, &state->ಸಂದೇಶ_len);
 
 finish:
-	strbuf_release(&msg);
+	strbuf_release(&ಸಂದೇಶ);
 	strbuf_release(&author_date);
 	strbuf_release(&author_email);
 	strbuf_release(&author_name);
 	strbuf_release(&sb);
 	clear_mailinfo(&mi);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
  * Sets commit_id to the commit hash where the mail was generated from.
  * Returns 0 on success, -1 on failure.
  */
-static int get_mail_commit_oid(struct object_id *commit_id, const char *mail)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ get_mail_commit_oid(ಸಂರಚನಾ object_id *commit_id, ಧ್ರುವ ವರ್ಣ *mail)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 	FILE *fp = xfopen(mail, "r");
-	const char *x;
-	int ret = 0;
+	ಧ್ರುವ ವರ್ಣ *x;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
 
-	if (strbuf_getline_lf(&sb, fp) ||
+	ಯದಿ (strbuf_getline_lf(&sb, fp) ||
 	    !skip_prefix(sb.buf, "From ", &x) ||
 	    get_oid_hex(x, commit_id) < 0)
 		ret = -1;
 
 	strbuf_release(&sb);
 	fclose(fp);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }
 
 /**
  * Sets state->msg, state->author_name, state->author_email, state->author_date
  * to the commit's respective info.
  */
-static void get_commit_info(struct am_state *state, struct commit *commit)
+ಸ್ಥಿರ ಶೂನ್ಯ get_commit_info(ಸಂರಚನಾ am_state *state, ಸಂರಚನಾ commit *commit)
 {
-	const char *buffer, *ident_line, *msg;
+	ಧ್ರುವ ವರ್ಣ *buffer, *ident_ಸಾಲು, *ಸಂದೇಶ;
 	size_t ident_len;
-	struct ident_split id;
+	ಸಂರಚನಾ ident_split id;
 
-	buffer = repo_logmsg_reencode(the_repository, commit, NULL,
+	buffer = repo_logmsg_reencode(the_repository, commit, ರಿಕ್ತ,
 				      get_commit_output_encoding());
 
-	ident_line = find_commit_header(buffer, "author", &ident_len);
-	if (!ident_line)
+	ident_ಸಾಲು = find_commit_header(buffer, "author", &ident_len);
+	ಯದಿ (!ident_ಸಾಲು)
 		die(_("missing author line in commit %s"),
 		      oid_to_hex(&commit->object.oid));
-	if (split_ident_line(&id, ident_line, ident_len) < 0)
-		die(_("invalid ident line: %.*s"), (int)ident_len, ident_line);
+	ಯದಿ (split_ident_ಸಾಲು(&id, ident_ಸಾಲು, ident_len) < 0)
+		die(_("invalid ident line: %.*s"), (ಪೂರ್ಣಾಙ್ಕ)ident_len, ident_ಸಾಲು);
 
-	assert(!state->author_name);
-	if (id.name_begin)
+	ಪ್ರತಿಜ್ಞಾ(!state->author_name);
+	ಯದಿ (id.name_begin)
 		state->author_name =
 			xmemdupz(id.name_begin, id.name_end - id.name_begin);
-	else
+	ಅನ್ಯಥಾ
 		state->author_name = xstrdup("");
 
-	assert(!state->author_email);
-	if (id.mail_begin)
+	ಪ್ರತಿಜ್ಞಾ(!state->author_email);
+	ಯದಿ (id.mail_begin)
 		state->author_email =
 			xmemdupz(id.mail_begin, id.mail_end - id.mail_begin);
-	else
+	ಅನ್ಯಥಾ
 		state->author_email = xstrdup("");
 
-	assert(!state->author_date);
+	ಪ್ರತಿಜ್ಞಾ(!state->author_date);
 	state->author_date = xstrdup(show_ident_date(&id, DATE_MODE(NORMAL)));
 
-	assert(!state->msg);
-	msg = strstr(buffer, "\n\n");
-	if (!msg)
+	ಪ್ರತಿಜ್ಞಾ(!state->ಸಂದೇಶ);
+	ಸಂದೇಶ = strstr(buffer, "\n\n");
+	ಯದಿ (!ಸಂದೇಶ)
 		die(_("unable to parse commit %s"), oid_to_hex(&commit->object.oid));
-	state->msg = xstrdup(msg + 2);
-	state->msg_len = strlen(state->msg);
+	state->ಸಂದೇಶ = xstrdup(ಸಂದೇಶ + 2);
+	state->ಸಂದೇಶ_len = strlen(state->ಸಂದೇಶ);
 	repo_unuse_commit_buffer(the_repository, commit, buffer);
 }
 
 /**
  * Writes `commit` as a patch to the state directory's "patch" file.
  */
-static void write_commit_patch(const struct am_state *state, struct commit *commit)
+ಸ್ಥಿರ ಶೂನ್ಯ write_commit_patch(ಧ್ರುವ ಸಂರಚನಾ am_state *state, ಸಂರಚನಾ commit *commit)
 {
-	struct rev_info rev_info;
+	ಸಂರಚನಾ rev_info rev_info;
 	FILE *fp;
 
 	fp = xfopen(am_path(state, "patch"), "w");
-	repo_init_revisions(the_repository, &rev_info, NULL);
+	repo_init_revisions(the_repository, &rev_info, ರಿಕ್ತ);
 	rev_info.diff = 1;
 	rev_info.abbrev = 0;
 	rev_info.disable_stdin = 1;
-	rev_info.show_root_diff = 1;
+	rev_info.show_ಬೇರು_diff = 1;
 	rev_info.diffopt.output_format = DIFF_FORMAT_PATCH;
 	rev_info.no_commit_id = 1;
-	rev_info.diffopt.flags.binary = 1;
+	rev_info.diffopt.flags.ದ್ವಿಮಾನ = 1;
 	rev_info.diffopt.flags.full_index = 1;
 	rev_info.diffopt.use_color = GIT_COLOR_NEVER;
 	rev_info.diffopt.file = fp;
 	rev_info.diffopt.close_file = 1;
 	add_pending_object(&rev_info, &commit->object, "");
 	diff_setup_done(&rev_info.diffopt);
-	log_tree_commit(&rev_info, commit);
+	log_ವೃಕ್ಷ_commit(&rev_info, commit);
 	release_revisions(&rev_info);
 }
 
@@ -1423,22 +1423,22 @@ static void write_commit_patch(const struct am_state *state, struct commit *comm
  * Writes the diff of the index against HEAD as a patch to the state
  * directory's "patch" file.
  */
-static void write_index_patch(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ write_index_patch(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct tree *tree;
-	struct object_id head;
-	struct rev_info rev_info;
+	ಸಂರಚನಾ ವೃಕ್ಷ *ವೃಕ್ಷ;
+	ಸಂರಚನಾ object_id head;
+	ಸಂರಚನಾ rev_info rev_info;
 	FILE *fp;
 
-	if (!repo_get_oid(the_repository, "HEAD", &head)) {
-		struct commit *commit = lookup_commit_or_die(&head, "HEAD");
-		tree = repo_get_commit_tree(the_repository, commit);
-	} else
-		tree = lookup_tree(the_repository,
-				   the_repository->hash_algo->empty_tree);
+	ಯದಿ (!repo_get_oid(the_repository, "HEAD", &head)) {
+		ಸಂರಚನಾ commit *commit = lookup_commit_or_die(&head, "HEAD");
+		ವೃಕ್ಷ = repo_get_commit_ವೃಕ್ಷ(the_repository, commit);
+	} ಅನ್ಯಥಾ
+		ವೃಕ್ಷ = lookup_ವೃಕ್ಷ(the_repository,
+				   the_repository->hash_algo->empty_ವೃಕ್ಷ);
 
 	fp = xfopen(am_path(state, "patch"), "w");
-	repo_init_revisions(the_repository, &rev_info, NULL);
+	repo_init_revisions(the_repository, &rev_info, ರಿಕ್ತ);
 	rev_info.diff = 1;
 	rev_info.disable_stdin = 1;
 	rev_info.no_commit_id = 1;
@@ -1446,7 +1446,7 @@ static void write_index_patch(const struct am_state *state)
 	rev_info.diffopt.use_color = GIT_COLOR_NEVER;
 	rev_info.diffopt.file = fp;
 	rev_info.diffopt.close_file = 1;
-	add_pending_object(&rev_info, &tree->object, "");
+	add_pending_object(&rev_info, &ವೃಕ್ಷ->object, "");
 	diff_setup_done(&rev_info.diffopt);
 	run_diff_index(&rev_info, DIFF_INDEX_CACHED);
 	release_revisions(&rev_info);
@@ -1461,12 +1461,12 @@ static void write_index_patch(const struct am_state *state)
  *
  * Will always return 0 as the patch should never be skipped.
  */
-static int parse_mail_rebase(struct am_state *state, const char *mail)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_mail_rebase(ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ *mail)
 {
-	struct commit *commit;
-	struct object_id commit_oid;
+	ಸಂರಚನಾ commit *commit;
+	ಸಂರಚನಾ object_id commit_oid;
 
-	if (get_mail_commit_oid(&commit_oid, mail) < 0)
+	ಯದಿ (get_mail_commit_oid(&commit_oid, mail) < 0)
 		die(_("could not parse %s"), mail);
 
 	commit = lookup_commit_or_die(&commit_oid, mail);
@@ -1479,29 +1479,29 @@ static int parse_mail_rebase(struct am_state *state, const char *mail)
 	write_state_text(state, "original-commit", oid_to_hex(&commit_oid));
 	refs_update_ref(get_main_ref_store(the_repository), "am",
 			"REBASE_HEAD", &commit_oid,
-			NULL, REF_NO_DEREF, UPDATE_REFS_DIE_ON_ERR);
+			ರಿಕ್ತ, REF_NO_DEREF, UPDATE_REFS_DIE_ON_ERR);
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Applies current patch with git-apply. Returns 0 on success, -1 otherwise. If
  * `index_file` is not NULL, the patch will be applied to that index.
  */
-static int run_apply(const struct am_state *state, const char *index_file)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ run_apply(ಧ್ರುವ ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ *index_file)
 {
-	struct strvec apply_paths = STRVEC_INIT;
-	struct strvec apply_opts = STRVEC_INIT;
-	struct apply_state apply_state;
-	int res, opts_left;
-	int force_apply = 0;
-	int options = 0;
-	const char **apply_argv;
+	ಸಂರಚನಾ strvec apply_paths = STRVEC_INIT;
+	ಸಂರಚನಾ strvec apply_opts = STRVEC_INIT;
+	ಸಂರಚನಾ apply_state apply_state;
+	ಪೂರ್ಣಾಙ್ಕ res, opts_ಎಡ;
+	ಪೂರ್ಣಾಙ್ಕ force_apply = 0;
+	ಪೂರ್ಣಾಙ್ಕ options = 0;
+	ಧ್ರುವ ವರ್ಣ **apply_argv;
 
-	if (init_apply_state(&apply_state, the_repository, NULL))
+	ಯದಿ (init_apply_state(&apply_state, the_repository, ರಿಕ್ತ))
 		BUG("init_apply_state() failed");
 
-	strvec_push(&apply_opts, "apply");
+	strvec_ತಳ್ಳು(&apply_opts, "apply");
 	strvec_pushv(&apply_opts, state->git_apply_opts.v);
 
 	/*
@@ -1511,118 +1511,118 @@ static int run_apply(const struct am_state *state, const char *index_file)
 	 */
 	DUP_ARRAY(apply_argv, apply_opts.v, apply_opts.nr);
 
-	opts_left = apply_parse_options(apply_opts.nr, apply_argv,
+	opts_ಎಡ = apply_parse_options(apply_opts.nr, apply_argv,
 					&apply_state, &force_apply, &options,
-					NULL);
+					ರಿಕ್ತ);
 
-	if (opts_left != 0)
+	ಯದಿ (opts_ಎಡ != 0)
 		die("unknown option passed through to git apply");
 
-	if (index_file) {
+	ಯದಿ (index_file) {
 		apply_state.index_file = index_file;
 		apply_state.cached = 1;
-	} else
+	} ಅನ್ಯಥಾ
 		apply_state.check_index = 1;
 
 	/*
 	 * If we are allowed to fall back on 3-way merge, don't give false
 	 * errors during the initial attempt.
 	 */
-	if (state->threeway && !index_file)
+	ಯದಿ (state->threeway && !index_file)
 		apply_state.apply_verbosity = verbosity_silent;
 
-	if (check_apply_state(&apply_state, force_apply))
+	ಯದಿ (check_apply_state(&apply_state, force_apply))
 		BUG("check_apply_state() failed");
 
-	strvec_push(&apply_paths, am_path(state, "patch"));
+	strvec_ತಳ್ಳು(&apply_paths, am_path(state, "patch"));
 
 	res = apply_all_patches(&apply_state, apply_paths.nr, apply_paths.v, options);
 
 	strvec_clear(&apply_paths);
 	strvec_clear(&apply_opts);
 	clear_apply_state(&apply_state);
-	free(apply_argv);
+	ಮುಕ್ತ(apply_argv);
 
-	if (res)
-		return res;
+	ಯದಿ (res)
+		ಪ್ರತ್ಯಾಗಮ res;
 
-	if (index_file) {
+	ಯದಿ (index_file) {
 		/* Reload index as apply_all_patches() will have modified it. */
 		discard_index(the_repository->index);
 		read_index_from(the_repository->index, index_file,
 				repo_get_git_dir(the_repository));
 	}
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Builds an index that contains just the blobs needed for a 3way merge.
  */
-static int build_fake_ancestor(const struct am_state *state, const char *index_file)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ build_fake_ancestor(ಧ್ರುವ ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ *index_file)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ಸಂರಚನಾ child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "apply");
+	strvec_ತಳ್ಳು(&cp.args, "apply");
 	strvec_pushv(&cp.args, state->git_apply_opts.v);
 	strvec_pushf(&cp.args, "--build-fake-ancestor=%s", index_file);
-	strvec_push(&cp.args, am_path(state, "patch"));
+	strvec_ತಳ್ಳು(&cp.args, am_path(state, "patch"));
 
-	if (run_command(&cp))
-		return -1;
+	ಯದಿ (run_command(&cp))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Attempt a threeway merge, using index_path as the temporary index.
  */
-static int fall_back_threeway(const struct am_state *state, const char *index_path)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ fall_back_threeway(ಧ್ರುವ ಸಂರಚನಾ am_state *state, ಧ್ರುವ ವರ್ಣ *index_path)
 {
-	struct object_id their_tree, our_tree;
-	struct object_id bases[1] = { 0 };
-	struct merge_options o;
-	struct commit *result;
-	char *their_tree_name;
+	ಸಂರಚನಾ object_id their_ವೃಕ್ಷ, our_ವೃಕ್ಷ;
+	ಸಂರಚನಾ object_id bases[1] = { 0 };
+	ಸಂರಚನಾ merge_options o;
+	ಸಂರಚನಾ commit *result;
+	ವರ್ಣ *their_ವೃಕ್ಷ_name;
 
-	if (repo_get_oid(the_repository, "HEAD", &our_tree) < 0)
-		oidcpy(&our_tree, the_hash_algo->empty_tree);
+	ಯದಿ (repo_get_oid(the_repository, "HEAD", &our_ವೃಕ್ಷ) < 0)
+		oidcpy(&our_ವೃಕ್ಷ, the_hash_algo->empty_ವೃಕ್ಷ);
 
-	if (build_fake_ancestor(state, index_path))
-		return error("could not build fake ancestor");
+	ಯದಿ (build_fake_ancestor(state, index_path))
+		ಪ್ರತ್ಯಾಗಮ error("could not build fake ancestor");
 
 	discard_index(the_repository->index);
 	read_index_from(the_repository->index, index_path, repo_get_git_dir(the_repository));
 
-	if (write_index_as_tree(&bases[0], the_repository->index, index_path, 0, NULL))
-		return error(_("Repository lacks necessary blobs to fall back on 3-way merge."));
+	ಯದಿ (write_index_as_ವೃಕ್ಷ(&bases[0], the_repository->index, index_path, 0, ರಿಕ್ತ))
+		ಪ್ರತ್ಯಾಗಮ error(_("Repository lacks necessary blobs to fall back on 3-way merge."));
 
 	say(state, stdout, _("Using index info to reconstruct a base tree..."));
 
-	if (!state->quiet) {
+	ಯದಿ (!state->quiet) {
 		/*
 		 * List paths that needed 3-way fallback, so that the user can
 		 * review them with extra care to spot mismerges.
 		 */
-		struct rev_info rev_info;
+		ಸಂರಚನಾ rev_info rev_info;
 
-		repo_init_revisions(the_repository, &rev_info, NULL);
+		repo_init_revisions(the_repository, &rev_info, ರಿಕ್ತ);
 		rev_info.diffopt.output_format = DIFF_FORMAT_NAME_STATUS;
 		rev_info.diffopt.filter |= diff_filter_bit('A');
 		rev_info.diffopt.filter |= diff_filter_bit('M');
-		add_pending_oid(&rev_info, "HEAD", &our_tree, 0);
+		add_pending_oid(&rev_info, "HEAD", &our_ವೃಕ್ಷ, 0);
 		diff_setup_done(&rev_info.diffopt);
 		run_diff_index(&rev_info, DIFF_INDEX_CACHED);
 		release_revisions(&rev_info);
 	}
 
-	if (run_apply(state, index_path))
-		return error(_("Did you hand edit your patch?\n"
+	ಯದಿ (run_apply(state, index_path))
+		ಪ್ರತ್ಯಾಗಮ error(_("Did you hand edit your patch?\n"
 				"It does not apply to blobs recorded in its index."));
 
-	if (write_index_as_tree(&their_tree, the_repository->index, index_path, 0, NULL))
-		return error("could not write tree");
+	ಯದಿ (write_index_as_ವೃಕ್ಷ(&their_ವೃಕ್ಷ, the_repository->index, index_path, 0, ರಿಕ್ತ))
+		ಪ್ರತ್ಯಾಗಮ error("could not write tree");
 
 	say(state, stdout, _("Falling back to patching base and 3-way merge..."));
 
@@ -1640,22 +1640,22 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 	init_ui_merge_options(&o, the_repository);
 
 	o.branch1 = "HEAD";
-	their_tree_name = xstrfmt("%.*s", linelen(state->msg), state->msg);
-	o.branch2 = their_tree_name;
+	their_ವೃಕ್ಷ_name = xstrfmt("%.*s", linelen(state->ಸಂದೇಶ), state->ಸಂದೇಶ);
+	o.branch2 = their_ವೃಕ್ಷ_name;
 	o.ancestor = "constructed fake ancestor";
 	o.detect_directory_renames = MERGE_DIRECTORY_RENAMES_NONE;
 
-	if (state->quiet)
+	ಯದಿ (state->quiet)
 		o.verbosity = 0;
 
-	if (merge_ort_generic(&o, &our_tree, &their_tree, 1, bases, &result)) {
+	ಯದಿ (merge_ort_generic(&o, &our_ವೃಕ್ಷ, &their_ವೃಕ್ಷ, 1, bases, &result)) {
 		repo_rerere(the_repository, state->allow_rerere_autoupdate);
-		free(their_tree_name);
-		return error(_("Failed to merge in the changes."));
+		ಮುಕ್ತ(their_ವೃಕ್ಷ_name);
+		ಪ್ರತ್ಯಾಗಮ error(_("Failed to merge in the changes."));
 	}
 
-	free(their_tree_name);
-	return 0;
+	ಮುಕ್ತ(their_ವೃಕ್ಷ_name);
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
@@ -1663,64 +1663,64 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
  * state->author_name, state->author_email and state->author_date as the author
  * information.
  */
-static void do_commit(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ do_commit(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct object_id tree, parent, commit;
-	const struct object_id *old_oid;
-	struct commit_list *parents = NULL;
-	const char *reflog_msg, *author, *committer = NULL;
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ object_id ವೃಕ್ಷ, parent, commit;
+	ಧ್ರುವ ಸಂರಚನಾ object_id *old_oid;
+	ಸಂರಚನಾ commit_list *parents = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *reflog_ಸಂದೇಶ, *author, *committer = ರಿಕ್ತ;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
-	if (!state->no_verify && run_hooks(the_repository, "pre-applypatch"))
+	ಯದಿ (!state->no_verify && run_hooks(the_repository, "pre-applypatch"))
 		exit(1);
 
-	if (write_index_as_tree(&tree, the_repository->index,
+	ಯದಿ (write_index_as_ವೃಕ್ಷ(&ವೃಕ್ಷ, the_repository->index,
 				repo_get_index_file(the_repository),
-				0, NULL))
+				0, ರಿಕ್ತ))
 		die(_("git write-tree failed to write a tree"));
 
-	if (!repo_get_oid_commit(the_repository, "HEAD", &parent)) {
+	ಯದಿ (!repo_get_oid_commit(the_repository, "HEAD", &parent)) {
 		old_oid = &parent;
-		commit_list_insert(lookup_commit(the_repository, &parent),
+		commit_list_ಸೇರಿಸು(lookup_commit(the_repository, &parent),
 				   &parents);
-	} else {
-		old_oid = NULL;
+	} ಅನ್ಯಥಾ {
+		old_oid = ರಿಕ್ತ;
 		say(state, stderr, _("applying to an empty history"));
 	}
 
 	author = fmt_ident(state->author_name, state->author_email,
 		WANT_AUTHOR_IDENT,
-			state->ignore_date ? NULL : state->author_date,
+			state->ignore_date ? ರಿಕ್ತ : state->author_date,
 			IDENT_STRICT);
 
-	if (state->committer_date_is_author_date)
+	ಯದಿ (state->committer_date_is_author_date)
 		committer = fmt_ident(getenv("GIT_COMMITTER_NAME"),
 				      getenv("GIT_COMMITTER_EMAIL"),
 				      WANT_COMMITTER_IDENT,
-				      state->ignore_date ? NULL
+				      state->ignore_date ? ರಿಕ್ತ
 							 : state->author_date,
 				      IDENT_STRICT);
 
-	if (commit_tree_extended(state->msg, state->msg_len, &tree, parents,
+	ಯದಿ (commit_ವೃಕ್ಷ_extended(state->ಸಂದೇಶ, state->ಸಂದೇಶ_len, &ವೃಕ್ಷ, parents,
 				 &commit, author, committer, state->sign_commit,
-				 NULL))
+				 ರಿಕ್ತ))
 		die(_("failed to write commit object"));
 
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!reflog_msg)
-		reflog_msg = "am";
+	reflog_ಸಂದೇಶ = getenv("GIT_REFLOG_ACTION");
+	ಯದಿ (!reflog_ಸಂದೇಶ)
+		reflog_ಸಂದೇಶ = "am";
 
-	strbuf_addf(&sb, "%s: %.*s", reflog_msg, linelen(state->msg),
-			state->msg);
+	strbuf_addf(&sb, "%s: %.*s", reflog_ಸಂದೇಶ, linelen(state->ಸಂದೇಶ),
+			state->ಸಂದೇಶ);
 
 	refs_update_ref(get_main_ref_store(the_repository), sb.buf, "HEAD",
 			&commit, old_oid, 0,
 			UPDATE_REFS_DIE_ON_ERR);
 
-	if (state->rebasing) {
+	ಯದಿ (state->rebasing) {
 		FILE *fp = xfopen(am_path(state, "rewritten"), "a");
 
-		assert(!is_null_oid(&state->orig_commit));
+		ಪ್ರತಿಜ್ಞಾ(!is_null_oid(&state->orig_commit));
 		fprintf(fp, "%s ", oid_to_hex(&state->orig_commit));
 		fprintf(fp, "%s\n", oid_to_hex(&commit));
 		fclose(fp);
@@ -1736,13 +1736,13 @@ static void do_commit(const struct am_state *state)
  * Validates the am_state for resuming -- the "msg" and authorship fields must
  * be filled up.
  */
-static void validate_resume_state(const struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ validate_resume_state(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	if (!state->msg)
+	ಯದಿ (!state->ಸಂದೇಶ)
 		die(_("cannot resume: %s does not exist."),
 			am_path(state, "final-commit"));
 
-	if (!state->author_name || !state->author_email || !state->author_date)
+	ಯದಿ (!state->author_name || !state->author_email || !state->author_date)
 		die(_("cannot resume: %s does not exist."),
 			am_path(state, "author-script"));
 }
@@ -1754,16 +1754,16 @@ static void validate_resume_state(const struct am_state *state)
  * Returns 0 if the user chooses to apply the patch, 1 if the user chooses to
  * skip it.
  */
-static int do_interactive(struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ do_interactive(ಸಂರಚನಾ am_state *state)
 {
-	assert(state->msg);
+	ಪ್ರತಿಜ್ಞಾ(state->ಸಂದೇಶ);
 
-	for (;;) {
-		char reply[64];
+	ಪ್ರತಿ (;;) {
+		ವರ್ಣ reply[64];
 
 		puts(_("Commit Body is:"));
 		puts("--------------------------");
-		printf("%s", state->msg);
+		printf("%s", state->ಸಂದೇಶ);
 		puts("--------------------------");
 
 		/*
@@ -1772,32 +1772,32 @@ static int do_interactive(struct am_state *state)
 		 * input at this point.
 		 */
 		printf(_("Apply? [y]es/[n]o/[e]dit/[v]iew patch/[a]ccept all: "));
-		if (!fgets(reply, sizeof(reply), stdin))
+		ಯದಿ (!fgets(reply, ಪರಿಮಾಣ(reply), stdin))
 			die("unable to read from stdin; aborting");
 
-		if (*reply == 'y' || *reply == 'Y') {
-			return 0;
-		} else if (*reply == 'a' || *reply == 'A') {
+		ಯದಿ (*reply == 'y' || *reply == 'Y') {
+			ಪ್ರತ್ಯಾಗಮ 0;
+		} ಅನ್ಯಥಾ ಯದಿ (*reply == 'a' || *reply == 'A') {
 			state->interactive = 0;
-			return 0;
-		} else if (*reply == 'n' || *reply == 'N') {
-			return 1;
-		} else if (*reply == 'e' || *reply == 'E') {
-			struct strbuf msg = STRBUF_INIT;
+			ಪ್ರತ್ಯಾಗಮ 0;
+		} ಅನ್ಯಥಾ ಯದಿ (*reply == 'n' || *reply == 'N') {
+			ಪ್ರತ್ಯಾಗಮ 1;
+		} ಅನ್ಯಥಾ ಯದಿ (*reply == 'e' || *reply == 'E') {
+			ಸಂರಚನಾ strbuf ಸಂದೇಶ = STRBUF_INIT;
 
-			if (!launch_editor(am_path(state, "final-commit"), &msg, NULL)) {
-				free(state->msg);
-				state->msg = strbuf_detach(&msg, &state->msg_len);
+			ಯದಿ (!launch_editor(am_path(state, "final-commit"), &ಸಂದೇಶ, ರಿಕ್ತ)) {
+				ಮುಕ್ತ(state->ಸಂದೇಶ);
+				state->ಸಂದೇಶ = strbuf_detach(&ಸಂದೇಶ, &state->ಸಂದೇಶ_len);
 			}
-			strbuf_release(&msg);
-		} else if (*reply == 'v' || *reply == 'V') {
-			const char *pager = git_pager(the_repository, 1);
-			struct child_process cp = CHILD_PROCESS_INIT;
+			strbuf_release(&ಸಂದೇಶ);
+		} ಅನ್ಯಥಾ ಯದಿ (*reply == 'v' || *reply == 'V') {
+			ಧ್ರುವ ವರ್ಣ *pager = git_pager(the_repository, 1);
+			ಸಂರಚನಾ child_process cp = CHILD_PROCESS_INIT;
 
-			if (!pager)
+			ಯದಿ (!pager)
 				pager = "cat";
 			prepare_pager_args(&cp, pager);
-			strvec_push(&cp.args, am_path(state, "patch"));
+			strvec_ತಳ್ಳು(&cp.args, am_path(state, "patch"));
 			run_command(&cp);
 		}
 	}
@@ -1810,86 +1810,86 @@ static int do_interactive(struct am_state *state)
  * well as the state directory's "patch" file is used as-is for applying the
  * patch and committing it.
  */
-static void am_run(struct am_state *state, int resume)
+ಸ್ಥಿರ ಶೂನ್ಯ am_run(ಸಂರಚನಾ am_state *state, ಪೂರ್ಣಾಙ್ಕ resume)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
 	unlink(am_path(state, "dirtyindex"));
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL) < 0)
+	ಯದಿ (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ) < 0)
 		die(_("unable to write index file"));
 
-	if (repo_index_has_changes(the_repository, NULL, &sb)) {
+	ಯದಿ (repo_index_has_changes(the_repository, ರಿಕ್ತ, &sb)) {
 		write_state_bool(state, "dirtyindex", 1);
 		die(_("Dirty index: cannot apply patches (dirty: %s)"), sb.buf);
 	}
 
 	strbuf_release(&sb);
 
-	while (state->cur <= state->last) {
-		const char *mail = am_path(state, msgnum(state));
-		int apply_status;
-		int to_keep;
+	ಯಾವತ್ (state->cur <= state->last) {
+		ಧ್ರುವ ವರ್ಣ *mail = am_path(state, msgnum(state));
+		ಪೂರ್ಣಾಙ್ಕ apply_status;
+		ಪೂರ್ಣಾಙ್ಕ to_keep;
 
 		reset_ident_date();
 
-		if (!file_exists(mail))
-			goto next;
+		ಯದಿ (!file_exists(mail))
+			ಗಚ್ಛ next;
 
-		if (resume) {
+		ಯದಿ (resume) {
 			validate_resume_state(state);
-		} else {
-			int skip;
+		} ಅನ್ಯಥಾ {
+			ಪೂರ್ಣಾಙ್ಕ skip;
 
-			if (state->rebasing)
+			ಯದಿ (state->rebasing)
 				skip = parse_mail_rebase(state, mail);
-			else
+			ಅನ್ಯಥಾ
 				skip = parse_mail(state, mail);
 
-			if (skip)
-				goto next; /* mail should be skipped */
+			ಯದಿ (skip)
+				ಗಚ್ಛ next; /* mail should be skipped */
 
-			if (state->signoff)
+			ಯದಿ (state->signoff)
 				am_append_signoff(state);
 
 			write_author_script(state);
-			write_commit_msg(state);
+			write_commit_ಸಂದೇಶ(state);
 		}
 
-		if (state->interactive && do_interactive(state))
-			goto next;
+		ಯದಿ (state->interactive && do_interactive(state))
+			ಗಚ್ಛ next;
 
 		to_keep = 0;
-		if (is_empty_or_missing_file(am_path(state, "patch"))) {
-			switch (state->empty_type) {
-			case DROP_EMPTY_COMMIT:
-				say(state, stdout, _("Skipping: %.*s"), linelen(state->msg), state->msg);
-				goto next;
-				break;
-			case KEEP_EMPTY_COMMIT:
+		ಯದಿ (is_empty_or_missing_file(am_path(state, "patch"))) {
+			ವಿಕಲ್ಪ (state->empty_type) {
+			ಪಕ್ಷ DROP_EMPTY_COMMIT:
+				say(state, stdout, _("Skipping: %.*s"), linelen(state->ಸಂದೇಶ), state->ಸಂದೇಶ);
+				ಗಚ್ಛ next;
+				ಭಙ್ಗ;
+			ಪಕ್ಷ KEEP_EMPTY_COMMIT:
 				to_keep = 1;
 				say(state, stdout, _("Creating an empty commit: %.*s"),
-					linelen(state->msg), state->msg);
-				break;
-			case STOP_ON_EMPTY_COMMIT:
+					linelen(state->ಸಂದೇಶ), state->ಸಂದೇಶ);
+				ಭಙ್ಗ;
+			ಪಕ್ಷ STOP_ON_EMPTY_COMMIT:
 				printf_ln(_("Patch is empty."));
 				die_user_resolve(state);
-				break;
+				ಭಙ್ಗ;
 			}
 		}
 
-		if (run_applypatch_msg_hook(state))
+		ಯದಿ (run_applypatch_ಸಂದೇಶ_hook(state))
 			exit(1);
-		if (to_keep)
-			goto commit;
+		ಯದಿ (to_keep)
+			ಗಚ್ಛ commit;
 
-		say(state, stdout, _("Applying: %.*s"), linelen(state->msg), state->msg);
+		say(state, stdout, _("Applying: %.*s"), linelen(state->ಸಂದೇಶ), state->ಸಂದೇಶ);
 
-		apply_status = run_apply(state, NULL);
+		apply_status = run_apply(state, ರಿಕ್ತ);
 
-		if (apply_status && state->threeway) {
-			struct strbuf sb = STRBUF_INIT;
+		ಯದಿ (apply_status && state->threeway) {
+			ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
 
 			strbuf_addstr(&sb, am_path(state, "patch-merge-index"));
 			apply_status = fall_back_threeway(state, sb.buf);
@@ -1899,18 +1899,18 @@ static void am_run(struct am_state *state, int resume)
 			 * Applying the patch to an earlier tree and merging
 			 * the result may have produced the same tree as ours.
 			 */
-			if (!apply_status &&
-			    !repo_index_has_changes(the_repository, NULL, NULL)) {
+			ಯದಿ (!apply_status &&
+			    !repo_index_has_changes(the_repository, ರಿಕ್ತ, ರಿಕ್ತ)) {
 				say(state, stdout, _("No changes -- Patch already applied."));
-				goto next;
+				ಗಚ್ಛ next;
 			}
 		}
 
-		if (apply_status) {
+		ಯದಿ (apply_status) {
 			printf_ln(_("Patch failed at %s %.*s"), msgnum(state),
-				linelen(state->msg), state->msg);
+				linelen(state->ಸಂದೇಶ), state->ಸಂದೇಶ);
 
-			if (advice_enabled(ADVICE_AM_WORK_DIR))
+			ಯದಿ (advice_enabled(ADVICE_AM_WORK_DIR))
 				advise(_("Use 'git am --show-current-patch=diff' to see the failed patch"));
 
 			die_user_resolve(state);
@@ -1922,13 +1922,13 @@ commit:
 next:
 		am_next(state);
 
-		if (resume)
+		ಯದಿ (resume)
 			am_load(state);
 		resume = 0;
 	}
 
-	if (!is_empty_or_missing_file(am_path(state, "rewritten"))) {
-		assert(state->rebasing);
+	ಯದಿ (!is_empty_or_missing_file(am_path(state, "rewritten"))) {
+		ಪ್ರತಿಜ್ಞಾ(state->rebasing);
 		copy_notes_for_rebase(state);
 		run_post_rewrite_hook(state);
 	}
@@ -1937,7 +1937,7 @@ next:
 	 * In rebasing mode, it's up to the caller to take care of
 	 * housekeeping.
 	 */
-	if (!state->rebasing) {
+	ಯದಿ (!state->rebasing) {
 		am_destroy(state);
 		run_auto_maintenance(the_repository, state->quiet);
 	}
@@ -1949,16 +1949,16 @@ next:
  * trust and commit what the user has in the index and working tree. If `allow_empty`
  * is true, commit as an empty commit when index has not changed and lacking a patch.
  */
-static void am_resolve(struct am_state *state, int allow_empty)
+ಸ್ಥಿರ ಶೂನ್ಯ am_resolve(ಸಂರಚನಾ am_state *state, ಪೂರ್ಣಾಙ್ಕ allow_empty)
 {
 	validate_resume_state(state);
 
-	say(state, stdout, _("Applying: %.*s"), linelen(state->msg), state->msg);
+	say(state, stdout, _("Applying: %.*s"), linelen(state->ಸಂದೇಶ), state->ಸಂದೇಶ);
 
-	if (!repo_index_has_changes(the_repository, NULL, NULL)) {
-		if (allow_empty && is_empty_or_missing_file(am_path(state, "patch"))) {
+	ಯದಿ (!repo_index_has_changes(the_repository, ರಿಕ್ತ, ರಿಕ್ತ)) {
+		ಯದಿ (allow_empty && is_empty_or_missing_file(am_path(state, "patch"))) {
 			printf_ln(_("No changes - recorded it as an empty commit."));
-		} else {
+		} ಅನ್ಯಥಾ {
 			printf_ln(_("No changes - did you forget to use 'git add'?\n"
 				    "If there is nothing left to stage, chances are that something else\n"
 				    "already introduced the same changes; you might want to skip this patch."));
@@ -1966,17 +1966,17 @@ static void am_resolve(struct am_state *state, int allow_empty)
 		}
 	}
 
-	if (unmerged_index(the_repository->index)) {
+	ಯದಿ (unmerged_index(the_repository->index)) {
 		printf_ln(_("You still have unmerged paths in your index.\n"
 			"You should 'git add' each file with resolved conflicts to mark them as such.\n"
 			"You might run `git rm` on a file to accept \"deleted by them\" for it."));
 		die_user_resolve(state);
 	}
 
-	if (state->interactive) {
+	ಯದಿ (state->interactive) {
 		write_index_patch(state);
-		if (do_interactive(state))
-			goto next;
+		ಯದಿ (do_interactive(state))
+			ಗಚ್ಛ next;
 	}
 
 	repo_rerere(the_repository, 0);
@@ -1994,20 +1994,20 @@ next:
  * true, any unmerged entries will be discarded. Returns 0 on success, -1 on
  * failure.
  */
-static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ fast_forward_to(ಸಂರಚನಾ ವೃಕ್ಷ *head, ಸಂರಚನಾ ವೃಕ್ಷ *remote, ಪೂರ್ಣಾಙ್ಕ reset)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	struct unpack_trees_options opts;
-	struct tree_desc t[2];
+	ಸಂರಚನಾ lock_file lock_file = LOCK_INIT;
+	ಸಂರಚನಾ unpack_trees_options opts;
+	ಸಂರಚನಾ ವೃಕ್ಷ_desc t[2];
 
-	if (repo_parse_tree(the_repository, head) || repo_parse_tree(the_repository, remote))
-		return -1;
+	ಯದಿ (repo_parse_ವೃಕ್ಷ(the_repository, head) || repo_parse_ವೃಕ್ಷ(the_repository, remote))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET, ರಿಕ್ತ, ರಿಕ್ತ, ರಿಕ್ತ);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, ಪರಿಮಾಣ(opts));
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
@@ -2016,102 +2016,102 @@ static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
 	opts.fn = twoway_merge;
-	init_tree_desc(&t[0], &head->object.oid, head->buffer, head->size);
-	init_tree_desc(&t[1], &remote->object.oid, remote->buffer, remote->size);
+	init_ವೃಕ್ಷ_desc(&t[0], &head->object.oid, head->buffer, head->size);
+	init_ವೃಕ್ಷ_desc(&t[1], &remote->object.oid, remote->buffer, remote->size);
 
-	if (unpack_trees(2, t, &opts)) {
+	ಯದಿ (unpack_trees(2, t, &opts)) {
 		rollback_lock_file(&lock_file);
-		return -1;
+		ಪ್ರತ್ಯಾಗಮ -1;
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	ಯದಿ (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Merges a tree into the index. The index's stat info will take precedence
  * over the merged tree's. Returns 0 on success, -1 on failure.
  */
-static int merge_tree(struct tree *tree)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ merge_ವೃಕ್ಷ(ಸಂರಚನಾ ವೃಕ್ಷ *ವೃಕ್ಷ)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	struct unpack_trees_options opts;
-	struct tree_desc t[1];
+	ಸಂರಚನಾ lock_file lock_file = LOCK_INIT;
+	ಸಂರಚನಾ unpack_trees_options opts;
+	ಸಂರಚನಾ ವೃಕ್ಷ_desc t[1];
 
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	ಯದಿ (repo_parse_ವೃಕ್ಷ(the_repository, ವೃಕ್ಷ))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, ಪರಿಮಾಣ(opts));
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
 	opts.merge = 1;
 	opts.fn = oneway_merge;
-	init_tree_desc(&t[0], &tree->object.oid, tree->buffer, tree->size);
+	init_ವೃಕ್ಷ_desc(&t[0], &ವೃಕ್ಷ->object.oid, ವೃಕ್ಷ->buffer, ವೃಕ್ಷ->size);
 
-	if (unpack_trees(1, t, &opts)) {
+	ಯದಿ (unpack_trees(1, t, &opts)) {
 		rollback_lock_file(&lock_file);
-		return -1;
+		ಪ್ರತ್ಯಾಗಮ -1;
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	ಯದಿ (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Clean the index without touching entries that are not modified between
  * `head` and `remote`.
  */
-static int clean_index(const struct object_id *head, const struct object_id *remote)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ clean_index(ಧ್ರುವ ಸಂರಚನಾ object_id *head, ಧ್ರುವ ಸಂರಚನಾ object_id *remote)
 {
-	struct tree *head_tree, *remote_tree, *index_tree;
-	struct object_id index;
+	ಸಂರಚನಾ ವೃಕ್ಷ *head_ವೃಕ್ಷ, *remote_ವೃಕ್ಷ, *index_ವೃಕ್ಷ;
+	ಸಂರಚನಾ object_id index;
 
-	head_tree = repo_parse_tree_indirect(the_repository, head);
-	if (!head_tree)
-		return error(_("Could not parse object '%s'."), oid_to_hex(head));
+	head_ವೃಕ್ಷ = repo_parse_ವೃಕ್ಷ_indirect(the_repository, head);
+	ಯದಿ (!head_ವೃಕ್ಷ)
+		ಪ್ರತ್ಯಾಗಮ error(_("Could not parse object '%s'."), oid_to_hex(head));
 
-	remote_tree = repo_parse_tree_indirect(the_repository, remote);
-	if (!remote_tree)
-		return error(_("Could not parse object '%s'."), oid_to_hex(remote));
+	remote_ವೃಕ್ಷ = repo_parse_ವೃಕ್ಷ_indirect(the_repository, remote);
+	ಯದಿ (!remote_ವೃಕ್ಷ)
+		ಪ್ರತ್ಯಾಗಮ error(_("Could not parse object '%s'."), oid_to_hex(remote));
 
 	repo_read_index_unmerged(the_repository);
 
-	if (fast_forward_to(head_tree, head_tree, 1))
-		return -1;
+	ಯದಿ (fast_forward_to(head_ವೃಕ್ಷ, head_ವೃಕ್ಷ, 1))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
-	if (write_index_as_tree(&index, the_repository->index,
+	ಯದಿ (write_index_as_ವೃಕ್ಷ(&index, the_repository->index,
 				repo_get_index_file(the_repository),
-				0, NULL))
-		return -1;
+				0, ರಿಕ್ತ))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
-	index_tree = repo_parse_tree_indirect(the_repository, &index);
-	if (!index_tree)
-		return error(_("Could not parse object '%s'."), oid_to_hex(&index));
+	index_ವೃಕ್ಷ = repo_parse_ವೃಕ್ಷ_indirect(the_repository, &index);
+	ಯದಿ (!index_ವೃಕ್ಷ)
+		ಪ್ರತ್ಯಾಗಮ error(_("Could not parse object '%s'."), oid_to_hex(&index));
 
-	if (fast_forward_to(index_tree, remote_tree, 0))
-		return -1;
+	ಯದಿ (fast_forward_to(index_ವೃಕ್ಷ, remote_ವೃಕ್ಷ, 0))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
-	if (merge_tree(remote_tree))
-		return -1;
+	ಯದಿ (merge_ವೃಕ್ಷ(remote_ವೃಕ್ಷ))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
 	remove_branch_state(the_repository, 0);
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Resets rerere's merge resolution metadata.
  */
-static void am_rerere_clear(void)
+ಸ್ಥಿರ ಶೂನ್ಯ am_rerere_clear(ಶೂನ್ಯ)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
+	ಸಂರಚನಾ string_list merge_rr = STRING_LIST_INIT_DUP;
 	rerere_clear(the_repository, &merge_rr);
 	string_list_clear(&merge_rr, 1);
 }
@@ -2119,22 +2119,22 @@ static void am_rerere_clear(void)
 /**
  * Resume the current am session by skipping the current patch.
  */
-static void am_skip(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_skip(ಸಂರಚನಾ am_state *state)
 {
-	struct object_id head;
+	ಸಂರಚನಾ object_id head;
 
 	am_rerere_clear();
 
-	if (repo_get_oid(the_repository, "HEAD", &head))
-		oidcpy(&head, the_hash_algo->empty_tree);
+	ಯದಿ (repo_get_oid(the_repository, "HEAD", &head))
+		oidcpy(&head, the_hash_algo->empty_ವೃಕ್ಷ);
 
-	if (clean_index(&head, &head))
+	ಯದಿ (clean_index(&head, &head))
 		die(_("failed to clean index"));
 
-	if (state->rebasing) {
+	ಯದಿ (state->rebasing) {
 		FILE *fp = xfopen(am_path(state, "rewritten"), "a");
 
-		assert(!is_null_oid(&state->orig_commit));
+		ಪ್ರತಿಜ್ಞಾ(!is_null_oid(&state->orig_commit));
 		fprintf(fp, "%s ", oid_to_hex(&state->orig_commit));
 		fprintf(fp, "%s\n", oid_to_hex(&head));
 		fclose(fp);
@@ -2152,188 +2152,188 @@ static void am_skip(struct am_state *state)
  * 1. git-am previously failed because the index was dirty.
  * 2. HEAD has moved since git-am previously failed.
  */
-static int safe_to_abort(const struct am_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ safe_to_abort(ಧ್ರುವ ಸಂರಚನಾ am_state *state)
 {
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id abort_safety, head;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಸಂರಚನಾ object_id abort_safety, head;
 
-	if (file_exists(am_path(state, "dirtyindex")))
-		return 0;
+	ಯದಿ (file_exists(am_path(state, "dirtyindex")))
+		ಪ್ರತ್ಯಾಗಮ 0;
 
-	if (read_state_file(&sb, state, "abort-safety", 1) > 0) {
-		if (get_oid_hex(sb.buf, &abort_safety))
+	ಯದಿ (read_state_file(&sb, state, "abort-safety", 1) > 0) {
+		ಯದಿ (get_oid_hex(sb.buf, &abort_safety))
 			die(_("could not parse %s"), am_path(state, "abort-safety"));
-	} else
+	} ಅನ್ಯಥಾ
 		oidclr(&abort_safety, the_repository->hash_algo);
 	strbuf_release(&sb);
 
-	if (repo_get_oid(the_repository, "HEAD", &head))
+	ಯದಿ (repo_get_oid(the_repository, "HEAD", &head))
 		oidclr(&head, the_repository->hash_algo);
 
-	if (oideq(&head, &abort_safety))
-		return 1;
+	ಯದಿ (oideq(&head, &abort_safety))
+		ಪ್ರತ್ಯಾಗಮ 1;
 
 	warning(_("You seem to have moved HEAD since the last 'am' failure.\n"
 		"Not rewinding to ORIG_HEAD"));
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * Aborts the current am session if it is safe to do so.
  */
-static void am_abort(struct am_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ am_abort(ಸಂರಚನಾ am_state *state)
 {
-	struct object_id curr_head, orig_head;
-	int has_curr_head, has_orig_head;
-	char *curr_branch;
+	ಸಂರಚನಾ object_id curr_head, orig_head;
+	ಪೂರ್ಣಾಙ್ಕ has_curr_head, has_orig_head;
+	ವರ್ಣ *curr_branch;
 
-	if (!safe_to_abort(state)) {
+	ಯದಿ (!safe_to_abort(state)) {
 		am_destroy(state);
-		return;
+		ಪ್ರತ್ಯಾಗಮ;
 	}
 
 	am_rerere_clear();
 
 	curr_branch = refs_resolve_refdup(get_main_ref_store(the_repository),
-					  "HEAD", 0, &curr_head, NULL);
+					  "HEAD", 0, &curr_head, ರಿಕ್ತ);
 	has_curr_head = curr_branch && !is_null_oid(&curr_head);
-	if (!has_curr_head)
-		oidcpy(&curr_head, the_hash_algo->empty_tree);
+	ಯದಿ (!has_curr_head)
+		oidcpy(&curr_head, the_hash_algo->empty_ವೃಕ್ಷ);
 
 	has_orig_head = !repo_get_oid(the_repository, "ORIG_HEAD", &orig_head);
-	if (!has_orig_head)
-		oidcpy(&orig_head, the_hash_algo->empty_tree);
+	ಯದಿ (!has_orig_head)
+		oidcpy(&orig_head, the_hash_algo->empty_ವೃಕ್ಷ);
 
-	if (clean_index(&curr_head, &orig_head))
+	ಯದಿ (clean_index(&curr_head, &orig_head))
 		die(_("failed to clean index"));
 
-	if (has_orig_head)
+	ಯದಿ (has_orig_head)
 		refs_update_ref(get_main_ref_store(the_repository),
 				"am --abort", "HEAD", &orig_head,
-				has_curr_head ? &curr_head : NULL, 0,
+				has_curr_head ? &curr_head : ರಿಕ್ತ, 0,
 				UPDATE_REFS_DIE_ON_ERR);
-	else if (curr_branch)
-		refs_delete_ref(get_main_ref_store(the_repository), NULL,
-				curr_branch, NULL, REF_NO_DEREF);
+	ಅನ್ಯಥಾ ಯದಿ (curr_branch)
+		refs_delete_ref(get_main_ref_store(the_repository), ರಿಕ್ತ,
+				curr_branch, ರಿಕ್ತ, REF_NO_DEREF);
 
-	free(curr_branch);
+	ಮುಕ್ತ(curr_branch);
 	am_destroy(state);
 }
 
-static int show_patch(struct am_state *state, enum resume_type resume_mode)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ show_patch(ಸಂರಚನಾ am_state *state, ಗಣನಾ resume_type resume_mode)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *patch_path;
-	int len;
+	ಸಂರಚನಾ strbuf sb = STRBUF_INIT;
+	ಧ್ರುವ ವರ್ಣ *patch_path;
+	ಪೂರ್ಣಾಙ್ಕ len;
 
-	if (!is_null_oid(&state->orig_commit)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	ಯದಿ (!is_null_oid(&state->orig_commit)) {
+		ಸಂರಚನಾ child_process cmd = CHILD_PROCESS_INIT;
 
 		strvec_pushl(&cmd.args, "show", oid_to_hex(&state->orig_commit),
-			     "--", NULL);
+			     "--", ರಿಕ್ತ);
 		cmd.git_cmd = 1;
-		return run_command(&cmd);
+		ಪ್ರತ್ಯಾಗಮ run_command(&cmd);
 	}
 
-	switch (resume_mode) {
-	case RESUME_SHOW_PATCH_RAW:
+	ವಿಕಲ್ಪ (resume_mode) {
+	ಪಕ್ಷ RESUME_SHOW_PATCH_RAW:
 		patch_path = am_path(state, msgnum(state));
-		break;
-	case RESUME_SHOW_PATCH_DIFF:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_SHOW_PATCH_DIFF:
 		patch_path = am_path(state, "patch");
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid mode for --show-current-patch");
 	}
 
 	len = strbuf_read_file(&sb, patch_path, 0);
-	if (len < 0)
+	ಯದಿ (len < 0)
 		die_errno(_("failed to read '%s'"), patch_path);
 
 	setup_pager(the_repository);
 	write_in_full(1, sb.buf, sb.len);
 	strbuf_release(&sb);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 /**
  * parse_options() callback that validates and sets opt->value to the
  * PATCH_FORMAT_* enum value corresponding to `arg`.
  */
-static int parse_opt_patchformat(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_opt_patchformat(ಧ್ರುವ ಸಂರಚನಾ option *opt, ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
-	int *opt_value = opt->value;
+	ಪೂರ್ಣಾಙ್ಕ *opt_ಮೌಲ್ಯ = opt->ಮೌಲ್ಯ;
 
-	if (unset)
-		*opt_value = PATCH_FORMAT_UNKNOWN;
-	else if (!strcmp(arg, "mbox"))
-		*opt_value = PATCH_FORMAT_MBOX;
-	else if (!strcmp(arg, "stgit"))
-		*opt_value = PATCH_FORMAT_STGIT;
-	else if (!strcmp(arg, "stgit-series"))
-		*opt_value = PATCH_FORMAT_STGIT_SERIES;
-	else if (!strcmp(arg, "hg"))
-		*opt_value = PATCH_FORMAT_HG;
-	else if (!strcmp(arg, "mboxrd"))
-		*opt_value = PATCH_FORMAT_MBOXRD;
+	ಯದಿ (unset)
+		*opt_ಮೌಲ್ಯ = PATCH_FORMAT_UNKNOWN;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "mbox"))
+		*opt_ಮೌಲ್ಯ = PATCH_FORMAT_MBOX;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "stgit"))
+		*opt_ಮೌಲ್ಯ = PATCH_FORMAT_STGIT;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "stgit-series"))
+		*opt_ಮೌಲ್ಯ = PATCH_FORMAT_STGIT_SERIES;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "hg"))
+		*opt_ಮೌಲ್ಯ = PATCH_FORMAT_HG;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "mboxrd"))
+		*opt_ಮೌಲ್ಯ = PATCH_FORMAT_MBOXRD;
 	/*
 	 * Please update $__git_patchformat in git-completion.bash
 	 * when you add new options
 	 */
-	else
-		return error(_("invalid value for '%s': '%s'"),
+	ಅನ್ಯಥಾ
+		ಪ್ರತ್ಯಾಗಮ error(_("invalid value for '%s': '%s'"),
 			     "--patch-format", arg);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static int parse_opt_show_current_patch(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ parse_opt_show_current_patch(ಧ್ರುವ ಸಂರಚನಾ option *opt, ಧ್ರುವ ವರ್ಣ *arg, ಪೂರ್ಣಾಙ್ಕ unset)
 {
-	int *opt_value = opt->value;
+	ಪೂರ್ಣಾಙ್ಕ *opt_ಮೌಲ್ಯ = opt->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		*opt_value = opt->defval;
-	else if (!strcmp(arg, "raw"))
-		*opt_value = RESUME_SHOW_PATCH_RAW;
-	else if (!strcmp(arg, "diff"))
-		*opt_value = RESUME_SHOW_PATCH_DIFF;
+	ಯದಿ (!arg)
+		*opt_ಮೌಲ್ಯ = opt->defval;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "raw"))
+		*opt_ಮೌಲ್ಯ = RESUME_SHOW_PATCH_RAW;
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(arg, "diff"))
+		*opt_ಮೌಲ್ಯ = RESUME_SHOW_PATCH_DIFF;
 	/*
 	 * Please update $__git_showcurrentpatch in git-completion.bash
 	 * when you add new options
 	 */
-	else
-		return error(_("invalid value for '%s': '%s'"),
+	ಅನ್ಯಥಾ
+		ಪ್ರತ್ಯಾಗಮ error(_("invalid value for '%s': '%s'"),
 			     "--show-current-patch", arg);
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-int cmd_am(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_am(ಪೂರ್ಣಾಙ್ಕ argc,
+	   ಧ್ರುವ ವರ್ಣ **argv,
+	   ಧ್ರುವ ವರ್ಣ *prefix,
+	   ಸಂರಚನಾ repository *repo UNUSED)
 {
-	struct am_state state;
-	int binary = -1;
-	int keep_cr = -1;
-	int patch_format = PATCH_FORMAT_UNKNOWN;
-	enum resume_type resume_mode = RESUME_FALSE;
-	int in_progress;
-	int ret = 0;
+	ಸಂರಚನಾ am_state state;
+	ಪೂರ್ಣಾಙ್ಕ ದ್ವಿಮಾನ = -1;
+	ಪೂರ್ಣಾಙ್ಕ keep_cr = -1;
+	ಪೂರ್ಣಾಙ್ಕ patch_format = PATCH_FORMAT_UNKNOWN;
+	ಗಣನಾ resume_type resume_mode = RESUME_FALSE;
+	ಪೂರ್ಣಾಙ್ಕ in_progress;
+	ಪೂರ್ಣಾಙ್ಕ ret = 0;
 
-	const char * const usage[] = {
+	ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ usage[] = {
 		N_("git am [<options>] [(<mbox> | <Maildir>)...]"),
 		N_("git am [<options>] (--continue | --skip | --abort)"),
-		NULL
+		ರಿಕ್ತ
 	};
 
-	struct option options[] = {
+	ಸಂರಚನಾ option options[] = {
 		OPT_BOOL('i', "interactive", &state.interactive,
 			N_("run interactively")),
 		OPT_BOOL('n', "no-verify", &state.no_verify,
 			N_("bypass pre-applypatch and applypatch-msg hooks")),
-		OPT_HIDDEN_BOOL('b', "binary", &binary,
+		OPT_HIDDEN_BOOL('b', "binary", &ದ್ವಿಮಾನ,
 			N_("historical option -- no-op")),
 		OPT_BOOL('3', "3way", &state.threeway,
 			N_("allow fall back on 3way merging if needed")),
@@ -2360,10 +2360,10 @@ int cmd_am(int argc,
 		OPT_PASSTHRU_ARGV(0, "whitespace", &state.git_apply_opts, N_("action"),
 			N_("pass it through git-apply"),
 			0),
-		OPT_PASSTHRU_ARGV(0, "ignore-space-change", &state.git_apply_opts, NULL,
+		OPT_PASSTHRU_ARGV(0, "ignore-space-change", &state.git_apply_opts, ರಿಕ್ತ,
 			N_("pass it through git-apply"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU_ARGV(0, "ignore-whitespace", &state.git_apply_opts, NULL,
+		OPT_PASSTHRU_ARGV(0, "ignore-whitespace", &state.git_apply_opts, ರಿಕ್ತ,
 			N_("pass it through git-apply"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU_ARGV(0, "directory", &state.git_apply_opts, N_("root"),
@@ -2375,19 +2375,19 @@ int cmd_am(int argc,
 		OPT_PASSTHRU_ARGV(0, "include", &state.git_apply_opts, N_("path"),
 			N_("pass it through git-apply"),
 			0),
-		OPT_PASSTHRU_ARGV('C', NULL, &state.git_apply_opts, N_("n"),
+		OPT_PASSTHRU_ARGV('C', ರಿಕ್ತ, &state.git_apply_opts, N_("n"),
 			N_("pass it through git-apply"),
 			0),
-		OPT_PASSTHRU_ARGV('p', NULL, &state.git_apply_opts, N_("num"),
+		OPT_PASSTHRU_ARGV('p', ರಿಕ್ತ, &state.git_apply_opts, N_("num"),
 			N_("pass it through git-apply"),
 			0),
 		OPT_CALLBACK(0, "patch-format", &patch_format, N_("format"),
 			N_("format the patch(es) are in"),
 			parse_opt_patchformat),
-		OPT_PASSTHRU_ARGV(0, "reject", &state.git_apply_opts, NULL,
+		OPT_PASSTHRU_ARGV(0, "reject", &state.git_apply_opts, ರಿಕ್ತ,
 			N_("pass it through git-apply"),
 			PARSE_OPT_NOARG),
-		OPT_STRING(0, "resolvemsg", &state.resolvemsg, NULL,
+		OPT_STRING(0, "resolvemsg", &state.resolvemsg, ರಿಕ್ತ,
 			N_("override error message when patch failure occurs")),
 		OPT_CMDMODE(0, "continue", &resume_mode,
 			N_("continue applying patches after resolving a conflict"),
@@ -2407,8 +2407,8 @@ int cmd_am(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "show-current-patch",
-			.value = &resume_mode,
-			.precision = sizeof(resume_mode),
+			.ಮೌಲ್ಯ = &resume_mode,
+			.precision = ಪರಿಮಾಣ(resume_mode),
 			.argh = "(diff|raw)",
 			.help = N_("show the patch being applied"),
 			.flags = PARSE_OPT_CMDMODE | PARSE_OPT_OPTARG | PARSE_OPT_NONEG | PARSE_OPT_LITERAL_ARGHELP,
@@ -2431,7 +2431,7 @@ int cmd_am(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &state.sign_commit,
+			.ಮೌಲ್ಯ = &state.sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG-sign commits"),
 			.flags = PARSE_OPT_OPTARG,
@@ -2447,27 +2447,27 @@ int cmd_am(int argc,
 
 	show_usage_with_options_if_asked(argc, argv, usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ರಿಕ್ತ);
 
 	am_state_init(&state);
 
 	in_progress = am_in_progress(&state);
-	if (in_progress)
+	ಯದಿ (in_progress)
 		am_load(&state);
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (binary >= 0)
+	ಯದಿ (ದ್ವಿಮಾನ >= 0)
 		fprintf_ln(stderr, _("The -b/--binary option has been a no-op for long time, and\n"
 				"it will be removed. Please do not use it anymore."));
 
 	/* Ensure a valid committer ident can be constructed */
 	git_committer_info(IDENT_STRICT);
 
-	if (repo_read_index_preload(the_repository, NULL, 0) < 0)
+	ಯದಿ (repo_read_index_preload(the_repository, ರಿಕ್ತ, 0) < 0)
 		die(_("failed to read the index"));
 
-	if (in_progress) {
+	ಯದಿ (in_progress) {
 		/*
 		 * Catch user error to feed us patches when there is a session
 		 * in progress:
@@ -2479,29 +2479,29 @@ int cmd_am(int argc,
 		 *    intend to feed us a patch but wanted to continue
 		 *    unattended.
 		 */
-		if (argc || (resume_mode == RESUME_FALSE && !isatty(0)))
+		ಯದಿ (argc || (resume_mode == RESUME_FALSE && !isatty(0)))
 			die(_("previous rebase directory %s still exists but mbox given."),
 				state.dir);
 
-		if (resume_mode == RESUME_FALSE)
+		ಯದಿ (resume_mode == RESUME_FALSE)
 			resume_mode = RESUME_APPLY;
 
-		if (state.signoff == SIGNOFF_EXPLICIT)
+		ಯದಿ (state.signoff == SIGNOFF_EXPLICIT)
 			am_append_signoff(&state);
-	} else {
-		struct strvec paths = STRVEC_INIT;
-		int i;
+	} ಅನ್ಯಥಾ {
+		ಸಂರಚನಾ strvec paths = STRVEC_INIT;
+		ಪೂರ್ಣಾಙ್ಕ i;
 
 		/*
 		 * Handle stray state directory in the independent-run case. In
 		 * the --rebasing case, it is up to the caller to take care of
 		 * stray directories.
 		 */
-		if (file_exists(state.dir) && !state.rebasing) {
-			if (resume_mode == RESUME_ABORT || resume_mode == RESUME_QUIT) {
+		ಯದಿ (file_exists(state.dir) && !state.rebasing) {
+			ಯದಿ (resume_mode == RESUME_ABORT || resume_mode == RESUME_QUIT) {
 				am_destroy(&state);
 				am_state_release(&state);
-				return 0;
+				ಪ್ರತ್ಯಾಗಮ 0;
 			}
 
 			die(_("Stray %s directory found.\n"
@@ -2509,17 +2509,17 @@ int cmd_am(int argc,
 				state.dir);
 		}
 
-		if (resume_mode)
+		ಯದಿ (resume_mode)
 			die(_("Resolve operation not in progress, we are not resuming."));
 
-		for (i = 0; i < argc; i++) {
-			if (is_absolute_path(argv[i]) || !prefix)
-				strvec_push(&paths, argv[i]);
-			else
-				strvec_push(&paths, mkpath("%s/%s", prefix, argv[i]));
+		ಪ್ರತಿ (i = 0; i < argc; i++) {
+			ಯದಿ (is_absolute_path(argv[i]) || !prefix)
+				strvec_ತಳ್ಳು(&paths, argv[i]);
+			ಅನ್ಯಥಾ
+				strvec_ತಳ್ಳು(&paths, mkpath("%s/%s", prefix, argv[i]));
 		}
 
-		if (state.interactive && !paths.nr)
+		ಯದಿ (state.interactive && !paths.nr)
 			die(_("interactive mode requires patches on the command line"));
 
 		am_setup(&state, patch_format, paths.v, keep_cr);
@@ -2527,36 +2527,36 @@ int cmd_am(int argc,
 		strvec_clear(&paths);
 	}
 
-	switch (resume_mode) {
-	case RESUME_FALSE:
+	ವಿಕಲ್ಪ (resume_mode) {
+	ಪಕ್ಷ RESUME_FALSE:
 		am_run(&state, 0);
-		break;
-	case RESUME_APPLY:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_APPLY:
 		am_run(&state, 1);
-		break;
-	case RESUME_RESOLVED:
-	case RESUME_ALLOW_EMPTY:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_RESOLVED:
+	ಪಕ್ಷ RESUME_ALLOW_EMPTY:
 		am_resolve(&state, resume_mode == RESUME_ALLOW_EMPTY ? 1 : 0);
-		break;
-	case RESUME_SKIP:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_SKIP:
 		am_skip(&state);
-		break;
-	case RESUME_ABORT:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_ABORT:
 		am_abort(&state);
-		break;
-	case RESUME_QUIT:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_QUIT:
 		am_rerere_clear();
 		am_destroy(&state);
-		break;
-	case RESUME_SHOW_PATCH_RAW:
-	case RESUME_SHOW_PATCH_DIFF:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ RESUME_SHOW_PATCH_RAW:
+	ಪಕ್ಷ RESUME_SHOW_PATCH_DIFF:
 		ret = show_patch(&state, resume_mode);
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		BUG("invalid resume value");
 	}
 
 	am_state_release(&state);
 
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }

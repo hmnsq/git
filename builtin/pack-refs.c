@@ -1,16 +1,16 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "pack-refs.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "pack-refs.h"
 
-int cmd_pack_refs(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo)
+ಪೂರ್ಣಾಙ್ಕ cmd_pack_refs(ಪೂರ್ಣಾಙ್ಕ argc,
+		  ಧ್ರುವ ವರ್ಣ **argv,
+		  ಧ್ರುವ ವರ್ಣ *prefix,
+		  ಸಂರಚನಾ repository *repo)
 {
-	static char const * const pack_refs_usage[] = {
+	ಸ್ಥಿರ ವರ್ಣ ಧ್ರುವ * ಧ್ರುವ pack_refs_usage[] = {
 		N_("git pack-refs " PACK_REFS_OPTS),
-		NULL
+		ರಿಕ್ತ
 	};
 
-	return pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
+	ಪ್ರತ್ಯಾಗಮ pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
 }

@@ -8,23 +8,23 @@
  * Pretend we resolved the heads, but declare our tree trumps everybody else.
  */
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "diff.h"
+#ಅನ್ತರ್ಭಾವ "git-compat-util.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
 
-static const char builtin_merge_ours_usage[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ builtin_merge_ours_usage[] =
 	"git merge-ours <base>... -- HEAD <remote>...";
 
-int cmd_merge_ours(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+ಪೂರ್ಣಾಙ್ಕ cmd_merge_ours(ಪೂರ್ಣಾಙ್ಕ argc,
+		   ಧ್ರುವ ವರ್ಣ **argv,
+		   ಧ್ರುವ ವರ್ಣ *prefix UNUSED,
+		   ಸಂರಚನಾ repository *repo)
 {
 	show_usage_if_asked(argc, argv, builtin_merge_ours_usage);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ರಿಕ್ತ);
 	prepare_repo_settings(repo);
 	repo->settings.command_requires_full_index = 0;
 
@@ -33,9 +33,9 @@ int cmd_merge_ours(int argc,
 	 * commit.  The index must match HEAD, or this merge cannot go
 	 * through.
 	 */
-	if (repo_read_index(repo) < 0)
+	ಯದಿ (repo_read_index(repo) < 0)
 		die_errno("read_cache failed");
-	if (index_differs_from(repo, "HEAD", NULL, 0))
-		return 2;
-	return 0;
+	ಯದಿ (index_differs_from(repo, "HEAD", ರಿಕ್ತ, 0))
+		ಪ್ರತ್ಯಾಗಮ 2;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }

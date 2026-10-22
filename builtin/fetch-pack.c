@@ -1,40 +1,40 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "pkt-line.h"
-#include "fetch-pack.h"
-#include "remote.h"
-#include "connect.h"
-#include "oid-array.h"
-#include "protocol.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "object-file.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "fetch-pack.h"
+#ಅನ್ತರ್ಭಾವ "remote.h"
+#ಅನ್ತರ್ಭಾವ "connect.h"
+#ಅನ್ತರ್ಭಾವ "oid-array.h"
+#ಅನ್ತರ್ಭಾವ "protocol.h"
 
-static const char fetch_pack_usage[] =
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ fetch_pack_usage[] =
 "git fetch-pack [--all] [--stdin] [--quiet | -q] [--keep | -k] [--thin] "
 "[--include-tag] [--upload-pack=<git-upload-pack>] [--depth=<n>] "
 "[--no-progress] [--diag-url] [-v] [<host>:]<directory> [<refs>...]";
 
-static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
-			     const char *name)
+ಸ್ಥಿರ ಶೂನ್ಯ add_sought_entry(ಸಂರಚನಾ ref ***sought, ಪೂರ್ಣಾಙ್ಕ *nr, ಪೂರ್ಣಾಙ್ಕ *alloc,
+			     ಧ್ರುವ ವರ್ಣ *name)
 {
-	struct ref *ref;
-	struct object_id oid;
-	const char *p;
+	ಸಂರಚನಾ ref *ref;
+	ಸಂರಚನಾ object_id oid;
+	ಧ್ರುವ ವರ್ಣ *p;
 
-	if (!parse_oid_hex(name, &oid, &p)) {
-		if (*p == ' ') {
+	ಯದಿ (!parse_oid_hex(name, &oid, &p)) {
+		ಯದಿ (*p == ' ') {
 			/* <oid> <ref>, find refname */
 			name = p + 1;
-		} else if (*p == '\0') {
+		} ಅನ್ಯಥಾ ಯದಿ (*p == '\0') {
 			; /* <oid>, leave oid as name */
-		} else {
+		} ಅನ್ಯಥಾ {
 			/* <ref>, clear cruft from oid */
 			oidclr(&oid, the_repository->hash_algo);
 		}
-	} else {
+	} ಅನ್ಯಥಾ {
 		/* <ref>, clear cruft from get_oid_hex */
 		oidclr(&oid, the_repository->hash_algo);
 	}
@@ -46,30 +46,30 @@ static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
 	(*sought)[*nr - 1] = ref;
 }
 
-int cmd_fetch_pack(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+ಪೂರ್ಣಾಙ್ಕ cmd_fetch_pack(ಪೂರ್ಣಾಙ್ಕ argc,
+		   ಧ್ರುವ ವರ್ಣ **argv,
+		   ಧ್ರುವ ವರ್ಣ *prefix UNUSED,
+		   ಸಂರಚನಾ repository *repo)
 {
-	int i, ret;
-	struct ref *fetched_refs = NULL, *remote_refs = NULL;
-	const char *dest = NULL;
-	struct ref **sought = NULL;
-	struct ref **sought_to_free = NULL;
-	int nr_sought = 0, alloc_sought = 0;
-	int fd[2];
-	struct string_list pack_lockfiles = STRING_LIST_INIT_DUP;
-	struct string_list *pack_lockfiles_ptr = NULL;
-	struct child_process *conn;
-	struct fetch_pack_args args;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct string_list deepen_not = STRING_LIST_INIT_DUP;
-	struct packet_reader reader;
-	enum protocol_version version;
+	ಪೂರ್ಣಾಙ್ಕ i, ret;
+	ಸಂರಚನಾ ref *fetched_refs = ರಿಕ್ತ, *remote_refs = ರಿಕ್ತ;
+	ಧ್ರುವ ವರ್ಣ *dest = ರಿಕ್ತ;
+	ಸಂರಚನಾ ref **sought = ರಿಕ್ತ;
+	ಸಂರಚನಾ ref **sought_to_free = ರಿಕ್ತ;
+	ಪೂರ್ಣಾಙ್ಕ nr_sought = 0, alloc_sought = 0;
+	ಪೂರ್ಣಾಙ್ಕ fd[2];
+	ಸಂರಚನಾ string_list pack_lockfiles = STRING_LIST_INIT_DUP;
+	ಸಂರಚನಾ string_list *pack_lockfiles_ptr = ರಿಕ್ತ;
+	ಸಂರಚನಾ child_process *conn;
+	ಸಂರಚನಾ fetch_pack_args args;
+	ಸಂರಚನಾ oid_array shallow = OID_ARRAY_INIT;
+	ಸಂರಚನಾ string_list deepen_not = STRING_LIST_INIT_DUP;
+	ಸಂರಚನಾ packet_reader reader;
+	ಗಣನಾ protocol_version version;
 
 	packet_trace_identity("fetch-pack");
 
-	memset(&args, 0, sizeof(args));
+	memset(&args, 0, ಪರಿಮಾಣ(args));
 	list_objects_filter_init(&args.filter_options);
 	args.uploadpack = "git-upload-pack";
 
@@ -77,174 +77,174 @@ int cmd_fetch_pack(int argc,
 
 	repo->fetch_if_missing = 0;
 
-	for (i = 1; i < argc && *argv[i] == '-'; i++) {
-		const char *arg = argv[i];
+	ಪ್ರತಿ (i = 1; i < argc && *argv[i] == '-'; i++) {
+		ಧ್ರುವ ವರ್ಣ *arg = argv[i];
 
-		if (skip_prefix(arg, "--upload-pack=", &arg)) {
+		ಯದಿ (skip_prefix(arg, "--upload-pack=", &arg)) {
 			args.uploadpack = arg;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (skip_prefix(arg, "--exec=", &arg)) {
+		ಯದಿ (skip_prefix(arg, "--exec=", &arg)) {
 			args.uploadpack = arg;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
+		ಯದಿ (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
 			args.quiet = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
+		ಯದಿ (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
 			args.lock_pack = args.keep_pack;
 			args.keep_pack = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--thin", arg)) {
+		ಯದಿ (!strcmp("--thin", arg)) {
 			args.use_thin_pack = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--include-tag", arg)) {
+		ಯದಿ (!strcmp("--include-tag", arg)) {
 			args.include_tag = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--all", arg)) {
+		ಯದಿ (!strcmp("--all", arg)) {
 			args.fetch_all = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--stdin", arg)) {
+		ಯದಿ (!strcmp("--stdin", arg)) {
 			args.stdin_refs = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--diag-url", arg)) {
+		ಯದಿ (!strcmp("--diag-url", arg)) {
 			args.diag_url = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("-v", arg)) {
+		ಯದಿ (!strcmp("-v", arg)) {
 			args.verbose = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (skip_prefix(arg, "--depth=", &arg)) {
-			args.depth = strtol(arg, NULL, 0);
-			continue;
+		ಯದಿ (skip_prefix(arg, "--depth=", &arg)) {
+			args.depth = strtol(arg, ರಿಕ್ತ, 0);
+			ಅನುವರ್ತ;
 		}
-		if (skip_prefix(arg, "--shallow-since=", &arg)) {
+		ಯದಿ (skip_prefix(arg, "--shallow-since=", &arg)) {
 			args.deepen_since = xstrdup(arg);
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (skip_prefix(arg, "--shallow-exclude=", &arg)) {
+		ಯದಿ (skip_prefix(arg, "--shallow-exclude=", &arg)) {
 			string_list_append(&deepen_not, arg);
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp(arg, "--deepen-relative")) {
+		ಯದಿ (!strcmp(arg, "--deepen-relative")) {
 			args.deepen_relative = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--no-progress", arg)) {
+		ಯದಿ (!strcmp("--no-progress", arg)) {
 			args.no_progress = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--stateless-rpc", arg)) {
+		ಯದಿ (!strcmp("--stateless-rpc", arg)) {
 			args.stateless_rpc = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--lock-pack", arg)) {
+		ಯದಿ (!strcmp("--lock-pack", arg)) {
 			args.lock_pack = 1;
 			pack_lockfiles_ptr = &pack_lockfiles;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--check-self-contained-and-connected", arg)) {
+		ಯದಿ (!strcmp("--check-self-contained-and-connected", arg)) {
 			args.check_self_contained_and_connected = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--cloning", arg)) {
+		ಯದಿ (!strcmp("--cloning", arg)) {
 			args.cloning = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--update-shallow", arg)) {
+		ಯದಿ (!strcmp("--update-shallow", arg)) {
 			args.update_shallow = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--from-promisor", arg)) {
+		ಯದಿ (!strcmp("--from-promisor", arg)) {
 			args.from_promisor = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp("--refetch", arg)) {
+		ಯದಿ (!strcmp("--refetch", arg)) {
 			args.refetch = 1;
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (skip_prefix(arg, ("--filter="), &arg)) {
+		ಯದಿ (skip_prefix(arg, ("--filter="), &arg)) {
 			parse_list_objects_filter(&args.filter_options, arg);
-			continue;
+			ಅನುವರ್ತ;
 		}
-		if (!strcmp(arg, ("--no-filter"))) {
+		ಯದಿ (!strcmp(arg, ("--no-filter"))) {
 			list_objects_filter_set_no_filter(&args.filter_options);
-			continue;
+			ಅನುವರ್ತ;
 		}
 		usage(fetch_pack_usage);
 	}
-	if (deepen_not.nr)
+	ಯದಿ (deepen_not.nr)
 		args.deepen_not = &deepen_not;
 
-	if (i < argc)
+	ಯದಿ (i < argc)
 		dest = argv[i++];
-	else
+	ಅನ್ಯಥಾ
 		usage(fetch_pack_usage);
 
 	/*
 	 * Copy refs from cmdline to growable list, then append any
 	 * refs from the standard input:
 	 */
-	for (; i < argc; i++)
+	ಪ್ರತಿ (; i < argc; i++)
 		add_sought_entry(&sought, &nr_sought, &alloc_sought, argv[i]);
-	if (args.stdin_refs) {
-		if (args.stateless_rpc) {
+	ಯದಿ (args.stdin_refs) {
+		ಯದಿ (args.stateless_rpc) {
 			/* in stateless RPC mode we use pkt-line to read
 			 * from stdin, until we get a flush packet
 			 */
-			for (;;) {
-				char *line = packet_read_line(0, NULL);
-				if (!line)
-					break;
-				add_sought_entry(&sought, &nr_sought,  &alloc_sought, line);
+			ಪ್ರತಿ (;;) {
+				ವರ್ಣ *ಸಾಲು = packet_read_ಸಾಲು(0, ರಿಕ್ತ);
+				ಯದಿ (!ಸಾಲು)
+					ಭಙ್ಗ;
+				add_sought_entry(&sought, &nr_sought,  &alloc_sought, ಸಾಲು);
 			}
 		}
-		else {
+		ಅನ್ಯಥಾ {
 			/* read from stdin one ref per line, until EOF */
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline_lf(&line, stdin) != EOF)
-				add_sought_entry(&sought, &nr_sought, &alloc_sought, line.buf);
-			strbuf_release(&line);
+			ಸಂರಚನಾ strbuf ಸಾಲು = STRBUF_INIT;
+			ಯಾವತ್ (strbuf_getline_lf(&ಸಾಲು, stdin) != EOF)
+				add_sought_entry(&sought, &nr_sought, &alloc_sought, ಸಾಲು.buf);
+			strbuf_release(&ಸಾಲು);
 		}
 	}
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	ಯದಿ (args.stateless_rpc) {
+		conn = ರಿಕ್ತ;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
-		int flags = args.verbose ? CONNECT_VERBOSE : 0;
-		if (args.diag_url)
+	} ಅನ್ಯಥಾ {
+		ಪೂರ್ಣಾಙ್ಕ flags = args.verbose ? CONNECT_VERBOSE : 0;
+		ಯದಿ (args.diag_url)
 			flags |= CONNECT_DIAG_URL;
 		conn = git_connect(fd, dest, GIT_CONNECT_UPLOAD_PACK,
 				   args.uploadpack, flags);
-		if (!conn)
-			return args.diag_url ? 0 : 1;
+		ಯದಿ (!conn)
+			ಪ್ರತ್ಯಾಗಮ args.diag_url ? 0 : 1;
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], ರಿಕ್ತ, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
 	version = discover_version(&reader);
-	switch (version) {
-	case protocol_v2:
-		get_remote_refs(fd[1], &reader, &remote_refs, 0, NULL, NULL,
+	ವಿಕಲ್ಪ (version) {
+	ಪಕ್ಷ protocol_v2:
+		get_remote_refs(fd[1], &reader, &remote_refs, 0, ರಿಕ್ತ, ರಿಕ್ತ,
 				args.stateless_rpc);
-		break;
-	case protocol_v1:
-	case protocol_v0:
-		get_remote_heads(&reader, &remote_refs, 0, NULL, &shallow);
-		break;
-	case protocol_unknown_version:
+		ಭಙ್ಗ;
+	ಪಕ್ಷ protocol_v1:
+	ಪಕ್ಷ protocol_v0:
+		get_remote_heads(&reader, &remote_refs, 0, ರಿಕ್ತ, &shallow);
+		ಭಙ್ಗ;
+	ಪಕ್ಷ protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
@@ -258,25 +258,25 @@ int cmd_fetch_pack(int argc,
 	fetched_refs = fetch_pack(&args, fd, remote_refs, sought, nr_sought,
 			 &shallow, pack_lockfiles_ptr, version);
 
-	if (pack_lockfiles.nr) {
-		int i;
+	ಯದಿ (pack_lockfiles.nr) {
+		ಪೂರ್ಣಾಙ್ಕ i;
 
-		printf("lock %s\n", pack_lockfiles.items[0].string);
+		printf("lock %s\n", pack_lockfiles.ವಸ್ತುಗಳು[0].string);
 		fflush(stdout);
-		for (i = 1; i < pack_lockfiles.nr; i++)
+		ಪ್ರತಿ (i = 1; i < pack_lockfiles.nr; i++)
 			warning(_("Lockfile created but not reported: %s"),
-				pack_lockfiles.items[i].string);
+				pack_lockfiles.ವಸ್ತುಗಳು[i].string);
 	}
-	if (args.check_self_contained_and_connected &&
+	ಯದಿ (args.check_self_contained_and_connected &&
 	    args.self_contained_and_connected) {
 		printf("connectivity-ok\n");
 		fflush(stdout);
 	}
 	close(fd[0]);
 	close(fd[1]);
-	if (finish_connect(conn)) {
+	ಯದಿ (finish_connect(conn)) {
 		ret = 1;
-		goto cleanup;
+		ಗಚ್ಛ cleanup;
 	}
 
 	ret = !fetched_refs;
@@ -289,19 +289,19 @@ int cmd_fetch_pack(int argc,
 	 */
 	ret |= report_unmatched_refs(sought, nr_sought);
 
-	for (struct ref *ref = fetched_refs; ref; ref = ref->next)
+	ಪ್ರತಿ (ಸಂರಚನಾ ref *ref = fetched_refs; ref; ref = ref->next)
 		printf("%s %s\n",
 		       oid_to_hex(&ref->old_oid), ref->name);
 
 cleanup:
-	for (size_t i = 0; i < nr_sought; i++)
+	ಪ್ರತಿ (size_t i = 0; i < nr_sought; i++)
 		free_one_ref(sought_to_free[i]);
-	free(sought_to_free);
-	free(sought);
+	ಮುಕ್ತ(sought_to_free);
+	ಮುಕ್ತ(sought);
 	free_refs(fetched_refs);
 	free_refs(remote_refs);
 	list_objects_filter_release(&args.filter_options);
 	oid_array_clear(&shallow);
 	string_list_clear(&pack_lockfiles, 0);
-	return ret;
+	ಪ್ರತ್ಯಾಗಮ ret;
 }

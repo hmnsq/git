@@ -1,156 +1,156 @@
-#include "builtin.h"
-#include "credential.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "credential.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
 #ifndef NO_UNIX_SOCKETS
 
-#include "unix-socket.h"
-#include "run-command.h"
+#ಅನ್ತರ್ಭಾವ "unix-socket.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
 
 #define FLAG_SPAWN 0x1
 #define FLAG_RELAY 0x2
 
 #ifdef GIT_WINDOWS_NATIVE
 
-static int connection_closed(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ connection_closed(ಪೂರ್ಣಾಙ್ಕ error)
 {
-	return (error == EINVAL);
+	ಪ್ರತ್ಯಾಗಮ (error == EINVAL);
 }
 
-static int connection_fatally_broken(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ connection_fatally_broken(ಪೂರ್ಣಾಙ್ಕ error)
 {
-	return (error != ENOENT) && (error != ENETDOWN);
+	ಪ್ರತ್ಯಾಗಮ (error != ENOENT) && (error != ENETDOWN);
 }
 
-#else
+#ಅನ್ಯಥಾ
 
-static int connection_closed(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ connection_closed(ಪೂರ್ಣಾಙ್ಕ error)
 {
-	return error == ECONNRESET || error == ECONNABORTED;
+	ಪ್ರತ್ಯಾಗಮ error == ECONNRESET || error == ECONNABORTED;
 }
 
-static int connection_fatally_broken(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ connection_fatally_broken(ಪೂರ್ಣಾಙ್ಕ error)
 {
-	return (error != ENOENT) && (error != ECONNREFUSED);
+	ಪ್ರತ್ಯಾಗಮ (error != ENOENT) && (error != ECONNREFUSED);
 }
 
 #endif
 
-static int send_request(const char *socket, const struct strbuf *out)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ send_request(ಧ್ರುವ ವರ್ಣ *socket, ಧ್ರುವ ಸಂರಚನಾ strbuf *out)
 {
-	int got_data = 0;
-	int fd = unix_stream_connect(socket, 0);
+	ಪೂರ್ಣಾಙ್ಕ got_data = 0;
+	ಪೂರ್ಣಾಙ್ಕ fd = unix_stream_connect(socket, 0);
 
-	if (fd < 0)
-		return -1;
+	ಯದಿ (fd < 0)
+		ಪ್ರತ್ಯಾಗಮ -1;
 
-	if (write_in_full(fd, out->buf, out->len) < 0)
+	ಯದಿ (write_in_full(fd, out->buf, out->len) < 0)
 		die_errno("unable to write to cache daemon");
 	shutdown(fd, SHUT_WR);
 
-	while (1) {
-		char in[1024];
-		int r;
+	ಯಾವತ್ (1) {
+		ವರ್ಣ in[1024];
+		ಪೂರ್ಣಾಙ್ಕ r;
 
-		r = read_in_full(fd, in, sizeof(in));
-		if (r == 0 || (r < 0 && connection_closed(errno)))
-			break;
-		if (r < 0)
+		r = read_in_full(fd, in, ಪರಿಮಾಣ(in));
+		ಯದಿ (r == 0 || (r < 0 && connection_closed(errno)))
+			ಭಙ್ಗ;
+		ಯದಿ (r < 0)
 			die_errno("read error from cache daemon");
 		write_or_die(1, in, r);
 		got_data = 1;
 	}
 	close(fd);
-	return got_data;
+	ಪ್ರತ್ಯಾಗಮ got_data;
 }
 
-static void spawn_daemon(const char *socket)
+ಸ್ಥಿರ ಶೂನ್ಯ spawn_daemon(ಧ್ರುವ ವರ್ಣ *socket)
 {
-	struct child_process daemon = CHILD_PROCESS_INIT;
-	char buf[128];
-	int r;
+	ಸಂರಚನಾ child_process daemon = CHILD_PROCESS_INIT;
+	ವರ್ಣ buf[128];
+	ಪೂರ್ಣಾಙ್ಕ r;
 
 	strvec_pushl(&daemon.args,
 		     "credential-cache--daemon", socket,
-		     NULL);
+		     ರಿಕ್ತ);
 	daemon.git_cmd = 1;
 	daemon.no_stdin = 1;
 	daemon.out = -1;
 
-	if (start_command(&daemon))
+	ಯದಿ (start_command(&daemon))
 		die_errno("unable to start cache daemon");
-	r = read_in_full(daemon.out, buf, sizeof(buf));
-	if (r < 0)
+	r = read_in_full(daemon.out, buf, ಪರಿಮಾಣ(buf));
+	ಯದಿ (r < 0)
 		die_errno("unable to read result code from cache daemon");
-	if (r != 3 || memcmp(buf, "ok\n", 3))
+	ಯದಿ (r != 3 || memcmp(buf, "ok\n", 3))
 		die("cache daemon did not start: %.*s", r, buf);
 
 	child_process_clear(&daemon);
 	close(daemon.out);
 }
 
-static void do_cache(const char *socket, const char *action, int timeout,
-		     int flags)
+ಸ್ಥಿರ ಶೂನ್ಯ do_cache(ಧ್ರುವ ವರ್ಣ *socket, ಧ್ರುವ ವರ್ಣ *action, ಪೂರ್ಣಾಙ್ಕ timeout,
+		     ಪೂರ್ಣಾಙ್ಕ flags)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ಸಂರಚನಾ strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "action=%s\n", action);
 	strbuf_addf(&buf, "timeout=%d\n", timeout);
-	if (flags & FLAG_RELAY) {
-		if (strbuf_read(&buf, 0, 0) < 0)
+	ಯದಿ (flags & FLAG_RELAY) {
+		ಯದಿ (strbuf_read(&buf, 0, 0) < 0)
 			die_errno("unable to relay credential");
 	}
 
-	if (send_request(socket, &buf) < 0) {
-		if (connection_fatally_broken(errno))
+	ಯದಿ (send_request(socket, &buf) < 0) {
+		ಯದಿ (connection_fatally_broken(errno))
 			die_errno("unable to connect to cache daemon");
-		if (flags & FLAG_SPAWN) {
+		ಯದಿ (flags & FLAG_SPAWN) {
 			spawn_daemon(socket);
-			if (send_request(socket, &buf) < 0)
+			ಯದಿ (send_request(socket, &buf) < 0)
 				die_errno("unable to connect to cache daemon");
 		}
 	}
 	strbuf_release(&buf);
 }
 
-static char *get_socket_path(void)
+ಸ್ಥಿರ ವರ್ಣ *get_socket_path(ಶೂನ್ಯ)
 {
-	struct stat sb;
-	char *old_dir, *socket;
+	ಸಂರಚನಾ stat sb;
+	ವರ್ಣ *old_dir, *socket;
 	old_dir = interpolate_path("~/.git-credential-cache", 0);
-	if (old_dir && !stat(old_dir, &sb) && S_ISDIR(sb.st_mode))
+	ಯದಿ (old_dir && !stat(old_dir, &sb) && S_ISDIR(sb.st_mode))
 		socket = xstrfmt("%s/socket", old_dir);
-	else
+	ಅನ್ಯಥಾ
 		socket = xdg_cache_home("credential/socket");
-	free(old_dir);
-	return socket;
+	ಮುಕ್ತ(old_dir);
+	ಪ್ರತ್ಯಾಗಮ socket;
 }
 
-static void announce_capabilities(void)
+ಸ್ಥಿರ ಶೂನ್ಯ announce_capabilities(ಶೂನ್ಯ)
 {
-	struct credential c = CREDENTIAL_INIT;
+	ಸಂರಚನಾ credential c = CREDENTIAL_INIT;
 	c.capa_authtype.request_initial = 1;
 	credential_announce_capabilities(&c, stdout);
 }
 
-int cmd_credential_cache(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_credential_cache(ಪೂರ್ಣಾಙ್ಕ argc,
+			 ಧ್ರುವ ವರ್ಣ **argv,
+			 ಧ್ರುವ ವರ್ಣ *prefix,
+			 ಸಂರಚನಾ repository *repo UNUSED)
 {
-	const char *socket_path_arg = NULL;
-	char *socket_path;
-	int timeout = 900;
-	const char *op;
-	const char * const usage[] = {
+	ಧ್ರುವ ವರ್ಣ *socket_path_arg = ರಿಕ್ತ;
+	ವರ್ಣ *socket_path;
+	ಪೂರ್ಣಾಙ್ಕ timeout = 900;
+	ಧ್ರುವ ವರ್ಣ *op;
+	ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ usage[] = {
 		"git credential-cache [<options>] <action>",
-		NULL
+		ರಿಕ್ತ
 	};
-	struct option options[] = {
+	ಸಂರಚನಾ option options[] = {
 		OPT_INTEGER(0, "timeout", &timeout,
 			    "number of seconds to cache credentials"),
 		OPT_STRING(0, "socket", &socket_path_arg, "path",
@@ -159,46 +159,46 @@ int cmd_credential_cache(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (!argc)
+	ಯದಿ (!argc)
 		usage_with_options(usage, options);
 	op = argv[0];
 
-	if (!have_unix_sockets())
+	ಯದಿ (!have_unix_sockets())
 		die(_("credential-cache unavailable; no unix socket support"));
 
 	socket_path = xstrdup_or_null(socket_path_arg);
-	if (!socket_path)
+	ಯದಿ (!socket_path)
 		socket_path = get_socket_path();
-	if (!socket_path)
+	ಯದಿ (!socket_path)
 		die("unable to find a suitable socket path; use --socket");
 
-	if (!strcmp(op, "exit"))
+	ಯದಿ (!strcmp(op, "exit"))
 		do_cache(socket_path, op, timeout, 0);
-	else if (!strcmp(op, "get") || !strcmp(op, "erase"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(op, "get") || !strcmp(op, "erase"))
 		do_cache(socket_path, op, timeout, FLAG_RELAY);
-	else if (!strcmp(op, "store"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(op, "store"))
 		do_cache(socket_path, op, timeout, FLAG_RELAY|FLAG_SPAWN);
-	else if (!strcmp(op, "capability"))
+	ಅನ್ಯಥಾ ಯದಿ (!strcmp(op, "capability"))
 		announce_capabilities();
-	else
+	ಅನ್ಯಥಾ
 		; /* ignore unknown operation */
 
-	free(socket_path);
-	return 0;
+	ಮುಕ್ತ(socket_path);
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-#else
+#ಅನ್ಯಥಾ
 
-int cmd_credential_cache(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_credential_cache(ಪೂರ್ಣಾಙ್ಕ argc, ಧ್ರುವ ವರ್ಣ **argv, ಧ್ರುವ ವರ್ಣ *prefix,
+			 ಸಂರಚನಾ repository *repo UNUSED)
 {
-	const char * const usage[] = {
+	ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ usage[] = {
 		"git credential-cache [options] <action>",
 		"",
 		"credential-cache is disabled in this build of Git",
-		NULL
+		ರಿಕ್ತ
 	};
-	struct option options[] = { OPT_END() };
+	ಸಂರಚನಾ option options[] = { OPT_END() };
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 	die(_("credential-cache unavailable; no unix socket support"));

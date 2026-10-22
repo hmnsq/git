@@ -6,248 +6,248 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
 
-#include "attr.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "ident.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "string-list.h"
+#ಅನ್ತರ್ಭಾವ "attr.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "editor.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "ident.h"
+#ಅನ್ತರ್ಭಾವ "pager.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
 
-static const char * const var_usage[] = {
+ಸ್ಥಿರ ಧ್ರುವ ವರ್ಣ * ಧ್ರುವ var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
-	NULL
+	ರಿಕ್ತ
 };
 
-enum ident_part {
+ಗಣನಾ ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+ಸ್ಥಿರ ವರ್ಣ *ident_part(ಧ್ರುವ ವರ್ಣ *ident, ಗಣನಾ ident_part part)
 {
-	struct ident_split split;
+	ಸಂರಚನಾ ident_split split;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	ಯದಿ (!ident)
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
+	ಯದಿ (split_ident_ಸಾಲು(&split, ident, strlen(ident)))
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 
-	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	ವಿಕಲ್ಪ (part) {
+	ಪಕ್ಷ IDENT_NAME:
+		ಯದಿ (!split.name_begin || !split.name_end)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
+		ಪ್ರತ್ಯಾಗಮ xmemdupz(split.name_begin,
 				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+	ಪಕ್ಷ IDENT_MAIL:
+		ಯದಿ (!split.mail_begin || !split.mail_end)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
+		ಪ್ರತ್ಯಾಗಮ xmemdupz(split.mail_begin,
 				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+	ಪಕ್ಷ IDENT_DATE:
+		ಯದಿ (!split.date_begin || !split.tz_end)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
+		ಪ್ರತ್ಯಾಗಮ xmemdupz(split.date_begin,
 				split.tz_end - split.date_begin);
-	default:
+	ಸ್ವಭಾವ:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *committer(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	ಪ್ರತ್ಯಾಗಮ xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *committer_name(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	ಪ್ರತ್ಯಾಗಮ ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *committer_email(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	ಪ್ರತ್ಯಾಗಮ ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *committer_date(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	ಪ್ರತ್ಯಾಗಮ ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *author(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	ಪ್ರತ್ಯಾಗಮ xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *author_name(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	ಪ್ರತ್ಯಾಗಮ ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *author_email(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	ಪ್ರತ್ಯಾಗಮ ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+ಸ್ಥಿರ ವರ್ಣ *author_date(ಪೂರ್ಣಾಙ್ಕ ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	ಪ್ರತ್ಯಾಗಮ ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *editor(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_editor());
+	ಪ್ರತ್ಯಾಗಮ xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *sequence_editor(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	ಪ್ರತ್ಯಾಗಮ xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *pager(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	ಧ್ರುವ ವರ್ಣ *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	ಯದಿ (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	ಪ್ರತ್ಯಾಗಮ xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *default_branch(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	return repo_default_branch_name(the_repository, 1);
+	ಪ್ರತ್ಯಾಗಮ repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *shell_path(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	return git_shell_path();
+	ಪ್ರತ್ಯಾಗಮ git_shell_path();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *git_attr_val_system(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
+	ಯದಿ (git_attr_system_is_enabled()) {
+		ವರ್ಣ *file = xstrdup(git_attr_system_file());
 		normalize_path_copy(file, file);
-		return file;
+		ಪ್ರತ್ಯಾಗಮ file;
 	}
-	return NULL;
+	ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *git_attr_val_global(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
+	ವರ್ಣ *file = xstrdup_or_null(git_attr_global_file());
+	ಯದಿ (file) {
 		normalize_path_copy(file, file);
-		return file;
+		ಪ್ರತ್ಯಾಗಮ file;
 	}
-	return NULL;
+	ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+ಸ್ಥಿರ ವರ್ಣ *git_config_val_system(ಪೂರ್ಣಾಙ್ಕ ident_flag UNUSED)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
+	ಯದಿ (git_config_system()) {
+		ವರ್ಣ *file = git_system_config();
 		normalize_path_copy(file, file);
-		return file;
+		ಪ್ರತ್ಯಾಗಮ file;
 	}
-	return NULL;
+	ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 }
 
-static void git_config_val_global(struct string_list *list)
+ಸ್ಥಿರ ಶೂನ್ಯ git_config_val_global(ಸಂರಚನಾ string_list *list)
 {
-	char *user, *xdg;
+	ವರ್ಣ *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
+	ಯದಿ (xdg && *xdg) {
 		normalize_path_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
+	ಯದಿ (user && *user) {
 		normalize_path_copy(user, user);
 		string_list_append(list, user);
 	}
-	free(xdg);
-	free(user);
+	ಮುಕ್ತ(xdg);
+	ಮುಕ್ತ(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+ಸಂರಚನಾ git_var {
+	ಧ್ರುವ ವರ್ಣ *name;
+	ವರ್ಣ *(*ಪಠ)(ಪೂರ್ಣಾಙ್ಕ);
+	ಶೂನ್ಯ (*multiread)(ಸಂರಚನಾ string_list *);
 };
-static struct git_var git_vars[] = {
+ಸ್ಥಿರ ಸಂರಚನಾ git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
-		.read = committer,
+		.ಪಠ = committer,
 	},
 	{
 		.name = "GIT_COMMITTER_NAME",
-		.read = committer_name,
+		.ಪಠ = committer_name,
 	},
 	{
 		.name = "GIT_COMMITTER_EMAIL",
-		.read = committer_email,
+		.ಪಠ = committer_email,
 	},
 	{
 		.name = "GIT_COMMITTER_DATE",
-		.read = committer_date,
+		.ಪಠ = committer_date,
 	},
 	{
 		.name = "GIT_AUTHOR_IDENT",
-		.read = author,
+		.ಪಠ = author,
 	},
 	{
 		.name = "GIT_AUTHOR_NAME",
-		.read = author_name,
+		.ಪಠ = author_name,
 	},
 	{
 		.name = "GIT_AUTHOR_EMAIL",
-		.read = author_email,
+		.ಪಠ = author_email,
 	},
 	{
 		.name = "GIT_AUTHOR_DATE",
-		.read = author_date,
+		.ಪಠ = author_date,
 	},
 	{
 		.name = "GIT_EDITOR",
-		.read = editor,
+		.ಪಠ = editor,
 	},
 	{
 		.name = "GIT_SEQUENCE_EDITOR",
-		.read = sequence_editor,
+		.ಪಠ = sequence_editor,
 	},
 	{
 		.name = "GIT_PAGER",
-		.read = pager,
+		.ಪಠ = pager,
 	},
 	{
 		.name = "GIT_DEFAULT_BRANCH",
-		.read = default_branch,
+		.ಪಠ = default_branch,
 	},
 	{
 		.name = "GIT_SHELL_PATH",
-		.read = shell_path,
+		.ಪಠ = shell_path,
 	},
 	{
 		.name = "GIT_ATTR_SYSTEM",
-		.read = git_attr_val_system,
+		.ಪಠ = git_attr_val_system,
 	},
 	{
 		.name = "GIT_ATTR_GLOBAL",
-		.read = git_attr_val_global,
+		.ಪಠ = git_attr_val_global,
 	},
 	{
 		.name = "GIT_CONFIG_SYSTEM",
-		.read = git_config_val_system,
+		.ಪಠ = git_config_val_system,
 	},
 	{
 		.name = "GIT_CONFIG_GLOBAL",
@@ -255,74 +255,74 @@ static struct git_var git_vars[] = {
 	},
 	{
 		.name = "",
-		.read = NULL,
+		.ಪಠ = ರಿಕ್ತ,
 	},
 };
 
-static void list_vars(int nul_term)
+ಸ್ಥಿರ ಶೂನ್ಯ list_vars(ಪೂರ್ಣಾಙ್ಕ nul_term)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	ಸಂರಚನಾ git_var *ptr;
+	ವರ್ಣ delim = nul_term ? '\n' : '=';
+	ವರ್ಣ term = nul_term ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	ಪ್ರತಿ (ptr = git_vars; ptr->ಪಠ || ptr->multiread; ptr++) {
+		ಯದಿ (ptr->ಪಠ) {
+			ವರ್ಣ *val = ptr->ಪಠ(0);
 
-			if (val) {
+			ಯದಿ (val) {
 				printf("%s%c%s%c", ptr->name, delim, val, term);
-				free(val);
+				ಮುಕ್ತ(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} ಅನ್ಯಥಾ {
+			ಸಂರಚನಾ string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
+			ಪ್ರತಿ (size_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+				       list.ವಸ್ತುಗಳು[i].string, term);
 			string_list_clear(&list, 0);
 		}
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+ಸ್ಥಿರ ಧ್ರುವ ಸಂರಚನಾ git_var *get_git_var(ಧ್ರುವ ವರ್ಣ *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	ಸಂರಚನಾ git_var *ptr;
+	ಪ್ರತಿ (ptr = git_vars; ptr->ಪಠ || ptr->multiread; ptr++) {
+		ಯದಿ (strcmp(var, ptr->name) == 0) {
+			ಪ್ರತ್ಯಾಗಮ ptr;
 		}
 	}
-	return NULL;
+	ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ show_config(ಧ್ರುವ ವರ್ಣ *var, ಧ್ರುವ ವರ್ಣ *ಮೌಲ್ಯ,
+		       ಧ್ರುವ ಸಂರಚನಾ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	ಪೂರ್ಣಾಙ್ಕ *nul_term = cb;
+	ವರ್ಣ delim = *nul_term ? '\n' : '=';
+	ವರ್ಣ term = *nul_term ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
-	else
+	ಯದಿ (ಮೌಲ್ಯ)
+		printf("%s%c%s%c", var, delim, ಮೌಲ್ಯ, term);
+	ಅನ್ಯಥಾ
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	ಪ್ರತ್ಯಾಗಮ git_default_config(var, ಮೌಲ್ಯ, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+ಪೂರ್ಣಾಙ್ಕ cmd_var(ಪೂರ್ಣಾಙ್ಕ argc,
+	    ಧ್ರುವ ವರ್ಣ **argv,
+	    ಧ್ರುವ ವರ್ಣ *prefix,
+	    ಸಂರಚನಾ repository *repo UNUSED)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
-		OPT_BOOL('l', NULL, &list,
+	ಪೂರ್ಣಾಙ್ಕ list = 0;
+	ಪೂರ್ಣಾಙ್ಕ nul_term = 0;
+	ವರ್ಣ delim;
+	ವರ್ಣ term;
+	ಸಂರಚನಾ option options[] = {
+		OPT_BOOL('l', ರಿಕ್ತ, &list,
 			 N_("list all variables")),
-		OPT_BOOL('z', NULL, &nul_term,
+		OPT_BOOL('z', ರಿಕ್ತ, &nul_term,
 			 N_("terminate entries with NUL")),
 		OPT_END(),
 	};
@@ -330,61 +330,61 @@ int cmd_var(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	ಯದಿ (list) {
+		ಯದಿ (argc)
 			usage_with_options(var_usage, options);
 		repo_config(the_repository, show_config, &nul_term);
 		list_vars(nul_term);
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	if (!argc)
+	ಯದಿ (!argc)
 		usage_with_options(var_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ರಿಕ್ತ);
 
 	delim = nul_term ? '\n' : '=';
 	term = nul_term ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	ಪ್ರತಿ (ಪೂರ್ಣಾಙ್ಕ i = 0; i < argc; i++) {
+		ಧ್ರುವ ಸಂರಚನಾ git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		ಯದಿ (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		ಯದಿ (git_var->ಪಠ) {
+			ವರ್ಣ *val = git_var->ಪಠ(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
-				continue;
+			ಯದಿ (!val) {
+				ಯದಿ (argc == 1)
+					ಪ್ರತ್ಯಾಗಮ 1;
+				ಅನುವರ್ತ;
 			}
-			if (argc == 1)
+			ಯದಿ (argc == 1)
 				printf("%s%c", val, term);
-			else
+			ಅನ್ಯಥಾ
 				printf("%s%c%s%c", git_var->name, delim,
 				       val, term);
-			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+			ಮುಕ್ತ(val);
+		} ಅನ್ಯಥಾ {
+			ಸಂರಚನಾ string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			ಯದಿ (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				ಪ್ರತ್ಯಾಗಮ 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
-					printf("%s%c", list.items[j].string,
+			ಪ್ರತಿ (size_t j = 0; j < list.nr; j++) {
+				ಯದಿ (argc == 1)
+					printf("%s%c", list.ವಸ್ತುಗಳು[j].string,
 					       term);
-				else
+				ಅನ್ಯಥಾ
 					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+					       list.ವಸ್ತುಗಳು[j].string, term);
 			}
 			string_list_clear(&list, 0);
 		}
 	}
 
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
