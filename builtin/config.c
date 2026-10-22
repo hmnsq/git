@@ -17,7 +17,7 @@
 #include "strbuf.h"
 #include "worktree.h"
 
-static const char *const builtin_config_usage[] = {
+static const var_na *const builtin_config_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>"),
 	N_("git config set [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
@@ -29,37 +29,37 @@ static const char *const builtin_config_usage[] = {
 	NULL
 };
 
-static const char *const builtin_config_list_usage[] = {
+static const var_na *const builtin_config_list_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
 	NULL
 };
 
-static const char *const builtin_config_get_usage[] = {
+static const var_na *const builtin_config_get_usage[] = {
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp=<regexp>] [--value=<pattern>] [--fixed-value] [--default=<default>] <name>"),
 	NULL
 };
 
-static const char *const builtin_config_set_usage[] = {
+static const var_na *const builtin_config_set_usage[] = {
 	N_("git config set [<file-option>] [--type=<type>] [--comment=<message>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
 	NULL
 };
 
-static const char *const builtin_config_unset_usage[] = {
+static const var_na *const builtin_config_unset_usage[] = {
 	N_("git config unset [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>"),
 	NULL
 };
 
-static const char *const builtin_config_rename_section_usage[] = {
+static const var_na *const builtin_config_rename_section_usage[] = {
 	N_("git config rename-section [<file-option>] <old-name> <new-name>"),
 	NULL
 };
 
-static const char *const builtin_config_remove_section_usage[] = {
+static const var_na *const builtin_config_remove_section_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
 	NULL
 };
 
-static const char *const builtin_config_edit_usage[] = {
+static const var_na *const builtin_config_edit_usage[] = {
 	N_("git config edit [<file-option>]"),
 	NULL
 };
@@ -73,21 +73,21 @@ static const char *const builtin_config_edit_usage[] = {
 	OPT_STRING('f', "file", &opts.source.file, N_("file"), N_("use given config file")), \
 	OPT_STRING(0, "blob", &opts.source.blob, N_("blob-id"), N_("read config from given blob object"))
 
-struct config_location_options {
-	struct git_config_source source;
-	struct config_options options;
-	char *file_to_free;
-	int use_global_config;
-	int use_system_config;
-	int use_local_config;
-	int use_worktree_config;
-	int respect_includes_opt;
+sa_nracanaa config_location_options {
+	sa_nracanaa git_config_source source;
+	sa_nracanaa config_options options;
+	var_na *file_to_free;
+	puur_naa_nka use_global_config;
+	puur_naa_nka use_system_config;
+	puur_naa_nka use_local_config;
+	puur_naa_nka use_worktree_config;
+	puur_naa_nka respect_includes_opt;
 };
 #define CONFIG_LOCATION_OPTIONS_INIT { \
 	.respect_includes_opt = -1, \
 }
 
-enum config_type {
+ga_nanaa config_type {
 	TYPE_NONE = 0,
 	TYPE_BOOL,
 	TYPE_INT,
@@ -117,18 +117,18 @@ enum config_type {
 	OPT_BOOL(0, "show-names", &opts.show_keys, N_("show config keys in addition to their values")), \
 	CONFIG_TYPE_OPTIONS(opts.type)
 
-struct config_display_options {
-	int end_nul;
-	int omit_values;
-	int show_origin;
-	int show_scope;
-	int show_keys;
-	enum config_type type;
-	char *default_value;
+sa_nracanaa config_display_options {
+	puur_naa_nka end_nul;
+	puur_naa_nka omit_values;
+	puur_naa_nka show_origin;
+	puur_naa_nka show_scope;
+	puur_naa_nka show_keys;
+	ga_nanaa config_type type;
+	var_na *default_value;
 	/* Populated via `display_options_init()`. */
-	int term;
-	int delim;
-	int key_delim;
+	puur_naa_nka term;
+	puur_naa_nka delim;
+	puur_naa_nka key_delim;
 };
 #define CONFIG_DISPLAY_OPTIONS_INIT { \
 	.term = '\n', \
@@ -148,14 +148,14 @@ struct config_display_options {
 	.defval = (i), \
 }
 
-static int option_parse_type(const struct option *opt, const char *arg,
-			     int unset)
+static puur_naa_nka option_parse_type(const sa_nracanaa option *opt, const var_na *arg,
+			     puur_naa_nka unset)
 {
-	int new_type, *to_type;
+	puur_naa_nka new_type, *to_type;
 
-	if (unset) {
-		*((int *) opt->value) = 0;
-		return 0;
+	ပေႃး (unset) {
+		*((puur_naa_nka *) opt->value) = 0;
+		ပွၵ်ႈ 0;
 	}
 
 	/*
@@ -163,27 +163,27 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	 * opt->defval.
 	 */
 	new_type = opt->defval;
-	if (!new_type) {
-		if (!strcmp(arg, "bool"))
+	ပေႃး (!new_type) {
+		ပေႃး (!strcmp(arg, "bool"))
 			new_type = TYPE_BOOL;
-		else if (!strcmp(arg, "int"))
+		ပေႃးဢမ်ႇ ပေႃး (!strcmp(arg, "int"))
 			new_type = TYPE_INT;
-		else if (!strcmp(arg, "bool-or-int"))
+		ပေႃးဢမ်ႇ ပေႃး (!strcmp(arg, "bool-or-int"))
 			new_type = TYPE_BOOL_OR_INT;
-		else if (!strcmp(arg, "bool-or-str"))
+		ပေႃးဢမ်ႇ ပေႃး (!strcmp(arg, "bool-or-str"))
 			new_type = TYPE_BOOL_OR_STR;
-		else if (!strcmp(arg, "path"))
+		ပေႃးဢမ်ႇ ပေႃး (!strcmp(arg, "path"))
 			new_type = TYPE_PATH;
-		else if (!strcmp(arg, "expiry-date"))
+		ပေႃးဢမ်ႇ ပေႃး (!strcmp(arg, "expiry-date"))
 			new_type = TYPE_EXPIRY_DATE;
-		else if (!strcmp(arg, "color"))
+		ပေႃးဢမ်ႇ ပေႃး (!strcmp(arg, "color"))
 			new_type = TYPE_COLOR;
-		else
+		ပေႃးဢမ်ႇ
 			die(_("unrecognized --type argument, %s"), arg);
 	}
 
 	to_type = opt->value;
-	if (*to_type && *to_type != new_type) {
+	ပေႃး (*to_type && *to_type != new_type) {
 		/*
 		 * Complain when there is a new type not equal to the old type.
 		 * This allows for combinations like '--int --type=int' and
@@ -196,34 +196,34 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	}
 	*to_type = new_type;
 
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static void check_argc(int argc, int min, int max)
+static void check_argc(puur_naa_nka argc, puur_naa_nka min, puur_naa_nka max)
 {
-	if (argc >= min && argc <= max)
-		return;
-	if (min == max)
+	ပေႃး (argc >= min && argc <= max)
+		ပွၵ်ႈ;
+	ပေႃး (min == max)
 		error(_("wrong number of arguments, should be %d"), min);
-	else
+	ပေႃးဢမ်ႇ
 		error(_("wrong number of arguments, should be from %d to %d"),
 		      min, max);
 	exit(129);
 }
 
-static NORETURN void die_missing_set_value(const char *arg)
+static NORETURN void die_missing_set_value(const var_na *arg)
 {
-	const char *last_dot = strrchr(arg, '.');
-	const char *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
-	char *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
+	const var_na *last_dot = strrchr(arg, '.');
+	const var_na *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
+	var_na *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
 
-	if (prefix && git_config_key_is_valid(prefix)) {
+	ပေႃး (prefix && git_config_key_is_valid(prefix)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 		advise(_("did you mean \"git config set %s %s\"?"),
 		       prefix, eq + 1);
-	} else if (git_config_key_is_valid(arg)) {
+	} ပေႃးဢမ်ႇ ပေႃး (git_config_key_is_valid(arg)) {
 		error(_("missing value to set to the variable '%s'"), arg);
-	} else {
+	} ပေႃးဢမ်ႇ {
 		error(_("missing value to set to a variable with an invalid name '%s'"),
 		      arg);
 	}
@@ -231,167 +231,167 @@ static NORETURN void die_missing_set_value(const char *arg)
 	exit(129);
 }
 
-static void show_config_origin(const struct config_display_options *opts,
-			       const struct key_value_info *kvi,
-			       struct strbuf *buf)
+static void show_config_origin(const sa_nracanaa config_display_options *opts,
+			       const sa_nracanaa key_value_info *kvi,
+			       sa_nracanaa strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
+	const var_na term = opts->end_nul ? '\0' : '\t';
 
 	strbuf_addstr(buf, config_origin_type_name(kvi->origin_type));
 	strbuf_addch(buf, ':');
-	if (opts->end_nul)
+	ပေႃး (opts->end_nul)
 		strbuf_addstr(buf, kvi->filename ? kvi->filename : "");
-	else
+	ပေႃးဢမ်ႇ
 		quote_c_style(kvi->filename ? kvi->filename : "", buf, NULL, 0);
 	strbuf_addch(buf, term);
 }
 
-static void show_config_scope(const struct config_display_options *opts,
-			      const struct key_value_info *kvi,
-			      struct strbuf *buf)
+static void show_config_scope(const sa_nracanaa config_display_options *opts,
+			      const sa_nracanaa key_value_info *kvi,
+			      sa_nracanaa strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
-	const char *scope = config_scope_name(kvi->scope);
+	const var_na term = opts->end_nul ? '\0' : '\t';
+	const var_na *scope = config_scope_name(kvi->scope);
 
 	strbuf_addstr(buf, N_(scope));
 	strbuf_addch(buf, term);
 }
 
-struct strbuf_list {
-	struct strbuf *items;
-	int nr;
-	int alloc;
+sa_nracanaa strbuf_list {
+	sa_nracanaa strbuf *items;
+	puur_naa_nka nr;
+	puur_naa_nka alloc;
 };
 
-static int format_config_int64(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       const struct key_value_info *kvi,
-			       int gently)
+static puur_naa_nka format_config_int64(sa_nracanaa strbuf *buf,
+			       const var_na *key_,
+			       const var_na *value_,
+			       const sa_nracanaa key_value_info *kvi,
+			       puur_naa_nka gently)
 {
 	int64_t v = 0;
-	if (gently) {
-		if (!git_parse_int64(value_, &v))
-			return -1;
-	} else {
+	ပေႃး (gently) {
+		ပေႃး (!git_parse_int64(value_, &v))
+			ပွၵ်ႈ -1;
+	} ပေႃးဢမ်ႇ {
 		/* may die() */
 		v = git_config_int64(key_, value_ ? value_ : "", kvi);
 	}
 
 	strbuf_addf(buf, "%"PRId64, v);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int format_config_bool(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+static puur_naa_nka format_config_bool(sa_nracanaa strbuf *buf,
+			      const var_na *key_,
+			      const var_na *value_,
+			      puur_naa_nka gently)
 {
-	int v = 0;
-	if (gently) {
-		if ((v = git_parse_maybe_bool(value_)) < 0)
-			return -1;
-	} else {
+	puur_naa_nka v = 0;
+	ပေႃး (gently) {
+		ပေႃး ((v = git_parse_maybe_bool(value_)) < 0)
+			ပွၵ်ႈ -1;
+	} ပေႃးဢမ်ႇ {
 		/* may die() */
 		v = git_config_bool(key_, value_);
 	}
 
 	strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int format_config_bool_or_int(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     const struct key_value_info *kvi,
-				     int gently)
+static puur_naa_nka format_config_bool_or_int(sa_nracanaa strbuf *buf,
+				     const var_na *key_,
+				     const var_na *value_,
+				     const sa_nracanaa key_value_info *kvi,
+				     puur_naa_nka gently)
 {
-	int v, is_bool = 0;
+	puur_naa_nka v, is_bool = 0;
 
-	if (gently) {
+	ပေႃး (gently) {
 		v = git_parse_maybe_bool_text(value_);
 
-		if (v >= 0)
+		ပေႃး (v >= 0)
 			is_bool = 1;
-		else if (!git_parse_int(value_, &v))
-			return -1;
-	} else {
+		ပေႃးဢမ်ႇ ပေႃး (!git_parse_int(value_, &v))
+			ပွၵ်ႈ -1;
+	} ပေႃးဢမ်ႇ {
 		v = git_config_bool_or_int(key_, value_, kvi,
 					   &is_bool);
 	}
 
-	if (is_bool)
+	ပေႃး (is_bool)
 		strbuf_addstr(buf, v ? "true" : "false");
-	else
+	ပေႃးဢမ်ႇ
 		strbuf_addf(buf, "%d", v);
 
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
 /* This mode is always gentle. */
-static int format_config_bool_or_str(struct strbuf *buf,
-				     const char *value_)
+static puur_naa_nka format_config_bool_or_str(sa_nracanaa strbuf *buf,
+				     const var_na *value_)
 {
-	int v = git_parse_maybe_bool(value_);
-	if (v < 0)
+	puur_naa_nka v = git_parse_maybe_bool(value_);
+	ပေႃး (v < 0)
 		strbuf_addstr(buf, value_);
-	else
+	ပေႃးဢမ်ႇ
 		strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int format_config_path(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+static puur_naa_nka format_config_path(sa_nracanaa strbuf *buf,
+			      const var_na *key_,
+			      const var_na *value_,
+			      puur_naa_nka gently)
 {
-	char *v;
+	var_na *v;
 
-	if (git_config_pathname(&v, key_, value_) < 0)
-		return -1;
+	ပေႃး (git_config_pathname(&v, key_, value_) < 0)
+		ပွၵ်ႈ -1;
 
-	if (v)
+	ပေႃး (v)
 		strbuf_addstr(buf, v);
-	else
-		return gently ? -1 : 1; /* :(optional)no-such-file */
+	ပေႃးဢမ်ႇ
+		ပွၵ်ႈ gently ? -1 : 1; /* :(optional)no-such-file */
 
 	free(v);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int format_config_expiry_date(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     int quietly)
+static puur_naa_nka format_config_expiry_date(sa_nracanaa strbuf *buf,
+				     const var_na *key_,
+				     const var_na *value_,
+				     puur_naa_nka quietly)
 {
 	timestamp_t t;
-	if (quietly) {
-		if (parse_expiry_date(value_, &t))
-			return -1;
-	} else if (git_config_expiry_date(&t, key_, value_) < 0) {
-		return -1;
+	ပေႃး (quietly) {
+		ပေႃး (parse_expiry_date(value_, &t))
+			ပွၵ်ႈ -1;
+	} ပေႃးဢမ်ႇ ပေႃး (git_config_expiry_date(&t, key_, value_) < 0) {
+		ပွၵ်ႈ -1;
 	}
 
 	strbuf_addf(buf, "%"PRItime, t);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int format_config_color(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       int gently)
+static puur_naa_nka format_config_color(sa_nracanaa strbuf *buf,
+			       const var_na *key_,
+			       const var_na *value_,
+			       puur_naa_nka gently)
 {
-	char v[COLOR_MAXLEN];
+	var_na v[COLOR_MAXLEN];
 
-	if (gently) {
-		if (color_parse_quietly(value_, v) < 0)
-			return -1;
-	} else if (git_config_color(v, key_, value_) < 0) {
-		return -1;
+	ပေႃး (gently) {
+		ပေႃး (color_parse_quietly(value_, v) < 0)
+			ပွၵ်ႈ -1;
+	} ပေႃးဢမ်ႇ ပေႃး (git_config_color(v, key_, value_) < 0) {
+		ပွၵ်ႈ -1;
 	}
 
 	strbuf_addstr(buf, v);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
 /*
@@ -403,63 +403,63 @@ static int format_config_color(struct strbuf *buf,
  * Note: 'gently' is currently ignored, but will be implemented in
  * a future change.
  */
-static int format_config(const struct config_display_options *opts,
-			 struct strbuf *buf, const char *key_,
-			 const char *value_, const struct key_value_info *kvi,
-			 int gently)
+static puur_naa_nka format_config(const sa_nracanaa config_display_options *opts,
+			 sa_nracanaa strbuf *buf, const var_na *key_,
+			 const var_na *value_, const sa_nracanaa key_value_info *kvi,
+			 puur_naa_nka gently)
 {
-	int res = 0;
-	if (opts->show_scope)
+	puur_naa_nka res = 0;
+	ပေႃး (opts->show_scope)
 		show_config_scope(opts, kvi, buf);
-	if (opts->show_origin)
+	ပေႃး (opts->show_origin)
 		show_config_origin(opts, kvi, buf);
-	if (opts->show_keys)
+	ပေႃး (opts->show_keys)
 		strbuf_addstr(buf, key_);
 
-	if (opts->omit_values)
+	ပေႃး (opts->omit_values)
 		goto terminator;
 
-	if (opts->show_keys)
+	ပေႃး (opts->show_keys)
 		strbuf_addch(buf, opts->key_delim);
 
 	switch (opts->type) {
-	case TYPE_INT:
+	pak_sa TYPE_INT:
 		res = format_config_int64(buf, key_, value_, kvi, gently);
-		break;
+		bha_nga;
 
-	case TYPE_BOOL:
+	pak_sa TYPE_BOOL:
 		res = format_config_bool(buf, key_, value_, gently);
-		break;
+		bha_nga;
 
-	case TYPE_BOOL_OR_INT:
+	pak_sa TYPE_BOOL_OR_INT:
 		res = format_config_bool_or_int(buf, key_, value_, kvi, gently);
-		break;
+		bha_nga;
 
-	case TYPE_BOOL_OR_STR:
+	pak_sa TYPE_BOOL_OR_STR:
 		res = format_config_bool_or_str(buf, value_);
-		break;
+		bha_nga;
 
-	case TYPE_PATH:
+	pak_sa TYPE_PATH:
 		res = format_config_path(buf, key_, value_, gently);
-		break;
+		bha_nga;
 
-	case TYPE_EXPIRY_DATE:
+	pak_sa TYPE_EXPIRY_DATE:
 		res = format_config_expiry_date(buf, key_, value_, gently);
-		break;
+		bha_nga;
 
-	case TYPE_COLOR:
+	pak_sa TYPE_COLOR:
 		res = format_config_color(buf, key_, value_, gently);
-		break;
+		bha_nga;
 
-	case TYPE_NONE:
-		if (value_) {
+	pak_sa TYPE_NONE:
+		ပေႃး (value_) {
 			strbuf_addstr(buf, value_);
-		} else {
+		} ပေႃးဢမ်ႇ {
 			/* Just show the key name; back out delimiter */
-			if (opts->show_keys)
+			ပေႃး (opts->show_keys)
 				strbuf_setlen(buf, buf->len - 1);
 		}
-		break;
+		bha_nga;
 
 	default:
 		BUG("undefined type %d", opts->type);
@@ -467,92 +467,92 @@ static int format_config(const struct config_display_options *opts,
 
 terminator:
 	strbuf_addch(buf, opts->term);
-	return res;
+	ပွၵ်ႈ res;
 }
 
-static int show_all_config(const char *key_, const char *value_,
-			   const struct config_context *ctx,
+static puur_naa_nka show_all_config(const var_na *key_, const var_na *value_,
+			   const sa_nracanaa config_context *ctx,
 			   void *cb)
 {
-	const struct config_display_options *opts = cb;
-	const struct key_value_info *kvi = ctx->kvi;
-	struct strbuf formatted = STRBUF_INIT;
+	const sa_nracanaa config_display_options *opts = cb;
+	const sa_nracanaa key_value_info *kvi = ctx->kvi;
+	sa_nracanaa strbuf formatted = STRBUF_INIT;
 
-	if (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
+	ပေႃး (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
 		fwrite(formatted.buf, 1, formatted.len, stdout);
 
 	strbuf_release(&formatted);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
 #define GET_VALUE_ALL        (1 << 0)
 #define GET_VALUE_KEY_REGEXP (1 << 1)
 
-struct collect_config_data {
-	const struct config_display_options *display_opts;
-	struct strbuf_list *values;
-	const char *value_pattern;
-	const char *key;
+sa_nracanaa collect_config_data {
+	const sa_nracanaa config_display_options *display_opts;
+	sa_nracanaa strbuf_list *values;
+	const var_na *value_pattern;
+	const var_na *key;
 	regex_t *regexp;
 	regex_t *key_regexp;
-	int do_not_match;
+	puur_naa_nka do_not_match;
 	unsigned get_value_flags;
 	unsigned flags;
 };
 
-static int collect_config(const char *key_, const char *value_,
-			  const struct config_context *ctx, void *cb)
+static puur_naa_nka collect_config(const var_na *key_, const var_na *value_,
+			  const sa_nracanaa config_context *ctx, void *cb)
 {
-	struct collect_config_data *data = cb;
-	struct strbuf_list *values = data->values;
-	const struct key_value_info *kvi = ctx->kvi;
-	int status;
+	sa_nracanaa collect_config_data *data = cb;
+	sa_nracanaa strbuf_list *values = data->values;
+	const sa_nracanaa key_value_info *kvi = ctx->kvi;
+	puur_naa_nka status;
 
-	if (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
+	ပေႃး (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
 	    strcmp(key_, data->key))
-		return 0;
-	if ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
+		ပွၵ်ႈ 0;
+	ပေႃး ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
 	    regexec(data->key_regexp, key_, 0, NULL, 0))
-		return 0;
-	if ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
+		ပွၵ်ႈ 0;
+	ပေႃး ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
 	    strcmp(data->value_pattern, (value_?value_:"")))
-		return 0;
-	if (data->regexp &&
+		ပွၵ်ႈ 0;
+	ပေႃး (data->regexp &&
 	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, NULL, 0)))
-		return 0;
+		ပွၵ်ႈ 0;
 
 	ALLOC_GROW(values->items, values->nr + 1, values->alloc);
 	strbuf_init(&values->items[values->nr], 0);
 
 	status = format_config(data->display_opts, &values->items[values->nr++],
 			       key_, value_, kvi, 0);
-	if (status < 0)
-		return status;
-	if (status) {
+	ပေႃး (status < 0)
+		ပွၵ်ႈ status;
+	ပေႃး (status) {
 		strbuf_release(&values->items[--values->nr]);
 		status = 0;
 	}
-	return status;
+	ပွၵ်ႈ status;
 }
 
-static int get_value(const struct config_location_options *opts,
-		     const struct config_display_options *display_opts,
-		     const char *key_, const char *regex_,
+static puur_naa_nka get_value(const sa_nracanaa config_location_options *opts,
+		     const sa_nracanaa config_display_options *display_opts,
+		     const var_na *key_, const var_na *regex_,
 		     unsigned get_value_flags, unsigned flags)
 {
-	int ret = CONFIG_GENERIC_ERROR;
-	struct strbuf_list values = {NULL};
-	struct collect_config_data data = {
+	puur_naa_nka ret = CONFIG_GENERIC_ERROR;
+	sa_nracanaa strbuf_list values = {NULL};
+	sa_nracanaa collect_config_data data = {
 		.display_opts = display_opts,
 		.values = &values,
 		.get_value_flags = get_value_flags,
 		.flags = flags,
 	};
-	char *key = NULL;
-	int i;
+	var_na *key = NULL;
+	puur_naa_nka i;
 
-	if (get_value_flags & GET_VALUE_KEY_REGEXP) {
-		char *tl;
+	ပေႃး (get_value_flags & GET_VALUE_KEY_REGEXP) {
+		var_na *tl;
 
 		/*
 		 * NEEDSWORK: this naive pattern lowercasing obviously does not
@@ -568,15 +568,15 @@ static int get_value(const struct config_location_options *opts,
 		for (tl = key; *tl && *tl != '.'; tl++)
 			*tl = tolower(*tl);
 
-		data.key_regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.key_regexp, key, REG_EXTENDED)) {
+		data.key_regexp = (regex_t*)xmalloc(parimaa_na(regex_t));
+		ပေႃး (regcomp(data.key_regexp, key, REG_EXTENDED)) {
 			error(_("invalid key pattern: %s"), key_);
 			FREE_AND_NULL(data.key_regexp);
 			ret = CONFIG_INVALID_PATTERN;
 			goto free_strings;
 		}
-	} else {
-		if (git_config_parse_key(key_, &key, NULL)) {
+	} ပေႃးဢမ်ႇ {
+		ပေႃး (git_config_parse_key(key_, &key, NULL)) {
 			ret = CONFIG_INVALID_KEY;
 			goto free_strings;
 		}
@@ -584,16 +584,16 @@ static int get_value(const struct config_location_options *opts,
 		data.key = key;
 	}
 
-	if (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
+	ပေႃး (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
 		data.value_pattern = regex_;
-	else if (regex_) {
-		if (regex_[0] == '!') {
+	ပေႃးဢမ်ႇ ပေႃး (regex_) {
+		ပေႃး (regex_[0] == '!') {
 			data.do_not_match = 1;
 			regex_++;
 		}
 
-		data.regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.regexp, regex_, REG_EXTENDED)) {
+		data.regexp = (regex_t*)xmalloc(parimaa_na(regex_t));
+		ပေႃး (regcomp(data.regexp, regex_, REG_EXTENDED)) {
 			error(_("invalid pattern: %s"), regex_);
 			FREE_AND_NULL(data.regexp);
 			ret = CONFIG_INVALID_PATTERN;
@@ -605,10 +605,10 @@ static int get_value(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!values.nr && display_opts->default_value) {
-		struct key_value_info kvi = KVI_INIT;
-		struct strbuf *item;
-		int status;
+	ပေႃး (!values.nr && display_opts->default_value) {
+		sa_nracanaa key_value_info kvi = KVI_INIT;
+		sa_nracanaa strbuf *item;
+		puur_naa_nka status;
 
 		kvi_from_param(&kvi);
 		ALLOC_GROW(values.items, values.nr + 1, values.alloc);
@@ -617,10 +617,10 @@ static int get_value(const struct config_location_options *opts,
 
 		status = format_config(display_opts, item, key_,
 				       display_opts->default_value, &kvi, 0);
-		if (status < 0)
+		ပေႃး (status < 0)
 			die(_("failed to format default config value: %s"),
 			    display_opts->default_value);
-		if (status) {
+		ပေႃး (status) {
 			/* default was a missing optional value */
 			values.nr--;
 			strbuf_release(item);
@@ -630,8 +630,8 @@ static int get_value(const struct config_location_options *opts,
 	ret = !values.nr;
 
 	for (i = 0; i < values.nr; i++) {
-		struct strbuf *buf = values.items + i;
-		if ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
+		sa_nracanaa strbuf *buf = values.items + i;
+		ပေႃး ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
 			fwrite(buf->buf, 1, buf->len, stdout);
 		strbuf_release(buf);
 	}
@@ -639,25 +639,25 @@ static int get_value(const struct config_location_options *opts,
 
 free_strings:
 	free(key);
-	if (data.key_regexp) {
+	ပေႃး (data.key_regexp) {
 		regfree(data.key_regexp);
 		free(data.key_regexp);
 	}
-	if (data.regexp) {
+	ပေႃး (data.regexp) {
 		regfree(data.regexp);
 		free(data.regexp);
 	}
 
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static char *normalize_value(const char *key, const char *value,
-			     int type, struct key_value_info *kvi)
+static var_na *normalize_value(const var_na *key, const var_na *value,
+			     puur_naa_nka type, sa_nracanaa key_value_info *kvi)
 {
-	if (!value)
-		return NULL;
+	ပေႃး (!value)
+		ပွၵ်ႈ NULL;
 
-	if (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
+	ပေႃး (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
 		/*
 		 * We don't do normalization for TYPE_PATH here: If
 		 * the path is like ~/foobar/, we prefer to store
@@ -665,29 +665,29 @@ static char *normalize_value(const char *key, const char *value,
 		 * when retrieving the value.
 		 * Also don't do normalization for expiry dates.
 		 */
-		return xstrdup(value);
-	if (type == TYPE_INT)
-		return xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
-	if (type == TYPE_BOOL)
-		return xstrdup(git_config_bool(key, value) ?  "true" : "false");
-	if (type == TYPE_BOOL_OR_INT) {
-		int is_bool, v;
+		ပွၵ်ႈ xstrdup(value);
+	ပေႃး (type == TYPE_INT)
+		ပွၵ်ႈ xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
+	ပေႃး (type == TYPE_BOOL)
+		ပွၵ်ႈ xstrdup(git_config_bool(key, value) ?  "true" : "false");
+	ပေႃး (type == TYPE_BOOL_OR_INT) {
+		puur_naa_nka is_bool, v;
 		v = git_config_bool_or_int(key, value, kvi, &is_bool);
-		if (!is_bool)
-			return xstrfmt("%d", v);
-		else
-			return xstrdup(v ? "true" : "false");
+		ပေႃး (!is_bool)
+			ပွၵ်ႈ xstrfmt("%d", v);
+		ပေႃးဢမ်ႇ
+			ပွၵ်ႈ xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_BOOL_OR_STR) {
-		int v = git_parse_maybe_bool(value);
-		if (v < 0)
-			return xstrdup(value);
-		else
-			return xstrdup(v ? "true" : "false");
+	ပေႃး (type == TYPE_BOOL_OR_STR) {
+		puur_naa_nka v = git_parse_maybe_bool(value);
+		ပေႃး (v < 0)
+			ပွၵ်ႈ xstrdup(value);
+		ပေႃးဢမ်ႇ
+			ပွၵ်ႈ xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_COLOR) {
-		char v[COLOR_MAXLEN];
-		if (git_config_color(v, key, value))
+	ပေႃး (type == TYPE_COLOR) {
+		var_na v[COLOR_MAXLEN];
+		ပေႃး (git_config_color(v, key, value))
 			die(_("cannot parse color '%s'"), value);
 
 		/*
@@ -697,49 +697,49 @@ static char *normalize_value(const char *key, const char *value,
 		 * "sanity-check", and return the given value, which we
 		 * know is representable as valid color code.
 		 */
-		return xstrdup(value);
+		ပွၵ်ႈ xstrdup(value);
 	}
 
 	BUG("cannot normalize type %d", type);
 }
 
-struct get_color_config_data {
-	int get_color_found;
-	const char *get_color_slot;
-	char parsed_color[COLOR_MAXLEN];
+sa_nracanaa get_color_config_data {
+	puur_naa_nka get_color_found;
+	const var_na *get_color_slot;
+	var_na parsed_color[COLOR_MAXLEN];
 };
 
-static int git_get_color_config(const char *var, const char *value,
-				const struct config_context *ctx UNUSED,
+static puur_naa_nka git_get_color_config(const var_na *var, const var_na *value,
+				const sa_nracanaa config_context *ctx UNUSED,
 				void *cb)
 {
-	struct get_color_config_data *data = cb;
+	sa_nracanaa get_color_config_data *data = cb;
 
-	if (!strcmp(var, data->get_color_slot)) {
-		if (!value)
+	ပေႃး (!strcmp(var, data->get_color_slot)) {
+		ပေႃး (!value)
 			config_error_nonbool(var);
-		if (color_parse(value, data->parsed_color) < 0)
-			return -1;
+		ပေႃး (color_parse(value, data->parsed_color) < 0)
+			ပွၵ်ႈ -1;
 		data->get_color_found = 1;
 	}
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int get_color(const struct config_location_options *opts,
-		      const char *var, const char *def_color)
+static puur_naa_nka get_color(const sa_nracanaa config_location_options *opts,
+		      const var_na *var, const var_na *def_color)
 {
-	struct get_color_config_data data = {
+	sa_nracanaa get_color_config_data data = {
 		.get_color_slot = var,
 		.parsed_color[0] = '\0',
 	};
-	int ret;
+	puur_naa_nka ret;
 
 	config_with_options(git_get_color_config, &data,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!data.get_color_found && def_color) {
-		if (color_parse(def_color, data.parsed_color) < 0) {
+	ပေႃး (!data.get_color_found && def_color) {
+		ပေႃး (color_parse(def_color, data.parsed_color) < 0) {
 			ret = error(_("unable to parse default color value"));
 			goto out;
 		}
@@ -749,35 +749,35 @@ static int get_color(const struct config_location_options *opts,
 
 out:
 	fputs(data.parsed_color, stdout);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-struct get_colorbool_config_data {
-	enum git_colorbool get_colorbool_found;
-	enum git_colorbool get_diff_color_found;
-	enum git_colorbool get_color_ui_found;
-	const char *get_colorbool_slot;
+sa_nracanaa get_colorbool_config_data {
+	ga_nanaa git_colorbool get_colorbool_found;
+	ga_nanaa git_colorbool get_diff_color_found;
+	ga_nanaa git_colorbool get_color_ui_found;
+	const var_na *get_colorbool_slot;
 };
 
-static int git_get_colorbool_config(const char *var, const char *value,
-				    const struct config_context *ctx UNUSED,
+static puur_naa_nka git_get_colorbool_config(const var_na *var, const var_na *value,
+				    const sa_nracanaa config_context *ctx UNUSED,
 				    void *cb)
 {
-	struct get_colorbool_config_data *data = cb;
+	sa_nracanaa get_colorbool_config_data *data = cb;
 
-	if (!strcmp(var, data->get_colorbool_slot))
+	ပေႃး (!strcmp(var, data->get_colorbool_slot))
 		data->get_colorbool_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "diff.color"))
+	ပေႃးဢမ်ႇ ပေႃး (!strcmp(var, "diff.color"))
 		data->get_diff_color_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "color.ui"))
+	ပေႃးဢမ်ႇ ပေႃး (!strcmp(var, "color.ui"))
 		data->get_color_ui_found = git_config_colorbool(var, value);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int get_colorbool(const struct config_location_options *opts,
-			 const char *var, int print)
+static puur_naa_nka get_colorbool(const sa_nracanaa config_location_options *opts,
+			 const var_na *var, puur_naa_nka print)
 {
-	struct get_colorbool_config_data data = {
+	sa_nracanaa get_colorbool_config_data data = {
 		.get_colorbool_slot = var,
 		.get_colorbool_found = GIT_COLOR_UNKNOWN,
 		.get_diff_color_found = GIT_COLOR_UNKNOWN,
@@ -789,97 +789,97 @@ static int get_colorbool(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
-		if (!strcmp(data.get_colorbool_slot, "color.diff"))
+	ပေႃး (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
+		ပေႃး (!strcmp(data.get_colorbool_slot, "color.diff"))
 			data.get_colorbool_found = data.get_diff_color_found;
-		if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+		ပေႃး (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
 			data.get_colorbool_found = data.get_color_ui_found;
 	}
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+	ပေႃး (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
 		/* default value if none found in config */
 		data.get_colorbool_found = GIT_COLOR_AUTO;
 
 	result = want_color(data.get_colorbool_found);
 
-	if (print) {
+	ပေႃး (print) {
 		printf("%s\n", result ? "true" : "false");
-		return 0;
-	} else
-		return result ? 0 : 1;
+		ပွၵ်ႈ 0;
+	} ပေႃးဢမ်ႇ
+		ပွၵ်ႈ result ? 0 : 1;
 }
 
-static void check_write(const struct git_config_source *source)
+static void check_write(const sa_nracanaa git_config_source *source)
 {
-	if (!source->file && !startup_info->have_repository)
+	ပေႃး (!source->file && !startup_info->have_repository)
 		die(_("not in a git directory"));
 
-	if (source->use_stdin)
+	ပေႃး (source->use_stdin)
 		die(_("writing to stdin is not supported"));
 
-	if (source->blob)
+	ပေႃး (source->blob)
 		die(_("writing config blobs is not supported"));
 }
 
-struct urlmatch_current_candidate_value {
-	char value_is_null;
-	struct strbuf value;
-	struct key_value_info kvi;
+sa_nracanaa urlmatch_current_candidate_value {
+	var_na value_is_null;
+	sa_nracanaa strbuf value;
+	sa_nracanaa key_value_info kvi;
 };
 
-static int urlmatch_collect_fn(const char *var, const char *value,
-			       const struct config_context *ctx,
+static puur_naa_nka urlmatch_collect_fn(const var_na *var, const var_na *value,
+			       const sa_nracanaa config_context *ctx,
 			       void *cb)
 {
-	struct string_list *values = cb;
-	struct string_list_item *item = string_list_insert(values, var);
-	struct urlmatch_current_candidate_value *matched = item->util;
-	const struct key_value_info *kvi = ctx->kvi;
+	sa_nracanaa string_list *values = cb;
+	sa_nracanaa string_list_item *item = string_list_insert(values, var);
+	sa_nracanaa urlmatch_current_candidate_value *matched = item->util;
+	const sa_nracanaa key_value_info *kvi = ctx->kvi;
 
-	if (!matched) {
-		matched = xmalloc(sizeof(*matched));
+	ပေႃး (!matched) {
+		matched = xmalloc(parimaa_na(*matched));
 		strbuf_init(&matched->value, 0);
 		item->util = matched;
-	} else {
+	} ပေႃးဢမ်ႇ {
 		strbuf_reset(&matched->value);
 	}
 	matched->kvi = *kvi;
 
-	if (value) {
+	ပေႃး (value) {
 		strbuf_addstr(&matched->value, value);
 		matched->value_is_null = 0;
-	} else {
+	} ပေႃးဢမ်ႇ {
 		matched->value_is_null = 1;
 	}
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int get_urlmatch(const struct config_location_options *opts,
-			const struct config_display_options *_display_opts,
-			const char *var, const char *url)
+static puur_naa_nka get_urlmatch(const sa_nracanaa config_location_options *opts,
+			const sa_nracanaa config_display_options *_display_opts,
+			const var_na *var, const var_na *url)
 {
-	int ret;
-	char *section;
-	char *section_tail;
-	struct config_display_options display_opts = *_display_opts;
-	struct string_list_item *item;
-	struct urlmatch_config config = URLMATCH_CONFIG_INIT;
-	struct string_list values = STRING_LIST_INIT_DUP;
+	puur_naa_nka ret;
+	var_na *section;
+	var_na *section_tail;
+	sa_nracanaa config_display_options display_opts = *_display_opts;
+	sa_nracanaa string_list_item *item;
+	sa_nracanaa urlmatch_config config = URLMATCH_CONFIG_INIT;
+	sa_nracanaa string_list values = STRING_LIST_INIT_DUP;
 
 	config.collect_fn = urlmatch_collect_fn;
 	config.cascade_fn = NULL;
 	config.cb = &values;
 
-	if (!url_normalize(url, &config.url))
+	ပေႃး (!url_normalize(url, &config.url))
 		die("%s", config.url.err);
 
 	config.section = section = xstrdup_tolower(var);
 	section_tail = strchr(section, '.');
-	if (section_tail) {
+	ပေႃး (section_tail) {
 		*section_tail = '\0';
 		config.key = section_tail + 1;
 		display_opts.show_keys = 0;
-	} else {
+	} ပေႃးဢမ်ႇ {
 		config.key = NULL;
 		display_opts.show_keys = 1;
 	}
@@ -891,14 +891,14 @@ static int get_urlmatch(const struct config_location_options *opts,
 	ret = !values.nr;
 
 	for_each_string_list_item(item, &values) {
-		struct urlmatch_current_candidate_value *matched = item->util;
-		struct strbuf buf = STRBUF_INIT;
-		int status;
+		sa_nracanaa urlmatch_current_candidate_value *matched = item->util;
+		sa_nracanaa strbuf buf = STRBUF_INIT;
+		puur_naa_nka status;
 
 		status = format_config(&display_opts, &buf, item->string,
 				       matched->value_is_null ? NULL : matched->value.buf,
 				       &matched->kvi, 0);
-		if (!status)
+		ပေႃး (!status)
 			fwrite(buf.buf, 1, buf.len, stdout);
 		strbuf_release(&buf);
 
@@ -909,12 +909,12 @@ static int get_urlmatch(const struct config_location_options *opts,
 	free(config.url.url);
 
 	free(section);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static char *default_user_config(void)
+static var_na *default_user_config(void)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf,
 		    _("# This is Git's per-user configuration file.\n"
 		      "[user]\n"
@@ -923,42 +923,42 @@ static char *default_user_config(void)
 		      "#	email = %s\n"),
 		    ident_default_name(),
 		    ident_default_email());
-	return strbuf_detach(&buf, NULL);
+	ပွၵ်ႈ strbuf_detach(&buf, NULL);
 }
 
-static void location_options_init(struct config_location_options *opts,
-				  const char *prefix)
+static void location_options_init(sa_nracanaa config_location_options *opts,
+				  const var_na *prefix)
 {
-	if (!opts->source.file)
+	ပေႃး (!opts->source.file)
 		opts->source.file = opts->file_to_free =
 			xstrdup_or_null(getenv(CONFIG_ENVIRONMENT));
 
-	if (opts->use_global_config + opts->use_system_config +
+	ပေႃး (opts->use_global_config + opts->use_system_config +
 	    opts->use_local_config + opts->use_worktree_config +
 	    !!opts->source.file + !!opts->source.blob > 1) {
 		error(_("only one config file at a time"));
 		exit(129);
 	}
 
-	if (!startup_info->have_repository) {
-		if (opts->use_local_config)
+	ပေႃး (!startup_info->have_repository) {
+		ပေႃး (opts->use_local_config)
 			die(_("--local can only be used inside a git repository"));
-		if (opts->source.blob)
+		ပေႃး (opts->source.blob)
 			die(_("--blob can only be used inside a git repository"));
-		if (opts->use_worktree_config)
+		ပေႃး (opts->use_worktree_config)
 			die(_("--worktree can only be used inside a git repository"));
 	}
 
-	if (opts->source.file &&
+	ပေႃး (opts->source.file &&
 			!strcmp(opts->source.file, "-")) {
 		opts->source.file = NULL;
 		opts->source.use_stdin = 1;
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->use_global_config) {
+	ပေႃး (opts->use_global_config) {
 		opts->source.file = opts->file_to_free = git_global_config();
-		if (!opts->source.file)
+		ပေႃး (!opts->source.file)
 			/*
 			 * It is unknown if HOME/.gitconfig exists, so
 			 * we do not know if we should write to XDG
@@ -967,80 +967,80 @@ static void location_options_init(struct config_location_options *opts,
 			 */
 			die(_("$HOME not set"));
 		opts->source.scope = CONFIG_SCOPE_GLOBAL;
-	} else if (opts->use_system_config) {
+	} ပေႃးဢမ်ႇ ပေႃး (opts->use_system_config) {
 		opts->source.file = opts->file_to_free = git_system_config();
 		opts->source.scope = CONFIG_SCOPE_SYSTEM;
-	} else if (opts->use_local_config) {
+	} ပေႃးဢမ်ႇ ပေႃး (opts->use_local_config) {
 		opts->source.file = opts->file_to_free = repo_git_path(the_repository, "config");
 		opts->source.scope = CONFIG_SCOPE_LOCAL;
-	} else if (opts->use_worktree_config) {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		if (the_repository->repository_format_worktree_config)
+	} ပေႃးဢမ်ႇ ပေႃး (opts->use_worktree_config) {
+		sa_nracanaa worktree **worktrees = get_worktrees(the_repository);
+		ပေႃး (the_repository->repository_format_worktree_config)
 			opts->source.file = opts->file_to_free =
 				repo_git_path(the_repository, "config.worktree");
-		else if (worktrees[0] && worktrees[1])
+		ပေႃးဢမ်ႇ ပေႃး (worktrees[0] && worktrees[1])
 			die(_("--worktree cannot be used with multiple "
 			      "working trees unless the config\n"
 			      "extension worktreeConfig is enabled. "
 			      "Please read \"CONFIGURATION FILE\"\n"
 			      "section in \"git help worktree\" for details"));
-		else
+		ပေႃးဢမ်ႇ
 			opts->source.file = opts->file_to_free =
 				repo_git_path(the_repository, "config");
 		opts->source.scope = CONFIG_SCOPE_LOCAL;
 		free_worktrees(worktrees);
-	} else if (opts->source.file) {
-		if (!is_absolute_path(opts->source.file) && prefix)
+	} ပေႃးဢမ်ႇ ပေႃး (opts->source.file) {
+		ပေႃး (!is_absolute_path(opts->source.file) && prefix)
 			opts->source.file = opts->file_to_free =
 				prefix_filename(prefix, opts->source.file);
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
-	} else if (opts->source.blob) {
+	} ပေႃးဢမ်ႇ ပေႃး (opts->source.blob) {
 		opts->source.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->respect_includes_opt == -1)
+	ပေႃး (opts->respect_includes_opt == -1)
 		opts->options.respect_includes = !opts->source.file;
-	else
+	ပေႃးဢမ်ႇ
 		opts->options.respect_includes = opts->respect_includes_opt;
-	if (startup_info->have_repository) {
+	ပေႃး (startup_info->have_repository) {
 		opts->options.commondir = repo_get_common_dir(the_repository);
 		opts->options.git_dir = repo_get_git_dir(the_repository);
 	}
 }
 
-static void location_options_release(struct config_location_options *opts)
+static void location_options_release(sa_nracanaa config_location_options *opts)
 {
 	free(opts->file_to_free);
 }
 
-static void display_options_init(struct config_display_options *opts)
+static void display_options_init(sa_nracanaa config_display_options *opts)
 {
-	if (opts->end_nul) {
+	ပေႃး (opts->end_nul) {
 		opts->term = '\0';
 		opts->delim = '\n';
 		opts->key_delim = '\n';
 	}
 }
 
-static void display_options_init_list(struct config_display_options *opts)
+static void display_options_init_list(sa_nracanaa config_display_options *opts)
 {
 	opts->show_keys = 1;
 
-	if (opts->end_nul) {
+	ပေႃး (opts->end_nul) {
 		display_options_init(opts);
-	} else {
+	} ပေႃးဢမ်ႇ {
 		opts->term = '\n';
 		opts->delim = ' ';
 		opts->key_delim = '=';
 	}
 }
 
-static int cmd_config_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_list(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	struct option opts[] = {
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	sa_nracanaa config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
 		OPT_GROUP(N_("Other")),
@@ -1057,29 +1057,29 @@ static int cmd_config_list(int argc, const char **argv, const char *prefix,
 
 	setup_auto_pager("config", 1);
 
-	if (config_with_options(show_all_config, &display_opts,
+	ပေႃး (config_with_options(show_all_config, &display_opts,
 				&location_opts.source, the_repository,
 				&location_opts.options) < 0) {
-		if (location_opts.source.file)
+		ပေႃး (location_opts.source.file)
 			die_errno(_("unable to read config file '%s'"),
 				  location_opts.source.file);
-		else
+		ပေႃးဢမ်ႇ
 			die(_("error processing config file(s)"));
 	}
 
 	location_options_release(&location_opts);
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int cmd_config_get(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_get(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			  sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *value_pattern = NULL, *url = NULL;
-	int flags = 0;
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	sa_nracanaa config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	const var_na *value_pattern = NULL, *url = NULL;
+	puur_naa_nka flags = 0;
 	unsigned get_value_flags = 0;
-	struct option opts[] = {
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter options")),
 		OPT_BIT(0, "all", &get_value_flags, N_("return all values for multi-valued config options"), GET_VALUE_ALL),
@@ -1095,18 +1095,18 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 			   N_("value"), N_("use default value when missing entry")),
 		OPT_END(),
 	};
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_get_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ပေႃး ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
-	if (display_opts.default_value &&
+	ပေႃး (display_opts.default_value &&
 	    ((get_value_flags & GET_VALUE_ALL) || url))
 		die(_("--default= cannot be used with --all or --url="));
-	if (url && ((get_value_flags & GET_VALUE_ALL) ||
+	ပေႃး (url && ((get_value_flags & GET_VALUE_ALL) ||
 		    (get_value_flags & GET_VALUE_KEY_REGEXP) ||
 		    value_pattern))
 		die(_("--url= cannot be used with --all, --regexp or --value"));
@@ -1114,29 +1114,29 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 	location_options_init(&location_opts, prefix);
 	display_options_init(&display_opts);
 
-	if (display_opts.type != TYPE_COLOR)
+	ပေႃး (display_opts.type != TYPE_COLOR)
 		setup_auto_pager("config", 1);
 
-	if (url)
+	ပေႃး (url)
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], url);
-	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
+	ပေႃးဢမ်ႇ ပေႃး (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
 		ret = get_color(&location_opts, "", display_opts.default_value);
-	else
+	ပေႃးဢမ်ႇ
 		ret = get_value(&location_opts, &display_opts, argv[0], value_pattern,
 				get_value_flags, flags);
 
 	location_options_release(&location_opts);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static int cmd_config_set(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_set(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			  sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL, *comment_arg = NULL;
-	char *comment = NULL;
-	int flags = 0, append = 0, type = 0;
-	struct option opts[] = {
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	const var_na *value_pattern = NULL, *comment_arg = NULL;
+	var_na *comment = NULL;
+	puur_naa_nka flags = 0, append = 0, type = 0;
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_TYPE_OPTIONS(type),
 		OPT_GROUP(N_("Filter")),
@@ -1148,21 +1148,21 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 		OPT_BOOL(0, "append", &append, N_("add a new line without altering any existing values")),
 		OPT_END(),
 	};
-	struct key_value_info default_kvi = KVI_INIT;
-	char *value;
-	int ret;
+	sa_nracanaa key_value_info default_kvi = KVI_INIT;
+	var_na *value;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_set_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc == 1)
+	ပေႃး (argc == 1)
 		die_missing_set_value(argv[0]);
 	check_argc(argc, 2, 2);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ပေႃး ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with --value=<pattern>"));
-	if (append && value_pattern)
+	ပေႃး (append && value_pattern)
 		die(_("--append cannot be used with --value=<pattern>"));
-	if (append)
+	ပေႃး (append)
 		value_pattern = CONFIG_REGEX_NONE;
 
 	comment = git_config_prepare_comment_string(comment_arg);
@@ -1172,14 +1172,14 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 
 	value = normalize_value(argv[0], argv[1], type, &default_kvi);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
+	ပေႃး ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], value, value_pattern,
 							      comment, flags);
-	} else {
+	} ပေႃးဢမ်ႇ {
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
 						     argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		ပေႃး (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use --value=<pattern>, --append or --all to change %s."), argv[0]);
 	}
@@ -1187,16 +1187,16 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 	location_options_release(&location_opts);
 	free(comment);
 	free(value);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static int cmd_config_unset(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_unset(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			    sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL;
-	int flags = 0;
-	struct option opts[] = {
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	const var_na *value_pattern = NULL;
+	puur_naa_nka flags = 0;
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter")),
 		OPT_BIT(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
@@ -1204,39 +1204,39 @@ static int cmd_config_unset(int argc, const char **argv, const char *prefix,
 		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
 		OPT_END(),
 	};
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_unset_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ပေႃး ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
 
 	location_options_init(&location_opts, prefix);
 	check_write(&location_opts.source);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
+	ပေႃး ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], NULL, value_pattern,
 							      NULL, flags);
-	else
+	ပေႃးဢမ်ႇ
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0],
 						     NULL, NULL);
 
 	location_options_release(&location_opts);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static int cmd_config_rename_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_rename_section(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+				     sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_rename_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -1247,26 +1247,26 @@ static int cmd_config_rename_section(int argc, const char **argv, const char *pr
 
 	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 						 argv[0], argv[1]);
-	if (ret < 0)
+	ပေႃး (ret < 0)
 		goto out;
-	else if (!ret)
+	ပေႃးဢမ်ႇ ပေႃး (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
 out:
 	location_options_release(&location_opts);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static int cmd_config_remove_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_remove_section(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+				     sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_remove_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -1277,60 +1277,60 @@ static int cmd_config_remove_section(int argc, const char **argv, const char *pr
 
 	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 						 argv[0], NULL);
-	if (ret < 0)
+	ပေႃး (ret < 0)
 		goto out;
-	else if (!ret)
+	ပေႃးဢမ်ႇ ပေႃး (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
 out:
 	location_options_release(&location_opts);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static int show_editor(struct config_location_options *opts)
+static puur_naa_nka show_editor(sa_nracanaa config_location_options *opts)
 {
-	char *config_file;
+	var_na *config_file;
 
-	if (!opts->source.file && !startup_info->have_repository)
+	ပေႃး (!opts->source.file && !startup_info->have_repository)
 		die(_("not in a git directory"));
-	if (opts->source.use_stdin)
+	ပေႃး (opts->source.use_stdin)
 		die(_("editing stdin is not supported"));
-	if (opts->source.blob)
+	ပေႃး (opts->source.blob)
 		die(_("editing blobs is not supported"));
 	repo_config(the_repository, git_default_config, NULL);
 	config_file = opts->source.file ?
 			xstrdup(opts->source.file) :
 			repo_git_path(the_repository, "config");
-	if (opts->use_global_config) {
-		int fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
-		if (fd >= 0) {
-			char *content = default_user_config();
+	ပေႃး (opts->use_global_config) {
+		puur_naa_nka fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
+		ပေႃး (fd >= 0) {
+			var_na *content = default_user_config();
 			write_str_in_full(fd, content);
 			free(content);
 			close(fd);
 		}
-		else if (errno != EEXIST)
+		ပေႃးဢမ်ႇ ပေႃး (errno != EEXIST)
 			die_errno(_("cannot create configuration file %s"), config_file);
 	}
-	if (launch_editor(config_file, NULL, NULL)) {
+	ပေႃး (launch_editor(config_file, NULL, NULL)) {
 		free(config_file);
-		return -1;
+		ပွၵ်ႈ -1;
 	}
 	free(config_file);
 
-	return 0;
+	ပွၵ်ႈ 0;
 }
 
-static int cmd_config_edit(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+static puur_naa_nka cmd_config_edit(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_END(),
 	};
-	int ret;
+	puur_naa_nka ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_edit_usage, 0);
 	check_argc(argc, 0, 0);
@@ -1340,12 +1340,12 @@ static int cmd_config_edit(int argc, const char **argv, const char *prefix,
 
 	ret = show_editor(&location_opts);
 	location_options_release(&location_opts);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-static int cmd_config_actions(int argc, const char **argv, const char *prefix)
+static puur_naa_nka cmd_config_actions(puur_naa_nka argc, const var_na **argv, const var_na *prefix)
 {
-	enum {
+	ga_nanaa {
 		ACTION_GET = (1<<0),
 		ACTION_GET_ALL = (1<<1),
 		ACTION_GET_REGEXP = (1<<2),
@@ -1363,12 +1363,12 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		ACTION_GET_COLORBOOL = (1<<14),
 		ACTION_GET_URLMATCH = (1<<15),
 	};
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *comment_arg = NULL;
-	int actions = 0;
+	sa_nracanaa config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	sa_nracanaa config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	const var_na *comment_arg = NULL;
+	puur_naa_nka actions = 0;
 	unsigned flags = 0;
-	struct option opts[] = {
+	sa_nracanaa option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Action")),
 		OPT_CMDMODE(0, "get", &actions, N_("get value: name [<value-pattern>]"), ACTION_GET),
@@ -1395,10 +1395,10 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 			 N_("respect include directives on lookup")),
 		OPT_END(),
 	};
-	char *value = NULL, *comment = NULL;
-	int ret = 0;
-	int actions_implicit;
-	struct key_value_info default_kvi = KVI_INIT;
+	var_na *value = NULL, *comment = NULL;
+	puur_naa_nka ret = 0;
+	puur_naa_nka actions_implicit;
+	sa_nracanaa key_value_info default_kvi = KVI_INIT;
 
 	argc = parse_options(argc, argv, prefix, opts,
 			     builtin_config_usage,
@@ -1407,79 +1407,79 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	location_options_init(&location_opts, prefix);
 	display_options_init(&display_opts);
 
-	if ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
+	ပေႃး ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
 		error(_("--get-color and variable type are incoherent"));
 		exit(129);
 	}
 
 	actions_implicit = (actions == 0);
-	if (actions_implicit)
+	ပေႃး (actions_implicit)
 		switch (argc) {
-		case 1: actions = ACTION_GET; break;
-		case 2: actions = ACTION_SET; break;
-		case 3: actions = ACTION_SET_ALL; break;
+		pak_sa 1: actions = ACTION_GET; bha_nga;
+		pak_sa 2: actions = ACTION_SET; bha_nga;
+		pak_sa 3: actions = ACTION_SET_ALL; bha_nga;
 		default:
 			error(_("no action specified"));
 			exit(129);
 		}
-	if (actions_implicit && argc == 1) {
-		const char *last_dot = strrchr(argv[0], '.');
-		if (last_dot && strchr(last_dot + 1, '='))
+	ပေႃး (actions_implicit && argc == 1) {
+		const var_na *last_dot = strrchr(argv[0], '.');
+		ပေႃး (last_dot && strchr(last_dot + 1, '='))
 			die_missing_set_value(argv[0]);
 	}
-	if (display_opts.omit_values &&
+	ပေႃး (display_opts.omit_values &&
 	    !(actions == ACTION_LIST || actions == ACTION_GET_REGEXP)) {
 		error(_("--name-only is only applicable to --list or --get-regexp"));
 		exit(129);
 	}
 
-	if (display_opts.show_origin && !(actions &
+	ပေႃး (display_opts.show_origin && !(actions &
 		(ACTION_GET|ACTION_GET_ALL|ACTION_GET_REGEXP|ACTION_LIST))) {
 		error(_("--show-origin is only applicable to --get, --get-all, "
 			"--get-regexp, and --list"));
 		exit(129);
 	}
 
-	if (display_opts.default_value && !(actions & ACTION_GET)) {
+	ပေႃး (display_opts.default_value && !(actions & ACTION_GET)) {
 		error(_("--default is only applicable to --get"));
 		exit(129);
 	}
 
-	if (comment_arg &&
+	ပေႃး (comment_arg &&
 	    !(actions & (ACTION_ADD|ACTION_SET|ACTION_SET_ALL|ACTION_REPLACE_ALL))) {
 		error(_("--comment is only applicable to add/set/replace operations"));
 		exit(129);
 	}
 
 	/* check usage of --fixed-value */
-	if (flags & CONFIG_FLAGS_FIXED_VALUE) {
-		int allowed_usage = 0;
+	ပေႃး (flags & CONFIG_FLAGS_FIXED_VALUE) {
+		puur_naa_nka allowed_usage = 0;
 
 		switch (actions) {
 		/* git config --get <name> <value-pattern> */
-		case ACTION_GET:
+		pak_sa ACTION_GET:
 		/* git config --get-all <name> <value-pattern> */
-		case ACTION_GET_ALL:
+		pak_sa ACTION_GET_ALL:
 		/* git config --get-regexp <name-pattern> <value-pattern> */
-		case ACTION_GET_REGEXP:
+		pak_sa ACTION_GET_REGEXP:
 		/* git config --unset <name> <value-pattern> */
-		case ACTION_UNSET:
+		pak_sa ACTION_UNSET:
 		/* git config --unset-all <name> <value-pattern> */
-		case ACTION_UNSET_ALL:
+		pak_sa ACTION_UNSET_ALL:
 			allowed_usage = argc > 1 && !!argv[1];
-			break;
+			bha_nga;
 
 		/* git config <name> <value> <value-pattern> */
-		case ACTION_SET_ALL:
+		pak_sa ACTION_SET_ALL:
 		/* git config --replace-all <name> <value> <value-pattern> */
-		case ACTION_REPLACE_ALL:
+		pak_sa ACTION_REPLACE_ALL:
 			allowed_usage = argc > 2 && !!argv[2];
-			break;
+			bha_nga;
 
 		/* other options don't allow --fixed-value */
 		}
 
-		if (!allowed_usage) {
+		ပေႃး (!allowed_usage) {
 			error(_("--fixed-value only applies with 'value-pattern'"));
 			exit(129);
 		}
@@ -1491,35 +1491,35 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	 * The following actions may produce more than one line of output and
 	 * should therefore be paged.
 	 */
-	if (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
+	ပေႃး (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
 		setup_auto_pager("config", 1);
 
-	if (actions == ACTION_LIST) {
+	ပေႃး (actions == ACTION_LIST) {
 		check_argc(argc, 0, 0);
 		display_options_init_list(&display_opts);
-		if (config_with_options(show_all_config, &display_opts,
+		ပေႃး (config_with_options(show_all_config, &display_opts,
 					&location_opts.source, the_repository,
 					&location_opts.options) < 0) {
-			if (location_opts.source.file)
+			ပေႃး (location_opts.source.file)
 				die_errno(_("unable to read config file '%s'"),
 					  location_opts.source.file);
-			else
+			ပေႃးဢမ်ႇ
 				die(_("error processing config file(s)"));
 		}
 	}
-	else if (actions == ACTION_EDIT) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_EDIT) {
 		ret = show_editor(&location_opts);
 	}
-	else if (actions == ACTION_SET) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_SET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		ပေႃး (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use a regexp, --add or --replace-all to change %s."), argv[0]);
 	}
-	else if (actions == ACTION_SET_ALL) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_SET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1527,7 +1527,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      argv[0], value, argv[2],
 							      comment, flags);
 	}
-	else if (actions == ACTION_ADD) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_ADD) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1536,7 +1536,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      CONFIG_REGEX_NONE,
 							      comment, flags);
 	}
-	else if (actions == ACTION_REPLACE_ALL) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_REPLACE_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
 		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
@@ -1544,75 +1544,75 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 							      argv[0], value, argv[2],
 							      comment, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_GET) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_GET) {
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				0, flags);
 	}
-	else if (actions == ACTION_GET_ALL) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_GET_ALL) {
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				GET_VALUE_ALL, flags);
 	}
-	else if (actions == ACTION_GET_REGEXP) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_GET_REGEXP) {
 		display_opts.show_keys = 1;
 		check_argc(argc, 1, 2);
 		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
 				GET_VALUE_ALL|GET_VALUE_KEY_REGEXP, flags);
 	}
-	else if (actions == ACTION_GET_URLMATCH) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_GET_URLMATCH) {
 		check_argc(argc, 2, 2);
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_UNSET) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_UNSET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		ပေႃး (argc == 2)
 			ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 								      argv[0], NULL, argv[1],
 								      NULL, flags);
-		else
+		ပေႃးဢမ်ႇ
 			ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
 							     argv[0], NULL, NULL);
 	}
-	else if (actions == ACTION_UNSET_ALL) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_UNSET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 2);
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
 							      argv[0], NULL, argv[1],
 							      NULL, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_RENAME_SECTION) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_RENAME_SECTION) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
 		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 							 argv[0], argv[1]);
-		if (ret < 0)
+		ပေႃး (ret < 0)
 			goto out;
-		else if (!ret)
+		ပေႃးဢမ်ႇ ပေႃး (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		ပေႃးဢမ်ႇ
 			ret = 0;
 	}
-	else if (actions == ACTION_REMOVE_SECTION) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_REMOVE_SECTION) {
 		check_write(&location_opts.source);
 		check_argc(argc, 1, 1);
 		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
 							 argv[0], NULL);
-		if (ret < 0)
+		ပေႃး (ret < 0)
 			goto out;
-		else if (!ret)
+		ပေႃးဢမ်ႇ ပေႃး (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		ပေႃးဢမ်ႇ
 			ret = 0;
 	}
-	else if (actions == ACTION_GET_COLOR) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_GET_COLOR) {
 		check_argc(argc, 1, 2);
 		ret = get_color(&location_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_GET_COLORBOOL) {
+	ပေႃးဢမ်ႇ ပေႃး (actions == ACTION_GET_COLORBOOL) {
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		ပေႃး (argc == 2)
 			color_stdout_is_tty = git_config_bool("command line", argv[1]);
 		ret = get_colorbool(&location_opts, argv[0], argc == 2);
 	}
@@ -1621,16 +1621,16 @@ out:
 	location_options_release(&location_opts);
 	free(comment);
 	free(value);
-	return ret;
+	ပွၵ်ႈ ret;
 }
 
-int cmd_config(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+puur_naa_nka cmd_config(puur_naa_nka argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo)
 {
 	parse_opt_subcommand_fn *subcommand = NULL;
-	struct option subcommand_opts[] = {
+	sa_nracanaa option subcommand_opts[] = {
 		OPT_SUBCOMMAND("list", &subcommand, cmd_config_list),
 		OPT_SUBCOMMAND("get", &subcommand, cmd_config_get),
 		OPT_SUBCOMMAND("set", &subcommand, cmd_config_set),
@@ -1651,11 +1651,11 @@ int cmd_config(int argc,
 	 */
 	argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_ARGV0|PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (subcommand) {
+	ပေႃး (subcommand) {
 		argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
 		       PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_UNKNOWN_OPT);
-		return subcommand(argc, argv, prefix, repo);
+		ပွၵ်ႈ subcommand(argc, argv, prefix, repo);
 	}
 
-	return cmd_config_actions(argc, argv, prefix);
+	ပွၵ်ႈ cmd_config_actions(argc, argv, prefix);
 }
