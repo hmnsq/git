@@ -5,69 +5,69 @@
  *
  * Based on git-verify-tag.sh
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "tag.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
-#include "ref-filter.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "tag.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "gpg-interface.h"
+#अन्तर्भाव "ref-filter.h"
 
-static const char * const verify_tag_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव verify_tag_usage[] = {
 		N_("git verify-tag [-v | --verbose] [--format=<format>] [--raw] <tag>..."),
-		NULL
+		रिक्त
 };
 
-int cmd_verify_tag(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+पूर्णाङ्क cmd_verify_tag(पूर्णाङ्क argc,
+		   ध्रुव वर्ण **argv,
+		   ध्रुव वर्ण *prefix,
+		   संरचना repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
+	पूर्णाङ्क i = 1, verbose = 0, had_error = 0;
 	unsigned flags = 0;
-	struct ref_format format = REF_FORMAT_INIT;
-	const struct option verify_tag_options[] = {
+	संरचना ref_format format = REF_FORMAT_INIT;
+	ध्रुव संरचना option verify_tag_options[] = {
 		OPT__VERBOSE(&verbose, N_("print tag contents")),
 		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
 		OPT_STRING(0, "format", &format.format, N_("format"), N_("format to use for the output")),
 		OPT_END()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, verify_tag_options,
 			     verify_tag_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	जइ (argc <= i)
 		usage_with_options(verify_tag_usage, verify_tag_options);
 
-	if (verbose)
+	जइ (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
-	if (format.format) {
-		if (verify_ref_format(&format))
+	जइ (format.format) {
+		जइ (verify_ref_format(&format))
 			usage_with_options(verify_tag_usage,
 					   verify_tag_options);
 		flags |= GPG_VERIFY_OMIT_STATUS;
 	}
 
-	while (i < argc) {
-		struct object_id oid;
-		const char *name = argv[i++];
+	जाव (i < argc) {
+		संरचना object_id oid;
+		ध्रुव वर्ण *name = argv[i++];
 
-		if (repo_get_oid(repo, name, &oid)) {
+		जइ (repo_get_oid(repo, name, &oid)) {
 			had_error = !!error("tag '%s' not found.", name);
-			continue;
+			अनुवर्त;
 		}
 
-		if (gpg_verify_tag(repo, &oid, name, flags)) {
+		जइ (gpg_verify_tag(repo, &oid, name, flags)) {
 			had_error = 1;
-			continue;
+			अनुवर्त;
 		}
 
-		if (format.format)
-			pretty_print_ref(name, &oid, NULL, &format);
+		जइ (format.format)
+			pretty_print_ref(name, &oid, रिक्त, &format);
 	}
-	return had_error;
+	प्रत्यागम had_error;
 }

@@ -1,51 +1,51 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "config.h"
-#include "connect.h"
-#include "connected.h"
-#include "environment.h"
-#include "exec-cmd.h"
-#include "fsck.h"
-#include "gettext.h"
-#include "gpg-interface.h"
-#include "hex.h"
-#include "hook.h"
-#include "object.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "pack.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "protocol.h"
-#include "refs.h"
-#include "remote.h"
-#include "run-command.h"
-#include "server-info.h"
-#include "setup.h"
-#include "shallow.h"
-#include "sideband.h"
-#include "sigchain.h"
-#include "string-list.h"
-#include "strvec.h"
-#include "trace.h"
-#include "trace2.h"
-#include "version.h"
-#include "worktree.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "abspath.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "commit-reach.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "connect.h"
+#अन्तर्भाव "connected.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "exec-cmd.h"
+#अन्तर्भाव "fsck.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "gpg-interface.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "hook.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "oid-array.h"
+#अन्तर्भाव "oidset.h"
+#अन्तर्भाव "pack.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "pkt-line.h"
+#अन्तर्भाव "protocol.h"
+#अन्तर्भाव "refs.h"
+#अन्तर्भाव "remote.h"
+#अन्तर्भाव "run-command.h"
+#अन्तर्भाव "server-info.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "shallow.h"
+#अन्तर्भाव "sideband.h"
+#अन्तर्भाव "sigchain.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "strvec.h"
+#अन्तर्भाव "trace.h"
+#अन्तर्भाव "trace2.h"
+#अन्तर्भाव "version.h"
+#अन्तर्भाव "worktree.h"
 
-static const char * const receive_pack_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव receive_pack_usage[] = {
 	N_("git receive-pack <git-dir>"),
-	NULL
+	रिक्त
 };
 
-enum deny_action {
+गणना deny_action {
 	DENY_UNCONFIGURED,
 	DENY_IGNORE,
 	DENY_WARN,
@@ -53,233 +53,233 @@ enum deny_action {
 	DENY_UPDATE_INSTEAD
 };
 
-enum report_status_version {
+गणना report_status_version {
 	REPORT_STATUS_UNKNOWN = 0,
 	REPORT_STATUS_V0,
 	REPORT_STATUS_V2,
 };
 
-static int deny_deletes;
-static int deny_non_fast_forwards;
-static enum deny_action deny_current_branch = DENY_UNCONFIGURED;
-static enum deny_action deny_delete_current = DENY_UNCONFIGURED;
-static int receive_fsck_objects = -1;
-static int transfer_fsck_objects = -1;
-static struct strbuf fsck_msg_types = STRBUF_INIT;
-static int advertise_atomic_push = 1;
-static int advertise_push_options;
-static int advertise_sid;
-static off_t max_input_size;
-static int use_sideband;
-static int use_atomic;
-static int use_push_options;
-static int quiet;
-static int prefer_ofs_delta = 1;
-static int auto_update_server_info;
-static int auto_gc = 1;
-static int reject_thin;
-static int skip_connectivity_check;
-static int stateless_rpc;
-static const char *service_dir;
-static const char *head_name;
-static void *head_name_to_free;
-static int sent_capabilities;
-static int shallow_update;
-static struct strbuf push_cert = STRBUF_INIT;
-static struct object_id push_cert_oid;
-static struct signature_check sigcheck;
-static const char *push_cert_nonce;
-static char *cert_nonce_seed;
-static struct strvec hidden_refs = STRVEC_INIT;
+स्थिर पूर्णाङ्क deny_deletes;
+स्थिर पूर्णाङ्क deny_non_fast_forwards;
+स्थिर गणना deny_action deny_current_branch = DENY_UNCONFIGURED;
+स्थिर गणना deny_action deny_delete_current = DENY_UNCONFIGURED;
+स्थिर पूर्णाङ्क receive_fsck_objects = -1;
+स्थिर पूर्णाङ्क transfer_fsck_objects = -1;
+स्थिर संरचना strbuf fsck_सन्देशः_types = STRBUF_INIT;
+स्थिर पूर्णाङ्क advertise_atomic_प्रक्षिप = 1;
+स्थिर पूर्णाङ्क advertise_प्रक्षिप_options;
+स्थिर पूर्णाङ्क advertise_sid;
+स्थिर off_t max_निवेशः_size;
+स्थिर पूर्णाङ्क use_sideband;
+स्थिर पूर्णाङ्क use_atomic;
+स्थिर पूर्णाङ्क use_प्रक्षिप_options;
+स्थिर पूर्णाङ्क quiet;
+स्थिर पूर्णाङ्क prefer_ofs_delta = 1;
+स्थिर पूर्णाङ्क auto_update_server_info;
+स्थिर पूर्णाङ्क auto_gc = 1;
+स्थिर पूर्णाङ्क reject_thin;
+स्थिर पूर्णाङ्क skip_connectivity_check;
+स्थिर पूर्णाङ्क stateless_rpc;
+स्थिर ध्रुव वर्ण *service_dir;
+स्थिर ध्रुव वर्ण *head_name;
+स्थिर शून्य *head_name_to_free;
+स्थिर पूर्णाङ्क sent_capabilities;
+स्थिर पूर्णाङ्क shallow_update;
+स्थिर संरचना strbuf प्रक्षिप_cert = STRBUF_INIT;
+स्थिर संरचना object_id प्रक्षिप_cert_oid;
+स्थिर संरचना signature_check sigcheck;
+स्थिर ध्रुव वर्ण *प्रक्षिप_cert_nonce;
+स्थिर वर्ण *cert_nonce_seed;
+स्थिर संरचना strvec hidden_refs = STRVEC_INIT;
 
-static const char *NONCE_UNSOLICITED = "UNSOLICITED";
-static const char *NONCE_BAD = "BAD";
-static const char *NONCE_MISSING = "MISSING";
-static const char *NONCE_OK = "OK";
-static const char *NONCE_SLOP = "SLOP";
-static const char *nonce_status;
-static long nonce_stamp_slop;
-static timestamp_t nonce_stamp_slop_limit;
-static struct ref_transaction *transaction;
+स्थिर ध्रुव वर्ण *NONCE_UNSOLICITED = "UNSOLICITED";
+स्थिर ध्रुव वर्ण *NONCE_BAD = "BAD";
+स्थिर ध्रुव वर्ण *NONCE_MISSING = "MISSING";
+स्थिर ध्रुव वर्ण *NONCE_OK = "OK";
+स्थिर ध्रुव वर्ण *NONCE_SLOP = "SLOP";
+स्थिर ध्रुव वर्ण *nonce_status;
+स्थिर long nonce_stamp_slop;
+स्थिर timestamp_t nonce_stamp_slop_limit;
+स्थिर संरचना ref_transaction *transaction;
 
-static enum {
+स्थिर गणना {
 	KEEPALIVE_NEVER = 0,
 	KEEPALIVE_AFTER_NUL,
 	KEEPALIVE_ALWAYS
 } use_keepalive;
-static int keepalive_in_sec = 5;
+स्थिर पूर्णाङ्क keepalive_in_sec = 5;
 
-static struct proc_receive_ref {
-	unsigned int want_add:1,
+स्थिर संरचना proc_receive_ref {
+	unsigned पूर्णाङ्क want_add:1,
 		     want_delete:1,
 		     want_modify:1,
 		     negative_ref:1;
-	char *ref_prefix;
-	struct proc_receive_ref *next;
+	वर्ण *ref_prefix;
+	संरचना proc_receive_ref *next;
 } *proc_receive_ref;
 
-static void proc_receive_ref_append(const char *prefix);
+स्थिर शून्य proc_receive_ref_append(ध्रुव वर्ण *prefix);
 
-static enum deny_action parse_deny_action(const char *var, const char *value)
+स्थिर गणना deny_action parse_deny_action(ध्रुव वर्ण *var, ध्रुव वर्ण *मानम्)
 {
-	if (value) {
-		if (!strcasecmp(value, "ignore"))
-			return DENY_IGNORE;
-		if (!strcasecmp(value, "warn"))
-			return DENY_WARN;
-		if (!strcasecmp(value, "refuse"))
-			return DENY_REFUSE;
-		if (!strcasecmp(value, "updateinstead"))
-			return DENY_UPDATE_INSTEAD;
+	जइ (मानम्) {
+		जइ (!strcasecmp(मानम्, "ignore"))
+			प्रत्यागम DENY_IGNORE;
+		जइ (!strcasecmp(मानम्, "warn"))
+			प्रत्यागम DENY_WARN;
+		जइ (!strcasecmp(मानम्, "refuse"))
+			प्रत्यागम DENY_REFUSE;
+		जइ (!strcasecmp(मानम्, "updateinstead"))
+			प्रत्यागम DENY_UPDATE_INSTEAD;
 	}
-	if (git_config_bool(var, value))
-		return DENY_REFUSE;
-	return DENY_IGNORE;
+	जइ (git_config_bool(var, मानम्))
+		प्रत्यागम DENY_REFUSE;
+	प्रत्यागम DENY_IGNORE;
 }
 
-static int receive_pack_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क receive_pack_config(ध्रुव वर्ण *var, ध्रुव वर्ण *मानम्,
+			       ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	const char *msg_id;
-	int status = parse_hide_refs_config(var, value, "receive", &hidden_refs);
+	ध्रुव वर्ण *सन्देशः_id;
+	पूर्णाङ्क status = parse_hide_refs_config(var, मानम्, "receive", &hidden_refs);
 
-	if (status)
-		return status;
+	जइ (status)
+		प्रत्यागम status;
 
-	if (strcmp(var, "receive.denydeletes") == 0) {
-		deny_deletes = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.denydeletes") == 0) {
+		deny_deletes = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.denynonfastforwards") == 0) {
-		deny_non_fast_forwards = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.denynonfastforwards") == 0) {
+		deny_non_fast_forwards = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.fsck.skiplist") == 0) {
-		char *path;
+	जइ (strcmp(var, "receive.fsck.skiplist") == 0) {
+		वर्ण *path;
 
-		if (git_config_pathname(&path, var, value))
-			return -1;
-		if (path)
-			strbuf_addf(&fsck_msg_types, "%cskiplist=%s",
-				    fsck_msg_types.len ? ',' : '=', path);
-		free(path);
-		return 0;
+		जइ (git_config_pathname(&path, var, मानम्))
+			प्रत्यागम -1;
+		जइ (path)
+			strbuf_addf(&fsck_सन्देशः_types, "%cskiplist=%s",
+				    fsck_सन्देशः_types.len ? ',' : '=', path);
+		मुक्त(path);
+		प्रत्यागम 0;
 	}
 
-	if (skip_prefix(var, "receive.fsck.", &msg_id)) {
-		if (!value)
-			return config_error_nonbool(var);
-		if (is_valid_msg_type(msg_id, value))
-			strbuf_addf(&fsck_msg_types, "%c%s=%s",
-				fsck_msg_types.len ? ',' : '=', msg_id, value);
-		else
-			warning("skipping unknown msg id '%s'", msg_id);
-		return 0;
+	जइ (skip_prefix(var, "receive.fsck.", &सन्देशः_id)) {
+		जइ (!मानम्)
+			प्रत्यागम config_error_nonbool(var);
+		जइ (is_valid_सन्देशः_type(सन्देशः_id, मानम्))
+			strbuf_addf(&fsck_सन्देशः_types, "%c%s=%s",
+				fsck_सन्देशः_types.len ? ',' : '=', सन्देशः_id, मानम्);
+		अण्णहा
+			warning("skipping unknown msg id '%s'", सन्देशः_id);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.fsckobjects") == 0) {
-		receive_fsck_objects = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.fsckobjects") == 0) {
+		receive_fsck_objects = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "transfer.fsckobjects") == 0) {
-		transfer_fsck_objects = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "transfer.fsckobjects") == 0) {
+		transfer_fsck_objects = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(var, "receive.denycurrentbranch")) {
-		deny_current_branch = parse_deny_action(var, value);
-		return 0;
+	जइ (!strcmp(var, "receive.denycurrentbranch")) {
+		deny_current_branch = parse_deny_action(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.denydeletecurrent") == 0) {
-		deny_delete_current = parse_deny_action(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.denydeletecurrent") == 0) {
+		deny_delete_current = parse_deny_action(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "repack.usedeltabaseoffset") == 0) {
-		prefer_ofs_delta = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "repack.usedeltabaseoffset") == 0) {
+		prefer_ofs_delta = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.updateserverinfo") == 0) {
-		auto_update_server_info = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.updateserverinfo") == 0) {
+		auto_update_server_info = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.autogc") == 0) {
-		auto_gc = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.autogc") == 0) {
+		auto_gc = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.shallowupdate") == 0) {
-		shallow_update = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.shallowupdate") == 0) {
+		shallow_update = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.certnonceseed") == 0)
-		return git_config_string(&cert_nonce_seed, var, value);
+	जइ (strcmp(var, "receive.certnonceseed") == 0)
+		प्रत्यागम git_config_string(&cert_nonce_seed, var, मानम्);
 
-	if (strcmp(var, "receive.certnonceslop") == 0) {
-		nonce_stamp_slop_limit = git_config_ulong(var, value, ctx->kvi);
-		return 0;
+	जइ (strcmp(var, "receive.certnonceslop") == 0) {
+		nonce_stamp_slop_limit = git_config_ulong(var, मानम्, ctx->kvi);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.advertiseatomic") == 0) {
-		advertise_atomic_push = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.advertiseatomic") == 0) {
+		advertise_atomic_प्रक्षिप = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.advertisepushoptions") == 0) {
-		advertise_push_options = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "receive.advertisepushoptions") == 0) {
+		advertise_प्रक्षिप_options = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.keepalive") == 0) {
-		keepalive_in_sec = git_config_int(var, value, ctx->kvi);
-		return 0;
+	जइ (strcmp(var, "receive.keepalive") == 0) {
+		keepalive_in_sec = git_config_int(var, मानम्, ctx->kvi);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.maxinputsize") == 0) {
-		max_input_size = git_config_int64(var, value, ctx->kvi);
-		return 0;
+	जइ (strcmp(var, "receive.maxinputsize") == 0) {
+		max_निवेशः_size = git_config_int64(var, मानम्, ctx->kvi);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "receive.procreceiverefs") == 0) {
-		if (!value)
-			return config_error_nonbool(var);
-		proc_receive_ref_append(value);
-		return 0;
+	जइ (strcmp(var, "receive.procreceiverefs") == 0) {
+		जइ (!मानम्)
+			प्रत्यागम config_error_nonbool(var);
+		proc_receive_ref_append(मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (strcmp(var, "transfer.advertisesid") == 0) {
-		advertise_sid = git_config_bool(var, value);
-		return 0;
+	जइ (strcmp(var, "transfer.advertisesid") == 0) {
+		advertise_sid = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	प्रत्यागम git_default_config(var, मानम्, ctx, cb);
 }
 
-static void show_ref(const char *path, const struct object_id *oid)
+स्थिर शून्य show_ref(ध्रुव वर्ण *path, ध्रुव संरचना object_id *oid)
 {
-	if (sent_capabilities) {
+	जइ (sent_capabilities) {
 		packet_write_fmt(1, "%s %s\n", oid_to_hex(oid), path);
-	} else {
-		struct strbuf cap = STRBUF_INIT;
+	} अण्णहा {
+		संरचना strbuf cap = STRBUF_INIT;
 
 		strbuf_addstr(&cap,
 			      "report-status report-status-v2 delete-refs side-band-64k quiet");
-		if (advertise_atomic_push)
+		जइ (advertise_atomic_प्रक्षिप)
 			strbuf_addstr(&cap, " atomic");
-		if (prefer_ofs_delta)
+		जइ (prefer_ofs_delta)
 			strbuf_addstr(&cap, " ofs-delta");
-		if (push_cert_nonce)
-			strbuf_addf(&cap, " push-cert=%s", push_cert_nonce);
-		if (advertise_push_options)
+		जइ (प्रक्षिप_cert_nonce)
+			strbuf_addf(&cap, " push-cert=%s", प्रक्षिप_cert_nonce);
+		जइ (advertise_प्रक्षिप_options)
 			strbuf_addstr(&cap, " push-options");
-		if (advertise_sid)
+		जइ (advertise_sid)
 			strbuf_addf(&cap, " session-id=%s", trace2_session_id());
 		strbuf_addf(&cap, " object-format=%s", the_hash_algo->name);
 		strbuf_addf(&cap, " agent=%s", git_user_agent_sanitized());
@@ -290,46 +290,46 @@ static void show_ref(const char *path, const struct object_id *oid)
 	}
 }
 
-static int show_ref_cb(const struct reference *ref, void *data)
+स्थिर पूर्णाङ्क show_ref_cb(ध्रुव संरचना reference *ref, शून्य *data)
 {
-	struct oidset *seen = data;
-	const char *path = strip_namespace(ref->name);
+	संरचना oidset *seen = data;
+	ध्रुव वर्ण *path = strip_namespace(ref->name);
 
-	if (ref_is_hidden(path, ref->name, &hidden_refs))
-		return 0;
+	जइ (ref_is_hidden(path, ref->name, &hidden_refs))
+		प्रत्यागम 0;
 
 	/*
 	 * Advertise refs outside our current namespace as ".have"
 	 * refs, so that the client can use them to minimize data
 	 * transfer but will otherwise ignore them.
 	 */
-	if (!path) {
-		if (oidset_insert(seen, ref->oid))
-			return 0;
+	जइ (!path) {
+		जइ (oidset_निवेशय(seen, ref->oid))
+			प्रत्यागम 0;
 		path = ".have";
-	} else {
-		oidset_insert(seen, ref->oid);
+	} अण्णहा {
+		oidset_निवेशय(seen, ref->oid);
 	}
 	show_ref(path, ref->oid);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void show_one_alternate_ref(const struct object_id *oid,
-				   void *data)
+स्थिर शून्य show_one_alternate_ref(ध्रुव संरचना object_id *oid,
+				   शून्य *data)
 {
-	struct oidset *seen = data;
+	संरचना oidset *seen = data;
 
-	if (oidset_insert(seen, oid))
-		return;
+	जइ (oidset_निवेशय(seen, oid))
+		प्रत्यागम;
 
 	show_ref(".have", oid);
 }
 
-static void write_head_info(void)
+स्थिर शून्य write_head_info(शून्य)
 {
-	struct refs_for_each_ref_options opts = { 0 };
-	static struct oidset seen = OIDSET_INIT;
-	struct strvec excludes_vector = STRVEC_INIT;
+	संरचना refs_for_each_ref_options opts = { 0 };
+	स्थिर संरचना oidset seen = OIDSET_INIT;
+	संरचना strvec excludes_vector = STRVEC_INIT;
 
 	/*
 	 * We need access to the reference names both with and without their
@@ -349,7 +349,7 @@ static void write_head_info(void)
 	oidset_clear(&seen);
 	strvec_clear(&excludes_vector);
 
-	if (!sent_capabilities)
+	जइ (!sent_capabilities)
 		show_ref("capabilities^{}", null_oid(the_hash_algo));
 
 	advertise_shallow_grafts(1);
@@ -360,112 +360,112 @@ static void write_head_info(void)
 
 #define RUN_PROC_RECEIVE_SCHEDULED	1
 #define RUN_PROC_RECEIVE_RETURNED	2
-struct command {
-	struct command *next;
-	const char *error_string;
-	char *error_string_owned;
-	struct ref_push_report *report;
-	unsigned int skip_update:1,
+संरचना command {
+	संरचना command *next;
+	ध्रुव वर्ण *error_string;
+	वर्ण *error_string_owned;
+	संरचना ref_प्रक्षिप_report *report;
+	unsigned पूर्णाङ्क skip_update:1,
 		     did_not_exist:1,
 		     run_proc_receive:2;
-	int index;
-	struct object_id old_oid;
-	struct object_id new_oid;
-	char ref_name[FLEX_ARRAY]; /* more */
+	पूर्णाङ्क index;
+	संरचना object_id old_oid;
+	संरचना object_id new_oid;
+	वर्ण ref_name[FLEX_ARRAY]; /* more */
 };
 
-static void proc_receive_ref_append(const char *prefix)
+स्थिर शून्य proc_receive_ref_append(ध्रुव वर्ण *prefix)
 {
-	struct proc_receive_ref *ref_pattern;
-	const char *p;
-	int len;
+	संरचना proc_receive_ref *ref_pattern;
+	ध्रुव वर्ण *p;
+	पूर्णाङ्क len;
 
 	CALLOC_ARRAY(ref_pattern, 1);
 	p = strchr(prefix, ':');
-	if (p) {
-		while (prefix < p) {
-			if (*prefix == 'a')
+	जइ (p) {
+		जाव (prefix < p) {
+			जइ (*prefix == 'a')
 				ref_pattern->want_add = 1;
-			else if (*prefix == 'd')
+			अण्णहा जइ (*prefix == 'd')
 				ref_pattern->want_delete = 1;
-			else if (*prefix == 'm')
+			अण्णहा जइ (*prefix == 'm')
 				ref_pattern->want_modify = 1;
-			else if (*prefix == '!')
+			अण्णहा जइ (*prefix == '!')
 				ref_pattern->negative_ref = 1;
 			prefix++;
 		}
 		prefix++;
-	} else {
+	} अण्णहा {
 		ref_pattern->want_add = 1;
 		ref_pattern->want_delete = 1;
 		ref_pattern->want_modify = 1;
 	}
 	len = strlen(prefix);
-	while (len && prefix[len - 1] == '/')
+	जाव (len && prefix[len - 1] == '/')
 		len--;
 	ref_pattern->ref_prefix = xmemdupz(prefix, len);
-	if (!proc_receive_ref) {
+	जइ (!proc_receive_ref) {
 		proc_receive_ref = ref_pattern;
-	} else {
-		struct proc_receive_ref *end;
+	} अण्णहा {
+		संरचना proc_receive_ref *end;
 
 		end = proc_receive_ref;
-		while (end->next)
+		जाव (end->next)
 			end = end->next;
 		end->next = ref_pattern;
 	}
 }
 
-static int proc_receive_ref_matches(struct command *cmd)
+स्थिर पूर्णाङ्क proc_receive_ref_matches(संरचना command *cmd)
 {
-	struct proc_receive_ref *p;
+	संरचना proc_receive_ref *p;
 
-	if (!proc_receive_ref)
-		return 0;
+	जइ (!proc_receive_ref)
+		प्रत्यागम 0;
 
-	for (p = proc_receive_ref; p; p = p->next) {
-		const char *match = p->ref_prefix;
-		const char *remains;
+	प्रति (p = proc_receive_ref; p; p = p->next) {
+		ध्रुव वर्ण *match = p->ref_prefix;
+		ध्रुव वर्ण *remains;
 
-		if (!p->want_add && is_null_oid(&cmd->old_oid))
-			continue;
-		else if (!p->want_delete && is_null_oid(&cmd->new_oid))
-			continue;
-		else if (!p->want_modify &&
+		जइ (!p->want_add && is_null_oid(&cmd->old_oid))
+			अनुवर्त;
+		अण्णहा जइ (!p->want_delete && is_null_oid(&cmd->new_oid))
+			अनुवर्त;
+		अण्णहा जइ (!p->want_modify &&
 			 !is_null_oid(&cmd->old_oid) &&
 			 !is_null_oid(&cmd->new_oid))
-			continue;
+			अनुवर्त;
 
-		if (skip_prefix(cmd->ref_name, match, &remains) &&
+		जइ (skip_prefix(cmd->ref_name, match, &remains) &&
 		    (!*remains || *remains == '/')) {
-			if (!p->negative_ref)
-				return 1;
-		} else if (p->negative_ref) {
-			return 1;
+			जइ (!p->negative_ref)
+				प्रत्यागम 1;
+		} अण्णहा जइ (p->negative_ref) {
+			प्रत्यागम 1;
 		}
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void report_message(const char *prefix, const char *err, va_list params)
+स्थिर शून्य report_message(ध्रुव वर्ण *prefix, ध्रुव वर्ण *err, va_list params)
 {
-	int sz;
-	char msg[4096];
+	पूर्णाङ्क sz;
+	वर्ण सन्देशः[4096];
 
-	sz = xsnprintf(msg, sizeof(msg), "%s", prefix);
-	sz += vsnprintf(msg + sz, sizeof(msg) - sz, err, params);
-	if (sz > (sizeof(msg) - 1))
-		sz = sizeof(msg) - 1;
-	msg[sz++] = '\n';
+	sz = xsnprintf(सन्देशः, परिमाण(सन्देशः), "%s", prefix);
+	sz += vsnprintf(सन्देशः + sz, परिमाण(सन्देशः) - sz, err, params);
+	जइ (sz > (परिमाण(सन्देशः) - 1))
+		sz = परिमाण(सन्देशः) - 1;
+	सन्देशः[sz++] = '\n';
 
-	if (use_sideband)
-		send_sideband(1, 2, msg, sz, use_sideband);
-	else
-		xwrite(2, msg, sz);
+	जइ (use_sideband)
+		send_sideband(1, 2, सन्देशः, sz, use_sideband);
+	अण्णहा
+		xwrite(2, सन्देशः, sz);
 }
 
 __attribute__((format (printf, 1, 2)))
-static void rp_warning(const char *err, ...)
+स्थिर शून्य rp_warning(ध्रुव वर्ण *err, ...)
 {
 	va_list params;
 	va_start(params, err);
@@ -474,7 +474,7 @@ static void rp_warning(const char *err, ...)
 }
 
 __attribute__((format (printf, 1, 2)))
-static void rp_error(const char *err, ...)
+स्थिर शून्य rp_error(ध्रुव वर्ण *err, ...)
 {
 	va_list params;
 	va_start(params, err);
@@ -482,47 +482,47 @@ static void rp_error(const char *err, ...)
 	va_end(params);
 }
 
-static int copy_to_sideband(int in, int out UNUSED, void *arg UNUSED)
+स्थिर पूर्णाङ्क copy_to_sideband(पूर्णाङ्क in, पूर्णाङ्क out UNUSED, शून्य *arg UNUSED)
 {
-	char data[128];
-	int keepalive_active = 0;
+	वर्ण data[128];
+	पूर्णाङ्क keepalive_active = 0;
 
-	if (keepalive_in_sec <= 0)
+	जइ (keepalive_in_sec <= 0)
 		use_keepalive = KEEPALIVE_NEVER;
-	if (use_keepalive == KEEPALIVE_ALWAYS)
+	जइ (use_keepalive == KEEPALIVE_ALWAYS)
 		keepalive_active = 1;
 
-	while (1) {
+	जाव (1) {
 		ssize_t sz;
 
-		if (keepalive_active) {
-			struct pollfd pfd;
-			int ret;
+		जइ (keepalive_active) {
+			संरचना pollfd pfd;
+			पूर्णाङ्क ret;
 
 			pfd.fd = in;
 			pfd.events = POLLIN;
 			ret = poll(&pfd, 1, 1000 * keepalive_in_sec);
 
-			if (ret < 0) {
-				if (errno == EINTR)
-					continue;
-				else
-					break;
-			} else if (ret == 0) {
+			जइ (ret < 0) {
+				जइ (errno == EINTR)
+					अनुवर्त;
+				अण्णहा
+					भङ्ग;
+			} अण्णहा जइ (ret == 0) {
 				/* no data; send a keepalive packet */
-				static const char buf[] = "0005\1";
-				write_or_die(1, buf, sizeof(buf) - 1);
-				continue;
+				स्थिर ध्रुव वर्ण buf[] = "0005\1";
+				write_or_die(1, buf, परिमाण(buf) - 1);
+				अनुवर्त;
 			} /* else there is actual data to read */
 		}
 
-		sz = xread(in, data, sizeof(data));
-		if (sz <= 0)
-			break;
+		sz = xread(in, data, परिमाण(data));
+		जइ (sz <= 0)
+			भङ्ग;
 
-		if (use_keepalive == KEEPALIVE_AFTER_NUL && !keepalive_active) {
-			const char *p = memchr(data, '\0', sz);
-			if (p) {
+		जइ (use_keepalive == KEEPALIVE_AFTER_NUL && !keepalive_active) {
+			ध्रुव वर्ण *p = memchr(data, '\0', sz);
+			जइ (p) {
 				/*
 				 * The NUL tells us to start sending keepalives. Make
 				 * sure we send any other data we read along
@@ -531,7 +531,7 @@ static int copy_to_sideband(int in, int out UNUSED, void *arg UNUSED)
 				keepalive_active = 1;
 				send_sideband(1, 2, data, p - data, use_sideband);
 				send_sideband(1, 2, p + 1, sz - (p - data + 1), use_sideband);
-				continue;
+				अनुवर्त;
 			}
 		}
 
@@ -542,7 +542,7 @@ static int copy_to_sideband(int in, int out UNUSED, void *arg UNUSED)
 		send_sideband(1, 2, data, sz, use_sideband);
 	}
 	close(in);
-	return 0;
+	प्रत्यागम 0;
 }
 
 /*
@@ -550,21 +550,21 @@ static int copy_to_sideband(int in, int out UNUSED, void *arg UNUSED)
  * The original stderr fd is saved to `saved_stderr` and STDERR_FILENO is
  * redirected to the async's input pipe.
  */
-static void prepare_sideband_async(struct async *sideband_async, int *saved_stderr, int *started)
+स्थिर शून्य prepare_sideband_async(संरचना async *sideband_async, पूर्णाङ्क *saved_stderr, पूर्णाङ्क *started)
 {
 	*started = 0;
 
-	if (!use_sideband)
-		return;
+	जइ (!use_sideband)
+		प्रत्यागम;
 
-	memset(sideband_async, 0, sizeof(*sideband_async));
+	memset(sideband_async, 0, परिमाण(*sideband_async));
 	sideband_async->proc = copy_to_sideband;
 	sideband_async->in = -1;
 
-	if (!start_async(sideband_async)) {
+	जइ (!start_async(sideband_async)) {
 		*started = 1;
 		*saved_stderr = dup(STDERR_FILENO);
-		if (*saved_stderr >= 0)
+		जइ (*saved_stderr >= 0)
 			dup2(sideband_async->in, STDERR_FILENO);
 		close(sideband_async->in);
 	}
@@ -573,111 +573,111 @@ static void prepare_sideband_async(struct async *sideband_async, int *saved_stde
 /*
  * Restore the original stderr and wait for the async sideband thread to finish.
  */
-static void finish_sideband_async(struct async *sideband_async, int saved_stderr, int started)
+स्थिर शून्य finish_sideband_async(संरचना async *sideband_async, पूर्णाङ्क saved_stderr, पूर्णाङ्क started)
 {
-	if (!use_sideband)
-		return;
+	जइ (!use_sideband)
+		प्रत्यागम;
 
-	if (saved_stderr >= 0) {
+	जइ (saved_stderr >= 0) {
 		dup2(saved_stderr, STDERR_FILENO);
 		close(saved_stderr);
 	}
 
-	if (started)
+	जइ (started)
 		finish_async(sideband_async);
 }
 
-static void hmac_hash(unsigned char *out,
-		      const char *key_in, size_t key_len,
-		      const char *text, size_t text_len)
+स्थिर शून्य hmac_hash(unsigned वर्ण *out,
+		      ध्रुव वर्ण *कुञ्चिका_in, size_t कुञ्चिका_len,
+		      ध्रुव वर्ण *text, size_t text_len)
 {
-	unsigned char key[GIT_MAX_BLKSZ];
-	unsigned char k_ipad[GIT_MAX_BLKSZ];
-	unsigned char k_opad[GIT_MAX_BLKSZ];
-	int i;
-	struct git_hash_ctx ctx;
+	unsigned वर्ण कुञ्चिका[GIT_MAX_BLKSZ];
+	unsigned वर्ण k_ipad[GIT_MAX_BLKSZ];
+	unsigned वर्ण k_opad[GIT_MAX_BLKSZ];
+	पूर्णाङ्क i;
+	संरचना git_hash_ctx ctx;
 
 	/* RFC 2104 2. (1) */
-	memset(key, '\0', GIT_MAX_BLKSZ);
-	if (the_hash_algo->blksz < key_len) {
+	memset(कुञ्चिका, '\0', GIT_MAX_BLKSZ);
+	जइ (the_hash_algo->blksz < कुञ्चिका_len) {
 		git_hash_init(&ctx, the_hash_algo);
-		git_hash_update(&ctx, key_in, key_len);
-		git_hash_final(key, &ctx);
-	} else {
-		memcpy(key, key_in, key_len);
+		git_hash_update(&ctx, कुञ्चिका_in, कुञ्चिका_len);
+		git_hash_final(कुञ्चिका, &ctx);
+	} अण्णहा {
+		memcpy(कुञ्चिका, कुञ्चिका_in, कुञ्चिका_len);
 	}
 
 	/* RFC 2104 2. (2) & (5) */
-	for (i = 0; i < sizeof(key); i++) {
-		k_ipad[i] = key[i] ^ 0x36;
-		k_opad[i] = key[i] ^ 0x5c;
+	प्रति (i = 0; i < परिमाण(कुञ्चिका); i++) {
+		k_ipad[i] = कुञ्चिका[i] ^ 0x36;
+		k_opad[i] = कुञ्चिका[i] ^ 0x5c;
 	}
 
 	/* RFC 2104 2. (3) & (4) */
 	git_hash_init(&ctx, the_hash_algo);
-	git_hash_update(&ctx, k_ipad, sizeof(k_ipad));
+	git_hash_update(&ctx, k_ipad, परिमाण(k_ipad));
 	git_hash_update(&ctx, text, text_len);
 	git_hash_final(out, &ctx);
 
 	/* RFC 2104 2. (6) & (7) */
 	git_hash_init(&ctx, the_hash_algo);
-	git_hash_update(&ctx, k_opad, sizeof(k_opad));
+	git_hash_update(&ctx, k_opad, परिमाण(k_opad));
 	git_hash_update(&ctx, out, the_hash_algo->rawsz);
 	git_hash_final(out, &ctx);
 }
 
-static char *prepare_push_cert_nonce(const char *path, timestamp_t stamp)
+स्थिर वर्ण *prepare_प्रक्षिप_cert_nonce(ध्रुव वर्ण *path, timestamp_t stamp)
 {
-	struct strbuf buf = STRBUF_INIT;
-	unsigned char hash[GIT_MAX_RAWSZ];
+	संरचना strbuf buf = STRBUF_INIT;
+	unsigned वर्ण hash[GIT_MAX_RAWSZ];
 
 	strbuf_addf(&buf, "%s:%"PRItime, path, stamp);
 	hmac_hash(hash, buf.buf, buf.len, cert_nonce_seed, strlen(cert_nonce_seed));
 	strbuf_release(&buf);
 
 	/* RFC 2104 5. HMAC-SHA1 or HMAC-SHA256 */
-	strbuf_addf(&buf, "%"PRItime"-%.*s", stamp, (int)the_hash_algo->hexsz, hash_to_hex(hash));
-	return strbuf_detach(&buf, NULL);
+	strbuf_addf(&buf, "%"PRItime"-%.*s", stamp, (पूर्णाङ्क)the_hash_algo->hexsz, hash_to_hex(hash));
+	प्रत्यागम strbuf_detach(&buf, रिक्त);
 }
 
 /*
  * Return zero if a and b are equal up to n bytes and nonzero if they are not.
  * This operation is guaranteed to run in constant time to avoid leaking data.
  */
-static int constant_memequal(const char *a, const char *b, size_t n)
+स्थिर पूर्णाङ्क constant_memequal(ध्रुव वर्ण *a, ध्रुव वर्ण *b, size_t n)
 {
-	int res = 0;
+	पूर्णाङ्क res = 0;
 	size_t i;
 
-	for (i = 0; i < n; i++)
+	प्रति (i = 0; i < n; i++)
 		res |= a[i] ^ b[i];
-	return res;
+	प्रत्यागम res;
 }
 
-static const char *check_nonce(const char *buf)
+स्थिर ध्रुव वर्ण *check_nonce(ध्रुव वर्ण *buf)
 {
 	size_t noncelen;
-	const char *found = find_commit_header(buf, "nonce", &noncelen);
-	char *nonce = found ? xmemdupz(found, noncelen) : NULL;
+	ध्रुव वर्ण *found = find_commit_header(buf, "nonce", &noncelen);
+	वर्ण *nonce = found ? xmemdupz(found, noncelen) : रिक्त;
 	timestamp_t stamp, ostamp;
-	char *bohmac, *expect = NULL;
-	const char *retval = NONCE_BAD;
+	वर्ण *bohmac, *expect = रिक्त;
+	ध्रुव वर्ण *retval = NONCE_BAD;
 
-	if (!nonce) {
+	जइ (!nonce) {
 		retval = NONCE_MISSING;
-		goto leave;
-	} else if (!push_cert_nonce) {
+		गच्छ leave;
+	} अण्णहा जइ (!प्रक्षिप_cert_nonce) {
 		retval = NONCE_UNSOLICITED;
-		goto leave;
-	} else if (!strcmp(push_cert_nonce, nonce)) {
+		गच्छ leave;
+	} अण्णहा जइ (!strcmp(प्रक्षिप_cert_nonce, nonce)) {
 		retval = NONCE_OK;
-		goto leave;
+		गच्छ leave;
 	}
 
-	if (!stateless_rpc) {
+	जइ (!stateless_rpc) {
 		/* returned nonce MUST match what we gave out earlier */
 		retval = NONCE_BAD;
-		goto leave;
+		गच्छ leave;
 	}
 
 	/*
@@ -693,26 +693,26 @@ static const char *check_nonce(const char *buf)
 	 */
 
 	/* nonce is concat(<seconds-since-epoch>, "-", <hmac>) */
-	if (*nonce <= '0' || '9' < *nonce) {
+	जइ (*nonce <= '0' || '9' < *nonce) {
 		retval = NONCE_BAD;
-		goto leave;
+		गच्छ leave;
 	}
 	stamp = parse_timestamp(nonce, &bohmac, 10);
-	if (bohmac == nonce || bohmac[0] != '-') {
+	जइ (bohmac == nonce || bohmac[0] != '-') {
 		retval = NONCE_BAD;
-		goto leave;
+		गच्छ leave;
 	}
 
-	expect = prepare_push_cert_nonce(service_dir, stamp);
-	if (noncelen != strlen(expect)) {
+	expect = prepare_प्रक्षिप_cert_nonce(service_dir, stamp);
+	जइ (noncelen != strlen(expect)) {
 		/* This is not even the right size. */
 		retval = NONCE_BAD;
-		goto leave;
+		गच्छ leave;
 	}
-	if (constant_memequal(expect, nonce, noncelen)) {
+	जइ (constant_memequal(expect, nonce, noncelen)) {
 		/* Not what we would have signed earlier */
 		retval = NONCE_BAD;
-		goto leave;
+		गच्छ leave;
 	}
 
 	/*
@@ -720,103 +720,103 @@ static const char *check_nonce(const char *buf)
 	 * would mean it was issued by another server with its clock
 	 * skewed in the future.
 	 */
-	ostamp = parse_timestamp(push_cert_nonce, NULL, 10);
+	ostamp = parse_timestamp(प्रक्षिप_cert_nonce, रिक्त, 10);
 	nonce_stamp_slop = (long)ostamp - (long)stamp;
 
-	if (nonce_stamp_slop_limit &&
+	जइ (nonce_stamp_slop_limit &&
 	    labs(nonce_stamp_slop) <= nonce_stamp_slop_limit) {
 		/*
 		 * Pretend as if the received nonce (which passes the
 		 * HMAC check, so it is not a forged by third-party)
 		 * is what we issued.
 		 */
-		free((void *)push_cert_nonce);
-		push_cert_nonce = xstrdup(nonce);
+		मुक्त((शून्य *)प्रक्षिप_cert_nonce);
+		प्रक्षिप_cert_nonce = xstrdup(nonce);
 		retval = NONCE_OK;
-	} else {
+	} अण्णहा {
 		retval = NONCE_SLOP;
 	}
 
 leave:
-	free(nonce);
-	free(expect);
-	return retval;
+	मुक्त(nonce);
+	मुक्त(expect);
+	प्रत्यागम retval;
 }
 
 /*
  * Return 1 if there is no push_cert or if the push options in push_cert are
  * the same as those in the argument; 0 otherwise.
  */
-static int check_cert_push_options(const struct string_list *push_options)
+स्थिर पूर्णाङ्क check_cert_प्रक्षिप_options(ध्रुव संरचना string_list *प्रक्षिप_options)
 {
-	const char *buf = push_cert.buf;
+	ध्रुव वर्ण *buf = प्रक्षिप_cert.buf;
 
-	const char *option;
+	ध्रुव वर्ण *option;
 	size_t optionlen;
-	int options_seen = 0;
+	पूर्णाङ्क options_seen = 0;
 
-	int retval = 1;
+	पूर्णाङ्क retval = 1;
 
-	if (!*buf)
-		return 1;
+	जइ (!*buf)
+		प्रत्यागम 1;
 
-	while ((option = find_commit_header(buf, "push-option", &optionlen))) {
+	जाव ((option = find_commit_header(buf, "push-option", &optionlen))) {
 		buf = option + optionlen + 1;
 		options_seen++;
-		if (options_seen > push_options->nr
-		    || xstrncmpz(push_options->items[options_seen - 1].string,
+		जइ (options_seen > प्रक्षिप_options->nr
+		    || xstrncmpz(प्रक्षिप_options->वस्तूनि[options_seen - 1].string,
 				 option, optionlen))
-			return 0;
+			प्रत्यागम 0;
 	}
 
-	if (options_seen != push_options->nr)
+	जइ (options_seen != प्रक्षिप_options->nr)
 		retval = 0;
 
-	return retval;
+	प्रत्यागम retval;
 }
 
-static void prepare_push_cert_sha1(struct run_hooks_opt *opt)
+स्थिर शून्य prepare_प्रक्षिप_cert_sha1(संरचना run_hooks_opt *opt)
 {
-	static int already_done;
+	स्थिर पूर्णाङ्क already_done;
 
-	if (!push_cert.len)
-		return;
+	जइ (!प्रक्षिप_cert.len)
+		प्रत्यागम;
 
-	if (!already_done) {
-		int bogs /* beginning_of_gpg_sig */;
+	जइ (!already_done) {
+		पूर्णाङ्क bogs /* beginning_of_gpg_sig */;
 
 		already_done = 1;
-		if (odb_write_object(the_repository->objects, push_cert.buf,
-				     push_cert.len, OBJ_BLOB, &push_cert_oid))
-			oidclr(&push_cert_oid, the_repository->hash_algo);
+		जइ (odb_write_object(the_repository->objects, प्रक्षिप_cert.buf,
+				     प्रक्षिप_cert.len, OBJ_BLOB, &प्रक्षिप_cert_oid))
+			oidclr(&प्रक्षिप_cert_oid, the_repository->hash_algo);
 
-		memset(&sigcheck, '\0', sizeof(sigcheck));
+		memset(&sigcheck, '\0', परिमाण(sigcheck));
 
-		bogs = parse_signed_buffer(push_cert.buf, push_cert.len);
-		sigcheck.payload = xmemdupz(push_cert.buf, bogs);
+		bogs = parse_signed_buffer(प्रक्षिप_cert.buf, प्रक्षिप_cert.len);
+		sigcheck.payload = xmemdupz(प्रक्षिप_cert.buf, bogs);
 		sigcheck.payload_len = bogs;
-		check_signature(&sigcheck, push_cert.buf + bogs,
-				push_cert.len - bogs);
+		check_signature(&sigcheck, प्रक्षिप_cert.buf + bogs,
+				प्रक्षिप_cert.len - bogs);
 
 		nonce_status = check_nonce(sigcheck.payload);
 	}
-	if (!is_null_oid(&push_cert_oid)) {
+	जइ (!is_null_oid(&प्रक्षिप_cert_oid)) {
 		strvec_pushf(&opt->env, "GIT_PUSH_CERT=%s",
-			     oid_to_hex(&push_cert_oid));
+			     oid_to_hex(&प्रक्षिप_cert_oid));
 		strvec_pushf(&opt->env, "GIT_PUSH_CERT_SIGNER=%s",
 			     sigcheck.signer ? sigcheck.signer : "");
 		strvec_pushf(&opt->env, "GIT_PUSH_CERT_KEY=%s",
-			     sigcheck.key ? sigcheck.key : "");
+			     sigcheck.कुञ्चिका ? sigcheck.कुञ्चिका : "");
 		strvec_pushf(&opt->env, "GIT_PUSH_CERT_STATUS=%c",
 			     sigcheck.result);
-		if (push_cert_nonce) {
+		जइ (प्रक्षिप_cert_nonce) {
 			strvec_pushf(&opt->env,
 				     "GIT_PUSH_CERT_NONCE=%s",
-				     push_cert_nonce);
+				     प्रक्षिप_cert_nonce);
 			strvec_pushf(&opt->env,
 				     "GIT_PUSH_CERT_NONCE_STATUS=%s",
 				     nonce_status);
-			if (nonce_status == NONCE_SLOP)
+			जइ (nonce_status == NONCE_SLOP)
 				strvec_pushf(&opt->env,
 					     "GIT_PUSH_CERT_NONCE_SLOP=%ld",
 					     nonce_stamp_slop);
@@ -824,34 +824,34 @@ static void prepare_push_cert_sha1(struct run_hooks_opt *opt)
 	}
 }
 
-struct receive_hook_feed_state {
-	struct command *cmd;
-	struct ref_push_report *report;
-	int skip_broken;
-	struct strbuf buf;
+संरचना receive_hook_feed_state {
+	संरचना command *cmd;
+	संरचना ref_प्रक्षिप_report *report;
+	पूर्णाङ्क skip_broken;
+	संरचना strbuf buf;
 };
 
-static int feed_receive_hook_cb(int hook_stdin_fd, void *pp_cb UNUSED, void *pp_task_cb)
+स्थिर पूर्णाङ्क feed_receive_hook_cb(पूर्णाङ्क hook_stdin_fd, शून्य *pp_cb UNUSED, शून्य *pp_task_cb)
 {
-	struct receive_hook_feed_state *state = pp_task_cb;
-	struct command *cmd = state->cmd;
+	संरचना receive_hook_feed_state *state = pp_task_cb;
+	संरचना command *cmd = state->cmd;
 
 	strbuf_reset(&state->buf);
 
-	while (cmd &&
+	जाव (cmd &&
 	       state->skip_broken && (cmd->error_string || cmd->did_not_exist))
 		cmd = cmd->next;
 
-	if (!cmd)
-		return 1;  /* no more commands left */
+	जइ (!cmd)
+		प्रत्यागम 1;  /* no more commands left */
 
-	if (!state->report)
+	जइ (!state->report)
 		state->report = cmd->report;
 
-	if (state->report) {
-		struct object_id *old_oid;
-		struct object_id *new_oid;
-		const char *ref_name;
+	जइ (state->report) {
+		संरचना object_id *old_oid;
+		संरचना object_id *new_oid;
+		ध्रुव वर्ण *ref_name;
 
 		old_oid = state->report->old_oid ? state->report->old_oid : &cmd->old_oid;
 		new_oid = state->report->new_oid ? state->report->new_oid : &cmd->new_oid;
@@ -862,9 +862,9 @@ static int feed_receive_hook_cb(int hook_stdin_fd, void *pp_cb UNUSED, void *pp_
 			    ref_name);
 
 		state->report = state->report->next;
-		if (!state->report)
+		जइ (!state->report)
 			cmd = cmd->next;
-	} else {
+	} अण्णहा {
 		strbuf_addf(&state->buf, "%s %s %s\n",
 			    oid_to_hex(&cmd->old_oid), oid_to_hex(&cmd->new_oid),
 			    cmd->ref_name);
@@ -873,22 +873,22 @@ static int feed_receive_hook_cb(int hook_stdin_fd, void *pp_cb UNUSED, void *pp_
 
 	state->cmd = cmd;
 
-	if (state->buf.len > 0) {
-		int ret = write_in_full(hook_stdin_fd, state->buf.buf, state->buf.len);
-		if (ret < 0) {
-			if (errno == EPIPE)
-				return 1; /* child closed pipe */
-			return ret;
+	जइ (state->buf.len > 0) {
+		पूर्णाङ्क ret = write_in_full(hook_stdin_fd, state->buf.buf, state->buf.len);
+		जइ (ret < 0) {
+			जइ (errno == EPIPE)
+				प्रत्यागम 1; /* child closed pipe */
+			प्रत्यागम ret;
 		}
 	}
 
-	return state->cmd ? 0 : 1;  /* 0 = more to come, 1 = EOF */
+	प्रत्यागम state->cmd ? 0 : 1;  /* 0 = more to come, 1 = EOF */
 }
 
-static void *receive_hook_feed_state_alloc(void *feed_pipe_ctx)
+स्थिर शून्य *receive_hook_feed_state_alloc(शून्य *feed_pipe_ctx)
 {
-	struct receive_hook_feed_state *init_state = feed_pipe_ctx;
-	struct receive_hook_feed_state *data;
+	संरचना receive_hook_feed_state *init_state = feed_pipe_ctx;
+	संरचना receive_hook_feed_state *data;
 
 	CALLOC_ARRAY(data, 1);
 	data->report = init_state->report;
@@ -896,59 +896,59 @@ static void *receive_hook_feed_state_alloc(void *feed_pipe_ctx)
 	data->skip_broken = init_state->skip_broken;
 	strbuf_init(&data->buf, 0);
 
-	return data;
+	प्रत्यागम data;
 }
 
-static void receive_hook_feed_state_free(void *data)
+स्थिर शून्य receive_hook_feed_state_free(शून्य *data)
 {
-	struct receive_hook_feed_state *d = data;
-	if (!d)
-		return;
+	संरचना receive_hook_feed_state *d = data;
+	जइ (!d)
+		प्रत्यागम;
 	strbuf_release(&d->buf);
-	free(d);
+	मुक्त(d);
 }
 
-static int run_receive_hook(struct command *commands,
-			    const char *hook_name,
-			    int skip_broken,
-			    struct odb_transaction *transaction,
-			    const struct string_list *push_options)
+स्थिर पूर्णाङ्क run_receive_hook(संरचना command *commands,
+			    ध्रुव वर्ण *hook_name,
+			    पूर्णाङ्क skip_broken,
+			    संरचना odb_transaction *transaction,
+			    ध्रुव संरचना string_list *प्रक्षिप_options)
 {
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	struct command *iter = commands;
-	struct receive_hook_feed_state feed_init_state = {
+	संरचना run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
+	संरचना command *iter = commands;
+	संरचना receive_hook_feed_state feed_init_state = {
 		.cmd = commands,
 		.skip_broken = skip_broken,
 		.buf = STRBUF_INIT,
 	};
-	struct async sideband_async;
-	int sideband_async_started = 0;
-	int saved_stderr = -1;
-	int ret;
+	संरचना async sideband_async;
+	पूर्णाङ्क sideband_async_started = 0;
+	पूर्णाङ्क saved_stderr = -1;
+	पूर्णाङ्क ret;
 
-	if (!hook_exists(the_repository, hook_name))
-		return 0;
+	जइ (!hook_exists(the_repository, hook_name))
+		प्रत्यागम 0;
 
 	/* if there are no valid commands, don't invoke the hook at all. */
-	while (iter && skip_broken && (iter->error_string || iter->did_not_exist))
+	जाव (iter && skip_broken && (iter->error_string || iter->did_not_exist))
 		iter = iter->next;
-	if (!iter)
-		return 0;
+	जइ (!iter)
+		प्रत्यागम 0;
 
-	if (push_options) {
-		for (int i = 0; i < push_options->nr; i++)
+	जइ (प्रक्षिप_options) {
+		प्रति (पूर्णाङ्क i = 0; i < प्रक्षिप_options->nr; i++)
 			strvec_pushf(&opt.env, "GIT_PUSH_OPTION_%d=%s", i,
-				     push_options->items[i].string);
+				     प्रक्षिप_options->वस्तूनि[i].string);
 		strvec_pushf(&opt.env, "GIT_PUSH_OPTION_COUNT=%"PRIuMAX"",
-					     (uintmax_t)push_options->nr);
-	} else {
-		strvec_push(&opt.env, "GIT_PUSH_OPTION_COUNT");
+					     (uintmax_t)प्रक्षिप_options->nr);
+	} अण्णहा {
+		strvec_प्रक्षिप(&opt.env, "GIT_PUSH_OPTION_COUNT");
 	}
 
-	if (transaction)
+	जइ (transaction)
 		odb_transaction_env(transaction, &opt.env);
 
-	prepare_push_cert_sha1(&opt);
+	prepare_प्रक्षिप_cert_sha1(&opt);
 
 	prepare_sideband_async(&sideband_async, &saved_stderr, &sideband_async_started);
 
@@ -962,26 +962,26 @@ static int run_receive_hook(struct command *commands,
 
 	finish_sideband_async(&sideband_async, saved_stderr, sideband_async_started);
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int run_update_hook(struct command *cmd)
+स्थिर पूर्णाङ्क run_update_hook(संरचना command *cmd)
 {
-	static const char hook_name[] = "update";
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	struct async sideband_async;
-	int sideband_async_started = 0;
-	int saved_stderr = -1;
-	int code;
+	स्थिर ध्रुव वर्ण hook_name[] = "update";
+	संरचना run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
+	संरचना async sideband_async;
+	पूर्णाङ्क sideband_async_started = 0;
+	पूर्णाङ्क saved_stderr = -1;
+	पूर्णाङ्क code;
 
-	if (!hook_exists(the_repository, hook_name))
-		return 0;
+	जइ (!hook_exists(the_repository, hook_name))
+		प्रत्यागम 0;
 
 	strvec_pushl(&opt.args,
 		     cmd->ref_name,
 		     oid_to_hex(&cmd->old_oid),
 		     oid_to_hex(&cmd->new_oid),
-		     NULL);
+		     रिक्त);
 
 	prepare_sideband_async(&sideband_async, &saved_stderr, &sideband_async_started);
 
@@ -989,322 +989,322 @@ static int run_update_hook(struct command *cmd)
 
 	finish_sideband_async(&sideband_async, saved_stderr, sideband_async_started);
 
-	return code;
+	प्रत्यागम code;
 }
 
-static int run_receive_report_hook(struct strbuf *report)
+स्थिर पूर्णाङ्क run_receive_report_hook(संरचना strbuf *report)
 {
-	struct child_process proc = CHILD_PROCESS_INIT;
-	struct async sideband_async;
-	int sideband_async_started = 0;
-	int saved_stderr = -1;
-	struct strbuf out = STRBUF_INIT;
-	const char *hook_path;
-	int ret;
+	संरचना child_process proc = CHILD_PROCESS_INIT;
+	संरचना async sideband_async;
+	पूर्णाङ्क sideband_async_started = 0;
+	पूर्णाङ्क saved_stderr = -1;
+	संरचना strbuf out = STRBUF_INIT;
+	ध्रुव वर्ण *hook_path;
+	पूर्णाङ्क ret;
 
 	hook_path = find_hook(the_repository, "receive-report");
-	if (!hook_path)
-		return 0;
+	जइ (!hook_path)
+		प्रत्यागम 0;
 
-	strvec_push(&proc.args, hook_path);
+	strvec_प्रक्षिप(&proc.args, hook_path);
 	proc.trace2_hook_name = "receive-report";
 
 	prepare_sideband_async(&sideband_async, &saved_stderr,
 			       &sideband_async_started);
 
-	sigchain_push(SIGPIPE, SIG_IGN);
+	sigchain_प्रक्षिप(SIGPIPE, SIG_IGN);
 	ret = pipe_command(&proc, report->buf, report->len, &out,
-			   report->len, NULL, 0);
-	sigchain_pop(SIGPIPE);
+			   report->len, रिक्त, 0);
+	sigchain_निष्कासय(SIGPIPE);
 
 	finish_sideband_async(&sideband_async, saved_stderr,
 			      sideband_async_started);
 
-	if (!ret)
+	जइ (!ret)
 		strbuf_swap(&out, report);
 
 	strbuf_release(&out);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static struct command *find_command_by_refname(struct command *list,
-					       const char *refname)
+स्थिर संरचना command *find_command_by_refname(संरचना command *list,
+					       ध्रुव वर्ण *refname)
 {
-	for (; list; list = list->next)
-		if (!strcmp(list->ref_name, refname))
-			return list;
-	return NULL;
+	प्रति (; list; list = list->next)
+		जइ (!strcmp(list->ref_name, refname))
+			प्रत्यागम list;
+	प्रत्यागम रिक्त;
 }
 
-static int read_proc_receive_report(struct packet_reader *reader,
-				    struct command *commands,
-				    struct strbuf *errmsg)
+स्थिर पूर्णाङ्क read_proc_receive_report(संरचना packet_reader *reader,
+				    संरचना command *commands,
+				    संरचना strbuf *errmsg)
 {
-	struct command *cmd;
-	struct command *hint = NULL;
-	struct ref_push_report *report = NULL;
-	int new_report = 0;
-	int code = 0;
-	int once = 0;
-	int response = 0;
+	संरचना command *cmd;
+	संरचना command *hint = रिक्त;
+	संरचना ref_प्रक्षिप_report *report = रिक्त;
+	पूर्णाङ्क new_report = 0;
+	पूर्णाङ्क code = 0;
+	पूर्णाङ्क once = 0;
+	पूर्णाङ्क response = 0;
 
-	for (;;) {
-		struct object_id old_oid, new_oid;
-		char *head;
-		char *refname;
-		char *p;
-		enum packet_read_status status;
+	प्रति (;;) {
+		संरचना object_id old_oid, new_oid;
+		वर्ण *head;
+		वर्ण *refname;
+		वर्ण *p;
+		गणना packet_read_status status;
 
 		status = packet_reader_read(reader);
-		if (status != PACKET_READ_NORMAL) {
+		जइ (status != PACKET_READ_NORMAL) {
 			/* Check whether proc-receive exited abnormally */
-			if (status == PACKET_READ_EOF && !response) {
+			जइ (status == PACKET_READ_EOF && !response) {
 				strbuf_addstr(errmsg, "proc-receive exited abnormally");
-				return -1;
+				प्रत्यागम -1;
 			}
-			break;
+			भङ्ग;
 		}
 		response++;
 
-		head = reader->line;
+		head = reader->पङ्क्तिः;
 		p = strchr(head, ' ');
-		if (!p) {
+		जइ (!p) {
 			strbuf_addf(errmsg, "proc-receive reported incomplete status line: '%s'\n", head);
 			code = -1;
-			continue;
+			अनुवर्त;
 		}
 		*p++ = '\0';
-		if (!strcmp(head, "option")) {
-			char *key;
-			const char *val;
+		जइ (!strcmp(head, "option")) {
+			वर्ण *कुञ्चिका;
+			ध्रुव वर्ण *val;
 
-			if (!hint || !(report || new_report)) {
-				if (!once++)
+			जइ (!hint || !(report || new_report)) {
+				जइ (!once++)
 					strbuf_addstr(errmsg, "proc-receive reported 'option' without a matching 'ok/ng' directive\n");
 				code = -1;
-				continue;
+				अनुवर्त;
 			}
-			if (new_report) {
-				if (!hint->report) {
+			जइ (new_report) {
+				जइ (!hint->report) {
 					CALLOC_ARRAY(hint->report, 1);
 					report = hint->report;
-				} else {
+				} अण्णहा {
 					report = hint->report;
-					while (report->next)
+					जाव (report->next)
 						report = report->next;
-					report->next = xcalloc(1, sizeof(struct ref_push_report));
+					report->next = xcalloc(1, परिमाण(संरचना ref_प्रक्षिप_report));
 					report = report->next;
 				}
 				new_report = 0;
 			}
-			key = p;
-			p = strchr(key, ' ');
-			if (p)
+			कुञ्चिका = p;
+			p = strchr(कुञ्चिका, ' ');
+			जइ (p)
 				*p++ = '\0';
 			val = p;
-			if (!strcmp(key, "refname"))
+			जइ (!strcmp(कुञ्चिका, "refname"))
 				report->ref_name = xstrdup_or_null(val);
-			else if (!strcmp(key, "old-oid") && val &&
+			अण्णहा जइ (!strcmp(कुञ्चिका, "old-oid") && val &&
 				 !parse_oid_hex(val, &old_oid, &val))
 				report->old_oid = oiddup(&old_oid);
-			else if (!strcmp(key, "new-oid") && val &&
+			अण्णहा जइ (!strcmp(कुञ्चिका, "new-oid") && val &&
 				 !parse_oid_hex(val, &new_oid, &val))
 				report->new_oid = oiddup(&new_oid);
-			else if (!strcmp(key, "forced-update"))
+			अण्णहा जइ (!strcmp(कुञ्चिका, "forced-update"))
 				report->forced_update = 1;
-			else if (!strcmp(key, "fall-through"))
+			अण्णहा जइ (!strcmp(कुञ्चिका, "fall-through"))
 				/* Fall through, let 'receive-pack' to execute it. */
 				hint->run_proc_receive = 0;
-			continue;
+			अनुवर्त;
 		}
 
-		report = NULL;
+		report = रिक्त;
 		new_report = 0;
 		refname = p;
 		p = strchr(refname, ' ');
-		if (p)
+		जइ (p)
 			*p++ = '\0';
-		if (strcmp(head, "ok") && strcmp(head, "ng")) {
+		जइ (strcmp(head, "ok") && strcmp(head, "ng")) {
 			strbuf_addf(errmsg, "proc-receive reported bad status '%s' on ref '%s'\n",
 				    head, refname);
 			code = -1;
-			continue;
+			अनुवर्त;
 		}
 
 		/* first try searching at our hint, falling back to all refs */
-		if (hint)
+		जइ (hint)
 			hint = find_command_by_refname(hint, refname);
-		if (!hint)
+		जइ (!hint)
 			hint = find_command_by_refname(commands, refname);
-		if (!hint) {
+		जइ (!hint) {
 			strbuf_addf(errmsg, "proc-receive reported status on unknown ref: %s\n",
 				    refname);
 			code = -1;
-			continue;
+			अनुवर्त;
 		}
-		if (!hint->run_proc_receive) {
+		जइ (!hint->run_proc_receive) {
 			strbuf_addf(errmsg, "proc-receive reported status on unexpected ref: %s\n",
 				    refname);
 			code = -1;
-			continue;
+			अनुवर्त;
 		}
 		hint->run_proc_receive |= RUN_PROC_RECEIVE_RETURNED;
-		if (!strcmp(head, "ng")) {
-			if (p)
+		जइ (!strcmp(head, "ng")) {
+			जइ (p)
 				hint->error_string = hint->error_string_owned = xstrdup(p);
-			else
+			अण्णहा
 				hint->error_string = "failed";
 			code = -1;
-			continue;
+			अनुवर्त;
 		}
 		new_report = 1;
 	}
 
-	for (cmd = commands; cmd; cmd = cmd->next)
-		if (cmd->run_proc_receive && !cmd->error_string &&
+	प्रति (cmd = commands; cmd; cmd = cmd->next)
+		जइ (cmd->run_proc_receive && !cmd->error_string &&
 		    !(cmd->run_proc_receive & RUN_PROC_RECEIVE_RETURNED)) {
 		    cmd->error_string = "proc-receive failed to report status";
 		    code = -1;
 		}
-	return code;
+	प्रत्यागम code;
 }
 
-static int run_proc_receive_hook(struct command *commands,
-				 const struct string_list *push_options)
+स्थिर पूर्णाङ्क run_proc_receive_hook(संरचना command *commands,
+				 ध्रुव संरचना string_list *प्रक्षिप_options)
 {
-	struct child_process proc = CHILD_PROCESS_INIT;
-	struct async muxer;
-	struct command *cmd;
-	struct packet_reader reader;
-	struct strbuf cap = STRBUF_INIT;
-	struct strbuf errmsg = STRBUF_INIT;
-	int hook_use_push_options = 0;
-	int version = 0;
-	int code;
-	const char *hook_path = find_hook(the_repository, "proc-receive");
+	संरचना child_process proc = CHILD_PROCESS_INIT;
+	संरचना async muxer;
+	संरचना command *cmd;
+	संरचना packet_reader reader;
+	संरचना strbuf cap = STRBUF_INIT;
+	संरचना strbuf errmsg = STRBUF_INIT;
+	पूर्णाङ्क hook_use_प्रक्षिप_options = 0;
+	पूर्णाङ्क version = 0;
+	पूर्णाङ्क code;
+	ध्रुव वर्ण *hook_path = find_hook(the_repository, "proc-receive");
 
-	if (!hook_path) {
+	जइ (!hook_path) {
 		rp_error("cannot find hook 'proc-receive'");
-		return -1;
+		प्रत्यागम -1;
 	}
 
-	strvec_push(&proc.args, hook_path);
+	strvec_प्रक्षिप(&proc.args, hook_path);
 	proc.in = -1;
 	proc.out = -1;
 	proc.trace2_hook_name = "proc-receive";
 
-	if (use_sideband) {
-		memset(&muxer, 0, sizeof(muxer));
+	जइ (use_sideband) {
+		memset(&muxer, 0, परिमाण(muxer));
 		muxer.proc = copy_to_sideband;
 		muxer.in = -1;
 		code = start_async(&muxer);
-		if (code)
-			return code;
+		जइ (code)
+			प्रत्यागम code;
 		proc.err = muxer.in;
-	} else {
+	} अण्णहा {
 		proc.err = 0;
 	}
 
 	code = start_command(&proc);
-	if (code) {
-		if (use_sideband)
+	जइ (code) {
+		जइ (use_sideband)
 			finish_async(&muxer);
-		return code;
+		प्रत्यागम code;
 	}
 
-	sigchain_push(SIGPIPE, SIG_IGN);
+	sigchain_प्रक्षिप(SIGPIPE, SIG_IGN);
 
 	/* Version negotiaton */
-	packet_reader_init(&reader, proc.out, NULL, 0,
+	packet_reader_init(&reader, proc.out, रिक्त, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF);
-	if (use_atomic)
+	जइ (use_atomic)
 		strbuf_addstr(&cap, " atomic");
-	if (use_push_options)
+	जइ (use_प्रक्षिप_options)
 		strbuf_addstr(&cap, " push-options");
-	if (cap.len) {
+	जइ (cap.len) {
 		code = packet_write_fmt_gently(proc.in, "version=1%c%s\n", '\0', cap.buf + 1);
 		strbuf_release(&cap);
-	} else {
+	} अण्णहा {
 		code = packet_write_fmt_gently(proc.in, "version=1\n");
 	}
-	if (!code)
+	जइ (!code)
 		code = packet_flush_gently(proc.in);
 
-	if (!code)
-		for (;;) {
-			int linelen;
-			enum packet_read_status status;
+	जइ (!code)
+		प्रति (;;) {
+			पूर्णाङ्क linelen;
+			गणना packet_read_status status;
 
 			status = packet_reader_read(&reader);
-			if (status != PACKET_READ_NORMAL) {
+			जइ (status != PACKET_READ_NORMAL) {
 				/* Check whether proc-receive exited abnormally */
-				if (status == PACKET_READ_EOF)
+				जइ (status == PACKET_READ_EOF)
 					code = -1;
-				break;
+				भङ्ग;
 			}
 
-			if (reader.pktlen > 8 && starts_with(reader.line, "version=")) {
-				version = atoi(reader.line + 8);
-				linelen = strlen(reader.line);
-				if (linelen < reader.pktlen) {
-					const char *feature_list = reader.line + linelen + 1;
-					if (parse_feature_request(feature_list, "push-options"))
-						hook_use_push_options = 1;
+			जइ (reader.pktlen > 8 && starts_with(reader.पङ्क्तिः, "version=")) {
+				version = atoi(reader.पङ्क्तिः + 8);
+				linelen = strlen(reader.पङ्क्तिः);
+				जइ (linelen < reader.pktlen) {
+					ध्रुव वर्ण *feature_list = reader.पङ्क्तिः + linelen + 1;
+					जइ (parse_feature_request(feature_list, "push-options"))
+						hook_use_प्रक्षिप_options = 1;
 				}
 			}
 		}
 
-	if (code) {
+	जइ (code) {
 		strbuf_addstr(&errmsg, "fail to negotiate version with proc-receive hook");
-		goto cleanup;
+		गच्छ cleanup;
 	}
 
-	switch (version) {
-	case 0:
+	विकल्प (version) {
+	पक्ष 0:
 		/* fallthrough */
-	case 1:
-		break;
-	default:
+	पक्ष 1:
+		भङ्ग;
+	स्वभाव:
 		strbuf_addf(&errmsg, "proc-receive version '%d' is not supported",
 			    version);
 		code = -1;
-		goto cleanup;
+		गच्छ cleanup;
 	}
 
 	/* Send commands */
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (!cmd->run_proc_receive || cmd->skip_update || cmd->error_string)
-			continue;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (!cmd->run_proc_receive || cmd->skip_update || cmd->error_string)
+			अनुवर्त;
 		code = packet_write_fmt_gently(proc.in, "%s %s %s",
 					       oid_to_hex(&cmd->old_oid),
 					       oid_to_hex(&cmd->new_oid),
 					       cmd->ref_name);
-		if (code)
-			break;
+		जइ (code)
+			भङ्ग;
 	}
-	if (!code)
+	जइ (!code)
 		code = packet_flush_gently(proc.in);
-	if (code) {
+	जइ (code) {
 		strbuf_addstr(&errmsg, "fail to write commands to proc-receive hook");
-		goto cleanup;
+		गच्छ cleanup;
 	}
 
 	/* Send push options */
-	if (hook_use_push_options) {
-		struct string_list_item *item;
+	जइ (hook_use_प्रक्षिप_options) {
+		संरचना string_list_item *item;
 
-		for_each_string_list_item(item, push_options) {
+		for_each_string_list_item(item, प्रक्षिप_options) {
 			code = packet_write_fmt_gently(proc.in, "%s", item->string);
-			if (code)
-				break;
+			जइ (code)
+				भङ्ग;
 		}
-		if (!code)
+		जइ (!code)
 			code = packet_flush_gently(proc.in);
-		if (code) {
+		जइ (code) {
 			strbuf_addstr(&errmsg,
 				      "fail to write push-options to proc-receive hook");
-			goto cleanup;
+			गच्छ cleanup;
 		}
 	}
 
@@ -1314,25 +1314,25 @@ static int run_proc_receive_hook(struct command *commands,
 cleanup:
 	close(proc.in);
 	close(proc.out);
-	if (use_sideband)
+	जइ (use_sideband)
 		finish_async(&muxer);
-	if (finish_command(&proc))
+	जइ (finish_command(&proc))
 		code = -1;
-	if (errmsg.len >0) {
-		char *p = errmsg.buf;
+	जइ (errmsg.len >0) {
+		वर्ण *p = errmsg.buf;
 
 		p += errmsg.len - 1;
-		if (*p == '\n')
+		जइ (*p == '\n')
 			*p = '\0';
 		rp_error("%s", errmsg.buf);
 		strbuf_release(&errmsg);
 	}
-	sigchain_pop(SIGPIPE);
+	sigchain_निष्कासय(SIGPIPE);
 
-	return code;
+	प्रत्यागम code;
 }
 
-static const char *refuse_unconfigured_deny_msg =
+स्थिर ध्रुव वर्ण *refuse_unconfigured_deny_सन्देशः =
 	N_("By default, updating the current branch in a non-bare repository\n"
 	   "is denied, because it will make the index and work tree inconsistent\n"
 	   "with what you pushed, and will require 'git reset --hard' to match\n"
@@ -1347,12 +1347,12 @@ static const char *refuse_unconfigured_deny_msg =
 	   "To squelch this message and still keep the default behaviour, set\n"
 	   "'receive.denyCurrentBranch' configuration variable to 'refuse'.");
 
-static void refuse_unconfigured_deny(void)
+स्थिर शून्य refuse_unconfigured_deny(शून्य)
 {
-	rp_error("%s", _(refuse_unconfigured_deny_msg));
+	rp_error("%s", _(refuse_unconfigured_deny_सन्देशः));
 }
 
-static const char *refuse_unconfigured_deny_delete_current_msg =
+स्थिर ध्रुव वर्ण *refuse_unconfigured_deny_delete_current_सन्देशः =
 	N_("By default, deleting the current branch is denied, because the next\n"
 	   "'git clone' won't result in any file checked out, causing confusion.\n"
 	   "\n"
@@ -1362,33 +1362,33 @@ static const char *refuse_unconfigured_deny_delete_current_msg =
 	   "\n"
 	   "To squelch this message, you can set it to 'refuse'.");
 
-static void refuse_unconfigured_deny_delete_current(void)
+स्थिर शून्य refuse_unconfigured_deny_delete_current(शून्य)
 {
-	rp_error("%s", _(refuse_unconfigured_deny_delete_current_msg));
+	rp_error("%s", _(refuse_unconfigured_deny_delete_current_सन्देशः));
 }
 
-static const struct object_id *command_singleton_iterator(void *cb_data);
-static int update_shallow_ref(struct command *cmd, struct shallow_info *si)
+स्थिर ध्रुव संरचना object_id *command_singleton_iterator(शून्य *cb_data);
+स्थिर पूर्णाङ्क update_shallow_ref(संरचना command *cmd, संरचना shallow_info *si)
 {
-	struct shallow_lock shallow_lock = SHALLOW_LOCK_INIT;
-	struct oid_array extra = OID_ARRAY_INIT;
-	struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	संरचना shallow_lock shallow_lock = SHALLOW_LOCK_INIT;
+	संरचना oid_array extra = OID_ARRAY_INIT;
+	संरचना check_connected_options opt = CHECK_CONNECTED_INIT;
 	uint32_t mask = 1 << (cmd->index % 32);
-	int i;
+	पूर्णाङ्क i;
 
-	trace_printf_key(&trace_shallow,
+	trace_printf_कुञ्चिका(&trace_shallow,
 			 "shallow: update_shallow_ref %s\n", cmd->ref_name);
-	for (i = 0; i < si->shallow->nr; i++)
-		if (si->used_shallow[i] &&
+	प्रति (i = 0; i < si->shallow->nr; i++)
+		जइ (si->used_shallow[i] &&
 		    (si->used_shallow[i][cmd->index / 32] & mask) &&
 		    !delayed_reachability_test(si, i))
 			oid_array_append(&extra, &si->shallow->oid[i]);
 
 	setup_alternate_shallow(&shallow_lock, &opt.shallow_file, &extra);
-	if (check_connected(command_singleton_iterator, cmd, &opt)) {
+	जइ (check_connected(command_singleton_iterator, cmd, &opt)) {
 		rollback_shallow_file(the_repository, &shallow_lock);
 		oid_array_clear(&extra);
-		return -1;
+		प्रत्यागम -1;
 	}
 
 	commit_shallow_file(the_repository, &shallow_lock);
@@ -1397,41 +1397,41 @@ static int update_shallow_ref(struct command *cmd, struct shallow_info *si)
 	 * Make sure setup_alternate_shallow() for the next ref does
 	 * not lose these new roots..
 	 */
-	for (i = 0; i < extra.nr; i++)
+	प्रति (i = 0; i < extra.nr; i++)
 		register_shallow(the_repository, &extra.oid[i]);
 
 	si->shallow_ref[cmd->index] = 0;
 	oid_array_clear(&extra);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static const char *push_to_deploy(unsigned char *sha1,
-				  struct strvec *env,
-				  const struct worktree *worktree)
+स्थिर ध्रुव वर्ण *प्रक्षिप_to_deploy(unsigned वर्ण *sha1,
+				  संरचना strvec *env,
+				  ध्रुव संरचना worktree *worktree)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	संरचना child_process child = CHILD_PROCESS_INIT;
 
 	strvec_pushl(&child.args, "update-index", "-q", "--ignore-submodules",
-		     "--refresh", NULL);
+		     "--refresh", रिक्त);
 	strvec_pushv(&child.env, env->v);
 	child.dir = worktree->path;
 	child.no_stdin = 1;
 	child.stdout_to_stderr = 1;
 	child.git_cmd = 1;
-	if (run_command(&child))
-		return "Up-to-date check failed";
+	जइ (run_command(&child))
+		प्रत्यागम "Up-to-date check failed";
 
 	/* run_command() does not clean up completely; reinitialize */
 	child_process_init(&child);
 	strvec_pushl(&child.args, "diff-files", "--quiet",
-		     "--ignore-submodules", "--", NULL);
+		     "--ignore-submodules", "--", रिक्त);
 	strvec_pushv(&child.env, env->v);
 	child.dir = worktree->path;
 	child.no_stdin = 1;
 	child.stdout_to_stderr = 1;
 	child.git_cmd = 1;
-	if (run_command(&child))
-		return "Working directory has unstaged changes";
+	जइ (run_command(&child))
+		प्रत्यागम "Working directory has unstaged changes";
 
 	child_process_init(&child);
 	strvec_pushl(&child.args, "diff-index", "--quiet", "--cached",
@@ -1445,274 +1445,274 @@ static const char *push_to_deploy(unsigned char *sha1,
 		      * empty tree.
 		      */
 		     !is_null_oid(&worktree->head_oid) ? "HEAD" :
-		     empty_tree_oid_hex(the_repository->hash_algo), "--", NULL);
+		     empty_वृक्षः_oid_hex(the_repository->hash_algo), "--", रिक्त);
 	strvec_pushv(&child.env, env->v);
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.stdout_to_stderr = 0;
 	child.git_cmd = 1;
-	if (run_command(&child))
-		return "Working directory has staged changes";
+	जइ (run_command(&child))
+		प्रत्यागम "Working directory has staged changes";
 
 	child_process_init(&child);
 	strvec_pushl(&child.args, "read-tree", "-u", "-m", hash_to_hex(sha1),
-		     NULL);
+		     रिक्त);
 	strvec_pushv(&child.env, env->v);
 	child.dir = worktree->path;
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.stdout_to_stderr = 0;
 	child.git_cmd = 1;
-	if (run_command(&child))
-		return "Could not update working tree to new HEAD";
+	जइ (run_command(&child))
+		प्रत्यागम "Could not update working tree to new HEAD";
 
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
-static const char *push_to_checkout_hook = "push-to-checkout";
+स्थिर ध्रुव वर्ण *प्रक्षिप_to_checkout_hook = "push-to-checkout";
 
-static const char *push_to_checkout(unsigned char *hash,
-				    int *invoked_hook,
-				    struct strvec *env,
-				    const char *work_tree)
+स्थिर ध्रुव वर्ण *प्रक्षिप_to_checkout(unsigned वर्ण *hash,
+				    पूर्णाङ्क *invoked_hook,
+				    संरचना strvec *env,
+				    ध्रुव वर्ण *work_वृक्षः)
 {
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	संरचना run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
 	opt.invoked_hook = invoked_hook;
 
 	strvec_pushv(&opt.env, env->v);
-	strvec_pushf(&opt.env, "GIT_WORK_TREE=%s", absolute_path(work_tree));
-	strvec_push(&opt.args, hash_to_hex(hash));
-	if (run_hooks_opt(the_repository, push_to_checkout_hook, &opt))
-		return "push-to-checkout hook declined";
-	else
-		return NULL;
+	strvec_pushf(&opt.env, "GIT_WORK_TREE=%s", absolute_path(work_वृक्षः));
+	strvec_प्रक्षिप(&opt.args, hash_to_hex(hash));
+	जइ (run_hooks_opt(the_repository, प्रक्षिप_to_checkout_hook, &opt))
+		प्रत्यागम "push-to-checkout hook declined";
+	अण्णहा
+		प्रत्यागम रिक्त;
 }
 
-static const char *update_worktree(unsigned char *sha1, const struct worktree *worktree)
+स्थिर ध्रुव वर्ण *update_worktree(unsigned वर्ण *sha1, ध्रुव संरचना worktree *worktree)
 {
-	const char *retval;
-	char *git_dir;
-	struct strvec env = STRVEC_INIT;
-	int invoked_hook;
+	ध्रुव वर्ण *retval;
+	वर्ण *git_dir;
+	संरचना strvec env = STRVEC_INIT;
+	पूर्णाङ्क invoked_hook;
 
-	if (!worktree || !worktree->path)
+	जइ (!worktree || !worktree->path)
 		BUG("worktree->path must be non-NULL");
 
-	if (worktree->is_bare)
-		return "denyCurrentBranch = updateInstead needs a worktree";
+	जइ (worktree->is_bare)
+		प्रत्यागम "denyCurrentBranch = updateInstead needs a worktree";
 	git_dir = get_worktree_git_dir(worktree);
 
 	strvec_pushf(&env, "GIT_DIR=%s", absolute_path(git_dir));
 
-	retval = push_to_checkout(sha1, &invoked_hook, &env, worktree->path);
-	if (!invoked_hook)
-		retval = push_to_deploy(sha1, &env, worktree);
+	retval = प्रक्षिप_to_checkout(sha1, &invoked_hook, &env, worktree->path);
+	जइ (!invoked_hook)
+		retval = प्रक्षिप_to_deploy(sha1, &env, worktree);
 
 	strvec_clear(&env);
-	free(git_dir);
-	return retval;
+	मुक्त(git_dir);
+	प्रत्यागम retval;
 }
 
-static const char *update(struct command *cmd, struct shallow_info *si)
+स्थिर ध्रुव वर्ण *update(संरचना command *cmd, संरचना shallow_info *si)
 {
-	const char *name = cmd->ref_name;
-	struct strbuf namespaced_name_buf = STRBUF_INIT;
-	static char *namespaced_name;
-	const char *ret;
-	struct object_id *old_oid = &cmd->old_oid;
-	struct object_id *new_oid = &cmd->new_oid;
-	int do_update_worktree = 0;
-	struct worktree **worktrees = get_worktrees(the_repository);
-	const struct worktree *worktree =
+	ध्रुव वर्ण *name = cmd->ref_name;
+	संरचना strbuf namespaced_name_buf = STRBUF_INIT;
+	स्थिर वर्ण *namespaced_name;
+	ध्रुव वर्ण *ret;
+	संरचना object_id *old_oid = &cmd->old_oid;
+	संरचना object_id *new_oid = &cmd->new_oid;
+	पूर्णाङ्क do_update_worktree = 0;
+	संरचना worktree **worktrees = get_worktrees(the_repository);
+	ध्रुव संरचना worktree *worktree =
 		find_shared_symref(worktrees, "HEAD", name);
 
 	/* only refs/... are allowed */
-	if (!starts_with(name, "refs/") ||
+	जइ (!starts_with(name, "refs/") ||
 	    check_refname_format(name + 5, is_null_oid(new_oid) ?
 				 REFNAME_ALLOW_ONELEVEL : 0)) {
 		rp_error("refusing to update funny ref '%s' remotely", name);
 		ret = "funny refname";
-		goto out;
+		गच्छ out;
 	}
 
 	strbuf_addf(&namespaced_name_buf, "%s%s", get_git_namespace(), name);
-	free(namespaced_name);
-	namespaced_name = strbuf_detach(&namespaced_name_buf, NULL);
+	मुक्त(namespaced_name);
+	namespaced_name = strbuf_detach(&namespaced_name_buf, रिक्त);
 
-	if (worktree && !worktree->is_bare) {
-		switch (deny_current_branch) {
-		case DENY_IGNORE:
-			break;
-		case DENY_WARN:
+	जइ (worktree && !worktree->is_bare) {
+		विकल्प (deny_current_branch) {
+		पक्ष DENY_IGNORE:
+			भङ्ग;
+		पक्ष DENY_WARN:
 			rp_warning("updating the current branch");
-			break;
-		case DENY_REFUSE:
-		case DENY_UNCONFIGURED:
+			भङ्ग;
+		पक्ष DENY_REFUSE:
+		पक्ष DENY_UNCONFIGURED:
 			rp_error("refusing to update checked out branch: %s", name);
-			if (deny_current_branch == DENY_UNCONFIGURED)
+			जइ (deny_current_branch == DENY_UNCONFIGURED)
 				refuse_unconfigured_deny();
 			ret = "branch is currently checked out";
-			goto out;
-		case DENY_UPDATE_INSTEAD:
+			गच्छ out;
+		पक्ष DENY_UPDATE_INSTEAD:
 			/* pass -- let other checks intervene first */
 			do_update_worktree = 1;
-			break;
+			भङ्ग;
 		}
 	}
 
-	if (!is_null_oid(new_oid) &&
+	जइ (!is_null_oid(new_oid) &&
 	    !odb_has_object(the_repository->objects, new_oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR)) {
 		error("unpack should have generated %s, "
 		      "but I can't find it!", oid_to_hex(new_oid));
 		ret = "bad pack";
-		goto out;
+		गच्छ out;
 	}
 
-	if (!is_null_oid(old_oid) && is_null_oid(new_oid)) {
-		if (deny_deletes && starts_with(name, "refs/heads/")) {
+	जइ (!is_null_oid(old_oid) && is_null_oid(new_oid)) {
+		जइ (deny_deletes && starts_with(name, "refs/heads/")) {
 			rp_error("denying ref deletion for %s", name);
 			ret = "deletion prohibited";
-			goto out;
+			गच्छ out;
 		}
 
-		if (worktree || (head_name && !strcmp(namespaced_name, head_name))) {
-			switch (deny_delete_current) {
-			case DENY_IGNORE:
-				break;
-			case DENY_WARN:
+		जइ (worktree || (head_name && !strcmp(namespaced_name, head_name))) {
+			विकल्प (deny_delete_current) {
+			पक्ष DENY_IGNORE:
+				भङ्ग;
+			पक्ष DENY_WARN:
 				rp_warning("deleting the current branch");
-				break;
-			case DENY_REFUSE:
-			case DENY_UNCONFIGURED:
-			case DENY_UPDATE_INSTEAD:
-				if (deny_delete_current == DENY_UNCONFIGURED)
+				भङ्ग;
+			पक्ष DENY_REFUSE:
+			पक्ष DENY_UNCONFIGURED:
+			पक्ष DENY_UPDATE_INSTEAD:
+				जइ (deny_delete_current == DENY_UNCONFIGURED)
 					refuse_unconfigured_deny_delete_current();
 				rp_error("refusing to delete the current branch: %s", name);
 				ret = "deletion of the current branch prohibited";
-				goto out;
-			default:
+				गच्छ out;
+			स्वभाव:
 				ret = "Invalid denyDeleteCurrent setting";
-				goto out;
+				गच्छ out;
 			}
 		}
 	}
 
-	if (deny_non_fast_forwards && !is_null_oid(new_oid) &&
+	जइ (deny_non_fast_forwards && !is_null_oid(new_oid) &&
 	    !is_null_oid(old_oid) &&
 	    starts_with(name, "refs/heads/")) {
-		struct object *old_object, *new_object;
-		struct commit *old_commit, *new_commit;
-		int ret2;
+		संरचना object *old_object, *new_object;
+		संरचना commit *old_commit, *new_commit;
+		पूर्णाङ्क ret2;
 
 		old_object = parse_object(the_repository, old_oid);
 		new_object = parse_object(the_repository, new_oid);
 
-		if (!old_object || !new_object ||
+		जइ (!old_object || !new_object ||
 		    old_object->type != OBJ_COMMIT ||
 		    new_object->type != OBJ_COMMIT) {
 			error("bad sha1 objects for %s", name);
 			ret = "bad ref";
-			goto out;
+			गच्छ out;
 		}
-		old_commit = (struct commit *)old_object;
-		new_commit = (struct commit *)new_object;
+		old_commit = (संरचना commit *)old_object;
+		new_commit = (संरचना commit *)new_object;
 		ret2 = repo_in_merge_bases(the_repository, old_commit, new_commit);
-		if (ret2 < 0)
+		जइ (ret2 < 0)
 			exit(128);
-		if (!ret2) {
+		जइ (!ret2) {
 			rp_error("denying non-fast-forward %s"
 				 " (you should pull first)", name);
 			ret = "non-fast-forward";
-			goto out;
+			गच्छ out;
 		}
 	}
-	if (run_update_hook(cmd)) {
+	जइ (run_update_hook(cmd)) {
 		rp_error("hook declined to update %s", name);
 		ret = "hook declined";
-		goto out;
+		गच्छ out;
 	}
 
-	if (do_update_worktree) {
+	जइ (do_update_worktree) {
 		ret = update_worktree(new_oid->hash, worktree);
-		if (ret)
-			goto out;
+		जइ (ret)
+			गच्छ out;
 	}
 
-	if (is_null_oid(new_oid)) {
-		struct strbuf err = STRBUF_INIT;
-		if (!parse_object(the_repository, old_oid)) {
-			old_oid = NULL;
-			if (refs_ref_exists(get_main_ref_store(the_repository), name)) {
+	जइ (is_null_oid(new_oid)) {
+		संरचना strbuf err = STRBUF_INIT;
+		जइ (!parse_object(the_repository, old_oid)) {
+			old_oid = रिक्त;
+			जइ (refs_ref_exists(get_main_ref_store(the_repository), name)) {
 				rp_warning("allowing deletion of corrupt ref");
-			} else {
+			} अण्णहा {
 				rp_warning("deleting a non-existent ref");
 				cmd->did_not_exist = 1;
 			}
 		}
-		if (ref_transaction_delete(transaction,
+		जइ (ref_transaction_delete(transaction,
 					   namespaced_name,
 					   old_oid,
-					   NULL, 0,
+					   रिक्त, 0,
 					   "push", &err)) {
 			rp_error("%s", err.buf);
 			ret = "failed to delete";
-		} else {
-			ret = NULL; /* good */
+		} अण्णहा {
+			ret = रिक्त; /* good */
 		}
 		strbuf_release(&err);
-	} else {
-		enum ref_transaction_error tx_err;
-		struct strbuf err = STRBUF_INIT;
-		if (shallow_update && si->shallow_ref[cmd->index] &&
+	} अण्णहा {
+		गणना ref_transaction_error tx_err;
+		संरचना strbuf err = STRBUF_INIT;
+		जइ (shallow_update && si->shallow_ref[cmd->index] &&
 		    update_shallow_ref(cmd, si)) {
 			ret = "shallow error";
-			goto out;
+			गच्छ out;
 		}
 
 		tx_err = ref_transaction_update(transaction,
 						  namespaced_name,
 						  new_oid, old_oid,
-						  NULL, NULL,
+						  रिक्त, रिक्त,
 						  0, "push",
 						  &err);
-		if (tx_err) {
+		जइ (tx_err) {
 			rp_error("%s", err.buf);
-			if (tx_err == REF_TRANSACTION_ERROR_GENERIC)
+			जइ (tx_err == REF_TRANSACTION_ERROR_GENERIC)
 				ret = "failed to update ref";
-			else
-				ret = ref_transaction_error_msg(tx_err);
-		} else {
-			ret = NULL; /* good */
+			अण्णहा
+				ret = ref_transaction_error_सन्देशः(tx_err);
+		} अण्णहा {
+			ret = रिक्त; /* good */
 		}
 		strbuf_release(&err);
 	}
 
 out:
 	free_worktrees(worktrees);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static void run_update_post_hook(struct command *commands)
+स्थिर शून्य run_update_post_hook(संरचना command *commands)
 {
-	static const char hook_name[] = "post-update";
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	struct async sideband_async;
-	struct command *cmd;
-	int sideband_async_started = 0;
-	int saved_stderr = -1;
+	स्थिर ध्रुव वर्ण hook_name[] = "post-update";
+	संरचना run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
+	संरचना async sideband_async;
+	संरचना command *cmd;
+	पूर्णाङ्क sideband_async_started = 0;
+	पूर्णाङ्क saved_stderr = -1;
 
-	if (!hook_exists(the_repository, hook_name))
-		return;
+	जइ (!hook_exists(the_repository, hook_name))
+		प्रत्यागम;
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (cmd->error_string || cmd->did_not_exist)
-			continue;
-		strvec_push(&opt.args, cmd->ref_name);
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (cmd->error_string || cmd->did_not_exist)
+			अनुवर्त;
+		strvec_प्रक्षिप(&opt.args, cmd->ref_name);
 	}
-	if (!opt.args.nr)
-		return;
+	जइ (!opt.args.nr)
+		प्रत्यागम;
 
 	prepare_sideband_async(&sideband_async, &saved_stderr, &sideband_async_started);
 
@@ -1721,34 +1721,34 @@ static void run_update_post_hook(struct command *commands)
 	finish_sideband_async(&sideband_async, saved_stderr, sideband_async_started);
 }
 
-static void check_aliased_update_internal(struct command *cmd,
-					  struct string_list *list,
-					  const char *dst_name, int flag)
+स्थिर शून्य check_aliased_update_internal(संरचना command *cmd,
+					  संरचना string_list *list,
+					  ध्रुव वर्ण *dst_name, पूर्णाङ्क flag)
 {
-	struct string_list_item *item;
-	struct command *dst_cmd;
+	संरचना string_list_item *item;
+	संरचना command *dst_cmd;
 
-	if (!(flag & REF_ISSYMREF))
-		return;
+	जइ (!(flag & REF_ISSYMREF))
+		प्रत्यागम;
 
-	if (!dst_name) {
+	जइ (!dst_name) {
 		rp_error("refusing update to broken symref '%s'", cmd->ref_name);
 		cmd->skip_update = 1;
 		cmd->error_string = "broken symref";
-		return;
+		प्रत्यागम;
 	}
 	dst_name = strip_namespace(dst_name);
 
-	if (!(item = string_list_lookup(list, dst_name)))
-		return;
+	जइ (!(item = string_list_lookup(list, dst_name)))
+		प्रत्यागम;
 
 	cmd->skip_update = 1;
 
-	dst_cmd = (struct command *) item->util;
+	dst_cmd = (संरचना command *) item->util;
 
-	if (oideq(&cmd->old_oid, &dst_cmd->old_oid) &&
+	जइ (oideq(&cmd->old_oid, &dst_cmd->old_oid) &&
 	    oideq(&cmd->new_oid, &dst_cmd->new_oid))
-		return;
+		प्रत्यागम;
 
 	dst_cmd->skip_update = 1;
 
@@ -1765,71 +1765,71 @@ static void check_aliased_update_internal(struct command *cmd,
 		"inconsistent aliased update";
 }
 
-static void check_aliased_update(struct command *cmd, struct string_list *list)
+स्थिर शून्य check_aliased_update(संरचना command *cmd, संरचना string_list *list)
 {
-	struct strbuf buf = STRBUF_INIT;
-	const char *dst_name;
-	int flag;
+	संरचना strbuf buf = STRBUF_INIT;
+	ध्रुव वर्ण *dst_name;
+	पूर्णाङ्क flag;
 
 	strbuf_addf(&buf, "%s%s", get_git_namespace(), cmd->ref_name);
 	dst_name = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					   buf.buf, 0, NULL, &flag);
+					   buf.buf, 0, रिक्त, &flag);
 	check_aliased_update_internal(cmd, list, dst_name, flag);
 	strbuf_release(&buf);
 }
 
-static void check_aliased_updates(struct command *commands)
+स्थिर शून्य check_aliased_updates(संरचना command *commands)
 {
-	struct command *cmd;
-	struct string_list ref_list = STRING_LIST_INIT_NODUP;
+	संरचना command *cmd;
+	संरचना string_list ref_list = STRING_LIST_INIT_NODUP;
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		struct string_list_item *item =
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		संरचना string_list_item *item =
 			string_list_append(&ref_list, cmd->ref_name);
-		item->util = (void *)cmd;
+		item->util = (शून्य *)cmd;
 	}
 	string_list_sort(&ref_list);
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (!cmd->error_string)
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (!cmd->error_string)
 			check_aliased_update(cmd, &ref_list);
 	}
 
 	string_list_clear(&ref_list, 0);
 }
 
-static const struct object_id *command_singleton_iterator(void *cb_data)
+स्थिर ध्रुव संरचना object_id *command_singleton_iterator(शून्य *cb_data)
 {
-	struct command **cmd_list = cb_data;
-	struct command *cmd = *cmd_list;
+	संरचना command **cmd_list = cb_data;
+	संरचना command *cmd = *cmd_list;
 
-	if (!cmd || is_null_oid(&cmd->new_oid))
-		return NULL;
-	*cmd_list = NULL; /* this returns only one */
-	return &cmd->new_oid;
+	जइ (!cmd || is_null_oid(&cmd->new_oid))
+		प्रत्यागम रिक्त;
+	*cmd_list = रिक्त; /* this returns only one */
+	प्रत्यागम &cmd->new_oid;
 }
 
-static void set_connectivity_errors(struct command *commands,
-				    struct shallow_info *si,
-				    struct odb_transaction *transaction)
+स्थिर शून्य set_connectivity_errors(संरचना command *commands,
+				    संरचना shallow_info *si,
+				    संरचना odb_transaction *transaction)
 {
-	struct command *cmd;
+	संरचना command *cmd;
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		struct command *singleton = cmd;
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
-		struct strvec env = STRVEC_INIT;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		संरचना command *singleton = cmd;
+		संरचना check_connected_options opt = CHECK_CONNECTED_INIT;
+		संरचना strvec env = STRVEC_INIT;
 
-		if (shallow_update && si->shallow_ref[cmd->index])
+		जइ (shallow_update && si->shallow_ref[cmd->index])
 			/* to be checked in update_shallow_ref() */
-			continue;
+			अनुवर्त;
 
 		odb_transaction_env(transaction, &env);
 		opt.env = env.v;
 
-		if (!check_connected(command_singleton_iterator, &singleton,
+		जइ (!check_connected(command_singleton_iterator, &singleton,
 				     &opt))
-			continue;
+			अनुवर्त;
 
 		cmd->error_string = "missing necessary objects";
 
@@ -1837,98 +1837,98 @@ static void set_connectivity_errors(struct command *commands,
 	}
 }
 
-struct iterate_data {
-	struct command *cmds;
-	struct shallow_info *si;
+संरचना iterate_data {
+	संरचना command *cmds;
+	संरचना shallow_info *si;
 };
 
-static const struct object_id *iterate_receive_command_list(void *cb_data)
+स्थिर ध्रुव संरचना object_id *iterate_receive_command_list(शून्य *cb_data)
 {
-	struct iterate_data *data = cb_data;
-	struct command **cmd_list = &data->cmds;
-	struct command *cmd = *cmd_list;
+	संरचना iterate_data *data = cb_data;
+	संरचना command **cmd_list = &data->cmds;
+	संरचना command *cmd = *cmd_list;
 
-	for (; cmd; cmd = cmd->next) {
-		if (shallow_update && data->si->shallow_ref[cmd->index])
+	प्रति (; cmd; cmd = cmd->next) {
+		जइ (shallow_update && data->si->shallow_ref[cmd->index])
 			/* to be checked in update_shallow_ref() */
-			continue;
-		if (!is_null_oid(&cmd->new_oid) && !cmd->skip_update) {
+			अनुवर्त;
+		जइ (!is_null_oid(&cmd->new_oid) && !cmd->skip_update) {
 			*cmd_list = cmd->next;
-			return &cmd->new_oid;
+			प्रत्यागम &cmd->new_oid;
 		}
 	}
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
-static void reject_updates_to_hidden(struct command *commands)
+स्थिर शून्य reject_updates_to_hidden(संरचना command *commands)
 {
-	struct strbuf refname_full = STRBUF_INIT;
+	संरचना strbuf refname_full = STRBUF_INIT;
 	size_t prefix_len;
-	struct command *cmd;
+	संरचना command *cmd;
 
 	strbuf_addstr(&refname_full, get_git_namespace());
 	prefix_len = refname_full.len;
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (cmd->error_string)
-			continue;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (cmd->error_string)
+			अनुवर्त;
 
 		strbuf_setlen(&refname_full, prefix_len);
 		strbuf_addstr(&refname_full, cmd->ref_name);
 
-		if (!ref_is_hidden(cmd->ref_name, refname_full.buf, &hidden_refs))
-			continue;
-		if (is_null_oid(&cmd->new_oid))
+		जइ (!ref_is_hidden(cmd->ref_name, refname_full.buf, &hidden_refs))
+			अनुवर्त;
+		जइ (is_null_oid(&cmd->new_oid))
 			cmd->error_string = "deny deleting a hidden ref";
-		else
+		अण्णहा
 			cmd->error_string = "deny updating a hidden ref";
 	}
 
 	strbuf_release(&refname_full);
 }
 
-static int should_process_cmd(struct command *cmd)
+स्थिर पूर्णाङ्क should_process_cmd(संरचना command *cmd)
 {
-	return !cmd->error_string && !cmd->skip_update;
+	प्रत्यागम !cmd->error_string && !cmd->skip_update;
 }
 
-static void BUG_if_skipped_connectivity_check(struct command *commands,
-					       struct shallow_info *si)
+स्थिर शून्य BUG_if_skipped_connectivity_check(संरचना command *commands,
+					       संरचना shallow_info *si)
 {
-	struct command *cmd;
+	संरचना command *cmd;
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (should_process_cmd(cmd) && si->shallow_ref[cmd->index])
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (should_process_cmd(cmd) && si->shallow_ref[cmd->index])
 			bug("connectivity check has not been run on ref %s",
 			    cmd->ref_name);
 	}
 	BUG_if_bug("connectivity check skipped???");
 }
 
-static void ref_transaction_rejection_handler(const char *refname,
-					      const struct object_id *old_oid UNUSED,
-					      const struct object_id *new_oid UNUSED,
-					      const char *old_target UNUSED,
-					      const char *new_target UNUSED,
-					      enum ref_transaction_error err,
-					      const char *details,
-					      void *cb_data)
+स्थिर शून्य ref_transaction_rejection_handler(ध्रुव वर्ण *refname,
+					      ध्रुव संरचना object_id *old_oid UNUSED,
+					      ध्रुव संरचना object_id *new_oid UNUSED,
+					      ध्रुव वर्ण *old_target UNUSED,
+					      ध्रुव वर्ण *new_target UNUSED,
+					      गणना ref_transaction_error err,
+					      ध्रुव वर्ण *details,
+					      शून्य *cb_data)
 {
-	struct strmap *failed_refs = cb_data;
+	संरचना strmap *failed_refs = cb_data;
 
-	if (details)
+	जइ (details)
 		rp_error("%s", details);
 
-	strmap_put(failed_refs, refname, (char *)ref_transaction_error_msg(err));
+	strmap_put(failed_refs, refname, (वर्ण *)ref_transaction_error_सन्देशः(err));
 }
 
-static void execute_commands_non_atomic(struct command *commands,
-					struct shallow_info *si)
+स्थिर शून्य execute_commands_non_atomic(संरचना command *commands,
+					संरचना shallow_info *si)
 {
-	struct command *cmd;
-	struct strbuf err = STRBUF_INIT;
-	const char *reported_error = NULL;
-	struct strmap failed_refs = STRMAP_INIT;
+	संरचना command *cmd;
+	संरचना strbuf err = STRBUF_INIT;
+	ध्रुव वर्ण *reported_error = रिक्त;
+	संरचना strmap failed_refs = STRMAP_INIT;
 
 	/*
 	 * Reference updates, where D/F conflicts shouldn't arise due to
@@ -1941,33 +1941,33 @@ static void execute_commands_non_atomic(struct command *commands,
 	 * of reference updates within a transaction. With that, we can
 	 * combine the two phases.
 	 */
-	enum processing_phase {
+	गणना processing_phase {
 		PHASE_DELETIONS,
 		PHASE_OTHERS
 	};
 
-	for (enum processing_phase phase = PHASE_DELETIONS; phase <= PHASE_OTHERS; phase++) {
-		for (cmd = commands; cmd; cmd = cmd->next) {
-			if (!should_process_cmd(cmd) || cmd->run_proc_receive)
-				continue;
+	प्रति (गणना processing_phase phase = PHASE_DELETIONS; phase <= PHASE_OTHERS; phase++) {
+		प्रति (cmd = commands; cmd; cmd = cmd->next) {
+			जइ (!should_process_cmd(cmd) || cmd->run_proc_receive)
+				अनुवर्त;
 
-			if (phase == PHASE_DELETIONS && !is_null_oid(&cmd->new_oid))
-				continue;
-			else if (phase == PHASE_OTHERS && is_null_oid(&cmd->new_oid))
-				continue;
+			जइ (phase == PHASE_DELETIONS && !is_null_oid(&cmd->new_oid))
+				अनुवर्त;
+			अण्णहा जइ (phase == PHASE_OTHERS && is_null_oid(&cmd->new_oid))
+				अनुवर्त;
 
 			/*
 			 * Lazily create a transaction only when we know there are
 			 * updates to be added.
 			 */
-			if (!transaction) {
+			जइ (!transaction) {
 				transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 									  REF_TRANSACTION_ALLOW_FAILURE, &err);
-				if (!transaction) {
+				जइ (!transaction) {
 					rp_error("%s", err.buf);
 					strbuf_reset(&err);
 					reported_error = "transaction failed to start";
-					goto failure;
+					गच्छ failure;
 				}
 			}
 
@@ -1975,13 +1975,13 @@ static void execute_commands_non_atomic(struct command *commands,
 		}
 
 		/* No transaction, so nothing to commit */
-		if (!transaction)
-			goto cleanup;
+		जइ (!transaction)
+			गच्छ cleanup;
 
-		if (ref_transaction_commit(transaction, &err)) {
+		जइ (ref_transaction_commit(transaction, &err)) {
 			rp_error("%s", err.buf);
 			reported_error = "failed to update refs";
-			goto failure;
+			गच्छ failure;
 		}
 
 		ref_transaction_for_each_rejected_update(transaction,
@@ -1989,61 +1989,61 @@ static void execute_commands_non_atomic(struct command *commands,
 							 ref_transaction_rejection_handler,
 							 &failed_refs);
 
-		if (strmap_empty(&failed_refs))
-			goto cleanup;
+		जइ (strmap_empty(&failed_refs))
+			गच्छ cleanup;
 
 	failure:
-		for (cmd = commands; cmd; cmd = cmd->next) {
-			if (reported_error)
+		प्रति (cmd = commands; cmd; cmd = cmd->next) {
+			जइ (reported_error)
 				cmd->error_string = reported_error;
-			else if (strmap_contains(&failed_refs, cmd->ref_name))
+			अण्णहा जइ (strmap_contains(&failed_refs, cmd->ref_name))
 				cmd->error_string = cmd->error_string_owned = xstrdup(strmap_get(&failed_refs, cmd->ref_name));
 		}
 
 	cleanup:
 		ref_transaction_free(transaction);
-		transaction = NULL;
+		transaction = रिक्त;
 		strmap_clear(&failed_refs, 0);
 		strbuf_release(&err);
 	}
 }
 
-static void execute_commands_atomic(struct command *commands,
-					struct shallow_info *si)
+स्थिर शून्य execute_commands_atomic(संरचना command *commands,
+					संरचना shallow_info *si)
 {
-	struct command *cmd;
-	struct strbuf err = STRBUF_INIT;
-	const char *reported_error = "atomic push failure";
+	संरचना command *cmd;
+	संरचना strbuf err = STRBUF_INIT;
+	ध्रुव वर्ण *reported_error = "atomic push failure";
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction) {
+	जइ (!transaction) {
 		rp_error("%s", err.buf);
 		strbuf_reset(&err);
 		reported_error = "transaction failed to start";
-		goto failure;
+		गच्छ failure;
 	}
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (!should_process_cmd(cmd) || cmd->run_proc_receive)
-			continue;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (!should_process_cmd(cmd) || cmd->run_proc_receive)
+			अनुवर्त;
 
 		cmd->error_string = update(cmd, si);
 
-		if (cmd->error_string)
-			goto failure;
+		जइ (cmd->error_string)
+			गच्छ failure;
 	}
 
-	if (ref_transaction_commit(transaction, &err)) {
+	जइ (ref_transaction_commit(transaction, &err)) {
 		rp_error("%s", err.buf);
 		reported_error = "atomic transaction failed";
-		goto failure;
+		गच्छ failure;
 	}
-	goto cleanup;
+	गच्छ cleanup;
 
 failure:
-	for (cmd = commands; cmd; cmd = cmd->next)
-		if (!cmd->error_string)
+	प्रति (cmd = commands; cmd; cmd = cmd->next)
+		जइ (!cmd->error_string)
 			cmd->error_string = reported_error;
 
 cleanup:
@@ -2051,33 +2051,33 @@ cleanup:
 	strbuf_release(&err);
 }
 
-static void execute_commands(struct command *commands,
-			     int unpacker_error,
-			     struct shallow_info *si,
-			     struct odb_transaction *transaction,
-			     const struct string_list *push_options)
+स्थिर शून्य execute_commands(संरचना command *commands,
+			     पूर्णाङ्क unpacker_error,
+			     संरचना shallow_info *si,
+			     संरचना odb_transaction *transaction,
+			     ध्रुव संरचना string_list *प्रक्षिप_options)
 {
-	struct check_connected_options opt = CHECK_CONNECTED_INIT;
-	struct command *cmd;
-	struct iterate_data data;
-	struct async muxer;
-	int err_fd = 0;
-	int run_proc_receive = 0;
+	संरचना check_connected_options opt = CHECK_CONNECTED_INIT;
+	संरचना command *cmd;
+	संरचना iterate_data data;
+	संरचना async muxer;
+	पूर्णाङ्क err_fd = 0;
+	पूर्णाङ्क run_proc_receive = 0;
 
-	if (unpacker_error) {
-		for (cmd = commands; cmd; cmd = cmd->next)
+	जइ (unpacker_error) {
+		प्रति (cmd = commands; cmd; cmd = cmd->next)
 			cmd->error_string = "unpacker error";
-		return;
+		प्रत्यागम;
 	}
 
-	if (!skip_connectivity_check) {
-		struct strvec env = STRVEC_INIT;
+	जइ (!skip_connectivity_check) {
+		संरचना strvec env = STRVEC_INIT;
 
-		if (use_sideband) {
-			memset(&muxer, 0, sizeof(muxer));
+		जइ (use_sideband) {
+			memset(&muxer, 0, परिमाण(muxer));
 			muxer.proc = copy_to_sideband;
 			muxer.in = -1;
-			if (!start_async(&muxer))
+			जइ (!start_async(&muxer))
 				err_fd = muxer.in;
 			/* ...else, continue without relaying sideband */
 		}
@@ -2090,10 +2090,10 @@ static void execute_commands(struct command *commands,
 		opt.env = env.v;
 		opt.exclude_hidden_refs_section = "receive";
 
-		if (check_connected(iterate_receive_command_list, &data, &opt))
+		जइ (check_connected(iterate_receive_command_list, &data, &opt))
 			set_connectivity_errors(commands, si, transaction);
 
-		if (use_sideband)
+		जइ (use_sideband)
 			finish_async(&muxer);
 
 		strvec_clear(&env);
@@ -2105,291 +2105,291 @@ static void execute_commands(struct command *commands,
 	 * Try to find commands that have special prefix in their reference names,
 	 * and mark them to run an external "proc-receive" hook later.
 	 */
-	if (proc_receive_ref) {
-		for (cmd = commands; cmd; cmd = cmd->next) {
-			if (!should_process_cmd(cmd))
-				continue;
+	जइ (proc_receive_ref) {
+		प्रति (cmd = commands; cmd; cmd = cmd->next) {
+			जइ (!should_process_cmd(cmd))
+				अनुवर्त;
 
-			if (proc_receive_ref_matches(cmd)) {
+			जइ (proc_receive_ref_matches(cmd)) {
 				cmd->run_proc_receive = RUN_PROC_RECEIVE_SCHEDULED;
 				run_proc_receive = 1;
 			}
 		}
 	}
 
-	if (run_receive_hook(commands, "pre-receive", 0, transaction, push_options)) {
-		for (cmd = commands; cmd; cmd = cmd->next) {
-			if (!cmd->error_string)
+	जइ (run_receive_hook(commands, "pre-receive", 0, transaction, प्रक्षिप_options)) {
+		प्रति (cmd = commands; cmd; cmd = cmd->next) {
+			जइ (!cmd->error_string)
 				cmd->error_string = "pre-receive hook declined";
 		}
-		return;
+		प्रत्यागम;
 	}
 
 	/*
 	 * If there is no command ready to run, should return directly to destroy
 	 * temporary data in the quarantine area.
 	 */
-	for (cmd = commands; cmd && cmd->error_string; cmd = cmd->next)
+	प्रति (cmd = commands; cmd && cmd->error_string; cmd = cmd->next)
 		; /* nothing */
-	if (!cmd)
-		return;
+	जइ (!cmd)
+		प्रत्यागम;
 
 	/*
 	 * Now we'll start writing out refs, which means the objects need
 	 * to be in their final positions so that other processes can see them.
 	 */
-	if (odb_transaction_commit(transaction)) {
-		for (cmd = commands; cmd; cmd = cmd->next) {
-			if (!cmd->error_string)
+	जइ (odb_transaction_commit(transaction)) {
+		प्रति (cmd = commands; cmd; cmd = cmd->next) {
+			जइ (!cmd->error_string)
 				cmd->error_string = "unable to migrate objects to permanent storage";
 		}
-		return;
+		प्रत्यागम;
 	}
 
 	check_aliased_updates(commands);
 
-	free(head_name_to_free);
+	मुक्त(head_name_to_free);
 	head_name = head_name_to_free = refs_resolve_refdup(get_main_ref_store(the_repository),
-							    "HEAD", 0, NULL,
-							    NULL);
+							    "HEAD", 0, रिक्त,
+							    रिक्त);
 
-	if (run_proc_receive &&
-	    run_proc_receive_hook(commands, push_options))
-		for (cmd = commands; cmd; cmd = cmd->next)
-			if (!cmd->error_string &&
+	जइ (run_proc_receive &&
+	    run_proc_receive_hook(commands, प्रक्षिप_options))
+		प्रति (cmd = commands; cmd; cmd = cmd->next)
+			जइ (!cmd->error_string &&
 			    !(cmd->run_proc_receive & RUN_PROC_RECEIVE_RETURNED) &&
 			    (cmd->run_proc_receive || use_atomic))
 				cmd->error_string = "fail to run proc-receive hook";
 
-	if (use_atomic)
+	जइ (use_atomic)
 		execute_commands_atomic(commands, si);
-	else
+	अण्णहा
 		execute_commands_non_atomic(commands, si);
 
-	if (shallow_update)
+	जइ (shallow_update)
 		BUG_if_skipped_connectivity_check(commands, si);
 }
 
-static struct command **queue_command(struct command **tail,
-				      const char *line,
-				      int linelen)
+स्थिर संरचना command **queue_command(संरचना command **tail,
+				      ध्रुव वर्ण *पङ्क्तिः,
+				      पूर्णाङ्क linelen)
 {
-	struct object_id old_oid, new_oid;
-	struct command *cmd;
-	const char *refname;
-	int reflen;
-	const char *p;
+	संरचना object_id old_oid, new_oid;
+	संरचना command *cmd;
+	ध्रुव वर्ण *refname;
+	पूर्णाङ्क reflen;
+	ध्रुव वर्ण *p;
 
-	if (parse_oid_hex(line, &old_oid, &p) ||
+	जइ (parse_oid_hex(पङ्क्तिः, &old_oid, &p) ||
 	    *p++ != ' ' ||
 	    parse_oid_hex(p, &new_oid, &p) ||
 	    *p++ != ' ')
-		die("protocol error: expected old/new/ref, got '%s'", line);
+		die("protocol error: expected old/new/ref, got '%s'", पङ्क्तिः);
 
 	refname = p;
-	reflen = linelen - (p - line);
+	reflen = linelen - (p - पङ्क्तिः);
 	FLEX_ALLOC_MEM(cmd, ref_name, refname, reflen);
 	oidcpy(&cmd->old_oid, &old_oid);
 	oidcpy(&cmd->new_oid, &new_oid);
 	*tail = cmd;
-	return &cmd->next;
+	प्रत्यागम &cmd->next;
 }
 
-static void free_commands(struct command *commands)
+स्थिर शून्य free_commands(संरचना command *commands)
 {
-	while (commands) {
-		struct command *next = commands->next;
+	जाव (commands) {
+		संरचना command *next = commands->next;
 
-		ref_push_report_free(commands->report);
-		free(commands->error_string_owned);
-		free(commands);
+		ref_प्रक्षिप_report_free(commands->report);
+		मुक्त(commands->error_string_owned);
+		मुक्त(commands);
 		commands = next;
 	}
 }
 
-static void queue_commands_from_cert(struct command **tail,
-				     struct strbuf *push_cert)
+स्थिर शून्य queue_commands_from_cert(संरचना command **tail,
+				     संरचना strbuf *प्रक्षिप_cert)
 {
-	const char *boc, *eoc;
+	ध्रुव वर्ण *boc, *eoc;
 
-	if (*tail)
+	जइ (*tail)
 		die("protocol error: got both push certificate and unsigned commands");
 
-	boc = strstr(push_cert->buf, "\n\n");
-	if (!boc)
-		die("malformed push certificate %.*s", 100, push_cert->buf);
-	else
+	boc = strstr(प्रक्षिप_cert->buf, "\n\n");
+	जइ (!boc)
+		die("malformed push certificate %.*s", 100, प्रक्षिप_cert->buf);
+	अण्णहा
 		boc += 2;
-	eoc = push_cert->buf + parse_signed_buffer(push_cert->buf, push_cert->len);
+	eoc = प्रक्षिप_cert->buf + parse_signed_buffer(प्रक्षिप_cert->buf, प्रक्षिप_cert->len);
 
-	while (boc < eoc) {
-		const char *eol = memchr(boc, '\n', eoc - boc);
+	जाव (boc < eoc) {
+		ध्रुव वर्ण *eol = memchr(boc, '\n', eoc - boc);
 		tail = queue_command(tail, boc, eol ? eol - boc : eoc - boc);
 		boc = eol ? eol + 1 : eoc;
 	}
 }
 
-static struct command *read_head_info(struct packet_reader *reader,
-				      struct oid_array *shallow,
-				      enum report_status_version *version)
+स्थिर संरचना command *read_head_info(संरचना packet_reader *reader,
+				      संरचना oid_array *shallow,
+				      गणना report_status_version *version)
 {
-	struct command *commands = NULL;
-	struct command **p = &commands;
-	for (;;) {
-		int linelen;
+	संरचना command *commands = रिक्त;
+	संरचना command **p = &commands;
+	प्रति (;;) {
+		पूर्णाङ्क linelen;
 
-		if (packet_reader_read(reader) != PACKET_READ_NORMAL)
-			break;
+		जइ (packet_reader_read(reader) != PACKET_READ_NORMAL)
+			भङ्ग;
 
-		if (reader->pktlen > 8 && starts_with(reader->line, "shallow ")) {
-			struct object_id oid;
-			if (get_oid_hex(reader->line + 8, &oid))
+		जइ (reader->pktlen > 8 && starts_with(reader->पङ्क्तिः, "shallow ")) {
+			संरचना object_id oid;
+			जइ (get_oid_hex(reader->पङ्क्तिः + 8, &oid))
 				die("protocol error: expected shallow sha, got '%s'",
-				    reader->line + 8);
+				    reader->पङ्क्तिः + 8);
 			oid_array_append(shallow, &oid);
-			continue;
+			अनुवर्त;
 		}
 
-		linelen = strlen(reader->line);
-		if (linelen < reader->pktlen) {
-			const char *feature_list = reader->line + linelen + 1;
-			const char *hash = NULL;
-			const char *client_sid;
+		linelen = strlen(reader->पङ्क्तिः);
+		जइ (linelen < reader->pktlen) {
+			ध्रुव वर्ण *feature_list = reader->पङ्क्तिः + linelen + 1;
+			ध्रुव वर्ण *hash = रिक्त;
+			ध्रुव वर्ण *client_sid;
 			size_t len = 0;
-			if (parse_feature_request(feature_list, "report-status"))
+			जइ (parse_feature_request(feature_list, "report-status"))
 				*version = REPORT_STATUS_V0;
-			if (parse_feature_request(feature_list, "report-status-v2"))
+			जइ (parse_feature_request(feature_list, "report-status-v2"))
 				*version = REPORT_STATUS_V2;
-			if (parse_feature_request(feature_list, "side-band-64k"))
+			जइ (parse_feature_request(feature_list, "side-band-64k"))
 				use_sideband = LARGE_PACKET_MAX;
-			if (parse_feature_request(feature_list, "quiet"))
+			जइ (parse_feature_request(feature_list, "quiet"))
 				quiet = 1;
-			if (advertise_atomic_push
+			जइ (advertise_atomic_प्रक्षिप
 			    && parse_feature_request(feature_list, "atomic"))
 				use_atomic = 1;
-			if (advertise_push_options
+			जइ (advertise_प्रक्षिप_options
 			    && parse_feature_request(feature_list, "push-options"))
-				use_push_options = 1;
-			hash = parse_feature_value(feature_list, "object-format", &len, NULL);
-			if (!hash) {
+				use_प्रक्षिप_options = 1;
+			hash = parse_feature_मानम्(feature_list, "object-format", &len, रिक्त);
+			जइ (!hash) {
 				hash = hash_algos[GIT_HASH_SHA1_LEGACY].name;
 				len = strlen(hash);
 			}
-			if (xstrncmpz(the_hash_algo->name, hash, len))
+			जइ (xstrncmpz(the_hash_algo->name, hash, len))
 				die("error: unsupported object format '%s'", hash);
-			client_sid = parse_feature_value(feature_list, "session-id", &len, NULL);
-			if (client_sid) {
-				char *sid = xstrndup(client_sid, len);
-				trace2_data_string("transfer", NULL, "client-sid", client_sid);
-				free(sid);
+			client_sid = parse_feature_मानम्(feature_list, "session-id", &len, रिक्त);
+			जइ (client_sid) {
+				वर्ण *sid = xstrndup(client_sid, len);
+				trace2_data_string("transfer", रिक्त, "client-sid", client_sid);
+				मुक्त(sid);
 			}
 		}
 
-		if (!strcmp(reader->line, "push-cert")) {
-			int true_flush = 0;
-			int saved_options = reader->options;
+		जइ (!strcmp(reader->पङ्क्तिः, "push-cert")) {
+			पूर्णाङ्क true_flush = 0;
+			पूर्णाङ्क saved_options = reader->options;
 			reader->options &= ~PACKET_READ_CHOMP_NEWLINE;
 
-			for (;;) {
+			प्रति (;;) {
 				packet_reader_read(reader);
-				if (reader->status == PACKET_READ_FLUSH) {
+				जइ (reader->status == PACKET_READ_FLUSH) {
 					true_flush = 1;
-					break;
+					भङ्ग;
 				}
-				if (reader->status != PACKET_READ_NORMAL) {
+				जइ (reader->status != PACKET_READ_NORMAL) {
 					die("protocol error: got an unexpected packet");
 				}
-				if (!strcmp(reader->line, "push-cert-end\n"))
-					break; /* end of cert */
-				strbuf_addstr(&push_cert, reader->line);
+				जइ (!strcmp(reader->पङ्क्तिः, "push-cert-end\n"))
+					भङ्ग; /* end of cert */
+				strbuf_addstr(&प्रक्षिप_cert, reader->पङ्क्तिः);
 			}
 			reader->options = saved_options;
 
-			if (true_flush)
-				break;
-			continue;
+			जइ (true_flush)
+				भङ्ग;
+			अनुवर्त;
 		}
 
-		p = queue_command(p, reader->line, linelen);
+		p = queue_command(p, reader->पङ्क्तिः, linelen);
 	}
 
-	if (push_cert.len)
-		queue_commands_from_cert(p, &push_cert);
+	जइ (प्रक्षिप_cert.len)
+		queue_commands_from_cert(p, &प्रक्षिप_cert);
 
-	return commands;
+	प्रत्यागम commands;
 }
 
-static void read_push_options(struct packet_reader *reader,
-			      struct string_list *options)
+स्थिर शून्य read_प्रक्षिप_options(संरचना packet_reader *reader,
+			      संरचना string_list *options)
 {
-	while (1) {
-		if (packet_reader_read(reader) != PACKET_READ_NORMAL)
-			break;
+	जाव (1) {
+		जइ (packet_reader_read(reader) != PACKET_READ_NORMAL)
+			भङ्ग;
 
-		string_list_append(options, reader->line);
+		string_list_append(options, reader->पङ्क्तिः);
 	}
 }
 
-static int unpack_with_sideband(struct odb_transaction *transaction,
-				const char *shallow_file,
-				struct strbuf *err_msg)
+स्थिर पूर्णाङ्क unpack_with_sideband(संरचना odb_transaction *transaction,
+				ध्रुव वर्ण *shallow_file,
+				संरचना strbuf *err_सन्देशः)
 {
-	struct odb_transaction_write_pack_opts opts = {
+	संरचना odb_transaction_write_pack_opts opts = {
 		.fsck_objects = (receive_fsck_objects >= 0
 				 ? receive_fsck_objects
 				 : transfer_fsck_objects >= 0
 				 ? transfer_fsck_objects
 				 : 0),
-		.fsck_msg_types = fsck_msg_types.buf,
-		.max_input_size = max_input_size,
+		.fsck_सन्देशः_types = fsck_सन्देशः_types.buf,
+		.max_निवेशः_size = max_निवेशः_size,
 		.shallow_file = shallow_file,
 		.reject_thin = reject_thin,
 		.quiet = quiet,
 	};
-	struct async muxer;
-	int ret;
+	संरचना async muxer;
+	पूर्णाङ्क ret;
 
-	if (!use_sideband)
-		return odb_transaction_write_pack(transaction, 0, err_msg, &opts);
+	जइ (!use_sideband)
+		प्रत्यागम odb_transaction_write_pack(transaction, 0, err_सन्देशः, &opts);
 
 	use_keepalive = KEEPALIVE_AFTER_NUL;
-	memset(&muxer, 0, sizeof(muxer));
+	memset(&muxer, 0, परिमाण(muxer));
 	muxer.proc = copy_to_sideband;
 	muxer.in = -1;
-	if (start_async(&muxer))
-		return 0;
+	जइ (start_async(&muxer))
+		प्रत्यागम 0;
 
 	opts.err_fd = muxer.in;
-	ret = odb_transaction_write_pack(transaction, 0, err_msg, &opts);
+	ret = odb_transaction_write_pack(transaction, 0, err_सन्देशः, &opts);
 
 	finish_async(&muxer);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static void prepare_shallow_update(struct shallow_info *si,
-				   const char *shallow_file)
+स्थिर शून्य prepare_shallow_update(संरचना shallow_info *si,
+				   ध्रुव वर्ण *shallow_file)
 {
-	int i, j, k, bitmap_size = DIV_ROUND_UP(si->ref->nr, 32);
+	पूर्णाङ्क i, j, k, bitmap_size = DIV_ROUND_UP(si->ref->nr, 32);
 
 	ALLOC_ARRAY(si->used_shallow, si->shallow->nr);
-	assign_shallow_commits_to_refs(si, si->used_shallow, NULL);
+	assign_shallow_commits_to_refs(si, si->used_shallow, रिक्त);
 
 	CALLOC_ARRAY(si->need_reachability_test, si->shallow->nr);
 	CALLOC_ARRAY(si->reachable, si->shallow->nr);
 	CALLOC_ARRAY(si->shallow_ref, si->ref->nr);
 
-	for (i = 0; i < si->nr_ours; i++)
+	प्रति (i = 0; i < si->nr_ours; i++)
 		si->need_reachability_test[si->ours[i]] = 1;
 
-	for (i = 0; i < si->shallow->nr; i++) {
-		if (!si->used_shallow[i])
-			continue;
-		for (j = 0; j < bitmap_size; j++) {
-			if (!si->used_shallow[i][j])
-				continue;
+	प्रति (i = 0; i < si->shallow->nr; i++) {
+		जइ (!si->used_shallow[i])
+			अनुवर्त;
+		प्रति (j = 0; j < bitmap_size; j++) {
+			जइ (!si->used_shallow[i][j])
+				अनुवर्त;
 			si->need_reachability_test[i]++;
-			for (k = 0; k < 32; k++)
-				if (si->used_shallow[i][j] & (1U << k))
+			प्रति (k = 0; k < 32; k++)
+				जइ (si->used_shallow[i][j] & (1U << k))
 					si->shallow_ref[j * 32 + k]++;
 		}
 
@@ -2410,48 +2410,48 @@ static void prepare_shallow_update(struct shallow_info *si,
 	setenv(GIT_SHALLOW_FILE_ENVIRONMENT, shallow_file, 1);
 }
 
-static void update_shallow_info(struct command *commands,
-				struct shallow_info *si,
-				struct oid_array *ref,
-				const char *shallow_file)
+स्थिर शून्य update_shallow_info(संरचना command *commands,
+				संरचना shallow_info *si,
+				संरचना oid_array *ref,
+				ध्रुव वर्ण *shallow_file)
 {
-	struct command *cmd;
-	int *ref_status;
+	संरचना command *cmd;
+	पूर्णाङ्क *ref_status;
 	remove_nonexistent_theirs_shallow(si);
-	if (!si->nr_ours && !si->nr_theirs) {
+	जइ (!si->nr_ours && !si->nr_theirs) {
 		shallow_update = 0;
-		return;
+		प्रत्यागम;
 	}
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (is_null_oid(&cmd->new_oid))
-			continue;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (is_null_oid(&cmd->new_oid))
+			अनुवर्त;
 		oid_array_append(ref, &cmd->new_oid);
 		cmd->index = ref->nr - 1;
 	}
 	si->ref = ref;
 
-	if (shallow_update) {
+	जइ (shallow_update) {
 		prepare_shallow_update(si, shallow_file);
-		return;
+		प्रत्यागम;
 	}
 
 	ALLOC_ARRAY(ref_status, ref->nr);
-	assign_shallow_commits_to_refs(si, NULL, ref_status);
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (is_null_oid(&cmd->new_oid))
-			continue;
-		if (ref_status[cmd->index]) {
+	assign_shallow_commits_to_refs(si, रिक्त, ref_status);
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (is_null_oid(&cmd->new_oid))
+			अनुवर्त;
+		जइ (ref_status[cmd->index]) {
 			cmd->error_string = "shallow update not allowed";
 			cmd->skip_update = 1;
 		}
 	}
-	free(ref_status);
+	मुक्त(ref_status);
 }
 
-static void override_cmds_error(struct command *commands, const char *err)
+स्थिर शून्य override_cmds_error(संरचना command *commands, ध्रुव वर्ण *err)
 {
-	for (struct command *cmd = commands; cmd; cmd = cmd->next) {
+	प्रति (संरचना command *cmd = commands; cmd; cmd = cmd->next) {
 		FREE_AND_NULL(cmd->error_string_owned);
 		cmd->error_string = err;
 	}
@@ -2460,42 +2460,42 @@ static void override_cmds_error(struct command *commands, const char *err)
 /*
  * Generate the response to be sent to the client invoking 'git-receive-pack(1)'.
  */
-static void generate_report(struct strbuf *buf, struct command *commands,
-			    const struct strbuf *unpack_status,
-			    enum report_status_version version)
+स्थिर शून्य generate_report(संरचना strbuf *buf, संरचना command *commands,
+			    ध्रुव संरचना strbuf *unpack_status,
+			    गणना report_status_version version)
 {
-	struct command *cmd;
+	संरचना command *cmd;
 
 	packet_buf_write(buf, "unpack %s\n",
 			 unpack_status->len ? unpack_status->buf : "ok");
 
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		struct ref_push_report *report;
-		int count = 0;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		संरचना ref_प्रक्षिप_report *report;
+		पूर्णाङ्क गणनम् = 0;
 
-		if (cmd->error_string)
+		जइ (cmd->error_string)
 			packet_buf_write(buf, "ng %s %s\n",
 					 cmd->ref_name, cmd->error_string);
-		else
+		अण्णहा
 			packet_buf_write(buf, "ok %s\n", cmd->ref_name);
 
-		if (version != REPORT_STATUS_V2 || cmd->error_string)
-			continue;
+		जइ (version != REPORT_STATUS_V2 || cmd->error_string)
+			अनुवर्त;
 
-		for (report = cmd->report; report; report = report->next) {
-			if (count++ > 0)
+		प्रति (report = cmd->report; report; report = report->next) {
+			जइ (गणनम्++ > 0)
 				packet_buf_write(buf, "ok %s\n",
 						 cmd->ref_name);
-			if (report->ref_name)
+			जइ (report->ref_name)
 				packet_buf_write(buf, "option refname %s\n",
 						 report->ref_name);
-			if (report->old_oid)
+			जइ (report->old_oid)
 				packet_buf_write(buf, "option old-oid %s\n",
 						 oid_to_hex(report->old_oid));
-			if (report->new_oid)
+			जइ (report->new_oid)
 				packet_buf_write(buf, "option new-oid %s\n",
 						 oid_to_hex(report->new_oid));
-			if (report->forced_update)
+			जइ (report->forced_update)
 				packet_buf_write(buf, "option forced-update\n");
 		}
 	}
@@ -2503,57 +2503,57 @@ static void generate_report(struct strbuf *buf, struct command *commands,
 	packet_buf_flush(buf);
 }
 
-static void report(struct command *commands, const struct strbuf *unpack_status,
-		   enum report_status_version version)
+स्थिर शून्य report(संरचना command *commands, ध्रुव संरचना strbuf *unpack_status,
+		   गणना report_status_version version)
 {
-	struct strbuf buf = STRBUF_INIT;
+	संरचना strbuf buf = STRBUF_INIT;
 
 	generate_report(&buf, commands, unpack_status, version);
 
-	if (run_receive_report_hook(&buf)) {
+	जइ (run_receive_report_hook(&buf)) {
 		strbuf_reset(&buf);
 		override_cmds_error(commands, "receive-report hook failed");
 		generate_report(&buf, commands, unpack_status, version);
 	}
 
-	if (use_sideband)
+	जइ (use_sideband)
 		send_sideband(1, 1, buf.buf, buf.len, use_sideband);
-	else
+	अण्णहा
 		write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
 }
 
-static int delete_only(struct command *commands)
+स्थिर पूर्णाङ्क delete_only(संरचना command *commands)
 {
-	struct command *cmd;
-	for (cmd = commands; cmd; cmd = cmd->next) {
-		if (!is_null_oid(&cmd->new_oid))
-			return 0;
+	संरचना command *cmd;
+	प्रति (cmd = commands; cmd; cmd = cmd->next) {
+		जइ (!is_null_oid(&cmd->new_oid))
+			प्रत्यागम 0;
 	}
-	return 1;
+	प्रत्यागम 1;
 }
 
-int cmd_receive_pack(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+पूर्णाङ्क cmd_receive_pack(पूर्णाङ्क argc,
+		     ध्रुव वर्ण **argv,
+		     ध्रुव वर्ण *prefix,
+		     संरचना repository *repo UNUSED)
 {
-	int advertise_refs = 0;
-	struct command *commands;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct oid_array ref = OID_ARRAY_INIT;
-	struct shallow_info si;
-	struct packet_reader reader;
-	struct odb_transaction *transaction = NULL;
-	enum report_status_version version = REPORT_STATUS_UNKNOWN;
+	पूर्णाङ्क advertise_refs = 0;
+	संरचना command *commands;
+	संरचना oid_array shallow = OID_ARRAY_INIT;
+	संरचना oid_array ref = OID_ARRAY_INIT;
+	संरचना shallow_info si;
+	संरचना packet_reader reader;
+	संरचना odb_transaction *transaction = रिक्त;
+	गणना report_status_version version = REPORT_STATUS_UNKNOWN;
 
-	struct option options[] = {
+	संरचना option options[] = {
 		OPT__QUIET(&quiet, N_("quiet")),
-		OPT_HIDDEN_BOOL(0, "skip-connectivity-check", &skip_connectivity_check, NULL),
-		OPT_HIDDEN_BOOL(0, "stateless-rpc", &stateless_rpc, NULL),
-		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs, NULL),
+		OPT_HIDDEN_BOOL(0, "skip-connectivity-check", &skip_connectivity_check, रिक्त),
+		OPT_HIDDEN_BOOL(0, "stateless-rpc", &stateless_rpc, रिक्त),
+		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs, रिक्त),
 		OPT_ALIAS(0, "advertise-refs", "http-backend-info-refs"),
-		OPT_HIDDEN_BOOL(0, "reject-thin-pack-for-testing", &reject_thin, NULL),
+		OPT_HIDDEN_BOOL(0, "reject-thin-pack-for-testing", &reject_thin, रिक्त),
 		OPT_END()
 	};
 
@@ -2561,128 +2561,128 @@ int cmd_receive_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, receive_pack_usage, 0);
 
-	if (argc > 1)
-		usage_msg_opt(_("too many arguments"), receive_pack_usage, options);
-	if (argc == 0)
-		usage_msg_opt(_("you must specify a directory"), receive_pack_usage, options);
+	जइ (argc > 1)
+		usage_सन्देशः_opt(_("too many arguments"), receive_pack_usage, options);
+	जइ (argc == 0)
+		usage_सन्देशः_opt(_("you must specify a directory"), receive_pack_usage, options);
 
 	service_dir = argv[0];
 
 	setup_path();
 
-	if (!enter_repo(the_repository, service_dir, 0))
+	जइ (!enter_repo(the_repository, service_dir, 0))
 		die("'%s' does not appear to be a git repository", service_dir);
 
-	repo_config(the_repository, receive_pack_config, NULL);
-	if (cert_nonce_seed)
-		push_cert_nonce = prepare_push_cert_nonce(service_dir, time(NULL));
+	repo_config(the_repository, receive_pack_config, रिक्त);
+	जइ (cert_nonce_seed)
+		प्रक्षिप_cert_nonce = prepare_प्रक्षिप_cert_nonce(service_dir, time(रिक्त));
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
+	विकल्प (determine_protocol_version_server()) {
+	पक्ष protocol_v2:
 		/*
 		 * push support for protocol v2 has not been implemented yet,
 		 * so ignore the request to use v2 and fallback to using v0.
 		 */
-		break;
-	case protocol_v1:
+		भङ्ग;
+	पक्ष protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		जइ (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
-		break;
-	case protocol_unknown_version:
+	पक्ष protocol_v0:
+		भङ्ग;
+	पक्ष protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
-	if (advertise_refs || !stateless_rpc) {
+	जइ (advertise_refs || !stateless_rpc) {
 		write_head_info();
 	}
-	if (advertise_refs)
-		return 0;
+	जइ (advertise_refs)
+		प्रत्यागम 0;
 
-	packet_reader_init(&reader, 0, NULL, 0,
+	packet_reader_init(&reader, 0, रिक्त, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	if ((commands = read_head_info(&reader, &shallow, &version))) {
-		struct string_list push_options = STRING_LIST_INIT_DUP;
-		struct strbuf unpack_status = STRBUF_INIT;
+	जइ ((commands = read_head_info(&reader, &shallow, &version))) {
+		संरचना string_list प्रक्षिप_options = STRING_LIST_INIT_DUP;
+		संरचना strbuf unpack_status = STRBUF_INIT;
 
-		if (use_push_options)
-			read_push_options(&reader, &push_options);
-		if (!check_cert_push_options(&push_options)) {
-			struct command *cmd;
-			for (cmd = commands; cmd; cmd = cmd->next)
+		जइ (use_प्रक्षिप_options)
+			read_प्रक्षिप_options(&reader, &प्रक्षिप_options);
+		जइ (!check_cert_प्रक्षिप_options(&प्रक्षिप_options)) {
+			संरचना command *cmd;
+			प्रति (cmd = commands; cmd; cmd = cmd->next)
 				cmd->error_string = "inconsistent push options";
 		}
 
 		prepare_shallow_info(&si, &shallow);
-		if (!si.nr_ours && !si.nr_theirs)
+		जइ (!si.nr_ours && !si.nr_theirs)
 			shallow_update = 0;
-		if (!delete_only(commands)) {
-			const char *alt_shallow_file = NULL;
+		जइ (!delete_only(commands)) {
+			ध्रुव वर्ण *alt_shallow_file = रिक्त;
 
-			if (si.nr_ours || si.nr_theirs)
+			जइ (si.nr_ours || si.nr_theirs)
 				alt_shallow_file = setup_temporary_shallow(si.shallow);
 
-			if (odb_transaction_begin(the_repository->objects, &transaction, ODB_TRANSACTION_RECEIVE))
+			जइ (odb_transaction_begin(the_repository->objects, &transaction, ODB_TRANSACTION_RECEIVE))
 				strbuf_addstr(&unpack_status, "unable to start object transaction");
-			else
+			अण्णहा
 				unpack_with_sideband(transaction, alt_shallow_file, &unpack_status);
 
 			update_shallow_info(commands, &si, &ref, alt_shallow_file);
 		}
 		use_keepalive = KEEPALIVE_ALWAYS;
 		execute_commands(commands, !!unpack_status.len, &si, transaction,
-				 &push_options);
+				 &प्रक्षिप_options);
 		odb_transaction_finalize(transaction);
-		sigchain_push(SIGPIPE, SIG_IGN);
+		sigchain_प्रक्षिप(SIGPIPE, SIG_IGN);
 
-		switch (version) {
-		case REPORT_STATUS_V2:
-		case REPORT_STATUS_V0:
+		विकल्प (version) {
+		पक्ष REPORT_STATUS_V2:
+		पक्ष REPORT_STATUS_V0:
 			report(commands, &unpack_status, version);
-			break;
-		case REPORT_STATUS_UNKNOWN:
-			break;
+			भङ्ग;
+		पक्ष REPORT_STATUS_UNKNOWN:
+			भङ्ग;
 		}
 
-		sigchain_pop(SIGPIPE);
-		run_receive_hook(commands, "post-receive", 1, NULL,
-				 &push_options);
+		sigchain_निष्कासय(SIGPIPE);
+		run_receive_hook(commands, "post-receive", 1, रिक्त,
+				 &प्रक्षिप_options);
 		run_update_post_hook(commands);
 		free_commands(commands);
-		string_list_clear(&push_options, 0);
-		if (auto_gc) {
-			struct child_process proc = CHILD_PROCESS_INIT;
+		string_list_clear(&प्रक्षिप_options, 0);
+		जइ (auto_gc) {
+			संरचना child_process proc = CHILD_PROCESS_INIT;
 
-			if (prepare_auto_maintenance(the_repository, 1, &proc)) {
+			जइ (prepare_auto_maintenance(the_repository, 1, &proc)) {
 				proc.no_stdin = 1;
 				proc.stdout_to_stderr = 1;
 				proc.err = use_sideband ? -1 : 0;
 
-				if (!start_command(&proc)) {
-					if (use_sideband)
-						copy_to_sideband(proc.err, -1, NULL);
+				जइ (!start_command(&proc)) {
+					जइ (use_sideband)
+						copy_to_sideband(proc.err, -1, रिक्त);
 					finish_command(&proc);
 				}
 			}
 		}
-		if (auto_update_server_info)
+		जइ (auto_update_server_info)
 			update_server_info(the_repository, 0);
 		clear_shallow_info(&si);
 		strbuf_release(&unpack_status);
 	}
-	if (use_sideband)
+	जइ (use_sideband)
 		packet_flush(1);
 	oid_array_clear(&shallow);
 	oid_array_clear(&ref);
 	strvec_clear(&hidden_refs);
-	free((void *)push_cert_nonce);
-	return 0;
+	मुक्त((शून्य *)प्रक्षिप_cert_nonce);
+	प्रत्यागम 0;
 }

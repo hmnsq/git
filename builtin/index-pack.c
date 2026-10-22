@@ -1,76 +1,76 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "delta.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "pack.h"
-#include "csum-file.h"
-#include "blob.h"
-#include "commit.h"
-#include "tag.h"
-#include "tree.h"
-#include "progress.h"
-#include "fsck.h"
-#include "strbuf.h"
-#include "thread-utils.h"
-#include "packfile.h"
-#include "pack-revindex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "path.h"
-#include "replace-object.h"
-#include "tree-walk.h"
-#include "promisor-remote.h"
-#include "run-command.h"
-#include "setup.h"
-#include "strvec.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "delta.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "pack.h"
+#अन्तर्भाव "csum-file.h"
+#अन्तर्भाव "blob.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "tag.h"
+#अन्तर्भाव "tree.h"
+#अन्तर्भाव "progress.h"
+#अन्तर्भाव "fsck.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "thread-utils.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "pack-revindex.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "odb/streaming.h"
+#अन्तर्भाव "oid-array.h"
+#अन्तर्भाव "oidset.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "replace-object.h"
+#अन्तर्भाव "tree-walk.h"
+#अन्तर्भाव "promisor-remote.h"
+#अन्तर्भाव "run-command.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "strvec.h"
 
-static const char index_pack_usage[] =
+स्थिर ध्रुव वर्ण index_pack_usage[] =
 "git index-pack [-v] [-o <index-file>] [--keep | --keep=<msg>] [--[no-]rev-index] [--verify] [--strict[=<msg-id>=<severity>...]] [--fsck-objects[=<msg-id>=<severity>...]] (<pack-file> | --stdin [--fix-thin] [<pack-file>])";
 
-struct object_entry {
-	struct pack_idx_entry idx;
+संरचना object_entry {
+	संरचना pack_idx_entry idx;
 	size_t size;
-	unsigned char hdr_size;
-	signed char type;
-	signed char real_type;
+	unsigned वर्ण hdr_size;
+	signed वर्ण type;
+	signed वर्ण real_type;
 };
 
-struct object_stat {
+संरचना object_stat {
 	unsigned delta_depth;
-	int base_object_no;
+	पूर्णाङ्क base_object_no;
 };
 
-struct base_data {
+संरचना base_data {
 	/* Initialized by make_base(). */
-	struct base_data *base;
-	struct object_entry *obj;
-	int ref_first, ref_last;
-	int ofs_first, ofs_last;
+	संरचना base_data *base;
+	संरचना object_entry *obj;
+	पूर्णाङ्क ref_first, ref_last;
+	पूर्णाङ्क ofs_first, ofs_last;
 	/*
 	 * Threads should increment retain_data if they are about to call
 	 * patch_delta() using this struct's data as a base, and decrement this
 	 * when they are done. While retain_data is nonzero, this struct's data
 	 * will not be freed even if the delta base cache limit is exceeded.
 	 */
-	int retain_data;
+	पूर्णाङ्क retain_data;
 	/*
 	 * The number of direct children that have not been fully processed
 	 * (entered work_head, entered done_head, left done_head). When this
 	 * number reaches zero, this struct base_data can be freed.
 	 */
-	int children_remaining;
+	पूर्णाङ्क children_remaining;
 
 	/* Not initialized by make_base(). */
-	struct list_head list;
-	void *data;
+	संरचना list_head list;
+	शून्य *data;
 	size_t size;
 };
 
@@ -81,7 +81,7 @@ struct base_data {
  *
  * Guarded by work_mutex.
  */
-static LIST_HEAD(work_head);
+स्थिर LIST_HEAD(work_head);
 
 /*
  * Stack of struct base_data that have children, all of whom have been
@@ -91,7 +91,7 @@ static LIST_HEAD(work_head);
  *
  * Guarded by work_mutex.
  */
-static LIST_HEAD(done_head);
+स्थिर LIST_HEAD(done_head);
 
 /*
  * All threads share one delta base cache.
@@ -99,211 +99,211 @@ static LIST_HEAD(done_head);
  * base_cache_used is guarded by work_mutex, and base_cache_limit is read-only
  * in a thread.
  */
-static size_t base_cache_used;
-static size_t base_cache_limit;
+स्थिर size_t base_cache_used;
+स्थिर size_t base_cache_limit;
 
-struct thread_local_data {
+संरचना thread_local_data {
 	pthread_t thread;
-	int pack_fd;
+	पूर्णाङ्क pack_fd;
 };
 
 /* Remember to update object flag allocation in object.h */
 #define FLAG_LINK (1u<<20)
 #define FLAG_CHECKED (1u<<21)
 
-struct ofs_delta_entry {
+संरचना ofs_delta_entry {
 	off_t offset;
-	int obj_no;
+	पूर्णाङ्क obj_no;
 };
 
-struct ref_delta_entry {
-	struct object_id oid;
-	int obj_no;
+संरचना ref_delta_entry {
+	संरचना object_id oid;
+	पूर्णाङ्क obj_no;
 };
 
-static struct object_entry *objects;
-static struct object_stat *obj_stat;
-static struct ofs_delta_entry *ofs_deltas;
-static struct ref_delta_entry *ref_deltas;
-static struct thread_local_data nothread_data;
-static int nr_objects;
-static int nr_ofs_deltas;
-static int nr_ref_deltas;
-static int ref_deltas_alloc;
-static int nr_resolved_deltas;
-static int nr_threads;
+स्थिर संरचना object_entry *objects;
+स्थिर संरचना object_stat *obj_stat;
+स्थिर संरचना ofs_delta_entry *ofs_deltas;
+स्थिर संरचना ref_delta_entry *ref_deltas;
+स्थिर संरचना thread_local_data nothread_data;
+स्थिर पूर्णाङ्क nr_objects;
+स्थिर पूर्णाङ्क nr_ofs_deltas;
+स्थिर पूर्णाङ्क nr_ref_deltas;
+स्थिर पूर्णाङ्क ref_deltas_alloc;
+स्थिर पूर्णाङ्क nr_resolved_deltas;
+स्थिर पूर्णाङ्क nr_threads;
 
-static int from_stdin;
-static int strict;
-static int do_fsck_object;
-static struct fsck_options fsck_options;
-static int verbose;
-static const char *progress_title;
-static int show_resolving_progress;
-static int show_stat;
-static int check_self_contained_and_connected;
+स्थिर पूर्णाङ्क from_stdin;
+स्थिर पूर्णाङ्क strict;
+स्थिर पूर्णाङ्क do_fsck_object;
+स्थिर संरचना fsck_options fsck_options;
+स्थिर पूर्णाङ्क verbose;
+स्थिर ध्रुव वर्ण *progress_title;
+स्थिर पूर्णाङ्क show_resolving_progress;
+स्थिर पूर्णाङ्क show_stat;
+स्थिर पूर्णाङ्क check_self_contained_and_connected;
 
-static struct progress *progress;
+स्थिर संरचना progress *progress;
 
-static unsigned char input_buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int input_offset, input_len;
-static off_t consumed_bytes;
-static off_t max_input_size;
-static unsigned deepest_delta;
-static struct git_hash_ctx input_ctx;
-static uint32_t input_crc32;
-static int input_fd, output_fd;
-static const char *curr_pack;
+स्थिर unsigned वर्ण निवेशः_buffer[DEFAULT_IO_BUFFER_SIZE];
+स्थिर unsigned पूर्णाङ्क निवेशः_offset, निवेशः_len;
+स्थिर off_t consumed_bytes;
+स्थिर off_t max_निवेशः_size;
+स्थिर unsigned deepest_delta;
+स्थिर संरचना git_hash_ctx निवेशः_ctx;
+स्थिर uint32_t निवेशः_crc32;
+स्थिर पूर्णाङ्क निवेशः_fd, output_fd;
+स्थिर ध्रुव वर्ण *curr_pack;
 
 /*
  * outgoing_links is guarded by read_mutex, and record_outgoing_links is
  * read-only in a thread.
  */
-static struct oidset outgoing_links = OIDSET_INIT;
-static int record_outgoing_links;
+स्थिर संरचना oidset outgoing_links = OIDSET_INIT;
+स्थिर पूर्णाङ्क record_outgoing_links;
 
-static struct thread_local_data *thread_data;
-static int nr_dispatched;
-static int threads_active;
+स्थिर संरचना thread_local_data *thread_data;
+स्थिर पूर्णाङ्क nr_dispatched;
+स्थिर पूर्णाङ्क threads_active;
 
-static pthread_mutex_t read_mutex;
+स्थिर pthread_mutex_t read_mutex;
 #define read_lock()		lock_mutex(&read_mutex)
 #define read_unlock()		unlock_mutex(&read_mutex)
 
-static pthread_mutex_t counter_mutex;
+स्थिर pthread_mutex_t counter_mutex;
 #define counter_lock()		lock_mutex(&counter_mutex)
 #define counter_unlock()	unlock_mutex(&counter_mutex)
 
-static pthread_mutex_t work_mutex;
+स्थिर pthread_mutex_t work_mutex;
 #define work_lock()		lock_mutex(&work_mutex)
 #define work_unlock()		unlock_mutex(&work_mutex)
 
-static pthread_mutex_t deepest_delta_mutex;
+स्थिर pthread_mutex_t deepest_delta_mutex;
 #define deepest_delta_lock()	lock_mutex(&deepest_delta_mutex)
 #define deepest_delta_unlock()	unlock_mutex(&deepest_delta_mutex)
 
-static pthread_key_t key;
+स्थिर pthread_कुञ्चिका_t कुञ्चिका;
 
-static inline void lock_mutex(pthread_mutex_t *mutex)
+स्थिर अन्तःस्थ शून्य lock_mutex(pthread_mutex_t *mutex)
 {
-	if (threads_active)
+	जइ (threads_active)
 		pthread_mutex_lock(mutex);
 }
 
-static inline void unlock_mutex(pthread_mutex_t *mutex)
+स्थिर अन्तःस्थ शून्य unlock_mutex(pthread_mutex_t *mutex)
 {
-	if (threads_active)
+	जइ (threads_active)
 		pthread_mutex_unlock(mutex);
 }
 
 /*
  * Mutex and conditional variable can't be statically-initialized on Windows.
  */
-static void init_thread(void)
+स्थिर शून्य init_thread(शून्य)
 {
-	int i;
+	पूर्णाङ्क i;
 	init_recursive_mutex(&read_mutex);
-	pthread_mutex_init(&counter_mutex, NULL);
-	pthread_mutex_init(&work_mutex, NULL);
-	if (show_stat)
-		pthread_mutex_init(&deepest_delta_mutex, NULL);
-	pthread_key_create(&key, NULL);
+	pthread_mutex_init(&counter_mutex, रिक्त);
+	pthread_mutex_init(&work_mutex, रिक्त);
+	जइ (show_stat)
+		pthread_mutex_init(&deepest_delta_mutex, रिक्त);
+	pthread_कुञ्चिका_create(&कुञ्चिका, रिक्त);
 	CALLOC_ARRAY(thread_data, nr_threads);
-	for (i = 0; i < nr_threads; i++) {
+	प्रति (i = 0; i < nr_threads; i++) {
 		thread_data[i].pack_fd = xopen(curr_pack, O_RDONLY);
 	}
 
 	threads_active = 1;
 }
 
-static void cleanup_thread(void)
+स्थिर शून्य cleanup_thread(शून्य)
 {
-	int i;
-	if (!threads_active)
-		return;
+	पूर्णाङ्क i;
+	जइ (!threads_active)
+		प्रत्यागम;
 	threads_active = 0;
 	pthread_mutex_destroy(&read_mutex);
 	pthread_mutex_destroy(&counter_mutex);
 	pthread_mutex_destroy(&work_mutex);
-	if (show_stat)
+	जइ (show_stat)
 		pthread_mutex_destroy(&deepest_delta_mutex);
-	for (i = 0; i < nr_threads; i++)
+	प्रति (i = 0; i < nr_threads; i++)
 		close(thread_data[i].pack_fd);
-	pthread_key_delete(key);
-	free(thread_data);
+	pthread_कुञ्चिका_delete(कुञ्चिका);
+	मुक्त(thread_data);
 }
 
-static int mark_link(struct object *obj, enum object_type type,
-		     void *data UNUSED,
-		     struct fsck_options *options UNUSED)
+स्थिर पूर्णाङ्क mark_link(संरचना object *obj, गणना object_type type,
+		     शून्य *data UNUSED,
+		     संरचना fsck_options *options UNUSED)
 {
-	if (!obj)
-		return -1;
+	जइ (!obj)
+		प्रत्यागम -1;
 
-	if (type != OBJ_ANY && obj->type != type)
+	जइ (type != OBJ_ANY && obj->type != type)
 		die(_("object type mismatch at %s"), oid_to_hex(&obj->oid));
 
 	obj->flags |= FLAG_LINK;
-	return 0;
+	प्रत्यागम 0;
 }
 
 /* The content of each linked object must have been checked
    or it must be already present in the object database */
-static unsigned check_object(struct object *obj)
+स्थिर unsigned check_object(संरचना object *obj)
 {
-	if (!obj)
-		return 0;
+	जइ (!obj)
+		प्रत्यागम 0;
 
-	if (!(obj->flags & FLAG_LINK))
-		return 0;
+	जइ (!(obj->flags & FLAG_LINK))
+		प्रत्यागम 0;
 
-	if (!(obj->flags & FLAG_CHECKED)) {
+	जइ (!(obj->flags & FLAG_CHECKED)) {
 		size_t size;
-		int type = odb_read_object_info(the_repository->objects,
+		पूर्णाङ्क type = odb_read_object_info(the_repository->objects,
 						&obj->oid, &size);
-		if (type <= 0)
+		जइ (type <= 0)
 			die(_("did not receive expected object %s"),
 			      oid_to_hex(&obj->oid));
-		if (type != obj->type)
+		जइ (type != obj->type)
 			die(_("object %s: expected type %s, found %s"),
 			    oid_to_hex(&obj->oid),
 			    type_name(obj->type), type_name(type));
 		obj->flags |= FLAG_CHECKED;
-		return 1;
+		प्रत्यागम 1;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static unsigned check_objects(void)
+स्थिर unsigned check_objects(शून्य)
 {
 	unsigned i, max, foreign_nr = 0;
 
 	max = get_max_object_index(the_repository);
 
-	if (verbose)
+	जइ (verbose)
 		progress = start_delayed_progress(the_repository,
 						  _("Checking objects"), max);
 
-	for (i = 0; i < max; i++) {
+	प्रति (i = 0; i < max; i++) {
 		foreign_nr += check_object(get_indexed_object(the_repository, i));
 		display_progress(progress, i + 1);
 	}
 
 	stop_progress(&progress);
-	return foreign_nr;
+	प्रत्यागम foreign_nr;
 }
 
 
 /* Discard current buffer used content. */
-static void flush(void)
+स्थिर शून्य flush(शून्य)
 {
-	if (input_offset) {
-		if (output_fd >= 0)
-			write_or_die(output_fd, input_buffer, input_offset);
-		git_hash_update(&input_ctx, input_buffer, input_offset);
-		memmove(input_buffer, input_buffer + input_offset, input_len);
-		input_offset = 0;
+	जइ (निवेशः_offset) {
+		जइ (output_fd >= 0)
+			write_or_die(output_fd, निवेशः_buffer, निवेशः_offset);
+		git_hash_update(&निवेशः_ctx, निवेशः_buffer, निवेशः_offset);
+		memmove(निवेशः_buffer, निवेशः_buffer + निवेशः_offset, निवेशः_len);
+		निवेशः_offset = 0;
 	}
 }
 
@@ -311,225 +311,225 @@ static void flush(void)
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+स्थिर शून्य *fill(पूर्णाङ्क min)
 {
-	if (min <= input_len)
-		return input_buffer + input_offset;
-	if (min > sizeof(input_buffer))
+	जइ (min <= निवेशः_len)
+		प्रत्यागम निवेशः_buffer + निवेशः_offset;
+	जइ (min > परिमाण(निवेशः_buffer))
 		die(Q_("cannot fill %d byte",
 		       "cannot fill %d bytes",
 		       min),
 		    min);
 	flush();
-	do {
-		ssize_t ret = xread(input_fd, input_buffer + input_len,
-				sizeof(input_buffer) - input_len);
-		if (ret <= 0) {
-			if (!ret)
+	करेहि {
+		ssize_t ret = xread(निवेशः_fd, निवेशः_buffer + निवेशः_len,
+				परिमाण(निवेशः_buffer) - निवेशः_len);
+		जइ (ret <= 0) {
+			जइ (!ret)
 				die(_("early EOF"));
 			die_errno(_("read error on input"));
 		}
-		input_len += ret;
-		if (from_stdin)
-			display_throughput(progress, consumed_bytes + input_len);
-	} while (input_len < min);
-	return input_buffer;
+		निवेशः_len += ret;
+		जइ (from_stdin)
+			display_throughput(progress, consumed_bytes + निवेशः_len);
+	} जाव (निवेशः_len < min);
+	प्रत्यागम निवेशः_buffer;
 }
 
-static void use(int bytes)
+स्थिर शून्य use(पूर्णाङ्क bytes)
 {
-	if (bytes > input_len)
+	जइ (bytes > निवेशः_len)
 		die(_("used more bytes than were available"));
-	input_crc32 = crc32(input_crc32, input_buffer + input_offset, bytes);
-	input_len -= bytes;
-	input_offset += bytes;
+	निवेशः_crc32 = crc32(निवेशः_crc32, निवेशः_buffer + निवेशः_offset, bytes);
+	निवेशः_len -= bytes;
+	निवेशः_offset += bytes;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	जइ (signed_add_overflows(consumed_bytes, bytes))
 		die(_("pack too large for current definition of off_t"));
 	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size) {
-		struct strbuf size_limit = STRBUF_INIT;
-		strbuf_humanise_bytes(&size_limit, max_input_size);
+	जइ (max_निवेशः_size && consumed_bytes > max_निवेशः_size) {
+		संरचना strbuf size_limit = STRBUF_INIT;
+		strbuf_humanise_bytes(&size_limit, max_निवेशः_size);
 		die(_("pack exceeds maximum allowed size (%s)"),
 		    size_limit.buf);
 	}
 }
 
-static const char *open_pack_file(const char *pack_name)
+स्थिर ध्रुव वर्ण *open_pack_file(ध्रुव वर्ण *pack_name)
 {
-	if (from_stdin) {
-		input_fd = 0;
-		if (!pack_name) {
-			struct strbuf tmp_file = STRBUF_INIT;
+	जइ (from_stdin) {
+		निवेशः_fd = 0;
+		जइ (!pack_name) {
+			संरचना strbuf tmp_file = STRBUF_INIT;
 			output_fd = odb_mkstemp(the_repository->objects, &tmp_file,
 						"pack/tmp_pack_XXXXXX");
-			pack_name = strbuf_detach(&tmp_file, NULL);
-		} else {
+			pack_name = strbuf_detach(&tmp_file, रिक्त);
+		} अण्णहा {
 			output_fd = xopen(pack_name, O_CREAT|O_EXCL|O_RDWR, 0600);
 		}
 		nothread_data.pack_fd = output_fd;
-	} else {
-		input_fd = xopen(pack_name, O_RDONLY);
+	} अण्णहा {
+		निवेशः_fd = xopen(pack_name, O_RDONLY);
 		output_fd = -1;
-		nothread_data.pack_fd = input_fd;
+		nothread_data.pack_fd = निवेशः_fd;
 	}
-	git_hash_init(&input_ctx, the_hash_algo);
-	return pack_name;
+	git_hash_init(&निवेशः_ctx, the_hash_algo);
+	प्रत्यागम pack_name;
 }
 
-static void parse_pack_header(void)
+स्थिर शून्य parse_pack_header(शून्य)
 {
-	unsigned char *hdr = fill(sizeof(struct pack_header));
+	unsigned वर्ण *hdr = fill(परिमाण(संरचना pack_header));
 
 	/* Header consistency check */
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	जइ (get_be32(hdr) != PACK_SIGNATURE)
 		die(_("pack signature mismatch"));
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	जइ (!pack_version_ok_native(get_be32(hdr)))
 		die(_("pack version %"PRIu32" unsupported"),
 		    get_be32(hdr));
 	hdr += 4;
 
 	nr_objects = get_be32(hdr);
-	use(sizeof(struct pack_header));
+	use(परिमाण(संरचना pack_header));
 }
 
 __attribute__((format (printf, 2, 3)))
-static NORETURN void bad_object(off_t offset, const char *format, ...)
+स्थिर NORETURN शून्य bad_object(off_t offset, ध्रुव वर्ण *format, ...)
 {
 	va_list params;
-	char buf[1024];
+	वर्ण buf[1024];
 
 	va_start(params, format);
-	vsnprintf(buf, sizeof(buf), format, params);
+	vsnprintf(buf, परिमाण(buf), format, params);
 	va_end(params);
 	die(_("pack has bad object at offset %"PRIuMAX": %s"),
 	    (uintmax_t)offset, buf);
 }
 
-static inline struct thread_local_data *get_thread_data(void)
+स्थिर अन्तःस्थ संरचना thread_local_data *get_thread_data(शून्य)
 {
-	if (HAVE_THREADS) {
-		if (threads_active)
-			return pthread_getspecific(key);
-		assert(!threads_active &&
+	जइ (HAVE_THREADS) {
+		जइ (threads_active)
+			प्रत्यागम pthread_getspecific(कुञ्चिका);
+		प्रतिज्ञा(!threads_active &&
 		       "This should only be reached when all threads are gone");
 	}
-	return &nothread_data;
+	प्रत्यागम &nothread_data;
 }
 
-static void set_thread_data(struct thread_local_data *data)
+स्थिर शून्य set_thread_data(संरचना thread_local_data *data)
 {
-	if (threads_active)
-		pthread_setspecific(key, data);
+	जइ (threads_active)
+		pthread_setspecific(कुञ्चिका, data);
 }
 
-static void free_base_data(struct base_data *c)
+स्थिर शून्य free_base_data(संरचना base_data *c)
 {
-	if (c->data) {
+	जइ (c->data) {
 		FREE_AND_NULL(c->data);
 		base_cache_used -= c->size;
 	}
 }
 
-static void prune_base_data(struct base_data *retain)
+स्थिर शून्य prune_base_data(संरचना base_data *retain)
 {
-	struct list_head *pos;
+	संरचना list_head *pos;
 
-	if (base_cache_used <= base_cache_limit)
-		return;
+	जइ (base_cache_used <= base_cache_limit)
+		प्रत्यागम;
 
 	list_for_each_prev(pos, &done_head) {
-		struct base_data *b = list_entry(pos, struct base_data, list);
-		if (b->retain_data || b == retain)
-			continue;
-		if (b->data) {
+		संरचना base_data *b = list_entry(pos, संरचना base_data, list);
+		जइ (b->retain_data || b == retain)
+			अनुवर्त;
+		जइ (b->data) {
 			free_base_data(b);
-			if (base_cache_used <= base_cache_limit)
-				return;
+			जइ (base_cache_used <= base_cache_limit)
+				प्रत्यागम;
 		}
 	}
 
 	list_for_each_prev(pos, &work_head) {
-		struct base_data *b = list_entry(pos, struct base_data, list);
-		if (b->retain_data || b == retain)
-			continue;
-		if (b->data) {
+		संरचना base_data *b = list_entry(pos, संरचना base_data, list);
+		जइ (b->retain_data || b == retain)
+			अनुवर्त;
+		जइ (b->data) {
 			free_base_data(b);
-			if (base_cache_used <= base_cache_limit)
-				return;
+			जइ (base_cache_used <= base_cache_limit)
+				प्रत्यागम;
 		}
 	}
 }
 
-static int is_delta_type(enum object_type type)
+स्थिर पूर्णाङ्क is_delta_type(गणना object_type type)
 {
-	return (type == OBJ_REF_DELTA || type == OBJ_OFS_DELTA);
+	प्रत्यागम (type == OBJ_REF_DELTA || type == OBJ_OFS_DELTA);
 }
 
-static void *unpack_entry_data(off_t offset, size_t size,
-			       enum object_type type, struct object_id *oid)
+स्थिर शून्य *unpack_entry_data(off_t offset, size_t size,
+			       गणना object_type type, संरचना object_id *oid)
 {
-	static char fixed_buf[8192];
-	int status;
+	स्थिर वर्ण fixed_buf[8192];
+	पूर्णाङ्क status;
 	git_zstream stream;
-	void *buf;
-	struct git_hash_ctx c;
-	char hdr[32];
-	int hdrlen;
+	शून्य *buf;
+	संरचना git_hash_ctx c;
+	वर्ण hdr[32];
+	पूर्णाङ्क hdrlen;
 
-	if (!is_delta_type(type)) {
-		hdrlen = format_object_header(hdr, sizeof(hdr), type, size);
+	जइ (!is_delta_type(type)) {
+		hdrlen = format_object_header(hdr, परिमाण(hdr), type, size);
 		git_hash_init(&c, the_hash_algo);
 		git_hash_update(&c, hdr, hdrlen);
-	} else
-		oid = NULL;
-	if (type == OBJ_BLOB &&
+	} अण्णहा
+		oid = रिक्त;
+	जइ (type == OBJ_BLOB &&
 	    size > repo_settings_get_big_file_threshold(the_repository))
 		buf = fixed_buf;
-	else
+	अण्णहा
 		buf = xmallocz(size);
 
-	memset(&stream, 0, sizeof(stream));
+	memset(&stream, 0, परिमाण(stream));
 	git_inflate_init(&stream);
 	stream.next_out = buf;
-	stream.avail_out = buf == fixed_buf ? sizeof(fixed_buf) : size;
+	stream.avail_out = buf == fixed_buf ? परिमाण(fixed_buf) : size;
 
-	do {
-		unsigned char *last_out = stream.next_out;
+	करेहि {
+		unsigned वर्ण *last_out = stream.next_out;
 		stream.next_in = fill(1);
-		stream.avail_in = input_len;
+		stream.avail_in = निवेशः_len;
 		status = git_inflate(&stream, 0);
-		use(input_len - stream.avail_in);
-		if (oid)
+		use(निवेशः_len - stream.avail_in);
+		जइ (oid)
 			git_hash_update(&c, last_out, stream.next_out - last_out);
-		if (buf == fixed_buf) {
+		जइ (buf == fixed_buf) {
 			stream.next_out = buf;
-			stream.avail_out = sizeof(fixed_buf);
+			stream.avail_out = परिमाण(fixed_buf);
 		}
-	} while (status == Z_OK);
-	if (stream.total_out != size || status != Z_STREAM_END)
+	} जाव (status == Z_OK);
+	जइ (stream.total_out != size || status != Z_STREAM_END)
 		bad_object(offset, _("inflate returned %d"), status);
 	git_inflate_end(&stream);
-	if (oid)
+	जइ (oid)
 		git_hash_final_oid(oid, &c);
-	return buf == fixed_buf ? NULL : buf;
+	प्रत्यागम buf == fixed_buf ? रिक्त : buf;
 }
 
-static void *unpack_raw_entry(struct object_entry *obj,
+स्थिर शून्य *unpack_raw_entry(संरचना object_entry *obj,
 			      off_t *ofs_offset,
-			      struct object_id *ref_oid,
-			      struct object_id *oid)
+			      संरचना object_id *ref_oid,
+			      संरचना object_id *oid)
 {
-	unsigned char *p;
+	unsigned वर्ण *p;
 	size_t size, c;
 	off_t base_offset;
 	unsigned shift;
-	void *data;
+	शून्य *data;
 
 	obj->idx.offset = consumed_bytes;
-	input_crc32 = crc32(0, NULL, 0);
+	निवेशः_crc32 = crc32(0, रिक्त, 0);
 
 	p = fill(1);
 	c = *p;
@@ -537,8 +537,8 @@ static void *unpack_raw_entry(struct object_entry *obj,
 	obj->type = (c >> 4) & 7;
 	size = (c & 15);
 	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	जाव (c & 0x80) {
+		जइ ((bitsizeof(size_t) - 7) < shift)
 			die(_("object size too large for this platform"));
 		p = fill(1);
 		c = *p;
@@ -548,20 +548,20 @@ static void *unpack_raw_entry(struct object_entry *obj,
 	}
 	obj->size = size;
 
-	switch (obj->type) {
-	case OBJ_REF_DELTA:
+	विकल्प (obj->type) {
+	पक्ष OBJ_REF_DELTA:
 		oidread(ref_oid, fill(the_hash_algo->rawsz),
 			the_repository->hash_algo);
 		use(the_hash_algo->rawsz);
-		break;
-	case OBJ_OFS_DELTA:
+		भङ्ग;
+	पक्ष OBJ_OFS_DELTA:
 		p = fill(1);
 		c = *p;
 		use(1);
 		base_offset = c & 127;
-		while (c & 128) {
+		जाव (c & 128) {
 			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
+			जइ (!base_offset || MSB(base_offset, 7))
 				bad_object(obj->idx.offset, _("offset value overflow for delta base object"));
 			p = fill(1);
 			c = *p;
@@ -569,48 +569,48 @@ static void *unpack_raw_entry(struct object_entry *obj,
 			base_offset = (base_offset << 7) + (c & 127);
 		}
 		*ofs_offset = obj->idx.offset - base_offset;
-		if (*ofs_offset <= 0 || *ofs_offset >= obj->idx.offset)
+		जइ (*ofs_offset <= 0 || *ofs_offset >= obj->idx.offset)
 			bad_object(obj->idx.offset, _("delta base offset is out of bound"));
-		break;
-	case OBJ_COMMIT:
-	case OBJ_TREE:
-	case OBJ_BLOB:
-	case OBJ_TAG:
-		break;
-	default:
+		भङ्ग;
+	पक्ष OBJ_COMMIT:
+	पक्ष OBJ_वृक्षः:
+	पक्ष OBJ_BLOB:
+	पक्ष OBJ_TAG:
+		भङ्ग;
+	स्वभाव:
 		bad_object(obj->idx.offset, _("unknown object type %d"), obj->type);
 	}
 	obj->hdr_size = consumed_bytes - obj->idx.offset;
 
 	data = unpack_entry_data(obj->idx.offset, obj->size, obj->type, oid);
-	obj->idx.crc32 = input_crc32;
-	return data;
+	obj->idx.crc32 = निवेशः_crc32;
+	प्रत्यागम data;
 }
 
-static void *unpack_data(struct object_entry *obj,
-			 int (*consume)(const unsigned char *, unsigned long, void *),
-			 void *cb_data)
+स्थिर शून्य *unpack_data(संरचना object_entry *obj,
+			 पूर्णाङ्क (*consume)(ध्रुव unsigned वर्ण *, unsigned long, शून्य *),
+			 शून्य *cb_data)
 {
 	off_t from = obj[0].idx.offset + obj[0].hdr_size;
 	off_t len = obj[1].idx.offset - from;
-	unsigned char *data, *inbuf;
+	unsigned वर्ण *data, *inbuf;
 	git_zstream stream;
-	int status;
+	पूर्णाङ्क status;
 
 	data = xmallocz(consume ? 64*1024 : obj->size);
-	inbuf = xmalloc((len < 64*1024) ? (int)len : 64*1024);
+	inbuf = xmalloc((len < 64*1024) ? (पूर्णाङ्क)len : 64*1024);
 
-	memset(&stream, 0, sizeof(stream));
+	memset(&stream, 0, परिमाण(stream));
 	git_inflate_init(&stream);
 	stream.next_out = data;
 	stream.avail_out = consume ? 64*1024 : obj->size;
 
-	do {
+	करेहि {
 		ssize_t n = (len < 64*1024) ? (ssize_t)len : 64*1024;
 		n = xpread(get_thread_data()->pack_fd, inbuf, n, from);
-		if (n < 0)
+		जइ (n < 0)
 			die_errno(_("cannot pread pack file"));
-		if (!n)
+		जइ (!n)
 			die(Q_("premature end of pack file, %"PRIuMAX" byte missing",
 			       "premature end of pack file, %"PRIuMAX" bytes missing",
 			       len),
@@ -619,211 +619,211 @@ static void *unpack_data(struct object_entry *obj,
 		len -= n;
 		stream.next_in = inbuf;
 		stream.avail_in = n;
-		if (!consume)
+		जइ (!consume)
 			status = git_inflate(&stream, 0);
-		else {
-			do {
+		अण्णहा {
+			करेहि {
 				status = git_inflate(&stream, 0);
-				if (consume(data, stream.next_out - data, cb_data)) {
-					free(inbuf);
-					free(data);
-					return NULL;
+				जइ (consume(data, stream.next_out - data, cb_data)) {
+					मुक्त(inbuf);
+					मुक्त(data);
+					प्रत्यागम रिक्त;
 				}
 				stream.next_out = data;
 				stream.avail_out = 64*1024;
-			} while (status == Z_OK && stream.avail_in);
+			} जाव (status == Z_OK && stream.avail_in);
 		}
-	} while (len && status == Z_OK && !stream.avail_in);
+	} जाव (len && status == Z_OK && !stream.avail_in);
 
 	/* This has been inflated OK when first encountered, so... */
-	if (status != Z_STREAM_END || stream.total_out != obj->size)
+	जइ (status != Z_STREAM_END || stream.total_out != obj->size)
 		die(_("serious inflate inconsistency"));
 
 	git_inflate_end(&stream);
-	free(inbuf);
-	if (consume) {
+	मुक्त(inbuf);
+	जइ (consume) {
 		FREE_AND_NULL(data);
 	}
-	return data;
+	प्रत्यागम data;
 }
 
-static void *get_data_from_pack(struct object_entry *obj)
+स्थिर शून्य *get_data_from_pack(संरचना object_entry *obj)
 {
-	return unpack_data(obj, NULL, NULL);
+	प्रत्यागम unpack_data(obj, रिक्त, रिक्त);
 }
 
-static int compare_ofs_delta_bases(off_t offset1, off_t offset2,
-				   enum object_type type1,
-				   enum object_type type2)
+स्थिर पूर्णाङ्क compare_ofs_delta_bases(off_t offset1, off_t offset2,
+				   गणना object_type type1,
+				   गणना object_type type2)
 {
-	int cmp = type1 - type2;
-	if (cmp)
-		return cmp;
-	return offset1 < offset2 ? -1 :
+	पूर्णाङ्क cmp = type1 - type2;
+	जइ (cmp)
+		प्रत्यागम cmp;
+	प्रत्यागम offset1 < offset2 ? -1 :
 	       offset1 > offset2 ?  1 :
 	       0;
 }
 
-static int find_ofs_delta(const off_t offset)
+स्थिर पूर्णाङ्क find_ofs_delta(ध्रुव off_t offset)
 {
-	int first = 0, last = nr_ofs_deltas;
+	पूर्णाङ्क first = 0, last = nr_ofs_deltas;
 
-	while (first < last) {
-		int next = first + (last - first) / 2;
-		struct ofs_delta_entry *delta = &ofs_deltas[next];
-		int cmp;
+	जाव (first < last) {
+		पूर्णाङ्क next = first + (last - first) / 2;
+		संरचना ofs_delta_entry *delta = &ofs_deltas[next];
+		पूर्णाङ्क cmp;
 
 		cmp = compare_ofs_delta_bases(offset, delta->offset,
 					      OBJ_OFS_DELTA,
 					      objects[delta->obj_no].type);
-		if (!cmp)
-			return next;
-		if (cmp < 0) {
+		जइ (!cmp)
+			प्रत्यागम next;
+		जइ (cmp < 0) {
 			last = next;
-			continue;
+			अनुवर्त;
 		}
 		first = next+1;
 	}
-	return -first-1;
+	प्रत्यागम -first-1;
 }
 
-static void find_ofs_delta_children(off_t offset,
-				    int *first_index, int *last_index)
+स्थिर शून्य find_ofs_delta_children(off_t offset,
+				    पूर्णाङ्क *first_index, पूर्णाङ्क *last_index)
 {
-	int first = find_ofs_delta(offset);
-	int last = first;
-	int end = nr_ofs_deltas - 1;
+	पूर्णाङ्क first = find_ofs_delta(offset);
+	पूर्णाङ्क last = first;
+	पूर्णाङ्क end = nr_ofs_deltas - 1;
 
-	if (first < 0) {
+	जइ (first < 0) {
 		*first_index = 0;
 		*last_index = -1;
-		return;
+		प्रत्यागम;
 	}
-	while (first > 0 && ofs_deltas[first - 1].offset == offset)
+	जाव (first > 0 && ofs_deltas[first - 1].offset == offset)
 		--first;
-	while (last < end && ofs_deltas[last + 1].offset == offset)
+	जाव (last < end && ofs_deltas[last + 1].offset == offset)
 		++last;
 	*first_index = first;
 	*last_index = last;
 }
 
-static int compare_ref_delta_bases(const struct object_id *oid1,
-				   const struct object_id *oid2,
-				   enum object_type type1,
-				   enum object_type type2)
+स्थिर पूर्णाङ्क compare_ref_delta_bases(ध्रुव संरचना object_id *oid1,
+				   ध्रुव संरचना object_id *oid2,
+				   गणना object_type type1,
+				   गणना object_type type2)
 {
-	int cmp = type1 - type2;
-	if (cmp)
-		return cmp;
-	return oidcmp(oid1, oid2);
+	पूर्णाङ्क cmp = type1 - type2;
+	जइ (cmp)
+		प्रत्यागम cmp;
+	प्रत्यागम oidcmp(oid1, oid2);
 }
 
-static int find_ref_delta(const struct object_id *oid)
+स्थिर पूर्णाङ्क find_ref_delta(ध्रुव संरचना object_id *oid)
 {
-	int first = 0, last = nr_ref_deltas;
+	पूर्णाङ्क first = 0, last = nr_ref_deltas;
 
-	while (first < last) {
-		int next = first + (last - first) / 2;
-		struct ref_delta_entry *delta = &ref_deltas[next];
-		int cmp;
+	जाव (first < last) {
+		पूर्णाङ्क next = first + (last - first) / 2;
+		संरचना ref_delta_entry *delta = &ref_deltas[next];
+		पूर्णाङ्क cmp;
 
 		cmp = compare_ref_delta_bases(oid, &delta->oid,
 					      OBJ_REF_DELTA,
 					      objects[delta->obj_no].type);
-		if (!cmp)
-			return next;
-		if (cmp < 0) {
+		जइ (!cmp)
+			प्रत्यागम next;
+		जइ (cmp < 0) {
 			last = next;
-			continue;
+			अनुवर्त;
 		}
 		first = next+1;
 	}
-	return -first-1;
+	प्रत्यागम -first-1;
 }
 
-static void find_ref_delta_children(const struct object_id *oid,
-				    int *first_index, int *last_index)
+स्थिर शून्य find_ref_delta_children(ध्रुव संरचना object_id *oid,
+				    पूर्णाङ्क *first_index, पूर्णाङ्क *last_index)
 {
-	int first = find_ref_delta(oid);
-	int last = first;
-	int end = nr_ref_deltas - 1;
+	पूर्णाङ्क first = find_ref_delta(oid);
+	पूर्णाङ्क last = first;
+	पूर्णाङ्क end = nr_ref_deltas - 1;
 
-	if (first < 0) {
+	जइ (first < 0) {
 		*first_index = 0;
 		*last_index = -1;
-		return;
+		प्रत्यागम;
 	}
-	while (first > 0 && oideq(&ref_deltas[first - 1].oid, oid))
+	जाव (first > 0 && oideq(&ref_deltas[first - 1].oid, oid))
 		--first;
-	while (last < end && oideq(&ref_deltas[last + 1].oid, oid))
+	जाव (last < end && oideq(&ref_deltas[last + 1].oid, oid))
 		++last;
 	*first_index = first;
 	*last_index = last;
 }
 
-struct compare_data {
-	struct object_entry *entry;
-	struct odb_stream *st;
-	unsigned char *buf;
+संरचना compare_data {
+	संरचना object_entry *entry;
+	संरचना odb_stream *st;
+	unsigned वर्ण *buf;
 	unsigned long buf_size;
 };
 
-static int compare_objects(const unsigned char *buf, unsigned long size,
-			   void *cb_data)
+स्थिर पूर्णाङ्क compare_objects(ध्रुव unsigned वर्ण *buf, unsigned long size,
+			   शून्य *cb_data)
 {
-	struct compare_data *data = cb_data;
+	संरचना compare_data *data = cb_data;
 
-	if (data->buf_size < size) {
-		free(data->buf);
+	जइ (data->buf_size < size) {
+		मुक्त(data->buf);
 		data->buf = xmalloc(size);
 		data->buf_size = size;
 	}
 
-	while (size) {
+	जाव (size) {
 		ssize_t len = odb_stream_read(data->st, data->buf, size);
-		if (len == 0)
+		जइ (len == 0)
 			die(_("SHA1 COLLISION FOUND WITH %s !"),
 			    oid_to_hex(&data->entry->idx.oid));
-		if (len < 0)
+		जइ (len < 0)
 			die(_("unable to read %s"),
 			    oid_to_hex(&data->entry->idx.oid));
-		if (memcmp(buf, data->buf, len))
+		जइ (memcmp(buf, data->buf, len))
 			die(_("SHA1 COLLISION FOUND WITH %s !"),
 			    oid_to_hex(&data->entry->idx.oid));
 		size -= len;
 		buf += len;
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int check_collison(struct object_entry *entry)
+स्थिर पूर्णाङ्क check_collison(संरचना object_entry *entry)
 {
-	struct compare_data data;
+	संरचना compare_data data;
 
-	if (entry->size <= repo_settings_get_big_file_threshold(the_repository) ||
+	जइ (entry->size <= repo_settings_get_big_file_threshold(the_repository) ||
 	    entry->type != OBJ_BLOB)
-		return -1;
+		प्रत्यागम -1;
 
-	memset(&data, 0, sizeof(data));
+	memset(&data, 0, परिमाण(data));
 	data.entry = entry;
-	data.st = odb_stream_from_object(the_repository->objects, &entry->idx.oid, NULL);
-	if (!data.st)
-		return -1;
-	if (data.st->size != entry->size || data.st->type != entry->type)
+	data.st = odb_stream_from_object(the_repository->objects, &entry->idx.oid, रिक्त);
+	जइ (!data.st)
+		प्रत्यागम -1;
+	जइ (data.st->size != entry->size || data.st->type != entry->type)
 		die(_("SHA1 COLLISION FOUND WITH %s !"),
 		    oid_to_hex(&entry->idx.oid));
 	unpack_data(entry, compare_objects, &data);
 	odb_stream_close(data.st);
-	free(data.buf);
-	return 0;
+	मुक्त(data.buf);
+	प्रत्यागम 0;
 }
 
-static void record_outgoing_link(const struct object_id *oid)
+स्थिर शून्य record_outgoing_link(ध्रुव संरचना object_id *oid)
 {
-	oidset_insert(&outgoing_links, oid);
+	oidset_निवेशय(&outgoing_links, oid);
 }
 
-static void maybe_record_name_entry(const struct name_entry *entry)
+स्थिर शून्य maybe_record_name_entry(ध्रुव संरचना name_entry *entry)
 {
 	/*
 	 * Checking only trees here results in a significantly faster packfile
@@ -848,100 +848,100 @@ static void maybe_record_name_entry(const struct name_entry *entry)
 	 * happens only once - when refetched, the blob goes into a promisor
 	 * pack, so it won't be GC-ed, the tradeoff seems worth it.
 	*/
-	if (S_ISDIR(entry->mode))
+	जइ (S_ISDIR(entry->mode))
 		record_outgoing_link(&entry->oid);
 }
 
-static void do_record_outgoing_links(struct object *obj)
+स्थिर शून्य do_record_outgoing_links(संरचना object *obj)
 {
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		struct tree_desc desc;
-		struct name_entry entry;
-		if (init_tree_desc_gently(&desc, &tree->object.oid,
-					  tree->buffer, tree->size, 0))
+	जइ (obj->type == OBJ_वृक्षः) {
+		संरचना वृक्षः *वृक्षः = (संरचना वृक्षः *)obj;
+		संरचना वृक्षः_desc desc;
+		संरचना name_entry entry;
+		जइ (init_वृक्षः_desc_gently(&desc, &वृक्षः->object.oid,
+					  वृक्षः->buffer, वृक्षः->size, 0))
 			/*
 			 * Error messages are given when packs are
 			 * verified, so do not print any here.
 			 */
-			return;
-		while (tree_entry_gently(&desc, &entry))
+			प्रत्यागम;
+		जाव (वृक्षः_entry_gently(&desc, &entry))
 			maybe_record_name_entry(&entry);
-	} else if (obj->type == OBJ_COMMIT) {
-		struct commit *commit = (struct commit *) obj;
-		struct commit_list *parents = commit->parents;
+	} अण्णहा जइ (obj->type == OBJ_COMMIT) {
+		संरचना commit *commit = (संरचना commit *) obj;
+		संरचना commit_list *parents = commit->parents;
 
-		record_outgoing_link(get_commit_tree_oid(commit));
-		for (; parents; parents = parents->next)
+		record_outgoing_link(get_commit_वृक्षः_oid(commit));
+		प्रति (; parents; parents = parents->next)
 			record_outgoing_link(&parents->item->object.oid);
-	} else if (obj->type == OBJ_TAG) {
-		struct tag *tag = (struct tag *) obj;
+	} अण्णहा जइ (obj->type == OBJ_TAG) {
+		संरचना tag *tag = (संरचना tag *) obj;
 		record_outgoing_link(get_tagged_oid(tag));
 	}
 }
 
-static void sha1_object(const void *data, struct object_entry *obj_entry,
-			unsigned long size, enum object_type type,
-			const struct object_id *oid)
+स्थिर शून्य sha1_object(ध्रुव शून्य *data, संरचना object_entry *obj_entry,
+			unsigned long size, गणना object_type type,
+			ध्रुव संरचना object_id *oid)
 {
-	void *new_data = NULL;
-	int collision_test_needed = 0;
+	शून्य *new_data = रिक्त;
+	पूर्णाङ्क collision_test_needed = 0;
 
-	assert(data || obj_entry);
+	प्रतिज्ञा(data || obj_entry);
 
-	if (startup_info->have_repository) {
+	जइ (startup_info->have_repository) {
 		read_lock();
 		collision_test_needed = odb_has_object(the_repository->objects, oid,
 						       ODB_HAS_OBJECT_FETCH_PROMISOR);
 		read_unlock();
 	}
 
-	if (collision_test_needed && !data) {
+	जइ (collision_test_needed && !data) {
 		read_lock();
-		if (!check_collison(obj_entry))
+		जइ (!check_collison(obj_entry))
 			collision_test_needed = 0;
 		read_unlock();
 	}
-	if (collision_test_needed) {
-		void *has_data;
-		enum object_type has_type;
+	जइ (collision_test_needed) {
+		शून्य *has_data;
+		गणना object_type has_type;
 		size_t has_size;
 		read_lock();
 		has_type = odb_read_object_info(the_repository->objects, oid, &has_size);
-		if (has_type < 0)
+		जइ (has_type < 0)
 			die(_("cannot read existing object info %s"), oid_to_hex(oid));
-		if (has_type != type || has_size != size)
+		जइ (has_type != type || has_size != size)
 			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_to_hex(oid));
 		has_data = odb_read_object(the_repository->objects, oid,
 					   &has_type, &has_size);
 		read_unlock();
-		if (!data)
+		जइ (!data)
 			data = new_data = get_data_from_pack(obj_entry);
-		if (!has_data)
+		जइ (!has_data)
 			die(_("cannot read existing object %s"), oid_to_hex(oid));
-		if (size != has_size || type != has_type ||
+		जइ (size != has_size || type != has_type ||
 		    memcmp(data, has_data, size) != 0)
 			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_to_hex(oid));
-		free(has_data);
+		मुक्त(has_data);
 	}
 
-	if (strict || do_fsck_object || record_outgoing_links) {
+	जइ (strict || do_fsck_object || record_outgoing_links) {
 		read_lock();
-		if (type == OBJ_BLOB) {
-			struct blob *blob = lookup_blob(the_repository, oid);
-			if (blob)
+		जइ (type == OBJ_BLOB) {
+			संरचना blob *blob = lookup_blob(the_repository, oid);
+			जइ (blob)
 				blob->object.flags |= FLAG_CHECKED;
-			else
+			अण्णहा
 				die(_("invalid blob object %s"), oid_to_hex(oid));
-			if (do_fsck_object &&
-			    fsck_object(&blob->object, (void *)data, size, &fsck_options))
+			जइ (do_fsck_object &&
+			    fsck_object(&blob->object, (शून्य *)data, size, &fsck_options))
 				die(_("fsck error in packed object"));
-		} else {
-			struct object *obj;
-			int eaten;
-			void *buf = (void *) data;
+		} अण्णहा {
+			संरचना object *obj;
+			पूर्णाङ्क eaten;
+			शून्य *buf = (शून्य *) data;
 
-			assert(data && "data can only be NULL for large _blobs_");
+			प्रतिज्ञा(data && "data can only be NULL for large _blobs_");
 
 			/*
 			 * we do not need to free the memory here, as the
@@ -950,24 +950,24 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
 			obj = parse_object_buffer(the_repository, oid, type,
 						  size, buf,
 						  &eaten);
-			if (!obj)
+			जइ (!obj)
 				die(_("invalid %s"), type_name(type));
-			if (do_fsck_object &&
+			जइ (do_fsck_object &&
 			    fsck_object(obj, buf, size, &fsck_options))
 				die(_("fsck error in packed object"));
-			if (strict && fsck_walk(obj, NULL, &fsck_options))
+			जइ (strict && fsck_walk(obj, रिक्त, &fsck_options))
 				die(_("Not all child objects of %s are reachable"), oid_to_hex(&obj->oid));
-			if (record_outgoing_links)
+			जइ (record_outgoing_links)
 				do_record_outgoing_links(obj);
 
-			if (obj->type == OBJ_TREE) {
-				struct tree *item = (struct tree *) obj;
-				item->buffer = NULL;
+			जइ (obj->type == OBJ_वृक्षः) {
+				संरचना वृक्षः *item = (संरचना वृक्षः *) obj;
+				item->buffer = रिक्त;
 				obj->parsed = 0;
 			}
-			if (obj->type == OBJ_COMMIT) {
-				struct commit *commit = (struct commit *) obj;
-				if (detach_commit_buffer(commit, NULL) != data)
+			जइ (obj->type == OBJ_COMMIT) {
+				संरचना commit *commit = (संरचना commit *) obj;
+				जइ (detach_commit_buffer(commit, रिक्त) != data)
 					BUG("parse_object_buffer transmogrified our buffer");
 			}
 			obj->flags |= FLAG_CHECKED;
@@ -975,7 +975,7 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
 		read_unlock();
 	}
 
-	free(new_data);
+	मुक्त(new_data);
 }
 
 /*
@@ -989,26 +989,26 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
  * none, the ultimate base object), and reconstruct each node in the delta
  * chain in order to generate the reconstructed data for this node.
  */
-static void *get_base_data(struct base_data *c)
+स्थिर शून्य *get_base_data(संरचना base_data *c)
 {
-	if (!c->data) {
-		struct object_entry *obj = c->obj;
-		struct base_data **delta = NULL;
-		int delta_nr = 0, delta_alloc = 0;
+	जइ (!c->data) {
+		संरचना object_entry *obj = c->obj;
+		संरचना base_data **delta = रिक्त;
+		पूर्णाङ्क delta_nr = 0, delta_alloc = 0;
 
-		while (is_delta_type(c->obj->type) && !c->data) {
+		जाव (is_delta_type(c->obj->type) && !c->data) {
 			ALLOC_GROW(delta, delta_nr + 1, delta_alloc);
 			delta[delta_nr++] = c;
 			c = c->base;
 		}
-		if (!delta_nr) {
+		जइ (!delta_nr) {
 			c->data = get_data_from_pack(obj);
 			c->size = obj->size;
 			base_cache_used += c->size;
 			prune_base_data(c);
 		}
-		for (; delta_nr > 0; delta_nr--) {
-			void *base, *raw;
+		प्रति (; delta_nr > 0; delta_nr--) {
+			शून्य *base, *raw;
 			c = delta[delta_nr - 1];
 			obj = c->obj;
 			base = get_base_data(c->base);
@@ -1017,21 +1017,21 @@ static void *get_base_data(struct base_data *c)
 				base, c->base->size,
 				raw, obj->size,
 				&c->size);
-			free(raw);
-			if (!c->data)
+			मुक्त(raw);
+			जइ (!c->data)
 				bad_object(obj->idx.offset, _("failed to apply delta"));
 			base_cache_used += c->size;
 			prune_base_data(c);
 		}
-		free(delta);
+		मुक्त(delta);
 	}
-	return c->data;
+	प्रत्यागम c->data;
 }
 
-static struct base_data *make_base(struct object_entry *obj,
-				   struct base_data *parent)
+स्थिर संरचना base_data *make_base(संरचना object_entry *obj,
+				   संरचना base_data *parent)
 {
-	struct base_data *base = xcalloc(1, sizeof(struct base_data));
+	संरचना base_data *base = xcalloc(1, परिमाण(संरचना base_data));
 	base->base = parent;
 	base->obj = obj;
 	find_ref_delta_children(&obj->idx.oid,
@@ -1040,36 +1040,36 @@ static struct base_data *make_base(struct object_entry *obj,
 				&base->ofs_first, &base->ofs_last);
 	base->children_remaining = base->ref_last - base->ref_first +
 		base->ofs_last - base->ofs_first + 2;
-	return base;
+	प्रत्यागम base;
 }
 
-static struct base_data *resolve_delta(struct object_entry *delta_obj,
-				       struct base_data *base)
+स्थिर संरचना base_data *resolve_delta(संरचना object_entry *delta_obj,
+				       संरचना base_data *base)
 {
-	void *delta_data, *result_data;
-	struct base_data *result;
+	शून्य *delta_data, *result_data;
+	संरचना base_data *result;
 	size_t result_size;
 
-	if (show_stat) {
-		int i = delta_obj - objects;
-		int j = base->obj - objects;
+	जइ (show_stat) {
+		पूर्णाङ्क i = delta_obj - objects;
+		पूर्णाङ्क j = base->obj - objects;
 		obj_stat[i].delta_depth = obj_stat[j].delta_depth + 1;
 		deepest_delta_lock();
-		if (deepest_delta < obj_stat[i].delta_depth)
+		जइ (deepest_delta < obj_stat[i].delta_depth)
 			deepest_delta = obj_stat[i].delta_depth;
 		deepest_delta_unlock();
 		obj_stat[i].base_object_no = j;
 	}
 	delta_data = get_data_from_pack(delta_obj);
-	assert(base->data);
+	प्रतिज्ञा(base->data);
 	result_data = patch_delta(base->data, base->size,
 				  delta_data, delta_obj->size, &result_size);
-	free(delta_data);
-	if (!result_data)
+	मुक्त(delta_data);
+	जइ (!result_data)
 		bad_object(delta_obj->idx.offset, _("failed to apply delta"));
 	hash_object_file(the_hash_algo, result_data, result_size,
 			 delta_obj->real_type, &delta_obj->idx.oid);
-	sha1_object(result_data, NULL, result_size, delta_obj->real_type,
+	sha1_object(result_data, रिक्त, result_size, delta_obj->real_type,
 		    &delta_obj->idx.oid);
 
 	result = make_base(delta_obj, base);
@@ -1080,80 +1080,80 @@ static struct base_data *resolve_delta(struct object_entry *delta_obj,
 	nr_resolved_deltas++;
 	counter_unlock();
 
-	return result;
+	प्रत्यागम result;
 }
 
-static int compare_ofs_delta_entry(const void *a, const void *b)
+स्थिर पूर्णाङ्क compare_ofs_delta_entry(ध्रुव शून्य *a, ध्रुव शून्य *b)
 {
-	const struct ofs_delta_entry *delta_a = a;
-	const struct ofs_delta_entry *delta_b = b;
+	ध्रुव संरचना ofs_delta_entry *delta_a = a;
+	ध्रुव संरचना ofs_delta_entry *delta_b = b;
 
-	return delta_a->offset < delta_b->offset ? -1 :
+	प्रत्यागम delta_a->offset < delta_b->offset ? -1 :
 	       delta_a->offset > delta_b->offset ?  1 :
 	       0;
 }
 
-static int compare_ref_delta_entry(const void *a, const void *b)
+स्थिर पूर्णाङ्क compare_ref_delta_entry(ध्रुव शून्य *a, ध्रुव शून्य *b)
 {
-	const struct ref_delta_entry *delta_a = a;
-	const struct ref_delta_entry *delta_b = b;
+	ध्रुव संरचना ref_delta_entry *delta_a = a;
+	ध्रुव संरचना ref_delta_entry *delta_b = b;
 
-	return oidcmp(&delta_a->oid, &delta_b->oid);
+	प्रत्यागम oidcmp(&delta_a->oid, &delta_b->oid);
 }
 
-static void *threaded_second_pass(void *data)
+स्थिर शून्य *threaded_second_pass(शून्य *data)
 {
-	if (data)
+	जइ (data)
 		set_thread_data(data);
-	for (;;) {
-		struct base_data *parent = NULL;
-		struct object_entry *child_obj = NULL;
-		struct base_data *child = NULL;
+	प्रति (;;) {
+		संरचना base_data *parent = रिक्त;
+		संरचना object_entry *child_obj = रिक्त;
+		संरचना base_data *child = रिक्त;
 
 		counter_lock();
 		display_progress(progress, nr_resolved_deltas);
 		counter_unlock();
 
 		work_lock();
-		if (list_empty(&work_head)) {
+		जइ (list_empty(&work_head)) {
 			/*
 			 * Take an object from the object array.
 			 */
-			while (nr_dispatched < nr_objects &&
+			जाव (nr_dispatched < nr_objects &&
 			       is_delta_type(objects[nr_dispatched].type))
 				nr_dispatched++;
-			if (nr_dispatched >= nr_objects) {
+			जइ (nr_dispatched >= nr_objects) {
 				work_unlock();
-				break;
+				भङ्ग;
 			}
 			child_obj = &objects[nr_dispatched++];
-		} else {
+		} अण्णहा {
 			/*
 			 * Peek at the top of the stack, and take a child from
 			 * it.
 			 */
-			parent = list_first_entry(&work_head, struct base_data,
+			parent = list_first_entry(&work_head, संरचना base_data,
 						  list);
 
-			while (parent->ref_first <= parent->ref_last) {
-				int offset = ref_deltas[parent->ref_first++].obj_no;
+			जाव (parent->ref_first <= parent->ref_last) {
+				पूर्णाङ्क offset = ref_deltas[parent->ref_first++].obj_no;
 				child_obj = objects + offset;
-				if (child_obj->real_type != OBJ_REF_DELTA) {
-					child_obj = NULL;
-					continue;
+				जइ (child_obj->real_type != OBJ_REF_DELTA) {
+					child_obj = रिक्त;
+					अनुवर्त;
 				}
 				child_obj->real_type = parent->obj->real_type;
-				break;
+				भङ्ग;
 			}
 
-			if (!child_obj && parent->ofs_first <= parent->ofs_last) {
+			जइ (!child_obj && parent->ofs_first <= parent->ofs_last) {
 				child_obj = objects +
 					ofs_deltas[parent->ofs_first++].obj_no;
-				assert(child_obj->real_type == OBJ_OFS_DELTA);
+				प्रतिज्ञा(child_obj->real_type == OBJ_OFS_DELTA);
 				child_obj->real_type = parent->obj->real_type;
 			}
 
-			if (parent->ref_first > parent->ref_last &&
+			जइ (parent->ref_first > parent->ref_last &&
 			    parent->ofs_first > parent->ofs_last) {
 				/*
 				 * This parent has run out of children, so move
@@ -1179,14 +1179,14 @@ static void *threaded_second_pass(void *data)
 		}
 		work_unlock();
 
-		if (child_obj) {
-			if (parent) {
+		जइ (child_obj) {
+			जइ (parent) {
 				child = resolve_delta(child_obj, parent);
-				if (!child->children_remaining)
+				जइ (!child->children_remaining)
 					FREE_AND_NULL(child->data);
-			} else{
-				child = make_base(child_obj, NULL);
-				if (child->children_remaining) {
+			} अण्णहा{
+				child = make_base(child_obj, रिक्त);
+				जइ (child->children_remaining) {
 					/*
 					 * Since this child has its own delta children,
 					 * we will need this data in the future.
@@ -1201,36 +1201,36 @@ static void *threaded_second_pass(void *data)
 		}
 
 		work_lock();
-		if (parent)
+		जइ (parent)
 			parent->retain_data--;
 
-		if (child && child->data) {
+		जइ (child && child->data) {
 			/*
 			 * This child has its own children, so add it to
 			 * work_head.
 			 */
 			list_add(&child->list, &work_head);
 			base_cache_used += child->size;
-			prune_base_data(NULL);
-		} else if (child) {
+			prune_base_data(रिक्त);
+		} अण्णहा जइ (child) {
 			/*
 			 * This child does not have its own children. It may be
 			 * the last descendant of its ancestors; free those
 			 * that we can.
 			 */
-			struct base_data *p = parent;
+			संरचना base_data *p = parent;
 
-			while (p) {
-				struct base_data *next_p;
+			जाव (p) {
+				संरचना base_data *next_p;
 
 				p->children_remaining--;
-				if (p->children_remaining)
-					break;
+				जइ (p->children_remaining)
+					भङ्ग;
 
 				next_p = p->base;
 				free_base_data(p);
 				list_del(&p->list);
-				free(p);
+				मुक्त(p);
 
 				p = next_p;
 			}
@@ -1238,7 +1238,7 @@ static void *threaded_second_pass(void *data)
 		}
 		work_unlock();
 	}
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
 /*
@@ -1247,43 +1247,43 @@ static void *threaded_second_pass(void *data)
  * - calculate SHA1 of all non-delta objects;
  * - remember base (SHA1 or offset) for all deltas.
  */
-static void parse_pack_objects(unsigned char *hash)
+स्थिर शून्य parse_pack_objects(unsigned वर्ण *hash)
 {
-	int i, nr_delays = 0;
-	struct ofs_delta_entry *ofs_delta = ofs_deltas;
-	struct object_id ref_delta_oid;
-	struct stat st;
-	struct git_hash_ctx tmp_ctx;
+	पूर्णाङ्क i, nr_delays = 0;
+	संरचना ofs_delta_entry *ofs_delta = ofs_deltas;
+	संरचना object_id ref_delta_oid;
+	संरचना stat st;
+	संरचना git_hash_ctx tmp_ctx;
 
-	if (verbose)
+	जइ (verbose)
 		progress = start_progress(
 				the_repository,
 				progress_title ? progress_title :
 				from_stdin ? _("Receiving objects") : _("Indexing objects"),
 				nr_objects);
-	for (i = 0; i < nr_objects; i++) {
-		struct object_entry *obj = &objects[i];
-		void *data = unpack_raw_entry(obj, &ofs_delta->offset,
+	प्रति (i = 0; i < nr_objects; i++) {
+		संरचना object_entry *obj = &objects[i];
+		शून्य *data = unpack_raw_entry(obj, &ofs_delta->offset,
 					      &ref_delta_oid,
 					      &obj->idx.oid);
 		obj->real_type = obj->type;
-		if (obj->type == OBJ_OFS_DELTA) {
+		जइ (obj->type == OBJ_OFS_DELTA) {
 			nr_ofs_deltas++;
 			ofs_delta->obj_no = i;
 			ofs_delta++;
-		} else if (obj->type == OBJ_REF_DELTA) {
+		} अण्णहा जइ (obj->type == OBJ_REF_DELTA) {
 			ALLOC_GROW(ref_deltas, nr_ref_deltas + 1, ref_deltas_alloc);
 			oidcpy(&ref_deltas[nr_ref_deltas].oid, &ref_delta_oid);
 			ref_deltas[nr_ref_deltas].obj_no = i;
 			nr_ref_deltas++;
-		} else if (!data) {
+		} अण्णहा जइ (!data) {
 			/* large blobs, check later */
 			obj->real_type = OBJ_BAD;
 			nr_delays++;
-		} else
-			sha1_object(data, NULL, obj->size, obj->type,
+		} अण्णहा
+			sha1_object(data, रिक्त, obj->size, obj->type,
 				    &obj->idx.oid);
-		free(data);
+		मुक्त(data);
 		display_progress(progress, i+1);
 	}
 	objects[i].idx.offset = consumed_bytes;
@@ -1292,29 +1292,29 @@ static void parse_pack_objects(unsigned char *hash)
 	/* Check pack integrity */
 	flush();
 	git_hash_init(&tmp_ctx, the_hash_algo);
-	git_hash_clone(&tmp_ctx, &input_ctx);
+	git_hash_clone(&tmp_ctx, &निवेशः_ctx);
 	git_hash_final(hash, &tmp_ctx);
-	if (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
+	जइ (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
 		die(_("pack is corrupted (SHA1 mismatch)"));
 	use(the_hash_algo->rawsz);
 
 	/* If input_fd is a file, we should have reached its end now. */
-	if (fstat(input_fd, &st))
+	जइ (fstat(निवेशः_fd, &st))
 		die_errno(_("cannot fstat packfile"));
-	if (S_ISREG(st.st_mode) &&
-			lseek(input_fd, 0, SEEK_CUR) - input_len != st.st_size)
+	जइ (S_ISREG(st.st_mode) &&
+			lseek(निवेशः_fd, 0, SEEK_CUR) - निवेशः_len != st.st_size)
 		die(_("pack has junk at the end"));
 
-	for (i = 0; i < nr_objects; i++) {
-		struct object_entry *obj = &objects[i];
-		if (obj->real_type != OBJ_BAD)
-			continue;
+	प्रति (i = 0; i < nr_objects; i++) {
+		संरचना object_entry *obj = &objects[i];
+		जइ (obj->real_type != OBJ_BAD)
+			अनुवर्त;
 		obj->real_type = obj->type;
-		sha1_object(NULL, obj, obj->size, obj->type,
+		sha1_object(रिक्त, obj, obj->size, obj->type,
 			    &obj->idx.oid);
 		nr_delays--;
 	}
-	if (nr_delays)
+	जइ (nr_delays)
 		die(_("confusion beyond insanity in parse_pack_objects()"));
 }
 
@@ -1326,37 +1326,37 @@ static void parse_pack_objects(unsigned char *hash)
  *   recursively checking if the resulting object is used as a base
  *   for some more deltas.
  */
-static void resolve_deltas(struct pack_idx_option *opts)
+स्थिर शून्य resolve_deltas(संरचना pack_idx_option *opts)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	if (!nr_ofs_deltas && !nr_ref_deltas)
-		return;
+	जइ (!nr_ofs_deltas && !nr_ref_deltas)
+		प्रत्यागम;
 
 	/* Sort deltas by base SHA1/offset for fast searching */
 	QSORT(ofs_deltas, nr_ofs_deltas, compare_ofs_delta_entry);
 	QSORT(ref_deltas, nr_ref_deltas, compare_ref_delta_entry);
 
-	if (verbose || show_resolving_progress)
+	जइ (verbose || show_resolving_progress)
 		progress = start_progress(the_repository,
 					  _("Resolving deltas"),
 					  nr_ref_deltas + nr_ofs_deltas);
 
 	nr_dispatched = 0;
 	base_cache_limit = opts->delta_base_cache_limit * nr_threads;
-	if (nr_threads > 1 || getenv("GIT_FORCE_THREADS")) {
+	जइ (nr_threads > 1 || getenv("GIT_FORCE_THREADS")) {
 		init_thread();
-		for (i = 0; i < nr_threads; i++) {
-			int ret = pthread_create(&thread_data[i].thread, NULL,
+		प्रति (i = 0; i < nr_threads; i++) {
+			पूर्णाङ्क ret = pthread_create(&thread_data[i].thread, रिक्त,
 						 threaded_second_pass, thread_data + i);
-			if (ret)
+			जइ (ret)
 				die(_("unable to create thread: %s"),
 				    strerror(ret));
 		}
-		for (i = 0; i < nr_threads; i++)
-			pthread_join(thread_data[i].thread, NULL);
+		प्रति (i = 0; i < nr_threads; i++)
+			pthread_join(thread_data[i].thread, रिक्त);
 		cleanup_thread();
-		return;
+		प्रत्यागम;
 	}
 	threaded_second_pass(&nothread_data);
 }
@@ -1366,87 +1366,87 @@ static void resolve_deltas(struct pack_idx_option *opts)
  * - append objects to convert thin pack to full pack if required
  * - write the final pack hash
  */
-static void fix_unresolved_deltas(struct hashfile *f);
-static void conclude_pack(int fix_thin_pack, const char *curr_pack, unsigned char *pack_hash)
+स्थिर शून्य fix_unresolved_deltas(संरचना hashfile *f);
+स्थिर शून्य conclude_pack(पूर्णाङ्क fix_thin_pack, ध्रुव वर्ण *curr_pack, unsigned वर्ण *pack_hash)
 {
-	if (nr_ref_deltas + nr_ofs_deltas == nr_resolved_deltas) {
+	जइ (nr_ref_deltas + nr_ofs_deltas == nr_resolved_deltas) {
 		stop_progress(&progress);
 		/* Flush remaining pack final hash. */
 		flush();
-		return;
+		प्रत्यागम;
 	}
 
-	if (fix_thin_pack) {
-		struct hashfile *f;
-		unsigned char read_hash[GIT_MAX_RAWSZ], tail_hash[GIT_MAX_RAWSZ];
-		struct strbuf msg = STRBUF_INIT;
-		int nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
-		int nr_objects_initial = nr_objects;
-		if (nr_unresolved <= 0)
+	जइ (fix_thin_pack) {
+		संरचना hashfile *f;
+		unsigned वर्ण read_hash[GIT_MAX_RAWSZ], tail_hash[GIT_MAX_RAWSZ];
+		संरचना strbuf सन्देशः = STRBUF_INIT;
+		पूर्णाङ्क nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
+		पूर्णाङ्क nr_objects_initial = nr_objects;
+		जइ (nr_unresolved <= 0)
 			die(_("confusion beyond insanity"));
 		REALLOC_ARRAY(objects, nr_objects + nr_unresolved + 1);
 		memset(objects + nr_objects + 1, 0,
-		       nr_unresolved * sizeof(*objects));
+		       nr_unresolved * परिमाण(*objects));
 		f = hashfd(the_repository->hash_algo, output_fd, curr_pack);
 		fix_unresolved_deltas(f);
-		strbuf_addf(&msg, Q_("completed with %d local object",
+		strbuf_addf(&सन्देशः, Q_("completed with %d local object",
 				     "completed with %d local objects",
 				     nr_objects - nr_objects_initial),
 			    nr_objects - nr_objects_initial);
-		stop_progress_msg(&progress, msg.buf);
-		strbuf_release(&msg);
+		stop_progress_सन्देशः(&progress, सन्देशः.buf);
+		strbuf_release(&सन्देशः);
 		finalize_hashfile(f, tail_hash, FSYNC_COMPONENT_PACK, 0);
 		hashcpy(read_hash, pack_hash, the_repository->hash_algo);
 		fixup_pack_header_footer(the_hash_algo, output_fd, pack_hash,
 					 curr_pack, nr_objects,
 					 read_hash, consumed_bytes-the_hash_algo->rawsz);
-		if (!hasheq(read_hash, tail_hash, the_repository->hash_algo))
+		जइ (!hasheq(read_hash, tail_hash, the_repository->hash_algo))
 			die(_("Unexpected tail checksum for %s "
 			      "(disk corruption?)"), curr_pack);
 	}
-	if (nr_ofs_deltas + nr_ref_deltas != nr_resolved_deltas)
+	जइ (nr_ofs_deltas + nr_ref_deltas != nr_resolved_deltas)
 		die(Q_("pack has %d unresolved delta",
 		       "pack has %d unresolved deltas",
 		       nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas),
 		    nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas);
 }
 
-static int write_compressed(struct hashfile *f, void *in, unsigned int size)
+स्थिर पूर्णाङ्क write_compressed(संरचना hashfile *f, शून्य *in, unsigned पूर्णाङ्क size)
 {
 	git_zstream stream;
-	int status;
-	unsigned char outbuf[4096];
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	पूर्णाङ्क status;
+	unsigned वर्ण outbuf[4096];
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
 
 	git_deflate_init(&stream, cfg->zlib_compression_level);
 	stream.next_in = in;
 	stream.avail_in = size;
 
-	do {
+	करेहि {
 		stream.next_out = outbuf;
-		stream.avail_out = sizeof(outbuf);
+		stream.avail_out = परिमाण(outbuf);
 		status = git_deflate(&stream, Z_FINISH);
-		hashwrite(f, outbuf, sizeof(outbuf) - stream.avail_out);
-	} while (status == Z_OK);
+		hashwrite(f, outbuf, परिमाण(outbuf) - stream.avail_out);
+	} जाव (status == Z_OK);
 
-	if (status != Z_STREAM_END)
+	जइ (status != Z_STREAM_END)
 		die(_("unable to deflate appended object (%d)"), status);
 	size = stream.total_out;
 	git_deflate_end(&stream);
-	return size;
+	प्रत्यागम size;
 }
 
-static struct object_entry *append_obj_to_pack(struct hashfile *f,
-			       const unsigned char *sha1, void *buf,
-			       unsigned long size, enum object_type type)
+स्थिर संरचना object_entry *append_obj_to_pack(संरचना hashfile *f,
+			       ध्रुव unsigned वर्ण *sha1, शून्य *buf,
+			       unsigned long size, गणना object_type type)
 {
-	struct object_entry *obj = &objects[nr_objects++];
-	unsigned char header[10];
+	संरचना object_entry *obj = &objects[nr_objects++];
+	unsigned वर्ण header[10];
 	unsigned long s = size;
-	int n = 0;
-	unsigned char c = (type << 4) | (s & 15);
+	पूर्णाङ्क n = 0;
+	unsigned वर्ण c = (type << 4) | (s & 15);
 	s >>= 4;
-	while (s) {
+	जाव (s) {
 		header[n++] = c | 0x80;
 		c = s & 0x7f;
 		s >>= 7;
@@ -1463,20 +1463,20 @@ static struct object_entry *append_obj_to_pack(struct hashfile *f,
 	obj[0].idx.crc32 = crc32_end(f);
 	hashflush(f);
 	oidread(&obj->idx.oid, sha1, the_repository->hash_algo);
-	return obj;
+	प्रत्यागम obj;
 }
 
-static int delta_pos_compare(const void *_a, const void *_b)
+स्थिर पूर्णाङ्क delta_pos_compare(ध्रुव शून्य *_a, ध्रुव शून्य *_b)
 {
-	struct ref_delta_entry *a = *(struct ref_delta_entry **)_a;
-	struct ref_delta_entry *b = *(struct ref_delta_entry **)_b;
-	return a->obj_no - b->obj_no;
+	संरचना ref_delta_entry *a = *(संरचना ref_delta_entry **)_a;
+	संरचना ref_delta_entry *b = *(संरचना ref_delta_entry **)_b;
+	प्रत्यागम a->obj_no - b->obj_no;
 }
 
-static void fix_unresolved_deltas(struct hashfile *f)
+स्थिर शून्य fix_unresolved_deltas(संरचना hashfile *f)
 {
-	struct ref_delta_entry **sorted_by_pos;
-	int i;
+	संरचना ref_delta_entry **sorted_by_pos;
+	पूर्णाङ्क i;
 
 	/*
 	 * Since many unresolved deltas may well be themselves base objects
@@ -1489,21 +1489,21 @@ static void fix_unresolved_deltas(struct hashfile *f)
 	 * resolving deltas in the same order as their position in the pack.
 	 */
 	ALLOC_ARRAY(sorted_by_pos, nr_ref_deltas);
-	for (i = 0; i < nr_ref_deltas; i++)
+	प्रति (i = 0; i < nr_ref_deltas; i++)
 		sorted_by_pos[i] = &ref_deltas[i];
 	QSORT(sorted_by_pos, nr_ref_deltas, delta_pos_compare);
 
-	if (repo_has_promisor_remote(the_repository)) {
+	जइ (repo_has_promisor_remote(the_repository)) {
 		/*
 		 * Prefetch the delta bases.
 		 */
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		for (i = 0; i < nr_ref_deltas; i++) {
-			struct ref_delta_entry *d = sorted_by_pos[i];
-			if (!odb_read_object_info_extended(the_repository->objects,
-							   &d->oid, NULL,
+		संरचना oid_array to_fetch = OID_ARRAY_INIT;
+		प्रति (i = 0; i < nr_ref_deltas; i++) {
+			संरचना ref_delta_entry *d = sorted_by_pos[i];
+			जइ (!odb_read_object_info_extended(the_repository->objects,
+							   &d->oid, रिक्त,
 							   OBJECT_INFO_FOR_PREFETCH))
-				continue;
+				अनुवर्त;
 			oid_array_append(&to_fetch, &d->oid);
 		}
 		promisor_remote_get_direct(the_repository,
@@ -1511,20 +1511,20 @@ static void fix_unresolved_deltas(struct hashfile *f)
 		oid_array_clear(&to_fetch);
 	}
 
-	for (i = 0; i < nr_ref_deltas; i++) {
-		struct ref_delta_entry *d = sorted_by_pos[i];
-		enum object_type type;
-		void *data;
+	प्रति (i = 0; i < nr_ref_deltas; i++) {
+		संरचना ref_delta_entry *d = sorted_by_pos[i];
+		गणना object_type type;
+		शून्य *data;
 		size_t size;
 
-		if (objects[d->obj_no].real_type != OBJ_REF_DELTA)
-			continue;
+		जइ (objects[d->obj_no].real_type != OBJ_REF_DELTA)
+			अनुवर्त;
 		data = odb_read_object(the_repository->objects, &d->oid,
 				       &type, &size);
-		if (!data)
-			continue;
+		जइ (!data)
+			अनुवर्त;
 
-		if (check_object_signature(the_repository, &d->oid, data, size,
+		जइ (check_object_signature(the_repository, &d->oid, data, size,
 					   type) < 0)
 			die(_("local object %s is corrupt"), oid_to_hex(&d->oid));
 
@@ -1534,127 +1534,127 @@ static void fix_unresolved_deltas(struct hashfile *f)
 		 * object).
 		 */
 		append_obj_to_pack(f, d->oid.hash, data, size, type);
-		free(data);
-		threaded_second_pass(NULL);
+		मुक्त(data);
+		threaded_second_pass(रिक्त);
 
 		display_progress(progress, nr_resolved_deltas);
 	}
-	free(sorted_by_pos);
+	मुक्त(sorted_by_pos);
 }
 
-static const char *derive_filename(const char *pack_name, const char *strip,
-				   const char *suffix, struct strbuf *buf)
+स्थिर ध्रुव वर्ण *derive_filename(ध्रुव वर्ण *pack_name, ध्रुव वर्ण *strip,
+				   ध्रुव वर्ण *suffix, संरचना strbuf *buf)
 {
 	size_t len;
-	if (!strip_suffix(pack_name, strip, &len) || !len ||
+	जइ (!strip_suffix(pack_name, strip, &len) || !len ||
 	    pack_name[len - 1] != '.')
 		die(_("packfile name '%s' does not end with '.%s'"),
 		    pack_name, strip);
 	strbuf_add(buf, pack_name, len);
 	strbuf_addstr(buf, suffix);
-	return buf->buf;
+	प्रत्यागम buf->buf;
 }
 
-static void write_special_file(const char *suffix, const char *msg,
-			       const char *pack_name, const unsigned char *hash,
-			       const char **report)
+स्थिर शून्य write_special_file(ध्रुव वर्ण *suffix, ध्रुव वर्ण *सन्देशः,
+			       ध्रुव वर्ण *pack_name, ध्रुव unsigned वर्ण *hash,
+			       ध्रुव वर्ण **report)
 {
-	struct strbuf name_buf = STRBUF_INIT;
-	const char *filename;
-	int fd;
-	int msg_len = strlen(msg);
+	संरचना strbuf name_buf = STRBUF_INIT;
+	ध्रुव वर्ण *filename;
+	पूर्णाङ्क fd;
+	पूर्णाङ्क सन्देशः_len = strlen(सन्देशः);
 
-	if (pack_name)
+	जइ (pack_name)
 		filename = derive_filename(pack_name, "pack", suffix, &name_buf);
-	else
+	अण्णहा
 		filename = odb_pack_name(the_repository, &name_buf, hash, suffix);
 
 	fd = safe_create_file_with_leading_directories(the_repository, filename);
-	if (fd < 0) {
-		if (errno != EEXIST)
+	जइ (fd < 0) {
+		जइ (errno != EEXIST)
 			die_errno(_("cannot write %s file '%s'"),
 				  suffix, filename);
-	} else {
-		if (msg_len > 0) {
-			write_or_die(fd, msg, msg_len);
+	} अण्णहा {
+		जइ (सन्देशः_len > 0) {
+			write_or_die(fd, सन्देशः, सन्देशः_len);
 			write_or_die(fd, "\n", 1);
 		}
-		if (close(fd) != 0)
+		जइ (close(fd) != 0)
 			die_errno(_("cannot close written %s file '%s'"),
 				  suffix, filename);
-		if (report)
+		जइ (report)
 			*report = suffix;
 	}
 	strbuf_release(&name_buf);
 }
 
-static void rename_tmp_packfile(const char **final_name,
-				const char *curr_name,
-				struct strbuf *name, unsigned char *hash,
-				const char *ext, int make_read_only_if_same)
+स्थिर शून्य rename_tmp_packfile(ध्रुव वर्ण **final_name,
+				ध्रुव वर्ण *curr_name,
+				संरचना strbuf *name, unsigned वर्ण *hash,
+				ध्रुव वर्ण *ext, पूर्णाङ्क make_read_only_if_same)
 {
-	if (!*final_name || strcmp(*final_name, curr_name)) {
-		if (!*final_name)
+	जइ (!*final_name || strcmp(*final_name, curr_name)) {
+		जइ (!*final_name)
 			*final_name = odb_pack_name(the_repository, name, hash, ext);
-		if (finalize_object_file(the_repository, curr_name, *final_name))
+		जइ (finalize_object_file(the_repository, curr_name, *final_name))
 			die(_("unable to rename temporary '*.%s' file to '%s'"),
 			    ext, *final_name);
-	} else if (make_read_only_if_same) {
+	} अण्णहा जइ (make_read_only_if_same) {
 		chmod(*final_name, 0444);
 	}
 }
 
-static void final(const char *final_pack_name, const char *curr_pack_name,
-		  const char *final_index_name, const char *curr_index_name,
-		  const char *final_rev_index_name, const char *curr_rev_index_name,
-		  const char *keep_msg, const char *promisor_msg,
-		  unsigned char *hash)
+स्थिर शून्य final(ध्रुव वर्ण *final_pack_name, ध्रुव वर्ण *curr_pack_name,
+		  ध्रुव वर्ण *final_index_name, ध्रुव वर्ण *curr_index_name,
+		  ध्रुव वर्ण *final_rev_index_name, ध्रुव वर्ण *curr_rev_index_name,
+		  ध्रुव वर्ण *keep_सन्देशः, ध्रुव वर्ण *promisor_सन्देशः,
+		  unsigned वर्ण *hash)
 {
-	const char *report = "pack";
-	struct strbuf pack_name = STRBUF_INIT;
-	struct strbuf index_name = STRBUF_INIT;
-	struct strbuf rev_index_name = STRBUF_INIT;
+	ध्रुव वर्ण *report = "pack";
+	संरचना strbuf pack_name = STRBUF_INIT;
+	संरचना strbuf index_name = STRBUF_INIT;
+	संरचना strbuf rev_index_name = STRBUF_INIT;
 
-	if (!from_stdin) {
-		close(input_fd);
-	} else {
+	जइ (!from_stdin) {
+		close(निवेशः_fd);
+	} अण्णहा {
 		fsync_component_or_die(FSYNC_COMPONENT_PACK, output_fd, curr_pack_name);
-		if (close(output_fd))
+		जइ (close(output_fd))
 			die_errno(_("error while closing pack file"));
 	}
 
-	if (keep_msg)
-		write_special_file("keep", keep_msg, final_pack_name, hash,
+	जइ (keep_सन्देशः)
+		write_special_file("keep", keep_सन्देशः, final_pack_name, hash,
 				   &report);
-	if (promisor_msg)
-		write_special_file("promisor", promisor_msg, final_pack_name,
-				   hash, NULL);
+	जइ (promisor_सन्देशः)
+		write_special_file("promisor", promisor_सन्देशः, final_pack_name,
+				   hash, रिक्त);
 
 	rename_tmp_packfile(&final_pack_name, curr_pack_name, &pack_name,
 			    hash, "pack", from_stdin);
-	if (curr_rev_index_name)
+	जइ (curr_rev_index_name)
 		rename_tmp_packfile(&final_rev_index_name, curr_rev_index_name,
 				    &rev_index_name, hash, "rev", 1);
 	rename_tmp_packfile(&final_index_name, curr_index_name, &index_name,
 			    hash, "idx", 1);
 
-	if (do_fsck_object && startup_info->have_repository) {
-		struct odb_source_files *files =
+	जइ (do_fsck_object && startup_info->have_repository) {
+		संरचना odb_source_files *files =
 			odb_source_files_downcast(the_repository->objects->source);
 		packfile_store_load_pack(files->dirs->packed, final_index_name, 0);
 	}
 
-	if (!from_stdin) {
+	जइ (!from_stdin) {
 		printf("%s\n", hash_to_hex(hash));
-	} else {
-		struct strbuf buf = STRBUF_INIT;
+	} अण्णहा {
+		संरचना strbuf buf = STRBUF_INIT;
 
 		strbuf_addf(&buf, "%s\t%s\n", report, hash_to_hex(hash));
 		write_or_die(1, buf.buf, buf.len);
 		strbuf_release(&buf);
 
 		/* Write the last part of the buffer to stdout */
-		write_in_full(1, input_buffer + input_offset, input_len);
+		write_in_full(1, निवेशः_buffer + निवेशः_offset, निवेशः_len);
 	}
 
 	strbuf_release(&rev_index_name);
@@ -1662,71 +1662,71 @@ static void final(const char *final_pack_name, const char *curr_pack_name,
 	strbuf_release(&pack_name);
 }
 
-static int git_index_pack_config(const char *k, const char *v,
-				 const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क git_index_pack_config(ध्रुव वर्ण *k, ध्रुव वर्ण *v,
+				 ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	struct pack_idx_option *opts = cb;
+	संरचना pack_idx_option *opts = cb;
 
-	if (!strcmp(k, "pack.indexversion")) {
+	जइ (!strcmp(k, "pack.indexversion")) {
 		opts->version = git_config_int(k, v, ctx->kvi);
-		if (opts->version > 2)
+		जइ (opts->version > 2)
 			die(_("bad pack.indexVersion=%"PRIu32), opts->version);
-		return 0;
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.threads")) {
+	जइ (!strcmp(k, "pack.threads")) {
 		nr_threads = git_config_int(k, v, ctx->kvi);
-		if (nr_threads < 0)
+		जइ (nr_threads < 0)
 			die(_("invalid number of threads specified (%d)"),
 			    nr_threads);
-		if (!HAVE_THREADS && nr_threads != 1) {
+		जइ (!HAVE_THREADS && nr_threads != 1) {
 			warning(_("no threads support, ignoring %s"), k);
 			nr_threads = 1;
 		}
-		return 0;
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.writereverseindex")) {
-		if (git_config_bool(k, v))
+	जइ (!strcmp(k, "pack.writereverseindex")) {
+		जइ (git_config_bool(k, v))
 			opts->flags |= WRITE_REV;
-		else
+		अण्णहा
 			opts->flags &= ~WRITE_REV;
 	}
-	if (!strcmp(k, "core.deltabasecachelimit")) {
+	जइ (!strcmp(k, "core.deltabasecachelimit")) {
 		opts->delta_base_cache_limit = git_config_ulong(k, v, ctx->kvi);
-		return 0;
+		प्रत्यागम 0;
 	}
-	return git_default_config(k, v, ctx, cb);
+	प्रत्यागम git_default_config(k, v, ctx, cb);
 }
 
-static int cmp_uint32(const void *a_, const void *b_)
+स्थिर पूर्णाङ्क cmp_uint32(ध्रुव शून्य *a_, ध्रुव शून्य *b_)
 {
 	uint32_t a = *((uint32_t *)a_);
 	uint32_t b = *((uint32_t *)b_);
 
-	return (a < b) ? -1 : (a != b);
+	प्रत्यागम (a < b) ? -1 : (a != b);
 }
 
-static void read_v2_anomalous_offsets(struct packed_git *p,
-				      struct pack_idx_option *opts)
+स्थिर शून्य read_v2_anomalous_offsets(संरचना packed_git *p,
+				      संरचना pack_idx_option *opts)
 {
-	const uint32_t *idx1, *idx2;
+	ध्रुव uint32_t *idx1, *idx2;
 	uint32_t i;
 
 	/* The address of the 4-byte offset table */
-	idx1 = (((const uint32_t *)((const uint8_t *)p->index_data + p->crc_offset))
-		+ (size_t)p->num_objects /* CRC32 table */
+	idx1 = (((ध्रुव uint32_t *)((ध्रुव uint8_t *)p->index_data + p->crc_offset))
+		+ (size_t)p->अङ्कः_objects /* CRC32 table */
 		);
 
 	/* The address of the 8-byte offset table */
-	idx2 = idx1 + p->num_objects;
+	idx2 = idx1 + p->अङ्कः_objects;
 
-	for (i = 0; i < p->num_objects; i++) {
+	प्रति (i = 0; i < p->अङ्कः_objects; i++) {
 		uint32_t off = ntohl(idx1[i]);
-		if (!(off & 0x80000000))
-			continue;
+		जइ (!(off & 0x80000000))
+			अनुवर्त;
 		off = off & 0x7fffffff;
 		check_pack_index_ptr(p, &idx2[off * 2]);
-		if (idx2[off * 2])
-			continue;
+		जइ (idx2[off * 2])
+			अनुवर्त;
 		/*
 		 * The real offset is ntohl(idx2[off * 2]) in high 4
 		 * octets, and ntohl(idx2[off * 2 + 1]) in low 4
@@ -1739,20 +1739,20 @@ static void read_v2_anomalous_offsets(struct packed_git *p,
 	QSORT(opts->anomaly, opts->anomaly_nr, cmp_uint32);
 }
 
-static void read_idx_option(struct pack_idx_option *opts, const char *pack_name)
+स्थिर शून्य read_idx_option(संरचना pack_idx_option *opts, ध्रुव वर्ण *pack_name)
 {
-	struct packed_git *p = add_packed_git(the_repository, pack_name,
+	संरचना packed_git *p = add_packed_git(the_repository, pack_name,
 					      strlen(pack_name), 1);
 
-	if (!p)
+	जइ (!p)
 		die(_("Cannot open existing pack file '%s'"), pack_name);
-	if (open_pack_index(p))
+	जइ (open_pack_index(p))
 		die(_("Cannot open existing pack idx file for '%s'"), pack_name);
 
 	/* Read the attributes from the existing idx file */
 	opts->version = p->index_version;
 
-	if (opts->version == 2)
+	जइ (opts->version == 2)
 		read_v2_anomalous_offsets(p, opts);
 
 	/*
@@ -1763,145 +1763,145 @@ static void read_idx_option(struct pack_idx_option *opts, const char *pack_name)
 	 * read anything from it).
 	 */
 	close_pack_index(p);
-	free(p);
+	मुक्त(p);
 }
 
-static void show_pack_info(int stat_only)
+स्थिर शून्य show_pack_info(पूर्णाङ्क stat_only)
 {
-	int i, baseobjects = nr_objects - nr_ref_deltas - nr_ofs_deltas;
-	unsigned long *chain_histogram = NULL;
+	पूर्णाङ्क i, baseobjects = nr_objects - nr_ref_deltas - nr_ofs_deltas;
+	unsigned long *chain_histogram = रिक्त;
 
-	if (deepest_delta)
+	जइ (deepest_delta)
 		CALLOC_ARRAY(chain_histogram, deepest_delta);
 
-	for (i = 0; i < nr_objects; i++) {
-		struct object_entry *obj = &objects[i];
+	प्रति (i = 0; i < nr_objects; i++) {
+		संरचना object_entry *obj = &objects[i];
 
-		if (is_delta_type(obj->type))
+		जइ (is_delta_type(obj->type))
 			chain_histogram[obj_stat[i].delta_depth - 1]++;
-		if (stat_only)
-			continue;
+		जइ (stat_only)
+			अनुवर्त;
 		printf("%s %-6s %"PRIuMAX" %"PRIuMAX" %"PRIuMAX,
 		       oid_to_hex(&obj->idx.oid),
 		       type_name(obj->real_type), (uintmax_t)obj->size,
 		       (uintmax_t)(obj[1].idx.offset - obj->idx.offset),
 		       (uintmax_t)obj->idx.offset);
-		if (is_delta_type(obj->type)) {
-			struct object_entry *bobj = &objects[obj_stat[i].base_object_no];
+		जइ (is_delta_type(obj->type)) {
+			संरचना object_entry *bobj = &objects[obj_stat[i].base_object_no];
 			printf(" %u %s", obj_stat[i].delta_depth,
 			       oid_to_hex(&bobj->idx.oid));
 		}
 		putchar('\n');
 	}
 
-	if (baseobjects)
+	जइ (baseobjects)
 		printf_ln(Q_("non delta: %d object",
 			     "non delta: %d objects",
 			     baseobjects),
 			  baseobjects);
-	for (i = 0; i < deepest_delta; i++) {
-		if (!chain_histogram[i])
-			continue;
+	प्रति (i = 0; i < deepest_delta; i++) {
+		जइ (!chain_histogram[i])
+			अनुवर्त;
 		printf_ln(Q_("chain length = %d: %lu object",
 			     "chain length = %d: %lu objects",
 			     chain_histogram[i]),
 			  i + 1,
 			  chain_histogram[i]);
 	}
-	free(chain_histogram);
+	मुक्त(chain_histogram);
 }
 
-static void repack_local_links(void)
+स्थिर शून्य repack_local_links(शून्य)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	संरचना child_process cmd = CHILD_PROCESS_INIT;
 	FILE *out;
-	struct strbuf line = STRBUF_INIT;
-	struct oidset_iter iter;
-	struct object_id *oid;
-	char *base_name = NULL;
+	संरचना strbuf पङ्क्तिः = STRBUF_INIT;
+	संरचना oidset_iter iter;
+	संरचना object_id *oid;
+	वर्ण *base_name = रिक्त;
 
-	if (!oidset_size(&outgoing_links))
-		return;
+	जइ (!oidset_size(&outgoing_links))
+		प्रत्यागम;
 
 	oidset_iter_init(&outgoing_links, &iter);
-	while ((oid = oidset_iter_next(&iter))) {
-		struct odb_source_info source_info;
-		struct object_info info = {
+	जाव ((oid = oidset_iter_next(&iter))) {
+		संरचना odb_source_info source_info;
+		संरचना object_info info = {
 			.source_infop = &source_info,
 		};
 
-		if (odb_read_object_info_extended(the_repository->objects, oid, &info, 0))
+		जइ (odb_read_object_info_extended(the_repository->objects, oid, &info, 0))
 			/* Missing; assume it is a promisor object */
-			continue;
-		if (source_info.source->type == ODB_SOURCE_PACKED &&
+			अनुवर्त;
+		जइ (source_info.source->type == ODB_SOURCE_PACKED &&
 		    source_info.u.packed.pack->pack_promisor)
-			continue;
+			अनुवर्त;
 
-		if (!cmd.args.nr) {
+		जइ (!cmd.args.nr) {
 			base_name = mkpathdup(
 				"%s/pack/pack",
 				repo_get_object_directory(the_repository));
-			strvec_push(&cmd.args, "pack-objects");
-			strvec_push(&cmd.args,
+			strvec_प्रक्षिप(&cmd.args, "pack-objects");
+			strvec_प्रक्षिप(&cmd.args,
 				    "--exclude-promisor-objects-best-effort");
-			strvec_push(&cmd.args, base_name);
+			strvec_प्रक्षिप(&cmd.args, base_name);
 			cmd.git_cmd = 1;
 			cmd.in = -1;
 			cmd.out = -1;
-			if (start_command(&cmd))
+			जइ (start_command(&cmd))
 				die(_("could not start pack-objects to repack local links"));
 		}
 
-		if (write_in_full(cmd.in, oid_to_hex(oid), the_hash_algo->hexsz) < 0 ||
+		जइ (write_in_full(cmd.in, oid_to_hex(oid), the_hash_algo->hexsz) < 0 ||
 		    write_in_full(cmd.in, "\n", 1) < 0)
 			die(_("failed to feed local object to pack-objects"));
 	}
 
-	if (!cmd.args.nr)
-		return;
+	जइ (!cmd.args.nr)
+		प्रत्यागम;
 
 	close(cmd.in);
 
 	out = xfdopen(cmd.out, "r");
-	while (strbuf_getline_lf(&line, out) != EOF) {
-		unsigned char binary[GIT_MAX_RAWSZ];
-		if (line.len != the_hash_algo->hexsz ||
-		    !hex_to_bytes(binary, line.buf, line.len))
+	जाव (strbuf_getline_lf(&पङ्क्तिः, out) != EOF) {
+		unsigned वर्ण द्विमान[GIT_MAX_RAWSZ];
+		जइ (पङ्क्तिः.len != the_hash_algo->hexsz ||
+		    !hex_to_bytes(द्विमान, पङ्क्तिः.buf, पङ्क्तिः.len))
 			die(_("index-pack: Expecting full hex object ID lines only from pack-objects."));
 
 		/*
 		 * pack-objects creates the .pack and .idx files, but not the
 		 * .promisor file. Create the .promisor file, which is empty.
 		 */
-		write_special_file("promisor", "", NULL, binary, NULL);
+		write_special_file("promisor", "", रिक्त, द्विमान, रिक्त);
 	}
 
 	fclose(out);
-	if (finish_command(&cmd))
+	जइ (finish_command(&cmd))
 		die(_("could not finish pack-objects to repack local links"));
-	strbuf_release(&line);
-	free(base_name);
+	strbuf_release(&पङ्क्तिः);
+	मुक्त(base_name);
 }
 
-int cmd_index_pack(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+पूर्णाङ्क cmd_index_pack(पूर्णाङ्क argc,
+		   ध्रुव वर्ण **argv,
+		   ध्रुव वर्ण *prefix,
+		   संरचना repository *repo)
 {
-	int i, fix_thin_pack = 0, verify = 0, stat_only = 0, rev_index;
-	const char *curr_index;
-	char *curr_rev_index = NULL;
-	const char *index_name = NULL, *pack_name = NULL, *rev_index_name = NULL;
-	const char *keep_msg = NULL;
-	const char *promisor_msg = NULL;
-	struct strbuf index_name_buf = STRBUF_INIT;
-	struct strbuf rev_index_name_buf = STRBUF_INIT;
-	struct pack_idx_entry **idx_objects;
-	struct pack_idx_option opts;
-	unsigned char pack_hash[GIT_MAX_RAWSZ];
+	पूर्णाङ्क i, fix_thin_pack = 0, verify = 0, stat_only = 0, rev_index;
+	ध्रुव वर्ण *curr_index;
+	वर्ण *curr_rev_index = रिक्त;
+	ध्रुव वर्ण *index_name = रिक्त, *pack_name = रिक्त, *rev_index_name = रिक्त;
+	ध्रुव वर्ण *keep_सन्देशः = रिक्त;
+	ध्रुव वर्ण *promisor_सन्देशः = रिक्त;
+	संरचना strbuf index_name_buf = STRBUF_INIT;
+	संरचना strbuf rev_index_name_buf = STRBUF_INIT;
+	संरचना pack_idx_entry **idx_objects;
+	संरचना pack_idx_option opts;
+	unsigned वर्ण pack_hash[GIT_MAX_RAWSZ];
 	unsigned foreign_nr = 1;	/* zero is a "good" value, assume bad */
-	int report_end_of_input = 0;
-	int hash_algo = 0;
+	पूर्णाङ्क report_end_of_निवेशः = 0;
+	पूर्णाङ्क hash_algo = 0;
 
 	show_usage_if_asked(argc, argv, index_pack_usage);
 
@@ -1921,114 +1921,114 @@ int cmd_index_pack(int argc,
 	reset_pack_idx_option(&opts);
 	opts.flags |= WRITE_REV;
 	repo_config(the_repository, git_index_pack_config, &opts);
-	if (prefix && chdir(prefix))
+	जइ (prefix && chdir(prefix))
 		die(_("Cannot come back to cwd"));
 
-	if (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
+	जइ (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
 		rev_index = 0;
-	else
+	अण्णहा
 		rev_index = !!(opts.flags & (WRITE_REV_VERIFY | WRITE_REV));
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	प्रति (i = 1; i < argc; i++) {
+		ध्रुव वर्ण *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "--stdin")) {
+		जइ (*arg == '-') {
+			जइ (!strcmp(arg, "--stdin")) {
 				from_stdin = 1;
-			} else if (!strcmp(arg, "--fix-thin")) {
+			} अण्णहा जइ (!strcmp(arg, "--fix-thin")) {
 				fix_thin_pack = 1;
-			} else if (skip_to_optional_arg(arg, "--strict", &arg)) {
+			} अण्णहा जइ (skip_to_optional_arg(arg, "--strict", &arg)) {
 				strict = 1;
 				do_fsck_object = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-			} else if (!strcmp(arg, "--check-self-contained-and-connected")) {
+				fsck_set_सन्देशः_types(&fsck_options, arg);
+			} अण्णहा जइ (!strcmp(arg, "--check-self-contained-and-connected")) {
 				strict = 1;
 				check_self_contained_and_connected = 1;
-			} else if (skip_to_optional_arg(arg, "--fsck-objects", &arg)) {
+			} अण्णहा जइ (skip_to_optional_arg(arg, "--fsck-objects", &arg)) {
 				do_fsck_object = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-			} else if (!strcmp(arg, "--verify")) {
+				fsck_set_सन्देशः_types(&fsck_options, arg);
+			} अण्णहा जइ (!strcmp(arg, "--verify")) {
 				verify = 1;
-			} else if (!strcmp(arg, "--verify-stat")) {
+			} अण्णहा जइ (!strcmp(arg, "--verify-stat")) {
 				verify = 1;
 				show_stat = 1;
-			} else if (!strcmp(arg, "--verify-stat-only")) {
+			} अण्णहा जइ (!strcmp(arg, "--verify-stat-only")) {
 				verify = 1;
 				show_stat = 1;
 				stat_only = 1;
-			} else if (skip_to_optional_arg(arg, "--keep", &keep_msg)) {
+			} अण्णहा जइ (skip_to_optional_arg(arg, "--keep", &keep_सन्देशः)) {
 				; /* nothing to do */
-			} else if (skip_to_optional_arg(arg, "--promisor", &promisor_msg)) {
+			} अण्णहा जइ (skip_to_optional_arg(arg, "--promisor", &promisor_सन्देशः)) {
 				record_outgoing_links = 1;
-			} else if (starts_with(arg, "--threads=")) {
-				char *end;
+			} अण्णहा जइ (starts_with(arg, "--threads=")) {
+				वर्ण *end;
 				nr_threads = strtoul(arg+10, &end, 0);
-				if (!arg[10] || *end || nr_threads < 0)
+				जइ (!arg[10] || *end || nr_threads < 0)
 					usage(index_pack_usage);
-				if (!HAVE_THREADS && nr_threads != 1) {
+				जइ (!HAVE_THREADS && nr_threads != 1) {
 					warning(_("no threads support, ignoring %s"), arg);
 					nr_threads = 1;
 				}
-			} else if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
-							     input_buffer,
-							     &input_len) < 0)
+			} अण्णहा जइ (skip_prefix(arg, "--pack_header=", &arg)) {
+				जइ (parse_pack_header_option(arg,
+							     निवेशः_buffer,
+							     &निवेशः_len) < 0)
 					die(_("bad --pack_header: %s"), arg);
-			} else if (!strcmp(arg, "-v")) {
+			} अण्णहा जइ (!strcmp(arg, "-v")) {
 				verbose = 1;
-			} else if (!strcmp(arg, "--progress-title")) {
-				if (progress_title || (i+1) >= argc)
+			} अण्णहा जइ (!strcmp(arg, "--progress-title")) {
+				जइ (progress_title || (i+1) >= argc)
 					usage(index_pack_usage);
 				progress_title = argv[++i];
-			} else if (!strcmp(arg, "--show-resolving-progress")) {
+			} अण्णहा जइ (!strcmp(arg, "--show-resolving-progress")) {
 				show_resolving_progress = 1;
-			} else if (!strcmp(arg, "--report-end-of-input")) {
-				report_end_of_input = 1;
-			} else if (!strcmp(arg, "-o")) {
-				if (index_name || (i+1) >= argc)
+			} अण्णहा जइ (!strcmp(arg, "--report-end-of-input")) {
+				report_end_of_निवेशः = 1;
+			} अण्णहा जइ (!strcmp(arg, "-o")) {
+				जइ (index_name || (i+1) >= argc)
 					usage(index_pack_usage);
 				index_name = argv[++i];
-			} else if (starts_with(arg, "--index-version=")) {
-				char *c;
+			} अण्णहा जइ (starts_with(arg, "--index-version=")) {
+				वर्ण *c;
 				opts.version = strtoul(arg + 16, &c, 10);
-				if (opts.version > 2)
+				जइ (opts.version > 2)
 					die(_("bad %s"), arg);
-				if (*c == ',')
+				जइ (*c == ',')
 					opts.off32_limit = strtoul(c+1, &c, 0);
-				if (*c || opts.off32_limit & 0x80000000)
+				जइ (*c || opts.off32_limit & 0x80000000)
 					die(_("bad %s"), arg);
-			} else if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
-			} else if (skip_prefix(arg, "--object-format=", &arg)) {
+			} अण्णहा जइ (skip_prefix(arg, "--max-input-size=", &arg)) {
+				max_निवेशः_size = strtoumax(arg, रिक्त, 10);
+			} अण्णहा जइ (skip_prefix(arg, "--object-format=", &arg)) {
 				hash_algo = hash_algo_by_name(arg);
-				if (hash_algo == GIT_HASH_UNKNOWN)
+				जइ (hash_algo == GIT_HASH_UNKNOWN)
 					die(_("unknown hash algorithm '%s'"), arg);
 				repo_set_hash_algo(the_repository, hash_algo);
-			} else if (!strcmp(arg, "--rev-index")) {
+			} अण्णहा जइ (!strcmp(arg, "--rev-index")) {
 				rev_index = 1;
-			} else if (!strcmp(arg, "--no-rev-index")) {
+			} अण्णहा जइ (!strcmp(arg, "--no-rev-index")) {
 				rev_index = 0;
-			} else
+			} अण्णहा
 				usage(index_pack_usage);
-			continue;
+			अनुवर्त;
 		}
 
-		if (pack_name)
+		जइ (pack_name)
 			usage(index_pack_usage);
 		pack_name = arg;
 	}
 
-	if (!pack_name && !from_stdin)
+	जइ (!pack_name && !from_stdin)
 		usage(index_pack_usage);
-	if (fix_thin_pack && !from_stdin)
+	जइ (fix_thin_pack && !from_stdin)
 		die(_("the option '%s' requires '%s'"), "--fix-thin", "--stdin");
-	if (promisor_msg && pack_name)
+	जइ (promisor_सन्देशः && pack_name)
 		die(_("--promisor cannot be used with a pack name"));
-	if (from_stdin && !startup_info->have_repository)
+	जइ (from_stdin && !startup_info->have_repository)
 		die(_("--stdin requires a git repository"));
-	if (from_stdin && hash_algo)
+	जइ (from_stdin && hash_algo)
 		die(_("options '%s' and '%s' cannot be used together"), "--object-format", "--stdin");
-	if (!index_name && pack_name)
+	जइ (!index_name && pack_name)
 		index_name = derive_filename(pack_name, "pack", "idx", &index_name_buf);
 
 	/*
@@ -2037,28 +2037,28 @@ int cmd_index_pack(int argc,
 	 * nor has the user told us which object hash to use we have no other
 	 * choice but to guess the object hash.
 	 */
-	if (!the_repository->hash_algo)
+	जइ (!the_repository->hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	opts.flags &= ~(WRITE_REV | WRITE_REV_VERIFY);
-	if (rev_index) {
+	जइ (rev_index) {
 		opts.flags |= verify ? WRITE_REV_VERIFY : WRITE_REV;
-		if (index_name)
+		जइ (index_name)
 			rev_index_name = derive_filename(index_name,
 							 "idx", "rev",
 							 &rev_index_name_buf);
 	}
 
-	if (verify) {
-		if (!index_name)
+	जइ (verify) {
+		जइ (!index_name)
 			die(_("--verify with no packfile name given"));
 		read_idx_option(&opts, index_name);
 		opts.flags |= WRITE_IDX_VERIFY | WRITE_IDX_STRICT;
 	}
-	if (strict)
+	जइ (strict)
 		opts.flags |= WRITE_IDX_STRICT;
 
-	if (HAVE_THREADS && !nr_threads) {
+	जइ (HAVE_THREADS && !nr_threads) {
 		nr_threads = online_cpus();
 		/*
 		 * Experiments show that going above 20 threads doesn't help,
@@ -2068,56 +2068,56 @@ int cmd_index_pack(int argc,
 		 * never reduce the level below "3", though, to match a
 		 * historical value that nobody complained about.
 		 */
-		if (nr_threads < 4)
+		जइ (nr_threads < 4)
 			; /* too few cores to consider capping */
-		else if (nr_threads < 6)
+		अण्णहा जइ (nr_threads < 6)
 			nr_threads = 3; /* historic cap */
-		else if (nr_threads < 40)
+		अण्णहा जइ (nr_threads < 40)
 			nr_threads /= 2;
-		else
+		अण्णहा
 			nr_threads = 20; /* hard cap */
 	}
 
 	curr_pack = open_pack_file(pack_name);
 	parse_pack_header();
 	CALLOC_ARRAY(objects, st_add(nr_objects, 1));
-	if (show_stat)
+	जइ (show_stat)
 		CALLOC_ARRAY(obj_stat, st_add(nr_objects, 1));
 	CALLOC_ARRAY(ofs_deltas, nr_objects);
 	parse_pack_objects(pack_hash);
-	if (report_end_of_input)
+	जइ (report_end_of_निवेशः)
 		write_in_full(2, "\0", 1);
 	resolve_deltas(&opts);
 	conclude_pack(fix_thin_pack, curr_pack, pack_hash);
-	free(ofs_deltas);
-	free(ref_deltas);
-	if (strict)
+	मुक्त(ofs_deltas);
+	मुक्त(ref_deltas);
+	जइ (strict)
 		foreign_nr = check_objects();
 
-	if (show_stat)
+	जइ (show_stat)
 		show_pack_info(stat_only);
 
 	ALLOC_ARRAY(idx_objects, nr_objects);
-	for (i = 0; i < nr_objects; i++)
+	प्रति (i = 0; i < nr_objects; i++)
 		idx_objects[i] = &objects[i].idx;
 	curr_index = write_idx_file(the_repository, index_name, idx_objects,
 				    nr_objects, &opts, pack_hash);
-	if (rev_index)
+	जइ (rev_index)
 		curr_rev_index = write_rev_file(the_repository, rev_index_name,
 						idx_objects, nr_objects,
 						pack_hash, opts.flags);
-	free(idx_objects);
+	मुक्त(idx_objects);
 
-	if (!verify)
+	जइ (!verify)
 		final(pack_name, curr_pack,
 		      index_name, curr_index,
 		      rev_index_name, curr_rev_index,
-		      keep_msg, promisor_msg,
+		      keep_सन्देशः, promisor_सन्देशः,
 		      pack_hash);
-	else
-		close(input_fd);
+	अण्णहा
+		close(निवेशः_fd);
 
-	if (do_fsck_object) {
+	जइ (do_fsck_object) {
 		/*
 		 * We cannot perform queued consistency checks when running
 		 * outside of a repository because those require us to read
@@ -2126,32 +2126,32 @@ int cmd_index_pack(int argc,
 		 * TODO: we may eventually set up an in-memory object database,
 		 * which would allow us to perform these queued checks.
 		 */
-		if (!startup_info->have_repository &&
+		जइ (!startup_info->have_repository &&
 		    fsck_has_queued_checks(&fsck_options))
 			die(_("cannot perform queued object checks outside "
 			      "of a repository"));
 
-		if (fsck_finish(&fsck_options))
+		जइ (fsck_finish(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
 
-	free(opts.anomaly);
-	free(objects);
+	मुक्त(opts.anomaly);
+	मुक्त(objects);
 	strbuf_release(&index_name_buf);
 	strbuf_release(&rev_index_name_buf);
-	if (!pack_name)
-		free((void *) curr_pack);
-	if (!index_name)
-		free((void *) curr_index);
-	free(curr_rev_index);
+	जइ (!pack_name)
+		मुक्त((शून्य *) curr_pack);
+	जइ (!index_name)
+		मुक्त((शून्य *) curr_index);
+	मुक्त(curr_rev_index);
 
 	repack_local_links();
 
 	/*
 	 * Let the caller know this pack is not self contained
 	 */
-	if (check_self_contained_and_connected && foreign_nr)
-		return 1;
+	जइ (check_self_contained_and_connected && foreign_nr)
+		प्रत्यागम 1;
 
-	return 0;
+	प्रत्यागम 0;
 }
