@@ -6,35 +6,35 @@
  * Based on git-tag.sh and mktag.c by Linus Torvalds.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
+#تعریف_کن DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "path.h"
-#include "tag.h"
-#include "parse-options.h"
-#include "diff.h"
-#include "revision.h"
-#include "gpg-interface.h"
-#include "oid-array.h"
-#include "column.h"
-#include "ref-filter.h"
-#include "date.h"
-#include "write-or-die.h"
-#include "object-file-convert.h"
-#include "trailer.h"
+#ضمن "builtin.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "editor.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "refs.h"
+#ضمن "object-file.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "path.h"
+#ضمن "tag.h"
+#ضمن "parse-options.h"
+#ضمن "diff.h"
+#ضمن "revision.h"
+#ضمن "gpg-interface.h"
+#ضمن "oid-array.h"
+#ضمن "column.h"
+#ضمن "ref-filter.h"
+#ضمن "date.h"
+#ضمن "write-or-die.h"
+#ضمن "object-file-convert.h"
+#ضمن "trailer.h"
 
-static const char * const git_tag_usage[] = {
+ساكن ثابت حرف * ثابت git_برچسب_usage[] = {
 	N_("git tag [-a | -s | -u <key-id>] [-f] [-m <msg> | -F <file>] [-e]\n"
 	   "        [(--trailer <token>[(=|:)<value>])...]\n"
 	   "        <tagname> [<commit> | <object>]"),
@@ -44,447 +44,447 @@ static const char * const git_tag_usage[] = {
 	   "        [--create-reflog] [--sort=<key>] [--format=<format>]\n"
 	   "        [--merged <commit>] [--no-merged <commit>] [<pattern>...]"),
 	N_("git tag -v [--format=<format>] <tagname>..."),
-	NULL
+	عدم
 };
 
-static unsigned int colopts;
-static int force_sign_annotate;
-static int config_sign_tag = -1; /* unspecified */
+ساكن بیعلامت صحيح colopts;
+ساكن صحيح force_sign_annotate;
+ساكن صحيح config_sign_برچسب = -1; /* unspecified */
 
-static int list_tags(struct ref_filter *filter, struct ref_sorting *sorting,
-		     struct ref_format *format)
+ساكن صحيح list_برچسبها(بنية ref_filter *filter, بنية ref_ترتیبدهی *ترتیبدهی,
+		     بنية ref_format *format)
 {
-	char *to_free = NULL;
+	حرف *مقصد_free = عدم;
 
-	if (filter->lines == -1)
-		filter->lines = 0;
+	إذا (filter->سطرها == -1)
+		filter->سطرها = 0;
 
-	if (!format->format) {
-		if (filter->lines) {
-			to_free = xstrfmt("%s %%(contents:lines=%d)",
+	إذا (!format->format) {
+		إذا (filter->سطرها) {
+			مقصد_free = xstrfmt("%s %%(contents:lines=%d)",
 					  "%(align:15)%(refname:lstrip=2)%(end)",
-					  filter->lines);
-			format->format = to_free;
-		} else
+					  filter->سطرها);
+			format->format = مقصد_free;
+		} وإلا
 			format->format = "%(refname:lstrip=2)";
 	}
 
-	if (verify_ref_format(format))
+	إذا (verify_ref_format(format))
 		die(_("unable to parse format string"));
-	filter->with_commit_tag_algo = 1;
-	filter_and_format_refs(filter, FILTER_REFS_TAGS, sorting, format);
+	filter->with_commit_برچسب_algo = 1;
+	filter_and_format_refs(filter, FILTER_REFS_برچسبها, ترتیبدهی, format);
 
-	free(to_free);
+	حرر(مقصد_free);
 
-	return 0;
+	أرجع 0;
 }
 
-typedef int (*each_tag_name_fn)(const char *name, const char *ref,
-				const struct object_id *oid, void *cb_data);
+تعريفنوع صحيح (*each_برچسب_name_fn)(ثابت حرف *name, ثابت حرف *ref,
+				ثابت بنية object_id *oid, فراغ *cb_داده);
 
-static int for_each_tag_name(const char **argv, each_tag_name_fn fn,
-			     void *cb_data)
+ساكن صحيح for_each_برچسب_name(ثابت حرف **argv, each_برچسب_name_fn fn,
+			     فراغ *cb_داده)
 {
-	const char **p;
-	struct strbuf ref = STRBUF_INIT;
-	int had_error = 0;
-	struct object_id oid;
+	ثابت حرف **p;
+	بنية strbuf ref = STRBUF_INIT;
+	صحيح had_error = 0;
+	بنية object_id oid;
 
-	for (p = argv; *p; p++) {
+	لكل (p = argv; *p; p++) {
 		strbuf_reset(&ref);
 		strbuf_addf(&ref, "refs/tags/%s", *p);
-		if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
+		إذا (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
 			error(_("tag '%s' not found."), *p);
 			had_error = 1;
-			continue;
+			استمر;
 		}
-		if (fn(*p, ref.buf, &oid, cb_data))
+		إذا (fn(*p, ref.buf, &oid, cb_داده))
 			had_error = 1;
 	}
 	strbuf_release(&ref);
-	return had_error;
+	أرجع had_error;
 }
 
-static int collect_tags(const char *name UNUSED, const char *ref,
-			const struct object_id *oid, void *cb_data)
+ساكن صحيح collect_برچسبها(ثابت حرف *name استفادهنشده, ثابت حرف *ref,
+			ثابت بنية object_id *oid, فراغ *cb_داده)
 {
-	struct string_list *ref_list = cb_data;
+	بنية string_list *ref_list = cb_داده;
 
 	string_list_append(ref_list, ref);
-	ref_list->items[ref_list->nr - 1].util = oiddup(oid);
-	return 0;
+	ref_list->اقلام[ref_list->nr - 1].util = oiddup(oid);
+	أرجع 0;
 }
 
-static int delete_tags(const char **argv)
+ساكن صحيح delete_برچسبها(ثابت حرف **argv)
 {
-	int result;
-	struct string_list refs_to_delete = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
+	صحيح نتیجه;
+	بنية string_list refs_مقصد_delete = STRING_LIST_INIT_DUP;
+	بنية string_list_قلم *قلم;
 
-	result = for_each_tag_name(argv, collect_tags, (void *)&refs_to_delete);
-	if (refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
-		result = 1;
+	نتیجه = for_each_برچسب_name(argv, collect_برچسبها, (فراغ *)&refs_مقصد_delete);
+	إذا (refs_delete_refs(get_main_ref_store(the_repository), عدم, &refs_مقصد_delete, REF_NO_DEREF))
+		نتیجه = 1;
 
-	for_each_string_list_item(item, &refs_to_delete) {
-		const char *name = item->string;
-		struct object_id *oid = item->util;
-		if (!refs_ref_exists(get_main_ref_store(the_repository), name))
-			printf(_("Deleted tag '%s' (was %s)\n"),
-				item->string + 10,
-				repo_find_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
+	for_each_string_list_قلم(قلم, &refs_مقصد_delete) {
+		ثابت حرف *name = قلم->string;
+		بنية object_id *oid = قلم->util;
+		إذا (!refs_ref_exists(get_main_ref_store(the_repository), name))
+			چاپ_کن(_("Deleted tag '%s' (was %s)\n"),
+				قلم->string + 10,
+				repo_پیدا_کن_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
 
-		free(oid);
+		حرر(oid);
 	}
-	string_list_clear(&refs_to_delete, 0);
-	return result;
+	string_list_clear(&refs_مقصد_delete, 0);
+	أرجع نتیجه;
 }
 
-static int verify_tag(const char *name, const char *ref UNUSED,
-		      const struct object_id *oid, void *cb_data)
+ساكن صحيح verify_برچسب(ثابت حرف *name, ثابت حرف *ref استفادهنشده,
+		      ثابت بنية object_id *oid, فراغ *cb_داده)
 {
-	int flags;
-	struct ref_format *format = cb_data;
+	صحيح flags;
+	بنية ref_format *format = cb_داده;
 	flags = GPG_VERIFY_VERBOSE;
 
-	if (format->format)
-		flags = GPG_VERIFY_OMIT_STATUS;
+	إذا (format->format)
+		flags = GPG_VERIFY_OMIT_وضعیت;
 
-	if (gpg_verify_tag(the_repository, oid, name, flags))
-		return -1;
+	إذا (gpg_verify_برچسب(the_repository, oid, name, flags))
+		أرجع -1;
 
-	if (format->format)
-		pretty_print_ref(name, oid, NULL, format);
+	إذا (format->format)
+		pretty_print_ref(name, oid, عدم, format);
 
-	return 0;
+	أرجع 0;
 }
 
-static int do_sign(struct strbuf *buffer, struct object_id **compat_oid,
-		   struct object_id *compat_oid_buf)
+ساكن صحيح do_sign(بنية strbuf *میانگیر, بنية object_id **compat_oid,
+		   بنية object_id *compat_oid_buf)
 {
-	const struct git_hash_algo *compat = the_repository->compat_hash_algo;
-	struct strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
-	struct strbuf compat_buf = STRBUF_INIT;
-	char *keyid = get_signing_key();
-	int ret = -1;
+	ثابت بنية git_hash_algo *compat = the_repository->compat_hash_algo;
+	بنية strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
+	بنية strbuf compat_buf = STRBUF_INIT;
+	حرف *keyid = get_signing_کلید();
+	صحيح ret = -1;
 
-	if (sign_buffer(buffer, &sig, keyid, 0))
-		goto out;
+	إذا (sign_میانگیر(میانگیر, &sig, keyid, 0))
+		اذهب بیرون;
 
-	if (compat) {
-		const struct git_hash_algo *algo = the_repository->hash_algo;
+	إذا (compat) {
+		ثابت بنية git_hash_algo *algo = the_repository->hash_algo;
 
-		if (convert_object_file(the_repository ,&compat_buf, algo, compat,
-					buffer->buf, buffer->len, OBJ_TAG, 1))
-			goto out;
-		if (sign_buffer(&compat_buf, &compat_sig, keyid, 0))
-			goto out;
-		add_header_signature(&compat_buf, &sig, algo);
+		إذا (convert_object_file(the_repository ,&compat_buf, algo, compat,
+					میانگیر->buf, میانگیر->len, OBJ_برچسب, 1))
+			اذهب بیرون;
+		إذا (sign_میانگیر(&compat_buf, &compat_sig, keyid, 0))
+			اذهب بیرون;
+		جمع_کن_سرآیند_signature(&compat_buf, &sig, algo);
 		strbuf_addbuf(&compat_buf, &compat_sig);
 		hash_object_file(compat, compat_buf.buf, compat_buf.len,
-				 OBJ_TAG, compat_oid_buf);
+				 OBJ_برچسب, compat_oid_buf);
 		*compat_oid = compat_oid_buf;
 	}
 
-	if (compat_sig.len)
-		add_header_signature(buffer, &compat_sig, compat);
+	إذا (compat_sig.len)
+		جمع_کن_سرآیند_signature(میانگیر, &compat_sig, compat);
 
-	strbuf_addbuf(buffer, &sig);
+	strbuf_addbuf(میانگیر, &sig);
 	ret = 0;
-out:
+بیرون:
 	strbuf_release(&sig);
 	strbuf_release(&compat_sig);
 	strbuf_release(&compat_buf);
-	free(keyid);
-	return ret;
+	حرر(keyid);
+	أرجع ret;
 }
 
-static const char tag_template[] =
+ساكن ثابت حرف برچسب_template[] =
 	N_("\nWrite a message for tag:\n  %s\n"
 	"Lines starting with '%s' will be ignored.\n");
 
-static const char tag_template_nocleanup[] =
+ساكن ثابت حرف برچسب_template_nocleanup[] =
 	N_("\nWrite a message for tag:\n  %s\n"
 	"Lines starting with '%s' will be kept; you may remove them"
 	" yourself if you want to.\n");
 
-static int git_tag_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+ساكن صحيح git_برچسب_config(ثابت حرف *var, ثابت حرف *مقدار,
+			  ثابت بنية config_context *ctx, فراغ *cb)
 {
-	if (!strcmp(var, "tag.gpgsign")) {
-		config_sign_tag = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "tag.gpgsign")) {
+		config_sign_برچسب = git_config_bool(var, مقدار);
+		أرجع 0;
 	}
 
-	if (!strcmp(var, "tag.sort")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(cb, value);
-		return 0;
+	إذا (!strcmp(var, "tag.sort")) {
+		إذا (!مقدار)
+			أرجع config_error_nonbool(var);
+		string_list_append(cb, مقدار);
+		أرجع 0;
 	}
 
-	if (!strcmp(var, "tag.forcesignannotated")) {
-		force_sign_annotate = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "tag.forcesignannotated")) {
+		force_sign_annotate = git_config_bool(var, مقدار);
+		أرجع 0;
 	}
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "tag", &colopts);
+	إذا (starts_with(var, "column."))
+		أرجع git_ستونی_config(var, مقدار, "tag", &colopts);
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	إذا (git_color_config(var, مقدار, cb) < 0)
+		أرجع -1;
 
-	return git_default_config(var, value, ctx, cb);
+	أرجع git_default_config(var, مقدار, ctx, cb);
 }
 
-static void write_tag_body(int fd, const struct object_id *oid)
+ساكن فراغ write_برچسب_body(صحيح fd, ثابت بنية object_id *oid)
 {
-	size_t size;
-	enum object_type type;
-	char *buf, *sp, *orig;
-	struct strbuf payload = STRBUF_INIT;
-	struct strbuf signature = STRBUF_INIT;
+	اندازه_t اندازه;
+	تعداد object_type type;
+	حرف *buf, *sp, *orig;
+	بنية strbuf payload = STRBUF_INIT;
+	بنية strbuf signature = STRBUF_INIT;
 
-	orig = buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf)
-		return;
-	if (parse_signature(buf, size, &payload, &signature)) {
+	orig = buf = odb_read_object(the_repository->objects, oid, &type, &اندازه);
+	إذا (!buf)
+		أرجع;
+	إذا (parse_signature(buf, اندازه, &payload, &signature)) {
 		buf = payload.buf;
-		size = payload.len;
+		اندازه = payload.len;
 	}
 	/* skip header */
-	sp = strstr(buf, "\n\n");
+	sp = جستجوی_رشته(buf, "\n\n");
 
-	if (!sp || !size || type != OBJ_TAG) {
-		free(buf);
-		return;
+	إذا (!sp || !اندازه || type != OBJ_برچسب) {
+		حرر(buf);
+		أرجع;
 	}
 	sp += 2; /* skip the 2 LFs */
-	write_or_die(fd, sp, buf + size - sp);
+	write_or_die(fd, sp, buf + اندازه - sp);
 
-	free(orig);
+	حرر(orig);
 	strbuf_release(&payload);
 	strbuf_release(&signature);
 }
 
-static int build_tag_object(struct strbuf *buf, int sign, struct object_id *result)
+ساكن صحيح build_برچسب_object(بنية strbuf *buf, صحيح sign, بنية object_id *نتیجه)
 {
-	struct object_id *compat_oid = NULL, compat_oid_buf;
-	if (sign && do_sign(buf, &compat_oid, &compat_oid_buf) < 0)
-		return error(_("unable to sign the tag"));
-	if (odb_write_object_ext(the_repository->objects, buf->buf,
-				 buf->len, OBJ_TAG, result, compat_oid, 0) < 0)
-		return error(_("unable to write tag file"));
-	return 0;
+	بنية object_id *compat_oid = عدم, compat_oid_buf;
+	إذا (sign && do_sign(buf, &compat_oid, &compat_oid_buf) < 0)
+		أرجع error(_("unable to sign the tag"));
+	إذا (odb_write_object_ext(the_repository->objects, buf->buf,
+				 buf->len, OBJ_برچسب, نتیجه, compat_oid, 0) < 0)
+		أرجع error(_("unable to write tag file"));
+	أرجع 0;
 }
 
-struct create_tag_options {
-	unsigned int message_given:1;
-	unsigned int use_editor:1;
-	unsigned int sign;
-	enum {
+بنية create_برچسب_options {
+	بیعلامت صحيح پیام_given:1;
+	بیعلامت صحيح use_editor:1;
+	بیعلامت صحيح sign;
+	تعداد {
 		CLEANUP_NONE,
 		CLEANUP_SPACE,
 		CLEANUP_ALL
-	} cleanup_mode;
+	} cleanup_نما;
 };
 
-static const char message_advice_nested_tag[] =
+ساكن ثابت حرف پیام_advice_nested_برچسب[] =
 	N_("You have created a nested tag. The object referred to by your new tag is\n"
 	   "already a tag. If you meant to tag the object that it points to, use:\n"
 	   "\n"
 	   "\tgit tag -f %s %s^{}");
 
-static void create_tag(const struct object_id *object, const char *object_ref,
-		       const char *tag,
-		       struct strbuf *buf, struct create_tag_options *opt,
-		       struct object_id *prev, struct object_id *result,
-		       struct strvec *trailer_args, char *path)
+ساكن فراغ create_برچسب(ثابت بنية object_id *object, ثابت حرف *object_ref,
+		       ثابت حرف *برچسب,
+		       بنية strbuf *buf, بنية create_برچسب_options *opt,
+		       بنية object_id *prev, بنية object_id *نتیجه,
+		       بنية strvec *trailer_آرگومانها, حرف *مسیر)
 {
-	enum object_type type;
-	struct strbuf header = STRBUF_INIT;
-	int should_edit;
+	تعداد object_type type;
+	بنية strbuf سرآیند = STRBUF_INIT;
+	صحيح should_edit;
 
-	type = odb_read_object_info(the_repository->objects, object, NULL);
-	if (type <= OBJ_NONE)
+	type = odb_read_object_info(the_repository->objects, object, عدم);
+	إذا (type <= OBJ_NONE)
 		die(_("bad object type."));
 
-	if (type == OBJ_TAG)
-		advise_if_enabled(ADVICE_NESTED_TAG, _(message_advice_nested_tag),
-				  tag, object_ref);
+	إذا (type == OBJ_برچسب)
+		advise_if_enabled(ADVICE_NESTED_برچسب, _(پیام_advice_nested_برچسب),
+				  برچسب, object_ref);
 
-	strbuf_addf(&header,
+	strbuf_addf(&سرآیند,
 		    "object %s\n"
 		    "type %s\n"
 		    "tag %s\n"
 		    "tagger %s\n\n",
-		    oid_to_hex(object),
+		    oid_مقصد_hex(object),
 		    type_name(type),
-		    tag,
+		    برچسب,
 		    git_committer_info(IDENT_STRICT));
 
-	should_edit = opt->use_editor || !opt->message_given;
-	if (should_edit || trailer_args->nr) {
-		int fd;
+	should_edit = opt->use_editor || !opt->پیام_given;
+	إذا (should_edit || trailer_آرگومانها->nr) {
+		صحيح fd;
 
 		/* write the template message before editing: */
-		fd = xopen(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+		fd = xopen(مسیر, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-		if (opt->message_given && buf->len) {
+		إذا (opt->پیام_given && buf->len) {
 			strbuf_complete(buf, '\n');
 			write_or_die(fd, buf->buf, buf->len);
 			strbuf_reset(buf);
-		} else if (!is_null_oid(prev)) {
-			write_tag_body(fd, prev);
-		} else {
-			struct strbuf buf = STRBUF_INIT;
+		} وإلا إذا (!is_null_oid(prev)) {
+			write_برچسب_body(fd, prev);
+		} وإلا {
+			بنية strbuf buf = STRBUF_INIT;
 			strbuf_addch(&buf, '\n');
-			if (opt->cleanup_mode == CLEANUP_ALL)
-				strbuf_commented_addf(&buf, comment_line_str,
-				      _(tag_template), tag, comment_line_str);
-			else
-				strbuf_commented_addf(&buf, comment_line_str,
-				      _(tag_template_nocleanup), tag, comment_line_str);
+			إذا (opt->cleanup_نما == CLEANUP_ALL)
+				strbuf_commented_addf(&buf, comment_سطر_str,
+				      _(برچسب_template), برچسب, comment_سطر_str);
+			وإلا
+				strbuf_commented_addf(&buf, comment_سطر_str,
+				      _(برچسب_template_nocleanup), برچسب, comment_سطر_str);
 			write_or_die(fd, buf.buf, buf.len);
 			strbuf_release(&buf);
 		}
 		close(fd);
 
-		if (trailer_args->nr && amend_file_with_trailers(path, trailer_args))
+		إذا (trailer_آرگومانها->nr && amend_file_with_trailers(مسیر, trailer_آرگومانها))
 			die(_("unable to pass trailers to --trailers"));
 
-		if (should_edit) {
-			if (launch_editor(path, buf, NULL)) {
+		إذا (should_edit) {
+			إذا (launch_editor(مسیر, buf, عدم)) {
 				fprintf(stderr,
 					_("Please supply the message using either -m or -F option.\n"));
-				exit(1);
+				خروج(1);
 			}
-		} else if (trailer_args->nr) {
+		} وإلا إذا (trailer_آرگومانها->nr) {
 			strbuf_reset(buf);
-			if (strbuf_read_file(buf, path, 0) < 0)
-				die_errno(_("failed to read '%s'"), path);
+			إذا (strbuf_read_file(buf, مسیر, 0) < 0)
+				die_errno(_("failed to read '%s'"), مسیر);
 		}
 	}
 
-	if (opt->cleanup_mode != CLEANUP_NONE)
+	إذا (opt->cleanup_نما != CLEANUP_NONE)
 		strbuf_stripspace(buf,
-		  opt->cleanup_mode == CLEANUP_ALL ? comment_line_str : NULL);
+		  opt->cleanup_نما == CLEANUP_ALL ? comment_سطر_str : عدم);
 
-	if (!opt->message_given && !buf->len)
+	إذا (!opt->پیام_given && !buf->len)
 		die(_("no tag message?"));
 
-	strbuf_insert(buf, 0, header.buf, header.len);
-	strbuf_release(&header);
+	strbuf_درج(buf, 0, سرآیند.buf, سرآیند.len);
+	strbuf_release(&سرآیند);
 
-	if (build_tag_object(buf, opt->sign, result) < 0) {
-		if (path)
+	إذا (build_برچسب_object(buf, opt->sign, نتیجه) < 0) {
+		إذا (مسیر)
 			fprintf(stderr, _("The tag message has been left in %s\n"),
-				path);
-		exit(128);
+				مسیر);
+		خروج(128);
 	}
 }
 
-static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
+ساكن فراغ create_reflog_پیام(ثابت بنية object_id *oid, بنية strbuf *sb)
 {
-	enum object_type type;
-	struct commit *c;
-	char *buf;
-	size_t size;
-	int subject_len = 0;
-	const char *subject_start;
+	تعداد object_type type;
+	بنية commit *c;
+	حرف *buf;
+	اندازه_t اندازه;
+	صحيح subject_len = 0;
+	ثابت حرف *subject_شروع;
 
-	char *rla = getenv("GIT_REFLOG_ACTION");
-	if (rla) {
+	حرف *rla = getenv("GIT_REFLOG_ACTION");
+	إذا (rla) {
 		strbuf_addstr(sb, rla);
-	} else {
+	} وإلا {
 		strbuf_addstr(sb, "tag: tagging ");
-		strbuf_add_unique_abbrev(sb, oid, DEFAULT_ABBREV);
+		strbuf_جمع_کن_unique_abbrev(sb, oid, DEFAULT_ABBREV);
 	}
 
 	strbuf_addstr(sb, " (");
-	type = odb_read_object_info(the_repository->objects, oid, NULL);
-	switch (type) {
-	default:
+	type = odb_read_object_info(the_repository->objects, oid, عدم);
+	بدل (type) {
+	افتراضي:
 		strbuf_addstr(sb, "object of unknown type");
-		break;
-	case OBJ_COMMIT:
-		if ((buf = odb_read_object(the_repository->objects, oid, &type, &size))) {
-			subject_len = find_commit_subject(buf, &subject_start);
-			strbuf_insert(sb, sb->len, subject_start, subject_len);
-		} else {
+		اكسر;
+	حالة OBJ_COMMIT:
+		إذا ((buf = odb_read_object(the_repository->objects, oid, &type, &اندازه))) {
+			subject_len = پیدا_کن_commit_subject(buf, &subject_شروع);
+			strbuf_درج(sb, sb->len, subject_شروع, subject_len);
+		} وإلا {
 			strbuf_addstr(sb, "commit object");
 		}
-		free(buf);
+		حرر(buf);
 
-		if ((c = lookup_commit_reference(the_repository, oid)))
-			strbuf_addf(sb, ", %s", show_date(c->date, 0, DATE_MODE(SHORT)));
-		break;
-	case OBJ_TREE:
+		إذا ((c = lookup_commit_reference(the_repository, oid)))
+			strbuf_addf(sb, ", %s", show_date(c->date, 0, DATE_نما(SHORT)));
+		اكسر;
+	حالة OBJ_درخت:
 		strbuf_addstr(sb, "tree object");
-		break;
-	case OBJ_BLOB:
+		اكسر;
+	حالة OBJ_BLOB:
 		strbuf_addstr(sb, "blob object");
-		break;
-	case OBJ_TAG:
+		اكسر;
+	حالة OBJ_برچسب:
 		strbuf_addstr(sb, "other tag object");
-		break;
+		اكسر;
 	}
 	strbuf_addch(sb, ')');
 }
 
-struct msg_arg {
-	int given;
-	struct strbuf buf;
+بنية پیام_arg {
+	صحيح given;
+	بنية strbuf buf;
 };
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+ساكن صحيح parse_پیام_arg(ثابت بنية option *opt, ثابت حرف *arg, صحيح unset)
 {
-	struct msg_arg *msg = opt->value;
+	بنية پیام_arg *پیام = opt->مقدار;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
-	if (msg->buf.len)
-		strbuf_addstr(&(msg->buf), "\n\n");
-	strbuf_addstr(&(msg->buf), arg);
-	msg->given = 1;
-	return 0;
+	إذا (!arg)
+		أرجع -1;
+	إذا (پیام->buf.len)
+		strbuf_addstr(&(پیام->buf), "\n\n");
+	strbuf_addstr(&(پیام->buf), arg);
+	پیام->given = 1;
+	أرجع 0;
 }
 
-int cmd_tag(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+صحيح cmd_برچسب(صحيح argc,
+	    ثابت حرف **argv,
+	    ثابت حرف *پیشوند,
+	    بنية repository *repo استفادهنشده)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf ref = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct object_id object, prev;
-	const char *object_ref, *tag;
-	struct create_tag_options opt;
-	char *cleanup_arg = NULL;
-	int create_reflog = 0;
-	int annotate = 0, force = 0;
-	int cmdmode = 0, create_tag_object = 0;
-	char *msgfile = NULL;
-	const char *keyid = NULL;
-	struct msg_arg msg = { .buf = STRBUF_INIT };
-	struct ref_transaction *transaction;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	struct ref_format format = REF_FORMAT_INIT;
-	struct strvec trailer_args = STRVEC_INIT;
-	int icase = 0;
-	int edit_flag = 0;
-	struct option options[] = {
+	بنية strbuf buf = STRBUF_INIT;
+	بنية strbuf ref = STRBUF_INIT;
+	بنية strbuf reflog_پیام = STRBUF_INIT;
+	بنية object_id object, prev;
+	ثابت حرف *object_ref, *برچسب;
+	بنية create_برچسب_options opt;
+	حرف *cleanup_arg = عدم;
+	صحيح create_reflog = 0;
+	صحيح annotate = 0, force = 0;
+	صحيح cmdmode = 0, create_برچسب_object = 0;
+	حرف *msgfile = عدم;
+	ثابت حرف *keyid = عدم;
+	بنية پیام_arg پیام = { .buf = STRBUF_INIT };
+	بنية ref_transaction *transaction;
+	بنية strbuf err = STRBUF_INIT;
+	بنية ref_filter filter = REF_FILTER_INIT;
+	بنية ref_ترتیبدهی *ترتیبدهی;
+	بنية string_list ترتیبدهی_options = STRING_LIST_INIT_DUP;
+	بنية ref_format format = REF_FORMAT_INIT;
+	بنية strvec trailer_آرگومانها = STRVEC_INIT;
+	صحيح icase = 0;
+	صحيح edit_flag = 0;
+	بنية option options[] = {
 		OPT_CMDMODE('l', "list", &cmdmode, N_("list tag names"), 'l'),
 		{
 			.type = OPTION_INTEGER,
 			.short_name = 'n',
-			.value = &filter.lines,
-			.precision = sizeof(filter.lines),
+			.مقدار = &filter.سطرها,
+			.precision = حجم(filter.سطرها),
 			.argh = N_("n"),
 			.help = N_("print <n> lines of each tag message"),
 			.flags = PARSE_OPT_OPTARG,
@@ -493,13 +493,13 @@ int cmd_tag(int argc,
 		OPT_CMDMODE('d', "delete", &cmdmode, N_("delete tags"), 'd'),
 		OPT_CMDMODE('v', "verify", &cmdmode, N_("verify tags"), 'v'),
 
-		OPT_GROUP(N_("Tag creation options")),
+		OPT_گروه(N_("Tag creation options")),
 		OPT_BOOL('a', "annotate", &annotate,
 					N_("annotated tag, needs a message")),
-		OPT_CALLBACK_F('m', "message", &msg, N_("message"),
-			       N_("tag message"), PARSE_OPT_NONEG, parse_msg_arg),
+		OPT_CALLBACK_F('m', "message", &پیام, N_("message"),
+			       N_("tag message"), PARSE_OPT_NONEG, parse_پیام_arg),
 		OPT_FILENAME('F', "file", &msgfile, N_("read message from file")),
-		OPT_STRVEC(0, "trailer", &trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &trailer_آرگومانها, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL('e', "edit", &edit_flag, N_("force edit of tag message")),
 		OPT_BOOL('s', "sign", &opt.sign, N_("annotated and GPG-signed tag")),
@@ -509,21 +509,21 @@ int cmd_tag(int argc,
 		OPT__FORCE(&force, N_("replace the tag if exists"), 0),
 		OPT_BOOL(0, "create-reflog", &create_reflog, N_("create a reflog")),
 
-		OPT_GROUP(N_("Tag listing options")),
-		OPT_COLUMN(0, "column", &colopts, N_("show tag list in columns")),
-		OPT_CONTAINS(&filter.with_commit, N_("print only tags that contain the commit")),
-		OPT_NO_CONTAINS(&filter.no_commit, N_("print only tags that don't contain the commit")),
+		OPT_گروه(N_("Tag listing options")),
+		OPT_ستونی(0, "column", &colopts, N_("show tag list in columns")),
+		OPT_شامل_است(&filter.with_commit, N_("print only tags that contain the commit")),
+		OPT_NO_شامل_است(&filter.no_commit, N_("print only tags that don't contain the commit")),
 		OPT_WITH(&filter.with_commit, N_("print only tags that contain the commit")),
 		OPT_WITHOUT(&filter.no_commit, N_("print only tags that don't contain the commit")),
 		OPT_MERGED(&filter, N_("print only tags that are merged")),
 		OPT_NO_MERGED(&filter, N_("print only tags that are not merged")),
-		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_empty,
+		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_خالی,
 			N_("do not output a newline after empty formatted refs")),
-		OPT_REF_SORT(&sorting_options),
+		OPT_REF_مرتب_سازی(&ترتیبدهی_options),
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "points-at",
-			.value = &filter.points_at,
+			.مقدار = &filter.points_at,
 			.argh = N_("object"),
 			.help = N_("print only tags of the object"),
 			.flags = PARSE_OPT_LASTARG_DEFAULT,
@@ -534,192 +534,192 @@ int cmd_tag(int argc,
 			   N_("format to use for the output")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
 		OPT_BOOL('i', "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
-		OPT_END()
+		OPT_انتها()
 	};
-	int ret = 0;
-	const char *only_in_list = NULL;
-	char *path = NULL;
+	صحيح ret = 0;
+	ثابت حرف *only_درون_list = عدم;
+	حرف *مسیر = عدم;
 
-	setup_ref_filter_porcelain_msg();
+	راهاندازی_ref_filter_porcelain_پیام();
 
 	/*
 	 * Try to set sort keys from config. If config does not set any,
 	 * fall back on default (refname) sorting.
 	 */
-	repo_config(the_repository, git_tag_config, &sorting_options);
-	if (!sorting_options.nr)
-		string_list_append(&sorting_options, "refname");
+	repo_config(the_repository, git_برچسب_config, &ترتیبدهی_options);
+	إذا (!ترتیبدهی_options.nr)
+		string_list_append(&ترتیبدهی_options, "refname");
 
-	memset(&opt, 0, sizeof(opt));
-	filter.lines = -1;
+	memset(&opt, 0, حجم(opt));
+	filter.سطرها = -1;
 	opt.sign = -1;
 
-	argc = parse_options(argc, argv, prefix, options, git_tag_usage, 0);
+	argc = parse_options(argc, argv, پیشوند, options, git_برچسب_usage, 0);
 
-	if (!cmdmode) {
-		if (argc == 0)
+	إذا (!cmdmode) {
+		إذا (argc == 0)
 			cmdmode = 'l';
-		else if (filter.with_commit || filter.no_commit ||
+		وإلا إذا (filter.with_commit || filter.no_commit ||
 			 filter.reachable_from || filter.unreachable_from ||
-			 filter.points_at.nr || filter.lines != -1)
+			 filter.points_at.nr || filter.سطرها != -1)
 			cmdmode = 'l';
 	}
 
-	if (cmdmode == 'l')
-		setup_auto_pager("tag", 1);
+	إذا (cmdmode == 'l')
+		راهاندازی_auto_pager("tag", 1);
 
-	if (trailer_args.nr)
+	إذا (trailer_آرگومانها.nr)
 		trailer_config_init();
 
-	if (opt.sign == -1)
-		opt.sign = cmdmode ? 0 : config_sign_tag > 0;
+	إذا (opt.sign == -1)
+		opt.sign = cmdmode ? 0 : config_sign_برچسب > 0;
 
-	if (keyid) {
+	إذا (keyid) {
 		opt.sign = 1;
-		set_signing_key(keyid);
+		مجموعه_signing_کلید(keyid);
 	}
-	create_tag_object = (opt.sign || annotate || msg.given || msgfile ||
-			     edit_flag || trailer_args.nr);
+	create_برچسب_object = (opt.sign || annotate || پیام.given || msgfile ||
+			     edit_flag || trailer_آرگومانها.nr);
 
-	if ((create_tag_object || force) && (cmdmode != 0))
-		usage_with_options(git_tag_usage, options);
+	إذا ((create_برچسب_object || force) && (cmdmode != 0))
+		usage_with_options(git_برچسب_usage, options);
 
 	finalize_colopts(&colopts, -1);
-	if (cmdmode == 'l' && filter.lines != -1) {
-		if (explicitly_enable_column(colopts))
+	إذا (cmdmode == 'l' && filter.سطرها != -1) {
+		إذا (explicitly_enable_ستونی(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "-n");
 		colopts = 0;
 	}
-	sorting = ref_sorting_options(&sorting_options);
-	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
+	ترتیبدهی = ref_ترتیبدهی_options(&ترتیبدهی_options);
+	ref_ترتیبدهی_مجموعه_مرتب_سازی_flags_all(ترتیبدهی, REF_ترتیبدهی_ICASE, icase);
 	filter.ignore_case = icase;
-	if (cmdmode == 'l') {
-		if (column_active(colopts)) {
-			struct column_options copts;
-			memset(&copts, 0, sizeof(copts));
+	إذا (cmdmode == 'l') {
+		إذا (ستونی_فعال(colopts)) {
+			بنية ستونی_options copts;
+			memset(&copts, 0, حجم(copts));
 			copts.padding = 2;
-			if (run_column_filter(colopts, &copts))
+			إذا (پیاپی_ستونی_filter(colopts, &copts))
 				die(_("could not start 'git column'"));
 		}
 		filter.name_patterns = argv;
-		ret = list_tags(&filter, sorting, &format);
-		if (column_active(colopts))
-			stop_column_filter();
-		goto cleanup;
+		ret = list_برچسبها(&filter, ترتیبدهی, &format);
+		إذا (ستونی_فعال(colopts))
+			stop_ستونی_filter();
+		اذهب cleanup;
 	}
-	if (filter.lines != -1)
-		only_in_list = "-n";
-	else if (filter.with_commit)
-		only_in_list = "--contains";
-	else if (filter.no_commit)
-		only_in_list = "--no-contains";
-	else if (filter.points_at.nr)
-		only_in_list = "--points-at";
-	else if (filter.reachable_from)
-		only_in_list = "--merged";
-	else if (filter.unreachable_from)
-		only_in_list = "--no-merged";
-	if (only_in_list)
-		die(_("the '%s' option is only allowed in list mode"), only_in_list);
-	if (cmdmode == 'd') {
-		ret = delete_tags(argv);
-		goto cleanup;
+	إذا (filter.سطرها != -1)
+		only_درون_list = "-n";
+	وإلا إذا (filter.with_commit)
+		only_درون_list = "--contains";
+	وإلا إذا (filter.no_commit)
+		only_درون_list = "--no-contains";
+	وإلا إذا (filter.points_at.nr)
+		only_درون_list = "--points-at";
+	وإلا إذا (filter.reachable_from)
+		only_درون_list = "--merged";
+	وإلا إذا (filter.unreachable_from)
+		only_درون_list = "--no-merged";
+	إذا (only_درون_list)
+		die(_("the '%s' option is only allowed in list mode"), only_درون_list);
+	إذا (cmdmode == 'd') {
+		ret = delete_برچسبها(argv);
+		اذهب cleanup;
 	}
-	if (cmdmode == 'v') {
-		if (format.format && verify_ref_format(&format))
-			usage_with_options(git_tag_usage, options);
-		ret = for_each_tag_name(argv, verify_tag, &format);
-		goto cleanup;
+	إذا (cmdmode == 'v') {
+		إذا (format.format && verify_ref_format(&format))
+			usage_with_options(git_برچسب_usage, options);
+		ret = for_each_برچسب_name(argv, verify_برچسب, &format);
+		اذهب cleanup;
 	}
 
-	if (msg.given || msgfile) {
-		if (msg.given && msgfile)
+	إذا (پیام.given || msgfile) {
+		إذا (پیام.given && msgfile)
 			die(_("options '%s' and '%s' cannot be used together"), "-F", "-m");
-		if (msg.given)
-			strbuf_addbuf(&buf, &(msg.buf));
-		else {
-			if (!strcmp(msgfile, "-")) {
-				if (strbuf_read(&buf, 0, 1024) < 0)
+		إذا (پیام.given)
+			strbuf_addbuf(&buf, &(پیام.buf));
+		وإلا {
+			إذا (!strcmp(msgfile, "-")) {
+				إذا (strbuf_read(&buf, 0, 1024) < 0)
 					die_errno(_("cannot read '%s'"), msgfile);
-			} else {
-				if (strbuf_read_file(&buf, msgfile, 1024) < 0)
+			} وإلا {
+				إذا (strbuf_read_file(&buf, msgfile, 1024) < 0)
 					die_errno(_("could not open or read '%s'"),
 						msgfile);
 			}
 		}
 	}
 
-	tag = argv[0];
+	برچسب = argv[0];
 
 	object_ref = argc == 2 ? argv[1] : "HEAD";
-	if (argc > 2)
+	إذا (argc > 2)
 		die(_("too many arguments"));
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	إذا (repo_get_oid(the_repository, object_ref, &object))
 		die(_("Failed to resolve '%s' as a valid ref."), object_ref);
 
-	if (check_tag_ref(&ref, tag))
-		die(_("'%s' is not a valid tag name."), tag);
+	إذا (check_برچسب_ref(&ref, برچسب))
+		die(_("'%s' is not a valid tag name."), برچسب);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &prev))
+	إذا (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &prev))
 		oidclr(&prev, the_repository->hash_algo);
-	else if (!force)
-		die(_("tag '%s' already exists"), tag);
+	وإلا إذا (!force)
+		die(_("tag '%s' already exists"), برچسب);
 
-	opt.message_given = msg.given || msgfile;
+	opt.پیام_given = پیام.given || msgfile;
 	opt.use_editor = edit_flag;
 
-	if (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
-		opt.cleanup_mode = CLEANUP_ALL;
-	else if (!strcmp(cleanup_arg, "verbatim"))
-		opt.cleanup_mode = CLEANUP_NONE;
-	else if (!strcmp(cleanup_arg, "whitespace"))
-		opt.cleanup_mode = CLEANUP_SPACE;
-	else
+	إذا (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
+		opt.cleanup_نما = CLEANUP_ALL;
+	وإلا إذا (!strcmp(cleanup_arg, "verbatim"))
+		opt.cleanup_نما = CLEANUP_NONE;
+	وإلا إذا (!strcmp(cleanup_arg, "whitespace"))
+		opt.cleanup_نما = CLEANUP_SPACE;
+	وإلا
 		die(_("Invalid cleanup mode %s"), cleanup_arg);
 
-	create_reflog_msg(&object, &reflog_msg);
+	create_reflog_پیام(&object, &reflog_پیام);
 
-	if (create_tag_object) {
-		if (force_sign_annotate && !annotate)
+	إذا (create_برچسب_object) {
+		إذا (force_sign_annotate && !annotate)
 			opt.sign = 1;
-		path = repo_git_path(the_repository, "TAG_EDITMSG");
-		create_tag(&object, object_ref, tag, &buf, &opt, &prev, &object,
-			   &trailer_args, path);
+		مسیر = repo_git_مسیر(the_repository, "TAG_EDITMSG");
+		create_برچسب(&object, object_ref, برچسب, &buf, &opt, &prev, &object,
+			   &trailer_آرگومانها, مسیر);
 	}
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	إذا (!transaction ||
 	    ref_transaction_update(transaction, ref.buf, &object, &prev,
-				   NULL, NULL,
+				   عدم, عدم,
 				   create_reflog ? REF_FORCE_CREATE_REFLOG : 0,
-				   reflog_msg.buf, &err) ||
+				   reflog_پیام.buf, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
-		if (path)
+		إذا (مسیر)
 			fprintf(stderr,
 				_("The tag message has been left in %s\n"),
-				path);
+				مسیر);
 		die("%s", err.buf);
 	}
-	if (path) {
-		unlink_or_warn(path);
-		free(path);
+	إذا (مسیر) {
+		unlink_or_warn(مسیر);
+		حرر(مسیر);
 	}
 	ref_transaction_free(transaction);
-	if (force && !is_null_oid(&prev) && !oideq(&prev, &object))
-		printf(_("Updated tag '%s' (was %s)\n"), tag,
-		       repo_find_unique_abbrev(the_repository, &prev, DEFAULT_ABBREV));
+	إذا (force && !is_null_oid(&prev) && !oideq(&prev, &object))
+		چاپ_کن(_("Updated tag '%s' (was %s)\n"), برچسب,
+		       repo_پیدا_کن_unique_abbrev(the_repository, &prev, DEFAULT_ABBREV));
 
 cleanup:
-	ref_sorting_release(sorting);
+	ref_ترتیبدهی_release(ترتیبدهی);
 	ref_filter_clear(&filter);
 	strbuf_release(&buf);
 	strbuf_release(&ref);
-	strbuf_release(&reflog_msg);
-	strbuf_release(&msg.buf);
+	strbuf_release(&reflog_پیام);
+	strbuf_release(&پیام.buf);
 	strbuf_release(&err);
-	strvec_clear(&trailer_args);
-	free(msgfile);
-	return ret;
+	strvec_clear(&trailer_آرگومانها);
+	حرر(msgfile);
+	أرجع ret;
 }

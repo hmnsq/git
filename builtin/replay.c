@@ -2,93 +2,93 @@
  * "git replay" builtin command
  */
 
-#include "git-compat-util.h"
+#ضمن "git-compat-util.h"
 
-#include "builtin.h"
-#include "config.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "replay.h"
-#include "revision.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "parse-options.h"
+#ضمن "refs.h"
+#ضمن "replay.h"
+#ضمن "revision.h"
 
-enum ref_action_mode {
+تعداد ref_action_نما {
 	REF_ACTION_UPDATE,
 	REF_ACTION_PRINT,
 };
 
-static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const char *source)
+ساكن تعداد ref_action_نما parse_ref_action_نما(ثابت حرف *ref_action, ثابت حرف *منبع)
 {
-	if (!ref_action || !strcmp(ref_action, "update"))
-		return REF_ACTION_UPDATE;
-	if (!strcmp(ref_action, "print"))
-		return REF_ACTION_PRINT;
-	die(_("invalid %s value: '%s'"), source, ref_action);
+	إذا (!ref_action || !strcmp(ref_action, "update"))
+		أرجع REF_ACTION_UPDATE;
+	إذا (!strcmp(ref_action, "print"))
+		أرجع REF_ACTION_PRINT;
+	die(_("invalid %s value: '%s'"), منبع, ref_action);
 }
 
-static enum ref_action_mode get_ref_action_mode(struct repository *repo, const char *ref_action)
+ساكن تعداد ref_action_نما get_ref_action_نما(بنية repository *repo, ثابت حرف *ref_action)
 {
-	const char *config_value = NULL;
+	ثابت حرف *config_مقدار = عدم;
 
 	/* Command line option takes precedence */
-	if (ref_action)
-		return parse_ref_action_mode(ref_action, "--ref-action");
+	إذا (ref_action)
+		أرجع parse_ref_action_نما(ref_action, "--ref-action");
 
 	/* Check config value */
-	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
-		return parse_ref_action_mode(config_value, "replay.refAction");
+	إذا (!repo_config_get_string_tmp(repo, "replay.refAction", &config_مقدار))
+		أرجع parse_ref_action_نما(config_مقدار, "replay.refAction");
 
 	/* Default to update mode */
-	return REF_ACTION_UPDATE;
+	أرجع REF_ACTION_UPDATE;
 }
 
-static int handle_ref_update(enum ref_action_mode mode,
-			     struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+ساكن صحيح handle_ref_update(تعداد ref_action_نما نما,
+			     بنية ref_transaction *transaction,
+			     ثابت حرف *refname,
+			     ثابت بنية object_id *new_oid,
+			     ثابت بنية object_id *old_oid,
+			     ثابت حرف *reflog_پیام,
+			     بنية strbuf *err)
 {
-	switch (mode) {
-	case REF_ACTION_PRINT:
-		printf("update %s %s %s\n",
+	بدل (نما) {
+	حالة REF_ACTION_PRINT:
+		چاپ_کن("update %s %s %s\n",
 		       refname,
-		       oid_to_hex(new_oid),
-		       oid_to_hex(old_oid));
-		return 0;
-	case REF_ACTION_UPDATE:
-		return ref_transaction_update(transaction, refname, new_oid, old_oid,
-					      NULL, NULL, 0, reflog_msg, err);
-	default:
-		BUG("unknown ref_action_mode %d", mode);
+		       oid_مقصد_hex(new_oid),
+		       oid_مقصد_hex(old_oid));
+		أرجع 0;
+	حالة REF_ACTION_UPDATE:
+		أرجع ref_transaction_update(transaction, refname, new_oid, old_oid,
+					      عدم, عدم, 0, reflog_پیام, err);
+	افتراضي:
+		BUG("unknown ref_action_mode %d", نما);
 	}
 }
 
-int cmd_replay(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+صحيح cmd_replay(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *پیشوند,
+	       بنية repository *repo)
 {
-	struct replay_revisions_options opts = { 0 };
-	struct replay_result result = { 0 };
-	const char *ref_action = NULL;
-	enum ref_action_mode ref_mode;
-	struct rev_info revs;
-	struct ref_transaction *transaction = NULL;
-	struct strbuf transaction_err = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	int desired_reverse;
-	int ret = 0;
+	بنية replay_revisions_options opts = { 0 };
+	بنية replay_نتیجه نتیجه = { 0 };
+	ثابت حرف *ref_action = عدم;
+	تعداد ref_action_نما ref_نما;
+	بنية rev_info revs;
+	بنية ref_transaction *transaction = عدم;
+	بنية strbuf transaction_err = STRBUF_INIT;
+	بنية strbuf reflog_پیام = STRBUF_INIT;
+	صحيح desired_معکوس;
+	صحيح ret = 0;
 
-	const char *const replay_usage[] = {
+	ثابت حرف *ثابت replay_usage[] = {
 		N_("(EXPERIMENTAL!) git replay "
 		   "([--contained] --onto=<newbase> | --advance=<branch> | --revert=<branch>)\n"
 		   "[--ref=<ref>] [--ref-action=<mode>] [--linearize] <revision-range>"),
-		NULL
+		عدم
 	};
-	struct option replay_options[] = {
+	بنية option replay_options[] = {
 		OPT_BOOL(0, "contained", &opts.contained,
 			 N_("update all branches that point at commits in <revision-range>")),
 		OPT_STRING_F(0, "onto", &opts.onto,
@@ -113,14 +113,14 @@ int cmd_replay(int argc,
 			     PARSE_OPT_NONEG),
 		OPT_BOOL(0, "linearize", &opts.linearize,
 			 N_("drop merge commits, replaying only non-merge commits")),
-		OPT_END()
+		OPT_انتها()
 	};
 
-	argc = parse_options(argc, argv, prefix, replay_options, replay_usage,
+	argc = parse_options(argc, argv, پیشوند, replay_options, replay_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	/* Exactly one mode must be specified */
-	if (!opts.onto && !opts.advance && !opts.revert) {
+	إذا (!opts.onto && !opts.advance && !opts.revert) {
 		error(_("exactly one of --onto, --advance, or --revert is required"));
 		usage_with_options(replay_usage, replay_options);
 	}
@@ -138,7 +138,7 @@ int cmd_replay(int argc,
 				  !!opts.contained, "--contained");
 
 	/* Parse ref action mode from command line or config */
-	ref_mode = get_ref_action_mode(repo, ref_action);
+	ref_نما = get_ref_action_نما(repo, ref_action);
 
 	/*
 	 * Cherry-pick/rebase need oldest-first ordering so that each
@@ -146,9 +146,9 @@ int cmd_replay(int argc,
 	 * Revert needs newest-first ordering (like git revert) to
 	 * reduce conflicts by peeling off changes from the top.
 	 */
-	desired_reverse = !opts.revert;
+	desired_معکوس = !opts.revert;
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, پیشوند);
 
 	/*
 	 * Set desired values for rev walking options here. If they
@@ -159,105 +159,105 @@ int cmd_replay(int argc,
 	 * some options changing these values if we think they could
 	 * be useful.
 	 */
-	revs.reverse = desired_reverse;
-	revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
-	revs.topo_order = 1;
+	revs.معکوس = desired_معکوس;
+	revs.مرتب_سازی_ترتیب = REV_مرتب_سازی_درون_گراف_ترتیب;
+	revs.topo_ترتیب = 1;
 	revs.simplify_history = 0;
 
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1) {
+	argc = راهاندازی_revisions(argc, argv, &revs, عدم);
+	إذا (argc > 1) {
 		ret = error(_("unrecognized argument: %s"), argv[1]);
-		goto cleanup;
+		اذهب cleanup;
 	}
 
 	/*
 	 * Detect and warn if we override some user specified rev
 	 * walking options.
 	 */
-	if (revs.reverse != desired_reverse) {
+	إذا (revs.معکوس != desired_معکوس) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"reverse");
-		revs.reverse = desired_reverse;
+		revs.معکوس = desired_معکوس;
 	}
-	if (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
+	إذا (revs.مرتب_سازی_ترتیب != REV_مرتب_سازی_درون_گراف_ترتیب) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"sort_order");
-		revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
+		revs.مرتب_سازی_ترتیب = REV_مرتب_سازی_درون_گراف_ترتیب;
 	}
-	if (revs.topo_order != 1) {
+	إذا (revs.topo_ترتیب != 1) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"topo_order");
-		revs.topo_order = 1;
+		revs.topo_ترتیب = 1;
 	}
-	if (revs.simplify_history != 0) {
+	إذا (revs.simplify_history != 0) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"simplify_history");
 		revs.simplify_history = 0;
 	}
 
-	ret = replay_revisions(&revs, &opts, &result);
-	if (ret)
-		goto cleanup;
+	ret = replay_revisions(&revs, &opts, &نتیجه);
+	إذا (ret)
+		اذهب cleanup;
 
 	/* Build reflog message */
-	if (opts.revert) {
-		strbuf_addf(&reflog_msg, "replay --revert %s", opts.revert);
-	} else if (opts.advance) {
-		strbuf_addf(&reflog_msg, "replay --advance %s", opts.advance);
-	} else {
-		struct object_id oid;
-		if (repo_get_oid_committish(repo, opts.onto, &oid))
+	إذا (opts.revert) {
+		strbuf_addf(&reflog_پیام, "replay --revert %s", opts.revert);
+	} وإلا إذا (opts.advance) {
+		strbuf_addf(&reflog_پیام, "replay --advance %s", opts.advance);
+	} وإلا {
+		بنية object_id oid;
+		إذا (repo_get_oid_committish(repo, opts.onto, &oid))
 			BUG("--onto commit should have been resolved beforehand already");
-		strbuf_addf(&reflog_msg, "replay --onto %s", oid_to_hex(&oid));
+		strbuf_addf(&reflog_پیام, "replay --onto %s", oid_مقصد_hex(&oid));
 	}
 
 	/* Initialize ref transaction if using update mode */
-	if (ref_mode == REF_ACTION_UPDATE) {
+	إذا (ref_نما == REF_ACTION_UPDATE) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &transaction_err);
-		if (!transaction) {
+		إذا (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			اذهب cleanup;
 		}
 	}
 
-	for (size_t i = 0; i < result.updates_nr; i++) {
-		ret = handle_ref_update(ref_mode, transaction, result.updates[i].refname,
-					&result.updates[i].new_oid, &result.updates[i].old_oid,
-					reflog_msg.buf, &transaction_err);
-		if (ret) {
+	لكل (اندازه_t i = 0; i < نتیجه.updates_nr; i++) {
+		ret = handle_ref_update(ref_نما, transaction, نتیجه.updates[i].refname,
+					&نتیجه.updates[i].new_oid, &نتیجه.updates[i].old_oid,
+					reflog_پیام.buf, &transaction_err);
+		إذا (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
-				    result.updates[i].refname, transaction_err.buf);
-			goto cleanup;
+				    نتیجه.updates[i].refname, transaction_err.buf);
+			اذهب cleanup;
 		}
 	}
 
 	/* Commit the ref transaction if we have one */
-	if (transaction) {
-		if (ref_transaction_commit(transaction, &transaction_err)) {
+	إذا (transaction) {
+		إذا (ref_transaction_commit(transaction, &transaction_err)) {
 			ret = error(_("failed to commit ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			اذهب cleanup;
 		}
 	}
 
 	ret = 0;
 
 cleanup:
-	if (transaction)
+	إذا (transaction)
 		ref_transaction_free(transaction);
-	replay_result_release(&result);
+	replay_نتیجه_release(&نتیجه);
 	strbuf_release(&transaction_err);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_پیام);
 	release_revisions(&revs);
 
 	/* Return */
-	if (ret < 0)
-		exit(128);
-	return ret;
+	إذا (ret < 0)
+		خروج(128);
+	أرجع ret;
 }

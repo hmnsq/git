@@ -1,27 +1,27 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "date.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "path.h"
-#include "transport.h"
-#include "remote.h"
-#include "string-list.h"
-#include "strbuf.h"
-#include "run-command.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "odb.h"
-#include "strvec.h"
-#include "commit-reach.h"
-#include "progress.h"
+#ضمن "builtin.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "date.h"
+#ضمن "gettext.h"
+#ضمن "ident.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "transport.h"
+#ضمن "remote.h"
+#ضمن "string-list.h"
+#ضمن "strbuf.h"
+#ضمن "run-command.h"
+#ضمن "rebase.h"
+#ضمن "refs.h"
+#ضمن "refspec.h"
+#ضمن "odb.h"
+#ضمن "strvec.h"
+#ضمن "commit-reach.h"
+#ضمن "progress.h"
 
-static const char * const builtin_remote_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_usage[] = {
 	"git remote [-v | --verbose]",
 	N_("git remote add [-t <branch>] [-m <master>] [-f] [--tags | --no-tags] [--mirror=<fetch|push>] <name> <url>"),
 	N_("git remote rename [--[no-]progress] <old> <new>"),
@@ -35,655 +35,655 @@ static const char * const builtin_remote_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_add_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_جمع_کن_usage[] = {
 	N_("git remote add [<options>] <name> <url>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_rename_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_rename_usage[] = {
 	N_("git remote rename [--[no-]progress] <old> <new>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_rm_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_rm_usage[] = {
 	N_("git remote remove <name>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_sethead_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_sethead_usage[] = {
 	N_("git remote set-head <name> (-a | --auto | -d | --delete | <branch>)"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_setbranches_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_setbranches_usage[] = {
 	N_("git remote set-branches <name> <branch>..."),
 	N_("git remote set-branches --add <name> <branch>..."),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_show_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_show_usage[] = {
 	N_("git remote show [<options>] <name>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_prune_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_prune_usage[] = {
 	N_("git remote prune [<options>] <name>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_update_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_update_usage[] = {
 	N_("git remote update [<options>] [<group> | <remote>]..."),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_geturl_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_geturl_usage[] = {
 	N_("git remote get-url [--push] [--all] <name>"),
-	NULL
+	عدم
 };
 
-static const char * const builtin_remote_seturl_usage[] = {
+ساكن ثابت حرف * ثابت builtin_remote_seturl_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	عدم
 };
 
-#define GET_REF_STATES (1<<0)
-#define GET_HEAD_NAMES (1<<1)
-#define GET_PUSH_REF_STATES (1<<2)
+#تعریف_کن GET_REF_حالتها (1<<0)
+#تعریف_کن GET_سر_نامها (1<<1)
+#تعریف_کن GET_افزودن_REF_حالتها (1<<2)
 
-static int verbose;
+ساكن صحيح verbose;
 
-static int fetch_remote(const char *name)
+ساكن صحيح fetch_remote(ثابت حرف *name)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية فرزند_process cmd = فرزند_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "fetch");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, name);
+	strvec_افزودن(&cmd.آرگومانها, "fetch");
+	إذا (verbose)
+		strvec_افزودن(&cmd.آرگومانها, "-v");
+	strvec_افزودن(&cmd.آرگومانها, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	إذا (پیاپی_command(&cmd))
+		أرجع error(_("Could not fetch %s"), name);
+	أرجع 0;
 }
 
-enum {
-	TAGS_UNSET = 0,
-	TAGS_DEFAULT = 1,
-	TAGS_SET = 2
+تعداد {
+	برچسبها_UNSET = 0,
+	برچسبها_DEFAULT = 1,
+	برچسبها_مجموعه = 2
 };
 
-#define MIRROR_NONE 0
-#define MIRROR_FETCH 1
-#define MIRROR_PUSH 2
-#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
+#تعریف_کن MIRROR_NONE 0
+#تعریف_کن MIRROR_FETCH 1
+#تعریف_کن MIRROR_افزودن 2
+#تعریف_کن MIRROR_BOTH (MIRROR_FETCH|MIRROR_افزودن)
 
-static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+ساكن فراغ جمع_کن_branch(ثابت حرف *کلید, ثابت حرف *branchname,
+		       ثابت حرف *remotename, صحيح mirror, بنية strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	إذا (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	وإلا
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
-	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
+	repo_config_مجموعه_multivar(the_repository, کلید, tmp->buf, "^$", 0);
 }
 
-static const char mirror_advice[] =
+ساكن ثابت حرف mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+ساكن صحيح parse_mirror_opt(ثابت بنية option *opt, ثابت حرف *arg, صحيح not)
 {
-	unsigned *mirror = opt->value;
-	if (not)
+	بیعلامت *mirror = opt->مقدار;
+	إذا (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	وإلا إذا (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	وإلا إذا (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
-		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	وإلا إذا (!strcmp(arg, "push"))
+		*mirror = MIRROR_افزودن;
+	وإلا
+		أرجع error(_("unknown --mirror argument: %s"), arg);
+	أرجع 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+ساكن صحيح check_remote_collision(بنية remote *remote, فراغ *داده)
 {
-	const char *name = data;
-	const char *p;
+	ثابت حرف *name = داده;
+	ثابت حرف *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	إذا (skip_پیشوند(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	إذا (skip_پیشوند(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	أرجع 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+ساكن صحيح جمع_کن(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+	       بنية repository *repo استفادهنشده)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
-	unsigned mirror = MIRROR_NONE;
-	struct string_list track = STRING_LIST_INIT_NODUP;
-	const char *master = NULL;
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
-	const char *name, *url;
-	int result = 0;
+	صحيح fetch = 0, fetch_برچسبها = برچسبها_DEFAULT;
+	بیعلامت mirror = MIRROR_NONE;
+	بنية string_list track = STRING_LIST_INIT_NODUP;
+	ثابت حرف *master = عدم;
+	بنية remote *remote;
+	بنية strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
+	ثابت حرف *name, *url;
+	صحيح نتیجه = 0;
 
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
-		OPT_SET_INT(0, "tags", &fetch_tags,
+		OPT_مجموعه_INT(0, "tags", &fetch_برچسبها,
 			    N_("import all tags and associated objects when fetching\n"
 			       "or do not fetch any tag at all (--no-tags)"),
-			    TAGS_SET),
+			    برچسبها_مجموعه),
 		OPT_STRING_LIST('t', "track", &track, N_("branch"),
 				N_("branch(es) to track")),
 		OPT_STRING('m', "master", &master, N_("branch"), N_("master branch")),
 		OPT_CALLBACK_F(0, "mirror", &mirror, "(push|fetch)",
 			N_("set up remote as a mirror to push to or fetch from"),
 			PARSE_OPT_OPTARG | PARSE_OPT_COMP_ARG, parse_mirror_opt),
-		OPT_END()
+		OPT_انتها()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_remote_add_usage, 0);
+	argc = parse_options(argc, argv, پیشوند, options,
+			     builtin_remote_جمع_کن_usage, 0);
 
-	if (argc != 2)
-		usage_with_options(builtin_remote_add_usage, options);
+	إذا (argc != 2)
+		usage_with_options(builtin_remote_جمع_کن_usage, options);
 
-	if (mirror && master)
+	إذا (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	إذا (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	إذا (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
-		exit(3);
+		خروج(3);
 	}
 
-	if (!valid_remote_name(name))
+	إذا (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
-	for_each_remote(check_remote_collision, (void *)name);
+	for_each_remote(check_remote_collision, (فراغ *)name);
 
 	strbuf_addf(&buf, "remote.%s.url", name);
-	repo_config_set(the_repository, buf.buf, url);
+	repo_config_مجموعه(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	إذا (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		إذا (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
-			add_branch(buf.buf, track.items[i].string,
+		لكل (اندازه_t i = 0; i < track.nr; i++) {
+			جمع_کن_branch(buf.buf, track.اقلام[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	إذا (mirror & MIRROR_افزودن) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
-		repo_config_set(the_repository, buf.buf, "true");
+		repo_config_مجموعه(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	إذا (fetch_برچسبها != برچسبها_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
-		repo_config_set(the_repository, buf.buf,
-				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
+		repo_config_مجموعه(the_repository, buf.buf,
+				fetch_برچسبها == برچسبها_مجموعه ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
-		result = 1;
-		goto out;
+	إذا (fetch && fetch_remote(name)) {
+		نتیجه = 1;
+		اذهب بیرون;
 	}
 
-	if (master) {
+	إذا (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
-			result = error(_("Could not setup master '%s'"), master);
+		إذا (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+			نتیجه = error(_("Could not setup master '%s'"), master);
 	}
 
-out:
+بیرون:
 	strbuf_release(&buf);
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	أرجع نتیجه;
 }
 
-struct branch_info {
-	char *remote_name;
-	struct string_list merge;
-	enum rebase_type rebase;
-	char *push_remote_name;
+بنية branch_info {
+	حرف *remote_name;
+	بنية string_list ادغام;
+	تعداد rebase_type rebase;
+	حرف *افزودن_remote_name;
 };
 
-static struct string_list branch_list = STRING_LIST_INIT_DUP;
+ساكن بنية string_list branch_list = STRING_LIST_INIT_DUP;
 
-static const char *abbrev_ref(const char *name, const char *prefix)
+ساكن ثابت حرف *abbrev_ref(ثابت حرف *name, ثابت حرف *پیشوند)
 {
-	skip_prefix(name, prefix, &name);
-	return name;
+	skip_پیشوند(name, پیشوند, &name);
+	أرجع name;
 }
-#define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
+#تعریف_کن abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *data UNUSED)
+ساكن صحيح config_read_branches(ثابت حرف *کلید, ثابت حرف *مقدار,
+				ثابت بنية config_context *ctx استفادهنشده,
+				فراغ *داده استفادهنشده)
 {
-	const char *orig_key = key;
-	char *name;
-	struct string_list_item *item;
-	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
-	size_t key_len;
+	ثابت حرف *orig_کلید = کلید;
+	حرف *name;
+	بنية string_list_قلم *قلم;
+	بنية branch_info *info;
+	تعداد { REMOTE, ادغام_2, REBASE, افزودن_REMOTE } type;
+	اندازه_t کلید_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	إذا (!starts_with(کلید, "branch."))
+		أرجع 0;
 
-	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	کلید += طول_رشته("branch.");
+	إذا (strip_suffix(کلید, ".remote", &کلید_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
-		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	وإلا إذا (strip_suffix(کلید, ".merge", &کلید_len))
+		type = ادغام_2;
+	وإلا إذا (strip_suffix(کلید, ".rebase", &کلید_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
-		type = PUSH_REMOTE;
-	else
-		return 0;
+	وإلا إذا (strip_suffix(کلید, ".pushremote", &کلید_len))
+		type = افزودن_REMOTE;
+	وإلا
+		أرجع 0;
 
-	name = xmemdupz(key, key_len);
-	item = string_list_insert(&branch_list, name);
+	name = xmemdupz(کلید, کلید_len);
+	قلم = string_list_درج(&branch_list, name);
 
-	if (!item->util)
-		item->util = xcalloc(1, sizeof(struct branch_info));
-	info = item->util;
-	switch (type) {
-	case REMOTE:
-		if (info->remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->remote_name = xstrdup(value);
-		break;
-	case MERGE: {
-		const char *space = strchr(value, ' ');
-		value = abbrev_branch(value);
-		while (space) {
-			char *merge;
-			merge = xstrndup(value, space - value);
-			string_list_append(&info->merge, merge);
-			value = abbrev_branch(space + 1);
-			space = strchr(value, ' ');
+	إذا (!قلم->util)
+		قلم->util = xcalloc(1, حجم(بنية branch_info));
+	info = قلم->util;
+	بدل (type) {
+	حالة REMOTE:
+		إذا (info->remote_name)
+			warning(_("more than one %s"), orig_کلید);
+		info->remote_name = xstrdup(مقدار);
+		اكسر;
+	حالة ادغام_2: {
+		ثابت حرف *space = strchr(مقدار, ' ');
+		مقدار = abbrev_branch(مقدار);
+		طالما (space) {
+			حرف *ادغام;
+			ادغام = xstrndup(مقدار, space - مقدار);
+			string_list_append(&info->ادغام, ادغام);
+			مقدار = abbrev_branch(space + 1);
+			space = strchr(مقدار, ' ');
 		}
-		string_list_append(&info->merge, xstrdup(value));
-		break;
+		string_list_append(&info->ادغام, xstrdup(مقدار));
+		اكسر;
 	}
-	case REBASE:
+	حالة REBASE:
 		/*
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
-		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		info->rebase = rebase_parse_مقدار(مقدار);
+		إذا (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
-				  "'true'"), name, value);
-		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->push_remote_name = xstrdup(value);
-		break;
-	default:
+				  "'true'"), name, مقدار);
+		اكسر;
+	حالة افزودن_REMOTE:
+		إذا (info->افزودن_remote_name)
+			warning(_("more than one %s"), orig_کلید);
+		info->افزودن_remote_name = xstrdup(مقدار);
+		اكسر;
+	افتراضي:
 		BUG("unexpected type=%d", type);
 	}
 
-	free(name);
-	return 0;
+	حرر(name);
+	أرجع 0;
 }
 
-static void read_branches(void)
+ساكن فراغ read_branches(فراغ)
 {
-	if (branch_list.nr)
-		return;
-	repo_config(the_repository, config_read_branches, NULL);
+	إذا (branch_list.nr)
+		أرجع;
+	repo_config(the_repository, config_read_branches, عدم);
 }
 
-struct ref_states {
-	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+بنية ref_حالتها {
+	بنية remote *remote;
+	بنية string_list new_refs, skipped, stale, tracked, heads, افزودن;
+	صحيح queried;
 };
 
-#define REF_STATES_INIT { \
+#تعریف_کن REF_حالتها_INIT { \
 	.new_refs = STRING_LIST_INIT_DUP, \
 	.skipped = STRING_LIST_INIT_DUP, \
 	.stale = STRING_LIST_INIT_DUP, \
 	.tracked = STRING_LIST_INIT_DUP, \
 	.heads = STRING_LIST_INIT_DUP, \
-	.push = STRING_LIST_INIT_DUP, \
+	.افزودن = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+ساكن صحيح get_ref_حالتها(ثابت بنية ref *remote_refs, بنية ref_حالتها *حالتها)
 {
-	struct ref *fetch_map = NULL, **tail = &fetch_map;
-	struct ref *ref, *stale_refs;
-	int i;
+	بنية ref *fetch_map = عدم, **دم = &fetch_map;
+	بنية ref *ref, *stale_refs;
+	صحيح i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	لكل (i = 0; i < حالتها->remote->fetch.nr; i++)
+		إذا (get_fetch_map(remote_refs, &حالتها->remote->fetch.اقلام[i], &دم, 1))
 			die(_("Could not get fetch map for refspec %s"),
-				states->remote->fetch.items[i].raw);
+				حالتها->remote->fetch.اقلام[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
-			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
-			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
-			string_list_append(&states->tracked, abbrev_branch(ref->name));
+	لكل (ref = fetch_map; ref; ref = ref->بعدی) {
+		إذا (refname_matches_negative_refspec_قلم(ref->name, &حالتها->remote->fetch))
+			string_list_append(&حالتها->skipped, abbrev_branch(ref->name));
+		وإلا إذا (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+			string_list_append(&حالتها->new_refs, abbrev_branch(ref->name));
+		وإلا
+			string_list_append(&حالتها->tracked, abbrev_branch(ref->name));
 	}
-	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
-		struct string_list_item *item =
-			string_list_append(&states->stale, abbrev_branch(ref->name));
-		item->util = xstrdup(ref->name);
+	stale_refs = get_stale_heads(&حالتها->remote->fetch, fetch_map);
+	لكل (ref = stale_refs; ref; ref = ref->بعدی) {
+		بنية string_list_قلم *قلم =
+			string_list_append(&حالتها->stale, abbrev_branch(ref->name));
+		قلم->util = xstrdup(ref->name);
 	}
 	free_refs(stale_refs);
 	free_refs(fetch_map);
 
-	string_list_sort(&states->new_refs);
-	string_list_sort(&states->skipped);
-	string_list_sort(&states->tracked);
-	string_list_sort(&states->stale);
+	string_list_مرتب_سازی(&حالتها->new_refs);
+	string_list_مرتب_سازی(&حالتها->skipped);
+	string_list_مرتب_سازی(&حالتها->tracked);
+	string_list_مرتب_سازی(&حالتها->stale);
 
-	return 0;
+	أرجع 0;
 }
 
-struct push_info {
-	char *dest;
-	int forced;
-	enum {
-		PUSH_STATUS_CREATE = 0,
-		PUSH_STATUS_DELETE,
-		PUSH_STATUS_UPTODATE,
-		PUSH_STATUS_FASTFORWARD,
-		PUSH_STATUS_OUTOFDATE,
-		PUSH_STATUS_NOTQUERIED
-	} status;
+بنية افزودن_info {
+	حرف *dest;
+	صحيح forced;
+	تعداد {
+		افزودن_وضعیت_CREATE = 0,
+		افزودن_وضعیت_DELETE,
+		افزودن_وضعیت_UPTODATE,
+		افزودن_وضعیت_FASTFORWARD,
+		افزودن_وضعیت_OUTOFDATE,
+		افزودن_وضعیت_NOTQUERIED
+	} وضعیت;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
-	struct ref_states *states)
+ساكن صحيح get_افزودن_ref_حالتها(ثابت بنية ref *remote_refs,
+	بنية ref_حالتها *حالتها)
 {
-	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	بنية remote *remote = حالتها->remote;
+	بنية ref *ref, *local_refs, *افزودن_map;
+	إذا (remote->mirror)
+		أرجع 0;
 
 	local_refs = get_local_heads();
-	push_map = copy_ref_list(remote_refs);
+	افزودن_map = copy_ref_list(remote_refs);
 
-	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
+	تطابق_افزودن_refs(local_refs, &افزودن_map, &remote->افزودن, تطابق_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
-		struct string_list_item *item;
-		struct push_info *info;
+	لكل (ref = افزودن_map; ref; ref = ref->بعدی) {
+		بنية string_list_قلم *قلم;
+		بنية افزودن_info *info;
 
-		if (!ref->peer_ref)
-			continue;
+		إذا (!ref->peer_ref)
+			استمر;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
-		item = string_list_append(&states->push,
+		قلم = string_list_append(&حالتها->افزودن,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
-		info = item->util;
+		قلم->util = xcalloc(1, حجم(بنية افزودن_info));
+		info = قلم->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
-			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
-			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
-			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		إذا (is_null_oid(&ref->new_oid)) {
+			info->وضعیت = افزودن_وضعیت_DELETE;
+		} وإلا إذا (oideq(&ref->old_oid, &ref->new_oid))
+			info->وضعیت = افزودن_وضعیت_UPTODATE;
+		وإلا إذا (is_null_oid(&ref->old_oid))
+			info->وضعیت = افزودن_وضعیت_CREATE;
+		وإلا إذا (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
-			info->status = PUSH_STATUS_FASTFORWARD;
-		else
-			info->status = PUSH_STATUS_OUTOFDATE;
+			info->وضعیت = افزودن_وضعیت_FASTFORWARD;
+		وإلا
+			info->وضعیت = افزودن_وضعیت_OUTOFDATE;
 	}
 	free_refs(local_refs);
-	free_refs(push_map);
-	return 0;
+	free_refs(افزودن_map);
+	أرجع 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+ساكن صحيح get_افزودن_ref_حالتها_noquery(بنية ref_حالتها *حالتها)
 {
-	int i;
-	struct remote *remote = states->remote;
-	struct string_list_item *item;
-	struct push_info *info;
+	صحيح i;
+	بنية remote *remote = حالتها->remote;
+	بنية string_list_قلم *قلم;
+	بنية افزودن_info *info;
 
-	if (remote->mirror)
-		return 0;
+	إذا (remote->mirror)
+		أرجع 0;
 
-	if (!remote->push.nr) {
-		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
-		info->status = PUSH_STATUS_NOTQUERIED;
-		info->dest = xstrdup(item->string);
+	إذا (!remote->افزودن.nr) {
+		قلم = string_list_append(&حالتها->افزودن, _("(matching)"));
+		info = قلم->util = xcalloc(1, حجم(بنية افزودن_info));
+		info->وضعیت = افزودن_وضعیت_NOTQUERIED;
+		info->dest = xstrdup(قلم->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
-			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
-			item = string_list_append(&states->push, spec->src);
-		else
-			item = string_list_append(&states->push, _("(delete)"));
+	لكل (i = 0; i < remote->افزودن.nr; i++) {
+		ثابت بنية refspec_قلم *spec = &remote->افزودن.اقلام[i];
+		إذا (spec->matching)
+			قلم = string_list_append(&حالتها->افزودن, _("(matching)"));
+		وإلا إذا (طول_رشته(spec->src))
+			قلم = string_list_append(&حالتها->افزودن, spec->src);
+		وإلا
+			قلم = string_list_append(&حالتها->افزودن, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = قلم->util = xcalloc(1, حجم(بنية افزودن_info));
 		info->forced = spec->force;
-		info->status = PUSH_STATUS_NOTQUERIED;
-		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
+		info->وضعیت = افزودن_وضعیت_NOTQUERIED;
+		info->dest = xstrdup(spec->dst ? spec->dst : قلم->string);
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+ساكن صحيح get_سر_نامها(ثابت بنية ref *remote_refs, بنية ref_حالتها *حالتها)
 {
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	بنية ref *ref, *matches;
+	بنية ref *fetch_map = عدم, **fetch_map_دم = &fetch_map;
+	بنية refspec_قلم refspec = {
 		.force = 0,
-		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.الگو = 1,
+		.src = (حرف *) "refs/heads/*",
+		.dst = (حرف *) "refs/heads/*",
 	};
 
-	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
-	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
-				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
-		string_list_append(&states->heads, abbrev_branch(ref->name));
+	get_fetch_map(remote_refs, &refspec, &fetch_map_دم, 0);
+	matches = guess_remote_سر(پیدا_کن_ref_by_name(remote_refs, "HEAD"),
+				    fetch_map, REMOTE_GUESS_سر_ALL);
+	لكل (ref = matches; ref; ref = ref->بعدی)
+		string_list_append(&حالتها->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	أرجع 0;
 }
 
-struct known_remote {
-	struct known_remote *next;
-	struct remote *remote;
+بنية معلوم_remote {
+	بنية معلوم_remote *بعدی;
+	بنية remote *remote;
 };
 
-struct known_remotes {
-	struct remote *to_delete;
-	struct known_remote *list;
+بنية معلوم_remotes {
+	بنية remote *مقصد_delete;
+	بنية معلوم_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+ساكن صحيح جمع_کن_معلوم_remote(بنية remote *remote, فراغ *cb_داده)
 {
-	struct known_remotes *all = cb_data;
-	struct known_remote *r;
+	بنية معلوم_remotes *all = cb_داده;
+	بنية معلوم_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	إذا (!strcmp(all->مقصد_delete->name, remote->name))
+		أرجع 0;
 
-	r = xmalloc(sizeof(*r));
+	r = xmalloc(حجم(*r));
 	r->remote = remote;
-	r->next = all->list;
+	r->بعدی = all->list;
 	all->list = r;
-	return 0;
+	أرجع 0;
 }
 
-struct branches_for_remote {
-	struct remote *remote;
-	struct string_list *branches, *skipped;
-	struct known_remotes *keep;
+بنية branches_for_remote {
+	بنية remote *remote;
+	بنية string_list *branches, *skipped;
+	بنية معلوم_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+ساكن صحيح جمع_کن_branch_for_removal(ثابت بنية reference *ref, فراغ *cb_داده)
 {
-	struct branches_for_remote *branches = cb_data;
-	struct refspec_item refspec;
-	struct known_remote *kr;
+	بنية branches_for_remote *branches = cb_داده;
+	بنية refspec_قلم refspec;
+	بنية معلوم_remote *kr;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
-	free(refspec.src);
+	memset(&refspec, 0, حجم(refspec));
+	refspec.dst = (حرف *)ref->name;
+	إذا (remote_پیدا_کن_tracking(branches->remote, &refspec))
+		أرجع 0;
+	حرر(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
-			free(refspec.src);
-			return 0;
+	لكل (kr = branches->keep->list; kr; kr = kr->بعدی) {
+		memset(&refspec, 0, حجم(refspec));
+		refspec.dst = (حرف *)ref->name;
+		إذا (!remote_پیدا_کن_tracking(kr->remote, &refspec)) {
+			حرر(refspec.src);
+			أرجع 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	إذا (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		إذا (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		أرجع 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	أرجع 0;
 }
 
-struct rename_info {
-	const char *old_name;
-	const char *new_name;
-	struct ref_transaction *transaction;
-	struct progress *progress;
-	struct strbuf *err;
-	uint32_t progress_nr;
-	uint64_t index;
+بنية rename_info {
+	ثابت حرف *old_name;
+	ثابت حرف *new_name;
+	بنية ref_transaction *transaction;
+	بنية پیشرفت *پیشرفت;
+	بنية strbuf *err;
+	uint32_t پیشرفت_nr;
+	uint64_t شاخص;
 };
 
-static void compute_renamed_ref(struct rename_info *rename,
-				const char *refname,
-				struct strbuf *out)
+ساكن فراغ compute_renamed_ref(بنية rename_info *rename,
+				ثابت حرف *refname,
+				بنية strbuf *بیرون)
 {
-	strbuf_reset(out);
-	strbuf_addstr(out, refname);
-	strbuf_splice(out, strlen("refs/remotes/"), strlen(rename->old_name),
-		      rename->new_name, strlen(rename->new_name));
+	strbuf_reset(بیرون);
+	strbuf_addstr(بیرون, refname);
+	strbuf_splice(بیرون, طول_رشته("refs/remotes/"), طول_رشته(rename->old_name),
+		      rename->new_name, طول_رشته(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
-				   struct object_id *old_oid,
-				   struct object_id *new_oid,
-				   const char *committer,
-				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+ساكن صحيح rename_one_reflog_مدخل(ثابت حرف *old_refname,
+				   بنية object_id *old_oid,
+				   بنية object_id *new_oid,
+				   ثابت حرف *committer,
+				   timestamp_t timestamp, صحيح tz,
+				   ثابت حرف *پیام, فراغ *cb_داده)
 {
-	struct rename_info *rename = cb_data;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf identity = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
-	struct strbuf mail = STRBUF_INIT;
-	struct ident_split ident;
-	const char *date;
-	int error;
+	بنية rename_info *rename = cb_داده;
+	بنية strbuf new_refname = STRBUF_INIT;
+	بنية strbuf عنصر_خنثی = STRBUF_INIT;
+	بنية strbuf name = STRBUF_INIT;
+	بنية strbuf mail = STRBUF_INIT;
+	بنية ident_تقسیم ident;
+	ثابت حرف *date;
+	صحيح error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	إذا (تقسیم_ident_سطر(&ident, committer, طول_رشته(committer)) < 0) {
 		error = -1;
-		goto out;
+		اذهب بیرون;
 	}
 
-	strbuf_add(&name, ident.name_begin, ident.name_end - ident.name_begin);
-	strbuf_add(&mail, ident.mail_begin, ident.mail_end - ident.mail_begin);
+	strbuf_جمع_کن(&name, ident.name_begin, ident.name_انتها - ident.name_begin);
+	strbuf_جمع_کن(&mail, ident.mail_begin, ident.mail_انتها - ident.mail_begin);
 
-	date = show_date(timestamp, tz, DATE_MODE(NORMAL));
-	strbuf_addstr(&identity, fmt_ident(name.buf, mail.buf,
+	date = show_date(timestamp, tz, DATE_نما(نرمال));
+	strbuf_addstr(&عنصر_خنثی, fmt_ident(name.buf, mail.buf,
 					  WANT_BLANK_IDENT, date, 0));
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
-					      new_oid, old_oid, identity.buf, msg,
-					      rename->index++, rename->err);
+					      new_oid, old_oid, عنصر_خنثی.buf, پیام,
+					      rename->شاخص++, rename->err);
 
-out:
+بیرون:
 	strbuf_release(&new_refname);
-	strbuf_release(&identity);
+	strbuf_release(&عنصر_خنثی);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	أرجع error;
 }
 
-static int rename_one_reflog(const char *old_refname,
-			     const struct object_id *old_oid,
-			     struct rename_info *rename)
+ساكن صحيح rename_one_reflog(ثابت حرف *old_refname,
+			     ثابت بنية object_id *old_oid,
+			     بنية rename_info *rename)
 {
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf message = STRBUF_INIT;
-	int error;
+	بنية strbuf new_refname = STRBUF_INIT;
+	بنية strbuf پیام_2 = STRBUF_INIT;
+	صحيح error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	إذا (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		أرجع 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
-		goto out;
+					 old_refname, rename_one_reflog_مدخل, rename);
+	إذا (error < 0)
+		اذهب بیرون;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
@@ -695,33 +695,33 @@ static int rename_one_reflog(const char *old_refname,
 	 * Furthermore, we only append the entry in case the reference
 	 * resolves. Missing references shouldn't have reflogs anyway.
 	 */
-	strbuf_addf(&message, "remote: renamed %s to %s", old_refname,
+	strbuf_addf(&پیام_2, "remote: renamed %s to %s", old_refname,
 		    new_refname.buf);
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
-					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+					      پیام_2.buf, rename->شاخص++, rename->err);
+	إذا (error < 0)
+		أرجع error;
 
-out:
+بیرون:
 	strbuf_release(&new_refname);
-	strbuf_release(&message);
-	return error;
+	strbuf_release(&پیام_2);
+	أرجع error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+ساكن صحيح rename_one_ref(ثابت بنية reference *ref, فراغ *cb_داده)
 {
-	struct strbuf new_referent = STRBUF_INIT;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct rename_info *rename = cb_data;
-	const struct object_id *oid = ref->oid;
-	const char *referent = ref->target;
-	int error;
+	بنية strbuf new_referent = STRBUF_INIT;
+	بنية strbuf new_refname = STRBUF_INIT;
+	بنية rename_info *rename = cb_داده;
+	ثابت بنية object_id *oid = ref->oid;
+	ثابت حرف *referent = ref->هدف;
+	صحيح error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	إذا (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -730,121 +730,121 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 		 */
 		referent = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						   ref->name, RESOLVE_REF_NO_RECURSE,
-						   NULL, NULL);
+						   عدم, عدم);
 		compute_renamed_ref(rename, referent, &new_referent);
-		oid = NULL;
+		oid = عدم;
 	}
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
-				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       oid, referent, REF_NO_DEREF, عدم, rename->err);
+	إذا (error < 0)
+		اذهب بیرون;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
-				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
+				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : عدم, عدم,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
-				       NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       عدم, rename->err);
+	إذا (error < 0)
+		اذهب بیرون;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
-		goto out;
+	إذا (error < 0)
+		اذهب بیرون;
 
-	display_progress(rename->progress, ++rename->progress_nr);
+	display_پیشرفت(rename->پیشرفت, ++rename->پیشرفت_nr);
 
-out:
+بیرون:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	أرجع error;
 }
 
-static int migrate_file(struct remote *remote)
+ساكن صحيح migrate_file(بنية remote *remote)
 {
-	struct strbuf buf = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
+	لكل (اندازه_t i = 0; i < remote->url.nr; i++)
+		repo_config_مجموعه_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
+	لكل (صحيح i = 0; i < remote->افزودن.nr; i++)
+		repo_config_مجموعه_multivar(the_repository, buf.buf, remote->افزودن.اقلام[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
-#ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
-		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
+	لكل (صحيح i = 0; i < remote->fetch.nr; i++)
+		repo_config_مجموعه_multivar(the_repository, buf.buf, remote->fetch.اقلام[i].raw, "^$", 0);
+#اگر_تعریف_نشده WITH_BREAKING_CHANGES
+	إذا (remote->origin == REMOTE_REMOTES)
+		unlink_or_warn(repo_git_مسیر_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
-		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
+	وإلا إذا (remote->origin == REMOTE_BRANCHES)
+		unlink_or_warn(repo_git_مسیر_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
-#endif /* WITH_BREAKING_CHANGES */
+#پایان_اگر /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	أرجع 0;
 }
 
-struct push_default_info
+بنية افزودن_default_info
 {
-	const char *old_name;
-	enum config_scope scope;
-	struct strbuf origin;
-	int linenr;
+	ثابت حرف *old_name;
+	تعداد config_scope scope;
+	بنية strbuf origin;
+	صحيح linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
-	const struct config_context *ctx, void *cb)
+ساكن صحيح config_read_افزودن_default(ثابت حرف *کلید, ثابت حرف *مقدار,
+	ثابت بنية config_context *ctx, فراغ *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	ثابت بنية کلید_مقدار_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
-	    !value || strcmp(value, info->old_name))
-		return 0;
+	بنية افزودن_default_info* info = cb;
+	إذا (strcmp(کلید, "remote.pushdefault") ||
+	    !مقدار || strcmp(مقدار, info->old_name))
+		أرجع 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	أرجع 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+ساكن فراغ handle_افزودن_default(ثابت حرف* old_name, ثابت حرف* new_name)
 {
-	struct push_default_info push_default = {
+	بنية افزودن_default_info افزودن_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
-	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	repo_config(the_repository, config_read_افزودن_default, &افزودن_default);
+	إذا (افزودن_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	وإلا إذا (افزودن_default.scope >= CONFIG_SCOPE_LOCAL) {
+		صحيح نتیجه = repo_config_مجموعه_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		إذا (new_name && نتیجه && نتیجه != CONFIG_NOTHING_مجموعه)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		وإلا إذا (!new_name && نتیجه && نتیجه != CONFIG_NOTHING_مجموعه)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} وإلا إذا (افزودن_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
 			  "now names the non-existent remote '%s'"),
-			config_scope_name(push_default.scope),
-			push_default.origin.buf, push_default.linenr,
+			config_scope_name(افزودن_default.scope),
+			افزودن_default.origin.buf, افزودن_default.linenr,
 			old_name);
 	}
 
-	strbuf_release(&push_default.origin);
+	strbuf_release(&افزودن_default.origin);
 }
 
-static const char conflicting_remote_refs_advice[] = N_(
+ساكن ثابت حرف conflicting_remote_refs_advice[] = N_(
 	"The remote you are trying to rename has conflicting references in the\n"
 	"new target refspec. This is most likely caused by you trying to nest\n"
 	"a remote into itself, e.g. by renaming 'parent' into 'parent/child'\n"
@@ -853,209 +853,209 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+ساكن صحيح mv(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+	      بنية repository *repo استفادهنشده)
 {
-	int show_progress = isatty(2);
-	struct option options[] = {
-		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
-		OPT_END()
+	صحيح show_پیشرفت = isatty(2);
+	بنية option options[] = {
+		OPT_BOOL(0, "progress", &show_پیشرفت, N_("force progress reporting")),
+		OPT_انتها()
 	};
-	struct remote *oldremote, *newremote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
+	بنية remote *oldremote, *newremote;
+	بنية strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
 		old_remote_context = STRBUF_INIT, err = STRBUF_INIT;
-	struct rename_info rename = {
+	بنية rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	صحيح refspecs_need_update = 0;
+	صحيح نتیجه = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	إذا (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	إذا (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
-		exit(2);
+		خروج(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	إذا (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		أرجع migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	إذا (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
-		exit(3);
+		خروج(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	إذا (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
-		result = error(_("Could not rename config section '%s' to '%s'"),
+	إذا (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+		نتیجه = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
-		goto out;
+		اذهب بیرون;
 	}
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
-		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
+	لكل (صحيح i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+		refspecs_need_update = !!جستجوی_رشته(oldremote->fetch.اقلام[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
-		struct refs_for_each_ref_options opts = {
+	إذا (refspecs_need_update) {
+		بنية refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
-			goto out;
+		إذا (!rename.transaction)
+			اذهب بیرون;
 
-		if (show_progress)
-			rename.progress = start_delayed_progress(the_repository,
+		إذا (show_پیشرفت)
+			rename.پیشرفت = شروع_delayed_پیشرفت(the_repository,
 								 _("Renaming remote references"), 0);
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/", rename.old_name);
-		opts.prefix = buf.buf;
+		opts.پیشوند = buf.buf;
 
-		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
+		نتیجه = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		إذا (نتیجه < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
-		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		نتیجه = ref_transaction_prepare(rename.transaction, &err);
+		إذا (نتیجه < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			إذا (نتیجه == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
-			die(NULL);
+			die(عدم);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	إذا (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
-			char *ptr;
+		repo_config_مجموعه_multivar(the_repository, buf.buf, عدم, عدم, CONFIG_FLAGS_MULTI_REPLACE);
+		لكل (صحيح i = 0; i < oldremote->fetch.nr; i++) {
+			حرف *ptr;
 
 			strbuf_reset(&buf2);
-			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
-			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			strbuf_addstr(&buf2, oldremote->fetch.اقلام[i].raw);
+			ptr = جستجوی_رشته(buf2.buf, old_remote_context.buf);
+			إذا (ptr) {
 				strbuf_splice(&buf2,
-					      ptr-buf2.buf + strlen(":refs/remotes/"),
-					      strlen(rename.old_name), rename.new_name,
-					      strlen(rename.new_name));
-			} else
+					      ptr-buf2.buf + طول_رشته(":refs/remotes/"),
+					      طول_رشته(rename.old_name), rename.new_name,
+					      طول_رشته(rename.new_name));
+			} وإلا
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
 					buf2.buf);
 
-			repo_config_set_multivar(the_repository, buf.buf, buf2.buf, "^$", 0);
+			repo_config_مجموعه_multivar(the_repository, buf.buf, buf2.buf, "^$", 0);
 		}
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+	لكل (اندازه_t i = 0; i < branch_list.nr; i++) {
+		بنية string_list_قلم *قلم = branch_list.اقلام + i;
+		بنية branch_info *info = قلم->util;
+		إذا (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.remote", item->string);
-			repo_config_set(the_repository, buf.buf, rename.new_name);
+			strbuf_addf(&buf, "branch.%s.remote", قلم->string);
+			repo_config_مجموعه(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		إذا (info->افزودن_remote_name && !strcmp(info->افزودن_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
-			repo_config_set(the_repository, buf.buf, rename.new_name);
+			strbuf_addf(&buf, "branch.%s.pushRemote", قلم->string);
+			repo_config_مجموعه(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
-		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+	إذا (refspecs_need_update) {
+		نتیجه = ref_transaction_commit(rename.transaction, &err);
+		إذا (نتیجه < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
-		stop_progress(&rename.progress);
+		stop_پیشرفت(&rename.پیشرفت);
 
-		handle_push_default(rename.old_name, rename.new_name);
+		handle_افزودن_default(rename.old_name, rename.new_name);
 	}
 
-out:
+بیرون:
 	ref_transaction_free(rename.transaction);
 	strbuf_release(&old_remote_context);
 	strbuf_release(&buf);
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	أرجع نتیجه;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+ساكن صحيح rm(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+	      بنية repository *repo استفادهنشده)
 {
-	struct option options[] = {
-		OPT_END()
+	بنية option options[] = {
+		OPT_انتها()
 	};
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT;
-	struct known_remotes known_remotes = { NULL, NULL };
-	struct string_list branches = STRING_LIST_INIT_DUP;
-	struct string_list skipped = STRING_LIST_INIT_DUP;
-	struct branches_for_remote cb_data;
-	int result;
+	بنية remote *remote;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية معلوم_remotes معلوم_remotes = { عدم, عدم };
+	بنية string_list branches = STRING_LIST_INIT_DUP;
+	بنية string_list skipped = STRING_LIST_INIT_DUP;
+	بنية branches_for_remote cb_داده;
+	صحيح نتیجه;
 
-	memset(&cb_data, 0, sizeof(cb_data));
-	cb_data.branches = &branches;
-	cb_data.skipped = &skipped;
-	cb_data.keep = &known_remotes;
+	memset(&cb_داده, 0, حجم(cb_داده));
+	cb_داده.branches = &branches;
+	cb_داده.skipped = &skipped;
+	cb_داده.keep = &معلوم_remotes;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	إذا (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	إذا (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
-		exit(2);
+		خروج(2);
 	}
 
-	known_remotes.to_delete = remote;
-	for_each_remote(add_known_remote, &known_remotes);
+	معلوم_remotes.مقصد_delete = remote;
+	for_each_remote(جمع_کن_معلوم_remote, &معلوم_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+	لكل (اندازه_t i = 0; i < branch_list.nr; i++) {
+		بنية string_list_قلم *قلم = branch_list.اقلام + i;
+		بنية branch_info *info = قلم->util;
+		إذا (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+			ثابت حرف *کلیدها[] = { "remote", "merge", عدم }, **k;
+			لكل (k = کلیدها; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
-						item->string, *k);
-				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+						قلم->string, *k);
+				نتیجه = repo_config_مجموعه_gently(the_repository, buf.buf, عدم);
+				إذا (نتیجه && نتیجه != CONFIG_NOTHING_مجموعه)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		إذا (info->افزودن_remote_name && !strcmp(info->افزودن_remote_name, remote->name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
-			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			strbuf_addf(&buf, "branch.%s.pushremote", قلم->string);
+			نتیجه = repo_config_مجموعه_gently(the_repository, buf.buf, عدم);
+			إذا (نتیجه && نتیجه != CONFIG_NOTHING_مجموعه)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1065,903 +1065,903 @@ static int rm(int argc, const char **argv, const char *prefix,
 	 * the branches one by one, since for_each_ref() relies on cached
 	 * refs, which are invalidated when deleting a branch.
 	 */
-	cb_data.remote = remote;
-	result = refs_for_each_ref(get_main_ref_store(the_repository),
-				   add_branch_for_removal, &cb_data);
+	cb_داده.remote = remote;
+	نتیجه = refs_for_each_ref(get_main_ref_store(the_repository),
+				   جمع_کن_branch_for_removal, &cb_داده);
 	strbuf_release(&buf);
 
-	if (!result)
-		result = refs_delete_refs(get_main_ref_store(the_repository),
+	إذا (!نتیجه)
+		نتیجه = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	إذا (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		لكل (اندازه_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
-				skipped.items[i].string);
+				skipped.اقلام[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	إذا (!نتیجه) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
-			result = error(_("Could not remove config section '%s'"), buf.buf);
-			goto out;
+		إذا (repo_config_rename_section(the_repository, buf.buf, عدم) < 1) {
+			نتیجه = error(_("Could not remove config section '%s'"), buf.buf);
+			اذهب بیرون;
 		}
 
-		handle_push_default(remote->name, NULL);
+		handle_افزودن_default(remote->name, عدم);
 	}
 
-out:
-	for (struct known_remote *r = known_remotes.list; r;) {
-		struct known_remote *next = r->next;
-		free(r);
-		r = next;
+بیرون:
+	لكل (بنية معلوم_remote *r = معلوم_remotes.list; r;) {
+		بنية معلوم_remote *بعدی = r->بعدی;
+		حرر(r);
+		r = بعدی;
 	}
 	strbuf_release(&buf);
-	return result;
+	أرجع نتیجه;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+ساكن فراغ clear_افزودن_info(فراغ *util, ثابت حرف *string استفادهنشده)
 {
-	struct push_info *info = util;
-	free(info->dest);
-	free(info);
+	بنية افزودن_info *info = util;
+	حرر(info->dest);
+	حرر(info);
 }
 
-static void free_remote_ref_states(struct ref_states *states)
+ساكن فراغ free_remote_ref_حالتها(بنية ref_حالتها *حالتها)
 {
-	string_list_clear(&states->new_refs, 0);
-	string_list_clear(&states->skipped, 0);
-	string_list_clear(&states->stale, 1);
-	string_list_clear(&states->tracked, 0);
-	string_list_clear(&states->heads, 0);
-	string_list_clear_func(&states->push, clear_push_info);
+	string_list_clear(&حالتها->new_refs, 0);
+	string_list_clear(&حالتها->skipped, 0);
+	string_list_clear(&حالتها->stale, 1);
+	string_list_clear(&حالتها->tracked, 0);
+	string_list_clear(&حالتها->heads, 0);
+	string_list_clear_func(&حالتها->افزودن, clear_افزودن_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+ساكن صحيح append_ref_مقصد_tracked_list(ثابت بنية reference *ref, فراغ *cb_داده)
 {
-	struct ref_states *states = cb_data;
-	struct refspec_item refspec;
+	بنية ref_حالتها *حالتها = cb_داده;
+	بنية refspec_قلم refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	إذا (ref->flags & REF_ISSYMREF)
+		أرجع 0;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
-		string_list_append(&states->tracked, abbrev_branch(refspec.src));
-		free(refspec.src);
+	memset(&refspec, 0, حجم(refspec));
+	refspec.dst = (حرف *)ref->name;
+	إذا (!remote_پیدا_کن_tracking(حالتها->remote, &refspec)) {
+		string_list_append(&حالتها->tracked, abbrev_branch(refspec.src));
+		حرر(refspec.src);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int get_remote_ref_states(const char *name,
-				 struct ref_states *states,
-				 int query)
+ساكن صحيح get_remote_ref_حالتها(ثابت حرف *name,
+				 بنية ref_حالتها *حالتها,
+				 صحيح query)
 {
-	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	حالتها->remote = remote_get(name);
+	إذا (!حالتها->remote)
+		أرجع error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
-		struct transport *transport;
-		const struct ref *remote_refs;
+	إذا (query) {
+		بنية transport *transport;
+		ثابت بنية ref *remote_refs;
 
-		transport = transport_get(states->remote, states->remote->url.v[0]);
-		remote_refs = transport_get_remote_refs(transport, NULL);
+		transport = transport_get(حالتها->remote, حالتها->remote->url.v[0]);
+		remote_refs = transport_get_remote_refs(transport, عدم);
 
-		states->queried = 1;
-		if (query & GET_REF_STATES)
-			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
-			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
-			get_push_ref_states(remote_refs, states);
+		حالتها->queried = 1;
+		إذا (query & GET_REF_حالتها)
+			get_ref_حالتها(remote_refs, حالتها);
+		إذا (query & GET_سر_نامها)
+			get_سر_نامها(remote_refs, حالتها);
+		إذا (query & GET_افزودن_REF_حالتها)
+			get_افزودن_ref_حالتها(remote_refs, حالتها);
 		transport_disconnect(transport);
-	} else {
+	} وإلا {
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_ref_to_tracked_list, states);
-		string_list_sort(&states->tracked);
-		get_push_ref_states_noquery(states);
+				  append_ref_مقصد_tracked_list, حالتها);
+		string_list_مرتب_سازی(&حالتها->tracked);
+		get_افزودن_ref_حالتها_noquery(حالتها);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-struct show_info {
-	struct string_list list;
-	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+بنية show_info {
+	بنية string_list list;
+	بنية ref_حالتها حالتها;
+	صحيح عرض, width2;
+	صحيح any_rebase;
 };
 
-#define SHOW_INFO_INIT { \
+#تعریف_کن SHOW_INFO_INIT { \
 	.list = STRING_LIST_INIT_DUP, \
-	.states = REF_STATES_INIT, \
+	.حالتها = REF_حالتها_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+ساكن صحيح جمع_کن_remote_مقصد_show_info(بنية string_list_قلم *قلم, فراغ *cb_داده)
 {
-	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
-		info->width = n;
-	string_list_insert(&info->list, item->string);
-	return 0;
+	بنية show_info *info = cb_داده;
+	صحيح n = طول_رشته(قلم->string);
+	إذا (n > info->عرض)
+		info->عرض = n;
+	string_list_درج(&info->list, قلم->string);
+	أرجع 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+ساكن صحيح show_remote_info_قلم(بنية string_list_قلم *قلم, فراغ *cb_داده)
 {
-	struct show_info *info = cb_data;
-	struct ref_states *states = &info->states;
-	const char *name = item->string;
+	بنية show_info *info = cb_داده;
+	بنية ref_حالتها *حالتها = &info->حالتها;
+	ثابت حرف *name = قلم->string;
 
-	if (states->queried) {
-		const char *fmt = "%s";
-		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+	إذا (حالتها->queried) {
+		ثابت حرف *fmt = "%s";
+		ثابت حرف *arg = "";
+		إذا (string_list_has_string(&حالتها->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
-			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+			arg = حالتها->remote->name;
+		} وإلا إذا (string_list_has_string(&حالتها->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		وإلا إذا (string_list_has_string(&حالتها->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		وإلا إذا (string_list_has_string(&حالتها->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		وإلا
 			arg = _(" ???");
-		printf("    %-*s", info->width, name);
-		printf(fmt, arg);
-		printf("\n");
-	} else
-		printf("    %s\n", name);
+		چاپ_کن("    %-*s", info->عرض, name);
+		چاپ_کن(fmt, arg);
+		چاپ_کن("\n");
+	} وإلا
+		چاپ_کن("    %s\n", name);
 
-	return 0;
+	أرجع 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+ساكن صحيح جمع_کن_local_مقصد_show_info(بنية string_list_قلم *branch_قلم, فراغ *cb_داده)
 {
-	struct show_info *show_info = cb_data;
-	struct ref_states *states = &show_info->states;
-	struct branch_info *branch_info = branch_item->util;
-	struct string_list_item *item;
-	int n;
+	بنية show_info *show_info = cb_داده;
+	بنية ref_حالتها *حالتها = &show_info->حالتها;
+	بنية branch_info *branch_info = branch_قلم->util;
+	بنية string_list_قلم *قلم;
+	صحيح n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
-	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
-		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	إذا (!branch_info->ادغام.nr || !branch_info->remote_name ||
+	    strcmp(حالتها->remote->name, branch_info->remote_name))
+		أرجع 0;
+	إذا ((n = طول_رشته(branch_قلم->string)) > show_info->عرض)
+		show_info->عرض = n;
+	إذا (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
-	item = string_list_insert(&show_info->list, branch_item->string);
-	item->util = branch_info;
+	قلم = string_list_درج(&show_info->list, branch_قلم->string);
+	قلم->util = branch_info;
 
-	return 0;
+	أرجع 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+ساكن صحيح show_local_info_قلم(بنية string_list_قلم *قلم, فراغ *cb_داده)
 {
-	struct show_info *show_info = cb_data;
-	struct branch_info *branch_info = item->util;
-	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	بنية show_info *show_info = cb_داده;
+	بنية branch_info *branch_info = قلم->util;
+	بنية string_list *ادغام = &branch_info->ادغام;
+	صحيح عرض = show_info->عرض + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	إذا (branch_info->rebase >= REBASE_TRUE && branch_info->ادغام.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
-			item->string);
-		return 0;
+			قلم->string);
+		أرجع 0;
 	}
 
-	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
-			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
-			msg = _("rebases interactively (with merges) onto "
+	چاپ_کن("    %-*s ", show_info->عرض, قلم->string);
+	إذا (branch_info->rebase >= REBASE_TRUE) {
+		ثابت حرف *پیام;
+		إذا (branch_info->rebase == REBASE_INTERACTIVE)
+			پیام = _("rebases interactively onto remote %s");
+		وإلا إذا (branch_info->rebase == REBASE_MERGES)
+			پیام = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
-			msg = _("rebases onto remote %s");
-		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
-		printf_ln(_(" merges with remote %s"), merge->items[0].string);
-		width++;
-	} else {
-		printf_ln(_("merges with remote %s"), merge->items[0].string);
+		وإلا
+			پیام = _("rebases onto remote %s");
+		printf_ln(پیام, ادغام->اقلام[0].string);
+		أرجع 0;
+	} وإلا إذا (show_info->any_rebase) {
+		printf_ln(_(" merges with remote %s"), ادغام->اقلام[0].string);
+		عرض++;
+	} وإلا {
+		printf_ln(_("merges with remote %s"), ادغام->اقلام[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
-		printf(_("%-*s    and with remote %s\n"), width, "",
-		       merge->items[i].string);
+	لكل (اندازه_t i = 1; i < ادغام->nr; i++)
+		چاپ_کن(_("%-*s    and with remote %s\n"), عرض, "",
+		       ادغام->اقلام[i].string);
 
-	return 0;
+	أرجع 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+ساكن صحيح جمع_کن_افزودن_مقصد_show_info(بنية string_list_قلم *افزودن_قلم, فراغ *cb_داده)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
-	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
-		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	بنية show_info *show_info = cb_داده;
+	بنية افزودن_info *افزودن_info = افزودن_قلم->util;
+	بنية string_list_قلم *قلم;
+	صحيح n;
+	إذا ((n = طول_رشته(افزودن_قلم->string)) > show_info->عرض)
+		show_info->عرض = n;
+	إذا ((n = طول_رشته(افزودن_info->dest)) > show_info->width2)
 		show_info->width2 = n;
-	item = string_list_append(&show_info->list, push_item->string);
-	item->util = push_item->util;
-	return 0;
+	قلم = string_list_append(&show_info->list, افزودن_قلم->string);
+	قلم->util = افزودن_قلم->util;
+	أرجع 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+ساكن صحيح cmp_string_with_افزودن(ثابت فراغ *va, ثابت فراغ *vb)
 {
-	const struct string_list_item *a = va;
-	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	ثابت بنية string_list_قلم *a = va;
+	ثابت بنية string_list_قلم *b = vb;
+	ثابت بنية افزودن_info *a_افزودن = a->util;
+	ثابت بنية افزودن_info *b_افزودن = b->util;
+	صحيح cmp = strcmp(a->string, b->string);
+	أرجع cmp ? cmp : strcmp(a_افزودن->dest, b_افزودن->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+ساكن صحيح show_افزودن_info_قلم(بنية string_list_قلم *قلم, فراغ *cb_داده)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
-	const char *src = item->string, *status = NULL;
+	بنية show_info *show_info = cb_داده;
+	بنية افزودن_info *افزودن_info = قلم->util;
+	ثابت حرف *src = قلم->string, *وضعیت = عدم;
 
-	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
-		status = _("create");
-		break;
-	case PUSH_STATUS_DELETE:
-		status = _("delete");
+	بدل (افزودن_info->وضعیت) {
+	حالة افزودن_وضعیت_CREATE:
+		وضعیت = _("create");
+		اكسر;
+	حالة افزودن_وضعیت_DELETE:
+		وضعیت = _("delete");
 		src = _("(none)");
-		break;
-	case PUSH_STATUS_UPTODATE:
-		status = _("up to date");
-		break;
-	case PUSH_STATUS_FASTFORWARD:
-		status = _("fast-forwardable");
-		break;
-	case PUSH_STATUS_OUTOFDATE:
-		status = _("local out of date");
-		break;
-	case PUSH_STATUS_NOTQUERIED:
-		break;
+		اكسر;
+	حالة افزودن_وضعیت_UPTODATE:
+		وضعیت = _("up to date");
+		اكسر;
+	حالة افزودن_وضعیت_FASTFORWARD:
+		وضعیت = _("fast-forwardable");
+		اكسر;
+	حالة افزودن_وضعیت_OUTOFDATE:
+		وضعیت = _("local out of date");
+		اكسر;
+	حالة افزودن_وضعیت_NOTQUERIED:
+		اكسر;
 	}
-	if (status) {
-		if (push_info->forced)
-			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-		else
-			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
-			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
-			       push_info->dest);
-		else
-			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
-			       push_info->dest);
+	إذا (وضعیت) {
+		إذا (افزودن_info->forced)
+			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->عرض, src,
+			       show_info->width2, افزودن_info->dest, وضعیت);
+		وإلا
+			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->عرض, src,
+			       show_info->width2, افزودن_info->dest, وضعیت);
+	} وإلا {
+		إذا (افزودن_info->forced)
+			printf_ln(_("    %-*s forces to %s"), show_info->عرض, src,
+			       افزودن_info->dest);
+		وإلا
+			printf_ln(_("    %-*s pushes to %s"), show_info->عرض, src,
+			       افزودن_info->dest);
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+ساكن صحيح get_one_مدخل(بنية remote *remote, فراغ *priv)
 {
-	struct string_list *list = priv;
-	struct strbuf remote_info_buf = STRBUF_INIT;
-	struct strvec *url;
+	بنية string_list *list = priv;
+	بنية strbuf remote_info_buf = STRBUF_INIT;
+	بنية strvec *url;
 
-	if (remote->url.nr > 0) {
-		struct strbuf promisor_config = STRBUF_INIT;
-		const char *partial_clone_filter = NULL;
+	إذا (remote->url.nr > 0) {
+		بنية strbuf promisor_config = STRBUF_INIT;
+		ثابت حرف *partial_clone_filter = عدم;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		إذا (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
-	} else
-		string_list_append(list, remote->name)->util = NULL;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+				strbuf_detach(&remote_info_buf, عدم);
+	} وإلا
+		string_list_append(list, remote->name)->util = عدم;
+	url = افزودن_url_از_remote(remote);
+	لكل (اندازه_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
+				strbuf_detach(&remote_info_buf, عدم);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int show_all(void)
+ساكن صحيح show_all(فراغ)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	بنية string_list list = STRING_LIST_INIT_DUP;
+	صحيح نتیجه;
 
-	result = for_each_remote(get_one_entry, &list);
+	نتیجه = for_each_remote(get_one_مدخل, &list);
 
-	if (!result) {
-		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
-			if (verbose)
-				printf("%s\t%s\n", item->string,
-					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
-					continue;
-				printf("%s\n", item->string);
+	إذا (!نتیجه) {
+		string_list_مرتب_سازی(&list);
+		لكل (اندازه_t i = 0; i < list.nr; i++) {
+			بنية string_list_قلم *قلم = list.اقلام + i;
+			إذا (verbose)
+				چاپ_کن("%s\t%s\n", قلم->string,
+					قلم->util ? (ثابت حرف *)قلم->util : "");
+			وإلا {
+				إذا (i && !strcmp((قلم - 1)->string, قلم->string))
+					استمر;
+				چاپ_کن("%s\n", قلم->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	أرجع نتیجه;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+ساكن صحيح show(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+		بنية repository *repo استفادهنشده)
 {
-	int no_query = 0, result = 0, query_flag = 0;
-	struct option options[] = {
-		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
-		OPT_END()
+	صحيح no_query = 0, نتیجه = 0, query_flag = 0;
+	بنية option options[] = {
+		OPT_BOOL('n', عدم, &no_query, N_("do not query remotes")),
+		OPT_انتها()
 	};
-	struct show_info info = SHOW_INFO_INIT;
+	بنية show_info info = SHOW_INFO_INIT;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	إذا (argc < 1)
+		أرجع show_all();
 
-	if (!no_query)
-		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
+	إذا (!no_query)
+		query_flag = (GET_REF_حالتها | GET_سر_نامها | GET_افزودن_REF_حالتها);
 
-	for (; argc; argc--, argv++) {
-		size_t i;
-		struct strvec *url;
+	لكل (; argc; argc--, argv++) {
+		اندازه_t i;
+		بنية strvec *url;
 
-		get_remote_ref_states(*argv, &info.states, query_flag);
+		get_remote_ref_حالتها(*argv, &info.حالتها, query_flag);
 
 		printf_ln(_("* remote %s"), *argv);
-		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
-		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		printf_ln(_("  Fetch URL: %s"), info.حالتها.remote->url.v[0]);
+		url = افزودن_url_از_remote(info.حالتها.remote);
+		لكل (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		إذا (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		إذا (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		وإلا إذا (!info.حالتها.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
-			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
-			printf(_("  HEAD branch (remote HEAD is ambiguous,"
+		وإلا إذا (info.حالتها.heads.nr == 1)
+			printf_ln(_("  HEAD branch: %s"), info.حالتها.heads.اقلام[0].string);
+		وإلا {
+			چاپ_کن(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
-				printf("    %s\n", info.states.heads.items[i].string);
+			لكل (i = 0; i < info.حالتها.heads.nr; i++)
+				چاپ_کن("    %s\n", info.حالتها.heads.اقلام[i].string);
 		}
 
 		/* remote branch info */
-		info.width = 0;
-		for_each_string_list(&info.states.new_refs, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		info.عرض = 0;
+		for_each_string_list(&info.حالتها.new_refs, جمع_کن_remote_مقصد_show_info, &info);
+		for_each_string_list(&info.حالتها.skipped, جمع_کن_remote_مقصد_show_info, &info);
+		for_each_string_list(&info.حالتها.tracked, جمع_کن_remote_مقصد_show_info, &info);
+		for_each_string_list(&info.حالتها.stale, جمع_کن_remote_مقصد_show_info, &info);
+		إذا (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_remote_info_item, &info);
+		for_each_string_list(&info.list, show_remote_info_قلم, &info);
 		string_list_clear(&info.list, 0);
 
 		/* git pull info */
-		info.width = 0;
+		info.عرض = 0;
 		info.any_rebase = 0;
-		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		for_each_string_list(&branch_list, جمع_کن_local_مقصد_show_info, &info);
+		إذا (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
-		for_each_string_list(&info.list, show_local_info_item, &info);
+		for_each_string_list(&info.list, show_local_info_قلم, &info);
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		إذا (info.حالتها.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
-		info.width = info.width2 = 0;
-		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
-		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		info.عرض = info.width2 = 0;
+		for_each_string_list(&info.حالتها.افزودن, جمع_کن_افزودن_مقصد_show_info, &info);
+		QSORT(info.list.اقلام, info.list.nr, cmp_string_with_افزودن);
+		إذا (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_push_info_item, &info);
+		for_each_string_list(&info.list, show_افزودن_info_قلم, &info);
 		string_list_clear(&info.list, 0);
 
-		free_remote_ref_states(&info.states);
+		free_remote_ref_حالتها(&info.حالتها);
 	}
 
-	return result;
+	أرجع نتیجه;
 }
 
-static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+ساكن فراغ report_مجموعه_سر_auto(ثابت حرف *remote, ثابت حرف *سر_name,
+			بنية strbuf *b_local_سر, صحيح was_detached) {
+	بنية strbuf buf_پیشوند = STRBUF_INIT;
+	ثابت حرف *prev_سر = عدم;
 
-	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
-	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
+	strbuf_addf(&buf_پیشوند, "refs/remotes/%s/", remote);
+	skip_پیشوند(b_local_سر->buf, buf_پیشوند.buf, &prev_سر);
 
-	if (prev_head && !strcmp(prev_head, head_name))
-		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
-			remote, head_name);
-	else if (prev_head)
-		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
-			remote, prev_head, head_name);
-	else if (!b_local_head->len)
-		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
-			remote, head_name);
-	else if (was_detached && b_local_head->len)
-		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
-			remote, b_local_head->buf, head_name);
-	else
-		printf(_("'%s/HEAD' used to point to '%s' "
+	إذا (prev_سر && !strcmp(prev_سر, سر_name))
+		چاپ_کن(_("'%s/HEAD' is unchanged and points to '%s'\n"),
+			remote, سر_name);
+	وإلا إذا (prev_سر)
+		چاپ_کن(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
+			remote, prev_سر, سر_name);
+	وإلا إذا (!b_local_سر->len)
+		چاپ_کن(_("'%s/HEAD' is now created and points to '%s'\n"),
+			remote, سر_name);
+	وإلا إذا (was_detached && b_local_سر->len)
+		چاپ_کن(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
+			remote, b_local_سر->buf, سر_name);
+	وإلا
+		چاپ_کن(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
-			remote, b_local_head->buf, head_name);
-	strbuf_release(&buf_prefix);
+			remote, b_local_سر->buf, سر_name);
+	strbuf_release(&buf_پیشوند);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
-		    struct repository *repo UNUSED)
+ساكن صحيح مجموعه_سر(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+		    بنية repository *repo استفادهنشده)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
-		b_local_head = STRBUF_INIT;
-	char *head_name = NULL;
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct remote *remote;
+	صحيح opt_a = 0, opt_d = 0, نتیجه = 0, was_detached;
+	بنية strbuf b_سر = STRBUF_INIT, b_remote_سر = STRBUF_INIT,
+		b_local_سر = STRBUF_INIT;
+	حرف *سر_name = عدم;
+	بنية ref_store *refs = get_main_ref_store(the_repository);
+	بنية remote *remote;
 
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_BOOL('a', "auto", &opt_a,
 			 N_("set refs/remotes/<name>/HEAD according to remote")),
 		OPT_BOOL('d', "delete", &opt_d,
 			 N_("delete refs/remotes/<name>/HEAD")),
-		OPT_END()
+		OPT_انتها()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	إذا (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
+	strbuf_addf(&b_سر, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
-		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
-		struct ref_states states = REF_STATES_INIT;
-		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
-			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
-			result |= error(_("Multiple remote HEAD branches. "
+	إذا (!opt_a && !opt_d && argc == 2) {
+		سر_name = xstrdup(argv[1]);
+	} وإلا إذا (opt_a && !opt_d && argc == 1) {
+		بنية ref_حالتها حالتها = REF_حالتها_INIT;
+		get_remote_ref_حالتها(argv[0], &حالتها, GET_سر_نامها);
+		إذا (!حالتها.heads.nr)
+			نتیجه |= error(_("Cannot determine remote HEAD"));
+		وإلا إذا (حالتها.heads.nr > 1) {
+			نتیجه |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			لكل (اندازه_t i = 0; i < حالتها.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
-					argv[0], states.heads.items[i].string);
-		} else
-			head_name = xstrdup(states.heads.items[0].string);
-		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
-			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+					argv[0], حالتها.heads.اقلام[i].string);
+		} وإلا
+			سر_name = xstrdup(حالتها.heads.اقلام[0].string);
+		free_remote_ref_حالتها(&حالتها);
+	} وإلا إذا (opt_d && !opt_a && argc == 1) {
+		إذا (refs_delete_ref(refs, عدم, b_سر.buf, عدم, REF_NO_DEREF))
+			نتیجه |= error(_("Could not delete %s"), b_سر.buf);
+	} وإلا
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
-		goto cleanup;
-	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
-		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
-		goto cleanup;
+	إذا (!سر_name)
+		اذهب cleanup;
+	strbuf_addf(&b_remote_سر, "refs/remotes/%s/%s", argv[0], سر_name);
+	إذا (!refs_ref_exists(refs, b_remote_سر.buf)) {
+		نتیجه |= error(_("Not a valid ref: %s"), b_remote_سر.buf);
+		اذهب cleanup;
 	}
-	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
-			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
-		result |= error(_("Could not set up %s"), b_head.buf);
-		goto cleanup;
+	was_detached = refs_update_symref_extended(refs, b_سر.buf, b_remote_سر.buf,
+			"remote set-head", &b_local_سر, 0);
+	إذا (was_detached == -1) {
+		نتیجه |= error(_("Could not set up %s"), b_سر.buf);
+		اذهب cleanup;
 	}
-	if (opt_a)
-		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
-		struct strbuf config_name = STRBUF_INIT;
+	إذا (opt_a)
+		report_مجموعه_سر_auto(argv[0], سر_name, &b_local_سر, was_detached);
+	إذا (remote->follow_remote_سر == FOLLOW_REMOTE_ALWAYS) {
+		بنية strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
-		repo_config_set(the_repository, config_name.buf, "warn");
+		repo_config_مجموعه(the_repository, config_name.buf, "warn");
 		strbuf_release(&config_name);
 	}
 
 cleanup:
-	free(head_name);
-	strbuf_release(&b_head);
-	strbuf_release(&b_remote_head);
-	strbuf_release(&b_local_head);
-	return result;
+	حرر(سر_name);
+	strbuf_release(&b_سر);
+	strbuf_release(&b_remote_سر);
+	strbuf_release(&b_local_سر);
+	أرجع نتیجه;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+ساكن صحيح prune_remote(ثابت حرف *remote, صحيح dry_پیاپی)
 {
-	int result = 0;
-	struct ref_states states = REF_STATES_INIT;
-	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
+	صحيح نتیجه = 0;
+	بنية ref_حالتها حالتها = REF_حالتها_INIT;
+	بنية string_list refs_مقصد_prune = STRING_LIST_INIT_NODUP;
+	بنية string_list_قلم *قلم;
 
-	get_remote_ref_states(remote, &states, GET_REF_STATES);
+	get_remote_ref_حالتها(remote, &حالتها, GET_REF_حالتها);
 
-	if (!states.stale.nr) {
-		free_remote_ref_states(&states);
-		return 0;
+	إذا (!حالتها.stale.nr) {
+		free_remote_ref_حالتها(&حالتها);
+		أرجع 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
-	printf_ln(_("URL: %s"), states.remote->url.v[0]);
+	printf_ln(_("URL: %s"), حالتها.remote->url.v[0]);
 
-	for_each_string_list_item(item, &states.stale)
-		string_list_append(&refs_to_prune, item->util);
-	string_list_sort(&refs_to_prune);
+	for_each_string_list_قلم(قلم, &حالتها.stale)
+		string_list_append(&refs_مقصد_prune, قلم->util);
+	string_list_مرتب_سازی(&refs_مقصد_prune);
 
-	if (!dry_run)
-		result |= refs_delete_refs(get_main_ref_store(the_repository),
-					   "remote: prune", &refs_to_prune, 0);
+	إذا (!dry_پیاپی)
+		نتیجه |= refs_delete_refs(get_main_ref_store(the_repository),
+					   "remote: prune", &refs_مقصد_prune, 0);
 
-	for_each_string_list_item(item, &states.stale) {
-		const char *refname = item->util;
+	for_each_string_list_قلم(قلم, &حالتها.stale) {
+		ثابت حرف *refname = قلم->util;
 
-		if (dry_run)
+		إذا (dry_پیاپی)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		وإلا
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
 
 	refs_warn_dangling_symrefs(get_main_ref_store(the_repository),
-				   stdout, " ", dry_run, &refs_to_prune);
+				   stdout, " ", dry_پیاپی, &refs_مقصد_prune);
 
-	string_list_clear(&refs_to_prune, 0);
-	free_remote_ref_states(&states);
-	return result;
+	string_list_clear(&refs_مقصد_prune, 0);
+	free_remote_ref_حالتها(&حالتها);
+	أرجع نتیجه;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+ساكن صحيح prune(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+		 بنية repository *repo استفادهنشده)
 {
-	int dry_run = 0, result = 0;
-	struct option options[] = {
-		OPT__DRY_RUN(&dry_run, N_("dry run")),
-		OPT_END()
+	صحيح dry_پیاپی = 0, نتیجه = 0;
+	بنية option options[] = {
+		OPT_DRY_پیاپی(&dry_پیاپی, N_("dry run")),
+		OPT_انتها()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	إذا (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
-		result |= prune_remote(*argv, dry_run);
+	لكل (; argc; argc--, argv++)
+		نتیجه |= prune_remote(*argv, dry_پیاپی);
 
-	return result;
+	أرجع نتیجه;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
-			      const struct config_context *ctx UNUSED,
-			      void *priv)
+ساكن صحيح get_remote_default(ثابت حرف *کلید, ثابت حرف *مقدار استفادهنشده,
+			      ثابت بنية config_context *ctx استفادهنشده,
+			      فراغ *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
-		*found = 1;
+	إذا (strcmp(کلید, "remotes.default") == 0) {
+		صحيح *یافت_2 = priv;
+		*یافت_2 = 1;
 	}
-	return 0;
+	أرجع 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
-		  struct repository *repo UNUSED)
+ساكن صحيح update(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+		  بنية repository *repo استفادهنشده)
 {
-	int i, prune = -1;
-	struct option options[] = {
+	صحيح i, prune = -1;
+	بنية option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
-		OPT_END()
+		OPT_انتها()
 	};
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	بنية فرزند_process cmd = فرزند_PROCESS_INIT;
+	صحيح default_defined = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_update_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_افزودن(&cmd.آرگومانها, "fetch");
 
-	if (prune != -1)
-		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
-		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
-		strvec_push(&cmd.args, argv[i]);
+	إذا (prune != -1)
+		strvec_افزودن(&cmd.آرگومانها, prune ? "--prune" : "--no-prune");
+	إذا (verbose)
+		strvec_افزودن(&cmd.آرگومانها, "-v");
+	strvec_افزودن(&cmd.آرگومانها, "--multiple");
+	إذا (argc < 2)
+		strvec_افزودن(&cmd.آرگومانها, "default");
+	لكل (i = 1; i < argc; i++)
+		strvec_افزودن(&cmd.آرگومانها, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	إذا (strcmp(cmd.آرگومانها.v[cmd.آرگومانها.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
-			strvec_pop(&cmd.args);
-			strvec_push(&cmd.args, "--all");
+		إذا (!default_defined) {
+			strvec_برداشت(&cmd.آرگومانها);
+			strvec_افزودن(&cmd.آرگومانها, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	أرجع پیاپی_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+ساكن صحيح remove_all_fetch_refspecs(ثابت حرف *کلید)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	أرجع repo_config_مجموعه_multivar_gently(the_repository, کلید, عدم, عدم,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
-static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+ساكن فراغ جمع_کن_branches(بنية remote *remote, ثابت حرف **branches,
+			 ثابت حرف *کلید)
 {
-	const char *remotename = remote->name;
-	int mirror = remote->mirror;
-	struct strbuf refspec = STRBUF_INIT;
+	ثابت حرف *remotename = remote->name;
+	صحيح mirror = remote->mirror;
+	بنية strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
-		add_branch(key, *branches, remotename, mirror, &refspec);
+	لكل (; *branches; branches++)
+		جمع_کن_branch(کلید, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+ساكن صحيح مجموعه_remote_branches(ثابت حرف *remotename, ثابت حرف **branches,
+				صحيح جمع_کن_نما)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct remote *remote;
+	بنية strbuf کلید = STRBUF_INIT;
+	بنية remote *remote;
 
-	strbuf_addf(&key, "remote.%s.fetch", remotename);
+	strbuf_addf(&کلید, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	إذا (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		خروج(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
-		strbuf_release(&key);
-		return 1;
+	إذا (!جمع_کن_نما && remove_all_fetch_refspecs(کلید.buf)) {
+		strbuf_release(&کلید);
+		أرجع 1;
 	}
-	add_branches(remote, branches, key.buf);
+	جمع_کن_branches(remote, branches, کلید.buf);
 
-	strbuf_release(&key);
-	return 0;
+	strbuf_release(&کلید);
+	أرجع 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+ساكن صحيح مجموعه_branches(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+			بنية repository *repo استفادهنشده)
 {
-	int add_mode = 0;
-	struct option options[] = {
-		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
-		OPT_END()
+	صحيح جمع_کن_نما = 0;
+	بنية option options[] = {
+		OPT_BOOL('\0', "add", &جمع_کن_نما, N_("add branch")),
+		OPT_انتها()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	إذا (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
-	argv[argc] = NULL;
+	argv[argc] = عدم;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	أرجع مجموعه_remote_branches(argv[0], argv + 1, جمع_کن_نما);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+ساكن صحيح get_url(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+		   بنية repository *repo استفادهنشده)
 {
-	int push_mode = 0, all_mode = 0;
-	const char *remotename = NULL;
-	struct remote *remote;
-	struct strvec *url;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	صحيح افزودن_نما = 0, all_نما = 0;
+	ثابت حرف *remotename = عدم;
+	بنية remote *remote;
+	بنية strvec *url;
+	بنية option options[] = {
+		OPT_BOOL('\0', "push", &افزودن_نما,
 			 N_("query push URLs rather than fetch URLs")),
-		OPT_BOOL('\0', "all", &all_mode,
+		OPT_BOOL('\0', "all", &all_نما,
 			 N_("return all URLs")),
-		OPT_END()
+		OPT_انتها()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	إذا (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	إذا (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		خروج(2);
 	}
 
-	url = push_mode ? push_url_of_remote(remote) : &remote->url;
+	url = افزودن_نما ? افزودن_url_از_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	إذا (all_نما) {
+		لكل (اندازه_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} وإلا {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+ساكن صحيح مجموعه_url(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند,
+		   بنية repository *repo استفادهنشده)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
-	const char *remotename = NULL;
-	const char *newurl = NULL;
-	const char *oldurl = NULL;
-	struct remote *remote;
+	صحيح افزودن_نما = 0, جمع_کن_نما = 0, delete_نما = 0;
+	صحيح matches = 0, negative_matches = 0;
+	ثابت حرف *remotename = عدم;
+	ثابت حرف *newurl = عدم;
+	ثابت حرف *oldurl = عدم;
+	بنية remote *remote;
 	regex_t old_regex;
-	struct strvec *urlset;
-	struct strbuf name_buf = STRBUF_INIT;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	بنية strvec *urlset;
+	بنية strbuf name_buf = STRBUF_INIT;
+	بنية option options[] = {
+		OPT_BOOL('\0', "push", &افزودن_نما,
 			 N_("manipulate push URLs")),
-		OPT_BOOL('\0', "add", &add_mode,
+		OPT_BOOL('\0', "add", &جمع_کن_نما,
 			 N_("add URL")),
-		OPT_BOOL('\0', "delete", &delete_mode,
+		OPT_BOOL('\0', "delete", &delete_نما,
 			    N_("delete URLs")),
-		OPT_END()
+		OPT_انتها()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, پیشوند, options,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	إذا (جمع_کن_نما && delete_نما)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	إذا (argc < 3 || argc > 4 || ((جمع_کن_نما || delete_نما) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	إذا (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	إذا (delete_نما)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	إذا (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		خروج(2);
 	}
 
-	if (push_mode) {
+	إذا (افزودن_نما) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} وإلا {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
-			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
+	إذا ((!oldurl && !delete_نما) || جمع_کن_نما) {
+		إذا (جمع_کن_نما)
+			repo_config_مجموعه_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
-			repo_config_set(the_repository, name_buf.buf, newurl);
-		goto out;
+		وإلا
+			repo_config_مجموعه(the_repository, name_buf.buf, newurl);
+		اذهب بیرون;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	إذا (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	لكل (اندازه_t i = 0; i < urlset->nr; i++)
+		إذا (!regexec(&old_regex, urlset->v[i], 0, عدم, 0))
 			matches++;
-		else
+		وإلا
 			negative_matches++;
-	if (!delete_mode && !matches)
+	إذا (!delete_نما && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	إذا (delete_نما && !negative_matches && !افزودن_نما)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
-		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
-		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
+	إذا (!delete_نما)
+		repo_config_مجموعه_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
+	وإلا
+		repo_config_مجموعه_multivar(the_repository, name_buf.buf, عدم, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
-out:
+بیرون:
 	strbuf_release(&name_buf);
-	return 0;
+	أرجع 0;
 }
 
-int cmd_remote(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+صحيح cmd_remote(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *پیشوند,
+	       بنية repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose; must be placed before a subcommand")),
-		OPT_SUBCOMMAND("add", &fn, add),
+		OPT_SUBCOMMAND("add", &fn, جمع_کن),
 		OPT_SUBCOMMAND("rename", &fn, mv),
-		OPT_SUBCOMMAND_F("rm", &fn, rm, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("rm", &fn, rm, عدم, PARSE_OPT_NOCOMPLETE),
 		OPT_SUBCOMMAND("remove", &fn, rm),
-		OPT_SUBCOMMAND("set-head", &fn, set_head),
-		OPT_SUBCOMMAND("set-branches", &fn, set_branches),
+		OPT_SUBCOMMAND("set-head", &fn, مجموعه_سر),
+		OPT_SUBCOMMAND("set-branches", &fn, مجموعه_branches),
 		OPT_SUBCOMMAND("get-url", &fn, get_url),
-		OPT_SUBCOMMAND("set-url", &fn, set_url),
+		OPT_SUBCOMMAND("set-url", &fn, مجموعه_url),
 		OPT_SUBCOMMAND("show", &fn, show),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("update", &fn, update),
-		OPT_END()
+		OPT_انتها()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
+	argc = parse_options(argc, argv, پیشوند, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	إذا (fn) {
+		أرجع !!fn(argc, argv, پیشوند, repo);
+	} وإلا {
+		إذا (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		أرجع !!show_all();
 	}
 }

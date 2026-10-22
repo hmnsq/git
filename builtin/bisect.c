@@ -1,127 +1,127 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
+#تعریف_کن DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "copy.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "bisect.h"
-#include "refs.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "oid-array.h"
-#include "path.h"
-#include "prompt.h"
-#include "quote.h"
-#include "revision.h"
+#ضمن "builtin.h"
+#ضمن "copy.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "parse-options.h"
+#ضمن "bisect.h"
+#ضمن "refs.h"
+#ضمن "strvec.h"
+#ضمن "run-command.h"
+#ضمن "oid-array.h"
+#ضمن "path.h"
+#ضمن "prompt.h"
+#ضمن "quote.h"
+#ضمن "revision.h"
 
-static GIT_PATH_FUNC(git_path_bisect_terms, "BISECT_TERMS")
-static GIT_PATH_FUNC(git_path_bisect_ancestors_ok, "BISECT_ANCESTORS_OK")
-static GIT_PATH_FUNC(git_path_bisect_start, "BISECT_START")
-static GIT_PATH_FUNC(git_path_bisect_log, "BISECT_LOG")
-static GIT_PATH_FUNC(git_path_bisect_names, "BISECT_NAMES")
-static GIT_PATH_FUNC(git_path_bisect_first_parent, "BISECT_FIRST_PARENT")
-static GIT_PATH_FUNC(git_path_bisect_reset_when_found, "BISECT_RESET_WHEN_FOUND")
-static GIT_PATH_FUNC(git_path_bisect_run, "BISECT_RUN")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_terms, "BISECT_TERMS")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_ancestors_ok, "BISECT_ANCESTORS_OK")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_شروع, "BISECT_START")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_log, "BISECT_LOG")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_نامها, "BISECT_NAMES")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_اولی_والد, "BISECT_FIRST_PARENT")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_reset_when_یافت, "BISECT_RESET_WHEN_FOUND")
+ساكن GIT_مسیر_FUNC(git_مسیر_bisect_پیاپی, "BISECT_RUN")
 
-#define BUILTIN_GIT_BISECT_START_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_شروع_USAGE \
 	N_("git bisect start [--term-(bad|new)=<term-new> --term-(good|old)=<term-old>]\n" \
 	   "                 [--no-checkout] [--first-parent] [--reset-when-found[=<where>]] [<bad> [<good>...]] [--] [<pathspec>...]")
-#define BUILTIN_GIT_BISECT_BAD_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_BAD_USAGE \
 	N_("git bisect (bad|new|<term-new>) [<rev>]")
-#define BUILTIN_GIT_BISECT_GOOD_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_GOOD_USAGE \
 	N_("git bisect (good|old|<term-old>) [<rev>...]")
-#define BUILTIN_GIT_BISECT_TERMS_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_TERMS_USAGE \
 	"git bisect terms [--term-(good|old) | --term-(bad|new)]"
-#define BUILTIN_GIT_BISECT_SKIP_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_SKIP_USAGE \
 	N_("git bisect skip [(<rev>|<range>)...]")
-#define BUILTIN_GIT_BISECT_NEXT_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_بعدی_USAGE \
 	"git bisect next"
-#define BUILTIN_GIT_BISECT_RESET_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_RESET_USAGE \
 	N_("git bisect reset [<commit>]")
-#define BUILTIN_GIT_BISECT_VISUALIZE_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_VISUALIZE_USAGE \
 	"git bisect (visualize|view)"
-#define BUILTIN_GIT_BISECT_REPLAY_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_REPLAY_USAGE \
 	N_("git bisect replay <logfile>")
-#define BUILTIN_GIT_BISECT_LOG_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_LOG_USAGE \
 	"git bisect log"
-#define BUILTIN_GIT_BISECT_RUN_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_پیاپی_USAGE \
 	N_("git bisect run [--reset-when-found[=<where>]] <cmd> [<arg>...]")
-#define BUILTIN_GIT_BISECT_HELP_USAGE \
+#تعریف_کن BUILTIN_GIT_BISECT_HELP_USAGE \
 	"git bisect help"
 
-static const char * const git_bisect_usage[] = {
-	BUILTIN_GIT_BISECT_START_USAGE,
+ساكن ثابت حرف * ثابت git_bisect_usage[] = {
+	BUILTIN_GIT_BISECT_شروع_USAGE,
 	BUILTIN_GIT_BISECT_BAD_USAGE,
 	BUILTIN_GIT_BISECT_GOOD_USAGE,
 	BUILTIN_GIT_BISECT_TERMS_USAGE,
 	BUILTIN_GIT_BISECT_SKIP_USAGE,
-	BUILTIN_GIT_BISECT_NEXT_USAGE,
+	BUILTIN_GIT_BISECT_بعدی_USAGE,
 	BUILTIN_GIT_BISECT_RESET_USAGE,
 	BUILTIN_GIT_BISECT_VISUALIZE_USAGE,
 	BUILTIN_GIT_BISECT_REPLAY_USAGE,
 	BUILTIN_GIT_BISECT_LOG_USAGE,
-	BUILTIN_GIT_BISECT_RUN_USAGE,
+	BUILTIN_GIT_BISECT_پیاپی_USAGE,
 	BUILTIN_GIT_BISECT_HELP_USAGE,
-	NULL
+	عدم
 };
 
-enum reset_when_found_mode {
-	RESET_WHEN_FOUND_NONE,
-	RESET_WHEN_FOUND_TO_ORIGINAL,
-	RESET_WHEN_FOUND_TO_FOUND,
+تعداد reset_when_یافت_نما {
+	RESET_WHEN_یافت_NONE,
+	RESET_WHEN_یافت_مقصد_ORIGINAL,
+	RESET_WHEN_یافت_مقصد_یافت,
 };
 
-struct add_bisect_ref_data {
-	struct rev_info *revs;
-	unsigned int object_flags;
+بنية جمع_کن_bisect_ref_داده {
+	بنية rev_info *revs;
+	بیعلامت صحيح object_flags;
 };
 
-struct bisect_terms {
-	char *term_good;
-	char *term_bad;
+بنية bisect_terms {
+	حرف *جمله_good;
+	حرف *جمله_bad;
 };
 
-static void free_terms(struct bisect_terms *terms)
+ساكن فراغ free_terms(بنية bisect_terms *terms)
 {
-	FREE_AND_NULL(terms->term_good);
-	FREE_AND_NULL(terms->term_bad);
+	FREE_AND_NULL(terms->جمله_good);
+	FREE_AND_NULL(terms->جمله_bad);
 }
 
-static void set_terms(struct bisect_terms *terms, const char *bad,
-		      const char *good)
+ساكن فراغ مجموعه_terms(بنية bisect_terms *terms, ثابت حرف *bad,
+		      ثابت حرف *good)
 {
-	free((void *)terms->term_good);
-	terms->term_good = xstrdup(good);
-	free((void *)terms->term_bad);
-	terms->term_bad = xstrdup(bad);
+	حرر((فراغ *)terms->جمله_good);
+	terms->جمله_good = xstrdup(good);
+	حرر((فراغ *)terms->جمله_bad);
+	terms->جمله_bad = xstrdup(bad);
 }
 
-static const char vocab_bad[] = "bad|new";
-static const char vocab_good[] = "good|old";
+ساكن ثابت حرف vocab_bad[] = "bad|new";
+ساكن ثابت حرف vocab_good[] = "good|old";
 
-static int bisect_autostart(struct bisect_terms *terms);
+ساكن صحيح bisect_autostart(بنية bisect_terms *terms);
 
 /*
  * Check whether the string `term` belongs to the set of strings
  * included in the variable arguments.
  */
-LAST_ARG_MUST_BE_NULL
-static int one_of(const char *term, ...)
+آخرین_ARG_MUST_BE_NULL
+ساكن صحيح one_از(ثابت حرف *جمله, ...)
 {
-	int res = 0;
+	صحيح res = 0;
 	va_list matches;
-	const char *match;
+	ثابت حرف *تطابق;
 
-	va_start(matches, term);
-	while (!res && (match = va_arg(matches, const char *)))
-		res = !strcmp(term, match);
-	va_end(matches);
+	va_شروع(matches, جمله);
+	طالما (!res && (تطابق = va_arg(matches, ثابت حرف *)))
+		res = !strcmp(جمله, تطابق);
+	va_انتها(matches);
 
-	return res;
+	أرجع res;
 }
 
 /*
@@ -130,88 +130,88 @@ static int one_of(const char *term, ...)
  * that indicate special success.
  */
 
-static int is_bisect_success(enum bisect_error res)
+ساكن صحيح is_bisect_success(تعداد bisect_error res)
 {
-	return !res ||
-		res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND ||
-		res == BISECT_INTERNAL_SUCCESS_MERGE_BASE;
+	أرجع !res ||
+		res == BISECT_داخلی_SUCCESS_1_ST_BAD_یافت ||
+		res == BISECT_داخلی_SUCCESS_ادغام_پایه;
 }
 
-static int write_in_file(const char *path, const char *mode, const char *format, va_list args)
+ساكن صحيح write_درون_file(ثابت حرف *مسیر, ثابت حرف *نما, ثابت حرف *format, va_list آرگومانها)
 {
-	FILE *fp = NULL;
-	int res = 0;
+	FILE *fp = عدم;
+	صحيح res = 0;
 
-	if (strcmp(mode, "w") && strcmp(mode, "a"))
-		BUG("write-in-file does not support '%s' mode", mode);
-	fp = fopen(path, mode);
-	if (!fp)
-		return error_errno(_("cannot open file '%s' in mode '%s'"), path, mode);
-	res = vfprintf(fp, format, args);
+	إذا (strcmp(نما, "w") && strcmp(نما, "a"))
+		BUG("write-in-file does not support '%s' mode", نما);
+	fp = fopen(مسیر, نما);
+	إذا (!fp)
+		أرجع error_errno(_("cannot open file '%s' in mode '%s'"), مسیر, نما);
+	res = vfprintf(fp, format, آرگومانها);
 
-	if (res < 0) {
-		int saved_errno = errno;
+	إذا (res < 0) {
+		صحيح saved_errno = errno;
 		fclose(fp);
 		errno = saved_errno;
-		return error_errno(_("could not write to file '%s'"), path);
+		أرجع error_errno(_("could not write to file '%s'"), مسیر);
 	}
 
-	return fclose(fp);
+	أرجع fclose(fp);
 }
 
-__attribute__((format (printf, 2, 3)))
-static int write_to_file(const char *path, const char *format, ...)
+__attribute__((format (چاپ_کن, 2, 3)))
+ساكن صحيح write_مقصد_file(ثابت حرف *مسیر, ثابت حرف *format, ...)
 {
-	int res;
-	va_list args;
+	صحيح res;
+	va_list آرگومانها;
 
-	va_start(args, format);
-	res = write_in_file(path, "w", format, args);
-	va_end(args);
+	va_شروع(آرگومانها, format);
+	res = write_درون_file(مسیر, "w", format, آرگومانها);
+	va_انتها(آرگومانها);
 
-	return res;
+	أرجع res;
 }
 
-__attribute__((format (printf, 2, 3)))
-static int append_to_file(const char *path, const char *format, ...)
+__attribute__((format (چاپ_کن, 2, 3)))
+ساكن صحيح append_مقصد_file(ثابت حرف *مسیر, ثابت حرف *format, ...)
 {
-	int res;
-	va_list args;
+	صحيح res;
+	va_list آرگومانها;
 
-	va_start(args, format);
-	res = write_in_file(path, "a", format, args);
-	va_end(args);
+	va_شروع(آرگومانها, format);
+	res = write_درون_file(مسیر, "a", format, آرگومانها);
+	va_انتها(آرگومانها);
 
-	return res;
+	أرجع res;
 }
 
-static int print_file_to_stdout(const char *path)
+ساكن صحيح print_file_مقصد_stdout(ثابت حرف *مسیر)
 {
-	int fd = open(path, O_RDONLY);
-	int ret = 0;
+	صحيح fd = open(مسیر, O_RDONLY);
+	صحيح ret = 0;
 
-	if (fd < 0)
-		return error_errno(_("cannot open file '%s' for reading"), path);
-	if (copy_fd(fd, 1) < 0)
-		ret = error_errno(_("failed to read '%s'"), path);
+	إذا (fd < 0)
+		أرجع error_errno(_("cannot open file '%s' for reading"), مسیر);
+	إذا (copy_fd(fd, 1) < 0)
+		ret = error_errno(_("failed to read '%s'"), مسیر);
 	close(fd);
-	return ret;
+	أرجع ret;
 }
 
-static int check_term_format(const char *term, const char *orig_term)
+ساكن صحيح check_جمله_format(ثابت حرف *جمله, ثابت حرف *orig_جمله)
 {
-	int res;
-	char *new_term = xstrfmt("refs/bisect/%s", term);
+	صحيح res;
+	حرف *new_جمله = xstrfmt("refs/bisect/%s", جمله);
 
-	res = check_refname_format(new_term, 0);
-	free(new_term);
+	res = check_refname_format(new_جمله, 0);
+	حرر(new_جمله);
 
-	if (res)
-		return error(_("'%s' is not a valid term"), term);
+	إذا (res)
+		أرجع error(_("'%s' is not a valid term"), جمله);
 
-	if (one_of(term, "help", "start", "skip", "next", "reset",
-			"visualize", "view", "replay", "log", "run", "terms", NULL))
-		return error(_("can't use the builtin command '%s' as a term"), term);
+	إذا (one_از(جمله, "help", "start", "skip", "next", "reset",
+			"visualize", "view", "replay", "log", "run", "terms", عدم))
+		أرجع error(_("can't use the builtin command '%s' as a term"), جمله);
 
 	/*
 	 * In theory, nothing prevents swapping completely good and bad,
@@ -219,458 +219,458 @@ static int check_term_format(const char *term, const char *orig_term)
 	 * enough. Forbid it for now.
 	 */
 
-	if ((strcmp(orig_term, "bad") && one_of(term, "bad", "new", NULL)) ||
-		 (strcmp(orig_term, "good") && one_of(term, "good", "old", NULL)))
-		return error(_("can't change the meaning of the term '%s'"), term);
+	إذا ((strcmp(orig_جمله, "bad") && one_از(جمله, "bad", "new", عدم)) ||
+		 (strcmp(orig_جمله, "good") && one_از(جمله, "good", "old", عدم)))
+		أرجع error(_("can't change the meaning of the term '%s'"), جمله);
 
-	return 0;
+	أرجع 0;
 }
 
-static int write_terms(const char *bad, const char *good)
+ساكن صحيح write_terms(ثابت حرف *bad, ثابت حرف *good)
 {
-	int res;
+	صحيح res;
 
-	if (!strcmp(bad, good))
-		return error(_("please use two different terms"));
+	إذا (!strcmp(bad, good))
+		أرجع error(_("please use two different terms"));
 
-	if (check_term_format(bad, "bad") || check_term_format(good, "good"))
-		return -1;
+	إذا (check_جمله_format(bad, "bad") || check_جمله_format(good, "good"))
+		أرجع -1;
 
-	res = write_to_file(git_path_bisect_terms(), "%s\n%s\n", bad, good);
+	res = write_مقصد_file(git_مسیر_bisect_terms(), "%s\n%s\n", bad, good);
 
-	return res;
+	أرجع res;
 }
 
-static int bisect_reset(const char *commit, bool quiet)
+ساكن صحيح bisect_reset(ثابت حرف *commit, bool quiet)
 {
-	struct strbuf branch = STRBUF_INIT;
+	بنية strbuf branch = STRBUF_INIT;
 
-	if (!commit) {
-		if (!strbuf_read_file(&branch, git_path_bisect_start(), 0))
-			printf(_("We are not bisecting.\n"));
-		else
+	إذا (!commit) {
+		إذا (!strbuf_read_file(&branch, git_مسیر_bisect_شروع(), 0))
+			چاپ_کن(_("We are not bisecting.\n"));
+		وإلا
 			strbuf_rtrim(&branch);
-	} else {
-		struct object_id oid;
+	} وإلا {
+		بنية object_id oid;
 
-		if (repo_get_oid_commit(the_repository, commit, &oid))
-			return error(_("'%s' is not a valid commit"), commit);
+		إذا (repo_get_oid_commit(the_repository, commit, &oid))
+			أرجع error(_("'%s' is not a valid commit"), commit);
 		strbuf_addstr(&branch, commit);
 	}
 
-	if (branch.len && !refs_ref_exists(get_main_ref_store(the_repository), "BISECT_HEAD")) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	إذا (branch.len && !refs_ref_exists(get_main_ref_store(the_repository), "BISECT_HEAD")) {
+		بنية فرزند_process cmd = فرزند_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
-		strvec_pushl(&cmd.args, "checkout", "--ignore-other-worktrees", NULL);
-		if (quiet)
-			strvec_push(&cmd.args, "--quiet");
-		strvec_pushl(&cmd.args, branch.buf, "--", NULL);
-		if (run_command(&cmd)) {
+		strvec_pushl(&cmd.آرگومانها, "checkout", "--ignore-other-worktrees", عدم);
+		إذا (quiet)
+			strvec_افزودن(&cmd.آرگومانها, "--quiet");
+		strvec_pushl(&cmd.آرگومانها, branch.buf, "--", عدم);
+		إذا (پیاپی_command(&cmd)) {
 			error(_("could not check out original"
 				" HEAD '%s'. Try 'git bisect"
 				" reset <commit>'."), branch.buf);
 			strbuf_release(&branch);
-			return -1;
+			أرجع -1;
 		}
 	}
 
 	strbuf_release(&branch);
-	return 0;
+	أرجع 0;
 }
 
-static int parse_reset_when_found(const char *value,
-				  enum reset_when_found_mode *mode)
+ساكن صحيح parse_reset_when_یافت(ثابت حرف *مقدار,
+				  تعداد reset_when_یافت_نما *نما)
 {
-	if (!strcmp(value, "original"))
-		*mode = RESET_WHEN_FOUND_TO_ORIGINAL;
-	else if (!strcmp(value, "found"))
-		*mode = RESET_WHEN_FOUND_TO_FOUND;
-	else
-		return error(_("invalid value for '--reset-when-found': '%s'"),
-			     value);
+	إذا (!strcmp(مقدار, "original"))
+		*نما = RESET_WHEN_یافت_مقصد_ORIGINAL;
+	وإلا إذا (!strcmp(مقدار, "found"))
+		*نما = RESET_WHEN_یافت_مقصد_یافت;
+	وإلا
+		أرجع error(_("invalid value for '--reset-when-found': '%s'"),
+			     مقدار);
 
-	return 0;
+	أرجع 0;
 }
 
-static const char *reset_when_found_mode_name(enum reset_when_found_mode mode)
+ساكن ثابت حرف *reset_when_یافت_نما_name(تعداد reset_when_یافت_نما نما)
 {
-	switch (mode) {
-	case RESET_WHEN_FOUND_TO_ORIGINAL:
-		return "original";
-	case RESET_WHEN_FOUND_TO_FOUND:
-		return "found";
-	case RESET_WHEN_FOUND_NONE:
+	بدل (نما) {
+	حالة RESET_WHEN_یافت_مقصد_ORIGINAL:
+		أرجع "original";
+	حالة RESET_WHEN_یافت_مقصد_یافت:
+		أرجع "found";
+	حالة RESET_WHEN_یافت_NONE:
 		BUG("no name for unset reset-when-found mode");
 	}
-	BUG("unknown reset-when-found mode %d", mode);
+	BUG("unknown reset-when-found mode %d", نما);
 }
 
-static int read_reset_when_found(enum reset_when_found_mode *mode)
+ساكن صحيح read_reset_when_یافت(تعداد reset_when_یافت_نما *نما)
 {
-	struct strbuf value = STRBUF_INIT;
-	int res = 0;
+	بنية strbuf مقدار = STRBUF_INIT;
+	صحيح res = 0;
 
-	*mode = RESET_WHEN_FOUND_NONE;
-	if (is_empty_or_missing_file(git_path_bisect_reset_when_found()))
-		return 0;
+	*نما = RESET_WHEN_یافت_NONE;
+	إذا (is_خالی_or_missing_file(git_مسیر_bisect_reset_when_یافت()))
+		أرجع 0;
 
-	if (strbuf_read_file(&value, git_path_bisect_reset_when_found(), 0) < 0) {
+	إذا (strbuf_read_file(&مقدار, git_مسیر_bisect_reset_when_یافت(), 0) < 0) {
 		res = error_errno(_("could not read '%s'"),
-				  git_path_bisect_reset_when_found());
-		goto out;
+				  git_مسیر_bisect_reset_when_یافت());
+		اذهب بیرون;
 	}
-	strbuf_trim(&value);
-	if (parse_reset_when_found(value.buf, mode))
+	strbuf_trim(&مقدار);
+	إذا (parse_reset_when_یافت(مقدار.buf, نما))
 		res = -1;
 
-out:
-	strbuf_release(&value);
-	return res;
+بیرون:
+	strbuf_release(&مقدار);
+	أرجع res;
 }
 
-static int bisect_reset_when_found(enum reset_when_found_mode mode)
+ساكن صحيح bisect_reset_when_یافت(تعداد reset_when_یافت_نما نما)
 {
-	struct bisect_terms terms = { 0 };
-	char *commit = NULL;
-	int res;
+	بنية bisect_terms terms = { 0 };
+	حرف *commit = عدم;
+	صحيح res;
 
-	if (mode == RESET_WHEN_FOUND_TO_FOUND) {
-		read_bisect_terms(&terms.term_bad, &terms.term_good);
-		commit = xstrfmt("refs/bisect/%s", terms.term_bad);
-	} else if (mode == RESET_WHEN_FOUND_NONE) {
+	إذا (نما == RESET_WHEN_یافت_مقصد_یافت) {
+		read_bisect_terms(&terms.جمله_bad, &terms.جمله_good);
+		commit = xstrfmt("refs/bisect/%s", terms.جمله_bad);
+	} وإلا إذا (نما == RESET_WHEN_یافت_NONE) {
 		BUG("automatic reset requested without a reset mode");
 	}
 
 	res = bisect_reset(commit, true);
-	if (!res)
+	إذا (!res)
 		res = bisect_clean_state();
 
-	free(commit);
+	حرر(commit);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static void log_commit(FILE *fp,
-		       const char *fmt, const char *state,
-		       struct commit *commit)
+ساكن فراغ log_commit(FILE *fp,
+		       ثابت حرف *fmt, ثابت حرف *state,
+		       بنية commit *commit)
 {
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_msg = STRBUF_INIT;
-	char *label = xstrfmt(fmt, state);
+	بنية pretty_print_context pp = {0};
+	بنية strbuf commit_پیام = STRBUF_INIT;
+	حرف *label = xstrfmt(fmt, state);
 
-	repo_format_commit_message(the_repository, commit, "%s", &commit_msg,
+	repo_format_commit_پیام(the_repository, commit, "%s", &commit_پیام,
 				   &pp);
 
-	fprintf(fp, "# %s: [%s] %s\n", label, oid_to_hex(&commit->object.oid),
-		commit_msg.buf);
+	fprintf(fp, "# %s: [%s] %s\n", label, oid_مقصد_hex(&commit->object.oid),
+		commit_پیام.buf);
 
-	strbuf_release(&commit_msg);
-	free(label);
+	strbuf_release(&commit_پیام);
+	حرر(label);
 }
 
-static int bisect_write(const char *state, const char *rev,
-			const struct bisect_terms *terms, int nolog)
+ساكن صحيح bisect_write(ثابت حرف *state, ثابت حرف *rev,
+			ثابت بنية bisect_terms *terms, صحيح nolog)
 {
-	struct strbuf tag = STRBUF_INIT;
-	struct object_id oid;
-	struct commit *commit;
-	FILE *fp = NULL;
-	int res = 0;
+	بنية strbuf برچسب = STRBUF_INIT;
+	بنية object_id oid;
+	بنية commit *commit;
+	FILE *fp = عدم;
+	صحيح res = 0;
 
-	if (!strcmp(state, terms->term_bad)) {
-		strbuf_addf(&tag, "refs/bisect/%s", state);
-	} else if (one_of(state, terms->term_good, "skip", NULL)) {
-		strbuf_addf(&tag, "refs/bisect/%s-%s", state, rev);
-	} else {
+	إذا (!strcmp(state, terms->جمله_bad)) {
+		strbuf_addf(&برچسب, "refs/bisect/%s", state);
+	} وإلا إذا (one_از(state, terms->جمله_good, "skip", عدم)) {
+		strbuf_addf(&برچسب, "refs/bisect/%s-%s", state, rev);
+	} وإلا {
 		res = error(_("Bad bisect_write argument: %s"), state);
-		goto finish;
+		اذهب پایان;
 	}
 
-	if (repo_get_oid(the_repository, rev, &oid)) {
+	إذا (repo_get_oid(the_repository, rev, &oid)) {
 		res = error(_("couldn't get the oid of the rev '%s'"), rev);
-		goto finish;
+		اذهب پایان;
 	}
 
-	if (refs_update_ref(get_main_ref_store(the_repository), NULL, tag.buf, &oid, NULL, 0,
-			    UPDATE_REFS_MSG_ON_ERR)) {
+	إذا (refs_update_ref(get_main_ref_store(the_repository), عدم, برچسب.buf, &oid, عدم, 0,
+			    UPDATE_REFS_پیام_ON_ERR)) {
 		res = -1;
-		goto finish;
+		اذهب پایان;
 	}
 
-	fp = fopen(git_path_bisect_log(), "a");
-	if (!fp) {
-		res = error_errno(_("couldn't open the file '%s'"), git_path_bisect_log());
-		goto finish;
+	fp = fopen(git_مسیر_bisect_log(), "a");
+	إذا (!fp) {
+		res = error_errno(_("couldn't open the file '%s'"), git_مسیر_bisect_log());
+		اذهب پایان;
 	}
 
 	commit = lookup_commit_reference(the_repository, &oid);
 	log_commit(fp, "%s", state, commit);
 
-	if (!nolog)
+	إذا (!nolog)
 		fprintf(fp, "git bisect %s %s\n", state, rev);
 
-finish:
-	if (fp)
+پایان:
+	إذا (fp)
 		fclose(fp);
-	strbuf_release(&tag);
-	return res;
+	strbuf_release(&برچسب);
+	أرجع res;
 }
 
-static int check_and_set_terms(struct bisect_terms *terms, const char *cmd)
+ساكن صحيح check_and_مجموعه_terms(بنية bisect_terms *terms, ثابت حرف *cmd)
 {
-	int has_term_file = !is_empty_or_missing_file(git_path_bisect_terms());
+	صحيح has_جمله_file = !is_خالی_or_missing_file(git_مسیر_bisect_terms());
 
-	if (one_of(cmd, "skip", "start", "terms", NULL))
-		return 0;
+	إذا (one_از(cmd, "skip", "start", "terms", عدم))
+		أرجع 0;
 
-	if (has_term_file && strcmp(cmd, terms->term_bad) &&
-	    strcmp(cmd, terms->term_good))
-		return error(_("Invalid command: you're currently in a "
-				"%s/%s bisect"), terms->term_bad,
-				terms->term_good);
+	إذا (has_جمله_file && strcmp(cmd, terms->جمله_bad) &&
+	    strcmp(cmd, terms->جمله_good))
+		أرجع error(_("Invalid command: you're currently in a "
+				"%s/%s bisect"), terms->جمله_bad,
+				terms->جمله_good);
 
-	if (!has_term_file) {
-		if (one_of(cmd, "bad", "good", NULL)) {
-			set_terms(terms, "bad", "good");
-			return write_terms(terms->term_bad, terms->term_good);
+	إذا (!has_جمله_file) {
+		إذا (one_از(cmd, "bad", "good", عدم)) {
+			مجموعه_terms(terms, "bad", "good");
+			أرجع write_terms(terms->جمله_bad, terms->جمله_good);
 		}
-		if (one_of(cmd, "new", "old", NULL)) {
-			set_terms(terms, "new", "old");
-			return write_terms(terms->term_bad, terms->term_good);
+		إذا (one_از(cmd, "new", "old", عدم)) {
+			مجموعه_terms(terms, "new", "old");
+			أرجع write_terms(terms->جمله_bad, terms->جمله_good);
 		}
 	}
 
-	return 0;
+	أرجع 0;
 }
 
-static int inc_nr(const struct reference *ref UNUSED, void *cb_data)
+ساكن صحيح inc_nr(ثابت بنية reference *ref استفادهنشده, فراغ *cb_داده)
 {
-	unsigned int *nr = (unsigned int *)cb_data;
+	بیعلامت صحيح *nr = (بیعلامت صحيح *)cb_داده;
 	(*nr)++;
-	return 0;
+	أرجع 0;
 }
 
-static const char need_bad_and_good_revision_warning[] =
+ساكن ثابت حرف need_bad_and_good_revision_warning[] =
 	N_("You need to give me at least one %s and %s revision.\n"
 	   "You can use \"git bisect %s\" and \"git bisect %s\" for that.");
 
-static const char need_bisect_start_warning[] =
+ساكن ثابت حرف need_bisect_شروع_warning[] =
 	N_("You need to start by \"git bisect start\".\n"
 	   "You then need to give me at least one %s and %s revision.\n"
 	   "You can use \"git bisect %s\" and \"git bisect %s\" for that.");
 
-static int decide_next(const struct bisect_terms *terms,
-		       const char *current_term, int missing_good,
-		       int missing_bad)
+ساكن صحيح decide_بعدی(ثابت بنية bisect_terms *terms,
+		       ثابت حرف *current_جمله, صحيح missing_good,
+		       صحيح missing_bad)
 {
-	if (!missing_good && !missing_bad)
-		return 0;
-	if (!current_term)
-		return -1;
+	إذا (!missing_good && !missing_bad)
+		أرجع 0;
+	إذا (!current_جمله)
+		أرجع -1;
 
-	if (missing_good && !missing_bad &&
-	    !strcmp(current_term, terms->term_good)) {
-		char *yesno;
+	إذا (missing_good && !missing_bad &&
+	    !strcmp(current_جمله, terms->جمله_good)) {
+		حرف *yesno;
 		/*
 		 * have bad (or new) but not good (or old). We could bisect
 		 * although this is less optimum.
 		 */
-		warning(_("bisecting only with a %s commit"), terms->term_bad);
-		if (!isatty(0))
-			return 0;
+		warning(_("bisecting only with a %s commit"), terms->جمله_bad);
+		إذا (!isatty(0))
+			أرجع 0;
 		/*
 		 * TRANSLATORS: Make sure to include [Y] and [n] in your
 		 * translation. The program will only accept English input
 		 * at this point.
 		 */
 		yesno = git_prompt(_("Are you sure [Y/n]? "), PROMPT_ECHO);
-		if (starts_with(yesno, "N") || starts_with(yesno, "n"))
-			return -1;
-		return 0;
+		إذا (starts_with(yesno, "N") || starts_with(yesno, "n"))
+			أرجع -1;
+		أرجع 0;
 	}
 
-	if (!is_empty_or_missing_file(git_path_bisect_start()))
-		return error(_(need_bad_and_good_revision_warning),
+	إذا (!is_خالی_or_missing_file(git_مسیر_bisect_شروع()))
+		أرجع error(_(need_bad_and_good_revision_warning),
 			     vocab_bad, vocab_good, vocab_bad, vocab_good);
-	else
-		return error(_(need_bisect_start_warning),
+	وإلا
+		أرجع error(_(need_bisect_شروع_warning),
 			     vocab_good, vocab_bad, vocab_good, vocab_bad);
 }
 
-static void bisect_status(struct bisect_state *state,
-			  const struct bisect_terms *terms)
+ساكن فراغ bisect_وضعیت(بنية bisect_state *state,
+			  ثابت بنية bisect_terms *terms)
 {
-	char *bad_ref = xstrfmt("refs/bisect/%s", terms->term_bad);
-	char *good_glob = xstrfmt("%s-*", terms->term_good);
-	struct refs_for_each_ref_options opts = {
-		.pattern = good_glob,
-		.prefix = "refs/bisect/",
-		.trim_prefix = strlen("refs/bisect/"),
+	حرف *bad_ref = xstrfmt("refs/bisect/%s", terms->جمله_bad);
+	حرف *good_glob = xstrfmt("%s-*", terms->جمله_good);
+	بنية refs_for_each_ref_options opts = {
+		.الگو = good_glob,
+		.پیشوند = "refs/bisect/",
+		.trim_پیشوند = طول_رشته("refs/bisect/"),
 	};
 
-	if (refs_ref_exists(get_main_ref_store(the_repository), bad_ref))
+	إذا (refs_ref_exists(get_main_ref_store(the_repository), bad_ref))
 		state->nr_bad = 1;
 
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
 			      inc_nr, &state->nr_good, &opts);
 
-	free(good_glob);
-	free(bad_ref);
+	حرر(good_glob);
+	حرر(bad_ref);
 }
 
-__attribute__((format (printf, 1, 2)))
-static void bisect_log_printf(const char *fmt, ...)
+__attribute__((format (چاپ_کن, 1, 2)))
+ساكن فراغ bisect_log_printf(ثابت حرف *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
 	va_list ap;
 
-	va_start(ap, fmt);
+	va_شروع(ap, fmt);
 	strbuf_vaddf(&buf, fmt, ap);
-	va_end(ap);
+	va_انتها(ap);
 
-	printf("%s", buf.buf);
-	append_to_file(git_path_bisect_log(), "# %s", buf.buf);
+	چاپ_کن("%s", buf.buf);
+	append_مقصد_file(git_مسیر_bisect_log(), "# %s", buf.buf);
 
 	strbuf_release(&buf);
 }
 
-static void bisect_print_status(const struct bisect_terms *terms)
+ساكن فراغ bisect_print_وضعیت(ثابت بنية bisect_terms *terms)
 {
-	struct bisect_state state = { 0 };
+	بنية bisect_state state = { 0 };
 
-	bisect_status(&state, terms);
+	bisect_وضعیت(&state, terms);
 
 	/* If we had both, we'd already be started, and shouldn't get here. */
-	if (state.nr_good && state.nr_bad)
-		return;
+	إذا (state.nr_good && state.nr_bad)
+		أرجع;
 
-	if (!state.nr_good && !state.nr_bad)
+	إذا (!state.nr_good && !state.nr_bad)
 		bisect_log_printf(_("status: waiting for both '%s' and '%s' commits\n"),
-				  terms->term_good, terms->term_bad);
-	else if (state.nr_good)
+				  terms->جمله_good, terms->جمله_bad);
+	وإلا إذا (state.nr_good)
 		bisect_log_printf(Q_("status: waiting for '%s' commit, %d '%s' commit known\n",
 				     "status: waiting for '%s' commit, %d '%s' commits known\n",
 				     state.nr_good),
-				  terms->term_bad, state.nr_good, terms->term_good);
-	else
+				  terms->جمله_bad, state.nr_good, terms->جمله_good);
+	وإلا
 		bisect_log_printf(_("status: waiting for '%s' commit(s), '%s' commit known\n"),
-				  terms->term_good, terms->term_bad);
+				  terms->جمله_good, terms->جمله_bad);
 }
 
-static int bisect_next_check(const struct bisect_terms *terms,
-			     const char *current_term)
+ساكن صحيح bisect_بعدی_check(ثابت بنية bisect_terms *terms,
+			     ثابت حرف *current_جمله)
 {
-	struct bisect_state state = { 0 };
-	bisect_status(&state, terms);
-	return decide_next(terms, current_term, !state.nr_good, !state.nr_bad);
+	بنية bisect_state state = { 0 };
+	bisect_وضعیت(&state, terms);
+	أرجع decide_بعدی(terms, current_جمله, !state.nr_good, !state.nr_bad);
 }
 
-static int get_terms(struct bisect_terms *terms, int file_missing_is_ok)
+ساكن صحيح get_terms(بنية bisect_terms *terms, صحيح file_missing_is_ok)
 {
-	struct strbuf str = STRBUF_INIT;
-	FILE *fp = NULL;
-	int res = 0;
+	بنية strbuf str = STRBUF_INIT;
+	FILE *fp = عدم;
+	صحيح res = 0;
 
-	fp = fopen(git_path_bisect_terms(), "r");
-	if (!fp) {
+	fp = fopen(git_مسیر_bisect_terms(), "r");
+	إذا (!fp) {
 		res = file_missing_is_ok ? 0 : -1;
-		goto finish;
+		اذهب پایان;
 	}
 
 	free_terms(terms);
-	if (strbuf_getline_lf(&str, fp) == EOF) {
+	إذا (strbuf_getline_lf(&str, fp) == EOF) {
 		res = -1;
-		goto finish;
+		اذهب پایان;
 	}
-	terms->term_bad = strbuf_detach(&str, NULL);
-	if (strbuf_getline_lf(&str, fp) == EOF) {
+	terms->جمله_bad = strbuf_detach(&str, عدم);
+	إذا (strbuf_getline_lf(&str, fp) == EOF) {
 		res = -1;
-		FREE_AND_NULL(terms->term_bad);
-		goto finish;
+		FREE_AND_NULL(terms->جمله_bad);
+		اذهب پایان;
 	}
-	terms->term_good = strbuf_detach(&str, NULL);
+	terms->جمله_good = strbuf_detach(&str, عدم);
 
-finish:
-	if (fp)
+پایان:
+	إذا (fp)
 		fclose(fp);
 	strbuf_release(&str);
-	return res;
+	أرجع res;
 }
 
-static int bisect_terms(struct bisect_terms *terms, const char *option)
+ساكن صحيح bisect_terms(بنية bisect_terms *terms, ثابت حرف *option)
 {
-	if (get_terms(terms, 0))
-		return error(_("no terms defined"));
+	إذا (get_terms(terms, 0))
+		أرجع error(_("no terms defined"));
 
-	if (!option) {
-		printf(_("Your current terms are '%s' for the old state\n"
+	إذا (!option) {
+		چاپ_کن(_("Your current terms are '%s' for the old state\n"
 			 "and '%s' for the new state.\n"),
-		       terms->term_good, terms->term_bad);
-		return 0;
+		       terms->جمله_good, terms->جمله_bad);
+		أرجع 0;
 	}
-	if (one_of(option, "--term-good", "--term-old", NULL))
-		printf("%s\n", terms->term_good);
-	else if (one_of(option, "--term-bad", "--term-new", NULL))
-		printf("%s\n", terms->term_bad);
-	else
-		return error(_("invalid argument %s for 'git bisect terms'.\n"
+	إذا (one_از(option, "--term-good", "--term-old", عدم))
+		چاپ_کن("%s\n", terms->جمله_good);
+	وإلا إذا (one_از(option, "--term-bad", "--term-new", عدم))
+		چاپ_کن("%s\n", terms->جمله_bad);
+	وإلا
+		أرجع error(_("invalid argument %s for 'git bisect terms'.\n"
 			       "Supported options are: "
 			       "--term-good|--term-old and "
 			       "--term-bad|--term-new."), option);
 
-	return 0;
+	أرجع 0;
 }
 
-static int bisect_append_log_quoted(const char **argv)
+ساكن صحيح bisect_append_log_quoted(ثابت حرف **argv)
 {
-	int res = 0;
-	FILE *fp = fopen(git_path_bisect_log(), "a");
-	struct strbuf orig_args = STRBUF_INIT;
+	صحيح res = 0;
+	FILE *fp = fopen(git_مسیر_bisect_log(), "a");
+	بنية strbuf orig_آرگومانها = STRBUF_INIT;
 
-	if (!fp)
-		return -1;
+	إذا (!fp)
+		أرجع -1;
 
-	if (fprintf(fp, "git bisect start") < 1) {
+	إذا (fprintf(fp, "git bisect start") < 1) {
 		res = -1;
-		goto finish;
+		اذهب پایان;
 	}
 
-	sq_quote_argv(&orig_args, argv);
-	if (fprintf(fp, "%s\n", orig_args.buf) < 1)
+	sq_quote_argv(&orig_آرگومانها, argv);
+	إذا (fprintf(fp, "%s\n", orig_آرگومانها.buf) < 1)
 		res = -1;
 
-finish:
+پایان:
 	fclose(fp);
-	strbuf_release(&orig_args);
-	return res;
+	strbuf_release(&orig_آرگومانها);
+	أرجع res;
 }
 
-static int add_bisect_ref(const struct reference *ref, void *cb)
+ساكن صحيح جمع_کن_bisect_ref(ثابت بنية reference *ref, فراغ *cb)
 {
-	struct add_bisect_ref_data *data = cb;
+	بنية جمع_کن_bisect_ref_داده *داده = cb;
 
-	add_pending_oid(data->revs, ref->name, ref->oid, data->object_flags);
+	جمع_کن_pending_oid(داده->revs, ref->name, ref->oid, داده->object_flags);
 
-	return 0;
+	أرجع 0;
 }
 
-static int prepare_revs(struct bisect_terms *terms, struct rev_info *revs)
+ساكن صحيح prepare_revs(بنية bisect_terms *terms, بنية rev_info *revs)
 {
-	struct refs_for_each_ref_options opts = {
-		.prefix = "refs/bisect/",
-		.trim_prefix = strlen("refs/bisect/"),
+	بنية refs_for_each_ref_options opts = {
+		.پیشوند = "refs/bisect/",
+		.trim_پیشوند = طول_رشته("refs/bisect/"),
 	};
-	int res = 0;
-	struct add_bisect_ref_data cb = { revs };
-	char *good = xstrfmt("%s-*", terms->term_good);
+	صحيح res = 0;
+	بنية جمع_کن_bisect_ref_داده cb = { revs };
+	حرف *good = xstrfmt("%s-*", terms->جمله_good);
 
 	/*
 	 * We cannot use terms->term_bad directly in
 	 * for_each_glob_ref_in() and we have to append a '*' to it,
 	 * otherwise for_each_glob_ref_in() will append '/' and '*'.
 	 */
-	char *bad = xstrfmt("%s*", terms->term_bad);
+	حرف *bad = xstrfmt("%s*", terms->جمله_bad);
 
 	/*
 	 * It is important to reset the flags used by revision walks
@@ -678,53 +678,53 @@ static int prepare_revs(struct bisect_terms *terms, struct rev_info *revs)
 	 * sets up a revision walk.
 	 */
 	reset_revision_walk();
-	repo_init_revisions(the_repository, revs, NULL);
-	setup_revisions(0, NULL, revs, NULL);
+	repo_init_revisions(the_repository, revs, عدم);
+	راهاندازی_revisions(0, عدم, revs, عدم);
 
-	opts.pattern = bad;
+	opts.الگو = bad;
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
-			      add_bisect_ref, &cb, &opts);
+			      جمع_کن_bisect_ref, &cb, &opts);
 
 	cb.object_flags = UNINTERESTING;
-	opts.pattern = good;
+	opts.الگو = good;
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
-			      add_bisect_ref, &cb, &opts);
+			      جمع_کن_bisect_ref, &cb, &opts);
 
-	if (prepare_revision_walk(revs))
+	إذا (prepare_revision_walk(revs))
 		res = error(_("revision walk setup failed"));
 
-	free(good);
-	free(bad);
-	return res;
+	حرر(good);
+	حرر(bad);
+	أرجع res;
 }
 
-static int bisect_skipped_commits(struct bisect_terms *terms)
+ساكن صحيح bisect_skipped_commits(بنية bisect_terms *terms)
 {
-	int res;
-	FILE *fp = NULL;
-	struct rev_info revs;
-	struct commit *commit;
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_name = STRBUF_INIT;
+	صحيح res;
+	FILE *fp = عدم;
+	بنية rev_info revs;
+	بنية commit *commit;
+	بنية pretty_print_context pp = {0};
+	بنية strbuf commit_name = STRBUF_INIT;
 
 	res = prepare_revs(terms, &revs);
-	if (res)
-		return res;
+	إذا (res)
+		أرجع res;
 
-	fp = fopen(git_path_bisect_log(), "a");
-	if (!fp)
-		return error_errno(_("could not open '%s' for appending"),
-				  git_path_bisect_log());
+	fp = fopen(git_مسیر_bisect_log(), "a");
+	إذا (!fp)
+		أرجع error_errno(_("could not open '%s' for appending"),
+				  git_مسیر_bisect_log());
 
-	if (fprintf(fp, "# only skipped commits left to test\n") < 0)
-		return error_errno(_("failed to write to '%s'"), git_path_bisect_log());
+	إذا (fprintf(fp, "# only skipped commits left to test\n") < 0)
+		أرجع error_errno(_("failed to write to '%s'"), git_مسیر_bisect_log());
 
-	while ((commit = get_revision(&revs)) != NULL) {
+	طالما ((commit = get_revision(&revs)) != عدم) {
 		strbuf_reset(&commit_name);
-		repo_format_commit_message(the_repository, commit, "%s",
+		repo_format_commit_پیام(the_repository, commit, "%s",
 					   &commit_name, &pp);
 		fprintf(fp, "# possible first '%s' commit: [%s] %s\n",
-			terms->term_bad, oid_to_hex(&commit->object.oid),
+			terms->جمله_bad, oid_مقصد_hex(&commit->object.oid),
 			commit_name.buf);
 	}
 
@@ -737,158 +737,158 @@ static int bisect_skipped_commits(struct bisect_terms *terms)
 	strbuf_release(&commit_name);
 	release_revisions(&revs);
 	fclose(fp);
-	return 0;
+	أرجع 0;
 }
 
-static int bisect_successful(struct bisect_terms *terms)
+ساكن صحيح bisect_successful(بنية bisect_terms *terms)
 {
-	struct object_id oid;
-	struct commit *commit;
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_name = STRBUF_INIT;
-	char *bad_ref = xstrfmt("refs/bisect/%s",terms->term_bad);
-	int res;
+	بنية object_id oid;
+	بنية commit *commit;
+	بنية pretty_print_context pp = {0};
+	بنية strbuf commit_name = STRBUF_INIT;
+	حرف *bad_ref = xstrfmt("refs/bisect/%s",terms->جمله_bad);
+	صحيح res;
 
 	refs_read_ref(get_main_ref_store(the_repository), bad_ref, &oid);
 	commit = lookup_commit_reference_by_name(bad_ref);
-	if (!commit) {
+	إذا (!commit) {
 		error(_("could not find commit for '%s'"), bad_ref);
-		free(bad_ref);
-		return BISECT_FAILED;
+		حرر(bad_ref);
+		أرجع BISECT_FAILED;
 	}
-	repo_format_commit_message(the_repository, commit, "%s", &commit_name,
+	repo_format_commit_پیام(the_repository, commit, "%s", &commit_name,
 				   &pp);
 
-	res = append_to_file(git_path_bisect_log(), "# first '%s' commit: [%s] %s\n",
-			    terms->term_bad, oid_to_hex(&commit->object.oid),
+	res = append_مقصد_file(git_مسیر_bisect_log(), "# first '%s' commit: [%s] %s\n",
+			    terms->جمله_bad, oid_مقصد_hex(&commit->object.oid),
 			    commit_name.buf);
 
 	strbuf_release(&commit_name);
-	free(bad_ref);
-	return res;
+	حرر(bad_ref);
+	أرجع res;
 }
 
-static enum bisect_error bisect_next(struct bisect_terms *terms,
-				     const char *prefix)
+ساكن تعداد bisect_error bisect_بعدی(بنية bisect_terms *terms,
+				     ثابت حرف *پیشوند)
 {
-	enum bisect_error res;
+	تعداد bisect_error res;
 
-	if (bisect_autostart(terms))
-		return BISECT_FAILED;
+	إذا (bisect_autostart(terms))
+		أرجع BISECT_FAILED;
 
-	if (bisect_next_check(terms, terms->term_good))
-		return BISECT_FAILED;
+	إذا (bisect_بعدی_check(terms, terms->جمله_good))
+		أرجع BISECT_FAILED;
 
 	/* Perform all bisection computation */
-	res = bisect_next_all(the_repository, prefix);
+	res = bisect_بعدی_all(the_repository, پیشوند);
 
-	if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
+	إذا (res == BISECT_داخلی_SUCCESS_1_ST_BAD_یافت) {
 		res = bisect_successful(terms);
-		return res ? res : BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND;
-	} else if (res == BISECT_ONLY_SKIPPED_LEFT) {
+		أرجع res ? res : BISECT_داخلی_SUCCESS_1_ST_BAD_یافت;
+	} وإلا إذا (res == BISECT_ONLY_SKIPPED_چپ) {
 		res = bisect_skipped_commits(terms);
-		return res ? res : BISECT_ONLY_SKIPPED_LEFT;
+		أرجع res ? res : BISECT_ONLY_SKIPPED_چپ;
 	}
-	return res;
+	أرجع res;
 }
 
-static enum bisect_error bisect_auto_next(struct bisect_terms *terms,
-					  const char *prefix)
+ساكن تعداد bisect_error bisect_auto_بعدی(بنية bisect_terms *terms,
+					  ثابت حرف *پیشوند)
 {
-	if (bisect_next_check(terms, NULL)) {
-		bisect_print_status(terms);
-		return BISECT_OK;
+	إذا (bisect_بعدی_check(terms, عدم)) {
+		bisect_print_وضعیت(terms);
+		أرجع BISECT_OK;
 	}
 
-	return bisect_next(terms, prefix);
+	أرجع bisect_بعدی(terms, پیشوند);
 }
 
-static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
-				      const char **argv)
+ساكن تعداد bisect_error bisect_شروع(بنية bisect_terms *terms, صحيح argc,
+				      ثابت حرف **argv)
 {
-	int no_checkout = 0;
-	int first_parent_only = 0;
-	int i, has_double_dash = 0, must_write_terms = 0, bad_seen = 0;
-	int flags, pathspec_pos;
-	enum bisect_error res = BISECT_OK;
-	struct string_list revs = STRING_LIST_INIT_DUP;
-	struct string_list states = STRING_LIST_INIT_DUP;
-	struct strbuf start_head = STRBUF_INIT;
-	struct strbuf bisect_names = STRBUF_INIT;
-	struct object_id head_oid;
-	struct object_id oid;
-	enum reset_when_found_mode reset_when_found = RESET_WHEN_FOUND_NONE;
-	const char *head;
+	صحيح no_checkout = 0;
+	صحيح اولی_والد_only = 0;
+	صحيح i, has_double_dash = 0, must_write_terms = 0, bad_دیده = 0;
+	صحيح flags, pathspec_pos;
+	تعداد bisect_error res = BISECT_OK;
+	بنية string_list revs = STRING_LIST_INIT_DUP;
+	بنية string_list حالتها = STRING_LIST_INIT_DUP;
+	بنية strbuf شروع_سر = STRBUF_INIT;
+	بنية strbuf bisect_نامها = STRBUF_INIT;
+	بنية object_id سر_oid;
+	بنية object_id oid;
+	تعداد reset_when_یافت_نما reset_when_یافت = RESET_WHEN_یافت_NONE;
+	ثابت حرف *سر;
 
-	if (is_bare_repository(the_repository))
+	إذا (is_bare_repository(the_repository))
 		no_checkout = 1;
 
 	/*
 	 * Check for one bad and then some good revisions
 	 */
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	لكل (i = 0; i < argc; i++) {
+		إذا (!strcmp(argv[i], "--")) {
 			has_double_dash = 1;
-			break;
+			اكسر;
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(argv[i], "--")) {
-			break;
-		} else if (!strcmp(arg, "--no-checkout")) {
+	لكل (i = 0; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
+		إذا (!strcmp(argv[i], "--")) {
+			اكسر;
+		} وإلا إذا (!strcmp(arg, "--no-checkout")) {
 			no_checkout = 1;
-		} else if (!strcmp(arg, "--first-parent")) {
-			first_parent_only = 1;
-		} else if (!strcmp(arg, "--reset-when-found")) {
-			reset_when_found = RESET_WHEN_FOUND_TO_ORIGINAL;
-		} else if (skip_prefix(arg, "--reset-when-found=", &arg)) {
-			if (parse_reset_when_found(arg, &reset_when_found)) {
+		} وإلا إذا (!strcmp(arg, "--first-parent")) {
+			اولی_والد_only = 1;
+		} وإلا إذا (!strcmp(arg, "--reset-when-found")) {
+			reset_when_یافت = RESET_WHEN_یافت_مقصد_ORIGINAL;
+		} وإلا إذا (skip_پیشوند(arg, "--reset-when-found=", &arg)) {
+			إذا (parse_reset_when_یافت(arg, &reset_when_یافت)) {
 				res = BISECT_FAILED;
-				goto finish;
+				اذهب پایان;
 			}
-		} else if (!strcmp(arg, "--term-good") ||
+		} وإلا إذا (!strcmp(arg, "--term-good") ||
 			 !strcmp(arg, "--term-old")) {
 			i++;
-			if (argc <= i)
-				return error(_("'' is not a valid term"));
+			إذا (argc <= i)
+				أرجع error(_("'' is not a valid term"));
 			must_write_terms = 1;
-			free((void *) terms->term_good);
-			terms->term_good = xstrdup(argv[i]);
-		} else if (skip_prefix(arg, "--term-good=", &arg) ||
-			   skip_prefix(arg, "--term-old=", &arg)) {
+			حرر((فراغ *) terms->جمله_good);
+			terms->جمله_good = xstrdup(argv[i]);
+		} وإلا إذا (skip_پیشوند(arg, "--term-good=", &arg) ||
+			   skip_پیشوند(arg, "--term-old=", &arg)) {
 			must_write_terms = 1;
-			free((void *) terms->term_good);
-			terms->term_good = xstrdup(arg);
-		} else if (!strcmp(arg, "--term-bad") ||
+			حرر((فراغ *) terms->جمله_good);
+			terms->جمله_good = xstrdup(arg);
+		} وإلا إذا (!strcmp(arg, "--term-bad") ||
 			 !strcmp(arg, "--term-new")) {
 			i++;
-			if (argc <= i)
-				return error(_("'' is not a valid term"));
+			إذا (argc <= i)
+				أرجع error(_("'' is not a valid term"));
 			must_write_terms = 1;
-			free((void *) terms->term_bad);
-			terms->term_bad = xstrdup(argv[i]);
-		} else if (skip_prefix(arg, "--term-bad=", &arg) ||
-			   skip_prefix(arg, "--term-new=", &arg)) {
+			حرر((فراغ *) terms->جمله_bad);
+			terms->جمله_bad = xstrdup(argv[i]);
+		} وإلا إذا (skip_پیشوند(arg, "--term-bad=", &arg) ||
+			   skip_پیشوند(arg, "--term-new=", &arg)) {
 			must_write_terms = 1;
-			free((void *) terms->term_bad);
-			terms->term_bad = xstrdup(arg);
-		} else if (starts_with(arg, "--")) {
-			return error(_("unrecognized option: '%s'"), arg);
-		} else if (!get_oidf(&oid, "%s^{commit}", arg)) {
-			string_list_append(&revs, oid_to_hex(&oid));
-		} else if (has_double_dash) {
+			حرر((فراغ *) terms->جمله_bad);
+			terms->جمله_bad = xstrdup(arg);
+		} وإلا إذا (starts_with(arg, "--")) {
+			أرجع error(_("unrecognized option: '%s'"), arg);
+		} وإلا إذا (!get_oidf(&oid, "%s^{commit}", arg)) {
+			string_list_append(&revs, oid_مقصد_hex(&oid));
+		} وإلا إذا (has_double_dash) {
 			die(_("'%s' does not appear to be a valid "
 			      "revision"), arg);
-		} else {
-			break;
+		} وإلا {
+			اكسر;
 		}
 	}
-	if (reset_when_found != RESET_WHEN_FOUND_NONE && no_checkout) {
+	إذا (reset_when_یافت != RESET_WHEN_یافت_NONE && no_checkout) {
 		res = error(_("options '%s' and '%s' cannot be used together"),
 			    "--reset-when-found", "--no-checkout");
-		goto finish;
+		اذهب پایان;
 	}
 	pathspec_pos = i;
 
@@ -898,146 +898,146 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 	 * set references named with the default terms, and won't be able
 	 * to change afterwards.
 	 */
-	if (revs.nr)
+	إذا (revs.nr)
 		must_write_terms = 1;
-	for (i = 0; i < revs.nr; i++) {
-		if (bad_seen) {
-			string_list_append(&states, terms->term_good);
-		} else {
-			bad_seen = 1;
-			string_list_append(&states, terms->term_bad);
+	لكل (i = 0; i < revs.nr; i++) {
+		إذا (bad_دیده) {
+			string_list_append(&حالتها, terms->جمله_good);
+		} وإلا {
+			bad_دیده = 1;
+			string_list_append(&حالتها, terms->جمله_bad);
 		}
 	}
 
 	/*
 	 * Verify HEAD
 	 */
-	head = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-				       "HEAD", 0, &head_oid, &flags);
-	if (!head) {
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
-			return error(_("bad HEAD - I need a HEAD"));
-		head = "HEAD";
+	سر = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
+				       "HEAD", 0, &سر_oid, &flags);
+	إذا (!سر) {
+		إذا (repo_get_oid(the_repository, "HEAD", &سر_oid))
+			أرجع error(_("bad HEAD - I need a HEAD"));
+		سر = "HEAD";
 	}
 
 	/*
 	 * Check if we are bisecting
 	 */
-	if (!is_empty_or_missing_file(git_path_bisect_start())) {
+	إذا (!is_خالی_or_missing_file(git_مسیر_bisect_شروع())) {
 		/* Reset to the rev from where we started */
-		strbuf_read_file(&start_head, git_path_bisect_start(), 0);
-		strbuf_trim(&start_head);
-		if (!no_checkout) {
-			struct child_process cmd = CHILD_PROCESS_INIT;
+		strbuf_read_file(&شروع_سر, git_مسیر_bisect_شروع(), 0);
+		strbuf_trim(&شروع_سر);
+		إذا (!no_checkout) {
+			بنية فرزند_process cmd = فرزند_PROCESS_INIT;
 
 			cmd.git_cmd = 1;
-			strvec_pushl(&cmd.args, "checkout", start_head.buf,
-				     "--", NULL);
-			if (run_command(&cmd)) {
+			strvec_pushl(&cmd.آرگومانها, "checkout", شروع_سر.buf,
+				     "--", عدم);
+			إذا (پیاپی_command(&cmd)) {
 				res = error(_("checking out '%s' failed."
 						 " Try 'git bisect start "
 						 "<valid-branch>'."),
-					       start_head.buf);
-				goto finish;
+					       شروع_سر.buf);
+				اذهب پایان;
 			}
 		}
-	} else {
+	} وإلا {
 		/* Get the rev from where we start. */
-		if (!repo_get_oid(the_repository, head, &head_oid) &&
-		    !starts_with(head, "refs/heads/")) {
-			strbuf_reset(&start_head);
-			strbuf_add_oid_hex(&start_head, &head_oid);
-		} else if (!repo_get_oid(the_repository, head, &head_oid) &&
-			   skip_prefix(head, "refs/heads/", &head)) {
-			strbuf_addstr(&start_head, head);
-		} else {
-			return error(_("bad HEAD - strange symbolic ref"));
+		إذا (!repo_get_oid(the_repository, سر, &سر_oid) &&
+		    !starts_with(سر, "refs/heads/")) {
+			strbuf_reset(&شروع_سر);
+			strbuf_جمع_کن_oid_hex(&شروع_سر, &سر_oid);
+		} وإلا إذا (!repo_get_oid(the_repository, سر, &سر_oid) &&
+			   skip_پیشوند(سر, "refs/heads/", &سر)) {
+			strbuf_addstr(&شروع_سر, سر);
+		} وإلا {
+			أرجع error(_("bad HEAD - strange symbolic ref"));
 		}
 	}
 
 	/*
 	 * Get rid of any old bisect state.
 	 */
-	if (bisect_clean_state())
-		return BISECT_FAILED;
+	إذا (bisect_clean_state())
+		أرجع BISECT_FAILED;
 
 	/*
 	 * Write new start state
 	 */
-	write_file(git_path_bisect_start(), "%s\n", start_head.buf);
+	write_file(git_مسیر_bisect_شروع(), "%s\n", شروع_سر.buf);
 
-	if (first_parent_only)
-		write_file(git_path_bisect_first_parent(), "\n");
+	إذا (اولی_والد_only)
+		write_file(git_مسیر_bisect_اولی_والد(), "\n");
 
-	if (reset_when_found != RESET_WHEN_FOUND_NONE)
-		write_file(git_path_bisect_reset_when_found(), "%s\n",
-			   reset_when_found_mode_name(reset_when_found));
+	إذا (reset_when_یافت != RESET_WHEN_یافت_NONE)
+		write_file(git_مسیر_bisect_reset_when_یافت(), "%s\n",
+			   reset_when_یافت_نما_name(reset_when_یافت));
 
-	if (no_checkout) {
-		if (repo_get_oid(the_repository, start_head.buf, &oid) < 0) {
-			res = error(_("invalid ref: '%s'"), start_head.buf);
-			goto finish;
+	إذا (no_checkout) {
+		إذا (repo_get_oid(the_repository, شروع_سر.buf, &oid) < 0) {
+			res = error(_("invalid ref: '%s'"), شروع_سر.buf);
+			اذهب پایان;
 		}
-		if (refs_update_ref(get_main_ref_store(the_repository), NULL, "BISECT_HEAD", &oid, NULL, 0,
-				    UPDATE_REFS_MSG_ON_ERR)) {
+		إذا (refs_update_ref(get_main_ref_store(the_repository), عدم, "BISECT_HEAD", &oid, عدم, 0,
+				    UPDATE_REFS_پیام_ON_ERR)) {
 			res = BISECT_FAILED;
-			goto finish;
+			اذهب پایان;
 		}
 	}
 
-	if (pathspec_pos < argc - 1)
-		sq_quote_argv(&bisect_names, argv + pathspec_pos);
-	write_file(git_path_bisect_names(), "%s\n", bisect_names.buf);
+	إذا (pathspec_pos < argc - 1)
+		sq_quote_argv(&bisect_نامها, argv + pathspec_pos);
+	write_file(git_مسیر_bisect_نامها(), "%s\n", bisect_نامها.buf);
 
-	for (i = 0; i < states.nr; i++)
-		if (bisect_write(states.items[i].string,
-				 revs.items[i].string, terms, 1)) {
+	لكل (i = 0; i < حالتها.nr; i++)
+		إذا (bisect_write(حالتها.اقلام[i].string,
+				 revs.اقلام[i].string, terms, 1)) {
 			res = BISECT_FAILED;
-			goto finish;
+			اذهب پایان;
 		}
 
-	if (must_write_terms && write_terms(terms->term_bad,
-					    terms->term_good)) {
+	إذا (must_write_terms && write_terms(terms->جمله_bad,
+					    terms->جمله_good)) {
 		res = BISECT_FAILED;
-		goto finish;
+		اذهب پایان;
 	}
 
 	res = bisect_append_log_quoted(argv);
-	if (res)
+	إذا (res)
 		res = BISECT_FAILED;
 
-finish:
+پایان:
 	string_list_clear(&revs, 0);
-	string_list_clear(&states, 0);
-	strbuf_release(&start_head);
-	strbuf_release(&bisect_names);
-	if (res)
-		return res;
+	string_list_clear(&حالتها, 0);
+	strbuf_release(&شروع_سر);
+	strbuf_release(&bisect_نامها);
+	إذا (res)
+		أرجع res;
 
-	res = bisect_auto_next(terms, NULL);
-	if (!is_bisect_success(res))
+	res = bisect_auto_بعدی(terms, عدم);
+	إذا (!is_bisect_success(res))
 		bisect_clean_state();
-	return res;
+	أرجع res;
 }
 
-static inline int file_is_not_empty(const char *path)
+ساكن مضمن صحيح file_is_not_خالی(ثابت حرف *مسیر)
 {
-	return !is_empty_or_missing_file(path);
+	أرجع !is_خالی_or_missing_file(مسیر);
 }
 
-static int bisect_autostart(struct bisect_terms *terms)
+ساكن صحيح bisect_autostart(بنية bisect_terms *terms)
 {
-	int res;
-	const char *yesno;
+	صحيح res;
+	ثابت حرف *yesno;
 
-	if (file_is_not_empty(git_path_bisect_start()))
-		return 0;
+	إذا (file_is_not_خالی(git_مسیر_bisect_شروع()))
+		أرجع 0;
 
 	fprintf_ln(stderr, _("You need to start by \"git bisect "
 			  "start\"\n"));
 
-	if (!isatty(STDIN_FILENO))
-		return -1;
+	إذا (!isatty(STDIN_FILENO))
+		أرجع -1;
 
 	/*
 	 * TRANSLATORS: Make sure to include [Y] and [n] in your
@@ -1047,47 +1047,47 @@ static int bisect_autostart(struct bisect_terms *terms)
 	yesno = git_prompt(_("Do you want me to do it for you "
 			     "[Y/n]? "), PROMPT_ECHO);
 	res = tolower(*yesno) == 'n' ?
-		-1 : bisect_start(terms, 0, empty_strvec);
+		-1 : bisect_شروع(terms, 0, خالی_strvec);
 
-	return res;
+	أرجع res;
 }
 
-static enum bisect_error bisect_state(struct bisect_terms *terms, int argc,
-				      const char **argv)
+ساكن تعداد bisect_error bisect_state(بنية bisect_terms *terms, صحيح argc,
+				      ثابت حرف **argv)
 {
-	const char *state;
-	int i, verify_expected = 1;
-	struct object_id oid, expected;
-	struct oid_array revs = OID_ARRAY_INIT;
+	ثابت حرف *state;
+	صحيح i, verify_expected = 1;
+	بنية object_id oid, expected;
+	بنية oid_array revs = OID_ARRAY_INIT;
 
-	if (!argc)
-		return error(_("Please call `--bisect-state` with at least one argument"));
+	إذا (!argc)
+		أرجع error(_("Please call `--bisect-state` with at least one argument"));
 
-	if (bisect_autostart(terms))
-		return BISECT_FAILED;
+	إذا (bisect_autostart(terms))
+		أرجع BISECT_FAILED;
 
 	state = argv[0];
-	if (check_and_set_terms(terms, state) ||
-	    !one_of(state, terms->term_good, terms->term_bad, "skip", NULL))
-		return BISECT_FAILED;
+	إذا (check_and_مجموعه_terms(terms, state) ||
+	    !one_از(state, terms->جمله_good, terms->جمله_bad, "skip", عدم))
+		أرجع BISECT_FAILED;
 
 	argv++;
 	argc--;
-	if (argc > 1 && !strcmp(state, terms->term_bad))
-		return error(_("'git bisect %s' can take only one argument."), terms->term_bad);
+	إذا (argc > 1 && !strcmp(state, terms->جمله_bad))
+		أرجع error(_("'git bisect %s' can take only one argument."), terms->جمله_bad);
 
-	if (argc == 0) {
-		const char *head = "BISECT_HEAD";
-		enum get_oid_result res_head = repo_get_oid(the_repository,
-							    head, &oid);
+	إذا (argc == 0) {
+		ثابت حرف *سر = "BISECT_HEAD";
+		تعداد get_oid_نتیجه res_سر = repo_get_oid(the_repository,
+							    سر, &oid);
 
-		if (res_head == MISSING_OBJECT) {
-			head = "HEAD";
-			res_head = repo_get_oid(the_repository, head, &oid);
+		إذا (res_سر == MISSING_OBJECT) {
+			سر = "HEAD";
+			res_سر = repo_get_oid(the_repository, سر, &oid);
 		}
 
-		if (res_head)
-			error(_("Bad rev input: %s"), head);
+		إذا (res_سر)
+			error(_("Bad rev input: %s"), سر);
 		oid_array_append(&revs, &oid);
 	}
 
@@ -1096,301 +1096,301 @@ static enum bisect_error bisect_state(struct bisect_terms *terms, int argc,
 	 * to discard junk revs.
 	 */
 
-	for (; argc; argc--, argv++) {
-		struct commit *commit;
+	لكل (; argc; argc--, argv++) {
+		بنية commit *commit;
 
-		if (repo_get_oid(the_repository, *argv, &oid)){
+		إذا (repo_get_oid(the_repository, *argv, &oid)){
 			error(_("Bad rev input: %s"), *argv);
 			oid_array_clear(&revs);
-			return BISECT_FAILED;
+			أرجع BISECT_FAILED;
 		}
 
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit)
+		إذا (!commit)
 			die(_("Bad rev input (not a commit): %s"), *argv);
 
 		oid_array_append(&revs, &commit->object.oid);
 	}
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "BISECT_EXPECTED_REV", &expected))
+	إذا (refs_read_ref(get_main_ref_store(the_repository), "BISECT_EXPECTED_REV", &expected))
 		verify_expected = 0; /* Ignore invalid file contents */
 
-	for (i = 0; i < revs.nr; i++) {
-		if (bisect_write(state, oid_to_hex(&revs.oid[i]), terms, 0)) {
+	لكل (i = 0; i < revs.nr; i++) {
+		إذا (bisect_write(state, oid_مقصد_hex(&revs.oid[i]), terms, 0)) {
 			oid_array_clear(&revs);
-			return BISECT_FAILED;
+			أرجع BISECT_FAILED;
 		}
-		if (verify_expected && !oideq(&revs.oid[i], &expected)) {
-			unlink_or_warn(git_path_bisect_ancestors_ok());
+		إذا (verify_expected && !oideq(&revs.oid[i], &expected)) {
+			unlink_or_warn(git_مسیر_bisect_ancestors_ok());
 			refs_delete_ref(get_main_ref_store(the_repository),
-					NULL, "BISECT_EXPECTED_REV", NULL,
+					عدم, "BISECT_EXPECTED_REV", عدم,
 					REF_NO_DEREF);
 			verify_expected = 0;
 		}
 	}
 
 	oid_array_clear(&revs);
-	return bisect_auto_next(terms, NULL);
+	أرجع bisect_auto_بعدی(terms, عدم);
 }
 
-static enum bisect_error bisect_log(void)
+ساكن تعداد bisect_error bisect_log(فراغ)
 {
-	int fd, status;
-	const char* filename = git_path_bisect_log();
+	صحيح fd, وضعیت;
+	ثابت حرف* filename = git_مسیر_bisect_log();
 
-	if (is_empty_or_missing_file(filename))
-		return error(_("We are not bisecting."));
+	إذا (is_خالی_or_missing_file(filename))
+		أرجع error(_("We are not bisecting."));
 
 	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return BISECT_FAILED;
+	إذا (fd < 0)
+		أرجع BISECT_FAILED;
 
-	status = copy_fd(fd, STDOUT_FILENO);
+	وضعیت = copy_fd(fd, STDOUT_FILENO);
 	close(fd);
-	return status ? BISECT_FAILED : BISECT_OK;
+	أرجع وضعیت ? BISECT_FAILED : BISECT_OK;
 }
 
-static int process_replay_line(struct bisect_terms *terms, struct strbuf *line)
+ساكن صحيح process_replay_سطر(بنية bisect_terms *terms, بنية strbuf *سطر)
 {
-	const char *p = line->buf + strspn(line->buf, " \t");
-	char *word_end, *rev;
+	ثابت حرف *p = سطر->buf + strspn(سطر->buf, " \t");
+	حرف *کلمه_انتها, *rev;
 
-	if ((!skip_prefix(p, "git bisect", &p) &&
-	!skip_prefix(p, "git-bisect", &p)) || !isspace(*p))
-		return 0;
+	إذا ((!skip_پیشوند(p, "git bisect", &p) &&
+	!skip_پیشوند(p, "git-bisect", &p)) || !آیا_فاصله(*p))
+		أرجع 0;
 	p += strspn(p, " \t");
 
-	word_end = (char *)p + strcspn(p, " \t");
-	rev = word_end + strspn(word_end, " \t");
-	*word_end = '\0'; /* NUL-terminate the word */
+	کلمه_انتها = (حرف *)p + strcspn(p, " \t");
+	rev = کلمه_انتها + strspn(کلمه_انتها, " \t");
+	*کلمه_انتها = '\0'; /* NUL-terminate the word */
 
-	if (get_terms(terms, 1))
-		return error(_("no terms defined"));
-	if (check_and_set_terms(terms, p))
-		return -1;
+	إذا (get_terms(terms, 1))
+		أرجع error(_("no terms defined"));
+	إذا (check_and_مجموعه_terms(terms, p))
+		أرجع -1;
 
-	if (!strcmp(p, "start")) {
-		struct strvec argv = STRVEC_INIT;
-		int res;
-		sq_dequote_to_strvec(rev, &argv);
-		res = bisect_start(terms, argv.nr, argv.v);
+	إذا (!strcmp(p, "start")) {
+		بنية strvec argv = STRVEC_INIT;
+		صحيح res;
+		sq_dequote_مقصد_strvec(rev, &argv);
+		res = bisect_شروع(terms, argv.nr, argv.v);
 		strvec_clear(&argv);
-		return res;
+		أرجع res;
 	}
 
-	if (one_of(p, terms->term_good,
-	   terms->term_bad, "skip", NULL))
-		return bisect_write(p, rev, terms, 0);
+	إذا (one_از(p, terms->جمله_good,
+	   terms->جمله_bad, "skip", عدم))
+		أرجع bisect_write(p, rev, terms, 0);
 
-	if (!strcmp(p, "terms")) {
-		struct strvec argv = STRVEC_INIT;
-		int res;
-		sq_dequote_to_strvec(rev, &argv);
-		res = bisect_terms(terms, argv.nr == 1 ? argv.v[0] : NULL);
+	إذا (!strcmp(p, "terms")) {
+		بنية strvec argv = STRVEC_INIT;
+		صحيح res;
+		sq_dequote_مقصد_strvec(rev, &argv);
+		res = bisect_terms(terms, argv.nr == 1 ? argv.v[0] : عدم);
 		strvec_clear(&argv);
-		return res;
+		أرجع res;
 	}
 	error(_("'%s'?? what are you talking about?"), p);
 
-	return -1;
+	أرجع -1;
 }
 
-static enum bisect_error bisect_replay(struct bisect_terms *terms, const char *filename)
+ساكن تعداد bisect_error bisect_replay(بنية bisect_terms *terms, ثابت حرف *filename)
 {
-	FILE *fp = NULL;
-	enum bisect_error res = BISECT_OK;
-	struct strbuf line = STRBUF_INIT;
+	FILE *fp = عدم;
+	تعداد bisect_error res = BISECT_OK;
+	بنية strbuf سطر = STRBUF_INIT;
 
-	if (is_empty_or_missing_file(filename))
-		return error(_("cannot read file '%s' for replaying"), filename);
+	إذا (is_خالی_or_missing_file(filename))
+		أرجع error(_("cannot read file '%s' for replaying"), filename);
 
-	if (bisect_clean_state())
-		return BISECT_FAILED;
+	إذا (bisect_clean_state())
+		أرجع BISECT_FAILED;
 
 	fp = fopen(filename, "r");
-	if (!fp)
-		return BISECT_FAILED;
+	إذا (!fp)
+		أرجع BISECT_FAILED;
 
-	while ((strbuf_getline(&line, fp) != EOF) && !res)
-		res = process_replay_line(terms, &line);
+	طالما ((strbuf_getline(&سطر, fp) != EOF) && !res)
+		res = process_replay_سطر(terms, &سطر);
 
-	strbuf_release(&line);
+	strbuf_release(&سطر);
 	fclose(fp);
 
-	if (res)
-		return BISECT_FAILED;
+	إذا (res)
+		أرجع BISECT_FAILED;
 
-	return bisect_auto_next(terms, NULL);
+	أرجع bisect_auto_بعدی(terms, عدم);
 }
 
-static enum bisect_error bisect_skip(struct bisect_terms *terms, int argc,
-				     const char **argv)
+ساكن تعداد bisect_error bisect_skip(بنية bisect_terms *terms, صحيح argc,
+				     ثابت حرف **argv)
 {
-	int i;
-	enum bisect_error res;
-	struct strvec argv_state = STRVEC_INIT;
+	صحيح i;
+	تعداد bisect_error res;
+	بنية strvec argv_state = STRVEC_INIT;
 
-	strvec_push(&argv_state, "skip");
+	strvec_افزودن(&argv_state, "skip");
 
-	for (i = 0; i < argc; i++) {
-		const char *dotdot = strstr(argv[i], "..");
+	لكل (i = 0; i < argc; i++) {
+		ثابت حرف *dotdot = جستجوی_رشته(argv[i], "..");
 
-		if (dotdot) {
-			struct rev_info revs;
-			struct commit *commit;
+		إذا (dotdot) {
+			بنية rev_info revs;
+			بنية commit *commit;
 
-			repo_init_revisions(the_repository, &revs, NULL);
-			setup_revisions(2, argv + i - 1, &revs, NULL);
+			repo_init_revisions(the_repository, &revs, عدم);
+			راهاندازی_revisions(2, argv + i - 1, &revs, عدم);
 
-			if (prepare_revision_walk(&revs))
+			إذا (prepare_revision_walk(&revs))
 				die(_("revision walk setup failed"));
-			while ((commit = get_revision(&revs)) != NULL)
-				strvec_push(&argv_state,
-						oid_to_hex(&commit->object.oid));
+			طالما ((commit = get_revision(&revs)) != عدم)
+				strvec_افزودن(&argv_state,
+						oid_مقصد_hex(&commit->object.oid));
 
 			reset_revision_walk();
 			release_revisions(&revs);
-		} else {
-			strvec_push(&argv_state, argv[i]);
+		} وإلا {
+			strvec_افزودن(&argv_state, argv[i]);
 		}
 	}
 	res = bisect_state(terms, argv_state.nr, argv_state.v);
 
 	strvec_clear(&argv_state);
-	return res;
+	أرجع res;
 }
 
-static int bisect_visualize(struct bisect_terms *terms, int argc,
-			    const char **argv)
+ساكن صحيح bisect_visualize(بنية bisect_terms *terms, صحيح argc,
+			    ثابت حرف **argv)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	بنية فرزند_process cmd = فرزند_PROCESS_INIT;
+	بنية strbuf sb = STRBUF_INIT;
 
-	if (bisect_next_check(terms, NULL) != 0)
-		return BISECT_FAILED;
+	إذا (bisect_بعدی_check(terms, عدم) != 0)
+		أرجع BISECT_FAILED;
 
 	cmd.no_stdin = 1;
-	if (!argc) {
-		if ((getenv("DISPLAY") || getenv("SESSIONNAME") || getenv("MSYSTEM") ||
-		     getenv("SECURITYSESSIONID")) && exists_in_PATH("gitk")) {
-			strvec_push(&cmd.args, "gitk");
-		} else {
-			strvec_push(&cmd.args, "log");
+	إذا (!argc) {
+		إذا ((getenv("DISPLAY") || getenv("SESSIONNAME") || getenv("MSYSTEM") ||
+		     getenv("SECURITYSESSIONID")) && exists_درون_مسیر("gitk")) {
+			strvec_افزودن(&cmd.آرگومانها, "gitk");
+		} وإلا {
+			strvec_افزودن(&cmd.آرگومانها, "log");
 			cmd.git_cmd = 1;
 		}
-	} else {
-		if (argv[0][0] == '-') {
-			strvec_push(&cmd.args, "log");
+	} وإلا {
+		إذا (argv[0][0] == '-') {
+			strvec_افزودن(&cmd.آرگومانها, "log");
 			cmd.git_cmd = 1;
-		} else if (strcmp(argv[0], "tig") && !starts_with(argv[0], "git"))
+		} وإلا إذا (strcmp(argv[0], "tig") && !starts_with(argv[0], "git"))
 			cmd.git_cmd = 1;
 
-		strvec_pushv(&cmd.args, argv);
+		strvec_pushv(&cmd.آرگومانها, argv);
 	}
 
-	strvec_pushl(&cmd.args, "--bisect", "--", NULL);
+	strvec_pushl(&cmd.آرگومانها, "--bisect", "--", عدم);
 
-	strbuf_read_file(&sb, git_path_bisect_names(), 0);
-	sq_dequote_to_strvec(sb.buf, &cmd.args);
+	strbuf_read_file(&sb, git_مسیر_bisect_نامها(), 0);
+	sq_dequote_مقصد_strvec(sb.buf, &cmd.آرگومانها);
 	strbuf_release(&sb);
 
-	return run_command(&cmd);
+	أرجع پیاپی_command(&cmd);
 }
 
-static int get_first_good(const struct reference *ref, void *cb_data)
+ساكن صحيح get_اولی_good(ثابت بنية reference *ref, فراغ *cb_داده)
 {
-	oidcpy(cb_data, ref->oid);
-	return 1;
+	oidcpy(cb_داده, ref->oid);
+	أرجع 1;
 }
 
-static int do_bisect_run(const char *command)
+ساكن صحيح do_bisect_پیاپی(ثابت حرف *command)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية فرزند_process cmd = فرزند_PROCESS_INIT;
 
-	printf(_("running %s\n"), command);
+	چاپ_کن(_("running %s\n"), command);
 	cmd.use_shell = 1;
-	strvec_push(&cmd.args, command);
-	return run_command(&cmd);
+	strvec_افزودن(&cmd.آرگومانها, command);
+	أرجع پیاپی_command(&cmd);
 }
 
-static int verify_good(const struct bisect_terms *terms, const char *command)
+ساكن صحيح verify_good(ثابت بنية bisect_terms *terms, ثابت حرف *command)
 {
-	int rc;
-	enum bisect_error res;
-	struct object_id good_rev;
-	struct object_id current_rev;
-	char *good_glob = xstrfmt("%s-*", terms->term_good);
-	int no_checkout = refs_ref_exists(get_main_ref_store(the_repository),
+	صحيح rc;
+	تعداد bisect_error res;
+	بنية object_id good_rev;
+	بنية object_id current_rev;
+	حرف *good_glob = xstrfmt("%s-*", terms->جمله_good);
+	صحيح no_checkout = refs_ref_exists(get_main_ref_store(the_repository),
 					  "BISECT_HEAD");
-	struct refs_for_each_ref_options opts = {
-		.pattern = good_glob,
-		.prefix = "refs/bisect/",
-		.trim_prefix = strlen("refs/bisect/"),
+	بنية refs_for_each_ref_options opts = {
+		.الگو = good_glob,
+		.پیشوند = "refs/bisect/",
+		.trim_پیشوند = طول_رشته("refs/bisect/"),
 	};
 
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
-			      get_first_good, &good_rev, &opts);
-	free(good_glob);
+			      get_اولی_good, &good_rev, &opts);
+	حرر(good_glob);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), no_checkout ? "BISECT_HEAD" : "HEAD", &current_rev))
-		return -1;
+	إذا (refs_read_ref(get_main_ref_store(the_repository), no_checkout ? "BISECT_HEAD" : "HEAD", &current_rev))
+		أرجع -1;
 
 	res = bisect_checkout(&good_rev, no_checkout);
-	if (res != BISECT_OK)
-		return -1;
+	إذا (res != BISECT_OK)
+		أرجع -1;
 
-	rc = do_bisect_run(command);
+	rc = do_bisect_پیاپی(command);
 
 	res = bisect_checkout(&current_rev, no_checkout);
-	if (res != BISECT_OK)
-		return -1;
+	إذا (res != BISECT_OK)
+		أرجع -1;
 
-	return rc;
+	أرجع rc;
 }
 
-static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
+ساكن صحيح bisect_پیاپی(بنية bisect_terms *terms, صحيح argc, ثابت حرف **argv)
 {
-	int res = BISECT_OK;
-	struct strbuf command = STRBUF_INIT;
-	const char *reset_when_found_arg;
-	const char *new_state;
-	int temporary_stdout_fd, saved_stdout;
-	int is_first_run = 1;
-	enum reset_when_found_mode reset_when_found = RESET_WHEN_FOUND_NONE;
+	صحيح res = BISECT_OK;
+	بنية strbuf command = STRBUF_INIT;
+	ثابت حرف *reset_when_یافت_arg;
+	ثابت حرف *new_state;
+	صحيح temporary_stdout_fd, saved_stdout;
+	صحيح is_اولی_پیاپی = 1;
+	تعداد reset_when_یافت_نما reset_when_یافت = RESET_WHEN_یافت_NONE;
 
-	if (bisect_next_check(terms, NULL))
-		return BISECT_FAILED;
+	إذا (bisect_بعدی_check(terms, عدم))
+		أرجع BISECT_FAILED;
 
-	if (argc && !strcmp(argv[0], "--reset-when-found")) {
-		reset_when_found = RESET_WHEN_FOUND_TO_ORIGINAL;
-	} else if (argc && skip_prefix(argv[0], "--reset-when-found=",
-				    &reset_when_found_arg)) {
-		if (parse_reset_when_found(reset_when_found_arg,
-					   &reset_when_found))
-			return BISECT_FAILED;
+	إذا (argc && !strcmp(argv[0], "--reset-when-found")) {
+		reset_when_یافت = RESET_WHEN_یافت_مقصد_ORIGINAL;
+	} وإلا إذا (argc && skip_پیشوند(argv[0], "--reset-when-found=",
+				    &reset_when_یافت_arg)) {
+		إذا (parse_reset_when_یافت(reset_when_یافت_arg,
+					   &reset_when_یافت))
+			أرجع BISECT_FAILED;
 	}
 
-	if (reset_when_found != RESET_WHEN_FOUND_NONE &&
+	إذا (reset_when_یافت != RESET_WHEN_یافت_NONE &&
 	    refs_ref_exists(get_main_ref_store(the_repository), "BISECT_HEAD"))
-		return error(_("options '%s' and '%s' cannot be used together"),
+		أرجع error(_("options '%s' and '%s' cannot be used together"),
 			     "--reset-when-found", "--no-checkout");
 
-	if (reset_when_found != RESET_WHEN_FOUND_NONE) {
-		write_file(git_path_bisect_reset_when_found(), "%s\n",
-			   reset_when_found_mode_name(reset_when_found));
+	إذا (reset_when_یافت != RESET_WHEN_یافت_NONE) {
+		write_file(git_مسیر_bisect_reset_when_یافت(), "%s\n",
+			   reset_when_یافت_نما_name(reset_when_یافت));
 		argc--;
 		argv++;
 	}
 
-	if (!argc) {
+	إذا (!argc) {
 		error(_("bisect run failed: no command provided."));
-		return BISECT_FAILED;
+		أرجع BISECT_FAILED;
 	}
 
 	sq_quote_argv(&command, argv);
 	strbuf_ltrim(&command);
-	while (1) {
-		res = do_bisect_run(command.buf);
+	طالما (1) {
+		res = do_bisect_پیاپی(command.buf);
 
 		/*
 		 * Exit code 126 and 127 can either come from the shell
@@ -1399,52 +1399,52 @@ static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
 		 * revision to avoid trashing the bisect run due to a
 		 * missing or non-executable script.
 		 */
-		if (is_first_run && (res == 126 || res == 127)) {
-			int rc = verify_good(terms, command.buf);
-			is_first_run = 0;
-			if (rc < 0 || 128 <= rc) {
+		إذا (is_اولی_پیاپی && (res == 126 || res == 127)) {
+			صحيح rc = verify_good(terms, command.buf);
+			is_اولی_پیاپی = 0;
+			إذا (rc < 0 || 128 <= rc) {
 				error(_("unable to verify %s on '%s' revision"),
-				      command.buf, terms->term_good);
+				      command.buf, terms->جمله_good);
 				res = BISECT_FAILED;
-				break;
+				اكسر;
 			}
-			if (rc == res) {
+			إذا (rc == res) {
 				error(_("bogus exit code %d for '%s' revision"),
-				      rc, terms->term_good);
+				      rc, terms->جمله_good);
 				res = BISECT_FAILED;
-				break;
+				اكسر;
 			}
 		}
 
-		if (res < 0 || 128 <= res) {
+		إذا (res < 0 || 128 <= res) {
 			error(_("bisect run failed: exit code %d from"
 				" %s is < 0 or >= 128"), res, command.buf);
-			break;
+			اكسر;
 		}
 
-		if (res == 125)
+		إذا (res == 125)
 			new_state = "skip";
-		else if (!res)
-			new_state = terms->term_good;
-		else
-			new_state = terms->term_bad;
+		وإلا إذا (!res)
+			new_state = terms->جمله_good;
+		وإلا
+			new_state = terms->جمله_bad;
 
-		temporary_stdout_fd = open(git_path_bisect_run(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
+		temporary_stdout_fd = open(git_مسیر_bisect_پیاپی(), O_CREAT | O_WRONLY | O_TRUNC, 0666);
 
-		if (temporary_stdout_fd < 0) {
-			res = error_errno(_("cannot open file '%s' for writing"), git_path_bisect_run());
-			break;
+		إذا (temporary_stdout_fd < 0) {
+			res = error_errno(_("cannot open file '%s' for writing"), git_مسیر_bisect_پیاپی());
+			اكسر;
 		}
 
 		fflush(stdout);
 		saved_stdout = dup(1);
-		if (saved_stdout < 0 ||
+		إذا (saved_stdout < 0 ||
 		    dup2(temporary_stdout_fd, 1) < 0) {
 			res = error_errno(_("could not duplicate stdout"));
-			if (saved_stdout >= 0)
+			إذا (saved_stdout >= 0)
 				close(saved_stdout);
 			close(temporary_stdout_fd);
-			break;
+			اكسر;
 		}
 
 		res = bisect_state(terms, 1, &new_state);
@@ -1454,204 +1454,204 @@ static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
 		close(saved_stdout);
 		close(temporary_stdout_fd);
 
-		print_file_to_stdout(git_path_bisect_run());
+		print_file_مقصد_stdout(git_مسیر_bisect_پیاپی());
 
-		if (res == BISECT_ONLY_SKIPPED_LEFT)
+		إذا (res == BISECT_ONLY_SKIPPED_چپ)
 			error(_("bisect run cannot continue any more"));
-		else if (res == BISECT_INTERNAL_SUCCESS_MERGE_BASE) {
+		وإلا إذا (res == BISECT_داخلی_SUCCESS_ادغام_پایه) {
 			puts(_("bisect run success"));
 			res = BISECT_OK;
-		} else if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
-			printf(_("bisect found first '%s' commit\n"), terms->term_bad);
-		} else if (res) {
+		} وإلا إذا (res == BISECT_داخلی_SUCCESS_1_ST_BAD_یافت) {
+			چاپ_کن(_("bisect found first '%s' commit\n"), terms->جمله_bad);
+		} وإلا إذا (res) {
 			error(_("bisect run failed: 'git bisect %s'"
 				" exited with error code %d"), new_state, res);
-		} else {
-			continue;
+		} وإلا {
+			استمر;
 		}
-		break;
+		اكسر;
 	}
 
 	strbuf_release(&command);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__reset(int argc, const char **argv, const char *prefix UNUSED,
-			     struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect__reset(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+			     بنية repository *repo استفادهنشده)
 {
-	int res;
+	صحيح res;
 
-	if (argc > 1)
-		return error(_("'%s' requires either no argument or a commit"),
+	إذا (argc > 1)
+		أرجع error(_("'%s' requires either no argument or a commit"),
 			     "git bisect reset");
-	res = bisect_reset(argc ? argv[0] : NULL, false);
-	if (res)
-		return res;
-	return bisect_clean_state();
+	res = bisect_reset(argc ? argv[0] : عدم, false);
+	إذا (res)
+		أرجع res;
+	أرجع bisect_clean_state();
 }
 
-static int cmd_bisect__terms(int argc, const char **argv, const char *prefix UNUSED,
-			     struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect__terms(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+			     بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	if (argc > 1)
-		return error(_("'%s' requires 0 or 1 argument"),
+	إذا (argc > 1)
+		أرجع error(_("'%s' requires 0 or 1 argument"),
 			     "git bisect terms");
-	res = bisect_terms(&terms, argc == 1 ? argv[0] : NULL);
+	res = bisect_terms(&terms, argc == 1 ? argv[0] : عدم);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__start(int argc, const char **argv, const char *prefix UNUSED,
-			     struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect_شروع(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+			     بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	set_terms(&terms, "bad", "good");
-	res = bisect_start(&terms, argc, argv);
+	مجموعه_terms(&terms, "bad", "good");
+	res = bisect_شروع(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__next(int argc, const char **argv UNUSED, const char *prefix,
-			    struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect_بعدی(صحيح argc, ثابت حرف **argv استفادهنشده, ثابت حرف *پیشوند,
+			    بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	if (argc)
-		return error(_("'%s' requires 0 arguments"),
+	إذا (argc)
+		أرجع error(_("'%s' requires 0 arguments"),
 			     "git bisect next");
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
-	res = bisect_next(&terms, prefix);
+	إذا (get_terms(&terms, 1))
+		أرجع error(_("no terms defined"));
+	res = bisect_بعدی(&terms, پیشوند);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__log(int argc UNUSED, const char **argv UNUSED,
-			   const char *prefix UNUSED,
-			   struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect__log(صحيح argc استفادهنشده, ثابت حرف **argv استفادهنشده,
+			   ثابت حرف *پیشوند استفادهنشده,
+			   بنية repository *repo استفادهنشده)
 {
-	return bisect_log();
+	أرجع bisect_log();
 }
 
-static int cmd_bisect__replay(int argc, const char **argv, const char *prefix UNUSED,
-			      struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect__replay(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+			      بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	if (argc != 1)
-		return error(_("no logfile given"));
-	set_terms(&terms, "bad", "good");
+	إذا (argc != 1)
+		أرجع error(_("no logfile given"));
+	مجموعه_terms(&terms, "bad", "good");
 	res = bisect_replay(&terms, argv[0]);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__skip(int argc, const char **argv, const char *prefix UNUSED,
-			    struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect__skip(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+			    بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	set_terms(&terms, "bad", "good");
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
+	مجموعه_terms(&terms, "bad", "good");
+	إذا (get_terms(&terms, 1))
+		أرجع error(_("no terms defined"));
 	res = bisect_skip(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__visualize(int argc, const char **argv, const char *prefix UNUSED,
-				 struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect__visualize(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+				 بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
+	إذا (get_terms(&terms, 1))
+		أرجع error(_("no terms defined"));
 	res = bisect_visualize(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-static int cmd_bisect__run(int argc, const char **argv, const char *prefix UNUSED,
-			   struct repository *repo UNUSED)
+ساكن صحيح cmd_bisect_پیاپی(صحيح argc, ثابت حرف **argv, ثابت حرف *پیشوند استفادهنشده,
+			   بنية repository *repo استفادهنشده)
 {
-	int res;
-	struct bisect_terms terms = { 0 };
+	صحيح res;
+	بنية bisect_terms terms = { 0 };
 
-	if (!argc)
-		return error(_("'%s' failed: no command provided."), "git bisect run");
-	if (get_terms(&terms, 1))
-		return error(_("no terms defined"));
-	res = bisect_run(&terms, argc, argv);
+	إذا (!argc)
+		أرجع error(_("'%s' failed: no command provided."), "git bisect run");
+	إذا (get_terms(&terms, 1))
+		أرجع error(_("no terms defined"));
+	res = bisect_پیاپی(&terms, argc, argv);
 	free_terms(&terms);
-	return res;
+	أرجع res;
 }
 
-int cmd_bisect(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+صحيح cmd_bisect(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *پیشوند,
+	       بنية repository *repo)
 {
-	int res = 0;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	صحيح res = 0;
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option options[] = {
 		OPT_SUBCOMMAND("reset", &fn, cmd_bisect__reset),
 		OPT_SUBCOMMAND("terms", &fn, cmd_bisect__terms),
-		OPT_SUBCOMMAND("start", &fn, cmd_bisect__start),
-		OPT_SUBCOMMAND("next", &fn, cmd_bisect__next),
+		OPT_SUBCOMMAND("start", &fn, cmd_bisect_شروع),
+		OPT_SUBCOMMAND("next", &fn, cmd_bisect_بعدی),
 		OPT_SUBCOMMAND("log", &fn, cmd_bisect__log),
 		OPT_SUBCOMMAND("replay", &fn, cmd_bisect__replay),
 		OPT_SUBCOMMAND("skip", &fn, cmd_bisect__skip),
 		OPT_SUBCOMMAND("visualize", &fn, cmd_bisect__visualize),
 		OPT_SUBCOMMAND("view", &fn, cmd_bisect__visualize),
-		OPT_SUBCOMMAND("run", &fn, cmd_bisect__run),
-		OPT_END()
+		OPT_SUBCOMMAND("run", &fn, cmd_bisect_پیاپی),
+		OPT_انتها()
 	};
-	argc = parse_options(argc, argv, prefix, options, git_bisect_usage,
+	argc = parse_options(argc, argv, پیشوند, options, git_bisect_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (!fn) {
-		struct bisect_terms terms = { 0 };
+	إذا (!fn) {
+		بنية bisect_terms terms = { 0 };
 
-		if (!argc)
-			usage_msg_opt(_("need a command"), git_bisect_usage, options);
+		إذا (!argc)
+			usage_پیام_opt(_("need a command"), git_bisect_usage, options);
 
-		if (!strcmp(argv[0], "help"))
+		إذا (!strcmp(argv[0], "help"))
 			usage_with_options(git_bisect_usage, options);
 
-		set_terms(&terms, "bad", "good");
-		if (get_terms(&terms, 1))
-			return error(_("no terms defined"));
-		if (check_and_set_terms(&terms, argv[0]) ||
-		    !one_of(argv[0], terms.term_good, terms.term_bad, NULL))
-			usage_msg_optf(_("unknown command: '%s'"), git_bisect_usage,
+		مجموعه_terms(&terms, "bad", "good");
+		إذا (get_terms(&terms, 1))
+			أرجع error(_("no terms defined"));
+		إذا (check_and_مجموعه_terms(&terms, argv[0]) ||
+		    !one_از(argv[0], terms.جمله_good, terms.جمله_bad, عدم))
+			usage_پیام_optf(_("unknown command: '%s'"), git_bisect_usage,
 				       options, argv[0]);
-		else
+		وإلا
 			res = bisect_state(&terms, argc, argv);
 		free_terms(&terms);
-	} else {
+	} وإلا {
 		argc--;
 		argv++;
-		res = fn(argc, argv, prefix, repo);
+		res = fn(argc, argv, پیشوند, repo);
 	}
 
-	if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
-		enum reset_when_found_mode mode;
+	إذا (res == BISECT_داخلی_SUCCESS_1_ST_BAD_یافت) {
+		تعداد reset_when_یافت_نما نما;
 
-		if (read_reset_when_found(&mode))
+		إذا (read_reset_when_یافت(&نما))
 			res = BISECT_FAILED;
-		else if (mode != RESET_WHEN_FOUND_NONE &&
-			 bisect_reset_when_found(mode))
+		وإلا إذا (نما != RESET_WHEN_یافت_NONE &&
+			 bisect_reset_when_یافت(نما))
 			res = BISECT_FAILED;
 	}
 
-	return is_bisect_success(res) ? 0 : -res;
+	أرجع is_bisect_success(res) ? 0 : -res;
 }

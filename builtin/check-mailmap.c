@@ -1,81 +1,81 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "ident.h"
-#include "mailmap.h"
-#include "parse-options.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "write-or-die.h"
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "ident.h"
+#ضمن "mailmap.h"
+#ضمن "parse-options.h"
+#ضمن "strbuf.h"
+#ضمن "string-list.h"
+#ضمن "write-or-die.h"
 
-static int use_stdin;
-static const char *mailmap_file, *mailmap_blob;
-static const char * const check_mailmap_usage[] = {
+ساكن صحيح use_stdin;
+ساكن ثابت حرف *mailmap_file, *mailmap_blob;
+ساكن ثابت حرف * ثابت check_mailmap_usage[] = {
 N_("git check-mailmap [<options>] <contact>..."),
-NULL
+عدم
 };
 
-static const struct option check_mailmap_options[] = {
+ساكن ثابت بنية option check_mailmap_options[] = {
 	OPT_BOOL(0, "stdin", &use_stdin, N_("also read contacts from stdin")),
 	OPT_FILENAME(0, "mailmap-file", &mailmap_file, N_("read additional mailmap entries from file")),
 	OPT_STRING(0, "mailmap-blob", &mailmap_blob, N_("blob"), N_("read additional mailmap entries from blob")),
-	OPT_END()
+	OPT_انتها()
 };
 
-static void check_mailmap(struct string_list *mailmap, const char *contact)
+ساكن فراغ check_mailmap(بنية string_list *mailmap, ثابت حرف *contact)
 {
-	const char *name, *mail;
-	size_t namelen, maillen;
-	struct ident_split ident;
+	ثابت حرف *name, *mail;
+	اندازه_t namelen, maillen;
+	بنية ident_تقسیم ident;
 
-	if (!split_ident_line(&ident, contact, strlen(contact))) {
+	إذا (!تقسیم_ident_سطر(&ident, contact, طول_رشته(contact))) {
 		name = ident.name_begin;
-		namelen = ident.name_end - ident.name_begin;
+		namelen = ident.name_انتها - ident.name_begin;
 		mail = ident.mail_begin;
-		maillen = ident.mail_end - ident.mail_begin;
-	} else {
+		maillen = ident.mail_انتها - ident.mail_begin;
+	} وإلا {
 		name = "";
 		namelen = 0;
 		mail = contact;
-		maillen = strlen(contact);
+		maillen = طول_رشته(contact);
 	}
 
 	map_user(mailmap, &mail, &maillen, &name, &namelen);
 
-	if (namelen)
-		printf("%.*s ", (int)namelen, name);
-	printf("<%.*s>\n", (int)maillen, mail);
+	إذا (namelen)
+		چاپ_کن("%.*s ", (صحيح)namelen, name);
+	چاپ_کن("<%.*s>\n", (صحيح)maillen, mail);
 }
 
-int cmd_check_mailmap(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+صحيح cmd_check_mailmap(صحيح argc,
+		      ثابت حرف **argv,
+		      ثابت حرف *پیشوند,
+		      بنية repository *repo استفادهنشده)
 {
-	int i;
-	struct string_list mailmap = STRING_LIST_INIT_NODUP;
+	صحيح i;
+	بنية string_list mailmap = STRING_LIST_INIT_NODUP;
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, check_mailmap_options,
+	repo_config(the_repository, git_default_config, عدم);
+	argc = parse_options(argc, argv, پیشوند, check_mailmap_options,
 			     check_mailmap_usage, 0);
-	if (argc == 0 && !use_stdin)
+	إذا (argc == 0 && !use_stdin)
 		die(_("no contacts specified"));
 
 	read_mailmap(the_repository, &mailmap);
-	if (mailmap_blob)
+	إذا (mailmap_blob)
 		read_mailmap_blob(the_repository, &mailmap, mailmap_blob);
-	if (mailmap_file)
+	إذا (mailmap_file)
 		read_mailmap_file(&mailmap, mailmap_file, 0);
 
-	for (i = 0; i < argc; ++i)
+	لكل (i = 0; i < argc; ++i)
 		check_mailmap(&mailmap, argv[i]);
 	maybe_flush_or_die(stdout, "stdout");
 
-	if (use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
+	إذا (use_stdin) {
+		بنية strbuf buf = STRBUF_INIT;
+		طالما (strbuf_getline_lf(&buf, stdin) != EOF) {
 			check_mailmap(&mailmap, buf.buf);
 			maybe_flush_or_die(stdout, "stdout");
 		}
@@ -83,5 +83,5 @@ int cmd_check_mailmap(int argc,
 	}
 
 	clear_mailmap(&mailmap);
-	return 0;
+	أرجع 0;
 }

@@ -1,249 +1,249 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "setup.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "diff.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hash.h"
+#ضمن "hex.h"
+#ضمن "parse-options.h"
+#ضمن "setup.h"
 
-static void flush_current_id(size_t patchlen, struct object_id *id, struct object_id *result)
+ساكن فراغ flush_current_id(اندازه_t patchlen, بنية object_id *id, بنية object_id *نتیجه)
 {
-	if (patchlen)
-		printf("%s %s\n", oid_to_hex(result), oid_to_hex(id));
+	إذا (patchlen)
+		چاپ_کن("%s %s\n", oid_مقصد_hex(نتیجه), oid_مقصد_hex(id));
 }
 
-static size_t remove_space(char *line)
+ساكن اندازه_t remove_space(حرف *سطر)
 {
-	char *src = line;
-	char *dst = line;
-	unsigned char c;
+	حرف *src = سطر;
+	حرف *dst = سطر;
+	بیعلامت حرف c;
 
-	while ((c = *src++) != '\0') {
-		if (!isspace(c))
+	طالما ((c = *src++) != '\0') {
+		إذا (!آیا_فاصله(c))
 			*dst++ = c;
 	}
-	return dst - line;
+	أرجع dst - سطر;
 }
 
-static int scan_hunk_header(const char *p, int *p_before, int *p_after)
+ساكن صحيح پیمایش_hunk_سرآیند(ثابت حرف *p, صحيح *p_before, صحيح *p_after)
 {
-	static const char digits[] = "0123456789";
-	const char *q, *r;
-	int n;
+	ساكن ثابت حرف digits[] = "0123456789";
+	ثابت حرف *q, *r;
+	صحيح n;
 
 	q = p + 4;
 	n = strspn(q, digits);
-	if (q[n] == ',') {
+	إذا (q[n] == ',') {
 		q += n + 1;
 		*p_before = atoi(q);
 		n = strspn(q, digits);
-	} else {
+	} وإلا {
 		*p_before = 1;
 	}
 
-	if (n == 0 || q[n] != ' ' || q[n+1] != '+')
-		return 0;
+	إذا (n == 0 || q[n] != ' ' || q[n+1] != '+')
+		أرجع 0;
 
 	r = q + n + 2;
 	n = strspn(r, digits);
-	if (r[n] == ',') {
+	إذا (r[n] == ',') {
 		r += n + 1;
 		*p_after = atoi(r);
 		n = strspn(r, digits);
-	} else {
+	} وإلا {
 		*p_after = 1;
 	}
-	if (n == 0)
-		return 0;
+	إذا (n == 0)
+		أرجع 0;
 
-	return 1;
+	أرجع 1;
 }
 
-static size_t get_one_patchid(struct object_id *next_oid, struct object_id *result,
-			      struct strbuf *line_buf, int stable, int verbatim)
+ساكن اندازه_t get_one_patchid(بنية object_id *بعدی_oid, بنية object_id *نتیجه,
+			      بنية strbuf *سطر_buf, صحيح stable, صحيح verbatim)
 {
-	size_t patchlen = 0;
-	int found_next = 0;
-	int before = -1, after = -1;
-	int diff_is_binary = 0;
-	char pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
-	struct git_hash_ctx ctx;
+	اندازه_t patchlen = 0;
+	صحيح یافت_بعدی = 0;
+	صحيح before = -1, after = -1;
+	صحيح diff_is_دودویی = 0;
+	حرف pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
+	بنية git_hash_ctx ctx;
 
 	git_hash_init(&ctx, the_hash_algo);
-	oidclr(result, the_repository->hash_algo);
+	oidclr(نتیجه, the_repository->hash_algo);
 
-	while (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
-		char *line = line_buf->buf;
-		const char *p = line;
-		size_t len;
+	طالما (strbuf_getwholeline(سطر_buf, stdin, '\n') != EOF) {
+		حرف *سطر = سطر_buf->buf;
+		ثابت حرف *p = سطر;
+		اندازه_t len;
 
 		/* Possibly skip over the prefix added by "log" or "format-patch" */
-		if (!skip_prefix(line, "commit ", &p) &&
-		    !skip_prefix(line, "From ", &p) &&
-		    starts_with(line, "\\ ") && 12 < strlen(line)) {
-			if (verbatim)
-				git_hash_update(&ctx, line, strlen(line));
-			continue;
+		إذا (!skip_پیشوند(سطر, "commit ", &p) &&
+		    !skip_پیشوند(سطر, "From ", &p) &&
+		    starts_with(سطر, "\\ ") && 12 < طول_رشته(سطر)) {
+			إذا (verbatim)
+				git_hash_update(&ctx, سطر, طول_رشته(سطر));
+			استمر;
 		}
 
-		if (!get_oid_hex(p, next_oid)) {
-			found_next = 1;
-			break;
+		إذا (!get_oid_hex(p, بعدی_oid)) {
+			یافت_بعدی = 1;
+			اكسر;
 		}
 
 		/* Ignore commit comments */
-		if (!patchlen && !starts_with(line, "diff "))
-			continue;
+		إذا (!patchlen && !starts_with(سطر, "diff "))
+			استمر;
 
 		/* Parsing diff header?  */
-		if (before == -1) {
-			if (starts_with(line, "GIT binary patch") ||
-			    starts_with(line, "Binary files")) {
-				diff_is_binary = 1;
+		إذا (before == -1) {
+			إذا (starts_with(سطر, "GIT binary patch") ||
+			    starts_with(سطر, "Binary files")) {
+				diff_is_دودویی = 1;
 				before = 0;
 				git_hash_update(&ctx, pre_oid_str,
-						strlen(pre_oid_str));
+						طول_رشته(pre_oid_str));
 				git_hash_update(&ctx, post_oid_str,
-						strlen(post_oid_str));
-				if (stable)
-					flush_one_hunk(result, &ctx);
-				continue;
-			} else if (skip_prefix(line, "index ", &p)) {
-				char *oid1_end = strstr(line, "..");
-				char *oid2_end = NULL;
-				if (oid1_end)
-					oid2_end = strstr(oid1_end, " ");
-				if (!oid2_end)
-					oid2_end = line + strlen(line) - 1;
-				if (oid1_end != NULL && oid2_end != NULL) {
-					*oid1_end = *oid2_end = '\0';
+						طول_رشته(post_oid_str));
+				إذا (stable)
+					flush_one_hunk(نتیجه, &ctx);
+				استمر;
+			} وإلا إذا (skip_پیشوند(سطر, "index ", &p)) {
+				حرف *oid1_انتها = جستجوی_رشته(سطر, "..");
+				حرف *oid2_انتها = عدم;
+				إذا (oid1_انتها)
+					oid2_انتها = جستجوی_رشته(oid1_انتها, " ");
+				إذا (!oid2_انتها)
+					oid2_انتها = سطر + طول_رشته(سطر) - 1;
+				إذا (oid1_انتها != عدم && oid2_انتها != عدم) {
+					*oid1_انتها = *oid2_انتها = '\0';
 					strlcpy(pre_oid_str, p, GIT_MAX_HEXSZ + 1);
-					strlcpy(post_oid_str, oid1_end + 2, GIT_MAX_HEXSZ + 1);
+					strlcpy(post_oid_str, oid1_انتها + 2, GIT_MAX_HEXSZ + 1);
 				}
-				continue;
-			} else if (starts_with(line, "--- "))
+				استمر;
+			} وإلا إذا (starts_with(سطر, "--- "))
 				before = after = 1;
-			else if (!isalpha(line[0]))
-				break;
+			وإلا إذا (!آیا_حرف(سطر[0]))
+				اكسر;
 		}
 
-		if (diff_is_binary) {
-			if (starts_with(line, "diff ")) {
-				diff_is_binary = 0;
+		إذا (diff_is_دودویی) {
+			إذا (starts_with(سطر, "diff ")) {
+				diff_is_دودویی = 0;
 				before = -1;
 			}
-			continue;
+			استمر;
 		}
 
 		/* Looking for a valid hunk header?  */
-		if (before == 0 && after == 0) {
-			if (starts_with(line, "@@ -")) {
+		إذا (before == 0 && after == 0) {
+			إذا (starts_with(سطر, "@@ -")) {
 				/* Parse next hunk, but ignore line numbers.  */
-				scan_hunk_header(line, &before, &after);
-				continue;
+				پیمایش_hunk_سرآیند(سطر, &before, &after);
+				استمر;
 			}
 
 			/* Split at the end of the patch.  */
-			if (!starts_with(line, "diff "))
-				break;
+			إذا (!starts_with(سطر, "diff "))
+				اكسر;
 
 			/* Else we're parsing another header.  */
-			if (stable)
-				flush_one_hunk(result, &ctx);
+			إذا (stable)
+				flush_one_hunk(نتیجه, &ctx);
 			before = after = -1;
 		}
 
 		/* If we get here, we're inside a hunk.  */
-		if (line[0] == '-' || line[0] == ' ')
+		إذا (سطر[0] == '-' || سطر[0] == ' ')
 			before--;
-		if (line[0] == '+' || line[0] == ' ')
+		إذا (سطر[0] == '+' || سطر[0] == ' ')
 			after--;
 
 		/* Add line to hash algo (possibly removing whitespace) */
-		len = verbatim ? strlen(line) : remove_space(line);
+		len = verbatim ? طول_رشته(سطر) : remove_space(سطر);
 		patchlen += len;
-		git_hash_update(&ctx, line, len);
+		git_hash_update(&ctx, سطر, len);
 	}
 
-	if (!found_next)
-		oidclr(next_oid, the_repository->hash_algo);
+	إذا (!یافت_بعدی)
+		oidclr(بعدی_oid, the_repository->hash_algo);
 
-	flush_one_hunk(result, &ctx);
+	flush_one_hunk(نتیجه, &ctx);
 	git_hash_discard(&ctx);
 
-	return patchlen;
+	أرجع patchlen;
 }
 
-static void generate_id_list(int stable, int verbatim)
+ساكن فراغ generate_id_list(صحيح stable, صحيح verbatim)
 {
-	struct object_id oid, n, result;
-	size_t patchlen;
-	struct strbuf line_buf = STRBUF_INIT;
+	بنية object_id oid, n, نتیجه;
+	اندازه_t patchlen;
+	بنية strbuf سطر_buf = STRBUF_INIT;
 
 	oidclr(&oid, the_repository->hash_algo);
-	while (!feof(stdin)) {
-		patchlen = get_one_patchid(&n, &result, &line_buf, stable, verbatim);
-		flush_current_id(patchlen, &oid, &result);
+	طالما (!feof(stdin)) {
+		patchlen = get_one_patchid(&n, &نتیجه, &سطر_buf, stable, verbatim);
+		flush_current_id(patchlen, &oid, &نتیجه);
 		oidcpy(&oid, &n);
 	}
-	strbuf_release(&line_buf);
+	strbuf_release(&سطر_buf);
 }
 
-static const char *const patch_id_usage[] = {
-	N_("git patch-id [--stable | --unstable | --verbatim]"), NULL
+ساكن ثابت حرف *ثابت patch_id_usage[] = {
+	N_("git patch-id [--stable | --unstable | --verbatim]"), عدم
 };
 
-struct patch_id_opts {
-	int stable;
-	int verbatim;
+بنية patch_id_opts {
+	صحيح stable;
+	صحيح verbatim;
 };
 
-static int git_patch_id_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+ساكن صحيح git_patch_id_config(ثابت حرف *var, ثابت حرف *مقدار,
+			       ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct patch_id_opts *opts = cb;
+	بنية patch_id_opts *opts = cb;
 
-	if (!strcmp(var, "patchid.stable")) {
-		opts->stable = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "patchid.stable")) {
+		opts->stable = git_config_bool(var, مقدار);
+		أرجع 0;
 	}
-	if (!strcmp(var, "patchid.verbatim")) {
-		opts->verbatim = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "patchid.verbatim")) {
+		opts->verbatim = git_config_bool(var, مقدار);
+		أرجع 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	أرجع git_default_config(var, مقدار, ctx, cb);
 }
 
-int cmd_patch_id(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+صحيح cmd_patch_id(صحيح argc,
+		 ثابت حرف **argv,
+		 ثابت حرف *پیشوند,
+		 بنية repository *repo استفادهنشده)
 {
 	/* if nothing is set, default to unstable */
-	struct patch_id_opts config = {0, 0};
-	int opts = 0;
-	struct option builtin_patch_id_options[] = {
+	بنية patch_id_opts config = {0, 0};
+	صحيح opts = 0;
+	بنية option builtin_patch_id_options[] = {
 		OPT_CMDMODE(0, "unstable", &opts,
 		    N_("use the unstable patch ID algorithm"), 1),
 		OPT_CMDMODE(0, "stable", &opts,
 		    N_("use the stable patch ID algorithm"), 2),
 		OPT_CMDMODE(0, "verbatim", &opts,
 			N_("don't strip whitespace from the patch"), 3),
-		OPT_END()
+		OPT_انتها()
 	};
 
 	repo_config(the_repository, git_patch_id_config, &config);
 
 	/* verbatim implies stable */
-	if (config.verbatim)
+	إذا (config.verbatim)
 		config.stable = 1;
 
-	argc = parse_options(argc, argv, prefix, builtin_patch_id_options,
+	argc = parse_options(argc, argv, پیشوند, builtin_patch_id_options,
 			     patch_id_usage, 0);
 
 	/*
@@ -255,10 +255,10 @@ int cmd_patch_id(int argc,
 	 * NEEDSWORK: This hack should be removed in favor of converting
 	 * the code that computes patch IDs to always use SHA1.
 	 */
-	if (!the_hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	إذا (!the_hash_algo)
+		repo_مجموعه_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	generate_id_list(opts ? opts > 1 : config.stable,
 			 opts ? opts == 3 : config.verbatim);
-	return 0;
+	أرجع 0;
 }

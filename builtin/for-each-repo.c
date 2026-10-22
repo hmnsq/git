@@ -1,75 +1,75 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "string-list.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "run-command.h"
+#ضمن "string-list.h"
 
-static const char * const for_each_repo_usage[] = {
+ساكن ثابت حرف * ثابت for_each_repo_usage[] = {
 	N_("git for-each-repo --config=<config> [--] <arguments>"),
-	NULL
+	عدم
 };
 
-static int run_command_on_repo(const char *path, const char **argv)
+ساكن صحيح پیاپی_command_on_repo(ثابت حرف *مسیر, ثابت حرف **argv)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *abspath = interpolate_path(path, 0);
+	بنية فرزند_process فرزند = فرزند_PROCESS_INIT;
+	حرف *abspath = interpolate_مسیر(مسیر, 0);
 
-	sanitize_repo_env(&child.env);
+	sanitize_repo_env(&فرزند.env);
 
-	child.git_cmd = 1;
-	strvec_pushl(&child.args, "-C", abspath, NULL);
-	strvec_pushv(&child.args, argv);
+	فرزند.git_cmd = 1;
+	strvec_pushl(&فرزند.آرگومانها, "-C", abspath, عدم);
+	strvec_pushv(&فرزند.آرگومانها, argv);
 
-	free(abspath);
+	حرر(abspath);
 
-	return run_command(&child);
+	أرجع پیاپی_command(&فرزند);
 }
 
-int cmd_for_each_repo(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+صحيح cmd_for_each_repo(صحيح argc,
+		      ثابت حرف **argv,
+		      ثابت حرف *پیشوند,
+		      بنية repository *repo استفادهنشده)
 {
-	static const char *config_key = NULL;
-	int keep_going = 0;
-	int result = 0;
-	const struct string_list *values;
-	int err;
+	ساكن ثابت حرف *config_کلید = عدم;
+	صحيح keep_going = 0;
+	صحيح نتیجه = 0;
+	ثابت بنية string_list *مقادیر;
+	صحيح err;
 
-	const struct option options[] = {
-		OPT_STRING(0, "config", &config_key, N_("config"),
+	ثابت بنية option options[] = {
+		OPT_STRING(0, "config", &config_کلید, N_("config"),
 			   N_("config key storing a list of repository paths")),
 		OPT_BOOL(0, "keep-going", &keep_going,
 			 N_("keep going even if command fails in a repository")),
-		OPT_END()
+		OPT_انتها()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, for_each_repo_usage,
+	argc = parse_options(argc, argv, پیشوند, options, for_each_repo_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (!config_key)
+	إذا (!config_کلید)
 		die(_("missing --config=<config>"));
 
-	err = repo_config_get_string_multi(the_repository, config_key, &values);
-	if (err < 0)
-		usage_msg_optf(_("got bad config --config=%s"),
-			       for_each_repo_usage, options, config_key);
-	else if (err)
-		return 0;
+	err = repo_config_get_string_multi(the_repository, config_کلید, &مقادیر);
+	إذا (err < 0)
+		usage_پیام_optf(_("got bad config --config=%s"),
+			       for_each_repo_usage, options, config_کلید);
+	وإلا إذا (err)
+		أرجع 0;
 
-	for (size_t i = 0; i < values->nr; i++) {
-		int ret = run_command_on_repo(values->items[i].string, argv);
-		if (ret) {
-			if (!keep_going)
-					return ret;
-			result = 1;
+	لكل (اندازه_t i = 0; i < مقادیر->nr; i++) {
+		صحيح ret = پیاپی_command_on_repo(مقادیر->اقلام[i].string, argv);
+		إذا (ret) {
+			إذا (!keep_going)
+					أرجع ret;
+			نتیجه = 1;
 		}
 	}
 
-	return result;
+	أرجع نتیجه;
 }

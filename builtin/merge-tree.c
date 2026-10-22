@@ -1,300 +1,300 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کن USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "environment.h"
-#include "tree-walk.h"
-#include "xdiff-interface.h"
-#include "help.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "merge-ort.h"
-#include "object-name.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "blob.h"
-#include "merge-blobs.h"
-#include "quote.h"
-#include "tree.h"
-#include "config.h"
-#include "strvec.h"
-#include "write-or-die.h"
+#ضمن "builtin.h"
+#ضمن "environment.h"
+#ضمن "tree-walk.h"
+#ضمن "xdiff-interface.h"
+#ضمن "help.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "commit.h"
+#ضمن "commit-reach.h"
+#ضمن "merge-ort.h"
+#ضمن "object-name.h"
+#ضمن "odb.h"
+#ضمن "parse-options.h"
+#ضمن "blob.h"
+#ضمن "merge-blobs.h"
+#ضمن "quote.h"
+#ضمن "tree.h"
+#ضمن "config.h"
+#ضمن "strvec.h"
+#ضمن "write-or-die.h"
 
-static int line_termination = '\n';
+ساكن صحيح سطر_termination = '\n';
 
-struct merge_list {
-	struct merge_list *next;
-	struct merge_list *link;	/* other stages for this object */
+بنية ادغام_list {
+	بنية ادغام_list *بعدی;
+	بنية ادغام_list *link;	/* other stages for this object */
 
-	unsigned int stage : 2;
-	unsigned int mode;
-	const char *path;
-	struct blob *blob;
+	بیعلامت صحيح stage : 2;
+	بیعلامت صحيح نما;
+	ثابت حرف *مسیر;
+	بنية blob *blob;
 };
 
-static struct merge_list *merge_result, **merge_result_end = &merge_result;
+ساكن بنية ادغام_list *ادغام_نتیجه, **ادغام_نتیجه_انتها = &ادغام_نتیجه;
 
-static void add_merge_entry(struct merge_list *entry)
+ساكن فراغ جمع_کن_ادغام_مدخل(بنية ادغام_list *مدخل)
 {
-	*merge_result_end = entry;
-	merge_result_end = &entry->next;
+	*ادغام_نتیجه_انتها = مدخل;
+	ادغام_نتیجه_انتها = &مدخل->بعدی;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+ساكن فراغ trivial_ادغام_trees(بنية درخت_desc t[3], ثابت حرف *پایه);
 
-static const char *explanation(struct merge_list *entry)
+ساكن ثابت حرف *explanation(بنية ادغام_list *مدخل)
 {
-	switch (entry->stage) {
-	case 0:
-		return "merged";
-	case 3:
-		return "added in remote";
-	case 2:
-		if (entry->link)
-			return "added in both";
-		return "added in local";
+	بدل (مدخل->stage) {
+	حالة 0:
+		أرجع "merged";
+	حالة 3:
+		أرجع "added in remote";
+	حالة 2:
+		إذا (مدخل->link)
+			أرجع "added in both";
+		أرجع "added in local";
 	}
 
 	/* Existed in base */
-	entry = entry->link;
-	if (!entry)
-		return "removed in both";
+	مدخل = مدخل->link;
+	إذا (!مدخل)
+		أرجع "removed in both";
 
-	if (entry->link)
-		return "changed in both";
+	إذا (مدخل->link)
+		أرجع "changed in both";
 
-	if (entry->stage == 3)
-		return "removed in local";
-	return "removed in remote";
+	إذا (مدخل->stage == 3)
+		أرجع "removed in local";
+	أرجع "removed in remote";
 }
 
-static void *result(struct merge_list *entry, size_t *size)
+ساكن فراغ *نتیجه(بنية ادغام_list *مدخل, اندازه_t *اندازه)
 {
-	enum object_type type;
-	struct blob *base, *our, *their;
-	const char *path = entry->path;
+	تعداد object_type type;
+	بنية blob *پایه, *our, *their;
+	ثابت حرف *مسیر = مدخل->مسیر;
 
-	if (!entry->stage)
-		return odb_read_object(the_repository->objects,
-				       &entry->blob->object.oid, &type,
-				       size);
-	base = NULL;
-	if (entry->stage == 1) {
-		base = entry->blob;
-		entry = entry->link;
+	إذا (!مدخل->stage)
+		أرجع odb_read_object(the_repository->objects,
+				       &مدخل->blob->object.oid, &type,
+				       اندازه);
+	پایه = عدم;
+	إذا (مدخل->stage == 1) {
+		پایه = مدخل->blob;
+		مدخل = مدخل->link;
 	}
-	our = NULL;
-	if (entry && entry->stage == 2) {
-		our = entry->blob;
-		entry = entry->link;
+	our = عدم;
+	إذا (مدخل && مدخل->stage == 2) {
+		our = مدخل->blob;
+		مدخل = مدخل->link;
 	}
-	their = NULL;
-	if (entry)
-		their = entry->blob;
-	return merge_blobs(the_repository->index, path,
-			   base, our, their, size);
+	their = عدم;
+	إذا (مدخل)
+		their = مدخل->blob;
+	أرجع ادغام_blobs(the_repository->شاخص, مسیر,
+			   پایه, our, their, اندازه);
 }
 
-static void *origin(struct merge_list *entry, size_t *size)
+ساكن فراغ *origin(بنية ادغام_list *مدخل, اندازه_t *اندازه)
 {
-	enum object_type type;
-	while (entry) {
-		if (entry->stage == 2)
-			return odb_read_object(the_repository->objects,
-					       &entry->blob->object.oid,
-					       &type, size);
-		entry = entry->link;
+	تعداد object_type type;
+	طالما (مدخل) {
+		إذا (مدخل->stage == 2)
+			أرجع odb_read_object(the_repository->objects,
+					       &مدخل->blob->object.oid,
+					       &type, اندازه);
+		مدخل = مدخل->link;
 	}
-	return NULL;
+	أرجع عدم;
 }
 
-static int show_outf(void *priv UNUSED, mmfile_t *mb, int nbuf)
+ساكن صحيح show_outf(فراغ *priv استفادهنشده, mmfile_t *mb, صحيح nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		printf("%.*s", (int) mb[i].size, mb[i].ptr);
-	return 0;
+	صحيح i;
+	لكل (i = 0; i < nbuf; i++)
+		چاپ_کن("%.*s", (صحيح) mb[i].اندازه, mb[i].ptr);
+	أرجع 0;
 }
 
-static void show_diff(struct merge_list *entry)
+ساكن فراغ show_diff(بنية ادغام_list *مدخل)
 {
-	size_t size;
+	اندازه_t اندازه;
 	mmfile_t src, dst;
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = show_outf };
+	xdemitcb_t ecb = { .بیرون_سطر = show_outf };
 
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, حجم(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, حجم(xecfg));
 	xecfg.ctxlen = 3;
 
-	src.ptr = origin(entry, &size);
-	if (!src.ptr)
-		size = 0;
-	src.size = size;
-	dst.ptr = result(entry, &size);
-	if (!dst.ptr)
-		size = 0;
-	dst.size = size;
-	if (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
+	src.ptr = origin(مدخل, &اندازه);
+	إذا (!src.ptr)
+		اندازه = 0;
+	src.اندازه = اندازه;
+	dst.ptr = نتیجه(مدخل, &اندازه);
+	إذا (!dst.ptr)
+		اندازه = 0;
+	dst.اندازه = اندازه;
+	إذا (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
 		die("unable to generate diff");
-	free(src.ptr);
-	free(dst.ptr);
+	حرر(src.ptr);
+	حرر(dst.ptr);
 }
 
-static void show_result_list(struct merge_list *entry)
+ساكن فراغ show_نتیجه_list(بنية ادغام_list *مدخل)
 {
-	printf("%s\n", explanation(entry));
-	do {
-		struct merge_list *link = entry->link;
-		static const char *desc[4] = { "result", "base", "our", "their" };
-		printf("  %-6s %o %s %s\n", desc[entry->stage], entry->mode, oid_to_hex(&entry->blob->object.oid), entry->path);
-		entry = link;
-	} while (entry);
+	چاپ_کن("%s\n", explanation(مدخل));
+	افعل {
+		بنية ادغام_list *link = مدخل->link;
+		ساكن ثابت حرف *desc[4] = { "result", "base", "our", "their" };
+		چاپ_کن("  %-6s %o %s %s\n", desc[مدخل->stage], مدخل->نما, oid_مقصد_hex(&مدخل->blob->object.oid), مدخل->مسیر);
+		مدخل = link;
+	} طالما (مدخل);
 }
 
-static void show_result(void)
+ساكن فراغ show_نتیجه(فراغ)
 {
-	struct merge_list *walk;
+	بنية ادغام_list *walk;
 
-	walk = merge_result;
-	while (walk) {
-		show_result_list(walk);
+	walk = ادغام_نتیجه;
+	طالما (walk) {
+		show_نتیجه_list(walk);
 		show_diff(walk);
-		walk = walk->next;
+		walk = walk->بعدی;
 	}
 }
 
 /* An empty entry never compares same, not even to another empty entry */
-static int same_entry(struct name_entry *a, struct name_entry *b)
+ساكن صحيح same_مدخل(بنية name_مدخل *a, بنية name_مدخل *b)
 {
-	return	!is_null_oid(&a->oid) &&
+	أرجع	!is_null_oid(&a->oid) &&
 		!is_null_oid(&b->oid) &&
 		oideq(&a->oid, &b->oid) &&
-		a->mode == b->mode;
+		a->نما == b->نما;
 }
 
-static int both_empty(struct name_entry *a, struct name_entry *b)
+ساكن صحيح both_خالی(بنية name_مدخل *a, بنية name_مدخل *b)
 {
-	return is_null_oid(&a->oid) && is_null_oid(&b->oid);
+	أرجع is_null_oid(&a->oid) && is_null_oid(&b->oid);
 }
 
-static struct merge_list *create_entry(unsigned stage, unsigned mode, const struct object_id *oid, const char *path)
+ساكن بنية ادغام_list *create_مدخل(بیعلامت stage, بیعلامت نما, ثابت بنية object_id *oid, ثابت حرف *مسیر)
 {
-	struct merge_list *res = xcalloc(1, sizeof(*res));
+	بنية ادغام_list *res = xcalloc(1, حجم(*res));
 
 	res->stage = stage;
-	res->path = path;
-	res->mode = mode;
+	res->مسیر = مسیر;
+	res->نما = نما;
 	res->blob = lookup_blob(the_repository, oid);
-	return res;
+	أرجع res;
 }
 
-static char *traverse_path(const struct traverse_info *info, const struct name_entry *n)
+ساكن حرف *traverse_مسیر(ثابت بنية traverse_info *info, ثابت بنية name_مدخل *n)
 {
-	struct strbuf buf = STRBUF_INIT;
-	strbuf_make_traverse_path(&buf, info, n->path, n->pathlen);
-	return strbuf_detach(&buf, NULL);
+	بنية strbuf buf = STRBUF_INIT;
+	strbuf_make_traverse_مسیر(&buf, info, n->مسیر, n->pathlen);
+	أرجع strbuf_detach(&buf, عدم);
 }
 
-static void resolve(const struct traverse_info *info, struct name_entry *ours, struct name_entry *result)
+ساكن فراغ resolve(ثابت بنية traverse_info *info, بنية name_مدخل *ours, بنية name_مدخل *نتیجه)
 {
-	struct merge_list *orig, *final;
-	const char *path;
+	بنية ادغام_list *orig, *final;
+	ثابت حرف *مسیر;
 
 	/* If it's already ours, don't bother showing it */
-	if (!ours)
-		return;
+	إذا (!ours)
+		أرجع;
 
-	path = traverse_path(info, result);
-	orig = create_entry(2, ours->mode, &ours->oid, path);
-	final = create_entry(0, result->mode, &result->oid, path);
+	مسیر = traverse_مسیر(info, نتیجه);
+	orig = create_مدخل(2, ours->نما, &ours->oid, مسیر);
+	final = create_مدخل(0, نتیجه->نما, &نتیجه->oid, مسیر);
 
 	final->link = orig;
 
-	add_merge_entry(final);
+	جمع_کن_ادغام_مدخل(final);
 }
 
-static void unresolved_directory(const struct traverse_info *info,
-				 struct name_entry n[3])
+ساكن فراغ unresolved_directory(ثابت بنية traverse_info *info,
+				 بنية name_مدخل n[3])
 {
-	struct repository *r = the_repository;
-	char *newbase;
-	struct name_entry *p;
-	struct tree_desc t[3];
-	void *buf0, *buf1, *buf2;
+	بنية repository *r = the_repository;
+	حرف *newbase;
+	بنية name_مدخل *p;
+	بنية درخت_desc t[3];
+	فراغ *buf0, *buf1, *buf2;
 
-	for (p = n; p < n + 3; p++) {
-		if (p->mode && S_ISDIR(p->mode))
-			break;
+	لكل (p = n; p < n + 3; p++) {
+		إذا (p->نما && S_ISDIR(p->نما))
+			اكسر;
 	}
-	if (n + 3 <= p)
-		return; /* there is no tree here */
+	إذا (n + 3 <= p)
+		أرجع; /* there is no tree here */
 
-	newbase = traverse_path(info, p);
+	newbase = traverse_مسیر(info, p);
 
-#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : NULL)
-	buf0 = fill_tree_descriptor(r, t + 0, ENTRY_OID(n + 0));
-	buf1 = fill_tree_descriptor(r, t + 1, ENTRY_OID(n + 1));
-	buf2 = fill_tree_descriptor(r, t + 2, ENTRY_OID(n + 2));
-#undef ENTRY_OID
+#تعریف_کن مدخل_OID(e) (((e)->نما && S_ISDIR((e)->نما)) ? &(e)->oid : عدم)
+	buf0 = fill_درخت_descriptor(r, t + 0, مدخل_OID(n + 0));
+	buf1 = fill_درخت_descriptor(r, t + 1, مدخل_OID(n + 1));
+	buf2 = fill_درخت_descriptor(r, t + 2, مدخل_OID(n + 2));
+#لغو_تعریف مدخل_OID
 
-	trivial_merge_trees(t, newbase);
+	trivial_ادغام_trees(t, newbase);
 
-	free(buf0);
-	free(buf1);
-	free(buf2);
-	free(newbase);
+	حرر(buf0);
+	حرر(buf1);
+	حرر(buf2);
+	حرر(newbase);
 }
 
 
-static struct merge_list *link_entry(unsigned stage, const struct traverse_info *info, struct name_entry *n, struct merge_list *entry)
+ساكن بنية ادغام_list *link_مدخل(بیعلامت stage, ثابت بنية traverse_info *info, بنية name_مدخل *n, بنية ادغام_list *مدخل)
 {
-	const char *path;
-	struct merge_list *link;
+	ثابت حرف *مسیر;
+	بنية ادغام_list *link;
 
-	if (!n->mode)
-		return entry;
-	if (entry)
-		path = entry->path;
-	else
-		path = traverse_path(info, n);
-	link = create_entry(stage, n->mode, &n->oid, path);
-	link->link = entry;
-	return link;
+	إذا (!n->نما)
+		أرجع مدخل;
+	إذا (مدخل)
+		مسیر = مدخل->مسیر;
+	وإلا
+		مسیر = traverse_مسیر(info, n);
+	link = create_مدخل(stage, n->نما, &n->oid, مسیر);
+	link->link = مدخل;
+	أرجع link;
 }
 
-static void unresolved(const struct traverse_info *info, struct name_entry n[3])
+ساكن فراغ unresolved(ثابت بنية traverse_info *info, بنية name_مدخل n[3])
 {
-	struct merge_list *entry = NULL;
-	int i;
-	unsigned dirmask = 0, mask = 0;
+	بنية ادغام_list *مدخل = عدم;
+	صحيح i;
+	بیعلامت dirmask = 0, ماسک = 0;
 
-	for (i = 0; i < 3; i++) {
-		mask |= (1 << i);
+	لكل (i = 0; i < 3; i++) {
+		ماسک |= (1 << i);
 		/*
 		 * Treat missing entries as directories so that we return
 		 * after unresolved_directory has handled this.
 		 */
-		if (!n[i].mode || S_ISDIR(n[i].mode))
+		إذا (!n[i].نما || S_ISDIR(n[i].نما))
 			dirmask |= (1 << i);
 	}
 
 	unresolved_directory(info, n);
 
-	if (dirmask == mask)
-		return;
+	إذا (dirmask == ماسک)
+		أرجع;
 
-	if (n[2].mode && !S_ISDIR(n[2].mode))
-		entry = link_entry(3, info, n + 2, entry);
-	if (n[1].mode && !S_ISDIR(n[1].mode))
-		entry = link_entry(2, info, n + 1, entry);
-	if (n[0].mode && !S_ISDIR(n[0].mode))
-		entry = link_entry(1, info, n + 0, entry);
+	إذا (n[2].نما && !S_ISDIR(n[2].نما))
+		مدخل = link_مدخل(3, info, n + 2, مدخل);
+	إذا (n[1].نما && !S_ISDIR(n[1].نما))
+		مدخل = link_مدخل(2, info, n + 1, مدخل);
+	إذا (n[0].نما && !S_ISDIR(n[0].نما))
+		مدخل = link_مدخل(1, info, n + 0, مدخل);
 
-	add_merge_entry(entry);
+	جمع_کن_ادغام_مدخل(مدخل);
 }
 
 /*
@@ -326,22 +326,22 @@ static void unresolved(const struct traverse_info *info, struct name_entry n[3])
  * The successful merge rules are the same as for the three-way merge
  * in git-read-tree.
  */
-static int threeway_callback(int n UNUSED, unsigned long mask,
-			     unsigned long dirmask UNUSED,
-			     struct name_entry *entry, struct traverse_info *info)
+ساكن صحيح threeway_callback(صحيح n استفادهنشده, بیعلامت دراز ماسک,
+			     بیعلامت دراز dirmask استفادهنشده,
+			     بنية name_مدخل *مدخل, بنية traverse_info *info)
 {
 	/* Same in both? */
-	if (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
+	إذا (same_مدخل(مدخل+1, مدخل+2) || both_خالی(مدخل+1, مدخل+2)) {
 		/* Modified, added or removed identically */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, عدم, مدخل+1);
+		أرجع ماسک;
 	}
 
-	if (same_entry(entry+0, entry+1)) {
-		if (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
+	إذا (same_مدخل(مدخل+0, مدخل+1)) {
+		إذا (!is_null_oid(&مدخل[2].oid) && !S_ISDIR(مدخل[2].نما)) {
 			/* We did not touch, they modified -- take theirs */
-			resolve(info, entry+1, entry+2);
-			return mask;
+			resolve(info, مدخل+1, مدخل+2);
+			أرجع ماسک;
 		}
 		/*
 		 * If we did not touch a directory but they made it
@@ -350,130 +350,130 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 		 */
 	}
 
-	if (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
+	إذا (same_مدخل(مدخل+0, مدخل+2) || both_خالی(مدخل+0, مدخل+2)) {
 		/* We added, modified or removed, they did not touch -- take ours */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, عدم, مدخل+1);
+		أرجع ماسک;
 	}
 
-	unresolved(info, entry);
-	return mask;
+	unresolved(info, مدخل);
+	أرجع ماسک;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+ساكن فراغ trivial_ادغام_trees(بنية درخت_desc t[3], ثابت حرف *پایه)
 {
-	struct traverse_info info;
+	بنية traverse_info info;
 
-	setup_traverse_info(&info, base);
+	راهاندازی_traverse_info(&info, پایه);
 	info.fn = threeway_callback;
-	traverse_trees(the_repository->index, 3, t, &info);
+	traverse_trees(the_repository->شاخص, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
-				 const char *rev)
+ساكن فراغ *get_درخت_descriptor(بنية repository *r,
+				 بنية درخت_desc *desc,
+				 ثابت حرف *rev)
 {
-	struct object_id oid;
-	void *buf;
+	بنية object_id oid;
+	فراغ *buf;
 
-	if (repo_get_oid(r, rev, &oid))
+	إذا (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
-	buf = fill_tree_descriptor(r, desc, &oid);
-	if (!buf)
+	buf = fill_درخت_descriptor(r, desc, &oid);
+	إذا (!buf)
 		die("%s is not a tree", rev);
-	return buf;
+	أرجع buf;
 }
 
-static int trivial_merge(const char *base,
-			 const char *branch1,
-			 const char *branch2)
+ساكن صحيح trivial_ادغام(ثابت حرف *پایه,
+			 ثابت حرف *branch1,
+			 ثابت حرف *branch2)
 {
-	struct repository *r = the_repository;
-	struct tree_desc t[3];
-	void *buf1, *buf2, *buf3;
+	بنية repository *r = the_repository;
+	بنية درخت_desc t[3];
+	فراغ *buf1, *buf2, *buf3;
 
-	buf1 = get_tree_descriptor(r, t+0, base);
-	buf2 = get_tree_descriptor(r, t+1, branch1);
-	buf3 = get_tree_descriptor(r, t+2, branch2);
-	trivial_merge_trees(t, "");
-	free(buf1);
-	free(buf2);
-	free(buf3);
+	buf1 = get_درخت_descriptor(r, t+0, پایه);
+	buf2 = get_درخت_descriptor(r, t+1, branch1);
+	buf3 = get_درخت_descriptor(r, t+2, branch2);
+	trivial_ادغام_trees(t, "");
+	حرر(buf1);
+	حرر(buf2);
+	حرر(buf3);
 
-	show_result();
-	return 0;
+	show_نتیجه();
+	أرجع 0;
 }
 
-enum mode {
-	MODE_UNKNOWN,
-	MODE_TRIVIAL,
-	MODE_REAL,
+تعداد نما {
+	نما_UNKNOWN,
+	نما_TRIVIAL,
+	نما_REAL,
 };
 
-struct merge_tree_options {
-	int mode;
-	int allow_unrelated_histories;
-	int show_messages;
-	int name_only;
-	int use_stdin;
-	struct merge_options merge_options;
+بنية ادغام_درخت_options {
+	صحيح نما;
+	صحيح allow_unrelated_histories;
+	صحيح show_messages;
+	صحيح name_only;
+	صحيح use_stdin;
+	بنية ادغام_options ادغام_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
-		      const char *merge_base,
-		      const char *branch1, const char *branch2,
-		      const char *prefix)
+ساكن صحيح real_ادغام(بنية ادغام_درخت_options *o,
+		      ثابت حرف *ادغام_پایه,
+		      ثابت حرف *branch1, ثابت حرف *branch2,
+		      ثابت حرف *پیشوند)
 {
-	struct commit *parent1, *parent2;
-	struct commit_list *merge_bases = NULL;
-	struct merge_result result = { 0 };
-	int show_messages = o->show_messages;
-	struct merge_options opt;
+	بنية commit *parent1, *parent2;
+	بنية commit_list *ادغام_bases = عدم;
+	بنية ادغام_نتیجه نتیجه = { 0 };
+	صحيح show_messages = o->show_messages;
+	بنية ادغام_options opt;
 
-	copy_merge_options(&opt, &o->merge_options);
-	opt.show_rename_progress = 0;
+	copy_ادغام_options(&opt, &o->ادغام_options);
+	opt.show_rename_پیشرفت = 0;
 
 	opt.branch1 = branch1;
 	opt.branch2 = branch2;
 
-	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+	إذا (ادغام_پایه) {
+		بنية درخت *پایه_درخت, *parent1_درخت, *parent2_درخت;
 
 		/*
 		 * We actually only need the trees because we already
 		 * have a merge base.
 		 */
-		struct object_id base_oid, head_oid, merge_oid;
+		بنية object_id پایه_oid, سر_oid, ادغام_oid;
 
-		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
-			die(_("could not parse as tree '%s'"), merge_base);
-		base_tree = repo_parse_tree_indirect(the_repository,
-						     &base_oid);
-		if (!base_tree)
-			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
-		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
+		إذا (repo_get_oid_treeish(the_repository, ادغام_پایه, &پایه_oid))
+			die(_("could not parse as tree '%s'"), ادغام_پایه);
+		پایه_درخت = repo_parse_درخت_غیرمستقیم(the_repository,
+						     &پایه_oid);
+		إذا (!پایه_درخت)
+			die(_("unable to read tree (%s)"), oid_مقصد_hex(&پایه_oid));
+		إذا (repo_get_oid_treeish(the_repository, branch1, &سر_oid))
 			die(_("could not parse as tree '%s'"), branch1);
-		parent1_tree = repo_parse_tree_indirect(the_repository,
-							&head_oid);
-		if (!parent1_tree)
-			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
-		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
+		parent1_درخت = repo_parse_درخت_غیرمستقیم(the_repository,
+							&سر_oid);
+		إذا (!parent1_درخت)
+			die(_("unable to read tree (%s)"), oid_مقصد_hex(&سر_oid));
+		إذا (repo_get_oid_treeish(the_repository, branch2, &ادغام_oid))
 			die(_("could not parse as tree '%s'"), branch2);
-		parent2_tree = repo_parse_tree_indirect(the_repository,
-							&merge_oid);
-		if (!parent2_tree)
-			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
+		parent2_درخت = repo_parse_درخت_غیرمستقیم(the_repository,
+							&ادغام_oid);
+		إذا (!parent2_درخت)
+			die(_("unable to read tree (%s)"), oid_مقصد_hex(&ادغام_oid));
 
-		opt.ancestor = merge_base;
-		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
-	} else {
-		parent1 = get_merge_parent(branch1);
-		if (!parent1)
+		opt.ancestor = ادغام_پایه;
+		ادغام_incore_nonrecursive(&opt, پایه_درخت, parent1_درخت, parent2_درخت, &نتیجه);
+	} وإلا {
+		parent1 = get_ادغام_والد(branch1);
+		إذا (!parent1)
 			help_unknown_ref(branch1, "merge-tree",
 					 _("not something we can merge"));
 
-		parent2 = get_merge_parent(branch2);
-		if (!parent2)
+		parent2 = get_ادغام_والد(branch2);
+		إذا (!parent2)
 			help_unknown_ref(branch2, "merge-tree",
 					 _("not something we can merge"));
 
@@ -481,92 +481,92 @@ static int real_merge(struct merge_tree_options *o,
 		 * Get the merge bases, in reverse order; see comment above
 		 * merge_incore_recursive in merge-ort.h
 		 */
-		if (repo_get_merge_bases(the_repository, parent1,
-					 parent2, &merge_bases) < 0)
-			exit(128);
-		if (!merge_bases && !o->allow_unrelated_histories)
+		إذا (repo_get_ادغام_bases(the_repository, parent1,
+					 parent2, &ادغام_bases) < 0)
+			خروج(128);
+		إذا (!ادغام_bases && !o->allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
-		merge_bases = commit_list_reverse(merge_bases);
-		merge_incore_recursive(&opt, merge_bases, parent1, parent2, &result);
-		commit_list_free(merge_bases);
+		ادغام_bases = commit_list_معکوس(ادغام_bases);
+		ادغام_incore_recursive(&opt, ادغام_bases, parent1, parent2, &نتیجه);
+		commit_list_free(ادغام_bases);
 	}
 
-	if (result.clean < 0)
+	إذا (نتیجه.clean < 0)
 		die(_("failure to merge"));
 
-	if (o->merge_options.mergeability_only)
-		goto cleanup;
+	إذا (o->ادغام_options.mergeability_only)
+		اذهب cleanup;
 
-	if (show_messages == -1)
-		show_messages = !result.clean;
+	إذا (show_messages == -1)
+		show_messages = !نتیجه.clean;
 
-	if (o->use_stdin)
-		printf("%d%c", result.clean, line_termination);
-	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
-	if (!result.clean) {
-		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
-		const char *last = NULL;
+	إذا (o->use_stdin)
+		چاپ_کن("%d%c", نتیجه.clean, سطر_termination);
+	چاپ_کن("%s%c", oid_مقصد_hex(&نتیجه.درخت->object.oid), سطر_termination);
+	إذا (!نتیجه.clean) {
+		بنية string_list conflicted_files = STRING_LIST_INIT_NODUP;
+		ثابت حرف *آخرین = عدم;
 
-		merge_get_conflicted_files(&result, &conflicted_files);
-		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
-			if (!o->name_only)
-				printf("%06o %s %d\t",
-				       c->mode, oid_to_hex(&c->oid), c->stage);
-			else if (last && !strcmp(last, name))
-				continue;
+		ادغام_get_conflicted_files(&نتیجه, &conflicted_files);
+		لكل (اندازه_t i = 0; i < conflicted_files.nr; i++) {
+			ثابت حرف *name = conflicted_files.اقلام[i].string;
+			بنية stage_info *c = conflicted_files.اقلام[i].util;
+			إذا (!o->name_only)
+				چاپ_کن("%06o %s %d\t",
+				       c->نما, oid_مقصد_hex(&c->oid), c->stage);
+			وإلا إذا (آخرین && !strcmp(آخرین, name))
+				استمر;
 			write_name_quoted_relative(
-				name, prefix, stdout, line_termination);
-			last = name;
+				name, پیشوند, stdout, سطر_termination);
+			آخرین = name;
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
-	if (show_messages) {
-		putchar(line_termination);
-		merge_display_update_messages(&opt, line_termination == '\0',
-					      &result);
+	إذا (show_messages) {
+		حرف_چاپ_کن(سطر_termination);
+		ادغام_display_update_messages(&opt, سطر_termination == '\0',
+					      &نتیجه);
 	}
-	if (o->use_stdin)
-		putchar(line_termination);
+	إذا (o->use_stdin)
+		حرف_چاپ_کن(سطر_termination);
 
 cleanup:
-	merge_finalize(&opt, &result);
-	clear_merge_options(&opt);
-	return !result.clean; /* result.clean < 0 handled above */
+	ادغام_finalize(&opt, &نتیجه);
+	clear_ادغام_options(&opt);
+	أرجع !نتیجه.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_ادغام_درخت(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *پیشوند,
+		   بنية repository *repo استفادهنشده)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
-	struct strvec xopts = STRVEC_INIT;
-	int expected_remaining_argc;
-	int original_argc;
-	const char *merge_base = NULL;
-	int ret;
-	int quiet = 0;
+	بنية ادغام_درخت_options o = { .show_messages = -1 };
+	بنية strvec xopts = STRVEC_INIT;
+	صحيح expected_مانده_argc;
+	صحيح original_argc;
+	ثابت حرف *ادغام_پایه = عدم;
+	صحيح ret;
+	صحيح quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	ثابت حرف * ثابت ادغام_درخت_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
-		NULL
+		عدم
 	};
-	struct option mt_options[] = {
-		OPT_CMDMODE(0, "write-tree", &o.mode,
+	بنية option mt_options[] = {
+		OPT_CMDMODE(0, "write-tree", &o.نما,
 			    N_("do a real merge instead of a trivial merge"),
-			    MODE_REAL),
-		OPT_CMDMODE(0, "trivial-merge", &o.mode,
-			    N_("do a trivial merge only"), MODE_TRIVIAL),
+			    نما_REAL),
+		OPT_CMDMODE(0, "trivial-merge", &o.نما,
+			    N_("do a trivial merge only"), نما_TRIVIAL),
 		OPT_BOOL(0, "messages", &o.show_messages,
 			 N_("also show informational/conflict messages")),
 		OPT_BOOL_F(0, "quiet",
 			   &quiet,
 			   N_("suppress all output; only exit status wanted"),
 			   PARSE_OPT_NONEG),
-		OPT_SET_INT('z', NULL, &line_termination,
+		OPT_مجموعه_INT('z', عدم, &سطر_termination,
 			    N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL_F(0, "name-only",
 			   &o.name_only,
@@ -581,123 +581,123 @@ int cmd_merge_tree(int argc,
 			   N_("perform multiple merges, one per line of input"),
 			   PARSE_OPT_NONEG),
 		OPT_STRING(0, "merge-base",
-			   &merge_base,
+			   &ادغام_پایه,
 			   N_("tree-ish"),
 			   N_("specify a merge-base for the merge")),
 		OPT_STRVEC('X', "strategy-option", &xopts, N_("option=value"),
 			N_("option for selected merge strategy")),
-		OPT_END()
+		OPT_انتها()
 	};
 
 	/* Init merge options */
-	init_basic_merge_options(&o.merge_options, the_repository);
+	init_basic_ادغام_options(&o.ادغام_options, the_repository);
 
 	/* Parse arguments */
 	original_argc = argc - 1; /* ignoring argv[0] */
-	argc = parse_options(argc, argv, prefix, mt_options,
-			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
+	argc = parse_options(argc, argv, پیشوند, mt_options,
+			     ادغام_درخت_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (quiet && o.show_messages == -1)
+	إذا (quiet && o.show_messages == -1)
 		o.show_messages = 0;
-	o.merge_options.mergeability_only = quiet;
+	o.ادغام_options.mergeability_only = quiet;
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
 	die_for_incompatible_opt2(quiet, "--quiet", o.name_only, "--name-only");
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
-	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
+	die_for_incompatible_opt2(quiet, "--quiet", !سطر_termination, "-z");
 
-	if (xopts.nr && o.mode == MODE_TRIVIAL)
+	إذا (xopts.nr && o.نما == نما_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
-	for (size_t x = 0; x < xopts.nr; x++)
-		if (parse_merge_opt(&o.merge_options, xopts.v[x]))
+	لكل (اندازه_t x = 0; x < xopts.nr; x++)
+		إذا (parse_ادغام_opt(&o.ادغام_options, xopts.v[x]))
 			die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 	/* Handle --stdin */
-	if (o.use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
+	إذا (o.use_stdin) {
+		بنية strbuf buf = STRBUF_INIT;
 
-		if (o.mode == MODE_TRIVIAL)
+		إذا (o.نما == نما_TRIVIAL)
 			die(_("--trivial-merge is incompatible with all other options"));
-		if (merge_base)
+		إذا (ادغام_پایه)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
-		line_termination = '\0';
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
-			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+		سطر_termination = '\0';
+		طالما (strbuf_getline_lf(&buf, stdin) != EOF) {
+			بنية string_list تقسیم = STRING_LIST_INIT_NODUP;
+			ثابت حرف *درون_داد_ادغام_پایه = عدم;
 
-			string_list_split_in_place_f(&split, buf.buf, " ", -1,
-						     STRING_LIST_SPLIT_TRIM);
+			string_list_تقسیم_درون_قراربده_f(&تقسیم, buf.buf, " ", -1,
+						     STRING_LIST_تقسیم_TRIM);
 
-			if (split.nr < 2)
+			إذا (تقسیم.nr < 2)
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
-				input_merge_base = split.items[0].string;
+			إذا (!strcmp(تقسیم.اقلام[1].string, "--")) {
+				درون_داد_ادغام_پایه = تقسیم.اقلام[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
-				real_merge(&o, input_merge_base,
-					   split.items[2].string, split.items[3].string,
-					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
-				real_merge(&o, NULL,
-					   split.items[0].string, split.items[1].string,
-					   prefix);
-			} else {
+			إذا (درون_داد_ادغام_پایه && تقسیم.nr == 4) {
+				real_ادغام(&o, درون_داد_ادغام_پایه,
+					   تقسیم.اقلام[2].string, تقسیم.اقلام[3].string,
+					   پیشوند);
+			} وإلا إذا (!درون_داد_ادغام_پایه && تقسیم.nr == 2) {
+				real_ادغام(&o, عدم,
+					   تقسیم.اقلام[0].string, تقسیم.اقلام[1].string,
+					   پیشوند);
+			} وإلا {
 				die(_("malformed input line: '%s'."), buf.buf);
 			}
 			maybe_flush_or_die(stdout, "stdout");
 
-			string_list_clear(&split, 0);
+			string_list_clear(&تقسیم, 0);
 		}
 		strbuf_release(&buf);
 
 		ret = 0;
-		goto out;
+		اذهب بیرون;
 	}
 
 	/* Figure out which mode to use */
-	switch (o.mode) {
-	default:
-		BUG("unexpected command mode %d", o.mode);
-	case MODE_UNKNOWN:
-		switch (argc) {
-		default:
-			usage_with_options(merge_tree_usage, mt_options);
-		case 2:
-			o.mode = MODE_REAL;
-			break;
-		case 3:
-			o.mode = MODE_TRIVIAL;
-			break;
+	بدل (o.نما) {
+	افتراضي:
+		BUG("unexpected command mode %d", o.نما);
+	حالة نما_UNKNOWN:
+		بدل (argc) {
+		افتراضي:
+			usage_with_options(ادغام_درخت_usage, mt_options);
+		حالة 2:
+			o.نما = نما_REAL;
+			اكسر;
+		حالة 3:
+			o.نما = نما_TRIVIAL;
+			اكسر;
 		}
-		expected_remaining_argc = argc;
-		break;
-	case MODE_REAL:
-		expected_remaining_argc = 2;
-		break;
-	case MODE_TRIVIAL:
-		expected_remaining_argc = 3;
+		expected_مانده_argc = argc;
+		اكسر;
+	حالة نما_REAL:
+		expected_مانده_argc = 2;
+		اكسر;
+	حالة نما_TRIVIAL:
+		expected_مانده_argc = 3;
 		/* Removal of `--trivial-merge` is expected */
 		original_argc--;
-		break;
+		اكسر;
 	}
-	if (o.mode == MODE_TRIVIAL && argc < original_argc)
+	إذا (o.نما == نما_TRIVIAL && argc < original_argc)
 		die(_("--trivial-merge is incompatible with all other options"));
 
-	if (argc != expected_remaining_argc)
-		usage_with_options(merge_tree_usage, mt_options);
+	إذا (argc != expected_مانده_argc)
+		usage_with_options(ادغام_درخت_usage, mt_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
 	/* Do the relevant type of merge */
-	if (o.mode == MODE_REAL)
-		ret = real_merge(&o, merge_base, argv[0], argv[1], prefix);
-	else
-		ret = trivial_merge(argv[0], argv[1], argv[2]);
+	إذا (o.نما == نما_REAL)
+		ret = real_ادغام(&o, ادغام_پایه, argv[0], argv[1], پیشوند);
+	وإلا
+		ret = trivial_ادغام(argv[0], argv[1], argv[2]);
 
-out:
+بیرون:
 	strvec_clear(&xopts);
-	return ret;
+	أرجع ret;
 }

@@ -1,16 +1,16 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "pack-refs.h"
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "pack-refs.h"
 
-int cmd_pack_refs(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo)
+صحيح cmd_pack_refs(صحيح argc,
+		  ثابت حرف **argv,
+		  ثابت حرف *پیشوند,
+		  بنية repository *repo)
 {
-	static char const * const pack_refs_usage[] = {
+	ساكن حرف ثابت * ثابت pack_refs_usage[] = {
 		N_("git pack-refs " PACK_REFS_OPTS),
-		NULL
+		عدم
 	};
 
-	return pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
+	أرجع pack_refs_core(argc, argv, پیشوند, repo, pack_refs_usage);
 }
