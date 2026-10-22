@@ -1,52 +1,52 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "git-compat-util.h"
-#include "credential.h"
-#include "builtin.h"
-#include "environment.h"
-#include "config.h"
+#अन्तर्भाव "git-compat-util.h"
+#अन्तर्भाव "credential.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "config.h"
 
-static const char usage_msg[] =
+स्थिर ध्रुव वर्ण usage_संदेश[] =
 	"git credential (fill|approve|reject)";
 
-int cmd_credential(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_credential(पूर्णाङ्क argc,
+		   ध्रुव वर्ण **argv,
+		   ध्रुव वर्ण *prefix UNUSED,
+		   संरचना repository *repo UNUSED)
 {
-	const char *op;
-	struct credential c = CREDENTIAL_INIT;
+	ध्रुव वर्ण *op;
+	संरचना credential c = CREDENTIAL_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_संदेश);
+	यदि (argc != 2)
+		usage(usage_संदेश);
 	op = argv[1];
 
-	if (!strcmp(op, "capability")) {
+	यदि (!म_भेद(op, "capability")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_INITIAL);
-		credential_announce_capabilities(&c, stdout);
-		return 0;
+		credential_announce_capabilities(&c, मानक_निकास);
+		प्रत्यागम 0;
 	}
 
-	if (credential_read(&c, stdin, CREDENTIAL_OP_INITIAL) < 0)
+	यदि (credential_read(&c, मानक_निवेश, CREDENTIAL_OP_INITIAL) < 0)
 		die("unable to read credential from stdin");
 
-	if (!strcmp(op, "fill")) {
+	यदि (!म_भेद(op, "fill")) {
 		credential_fill(the_repository, &c, 0);
 		credential_next_state(&c);
-		credential_write(&c, stdout, CREDENTIAL_OP_RESPONSE);
-	} else if (!strcmp(op, "approve")) {
+		credential_write(&c, मानक_निकास, CREDENTIAL_OP_RESPONSE);
+	} अन्यथा यदि (!म_भेद(op, "approve")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_approve(the_repository, &c);
-	} else if (!strcmp(op, "reject")) {
+	} अन्यथा यदि (!म_भेद(op, "reject")) {
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_reject(the_repository, &c);
-	} else {
-		usage(usage_msg);
+	} अन्यथा {
+		usage(usage_संदेश);
 	}
 
 	credential_clear(&c);
-	return 0;
+	प्रत्यागम 0;
 }

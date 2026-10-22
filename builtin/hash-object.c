@@ -5,84 +5,84 @@
  * Copyright (C) Junio C Hamano, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "blob.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "abspath.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "blob.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "write-or-die.h"
 
-static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
+स्थिर शून्य hash_fd(पूर्णाङ्क fd, ध्रुव वर्ण *type, ध्रुव वर्ण *path, अचिन्हित flags)
 {
-	struct stat st;
-	struct object_id oid;
+	संरचना stat st;
+	संरचना object_id oid;
 
-	if (fstat(fd, &st) < 0 ||
+	यदि (ख_स्थिति(fd, &st) < 0 ||
 	    index_fd(the_repository->index, &oid, fd, &st,
 		     type_from_string(type), path, flags))
 		die((flags & INDEX_WRITE_OBJECT)
 		    ? "Unable to add %s to database"
 		    : "Unable to hash %s", path);
-	printf("%s\n", oid_to_hex(&oid));
-	maybe_flush_or_die(stdout, "hash to stdout");
+	म_लिखो("%s\n", oid_to_hex(&oid));
+	maybe_flush_or_die(मानक_निकास, "hash to stdout");
 }
 
-static void hash_object(const char *path, const char *type, const char *vpath,
-			unsigned flags)
+स्थिर शून्य hash_object(ध्रुव वर्ण *path, ध्रुव वर्ण *type, ध्रुव वर्ण *vpath,
+			अचिन्हित flags)
 {
-	int fd;
+	पूर्णाङ्क fd;
 	fd = xopen(path, O_RDONLY);
 	hash_fd(fd, type, vpath, flags);
 }
 
-static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
+स्थिर शून्य hash_stdin_paths(ध्रुव वर्ण *type, पूर्णाङ्क no_filters, अचिन्हित flags)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना strbuf unquoted = STRBUF_INIT;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (buf.buf[0] == '"') {
+	यावत् (strbuf_getline(&buf, मानक_निवेश) != खातापूर्ण) {
+		यदि (buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			यदि (unquote_c_style(&unquoted, buf.buf, रिक्त))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
-		hash_object(buf.buf, type, no_filters ? NULL : buf.buf, flags);
+		hash_object(buf.buf, type, no_filters ? रिक्त : buf.buf, flags);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
 }
 
-int cmd_hash_object(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+पूर्णाङ्क cmd_hash_object(पूर्णाङ्क argc,
+		    ध्रुव वर्ण **argv,
+		    ध्रुव वर्ण *prefix,
+		    संरचना repository *repo UNUSED)
 {
-	static const char * const hash_object_usage[] = {
+	स्थिर ध्रुव वर्ण * ध्रुव hash_object_usage[] = {
 		N_("git hash-object [-t <type>] [-w] [--path=<file> | --no-filters]\n"
 		   "                [--stdin [--literally]] [--] <file>..."),
 		N_("git hash-object [-t <type>] [-w] --stdin-paths [--no-filters]"),
-		NULL
+		रिक्त
 	};
-	const char *type = blob_type;
-	int hashstdin = 0;
-	int stdin_paths = 0;
-	int no_filters = 0;
-	int nongit = 0;
-	unsigned flags = INDEX_FORMAT_CHECK;
-	const char *vpath = NULL;
-	char *vpath_free = NULL;
-	const struct option hash_object_options[] = {
-		OPT_STRING('t', NULL, &type, N_("type"), N_("object type")),
-		OPT_BIT('w', NULL, &flags, N_("write the object into the object database"),
+	ध्रुव वर्ण *type = blob_type;
+	पूर्णाङ्क hashstdin = 0;
+	पूर्णाङ्क stdin_paths = 0;
+	पूर्णाङ्क no_filters = 0;
+	पूर्णाङ्क nongit = 0;
+	अचिन्हित flags = INDEX_FORMAT_CHECK;
+	ध्रुव वर्ण *vpath = रिक्त;
+	वर्ण *vpath_free = रिक्त;
+	ध्रुव संरचना option hash_object_options[] = {
+		OPT_STRING('t', रिक्त, &type, N_("type"), N_("object type")),
+		OPT_BIT('w', रिक्त, &flags, N_("write the object into the object database"),
 			INDEX_WRITE_OBJECT),
 		OPT_COUNTUP( 0 , "stdin", &hashstdin, N_("read the object from stdin")),
 		OPT_BOOL( 0 , "stdin-paths", &stdin_paths, N_("read file names from stdin")),
@@ -93,65 +93,65 @@ int cmd_hash_object(int argc,
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
 	};
-	int i;
-	const char *errstr = NULL;
+	पूर्णाङ्क i;
+	ध्रुव वर्ण *errstr = रिक्त;
 
 	argc = parse_options(argc, argv, prefix, hash_object_options,
 			     hash_object_usage, 0);
 
-	if (flags & INDEX_WRITE_OBJECT)
+	यदि (flags & INDEX_WRITE_OBJECT)
 		prefix = setup_git_directory(the_repository);
-	else
+	अन्यथा
 		prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (nongit && !the_hash_algo)
+	यदि (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	if (vpath && prefix) {
+	यदि (vpath && prefix) {
 		vpath_free = prefix_filename(prefix, vpath);
 		vpath = vpath_free;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
-	if (stdin_paths) {
-		if (hashstdin)
+	यदि (stdin_paths) {
+		यदि (hashstdin)
 			errstr = "Can't use --stdin-paths with --stdin";
-		else if (argc)
+		अन्यथा यदि (argc)
 			errstr = "Can't specify files with --stdin-paths";
-		else if (vpath)
+		अन्यथा यदि (vpath)
 			errstr = "Can't use --stdin-paths with --path";
 	}
-	else {
-		if (hashstdin > 1)
+	अन्यथा {
+		यदि (hashstdin > 1)
 			errstr = "Multiple --stdin arguments are not supported";
-		if (vpath && no_filters)
+		यदि (vpath && no_filters)
 			errstr = "Can't use --path with --no-filters";
 	}
 
-	if (errstr) {
+	यदि (errstr) {
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
 
-	if (hashstdin)
+	यदि (hashstdin)
 		hash_fd(0, type, vpath, flags);
 
-	for (i = 0 ; i < argc; i++) {
-		const char *arg = argv[i];
-		char *to_free = NULL;
+	प्रति (i = 0 ; i < argc; i++) {
+		ध्रुव वर्ण *arg = argv[i];
+		वर्ण *to_free = रिक्त;
 
-		if (prefix)
+		यदि (prefix)
 			arg = to_free = prefix_filename(prefix, arg);
-		hash_object(arg, type, no_filters ? NULL : vpath ? vpath : arg,
+		hash_object(arg, type, no_filters ? रिक्त : vpath ? vpath : arg,
 			    flags);
-		free(to_free);
+		मुक्त(to_free);
 	}
 
-	if (stdin_paths)
+	यदि (stdin_paths)
 		hash_stdin_paths(type, no_filters, flags);
 
-	free(vpath_free);
+	मुक्त(vpath_free);
 
-	return 0;
+	प्रत्यागम 0;
 }

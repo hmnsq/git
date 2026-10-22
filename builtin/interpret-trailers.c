@@ -5,146 +5,146 @@
  *
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "tempfile.h"
-#include "trailer.h"
-#include "config.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "tempfile.h"
+#अन्तर्भाव "trailer.h"
+#अन्तर्भाव "config.h"
 
-static const char * const git_interpret_trailers_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव git_interpret_trailers_usage[] = {
 	N_("git interpret-trailers [--in-place] [--trim-empty]\n"
 	   "                       [(--trailer (<key>|<key-alias>)[(=|:)<value>])...]\n"
 	   "                       [--parse] [<file>...]"),
-	NULL
+	रिक्त
 };
 
-static enum trailer_where where;
-static enum trailer_if_exists if_exists;
-static enum trailer_if_missing if_missing;
+स्थिर गणना trailer_where where;
+स्थिर गणना trailer_if_exists if_exists;
+स्थिर गणना trailer_if_missing if_missing;
 
-static int option_parse_where(const struct option *opt,
-			      const char *arg, int unset UNUSED)
+स्थिर पूर्णाङ्क option_parse_where(ध्रुव संरचना option *opt,
+			      ध्रुव वर्ण *arg, पूर्णाङ्क unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	प्रत्यागम trailer_set_where(opt->मूल्य, arg);
 }
 
-static int option_parse_if_exists(const struct option *opt,
-				  const char *arg, int unset UNUSED)
+स्थिर पूर्णाङ्क option_parse_if_exists(ध्रुव संरचना option *opt,
+				  ध्रुव वर्ण *arg, पूर्णाङ्क unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	प्रत्यागम trailer_set_if_exists(opt->मूल्य, arg);
 }
 
-static int option_parse_if_missing(const struct option *opt,
-				   const char *arg, int unset UNUSED)
+स्थिर पूर्णाङ्क option_parse_if_missing(ध्रुव संरचना option *opt,
+				   ध्रुव वर्ण *arg, पूर्णाङ्क unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	प्रत्यागम trailer_set_if_missing(opt->मूल्य, arg);
 }
 
-static void new_trailers_clear(struct list_head *trailers)
+स्थिर शून्य new_trailers_clear(संरचना list_head *trailers)
 {
-	struct list_head *pos, *tmp;
-	struct new_trailer_item *item;
+	संरचना list_head *pos, *tmp;
+	संरचना new_trailer_item *item;
 
 	list_for_each_safe(pos, tmp, trailers) {
-		item = list_entry(pos, struct new_trailer_item, list);
+		item = list_entry(pos, संरचना new_trailer_item, list);
 		list_del(pos);
-		free(item);
+		मुक्त(item);
 	}
 }
 
-static int option_parse_trailer(const struct option *opt,
-				   const char *arg, int unset)
+स्थिर पूर्णाङ्क option_parse_trailer(ध्रुव संरचना option *opt,
+				   ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct list_head *trailers = opt->value;
-	struct new_trailer_item *item;
+	संरचना list_head *trailers = opt->मूल्य;
+	संरचना new_trailer_item *item;
 
-	if (unset) {
+	यदि (unset) {
 		new_trailers_clear(trailers);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!arg)
-		return -1;
+	यदि (!arg)
+		प्रत्यागम -1;
 
-	item = xmalloc(sizeof(*item));
+	item = xmalloc(परिमाण(*item));
 	item->text = arg;
 	item->where = where;
 	item->if_exists = if_exists;
 	item->if_missing = if_missing;
 	list_add_tail(&item->list, trailers);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int parse_opt_parse(const struct option *opt, const char *arg,
-			   int unset)
+स्थिर पूर्णाङ्क parse_opt_parse(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg,
+			   पूर्णाङ्क unset)
 {
-	struct process_trailer_options *v = opt->value;
+	संरचना process_trailer_options *v = opt->मूल्य;
 	v->only_trailers = 1;
-	v->only_input = 1;
+	v->only_निवेश = 1;
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void read_input_file(struct strbuf *sb, const char *file)
+स्थिर शून्य read_निवेश_file(संरचना strbuf *sb, ध्रुव वर्ण *file)
 {
-	if (file) {
-		if (strbuf_read_file(sb, file, 0) < 0)
+	यदि (file) {
+		यदि (strbuf_read_file(sb, file, 0) < 0)
 			die_errno(_("could not read input file '%s'"), file);
-	} else {
-		if (strbuf_read(sb, fileno(stdin), 0) < 0)
+	} अन्यथा {
+		यदि (strbuf_read(sb, fileno(मानक_निवेश), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
-	strbuf_complete_line(sb);
+	strbuf_complete_पंक्ति(sb);
 }
 
-static void interpret_trailers(const struct process_trailer_options *opts,
-			       struct list_head *new_trailer_head,
-			       const char *file)
+स्थिर शून्य interpret_trailers(ध्रुव संरचना process_trailer_options *opts,
+			       संरचना list_head *new_trailer_head,
+			       ध्रुव वर्ण *file)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
-	struct tempfile *tempfile = NULL;
-	int fd = 1;
+	संरचना strbuf निवेश = STRBUF_INIT;
+	संरचना strbuf out = STRBUF_INIT;
+	संरचना tempfile *tempfile = रिक्त;
+	पूर्णाङ्क fd = 1;
 
 	trailer_config_init();
 
-	read_input_file(&input, file);
+	read_निवेश_file(&निवेश, file);
 
-	if (opts->in_place) {
+	यदि (opts->in_place) {
 		tempfile = trailer_create_in_place_tempfile(file);
-		if (!tempfile)
-			die(NULL);
+		यदि (!tempfile)
+			die(रिक्त);
 		fd = tempfile->fd;
 	}
-	process_trailers(opts, new_trailer_head, &input, &out);
+	process_trailers(opts, new_trailer_head, &निवेश, &out);
 
-	if (write_in_full(fd, out.buf, out.len) < 0)
+	यदि (write_in_full(fd, out.buf, out.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
-	if (opts->in_place)
-		if (rename_tempfile(&tempfile, file))
+	यदि (opts->in_place)
+		यदि (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
-	strbuf_release(&input);
+	strbuf_release(&निवेश);
 	strbuf_release(&out);
 }
 
-int cmd_interpret_trailers(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_interpret_trailers(पूर्णाङ्क argc,
+			   ध्रुव वर्ण **argv,
+			   ध्रुव वर्ण *prefix,
+			   संरचना repository *repo UNUSED)
 {
-	struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
+	संरचना process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
 	LIST_HEAD(trailers);
 
-	struct option options[] = {
+	संरचना option options[] = {
 		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
 		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
 
@@ -156,9 +156,9 @@ int cmd_interpret_trailers(int argc,
 			     N_("action if trailer is missing"), option_parse_if_missing),
 
 		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
-		OPT_BOOL(0, "only-input", &opts.only_input, N_("do not apply trailer.<key-alias> configuration variables")),
+		OPT_BOOL(0, "only-input", &opts.only_निवेश, N_("do not apply trailer.<key-alias> configuration variables")),
 		OPT_BOOL(0, "unfold", &opts.unfold, N_("reformat multiline trailer values as single-line values")),
-		OPT_CALLBACK_F(0, "parse", &opts, NULL, N_("alias for --only-trailers --only-input --unfold"),
+		OPT_CALLBACK_F(0, "parse", &opts, रिक्त, N_("alias for --only-trailers --only-input --unfold"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_parse),
 		OPT_BOOL(0, "no-divider", &opts.no_divider, N_("do not treat \"---\" as the end of input")),
 		OPT_CALLBACK(0, "trailer", &trailers, N_("trailer"),
@@ -166,28 +166,28 @@ int cmd_interpret_trailers(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
-		usage_msg_opt(
+	यदि (opts.only_निवेश && !list_empty(&trailers))
+		usage_संदेश_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);
 
-	if (argc) {
-		int i;
-		for (i = 0; i < argc; i++)
+	यदि (argc) {
+		पूर्णाङ्क i;
+		प्रति (i = 0; i < argc; i++)
 			interpret_trailers(&opts, &trailers, argv[i]);
-	} else {
-		if (opts.in_place)
+	} अन्यथा {
+		यदि (opts.in_place)
 			die(_("no input file given for in-place editing"));
-		interpret_trailers(&opts, &trailers, NULL);
+		interpret_trailers(&opts, &trailers, रिक्त);
 	}
 
 	new_trailers_clear(&trailers);
 
-	return 0;
+	प्रत्यागम 0;
 }

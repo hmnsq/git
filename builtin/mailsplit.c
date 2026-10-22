@@ -7,59 +7,59 @@
 
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "strbuf.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "strbuf.h"
 
-static const char git_mailsplit_usage[] =
+स्थिर ध्रुव वर्ण git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+स्थिर पूर्णाङ्क is_from_पंक्ति(ध्रुव वर्ण *पंक्ति, पूर्णाङ्क len)
 {
-	const char *colon;
+	ध्रुव वर्ण *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	यदि (len < 20 || स_भेद("From ", पंक्ति, 5))
+		प्रत्यागम 0;
 
-	colon = line + len - 2;
-	line += 5;
-	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
-			break;
+	colon = पंक्ति + len - 2;
+	पंक्ति += 5;
+	प्रति (;;) {
+		यदि (colon < पंक्ति)
+			प्रत्यागम 0;
+		यदि (*--colon == ':')
+			भङ्ग;
 	}
 
-	if (!isdigit(colon[-4]) ||
-	    !isdigit(colon[-2]) ||
-	    !isdigit(colon[-1]) ||
-	    !isdigit(colon[ 1]) ||
-	    !isdigit(colon[ 2]))
-		return 0;
+	यदि (!है_अंक(colon[-4]) ||
+	    !है_अंक(colon[-2]) ||
+	    !है_अंक(colon[-1]) ||
+	    !है_अंक(colon[ 1]) ||
+	    !है_अंक(colon[ 2]))
+		प्रत्यागम 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	यदि (म_से_दीर्घ(colon+3, रिक्त, 10) <= 90)
+		प्रत्यागम 0;
 
 	/* Ok, close enough */
-	return 1;
+	प्रत्यागम 1;
 }
 
-static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+स्थिर संरचना strbuf buf = STRBUF_INIT;
+स्थिर पूर्णाङ्क keep_cr;
+स्थिर पूर्णाङ्क mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+स्थिर पूर्णाङ्क is_gtfrom(ध्रुव संरचना strbuf *buf)
 {
-	size_t min = strlen(">From ");
-	size_t ngt;
+	माप_प्रकार min = म_माप(">From ");
+	माप_प्रकार ngt;
 
-	if (buf->len < min)
-		return 0;
+	यदि (buf->len < min)
+		प्रत्यागम 0;
 
-	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	ngt = म_अखोज(buf->buf, ">");
+	प्रत्यागम ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,16 +67,16 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+स्थिर पूर्णाङ्क split_one(खाता *mbox, ध्रुव वर्ण *name, पूर्णाङ्क allow_bare)
 {
-	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	खाता *output;
+	पूर्णाङ्क fd;
+	पूर्णाङ्क status = 0;
+	पूर्णाङ्क is_bare = !is_from_पंक्ति(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
-		fprintf(stderr, "corrupt mailbox\n");
-		exit(1);
+	यदि (is_bare && !allow_bare) {
+		ख_लिखो(मानक_त्रुटि, "corrupt mailbox\n");
+		निकास(1);
 	}
 	fd = xopen(name, O_WRONLY | O_CREAT | O_EXCL, 0666);
 	output = xfdopen(fd, "w");
@@ -84,294 +84,294 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	/* Copy it out, while searching for a line that begins with
 	 * "From " and having something that looks like a date format.
 	 */
-	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+	प्रति (;;) {
+		यदि (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		यदि (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		यदि (ख_डालो(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
+		यदि (strbuf_getwholeline(&buf, mbox, '\n')) {
+			यदि (ख_पूर्ण(mbox)) {
 				status = 1;
-				break;
+				भङ्ग;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
-			break; /* done with one message */
+		यदि (!is_bare && is_from_पंक्ति(buf.buf, buf.len))
+			भङ्ग; /* done with one message */
 	}
-	fclose(output);
-	return status;
+	ख_बंद(output);
+	प्रत्यागम status;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+स्थिर पूर्णाङ्क populate_maildir_list(संरचना string_list *list, ध्रुव वर्ण *path)
 {
-	DIR *dir;
-	struct dirent *dent;
-	char *name = NULL;
-	const char *subs[] = { "cur", "new", NULL };
-	const char **sub;
-	int ret = -1;
+	सूची *dir;
+	संरचना dirent *dent;
+	वर्ण *name = रिक्त;
+	ध्रुव वर्ण *subs[] = { "cur", "new", रिक्त };
+	ध्रुव वर्ण **sub;
+	पूर्णाङ्क ret = -1;
 
-	for (sub = subs; *sub; ++sub) {
-		free(name);
+	प्रति (sub = subs; *sub; ++sub) {
+		मुक्त(name);
 		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
-				continue;
+		यदि (!(dir = सूची_खोलो(name))) {
+			यदि (त्रुटि_सं == ENOENT)
+				अनुवर्त;
 			error_errno("cannot opendir %s", name);
-			goto out;
+			गच्छ out;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
-				continue;
-			free(name);
+		यावत् ((dent = सूची_पढ़ो(dir)) != रिक्त) {
+			यदि (dent->d_name[0] == '.')
+				अनुवर्त;
+			मुक्त(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
-			string_list_insert(list, name);
+			string_list_जोड़ो(list, name);
 		}
 
-		closedir(dir);
+		बंद_सूची(dir);
 	}
 
 	ret = 0;
 
 out:
-	free(name);
-	return ret;
+	मुक्त(name);
+	प्रत्यागम ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+स्थिर पूर्णाङ्क maildir_filename_cmp(ध्रुव वर्ण *a, ध्रुव वर्ण *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
-			na = strtol(a, (char **)&a, 10);
-			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+	यावत् (*a && *b) {
+		यदि (है_अंक(*a) && है_अंक(*b)) {
+			दीर्घ पूर्णाङ्क na, nb;
+			na = म_से_दीर्घ(a, (वर्ण **)&a, 10);
+			nb = म_से_दीर्घ(b, (वर्ण **)&b, 10);
+			यदि (na != nb)
+				प्रत्यागम na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		अन्यथा {
+			यदि (*a != *b)
+				प्रत्यागम (अचिन्हित वर्ण)*a - (अचिन्हित वर्ण)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	प्रत्यागम (अचिन्हित वर्ण)*a - (अचिन्हित वर्ण)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+स्थिर पूर्णाङ्क split_maildir(ध्रुव वर्ण *maildir, ध्रुव वर्ण *dir,
+	पूर्णाङ्क nr_prec, पूर्णाङ्क skip)
 {
-	char *file = NULL;
-	FILE *f = NULL;
-	int ret = -1;
-	struct string_list list = STRING_LIST_INIT_DUP;
+	वर्ण *file = रिक्त;
+	खाता *f = रिक्त;
+	पूर्णाङ्क ret = -1;
+	संरचना string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
-		goto out;
+	यदि (populate_maildir_list(&list, maildir) < 0)
+		गच्छ out;
 
-	for (size_t i = 0; i < list.nr; i++) {
-		char *name;
+	प्रति (माप_प्रकार i = 0; i < list.nr; i++) {
+		वर्ण *name;
 
-		free(file);
-		file = xstrfmt("%s/%s", maildir, list.items[i].string);
+		मुक्त(file);
+		file = xstrfmt("%s/%s", maildir, list.वस्तुएँ[i].string);
 
-		f = fopen(file, "r");
-		if (!f) {
+		f = ख_खोलो(file, "r");
+		यदि (!f) {
 			error_errno("cannot open mail %s", file);
-			goto out;
+			गच्छ out;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		यदि (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
-			goto out;
+			गच्छ out;
 		}
 
 		name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		split_one(f, name, 1);
-		free(name);
+		मुक्त(name);
 
-		fclose(f);
-		f = NULL;
+		ख_बंद(f);
+		f = रिक्त;
 	}
 
 	ret = skip;
 out:
-	if (f)
-		fclose(f);
-	free(file);
+	यदि (f)
+		ख_बंद(f);
+	मुक्त(file);
 	string_list_clear(&list, 1);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+स्थिर पूर्णाङ्क split_mbox(ध्रुव वर्ण *file, ध्रुव वर्ण *dir, पूर्णाङ्क allow_bare,
+		      पूर्णाङ्क nr_prec, पूर्णाङ्क skip)
 {
-	int ret = -1;
-	int peek;
+	पूर्णाङ्क ret = -1;
+	पूर्णाङ्क peek;
 
-	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	खाता *f = !म_भेद(file, "-") ? मानक_निवेश : ख_खोलो(file, "r");
+	पूर्णाङ्क file_done = 0;
 
-	if (!f) {
+	यदि (!f) {
 		error_errno("cannot open mbox %s", file);
-		goto out;
+		गच्छ out;
 	}
 
-	if (isatty(fileno(f)))
+	यदि (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
-	do {
-		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+	कुरु {
+		peek = ख_अक्षर_लो(f);
+		यदि (peek == खातापूर्ण) {
+			यदि (f == मानक_निवेश)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
-				fclose(f);
+			अन्यथा {
+				ख_बंद(f);
 				error(_("empty mbox: '%s'"), file);
 			}
-			goto out;
+			गच्छ out;
 		}
-	} while (isspace(peek));
-	ungetc(peek, f);
+	} यावत् (है_खाली(peek));
+	अक्षर_वापस(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	यदि (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		यदि (f != मानक_निवेश) {
 			error("cannot read mbox %s", file);
-			goto out;
+			गच्छ out;
 		}
 		file_done = 1;
 	}
 
-	while (!file_done) {
-		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
+	यावत् (!file_done) {
+		वर्ण *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		file_done = split_one(f, name, allow_bare);
-		free(name);
+		मुक्त(name);
 	}
 
-	if (f != stdin)
-		fclose(f);
+	यदि (f != मानक_निवेश)
+		ख_बंद(f);
 
 	ret = skip;
 out:
-	return ret;
+	प्रत्यागम ret;
 }
 
-int cmd_mailsplit(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णाङ्क cmd_mailsplit(पूर्णाङ्क argc,
+		  ध्रुव वर्ण **argv,
+		  ध्रुव वर्ण *prefix,
+		  संरचना repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
-	const char *dir = NULL;
-	const char **argp;
-	static const char *stdin_only[] = { "-", NULL };
+	पूर्णाङ्क nr = 0, nr_prec = 4, अंक = 0;
+	पूर्णाङ्क allow_bare = 0;
+	ध्रुव वर्ण *dir = रिक्त;
+	ध्रुव वर्ण **argp;
+	स्थिर ध्रुव वर्ण *stdin_only[] = { "-", रिक्त };
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
-	for (argp = argv+1; *argp; argp++) {
-		const char *arg = *argp;
+	प्रति (argp = argv+1; *argp; argp++) {
+		ध्रुव वर्ण *arg = *argp;
 
-		if (arg[0] != '-')
-			break;
+		यदि (arg[0] != '-')
+			भङ्ग;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
-			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+		यदि ( arg[1] == 'd' ) {
+			nr_prec = म_से_दीर्घ(arg+2, रिक्त, 10);
+			यदि (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
-			continue;
-		} else if ( arg[1] == 'f' ) {
-			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+			अनुवर्त;
+		} अन्यथा यदि ( arg[1] == 'f' ) {
+			nr = म_से_दीर्घ(arg+2, रिक्त, 10);
+		} अन्यथा यदि ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} अन्यथा यदि (!म_भेद(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} अन्यथा यदि ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} अन्यथा यदि (!म_भेद(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} अन्यथा यदि ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
-			break;
-		} else {
+			भङ्ग;
+		} अन्यथा {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	यदि ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
-		switch (argc - (argp-argv)) {
-		case 1:
+		विकल्प (argc - (argp-argv)) {
+		पक्ष 1:
 			dir = argp[0];
 			argp = stdin_only;
-			break;
-		case 2:
+			भङ्ग;
+		पक्ष 2:
 			stdin_only[0] = argp[0];
 			dir = argp[1];
 			argp = stdin_only;
-			break;
-		default:
+			भङ्ग;
+		स्वभाव:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} अन्यथा {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		यदि ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
-		const char *arg = *argp++;
-		struct stat argstat;
-		int ret = 0;
+	यावत् (*argp) {
+		ध्रुव वर्ण *arg = *argp++;
+		संरचना stat argstat;
+		पूर्णाङ्क ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
+		यदि (arg[0] == '-' && arg[1] == 0) {
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+			यदि (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				प्रत्यागम 1;
 			}
-			num += (ret - nr);
+			अंक += (ret - nr);
 			nr = ret;
-			continue;
+			अनुवर्त;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		यदि (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			प्रत्यागम 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
+		यदि (S_ISDIR(argstat.st_mode))
 			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
+		अन्यथा
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		यदि (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			प्रत्यागम 1;
 		}
-		num += (ret - nr);
+		अंक += (ret - nr);
 		nr = ret;
 	}
 
-	printf("%d\n", num);
+	म_लिखो("%d\n", अंक);
 
-	return 0;
+	प्रत्यागम 0;
 }
