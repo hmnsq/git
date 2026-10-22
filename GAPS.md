@@ -1,0 +1,562 @@
+# What is still missing
+
+76 languages. Each line says in how many languages it is missing.
+
+## Files in languages BURP cannot read yet
+
+
+## Keywords with no word in a language's table
+
+- guru:size_t: 71
+- guru:stderr: 71
+- guru:fprintf: 71
+- guru:stdout: 71
+- guru:stdin: 71
+- guru:FILE: 71
+- guru:errno: 71
+- guru:rename: 71
+- guru:fclose: 71
+- guru:EOF: 71
+- guru:close: 71
+- guru:strchr: 71
+- guru:fputs: 71
+- guru:fputc: 71
+- guru:getenv: 71
+- guru:fflush: 71
+- guru:fopen: 71
+- guru:va_list: 71
+- guru:time: 71
+- guru:strtoul: 71
+- guru:fwrite: 71
+- guru:memcmp: 71
+- guru:va_start: 71
+- guru:va_end: 71
+- guru:strtol: 71
+- guru:tm: 71
+- guru:mkdir: 71
+- guru:atoi: 71
+- guru:strerror: 71
+- guru:tmpfile: 71
+- guru:strrchr: 71
+- guru:fgets: 71
+- guru:strspn: 71
+- guru:time_t: 71
+- guru:fread: 71
+- guru:fstat: 71
+- guru:DIR: 71
+- guru:opendir: 71
+- guru:closedir: 71
+- guru:rmdir: 71
+- guru:chdir: 71
+- guru:SIG_IGN: 71
+- guru:feof: 71
+- guru:putc: 71
+- guru:strcspn: 71
+- guru:atexit: 71
+- guru:tolower: 71
+- guru:perror: 71
+- guru:ferror: 71
+- guru:labs: 71
+- guru:va_arg: 71
+- guru:memchr: 71
+- guru:readdir: 71
+- guru:vfprintf: 71
+- guru:SEEK_SET: 71
+- guru:dirname: 71
+- guru:freopen: 71
+- guru:fgetc: 71
+- guru:ungetc: 71
+- guru:ULONG_MAX: 71
+- guru:abort: 71
+- guru:memmove: 71
+- guru:fseek: 71
+- guru:setvbuf: 71
+- guru:BUFSIZ: 71
+- guru:isxdigit: 71
+- guru:sig_atomic_t: 71
+- guru:fscanf: 71
+- guru:kill: 71
+- guru:rewind: 71
+- guru:ERANGE: 71
+- guru:SEEK_CUR: 71
+- guru:SIG_DFL: 71
+- guru:clearerr: 71
+- guru:bsearch: 71
+- guru:vprintf: 71
+- guru:strcmp: 70
+- guru:memset: 70
+- guru:puts: 70
+- guru:open: 70
+- guru:log: 67
+- guru:#define: 66
+- guru:#endif: 66
+- guru:#ifndef: 66
+- guru:#ifdef: 66
+- guru:#undef: 66
+- guru:unsigned: 62
+- guru:printf: 62
+- guru:strlen: 62
+- guru:long: 62
+- guru:exit: 62
+- guru:putchar: 62
+- guru:strstr: 62
+- guru:memcpy: 62
+- guru:isspace: 62
+- guru:strncmp: 62
+- guru:isdigit: 62
+- guru:short: 62
+- guru:INT_MAX: 62
+- guru:isalpha: 62
+- guru:template: 62
+- guru:signed: 62
+- guru:toupper: 62
+- guru:const: 25
+- guru:static: 25
+- guru:NULL: 25
+- guru:void: 25
+- guru:free: 25
+- guru:goto: 25
+- guru:continue: 25
+- guru:switch: 25
+- guru:default: 25
+- guru:assert: 25
+- guru:read: 25
+- guru:do: 25
+- guru:typedef: 25
+- guru:raise: 25
+- guru:private: 25
+- guru:#elif: 25
+- guru:extern: 25
+- guru:for: 9
+- guru:struct: 9
+- guru:char: 9
+- guru:case: 9
+- guru:break: 9
+- guru:enum: 9
+- guru:sizeof: 9
+- guru:inline: 9
+- guru:signal: 9
+- guru:union: 9
+- guru:volatile: 9
+- guru:if: 1
+- guru:int: 1
+- guru:return: 1
+- guru:else: 1
+- guru:while: 1
+- guru:#else: 1
+- guru:#if: 1
+
+## Names with no dictionary entry (the most common first)
+
+- `_`: 76
+- `i`: 76
+- `buf`: 76
+- `the_repository`: 76
+- `N_`: 76
+- `oid`: 76
+- `opts`: 76
+- `die`: 76
+- `argv`: 76
+- `argc`: 76
+- `ret`: 76
+- `name`: 76
+- `repo`: 76
+- `arg`: 76
+- `p`: 76
+- `state`: 76
+- `options`: 76
+- `commit`: 76
+- `opt`: 76
+- `flags`: 76
+- `strbuf`: 76
+- `nr`: 76
+- `rev`: 76
+- `len`: 76
+- `sb`: 76
+- `ref`: 76
+- `type`: 76
+- `cmd`: 76
+- `revs`: 76
+- `STRBUF_INIT`: 76
+- `error`: 76
+- `object_id`: 76
+- `strbuf_release`: 76
+- `object`: 76
+- `info`: 76
+- `OPT_BOOL`: 76
+- `option`: 76
+- `cfg`: 76
+- `e`: 76
+- `obj`: 76
+- `s`: 76
+- `repository`: 76
+- `remote`: 76
+- `list`: 76
+- `var`: 76
+- `ce`: 76
+- `b`: 76
+- `c`: 76
+- `objects`: 76
+- `v`: 76
+- `err`: 76
+- `strbuf_addf`: 76
+- `dir`: 76
+- `pathspec`: 76
+- `ctx`: 76
+- `t`: 76
+- `quiet`: 76
+- `format`: 76
+- `res`: 76
+- `cp`: 76
+- `unset`: 76
+- `strbuf_addstr`: 76
+- `refname`: 76
+- `branch`: 76
+- `diffopt`: 76
+- `pos`: 76
+- `o`: 76
+- `n`: 76
+- `st`: 76
+- `fn`: 76
+- `string_list`: 76
+- `r`: 76
+- `parse_options`: 76
+- `ent`: 76
+- `string`: 76
+- `get_main_ref_store`: 76
+- `k`: 76
+- `parents`: 76
+- `cleanup`: 76
+- `fd`: 76
+- `pl`: 76
+- `fp`: 76
+- `transaction`: 76
+- `old_oid`: 76
+- `file`: 76
+- `warning`: 76
+- `strbuf_reset`: 76
+- `idx`: 76
+- `terms`: 76
+- `PARSE_OPT_NONEG`: 76
+- `rev_info`: 76
+- `filename`: 76
+- `OPT_STRING`: 76
+- `filter`: 76
+- `the_hash_algo`: 76
+- `BUG`: 76
+- `force`: 76
+- `xstrdup`: 76
+- `string_list_clear`: 76
+- `a`: 76
+- `transport`: 76
+- `f`: 76
+- `src`: 76
+- `cb`: 76
+- `OPT_CALLBACK_F`: 76
+- `new_oid`: 76
+- `die_errno`: 76
+- `d`: 76
+- `usage_with_options`: 76
+- `usage`: 76
+- `j`: 76
+- `repo_config`: 76
+- `hash_algo`: 76
+- `command`: 76
+- `url`: 76
+- `dst`: 76
+- `verbose`: 76
+- `object_type`: 76
+- `git_cmd`: 76
+- `string_list_append`: 76
+- `hash`: 76
+- `wt`: 76
+- `OPT_SUBCOMMAND`: 76
+- `rm`: 76
+- `strvec_pushl`: 76
+- `lm`: 76
+- `strbuf_addch`: 76
+- `starts_with`: 76
+- `action`: 76
+- `sub`: 76
+- `pack`: 76
+- `USE_THE_REPOSITORY_VARIABLE`: 76
+- `git_config_bool`: 76
+- `entries`: 76
+- `oidcpy`: 76
+- `strvec_pushf`: 76
+- `commit_list`: 76
+- `is_null_oid`: 76
+- `iter`: 76
+- `ident`: 76
+- `new_branch_info`: 76
+- `util`: 76
+- `report`: 76
+- `off_t`: 76
+- `versions`: 76
+- `cache`: 76
+- `command_buf`: 76
+- `STRING_LIST_INIT_DUP`: 76
+- `refs`: 76
+- `uintmax_t`: 76
+- `ptr`: 76
+- `strvec`: 76
+- `repo_get_oid`: 76
+- `abbrev`: 76
+- `git_default_config`: 76
+- `xstrfmt`: 76
+- `worktrees`: 76
+- `istate`: 76
+- `batch`: 76
+- `env`: 76
+- `FREE_AND_NULL`: 76
+- `fprintf_ln`: 76
+- `worktree`: 76
+- `val`: 76
+- `location_opts`: 76
+- `str`: 76
+- `commands`: 76
+- `filter_options`: 76
+- `oe`: 76
+- `displaypath`: 76
+- `BUG_ON_OPT_NEG`: 76
+- `stat`: 76
+- `remoteheads`: 76
+- `display_state`: 76
+- `config`: 76
+- `suc`: 76
+- `original`: 76
+- `l`: 76
+- `mark`: 76
+- `stats`: 76
+- `PARSE_OPT_NOARG`: 76
+- `cur`: 76
+- `PRIuMAX`: 76
+- `rs`: 76
+- `strbuf_detach`: 76
+- `PARSE_OPT_OPTARG`: 76
+- `remote_name`: 76
+- `kvi`: 76
+- `OPT_CMDMODE`: 76
+- `refspec`: 76
+- `si`: 76
+- `av`: 76
+- `ac`: 76
+- `uint32_t`: 76
+- `fmt`: 76
+- `branch_name`: 76
+- `new_branch`: 76
+- `OBJ_COMMIT`: 76
+- `recurse_submodules`: 76
+- `cnt`: 76
+- `interactive_opts`: 76
+- `oideq`: 76
+- `long_name`: 76
+- `rpt`: 76
+- `STRVEC_INIT`: 76
+- `output`: 76
+- `ref_map`: 76
+- `STRING_LIST_INIT_NODUP`: 76
+- `output_format`: 76
+- `strvec_clear`: 76
+- `paths`: 76
+- `error_errno`: 76
+- `rc`: 76
+- `dest`: 76
+- `blob`: 76
+- `strategy`: 76
+- `OBJ_BLOB`: 76
+- `packed_git`: 76
+- `git_dir`: 76
+- `printf_ln`: 76
+- `reader`: 76
+- `reference`: 76
+- `m`: 76
+- `ref_name`: 76
+- `help`: 76
+- `nr_objects`: 76
+- `ps`: 76
+- `pending`: 76
+- `all`: 76
+- `ref_storage_format`: 76
+- `hexsz`: 76
+- `remote_refs`: 76
+- `S_ISDIR`: 76
+- `timestamp_t`: 76
+- `verbosity`: 76
+- `pack_name`: 76
+- `ud`: 76
+- `retval`: 76
+- `suspect`: 76
+- `oi`: 76
+- `stage`: 76
+- `cmdmode`: 76
+- `release_revisions`: 76
+- `signature`: 76
+- `pack_id`: 76
+- `from`: 76
+- `repo_init_revisions`: 76
+- `ci`: 76
+- `payload`: 76
+- `q`: 76
+- `cache_nr`: 76
+- `strcasecmp`: 76
+- `display_opts`: 76
+- `replay`: 76
+- `config_context`: 76
+- `am_state`: 76
+- `it`: 76
+- `choice`: 76
+- `cmp`: 76
+- `grep_opt`: 76
+- `settings`: 76
+- `author`: 76
+- `ofs`: 76
+- `reason`: 76
+- `mi`: 76
+- `endp`: 76
+- `type_name`: 76
+- `branch_info`: 76
+- `peeled`: 76
+- `ps_matched`: 76
+- `prepare_repo_settings`: 76
+- `oidclr`: 76
+- `subject`: 76
+- `DEFAULT_ABBREV`: 76
+- `actions`: 76
+- `commit_list_free`: 76
+- `DISABLE_SIGN_COMPARE_WARNINGS`: 76
+- `upstream`: 76
+- `flag`: 76
+- `strvec_pushv`: 76
+- `id`: 76
+- `committer`: 76
+- `local`: 76
+- `fast_import_state`: 76
+- `CALLOC_ARRAY`: 76
+- `UNINTERESTING`: 76
+- `null_oid`: 76
+- `old_branch_info`: 76
+- `one`: 76
+- `delta`: 76
+- `hdrlen`: 76
+- `w_curs`: 76
+- `strbuf_setlen`: 76
+- `spec`: 76
+- `stash`: 76
+- `me`: 76
+- `pack_list`: 76
+- `error_string`: 76
+- `bisect_terms`: 76
+- `xmalloc`: 76
+
+## Comments with no translation
+
+- unspecified: 76
+- fallthrough: 76
+- fallthru: 76
+- TODO: audit for interaction with sparse-index.: 76
+- !WITH_BREAKING_CHANGES: 76
+- nothing: 76
+- assert current thread holding state->main_lock: 76
+- Shared options: 76
+- FIXME: !overwrite_ignore: 76
+- Remember to update object flag allocation in object.h: 76
+- bundle internals use argv[1] as further parameters: 76
+- nothing to do: 76
+- FALLTHROUGH: 76
+- default on: 76
+- member name: 76
+- no "diff" UI options: 76
+- just not zero!: 76
+- Don't die - this feature is supported: 76
+- make sure off_t is sufficiently large not to wrap: 76
+- unset implies NULL arg, which is handled in our helper: 76
+- do nothing: 76
+- Return 0 if we will bust the pack-size limit: 76
+- Options passed to git-fetch: 76
+- already validated arguments: 76
+- Without -z, consume SP and use next argument: 76
+- With -z, read the next NUL-terminated line: 76
+- keep recording as empty commits: 76
+- add the null: 76
+- * Try to set sort keys from config. If config does not set any,
+	 * fall back on default (refname) s: 76
+- happy: 76
+- Prepare the path to put the result: 76
+- The singular version: 76
+- The plural version: 76
+- Give ngettext() the count: 76
+- treat '@' as a shortcut for 'HEAD': 76
+- default enabled: 76
+- no need to be strict, transport_set_option() will validate it again: 76
+- At this point, we need the_repository to match the cloned repo.: 76
+- default already initialized: 76
+- may die(): 76
+- * Make sure there is one revision (i.e. pending object),
+	 * and there is no revision filtering para: 76
+- Exporting modes: 76
+- Stripping modes: 76
+- Aborting modes: 76
+- Determine if we should auto-checkpoint.: 76
+- not used with inline_data, but makes gcc happy: 76
+- no command line request: 76
+- TRANSLATORS: e.g. error in tree 01bfda: <more explanation>: 76
+- Ignore exit code, as an empty crontab will return error.: 76
+- Purposefully not short-circuited to make sure all are called.: 76
+- * add_work() copies gs and thus assumes ownership of
+		 * its fields, so do not call grep_source_cle: 76
+- Exit if we're not in a partial clone: 76
+- * Mutex and conditional variable can't be statically-initialized on Windows.: 76
+- * Make sure at least "min" bytes are available in the buffer, and
+ * return the pointer to the buffe: 76
+- Write the last part of the buffer to stdout: 76
+- Don't say anything if head and upstream are the same.: 76
+- empty stdin is OK: 76
+- already up-to-date: 76
+- WITH_BREAKING_CHANGES: 76
+- write the template message before editing:: 76
+- fail if any missing objects are encountered: 76
+- silently allow ALL missing objects: 76
+- silently allow all missing PROMISOR objects: 76
+- rhs < 2^x <= lhs ?: 76
+- * We must not set ->data_ready before we wait on the
+		 * condition because the main thread may have: 76
+- leave ->working 1 so that this doesn't get more work assigned: 76
+- Partition the work amongst work threads.: 76
+- Start work threads.: 76
+- * Now let's wait for work completion.  Each time a thread is done
+	 * with its work, we steal half o: 76
+- cmp ~ p1 - p2: 76
+- p1 has the object, p2 doesn't: 76
+- p2 has the object, p1 doesn't: 76
+- Options passed to git-merge or git-rebase: 76
+- be quiet: 76
+- Check whether proc-receive exited abnormally: 76
+- good: 76
+- to be checked in update_shallow_ref(): 76
+- * v1 is just the original protocol with a version string,
+		 * so just fall through after writing th: 76
+- Strip end of line characters.: 76
+- * A NULL OID should not have a table annotation.: 76
+- already handled above: 76
+- If both heads/foo and tags/foo exists, get_sha1 would
+	 * get confused.: 76
+- NUL-terminate: will be fed to update-index -z: 76
+- Possibly a url relative to parent: 76
+- point at the head of path: 76
+- consume remaining arguments.: 76
+- Without -z, use the next argument: 76
+- With -z, use everything up to the next NUL: 76
+- Skip the delimiter: 76
+- DWIM: Infer --orphan when repo has no refs.: 76
+- do not touch unmerged paths: 76
+- do not touch non blobs: 76
+- if we are told to ignore, we are not adding removals: 76
+- takes no arguments: 76
+- Drop trailing slash for aesthetics: 76
+- "-u" was given but not "-A": 76
+- * Check the "pathspec '%s' did not match any files" block
+	 * below before enabling new magic.: 76
+- Turn "git add pathspec..." to "git add -A pathspec...": 76
+- Set up the default git porcelain excludes: 76
+- This picks up the paths that are not tracked: 76
