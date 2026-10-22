@@ -22,42 +22,42 @@
 #include "sparse-index.h"
 
 #define CHECKOUT_ALL 4
-static int nul_term_line;
-static int checkout_stage; /* default to checkout stage0 */
-static int ignore_skip_worktree; /* default to 0 */
-static int to_tempfile = -1;
-static char topath[4][TEMPORARY_FILENAME_LENGTH + 1];
+static puur_naa_nka nul_term_line;
+static puur_naa_nka checkout_stage; /* default to checkout stage0 */
+static puur_naa_nka ignore_skip_worktree; /* default to 0 */
+static puur_naa_nka to_tempfile = -1;
+static var_na topath[4][TEMPORARY_FILENAME_LENGTH + 1];
 
-static struct checkout state = CHECKOUT_INIT;
+static sa_nracanaa checkout state = CHECKOUT_INIT;
 
-static void write_tempfile_record(const char *name, const char *prefix)
+static void write_tempfile_record(const var_na *name, const var_na *prefix)
 {
-	int i;
-	int have_tempname = 0;
+	puur_naa_nka i;
+	puur_naa_nka have_tempname = 0;
 
-	if (CHECKOUT_ALL == checkout_stage) {
+	ᨀᨘ (CHECKOUT_ALL == checkout_stage) {
 		for (i = 1; i < 4; i++)
-			if (topath[i][0]) {
+			ᨀᨘ (topath[i][0]) {
 				have_tempname = 1;
-				break;
+				bha_nga;
 			}
 
-		if (have_tempname) {
+		ᨀᨘ (have_tempname) {
 			for (i = 1; i < 4; i++) {
-				if (i > 1)
+				ᨀᨘ (i > 1)
 					putchar(' ');
-				if (topath[i][0])
+				ᨀᨘ (topath[i][0])
 					fputs(topath[i], stdout);
-				else
+				ᨀᨘᨁ
 					putchar('.');
 			}
 		}
-	} else if (topath[checkout_stage][0]) {
+	} ᨀᨘᨁ ᨀᨘ (topath[checkout_stage][0]) {
 		have_tempname = 1;
 		fputs(topath[checkout_stage], stdout);
 	}
 
-	if (have_tempname) {
+	ᨀᨘ (have_tempname) {
 		putchar('\t');
 		write_name_quoted_relative(name, prefix, stdout,
 					   nul_term_line ? '\0' : '\n');
@@ -68,46 +68,46 @@ static void write_tempfile_record(const char *name, const char *prefix)
 	}
 }
 
-static int checkout_file(struct index_state *index, const char *name, const char *prefix)
+static puur_naa_nka checkout_file(sa_nracanaa index_state *index, const var_na *name, const var_na *prefix)
 {
-	int namelen = strlen(name);
-	int pos = index_name_pos(index, name, namelen);
-	int has_same_name = 0;
-	int is_file = 0;
-	int is_skipped = 1;
-	int did_checkout = 0;
-	int errs = 0;
+	puur_naa_nka namelen = strlen(name);
+	puur_naa_nka pos = index_name_pos(index, name, namelen);
+	puur_naa_nka has_same_name = 0;
+	puur_naa_nka is_file = 0;
+	puur_naa_nka is_skipped = 1;
+	puur_naa_nka did_checkout = 0;
+	puur_naa_nka errs = 0;
 
-	if (pos < 0)
+	ᨀᨘ (pos < 0)
 		pos = -pos - 1;
 
-	while (pos < index->cache_nr) {
-		struct cache_entry *ce = index->cache[pos];
-		if (ce_namelen(ce) != namelen ||
+	ᨀᨛ (pos < index->cache_nr) {
+		sa_nracanaa cache_entry *ce = index->cache[pos];
+		ᨀᨘ (ce_namelen(ce) != namelen ||
 		    memcmp(ce->name, name, namelen))
-			break;
+			bha_nga;
 		has_same_name = 1;
 		pos++;
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			break;
+		ᨀᨘ (S_ISSPARSEDIR(ce->ce_mode))
+			bha_nga;
 		is_file = 1;
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			break;
+		ᨀᨘ (!ignore_skip_worktree && ce_skip_worktree(ce))
+			bha_nga;
 		is_skipped = 0;
-		if (ce_stage(ce) != checkout_stage
+		ᨀᨘ (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
 			continue;
 		did_checkout = 1;
-		if (checkout_entry(ce, &state,
+		ᨀᨘ (checkout_entry(ce, &state,
 				   to_tempfile ? topath[ce_stage(ce)] : NULL,
 				   NULL) < 0)
 			errs++;
 	}
 
-	if (did_checkout) {
-		if (to_tempfile)
+	ᨀᨘ (did_checkout) {
+		ᨀᨘ (to_tempfile)
 			write_tempfile_record(name, prefix);
-		return errs > 0 ? -1 : 0;
+		ᨀᨘᨒ errs > 0 ? -1 : 0;
 	}
 
 	/*
@@ -115,38 +115,38 @@ static int checkout_file(struct index_state *index, const char *name, const char
 	 * because we did find an entry but it was stage 0, that's not an
 	 * error.
 	 */
-	if (has_same_name && checkout_stage == CHECKOUT_ALL)
-		return 0;
+	ᨀᨘ (has_same_name && checkout_stage == CHECKOUT_ALL)
+		ᨀᨘᨒ 0;
 
-	if (!state.quiet) {
+	ᨀᨘ (!state.quiet) {
 		fprintf(stderr, "git checkout-index: %s ", name);
-		if (!has_same_name)
+		ᨀᨘ (!has_same_name)
 			fprintf(stderr, "is not in the cache");
-		else if (!is_file)
+		ᨀᨘᨁ ᨀᨘ (!is_file)
 			fprintf(stderr, "is a sparse directory");
-		else if (is_skipped)
+		ᨀᨘᨁ ᨀᨘ (is_skipped)
 			fprintf(stderr, "has skip-worktree enabled; "
 					"use '--ignore-skip-worktree-bits' to checkout");
-		else if (checkout_stage)
+		ᨀᨘᨁ ᨀᨘ (checkout_stage)
 			fprintf(stderr, "does not exist at stage %d",
 				checkout_stage);
-		else
+		ᨀᨘᨁ
 			fprintf(stderr, "is unmerged");
 		fputc('\n', stderr);
 	}
-	return -1;
+	ᨀᨘᨒ -1;
 }
 
-static int checkout_all(struct index_state *index, const char *prefix, int prefix_length)
+static puur_naa_nka checkout_all(sa_nracanaa index_state *index, const var_na *prefix, puur_naa_nka prefix_length)
 {
-	int i, errs = 0;
-	struct cache_entry *last_ce = NULL;
+	puur_naa_nka i, errs = 0;
+	sa_nracanaa cache_entry *last_ce = NULL;
 
 	for (i = 0; i < index->cache_nr ; i++) {
-		struct cache_entry *ce = index->cache[i];
+		sa_nracanaa cache_entry *ce = index->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			if (!ce_skip_worktree(ce))
+		ᨀᨘ (S_ISSPARSEDIR(ce->ce_mode)) {
+			ᨀᨘ (!ce_skip_worktree(ce))
 				BUG("sparse directory '%s' does not have skip-worktree set", ce->name);
 
 			/*
@@ -155,76 +155,76 @@ static int checkout_all(struct index_state *index, const char *prefix, int prefi
 			 * the loop on the current index position (now pointing to the
 			 * first entry inside the expanded sparse directory).
 			 */
-			if (ignore_skip_worktree) {
+			ᨀᨘ (ignore_skip_worktree) {
 				ensure_full_index(index);
 				ce = index->cache[i];
 			}
 		}
 
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
+		ᨀᨘ (!ignore_skip_worktree && ce_skip_worktree(ce))
 			continue;
-		if (ce_stage(ce) != checkout_stage
+		ᨀᨘ (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
 			continue;
-		if (prefix && *prefix &&
+		ᨀᨘ (prefix && *prefix &&
 		    (ce_namelen(ce) <= prefix_length ||
 		     memcmp(prefix, ce->name, prefix_length)))
 			continue;
-		if (last_ce && to_tempfile) {
-			if (ce_namelen(last_ce) != ce_namelen(ce)
+		ᨀᨘ (last_ce && to_tempfile) {
+			ᨀᨘ (ce_namelen(last_ce) != ce_namelen(ce)
 			    || memcmp(last_ce->name, ce->name, ce_namelen(ce)))
 				write_tempfile_record(last_ce->name, prefix);
 		}
-		if (checkout_entry(ce, &state,
+		ᨀᨘ (checkout_entry(ce, &state,
 				   to_tempfile ? topath[ce_stage(ce)] : NULL,
 				   NULL) < 0)
 			errs++;
 		last_ce = ce;
 	}
-	if (last_ce && to_tempfile)
+	ᨀᨘ (last_ce && to_tempfile)
 		write_tempfile_record(last_ce->name, prefix);
-	return !!errs;
+	ᨀᨘᨒ !!errs;
 }
 
-static const char * const builtin_checkout_index_usage[] = {
+static const var_na * const builtin_checkout_index_usage[] = {
 	N_("git checkout-index [<options>] [--] [<file>...]"),
 	NULL
 };
 
-static int option_parse_stage(const struct option *opt,
-			      const char *arg, int unset)
+static puur_naa_nka option_parse_stage(const sa_nracanaa option *opt,
+			      const var_na *arg, puur_naa_nka unset)
 {
-	int *stage = opt->value;
+	puur_naa_nka *stage = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "all")) {
+	ᨀᨘ (!strcmp(arg, "all")) {
 		*stage = CHECKOUT_ALL;
-	} else {
-		int ch = arg[0];
-		if ('1' <= ch && ch <= '3')
+	} ᨀᨘᨁ {
+		puur_naa_nka ch = arg[0];
+		ᨀᨘ ('1' <= ch && ch <= '3')
 			*stage = arg[0] - '0';
-		else
+		ᨀᨘᨁ
 			die(_("stage should be between 1 and 3 or all"));
 	}
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-int cmd_checkout_index(int argc,
-		       const char **argv,
-		       const char *prefix,
-		       struct repository *repo)
+puur_naa_nka cmd_checkout_index(puur_naa_nka argc,
+		       const var_na **argv,
+		       const var_na *prefix,
+		       sa_nracanaa repository *repo)
 {
-	int i;
-	struct lock_file lock_file = LOCK_INIT;
-	int all = 0;
-	int read_from_stdin = 0;
-	int prefix_length;
-	int force = 0, quiet = 0, not_new = 0;
-	int index_opt = 0;
-	int err = 0;
-	int pc_workers, pc_threshold;
-	struct option builtin_checkout_index_options[] = {
+	puur_naa_nka i;
+	sa_nracanaa lock_file lock_file = LOCK_INIT;
+	puur_naa_nka all = 0;
+	puur_naa_nka read_from_stdin = 0;
+	puur_naa_nka prefix_length;
+	puur_naa_nka force = 0, quiet = 0, not_new = 0;
+	puur_naa_nka index_opt = 0;
+	puur_naa_nka err = 0;
+	puur_naa_nka pc_workers, pc_threshold;
+	sa_nracanaa option builtin_checkout_index_options[] = {
 		OPT_BOOL('a', "all", &all,
 			N_("check out all files in the index")),
 		OPT_BOOL(0, "ignore-skip-worktree-bits", &ignore_skip_worktree,
@@ -259,7 +259,7 @@ int cmd_checkout_index(int argc,
 	prepare_repo_settings(repo);
 	repo->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(repo) < 0) {
+	ᨀᨘ (repo_read_index(repo) < 0) {
 		die("invalid cache");
 	}
 
@@ -270,20 +270,20 @@ int cmd_checkout_index(int argc,
 	state.quiet = quiet;
 	state.not_new = not_new;
 
-	if (!state.base_dir)
+	ᨀᨘ (!state.base_dir)
 		state.base_dir = "";
 	state.base_dir_len = strlen(state.base_dir);
 
-	if (to_tempfile < 0)
+	ᨀᨘ (to_tempfile < 0)
 		to_tempfile = (checkout_stage == CHECKOUT_ALL);
-	if (!to_tempfile && checkout_stage == CHECKOUT_ALL)
+	ᨀᨘ (!to_tempfile && checkout_stage == CHECKOUT_ALL)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--stage=all", "--no-temp");
 
 	/*
 	 * when --prefix is specified we do not want to update cache.
 	 */
-	if (index_opt && !state.base_dir_len && !to_tempfile) {
+	ᨀᨘ (index_opt && !state.base_dir_len && !to_tempfile) {
 		state.refresh_cache = 1;
 		state.istate = repo->index;
 		repo_hold_locked_index(repo, &lock_file,
@@ -291,37 +291,37 @@ int cmd_checkout_index(int argc,
 	}
 
 	get_parallel_checkout_configs(&pc_workers, &pc_threshold);
-	if (pc_workers > 1)
+	ᨀᨘ (pc_workers > 1)
 		init_parallel_checkout();
 
 	/* Check out named files first */
 	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		char *p;
+		const var_na *arg = argv[i];
+		var_na *p;
 
-		if (all)
+		ᨀᨘ (all)
 			die("git checkout-index: don't mix '--all' and explicit filenames");
-		if (read_from_stdin)
+		ᨀᨘ (read_from_stdin)
 			die("git checkout-index: don't mix '--stdin' and explicit filenames");
 		p = prefix_path(repo, prefix, prefix_length, arg);
 		err |= checkout_file(repo->index, p, prefix);
 		free(p);
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	ᨀᨘ (read_from_stdin) {
+		sa_nracanaa strbuf buf = STRBUF_INIT;
+		sa_nracanaa strbuf unquoted = STRBUF_INIT;
 		strbuf_getline_fn getline_fn;
 
-		if (all)
+		ᨀᨘ (all)
 			die("git checkout-index: don't mix '--all' and '--stdin'");
 
 		getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		ᨀᨛ (getline_fn(&buf, stdin) != EOF) {
+			var_na *p;
+			ᨀᨘ (!nul_term_line && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				ᨀᨘ (unquote_c_style(&unquoted, buf.buf, NULL))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
@@ -333,18 +333,18 @@ int cmd_checkout_index(int argc,
 		strbuf_release(&buf);
 	}
 
-	if (all)
+	ᨀᨘ (all)
 		err |= checkout_all(repo->index, prefix, prefix_length);
 
-	if (pc_workers > 1)
+	ᨀᨘ (pc_workers > 1)
 		err |= run_parallel_checkout(&state, pc_workers, pc_threshold,
 					     NULL, NULL);
 
-	if (err)
-		return 1;
+	ᨀᨘ (err)
+		ᨀᨘᨒ 1;
 
-	if (is_lock_file_locked(&lock_file) &&
+	ᨀᨘ (is_lock_file_locked(&lock_file) &&
 	    write_locked_index(repo->index, &lock_file, COMMIT_LOCK))
 		die("Unable to write new index file");
-	return 0;
+	ᨀᨘᨒ 0;
 }

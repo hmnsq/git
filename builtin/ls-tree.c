@@ -18,114 +18,114 @@
 #include "parse-options.h"
 #include "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+static const var_na * const ls_tree_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
 	NULL
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+static void expand_objectsize(sa_nracanaa strbuf *line, const sa_nracanaa object_id *oid,
+			      const ga_nanaa object_type type, unsigned puur_naa_nka padded)
 {
-	static const char padding[] = "       ";
+	static const var_na padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
 	size_t orig_len = line->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	ᨀᨘ (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+		ᨀᨘ (odb_read_object_info(the_repository->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
 		strbuf_add_uint(line, size);
-	} else {
+	} ᨀᨘᨁ {
 		strbuf_addstr(line, "-");
 	}
 	len = line->len - orig_len;
-	if (len < min_len)
+	ᨀᨘ (len < min_len)
 		strbuf_insert(line, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
+sa_nracanaa ls_tree_options {
 	unsigned null_termination:1;
-	int abbrev;
-	enum ls_tree_path_options {
+	puur_naa_nka abbrev;
+	ga_nanaa ls_tree_path_options {
 		LS_RECURSIVE = 1 << 0,
 		LS_TREE_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
-	struct pathspec pathspec;
-	const char *prefix;
-	const char *format;
+	sa_nracanaa pathspec pathspec;
+	const var_na *prefix;
+	const var_na *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
-			  size_t baselen, const char *pathname)
+static puur_naa_nka show_recursive(sa_nracanaa ls_tree_options *options, const var_na *base,
+			  size_t baselen, const var_na *pathname)
 {
-	int i;
+	puur_naa_nka i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	ᨀᨘ (options->ls_options & LS_RECURSIVE)
+		ᨀᨘᨒ 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	ᨀᨘ (!options->pathspec.nr)
+		ᨀᨘᨒ 0;
 
 	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
+		const var_na *spec = options->pathspec.items[i].match;
 		size_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
+		ᨀᨘ (strncmp(base, spec, baselen))
 			continue;
 		len = strlen(pathname);
 		spec += baselen;
 		speclen = strlen(spec);
-		if (speclen <= len)
+		ᨀᨘ (speclen <= len)
 			continue;
-		if (spec[len] && spec[len] != '/')
+		ᨀᨘ (spec[len] && spec[len] != '/')
 			continue;
-		if (memcmp(pathname, spec, len))
+		ᨀᨘ (memcmp(pathname, spec, len))
 			continue;
-		return 1;
+		ᨀᨘᨒ 1;
 	}
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
-			 const char *pathname, unsigned mode, void *context)
+static puur_naa_nka show_tree_fmt(const sa_nracanaa object_id *oid, sa_nracanaa strbuf *base,
+			 const var_na *pathname, unsigned mode, void *context)
 {
-	struct ls_tree_options *options = context;
-	int recurse = 0;
-	struct strbuf sb = STRBUF_INIT;
-	enum object_type type = object_type(mode);
-	const char *format = options->format;
+	sa_nracanaa ls_tree_options *options = context;
+	puur_naa_nka recurse = 0;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	ga_nanaa object_type type = object_type(mode);
+	const var_na *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
+	ᨀᨘ (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
 		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	ᨀᨘ (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
+		ᨀᨘᨒ recurse;
+	ᨀᨘ (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
+		ᨀᨘᨒ 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	ᨀᨛ (strbuf_expand_step(&sb, &format)) {
 		size_t len;
 
-		if (skip_prefix(format, "%", &format))
+		ᨀᨘ (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		ᨀᨘᨁ ᨀᨘ ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		ᨀᨘᨁ ᨀᨘ (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		ᨀᨘᨁ ᨀᨘ (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		ᨀᨘᨁ ᨀᨘ (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		ᨀᨘᨁ ᨀᨘ (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
+		ᨀᨘᨁ ᨀᨘ (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
-			const char *name;
-			const char *prefix = options->prefix;
-			struct strbuf sbuf = STRBUF_INIT;
+		ᨀᨘᨁ ᨀᨘ (skip_prefix(format, "(path)", &format)) {
+			const var_na *name;
+			const var_na *prefix = options->prefix;
+			sa_nracanaa strbuf sbuf = STRBUF_INIT;
 			size_t baselen = base->len;
 
 			strbuf_addstr(base, pathname);
@@ -133,168 +133,168 @@ static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
 			quote_c_style(name, &sb, NULL, 0);
 			strbuf_setlen(base, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} ᨀᨘᨁ
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	ᨀᨘᨒ recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
-			    struct strbuf *base, const char *pathname,
-			    enum object_type type)
+static puur_naa_nka show_tree_common(sa_nracanaa ls_tree_options *options, puur_naa_nka *recurse,
+			    sa_nracanaa strbuf *base, const var_na *pathname,
+			    ga_nanaa object_type type)
 {
-	int ret = -1;
+	puur_naa_nka ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	ᨀᨘ (type == OBJ_BLOB) {
+		ᨀᨘ (options->ls_options & LS_TREE_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
+	} ᨀᨘᨁ ᨀᨘ (type == OBJ_TREE &&
 		   show_recursive(options, base->buf, base->len, pathname)) {
 		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+		ᨀᨘ (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	ᨀᨘᨒ ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
-					  struct strbuf *base,
-					  const char *pathname,
+static void show_tree_common_default_long(sa_nracanaa ls_tree_options *options,
+					  sa_nracanaa strbuf *base,
+					  const var_na *pathname,
 					  const size_t baselen)
 {
-	const char *prefix = options->prefix;
+	const var_na *prefix = options->prefix;
 
 	strbuf_addstr(base, pathname);
 
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	ᨀᨘ (options->null_termination) {
+		sa_nracanaa strbuf sb = STRBUF_INIT;
+		const var_na *name = relative_path(base->buf, prefix, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} ᨀᨘᨁ {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 
 	strbuf_setlen(base, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
-			     const char *pathname, unsigned mode,
+static puur_naa_nka show_tree_default(const sa_nracanaa object_id *oid, sa_nracanaa strbuf *base,
+			     const var_na *pathname, unsigned mode,
 			     void *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
+	sa_nracanaa ls_tree_options *options = context;
+	puur_naa_nka early;
+	puur_naa_nka recurse;
+	ga_nanaa object_type type = object_type(mode);
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	ᨀᨘ (early >= 0)
+		ᨀᨘᨒ early;
 
 	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
 	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	ᨀᨘᨒ recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
-			  const char *pathname, unsigned mode,
+static puur_naa_nka show_tree_long(const sa_nracanaa object_id *oid, sa_nracanaa strbuf *base,
+			  const var_na *pathname, unsigned mode,
 			  void *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	char size_text[24];
-	enum object_type type = object_type(mode);
+	sa_nracanaa ls_tree_options *options = context;
+	puur_naa_nka early;
+	puur_naa_nka recurse;
+	var_na size_text[24];
+	ga_nanaa object_type type = object_type(mode);
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	ᨀᨘ (early >= 0)
+		ᨀᨘᨒ early;
 
-	if (type == OBJ_BLOB) {
+	ᨀᨘ (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
-			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
-			xsnprintf(size_text, sizeof(size_text),
+		ᨀᨘ (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
+			xsnprintf(size_text, parimaa_na(size_text), "BAD");
+		ᨀᨘᨁ
+			xsnprintf(size_text, parimaa_na(size_text),
 				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
-		xsnprintf(size_text, sizeof(size_text), "-");
+	} ᨀᨘᨁ {
+		xsnprintf(size_text, parimaa_na(size_text), "-");
 	}
 
 	printf("%06o %s %s %7s\t", mode, type_name(type),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
 	       size_text);
 	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	ᨀᨘᨒ recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
-			       struct strbuf *base,
-			       const char *pathname, unsigned mode,
+static puur_naa_nka show_tree_name_only(const sa_nracanaa object_id *oid UNUSED,
+			       sa_nracanaa strbuf *base,
+			       const var_na *pathname, unsigned mode,
 			       void *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	sa_nracanaa ls_tree_options *options = context;
+	puur_naa_nka early;
+	puur_naa_nka recurse;
 	const size_t baselen = base->len;
-	enum object_type type = object_type(mode);
-	const char *prefix;
+	ga_nanaa object_type type = object_type(mode);
+	const var_na *prefix;
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	ᨀᨘ (early >= 0)
+		ᨀᨘᨒ early;
 
 	prefix = options->prefix;
 	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	ᨀᨘ (options->null_termination) {
+		sa_nracanaa strbuf sb = STRBUF_INIT;
+		const var_na *name = relative_path(base->buf, prefix, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} ᨀᨘᨁ {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 	strbuf_setlen(base, baselen);
-	return recurse;
+	ᨀᨘᨒ recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
-			    const char *pathname, unsigned mode,
+static puur_naa_nka show_tree_object(const sa_nracanaa object_id *oid, sa_nracanaa strbuf *base,
+			    const var_na *pathname, unsigned mode,
 			    void *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
-	const char *str;
+	sa_nracanaa ls_tree_options *options = context;
+	puur_naa_nka early;
+	puur_naa_nka recurse;
+	ga_nanaa object_type type = object_type(mode);
+	const var_na *str;
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	ᨀᨘ (early >= 0)
+		ᨀᨘᨒ early;
 
 	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	ᨀᨘ (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} ᨀᨘᨁ  {
 		puts(str);
 	}
-	return recurse;
+	ᨀᨘᨒ recurse;
 }
 
-enum ls_tree_cmdmode {
+ga_nanaa ls_tree_cmdmode {
 	MODE_DEFAULT = 0,
 	MODE_LONG,
 	MODE_NAME_ONLY,
@@ -302,13 +302,13 @@ enum ls_tree_cmdmode {
 	MODE_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
-	const char *const fmt;
+sa_nracanaa ls_tree_cmdmode_to_fmt {
+	ga_nanaa ls_tree_cmdmode mode;
+	const var_na *const fmt;
 	read_tree_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+static sa_nracanaa ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
 	{
 		.mode = MODE_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
@@ -335,20 +335,20 @@ static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
 	},
 };
 
-int cmd_ls_tree(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+puur_naa_nka cmd_ls_tree(puur_naa_nka argc,
+		const var_na **argv,
+		const var_na *prefix,
+		sa_nracanaa repository *repo UNUSED)
 {
-	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
+	sa_nracanaa object_id oid;
+	sa_nracanaa tree *tree;
+	puur_naa_nka i, full_tree = 0;
+	puur_naa_nka full_name = !prefix || !*prefix;
 	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
+	ga_nanaa ls_tree_cmdmode cmdmode = MODE_DEFAULT;
+	puur_naa_nka null_termination = 0;
+	sa_nracanaa ls_tree_options options = { 0 };
+	const sa_nracanaa option ls_tree_options[] = {
 		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
 			LS_TREE_ONLY),
 		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
@@ -375,8 +375,8 @@ int cmd_ls_tree(int argc,
 		OPT__ABBREV(&options.abbrev),
 		OPT_END()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	sa_nracanaa ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
+	puur_naa_nka ret;
 
 	repo_config(the_repository, git_default_config, NULL);
 
@@ -384,7 +384,7 @@ int cmd_ls_tree(int argc,
 			     ls_tree_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
+	ᨀᨘ (full_tree)
 		prefix = NULL;
 	options.prefix = full_name ? NULL : prefix;
 
@@ -393,21 +393,21 @@ int cmd_ls_tree(int argc,
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
+	ᨀᨘ (cmdmode == MODE_NAME_STATUS)
 		cmdmode = MODE_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
+	ᨀᨘ ( (LS_TREE_ONLY|LS_RECURSIVE) ==
 	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
+	ᨀᨘ (options.format && cmdmode)
 		usage_msg_opt(
 			_("--format can't be combined with other format-altering options"),
 			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
+	ᨀᨘ (argc < 1)
 		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+	ᨀᨘ (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -425,28 +425,28 @@ int cmd_ls_tree(int argc,
 		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
 	options.pathspec.has_wildcard = 0;
 	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	ᨀᨘ (!tree)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
+	ᨀᨛ (m2f) {
+		ᨀᨘ (!m2f->fmt) {
 			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
+		} ᨀᨘᨁ ᨀᨘ (options.format && !strcmp(options.format, m2f->fmt)) {
 			cmdmode = m2f->mode;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} ᨀᨘᨁ ᨀᨘ (!options.format && cmdmode == m2f->mode) {
 			fn = m2f->fn;
-		} else {
+		} ᨀᨘᨁ {
 			m2f++;
 			continue;
 		}
-		break;
+		bha_nga;
 	}
 
 	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	ᨀᨘᨒ ret;
 }

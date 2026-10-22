@@ -25,7 +25,7 @@
 #include "tag.h"
 #include "wildmatch.h"
 
-static const char * const git_replace_usage[] = {
+static const var_na * const git_replace_usage[] = {
 	N_("git replace [-f] <object> <replacement>"),
 	N_("git replace [-f] --edit <object>"),
 	N_("git replace [-f] --graft <commit> [<parent>...]"),
@@ -35,33 +35,33 @@ static const char * const git_replace_usage[] = {
 	NULL
 };
 
-enum replace_format {
+ga_nanaa replace_format {
 	REPLACE_FORMAT_SHORT,
 	REPLACE_FORMAT_MEDIUM,
 	REPLACE_FORMAT_LONG
 };
 
-struct show_data {
-	struct repository *repo;
-	const char *pattern;
-	enum replace_format format;
+sa_nracanaa show_data {
+	sa_nracanaa repository *repo;
+	const var_na *pattern;
+	ga_nanaa replace_format format;
 };
 
-static int show_reference(const struct reference *ref, void *cb_data)
+static puur_naa_nka show_reference(const sa_nracanaa reference *ref, void *cb_data)
 {
-	struct show_data *data = cb_data;
+	sa_nracanaa show_data *data = cb_data;
 
-	if (!wildmatch(data->pattern, ref->name, 0)) {
-		if (data->format == REPLACE_FORMAT_SHORT)
+	ᨀᨘ (!wildmatch(data->pattern, ref->name, 0)) {
+		ᨀᨘ (data->format == REPLACE_FORMAT_SHORT)
 			printf("%s\n", ref->name);
-		else if (data->format == REPLACE_FORMAT_MEDIUM)
+		ᨀᨘᨁ ᨀᨘ (data->format == REPLACE_FORMAT_MEDIUM)
 			printf("%s -> %s\n", ref->name, oid_to_hex(ref->oid));
-		else { /* data->format == REPLACE_FORMAT_LONG */
-			struct object_id object;
-			enum object_type obj_type, repl_type;
+		ᨀᨘᨁ { /* data->format == REPLACE_FORMAT_LONG */
+			sa_nracanaa object_id object;
+			ga_nanaa object_type obj_type, repl_type;
 
-			if (repo_get_oid(data->repo, ref->name, &object))
-				return error(_("failed to resolve '%s' as a valid ref"), ref->name);
+			ᨀᨘ (repo_get_oid(data->repo, ref->name, &object))
+				ᨀᨘᨒ error(_("failed to resolve '%s' as a valid ref"), ref->name);
 
 			obj_type = odb_read_object_info(data->repo->objects, &object, NULL);
 			repl_type = odb_read_object_info(data->repo->objects, ref->oid, NULL);
@@ -71,56 +71,56 @@ static int show_reference(const struct reference *ref, void *cb_data)
 		}
 	}
 
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-static int list_replace_refs(const char *pattern, const char *format)
+static puur_naa_nka list_replace_refs(const var_na *pattern, const var_na *format)
 {
-	struct show_data data;
+	sa_nracanaa show_data data;
 
 	data.repo = the_repository;
-	if (!pattern)
+	ᨀᨘ (!pattern)
 		pattern = "*";
 	data.pattern = pattern;
 
-	if (format == NULL || *format == '\0' || !strcmp(format, "short"))
+	ᨀᨘ (format == NULL || *format == '\0' || !strcmp(format, "short"))
 		data.format = REPLACE_FORMAT_SHORT;
-	else if (!strcmp(format, "medium"))
+	ᨀᨘᨁ ᨀᨘ (!strcmp(format, "medium"))
 		data.format = REPLACE_FORMAT_MEDIUM;
-	else if (!strcmp(format, "long"))
+	ᨀᨘᨁ ᨀᨘ (!strcmp(format, "long"))
 		data.format = REPLACE_FORMAT_LONG;
 	/*
 	 * Please update _git_replace() in git-completion.bash when
 	 * you add new format
 	 */
-	else
-		return error(_("invalid replace format '%s'\n"
+	ᨀᨘᨁ
+		ᨀᨘᨒ error(_("invalid replace format '%s'\n"
 			       "valid formats are 'short', 'medium' and 'long'"),
 			     format);
 
 	refs_for_each_replace_ref(get_main_ref_store(the_repository),
 				  show_reference, (void *)&data);
 
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-typedef int (*each_replace_name_fn)(const char *name, const char *ref,
-				    const struct object_id *oid);
+typedef puur_naa_nka (*each_replace_name_fn)(const var_na *name, const var_na *ref,
+				    const sa_nracanaa object_id *oid);
 
-static int for_each_replace_name(const char **argv, each_replace_name_fn fn)
+static puur_naa_nka for_each_replace_name(const var_na **argv, each_replace_name_fn fn)
 {
-	const char **p, *full_hex;
-	struct strbuf ref = STRBUF_INIT;
+	const var_na **p, *full_hex;
+	sa_nracanaa strbuf ref = STRBUF_INIT;
 	size_t base_len;
-	int had_error = 0;
-	struct object_id oid;
-	const char *git_replace_ref_base = ref_namespace[NAMESPACE_REPLACE].ref;
+	puur_naa_nka had_error = 0;
+	sa_nracanaa object_id oid;
+	const var_na *git_replace_ref_base = ref_namespace[NAMESPACE_REPLACE].ref;
 
 	strbuf_addstr(&ref, git_replace_ref_base);
 	base_len = ref.len;
 
 	for (p = argv; *p; p++) {
-		if (repo_get_oid(the_repository, *p, &oid)) {
+		ᨀᨘ (repo_get_oid(the_repository, *p, &oid)) {
 			error("failed to resolve '%s' as a valid ref", *p);
 			had_error = 1;
 			continue;
@@ -130,77 +130,77 @@ static int for_each_replace_name(const char **argv, each_replace_name_fn fn)
 		strbuf_add_oid_hex(&ref, &oid);
 		full_hex = ref.buf + base_len;
 
-		if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
+		ᨀᨘ (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
 			error(_("replace ref '%s' not found"), full_hex);
 			had_error = 1;
 			continue;
 		}
-		if (fn(full_hex, ref.buf, &oid))
+		ᨀᨘ (fn(full_hex, ref.buf, &oid))
 			had_error = 1;
 	}
 	strbuf_release(&ref);
-	return had_error;
+	ᨀᨘᨒ had_error;
 }
 
-static int delete_replace_ref(const char *name, const char *ref,
-			      const struct object_id *oid)
+static puur_naa_nka delete_replace_ref(const var_na *name, const var_na *ref,
+			      const sa_nracanaa object_id *oid)
 {
-	if (refs_delete_ref(get_main_ref_store(the_repository), NULL, ref, oid, 0))
-		return 1;
+	ᨀᨘ (refs_delete_ref(get_main_ref_store(the_repository), NULL, ref, oid, 0))
+		ᨀᨘᨒ 1;
 	printf_ln(_("Deleted replace ref '%s'"), name);
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-static int check_ref_valid(struct object_id *object,
-			    struct object_id *prev,
-			    struct strbuf *ref,
-			    int force)
+static puur_naa_nka check_ref_valid(sa_nracanaa object_id *object,
+			    sa_nracanaa object_id *prev,
+			    sa_nracanaa strbuf *ref,
+			    puur_naa_nka force)
 {
-	const char *git_replace_ref_base = ref_namespace[NAMESPACE_REPLACE].ref;
+	const var_na *git_replace_ref_base = ref_namespace[NAMESPACE_REPLACE].ref;
 
 	strbuf_reset(ref);
 	strbuf_addf(ref, "%s%s", git_replace_ref_base, oid_to_hex(object));
-	if (check_refname_format(ref->buf, 0))
-		return error(_("'%s' is not a valid ref name"), ref->buf);
+	ᨀᨘ (check_refname_format(ref->buf, 0))
+		ᨀᨘᨒ error(_("'%s' is not a valid ref name"), ref->buf);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), ref->buf, prev))
+	ᨀᨘ (refs_read_ref(get_main_ref_store(the_repository), ref->buf, prev))
 		oidclr(prev, the_repository->hash_algo);
-	else if (!force)
-		return error(_("replace ref '%s' already exists"), ref->buf);
-	return 0;
+	ᨀᨘᨁ ᨀᨘ (!force)
+		ᨀᨘᨒ error(_("replace ref '%s' already exists"), ref->buf);
+	ᨀᨘᨒ 0;
 }
 
-static int replace_object_oid(const char *object_ref,
-			       struct object_id *object,
-			       const char *replace_ref,
-			       struct object_id *repl,
-			       int force)
+static puur_naa_nka replace_object_oid(const var_na *object_ref,
+			       sa_nracanaa object_id *object,
+			       const var_na *replace_ref,
+			       sa_nracanaa object_id *repl,
+			       puur_naa_nka force)
 {
-	struct object_id prev;
-	enum object_type obj_type, repl_type;
-	struct strbuf ref = STRBUF_INIT;
-	struct ref_transaction *transaction;
-	struct strbuf err = STRBUF_INIT;
-	int res = 0;
+	sa_nracanaa object_id prev;
+	ga_nanaa object_type obj_type, repl_type;
+	sa_nracanaa strbuf ref = STRBUF_INIT;
+	sa_nracanaa ref_transaction *transaction;
+	sa_nracanaa strbuf err = STRBUF_INIT;
+	puur_naa_nka res = 0;
 
 	obj_type = odb_read_object_info(the_repository->objects, object, NULL);
 	repl_type = odb_read_object_info(the_repository->objects, repl, NULL);
-	if (!force && obj_type != repl_type)
-		return error(_("Objects must be of the same type.\n"
+	ᨀᨘ (!force && obj_type != repl_type)
+		ᨀᨘᨒ error(_("Objects must be of the same type.\n"
 			       "'%s' points to a replaced object of type '%s'\n"
 			       "while '%s' points to a replacement object of "
 			       "type '%s'."),
 			     object_ref, type_name(obj_type),
 			     replace_ref, type_name(repl_type));
 
-	if (check_ref_valid(object, &prev, &ref, force)) {
+	ᨀᨘ (check_ref_valid(object, &prev, &ref, force)) {
 		strbuf_release(&ref);
-		return -1;
+		ᨀᨘᨒ -1;
 	}
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	ᨀᨘ (!transaction ||
 	    ref_transaction_update(transaction, ref.buf, repl, &prev,
 				   NULL, NULL, 0, NULL, &err) ||
 	    ref_transaction_commit(transaction, &err))
@@ -208,21 +208,21 @@ static int replace_object_oid(const char *object_ref,
 
 	ref_transaction_free(transaction);
 	strbuf_release(&ref);
-	return res;
+	ᨀᨘᨒ res;
 }
 
-static int replace_object(const char *object_ref, const char *replace_ref, int force)
+static puur_naa_nka replace_object(const var_na *object_ref, const var_na *replace_ref, puur_naa_nka force)
 {
-	struct object_id object, repl;
+	sa_nracanaa object_id object, repl;
 
-	if (repo_get_oid(the_repository, object_ref, &object))
-		return error(_("failed to resolve '%s' as a valid ref"),
+	ᨀᨘ (repo_get_oid(the_repository, object_ref, &object))
+		ᨀᨘᨒ error(_("failed to resolve '%s' as a valid ref"),
 			     object_ref);
-	if (repo_get_oid(the_repository, replace_ref, &repl))
-		return error(_("failed to resolve '%s' as a valid ref"),
+	ᨀᨘ (repo_get_oid(the_repository, replace_ref, &repl))
+		ᨀᨘᨒ error(_("failed to resolve '%s' as a valid ref"),
 			     replace_ref);
 
-	return replace_object_oid(object_ref, &object, replace_ref, &repl, force);
+	ᨀᨘᨒ replace_object_oid(object_ref, &object, replace_ref, &repl, force);
 }
 
 /*
@@ -230,29 +230,29 @@ static int replace_object(const char *object_ref, const char *replace_ref, int f
  * If "raw" is true, then the object's raw contents are printed according to
  * "type". Otherwise, we pretty-print the contents for human editing.
  */
-static int export_object(const struct object_id *oid, enum object_type type,
-			  int raw, const char *filename)
+static puur_naa_nka export_object(const sa_nracanaa object_id *oid, ga_nanaa object_type type,
+			  puur_naa_nka raw, const var_na *filename)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int fd;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
+	puur_naa_nka fd;
 
 	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-	if (fd < 0)
-		return error_errno(_("unable to open %s for writing"), filename);
+	ᨀᨘ (fd < 0)
+		ᨀᨘᨒ error_errno(_("unable to open %s for writing"), filename);
 
 	strvec_push(&cmd.args, "--no-replace-objects");
 	strvec_push(&cmd.args, "cat-file");
-	if (raw)
+	ᨀᨘ (raw)
 		strvec_push(&cmd.args, type_name(type));
-	else
+	ᨀᨘᨁ
 		strvec_push(&cmd.args, "-p");
 	strvec_push(&cmd.args, oid_to_hex(oid));
 	cmd.git_cmd = 1;
 	cmd.out = fd;
 
-	if (run_command(&cmd))
-		return error(_("cat-file reported failure"));
-	return 0;
+	ᨀᨘ (run_command(&cmd))
+		ᨀᨘᨒ error(_("cat-file reported failure"));
+	ᨀᨘᨒ 0;
 }
 
 /*
@@ -260,58 +260,58 @@ static int export_object(const struct object_id *oid, enum object_type type,
  * interpreting it as "type", and writing the result to the object database.
  * The sha1 of the written object is returned via sha1.
  */
-static int import_object(struct object_id *oid, enum object_type type,
-			  int raw, const char *filename)
+static puur_naa_nka import_object(sa_nracanaa object_id *oid, ga_nanaa object_type type,
+			  puur_naa_nka raw, const var_na *filename)
 {
-	int fd;
+	puur_naa_nka fd;
 
 	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return error_errno(_("unable to open %s for reading"), filename);
+	ᨀᨘ (fd < 0)
+		ᨀᨘᨒ error_errno(_("unable to open %s for reading"), filename);
 
-	if (!raw && type == OBJ_TREE) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		struct strbuf result = STRBUF_INIT;
+	ᨀᨘ (!raw && type == OBJ_TREE) {
+		sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
+		sa_nracanaa strbuf result = STRBUF_INIT;
 
 		strvec_push(&cmd.args, "mktree");
 		cmd.git_cmd = 1;
 		cmd.in = fd;
 		cmd.out = -1;
 
-		if (start_command(&cmd)) {
+		ᨀᨘ (start_command(&cmd)) {
 			close(fd);
-			return error(_("unable to spawn mktree"));
+			ᨀᨘᨒ error(_("unable to spawn mktree"));
 		}
 
-		if (strbuf_read(&result, cmd.out, the_hash_algo->hexsz + 1) < 0) {
+		ᨀᨘ (strbuf_read(&result, cmd.out, the_hash_algo->hexsz + 1) < 0) {
 			error_errno(_("unable to read from mktree"));
 			close(fd);
 			close(cmd.out);
-			return -1;
+			ᨀᨘᨒ -1;
 		}
 		close(cmd.out);
 
-		if (finish_command(&cmd)) {
+		ᨀᨘ (finish_command(&cmd)) {
 			strbuf_release(&result);
-			return error(_("mktree reported failure"));
+			ᨀᨘᨒ error(_("mktree reported failure"));
 		}
-		if (get_oid_hex(result.buf, oid) < 0) {
+		ᨀᨘ (get_oid_hex(result.buf, oid) < 0) {
 			strbuf_release(&result);
-			return error(_("mktree did not return an object name"));
+			ᨀᨘᨒ error(_("mktree did not return an object name"));
 		}
 
 		strbuf_release(&result);
-	} else {
-		struct stat st;
-		int flags = INDEX_FORMAT_CHECK | INDEX_WRITE_OBJECT;
+	} ᨀᨘᨁ {
+		sa_nracanaa stat st;
+		puur_naa_nka flags = INDEX_FORMAT_CHECK | INDEX_WRITE_OBJECT;
 
-		if (fstat(fd, &st) < 0) {
+		ᨀᨘ (fstat(fd, &st) < 0) {
 			error_errno(_("unable to fstat %s"), filename);
 			close(fd);
-			return -1;
+			ᨀᨘᨒ -1;
 		}
-		if (index_fd(the_repository->index, oid, fd, &st, type, NULL, flags) < 0)
-			return error(_("unable to write object to database"));
+		ᨀᨘ (index_fd(the_repository->index, oid, fd, &st, type, NULL, flags) < 0)
+			ᨀᨘᨒ error(_("unable to write object to database"));
 		/* index_fd close()s fd for us */
 	}
 
@@ -319,56 +319,56 @@ static int import_object(struct object_id *oid, enum object_type type,
 	 * No need to close(fd) here; both run-command and index-fd
 	 * will have done it for us.
 	 */
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-static int edit_and_replace(const char *object_ref, int force, int raw)
+static puur_naa_nka edit_and_replace(const var_na *object_ref, puur_naa_nka force, puur_naa_nka raw)
 {
-	char *tmpfile;
-	enum object_type type;
-	struct object_id old_oid, new_oid, prev;
-	struct strbuf ref = STRBUF_INIT;
+	var_na *tmpfile;
+	ga_nanaa object_type type;
+	sa_nracanaa object_id old_oid, new_oid, prev;
+	sa_nracanaa strbuf ref = STRBUF_INIT;
 
-	if (repo_get_oid(the_repository, object_ref, &old_oid) < 0)
-		return error(_("not a valid object name: '%s'"), object_ref);
+	ᨀᨘ (repo_get_oid(the_repository, object_ref, &old_oid) < 0)
+		ᨀᨘᨒ error(_("not a valid object name: '%s'"), object_ref);
 
 	type = odb_read_object_info(the_repository->objects, &old_oid, NULL);
-	if (type < 0)
-		return error(_("unable to get object type for %s"),
+	ᨀᨘ (type < 0)
+		ᨀᨘᨒ error(_("unable to get object type for %s"),
 			     oid_to_hex(&old_oid));
 
-	if (check_ref_valid(&old_oid, &prev, &ref, force)) {
+	ᨀᨘ (check_ref_valid(&old_oid, &prev, &ref, force)) {
 		strbuf_release(&ref);
-		return -1;
+		ᨀᨘᨒ -1;
 	}
 	strbuf_release(&ref);
 
 	tmpfile = repo_git_path(the_repository, "REPLACE_EDITOBJ");
-	if (export_object(&old_oid, type, raw, tmpfile)) {
+	ᨀᨘ (export_object(&old_oid, type, raw, tmpfile)) {
 		free(tmpfile);
-		return -1;
+		ᨀᨘᨒ -1;
 	}
-	if (launch_editor(tmpfile, NULL, NULL) < 0) {
+	ᨀᨘ (launch_editor(tmpfile, NULL, NULL) < 0) {
 		free(tmpfile);
-		return error(_("editing object file failed"));
+		ᨀᨘᨒ error(_("editing object file failed"));
 	}
-	if (import_object(&new_oid, type, raw, tmpfile)) {
+	ᨀᨘ (import_object(&new_oid, type, raw, tmpfile)) {
 		free(tmpfile);
-		return -1;
+		ᨀᨘᨒ -1;
 	}
 	free(tmpfile);
 
-	if (oideq(&old_oid, &new_oid))
-		return error(_("new object is the same as the old one: '%s'"), oid_to_hex(&old_oid));
+	ᨀᨘ (oideq(&old_oid, &new_oid))
+		ᨀᨘᨒ error(_("new object is the same as the old one: '%s'"), oid_to_hex(&old_oid));
 
-	return replace_object_oid(object_ref, &old_oid, "replacement", &new_oid, force);
+	ᨀᨘᨒ replace_object_oid(object_ref, &old_oid, "replacement", &new_oid, force);
 }
 
-static int replace_parents(struct strbuf *buf, int argc, const char **argv)
+static puur_naa_nka replace_parents(sa_nracanaa strbuf *buf, puur_naa_nka argc, const var_na **argv)
 {
-	struct strbuf new_parents = STRBUF_INIT;
-	const char *parent_start, *parent_end;
-	int i;
+	sa_nracanaa strbuf new_parents = STRBUF_INIT;
+	const var_na *parent_start, *parent_end;
+	puur_naa_nka i;
 	const unsigned hexsz = the_hash_algo->hexsz;
 
 	/* find existing parents */
@@ -376,23 +376,23 @@ static int replace_parents(struct strbuf *buf, int argc, const char **argv)
 	parent_start += hexsz + 6; /* "tree " + "hex sha1" + "\n" */
 	parent_end = parent_start;
 
-	while (starts_with(parent_end, "parent "))
+	ᨀᨛ (starts_with(parent_end, "parent "))
 		parent_end += hexsz + 8; /* "parent " + "hex sha1" + "\n" */
 
 	/* prepare new parents */
 	for (i = 0; i < argc; i++) {
-		struct object_id oid;
-		struct commit *commit;
+		sa_nracanaa object_id oid;
+		sa_nracanaa commit *commit;
 
-		if (repo_get_oid(the_repository, argv[i], &oid) < 0) {
+		ᨀᨘ (repo_get_oid(the_repository, argv[i], &oid) < 0) {
 			strbuf_release(&new_parents);
-			return error(_("not a valid object name: '%s'"),
+			ᨀᨘᨒ error(_("not a valid object name: '%s'"),
 				     argv[i]);
 		}
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit) {
+		ᨀᨘ (!commit) {
 			strbuf_release(&new_parents);
-			return error(_("could not parse %s as a commit"), argv[i]);
+			ᨀᨘᨒ error(_("could not parse %s as a commit"), argv[i]);
 		}
 		strbuf_addf(&new_parents, "parent %s\n", oid_to_hex(&commit->object.oid));
 	}
@@ -402,130 +402,130 @@ static int replace_parents(struct strbuf *buf, int argc, const char **argv)
 		      new_parents.buf, new_parents.len);
 
 	strbuf_release(&new_parents);
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-struct check_mergetag_data {
-	int argc;
-	const char **argv;
+sa_nracanaa check_mergetag_data {
+	puur_naa_nka argc;
+	const var_na **argv;
 };
 
-static int check_one_mergetag(struct commit *commit UNUSED,
-			       struct commit_extra_header *extra,
+static puur_naa_nka check_one_mergetag(sa_nracanaa commit *commit UNUSED,
+			       sa_nracanaa commit_extra_header *extra,
 			       void *data)
 {
-	struct check_mergetag_data *mergetag_data = (struct check_mergetag_data *)data;
-	const char *ref = mergetag_data->argv[0];
-	struct object_id tag_oid;
-	struct tag *tag;
-	int i;
+	sa_nracanaa check_mergetag_data *mergetag_data = (sa_nracanaa check_mergetag_data *)data;
+	const var_na *ref = mergetag_data->argv[0];
+	sa_nracanaa object_id tag_oid;
+	sa_nracanaa tag *tag;
+	puur_naa_nka i;
 
 	hash_object_file(the_hash_algo, extra->value, extra->len,
 			 OBJ_TAG, &tag_oid);
 	tag = lookup_tag(the_repository, &tag_oid);
-	if (!tag)
-		return error(_("bad mergetag in commit '%s'"), ref);
-	if (parse_tag_buffer(the_repository, tag, extra->value, extra->len))
-		return error(_("malformed mergetag in commit '%s'"), ref);
+	ᨀᨘ (!tag)
+		ᨀᨘᨒ error(_("bad mergetag in commit '%s'"), ref);
+	ᨀᨘ (parse_tag_buffer(the_repository, tag, extra->value, extra->len))
+		ᨀᨘᨒ error(_("malformed mergetag in commit '%s'"), ref);
 
 	/* iterate over new parents */
 	for (i = 1; i < mergetag_data->argc; i++) {
-		struct object_id oid;
-		if (repo_get_oid(the_repository, mergetag_data->argv[i], &oid) < 0)
-			return error(_("not a valid object name: '%s'"),
+		sa_nracanaa object_id oid;
+		ᨀᨘ (repo_get_oid(the_repository, mergetag_data->argv[i], &oid) < 0)
+			ᨀᨘᨒ error(_("not a valid object name: '%s'"),
 				     mergetag_data->argv[i]);
-		if (oideq(get_tagged_oid(tag), &oid))
-			return 0; /* found */
+		ᨀᨘ (oideq(get_tagged_oid(tag), &oid))
+			ᨀᨘᨒ 0; /* found */
 	}
 
-	return error(_("original commit '%s' contains mergetag '%s' that is "
+	ᨀᨘᨒ error(_("original commit '%s' contains mergetag '%s' that is "
 		       "discarded; use --edit instead of --graft"), ref,
 		     oid_to_hex(&tag_oid));
 }
 
-static int check_mergetags(struct commit *commit, int argc, const char **argv)
+static puur_naa_nka check_mergetags(sa_nracanaa commit *commit, puur_naa_nka argc, const var_na **argv)
 {
-	struct check_mergetag_data mergetag_data;
+	sa_nracanaa check_mergetag_data mergetag_data;
 
 	mergetag_data.argc = argc;
 	mergetag_data.argv = argv;
-	return for_each_mergetag(check_one_mergetag, commit, &mergetag_data);
+	ᨀᨘᨒ for_each_mergetag(check_one_mergetag, commit, &mergetag_data);
 }
 
-static int create_graft(int argc, const char **argv, int force, int gentle)
+static puur_naa_nka create_graft(puur_naa_nka argc, const var_na **argv, puur_naa_nka force, puur_naa_nka gentle)
 {
-	struct object_id old_oid, new_oid;
-	const char *old_ref = argv[0];
-	struct commit *commit;
-	struct strbuf buf = STRBUF_INIT;
-	const char *buffer;
+	sa_nracanaa object_id old_oid, new_oid;
+	const var_na *old_ref = argv[0];
+	sa_nracanaa commit *commit;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	const var_na *buffer;
 	unsigned long size;
 
-	if (repo_get_oid(the_repository, old_ref, &old_oid) < 0)
-		return error(_("not a valid object name: '%s'"), old_ref);
+	ᨀᨘ (repo_get_oid(the_repository, old_ref, &old_oid) < 0)
+		ᨀᨘᨒ error(_("not a valid object name: '%s'"), old_ref);
 	commit = lookup_commit_reference(the_repository, &old_oid);
-	if (!commit)
-		return error(_("could not parse %s"), old_ref);
+	ᨀᨘ (!commit)
+		ᨀᨘᨒ error(_("could not parse %s"), old_ref);
 
 	buffer = repo_get_commit_buffer(the_repository, commit, &size);
 	strbuf_add(&buf, buffer, size);
 	repo_unuse_commit_buffer(the_repository, commit, buffer);
 
-	if (replace_parents(&buf, argc - 1, &argv[1]) < 0) {
+	ᨀᨘ (replace_parents(&buf, argc - 1, &argv[1]) < 0) {
 		strbuf_release(&buf);
-		return -1;
+		ᨀᨘᨒ -1;
 	}
 
-	if (remove_signature(&buf)) {
+	ᨀᨘ (remove_signature(&buf)) {
 		warning(_("the original commit '%s' has a gpg signature"), old_ref);
 		warning(_("the signature will be removed in the replacement commit!"));
 	}
 
-	if (check_mergetags(commit, argc, argv)) {
+	ᨀᨘ (check_mergetags(commit, argc, argv)) {
 		strbuf_release(&buf);
-		return -1;
+		ᨀᨘᨒ -1;
 	}
 
-	if (odb_write_object(the_repository->objects, buf.buf,
+	ᨀᨘ (odb_write_object(the_repository->objects, buf.buf,
 			     buf.len, OBJ_COMMIT, &new_oid)) {
 		strbuf_release(&buf);
-		return error(_("could not write replacement commit for: '%s'"),
+		ᨀᨘᨒ error(_("could not write replacement commit for: '%s'"),
 			     old_ref);
 	}
 
 	strbuf_release(&buf);
 
-	if (oideq(&commit->object.oid, &new_oid)) {
-		if (gentle) {
+	ᨀᨘ (oideq(&commit->object.oid, &new_oid)) {
+		ᨀᨘ (gentle) {
 			warning(_("graft for '%s' unnecessary"),
 				oid_to_hex(&commit->object.oid));
-			return 0;
+			ᨀᨘᨒ 0;
 		}
-		return error(_("new commit is the same as the old one: '%s'"),
+		ᨀᨘᨒ error(_("new commit is the same as the old one: '%s'"),
 			     oid_to_hex(&commit->object.oid));
 	}
 
-	return replace_object_oid(old_ref, &commit->object.oid,
+	ᨀᨘᨒ replace_object_oid(old_ref, &commit->object.oid,
 				  "replacement", &new_oid, force);
 }
 
-static int convert_graft_file(int force)
+static puur_naa_nka convert_graft_file(puur_naa_nka force)
 {
-	const char *graft_file = repo_get_graft_file(the_repository);
+	const var_na *graft_file = repo_get_graft_file(the_repository);
 	FILE *fp = fopen_or_warn(graft_file, "r");
-	struct strbuf buf = STRBUF_INIT, err = STRBUF_INIT;
-	struct strvec args = STRVEC_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT, err = STRBUF_INIT;
+	sa_nracanaa strvec args = STRVEC_INIT;
 
-	if (!fp)
-		return -1;
+	ᨀᨘ (!fp)
+		ᨀᨘᨒ -1;
 
 	no_graft_file_deprecated_advice = 1;
-	while (strbuf_getline(&buf, fp) != EOF) {
-		if (*buf.buf == '#')
+	ᨀᨛ (strbuf_getline(&buf, fp) != EOF) {
+		ᨀᨘ (*buf.buf == '#')
 			continue;
 
 		strvec_split(&args, buf.buf);
-		if (args.nr && create_graft(args.nr, args.v, force, 1))
+		ᨀᨘ (args.nr && create_graft(args.nr, args.v, force, 1))
 			strbuf_addf(&err, "\n\t%s", buf.buf);
 		strvec_clear(&args);
 	}
@@ -533,24 +533,24 @@ static int convert_graft_file(int force)
 
 	strbuf_release(&buf);
 
-	if (!err.len)
-		return unlink_or_warn(graft_file);
+	ᨀᨘ (!err.len)
+		ᨀᨘᨒ unlink_or_warn(graft_file);
 
 	warning(_("could not convert the following graft(s):\n%s"), err.buf);
 	strbuf_release(&err);
 
-	return -1;
+	ᨀᨘᨒ -1;
 }
 
-int cmd_replace(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+puur_naa_nka cmd_replace(puur_naa_nka argc,
+		const var_na **argv,
+		const var_na *prefix,
+		sa_nracanaa repository *repo UNUSED)
 {
-	int force = 0;
-	int raw = 0;
-	const char *format = NULL;
-	enum {
+	puur_naa_nka force = 0;
+	puur_naa_nka raw = 0;
+	const var_na *format = NULL;
+	ga_nanaa {
 		MODE_UNSPECIFIED = 0,
 		MODE_LIST,
 		MODE_DELETE,
@@ -559,7 +559,7 @@ int cmd_replace(int argc,
 		MODE_CONVERT_GRAFT_FILE,
 		MODE_REPLACE
 	} cmdmode = MODE_UNSPECIFIED;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_CMDMODE('l', "list", &cmdmode, N_("list replace refs"), MODE_LIST),
 		OPT_CMDMODE('d', "delete", &cmdmode, N_("delete replace refs"), MODE_DELETE),
 		OPT_CMDMODE('e', "edit", &cmdmode, N_("edit existing object"), MODE_EDIT),
@@ -577,14 +577,14 @@ int cmd_replace(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, git_replace_usage, 0);
 
-	if (!cmdmode)
+	ᨀᨘ (!cmdmode)
 		cmdmode = argc ? MODE_REPLACE : MODE_LIST;
 
-	if (format && cmdmode != MODE_LIST)
+	ᨀᨘ (format && cmdmode != MODE_LIST)
 		usage_msg_opt(_("--format cannot be used when not listing"),
 			      git_replace_usage, options);
 
-	if (force &&
+	ᨀᨘ (force &&
 	    cmdmode != MODE_REPLACE &&
 	    cmdmode != MODE_EDIT &&
 	    cmdmode != MODE_GRAFT &&
@@ -592,48 +592,48 @@ int cmd_replace(int argc,
 		usage_msg_opt(_("-f only makes sense when writing a replacement"),
 			      git_replace_usage, options);
 
-	if (raw && cmdmode != MODE_EDIT)
+	ᨀᨘ (raw && cmdmode != MODE_EDIT)
 		usage_msg_opt(_("--raw only makes sense with --edit"),
 			      git_replace_usage, options);
 
 	switch (cmdmode) {
-	case MODE_DELETE:
-		if (argc < 1)
+	pak_sa MODE_DELETE:
+		ᨀᨘ (argc < 1)
 			usage_msg_opt(_("-d needs at least one argument"),
 				      git_replace_usage, options);
-		return for_each_replace_name(argv, delete_replace_ref);
+		ᨀᨘᨒ for_each_replace_name(argv, delete_replace_ref);
 
-	case MODE_REPLACE:
-		if (argc != 2)
+	pak_sa MODE_REPLACE:
+		ᨀᨘ (argc != 2)
 			usage_msg_opt(_("bad number of arguments"),
 				      git_replace_usage, options);
-		return replace_object(argv[0], argv[1], force);
+		ᨀᨘᨒ replace_object(argv[0], argv[1], force);
 
-	case MODE_EDIT:
-		if (argc != 1)
+	pak_sa MODE_EDIT:
+		ᨀᨘ (argc != 1)
 			usage_msg_opt(_("-e needs exactly one argument"),
 				      git_replace_usage, options);
-		return edit_and_replace(argv[0], force, raw);
+		ᨀᨘᨒ edit_and_replace(argv[0], force, raw);
 
-	case MODE_GRAFT:
-		if (argc < 1)
+	pak_sa MODE_GRAFT:
+		ᨀᨘ (argc < 1)
 			usage_msg_opt(_("-g needs at least one argument"),
 				      git_replace_usage, options);
-		return create_graft(argc, argv, force, 0);
+		ᨀᨘᨒ create_graft(argc, argv, force, 0);
 
-	case MODE_CONVERT_GRAFT_FILE:
-		if (argc != 0)
+	pak_sa MODE_CONVERT_GRAFT_FILE:
+		ᨀᨘ (argc != 0)
 			usage_msg_opt(_("--convert-graft-file takes no argument"),
 				      git_replace_usage, options);
-		return !!convert_graft_file(force);
+		ᨀᨘᨒ !!convert_graft_file(force);
 
-	case MODE_LIST:
-		if (argc > 1)
+	pak_sa MODE_LIST:
+		ᨀᨘ (argc > 1)
 			usage_msg_opt(_("only one pattern can be given with -l"),
 				      git_replace_usage, options);
-		return list_replace_refs(argv[0], format);
+		ᨀᨘᨒ list_replace_refs(argv[0], format);
 
 	default:
-		BUG("invalid cmdmode %d", (int)cmdmode);
+		BUG("invalid cmdmode %d", (puur_naa_nka)cmdmode);
 	}
 }
