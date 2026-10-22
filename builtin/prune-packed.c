@@ -1,20 +1,20 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "prune-packed.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "prune-packed.h"
 
-static const char * const prune_packed_usage[] = {
+स्थिर स्थिरांक अक्षर * स्थिरांक prune_packed_usage[] = {
 	"git prune-packed [-n | --dry-run] [-q | --quiet]",
-	NULL
+	रिक्त
 };
 
-int cmd_prune_packed(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+पूर्णांक cmd_prune_packed(पूर्णांक argc,
+		     स्थिरांक अक्षर **argv,
+		     स्थिरांक अक्षर *prefix,
+		     संरचना repository *repo UNUSED)
 {
-	int opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
-	const struct option prune_packed_options[] = {
+	पूर्णांक opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
+	स्थिरांक संरचना option prune_packed_options[] = {
 		OPT_BIT('n', "dry-run", &opts, N_("dry run"),
 			PRUNE_PACKED_DRY_RUN),
 		OPT_NEGBIT('q', "quiet", &opts, N_("be quiet"),
@@ -25,11 +25,11 @@ int cmd_prune_packed(int argc,
 	argc = parse_options(argc, argv, prefix, prune_packed_options,
 			     prune_packed_usage, 0);
 
-	if (argc > 0)
-		usage_msg_opt(_("too many arguments"),
+	जर (argc > 0)
+		usage_संदेश_opt(_("too many arguments"),
 			      prune_packed_usage,
 			      prune_packed_options);
 
 	prune_packed_objects(opts);
-	return 0;
+	परत 0;
 }

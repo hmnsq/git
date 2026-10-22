@@ -1,68 +1,68 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "rerere.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "xdiff/xdiff.h"
-#include "xdiff-interface.h"
-#include "pathspec.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "rerere.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "xdiff/xdiff.h"
+#अन्तर्भाव "xdiff-interface.h"
+#अन्तर्भाव "pathspec.h"
 
-static const char * const rerere_usage[] = {
+स्थिर स्थिरांक अक्षर * स्थिरांक rerere_usage[] = {
 	N_("git rerere [clear | forget <pathspec>... | diff | status | remaining | gc]"),
-	NULL,
+	रिक्त,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+स्थिर पूर्णांक outf(शून्य *dummy UNUSED, mmfile_t *ptr, पूर्णांक nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	पूर्णांक i;
+	साठी (i = 0; i < nbuf; i++)
+		जर (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			परत -1;
+	परत 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
-		const char *file2, const char *label2)
+स्थिर पूर्णांक diff_two(स्थिरांक अक्षर *file1, स्थिरांक अक्षर *label1,
+		स्थिरांक अक्षर *file2, स्थिरांक अक्षर *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = outf };
+	xdemitcb_t ecb = { .out_ओळ = outf };
 	mmfile_t minus, plus;
-	int ret;
+	पूर्णांक ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
-		free(minus.ptr);
-		return -1;
+	जर (read_mmfile(&minus, file1))
+		परत -1;
+	जर (read_mmfile(&plus, file2)) {
+		मुक्त(minus.ptr);
+		परत -1;
 	}
 
-	printf("--- a/%s\n+++ b/%s\n", label1, label2);
-	fflush(stdout);
-	memset(&xpp, 0, sizeof(xpp));
+	म_लिखो("--- a/%s\n+++ b/%s\n", label1, label2);
+	ख_साफ(मानक_निकास);
+	स_रखो(&xpp, 0, आकार(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	स_रखो(&xecfg, 0, आकार(xecfg));
 	xecfg.ctxlen = 3;
 	ret = xdi_diff(&minus, &plus, &xpp, &xecfg, &ecb);
 
-	free(minus.ptr);
-	free(plus.ptr);
-	return ret;
+	मुक्त(minus.ptr);
+	मुक्त(plus.ptr);
+	परत ret;
 }
 
-int cmd_rerere(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+पूर्णांक cmd_rerere(पूर्णांक argc,
+	       स्थिरांक अक्षर **argv,
+	       स्थिरांक अक्षर *prefix,
+	       संरचना repository *repo UNUSED)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	संरचना string_list merge_rr = STRING_LIST_INIT_DUP;
+	पूर्णांक autoupdate = -1, flags = 0;
 
-	struct option options[] = {
+	संरचना option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
 			N_("register clean resolutions in index"), 1),
 		OPT_END(),
@@ -70,21 +70,21 @@ int cmd_rerere(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, rerere_usage, 0);
 
-	repo_config(the_repository, git_xmerge_config, NULL);
+	repo_config(the_repository, git_xmerge_config, रिक्त);
 
-	if (autoupdate == 1)
+	जर (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	जर (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	जर (argc < 1)
+		परत repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
-		struct pathspec pathspec;
-		int ret;
+	जर (!म_भेद(argv[0], "forget")) {
+		संरचना pathspec pathspec;
+		पूर्णांक ret;
 
-		if (argc < 2)
+		जर (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		परत ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	जर (!म_भेद(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} अन्यथा जर (!म_भेद(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	अन्यथा जर (!म_भेद(argv[0], "status")) {
+		जर (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
-			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+			परत 0;
+		साठी (माप_प्रकार i = 0; i < merge_rr.nr; i++)
+			म_लिखो("%s\n", merge_rr.वस्तुसंच[i].string);
+	} अन्यथा जर (!म_भेद(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
-				printf("%s\n", merge_rr.items[i].string);
-			else
+		साठी (माप_प्रकार i = 0; i < merge_rr.nr; i++) {
+			जर (merge_rr.वस्तुसंच[i].util != RERERE_RESOLVED)
+				म_लिखो("%s\n", merge_rr.वस्तुसंच[i].string);
+			अन्यथा
 				/* prepare for later call to
 				 * string_list_clear() */
-				merge_rr.items[i].util = NULL;
+				merge_rr.वस्तुसंच[i].util = रिक्त;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
-		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+	} अन्यथा जर (!म_भेद(argv[0], "diff")) {
+		संरचना strbuf buf = STRBUF_INIT;
+		जर (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			const char *path = merge_rr.items[i].string;
-			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
-				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
+			परत 0;
+		साठी (माप_प्रकार i = 0; i < merge_rr.nr; i++) {
+			स्थिरांक अक्षर *path = merge_rr.वस्तुसंच[i].string;
+			स्थिरांक संरचना rerere_id *id = merge_rr.वस्तुसंच[i].util;
+			जर (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, रिक्त));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} अन्यथा
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	परत 0;
 }

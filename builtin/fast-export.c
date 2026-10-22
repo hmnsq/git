@@ -7,166 +7,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "commit.h"
-#include "object.h"
-#include "tag.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "log-tree.h"
-#include "revision.h"
-#include "decorate.h"
-#include "string-list.h"
-#include "utf8.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "remote.h"
-#include "blob.h"
-#include "gpg-interface.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "refs.h"
+#अन्तर्भाव "refspec.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "tag.h"
+#अन्तर्भाव "diff.h"
+#अन्तर्भाव "diffcore.h"
+#अन्तर्भाव "log-tree.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "decorate.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "utf8.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "remote.h"
+#अन्तर्भाव "blob.h"
+#अन्तर्भाव "gpg-interface.h"
 
-static const char *const fast_export_usage[] = {
+स्थिर स्थिरांक अक्षर *स्थिरांक fast_export_usage[] = {
 	N_("git fast-export [<options>] [<revision-range>] [[--] <path>...]"),
-	NULL
+	रिक्त
 };
 
-static int progress;
-static enum sign_mode signed_tag_mode = SIGN_ABORT;
-static enum sign_mode signed_commit_mode = SIGN_STRIP;
-static enum tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
-static enum reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
-static int fake_missing_tagger;
-static int use_done_feature;
-static int no_data;
-static int full_tree;
-static int reference_excluded_commits;
-static int show_original_ids;
-static int mark_tags;
-static struct string_list extra_refs = STRING_LIST_INIT_DUP;
-static struct string_list tag_refs = STRING_LIST_INIT_DUP;
-static struct refspec refspecs;
-static int anonymize;
-static struct hashmap anonymized_seeds;
-static struct revision_sources revision_sources;
+स्थिर पूर्णांक progress;
+स्थिर गणना sign_mode signed_tag_mode = SIGN_ABORT;
+स्थिर गणना sign_mode signed_commit_mode = SIGN_STRIP;
+स्थिर गणना tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
+स्थिर गणना reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
+स्थिर पूर्णांक fake_missing_tagger;
+स्थिर पूर्णांक use_done_feature;
+स्थिर पूर्णांक no_data;
+स्थिर पूर्णांक full_वृक्ष;
+स्थिर पूर्णांक reference_excluded_commits;
+स्थिर पूर्णांक show_original_ids;
+स्थिर पूर्णांक mark_tags;
+स्थिर संरचना string_list extra_refs = STRING_LIST_INIT_DUP;
+स्थिर संरचना string_list tag_refs = STRING_LIST_INIT_DUP;
+स्थिर संरचना refspec refspecs;
+स्थिर पूर्णांक anonymize;
+स्थिर संरचना hashmap anonymized_seeds;
+स्थिर संरचना revision_sources revision_sources;
 
-static int parse_opt_sign_mode(const struct option *opt,
-			       const char *arg, int unset)
+स्थिर पूर्णांक parse_opt_sign_mode(स्थिरांक संरचना option *opt,
+			       स्थिरांक अक्षर *arg, पूर्णांक unset)
 {
-	enum sign_mode *val = opt->value;
+	गणना sign_mode *val = opt->मूल्य;
 
-	if (unset)
-		return 0;
+	जर (unset)
+		परत 0;
 
-	if (parse_sign_mode(arg, val, NULL) || (*val == SIGN_STRIP_IF_INVALID) ||
+	जर (parse_sign_mode(arg, val, रिक्त) || (*val == SIGN_STRIP_IF_INVALID) ||
 	    (*val == SIGN_SIGN_IF_INVALID) || (*val == SIGN_ABORT_IF_INVALID))
-		return error(_("unknown %s mode: %s"), opt->long_name, arg);
+		परत error(_("unknown %s mode: %s"), opt->long_name, arg);
 
-	return 0;
+	परत 0;
 }
 
-static int parse_opt_tag_of_filtered_mode(const struct option *opt,
-					  const char *arg, int unset)
+स्थिर पूर्णांक parse_opt_tag_of_filtered_mode(स्थिरांक संरचना option *opt,
+					  स्थिरांक अक्षर *arg, पूर्णांक unset)
 {
-	enum tag_of_filtered_mode *val = opt->value;
+	गणना tag_of_filtered_mode *val = opt->मूल्य;
 
-	if (unset || !strcmp(arg, "abort"))
+	जर (unset || !म_भेद(arg, "abort"))
 		*val = TAG_FILTERING_ABORT;
-	else if (!strcmp(arg, "drop"))
+	अन्यथा जर (!म_भेद(arg, "drop"))
 		*val = DROP;
-	else if (!strcmp(arg, "rewrite"))
+	अन्यथा जर (!म_भेद(arg, "rewrite"))
 		*val = REWRITE;
-	else
-		return error(_("unknown tag-of-filtered mode: %s"), arg);
-	return 0;
+	अन्यथा
+		परत error(_("unknown tag-of-filtered mode: %s"), arg);
+	परत 0;
 }
 
-static int parse_opt_reencode_mode(const struct option *opt,
-				   const char *arg, int unset)
+स्थिर पूर्णांक parse_opt_reencode_mode(स्थिरांक संरचना option *opt,
+				   स्थिरांक अक्षर *arg, पूर्णांक unset)
 {
-	enum reencode_mode *val = opt->value;
+	गणना reencode_mode *val = opt->मूल्य;
 
-	if (unset) {
+	जर (unset) {
 		*val = REENCODE_ABORT;
-		return 0;
+		परत 0;
 	}
 
-	switch (git_parse_maybe_bool(arg)) {
-	case 0:
+	निवड (git_parse_maybe_bool(arg)) {
+	स्थिती 0:
 		*val = REENCODE_NO;
-		break;
-	case 1:
+		थांबा;
+	स्थिती 1:
 		*val = REENCODE_YES;
-		break;
-	default:
-		if (!strcasecmp(arg, "abort"))
+		थांबा;
+	पूर्वनिर्धारित:
+		जर (!strcasecmp(arg, "abort"))
 			*val = REENCODE_ABORT;
-		else
-			return error(_("unknown reencoding mode: %s"), arg);
+		अन्यथा
+			परत error(_("unknown reencoding mode: %s"), arg);
 	}
 
-	return 0;
+	परत 0;
 }
 
-static struct decoration idnums;
-static uint32_t last_idnum;
-struct anonymized_entry {
-	struct hashmap_entry hash;
-	char *anon;
-	const char orig[FLEX_ARRAY];
+स्थिर संरचना decoration idnums;
+स्थिर uint32_t last_idnum;
+संरचना anonymized_entry {
+	संरचना hashmap_entry hash;
+	अक्षर *anon;
+	स्थिरांक अक्षर orig[FLEX_ARRAY];
 };
 
-struct anonymized_entry_key {
-	struct hashmap_entry hash;
-	const char *orig;
-	size_t orig_len;
+संरचना anonymized_entry_किल्ली {
+	संरचना hashmap_entry hash;
+	स्थिरांक अक्षर *orig;
+	माप_प्रकार orig_len;
 };
 
-static int anonymized_entry_cmp(const void *cmp_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+स्थिर पूर्णांक anonymized_entry_cmp(स्थिरांक शून्य *cmp_data UNUSED,
+				स्थिरांक संरचना hashmap_entry *eptr,
+				स्थिरांक संरचना hashmap_entry *entry_or_किल्ली,
+				स्थिरांक शून्य *keydata)
 {
-	const struct anonymized_entry *a, *b;
+	स्थिरांक संरचना anonymized_entry *a, *b;
 
-	a = container_of(eptr, const struct anonymized_entry, hash);
-	if (keydata) {
-		const struct anonymized_entry_key *key = keydata;
-		int equal = !xstrncmpz(a->orig, key->orig, key->orig_len);
-		return !equal;
+	a = container_of(eptr, स्थिरांक संरचना anonymized_entry, hash);
+	जर (keydata) {
+		स्थिरांक संरचना anonymized_entry_किल्ली *किल्ली = keydata;
+		पूर्णांक equal = !xstrncmpz(a->orig, किल्ली->orig, किल्ली->orig_len);
+		परत !equal;
 	}
 
-	b = container_of(entry_or_key, const struct anonymized_entry, hash);
-	return strcmp(a->orig, b->orig);
+	b = container_of(entry_or_किल्ली, स्थिरांक संरचना anonymized_entry, hash);
+	परत म_भेद(a->orig, b->orig);
 }
 
-static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
-						     unsigned hash,
-						     const char *orig, size_t len,
-						     char *anon)
+स्थिर संरचना anonymized_entry *add_anonymized_entry(संरचना hashmap *map,
+						     अचिन्हित hash,
+						     स्थिरांक अक्षर *orig, माप_प्रकार len,
+						     अक्षर *anon)
 {
-	struct anonymized_entry *ret, *old;
+	संरचना anonymized_entry *ret, *old;
 
-	if (!map->cmpfn)
-		hashmap_init(map, anonymized_entry_cmp, NULL, 0);
+	जर (!map->cmpfn)
+		hashmap_init(map, anonymized_entry_cmp, रिक्त, 0);
 
 	FLEX_ALLOC_MEM(ret, orig, orig, len);
 	hashmap_entry_init(&ret->hash, hash);
 	ret->anon = anon;
 	old = hashmap_put_entry(map, ret, hash);
 
-	if (old) {
-		free(old->anon);
-		free(old);
+	जर (old) {
+		मुक्त(old->anon);
+		मुक्त(old);
 	}
 
-	return ret;
+	परत ret;
 }
 
 /*
@@ -174,30 +174,30 @@ static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
  * the same anonymized string with another. The actual generation
  * is farmed out to the generate function.
  */
-static const char *anonymize_str(struct hashmap *map,
-				 char *(*generate)(void),
-				 const char *orig, size_t len)
+स्थिर स्थिरांक अक्षर *anonymize_str(संरचना hashmap *map,
+				 अक्षर *(*generate)(शून्य),
+				 स्थिरांक अक्षर *orig, माप_प्रकार len)
 {
-	struct anonymized_entry_key key;
-	struct anonymized_entry *ret;
+	संरचना anonymized_entry_किल्ली किल्ली;
+	संरचना anonymized_entry *ret;
 
-	hashmap_entry_init(&key.hash, memhash(orig, len));
-	key.orig = orig;
-	key.orig_len = len;
+	hashmap_entry_init(&किल्ली.hash, memhash(orig, len));
+	किल्ली.orig = orig;
+	किल्ली.orig_len = len;
 
 	/* First check if it's a token the user configured manually... */
-	ret = hashmap_get_entry(&anonymized_seeds, &key, hash, &key);
+	ret = hashmap_get_entry(&anonymized_seeds, &किल्ली, hash, &किल्ली);
 
 	/* ...otherwise check if we've already seen it in this context... */
-	if (!ret)
-		ret = hashmap_get_entry(map, &key, hash, &key);
+	जर (!ret)
+		ret = hashmap_get_entry(map, &किल्ली, hash, &किल्ली);
 
 	/* ...and finally generate a new mapping if necessary */
-	if (!ret)
-		ret = add_anonymized_entry(map, key.hash.hash,
+	जर (!ret)
+		ret = add_anonymized_entry(map, किल्ली.hash.hash,
 					   orig, len, generate());
 
-	return ret->anon;
+	परत ret->anon;
 }
 
 /*
@@ -206,72 +206,72 @@ static const char *anonymize_str(struct hashmap *map,
  * The paths are cached via anonymize_mem so that repeated
  * lookups for "a" will yield the same value.
  */
-static void anonymize_path(struct strbuf *out, const char *path,
-			   struct hashmap *map,
-			   char *(*generate)(void))
+स्थिर शून्य anonymize_path(संरचना strbuf *out, स्थिरांक अक्षर *path,
+			   संरचना hashmap *map,
+			   अक्षर *(*generate)(शून्य))
 {
-	while (*path) {
-		const char *end_of_component = strchrnul(path, '/');
-		size_t len = end_of_component - path;
-		const char *c = anonymize_str(map, generate, path, len);
+	पर्यंत (*path) {
+		स्थिरांक अक्षर *end_of_component = strchrnul(path, '/');
+		माप_प्रकार len = end_of_component - path;
+		स्थिरांक अक्षर *c = anonymize_str(map, generate, path, len);
 		strbuf_addstr(out, c);
 		path = end_of_component;
-		if (*path)
+		जर (*path)
 			strbuf_addch(out, *path++);
 	}
 }
 
-static inline void *mark_to_ptr(uint32_t mark)
+स्थिर ओळीत शून्य *mark_to_ptr(uint32_t mark)
 {
-	return (void *)(uintptr_t)mark;
+	परत (शून्य *)(uintptr_t)mark;
 }
 
-static inline uint32_t ptr_to_mark(void * mark)
+स्थिर ओळीत uint32_t ptr_to_mark(शून्य * mark)
 {
-	return (uint32_t)(uintptr_t)mark;
+	परत (uint32_t)(uintptr_t)mark;
 }
 
-static inline void mark_object(struct object *object, uint32_t mark)
+स्थिर ओळीत शून्य mark_object(संरचना object *object, uint32_t mark)
 {
 	add_decoration(&idnums, object, mark_to_ptr(mark));
 }
 
-static inline void mark_next_object(struct object *object)
+स्थिर ओळीत शून्य mark_next_object(संरचना object *object)
 {
 	mark_object(object, ++last_idnum);
 }
 
-static int get_object_mark(struct object *object)
+स्थिर पूर्णांक get_object_mark(संरचना object *object)
 {
-	void *decoration = lookup_decoration(&idnums, object);
-	if (!decoration)
-		return 0;
-	return ptr_to_mark(decoration);
+	शून्य *decoration = lookup_decoration(&idnums, object);
+	जर (!decoration)
+		परत 0;
+	परत ptr_to_mark(decoration);
 }
 
-static struct commit *rewrite_commit(struct commit *p)
+स्थिर संरचना commit *rewrite_commit(संरचना commit *p)
 {
-	for (;;) {
-		if (p->parents && p->parents->next)
-			break;
-		if (p->object.flags & UNINTERESTING)
-			break;
-		if (!(p->object.flags & TREESAME))
-			break;
-		if (!p->parents)
-			return NULL;
+	साठी (;;) {
+		जर (p->parents && p->parents->next)
+			थांबा;
+		जर (p->object.flags & UNINTERESTING)
+			थांबा;
+		जर (!(p->object.flags & TREESAME))
+			थांबा;
+		जर (!p->parents)
+			परत रिक्त;
 		p = p->parents->item;
 	}
-	return p;
+	परत p;
 }
 
-static void show_progress(void)
+स्थिर शून्य show_progress(शून्य)
 {
-	static int counter = 0;
-	if (!progress)
-		return;
-	if ((++counter % progress) == 0)
-		printf("progress %d objects\n", counter);
+	स्थिर पूर्णांक counter = 0;
+	जर (!progress)
+		परत;
+	जर ((++counter % progress) == 0)
+		म_लिखो("progress %d objects\n", counter);
 }
 
 /*
@@ -285,127 +285,127 @@ static void show_progress(void)
  * There's no need to cache this result with anonymize_mem, since
  * we already handle blob content caching with marks.
  */
-static char *anonymize_blob(unsigned long *size)
+स्थिर अक्षर *anonymize_blob(अचिन्हित दीर्घ *size)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	स्थिर पूर्णांक counter;
+	संरचना strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "anonymous blob %d", counter++);
 	*size = out.len;
-	return strbuf_detach(&out, NULL);
+	परत strbuf_detach(&out, रिक्त);
 }
 
-static void export_blob(const struct object_id *oid)
+स्थिर शून्य export_blob(स्थिरांक संरचना object_id *oid)
 {
-	unsigned long size;
-	enum object_type type;
-	char *buf;
-	struct object *object;
-	int eaten;
+	अचिन्हित दीर्घ size;
+	गणना object_type type;
+	अक्षर *buf;
+	संरचना object *object;
+	पूर्णांक eaten;
 
-	if (no_data)
-		return;
+	जर (no_data)
+		परत;
 
-	if (is_null_oid(oid))
-		return;
+	जर (is_null_oid(oid))
+		परत;
 
 	object = lookup_object(the_repository, oid);
-	if (object && object->flags & SHOWN)
-		return;
+	जर (object && object->flags & SHOWN)
+		परत;
 
-	if (anonymize) {
+	जर (anonymize) {
 		buf = anonymize_blob(&size);
-		object = (struct object *)lookup_blob(the_repository, oid);
+		object = (संरचना object *)lookup_blob(the_repository, oid);
 		eaten = 0;
-	} else {
-		size_t size_st = 0;
+	} अन्यथा {
+		माप_प्रकार size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
 				      &size_st);
 		size = cast_size_t_to_ulong(size_st);
-		if (!buf)
+		जर (!buf)
 			die(_("could not read blob %s"), oid_to_hex(oid));
-		if (check_object_signature(the_repository, oid, buf, size,
+		जर (check_object_signature(the_repository, oid, buf, size,
 					   type) < 0)
 			die(_("oid mismatch in blob %s"), oid_to_hex(oid));
 		object = parse_object_buffer(the_repository, oid, type,
 					     size, buf, &eaten);
 	}
 
-	if (!object)
+	जर (!object)
 		die(_("could not read blob %s"), oid_to_hex(oid));
 
 	mark_next_object(object);
 
-	printf("blob\nmark :%"PRIu32"\n", last_idnum);
-	if (show_original_ids)
-		printf("original-oid %s\n", oid_to_hex(oid));
-	printf("data %"PRIuMAX"\n", (uintmax_t)size);
-	if (size && fwrite(buf, size, 1, stdout) != 1)
+	म_लिखो("blob\nmark :%"PRIu32"\n", last_idnum);
+	जर (show_original_ids)
+		म_लिखो("original-oid %s\n", oid_to_hex(oid));
+	म_लिखो("data %"PRIuMAX"\n", (uintmax_t)size);
+	जर (size && ख_डालो(buf, size, 1, मानक_निकास) != 1)
 		die_errno(_("could not write blob '%s'"), oid_to_hex(oid));
-	printf("\n");
+	म_लिखो("\n");
 
 	show_progress();
 
 	object->flags |= SHOWN;
-	if (!eaten)
-		free(buf);
+	जर (!eaten)
+		मुक्त(buf);
 }
 
-static int depth_first(const void *a_, const void *b_)
+स्थिर पूर्णांक depth_first(स्थिरांक शून्य *a_, स्थिरांक शून्य *b_)
 {
-	const struct diff_filepair *a = *((const struct diff_filepair **)a_);
-	const struct diff_filepair *b = *((const struct diff_filepair **)b_);
-	const char *name_a, *name_b;
-	int len_a, len_b, len;
-	int cmp;
+	स्थिरांक संरचना diff_filepair *a = *((स्थिरांक संरचना diff_filepair **)a_);
+	स्थिरांक संरचना diff_filepair *b = *((स्थिरांक संरचना diff_filepair **)b_);
+	स्थिरांक अक्षर *name_a, *name_b;
+	पूर्णांक len_a, len_b, len;
+	पूर्णांक cmp;
 
 	name_a = a->one ? a->one->path : a->two->path;
 	name_b = b->one ? b->one->path : b->two->path;
 
-	len_a = strlen(name_a);
-	len_b = strlen(name_b);
+	len_a = म_माप(name_a);
+	len_b = म_माप(name_b);
 	len = (len_a < len_b) ? len_a : len_b;
 
 	/* strcmp will sort 'd' before 'd/e', we want 'd/e' before 'd' */
-	cmp = memcmp(name_a, name_b, len);
-	if (cmp)
-		return cmp;
+	cmp = स_भेद(name_a, name_b, len);
+	जर (cmp)
+		परत cmp;
 	cmp = len_b - len_a;
-	if (cmp)
-		return cmp;
+	जर (cmp)
+		परत cmp;
 	/*
 	 * Move 'R'ename entries last so that all references of the file
 	 * appear in the output before it is renamed (e.g., when a file
 	 * was copied and renamed in the same commit).
 	 */
-	return (a->status == 'R') - (b->status == 'R');
+	परत (a->status == 'R') - (b->status == 'R');
 }
 
-static void print_path_1(const char *path)
+स्थिर शून्य print_path_1(स्थिरांक अक्षर *path)
 {
-	int need_quote = quote_c_style(path, NULL, NULL, 0);
-	if (need_quote)
-		quote_c_style(path, NULL, stdout, 0);
-	else if (strchr(path, ' '))
-		printf("\"%s\"", path);
-	else
-		printf("%s", path);
+	पूर्णांक need_quote = quote_c_style(path, रिक्त, रिक्त, 0);
+	जर (need_quote)
+		quote_c_style(path, रिक्त, मानक_निकास, 0);
+	अन्यथा जर (म_अक्षर(path, ' '))
+		म_लिखो("\"%s\"", path);
+	अन्यथा
+		म_लिखो("%s", path);
 }
 
-static char *anonymize_path_component(void)
+स्थिर अक्षर *anonymize_path_component(शून्य)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	स्थिर पूर्णांक counter;
+	संरचना strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "path%d", counter++);
-	return strbuf_detach(&out, NULL);
+	परत strbuf_detach(&out, रिक्त);
 }
 
-static void print_path(const char *path)
+स्थिर शून्य print_path(स्थिरांक अक्षर *path)
 {
-	if (!anonymize)
+	जर (!anonymize)
 		print_path_1(path);
-	else {
-		static struct hashmap paths;
-		static struct strbuf anon = STRBUF_INIT;
+	अन्यथा {
+		स्थिर संरचना hashmap paths;
+		स्थिर संरचना strbuf anon = STRBUF_INIT;
 
 		anonymize_path(&anon, path, &paths, anonymize_path_component);
 		print_path_1(anon.buf);
@@ -413,30 +413,30 @@ static void print_path(const char *path)
 	}
 }
 
-static char *generate_fake_oid(void)
+स्थिर अक्षर *generate_fake_oid(शून्य)
 {
-	static uint32_t counter = 1; /* avoid null oid */
-	const unsigned hashsz = the_hash_algo->rawsz;
-	struct object_id oid;
-	char *hex = xmallocz(GIT_MAX_HEXSZ);
+	स्थिर uint32_t counter = 1; /* avoid null oid */
+	स्थिरांक अचिन्हित hashsz = the_hash_algo->rawsz;
+	संरचना object_id oid;
+	अक्षर *hex = xmallocz(GIT_MAX_HEXSZ);
 
 	oidclr(&oid, the_repository->hash_algo);
 	put_be32(oid.hash + hashsz - 4, counter++);
-	return oid_to_hex_r(hex, &oid);
+	परत oid_to_hex_r(hex, &oid);
 }
 
-static const char *anonymize_oid(const char *oid_hex)
+स्थिर स्थिरांक अक्षर *anonymize_oid(स्थिरांक अक्षर *oid_hex)
 {
-	static struct hashmap objs;
-	size_t len = strlen(oid_hex);
-	return anonymize_str(&objs, generate_fake_oid, oid_hex, len);
+	स्थिर संरचना hashmap objs;
+	माप_प्रकार len = म_माप(oid_hex);
+	परत anonymize_str(&objs, generate_fake_oid, oid_hex, len);
 }
 
-static void show_filemodify(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED, void *data)
+स्थिर शून्य show_filemodify(संरचना diff_queue_struct *q,
+			    संरचना diff_options *options UNUSED, शून्य *data)
 {
-	int i;
-	struct string_list *changed = data;
+	पूर्णांक i;
+	संरचना string_list *changed = data;
 
 	/*
 	 * Handle files below a directory first, in case they are all deleted
@@ -444,20 +444,20 @@ static void show_filemodify(struct diff_queue_struct *q,
 	 */
 	QSORT(q->queue, q->nr, depth_first);
 
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filespec *ospec = q->queue[i]->one;
-		struct diff_filespec *spec = q->queue[i]->two;
+	साठी (i = 0; i < q->nr; i++) {
+		संरचना diff_filespec *ospec = q->queue[i]->one;
+		संरचना diff_filespec *spec = q->queue[i]->two;
 
-		switch (q->queue[i]->status) {
-		case DIFF_STATUS_DELETED:
-			printf("D ");
+		निवड (q->queue[i]->status) {
+		स्थिती DIFF_STATUS_DELETED:
+			म_लिखो("D ");
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
-			putchar('\n');
-			break;
+			string_list_घाला(changed, spec->path);
+			अक्षर_दो('\n');
+			थांबा;
 
-		case DIFF_STATUS_COPIED:
-		case DIFF_STATUS_RENAMED:
+		स्थिती DIFF_STATUS_COPIED:
+		स्थिती DIFF_STATUS_RENAMED:
 			/*
 			 * If a change in the file corresponding to ospec->path
 			 * has been observed, we cannot trust its contents
@@ -465,44 +465,44 @@ static void show_filemodify(struct diff_queue_struct *q,
 			 * contents, not the current contents.  So, declare a
 			 * copy or rename only if there was no change observed.
 			 */
-			if (!string_list_has_string(changed, ospec->path)) {
-				printf("%c ", q->queue[i]->status);
+			जर (!string_list_has_string(changed, ospec->path)) {
+				म_लिखो("%c ", q->queue[i]->status);
 				print_path(ospec->path);
-				putchar(' ');
+				अक्षर_दो(' ');
 				print_path(spec->path);
-				string_list_insert(changed, spec->path);
-				putchar('\n');
+				string_list_घाला(changed, spec->path);
+				अक्षर_दो('\n');
 
-				if (oideq(&ospec->oid, &spec->oid) &&
+				जर (oideq(&ospec->oid, &spec->oid) &&
 				    ospec->mode == spec->mode)
-					break;
+					थांबा;
 			}
 			/* fallthrough */
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
-		case DIFF_STATUS_ADDED:
+		स्थिती DIFF_STATUS_TYPE_CHANGED:
+		स्थिती DIFF_STATUS_MODIFIED:
+		स्थिती DIFF_STATUS_ADDED:
 			/*
 			 * Links refer to objects in another repositories;
 			 * output the SHA-1 verbatim.
 			 */
-			if (no_data || S_ISGITLINK(spec->mode))
-				printf("M %06o %s ", spec->mode,
+			जर (no_data || S_ISGITLINK(spec->mode))
+				म_लिखो("M %06o %s ", spec->mode,
 				       anonymize ?
 				       anonymize_oid(oid_to_hex(&spec->oid)) :
 				       oid_to_hex(&spec->oid));
-			else {
-				struct object *object = lookup_object(the_repository,
+			अन्यथा {
+				संरचना object *object = lookup_object(the_repository,
 								      &spec->oid);
-				printf("M %06o :%d ", spec->mode,
+				म_लिखो("M %06o :%d ", spec->mode,
 				       get_object_mark(object));
 			}
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
-			putchar('\n');
-			break;
+			string_list_घाला(changed, spec->path);
+			अक्षर_दो('\n');
+			थांबा;
 
-		default:
+		पूर्वनिर्धारित:
 			die(_("unexpected comparison status '%c' for %s, %s"),
 			    q->queue[i]->status,
 			    ospec->path ? ospec->path : _("none"),
@@ -511,59 +511,59 @@ static void show_filemodify(struct diff_queue_struct *q,
 	}
 }
 
-static char *anonymize_ref_component(void)
+स्थिर अक्षर *anonymize_ref_component(शून्य)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	स्थिर पूर्णांक counter;
+	संरचना strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "ref%d", counter++);
-	return strbuf_detach(&out, NULL);
+	परत strbuf_detach(&out, रिक्त);
 }
 
-static const char *anonymize_refname(const char *refname)
+स्थिर स्थिरांक अक्षर *anonymize_refname(स्थिरांक अक्षर *refname)
 {
 	/*
 	 * If any of these prefixes is found, we will leave it intact
 	 * so that tags remain tags and so forth.
 	 */
-	static const char *prefixes[] = {
+	स्थिर स्थिरांक अक्षर *prefixes[] = {
 		"refs/heads/",
 		"refs/tags/",
 		"refs/remotes/",
 		"refs/"
 	};
-	static struct hashmap refs;
-	static struct strbuf anon = STRBUF_INIT;
-	int i;
+	स्थिर संरचना hashmap refs;
+	स्थिर संरचना strbuf anon = STRBUF_INIT;
+	पूर्णांक i;
 
 	strbuf_reset(&anon);
-	for (i = 0; i < ARRAY_SIZE(prefixes); i++) {
-		if (skip_prefix(refname, prefixes[i], &refname)) {
+	साठी (i = 0; i < ARRAY_SIZE(prefixes); i++) {
+		जर (skip_prefix(refname, prefixes[i], &refname)) {
 			strbuf_addstr(&anon, prefixes[i]);
-			break;
+			थांबा;
 		}
 	}
 
 	anonymize_path(&anon, refname, &refs, anonymize_ref_component);
-	return anon.buf;
+	परत anon.buf;
 }
 
 /*
  * We do not even bother to cache commit messages, as they are unlikely
  * to be repeated verbatim, and it is not that interesting when they are.
  */
-static char *anonymize_commit_message(void)
+स्थिर अक्षर *anonymize_commit_message(शून्य)
 {
-	static int counter;
-	return xstrfmt("subject %d\n\nbody\n", counter++);
+	स्थिर पूर्णांक counter;
+	परत xstrfmt("subject %d\n\nbody\n", counter++);
 }
 
-static char *anonymize_ident(void)
+स्थिर अक्षर *anonymize_ident(शून्य)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	स्थिर पूर्णांक counter;
+	संरचना strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "User %d <user%d@example.com>", counter, counter);
 	counter++;
-	return strbuf_detach(&out, NULL);
+	परत strbuf_detach(&out, रिक्त);
 }
 
 /*
@@ -571,32 +571,32 @@ static char *anonymize_ident(void)
  * but keep timestamps intact, as they influence things like traversal
  * order (and by themselves should not be too revealing).
  */
-static void anonymize_ident_line(const char **beg, const char **end)
+स्थिर शून्य anonymize_ident_ओळ(स्थिरांक अक्षर **beg, स्थिरांक अक्षर **end)
 {
-	static struct hashmap idents;
-	static struct strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
-	static unsigned which_buffer;
+	स्थिर संरचना hashmap idents;
+	स्थिर संरचना strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
+	स्थिर अचिन्हित which_buffer;
 
-	struct strbuf *out;
-	struct ident_split split;
-	const char *end_of_header;
+	संरचना strbuf *out;
+	संरचना ident_split split;
+	स्थिरांक अक्षर *end_of_header;
 
 	out = &buffers[which_buffer++];
 	which_buffer %= ARRAY_SIZE(buffers);
 	strbuf_reset(out);
 
 	/* skip "committer", "author", "tagger", etc */
-	end_of_header = strchr(*beg, ' ');
-	if (!end_of_header)
+	end_of_header = म_अक्षर(*beg, ' ');
+	जर (!end_of_header)
 		BUG("malformed line fed to anonymize_ident_line: %.*s",
-		    (int)(*end - *beg), *beg);
+		    (पूर्णांक)(*end - *beg), *beg);
 	end_of_header++;
 	strbuf_add(out, *beg, end_of_header - *beg);
 
-	if (!split_ident_line(&split, end_of_header, *end - end_of_header) &&
+	जर (!split_ident_ओळ(&split, end_of_header, *end - end_of_header) &&
 	    split.date_begin) {
-		const char *ident;
-		size_t len;
+		स्थिरांक अक्षर *ident;
+		माप_प्रकार len;
 
 		len = split.mail_end - split.name_begin;
 		ident = anonymize_str(&idents, anonymize_ident,
@@ -604,7 +604,7 @@ static void anonymize_ident_line(const char **beg, const char **end)
 		strbuf_addstr(out, ident);
 		strbuf_addch(out, ' ');
 		strbuf_add(out, split.date_begin, split.tz_end - split.date_begin);
-	} else {
+	} अन्यथा {
 		strbuf_addstr(out, "Malformed Ident <malformed@example.com> 0 -0000");
 	}
 
@@ -624,21 +624,21 @@ static void anonymize_ident_line(const char **beg, const char **end)
  * If the header is found, then *end is set to point at the '\n' in
  * msg that immediately follows the header value.
  */
-static const char *find_commit_multiline_header(const char *msg,
-						const char *key,
-						const char **end)
+स्थिर स्थिरांक अक्षर *find_commit_multiline_header(स्थिरांक अक्षर *संदेश,
+						स्थिरांक अक्षर *किल्ली,
+						स्थिरांक अक्षर **end)
 {
-	struct strbuf val = STRBUF_INIT;
-	const char *bol, *eol;
-	size_t len;
+	संरचना strbuf val = STRBUF_INIT;
+	स्थिरांक अक्षर *bol, *eol;
+	माप_प्रकार len;
 
-	bol = find_commit_header(msg, key, &len);
-	if (!bol)
-		return NULL;
+	bol = find_commit_header(संदेश, किल्ली, &len);
+	जर (!bol)
+		परत रिक्त;
 	eol = bol + len;
 	strbuf_add(&val, bol, len);
 
-	while (eol[0] == '\n' && eol[1] == ' ') {
+	पर्यंत (eol[0] == '\n' && eol[1] == ' ') {
 		bol = eol + 2;
 		eol = strchrnul(bol, '\n');
 		strbuf_addch(&val, '\n');
@@ -646,70 +646,70 @@ static const char *find_commit_multiline_header(const char *msg,
 	}
 
 	*end = eol;
-	return strbuf_detach(&val, NULL);
+	परत strbuf_detach(&val, रिक्त);
 }
 
-static void print_signature(const char *signature, const char *object_hash)
+स्थिर शून्य print_signature(स्थिरांक अक्षर *signature, स्थिरांक अक्षर *object_hash)
 {
-	if (!signature)
-		return;
+	जर (!signature)
+		परत;
 
-	printf("gpgsig %s %s\ndata %u\n%s\n",
+	म_लिखो("gpgsig %s %s\ndata %u\n%s\n",
 	       object_hash,
 	       get_signature_format(signature),
-	       (unsigned)strlen(signature),
+	       (अचिन्हित)म_माप(signature),
 	       signature);
 }
 
-static const char *append_signatures_for_header(struct string_list *signatures,
-						const char *pos,
-						const char *header,
-						const char *object_hash)
+स्थिर स्थिरांक अक्षर *append_signatures_for_header(संरचना string_list *signatures,
+						स्थिरांक अक्षर *pos,
+						स्थिरांक अक्षर *header,
+						स्थिरांक अक्षर *object_hash)
 {
-	const char *signature;
-	const char *start = pos;
-	const char *end = pos;
+	स्थिरांक अक्षर *signature;
+	स्थिरांक अक्षर *start = pos;
+	स्थिरांक अक्षर *end = pos;
 
-	while ((signature = find_commit_multiline_header(start + 1,
+	पर्यंत ((signature = find_commit_multiline_header(start + 1,
 							 header,
 							 &end))) {
-		string_list_append(signatures, signature)->util = (void *)object_hash;
-		free((char *)signature);
+		string_list_append(signatures, signature)->util = (शून्य *)object_hash;
+		मुक्त((अक्षर *)signature);
 		start = end;
 	}
 
-	return end;
+	परत end;
 }
 
-static void handle_commit(struct commit *commit, struct rev_info *rev,
-			  struct string_list *paths_of_changed_objects)
+स्थिर शून्य handle_commit(संरचना commit *commit, संरचना rev_info *rev,
+			  संरचना string_list *paths_of_changed_objects)
 {
-	int saved_output_format = rev->diffopt.output_format;
-	const char *commit_buffer, *commit_buffer_cursor;
-	const char *author, *author_end, *committer, *committer_end;
-	const char *encoding = NULL;
-	size_t encoding_len;
-	struct string_list signatures = STRING_LIST_INIT_DUP;
-	const char *message;
-	char *reencoded = NULL;
-	struct commit_list *p;
-	const char *refname;
-	int i;
+	पूर्णांक saved_output_format = rev->diffopt.output_format;
+	स्थिरांक अक्षर *commit_buffer, *commit_buffer_cursor;
+	स्थिरांक अक्षर *author, *author_end, *committer, *committer_end;
+	स्थिरांक अक्षर *encoding = रिक्त;
+	माप_प्रकार encoding_len;
+	संरचना string_list signatures = STRING_LIST_INIT_DUP;
+	स्थिरांक अक्षर *message;
+	अक्षर *reencoded = रिक्त;
+	संरचना commit_list *p;
+	स्थिरांक अक्षर *refname;
+	पूर्णांक i;
 
 	rev->diffopt.output_format = DIFF_FORMAT_CALLBACK;
 
 	parse_commit_or_die(commit);
-	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, NULL);
+	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, रिक्त);
 
-	author = strstr(commit_buffer_cursor, "\nauthor ");
-	if (!author)
+	author = म_माला(commit_buffer_cursor, "\nauthor ");
+	जर (!author)
 		die(_("could not find author in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	author++;
 	commit_buffer_cursor = author_end = strchrnul(author, '\n');
 
-	committer = strstr(commit_buffer_cursor, "\ncommitter ");
-	if (!committer)
+	committer = म_माला(commit_buffer_cursor, "\ncommitter ");
+	जर (!committer)
 		die(_("could not find committer in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	committer++;
@@ -722,39 +722,39 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * pointer to the beginning of the next line.
 	 */
 
-	if (*commit_buffer_cursor == '\n') {
+	जर (*commit_buffer_cursor == '\n') {
 		encoding = find_commit_header(commit_buffer_cursor + 1, "encoding", &encoding_len);
-		if (encoding)
+		जर (encoding)
 			commit_buffer_cursor = encoding + encoding_len;
 	}
 
-	if (*commit_buffer_cursor == '\n') {
-		const char *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+	जर (*commit_buffer_cursor == '\n') {
+		स्थिरांक अक्षर *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
 								      "gpgsig", "sha1");
-		const char *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+		स्थिरांक अक्षर *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
 									"gpgsig-sha256", "sha256");
 		commit_buffer_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
 	}
 
-	message = strstr(commit_buffer_cursor, "\n\n");
-	if (message)
+	message = म_माला(commit_buffer_cursor, "\n\n");
+	जर (message)
 		message += 2;
 
-	if (commit->parents &&
+	जर (commit->parents &&
 	    (get_object_mark(&commit->parents->item->object) != 0 ||
 	     reference_excluded_commits) &&
-	    !full_tree) {
+	    !full_वृक्ष) {
 		parse_commit_or_die(commit->parents->item);
-		diff_tree_oid(get_commit_tree_oid(commit->parents->item),
-			      get_commit_tree_oid(commit), "", &rev->diffopt);
+		diff_वृक्ष_oid(get_commit_वृक्ष_oid(commit->parents->item),
+			      get_commit_वृक्ष_oid(commit), "", &rev->diffopt);
 	}
-	else
-		diff_root_tree_oid(get_commit_tree_oid(commit),
+	अन्यथा
+		diff_मूळ_वृक्ष_oid(get_commit_वृक्ष_oid(commit),
 				   "", &rev->diffopt);
 
 	/* Export the referenced blobs, and remember the marks. */
-	for (i = 0; i < diff_queued_diff.nr; i++)
-		if (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
+	साठी (i = 0; i < diff_queued_diff.nr; i++)
+		जर (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
 			export_blob(&diff_queued_diff.queue[i]->two->oid);
 
 	refname = *revision_sources_at(&revision_sources, commit);
@@ -765,210 +765,210 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * repo may have enough refs for this to become slow.
 	 */
 	string_list_remove(&extra_refs, refname, 0);
-	if (anonymize) {
+	जर (anonymize) {
 		refname = anonymize_refname(refname);
-		anonymize_ident_line(&committer, &committer_end);
-		anonymize_ident_line(&author, &author_end);
+		anonymize_ident_ओळ(&committer, &committer_end);
+		anonymize_ident_ओळ(&author, &author_end);
 	}
 
 	mark_next_object(&commit->object);
-	if (anonymize) {
+	जर (anonymize) {
 		reencoded = anonymize_commit_message();
-	} else if (encoding) {
-		char *buf;
-		switch (reencode_mode) {
-		case REENCODE_YES:
-			buf = xstrfmt("%.*s", (int)encoding_len, encoding);
+	} अन्यथा जर (encoding) {
+		अक्षर *buf;
+		निवड (reencode_mode) {
+		स्थिती REENCODE_YES:
+			buf = xstrfmt("%.*s", (पूर्णांक)encoding_len, encoding);
 			reencoded = reencode_string(message, "UTF-8", buf);
-			free(buf);
-			break;
-		case REENCODE_NO:
-			break;
-		case REENCODE_ABORT:
+			मुक्त(buf);
+			थांबा;
+		स्थिती REENCODE_NO:
+			थांबा;
+		स्थिती REENCODE_ABORT:
 			die(_("encountered commit-specific encoding %.*s in commit "
 			      "%s; use --reencode=[yes|no] to handle it"),
-			    (int)encoding_len, encoding,
+			    (पूर्णांक)encoding_len, encoding,
 			    oid_to_hex(&commit->object.oid));
 		}
 	}
-	if (!commit->parents)
-		printf("reset %s\n", refname);
-	printf("commit %s\nmark :%"PRIu32"\n", refname, last_idnum);
-	if (show_original_ids)
-		printf("original-oid %s\n", oid_to_hex(&commit->object.oid));
-	printf("%.*s\n%.*s\n",
-	       (int)(author_end - author), author,
-	       (int)(committer_end - committer), committer);
-	if (signatures.nr) {
-		switch (signed_commit_mode) {
+	जर (!commit->parents)
+		म_लिखो("reset %s\n", refname);
+	म_लिखो("commit %s\nmark :%"PRIu32"\n", refname, last_idnum);
+	जर (show_original_ids)
+		म_लिखो("original-oid %s\n", oid_to_hex(&commit->object.oid));
+	म_लिखो("%.*s\n%.*s\n",
+	       (पूर्णांक)(author_end - author), author,
+	       (पूर्णांक)(committer_end - committer), committer);
+	जर (signatures.nr) {
+		निवड (signed_commit_mode) {
 		/* Exporting modes */
-		case SIGN_WARN_VERBATIM:
+		स्थिती SIGN_WARN_VERBATIM:
 			warning(_("exporting %"PRIuMAX" signature(s) for commit %s"),
 				(uintmax_t)signatures.nr, oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_VERBATIM:
-			for (size_t i = 0; i < signatures.nr; i++) {
-				struct string_list_item *item = &signatures.items[i];
+		स्थिती SIGN_VERBATIM:
+			साठी (माप_प्रकार i = 0; i < signatures.nr; i++) {
+				संरचना string_list_item *item = &signatures.वस्तुसंच[i];
 				print_signature(item->string, item->util);
 			}
-			break;
+			थांबा;
 
 		/* Stripping modes */
-		case SIGN_WARN_STRIP:
+		स्थिती SIGN_WARN_STRIP:
 			warning(_("stripping signature(s) from commit %s"),
 				oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_STRIP:
-			break;
+		स्थिती SIGN_STRIP:
+			थांबा;
 
 		/* Aborting modes */
-		case SIGN_ABORT:
+		स्थिती SIGN_ABORT:
 			die(_("encountered signed commit %s; use "
 			      "--signed-commits=<mode> to handle it"),
 			    oid_to_hex(&commit->object.oid));
-		default:
+		पूर्वनिर्धारित:
 			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 		}
 		string_list_clear(&signatures, 0);
 	}
-	if (!reencoded && encoding)
-		printf("encoding %.*s\n", (int)encoding_len, encoding);
-	printf("data %u\n%s",
-	       (unsigned)(reencoded
-			  ? strlen(reencoded) : message
-			  ? strlen(message) : 0),
+	जर (!reencoded && encoding)
+		म_लिखो("encoding %.*s\n", (पूर्णांक)encoding_len, encoding);
+	म_लिखो("data %u\n%s",
+	       (अचिन्हित)(reencoded
+			  ? म_माप(reencoded) : message
+			  ? म_माप(message) : 0),
 	       reencoded ? reencoded : message ? message : "");
-	free(reencoded);
+	मुक्त(reencoded);
 	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
 
-	for (i = 0, p = commit->parents; p; p = p->next) {
-		struct object *obj = &p->item->object;
-		int mark = get_object_mark(obj);
+	साठी (i = 0, p = commit->parents; p; p = p->next) {
+		संरचना object *obj = &p->item->object;
+		पूर्णांक mark = get_object_mark(obj);
 
-		if (!mark && !reference_excluded_commits)
-			continue;
-		if (i == 0)
-			printf("from ");
-		else
-			printf("merge ");
-		if (mark)
-			printf(":%d\n", mark);
-		else
-			printf("%s\n",
+		जर (!mark && !reference_excluded_commits)
+			सुरूठेवा;
+		जर (i == 0)
+			म_लिखो("from ");
+		अन्यथा
+			म_लिखो("merge ");
+		जर (mark)
+			म_लिखो(":%d\n", mark);
+		अन्यथा
+			म_लिखो("%s\n",
 			       anonymize ?
 			       anonymize_oid(oid_to_hex(&obj->oid)) :
 			       oid_to_hex(&obj->oid));
 		i++;
 	}
 
-	if (full_tree)
-		printf("deleteall\n");
-	log_tree_diff_flush(rev);
+	जर (full_वृक्ष)
+		म_लिखो("deleteall\n");
+	log_वृक्ष_diff_flush(rev);
 	string_list_clear(paths_of_changed_objects, 0);
 	rev->diffopt.output_format = saved_output_format;
 
-	printf("\n");
+	म_लिखो("\n");
 
 	show_progress();
 }
 
-static char *anonymize_tag(void)
+स्थिर अक्षर *anonymize_tag(शून्य)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	स्थिर पूर्णांक counter;
+	संरचना strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "tag message %d", counter++);
-	return strbuf_detach(&out, NULL);
+	परत strbuf_detach(&out, रिक्त);
 }
 
 
-static void handle_tag(const char *name, struct tag *tag)
+स्थिर शून्य handle_tag(स्थिरांक अक्षर *name, संरचना tag *tag)
 {
-	size_t size;
-	enum object_type type;
-	char *buf;
-	const char *tagger, *tagger_end, *message;
-	size_t message_size = 0;
-	struct object *tagged;
-	int tagged_mark;
-	struct commit *p;
+	माप_प्रकार size;
+	गणना object_type type;
+	अक्षर *buf;
+	स्थिरांक अक्षर *tagger, *tagger_end, *message;
+	माप_प्रकार message_size = 0;
+	संरचना object *tagged;
+	पूर्णांक tagged_mark;
+	संरचना commit *p;
 
 	/* Trees have no identifier in fast-export output, thus we have no way
 	 * to output tags of trees, tags of tags of trees, etc.  Simply omit
 	 * such tags.
 	 */
 	tagged = tag->tagged;
-	while (tagged->type == OBJ_TAG) {
-		tagged = ((struct tag *)tagged)->tagged;
+	पर्यंत (tagged->type == OBJ_TAG) {
+		tagged = ((संरचना tag *)tagged)->tagged;
 	}
-	if (tagged->type == OBJ_TREE) {
+	जर (tagged->type == OBJ_वृक्ष) {
 		warning(_("omitting tag %s,\nsince tags of trees (or tags "
 			  "of tags of trees, etc.) are not supported."),
 			oid_to_hex(&tag->object.oid));
-		return;
+		परत;
 	}
 
 	buf = odb_read_object(the_repository->objects, &tag->object.oid,
 			      &type, &size);
-	if (!buf)
+	जर (!buf)
 		die(_("could not read tag %s"), oid_to_hex(&tag->object.oid));
 	message = memmem(buf, size, "\n\n", 2);
-	if (message) {
+	जर (message) {
 		message += 2;
-		message_size = strlen(message);
+		message_size = म_माप(message);
 	}
 	tagger = memmem(buf, message ? message - buf : size, "\ntagger ", 8);
-	if (!tagger) {
-		if (fake_missing_tagger)
+	जर (!tagger) {
+		जर (fake_missing_tagger)
 			tagger = "tagger Unspecified Tagger "
 				"<unspecified-tagger> 0 +0000";
-		else
+		अन्यथा
 			tagger = "";
-		tagger_end = tagger + strlen(tagger);
-	} else {
+		tagger_end = tagger + म_माप(tagger);
+	} अन्यथा {
 		tagger++;
 		tagger_end = strchrnul(tagger, '\n');
-		if (anonymize)
-			anonymize_ident_line(&tagger, &tagger_end);
+		जर (anonymize)
+			anonymize_ident_ओळ(&tagger, &tagger_end);
 	}
 
-	if (anonymize) {
+	जर (anonymize) {
 		name = anonymize_refname(name);
-		if (message) {
-			static struct hashmap tags;
+		जर (message) {
+			स्थिर संरचना hashmap tags;
 			message = anonymize_str(&tags, anonymize_tag,
 						message, message_size);
-			message_size = strlen(message);
+			message_size = म_माप(message);
 		}
 	}
 
 	/* handle signed tags */
-	if (message) {
-		size_t sig_offset = parse_signed_buffer(message, message_size);
-		if (sig_offset < message_size)
-			switch (signed_tag_mode) {
+	जर (message) {
+		माप_प्रकार sig_offset = parse_signed_buffer(message, message_size);
+		जर (sig_offset < message_size)
+			निवड (signed_tag_mode) {
 			/* Exporting modes */
-			case SIGN_WARN_VERBATIM:
+			स्थिती SIGN_WARN_VERBATIM:
 				warning(_("exporting signed tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_VERBATIM:
-				break;
+			स्थिती SIGN_VERBATIM:
+				थांबा;
 
 			/* Stripping modes */
-			case SIGN_WARN_STRIP:
+			स्थिती SIGN_WARN_STRIP:
 				warning(_("stripping signature from tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_STRIP:
+			स्थिती SIGN_STRIP:
 				message_size = sig_offset;
-				break;
+				थांबा;
 
 			/* Aborting modes */
-			case SIGN_ABORT:
+			स्थिती SIGN_ABORT:
 				die(_("encountered signed tag %s; use "
 				      "--signed-tags=<mode> to handle it"),
 				    oid_to_hex(&tag->object.oid));
-			default:
+			पूर्वनिर्धारित:
 				BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 			}
 	}
@@ -976,182 +976,182 @@ static void handle_tag(const char *name, struct tag *tag)
 	/* handle tag->tagged having been filtered out due to paths specified */
 	tagged = tag->tagged;
 	tagged_mark = get_object_mark(tagged);
-	if (!tagged_mark) {
-		switch (tag_of_filtered_mode) {
-		case TAG_FILTERING_ABORT:
+	जर (!tagged_mark) {
+		निवड (tag_of_filtered_mode) {
+		स्थिती TAG_FILTERING_ABORT:
 			die(_("tag %s tags unexported object; use "
 			      "--tag-of-filtered-object=<mode> to handle it"),
 			    oid_to_hex(&tag->object.oid));
-		case DROP:
+		स्थिती DROP:
 			/* Ignore this tag altogether */
-			free(buf);
-			return;
-		case REWRITE:
-			if (tagged->type == OBJ_TAG && !mark_tags) {
+			मुक्त(buf);
+			परत;
+		स्थिती REWRITE:
+			जर (tagged->type == OBJ_TAG && !mark_tags) {
 				die(_("cannot export nested tags unless --mark-tags is specified."));
-			} else if (tagged->type == OBJ_COMMIT) {
-				p = rewrite_commit((struct commit *)tagged);
-				if (!p) {
-					printf("reset %s\nfrom %s\n\n",
+			} अन्यथा जर (tagged->type == OBJ_COMMIT) {
+				p = rewrite_commit((संरचना commit *)tagged);
+				जर (!p) {
+					म_लिखो("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					free(buf);
-					return;
+					मुक्त(buf);
+					परत;
 				}
 				tagged_mark = get_object_mark(&p->object);
-			} else {
+			} अन्यथा {
 				/* tagged->type is either OBJ_BLOB or OBJ_TAG */
 				tagged_mark = get_object_mark(tagged);
 			}
 		}
 	}
 
-	if (tagged->type == OBJ_TAG) {
-		printf("reset %s\nfrom %s\n\n",
+	जर (tagged->type == OBJ_TAG) {
+		म_लिखो("reset %s\nfrom %s\n\n",
 		       name, oid_to_hex(null_oid(the_hash_algo)));
 	}
 	skip_prefix(name, "refs/tags/", &name);
-	printf("tag %s\n", name);
-	if (mark_tags) {
+	म_लिखो("tag %s\n", name);
+	जर (mark_tags) {
 		mark_next_object(&tag->object);
-		printf("mark :%"PRIu32"\n", last_idnum);
+		म_लिखो("mark :%"PRIu32"\n", last_idnum);
 	}
-	if (tagged_mark)
-		printf("from :%d\n", tagged_mark);
-	else
-		printf("from %s\n", oid_to_hex(&tagged->oid));
+	जर (tagged_mark)
+		म_लिखो("from :%d\n", tagged_mark);
+	अन्यथा
+		म_लिखो("from %s\n", oid_to_hex(&tagged->oid));
 
-	if (show_original_ids)
-		printf("original-oid %s\n", oid_to_hex(&tag->object.oid));
-	printf("%.*s%sdata %d\n%.*s\n",
-	       (int)(tagger_end - tagger), tagger,
+	जर (show_original_ids)
+		म_लिखो("original-oid %s\n", oid_to_hex(&tag->object.oid));
+	म_लिखो("%.*s%sdata %d\n%.*s\n",
+	       (पूर्णांक)(tagger_end - tagger), tagger,
 	       tagger == tagger_end ? "" : "\n",
-	       (int)message_size, (int)message_size, message ? message : "");
-	free(buf);
+	       (पूर्णांक)message_size, (पूर्णांक)message_size, message ? message : "");
+	मुक्त(buf);
 }
 
-static struct commit *get_commit(struct rev_cmdline_entry *e, const char *full_name)
+स्थिर संरचना commit *get_commit(संरचना rev_cmdline_entry *e, स्थिरांक अक्षर *full_name)
 {
-	switch (e->item->type) {
-	case OBJ_COMMIT:
-		return (struct commit *)e->item;
-	case OBJ_TAG: {
-		struct tag *tag = (struct tag *)e->item;
+	निवड (e->item->type) {
+	स्थिती OBJ_COMMIT:
+		परत (संरचना commit *)e->item;
+	स्थिती OBJ_TAG: {
+		संरचना tag *tag = (संरचना tag *)e->item;
 
 		/* handle nested tags */
-		while (tag && tag->object.type == OBJ_TAG) {
+		पर्यंत (tag && tag->object.type == OBJ_TAG) {
 			parse_object(the_repository, &tag->object.oid);
 			string_list_append(&tag_refs, full_name)->util = tag;
-			tag = (struct tag *)tag->tagged;
+			tag = (संरचना tag *)tag->tagged;
 		}
-		if (!tag)
+		जर (!tag)
 			die(_("tag %s points nowhere?"), e->name);
-		return (struct commit *)tag;
+		परत (संरचना commit *)tag;
 	}
-	default:
-		return NULL;
+	पूर्वनिर्धारित:
+		परत रिक्त;
 	}
 }
 
-static void get_tags_and_duplicates(struct rev_cmdline_info *info)
+स्थिर शून्य get_tags_and_duplicates(संरचना rev_cmdline_info *info)
 {
-	int i;
+	पूर्णांक i;
 
-	for (i = 0; i < info->nr; i++) {
-		struct rev_cmdline_entry *e = info->rev + i;
-		struct object_id oid;
-		struct commit *commit;
-		char *full_name = NULL;
+	साठी (i = 0; i < info->nr; i++) {
+		संरचना rev_cmdline_entry *e = info->rev + i;
+		संरचना object_id oid;
+		संरचना commit *commit;
+		अक्षर *full_name = रिक्त;
 
-		if (e->flags & UNINTERESTING)
-			continue;
+		जर (e->flags & UNINTERESTING)
+			सुरूठेवा;
 
-		if (repo_dwim_ref(the_repository, e->name, strlen(e->name),
+		जर (repo_dwim_ref(the_repository, e->name, म_माप(e->name),
 				  &oid, &full_name, 0) != 1) {
-			free(full_name);
-			continue;
+			मुक्त(full_name);
+			सुरूठेवा;
 		}
 
-		if (refspecs.nr) {
-			char *private;
-			private = apply_refspecs(&refspecs, full_name);
-			if (private) {
-				free(full_name);
-				full_name = private;
+		जर (refspecs.nr) {
+			अक्षर *खाजगी;
+			खाजगी = apply_refspecs(&refspecs, full_name);
+			जर (खाजगी) {
+				मुक्त(full_name);
+				full_name = खाजगी;
 			}
 		}
 
 		commit = get_commit(e, full_name);
-		if (!commit) {
+		जर (!commit) {
 			warning(_("%s: unexpected object of type %s, skipping."),
 				e->name,
 				type_name(e->item->type));
-			free(full_name);
-			continue;
+			मुक्त(full_name);
+			सुरूठेवा;
 		}
 
-		switch (commit->object.type) {
-		case OBJ_COMMIT:
-			break;
-		case OBJ_BLOB:
+		निवड (commit->object.type) {
+		स्थिती OBJ_COMMIT:
+			थांबा;
+		स्थिती OBJ_BLOB:
 			export_blob(&commit->object.oid);
-			free(full_name);
-			continue;
-		default: /* OBJ_TAG (nested tags) is already handled */
+			मुक्त(full_name);
+			सुरूठेवा;
+		पूर्वनिर्धारित: /* OBJ_TAG (nested tags) is already handled */
 			warning(_("tag points to object of unexpected type %s, skipping."),
 				type_name(commit->object.type));
-			free(full_name);
-			continue;
+			मुक्त(full_name);
+			सुरूठेवा;
 		}
 
 		/*
 		 * Make sure this ref gets properly updated eventually, whether
 		 * through a commit or manually at the end.
 		 */
-		if (e->item->type != OBJ_TAG)
+		जर (e->item->type != OBJ_TAG)
 			string_list_append(&extra_refs, full_name)->util = commit;
 
-		if (!*revision_sources_at(&revision_sources, commit))
+		जर (!*revision_sources_at(&revision_sources, commit))
 			*revision_sources_at(&revision_sources, commit) = full_name;
-		else
-			free(full_name);
+		अन्यथा
+			मुक्त(full_name);
 	}
 
 	string_list_sort_u(&extra_refs, 0);
 }
 
-static void handle_tags_and_duplicates(struct string_list *extras)
+स्थिर शून्य handle_tags_and_duplicates(संरचना string_list *extras)
 {
-	struct commit *commit;
-	int i;
+	संरचना commit *commit;
+	पूर्णांक i;
 
-	for (i = extras->nr - 1; i >= 0; i--) {
-		const char *name = extras->items[i].string;
-		struct object *object = extras->items[i].util;
-		int mark;
+	साठी (i = extras->nr - 1; i >= 0; i--) {
+		स्थिरांक अक्षर *name = extras->वस्तुसंच[i].string;
+		संरचना object *object = extras->वस्तुसंच[i].util;
+		पूर्णांक mark;
 
-		switch (object->type) {
-		case OBJ_TAG:
-			handle_tag(name, (struct tag *)object);
-			break;
-		case OBJ_COMMIT:
-			if (anonymize)
+		निवड (object->type) {
+		स्थिती OBJ_TAG:
+			handle_tag(name, (संरचना tag *)object);
+			थांबा;
+		स्थिती OBJ_COMMIT:
+			जर (anonymize)
 				name = anonymize_refname(name);
 			/* create refs pointing to already seen commits */
-			commit = rewrite_commit((struct commit *)object);
-			if (!commit) {
+			commit = rewrite_commit((संरचना commit *)object);
+			जर (!commit) {
 				/*
 				 * Neither this object nor any of its
 				 * ancestors touch any relevant paths, so
 				 * it has been filtered to nothing.  Delete
 				 * it.
 				 */
-				printf("reset %s\nfrom %s\n\n",
+				म_लिखो("reset %s\nfrom %s\n\n",
 				       name, oid_to_hex(null_oid(the_hash_algo)));
-				continue;
+				सुरूठेवा;
 			}
 
 			mark = get_object_mark(&commit->object);
-			if (!mark) {
+			जर (!mark) {
 				/*
 				 * Getting here means we have a commit which
 				 * was excluded by a negative refspec (e.g.
@@ -1162,165 +1162,165 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 * in its history to be deleted, which basically
 				 * just means deletion of the ref.
 				 */
-				if (!reference_excluded_commits) {
+				जर (!reference_excluded_commits) {
 					/* delete the ref */
-					printf("reset %s\nfrom %s\n\n",
+					म_लिखो("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					continue;
+					सुरूठेवा;
 				}
 				/* set ref to commit using oid, not mark */
-				printf("reset %s\nfrom %s\n\n", name,
+				म_लिखो("reset %s\nfrom %s\n\n", name,
 				       oid_to_hex(&commit->object.oid));
-				continue;
+				सुरूठेवा;
 			}
 
-			printf("reset %s\nfrom :%d\n\n", name, mark
+			म_लिखो("reset %s\nfrom :%d\n\n", name, mark
 			       );
 			show_progress();
-			break;
+			थांबा;
 		}
 	}
 }
 
-static void export_marks(char *file)
+स्थिर शून्य export_marks(अक्षर *file)
 {
-	unsigned int i;
+	अचिन्हित पूर्णांक i;
 	uint32_t mark;
-	struct decoration_entry *deco = idnums.entries;
-	FILE *f;
-	int e = 0;
+	संरचना decoration_entry *deco = idnums.entries;
+	खाता *f;
+	पूर्णांक e = 0;
 
 	f = fopen_for_writing(file);
-	if (!f)
+	जर (!f)
 		die_errno(_("unable to open marks file %s for writing."), file);
 
-	for (i = 0; i < idnums.size; i++) {
-		if (deco->base && deco->base->type == 1) {
+	साठी (i = 0; i < idnums.size; i++) {
+		जर (deco->base && deco->base->type == 1) {
 			mark = ptr_to_mark(deco->decoration);
-			if (fprintf(f, ":%"PRIu32" %s\n", mark,
+			जर (ख_लिखो(f, ":%"PRIu32" %s\n", mark,
 				oid_to_hex(&deco->base->oid)) < 0) {
 			    e = 1;
-			    break;
+			    थांबा;
 			}
 		}
 		deco++;
 	}
 
-	e |= ferror(f);
-	e |= fclose(f);
-	if (e)
+	e |= ख_त्रुटि(f);
+	e |= ख_बंद(f);
+	जर (e)
 		error(_("unable to write marks file %s."), file);
 }
 
-static void import_marks(char *input_file, int check_exists)
+स्थिर शून्य import_marks(अक्षर *आदान_file, पूर्णांक check_exists)
 {
-	char line[512];
-	FILE *f;
-	struct stat sb;
+	अक्षर ओळ[512];
+	खाता *f;
+	संरचना stat sb;
 
-	if (check_exists && stat(input_file, &sb))
-		return;
+	जर (check_exists && stat(आदान_file, &sb))
+		परत;
 
-	f = xfopen(input_file, "r");
-	while (fgets(line, sizeof(line), f)) {
+	f = xfopen(आदान_file, "r");
+	पर्यंत (ख_माला_लो(ओळ, आकार(ओळ), f)) {
 		uint32_t mark;
-		char *line_end, *mark_end;
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
-		enum object_type type;
+		अक्षर *ओळ_end, *mark_end;
+		संरचना object_id oid;
+		संरचना object *object;
+		संरचना commit *commit;
+		गणना object_type type;
 
-		line_end = strchr(line, '\n');
-		if (line[0] != ':' || !line_end)
-			die(_("corrupt mark line: %s"), line);
-		*line_end = '\0';
+		ओळ_end = म_अक्षर(ओळ, '\n');
+		जर (ओळ[0] != ':' || !ओळ_end)
+			die(_("corrupt mark line: %s"), ओळ);
+		*ओळ_end = '\0';
 
-		mark = strtoumax(line + 1, &mark_end, 10);
-		if (!mark || mark_end == line + 1
+		mark = strtoumax(ओळ + 1, &mark_end, 10);
+		जर (!mark || mark_end == ओळ + 1
 			|| *mark_end != ' ' || get_oid_hex(mark_end + 1, &oid))
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), ओळ);
 
-		if (last_idnum < mark)
+		जर (last_idnum < mark)
 			last_idnum = mark;
 
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+		type = odb_read_object_info(the_repository->objects, &oid, रिक्त);
+		जर (type < 0)
 			die(_("object not found: %s"), oid_to_hex(&oid));
 
-		if (type != OBJ_COMMIT)
+		जर (type != OBJ_COMMIT)
 			/* only commits */
-			continue;
+			सुरूठेवा;
 
 		commit = lookup_commit(the_repository, &oid);
-		if (!commit)
+		जर (!commit)
 			die(_("not a commit? can't happen: %s"), oid_to_hex(&oid));
 
 		object = &commit->object;
 
-		if (object->flags & SHOWN)
+		जर (object->flags & SHOWN)
 			error(_("object %s already has a mark"), oid_to_hex(&oid));
 
 		mark_object(object, mark);
 
 		object->flags |= SHOWN;
 	}
-	fclose(f);
+	ख_बंद(f);
 }
 
-static void handle_deletes(void)
+स्थिर शून्य handle_deletes(शून्य)
 {
-	int i;
-	for (i = 0; i < refspecs.nr; i++) {
-		struct refspec_item *refspec = &refspecs.items[i];
-		if (*refspec->src)
-			continue;
+	पूर्णांक i;
+	साठी (i = 0; i < refspecs.nr; i++) {
+		संरचना refspec_item *refspec = &refspecs.वस्तुसंच[i];
+		जर (*refspec->src)
+			सुरूठेवा;
 
-		printf("reset %s\nfrom %s\n\n",
+		म_लिखो("reset %s\nfrom %s\n\n",
 				refspec->dst, oid_to_hex(null_oid(the_hash_algo)));
 	}
 }
 
-static int parse_opt_anonymize_map(const struct option *opt,
-				   const char *arg, int unset)
+स्थिर पूर्णांक parse_opt_anonymize_map(स्थिरांक संरचना option *opt,
+				   स्थिरांक अक्षर *arg, पूर्णांक unset)
 {
-	struct hashmap *map = opt->value;
-	const char *delim, *value;
-	size_t keylen;
+	संरचना hashmap *map = opt->मूल्य;
+	स्थिरांक अक्षर *delim, *मूल्य;
+	माप_प्रकार keylen;
 
 	BUG_ON_OPT_NEG(unset);
 
-	delim = strchr(arg, ':');
-	if (delim) {
+	delim = म_अक्षर(arg, ':');
+	जर (delim) {
 		keylen = delim - arg;
-		value = delim + 1;
-	} else {
-		keylen = strlen(arg);
-		value = arg;
+		मूल्य = delim + 1;
+	} अन्यथा {
+		keylen = म_माप(arg);
+		मूल्य = arg;
 	}
 
-	if (!keylen || !*value)
-		return error(_("--anonymize-map token cannot be empty"));
+	जर (!keylen || !*मूल्य)
+		परत error(_("--anonymize-map token cannot be empty"));
 
 	add_anonymized_entry(map, memhash(arg, keylen), arg, keylen,
-			     xstrdup(value));
+			     xstrdup(मूल्य));
 
-	return 0;
+	परत 0;
 }
 
-int cmd_fast_export(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+पूर्णांक cmd_fast_export(पूर्णांक argc,
+		    स्थिरांक अक्षर **argv,
+		    स्थिरांक अक्षर *prefix,
+		    संरचना repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	char *export_filename = NULL,
-	     *import_filename = NULL,
-	     *import_filename_if_exists = NULL;
+	संरचना rev_info revs;
+	संरचना commit *commit;
+	अक्षर *export_filename = रिक्त,
+	     *import_filename = रिक्त,
+	     *import_filename_if_exists = रिक्त;
 	uint32_t lastimportid;
-	struct string_list refspecs_list = STRING_LIST_INIT_NODUP;
-	struct string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
-	struct option options[] = {
+	संरचना string_list refspecs_list = STRING_LIST_INIT_NODUP;
+	संरचना string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
+	संरचना option options[] = {
 		OPT_INTEGER(0, "progress", &progress,
 			    N_("show progress after <n> objects")),
 		OPT_CALLBACK(0, "signed-tags", &signed_tag_mode, N_("mode"),
@@ -1345,7 +1345,7 @@ int cmd_fast_export(int argc,
 			     N_("import marks from this file if it exists")),
 		OPT_BOOL(0, "fake-missing-tagger", &fake_missing_tagger,
 			 N_("fake a tagger when tags lack one")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_वृक्ष,
 			 N_("output full tree for each commit")),
 		OPT_BOOL(0, "use-done-feature", &use_done_feature,
 			     N_("use the done feature to terminate the stream")),
@@ -1366,11 +1366,11 @@ int cmd_fast_export(int argc,
 		OPT_END()
 	};
 
-	if (argc == 1)
+	जर (argc == 1)
 		usage_with_options (fast_export_usage, options);
 
 	/* we handle encodings */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
 	refspec_init_fetch(&refspecs, the_hash_algo);
 
@@ -1381,39 +1381,39 @@ int cmd_fast_export(int argc,
 	revs.rewrite_parents = 1;
 	argc = parse_options(argc, argv, prefix, options, fast_export_usage,
 			PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1)
+	argc = setup_revisions(argc, argv, &revs, रिक्त);
+	जर (argc > 1)
 		usage_with_options (fast_export_usage, options);
 
-	if (anonymized_seeds.cmpfn && !anonymize)
+	जर (anonymized_seeds.cmpfn && !anonymize)
 		die(_("the option '%s' requires '%s'"), "--anonymize-map", "--anonymize");
 
-	if (refspecs_list.nr) {
-		int i;
+	जर (refspecs_list.nr) {
+		पूर्णांक i;
 
-		for (i = 0; i < refspecs_list.nr; i++)
-			refspec_append(&refspecs, refspecs_list.items[i].string);
+		साठी (i = 0; i < refspecs_list.nr; i++)
+			refspec_append(&refspecs, refspecs_list.वस्तुसंच[i].string);
 
 		string_list_clear(&refspecs_list, 1);
 	}
 
-	if (use_done_feature)
-		printf("feature done\n");
+	जर (use_done_feature)
+		म_लिखो("feature done\n");
 
-	if (import_filename && import_filename_if_exists)
+	जर (import_filename && import_filename_if_exists)
 		die(_("options '%s' and '%s' cannot be used together"), "--import-marks", "--import-marks-if-exists");
-	if (import_filename)
+	जर (import_filename)
 		import_marks(import_filename, 0);
-	else if (import_filename_if_exists)
+	अन्यथा जर (import_filename_if_exists)
 		import_marks(import_filename_if_exists, 1);
 	lastimportid = last_idnum;
 
-	if (import_filename && revs.prune_data.nr)
-		full_tree = 1;
+	जर (import_filename && revs.prune_data.nr)
+		full_वृक्ष = 1;
 
 	get_tags_and_duplicates(&revs.cmdline);
 
-	if (prepare_revision_walk(&revs))
+	जर (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 
 	revs.reverse = 1;
@@ -1422,7 +1422,7 @@ int cmd_fast_export(int argc,
 	revs.diffopt.flags.recursive = 1;
 
 	revs.diffopt.no_free = 1;
-	while ((commit = get_revision(&revs)))
+	पर्यंत ((commit = get_revision(&revs)))
 		handle_commit(commit, &revs, &paths_of_changed_objects);
 	revs.diffopt.no_free = 0;
 
@@ -1430,14 +1430,14 @@ int cmd_fast_export(int argc,
 	handle_tags_and_duplicates(&tag_refs);
 	handle_deletes();
 
-	if (export_filename && lastimportid != last_idnum)
+	जर (export_filename && lastimportid != last_idnum)
 		export_marks(export_filename);
 
-	if (use_done_feature)
-		printf("done\n");
+	जर (use_done_feature)
+		म_लिखो("done\n");
 
 	refspec_clear(&refspecs);
 	release_revisions(&revs);
 
-	return 0;
+	परत 0;
 }

@@ -1,26 +1,26 @@
-#include "builtin.h"
-#include "commit.h"
-#include "config.h"
-#include "environment.h"
-#include "for-each-ref.h"
-#include "gettext.h"
-#include "object.h"
-#include "parse-options.h"
-#include "ref-filter.h"
-#include "strbuf.h"
-#include "strvec.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "for-each-ref.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "ref-filter.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "strvec.h"
 
-int for_each_ref_core(int argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
+पूर्णांक for_each_ref_core(पूर्णांक argc, स्थिरांक अक्षर **argv, स्थिरांक अक्षर *prefix, संरचना repository *repo, स्थिरांक अक्षर *स्थिरांक *usage)
 {
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_format format = REF_FORMAT_INIT;
-	unsigned int flags = FILTER_REFS_REGULAR;
-	struct strvec vec = STRVEC_INIT;
+	संरचना ref_sorting *sorting;
+	संरचना string_list sorting_options = STRING_LIST_INIT_DUP;
+	पूर्णांक icase = 0, include_मूळ_refs = 0, from_stdin = 0;
+	संरचना ref_filter filter = REF_FILTER_INIT;
+	संरचना ref_format format = REF_FORMAT_INIT;
+	अचिन्हित पूर्णांक flags = FILTER_REFS_REGULAR;
+	संरचना strvec vec = STRVEC_INIT;
 
-	struct option opts[] = {
+	संरचना option opts[] = {
 		OPT_BIT('s', "shell", &format.quote_style,
 			N_("quote placeholders suitably for shells"), QUOTE_SHELL),
 		OPT_BIT('p', "perl",  &format.quote_style,
@@ -33,7 +33,7 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 			N_("do not output a newline after empty formatted refs")),
 
 		OPT_GROUP(""),
-		OPT_INTEGER( 0 , "count", &format.array_opts.max_count, N_("show only <n> matched refs")),
+		OPT_INTEGER( 0 , "count", &format.array_opts.max_मोजणी, N_("show only <n> matched refs")),
 		OPT_STRING(  0 , "format", &format.format, N_("format"), N_("format to use for the output")),
 		OPT_STRING(  0 , "start-after", &filter.start_after, N_("marker"), N_("start iteration after the provided marker")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
@@ -48,58 +48,58 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 		OPT_NO_CONTAINS(&filter.no_commit, N_("print only refs which don't contain the commit")),
 		OPT_BOOL(0, "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read reference patterns from stdin")),
-		OPT_BOOL(0, "include-root-refs", &include_root_refs, N_("also include HEAD ref and pseudorefs")),
+		OPT_BOOL(0, "include-root-refs", &include_मूळ_refs, N_("also include HEAD ref and pseudorefs")),
 		OPT_END(),
 	};
 
 	format.format = "%(objectname) %(objecttype)\t%(refname)";
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, रिक्त);
 
 	/* Set default (refname) sorting */
 	string_list_append(&sorting_options, "refname");
 
 	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
-		error("invalid --count argument: `%d'", format.array_opts.max_count);
+	जर (format.array_opts.max_मोजणी < 0) {
+		error("invalid --count argument: `%d'", format.array_opts.max_मोजणी);
 		usage_with_options(usage, opts);
 	}
-	if (HAS_MULTI_BITS(format.quote_style)) {
+	जर (HAS_MULTI_BITS(format.quote_style)) {
 		error("more than one quoting style?");
 		usage_with_options(usage, opts);
 	}
-	if (verify_ref_format(&format))
+	जर (verify_ref_format(&format))
 		usage_with_options(usage, opts);
 
-	if (filter.start_after && sorting_options.nr > 1)
+	जर (filter.start_after && sorting_options.nr > 1)
 		die(_("cannot use --start-after with custom sort options"));
 
 	sorting = ref_sorting_options(&sorting_options);
 	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
 	filter.ignore_case = icase;
 
-	if (from_stdin) {
-		struct strbuf line = STRBUF_INIT;
+	जर (from_stdin) {
+		संरचना strbuf ओळ = STRBUF_INIT;
 
-		if (argv[0])
+		जर (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
-			strvec_push(&vec, line.buf);
+		पर्यंत (strbuf_getline(&ओळ, मानक_निवेश) != खातापूर्ण)
+			strvec_ढकला(&vec, ओळ.buf);
 
-		strbuf_release(&line);
+		strbuf_release(&ओळ);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
-	} else {
+	} अन्यथा {
 		filter.name_patterns = argv;
 	}
 
-	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
+	जर (filter.start_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
-		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
+	जर (include_मूळ_refs)
+		flags |= FILTER_REFS_मूळ_REFS | FILTER_REFS_DETACHED_HEAD;
 
 	filter.match_as_path = 1;
 	filter_and_format_refs(&filter, flags, sorting, &format);
@@ -107,18 +107,18 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	ref_filter_clear(&filter);
 	ref_sorting_release(sorting);
 	strvec_clear(&vec);
-	return 0;
+	परत 0;
 }
 
-int cmd_for_each_ref(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+पूर्णांक cmd_for_each_ref(पूर्णांक argc,
+		     स्थिरांक अक्षर **argv,
+		     स्थिरांक अक्षर *prefix,
+		     संरचना repository *repo)
 {
-	static char const * const for_each_ref_usage[] = {
+	स्थिर अक्षर स्थिरांक * स्थिरांक for_each_ref_usage[] = {
 		N_("git for-each-ref " COMMON_USAGE_FOR_EACH_REF),
-		NULL
+		रिक्त
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
+	परत for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
 }

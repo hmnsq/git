@@ -1,101 +1,101 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "advice.h"
-#include "gettext.h"
-#include "hash.h"
-#include "merge-ort-wrappers.h"
-#include "object-name.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "advice.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hash.h"
+#अन्तर्भाव "merge-ort-wrappers.h"
+#अन्तर्भाव "object-name.h"
 
-static const char builtin_merge_recursive_usage[] =
+स्थिर स्थिरांक अक्षर builtin_merge_recursive_usage[] =
 	"git %s <base>... -- <head> <remote> ...";
 
-static char *better_branch_name(const char *branch)
+स्थिर अक्षर *better_branch_name(स्थिरांक अक्षर *branch)
 {
-	static char githead_env[8 + GIT_MAX_HEXSZ + 1];
-	char *name;
+	स्थिर अक्षर githead_env[8 + GIT_MAX_HEXSZ + 1];
+	अक्षर *name;
 
-	if (strlen(branch) != the_hash_algo->hexsz)
-		return xstrdup(branch);
-	xsnprintf(githead_env, sizeof(githead_env), "GITHEAD_%s", branch);
-	name = getenv(githead_env);
-	return xstrdup(name ? name : branch);
+	जर (म_माप(branch) != the_hash_algo->hexsz)
+		परत xstrdup(branch);
+	xsnprintf(githead_env, आकार(githead_env), "GITHEAD_%s", branch);
+	name = दो_पर्या(githead_env);
+	परत xstrdup(name ? name : branch);
 }
 
-int cmd_merge_recursive(int argc,
-			const char **argv,
-			const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+पूर्णांक cmd_merge_recursive(पूर्णांक argc,
+			स्थिरांक अक्षर **argv,
+			स्थिरांक अक्षर *prefix UNUSED,
+			संरचना repository *repo UNUSED)
 {
-	struct object_id bases[21];
-	unsigned bases_count = 0;
-	int i, failed;
-	struct object_id h1, h2;
-	struct merge_options o;
-	char *better1, *better2;
-	struct commit *result;
+	संरचना object_id bases[21];
+	अचिन्हित bases_मोजणी = 0;
+	पूर्णांक i, failed;
+	संरचना object_id h1, h2;
+	संरचना merge_options o;
+	अक्षर *better1, *better2;
+	संरचना commit *result;
 
 	init_basic_merge_options(&o, the_repository);
-	if (argv[0] && ends_with(argv[0], "-subtree"))
+	जर (argv[0] && ends_with(argv[0], "-subtree"))
 		o.subtree_shift = "";
 
-	if (argc == 2 && (!strcmp(argv[1], "-h") ||
-			  !strcmp(argv[1], "--help-all"))) {
-		struct strbuf msg = STRBUF_INIT;
-		strbuf_addf(&msg, builtin_merge_recursive_usage, argv[0]);
-		show_usage_if_asked(argc, argv, msg.buf);
+	जर (argc == 2 && (!म_भेद(argv[1], "-h") ||
+			  !म_भेद(argv[1], "--help-all"))) {
+		संरचना strbuf संदेश = STRBUF_INIT;
+		strbuf_addf(&संदेश, builtin_merge_recursive_usage, argv[0]);
+		show_usage_if_asked(argc, argv, संदेश.buf);
 	}
 
-	if (argc < 4)
+	जर (argc < 4)
 		usagef(builtin_merge_recursive_usage, argv[0]);
 
-	for (i = 1; i < argc; ++i) {
-		const char *arg = argv[i];
+	साठी (i = 1; i < argc; ++i) {
+		स्थिरांक अक्षर *arg = argv[i];
 
-		if (starts_with(arg, "--")) {
-			if (!arg[2])
-				break;
-			if (parse_merge_opt(&o, arg + 2))
+		जर (starts_with(arg, "--")) {
+			जर (!arg[2])
+				थांबा;
+			जर (parse_merge_opt(&o, arg + 2))
 				die(_("unknown option %s"), arg);
-			continue;
+			सुरूठेवा;
 		}
-		if (bases_count < ARRAY_SIZE(bases)-1) {
-			if (repo_get_oid(the_repository, argv[i], &bases[bases_count++]))
+		जर (bases_मोजणी < ARRAY_SIZE(bases)-1) {
+			जर (repo_get_oid(the_repository, argv[i], &bases[bases_मोजणी++]))
 				die(_("could not parse object '%s'"), argv[i]);
 		}
-		else
+		अन्यथा
 			warning(Q_("cannot handle more than %d base. "
 				   "Ignoring %s.",
 				   "cannot handle more than %d bases. "
 				   "Ignoring %s.",
 				    ARRAY_SIZE(bases)-1),
-				(int)ARRAY_SIZE(bases)-1, argv[i]);
+				(पूर्णांक)ARRAY_SIZE(bases)-1, argv[i]);
 	}
-	if (argc - i != 3) /* "--" "<head>" "<remote>" */
+	जर (argc - i != 3) /* "--" "<head>" "<remote>" */
 		die(_("not handling anything other than two heads merge."));
 
-	if (repo_read_index_unmerged(the_repository))
+	जर (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("merge");
 
 	o.branch1 = argv[++i];
 	o.branch2 = argv[++i];
 
-	if (repo_get_oid(the_repository, o.branch1, &h1))
+	जर (repo_get_oid(the_repository, o.branch1, &h1))
 		die(_("could not resolve ref '%s'"), o.branch1);
-	if (repo_get_oid(the_repository, o.branch2, &h2))
+	जर (repo_get_oid(the_repository, o.branch2, &h2))
 		die(_("could not resolve ref '%s'"), o.branch2);
 
 	o.branch1 = better1 = better_branch_name(o.branch1);
 	o.branch2 = better2 = better_branch_name(o.branch2);
 
-	if (o.verbosity >= 3)
-		printf(_("Merging %s with %s\n"), o.branch1, o.branch2);
+	जर (o.verbosity >= 3)
+		म_लिखो(_("Merging %s with %s\n"), o.branch1, o.branch2);
 
-	failed = merge_ort_generic(&o, &h1, &h2, bases_count, bases, &result);
+	failed = merge_ort_generic(&o, &h1, &h2, bases_मोजणी, bases, &result);
 
-	free(better1);
-	free(better2);
+	मुक्त(better1);
+	मुक्त(better2);
 
-	if (failed < 0)
-		return 128; /* die() error code */
-	return failed;
+	जर (failed < 0)
+		परत 128; /* die() error code */
+	परत failed;
 }

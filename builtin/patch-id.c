@@ -1,233 +1,233 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "setup.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "diff.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hash.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "setup.h"
 
-static void flush_current_id(size_t patchlen, struct object_id *id, struct object_id *result)
+स्थिर शून्य flush_current_id(माप_प्रकार patchlen, संरचना object_id *id, संरचना object_id *result)
 {
-	if (patchlen)
-		printf("%s %s\n", oid_to_hex(result), oid_to_hex(id));
+	जर (patchlen)
+		म_लिखो("%s %s\n", oid_to_hex(result), oid_to_hex(id));
 }
 
-static size_t remove_space(char *line)
+स्थिर माप_प्रकार remove_space(अक्षर *ओळ)
 {
-	char *src = line;
-	char *dst = line;
-	unsigned char c;
+	अक्षर *src = ओळ;
+	अक्षर *dst = ओळ;
+	अचिन्हित अक्षर c;
 
-	while ((c = *src++) != '\0') {
-		if (!isspace(c))
+	पर्यंत ((c = *src++) != '\0') {
+		जर (!है_खाली(c))
 			*dst++ = c;
 	}
-	return dst - line;
+	परत dst - ओळ;
 }
 
-static int scan_hunk_header(const char *p, int *p_before, int *p_after)
+स्थिर पूर्णांक scan_hunk_header(स्थिरांक अक्षर *p, पूर्णांक *p_before, पूर्णांक *p_after)
 {
-	static const char digits[] = "0123456789";
-	const char *q, *r;
-	int n;
+	स्थिर स्थिरांक अक्षर digits[] = "0123456789";
+	स्थिरांक अक्षर *q, *r;
+	पूर्णांक n;
 
 	q = p + 4;
-	n = strspn(q, digits);
-	if (q[n] == ',') {
+	n = म_अखोज(q, digits);
+	जर (q[n] == ',') {
 		q += n + 1;
-		*p_before = atoi(q);
-		n = strspn(q, digits);
-	} else {
+		*p_before = म_से_प(q);
+		n = म_अखोज(q, digits);
+	} अन्यथा {
 		*p_before = 1;
 	}
 
-	if (n == 0 || q[n] != ' ' || q[n+1] != '+')
-		return 0;
+	जर (n == 0 || q[n] != ' ' || q[n+1] != '+')
+		परत 0;
 
 	r = q + n + 2;
-	n = strspn(r, digits);
-	if (r[n] == ',') {
+	n = म_अखोज(r, digits);
+	जर (r[n] == ',') {
 		r += n + 1;
-		*p_after = atoi(r);
-		n = strspn(r, digits);
-	} else {
+		*p_after = म_से_प(r);
+		n = म_अखोज(r, digits);
+	} अन्यथा {
 		*p_after = 1;
 	}
-	if (n == 0)
-		return 0;
+	जर (n == 0)
+		परत 0;
 
-	return 1;
+	परत 1;
 }
 
-static size_t get_one_patchid(struct object_id *next_oid, struct object_id *result,
-			      struct strbuf *line_buf, int stable, int verbatim)
+स्थिर माप_प्रकार get_one_patchid(संरचना object_id *next_oid, संरचना object_id *result,
+			      संरचना strbuf *ओळ_buf, पूर्णांक stable, पूर्णांक verbatim)
 {
-	size_t patchlen = 0;
-	int found_next = 0;
-	int before = -1, after = -1;
-	int diff_is_binary = 0;
-	char pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
-	struct git_hash_ctx ctx;
+	माप_प्रकार patchlen = 0;
+	पूर्णांक found_next = 0;
+	पूर्णांक before = -1, after = -1;
+	पूर्णांक diff_is_द्विमान = 0;
+	अक्षर pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
+	संरचना git_hash_ctx ctx;
 
 	git_hash_init(&ctx, the_hash_algo);
 	oidclr(result, the_repository->hash_algo);
 
-	while (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
-		char *line = line_buf->buf;
-		const char *p = line;
-		size_t len;
+	पर्यंत (strbuf_getwholeline(ओळ_buf, मानक_निवेश, '\n') != खातापूर्ण) {
+		अक्षर *ओळ = ओळ_buf->buf;
+		स्थिरांक अक्षर *p = ओळ;
+		माप_प्रकार len;
 
 		/* Possibly skip over the prefix added by "log" or "format-patch" */
-		if (!skip_prefix(line, "commit ", &p) &&
-		    !skip_prefix(line, "From ", &p) &&
-		    starts_with(line, "\\ ") && 12 < strlen(line)) {
-			if (verbatim)
-				git_hash_update(&ctx, line, strlen(line));
-			continue;
+		जर (!skip_prefix(ओळ, "commit ", &p) &&
+		    !skip_prefix(ओळ, "From ", &p) &&
+		    starts_with(ओळ, "\\ ") && 12 < म_माप(ओळ)) {
+			जर (verbatim)
+				git_hash_update(&ctx, ओळ, म_माप(ओळ));
+			सुरूठेवा;
 		}
 
-		if (!get_oid_hex(p, next_oid)) {
+		जर (!get_oid_hex(p, next_oid)) {
 			found_next = 1;
-			break;
+			थांबा;
 		}
 
 		/* Ignore commit comments */
-		if (!patchlen && !starts_with(line, "diff "))
-			continue;
+		जर (!patchlen && !starts_with(ओळ, "diff "))
+			सुरूठेवा;
 
 		/* Parsing diff header?  */
-		if (before == -1) {
-			if (starts_with(line, "GIT binary patch") ||
-			    starts_with(line, "Binary files")) {
-				diff_is_binary = 1;
+		जर (before == -1) {
+			जर (starts_with(ओळ, "GIT binary patch") ||
+			    starts_with(ओळ, "Binary files")) {
+				diff_is_द्विमान = 1;
 				before = 0;
 				git_hash_update(&ctx, pre_oid_str,
-						strlen(pre_oid_str));
+						म_माप(pre_oid_str));
 				git_hash_update(&ctx, post_oid_str,
-						strlen(post_oid_str));
-				if (stable)
+						म_माप(post_oid_str));
+				जर (stable)
 					flush_one_hunk(result, &ctx);
-				continue;
-			} else if (skip_prefix(line, "index ", &p)) {
-				char *oid1_end = strstr(line, "..");
-				char *oid2_end = NULL;
-				if (oid1_end)
-					oid2_end = strstr(oid1_end, " ");
-				if (!oid2_end)
-					oid2_end = line + strlen(line) - 1;
-				if (oid1_end != NULL && oid2_end != NULL) {
+				सुरूठेवा;
+			} अन्यथा जर (skip_prefix(ओळ, "index ", &p)) {
+				अक्षर *oid1_end = म_माला(ओळ, "..");
+				अक्षर *oid2_end = रिक्त;
+				जर (oid1_end)
+					oid2_end = म_माला(oid1_end, " ");
+				जर (!oid2_end)
+					oid2_end = ओळ + म_माप(ओळ) - 1;
+				जर (oid1_end != रिक्त && oid2_end != रिक्त) {
 					*oid1_end = *oid2_end = '\0';
 					strlcpy(pre_oid_str, p, GIT_MAX_HEXSZ + 1);
 					strlcpy(post_oid_str, oid1_end + 2, GIT_MAX_HEXSZ + 1);
 				}
-				continue;
-			} else if (starts_with(line, "--- "))
+				सुरूठेवा;
+			} अन्यथा जर (starts_with(ओळ, "--- "))
 				before = after = 1;
-			else if (!isalpha(line[0]))
-				break;
+			अन्यथा जर (!है_अक्षर(ओळ[0]))
+				थांबा;
 		}
 
-		if (diff_is_binary) {
-			if (starts_with(line, "diff ")) {
-				diff_is_binary = 0;
+		जर (diff_is_द्विमान) {
+			जर (starts_with(ओळ, "diff ")) {
+				diff_is_द्विमान = 0;
 				before = -1;
 			}
-			continue;
+			सुरूठेवा;
 		}
 
 		/* Looking for a valid hunk header?  */
-		if (before == 0 && after == 0) {
-			if (starts_with(line, "@@ -")) {
+		जर (before == 0 && after == 0) {
+			जर (starts_with(ओळ, "@@ -")) {
 				/* Parse next hunk, but ignore line numbers.  */
-				scan_hunk_header(line, &before, &after);
-				continue;
+				scan_hunk_header(ओळ, &before, &after);
+				सुरूठेवा;
 			}
 
 			/* Split at the end of the patch.  */
-			if (!starts_with(line, "diff "))
-				break;
+			जर (!starts_with(ओळ, "diff "))
+				थांबा;
 
 			/* Else we're parsing another header.  */
-			if (stable)
+			जर (stable)
 				flush_one_hunk(result, &ctx);
 			before = after = -1;
 		}
 
 		/* If we get here, we're inside a hunk.  */
-		if (line[0] == '-' || line[0] == ' ')
+		जर (ओळ[0] == '-' || ओळ[0] == ' ')
 			before--;
-		if (line[0] == '+' || line[0] == ' ')
+		जर (ओळ[0] == '+' || ओळ[0] == ' ')
 			after--;
 
 		/* Add line to hash algo (possibly removing whitespace) */
-		len = verbatim ? strlen(line) : remove_space(line);
+		len = verbatim ? म_माप(ओळ) : remove_space(ओळ);
 		patchlen += len;
-		git_hash_update(&ctx, line, len);
+		git_hash_update(&ctx, ओळ, len);
 	}
 
-	if (!found_next)
+	जर (!found_next)
 		oidclr(next_oid, the_repository->hash_algo);
 
 	flush_one_hunk(result, &ctx);
 	git_hash_discard(&ctx);
 
-	return patchlen;
+	परत patchlen;
 }
 
-static void generate_id_list(int stable, int verbatim)
+स्थिर शून्य generate_id_list(पूर्णांक stable, पूर्णांक verbatim)
 {
-	struct object_id oid, n, result;
-	size_t patchlen;
-	struct strbuf line_buf = STRBUF_INIT;
+	संरचना object_id oid, n, result;
+	माप_प्रकार patchlen;
+	संरचना strbuf ओळ_buf = STRBUF_INIT;
 
 	oidclr(&oid, the_repository->hash_algo);
-	while (!feof(stdin)) {
-		patchlen = get_one_patchid(&n, &result, &line_buf, stable, verbatim);
+	पर्यंत (!ख_पूर्ण(मानक_निवेश)) {
+		patchlen = get_one_patchid(&n, &result, &ओळ_buf, stable, verbatim);
 		flush_current_id(patchlen, &oid, &result);
 		oidcpy(&oid, &n);
 	}
-	strbuf_release(&line_buf);
+	strbuf_release(&ओळ_buf);
 }
 
-static const char *const patch_id_usage[] = {
-	N_("git patch-id [--stable | --unstable | --verbatim]"), NULL
+स्थिर स्थिरांक अक्षर *स्थिरांक patch_id_usage[] = {
+	N_("git patch-id [--stable | --unstable | --verbatim]"), रिक्त
 };
 
-struct patch_id_opts {
-	int stable;
-	int verbatim;
+संरचना patch_id_opts {
+	पूर्णांक stable;
+	पूर्णांक verbatim;
 };
 
-static int git_patch_id_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+स्थिर पूर्णांक git_patch_id_config(स्थिरांक अक्षर *var, स्थिरांक अक्षर *मूल्य,
+			       स्थिरांक संरचना config_context *ctx, शून्य *cb)
 {
-	struct patch_id_opts *opts = cb;
+	संरचना patch_id_opts *opts = cb;
 
-	if (!strcmp(var, "patchid.stable")) {
-		opts->stable = git_config_bool(var, value);
-		return 0;
+	जर (!म_भेद(var, "patchid.stable")) {
+		opts->stable = git_config_bool(var, मूल्य);
+		परत 0;
 	}
-	if (!strcmp(var, "patchid.verbatim")) {
-		opts->verbatim = git_config_bool(var, value);
-		return 0;
+	जर (!म_भेद(var, "patchid.verbatim")) {
+		opts->verbatim = git_config_bool(var, मूल्य);
+		परत 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	परत git_default_config(var, मूल्य, ctx, cb);
 }
 
-int cmd_patch_id(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+पूर्णांक cmd_patch_id(पूर्णांक argc,
+		 स्थिरांक अक्षर **argv,
+		 स्थिरांक अक्षर *prefix,
+		 संरचना repository *repo UNUSED)
 {
 	/* if nothing is set, default to unstable */
-	struct patch_id_opts config = {0, 0};
-	int opts = 0;
-	struct option builtin_patch_id_options[] = {
+	संरचना patch_id_opts config = {0, 0};
+	पूर्णांक opts = 0;
+	संरचना option builtin_patch_id_options[] = {
 		OPT_CMDMODE(0, "unstable", &opts,
 		    N_("use the unstable patch ID algorithm"), 1),
 		OPT_CMDMODE(0, "stable", &opts,
@@ -240,7 +240,7 @@ int cmd_patch_id(int argc,
 	repo_config(the_repository, git_patch_id_config, &config);
 
 	/* verbatim implies stable */
-	if (config.verbatim)
+	जर (config.verbatim)
 		config.stable = 1;
 
 	argc = parse_options(argc, argv, prefix, builtin_patch_id_options,
@@ -255,10 +255,10 @@ int cmd_patch_id(int argc,
 	 * NEEDSWORK: This hack should be removed in favor of converting
 	 * the code that computes patch IDs to always use SHA1.
 	 */
-	if (!the_hash_algo)
+	जर (!the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	generate_id_list(opts ? opts > 1 : config.stable,
 			 opts ? opts == 3 : config.verbatim);
-	return 0;
+	परत 0;
 }
