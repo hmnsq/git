@@ -1,32 +1,32 @@
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "server-info.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "server-info.h"
 
-static const char * const update_server_info_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ update_server_info_usage[] = {
 	"git update-server-info [-f | --force]",
-	NULL
+	ਨਿਰਾ
 };
 
-int cmd_update_server_info(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo)
+ਪੂਰਨ cmd_update_server_info(ਪੂਰਨ argc,
+			   ਅਚਲ ਅੱਖਰ **argv,
+			   ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			   ਬਣਤਰ repository *repo)
 {
-	int force = 0;
-	struct option options[] = {
+	ਪੂਰਨ force = 0;
+	ਬਣਤਰ option options[] = {
 		OPT__FORCE(&force, N_("update the info files from scratch"), 0),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ਨਿਰਾ);
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options,
 			     update_server_info_usage, 0);
-	if (argc > 0)
+	ਜੇ (argc > 0)
 		usage_with_options(update_server_info_usage, options);
 
-	return !!update_server_info(repo, force);
+	ਵਾਪਸ !!update_server_info(repo, force);
 }

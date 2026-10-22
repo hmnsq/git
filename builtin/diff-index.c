@@ -1,41 +1,41 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "commit.h"
-#include "preload-index.h"
-#include "revision.h"
-#include "setup.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff-merges.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "preload-index.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "setup.h"
 
-static const char diff_cache_usage[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ diff_cache_usage[] =
 "git diff-index [-m] [--cached] [--merge-base] "
 "[<common-diff-options>] <tree-ish> [<path>...]"
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_index(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ਪੂਰਨ cmd_diff_ਸੂਚਕਾਂਕ(ਪੂਰਨ argc,
+		   ਅਚਲ ਅੱਖਰ **argv,
+		   ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		   ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct rev_info rev;
-	unsigned int option = 0;
-	int i;
-	int result;
+	ਬਣਤਰ rev_info rev;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ option = 0;
+	ਪੂਰਨ i;
+	ਪੂਰਨ ਨਤੀਜਾ;
 
 	show_usage_if_asked(argc, argv, diff_cache_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, ਨਿਰਾ); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_ਭਰਿਆ_ਸੂਚਕਾਂਕ = 0;
 
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, ਅਗੇਤਰ);
 	rev.abbrev = 0;
-	prefix = precompose_argv_prefix(argc, argv, prefix);
+	ਅਗੇਤਰ = precompose_argv_ਅਗੇਤਰ(argc, argv, ਅਗੇਤਰ);
 
 	/*
 	 * We need (some of) diff for merges options (e.g., --cc), and we need
@@ -43,43 +43,43 @@ int cmd_diff_index(int argc,
 	 */
 	diff_merges_suppress_m_parsing();
 
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	argc = ਤਿਆਰੀ_revisions(argc, argv, &rev, ਨਿਰਾ);
+	ਲਈ (i = 1; i < argc; i++) {
+		ਅਚਲ ਅੱਖਰ *arg = argv[i];
 
-		if (!strcmp(arg, "--cached"))
-			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
-			option |= DIFF_INDEX_MERGE_BASE;
-		else if (!strcmp(arg, "-m"))
-			rev.match_missing = 1;
-		else
+		ਜੇ (!strcmp(arg, "--cached"))
+			option |= DIFF_ਸੂਚਕਾਂਕ_CACHED;
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "--merge-base"))
+			option |= DIFF_ਸੂਚਕਾਂਕ_ਮਿਲਾਓ_ਅਧਾਰ;
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "-m"))
+			rev.ਮੇਲ_missing = 1;
+		ਨਹੀਂਤਾਂ
 			usage(diff_cache_usage);
 	}
-	if (!rev.diffopt.output_format)
+	ਜੇ (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
-	rev.diffopt.rotate_to_strict = 1;
+	rev.diffopt.rotate_ਮੰਜ਼ਿਲ_strict = 1;
 
 	/*
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (rev.pending.nr != 1 ||
-	    rev.max_count != -1 || rev.min_age != -1 || rev.max_age != -1)
+	ਜੇ (rev.pending.nr != 1 ||
+	    rev.max_ਗਿਣਤੀ != -1 || rev.min_age != -1 || rev.max_age != -1)
 		usage(diff_cache_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	ਜੇ (!(option & DIFF_ਸੂਚਕਾਂਕ_CACHED)) {
+		ਤਿਆਰੀ_work_ਰੁੱਖ(the_repository);
+		ਜੇ (repo_read_ਸੂਚਕਾਂਕ_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
-			return -1;
+			ਵਾਪਸ -1;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} ਨਹੀਂਤਾਂ ਜੇ (repo_read_ਸੂਚਕਾਂਕ(the_repository) < 0) {
 		perror("repo_read_index");
-		return -1;
+		ਵਾਪਸ -1;
 	}
-	run_diff_index(&rev, option);
-	result = diff_result_code(&rev);
+	ਲੜੀਵਾਰ_diff_ਸੂਚਕਾਂਕ(&rev, option);
+	ਨਤੀਜਾ = diff_ਨਤੀਜਾ_ਕੋਡ(&rev);
 	release_revisions(&rev);
-	return result;
+	ਵਾਪਸ ਨਤੀਜਾ;
 }

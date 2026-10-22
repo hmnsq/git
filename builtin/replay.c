@@ -2,93 +2,93 @@
  * "git replay" builtin command
  */
 
-#include "git-compat-util.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "git-compat-util.h"
 
-#include "builtin.h"
-#include "config.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "replay.h"
-#include "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "replay.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
 
-enum ref_action_mode {
+ਗਿਣਤੀ ref_action_ਬਹੁਲਕ {
 	REF_ACTION_UPDATE,
 	REF_ACTION_PRINT,
 };
 
-static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const char *source)
+ਸਥਿਰ ਗਿਣਤੀ ref_action_ਬਹੁਲਕ parse_ref_action_ਬਹੁਲਕ(ਅਚਲ ਅੱਖਰ *ref_action, ਅਚਲ ਅੱਖਰ *ਸਰੋਤ)
 {
-	if (!ref_action || !strcmp(ref_action, "update"))
-		return REF_ACTION_UPDATE;
-	if (!strcmp(ref_action, "print"))
-		return REF_ACTION_PRINT;
-	die(_("invalid %s value: '%s'"), source, ref_action);
+	ਜੇ (!ref_action || !strcmp(ref_action, "update"))
+		ਵਾਪਸ REF_ACTION_UPDATE;
+	ਜੇ (!strcmp(ref_action, "print"))
+		ਵਾਪਸ REF_ACTION_PRINT;
+	die(_("invalid %s value: '%s'"), ਸਰੋਤ, ref_action);
 }
 
-static enum ref_action_mode get_ref_action_mode(struct repository *repo, const char *ref_action)
+ਸਥਿਰ ਗਿਣਤੀ ref_action_ਬਹੁਲਕ get_ref_action_ਬਹੁਲਕ(ਬਣਤਰ repository *repo, ਅਚਲ ਅੱਖਰ *ref_action)
 {
-	const char *config_value = NULL;
+	ਅਚਲ ਅੱਖਰ *config_ਮੁੱਲ = ਨਿਰਾ;
 
 	/* Command line option takes precedence */
-	if (ref_action)
-		return parse_ref_action_mode(ref_action, "--ref-action");
+	ਜੇ (ref_action)
+		ਵਾਪਸ parse_ref_action_ਬਹੁਲਕ(ref_action, "--ref-action");
 
 	/* Check config value */
-	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
-		return parse_ref_action_mode(config_value, "replay.refAction");
+	ਜੇ (!repo_config_get_string_tmp(repo, "replay.refAction", &config_ਮੁੱਲ))
+		ਵਾਪਸ parse_ref_action_ਬਹੁਲਕ(config_ਮੁੱਲ, "replay.refAction");
 
 	/* Default to update mode */
-	return REF_ACTION_UPDATE;
+	ਵਾਪਸ REF_ACTION_UPDATE;
 }
 
-static int handle_ref_update(enum ref_action_mode mode,
-			     struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+ਸਥਿਰ ਪੂਰਨ handle_ref_update(ਗਿਣਤੀ ref_action_ਬਹੁਲਕ ਬਹੁਲਕ,
+			     ਬਣਤਰ ref_transaction *transaction,
+			     ਅਚਲ ਅੱਖਰ *refname,
+			     ਅਚਲ ਬਣਤਰ object_id *new_oid,
+			     ਅਚਲ ਬਣਤਰ object_id *old_oid,
+			     ਅਚਲ ਅੱਖਰ *reflog_ਸੁਨੇਹਾ,
+			     ਬਣਤਰ strbuf *err)
 {
-	switch (mode) {
-	case REF_ACTION_PRINT:
-		printf("update %s %s %s\n",
+	ਚੋਣ (ਬਹੁਲਕ) {
+	ਹਾਲਤ REF_ACTION_PRINT:
+		ਲਿਖੋ("update %s %s %s\n",
 		       refname,
-		       oid_to_hex(new_oid),
-		       oid_to_hex(old_oid));
-		return 0;
-	case REF_ACTION_UPDATE:
-		return ref_transaction_update(transaction, refname, new_oid, old_oid,
-					      NULL, NULL, 0, reflog_msg, err);
-	default:
-		BUG("unknown ref_action_mode %d", mode);
+		       oid_ਮੰਜ਼ਿਲ_hex(new_oid),
+		       oid_ਮੰਜ਼ਿਲ_hex(old_oid));
+		ਵਾਪਸ 0;
+	ਹਾਲਤ REF_ACTION_UPDATE:
+		ਵਾਪਸ ref_transaction_update(transaction, refname, new_oid, old_oid,
+					      ਨਿਰਾ, ਨਿਰਾ, 0, reflog_ਸੁਨੇਹਾ, err);
+	ਮੂਲ:
+		BUG("unknown ref_action_mode %d", ਬਹੁਲਕ);
 	}
 }
 
-int cmd_replay(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ਪੂਰਨ cmd_replay(ਪੂਰਨ argc,
+	       ਅਚਲ ਅੱਖਰ **argv,
+	       ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+	       ਬਣਤਰ repository *repo)
 {
-	struct replay_revisions_options opts = { 0 };
-	struct replay_result result = { 0 };
-	const char *ref_action = NULL;
-	enum ref_action_mode ref_mode;
-	struct rev_info revs;
-	struct ref_transaction *transaction = NULL;
-	struct strbuf transaction_err = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	int desired_reverse;
-	int ret = 0;
+	ਬਣਤਰ replay_revisions_options opts = { 0 };
+	ਬਣਤਰ replay_ਨਤੀਜਾ ਨਤੀਜਾ = { 0 };
+	ਅਚਲ ਅੱਖਰ *ref_action = ਨਿਰਾ;
+	ਗਿਣਤੀ ref_action_ਬਹੁਲਕ ref_ਬਹੁਲਕ;
+	ਬਣਤਰ rev_info revs;
+	ਬਣਤਰ ref_transaction *transaction = ਨਿਰਾ;
+	ਬਣਤਰ strbuf transaction_err = STRBUF_INIT;
+	ਬਣਤਰ strbuf reflog_ਸੁਨੇਹਾ = STRBUF_INIT;
+	ਪੂਰਨ desired_ਉਲਟ;
+	ਪੂਰਨ ret = 0;
 
-	const char *const replay_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ replay_usage[] = {
 		N_("(EXPERIMENTAL!) git replay "
 		   "([--contained] --onto=<newbase> | --advance=<branch> | --revert=<branch>)\n"
 		   "[--ref=<ref>] [--ref-action=<mode>] [--linearize] <revision-range>"),
-		NULL
+		ਨਿਰਾ
 	};
-	struct option replay_options[] = {
+	ਬਣਤਰ option replay_options[] = {
 		OPT_BOOL(0, "contained", &opts.contained,
 			 N_("update all branches that point at commits in <revision-range>")),
 		OPT_STRING_F(0, "onto", &opts.onto,
@@ -113,14 +113,14 @@ int cmd_replay(int argc,
 			     PARSE_OPT_NONEG),
 		OPT_BOOL(0, "linearize", &opts.linearize,
 			 N_("drop merge commits, replaying only non-merge commits")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
-	argc = parse_options(argc, argv, prefix, replay_options, replay_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, replay_options, replay_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	/* Exactly one mode must be specified */
-	if (!opts.onto && !opts.advance && !opts.revert) {
+	ਜੇ (!opts.onto && !opts.advance && !opts.revert) {
 		error(_("exactly one of --onto, --advance, or --revert is required"));
 		usage_with_options(replay_usage, replay_options);
 	}
@@ -138,7 +138,7 @@ int cmd_replay(int argc,
 				  !!opts.contained, "--contained");
 
 	/* Parse ref action mode from command line or config */
-	ref_mode = get_ref_action_mode(repo, ref_action);
+	ref_ਬਹੁਲਕ = get_ref_action_ਬਹੁਲਕ(repo, ref_action);
 
 	/*
 	 * Cherry-pick/rebase need oldest-first ordering so that each
@@ -146,9 +146,9 @@ int cmd_replay(int argc,
 	 * Revert needs newest-first ordering (like git revert) to
 	 * reduce conflicts by peeling off changes from the top.
 	 */
-	desired_reverse = !opts.revert;
+	desired_ਉਲਟ = !opts.revert;
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, ਅਗੇਤਰ);
 
 	/*
 	 * Set desired values for rev walking options here. If they
@@ -159,105 +159,105 @@ int cmd_replay(int argc,
 	 * some options changing these values if we think they could
 	 * be useful.
 	 */
-	revs.reverse = desired_reverse;
-	revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
-	revs.topo_order = 1;
+	revs.ਉਲਟ = desired_ਉਲਟ;
+	revs.ਛਾਂਟੋ_ਕ੍ਰਮ = REV_ਛਾਂਟੋ_ਵਿੱਚ_ਗ੍ਰਾਫ_ਕ੍ਰਮ;
+	revs.topo_ਕ੍ਰਮ = 1;
 	revs.simplify_history = 0;
 
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1) {
+	argc = ਤਿਆਰੀ_revisions(argc, argv, &revs, ਨਿਰਾ);
+	ਜੇ (argc > 1) {
 		ret = error(_("unrecognized argument: %s"), argv[1]);
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 
 	/*
 	 * Detect and warn if we override some user specified rev
 	 * walking options.
 	 */
-	if (revs.reverse != desired_reverse) {
+	ਜੇ (revs.ਉਲਟ != desired_ਉਲਟ) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"reverse");
-		revs.reverse = desired_reverse;
+		revs.ਉਲਟ = desired_ਉਲਟ;
 	}
-	if (revs.sort_order != REV_SORT_IN_GRAPH_ORDER) {
+	ਜੇ (revs.ਛਾਂਟੋ_ਕ੍ਰਮ != REV_ਛਾਂਟੋ_ਵਿੱਚ_ਗ੍ਰਾਫ_ਕ੍ਰਮ) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"sort_order");
-		revs.sort_order = REV_SORT_IN_GRAPH_ORDER;
+		revs.ਛਾਂਟੋ_ਕ੍ਰਮ = REV_ਛਾਂਟੋ_ਵਿੱਚ_ਗ੍ਰਾਫ_ਕ੍ਰਮ;
 	}
-	if (revs.topo_order != 1) {
+	ਜੇ (revs.topo_ਕ੍ਰਮ != 1) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"topo_order");
-		revs.topo_order = 1;
+		revs.topo_ਕ੍ਰਮ = 1;
 	}
-	if (revs.simplify_history != 0) {
+	ਜੇ (revs.simplify_history != 0) {
 		warning(_("some rev walking options will be overridden as "
 			  "'%s' bit in 'struct rev_info' will be forced"),
 			"simplify_history");
 		revs.simplify_history = 0;
 	}
 
-	ret = replay_revisions(&revs, &opts, &result);
-	if (ret)
-		goto cleanup;
+	ret = replay_revisions(&revs, &opts, &ਨਤੀਜਾ);
+	ਜੇ (ret)
+		ਜਾਓ cleanup;
 
 	/* Build reflog message */
-	if (opts.revert) {
-		strbuf_addf(&reflog_msg, "replay --revert %s", opts.revert);
-	} else if (opts.advance) {
-		strbuf_addf(&reflog_msg, "replay --advance %s", opts.advance);
-	} else {
-		struct object_id oid;
-		if (repo_get_oid_committish(repo, opts.onto, &oid))
+	ਜੇ (opts.revert) {
+		strbuf_addf(&reflog_ਸੁਨੇਹਾ, "replay --revert %s", opts.revert);
+	} ਨਹੀਂਤਾਂ ਜੇ (opts.advance) {
+		strbuf_addf(&reflog_ਸੁਨੇਹਾ, "replay --advance %s", opts.advance);
+	} ਨਹੀਂਤਾਂ {
+		ਬਣਤਰ object_id oid;
+		ਜੇ (repo_get_oid_committish(repo, opts.onto, &oid))
 			BUG("--onto commit should have been resolved beforehand already");
-		strbuf_addf(&reflog_msg, "replay --onto %s", oid_to_hex(&oid));
+		strbuf_addf(&reflog_ਸੁਨੇਹਾ, "replay --onto %s", oid_ਮੰਜ਼ਿਲ_hex(&oid));
 	}
 
 	/* Initialize ref transaction if using update mode */
-	if (ref_mode == REF_ACTION_UPDATE) {
+	ਜੇ (ref_ਬਹੁਲਕ == REF_ACTION_UPDATE) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &transaction_err);
-		if (!transaction) {
+		ਜੇ (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			ਜਾਓ cleanup;
 		}
 	}
 
-	for (size_t i = 0; i < result.updates_nr; i++) {
-		ret = handle_ref_update(ref_mode, transaction, result.updates[i].refname,
-					&result.updates[i].new_oid, &result.updates[i].old_oid,
-					reflog_msg.buf, &transaction_err);
-		if (ret) {
+	ਲਈ (ਮਾਪ_t i = 0; i < ਨਤੀਜਾ.updates_nr; i++) {
+		ret = handle_ref_update(ref_ਬਹੁਲਕ, transaction, ਨਤੀਜਾ.updates[i].refname,
+					&ਨਤੀਜਾ.updates[i].new_oid, &ਨਤੀਜਾ.updates[i].old_oid,
+					reflog_ਸੁਨੇਹਾ.buf, &transaction_err);
+		ਜੇ (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
-				    result.updates[i].refname, transaction_err.buf);
-			goto cleanup;
+				    ਨਤੀਜਾ.updates[i].refname, transaction_err.buf);
+			ਜਾਓ cleanup;
 		}
 	}
 
 	/* Commit the ref transaction if we have one */
-	if (transaction) {
-		if (ref_transaction_commit(transaction, &transaction_err)) {
+	ਜੇ (transaction) {
+		ਜੇ (ref_transaction_commit(transaction, &transaction_err)) {
 			ret = error(_("failed to commit ref transaction: %s"),
 				    transaction_err.buf);
-			goto cleanup;
+			ਜਾਓ cleanup;
 		}
 	}
 
 	ret = 0;
 
 cleanup:
-	if (transaction)
+	ਜੇ (transaction)
 		ref_transaction_free(transaction);
-	replay_result_release(&result);
+	replay_ਨਤੀਜਾ_release(&ਨਤੀਜਾ);
 	strbuf_release(&transaction_err);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_ਸੁਨੇਹਾ);
 	release_revisions(&revs);
 
 	/* Return */
-	if (ret < 0)
-		exit(128);
-	return ret;
+	ਜੇ (ret < 0)
+		ਬਾਹਰ_ਨਿਕਲੋ(128);
+	ਵਾਪਸ ret;
 }

@@ -1,81 +1,81 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "ident.h"
-#include "mailmap.h"
-#include "parse-options.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "write-or-die.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "ident.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "mailmap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "string-list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "write-or-die.h"
 
-static int use_stdin;
-static const char *mailmap_file, *mailmap_blob;
-static const char * const check_mailmap_usage[] = {
+ਸਥਿਰ ਪੂਰਨ use_stdin;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *mailmap_file, *mailmap_blob;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ check_mailmap_usage[] = {
 N_("git check-mailmap [<options>] <contact>..."),
-NULL
+ਨਿਰਾ
 };
 
-static const struct option check_mailmap_options[] = {
+ਸਥਿਰ ਅਚਲ ਬਣਤਰ option check_mailmap_options[] = {
 	OPT_BOOL(0, "stdin", &use_stdin, N_("also read contacts from stdin")),
 	OPT_FILENAME(0, "mailmap-file", &mailmap_file, N_("read additional mailmap entries from file")),
 	OPT_STRING(0, "mailmap-blob", &mailmap_blob, N_("blob"), N_("read additional mailmap entries from blob")),
-	OPT_END()
+	OPT_ਸਿਰਾ()
 };
 
-static void check_mailmap(struct string_list *mailmap, const char *contact)
+ਸਥਿਰ ਖਾਲੀ check_mailmap(ਬਣਤਰ string_list *mailmap, ਅਚਲ ਅੱਖਰ *contact)
 {
-	const char *name, *mail;
-	size_t namelen, maillen;
-	struct ident_split ident;
+	ਅਚਲ ਅੱਖਰ *name, *mail;
+	ਮਾਪ_t namelen, maillen;
+	ਬਣਤਰ ident_ਵੰਡੋ ident;
 
-	if (!split_ident_line(&ident, contact, strlen(contact))) {
+	ਜੇ (!ਵੰਡੋ_ident_ਸਤਰ(&ident, contact, ਲੜੀ_ਲੰਬਾਈ(contact))) {
 		name = ident.name_begin;
-		namelen = ident.name_end - ident.name_begin;
+		namelen = ident.name_ਸਿਰਾ - ident.name_begin;
 		mail = ident.mail_begin;
-		maillen = ident.mail_end - ident.mail_begin;
-	} else {
+		maillen = ident.mail_ਸਿਰਾ - ident.mail_begin;
+	} ਨਹੀਂਤਾਂ {
 		name = "";
 		namelen = 0;
 		mail = contact;
-		maillen = strlen(contact);
+		maillen = ਲੜੀ_ਲੰਬਾਈ(contact);
 	}
 
 	map_user(mailmap, &mail, &maillen, &name, &namelen);
 
-	if (namelen)
-		printf("%.*s ", (int)namelen, name);
-	printf("<%.*s>\n", (int)maillen, mail);
+	ਜੇ (namelen)
+		ਲਿਖੋ("%.*s ", (ਪੂਰਨ)namelen, name);
+	ਲਿਖੋ("<%.*s>\n", (ਪੂਰਨ)maillen, mail);
 }
 
-int cmd_check_mailmap(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+ਪੂਰਨ cmd_check_mailmap(ਪੂਰਨ argc,
+		      ਅਚਲ ਅੱਖਰ **argv,
+		      ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		      ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int i;
-	struct string_list mailmap = STRING_LIST_INIT_NODUP;
+	ਪੂਰਨ i;
+	ਬਣਤਰ string_list mailmap = STRING_LIST_INIT_NODUP;
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, check_mailmap_options,
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, check_mailmap_options,
 			     check_mailmap_usage, 0);
-	if (argc == 0 && !use_stdin)
+	ਜੇ (argc == 0 && !use_stdin)
 		die(_("no contacts specified"));
 
 	read_mailmap(the_repository, &mailmap);
-	if (mailmap_blob)
+	ਜੇ (mailmap_blob)
 		read_mailmap_blob(the_repository, &mailmap, mailmap_blob);
-	if (mailmap_file)
+	ਜੇ (mailmap_file)
 		read_mailmap_file(&mailmap, mailmap_file, 0);
 
-	for (i = 0; i < argc; ++i)
+	ਲਈ (i = 0; i < argc; ++i)
 		check_mailmap(&mailmap, argv[i]);
 	maybe_flush_or_die(stdout, "stdout");
 
-	if (use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
+	ਜੇ (use_stdin) {
+		ਬਣਤਰ strbuf buf = STRBUF_INIT;
+		ਜਦੋਂ (strbuf_getline_lf(&buf, stdin) != EOF) {
 			check_mailmap(&mailmap, buf.buf);
 			maybe_flush_or_die(stdout, "stdout");
 		}
@@ -83,5 +83,5 @@ int cmd_check_mailmap(int argc,
 	}
 
 	clear_mailmap(&mailmap);
-	return 0;
+	ਵਾਪਸ 0;
 }

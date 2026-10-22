@@ -3,176 +3,176 @@
  *
  * Copyright (c) 2006 Junio C Hamano
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dir.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "quote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "packfile.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+ਸਥਿਰ ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ garbage;
+ਸਥਿਰ off_t ਮਾਪ_garbage;
+ਸਥਿਰ ਪੂਰਨ verbose;
+ਸਥਿਰ ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ loose, packed, packed_loose;
+ਸਥਿਰ off_t loose_ਮਾਪ;
 
-static const char *bits_to_msg(unsigned seen_bits)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਬਿੱਟ_ਮੰਜ਼ਿਲ_ਸੁਨੇਹਾ(ਬਿਨਾਨਿਸ਼ਾਨੀ ਵੇਖਿਆ_ਬਿੱਟ)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	ਚੋਣ (ਵੇਖਿਆ_ਬਿੱਟ) {
+	ਹਾਲਤ 0:
+		ਵਾਪਸ "no corresponding .idx or .pack";
+	ਹਾਲਤ PACKDIR_FILE_GARBAGE:
+		ਵਾਪਸ "garbage found";
+	ਹਾਲਤ PACKDIR_FILE_PACK:
+		ਵਾਪਸ "no corresponding .idx";
+	ਹਾਲਤ PACKDIR_FILE_IDX:
+		ਵਾਪਸ "no corresponding .pack";
+	ਹਾਲਤ PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	ਮੂਲ:
+		ਵਾਪਸ ਨਿਰਾ;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+ਸਥਿਰ ਖਾਲੀ real_report_garbage(ਬਿਨਾਨਿਸ਼ਾਨੀ ਵੇਖਿਆ_ਬਿੱਟ, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	ਬਣਤਰ stat st;
+	ਅਚਲ ਅੱਖਰ *desc = ਬਿੱਟ_ਮੰਜ਼ਿਲ_ਸੁਨੇਹਾ(ਵੇਖਿਆ_ਬਿੱਟ);
 
-	if (!desc)
-		return;
+	ਜੇ (!desc)
+		ਵਾਪਸ;
 
-	if (!stat(path, &st))
-		size_garbage += st.st_size;
-	warning("%s: %s", desc, path);
+	ਜੇ (!stat(ਰਸਤਾ, &st))
+		ਮਾਪ_garbage += st.st_ਮਾਪ;
+	warning("%s: %s", desc, ਰਸਤਾ);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+ਸਥਿਰ ਖਾਲੀ loose_garbage(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	if (verbose)
-		report_garbage(PACKDIR_FILE_GARBAGE, path);
+	ਜੇ (verbose)
+		report_garbage(PACKDIR_FILE_GARBAGE, ਰਸਤਾ);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+ਸਥਿਰ ਪੂਰਨ ਗਿਣਤੀ_loose(ਅਚਲ ਬਣਤਰ object_id *oid, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ,
+		       ਖਾਲੀ *ਅੰਕੜੇ ਅਣਵਰਤਿਆ)
 {
-	struct stat st;
+	ਬਣਤਰ stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
-		loose_garbage(path);
-	else {
-		loose_size += on_disk_bytes(st);
+	ਜੇ (lstat(ਰਸਤਾ, &st) || !S_ISREG(st.st_ਬਹੁਲਕ))
+		loose_garbage(ਰਸਤਾ);
+	ਨਹੀਂਤਾਂ {
+		loose_ਮਾਪ += on_disk_ਬਾਈਟਾਂ(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		ਜੇ (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+ਸਥਿਰ ਪੂਰਨ ਗਿਣਤੀ_cruft(ਅਚਲ ਅੱਖਰ *basename ਅਣਵਰਤਿਆ, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ,
+		       ਖਾਲੀ *ਅੰਕੜੇ ਅਣਵਰਤਿਆ)
 {
-	loose_garbage(path);
-	return 0;
+	loose_garbage(ਰਸਤਾ);
+	ਵਾਪਸ 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+ਸਥਿਰ ਪੂਰਨ print_alternate(ਬਣਤਰ odb_files_dir *alternate, ਖਾਲੀ *ਅੰਕੜੇ ਅਣਵਰਤਿਆ)
 {
-	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
-	putchar('\n');
-	return 0;
+	ਲਿਖੋ("alternate: ");
+	quote_c_style(alternate->abspath, ਨਿਰਾ, stdout, 0);
+	ਅੱਖਰ_ਲਿਖੋ('\n');
+	ਵਾਪਸ 0;
 }
 
-static char const * const count_objects_usage[] = {
+ਸਥਿਰ ਅੱਖਰ ਅਚਲ * ਅਚਲ ਗਿਣਤੀ_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	ਨਿਰਾ
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+ਪੂਰਨ cmd_ਗਿਣਤੀ_objects(ਪੂਰਨ argc,
+		      ਅਚਲ ਅੱਖਰ **argv,
+		      ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		      ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	ਪੂਰਨ human_readable = 0;
+	ਬਣਤਰ option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, ਗਿਣਤੀ_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
-		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	ਜੇ (argc)
+		usage_with_options(ਗਿਣਤੀ_objects_usage, opts);
+	ਜੇ (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
-	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+	for_each_loose_file_ਵਿੱਚ_ਸਰੋਤ(the_repository->objects->ਸਰੋਤ,
+				      ਗਿਣਤੀ_loose, ਗਿਣਤੀ_cruft, ਨਿਰਾ, ਨਿਰਾ);
 
-	if (verbose) {
-		struct packed_git *p;
-		unsigned long num_pack = 0;
-		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+	ਜੇ (verbose) {
+		ਬਣਤਰ packed_git *p;
+		ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਅੰਕ_pack = 0;
+		off_t ਮਾਪ_pack = 0;
+		ਬਣਤਰ strbuf loose_buf = STRBUF_INIT;
+		ਬਣਤਰ strbuf pack_buf = STRBUF_INIT;
+		ਬਣਤਰ strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
-			packed += p->num_objects;
-			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			ਜੇ (!p->pack_local)
+				ਜਾਰੀ;
+			ਜੇ (open_pack_ਸੂਚਕਾਂਕ(p))
+				ਜਾਰੀ;
+			packed += p->ਅੰਕ_objects;
+			ਮਾਪ_pack += p->pack_ਮਾਪ + p->ਸੂਚਕਾਂਕ_ਮਾਪ;
+			ਅੰਕ_pack++;
 		}
 
-		if (human_readable) {
-			strbuf_humanise_bytes(&loose_buf, loose_size);
-			strbuf_humanise_bytes(&pack_buf, size_pack);
-			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		ਜੇ (human_readable) {
+			strbuf_humanise_ਬਾਈਟਾਂ(&loose_buf, loose_ਮਾਪ);
+			strbuf_humanise_ਬਾਈਟਾਂ(&pack_buf, ਮਾਪ_pack);
+			strbuf_humanise_ਬਾਈਟਾਂ(&garbage_buf, ਮਾਪ_garbage);
+		} ਨਹੀਂਤਾਂ {
 			strbuf_addf(&loose_buf, "%lu",
-				    (unsigned long)(loose_size / 1024));
+				    (ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ)(loose_ਮਾਪ / 1024));
 			strbuf_addf(&pack_buf, "%lu",
-				    (unsigned long)(size_pack / 1024));
+				    (ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ)(ਮਾਪ_pack / 1024));
 			strbuf_addf(&garbage_buf, "%lu",
-				    (unsigned long)(size_garbage / 1024));
+				    (ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ)(ਮਾਪ_garbage / 1024));
 		}
 
-		printf("count: %lu\n", loose);
-		printf("size: %s\n", loose_buf.buf);
-		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
-		printf("size-pack: %s\n", pack_buf.buf);
-		printf("prune-packable: %lu\n", packed_loose);
-		printf("garbage: %lu\n", garbage);
-		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		ਲਿਖੋ("count: %lu\n", loose);
+		ਲਿਖੋ("size: %s\n", loose_buf.buf);
+		ਲਿਖੋ("in-pack: %lu\n", packed);
+		ਲਿਖੋ("packs: %lu\n", ਅੰਕ_pack);
+		ਲਿਖੋ("size-pack: %s\n", pack_buf.buf);
+		ਲਿਖੋ("prune-packable: %lu\n", packed_loose);
+		ਲਿਖੋ("garbage: %lu\n", garbage);
+		ਲਿਖੋ("size-garbage: %s\n", garbage_buf.buf);
+		odb_for_each_alternate(the_repository->objects, print_alternate, ਨਿਰਾ);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
-			strbuf_humanise_bytes(&buf, loose_size);
-		else
+	} ਨਹੀਂਤਾਂ {
+		ਬਣਤਰ strbuf buf = STRBUF_INIT;
+		ਜੇ (human_readable)
+			strbuf_humanise_ਬਾਈਟਾਂ(&buf, loose_ਮਾਪ);
+		ਨਹੀਂਤਾਂ
 			strbuf_addf(&buf, "%lu kilobytes",
-				    (unsigned long)(loose_size / 1024));
-		printf("%lu objects, %s\n", loose, buf.buf);
+				    (ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ)(loose_ਮਾਪ / 1024));
+		ਲਿਖੋ("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }

@@ -1,51 +1,51 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
 
-static char *create_temp_file(struct object_id *oid)
+ਸਥਿਰ ਅੱਖਰ *create_ਆਰਜ਼ੀ_file(ਬਣਤਰ object_id *oid)
 {
-	static char path[50];
-	void *buf;
-	enum object_type type;
-	size_t size;
-	int fd;
+	ਸਥਿਰ ਅੱਖਰ ਰਸਤਾ[50];
+	ਖਾਲੀ *buf;
+	ਗਿਣਤੀ object_type type;
+	ਮਾਪ_t ਮਾਪ;
+	ਪੂਰਨ fd;
 
-	buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf || type != OBJ_BLOB)
-		die("unable to read blob object %s", oid_to_hex(oid));
+	buf = odb_read_object(the_repository->objects, oid, &type, &ਮਾਪ);
+	ਜੇ (!buf || type != OBJ_BLOB)
+		die("unable to read blob object %s", oid_ਮੰਜ਼ਿਲ_hex(oid));
 
-	xsnprintf(path, sizeof(path), ".merge_file_XXXXXX");
-	fd = xmkstemp(path);
-	if (write_in_full(fd, buf, size) < 0)
+	xsnprintf(ਰਸਤਾ, ਆਕਾਰ(ਰਸਤਾ), ".merge_file_XXXXXX");
+	fd = xmkstemp(ਰਸਤਾ);
+	ਜੇ (write_ਵਿੱਚ_ਭਰਿਆ(fd, buf, ਮਾਪ) < 0)
 		die_errno("unable to write temp-file");
 	close(fd);
-	free(buf);
-	return path;
+	ਮੁਕਤ(buf);
+	ਵਾਪਸ ਰਸਤਾ;
 }
 
-static const char usage_msg[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ usage_ਸੁਨੇਹਾ[] =
 "git unpack-file <blob>";
 
-int cmd_unpack_file(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+ਪੂਰਨ cmd_unpack_file(ਪੂਰਨ argc,
+		    ਅਚਲ ਅੱਖਰ **argv,
+		    ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ,
+		    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct object_id oid;
+	ਬਣਤਰ object_id oid;
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
-	if (repo_get_oid(the_repository, argv[1], &oid))
+	show_usage_if_asked(argc, argv, usage_ਸੁਨੇਹਾ);
+	ਜੇ (argc != 2)
+		usage(usage_ਸੁਨੇਹਾ);
+	ਜੇ (repo_get_oid(the_repository, argv[1], &oid))
 		die("Not a valid object name %s", argv[1]);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
 
-	puts(create_temp_file(&oid));
-	return 0;
+	puts(create_ਆਰਜ਼ੀ_file(&oid));
+	ਵਾਪਸ 0;
 }

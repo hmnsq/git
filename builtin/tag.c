@@ -6,35 +6,35 @@
  * Based on git-tag.sh and mktag.c by Linus Torvalds.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "path.h"
-#include "tag.h"
-#include "parse-options.h"
-#include "diff.h"
-#include "revision.h"
-#include "gpg-interface.h"
-#include "oid-array.h"
-#include "column.h"
-#include "ref-filter.h"
-#include "date.h"
-#include "write-or-die.h"
-#include "object-file-convert.h"
-#include "trailer.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "advice.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "editor.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tag.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gpg-interface.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "oid-array.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "column.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "ref-filter.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "date.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "write-or-die.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file-convert.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "trailer.h"
 
-static const char * const git_tag_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ git_ਟੈਗ_usage[] = {
 	N_("git tag [-a | -s | -u <key-id>] [-f] [-m <msg> | -F <file>] [-e]\n"
 	   "        [(--trailer <token>[(=|:)<value>])...]\n"
 	   "        <tagname> [<commit> | <object>]"),
@@ -44,447 +44,447 @@ static const char * const git_tag_usage[] = {
 	   "        [--create-reflog] [--sort=<key>] [--format=<format>]\n"
 	   "        [--merged <commit>] [--no-merged <commit>] [<pattern>...]"),
 	N_("git tag -v [--format=<format>] <tagname>..."),
-	NULL
+	ਨਿਰਾ
 };
 
-static unsigned int colopts;
-static int force_sign_annotate;
-static int config_sign_tag = -1; /* unspecified */
+ਸਥਿਰ ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ colopts;
+ਸਥਿਰ ਪੂਰਨ force_sign_annotate;
+ਸਥਿਰ ਪੂਰਨ config_sign_ਟੈਗ = -1; /* unspecified */
 
-static int list_tags(struct ref_filter *filter, struct ref_sorting *sorting,
-		     struct ref_format *format)
+ਸਥਿਰ ਪੂਰਨ list_ਟੈਗ_ਸੂਚੀ(ਬਣਤਰ ref_filter *filter, ਬਣਤਰ ref_ਛਾਂਟੀ *ਛਾਂਟੀ,
+		     ਬਣਤਰ ref_format *format)
 {
-	char *to_free = NULL;
+	ਅੱਖਰ *ਮੰਜ਼ਿਲ_free = ਨਿਰਾ;
 
-	if (filter->lines == -1)
-		filter->lines = 0;
+	ਜੇ (filter->ਸਤਰਾਂ == -1)
+		filter->ਸਤਰਾਂ = 0;
 
-	if (!format->format) {
-		if (filter->lines) {
-			to_free = xstrfmt("%s %%(contents:lines=%d)",
+	ਜੇ (!format->format) {
+		ਜੇ (filter->ਸਤਰਾਂ) {
+			ਮੰਜ਼ਿਲ_free = xstrfmt("%s %%(contents:lines=%d)",
 					  "%(align:15)%(refname:lstrip=2)%(end)",
-					  filter->lines);
-			format->format = to_free;
-		} else
+					  filter->ਸਤਰਾਂ);
+			format->format = ਮੰਜ਼ਿਲ_free;
+		} ਨਹੀਂਤਾਂ
 			format->format = "%(refname:lstrip=2)";
 	}
 
-	if (verify_ref_format(format))
+	ਜੇ (verify_ref_format(format))
 		die(_("unable to parse format string"));
-	filter->with_commit_tag_algo = 1;
-	filter_and_format_refs(filter, FILTER_REFS_TAGS, sorting, format);
+	filter->with_commit_ਟੈਗ_algo = 1;
+	filter_and_format_refs(filter, FILTER_REFS_ਟੈਗ_ਸੂਚੀ, ਛਾਂਟੀ, format);
 
-	free(to_free);
+	ਮੁਕਤ(ਮੰਜ਼ਿਲ_free);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-typedef int (*each_tag_name_fn)(const char *name, const char *ref,
-				const struct object_id *oid, void *cb_data);
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਪੂਰਨ (*each_ਟੈਗ_name_fn)(ਅਚਲ ਅੱਖਰ *name, ਅਚਲ ਅੱਖਰ *ref,
+				ਅਚਲ ਬਣਤਰ object_id *oid, ਖਾਲੀ *cb_ਅੰਕੜੇ);
 
-static int for_each_tag_name(const char **argv, each_tag_name_fn fn,
-			     void *cb_data)
+ਸਥਿਰ ਪੂਰਨ for_each_ਟੈਗ_name(ਅਚਲ ਅੱਖਰ **argv, each_ਟੈਗ_name_fn fn,
+			     ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	const char **p;
-	struct strbuf ref = STRBUF_INIT;
-	int had_error = 0;
-	struct object_id oid;
+	ਅਚਲ ਅੱਖਰ **p;
+	ਬਣਤਰ strbuf ref = STRBUF_INIT;
+	ਪੂਰਨ had_error = 0;
+	ਬਣਤਰ object_id oid;
 
-	for (p = argv; *p; p++) {
+	ਲਈ (p = argv; *p; p++) {
 		strbuf_reset(&ref);
 		strbuf_addf(&ref, "refs/tags/%s", *p);
-		if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
+		ਜੇ (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
 			error(_("tag '%s' not found."), *p);
 			had_error = 1;
-			continue;
+			ਜਾਰੀ;
 		}
-		if (fn(*p, ref.buf, &oid, cb_data))
+		ਜੇ (fn(*p, ref.buf, &oid, cb_ਅੰਕੜੇ))
 			had_error = 1;
 	}
 	strbuf_release(&ref);
-	return had_error;
+	ਵਾਪਸ had_error;
 }
 
-static int collect_tags(const char *name UNUSED, const char *ref,
-			const struct object_id *oid, void *cb_data)
+ਸਥਿਰ ਪੂਰਨ collect_ਟੈਗ_ਸੂਚੀ(ਅਚਲ ਅੱਖਰ *name ਅਣਵਰਤਿਆ, ਅਚਲ ਅੱਖਰ *ref,
+			ਅਚਲ ਬਣਤਰ object_id *oid, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct string_list *ref_list = cb_data;
+	ਬਣਤਰ string_list *ref_list = cb_ਅੰਕੜੇ;
 
 	string_list_append(ref_list, ref);
-	ref_list->items[ref_list->nr - 1].util = oiddup(oid);
-	return 0;
+	ref_list->ਚੀਜ਼ਾਂ[ref_list->nr - 1].util = oiddup(oid);
+	ਵਾਪਸ 0;
 }
 
-static int delete_tags(const char **argv)
+ਸਥਿਰ ਪੂਰਨ delete_ਟੈਗ_ਸੂਚੀ(ਅਚਲ ਅੱਖਰ **argv)
 {
-	int result;
-	struct string_list refs_to_delete = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
+	ਪੂਰਨ ਨਤੀਜਾ;
+	ਬਣਤਰ string_list refs_ਮੰਜ਼ਿਲ_delete = STRING_LIST_INIT_DUP;
+	ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
 
-	result = for_each_tag_name(argv, collect_tags, (void *)&refs_to_delete);
-	if (refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
-		result = 1;
+	ਨਤੀਜਾ = for_each_ਟੈਗ_name(argv, collect_ਟੈਗ_ਸੂਚੀ, (ਖਾਲੀ *)&refs_ਮੰਜ਼ਿਲ_delete);
+	ਜੇ (refs_delete_refs(get_main_ref_store(the_repository), ਨਿਰਾ, &refs_ਮੰਜ਼ਿਲ_delete, REF_NO_DEREF))
+		ਨਤੀਜਾ = 1;
 
-	for_each_string_list_item(item, &refs_to_delete) {
-		const char *name = item->string;
-		struct object_id *oid = item->util;
-		if (!refs_ref_exists(get_main_ref_store(the_repository), name))
-			printf(_("Deleted tag '%s' (was %s)\n"),
-				item->string + 10,
-				repo_find_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
+	for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &refs_ਮੰਜ਼ਿਲ_delete) {
+		ਅਚਲ ਅੱਖਰ *name = ਵਸਤੂ->string;
+		ਬਣਤਰ object_id *oid = ਵਸਤੂ->util;
+		ਜੇ (!refs_ref_exists(get_main_ref_store(the_repository), name))
+			ਲਿਖੋ(_("Deleted tag '%s' (was %s)\n"),
+				ਵਸਤੂ->string + 10,
+				repo_ਲੱਭੋ_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
 
-		free(oid);
+		ਮੁਕਤ(oid);
 	}
-	string_list_clear(&refs_to_delete, 0);
-	return result;
+	string_list_clear(&refs_ਮੰਜ਼ਿਲ_delete, 0);
+	ਵਾਪਸ ਨਤੀਜਾ;
 }
 
-static int verify_tag(const char *name, const char *ref UNUSED,
-		      const struct object_id *oid, void *cb_data)
+ਸਥਿਰ ਪੂਰਨ verify_ਟੈਗ(ਅਚਲ ਅੱਖਰ *name, ਅਚਲ ਅੱਖਰ *ref ਅਣਵਰਤਿਆ,
+		      ਅਚਲ ਬਣਤਰ object_id *oid, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	int flags;
-	struct ref_format *format = cb_data;
+	ਪੂਰਨ flags;
+	ਬਣਤਰ ref_format *format = cb_ਅੰਕੜੇ;
 	flags = GPG_VERIFY_VERBOSE;
 
-	if (format->format)
-		flags = GPG_VERIFY_OMIT_STATUS;
+	ਜੇ (format->format)
+		flags = GPG_VERIFY_OMIT_ਸਥਿਤੀ;
 
-	if (gpg_verify_tag(the_repository, oid, name, flags))
-		return -1;
+	ਜੇ (gpg_verify_ਟੈਗ(the_repository, oid, name, flags))
+		ਵਾਪਸ -1;
 
-	if (format->format)
-		pretty_print_ref(name, oid, NULL, format);
+	ਜੇ (format->format)
+		pretty_print_ref(name, oid, ਨਿਰਾ, format);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int do_sign(struct strbuf *buffer, struct object_id **compat_oid,
-		   struct object_id *compat_oid_buf)
+ਸਥਿਰ ਪੂਰਨ do_sign(ਬਣਤਰ strbuf *ਬਫਰ, ਬਣਤਰ object_id **compat_oid,
+		   ਬਣਤਰ object_id *compat_oid_buf)
 {
-	const struct git_hash_algo *compat = the_repository->compat_hash_algo;
-	struct strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
-	struct strbuf compat_buf = STRBUF_INIT;
-	char *keyid = get_signing_key();
-	int ret = -1;
+	ਅਚਲ ਬਣਤਰ git_hash_algo *compat = the_repository->compat_hash_algo;
+	ਬਣਤਰ strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
+	ਬਣਤਰ strbuf compat_buf = STRBUF_INIT;
+	ਅੱਖਰ *keyid = get_signing_ਕੁੰਜੀ();
+	ਪੂਰਨ ret = -1;
 
-	if (sign_buffer(buffer, &sig, keyid, 0))
-		goto out;
+	ਜੇ (sign_ਬਫਰ(ਬਫਰ, &sig, keyid, 0))
+		ਜਾਓ ਬਾਹਰਲਾ;
 
-	if (compat) {
-		const struct git_hash_algo *algo = the_repository->hash_algo;
+	ਜੇ (compat) {
+		ਅਚਲ ਬਣਤਰ git_hash_algo *algo = the_repository->hash_algo;
 
-		if (convert_object_file(the_repository ,&compat_buf, algo, compat,
-					buffer->buf, buffer->len, OBJ_TAG, 1))
-			goto out;
-		if (sign_buffer(&compat_buf, &compat_sig, keyid, 0))
-			goto out;
-		add_header_signature(&compat_buf, &sig, algo);
+		ਜੇ (convert_object_file(the_repository ,&compat_buf, algo, compat,
+					ਬਫਰ->buf, ਬਫਰ->len, OBJ_ਟੈਗ, 1))
+			ਜਾਓ ਬਾਹਰਲਾ;
+		ਜੇ (sign_ਬਫਰ(&compat_buf, &compat_sig, keyid, 0))
+			ਜਾਓ ਬਾਹਰਲਾ;
+		ਜੋੜੋ_ਸਿਰਲੇਖ_signature(&compat_buf, &sig, algo);
 		strbuf_addbuf(&compat_buf, &compat_sig);
 		hash_object_file(compat, compat_buf.buf, compat_buf.len,
-				 OBJ_TAG, compat_oid_buf);
+				 OBJ_ਟੈਗ, compat_oid_buf);
 		*compat_oid = compat_oid_buf;
 	}
 
-	if (compat_sig.len)
-		add_header_signature(buffer, &compat_sig, compat);
+	ਜੇ (compat_sig.len)
+		ਜੋੜੋ_ਸਿਰਲੇਖ_signature(ਬਫਰ, &compat_sig, compat);
 
-	strbuf_addbuf(buffer, &sig);
+	strbuf_addbuf(ਬਫਰ, &sig);
 	ret = 0;
-out:
+ਬਾਹਰਲਾ:
 	strbuf_release(&sig);
 	strbuf_release(&compat_sig);
 	strbuf_release(&compat_buf);
-	free(keyid);
-	return ret;
+	ਮੁਕਤ(keyid);
+	ਵਾਪਸ ret;
 }
 
-static const char tag_template[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ ਟੈਗ_template[] =
 	N_("\nWrite a message for tag:\n  %s\n"
 	"Lines starting with '%s' will be ignored.\n");
 
-static const char tag_template_nocleanup[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ ਟੈਗ_template_nocleanup[] =
 	N_("\nWrite a message for tag:\n  %s\n"
 	"Lines starting with '%s' will be kept; you may remove them"
 	" yourself if you want to.\n");
 
-static int git_tag_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+ਸਥਿਰ ਪੂਰਨ git_ਟੈਗ_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+			  ਅਚਲ ਬਣਤਰ config_context *ctx, ਖਾਲੀ *cb)
 {
-	if (!strcmp(var, "tag.gpgsign")) {
-		config_sign_tag = git_config_bool(var, value);
-		return 0;
+	ਜੇ (!strcmp(var, "tag.gpgsign")) {
+		config_sign_ਟੈਗ = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
 
-	if (!strcmp(var, "tag.sort")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(cb, value);
-		return 0;
+	ਜੇ (!strcmp(var, "tag.sort")) {
+		ਜੇ (!ਮੁੱਲ)
+			ਵਾਪਸ config_error_nonbool(var);
+		string_list_append(cb, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
 
-	if (!strcmp(var, "tag.forcesignannotated")) {
-		force_sign_annotate = git_config_bool(var, value);
-		return 0;
+	ਜੇ (!strcmp(var, "tag.forcesignannotated")) {
+		force_sign_annotate = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "tag", &colopts);
+	ਜੇ (starts_with(var, "column."))
+		ਵਾਪਸ git_ਕਾਲਮ_config(var, ਮੁੱਲ, "tag", &colopts);
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	ਜੇ (git_color_config(var, ਮੁੱਲ, cb) < 0)
+		ਵਾਪਸ -1;
 
-	return git_default_config(var, value, ctx, cb);
+	ਵਾਪਸ git_default_config(var, ਮੁੱਲ, ctx, cb);
 }
 
-static void write_tag_body(int fd, const struct object_id *oid)
+ਸਥਿਰ ਖਾਲੀ write_ਟੈਗ_body(ਪੂਰਨ fd, ਅਚਲ ਬਣਤਰ object_id *oid)
 {
-	size_t size;
-	enum object_type type;
-	char *buf, *sp, *orig;
-	struct strbuf payload = STRBUF_INIT;
-	struct strbuf signature = STRBUF_INIT;
+	ਮਾਪ_t ਮਾਪ;
+	ਗਿਣਤੀ object_type type;
+	ਅੱਖਰ *buf, *sp, *orig;
+	ਬਣਤਰ strbuf payload = STRBUF_INIT;
+	ਬਣਤਰ strbuf signature = STRBUF_INIT;
 
-	orig = buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf)
-		return;
-	if (parse_signature(buf, size, &payload, &signature)) {
+	orig = buf = odb_read_object(the_repository->objects, oid, &type, &ਮਾਪ);
+	ਜੇ (!buf)
+		ਵਾਪਸ;
+	ਜੇ (parse_signature(buf, ਮਾਪ, &payload, &signature)) {
 		buf = payload.buf;
-		size = payload.len;
+		ਮਾਪ = payload.len;
 	}
 	/* skip header */
-	sp = strstr(buf, "\n\n");
+	sp = ਲੜੀ_ਖੋਜ(buf, "\n\n");
 
-	if (!sp || !size || type != OBJ_TAG) {
-		free(buf);
-		return;
+	ਜੇ (!sp || !ਮਾਪ || type != OBJ_ਟੈਗ) {
+		ਮੁਕਤ(buf);
+		ਵਾਪਸ;
 	}
 	sp += 2; /* skip the 2 LFs */
-	write_or_die(fd, sp, buf + size - sp);
+	write_or_die(fd, sp, buf + ਮਾਪ - sp);
 
-	free(orig);
+	ਮੁਕਤ(orig);
 	strbuf_release(&payload);
 	strbuf_release(&signature);
 }
 
-static int build_tag_object(struct strbuf *buf, int sign, struct object_id *result)
+ਸਥਿਰ ਪੂਰਨ build_ਟੈਗ_object(ਬਣਤਰ strbuf *buf, ਪੂਰਨ sign, ਬਣਤਰ object_id *ਨਤੀਜਾ)
 {
-	struct object_id *compat_oid = NULL, compat_oid_buf;
-	if (sign && do_sign(buf, &compat_oid, &compat_oid_buf) < 0)
-		return error(_("unable to sign the tag"));
-	if (odb_write_object_ext(the_repository->objects, buf->buf,
-				 buf->len, OBJ_TAG, result, compat_oid, 0) < 0)
-		return error(_("unable to write tag file"));
-	return 0;
+	ਬਣਤਰ object_id *compat_oid = ਨਿਰਾ, compat_oid_buf;
+	ਜੇ (sign && do_sign(buf, &compat_oid, &compat_oid_buf) < 0)
+		ਵਾਪਸ error(_("unable to sign the tag"));
+	ਜੇ (odb_write_object_ext(the_repository->objects, buf->buf,
+				 buf->len, OBJ_ਟੈਗ, ਨਤੀਜਾ, compat_oid, 0) < 0)
+		ਵਾਪਸ error(_("unable to write tag file"));
+	ਵਾਪਸ 0;
 }
 
-struct create_tag_options {
-	unsigned int message_given:1;
-	unsigned int use_editor:1;
-	unsigned int sign;
-	enum {
+ਬਣਤਰ create_ਟੈਗ_options {
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ ਸੁਨੇਹਾ_given:1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ use_editor:1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ sign;
+	ਗਿਣਤੀ {
 		CLEANUP_NONE,
 		CLEANUP_SPACE,
 		CLEANUP_ALL
-	} cleanup_mode;
+	} cleanup_ਬਹੁਲਕ;
 };
 
-static const char message_advice_nested_tag[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ ਸੁਨੇਹਾ_advice_nested_ਟੈਗ[] =
 	N_("You have created a nested tag. The object referred to by your new tag is\n"
 	   "already a tag. If you meant to tag the object that it points to, use:\n"
 	   "\n"
 	   "\tgit tag -f %s %s^{}");
 
-static void create_tag(const struct object_id *object, const char *object_ref,
-		       const char *tag,
-		       struct strbuf *buf, struct create_tag_options *opt,
-		       struct object_id *prev, struct object_id *result,
-		       struct strvec *trailer_args, char *path)
+ਸਥਿਰ ਖਾਲੀ create_ਟੈਗ(ਅਚਲ ਬਣਤਰ object_id *object, ਅਚਲ ਅੱਖਰ *object_ref,
+		       ਅਚਲ ਅੱਖਰ *ਟੈਗ,
+		       ਬਣਤਰ strbuf *buf, ਬਣਤਰ create_ਟੈਗ_options *opt,
+		       ਬਣਤਰ object_id *prev, ਬਣਤਰ object_id *ਨਤੀਜਾ,
+		       ਬਣਤਰ strvec *trailer_ਦਲੀਲਾਂ, ਅੱਖਰ *ਰਸਤਾ)
 {
-	enum object_type type;
-	struct strbuf header = STRBUF_INIT;
-	int should_edit;
+	ਗਿਣਤੀ object_type type;
+	ਬਣਤਰ strbuf ਸਿਰਲੇਖ = STRBUF_INIT;
+	ਪੂਰਨ should_edit;
 
-	type = odb_read_object_info(the_repository->objects, object, NULL);
-	if (type <= OBJ_NONE)
+	type = odb_read_object_info(the_repository->objects, object, ਨਿਰਾ);
+	ਜੇ (type <= OBJ_NONE)
 		die(_("bad object type."));
 
-	if (type == OBJ_TAG)
-		advise_if_enabled(ADVICE_NESTED_TAG, _(message_advice_nested_tag),
-				  tag, object_ref);
+	ਜੇ (type == OBJ_ਟੈਗ)
+		advise_if_enabled(ADVICE_NESTED_ਟੈਗ, _(ਸੁਨੇਹਾ_advice_nested_ਟੈਗ),
+				  ਟੈਗ, object_ref);
 
-	strbuf_addf(&header,
+	strbuf_addf(&ਸਿਰਲੇਖ,
 		    "object %s\n"
 		    "type %s\n"
 		    "tag %s\n"
 		    "tagger %s\n\n",
-		    oid_to_hex(object),
+		    oid_ਮੰਜ਼ਿਲ_hex(object),
 		    type_name(type),
-		    tag,
+		    ਟੈਗ,
 		    git_committer_info(IDENT_STRICT));
 
-	should_edit = opt->use_editor || !opt->message_given;
-	if (should_edit || trailer_args->nr) {
-		int fd;
+	should_edit = opt->use_editor || !opt->ਸੁਨੇਹਾ_given;
+	ਜੇ (should_edit || trailer_ਦਲੀਲਾਂ->nr) {
+		ਪੂਰਨ fd;
 
 		/* write the template message before editing: */
-		fd = xopen(path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
+		fd = xopen(ਰਸਤਾ, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-		if (opt->message_given && buf->len) {
+		ਜੇ (opt->ਸੁਨੇਹਾ_given && buf->len) {
 			strbuf_complete(buf, '\n');
 			write_or_die(fd, buf->buf, buf->len);
 			strbuf_reset(buf);
-		} else if (!is_null_oid(prev)) {
-			write_tag_body(fd, prev);
-		} else {
-			struct strbuf buf = STRBUF_INIT;
+		} ਨਹੀਂਤਾਂ ਜੇ (!is_null_oid(prev)) {
+			write_ਟੈਗ_body(fd, prev);
+		} ਨਹੀਂਤਾਂ {
+			ਬਣਤਰ strbuf buf = STRBUF_INIT;
 			strbuf_addch(&buf, '\n');
-			if (opt->cleanup_mode == CLEANUP_ALL)
-				strbuf_commented_addf(&buf, comment_line_str,
-				      _(tag_template), tag, comment_line_str);
-			else
-				strbuf_commented_addf(&buf, comment_line_str,
-				      _(tag_template_nocleanup), tag, comment_line_str);
+			ਜੇ (opt->cleanup_ਬਹੁਲਕ == CLEANUP_ALL)
+				strbuf_commented_addf(&buf, comment_ਸਤਰ_str,
+				      _(ਟੈਗ_template), ਟੈਗ, comment_ਸਤਰ_str);
+			ਨਹੀਂਤਾਂ
+				strbuf_commented_addf(&buf, comment_ਸਤਰ_str,
+				      _(ਟੈਗ_template_nocleanup), ਟੈਗ, comment_ਸਤਰ_str);
 			write_or_die(fd, buf.buf, buf.len);
 			strbuf_release(&buf);
 		}
 		close(fd);
 
-		if (trailer_args->nr && amend_file_with_trailers(path, trailer_args))
+		ਜੇ (trailer_ਦਲੀਲਾਂ->nr && amend_file_with_trailers(ਰਸਤਾ, trailer_ਦਲੀਲਾਂ))
 			die(_("unable to pass trailers to --trailers"));
 
-		if (should_edit) {
-			if (launch_editor(path, buf, NULL)) {
+		ਜੇ (should_edit) {
+			ਜੇ (launch_editor(ਰਸਤਾ, buf, ਨਿਰਾ)) {
 				fprintf(stderr,
 					_("Please supply the message using either -m or -F option.\n"));
-				exit(1);
+				ਬਾਹਰ_ਨਿਕਲੋ(1);
 			}
-		} else if (trailer_args->nr) {
+		} ਨਹੀਂਤਾਂ ਜੇ (trailer_ਦਲੀਲਾਂ->nr) {
 			strbuf_reset(buf);
-			if (strbuf_read_file(buf, path, 0) < 0)
-				die_errno(_("failed to read '%s'"), path);
+			ਜੇ (strbuf_read_file(buf, ਰਸਤਾ, 0) < 0)
+				die_errno(_("failed to read '%s'"), ਰਸਤਾ);
 		}
 	}
 
-	if (opt->cleanup_mode != CLEANUP_NONE)
+	ਜੇ (opt->cleanup_ਬਹੁਲਕ != CLEANUP_NONE)
 		strbuf_stripspace(buf,
-		  opt->cleanup_mode == CLEANUP_ALL ? comment_line_str : NULL);
+		  opt->cleanup_ਬਹੁਲਕ == CLEANUP_ALL ? comment_ਸਤਰ_str : ਨਿਰਾ);
 
-	if (!opt->message_given && !buf->len)
+	ਜੇ (!opt->ਸੁਨੇਹਾ_given && !buf->len)
 		die(_("no tag message?"));
 
-	strbuf_insert(buf, 0, header.buf, header.len);
-	strbuf_release(&header);
+	strbuf_ਪਾਓ(buf, 0, ਸਿਰਲੇਖ.buf, ਸਿਰਲੇਖ.len);
+	strbuf_release(&ਸਿਰਲੇਖ);
 
-	if (build_tag_object(buf, opt->sign, result) < 0) {
-		if (path)
+	ਜੇ (build_ਟੈਗ_object(buf, opt->sign, ਨਤੀਜਾ) < 0) {
+		ਜੇ (ਰਸਤਾ)
 			fprintf(stderr, _("The tag message has been left in %s\n"),
-				path);
-		exit(128);
+				ਰਸਤਾ);
+		ਬਾਹਰ_ਨਿਕਲੋ(128);
 	}
 }
 
-static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
+ਸਥਿਰ ਖਾਲੀ create_reflog_ਸੁਨੇਹਾ(ਅਚਲ ਬਣਤਰ object_id *oid, ਬਣਤਰ strbuf *sb)
 {
-	enum object_type type;
-	struct commit *c;
-	char *buf;
-	size_t size;
-	int subject_len = 0;
-	const char *subject_start;
+	ਗਿਣਤੀ object_type type;
+	ਬਣਤਰ commit *c;
+	ਅੱਖਰ *buf;
+	ਮਾਪ_t ਮਾਪ;
+	ਪੂਰਨ subject_len = 0;
+	ਅਚਲ ਅੱਖਰ *subject_ਸ਼ੁਰੂ;
 
-	char *rla = getenv("GIT_REFLOG_ACTION");
-	if (rla) {
+	ਅੱਖਰ *rla = getenv("GIT_REFLOG_ACTION");
+	ਜੇ (rla) {
 		strbuf_addstr(sb, rla);
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		strbuf_addstr(sb, "tag: tagging ");
-		strbuf_add_unique_abbrev(sb, oid, DEFAULT_ABBREV);
+		strbuf_ਜੋੜੋ_unique_abbrev(sb, oid, DEFAULT_ABBREV);
 	}
 
 	strbuf_addstr(sb, " (");
-	type = odb_read_object_info(the_repository->objects, oid, NULL);
-	switch (type) {
-	default:
+	type = odb_read_object_info(the_repository->objects, oid, ਨਿਰਾ);
+	ਚੋਣ (type) {
+	ਮੂਲ:
 		strbuf_addstr(sb, "object of unknown type");
-		break;
-	case OBJ_COMMIT:
-		if ((buf = odb_read_object(the_repository->objects, oid, &type, &size))) {
-			subject_len = find_commit_subject(buf, &subject_start);
-			strbuf_insert(sb, sb->len, subject_start, subject_len);
-		} else {
+		ਰੋਕੋ;
+	ਹਾਲਤ OBJ_COMMIT:
+		ਜੇ ((buf = odb_read_object(the_repository->objects, oid, &type, &ਮਾਪ))) {
+			subject_len = ਲੱਭੋ_commit_subject(buf, &subject_ਸ਼ੁਰੂ);
+			strbuf_ਪਾਓ(sb, sb->len, subject_ਸ਼ੁਰੂ, subject_len);
+		} ਨਹੀਂਤਾਂ {
 			strbuf_addstr(sb, "commit object");
 		}
-		free(buf);
+		ਮੁਕਤ(buf);
 
-		if ((c = lookup_commit_reference(the_repository, oid)))
-			strbuf_addf(sb, ", %s", show_date(c->date, 0, DATE_MODE(SHORT)));
-		break;
-	case OBJ_TREE:
+		ਜੇ ((c = lookup_commit_reference(the_repository, oid)))
+			strbuf_addf(sb, ", %s", show_date(c->date, 0, DATE_ਬਹੁਲਕ(SHORT)));
+		ਰੋਕੋ;
+	ਹਾਲਤ OBJ_ਰੁੱਖ:
 		strbuf_addstr(sb, "tree object");
-		break;
-	case OBJ_BLOB:
+		ਰੋਕੋ;
+	ਹਾਲਤ OBJ_BLOB:
 		strbuf_addstr(sb, "blob object");
-		break;
-	case OBJ_TAG:
+		ਰੋਕੋ;
+	ਹਾਲਤ OBJ_ਟੈਗ:
 		strbuf_addstr(sb, "other tag object");
-		break;
+		ਰੋਕੋ;
 	}
 	strbuf_addch(sb, ')');
 }
 
-struct msg_arg {
-	int given;
-	struct strbuf buf;
+ਬਣਤਰ ਸੁਨੇਹਾ_arg {
+	ਪੂਰਨ given;
+	ਬਣਤਰ strbuf buf;
 };
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_ਸੁਨੇਹਾ_arg(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	struct msg_arg *msg = opt->value;
+	ਬਣਤਰ ਸੁਨੇਹਾ_arg *ਸੁਨੇਹਾ = opt->ਮੁੱਲ;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
-	if (msg->buf.len)
-		strbuf_addstr(&(msg->buf), "\n\n");
-	strbuf_addstr(&(msg->buf), arg);
-	msg->given = 1;
-	return 0;
+	ਜੇ (!arg)
+		ਵਾਪਸ -1;
+	ਜੇ (ਸੁਨੇਹਾ->buf.len)
+		strbuf_addstr(&(ਸੁਨੇਹਾ->buf), "\n\n");
+	strbuf_addstr(&(ਸੁਨੇਹਾ->buf), arg);
+	ਸੁਨੇਹਾ->given = 1;
+	ਵਾਪਸ 0;
 }
 
-int cmd_tag(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+ਪੂਰਨ cmd_ਟੈਗ(ਪੂਰਨ argc,
+	    ਅਚਲ ਅੱਖਰ **argv,
+	    ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+	    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf ref = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct object_id object, prev;
-	const char *object_ref, *tag;
-	struct create_tag_options opt;
-	char *cleanup_arg = NULL;
-	int create_reflog = 0;
-	int annotate = 0, force = 0;
-	int cmdmode = 0, create_tag_object = 0;
-	char *msgfile = NULL;
-	const char *keyid = NULL;
-	struct msg_arg msg = { .buf = STRBUF_INIT };
-	struct ref_transaction *transaction;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	struct ref_format format = REF_FORMAT_INIT;
-	struct strvec trailer_args = STRVEC_INIT;
-	int icase = 0;
-	int edit_flag = 0;
-	struct option options[] = {
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਬਣਤਰ strbuf ref = STRBUF_INIT;
+	ਬਣਤਰ strbuf reflog_ਸੁਨੇਹਾ = STRBUF_INIT;
+	ਬਣਤਰ object_id object, prev;
+	ਅਚਲ ਅੱਖਰ *object_ref, *ਟੈਗ;
+	ਬਣਤਰ create_ਟੈਗ_options opt;
+	ਅੱਖਰ *cleanup_arg = ਨਿਰਾ;
+	ਪੂਰਨ create_reflog = 0;
+	ਪੂਰਨ annotate = 0, force = 0;
+	ਪੂਰਨ cmdmode = 0, create_ਟੈਗ_object = 0;
+	ਅੱਖਰ *msgfile = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *keyid = ਨਿਰਾ;
+	ਬਣਤਰ ਸੁਨੇਹਾ_arg ਸੁਨੇਹਾ = { .buf = STRBUF_INIT };
+	ਬਣਤਰ ref_transaction *transaction;
+	ਬਣਤਰ strbuf err = STRBUF_INIT;
+	ਬਣਤਰ ref_filter filter = REF_FILTER_INIT;
+	ਬਣਤਰ ref_ਛਾਂਟੀ *ਛਾਂਟੀ;
+	ਬਣਤਰ string_list ਛਾਂਟੀ_options = STRING_LIST_INIT_DUP;
+	ਬਣਤਰ ref_format format = REF_FORMAT_INIT;
+	ਬਣਤਰ strvec trailer_ਦਲੀਲਾਂ = STRVEC_INIT;
+	ਪੂਰਨ icase = 0;
+	ਪੂਰਨ edit_flag = 0;
+	ਬਣਤਰ option options[] = {
 		OPT_CMDMODE('l', "list", &cmdmode, N_("list tag names"), 'l'),
 		{
 			.type = OPTION_INTEGER,
 			.short_name = 'n',
-			.value = &filter.lines,
-			.precision = sizeof(filter.lines),
+			.ਮੁੱਲ = &filter.ਸਤਰਾਂ,
+			.precision = ਆਕਾਰ(filter.ਸਤਰਾਂ),
 			.argh = N_("n"),
 			.help = N_("print <n> lines of each tag message"),
 			.flags = PARSE_OPT_OPTARG,
@@ -493,13 +493,13 @@ int cmd_tag(int argc,
 		OPT_CMDMODE('d', "delete", &cmdmode, N_("delete tags"), 'd'),
 		OPT_CMDMODE('v', "verify", &cmdmode, N_("verify tags"), 'v'),
 
-		OPT_GROUP(N_("Tag creation options")),
+		OPT_ਸਮੂਹ(N_("Tag creation options")),
 		OPT_BOOL('a', "annotate", &annotate,
 					N_("annotated tag, needs a message")),
-		OPT_CALLBACK_F('m', "message", &msg, N_("message"),
-			       N_("tag message"), PARSE_OPT_NONEG, parse_msg_arg),
+		OPT_CALLBACK_F('m', "message", &ਸੁਨੇਹਾ, N_("message"),
+			       N_("tag message"), PARSE_OPT_NONEG, parse_ਸੁਨੇਹਾ_arg),
 		OPT_FILENAME('F', "file", &msgfile, N_("read message from file")),
-		OPT_STRVEC(0, "trailer", &trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &trailer_ਦਲੀਲਾਂ, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL('e', "edit", &edit_flag, N_("force edit of tag message")),
 		OPT_BOOL('s', "sign", &opt.sign, N_("annotated and GPG-signed tag")),
@@ -509,21 +509,21 @@ int cmd_tag(int argc,
 		OPT__FORCE(&force, N_("replace the tag if exists"), 0),
 		OPT_BOOL(0, "create-reflog", &create_reflog, N_("create a reflog")),
 
-		OPT_GROUP(N_("Tag listing options")),
-		OPT_COLUMN(0, "column", &colopts, N_("show tag list in columns")),
-		OPT_CONTAINS(&filter.with_commit, N_("print only tags that contain the commit")),
-		OPT_NO_CONTAINS(&filter.no_commit, N_("print only tags that don't contain the commit")),
+		OPT_ਸਮੂਹ(N_("Tag listing options")),
+		OPT_ਕਾਲਮ(0, "column", &colopts, N_("show tag list in columns")),
+		OPT_ਸ਼ਾਮਲ_ਹੈ(&filter.with_commit, N_("print only tags that contain the commit")),
+		OPT_NO_ਸ਼ਾਮਲ_ਹੈ(&filter.no_commit, N_("print only tags that don't contain the commit")),
 		OPT_WITH(&filter.with_commit, N_("print only tags that contain the commit")),
 		OPT_WITHOUT(&filter.no_commit, N_("print only tags that don't contain the commit")),
 		OPT_MERGED(&filter, N_("print only tags that are merged")),
 		OPT_NO_MERGED(&filter, N_("print only tags that are not merged")),
-		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_empty,
+		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_ਖਾਲੀ_ਥਾਵਾਂ,
 			N_("do not output a newline after empty formatted refs")),
-		OPT_REF_SORT(&sorting_options),
+		OPT_REF_ਛਾਂਟੋ(&ਛਾਂਟੀ_options),
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "points-at",
-			.value = &filter.points_at,
+			.ਮੁੱਲ = &filter.points_at,
 			.argh = N_("object"),
 			.help = N_("print only tags of the object"),
 			.flags = PARSE_OPT_LASTARG_DEFAULT,
@@ -534,192 +534,192 @@ int cmd_tag(int argc,
 			   N_("format to use for the output")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
 		OPT_BOOL('i', "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	int ret = 0;
-	const char *only_in_list = NULL;
-	char *path = NULL;
+	ਪੂਰਨ ret = 0;
+	ਅਚਲ ਅੱਖਰ *only_ਵਿੱਚ_list = ਨਿਰਾ;
+	ਅੱਖਰ *ਰਸਤਾ = ਨਿਰਾ;
 
-	setup_ref_filter_porcelain_msg();
+	ਤਿਆਰੀ_ref_filter_porcelain_ਸੁਨੇਹਾ();
 
 	/*
 	 * Try to set sort keys from config. If config does not set any,
 	 * fall back on default (refname) sorting.
 	 */
-	repo_config(the_repository, git_tag_config, &sorting_options);
-	if (!sorting_options.nr)
-		string_list_append(&sorting_options, "refname");
+	repo_config(the_repository, git_ਟੈਗ_config, &ਛਾਂਟੀ_options);
+	ਜੇ (!ਛਾਂਟੀ_options.nr)
+		string_list_append(&ਛਾਂਟੀ_options, "refname");
 
-	memset(&opt, 0, sizeof(opt));
-	filter.lines = -1;
+	memset(&opt, 0, ਆਕਾਰ(opt));
+	filter.ਸਤਰਾਂ = -1;
 	opt.sign = -1;
 
-	argc = parse_options(argc, argv, prefix, options, git_tag_usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, git_ਟੈਗ_usage, 0);
 
-	if (!cmdmode) {
-		if (argc == 0)
+	ਜੇ (!cmdmode) {
+		ਜੇ (argc == 0)
 			cmdmode = 'l';
-		else if (filter.with_commit || filter.no_commit ||
+		ਨਹੀਂਤਾਂ ਜੇ (filter.with_commit || filter.no_commit ||
 			 filter.reachable_from || filter.unreachable_from ||
-			 filter.points_at.nr || filter.lines != -1)
+			 filter.points_at.nr || filter.ਸਤਰਾਂ != -1)
 			cmdmode = 'l';
 	}
 
-	if (cmdmode == 'l')
-		setup_auto_pager("tag", 1);
+	ਜੇ (cmdmode == 'l')
+		ਤਿਆਰੀ_auto_pager("tag", 1);
 
-	if (trailer_args.nr)
+	ਜੇ (trailer_ਦਲੀਲਾਂ.nr)
 		trailer_config_init();
 
-	if (opt.sign == -1)
-		opt.sign = cmdmode ? 0 : config_sign_tag > 0;
+	ਜੇ (opt.sign == -1)
+		opt.sign = cmdmode ? 0 : config_sign_ਟੈਗ > 0;
 
-	if (keyid) {
+	ਜੇ (keyid) {
 		opt.sign = 1;
-		set_signing_key(keyid);
+		ਸੈੱਟ_signing_ਕੁੰਜੀ(keyid);
 	}
-	create_tag_object = (opt.sign || annotate || msg.given || msgfile ||
-			     edit_flag || trailer_args.nr);
+	create_ਟੈਗ_object = (opt.sign || annotate || ਸੁਨੇਹਾ.given || msgfile ||
+			     edit_flag || trailer_ਦਲੀਲਾਂ.nr);
 
-	if ((create_tag_object || force) && (cmdmode != 0))
-		usage_with_options(git_tag_usage, options);
+	ਜੇ ((create_ਟੈਗ_object || force) && (cmdmode != 0))
+		usage_with_options(git_ਟੈਗ_usage, options);
 
 	finalize_colopts(&colopts, -1);
-	if (cmdmode == 'l' && filter.lines != -1) {
-		if (explicitly_enable_column(colopts))
+	ਜੇ (cmdmode == 'l' && filter.ਸਤਰਾਂ != -1) {
+		ਜੇ (explicitly_enable_ਕਾਲਮ(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "-n");
 		colopts = 0;
 	}
-	sorting = ref_sorting_options(&sorting_options);
-	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
+	ਛਾਂਟੀ = ref_ਛਾਂਟੀ_options(&ਛਾਂਟੀ_options);
+	ref_ਛਾਂਟੀ_ਸੈੱਟ_ਛਾਂਟੋ_flags_all(ਛਾਂਟੀ, REF_ਛਾਂਟੀ_ICASE, icase);
 	filter.ignore_case = icase;
-	if (cmdmode == 'l') {
-		if (column_active(colopts)) {
-			struct column_options copts;
-			memset(&copts, 0, sizeof(copts));
+	ਜੇ (cmdmode == 'l') {
+		ਜੇ (ਕਾਲਮ_ਸਰਗਰਮ(colopts)) {
+			ਬਣਤਰ ਕਾਲਮ_options copts;
+			memset(&copts, 0, ਆਕਾਰ(copts));
 			copts.padding = 2;
-			if (run_column_filter(colopts, &copts))
+			ਜੇ (ਲੜੀਵਾਰ_ਕਾਲਮ_filter(colopts, &copts))
 				die(_("could not start 'git column'"));
 		}
 		filter.name_patterns = argv;
-		ret = list_tags(&filter, sorting, &format);
-		if (column_active(colopts))
-			stop_column_filter();
-		goto cleanup;
+		ret = list_ਟੈਗ_ਸੂਚੀ(&filter, ਛਾਂਟੀ, &format);
+		ਜੇ (ਕਾਲਮ_ਸਰਗਰਮ(colopts))
+			stop_ਕਾਲਮ_filter();
+		ਜਾਓ cleanup;
 	}
-	if (filter.lines != -1)
-		only_in_list = "-n";
-	else if (filter.with_commit)
-		only_in_list = "--contains";
-	else if (filter.no_commit)
-		only_in_list = "--no-contains";
-	else if (filter.points_at.nr)
-		only_in_list = "--points-at";
-	else if (filter.reachable_from)
-		only_in_list = "--merged";
-	else if (filter.unreachable_from)
-		only_in_list = "--no-merged";
-	if (only_in_list)
-		die(_("the '%s' option is only allowed in list mode"), only_in_list);
-	if (cmdmode == 'd') {
-		ret = delete_tags(argv);
-		goto cleanup;
+	ਜੇ (filter.ਸਤਰਾਂ != -1)
+		only_ਵਿੱਚ_list = "-n";
+	ਨਹੀਂਤਾਂ ਜੇ (filter.with_commit)
+		only_ਵਿੱਚ_list = "--contains";
+	ਨਹੀਂਤਾਂ ਜੇ (filter.no_commit)
+		only_ਵਿੱਚ_list = "--no-contains";
+	ਨਹੀਂਤਾਂ ਜੇ (filter.points_at.nr)
+		only_ਵਿੱਚ_list = "--points-at";
+	ਨਹੀਂਤਾਂ ਜੇ (filter.reachable_from)
+		only_ਵਿੱਚ_list = "--merged";
+	ਨਹੀਂਤਾਂ ਜੇ (filter.unreachable_from)
+		only_ਵਿੱਚ_list = "--no-merged";
+	ਜੇ (only_ਵਿੱਚ_list)
+		die(_("the '%s' option is only allowed in list mode"), only_ਵਿੱਚ_list);
+	ਜੇ (cmdmode == 'd') {
+		ret = delete_ਟੈਗ_ਸੂਚੀ(argv);
+		ਜਾਓ cleanup;
 	}
-	if (cmdmode == 'v') {
-		if (format.format && verify_ref_format(&format))
-			usage_with_options(git_tag_usage, options);
-		ret = for_each_tag_name(argv, verify_tag, &format);
-		goto cleanup;
+	ਜੇ (cmdmode == 'v') {
+		ਜੇ (format.format && verify_ref_format(&format))
+			usage_with_options(git_ਟੈਗ_usage, options);
+		ret = for_each_ਟੈਗ_name(argv, verify_ਟੈਗ, &format);
+		ਜਾਓ cleanup;
 	}
 
-	if (msg.given || msgfile) {
-		if (msg.given && msgfile)
+	ਜੇ (ਸੁਨੇਹਾ.given || msgfile) {
+		ਜੇ (ਸੁਨੇਹਾ.given && msgfile)
 			die(_("options '%s' and '%s' cannot be used together"), "-F", "-m");
-		if (msg.given)
-			strbuf_addbuf(&buf, &(msg.buf));
-		else {
-			if (!strcmp(msgfile, "-")) {
-				if (strbuf_read(&buf, 0, 1024) < 0)
+		ਜੇ (ਸੁਨੇਹਾ.given)
+			strbuf_addbuf(&buf, &(ਸੁਨੇਹਾ.buf));
+		ਨਹੀਂਤਾਂ {
+			ਜੇ (!strcmp(msgfile, "-")) {
+				ਜੇ (strbuf_read(&buf, 0, 1024) < 0)
 					die_errno(_("cannot read '%s'"), msgfile);
-			} else {
-				if (strbuf_read_file(&buf, msgfile, 1024) < 0)
+			} ਨਹੀਂਤਾਂ {
+				ਜੇ (strbuf_read_file(&buf, msgfile, 1024) < 0)
 					die_errno(_("could not open or read '%s'"),
 						msgfile);
 			}
 		}
 	}
 
-	tag = argv[0];
+	ਟੈਗ = argv[0];
 
 	object_ref = argc == 2 ? argv[1] : "HEAD";
-	if (argc > 2)
+	ਜੇ (argc > 2)
 		die(_("too many arguments"));
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	ਜੇ (repo_get_oid(the_repository, object_ref, &object))
 		die(_("Failed to resolve '%s' as a valid ref."), object_ref);
 
-	if (check_tag_ref(&ref, tag))
-		die(_("'%s' is not a valid tag name."), tag);
+	ਜੇ (check_ਟੈਗ_ref(&ref, ਟੈਗ))
+		die(_("'%s' is not a valid tag name."), ਟੈਗ);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &prev))
+	ਜੇ (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &prev))
 		oidclr(&prev, the_repository->hash_algo);
-	else if (!force)
-		die(_("tag '%s' already exists"), tag);
+	ਨਹੀਂਤਾਂ ਜੇ (!force)
+		die(_("tag '%s' already exists"), ਟੈਗ);
 
-	opt.message_given = msg.given || msgfile;
+	opt.ਸੁਨੇਹਾ_given = ਸੁਨੇਹਾ.given || msgfile;
 	opt.use_editor = edit_flag;
 
-	if (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
-		opt.cleanup_mode = CLEANUP_ALL;
-	else if (!strcmp(cleanup_arg, "verbatim"))
-		opt.cleanup_mode = CLEANUP_NONE;
-	else if (!strcmp(cleanup_arg, "whitespace"))
-		opt.cleanup_mode = CLEANUP_SPACE;
-	else
+	ਜੇ (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
+		opt.cleanup_ਬਹੁਲਕ = CLEANUP_ALL;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(cleanup_arg, "verbatim"))
+		opt.cleanup_ਬਹੁਲਕ = CLEANUP_NONE;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(cleanup_arg, "whitespace"))
+		opt.cleanup_ਬਹੁਲਕ = CLEANUP_SPACE;
+	ਨਹੀਂਤਾਂ
 		die(_("Invalid cleanup mode %s"), cleanup_arg);
 
-	create_reflog_msg(&object, &reflog_msg);
+	create_reflog_ਸੁਨੇਹਾ(&object, &reflog_ਸੁਨੇਹਾ);
 
-	if (create_tag_object) {
-		if (force_sign_annotate && !annotate)
+	ਜੇ (create_ਟੈਗ_object) {
+		ਜੇ (force_sign_annotate && !annotate)
 			opt.sign = 1;
-		path = repo_git_path(the_repository, "TAG_EDITMSG");
-		create_tag(&object, object_ref, tag, &buf, &opt, &prev, &object,
-			   &trailer_args, path);
+		ਰਸਤਾ = repo_git_ਰਸਤਾ(the_repository, "TAG_EDITMSG");
+		create_ਟੈਗ(&object, object_ref, ਟੈਗ, &buf, &opt, &prev, &object,
+			   &trailer_ਦਲੀਲਾਂ, ਰਸਤਾ);
 	}
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	ਜੇ (!transaction ||
 	    ref_transaction_update(transaction, ref.buf, &object, &prev,
-				   NULL, NULL,
+				   ਨਿਰਾ, ਨਿਰਾ,
 				   create_reflog ? REF_FORCE_CREATE_REFLOG : 0,
-				   reflog_msg.buf, &err) ||
+				   reflog_ਸੁਨੇਹਾ.buf, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
-		if (path)
+		ਜੇ (ਰਸਤਾ)
 			fprintf(stderr,
 				_("The tag message has been left in %s\n"),
-				path);
+				ਰਸਤਾ);
 		die("%s", err.buf);
 	}
-	if (path) {
-		unlink_or_warn(path);
-		free(path);
+	ਜੇ (ਰਸਤਾ) {
+		unlink_or_warn(ਰਸਤਾ);
+		ਮੁਕਤ(ਰਸਤਾ);
 	}
 	ref_transaction_free(transaction);
-	if (force && !is_null_oid(&prev) && !oideq(&prev, &object))
-		printf(_("Updated tag '%s' (was %s)\n"), tag,
-		       repo_find_unique_abbrev(the_repository, &prev, DEFAULT_ABBREV));
+	ਜੇ (force && !is_null_oid(&prev) && !oideq(&prev, &object))
+		ਲਿਖੋ(_("Updated tag '%s' (was %s)\n"), ਟੈਗ,
+		       repo_ਲੱਭੋ_unique_abbrev(the_repository, &prev, DEFAULT_ABBREV));
 
 cleanup:
-	ref_sorting_release(sorting);
+	ref_ਛਾਂਟੀ_release(ਛਾਂਟੀ);
 	ref_filter_clear(&filter);
 	strbuf_release(&buf);
 	strbuf_release(&ref);
-	strbuf_release(&reflog_msg);
-	strbuf_release(&msg.buf);
+	strbuf_release(&reflog_ਸੁਨੇਹਾ);
+	strbuf_release(&ਸੁਨੇਹਾ.buf);
 	strbuf_release(&err);
-	strvec_clear(&trailer_args);
-	free(msgfile);
-	return ret;
+	strvec_clear(&trailer_ਦਲੀਲਾਂ);
+	ਮੁਕਤ(msgfile);
+	ਵਾਪਸ ret;
 }

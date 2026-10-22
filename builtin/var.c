@@ -4,250 +4,250 @@
  * Copyright (C) Eric Biederman, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
 
-#include "attr.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "ident.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "string-list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "attr.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "editor.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "ident.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "pager.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "string-list.h"
 
-static const char * const var_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ var_usage[] = {
 	N_("git var [-z] -l"),
 	N_("git var [-z] <variable>..."),
-	NULL
+	ਨਿਰਾ
 };
 
-enum ident_part {
+ਗਿਣਤੀ ident_part {
 	IDENT_NAME,
 	IDENT_MAIL,
 	IDENT_DATE,
 };
 
-static char *ident_part(const char *ident, enum ident_part part)
+ਸਥਿਰ ਅੱਖਰ *ident_part(ਅਚਲ ਅੱਖਰ *ident, ਗਿਣਤੀ ident_part part)
 {
-	struct ident_split split;
+	ਬਣਤਰ ident_ਵੰਡੋ ਵੰਡੋ;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	ਜੇ (!ident)
+		ਵਾਪਸ ਨਿਰਾ;
+	ਜੇ (ਵੰਡੋ_ident_ਸਤਰ(&ਵੰਡੋ, ident, ਲੜੀ_ਲੰਬਾਈ(ident)))
+		ਵਾਪਸ ਨਿਰਾ;
 
-	switch (part) {
-	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+	ਚੋਣ (part) {
+	ਹਾਲਤ IDENT_NAME:
+		ਜੇ (!ਵੰਡੋ.name_begin || !ਵੰਡੋ.name_ਸਿਰਾ)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
-				split.name_end - split.name_begin);
-	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+		ਵਾਪਸ xmemdupz(ਵੰਡੋ.name_begin,
+				ਵੰਡੋ.name_ਸਿਰਾ - ਵੰਡੋ.name_begin);
+	ਹਾਲਤ IDENT_MAIL:
+		ਜੇ (!ਵੰਡੋ.mail_begin || !ਵੰਡੋ.mail_ਸਿਰਾ)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
-				split.mail_end - split.mail_begin);
-	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+		ਵਾਪਸ xmemdupz(ਵੰਡੋ.mail_begin,
+				ਵੰਡੋ.mail_ਸਿਰਾ - ਵੰਡੋ.mail_begin);
+	ਹਾਲਤ IDENT_DATE:
+		ਜੇ (!ਵੰਡੋ.date_begin || !ਵੰਡੋ.tz_ਸਿਰਾ)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
-				split.tz_end - split.date_begin);
-	default:
+		ਵਾਪਸ xmemdupz(ਵੰਡੋ.date_begin,
+				ਵੰਡੋ.tz_ਸਿਰਾ - ਵੰਡੋ.date_begin);
+	ਮੂਲ:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *committer(ਪੂਰਨ ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	ਵਾਪਸ xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *committer_name(ਪੂਰਨ ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	ਵਾਪਸ ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *committer_email(ਪੂਰਨ ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	ਵਾਪਸ ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *committer_date(ਪੂਰਨ ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	ਵਾਪਸ ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *author(ਪੂਰਨ ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	ਵਾਪਸ xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *author_name(ਪੂਰਨ ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	ਵਾਪਸ ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *author_email(ਪੂਰਨ ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	ਵਾਪਸ ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+ਸਥਿਰ ਅੱਖਰ *author_date(ਪੂਰਨ ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	ਵਾਪਸ ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *editor(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	return xstrdup_or_null(git_editor());
+	ਵਾਪਸ xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *sequence_editor(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	ਵਾਪਸ xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *pager(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	const char *pgm = git_pager(the_repository, 1);
+	ਅਚਲ ਅੱਖਰ *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	ਜੇ (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	ਵਾਪਸ xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *default_branch(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	return repo_default_branch_name(the_repository, 1);
+	ਵਾਪਸ repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *shell_ਰਸਤਾ(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	return git_shell_path();
+	ਵਾਪਸ git_shell_ਰਸਤਾ();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *git_attr_val_system(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	if (git_attr_system_is_enabled()) {
-		char *file = xstrdup(git_attr_system_file());
-		normalize_path_copy(file, file);
-		return file;
+	ਜੇ (git_attr_system_is_enabled()) {
+		ਅੱਖਰ *file = xstrdup(git_attr_system_file());
+		normalize_ਰਸਤਾ_copy(file, file);
+		ਵਾਪਸ file;
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *git_attr_val_global(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
-		normalize_path_copy(file, file);
-		return file;
+	ਅੱਖਰ *file = xstrdup_or_null(git_attr_global_file());
+	ਜੇ (file) {
+		normalize_ਰਸਤਾ_copy(file, file);
+		ਵਾਪਸ file;
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+ਸਥਿਰ ਅੱਖਰ *git_config_val_system(ਪੂਰਨ ident_flag ਅਣਵਰਤਿਆ)
 {
-	if (git_config_system()) {
-		char *file = git_system_config();
-		normalize_path_copy(file, file);
-		return file;
+	ਜੇ (git_config_system()) {
+		ਅੱਖਰ *file = git_system_config();
+		normalize_ਰਸਤਾ_copy(file, file);
+		ਵਾਪਸ file;
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-static void git_config_val_global(struct string_list *list)
+ਸਥਿਰ ਖਾਲੀ git_config_val_global(ਬਣਤਰ string_list *list)
 {
-	char *user, *xdg;
+	ਅੱਖਰ *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
-		normalize_path_copy(xdg, xdg);
+	ਜੇ (xdg && *xdg) {
+		normalize_ਰਸਤਾ_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
-		normalize_path_copy(user, user);
+	ਜੇ (user && *user) {
+		normalize_ਰਸਤਾ_copy(user, user);
 		string_list_append(list, user);
 	}
-	free(xdg);
-	free(user);
+	ਮੁਕਤ(xdg);
+	ਮੁਕਤ(user);
 }
 
-struct git_var {
-	const char *name;
-	char *(*read)(int);
-	void (*multiread)(struct string_list *);
+ਬਣਤਰ git_var {
+	ਅਚਲ ਅੱਖਰ *name;
+	ਅੱਖਰ *(*ਪਠ)(ਪੂਰਨ);
+	ਖਾਲੀ (*multiread)(ਬਣਤਰ string_list *);
 };
-static struct git_var git_vars[] = {
+ਸਥਿਰ ਬਣਤਰ git_var git_vars[] = {
 	{
 		.name = "GIT_COMMITTER_IDENT",
-		.read = committer,
+		.ਪਠ = committer,
 	},
 	{
 		.name = "GIT_COMMITTER_NAME",
-		.read = committer_name,
+		.ਪਠ = committer_name,
 	},
 	{
 		.name = "GIT_COMMITTER_EMAIL",
-		.read = committer_email,
+		.ਪਠ = committer_email,
 	},
 	{
 		.name = "GIT_COMMITTER_DATE",
-		.read = committer_date,
+		.ਪਠ = committer_date,
 	},
 	{
 		.name = "GIT_AUTHOR_IDENT",
-		.read = author,
+		.ਪਠ = author,
 	},
 	{
 		.name = "GIT_AUTHOR_NAME",
-		.read = author_name,
+		.ਪਠ = author_name,
 	},
 	{
 		.name = "GIT_AUTHOR_EMAIL",
-		.read = author_email,
+		.ਪਠ = author_email,
 	},
 	{
 		.name = "GIT_AUTHOR_DATE",
-		.read = author_date,
+		.ਪਠ = author_date,
 	},
 	{
 		.name = "GIT_EDITOR",
-		.read = editor,
+		.ਪਠ = editor,
 	},
 	{
 		.name = "GIT_SEQUENCE_EDITOR",
-		.read = sequence_editor,
+		.ਪਠ = sequence_editor,
 	},
 	{
 		.name = "GIT_PAGER",
-		.read = pager,
+		.ਪਠ = pager,
 	},
 	{
 		.name = "GIT_DEFAULT_BRANCH",
-		.read = default_branch,
+		.ਪਠ = default_branch,
 	},
 	{
 		.name = "GIT_SHELL_PATH",
-		.read = shell_path,
+		.ਪਠ = shell_ਰਸਤਾ,
 	},
 	{
 		.name = "GIT_ATTR_SYSTEM",
-		.read = git_attr_val_system,
+		.ਪਠ = git_attr_val_system,
 	},
 	{
 		.name = "GIT_ATTR_GLOBAL",
-		.read = git_attr_val_global,
+		.ਪਠ = git_attr_val_global,
 	},
 	{
 		.name = "GIT_CONFIG_SYSTEM",
-		.read = git_config_val_system,
+		.ਪਠ = git_config_val_system,
 	},
 	{
 		.name = "GIT_CONFIG_GLOBAL",
@@ -255,136 +255,136 @@ static struct git_var git_vars[] = {
 	},
 	{
 		.name = "",
-		.read = NULL,
+		.ਪਠ = ਨਿਰਾ,
 	},
 };
 
-static void list_vars(int nul_term)
+ਸਥਿਰ ਖਾਲੀ list_vars(ਪੂਰਨ nul_ਪਦ)
 {
-	struct git_var *ptr;
-	char delim = nul_term ? '\n' : '=';
-	char term = nul_term ? '\0' : '\n';
+	ਬਣਤਰ git_var *ptr;
+	ਅੱਖਰ delim = nul_ਪਦ ? '\n' : '=';
+	ਅੱਖਰ ਪਦ = nul_ਪਦ ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
-			char *val = ptr->read(0);
+	ਲਈ (ptr = git_vars; ptr->ਪਠ || ptr->multiread; ptr++) {
+		ਜੇ (ptr->ਪਠ) {
+			ਅੱਖਰ *val = ptr->ਪਠ(0);
 
-			if (val) {
-				printf("%s%c%s%c", ptr->name, delim, val, term);
-				free(val);
+			ਜੇ (val) {
+				ਲਿਖੋ("%s%c%s%c", ptr->name, delim, val, ਪਦ);
+				ਮੁਕਤ(val);
 			}
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+		} ਨਹੀਂਤਾਂ {
+			ਬਣਤਰ string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
-				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+			ਲਈ (ਮਾਪ_t i = 0; i < list.nr; i++)
+				ਲਿਖੋ("%s%c%s%c", ptr->name, delim,
+				       list.ਚੀਜ਼ਾਂ[i].string, ਪਦ);
 			string_list_clear(&list, 0);
 		}
 	}
 }
 
-static const struct git_var *get_git_var(const char *var)
+ਸਥਿਰ ਅਚਲ ਬਣਤਰ git_var *get_git_var(ਅਚਲ ਅੱਖਰ *var)
 {
-	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	ਬਣਤਰ git_var *ptr;
+	ਲਈ (ptr = git_vars; ptr->ਪਠ || ptr->multiread; ptr++) {
+		ਜੇ (strcmp(var, ptr->name) == 0) {
+			ਵਾਪਸ ptr;
 		}
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-static int show_config(const char *var, const char *value,
-		       const struct config_context *ctx, void *cb)
+ਸਥਿਰ ਪੂਰਨ show_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+		       ਅਚਲ ਬਣਤਰ config_context *ctx, ਖਾਲੀ *cb)
 {
-	int *nul_term = cb;
-	char delim = *nul_term ? '\n' : '=';
-	char term = *nul_term ? '\0' : '\n';
+	ਪੂਰਨ *nul_ਪਦ = cb;
+	ਅੱਖਰ delim = *nul_ਪਦ ? '\n' : '=';
+	ਅੱਖਰ ਪਦ = *nul_ਪਦ ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
-	else
-		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	ਜੇ (ਮੁੱਲ)
+		ਲਿਖੋ("%s%c%s%c", var, delim, ਮੁੱਲ, ਪਦ);
+	ਨਹੀਂਤਾਂ
+		ਲਿਖੋ("%s%c", var, ਪਦ);
+	ਵਾਪਸ git_default_config(var, ਮੁੱਲ, ctx, cb);
 }
 
-int cmd_var(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+ਪੂਰਨ cmd_var(ਪੂਰਨ argc,
+	    ਅਚਲ ਅੱਖਰ **argv,
+	    ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+	    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int list = 0;
-	int nul_term = 0;
-	char delim;
-	char term;
-	struct option options[] = {
-		OPT_BOOL('l', NULL, &list,
+	ਪੂਰਨ list = 0;
+	ਪੂਰਨ nul_ਪਦ = 0;
+	ਅੱਖਰ delim;
+	ਅੱਖਰ ਪਦ;
+	ਬਣਤਰ option options[] = {
+		OPT_BOOL('l', ਨਿਰਾ, &list,
 			 N_("list all variables")),
-		OPT_BOOL('z', NULL, &nul_term,
+		OPT_BOOL('z', ਨਿਰਾ, &nul_ਪਦ,
 			 N_("terminate entries with NUL")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	ਜੇ (list) {
+		ਜੇ (argc)
 			usage_with_options(var_usage, options);
-		repo_config(the_repository, show_config, &nul_term);
-		list_vars(nul_term);
-		return 0;
+		repo_config(the_repository, show_config, &nul_ਪਦ);
+		list_vars(nul_ਪਦ);
+		ਵਾਪਸ 0;
 	}
 
-	if (!argc)
+	ਜੇ (!argc)
 		usage_with_options(var_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
 
-	delim = nul_term ? '\n' : '=';
-	term = nul_term ? '\0' : '\n';
+	delim = nul_ਪਦ ? '\n' : '=';
+	ਪਦ = nul_ਪਦ ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
-		const struct git_var *git_var = get_git_var(argv[i]);
+	ਲਈ (ਪੂਰਨ i = 0; i < argc; i++) {
+		ਅਚਲ ਬਣਤਰ git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		ਜੇ (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
-			char *val = git_var->read(IDENT_STRICT);
+		ਜੇ (git_var->ਪਠ) {
+			ਅੱਖਰ *val = git_var->ਪਠ(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
-				continue;
+			ਜੇ (!val) {
+				ਜੇ (argc == 1)
+					ਵਾਪਸ 1;
+				ਜਾਰੀ;
 			}
-			if (argc == 1)
-				printf("%s%c", val, term);
-			else
-				printf("%s%c%s%c", git_var->name, delim,
-				       val, term);
-			free(val);
-		} else {
-			struct string_list list = STRING_LIST_INIT_DUP;
+			ਜੇ (argc == 1)
+				ਲਿਖੋ("%s%c", val, ਪਦ);
+			ਨਹੀਂਤਾਂ
+				ਲਿਖੋ("%s%c%s%c", git_var->name, delim,
+				       val, ਪਦ);
+			ਮੁਕਤ(val);
+		} ਨਹੀਂਤਾਂ {
+			ਬਣਤਰ string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			ਜੇ (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				ਵਾਪਸ 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
-					printf("%s%c", list.items[j].string,
-					       term);
-				else
-					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+			ਲਈ (ਮਾਪ_t j = 0; j < list.nr; j++) {
+				ਜੇ (argc == 1)
+					ਲਿਖੋ("%s%c", list.ਚੀਜ਼ਾਂ[j].string,
+					       ਪਦ);
+				ਨਹੀਂਤਾਂ
+					ਲਿਖੋ("%s%c%s%c", git_var->name, delim,
+					       list.ਚੀਜ਼ਾਂ[j].string, ਪਦ);
 			}
 			string_list_clear(&list, 0);
 		}
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }

@@ -6,31 +6,31 @@
  * Fetch one or more remote refs and merge it/them into the current HEAD.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "merge.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "oid-array.h"
-#include "remote.h"
-#include "dir.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "wt-status.h"
-#include "commit-reach.h"
-#include "sequencer.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "advice.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "merge.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "oid-array.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "remote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dir.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "read-cache-ll.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "rebase.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refspec.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "submodule.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "submodule-config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "wt-status.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit-reach.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "sequencer.h"
 
 /**
  * Parses the value of --rebase. If value is a false value, returns
@@ -38,128 +38,128 @@
  * "merges", returns REBASE_MERGES. If value is a invalid value, dies with
  * a fatal error if fatal is true, otherwise returns REBASE_INVALID.
  */
-static enum rebase_type parse_config_rebase(const char *key, const char *value,
-		int fatal)
+ਸਥਿਰ ਗਿਣਤੀ rebase_type parse_config_rebase(ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+		ਪੂਰਨ fatal)
 {
-	enum rebase_type v = rebase_parse_value(value);
-	if (v != REBASE_INVALID)
-		return v;
+	ਗਿਣਤੀ rebase_type v = rebase_parse_ਮੁੱਲ(ਮੁੱਲ);
+	ਜੇ (v != REBASE_INVALID)
+		ਵਾਪਸ v;
 
-	if (fatal)
-		die(_("invalid value for '%s': '%s'"), key, value);
-	else
-		error(_("invalid value for '%s': '%s'"), key, value);
+	ਜੇ (fatal)
+		die(_("invalid value for '%s': '%s'"), ਕੁੰਜੀ, ਮੁੱਲ);
+	ਨਹੀਂਤਾਂ
+		error(_("invalid value for '%s': '%s'"), ਕੁੰਜੀ, ਮੁੱਲ);
 
-	return REBASE_INVALID;
+	ਵਾਪਸ REBASE_INVALID;
 }
 
 /**
  * Callback for --rebase, which parses arg with parse_config_rebase().
  */
-static int parse_opt_rebase(const struct option *opt, const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_opt_rebase(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	enum rebase_type *value = opt->value;
+	ਗਿਣਤੀ rebase_type *ਮੁੱਲ = opt->ਮੁੱਲ;
 
-	if (arg)
-		*value = parse_config_rebase("--rebase", arg, 0);
-	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
-	return *value == REBASE_INVALID ? -1 : 0;
+	ਜੇ (arg)
+		*ਮੁੱਲ = parse_config_rebase("--rebase", arg, 0);
+	ਨਹੀਂਤਾਂ
+		*ਮੁੱਲ = unset ? REBASE_FALSE : REBASE_TRUE;
+	ਵਾਪਸ *ਮੁੱਲ == REBASE_INVALID ? -1 : 0;
 }
 
-static const char * const pull_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ pull_usage[] = {
 	N_("git pull [<options>] [<repository> [<refspec>...]]"),
-	NULL
+	ਨਿਰਾ
 };
 
 /* Shared options */
-static int opt_verbosity;
-static const char *opt_progress;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+ਸਥਿਰ ਪੂਰਨ opt_verbosity;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_ਤਰੱਕੀ;
+ਸਥਿਰ ਪੂਰਨ recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+ਸਥਿਰ ਪੂਰਨ recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 
 /* Options passed to git-merge or git-rebase */
-static enum rebase_type opt_rebase = -1;
-static const char *opt_diffstat;
-static const char *opt_log;
-static const char *opt_signoff;
-static const char *opt_squash;
-static const char *opt_commit;
-static const char *opt_edit;
-static const char *cleanup_arg;
-static char *opt_ff;
-static const char *opt_verify_signatures;
-static const char *opt_verify;
-static int opt_autostash = -1;
-static int config_rebase_autostash;
-static int config_pull_autostash = -1;
-static int check_trust_level = 1;
-static struct strvec opt_strategies = STRVEC_INIT;
-static struct strvec opt_strategy_opts = STRVEC_INIT;
-static const char *opt_gpg_sign;
-static int opt_allow_unrelated_histories;
+ਸਥਿਰ ਗਿਣਤੀ rebase_type opt_rebase = -1;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_diffstat;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_log;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_signoff;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_squash;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_commit;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_edit;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *cleanup_arg;
+ਸਥਿਰ ਅੱਖਰ *opt_ff;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_verify_signatures;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_verify;
+ਸਥਿਰ ਪੂਰਨ opt_autostash = -1;
+ਸਥਿਰ ਪੂਰਨ config_rebase_autostash;
+ਸਥਿਰ ਪੂਰਨ config_pull_autostash = -1;
+ਸਥਿਰ ਪੂਰਨ check_trust_level = 1;
+ਸਥਿਰ ਬਣਤਰ strvec opt_strategies = STRVEC_INIT;
+ਸਥਿਰ ਬਣਤਰ strvec opt_strategy_opts = STRVEC_INIT;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_gpg_sign;
+ਸਥਿਰ ਪੂਰਨ opt_allow_unrelated_histories;
 
 /* Options passed to git-fetch */
-static const char *opt_all;
-static const char *opt_append;
-static const char *opt_upload_pack;
-static int opt_force;
-static const char *opt_tags;
-static const char *opt_prune;
-static const char *max_children;
-static int opt_dry_run;
-static const char *opt_keep;
-static const char *opt_depth;
-static const char *opt_unshallow;
-static const char *opt_update_shallow;
-static const char *opt_refmap;
-static const char *opt_ipv4;
-static const char *opt_ipv6;
-static int opt_show_forced_updates = -1;
-static const char *set_upstream;
-static struct strvec opt_fetch = STRVEC_INIT;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_all;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_append;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_upload_pack;
+ਸਥਿਰ ਪੂਰਨ opt_force;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_ਟੈਗ_ਸੂਚੀ;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_prune;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *max_children;
+ਸਥਿਰ ਪੂਰਨ opt_dry_ਲੜੀਵਾਰ;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_keep;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_ਡੂੰਘਾਈ;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_unshallow;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_update_shallow;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_refmap;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_ipv4;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *opt_ipv6;
+ਸਥਿਰ ਪੂਰਨ opt_show_forced_updates = -1;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਸੈੱਟ_upstream;
+ਸਥਿਰ ਬਣਤਰ strvec opt_fetch = STRVEC_INIT;
 
 /**
  * Pushes "-q" or "-v" switches into arr to match the opt_verbosity level.
  */
-static void argv_push_verbosity(struct strvec *arr)
+ਸਥਿਰ ਖਾਲੀ argv_ਧੱਕੋ_verbosity(ਬਣਤਰ strvec *arr)
 {
-	int verbosity;
+	ਪੂਰਨ verbosity;
 
-	for (verbosity = opt_verbosity; verbosity > 0; verbosity--)
-		strvec_push(arr, "-v");
+	ਲਈ (verbosity = opt_verbosity; verbosity > 0; verbosity--)
+		strvec_ਧੱਕੋ(arr, "-v");
 
-	for (verbosity = opt_verbosity; verbosity < 0; verbosity++)
-		strvec_push(arr, "-q");
+	ਲਈ (verbosity = opt_verbosity; verbosity < 0; verbosity++)
+		strvec_ਧੱਕੋ(arr, "-q");
 }
 
 /**
  * Pushes "-f" switches into arr to match the opt_force level.
  */
-static void argv_push_force(struct strvec *arr)
+ਸਥਿਰ ਖਾਲੀ argv_ਧੱਕੋ_force(ਬਣਤਰ strvec *arr)
 {
-	int force = opt_force;
-	while (force-- > 0)
-		strvec_push(arr, "-f");
+	ਪੂਰਨ force = opt_force;
+	ਜਦੋਂ (force-- > 0)
+		strvec_ਧੱਕੋ(arr, "-f");
 }
 
 /**
  * Sets the GIT_REFLOG_ACTION environment variable to the concatenation of argv
  */
-static void set_reflog_message(int argc, const char **argv)
+ਸਥਿਰ ਖਾਲੀ ਸੈੱਟ_reflog_ਸੁਨੇਹਾ(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv)
 {
-	int i;
-	struct strbuf msg = STRBUF_INIT;
+	ਪੂਰਨ i;
+	ਬਣਤਰ strbuf ਸੁਨੇਹਾ = STRBUF_INIT;
 
-	for (i = 0; i < argc; i++) {
-		if (i)
-			strbuf_addch(&msg, ' ');
-		strbuf_addstr(&msg, argv[i]);
+	ਲਈ (i = 0; i < argc; i++) {
+		ਜੇ (i)
+			strbuf_addch(&ਸੁਨੇਹਾ, ' ');
+		strbuf_addstr(&ਸੁਨੇਹਾ, argv[i]);
 	}
 
-	setenv("GIT_REFLOG_ACTION", msg.buf, 0);
+	setenv("GIT_REFLOG_ACTION", ਸੁਨੇਹਾ.buf, 0);
 
-	strbuf_release(&msg);
+	strbuf_release(&ਸੁਨੇਹਾ);
 }
 
 /**
@@ -168,24 +168,24 @@ static void set_reflog_message(int argc, const char **argv)
  * "--ff-only". Otherwise, if pull.ff is set to an invalid value, die with an
  * error.
  */
-static const char *config_get_ff(void)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *config_get_ff(ਖਾਲੀ)
 {
-	const char *value;
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ;
 
-	if (repo_config_get_value(the_repository, "pull.ff", &value))
-		return NULL;
+	ਜੇ (repo_config_get_ਮੁੱਲ(the_repository, "pull.ff", &ਮੁੱਲ))
+		ਵਾਪਸ ਨਿਰਾ;
 
-	switch (git_parse_maybe_bool(value)) {
-	case 0:
-		return "--no-ff";
-	case 1:
-		return "--ff";
+	ਚੋਣ (git_parse_maybe_bool(ਮੁੱਲ)) {
+	ਹਾਲਤ 0:
+		ਵਾਪਸ "--no-ff";
+	ਹਾਲਤ 1:
+		ਵਾਪਸ "--ff";
 	}
 
-	if (!strcmp(value, "only"))
-		return "--ff-only";
+	ਜੇ (!strcmp(ਮੁੱਲ, "only"))
+		ਵਾਪਸ "--ff-only";
 
-	die(_("invalid value for '%s': '%s'"), "pull.ff", value);
+	die(_("invalid value for '%s': '%s'"), "pull.ff", ਮੁੱਲ);
 }
 
 /**
@@ -195,38 +195,38 @@ static const char *config_get_ff(void)
  * looks for the value of "pull.rebase". If both configuration keys do not
  * exist, returns REBASE_FALSE.
  */
-static enum rebase_type config_get_rebase(int *rebase_unspecified)
+ਸਥਿਰ ਗਿਣਤੀ rebase_type config_get_rebase(ਪੂਰਨ *rebase_unspecified)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *value;
+	ਬਣਤਰ branch *curr_branch = branch_get("HEAD");
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ;
 
-	if (curr_branch) {
-		char *key = xstrfmt("branch.%s.rebase", curr_branch->name);
+	ਜੇ (curr_branch) {
+		ਅੱਖਰ *ਕੁੰਜੀ = xstrfmt("branch.%s.rebase", curr_branch->name);
 
-		if (!repo_config_get_value(the_repository, key, &value)) {
-			enum rebase_type ret = parse_config_rebase(key, value, 1);
-			free(key);
-			return ret;
+		ਜੇ (!repo_config_get_ਮੁੱਲ(the_repository, ਕੁੰਜੀ, &ਮੁੱਲ)) {
+			ਗਿਣਤੀ rebase_type ret = parse_config_rebase(ਕੁੰਜੀ, ਮੁੱਲ, 1);
+			ਮੁਕਤ(ਕੁੰਜੀ);
+			ਵਾਪਸ ret;
 		}
 
-		free(key);
+		ਮੁਕਤ(ਕੁੰਜੀ);
 	}
 
-	if (!repo_config_get_value(the_repository, "pull.rebase", &value))
-		return parse_config_rebase("pull.rebase", value, 1);
+	ਜੇ (!repo_config_get_ਮੁੱਲ(the_repository, "pull.rebase", &ਮੁੱਲ))
+		ਵਾਪਸ parse_config_rebase("pull.rebase", ਮੁੱਲ, 1);
 
 	*rebase_unspecified = 1;
 
-	return REBASE_FALSE;
+	ਵਾਪਸ REBASE_FALSE;
 }
 
 /**
  * Read config variables.
  */
-static int git_pull_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+ਸਥਿਰ ਪੂਰਨ git_pull_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+			   ਅਚਲ ਬਣਤਰ config_context *ctx, ਖਾਲੀ *cb)
 {
-	if (!strcmp(var, "rebase.autostash")) {
+	ਜੇ (!strcmp(var, "rebase.autostash")) {
 		/*
 		 * run_rebase() also reads this option. The reason we handle it here is
 		 * that when pull.rebase is true, a fast-forward may occur without
@@ -235,41 +235,41 @@ static int git_pull_config(const char *var, const char *value,
 		 *
 		 * run_merge() handles merge.autostash, so we don't handle it here.
 		 */
-		config_rebase_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "pull.autostash")) {
-		config_pull_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value) ?
+		config_rebase_autostash = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
+	} ਨਹੀਂਤਾਂ ਜੇ (!strcmp(var, "pull.autostash")) {
+		config_pull_autostash = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
+	} ਨਹੀਂਤਾਂ ਜੇ (!strcmp(var, "submodule.recurse")) {
+		recurse_submodules = git_config_bool(var, ਮੁੱਲ) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
-		return 0;
-	} else if (!strcmp(var, "gpg.mintrustlevel")) {
+		ਵਾਪਸ 0;
+	} ਨਹੀਂਤਾਂ ਜੇ (!strcmp(var, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ਵਾਪਸ git_default_config(var, ਮੁੱਲ, ctx, cb);
 }
 
 /**
  * Appends merge candidates from FETCH_HEAD that are not marked not-for-merge
  * into merge_heads.
  */
-static void get_merge_heads(struct oid_array *merge_heads)
+ਸਥਿਰ ਖਾਲੀ get_ਮਿਲਾਓ_heads(ਬਣਤਰ oid_array *ਮਿਲਾਓ_heads)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	ਅਚਲ ਅੱਖਰ *filename = git_ਰਸਤਾ_fetch_ਸਿਰ(the_repository);
 	FILE *fp;
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਬਣਤਰ object_id oid;
 
 	fp = xfopen(filename, "r");
-	while (strbuf_getline_lf(&sb, fp) != EOF) {
-		const char *p;
-		if (parse_oid_hex(sb.buf, &oid, &p))
-			continue;  /* invalid line: does not start with object ID */
-		if (starts_with(p, "\tnot-for-merge\t"))
-			continue;  /* ref is not-for-merge */
-		oid_array_append(merge_heads, &oid);
+	ਜਦੋਂ (strbuf_getline_lf(&sb, fp) != EOF) {
+		ਅਚਲ ਅੱਖਰ *p;
+		ਜੇ (parse_oid_hex(sb.buf, &oid, &p))
+			ਜਾਰੀ;  /* invalid line: does not start with object ID */
+		ਜੇ (starts_with(p, "\tnot-for-merge\t"))
+			ਜਾਰੀ;  /* ref is not-for-merge */
+		oid_array_append(ਮਿਲਾਓ_heads, &oid);
 	}
 	fclose(fp);
 	strbuf_release(&sb);
@@ -279,15 +279,15 @@ static void get_merge_heads(struct oid_array *merge_heads)
  * Used by die_no_merge_candidates() as a for_each_remote() callback to
  * retrieve the name of the remote if the repository only has one remote.
  */
-static int get_only_remote(struct remote *remote, void *cb_data)
+ਸਥਿਰ ਪੂਰਨ get_only_remote(ਬਣਤਰ remote *remote, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	const char **remote_name = cb_data;
+	ਅਚਲ ਅੱਖਰ **remote_name = cb_ਅੰਕੜੇ;
 
-	if (*remote_name)
-		return -1;
+	ਜੇ (*remote_name)
+		ਵਾਪਸ -1;
 
 	*remote_name = remote->name;
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /**
@@ -312,43 +312,43 @@ static int get_only_remote(struct remote *remote, void *cb_data)
  *    branch to merge didn't get fetched. (Either it doesn't exist, or wasn't
  *    part of the configured fetch refspec.)
  */
-static void NORETURN die_no_merge_candidates(const char *repo, const char **refspecs)
+ਸਥਿਰ ਖਾਲੀ NORETURN die_no_ਮਿਲਾਓ_candidates(ਅਚਲ ਅੱਖਰ *repo, ਅਚਲ ਅੱਖਰ **refspecs)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *remote = curr_branch ? curr_branch->remote_name : NULL;
+	ਬਣਤਰ branch *curr_branch = branch_get("HEAD");
+	ਅਚਲ ਅੱਖਰ *remote = curr_branch ? curr_branch->remote_name : ਨਿਰਾ;
 
-	if (*refspecs) {
-		if (opt_rebase)
+	ਜੇ (*refspecs) {
+		ਜੇ (opt_rebase)
 			fprintf_ln(stderr, _("There is no candidate for rebasing against among the refs that you just fetched."));
-		else
+		ਨਹੀਂਤਾਂ
 			fprintf_ln(stderr, _("There are no candidates for merging among the refs that you just fetched."));
 		fprintf_ln(stderr, _("Generally this means that you provided a wildcard refspec which had no\n"
 					"matches on the remote end."));
-	} else if (repo && curr_branch && (!remote || strcmp(repo, remote))) {
+	} ਨਹੀਂਤਾਂ ਜੇ (repo && curr_branch && (!remote || strcmp(repo, remote))) {
 		fprintf_ln(stderr, _("You asked to pull from the remote '%s', but did not specify\n"
 			"a branch. Because this is not the default configured remote\n"
 			"for your current branch, you must specify a branch on the command line."),
 			repo);
-	} else if (!curr_branch) {
+	} ਨਹੀਂਤਾਂ ਜੇ (!curr_branch) {
 		fprintf_ln(stderr, _("You are not currently on a branch."));
-		if (opt_rebase)
+		ਜੇ (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		ਨਹੀਂਤਾਂ
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git pull %s %s", _("<remote>"), _("<branch>"));
 		fprintf(stderr, "\n");
-	} else if (!curr_branch->merge_nr) {
-		const char *remote_name = NULL;
+	} ਨਹੀਂਤਾਂ ਜੇ (!curr_branch->ਮਿਲਾਓ_nr) {
+		ਅਚਲ ਅੱਖਰ *remote_name = ਨਿਰਾ;
 
-		if (for_each_remote(get_only_remote, &remote_name) || !remote_name)
+		ਜੇ (for_each_remote(get_only_remote, &remote_name) || !remote_name)
 			remote_name = _("<remote>");
 
 		fprintf_ln(stderr, _("There is no tracking information for the current branch."));
-		if (opt_rebase)
+		ਜੇ (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		ਨਹੀਂਤਾਂ
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
@@ -358,11 +358,11 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git branch --set-upstream-to=%s/%s %s\n",
 				remote_name, _("<branch>"), curr_branch->name);
-	} else
+	} ਨਹੀਂਤਾਂ
 		fprintf_ln(stderr, _("Your configuration specifies to merge with the ref '%s'\n"
 			"from the remote, but no such ref was fetched."),
-			curr_branch->merge[0]->src);
-	exit(1);
+			curr_branch->ਮਿਲਾਓ[0]->src);
+	ਬਾਹਰ_ਨਿਕਲੋ(1);
 }
 
 /**
@@ -370,14 +370,14 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
  * as a string and `refspecs` as a null-terminated array of strings. If `repo`
  * is not provided in argv, it is set to NULL.
  */
-static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
-		const char ***refspecs)
+ਸਥਿਰ ਖਾਲੀ parse_repo_refspecs(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ **repo,
+		ਅਚਲ ਅੱਖਰ ***refspecs)
 {
-	if (argc > 0) {
+	ਜੇ (argc > 0) {
 		*repo = *argv++;
 		argc--;
-	} else
-		*repo = NULL;
+	} ਨਹੀਂਤਾਂ
+		*repo = ਨਿਰਾ;
 	*refspecs = argv;
 }
 
@@ -385,94 +385,94 @@ static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
  * Runs git-fetch, returning its exit status. `repo` and `refspecs` are the
  * repository and refspecs to fetch, or NULL if they are not provided.
  */
-static int run_fetch(const char *repo, const char **refspecs)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_fetch(ਅਚਲ ਅੱਖਰ *repo, ਅਚਲ ਅੱਖਰ **refspecs)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", NULL);
+	strvec_pushl(&cmd.ਦਲੀਲਾਂ, "fetch", "--update-head-ok", ਨਿਰਾ);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_ਧੱਕੋ_verbosity(&cmd.ਦਲੀਲਾਂ);
+	ਜੇ (opt_ਤਰੱਕੀ)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ਤਰੱਕੀ);
 
 	/* Options passed to git-fetch */
-	if (opt_all)
-		strvec_push(&cmd.args, opt_all);
-	if (opt_append)
-		strvec_push(&cmd.args, opt_append);
-	if (opt_upload_pack)
-		strvec_push(&cmd.args, opt_upload_pack);
-	argv_push_force(&cmd.args);
-	if (opt_tags)
-		strvec_push(&cmd.args, opt_tags);
-	if (opt_prune)
-		strvec_push(&cmd.args, opt_prune);
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_ON:
-			strvec_push(&cmd.args, "--recurse-submodules=on");
-			break;
-		case RECURSE_SUBMODULES_OFF:
-			strvec_push(&cmd.args, "--recurse-submodules=no");
-			break;
-		case RECURSE_SUBMODULES_ON_DEMAND:
-			strvec_push(&cmd.args, "--recurse-submodules=on-demand");
-			break;
-		default:
+	ਜੇ (opt_all)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_all);
+	ਜੇ (opt_append)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_append);
+	ਜੇ (opt_upload_pack)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_upload_pack);
+	argv_ਧੱਕੋ_force(&cmd.ਦਲੀਲਾਂ);
+	ਜੇ (opt_ਟੈਗ_ਸੂਚੀ)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ਟੈਗ_ਸੂਚੀ);
+	ਜੇ (opt_prune)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_prune);
+	ਜੇ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+		ਚੋਣ (recurse_submodules_cli) {
+		ਹਾਲਤ RECURSE_SUBMODULES_ON:
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--recurse-submodules=on");
+			ਰੋਕੋ;
+		ਹਾਲਤ RECURSE_SUBMODULES_OFF:
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--recurse-submodules=no");
+			ਰੋਕੋ;
+		ਹਾਲਤ RECURSE_SUBMODULES_ON_DEMAND:
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--recurse-submodules=on-demand");
+			ਰੋਕੋ;
+		ਮੂਲ:
 			BUG("submodule recursion option not understood");
 		}
-	if (max_children)
-		strvec_push(&cmd.args, max_children);
-	if (opt_dry_run)
-		strvec_push(&cmd.args, "--dry-run");
-	if (opt_keep)
-		strvec_push(&cmd.args, opt_keep);
-	if (opt_depth)
-		strvec_push(&cmd.args, opt_depth);
-	if (opt_unshallow)
-		strvec_push(&cmd.args, opt_unshallow);
-	if (opt_update_shallow)
-		strvec_push(&cmd.args, opt_update_shallow);
-	if (opt_refmap)
-		strvec_push(&cmd.args, opt_refmap);
-	if (opt_ipv4)
-		strvec_push(&cmd.args, opt_ipv4);
-	if (opt_ipv6)
-		strvec_push(&cmd.args, opt_ipv6);
-	if (opt_show_forced_updates > 0)
-		strvec_push(&cmd.args, "--show-forced-updates");
-	else if (opt_show_forced_updates == 0)
-		strvec_push(&cmd.args, "--no-show-forced-updates");
-	if (set_upstream)
-		strvec_push(&cmd.args, set_upstream);
-	strvec_pushv(&cmd.args, opt_fetch.v);
+	ਜੇ (max_children)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, max_children);
+	ਜੇ (opt_dry_ਲੜੀਵਾਰ)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--dry-run");
+	ਜੇ (opt_keep)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_keep);
+	ਜੇ (opt_ਡੂੰਘਾਈ)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ਡੂੰਘਾਈ);
+	ਜੇ (opt_unshallow)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_unshallow);
+	ਜੇ (opt_update_shallow)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_update_shallow);
+	ਜੇ (opt_refmap)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_refmap);
+	ਜੇ (opt_ipv4)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ipv4);
+	ਜੇ (opt_ipv6)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ipv6);
+	ਜੇ (opt_show_forced_updates > 0)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--show-forced-updates");
+	ਨਹੀਂਤਾਂ ਜੇ (opt_show_forced_updates == 0)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--no-show-forced-updates");
+	ਜੇ (ਸੈੱਟ_upstream)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, ਸੈੱਟ_upstream);
+	strvec_pushv(&cmd.ਦਲੀਲਾਂ, opt_fetch.v);
 
-	if (repo) {
-		strvec_push(&cmd.args, repo);
-		strvec_pushv(&cmd.args, refspecs);
-	} else if (*refspecs)
+	ਜੇ (repo) {
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, repo);
+		strvec_pushv(&cmd.ਦਲੀਲਾਂ, refspecs);
+	} ਨਹੀਂਤਾਂ ਜੇ (*refspecs)
 		BUG("refspecs without repo?");
 	cmd.git_cmd = 1;
-	cmd.odb_to_close = the_repository->objects;
-	return run_command(&cmd);
+	cmd.odb_ਮੰਜ਼ਿਲ_close = the_repository->objects;
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cmd);
 }
 
 /**
  * "Pulls into void" by branching off merge_head.
  */
-static int pull_into_void(const struct object_id *merge_head,
-		const struct object_id *curr_head)
+ਸਥਿਰ ਪੂਰਨ pull_into_void(ਅਚਲ ਬਣਤਰ object_id *ਮਿਲਾਓ_ਸਿਰ,
+		ਅਚਲ ਬਣਤਰ object_id *curr_ਸਿਰ)
 {
-	if (opt_verify_signatures) {
-		struct commit *commit;
+	ਜੇ (opt_verify_signatures) {
+		ਬਣਤਰ commit *commit;
 
-		commit = lookup_commit(the_repository, merge_head);
-		if (!commit)
+		commit = lookup_commit(the_repository, ਮਿਲਾਓ_ਸਿਰ);
+		ਜੇ (!commit)
 			die(_("unable to access commit %s"),
-			    oid_to_hex(merge_head));
+			    oid_ਮੰਜ਼ਿਲ_hex(ਮਿਲਾਓ_ਸਿਰ));
 
-		verify_merge_signature(commit, opt_verbosity,
+		verify_ਮਿਲਾਓ_signature(commit, opt_verbosity,
 				       check_trust_level);
 	}
 
@@ -482,92 +482,92 @@ static int pull_into_void(const struct object_id *merge_head,
 	 * index/worktree changes that the user already made on the unborn
 	 * branch.
 	 */
-	if (checkout_fast_forward(the_repository,
-				  the_hash_algo->empty_tree,
-				  merge_head, 0))
-		return 1;
+	ਜੇ (checkout_fast_forward(the_repository,
+				  the_hash_algo->ਖਾਲੀ_ਥਾਵਾਂ_ਰੁੱਖ,
+				  ਮਿਲਾਓ_ਸਿਰ, 0))
+		ਵਾਪਸ 1;
 
-	if (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
-		return 1;
+	ਜੇ (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", ਮਿਲਾਓ_ਸਿਰ, curr_ਸਿਰ, 0, UPDATE_REFS_DIE_ON_ERR))
+		ਵਾਪਸ 1;
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int rebase_submodules(void)
+ਸਥਿਰ ਪੂਰਨ rebase_submodules(ਖਾਲੀ)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
-	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--rebase", NULL);
-	argv_push_verbosity(&cp.args);
+	strvec_pushl(&cp.ਦਲੀਲਾਂ, "submodule", "update",
+		     "--recursive", "--rebase", ਨਿਰਾ);
+	argv_ਧੱਕੋ_verbosity(&cp.ਦਲੀਲਾਂ);
 
-	return run_command(&cp);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cp);
 }
 
-static int update_submodules(void)
+ਸਥਿਰ ਪੂਰਨ update_submodules(ਖਾਲੀ)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
-	strvec_pushl(&cp.args, "submodule", "update",
-		     "--recursive", "--checkout", NULL);
-	argv_push_verbosity(&cp.args);
+	strvec_pushl(&cp.ਦਲੀਲਾਂ, "submodule", "update",
+		     "--recursive", "--checkout", ਨਿਰਾ);
+	argv_ਧੱਕੋ_verbosity(&cp.ਦਲੀਲਾਂ);
 
-	return run_command(&cp);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cp);
 }
 
 /**
  * Runs git-merge, returning its exit status.
  */
-static int run_merge(void)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_ਮਿਲਾਓ(ਖਾਲੀ)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "merge", NULL);
+	strvec_pushl(&cmd.ਦਲੀਲਾਂ, "merge", ਨਿਰਾ);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+	argv_ਧੱਕੋ_verbosity(&cmd.ਦਲੀਲਾਂ);
+	ਜੇ (opt_ਤਰੱਕੀ)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ਤਰੱਕੀ);
 
 	/* Options passed to git-merge */
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	if (opt_log)
-		strvec_push(&cmd.args, opt_log);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_squash)
-		strvec_push(&cmd.args, opt_squash);
-	if (opt_commit)
-		strvec_push(&cmd.args, opt_commit);
-	if (opt_edit)
-		strvec_push(&cmd.args, opt_edit);
-	if (cleanup_arg)
-		strvec_pushf(&cmd.args, "--cleanup=%s", cleanup_arg);
-	if (opt_ff)
-		strvec_push(&cmd.args, opt_ff);
-	if (opt_verify)
-		strvec_push(&cmd.args, opt_verify);
-	if (opt_verify_signatures)
-		strvec_push(&cmd.args, opt_verify_signatures);
-	strvec_pushv(&cmd.args, opt_strategies.v);
-	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_allow_unrelated_histories > 0)
-		strvec_push(&cmd.args, "--allow-unrelated-histories");
+	ਜੇ (opt_diffstat)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_diffstat);
+	ਜੇ (opt_log)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_log);
+	ਜੇ (opt_signoff)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_signoff);
+	ਜੇ (opt_squash)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_squash);
+	ਜੇ (opt_commit)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_commit);
+	ਜੇ (opt_edit)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_edit);
+	ਜੇ (cleanup_arg)
+		strvec_pushf(&cmd.ਦਲੀਲਾਂ, "--cleanup=%s", cleanup_arg);
+	ਜੇ (opt_ff)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_ff);
+	ਜੇ (opt_verify)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_verify);
+	ਜੇ (opt_verify_signatures)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_verify_signatures);
+	strvec_pushv(&cmd.ਦਲੀਲਾਂ, opt_strategies.v);
+	strvec_pushv(&cmd.ਦਲੀਲਾਂ, opt_strategy_opts.v);
+	ਜੇ (opt_gpg_sign)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_gpg_sign);
+	ਜੇ (opt_autostash == 0)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--no-autostash");
+	ਨਹੀਂਤਾਂ ਜੇ (opt_autostash == 1)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--autostash");
+	ਜੇ (opt_allow_unrelated_histories > 0)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--allow-unrelated-histories");
 
-	strvec_push(&cmd.args, "FETCH_HEAD");
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "FETCH_HEAD");
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cmd);
 }
 
 /**
@@ -577,27 +577,27 @@ static int run_merge(void)
  * remote is not the branch's configured remote or the branch does not have any
  * configured upstream branch.
  */
-static const char *get_upstream_branch(const char *remote)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *get_upstream_branch(ਅਚਲ ਅੱਖਰ *remote)
 {
-	struct remote *rm;
-	struct branch *curr_branch;
-	const char *curr_branch_remote;
+	ਬਣਤਰ remote *rm;
+	ਬਣਤਰ branch *curr_branch;
+	ਅਚਲ ਅੱਖਰ *curr_branch_remote;
 
 	rm = remote_get(remote);
-	if (!rm)
-		return NULL;
+	ਜੇ (!rm)
+		ਵਾਪਸ ਨਿਰਾ;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return NULL;
+	ਜੇ (!curr_branch)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	curr_branch_remote = remote_for_branch(curr_branch, NULL);
-	assert(curr_branch_remote);
+	curr_branch_remote = remote_for_branch(curr_branch, ਨਿਰਾ);
+	ਪ੍ਰਤਿਜ੍ਞਾ(curr_branch_remote);
 
-	if (strcmp(curr_branch_remote, rm->name))
-		return NULL;
+	ਜੇ (strcmp(curr_branch_remote, rm->name))
+		ਵਾਪਸ ਨਿਰਾ;
 
-	return branch_get_upstream(curr_branch, NULL);
+	ਵਾਪਸ branch_get_upstream(curr_branch, ਨਿਰਾ);
 }
 
 /**
@@ -606,36 +606,36 @@ static const char *get_upstream_branch(const char *remote)
  * FIXME: The current implementation assumes the default mapping of
  * refs/heads/<branch_name> to refs/remotes/<remote_name>/<branch_name>.
  */
-static const char *get_tracking_branch(const char *remote, const char *refspec)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *get_tracking_branch(ਅਚਲ ਅੱਖਰ *remote, ਅਚਲ ਅੱਖਰ *refspec)
 {
-	struct refspec_item spec;
-	const char *spec_src;
-	const char *merge_branch;
+	ਬਣਤਰ refspec_ਵਸਤੂ spec;
+	ਅਚਲ ਅੱਖਰ *spec_src;
+	ਅਚਲ ਅੱਖਰ *ਮਿਲਾਓ_branch;
 
-	if (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
+	ਜੇ (!refspec_ਵਸਤੂ_init_fetch(&spec, refspec, the_hash_algo))
 		die(_("invalid refspec '%s'"), refspec);
 	spec_src = spec.src;
-	if (!*spec_src || !strcmp(spec_src, "HEAD"))
+	ਜੇ (!*spec_src || !strcmp(spec_src, "HEAD"))
 		spec_src = "HEAD";
-	else if (skip_prefix(spec_src, "heads/", &spec_src))
+	ਨਹੀਂਤਾਂ ਜੇ (skip_ਅਗੇਤਰ(spec_src, "heads/", &spec_src))
 		;
-	else if (skip_prefix(spec_src, "refs/heads/", &spec_src))
+	ਨਹੀਂਤਾਂ ਜੇ (skip_ਅਗੇਤਰ(spec_src, "refs/heads/", &spec_src))
 		;
-	else if (starts_with(spec_src, "refs/") ||
+	ਨਹੀਂਤਾਂ ਜੇ (starts_with(spec_src, "refs/") ||
 		starts_with(spec_src, "tags/") ||
 		starts_with(spec_src, "remotes/"))
 		spec_src = "";
 
-	if (*spec_src) {
-		if (!strcmp(remote, "."))
-			merge_branch = mkpath("refs/heads/%s", spec_src);
-		else
-			merge_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
-	} else
-		merge_branch = NULL;
+	ਜੇ (*spec_src) {
+		ਜੇ (!strcmp(remote, "."))
+			ਮਿਲਾਓ_branch = mkpath("refs/heads/%s", spec_src);
+		ਨਹੀਂਤਾਂ
+			ਮਿਲਾਓ_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
+	} ਨਹੀਂਤਾਂ
+		ਮਿਲਾਓ_branch = ਨਿਰਾ;
 
-	refspec_item_clear(&spec);
-	return merge_branch;
+	refspec_ਵਸਤੂ_clear(&spec);
+	ਵਾਪਸ ਮਿਲਾਓ_branch;
 }
 
 /**
@@ -643,76 +643,76 @@ static const char *get_tracking_branch(const char *remote, const char *refspec)
  * current branch forked from its remote-tracking branch. Returns 0 on success,
  * -1 on failure.
  */
-static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
-		const char *refspec)
+ਸਥਿਰ ਪੂਰਨ get_rebase_fork_ਬਿੰਦੂ(ਬਣਤਰ object_id *fork_ਬਿੰਦੂ, ਅਚਲ ਅੱਖਰ *repo,
+		ਅਚਲ ਅੱਖਰ *refspec)
 {
-	int ret;
-	struct branch *curr_branch;
-	const char *remote_branch;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	ਪੂਰਨ ret;
+	ਬਣਤਰ branch *curr_branch;
+	ਅਚਲ ਅੱਖਰ *remote_branch;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return -1;
+	ਜੇ (!curr_branch)
+		ਵਾਪਸ -1;
 
-	if (refspec)
+	ਜੇ (refspec)
 		remote_branch = get_tracking_branch(repo, refspec);
-	else
+	ਨਹੀਂਤਾਂ
 		remote_branch = get_upstream_branch(repo);
 
-	if (!remote_branch)
-		return -1;
+	ਜੇ (!remote_branch)
+		ਵਾਪਸ -1;
 
-	strvec_pushl(&cp.args, "merge-base", "--fork-point",
-		     remote_branch, curr_branch->name, NULL);
+	strvec_pushl(&cp.ਦਲੀਲਾਂ, "merge-base", "--fork-point",
+		     remote_branch, curr_branch->name, ਨਿਰਾ);
 	cp.no_stdin = 1;
 	cp.no_stderr = 1;
 	cp.git_cmd = 1;
 
 	ret = capture_command(&cp, &sb, GIT_MAX_HEXSZ);
-	if (ret)
-		goto cleanup;
+	ਜੇ (ret)
+		ਜਾਓ cleanup;
 
-	ret = get_oid_hex(sb.buf, fork_point);
-	if (ret)
-		goto cleanup;
+	ret = get_oid_hex(sb.buf, fork_ਬਿੰਦੂ);
+	ਜੇ (ret)
+		ਜਾਓ cleanup;
 
 cleanup:
 	strbuf_release(&sb);
-	return ret ? -1 : 0;
+	ਵਾਪਸ ret ? -1 : 0;
 }
 
 /**
  * Sets merge_base to the octopus merge base of curr_head, merge_head and
  * fork_point. Returns 0 if a merge base is found, 1 otherwise.
  */
-static int get_octopus_merge_base(struct object_id *merge_base,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+ਸਥਿਰ ਪੂਰਨ get_octopus_ਮਿਲਾਓ_ਅਧਾਰ(ਬਣਤਰ object_id *ਮਿਲਾਓ_ਅਧਾਰ,
+		ਅਚਲ ਬਣਤਰ object_id *curr_ਸਿਰ,
+		ਅਚਲ ਬਣਤਰ object_id *ਮਿਲਾਓ_ਸਿਰ,
+		ਅਚਲ ਬਣਤਰ object_id *fork_ਬਿੰਦੂ)
 {
-	struct commit_list *revs = NULL, *result = NULL;
+	ਬਣਤਰ commit_list *revs = ਨਿਰਾ, *ਨਤੀਜਾ = ਨਿਰਾ;
 
-	commit_list_insert(lookup_commit_reference(the_repository, curr_head),
+	commit_list_ਪਾਓ(lookup_commit_reference(the_repository, curr_ਸਿਰ),
 			   &revs);
-	commit_list_insert(lookup_commit_reference(the_repository, merge_head),
+	commit_list_ਪਾਓ(lookup_commit_reference(the_repository, ਮਿਲਾਓ_ਸਿਰ),
 			   &revs);
-	if (!is_null_oid(fork_point))
-		commit_list_insert(lookup_commit_reference(the_repository, fork_point),
+	ਜੇ (!is_null_oid(fork_ਬਿੰਦੂ))
+		commit_list_ਪਾਓ(lookup_commit_reference(the_repository, fork_ਬਿੰਦੂ),
 				   &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0)
-		exit(128);
+	ਜੇ (get_octopus_ਮਿਲਾਓ_bases(revs, &ਨਤੀਜਾ) < 0)
+		ਬਾਹਰ_ਨਿਕਲੋ(128);
 	commit_list_free(revs);
-	reduce_heads_replace(&result);
+	reduce_heads_replace(&ਨਤੀਜਾ);
 
-	if (!result)
-		return 1;
+	ਜੇ (!ਨਤੀਜਾ)
+		ਵਾਪਸ 1;
 
-	oidcpy(merge_base, &result->item->object.oid);
-	commit_list_free(result);
-	return 0;
+	oidcpy(ਮਿਲਾਓ_ਅਧਾਰ, &ਨਤੀਜਾ->ਵਸਤੂ->object.oid);
+	commit_list_free(ਨਤੀਜਾ);
+	ਵਾਪਸ 0;
 }
 
 /**
@@ -720,26 +720,26 @@ static int get_octopus_merge_base(struct object_id *merge_base,
  * fork point calculated by get_rebase_fork_point(), compute the <newbase> and
  * <upstream> arguments to use for the upcoming git-rebase invocation.
  */
-static int get_rebase_newbase_and_upstream(struct object_id *newbase,
-		struct object_id *upstream,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+ਸਥਿਰ ਪੂਰਨ get_rebase_newbase_and_upstream(ਬਣਤਰ object_id *newbase,
+		ਬਣਤਰ object_id *upstream,
+		ਅਚਲ ਬਣਤਰ object_id *curr_ਸਿਰ,
+		ਅਚਲ ਬਣਤਰ object_id *ਮਿਲਾਓ_ਸਿਰ,
+		ਅਚਲ ਬਣਤਰ object_id *fork_ਬਿੰਦੂ)
 {
-	struct object_id oct_merge_base;
+	ਬਣਤਰ object_id oct_ਮਿਲਾਓ_ਅਧਾਰ;
 
-	if (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
-		if (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
-			fork_point = NULL;
+	ਜੇ (!get_octopus_ਮਿਲਾਓ_ਅਧਾਰ(&oct_ਮਿਲਾਓ_ਅਧਾਰ, curr_ਸਿਰ, ਮਿਲਾਓ_ਸਿਰ, fork_ਬਿੰਦੂ))
+		ਜੇ (!is_null_oid(fork_ਬਿੰਦੂ) && oideq(&oct_ਮਿਲਾਓ_ਅਧਾਰ, fork_ਬਿੰਦੂ))
+			fork_ਬਿੰਦੂ = ਨਿਰਾ;
 
-	if (fork_point && !is_null_oid(fork_point))
-		oidcpy(upstream, fork_point);
-	else
-		oidcpy(upstream, merge_head);
+	ਜੇ (fork_ਬਿੰਦੂ && !is_null_oid(fork_ਬਿੰਦੂ))
+		oidcpy(upstream, fork_ਬਿੰਦੂ);
+	ਨਹੀਂਤਾਂ
+		oidcpy(upstream, ਮਿਲਾਓ_ਸਿਰ);
 
-	oidcpy(newbase, merge_head);
+	oidcpy(newbase, ਮਿਲਾਓ_ਸਿਰ);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /**
@@ -747,70 +747,70 @@ static int get_rebase_newbase_and_upstream(struct object_id *newbase,
  * get_rebase_newbase_and_upstream(), runs git-rebase with the
  * appropriate arguments and returns its exit status.
  */
-static int run_rebase(const struct object_id *newbase,
-		const struct object_id *upstream)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_rebase(ਅਚਲ ਬਣਤਰ object_id *newbase,
+		ਅਚਲ ਬਣਤਰ object_id *upstream)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "rebase");
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "rebase");
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_ਧੱਕੋ_verbosity(&cmd.ਦਲੀਲਾਂ);
 
 	/* Options passed to git-rebase */
-	if (opt_rebase == REBASE_MERGES)
-		strvec_push(&cmd.args, "--rebase-merges");
-	else if (opt_rebase == REBASE_INTERACTIVE)
-		strvec_push(&cmd.args, "--interactive");
-	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	strvec_pushv(&cmd.args, opt_strategies.v);
-	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
-	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
-	if (opt_verify_signatures &&
+	ਜੇ (opt_rebase == REBASE_MERGES)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--rebase-merges");
+	ਨਹੀਂਤਾਂ ਜੇ (opt_rebase == REBASE_INTERACTIVE)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--interactive");
+	ਜੇ (opt_diffstat)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_diffstat);
+	strvec_pushv(&cmd.ਦਲੀਲਾਂ, opt_strategies.v);
+	strvec_pushv(&cmd.ਦਲੀਲਾਂ, opt_strategy_opts.v);
+	ਜੇ (opt_gpg_sign)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_gpg_sign);
+	ਜੇ (opt_signoff)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, opt_signoff);
+	ਜੇ (opt_autostash == 0)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--no-autostash");
+	ਨਹੀਂਤਾਂ ਜੇ (opt_autostash == 1)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--autostash");
+	ਜੇ (opt_verify_signatures &&
 	    !strcmp(opt_verify_signatures, "--verify-signatures"))
 		warning(_("ignoring --verify-signatures for rebase"));
 
-	strvec_push(&cmd.args, "--onto");
-	strvec_push(&cmd.args, oid_to_hex(newbase));
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--onto");
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, oid_ਮੰਜ਼ਿਲ_hex(newbase));
 
-	strvec_push(&cmd.args, oid_to_hex(upstream));
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, oid_ਮੰਜ਼ਿਲ_hex(upstream));
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cmd);
 }
 
-static int get_can_ff(struct object_id *orig_head,
-		      struct oid_array *merge_heads)
+ਸਥਿਰ ਪੂਰਨ get_can_ff(ਬਣਤਰ object_id *orig_ਸਿਰ,
+		      ਬਣਤਰ oid_array *ਮਿਲਾਓ_heads)
 {
-	int ret;
-	struct commit_list *list = NULL;
-	struct commit *merge_head, *head;
-	struct object_id *orig_merge_head;
+	ਪੂਰਨ ret;
+	ਬਣਤਰ commit_list *list = ਨਿਰਾ;
+	ਬਣਤਰ commit *ਮਿਲਾਓ_ਸਿਰ, *ਸਿਰ;
+	ਬਣਤਰ object_id *orig_ਮਿਲਾਓ_ਸਿਰ;
 
-	if (merge_heads->nr > 1)
-		return 0;
+	ਜੇ (ਮਿਲਾਓ_heads->nr > 1)
+		ਵਾਪਸ 0;
 
-	orig_merge_head = &merge_heads->oid[0];
-	head = lookup_commit_reference(the_repository, orig_head);
-	if (!head)
-		return 0;
-	merge_head = lookup_commit_reference(the_repository, orig_merge_head);
-	if (!merge_head)
-		return 0;
-	commit_list_insert(head, &list);
-	ret = repo_is_descendant_of(the_repository, merge_head, list);
+	orig_ਮਿਲਾਓ_ਸਿਰ = &ਮਿਲਾਓ_heads->oid[0];
+	ਸਿਰ = lookup_commit_reference(the_repository, orig_ਸਿਰ);
+	ਜੇ (!ਸਿਰ)
+		ਵਾਪਸ 0;
+	ਮਿਲਾਓ_ਸਿਰ = lookup_commit_reference(the_repository, orig_ਮਿਲਾਓ_ਸਿਰ);
+	ਜੇ (!ਮਿਲਾਓ_ਸਿਰ)
+		ਵਾਪਸ 0;
+	commit_list_ਪਾਓ(ਸਿਰ, &list);
+	ret = repo_is_descendant_ਦਾ(the_repository, ਮਿਲਾਓ_ਸਿਰ, list);
 	commit_list_free(list);
-	if (ret < 0)
-		exit(128);
-	return ret;
+	ਜੇ (ret < 0)
+		ਬਾਹਰ_ਨਿਕਲੋ(128);
+	ਵਾਪਸ ret;
 }
 
 /*
@@ -818,34 +818,34 @@ static int get_can_ff(struct object_id *orig_head,
  * Unfortunately is_descendant_of() cannot be used as it asks
  * if orig_head is a descendant of at least one of them.
  */
-static int already_up_to_date(struct object_id *orig_head,
-			      struct oid_array *merge_heads)
+ਸਥਿਰ ਪੂਰਨ already_ਉੱਪਰ_ਮੰਜ਼ਿਲ_date(ਬਣਤਰ object_id *orig_ਸਿਰ,
+			      ਬਣਤਰ oid_array *ਮਿਲਾਓ_heads)
 {
-	struct commit *ours;
+	ਬਣਤਰ commit *ours;
 
-	ours = lookup_commit_reference(the_repository, orig_head);
-	if (!ours)
-		return 0;
-	for (size_t i = 0; i < merge_heads->nr; i++) {
-		struct commit_list *list = NULL;
-		struct commit *theirs;
-		int ok;
+	ours = lookup_commit_reference(the_repository, orig_ਸਿਰ);
+	ਜੇ (!ours)
+		ਵਾਪਸ 0;
+	ਲਈ (ਮਾਪ_t i = 0; i < ਮਿਲਾਓ_heads->nr; i++) {
+		ਬਣਤਰ commit_list *list = ਨਿਰਾ;
+		ਬਣਤਰ commit *theirs;
+		ਪੂਰਨ ok;
 
-		theirs = lookup_commit_reference(the_repository, &merge_heads->oid[i]);
-		if (!theirs)
-			return 0;
-		commit_list_insert(theirs, &list);
-		ok = repo_is_descendant_of(the_repository, ours, list);
+		theirs = lookup_commit_reference(the_repository, &ਮਿਲਾਓ_heads->oid[i]);
+		ਜੇ (!theirs)
+			ਵਾਪਸ 0;
+		commit_list_ਪਾਓ(theirs, &list);
+		ok = repo_is_descendant_ਦਾ(the_repository, ours, list);
 		commit_list_free(list);
-		if (ok < 0)
-			exit(128);
-		if (!ok)
-			return 0;
+		ਜੇ (ok < 0)
+			ਬਾਹਰ_ਨਿਕਲੋ(128);
+		ਜੇ (!ok)
+			ਵਾਪਸ 0;
 	}
-	return 1;
+	ਵਾਪਸ 1;
 }
 
-static void show_advice_pull_non_ff(void)
+ਸਥਿਰ ਖਾਲੀ show_advice_pull_non_ff(ਖਾਲੀ)
 {
 	advise(_("You have divergent branches and need to specify how to reconcile them.\n"
 		 "You can do so by running one of the following commands sometime before\n"
@@ -861,23 +861,23 @@ static void show_advice_pull_non_ff(void)
 		 "invocation.\n"));
 }
 
-int cmd_pull(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+ਪੂਰਨ cmd_pull(ਪੂਰਨ argc,
+	     ਅਚਲ ਅੱਖਰ **argv,
+	     ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+	     ਬਣਤਰ repository *repository ਅਣਵਰਤਿਆ)
 {
-	const char *repo, **refspecs;
-	struct oid_array merge_heads = OID_ARRAY_INIT;
-	struct object_id orig_head, curr_head;
-	struct object_id rebase_fork_point;
-	int rebase_unspecified = 0;
-	int can_ff;
-	int divergent;
-	int ret;
-	static struct option pull_options[] = {
+	ਅਚਲ ਅੱਖਰ *repo, **refspecs;
+	ਬਣਤਰ oid_array ਮਿਲਾਓ_heads = OID_ARRAY_INIT;
+	ਬਣਤਰ object_id orig_ਸਿਰ, curr_ਸਿਰ;
+	ਬਣਤਰ object_id rebase_fork_ਬਿੰਦੂ;
+	ਪੂਰਨ rebase_unspecified = 0;
+	ਪੂਰਨ can_ff;
+	ਪੂਰਨ divergent;
+	ਪੂਰਨ ret;
+	ਸਥਿਰ ਬਣਤਰ option pull_options[] = {
 		/* Shared options */
 		OPT__VERBOSITY(&opt_verbosity),
-		OPT_PASSTHRU(0, "progress", &opt_progress, NULL,
+		OPT_PASSTHRU(0, "progress", &opt_ਤਰੱਕੀ, ਨਿਰਾ,
 			N_("force progress reporting"),
 			PARSE_OPT_NOARG),
 		OPT_CALLBACK_F(0, "recurse-submodules",
@@ -886,49 +886,49 @@ int cmd_pull(int argc,
 			   PARSE_OPT_OPTARG, option_fetch_parse_recurse_submodules),
 
 		/* Options passed to git-merge or git-rebase */
-		OPT_GROUP(N_("Options related to merging")),
+		OPT_ਸਮੂਹ(N_("Options related to merging")),
 		OPT_CALLBACK_F('r', "rebase", &opt_rebase,
 			"(false|true|merges|interactive)",
 			N_("incorporate changes by rebasing rather than merging"),
 			PARSE_OPT_OPTARG, parse_opt_rebase),
-		OPT_PASSTHRU('n', NULL, &opt_diffstat, NULL,
+		OPT_PASSTHRU('n', ਨਿਰਾ, &opt_diffstat, ਨਿਰਾ,
 			N_("do not show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "stat", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "stat", &opt_diffstat, ਨਿਰਾ,
 			N_("show a diffstat at the end of the merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "summary", &opt_diffstat, ਨਿਰਾ,
 			N_("(synonym to --stat)"),
 			PARSE_OPT_NOARG | PARSE_OPT_HIDDEN),
-		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, NULL,
+		OPT_PASSTHRU(0, "compact-summary", &opt_diffstat, ਨਿਰਾ,
 			N_("show a compact-summary at the end of the merge"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "log", &opt_log, N_("n"),
 			N_("add (at most <n>) entries from shortlog to merge commit message"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "signoff", &opt_signoff, NULL,
+		OPT_PASSTHRU(0, "signoff", &opt_signoff, ਨਿਰਾ,
 			N_("add a Signed-off-by trailer"),
 			PARSE_OPT_OPTARG),
-		OPT_PASSTHRU(0, "squash", &opt_squash, NULL,
+		OPT_PASSTHRU(0, "squash", &opt_squash, ਨਿਰਾ,
 			N_("create a single commit instead of doing a merge"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "commit", &opt_commit, NULL,
+		OPT_PASSTHRU(0, "commit", &opt_commit, ਨਿਰਾ,
 			N_("perform a commit if the merge succeeds (default)"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "edit", &opt_edit, NULL,
+		OPT_PASSTHRU(0, "edit", &opt_edit, ਨਿਰਾ,
 			N_("edit message before committing"),
 			PARSE_OPT_NOARG),
 		OPT_CLEANUP(&cleanup_arg),
-		OPT_PASSTHRU(0, "ff", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff", &opt_ff, ਨਿਰਾ,
 			N_("allow fast-forward"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "ff-only", &opt_ff, NULL,
+		OPT_PASSTHRU(0, "ff-only", &opt_ff, ਨਿਰਾ,
 			N_("abort if fast-forward is not possible"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG),
-		OPT_PASSTHRU(0, "verify", &opt_verify, NULL,
+		OPT_PASSTHRU(0, "verify", &opt_verify, ਨਿਰਾ,
 			N_("control use of pre-merge-commit and commit-msg hooks"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, NULL,
+		OPT_PASSTHRU(0, "verify-signatures", &opt_verify_signatures, ਨਿਰਾ,
 			N_("verify that the named commit has a valid GPG signature"),
 			PARSE_OPT_NOARG),
 		OPT_BOOL(0, "autostash", &opt_autostash,
@@ -943,37 +943,37 @@ int cmd_pull(int argc,
 		OPT_PASSTHRU('S', "gpg-sign", &opt_gpg_sign, N_("key-id"),
 			N_("GPG sign commit"),
 			PARSE_OPT_OPTARG),
-		OPT_SET_INT(0, "allow-unrelated-histories",
+		OPT_ਸੈੱਟ_INT(0, "allow-unrelated-histories",
 			    &opt_allow_unrelated_histories,
 			    N_("allow merging unrelated histories"), 1),
 
 		/* Options passed to git-fetch */
-		OPT_GROUP(N_("Options related to fetching")),
-		OPT_PASSTHRU(0, "all", &opt_all, NULL,
+		OPT_ਸਮੂਹ(N_("Options related to fetching")),
+		OPT_PASSTHRU(0, "all", &opt_all, ਨਿਰਾ,
 			N_("fetch from all remotes"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('a', "append", &opt_append, NULL,
+		OPT_PASSTHRU('a', "append", &opt_append, ਨਿਰਾ,
 			N_("append to .git/FETCH_HEAD instead of overwriting"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "upload-pack", &opt_upload_pack, N_("path"),
 			N_("path to upload pack on remote end"),
 			0),
 		OPT__FORCE(&opt_force, N_("force overwrite of local branch"), 0),
-		OPT_PASSTHRU('t', "tags", &opt_tags, NULL,
+		OPT_PASSTHRU('t', "tags", &opt_ਟੈਗ_ਸੂਚੀ, ਨਿਰਾ,
 			N_("fetch all tags and associated objects"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('p', "prune", &opt_prune, NULL,
+		OPT_PASSTHRU('p', "prune", &opt_prune, ਨਿਰਾ,
 			N_("prune remote-tracking branches no longer on remote"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU('j', "jobs", &max_children, N_("n"),
 			N_("number of submodules pulled in parallel"),
 			PARSE_OPT_OPTARG),
-		OPT_BOOL(0, "dry-run", &opt_dry_run,
+		OPT_BOOL(0, "dry-run", &opt_dry_ਲੜੀਵਾਰ,
 			N_("dry run")),
-		OPT_PASSTHRU('k', "keep", &opt_keep, NULL,
+		OPT_PASSTHRU('k', "keep", &opt_keep, ਨਿਰਾ,
 			N_("keep downloaded pack"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "depth", &opt_depth, N_("depth"),
+		OPT_PASSTHRU(0, "depth", &opt_ਡੂੰਘਾਈ, N_("depth"),
 			N_("deepen history of shallow clone"),
 			0),
 		OPT_PASSTHRU_ARGV(0, "shallow-since", &opt_fetch, N_("time"),
@@ -985,10 +985,10 @@ int cmd_pull(int argc,
 		OPT_PASSTHRU_ARGV(0, "deepen", &opt_fetch, N_("n"),
 			N_("deepen history of shallow clone"),
 			0),
-		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, NULL,
+		OPT_PASSTHRU(0, "unshallow", &opt_unshallow, ਨਿਰਾ,
 			N_("convert to a complete repository"),
 			PARSE_OPT_NONEG | PARSE_OPT_NOARG),
-		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, NULL,
+		OPT_PASSTHRU(0, "update-shallow", &opt_update_shallow, ਨਿਰਾ,
 			N_("accept refs that update .git/shallow"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU(0, "refmap", &opt_refmap, N_("refmap"),
@@ -998,10 +998,10 @@ int cmd_pull(int argc,
 			N_("server-specific"),
 			N_("option to transmit"),
 			0),
-		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, NULL,
+		OPT_PASSTHRU('4',  "ipv4", &opt_ipv4, ਨਿਰਾ,
 			N_("use IPv4 addresses only"),
 			PARSE_OPT_NOARG),
-		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, NULL,
+		OPT_PASSTHRU('6',  "ipv6", &opt_ipv6, ਨਿਰਾ,
 			N_("use IPv6 addresses only"),
 			PARSE_OPT_NOARG),
 		OPT_PASSTHRU_ARGV(0, "negotiation-restrict", &opt_fetch, N_("revision"),
@@ -1013,39 +1013,39 @@ int cmd_pull(int argc,
 			0),
 		OPT_BOOL(0, "show-forced-updates", &opt_show_forced_updates,
 			 N_("check for forced-updates on all updated branches")),
-		OPT_PASSTHRU(0, "set-upstream", &set_upstream, NULL,
+		OPT_PASSTHRU(0, "set-upstream", &ਸੈੱਟ_upstream, ਨਿਰਾ,
 			N_("set upstream for git pull/fetch"),
 			PARSE_OPT_NOARG),
 
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
-	if (!getenv("GIT_REFLOG_ACTION"))
-		set_reflog_message(argc, argv);
+	ਜੇ (!getenv("GIT_REFLOG_ACTION"))
+		ਸੈੱਟ_reflog_ਸੁਨੇਹਾ(argc, argv);
 
-	repo_config(the_repository, git_pull_config, NULL);
-	if (the_repository->gitdir) {
+	repo_config(the_repository, git_pull_config, ਨਿਰਾ);
+	ਜੇ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_ਭਰਿਆ_ਸੂਚਕਾਂਕ = 0;
 	}
 
-	argc = parse_options(argc, argv, prefix, pull_options, pull_usage, 0);
-	if (opt_autostash == -1)
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, pull_options, pull_usage, 0);
+	ਜੇ (opt_autostash == -1)
 		opt_autostash = config_pull_autostash;
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	ਜੇ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		recurse_submodules = recurse_submodules_cli;
 
-	if (cleanup_arg)
+	ਜੇ (cleanup_arg)
 		/*
 		 * this only checks the validity of cleanup_arg; we don't need
 		 * a valid value for use_editor
 		 */
-		get_cleanup_mode(cleanup_arg, 0);
+		get_cleanup_ਬਹੁਲਕ(cleanup_arg, 0);
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
 
-	if (!opt_ff) {
+	ਜੇ (!opt_ff) {
 		opt_ff = xstrdup_or_null(config_get_ff());
 		/*
 		 * A subtle point: opt_ff was set on the line above via
@@ -1058,51 +1058,51 @@ int cmd_pull(int argc,
 		 * "--rebase" can override a config setting of
 		 * pull.ff=only.
 		 */
-		if (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
-			free(opt_ff);
+		ਜੇ (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
+			ਮੁਕਤ(opt_ff);
 			opt_ff = xstrdup("--ff");
 		}
 	}
 
-	if (opt_rebase < 0)
+	ਜੇ (opt_rebase < 0)
 		opt_rebase = config_get_rebase(&rebase_unspecified);
 
-	if (repo_read_index_unmerged(the_repository))
+	ਜੇ (repo_read_ਸੂਚਕਾਂਕ_unmerged(the_repository))
 		die_resolve_conflict("pull");
 
-	if (file_exists(git_path_merge_head(the_repository)))
-		die_conclude_merge();
+	ਜੇ (file_exists(git_ਰਸਤਾ_ਮਿਲਾਓ_ਸਿਰ(the_repository)))
+		die_conclude_ਮਿਲਾਓ();
 
-	if (repo_get_oid(the_repository, "HEAD", &orig_head))
-		oidclr(&orig_head, the_repository->hash_algo);
+	ਜੇ (repo_get_oid(the_repository, "HEAD", &orig_ਸਿਰ))
+		oidclr(&orig_ਸਿਰ, the_repository->hash_algo);
 
-	if (opt_rebase) {
-		if (opt_autostash == -1)
+	ਜੇ (opt_rebase) {
+		ਜੇ (opt_autostash == -1)
 			opt_autostash = config_rebase_autostash;
 
-		if (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
+		ਜੇ (is_null_oid(&orig_ਸਿਰ) && !is_ਸੂਚਕਾਂਕ_unborn(the_repository->ਸੂਚਕਾਂਕ))
 			die(_("Updating an unborn branch with changes added to the index."));
 
-		if (!opt_autostash)
-			require_clean_work_tree(the_repository,
+		ਜੇ (!opt_autostash)
+			require_clean_work_ਰੁੱਖ(the_repository,
 				N_("pull with rebase"),
 				_("Please commit or stash them."), 1, 0);
 
-		if (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
-			oidclr(&rebase_fork_point, the_repository->hash_algo);
+		ਜੇ (get_rebase_fork_ਬਿੰਦੂ(&rebase_fork_ਬਿੰਦੂ, repo, *refspecs))
+			oidclr(&rebase_fork_ਬਿੰਦੂ, the_repository->hash_algo);
 	}
 
-	if (run_fetch(repo, refspecs))
-		return 1;
+	ਜੇ (ਲੜੀਵਾਰ_fetch(repo, refspecs))
+		ਵਾਪਸ 1;
 
-	if (opt_dry_run)
-		return 0;
+	ਜੇ (opt_dry_ਲੜੀਵਾਰ)
+		ਵਾਪਸ 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &curr_head))
-		oidclr(&curr_head, the_repository->hash_algo);
+	ਜੇ (repo_get_oid(the_repository, "HEAD", &curr_ਸਿਰ))
+		oidclr(&curr_ਸਿਰ, the_repository->hash_algo);
 
-	if (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
-			!oideq(&orig_head, &curr_head)) {
+	ਜੇ (!is_null_oid(&orig_ਸਿਰ) && !is_null_oid(&curr_ਸਿਰ) &&
+			!oideq(&orig_ਸਿਰ, &curr_ਸਿਰ)) {
 		/*
 		 * The fetch involved updating the current branch.
 		 *
@@ -1113,85 +1113,85 @@ int cmd_pull(int argc,
 
 		warning(_("fetch updated the current branch head.\n"
 			"fast-forwarding your working tree from\n"
-			"commit %s."), oid_to_hex(&orig_head));
+			"commit %s."), oid_ਮੰਜ਼ਿਲ_hex(&orig_ਸਿਰ));
 
-		if (checkout_fast_forward(the_repository, &orig_head,
-					  &curr_head, 0))
+		ਜੇ (checkout_fast_forward(the_repository, &orig_ਸਿਰ,
+					  &curr_ਸਿਰ, 0))
 			die(_("Cannot fast-forward your working tree.\n"
 				"After making sure that you saved anything precious from\n"
 				"$ git diff %s\n"
 				"output, run\n"
 				"$ git reset --hard\n"
-				"to recover."), oid_to_hex(&orig_head));
+				"to recover."), oid_ਮੰਜ਼ਿਲ_hex(&orig_ਸਿਰ));
 	}
 
-	get_merge_heads(&merge_heads);
+	get_ਮਿਲਾਓ_heads(&ਮਿਲਾਓ_heads);
 
-	if (!merge_heads.nr)
-		die_no_merge_candidates(repo, refspecs);
+	ਜੇ (!ਮਿਲਾਓ_heads.nr)
+		die_no_ਮਿਲਾਓ_candidates(repo, refspecs);
 
-	if (is_null_oid(&orig_head)) {
-		if (merge_heads.nr > 1)
+	ਜੇ (is_null_oid(&orig_ਸਿਰ)) {
+		ਜੇ (ਮਿਲਾਓ_heads.nr > 1)
 			die(_("Cannot merge multiple branches into empty head."));
-		ret = pull_into_void(merge_heads.oid, &curr_head);
-		goto cleanup;
+		ret = pull_into_void(ਮਿਲਾਓ_heads.oid, &curr_ਸਿਰ);
+		ਜਾਓ cleanup;
 	}
-	if (merge_heads.nr > 1) {
-		if (opt_rebase)
+	ਜੇ (ਮਿਲਾਓ_heads.nr > 1) {
+		ਜੇ (opt_rebase)
 			die(_("Cannot rebase onto multiple branches."));
-		if (opt_ff && !strcmp(opt_ff, "--ff-only"))
+		ਜੇ (opt_ff && !strcmp(opt_ff, "--ff-only"))
 			die(_("Cannot fast-forward to multiple branches."));
 	}
 
-	can_ff = get_can_ff(&orig_head, &merge_heads);
-	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
+	can_ff = get_can_ff(&orig_ਸਿਰ, &ਮਿਲਾਓ_heads);
+	divergent = !can_ff && !already_ਉੱਪਰ_ਮੰਜ਼ਿਲ_date(&orig_ਸਿਰ, &ਮਿਲਾਓ_heads);
 
 	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
+	ਜੇ (opt_ff && !strcmp(opt_ff, "--ff-only")) {
+		ਜੇ (divergent)
 			die_ff_impossible();
 		opt_rebase = REBASE_FALSE;
 	}
 	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_ff && rebase_unspecified && divergent) {
+	ਜੇ (!opt_ff && rebase_unspecified && divergent) {
 		show_advice_pull_non_ff();
 		die(_("Need to specify how to reconcile divergent branches."));
 	}
 
-	if (opt_rebase) {
-		struct object_id newbase;
-		struct object_id upstream;
-		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_head,
-						merge_heads.oid, &rebase_fork_point);
+	ਜੇ (opt_rebase) {
+		ਬਣਤਰ object_id newbase;
+		ਬਣਤਰ object_id upstream;
+		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_ਸਿਰ,
+						ਮਿਲਾਓ_heads.oid, &rebase_fork_ਬਿੰਦੂ);
 
-		if ((recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ਜੇ ((recurse_submodules == RECURSE_SUBMODULES_ON ||
 		     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND) &&
-		    submodule_touches_in_range(the_repository, &upstream, &curr_head))
+		    submodule_touches_ਵਿੱਚ_range(the_repository, &upstream, &curr_ਸਿਰ))
 			die(_("cannot rebase with locally recorded submodule modifications"));
 
-		if (can_ff) {
+		ਜੇ (can_ff) {
 			/* we can fast-forward this without invoking rebase */
-			free(opt_ff);
+			ਮੁਕਤ(opt_ff);
 			opt_ff = xstrdup("--ff-only");
-			ret = run_merge();
-		} else {
-			ret = run_rebase(&newbase, &upstream);
+			ret = ਲੜੀਵਾਰ_ਮਿਲਾਓ();
+		} ਨਹੀਂਤਾਂ {
+			ret = ਲੜੀਵਾਰ_rebase(&newbase, &upstream);
 		}
 
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ਜੇ (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = rebase_submodules();
 
-		goto cleanup;
-	} else {
-		ret = run_merge();
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ਜਾਓ cleanup;
+	} ਨਹੀਂਤਾਂ {
+		ret = ਲੜੀਵਾਰ_ਮਿਲਾਓ();
+		ਜੇ (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = update_submodules();
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 
 cleanup:
-	oid_array_clear(&merge_heads);
-	return ret;
+	oid_array_clear(&ਮਿਲਾਓ_heads);
+	ਵਾਪਸ ret;
 }

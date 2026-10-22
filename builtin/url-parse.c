@@ -1,135 +1,135 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "url.h"
-#include "urlmatch.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "url.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
-	NULL
+	ਨਿਰਾ
 };
 
-static char *component_arg;
+ਸਥਿਰ ਅੱਖਰ *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+ਸਥਿਰ ਬਣਤਰ option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
-	OPT_END(),
+	OPT_ਸਿਰਾ(),
 };
 
-enum url_component {
+ਗਿਣਤੀ url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
 	URL_PASSWORD,
 	URL_HOST,
-	URL_PORT,
-	URL_PATH,
+	URL_ਪੋਰਟ,
+	URL_ਰਸਤਾ,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+ਸਥਿਰ ਖਾਲੀ parse_or_die(ਅਚਲ ਅੱਖਰ *url, ਬਣਤਰ url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	ਜੇ (url_is_local_not_ssh(url)) {
+		ਜੇ (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		ਜੇ (has_dos_drive_ਅਗੇਤਰ(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	ਜੇ (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+ਸਥਿਰ ਗਿਣਤੀ url_component get_component_or_die(ਅਚਲ ਅੱਖਰ *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	ਜੇ (!strcmp("path", arg))
+		ਵਾਪਸ URL_ਰਸਤਾ;
+	ਜੇ (!strcmp("host", arg))
+		ਵਾਪਸ URL_HOST;
+	ਜੇ (!strcmp("scheme", arg))
+		ਵਾਪਸ URL_SCHEME;
+	ਜੇ (!strcmp("user", arg))
+		ਵਾਪਸ URL_USER;
+	ਜੇ (!strcmp("password", arg))
+		ਵਾਪਸ URL_PASSWORD;
+	ਜੇ (!strcmp("port", arg))
+		ਵਾਪਸ URL_ਪੋਰਟ;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+ਸਥਿਰ ਅੱਖਰ *ਕੱਢੋ_component(ਗਿਣਤੀ url_component component,
+			       ਬਣਤਰ url_info *info)
 {
-	size_t offset, length;
+	ਮਾਪ_t ਵਿੱਥ, ਲੰਮਾਈ;
 
-	switch (component) {
-	case URL_SCHEME:
-		offset = 0;
-		length = info->scheme_len;
-		break;
-	case URL_USER:
-		offset = info->user_off;
-		length = info->user_len;
-		break;
-	case URL_PASSWORD:
-		offset = info->passwd_off;
-		length = info->passwd_len;
-		break;
-	case URL_HOST:
-		offset = info->host_off;
-		length = info->host_len;
-		break;
-	case URL_PORT:
-		offset = info->port_off;
-		length = info->port_len;
-		break;
-	case URL_PATH:
-		offset = info->path_off;
-		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+	ਚੋਣ (component) {
+	ਹਾਲਤ URL_SCHEME:
+		ਵਿੱਥ = 0;
+		ਲੰਮਾਈ = info->scheme_len;
+		ਰੋਕੋ;
+	ਹਾਲਤ URL_USER:
+		ਵਿੱਥ = info->user_off;
+		ਲੰਮਾਈ = info->user_len;
+		ਰੋਕੋ;
+	ਹਾਲਤ URL_PASSWORD:
+		ਵਿੱਥ = info->passwd_off;
+		ਲੰਮਾਈ = info->passwd_len;
+		ਰੋਕੋ;
+	ਹਾਲਤ URL_HOST:
+		ਵਿੱਥ = info->host_off;
+		ਲੰਮਾਈ = info->host_len;
+		ਰੋਕੋ;
+	ਹਾਲਤ URL_ਪੋਰਟ:
+		ਵਿੱਥ = info->ਪੋਰਟ_off;
+		ਲੰਮਾਈ = info->ਪੋਰਟ_len;
+		ਰੋਕੋ;
+	ਹਾਲਤ URL_ਰਸਤਾ:
+		ਵਿੱਥ = info->ਰਸਤਾ_off;
+		ਲੰਮਾਈ = info->ਰਸਤਾ_len;
+		ਰੋਕੋ;
+	ਹਾਲਤ URL_NONE:
+		ਵਾਪਸ ਨਿਰਾ;
 	}
 
-	return xstrndup(info->url + offset, length);
+	ਵਾਪਸ xstrndup(info->url + ਵਿੱਥ, ਲੰਮਾਈ);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ਪੂਰਨ cmd_url_parse(ਪੂਰਨ argc,
+		  ਅਚਲ ਅੱਖਰ **argv,
+		  ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	ਬਣਤਰ url_info info;
+	ਗਿਣਤੀ url_component selected = URL_NONE;
+	ਅੱਖਰ *extracted;
+	ਪੂਰਨ i;
 
-	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	ਜੇ (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	ਜੇ (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	ਲਈ (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
-			extracted = extract_component(selected, &info);
-			if (extracted) {
+		ਜੇ (selected != URL_NONE) {
+			extracted = ਕੱਢੋ_component(selected, &info);
+			ਜੇ (extracted) {
 				puts(extracted);
-				free(extracted);
+				ਮੁਕਤ(extracted);
 			}
 		}
 
-		free(info.url);
+		ਮੁਕਤ(info.url);
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }

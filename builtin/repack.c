@@ -1,225 +1,225 @@
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "server-info.h"
-#include "string-list.h"
-#include "midx.h"
-#include "packfile.h"
-#include "prune-packed.h"
-#include "promisor-remote.h"
-#include "repack.h"
-#include "shallow.h"
-#include "list-objects-filter-options.h"
-#include "oidset.h"
-#include "hex.h"
-#include "wt-status.h"
-#include "read-cache-ll.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "server-info.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "string-list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "midx.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "packfile.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "prune-packed.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "promisor-remote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "repack.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "shallow.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "list-objects-filter-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "oidset.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "wt-status.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "read-cache-ll.h"
 
-#define ALL_INTO_ONE 1
-#define LOOSEN_UNREACHABLE 2
-#define PACK_CRUFT 4
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ALL_INTO_ONE 1
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LOOSEN_UNREACHABLE 2
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ PACK_CRUFT 4
 
-#define DELETE_PACK 1
-#define RETAIN_PACK 2
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DELETE_PACK 1
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ RETAIN_PACK 2
 
-static int pack_everything;
-static int write_bitmaps = -1;
-static int use_delta_islands;
-static int run_update_server_info = 1;
-static char *packdir, *packtmp_name, *packtmp;
-static int midx_must_contain_cruft = 1;
-static int drop_filtered;
-static int dry_run;
-static int write_bitmaps_given;
+ਸਥਿਰ ਪੂਰਨ pack_everything;
+ਸਥਿਰ ਪੂਰਨ write_bitmaps = -1;
+ਸਥਿਰ ਪੂਰਨ use_delta_islands;
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_update_server_info = 1;
+ਸਥਿਰ ਅੱਖਰ *packdir, *packtmp_name, *packtmp;
+ਸਥਿਰ ਪੂਰਨ midx_must_contain_cruft = 1;
+ਸਥਿਰ ਪੂਰਨ drop_filtered;
+ਸਥਿਰ ਪੂਰਨ dry_ਲੜੀਵਾਰ;
+ਸਥਿਰ ਪੂਰਨ write_bitmaps_given;
 
-static const char *const git_repack_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ git_repack_usage[] = {
 	N_("git repack [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m]\n"
 	   "[--window=<n>] [--depth=<n>] [--threads=<n>] [--keep-pack=<pack-name>]\n"
 	   "[--write-midx[=<mode>]] [--name-hash-version=<n>] [--path-walk]\n"
 	   "[--filter=<filter-spec>] [--drop-filtered [--dry-run]]"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char incremental_bitmap_conflict_error[] = N_(
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ incremental_bitmap_conflict_error[] = N_(
 "Incremental repacks are incompatible with bitmap indexes.  Use\n"
 "--no-write-bitmap-index or disable the pack.writeBitmaps configuration."
 );
 
-#define DEFAULT_MIDX_SPLIT_FACTOR 2
-#define DEFAULT_MIDX_NEW_LAYER_THRESHOLD 8
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEFAULT_MIDX_ਵੰਡੋ_ਗੁਣਕ 2
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEFAULT_MIDX_NEW_LAYER_ਹੱਦ 8
 
-struct repack_config_ctx {
-	struct pack_objects_args *po_args;
-	struct pack_objects_args *cruft_po_args;
-	int midx_split_factor;
-	int midx_new_layer_threshold;
+ਬਣਤਰ repack_config_ctx {
+	ਬਣਤਰ pack_objects_ਦਲੀਲਾਂ *po_ਦਲੀਲਾਂ;
+	ਬਣਤਰ pack_objects_ਦਲੀਲਾਂ *cruft_po_ਦਲੀਲਾਂ;
+	ਪੂਰਨ midx_ਵੰਡੋ_ਗੁਣਕ;
+	ਪੂਰਨ midx_new_layer_ਹੱਦ;
 };
 
-static int repack_config(const char *var, const char *value,
-			 const struct config_context *ctx, void *cb)
+ਸਥਿਰ ਪੂਰਨ repack_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+			 ਅਚਲ ਬਣਤਰ config_context *ctx, ਖਾਲੀ *cb)
 {
-	struct repack_config_ctx *repack_ctx = cb;
-	struct pack_objects_args *po_args = repack_ctx->po_args;
-	struct pack_objects_args *cruft_po_args = repack_ctx->cruft_po_args;
-	if (!strcmp(var, "repack.usedeltabaseoffset")) {
-		po_args->delta_base_offset = git_config_bool(var, value);
-		return 0;
+	ਬਣਤਰ repack_config_ctx *repack_ctx = cb;
+	ਬਣਤਰ pack_objects_ਦਲੀਲਾਂ *po_ਦਲੀਲਾਂ = repack_ctx->po_ਦਲੀਲਾਂ;
+	ਬਣਤਰ pack_objects_ਦਲੀਲਾਂ *cruft_po_ਦਲੀਲਾਂ = repack_ctx->cruft_po_ਦਲੀਲਾਂ;
+	ਜੇ (!strcmp(var, "repack.usedeltabaseoffset")) {
+		po_ਦਲੀਲਾਂ->delta_ਅਧਾਰ_ਵਿੱਥ = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "repack.packkeptobjects")) {
-		po_args->pack_kept_objects = git_config_bool(var, value);
-		return 0;
+	ਜੇ (!strcmp(var, "repack.packkeptobjects")) {
+		po_ਦਲੀਲਾਂ->pack_kept_objects = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "repack.writebitmaps") ||
+	ਜੇ (!strcmp(var, "repack.writebitmaps") ||
 	    !strcmp(var, "pack.writebitmaps")) {
-		write_bitmaps = git_config_bool(var, value);
-		return 0;
+		write_bitmaps = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "repack.usedeltaislands")) {
-		use_delta_islands = git_config_bool(var, value);
-		return 0;
+	ਜੇ (!strcmp(var, "repack.usedeltaislands")) {
+		use_delta_islands = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (strcmp(var, "repack.updateserverinfo") == 0) {
-		run_update_server_info = git_config_bool(var, value);
-		return 0;
+	ਜੇ (strcmp(var, "repack.updateserverinfo") == 0) {
+		ਲੜੀਵਾਰ_update_server_info = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "repack.cruftwindow")) {
-		free(cruft_po_args->window);
-		return git_config_string(&cruft_po_args->window, var, value);
+	ਜੇ (!strcmp(var, "repack.cruftwindow")) {
+		ਮੁਕਤ(cruft_po_ਦਲੀਲਾਂ->ਖਿੜਕੀ);
+		ਵਾਪਸ git_config_string(&cruft_po_ਦਲੀਲਾਂ->ਖਿੜਕੀ, var, ਮੁੱਲ);
 	}
-	if (!strcmp(var, "repack.cruftwindowmemory")) {
-		free(cruft_po_args->window_memory);
-		return git_config_string(&cruft_po_args->window_memory, var, value);
+	ਜੇ (!strcmp(var, "repack.cruftwindowmemory")) {
+		ਮੁਕਤ(cruft_po_ਦਲੀਲਾਂ->ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ);
+		ਵਾਪਸ git_config_string(&cruft_po_ਦਲੀਲਾਂ->ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ, var, ਮੁੱਲ);
 	}
-	if (!strcmp(var, "repack.cruftdepth")) {
-		free(cruft_po_args->depth);
-		return git_config_string(&cruft_po_args->depth, var, value);
+	ਜੇ (!strcmp(var, "repack.cruftdepth")) {
+		ਮੁਕਤ(cruft_po_ਦਲੀਲਾਂ->ਡੂੰਘਾਈ);
+		ਵਾਪਸ git_config_string(&cruft_po_ਦਲੀਲਾਂ->ਡੂੰਘਾਈ, var, ਮੁੱਲ);
 	}
-	if (!strcmp(var, "repack.cruftthreads")) {
-		free(cruft_po_args->threads);
-		return git_config_string(&cruft_po_args->threads, var, value);
+	ਜੇ (!strcmp(var, "repack.cruftthreads")) {
+		ਮੁਕਤ(cruft_po_ਦਲੀਲਾਂ->ਧਾਗੇ);
+		ਵਾਪਸ git_config_string(&cruft_po_ਦਲੀਲਾਂ->ਧਾਗੇ, var, ਮੁੱਲ);
 	}
-	if (!strcmp(var, "repack.midxmustcontaincruft")) {
-		midx_must_contain_cruft = git_config_bool(var, value);
-		return 0;
+	ਜੇ (!strcmp(var, "repack.midxmustcontaincruft")) {
+		midx_must_contain_cruft = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "repack.midxsplitfactor")) {
-		repack_ctx->midx_split_factor = git_config_int(var, value,
+	ਜੇ (!strcmp(var, "repack.midxsplitfactor")) {
+		repack_ctx->midx_ਵੰਡੋ_ਗੁਣਕ = git_config_int(var, ਮੁੱਲ,
 							       ctx->kvi);
-		return 0;
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "repack.midxnewlayerthreshold")) {
-		repack_ctx->midx_new_layer_threshold = git_config_int(var, value,
+	ਜੇ (!strcmp(var, "repack.midxnewlayerthreshold")) {
+		repack_ctx->midx_new_layer_ਹੱਦ = git_config_int(var, ਮੁੱਲ,
 								      ctx->kvi);
-		return 0;
+		ਵਾਪਸ 0;
 	}
-	return git_default_config(var, value, ctx, cb);
+	ਵਾਪਸ git_default_config(var, ਮੁੱਲ, ctx, cb);
 }
 
-static int option_parse_write_bitmaps(const struct option *opt, const char *arg,
-				      int unset)
+ਸਥਿਰ ਪੂਰਨ option_parse_write_bitmaps(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg,
+				      ਪੂਰਨ unset)
 {
-	int *value = opt->value;
+	ਪੂਰਨ *ਮੁੱਲ = opt->ਮੁੱਲ;
 
 	BUG_ON_OPT_ARG(arg);
-	if (unset)
-		*value = 0;
-	else
-		*value = 1;
+	ਜੇ (unset)
+		*ਮੁੱਲ = 0;
+	ਨਹੀਂਤਾਂ
+		*ਮੁੱਲ = 1;
 
 	write_bitmaps_given = 1;
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int option_parse_write_midx(const struct option *opt, const char *arg,
-				   int unset)
+ਸਥਿਰ ਪੂਰਨ option_parse_write_midx(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg,
+				   ਪੂਰਨ unset)
 {
-	enum repack_write_midx_mode *cfg = opt->value;
+	ਗਿਣਤੀ repack_write_midx_ਬਹੁਲਕ *cfg = opt->ਮੁੱਲ;
 
-	if (unset) {
+	ਜੇ (unset) {
 		*cfg = REPACK_WRITE_MIDX_NONE;
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
-	if (!arg || !*arg)
+	ਜੇ (!arg || !*arg)
 		*cfg = REPACK_WRITE_MIDX_DEFAULT;
-	else if (!strcmp(arg, "incremental"))
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "incremental"))
 		*cfg = REPACK_WRITE_MIDX_INCREMENTAL;
-	else
-		return error(_("unknown value for %s: %s"), opt->long_name, arg);
+	ਨਹੀਂਤਾਂ
+		ਵਾਪਸ error(_("unknown value for %s: %s"), opt->long_name, arg);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-int cmd_repack(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ਪੂਰਨ cmd_repack(ਪੂਰਨ argc,
+	       ਅਚਲ ਅੱਖਰ **argv,
+	       ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+	       ਬਣਤਰ repository *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct string_list_item *item;
-	struct string_list names = STRING_LIST_INIT_DUP;
-	struct existing_packs existing = EXISTING_PACKS_INIT;
-	struct oidset drop_oids = OIDSET_INIT;
-	struct pack_geometry geometry = { 0 };
-	struct tempfile *refs_snapshot = NULL;
-	int i, ret;
-	int show_progress;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
+	ਬਣਤਰ string_list ਨਾਂ = STRING_LIST_INIT_DUP;
+	ਬਣਤਰ existing_packs existing = EXISTING_PACKS_INIT;
+	ਬਣਤਰ oidset drop_oids = OIDSET_INIT;
+	ਬਣਤਰ pack_geometry geometry = { 0 };
+	ਬਣਤਰ tempfile *refs_snapshot = ਨਿਰਾ;
+	ਪੂਰਨ i, ret;
+	ਪੂਰਨ show_ਤਰੱਕੀ;
 
 	/* variables to be filled by option parsing */
-	struct repack_config_ctx config_ctx;
-	int delete_redundant = 0;
-	const char *unpack_unreachable = NULL;
-	int keep_unreachable = 0;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct pack_objects_args po_args = PACK_OBJECTS_ARGS_INIT;
-	struct pack_objects_args cruft_po_args = PACK_OBJECTS_ARGS_INIT;
-	enum repack_write_midx_mode write_midx = REPACK_WRITE_MIDX_NONE;
-	const char *cruft_expiration = NULL;
-	const char *expire_to = NULL;
-	const char *filter_to = NULL;
-	const char *opt_window = NULL;
-	const char *opt_window_memory = NULL;
-	const char *opt_depth = NULL;
-	const char *opt_threads = NULL;
-	unsigned long combine_cruft_below_size = 0ul;
+	ਬਣਤਰ repack_config_ctx config_ctx;
+	ਪੂਰਨ delete_redundant = 0;
+	ਅਚਲ ਅੱਖਰ *unpack_unreachable = ਨਿਰਾ;
+	ਪੂਰਨ keep_unreachable = 0;
+	ਬਣਤਰ string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	ਬਣਤਰ pack_objects_ਦਲੀਲਾਂ po_ਦਲੀਲਾਂ = PACK_OBJECTS_ਦਲੀਲਾਂ_INIT;
+	ਬਣਤਰ pack_objects_ਦਲੀਲਾਂ cruft_po_ਦਲੀਲਾਂ = PACK_OBJECTS_ਦਲੀਲਾਂ_INIT;
+	ਗਿਣਤੀ repack_write_midx_ਬਹੁਲਕ write_midx = REPACK_WRITE_MIDX_NONE;
+	ਅਚਲ ਅੱਖਰ *cruft_expiration = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *expire_ਮੰਜ਼ਿਲ = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *filter_ਮੰਜ਼ਿਲ = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *opt_ਖਿੜਕੀ = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *opt_ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *opt_ਡੂੰਘਾਈ = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *opt_ਧਾਗੇ = ਨਿਰਾ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ combine_cruft_ਹੇਠਾਂ_ਮਾਪ = 0ul;
 
-	struct option builtin_repack_options[] = {
-		OPT_BIT('a', NULL, &pack_everything,
+	ਬਣਤਰ option builtin_repack_options[] = {
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ('a', ਨਿਰਾ, &pack_everything,
 				N_("pack everything in a single pack"), ALL_INTO_ONE),
-		OPT_BIT('A', NULL, &pack_everything,
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ('A', ਨਿਰਾ, &pack_everything,
 				N_("same as -a, and turn unreachable objects loose"),
 				   LOOSEN_UNREACHABLE | ALL_INTO_ONE),
-		OPT_BIT(0, "cruft", &pack_everything,
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "cruft", &pack_everything,
 				N_("same as -a, pack unreachable cruft objects separately"),
 				   PACK_CRUFT),
 		OPT_STRING(0, "cruft-expiration", &cruft_expiration, N_("approxidate"),
 				N_("with --cruft, expire objects older than this")),
 		OPT_UNSIGNED(0, "combine-cruft-below-size",
-			     &combine_cruft_below_size,
+			     &combine_cruft_ਹੇਠਾਂ_ਮਾਪ,
 			     N_("with --cruft, only repack cruft packs smaller than this")),
-		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_args.max_pack_size,
+		OPT_UNSIGNED(0, "max-cruft-size", &cruft_po_ਦਲੀਲਾਂ.max_pack_ਮਾਪ,
 			     N_("with --cruft, limit the size of new cruft packs")),
-		OPT_BOOL('d', NULL, &delete_redundant,
+		OPT_BOOL('d', ਨਿਰਾ, &delete_redundant,
 				N_("remove redundant packs, and run git-prune-packed")),
-		OPT_BOOL('f', NULL, &po_args.no_reuse_delta,
+		OPT_BOOL('f', ਨਿਰਾ, &po_ਦਲੀਲਾਂ.no_reuse_delta,
 				N_("pass --no-reuse-delta to git-pack-objects")),
-		OPT_BOOL('F', NULL, &po_args.no_reuse_object,
+		OPT_BOOL('F', ਨਿਰਾ, &po_ਦਲੀਲਾਂ.no_reuse_object,
 				N_("pass --no-reuse-object to git-pack-objects")),
-		OPT_INTEGER(0, "name-hash-version", &po_args.name_hash_version,
+		OPT_INTEGER(0, "name-hash-version", &po_ਦਲੀਲਾਂ.name_hash_ਸੰਸਕਰਣ,
 				N_("specify the name hash version to use for grouping similar objects by path")),
-		OPT_BOOL(0, "path-walk", &po_args.path_walk,
+		OPT_BOOL(0, "path-walk", &po_ਦਲੀਲਾਂ.ਰਸਤਾ_walk,
 				N_("pass --path-walk to git-pack-objects")),
-		OPT_NEGBIT('n', NULL, &run_update_server_info,
+		OPT_NEGBIT('n', ਨਿਰਾ, &ਲੜੀਵਾਰ_update_server_info,
 				N_("do not run git-update-server-info"), 1),
-		OPT__QUIET(&po_args.quiet, N_("be quiet")),
-		OPT_BOOL('l', "local", &po_args.local,
+		OPT__QUIET(&po_ਦਲੀਲਾਂ.quiet, N_("be quiet")),
+		OPT_BOOL('l', "local", &po_ਦਲੀਲਾਂ.local,
 				N_("pass --local to git-pack-objects")),
-		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, NULL,
+		OPT_CALLBACK_F('b', "write-bitmap-index", &write_bitmaps, ਨਿਰਾ,
 				N_("write bitmap index"),
 				PARSE_OPT_NOARG, option_parse_write_bitmaps),
 		OPT_BOOL('i', "delta-islands", &use_delta_islands,
@@ -228,78 +228,78 @@ int cmd_repack(int argc,
 				N_("with -A, do not loosen objects older than this")),
 		OPT_BOOL('k', "keep-unreachable", &keep_unreachable,
 				N_("with -a, repack unreachable objects")),
-		OPT_STRING(0, "window", &opt_window, N_("n"),
+		OPT_STRING(0, "window", &opt_ਖਿੜਕੀ, N_("n"),
 				N_("size of the window used for delta compression")),
-		OPT_STRING(0, "window-memory", &opt_window_memory, N_("bytes"),
+		OPT_STRING(0, "window-memory", &opt_ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ, N_("bytes"),
 				N_("same as the above, but limit memory size instead of entries count")),
-		OPT_STRING(0, "depth", &opt_depth, N_("n"),
+		OPT_STRING(0, "depth", &opt_ਡੂੰਘਾਈ, N_("n"),
 				N_("limits the maximum delta depth")),
-		OPT_STRING(0, "threads", &opt_threads, N_("n"),
+		OPT_STRING(0, "threads", &opt_ਧਾਗੇ, N_("n"),
 				N_("limits the maximum number of threads")),
-		OPT_UNSIGNED(0, "max-pack-size", &po_args.max_pack_size,
+		OPT_UNSIGNED(0, "max-pack-size", &po_ਦਲੀਲਾਂ.max_pack_ਮਾਪ,
 			     N_("maximum size of each packfile")),
-		OPT_PARSE_LIST_OBJECTS_FILTER(&po_args.filter_options),
-		OPT_BOOL(0, "pack-kept-objects", &po_args.pack_kept_objects,
+		OPT_PARSE_LIST_OBJECTS_FILTER(&po_ਦਲੀਲਾਂ.filter_options),
+		OPT_BOOL(0, "pack-kept-objects", &po_ਦਲੀਲਾਂ.pack_kept_objects,
 				N_("repack objects in packs marked with .keep")),
 		OPT_STRING_LIST(0, "keep-pack", &keep_pack_list, N_("name"),
 				N_("do not repack this pack")),
-		OPT_INTEGER('g', "geometric", &geometry.split_factor,
+		OPT_INTEGER('g', "geometric", &geometry.ਵੰਡੋ_ਗੁਣਕ,
 			    N_("find a geometric progression with factor <N>")),
 		OPT_CALLBACK_F(0, "write-midx", &write_midx,
 			   N_("mode"),
 			   N_("write a multi-pack index of the resulting packs"),
 			   PARSE_OPT_OPTARG, option_parse_write_midx),
-		OPT_SET_INT_F('m', NULL, &write_midx,
+		OPT_ਸੈੱਟ_INT_F('m', ਨਿਰਾ, &write_midx,
 			   N_("write a multi-pack index of the resulting packs"),
 			   REPACK_WRITE_MIDX_DEFAULT,
 			   PARSE_OPT_HIDDEN),
-		OPT_STRING(0, "expire-to", &expire_to, N_("dir"),
+		OPT_STRING(0, "expire-to", &expire_ਮੰਜ਼ਿਲ, N_("dir"),
 			   N_("pack prefix to store a pack containing pruned objects")),
-		OPT_STRING(0, "filter-to", &filter_to, N_("dir"),
+		OPT_STRING(0, "filter-to", &filter_ਮੰਜ਼ਿਲ, N_("dir"),
 			   N_("pack prefix to store a pack containing filtered out objects")),
 		OPT_BOOL(0, "drop-filtered", &drop_filtered,
 				N_("delete filtered out objects (requires --filter)")),
-		OPT_BOOL(0, "dry-run", &dry_run,
+		OPT_BOOL(0, "dry-run", &dry_ਲੜੀਵਾਰ,
 				N_("only show which objects would be dropped")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
-	list_objects_filter_init(&po_args.filter_options);
+	list_objects_filter_init(&po_ਦਲੀਲਾਂ.filter_options);
 
-	memset(&config_ctx, 0, sizeof(config_ctx));
-	config_ctx.po_args = &po_args;
-	config_ctx.cruft_po_args = &cruft_po_args;
-	config_ctx.midx_split_factor = DEFAULT_MIDX_SPLIT_FACTOR;
-	config_ctx.midx_new_layer_threshold = DEFAULT_MIDX_NEW_LAYER_THRESHOLD;
+	memset(&config_ctx, 0, ਆਕਾਰ(config_ctx));
+	config_ctx.po_ਦਲੀਲਾਂ = &po_ਦਲੀਲਾਂ;
+	config_ctx.cruft_po_ਦਲੀਲਾਂ = &cruft_po_ਦਲੀਲਾਂ;
+	config_ctx.midx_ਵੰਡੋ_ਗੁਣਕ = DEFAULT_MIDX_ਵੰਡੋ_ਗੁਣਕ;
+	config_ctx.midx_new_layer_ਹੱਦ = DEFAULT_MIDX_NEW_LAYER_ਹੱਦ;
 
 	repo_config(repo, repack_config, &config_ctx);
 
-	argc = parse_options(argc, argv, prefix, builtin_repack_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, builtin_repack_options,
 				git_repack_usage, 0);
 
-	po_args.window = xstrdup_or_null(opt_window);
-	po_args.window_memory = xstrdup_or_null(opt_window_memory);
-	po_args.depth = xstrdup_or_null(opt_depth);
-	po_args.threads = xstrdup_or_null(opt_threads);
+	po_ਦਲੀਲਾਂ.ਖਿੜਕੀ = xstrdup_or_null(opt_ਖਿੜਕੀ);
+	po_ਦਲੀਲਾਂ.ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ = xstrdup_or_null(opt_ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ);
+	po_ਦਲੀਲਾਂ.ਡੂੰਘਾਈ = xstrdup_or_null(opt_ਡੂੰਘਾਈ);
+	po_ਦਲੀਲਾਂ.ਧਾਗੇ = xstrdup_or_null(opt_ਧਾਗੇ);
 
 	die_for_incompatible_opt2(drop_filtered, "--drop-filtered",
-		!!filter_to, "--filter-to");
+		!!filter_ਮੰਜ਼ਿਲ, "--filter-to");
 
-	if (dry_run && !drop_filtered)
+	ਜੇ (dry_ਲੜੀਵਾਰ && !drop_filtered)
 		die(_("--dry-run only takes effect with --drop-filtered"));
 
-	if (drop_filtered) {
-		if (!po_args.filter_options.choice)
+	ਜੇ (drop_filtered) {
+		ਜੇ (!po_ਦਲੀਲਾਂ.filter_options.choice)
 			die(_("--drop-filtered requires --filter"));
 
-		if (!(pack_everything & ALL_INTO_ONE))
+		ਜੇ (!(pack_everything & ALL_INTO_ONE))
 			die(_("--drop-filtered requires -a"));
 
 		/*
 		 * Only blob:limit=<n> is supported for now. Reject other
 		 * filter choices early, before walking the object database.
 		 */
-		if (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
+		ਜੇ (po_ਦਲੀਲਾਂ.filter_options.choice != LOFC_BLOB_ਹੱਦਬੰਦੀ)
 			die(_("--drop-filtered only supports --filter=blob:limit=<n> for now"));
 
 		/*
@@ -307,7 +307,7 @@ int cmd_repack(int argc,
 		 * report; a bitmap setting from config is silently overridden
 		 * for the duration of the command.
 		 */
-		if (write_bitmaps_given && write_bitmaps > 0)
+		ਜੇ (write_bitmaps_given && write_bitmaps > 0)
 			die(_("options '%s' and '%s' cannot be used together"),
 				"--drop-filtered", "--write-bitmap-index");
 
@@ -316,7 +316,7 @@ int cmd_repack(int argc,
 		 * dropped objects from, so dropping them would be permanent
 		 * data loss.
 		 */
-		if (!repo_has_promisor_remote(repo))
+		ਜੇ (!repo_has_promisor_remote(repo))
 			die(_("--drop-filtered requires a promisor remote"));
 
 		/*
@@ -329,21 +329,21 @@ int cmd_repack(int argc,
 		 * safety measure. Bare repositories have no such state, so
 		 * the check is skipped there.
 		 */
-		if (!is_bare_repository(repo)) {
-			struct wt_status_state state = { 0 };
+		ਜੇ (!is_bare_repository(repo)) {
+			ਬਣਤਰ wt_ਸਥਿਤੀ_state state = { 0 };
 
-			wt_status_get_state(repo, &state, 0);
-			if (state.merge_in_progress || state.revert_in_progress ||
-			    state.rebase_in_progress || state.bisect_in_progress ||
-			    state.cherry_pick_in_progress || state.am_in_progress ||
-			    state.rebase_interactive_in_progress) {
-				wt_status_state_free_buffers(&state);
+			wt_ਸਥਿਤੀ_get_state(repo, &state, 0);
+			ਜੇ (state.ਮਿਲਾਓ_ਵਿੱਚ_ਤਰੱਕੀ || state.revert_ਵਿੱਚ_ਤਰੱਕੀ ||
+			    state.rebase_ਵਿੱਚ_ਤਰੱਕੀ || state.bisect_ਵਿੱਚ_ਤਰੱਕੀ ||
+			    state.cherry_pick_ਵਿੱਚ_ਤਰੱਕੀ || state.am_ਵਿੱਚ_ਤਰੱਕੀ ||
+			    state.rebase_interactive_ਵਿੱਚ_ਤਰੱਕੀ) {
+				wt_ਸਥਿਤੀ_state_free_buffers(&state);
 				die(_("--drop-filtered cannot be used while "
 				      "another operation (merge, rebase, am, "
 				      "cherry-pick, revert, or bisect) is in "
 				      "progress"));
 			}
-			wt_status_state_free_buffers(&state);
+			wt_ਸਥਿਤੀ_state_free_buffers(&state);
 		}
 
 		write_bitmaps = 0;
@@ -353,13 +353,13 @@ int cmd_repack(int argc,
 		 * without them and then removing the old packs, so the
 		 * redundant packs must be deleted. Imply -d on a real run.
 		 */
-		if (!dry_run)
+		ਜੇ (!dry_ਲੜੀਵਾਰ)
 			delete_redundant = 1;
 
-		ret = enumerate_promisor_blobs(repo, &po_args.filter_options, &drop_oids);
+		ret = enumerate_promisor_blobs(repo, &po_ਦਲੀਲਾਂ.filter_options, &drop_oids);
 
-		if (ret)
-			goto cleanup;
+		ਜੇ (ret)
+			ਜਾਓ cleanup;
 
 		/*
 		 * Refuse to drop blobs that the current index references.
@@ -368,56 +368,56 @@ int cmd_repack(int argc,
 		 * nothing. This guard just avoids that churn. Bare
 		 * repositories have no index, so the check is skipped there.
 		 */
-		if (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
-			struct index_state *istate = repo->index;
-			unsigned int i;
+		ਜੇ (!is_bare_repository(repo) && oidset_ਮਾਪ(&drop_oids)) {
+			ਬਣਤਰ ਸੂਚਕਾਂਕ_state *istate = repo->ਸੂਚਕਾਂਕ;
+			ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ i;
 
-			if (repo_read_index(repo) < 0)
+			ਜੇ (repo_read_ਸੂਚਕਾਂਕ(repo) < 0)
 				die(_("could not read the index"));
 
-			for (i = 0; i < istate->cache_nr; i++) {
-				const struct cache_entry *ce = istate->cache[i];
+			ਲਈ (i = 0; i < istate->cache_nr; i++) {
+				ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce = istate->cache[i];
 
-				if (oidset_contains(&drop_oids, &ce->oid))
+				ਜੇ (oidset_ਸ਼ਾਮਲ_ਹੈ(&drop_oids, &ce->oid))
 					die(_("cannot drop '%s' (%s): it is referenced by the current index"),
-						ce->name, oid_to_hex(&ce->oid));
+						ce->name, oid_ਮੰਜ਼ਿਲ_hex(&ce->oid));
 			}
 		}
 
-		if (dry_run) {
-			struct oidset_iter iter;
-			const struct object_id *oid;
+		ਜੇ (dry_ਲੜੀਵਾਰ) {
+			ਬਣਤਰ oidset_iter iter;
+			ਅਚਲ ਬਣਤਰ object_id *oid;
 
 			oidset_iter_init(&drop_oids, &iter);
-			while ((oid = oidset_iter_next(&iter)))
-				printf("%s\n", oid_to_hex(oid));
+			ਜਦੋਂ ((oid = oidset_iter_ਅਗਲਾ(&iter)))
+				ਲਿਖੋ("%s\n", oid_ਮੰਜ਼ਿਲ_hex(oid));
 		}
 	}
 
-	if (delete_redundant && repo->repository_format_precious_objects)
+	ਜੇ (delete_redundant && repo->repository_format_precious_objects)
 		die(_("cannot delete packs in a precious-objects repo"));
 
 	die_for_incompatible_opt3(unpack_unreachable || (pack_everything & LOOSEN_UNREACHABLE), "-A",
 				  keep_unreachable, "-k/--keep-unreachable",
 				  pack_everything & PACK_CRUFT, "--cruft");
 
-	if (pack_everything & PACK_CRUFT)
+	ਜੇ (pack_everything & PACK_CRUFT)
 		pack_everything |= ALL_INTO_ONE;
 
-	if (write_bitmaps < 0) {
-		if (write_midx == REPACK_WRITE_MIDX_NONE &&
+	ਜੇ (write_bitmaps < 0) {
+		ਜੇ (write_midx == REPACK_WRITE_MIDX_NONE &&
 		    (!(pack_everything & ALL_INTO_ONE) || !is_bare_repository(repo)))
 			write_bitmaps = 0;
 	}
-	if (po_args.pack_kept_objects < 0)
-		po_args.pack_kept_objects = write_bitmaps > 0 &&
+	ਜੇ (po_ਦਲੀਲਾਂ.pack_kept_objects < 0)
+		po_ਦਲੀਲਾਂ.pack_kept_objects = write_bitmaps > 0 &&
 			write_midx == REPACK_WRITE_MIDX_NONE;
 
-	if (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
+	ਜੇ (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
 	    write_midx == REPACK_WRITE_MIDX_NONE)
 		die(_(incremental_bitmap_conflict_error));
 
-	if (write_bitmaps && po_args.local &&
+	ਜੇ (write_bitmaps && po_ਦਲੀਲਾਂ.local &&
 	    odb_has_alternates(repo->objects)) {
 		/*
 		 * When asked to do a local repack, but we have
@@ -430,54 +430,54 @@ int cmd_repack(int argc,
 		write_bitmaps = 0;
 	}
 
-	if (config_ctx.midx_split_factor < 2)
+	ਜੇ (config_ctx.midx_ਵੰਡੋ_ਗੁਣਕ < 2)
 		die(_("invalid value for %s: %d"), "--midx-split-factor",
-		    config_ctx.midx_split_factor);
-	if (config_ctx.midx_new_layer_threshold < 1)
+		    config_ctx.midx_ਵੰਡੋ_ਗੁਣਕ);
+	ਜੇ (config_ctx.midx_new_layer_ਹੱਦ < 1)
 		die(_("invalid value for %s: %d"), "--midx-new-layer-threshold",
-		    config_ctx.midx_new_layer_threshold);
+		    config_ctx.midx_new_layer_ਹੱਦ);
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
-		struct strbuf path = STRBUF_INIT;
+	ਜੇ (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
+		ਬਣਤਰ strbuf ਰਸਤਾ = STRBUF_INIT;
 
-		strbuf_addf(&path, "%s/%s_XXXXXX",
+		strbuf_addf(&ਰਸਤਾ, "%s/%s_XXXXXX",
 			    repo_get_object_directory(repo),
 			    "bitmap-ref-tips");
 
-		refs_snapshot = xmks_tempfile(path.buf);
+		refs_snapshot = xmks_tempfile(ਰਸਤਾ.buf);
 		midx_snapshot_refs(repo, refs_snapshot);
 
-		strbuf_release(&path);
+		strbuf_release(&ਰਸਤਾ);
 	}
 
 	packdir = mkpathdup("%s/pack", repo_get_object_directory(repo));
-	packtmp_name = xstrfmt(".tmp-%d-pack", (int)getpid());
+	packtmp_name = xstrfmt(".tmp-%d-pack", (ਪੂਰਨ)getpid());
 	packtmp = mkpathdup("%s/%s", packdir, packtmp_name);
 
 	existing.repo = repo;
 	existing_packs_collect(&existing, &keep_pack_list);
 
-	if (geometry.split_factor) {
-		if (pack_everything)
+	ਜੇ (geometry.ਵੰਡੋ_ਗੁਣਕ) {
+		ਜੇ (pack_everything)
 			die(_("options '%s' and '%s' cannot be used together"), "--geometric", "-A/-a");
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
-			geometry.midx_layer_threshold = config_ctx.midx_new_layer_threshold;
-			geometry.midx_layer_threshold_set = true;
+		ਜੇ (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
+			geometry.midx_layer_ਹੱਦ = config_ctx.midx_new_layer_ਹੱਦ;
+			geometry.midx_layer_ਹੱਦ_ਸੈੱਟ = true;
 		}
-		pack_geometry_init(&geometry, &existing, &po_args);
-		pack_geometry_split(&geometry);
+		pack_geometry_init(&geometry, &existing, &po_ਦਲੀਲਾਂ);
+		pack_geometry_ਵੰਡੋ(&geometry);
 	}
 
-	prepare_pack_objects(&cmd, &po_args, packtmp);
+	prepare_pack_objects(&cmd, &po_ਦਲੀਲਾਂ, packtmp);
 
-	show_progress = !po_args.quiet && isatty(2);
+	show_ਤਰੱਕੀ = !po_ਦਲੀਲਾਂ.quiet && isatty(2);
 
-	strvec_push(&cmd.args, "--keep-true-parents");
-	for (i = 0; i < keep_pack_list.nr; i++)
-		strvec_pushf(&cmd.args, "--keep-pack=%s",
-			     keep_pack_list.items[i].string);
-	strvec_push(&cmd.args, "--non-empty");
-	if (!geometry.split_factor) {
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--keep-true-parents");
+	ਲਈ (i = 0; i < keep_pack_list.nr; i++)
+		strvec_pushf(&cmd.ਦਲੀਲਾਂ, "--keep-pack=%s",
+			     keep_pack_list.ਚੀਜ਼ਾਂ[i].string);
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--non-empty");
+	ਜੇ (!geometry.ਵੰਡੋ_ਗੁਣਕ) {
 		/*
 		 * We need to grab all reachable objects, including those that
 		 * are reachable from reflogs and the index.
@@ -488,90 +488,90 @@ int cmd_repack(int argc,
 		 * repacking all the objects in specified packs and loose ones
 		 * (indeed, --stdin-packs is incompatible with these options).
 		 */
-		strvec_push(&cmd.args, "--all");
-		strvec_push(&cmd.args, "--reflog");
-		strvec_push(&cmd.args, "--indexed-objects");
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--all");
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--reflog");
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--indexed-objects");
 	}
-	if (repo_has_promisor_remote(repo))
-		strvec_push(&cmd.args, "--exclude-promisor-objects");
-	if (write_midx == REPACK_WRITE_MIDX_NONE) {
-		if (write_bitmaps > 0)
-			strvec_push(&cmd.args, "--write-bitmap-index");
-		else if (write_bitmaps < 0)
-			strvec_push(&cmd.args, "--write-bitmap-index-quiet");
+	ਜੇ (repo_has_promisor_remote(repo))
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--exclude-promisor-objects");
+	ਜੇ (write_midx == REPACK_WRITE_MIDX_NONE) {
+		ਜੇ (write_bitmaps > 0)
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--write-bitmap-index");
+		ਨਹੀਂਤਾਂ ਜੇ (write_bitmaps < 0)
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--write-bitmap-index-quiet");
 	}
-	if (use_delta_islands)
-		strvec_push(&cmd.args, "--delta-islands");
+	ਜੇ (use_delta_islands)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--delta-islands");
 
-	if (pack_everything & ALL_INTO_ONE) {
-		repack_promisor_objects(repo, &po_args, &names, packtmp,
-			(drop_filtered && !dry_run) ? &drop_oids : NULL);
+	ਜੇ (pack_everything & ALL_INTO_ONE) {
+		repack_promisor_objects(repo, &po_ਦਲੀਲਾਂ, &ਨਾਂ, packtmp,
+			(drop_filtered && !dry_ਲੜੀਵਾਰ) ? &drop_oids : ਨਿਰਾ);
 
-		if (existing_packs_has_non_kept(&existing) &&
+		ਜੇ (existing_packs_has_non_kept(&existing) &&
 		    delete_redundant &&
 		    !(pack_everything & PACK_CRUFT)) {
-			for_each_string_list_item(item, &names) {
-				strvec_pushf(&cmd.args, "--keep-pack=%s-%s.pack",
-					     packtmp_name, item->string);
+			for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &ਨਾਂ) {
+				strvec_pushf(&cmd.ਦਲੀਲਾਂ, "--keep-pack=%s-%s.pack",
+					     packtmp_name, ਵਸਤੂ->string);
 			}
-			if (unpack_unreachable) {
-				strvec_pushf(&cmd.args,
+			ਜੇ (unpack_unreachable) {
+				strvec_pushf(&cmd.ਦਲੀਲਾਂ,
 					     "--unpack-unreachable=%s",
 					     unpack_unreachable);
-			} else if (pack_everything & LOOSEN_UNREACHABLE) {
-				strvec_push(&cmd.args,
+			} ਨਹੀਂਤਾਂ ਜੇ (pack_everything & LOOSEN_UNREACHABLE) {
+				strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ,
 					    "--unpack-unreachable");
-			} else if (keep_unreachable) {
-				strvec_push(&cmd.args, "--keep-unreachable");
+			} ਨਹੀਂਤਾਂ ਜੇ (keep_unreachable) {
+				strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--keep-unreachable");
 			}
 		}
 
-		if (keep_unreachable && delete_redundant &&
+		ਜੇ (keep_unreachable && delete_redundant &&
 		    !(pack_everything & PACK_CRUFT))
-			strvec_push(&cmd.args, "--pack-loose-unreachable");
-	} else if (geometry.split_factor) {
-		pack_geometry_repack_promisors(repo, &po_args, &geometry,
-					       &names, packtmp);
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--pack-loose-unreachable");
+	} ਨਹੀਂਤਾਂ ਜੇ (geometry.ਵੰਡੋ_ਗੁਣਕ) {
+		pack_geometry_repack_promisors(repo, &po_ਦਲੀਲਾਂ, &geometry,
+					       &ਨਾਂ, packtmp);
 
-		if (midx_must_contain_cruft)
-			strvec_push(&cmd.args, "--stdin-packs");
-		else
-			strvec_push(&cmd.args, "--stdin-packs=follow");
-		strvec_push(&cmd.args, "--unpacked");
-	} else {
-		strvec_push(&cmd.args, "--unpacked");
-		strvec_push(&cmd.args, "--incremental");
+		ਜੇ (midx_must_contain_cruft)
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--stdin-packs");
+		ਨਹੀਂਤਾਂ
+			strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--stdin-packs=follow");
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--unpacked");
+	} ਨਹੀਂਤਾਂ {
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--unpacked");
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--incremental");
 	}
 
-	if (po_args.filter_options.choice)
-		strvec_pushf(&cmd.args, "--filter=%s",
-			     expand_list_objects_filter_spec(&po_args.filter_options));
-	else if (filter_to)
+	ਜੇ (po_ਦਲੀਲਾਂ.filter_options.choice)
+		strvec_pushf(&cmd.ਦਲੀਲਾਂ, "--filter=%s",
+			     expand_list_objects_filter_spec(&po_ਦਲੀਲਾਂ.filter_options));
+	ਨਹੀਂਤਾਂ ਜੇ (filter_ਮੰਜ਼ਿਲ)
 		die(_("option '%s' can only be used along with '%s'"), "--filter-to", "--filter");
 
-	if (geometry.split_factor)
-		cmd.in = -1;
-	else
+	ਜੇ (geometry.ਵੰਡੋ_ਗੁਣਕ)
+		cmd.ਵਿੱਚ = -1;
+	ਨਹੀਂਤਾਂ
 		cmd.no_stdin = 1;
 
-	ret = start_command(&cmd);
-	if (ret)
-		goto cleanup;
+	ret = ਸ਼ੁਰੂ_command(&cmd);
+	ਜੇ (ret)
+		ਜਾਓ cleanup;
 
-	if (geometry.split_factor) {
-		FILE *in = xfdopen(cmd.in, "w");
+	ਜੇ (geometry.ਵੰਡੋ_ਗੁਣਕ) {
+		FILE *ਵਿੱਚ = xfdopen(cmd.ਵਿੱਚ, "w");
 		/*
 		 * The resulting pack should contain all objects in packs that
 		 * are going to be rolled up, but exclude objects in packs which
 		 * are being left alone.
 		 */
-		for (i = 0; i < geometry.split; i++)
-			fprintf(in, "%s\n", pack_basename(geometry.pack[i]));
-		for (i = geometry.split; i < geometry.pack_nr; i++) {
-			const char *basename = pack_basename(geometry.pack[i]);
-			char marker = '^';
+		ਲਈ (i = 0; i < geometry.ਵੰਡੋ; i++)
+			fprintf(ਵਿੱਚ, "%s\n", pack_basename(geometry.pack[i]));
+		ਲਈ (i = geometry.ਵੰਡੋ; i < geometry.pack_nr; i++) {
+			ਅਚਲ ਅੱਖਰ *basename = pack_basename(geometry.pack[i]);
+			ਅੱਖਰ marker = '^';
 
-			if (!midx_must_contain_cruft &&
+			ਜੇ (!midx_must_contain_cruft &&
 			    !string_list_has_string(&existing.midx_packs,
 						    basename)) {
 				/*
@@ -582,27 +582,27 @@ int cmd_repack(int argc,
 				marker = '!';
 			}
 
-			fprintf(in, "%c%s\n", marker, basename);
+			fprintf(ਵਿੱਚ, "%c%s\n", marker, basename);
 		}
-		fclose(in);
+		fclose(ਵਿੱਚ);
 	}
 
 	{
-		struct write_pack_opts opts = {
+		ਬਣਤਰ write_pack_opts opts = {
 			.packdir = packdir,
 			.destination = packdir,
 			.packtmp = packtmp,
 		};
-		ret = finish_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
-					      &names);
-		if (ret)
-			goto cleanup;
+		ret = ਅੰਤ_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
+					      &ਨਾਂ);
+		ਜੇ (ret)
+			ਜਾਓ cleanup;
 	}
 
-	if (!names.nr) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
+	ਜੇ (!ਨਾਂ.nr) {
+		ਬਣਤਰ odb_ਸਰੋਤ_files *files = odb_ਸਰੋਤ_files_downcast(existing.ਸਰੋਤ);
 
-		if (!po_args.quiet)
+		ਜੇ (!po_ਦਲੀਲਾਂ.quiet)
 			printf_ln(_("Nothing new to pack."));
 		/*
 		 * If we didn't write any new packs, the non-cruft packs
@@ -617,41 +617,41 @@ int cmd_repack(int argc,
 		 * midx_has_unknown_packs() will make the decision for
 		 * us.
 		 */
-		if (!get_multi_pack_index(files->dirs->packed))
+		ਜੇ (!get_multi_pack_ਸੂਚਕਾਂਕ(files->dirs->packed))
 			midx_must_contain_cruft = 1;
 	}
 
-	if (pack_everything & PACK_CRUFT) {
-		struct write_pack_opts opts = {
-			.po_args = &cruft_po_args,
+	ਜੇ (pack_everything & PACK_CRUFT) {
+		ਬਣਤਰ write_pack_opts opts = {
+			.po_ਦਲੀਲਾਂ = &cruft_po_ਦਲੀਲਾਂ,
 			.destination = packtmp,
 			.packtmp = packtmp,
 			.packdir = packdir,
 		};
 
-		if (!cruft_po_args.window)
-			cruft_po_args.window = xstrdup_or_null(po_args.window);
-		if (!cruft_po_args.window_memory)
-			cruft_po_args.window_memory = xstrdup_or_null(po_args.window_memory);
-		if (!cruft_po_args.depth)
-			cruft_po_args.depth = xstrdup_or_null(po_args.depth);
-		if (!cruft_po_args.threads)
-			cruft_po_args.threads = xstrdup_or_null(po_args.threads);
-		if (!cruft_po_args.max_pack_size)
-			cruft_po_args.max_pack_size = po_args.max_pack_size;
+		ਜੇ (!cruft_po_ਦਲੀਲਾਂ.ਖਿੜਕੀ)
+			cruft_po_ਦਲੀਲਾਂ.ਖਿੜਕੀ = xstrdup_or_null(po_ਦਲੀਲਾਂ.ਖਿੜਕੀ);
+		ਜੇ (!cruft_po_ਦਲੀਲਾਂ.ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ)
+			cruft_po_ਦਲੀਲਾਂ.ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ = xstrdup_or_null(po_ਦਲੀਲਾਂ.ਖਿੜਕੀ_ਸਮ੍ਰਿਤੀ);
+		ਜੇ (!cruft_po_ਦਲੀਲਾਂ.ਡੂੰਘਾਈ)
+			cruft_po_ਦਲੀਲਾਂ.ਡੂੰਘਾਈ = xstrdup_or_null(po_ਦਲੀਲਾਂ.ਡੂੰਘਾਈ);
+		ਜੇ (!cruft_po_ਦਲੀਲਾਂ.ਧਾਗੇ)
+			cruft_po_ਦਲੀਲਾਂ.ਧਾਗੇ = xstrdup_or_null(po_ਦਲੀਲਾਂ.ਧਾਗੇ);
+		ਜੇ (!cruft_po_ਦਲੀਲਾਂ.max_pack_ਮਾਪ)
+			cruft_po_ਦਲੀਲਾਂ.max_pack_ਮਾਪ = po_ਦਲੀਲਾਂ.max_pack_ਮਾਪ;
 
-		cruft_po_args.local = po_args.local;
-		cruft_po_args.quiet = po_args.quiet;
-		cruft_po_args.delta_base_offset = po_args.delta_base_offset;
-		cruft_po_args.pack_kept_objects = 0;
+		cruft_po_ਦਲੀਲਾਂ.local = po_ਦਲੀਲਾਂ.local;
+		cruft_po_ਦਲੀਲਾਂ.quiet = po_ਦਲੀਲਾਂ.quiet;
+		cruft_po_ਦਲੀਲਾਂ.delta_ਅਧਾਰ_ਵਿੱਥ = po_ਦਲੀਲਾਂ.delta_ਅਧਾਰ_ਵਿੱਥ;
+		cruft_po_ਦਲੀਲਾਂ.pack_kept_objects = 0;
 
 		ret = write_cruft_pack(&opts, cruft_expiration,
-				       combine_cruft_below_size, &names,
+				       combine_cruft_ਹੇਠਾਂ_ਮਾਪ, &ਨਾਂ,
 				       &existing);
-		if (ret)
-			goto cleanup;
+		ਜੇ (ret)
+			ਜਾਓ cleanup;
 
-		if (delete_redundant && expire_to) {
+		ਜੇ (delete_redundant && expire_ਮੰਜ਼ਿਲ) {
 			/*
 			 * If `--expire-to` is given with `-d`, it's possible
 			 * that we're about to prune some objects. With cruft
@@ -680,112 +680,112 @@ int cmd_repack(int argc,
 			 * pack, but rather removing all cruft packs from the
 			 * main repository regardless of size.
 			 */
-			opts.destination = expire_to;
-			ret = write_cruft_pack(&opts, NULL, 0ul, &names,
+			opts.destination = expire_ਮੰਜ਼ਿਲ;
+			ret = write_cruft_pack(&opts, ਨਿਰਾ, 0ul, &ਨਾਂ,
 					       &existing);
-			if (ret)
-				goto cleanup;
+			ਜੇ (ret)
+				ਜਾਓ cleanup;
 		}
 	}
 
-	if (po_args.filter_options.choice && !drop_filtered) {
-		struct write_pack_opts opts = {
-			.po_args = &po_args,
-			.destination = filter_to,
+	ਜੇ (po_ਦਲੀਲਾਂ.filter_options.choice && !drop_filtered) {
+		ਬਣਤਰ write_pack_opts opts = {
+			.po_ਦਲੀਲਾਂ = &po_ਦਲੀਲਾਂ,
+			.destination = filter_ਮੰਜ਼ਿਲ,
 			.packdir = packdir,
 			.packtmp = packtmp,
 		};
 
-		if (!opts.destination)
+		ਜੇ (!opts.destination)
 			opts.destination = packtmp;
 
-		ret = write_filtered_pack(&opts, &existing, &names);
-		if (ret)
-			goto cleanup;
+		ret = write_filtered_pack(&opts, &existing, &ਨਾਂ);
+		ਜੇ (ret)
+			ਜਾਓ cleanup;
 	}
 
-	string_list_sort(&names);
+	string_list_ਛਾਂਟੋ(&ਨਾਂ);
 
 	odb_close(repo->objects);
 
 	/*
 	 * Ok we have prepared all new packfiles.
 	 */
-	for_each_string_list_item(item, &names)
-		generated_pack_install(item->util, item->string, packdir,
+	for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &ਨਾਂ)
+		generated_pack_install(ਵਸਤੂ->util, ਵਸਤੂ->string, packdir,
 				       packtmp);
 	/* End of pack replacement. */
 
-	if (delete_redundant && pack_everything & ALL_INTO_ONE) {
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
+	ਜੇ (delete_redundant && pack_everything & ALL_INTO_ONE) {
+		ਜੇ (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
 			existing_packs_retain_midx_packs(&existing);
-		existing_packs_mark_for_deletion(&existing, &names);
+		existing_packs_mark_for_deletion(&existing, &ਨਾਂ);
 	}
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE) {
-		struct repack_write_midx_opts opts = {
+	ਜੇ (write_midx != REPACK_WRITE_MIDX_NONE) {
+		ਬਣਤਰ repack_write_midx_opts opts = {
 			.existing = &existing,
 			.geometry = &geometry,
-			.names = &names,
-			.refs_snapshot = refs_snapshot ? get_tempfile_path(refs_snapshot) : NULL,
+			.ਨਾਂ = &ਨਾਂ,
+			.refs_snapshot = refs_snapshot ? get_tempfile_ਰਸਤਾ(refs_snapshot) : ਨਿਰਾ,
 			.packdir = packdir,
-			.show_progress = show_progress,
+			.show_ਤਰੱਕੀ = show_ਤਰੱਕੀ,
 			.write_bitmaps = write_bitmaps > 0,
 			.midx_must_contain_cruft = midx_must_contain_cruft,
-			.midx_split_factor = config_ctx.midx_split_factor,
-			.midx_new_layer_threshold = config_ctx.midx_new_layer_threshold,
-			.mode = write_midx,
+			.midx_ਵੰਡੋ_ਗੁਣਕ = config_ctx.midx_ਵੰਡੋ_ਗੁਣਕ,
+			.midx_new_layer_ਹੱਦ = config_ctx.midx_new_layer_ਹੱਦ,
+			.ਬਹੁਲਕ = write_midx,
 		};
 
 		ret = repack_write_midx(&opts);
-		if (ret)
-			goto cleanup;
+		ਜੇ (ret)
+			ਜਾਓ cleanup;
 	}
 
 	odb_reprepare(repo->objects);
 
-	if (delete_redundant) {
-		int opts = 0;
+	ਜੇ (delete_redundant) {
+		ਪੂਰਨ opts = 0;
 		bool wrote_incremental_midx = write_midx == REPACK_WRITE_MIDX_INCREMENTAL;
 
 		existing_packs_remove_redundant(&existing, packdir,
 						wrote_incremental_midx);
 
-		if (geometry.split_factor)
-			pack_geometry_remove_redundant(&geometry, &names,
+		ਜੇ (geometry.ਵੰਡੋ_ਗੁਣਕ)
+			pack_geometry_remove_redundant(&geometry, &ਨਾਂ,
 						       &existing, packdir,
 						       wrote_incremental_midx);
-		if (show_progress)
+		ਜੇ (show_ਤਰੱਕੀ)
 			opts |= PRUNE_PACKED_VERBOSE;
 		prune_packed_objects(opts);
 
-		if (!keep_unreachable &&
+		ਜੇ (!keep_unreachable &&
 		    (!(pack_everything & LOOSEN_UNREACHABLE) ||
 		     unpack_unreachable) &&
 		    is_repository_shallow(repo))
-			prune_shallow(PRUNE_QUICK);
+			prune_shallow(PRUNE_ਤੇਜ਼);
 	}
 
-	if (run_update_server_info)
+	ਜੇ (ਲੜੀਵਾਰ_update_server_info)
 		update_server_info(repo, 0);
 
-	if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
-		struct odb_source_files *files = odb_source_files_downcast(existing.source);
-		unsigned flags = 0;
+	ਜੇ (git_env_bool(GIT_TEST_MULTI_PACK_ਸੂਚਕਾਂਕ, 0)) {
+		ਬਣਤਰ odb_ਸਰੋਤ_files *files = odb_ਸਰੋਤ_files_downcast(existing.ਸਰੋਤ);
+		ਬਿਨਾਨਿਸ਼ਾਨੀ flags = 0;
 
-		if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
+		ਜੇ (git_env_bool(GIT_TEST_MULTI_PACK_ਸੂਚਕਾਂਕ_WRITE_INCREMENTAL, 0))
 			flags |= MIDX_WRITE_INCREMENTAL;
-		write_midx_file(files->dirs->packed, NULL, NULL, flags);
+		write_midx_file(files->dirs->packed, ਨਿਰਾ, ਨਿਰਾ, flags);
 	}
 
 cleanup:
 	string_list_clear(&keep_pack_list, 0);
-	string_list_clear(&names, 1);
+	string_list_clear(&ਨਾਂ, 1);
 	oidset_clear(&drop_oids);
 	existing_packs_release(&existing);
 	pack_geometry_release(&geometry);
-	pack_objects_args_release(&po_args);
-	pack_objects_args_release(&cruft_po_args);
+	pack_objects_ਦਲੀਲਾਂ_release(&po_ਦਲੀਲਾਂ);
+	pack_objects_ਦਲੀਲਾਂ_release(&cruft_po_ਦਲੀਲਾਂ);
 
-	return ret;
+	ਵਾਪਸ ret;
 }

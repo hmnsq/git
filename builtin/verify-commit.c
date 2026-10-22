@@ -5,80 +5,80 @@
  *
  * Based on git-verify-tag
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "commit.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gpg-interface.h"
 
-static const char * const verify_commit_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ verify_commit_usage[] = {
 		N_("git verify-commit [-v | --verbose] [--raw] <commit>..."),
-		NULL
+		ਨਿਰਾ
 };
 
-static int run_gpg_verify(struct commit *commit, unsigned flags)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_gpg_verify(ਬਣਤਰ commit *commit, ਬਿਨਾਨਿਸ਼ਾਨੀ flags)
 {
-	struct signature_check signature_check;
-	int ret;
+	ਬਣਤਰ signature_check signature_check;
+	ਪੂਰਨ ret;
 
-	memset(&signature_check, 0, sizeof(signature_check));
+	memset(&signature_check, 0, ਆਕਾਰ(signature_check));
 
 	ret = check_commit_signature(commit, &signature_check);
-	print_signature_buffer(&signature_check, flags);
+	print_signature_ਬਫਰ(&signature_check, flags);
 
 	signature_check_clear(&signature_check);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int verify_commit(struct repository *repo, const char *name, unsigned flags)
+ਸਥਿਰ ਪੂਰਨ verify_commit(ਬਣਤਰ repository *repo, ਅਚਲ ਅੱਖਰ *name, ਬਿਨਾਨਿਸ਼ਾਨੀ flags)
 {
-	struct object_id oid;
-	struct object *obj;
+	ਬਣਤਰ object_id oid;
+	ਬਣਤਰ object *obj;
 
-	if (repo_get_oid(repo, name, &oid))
-		return error("commit '%s' not found.", name);
+	ਜੇ (repo_get_oid(repo, name, &oid))
+		ਵਾਪਸ error("commit '%s' not found.", name);
 
 	obj = parse_object(repo, &oid);
-	if (!obj)
-		return error("%s: unable to read file.", name);
-	if (obj->type != OBJ_COMMIT)
-		return error("%s: cannot verify a non-commit object of type %s.",
+	ਜੇ (!obj)
+		ਵਾਪਸ error("%s: unable to read file.", name);
+	ਜੇ (obj->type != OBJ_COMMIT)
+		ਵਾਪਸ error("%s: cannot verify a non-commit object of type %s.",
 				name, type_name(obj->type));
 
-	return run_gpg_verify((struct commit *)obj, flags);
+	ਵਾਪਸ ਲੜੀਵਾਰ_gpg_verify((ਬਣਤਰ commit *)obj, flags);
 }
 
-int cmd_verify_commit(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+ਪੂਰਨ cmd_verify_commit(ਪੂਰਨ argc,
+		      ਅਚਲ ਅੱਖਰ **argv,
+		      ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		      ਬਣਤਰ repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
-	unsigned flags = 0;
-	const struct option verify_commit_options[] = {
+	ਪੂਰਨ i = 1, verbose = 0, had_error = 0;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ flags = 0;
+	ਅਚਲ ਬਣਤਰ option verify_commit_options[] = {
 		OPT__VERBOSE(&verbose, N_("print commit contents")),
-		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
-		OPT_END()
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
+		OPT_ਸਿਰਾ()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ਨਿਰਾ);
 
-	argc = parse_options(argc, argv, prefix, verify_commit_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, verify_commit_options,
 			     verify_commit_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	ਜੇ (argc <= i)
 		usage_with_options(verify_commit_usage, verify_commit_options);
 
-	if (verbose)
+	ਜੇ (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
 	/* sometimes the program was terminated because this signal
 	 * was received in the process of writing the gpg input: */
-	signal(SIGPIPE, SIG_IGN);
-	while (i < argc)
-		if (verify_commit(repo, argv[i++], flags))
+	ਸੰਕੇਤ(SIGPIPE, SIG_IGN);
+	ਜਦੋਂ (i < argc)
+		ਜੇ (verify_commit(repo, argv[i++], flags))
 			had_error = 1;
-	return had_error;
+	ਵਾਪਸ had_error;
 }

@@ -1,52 +1,52 @@
 /* We need this macro to access core_apply_sparse_checkout */
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "git-compat-util.h"
-#include "config.h"
-#include "parse-options.h"
-#include "repository.h"
-#include "commit.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "object.h"
-#include "odb.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "promisor-remote.h"
-#include "strmap.h"
-#include "string-list.h"
-#include "revision.h"
-#include "trace2.h"
-#include "progress.h"
-#include "packfile.h"
-#include "path-walk.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "git-compat-util.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "repository.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dir.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tree.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tree-walk.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "oid-array.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "oidset.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "promisor-remote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strmap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "string-list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "trace2.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "progress.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "packfile.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path-walk.h"
 
-static const char * const builtin_backfill_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ builtin_backfill_usage[] = {
 	N_("git backfill [--min-batch-size=<n>] [--[no-]sparse] [--[no-]include-edges] [<revision-range>]"),
-	NULL
+	ਨਿਰਾ
 };
 
-struct backfill_context {
-	struct repository *repo;
-	struct oid_array current_batch;
-	size_t min_batch_size;
-	int sparse;
-	int include_edges;
-	struct rev_info revs;
+ਬਣਤਰ backfill_context {
+	ਬਣਤਰ repository *repo;
+	ਬਣਤਰ oid_array current_batch;
+	ਮਾਪ_t min_batch_ਮਾਪ;
+	ਪੂਰਨ sparse;
+	ਪੂਰਨ include_ਕਿਨਾਰੇ;
+	ਬਣਤਰ rev_info revs;
 };
 
-static void backfill_context_clear(struct backfill_context *ctx)
+ਸਥਿਰ ਖਾਲੀ backfill_context_clear(ਬਣਤਰ backfill_context *ctx)
 {
 	oid_array_clear(&ctx->current_batch);
 }
 
-static void download_batch(struct backfill_context *ctx)
+ਸਥਿਰ ਖਾਲੀ download_batch(ਬਣਤਰ backfill_context *ctx)
 {
-	promisor_remote_get_direct(ctx->repo,
+	promisor_remote_get_ਸਿੱਧਾ(ctx->repo,
 				   ctx->current_batch.oid,
 				   ctx->current_batch.nr);
 	oid_array_clear(&ctx->current_batch);
@@ -58,131 +58,131 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
-			      struct oid_array *list,
-			      enum object_type type,
-			      void *data)
+ਸਥਿਰ ਪੂਰਨ fill_missing_blobs(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ ਅਣਵਰਤਿਆ,
+			      ਬਣਤਰ oid_array *list,
+			      ਗਿਣਤੀ object_type type,
+			      ਖਾਲੀ *ਅੰਕੜੇ)
 {
-	struct backfill_context *ctx = data;
+	ਬਣਤਰ backfill_context *ctx = ਅੰਕੜੇ;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	ਜੇ (type != OBJ_BLOB)
+		ਵਾਪਸ 0;
 
-	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+	ਲਈ (ਮਾਪ_t i = 0; i < list->nr; i++) {
+		ਜੇ (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	ਜੇ (ctx->current_batch.nr >= ctx->min_batch_ਮਾਪ)
 		download_batch(ctx);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static void reject_unsupported_rev_list_options(struct rev_info *revs)
+ਸਥਿਰ ਖਾਲੀ reject_unsupported_rev_list_options(ਬਣਤਰ rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	ਜੇ (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	ਜੇ (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	ਜੇ (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	ਜੇ (revs->ਸਤਰ_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	ਜੇ (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	ਜੇ (!ਰਸਤਾ_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	ਜੇ (revs->filter.blob_ਹੱਦਬੰਦੀ_ਮੁੱਲ)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+ਸਥਿਰ ਪੂਰਨ do_backfill(ਬਣਤਰ backfill_context *ctx)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	ਬਣਤਰ ਰਸਤਾ_walk_info info = ਰਸਤਾ_WALK_INFO_INIT;
+	ਪੂਰਨ ret;
 
-	if (ctx->sparse) {
+	ਜੇ (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
-			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+		ਜੇ (get_sparse_checkout_patterns(info.pl)) {
+			ਰਸਤਾ_walk_info_clear(&info);
+			ਵਾਪਸ error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
-		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
-		ctx->revs.edge_hint = 1;
+	ਜੇ (!ctx->revs.pending.nr)
+		ਜੋੜੋ_ਸਿਰ_ਮੰਜ਼ਿਲ_pending(&ctx->revs);
+	ਜੇ (ctx->include_ਕਿਨਾਰੇ)
+		ctx->revs.ਕਿਨਾਰਾ_hint = 1;
 
 	info.blobs = 1;
-	info.tags = info.commits = info.trees = 0;
+	info.ਟੈਗ_ਸੂਚੀ = info.commits = info.trees = 0;
 
 	info.revs = &ctx->revs;
-	info.path_fn = fill_missing_blobs;
-	info.path_fn_data = ctx;
+	info.ਰਸਤਾ_fn = fill_missing_blobs;
+	info.ਰਸਤਾ_fn_ਅੰਕੜੇ = ctx;
 
-	ret = walk_objects_by_path(&info);
+	ret = walk_objects_by_ਰਸਤਾ(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	ਜੇ (!ret)
 		download_batch(ctx);
 
-	path_walk_info_clear(&info);
-	return ret;
+	ਰਸਤਾ_walk_info_clear(&info);
+	ਵਾਪਸ ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+ਪੂਰਨ cmd_backfill(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ, ਬਣਤਰ repository *repo)
 {
-	int result;
-	struct backfill_context ctx = {
+	ਪੂਰਨ ਨਤੀਜਾ;
+	ਬਣਤਰ backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
-		.min_batch_size = 50000,
+		.min_batch_ਮਾਪ = 50000,
 		.sparse = -1,
 		.revs = REV_INFO_INIT,
-		.include_edges = 1,
+		.include_ਕਿਨਾਰੇ = 1,
 	};
-	struct option options[] = {
-		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_size,
+	ਬਣਤਰ option options[] = {
+		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_ਮਾਪ,
 			     N_("Minimum number of objects to request at a time")),
 		OPT_BOOL(0, "sparse", &ctx.sparse,
 			 N_("Restrict the missing objects to the current sparse-checkout")),
-		OPT_BOOL(0, "include-edges", &ctx.include_edges,
+		OPT_BOOL(0, "include-edges", &ctx.include_ਕਿਨਾਰੇ,
 			 N_("Include blobs from boundary commits in the backfill")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ਬਣਤਰ repo_config_ਮੁੱਲਾਂ *cfg = repo_config_ਮੁੱਲਾਂ(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, builtin_backfill_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, builtin_backfill_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_init_revisions(repo, &ctx.revs, prefix);
-	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
+	repo_init_revisions(repo, &ctx.revs, ਅਗੇਤਰ);
+	argc = ਤਿਆਰੀ_revisions(argc, argv, &ctx.revs, ਨਿਰਾ);
 
-	if (argc > 1)
+	ਜੇ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ਨਿਰਾ);
 
-	if (ctx.sparse < 0)
+	ਜੇ (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
-	result = do_backfill(&ctx);
+	ਨਤੀਜਾ = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	ਵਾਪਸ ਨਤੀਜਾ;
 }

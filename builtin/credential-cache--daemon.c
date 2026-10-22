@@ -1,160 +1,160 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "abspath.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
 
-#ifndef NO_UNIX_SOCKETS
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ NO_UNIX_SOCKETS
 
-#include "config.h"
-#include "tempfile.h"
-#include "credential.h"
-#include "unix-socket.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tempfile.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "credential.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "unix-socket.h"
 
-struct credential_cache_entry {
-	struct credential item;
+ਬਣਤਰ credential_cache_ਇੰਦਰਾਜ {
+	ਬਣਤਰ credential ਵਸਤੂ;
 	timestamp_t expiration;
 };
-static struct credential_cache_entry *entries;
-static int entries_nr;
-static int entries_alloc;
+ਸਥਿਰ ਬਣਤਰ credential_cache_ਇੰਦਰਾਜ *entries;
+ਸਥਿਰ ਪੂਰਨ entries_nr;
+ਸਥਿਰ ਪੂਰਨ entries_alloc;
 
-static void cache_credential(struct credential *c, int timeout)
+ਸਥਿਰ ਖਾਲੀ cache_credential(ਬਣਤਰ credential *c, ਪੂਰਨ timeout)
 {
-	struct credential_cache_entry *e;
+	ਬਣਤਰ credential_cache_ਇੰਦਰਾਜ *e;
 
 	ALLOC_GROW(entries, entries_nr + 1, entries_alloc);
 	e = &entries[entries_nr++];
 
 	/* take ownership of pointers */
-	memcpy(&e->item, c, sizeof(*c));
-	memset(c, 0, sizeof(*c));
-	e->expiration = time(NULL) + timeout;
+	ਸਮ੍ਰਿਤੀ_ਨਕਲ(&e->ਵਸਤੂ, c, ਆਕਾਰ(*c));
+	memset(c, 0, ਆਕਾਰ(*c));
+	e->expiration = ਸਮਾਂ(ਨਿਰਾ) + timeout;
 }
 
-static struct credential_cache_entry *lookup_credential(const struct credential *c)
+ਸਥਿਰ ਬਣਤਰ credential_cache_ਇੰਦਰਾਜ *lookup_credential(ਅਚਲ ਬਣਤਰ credential *c)
 {
-	int i;
-	for (i = 0; i < entries_nr; i++) {
-		struct credential *e = &entries[i].item;
-		if (credential_match(c, e, 0))
-			return &entries[i];
+	ਪੂਰਨ i;
+	ਲਈ (i = 0; i < entries_nr; i++) {
+		ਬਣਤਰ credential *e = &entries[i].ਵਸਤੂ;
+		ਜੇ (credential_ਮੇਲ(c, e, 0))
+			ਵਾਪਸ &entries[i];
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-static void remove_credential(const struct credential *c, int match_password)
+ਸਥਿਰ ਖਾਲੀ remove_credential(ਅਚਲ ਬਣਤਰ credential *c, ਪੂਰਨ ਮੇਲ_password)
 {
-	struct credential_cache_entry *e;
+	ਬਣਤਰ credential_cache_ਇੰਦਰਾਜ *e;
 
-	int i;
-	for (i = 0; i < entries_nr; i++) {
+	ਪੂਰਨ i;
+	ਲਈ (i = 0; i < entries_nr; i++) {
 		e = &entries[i];
-		if (credential_match(c, &e->item, match_password))
+		ਜੇ (credential_ਮੇਲ(c, &e->ਵਸਤੂ, ਮੇਲ_password))
 			e->expiration = 0;
 	}
 }
 
-static timestamp_t check_expirations(void)
+ਸਥਿਰ timestamp_t check_expirations(ਖਾਲੀ)
 {
-	static timestamp_t wait_for_entry_until;
-	int i = 0;
-	timestamp_t now = time(NULL);
-	timestamp_t next = TIME_MAX;
+	ਸਥਿਰ timestamp_t wait_for_ਇੰਦਰਾਜ_until;
+	ਪੂਰਨ i = 0;
+	timestamp_t now = ਸਮਾਂ(ਨਿਰਾ);
+	timestamp_t ਅਗਲਾ = ਸਮਾਂ_MAX;
 
 	/*
 	 * Initially give the client 30 seconds to actually contact us
 	 * and store a credential before we decide there's no point in
 	 * keeping the daemon around.
 	 */
-	if (!wait_for_entry_until)
-		wait_for_entry_until = now + 30;
+	ਜੇ (!wait_for_ਇੰਦਰਾਜ_until)
+		wait_for_ਇੰਦਰਾਜ_until = now + 30;
 
-	while (i < entries_nr) {
-		if (entries[i].expiration <= now) {
+	ਜਦੋਂ (i < entries_nr) {
+		ਜੇ (entries[i].expiration <= now) {
 			entries_nr--;
-			credential_clear(&entries[i].item);
-			if (i != entries_nr)
-				memcpy(&entries[i], &entries[entries_nr], sizeof(*entries));
+			credential_clear(&entries[i].ਵਸਤੂ);
+			ਜੇ (i != entries_nr)
+				ਸਮ੍ਰਿਤੀ_ਨਕਲ(&entries[i], &entries[entries_nr], ਆਕਾਰ(*entries));
 			/*
 			 * Stick around 30 seconds in case a new credential
 			 * shows up (e.g., because we just removed a failed
 			 * one, and we will soon get the correct one).
 			 */
-			wait_for_entry_until = now + 30;
+			wait_for_ਇੰਦਰਾਜ_until = now + 30;
 		}
-		else {
-			if (entries[i].expiration < next)
-				next = entries[i].expiration;
+		ਨਹੀਂਤਾਂ {
+			ਜੇ (entries[i].expiration < ਅਗਲਾ)
+				ਅਗਲਾ = entries[i].expiration;
 			i++;
 		}
 	}
 
-	if (!entries_nr) {
-		if (wait_for_entry_until <= now)
-			return 0;
-		next = wait_for_entry_until;
+	ਜੇ (!entries_nr) {
+		ਜੇ (wait_for_ਇੰਦਰਾਜ_until <= now)
+			ਵਾਪਸ 0;
+		ਅਗਲਾ = wait_for_ਇੰਦਰਾਜ_until;
 	}
 
-	return next - now;
+	ਵਾਪਸ ਅਗਲਾ - now;
 }
 
-static int read_request(FILE *fh, struct credential *c,
-			struct strbuf *action, int *timeout)
+ਸਥਿਰ ਪੂਰਨ read_request(FILE *fh, ਬਣਤਰ credential *c,
+			ਬਣਤਰ strbuf *action, ਪੂਰਨ *timeout)
 {
-	static struct strbuf item = STRBUF_INIT;
-	const char *p;
+	ਸਥਿਰ ਬਣਤਰ strbuf ਵਸਤੂ = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *p;
 
-	strbuf_getline_lf(&item, fh);
-	if (!skip_prefix(item.buf, "action=", &p))
-		return error("client sent bogus action line: %s", item.buf);
+	strbuf_getline_lf(&ਵਸਤੂ, fh);
+	ਜੇ (!skip_ਅਗੇਤਰ(ਵਸਤੂ.buf, "action=", &p))
+		ਵਾਪਸ error("client sent bogus action line: %s", ਵਸਤੂ.buf);
 	strbuf_addstr(action, p);
 
-	strbuf_getline_lf(&item, fh);
-	if (!skip_prefix(item.buf, "timeout=", &p))
-		return error("client sent bogus timeout line: %s", item.buf);
+	strbuf_getline_lf(&ਵਸਤੂ, fh);
+	ਜੇ (!skip_ਅਗੇਤਰ(ਵਸਤੂ.buf, "timeout=", &p))
+		ਵਾਪਸ error("client sent bogus timeout line: %s", ਵਸਤੂ.buf);
 	*timeout = atoi(p);
 
-	credential_set_all_capabilities(c, CREDENTIAL_OP_INITIAL);
+	credential_ਸੈੱਟ_all_capabilities(c, CREDENTIAL_OP_INITIAL);
 
-	if (credential_read(c, fh, CREDENTIAL_OP_HELPER) < 0)
-		return -1;
-	return 0;
+	ਜੇ (credential_read(c, fh, CREDENTIAL_OP_HELPER) < 0)
+		ਵਾਪਸ -1;
+	ਵਾਪਸ 0;
 }
 
-static void serve_one_client(FILE *in, FILE *out)
+ਸਥਿਰ ਖਾਲੀ serve_one_client(FILE *ਵਿੱਚ, FILE *ਬਾਹਰਲਾ)
 {
-	struct credential c = CREDENTIAL_INIT;
-	struct strbuf action = STRBUF_INIT;
-	int timeout = -1;
+	ਬਣਤਰ credential c = CREDENTIAL_INIT;
+	ਬਣਤਰ strbuf action = STRBUF_INIT;
+	ਪੂਰਨ timeout = -1;
 
-	if (read_request(in, &c, &action, &timeout) < 0)
+	ਜੇ (read_request(ਵਿੱਚ, &c, &action, &timeout) < 0)
 		/* ignore error */ ;
-	else if (!strcmp(action.buf, "get")) {
-		struct credential_cache_entry *e = lookup_credential(&c);
-		if (e) {
-			e->item.capa_authtype.request_initial = 1;
-			e->item.capa_authtype.request_helper = 1;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(action.buf, "get")) {
+		ਬਣਤਰ credential_cache_ਇੰਦਰਾਜ *e = lookup_credential(&c);
+		ਜੇ (e) {
+			e->ਵਸਤੂ.capa_authtype.request_initial = 1;
+			e->ਵਸਤੂ.capa_authtype.request_helper = 1;
 
-			fprintf(out, "capability[]=authtype\n");
-			if (e->item.username)
-				fprintf(out, "username=%s\n", e->item.username);
-			if (e->item.password)
-				fprintf(out, "password=%s\n", e->item.password);
-			if (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.authtype)
-				fprintf(out, "authtype=%s\n", e->item.authtype);
-			if (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.credential)
-				fprintf(out, "credential=%s\n", e->item.credential);
-			if (e->item.password_expiry_utc != TIME_MAX)
-				fprintf(out, "password_expiry_utc=%"PRItime"\n",
-					e->item.password_expiry_utc);
-			if (e->item.oauth_refresh_token)
-				fprintf(out, "oauth_refresh_token=%s\n",
-					e->item.oauth_refresh_token);
+			fprintf(ਬਾਹਰਲਾ, "capability[]=authtype\n");
+			ਜੇ (e->ਵਸਤੂ.username)
+				fprintf(ਬਾਹਰਲਾ, "username=%s\n", e->ਵਸਤੂ.username);
+			ਜੇ (e->ਵਸਤੂ.password)
+				fprintf(ਬਾਹਰਲਾ, "password=%s\n", e->ਵਸਤੂ.password);
+			ਜੇ (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->ਵਸਤੂ.authtype)
+				fprintf(ਬਾਹਰਲਾ, "authtype=%s\n", e->ਵਸਤੂ.authtype);
+			ਜੇ (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->ਵਸਤੂ.credential)
+				fprintf(ਬਾਹਰਲਾ, "credential=%s\n", e->ਵਸਤੂ.credential);
+			ਜੇ (e->ਵਸਤੂ.password_expiry_utc != ਸਮਾਂ_MAX)
+				fprintf(ਬਾਹਰਲਾ, "password_expiry_utc=%"PRItime"\n",
+					e->ਵਸਤੂ.password_expiry_utc);
+			ਜੇ (e->ਵਸਤੂ.oauth_refresh_token)
+				fprintf(ਬਾਹਰਲਾ, "oauth_refresh_token=%s\n",
+					e->ਵਸਤੂ.oauth_refresh_token);
 		}
 	}
-	else if (!strcmp(action.buf, "exit")) {
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(action.buf, "exit")) {
 		/*
 		 * It's important that we clean up our socket first, and then
 		 * signal the client only once we have finished the cleanup.
@@ -163,121 +163,121 @@ static void serve_one_client(FILE *in, FILE *out)
 		 * process actually ends, which closes the socket and gives
 		 * them EOF.
 		 */
-		exit(0);
+		ਬਾਹਰ_ਨਿਕਲੋ(0);
 	}
-	else if (!strcmp(action.buf, "erase"))
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(action.buf, "erase"))
 		remove_credential(&c, 1);
-	else if (!strcmp(action.buf, "store")) {
-		if (timeout < 0)
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(action.buf, "store")) {
+		ਜੇ (timeout < 0)
 			warning("cache client didn't specify a timeout");
-		else if ((!c.username || !c.password) && (!c.authtype && !c.credential))
+		ਨਹੀਂਤਾਂ ਜੇ ((!c.username || !c.password) && (!c.authtype && !c.credential))
 			warning("cache client gave us a partial credential");
-		else if (c.ephemeral)
+		ਨਹੀਂਤਾਂ ਜੇ (c.ephemeral)
 			warning("not storing ephemeral credential");
-		else {
+		ਨਹੀਂਤਾਂ {
 			remove_credential(&c, 0);
 			cache_credential(&c, timeout);
 		}
 	}
-	else
+	ਨਹੀਂਤਾਂ
 		warning("cache client sent unknown action: %s", action.buf);
 
 	credential_clear(&c);
 	strbuf_release(&action);
 }
 
-static int serve_cache_loop(int fd)
+ਸਥਿਰ ਪੂਰਨ serve_cache_loop(ਪੂਰਨ fd)
 {
-	struct pollfd pfd;
+	ਬਣਤਰ pollfd pfd;
 	timestamp_t wakeup;
 
 	wakeup = check_expirations();
-	if (!wakeup)
-		return 0;
+	ਜੇ (!wakeup)
+		ਵਾਪਸ 0;
 
 	pfd.fd = fd;
 	pfd.events = POLLIN;
-	if (poll(&pfd, 1, 1000 * wakeup) < 0) {
-		if (errno != EINTR)
+	ਜੇ (poll(&pfd, 1, 1000 * wakeup) < 0) {
+		ਜੇ (errno != EINTR)
 			die_errno("poll failed");
-		return 1;
+		ਵਾਪਸ 1;
 	}
 
-	if (pfd.revents & POLLIN) {
-		int client, client2;
-		FILE *in, *out;
+	ਜੇ (pfd.revents & POLLIN) {
+		ਪੂਰਨ client, client2;
+		FILE *ਵਿੱਚ, *ਬਾਹਰਲਾ;
 
-		client = accept(fd, NULL, NULL);
-		if (client < 0) {
+		client = accept(fd, ਨਿਰਾ, ਨਿਰਾ);
+		ਜੇ (client < 0) {
 			warning_errno("accept failed");
-			return 1;
+			ਵਾਪਸ 1;
 		}
 		client2 = dup(client);
-		if (client2 < 0) {
+		ਜੇ (client2 < 0) {
 			warning_errno("dup failed");
 			close(client);
-			return 1;
+			ਵਾਪਸ 1;
 		}
 
-		in = xfdopen(client, "r");
-		out = xfdopen(client2, "w");
-		serve_one_client(in, out);
-		fclose(in);
-		fclose(out);
+		ਵਿੱਚ = xfdopen(client, "r");
+		ਬਾਹਰਲਾ = xfdopen(client2, "w");
+		serve_one_client(ਵਿੱਚ, ਬਾਹਰਲਾ);
+		fclose(ਵਿੱਚ);
+		fclose(ਬਾਹਰਲਾ);
 	}
-	return 1;
+	ਵਾਪਸ 1;
 }
 
-static void serve_cache(const char *socket_path, int debug)
+ਸਥਿਰ ਖਾਲੀ serve_cache(ਅਚਲ ਅੱਖਰ *socket_ਰਸਤਾ, ਪੂਰਨ debug)
 {
-	struct unix_stream_listen_opts opts = UNIX_STREAM_LISTEN_OPTS_INIT;
-	int fd;
+	ਬਣਤਰ unix_ਧਾਰਾ_listen_opts opts = UNIX_ਧਾਰਾ_LISTEN_OPTS_INIT;
+	ਪੂਰਨ fd;
 
-	fd = unix_stream_listen(socket_path, &opts);
-	if (fd < 0)
-		die_errno("unable to bind to '%s'", socket_path);
+	fd = unix_ਧਾਰਾ_listen(socket_ਰਸਤਾ, &opts);
+	ਜੇ (fd < 0)
+		die_errno("unable to bind to '%s'", socket_ਰਸਤਾ);
 
-	printf("ok\n");
+	ਲਿਖੋ("ok\n");
 	fclose(stdout);
-	if (!debug) {
-		if (!freopen("/dev/null", "w", stderr))
+	ਜੇ (!debug) {
+		ਜੇ (!freopen("/dev/null", "w", stderr))
 			die_errno("unable to point stderr to /dev/null");
 	}
 
-	while (serve_cache_loop(fd))
+	ਜਦੋਂ (serve_cache_loop(fd))
 		; /* nothing */
 
 	close(fd);
 }
 
-static const char permissions_advice[] = N_(
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ permissions_advice[] = N_(
 "The permissions on your socket directory are too loose; other\n"
 "users may be able to read your cached credentials. Consider running:\n"
 "\n"
 "	chmod 0700 %s");
-static void init_socket_directory(const char *path)
+ਸਥਿਰ ਖਾਲੀ init_socket_directory(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	struct stat st;
-	char *path_copy = xstrdup(path);
-	char *dir = dirname(path_copy);
+	ਬਣਤਰ stat st;
+	ਅੱਖਰ *ਰਸਤਾ_copy = xstrdup(ਰਸਤਾ);
+	ਅੱਖਰ *dir = dirname(ਰਸਤਾ_copy);
 
-	if (!stat(dir, &st)) {
-		if (st.st_mode & 077)
+	ਜੇ (!stat(dir, &st)) {
+		ਜੇ (st.st_ਬਹੁਲਕ & 077)
 			die(_(permissions_advice), dir);
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		/*
 		 * We must be sure to create the directory with the correct mode,
 		 * not just chmod it after the fact; otherwise, there is a race
 		 * condition in which somebody can chdir to it, sleep, then try to open
 		 * our protected socket.
 		 */
-		if (safe_create_leading_directories_const(the_repository, dir) < 0)
+		ਜੇ (ਸੁਰੱਖਿਅਤ_create_leading_directories_const(the_repository, dir) < 0)
 			die_errno("unable to create directories for '%s'", dir);
-		if (mkdir(dir, 0700) < 0)
+		ਜੇ (mkdir(dir, 0700) < 0)
 			die_errno("unable to mkdir '%s'", dir);
 	}
 
-	if (chdir(dir))
+	ਜੇ (chdir(dir))
 		/*
 		 * We don't actually care what our cwd is; we chdir here just to
 		 * be a friendly daemon and avoid tying up our original cwd.
@@ -285,70 +285,70 @@ static void init_socket_directory(const char *path)
 		 */
 		;
 
-	free(path_copy);
+	ਮੁਕਤ(ਰਸਤਾ_copy);
 }
 
-int cmd_credential_cache_daemon(int argc,
-				const char **argv,
-				const char *prefix,
-				struct repository *repo UNUSED)
+ਪੂਰਨ cmd_credential_cache_daemon(ਪੂਰਨ argc,
+				ਅਚਲ ਅੱਖਰ **argv,
+				ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+				ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct tempfile *socket_file;
-	const char *socket_path;
-	int ignore_sighup = 0;
-	static const char *usage[] = {
+	ਬਣਤਰ tempfile *socket_file;
+	ਅਚਲ ਅੱਖਰ *socket_ਰਸਤਾ;
+	ਪੂਰਨ ignore_sighup = 0;
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *usage[] = {
 		"git credential-cache--daemon [--debug] <socket-path>",
-		NULL
+		ਨਿਰਾ
 	};
-	int debug = 0;
-	const struct option options[] = {
+	ਪੂਰਨ debug = 0;
+	ਅਚਲ ਬਣਤਰ option options[] = {
 		OPT_BOOL(0, "debug", &debug,
 			 N_("print debugging messages to stderr")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
 	repo_config_get_bool(the_repository, "credentialcache.ignoresighup", &ignore_sighup);
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	socket_path = argv[0];
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
+	socket_ਰਸਤਾ = argv[0];
 
-	if (!have_unix_sockets())
+	ਜੇ (!have_unix_sockets())
 		die(_("credential-cache--daemon unavailable; no unix socket support"));
-	if (!socket_path)
+	ਜੇ (!socket_ਰਸਤਾ)
 		usage_with_options(usage, options);
 
-	if (!is_absolute_path(socket_path))
+	ਜੇ (!is_absolute_ਰਸਤਾ(socket_ਰਸਤਾ))
 		die("socket directory must be an absolute path");
 
-	init_socket_directory(socket_path);
-	socket_file = register_tempfile(socket_path);
+	init_socket_directory(socket_ਰਸਤਾ);
+	socket_file = ਰਜਿਸਟਰ_tempfile(socket_ਰਸਤਾ);
 
-	if (ignore_sighup)
-		signal(SIGHUP, SIG_IGN);
+	ਜੇ (ignore_sighup)
+		ਸੰਕੇਤ(SIGHUP, SIG_IGN);
 
-	serve_cache(socket_path, debug);
+	serve_cache(socket_ਰਸਤਾ, debug);
 	delete_tempfile(&socket_file);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-#else
+#ਨਹੀਂਤਾਂ
 
-int cmd_credential_cache_daemon(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+ਪੂਰਨ cmd_credential_cache_daemon(ਪੂਰਨ argc,
+ਅਚਲ ਅੱਖਰ **argv,
+ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	const char * const usage[] = {
+	ਅਚਲ ਅੱਖਰ * ਅਚਲ usage[] = {
 		"git credential-cache--daemon [--debug] <socket-path>",
 		"",
 		"credential-cache--daemon is disabled in this build of Git",
-		NULL
+		ਨਿਰਾ
 	};
-	struct option options[] = { OPT_END() };
+	ਬਣਤਰ option options[] = { OPT_ਸਿਰਾ() };
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
 	die(_("credential-cache--daemon unavailable; no unix socket support"));
 }
 
-#endif /* NO_UNIX_SOCKET */
+#ਜੇ_ਅੰਤ /* NO_UNIX_SOCKET */

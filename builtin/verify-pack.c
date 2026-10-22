@@ -1,96 +1,96 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
 
-#define VERIFY_PACK_VERBOSE 01
-#define VERIFY_PACK_STAT_ONLY 02
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ VERIFY_PACK_VERBOSE 01
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+ਸਥਿਰ ਪੂਰਨ verify_one_pack(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags, ਅਚਲ ਅੱਖਰ *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	ਬਣਤਰ ਬੱਚਾ_process ਸੂਚਕਾਂਕ_pack = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strvec *argv = &ਸੂਚਕਾਂਕ_pack.ਦਲੀਲਾਂ;
+	ਬਣਤਰ strbuf arg = STRBUF_INIT;
+	ਪੂਰਨ verbose = flags & VERIFY_PACK_VERBOSE;
+	ਪੂਰਨ stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	ਪੂਰਨ err;
 
-	strvec_push(argv, "index-pack");
+	strvec_ਧੱਕੋ(argv, "index-pack");
 
-	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
-		strvec_push(argv, "--verify-stat");
-	else
-		strvec_push(argv, "--verify");
+	ਜੇ (stat_only)
+		strvec_ਧੱਕੋ(argv, "--verify-stat-only");
+	ਨਹੀਂਤਾਂ ਜੇ (verbose)
+		strvec_ਧੱਕੋ(argv, "--verify-stat");
+	ਨਹੀਂਤਾਂ
+		strvec_ਧੱਕੋ(argv, "--verify");
 
-	if (hash_algo)
+	ਜੇ (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
 	 * In addition to "foo.pack" we accept "foo.idx" and "foo";
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
-	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
-	    !ends_with(arg.buf, ".pack"))
+	strbuf_addstr(&arg, ਰਸਤਾ);
+	ਜੇ (strbuf_strip_suffix(&arg, ".idx") ||
+	    !ਸਿਰੇ_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_ਧੱਕੋ(argv, arg.buf);
 
-	index_pack.git_cmd = 1;
+	ਸੂਚਕਾਂਕ_pack.git_cmd = 1;
 
-	err = run_command(&index_pack);
+	err = ਲੜੀਵਾਰ_command(&ਸੂਚਕਾਂਕ_pack);
 
-	if (verbose || stat_only) {
-		if (err)
-			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
-				printf("%s: ok\n", arg.buf);
+	ਜੇ (verbose || stat_only) {
+		ਜੇ (err)
+			ਲਿਖੋ("%s: bad\n", arg.buf);
+		ਨਹੀਂਤਾਂ {
+			ਜੇ (!stat_only)
+				ਲਿਖੋ("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	ਵਾਪਸ err;
 }
 
-static const char * const verify_pack_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
-	NULL
+	ਨਿਰਾ
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ਪੂਰਨ cmd_verify_pack(ਪੂਰਨ argc,
+		    ਅਚਲ ਅੱਖਰ **argv,
+		    ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
-		OPT_BIT('v', "verbose", &flags, N_("verbose"),
+	ਪੂਰਨ err = 0;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags = 0;
+	ਅਚਲ ਅੱਖਰ *object_format = ਨਿਰਾ;
+	ਪੂਰਨ i;
+	ਅਚਲ ਬਣਤਰ option verify_pack_options[] = {
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
-		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ('s', "stat-only", &flags, N_("show statistics only"),
 			VERIFY_PACK_STAT_ONLY),
 		OPT_STRING(0, "object-format", &object_format, N_("hash"),
 			   N_("specify the hash algorithm to use")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, verify_pack_options,
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	ਜੇ (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	ਲਈ (i = 0; i < argc; i++) {
+		ਜੇ (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	ਵਾਪਸ err;
 }

@@ -12,275 +12,275 @@
  * Copyright (C) 2016 Johannes Schindelin
  */
 
-#include "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
 
-#include "abspath.h"
-#include "config.h"
-#include "copy.h"
-#include "run-command.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "repository.h"
-#include "sparse-index.h"
-#include "strvec.h"
-#include "strbuf.h"
-#include "lockfile.h"
-#include "object-file.h"
-#include "odb.h"
-#include "dir.h"
-#include "entry.h"
-#include "setup.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "abspath.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "copy.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "read-cache-ll.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "repository.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "sparse-index.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strvec.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "lockfile.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dir.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "entry.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "setup.h"
 
-static const char *const builtin_difftool_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_difftool_usage[] = {
 	N_("git difftool [<options>] [<commit> [<commit>]] [--] [<path>...]"),
-	NULL
+	ਨਿਰਾ
 };
 
-struct difftool_options {
-	int has_symlinks;
-	int symlinks;
-	int trust_exit_code;
+ਬਣਤਰ difftool_options {
+	ਪੂਰਨ has_symlinks;
+	ਪੂਰਨ symlinks;
+	ਪੂਰਨ trust_exit_ਕੋਡ;
 };
 
-static int difftool_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+ਸਥਿਰ ਪੂਰਨ difftool_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+			   ਅਚਲ ਬਣਤਰ config_context *ctx, ਖਾਲੀ *cb)
 {
-	struct difftool_options *dt_options = (struct difftool_options *)cb;
-	if (!strcmp(var, "difftool.trustexitcode")) {
-		dt_options->trust_exit_code = git_config_bool(var, value);
-		return 0;
+	ਬਣਤਰ difftool_options *dt_options = (ਬਣਤਰ difftool_options *)cb;
+	ਜੇ (!strcmp(var, "difftool.trustexitcode")) {
+		dt_options->trust_exit_ਕੋਡ = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
-	if (!strcmp(var, "core.symlinks")) {
-		dt_options->has_symlinks = git_config_bool(var, value);
-		return 0;
+	ਜੇ (!strcmp(var, "core.symlinks")) {
+		dt_options->has_symlinks = git_config_bool(var, ਮੁੱਲ);
+		ਵਾਪਸ 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ਵਾਪਸ git_default_config(var, ਮੁੱਲ, ctx, cb);
 }
 
-static int print_tool_help(void)
+ਸਥਿਰ ਪੂਰਨ print_tool_help(ਖਾਲੀ)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "mergetool", "--tool-help=diff", NULL);
-	return run_command(&cmd);
+	strvec_pushl(&cmd.ਦਲੀਲਾਂ, "mergetool", "--tool-help=diff", ਨਿਰਾ);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cmd);
 }
 
-static int parse_index_info(struct repository *repo,
-			    char *p, int *mode1, int *mode2,
-			    struct object_id *oid1, struct object_id *oid2,
-			    char *status)
+ਸਥਿਰ ਪੂਰਨ parse_ਸੂਚਕਾਂਕ_info(ਬਣਤਰ repository *repo,
+			    ਅੱਖਰ *p, ਪੂਰਨ *mode1, ਪੂਰਨ *mode2,
+			    ਬਣਤਰ object_id *oid1, ਬਣਤਰ object_id *oid2,
+			    ਅੱਖਰ *ਸਥਿਤੀ)
 {
-	if (*p != ':')
-		return error("expected ':', got '%c'", *p);
-	*mode1 = (int)strtol(p + 1, &p, 8);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	*mode2 = (int)strtol(p + 1, &p, 8);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	if (parse_oid_hex_algop(++p, oid1, (const char **)&p, repo->hash_algo))
-		return error("expected object ID, got '%s'", p);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	if (parse_oid_hex_algop(++p, oid2, (const char **)&p, repo->hash_algo))
-		return error("expected object ID, got '%s'", p);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	*status = *++p;
-	if (!*status)
-		return error("missing status");
-	if (p[1] && !isdigit(p[1]))
-		return error("unexpected trailer: '%s'", p + 1);
-	return 0;
+	ਜੇ (*p != ':')
+		ਵਾਪਸ error("expected ':', got '%c'", *p);
+	*mode1 = (ਪੂਰਨ)strtol(p + 1, &p, 8);
+	ਜੇ (*p != ' ')
+		ਵਾਪਸ error("expected ' ', got '%c'", *p);
+	*mode2 = (ਪੂਰਨ)strtol(p + 1, &p, 8);
+	ਜੇ (*p != ' ')
+		ਵਾਪਸ error("expected ' ', got '%c'", *p);
+	ਜੇ (parse_oid_hex_algop(++p, oid1, (ਅਚਲ ਅੱਖਰ **)&p, repo->hash_algo))
+		ਵਾਪਸ error("expected object ID, got '%s'", p);
+	ਜੇ (*p != ' ')
+		ਵਾਪਸ error("expected ' ', got '%c'", *p);
+	ਜੇ (parse_oid_hex_algop(++p, oid2, (ਅਚਲ ਅੱਖਰ **)&p, repo->hash_algo))
+		ਵਾਪਸ error("expected object ID, got '%s'", p);
+	ਜੇ (*p != ' ')
+		ਵਾਪਸ error("expected ' ', got '%c'", *p);
+	*ਸਥਿਤੀ = *++p;
+	ਜੇ (!*ਸਥਿਤੀ)
+		ਵਾਪਸ error("missing status");
+	ਜੇ (p[1] && !ਅੰਕ_ਹੈ(p[1]))
+		ਵਾਪਸ error("unexpected trailer: '%s'", p + 1);
+	ਵਾਪਸ 0;
 }
 
 /*
  * Remove any trailing slash from $workdir
  * before starting to avoid double slashes in symlink targets.
  */
-static void add_path(struct strbuf *buf, size_t base_len, const char *path)
+ਸਥਿਰ ਖਾਲੀ ਜੋੜੋ_ਰਸਤਾ(ਬਣਤਰ strbuf *buf, ਮਾਪ_t ਅਧਾਰ_len, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	strbuf_setlen(buf, base_len);
-	if (buf->len && buf->buf[buf->len - 1] != '/')
+	strbuf_setlen(buf, ਅਧਾਰ_len);
+	ਜੇ (buf->len && buf->buf[buf->len - 1] != '/')
 		strbuf_addch(buf, '/');
-	strbuf_addstr(buf, path);
+	strbuf_addstr(buf, ਰਸਤਾ);
 }
 
 /*
  * Determine whether we can simply reuse the file in the worktree.
  */
-static int use_wt_file(struct repository *repo,
-		       const char *workdir, const char *name,
-		       struct object_id *oid)
+ਸਥਿਰ ਪੂਰਨ use_wt_file(ਬਣਤਰ repository *repo,
+		       ਅਚਲ ਅੱਖਰ *workdir, ਅਚਲ ਅੱਖਰ *name,
+		       ਬਣਤਰ object_id *oid)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct stat st;
-	int use = 0;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਬਣਤਰ stat st;
+	ਪੂਰਨ use = 0;
 
 	strbuf_addstr(&buf, workdir);
-	add_path(&buf, buf.len, name);
+	ਜੋੜੋ_ਰਸਤਾ(&buf, buf.len, name);
 
-	if (!lstat(buf.buf, &st) && !S_ISLNK(st.st_mode)) {
-		struct object_id wt_oid;
-		int fd = open(buf.buf, O_RDONLY);
+	ਜੇ (!lstat(buf.buf, &st) && !S_ISLNK(st.st_ਬਹੁਲਕ)) {
+		ਬਣਤਰ object_id wt_oid;
+		ਪੂਰਨ fd = open(buf.buf, O_RDONLY);
 
-		if (fd >= 0 &&
-		    !index_fd(repo->index, &wt_oid, fd, &st, OBJ_BLOB, name, 0)) {
-			if (is_null_oid(oid)) {
+		ਜੇ (fd >= 0 &&
+		    !ਸੂਚਕਾਂਕ_fd(repo->ਸੂਚਕਾਂਕ, &wt_oid, fd, &st, OBJ_BLOB, name, 0)) {
+			ਜੇ (is_null_oid(oid)) {
 				oidcpy(oid, &wt_oid);
 				use = 1;
-			} else if (oideq(oid, &wt_oid))
+			} ਨਹੀਂਤਾਂ ਜੇ (oideq(oid, &wt_oid))
 				use = 1;
 		}
 	}
 
 	strbuf_release(&buf);
 
-	return use;
+	ਵਾਪਸ use;
 }
 
-struct working_tree_entry {
-	struct hashmap_entry entry;
-	char path[FLEX_ARRAY];
+ਬਣਤਰ working_ਰੁੱਖ_ਇੰਦਰਾਜ {
+	ਬਣਤਰ hashmap_ਇੰਦਰਾਜ ਇੰਦਰਾਜ;
+	ਅੱਖਰ ਰਸਤਾ[FLEX_ARRAY];
 };
 
-static int working_tree_entry_cmp(const void *cmp_data UNUSED,
-				  const struct hashmap_entry *eptr,
-				  const struct hashmap_entry *entry_or_key,
-				  const void *keydata UNUSED)
+ਸਥਿਰ ਪੂਰਨ working_ਰੁੱਖ_ਇੰਦਰਾਜ_cmp(ਅਚਲ ਖਾਲੀ *cmp_ਅੰਕੜੇ ਅਣਵਰਤਿਆ,
+				  ਅਚਲ ਬਣਤਰ hashmap_ਇੰਦਰਾਜ *eptr,
+				  ਅਚਲ ਬਣਤਰ hashmap_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ_or_ਕੁੰਜੀ,
+				  ਅਚਲ ਖਾਲੀ *keydata ਅਣਵਰਤਿਆ)
 {
-	const struct working_tree_entry *a, *b;
+	ਅਚਲ ਬਣਤਰ working_ਰੁੱਖ_ਇੰਦਰਾਜ *a, *b;
 
-	a = container_of(eptr, const struct working_tree_entry, entry);
-	b = container_of(entry_or_key, const struct working_tree_entry, entry);
+	a = container_ਦਾ(eptr, ਅਚਲ ਬਣਤਰ working_ਰੁੱਖ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	b = container_ਦਾ(ਇੰਦਰਾਜ_or_ਕੁੰਜੀ, ਅਚਲ ਬਣਤਰ working_ਰੁੱਖ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
 
-	return strcmp(a->path, b->path);
+	ਵਾਪਸ strcmp(a->ਰਸਤਾ, b->ਰਸਤਾ);
 }
 
 /*
  * The `left` and `right` entries hold paths for the symlinks hashmap,
  * and a SHA-1 surrounded by brief text for submodules.
  */
-struct pair_entry {
-	struct hashmap_entry entry;
-	char left[PATH_MAX], right[PATH_MAX];
-	const char path[FLEX_ARRAY];
+ਬਣਤਰ pair_ਇੰਦਰਾਜ {
+	ਬਣਤਰ hashmap_ਇੰਦਰਾਜ ਇੰਦਰਾਜ;
+	ਅੱਖਰ ਖੱਬਾ[ਰਸਤਾ_MAX], ਸੱਜਾ[ਰਸਤਾ_MAX];
+	ਅਚਲ ਅੱਖਰ ਰਸਤਾ[FLEX_ARRAY];
 };
 
-static int pair_cmp(const void *cmp_data UNUSED,
-		    const struct hashmap_entry *eptr,
-		    const struct hashmap_entry *entry_or_key,
-		    const void *keydata UNUSED)
+ਸਥਿਰ ਪੂਰਨ pair_cmp(ਅਚਲ ਖਾਲੀ *cmp_ਅੰਕੜੇ ਅਣਵਰਤਿਆ,
+		    ਅਚਲ ਬਣਤਰ hashmap_ਇੰਦਰਾਜ *eptr,
+		    ਅਚਲ ਬਣਤਰ hashmap_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ_or_ਕੁੰਜੀ,
+		    ਅਚਲ ਖਾਲੀ *keydata ਅਣਵਰਤਿਆ)
 {
-	const struct pair_entry *a, *b;
+	ਅਚਲ ਬਣਤਰ pair_ਇੰਦਰਾਜ *a, *b;
 
-	a = container_of(eptr, const struct pair_entry, entry);
-	b = container_of(entry_or_key, const struct pair_entry, entry);
+	a = container_ਦਾ(eptr, ਅਚਲ ਬਣਤਰ pair_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	b = container_ਦਾ(ਇੰਦਰਾਜ_or_ਕੁੰਜੀ, ਅਚਲ ਬਣਤਰ pair_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
 
-	return strcmp(a->path, b->path);
+	ਵਾਪਸ strcmp(a->ਰਸਤਾ, b->ਰਸਤਾ);
 }
 
-static void add_left_or_right(struct hashmap *map, const char *path,
-			      const char *content, int is_right)
+ਸਥਿਰ ਖਾਲੀ ਜੋੜੋ_ਖੱਬਾ_or_ਸੱਜਾ(ਬਣਤਰ hashmap *map, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ,
+			      ਅਚਲ ਅੱਖਰ *content, ਪੂਰਨ is_ਸੱਜਾ)
 {
-	struct pair_entry *e, *existing;
+	ਬਣਤਰ pair_ਇੰਦਰਾਜ *e, *existing;
 
-	FLEX_ALLOC_STR(e, path, path);
-	hashmap_entry_init(&e->entry, strhash(path));
-	existing = hashmap_get_entry(map, e, entry, NULL);
-	if (existing) {
-		free(e);
+	FLEX_ALLOC_STR(e, ਰਸਤਾ, ਰਸਤਾ);
+	hashmap_ਇੰਦਰਾਜ_init(&e->ਇੰਦਰਾਜ, strhash(ਰਸਤਾ));
+	existing = hashmap_get_ਇੰਦਰਾਜ(map, e, ਇੰਦਰਾਜ, ਨਿਰਾ);
+	ਜੇ (existing) {
+		ਮੁਕਤ(e);
 		e = existing;
-	} else {
-		e->left[0] = e->right[0] = '\0';
-		hashmap_add(map, &e->entry);
+	} ਨਹੀਂਤਾਂ {
+		e->ਖੱਬਾ[0] = e->ਸੱਜਾ[0] = '\0';
+		hashmap_ਜੋੜੋ(map, &e->ਇੰਦਰਾਜ);
 	}
-	strlcpy(is_right ? e->right : e->left, content, PATH_MAX);
+	strlcpy(is_ਸੱਜਾ ? e->ਸੱਜਾ : e->ਖੱਬਾ, content, ਰਸਤਾ_MAX);
 }
 
-struct path_entry {
-	struct hashmap_entry entry;
-	char path[FLEX_ARRAY];
+ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ {
+	ਬਣਤਰ hashmap_ਇੰਦਰਾਜ ਇੰਦਰਾਜ;
+	ਅੱਖਰ ਰਸਤਾ[FLEX_ARRAY];
 };
 
-static int path_entry_cmp(const void *cmp_data UNUSED,
-			  const struct hashmap_entry *eptr,
-			  const struct hashmap_entry *entry_or_key,
-			  const void *key)
+ਸਥਿਰ ਪੂਰਨ ਰਸਤਾ_ਇੰਦਰਾਜ_cmp(ਅਚਲ ਖਾਲੀ *cmp_ਅੰਕੜੇ ਅਣਵਰਤਿਆ,
+			  ਅਚਲ ਬਣਤਰ hashmap_ਇੰਦਰਾਜ *eptr,
+			  ਅਚਲ ਬਣਤਰ hashmap_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ_or_ਕੁੰਜੀ,
+			  ਅਚਲ ਖਾਲੀ *ਕੁੰਜੀ)
 {
-	const struct path_entry *a, *b;
+	ਅਚਲ ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ *a, *b;
 
-	a = container_of(eptr, const struct path_entry, entry);
-	b = container_of(entry_or_key, const struct path_entry, entry);
+	a = container_ਦਾ(eptr, ਅਚਲ ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	b = container_ਦਾ(ਇੰਦਰਾਜ_or_ਕੁੰਜੀ, ਅਚਲ ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
 
-	return strcmp(a->path, key ? key : b->path);
+	ਵਾਪਸ strcmp(a->ਰਸਤਾ, ਕੁੰਜੀ ? ਕੁੰਜੀ : b->ਰਸਤਾ);
 }
 
-static void changed_files(struct repository *repo,
-			  struct hashmap *result, const char *index_path,
-			  const char *workdir)
+ਸਥਿਰ ਖਾਲੀ ਬਦਲਿਆ_files(ਬਣਤਰ repository *repo,
+			  ਬਣਤਰ hashmap *ਨਤੀਜਾ, ਅਚਲ ਅੱਖਰ *ਸੂਚਕਾਂਕ_ਰਸਤਾ,
+			  ਅਚਲ ਅੱਖਰ *workdir)
 {
-	struct child_process update_index = CHILD_PROCESS_INIT;
-	struct child_process diff_files = CHILD_PROCESS_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	const char *git_dir = absolute_path(repo_get_git_dir(repo));
+	ਬਣਤਰ ਬੱਚਾ_process update_ਸੂਚਕਾਂਕ = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process diff_files = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *git_dir = absolute_ਰਸਤਾ(repo_get_git_dir(repo));
 	FILE *fp;
 
-	strvec_pushl(&update_index.args,
+	strvec_pushl(&update_ਸੂਚਕਾਂਕ.ਦਲੀਲਾਂ,
 		     "--git-dir", git_dir, "--work-tree", workdir,
 		     "update-index", "--really-refresh", "-q",
-		     "--unmerged", NULL);
-	update_index.no_stdin = 1;
-	update_index.no_stdout = 1;
-	update_index.no_stderr = 1;
-	update_index.git_cmd = 1;
-	update_index.use_shell = 0;
-	update_index.clean_on_exit = 1;
-	update_index.dir = workdir;
-	strvec_pushf(&update_index.env, "GIT_INDEX_FILE=%s", index_path);
+		     "--unmerged", ਨਿਰਾ);
+	update_ਸੂਚਕਾਂਕ.no_stdin = 1;
+	update_ਸੂਚਕਾਂਕ.no_stdout = 1;
+	update_ਸੂਚਕਾਂਕ.no_stderr = 1;
+	update_ਸੂਚਕਾਂਕ.git_cmd = 1;
+	update_ਸੂਚਕਾਂਕ.use_shell = 0;
+	update_ਸੂਚਕਾਂਕ.clean_on_exit = 1;
+	update_ਸੂਚਕਾਂਕ.dir = workdir;
+	strvec_pushf(&update_ਸੂਚਕਾਂਕ.env, "GIT_INDEX_FILE=%s", ਸੂਚਕਾਂਕ_ਰਸਤਾ);
 	/* Ignore any errors of update-index */
-	run_command(&update_index);
+	ਲੜੀਵਾਰ_command(&update_ਸੂਚਕਾਂਕ);
 
-	strvec_pushl(&diff_files.args,
+	strvec_pushl(&diff_files.ਦਲੀਲਾਂ,
 		     "--git-dir", git_dir, "--work-tree", workdir,
-		     "diff-files", "--name-only", "-z", NULL);
+		     "diff-files", "--name-only", "-z", ਨਿਰਾ);
 	diff_files.no_stdin = 1;
 	diff_files.git_cmd = 1;
 	diff_files.use_shell = 0;
 	diff_files.clean_on_exit = 1;
-	diff_files.out = -1;
+	diff_files.ਬਾਹਰਲਾ = -1;
 	diff_files.dir = workdir;
-	strvec_pushf(&diff_files.env, "GIT_INDEX_FILE=%s", index_path);
-	if (start_command(&diff_files))
+	strvec_pushf(&diff_files.env, "GIT_INDEX_FILE=%s", ਸੂਚਕਾਂਕ_ਰਸਤਾ);
+	ਜੇ (ਸ਼ੁਰੂ_command(&diff_files))
 		die("could not obtain raw diff");
-	fp = xfdopen(diff_files.out, "r");
-	while (!strbuf_getline_nul(&buf, fp)) {
-		struct path_entry *entry;
-		FLEX_ALLOC_STR(entry, path, buf.buf);
-		hashmap_entry_init(&entry->entry, strhash(buf.buf));
-		hashmap_add(result, &entry->entry);
+	fp = xfdopen(diff_files.ਬਾਹਰਲਾ, "r");
+	ਜਦੋਂ (!strbuf_getline_nul(&buf, fp)) {
+		ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ;
+		FLEX_ALLOC_STR(ਇੰਦਰਾਜ, ਰਸਤਾ, buf.buf);
+		hashmap_ਇੰਦਰਾਜ_init(&ਇੰਦਰਾਜ->ਇੰਦਰਾਜ, strhash(buf.buf));
+		hashmap_ਜੋੜੋ(ਨਤੀਜਾ, &ਇੰਦਰਾਜ->ਇੰਦਰਾਜ);
 	}
 	fclose(fp);
-	if (finish_command(&diff_files))
+	ਜੇ (ਅੰਤ_command(&diff_files))
 		die("diff-files did not exit properly");
 	strbuf_release(&buf);
 }
 
-static int ensure_leading_directories(struct repository *repo, char *path)
+ਸਥਿਰ ਪੂਰਨ ensure_leading_directories(ਬਣਤਰ repository *repo, ਅੱਖਰ *ਰਸਤਾ)
 {
-	switch (safe_create_leading_directories(repo, path)) {
-		case SCLD_OK:
-		case SCLD_EXISTS:
-			return 0;
-		default:
-			return error(_("could not create leading directories "
-				       "of '%s'"), path);
+	ਚੋਣ (ਸੁਰੱਖਿਅਤ_create_leading_directories(repo, ਰਸਤਾ)) {
+		ਹਾਲਤ SCLD_OK:
+		ਹਾਲਤ SCLD_EXISTS:
+			ਵਾਪਸ 0;
+		ਮੂਲ:
+			ਵਾਪਸ error(_("could not create leading directories "
+				       "of '%s'"), ਰਸਤਾ);
 	}
 }
 
@@ -302,51 +302,51 @@ static int ensure_leading_directories(struct repository *repo, char *path)
  * to compare the readlink(2) result as text, even on a filesystem that is
  * capable of doing a symbolic link.
  */
-static char *get_symlink(struct repository *repo,
-			 struct difftool_options *dt_options,
-			 const struct object_id *oid, const char *path)
+ਸਥਿਰ ਅੱਖਰ *get_symlink(ਬਣਤਰ repository *repo,
+			 ਬਣਤਰ difftool_options *dt_options,
+			 ਅਚਲ ਬਣਤਰ object_id *oid, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	char *data;
-	if (is_null_oid(oid)) {
+	ਅੱਖਰ *ਅੰਕੜੇ;
+	ਜੇ (is_null_oid(oid)) {
 		/* The symlink is unknown to Git so read from the filesystem */
-		struct strbuf link = STRBUF_INIT;
-		if (dt_options->has_symlinks) {
-			if (strbuf_readlink(&link, path, strlen(path)))
-				die(_("could not read symlink %s"), path);
-		} else if (strbuf_read_file(&link, path, 128))
-			die(_("could not read symlink file %s"), path);
+		ਬਣਤਰ strbuf link = STRBUF_INIT;
+		ਜੇ (dt_options->has_symlinks) {
+			ਜੇ (strbuf_readlink(&link, ਰਸਤਾ, ਲੜੀ_ਲੰਬਾਈ(ਰਸਤਾ)))
+				die(_("could not read symlink %s"), ਰਸਤਾ);
+		} ਨਹੀਂਤਾਂ ਜੇ (strbuf_read_file(&link, ਰਸਤਾ, 128))
+			die(_("could not read symlink file %s"), ਰਸਤਾ);
 
-		data = strbuf_detach(&link, NULL);
-	} else {
-		enum object_type type;
-		size_t size;
-		data = odb_read_object(repo->objects, oid, &type, &size);
-		if (!data)
+		ਅੰਕੜੇ = strbuf_detach(&link, ਨਿਰਾ);
+	} ਨਹੀਂਤਾਂ {
+		ਗਿਣਤੀ object_type type;
+		ਮਾਪ_t ਮਾਪ;
+		ਅੰਕੜੇ = odb_read_object(repo->objects, oid, &type, &ਮਾਪ);
+		ਜੇ (!ਅੰਕੜੇ)
 			die(_("could not read object %s for symlink %s"),
-				oid_to_hex(oid), path);
+				oid_ਮੰਜ਼ਿਲ_hex(oid), ਰਸਤਾ);
 	}
 
-	return data;
+	ਵਾਪਸ ਅੰਕੜੇ;
 }
 
-static int checkout_path(unsigned mode, struct object_id *oid,
-			 const char *path, const struct checkout *state)
+ਸਥਿਰ ਪੂਰਨ checkout_ਰਸਤਾ(ਬਿਨਾਨਿਸ਼ਾਨੀ ਬਹੁਲਕ, ਬਣਤਰ object_id *oid,
+			 ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਬਣਤਰ checkout *state)
 {
-	struct cache_entry *ce;
-	int ret;
+	ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce;
+	ਪੂਰਨ ret;
 
-	ce = make_transient_cache_entry(mode, oid, path, 0, NULL);
-	ret = checkout_entry(ce, state, NULL, NULL);
+	ce = make_transient_cache_ਇੰਦਰਾਜ(ਬਹੁਲਕ, oid, ਰਸਤਾ, 0, ਨਿਰਾ);
+	ret = checkout_ਇੰਦਰਾਜ(ce, state, ਨਿਰਾ, ਨਿਰਾ);
 
-	discard_cache_entry(ce);
-	return ret;
+	discard_cache_ਇੰਦਰਾਜ(ce);
+	ਵਾਪਸ ret;
 }
 
-static void write_file_in_directory(struct repository *repo,
-				    struct strbuf *dir, size_t dir_len,
-				    const char *path, const char *content)
+ਸਥਿਰ ਖਾਲੀ write_file_ਵਿੱਚ_directory(ਬਣਤਰ repository *repo,
+				    ਬਣਤਰ strbuf *dir, ਮਾਪ_t dir_len,
+				    ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ *content)
 {
-	add_path(dir, dir_len, path);
+	ਜੋੜੋ_ਰਸਤਾ(dir, dir_len, ਰਸਤਾ);
 	ensure_leading_directories(repo, dir->buf);
 	unlink(dir->buf);
 	write_file(dir->buf, "%s", content);
@@ -358,204 +358,204 @@ static void write_file_in_directory(struct repository *repo,
  * as text files, resulting in behavior that is analogous to what "git diff"
  * displays for symlink and submodule diffs.
  */
-static void write_standin_files(struct repository *repo,
-				struct pair_entry *entry,
-				struct strbuf *ldir, size_t ldir_len,
-				struct strbuf *rdir, size_t rdir_len)
+ਸਥਿਰ ਖਾਲੀ write_standin_files(ਬਣਤਰ repository *repo,
+				ਬਣਤਰ pair_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ,
+				ਬਣਤਰ strbuf *ldir, ਮਾਪ_t ldir_len,
+				ਬਣਤਰ strbuf *rdir, ਮਾਪ_t rdir_len)
 {
-	if (*entry->left)
-		write_file_in_directory(repo, ldir, ldir_len, entry->path, entry->left);
-	if (*entry->right)
-		write_file_in_directory(repo, rdir, rdir_len, entry->path, entry->right);
+	ਜੇ (*ਇੰਦਰਾਜ->ਖੱਬਾ)
+		write_file_ਵਿੱਚ_directory(repo, ldir, ldir_len, ਇੰਦਰਾਜ->ਰਸਤਾ, ਇੰਦਰਾਜ->ਖੱਬਾ);
+	ਜੇ (*ਇੰਦਰਾਜ->ਸੱਜਾ)
+		write_file_ਵਿੱਚ_directory(repo, rdir, rdir_len, ਇੰਦਰਾਜ->ਰਸਤਾ, ਇੰਦਰਾਜ->ਸੱਜਾ);
 }
 
-static int run_dir_diff(struct repository *repo,
-			struct difftool_options *dt_options,
-			const char *extcmd, const char *prefix,
-			struct child_process *child)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_dir_diff(ਬਣਤਰ repository *repo,
+			ਬਣਤਰ difftool_options *dt_options,
+			ਅਚਲ ਅੱਖਰ *extcmd, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			ਬਣਤਰ ਬੱਚਾ_process *ਬੱਚਾ)
 {
-	struct strbuf info = STRBUF_INIT, lpath = STRBUF_INIT;
-	struct strbuf rpath = STRBUF_INIT, buf = STRBUF_INIT;
-	struct strbuf ldir = STRBUF_INIT, rdir = STRBUF_INIT;
-	struct strbuf wtdir = STRBUF_INIT;
-	struct strbuf tmpdir = STRBUF_INIT;
-	char *lbase_dir = NULL, *rbase_dir = NULL;
-	size_t ldir_len, rdir_len, wtdir_len;
-	const char *workdir, *tmp;
-	int ret = 0;
-	size_t i;
-	FILE *fp = NULL;
-	struct hashmap working_tree_dups = HASHMAP_INIT(working_tree_entry_cmp,
-							NULL);
-	struct hashmap submodules = HASHMAP_INIT(pair_cmp, NULL);
-	struct hashmap symlinks2 = HASHMAP_INIT(pair_cmp, NULL);
-	struct hashmap_iter iter;
-	struct pair_entry *entry;
-	struct index_state wtindex = INDEX_STATE_INIT(repo);
-	struct checkout lstate, rstate;
-	int err = 0;
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct hashmap wt_modified = HASHMAP_INIT(path_entry_cmp, NULL);
-	struct hashmap tmp_modified = HASHMAP_INIT(path_entry_cmp, NULL);
-	int indices_loaded = 0;
+	ਬਣਤਰ strbuf info = STRBUF_INIT, lpath = STRBUF_INIT;
+	ਬਣਤਰ strbuf rpath = STRBUF_INIT, buf = STRBUF_INIT;
+	ਬਣਤਰ strbuf ldir = STRBUF_INIT, rdir = STRBUF_INIT;
+	ਬਣਤਰ strbuf wtdir = STRBUF_INIT;
+	ਬਣਤਰ strbuf tmpdir = STRBUF_INIT;
+	ਅੱਖਰ *lbase_dir = ਨਿਰਾ, *rbase_dir = ਨਿਰਾ;
+	ਮਾਪ_t ldir_len, rdir_len, wtdir_len;
+	ਅਚਲ ਅੱਖਰ *workdir, *tmp;
+	ਪੂਰਨ ret = 0;
+	ਮਾਪ_t i;
+	FILE *fp = ਨਿਰਾ;
+	ਬਣਤਰ hashmap working_ਰੁੱਖ_dups = HASHMAP_INIT(working_ਰੁੱਖ_ਇੰਦਰਾਜ_cmp,
+							ਨਿਰਾ);
+	ਬਣਤਰ hashmap submodules = HASHMAP_INIT(pair_cmp, ਨਿਰਾ);
+	ਬਣਤਰ hashmap symlinks2 = HASHMAP_INIT(pair_cmp, ਨਿਰਾ);
+	ਬਣਤਰ hashmap_iter iter;
+	ਬਣਤਰ pair_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ;
+	ਬਣਤਰ ਸੂਚਕਾਂਕ_state wtindex = ਸੂਚਕਾਂਕ_STATE_INIT(repo);
+	ਬਣਤਰ checkout lstate, rstate;
+	ਪੂਰਨ err = 0;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ hashmap wt_modified = HASHMAP_INIT(ਰਸਤਾ_ਇੰਦਰਾਜ_cmp, ਨਿਰਾ);
+	ਬਣਤਰ hashmap tmp_modified = HASHMAP_INIT(ਰਸਤਾ_ਇੰਦਰਾਜ_cmp, ਨਿਰਾ);
+	ਪੂਰਨ indices_loaded = 0;
 
-	workdir = repo_get_work_tree(repo);
+	workdir = repo_get_work_ਰੁੱਖ(repo);
 
 	/* Setup temp directories */
 	tmp = getenv("TMPDIR");
-	strbuf_add_absolute_path(&tmpdir, tmp ? tmp : "/tmp");
+	strbuf_ਜੋੜੋ_absolute_ਰਸਤਾ(&tmpdir, tmp ? tmp : "/tmp");
 	strbuf_trim_trailing_dir_sep(&tmpdir);
 	strbuf_addstr(&tmpdir, "/git-difftool.XXXXXX");
-	if (!mkdtemp(tmpdir.buf)) {
+	ਜੇ (!mkdtemp(tmpdir.buf)) {
 		ret = error("could not create '%s'", tmpdir.buf);
-		goto finish;
+		ਜਾਓ ਅੰਤ;
 	}
 	strbuf_addf(&ldir, "%s/left/", tmpdir.buf);
 	strbuf_addf(&rdir, "%s/right/", tmpdir.buf);
 	strbuf_addstr(&wtdir, workdir);
-	if (!wtdir.len || !is_dir_sep(wtdir.buf[wtdir.len - 1]))
+	ਜੇ (!wtdir.len || !is_dir_sep(wtdir.buf[wtdir.len - 1]))
 		strbuf_addch(&wtdir, '/');
 	mkdir(ldir.buf, 0700);
 	mkdir(rdir.buf, 0700);
 
-	memset(&lstate, 0, sizeof(lstate));
-	lstate.base_dir = lbase_dir = xstrdup(ldir.buf);
-	lstate.base_dir_len = ldir.len;
+	memset(&lstate, 0, ਆਕਾਰ(lstate));
+	lstate.ਅਧਾਰ_dir = lbase_dir = xstrdup(ldir.buf);
+	lstate.ਅਧਾਰ_dir_len = ldir.len;
 	lstate.force = 1;
-	memset(&rstate, 0, sizeof(rstate));
-	rstate.base_dir = rbase_dir = xstrdup(rdir.buf);
-	rstate.base_dir_len = rdir.len;
+	memset(&rstate, 0, ਆਕਾਰ(rstate));
+	rstate.ਅਧਾਰ_dir = rbase_dir = xstrdup(rdir.buf);
+	rstate.ਅਧਾਰ_dir_len = rdir.len;
 	rstate.force = 1;
 
 	ldir_len = ldir.len;
 	rdir_len = rdir.len;
 	wtdir_len = wtdir.len;
 
-	child->no_stdin = 1;
-	child->git_cmd = 1;
-	child->use_shell = 0;
-	child->clean_on_exit = 1;
-	child->dir = prefix;
-	child->out = -1;
-	if (start_command(child))
+	ਬੱਚਾ->no_stdin = 1;
+	ਬੱਚਾ->git_cmd = 1;
+	ਬੱਚਾ->use_shell = 0;
+	ਬੱਚਾ->clean_on_exit = 1;
+	ਬੱਚਾ->dir = ਅਗੇਤਰ;
+	ਬੱਚਾ->ਬਾਹਰਲਾ = -1;
+	ਜੇ (ਸ਼ੁਰੂ_command(ਬੱਚਾ))
 		die("could not obtain raw diff");
-	fp = xfdopen(child->out, "r");
+	fp = xfdopen(ਬੱਚਾ->ਬਾਹਰਲਾ, "r");
 
 	/* Build index info for left and right sides of the diff */
 	i = 0;
-	while (!strbuf_getline_nul(&info, fp)) {
-		int lmode, rmode;
-		struct object_id loid, roid;
-		char status;
-		const char *src_path, *dst_path;
+	ਜਦੋਂ (!strbuf_getline_nul(&info, fp)) {
+		ਪੂਰਨ lmode, rmode;
+		ਬਣਤਰ object_id loid, roid;
+		ਅੱਖਰ ਸਥਿਤੀ;
+		ਅਚਲ ਅੱਖਰ *src_ਰਸਤਾ, *dst_ਰਸਤਾ;
 
-		if (starts_with(info.buf, "::"))
+		ਜੇ (starts_with(info.buf, "::"))
 			die(N_("combined diff formats ('-c' and '--cc') are "
 			       "not supported in\n"
 			       "directory diff mode ('-d' and '--dir-diff')."));
 
-		if (parse_index_info(repo, info.buf, &lmode, &rmode, &loid, &roid, &status))
-			break;
-		if (strbuf_getline_nul(&lpath, fp))
-			break;
-		src_path = lpath.buf;
+		ਜੇ (parse_ਸੂਚਕਾਂਕ_info(repo, info.buf, &lmode, &rmode, &loid, &roid, &ਸਥਿਤੀ))
+			ਰੋਕੋ;
+		ਜੇ (strbuf_getline_nul(&lpath, fp))
+			ਰੋਕੋ;
+		src_ਰਸਤਾ = lpath.buf;
 
 		i++;
-		if (status != 'C' && status != 'R') {
-			dst_path = src_path;
-		} else {
-			if (strbuf_getline_nul(&rpath, fp))
-				break;
-			dst_path = rpath.buf;
+		ਜੇ (ਸਥਿਤੀ != 'C' && ਸਥਿਤੀ != 'R') {
+			dst_ਰਸਤਾ = src_ਰਸਤਾ;
+		} ਨਹੀਂਤਾਂ {
+			ਜੇ (strbuf_getline_nul(&rpath, fp))
+				ਰੋਕੋ;
+			dst_ਰਸਤਾ = rpath.buf;
 		}
 
-		if (S_ISGITLINK(lmode) || S_ISGITLINK(rmode)) {
+		ਜੇ (S_ISGITLINK(lmode) || S_ISGITLINK(rmode)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "Subproject commit %s",
-				    oid_to_hex(&loid));
-			add_left_or_right(&submodules, src_path, buf.buf, 0);
+				    oid_ਮੰਜ਼ਿਲ_hex(&loid));
+			ਜੋੜੋ_ਖੱਬਾ_or_ਸੱਜਾ(&submodules, src_ਰਸਤਾ, buf.buf, 0);
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "Subproject commit %s",
-				    oid_to_hex(&roid));
-			if (oideq(&loid, &roid))
+				    oid_ਮੰਜ਼ਿਲ_hex(&roid));
+			ਜੇ (oideq(&loid, &roid))
 				strbuf_addstr(&buf, "-dirty");
-			add_left_or_right(&submodules, dst_path, buf.buf, 1);
-			continue;
+			ਜੋੜੋ_ਖੱਬਾ_or_ਸੱਜਾ(&submodules, dst_ਰਸਤਾ, buf.buf, 1);
+			ਜਾਰੀ;
 		}
 
-		if (S_ISLNK(lmode)) {
-			char *content = get_symlink(repo, dt_options, &loid, src_path);
-			add_left_or_right(&symlinks2, src_path, content, 0);
-			free(content);
+		ਜੇ (S_ISLNK(lmode)) {
+			ਅੱਖਰ *content = get_symlink(repo, dt_options, &loid, src_ਰਸਤਾ);
+			ਜੋੜੋ_ਖੱਬਾ_or_ਸੱਜਾ(&symlinks2, src_ਰਸਤਾ, content, 0);
+			ਮੁਕਤ(content);
 		}
 
-		if (S_ISLNK(rmode)) {
-			char *content = get_symlink(repo, dt_options, &roid, dst_path);
-			add_left_or_right(&symlinks2, dst_path, content, 1);
-			free(content);
+		ਜੇ (S_ISLNK(rmode)) {
+			ਅੱਖਰ *content = get_symlink(repo, dt_options, &roid, dst_ਰਸਤਾ);
+			ਜੋੜੋ_ਖੱਬਾ_or_ਸੱਜਾ(&symlinks2, dst_ਰਸਤਾ, content, 1);
+			ਮੁਕਤ(content);
 		}
 
-		if (lmode && status != 'C') {
-			if (checkout_path(lmode, &loid, src_path, &lstate)) {
-				ret = error("could not write '%s'", src_path);
-				goto finish;
+		ਜੇ (lmode && ਸਥਿਤੀ != 'C') {
+			ਜੇ (checkout_ਰਸਤਾ(lmode, &loid, src_ਰਸਤਾ, &lstate)) {
+				ret = error("could not write '%s'", src_ਰਸਤਾ);
+				ਜਾਓ ਅੰਤ;
 			}
 		}
 
-		if (rmode && !S_ISLNK(rmode)) {
-			struct working_tree_entry *entry;
+		ਜੇ (rmode && !S_ISLNK(rmode)) {
+			ਬਣਤਰ working_ਰੁੱਖ_ਇੰਦਰਾਜ *ਇੰਦਰਾਜ;
 
 			/* Avoid duplicate working_tree entries */
-			FLEX_ALLOC_STR(entry, path, dst_path);
-			hashmap_entry_init(&entry->entry, strhash(dst_path));
-			if (hashmap_get(&working_tree_dups, &entry->entry,
-					NULL)) {
-				free(entry);
-				continue;
+			FLEX_ALLOC_STR(ਇੰਦਰਾਜ, ਰਸਤਾ, dst_ਰਸਤਾ);
+			hashmap_ਇੰਦਰਾਜ_init(&ਇੰਦਰਾਜ->ਇੰਦਰਾਜ, strhash(dst_ਰਸਤਾ));
+			ਜੇ (hashmap_get(&working_ਰੁੱਖ_dups, &ਇੰਦਰਾਜ->ਇੰਦਰਾਜ,
+					ਨਿਰਾ)) {
+				ਮੁਕਤ(ਇੰਦਰਾਜ);
+				ਜਾਰੀ;
 			}
-			hashmap_add(&working_tree_dups, &entry->entry);
+			hashmap_ਜੋੜੋ(&working_ਰੁੱਖ_dups, &ਇੰਦਰਾਜ->ਇੰਦਰਾਜ);
 
-			if (!use_wt_file(repo, workdir, dst_path, &roid)) {
-				if (checkout_path(rmode, &roid, dst_path,
+			ਜੇ (!use_wt_file(repo, workdir, dst_ਰਸਤਾ, &roid)) {
+				ਜੇ (checkout_ਰਸਤਾ(rmode, &roid, dst_ਰਸਤਾ,
 						  &rstate)) {
 					ret = error("could not write '%s'",
-						    dst_path);
-					goto finish;
+						    dst_ਰਸਤਾ);
+					ਜਾਓ ਅੰਤ;
 				}
-			} else if (!is_null_oid(&roid)) {
+			} ਨਹੀਂਤਾਂ ਜੇ (!is_null_oid(&roid)) {
 				/*
 				 * Changes in the working tree need special
 				 * treatment since they are not part of the
 				 * index.
 				 */
-				struct cache_entry *ce2 =
-					make_cache_entry(&wtindex, rmode, &roid,
-							 dst_path, 0, 0);
+				ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce2 =
+					make_cache_ਇੰਦਰਾਜ(&wtindex, rmode, &roid,
+							 dst_ਰਸਤਾ, 0, 0);
 
-				add_index_entry(&wtindex, ce2,
-						ADD_CACHE_JUST_APPEND);
+				ਜੋੜੋ_ਸੂਚਕਾਂਕ_ਇੰਦਰਾਜ(&wtindex, ce2,
+						ਜੋੜੋ_CACHE_JUST_APPEND);
 
-				add_path(&rdir, rdir_len, dst_path);
-				if (ensure_leading_directories(repo, rdir.buf)) {
+				ਜੋੜੋ_ਰਸਤਾ(&rdir, rdir_len, dst_ਰਸਤਾ);
+				ਜੇ (ensure_leading_directories(repo, rdir.buf)) {
 					ret = error("could not create "
 						    "directory for '%s'",
-						    dst_path);
-					goto finish;
+						    dst_ਰਸਤਾ);
+					ਜਾਓ ਅੰਤ;
 				}
-				add_path(&wtdir, wtdir_len, dst_path);
-				if (dt_options->symlinks) {
-					if (symlink(wtdir.buf, rdir.buf)) {
+				ਜੋੜੋ_ਰਸਤਾ(&wtdir, wtdir_len, dst_ਰਸਤਾ);
+				ਜੇ (dt_options->symlinks) {
+					ਜੇ (symlink(wtdir.buf, rdir.buf)) {
 						ret = error_errno("could not symlink '%s' to '%s'", wtdir.buf, rdir.buf);
-						goto finish;
+						ਜਾਓ ਅੰਤ;
 					}
-				} else {
-					struct stat st;
-					if (stat(wtdir.buf, &st))
-						st.st_mode = 0644;
-					if (copy_file(repo, rdir.buf, wtdir.buf,
-						      st.st_mode)) {
+				} ਨਹੀਂਤਾਂ {
+					ਬਣਤਰ stat st;
+					ਜੇ (stat(wtdir.buf, &st))
+						st.st_ਬਹੁਲਕ = 0644;
+					ਜੇ (copy_file(repo, rdir.buf, wtdir.buf,
+						      st.st_ਬਹੁਲਕ)) {
 						ret = error("could not copy '%s' to '%s'", wtdir.buf, rdir.buf);
-						goto finish;
+						ਜਾਓ ਅੰਤ;
 					}
 				}
 			}
@@ -563,23 +563,23 @@ static int run_dir_diff(struct repository *repo,
 	}
 
 	fclose(fp);
-	fp = NULL;
-	if (finish_command(child)) {
+	fp = ਨਿਰਾ;
+	ਜੇ (ਅੰਤ_command(ਬੱਚਾ)) {
 		ret = error("error occurred running diff --raw");
-		goto finish;
+		ਜਾਓ ਅੰਤ;
 	}
 
-	if (!i)
-		goto finish;
+	ਜੇ (!i)
+		ਜਾਓ ਅੰਤ;
 
 	/*
 	 * Changes to submodules require special treatment.This loop writes a
 	 * temporary file to both the left and right directories to show the
 	 * change in the recorded SHA1 for the submodule.
 	 */
-	hashmap_for_each_entry(&submodules, &iter, entry,
-				entry /* member name */) {
-		write_standin_files(repo, entry, &ldir, ldir_len, &rdir, rdir_len);
+	hashmap_for_each_ਇੰਦਰਾਜ(&submodules, &iter, ਇੰਦਰਾਜ,
+				ਇੰਦਰਾਜ /* member name */) {
+		write_standin_files(repo, ਇੰਦਰਾਜ, &ldir, ldir_len, &rdir, rdir_len);
 	}
 
 	/*
@@ -587,27 +587,27 @@ static int run_dir_diff(struct repository *repo,
 	 * shows only the link itself, not the contents of the link target.
 	 * This loop replicates that behavior.
 	 */
-	hashmap_for_each_entry(&symlinks2, &iter, entry,
-				entry /* member name */) {
+	hashmap_for_each_ਇੰਦਰਾਜ(&symlinks2, &iter, ਇੰਦਰਾਜ,
+				ਇੰਦਰਾਜ /* member name */) {
 
-		write_standin_files(repo, entry, &ldir, ldir_len, &rdir, rdir_len);
+		write_standin_files(repo, ਇੰਦਰਾਜ, &ldir, ldir_len, &rdir, rdir_len);
 	}
 
 	strbuf_setlen(&ldir, ldir_len);
 	strbuf_setlen(&rdir, rdir_len);
 
-	if (extcmd) {
-		strvec_push(&cmd.args, extcmd);
-	} else {
-		strvec_push(&cmd.args, "difftool--helper");
+	ਜੇ (extcmd) {
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, extcmd);
+	} ਨਹੀਂਤਾਂ {
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "difftool--helper");
 		cmd.git_cmd = 1;
 		setenv("GIT_DIFFTOOL_DIRDIFF", "true", 1);
 	}
-	strvec_pushl(&cmd.args, ldir.buf, rdir.buf, NULL);
-	ret = run_command(&cmd);
+	strvec_pushl(&cmd.ਦਲੀਲਾਂ, ldir.buf, rdir.buf, ਨਿਰਾ);
+	ret = ਲੜੀਵਾਰ_command(&cmd);
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(&wtindex);
+	ensure_ਭਰਿਆ_ਸੂਚਕਾਂਕ(&wtindex);
 
 	/*
 	 * If the diff includes working copy files and those
@@ -620,72 +620,72 @@ static int run_dir_diff(struct repository *repo,
 	 * in the common case of --symlinks and the difftool updating
 	 * files through the symlink.
 	 */
-	for (i = 0; i < wtindex.cache_nr; i++) {
-		struct hashmap_entry dummy;
-		const char *name = wtindex.cache[i]->name;
-		struct stat st;
+	ਲਈ (i = 0; i < wtindex.cache_nr; i++) {
+		ਬਣਤਰ hashmap_ਇੰਦਰਾਜ dummy;
+		ਅਚਲ ਅੱਖਰ *name = wtindex.cache[i]->name;
+		ਬਣਤਰ stat st;
 
-		add_path(&rdir, rdir_len, name);
-		if (lstat(rdir.buf, &st))
-			continue;
+		ਜੋੜੋ_ਰਸਤਾ(&rdir, rdir_len, name);
+		ਜੇ (lstat(rdir.buf, &st))
+			ਜਾਰੀ;
 
-		if ((dt_options->symlinks && S_ISLNK(st.st_mode)) || !S_ISREG(st.st_mode))
-			continue;
+		ਜੇ ((dt_options->symlinks && S_ISLNK(st.st_ਬਹੁਲਕ)) || !S_ISREG(st.st_ਬਹੁਲਕ))
+			ਜਾਰੀ;
 
-		if (!indices_loaded) {
-			struct lock_file lock = LOCK_INIT;
+		ਜੇ (!indices_loaded) {
+			ਬਣਤਰ ਤਾਲਾ_file ਤਾਲਾ = ਤਾਲਾ_INIT;
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "%s/wtindex", tmpdir.buf);
-			if (repo_hold_lock_file_for_update(repo, &lock, buf.buf, 0) < 0 ||
-			    write_locked_index(&wtindex, &lock, COMMIT_LOCK)) {
+			ਜੇ (repo_hold_ਤਾਲਾ_file_for_update(repo, &ਤਾਲਾ, buf.buf, 0) < 0 ||
+			    write_locked_ਸੂਚਕਾਂਕ(&wtindex, &ਤਾਲਾ, COMMIT_ਤਾਲਾ)) {
 				ret = error("could not write %s", buf.buf);
-				goto finish;
+				ਜਾਓ ਅੰਤ;
 			}
-			changed_files(repo, &wt_modified, buf.buf, workdir);
+			ਬਦਲਿਆ_files(repo, &wt_modified, buf.buf, workdir);
 			strbuf_setlen(&rdir, rdir_len);
-			changed_files(repo, &tmp_modified, buf.buf, rdir.buf);
-			add_path(&rdir, rdir_len, name);
+			ਬਦਲਿਆ_files(repo, &tmp_modified, buf.buf, rdir.buf);
+			ਜੋੜੋ_ਰਸਤਾ(&rdir, rdir_len, name);
 			indices_loaded = 1;
 		}
 
-		hashmap_entry_init(&dummy, strhash(name));
-		if (hashmap_get(&tmp_modified, &dummy, name)) {
-			add_path(&wtdir, wtdir_len, name);
-			if (hashmap_get(&wt_modified, &dummy, name)) {
+		hashmap_ਇੰਦਰਾਜ_init(&dummy, strhash(name));
+		ਜੇ (hashmap_get(&tmp_modified, &dummy, name)) {
+			ਜੋੜੋ_ਰਸਤਾ(&wtdir, wtdir_len, name);
+			ਜੇ (hashmap_get(&wt_modified, &dummy, name)) {
 				warning(_("both files modified: '%s' and '%s'."),
 					wtdir.buf, rdir.buf);
 				warning(_("working tree file has been left."));
 				warning("%s", "");
 				err = 1;
-			} else if (unlink(wtdir.buf) ||
-				   copy_file(repo, wtdir.buf, rdir.buf, st.st_mode))
+			} ਨਹੀਂਤਾਂ ਜੇ (unlink(wtdir.buf) ||
+				   copy_file(repo, wtdir.buf, rdir.buf, st.st_ਬਹੁਲਕ))
 				warning_errno(_("could not copy '%s' to '%s'"),
 					      rdir.buf, wtdir.buf);
 		}
 	}
 
-	if (err) {
+	ਜੇ (err) {
 		warning(_("temporary files exist in '%s'."), tmpdir.buf);
 		warning(_("you may want to cleanup or recover these."));
 		ret = 1;
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		remove_dir_recursively(&tmpdir, 0);
-		if (ret)
+		ਜੇ (ret)
 			warning(_("failed: %d"), ret);
 	}
 
-finish:
-	if (fp)
+ਅੰਤ:
+	ਜੇ (fp)
 		fclose(fp);
 
-	hashmap_clear_and_free(&working_tree_dups, struct working_tree_entry, entry);
-	hashmap_clear_and_free(&wt_modified, struct path_entry, entry);
-	hashmap_clear_and_free(&tmp_modified, struct path_entry, entry);
-	hashmap_clear_and_free(&submodules, struct pair_entry, entry);
-	hashmap_clear_and_free(&symlinks2, struct pair_entry, entry);
-	release_index(&wtindex);
-	free(lbase_dir);
-	free(rbase_dir);
+	hashmap_clear_and_free(&working_ਰੁੱਖ_dups, ਬਣਤਰ working_ਰੁੱਖ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	hashmap_clear_and_free(&wt_modified, ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	hashmap_clear_and_free(&tmp_modified, ਬਣਤਰ ਰਸਤਾ_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	hashmap_clear_and_free(&submodules, ਬਣਤਰ pair_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	hashmap_clear_and_free(&symlinks2, ਬਣਤਰ pair_ਇੰਦਰਾਜ, ਇੰਦਰਾਜ);
+	release_ਸੂਚਕਾਂਕ(&wtindex);
+	ਮੁਕਤ(lbase_dir);
+	ਮੁਕਤ(rbase_dir);
 	strbuf_release(&info);
 	strbuf_release(&lpath);
 	strbuf_release(&rpath);
@@ -695,46 +695,46 @@ finish:
 	strbuf_release(&buf);
 	strbuf_release(&tmpdir);
 
-	return (ret < 0) ? 1 : ret;
+	ਵਾਪਸ (ret < 0) ? 1 : ret;
 }
 
-static int run_file_diff(int prompt, const char *prefix,
-			 struct child_process *child)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_file_diff(ਪੂਰਨ prompt, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			 ਬਣਤਰ ਬੱਚਾ_process *ਬੱਚਾ)
 {
-	strvec_push(&child->env, "GIT_PAGER=");
-	strvec_push(&child->env, "GIT_EXTERNAL_DIFF=git-difftool--helper");
-	if (prompt > 0)
-		strvec_push(&child->env, "GIT_DIFFTOOL_PROMPT=true");
-	else if (!prompt)
-		strvec_push(&child->env, "GIT_DIFFTOOL_NO_PROMPT=true");
+	strvec_ਧੱਕੋ(&ਬੱਚਾ->env, "GIT_PAGER=");
+	strvec_ਧੱਕੋ(&ਬੱਚਾ->env, "GIT_EXTERNAL_DIFF=git-difftool--helper");
+	ਜੇ (prompt > 0)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->env, "GIT_DIFFTOOL_PROMPT=true");
+	ਨਹੀਂਤਾਂ ਜੇ (!prompt)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->env, "GIT_DIFFTOOL_NO_PROMPT=true");
 
-	child->git_cmd = 1;
-	child->dir = prefix;
+	ਬੱਚਾ->git_cmd = 1;
+	ਬੱਚਾ->dir = ਅਗੇਤਰ;
 
-	return run_command(child);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(ਬੱਚਾ);
 }
 
-int cmd_difftool(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+ਪੂਰਨ cmd_difftool(ਪੂਰਨ argc,
+		 ਅਚਲ ਅੱਖਰ **argv,
+		 ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		 ਬਣਤਰ repository *repo)
 {
-	int use_gui_tool = -1, dir_diff = 0, prompt = -1, tool_help = 0, no_index = 0;
-	static char *difftool_cmd = NULL, *extcmd = NULL;
-	struct difftool_options dt_options = {
+	ਪੂਰਨ use_gui_tool = -1, dir_diff = 0, prompt = -1, tool_help = 0, no_ਸੂਚਕਾਂਕ = 0;
+	ਸਥਿਰ ਅੱਖਰ *difftool_cmd = ਨਿਰਾ, *extcmd = ਨਿਰਾ;
+	ਬਣਤਰ difftool_options dt_options = {
 		.has_symlinks = 1,
 		.symlinks = 1,
-		.trust_exit_code = 0
+		.trust_exit_ਕੋਡ = 0
 	};
-	struct option builtin_difftool_options[] = {
+	ਬਣਤਰ option builtin_difftool_options[] = {
 		OPT_BOOL('g', "gui", &use_gui_tool,
 			 N_("use `diff.guitool` instead of `diff.tool`")),
 		OPT_BOOL('d', "dir-diff", &dir_diff,
 			 N_("perform a full-directory diff")),
-		OPT_SET_INT_F('y', "no-prompt", &prompt,
+		OPT_ਸੈੱਟ_INT_F('y', "no-prompt", &prompt,
 			N_("do not prompt before launching a diff tool"),
 			0, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "prompt", &prompt, NULL,
+		OPT_ਸੈੱਟ_INT_F(0, "prompt", &prompt, ਨਿਰਾ,
 			1, PARSE_OPT_NONEG | PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "symlinks", &dt_options.symlinks,
 			 N_("use symlinks in dir-diff mode")),
@@ -743,34 +743,34 @@ int cmd_difftool(int argc,
 		OPT_BOOL(0, "tool-help", &tool_help,
 			 N_("print a list of diff tools that may be used with "
 			    "`--tool`")),
-		OPT_BOOL(0, "trust-exit-code", &dt_options.trust_exit_code,
+		OPT_BOOL(0, "trust-exit-code", &dt_options.trust_exit_ਕੋਡ,
 			 N_("make 'git-difftool' exit when an invoked diff "
 			    "tool returns a non-zero exit code")),
 		OPT_STRING('x', "extcmd", &extcmd, N_("command"),
 			   N_("specify a custom command for viewing diffs")),
-		OPT_BOOL(0, "no-index", &no_index, N_("passed to `diff`")),
-		OPT_END()
+		OPT_BOOL(0, "no-index", &no_ਸੂਚਕਾਂਕ, N_("passed to `diff`")),
+		OPT_ਸਿਰਾ()
 	};
-	struct child_process child = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process ਬੱਚਾ = ਬੱਚਾ_PROCESS_INIT;
 
 	repo_config(repo, difftool_config, &dt_options);
 	dt_options.symlinks = dt_options.has_symlinks;
 
-	argc = parse_options(argc, argv, prefix, builtin_difftool_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, builtin_difftool_options,
 			     builtin_difftool_usage, PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (tool_help)
-		return print_tool_help();
+	ਜੇ (tool_help)
+		ਵਾਪਸ print_tool_help();
 
-	if (!no_index && !startup_info->have_repository)
+	ਜੇ (!no_ਸੂਚਕਾਂਕ && !startup_info->have_repository)
 		die(_("difftool requires worktree or --no-index"));
 
-	if (!no_index){
-		setup_work_tree(repo);
-		setenv(GIT_DIR_ENVIRONMENT, absolute_path(repo_get_git_dir(repo)), 1);
-		setenv(GIT_WORK_TREE_ENVIRONMENT, absolute_path(repo_get_work_tree(repo)), 1);
-	} else if (dir_diff)
+	ਜੇ (!no_ਸੂਚਕਾਂਕ){
+		ਤਿਆਰੀ_work_ਰੁੱਖ(repo);
+		setenv(GIT_DIR_ENVIRONMENT, absolute_ਰਸਤਾ(repo_get_git_dir(repo)), 1);
+		setenv(GIT_WORK_ਰੁੱਖ_ENVIRONMENT, absolute_ਰਸਤਾ(repo_get_work_ਰੁੱਖ(repo)), 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (dir_diff)
 		die(_("options '%s' and '%s' cannot be used together"), "--dir-diff", "--no-index");
 
 	die_for_incompatible_opt3(use_gui_tool == 1, "--gui",
@@ -782,27 +782,27 @@ int cmd_difftool(int argc,
 	 * empty or unset means "use the difftool.guiDefault config or default to
 	 * false".
 	 */
-	if (use_gui_tool == 1)
+	ਜੇ (use_gui_tool == 1)
 		setenv("GIT_MERGETOOL_GUI", "true", 1);
-	else if (use_gui_tool == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (use_gui_tool == 0)
 		setenv("GIT_MERGETOOL_GUI", "false", 1);
 
-	if (difftool_cmd) {
-		if (*difftool_cmd)
+	ਜੇ (difftool_cmd) {
+		ਜੇ (*difftool_cmd)
 			setenv("GIT_DIFF_TOOL", difftool_cmd, 1);
-		else
+		ਨਹੀਂਤਾਂ
 			die(_("no <tool> given for --tool=<tool>"));
 	}
 
-	if (extcmd) {
-		if (*extcmd)
+	ਜੇ (extcmd) {
+		ਜੇ (*extcmd)
 			setenv("GIT_DIFFTOOL_EXTCMD", extcmd, 1);
-		else
+		ਨਹੀਂਤਾਂ
 			die(_("no <cmd> given for --extcmd=<cmd>"));
 	}
 
 	setenv("GIT_DIFFTOOL_TRUST_EXIT_CODE",
-	       dt_options.trust_exit_code ? "true" : "false", 1);
+	       dt_options.trust_exit_ਕੋਡ ? "true" : "false", 1);
 
 	/*
 	 * In directory diff mode, 'git-difftool--helper' is called once
@@ -810,14 +810,14 @@ int cmd_difftool(int argc,
 	 * will invoke a separate instance of 'git-difftool--helper' for
 	 * each file that changed.
 	 */
-	strvec_push(&child.args, "diff");
-	if (no_index)
-		strvec_push(&child.args, "--no-index");
-	if (dir_diff)
-		strvec_pushl(&child.args, "--raw", "--no-abbrev", "-z", NULL);
-	strvec_pushv(&child.args, argv);
+	strvec_ਧੱਕੋ(&ਬੱਚਾ.ਦਲੀਲਾਂ, "diff");
+	ਜੇ (no_ਸੂਚਕਾਂਕ)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ.ਦਲੀਲਾਂ, "--no-index");
+	ਜੇ (dir_diff)
+		strvec_pushl(&ਬੱਚਾ.ਦਲੀਲਾਂ, "--raw", "--no-abbrev", "-z", ਨਿਰਾ);
+	strvec_pushv(&ਬੱਚਾ.ਦਲੀਲਾਂ, argv);
 
-	if (dir_diff)
-		return run_dir_diff(repo, &dt_options, extcmd, prefix, &child);
-	return run_file_diff(prompt, prefix, &child);
+	ਜੇ (dir_diff)
+		ਵਾਪਸ ਲੜੀਵਾਰ_dir_diff(repo, &dt_options, extcmd, ਅਗੇਤਰ, &ਬੱਚਾ);
+	ਵਾਪਸ ਲੜੀਵਾਰ_file_diff(prompt, ਅਗੇਤਰ, &ਬੱਚਾ);
 }

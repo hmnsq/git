@@ -2,14 +2,14 @@
  * GIT - The information manager from hell
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "setup.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
 
-static const char builtin_check_ref_format_usage[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ builtin_check_ref_format_usage[] =
 "git check-ref-format [--normalize] [<options>] <refname>\n"
 "   or: git check-ref-format --branch <branchname-shorthand>";
 
@@ -20,84 +20,84 @@ static const char builtin_check_ref_format_usage[] =
  * This function is similar to normalize_path_copy(), but stripped down
  * to meet check_ref_format's simpler needs.
  */
-static char *collapse_slashes(const char *refname)
+ਸਥਿਰ ਅੱਖਰ *collapse_slashes(ਅਚਲ ਅੱਖਰ *refname)
 {
-	char *ret = xmallocz(strlen(refname));
-	char ch;
-	char prev = '/';
-	char *cp = ret;
+	ਅੱਖਰ *ret = xmallocz(ਲੜੀ_ਲੰਬਾਈ(refname));
+	ਅੱਖਰ ch;
+	ਅੱਖਰ prev = '/';
+	ਅੱਖਰ *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
-			continue;
+	ਜਦੋਂ ((ch = *refname++) != '\0') {
+		ਜੇ (prev == '/' && ch == prev)
+			ਜਾਰੀ;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+ਸਥਿਰ ਪੂਰਨ check_ref_format_branch(ਅਚਲ ਅੱਖਰ *arg)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	int nongit;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *name;
+	ਪੂਰਨ nongit;
 
-	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
-	    !skip_prefix(sb.buf, "refs/heads/", &name))
+	ਤਿਆਰੀ_git_directory_gently(the_repository, &nongit);
+	ਜੇ (check_branch_ref(the_repository, &sb, arg) ||
+	    !skip_ਅਗੇਤਰ(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
-	printf("%s\n", name);
+	ਲਿਖੋ("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-int cmd_check_ref_format(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+ਪੂਰਨ cmd_check_ref_format(ਪੂਰਨ argc,
+			 ਅਚਲ ਅੱਖਰ **argv,
+			 ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			 ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
-	const char *refname;
-	char *to_free = NULL;
-	int ret = 1;
+	ਪੂਰਨ i;
+	ਪੂਰਨ normalize = 0;
+	ਪੂਰਨ flags = 0;
+	ਅਚਲ ਅੱਖਰ *refname;
+	ਅੱਖਰ *ਮੰਜ਼ਿਲ_free = ਨਿਰਾ;
+	ਪੂਰਨ ret = 1;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_ਖਾਲੀ_ਥਾਵਾਂ_ਅਗੇਤਰ(ਅਗੇਤਰ);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	ਜੇ (argc == 3 && !strcmp(argv[1], "--branch"))
+		ਵਾਪਸ check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	ਲਈ (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		ਜੇ (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
-			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(argv[i], "--refspec-pattern"))
+			flags |= REFNAME_REFSPEC_ਨਮੂਨਾ;
+		ਨਹੀਂਤਾਂ
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	ਜੇ (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
-		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
-		goto cleanup;
-	if (normalize)
-		printf("%s\n", refname);
+	ਜੇ (normalize)
+		refname = ਮੰਜ਼ਿਲ_free = collapse_slashes(refname);
+	ਜੇ (check_refname_format(refname, flags))
+		ਜਾਓ cleanup;
+	ਜੇ (normalize)
+		ਲਿਖੋ("%s\n", refname);
 
 	ret = 0;
 cleanup:
-	free(to_free);
-	return ret;
+	ਮੁਕਤ(ਮੰਜ਼ਿਲ_free);
+	ਵਾਪਸ ret;
 }

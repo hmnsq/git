@@ -5,69 +5,69 @@
  *
  * Based on git-verify-tag.sh
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "tag.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
-#include "ref-filter.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tag.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gpg-interface.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "ref-filter.h"
 
-static const char * const verify_tag_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ verify_ਟੈਗ_usage[] = {
 		N_("git verify-tag [-v | --verbose] [--format=<format>] [--raw] <tag>..."),
-		NULL
+		ਨਿਰਾ
 };
 
-int cmd_verify_tag(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+ਪੂਰਨ cmd_verify_ਟੈਗ(ਪੂਰਨ argc,
+		   ਅਚਲ ਅੱਖਰ **argv,
+		   ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		   ਬਣਤਰ repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
-	unsigned flags = 0;
-	struct ref_format format = REF_FORMAT_INIT;
-	const struct option verify_tag_options[] = {
+	ਪੂਰਨ i = 1, verbose = 0, had_error = 0;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ flags = 0;
+	ਬਣਤਰ ref_format format = REF_FORMAT_INIT;
+	ਅਚਲ ਬਣਤਰ option verify_ਟੈਗ_options[] = {
 		OPT__VERBOSE(&verbose, N_("print tag contents")),
-		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
 		OPT_STRING(0, "format", &format.format, N_("format"), N_("format to use for the output")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ਨਿਰਾ);
 
-	argc = parse_options(argc, argv, prefix, verify_tag_options,
-			     verify_tag_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
-		usage_with_options(verify_tag_usage, verify_tag_options);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, verify_ਟੈਗ_options,
+			     verify_ਟੈਗ_usage, PARSE_OPT_KEEP_ARGV0);
+	ਜੇ (argc <= i)
+		usage_with_options(verify_ਟੈਗ_usage, verify_ਟੈਗ_options);
 
-	if (verbose)
+	ਜੇ (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
-	if (format.format) {
-		if (verify_ref_format(&format))
-			usage_with_options(verify_tag_usage,
-					   verify_tag_options);
-		flags |= GPG_VERIFY_OMIT_STATUS;
+	ਜੇ (format.format) {
+		ਜੇ (verify_ref_format(&format))
+			usage_with_options(verify_ਟੈਗ_usage,
+					   verify_ਟੈਗ_options);
+		flags |= GPG_VERIFY_OMIT_ਸਥਿਤੀ;
 	}
 
-	while (i < argc) {
-		struct object_id oid;
-		const char *name = argv[i++];
+	ਜਦੋਂ (i < argc) {
+		ਬਣਤਰ object_id oid;
+		ਅਚਲ ਅੱਖਰ *name = argv[i++];
 
-		if (repo_get_oid(repo, name, &oid)) {
+		ਜੇ (repo_get_oid(repo, name, &oid)) {
 			had_error = !!error("tag '%s' not found.", name);
-			continue;
+			ਜਾਰੀ;
 		}
 
-		if (gpg_verify_tag(repo, &oid, name, flags)) {
+		ਜੇ (gpg_verify_ਟੈਗ(repo, &oid, name, flags)) {
 			had_error = 1;
-			continue;
+			ਜਾਰੀ;
 		}
 
-		if (format.format)
-			pretty_print_ref(name, &oid, NULL, &format);
+		ਜੇ (format.format)
+			pretty_print_ref(name, &oid, ਨਿਰਾ, &format);
 	}
-	return had_error;
+	ਵਾਪਸ had_error;
 }

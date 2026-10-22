@@ -1,259 +1,259 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "abspath.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
 
-#include "config.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "path.h"
-#include "pathspec.h"
-#include "preload-index.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "string-list.h"
-#include "run-command.h"
-#include "remote.h"
-#include "refs.h"
-#include "refspec.h"
-#include "revision.h"
-#include "diffcore.h"
-#include "diff.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "odb/source-files.h"
-#include "advice.h"
-#include "branch.h"
-#include "list-objects-filter-options.h"
-#include "wildmatch.h"
-#include "strbuf.h"
-#include "url.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "quote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "pathspec.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "preload-index.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dir.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "read-cache.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "setup.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "sparse-index.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "submodule.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "submodule-config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "string-list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "remote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refspec.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diffcore.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb/source.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb/source-files.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "advice.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "branch.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "list-objects-filter-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "wildmatch.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "url.h"
 
-#define OPT_QUIET (1 << 0)
-#define OPT_CACHED (1 << 1)
-#define OPT_RECURSIVE (1 << 2)
-#define OPT_FORCE (1 << 3)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ OPT_QUIET (1 << 0)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ OPT_CACHED (1 << 1)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ OPT_RECURSIVE (1 << 2)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ OPT_FORCE (1 << 3)
 
-typedef void (*each_submodule_fn)(const struct cache_entry *list_item,
-				  void *cb_data);
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਖਾਲੀ (*each_submodule_fn)(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *list_ਵਸਤੂ,
+				  ਖਾਲੀ *cb_ਅੰਕੜੇ);
 
-static char *get_default_remote(void)
+ਸਥਿਰ ਅੱਖਰ *get_default_remote(ਖਾਲੀ)
 {
-	return xstrdup(repo_default_remote(the_repository));
+	ਵਾਪਸ xstrdup(repo_default_remote(the_repository));
 }
 
-static char *resolve_relative_url(const char *rel_url, const char *up_path, int quiet)
+ਸਥਿਰ ਅੱਖਰ *resolve_relative_url(ਅਚਲ ਅੱਖਰ *rel_url, ਅਚਲ ਅੱਖਰ *ਉੱਪਰ_ਰਸਤਾ, ਪੂਰਨ quiet)
 {
-	char *remoteurl, *resolved_url;
-	char *remote = get_default_remote();
-	struct strbuf remotesb = STRBUF_INIT;
+	ਅੱਖਰ *remoteurl, *resolved_url;
+	ਅੱਖਰ *remote = get_default_remote();
+	ਬਣਤਰ strbuf remotesb = STRBUF_INIT;
 
 	strbuf_addf(&remotesb, "remote.%s.url", remote);
-	if (repo_config_get_string(the_repository, remotesb.buf, &remoteurl)) {
-		if (!quiet)
+	ਜੇ (repo_config_get_string(the_repository, remotesb.buf, &remoteurl)) {
+		ਜੇ (!quiet)
 			warning(_("could not look up configuration '%s'. "
 				  "Assuming this repository is its own "
 				  "authoritative upstream."),
 				remotesb.buf);
 		remoteurl = xgetcwd();
 	}
-	resolved_url = relative_url(remoteurl, rel_url, up_path);
+	resolved_url = relative_url(remoteurl, rel_url, ਉੱਪਰ_ਰਸਤਾ);
 
-	free(remote);
-	free(remoteurl);
+	ਮੁਕਤ(remote);
+	ਮੁਕਤ(remoteurl);
 	strbuf_release(&remotesb);
 
-	return resolved_url;
+	ਵਾਪਸ resolved_url;
 }
 
-static int get_default_remote_submodule(const char *module_path, char **default_remote)
+ਸਥਿਰ ਪੂਰਨ get_default_remote_submodule(ਅਚਲ ਅੱਖਰ *module_ਰਸਤਾ, ਅੱਖਰ **default_remote)
 {
-	const struct submodule *sub;
-	struct repository subrepo;
-	const char *remote_name = NULL;
-	char *url = NULL;
-	int ret = 0;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਬਣਤਰ repository subrepo;
+	ਅਚਲ ਅੱਖਰ *remote_name = ਨਿਰਾ;
+	ਅੱਖਰ *url = ਨਿਰਾ;
+	ਪੂਰਨ ret = 0;
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), module_path);
-	if (sub && sub->url) {
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), module_ਰਸਤਾ);
+	ਜੇ (sub && sub->url) {
 		url = xstrdup(sub->url);
 
 		/* Possibly a url relative to parent */
-		if (starts_with_dot_dot_slash(url) ||
+		ਜੇ (starts_with_dot_dot_slash(url) ||
 		    starts_with_dot_slash(url)) {
-			char *oldurl = url;
+			ਅੱਖਰ *oldurl = url;
 
-			url = resolve_relative_url(oldurl, NULL, 1);
-			free(oldurl);
+			url = resolve_relative_url(oldurl, ਨਿਰਾ, 1);
+			ਮੁਕਤ(oldurl);
 		}
 	}
 
-	if (repo_submodule_init(&subrepo, the_repository, module_path,
+	ਜੇ (repo_submodule_init(&subrepo, the_repository, module_ਰਸਤਾ,
 				null_oid(the_hash_algo)) < 0) {
-		ret = die_message(_("could not get a repository handle for submodule '%s'"),
-				   module_path);
-		goto out;
+		ret = die_ਸੁਨੇਹਾ(_("could not get a repository handle for submodule '%s'"),
+				   module_ਰਸਤਾ);
+		ਜਾਓ ਬਾਹਰਲਾ;
 	}
 
 	/* Look up by URL first */
-	if (url)
+	ਜੇ (url)
 		remote_name = repo_remote_from_url(&subrepo, url);
-	if (!remote_name)
+	ਜੇ (!remote_name)
 		remote_name = repo_default_remote(&subrepo);
 
 	*default_remote = xstrdup(remote_name);
 
-out:
+ਬਾਹਰਲਾ:
 	repo_clear(&subrepo);
-	free(url);
+	ਮੁਕਤ(url);
 
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int module_get_default_remote(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_get_default_remote(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+				     ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	const char *path;
-	char *resolved_path = NULL;
-	char *default_remote = NULL;
-	int code;
-	struct option options[] = {
-		OPT_END()
+	ਅਚਲ ਅੱਖਰ *ਰਸਤਾ;
+	ਅੱਖਰ *resolved_ਰਸਤਾ = ਨਿਰਾ;
+	ਅੱਖਰ *default_remote = ਨਿਰਾ;
+	ਪੂਰਨ ਕੋਡ;
+	ਬਣਤਰ option options[] = {
+		OPT_ਸਿਰਾ()
 	};
-	const char *const usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ usage[] = {
 		N_("git submodule--helper get-default-remote <path>"),
-		NULL
+		ਨਿਰਾ
 	};
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1)
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
+	ਜੇ (argc != 1)
 		usage_with_options(usage, options);
 
-	path = argv[0];
-	if (prefix && *prefix && !is_absolute_path(path)) {
-		resolved_path = xstrfmt("%s%s", prefix, path);
-		path = resolved_path;
+	ਰਸਤਾ = argv[0];
+	ਜੇ (ਅਗੇਤਰ && *ਅਗੇਤਰ && !is_absolute_ਰਸਤਾ(ਰਸਤਾ)) {
+		resolved_ਰਸਤਾ = xstrfmt("%s%s", ਅਗੇਤਰ, ਰਸਤਾ);
+		ਰਸਤਾ = resolved_ਰਸਤਾ;
 	}
 
-	code = get_default_remote_submodule(path, &default_remote);
-	if (code) {
-		free(resolved_path);
-		return code;
+	ਕੋਡ = get_default_remote_submodule(ਰਸਤਾ, &default_remote);
+	ਜੇ (ਕੋਡ) {
+		ਮੁਕਤ(resolved_ਰਸਤਾ);
+		ਵਾਪਸ ਕੋਡ;
 	}
 
-	printf("%s\n", default_remote);
-	free(default_remote);
-	free(resolved_path);
-	return 0;
+	ਲਿਖੋ("%s\n", default_remote);
+	ਮੁਕਤ(default_remote);
+	ਮੁਕਤ(resolved_ਰਸਤਾ);
+	ਵਾਪਸ 0;
 }
 
 /* the result should be freed by the caller. */
-static char *get_submodule_displaypath(const char *path, const char *prefix,
-				       const char *super_prefix)
+ਸਥਿਰ ਅੱਖਰ *get_submodule_displaypath(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+				       ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ)
 {
-	if (prefix && super_prefix) {
+	ਜੇ (ਅਗੇਤਰ && super_ਅਗੇਤਰ) {
 		BUG("cannot have prefix '%s' and superprefix '%s'",
-		    prefix, super_prefix);
-	} else if (prefix) {
-		struct strbuf sb = STRBUF_INIT;
-		char *displaypath = xstrdup(relative_path(path, prefix, &sb));
+		    ਅਗੇਤਰ, super_ਅਗੇਤਰ);
+	} ਨਹੀਂਤਾਂ ਜੇ (ਅਗੇਤਰ) {
+		ਬਣਤਰ strbuf sb = STRBUF_INIT;
+		ਅੱਖਰ *displaypath = xstrdup(relative_ਰਸਤਾ(ਰਸਤਾ, ਅਗੇਤਰ, &sb));
 		strbuf_release(&sb);
-		return displaypath;
-	} else if (super_prefix) {
-		return xstrfmt("%s%s", super_prefix, path);
-	} else {
-		return xstrdup(path);
+		ਵਾਪਸ displaypath;
+	} ਨਹੀਂਤਾਂ ਜੇ (super_ਅਗੇਤਰ) {
+		ਵਾਪਸ xstrfmt("%s%s", super_ਅਗੇਤਰ, ਰਸਤਾ);
+	} ਨਹੀਂਤਾਂ {
+		ਵਾਪਸ xstrdup(ਰਸਤਾ);
 	}
 }
 
-static char *compute_rev_name(const char *sub_path, const char* object_id)
+ਸਥਿਰ ਅੱਖਰ *compute_rev_name(ਅਚਲ ਅੱਖਰ *sub_ਰਸਤਾ, ਅਚਲ ਅੱਖਰ* object_id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char ***d;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ ***d;
 
-	static const char *describe_bare[] = { NULL };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *describe_bare[] = { ਨਿਰਾ };
 
-	static const char *describe_tags[] = { "--tags", NULL };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *describe_ਟੈਗ_ਸੂਚੀ[] = { "--tags", ਨਿਰਾ };
 
-	static const char *describe_contains[] = { "--contains", NULL };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *describe_ਸ਼ਾਮਲ_ਹੈ[] = { "--contains", ਨਿਰਾ };
 
-	static const char *describe_all_always[] = { "--all", "--always", NULL };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *describe_all_always[] = { "--all", "--always", ਨਿਰਾ };
 
-	static const char **describe_argv[] = { describe_bare, describe_tags,
-						describe_contains,
-						describe_all_always, NULL };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ **describe_argv[] = { describe_bare, describe_ਟੈਗ_ਸੂਚੀ,
+						describe_ਸ਼ਾਮਲ_ਹੈ,
+						describe_all_always, ਨਿਰਾ };
 
-	for (d = describe_argv; *d; d++) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	ਲਈ (d = describe_argv; *d; d++) {
+		ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
 		prepare_submodule_repo_env(&cp.env);
-		cp.dir = sub_path;
+		cp.dir = sub_ਰਸਤਾ;
 		cp.git_cmd = 1;
 		cp.no_stderr = 1;
 
-		strvec_push(&cp.args, "describe");
-		strvec_pushv(&cp.args, *d);
-		strvec_push(&cp.args, object_id);
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "describe");
+		strvec_pushv(&cp.ਦਲੀਲਾਂ, *d);
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, object_id);
 
-		if (!capture_command(&cp, &sb, 0)) {
+		ਜੇ (!capture_command(&cp, &sb, 0)) {
 			strbuf_strip_suffix(&sb, "\n");
-			return strbuf_detach(&sb, NULL);
+			ਵਾਪਸ strbuf_detach(&sb, ਨਿਰਾ);
 		}
 	}
 
 	strbuf_release(&sb);
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-struct module_list {
-	const struct cache_entry **entries;
-	int alloc, nr;
+ਬਣਤਰ module_list {
+	ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ **entries;
+	ਪੂਰਨ alloc, nr;
 };
-#define MODULE_LIST_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MODULE_LIST_INIT { 0 }
 
-static void module_list_release(struct module_list *ml)
+ਸਥਿਰ ਖਾਲੀ module_list_release(ਬਣਤਰ module_list *ml)
 {
-	free(ml->entries);
+	ਮੁਕਤ(ml->entries);
 }
 
-static int module_list_compute(const char **argv,
-			       const char *prefix,
-			       struct pathspec *pathspec,
-			       struct module_list *list)
+ਸਥਿਰ ਪੂਰਨ module_list_compute(ਅਚਲ ਅੱਖਰ **argv,
+			       ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			       ਬਣਤਰ pathspec *pathspec,
+			       ਬਣਤਰ module_list *list)
 {
-	int result = 0;
-	char *ps_matched = NULL;
+	ਪੂਰਨ ਨਤੀਜਾ = 0;
+	ਅੱਖਰ *ps_matched = ਨਿਰਾ;
 
 	parse_pathspec(pathspec, 0,
-		       PATHSPEC_PREFER_FULL,
-		       prefix, argv);
+		       PATHSPEC_PREFER_ਭਰਿਆ,
+		       ਅਗੇਤਰ, argv);
 
-	if (pathspec->nr)
+	ਜੇ (pathspec->nr)
 		ps_matched = xcalloc(pathspec->nr, 1);
 
-	if (repo_read_index(the_repository) < 0)
+	ਜੇ (repo_read_ਸੂਚਕਾਂਕ(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	for (size_t i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
+	ਲਈ (ਮਾਪ_t i = 0; i < the_repository->ਸੂਚਕਾਂਕ->cache_nr; i++) {
+		ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce = the_repository->ਸੂਚਕਾਂਕ->cache[i];
 
-		if (!match_pathspec(the_repository->index, pathspec, ce->name, ce_namelen(ce),
+		ਜੇ (!ਮੇਲ_pathspec(the_repository->ਸੂਚਕਾਂਕ, pathspec, ce->name, ce_namelen(ce),
 				    0, ps_matched, 1) ||
-		    !S_ISGITLINK(ce->ce_mode))
-			continue;
+		    !S_ISGITLINK(ce->ce_ਬਹੁਲਕ))
+			ਜਾਰੀ;
 
 		ALLOC_GROW(list->entries, list->nr + 1, list->alloc);
 		list->entries[list->nr++] = ce;
-		while (i + 1 < the_repository->index->cache_nr &&
-		       !strcmp(ce->name, the_repository->index->cache[i + 1]->name))
+		ਜਦੋਂ (i + 1 < the_repository->ਸੂਚਕਾਂਕ->cache_nr &&
+		       !strcmp(ce->name, the_repository->ਸੂਚਕਾਂਕ->cache[i + 1]->name))
 			/*
 			 * Skip entries with the same name in different stages
 			 * to make sure an entry is returned only once.
@@ -261,95 +261,95 @@ static int module_list_compute(const char **argv,
 			i++;
 	}
 
-	if (ps_matched && report_path_error(ps_matched, pathspec))
-		result = -1;
+	ਜੇ (ps_matched && report_ਰਸਤਾ_error(ps_matched, pathspec))
+		ਨਤੀਜਾ = -1;
 
-	free(ps_matched);
+	ਮੁਕਤ(ps_matched);
 
-	return result;
+	ਵਾਪਸ ਨਤੀਜਾ;
 }
 
-static void module_list_active(struct module_list *list)
+ਸਥਿਰ ਖਾਲੀ module_list_ਸਰਗਰਮ(ਬਣਤਰ module_list *list)
 {
-	int i;
-	struct module_list active_modules = MODULE_LIST_INIT;
+	ਪੂਰਨ i;
+	ਬਣਤਰ module_list ਸਰਗਰਮ_modules = MODULE_LIST_INIT;
 
-	for (i = 0; i < list->nr; i++) {
-		const struct cache_entry *ce = list->entries[i];
+	ਲਈ (i = 0; i < list->nr; i++) {
+		ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce = list->entries[i];
 
-		if (!is_submodule_active(the_repository, ce->name))
-			continue;
+		ਜੇ (!is_submodule_ਸਰਗਰਮ(the_repository, ce->name))
+			ਜਾਰੀ;
 
-		ALLOC_GROW(active_modules.entries,
-			   active_modules.nr + 1,
-			   active_modules.alloc);
-		active_modules.entries[active_modules.nr++] = ce;
+		ALLOC_GROW(ਸਰਗਰਮ_modules.entries,
+			   ਸਰਗਰਮ_modules.nr + 1,
+			   ਸਰਗਰਮ_modules.alloc);
+		ਸਰਗਰਮ_modules.entries[ਸਰਗਰਮ_modules.nr++] = ce;
 	}
 
 	module_list_release(list);
-	*list = active_modules;
+	*list = ਸਰਗਰਮ_modules;
 }
 
-static char *get_up_path(const char *path)
+ਸਥਿਰ ਅੱਖਰ *get_ਉੱਪਰ_ਰਸਤਾ(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
 
-	strbuf_addstrings(&sb, "../", count_slashes(path));
+	strbuf_addstrings(&sb, "../", ਗਿਣਤੀ_slashes(ਰਸਤਾ));
 
 	/*
 	 * Check if 'path' ends with slash or not
 	 * for having the same output for dir/sub_dir
 	 * and dir/sub_dir/
 	 */
-	if (!is_dir_sep(path[strlen(path) - 1]))
+	ਜੇ (!is_dir_sep(ਰਸਤਾ[ਲੜੀ_ਲੰਬਾਈ(ਰਸਤਾ) - 1]))
 		strbuf_addstr(&sb, "../");
 
-	return strbuf_detach(&sb, NULL);
+	ਵਾਪਸ strbuf_detach(&sb, ਨਿਰਾ);
 }
 
-static void for_each_listed_submodule(const struct module_list *list,
-				      each_submodule_fn fn, void *cb_data)
+ਸਥਿਰ ਖਾਲੀ for_each_listed_submodule(ਅਚਲ ਬਣਤਰ module_list *list,
+				      each_submodule_fn fn, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	int i;
+	ਪੂਰਨ i;
 
-	for (i = 0; i < list->nr; i++)
-		fn(list->entries[i], cb_data);
+	ਲਈ (i = 0; i < list->nr; i++)
+		fn(list->entries[i], cb_ਅੰਕੜੇ);
 }
 
-struct foreach_cb {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	const char *super_prefix;
-	int quiet;
-	int recursive;
+ਬਣਤਰ foreach_cb {
+	ਪੂਰਨ argc;
+	ਅਚਲ ਅੱਖਰ **argv;
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ;
+	ਪੂਰਨ quiet;
+	ਪੂਰਨ recursive;
 };
-#define FOREACH_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ FOREACH_CB_INIT { 0 }
 
-static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
-				       void *cb_data)
+ਸਥਿਰ ਖਾਲੀ runcommand_ਵਿੱਚ_submodule_cb(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *list_ਵਸਤੂ,
+				       ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct foreach_cb *info = cb_data;
-	const char *path = list_item->name;
-	const struct object_id *ce_oid = &list_item->oid;
-	const struct submodule *sub;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	char *displaypath;
+	ਬਣਤਰ foreach_cb *info = cb_ਅੰਕੜੇ;
+	ਅਚਲ ਅੱਖਰ *ਰਸਤਾ = list_ਵਸਤੂ->name;
+	ਅਚਲ ਬਣਤਰ object_id *ce_oid = &list_ਵਸਤੂ->oid;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+	ਅੱਖਰ *displaypath;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	ਜੇ (validate_submodule_ਰਸਤਾ(ਰਸਤਾ) < 0)
+		die(ਨਿਰਾ);
 
-	displaypath = get_submodule_displaypath(path, info->prefix,
-						info->super_prefix);
+	displaypath = get_submodule_displaypath(ਰਸਤਾ, info->ਅਗੇਤਰ,
+						info->super_ਅਗੇਤਰ);
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
 
-	if (!sub)
+	ਜੇ (!sub)
 		die(_("No url found for submodule path '%s' in .gitmodules"),
 			displaypath);
 
-	if (!is_submodule_populated_gently(path, NULL))
-		goto cleanup;
+	ਜੇ (!is_submodule_populated_gently(ਰਸਤਾ, ਨਿਰਾ))
+		ਜਾਓ cleanup;
 
 	prepare_submodule_repo_env(&cp.env);
 
@@ -359,7 +359,7 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 	 * child process.
 	 */
 	cp.use_shell = 1;
-	cp.dir = path;
+	cp.dir = ਰਸਤਾ;
 
 	/*
 	 * NEEDSWORK: the command currently has access to the variables $name,
@@ -367,15 +367,15 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 	 * contains a single argument. This is done for maintaining a faithful
 	 * translation from shell script.
 	 */
-	if (info->argc == 1) {
-		char *toplevel = xgetcwd();
-		struct strbuf sb = STRBUF_INIT;
+	ਜੇ (info->argc == 1) {
+		ਅੱਖਰ *toplevel = xgetcwd();
+		ਬਣਤਰ strbuf sb = STRBUF_INIT;
 
 		strvec_pushf(&cp.env, "name=%s", sub->name);
-		strvec_pushf(&cp.env, "sm_path=%s", path);
+		strvec_pushf(&cp.env, "sm_path=%s", ਰਸਤਾ);
 		strvec_pushf(&cp.env, "displaypath=%s", displaypath);
 		strvec_pushf(&cp.env, "sha1=%s",
-			     oid_to_hex(ce_oid));
+			     oid_ਮੰਜ਼ਿਲ_hex(ce_oid));
 		strvec_pushf(&cp.env, "toplevel=%s", toplevel);
 
 		/*
@@ -387,186 +387,186 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 		 * existing PATH variable. Hence, to avoid that, we expose
 		 * path via the args strvec and not via env.
 		 */
-		sq_quote_buf(&sb, path);
-		strvec_pushf(&cp.args, "path=%s; %s",
+		sq_quote_buf(&sb, ਰਸਤਾ);
+		strvec_pushf(&cp.ਦਲੀਲਾਂ, "path=%s; %s",
 			     sb.buf, info->argv[0]);
 		strbuf_release(&sb);
-		free(toplevel);
-	} else {
-		strvec_pushv(&cp.args, info->argv);
+		ਮੁਕਤ(toplevel);
+	} ਨਹੀਂਤਾਂ {
+		strvec_pushv(&cp.ਦਲੀਲਾਂ, info->argv);
 	}
 
-	if (!info->quiet)
-		printf(_("Entering '%s'\n"), displaypath);
+	ਜੇ (!info->quiet)
+		ਲਿਖੋ(_("Entering '%s'\n"), displaypath);
 
-	if (info->argv[0]) {
-		if (run_command(&cp))
+	ਜੇ (info->argv[0]) {
+		ਜੇ (ਲੜੀਵਾਰ_command(&cp))
 			die(_("run_command returned non-zero status for %s\n."),
 			    displaypath);
-	} else {
-		child_process_clear(&cp);
+	} ਨਹੀਂਤਾਂ {
+		ਬੱਚਾ_process_clear(&cp);
 	}
 
-	if (info->recursive) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
+	ਜੇ (info->recursive) {
+		ਬਣਤਰ ਬੱਚਾ_process cpr = ਬੱਚਾ_PROCESS_INIT;
 
 		cpr.git_cmd = 1;
-		cpr.dir = path;
+		cpr.dir = ਰਸਤਾ;
 		prepare_submodule_repo_env(&cpr.env);
 
-		strvec_pushl(&cpr.args, "submodule--helper", "foreach", "--recursive",
-			     NULL);
-		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
+		strvec_pushl(&cpr.ਦਲੀਲਾਂ, "submodule--helper", "foreach", "--recursive",
+			     ਨਿਰਾ);
+		strvec_pushf(&cpr.ਦਲੀਲਾਂ, "--super-prefix=%s/", displaypath);
 
-		if (info->quiet)
-			strvec_push(&cpr.args, "--quiet");
+		ਜੇ (info->quiet)
+			strvec_ਧੱਕੋ(&cpr.ਦਲੀਲਾਂ, "--quiet");
 
-		strvec_push(&cpr.args, "--");
-		strvec_pushv(&cpr.args, info->argv);
+		strvec_ਧੱਕੋ(&cpr.ਦਲੀਲਾਂ, "--");
+		strvec_pushv(&cpr.ਦਲੀਲਾਂ, info->argv);
 
-		if (run_command(&cpr))
+		ਜੇ (ਲੜੀਵਾਰ_command(&cpr))
 			die(_("run_command returned non-zero status while "
 				"recursing in the nested submodules of %s\n."),
 				displaypath);
 	}
 
 cleanup:
-	free(displaypath);
+	ਮੁਕਤ(displaypath);
 }
 
-static int module_foreach(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_foreach(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct foreach_cb info = FOREACH_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	struct option module_foreach_options[] = {
-		OPT__SUPER_PREFIX(&info.super_prefix),
+	ਬਣਤਰ foreach_cb info = FOREACH_CB_INIT;
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+	ਬਣਤਰ option module_foreach_options[] = {
+		OPT_SUPER_ਅਗੇਤਰ(&info.super_ਅਗੇਤਰ),
 		OPT__QUIET(&info.quiet, N_("suppress output of entering each submodule command")),
 		OPT_BOOL(0, "recursive", &info.recursive,
 			 N_("recurse into nested submodules")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule foreach [--quiet] [--recursive] [--] <command>"),
-		NULL
+		ਨਿਰਾ
 	};
-	int ret = 1;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, module_foreach_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_foreach_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(NULL, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	ਜੇ (module_list_compute(ਨਿਰਾ, ਅਗੇਤਰ, &pathspec, &list) < 0)
+		ਜਾਓ cleanup;
 
 	info.argc = argc;
 	info.argv = argv;
-	info.prefix = prefix;
+	info.ਅਗੇਤਰ = ਅਗੇਤਰ;
 
-	for_each_listed_submodule(&list, runcommand_in_submodule_cb, &info);
+	for_each_listed_submodule(&list, runcommand_ਵਿੱਚ_submodule_cb, &info);
 
 	ret = 0;
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-struct init_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+ਬਣਤਰ init_cb {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags;
 };
-#define INIT_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ INIT_CB_INIT { 0 }
 
-static int validate_and_set_submodule_gitdir(struct strbuf *gitdir_path,
-					     const char *submodule_name)
+ਸਥਿਰ ਪੂਰਨ validate_and_ਸੈੱਟ_submodule_gitdir(ਬਣਤਰ strbuf *gitdir_ਰਸਤਾ,
+					     ਅਚਲ ਅੱਖਰ *submodule_name)
 {
-	const char *value;
-	char *key;
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ;
+	ਅੱਖਰ *ਕੁੰਜੀ;
 
-	if (validate_submodule_git_dir(gitdir_path->buf, submodule_name))
-		return -1;
+	ਜੇ (validate_submodule_git_dir(gitdir_ਰਸਤਾ->buf, submodule_name))
+		ਵਾਪਸ -1;
 
-	key = xstrfmt("submodule.%s.gitdir", submodule_name);
+	ਕੁੰਜੀ = xstrfmt("submodule.%s.gitdir", submodule_name);
 
 	/* Nothing to do if the config already exists. */
-	if (!repo_config_get_string_tmp(the_repository, key, &value)) {
-		free(key);
-		return 0;
+	ਜੇ (!repo_config_get_string_tmp(the_repository, ਕੁੰਜੀ, &ਮੁੱਲ)) {
+		ਮੁਕਤ(ਕੁੰਜੀ);
+		ਵਾਪਸ 0;
 	}
 
-	if (repo_config_set_gently(the_repository, key, gitdir_path->buf)) {
-		free(key);
-		return -1;
+	ਜੇ (repo_config_ਸੈੱਟ_gently(the_repository, ਕੁੰਜੀ, gitdir_ਰਸਤਾ->buf)) {
+		ਮੁਕਤ(ਕੁੰਜੀ);
+		ਵਾਪਸ -1;
 	}
 
-	free(key);
-	return 0;
+	ਮੁਕਤ(ਕੁੰਜੀ);
+	ਵਾਪਸ 0;
 }
 
-static void create_default_gitdir_config(const char *submodule_name)
+ਸਥਿਰ ਖਾਲੀ create_default_gitdir_config(ਅਚਲ ਅੱਖਰ *submodule_name)
 {
-	struct strbuf gitdir_path = STRBUF_INIT;
-	struct git_hash_ctx ctx;
-	char hex_name_hash[GIT_MAX_HEXSZ + 1], header[128];
-	unsigned char raw_name_hash[GIT_MAX_RAWSZ];
-	int header_len;
+	ਬਣਤਰ strbuf gitdir_ਰਸਤਾ = STRBUF_INIT;
+	ਬਣਤਰ git_hash_ctx ctx;
+	ਅੱਖਰ hex_name_hash[GIT_MAX_HEXSZ + 1], ਸਿਰਲੇਖ[128];
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ raw_name_hash[GIT_MAX_RAWSZ];
+	ਪੂਰਨ ਸਿਰਲੇਖ_len;
 
 	/* Case 1: try the plain module name */
-	repo_git_path_append(the_repository, &gitdir_path, "modules/%s", submodule_name);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
-		strbuf_release(&gitdir_path);
-		return;
+	repo_git_ਰਸਤਾ_append(the_repository, &gitdir_ਰਸਤਾ, "modules/%s", submodule_name);
+	ਜੇ (!validate_and_ਸੈੱਟ_submodule_gitdir(&gitdir_ਰਸਤਾ, submodule_name)) {
+		strbuf_release(&gitdir_ਰਸਤਾ);
+		ਵਾਪਸ;
 	}
 
 	/* Case 2.1: Try URI-safe (RFC3986) encoding first, this fixes nested gitdirs */
-	strbuf_reset(&gitdir_path);
-	repo_git_path_append(the_repository, &gitdir_path, "modules/");
-	strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_rfc3986_unreserved);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
-		strbuf_release(&gitdir_path);
-		return;
+	strbuf_reset(&gitdir_ਰਸਤਾ);
+	repo_git_ਰਸਤਾ_append(the_repository, &gitdir_ਰਸਤਾ, "modules/");
+	strbuf_addstr_urlencode(&gitdir_ਰਸਤਾ, submodule_name, is_rfc3986_unreserved);
+	ਜੇ (!validate_and_ਸੈੱਟ_submodule_gitdir(&gitdir_ਰਸਤਾ, submodule_name)) {
+		strbuf_release(&gitdir_ਰਸਤਾ);
+		ਵਾਪਸ;
 	}
 
 	/* Case 2.2: Try extended uppercase URI (RFC3986) encoding, to fix case-folding */
-	strbuf_reset(&gitdir_path);
-	repo_git_path_append(the_repository, &gitdir_path, "modules/");
-	strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_casefolding_rfc3986_unreserved);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-		return;
+	strbuf_reset(&gitdir_ਰਸਤਾ);
+	repo_git_ਰਸਤਾ_append(the_repository, &gitdir_ਰਸਤਾ, "modules/");
+	strbuf_addstr_urlencode(&gitdir_ਰਸਤਾ, submodule_name, is_casefolding_rfc3986_unreserved);
+	ਜੇ (!validate_and_ਸੈੱਟ_submodule_gitdir(&gitdir_ਰਸਤਾ, submodule_name))
+		ਵਾਪਸ;
 
 	/* Case 2.3: Try some derived gitdir names, see if one sticks */
-	for (char c = '0'; c <= '9'; c++) {
-		strbuf_reset(&gitdir_path);
-		repo_git_path_append(the_repository, &gitdir_path, "modules/");
-		strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_rfc3986_unreserved);
-		strbuf_addch(&gitdir_path, c);
-		if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-			return;
+	ਲਈ (ਅੱਖਰ c = '0'; c <= '9'; c++) {
+		strbuf_reset(&gitdir_ਰਸਤਾ);
+		repo_git_ਰਸਤਾ_append(the_repository, &gitdir_ਰਸਤਾ, "modules/");
+		strbuf_addstr_urlencode(&gitdir_ਰਸਤਾ, submodule_name, is_rfc3986_unreserved);
+		strbuf_addch(&gitdir_ਰਸਤਾ, c);
+		ਜੇ (!validate_and_ਸੈੱਟ_submodule_gitdir(&gitdir_ਰਸਤਾ, submodule_name))
+			ਵਾਪਸ;
 
-		strbuf_reset(&gitdir_path);
-		repo_git_path_append(the_repository, &gitdir_path, "modules/");
-		strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_casefolding_rfc3986_unreserved);
-		strbuf_addch(&gitdir_path, c);
-		if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-			return;
+		strbuf_reset(&gitdir_ਰਸਤਾ);
+		repo_git_ਰਸਤਾ_append(the_repository, &gitdir_ਰਸਤਾ, "modules/");
+		strbuf_addstr_urlencode(&gitdir_ਰਸਤਾ, submodule_name, is_casefolding_rfc3986_unreserved);
+		strbuf_addch(&gitdir_ਰਸਤਾ, c);
+		ਜੇ (!validate_and_ਸੈੱਟ_submodule_gitdir(&gitdir_ਰਸਤਾ, submodule_name))
+			ਵਾਪਸ;
 	}
 
 	/* Case 2.4: If all the above failed, try a hash of the name as a last resort */
-	header_len = snprintf(header, sizeof(header),
-			      "blob %"PRIuMAX, (uintmax_t)strlen(submodule_name));
+	ਸਿਰਲੇਖ_len = snprintf(ਸਿਰਲੇਖ, ਆਕਾਰ(ਸਿਰਲੇਖ),
+			      "blob %"PRIuMAX, (uintmax_t)ਲੜੀ_ਲੰਬਾਈ(submodule_name));
 	git_hash_init(&ctx, the_hash_algo);
-	git_hash_update(&ctx, header, header_len);
+	git_hash_update(&ctx, ਸਿਰਲੇਖ, ਸਿਰਲੇਖ_len);
 	git_hash_update(&ctx, "\0", 1);
-	git_hash_update(&ctx, submodule_name, strlen(submodule_name));
+	git_hash_update(&ctx, submodule_name, ਲੜੀ_ਲੰਬਾਈ(submodule_name));
 	git_hash_final(raw_name_hash, &ctx);
-	hash_to_hex_algop_r(hex_name_hash, raw_name_hash, the_hash_algo);
-	strbuf_reset(&gitdir_path);
-	repo_git_path_append(the_repository, &gitdir_path, "modules/%s", hex_name_hash);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
-		strbuf_release(&gitdir_path);
-		return;
+	hash_ਮੰਜ਼ਿਲ_hex_algop_r(hex_name_hash, raw_name_hash, the_hash_algo);
+	strbuf_reset(&gitdir_ਰਸਤਾ);
+	repo_git_ਰਸਤਾ_append(the_repository, &gitdir_ਰਸਤਾ, "modules/%s", hex_name_hash);
+	ਜੇ (!validate_and_ਸੈੱਟ_submodule_gitdir(&gitdir_ਰਸਤਾ, submodule_name)) {
+		strbuf_release(&gitdir_ਰਸਤਾ);
+		ਵਾਪਸ;
 	}
 
 	/* Case 3: nothing worked, error out */
@@ -576,20 +576,20 @@ static void create_default_gitdir_config(const char *submodule_name)
 	    submodule_name, submodule_name, submodule_name);
 }
 
-static void init_submodule(const char *path, const char *prefix,
-			   const char *super_prefix,
-			   unsigned int flags)
+ਸਥਿਰ ਖਾਲੀ init_submodule(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			   ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ,
+			   ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags)
 {
-	const struct submodule *sub;
-	struct strbuf sb = STRBUF_INIT;
-	const char *upd;
-	char *url = NULL, *displaypath;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *upd;
+	ਅੱਖਰ *url = ਨਿਰਾ, *displaypath;
 
-	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
+	displaypath = get_submodule_displaypath(ਰਸਤਾ, ਅਗੇਤਰ, super_ਅਗੇਤਰ);
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
 
-	if (!sub)
+	ਜੇ (!sub)
 		die(_("No url found for submodule path '%s' in .gitmodules"),
 			displaypath);
 
@@ -599,9 +599,9 @@ static void init_submodule(const char *path, const char *prefix,
 	 *
 	 * Set active flag for the submodule being initialized
 	 */
-	if (!is_submodule_active(the_repository, path)) {
+	ਜੇ (!is_submodule_ਸਰਗਰਮ(the_repository, ਰਸਤਾ)) {
 		strbuf_addf(&sb, "submodule.%s.active", sub->name);
-		repo_config_set_gently(the_repository, sb.buf, "true");
+		repo_config_ਸੈੱਟ_gently(the_repository, sb.buf, "true");
 		strbuf_reset(&sb);
 	}
 
@@ -611,26 +611,26 @@ static void init_submodule(const char *path, const char *prefix,
 	 * .gitmodules, so look it up directly.
 	 */
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_get_string(the_repository, sb.buf, &url)) {
-		if (!sub->url)
+	ਜੇ (repo_config_get_string(the_repository, sb.buf, &url)) {
+		ਜੇ (!sub->url)
 			die(_("No url found for submodule path '%s' in .gitmodules"),
 				displaypath);
 
 		url = xstrdup(sub->url);
 
 		/* Possibly a url relative to parent */
-		if (starts_with_dot_dot_slash(url) ||
+		ਜੇ (starts_with_dot_dot_slash(url) ||
 		    starts_with_dot_slash(url)) {
-			char *oldurl = url;
+			ਅੱਖਰ *oldurl = url;
 
-			url = resolve_relative_url(oldurl, NULL, 0);
-			free(oldurl);
+			url = resolve_relative_url(oldurl, ਨਿਰਾ, 0);
+			ਮੁਕਤ(oldurl);
 		}
 
-		if (repo_config_set_gently(the_repository, sb.buf, url))
+		ਜੇ (repo_config_ਸੈੱਟ_gently(the_repository, sb.buf, url))
 			die(_("Failed to register url for submodule path '%s'"),
 			    displaypath);
-		if (!(flags & OPT_QUIET))
+		ਜੇ (!(flags & OPT_QUIET))
 			fprintf(stderr,
 				_("Submodule '%s' (%s) registered for path '%s'\n"),
 				sub->name, url, displaypath);
@@ -639,68 +639,68 @@ static void init_submodule(const char *path, const char *prefix,
 
 	/* Copy "update" setting when it is not set yet */
 	strbuf_addf(&sb, "submodule.%s.update", sub->name);
-	if (repo_config_get_string_tmp(the_repository, sb.buf, &upd) &&
+	ਜੇ (repo_config_get_string_tmp(the_repository, sb.buf, &upd) &&
 	    sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
-		if (sub->update_strategy.type == SM_UPDATE_COMMAND) {
+		ਜੇ (sub->update_strategy.type == SM_UPDATE_COMMAND) {
 			fprintf(stderr, _("warning: command update mode suggested for submodule '%s'\n"),
 				sub->name);
 			upd = "none";
-		} else {
-			upd = submodule_update_type_to_string(sub->update_strategy.type);
+		} ਨਹੀਂਤਾਂ {
+			upd = submodule_update_type_ਮੰਜ਼ਿਲ_string(sub->update_strategy.type);
 		}
 
-		if (repo_config_set_gently(the_repository, sb.buf, upd))
+		ਜੇ (repo_config_ਸੈੱਟ_gently(the_repository, sb.buf, upd))
 			die(_("Failed to register update mode for submodule path '%s'"), displaypath);
 	}
 
-	if (the_repository->repository_format_submodule_path_cfg)
+	ਜੇ (the_repository->repository_format_submodule_ਰਸਤਾ_cfg)
 		create_default_gitdir_config(sub->name);
 
 	strbuf_release(&sb);
-	free(displaypath);
-	free(url);
+	ਮੁਕਤ(displaypath);
+	ਮੁਕਤ(url);
 }
 
-static void init_submodule_cb(const struct cache_entry *list_item, void *cb_data)
+ਸਥਿਰ ਖਾਲੀ init_submodule_cb(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *list_ਵਸਤੂ, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct init_cb *info = cb_data;
+	ਬਣਤਰ init_cb *info = cb_ਅੰਕੜੇ;
 
-	init_submodule(list_item->name, info->prefix, info->super_prefix,
+	init_submodule(list_ਵਸਤੂ->name, info->ਅਗੇਤਰ, info->super_ਅਗੇਤਰ,
 		       info->flags);
 }
 
-static int module_init(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_init(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		       ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct init_cb info = INIT_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	struct option module_init_options[] = {
+	ਬਣਤਰ init_cb info = INIT_CB_INIT;
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+	ਪੂਰਨ quiet = 0;
+	ਬਣਤਰ option module_init_options[] = {
 		OPT__QUIET(&quiet, N_("suppress output for initializing a submodule")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule init [<options>] [<path>]"),
-		NULL
+		ਨਿਰਾ
 	};
-	int ret = 1;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, module_init_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_init_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	ਜੇ (module_list_compute(argv, ਅਗੇਤਰ, &pathspec, &list) < 0)
+		ਜਾਓ cleanup;
 
 	/*
 	 * If there are no path args and submodule.active is set then,
 	 * by default, only initialize 'active' modules.
 	 */
-	if (!argc && !repo_config_get(the_repository, "submodule.active"))
-		module_list_active(&list);
+	ਜੇ (!argc && !repo_config_get(the_repository, "submodule.active"))
+		module_list_ਸਰਗਰਮ(&list);
 
-	info.prefix = prefix;
-	if (quiet)
+	info.ਅਗੇਤਰ = ਅਗੇਤਰ;
+	ਜੇ (quiet)
 		info.flags |= OPT_QUIET;
 
 	for_each_listed_submodule(&list, init_submodule_cb, &info);
@@ -709,352 +709,352 @@ static int module_init(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-struct status_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+ਬਣਤਰ ਸਥਿਤੀ_cb {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags;
 };
-#define STATUS_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ਸਥਿਤੀ_CB_INIT { 0 }
 
-static void print_status(unsigned int flags, char state, const char *path,
-			 const struct object_id *oid, const char *displaypath)
+ਸਥਿਰ ਖਾਲੀ print_ਸਥਿਤੀ(ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags, ਅੱਖਰ state, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ,
+			 ਅਚਲ ਬਣਤਰ object_id *oid, ਅਚਲ ਅੱਖਰ *displaypath)
 {
-	if (flags & OPT_QUIET)
-		return;
+	ਜੇ (flags & OPT_QUIET)
+		ਵਾਪਸ;
 
-	printf("%c%s %s", state, oid_to_hex(oid), displaypath);
+	ਲਿਖੋ("%c%s %s", state, oid_ਮੰਜ਼ਿਲ_hex(oid), displaypath);
 
-	if (state == ' ' || state == '+') {
-		char *name = compute_rev_name(path, oid_to_hex(oid));
+	ਜੇ (state == ' ' || state == '+') {
+		ਅੱਖਰ *name = compute_rev_name(ਰਸਤਾ, oid_ਮੰਜ਼ਿਲ_hex(oid));
 
-		if (name)
-			printf(" (%s)", name);
-		free(name);
+		ਜੇ (name)
+			ਲਿਖੋ(" (%s)", name);
+		ਮੁਕਤ(name);
 	}
 
-	printf("\n");
+	ਲਿਖੋ("\n");
 }
 
-static int handle_submodule_head_ref(const struct reference *ref, void *cb_data)
+ਸਥਿਰ ਪੂਰਨ handle_submodule_ਸਿਰ_ref(ਅਚਲ ਬਣਤਰ reference *ref, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct object_id *output = cb_data;
+	ਬਣਤਰ object_id *output = cb_ਅੰਕੜੇ;
 
-	if (ref->oid)
+	ਜੇ (ref->oid)
 		oidcpy(output, ref->oid);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static void status_submodule(const char *path, const struct object_id *ce_oid,
-			     unsigned int ce_flags, const char *prefix,
-			     const char *super_prefix, unsigned int flags)
+ਸਥਿਰ ਖਾਲੀ ਸਥਿਤੀ_submodule(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਬਣਤਰ object_id *ce_oid,
+			     ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ ce_flags, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			     ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ, ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags)
 {
-	char *displaypath;
-	struct strvec diff_files_args = STRVEC_INIT;
-	struct rev_info rev = REV_INFO_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	const char *git_dir;
+	ਅੱਖਰ *displaypath;
+	ਬਣਤਰ strvec diff_files_ਦਲੀਲਾਂ = STRVEC_INIT;
+	ਬਣਤਰ rev_info rev = REV_INFO_INIT;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *git_dir;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	ਜੇ (validate_submodule_ਰਸਤਾ(ਰਸਤਾ) < 0)
+		die(ਨਿਰਾ);
 
-	if (!submodule_from_path(the_repository, null_oid(the_hash_algo), path))
+	ਜੇ (!submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ))
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
-		      path);
+		      ਰਸਤਾ);
 
-	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
+	displaypath = get_submodule_displaypath(ਰਸਤਾ, ਅਗੇਤਰ, super_ਅਗੇਤਰ);
 
-	if ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
-		print_status(flags, 'U', path, null_oid(the_hash_algo), displaypath);
-		goto cleanup;
+	ਜੇ ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
+		print_ਸਥਿਤੀ(flags, 'U', ਰਸਤਾ, null_oid(the_hash_algo), displaypath);
+		ਜਾਓ cleanup;
 	}
 
-	strbuf_addf(&buf, "%s/.git", path);
+	strbuf_addf(&buf, "%s/.git", ਰਸਤਾ);
 	git_dir = read_gitfile(buf.buf);
-	if (!git_dir)
+	ਜੇ (!git_dir)
 		git_dir = buf.buf;
 
-	if (!is_submodule_active(the_repository, path) ||
+	ਜੇ (!is_submodule_ਸਰਗਰਮ(the_repository, ਰਸਤਾ) ||
 	    !is_git_directory(git_dir)) {
-		print_status(flags, '-', path, ce_oid, displaypath);
+		print_ਸਥਿਤੀ(flags, '-', ਰਸਤਾ, ce_oid, displaypath);
 		strbuf_release(&buf);
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 	strbuf_release(&buf);
 
-	strvec_pushl(&diff_files_args, "diff-files",
+	strvec_pushl(&diff_files_ਦਲੀਲਾਂ, "diff-files",
 		     "--ignore-submodules=dirty", "--quiet", "--",
-		     path, NULL);
+		     ਰਸਤਾ, ਨਿਰਾ);
 
-	repo_config(the_repository, git_diff_basic_config, NULL);
+	repo_config(the_repository, git_diff_basic_config, ਨਿਰਾ);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, ਨਿਰਾ);
 	rev.abbrev = 0;
-	setup_revisions_from_strvec(&diff_files_args, &rev, NULL);
-	run_diff_files(&rev, 0);
+	ਤਿਆਰੀ_revisions_from_strvec(&diff_files_ਦਲੀਲਾਂ, &rev, ਨਿਰਾ);
+	ਲੜੀਵਾਰ_diff_files(&rev, 0);
 
-	if (!diff_result_code(&rev)) {
-		print_status(flags, ' ', path, ce_oid,
+	ਜੇ (!diff_ਨਤੀਜਾ_ਕੋਡ(&rev)) {
+		print_ਸਥਿਤੀ(flags, ' ', ਰਸਤਾ, ce_oid,
 			     displaypath);
-	} else if (!(flags & OPT_CACHED)) {
-		struct object_id oid;
-		struct ref_store *refs = repo_get_submodule_ref_store(the_repository,
-								      path);
+	} ਨਹੀਂਤਾਂ ਜੇ (!(flags & OPT_CACHED)) {
+		ਬਣਤਰ object_id oid;
+		ਬਣਤਰ ref_store *refs = repo_get_submodule_ref_store(the_repository,
+								      ਰਸਤਾ);
 
-		if (!refs) {
-			print_status(flags, '-', path, ce_oid, displaypath);
-			goto cleanup;
+		ਜੇ (!refs) {
+			print_ਸਥਿਤੀ(flags, '-', ਰਸਤਾ, ce_oid, displaypath);
+			ਜਾਓ cleanup;
 		}
-		if (refs_head_ref(refs, handle_submodule_head_ref, &oid))
+		ਜੇ (refs_ਸਿਰ_ref(refs, handle_submodule_ਸਿਰ_ref, &oid))
 			die(_("could not resolve HEAD ref inside the "
-			      "submodule '%s'"), path);
+			      "submodule '%s'"), ਰਸਤਾ);
 
-		print_status(flags, '+', path, &oid, displaypath);
-	} else {
-		print_status(flags, '+', path, ce_oid, displaypath);
+		print_ਸਥਿਤੀ(flags, '+', ਰਸਤਾ, &oid, displaypath);
+	} ਨਹੀਂਤਾਂ {
+		print_ਸਥਿਤੀ(flags, '+', ਰਸਤਾ, ce_oid, displaypath);
 	}
 
-	if (flags & OPT_RECURSIVE) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
-		int res;
+	ਜੇ (flags & OPT_RECURSIVE) {
+		ਬਣਤਰ ਬੱਚਾ_process cpr = ਬੱਚਾ_PROCESS_INIT;
+		ਪੂਰਨ res;
 
 		cpr.git_cmd = 1;
-		cpr.dir = path;
+		cpr.dir = ਰਸਤਾ;
 		prepare_submodule_repo_env(&cpr.env);
 
-		strvec_pushl(&cpr.args, "submodule--helper", "status",
-			     "--recursive", NULL);
-		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
+		strvec_pushl(&cpr.ਦਲੀਲਾਂ, "submodule--helper", "status",
+			     "--recursive", ਨਿਰਾ);
+		strvec_pushf(&cpr.ਦਲੀਲਾਂ, "--super-prefix=%s/", displaypath);
 
-		if (flags & OPT_CACHED)
-			strvec_push(&cpr.args, "--cached");
+		ਜੇ (flags & OPT_CACHED)
+			strvec_ਧੱਕੋ(&cpr.ਦਲੀਲਾਂ, "--cached");
 
-		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+		ਜੇ (flags & OPT_QUIET)
+			strvec_ਧੱਕੋ(&cpr.ਦਲੀਲਾਂ, "--quiet");
 
-		res = run_command(&cpr);
-		if (res == SIGPIPE + 128)
-			raise(SIGPIPE);
-		else if (res)
-			die(_("failed to recurse into submodule '%s'"), path);
+		res = ਲੜੀਵਾਰ_command(&cpr);
+		ਜੇ (res == SIGPIPE + 128)
+			ਉਠਾਓ(SIGPIPE);
+		ਨਹੀਂਤਾਂ ਜੇ (res)
+			die(_("failed to recurse into submodule '%s'"), ਰਸਤਾ);
 	}
 
 cleanup:
-	strvec_clear(&diff_files_args);
-	free(displaypath);
+	strvec_clear(&diff_files_ਦਲੀਲਾਂ);
+	ਮੁਕਤ(displaypath);
 	release_revisions(&rev);
 }
 
-static void status_submodule_cb(const struct cache_entry *list_item,
-				void *cb_data)
+ਸਥਿਰ ਖਾਲੀ ਸਥਿਤੀ_submodule_cb(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *list_ਵਸਤੂ,
+				ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct status_cb *info = cb_data;
+	ਬਣਤਰ ਸਥਿਤੀ_cb *info = cb_ਅੰਕੜੇ;
 
-	status_submodule(list_item->name, &list_item->oid, list_item->ce_flags,
-			 info->prefix, info->super_prefix, info->flags);
+	ਸਥਿਤੀ_submodule(list_ਵਸਤੂ->name, &list_ਵਸਤੂ->oid, list_ਵਸਤੂ->ce_flags,
+			 info->ਅਗੇਤਰ, info->super_ਅਗੇਤਰ, info->flags);
 }
 
-static int module_status(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_ਸਥਿਤੀ(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			 ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct status_cb info = STATUS_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	struct option module_status_options[] = {
-		OPT__SUPER_PREFIX(&info.super_prefix),
+	ਬਣਤਰ ਸਥਿਤੀ_cb info = ਸਥਿਤੀ_CB_INIT;
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+	ਪੂਰਨ quiet = 0;
+	ਬਣਤਰ option module_ਸਥਿਤੀ_options[] = {
+		OPT_SUPER_ਅਗੇਤਰ(&info.super_ਅਗੇਤਰ),
 		OPT__QUIET(&quiet, N_("suppress submodule status output")),
-		OPT_BIT(0, "cached", &info.flags, N_("use commit stored in the index instead of the one stored in the submodule HEAD"), OPT_CACHED),
-		OPT_BIT(0, "recursive", &info.flags, N_("recurse into nested submodules"), OPT_RECURSIVE),
-		OPT_END()
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "cached", &info.flags, N_("use commit stored in the index instead of the one stored in the submodule HEAD"), OPT_CACHED),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "recursive", &info.flags, N_("recurse into nested submodules"), OPT_RECURSIVE),
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule status [--quiet] [--cached] [--recursive] [<path>...]"),
-		NULL
+		ਨਿਰਾ
 	};
-	int ret = 1;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, module_status_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_ਸਥਿਤੀ_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	ਜੇ (module_list_compute(argv, ਅਗੇਤਰ, &pathspec, &list) < 0)
+		ਜਾਓ cleanup;
 
-	info.prefix = prefix;
-	if (quiet)
+	info.ਅਗੇਤਰ = ਅਗੇਤਰ;
+	ਜੇ (quiet)
 		info.flags |= OPT_QUIET;
 
-	for_each_listed_submodule(&list, status_submodule_cb, &info);
+	for_each_listed_submodule(&list, ਸਥਿਤੀ_submodule_cb, &info);
 
 	ret = 0;
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-struct module_cb {
-	unsigned int mod_src;
-	unsigned int mod_dst;
-	struct object_id oid_src;
-	struct object_id oid_dst;
-	char status;
-	char *sm_path;
+ਬਣਤਰ module_cb {
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ mod_src;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ mod_dst;
+	ਬਣਤਰ object_id oid_src;
+	ਬਣਤਰ object_id oid_dst;
+	ਅੱਖਰ ਸਥਿਤੀ;
+	ਅੱਖਰ *sm_ਰਸਤਾ;
 };
-#define MODULE_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MODULE_CB_INIT { 0 }
 
-static void module_cb_release(struct module_cb *mcb)
+ਸਥਿਰ ਖਾਲੀ module_cb_release(ਬਣਤਰ module_cb *mcb)
 {
-	free(mcb->sm_path);
+	ਮੁਕਤ(mcb->sm_ਰਸਤਾ);
 }
 
-struct module_cb_list {
-	struct module_cb **entries;
-	int alloc, nr;
+ਬਣਤਰ module_cb_list {
+	ਬਣਤਰ module_cb **entries;
+	ਪੂਰਨ alloc, nr;
 };
-#define MODULE_CB_LIST_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MODULE_CB_LIST_INIT { 0 }
 
-static void module_cb_list_release(struct module_cb_list *mcbl)
+ਸਥਿਰ ਖਾਲੀ module_cb_list_release(ਬਣਤਰ module_cb_list *mcbl)
 {
-	int i;
+	ਪੂਰਨ i;
 
-	for (i = 0; i < mcbl->nr; i++) {
-		struct module_cb *mcb = mcbl->entries[i];
+	ਲਈ (i = 0; i < mcbl->nr; i++) {
+		ਬਣਤਰ module_cb *mcb = mcbl->entries[i];
 
 		module_cb_release(mcb);
-		free(mcb);
+		ਮੁਕਤ(mcb);
 	}
-	free(mcbl->entries);
+	ਮੁਕਤ(mcbl->entries);
 }
 
-struct summary_cb {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int cached: 1;
-	unsigned int for_status: 1;
-	unsigned int files: 1;
-	int summary_limit;
+ਬਣਤਰ summary_cb {
+	ਪੂਰਨ argc;
+	ਅਚਲ ਅੱਖਰ **argv;
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ cached: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ for_ਸਥਿਤੀ: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ files: 1;
+	ਪੂਰਨ summary_ਹੱਦਬੰਦੀ;
 };
-#define SUMMARY_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SUMMARY_CB_INIT { 0 }
 
-enum diff_cmd {
-	DIFF_INDEX,
+ਗਿਣਤੀ diff_cmd {
+	DIFF_ਸੂਚਕਾਂਕ,
 	DIFF_FILES
 };
 
-static char *verify_submodule_committish(const char *sm_path,
-					 const char *committish)
+ਸਥਿਰ ਅੱਖਰ *verify_submodule_committish(ਅਚਲ ਅੱਖਰ *sm_ਰਸਤਾ,
+					 ਅਚਲ ਅੱਖਰ *committish)
 {
-	struct child_process cp_rev_parse = CHILD_PROCESS_INIT;
-	struct strbuf result = STRBUF_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cp_rev_parse = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strbuf ਨਤੀਜਾ = STRBUF_INIT;
 
 	cp_rev_parse.git_cmd = 1;
-	cp_rev_parse.dir = sm_path;
+	cp_rev_parse.dir = sm_ਰਸਤਾ;
 	prepare_submodule_repo_env(&cp_rev_parse.env);
-	strvec_pushl(&cp_rev_parse.args, "rev-parse", "-q", "--short", NULL);
-	strvec_pushf(&cp_rev_parse.args, "%s^0", committish);
-	strvec_push(&cp_rev_parse.args, "--");
+	strvec_pushl(&cp_rev_parse.ਦਲੀਲਾਂ, "rev-parse", "-q", "--short", ਨਿਰਾ);
+	strvec_pushf(&cp_rev_parse.ਦਲੀਲਾਂ, "%s^0", committish);
+	strvec_ਧੱਕੋ(&cp_rev_parse.ਦਲੀਲਾਂ, "--");
 
-	if (capture_command(&cp_rev_parse, &result, 0))
-		return NULL;
+	ਜੇ (capture_command(&cp_rev_parse, &ਨਤੀਜਾ, 0))
+		ਵਾਪਸ ਨਿਰਾ;
 
-	strbuf_trim_trailing_newline(&result);
-	return strbuf_detach(&result, NULL);
+	strbuf_trim_trailing_newline(&ਨਤੀਜਾ);
+	ਵਾਪਸ strbuf_detach(&ਨਤੀਜਾ, ਨਿਰਾ);
 }
 
-static void print_submodule_summary(struct summary_cb *info, const char *errmsg,
-				    int total_commits, const char *displaypath,
-				    const char *src_abbrev, const char *dst_abbrev,
-				    struct module_cb *p)
+ਸਥਿਰ ਖਾਲੀ print_submodule_summary(ਬਣਤਰ summary_cb *info, ਅਚਲ ਅੱਖਰ *errmsg,
+				    ਪੂਰਨ ਕੁੱਲ_commits, ਅਚਲ ਅੱਖਰ *displaypath,
+				    ਅਚਲ ਅੱਖਰ *src_abbrev, ਅਚਲ ਅੱਖਰ *dst_abbrev,
+				    ਬਣਤਰ module_cb *p)
 {
-	if (p->status == 'T') {
-		if (S_ISGITLINK(p->mod_dst))
-			printf(_("* %s %s(blob)->%s(submodule)"),
+	ਜੇ (p->ਸਥਿਤੀ == 'T') {
+		ਜੇ (S_ISGITLINK(p->mod_dst))
+			ਲਿਖੋ(_("* %s %s(blob)->%s(submodule)"),
 				 displaypath, src_abbrev, dst_abbrev);
-		else
-			printf(_("* %s %s(submodule)->%s(blob)"),
+		ਨਹੀਂਤਾਂ
+			ਲਿਖੋ(_("* %s %s(submodule)->%s(blob)"),
 				 displaypath, src_abbrev, dst_abbrev);
-	} else {
-		printf("* %s %s...%s",
+	} ਨਹੀਂਤਾਂ {
+		ਲਿਖੋ("* %s %s...%s",
 			displaypath, src_abbrev, dst_abbrev);
 	}
 
-	if (total_commits < 0)
-		printf(":\n");
-	else
-		printf(" (%d):\n", total_commits);
+	ਜੇ (ਕੁੱਲ_commits < 0)
+		ਲਿਖੋ(":\n");
+	ਨਹੀਂਤਾਂ
+		ਲਿਖੋ(" (%d):\n", ਕੁੱਲ_commits);
 
-	if (errmsg) {
-		printf(_("%s"), errmsg);
-	} else if (total_commits > 0) {
-		struct child_process cp_log = CHILD_PROCESS_INIT;
+	ਜੇ (errmsg) {
+		ਲਿਖੋ(_("%s"), errmsg);
+	} ਨਹੀਂਤਾਂ ਜੇ (ਕੁੱਲ_commits > 0) {
+		ਬਣਤਰ ਬੱਚਾ_process cp_log = ਬੱਚਾ_PROCESS_INIT;
 
 		cp_log.git_cmd = 1;
-		cp_log.dir = p->sm_path;
+		cp_log.dir = p->sm_ਰਸਤਾ;
 		prepare_submodule_repo_env(&cp_log.env);
-		strvec_pushl(&cp_log.args, "log", NULL);
+		strvec_pushl(&cp_log.ਦਲੀਲਾਂ, "log", ਨਿਰਾ);
 
-		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
-			if (info->summary_limit > 0)
-				strvec_pushf(&cp_log.args, "-%d",
-					     info->summary_limit);
+		ਜੇ (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
+			ਜੇ (info->summary_ਹੱਦਬੰਦੀ > 0)
+				strvec_pushf(&cp_log.ਦਲੀਲਾਂ, "-%d",
+					     info->summary_ਹੱਦਬੰਦੀ);
 
-			strvec_pushl(&cp_log.args, "--pretty=  %m %s",
-				     "--first-parent", NULL);
-			strvec_pushf(&cp_log.args, "%s...%s",
+			strvec_pushl(&cp_log.ਦਲੀਲਾਂ, "--pretty=  %m %s",
+				     "--first-parent", ਨਿਰਾ);
+			strvec_pushf(&cp_log.ਦਲੀਲਾਂ, "%s...%s",
 				     src_abbrev, dst_abbrev);
-		} else if (S_ISGITLINK(p->mod_dst)) {
-			strvec_pushl(&cp_log.args, "--pretty=  > %s",
-				     "-1", dst_abbrev, NULL);
-		} else {
-			strvec_pushl(&cp_log.args, "--pretty=  < %s",
-				     "-1", src_abbrev, NULL);
+		} ਨਹੀਂਤਾਂ ਜੇ (S_ISGITLINK(p->mod_dst)) {
+			strvec_pushl(&cp_log.ਦਲੀਲਾਂ, "--pretty=  > %s",
+				     "-1", dst_abbrev, ਨਿਰਾ);
+		} ਨਹੀਂਤਾਂ {
+			strvec_pushl(&cp_log.ਦਲੀਲਾਂ, "--pretty=  < %s",
+				     "-1", src_abbrev, ਨਿਰਾ);
 		}
-		run_command(&cp_log);
+		ਲੜੀਵਾਰ_command(&cp_log);
 	}
-	printf("\n");
+	ਲਿਖੋ("\n");
 }
 
-static void generate_submodule_summary(struct summary_cb *info,
-				       struct module_cb *p)
+ਸਥਿਰ ਖਾਲੀ generate_submodule_summary(ਬਣਤਰ summary_cb *info,
+				       ਬਣਤਰ module_cb *p)
 {
-	char *displaypath, *src_abbrev = NULL, *dst_abbrev;
-	int missing_src = 0, missing_dst = 0;
-	struct strbuf errmsg = STRBUF_INIT;
-	int total_commits = -1;
+	ਅੱਖਰ *displaypath, *src_abbrev = ਨਿਰਾ, *dst_abbrev;
+	ਪੂਰਨ missing_src = 0, missing_dst = 0;
+	ਬਣਤਰ strbuf errmsg = STRBUF_INIT;
+	ਪੂਰਨ ਕੁੱਲ_commits = -1;
 
-	if (!info->cached && oideq(&p->oid_dst, null_oid(the_hash_algo))) {
-		if (S_ISGITLINK(p->mod_dst)) {
-			struct ref_store *refs = repo_get_submodule_ref_store(the_repository,
-									      p->sm_path);
+	ਜੇ (!info->cached && oideq(&p->oid_dst, null_oid(the_hash_algo))) {
+		ਜੇ (S_ISGITLINK(p->mod_dst)) {
+			ਬਣਤਰ ref_store *refs = repo_get_submodule_ref_store(the_repository,
+									      p->sm_ਰਸਤਾ);
 
-			if (refs)
-				refs_head_ref(refs, handle_submodule_head_ref, &p->oid_dst);
-		} else if (S_ISLNK(p->mod_dst) || S_ISREG(p->mod_dst)) {
-			struct stat st;
-			int fd = open(p->sm_path, O_RDONLY);
+			ਜੇ (refs)
+				refs_ਸਿਰ_ref(refs, handle_submodule_ਸਿਰ_ref, &p->oid_dst);
+		} ਨਹੀਂਤਾਂ ਜੇ (S_ISLNK(p->mod_dst) || S_ISREG(p->mod_dst)) {
+			ਬਣਤਰ stat st;
+			ਪੂਰਨ fd = open(p->sm_ਰਸਤਾ, O_RDONLY);
 
-			if (fd < 0 || fstat(fd, &st) < 0 ||
-			    index_fd(the_repository->index, &p->oid_dst, fd, &st, OBJ_BLOB,
-				     p->sm_path, 0))
-				error(_("couldn't hash object from '%s'"), p->sm_path);
-		} else {
+			ਜੇ (fd < 0 || fstat(fd, &st) < 0 ||
+			    ਸੂਚਕਾਂਕ_fd(the_repository->ਸੂਚਕਾਂਕ, &p->oid_dst, fd, &st, OBJ_BLOB,
+				     p->sm_ਰਸਤਾ, 0))
+				error(_("couldn't hash object from '%s'"), p->sm_ਰਸਤਾ);
+		} ਨਹੀਂਤਾਂ {
 			/* for a submodule removal (mode:0000000), don't warn */
-			if (p->mod_dst)
+			ਜੇ (p->mod_dst)
 				warning(_("unexpected mode %o"), p->mod_dst);
 		}
 	}
 
-	if (S_ISGITLINK(p->mod_src)) {
-		if (p->status != 'D')
-			src_abbrev = verify_submodule_committish(p->sm_path,
-								 oid_to_hex(&p->oid_src));
-		if (!src_abbrev) {
+	ਜੇ (S_ISGITLINK(p->mod_src)) {
+		ਜੇ (p->ਸਥਿਤੀ != 'D')
+			src_abbrev = verify_submodule_committish(p->sm_ਰਸਤਾ,
+								 oid_ਮੰਜ਼ਿਲ_hex(&p->oid_src));
+		ਜੇ (!src_abbrev) {
 			missing_src = 1;
 			/*
 			 * As `rev-parse` failed, we fallback to getting
@@ -1062,22 +1062,22 @@ static void generate_submodule_summary(struct summary_cb *info,
 			 * this as we might still need the abbreviated
 			 * hash in cases like a submodule type change, etc.
 			 */
-			src_abbrev = xstrndup(oid_to_hex(&p->oid_src), 7);
+			src_abbrev = xstrndup(oid_ਮੰਜ਼ਿਲ_hex(&p->oid_src), 7);
 		}
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		/*
 		 * The source does not point to a submodule.
 		 * So, we fallback to getting the abbreviation using
 		 * oid_src as we might still need the abbreviated
 		 * hash in cases like submodule add, etc.
 		 */
-		src_abbrev = xstrndup(oid_to_hex(&p->oid_src), 7);
+		src_abbrev = xstrndup(oid_ਮੰਜ਼ਿਲ_hex(&p->oid_src), 7);
 	}
 
-	if (S_ISGITLINK(p->mod_dst)) {
-		dst_abbrev = verify_submodule_committish(p->sm_path,
-							 oid_to_hex(&p->oid_dst));
-		if (!dst_abbrev) {
+	ਜੇ (S_ISGITLINK(p->mod_dst)) {
+		dst_abbrev = verify_submodule_committish(p->sm_ਰਸਤਾ,
+							 oid_ਮੰਜ਼ਿਲ_hex(&p->oid_dst));
+		ਜੇ (!dst_abbrev) {
 			missing_dst = 1;
 			/*
 			 * As `rev-parse` failed, we fallback to getting
@@ -1085,322 +1085,322 @@ static void generate_submodule_summary(struct summary_cb *info,
 			 * this as we might still need the abbreviated
 			 * hash in cases like a submodule type change, etc.
 			 */
-			dst_abbrev = xstrndup(oid_to_hex(&p->oid_dst), 7);
+			dst_abbrev = xstrndup(oid_ਮੰਜ਼ਿਲ_hex(&p->oid_dst), 7);
 		}
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		/*
 		 * The destination does not point to a submodule.
 		 * So, we fallback to getting the abbreviation using
 		 * oid_dst as we might still need the abbreviated
 		 * hash in cases like a submodule removal, etc.
 		 */
-		dst_abbrev = xstrndup(oid_to_hex(&p->oid_dst), 7);
+		dst_abbrev = xstrndup(oid_ਮੰਜ਼ਿਲ_hex(&p->oid_dst), 7);
 	}
 
-	displaypath = get_submodule_displaypath(p->sm_path, info->prefix,
-						info->super_prefix);
+	displaypath = get_submodule_displaypath(p->sm_ਰਸਤਾ, info->ਅਗੇਤਰ,
+						info->super_ਅਗੇਤਰ);
 
-	if (!missing_src && !missing_dst) {
-		struct child_process cp_rev_list = CHILD_PROCESS_INIT;
-		struct strbuf sb_rev_list = STRBUF_INIT;
+	ਜੇ (!missing_src && !missing_dst) {
+		ਬਣਤਰ ਬੱਚਾ_process cp_rev_list = ਬੱਚਾ_PROCESS_INIT;
+		ਬਣਤਰ strbuf sb_rev_list = STRBUF_INIT;
 
-		strvec_pushl(&cp_rev_list.args, "rev-list",
-			     "--first-parent", "--count", NULL);
-		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
-			strvec_pushf(&cp_rev_list.args, "%s...%s",
+		strvec_pushl(&cp_rev_list.ਦਲੀਲਾਂ, "rev-list",
+			     "--first-parent", "--count", ਨਿਰਾ);
+		ਜੇ (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
+			strvec_pushf(&cp_rev_list.ਦਲੀਲਾਂ, "%s...%s",
 				     src_abbrev, dst_abbrev);
-		else
-			strvec_push(&cp_rev_list.args, S_ISGITLINK(p->mod_src) ?
+		ਨਹੀਂਤਾਂ
+			strvec_ਧੱਕੋ(&cp_rev_list.ਦਲੀਲਾਂ, S_ISGITLINK(p->mod_src) ?
 				    src_abbrev : dst_abbrev);
-		strvec_push(&cp_rev_list.args, "--");
+		strvec_ਧੱਕੋ(&cp_rev_list.ਦਲੀਲਾਂ, "--");
 
 		cp_rev_list.git_cmd = 1;
-		cp_rev_list.dir = p->sm_path;
+		cp_rev_list.dir = p->sm_ਰਸਤਾ;
 		prepare_submodule_repo_env(&cp_rev_list.env);
 
-		if (!capture_command(&cp_rev_list, &sb_rev_list, 0))
-			total_commits = atoi(sb_rev_list.buf);
+		ਜੇ (!capture_command(&cp_rev_list, &sb_rev_list, 0))
+			ਕੁੱਲ_commits = atoi(sb_rev_list.buf);
 
 		strbuf_release(&sb_rev_list);
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		/*
 		 * Don't give error msg for modification whose dst is not
 		 * submodule, i.e., deleted or changed to blob
 		 */
-		if (S_ISGITLINK(p->mod_dst)) {
-			if (missing_src && missing_dst) {
+		ਜੇ (S_ISGITLINK(p->mod_dst)) {
+			ਜੇ (missing_src && missing_dst) {
 				strbuf_addf(&errmsg, "  Warn: %s doesn't contain commits %s and %s\n",
-					    displaypath, oid_to_hex(&p->oid_src),
-					    oid_to_hex(&p->oid_dst));
-			} else {
+					    displaypath, oid_ਮੰਜ਼ਿਲ_hex(&p->oid_src),
+					    oid_ਮੰਜ਼ਿਲ_hex(&p->oid_dst));
+			} ਨਹੀਂਤਾਂ {
 				strbuf_addf(&errmsg, "  Warn: %s doesn't contain commit %s\n",
 					    displaypath, missing_src ?
-					    oid_to_hex(&p->oid_src) :
-					    oid_to_hex(&p->oid_dst));
+					    oid_ਮੰਜ਼ਿਲ_hex(&p->oid_src) :
+					    oid_ਮੰਜ਼ਿਲ_hex(&p->oid_dst));
 			}
 		}
 	}
 
-	print_submodule_summary(info, errmsg.len ? errmsg.buf : NULL,
-				total_commits, displaypath, src_abbrev,
+	print_submodule_summary(info, errmsg.len ? errmsg.buf : ਨਿਰਾ,
+				ਕੁੱਲ_commits, displaypath, src_abbrev,
 				dst_abbrev, p);
 
-	free(displaypath);
-	free(src_abbrev);
-	free(dst_abbrev);
+	ਮੁਕਤ(displaypath);
+	ਮੁਕਤ(src_abbrev);
+	ਮੁਕਤ(dst_abbrev);
 	strbuf_release(&errmsg);
 }
 
-static void prepare_submodule_summary(struct summary_cb *info,
-				      struct module_cb_list *list)
+ਸਥਿਰ ਖਾਲੀ prepare_submodule_summary(ਬਣਤਰ summary_cb *info,
+				      ਬਣਤਰ module_cb_list *list)
 {
-	int i;
-	for (i = 0; i < list->nr; i++) {
-		const struct submodule *sub;
-		struct module_cb *p = list->entries[i];
-		struct strbuf sm_gitdir = STRBUF_INIT;
+	ਪੂਰਨ i;
+	ਲਈ (i = 0; i < list->nr; i++) {
+		ਅਚਲ ਬਣਤਰ submodule *sub;
+		ਬਣਤਰ module_cb *p = list->entries[i];
+		ਬਣਤਰ strbuf sm_gitdir = STRBUF_INIT;
 
-		if (p->status == 'D' || p->status == 'T') {
+		ਜੇ (p->ਸਥਿਤੀ == 'D' || p->ਸਥਿਤੀ == 'T') {
 			generate_submodule_summary(info, p);
-			continue;
+			ਜਾਰੀ;
 		}
 
-		if (info->for_status && p->status != 'A' &&
-		    (sub = submodule_from_path(the_repository,
-					       null_oid(the_hash_algo), p->sm_path))) {
-			char *config_key = NULL;
-			const char *value;
-			int ignore_all = 0;
+		ਜੇ (info->for_ਸਥਿਤੀ && p->ਸਥਿਤੀ != 'A' &&
+		    (sub = submodule_from_ਰਸਤਾ(the_repository,
+					       null_oid(the_hash_algo), p->sm_ਰਸਤਾ))) {
+			ਅੱਖਰ *config_ਕੁੰਜੀ = ਨਿਰਾ;
+			ਅਚਲ ਅੱਖਰ *ਮੁੱਲ;
+			ਪੂਰਨ ignore_all = 0;
 
-			config_key = xstrfmt("submodule.%s.ignore",
+			config_ਕੁੰਜੀ = xstrfmt("submodule.%s.ignore",
 					     sub->name);
-			if (!repo_config_get_string_tmp(the_repository, config_key, &value))
-				ignore_all = !strcmp(value, "all");
-			else if (sub->ignore)
+			ਜੇ (!repo_config_get_string_tmp(the_repository, config_ਕੁੰਜੀ, &ਮੁੱਲ))
+				ignore_all = !strcmp(ਮੁੱਲ, "all");
+			ਨਹੀਂਤਾਂ ਜੇ (sub->ignore)
 				ignore_all = !strcmp(sub->ignore, "all");
 
-			free(config_key);
-			if (ignore_all)
-				continue;
+			ਮੁਕਤ(config_ਕੁੰਜੀ);
+			ਜੇ (ignore_all)
+				ਜਾਰੀ;
 		}
 
 		/* Also show added or modified modules which are checked out */
-		strbuf_addstr(&sm_gitdir, p->sm_path);
-		if (is_nonbare_repository_dir(&sm_gitdir))
+		strbuf_addstr(&sm_gitdir, p->sm_ਰਸਤਾ);
+		ਜੇ (is_nonbare_repository_dir(&sm_gitdir))
 			generate_submodule_summary(info, p);
 		strbuf_release(&sm_gitdir);
 	}
 }
 
-static void submodule_summary_callback(struct diff_queue_struct *q,
-				       struct diff_options *options UNUSED,
-				       void *data)
+ਸਥਿਰ ਖਾਲੀ submodule_summary_callback(ਬਣਤਰ diff_ਕਤਾਰ_struct *q,
+				       ਬਣਤਰ diff_options *options ਅਣਵਰਤਿਆ,
+				       ਖਾਲੀ *ਅੰਕੜੇ)
 {
-	int i;
-	struct module_cb_list *list = data;
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct module_cb *temp;
+	ਪੂਰਨ i;
+	ਬਣਤਰ module_cb_list *list = ਅੰਕੜੇ;
+	ਲਈ (i = 0; i < q->nr; i++) {
+		ਬਣਤਰ diff_filepair *p = q->ਕਤਾਰ[i];
+		ਬਣਤਰ module_cb *ਆਰਜ਼ੀ;
 
-		if (!S_ISGITLINK(p->one->mode) && !S_ISGITLINK(p->two->mode))
-			continue;
-		temp = xmalloc(sizeof(*temp));
-		temp->mod_src = p->one->mode;
-		temp->mod_dst = p->two->mode;
-		temp->oid_src = p->one->oid;
-		temp->oid_dst = p->two->oid;
-		temp->status = p->status;
-		temp->sm_path = xstrdup(p->one->path);
+		ਜੇ (!S_ISGITLINK(p->one->ਬਹੁਲਕ) && !S_ISGITLINK(p->two->ਬਹੁਲਕ))
+			ਜਾਰੀ;
+		ਆਰਜ਼ੀ = xmalloc(ਆਕਾਰ(*ਆਰਜ਼ੀ));
+		ਆਰਜ਼ੀ->mod_src = p->one->ਬਹੁਲਕ;
+		ਆਰਜ਼ੀ->mod_dst = p->two->ਬਹੁਲਕ;
+		ਆਰਜ਼ੀ->oid_src = p->one->oid;
+		ਆਰਜ਼ੀ->oid_dst = p->two->oid;
+		ਆਰਜ਼ੀ->ਸਥਿਤੀ = p->ਸਥਿਤੀ;
+		ਆਰਜ਼ੀ->sm_ਰਸਤਾ = xstrdup(p->one->ਰਸਤਾ);
 
 		ALLOC_GROW(list->entries, list->nr + 1, list->alloc);
-		list->entries[list->nr++] = temp;
+		list->entries[list->nr++] = ਆਰਜ਼ੀ;
 	}
 }
 
-static const char *get_diff_cmd(enum diff_cmd diff_cmd)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *get_diff_cmd(ਗਿਣਤੀ diff_cmd diff_cmd)
 {
-	switch (diff_cmd) {
-	case DIFF_INDEX: return "diff-index";
-	case DIFF_FILES: return "diff-files";
-	default: BUG("bad diff_cmd value %d", diff_cmd);
+	ਚੋਣ (diff_cmd) {
+	ਹਾਲਤ DIFF_ਸੂਚਕਾਂਕ: ਵਾਪਸ "diff-index";
+	ਹਾਲਤ DIFF_FILES: ਵਾਪਸ "diff-files";
+	ਮੂਲ: BUG("bad diff_cmd value %d", diff_cmd);
 	}
 }
 
-static int compute_summary_module_list(struct object_id *head_oid,
-				       struct summary_cb *info,
-				       enum diff_cmd diff_cmd)
+ਸਥਿਰ ਪੂਰਨ compute_summary_module_list(ਬਣਤਰ object_id *ਸਿਰ_oid,
+				       ਬਣਤਰ summary_cb *info,
+				       ਗਿਣਤੀ diff_cmd diff_cmd)
 {
-	struct strvec diff_args = STRVEC_INIT;
-	struct rev_info rev;
-	struct module_cb_list list = MODULE_CB_LIST_INIT;
-	int ret = 0;
+	ਬਣਤਰ strvec diff_ਦਲੀਲਾਂ = STRVEC_INIT;
+	ਬਣਤਰ rev_info rev;
+	ਬਣਤਰ module_cb_list list = MODULE_CB_LIST_INIT;
+	ਪੂਰਨ ret = 0;
 
-	strvec_push(&diff_args, get_diff_cmd(diff_cmd));
-	if (info->cached)
-		strvec_push(&diff_args, "--cached");
-	strvec_pushl(&diff_args, "--ignore-submodules=dirty", "--raw", NULL);
-	if (head_oid)
-		strvec_push(&diff_args, oid_to_hex(head_oid));
-	strvec_push(&diff_args, "--");
-	if (info->argc)
-		strvec_pushv(&diff_args, info->argv);
+	strvec_ਧੱਕੋ(&diff_ਦਲੀਲਾਂ, get_diff_cmd(diff_cmd));
+	ਜੇ (info->cached)
+		strvec_ਧੱਕੋ(&diff_ਦਲੀਲਾਂ, "--cached");
+	strvec_pushl(&diff_ਦਲੀਲਾਂ, "--ignore-submodules=dirty", "--raw", ਨਿਰਾ);
+	ਜੇ (ਸਿਰ_oid)
+		strvec_ਧੱਕੋ(&diff_ਦਲੀਲਾਂ, oid_ਮੰਜ਼ਿਲ_hex(ਸਿਰ_oid));
+	strvec_ਧੱਕੋ(&diff_ਦਲੀਲਾਂ, "--");
+	ਜੇ (info->argc)
+		strvec_pushv(&diff_ਦਲੀਲਾਂ, info->argv);
 
-	repo_config(the_repository, git_diff_basic_config, NULL);
-	repo_init_revisions(the_repository, &rev, info->prefix);
+	repo_config(the_repository, git_diff_basic_config, ਨਿਰਾ);
+	repo_init_revisions(the_repository, &rev, info->ਅਗੇਤਰ);
 	rev.abbrev = 0;
-	precompose_argv_prefix(diff_args.nr, diff_args.v, NULL);
-	setup_revisions_from_strvec(&diff_args, &rev, NULL);
+	precompose_argv_ਅਗੇਤਰ(diff_ਦਲੀਲਾਂ.nr, diff_ਦਲੀਲਾਂ.v, ਨਿਰਾ);
+	ਤਿਆਰੀ_revisions_from_strvec(&diff_ਦਲੀਲਾਂ, &rev, ਨਿਰਾ);
 	rev.diffopt.output_format = DIFF_FORMAT_NO_OUTPUT | DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = submodule_summary_callback;
-	rev.diffopt.format_callback_data = &list;
+	rev.diffopt.format_callback_ਅੰਕੜੇ = &list;
 
-	if (!info->cached) {
-		if (diff_cmd == DIFF_INDEX)
-			setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	ਜੇ (!info->cached) {
+		ਜੇ (diff_cmd == DIFF_ਸੂਚਕਾਂਕ)
+			ਤਿਆਰੀ_work_ਰੁੱਖ(the_repository);
+		ਜੇ (repo_read_ਸੂਚਕਾਂਕ_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
 			ret = -1;
-			goto cleanup;
+			ਜਾਓ cleanup;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} ਨਹੀਂਤਾਂ ਜੇ (repo_read_ਸੂਚਕਾਂਕ(the_repository) < 0) {
 		perror("repo_read_cache");
 		ret = -1;
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 
-	if (diff_cmd == DIFF_INDEX)
-		run_diff_index(&rev, info->cached ? DIFF_INDEX_CACHED : 0);
-	else
-		run_diff_files(&rev, 0);
+	ਜੇ (diff_cmd == DIFF_ਸੂਚਕਾਂਕ)
+		ਲੜੀਵਾਰ_diff_ਸੂਚਕਾਂਕ(&rev, info->cached ? DIFF_ਸੂਚਕਾਂਕ_CACHED : 0);
+	ਨਹੀਂਤਾਂ
+		ਲੜੀਵਾਰ_diff_files(&rev, 0);
 	prepare_submodule_summary(info, &list);
 cleanup:
-	strvec_clear(&diff_args);
+	strvec_clear(&diff_ਦਲੀਲਾਂ);
 	release_revisions(&rev);
 	module_cb_list_release(&list);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int module_summary(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_summary(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct summary_cb info = SUMMARY_CB_INIT;
-	int cached = 0;
-	int for_status = 0;
-	int files = 0;
-	int summary_limit = -1;
-	enum diff_cmd diff_cmd = DIFF_INDEX;
-	struct object_id head_oid;
-	int ret;
-	struct option module_summary_options[] = {
+	ਬਣਤਰ summary_cb info = SUMMARY_CB_INIT;
+	ਪੂਰਨ cached = 0;
+	ਪੂਰਨ for_ਸਥਿਤੀ = 0;
+	ਪੂਰਨ files = 0;
+	ਪੂਰਨ summary_ਹੱਦਬੰਦੀ = -1;
+	ਗਿਣਤੀ diff_cmd diff_cmd = DIFF_ਸੂਚਕਾਂਕ;
+	ਬਣਤਰ object_id ਸਿਰ_oid;
+	ਪੂਰਨ ret;
+	ਬਣਤਰ option module_summary_options[] = {
 		OPT_BOOL(0, "cached", &cached,
 			 N_("use the commit stored in the index instead of the submodule HEAD")),
 		OPT_BOOL(0, "files", &files,
 			 N_("compare the commit in the index with that in the submodule HEAD")),
-		OPT_BOOL(0, "for-status", &for_status,
+		OPT_BOOL(0, "for-status", &for_ਸਥਿਤੀ,
 			 N_("skip submodules with 'ignore_config' value set to 'all'")),
-		OPT_INTEGER('n', "summary-limit", &summary_limit,
+		OPT_INTEGER('n', "summary-limit", &summary_ਹੱਦਬੰਦੀ,
 			     N_("limit the summary size")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule summary [<options>] [<commit>] [--] [<path>]"),
-		NULL
+		ਨਿਰਾ
 	};
 
-	argc = parse_options(argc, argv, prefix, module_summary_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_summary_options,
 			     git_submodule_helper_usage, 0);
 
-	if (!summary_limit)
-		return 0;
+	ਜੇ (!summary_ਹੱਦਬੰਦੀ)
+		ਵਾਪਸ 0;
 
-	if (!repo_get_oid(the_repository, argc ? argv[0] : "HEAD", &head_oid)) {
-		if (argc) {
+	ਜੇ (!repo_get_oid(the_repository, argc ? argv[0] : "HEAD", &ਸਿਰ_oid)) {
+		ਜੇ (argc) {
 			argv++;
 			argc--;
 		}
-	} else if (!argc || !strcmp(argv[0], "HEAD")) {
+	} ਨਹੀਂਤਾਂ ਜੇ (!argc || !strcmp(argv[0], "HEAD")) {
 		/* before the first commit: compare with an empty tree */
-		oidcpy(&head_oid, the_hash_algo->empty_tree);
-		if (argc) {
+		oidcpy(&ਸਿਰ_oid, the_hash_algo->ਖਾਲੀ_ਥਾਵਾਂ_ਰੁੱਖ);
+		ਜੇ (argc) {
 			argv++;
 			argc--;
 		}
-	} else {
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
+	} ਨਹੀਂਤਾਂ {
+		ਜੇ (repo_get_oid(the_repository, "HEAD", &ਸਿਰ_oid))
 			die(_("could not fetch a revision for HEAD"));
 	}
 
-	if (files) {
-		if (cached)
+	ਜੇ (files) {
+		ਜੇ (cached)
 			die(_("options '%s' and '%s' cannot be used together"), "--cached", "--files");
 		diff_cmd = DIFF_FILES;
 	}
 
 	info.argc = argc;
 	info.argv = argv;
-	info.prefix = prefix;
+	info.ਅਗੇਤਰ = ਅਗੇਤਰ;
 	info.cached = !!cached;
 	info.files = !!files;
-	info.for_status = !!for_status;
-	info.summary_limit = summary_limit;
+	info.for_ਸਥਿਤੀ = !!for_ਸਥਿਤੀ;
+	info.summary_ਹੱਦਬੰਦੀ = summary_ਹੱਦਬੰਦੀ;
 
-	ret = compute_summary_module_list((diff_cmd == DIFF_INDEX) ? &head_oid : NULL,
+	ret = compute_summary_module_list((diff_cmd == DIFF_ਸੂਚਕਾਂਕ) ? &ਸਿਰ_oid : ਨਿਰਾ,
 					  &info, diff_cmd);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int module_gitdir(int argc, const char **argv, const char *prefix UNUSED,
-			 struct repository *repo)
+ਸਥਿਰ ਪੂਰਨ module_gitdir(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ,
+			 ਬਣਤਰ repository *repo)
 {
-	struct strbuf gitdir = STRBUF_INIT;
+	ਬਣਤਰ strbuf gitdir = STRBUF_INIT;
 
-	if (argc != 2)
+	ਜੇ (argc != 2)
 		usage(_("git submodule--helper gitdir <name>"));
 
-	submodule_name_to_gitdir(&gitdir, repo, argv[1]);
+	submodule_name_ਮੰਜ਼ਿਲ_gitdir(&gitdir, repo, argv[1]);
 
-	printf("%s\n", gitdir.buf);
+	ਲਿਖੋ("%s\n", gitdir.buf);
 
 	strbuf_release(&gitdir);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int module_migrate(int argc UNUSED, const char **argv UNUSED,
-			  const char *prefix UNUSED, struct repository *repo)
+ਸਥਿਰ ਪੂਰਨ module_migrate(ਪੂਰਨ argc ਅਣਵਰਤਿਆ, ਅਚਲ ਅੱਖਰ **argv ਅਣਵਰਤਿਆ,
+			  ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ, ਬਣਤਰ repository *repo)
 {
-	struct strbuf module_dir = STRBUF_INIT;
+	ਬਣਤਰ strbuf module_dir = STRBUF_INIT;
 	DIR *dir;
-	struct dirent *de;
-	int repo_version = 0;
+	ਬਣਤਰ dirent *de;
+	ਪੂਰਨ repo_ਸੰਸਕਰਣ = 0;
 
-	repo_git_path_append(repo, &module_dir, "modules/");
+	repo_git_ਰਸਤਾ_append(repo, &module_dir, "modules/");
 
 	dir = opendir(module_dir.buf);
-	if (!dir)
+	ਜੇ (!dir)
 		die(_("could not open '%s'"), module_dir.buf);
 
-	while ((de = readdir(dir))) {
-		struct strbuf gitdir_path = STRBUF_INIT;
-		char *key;
-		const char *value;
+	ਜਦੋਂ ((de = readdir(dir))) {
+		ਬਣਤਰ strbuf gitdir_ਰਸਤਾ = STRBUF_INIT;
+		ਅੱਖਰ *ਕੁੰਜੀ;
+		ਅਚਲ ਅੱਖਰ *ਮੁੱਲ;
 
-		if (is_dot_or_dotdot(de->d_name))
-			continue;
+		ਜੇ (is_dot_or_dotdot(de->d_name))
+			ਜਾਰੀ;
 
-		strbuf_addf(&gitdir_path, "%s/%s", module_dir.buf, de->d_name);
-		if (!is_git_directory(gitdir_path.buf)) {
-			strbuf_release(&gitdir_path);
-			continue;
+		strbuf_addf(&gitdir_ਰਸਤਾ, "%s/%s", module_dir.buf, de->d_name);
+		ਜੇ (!is_git_directory(gitdir_ਰਸਤਾ.buf)) {
+			strbuf_release(&gitdir_ਰਸਤਾ);
+			ਜਾਰੀ;
 		}
-		strbuf_release(&gitdir_path);
+		strbuf_release(&gitdir_ਰਸਤਾ);
 
-		key = xstrfmt("submodule.%s.gitdir", de->d_name);
-		if (!repo_config_get_string_tmp(repo, key, &value)) {
+		ਕੁੰਜੀ = xstrfmt("submodule.%s.gitdir", de->d_name);
+		ਜੇ (!repo_config_get_string_tmp(repo, ਕੁੰਜੀ, &ਮੁੱਲ)) {
 			/* Already has a gitdir config, nothing to do. */
-			free(key);
-			continue;
+			ਮੁਕਤ(ਕੁੰਜੀ);
+			ਜਾਰੀ;
 		}
-		free(key);
+		ਮੁਕਤ(ਕੁੰਜੀ);
 
 		create_default_gitdir_config(de->d_name);
 	}
@@ -1408,162 +1408,162 @@ static int module_migrate(int argc UNUSED, const char **argv UNUSED,
 	closedir(dir);
 	strbuf_release(&module_dir);
 
-	repo_config_get_int(the_repository, "core.repositoryformatversion", &repo_version);
-	if (repo_version == 0 &&
-	    repo_config_set_gently(repo, "core.repositoryformatversion", "1"))
+	repo_config_get_int(the_repository, "core.repositoryformatversion", &repo_ਸੰਸਕਰਣ);
+	ਜੇ (repo_ਸੰਸਕਰਣ == 0 &&
+	    repo_config_ਸੈੱਟ_gently(repo, "core.repositoryformatversion", "1"))
 		die(_("could not set core.repositoryformatversion to 1.\n"
 		      "Please set it for migration to work, for example:\n"
 		      "git config core.repositoryformatversion 1"));
 
-	if (repo_config_set_gently(repo, "extensions.submodulePathConfig", "true"))
+	ਜੇ (repo_config_ਸੈੱਟ_gently(repo, "extensions.submodulePathConfig", "true"))
 		die(_("could not enable submodulePathConfig extension. It is required\n"
 		      "for migration to work. Please enable it in the root repo:\n"
 		      "git config extensions.submodulePathConfig true"));
 
-	repo->repository_format_submodule_path_cfg = 1;
+	repo->repository_format_submodule_ਰਸਤਾ_cfg = 1;
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-struct sync_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+ਬਣਤਰ sync_cb {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags;
 };
-#define SYNC_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SYNC_CB_INIT { 0 }
 
-static void sync_submodule(const char *path, const char *prefix,
-			   const char *super_prefix, unsigned int flags)
+ਸਥਿਰ ਖਾਲੀ sync_submodule(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			   ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ, ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags)
 {
-	const struct submodule *sub;
-	char *remote_key = NULL;
-	char *sub_origin_url, *super_config_url, *displaypath, *default_remote;
-	struct strbuf sb = STRBUF_INIT;
-	char *sub_config_path = NULL;
-	int code;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਅੱਖਰ *remote_ਕੁੰਜੀ = ਨਿਰਾ;
+	ਅੱਖਰ *sub_origin_url, *super_config_url, *displaypath, *default_remote;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਅੱਖਰ *sub_config_ਰਸਤਾ = ਨਿਰਾ;
+	ਪੂਰਨ ਕੋਡ;
 
-	if (!is_submodule_active(the_repository, path))
-		return;
+	ਜੇ (!is_submodule_ਸਰਗਰਮ(the_repository, ਰਸਤਾ))
+		ਵਾਪਸ;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	ਜੇ (validate_submodule_ਰਸਤਾ(ਰਸਤਾ) < 0)
+		die(ਨਿਰਾ);
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
 
-	if (sub && sub->url) {
-		if (starts_with_dot_dot_slash(sub->url) ||
+	ਜੇ (sub && sub->url) {
+		ਜੇ (starts_with_dot_dot_slash(sub->url) ||
 		    starts_with_dot_slash(sub->url)) {
-			char *up_path = get_up_path(path);
+			ਅੱਖਰ *ਉੱਪਰ_ਰਸਤਾ = get_ਉੱਪਰ_ਰਸਤਾ(ਰਸਤਾ);
 
-			sub_origin_url = resolve_relative_url(sub->url, up_path, 1);
-			super_config_url = resolve_relative_url(sub->url, NULL, 1);
-			free(up_path);
-		} else {
+			sub_origin_url = resolve_relative_url(sub->url, ਉੱਪਰ_ਰਸਤਾ, 1);
+			super_config_url = resolve_relative_url(sub->url, ਨਿਰਾ, 1);
+			ਮੁਕਤ(ਉੱਪਰ_ਰਸਤਾ);
+		} ਨਹੀਂਤਾਂ {
 			sub_origin_url = xstrdup(sub->url);
 			super_config_url = xstrdup(sub->url);
 		}
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		sub_origin_url = xstrdup("");
 		super_config_url = xstrdup("");
 	}
 
-	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
+	displaypath = get_submodule_displaypath(ਰਸਤਾ, ਅਗੇਤਰ, super_ਅਗੇਤਰ);
 
-	if (!(flags & OPT_QUIET))
-		printf(_("Synchronizing submodule url for '%s'\n"),
+	ਜੇ (!(flags & OPT_QUIET))
+		ਲਿਖੋ(_("Synchronizing submodule url for '%s'\n"),
 			 displaypath);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_set_gently(the_repository, sb.buf, super_config_url))
+	ਜੇ (repo_config_ਸੈੱਟ_gently(the_repository, sb.buf, super_config_url))
 		die(_("failed to register url for submodule path '%s'"),
 		      displaypath);
 
-	if (!is_submodule_populated_gently(path, NULL))
-		goto cleanup;
+	ਜੇ (!is_submodule_populated_gently(ਰਸਤਾ, ਨਿਰਾ))
+		ਜਾਓ cleanup;
 
 	strbuf_reset(&sb);
-	code = get_default_remote_submodule(path, &default_remote);
-	if (code)
-		exit(code);
+	ਕੋਡ = get_default_remote_submodule(ਰਸਤਾ, &default_remote);
+	ਜੇ (ਕੋਡ)
+		ਬਾਹਰ_ਨਿਕਲੋ(ਕੋਡ);
 
-	remote_key = xstrfmt("remote.%s.url", default_remote);
-	free(default_remote);
+	remote_ਕੁੰਜੀ = xstrfmt("remote.%s.url", default_remote);
+	ਮੁਕਤ(default_remote);
 
-	submodule_to_gitdir(the_repository, &sb, path);
+	submodule_ਮੰਜ਼ਿਲ_gitdir(the_repository, &sb, ਰਸਤਾ);
 	strbuf_addstr(&sb, "/config");
 
-	if (repo_config_set_in_file_gently(the_repository, sb.buf, remote_key, NULL, sub_origin_url))
+	ਜੇ (repo_config_ਸੈੱਟ_ਵਿੱਚ_file_gently(the_repository, sb.buf, remote_ਕੁੰਜੀ, ਨਿਰਾ, sub_origin_url))
 		die(_("failed to update remote for submodule '%s'"),
-		      path);
+		      ਰਸਤਾ);
 
-	if (flags & OPT_RECURSIVE) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
+	ਜੇ (flags & OPT_RECURSIVE) {
+		ਬਣਤਰ ਬੱਚਾ_process cpr = ਬੱਚਾ_PROCESS_INIT;
 
 		cpr.git_cmd = 1;
-		cpr.dir = path;
+		cpr.dir = ਰਸਤਾ;
 		prepare_submodule_repo_env(&cpr.env);
 
-		strvec_pushl(&cpr.args, "submodule--helper", "sync",
-			     "--recursive", NULL);
-		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
+		strvec_pushl(&cpr.ਦਲੀਲਾਂ, "submodule--helper", "sync",
+			     "--recursive", ਨਿਰਾ);
+		strvec_pushf(&cpr.ਦਲੀਲਾਂ, "--super-prefix=%s/", displaypath);
 
-		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+		ਜੇ (flags & OPT_QUIET)
+			strvec_ਧੱਕੋ(&cpr.ਦਲੀਲਾਂ, "--quiet");
 
-		if (run_command(&cpr))
+		ਜੇ (ਲੜੀਵਾਰ_command(&cpr))
 			die(_("failed to recurse into submodule '%s'"),
-			      path);
+			      ਰਸਤਾ);
 	}
 
 cleanup:
-	free(super_config_url);
-	free(sub_origin_url);
+	ਮੁਕਤ(super_config_url);
+	ਮੁਕਤ(sub_origin_url);
 	strbuf_release(&sb);
-	free(remote_key);
-	free(displaypath);
-	free(sub_config_path);
+	ਮੁਕਤ(remote_ਕੁੰਜੀ);
+	ਮੁਕਤ(displaypath);
+	ਮੁਕਤ(sub_config_ਰਸਤਾ);
 }
 
-static void sync_submodule_cb(const struct cache_entry *list_item, void *cb_data)
+ਸਥਿਰ ਖਾਲੀ sync_submodule_cb(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *list_ਵਸਤੂ, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct sync_cb *info = cb_data;
+	ਬਣਤਰ sync_cb *info = cb_ਅੰਕੜੇ;
 
-	sync_submodule(list_item->name, info->prefix, info->super_prefix,
+	sync_submodule(list_ਵਸਤੂ->name, info->ਅਗੇਤਰ, info->super_ਅਗੇਤਰ,
 		       info->flags);
 }
 
-static int module_sync(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_sync(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		       ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct sync_cb info = SYNC_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	int recursive = 0;
-	struct option module_sync_options[] = {
-		OPT__SUPER_PREFIX(&info.super_prefix),
+	ਬਣਤਰ sync_cb info = SYNC_CB_INIT;
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+	ਪੂਰਨ quiet = 0;
+	ਪੂਰਨ recursive = 0;
+	ਬਣਤਰ option module_sync_options[] = {
+		OPT_SUPER_ਅਗੇਤਰ(&info.super_ਅਗੇਤਰ),
 		OPT__QUIET(&quiet, N_("suppress output of synchronizing submodule url")),
 		OPT_BOOL(0, "recursive", &recursive,
 			N_("recurse into nested submodules")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule sync [--quiet] [--recursive] [<path>]"),
-		NULL
+		ਨਿਰਾ
 	};
-	int ret = 1;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, module_sync_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_sync_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	ਜੇ (module_list_compute(argv, ਅਗੇਤਰ, &pathspec, &list) < 0)
+		ਜਾਓ cleanup;
 
-	info.prefix = prefix;
-	if (quiet)
+	info.ਅਗੇਤਰ = ਅਗੇਤਰ;
+	ਜੇ (quiet)
 		info.flags |= OPT_QUIET;
-	if (recursive)
+	ਜੇ (recursive)
 		info.flags |= OPT_RECURSIVE;
 
 	for_each_listed_submodule(&list, sync_submodule_cb, &info);
@@ -1572,154 +1572,154 @@ static int module_sync(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-struct deinit_cb {
-	const char *prefix;
-	unsigned int flags;
+ਬਣਤਰ deinit_cb {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags;
 };
-#define DEINIT_CB_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEINIT_CB_INIT { 0 }
 
-static void deinit_submodule(const char *path, const char *prefix,
-			     unsigned int flags)
+ਸਥਿਰ ਖਾਲੀ deinit_submodule(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			     ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ flags)
 {
-	const struct submodule *sub;
-	char *displaypath = NULL;
-	struct child_process cp_config = CHILD_PROCESS_INIT;
-	struct strbuf sb_config = STRBUF_INIT;
-	char *sub_git_dir = xstrfmt("%s/.git", path);
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਅੱਖਰ *displaypath = ਨਿਰਾ;
+	ਬਣਤਰ ਬੱਚਾ_process cp_config = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strbuf sb_config = STRBUF_INIT;
+	ਅੱਖਰ *sub_git_dir = xstrfmt("%s/.git", ਰਸਤਾ);
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	ਜੇ (validate_submodule_ਰਸਤਾ(ਰਸਤਾ) < 0)
+		die(ਨਿਰਾ);
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
 
-	if (!sub || !sub->name)
-		goto cleanup;
+	ਜੇ (!sub || !sub->name)
+		ਜਾਓ cleanup;
 
-	displaypath = get_submodule_displaypath(path, prefix, NULL);
+	displaypath = get_submodule_displaypath(ਰਸਤਾ, ਅਗੇਤਰ, ਨਿਰਾ);
 
 	/* remove the submodule work tree (unless the user already did it) */
-	if (is_directory(path)) {
-		struct strbuf sb_rm = STRBUF_INIT;
-		const char *format;
+	ਜੇ (is_directory(ਰਸਤਾ)) {
+		ਬਣਤਰ strbuf sb_rm = STRBUF_INIT;
+		ਅਚਲ ਅੱਖਰ *format;
 
-		if (is_directory(sub_git_dir)) {
-			if (!(flags & OPT_QUIET))
+		ਜੇ (is_directory(sub_git_dir)) {
+			ਜੇ (!(flags & OPT_QUIET))
 				warning(_("Submodule work tree '%s' contains a .git "
 					  "directory. This will be replaced with a "
 					  ".git file by using absorbgitdirs."),
 					displaypath);
 
-			absorb_git_dir_into_superproject(path, NULL);
+			absorb_git_dir_into_superproject(ਰਸਤਾ, ਨਿਰਾ);
 
 		}
 
-		if (!(flags & OPT_FORCE)) {
-			struct child_process cp_rm = CHILD_PROCESS_INIT;
+		ਜੇ (!(flags & OPT_FORCE)) {
+			ਬਣਤਰ ਬੱਚਾ_process cp_rm = ਬੱਚਾ_PROCESS_INIT;
 
 			cp_rm.git_cmd = 1;
-			strvec_pushl(&cp_rm.args, "rm", "-qn",
-				     path, NULL);
+			strvec_pushl(&cp_rm.ਦਲੀਲਾਂ, "rm", "-qn",
+				     ਰਸਤਾ, ਨਿਰਾ);
 
-			if (run_command(&cp_rm))
+			ਜੇ (ਲੜੀਵਾਰ_command(&cp_rm))
 				die(_("Submodule work tree '%s' contains local "
 				      "modifications; use '-f' to discard them"),
 				      displaypath);
 		}
 
-		strbuf_addstr(&sb_rm, path);
+		strbuf_addstr(&sb_rm, ਰਸਤਾ);
 
-		if (!remove_dir_recursively(&sb_rm, 0))
+		ਜੇ (!remove_dir_recursively(&sb_rm, 0))
 			format = _("Cleared directory '%s'\n");
-		else
+		ਨਹੀਂਤਾਂ
 			format = _("Could not remove submodule work tree '%s'\n");
 
-		if (!(flags & OPT_QUIET))
-			printf(format, displaypath);
+		ਜੇ (!(flags & OPT_QUIET))
+			ਲਿਖੋ(format, displaypath);
 
 		submodule_unset_core_worktree(sub);
 
 		strbuf_release(&sb_rm);
 	}
 
-	if (mkdir(path, 0777))
-		printf(_("could not create empty submodule directory %s"),
+	ਜੇ (mkdir(ਰਸਤਾ, 0777))
+		ਲਿਖੋ(_("could not create empty submodule directory %s"),
 		      displaypath);
 
 	cp_config.git_cmd = 1;
-	strvec_pushl(&cp_config.args, "config", "--get-regexp", NULL);
-	strvec_pushf(&cp_config.args, "submodule.%s\\.", sub->name);
+	strvec_pushl(&cp_config.ਦਲੀਲਾਂ, "config", "--get-regexp", ਨਿਰਾ);
+	strvec_pushf(&cp_config.ਦਲੀਲਾਂ, "submodule.%s\\.", sub->name);
 
 	/* remove the .git/config entries (unless the user already did it) */
-	if (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
-		char *sub_key = xstrfmt("submodule.%s", sub->name);
+	ਜੇ (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
+		ਅੱਖਰ *sub_ਕੁੰਜੀ = xstrfmt("submodule.%s", sub->name);
 
 		/*
 		 * remove the whole section so we have a clean state when
 		 * the user later decides to init this submodule again
 		 */
-		repo_config_rename_section_in_file(the_repository, NULL, sub_key, NULL);
-		if (!(flags & OPT_QUIET))
-			printf(_("Submodule '%s' (%s) unregistered for path '%s'\n"),
+		repo_config_rename_section_ਵਿੱਚ_file(the_repository, ਨਿਰਾ, sub_ਕੁੰਜੀ, ਨਿਰਾ);
+		ਜੇ (!(flags & OPT_QUIET))
+			ਲਿਖੋ(_("Submodule '%s' (%s) unregistered for path '%s'\n"),
 				 sub->name, sub->url, displaypath);
-		free(sub_key);
+		ਮੁਕਤ(sub_ਕੁੰਜੀ);
 	}
 
 cleanup:
-	free(displaypath);
-	free(sub_git_dir);
+	ਮੁਕਤ(displaypath);
+	ਮੁਕਤ(sub_git_dir);
 	strbuf_release(&sb_config);
 }
 
-static void deinit_submodule_cb(const struct cache_entry *list_item,
-				void *cb_data)
+ਸਥਿਰ ਖਾਲੀ deinit_submodule_cb(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *list_ਵਸਤੂ,
+				ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct deinit_cb *info = cb_data;
-	deinit_submodule(list_item->name, info->prefix, info->flags);
+	ਬਣਤਰ deinit_cb *info = cb_ਅੰਕੜੇ;
+	deinit_submodule(list_ਵਸਤੂ->name, info->ਅਗੇਤਰ, info->flags);
 }
 
-static int module_deinit(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_deinit(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			 ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct deinit_cb info = DEINIT_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	int force = 0;
-	int all = 0;
-	struct option module_deinit_options[] = {
+	ਬਣਤਰ deinit_cb info = DEINIT_CB_INIT;
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+	ਪੂਰਨ quiet = 0;
+	ਪੂਰਨ force = 0;
+	ਪੂਰਨ all = 0;
+	ਬਣਤਰ option module_deinit_options[] = {
 		OPT__QUIET(&quiet, N_("suppress submodule status output")),
 		OPT__FORCE(&force, N_("remove submodule working trees even if they contain local changes"), 0),
 		OPT_BOOL(0, "all", &all, N_("unregister all submodules")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule deinit [--quiet] [-f | --force] [--all | [--] [<path>...]]"),
-		NULL
+		ਨਿਰਾ
 	};
-	int ret = 1;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, module_deinit_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_deinit_options,
 			     git_submodule_helper_usage, 0);
 
-	if (all && argc) {
+	ਜੇ (all && argc) {
 		error("pathspec and --all are incompatible");
 		usage_with_options(git_submodule_helper_usage,
 				   module_deinit_options);
 	}
 
-	if (!argc && !all)
+	ਜੇ (!argc && !all)
 		die(_("Use '--all' if you really want to deinitialize all submodules"));
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	ਜੇ (module_list_compute(argv, ਅਗੇਤਰ, &pathspec, &list) < 0)
+		ਜਾਓ cleanup;
 
-	info.prefix = prefix;
-	if (quiet)
+	info.ਅਗੇਤਰ = ਅਗੇਤਰ;
+	ਜੇ (quiet)
 		info.flags |= OPT_QUIET;
-	if (force)
+	ਜੇ (force)
 		info.flags |= OPT_FORCE;
 
 	for_each_listed_submodule(&list, deinit_submodule_cb, &info);
@@ -1728,66 +1728,66 @@ static int module_deinit(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-struct module_clone_data {
-	const char *prefix;
-	const char *path;
-	const char *name;
-	const char *url;
-	int depth;
-	struct list_objects_filter_options *filter_options;
-	enum ref_storage_format ref_storage_format;
-	unsigned int quiet: 1;
-	unsigned int progress: 1;
-	unsigned int dissociate: 1;
-	unsigned int require_init: 1;
-	int single_branch;
+ਬਣਤਰ module_clone_ਅੰਕੜੇ {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *ਰਸਤਾ;
+	ਅਚਲ ਅੱਖਰ *name;
+	ਅਚਲ ਅੱਖਰ *url;
+	ਪੂਰਨ ਡੂੰਘਾਈ;
+	ਬਣਤਰ list_objects_filter_options *filter_options;
+	ਗਿਣਤੀ ref_storage_format ref_storage_format;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ quiet: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ ਤਰੱਕੀ: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ dissociate: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ require_init: 1;
+	ਪੂਰਨ single_branch;
 };
-#define MODULE_CLONE_DATA_INIT { \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MODULE_CLONE_ਅੰਕੜੇ_INIT { \
 	.single_branch = -1, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-struct submodule_alternate_setup {
-	const char *submodule_name;
-	enum SUBMODULE_ALTERNATE_ERROR_MODE {
+ਬਣਤਰ submodule_alternate_ਤਿਆਰੀ {
+	ਅਚਲ ਅੱਖਰ *submodule_name;
+	ਗਿਣਤੀ SUBMODULE_ALTERNATE_ERROR_ਬਹੁਲਕ {
 		SUBMODULE_ALTERNATE_ERROR_DIE,
 		SUBMODULE_ALTERNATE_ERROR_INFO,
 		SUBMODULE_ALTERNATE_ERROR_IGNORE
-	} error_mode;
-	struct string_list *reference;
+	} error_ਬਹੁਲਕ;
+	ਬਣਤਰ string_list *reference;
 };
-#define SUBMODULE_ALTERNATE_SETUP_INIT { \
-	.error_mode = SUBMODULE_ALTERNATE_ERROR_IGNORE, \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SUBMODULE_ALTERNATE_ਤਿਆਰੀ_INIT { \
+	.error_ਬਹੁਲਕ = SUBMODULE_ALTERNATE_ERROR_IGNORE, \
 }
 
-static const char alternate_error_advice[] = N_(
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ alternate_error_advice[] = N_(
 "An alternate computed from a superproject's alternate is invalid.\n"
 "To allow Git to clone without an alternate in such a case, set\n"
 "submodule.alternateErrorStrategy to 'info' or, equivalently, clone with\n"
 "'--reference-if-able' instead of '--reference'."
 );
 
-static int add_possible_reference_from_superproject(
-		struct odb_files_dir *alt_odb, void *sas_cb)
+ਸਥਿਰ ਪੂਰਨ ਜੋੜੋ_possible_reference_from_superproject(
+		ਬਣਤਰ odb_files_dir *alt_odb, ਖਾਲੀ *sas_cb)
 {
-	struct submodule_alternate_setup *sas = sas_cb;
-	size_t len;
+	ਬਣਤਰ submodule_alternate_ਤਿਆਰੀ *sas = sas_cb;
+	ਮਾਪ_t len;
 
 	/*
 	 * If the alternate object store is another repository, try the
 	 * standard layout with .git/(modules/<name>)+/objects
 	 */
-	if (strip_suffix(alt_odb->abspath, "/objects", &len)) {
-		struct repository alternate;
-		char *sm_alternate;
-		struct strbuf sb = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
-		strbuf_add(&sb, alt_odb->abspath, len);
+	ਜੇ (strip_suffix(alt_odb->abspath, "/objects", &len)) {
+		ਬਣਤਰ repository alternate;
+		ਅੱਖਰ *sm_alternate;
+		ਬਣਤਰ strbuf sb = STRBUF_INIT;
+		ਬਣਤਰ strbuf err = STRBUF_INIT;
+		strbuf_ਜੋੜੋ(&sb, alt_odb->abspath, len);
 
-		if (repo_init(&alternate, sb.buf, NULL) < 0)
+		ਜੇ (repo_init(&alternate, sb.buf, ਨਿਰਾ) < 0)
 			die(_("could not get a repository handle for gitdir '%s'"),
 			    sb.buf);
 
@@ -1798,27 +1798,27 @@ static int add_possible_reference_from_superproject(
 		 * be taken as a file name.
 		 */
 		strbuf_reset(&sb);
-		submodule_name_to_gitdir(&sb, &alternate, sas->submodule_name);
+		submodule_name_ਮੰਜ਼ਿਲ_gitdir(&sb, &alternate, sas->submodule_name);
 		strbuf_addch(&sb, '/');
 		repo_clear(&alternate);
 
-		sm_alternate = compute_alternate_path(sb.buf, &err);
-		if (sm_alternate) {
-			char *p = strbuf_detach(&sb, NULL);
+		sm_alternate = compute_alternate_ਰਸਤਾ(sb.buf, &err);
+		ਜੇ (sm_alternate) {
+			ਅੱਖਰ *p = strbuf_detach(&sb, ਨਿਰਾ);
 
 			string_list_append(sas->reference, p)->util = p;
-			free(sm_alternate);
-		} else {
-			switch (sas->error_mode) {
-			case SUBMODULE_ALTERNATE_ERROR_DIE:
-				if (advice_enabled(ADVICE_SUBMODULE_ALTERNATE_ERROR_STRATEGY_DIE))
+			ਮੁਕਤ(sm_alternate);
+		} ਨਹੀਂਤਾਂ {
+			ਚੋਣ (sas->error_ਬਹੁਲਕ) {
+			ਹਾਲਤ SUBMODULE_ALTERNATE_ERROR_DIE:
+				ਜੇ (advice_enabled(ADVICE_SUBMODULE_ALTERNATE_ERROR_STRATEGY_DIE))
 					advise(_(alternate_error_advice));
 				die(_("submodule '%s' cannot add alternate: %s"),
 				    sas->submodule_name, err.buf);
-			case SUBMODULE_ALTERNATE_ERROR_INFO:
+			ਹਾਲਤ SUBMODULE_ALTERNATE_ERROR_INFO:
 				fprintf_ln(stderr, _("submodule '%s' cannot add alternate: %s"),
 					sas->submodule_name, err.buf);
-			case SUBMODULE_ALTERNATE_ERROR_IGNORE:
+			ਹਾਲਤ SUBMODULE_ALTERNATE_ERROR_IGNORE:
 				; /* nothing */
 			}
 		}
@@ -1827,170 +1827,170 @@ static int add_possible_reference_from_superproject(
 		strbuf_release(&sb);
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static void prepare_possible_alternates(const char *sm_name,
-		struct string_list *reference)
+ਸਥਿਰ ਖਾਲੀ prepare_possible_alternates(ਅਚਲ ਅੱਖਰ *sm_name,
+		ਬਣਤਰ string_list *reference)
 {
-	char *sm_alternate = NULL, *error_strategy = NULL;
-	struct submodule_alternate_setup sas = SUBMODULE_ALTERNATE_SETUP_INIT;
+	ਅੱਖਰ *sm_alternate = ਨਿਰਾ, *error_strategy = ਨਿਰਾ;
+	ਬਣਤਰ submodule_alternate_ਤਿਆਰੀ sas = SUBMODULE_ALTERNATE_ਤਿਆਰੀ_INIT;
 
 	repo_config_get_string(the_repository, "submodule.alternateLocation", &sm_alternate);
-	if (!sm_alternate)
-		return;
+	ਜੇ (!sm_alternate)
+		ਵਾਪਸ;
 
 	repo_config_get_string(the_repository, "submodule.alternateErrorStrategy", &error_strategy);
 
-	if (!error_strategy)
+	ਜੇ (!error_strategy)
 		error_strategy = xstrdup("die");
 
 	sas.submodule_name = sm_name;
 	sas.reference = reference;
-	if (!strcmp(error_strategy, "die"))
-		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_DIE;
-	else if (!strcmp(error_strategy, "info"))
-		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_INFO;
-	else if (!strcmp(error_strategy, "ignore"))
-		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_IGNORE;
-	else
+	ਜੇ (!strcmp(error_strategy, "die"))
+		sas.error_ਬਹੁਲਕ = SUBMODULE_ALTERNATE_ERROR_DIE;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(error_strategy, "info"))
+		sas.error_ਬਹੁਲਕ = SUBMODULE_ALTERNATE_ERROR_INFO;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(error_strategy, "ignore"))
+		sas.error_ਬਹੁਲਕ = SUBMODULE_ALTERNATE_ERROR_IGNORE;
+	ਨਹੀਂਤਾਂ
 		die(_("Value '%s' for submodule.alternateErrorStrategy is not recognized"), error_strategy);
 
-	if (!strcmp(sm_alternate, "superproject"))
+	ਜੇ (!strcmp(sm_alternate, "superproject"))
 		odb_for_each_alternate(the_repository->objects,
-				       add_possible_reference_from_superproject, &sas);
-	else if (!strcmp(sm_alternate, "no"))
+				       ਜੋੜੋ_possible_reference_from_superproject, &sas);
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(sm_alternate, "no"))
 		; /* do nothing */
-	else
+	ਨਹੀਂਤਾਂ
 		die(_("Value '%s' for submodule.alternateLocation is not recognized"), sm_alternate);
 
-	free(sm_alternate);
-	free(error_strategy);
+	ਮੁਕਤ(sm_alternate);
+	ਮੁਕਤ(error_strategy);
 }
 
-static char *clone_submodule_sm_gitdir(const char *name)
+ਸਥਿਰ ਅੱਖਰ *clone_submodule_sm_gitdir(ਅਚਲ ਅੱਖਰ *name)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *sm_gitdir;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਅੱਖਰ *sm_gitdir;
 
-	submodule_name_to_gitdir(&sb, the_repository, name);
+	submodule_name_ਮੰਜ਼ਿਲ_gitdir(&sb, the_repository, name);
 	sm_gitdir = absolute_pathdup(sb.buf);
 	strbuf_release(&sb);
 
-	return sm_gitdir;
+	ਵਾਪਸ sm_gitdir;
 }
 
-static int dir_contains_only_dotgit(const char *path)
+ਸਥਿਰ ਪੂਰਨ dir_ਸ਼ਾਮਲ_ਹੈ_only_dotgit(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	DIR *dir = opendir(path);
-	struct dirent *e;
-	int ret = 1;
+	DIR *dir = opendir(ਰਸਤਾ);
+	ਬਣਤਰ dirent *e;
+	ਪੂਰਨ ret = 1;
 
-	if (!dir)
-		return 0;
+	ਜੇ (!dir)
+		ਵਾਪਸ 0;
 
 	e = readdir_skip_dot_and_dotdot(dir);
-	if (!e)
+	ਜੇ (!e)
 		ret = 0;
-	else if (strcmp(DEFAULT_GIT_DIR_ENVIRONMENT, e->d_name) ||
+	ਨਹੀਂਤਾਂ ਜੇ (strcmp(DEFAULT_GIT_DIR_ENVIRONMENT, e->d_name) ||
 		 (e = readdir_skip_dot_and_dotdot(dir))) {
-		error("unexpected item '%s' in '%s'", e->d_name, path);
+		error("unexpected item '%s' in '%s'", e->d_name, ਰਸਤਾ);
 		ret = 0;
 	}
 
 	closedir(dir);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int clone_submodule(const struct module_clone_data *clone_data,
-			   struct string_list *reference)
+ਸਥਿਰ ਪੂਰਨ clone_submodule(ਅਚਲ ਬਣਤਰ module_clone_ਅੰਕੜੇ *clone_ਅੰਕੜੇ,
+			   ਬਣਤਰ string_list *reference)
 {
-	char *p;
-	char *sm_gitdir = clone_submodule_sm_gitdir(clone_data->name);
-	char *sm_alternate = NULL, *error_strategy = NULL;
-	struct stat st;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	const char *clone_data_path = clone_data->path;
-	char *to_free = NULL;
+	ਅੱਖਰ *p;
+	ਅੱਖਰ *sm_gitdir = clone_submodule_sm_gitdir(clone_ਅੰਕੜੇ->name);
+	ਅੱਖਰ *sm_alternate = ਨਿਰਾ, *error_strategy = ਨਿਰਾ;
+	ਬਣਤਰ stat st;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+	ਅਚਲ ਅੱਖਰ *clone_ਅੰਕੜੇ_ਰਸਤਾ = clone_ਅੰਕੜੇ->ਰਸਤਾ;
+	ਅੱਖਰ *ਮੰਜ਼ਿਲ_free = ਨਿਰਾ;
 
-	if (validate_submodule_path(clone_data_path) < 0)
-		die(NULL);
+	ਜੇ (validate_submodule_ਰਸਤਾ(clone_ਅੰਕੜੇ_ਰਸਤਾ) < 0)
+		die(ਨਿਰਾ);
 
-	if (!is_absolute_path(clone_data->path))
-		clone_data_path = to_free = xstrfmt("%s/%s", repo_get_work_tree(the_repository),
-						    clone_data->path);
+	ਜੇ (!is_absolute_ਰਸਤਾ(clone_ਅੰਕੜੇ->ਰਸਤਾ))
+		clone_ਅੰਕੜੇ_ਰਸਤਾ = ਮੰਜ਼ਿਲ_free = xstrfmt("%s/%s", repo_get_work_ਰੁੱਖ(the_repository),
+						    clone_ਅੰਕੜੇ->ਰਸਤਾ);
 
-	if (!file_exists(sm_gitdir)) {
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
-		    !is_empty_dir(clone_data_path))
-			die(_("directory not empty: '%s'"), clone_data_path);
+	ਜੇ (!file_exists(sm_gitdir)) {
+		ਜੇ (clone_ਅੰਕੜੇ->require_init && !stat(clone_ਅੰਕੜੇ_ਰਸਤਾ, &st) &&
+		    !is_ਖਾਲੀ_ਥਾਵਾਂ_dir(clone_ਅੰਕੜੇ_ਰਸਤਾ))
+			die(_("directory not empty: '%s'"), clone_ਅੰਕੜੇ_ਰਸਤਾ);
 
-		if (safe_create_leading_directories_const(the_repository, sm_gitdir) < 0)
+		ਜੇ (ਸੁਰੱਖਿਅਤ_create_leading_directories_const(the_repository, sm_gitdir) < 0)
 			die(_("could not create directory '%s'"), sm_gitdir);
 
-		prepare_possible_alternates(clone_data->name, reference);
+		prepare_possible_alternates(clone_ਅੰਕੜੇ->name, reference);
 
-		strvec_push(&cp.args, "clone");
-		strvec_push(&cp.args, "--no-checkout");
-		if (clone_data->quiet)
-			strvec_push(&cp.args, "--quiet");
-		if (clone_data->progress)
-			strvec_push(&cp.args, "--progress");
-		if (clone_data->depth > 0)
-			strvec_pushf(&cp.args, "--depth=%d", clone_data->depth);
-		if (reference->nr) {
-			struct string_list_item *item;
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "clone");
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--no-checkout");
+		ਜੇ (clone_ਅੰਕੜੇ->quiet)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--quiet");
+		ਜੇ (clone_ਅੰਕੜੇ->ਤਰੱਕੀ)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--progress");
+		ਜੇ (clone_ਅੰਕੜੇ->ਡੂੰਘਾਈ > 0)
+			strvec_pushf(&cp.ਦਲੀਲਾਂ, "--depth=%d", clone_ਅੰਕੜੇ->ਡੂੰਘਾਈ);
+		ਜੇ (reference->nr) {
+			ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
 
-			for_each_string_list_item(item, reference)
-				strvec_pushl(&cp.args, "--reference",
-					     item->string, NULL);
+			for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, reference)
+				strvec_pushl(&cp.ਦਲੀਲਾਂ, "--reference",
+					     ਵਸਤੂ->string, ਨਿਰਾ);
 		}
-		if (clone_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-			strvec_pushf(&cp.args, "--ref-storage-format=%s",
-				     ref_storage_format_to_name(clone_data->ref_storage_format));
-		if (clone_data->dissociate)
-			strvec_push(&cp.args, "--dissociate");
-		if (sm_gitdir && *sm_gitdir)
-			strvec_pushl(&cp.args, "--separate-git-dir", sm_gitdir, NULL);
-		if (clone_data->filter_options && clone_data->filter_options->choice)
-			strvec_pushf(&cp.args, "--filter=%s",
+		ਜੇ (clone_ਅੰਕੜੇ->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+			strvec_pushf(&cp.ਦਲੀਲਾਂ, "--ref-storage-format=%s",
+				     ref_storage_format_ਮੰਜ਼ਿਲ_name(clone_ਅੰਕੜੇ->ref_storage_format));
+		ਜੇ (clone_ਅੰਕੜੇ->dissociate)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--dissociate");
+		ਜੇ (sm_gitdir && *sm_gitdir)
+			strvec_pushl(&cp.ਦਲੀਲਾਂ, "--separate-git-dir", sm_gitdir, ਨਿਰਾ);
+		ਜੇ (clone_ਅੰਕੜੇ->filter_options && clone_ਅੰਕੜੇ->filter_options->choice)
+			strvec_pushf(&cp.ਦਲੀਲਾਂ, "--filter=%s",
 				     expand_list_objects_filter_spec(
-					     clone_data->filter_options));
-		if (clone_data->single_branch >= 0)
-			strvec_push(&cp.args, clone_data->single_branch ?
+					     clone_ਅੰਕੜੇ->filter_options));
+		ਜੇ (clone_ਅੰਕੜੇ->single_branch >= 0)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, clone_ਅੰਕੜੇ->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 
-		strvec_push(&cp.args, "--");
-		strvec_push(&cp.args, clone_data->url);
-		strvec_push(&cp.args, clone_data_path);
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--");
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, clone_ਅੰਕੜੇ->url);
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, clone_ਅੰਕੜੇ_ਰਸਤਾ);
 
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
 		cp.no_stdin = 1;
 
-		if(run_command(&cp))
+		ਜੇ(ਲੜੀਵਾਰ_command(&cp))
 			die(_("clone of '%s' into submodule path '%s' failed"),
-			    clone_data->url, clone_data_path);
+			    clone_ਅੰਕੜੇ->url, clone_ਅੰਕੜੇ_ਰਸਤਾ);
 
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
-		    !dir_contains_only_dotgit(clone_data_path)) {
-			char *dot_git = xstrfmt("%s/.git", clone_data_path);
+		ਜੇ (clone_ਅੰਕੜੇ->require_init && !stat(clone_ਅੰਕੜੇ_ਰਸਤਾ, &st) &&
+		    !dir_ਸ਼ਾਮਲ_ਹੈ_only_dotgit(clone_ਅੰਕੜੇ_ਰਸਤਾ)) {
+			ਅੱਖਰ *dot_git = xstrfmt("%s/.git", clone_ਅੰਕੜੇ_ਰਸਤਾ);
 			unlink(dot_git);
-			free(dot_git);
-			die(_("directory not empty: '%s'"), clone_data_path);
+			ਮੁਕਤ(dot_git);
+			die(_("directory not empty: '%s'"), clone_ਅੰਕੜੇ_ਰਸਤਾ);
 		}
-	} else {
-		char *path;
+	} ਨਹੀਂਤਾਂ {
+		ਅੱਖਰ *ਰਸਤਾ;
 
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
-		    !is_empty_dir(clone_data_path))
-			die(_("directory not empty: '%s'"), clone_data_path);
-		if (safe_create_leading_directories_const(the_repository, clone_data_path) < 0)
-			die(_("could not create directory '%s'"), clone_data_path);
-		path = xstrfmt("%s/index", sm_gitdir);
-		unlink_or_warn(path);
-		free(path);
+		ਜੇ (clone_ਅੰਕੜੇ->require_init && !stat(clone_ਅੰਕੜੇ_ਰਸਤਾ, &st) &&
+		    !is_ਖਾਲੀ_ਥਾਵਾਂ_dir(clone_ਅੰਕੜੇ_ਰਸਤਾ))
+			die(_("directory not empty: '%s'"), clone_ਅੰਕੜੇ_ਰਸਤਾ);
+		ਜੇ (ਸੁਰੱਖਿਅਤ_create_leading_directories_const(the_repository, clone_ਅੰਕੜੇ_ਰਸਤਾ) < 0)
+			die(_("could not create directory '%s'"), clone_ਅੰਕੜੇ_ਰਸਤਾ);
+		ਰਸਤਾ = xstrfmt("%s/index", sm_gitdir);
+		unlink_or_warn(ਰਸਤਾ);
+		ਮੁਕਤ(ਰਸਤਾ);
 	}
 
 	/*
@@ -2002,61 +2002,61 @@ static int clone_submodule(const struct module_clone_data *clone_data,
 	 * To prevent further harm coming from this unintentionally-nested
 	 * gitdir, let's disable it by deleting the `HEAD` file.
 	 */
-	if (validate_submodule_git_dir(sm_gitdir, clone_data->name) < 0) {
-		char *head = xstrfmt("%s/HEAD", sm_gitdir);
-		unlink(head);
-		free(head);
+	ਜੇ (validate_submodule_git_dir(sm_gitdir, clone_ਅੰਕੜੇ->name) < 0) {
+		ਅੱਖਰ *ਸਿਰ = xstrfmt("%s/HEAD", sm_gitdir);
+		unlink(ਸਿਰ);
+		ਮੁਕਤ(ਸਿਰ);
 		die(_("refusing to create/use '%s' in another submodule's git dir. "
 		      "Enabling extensions.submodulePathConfig should fix this."),
 		    sm_gitdir);
 	}
 
-	connect_work_tree_and_git_dir(clone_data_path, sm_gitdir, 0);
+	connect_work_ਰੁੱਖ_and_git_dir(clone_ਅੰਕੜੇ_ਰਸਤਾ, sm_gitdir, 0);
 
-	p = repo_submodule_path(the_repository, clone_data_path, "config");
-	if (!p)
-		die(_("could not get submodule directory for '%s'"), clone_data_path);
+	p = repo_submodule_ਰਸਤਾ(the_repository, clone_ਅੰਕੜੇ_ਰਸਤਾ, "config");
+	ਜੇ (!p)
+		die(_("could not get submodule directory for '%s'"), clone_ਅੰਕੜੇ_ਰਸਤਾ);
 
 	/* setup alternateLocation and alternateErrorStrategy in the cloned submodule if needed */
 	repo_config_get_string(the_repository, "submodule.alternateLocation", &sm_alternate);
-	if (sm_alternate)
-		repo_config_set_in_file(the_repository, p, "submodule.alternateLocation",
+	ਜੇ (sm_alternate)
+		repo_config_ਸੈੱਟ_ਵਿੱਚ_file(the_repository, p, "submodule.alternateLocation",
 					sm_alternate);
 	repo_config_get_string(the_repository, "submodule.alternateErrorStrategy", &error_strategy);
-	if (error_strategy)
-		repo_config_set_in_file(the_repository, p, "submodule.alternateErrorStrategy",
+	ਜੇ (error_strategy)
+		repo_config_ਸੈੱਟ_ਵਿੱਚ_file(the_repository, p, "submodule.alternateErrorStrategy",
 					error_strategy);
 
-	free(sm_alternate);
-	free(error_strategy);
+	ਮੁਕਤ(sm_alternate);
+	ਮੁਕਤ(error_strategy);
 
-	free(sm_gitdir);
-	free(p);
-	free(to_free);
-	return 0;
+	ਮੁਕਤ(sm_gitdir);
+	ਮੁਕਤ(p);
+	ਮੁਕਤ(ਮੰਜ਼ਿਲ_free);
+	ਵਾਪਸ 0;
 }
 
-static int module_clone(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_clone(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int dissociate = 0, quiet = 0, progress = 0, require_init = 0;
-	struct module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
-	struct string_list reference = STRING_LIST_INIT_NODUP;
-	struct list_objects_filter_options filter_options =
+	ਪੂਰਨ dissociate = 0, quiet = 0, ਤਰੱਕੀ = 0, require_init = 0;
+	ਬਣਤਰ module_clone_ਅੰਕੜੇ clone_ਅੰਕੜੇ = MODULE_CLONE_ਅੰਕੜੇ_INIT;
+	ਬਣਤਰ string_list reference = STRING_LIST_INIT_NODUP;
+	ਬਣਤਰ list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	const char *ref_storage_format = NULL;
+	ਅਚਲ ਅੱਖਰ *ref_storage_format = ਨਿਰਾ;
 
-	struct option module_clone_options[] = {
-		OPT_STRING(0, "prefix", &clone_data.prefix,
+	ਬਣਤਰ option module_clone_options[] = {
+		OPT_STRING(0, "prefix", &clone_ਅੰਕੜੇ.ਅਗੇਤਰ,
 			   N_("path"),
 			   N_("alternative anchor for relative paths")),
-		OPT_STRING(0, "path", &clone_data.path,
+		OPT_STRING(0, "path", &clone_ਅੰਕੜੇ.ਰਸਤਾ,
 			   N_("path"),
 			   N_("where the new submodule will be cloned to")),
-		OPT_STRING(0, "name", &clone_data.name,
+		OPT_STRING(0, "name", &clone_ਅੰਕੜੇ.name,
 			   N_("string"),
 			   N_("name of the new submodule")),
-		OPT_STRING(0, "url", &clone_data.url,
+		OPT_STRING(0, "url", &clone_ਅੰਕੜੇ.url,
 			   N_("string"),
 			   N_("url where to clone the submodule from")),
 		OPT_STRING_LIST(0, "reference", &reference,
@@ -2067,162 +2067,162 @@ static int module_clone(int argc, const char **argv, const char *prefix,
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "dissociate", &dissociate,
 			   N_("use --reference only while cloning")),
-		OPT_INTEGER(0, "depth", &clone_data.depth,
+		OPT_INTEGER(0, "depth", &clone_ਅੰਕੜੇ.ਡੂੰਘਾਈ,
 			   N_("depth for shallow clones")),
 		OPT__QUIET(&quiet, "suppress output for cloning a submodule"),
-		OPT_BOOL(0, "progress", &progress,
+		OPT_BOOL(0, "progress", &ਤਰੱਕੀ,
 			   N_("force cloning progress")),
 		OPT_BOOL(0, "require-init", &require_init,
 			   N_("disallow cloning into non-empty directory")),
-		OPT_BOOL(0, "single-branch", &clone_data.single_branch,
+		OPT_BOOL(0, "single-branch", &clone_ਅੰਕੜੇ.single_branch,
 			 N_("clone only one branch, HEAD or --branch")),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule--helper clone [--prefix=<path>] [--quiet] "
 		   "[--reference <repository>] [--name <name>] [--depth <depth>] "
 		   "[--single-branch] [--filter <filter-spec>] "
 		   "--url <url> --path <path>"),
-		NULL
+		ਨਿਰਾ
 	};
 
-	argc = parse_options(argc, argv, prefix, module_clone_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_clone_options,
 			     git_submodule_helper_usage, 0);
 
-	if (ref_storage_format) {
-		clone_data.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (clone_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	ਜੇ (ref_storage_format) {
+		clone_ਅੰਕੜੇ.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
+		ਜੇ (clone_ਅੰਕੜੇ.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
-	clone_data.dissociate = !!dissociate;
-	clone_data.quiet = !!quiet;
-	clone_data.progress = !!progress;
-	clone_data.require_init = !!require_init;
-	clone_data.filter_options = &filter_options;
+	clone_ਅੰਕੜੇ.dissociate = !!dissociate;
+	clone_ਅੰਕੜੇ.quiet = !!quiet;
+	clone_ਅੰਕੜੇ.ਤਰੱਕੀ = !!ਤਰੱਕੀ;
+	clone_ਅੰਕੜੇ.require_init = !!require_init;
+	clone_ਅੰਕੜੇ.filter_options = &filter_options;
 
-	if (argc || !clone_data.url || !clone_data.path || !*(clone_data.path))
+	ਜੇ (argc || !clone_ਅੰਕੜੇ.url || !clone_ਅੰਕੜੇ.ਰਸਤਾ || !*(clone_ਅੰਕੜੇ.ਰਸਤਾ))
 		usage_with_options(git_submodule_helper_usage,
 				   module_clone_options);
 
-	clone_submodule(&clone_data, &reference);
+	clone_submodule(&clone_ਅੰਕੜੇ, &reference);
 	list_objects_filter_release(&filter_options);
 	string_list_clear(&reference, 1);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int determine_submodule_update_strategy(struct repository *r,
-					       int just_cloned,
-					       const char *path,
-					       enum submodule_update_type update,
-					       struct submodule_update_strategy *out)
+ਸਥਿਰ ਪੂਰਨ determine_submodule_update_strategy(ਬਣਤਰ repository *r,
+					       ਪੂਰਨ just_cloned,
+					       ਅਚਲ ਅੱਖਰ *ਰਸਤਾ,
+					       ਗਿਣਤੀ submodule_update_type update,
+					       ਬਣਤਰ submodule_update_strategy *ਬਾਹਰਲਾ)
 {
-	const struct submodule *sub = submodule_from_path(r, null_oid(the_hash_algo), path);
-	char *key;
-	const char *val;
-	int ret;
+	ਅਚਲ ਬਣਤਰ submodule *sub = submodule_from_ਰਸਤਾ(r, null_oid(the_hash_algo), ਰਸਤਾ);
+	ਅੱਖਰ *ਕੁੰਜੀ;
+	ਅਚਲ ਅੱਖਰ *val;
+	ਪੂਰਨ ret;
 
 	/*
 	 * NEEDSWORK: audit and ensure that update_submodule() has right
 	 * to assume that submodule_from_path() above will always succeed.
 	 */
-	if (!sub)
+	ਜੇ (!sub)
 		BUG("update_submodule assumes a submodule exists at path (%s)",
-		    path);
-	key = xstrfmt("submodule.%s.update", sub->name);
+		    ਰਸਤਾ);
+	ਕੁੰਜੀ = xstrfmt("submodule.%s.update", sub->name);
 
-	if (update) {
-		out->type = update;
-	} else if (!repo_config_get_string_tmp(r, key, &val)) {
-		if (parse_submodule_update_strategy(val, out) < 0) {
-			ret = die_message(_("Invalid update mode '%s' configured for submodule path '%s'"),
-					  val, path);
-			goto cleanup;
+	ਜੇ (update) {
+		ਬਾਹਰਲਾ->type = update;
+	} ਨਹੀਂਤਾਂ ਜੇ (!repo_config_get_string_tmp(r, ਕੁੰਜੀ, &val)) {
+		ਜੇ (parse_submodule_update_strategy(val, ਬਾਹਰਲਾ) < 0) {
+			ret = die_ਸੁਨੇਹਾ(_("Invalid update mode '%s' configured for submodule path '%s'"),
+					  val, ਰਸਤਾ);
+			ਜਾਓ cleanup;
 		}
-	} else if (sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
-		if (sub->update_strategy.type == SM_UPDATE_COMMAND)
+	} ਨਹੀਂਤਾਂ ਜੇ (sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
+		ਜੇ (sub->update_strategy.type == SM_UPDATE_COMMAND)
 			BUG("how did we read update = !command from .gitmodules?");
-		out->type = sub->update_strategy.type;
-		out->command = sub->update_strategy.command;
-	} else
-		out->type = SM_UPDATE_CHECKOUT;
+		ਬਾਹਰਲਾ->type = sub->update_strategy.type;
+		ਬਾਹਰਲਾ->command = sub->update_strategy.command;
+	} ਨਹੀਂਤਾਂ
+		ਬਾਹਰਲਾ->type = SM_UPDATE_CHECKOUT;
 
-	if (just_cloned &&
-	    (out->type == SM_UPDATE_MERGE ||
-	     out->type == SM_UPDATE_REBASE ||
-	     out->type == SM_UPDATE_NONE))
-		out->type = SM_UPDATE_CHECKOUT;
+	ਜੇ (just_cloned &&
+	    (ਬਾਹਰਲਾ->type == SM_UPDATE_ਮਿਲਾਓ ||
+	     ਬਾਹਰਲਾ->type == SM_UPDATE_REBASE ||
+	     ਬਾਹਰਲਾ->type == SM_UPDATE_NONE))
+		ਬਾਹਰਲਾ->type = SM_UPDATE_CHECKOUT;
 
 	ret = 0;
 cleanup:
-	free(key);
-	return ret;
+	ਮੁਕਤ(ਕੁੰਜੀ);
+	ਵਾਪਸ ret;
 }
 
-struct update_clone_data {
-	const struct submodule *sub;
-	struct object_id oid;
-	unsigned just_cloned;
+ਬਣਤਰ update_clone_ਅੰਕੜੇ {
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਬਣਤਰ object_id oid;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ just_cloned;
 };
 
-struct submodule_update_clone {
+ਬਣਤਰ submodule_update_clone {
 	/* index into 'update_data.list', the list of submodules to look into for cloning */
-	int current;
+	ਪੂਰਨ current;
 
 	/* configuration parameters which are passed on to the children */
-	const struct update_data *update_data;
+	ਅਚਲ ਬਣਤਰ update_ਅੰਕੜੇ *update_ਅੰਕੜੇ;
 
 	/* to be consumed by update_submodule() */
-	struct update_clone_data *update_clone;
-	int update_clone_nr; int update_clone_alloc;
+	ਬਣਤਰ update_clone_ਅੰਕੜੇ *update_clone;
+	ਪੂਰਨ update_clone_nr; ਪੂਰਨ update_clone_alloc;
 
 	/* If we want to stop as fast as possible and return an error */
-	unsigned quickstop : 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ quickstop : 1;
 
 	/* failed clones to be retried again */
-	const struct cache_entry **failed_clones;
-	int failed_clones_nr, failed_clones_alloc;
+	ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ **failed_clones;
+	ਪੂਰਨ failed_clones_nr, failed_clones_alloc;
 };
-#define SUBMODULE_UPDATE_CLONE_INIT { 0 }
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ SUBMODULE_UPDATE_CLONE_INIT { 0 }
 
-static void submodule_update_clone_release(struct submodule_update_clone *suc)
+ਸਥਿਰ ਖਾਲੀ submodule_update_clone_release(ਬਣਤਰ submodule_update_clone *suc)
 {
-	free(suc->update_clone);
-	free(suc->failed_clones);
+	ਮੁਕਤ(suc->update_clone);
+	ਮੁਕਤ(suc->failed_clones);
 }
 
-struct update_data {
-	const char *prefix;
-	const char *super_prefix;
-	char *displaypath;
-	enum submodule_update_type update_default;
-	struct object_id suboid;
-	struct string_list references;
-	struct submodule_update_strategy update_strategy;
-	struct list_objects_filter_options *filter_options;
-	struct module_list list;
-	enum ref_storage_format ref_storage_format;
-	int depth;
-	int max_jobs;
-	int single_branch;
-	int recommend_shallow;
-	unsigned int require_init;
-	unsigned int force;
-	unsigned int quiet;
-	unsigned int nofetch;
-	unsigned int remote;
-	unsigned int progress;
-	unsigned int dissociate;
-	unsigned int init;
-	unsigned int warn_if_uninitialized;
-	unsigned int recursive;
+ਬਣਤਰ update_ਅੰਕੜੇ {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ;
+	ਅੱਖਰ *displaypath;
+	ਗਿਣਤੀ submodule_update_type update_default;
+	ਬਣਤਰ object_id suboid;
+	ਬਣਤਰ string_list references;
+	ਬਣਤਰ submodule_update_strategy update_strategy;
+	ਬਣਤਰ list_objects_filter_options *filter_options;
+	ਬਣਤਰ module_list list;
+	ਗਿਣਤੀ ref_storage_format ref_storage_format;
+	ਪੂਰਨ ਡੂੰਘਾਈ;
+	ਪੂਰਨ max_jobs;
+	ਪੂਰਨ single_branch;
+	ਪੂਰਨ recommend_shallow;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ require_init;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ force;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ quiet;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ nofetch;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ remote;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ ਤਰੱਕੀ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ dissociate;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ init;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ warn_if_uninitialized;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ recursive;
 
 	/* copied over from update_clone_data */
-	struct object_id oid;
-	unsigned int just_cloned;
-	const char *sm_path;
+	ਬਣਤਰ object_id oid;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ just_cloned;
+	ਅਚਲ ਅੱਖਰ *sm_ਰਸਤਾ;
 };
-#define UPDATE_DATA_INIT { \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ UPDATE_ਅੰਕੜੇ_INIT { \
 	.update_strategy = SUBMODULE_UPDATE_STRATEGY_INIT, \
 	.list = MODULE_LIST_INIT, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
@@ -2232,28 +2232,28 @@ struct update_data {
 	.max_jobs = 1, \
 }
 
-static void update_data_release(struct update_data *ud)
+ਸਥਿਰ ਖਾਲੀ update_ਅੰਕੜੇ_release(ਬਣਤਰ update_ਅੰਕੜੇ *ud)
 {
-	free(ud->displaypath);
+	ਮੁਕਤ(ud->displaypath);
 	submodule_update_strategy_release(&ud->update_strategy);
 	module_list_release(&ud->list);
 }
 
-static void next_submodule_warn_missing(struct submodule_update_clone *suc,
-		struct strbuf *out, const char *displaypath)
+ਸਥਿਰ ਖਾਲੀ ਅਗਲਾ_submodule_warn_missing(ਬਣਤਰ submodule_update_clone *suc,
+		ਬਣਤਰ strbuf *ਬਾਹਰਲਾ, ਅਚਲ ਅੱਖਰ *displaypath)
 {
 	/*
 	 * Only mention uninitialized submodules when their
 	 * paths have been specified.
 	 */
-	if (suc->update_data->warn_if_uninitialized) {
-		strbuf_addf(out,
+	ਜੇ (suc->update_ਅੰਕੜੇ->warn_if_uninitialized) {
+		strbuf_addf(ਬਾਹਰਲਾ,
 			_("Submodule path '%s' not initialized"),
 			displaypath);
-		strbuf_addch(out, '\n');
-		strbuf_addstr(out,
+		strbuf_addch(ਬਾਹਰਲਾ, '\n');
+		strbuf_addstr(ਬਾਹਰਲਾ,
 			_("Maybe you want to use 'update --init'?"));
-		strbuf_addch(out, '\n');
+		strbuf_addch(ਬਾਹਰਲਾ, '\n');
 	}
 }
 
@@ -2261,70 +2261,70 @@ static void next_submodule_warn_missing(struct submodule_update_clone *suc,
  * Determine whether 'ce' needs to be cloned. If so, prepare the 'child' to
  * run the clone. Returns 1 if 'ce' needs to be cloned, 0 otherwise.
  */
-static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
-					   struct child_process *child,
-					   struct submodule_update_clone *suc,
-					   struct strbuf *out)
+ਸਥਿਰ ਪੂਰਨ prepare_ਮੰਜ਼ਿਲ_clone_ਅਗਲਾ_submodule(ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce,
+					   ਬਣਤਰ ਬੱਚਾ_process *ਬੱਚਾ,
+					   ਬਣਤਰ submodule_update_clone *suc,
+					   ਬਣਤਰ strbuf *ਬਾਹਰਲਾ)
 {
-	const struct submodule *sub = NULL;
-	const char *url = NULL;
-	const char *update_string;
-	enum submodule_update_type update_type;
-	char *key;
-	const struct update_data *ud = suc->update_data;
-	char *displaypath = get_submodule_displaypath(ce->name, ud->prefix,
-						      ud->super_prefix);
-	struct strbuf sb = STRBUF_INIT;
-	int needs_cloning = 0;
-	int need_free_url = 0;
+	ਅਚਲ ਬਣਤਰ submodule *sub = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *url = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *update_string;
+	ਗਿਣਤੀ submodule_update_type update_type;
+	ਅੱਖਰ *ਕੁੰਜੀ;
+	ਅਚਲ ਬਣਤਰ update_ਅੰਕੜੇ *ud = suc->update_ਅੰਕੜੇ;
+	ਅੱਖਰ *displaypath = get_submodule_displaypath(ce->name, ud->ਅਗੇਤਰ,
+						      ud->super_ਅਗੇਤਰ);
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਪੂਰਨ needs_cloning = 0;
+	ਪੂਰਨ need_free_url = 0;
 
-	if (ce_stage(ce)) {
-		strbuf_addf(out, _("Skipping unmerged submodule %s"), displaypath);
-		strbuf_addch(out, '\n');
-		goto cleanup;
+	ਜੇ (ce_stage(ce)) {
+		strbuf_addf(ਬਾਹਰਲਾ, _("Skipping unmerged submodule %s"), displaypath);
+		strbuf_addch(ਬਾਹਰਲਾ, '\n');
+		ਜਾਓ cleanup;
 	}
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), ce->name);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ce->name);
 
-	if (!sub) {
-		next_submodule_warn_missing(suc, out, displaypath);
-		goto cleanup;
+	ਜੇ (!sub) {
+		ਅਗਲਾ_submodule_warn_missing(suc, ਬਾਹਰਲਾ, displaypath);
+		ਜਾਓ cleanup;
 	}
 
-	key = xstrfmt("submodule.%s.update", sub->name);
-	if (!repo_config_get_string_tmp(the_repository, key, &update_string)) {
+	ਕੁੰਜੀ = xstrfmt("submodule.%s.update", sub->name);
+	ਜੇ (!repo_config_get_string_tmp(the_repository, ਕੁੰਜੀ, &update_string)) {
 		update_type = parse_submodule_update_type(update_string);
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		update_type = sub->update_strategy.type;
 	}
-	free(key);
+	ਮੁਕਤ(ਕੁੰਜੀ);
 
-	if (suc->update_data->update_strategy.type == SM_UPDATE_NONE
-	    || (suc->update_data->update_strategy.type == SM_UPDATE_UNSPECIFIED
+	ਜੇ (suc->update_ਅੰਕੜੇ->update_strategy.type == SM_UPDATE_NONE
+	    || (suc->update_ਅੰਕੜੇ->update_strategy.type == SM_UPDATE_UNSPECIFIED
 		&& update_type == SM_UPDATE_NONE)) {
-		strbuf_addf(out, _("Skipping submodule '%s'"), displaypath);
-		strbuf_addch(out, '\n');
-		goto cleanup;
+		strbuf_addf(ਬਾਹਰਲਾ, _("Skipping submodule '%s'"), displaypath);
+		strbuf_addch(ਬਾਹਰਲਾ, '\n');
+		ਜਾਓ cleanup;
 	}
 
 	/* Check if the submodule has been initialized. */
-	if (!is_submodule_active(the_repository, ce->name)) {
-		next_submodule_warn_missing(suc, out, displaypath);
-		goto cleanup;
+	ਜੇ (!is_submodule_ਸਰਗਰਮ(the_repository, ce->name)) {
+		ਅਗਲਾ_submodule_warn_missing(suc, ਬਾਹਰਲਾ, displaypath);
+		ਜਾਓ cleanup;
 	}
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_get_string_tmp(the_repository, sb.buf, &url)) {
-		if (sub->url && (starts_with_dot_slash(sub->url) ||
+	ਜੇ (repo_config_get_string_tmp(the_repository, sb.buf, &url)) {
+		ਜੇ (sub->url && (starts_with_dot_slash(sub->url) ||
 				 starts_with_dot_dot_slash(sub->url))) {
-			url = resolve_relative_url(sub->url, NULL, 0);
+			url = resolve_relative_url(sub->url, ਨਿਰਾ, 0);
 			need_free_url = 1;
-		} else
+		} ਨਹੀਂਤਾਂ
 			url = sub->url;
 	}
 
-	if (!url)
+	ਜੇ (!url)
 		die(_("cannot clone submodule '%s' without a URL"), sub->name);
 
 	strbuf_reset(&sb);
@@ -2338,76 +2338,76 @@ static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
 	suc->update_clone[suc->update_clone_nr].sub = sub;
 	suc->update_clone_nr++;
 
-	if (!needs_cloning)
-		goto cleanup;
+	ਜੇ (!needs_cloning)
+		ਜਾਓ cleanup;
 
-	child->git_cmd = 1;
-	child->no_stdin = 1;
-	child->stdout_to_stderr = 1;
-	child->err = -1;
-	strvec_push(&child->args, "submodule--helper");
-	strvec_push(&child->args, "clone");
-	if (suc->update_data->progress)
-		strvec_push(&child->args, "--progress");
-	if (suc->update_data->quiet)
-		strvec_push(&child->args, "--quiet");
-	if (suc->update_data->prefix)
-		strvec_pushl(&child->args, "--prefix", suc->update_data->prefix, NULL);
-	if (suc->update_data->recommend_shallow && sub->recommend_shallow == 1)
-		strvec_push(&child->args, "--depth=1");
-	else if (suc->update_data->depth)
-		strvec_pushf(&child->args, "--depth=%d", suc->update_data->depth);
-	if (suc->update_data->filter_options && suc->update_data->filter_options->choice)
-		strvec_pushf(&child->args, "--filter=%s",
-			     expand_list_objects_filter_spec(suc->update_data->filter_options));
-	if (suc->update_data->require_init)
-		strvec_push(&child->args, "--require-init");
-	if (suc->update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-		strvec_pushf(&child->args, "--ref-storage-format=%s",
-			     ref_storage_format_to_name(suc->update_data->ref_storage_format));
-	strvec_pushl(&child->args, "--path", sub->path, NULL);
-	strvec_pushl(&child->args, "--name", sub->name, NULL);
-	strvec_pushl(&child->args, "--url", url, NULL);
-	if (suc->update_data->references.nr) {
-		struct string_list_item *item;
+	ਬੱਚਾ->git_cmd = 1;
+	ਬੱਚਾ->no_stdin = 1;
+	ਬੱਚਾ->stdout_ਮੰਜ਼ਿਲ_stderr = 1;
+	ਬੱਚਾ->err = -1;
+	strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "submodule--helper");
+	strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "clone");
+	ਜੇ (suc->update_ਅੰਕੜੇ->ਤਰੱਕੀ)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--progress");
+	ਜੇ (suc->update_ਅੰਕੜੇ->quiet)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--quiet");
+	ਜੇ (suc->update_ਅੰਕੜੇ->ਅਗੇਤਰ)
+		strvec_pushl(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--prefix", suc->update_ਅੰਕੜੇ->ਅਗੇਤਰ, ਨਿਰਾ);
+	ਜੇ (suc->update_ਅੰਕੜੇ->recommend_shallow && sub->recommend_shallow == 1)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--depth=1");
+	ਨਹੀਂਤਾਂ ਜੇ (suc->update_ਅੰਕੜੇ->ਡੂੰਘਾਈ)
+		strvec_pushf(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--depth=%d", suc->update_ਅੰਕੜੇ->ਡੂੰਘਾਈ);
+	ਜੇ (suc->update_ਅੰਕੜੇ->filter_options && suc->update_ਅੰਕੜੇ->filter_options->choice)
+		strvec_pushf(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--filter=%s",
+			     expand_list_objects_filter_spec(suc->update_ਅੰਕੜੇ->filter_options));
+	ਜੇ (suc->update_ਅੰਕੜੇ->require_init)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--require-init");
+	ਜੇ (suc->update_ਅੰਕੜੇ->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+		strvec_pushf(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--ref-storage-format=%s",
+			     ref_storage_format_ਮੰਜ਼ਿਲ_name(suc->update_ਅੰਕੜੇ->ref_storage_format));
+	strvec_pushl(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--path", sub->ਰਸਤਾ, ਨਿਰਾ);
+	strvec_pushl(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--name", sub->name, ਨਿਰਾ);
+	strvec_pushl(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--url", url, ਨਿਰਾ);
+	ਜੇ (suc->update_ਅੰਕੜੇ->references.nr) {
+		ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
 
-		for_each_string_list_item(item, &suc->update_data->references)
-			strvec_pushl(&child->args, "--reference", item->string, NULL);
+		for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &suc->update_ਅੰਕੜੇ->references)
+			strvec_pushl(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--reference", ਵਸਤੂ->string, ਨਿਰਾ);
 	}
-	if (suc->update_data->dissociate)
-		strvec_push(&child->args, "--dissociate");
-	if (suc->update_data->single_branch >= 0)
-		strvec_push(&child->args, suc->update_data->single_branch ?
+	ਜੇ (suc->update_ਅੰਕੜੇ->dissociate)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, "--dissociate");
+	ਜੇ (suc->update_ਅੰਕੜੇ->single_branch >= 0)
+		strvec_ਧੱਕੋ(&ਬੱਚਾ->ਦਲੀਲਾਂ, suc->update_ਅੰਕੜੇ->single_branch ?
 					      "--single-branch" :
 					      "--no-single-branch");
 
 cleanup:
-	free(displaypath);
+	ਮੁਕਤ(displaypath);
 	strbuf_release(&sb);
-	if (need_free_url)
-		free((void*)url);
+	ਜੇ (need_free_url)
+		ਮੁਕਤ((ਖਾਲੀ*)url);
 
-	return needs_cloning;
+	ਵਾਪਸ needs_cloning;
 }
 
-static int update_clone_get_next_task(struct child_process *child,
-				      struct strbuf *err,
-				      void *suc_cb,
-				      void **idx_task_cb)
+ਸਥਿਰ ਪੂਰਨ update_clone_get_ਅਗਲਾ_task(ਬਣਤਰ ਬੱਚਾ_process *ਬੱਚਾ,
+				      ਬਣਤਰ strbuf *err,
+				      ਖਾਲੀ *suc_cb,
+				      ਖਾਲੀ **idx_task_cb)
 {
-	struct submodule_update_clone *suc = suc_cb;
-	const struct cache_entry *ce;
-	int index;
+	ਬਣਤਰ submodule_update_clone *suc = suc_cb;
+	ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce;
+	ਪੂਰਨ ਸੂਚਕਾਂਕ;
 
-	for (; suc->current < suc->update_data->list.nr; suc->current++) {
-		ce = suc->update_data->list.entries[suc->current];
-		if (prepare_to_clone_next_submodule(ce, child, suc, err)) {
-			int *p = xmalloc(sizeof(*p));
+	ਲਈ (; suc->current < suc->update_ਅੰਕੜੇ->list.nr; suc->current++) {
+		ce = suc->update_ਅੰਕੜੇ->list.entries[suc->current];
+		ਜੇ (prepare_ਮੰਜ਼ਿਲ_clone_ਅਗਲਾ_submodule(ce, ਬੱਚਾ, suc, err)) {
+			ਪੂਰਨ *p = xmalloc(ਆਕਾਰ(*p));
 
 			*p = suc->current;
 			*idx_task_cb = p;
 			suc->current++;
-			return 1;
+			ਵਾਪਸ 1;
 		}
 	}
 
@@ -2416,55 +2416,55 @@ static int update_clone_get_next_task(struct child_process *child,
 	 * stragglers again, which we can imagine as an extension of the
 	 * entry list.
 	 */
-	index = suc->current - suc->update_data->list.nr;
-	if (index < suc->failed_clones_nr) {
-		int *p;
+	ਸੂਚਕਾਂਕ = suc->current - suc->update_ਅੰਕੜੇ->list.nr;
+	ਜੇ (ਸੂਚਕਾਂਕ < suc->failed_clones_nr) {
+		ਪੂਰਨ *p;
 
-		ce = suc->failed_clones[index];
-		if (!prepare_to_clone_next_submodule(ce, child, suc, err)) {
+		ce = suc->failed_clones[ਸੂਚਕਾਂਕ];
+		ਜੇ (!prepare_ਮੰਜ਼ਿਲ_clone_ਅਗਲਾ_submodule(ce, ਬੱਚਾ, suc, err)) {
 			suc->current ++;
 			strbuf_addstr(err, "BUG: submodule considered for "
 					   "cloning, doesn't need cloning "
 					   "any more?\n");
-			return 0;
+			ਵਾਪਸ 0;
 		}
-		p = xmalloc(sizeof(*p));
+		p = xmalloc(ਆਕਾਰ(*p));
 		*p = suc->current;
 		*idx_task_cb = p;
 		suc->current ++;
-		return 1;
+		ਵਾਪਸ 1;
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int update_clone_start_failure(struct strbuf *err UNUSED,
-				      void *suc_cb,
-				      void *idx_task_cb UNUSED)
+ਸਥਿਰ ਪੂਰਨ update_clone_ਸ਼ੁਰੂ_failure(ਬਣਤਰ strbuf *err ਅਣਵਰਤਿਆ,
+				      ਖਾਲੀ *suc_cb,
+				      ਖਾਲੀ *idx_task_cb ਅਣਵਰਤਿਆ)
 {
-	struct submodule_update_clone *suc = suc_cb;
+	ਬਣਤਰ submodule_update_clone *suc = suc_cb;
 
 	suc->quickstop = 1;
-	return 1;
+	ਵਾਪਸ 1;
 }
 
-static int update_clone_task_finished(int result,
-				      struct strbuf *err,
-				      void *suc_cb,
-				      void *idx_task_cb)
+ਸਥਿਰ ਪੂਰਨ update_clone_task_ਮੁਕੰਮਲ(ਪੂਰਨ ਨਤੀਜਾ,
+				      ਬਣਤਰ strbuf *err,
+				      ਖਾਲੀ *suc_cb,
+				      ਖਾਲੀ *idx_task_cb)
 {
-	const struct cache_entry *ce;
-	struct submodule_update_clone *suc = suc_cb;
-	int *idxP = idx_task_cb;
-	int idx = *idxP;
+	ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce;
+	ਬਣਤਰ submodule_update_clone *suc = suc_cb;
+	ਪੂਰਨ *idxP = idx_task_cb;
+	ਪੂਰਨ idx = *idxP;
 
-	free(idxP);
+	ਮੁਕਤ(idxP);
 
-	if (!result)
-		return 0;
+	ਜੇ (!ਨਤੀਜਾ)
+		ਵਾਪਸ 0;
 
-	if (idx < suc->update_data->list.nr) {
-		ce  = suc->update_data->list.entries[idx];
+	ਜੇ (idx < suc->update_ਅੰਕੜੇ->list.nr) {
+		ce  = suc->update_ਅੰਕੜੇ->list.entries[idx];
 		strbuf_addf(err, _("Failed to clone '%s'. Retry scheduled"),
 			    ce->name);
 		strbuf_addch(err, '\n');
@@ -2472,464 +2472,464 @@ static int update_clone_task_finished(int result,
 			   suc->failed_clones_nr + 1,
 			   suc->failed_clones_alloc);
 		suc->failed_clones[suc->failed_clones_nr++] = ce;
-		return 0;
-	} else {
-		idx -= suc->update_data->list.nr;
+		ਵਾਪਸ 0;
+	} ਨਹੀਂਤਾਂ {
+		idx -= suc->update_ਅੰਕੜੇ->list.nr;
 		ce  = suc->failed_clones[idx];
 		strbuf_addf(err, _("Failed to clone '%s' a second time, aborting"),
 			    ce->name);
 		strbuf_addch(err, '\n');
 		suc->quickstop = 1;
-		return 1;
+		ਵਾਪਸ 1;
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int git_update_clone_config(const char *var, const char *value,
-				   const struct config_context *ctx,
-				   void *cb)
+ਸਥਿਰ ਪੂਰਨ git_update_clone_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+				   ਅਚਲ ਬਣਤਰ config_context *ctx,
+				   ਖਾਲੀ *cb)
 {
-	int *max_jobs = cb;
+	ਪੂਰਨ *max_jobs = cb;
 
-	if (!strcmp(var, "submodule.fetchjobs"))
-		*max_jobs = parse_submodule_fetchjobs(var, value, ctx->kvi);
-	return 0;
+	ਜੇ (!strcmp(var, "submodule.fetchjobs"))
+		*max_jobs = parse_submodule_fetchjobs(var, ਮੁੱਲ, ctx->kvi);
+	ਵਾਪਸ 0;
 }
 
-static int is_tip_reachable(const char *path, const struct object_id *oid)
+ਸਥਿਰ ਪੂਰਨ is_tip_reachable(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਬਣਤਰ object_id *oid)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf rev = STRBUF_INIT;
-	char *hex = oid_to_hex(oid);
-	int reachable;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strbuf rev = STRBUF_INIT;
+	ਅੱਖਰ *hex = oid_ਮੰਜ਼ਿਲ_hex(oid);
+	ਪੂਰਨ reachable;
 
 	cp.git_cmd = 1;
-	cp.dir = path;
+	cp.dir = ਰਸਤਾ;
 	cp.no_stderr = 1;
-	strvec_pushl(&cp.args, "rev-list", "-n", "1", hex, "--not", "--all", NULL);
+	strvec_pushl(&cp.ਦਲੀਲਾਂ, "rev-list", "-n", "1", hex, "--not", "--all", ਨਿਰਾ);
 
 	prepare_submodule_repo_env(&cp.env);
 
-	if (capture_command(&cp, &rev, GIT_MAX_HEXSZ + 1) || rev.len)
+	ਜੇ (capture_command(&cp, &rev, GIT_MAX_HEXSZ + 1) || rev.len)
 		reachable = 0;
-	else
+	ਨਹੀਂਤਾਂ
 		reachable = 1;
 
 	strbuf_release(&rev);
-	return reachable;
+	ਵਾਪਸ reachable;
 }
 
-static int fetch_in_submodule(const char *module_path, int depth, int quiet,
-			      const struct object_id *oid)
+ਸਥਿਰ ਪੂਰਨ fetch_ਵਿੱਚ_submodule(ਅਚਲ ਅੱਖਰ *module_ਰਸਤਾ, ਪੂਰਨ ਡੂੰਘਾਈ, ਪੂਰਨ quiet,
+			      ਅਚਲ ਬਣਤਰ object_id *oid)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
 
 	prepare_submodule_repo_env(&cp.env);
 	cp.git_cmd = 1;
-	cp.dir = module_path;
+	cp.dir = module_ਰਸਤਾ;
 
-	strvec_push(&cp.args, "fetch");
-	if (quiet)
-		strvec_push(&cp.args, "--quiet");
-	if (depth)
-		strvec_pushf(&cp.args, "--depth=%d", depth);
-	if (oid) {
-		char *hex = oid_to_hex(oid);
-		char *remote;
-		int code;
+	strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "fetch");
+	ਜੇ (quiet)
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--quiet");
+	ਜੇ (ਡੂੰਘਾਈ)
+		strvec_pushf(&cp.ਦਲੀਲਾਂ, "--depth=%d", ਡੂੰਘਾਈ);
+	ਜੇ (oid) {
+		ਅੱਖਰ *hex = oid_ਮੰਜ਼ਿਲ_hex(oid);
+		ਅੱਖਰ *remote;
+		ਪੂਰਨ ਕੋਡ;
 
-		code = get_default_remote_submodule(module_path, &remote);
-		if (code) {
-			child_process_clear(&cp);
-			return code;
+		ਕੋਡ = get_default_remote_submodule(module_ਰਸਤਾ, &remote);
+		ਜੇ (ਕੋਡ) {
+			ਬੱਚਾ_process_clear(&cp);
+			ਵਾਪਸ ਕੋਡ;
 		}
 
-		strvec_pushl(&cp.args, remote, hex, NULL);
-		free(remote);
+		strvec_pushl(&cp.ਦਲੀਲਾਂ, remote, hex, ਨਿਰਾ);
+		ਮੁਕਤ(remote);
 	}
 
-	return run_command(&cp);
+	ਵਾਪਸ ਲੜੀਵਾਰ_command(&cp);
 }
 
-static int run_update_command(const struct update_data *ud, int subforce)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_update_command(ਅਚਲ ਬਣਤਰ update_ਅੰਕੜੇ *ud, ਪੂਰਨ subforce)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	char *oid = oid_to_hex(&ud->oid);
-	int ret;
+	ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+	ਅੱਖਰ *oid = oid_ਮੰਜ਼ਿਲ_hex(&ud->oid);
+	ਪੂਰਨ ret;
 
-	switch (ud->update_strategy.type) {
-	case SM_UPDATE_CHECKOUT:
+	ਚੋਣ (ud->update_strategy.type) {
+	ਹਾਲਤ SM_UPDATE_CHECKOUT:
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "checkout", "-q", NULL);
-		if (subforce)
-			strvec_push(&cp.args, "-f");
-		break;
-	case SM_UPDATE_REBASE:
+		strvec_pushl(&cp.ਦਲੀਲਾਂ, "checkout", "-q", ਨਿਰਾ);
+		ਜੇ (subforce)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "-f");
+		ਰੋਕੋ;
+	ਹਾਲਤ SM_UPDATE_REBASE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "rebase");
-		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
-		break;
-	case SM_UPDATE_MERGE:
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "rebase");
+		ਜੇ (ud->quiet)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--quiet");
+		ਰੋਕੋ;
+	ਹਾਲਤ SM_UPDATE_ਮਿਲਾਓ:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "merge");
-		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
-		break;
-	case SM_UPDATE_COMMAND:
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "merge");
+		ਜੇ (ud->quiet)
+			strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, "--quiet");
+		ਰੋਕੋ;
+	ਹਾਲਤ SM_UPDATE_COMMAND:
 		cp.use_shell = 1;
-		strvec_push(&cp.args, ud->update_strategy.command);
-		break;
-	default:
+		strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, ud->update_strategy.command);
+		ਰੋਕੋ;
+	ਮੂਲ:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
-	strvec_push(&cp.args, oid);
+	strvec_ਧੱਕੋ(&cp.ਦਲੀਲਾਂ, oid);
 
-	cp.dir = ud->sm_path;
+	cp.dir = ud->sm_ਰਸਤਾ;
 	prepare_submodule_repo_env(&cp.env);
-	if ((ret = run_command(&cp))) {
-		switch (ud->update_strategy.type) {
-		case SM_UPDATE_CHECKOUT:
-			die_message(_("Unable to checkout '%s' in submodule path '%s'"),
+	ਜੇ ((ret = ਲੜੀਵਾਰ_command(&cp))) {
+		ਚੋਣ (ud->update_strategy.type) {
+		ਹਾਲਤ SM_UPDATE_CHECKOUT:
+			die_ਸੁਨੇਹਾ(_("Unable to checkout '%s' in submodule path '%s'"),
 				    oid, ud->displaypath);
 			/* No "ret" assignment, use "git checkout"'s */
-			break;
-		case SM_UPDATE_REBASE:
-			ret = die_message(_("Unable to rebase '%s' in submodule path '%s'"),
+			ਰੋਕੋ;
+		ਹਾਲਤ SM_UPDATE_REBASE:
+			ret = die_ਸੁਨੇਹਾ(_("Unable to rebase '%s' in submodule path '%s'"),
 					  oid, ud->displaypath);
-			break;
-		case SM_UPDATE_MERGE:
-			ret = die_message(_("Unable to merge '%s' in submodule path '%s'"),
+			ਰੋਕੋ;
+		ਹਾਲਤ SM_UPDATE_ਮਿਲਾਓ:
+			ret = die_ਸੁਨੇਹਾ(_("Unable to merge '%s' in submodule path '%s'"),
 					  oid, ud->displaypath);
-			break;
-		case SM_UPDATE_COMMAND:
-			ret = die_message(_("Execution of '%s %s' failed in submodule path '%s'"),
+			ਰੋਕੋ;
+		ਹਾਲਤ SM_UPDATE_COMMAND:
+			ret = die_ਸੁਨੇਹਾ(_("Execution of '%s %s' failed in submodule path '%s'"),
 					  ud->update_strategy.command, oid, ud->displaypath);
-			break;
-		default:
+			ਰੋਕੋ;
+		ਮੂਲ:
 			BUG("unexpected update strategy type: %d",
 			    ud->update_strategy.type);
 		}
 
-		return ret;
+		ਵਾਪਸ ret;
 	}
 
-	if (ud->quiet)
-		return 0;
+	ਜੇ (ud->quiet)
+		ਵਾਪਸ 0;
 
-	switch (ud->update_strategy.type) {
-	case SM_UPDATE_CHECKOUT:
-		printf(_("Submodule path '%s': checked out '%s'\n"),
+	ਚੋਣ (ud->update_strategy.type) {
+	ਹਾਲਤ SM_UPDATE_CHECKOUT:
+		ਲਿਖੋ(_("Submodule path '%s': checked out '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_REBASE:
-		printf(_("Submodule path '%s': rebased into '%s'\n"),
+		ਰੋਕੋ;
+	ਹਾਲਤ SM_UPDATE_REBASE:
+		ਲਿਖੋ(_("Submodule path '%s': rebased into '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_MERGE:
-		printf(_("Submodule path '%s': merged in '%s'\n"),
+		ਰੋਕੋ;
+	ਹਾਲਤ SM_UPDATE_ਮਿਲਾਓ:
+		ਲਿਖੋ(_("Submodule path '%s': merged in '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_COMMAND:
-		printf(_("Submodule path '%s': '%s %s'\n"),
+		ਰੋਕੋ;
+	ਹਾਲਤ SM_UPDATE_COMMAND:
+		ਲਿਖੋ(_("Submodule path '%s': '%s %s'\n"),
 		       ud->displaypath, ud->update_strategy.command, oid);
-		break;
-	default:
+		ਰੋਕੋ;
+	ਮੂਲ:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int run_update_procedure(const struct update_data *ud)
+ਸਥਿਰ ਪੂਰਨ ਲੜੀਵਾਰ_update_procedure(ਅਚਲ ਬਣਤਰ update_ਅੰਕੜੇ *ud)
 {
-	int subforce = is_null_oid(&ud->suboid) || ud->force;
+	ਪੂਰਨ subforce = is_null_oid(&ud->suboid) || ud->force;
 
-	if (!ud->nofetch) {
+	ਜੇ (!ud->nofetch) {
 		/*
 		 * Run fetch only if `oid` isn't present or it
 		 * is not reachable from a ref.
 		 */
-		if (!is_tip_reachable(ud->sm_path, &ud->oid) &&
-		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, NULL) &&
+		ਜੇ (!is_tip_reachable(ud->sm_ਰਸਤਾ, &ud->oid) &&
+		    fetch_ਵਿੱਚ_submodule(ud->sm_ਰਸਤਾ, ud->ਡੂੰਘਾਈ, ud->quiet, ਨਿਰਾ) &&
 		    !ud->quiet)
 			fprintf_ln(stderr,
 				   _("Unable to fetch in submodule path '%s'; "
 				     "trying to directly fetch %s:"),
-				   ud->displaypath, oid_to_hex(&ud->oid));
+				   ud->displaypath, oid_ਮੰਜ਼ਿਲ_hex(&ud->oid));
 		/*
 		 * Now we tried the usual fetch, but `oid` may
 		 * not be reachable from any of the refs.
 		 */
-		if (!is_tip_reachable(ud->sm_path, &ud->oid) &&
-		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, &ud->oid))
-			return die_message(_("Fetched in submodule path '%s', but it did not "
+		ਜੇ (!is_tip_reachable(ud->sm_ਰਸਤਾ, &ud->oid) &&
+		    fetch_ਵਿੱਚ_submodule(ud->sm_ਰਸਤਾ, ud->ਡੂੰਘਾਈ, ud->quiet, &ud->oid))
+			ਵਾਪਸ die_ਸੁਨੇਹਾ(_("Fetched in submodule path '%s', but it did not "
 					     "contain %s. Direct fetching of that commit failed."),
-					   ud->displaypath, oid_to_hex(&ud->oid));
+					   ud->displaypath, oid_ਮੰਜ਼ਿਲ_hex(&ud->oid));
 	}
 
-	return run_update_command(ud, subforce);
+	ਵਾਪਸ ਲੜੀਵਾਰ_update_command(ud, subforce);
 }
 
-static int remote_submodule_branch(const char *path, const char **branch)
+ਸਥਿਰ ਪੂਰਨ remote_submodule_branch(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ **branch)
 {
-	const struct submodule *sub;
-	char *key;
-	*branch = NULL;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
+	ਅੱਖਰ *ਕੁੰਜੀ;
+	*branch = ਨਿਰਾ;
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
-	if (!sub)
-		return die_message(_("could not initialize submodule at path '%s'"),
-				   path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
+	ਜੇ (!sub)
+		ਵਾਪਸ die_ਸੁਨੇਹਾ(_("could not initialize submodule at path '%s'"),
+				   ਰਸਤਾ);
 
-	key = xstrfmt("submodule.%s.branch", sub->name);
-	if (repo_config_get_string_tmp(the_repository, key, branch))
+	ਕੁੰਜੀ = xstrfmt("submodule.%s.branch", sub->name);
+	ਜੇ (repo_config_get_string_tmp(the_repository, ਕੁੰਜੀ, branch))
 		*branch = sub->branch;
-	free(key);
+	ਮੁਕਤ(ਕੁੰਜੀ);
 
-	if (!*branch) {
+	ਜੇ (!*branch) {
 		*branch = "HEAD";
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
-	if (!strcmp(*branch, ".")) {
-		const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-							      "HEAD", 0, NULL,
-							      NULL);
+	ਜੇ (!strcmp(*branch, ".")) {
+		ਅਚਲ ਅੱਖਰ *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
+							      "HEAD", 0, ਨਿਰਾ,
+							      ਨਿਰਾ);
 
-		if (!refname)
-			return die_message(_("No such ref: %s"), "HEAD");
+		ਜੇ (!refname)
+			ਵਾਪਸ die_ਸੁਨੇਹਾ(_("No such ref: %s"), "HEAD");
 
 		/* detached HEAD */
-		if (!strcmp(refname, "HEAD"))
-			return die_message(_("Submodule (%s) branch configured to inherit "
+		ਜੇ (!strcmp(refname, "HEAD"))
+			ਵਾਪਸ die_ਸੁਨੇਹਾ(_("Submodule (%s) branch configured to inherit "
 					     "branch from superproject, but the superproject "
 					     "is not on any branch"), sub->name);
 
-		if (!skip_prefix(refname, "refs/heads/", &refname))
-			return die_message(_("Expecting a full ref name, got %s"),
+		ਜੇ (!skip_ਅਗੇਤਰ(refname, "refs/heads/", &refname))
+			ਵਾਪਸ die_ਸੁਨੇਹਾ(_("Expecting a full ref name, got %s"),
 					   refname);
 
 		*branch = refname;
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
 	/* Our "branch" is coming from repo_config_get_string_tmp() */
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int ensure_core_worktree(const char *path)
+ਸਥਿਰ ਪੂਰਨ ensure_core_worktree(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	const char *cw;
-	struct repository subrepo;
+	ਅਚਲ ਅੱਖਰ *cw;
+	ਬਣਤਰ repository subrepo;
 
-	if (repo_submodule_init(&subrepo, the_repository, path, null_oid(the_hash_algo)))
-		return die_message(_("could not get a repository handle for submodule '%s'"),
-				   path);
+	ਜੇ (repo_submodule_init(&subrepo, the_repository, ਰਸਤਾ, null_oid(the_hash_algo)))
+		ਵਾਪਸ die_ਸੁਨੇਹਾ(_("could not get a repository handle for submodule '%s'"),
+				   ਰਸਤਾ);
 
-	if (!repo_config_get_string_tmp(&subrepo, "core.worktree", &cw)) {
-		char *cfg_file, *abs_path;
-		const char *rel_path;
-		struct strbuf sb = STRBUF_INIT;
+	ਜੇ (!repo_config_get_string_tmp(&subrepo, "core.worktree", &cw)) {
+		ਅੱਖਰ *cfg_file, *abs_ਰਸਤਾ;
+		ਅਚਲ ਅੱਖਰ *rel_ਰਸਤਾ;
+		ਬਣਤਰ strbuf sb = STRBUF_INIT;
 
-		cfg_file = repo_git_path(&subrepo, "config");
+		cfg_file = repo_git_ਰਸਤਾ(&subrepo, "config");
 
-		abs_path = absolute_pathdup(path);
-		rel_path = relative_path(abs_path, subrepo.gitdir, &sb);
+		abs_ਰਸਤਾ = absolute_pathdup(ਰਸਤਾ);
+		rel_ਰਸਤਾ = relative_ਰਸਤਾ(abs_ਰਸਤਾ, subrepo.gitdir, &sb);
 
-		repo_config_set_in_file(the_repository, cfg_file, "core.worktree", rel_path);
+		repo_config_ਸੈੱਟ_ਵਿੱਚ_file(the_repository, cfg_file, "core.worktree", rel_ਰਸਤਾ);
 
-		free(cfg_file);
-		free(abs_path);
+		ਮੁਕਤ(cfg_file);
+		ਮੁਕਤ(abs_ਰਸਤਾ);
 		strbuf_release(&sb);
 	}
 
 	repo_clear(&subrepo);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static const char *submodule_update_type_to_label(enum submodule_update_type type)
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *submodule_update_type_ਮੰਜ਼ਿਲ_label(ਗਿਣਤੀ submodule_update_type type)
 {
-	switch (type) {
-	case SM_UPDATE_CHECKOUT:
-		return "checkout";
-	case SM_UPDATE_MERGE:
-		return "merge";
-	case SM_UPDATE_REBASE:
-		return "rebase";
-	case SM_UPDATE_UNSPECIFIED:
-	case SM_UPDATE_NONE:
-	case SM_UPDATE_COMMAND:
-		break;
+	ਚੋਣ (type) {
+	ਹਾਲਤ SM_UPDATE_CHECKOUT:
+		ਵਾਪਸ "checkout";
+	ਹਾਲਤ SM_UPDATE_ਮਿਲਾਓ:
+		ਵਾਪਸ "merge";
+	ਹਾਲਤ SM_UPDATE_REBASE:
+		ਵਾਪਸ "rebase";
+	ਹਾਲਤ SM_UPDATE_UNSPECIFIED:
+	ਹਾਲਤ SM_UPDATE_NONE:
+	ਹਾਲਤ SM_UPDATE_COMMAND:
+		ਰੋਕੋ;
 	}
 	BUG("unreachable with type %d", type);
 }
 
-static void update_data_to_args(const struct update_data *update_data,
-				struct strvec *args)
+ਸਥਿਰ ਖਾਲੀ update_ਅੰਕੜੇ_ਮੰਜ਼ਿਲ_ਦਲੀਲਾਂ(ਅਚਲ ਬਣਤਰ update_ਅੰਕੜੇ *update_ਅੰਕੜੇ,
+				ਬਣਤਰ strvec *ਦਲੀਲਾਂ)
 {
-	enum submodule_update_type update_type = update_data->update_default;
+	ਗਿਣਤੀ submodule_update_type update_type = update_ਅੰਕੜੇ->update_default;
 
-	strvec_pushl(args, "submodule--helper", "update", "--recursive", NULL);
-	if (update_data->displaypath)
-		strvec_pushf(args, "--super-prefix=%s/",
-			     update_data->displaypath);
-	strvec_pushf(args, "--jobs=%d", update_data->max_jobs);
-	if (update_data->quiet)
-		strvec_push(args, "--quiet");
-	if (update_data->force)
-		strvec_push(args, "--force");
-	if (update_data->init)
-		strvec_push(args, "--init");
-	if (update_data->remote)
-		strvec_push(args, "--remote");
-	if (update_data->nofetch)
-		strvec_push(args, "--no-fetch");
-	if (update_data->dissociate)
-		strvec_push(args, "--dissociate");
-	if (update_data->progress)
-		strvec_push(args, "--progress");
-	if (update_data->require_init)
-		strvec_push(args, "--require-init");
-	if (update_data->depth)
-		strvec_pushf(args, "--depth=%d", update_data->depth);
-	if (update_type != SM_UPDATE_UNSPECIFIED)
-		strvec_pushf(args, "--%s",
-			     submodule_update_type_to_label(update_type));
+	strvec_pushl(ਦਲੀਲਾਂ, "submodule--helper", "update", "--recursive", ਨਿਰਾ);
+	ਜੇ (update_ਅੰਕੜੇ->displaypath)
+		strvec_pushf(ਦਲੀਲਾਂ, "--super-prefix=%s/",
+			     update_ਅੰਕੜੇ->displaypath);
+	strvec_pushf(ਦਲੀਲਾਂ, "--jobs=%d", update_ਅੰਕੜੇ->max_jobs);
+	ਜੇ (update_ਅੰਕੜੇ->quiet)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--quiet");
+	ਜੇ (update_ਅੰਕੜੇ->force)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--force");
+	ਜੇ (update_ਅੰਕੜੇ->init)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--init");
+	ਜੇ (update_ਅੰਕੜੇ->remote)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--remote");
+	ਜੇ (update_ਅੰਕੜੇ->nofetch)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--no-fetch");
+	ਜੇ (update_ਅੰਕੜੇ->dissociate)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--dissociate");
+	ਜੇ (update_ਅੰਕੜੇ->ਤਰੱਕੀ)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--progress");
+	ਜੇ (update_ਅੰਕੜੇ->require_init)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--require-init");
+	ਜੇ (update_ਅੰਕੜੇ->ਡੂੰਘਾਈ)
+		strvec_pushf(ਦਲੀਲਾਂ, "--depth=%d", update_ਅੰਕੜੇ->ਡੂੰਘਾਈ);
+	ਜੇ (update_type != SM_UPDATE_UNSPECIFIED)
+		strvec_pushf(ਦਲੀਲਾਂ, "--%s",
+			     submodule_update_type_ਮੰਜ਼ਿਲ_label(update_type));
 
-	if (update_data->references.nr) {
-		struct string_list_item *item;
+	ਜੇ (update_ਅੰਕੜੇ->references.nr) {
+		ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
 
-		for_each_string_list_item(item, &update_data->references)
-			strvec_pushl(args, "--reference", item->string, NULL);
+		for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &update_ਅੰਕੜੇ->references)
+			strvec_pushl(ਦਲੀਲਾਂ, "--reference", ਵਸਤੂ->string, ਨਿਰਾ);
 	}
-	if (update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-		strvec_pushf(args, "--ref-storage-format=%s",
-			     ref_storage_format_to_name(update_data->ref_storage_format));
-	if (update_data->filter_options && update_data->filter_options->choice)
-		strvec_pushf(args, "--filter=%s",
+	ਜੇ (update_ਅੰਕੜੇ->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+		strvec_pushf(ਦਲੀਲਾਂ, "--ref-storage-format=%s",
+			     ref_storage_format_ਮੰਜ਼ਿਲ_name(update_ਅੰਕੜੇ->ref_storage_format));
+	ਜੇ (update_ਅੰਕੜੇ->filter_options && update_ਅੰਕੜੇ->filter_options->choice)
+		strvec_pushf(ਦਲੀਲਾਂ, "--filter=%s",
 				expand_list_objects_filter_spec(
-					update_data->filter_options));
-	if (update_data->recommend_shallow == 0)
-		strvec_push(args, "--no-recommend-shallow");
-	else if (update_data->recommend_shallow == 1)
-		strvec_push(args, "--recommend-shallow");
-	if (update_data->single_branch >= 0)
-		strvec_push(args, update_data->single_branch ?
+					update_ਅੰਕੜੇ->filter_options));
+	ਜੇ (update_ਅੰਕੜੇ->recommend_shallow == 0)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--no-recommend-shallow");
+	ਨਹੀਂਤਾਂ ਜੇ (update_ਅੰਕੜੇ->recommend_shallow == 1)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, "--recommend-shallow");
+	ਜੇ (update_ਅੰਕੜੇ->single_branch >= 0)
+		strvec_ਧੱਕੋ(ਦਲੀਲਾਂ, update_ਅੰਕੜੇ->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 }
 
-static int update_submodule(struct update_data *update_data)
+ਸਥਿਰ ਪੂਰਨ update_submodule(ਬਣਤਰ update_ਅੰਕੜੇ *update_ਅੰਕੜੇ)
 {
-	int ret;
+	ਪੂਰਨ ret;
 
-	if (validate_submodule_path(update_data->sm_path) < 0)
-		return -1;
+	ਜੇ (validate_submodule_ਰਸਤਾ(update_ਅੰਕੜੇ->sm_ਰਸਤਾ) < 0)
+		ਵਾਪਸ -1;
 
 	ret = determine_submodule_update_strategy(the_repository,
-						  update_data->just_cloned,
-						  update_data->sm_path,
-						  update_data->update_default,
-						  &update_data->update_strategy);
-	if (ret)
-		return ret;
+						  update_ਅੰਕੜੇ->just_cloned,
+						  update_ਅੰਕੜੇ->sm_ਰਸਤਾ,
+						  update_ਅੰਕੜੇ->update_default,
+						  &update_ਅੰਕੜੇ->update_strategy);
+	ਜੇ (ret)
+		ਵਾਪਸ ret;
 
-	if (update_data->just_cloned)
-		oidcpy(&update_data->suboid, null_oid(the_hash_algo));
-	else if (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
-					  "HEAD", &update_data->suboid))
-		return die_message(_("Unable to find current revision in submodule path '%s'"),
-				   update_data->displaypath);
+	ਜੇ (update_ਅੰਕੜੇ->just_cloned)
+		oidcpy(&update_ਅੰਕੜੇ->suboid, null_oid(the_hash_algo));
+	ਨਹੀਂਤਾਂ ਜੇ (repo_resolve_gitlink_ref(the_repository, update_ਅੰਕੜੇ->sm_ਰਸਤਾ,
+					  "HEAD", &update_ਅੰਕੜੇ->suboid))
+		ਵਾਪਸ die_ਸੁਨੇਹਾ(_("Unable to find current revision in submodule path '%s'"),
+				   update_ਅੰਕੜੇ->displaypath);
 
-	if (update_data->remote) {
-		char *remote_name;
-		const char *branch;
-		char *remote_ref;
-		int code;
+	ਜੇ (update_ਅੰਕੜੇ->remote) {
+		ਅੱਖਰ *remote_name;
+		ਅਚਲ ਅੱਖਰ *branch;
+		ਅੱਖਰ *remote_ref;
+		ਪੂਰਨ ਕੋਡ;
 
-		code = get_default_remote_submodule(update_data->sm_path, &remote_name);
-		if (code)
-			return code;
-		code = remote_submodule_branch(update_data->sm_path, &branch);
-		if (code) {
-			free(remote_name);
-			return code;
+		ਕੋਡ = get_default_remote_submodule(update_ਅੰਕੜੇ->sm_ਰਸਤਾ, &remote_name);
+		ਜੇ (ਕੋਡ)
+			ਵਾਪਸ ਕੋਡ;
+		ਕੋਡ = remote_submodule_branch(update_ਅੰਕੜੇ->sm_ਰਸਤਾ, &branch);
+		ਜੇ (ਕੋਡ) {
+			ਮੁਕਤ(remote_name);
+			ਵਾਪਸ ਕੋਡ;
 		}
 		remote_ref = xstrfmt("refs/remotes/%s/%s", remote_name, branch);
 
-		free(remote_name);
+		ਮੁਕਤ(remote_name);
 
-		if (!update_data->nofetch) {
-			if (fetch_in_submodule(update_data->sm_path, update_data->depth,
-					      0, NULL)) {
-				free(remote_ref);
-				return die_message(_("Unable to fetch in submodule path '%s'"),
-						   update_data->sm_path);
+		ਜੇ (!update_ਅੰਕੜੇ->nofetch) {
+			ਜੇ (fetch_ਵਿੱਚ_submodule(update_ਅੰਕੜੇ->sm_ਰਸਤਾ, update_ਅੰਕੜੇ->ਡੂੰਘਾਈ,
+					      0, ਨਿਰਾ)) {
+				ਮੁਕਤ(remote_ref);
+				ਵਾਪਸ die_ਸੁਨੇਹਾ(_("Unable to fetch in submodule path '%s'"),
+						   update_ਅੰਕੜੇ->sm_ਰਸਤਾ);
 			}
 		}
 
-		if (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
-					     remote_ref, &update_data->oid)) {
-			ret = die_message(_("Unable to find %s revision in submodule path '%s'"),
-					  remote_ref, update_data->sm_path);
-			free(remote_ref);
-			return ret;
+		ਜੇ (repo_resolve_gitlink_ref(the_repository, update_ਅੰਕੜੇ->sm_ਰਸਤਾ,
+					     remote_ref, &update_ਅੰਕੜੇ->oid)) {
+			ret = die_ਸੁਨੇਹਾ(_("Unable to find %s revision in submodule path '%s'"),
+					  remote_ref, update_ਅੰਕੜੇ->sm_ਰਸਤਾ);
+			ਮੁਕਤ(remote_ref);
+			ਵਾਪਸ ret;
 		}
 
-		free(remote_ref);
+		ਮੁਕਤ(remote_ref);
 	}
 
-	if (!oideq(&update_data->oid, &update_data->suboid) || update_data->force) {
-		ret = run_update_procedure(update_data);
-		if (ret)
-			return ret;
+	ਜੇ (!oideq(&update_ਅੰਕੜੇ->oid, &update_ਅੰਕੜੇ->suboid) || update_ਅੰਕੜੇ->force) {
+		ret = ਲੜੀਵਾਰ_update_procedure(update_ਅੰਕੜੇ);
+		ਜੇ (ret)
+			ਵਾਪਸ ret;
 	}
 
-	if (update_data->recursive) {
-		struct child_process cp = CHILD_PROCESS_INIT;
-		struct update_data next = *update_data;
+	ਜੇ (update_ਅੰਕੜੇ->recursive) {
+		ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+		ਬਣਤਰ update_ਅੰਕੜੇ ਅਗਲਾ = *update_ਅੰਕੜੇ;
 
-		next.prefix = NULL;
-		oidcpy(&next.oid, null_oid(the_hash_algo));
-		oidcpy(&next.suboid, null_oid(the_hash_algo));
+		ਅਗਲਾ.ਅਗੇਤਰ = ਨਿਰਾ;
+		oidcpy(&ਅਗਲਾ.oid, null_oid(the_hash_algo));
+		oidcpy(&ਅਗਲਾ.suboid, null_oid(the_hash_algo));
 
-		cp.dir = update_data->sm_path;
+		cp.dir = update_ਅੰਕੜੇ->sm_ਰਸਤਾ;
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
-		update_data_to_args(&next, &cp.args);
+		update_ਅੰਕੜੇ_ਮੰਜ਼ਿਲ_ਦਲੀਲਾਂ(&ਅਗਲਾ, &cp.ਦਲੀਲਾਂ);
 
-		ret = run_command(&cp);
-		if (ret)
-			die_message(_("Failed to recurse into submodule path '%s'"),
-				    update_data->displaypath);
-		return ret;
+		ret = ਲੜੀਵਾਰ_command(&cp);
+		ਜੇ (ret)
+			die_ਸੁਨੇਹਾ(_("Failed to recurse into submodule path '%s'"),
+				    update_ਅੰਕੜੇ->displaypath);
+		ਵਾਪਸ ret;
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int update_submodules(struct update_data *update_data)
+ਸਥਿਰ ਪੂਰਨ update_submodules(ਬਣਤਰ update_ਅੰਕੜੇ *update_ਅੰਕੜੇ)
 {
-	int i, ret = 0;
-	struct submodule_update_clone suc = SUBMODULE_UPDATE_CLONE_INIT;
-	const struct run_process_parallel_opts opts = {
+	ਪੂਰਨ i, ret = 0;
+	ਬਣਤਰ submodule_update_clone suc = SUBMODULE_UPDATE_CLONE_INIT;
+	ਅਚਲ ਬਣਤਰ ਲੜੀਵਾਰ_process_parallel_opts opts = {
 		.tr2_category = "submodule",
 		.tr2_label = "parallel/update",
 
-		.processes = update_data->max_jobs,
+		.processes = update_ਅੰਕੜੇ->max_jobs,
 
-		.get_next_task = update_clone_get_next_task,
-		.start_failure = update_clone_start_failure,
-		.task_finished = update_clone_task_finished,
-		.data = &suc,
+		.get_ਅਗਲਾ_task = update_clone_get_ਅਗਲਾ_task,
+		.ਸ਼ੁਰੂ_failure = update_clone_ਸ਼ੁਰੂ_failure,
+		.task_ਮੁਕੰਮਲ = update_clone_task_ਮੁਕੰਮਲ,
+		.ਅੰਕੜੇ = &suc,
 	};
 
-	suc.update_data = update_data;
-	run_processes_parallel(&opts);
+	suc.update_ਅੰਕੜੇ = update_ਅੰਕੜੇ;
+	ਲੜੀਵਾਰ_processes_parallel(&opts);
 
 	/*
 	 * We saved the output and put it out all at once now.
@@ -2939,18 +2939,18 @@ static int update_submodules(struct update_data *update_data)
 	 *   checkout involve more straightforward sequential I/O.
 	 * - the listener can avoid doing any work if fetching failed.
 	 */
-	if (suc.quickstop) {
+	ਜੇ (suc.quickstop) {
 		ret = 1;
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 
-	for (i = 0; i < suc.update_clone_nr; i++) {
-		struct update_clone_data ucd = suc.update_clone[i];
-		int code = 128;
+	ਲਈ (i = 0; i < suc.update_clone_nr; i++) {
+		ਬਣਤਰ update_clone_ਅੰਕੜੇ ucd = suc.update_clone[i];
+		ਪੂਰਨ ਕੋਡ = 128;
 
-		oidcpy(&update_data->oid, &ucd.oid);
-		update_data->just_cloned = ucd.just_cloned;
-		update_data->sm_path = ucd.sub->path;
+		oidcpy(&update_ਅੰਕੜੇ->oid, &ucd.oid);
+		update_ਅੰਕੜੇ->just_cloned = ucd.just_cloned;
+		update_ਅੰਕੜੇ->sm_ਰਸਤਾ = ucd.sub->ਰਸਤਾ;
 
 		/*
 		 * Verify that the submodule path does not contain any
@@ -2958,44 +2958,44 @@ static int update_submodules(struct update_data *update_data)
 		 * TODO: allow exempting it via
 		 * `safe.submodule.path` or something
 		 */
-		if (validate_submodule_path(update_data->sm_path) < 0)
-			goto fail;
+		ਜੇ (validate_submodule_ਰਸਤਾ(update_ਅੰਕੜੇ->sm_ਰਸਤਾ) < 0)
+			ਜਾਓ fail;
 
-		code = ensure_core_worktree(update_data->sm_path);
-		if (code)
-			goto fail;
+		ਕੋਡ = ensure_core_worktree(update_ਅੰਕੜੇ->sm_ਰਸਤਾ);
+		ਜੇ (ਕੋਡ)
+			ਜਾਓ fail;
 
-		update_data->displaypath = get_submodule_displaypath(
-			update_data->sm_path, update_data->prefix,
-			update_data->super_prefix);
-		code = update_submodule(update_data);
-		FREE_AND_NULL(update_data->displaypath);
+		update_ਅੰਕੜੇ->displaypath = get_submodule_displaypath(
+			update_ਅੰਕੜੇ->sm_ਰਸਤਾ, update_ਅੰਕੜੇ->ਅਗੇਤਰ,
+			update_ਅੰਕੜੇ->super_ਅਗੇਤਰ);
+		ਕੋਡ = update_submodule(update_ਅੰਕੜੇ);
+		FREE_AND_NULL(update_ਅੰਕੜੇ->displaypath);
 fail:
-		if (!code)
-			continue;
-		ret = code;
-		if (ret == 128)
-			goto cleanup;
+		ਜੇ (!ਕੋਡ)
+			ਜਾਰੀ;
+		ret = ਕੋਡ;
+		ਜੇ (ret == 128)
+			ਜਾਓ cleanup;
 	}
 
 cleanup:
 	submodule_update_clone_release(&suc);
-	string_list_clear(&update_data->references, 0);
-	return ret;
+	string_list_clear(&update_ਅੰਕੜੇ->references, 0);
+	ਵਾਪਸ ret;
 }
 
-static int module_update(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_update(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			 ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct pathspec pathspec = { 0 };
-	struct pathspec pathspec2 = { 0 };
-	struct update_data opt = UPDATE_DATA_INIT;
-	struct list_objects_filter_options filter_options =
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ pathspec pathspec2 = { 0 };
+	ਬਣਤਰ update_ਅੰਕੜੇ opt = UPDATE_ਅੰਕੜੇ_INIT;
+	ਬਣਤਰ list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	const char *ref_storage_format = NULL;
-	int ret;
-	struct option module_update_options[] = {
-		OPT__SUPER_PREFIX(&opt.super_prefix),
+	ਅਚਲ ਅੱਖਰ *ref_storage_format = ਨਿਰਾ;
+	ਪੂਰਨ ret;
+	ਬਣਤਰ option module_update_options[] = {
+		OPT_SUPER_ਅਗੇਤਰ(&opt.super_ਅਗੇਤਰ),
 		OPT__FORCE(&opt.force, N_("force checkout updates"), 0),
 		OPT_BOOL('i', "init", &opt.init,
 			 N_("initialize uninitialized submodules before update")),
@@ -3005,13 +3005,13 @@ static int module_update(int argc, const char **argv, const char *prefix,
 			 N_("traverse submodules recursively")),
 		OPT_BOOL('N', "no-fetch", &opt.nofetch,
 			 N_("don't fetch new objects from the remote site")),
-		OPT_SET_INT(0, "checkout", &opt.update_default,
+		OPT_ਸੈੱਟ_INT(0, "checkout", &opt.update_default,
 			N_("use the 'checkout' update strategy (default)"),
 			SM_UPDATE_CHECKOUT),
-		OPT_SET_INT('m', "merge", &opt.update_default,
+		OPT_ਸੈੱਟ_INT('m', "merge", &opt.update_default,
 			N_("use the 'merge' update strategy"),
-			SM_UPDATE_MERGE),
-		OPT_SET_INT('r', "rebase", &opt.update_default,
+			SM_UPDATE_ਮਿਲਾਓ),
+		OPT_ਸੈੱਟ_INT('r', "rebase", &opt.update_default,
 			N_("use the 'rebase' update strategy"),
 			SM_UPDATE_REBASE),
 		OPT_STRING_LIST(0, "reference", &opt.references, N_("repo"),
@@ -3021,7 +3021,7 @@ static int module_update(int argc, const char **argv, const char *prefix,
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "dissociate", &opt.dissociate,
 			   N_("use --reference only while cloning")),
-		OPT_INTEGER(0, "depth", &opt.depth,
+		OPT_INTEGER(0, "depth", &opt.ਡੂੰਘਾਈ,
 			   N_("create a shallow clone truncated to the "
 			      "specified number of revisions")),
 		OPT_INTEGER('j', "jobs", &opt.max_jobs,
@@ -3029,80 +3029,80 @@ static int module_update(int argc, const char **argv, const char *prefix,
 		OPT_BOOL(0, "recommend-shallow", &opt.recommend_shallow,
 			    N_("whether the initial clone should follow the shallow recommendation")),
 		OPT__QUIET(&opt.quiet, N_("don't print cloning progress")),
-		OPT_BOOL(0, "progress", &opt.progress,
+		OPT_BOOL(0, "progress", &opt.ਤਰੱਕੀ,
 			    N_("force cloning progress")),
 		OPT_BOOL(0, "require-init", &opt.require_init,
 			   N_("disallow cloning into non-empty directory, implies --init")),
 		OPT_BOOL(0, "single-branch", &opt.single_branch,
 			 N_("clone only one branch, HEAD or --branch")),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule [--quiet] update"
 		" [--init [--filter=<filter-spec>]] [--remote]"
 		" [-N|--no-fetch] [-f|--force]"
 		" [--checkout|--merge|--rebase]"
 		" [--[no-]recommend-shallow] [--reference <repository>]"
 		" [--recursive] [--[no-]single-branch] [--] [<path>...]"),
-		NULL
+		ਨਿਰਾ
 	};
 
 	update_clone_config_from_gitmodules(the_repository, &opt.max_jobs);
 	repo_config(the_repository, git_update_clone_config, &opt.max_jobs);
 
-	argc = parse_options(argc, argv, prefix, module_update_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, module_update_options,
 			     git_submodule_helper_usage, 0);
 
-	if (opt.require_init)
+	ਜੇ (opt.require_init)
 		opt.init = 1;
 
-	if (filter_options.choice && !opt.init) {
+	ਜੇ (filter_options.choice && !opt.init) {
 		usage_with_options(git_submodule_helper_usage,
 				   module_update_options);
 	}
 
-	if (ref_storage_format) {
+	ਜੇ (ref_storage_format) {
 		opt.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (opt.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+		ਜੇ (opt.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 
 	opt.filter_options = &filter_options;
-	opt.prefix = prefix;
+	opt.ਅਗੇਤਰ = ਅਗੇਤਰ;
 
-	if (opt.update_default)
+	ਜੇ (opt.update_default)
 		opt.update_strategy.type = opt.update_default;
 
-	if (module_list_compute(argv, prefix, &pathspec, &opt.list) < 0) {
+	ਜੇ (module_list_compute(argv, ਅਗੇਤਰ, &pathspec, &opt.list) < 0) {
 		ret = 1;
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 
-	if (pathspec.nr)
+	ਜੇ (pathspec.nr)
 		opt.warn_if_uninitialized = 1;
 
-	if (opt.init) {
-		struct module_list list = MODULE_LIST_INIT;
-		struct init_cb info = INIT_CB_INIT;
+	ਜੇ (opt.init) {
+		ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+		ਬਣਤਰ init_cb info = INIT_CB_INIT;
 
-		if (module_list_compute(argv, opt.prefix,
+		ਜੇ (module_list_compute(argv, opt.ਅਗੇਤਰ,
 					&pathspec2, &list) < 0) {
 			module_list_release(&list);
 			ret = 1;
-			goto cleanup;
+			ਜਾਓ cleanup;
 		}
 
 		/*
 		 * If there are no path args and submodule.active is set then,
 		 * by default, only initialize 'active' modules.
 		 */
-		if (!argc && !repo_config_get(the_repository, "submodule.active"))
-			module_list_active(&list);
+		ਜੇ (!argc && !repo_config_get(the_repository, "submodule.active"))
+			module_list_ਸਰਗਰਮ(&list);
 
-		info.prefix = opt.prefix;
-		info.super_prefix = opt.super_prefix;
-		if (opt.quiet)
+		info.ਅਗੇਤਰ = opt.ਅਗੇਤਰ;
+		info.super_ਅਗੇਤਰ = opt.super_ਅਗੇਤਰ;
+		ਜੇ (opt.quiet)
 			info.flags |= OPT_QUIET;
 
 		for_each_listed_submodule(&list, init_submodule_cb, &info);
@@ -3111,23 +3111,23 @@ static int module_update(int argc, const char **argv, const char *prefix,
 
 	ret = update_submodules(&opt);
 cleanup:
-	update_data_release(&opt);
+	update_ਅੰਕੜੇ_release(&opt);
 	list_objects_filter_release(&filter_options);
 	clear_pathspec(&pathspec);
 	clear_pathspec(&pathspec2);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int push_check(int argc, const char **argv, const char *prefix UNUSED,
-		      struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ ਧੱਕੋ_check(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ,
+		      ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct remote *remote;
-	const char *superproject_head;
-	char *head;
-	int detached_head = 0;
-	struct object_id head_oid;
+	ਬਣਤਰ remote *remote;
+	ਅਚਲ ਅੱਖਰ *superproject_ਸਿਰ;
+	ਅੱਖਰ *ਸਿਰ;
+	ਪੂਰਨ detached_ਸਿਰ = 0;
+	ਬਣਤਰ object_id ਸਿਰ_oid;
 
-	if (argc < 3)
+	ਜੇ (argc < 3)
 		die("submodule--helper push-check requires at least 2 arguments");
 
 	/*
@@ -3135,57 +3135,57 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 	 * if HEAD then the superproject is in a detached head state, otherwise
 	 * it will be the resolved head ref.
 	 */
-	superproject_head = argv[1];
+	superproject_ਸਿਰ = argv[1];
 	argv++;
 	argc--;
 	/* Get the submodule's head ref and determine if it is detached */
-	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   0, &head_oid, NULL);
-	if (!head)
+	ਸਿਰ = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
+				   0, &ਸਿਰ_oid, ਨਿਰਾ);
+	ਜੇ (!ਸਿਰ)
 		die(_("Failed to resolve HEAD as a valid ref."));
-	if (!strcmp(head, "HEAD"))
-		detached_head = 1;
+	ਜੇ (!strcmp(ਸਿਰ, "HEAD"))
+		detached_ਸਿਰ = 1;
 
 	/*
 	 * The remote must be configured.
 	 * This is to avoid pushing to the exact same URL as the parent.
 	 */
 	remote = pushremote_get(argv[1]);
-	if (!remote || remote->origin == REMOTE_UNCONFIGURED)
+	ਜੇ (!remote || remote->origin == REMOTE_UNCONFIGURED)
 		die("remote '%s' not configured", argv[1]);
 
 	/* Check the refspec */
-	if (argc > 2) {
-		int i;
-		struct ref *local_refs = get_local_heads();
-		struct refspec refspec = REFSPEC_INIT_PUSH(the_hash_algo);
+	ਜੇ (argc > 2) {
+		ਪੂਰਨ i;
+		ਬਣਤਰ ref *local_refs = get_local_heads();
+		ਬਣਤਰ refspec refspec = REFSPEC_INIT_ਧੱਕੋ(the_hash_algo);
 
 		refspec_appendn(&refspec, argv + 2, argc - 2);
 
-		for (i = 0; i < refspec.nr; i++) {
-			const struct refspec_item *rs = &refspec.items[i];
+		ਲਈ (i = 0; i < refspec.nr; i++) {
+			ਅਚਲ ਬਣਤਰ refspec_ਵਸਤੂ *rs = &refspec.ਚੀਜ਼ਾਂ[i];
 
-			if (rs->pattern || rs->matching)
-				continue;
+			ਜੇ (rs->ਨਮੂਨਾ || rs->matching)
+				ਜਾਰੀ;
 
 			/* LHS must match a single ref */
-			switch (count_refspec_match(rs->src, local_refs, NULL)) {
-			case 1:
-				break;
-			case 0:
+			ਚੋਣ (ਗਿਣਤੀ_refspec_ਮੇਲ(rs->src, local_refs, ਨਿਰਾ)) {
+			ਹਾਲਤ 1:
+				ਰੋਕੋ;
+			ਹਾਲਤ 0:
 				/*
 				 * If LHS matches 'HEAD' then we need to ensure
 				 * that it matches the same named branch
 				 * checked out in the superproject.
 				 */
-				if (!strcmp(rs->src, "HEAD")) {
-					if (!detached_head &&
-					    !strcmp(head, superproject_head))
-						break;
+				ਜੇ (!strcmp(rs->src, "HEAD")) {
+					ਜੇ (!detached_ਸਿਰ &&
+					    !strcmp(ਸਿਰ, superproject_ਸਿਰ))
+						ਰੋਕੋ;
 					die("HEAD does not match the named branch in the superproject");
 				}
 				/* fallthrough */
-			default:
+			ਮੂਲ:
 				die("src refspec '%s' must name a ref",
 				    rs->src);
 			}
@@ -3194,93 +3194,93 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 		refspec_clear(&refspec);
 		free_refs(local_refs);
 	}
-	free(head);
+	ਮੁਕਤ(ਸਿਰ);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int absorb_git_dirs(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ absorb_git_dirs(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			   ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int i;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	const char *super_prefix = NULL;
-	struct option embed_gitdir_options[] = {
-		OPT__SUPER_PREFIX(&super_prefix),
-		OPT_END()
+	ਪੂਰਨ i;
+	ਬਣਤਰ pathspec pathspec = { 0 };
+	ਬਣਤਰ module_list list = MODULE_LIST_INIT;
+	ਅਚਲ ਅੱਖਰ *super_ਅਗੇਤਰ = ਨਿਰਾ;
+	ਬਣਤਰ option embed_gitdir_options[] = {
+		OPT_SUPER_ਅਗੇਤਰ(&super_ਅਗੇਤਰ),
+		OPT_ਸਿਰਾ()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ git_submodule_helper_usage[] = {
 		N_("git submodule absorbgitdirs [<options>] [<path>...]"),
-		NULL
+		ਨਿਰਾ
 	};
-	int ret = 1;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, embed_gitdir_options,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, embed_gitdir_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	ਜੇ (module_list_compute(argv, ਅਗੇਤਰ, &pathspec, &list) < 0)
+		ਜਾਓ cleanup;
 
-	for (i = 0; i < list.nr; i++)
+	ਲਈ (i = 0; i < list.nr; i++)
 		absorb_git_dir_into_superproject(list.entries[i]->name,
-						 super_prefix);
+						 super_ਅਗੇਤਰ);
 
 	ret = 0;
 cleanup:
 	clear_pathspec(&pathspec);
 	module_list_release(&list);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int module_set_url(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_ਸੈੱਟ_url(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int quiet = 0, ret;
-	const char *newurl;
-	const char *path;
-	char *config_name;
-	struct option options[] = {
+	ਪੂਰਨ quiet = 0, ret;
+	ਅਚਲ ਅੱਖਰ *newurl;
+	ਅਚਲ ਅੱਖਰ *ਰਸਤਾ;
+	ਅੱਖਰ *config_name;
+	ਬਣਤਰ option options[] = {
 		OPT__QUIET(&quiet, N_("suppress output for setting url of a submodule")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ usage[] = {
 		N_("git submodule set-url [--quiet] <path> <newurl>"),
-		NULL
+		ਨਿਰਾ
 	};
-	const struct submodule *sub;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
 
-	if (argc != 2 || !(path = argv[0]) || !(newurl = argv[1]))
+	ਜੇ (argc != 2 || !(ਰਸਤਾ = argv[0]) || !(newurl = argv[1]))
 		usage_with_options(usage, options);
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
 
-	if (!sub)
+	ਜੇ (!sub)
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
-		    path);
+		    ਰਸਤਾ);
 
 	config_name = xstrfmt("submodule.%s.url", sub->name);
-	ret = config_set_in_gitmodules_file_gently(the_repository, config_name, newurl);
+	ret = config_ਸੈੱਟ_ਵਿੱਚ_gitmodules_file_gently(the_repository, config_name, newurl);
 
-	if (!ret) {
+	ਜੇ (!ret) {
 		repo_read_gitmodules(the_repository, 0);
-		sync_submodule(sub->path, prefix, NULL, quiet ? OPT_QUIET : 0);
+		sync_submodule(sub->ਰਸਤਾ, ਅਗੇਤਰ, ਨਿਰਾ, quiet ? OPT_QUIET : 0);
 	}
 
-	free(config_name);
-	return !!ret;
+	ਮੁਕਤ(config_name);
+	ਵਾਪਸ !!ret;
 }
 
-static int module_set_branch(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_ਸੈੱਟ_branch(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			     ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int opt_default = 0, ret;
-	const char *opt_branch = NULL;
-	const char *path;
-	char *config_name;
-	struct option options[] = {
+	ਪੂਰਨ opt_default = 0, ret;
+	ਅਚਲ ਅੱਖਰ *opt_branch = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *ਰਸਤਾ;
+	ਅੱਖਰ *config_name;
+	ਬਣਤਰ option options[] = {
 		/*
 		 * We accept the `quiet` option for uniformity across subcommands,
 		 * though there is nothing to make less verbose in this subcommand.
@@ -3291,45 +3291,45 @@ static int module_set_branch(int argc, const char **argv, const char *prefix,
 			N_("set the default tracking branch to master")),
 		OPT_STRING('b', "branch", &opt_branch, N_("branch"),
 			N_("set the default tracking branch")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ usage[] = {
 		N_("git submodule set-branch [-q|--quiet] (-d|--default) <path>"),
 		N_("git submodule set-branch [-q|--quiet] (-b|--branch) <branch> <path>"),
-		NULL
+		ਨਿਰਾ
 	};
-	const struct submodule *sub;
+	ਅਚਲ ਬਣਤਰ submodule *sub;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
 
-	if (!opt_branch && !opt_default)
+	ਜੇ (!opt_branch && !opt_default)
 		die(_("--branch or --default required"));
 
-	if (opt_branch && opt_default)
+	ਜੇ (opt_branch && opt_default)
 		die(_("options '%s' and '%s' cannot be used together"), "--branch", "--default");
 
-	if (argc != 1 || !(path = argv[0]))
+	ਜੇ (argc != 1 || !(ਰਸਤਾ = argv[0]))
 		usage_with_options(usage, options);
 
-	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
+	sub = submodule_from_ਰਸਤਾ(the_repository, null_oid(the_hash_algo), ਰਸਤਾ);
 
-	if (!sub)
+	ਜੇ (!sub)
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
-		    path);
+		    ਰਸਤਾ);
 
 	config_name = xstrfmt("submodule.%s.branch", sub->name);
-	ret = config_set_in_gitmodules_file_gently(the_repository, config_name, opt_branch);
+	ret = config_ਸੈੱਟ_ਵਿੱਚ_gitmodules_file_gently(the_repository, config_name, opt_branch);
 
-	free(config_name);
-	return !!ret;
+	ਮੁਕਤ(config_name);
+	ਵਾਪਸ !!ret;
 }
 
-static int module_create_branch(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_create_branch(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+				ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	enum branch_track track;
-	int quiet = 0, force = 0, reflog = 0, dry_run = 0;
-	struct option options[] = {
+	ਗਿਣਤੀ branch_track track;
+	ਪੂਰਨ quiet = 0, force = 0, reflog = 0, dry_ਲੜੀਵਾਰ = 0;
+	ਬਣਤਰ option options[] = {
 		OPT__QUIET(&quiet, N_("print only error messages")),
 		OPT__FORCE(&force, N_("force creation"), 0),
 		OPT_BOOL(0, "create-reflog", &reflog,
@@ -3337,230 +3337,230 @@ static int module_create_branch(int argc, const char **argv, const char *prefix,
 		OPT_CALLBACK_F('t', "track",  &track, "(direct|inherit)",
 			N_("set branch tracking configuration"),
 			PARSE_OPT_OPTARG,
-			parse_opt_tracking_mode),
-		OPT__DRY_RUN(&dry_run,
+			parse_opt_tracking_ਬਹੁਲਕ),
+		OPT_DRY_ਲੜੀਵਾਰ(&dry_ਲੜੀਵਾਰ,
 			     N_("show whether the branch would be created")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	const char *const usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ usage[] = {
 		N_("git submodule--helper create-branch [-f|--force] [--create-reflog] [-q|--quiet] [-t|--track] [-n|--dry-run] <name> <start-oid> <start-name>"),
-		NULL
+		ਨਿਰਾ
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ਬਣਤਰ repo_config_ਮੁੱਲਾਂ *cfg = repo_config_ਮੁੱਲਾਂ(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
 	track = cfg->branch_track;
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
 
-	if (argc != 3)
+	ਜੇ (argc != 3)
 		usage_with_options(usage, options);
 
-	if (!quiet && !dry_run)
+	ਜੇ (!quiet && !dry_ਲੜੀਵਾਰ)
 		printf_ln(_("creating branch '%s'"), argv[0]);
 
 	create_branches_recursively(the_repository, argv[0], argv[1], argv[2],
-				    force, reflog, quiet, track, dry_run);
-	return 0;
+				    force, reflog, quiet, track, dry_ਲੜੀਵਾਰ);
+	ਵਾਪਸ 0;
 }
 
-struct add_data {
-	const char *prefix;
-	const char *branch;
-	const char *reference_path;
-	char *sm_path;
-	const char *sm_name;
-	const char *repo;
-	const char *realrepo;
-	enum ref_storage_format ref_storage_format;
-	int depth;
-	unsigned int force: 1;
-	unsigned int quiet: 1;
-	unsigned int progress: 1;
-	unsigned int dissociate: 1;
+ਬਣਤਰ ਜੋੜੋ_ਅੰਕੜੇ {
+	ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ;
+	ਅਚਲ ਅੱਖਰ *branch;
+	ਅਚਲ ਅੱਖਰ *reference_ਰਸਤਾ;
+	ਅੱਖਰ *sm_ਰਸਤਾ;
+	ਅਚਲ ਅੱਖਰ *sm_name;
+	ਅਚਲ ਅੱਖਰ *repo;
+	ਅਚਲ ਅੱਖਰ *realrepo;
+	ਗਿਣਤੀ ref_storage_format ref_storage_format;
+	ਪੂਰਨ ਡੂੰਘਾਈ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ force: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ quiet: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ ਤਰੱਕੀ: 1;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ dissociate: 1;
 };
-#define ADD_DATA_INIT { \
-	.depth = -1, \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ਜੋੜੋ_ਅੰਕੜੇ_INIT { \
+	.ਡੂੰਘਾਈ = -1, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-static void append_fetch_remotes(struct strbuf *msg, const char *git_dir_path)
+ਸਥਿਰ ਖਾਲੀ append_fetch_remotes(ਬਣਤਰ strbuf *ਸੁਨੇਹਾ, ਅਚਲ ਅੱਖਰ *git_dir_ਰਸਤਾ)
 {
-	struct child_process cp_remote = CHILD_PROCESS_INIT;
-	struct strbuf sb_remote_out = STRBUF_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process cp_remote = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ strbuf sb_remote_ਬਾਹਰਲਾ = STRBUF_INIT;
 
 	cp_remote.git_cmd = 1;
 	strvec_pushf(&cp_remote.env,
-		     "GIT_DIR=%s", git_dir_path);
-	strvec_push(&cp_remote.env, "GIT_WORK_TREE=.");
-	strvec_pushl(&cp_remote.args, "remote", "-v", NULL);
-	if (!capture_command(&cp_remote, &sb_remote_out, 0)) {
-		char *next_line;
-		char *line = sb_remote_out.buf;
+		     "GIT_DIR=%s", git_dir_ਰਸਤਾ);
+	strvec_ਧੱਕੋ(&cp_remote.env, "GIT_WORK_TREE=.");
+	strvec_pushl(&cp_remote.ਦਲੀਲਾਂ, "remote", "-v", ਨਿਰਾ);
+	ਜੇ (!capture_command(&cp_remote, &sb_remote_ਬਾਹਰਲਾ, 0)) {
+		ਅੱਖਰ *ਅਗਲਾ_ਸਤਰ;
+		ਅੱਖਰ *ਸਤਰ = sb_remote_ਬਾਹਰਲਾ.buf;
 
-		while ((next_line = strchr(line, '\n')) != NULL) {
-			size_t len = next_line - line;
+		ਜਦੋਂ ((ਅਗਲਾ_ਸਤਰ = strchr(ਸਤਰ, '\n')) != ਨਿਰਾ) {
+			ਮਾਪ_t len = ਅਗਲਾ_ਸਤਰ - ਸਤਰ;
 
-			if (strip_suffix_mem(line, &len, " (fetch)"))
-				strbuf_addf(msg, "  %.*s\n", (int)len, line);
-			line = next_line + 1;
+			ਜੇ (strip_suffix_mem(ਸਤਰ, &len, " (fetch)"))
+				strbuf_addf(ਸੁਨੇਹਾ, "  %.*s\n", (ਪੂਰਨ)len, ਸਤਰ);
+			ਸਤਰ = ਅਗਲਾ_ਸਤਰ + 1;
 		}
 	}
 
-	strbuf_release(&sb_remote_out);
+	strbuf_release(&sb_remote_ਬਾਹਰਲਾ);
 }
 
-static int add_submodule(const struct add_data *add_data)
+ਸਥਿਰ ਪੂਰਨ ਜੋੜੋ_submodule(ਅਚਲ ਬਣਤਰ ਜੋੜੋ_ਅੰਕੜੇ *ਜੋੜੋ_ਅੰਕੜੇ)
 {
-	struct module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
-	struct string_list reference = STRING_LIST_INIT_NODUP;
-	int ret = -1;
+	ਬਣਤਰ module_clone_ਅੰਕੜੇ clone_ਅੰਕੜੇ = MODULE_CLONE_ਅੰਕੜੇ_INIT;
+	ਬਣਤਰ string_list reference = STRING_LIST_INIT_NODUP;
+	ਪੂਰਨ ret = -1;
 
 	/* perhaps the path already exists and is already a git repo, else clone it */
-	if (is_directory(add_data->sm_path)) {
-		char *submod_gitdir_path;
-		struct strbuf sm_path = STRBUF_INIT;
-		strbuf_addstr(&sm_path, add_data->sm_path);
-		submod_gitdir_path = xstrfmt("%s/.git", add_data->sm_path);
-		if (is_nonbare_repository_dir(&sm_path))
-			printf(_("Adding existing repo at '%s' to the index\n"),
-			       add_data->sm_path);
-		else
+	ਜੇ (is_directory(ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ)) {
+		ਅੱਖਰ *submod_gitdir_ਰਸਤਾ;
+		ਬਣਤਰ strbuf sm_ਰਸਤਾ = STRBUF_INIT;
+		strbuf_addstr(&sm_ਰਸਤਾ, ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
+		submod_gitdir_ਰਸਤਾ = xstrfmt("%s/.git", ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
+		ਜੇ (is_nonbare_repository_dir(&sm_ਰਸਤਾ))
+			ਲਿਖੋ(_("Adding existing repo at '%s' to the index\n"),
+			       ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
+		ਨਹੀਂਤਾਂ
 			die(_("'%s' already exists and is not a valid git repo"),
-			    add_data->sm_path);
-		strbuf_release(&sm_path);
-		free(submod_gitdir_path);
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
-		struct strbuf submod_gitdir = STRBUF_INIT;
+			    ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
+		strbuf_release(&sm_ਰਸਤਾ);
+		ਮੁਕਤ(submod_gitdir_ਰਸਤਾ);
+	} ਨਹੀਂਤਾਂ {
+		ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
+		ਬਣਤਰ strbuf submod_gitdir = STRBUF_INIT;
 
-		submodule_name_to_gitdir(&submod_gitdir, the_repository, add_data->sm_name);
+		submodule_name_ਮੰਜ਼ਿਲ_gitdir(&submod_gitdir, the_repository, ਜੋੜੋ_ਅੰਕੜੇ->sm_name);
 
-		if (is_directory(submod_gitdir.buf)) {
-			if (!add_data->force) {
-				struct strbuf msg = STRBUF_INIT;
-				char *die_msg;
+		ਜੇ (is_directory(submod_gitdir.buf)) {
+			ਜੇ (!ਜੋੜੋ_ਅੰਕੜੇ->force) {
+				ਬਣਤਰ strbuf ਸੁਨੇਹਾ = STRBUF_INIT;
+				ਅੱਖਰ *die_ਸੁਨੇਹਾ_2;
 
-				strbuf_addf(&msg, _("A git directory for '%s' is found "
+				strbuf_addf(&ਸੁਨੇਹਾ, _("A git directory for '%s' is found "
 						    "locally with remote(s):\n"),
-					    add_data->sm_name);
+					    ਜੋੜੋ_ਅੰਕੜੇ->sm_name);
 
-				append_fetch_remotes(&msg, submod_gitdir.buf);
+				append_fetch_remotes(&ਸੁਨੇਹਾ, submod_gitdir.buf);
 				strbuf_release(&submod_gitdir);
 
-				strbuf_addf(&msg, _("If you want to reuse this local git "
+				strbuf_addf(&ਸੁਨੇਹਾ, _("If you want to reuse this local git "
 						    "directory instead of cloning again from\n"
 						    "  %s\n"
 						    "use the '--force' option. If the local git "
 						    "directory is not the correct repo\n"
 						    "or you are unsure what this means choose "
 						    "another name with the '--name' option."),
-					    add_data->realrepo);
+					    ਜੋੜੋ_ਅੰਕੜੇ->realrepo);
 
-				die_msg = strbuf_detach(&msg, NULL);
-				die("%s", die_msg);
-			} else {
-				printf(_("Reactivating local git directory for "
-					 "submodule '%s'\n"), add_data->sm_name);
+				die_ਸੁਨੇਹਾ_2 = strbuf_detach(&ਸੁਨੇਹਾ, ਨਿਰਾ);
+				die("%s", die_ਸੁਨੇਹਾ_2);
+			} ਨਹੀਂਤਾਂ {
+				ਲਿਖੋ(_("Reactivating local git directory for "
+					 "submodule '%s'\n"), ਜੋੜੋ_ਅੰਕੜੇ->sm_name);
 			}
 		}
 		strbuf_release(&submod_gitdir);
 
-		clone_data.prefix = add_data->prefix;
-		clone_data.path = add_data->sm_path;
-		clone_data.name = add_data->sm_name;
-		clone_data.url = add_data->realrepo;
-		clone_data.quiet = add_data->quiet;
-		clone_data.progress = add_data->progress;
-		if (add_data->reference_path) {
-			char *p = xstrdup(add_data->reference_path);
+		clone_ਅੰਕੜੇ.ਅਗੇਤਰ = ਜੋੜੋ_ਅੰਕੜੇ->ਅਗੇਤਰ;
+		clone_ਅੰਕੜੇ.ਰਸਤਾ = ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ;
+		clone_ਅੰਕੜੇ.name = ਜੋੜੋ_ਅੰਕੜੇ->sm_name;
+		clone_ਅੰਕੜੇ.url = ਜੋੜੋ_ਅੰਕੜੇ->realrepo;
+		clone_ਅੰਕੜੇ.quiet = ਜੋੜੋ_ਅੰਕੜੇ->quiet;
+		clone_ਅੰਕੜੇ.ਤਰੱਕੀ = ਜੋੜੋ_ਅੰਕੜੇ->ਤਰੱਕੀ;
+		ਜੇ (ਜੋੜੋ_ਅੰਕੜੇ->reference_ਰਸਤਾ) {
+			ਅੱਖਰ *p = xstrdup(ਜੋੜੋ_ਅੰਕੜੇ->reference_ਰਸਤਾ);
 
 			string_list_append(&reference, p)->util = p;
 		}
-		clone_data.ref_storage_format = add_data->ref_storage_format;
-		clone_data.dissociate = add_data->dissociate;
-		if (add_data->depth >= 0)
-			clone_data.depth = add_data->depth;
+		clone_ਅੰਕੜੇ.ref_storage_format = ਜੋੜੋ_ਅੰਕੜੇ->ref_storage_format;
+		clone_ਅੰਕੜੇ.dissociate = ਜੋੜੋ_ਅੰਕੜੇ->dissociate;
+		ਜੇ (ਜੋੜੋ_ਅੰਕੜੇ->ਡੂੰਘਾਈ >= 0)
+			clone_ਅੰਕੜੇ.ਡੂੰਘਾਈ = ਜੋੜੋ_ਅੰਕੜੇ->ਡੂੰਘਾਈ;
 
-		if (clone_submodule(&clone_data, &reference))
-			goto cleanup;
+		ਜੇ (clone_submodule(&clone_ਅੰਕੜੇ, &reference))
+			ਜਾਓ cleanup;
 
 		prepare_submodule_repo_env(&cp.env);
 		cp.git_cmd = 1;
-		cp.dir = add_data->sm_path;
+		cp.dir = ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ;
 		/*
 		 * NOTE: we only get here if add_data->force is true, so
 		 * passing --force to checkout is reasonable.
 		 */
-		strvec_pushl(&cp.args, "checkout", "-f", "-q", NULL);
+		strvec_pushl(&cp.ਦਲੀਲਾਂ, "checkout", "-f", "-q", ਨਿਰਾ);
 
-		if (add_data->branch) {
-			strvec_pushl(&cp.args, "-B", add_data->branch, NULL);
-			strvec_pushf(&cp.args, "origin/%s", add_data->branch);
+		ਜੇ (ਜੋੜੋ_ਅੰਕੜੇ->branch) {
+			strvec_pushl(&cp.ਦਲੀਲਾਂ, "-B", ਜੋੜੋ_ਅੰਕੜੇ->branch, ਨਿਰਾ);
+			strvec_pushf(&cp.ਦਲੀਲਾਂ, "origin/%s", ਜੋੜੋ_ਅੰਕੜੇ->branch);
 		}
 
-		if (run_command(&cp))
-			die(_("unable to checkout submodule '%s'"), add_data->sm_path);
+		ਜੇ (ਲੜੀਵਾਰ_command(&cp))
+			die(_("unable to checkout submodule '%s'"), ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
 	}
 	ret = 0;
 
 cleanup:
 	string_list_clear(&reference, 1);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int config_submodule_in_gitmodules(const char *name, const char *var, const char *value)
+ਸਥਿਰ ਪੂਰਨ config_submodule_ਵਿੱਚ_gitmodules(ਅਚਲ ਅੱਖਰ *name, ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ)
 {
-	char *key;
-	int ret;
+	ਅੱਖਰ *ਕੁੰਜੀ;
+	ਪੂਰਨ ret;
 
-	if (!is_writing_gitmodules_ok())
+	ਜੇ (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	key = xstrfmt("submodule.%s.%s", name, var);
-	ret = config_set_in_gitmodules_file_gently(the_repository, key, value);
-	free(key);
+	ਕੁੰਜੀ = xstrfmt("submodule.%s.%s", name, var);
+	ret = config_ਸੈੱਟ_ਵਿੱਚ_gitmodules_file_gently(the_repository, ਕੁੰਜੀ, ਮੁੱਲ);
+	ਮੁਕਤ(ਕੁੰਜੀ);
 
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static void configure_added_submodule(struct add_data *add_data)
+ਸਥਿਰ ਖਾਲੀ configure_added_submodule(ਬਣਤਰ ਜੋੜੋ_ਅੰਕੜੇ *ਜੋੜੋ_ਅੰਕੜੇ)
 {
-	char *key;
-	struct child_process add_submod = CHILD_PROCESS_INIT;
-	struct child_process add_gitmodules = CHILD_PROCESS_INIT;
-	const struct string_list *values;
-	int matched = 0;
+	ਅੱਖਰ *ਕੁੰਜੀ;
+	ਬਣਤਰ ਬੱਚਾ_process ਜੋੜੋ_submod = ਬੱਚਾ_PROCESS_INIT;
+	ਬਣਤਰ ਬੱਚਾ_process ਜੋੜੋ_gitmodules = ਬੱਚਾ_PROCESS_INIT;
+	ਅਚਲ ਬਣਤਰ string_list *ਮੁੱਲਾਂ;
+	ਪੂਰਨ matched = 0;
 
-	key = xstrfmt("submodule.%s.url", add_data->sm_name);
-	repo_config_set_gently(the_repository, key, add_data->realrepo);
-	free(key);
+	ਕੁੰਜੀ = xstrfmt("submodule.%s.url", ਜੋੜੋ_ਅੰਕੜੇ->sm_name);
+	repo_config_ਸੈੱਟ_gently(the_repository, ਕੁੰਜੀ, ਜੋੜੋ_ਅੰਕੜੇ->realrepo);
+	ਮੁਕਤ(ਕੁੰਜੀ);
 
-	add_submod.git_cmd = 1;
-	strvec_pushl(&add_submod.args, "add",
-		     "--no-warn-embedded-repo", NULL);
-	if (add_data->force)
-		strvec_push(&add_submod.args, "--force");
-	strvec_pushl(&add_submod.args, "--", add_data->sm_path, NULL);
+	ਜੋੜੋ_submod.git_cmd = 1;
+	strvec_pushl(&ਜੋੜੋ_submod.ਦਲੀਲਾਂ, "add",
+		     "--no-warn-embedded-repo", ਨਿਰਾ);
+	ਜੇ (ਜੋੜੋ_ਅੰਕੜੇ->force)
+		strvec_ਧੱਕੋ(&ਜੋੜੋ_submod.ਦਲੀਲਾਂ, "--force");
+	strvec_pushl(&ਜੋੜੋ_submod.ਦਲੀਲਾਂ, "--", ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ, ਨਿਰਾ);
 
-	if (run_command(&add_submod))
-		die(_("Failed to add submodule '%s'"), add_data->sm_path);
+	ਜੇ (ਲੜੀਵਾਰ_command(&ਜੋੜੋ_submod))
+		die(_("Failed to add submodule '%s'"), ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
 
-	if (config_submodule_in_gitmodules(add_data->sm_name, "path", add_data->sm_path) ||
-	    config_submodule_in_gitmodules(add_data->sm_name, "url", add_data->repo))
-		die(_("Failed to register submodule '%s'"), add_data->sm_path);
+	ਜੇ (config_submodule_ਵਿੱਚ_gitmodules(ਜੋੜੋ_ਅੰਕੜੇ->sm_name, "path", ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ) ||
+	    config_submodule_ਵਿੱਚ_gitmodules(ਜੋੜੋ_ਅੰਕੜੇ->sm_name, "url", ਜੋੜੋ_ਅੰਕੜੇ->repo))
+		die(_("Failed to register submodule '%s'"), ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
 
-	if (add_data->branch) {
-		if (config_submodule_in_gitmodules(add_data->sm_name,
-						   "branch", add_data->branch))
-			die(_("Failed to register submodule '%s'"), add_data->sm_path);
+	ਜੇ (ਜੋੜੋ_ਅੰਕੜੇ->branch) {
+		ਜੇ (config_submodule_ਵਿੱਚ_gitmodules(ਜੋੜੋ_ਅੰਕੜੇ->sm_name,
+						   "branch", ਜੋੜੋ_ਅੰਕੜੇ->branch))
+			die(_("Failed to register submodule '%s'"), ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
 	}
 
-	add_gitmodules.git_cmd = 1;
-	strvec_pushl(&add_gitmodules.args,
-		     "add", "--force", "--", ".gitmodules", NULL);
+	ਜੋੜੋ_gitmodules.git_cmd = 1;
+	strvec_pushl(&ਜੋੜੋ_gitmodules.ਦਲੀਲਾਂ,
+		     "add", "--force", "--", ".gitmodules", ਨਿਰਾ);
 
-	if (run_command(&add_gitmodules))
-		die(_("Failed to register submodule '%s'"), add_data->sm_path);
+	ਜੇ (ਲੜੀਵਾਰ_command(&ਜੋੜੋ_gitmodules))
+		die(_("Failed to register submodule '%s'"), ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ);
 
 	/*
 	 * NEEDSWORK: In a multi-working-tree world this needs to be
@@ -3572,274 +3572,274 @@ static void configure_added_submodule(struct add_data *add_data)
 	 * is_submodule_active(), since that function needs to find
 	 * out the value of "submodule.active" again anyway.
 	 */
-	if (repo_config_get(the_repository, "submodule.active") || /* key absent */
-	    repo_config_get_string_multi(the_repository, "submodule.active", &values)) {
+	ਜੇ (repo_config_get(the_repository, "submodule.active") || /* key absent */
+	    repo_config_get_string_multi(the_repository, "submodule.active", &ਮੁੱਲਾਂ)) {
 		/*
 		 * If the submodule being added isn't already covered by the
 		 * current configured pathspec, set the submodule's active flag
 		 */
-		key = xstrfmt("submodule.%s.active", add_data->sm_name);
-		repo_config_set_gently(the_repository, key, "true");
-		free(key);
-	} else {
-		for (size_t i = 0; i < values->nr; i++) {
-			const char *pat = values->items[i].string;
-			if (!wildmatch(pat, add_data->sm_path, 0)) { /* match found */
+		ਕੁੰਜੀ = xstrfmt("submodule.%s.active", ਜੋੜੋ_ਅੰਕੜੇ->sm_name);
+		repo_config_ਸੈੱਟ_gently(the_repository, ਕੁੰਜੀ, "true");
+		ਮੁਕਤ(ਕੁੰਜੀ);
+	} ਨਹੀਂਤਾਂ {
+		ਲਈ (ਮਾਪ_t i = 0; i < ਮੁੱਲਾਂ->nr; i++) {
+			ਅਚਲ ਅੱਖਰ *pat = ਮੁੱਲਾਂ->ਚੀਜ਼ਾਂ[i].string;
+			ਜੇ (!wildmatch(pat, ਜੋੜੋ_ਅੰਕੜੇ->sm_ਰਸਤਾ, 0)) { /* match found */
 				matched = 1;
-				break;
+				ਰੋਕੋ;
 			}
 		}
-		if (!matched) { /* no pattern matched -> force-enable */
-			key = xstrfmt("submodule.%s.active", add_data->sm_name);
-			repo_config_set_gently(the_repository, key, "true");
-			free(key);
+		ਜੇ (!matched) { /* no pattern matched -> force-enable */
+			ਕੁੰਜੀ = xstrfmt("submodule.%s.active", ਜੋੜੋ_ਅੰਕੜੇ->sm_name);
+			repo_config_ਸੈੱਟ_gently(the_repository, ਕੁੰਜੀ, "true");
+			ਮੁਕਤ(ਕੁੰਜੀ);
 		}
 	}
 }
 
-static void die_on_index_match(const char *path, int force)
+ਸਥਿਰ ਖਾਲੀ die_on_ਸੂਚਕਾਂਕ_ਮੇਲ(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਪੂਰਨ force)
 {
-	struct pathspec ps;
-	const char *args[] = { path, NULL };
-	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, NULL, args);
+	ਬਣਤਰ pathspec ps;
+	ਅਚਲ ਅੱਖਰ *ਦਲੀਲਾਂ[] = { ਰਸਤਾ, ਨਿਰਾ };
+	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, ਨਿਰਾ, ਦਲੀਲਾਂ);
 
-	if (repo_read_index_preload(the_repository, NULL, 0) < 0)
+	ਜੇ (repo_read_ਸੂਚਕਾਂਕ_preload(the_repository, ਨਿਰਾ, 0) < 0)
 		die(_("index file corrupt"));
 
-	if (ps.nr) {
-		char *ps_matched = xcalloc(ps.nr, 1);
+	ਜੇ (ps.nr) {
+		ਅੱਖਰ *ps_matched = xcalloc(ps.nr, 1);
 
 		/* TODO: audit for interaction with sparse-index. */
-		ensure_full_index(the_repository->index);
+		ensure_ਭਰਿਆ_ਸੂਚਕਾਂਕ(the_repository->ਸੂਚਕਾਂਕ);
 
 		/*
 		 * Since there is only one pathspec, we just need to
 		 * check ps_matched[0] to know if a cache entry matched.
 		 */
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++) {
-			ce_path_match(the_repository->index, the_repository->index->cache[i], &ps,
+		ਲਈ (ਮਾਪ_t i = 0; i < the_repository->ਸੂਚਕਾਂਕ->cache_nr; i++) {
+			ce_ਰਸਤਾ_ਮੇਲ(the_repository->ਸੂਚਕਾਂਕ, the_repository->ਸੂਚਕਾਂਕ->cache[i], &ps,
 				      ps_matched);
 
-			if (ps_matched[0]) {
-				if (!force)
+			ਜੇ (ps_matched[0]) {
+				ਜੇ (!force)
 					die(_("'%s' already exists in the index"),
-					    path);
-				if (!S_ISGITLINK(the_repository->index->cache[i]->ce_mode))
+					    ਰਸਤਾ);
+				ਜੇ (!S_ISGITLINK(the_repository->ਸੂਚਕਾਂਕ->cache[i]->ce_ਬਹੁਲਕ))
 					die(_("'%s' already exists in the index "
-					      "and is not a submodule"), path);
-				break;
+					      "and is not a submodule"), ਰਸਤਾ);
+				ਰੋਕੋ;
 			}
 		}
-		free(ps_matched);
+		ਮੁਕਤ(ps_matched);
 	}
 	clear_pathspec(&ps);
 }
 
-static void die_on_repo_without_commits(const char *path)
+ਸਥਿਰ ਖਾਲੀ die_on_repo_without_commits(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	struct strbuf sb = STRBUF_INIT;
-	strbuf_addstr(&sb, path);
-	if (is_nonbare_repository_dir(&sb)) {
-		struct object_id oid;
-		if (repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid) < 0)
-			die(_("'%s' does not have a commit checked out"), path);
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	strbuf_addstr(&sb, ਰਸਤਾ);
+	ਜੇ (is_nonbare_repository_dir(&sb)) {
+		ਬਣਤਰ object_id oid;
+		ਜੇ (repo_resolve_gitlink_ref(the_repository, ਰਸਤਾ, "HEAD", &oid) < 0)
+			die(_("'%s' does not have a commit checked out"), ਰਸਤਾ);
 	}
 	strbuf_release(&sb);
 }
 
-static int module_add(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ module_ਜੋੜੋ(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		      ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int force = 0, quiet = 0, progress = 0, dissociate = 0;
-	struct add_data add_data = ADD_DATA_INIT;
-	const char *ref_storage_format = NULL;
-	char *to_free = NULL;
-	const struct submodule *existing;
-	struct strbuf buf = STRBUF_INIT;
-	char *sm_name_to_free = NULL;
-	struct option options[] = {
-		OPT_STRING('b', "branch", &add_data.branch, N_("branch"),
+	ਪੂਰਨ force = 0, quiet = 0, ਤਰੱਕੀ = 0, dissociate = 0;
+	ਬਣਤਰ ਜੋੜੋ_ਅੰਕੜੇ ਜੋੜੋ_ਅੰਕੜੇ = ਜੋੜੋ_ਅੰਕੜੇ_INIT;
+	ਅਚਲ ਅੱਖਰ *ref_storage_format = ਨਿਰਾ;
+	ਅੱਖਰ *ਮੰਜ਼ਿਲ_free = ਨਿਰਾ;
+	ਅਚਲ ਬਣਤਰ submodule *existing;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਅੱਖਰ *sm_name_ਮੰਜ਼ਿਲ_free = ਨਿਰਾ;
+	ਬਣਤਰ option options[] = {
+		OPT_STRING('b', "branch", &ਜੋੜੋ_ਅੰਕੜੇ.branch, N_("branch"),
 			   N_("branch of repository to add as submodule")),
 		OPT__FORCE(&force, N_("allow adding an otherwise ignored submodule path"),
 			   PARSE_OPT_NOCOMPLETE),
 		OPT__QUIET(&quiet, N_("print only error messages")),
-		OPT_BOOL(0, "progress", &progress, N_("force cloning progress")),
-		OPT_STRING(0, "reference", &add_data.reference_path, N_("repository"),
+		OPT_BOOL(0, "progress", &ਤਰੱਕੀ, N_("force cloning progress")),
+		OPT_STRING(0, "reference", &ਜੋੜੋ_ਅੰਕੜੇ.reference_ਰਸਤਾ, N_("repository"),
 			   N_("reference repository")),
 		OPT_STRING(0, "ref-storage-format", &ref_storage_format, N_("format"),
 			   N_("specify the reference storage format to use")),
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "dissociate", &dissociate, N_("borrow the objects from reference repositories")),
-		OPT_STRING(0, "name", &add_data.sm_name, N_("name"),
+		OPT_STRING(0, "name", &ਜੋੜੋ_ਅੰਕੜੇ.sm_name, N_("name"),
 			   N_("sets the submodule's name to the given string "
 			      "instead of defaulting to its path")),
-		OPT_INTEGER(0, "depth", &add_data.depth, N_("depth for shallow clones")),
-		OPT_END()
+		OPT_INTEGER(0, "depth", &ਜੋੜੋ_ਅੰਕੜੇ.ਡੂੰਘਾਈ, N_("depth for shallow clones")),
+		OPT_ਸਿਰਾ()
 	};
-	const char *const usage[] = {
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ usage[] = {
 		N_("git submodule add [<options>] [--] <repository> [<path>]"),
-		NULL
+		ਨਿਰਾ
 	};
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 1;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
+	ਪੂਰਨ ret = 1;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
 
-	if (!is_writing_gitmodules_ok())
+	ਜੇ (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	if (prefix && *prefix &&
-	    add_data.reference_path && !is_absolute_path(add_data.reference_path))
-		add_data.reference_path = xstrfmt("%s%s", prefix, add_data.reference_path);
+	ਜੇ (ਅਗੇਤਰ && *ਅਗੇਤਰ &&
+	    ਜੋੜੋ_ਅੰਕੜੇ.reference_ਰਸਤਾ && !is_absolute_ਰਸਤਾ(ਜੋੜੋ_ਅੰਕੜੇ.reference_ਰਸਤਾ))
+		ਜੋੜੋ_ਅੰਕੜੇ.reference_ਰਸਤਾ = xstrfmt("%s%s", ਅਗੇਤਰ, ਜੋੜੋ_ਅੰਕੜੇ.reference_ਰਸਤਾ);
 
-	if (argc == 0 || argc > 2)
+	ਜੇ (argc == 0 || argc > 2)
 		usage_with_options(usage, options);
 
-	if (ref_storage_format) {
-		add_data.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (add_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	ਜੇ (ref_storage_format) {
+		ਜੋੜੋ_ਅੰਕੜੇ.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
+		ਜੇ (ਜੋੜੋ_ਅੰਕੜੇ.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 
-	add_data.repo = argv[0];
-	if (argc == 1)
-		add_data.sm_path = git_url_basename(add_data.repo, 0, 0);
-	else
-		add_data.sm_path = xstrdup(argv[1]);
+	ਜੋੜੋ_ਅੰਕੜੇ.repo = argv[0];
+	ਜੇ (argc == 1)
+		ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ = git_url_basename(ਜੋੜੋ_ਅੰਕੜੇ.repo, 0, 0);
+	ਨਹੀਂਤਾਂ
+		ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ = xstrdup(argv[1]);
 
-	if (prefix && *prefix && !is_absolute_path(add_data.sm_path)) {
-		char *sm_path = add_data.sm_path;
+	ਜੇ (ਅਗੇਤਰ && *ਅਗੇਤਰ && !is_absolute_ਰਸਤਾ(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ)) {
+		ਅੱਖਰ *sm_ਰਸਤਾ = ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ;
 
-		add_data.sm_path = xstrfmt("%s%s", prefix, sm_path);
-		free(sm_path);
+		ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ = xstrfmt("%s%s", ਅਗੇਤਰ, sm_ਰਸਤਾ);
+		ਮੁਕਤ(sm_ਰਸਤਾ);
 	}
 
-	if (starts_with_dot_dot_slash(add_data.repo) ||
-	    starts_with_dot_slash(add_data.repo)) {
-		if (prefix)
+	ਜੇ (starts_with_dot_dot_slash(ਜੋੜੋ_ਅੰਕੜੇ.repo) ||
+	    starts_with_dot_slash(ਜੋੜੋ_ਅੰਕੜੇ.repo)) {
+		ਜੇ (ਅਗੇਤਰ)
 			die(_("Relative path can only be used from the toplevel "
 			      "of the working tree"));
 
 		/* dereference source url relative to parent's url */
-		to_free = resolve_relative_url(add_data.repo, NULL, 1);
-		add_data.realrepo = to_free;
-	} else if (is_dir_sep(add_data.repo[0]) || strchr(add_data.repo, ':')) {
-		add_data.realrepo = add_data.repo;
-	} else {
+		ਮੰਜ਼ਿਲ_free = resolve_relative_url(ਜੋੜੋ_ਅੰਕੜੇ.repo, ਨਿਰਾ, 1);
+		ਜੋੜੋ_ਅੰਕੜੇ.realrepo = ਮੰਜ਼ਿਲ_free;
+	} ਨਹੀਂਤਾਂ ਜੇ (is_dir_sep(ਜੋੜੋ_ਅੰਕੜੇ.repo[0]) || strchr(ਜੋੜੋ_ਅੰਕੜੇ.repo, ':')) {
+		ਜੋੜੋ_ਅੰਕੜੇ.realrepo = ਜੋੜੋ_ਅੰਕੜੇ.repo;
+	} ਨਹੀਂਤਾਂ {
 		die(_("repo URL: '%s' must be absolute or begin with ./|../"),
-		    add_data.repo);
+		    ਜੋੜੋ_ਅੰਕੜੇ.repo);
 	}
 
 	/*
 	 * normalize path:
 	 * multiple //; leading ./; /./; /../;
 	 */
-	normalize_path_copy(add_data.sm_path, add_data.sm_path);
-	strip_dir_trailing_slashes(add_data.sm_path);
+	normalize_ਰਸਤਾ_copy(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ, ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ);
+	strip_dir_trailing_slashes(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ);
 
-	if (validate_submodule_path(add_data.sm_path) < 0)
-		die(NULL);
+	ਜੇ (validate_submodule_ਰਸਤਾ(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ) < 0)
+		die(ਨਿਰਾ);
 
-	die_on_index_match(add_data.sm_path, force);
-	die_on_repo_without_commits(add_data.sm_path);
+	die_on_ਸੂਚਕਾਂਕ_ਮੇਲ(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ, force);
+	die_on_repo_without_commits(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ);
 
-	if (!force) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	ਜੇ (!force) {
+		ਬਣਤਰ ਬੱਚਾ_process cp = ਬੱਚਾ_PROCESS_INIT;
 
 		cp.git_cmd = 1;
 		cp.no_stdout = 1;
-		strvec_pushl(&cp.args, "add", "--dry-run", "--ignore-missing",
-			     "--no-warn-embedded-repo", add_data.sm_path, NULL);
-		if ((ret = pipe_command(&cp, NULL, 0, NULL, 0, &sb, 0))) {
-			strbuf_complete_line(&sb);
+		strvec_pushl(&cp.ਦਲੀਲਾਂ, "add", "--dry-run", "--ignore-missing",
+			     "--no-warn-embedded-repo", ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ, ਨਿਰਾ);
+		ਜੇ ((ret = pipe_command(&cp, ਨਿਰਾ, 0, ਨਿਰਾ, 0, &sb, 0))) {
+			strbuf_complete_ਸਤਰ(&sb);
 			fputs(sb.buf, stderr);
-			goto cleanup;
+			ਜਾਓ cleanup;
 		}
 	}
 
-	if (!add_data.sm_name)
-		add_data.sm_name = add_data.sm_path;
+	ਜੇ (!ਜੋੜੋ_ਅੰਕੜੇ.sm_name)
+		ਜੋੜੋ_ਅੰਕੜੇ.sm_name = ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ;
 
 	existing = submodule_from_name(the_repository,
 					null_oid(the_hash_algo),
-					add_data.sm_name);
+					ਜੋੜੋ_ਅੰਕੜੇ.sm_name);
 
-	if (existing && existing->path &&
-	    strcmp(existing->path, add_data.sm_path)) {
-		if (!force) {
+	ਜੇ (existing && existing->ਰਸਤਾ &&
+	    strcmp(existing->ਰਸਤਾ, ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ)) {
+		ਜੇ (!force) {
 			die(_("submodule name '%s' already used for path '%s'"),
-			    add_data.sm_name, existing->path);
+			    ਜੋੜੋ_ਅੰਕੜੇ.sm_name, existing->ਰਸਤਾ);
 		}
 		/* --force: build <name><n> until unique */
-		for (int i = 1; ; i++) {
+		ਲਈ (ਪੂਰਨ i = 1; ; i++) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "%s%d", add_data.sm_name, i);
-			if (!submodule_from_name(the_repository,
+			strbuf_addf(&buf, "%s%d", ਜੋੜੋ_ਅੰਕੜੇ.sm_name, i);
+			ਜੇ (!submodule_from_name(the_repository,
 						null_oid(the_hash_algo),
 						buf.buf)) {
-				break;
+				ਰੋਕੋ;
 			}
 		}
-		add_data.sm_name = sm_name_to_free = strbuf_detach(&buf, NULL);
+		ਜੋੜੋ_ਅੰਕੜੇ.sm_name = sm_name_ਮੰਜ਼ਿਲ_free = strbuf_detach(&buf, ਨਿਰਾ);
 	}
 
-	if (check_submodule_name(add_data.sm_name))
-		die(_("'%s' is not a valid submodule name"), add_data.sm_name);
+	ਜੇ (check_submodule_name(ਜੋੜੋ_ਅੰਕੜੇ.sm_name))
+		die(_("'%s' is not a valid submodule name"), ਜੋੜੋ_ਅੰਕੜੇ.sm_name);
 
-	add_data.prefix = prefix;
-	add_data.force = !!force;
-	add_data.quiet = !!quiet;
-	add_data.progress = !!progress;
-	add_data.dissociate = !!dissociate;
+	ਜੋੜੋ_ਅੰਕੜੇ.ਅਗੇਤਰ = ਅਗੇਤਰ;
+	ਜੋੜੋ_ਅੰਕੜੇ.force = !!force;
+	ਜੋੜੋ_ਅੰਕੜੇ.quiet = !!quiet;
+	ਜੋੜੋ_ਅੰਕੜੇ.ਤਰੱਕੀ = !!ਤਰੱਕੀ;
+	ਜੋੜੋ_ਅੰਕੜੇ.dissociate = !!dissociate;
 
-	if (the_repository->repository_format_submodule_path_cfg)
-		create_default_gitdir_config(add_data.sm_name);
+	ਜੇ (the_repository->repository_format_submodule_ਰਸਤਾ_cfg)
+		create_default_gitdir_config(ਜੋੜੋ_ਅੰਕੜੇ.sm_name);
 
-	if (add_submodule(&add_data))
-		goto cleanup;
-	configure_added_submodule(&add_data);
+	ਜੇ (ਜੋੜੋ_submodule(&ਜੋੜੋ_ਅੰਕੜੇ))
+		ਜਾਓ cleanup;
+	configure_added_submodule(&ਜੋੜੋ_ਅੰਕੜੇ);
 
 	ret = 0;
 cleanup:
-	free(sm_name_to_free);
-	free(add_data.sm_path);
-	free(to_free);
+	ਮੁਕਤ(sm_name_ਮੰਜ਼ਿਲ_free);
+	ਮੁਕਤ(ਜੋੜੋ_ਅੰਕੜੇ.sm_ਰਸਤਾ);
+	ਮੁਕਤ(ਮੰਜ਼ਿਲ_free);
 	strbuf_release(&sb);
 
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-int cmd_submodule__helper(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo)
+ਪੂਰਨ cmd_submodule__helper(ਪੂਰਨ argc,
+			  ਅਚਲ ਅੱਖਰ **argv,
+			  ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			  ਬਣਤਰ repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	const char *const usage[] = {
+	parse_opt_subcommand_fn *fn = ਨਿਰਾ;
+	ਅਚਲ ਅੱਖਰ *ਅਚਲ usage[] = {
 		N_("git submodule--helper <command>"),
-		NULL
+		ਨਿਰਾ
 	};
-	struct option options[] = {
+	ਬਣਤਰ option options[] = {
 		OPT_SUBCOMMAND("migrate-gitdir-configs", &fn, module_migrate),
 		OPT_SUBCOMMAND("gitdir", &fn, module_gitdir),
 		OPT_SUBCOMMAND("clone", &fn, module_clone),
-		OPT_SUBCOMMAND("add", &fn, module_add),
+		OPT_SUBCOMMAND("add", &fn, module_ਜੋੜੋ),
 		OPT_SUBCOMMAND("update", &fn, module_update),
 		OPT_SUBCOMMAND("foreach", &fn, module_foreach),
 		OPT_SUBCOMMAND("init", &fn, module_init),
-		OPT_SUBCOMMAND("status", &fn, module_status),
+		OPT_SUBCOMMAND("status", &fn, module_ਸਥਿਤੀ),
 		OPT_SUBCOMMAND("sync", &fn, module_sync),
 		OPT_SUBCOMMAND("deinit", &fn, module_deinit),
 		OPT_SUBCOMMAND("summary", &fn, module_summary),
-		OPT_SUBCOMMAND("push-check", &fn, push_check),
+		OPT_SUBCOMMAND("push-check", &fn, ਧੱਕੋ_check),
 		OPT_SUBCOMMAND("absorbgitdirs", &fn, absorb_git_dirs),
-		OPT_SUBCOMMAND("set-url", &fn, module_set_url),
-		OPT_SUBCOMMAND("set-branch", &fn, module_set_branch),
+		OPT_SUBCOMMAND("set-url", &fn, module_ਸੈੱਟ_url),
+		OPT_SUBCOMMAND("set-branch", &fn, module_ਸੈੱਟ_branch),
 		OPT_SUBCOMMAND("create-branch", &fn, module_create_branch),
 		OPT_SUBCOMMAND("get-default-remote", &fn, module_get_default_remote),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	ਵਾਪਸ fn(argc, argv, ਅਗੇਤਰ, repo);
 }

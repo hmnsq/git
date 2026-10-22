@@ -1,101 +1,101 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "advice.h"
-#include "gettext.h"
-#include "hash.h"
-#include "merge-ort-wrappers.h"
-#include "object-name.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "advice.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hash.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "merge-ort-wrappers.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
 
-static const char builtin_merge_recursive_usage[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ builtin_ਮਿਲਾਓ_recursive_usage[] =
 	"git %s <base>... -- <head> <remote> ...";
 
-static char *better_branch_name(const char *branch)
+ਸਥਿਰ ਅੱਖਰ *better_branch_name(ਅਚਲ ਅੱਖਰ *branch)
 {
-	static char githead_env[8 + GIT_MAX_HEXSZ + 1];
-	char *name;
+	ਸਥਿਰ ਅੱਖਰ githead_env[8 + GIT_MAX_HEXSZ + 1];
+	ਅੱਖਰ *name;
 
-	if (strlen(branch) != the_hash_algo->hexsz)
-		return xstrdup(branch);
-	xsnprintf(githead_env, sizeof(githead_env), "GITHEAD_%s", branch);
+	ਜੇ (ਲੜੀ_ਲੰਬਾਈ(branch) != the_hash_algo->hexsz)
+		ਵਾਪਸ xstrdup(branch);
+	xsnprintf(githead_env, ਆਕਾਰ(githead_env), "GITHEAD_%s", branch);
 	name = getenv(githead_env);
-	return xstrdup(name ? name : branch);
+	ਵਾਪਸ xstrdup(name ? name : branch);
 }
 
-int cmd_merge_recursive(int argc,
-			const char **argv,
-			const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+ਪੂਰਨ cmd_ਮਿਲਾਓ_recursive(ਪੂਰਨ argc,
+			ਅਚਲ ਅੱਖਰ **argv,
+			ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ,
+			ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct object_id bases[21];
-	unsigned bases_count = 0;
-	int i, failed;
-	struct object_id h1, h2;
-	struct merge_options o;
-	char *better1, *better2;
-	struct commit *result;
+	ਬਣਤਰ object_id bases[21];
+	ਬਿਨਾਨਿਸ਼ਾਨੀ bases_ਗਿਣਤੀ = 0;
+	ਪੂਰਨ i, failed;
+	ਬਣਤਰ object_id h1, h2;
+	ਬਣਤਰ ਮਿਲਾਓ_options o;
+	ਅੱਖਰ *better1, *better2;
+	ਬਣਤਰ commit *ਨਤੀਜਾ;
 
-	init_basic_merge_options(&o, the_repository);
-	if (argv[0] && ends_with(argv[0], "-subtree"))
-		o.subtree_shift = "";
+	init_basic_ਮਿਲਾਓ_options(&o, the_repository);
+	ਜੇ (argv[0] && ਸਿਰੇ_with(argv[0], "-subtree"))
+		o.subtree_ਖਿਸਕਾਓ = "";
 
-	if (argc == 2 && (!strcmp(argv[1], "-h") ||
+	ਜੇ (argc == 2 && (!strcmp(argv[1], "-h") ||
 			  !strcmp(argv[1], "--help-all"))) {
-		struct strbuf msg = STRBUF_INIT;
-		strbuf_addf(&msg, builtin_merge_recursive_usage, argv[0]);
-		show_usage_if_asked(argc, argv, msg.buf);
+		ਬਣਤਰ strbuf ਸੁਨੇਹਾ = STRBUF_INIT;
+		strbuf_addf(&ਸੁਨੇਹਾ, builtin_ਮਿਲਾਓ_recursive_usage, argv[0]);
+		show_usage_if_asked(argc, argv, ਸੁਨੇਹਾ.buf);
 	}
 
-	if (argc < 4)
-		usagef(builtin_merge_recursive_usage, argv[0]);
+	ਜੇ (argc < 4)
+		usagef(builtin_ਮਿਲਾਓ_recursive_usage, argv[0]);
 
-	for (i = 1; i < argc; ++i) {
-		const char *arg = argv[i];
+	ਲਈ (i = 1; i < argc; ++i) {
+		ਅਚਲ ਅੱਖਰ *arg = argv[i];
 
-		if (starts_with(arg, "--")) {
-			if (!arg[2])
-				break;
-			if (parse_merge_opt(&o, arg + 2))
+		ਜੇ (starts_with(arg, "--")) {
+			ਜੇ (!arg[2])
+				ਰੋਕੋ;
+			ਜੇ (parse_ਮਿਲਾਓ_opt(&o, arg + 2))
 				die(_("unknown option %s"), arg);
-			continue;
+			ਜਾਰੀ;
 		}
-		if (bases_count < ARRAY_SIZE(bases)-1) {
-			if (repo_get_oid(the_repository, argv[i], &bases[bases_count++]))
+		ਜੇ (bases_ਗਿਣਤੀ < ARRAY_ਮਾਪ(bases)-1) {
+			ਜੇ (repo_get_oid(the_repository, argv[i], &bases[bases_ਗਿਣਤੀ++]))
 				die(_("could not parse object '%s'"), argv[i]);
 		}
-		else
+		ਨਹੀਂਤਾਂ
 			warning(Q_("cannot handle more than %d base. "
 				   "Ignoring %s.",
 				   "cannot handle more than %d bases. "
 				   "Ignoring %s.",
-				    ARRAY_SIZE(bases)-1),
-				(int)ARRAY_SIZE(bases)-1, argv[i]);
+				    ARRAY_ਮਾਪ(bases)-1),
+				(ਪੂਰਨ)ARRAY_ਮਾਪ(bases)-1, argv[i]);
 	}
-	if (argc - i != 3) /* "--" "<head>" "<remote>" */
+	ਜੇ (argc - i != 3) /* "--" "<head>" "<remote>" */
 		die(_("not handling anything other than two heads merge."));
 
-	if (repo_read_index_unmerged(the_repository))
+	ਜੇ (repo_read_ਸੂਚਕਾਂਕ_unmerged(the_repository))
 		die_resolve_conflict("merge");
 
 	o.branch1 = argv[++i];
 	o.branch2 = argv[++i];
 
-	if (repo_get_oid(the_repository, o.branch1, &h1))
+	ਜੇ (repo_get_oid(the_repository, o.branch1, &h1))
 		die(_("could not resolve ref '%s'"), o.branch1);
-	if (repo_get_oid(the_repository, o.branch2, &h2))
+	ਜੇ (repo_get_oid(the_repository, o.branch2, &h2))
 		die(_("could not resolve ref '%s'"), o.branch2);
 
 	o.branch1 = better1 = better_branch_name(o.branch1);
 	o.branch2 = better2 = better_branch_name(o.branch2);
 
-	if (o.verbosity >= 3)
-		printf(_("Merging %s with %s\n"), o.branch1, o.branch2);
+	ਜੇ (o.verbosity >= 3)
+		ਲਿਖੋ(_("Merging %s with %s\n"), o.branch1, o.branch2);
 
-	failed = merge_ort_generic(&o, &h1, &h2, bases_count, bases, &result);
+	failed = ਮਿਲਾਓ_ort_generic(&o, &h1, &h2, bases_ਗਿਣਤੀ, bases, &ਨਤੀਜਾ);
 
-	free(better1);
-	free(better2);
+	ਮੁਕਤ(better1);
+	ਮੁਕਤ(better2);
 
-	if (failed < 0)
-		return 128; /* die() error code */
-	return failed;
+	ਜੇ (failed < 0)
+		ਵਾਪਸ 128; /* die() error code */
+	ਵਾਪਸ failed;
 }

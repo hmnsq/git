@@ -7,222 +7,222 @@
  * and Carlos Rica <jasampler@gmail.com> that was itself based on
  * git-tag.sh and mktag.c by Linus Torvalds.
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "replace-object.h"
-#include "tag.h"
-#include "wildmatch.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "editor.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "refs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-file.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "replace-object.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tag.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "wildmatch.h"
 
-static const char * const git_replace_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ git_replace_usage[] = {
 	N_("git replace [-f] <object> <replacement>"),
 	N_("git replace [-f] --edit <object>"),
 	N_("git replace [-f] --graft <commit> [<parent>...]"),
 	"git replace [-f] --convert-graft-file",
 	N_("git replace -d <object>..."),
 	N_("git replace [--format=<format>] [-l [<pattern>]]"),
-	NULL
+	ਨਿਰਾ
 };
 
-enum replace_format {
+ਗਿਣਤੀ replace_format {
 	REPLACE_FORMAT_SHORT,
 	REPLACE_FORMAT_MEDIUM,
 	REPLACE_FORMAT_LONG
 };
 
-struct show_data {
-	struct repository *repo;
-	const char *pattern;
-	enum replace_format format;
+ਬਣਤਰ show_ਅੰਕੜੇ {
+	ਬਣਤਰ repository *repo;
+	ਅਚਲ ਅੱਖਰ *ਨਮੂਨਾ;
+	ਗਿਣਤੀ replace_format format;
 };
 
-static int show_reference(const struct reference *ref, void *cb_data)
+ਸਥਿਰ ਪੂਰਨ show_reference(ਅਚਲ ਬਣਤਰ reference *ref, ਖਾਲੀ *cb_ਅੰਕੜੇ)
 {
-	struct show_data *data = cb_data;
+	ਬਣਤਰ show_ਅੰਕੜੇ *ਅੰਕੜੇ = cb_ਅੰਕੜੇ;
 
-	if (!wildmatch(data->pattern, ref->name, 0)) {
-		if (data->format == REPLACE_FORMAT_SHORT)
-			printf("%s\n", ref->name);
-		else if (data->format == REPLACE_FORMAT_MEDIUM)
-			printf("%s -> %s\n", ref->name, oid_to_hex(ref->oid));
-		else { /* data->format == REPLACE_FORMAT_LONG */
-			struct object_id object;
-			enum object_type obj_type, repl_type;
+	ਜੇ (!wildmatch(ਅੰਕੜੇ->ਨਮੂਨਾ, ref->name, 0)) {
+		ਜੇ (ਅੰਕੜੇ->format == REPLACE_FORMAT_SHORT)
+			ਲਿਖੋ("%s\n", ref->name);
+		ਨਹੀਂਤਾਂ ਜੇ (ਅੰਕੜੇ->format == REPLACE_FORMAT_MEDIUM)
+			ਲਿਖੋ("%s -> %s\n", ref->name, oid_ਮੰਜ਼ਿਲ_hex(ref->oid));
+		ਨਹੀਂਤਾਂ { /* data->format == REPLACE_FORMAT_LONG */
+			ਬਣਤਰ object_id object;
+			ਗਿਣਤੀ object_type obj_type, repl_type;
 
-			if (repo_get_oid(data->repo, ref->name, &object))
-				return error(_("failed to resolve '%s' as a valid ref"), ref->name);
+			ਜੇ (repo_get_oid(ਅੰਕੜੇ->repo, ref->name, &object))
+				ਵਾਪਸ error(_("failed to resolve '%s' as a valid ref"), ref->name);
 
-			obj_type = odb_read_object_info(data->repo->objects, &object, NULL);
-			repl_type = odb_read_object_info(data->repo->objects, ref->oid, NULL);
+			obj_type = odb_read_object_info(ਅੰਕੜੇ->repo->objects, &object, ਨਿਰਾ);
+			repl_type = odb_read_object_info(ਅੰਕੜੇ->repo->objects, ref->oid, ਨਿਰਾ);
 
-			printf("%s (%s) -> %s (%s)\n", ref->name, type_name(obj_type),
-			       oid_to_hex(ref->oid), type_name(repl_type));
+			ਲਿਖੋ("%s (%s) -> %s (%s)\n", ref->name, type_name(obj_type),
+			       oid_ਮੰਜ਼ਿਲ_hex(ref->oid), type_name(repl_type));
 		}
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int list_replace_refs(const char *pattern, const char *format)
+ਸਥਿਰ ਪੂਰਨ list_replace_refs(ਅਚਲ ਅੱਖਰ *ਨਮੂਨਾ, ਅਚਲ ਅੱਖਰ *format)
 {
-	struct show_data data;
+	ਬਣਤਰ show_ਅੰਕੜੇ ਅੰਕੜੇ;
 
-	data.repo = the_repository;
-	if (!pattern)
-		pattern = "*";
-	data.pattern = pattern;
+	ਅੰਕੜੇ.repo = the_repository;
+	ਜੇ (!ਨਮੂਨਾ)
+		ਨਮੂਨਾ = "*";
+	ਅੰਕੜੇ.ਨਮੂਨਾ = ਨਮੂਨਾ;
 
-	if (format == NULL || *format == '\0' || !strcmp(format, "short"))
-		data.format = REPLACE_FORMAT_SHORT;
-	else if (!strcmp(format, "medium"))
-		data.format = REPLACE_FORMAT_MEDIUM;
-	else if (!strcmp(format, "long"))
-		data.format = REPLACE_FORMAT_LONG;
+	ਜੇ (format == ਨਿਰਾ || *format == '\0' || !strcmp(format, "short"))
+		ਅੰਕੜੇ.format = REPLACE_FORMAT_SHORT;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(format, "medium"))
+		ਅੰਕੜੇ.format = REPLACE_FORMAT_MEDIUM;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(format, "long"))
+		ਅੰਕੜੇ.format = REPLACE_FORMAT_LONG;
 	/*
 	 * Please update _git_replace() in git-completion.bash when
 	 * you add new format
 	 */
-	else
-		return error(_("invalid replace format '%s'\n"
+	ਨਹੀਂਤਾਂ
+		ਵਾਪਸ error(_("invalid replace format '%s'\n"
 			       "valid formats are 'short', 'medium' and 'long'"),
 			     format);
 
 	refs_for_each_replace_ref(get_main_ref_store(the_repository),
-				  show_reference, (void *)&data);
+				  show_reference, (ਖਾਲੀ *)&ਅੰਕੜੇ);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-typedef int (*each_replace_name_fn)(const char *name, const char *ref,
-				    const struct object_id *oid);
+ਕਿਸਮਪਰਿਭਾਸ਼ਾ ਪੂਰਨ (*each_replace_name_fn)(ਅਚਲ ਅੱਖਰ *name, ਅਚਲ ਅੱਖਰ *ref,
+				    ਅਚਲ ਬਣਤਰ object_id *oid);
 
-static int for_each_replace_name(const char **argv, each_replace_name_fn fn)
+ਸਥਿਰ ਪੂਰਨ for_each_replace_name(ਅਚਲ ਅੱਖਰ **argv, each_replace_name_fn fn)
 {
-	const char **p, *full_hex;
-	struct strbuf ref = STRBUF_INIT;
-	size_t base_len;
-	int had_error = 0;
-	struct object_id oid;
-	const char *git_replace_ref_base = ref_namespace[NAMESPACE_REPLACE].ref;
+	ਅਚਲ ਅੱਖਰ **p, *ਭਰਿਆ_hex;
+	ਬਣਤਰ strbuf ref = STRBUF_INIT;
+	ਮਾਪ_t ਅਧਾਰ_len;
+	ਪੂਰਨ had_error = 0;
+	ਬਣਤਰ object_id oid;
+	ਅਚਲ ਅੱਖਰ *git_replace_ref_ਅਧਾਰ = ref_namespace[NAMESPACE_REPLACE].ref;
 
-	strbuf_addstr(&ref, git_replace_ref_base);
-	base_len = ref.len;
+	strbuf_addstr(&ref, git_replace_ref_ਅਧਾਰ);
+	ਅਧਾਰ_len = ref.len;
 
-	for (p = argv; *p; p++) {
-		if (repo_get_oid(the_repository, *p, &oid)) {
+	ਲਈ (p = argv; *p; p++) {
+		ਜੇ (repo_get_oid(the_repository, *p, &oid)) {
 			error("failed to resolve '%s' as a valid ref", *p);
 			had_error = 1;
-			continue;
+			ਜਾਰੀ;
 		}
 
-		strbuf_setlen(&ref, base_len);
-		strbuf_add_oid_hex(&ref, &oid);
-		full_hex = ref.buf + base_len;
+		strbuf_setlen(&ref, ਅਧਾਰ_len);
+		strbuf_ਜੋੜੋ_oid_hex(&ref, &oid);
+		ਭਰਿਆ_hex = ref.buf + ਅਧਾਰ_len;
 
-		if (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
-			error(_("replace ref '%s' not found"), full_hex);
+		ਜੇ (refs_read_ref(get_main_ref_store(the_repository), ref.buf, &oid)) {
+			error(_("replace ref '%s' not found"), ਭਰਿਆ_hex);
 			had_error = 1;
-			continue;
+			ਜਾਰੀ;
 		}
-		if (fn(full_hex, ref.buf, &oid))
+		ਜੇ (fn(ਭਰਿਆ_hex, ref.buf, &oid))
 			had_error = 1;
 	}
 	strbuf_release(&ref);
-	return had_error;
+	ਵਾਪਸ had_error;
 }
 
-static int delete_replace_ref(const char *name, const char *ref,
-			      const struct object_id *oid)
+ਸਥਿਰ ਪੂਰਨ delete_replace_ref(ਅਚਲ ਅੱਖਰ *name, ਅਚਲ ਅੱਖਰ *ref,
+			      ਅਚਲ ਬਣਤਰ object_id *oid)
 {
-	if (refs_delete_ref(get_main_ref_store(the_repository), NULL, ref, oid, 0))
-		return 1;
+	ਜੇ (refs_delete_ref(get_main_ref_store(the_repository), ਨਿਰਾ, ref, oid, 0))
+		ਵਾਪਸ 1;
 	printf_ln(_("Deleted replace ref '%s'"), name);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int check_ref_valid(struct object_id *object,
-			    struct object_id *prev,
-			    struct strbuf *ref,
-			    int force)
+ਸਥਿਰ ਪੂਰਨ check_ref_valid(ਬਣਤਰ object_id *object,
+			    ਬਣਤਰ object_id *prev,
+			    ਬਣਤਰ strbuf *ref,
+			    ਪੂਰਨ force)
 {
-	const char *git_replace_ref_base = ref_namespace[NAMESPACE_REPLACE].ref;
+	ਅਚਲ ਅੱਖਰ *git_replace_ref_ਅਧਾਰ = ref_namespace[NAMESPACE_REPLACE].ref;
 
 	strbuf_reset(ref);
-	strbuf_addf(ref, "%s%s", git_replace_ref_base, oid_to_hex(object));
-	if (check_refname_format(ref->buf, 0))
-		return error(_("'%s' is not a valid ref name"), ref->buf);
+	strbuf_addf(ref, "%s%s", git_replace_ref_ਅਧਾਰ, oid_ਮੰਜ਼ਿਲ_hex(object));
+	ਜੇ (check_refname_format(ref->buf, 0))
+		ਵਾਪਸ error(_("'%s' is not a valid ref name"), ref->buf);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), ref->buf, prev))
+	ਜੇ (refs_read_ref(get_main_ref_store(the_repository), ref->buf, prev))
 		oidclr(prev, the_repository->hash_algo);
-	else if (!force)
-		return error(_("replace ref '%s' already exists"), ref->buf);
-	return 0;
+	ਨਹੀਂਤਾਂ ਜੇ (!force)
+		ਵਾਪਸ error(_("replace ref '%s' already exists"), ref->buf);
+	ਵਾਪਸ 0;
 }
 
-static int replace_object_oid(const char *object_ref,
-			       struct object_id *object,
-			       const char *replace_ref,
-			       struct object_id *repl,
-			       int force)
+ਸਥਿਰ ਪੂਰਨ replace_object_oid(ਅਚਲ ਅੱਖਰ *object_ref,
+			       ਬਣਤਰ object_id *object,
+			       ਅਚਲ ਅੱਖਰ *replace_ref,
+			       ਬਣਤਰ object_id *repl,
+			       ਪੂਰਨ force)
 {
-	struct object_id prev;
-	enum object_type obj_type, repl_type;
-	struct strbuf ref = STRBUF_INIT;
-	struct ref_transaction *transaction;
-	struct strbuf err = STRBUF_INIT;
-	int res = 0;
+	ਬਣਤਰ object_id prev;
+	ਗਿਣਤੀ object_type obj_type, repl_type;
+	ਬਣਤਰ strbuf ref = STRBUF_INIT;
+	ਬਣਤਰ ref_transaction *transaction;
+	ਬਣਤਰ strbuf err = STRBUF_INIT;
+	ਪੂਰਨ res = 0;
 
-	obj_type = odb_read_object_info(the_repository->objects, object, NULL);
-	repl_type = odb_read_object_info(the_repository->objects, repl, NULL);
-	if (!force && obj_type != repl_type)
-		return error(_("Objects must be of the same type.\n"
+	obj_type = odb_read_object_info(the_repository->objects, object, ਨਿਰਾ);
+	repl_type = odb_read_object_info(the_repository->objects, repl, ਨਿਰਾ);
+	ਜੇ (!force && obj_type != repl_type)
+		ਵਾਪਸ error(_("Objects must be of the same type.\n"
 			       "'%s' points to a replaced object of type '%s'\n"
 			       "while '%s' points to a replacement object of "
 			       "type '%s'."),
 			     object_ref, type_name(obj_type),
 			     replace_ref, type_name(repl_type));
 
-	if (check_ref_valid(object, &prev, &ref, force)) {
+	ਜੇ (check_ref_valid(object, &prev, &ref, force)) {
 		strbuf_release(&ref);
-		return -1;
+		ਵਾਪਸ -1;
 	}
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	ਜੇ (!transaction ||
 	    ref_transaction_update(transaction, ref.buf, repl, &prev,
-				   NULL, NULL, 0, NULL, &err) ||
+				   ਨਿਰਾ, ਨਿਰਾ, 0, ਨਿਰਾ, &err) ||
 	    ref_transaction_commit(transaction, &err))
 		res = error("%s", err.buf);
 
 	ref_transaction_free(transaction);
 	strbuf_release(&ref);
-	return res;
+	ਵਾਪਸ res;
 }
 
-static int replace_object(const char *object_ref, const char *replace_ref, int force)
+ਸਥਿਰ ਪੂਰਨ replace_object(ਅਚਲ ਅੱਖਰ *object_ref, ਅਚਲ ਅੱਖਰ *replace_ref, ਪੂਰਨ force)
 {
-	struct object_id object, repl;
+	ਬਣਤਰ object_id object, repl;
 
-	if (repo_get_oid(the_repository, object_ref, &object))
-		return error(_("failed to resolve '%s' as a valid ref"),
+	ਜੇ (repo_get_oid(the_repository, object_ref, &object))
+		ਵਾਪਸ error(_("failed to resolve '%s' as a valid ref"),
 			     object_ref);
-	if (repo_get_oid(the_repository, replace_ref, &repl))
-		return error(_("failed to resolve '%s' as a valid ref"),
+	ਜੇ (repo_get_oid(the_repository, replace_ref, &repl))
+		ਵਾਪਸ error(_("failed to resolve '%s' as a valid ref"),
 			     replace_ref);
 
-	return replace_object_oid(object_ref, &object, replace_ref, &repl, force);
+	ਵਾਪਸ replace_object_oid(object_ref, &object, replace_ref, &repl, force);
 }
 
 /*
@@ -230,29 +230,29 @@ static int replace_object(const char *object_ref, const char *replace_ref, int f
  * If "raw" is true, then the object's raw contents are printed according to
  * "type". Otherwise, we pretty-print the contents for human editing.
  */
-static int export_object(const struct object_id *oid, enum object_type type,
-			  int raw, const char *filename)
+ਸਥਿਰ ਪੂਰਨ export_object(ਅਚਲ ਬਣਤਰ object_id *oid, ਗਿਣਤੀ object_type type,
+			  ਪੂਰਨ raw, ਅਚਲ ਅੱਖਰ *filename)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int fd;
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
+	ਪੂਰਨ fd;
 
 	fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-	if (fd < 0)
-		return error_errno(_("unable to open %s for writing"), filename);
+	ਜੇ (fd < 0)
+		ਵਾਪਸ error_errno(_("unable to open %s for writing"), filename);
 
-	strvec_push(&cmd.args, "--no-replace-objects");
-	strvec_push(&cmd.args, "cat-file");
-	if (raw)
-		strvec_push(&cmd.args, type_name(type));
-	else
-		strvec_push(&cmd.args, "-p");
-	strvec_push(&cmd.args, oid_to_hex(oid));
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "--no-replace-objects");
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "cat-file");
+	ਜੇ (raw)
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, type_name(type));
+	ਨਹੀਂਤਾਂ
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "-p");
+	strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, oid_ਮੰਜ਼ਿਲ_hex(oid));
 	cmd.git_cmd = 1;
-	cmd.out = fd;
+	cmd.ਬਾਹਰਲਾ = fd;
 
-	if (run_command(&cmd))
-		return error(_("cat-file reported failure"));
-	return 0;
+	ਜੇ (ਲੜੀਵਾਰ_command(&cmd))
+		ਵਾਪਸ error(_("cat-file reported failure"));
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -260,58 +260,58 @@ static int export_object(const struct object_id *oid, enum object_type type,
  * interpreting it as "type", and writing the result to the object database.
  * The sha1 of the written object is returned via sha1.
  */
-static int import_object(struct object_id *oid, enum object_type type,
-			  int raw, const char *filename)
+ਸਥਿਰ ਪੂਰਨ import_object(ਬਣਤਰ object_id *oid, ਗਿਣਤੀ object_type type,
+			  ਪੂਰਨ raw, ਅਚਲ ਅੱਖਰ *filename)
 {
-	int fd;
+	ਪੂਰਨ fd;
 
 	fd = open(filename, O_RDONLY);
-	if (fd < 0)
-		return error_errno(_("unable to open %s for reading"), filename);
+	ਜੇ (fd < 0)
+		ਵਾਪਸ error_errno(_("unable to open %s for reading"), filename);
 
-	if (!raw && type == OBJ_TREE) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		struct strbuf result = STRBUF_INIT;
+	ਜੇ (!raw && type == OBJ_ਰੁੱਖ) {
+		ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
+		ਬਣਤਰ strbuf ਨਤੀਜਾ = STRBUF_INIT;
 
-		strvec_push(&cmd.args, "mktree");
+		strvec_ਧੱਕੋ(&cmd.ਦਲੀਲਾਂ, "mktree");
 		cmd.git_cmd = 1;
-		cmd.in = fd;
-		cmd.out = -1;
+		cmd.ਵਿੱਚ = fd;
+		cmd.ਬਾਹਰਲਾ = -1;
 
-		if (start_command(&cmd)) {
+		ਜੇ (ਸ਼ੁਰੂ_command(&cmd)) {
 			close(fd);
-			return error(_("unable to spawn mktree"));
+			ਵਾਪਸ error(_("unable to spawn mktree"));
 		}
 
-		if (strbuf_read(&result, cmd.out, the_hash_algo->hexsz + 1) < 0) {
+		ਜੇ (strbuf_read(&ਨਤੀਜਾ, cmd.ਬਾਹਰਲਾ, the_hash_algo->hexsz + 1) < 0) {
 			error_errno(_("unable to read from mktree"));
 			close(fd);
-			close(cmd.out);
-			return -1;
+			close(cmd.ਬਾਹਰਲਾ);
+			ਵਾਪਸ -1;
 		}
-		close(cmd.out);
+		close(cmd.ਬਾਹਰਲਾ);
 
-		if (finish_command(&cmd)) {
-			strbuf_release(&result);
-			return error(_("mktree reported failure"));
+		ਜੇ (ਅੰਤ_command(&cmd)) {
+			strbuf_release(&ਨਤੀਜਾ);
+			ਵਾਪਸ error(_("mktree reported failure"));
 		}
-		if (get_oid_hex(result.buf, oid) < 0) {
-			strbuf_release(&result);
-			return error(_("mktree did not return an object name"));
+		ਜੇ (get_oid_hex(ਨਤੀਜਾ.buf, oid) < 0) {
+			strbuf_release(&ਨਤੀਜਾ);
+			ਵਾਪਸ error(_("mktree did not return an object name"));
 		}
 
-		strbuf_release(&result);
-	} else {
-		struct stat st;
-		int flags = INDEX_FORMAT_CHECK | INDEX_WRITE_OBJECT;
+		strbuf_release(&ਨਤੀਜਾ);
+	} ਨਹੀਂਤਾਂ {
+		ਬਣਤਰ stat st;
+		ਪੂਰਨ flags = ਸੂਚਕਾਂਕ_FORMAT_CHECK | ਸੂਚਕਾਂਕ_WRITE_OBJECT;
 
-		if (fstat(fd, &st) < 0) {
+		ਜੇ (fstat(fd, &st) < 0) {
 			error_errno(_("unable to fstat %s"), filename);
 			close(fd);
-			return -1;
+			ਵਾਪਸ -1;
 		}
-		if (index_fd(the_repository->index, oid, fd, &st, type, NULL, flags) < 0)
-			return error(_("unable to write object to database"));
+		ਜੇ (ਸੂਚਕਾਂਕ_fd(the_repository->ਸੂਚਕਾਂਕ, oid, fd, &st, type, ਨਿਰਾ, flags) < 0)
+			ਵਾਪਸ error(_("unable to write object to database"));
 		/* index_fd close()s fd for us */
 	}
 
@@ -319,321 +319,321 @@ static int import_object(struct object_id *oid, enum object_type type,
 	 * No need to close(fd) here; both run-command and index-fd
 	 * will have done it for us.
 	 */
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int edit_and_replace(const char *object_ref, int force, int raw)
+ਸਥਿਰ ਪੂਰਨ edit_and_replace(ਅਚਲ ਅੱਖਰ *object_ref, ਪੂਰਨ force, ਪੂਰਨ raw)
 {
-	char *tmpfile;
-	enum object_type type;
-	struct object_id old_oid, new_oid, prev;
-	struct strbuf ref = STRBUF_INIT;
+	ਅੱਖਰ *tmpfile;
+	ਗਿਣਤੀ object_type type;
+	ਬਣਤਰ object_id old_oid, new_oid, prev;
+	ਬਣਤਰ strbuf ref = STRBUF_INIT;
 
-	if (repo_get_oid(the_repository, object_ref, &old_oid) < 0)
-		return error(_("not a valid object name: '%s'"), object_ref);
+	ਜੇ (repo_get_oid(the_repository, object_ref, &old_oid) < 0)
+		ਵਾਪਸ error(_("not a valid object name: '%s'"), object_ref);
 
-	type = odb_read_object_info(the_repository->objects, &old_oid, NULL);
-	if (type < 0)
-		return error(_("unable to get object type for %s"),
-			     oid_to_hex(&old_oid));
+	type = odb_read_object_info(the_repository->objects, &old_oid, ਨਿਰਾ);
+	ਜੇ (type < 0)
+		ਵਾਪਸ error(_("unable to get object type for %s"),
+			     oid_ਮੰਜ਼ਿਲ_hex(&old_oid));
 
-	if (check_ref_valid(&old_oid, &prev, &ref, force)) {
+	ਜੇ (check_ref_valid(&old_oid, &prev, &ref, force)) {
 		strbuf_release(&ref);
-		return -1;
+		ਵਾਪਸ -1;
 	}
 	strbuf_release(&ref);
 
-	tmpfile = repo_git_path(the_repository, "REPLACE_EDITOBJ");
-	if (export_object(&old_oid, type, raw, tmpfile)) {
-		free(tmpfile);
-		return -1;
+	tmpfile = repo_git_ਰਸਤਾ(the_repository, "REPLACE_EDITOBJ");
+	ਜੇ (export_object(&old_oid, type, raw, tmpfile)) {
+		ਮੁਕਤ(tmpfile);
+		ਵਾਪਸ -1;
 	}
-	if (launch_editor(tmpfile, NULL, NULL) < 0) {
-		free(tmpfile);
-		return error(_("editing object file failed"));
+	ਜੇ (launch_editor(tmpfile, ਨਿਰਾ, ਨਿਰਾ) < 0) {
+		ਮੁਕਤ(tmpfile);
+		ਵਾਪਸ error(_("editing object file failed"));
 	}
-	if (import_object(&new_oid, type, raw, tmpfile)) {
-		free(tmpfile);
-		return -1;
+	ਜੇ (import_object(&new_oid, type, raw, tmpfile)) {
+		ਮੁਕਤ(tmpfile);
+		ਵਾਪਸ -1;
 	}
-	free(tmpfile);
+	ਮੁਕਤ(tmpfile);
 
-	if (oideq(&old_oid, &new_oid))
-		return error(_("new object is the same as the old one: '%s'"), oid_to_hex(&old_oid));
+	ਜੇ (oideq(&old_oid, &new_oid))
+		ਵਾਪਸ error(_("new object is the same as the old one: '%s'"), oid_ਮੰਜ਼ਿਲ_hex(&old_oid));
 
-	return replace_object_oid(object_ref, &old_oid, "replacement", &new_oid, force);
+	ਵਾਪਸ replace_object_oid(object_ref, &old_oid, "replacement", &new_oid, force);
 }
 
-static int replace_parents(struct strbuf *buf, int argc, const char **argv)
+ਸਥਿਰ ਪੂਰਨ replace_parents(ਬਣਤਰ strbuf *buf, ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv)
 {
-	struct strbuf new_parents = STRBUF_INIT;
-	const char *parent_start, *parent_end;
-	int i;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	ਬਣਤਰ strbuf new_parents = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *ਮਾਪਾ_ਸ਼ੁਰੂ, *ਮਾਪਾ_ਸਿਰਾ;
+	ਪੂਰਨ i;
+	ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ hexsz = the_hash_algo->hexsz;
 
 	/* find existing parents */
-	parent_start = buf->buf;
-	parent_start += hexsz + 6; /* "tree " + "hex sha1" + "\n" */
-	parent_end = parent_start;
+	ਮਾਪਾ_ਸ਼ੁਰੂ = buf->buf;
+	ਮਾਪਾ_ਸ਼ੁਰੂ += hexsz + 6; /* "tree " + "hex sha1" + "\n" */
+	ਮਾਪਾ_ਸਿਰਾ = ਮਾਪਾ_ਸ਼ੁਰੂ;
 
-	while (starts_with(parent_end, "parent "))
-		parent_end += hexsz + 8; /* "parent " + "hex sha1" + "\n" */
+	ਜਦੋਂ (starts_with(ਮਾਪਾ_ਸਿਰਾ, "parent "))
+		ਮਾਪਾ_ਸਿਰਾ += hexsz + 8; /* "parent " + "hex sha1" + "\n" */
 
 	/* prepare new parents */
-	for (i = 0; i < argc; i++) {
-		struct object_id oid;
-		struct commit *commit;
+	ਲਈ (i = 0; i < argc; i++) {
+		ਬਣਤਰ object_id oid;
+		ਬਣਤਰ commit *commit;
 
-		if (repo_get_oid(the_repository, argv[i], &oid) < 0) {
+		ਜੇ (repo_get_oid(the_repository, argv[i], &oid) < 0) {
 			strbuf_release(&new_parents);
-			return error(_("not a valid object name: '%s'"),
+			ਵਾਪਸ error(_("not a valid object name: '%s'"),
 				     argv[i]);
 		}
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit) {
+		ਜੇ (!commit) {
 			strbuf_release(&new_parents);
-			return error(_("could not parse %s as a commit"), argv[i]);
+			ਵਾਪਸ error(_("could not parse %s as a commit"), argv[i]);
 		}
-		strbuf_addf(&new_parents, "parent %s\n", oid_to_hex(&commit->object.oid));
+		strbuf_addf(&new_parents, "parent %s\n", oid_ਮੰਜ਼ਿਲ_hex(&commit->object.oid));
 	}
 
 	/* replace existing parents with new ones */
-	strbuf_splice(buf, parent_start - buf->buf, parent_end - parent_start,
+	strbuf_splice(buf, ਮਾਪਾ_ਸ਼ੁਰੂ - buf->buf, ਮਾਪਾ_ਸਿਰਾ - ਮਾਪਾ_ਸ਼ੁਰੂ,
 		      new_parents.buf, new_parents.len);
 
 	strbuf_release(&new_parents);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-struct check_mergetag_data {
-	int argc;
-	const char **argv;
+ਬਣਤਰ check_mergetag_ਅੰਕੜੇ {
+	ਪੂਰਨ argc;
+	ਅਚਲ ਅੱਖਰ **argv;
 };
 
-static int check_one_mergetag(struct commit *commit UNUSED,
-			       struct commit_extra_header *extra,
-			       void *data)
+ਸਥਿਰ ਪੂਰਨ check_one_mergetag(ਬਣਤਰ commit *commit ਅਣਵਰਤਿਆ,
+			       ਬਣਤਰ commit_extra_ਸਿਰਲੇਖ *extra,
+			       ਖਾਲੀ *ਅੰਕੜੇ)
 {
-	struct check_mergetag_data *mergetag_data = (struct check_mergetag_data *)data;
-	const char *ref = mergetag_data->argv[0];
-	struct object_id tag_oid;
-	struct tag *tag;
-	int i;
+	ਬਣਤਰ check_mergetag_ਅੰਕੜੇ *mergetag_ਅੰਕੜੇ = (ਬਣਤਰ check_mergetag_ਅੰਕੜੇ *)ਅੰਕੜੇ;
+	ਅਚਲ ਅੱਖਰ *ref = mergetag_ਅੰਕੜੇ->argv[0];
+	ਬਣਤਰ object_id ਟੈਗ_oid;
+	ਬਣਤਰ ਟੈਗ *ਟੈਗ;
+	ਪੂਰਨ i;
 
-	hash_object_file(the_hash_algo, extra->value, extra->len,
-			 OBJ_TAG, &tag_oid);
-	tag = lookup_tag(the_repository, &tag_oid);
-	if (!tag)
-		return error(_("bad mergetag in commit '%s'"), ref);
-	if (parse_tag_buffer(the_repository, tag, extra->value, extra->len))
-		return error(_("malformed mergetag in commit '%s'"), ref);
+	hash_object_file(the_hash_algo, extra->ਮੁੱਲ, extra->len,
+			 OBJ_ਟੈਗ, &ਟੈਗ_oid);
+	ਟੈਗ = lookup_ਟੈਗ(the_repository, &ਟੈਗ_oid);
+	ਜੇ (!ਟੈਗ)
+		ਵਾਪਸ error(_("bad mergetag in commit '%s'"), ref);
+	ਜੇ (parse_ਟੈਗ_ਬਫਰ(the_repository, ਟੈਗ, extra->ਮੁੱਲ, extra->len))
+		ਵਾਪਸ error(_("malformed mergetag in commit '%s'"), ref);
 
 	/* iterate over new parents */
-	for (i = 1; i < mergetag_data->argc; i++) {
-		struct object_id oid;
-		if (repo_get_oid(the_repository, mergetag_data->argv[i], &oid) < 0)
-			return error(_("not a valid object name: '%s'"),
-				     mergetag_data->argv[i]);
-		if (oideq(get_tagged_oid(tag), &oid))
-			return 0; /* found */
+	ਲਈ (i = 1; i < mergetag_ਅੰਕੜੇ->argc; i++) {
+		ਬਣਤਰ object_id oid;
+		ਜੇ (repo_get_oid(the_repository, mergetag_ਅੰਕੜੇ->argv[i], &oid) < 0)
+			ਵਾਪਸ error(_("not a valid object name: '%s'"),
+				     mergetag_ਅੰਕੜੇ->argv[i]);
+		ਜੇ (oideq(get_tagged_oid(ਟੈਗ), &oid))
+			ਵਾਪਸ 0; /*ਮਿਲਿਆ*/
 	}
 
-	return error(_("original commit '%s' contains mergetag '%s' that is "
+	ਵਾਪਸ error(_("original commit '%s' contains mergetag '%s' that is "
 		       "discarded; use --edit instead of --graft"), ref,
-		     oid_to_hex(&tag_oid));
+		     oid_ਮੰਜ਼ਿਲ_hex(&ਟੈਗ_oid));
 }
 
-static int check_mergetags(struct commit *commit, int argc, const char **argv)
+ਸਥਿਰ ਪੂਰਨ check_mergetags(ਬਣਤਰ commit *commit, ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv)
 {
-	struct check_mergetag_data mergetag_data;
+	ਬਣਤਰ check_mergetag_ਅੰਕੜੇ mergetag_ਅੰਕੜੇ;
 
-	mergetag_data.argc = argc;
-	mergetag_data.argv = argv;
-	return for_each_mergetag(check_one_mergetag, commit, &mergetag_data);
+	mergetag_ਅੰਕੜੇ.argc = argc;
+	mergetag_ਅੰਕੜੇ.argv = argv;
+	ਵਾਪਸ for_each_mergetag(check_one_mergetag, commit, &mergetag_ਅੰਕੜੇ);
 }
 
-static int create_graft(int argc, const char **argv, int force, int gentle)
+ਸਥਿਰ ਪੂਰਨ create_graft(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਪੂਰਨ force, ਪੂਰਨ gentle)
 {
-	struct object_id old_oid, new_oid;
-	const char *old_ref = argv[0];
-	struct commit *commit;
-	struct strbuf buf = STRBUF_INIT;
-	const char *buffer;
-	unsigned long size;
+	ਬਣਤਰ object_id old_oid, new_oid;
+	ਅਚਲ ਅੱਖਰ *old_ref = argv[0];
+	ਬਣਤਰ commit *commit;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਅਚਲ ਅੱਖਰ *ਬਫਰ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਮਾਪ;
 
-	if (repo_get_oid(the_repository, old_ref, &old_oid) < 0)
-		return error(_("not a valid object name: '%s'"), old_ref);
+	ਜੇ (repo_get_oid(the_repository, old_ref, &old_oid) < 0)
+		ਵਾਪਸ error(_("not a valid object name: '%s'"), old_ref);
 	commit = lookup_commit_reference(the_repository, &old_oid);
-	if (!commit)
-		return error(_("could not parse %s"), old_ref);
+	ਜੇ (!commit)
+		ਵਾਪਸ error(_("could not parse %s"), old_ref);
 
-	buffer = repo_get_commit_buffer(the_repository, commit, &size);
-	strbuf_add(&buf, buffer, size);
-	repo_unuse_commit_buffer(the_repository, commit, buffer);
+	ਬਫਰ = repo_get_commit_ਬਫਰ(the_repository, commit, &ਮਾਪ);
+	strbuf_ਜੋੜੋ(&buf, ਬਫਰ, ਮਾਪ);
+	repo_unuse_commit_ਬਫਰ(the_repository, commit, ਬਫਰ);
 
-	if (replace_parents(&buf, argc - 1, &argv[1]) < 0) {
+	ਜੇ (replace_parents(&buf, argc - 1, &argv[1]) < 0) {
 		strbuf_release(&buf);
-		return -1;
+		ਵਾਪਸ -1;
 	}
 
-	if (remove_signature(&buf)) {
+	ਜੇ (remove_signature(&buf)) {
 		warning(_("the original commit '%s' has a gpg signature"), old_ref);
 		warning(_("the signature will be removed in the replacement commit!"));
 	}
 
-	if (check_mergetags(commit, argc, argv)) {
+	ਜੇ (check_mergetags(commit, argc, argv)) {
 		strbuf_release(&buf);
-		return -1;
+		ਵਾਪਸ -1;
 	}
 
-	if (odb_write_object(the_repository->objects, buf.buf,
+	ਜੇ (odb_write_object(the_repository->objects, buf.buf,
 			     buf.len, OBJ_COMMIT, &new_oid)) {
 		strbuf_release(&buf);
-		return error(_("could not write replacement commit for: '%s'"),
+		ਵਾਪਸ error(_("could not write replacement commit for: '%s'"),
 			     old_ref);
 	}
 
 	strbuf_release(&buf);
 
-	if (oideq(&commit->object.oid, &new_oid)) {
-		if (gentle) {
+	ਜੇ (oideq(&commit->object.oid, &new_oid)) {
+		ਜੇ (gentle) {
 			warning(_("graft for '%s' unnecessary"),
-				oid_to_hex(&commit->object.oid));
-			return 0;
+				oid_ਮੰਜ਼ਿਲ_hex(&commit->object.oid));
+			ਵਾਪਸ 0;
 		}
-		return error(_("new commit is the same as the old one: '%s'"),
-			     oid_to_hex(&commit->object.oid));
+		ਵਾਪਸ error(_("new commit is the same as the old one: '%s'"),
+			     oid_ਮੰਜ਼ਿਲ_hex(&commit->object.oid));
 	}
 
-	return replace_object_oid(old_ref, &commit->object.oid,
+	ਵਾਪਸ replace_object_oid(old_ref, &commit->object.oid,
 				  "replacement", &new_oid, force);
 }
 
-static int convert_graft_file(int force)
+ਸਥਿਰ ਪੂਰਨ convert_graft_file(ਪੂਰਨ force)
 {
-	const char *graft_file = repo_get_graft_file(the_repository);
+	ਅਚਲ ਅੱਖਰ *graft_file = repo_get_graft_file(the_repository);
 	FILE *fp = fopen_or_warn(graft_file, "r");
-	struct strbuf buf = STRBUF_INIT, err = STRBUF_INIT;
-	struct strvec args = STRVEC_INIT;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT, err = STRBUF_INIT;
+	ਬਣਤਰ strvec ਦਲੀਲਾਂ = STRVEC_INIT;
 
-	if (!fp)
-		return -1;
+	ਜੇ (!fp)
+		ਵਾਪਸ -1;
 
 	no_graft_file_deprecated_advice = 1;
-	while (strbuf_getline(&buf, fp) != EOF) {
-		if (*buf.buf == '#')
-			continue;
+	ਜਦੋਂ (strbuf_getline(&buf, fp) != EOF) {
+		ਜੇ (*buf.buf == '#')
+			ਜਾਰੀ;
 
-		strvec_split(&args, buf.buf);
-		if (args.nr && create_graft(args.nr, args.v, force, 1))
+		strvec_ਵੰਡੋ(&ਦਲੀਲਾਂ, buf.buf);
+		ਜੇ (ਦਲੀਲਾਂ.nr && create_graft(ਦਲੀਲਾਂ.nr, ਦਲੀਲਾਂ.v, force, 1))
 			strbuf_addf(&err, "\n\t%s", buf.buf);
-		strvec_clear(&args);
+		strvec_clear(&ਦਲੀਲਾਂ);
 	}
 	fclose(fp);
 
 	strbuf_release(&buf);
 
-	if (!err.len)
-		return unlink_or_warn(graft_file);
+	ਜੇ (!err.len)
+		ਵਾਪਸ unlink_or_warn(graft_file);
 
 	warning(_("could not convert the following graft(s):\n%s"), err.buf);
 	strbuf_release(&err);
 
-	return -1;
+	ਵਾਪਸ -1;
 }
 
-int cmd_replace(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+ਪੂਰਨ cmd_replace(ਪੂਰਨ argc,
+		ਅਚਲ ਅੱਖਰ **argv,
+		ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int force = 0;
-	int raw = 0;
-	const char *format = NULL;
-	enum {
-		MODE_UNSPECIFIED = 0,
-		MODE_LIST,
-		MODE_DELETE,
-		MODE_EDIT,
-		MODE_GRAFT,
-		MODE_CONVERT_GRAFT_FILE,
-		MODE_REPLACE
-	} cmdmode = MODE_UNSPECIFIED;
-	struct option options[] = {
-		OPT_CMDMODE('l', "list", &cmdmode, N_("list replace refs"), MODE_LIST),
-		OPT_CMDMODE('d', "delete", &cmdmode, N_("delete replace refs"), MODE_DELETE),
-		OPT_CMDMODE('e', "edit", &cmdmode, N_("edit existing object"), MODE_EDIT),
-		OPT_CMDMODE('g', "graft", &cmdmode, N_("change a commit's parents"), MODE_GRAFT),
-		OPT_CMDMODE(0, "convert-graft-file", &cmdmode, N_("convert existing graft file"), MODE_CONVERT_GRAFT_FILE),
+	ਪੂਰਨ force = 0;
+	ਪੂਰਨ raw = 0;
+	ਅਚਲ ਅੱਖਰ *format = ਨਿਰਾ;
+	ਗਿਣਤੀ {
+		ਬਹੁਲਕ_UNSPECIFIED = 0,
+		ਬਹੁਲਕ_LIST,
+		ਬਹੁਲਕ_DELETE,
+		ਬਹੁਲਕ_EDIT,
+		ਬਹੁਲਕ_GRAFT,
+		ਬਹੁਲਕ_CONVERT_GRAFT_FILE,
+		ਬਹੁਲਕ_REPLACE
+	} cmdmode = ਬਹੁਲਕ_UNSPECIFIED;
+	ਬਣਤਰ option options[] = {
+		OPT_CMDMODE('l', "list", &cmdmode, N_("list replace refs"), ਬਹੁਲਕ_LIST),
+		OPT_CMDMODE('d', "delete", &cmdmode, N_("delete replace refs"), ਬਹੁਲਕ_DELETE),
+		OPT_CMDMODE('e', "edit", &cmdmode, N_("edit existing object"), ਬਹੁਲਕ_EDIT),
+		OPT_CMDMODE('g', "graft", &cmdmode, N_("change a commit's parents"), ਬਹੁਲਕ_GRAFT),
+		OPT_CMDMODE(0, "convert-graft-file", &cmdmode, N_("convert existing graft file"), ਬਹੁਲਕ_CONVERT_GRAFT_FILE),
 		OPT_BOOL_F('f', "force", &force, N_("replace the ref if it exists"),
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL(0, "raw", &raw, N_("do not pretty-print contents for --edit")),
 		OPT_STRING(0, "format", &format, N_("format"), N_("use this format")),
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
 
 	disable_replace_refs();
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
 
-	argc = parse_options(argc, argv, prefix, options, git_replace_usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, git_replace_usage, 0);
 
-	if (!cmdmode)
-		cmdmode = argc ? MODE_REPLACE : MODE_LIST;
+	ਜੇ (!cmdmode)
+		cmdmode = argc ? ਬਹੁਲਕ_REPLACE : ਬਹੁਲਕ_LIST;
 
-	if (format && cmdmode != MODE_LIST)
-		usage_msg_opt(_("--format cannot be used when not listing"),
+	ਜੇ (format && cmdmode != ਬਹੁਲਕ_LIST)
+		usage_ਸੁਨੇਹਾ_opt(_("--format cannot be used when not listing"),
 			      git_replace_usage, options);
 
-	if (force &&
-	    cmdmode != MODE_REPLACE &&
-	    cmdmode != MODE_EDIT &&
-	    cmdmode != MODE_GRAFT &&
-	    cmdmode != MODE_CONVERT_GRAFT_FILE)
-		usage_msg_opt(_("-f only makes sense when writing a replacement"),
+	ਜੇ (force &&
+	    cmdmode != ਬਹੁਲਕ_REPLACE &&
+	    cmdmode != ਬਹੁਲਕ_EDIT &&
+	    cmdmode != ਬਹੁਲਕ_GRAFT &&
+	    cmdmode != ਬਹੁਲਕ_CONVERT_GRAFT_FILE)
+		usage_ਸੁਨੇਹਾ_opt(_("-f only makes sense when writing a replacement"),
 			      git_replace_usage, options);
 
-	if (raw && cmdmode != MODE_EDIT)
-		usage_msg_opt(_("--raw only makes sense with --edit"),
+	ਜੇ (raw && cmdmode != ਬਹੁਲਕ_EDIT)
+		usage_ਸੁਨੇਹਾ_opt(_("--raw only makes sense with --edit"),
 			      git_replace_usage, options);
 
-	switch (cmdmode) {
-	case MODE_DELETE:
-		if (argc < 1)
-			usage_msg_opt(_("-d needs at least one argument"),
+	ਚੋਣ (cmdmode) {
+	ਹਾਲਤ ਬਹੁਲਕ_DELETE:
+		ਜੇ (argc < 1)
+			usage_ਸੁਨੇਹਾ_opt(_("-d needs at least one argument"),
 				      git_replace_usage, options);
-		return for_each_replace_name(argv, delete_replace_ref);
+		ਵਾਪਸ for_each_replace_name(argv, delete_replace_ref);
 
-	case MODE_REPLACE:
-		if (argc != 2)
-			usage_msg_opt(_("bad number of arguments"),
+	ਹਾਲਤ ਬਹੁਲਕ_REPLACE:
+		ਜੇ (argc != 2)
+			usage_ਸੁਨੇਹਾ_opt(_("bad number of arguments"),
 				      git_replace_usage, options);
-		return replace_object(argv[0], argv[1], force);
+		ਵਾਪਸ replace_object(argv[0], argv[1], force);
 
-	case MODE_EDIT:
-		if (argc != 1)
-			usage_msg_opt(_("-e needs exactly one argument"),
+	ਹਾਲਤ ਬਹੁਲਕ_EDIT:
+		ਜੇ (argc != 1)
+			usage_ਸੁਨੇਹਾ_opt(_("-e needs exactly one argument"),
 				      git_replace_usage, options);
-		return edit_and_replace(argv[0], force, raw);
+		ਵਾਪਸ edit_and_replace(argv[0], force, raw);
 
-	case MODE_GRAFT:
-		if (argc < 1)
-			usage_msg_opt(_("-g needs at least one argument"),
+	ਹਾਲਤ ਬਹੁਲਕ_GRAFT:
+		ਜੇ (argc < 1)
+			usage_ਸੁਨੇਹਾ_opt(_("-g needs at least one argument"),
 				      git_replace_usage, options);
-		return create_graft(argc, argv, force, 0);
+		ਵਾਪਸ create_graft(argc, argv, force, 0);
 
-	case MODE_CONVERT_GRAFT_FILE:
-		if (argc != 0)
-			usage_msg_opt(_("--convert-graft-file takes no argument"),
+	ਹਾਲਤ ਬਹੁਲਕ_CONVERT_GRAFT_FILE:
+		ਜੇ (argc != 0)
+			usage_ਸੁਨੇਹਾ_opt(_("--convert-graft-file takes no argument"),
 				      git_replace_usage, options);
-		return !!convert_graft_file(force);
+		ਵਾਪਸ !!convert_graft_file(force);
 
-	case MODE_LIST:
-		if (argc > 1)
-			usage_msg_opt(_("only one pattern can be given with -l"),
+	ਹਾਲਤ ਬਹੁਲਕ_LIST:
+		ਜੇ (argc > 1)
+			usage_ਸੁਨੇਹਾ_opt(_("only one pattern can be given with -l"),
 				      git_replace_usage, options);
-		return list_replace_refs(argv[0], format);
+		ਵਾਪਸ list_replace_refs(argv[0], format);
 
-	default:
-		BUG("invalid cmdmode %d", (int)cmdmode);
+	ਮੂਲ:
+		BUG("invalid cmdmode %d", (ਪੂਰਨ)cmdmode);
 	}
 }

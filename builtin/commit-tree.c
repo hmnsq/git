@@ -3,158 +3,158 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "object-name.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "odb.h"
 
-#include "commit.h"
-#include "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
 
-static const char * const commit_tree_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ * ਅਚਲ commit_ਰੁੱਖ_usage[] = {
 	N_("git commit-tree <tree> [(-p <parent>)...]"),
 	N_("git commit-tree [(-p <parent>)...] [-S[<keyid>]] [(-m <message>)...]\n"
 	   "                [(-F <file>)...] <tree>"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *sign_commit;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *sign_commit;
 
-static void new_parent(struct commit *parent, struct commit_list **parents_p)
+ਸਥਿਰ ਖਾਲੀ new_ਮਾਪਾ(ਬਣਤਰ commit *ਮਾਪਾ, ਬਣਤਰ commit_list **parents_p)
 {
-	struct object_id *oid = &parent->object.oid;
-	struct commit_list *parents;
-	for (parents = *parents_p; parents; parents = parents->next) {
-		if (parents->item == parent) {
-			error(_("duplicate parent %s ignored"), oid_to_hex(oid));
-			return;
+	ਬਣਤਰ object_id *oid = &ਮਾਪਾ->object.oid;
+	ਬਣਤਰ commit_list *parents;
+	ਲਈ (parents = *parents_p; parents; parents = parents->ਅਗਲਾ) {
+		ਜੇ (parents->ਵਸਤੂ == ਮਾਪਾ) {
+			error(_("duplicate parent %s ignored"), oid_ਮੰਜ਼ਿਲ_hex(oid));
+			ਵਾਪਸ;
 		}
-		parents_p = &parents->next;
+		parents_p = &parents->ਅਗਲਾ;
 	}
-	commit_list_insert(parent, parents_p);
+	commit_list_ਪਾਓ(ਮਾਪਾ, parents_p);
 }
 
-static int parse_parent_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_ਮਾਪਾ_arg_callback(ਅਚਲ ਬਣਤਰ option *opt,
+		ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	struct object_id oid;
-	struct commit_list **parents = opt->value;
+	ਬਣਤਰ object_id oid;
+	ਬਣਤਰ commit_list **parents = opt->ਮੁੱਲ;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (repo_get_oid_commit(the_repository, arg, &oid))
+	ਜੇ (repo_get_oid_commit(the_repository, arg, &oid))
 		die(_("not a valid object name %s"), arg);
 
 	odb_assert_oid_type(the_repository->objects, &oid, OBJ_COMMIT);
-	new_parent(lookup_commit(the_repository, &oid), parents);
-	return 0;
+	new_ਮਾਪਾ(lookup_commit(the_repository, &oid), parents);
+	ਵਾਪਸ 0;
 }
 
-static int parse_message_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_ਸੁਨੇਹਾ_arg_callback(ਅਚਲ ਬਣਤਰ option *opt,
+		ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	struct strbuf *buf = opt->value;
+	ਬਣਤਰ strbuf *buf = opt->ਮੁੱਲ;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (buf->len)
+	ਜੇ (buf->len)
 		strbuf_addch(buf, '\n');
 	strbuf_addstr(buf, arg);
-	strbuf_complete_line(buf);
+	strbuf_complete_ਸਤਰ(buf);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int parse_file_arg_callback(const struct option *opt,
-		const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_file_arg_callback(ਅਚਲ ਬਣਤਰ option *opt,
+		ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	int fd;
-	struct strbuf *buf = opt->value;
+	ਪੂਰਨ fd;
+	ਬਣਤਰ strbuf *buf = opt->ਮੁੱਲ;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
-	if (buf->len)
+	ਜੇ (buf->len)
 		strbuf_addch(buf, '\n');
-	if (!strcmp(arg, "-"))
+	ਜੇ (!strcmp(arg, "-"))
 		fd = 0;
-	else {
+	ਨਹੀਂਤਾਂ {
 		fd = xopen(arg, O_RDONLY);
 	}
-	if (strbuf_read(buf, fd, 0) < 0)
+	ਜੇ (strbuf_read(buf, fd, 0) < 0)
 		die_errno(_("git commit-tree: failed to read '%s'"), arg);
-	if (fd && close(fd))
+	ਜੇ (fd && close(fd))
 		die_errno(_("git commit-tree: failed to close '%s'"), arg);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-int cmd_commit_tree(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ਪੂਰਨ cmd_commit_ਰੁੱਖ(ਪੂਰਨ argc,
+		    ਅਚਲ ਅੱਖਰ **argv,
+		    ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	static struct strbuf buffer = STRBUF_INIT;
-	struct commit_list *parents = NULL;
-	struct object_id tree_oid;
-	struct object_id commit_oid;
+	ਸਥਿਰ ਬਣਤਰ strbuf ਬਫਰ = STRBUF_INIT;
+	ਬਣਤਰ commit_list *parents = ਨਿਰਾ;
+	ਬਣਤਰ object_id ਰੁੱਖ_oid;
+	ਬਣਤਰ object_id commit_oid;
 
-	struct option options[] = {
-		OPT_CALLBACK_F('p', NULL, &parents, N_("parent"),
+	ਬਣਤਰ option options[] = {
+		OPT_CALLBACK_F('p', ਨਿਰਾ, &parents, N_("parent"),
 			N_("id of a parent commit object"), PARSE_OPT_NONEG,
-			parse_parent_arg_callback),
-		OPT_CALLBACK_F('m', NULL, &buffer, N_("message"),
+			parse_ਮਾਪਾ_arg_callback),
+		OPT_CALLBACK_F('m', ਨਿਰਾ, &ਬਫਰ, N_("message"),
 			N_("commit message"), PARSE_OPT_NONEG,
-			parse_message_arg_callback),
-		OPT_CALLBACK_F('F', NULL, &buffer, N_("file"),
+			parse_ਸੁਨੇਹਾ_arg_callback),
+		OPT_CALLBACK_F('F', ਨਿਰਾ, &ਬਫਰ, N_("file"),
 			N_("read commit log message from file"), PARSE_OPT_NONEG,
 			parse_file_arg_callback),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.ਮੁੱਲ = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t) "",
 		},
-		OPT_END()
+		OPT_ਸਿਰਾ()
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
 
 	show_usage_with_options_if_asked(argc, argv,
-					 commit_tree_usage, options);
+					 commit_ਰੁੱਖ_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, commit_tree_usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, options, commit_ਰੁੱਖ_usage, 0);
 
-	if (argc != 1)
+	ਜੇ (argc != 1)
 		die(_("must give exactly one tree"));
 
-	if (repo_get_oid_tree(the_repository, argv[0], &tree_oid))
+	ਜੇ (repo_get_oid_ਰੁੱਖ(the_repository, argv[0], &ਰੁੱਖ_oid))
 		die(_("not a valid object name %s"), argv[0]);
 
-	if (!buffer.len) {
-		if (strbuf_read(&buffer, 0, 0) < 0)
+	ਜੇ (!ਬਫਰ.len) {
+		ਜੇ (strbuf_read(&ਬਫਰ, 0, 0) < 0)
 			die_errno(_("git commit-tree: failed to read"));
 	}
 
-	if (commit_tree(buffer.buf, buffer.len, &tree_oid, parents, &commit_oid,
-			NULL, sign_commit)) {
+	ਜੇ (commit_ਰੁੱਖ(ਬਫਰ.buf, ਬਫਰ.len, &ਰੁੱਖ_oid, parents, &commit_oid,
+			ਨਿਰਾ, sign_commit)) {
 		ret = 1;
-		goto out;
+		ਜਾਓ ਬਾਹਰਲਾ;
 	}
 
-	printf("%s\n", oid_to_hex(&commit_oid));
+	ਲਿਖੋ("%s\n", oid_ਮੰਜ਼ਿਲ_hex(&commit_oid));
 	ret = 0;
 
-out:
+ਬਾਹਰਲਾ:
 	commit_list_free(parents);
-	strbuf_release(&buffer);
-	return ret;
+	strbuf_release(&ਬਫਰ);
+	ਵਾਪਸ ret;
 }

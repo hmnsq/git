@@ -8,34 +8,34 @@
  * Pretend we resolved the heads, but declare our tree trumps everybody else.
  */
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "diff.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "git-compat-util.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff.h"
 
-static const char builtin_merge_ours_usage[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ builtin_ਮਿਲਾਓ_ours_usage[] =
 	"git merge-ours <base>... -- HEAD <remote>...";
 
-int cmd_merge_ours(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+ਪੂਰਨ cmd_ਮਿਲਾਓ_ours(ਪੂਰਨ argc,
+		   ਅਚਲ ਅੱਖਰ **argv,
+		   ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ,
+		   ਬਣਤਰ repository *repo)
 {
-	show_usage_if_asked(argc, argv, builtin_merge_ours_usage);
+	show_usage_if_asked(argc, argv, builtin_ਮਿਲਾਓ_ours_usage);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ਨਿਰਾ);
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_ਭਰਿਆ_ਸੂਚਕਾਂਕ = 0;
 
 	/*
 	 * The contents of the current index becomes the tree we
 	 * commit.  The index must match HEAD, or this merge cannot go
 	 * through.
 	 */
-	if (repo_read_index(repo) < 0)
+	ਜੇ (repo_read_ਸੂਚਕਾਂਕ(repo) < 0)
 		die_errno("read_cache failed");
-	if (index_differs_from(repo, "HEAD", NULL, 0))
-		return 2;
-	return 0;
+	ਜੇ (ਸੂਚਕਾਂਕ_differs_from(repo, "HEAD", ਨਿਰਾ, 0))
+		ਵਾਪਸ 2;
+	ਵਾਪਸ 0;
 }

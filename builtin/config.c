@@ -1,23 +1,23 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "color.h"
-#include "date.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "urlmatch.h"
-#include "path.h"
-#include "quote.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "worktree.h"
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "abspath.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "advice.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "color.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "date.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "editor.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "ident.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "urlmatch.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "path.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "quote.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "setup.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strbuf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "worktree.h"
 
-static const char *const builtin_config_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>"),
 	N_("git config set [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
@@ -26,136 +26,136 @@ static const char *const builtin_config_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
 	N_("git config edit [<file-option>]"),
 	N_("git config [<file-option>] --get-colorbool <name> [<stdout-is-tty>]"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_list_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_list_usage[] = {
 	N_("git config list [<file-option>] [<display-option>] [--includes]"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_get_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_get_usage[] = {
 	N_("git config get [<file-option>] [<display-option>] [--includes] [--all] [--regexp=<regexp>] [--value=<pattern>] [--fixed-value] [--default=<default>] <name>"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_set_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_ਸੈੱਟ_usage[] = {
 	N_("git config set [<file-option>] [--type=<type>] [--comment=<message>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_unset_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_unset_usage[] = {
 	N_("git config unset [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_rename_section_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_rename_section_usage[] = {
 	N_("git config rename-section [<file-option>] <old-name> <new-name>"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_remove_section_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_remove_section_usage[] = {
 	N_("git config remove-section [<file-option>] <name>"),
-	NULL
+	ਨਿਰਾ
 };
 
-static const char *const builtin_config_edit_usage[] = {
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *ਅਚਲ builtin_config_edit_usage[] = {
 	N_("git config edit [<file-option>]"),
-	NULL
+	ਨਿਰਾ
 };
 
-#define CONFIG_LOCATION_OPTIONS(opts) \
-	OPT_GROUP(N_("Config file location")), \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ CONFIG_LOCATION_OPTIONS(opts) \
+	OPT_ਸਮੂਹ(N_("Config file location")), \
 	OPT_BOOL(0, "global", &opts.use_global_config, N_("use global config file")), \
 	OPT_BOOL(0, "system", &opts.use_system_config, N_("use system config file")), \
 	OPT_BOOL(0, "local", &opts.use_local_config, N_("use repository config file")), \
 	OPT_BOOL(0, "worktree", &opts.use_worktree_config, N_("use per-worktree config file")), \
-	OPT_STRING('f', "file", &opts.source.file, N_("file"), N_("use given config file")), \
-	OPT_STRING(0, "blob", &opts.source.blob, N_("blob-id"), N_("read config from given blob object"))
+	OPT_STRING('f', "file", &opts.ਸਰੋਤ.file, N_("file"), N_("use given config file")), \
+	OPT_STRING(0, "blob", &opts.ਸਰੋਤ.blob, N_("blob-id"), N_("read config from given blob object"))
 
-struct config_location_options {
-	struct git_config_source source;
-	struct config_options options;
-	char *file_to_free;
-	int use_global_config;
-	int use_system_config;
-	int use_local_config;
-	int use_worktree_config;
-	int respect_includes_opt;
+ਬਣਤਰ config_location_options {
+	ਬਣਤਰ git_config_ਸਰੋਤ ਸਰੋਤ;
+	ਬਣਤਰ config_options options;
+	ਅੱਖਰ *file_ਮੰਜ਼ਿਲ_free;
+	ਪੂਰਨ use_global_config;
+	ਪੂਰਨ use_system_config;
+	ਪੂਰਨ use_local_config;
+	ਪੂਰਨ use_worktree_config;
+	ਪੂਰਨ respect_includes_opt;
 };
-#define CONFIG_LOCATION_OPTIONS_INIT { \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ CONFIG_LOCATION_OPTIONS_INIT { \
 	.respect_includes_opt = -1, \
 }
 
-enum config_type {
+ਗਿਣਤੀ config_type {
 	TYPE_NONE = 0,
 	TYPE_BOOL,
 	TYPE_INT,
 	TYPE_BOOL_OR_INT,
-	TYPE_PATH,
+	TYPE_ਰਸਤਾ,
 	TYPE_EXPIRY_DATE,
 	TYPE_COLOR,
 	TYPE_BOOL_OR_STR,
 };
 
-#define CONFIG_TYPE_OPTIONS(type) \
-	OPT_GROUP(N_("Type")), \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ CONFIG_TYPE_OPTIONS(type) \
+	OPT_ਸਮੂਹ(N_("Type")), \
 	OPT_CALLBACK('t', "type", &type, N_("type"), N_("value is given this type"), option_parse_type), \
-	OPT_CALLBACK_VALUE(0, "bool", &type, N_("value is \"true\" or \"false\""), TYPE_BOOL), \
-	OPT_CALLBACK_VALUE(0, "int", &type, N_("value is decimal number"), TYPE_INT), \
-	OPT_CALLBACK_VALUE(0, "bool-or-int", &type, N_("value is --bool or --int"), TYPE_BOOL_OR_INT), \
-	OPT_CALLBACK_VALUE(0, "bool-or-str", &type, N_("value is --bool or string"), TYPE_BOOL_OR_STR), \
-	OPT_CALLBACK_VALUE(0, "path", &type, N_("value is a path (file or directory name)"), TYPE_PATH), \
-	OPT_CALLBACK_VALUE(0, "expiry-date", &type, N_("value is an expiry date"), TYPE_EXPIRY_DATE)
+	OPT_CALLBACK_ਮੁੱਲ(0, "bool", &type, N_("value is \"true\" or \"false\""), TYPE_BOOL), \
+	OPT_CALLBACK_ਮੁੱਲ(0, "int", &type, N_("value is decimal number"), TYPE_INT), \
+	OPT_CALLBACK_ਮੁੱਲ(0, "bool-or-int", &type, N_("value is --bool or --int"), TYPE_BOOL_OR_INT), \
+	OPT_CALLBACK_ਮੁੱਲ(0, "bool-or-str", &type, N_("value is --bool or string"), TYPE_BOOL_OR_STR), \
+	OPT_CALLBACK_ਮੁੱਲ(0, "path", &type, N_("value is a path (file or directory name)"), TYPE_ਰਸਤਾ), \
+	OPT_CALLBACK_ਮੁੱਲ(0, "expiry-date", &type, N_("value is an expiry date"), TYPE_EXPIRY_DATE)
 
-#define CONFIG_DISPLAY_OPTIONS(opts) \
-	OPT_GROUP(N_("Display options")), \
-	OPT_BOOL('z', "null", &opts.end_nul, N_("terminate values with NUL byte")), \
-	OPT_BOOL(0, "name-only", &opts.omit_values, N_("show variable names only")), \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ CONFIG_DISPLAY_OPTIONS(opts) \
+	OPT_ਸਮੂਹ(N_("Display options")), \
+	OPT_BOOL('z', "null", &opts.ਸਿਰਾ_nul, N_("terminate values with NUL byte")), \
+	OPT_BOOL(0, "name-only", &opts.omit_ਮੁੱਲਾਂ, N_("show variable names only")), \
 	OPT_BOOL(0, "show-origin", &opts.show_origin, N_("show origin of config (file, standard input, blob, command line)")), \
 	OPT_BOOL(0, "show-scope", &opts.show_scope, N_("show scope of config (worktree, local, global, system, command)")), \
-	OPT_BOOL(0, "show-names", &opts.show_keys, N_("show config keys in addition to their values")), \
+	OPT_BOOL(0, "show-names", &opts.show_ਕੁੰਜੀਆਂ, N_("show config keys in addition to their values")), \
 	CONFIG_TYPE_OPTIONS(opts.type)
 
-struct config_display_options {
-	int end_nul;
-	int omit_values;
-	int show_origin;
-	int show_scope;
-	int show_keys;
-	enum config_type type;
-	char *default_value;
+ਬਣਤਰ config_display_options {
+	ਪੂਰਨ ਸਿਰਾ_nul;
+	ਪੂਰਨ omit_ਮੁੱਲਾਂ;
+	ਪੂਰਨ show_origin;
+	ਪੂਰਨ show_scope;
+	ਪੂਰਨ show_ਕੁੰਜੀਆਂ;
+	ਗਿਣਤੀ config_type type;
+	ਅੱਖਰ *default_ਮੁੱਲ;
 	/* Populated via `display_options_init()`. */
-	int term;
-	int delim;
-	int key_delim;
+	ਪੂਰਨ ਪਦ;
+	ਪੂਰਨ delim;
+	ਪੂਰਨ ਕੁੰਜੀ_delim;
 };
-#define CONFIG_DISPLAY_OPTIONS_INIT { \
-	.term = '\n', \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ CONFIG_DISPLAY_OPTIONS_INIT { \
+	.ਪਦ = '\n', \
 	.delim = '=', \
-	.key_delim = ' ', \
+	.ਕੁੰਜੀ_delim = ' ', \
 	.type = TYPE_NONE, \
 }
 
-#define OPT_CALLBACK_VALUE(s, l, v, h, i) { \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ OPT_CALLBACK_ਮੁੱਲ(s, l, v, h, i) { \
 	.type = OPTION_CALLBACK, \
 	.short_name = (s), \
 	.long_name = (l), \
-	.value = (v), \
+	.ਮੁੱਲ = (v), \
 	.help = (h), \
 	.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG, \
 	.callback = option_parse_type, \
 	.defval = (i), \
 }
 
-static int option_parse_type(const struct option *opt, const char *arg,
-			     int unset)
+ਸਥਿਰ ਪੂਰਨ option_parse_type(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg,
+			     ਪੂਰਨ unset)
 {
-	int new_type, *to_type;
+	ਪੂਰਨ new_type, *ਮੰਜ਼ਿਲ_type;
 
-	if (unset) {
-		*((int *) opt->value) = 0;
-		return 0;
+	ਜੇ (unset) {
+		*((ਪੂਰਨ *) opt->ਮੁੱਲ) = 0;
+		ਵਾਪਸ 0;
 	}
 
 	/*
@@ -163,27 +163,27 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	 * opt->defval.
 	 */
 	new_type = opt->defval;
-	if (!new_type) {
-		if (!strcmp(arg, "bool"))
+	ਜੇ (!new_type) {
+		ਜੇ (!strcmp(arg, "bool"))
 			new_type = TYPE_BOOL;
-		else if (!strcmp(arg, "int"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "int"))
 			new_type = TYPE_INT;
-		else if (!strcmp(arg, "bool-or-int"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "bool-or-int"))
 			new_type = TYPE_BOOL_OR_INT;
-		else if (!strcmp(arg, "bool-or-str"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "bool-or-str"))
 			new_type = TYPE_BOOL_OR_STR;
-		else if (!strcmp(arg, "path"))
-			new_type = TYPE_PATH;
-		else if (!strcmp(arg, "expiry-date"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "path"))
+			new_type = TYPE_ਰਸਤਾ;
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "expiry-date"))
 			new_type = TYPE_EXPIRY_DATE;
-		else if (!strcmp(arg, "color"))
+		ਨਹੀਂਤਾਂ ਜੇ (!strcmp(arg, "color"))
 			new_type = TYPE_COLOR;
-		else
+		ਨਹੀਂਤਾਂ
 			die(_("unrecognized --type argument, %s"), arg);
 	}
 
-	to_type = opt->value;
-	if (*to_type && *to_type != new_type) {
+	ਮੰਜ਼ਿਲ_type = opt->ਮੁੱਲ;
+	ਜੇ (*ਮੰਜ਼ਿਲ_type && *ਮੰਜ਼ਿਲ_type != new_type) {
 		/*
 		 * Complain when there is a new type not equal to the old type.
 		 * This allows for combinations like '--int --type=int' and
@@ -192,206 +192,206 @@ static int option_parse_type(const struct option *opt, const char *arg,
 		 * --type=int'.
 		 */
 		error(_("only one type at a time"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
-	*to_type = new_type;
+	*ਮੰਜ਼ਿਲ_type = new_type;
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static void check_argc(int argc, int min, int max)
+ਸਥਿਰ ਖਾਲੀ check_argc(ਪੂਰਨ argc, ਪੂਰਨ min, ਪੂਰਨ max)
 {
-	if (argc >= min && argc <= max)
-		return;
-	if (min == max)
+	ਜੇ (argc >= min && argc <= max)
+		ਵਾਪਸ;
+	ਜੇ (min == max)
 		error(_("wrong number of arguments, should be %d"), min);
-	else
+	ਨਹੀਂਤਾਂ
 		error(_("wrong number of arguments, should be from %d to %d"),
 		      min, max);
-	exit(129);
+	ਬਾਹਰ_ਨਿਕਲੋ(129);
 }
 
-static NORETURN void die_missing_set_value(const char *arg)
+ਸਥਿਰ NORETURN ਖਾਲੀ die_missing_ਸੈੱਟ_ਮੁੱਲ(ਅਚਲ ਅੱਖਰ *arg)
 {
-	const char *last_dot = strrchr(arg, '.');
-	const char *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
-	char *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
+	ਅਚਲ ਅੱਖਰ *ਆਖਰੀ_dot = strrchr(arg, '.');
+	ਅਚਲ ਅੱਖਰ *eq = ਆਖਰੀ_dot ? strchr(ਆਖਰੀ_dot + 1, '=') : ਨਿਰਾ;
+	ਅੱਖਰ *ਅਗੇਤਰ = eq ? xstrndup(arg, eq - arg) : ਨਿਰਾ;
 
-	if (prefix && git_config_key_is_valid(prefix)) {
+	ਜੇ (ਅਗੇਤਰ && git_config_ਕੁੰਜੀ_is_valid(ਅਗੇਤਰ)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 		advise(_("did you mean \"git config set %s %s\"?"),
-		       prefix, eq + 1);
-	} else if (git_config_key_is_valid(arg)) {
+		       ਅਗੇਤਰ, eq + 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (git_config_ਕੁੰਜੀ_is_valid(arg)) {
 		error(_("missing value to set to the variable '%s'"), arg);
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		error(_("missing value to set to a variable with an invalid name '%s'"),
 		      arg);
 	}
-	free(prefix);
-	exit(129);
+	ਮੁਕਤ(ਅਗੇਤਰ);
+	ਬਾਹਰ_ਨਿਕਲੋ(129);
 }
 
-static void show_config_origin(const struct config_display_options *opts,
-			       const struct key_value_info *kvi,
-			       struct strbuf *buf)
+ਸਥਿਰ ਖਾਲੀ show_config_origin(ਅਚਲ ਬਣਤਰ config_display_options *opts,
+			       ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi,
+			       ਬਣਤਰ strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
+	ਅਚਲ ਅੱਖਰ ਪਦ = opts->ਸਿਰਾ_nul ? '\0' : '\t';
 
 	strbuf_addstr(buf, config_origin_type_name(kvi->origin_type));
 	strbuf_addch(buf, ':');
-	if (opts->end_nul)
+	ਜੇ (opts->ਸਿਰਾ_nul)
 		strbuf_addstr(buf, kvi->filename ? kvi->filename : "");
-	else
-		quote_c_style(kvi->filename ? kvi->filename : "", buf, NULL, 0);
-	strbuf_addch(buf, term);
+	ਨਹੀਂਤਾਂ
+		quote_c_style(kvi->filename ? kvi->filename : "", buf, ਨਿਰਾ, 0);
+	strbuf_addch(buf, ਪਦ);
 }
 
-static void show_config_scope(const struct config_display_options *opts,
-			      const struct key_value_info *kvi,
-			      struct strbuf *buf)
+ਸਥਿਰ ਖਾਲੀ show_config_scope(ਅਚਲ ਬਣਤਰ config_display_options *opts,
+			      ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi,
+			      ਬਣਤਰ strbuf *buf)
 {
-	const char term = opts->end_nul ? '\0' : '\t';
-	const char *scope = config_scope_name(kvi->scope);
+	ਅਚਲ ਅੱਖਰ ਪਦ = opts->ਸਿਰਾ_nul ? '\0' : '\t';
+	ਅਚਲ ਅੱਖਰ *scope = config_scope_name(kvi->scope);
 
 	strbuf_addstr(buf, N_(scope));
-	strbuf_addch(buf, term);
+	strbuf_addch(buf, ਪਦ);
 }
 
-struct strbuf_list {
-	struct strbuf *items;
-	int nr;
-	int alloc;
+ਬਣਤਰ strbuf_list {
+	ਬਣਤਰ strbuf *ਚੀਜ਼ਾਂ;
+	ਪੂਰਨ nr;
+	ਪੂਰਨ alloc;
 };
 
-static int format_config_int64(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       const struct key_value_info *kvi,
-			       int gently)
+ਸਥਿਰ ਪੂਰਨ format_config_int64(ਬਣਤਰ strbuf *buf,
+			       ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+			       ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+			       ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi,
+			       ਪੂਰਨ gently)
 {
 	int64_t v = 0;
-	if (gently) {
-		if (!git_parse_int64(value_, &v))
-			return -1;
-	} else {
+	ਜੇ (gently) {
+		ਜੇ (!git_parse_int64(ਮੁੱਲ_2, &v))
+			ਵਾਪਸ -1;
+	} ਨਹੀਂਤਾਂ {
 		/* may die() */
-		v = git_config_int64(key_, value_ ? value_ : "", kvi);
+		v = git_config_int64(ਕੁੰਜੀ_2, ਮੁੱਲ_2 ? ਮੁੱਲ_2 : "", kvi);
 	}
 
 	strbuf_addf(buf, "%"PRId64, v);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int format_config_bool(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+ਸਥਿਰ ਪੂਰਨ format_config_bool(ਬਣਤਰ strbuf *buf,
+			      ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+			      ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+			      ਪੂਰਨ gently)
 {
-	int v = 0;
-	if (gently) {
-		if ((v = git_parse_maybe_bool(value_)) < 0)
-			return -1;
-	} else {
+	ਪੂਰਨ v = 0;
+	ਜੇ (gently) {
+		ਜੇ ((v = git_parse_maybe_bool(ਮੁੱਲ_2)) < 0)
+			ਵਾਪਸ -1;
+	} ਨਹੀਂਤਾਂ {
 		/* may die() */
-		v = git_config_bool(key_, value_);
+		v = git_config_bool(ਕੁੰਜੀ_2, ਮੁੱਲ_2);
 	}
 
 	strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int format_config_bool_or_int(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     const struct key_value_info *kvi,
-				     int gently)
+ਸਥਿਰ ਪੂਰਨ format_config_bool_or_int(ਬਣਤਰ strbuf *buf,
+				     ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+				     ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+				     ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi,
+				     ਪੂਰਨ gently)
 {
-	int v, is_bool = 0;
+	ਪੂਰਨ v, is_bool = 0;
 
-	if (gently) {
-		v = git_parse_maybe_bool_text(value_);
+	ਜੇ (gently) {
+		v = git_parse_maybe_bool_ਪਾਠ(ਮੁੱਲ_2);
 
-		if (v >= 0)
+		ਜੇ (v >= 0)
 			is_bool = 1;
-		else if (!git_parse_int(value_, &v))
-			return -1;
-	} else {
-		v = git_config_bool_or_int(key_, value_, kvi,
+		ਨਹੀਂਤਾਂ ਜੇ (!git_parse_int(ਮੁੱਲ_2, &v))
+			ਵਾਪਸ -1;
+	} ਨਹੀਂਤਾਂ {
+		v = git_config_bool_or_int(ਕੁੰਜੀ_2, ਮੁੱਲ_2, kvi,
 					   &is_bool);
 	}
 
-	if (is_bool)
+	ਜੇ (is_bool)
 		strbuf_addstr(buf, v ? "true" : "false");
-	else
+	ਨਹੀਂਤਾਂ
 		strbuf_addf(buf, "%d", v);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /* This mode is always gentle. */
-static int format_config_bool_or_str(struct strbuf *buf,
-				     const char *value_)
+ਸਥਿਰ ਪੂਰਨ format_config_bool_or_str(ਬਣਤਰ strbuf *buf,
+				     ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2)
 {
-	int v = git_parse_maybe_bool(value_);
-	if (v < 0)
-		strbuf_addstr(buf, value_);
-	else
+	ਪੂਰਨ v = git_parse_maybe_bool(ਮੁੱਲ_2);
+	ਜੇ (v < 0)
+		strbuf_addstr(buf, ਮੁੱਲ_2);
+	ਨਹੀਂਤਾਂ
 		strbuf_addstr(buf, v ? "true" : "false");
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int format_config_path(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
-			      int gently)
+ਸਥਿਰ ਪੂਰਨ format_config_ਰਸਤਾ(ਬਣਤਰ strbuf *buf,
+			      ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+			      ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+			      ਪੂਰਨ gently)
 {
-	char *v;
+	ਅੱਖਰ *v;
 
-	if (git_config_pathname(&v, key_, value_) < 0)
-		return -1;
+	ਜੇ (git_config_pathname(&v, ਕੁੰਜੀ_2, ਮੁੱਲ_2) < 0)
+		ਵਾਪਸ -1;
 
-	if (v)
+	ਜੇ (v)
 		strbuf_addstr(buf, v);
-	else
-		return gently ? -1 : 1; /* :(optional)no-such-file */
+	ਨਹੀਂਤਾਂ
+		ਵਾਪਸ gently ? -1 : 1; /* :(optional)no-such-file */
 
-	free(v);
-	return 0;
+	ਮੁਕਤ(v);
+	ਵਾਪਸ 0;
 }
 
-static int format_config_expiry_date(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     int quietly)
+ਸਥਿਰ ਪੂਰਨ format_config_expiry_date(ਬਣਤਰ strbuf *buf,
+				     ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+				     ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+				     ਪੂਰਨ quietly)
 {
 	timestamp_t t;
-	if (quietly) {
-		if (parse_expiry_date(value_, &t))
-			return -1;
-	} else if (git_config_expiry_date(&t, key_, value_) < 0) {
-		return -1;
+	ਜੇ (quietly) {
+		ਜੇ (parse_expiry_date(ਮੁੱਲ_2, &t))
+			ਵਾਪਸ -1;
+	} ਨਹੀਂਤਾਂ ਜੇ (git_config_expiry_date(&t, ਕੁੰਜੀ_2, ਮੁੱਲ_2) < 0) {
+		ਵਾਪਸ -1;
 	}
 
 	strbuf_addf(buf, "%"PRItime, t);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int format_config_color(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       int gently)
+ਸਥਿਰ ਪੂਰਨ format_config_color(ਬਣਤਰ strbuf *buf,
+			       ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+			       ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+			       ਪੂਰਨ gently)
 {
-	char v[COLOR_MAXLEN];
+	ਅੱਖਰ v[COLOR_MAXLEN];
 
-	if (gently) {
-		if (color_parse_quietly(value_, v) < 0)
-			return -1;
-	} else if (git_config_color(v, key_, value_) < 0) {
-		return -1;
+	ਜੇ (gently) {
+		ਜੇ (color_parse_quietly(ਮੁੱਲ_2, v) < 0)
+			ਵਾਪਸ -1;
+	} ਨਹੀਂਤਾਂ ਜੇ (git_config_color(v, ਕੁੰਜੀ_2, ਮੁੱਲ_2) < 0) {
+		ਵਾਪਸ -1;
 	}
 
 	strbuf_addstr(buf, v);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -403,156 +403,156 @@ static int format_config_color(struct strbuf *buf,
  * Note: 'gently' is currently ignored, but will be implemented in
  * a future change.
  */
-static int format_config(const struct config_display_options *opts,
-			 struct strbuf *buf, const char *key_,
-			 const char *value_, const struct key_value_info *kvi,
-			 int gently)
+ਸਥਿਰ ਪੂਰਨ format_config(ਅਚਲ ਬਣਤਰ config_display_options *opts,
+			 ਬਣਤਰ strbuf *buf, ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2,
+			 ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2, ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi,
+			 ਪੂਰਨ gently)
 {
-	int res = 0;
-	if (opts->show_scope)
+	ਪੂਰਨ res = 0;
+	ਜੇ (opts->show_scope)
 		show_config_scope(opts, kvi, buf);
-	if (opts->show_origin)
+	ਜੇ (opts->show_origin)
 		show_config_origin(opts, kvi, buf);
-	if (opts->show_keys)
-		strbuf_addstr(buf, key_);
+	ਜੇ (opts->show_ਕੁੰਜੀਆਂ)
+		strbuf_addstr(buf, ਕੁੰਜੀ_2);
 
-	if (opts->omit_values)
-		goto terminator;
+	ਜੇ (opts->omit_ਮੁੱਲਾਂ)
+		ਜਾਓ terminator;
 
-	if (opts->show_keys)
-		strbuf_addch(buf, opts->key_delim);
+	ਜੇ (opts->show_ਕੁੰਜੀਆਂ)
+		strbuf_addch(buf, opts->ਕੁੰਜੀ_delim);
 
-	switch (opts->type) {
-	case TYPE_INT:
-		res = format_config_int64(buf, key_, value_, kvi, gently);
-		break;
+	ਚੋਣ (opts->type) {
+	ਹਾਲਤ TYPE_INT:
+		res = format_config_int64(buf, ਕੁੰਜੀ_2, ਮੁੱਲ_2, kvi, gently);
+		ਰੋਕੋ;
 
-	case TYPE_BOOL:
-		res = format_config_bool(buf, key_, value_, gently);
-		break;
+	ਹਾਲਤ TYPE_BOOL:
+		res = format_config_bool(buf, ਕੁੰਜੀ_2, ਮੁੱਲ_2, gently);
+		ਰੋਕੋ;
 
-	case TYPE_BOOL_OR_INT:
-		res = format_config_bool_or_int(buf, key_, value_, kvi, gently);
-		break;
+	ਹਾਲਤ TYPE_BOOL_OR_INT:
+		res = format_config_bool_or_int(buf, ਕੁੰਜੀ_2, ਮੁੱਲ_2, kvi, gently);
+		ਰੋਕੋ;
 
-	case TYPE_BOOL_OR_STR:
-		res = format_config_bool_or_str(buf, value_);
-		break;
+	ਹਾਲਤ TYPE_BOOL_OR_STR:
+		res = format_config_bool_or_str(buf, ਮੁੱਲ_2);
+		ਰੋਕੋ;
 
-	case TYPE_PATH:
-		res = format_config_path(buf, key_, value_, gently);
-		break;
+	ਹਾਲਤ TYPE_ਰਸਤਾ:
+		res = format_config_ਰਸਤਾ(buf, ਕੁੰਜੀ_2, ਮੁੱਲ_2, gently);
+		ਰੋਕੋ;
 
-	case TYPE_EXPIRY_DATE:
-		res = format_config_expiry_date(buf, key_, value_, gently);
-		break;
+	ਹਾਲਤ TYPE_EXPIRY_DATE:
+		res = format_config_expiry_date(buf, ਕੁੰਜੀ_2, ਮੁੱਲ_2, gently);
+		ਰੋਕੋ;
 
-	case TYPE_COLOR:
-		res = format_config_color(buf, key_, value_, gently);
-		break;
+	ਹਾਲਤ TYPE_COLOR:
+		res = format_config_color(buf, ਕੁੰਜੀ_2, ਮੁੱਲ_2, gently);
+		ਰੋਕੋ;
 
-	case TYPE_NONE:
-		if (value_) {
-			strbuf_addstr(buf, value_);
-		} else {
+	ਹਾਲਤ TYPE_NONE:
+		ਜੇ (ਮੁੱਲ_2) {
+			strbuf_addstr(buf, ਮੁੱਲ_2);
+		} ਨਹੀਂਤਾਂ {
 			/* Just show the key name; back out delimiter */
-			if (opts->show_keys)
+			ਜੇ (opts->show_ਕੁੰਜੀਆਂ)
 				strbuf_setlen(buf, buf->len - 1);
 		}
-		break;
+		ਰੋਕੋ;
 
-	default:
+	ਮੂਲ:
 		BUG("undefined type %d", opts->type);
 	}
 
 terminator:
-	strbuf_addch(buf, opts->term);
-	return res;
+	strbuf_addch(buf, opts->ਪਦ);
+	ਵਾਪਸ res;
 }
 
-static int show_all_config(const char *key_, const char *value_,
-			   const struct config_context *ctx,
-			   void *cb)
+ਸਥਿਰ ਪੂਰਨ show_all_config(ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+			   ਅਚਲ ਬਣਤਰ config_context *ctx,
+			   ਖਾਲੀ *cb)
 {
-	const struct config_display_options *opts = cb;
-	const struct key_value_info *kvi = ctx->kvi;
-	struct strbuf formatted = STRBUF_INIT;
+	ਅਚਲ ਬਣਤਰ config_display_options *opts = cb;
+	ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi = ctx->kvi;
+	ਬਣਤਰ strbuf formatted = STRBUF_INIT;
 
-	if (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
+	ਜੇ (format_config(opts, &formatted, ਕੁੰਜੀ_2, ਮੁੱਲ_2, kvi, 1) >= 0)
 		fwrite(formatted.buf, 1, formatted.len, stdout);
 
 	strbuf_release(&formatted);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-#define GET_VALUE_ALL        (1 << 0)
-#define GET_VALUE_KEY_REGEXP (1 << 1)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ GET_ਮੁੱਲ_ALL        (1 << 0)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP (1 << 1)
 
-struct collect_config_data {
-	const struct config_display_options *display_opts;
-	struct strbuf_list *values;
-	const char *value_pattern;
-	const char *key;
+ਬਣਤਰ collect_config_ਅੰਕੜੇ {
+	ਅਚਲ ਬਣਤਰ config_display_options *display_opts;
+	ਬਣਤਰ strbuf_list *ਮੁੱਲਾਂ;
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_ਨਮੂਨਾ;
+	ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ;
 	regex_t *regexp;
-	regex_t *key_regexp;
-	int do_not_match;
-	unsigned get_value_flags;
-	unsigned flags;
+	regex_t *ਕੁੰਜੀ_regexp;
+	ਪੂਰਨ do_not_ਮੇਲ;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ get_ਮੁੱਲ_flags;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ flags;
 };
 
-static int collect_config(const char *key_, const char *value_,
-			  const struct config_context *ctx, void *cb)
+ਸਥਿਰ ਪੂਰਨ collect_config(ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_2,
+			  ਅਚਲ ਬਣਤਰ config_context *ctx, ਖਾਲੀ *cb)
 {
-	struct collect_config_data *data = cb;
-	struct strbuf_list *values = data->values;
-	const struct key_value_info *kvi = ctx->kvi;
-	int status;
+	ਬਣਤਰ collect_config_ਅੰਕੜੇ *ਅੰਕੜੇ = cb;
+	ਬਣਤਰ strbuf_list *ਮੁੱਲਾਂ = ਅੰਕੜੇ->ਮੁੱਲਾਂ;
+	ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi = ctx->kvi;
+	ਪੂਰਨ ਸਥਿਤੀ;
 
-	if (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    strcmp(key_, data->key))
-		return 0;
-	if ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    regexec(data->key_regexp, key_, 0, NULL, 0))
-		return 0;
-	if ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
-	    strcmp(data->value_pattern, (value_?value_:"")))
-		return 0;
-	if (data->regexp &&
-	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, NULL, 0)))
-		return 0;
+	ਜੇ (!(ਅੰਕੜੇ->get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP) &&
+	    strcmp(ਕੁੰਜੀ_2, ਅੰਕੜੇ->ਕੁੰਜੀ))
+		ਵਾਪਸ 0;
+	ਜੇ ((ਅੰਕੜੇ->get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP) &&
+	    regexec(ਅੰਕੜੇ->ਕੁੰਜੀ_regexp, ਕੁੰਜੀ_2, 0, ਨਿਰਾ, 0))
+		ਵਾਪਸ 0;
+	ਜੇ ((ਅੰਕੜੇ->flags & CONFIG_FLAGS_FIXED_ਮੁੱਲ) &&
+	    strcmp(ਅੰਕੜੇ->ਮੁੱਲ_ਨਮੂਨਾ, (ਮੁੱਲ_2?ਮੁੱਲ_2:"")))
+		ਵਾਪਸ 0;
+	ਜੇ (ਅੰਕੜੇ->regexp &&
+	    (ਅੰਕੜੇ->do_not_ਮੇਲ ^ !!regexec(ਅੰਕੜੇ->regexp, (ਮੁੱਲ_2?ਮੁੱਲ_2:""), 0, ਨਿਰਾ, 0)))
+		ਵਾਪਸ 0;
 
-	ALLOC_GROW(values->items, values->nr + 1, values->alloc);
-	strbuf_init(&values->items[values->nr], 0);
+	ALLOC_GROW(ਮੁੱਲਾਂ->ਚੀਜ਼ਾਂ, ਮੁੱਲਾਂ->nr + 1, ਮੁੱਲਾਂ->alloc);
+	strbuf_init(&ਮੁੱਲਾਂ->ਚੀਜ਼ਾਂ[ਮੁੱਲਾਂ->nr], 0);
 
-	status = format_config(data->display_opts, &values->items[values->nr++],
-			       key_, value_, kvi, 0);
-	if (status < 0)
-		return status;
-	if (status) {
-		strbuf_release(&values->items[--values->nr]);
-		status = 0;
+	ਸਥਿਤੀ = format_config(ਅੰਕੜੇ->display_opts, &ਮੁੱਲਾਂ->ਚੀਜ਼ਾਂ[ਮੁੱਲਾਂ->nr++],
+			       ਕੁੰਜੀ_2, ਮੁੱਲ_2, kvi, 0);
+	ਜੇ (ਸਥਿਤੀ < 0)
+		ਵਾਪਸ ਸਥਿਤੀ;
+	ਜੇ (ਸਥਿਤੀ) {
+		strbuf_release(&ਮੁੱਲਾਂ->ਚੀਜ਼ਾਂ[--ਮੁੱਲਾਂ->nr]);
+		ਸਥਿਤੀ = 0;
 	}
-	return status;
+	ਵਾਪਸ ਸਥਿਤੀ;
 }
 
-static int get_value(const struct config_location_options *opts,
-		     const struct config_display_options *display_opts,
-		     const char *key_, const char *regex_,
-		     unsigned get_value_flags, unsigned flags)
+ਸਥਿਰ ਪੂਰਨ get_ਮੁੱਲ(ਅਚਲ ਬਣਤਰ config_location_options *opts,
+		     ਅਚਲ ਬਣਤਰ config_display_options *display_opts,
+		     ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ_2, ਅਚਲ ਅੱਖਰ *regex_,
+		     ਬਿਨਾਨਿਸ਼ਾਨੀ get_ਮੁੱਲ_flags, ਬਿਨਾਨਿਸ਼ਾਨੀ flags)
 {
-	int ret = CONFIG_GENERIC_ERROR;
-	struct strbuf_list values = {NULL};
-	struct collect_config_data data = {
+	ਪੂਰਨ ret = CONFIG_GENERIC_ERROR;
+	ਬਣਤਰ strbuf_list ਮੁੱਲਾਂ = {ਨਿਰਾ};
+	ਬਣਤਰ collect_config_ਅੰਕੜੇ ਅੰਕੜੇ = {
 		.display_opts = display_opts,
-		.values = &values,
-		.get_value_flags = get_value_flags,
+		.ਮੁੱਲਾਂ = &ਮੁੱਲਾਂ,
+		.get_ਮੁੱਲ_flags = get_ਮੁੱਲ_flags,
 		.flags = flags,
 	};
-	char *key = NULL;
-	int i;
+	ਅੱਖਰ *ਕੁੰਜੀ = ਨਿਰਾ;
+	ਪੂਰਨ i;
 
-	if (get_value_flags & GET_VALUE_KEY_REGEXP) {
-		char *tl;
+	ਜੇ (get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP) {
+		ਅੱਖਰ *tl;
 
 		/*
 		 * NEEDSWORK: this naive pattern lowercasing obviously does not
@@ -560,104 +560,104 @@ static int get_value(const struct config_location_options *opts,
 		 * Perhaps we should deprecate this altogether someday.
 		 */
 
-		key = xstrdup(key_);
-		for (tl = key + strlen(key) - 1;
-		     tl >= key && *tl != '.';
+		ਕੁੰਜੀ = xstrdup(ਕੁੰਜੀ_2);
+		ਲਈ (tl = ਕੁੰਜੀ + ਲੜੀ_ਲੰਬਾਈ(ਕੁੰਜੀ) - 1;
+		     tl >= ਕੁੰਜੀ && *tl != '.';
 		     tl--)
 			*tl = tolower(*tl);
-		for (tl = key; *tl && *tl != '.'; tl++)
+		ਲਈ (tl = ਕੁੰਜੀ; *tl && *tl != '.'; tl++)
 			*tl = tolower(*tl);
 
-		data.key_regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.key_regexp, key, REG_EXTENDED)) {
-			error(_("invalid key pattern: %s"), key_);
-			FREE_AND_NULL(data.key_regexp);
-			ret = CONFIG_INVALID_PATTERN;
-			goto free_strings;
+		ਅੰਕੜੇ.ਕੁੰਜੀ_regexp = (regex_t*)xmalloc(ਆਕਾਰ(regex_t));
+		ਜੇ (regcomp(ਅੰਕੜੇ.ਕੁੰਜੀ_regexp, ਕੁੰਜੀ, REG_EXTENDED)) {
+			error(_("invalid key pattern: %s"), ਕੁੰਜੀ_2);
+			FREE_AND_NULL(ਅੰਕੜੇ.ਕੁੰਜੀ_regexp);
+			ret = CONFIG_INVALID_ਨਮੂਨਾ;
+			ਜਾਓ free_ਲੜੀਆਂ;
 		}
-	} else {
-		if (git_config_parse_key(key_, &key, NULL)) {
-			ret = CONFIG_INVALID_KEY;
-			goto free_strings;
+	} ਨਹੀਂਤਾਂ {
+		ਜੇ (git_config_parse_ਕੁੰਜੀ(ਕੁੰਜੀ_2, &ਕੁੰਜੀ, ਨਿਰਾ)) {
+			ret = CONFIG_INVALID_ਕੁੰਜੀ;
+			ਜਾਓ free_ਲੜੀਆਂ;
 		}
 
-		data.key = key;
+		ਅੰਕੜੇ.ਕੁੰਜੀ = ਕੁੰਜੀ;
 	}
 
-	if (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
-		data.value_pattern = regex_;
-	else if (regex_) {
-		if (regex_[0] == '!') {
-			data.do_not_match = 1;
+	ਜੇ (regex_ && (flags & CONFIG_FLAGS_FIXED_ਮੁੱਲ))
+		ਅੰਕੜੇ.ਮੁੱਲ_ਨਮੂਨਾ = regex_;
+	ਨਹੀਂਤਾਂ ਜੇ (regex_) {
+		ਜੇ (regex_[0] == '!') {
+			ਅੰਕੜੇ.do_not_ਮੇਲ = 1;
 			regex_++;
 		}
 
-		data.regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.regexp, regex_, REG_EXTENDED)) {
+		ਅੰਕੜੇ.regexp = (regex_t*)xmalloc(ਆਕਾਰ(regex_t));
+		ਜੇ (regcomp(ਅੰਕੜੇ.regexp, regex_, REG_EXTENDED)) {
 			error(_("invalid pattern: %s"), regex_);
-			FREE_AND_NULL(data.regexp);
-			ret = CONFIG_INVALID_PATTERN;
-			goto free_strings;
+			FREE_AND_NULL(ਅੰਕੜੇ.regexp);
+			ret = CONFIG_INVALID_ਨਮੂਨਾ;
+			ਜਾਓ free_ਲੜੀਆਂ;
 		}
 	}
 
-	config_with_options(collect_config, &data,
-			    &opts->source, the_repository,
+	config_with_options(collect_config, &ਅੰਕੜੇ,
+			    &opts->ਸਰੋਤ, the_repository,
 			    &opts->options);
 
-	if (!values.nr && display_opts->default_value) {
-		struct key_value_info kvi = KVI_INIT;
-		struct strbuf *item;
-		int status;
+	ਜੇ (!ਮੁੱਲਾਂ.nr && display_opts->default_ਮੁੱਲ) {
+		ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info kvi = KVI_INIT;
+		ਬਣਤਰ strbuf *ਵਸਤੂ;
+		ਪੂਰਨ ਸਥਿਤੀ;
 
 		kvi_from_param(&kvi);
-		ALLOC_GROW(values.items, values.nr + 1, values.alloc);
-		item = &values.items[values.nr++];
-		strbuf_init(item, 0);
+		ALLOC_GROW(ਮੁੱਲਾਂ.ਚੀਜ਼ਾਂ, ਮੁੱਲਾਂ.nr + 1, ਮੁੱਲਾਂ.alloc);
+		ਵਸਤੂ = &ਮੁੱਲਾਂ.ਚੀਜ਼ਾਂ[ਮੁੱਲਾਂ.nr++];
+		strbuf_init(ਵਸਤੂ, 0);
 
-		status = format_config(display_opts, item, key_,
-				       display_opts->default_value, &kvi, 0);
-		if (status < 0)
+		ਸਥਿਤੀ = format_config(display_opts, ਵਸਤੂ, ਕੁੰਜੀ_2,
+				       display_opts->default_ਮੁੱਲ, &kvi, 0);
+		ਜੇ (ਸਥਿਤੀ < 0)
 			die(_("failed to format default config value: %s"),
-			    display_opts->default_value);
-		if (status) {
+			    display_opts->default_ਮੁੱਲ);
+		ਜੇ (ਸਥਿਤੀ) {
 			/* default was a missing optional value */
-			values.nr--;
-			strbuf_release(item);
+			ਮੁੱਲਾਂ.nr--;
+			strbuf_release(ਵਸਤੂ);
 		}
 	}
 
-	ret = !values.nr;
+	ret = !ਮੁੱਲਾਂ.nr;
 
-	for (i = 0; i < values.nr; i++) {
-		struct strbuf *buf = values.items + i;
-		if ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
+	ਲਈ (i = 0; i < ਮੁੱਲਾਂ.nr; i++) {
+		ਬਣਤਰ strbuf *buf = ਮੁੱਲਾਂ.ਚੀਜ਼ਾਂ + i;
+		ਜੇ ((get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ALL) || i == ਮੁੱਲਾਂ.nr - 1)
 			fwrite(buf->buf, 1, buf->len, stdout);
 		strbuf_release(buf);
 	}
-	free(values.items);
+	ਮੁਕਤ(ਮੁੱਲਾਂ.ਚੀਜ਼ਾਂ);
 
-free_strings:
-	free(key);
-	if (data.key_regexp) {
-		regfree(data.key_regexp);
-		free(data.key_regexp);
+free_ਲੜੀਆਂ:
+	ਮੁਕਤ(ਕੁੰਜੀ);
+	ਜੇ (ਅੰਕੜੇ.ਕੁੰਜੀ_regexp) {
+		regfree(ਅੰਕੜੇ.ਕੁੰਜੀ_regexp);
+		ਮੁਕਤ(ਅੰਕੜੇ.ਕੁੰਜੀ_regexp);
 	}
-	if (data.regexp) {
-		regfree(data.regexp);
-		free(data.regexp);
+	ਜੇ (ਅੰਕੜੇ.regexp) {
+		regfree(ਅੰਕੜੇ.regexp);
+		ਮੁਕਤ(ਅੰਕੜੇ.regexp);
 	}
 
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static char *normalize_value(const char *key, const char *value,
-			     int type, struct key_value_info *kvi)
+ਸਥਿਰ ਅੱਖਰ *normalize_ਮੁੱਲ(ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+			     ਪੂਰਨ type, ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi)
 {
-	if (!value)
-		return NULL;
+	ਜੇ (!ਮੁੱਲ)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	if (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
+	ਜੇ (type == 0 || type == TYPE_ਰਸਤਾ || type == TYPE_EXPIRY_DATE)
 		/*
 		 * We don't do normalization for TYPE_PATH here: If
 		 * the path is like ~/foobar/, we prefer to store
@@ -665,30 +665,30 @@ static char *normalize_value(const char *key, const char *value,
 		 * when retrieving the value.
 		 * Also don't do normalization for expiry dates.
 		 */
-		return xstrdup(value);
-	if (type == TYPE_INT)
-		return xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
-	if (type == TYPE_BOOL)
-		return xstrdup(git_config_bool(key, value) ?  "true" : "false");
-	if (type == TYPE_BOOL_OR_INT) {
-		int is_bool, v;
-		v = git_config_bool_or_int(key, value, kvi, &is_bool);
-		if (!is_bool)
-			return xstrfmt("%d", v);
-		else
-			return xstrdup(v ? "true" : "false");
+		ਵਾਪਸ xstrdup(ਮੁੱਲ);
+	ਜੇ (type == TYPE_INT)
+		ਵਾਪਸ xstrfmt("%"PRId64, git_config_int64(ਕੁੰਜੀ, ਮੁੱਲ, kvi));
+	ਜੇ (type == TYPE_BOOL)
+		ਵਾਪਸ xstrdup(git_config_bool(ਕੁੰਜੀ, ਮੁੱਲ) ?  "true" : "false");
+	ਜੇ (type == TYPE_BOOL_OR_INT) {
+		ਪੂਰਨ is_bool, v;
+		v = git_config_bool_or_int(ਕੁੰਜੀ, ਮੁੱਲ, kvi, &is_bool);
+		ਜੇ (!is_bool)
+			ਵਾਪਸ xstrfmt("%d", v);
+		ਨਹੀਂਤਾਂ
+			ਵਾਪਸ xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_BOOL_OR_STR) {
-		int v = git_parse_maybe_bool(value);
-		if (v < 0)
-			return xstrdup(value);
-		else
-			return xstrdup(v ? "true" : "false");
+	ਜੇ (type == TYPE_BOOL_OR_STR) {
+		ਪੂਰਨ v = git_parse_maybe_bool(ਮੁੱਲ);
+		ਜੇ (v < 0)
+			ਵਾਪਸ xstrdup(ਮੁੱਲ);
+		ਨਹੀਂਤਾਂ
+			ਵਾਪਸ xstrdup(v ? "true" : "false");
 	}
-	if (type == TYPE_COLOR) {
-		char v[COLOR_MAXLEN];
-		if (git_config_color(v, key, value))
-			die(_("cannot parse color '%s'"), value);
+	ਜੇ (type == TYPE_COLOR) {
+		ਅੱਖਰ v[COLOR_MAXLEN];
+		ਜੇ (git_config_color(v, ਕੁੰਜੀ, ਮੁੱਲ))
+			die(_("cannot parse color '%s'"), ਮੁੱਲ);
 
 		/*
 		 * The contents of `v` now contain an ANSI escape
@@ -697,224 +697,224 @@ static char *normalize_value(const char *key, const char *value,
 		 * "sanity-check", and return the given value, which we
 		 * know is representable as valid color code.
 		 */
-		return xstrdup(value);
+		ਵਾਪਸ xstrdup(ਮੁੱਲ);
 	}
 
 	BUG("cannot normalize type %d", type);
 }
 
-struct get_color_config_data {
-	int get_color_found;
-	const char *get_color_slot;
-	char parsed_color[COLOR_MAXLEN];
+ਬਣਤਰ get_color_config_ਅੰਕੜੇ {
+	ਪੂਰਨ get_color_ਮਿਲਿਆ;
+	ਅਚਲ ਅੱਖਰ *get_color_ਥਾਂ;
+	ਅੱਖਰ parsed_color[COLOR_MAXLEN];
 };
 
-static int git_get_color_config(const char *var, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *cb)
+ਸਥਿਰ ਪੂਰਨ git_get_color_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+				ਅਚਲ ਬਣਤਰ config_context *ctx ਅਣਵਰਤਿਆ,
+				ਖਾਲੀ *cb)
 {
-	struct get_color_config_data *data = cb;
+	ਬਣਤਰ get_color_config_ਅੰਕੜੇ *ਅੰਕੜੇ = cb;
 
-	if (!strcmp(var, data->get_color_slot)) {
-		if (!value)
+	ਜੇ (!strcmp(var, ਅੰਕੜੇ->get_color_ਥਾਂ)) {
+		ਜੇ (!ਮੁੱਲ)
 			config_error_nonbool(var);
-		if (color_parse(value, data->parsed_color) < 0)
-			return -1;
-		data->get_color_found = 1;
+		ਜੇ (color_parse(ਮੁੱਲ, ਅੰਕੜੇ->parsed_color) < 0)
+			ਵਾਪਸ -1;
+		ਅੰਕੜੇ->get_color_ਮਿਲਿਆ = 1;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int get_color(const struct config_location_options *opts,
-		      const char *var, const char *def_color)
+ਸਥਿਰ ਪੂਰਨ get_color(ਅਚਲ ਬਣਤਰ config_location_options *opts,
+		      ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *def_color)
 {
-	struct get_color_config_data data = {
-		.get_color_slot = var,
+	ਬਣਤਰ get_color_config_ਅੰਕੜੇ ਅੰਕੜੇ = {
+		.get_color_ਥਾਂ = var,
 		.parsed_color[0] = '\0',
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	config_with_options(git_get_color_config, &data,
-			    &opts->source, the_repository,
+	config_with_options(git_get_color_config, &ਅੰਕੜੇ,
+			    &opts->ਸਰੋਤ, the_repository,
 			    &opts->options);
 
-	if (!data.get_color_found && def_color) {
-		if (color_parse(def_color, data.parsed_color) < 0) {
+	ਜੇ (!ਅੰਕੜੇ.get_color_ਮਿਲਿਆ && def_color) {
+		ਜੇ (color_parse(def_color, ਅੰਕੜੇ.parsed_color) < 0) {
 			ret = error(_("unable to parse default color value"));
-			goto out;
+			ਜਾਓ ਬਾਹਰਲਾ;
 		}
 	}
 
 	ret = 0;
 
-out:
-	fputs(data.parsed_color, stdout);
-	return ret;
+ਬਾਹਰਲਾ:
+	fputs(ਅੰਕੜੇ.parsed_color, stdout);
+	ਵਾਪਸ ret;
 }
 
-struct get_colorbool_config_data {
-	enum git_colorbool get_colorbool_found;
-	enum git_colorbool get_diff_color_found;
-	enum git_colorbool get_color_ui_found;
-	const char *get_colorbool_slot;
+ਬਣਤਰ get_colorbool_config_ਅੰਕੜੇ {
+	ਗਿਣਤੀ git_colorbool get_colorbool_ਮਿਲਿਆ;
+	ਗਿਣਤੀ git_colorbool get_diff_color_ਮਿਲਿਆ;
+	ਗਿਣਤੀ git_colorbool get_color_ui_ਮਿਲਿਆ;
+	ਅਚਲ ਅੱਖਰ *get_colorbool_ਥਾਂ;
 };
 
-static int git_get_colorbool_config(const char *var, const char *value,
-				    const struct config_context *ctx UNUSED,
-				    void *cb)
+ਸਥਿਰ ਪੂਰਨ git_get_colorbool_config(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+				    ਅਚਲ ਬਣਤਰ config_context *ctx ਅਣਵਰਤਿਆ,
+				    ਖਾਲੀ *cb)
 {
-	struct get_colorbool_config_data *data = cb;
+	ਬਣਤਰ get_colorbool_config_ਅੰਕੜੇ *ਅੰਕੜੇ = cb;
 
-	if (!strcmp(var, data->get_colorbool_slot))
-		data->get_colorbool_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "diff.color"))
-		data->get_diff_color_found = git_config_colorbool(var, value);
-	else if (!strcmp(var, "color.ui"))
-		data->get_color_ui_found = git_config_colorbool(var, value);
-	return 0;
+	ਜੇ (!strcmp(var, ਅੰਕੜੇ->get_colorbool_ਥਾਂ))
+		ਅੰਕੜੇ->get_colorbool_ਮਿਲਿਆ = git_config_colorbool(var, ਮੁੱਲ);
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(var, "diff.color"))
+		ਅੰਕੜੇ->get_diff_color_ਮਿਲਿਆ = git_config_colorbool(var, ਮੁੱਲ);
+	ਨਹੀਂਤਾਂ ਜੇ (!strcmp(var, "color.ui"))
+		ਅੰਕੜੇ->get_color_ui_ਮਿਲਿਆ = git_config_colorbool(var, ਮੁੱਲ);
+	ਵਾਪਸ 0;
 }
 
-static int get_colorbool(const struct config_location_options *opts,
-			 const char *var, int print)
+ਸਥਿਰ ਪੂਰਨ get_colorbool(ਅਚਲ ਬਣਤਰ config_location_options *opts,
+			 ਅਚਲ ਅੱਖਰ *var, ਪੂਰਨ print)
 {
-	struct get_colorbool_config_data data = {
-		.get_colorbool_slot = var,
-		.get_colorbool_found = GIT_COLOR_UNKNOWN,
-		.get_diff_color_found = GIT_COLOR_UNKNOWN,
-		.get_color_ui_found = GIT_COLOR_UNKNOWN,
+	ਬਣਤਰ get_colorbool_config_ਅੰਕੜੇ ਅੰਕੜੇ = {
+		.get_colorbool_ਥਾਂ = var,
+		.get_colorbool_ਮਿਲਿਆ = GIT_COLOR_UNKNOWN,
+		.get_diff_color_ਮਿਲਿਆ = GIT_COLOR_UNKNOWN,
+		.get_color_ui_ਮਿਲਿਆ = GIT_COLOR_UNKNOWN,
 	};
-	bool result;
+	bool ਨਤੀਜਾ;
 
-	config_with_options(git_get_colorbool_config, &data,
-			    &opts->source, the_repository,
+	config_with_options(git_get_colorbool_config, &ਅੰਕੜੇ,
+			    &opts->ਸਰੋਤ, the_repository,
 			    &opts->options);
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN) {
-		if (!strcmp(data.get_colorbool_slot, "color.diff"))
-			data.get_colorbool_found = data.get_diff_color_found;
-		if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
-			data.get_colorbool_found = data.get_color_ui_found;
+	ਜੇ (ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ == GIT_COLOR_UNKNOWN) {
+		ਜੇ (!strcmp(ਅੰਕੜੇ.get_colorbool_ਥਾਂ, "color.diff"))
+			ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ = ਅੰਕੜੇ.get_diff_color_ਮਿਲਿਆ;
+		ਜੇ (ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ == GIT_COLOR_UNKNOWN)
+			ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ = ਅੰਕੜੇ.get_color_ui_ਮਿਲਿਆ;
 	}
 
-	if (data.get_colorbool_found == GIT_COLOR_UNKNOWN)
+	ਜੇ (ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ == GIT_COLOR_UNKNOWN)
 		/* default value if none found in config */
-		data.get_colorbool_found = GIT_COLOR_AUTO;
+		ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ = GIT_COLOR_AUTO;
 
-	result = want_color(data.get_colorbool_found);
+	ਨਤੀਜਾ = want_color(ਅੰਕੜੇ.get_colorbool_ਮਿਲਿਆ);
 
-	if (print) {
-		printf("%s\n", result ? "true" : "false");
-		return 0;
-	} else
-		return result ? 0 : 1;
+	ਜੇ (print) {
+		ਲਿਖੋ("%s\n", ਨਤੀਜਾ ? "true" : "false");
+		ਵਾਪਸ 0;
+	} ਨਹੀਂਤਾਂ
+		ਵਾਪਸ ਨਤੀਜਾ ? 0 : 1;
 }
 
-static void check_write(const struct git_config_source *source)
+ਸਥਿਰ ਖਾਲੀ check_write(ਅਚਲ ਬਣਤਰ git_config_ਸਰੋਤ *ਸਰੋਤ)
 {
-	if (!source->file && !startup_info->have_repository)
+	ਜੇ (!ਸਰੋਤ->file && !startup_info->have_repository)
 		die(_("not in a git directory"));
 
-	if (source->use_stdin)
+	ਜੇ (ਸਰੋਤ->use_stdin)
 		die(_("writing to stdin is not supported"));
 
-	if (source->blob)
+	ਜੇ (ਸਰੋਤ->blob)
 		die(_("writing config blobs is not supported"));
 }
 
-struct urlmatch_current_candidate_value {
-	char value_is_null;
-	struct strbuf value;
-	struct key_value_info kvi;
+ਬਣਤਰ urlmatch_current_candidate_ਮੁੱਲ {
+	ਅੱਖਰ ਮੁੱਲ_is_null;
+	ਬਣਤਰ strbuf ਮੁੱਲ;
+	ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info kvi;
 };
 
-static int urlmatch_collect_fn(const char *var, const char *value,
-			       const struct config_context *ctx,
-			       void *cb)
+ਸਥਿਰ ਪੂਰਨ urlmatch_collect_fn(ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ,
+			       ਅਚਲ ਬਣਤਰ config_context *ctx,
+			       ਖਾਲੀ *cb)
 {
-	struct string_list *values = cb;
-	struct string_list_item *item = string_list_insert(values, var);
-	struct urlmatch_current_candidate_value *matched = item->util;
-	const struct key_value_info *kvi = ctx->kvi;
+	ਬਣਤਰ string_list *ਮੁੱਲਾਂ = cb;
+	ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ = string_list_ਪਾਓ(ਮੁੱਲਾਂ, var);
+	ਬਣਤਰ urlmatch_current_candidate_ਮੁੱਲ *matched = ਵਸਤੂ->util;
+	ਅਚਲ ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info *kvi = ctx->kvi;
 
-	if (!matched) {
-		matched = xmalloc(sizeof(*matched));
-		strbuf_init(&matched->value, 0);
-		item->util = matched;
-	} else {
-		strbuf_reset(&matched->value);
+	ਜੇ (!matched) {
+		matched = xmalloc(ਆਕਾਰ(*matched));
+		strbuf_init(&matched->ਮੁੱਲ, 0);
+		ਵਸਤੂ->util = matched;
+	} ਨਹੀਂਤਾਂ {
+		strbuf_reset(&matched->ਮੁੱਲ);
 	}
 	matched->kvi = *kvi;
 
-	if (value) {
-		strbuf_addstr(&matched->value, value);
-		matched->value_is_null = 0;
-	} else {
-		matched->value_is_null = 1;
+	ਜੇ (ਮੁੱਲ) {
+		strbuf_addstr(&matched->ਮੁੱਲ, ਮੁੱਲ);
+		matched->ਮੁੱਲ_is_null = 0;
+	} ਨਹੀਂਤਾਂ {
+		matched->ਮੁੱਲ_is_null = 1;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int get_urlmatch(const struct config_location_options *opts,
-			const struct config_display_options *_display_opts,
-			const char *var, const char *url)
+ਸਥਿਰ ਪੂਰਨ get_urlmatch(ਅਚਲ ਬਣਤਰ config_location_options *opts,
+			ਅਚਲ ਬਣਤਰ config_display_options *_display_opts,
+			ਅਚਲ ਅੱਖਰ *var, ਅਚਲ ਅੱਖਰ *url)
 {
-	int ret;
-	char *section;
-	char *section_tail;
-	struct config_display_options display_opts = *_display_opts;
-	struct string_list_item *item;
-	struct urlmatch_config config = URLMATCH_CONFIG_INIT;
-	struct string_list values = STRING_LIST_INIT_DUP;
+	ਪੂਰਨ ret;
+	ਅੱਖਰ *section;
+	ਅੱਖਰ *section_ਪੂਛ;
+	ਬਣਤਰ config_display_options display_opts = *_display_opts;
+	ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
+	ਬਣਤਰ urlmatch_config config = URLMATCH_CONFIG_INIT;
+	ਬਣਤਰ string_list ਮੁੱਲਾਂ = STRING_LIST_INIT_DUP;
 
 	config.collect_fn = urlmatch_collect_fn;
-	config.cascade_fn = NULL;
-	config.cb = &values;
+	config.cascade_fn = ਨਿਰਾ;
+	config.cb = &ਮੁੱਲਾਂ;
 
-	if (!url_normalize(url, &config.url))
+	ਜੇ (!url_normalize(url, &config.url))
 		die("%s", config.url.err);
 
 	config.section = section = xstrdup_tolower(var);
-	section_tail = strchr(section, '.');
-	if (section_tail) {
-		*section_tail = '\0';
-		config.key = section_tail + 1;
-		display_opts.show_keys = 0;
-	} else {
-		config.key = NULL;
-		display_opts.show_keys = 1;
+	section_ਪੂਛ = strchr(section, '.');
+	ਜੇ (section_ਪੂਛ) {
+		*section_ਪੂਛ = '\0';
+		config.ਕੁੰਜੀ = section_ਪੂਛ + 1;
+		display_opts.show_ਕੁੰਜੀਆਂ = 0;
+	} ਨਹੀਂਤਾਂ {
+		config.ਕੁੰਜੀ = ਨਿਰਾ;
+		display_opts.show_ਕੁੰਜੀਆਂ = 1;
 	}
 
-	config_with_options(urlmatch_config_entry, &config,
-			    &opts->source, the_repository,
+	config_with_options(urlmatch_config_ਇੰਦਰਾਜ, &config,
+			    &opts->ਸਰੋਤ, the_repository,
 			    &opts->options);
 
-	ret = !values.nr;
+	ret = !ਮੁੱਲਾਂ.nr;
 
-	for_each_string_list_item(item, &values) {
-		struct urlmatch_current_candidate_value *matched = item->util;
-		struct strbuf buf = STRBUF_INIT;
-		int status;
+	for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &ਮੁੱਲਾਂ) {
+		ਬਣਤਰ urlmatch_current_candidate_ਮੁੱਲ *matched = ਵਸਤੂ->util;
+		ਬਣਤਰ strbuf buf = STRBUF_INIT;
+		ਪੂਰਨ ਸਥਿਤੀ;
 
-		status = format_config(&display_opts, &buf, item->string,
-				       matched->value_is_null ? NULL : matched->value.buf,
+		ਸਥਿਤੀ = format_config(&display_opts, &buf, ਵਸਤੂ->string,
+				       matched->ਮੁੱਲ_is_null ? ਨਿਰਾ : matched->ਮੁੱਲ.buf,
 				       &matched->kvi, 0);
-		if (!status)
+		ਜੇ (!ਸਥਿਤੀ)
 			fwrite(buf.buf, 1, buf.len, stdout);
 		strbuf_release(&buf);
 
-		strbuf_release(&matched->value);
+		strbuf_release(&matched->ਮੁੱਲ);
 	}
 	urlmatch_config_release(&config);
-	string_list_clear(&values, 1);
-	free(config.url.url);
+	string_list_clear(&ਮੁੱਲਾਂ, 1);
+	ਮੁਕਤ(config.url.url);
 
-	free(section);
-	return ret;
+	ਮੁਕਤ(section);
+	ਵਾਪਸ ret;
 }
 
-static char *default_user_config(void)
+ਸਥਿਰ ਅੱਖਰ *default_user_config(ਖਾਲੀ)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf,
 		    _("# This is Git's per-user configuration file.\n"
 		      "[user]\n"
@@ -923,42 +923,42 @@ static char *default_user_config(void)
 		      "#	email = %s\n"),
 		    ident_default_name(),
 		    ident_default_email());
-	return strbuf_detach(&buf, NULL);
+	ਵਾਪਸ strbuf_detach(&buf, ਨਿਰਾ);
 }
 
-static void location_options_init(struct config_location_options *opts,
-				  const char *prefix)
+ਸਥਿਰ ਖਾਲੀ location_options_init(ਬਣਤਰ config_location_options *opts,
+				  ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ)
 {
-	if (!opts->source.file)
-		opts->source.file = opts->file_to_free =
+	ਜੇ (!opts->ਸਰੋਤ.file)
+		opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free =
 			xstrdup_or_null(getenv(CONFIG_ENVIRONMENT));
 
-	if (opts->use_global_config + opts->use_system_config +
+	ਜੇ (opts->use_global_config + opts->use_system_config +
 	    opts->use_local_config + opts->use_worktree_config +
-	    !!opts->source.file + !!opts->source.blob > 1) {
+	    !!opts->ਸਰੋਤ.file + !!opts->ਸਰੋਤ.blob > 1) {
 		error(_("only one config file at a time"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
 
-	if (!startup_info->have_repository) {
-		if (opts->use_local_config)
+	ਜੇ (!startup_info->have_repository) {
+		ਜੇ (opts->use_local_config)
 			die(_("--local can only be used inside a git repository"));
-		if (opts->source.blob)
+		ਜੇ (opts->ਸਰੋਤ.blob)
 			die(_("--blob can only be used inside a git repository"));
-		if (opts->use_worktree_config)
+		ਜੇ (opts->use_worktree_config)
 			die(_("--worktree can only be used inside a git repository"));
 	}
 
-	if (opts->source.file &&
-			!strcmp(opts->source.file, "-")) {
-		opts->source.file = NULL;
-		opts->source.use_stdin = 1;
-		opts->source.scope = CONFIG_SCOPE_COMMAND;
+	ਜੇ (opts->ਸਰੋਤ.file &&
+			!strcmp(opts->ਸਰੋਤ.file, "-")) {
+		opts->ਸਰੋਤ.file = ਨਿਰਾ;
+		opts->ਸਰੋਤ.use_stdin = 1;
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->use_global_config) {
-		opts->source.file = opts->file_to_free = git_global_config();
-		if (!opts->source.file)
+	ਜੇ (opts->use_global_config) {
+		opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free = git_global_config();
+		ਜੇ (!opts->ਸਰੋਤ.file)
 			/*
 			 * It is unknown if HOME/.gitconfig exists, so
 			 * we do not know if we should write to XDG
@@ -966,417 +966,417 @@ static void location_options_init(struct config_location_options *opts,
 			 * is set and points at a sane location.
 			 */
 			die(_("$HOME not set"));
-		opts->source.scope = CONFIG_SCOPE_GLOBAL;
-	} else if (opts->use_system_config) {
-		opts->source.file = opts->file_to_free = git_system_config();
-		opts->source.scope = CONFIG_SCOPE_SYSTEM;
-	} else if (opts->use_local_config) {
-		opts->source.file = opts->file_to_free = repo_git_path(the_repository, "config");
-		opts->source.scope = CONFIG_SCOPE_LOCAL;
-	} else if (opts->use_worktree_config) {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		if (the_repository->repository_format_worktree_config)
-			opts->source.file = opts->file_to_free =
-				repo_git_path(the_repository, "config.worktree");
-		else if (worktrees[0] && worktrees[1])
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_GLOBAL;
+	} ਨਹੀਂਤਾਂ ਜੇ (opts->use_system_config) {
+		opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free = git_system_config();
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_SYSTEM;
+	} ਨਹੀਂਤਾਂ ਜੇ (opts->use_local_config) {
+		opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free = repo_git_ਰਸਤਾ(the_repository, "config");
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_LOCAL;
+	} ਨਹੀਂਤਾਂ ਜੇ (opts->use_worktree_config) {
+		ਬਣਤਰ worktree **worktrees = get_worktrees(the_repository);
+		ਜੇ (the_repository->repository_format_worktree_config)
+			opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free =
+				repo_git_ਰਸਤਾ(the_repository, "config.worktree");
+		ਨਹੀਂਤਾਂ ਜੇ (worktrees[0] && worktrees[1])
 			die(_("--worktree cannot be used with multiple "
 			      "working trees unless the config\n"
 			      "extension worktreeConfig is enabled. "
 			      "Please read \"CONFIGURATION FILE\"\n"
 			      "section in \"git help worktree\" for details"));
-		else
-			opts->source.file = opts->file_to_free =
-				repo_git_path(the_repository, "config");
-		opts->source.scope = CONFIG_SCOPE_LOCAL;
+		ਨਹੀਂਤਾਂ
+			opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free =
+				repo_git_ਰਸਤਾ(the_repository, "config");
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_LOCAL;
 		free_worktrees(worktrees);
-	} else if (opts->source.file) {
-		if (!is_absolute_path(opts->source.file) && prefix)
-			opts->source.file = opts->file_to_free =
-				prefix_filename(prefix, opts->source.file);
-		opts->source.scope = CONFIG_SCOPE_COMMAND;
-	} else if (opts->source.blob) {
-		opts->source.scope = CONFIG_SCOPE_COMMAND;
+	} ਨਹੀਂਤਾਂ ਜੇ (opts->ਸਰੋਤ.file) {
+		ਜੇ (!is_absolute_ਰਸਤਾ(opts->ਸਰੋਤ.file) && ਅਗੇਤਰ)
+			opts->ਸਰੋਤ.file = opts->file_ਮੰਜ਼ਿਲ_free =
+				ਅਗੇਤਰ_filename(ਅਗੇਤਰ, opts->ਸਰੋਤ.file);
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_COMMAND;
+	} ਨਹੀਂਤਾਂ ਜੇ (opts->ਸਰੋਤ.blob) {
+		opts->ਸਰੋਤ.scope = CONFIG_SCOPE_COMMAND;
 	}
 
-	if (opts->respect_includes_opt == -1)
-		opts->options.respect_includes = !opts->source.file;
-	else
+	ਜੇ (opts->respect_includes_opt == -1)
+		opts->options.respect_includes = !opts->ਸਰੋਤ.file;
+	ਨਹੀਂਤਾਂ
 		opts->options.respect_includes = opts->respect_includes_opt;
-	if (startup_info->have_repository) {
+	ਜੇ (startup_info->have_repository) {
 		opts->options.commondir = repo_get_common_dir(the_repository);
 		opts->options.git_dir = repo_get_git_dir(the_repository);
 	}
 }
 
-static void location_options_release(struct config_location_options *opts)
+ਸਥਿਰ ਖਾਲੀ location_options_release(ਬਣਤਰ config_location_options *opts)
 {
-	free(opts->file_to_free);
+	ਮੁਕਤ(opts->file_ਮੰਜ਼ਿਲ_free);
 }
 
-static void display_options_init(struct config_display_options *opts)
+ਸਥਿਰ ਖਾਲੀ display_options_init(ਬਣਤਰ config_display_options *opts)
 {
-	if (opts->end_nul) {
-		opts->term = '\0';
+	ਜੇ (opts->ਸਿਰਾ_nul) {
+		opts->ਪਦ = '\0';
 		opts->delim = '\n';
-		opts->key_delim = '\n';
+		opts->ਕੁੰਜੀ_delim = '\n';
 	}
 }
 
-static void display_options_init_list(struct config_display_options *opts)
+ਸਥਿਰ ਖਾਲੀ display_options_init_list(ਬਣਤਰ config_display_options *opts)
 {
-	opts->show_keys = 1;
+	opts->show_ਕੁੰਜੀਆਂ = 1;
 
-	if (opts->end_nul) {
+	ਜੇ (opts->ਸਿਰਾ_nul) {
 		display_options_init(opts);
-	} else {
-		opts->term = '\n';
+	} ਨਹੀਂਤਾਂ {
+		opts->ਪਦ = '\n';
 		opts->delim = ' ';
-		opts->key_delim = '=';
+		opts->ਕੁੰਜੀ_delim = '=';
 	}
 }
 
-static int cmd_config_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_list(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			   ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਬਣਤਰ config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
-		OPT_GROUP(N_("Other")),
+		OPT_ਸਮੂਹ(N_("Other")),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_list_usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_list_usage, 0);
 	check_argc(argc, 0, 0);
 
-	location_options_init(&location_opts, prefix);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
 	display_options_init_list(&display_opts);
 
-	setup_auto_pager("config", 1);
+	ਤਿਆਰੀ_auto_pager("config", 1);
 
-	if (config_with_options(show_all_config, &display_opts,
-				&location_opts.source, the_repository,
+	ਜੇ (config_with_options(show_all_config, &display_opts,
+				&location_opts.ਸਰੋਤ, the_repository,
 				&location_opts.options) < 0) {
-		if (location_opts.source.file)
+		ਜੇ (location_opts.ਸਰੋਤ.file)
 			die_errno(_("unable to read config file '%s'"),
-				  location_opts.source.file);
-		else
+				  location_opts.ਸਰੋਤ.file);
+		ਨਹੀਂਤਾਂ
 			die(_("error processing config file(s)"));
 	}
 
 	location_options_release(&location_opts);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int cmd_config_get(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_get(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *value_pattern = NULL, *url = NULL;
-	int flags = 0;
-	unsigned get_value_flags = 0;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਬਣਤਰ config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_ਨਮੂਨਾ = ਨਿਰਾ, *url = ਨਿਰਾ;
+	ਪੂਰਨ flags = 0;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ get_ਮੁੱਲ_flags = 0;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_GROUP(N_("Filter options")),
-		OPT_BIT(0, "all", &get_value_flags, N_("return all values for multi-valued config options"), GET_VALUE_ALL),
-		OPT_BIT(0, "regexp", &get_value_flags, N_("interpret the name as a regular expression"), GET_VALUE_KEY_REGEXP),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("show config with values matching the pattern")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_ਸਮੂਹ(N_("Filter options")),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "all", &get_ਮੁੱਲ_flags, N_("return all values for multi-valued config options"), GET_ਮੁੱਲ_ALL),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "regexp", &get_ਮੁੱਲ_flags, N_("interpret the name as a regular expression"), GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP),
+		OPT_STRING(0, "value", &ਮੁੱਲ_ਨਮੂਨਾ, N_("pattern"), N_("show config with values matching the pattern")),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_ਮੁੱਲ),
 		OPT_STRING(0, "url", &url, N_("URL"), N_("show config matching the given URL")),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
-		OPT_GROUP(N_("Other")),
+		OPT_ਸਮੂਹ(N_("Other")),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_STRING(0, "default", &display_opts.default_value,
+		OPT_STRING(0, "default", &display_opts.default_ਮੁੱਲ,
 			   N_("value"), N_("use default value when missing entry")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_get_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_get_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ਜੇ ((flags & CONFIG_FLAGS_FIXED_ਮੁੱਲ) && !ਮੁੱਲ_ਨਮੂਨਾ)
 		die(_("--fixed-value only applies with 'value-pattern'"));
-	if (display_opts.default_value &&
-	    ((get_value_flags & GET_VALUE_ALL) || url))
+	ਜੇ (display_opts.default_ਮੁੱਲ &&
+	    ((get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ALL) || url))
 		die(_("--default= cannot be used with --all or --url="));
-	if (url && ((get_value_flags & GET_VALUE_ALL) ||
-		    (get_value_flags & GET_VALUE_KEY_REGEXP) ||
-		    value_pattern))
+	ਜੇ (url && ((get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ALL) ||
+		    (get_ਮੁੱਲ_flags & GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP) ||
+		    ਮੁੱਲ_ਨਮੂਨਾ))
 		die(_("--url= cannot be used with --all, --regexp or --value"));
 
-	location_options_init(&location_opts, prefix);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
 	display_options_init(&display_opts);
 
-	if (display_opts.type != TYPE_COLOR)
-		setup_auto_pager("config", 1);
+	ਜੇ (display_opts.type != TYPE_COLOR)
+		ਤਿਆਰੀ_auto_pager("config", 1);
 
-	if (url)
+	ਜੇ (url)
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], url);
-	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
-		ret = get_color(&location_opts, "", display_opts.default_value);
-	else
-		ret = get_value(&location_opts, &display_opts, argv[0], value_pattern,
-				get_value_flags, flags);
+	ਨਹੀਂਤਾਂ ਜੇ (display_opts.type == TYPE_COLOR && !ਲੜੀ_ਲੰਬਾਈ(argv[0]) && display_opts.default_ਮੁੱਲ)
+		ret = get_color(&location_opts, "", display_opts.default_ਮੁੱਲ);
+	ਨਹੀਂਤਾਂ
+		ret = get_ਮੁੱਲ(&location_opts, &display_opts, argv[0], ਮੁੱਲ_ਨਮੂਨਾ,
+				get_ਮੁੱਲ_flags, flags);
 
 	location_options_release(&location_opts);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int cmd_config_set(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_ਸੈੱਟ(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL, *comment_arg = NULL;
-	char *comment = NULL;
-	int flags = 0, append = 0, type = 0;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_ਨਮੂਨਾ = ਨਿਰਾ, *comment_arg = ਨਿਰਾ;
+	ਅੱਖਰ *comment = ਨਿਰਾ;
+	ਪੂਰਨ flags = 0, append = 0, type = 0;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		CONFIG_TYPE_OPTIONS(type),
-		OPT_GROUP(N_("Filter")),
-		OPT_BIT(0, "all", &flags, N_("replace multi-valued config option with new value"), CONFIG_FLAGS_MULTI_REPLACE),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("show config with values matching the pattern")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
-		OPT_GROUP(N_("Other")),
+		OPT_ਸਮੂਹ(N_("Filter")),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "all", &flags, N_("replace multi-valued config option with new value"), CONFIG_FLAGS_MULTI_REPLACE),
+		OPT_STRING(0, "value", &ਮੁੱਲ_ਨਮੂਨਾ, N_("pattern"), N_("show config with values matching the pattern")),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_ਮੁੱਲ),
+		OPT_ਸਮੂਹ(N_("Other")),
 		OPT_STRING(0, "comment", &comment_arg, N_("value"), N_("human-readable comment string (# will be prepended as needed)")),
 		OPT_BOOL(0, "append", &append, N_("add a new line without altering any existing values")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	struct key_value_info default_kvi = KVI_INIT;
-	char *value;
-	int ret;
+	ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info default_kvi = KVI_INIT;
+	ਅੱਖਰ *ਮੁੱਲ;
+	ਪੂਰਨ ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_set_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_ਸੈੱਟ_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc == 1)
-		die_missing_set_value(argv[0]);
+	ਜੇ (argc == 1)
+		die_missing_ਸੈੱਟ_ਮੁੱਲ(argv[0]);
 	check_argc(argc, 2, 2);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ਜੇ ((flags & CONFIG_FLAGS_FIXED_ਮੁੱਲ) && !ਮੁੱਲ_ਨਮੂਨਾ)
 		die(_("--fixed-value only applies with --value=<pattern>"));
-	if (append && value_pattern)
+	ਜੇ (append && ਮੁੱਲ_ਨਮੂਨਾ)
 		die(_("--append cannot be used with --value=<pattern>"));
-	if (append)
-		value_pattern = CONFIG_REGEX_NONE;
+	ਜੇ (append)
+		ਮੁੱਲ_ਨਮੂਨਾ = CONFIG_REGEX_NONE;
 
 	comment = git_config_prepare_comment_string(comment_arg);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
+	check_write(&location_opts.ਸਰੋਤ);
 
-	value = normalize_value(argv[0], argv[1], type, &default_kvi);
+	ਮੁੱਲ = normalize_ਮੁੱਲ(argv[0], argv[1], type, &default_kvi);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, value_pattern,
+	ਜੇ ((flags & CONFIG_FLAGS_MULTI_REPLACE) || ਮੁੱਲ_ਨਮੂਨਾ) {
+		ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							      argv[0], ਮੁੱਲ, ਮੁੱਲ_ਨਮੂਨਾ,
 							      comment, flags);
-	} else {
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
-						     argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+	} ਨਹੀਂਤਾਂ {
+		ret = repo_config_ਸੈੱਟ_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+						     argv[0], comment, ਮੁੱਲ);
+		ਜੇ (ret == CONFIG_NOTHING_ਸੈੱਟ)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use --value=<pattern>, --append or --all to change %s."), argv[0]);
 	}
 
 	location_options_release(&location_opts);
-	free(comment);
-	free(value);
-	return ret;
+	ਮੁਕਤ(comment);
+	ਮੁਕਤ(ਮੁੱਲ);
+	ਵਾਪਸ ret;
 }
 
-static int cmd_config_unset(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_unset(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL;
-	int flags = 0;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਅਚਲ ਅੱਖਰ *ਮੁੱਲ_ਨਮੂਨਾ = ਨਿਰਾ;
+	ਪੂਰਨ flags = 0;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_GROUP(N_("Filter")),
-		OPT_BIT(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("unset multi-valued config options with matching values")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
-		OPT_END(),
+		OPT_ਸਮੂਹ(N_("Filter")),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
+		OPT_STRING(0, "value", &ਮੁੱਲ_ਨਮੂਨਾ, N_("pattern"), N_("unset multi-valued config options with matching values")),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_ਮੁੱਲ),
+		OPT_ਸਿਰਾ(),
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_unset_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_unset_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	ਜੇ ((flags & CONFIG_FLAGS_FIXED_ਮੁੱਲ) && !ਮੁੱਲ_ਨਮੂਨਾ)
 		die(_("--fixed-value only applies with 'value-pattern'"));
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
+	check_write(&location_opts.ਸਰੋਤ);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, value_pattern,
-							      NULL, flags);
-	else
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0],
-						     NULL, NULL);
+	ਜੇ ((flags & CONFIG_FLAGS_MULTI_REPLACE) || ਮੁੱਲ_ਨਮੂਨਾ)
+		ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							      argv[0], ਨਿਰਾ, ਮੁੱਲ_ਨਮੂਨਾ,
+							      ਨਿਰਾ, flags);
+	ਨਹੀਂਤਾਂ
+		ret = repo_config_ਸੈੱਟ_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file, argv[0],
+						     ਨਿਰਾ, ਨਿਰਾ);
 
 	location_options_release(&location_opts);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int cmd_config_rename_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_rename_section(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+				     ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_rename_section_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_rename_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 2, 2);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
+	check_write(&location_opts.ਸਰੋਤ);
 
-	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
+	ret = repo_config_rename_section_ਵਿੱਚ_file(the_repository, location_opts.ਸਰੋਤ.file,
 						 argv[0], argv[1]);
-	if (ret < 0)
-		goto out;
-	else if (!ret)
+	ਜੇ (ret < 0)
+		ਜਾਓ ਬਾਹਰਲਾ;
+	ਨਹੀਂਤਾਂ ਜੇ (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
-out:
+ਬਾਹਰਲਾ:
 	location_options_release(&location_opts);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int cmd_config_remove_section(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_remove_section(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+				     ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_remove_section_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_remove_section_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
+	check_write(&location_opts.ਸਰੋਤ);
 
-	ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
-						 argv[0], NULL);
-	if (ret < 0)
-		goto out;
-	else if (!ret)
+	ret = repo_config_rename_section_ਵਿੱਚ_file(the_repository, location_opts.ਸਰੋਤ.file,
+						 argv[0], ਨਿਰਾ);
+	ਜੇ (ret < 0)
+		ਜਾਓ ਬਾਹਰਲਾ;
+	ਨਹੀਂਤਾਂ ਜੇ (!ret)
 		die(_("no such section: %s"), argv[0]);
 	ret = 0;
 
-out:
+ਬਾਹਰਲਾ:
 	location_options_release(&location_opts);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int show_editor(struct config_location_options *opts)
+ਸਥਿਰ ਪੂਰਨ show_editor(ਬਣਤਰ config_location_options *opts)
 {
-	char *config_file;
+	ਅੱਖਰ *config_file;
 
-	if (!opts->source.file && !startup_info->have_repository)
+	ਜੇ (!opts->ਸਰੋਤ.file && !startup_info->have_repository)
 		die(_("not in a git directory"));
-	if (opts->source.use_stdin)
+	ਜੇ (opts->ਸਰੋਤ.use_stdin)
 		die(_("editing stdin is not supported"));
-	if (opts->source.blob)
+	ਜੇ (opts->ਸਰੋਤ.blob)
 		die(_("editing blobs is not supported"));
-	repo_config(the_repository, git_default_config, NULL);
-	config_file = opts->source.file ?
-			xstrdup(opts->source.file) :
-			repo_git_path(the_repository, "config");
-	if (opts->use_global_config) {
-		int fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
-		if (fd >= 0) {
-			char *content = default_user_config();
-			write_str_in_full(fd, content);
-			free(content);
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
+	config_file = opts->ਸਰੋਤ.file ?
+			xstrdup(opts->ਸਰੋਤ.file) :
+			repo_git_ਰਸਤਾ(the_repository, "config");
+	ਜੇ (opts->use_global_config) {
+		ਪੂਰਨ fd = open(config_file, O_CREAT | O_EXCL | O_WRONLY, 0666);
+		ਜੇ (fd >= 0) {
+			ਅੱਖਰ *content = default_user_config();
+			write_str_ਵਿੱਚ_ਭਰਿਆ(fd, content);
+			ਮੁਕਤ(content);
 			close(fd);
 		}
-		else if (errno != EEXIST)
+		ਨਹੀਂਤਾਂ ਜੇ (errno != EEXIST)
 			die_errno(_("cannot create configuration file %s"), config_file);
 	}
-	if (launch_editor(config_file, NULL, NULL)) {
-		free(config_file);
-		return -1;
+	ਜੇ (launch_editor(config_file, ਨਿਰਾ, ਨਿਰਾ)) {
+		ਮੁਕਤ(config_file);
+		ਵਾਪਸ -1;
 	}
-	free(config_file);
+	ਮੁਕਤ(config_file);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int cmd_config_edit(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+ਸਥਿਰ ਪੂਰਨ cmd_config_edit(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+			   ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	argc = parse_options(argc, argv, prefix, opts, builtin_config_edit_usage, 0);
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts, builtin_config_edit_usage, 0);
 	check_argc(argc, 0, 0);
 
-	location_options_init(&location_opts, prefix);
-	check_write(&location_opts.source);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
+	check_write(&location_opts.ਸਰੋਤ);
 
 	ret = show_editor(&location_opts);
 	location_options_release(&location_opts);
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static int cmd_config_actions(int argc, const char **argv, const char *prefix)
+ਸਥਿਰ ਪੂਰਨ cmd_config_actions(ਪੂਰਨ argc, ਅਚਲ ਅੱਖਰ **argv, ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ)
 {
-	enum {
+	ਗਿਣਤੀ {
 		ACTION_GET = (1<<0),
 		ACTION_GET_ALL = (1<<1),
 		ACTION_GET_REGEXP = (1<<2),
 		ACTION_REPLACE_ALL = (1<<3),
-		ACTION_ADD = (1<<4),
+		ACTION_ਜੋੜੋ = (1<<4),
 		ACTION_UNSET = (1<<5),
 		ACTION_UNSET_ALL = (1<<6),
 		ACTION_RENAME_SECTION = (1<<7),
 		ACTION_REMOVE_SECTION = (1<<8),
 		ACTION_LIST = (1<<9),
 		ACTION_EDIT = (1<<10),
-		ACTION_SET = (1<<11),
-		ACTION_SET_ALL = (1<<12),
+		ACTION_ਸੈੱਟ = (1<<11),
+		ACTION_ਸੈੱਟ_ALL = (1<<12),
 		ACTION_GET_COLOR = (1<<13),
 		ACTION_GET_COLORBOOL = (1<<14),
 		ACTION_GET_URLMATCH = (1<<15),
 	};
-	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *comment_arg = NULL;
-	int actions = 0;
-	unsigned flags = 0;
-	struct option opts[] = {
+	ਬਣਤਰ config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
+	ਬਣਤਰ config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
+	ਅਚਲ ਅੱਖਰ *comment_arg = ਨਿਰਾ;
+	ਪੂਰਨ actions = 0;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ flags = 0;
+	ਬਣਤਰ option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
-		OPT_GROUP(N_("Action")),
+		OPT_ਸਮੂਹ(N_("Action")),
 		OPT_CMDMODE(0, "get", &actions, N_("get value: name [<value-pattern>]"), ACTION_GET),
 		OPT_CMDMODE(0, "get-all", &actions, N_("get all values: key [<value-pattern>]"), ACTION_GET_ALL),
 		OPT_CMDMODE(0, "get-regexp", &actions, N_("get values for regexp: name-regex [<value-pattern>]"), ACTION_GET_REGEXP),
 		OPT_CMDMODE(0, "get-urlmatch", &actions, N_("get value specific for the URL: section[.var] URL"), ACTION_GET_URLMATCH),
 		OPT_CMDMODE(0, "replace-all", &actions, N_("replace all matching variables: name value [<value-pattern>]"), ACTION_REPLACE_ALL),
-		OPT_CMDMODE(0, "add", &actions, N_("add a new variable: name value"), ACTION_ADD),
+		OPT_CMDMODE(0, "add", &actions, N_("add a new variable: name value"), ACTION_ਜੋੜੋ),
 		OPT_CMDMODE(0, "unset", &actions, N_("remove a variable: name [<value-pattern>]"), ACTION_UNSET),
 		OPT_CMDMODE(0, "unset-all", &actions, N_("remove all matches: name [<value-pattern>]"), ACTION_UNSET_ALL),
 		OPT_CMDMODE(0, "rename-section", &actions, N_("rename section: old-name new-name"), ACTION_RENAME_SECTION),
@@ -1386,102 +1386,102 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		OPT_CMDMODE(0, "get-color", &actions, N_("find the color configured: slot [<default>]"), ACTION_GET_COLOR),
 		OPT_CMDMODE(0, "get-colorbool", &actions, N_("find the color setting: slot [<stdout-is-tty>]"), ACTION_GET_COLORBOOL),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
-		OPT_GROUP(N_("Other")),
-		OPT_STRING(0, "default", &display_opts.default_value,
+		OPT_ਸਮੂਹ(N_("Other")),
+		OPT_STRING(0, "default", &display_opts.default_ਮੁੱਲ,
 			   N_("value"), N_("with --get, use default value when missing entry")),
 		OPT_STRING(0, "comment", &comment_arg, N_("value"), N_("human-readable comment string (# will be prepended as needed)")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_ਮੁੱਲ),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
-	char *value = NULL, *comment = NULL;
-	int ret = 0;
-	int actions_implicit;
-	struct key_value_info default_kvi = KVI_INIT;
+	ਅੱਖਰ *ਮੁੱਲ = ਨਿਰਾ, *comment = ਨਿਰਾ;
+	ਪੂਰਨ ret = 0;
+	ਪੂਰਨ actions_implicit;
+	ਬਣਤਰ ਕੁੰਜੀ_ਮੁੱਲ_info default_kvi = KVI_INIT;
 
-	argc = parse_options(argc, argv, prefix, opts,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, opts,
 			     builtin_config_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	location_options_init(&location_opts, prefix);
+	location_options_init(&location_opts, ਅਗੇਤਰ);
 	display_options_init(&display_opts);
 
-	if ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
+	ਜੇ ((actions & (ACTION_GET_COLOR|ACTION_GET_COLORBOOL)) && display_opts.type) {
 		error(_("--get-color and variable type are incoherent"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
 
 	actions_implicit = (actions == 0);
-	if (actions_implicit)
-		switch (argc) {
-		case 1: actions = ACTION_GET; break;
-		case 2: actions = ACTION_SET; break;
-		case 3: actions = ACTION_SET_ALL; break;
-		default:
+	ਜੇ (actions_implicit)
+		ਚੋਣ (argc) {
+		ਹਾਲਤ 1: actions = ACTION_GET; ਰੋਕੋ;
+		ਹਾਲਤ 2: actions = ACTION_ਸੈੱਟ; ਰੋਕੋ;
+		ਹਾਲਤ 3: actions = ACTION_ਸੈੱਟ_ALL; ਰੋਕੋ;
+		ਮੂਲ:
 			error(_("no action specified"));
-			exit(129);
+			ਬਾਹਰ_ਨਿਕਲੋ(129);
 		}
-	if (actions_implicit && argc == 1) {
-		const char *last_dot = strrchr(argv[0], '.');
-		if (last_dot && strchr(last_dot + 1, '='))
-			die_missing_set_value(argv[0]);
+	ਜੇ (actions_implicit && argc == 1) {
+		ਅਚਲ ਅੱਖਰ *ਆਖਰੀ_dot = strrchr(argv[0], '.');
+		ਜੇ (ਆਖਰੀ_dot && strchr(ਆਖਰੀ_dot + 1, '='))
+			die_missing_ਸੈੱਟ_ਮੁੱਲ(argv[0]);
 	}
-	if (display_opts.omit_values &&
+	ਜੇ (display_opts.omit_ਮੁੱਲਾਂ &&
 	    !(actions == ACTION_LIST || actions == ACTION_GET_REGEXP)) {
 		error(_("--name-only is only applicable to --list or --get-regexp"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
 
-	if (display_opts.show_origin && !(actions &
+	ਜੇ (display_opts.show_origin && !(actions &
 		(ACTION_GET|ACTION_GET_ALL|ACTION_GET_REGEXP|ACTION_LIST))) {
 		error(_("--show-origin is only applicable to --get, --get-all, "
 			"--get-regexp, and --list"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
 
-	if (display_opts.default_value && !(actions & ACTION_GET)) {
+	ਜੇ (display_opts.default_ਮੁੱਲ && !(actions & ACTION_GET)) {
 		error(_("--default is only applicable to --get"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
 
-	if (comment_arg &&
-	    !(actions & (ACTION_ADD|ACTION_SET|ACTION_SET_ALL|ACTION_REPLACE_ALL))) {
+	ਜੇ (comment_arg &&
+	    !(actions & (ACTION_ਜੋੜੋ|ACTION_ਸੈੱਟ|ACTION_ਸੈੱਟ_ALL|ACTION_REPLACE_ALL))) {
 		error(_("--comment is only applicable to add/set/replace operations"));
-		exit(129);
+		ਬਾਹਰ_ਨਿਕਲੋ(129);
 	}
 
 	/* check usage of --fixed-value */
-	if (flags & CONFIG_FLAGS_FIXED_VALUE) {
-		int allowed_usage = 0;
+	ਜੇ (flags & CONFIG_FLAGS_FIXED_ਮੁੱਲ) {
+		ਪੂਰਨ allowed_usage = 0;
 
-		switch (actions) {
+		ਚੋਣ (actions) {
 		/* git config --get <name> <value-pattern> */
-		case ACTION_GET:
+		ਹਾਲਤ ACTION_GET:
 		/* git config --get-all <name> <value-pattern> */
-		case ACTION_GET_ALL:
+		ਹਾਲਤ ACTION_GET_ALL:
 		/* git config --get-regexp <name-pattern> <value-pattern> */
-		case ACTION_GET_REGEXP:
+		ਹਾਲਤ ACTION_GET_REGEXP:
 		/* git config --unset <name> <value-pattern> */
-		case ACTION_UNSET:
+		ਹਾਲਤ ACTION_UNSET:
 		/* git config --unset-all <name> <value-pattern> */
-		case ACTION_UNSET_ALL:
+		ਹਾਲਤ ACTION_UNSET_ALL:
 			allowed_usage = argc > 1 && !!argv[1];
-			break;
+			ਰੋਕੋ;
 
 		/* git config <name> <value> <value-pattern> */
-		case ACTION_SET_ALL:
+		ਹਾਲਤ ACTION_ਸੈੱਟ_ALL:
 		/* git config --replace-all <name> <value> <value-pattern> */
-		case ACTION_REPLACE_ALL:
+		ਹਾਲਤ ACTION_REPLACE_ALL:
 			allowed_usage = argc > 2 && !!argv[2];
-			break;
+			ਰੋਕੋ;
 
 		/* other options don't allow --fixed-value */
 		}
 
-		if (!allowed_usage) {
+		ਜੇ (!allowed_usage) {
 			error(_("--fixed-value only applies with 'value-pattern'"));
-			exit(129);
+			ਬਾਹਰ_ਨਿਕਲੋ(129);
 		}
 	}
 
@@ -1491,154 +1491,154 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	 * The following actions may produce more than one line of output and
 	 * should therefore be paged.
 	 */
-	if (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
-		setup_auto_pager("config", 1);
+	ਜੇ (actions & (ACTION_LIST | ACTION_GET_ALL | ACTION_GET_REGEXP | ACTION_GET_URLMATCH))
+		ਤਿਆਰੀ_auto_pager("config", 1);
 
-	if (actions == ACTION_LIST) {
+	ਜੇ (actions == ACTION_LIST) {
 		check_argc(argc, 0, 0);
 		display_options_init_list(&display_opts);
-		if (config_with_options(show_all_config, &display_opts,
-					&location_opts.source, the_repository,
+		ਜੇ (config_with_options(show_all_config, &display_opts,
+					&location_opts.ਸਰੋਤ, the_repository,
 					&location_opts.options) < 0) {
-			if (location_opts.source.file)
+			ਜੇ (location_opts.ਸਰੋਤ.file)
 				die_errno(_("unable to read config file '%s'"),
-					  location_opts.source.file);
-			else
+					  location_opts.ਸਰੋਤ.file);
+			ਨਹੀਂਤਾਂ
 				die(_("error processing config file(s)"));
 		}
 	}
-	else if (actions == ACTION_EDIT) {
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_EDIT) {
 		ret = show_editor(&location_opts);
 	}
-	else if (actions == ACTION_SET) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_ਸੈੱਟ) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 2, 2);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, value);
-		if (ret == CONFIG_NOTHING_SET)
+		ਮੁੱਲ = normalize_ਮੁੱਲ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_ਸੈੱਟ_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file, argv[0], comment, ਮੁੱਲ);
+		ਜੇ (ret == CONFIG_NOTHING_ਸੈੱਟ)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use a regexp, --add or --replace-all to change %s."), argv[0]);
 	}
-	else if (actions == ACTION_SET_ALL) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_ਸੈੱਟ_ALL) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 2, 3);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, argv[2],
+		ਮੁੱਲ = normalize_ਮੁੱਲ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							      argv[0], ਮੁੱਲ, argv[2],
 							      comment, flags);
 	}
-	else if (actions == ACTION_ADD) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_ਜੋੜੋ) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 2, 2);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value,
+		ਮੁੱਲ = normalize_ਮੁੱਲ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							      argv[0], ਮੁੱਲ,
 							      CONFIG_REGEX_NONE,
 							      comment, flags);
 	}
-	else if (actions == ACTION_REPLACE_ALL) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_REPLACE_ALL) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 2, 3);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, argv[2],
+		ਮੁੱਲ = normalize_ਮੁੱਲ(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							      argv[0], ਮੁੱਲ, argv[2],
 							      comment, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_GET) {
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_GET) {
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
+		ret = get_ਮੁੱਲ(&location_opts, &display_opts, argv[0], argv[1],
 				0, flags);
 	}
-	else if (actions == ACTION_GET_ALL) {
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_GET_ALL) {
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
-				GET_VALUE_ALL, flags);
+		ret = get_ਮੁੱਲ(&location_opts, &display_opts, argv[0], argv[1],
+				GET_ਮੁੱਲ_ALL, flags);
 	}
-	else if (actions == ACTION_GET_REGEXP) {
-		display_opts.show_keys = 1;
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_GET_REGEXP) {
+		display_opts.show_ਕੁੰਜੀਆਂ = 1;
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
-				GET_VALUE_ALL|GET_VALUE_KEY_REGEXP, flags);
+		ret = get_ਮੁੱਲ(&location_opts, &display_opts, argv[0], argv[1],
+				GET_ਮੁੱਲ_ALL|GET_ਮੁੱਲ_ਕੁੰਜੀ_REGEXP, flags);
 	}
-	else if (actions == ACTION_GET_URLMATCH) {
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_GET_URLMATCH) {
 		check_argc(argc, 2, 2);
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_UNSET) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_UNSET) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 1, 2);
-		if (argc == 2)
-			ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-								      argv[0], NULL, argv[1],
-								      NULL, flags);
-		else
-			ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
-							     argv[0], NULL, NULL);
+		ਜੇ (argc == 2)
+			ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+								      argv[0], ਨਿਰਾ, argv[1],
+								      ਨਿਰਾ, flags);
+		ਨਹੀਂਤਾਂ
+			ret = repo_config_ਸੈੱਟ_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							     argv[0], ਨਿਰਾ, ਨਿਰਾ);
 	}
-	else if (actions == ACTION_UNSET_ALL) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_UNSET_ALL) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 1, 2);
-		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, argv[1],
-							      NULL, flags | CONFIG_FLAGS_MULTI_REPLACE);
+		ret = repo_config_ਸੈੱਟ_multivar_ਵਿੱਚ_file_gently(the_repository, location_opts.ਸਰੋਤ.file,
+							      argv[0], ਨਿਰਾ, argv[1],
+							      ਨਿਰਾ, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
-	else if (actions == ACTION_RENAME_SECTION) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_RENAME_SECTION) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 2, 2);
-		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
+		ret = repo_config_rename_section_ਵਿੱਚ_file(the_repository, location_opts.ਸਰੋਤ.file,
 							 argv[0], argv[1]);
-		if (ret < 0)
-			goto out;
-		else if (!ret)
+		ਜੇ (ret < 0)
+			ਜਾਓ ਬਾਹਰਲਾ;
+		ਨਹੀਂਤਾਂ ਜੇ (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		ਨਹੀਂਤਾਂ
 			ret = 0;
 	}
-	else if (actions == ACTION_REMOVE_SECTION) {
-		check_write(&location_opts.source);
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_REMOVE_SECTION) {
+		check_write(&location_opts.ਸਰੋਤ);
 		check_argc(argc, 1, 1);
-		ret = repo_config_rename_section_in_file(the_repository, location_opts.source.file,
-							 argv[0], NULL);
-		if (ret < 0)
-			goto out;
-		else if (!ret)
+		ret = repo_config_rename_section_ਵਿੱਚ_file(the_repository, location_opts.ਸਰੋਤ.file,
+							 argv[0], ਨਿਰਾ);
+		ਜੇ (ret < 0)
+			ਜਾਓ ਬਾਹਰਲਾ;
+		ਨਹੀਂਤਾਂ ਜੇ (!ret)
 			die(_("no such section: %s"), argv[0]);
-		else
+		ਨਹੀਂਤਾਂ
 			ret = 0;
 	}
-	else if (actions == ACTION_GET_COLOR) {
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_GET_COLOR) {
 		check_argc(argc, 1, 2);
 		ret = get_color(&location_opts, argv[0], argv[1]);
 	}
-	else if (actions == ACTION_GET_COLORBOOL) {
+	ਨਹੀਂਤਾਂ ਜੇ (actions == ACTION_GET_COLORBOOL) {
 		check_argc(argc, 1, 2);
-		if (argc == 2)
+		ਜੇ (argc == 2)
 			color_stdout_is_tty = git_config_bool("command line", argv[1]);
 		ret = get_colorbool(&location_opts, argv[0], argc == 2);
 	}
 
-out:
+ਬਾਹਰਲਾ:
 	location_options_release(&location_opts);
-	free(comment);
-	free(value);
-	return ret;
+	ਮੁਕਤ(comment);
+	ਮੁਕਤ(ਮੁੱਲ);
+	ਵਾਪਸ ret;
 }
 
-int cmd_config(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ਪੂਰਨ cmd_config(ਪੂਰਨ argc,
+	       ਅਚਲ ਅੱਖਰ **argv,
+	       ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+	       ਬਣਤਰ repository *repo)
 {
-	parse_opt_subcommand_fn *subcommand = NULL;
-	struct option subcommand_opts[] = {
+	parse_opt_subcommand_fn *subcommand = ਨਿਰਾ;
+	ਬਣਤਰ option subcommand_opts[] = {
 		OPT_SUBCOMMAND("list", &subcommand, cmd_config_list),
 		OPT_SUBCOMMAND("get", &subcommand, cmd_config_get),
-		OPT_SUBCOMMAND("set", &subcommand, cmd_config_set),
+		OPT_SUBCOMMAND("set", &subcommand, cmd_config_ਸੈੱਟ),
 		OPT_SUBCOMMAND("unset", &subcommand, cmd_config_unset),
 		OPT_SUBCOMMAND("rename-section", &subcommand, cmd_config_rename_section),
 		OPT_SUBCOMMAND("remove-section", &subcommand, cmd_config_remove_section),
 		OPT_SUBCOMMAND("edit", &subcommand, cmd_config_edit),
-		OPT_END(),
+		OPT_ਸਿਰਾ(),
 	};
 
 	/*
@@ -1649,13 +1649,13 @@ int cmd_config(int argc,
 	 * line in case no subcommand was given, which would otherwise confuse
 	 * us when parsing the legacy-style modes that don't use subcommands.
 	 */
-	argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
+	argc = parse_options(argc, argv, ਅਗੇਤਰ, subcommand_opts, builtin_config_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_ARGV0|PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (subcommand) {
-		argc = parse_options(argc, argv, prefix, subcommand_opts, builtin_config_usage,
+	ਜੇ (subcommand) {
+		argc = parse_options(argc, argv, ਅਗੇਤਰ, subcommand_opts, builtin_config_usage,
 		       PARSE_OPT_SUBCOMMAND_OPTIONAL|PARSE_OPT_KEEP_UNKNOWN_OPT);
-		return subcommand(argc, argv, prefix, repo);
+		ਵਾਪਸ subcommand(argc, argv, ਅਗੇਤਰ, repo);
 	}
 
-	return cmd_config_actions(argc, argv, prefix);
+	ਵਾਪਸ cmd_config_actions(argc, argv, ਅਗੇਤਰ);
 }

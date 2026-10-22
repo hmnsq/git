@@ -1,131 +1,131 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "hex.h"
-#include "read-cache-ll.h"
-#include "run-command.h"
-#include "sparse-index.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "read-cache-ll.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "run-command.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "sparse-index.h"
 
-static const char *pgm;
-static int one_shot, quiet;
-static int err;
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *pgm;
+ਸਥਿਰ ਪੂਰਨ one_shot, quiet;
+ਸਥਿਰ ਪੂਰਨ err;
 
-static int merge_entry(int pos, const char *path)
+ਸਥਿਰ ਪੂਰਨ ਮਿਲਾਓ_ਇੰਦਰਾਜ(ਪੂਰਨ pos, ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	int found;
-	const char *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
-	char hexbuf[4][GIT_MAX_HEXSZ + 1];
-	char ownbuf[4][60];
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ਪੂਰਨ ਮਿਲਿਆ_2;
+	ਅਚਲ ਅੱਖਰ *arguments[] = { pgm, "", "", "", ਰਸਤਾ, "", "", "", ਨਿਰਾ };
+	ਅੱਖਰ hexbuf[4][GIT_MAX_HEXSZ + 1];
+	ਅੱਖਰ ownbuf[4][60];
+	ਬਣਤਰ ਬੱਚਾ_process cmd = ਬੱਚਾ_PROCESS_INIT;
 
-	if (pos >= the_repository->index->cache_nr)
-		die("git merge-index: %s not in the cache", path);
-	found = 0;
-	do {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		int stage = ce_stage(ce);
+	ਜੇ (pos >= the_repository->ਸੂਚਕਾਂਕ->cache_nr)
+		die("git merge-index: %s not in the cache", ਰਸਤਾ);
+	ਮਿਲਿਆ_2 = 0;
+	ਕਰੋ {
+		ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce = the_repository->ਸੂਚਕਾਂਕ->cache[pos];
+		ਪੂਰਨ stage = ce_stage(ce);
 
-		if (strcmp(ce->name, path))
-			break;
-		found++;
-		oid_to_hex_r(hexbuf[stage], &ce->oid);
-		xsnprintf(ownbuf[stage], sizeof(ownbuf[stage]), "%o", ce->ce_mode);
+		ਜੇ (strcmp(ce->name, ਰਸਤਾ))
+			ਰੋਕੋ;
+		ਮਿਲਿਆ_2++;
+		oid_ਮੰਜ਼ਿਲ_hex_r(hexbuf[stage], &ce->oid);
+		xsnprintf(ownbuf[stage], ਆਕਾਰ(ownbuf[stage]), "%o", ce->ce_ਬਹੁਲਕ);
 		arguments[stage] = hexbuf[stage];
 		arguments[stage + 4] = ownbuf[stage];
-	} while (++pos < the_repository->index->cache_nr);
-	if (!found)
-		die("git merge-index: %s not in the cache", path);
+	} ਜਦੋਂ (++pos < the_repository->ਸੂਚਕਾਂਕ->cache_nr);
+	ਜੇ (!ਮਿਲਿਆ_2)
+		die("git merge-index: %s not in the cache", ਰਸਤਾ);
 
-	strvec_pushv(&cmd.args, arguments);
-	if (run_command(&cmd)) {
-		if (one_shot)
+	strvec_pushv(&cmd.ਦਲੀਲਾਂ, arguments);
+	ਜੇ (ਲੜੀਵਾਰ_command(&cmd)) {
+		ਜੇ (one_shot)
 			err++;
-		else {
-			if (!quiet)
+		ਨਹੀਂਤਾਂ {
+			ਜੇ (!quiet)
 				die("merge program failed");
-			exit(1);
+			ਬਾਹਰ_ਨਿਕਲੋ(1);
 		}
 	}
-	return found;
+	ਵਾਪਸ ਮਿਲਿਆ_2;
 }
 
-static void merge_one_path(const char *path)
+ਸਥਿਰ ਖਾਲੀ ਮਿਲਾਓ_one_ਰਸਤਾ(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ)
 {
-	int pos = index_name_pos(the_repository->index, path, strlen(path));
+	ਪੂਰਨ pos = ਸੂਚਕਾਂਕ_name_pos(the_repository->ਸੂਚਕਾਂਕ, ਰਸਤਾ, ਲੜੀ_ਲੰਬਾਈ(ਰਸਤਾ));
 
 	/*
 	 * If it already exists in the cache as stage0, it's
 	 * already merged and there is nothing to do.
 	 */
-	if (pos < 0)
-		merge_entry(-pos-1, path);
+	ਜੇ (pos < 0)
+		ਮਿਲਾਓ_ਇੰਦਰਾਜ(-pos-1, ਰਸਤਾ);
 }
 
-static void merge_all(void)
+ਸਥਿਰ ਖਾਲੀ ਮਿਲਾਓ_all(ਖਾਲੀ)
 {
-	int i;
+	ਪੂਰਨ i;
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		if (!ce_stage(ce))
-			continue;
-		i += merge_entry(i, ce->name)-1;
+	ensure_ਭਰਿਆ_ਸੂਚਕਾਂਕ(the_repository->ਸੂਚਕਾਂਕ);
+	ਲਈ (i = 0; i < the_repository->ਸੂਚਕਾਂਕ->cache_nr; i++) {
+		ਅਚਲ ਬਣਤਰ cache_ਇੰਦਰਾਜ *ce = the_repository->ਸੂਚਕਾਂਕ->cache[i];
+		ਜੇ (!ce_stage(ce))
+			ਜਾਰੀ;
+		i += ਮਿਲਾਓ_ਇੰਦਰਾਜ(i, ce->name)-1;
 	}
 }
 
-static const char usage_string[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ usage_string[] =
 "git merge-index [-o] [-q] <merge-program> (-a | [--] [<filename>...])";
 
-int cmd_merge_index(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+ਪੂਰਨ cmd_ਮਿਲਾਓ_ਸੂਚਕਾਂਕ(ਪੂਰਨ argc,
+		    ਅਚਲ ਅੱਖਰ **argv,
+		    ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ ਅਣਵਰਤਿਆ,
+		    ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	int i, force_file = 0;
+	ਪੂਰਨ i, force_file = 0;
 
 	/* Without this we cannot rely on waitpid() to tell
 	 * what happened to our children.
 	 */
-	signal(SIGCHLD, SIG_DFL);
+	ਸੰਕੇਤ(SIGCHLD, SIG_DFL);
 
 	show_usage_if_asked(argc, argv, usage_string);
 
-	if (argc < 3)
+	ਜੇ (argc < 3)
 		usage(usage_string);
 
-	repo_read_index(the_repository);
+	repo_read_ਸੂਚਕਾਂਕ(the_repository);
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
+	ensure_ਭਰਿਆ_ਸੂਚਕਾਂਕ(the_repository->ਸੂਚਕਾਂਕ);
 
 	i = 1;
-	if (!strcmp(argv[i], "-o")) {
+	ਜੇ (!strcmp(argv[i], "-o")) {
 		one_shot = 1;
 		i++;
 	}
-	if (!strcmp(argv[i], "-q")) {
+	ਜੇ (!strcmp(argv[i], "-q")) {
 		quiet = 1;
 		i++;
 	}
 	pgm = argv[i++];
-	for (; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!force_file && *arg == '-') {
-			if (!strcmp(arg, "--")) {
+	ਲਈ (; i < argc; i++) {
+		ਅਚਲ ਅੱਖਰ *arg = argv[i];
+		ਜੇ (!force_file && *arg == '-') {
+			ਜੇ (!strcmp(arg, "--")) {
 				force_file = 1;
-				continue;
+				ਜਾਰੀ;
 			}
-			if (!strcmp(arg, "-a")) {
-				merge_all();
-				continue;
+			ਜੇ (!strcmp(arg, "-a")) {
+				ਮਿਲਾਓ_all();
+				ਜਾਰੀ;
 			}
 			die("git merge-index: unknown option %s", arg);
 		}
-		merge_one_path(arg);
+		ਮਿਲਾਓ_one_ਰਸਤਾ(arg);
 	}
-	if (err && !quiet)
+	ਜੇ (err && !quiet)
 		die("merge program failed");
-	return err;
+	ਵਾਪਸ err;
 }

@@ -1,92 +1,92 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "commit.h"
-#include "gettext.h"
-#include "hex.h"
-#include "log-tree.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "tmp-objdir.h"
-#include "tree.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "hex.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "log-tree.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "read-cache-ll.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tmp-objdir.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "tree.h"
 
-static struct rev_info log_tree_opt;
+ਸਥਿਰ ਬਣਤਰ rev_info log_ਰੁੱਖ_opt;
 
-static int diff_tree_commit_oid(const struct object_id *oid)
+ਸਥਿਰ ਪੂਰਨ diff_ਰੁੱਖ_commit_oid(ਅਚਲ ਬਣਤਰ object_id *oid)
 {
-	struct commit *commit = lookup_commit_reference(the_repository, oid);
-	if (!commit)
-		return -1;
-	return log_tree_commit(&log_tree_opt, commit);
+	ਬਣਤਰ commit *commit = lookup_commit_reference(the_repository, oid);
+	ਜੇ (!commit)
+		ਵਾਪਸ -1;
+	ਵਾਪਸ log_ਰੁੱਖ_commit(&log_ਰੁੱਖ_opt, commit);
 }
 
 /* Diff one or more commits. */
-static int stdin_diff_commit(struct commit *commit, const char *p)
+ਸਥਿਰ ਪੂਰਨ stdin_diff_commit(ਬਣਤਰ commit *commit, ਅਚਲ ਅੱਖਰ *p)
 {
-	struct object_id oid;
-	struct commit_list **pptr = NULL;
+	ਬਣਤਰ object_id oid;
+	ਬਣਤਰ commit_list **pptr = ਨਿਰਾ;
 
 	/* Graft the fake parents locally to the commit */
-	while (isspace(*p++) && !parse_oid_hex(p, &oid, &p)) {
-		struct commit *parent = lookup_commit(the_repository, &oid);
-		if (!pptr) {
+	ਜਦੋਂ (ਖਾਲੀ_ਥਾਂ_ਹੈ(*p++) && !parse_oid_hex(p, &oid, &p)) {
+		ਬਣਤਰ commit *ਮਾਪਾ = lookup_commit(the_repository, &oid);
+		ਜੇ (!pptr) {
 			/* Free the real parent list */
 			commit_list_free(commit->parents);
-			commit->parents = NULL;
+			commit->parents = ਨਿਰਾ;
 			pptr = &(commit->parents);
 		}
-		if (parent) {
-			pptr = &commit_list_insert(parent, pptr)->next;
+		ਜੇ (ਮਾਪਾ) {
+			pptr = &commit_list_ਪਾਓ(ਮਾਪਾ, pptr)->ਅਗਲਾ;
 		}
 	}
-	return log_tree_commit(&log_tree_opt, commit);
+	ਵਾਪਸ log_ਰੁੱਖ_commit(&log_ਰੁੱਖ_opt, commit);
 }
 
 /* Diff two trees. */
-static int stdin_diff_trees(struct tree *tree1, const char *p)
+ਸਥਿਰ ਪੂਰਨ stdin_diff_trees(ਬਣਤਰ ਰੁੱਖ *tree1, ਅਚਲ ਅੱਖਰ *p)
 {
-	struct object_id oid;
-	struct tree *tree2;
-	if (!isspace(*p++) || parse_oid_hex(p, &oid, &p) || *p)
-		return error("Need exactly two trees, separated by a space");
-	tree2 = lookup_tree(the_repository, &oid);
-	if (!tree2 || repo_parse_tree(the_repository, tree2))
-		return -1;
-	printf("%s %s\n", oid_to_hex(&tree1->object.oid),
-			  oid_to_hex(&tree2->object.oid));
-	diff_tree_oid(&tree1->object.oid, &tree2->object.oid,
-		      "", &log_tree_opt.diffopt);
-	log_tree_diff_flush(&log_tree_opt);
-	return 0;
+	ਬਣਤਰ object_id oid;
+	ਬਣਤਰ ਰੁੱਖ *tree2;
+	ਜੇ (!ਖਾਲੀ_ਥਾਂ_ਹੈ(*p++) || parse_oid_hex(p, &oid, &p) || *p)
+		ਵਾਪਸ error("Need exactly two trees, separated by a space");
+	tree2 = lookup_ਰੁੱਖ(the_repository, &oid);
+	ਜੇ (!tree2 || repo_parse_ਰੁੱਖ(the_repository, tree2))
+		ਵਾਪਸ -1;
+	ਲਿਖੋ("%s %s\n", oid_ਮੰਜ਼ਿਲ_hex(&tree1->object.oid),
+			  oid_ਮੰਜ਼ਿਲ_hex(&tree2->object.oid));
+	diff_ਰੁੱਖ_oid(&tree1->object.oid, &tree2->object.oid,
+		      "", &log_ਰੁੱਖ_opt.diffopt);
+	log_ਰੁੱਖ_diff_flush(&log_ਰੁੱਖ_opt);
+	ਵਾਪਸ 0;
 }
 
-static int diff_tree_stdin(char *line)
+ਸਥਿਰ ਪੂਰਨ diff_ਰੁੱਖ_stdin(ਅੱਖਰ *ਸਤਰ)
 {
-	int len = strlen(line);
-	struct object_id oid;
-	struct object *obj;
-	const char *p;
+	ਪੂਰਨ len = ਲੜੀ_ਲੰਬਾਈ(ਸਤਰ);
+	ਬਣਤਰ object_id oid;
+	ਬਣਤਰ object *obj;
+	ਅਚਲ ਅੱਖਰ *p;
 
-	if (!len || line[len-1] != '\n')
-		return -1;
-	line[len-1] = 0;
-	if (parse_oid_hex(line, &oid, &p))
-		return -1;
+	ਜੇ (!len || ਸਤਰ[len-1] != '\n')
+		ਵਾਪਸ -1;
+	ਸਤਰ[len-1] = 0;
+	ਜੇ (parse_oid_hex(ਸਤਰ, &oid, &p))
+		ਵਾਪਸ -1;
 	obj = parse_object(the_repository, &oid);
-	if (!obj)
-		return -1;
-	if (obj->type == OBJ_COMMIT)
-		return stdin_diff_commit((struct commit *)obj, p);
-	if (obj->type == OBJ_TREE)
-		return stdin_diff_trees((struct tree *)obj, p);
+	ਜੇ (!obj)
+		ਵਾਪਸ -1;
+	ਜੇ (obj->type == OBJ_COMMIT)
+		ਵਾਪਸ stdin_diff_commit((ਬਣਤਰ commit *)obj, p);
+	ਜੇ (obj->type == OBJ_ਰੁੱਖ)
+		ਵਾਪਸ stdin_diff_trees((ਬਣਤਰ ਰੁੱਖ *)obj, p);
 	error("Object %s is a %s, not a commit or tree",
-	      oid_to_hex(&oid), type_name(obj->type));
-	return -1;
+	      oid_ਮੰਜ਼ਿਲ_hex(&oid), type_name(obj->type));
+	ਵਾਪਸ -1;
 }
 
-static const char diff_tree_usage[] =
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ diff_ਰੁੱਖ_usage[] =
 "git diff-tree [--stdin] [-m] [-s] [-v] [--no-commit-id] [--pretty]\n"
 "              [-t] [-r] [-c | --cc] [--combined-all-paths] [--root] [--merge-base]\n"
 "              [<common-diff-options>] <tree-ish> [<tree-ish>] [<path>...]\n"
@@ -99,76 +99,76 @@ static const char diff_tree_usage[] =
 "  --root        include the initial commit as diff against /dev/null\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static void diff_tree_tweak_rev(struct rev_info *rev)
+ਸਥਿਰ ਖਾਲੀ diff_ਰੁੱਖ_tweak_rev(ਬਣਤਰ rev_info *rev)
 {
-	if (!rev->diffopt.output_format) {
-		if (rev->dense_combined_merges)
+	ਜੇ (!rev->diffopt.output_format) {
+		ਜੇ (rev->dense_combined_merges)
 			rev->diffopt.output_format = DIFF_FORMAT_PATCH;
-		else
+		ਨਹੀਂਤਾਂ
 			rev->diffopt.output_format = DIFF_FORMAT_RAW;
 	}
 }
 
-int cmd_diff_tree(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ਪੂਰਨ cmd_diff_ਰੁੱਖ(ਪੂਰਨ argc,
+		  ਅਚਲ ਅੱਖਰ **argv,
+		  ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		  ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	char line[1000];
-	struct object *tree1, *tree2;
-	static struct rev_info *opt = &log_tree_opt;
-	struct setup_revision_opt s_r_opt;
-	struct userformat_want w;
-	int read_stdin = 0;
-	int merge_base = 0;
+	ਅੱਖਰ ਸਤਰ[1000];
+	ਬਣਤਰ object *tree1, *tree2;
+	ਸਥਿਰ ਬਣਤਰ rev_info *opt = &log_ਰੁੱਖ_opt;
+	ਬਣਤਰ ਤਿਆਰੀ_revision_opt s_r_opt;
+	ਬਣਤਰ userformat_want w;
+	ਪੂਰਨ read_stdin = 0;
+	ਪੂਰਨ ਮਿਲਾਓ_ਅਧਾਰ = 0;
 
-	show_usage_if_asked(argc, argv, diff_tree_usage);
+	show_usage_if_asked(argc, argv, diff_ਰੁੱਖ_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, ਨਿਰਾ); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_ਭਰਿਆ_ਸੂਚਕਾਂਕ = 0;
 
-	repo_init_revisions(the_repository, opt, prefix);
-	if (repo_read_index(the_repository) < 0)
+	repo_init_revisions(the_repository, opt, ਅਗੇਤਰ);
+	ਜੇ (repo_read_ਸੂਚਕਾਂਕ(the_repository) < 0)
 		die(_("index file corrupt"));
 	opt->abbrev = 0;
 	opt->diff = 1;
 	opt->disable_stdin = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
-	s_r_opt.tweak = diff_tree_tweak_rev;
+	memset(&s_r_opt, 0, ਆਕਾਰ(s_r_opt));
+	s_r_opt.tweak = diff_ਰੁੱਖ_tweak_rev;
 
-	prefix = precompose_argv_prefix(argc, argv, prefix);
-	argc = setup_revisions(argc, argv, opt, &s_r_opt);
+	ਅਗੇਤਰ = precompose_argv_ਅਗੇਤਰ(argc, argv, ਅਗੇਤਰ);
+	argc = ਤਿਆਰੀ_revisions(argc, argv, opt, &s_r_opt);
 
-	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	memset(&w, 0, ਆਕਾਰ(w));
+	userformat_ਲੱਭੋ_requirements(ਨਿਰਾ, &w);
 
-	if (!opt->show_notes_given && w.notes)
+	ਜੇ (!opt->show_notes_given && w.notes)
 		opt->show_notes = 1;
-	if (opt->show_notes)
-		load_display_notes(&opt->notes_opt);
+	ਜੇ (opt->show_notes)
+		ਲੱਦੋ_display_notes(&opt->notes_opt);
 
-	while (--argc > 0) {
-		const char *arg = *++argv;
+	ਜਦੋਂ (--argc > 0) {
+		ਅਚਲ ਅੱਖਰ *arg = *++argv;
 
-		if (!strcmp(arg, "--stdin")) {
+		ਜੇ (!strcmp(arg, "--stdin")) {
 			read_stdin = 1;
-			continue;
+			ਜਾਰੀ;
 		}
-		if (!strcmp(arg, "--merge-base")) {
-			merge_base = 1;
-			continue;
+		ਜੇ (!strcmp(arg, "--merge-base")) {
+			ਮਿਲਾਓ_ਅਧਾਰ = 1;
+			ਜਾਰੀ;
 		}
-		usage(diff_tree_usage);
+		usage(diff_ਰੁੱਖ_usage);
 	}
 
-	if (read_stdin && merge_base)
+	ਜੇ (read_stdin && ਮਿਲਾਓ_ਅਧਾਰ)
 		die(_("options '%s' and '%s' cannot be used together"), "--stdin", "--merge-base");
-	if (merge_base && opt->pending.nr != 2)
+	ਜੇ (ਮਿਲਾਓ_ਅਧਾਰ && opt->pending.nr != 2)
 		die(_("--merge-base only works with two commits"));
 
-	opt->diffopt.rotate_to_strict = 1;
+	opt->diffopt.rotate_ਮੰਜ਼ਿਲ_strict = 1;
 
 	/*
 	 * NOTE!  We expect "a..b" to expand to "^a b" but it is
@@ -177,62 +177,62 @@ int cmd_diff_tree(int argc,
 	 * second one is marked UNINTERESTING, we recover the original
 	 * order the user gave, i.e. "a..b", by swapping the trees.
 	 */
-	switch (opt->pending.nr) {
-	case 0:
-		if (!read_stdin)
-			usage(diff_tree_usage);
-		break;
-	case 1:
-		tree1 = opt->pending.objects[0].item;
-		diff_tree_commit_oid(&tree1->oid);
-		break;
-	case 2:
-		tree1 = opt->pending.objects[0].item;
-		tree2 = opt->pending.objects[1].item;
-		if (merge_base) {
-			struct object_id oid;
+	ਚੋਣ (opt->pending.nr) {
+	ਹਾਲਤ 0:
+		ਜੇ (!read_stdin)
+			usage(diff_ਰੁੱਖ_usage);
+		ਰੋਕੋ;
+	ਹਾਲਤ 1:
+		tree1 = opt->pending.objects[0].ਵਸਤੂ;
+		diff_ਰੁੱਖ_commit_oid(&tree1->oid);
+		ਰੋਕੋ;
+	ਹਾਲਤ 2:
+		tree1 = opt->pending.objects[0].ਵਸਤੂ;
+		tree2 = opt->pending.objects[1].ਵਸਤੂ;
+		ਜੇ (ਮਿਲਾਓ_ਅਧਾਰ) {
+			ਬਣਤਰ object_id oid;
 
-			diff_get_merge_base(opt, &oid);
+			diff_get_ਮਿਲਾਓ_ਅਧਾਰ(opt, &oid);
 			tree1 = lookup_object(the_repository, &oid);
-		} else if (tree2->flags & UNINTERESTING) {
-			SWAP(tree2, tree1);
+		} ਨਹੀਂਤਾਂ ਜੇ (tree2->flags & UNINTERESTING) {
+			ਅਦਲਾ_ਬਦਲੀ(tree2, tree1);
 		}
-		diff_tree_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
-		log_tree_diff_flush(opt);
-		break;
+		diff_ਰੁੱਖ_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
+		log_ਰੁੱਖ_diff_flush(opt);
+		ਰੋਕੋ;
 	}
 
-	if (read_stdin) {
-		int saved_nrl = 0;
-		int saved_dcctc = 0;
+	ਜੇ (read_stdin) {
+		ਪੂਰਨ saved_nrl = 0;
+		ਪੂਰਨ saved_dcctc = 0;
 
-		opt->diffopt.rotate_to_strict = 0;
+		opt->diffopt.rotate_ਮੰਜ਼ਿਲ_strict = 0;
 		opt->diffopt.no_free = 1;
-		if (opt->diffopt.detect_rename) {
-			if (the_repository->index->cache)
-				repo_read_index(the_repository);
-			opt->diffopt.setup |= DIFF_SETUP_USE_SIZE_CACHE;
+		ਜੇ (opt->diffopt.detect_rename) {
+			ਜੇ (the_repository->ਸੂਚਕਾਂਕ->cache)
+				repo_read_ਸੂਚਕਾਂਕ(the_repository);
+			opt->diffopt.ਤਿਆਰੀ |= DIFF_ਤਿਆਰੀ_USE_ਮਾਪ_CACHE;
 		}
-		while (fgets(line, sizeof(line), stdin)) {
-			struct object_id oid;
+		ਜਦੋਂ (fgets(ਸਤਰ, ਆਕਾਰ(ਸਤਰ), stdin)) {
+			ਬਣਤਰ object_id oid;
 
-			if (get_oid_hex(line, &oid)) {
-				fputs(line, stdout);
+			ਜੇ (get_oid_hex(ਸਤਰ, &oid)) {
+				fputs(ਸਤਰ, stdout);
 				fflush(stdout);
 			}
-			else {
-				diff_tree_stdin(line);
-				if (saved_nrl < opt->diffopt.needed_rename_limit)
-					saved_nrl = opt->diffopt.needed_rename_limit;
-				if (opt->diffopt.degraded_cc_to_c)
+			ਨਹੀਂਤਾਂ {
+				diff_ਰੁੱਖ_stdin(ਸਤਰ);
+				ਜੇ (saved_nrl < opt->diffopt.needed_rename_ਹੱਦਬੰਦੀ)
+					saved_nrl = opt->diffopt.needed_rename_ਹੱਦਬੰਦੀ;
+				ਜੇ (opt->diffopt.degraded_cc_ਮੰਜ਼ਿਲ_c)
 					saved_dcctc = 1;
 			}
 		}
-		opt->diffopt.degraded_cc_to_c = saved_dcctc;
-		opt->diffopt.needed_rename_limit = saved_nrl;
+		opt->diffopt.degraded_cc_ਮੰਜ਼ਿਲ_c = saved_dcctc;
+		opt->diffopt.needed_rename_ਹੱਦਬੰਦੀ = saved_nrl;
 		opt->diffopt.no_free = 0;
 		diff_free(&opt->diffopt);
 	}
 
-	return diff_result_code(opt);
+	ਵਾਪਸ diff_ਨਤੀਜਾ_ਕੋਡ(opt);
 }

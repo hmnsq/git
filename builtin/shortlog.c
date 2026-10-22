@@ -1,25 +1,25 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "revision.h"
-#include "utf8.h"
-#include "mailmap.h"
-#include "setup.h"
-#include "shortlog.h"
-#include "parse-options.h"
-#include "trailer.h"
-#include "strmap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "builtin.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "config.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "commit.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "diff.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "environment.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "gettext.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "string-list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "revision.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "utf8.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "mailmap.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "setup.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "shortlog.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "parse-options.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "trailer.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strmap.h"
 
-static char const * const shortlog_usage[] = {
+ਸਥਿਰ ਅੱਖਰ ਅਚਲ * ਅਚਲ shortlog_usage[] = {
 	N_("git shortlog [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git log --pretty=short | git shortlog [<options>]"),
-	NULL
+	ਨਿਰਾ
 };
 
 /*
@@ -33,381 +33,381 @@ static char const * const shortlog_usage[] = {
  *
  *  This macro accesses the latter.
  */
-#define UTIL_TO_INT(x) ((intptr_t)(x)->util)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ UTIL_ਮੰਜ਼ਿਲ_INT(x) ((intptr_t)(x)->util)
 
-static int compare_by_counter(const void *a1, const void *a2)
+ਸਥਿਰ ਪੂਰਨ compare_by_counter(ਅਚਲ ਖਾਲੀ *a1, ਅਚਲ ਖਾਲੀ *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	return UTIL_TO_INT(i2) - UTIL_TO_INT(i1);
+	ਅਚਲ ਬਣਤਰ string_list_ਵਸਤੂ *i1 = a1, *i2 = a2;
+	ਵਾਪਸ UTIL_ਮੰਜ਼ਿਲ_INT(i2) - UTIL_ਮੰਜ਼ਿਲ_INT(i1);
 }
 
-static int compare_by_list(const void *a1, const void *a2)
+ਸਥਿਰ ਪੂਰਨ compare_by_list(ਅਚਲ ਖਾਲੀ *a1, ਅਚਲ ਖਾਲੀ *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	const struct string_list *l1 = i1->util, *l2 = i2->util;
+	ਅਚਲ ਬਣਤਰ string_list_ਵਸਤੂ *i1 = a1, *i2 = a2;
+	ਅਚਲ ਬਣਤਰ string_list *l1 = i1->util, *l2 = i2->util;
 
-	if (l1->nr < l2->nr)
-		return 1;
-	else if (l1->nr == l2->nr)
-		return 0;
-	else
-		return -1;
+	ਜੇ (l1->nr < l2->nr)
+		ਵਾਪਸ 1;
+	ਨਹੀਂਤਾਂ ਜੇ (l1->nr == l2->nr)
+		ਵਾਪਸ 0;
+	ਨਹੀਂਤਾਂ
+		ਵਾਪਸ -1;
 }
 
-static void insert_one_record(struct shortlog *log,
-			      const char *ident,
-			      const char *oneline)
+ਸਥਿਰ ਖਾਲੀ ਪਾਓ_one_ਰਿਕਾਰਡ(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ,
+			      ਅਚਲ ਅੱਖਰ *ident,
+			      ਅਚਲ ਅੱਖਰ *oneline)
 {
-	struct string_list_item *item;
+	ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
 
-	item = string_list_insert(&log->list, ident);
+	ਵਸਤੂ = string_list_ਪਾਓ(&ਲਘੂਗਣਕ->list, ident);
 
-	if (log->summary)
-		item->util = (void *)(UTIL_TO_INT(item) + 1);
-	else {
-		char *buffer;
-		struct strbuf subject = STRBUF_INIT;
-		const char *eol;
+	ਜੇ (ਲਘੂਗਣਕ->summary)
+		ਵਸਤੂ->util = (ਖਾਲੀ *)(UTIL_ਮੰਜ਼ਿਲ_INT(ਵਸਤੂ) + 1);
+	ਨਹੀਂਤਾਂ {
+		ਅੱਖਰ *ਬਫਰ;
+		ਬਣਤਰ strbuf subject = STRBUF_INIT;
+		ਅਚਲ ਅੱਖਰ *eol;
 
 		/* Skip any leading whitespace, including any blank lines. */
-		while (*oneline && isspace(*oneline))
+		ਜਦੋਂ (*oneline && ਖਾਲੀ_ਥਾਂ_ਹੈ(*oneline))
 			oneline++;
 		eol = strchr(oneline, '\n');
-		if (!eol)
-			eol = oneline + strlen(oneline);
-		if (starts_with(oneline, "[PATCH")) {
-			const char *eob = strchr(oneline, ']');
-			if (eob && (!eol || eob < eol))
+		ਜੇ (!eol)
+			eol = oneline + ਲੜੀ_ਲੰਬਾਈ(oneline);
+		ਜੇ (starts_with(oneline, "[PATCH")) {
+			ਅਚਲ ਅੱਖਰ *eob = strchr(oneline, ']');
+			ਜੇ (eob && (!eol || eob < eol))
 				oneline = eob + 1;
 		}
-		while (*oneline && isspace(*oneline) && *oneline != '\n')
+		ਜਦੋਂ (*oneline && ਖਾਲੀ_ਥਾਂ_ਹੈ(*oneline) && *oneline != '\n')
 			oneline++;
 		format_subject(&subject, oneline, " ");
-		buffer = strbuf_detach(&subject, NULL);
+		ਬਫਰ = strbuf_detach(&subject, ਨਿਰਾ);
 
-		if (!item->util) {
-			item->util = xmalloc(sizeof(struct string_list));
-			string_list_init_nodup(item->util);
+		ਜੇ (!ਵਸਤੂ->util) {
+			ਵਸਤੂ->util = xmalloc(ਆਕਾਰ(ਬਣਤਰ string_list));
+			string_list_init_nodup(ਵਸਤੂ->util);
 		}
-		string_list_append(item->util, buffer);
+		string_list_append(ਵਸਤੂ->util, ਬਫਰ);
 	}
 }
 
-static int parse_ident(struct shortlog *log,
-		       struct strbuf *out, const char *in)
+ਸਥਿਰ ਪੂਰਨ parse_ident(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ,
+		       ਬਣਤਰ strbuf *ਬਾਹਰਲਾ, ਅਚਲ ਅੱਖਰ *ਵਿੱਚ)
 {
-	const char *mailbuf, *namebuf;
-	size_t namelen, maillen;
-	struct ident_split ident;
+	ਅਚਲ ਅੱਖਰ *mailbuf, *namebuf;
+	ਮਾਪ_t namelen, maillen;
+	ਬਣਤਰ ident_ਵੰਡੋ ident;
 
-	if (split_ident_line(&ident, in, strlen(in)))
-		return -1;
+	ਜੇ (ਵੰਡੋ_ident_ਸਤਰ(&ident, ਵਿੱਚ, ਲੜੀ_ਲੰਬਾਈ(ਵਿੱਚ)))
+		ਵਾਪਸ -1;
 
 	namebuf = ident.name_begin;
 	mailbuf = ident.mail_begin;
-	namelen = ident.name_end - ident.name_begin;
-	maillen = ident.mail_end - ident.mail_begin;
+	namelen = ident.name_ਸਿਰਾ - ident.name_begin;
+	maillen = ident.mail_ਸਿਰਾ - ident.mail_begin;
 
-	map_user(&log->mailmap, &mailbuf, &maillen, &namebuf, &namelen);
-	strbuf_add(out, namebuf, namelen);
-	if (log->email)
-		strbuf_addf(out, " <%.*s>", (int)maillen, mailbuf);
+	map_user(&ਲਘੂਗਣਕ->mailmap, &mailbuf, &maillen, &namebuf, &namelen);
+	strbuf_ਜੋੜੋ(ਬਾਹਰਲਾ, namebuf, namelen);
+	ਜੇ (ਲਘੂਗਣਕ->email)
+		strbuf_addf(ਬਾਹਰਲਾ, " <%.*s>", (ਪੂਰਨ)maillen, mailbuf);
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static void read_from_stdin(struct shortlog *log)
+ਸਥਿਰ ਖਾਲੀ read_from_stdin(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	struct strbuf ident = STRBUF_INIT;
-	struct strbuf mapped_ident = STRBUF_INIT;
-	struct strbuf oneline = STRBUF_INIT;
-	static const char *author_match[2] = { "Author: ", "author " };
-	static const char *committer_match[2] = { "Commit: ", "committer " };
-	const char **match;
+	ਬਣਤਰ strbuf ident = STRBUF_INIT;
+	ਬਣਤਰ strbuf mapped_ident = STRBUF_INIT;
+	ਬਣਤਰ strbuf oneline = STRBUF_INIT;
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *author_ਮੇਲ[2] = { "Author: ", "author " };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *committer_ਮੇਲ[2] = { "Commit: ", "committer " };
+	ਅਚਲ ਅੱਖਰ **ਮੇਲ;
 
-	if (HAS_MULTI_BITS(log->groups))
+	ਜੇ (HAS_MULTI_ਬਿੱਟ(ਲਘੂਗਣਕ->groups))
 		die(_("using multiple --group options with stdin is not supported"));
 
-	switch (log->groups) {
-	case SHORTLOG_GROUP_AUTHOR:
-		match = author_match;
-		break;
-	case SHORTLOG_GROUP_COMMITTER:
-		match = committer_match;
-		break;
-	case SHORTLOG_GROUP_TRAILER:
+	ਚੋਣ (ਲਘੂਗਣਕ->groups) {
+	ਹਾਲਤ SHORTLOG_ਸਮੂਹ_AUTHOR:
+		ਮੇਲ = author_ਮੇਲ;
+		ਰੋਕੋ;
+	ਹਾਲਤ SHORTLOG_ਸਮੂਹ_COMMITTER:
+		ਮੇਲ = committer_ਮੇਲ;
+		ਰੋਕੋ;
+	ਹਾਲਤ SHORTLOG_ਸਮੂਹ_TRAILER:
 		die(_("using %s with stdin is not supported"), "--group=trailer");
-	case SHORTLOG_GROUP_FORMAT:
+	ਹਾਲਤ SHORTLOG_ਸਮੂਹ_FORMAT:
 		die(_("using %s with stdin is not supported"), "--group=format");
-	default:
+	ਮੂਲ:
 		BUG("unhandled shortlog group");
 	}
 
-	while (strbuf_getline_lf(&ident, stdin) != EOF) {
-		const char *v;
-		if (!skip_prefix(ident.buf, match[0], &v) &&
-		    !skip_prefix(ident.buf, match[1], &v))
-			continue;
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+	ਜਦੋਂ (strbuf_getline_lf(&ident, stdin) != EOF) {
+		ਅਚਲ ਅੱਖਰ *v;
+		ਜੇ (!skip_ਅਗੇਤਰ(ident.buf, ਮੇਲ[0], &v) &&
+		    !skip_ਅਗੇਤਰ(ident.buf, ਮੇਲ[1], &v))
+			ਜਾਰੀ;
+		ਜਦੋਂ (strbuf_getline_lf(&oneline, stdin) != EOF &&
 		       oneline.len)
 			; /* discard headers */
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+		ਜਦੋਂ (strbuf_getline_lf(&oneline, stdin) != EOF &&
 		       !oneline.len)
 			; /* discard blanks */
 
 		strbuf_reset(&mapped_ident);
-		if (parse_ident(log, &mapped_ident, v) < 0)
-			continue;
+		ਜੇ (parse_ident(ਲਘੂਗਣਕ, &mapped_ident, v) < 0)
+			ਜਾਰੀ;
 
-		insert_one_record(log, mapped_ident.buf, oneline.buf);
+		ਪਾਓ_one_ਰਿਕਾਰਡ(ਲਘੂਗਣਕ, mapped_ident.buf, oneline.buf);
 	}
 	strbuf_release(&ident);
 	strbuf_release(&mapped_ident);
 	strbuf_release(&oneline);
 }
 
-static void insert_records_from_trailers(struct shortlog *log,
-					 struct strset *dups,
-					 struct commit *commit,
-					 struct pretty_print_context *ctx,
-					 const char *oneline)
+ਸਥਿਰ ਖਾਲੀ ਪਾਓ_ਰਿਕਾਰਡਾਂ_from_trailers(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ,
+					 ਬਣਤਰ strset *dups,
+					 ਬਣਤਰ commit *commit,
+					 ਬਣਤਰ pretty_print_context *ctx,
+					 ਅਚਲ ਅੱਖਰ *oneline)
 {
-	struct trailer_iterator iter;
-	const char *commit_buffer, *body;
-	struct strbuf ident = STRBUF_INIT;
+	ਬਣਤਰ trailer_iterator iter;
+	ਅਚਲ ਅੱਖਰ *commit_ਬਫਰ, *body;
+	ਬਣਤਰ strbuf ident = STRBUF_INIT;
 
-	if (!log->trailers.nr)
-		return;
+	ਜੇ (!ਲਘੂਗਣਕ->trailers.nr)
+		ਵਾਪਸ;
 
 	/*
 	 * Using repo_format_commit_message("%B") would be simpler here, but
 	 * this saves us copying the message.
 	 */
-	commit_buffer = repo_logmsg_reencode(the_repository, commit, NULL,
+	commit_ਬਫਰ = repo_logmsg_reencode(the_repository, commit, ਨਿਰਾ,
 					     ctx->output_encoding);
-	body = strstr(commit_buffer, "\n\n");
-	if (!body)
-		goto out;
+	body = ਲੜੀ_ਖੋਜ(commit_ਬਫਰ, "\n\n");
+	ਜੇ (!body)
+		ਜਾਓ ਬਾਹਰਲਾ;
 
 	trailer_iterator_init(&iter, body);
-	while (trailer_iterator_advance(&iter)) {
-		const char *value = iter.val.buf;
+	ਜਦੋਂ (trailer_iterator_advance(&iter)) {
+		ਅਚਲ ਅੱਖਰ *ਮੁੱਲ = iter.val.buf;
 
-		if (!string_list_has_string(&log->trailers, iter.key.buf))
-			continue;
+		ਜੇ (!string_list_has_string(&ਲਘੂਗਣਕ->trailers, iter.ਕੁੰਜੀ.buf))
+			ਜਾਰੀ;
 
 		strbuf_reset(&ident);
-		if (!parse_ident(log, &ident, value))
-			value = ident.buf;
+		ਜੇ (!parse_ident(ਲਘੂਗਣਕ, &ident, ਮੁੱਲ))
+			ਮੁੱਲ = ident.buf;
 
-		if (!strset_add(dups, value))
-			continue;
-		insert_one_record(log, value, oneline);
+		ਜੇ (!strset_ਜੋੜੋ(dups, ਮੁੱਲ))
+			ਜਾਰੀ;
+		ਪਾਓ_one_ਰਿਕਾਰਡ(ਲਘੂਗਣਕ, ਮੁੱਲ, oneline);
 	}
 	trailer_iterator_release(&iter);
 
-out:
+ਬਾਹਰਲਾ:
 	strbuf_release(&ident);
-	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
+	repo_unuse_commit_ਬਫਰ(the_repository, commit, commit_ਬਫਰ);
 }
 
-static int shortlog_needs_dedup(const struct shortlog *log)
+ਸਥਿਰ ਪੂਰਨ shortlog_needs_dedup(ਅਚਲ ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	return HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
+	ਵਾਪਸ HAS_MULTI_ਬਿੱਟ(ਲਘੂਗਣਕ->groups) || ਲਘੂਗਣਕ->format.nr > 1 || ਲਘੂਗਣਕ->trailers.nr;
 }
 
-static void insert_records_from_format(struct shortlog *log,
-				       struct strset *dups,
-				       struct commit *commit,
-				       struct pretty_print_context *ctx,
-				       const char *oneline)
+ਸਥਿਰ ਖਾਲੀ ਪਾਓ_ਰਿਕਾਰਡਾਂ_from_format(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ,
+				       ਬਣਤਰ strset *dups,
+				       ਬਣਤਰ commit *commit,
+				       ਬਣਤਰ pretty_print_context *ctx,
+				       ਅਚਲ ਅੱਖਰ *oneline)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
+	ਬਣਤਰ strbuf buf = STRBUF_INIT;
+	ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ;
 
-	for_each_string_list_item(item, &log->format) {
+	for_each_string_list_ਵਸਤੂ(ਵਸਤੂ, &ਲਘੂਗਣਕ->format) {
 		strbuf_reset(&buf);
 
-		repo_format_commit_message(the_repository, commit,
-					   item->string, &buf, ctx);
+		repo_format_commit_ਸੁਨੇਹਾ(the_repository, commit,
+					   ਵਸਤੂ->string, &buf, ctx);
 
-		if (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
-			insert_one_record(log, buf.buf, oneline);
+		ਜੇ (!shortlog_needs_dedup(ਲਘੂਗਣਕ) || strset_ਜੋੜੋ(dups, buf.buf))
+			ਪਾਓ_one_ਰਿਕਾਰਡ(ਲਘੂਗਣਕ, buf.buf, oneline);
 	}
 
 	strbuf_release(&buf);
 }
 
-void shortlog_add_commit(struct shortlog *log, struct commit *commit)
+ਖਾਲੀ shortlog_ਜੋੜੋ_commit(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ, ਬਣਤਰ commit *commit)
 {
-	struct strbuf oneline = STRBUF_INIT;
-	struct strset dups = STRSET_INIT;
-	struct pretty_print_context ctx = {0};
-	const char *oneline_str;
+	ਬਣਤਰ strbuf oneline = STRBUF_INIT;
+	ਬਣਤਰ strset dups = STRSET_INIT;
+	ਬਣਤਰ pretty_print_context ctx = {0};
+	ਅਚਲ ਅੱਖਰ *oneline_str;
 
 	ctx.fmt = CMIT_FMT_USERFORMAT;
-	ctx.abbrev = log->abbrev;
-	ctx.date_mode = log->date_mode;
+	ctx.abbrev = ਲਘੂਗਣਕ->abbrev;
+	ctx.date_ਬਹੁਲਕ = ਲਘੂਗਣਕ->date_ਬਹੁਲਕ;
 	ctx.output_encoding = get_log_output_encoding();
 
-	if (!log->summary) {
-		if (log->user_format)
+	ਜੇ (!ਲਘੂਗਣਕ->summary) {
+		ਜੇ (ਲਘੂਗਣਕ->user_format)
 			pretty_print_commit(&ctx, commit, &oneline);
-		else
-			repo_format_commit_message(the_repository, commit,
+		ਨਹੀਂਤਾਂ
+			repo_format_commit_ਸੁਨੇਹਾ(the_repository, commit,
 						   "%s", &oneline, &ctx);
 	}
 	oneline_str = oneline.len ? oneline.buf : "<none>";
 
-	insert_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
-	insert_records_from_format(log, &dups, commit, &ctx, oneline_str);
+	ਪਾਓ_ਰਿਕਾਰਡਾਂ_from_trailers(ਲਘੂਗਣਕ, &dups, commit, &ctx, oneline_str);
+	ਪਾਓ_ਰਿਕਾਰਡਾਂ_from_format(ਲਘੂਗਣਕ, &dups, commit, &ctx, oneline_str);
 
 	strset_clear(&dups);
 	strbuf_release(&oneline);
 }
 
-static void get_from_rev(struct rev_info *rev, struct shortlog *log)
+ਸਥਿਰ ਖਾਲੀ get_from_rev(ਬਣਤਰ rev_info *rev, ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	struct commit *commit;
+	ਬਣਤਰ commit *commit;
 
-	if (prepare_revision_walk(rev))
+	ਜੇ (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(rev)) != NULL)
-		shortlog_add_commit(log, commit);
+	ਜਦੋਂ ((commit = get_revision(rev)) != ਨਿਰਾ)
+		shortlog_ਜੋੜੋ_commit(ਲਘੂਗਣਕ, commit);
 }
 
-static int parse_uint(char const **arg, int comma, int defval)
+ਸਥਿਰ ਪੂਰਨ parse_uint(ਅੱਖਰ ਅਚਲ **arg, ਪੂਰਨ comma, ਪੂਰਨ defval)
 {
-	unsigned long ul;
-	int ret;
-	char *endp;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ul;
+	ਪੂਰਨ ret;
+	ਅੱਖਰ *endp;
 
 	ul = strtoul(*arg, &endp, 10);
-	if (*endp && *endp != comma)
-		return -1;
-	if (ul > INT_MAX)
-		return -1;
-	ret = *arg == endp ? defval : (int)ul;
+	ਜੇ (*endp && *endp != comma)
+		ਵਾਪਸ -1;
+	ਜੇ (ul > ਵੱਧ_ਤੋਂ_ਵੱਧ_ਅੰਕ)
+		ਵਾਪਸ -1;
+	ret = *arg == endp ? defval : (ਪੂਰਨ)ul;
 	*arg = *endp ? endp + 1 : endp;
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static const char wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
-#define DEFAULT_WRAPLEN 76
-#define DEFAULT_INDENT1 6
-#define DEFAULT_INDENT2 9
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEFAULT_WRAPLEN 76
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEFAULT_INDENT1 6
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DEFAULT_INDENT2 9
 
-static int parse_wrap_args(const struct option *opt, const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_wrap_ਦਲੀਲਾਂ(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	struct shortlog *log = opt->value;
+	ਬਣਤਰ shortlog *ਲਘੂਗਣਕ = opt->ਮੁੱਲ;
 
-	log->wrap_lines = !unset;
-	if (unset)
-		return 0;
-	if (!arg) {
-		log->wrap = DEFAULT_WRAPLEN;
-		log->in1 = DEFAULT_INDENT1;
-		log->in2 = DEFAULT_INDENT2;
-		return 0;
+	ਲਘੂਗਣਕ->wrap_ਸਤਰਾਂ = !unset;
+	ਜੇ (unset)
+		ਵਾਪਸ 0;
+	ਜੇ (!arg) {
+		ਲਘੂਗਣਕ->wrap = DEFAULT_WRAPLEN;
+		ਲਘੂਗਣਕ->in1 = DEFAULT_INDENT1;
+		ਲਘੂਗਣਕ->in2 = DEFAULT_INDENT2;
+		ਵਾਪਸ 0;
 	}
 
-	log->wrap = parse_uint(&arg, ',', DEFAULT_WRAPLEN);
-	log->in1 = parse_uint(&arg, ',', DEFAULT_INDENT1);
-	log->in2 = parse_uint(&arg, '\0', DEFAULT_INDENT2);
-	if (log->wrap < 0 || log->in1 < 0 || log->in2 < 0)
-		return error(wrap_arg_usage);
-	if (log->wrap &&
-	    ((log->in1 && log->wrap <= log->in1) ||
-	     (log->in2 && log->wrap <= log->in2)))
-		return error(wrap_arg_usage);
-	return 0;
+	ਲਘੂਗਣਕ->wrap = parse_uint(&arg, ',', DEFAULT_WRAPLEN);
+	ਲਘੂਗਣਕ->in1 = parse_uint(&arg, ',', DEFAULT_INDENT1);
+	ਲਘੂਗਣਕ->in2 = parse_uint(&arg, '\0', DEFAULT_INDENT2);
+	ਜੇ (ਲਘੂਗਣਕ->wrap < 0 || ਲਘੂਗਣਕ->in1 < 0 || ਲਘੂਗਣਕ->in2 < 0)
+		ਵਾਪਸ error(wrap_arg_usage);
+	ਜੇ (ਲਘੂਗਣਕ->wrap &&
+	    ((ਲਘੂਗਣਕ->in1 && ਲਘੂਗਣਕ->wrap <= ਲਘੂਗਣਕ->in1) ||
+	     (ਲਘੂਗਣਕ->in2 && ਲਘੂਗਣਕ->wrap <= ਲਘੂਗਣਕ->in2)))
+		ਵਾਪਸ error(wrap_arg_usage);
+	ਵਾਪਸ 0;
 }
 
-static int parse_group_option(const struct option *opt, const char *arg, int unset)
+ਸਥਿਰ ਪੂਰਨ parse_ਸਮੂਹ_option(ਅਚਲ ਬਣਤਰ option *opt, ਅਚਲ ਅੱਖਰ *arg, ਪੂਰਨ unset)
 {
-	struct shortlog *log = opt->value;
-	const char *field;
+	ਬਣਤਰ shortlog *ਲਘੂਗਣਕ = opt->ਮੁੱਲ;
+	ਅਚਲ ਅੱਖਰ *ਖੇਤਰ;
 
-	if (unset) {
-		log->groups = 0;
-		string_list_clear(&log->trailers, 0);
-		string_list_clear(&log->format, 0);
-	} else if (!strcasecmp(arg, "author"))
-		log->groups |= SHORTLOG_GROUP_AUTHOR;
-	else if (!strcasecmp(arg, "committer"))
-		log->groups |= SHORTLOG_GROUP_COMMITTER;
-	else if (skip_prefix(arg, "trailer:", &field)) {
-		log->groups |= SHORTLOG_GROUP_TRAILER;
-		string_list_append(&log->trailers, field);
-	} else if (skip_prefix(arg, "format:", &field)) {
-		log->groups |= SHORTLOG_GROUP_FORMAT;
-		string_list_append(&log->format, field);
-	} else if (strchr(arg, '%')) {
-		log->groups |= SHORTLOG_GROUP_FORMAT;
-		string_list_append(&log->format, arg);
-	} else {
-		return error(_("unknown group type: %s"), arg);
+	ਜੇ (unset) {
+		ਲਘੂਗਣਕ->groups = 0;
+		string_list_clear(&ਲਘੂਗਣਕ->trailers, 0);
+		string_list_clear(&ਲਘੂਗਣਕ->format, 0);
+	} ਨਹੀਂਤਾਂ ਜੇ (!strcasecmp(arg, "author"))
+		ਲਘੂਗਣਕ->groups |= SHORTLOG_ਸਮੂਹ_AUTHOR;
+	ਨਹੀਂਤਾਂ ਜੇ (!strcasecmp(arg, "committer"))
+		ਲਘੂਗਣਕ->groups |= SHORTLOG_ਸਮੂਹ_COMMITTER;
+	ਨਹੀਂਤਾਂ ਜੇ (skip_ਅਗੇਤਰ(arg, "trailer:", &ਖੇਤਰ)) {
+		ਲਘੂਗਣਕ->groups |= SHORTLOG_ਸਮੂਹ_TRAILER;
+		string_list_append(&ਲਘੂਗਣਕ->trailers, ਖੇਤਰ);
+	} ਨਹੀਂਤਾਂ ਜੇ (skip_ਅਗੇਤਰ(arg, "format:", &ਖੇਤਰ)) {
+		ਲਘੂਗਣਕ->groups |= SHORTLOG_ਸਮੂਹ_FORMAT;
+		string_list_append(&ਲਘੂਗਣਕ->format, ਖੇਤਰ);
+	} ਨਹੀਂਤਾਂ ਜੇ (strchr(arg, '%')) {
+		ਲਘੂਗਣਕ->groups |= SHORTLOG_ਸਮੂਹ_FORMAT;
+		string_list_append(&ਲਘੂਗਣਕ->format, arg);
+	} ਨਹੀਂਤਾਂ {
+		ਵਾਪਸ error(_("unknown group type: %s"), arg);
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 
-void shortlog_init(struct shortlog *log)
+ਖਾਲੀ shortlog_init(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	memset(log, 0, sizeof(*log));
+	memset(ਲਘੂਗਣਕ, 0, ਆਕਾਰ(*ਲਘੂਗਣਕ));
 
-	read_mailmap(the_repository, &log->mailmap);
+	read_mailmap(the_repository, &ਲਘੂਗਣਕ->mailmap);
 
-	log->list.strdup_strings = 1;
-	log->wrap = DEFAULT_WRAPLEN;
-	log->in1 = DEFAULT_INDENT1;
-	log->in2 = DEFAULT_INDENT2;
-	log->trailers.strdup_strings = 1;
-	log->trailers.cmp = strcasecmp;
-	log->format.strdup_strings = 1;
+	ਲਘੂਗਣਕ->list.strdup_ਲੜੀਆਂ = 1;
+	ਲਘੂਗਣਕ->wrap = DEFAULT_WRAPLEN;
+	ਲਘੂਗਣਕ->in1 = DEFAULT_INDENT1;
+	ਲਘੂਗਣਕ->in2 = DEFAULT_INDENT2;
+	ਲਘੂਗਣਕ->trailers.strdup_ਲੜੀਆਂ = 1;
+	ਲਘੂਗਣਕ->trailers.cmp = strcasecmp;
+	ਲਘੂਗਣਕ->format.strdup_ਲੜੀਆਂ = 1;
 }
 
-void shortlog_finish_setup(struct shortlog *log)
+ਖਾਲੀ shortlog_ਅੰਤ_ਤਿਆਰੀ(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	if (log->groups & SHORTLOG_GROUP_AUTHOR)
-		string_list_append(&log->format,
-				   log->email ? "%aN <%aE>" : "%aN");
-	if (log->groups & SHORTLOG_GROUP_COMMITTER)
-		string_list_append(&log->format,
-				   log->email ? "%cN <%cE>" : "%cN");
+	ਜੇ (ਲਘੂਗਣਕ->groups & SHORTLOG_ਸਮੂਹ_AUTHOR)
+		string_list_append(&ਲਘੂਗਣਕ->format,
+				   ਲਘੂਗਣਕ->email ? "%aN <%aE>" : "%aN");
+	ਜੇ (ਲਘੂਗਣਕ->groups & SHORTLOG_ਸਮੂਹ_COMMITTER)
+		string_list_append(&ਲਘੂਗਣਕ->format,
+				   ਲਘੂਗਣਕ->email ? "%cN <%cE>" : "%cN");
 
-	string_list_sort(&log->trailers);
+	string_list_ਛਾਂਟੋ(&ਲਘੂਗਣਕ->trailers);
 }
 
-int cmd_shortlog(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ਪੂਰਨ cmd_shortlog(ਪੂਰਨ argc,
+		 ਅਚਲ ਅੱਖਰ **argv,
+		 ਅਚਲ ਅੱਖਰ *ਅਗੇਤਰ,
+		 ਬਣਤਰ repository *repo ਅਣਵਰਤਿਆ)
 {
-	struct shortlog log = { STRING_LIST_INIT_NODUP };
-	struct rev_info rev;
-	int nongit = !startup_info->have_repository;
+	ਬਣਤਰ shortlog ਲਘੂਗਣਕ = { STRING_LIST_INIT_NODUP };
+	ਬਣਤਰ rev_info rev;
+	ਪੂਰਨ nongit = !startup_info->have_repository;
 
-	const struct option options[] = {
-		OPT_BIT('c', "committer", &log.groups,
+	ਅਚਲ ਬਣਤਰ option options[] = {
+		OPT_ਦੋਆਧਾਰੀ_ਅੰਕ('c', "committer", &ਲਘੂਗਣਕ.groups,
 			N_("group by committer rather than author"),
-			SHORTLOG_GROUP_COMMITTER),
-		OPT_BOOL('n', "numbered", &log.sort_by_number,
+			SHORTLOG_ਸਮੂਹ_COMMITTER),
+		OPT_BOOL('n', "numbered", &ਲਘੂਗਣਕ.ਛਾਂਟੋ_by_ਸੰਖਿਆ,
 			 N_("sort output according to the number of commits per author")),
-		OPT_BOOL('s', "summary", &log.summary,
+		OPT_BOOL('s', "summary", &ਲਘੂਗਣਕ.summary,
 			 N_("suppress commit descriptions, only provides commit count")),
-		OPT_BOOL('e', "email", &log.email,
+		OPT_BOOL('e', "email", &ਲਘੂਗਣਕ.email,
 			 N_("show the email address of each author")),
-		OPT_CALLBACK_F('w', NULL, &log, N_("<w>[,<i1>[,<i2>]]"),
+		OPT_CALLBACK_F('w', ਨਿਰਾ, &ਲਘੂਗਣਕ, N_("<w>[,<i1>[,<i2>]]"),
 			N_("linewrap output"), PARSE_OPT_OPTARG,
-			&parse_wrap_args),
-		OPT_CALLBACK(0, "group", &log, N_("field"),
-			N_("group by field"), parse_group_option),
-		OPT_END(),
+			&parse_wrap_ਦਲੀਲਾਂ),
+		OPT_CALLBACK(0, "group", &ਲਘੂਗਣਕ, N_("field"),
+			N_("group by field"), parse_ਸਮੂਹ_option),
+		OPT_ਸਿਰਾ(),
 	};
 
-	struct parse_opt_ctx_t ctx;
+	ਬਣਤਰ parse_opt_ctx_t ctx;
 
 	/*
 	 * NEEDSWORK: Later on we'll call parse_revision_opt which relies on
@@ -418,120 +418,120 @@ int cmd_shortlog(int argc,
 	 * SHA1, but ideally the parsing machinery would be split between
 	 * git/nongit so that we do not have to do this.
 	 */
-	if (nongit && !the_hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	ਜੇ (nongit && !the_hash_algo)
+		repo_ਸੈੱਟ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	repo_config(the_repository, git_default_config, NULL);
-	shortlog_init(&log);
-	repo_init_revisions(the_repository, &rev, prefix);
-	parse_options_start(&ctx, argc, argv, prefix, options,
+	repo_config(the_repository, git_default_config, ਨਿਰਾ);
+	shortlog_init(&ਲਘੂਗਣਕ);
+	repo_init_revisions(the_repository, &rev, ਅਗੇਤਰ);
+	parse_options_ਸ਼ੁਰੂ(&ctx, argc, argv, ਅਗੇਤਰ, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
 
-	for (;;) {
-		switch (parse_options_step(&ctx, options, shortlog_usage)) {
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_UNKNOWN:
-			break;
-		case PARSE_OPT_HELP:
-			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-		case PARSE_OPT_SUBCOMMAND:
-			exit(129);
-		case PARSE_OPT_COMPLETE:
-			exit(0);
-		case PARSE_OPT_DONE:
-			goto parse_done;
+	ਲਈ (;;) {
+		ਚੋਣ (parse_options_ਕਦਮ(&ctx, options, shortlog_usage)) {
+		ਹਾਲਤ PARSE_OPT_NON_OPTION:
+		ਹਾਲਤ PARSE_OPT_UNKNOWN:
+			ਰੋਕੋ;
+		ਹਾਲਤ PARSE_OPT_HELP:
+			ਬਾਹਰ_ਨਿਕਲੋ(0);
+		ਹਾਲਤ PARSE_OPT_HELP_ERROR:
+		ਹਾਲਤ PARSE_OPT_ERROR:
+		ਹਾਲਤ PARSE_OPT_SUBCOMMAND:
+			ਬਾਹਰ_ਨਿਕਲੋ(129);
+		ਹਾਲਤ PARSE_OPT_COMPLETE:
+			ਬਾਹਰ_ਨਿਕਲੋ(0);
+		ਹਾਲਤ PARSE_OPT_ਪੂਰਾ:
+			ਜਾਓ parse_ਪੂਰਾ;
 		}
 		parse_revision_opt(&rev, &ctx, options, shortlog_usage);
 	}
-parse_done:
-	revision_opts_finish(&rev);
-	argc = parse_options_end(&ctx);
+parse_ਪੂਰਾ:
+	revision_opts_ਅੰਤ(&rev);
+	argc = parse_options_ਸਿਰਾ(&ctx);
 
-	if (nongit && argc > 1) {
+	ਜੇ (nongit && argc > 1) {
 		error(_("too many arguments given outside repository"));
 		usage_with_options(shortlog_usage, options);
 	}
 
-	if (!nongit && setup_revisions(argc, argv, &rev, NULL) != 1) {
+	ਜੇ (!nongit && ਤਿਆਰੀ_revisions(argc, argv, &rev, ਨਿਰਾ) != 1) {
 		error(_("unrecognized argument: %s"), argv[1]);
 		usage_with_options(shortlog_usage, options);
 	}
 
-	log.user_format = rev.commit_format == CMIT_FMT_USERFORMAT;
-	log.abbrev = rev.abbrev;
-	log.file = rev.diffopt.file;
-	log.date_mode = rev.date_mode;
+	ਲਘੂਗਣਕ.user_format = rev.commit_format == CMIT_FMT_USERFORMAT;
+	ਲਘੂਗਣਕ.abbrev = rev.abbrev;
+	ਲਘੂਗਣਕ.file = rev.diffopt.file;
+	ਲਘੂਗਣਕ.date_ਬਹੁਲਕ = rev.date_ਬਹੁਲਕ;
 
-	if (!log.groups)
-		log.groups = SHORTLOG_GROUP_AUTHOR;
-	shortlog_finish_setup(&log);
+	ਜੇ (!ਲਘੂਗਣਕ.groups)
+		ਲਘੂਗਣਕ.groups = SHORTLOG_ਸਮੂਹ_AUTHOR;
+	shortlog_ਅੰਤ_ਤਿਆਰੀ(&ਲਘੂਗਣਕ);
 
 	/* assume HEAD if from a tty */
-	if (!nongit && !rev.pending.nr && isatty(0))
-		add_head_to_pending(&rev);
-	if (rev.pending.nr == 0) {
-		if (isatty(0))
+	ਜੇ (!nongit && !rev.pending.nr && isatty(0))
+		ਜੋੜੋ_ਸਿਰ_ਮੰਜ਼ਿਲ_pending(&rev);
+	ਜੇ (rev.pending.nr == 0) {
+		ਜੇ (isatty(0))
 			fprintf(stderr, _("(reading log message from standard input)\n"));
-		read_from_stdin(&log);
+		read_from_stdin(&ਲਘੂਗਣਕ);
 	}
-	else
-		get_from_rev(&rev, &log);
+	ਨਹੀਂਤਾਂ
+		get_from_rev(&rev, &ਲਘੂਗਣਕ);
 
-	shortlog_output(&log);
+	shortlog_output(&ਲਘੂਗਣਕ);
 	release_revisions(&rev);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static void add_wrapped_shortlog_msg(struct strbuf *sb, const char *s,
-				     const struct shortlog *log)
+ਸਥਿਰ ਖਾਲੀ ਜੋੜੋ_wrapped_shortlog_ਸੁਨੇਹਾ(ਬਣਤਰ strbuf *sb, ਅਚਲ ਅੱਖਰ *s,
+				     ਅਚਲ ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	strbuf_add_wrapped_text(sb, s, log->in1, log->in2, log->wrap);
+	strbuf_ਜੋੜੋ_wrapped_ਪਾਠ(sb, s, ਲਘੂਗਣਕ->in1, ਲਘੂਗਣਕ->in2, ਲਘੂਗਣਕ->wrap);
 	strbuf_addch(sb, '\n');
 }
 
-void shortlog_output(struct shortlog *log)
+ਖਾਲੀ shortlog_output(ਬਣਤਰ shortlog *ਲਘੂਗਣਕ)
 {
-	size_t i, j;
-	struct strbuf sb = STRBUF_INIT;
+	ਮਾਪ_t i, j;
+	ਬਣਤਰ strbuf sb = STRBUF_INIT;
 
-	if (log->sort_by_number)
-		STABLE_QSORT(log->list.items, log->list.nr,
-		      log->summary ? compare_by_counter : compare_by_list);
-	for (i = 0; i < log->list.nr; i++) {
-		const struct string_list_item *item = &log->list.items[i];
-		if (log->summary) {
-			fprintf(log->file, "%6d\t%s\n",
-				(int)UTIL_TO_INT(item), item->string);
-		} else {
-			struct string_list *onelines = item->util;
-			fprintf(log->file, "%s (%"PRIuMAX"):\n",
-				item->string, (uintmax_t)onelines->nr);
-			for (j = onelines->nr; j >= 1; j--) {
-				const char *msg = onelines->items[j - 1].string;
+	ਜੇ (ਲਘੂਗਣਕ->ਛਾਂਟੋ_by_ਸੰਖਿਆ)
+		STABLE_QSORT(ਲਘੂਗਣਕ->list.ਚੀਜ਼ਾਂ, ਲਘੂਗਣਕ->list.nr,
+		      ਲਘੂਗਣਕ->summary ? compare_by_counter : compare_by_list);
+	ਲਈ (i = 0; i < ਲਘੂਗਣਕ->list.nr; i++) {
+		ਅਚਲ ਬਣਤਰ string_list_ਵਸਤੂ *ਵਸਤੂ = &ਲਘੂਗਣਕ->list.ਚੀਜ਼ਾਂ[i];
+		ਜੇ (ਲਘੂਗਣਕ->summary) {
+			fprintf(ਲਘੂਗਣਕ->file, "%6d\t%s\n",
+				(ਪੂਰਨ)UTIL_ਮੰਜ਼ਿਲ_INT(ਵਸਤੂ), ਵਸਤੂ->string);
+		} ਨਹੀਂਤਾਂ {
+			ਬਣਤਰ string_list *onelines = ਵਸਤੂ->util;
+			fprintf(ਲਘੂਗਣਕ->file, "%s (%"PRIuMAX"):\n",
+				ਵਸਤੂ->string, (uintmax_t)onelines->nr);
+			ਲਈ (j = onelines->nr; j >= 1; j--) {
+				ਅਚਲ ਅੱਖਰ *ਸੁਨੇਹਾ = onelines->ਚੀਜ਼ਾਂ[j - 1].string;
 
-				if (log->wrap_lines) {
+				ਜੇ (ਲਘੂਗਣਕ->wrap_ਸਤਰਾਂ) {
 					strbuf_reset(&sb);
-					add_wrapped_shortlog_msg(&sb, msg, log);
-					fwrite(sb.buf, sb.len, 1, log->file);
+					ਜੋੜੋ_wrapped_shortlog_ਸੁਨੇਹਾ(&sb, ਸੁਨੇਹਾ, ਲਘੂਗਣਕ);
+					fwrite(sb.buf, sb.len, 1, ਲਘੂਗਣਕ->file);
 				}
-				else
-					fprintf(log->file, "      %s\n", msg);
+				ਨਹੀਂਤਾਂ
+					fprintf(ਲਘੂਗਣਕ->file, "      %s\n", ਸੁਨੇਹਾ);
 			}
-			putc('\n', log->file);
-			onelines->strdup_strings = 1;
+			putc('\n', ਲਘੂਗਣਕ->file);
+			onelines->strdup_ਲੜੀਆਂ = 1;
 			string_list_clear(onelines, 0);
-			free(onelines);
+			ਮੁਕਤ(onelines);
 		}
 
-		log->list.items[i].util = NULL;
+		ਲਘੂਗਣਕ->list.ਚੀਜ਼ਾਂ[i].util = ਨਿਰਾ;
 	}
 
 	strbuf_release(&sb);
-	log->list.strdup_strings = 1;
-	string_list_clear(&log->list, 1);
-	clear_mailmap(&log->mailmap);
-	string_list_clear(&log->format, 0);
-	string_list_clear(&log->trailers, 0);
+	ਲਘੂਗਣਕ->list.strdup_ਲੜੀਆਂ = 1;
+	string_list_clear(&ਲਘੂਗਣਕ->list, 1);
+	clear_mailmap(&ਲਘੂਗਣਕ->mailmap);
+	string_list_clear(&ਲਘੂਗਣਕ->format, 0);
+	string_list_clear(&ਲਘੂਗਣਕ->trailers, 0);
 }
