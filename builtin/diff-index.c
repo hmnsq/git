@@ -10,21 +10,21 @@
 #include "revision.h"
 #include "setup.h"
 
-static const char diff_cache_usage[] =
+static const var_na diff_cache_usage[] =
 "git diff-index [-m] [--cached] [--merge-base] "
 "[<common-diff-options>] <tree-ish> [<path>...]"
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_index(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+puur_naa_nka cmd_diff_index(puur_naa_nka argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	struct rev_info rev;
-	unsigned int option = 0;
-	int i;
-	int result;
+	sa_nracanaa rev_info rev;
+	unsigned puur_naa_nka option = 0;
+	puur_naa_nka i;
+	puur_naa_nka result;
 
 	show_usage_if_asked(argc, argv, diff_cache_usage);
 
@@ -45,18 +45,18 @@ int cmd_diff_index(int argc,
 
 	argc = setup_revisions(argc, argv, &rev, NULL);
 	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+		const var_na *arg = argv[i];
 
-		if (!strcmp(arg, "--cached"))
+		ᯀᯮᯝ (!strcmp(arg, "--cached"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else if (!strcmp(arg, "-m"))
+		ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "-m"))
 			rev.match_missing = 1;
-		else
+		ᯀᯮᯝᯂᯪ
 			usage(diff_cache_usage);
 	}
-	if (!rev.diffopt.output_format)
+	ᯀᯮᯝ (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	rev.diffopt.rotate_to_strict = 1;
@@ -65,21 +65,21 @@ int cmd_diff_index(int argc,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (rev.pending.nr != 1 ||
+	ᯀᯮᯝ (rev.pending.nr != 1 ||
 	    rev.max_count != -1 || rev.min_age != -1 || rev.max_age != -1)
 		usage(diff_cache_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
+	ᯀᯮᯝ (!(option & DIFF_INDEX_CACHED)) {
 		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+		ᯀᯮᯝ (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
-			return -1;
+			ᯀᯮᯞ -1;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (repo_read_index(the_repository) < 0) {
 		perror("repo_read_index");
-		return -1;
+		ᯀᯮᯞ -1;
 	}
 	run_diff_index(&rev, option);
 	result = diff_result_code(&rev);
 	release_revisions(&rev);
-	return result;
+	ᯀᯮᯞ result;
 }

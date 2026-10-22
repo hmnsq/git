@@ -56,68 +56,68 @@
 #define COVER_FROM_AUTO_MAX_SUBJECT_LEN 100
 #define FORMAT_PATCH_NAME_MAX_DEFAULT 64
 
-static unsigned int force_in_body_from;
-static int stdout_mboxrd;
-static int format_no_prefix;
+static unsigned puur_naa_nka force_in_body_from;
+static puur_naa_nka stdout_mboxrd;
+static puur_naa_nka format_no_prefix;
 
-static const char * const builtin_log_usage[] = {
+static const var_na * const builtin_log_usage[] = {
 	N_("git log [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git show [<options>] <object>..."),
 	NULL
 };
 
-struct line_opt_callback_data {
-	struct rev_info *rev;
-	const char *prefix;
-	struct string_list args;
+sa_nracanaa line_opt_callback_data {
+	sa_nracanaa rev_info *rev;
+	const var_na *prefix;
+	sa_nracanaa string_list args;
 };
 
-static int session_is_interactive(void)
+static puur_naa_nka session_is_interactive(void)
 {
-	return isatty(1) || pager_in_use();
+	ᯀᯮᯞ isatty(1) || pager_in_use();
 }
 
-static int auto_decoration_style(void)
+static puur_naa_nka auto_decoration_style(void)
 {
-	return session_is_interactive() ? DECORATE_SHORT_REFS : 0;
+	ᯀᯮᯞ session_is_interactive() ? DECORATE_SHORT_REFS : 0;
 }
 
-static int parse_decoration_style(const char *value)
+static puur_naa_nka parse_decoration_style(const var_na *value)
 {
 	switch (git_parse_maybe_bool(value)) {
-	case 1:
-		return DECORATE_SHORT_REFS;
-	case 0:
-		return 0;
+	pak_sa 1:
+		ᯀᯮᯞ DECORATE_SHORT_REFS;
+	pak_sa 0:
+		ᯀᯮᯞ 0;
 	default:
-		break;
+		bha_nga;
 	}
-	if (!strcmp(value, "full"))
-		return DECORATE_FULL_REFS;
-	else if (!strcmp(value, "short"))
-		return DECORATE_SHORT_REFS;
-	else if (!strcmp(value, "auto"))
-		return auto_decoration_style();
+	ᯀᯮᯝ (!strcmp(value, "full"))
+		ᯀᯮᯞ DECORATE_FULL_REFS;
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(value, "short"))
+		ᯀᯮᯞ DECORATE_SHORT_REFS;
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(value, "auto"))
+		ᯀᯮᯞ auto_decoration_style();
 	/*
 	 * Please update _git_log() in git-completion.bash when you
 	 * add new decoration styles.
 	 */
-	return -1;
+	ᯀᯮᯞ -1;
 }
 
-struct log_config {
-	int default_abbrev_commit;
-	int default_show_root;
-	int default_follow;
-	int default_show_signature;
-	int default_encode_email_headers;
-	int decoration_style;
-	int decoration_given;
-	int use_mailmap_config;
-	char *fmt_patch_subject_prefix;
-	int fmt_patch_name_max;
-	char *fmt_pretty;
-	char *default_date_mode;
+sa_nracanaa log_config {
+	puur_naa_nka default_abbrev_commit;
+	puur_naa_nka default_show_root;
+	puur_naa_nka default_follow;
+	puur_naa_nka default_show_signature;
+	puur_naa_nka default_encode_email_headers;
+	puur_naa_nka decoration_style;
+	puur_naa_nka decoration_given;
+	puur_naa_nka use_mailmap_config;
+	var_na *fmt_patch_subject_prefix;
+	puur_naa_nka fmt_patch_name_max;
+	var_na *fmt_pretty;
+	var_na *default_date_mode;
 
 #ifndef WITH_BREAKING_CHANGES
 	/*
@@ -125,13 +125,13 @@ struct log_config {
 	 * is very deliberate.  This member is only to be used to
 	 * resurrect whatchanged that is deprecated.
 	 */
-	int i_still_use_this;
+	puur_naa_nka i_still_use_this;
 #endif
 };
 
-static void log_config_init(struct log_config *cfg)
+static void log_config_init(sa_nracanaa log_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
+	memset(cfg, 0, parimaa_na(*cfg));
 	cfg->default_show_root = 1;
 	cfg->default_encode_email_headers = 1;
 	cfg->use_mailmap_config = 1;
@@ -140,70 +140,70 @@ static void log_config_init(struct log_config *cfg)
 	cfg->decoration_style = auto_decoration_style();
 }
 
-static void log_config_release(struct log_config *cfg)
+static void log_config_release(sa_nracanaa log_config *cfg)
 {
 	free(cfg->default_date_mode);
 	free(cfg->fmt_pretty);
 	free(cfg->fmt_patch_subject_prefix);
 }
 
-static int use_default_decoration_filter = 1;
-static struct string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
+static puur_naa_nka use_default_decoration_filter = 1;
+static sa_nracanaa string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
+static sa_nracanaa string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
+static sa_nracanaa string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
 
-static int clear_decorations_callback(const struct option *opt UNUSED,
-				      const char *arg, int unset)
+static puur_naa_nka clear_decorations_callback(const sa_nracanaa option *opt UNUSED,
+				      const var_na *arg, puur_naa_nka unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	string_list_clear(&decorate_refs_include, 0);
 	string_list_clear(&decorate_refs_exclude, 0);
 	use_default_decoration_filter = 0;
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int decorate_callback(const struct option *opt, const char *arg,
-			     int unset)
+static puur_naa_nka decorate_callback(const sa_nracanaa option *opt, const var_na *arg,
+			     puur_naa_nka unset)
 {
-	struct log_config *cfg = opt->value;
+	sa_nracanaa log_config *cfg = opt->value;
 
-	if (unset)
+	ᯀᯮᯝ (unset)
 		cfg->decoration_style = 0;
-	else if (arg)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (arg)
 		cfg->decoration_style = parse_decoration_style(arg);
-	else
+	ᯀᯮᯝᯂᯪ
 		cfg->decoration_style = DECORATE_SHORT_REFS;
 
-	if (cfg->decoration_style < 0)
+	ᯀᯮᯝ (cfg->decoration_style < 0)
 		die(_("invalid --decorate option: %s"), arg);
 
 	cfg->decoration_given = 1;
 
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int log_line_range_callback(const struct option *option, const char *arg, int unset)
+static puur_naa_nka log_line_range_callback(const sa_nracanaa option *option, const var_na *arg, puur_naa_nka unset)
 {
-	struct line_opt_callback_data *data = option->value;
+	sa_nracanaa line_opt_callback_data *data = option->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
+	ᯀᯮᯝ (!arg)
+		ᯀᯮᯞ -1;
 
 	data->rev->line_level_traverse = 1;
 	string_list_append(&data->args, arg);
 
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static void cmd_log_init_defaults(struct rev_info *rev,
-				  struct log_config *cfg)
+static void cmd_log_init_defaults(sa_nracanaa rev_info *rev,
+				  sa_nracanaa log_config *cfg)
 {
-	if (cfg->fmt_pretty)
+	ᯀᯮᯝ (cfg->fmt_pretty)
 		get_commit_format(cfg->fmt_pretty, rev);
-	if (cfg->default_follow)
+	ᯀᯮᯝ (cfg->default_follow)
 		rev->diffopt.flags.default_follow_renames = 1;
 	rev->verbose_header = 1;
 	init_diffstat_widths(&rev->diffopt);
@@ -216,19 +216,19 @@ static void cmd_log_init_defaults(struct rev_info *rev,
 	rev->show_signature = cfg->default_show_signature;
 	rev->encode_email_headers = cfg->default_encode_email_headers;
 
-	if (cfg->default_date_mode)
+	ᯀᯮᯝ (cfg->default_date_mode)
 		parse_date_format(cfg->default_date_mode, &rev->date_mode);
 }
 
-static void set_default_decoration_filter(struct decoration_filter *decoration_filter)
+static void set_default_decoration_filter(sa_nracanaa decoration_filter *decoration_filter)
 {
-	char *value = NULL;
-	struct string_list *include = decoration_filter->include_ref_pattern;
-	const struct string_list *config_exclude;
+	var_na *value = NULL;
+	sa_nracanaa string_list *include = decoration_filter->include_ref_pattern;
+	const sa_nracanaa string_list *config_exclude;
 
-	if (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
+	ᯀᯮᯝ (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
 					 &config_exclude)) {
-		struct string_list_item *item;
+		sa_nracanaa string_list_item *item;
 		for_each_string_list_item(item, config_exclude)
 			string_list_append(decoration_filter->exclude_ref_config_pattern,
 					   item->string);
@@ -239,45 +239,45 @@ static void set_default_decoration_filter(struct decoration_filter *decoration_f
 	 * log.initialDecorationSet=all. Don't ever disable it by config,
 	 * since the command-line takes precedent.
 	 */
-	if (use_default_decoration_filter &&
+	ᯀᯮᯝ (use_default_decoration_filter &&
 	    !repo_config_get_string(the_repository, "log.initialdecorationset", &value) &&
 	    !strcmp("all", value))
 		use_default_decoration_filter = 0;
 	free(value);
 
-	if (!use_default_decoration_filter ||
+	ᯀᯮᯝ (!use_default_decoration_filter ||
 	    decoration_filter->exclude_ref_pattern->nr ||
 	    decoration_filter->include_ref_pattern->nr ||
 	    decoration_filter->exclude_ref_config_pattern->nr)
-		return;
+		ᯀᯮᯞ;
 
 	/*
 	 * No command-line or config options were given, so
 	 * populate with sensible defaults.
 	 */
 	for (size_t i = 0; i < ARRAY_SIZE(ref_namespace); i++) {
-		if (!ref_namespace[i].decoration)
+		ᯀᯮᯝ (!ref_namespace[i].decoration)
 			continue;
 
 		string_list_append(include, ref_namespace[i].ref);
 	}
 }
 
-static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+static void cmd_log_init_finish(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			 sa_nracanaa rev_info *rev, sa_nracanaa setup_revision_opt *opt,
+			 sa_nracanaa log_config *cfg)
 {
-	struct userformat_want w;
-	int quiet = 0, source = 0, mailmap;
-	static struct line_opt_callback_data line_cb = {NULL, NULL, STRING_LIST_INIT_DUP};
-	struct decoration_filter decoration_filter = {
+	sa_nracanaa userformat_want w;
+	puur_naa_nka quiet = 0, source = 0, mailmap;
+	static sa_nracanaa line_opt_callback_data line_cb = {NULL, NULL, STRING_LIST_INIT_DUP};
+	sa_nracanaa decoration_filter decoration_filter = {
 		.exclude_ref_pattern = &decorate_refs_exclude,
 		.include_ref_pattern = &decorate_refs_include,
 		.exclude_ref_config_pattern = &decorate_refs_exclude_config,
 	};
-	static struct revision_sources revision_sources;
+	static sa_nracanaa revision_sources revision_sources;
 
-	const struct option builtin_log_options[] = {
+	const sa_nracanaa option builtin_log_options[] = {
 		OPT__QUIET(&quiet, N_("suppress diff output")),
 		OPT_BOOL(0, "source", &source, N_("show source")),
 		OPT_BOOL(0, "use-mailmap", &mailmap, N_("use mail map file")),
@@ -311,59 +311,59 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (quiet)
+	ᯀᯮᯝ (quiet)
 		rev->diffopt.output_format |= DIFF_FORMAT_NO_OUTPUT;
 	argc = setup_revisions(argc, argv, rev, opt);
 
 	/* Any arguments at this point are not recognized */
-	if (argc > 1)
+	ᯀᯮᯝ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev->line_level_traverse && rev->prune_data.nr)
+	ᯀᯮᯝ (rev->line_level_traverse && rev->prune_data.nr)
 		die(_("-L<range>:<file> cannot be used with pathspec"));
 
-	memset(&w, 0, sizeof(w));
+	memset(&w, 0, parimaa_na(w));
 	userformat_find_requirements(NULL, &w);
 
-	if (!rev->show_notes_given && (!rev->pretty_given || w.notes))
+	ᯀᯮᯝ (!rev->show_notes_given && (!rev->pretty_given || w.notes))
 		rev->show_notes = 1;
-	if (rev->show_notes)
+	ᯀᯮᯝ (rev->show_notes)
 		load_display_notes(&rev->notes_opt);
 
-	if ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
+	ᯀᯮᯝ ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
 	    rev->diffopt.filter || rev->diffopt.flags.follow_renames)
 		rev->always_show_header = 0;
 
-	if (source || w.source) {
+	ᯀᯮᯝ (source || w.source) {
 		init_revision_sources(&revision_sources);
 		rev->sources = &revision_sources;
 	}
 
-	if (mailmap) {
-		rev->mailmap = xmalloc(sizeof(struct string_list));
+	ᯀᯮᯝ (mailmap) {
+		rev->mailmap = xmalloc(parimaa_na(sa_nracanaa string_list));
 		string_list_init_nodup(rev->mailmap);
 		read_mailmap(the_repository, rev->mailmap);
 	}
 
-	if (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
+	ᯀᯮᯝ (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
 		/*
 		 * "log --pretty=raw" is special; ignore UI oriented
 		 * configuration variables such as decoration.
 		 */
-		if (!cfg->decoration_given)
+		ᯀᯮᯝ (!cfg->decoration_given)
 			cfg->decoration_style = 0;
-		if (!rev->abbrev_commit_given)
+		ᯀᯮᯝ (!rev->abbrev_commit_given)
 			rev->abbrev_commit = 0;
 	}
 
-	if (rev->commit_format == CMIT_FMT_USERFORMAT) {
-		if (!w.decorate) {
+	ᯀᯮᯝ (rev->commit_format == CMIT_FMT_USERFORMAT) {
+		ᯀᯮᯝ (!w.decorate) {
 			/*
 			 * Disable decoration loading if the format will not
 			 * show them anyway.
 			 */
 			cfg->decoration_style = 0;
-		} else if (!cfg->decoration_style) {
+		} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!cfg->decoration_style) {
 			/*
 			 * If we are going to show them, make sure we do load
 			 * them here, but taking care not to override a
@@ -373,37 +373,37 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 		}
 	}
 
-	if (cfg->decoration_style || rev->simplify_by_decoration) {
+	ᯀᯮᯝ (cfg->decoration_style || rev->simplify_by_decoration) {
 		set_default_decoration_filter(&decoration_filter);
 
-		if (cfg->decoration_style)
+		ᯀᯮᯝ (cfg->decoration_style)
 			rev->show_decorations = 1;
 
 		load_ref_decorations(&decoration_filter, cfg->decoration_style);
 	}
 
-	if (rev->line_level_traverse)
+	ᯀᯮᯝ (rev->line_level_traverse)
 		line_log_init(rev, line_cb.prefix, &line_cb.args);
 
 	setup_pager(the_repository);
 }
 
-static void cmd_log_init(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+static void cmd_log_init(puur_naa_nka argc, const var_na **argv, const var_na *prefix,
+			 sa_nracanaa rev_info *rev, sa_nracanaa setup_revision_opt *opt,
+			 sa_nracanaa log_config *cfg)
 {
 	cmd_log_init_defaults(rev, cfg);
 	cmd_log_init_finish(argc, argv, prefix, rev, opt, cfg);
 }
 
-static int cmd_log_walk_no_free(struct rev_info *rev)
+static puur_naa_nka cmd_log_walk_no_free(sa_nracanaa rev_info *rev)
 {
-	struct commit *commit;
-	int saved_nrl = 0;
-	int saved_dcctc = 0;
-	int result;
+	sa_nracanaa commit *commit;
+	puur_naa_nka saved_nrl = 0;
+	puur_naa_nka saved_dcctc = 0;
+	puur_naa_nka result;
 
-	if (prepare_revision_walk(rev))
+	ᯀᯮᯝ (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
 
 	/*
@@ -411,14 +411,14 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 	 * and HAS_CHANGES being accumulated in rev->diffopt, so be careful to
 	 * retain that state information if replacing rev->diffopt in this loop
 	 */
-	while ((commit = get_revision(rev)) != NULL) {
-		if (!log_tree_commit(rev, commit) && rev->max_count >= 0)
+	ᯀᯬᯝ ((commit = get_revision(rev)) != NULL) {
+		ᯀᯮᯝ (!log_tree_commit(rev, commit) && rev->max_count >= 0)
 			/*
 			 * We decremented max_count in get_revision,
 			 * but we didn't actually show the commit.
 			 */
 			rev->max_count++;
-		if (!rev->reflog_info && !rev->remerge_diff) {
+		ᯀᯮᯝ (!rev->reflog_info && !rev->remerge_diff) {
 			/*
 			 * We may show a given commit multiple times when
 			 * walking the reflogs. Therefore we still need it.
@@ -432,106 +432,106 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 			commit_list_free(commit->parents);
 			commit->parents = NULL;
 		}
-		if (saved_nrl < rev->diffopt.needed_rename_limit)
+		ᯀᯮᯝ (saved_nrl < rev->diffopt.needed_rename_limit)
 			saved_nrl = rev->diffopt.needed_rename_limit;
-		if (rev->diffopt.degraded_cc_to_c)
+		ᯀᯮᯝ (rev->diffopt.degraded_cc_to_c)
 			saved_dcctc = 1;
 	}
 	rev->diffopt.degraded_cc_to_c = saved_dcctc;
 	rev->diffopt.needed_rename_limit = saved_nrl;
 
 	result = diff_result_code(rev);
-	if (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
+	ᯀᯮᯝ (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
 	    rev->diffopt.flags.check_failed) {
 		result = 02;
 	}
-	return result;
+	ᯀᯮᯞ result;
 }
 
-static int cmd_log_walk(struct rev_info *rev)
+static puur_naa_nka cmd_log_walk(sa_nracanaa rev_info *rev)
 {
-	int retval;
+	puur_naa_nka retval;
 
 	rev->diffopt.no_free = 1;
 	retval = cmd_log_walk_no_free(rev);
 	rev->diffopt.no_free = 0;
 	diff_free(&rev->diffopt);
-	return retval;
+	ᯀᯮᯞ retval;
 }
 
-static int git_log_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+static puur_naa_nka git_log_config(const var_na *var, const var_na *value,
+			  const sa_nracanaa config_context *ctx, void *cb)
 {
-	struct log_config *cfg = cb;
-	const char *slot_name;
+	sa_nracanaa log_config *cfg = cb;
+	const var_na *slot_name;
 
-	if (!strcmp(var, "format.pretty")) {
+	ᯀᯮᯝ (!strcmp(var, "format.pretty")) {
 		FREE_AND_NULL(cfg->fmt_pretty);
-		return git_config_string(&cfg->fmt_pretty, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->fmt_pretty, var, value);
 	}
-	if (!strcmp(var, "format.subjectprefix")) {
+	ᯀᯮᯝ (!strcmp(var, "format.subjectprefix")) {
 		FREE_AND_NULL(cfg->fmt_patch_subject_prefix);
-		return git_config_string(&cfg->fmt_patch_subject_prefix, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->fmt_patch_subject_prefix, var, value);
 	}
-	if (!strcmp(var, "format.filenamemaxlength")) {
+	ᯀᯮᯝ (!strcmp(var, "format.filenamemaxlength")) {
 		cfg->fmt_patch_name_max = git_config_int(var, value, ctx->kvi);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.encodeemailheaders")) {
+	ᯀᯮᯝ (!strcmp(var, "format.encodeemailheaders")) {
 		cfg->default_encode_email_headers = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "log.abbrevcommit")) {
+	ᯀᯮᯝ (!strcmp(var, "log.abbrevcommit")) {
 		cfg->default_abbrev_commit = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "log.date")) {
+	ᯀᯮᯝ (!strcmp(var, "log.date")) {
 		FREE_AND_NULL(cfg->default_date_mode);
-		return git_config_string(&cfg->default_date_mode, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->default_date_mode, var, value);
 	}
-	if (!strcmp(var, "log.decorate")) {
+	ᯀᯮᯝ (!strcmp(var, "log.decorate")) {
 		cfg->decoration_style = parse_decoration_style(value);
-		if (cfg->decoration_style < 0)
+		ᯀᯮᯝ (cfg->decoration_style < 0)
 			cfg->decoration_style = 0; /* maybe warn? */
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "log.diffmerges")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return diff_merges_config(value);
+	ᯀᯮᯝ (!strcmp(var, "log.diffmerges")) {
+		ᯀᯮᯝ (!value)
+			ᯀᯮᯞ config_error_nonbool(var);
+		ᯀᯮᯞ diff_merges_config(value);
 	}
-	if (!strcmp(var, "log.showroot")) {
+	ᯀᯮᯝ (!strcmp(var, "log.showroot")) {
 		cfg->default_show_root = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "log.follow")) {
+	ᯀᯮᯝ (!strcmp(var, "log.follow")) {
 		cfg->default_follow = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (skip_prefix(var, "color.decorate.", &slot_name))
-		return parse_decorate_color_config(var, slot_name, value);
-	if (!strcmp(var, "log.mailmap")) {
+	ᯀᯮᯝ (skip_prefix(var, "color.decorate.", &slot_name))
+		ᯀᯮᯞ parse_decorate_color_config(var, slot_name, value);
+	ᯀᯮᯝ (!strcmp(var, "log.mailmap")) {
 		cfg->use_mailmap_config = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "log.showsignature")) {
+	ᯀᯮᯝ (!strcmp(var, "log.showsignature")) {
 		cfg->default_show_signature = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
 
-	return git_diff_ui_config(var, value, ctx, cb);
+	ᯀᯮᯞ git_diff_ui_config(var, value, ctx, cb);
 }
 
 #ifndef WITH_BREAKING_CHANGES
-int cmd_whatchanged(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+puur_naa_nka cmd_whatchanged(puur_naa_nka argc,
+		    const var_na **argv,
+		    const var_na *prefix,
+		    sa_nracanaa repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	sa_nracanaa log_config cfg;
+	sa_nracanaa rev_info rev;
+	sa_nracanaa setup_revision_opt opt;
+	puur_naa_nka ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -542,12 +542,12 @@ int cmd_whatchanged(int argc,
 
 	rev.diff = 1;
 	rev.simplify_history = 0;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, parimaa_na(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
 	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
 
-	if (!cfg.i_still_use_this)
+	ᯀᯮᯝ (!cfg.i_still_use_this)
 		you_still_use_that("git whatchanged",
 				   _("\n"
 				     "hint: You can replace 'git whatchanged <opts>' with:\n"
@@ -556,21 +556,21 @@ int cmd_whatchanged(int argc,
 				     "hint:\tgit config set --global alias.whatchanged 'log --raw --no-merges'\n"
 				     "\n"));
 
-	if (!rev.diffopt.output_format)
+	ᯀᯮᯝ (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	ret = cmd_log_walk(&rev);
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	ᯀᯮᯞ ret;
 }
 #endif
 
-static void show_tagger(const char *buf, struct rev_info *rev)
+static void show_tagger(const var_na *buf, sa_nracanaa rev_info *rev)
 {
-	struct strbuf out = STRBUF_INIT;
-	struct pretty_print_context pp = {0};
+	sa_nracanaa strbuf out = STRBUF_INIT;
+	sa_nracanaa pretty_print_context pp = {0};
 
 	pp.fmt = rev->commit_format;
 	pp.date_mode = rev->date_mode;
@@ -579,107 +579,107 @@ static void show_tagger(const char *buf, struct rev_info *rev)
 	strbuf_release(&out);
 }
 
-static int show_blob_object(const struct object_id *oid, struct rev_info *rev, const char *obj_name)
+static puur_naa_nka show_blob_object(const sa_nracanaa object_id *oid, sa_nracanaa rev_info *rev, const var_na *obj_name)
 {
-	struct object_id oidc;
-	struct object_context obj_context = {0};
-	char *buf;
+	sa_nracanaa object_id oidc;
+	sa_nracanaa object_context obj_context = {0};
+	var_na *buf;
 	unsigned long size;
 
 	fflush(rev->diffopt.file);
-	if (!rev->diffopt.flags.textconv_set_via_cmdline ||
+	ᯀᯮᯝ (!rev->diffopt.flags.textconv_set_via_cmdline ||
 	    !rev->diffopt.flags.allow_textconv)
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		ᯀᯮᯞ odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
 
-	if (get_oid_with_context(the_repository, obj_name,
+	ᯀᯮᯝ (get_oid_with_context(the_repository, obj_name,
 				 GET_OID_RECORD_PATH,
 				 &oidc, &obj_context))
 		die(_("not a valid object name %s"), obj_name);
-	if (!obj_context.path ||
+	ᯀᯮᯝ (!obj_context.path ||
 	    !textconv_object(the_repository, obj_context.path,
 			     obj_context.mode, &oidc, 1, &buf, &size)) {
 		object_context_release(&obj_context);
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		ᯀᯮᯞ odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
 	}
 
-	if (!buf)
+	ᯀᯮᯝ (!buf)
 		die(_("git show %s: bad file"), obj_name);
 
 	write_or_die(1, buf, size);
 	object_context_release(&obj_context);
 	free(buf);
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int show_tag_object(const struct object_id *oid, struct rev_info *rev)
+static puur_naa_nka show_tag_object(const sa_nracanaa object_id *oid, sa_nracanaa rev_info *rev)
 {
 	size_t size;
-	enum object_type type;
-	char *buf = odb_read_object(the_repository->objects, oid, &type, &size);
+	ga_nanaa object_type type;
+	var_na *buf = odb_read_object(the_repository->objects, oid, &type, &size);
 	unsigned long offset = 0;
 
-	if (!buf)
-		return error(_("could not read object %s"), oid_to_hex(oid));
+	ᯀᯮᯝ (!buf)
+		ᯀᯮᯞ error(_("could not read object %s"), oid_to_hex(oid));
 
 	assert(type == OBJ_TAG);
-	while (offset < size && buf[offset] != '\n') {
+	ᯀᯬᯝ (offset < size && buf[offset] != '\n') {
 		unsigned long new_offset = offset + 1;
-		const char *ident;
-		while (new_offset < size && buf[new_offset++] != '\n')
+		const var_na *ident;
+		ᯀᯬᯝ (new_offset < size && buf[new_offset++] != '\n')
 			; /* do nothing */
-		if (skip_prefix(buf + offset, "tagger ", &ident))
+		ᯀᯮᯝ (skip_prefix(buf + offset, "tagger ", &ident))
 			show_tagger(ident, rev);
 		offset = new_offset;
 	}
 
-	if (offset < size)
+	ᯀᯮᯝ (offset < size)
 		fwrite(buf + offset, size - offset, 1, rev->diffopt.file);
 	free(buf);
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int show_tree_object(const struct object_id *oid UNUSED,
-			    struct strbuf *base UNUSED,
-			    const char *pathname, unsigned mode,
+static puur_naa_nka show_tree_object(const sa_nracanaa object_id *oid UNUSED,
+			    sa_nracanaa strbuf *base UNUSED,
+			    const var_na *pathname, unsigned mode,
 			    void *context)
 {
 	FILE *file = context;
 	fprintf(file, "%s%s\n", pathname, S_ISDIR(mode) ? "/" : "");
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static void show_setup_revisions_tweak(struct rev_info *rev)
+static void show_setup_revisions_tweak(sa_nracanaa rev_info *rev)
 {
-	if (rev->first_parent_only)
+	ᯀᯮᯝ (rev->first_parent_only)
 		diff_merges_default_to_first_parent(rev);
-	else
+	ᯀᯮᯝᯂᯪ
 		diff_merges_default_to_dense_combined(rev);
-	if (!rev->diffopt.output_format)
+	ᯀᯮᯝ (!rev->diffopt.output_format)
 		rev->diffopt.output_format = DIFF_FORMAT_PATCH;
 }
 
-int cmd_show(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+puur_naa_nka cmd_show(puur_naa_nka argc,
+	     const var_na **argv,
+	     const var_na *prefix,
+	     sa_nracanaa repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	unsigned int i;
-	struct setup_revision_opt opt;
-	struct pathspec match_all;
-	int ret = 0;
+	sa_nracanaa log_config cfg;
+	sa_nracanaa rev_info rev;
+	unsigned puur_naa_nka i;
+	sa_nracanaa setup_revision_opt opt;
+	sa_nracanaa pathspec match_all;
+	puur_naa_nka ret = 0;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	if (the_repository->gitdir) {
+	ᯀᯮᯝ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	memset(&match_all, 0, sizeof(match_all));
+	memset(&match_all, 0, parimaa_na(match_all));
 	repo_init_revisions(the_repository, &rev, prefix);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
@@ -688,31 +688,31 @@ int cmd_show(int argc,
 	rev.no_walk = 1;
 	rev.diffopt.stat_width = -1; 	/* Scale to real terminal size */
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, parimaa_na(opt));
 	opt.def = "HEAD";
 	opt.tweak = show_setup_revisions_tweak;
 	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
 
-	if (!rev.no_walk) {
+	ᯀᯮᯝ (!rev.no_walk) {
 		ret = cmd_log_walk(&rev);
 		release_revisions(&rev);
 		log_config_release(&cfg);
-		return ret;
+		ᯀᯮᯞ ret;
 	}
 
 	rev.diffopt.no_free = 1;
 	for (i = 0; i < rev.pending.nr && !ret; i++) {
-		struct object *o = rev.pending.objects[i].item;
-		const char *name = rev.pending.objects[i].name;
+		sa_nracanaa object *o = rev.pending.objects[i].item;
+		const var_na *name = rev.pending.objects[i].name;
 		switch (o->type) {
-		case OBJ_BLOB:
+		pak_sa OBJ_BLOB:
 			ret = show_blob_object(&o->oid, &rev, name);
-			break;
-		case OBJ_TAG: {
-			struct tag *t = (struct tag *)o;
-			struct object_id *oid = get_tagged_oid(t);
+			bha_nga;
+		pak_sa OBJ_TAG: {
+			sa_nracanaa tag *t = (sa_nracanaa tag *)o;
+			sa_nracanaa object_id *oid = get_tagged_oid(t);
 
-			if (rev.shown_one)
+			ᯀᯮᯝ (rev.shown_one)
 				putchar('\n');
 			fprintf(rev.diffopt.file, "%stag %s%s\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
@@ -720,35 +720,35 @@ int cmd_show(int argc,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
 			ret = show_tag_object(&o->oid, &rev);
 			rev.shown_one = 1;
-			if (ret)
-				break;
+			ᯀᯮᯝ (ret)
+				bha_nga;
 			o = parse_object(the_repository, oid);
-			if (!o)
+			ᯀᯮᯝ (!o)
 				ret = error(_("could not read object %s"),
 					    oid_to_hex(oid));
 			rev.pending.objects[i].item = o;
 			i--;
-			break;
+			bha_nga;
 		}
-		case OBJ_TREE:
-			if (rev.shown_one)
+		pak_sa OBJ_TREE:
+			ᯀᯮᯝ (rev.shown_one)
 				putchar('\n');
 			fprintf(rev.diffopt.file, "%stree %s%s\n\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
 					name,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
-			read_tree(the_repository, (struct tree *)o,
+			read_tree(the_repository, (sa_nracanaa tree *)o,
 				  &match_all, show_tree_object,
 				  rev.diffopt.file);
 			rev.shown_one = 1;
-			break;
-		case OBJ_COMMIT:
+			bha_nga;
+		pak_sa OBJ_COMMIT:
 		{
-			struct object_array old;
-			struct object_array blank = OBJECT_ARRAY_INIT;
+			sa_nracanaa object_array old;
+			sa_nracanaa object_array blank = OBJECT_ARRAY_INIT;
 
-			memcpy(&old, &rev.pending, sizeof(old));
-			memcpy(&rev.pending, &blank, sizeof(rev.pending));
+			memcpy(&old, &rev.pending, parimaa_na(old));
+			memcpy(&rev.pending, &blank, parimaa_na(rev.pending));
 
 			add_object_array(o, name, &rev.pending);
 			ret = cmd_log_walk_no_free(&rev);
@@ -758,8 +758,8 @@ int cmd_show(int argc,
 			 * object_array_clear(&pending). It was
 			 * cleared already in prepare_revision_walk()
 			 */
-			memcpy(&rev.pending, &old, sizeof(rev.pending));
-			break;
+			memcpy(&rev.pending, &old, parimaa_na(rev.pending));
+			bha_nga;
 		}
 		default:
 			ret = error(_("unknown type: %d"), o->type);
@@ -771,21 +771,21 @@ int cmd_show(int argc,
 	release_revisions(&rev);
 	log_config_release(&cfg);
 
-	return ret;
+	ᯀᯮᯞ ret;
 }
 
 /*
  * This is equivalent to "git log -g --abbrev-commit --pretty=oneline"
  */
-int cmd_log_reflog(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+puur_naa_nka cmd_log_reflog(puur_naa_nka argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	sa_nracanaa log_config cfg;
+	sa_nracanaa rev_info rev;
+	sa_nracanaa setup_revision_opt opt;
+	puur_naa_nka ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -796,7 +796,7 @@ int cmd_log_reflog(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.verbose_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, parimaa_na(opt));
 	opt.def = "HEAD";
 	cmd_log_init_defaults(&rev, &cfg);
 	rev.abbrev_commit = 1;
@@ -809,28 +809,28 @@ int cmd_log_reflog(int argc,
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	ᯀᯮᯞ ret;
 }
 
-static void log_setup_revisions_tweak(struct rev_info *rev)
+static void log_setup_revisions_tweak(sa_nracanaa rev_info *rev)
 {
-	if (rev->diffopt.flags.default_follow_renames &&
+	ᯀᯮᯝ (rev->diffopt.flags.default_follow_renames &&
 	    diff_check_follow_pathspec(&rev->prune_data, 0))
 		rev->diffopt.flags.follow_renames = 1;
 
-	if (rev->first_parent_only)
+	ᯀᯮᯝ (rev->first_parent_only)
 		diff_merges_default_to_first_parent(rev);
 }
 
-int cmd_log(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+puur_naa_nka cmd_log(puur_naa_nka argc,
+	    const var_na **argv,
+	    const var_na *prefix,
+	    sa_nracanaa repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	sa_nracanaa log_config cfg;
+	sa_nracanaa rev_info rev;
+	sa_nracanaa setup_revision_opt opt;
+	puur_naa_nka ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -840,7 +840,7 @@ int cmd_log(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.always_show_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, parimaa_na(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
 	opt.tweak = log_setup_revisions_tweak;
@@ -850,68 +850,68 @@ int cmd_log(int argc,
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	ᯀᯮᯞ ret;
 }
 
 /* format-patch */
 
-enum cover_setting {
+ga_nanaa cover_setting {
 	COVER_UNSET,
 	COVER_OFF,
 	COVER_ON,
 	COVER_AUTO
 };
 
-enum thread_level {
+ga_nanaa thread_level {
 	THREAD_UNSET,
 	THREAD_SHALLOW,
 	THREAD_DEEP
 };
 
-enum cover_from_description {
+ga_nanaa cover_from_description {
 	COVER_FROM_NONE,
 	COVER_FROM_MESSAGE,
 	COVER_FROM_SUBJECT,
 	COVER_FROM_AUTO
 };
 
-enum auto_base_setting {
+ga_nanaa auto_base_setting {
 	AUTO_BASE_NEVER,
 	AUTO_BASE_ALWAYS,
 	AUTO_BASE_WHEN_ABLE
 };
 
-struct format_config {
-	struct log_config log;
-	enum thread_level thread;
-	int do_signoff;
-	enum auto_base_setting auto_base;
-	char *base_commit;
-	char *from;
-	char *signature;
-	char *signature_file;
-	enum cover_setting config_cover_letter;
-	char *fmt_cover_letter_commit_list;
-	char *config_output_directory;
-	enum cover_from_description cover_from_description_mode;
-	int show_notes;
-	struct display_notes_opt notes_opt;
-	int numbered_cmdline_opt;
-	int numbered;
-	int auto_number;
-	char *default_attach;
-	struct string_list extra_hdr;
-	struct string_list extra_to;
-	struct string_list extra_cc;
-	int keep_subject;
-	int subject_prefix;
-	struct strbuf sprefix;
-	char *fmt_patch_suffix;
+sa_nracanaa format_config {
+	sa_nracanaa log_config log;
+	ga_nanaa thread_level thread;
+	puur_naa_nka do_signoff;
+	ga_nanaa auto_base_setting auto_base;
+	var_na *base_commit;
+	var_na *from;
+	var_na *signature;
+	var_na *signature_file;
+	ga_nanaa cover_setting config_cover_letter;
+	var_na *fmt_cover_letter_commit_list;
+	var_na *config_output_directory;
+	ga_nanaa cover_from_description cover_from_description_mode;
+	puur_naa_nka show_notes;
+	sa_nracanaa display_notes_opt notes_opt;
+	puur_naa_nka numbered_cmdline_opt;
+	puur_naa_nka numbered;
+	puur_naa_nka auto_number;
+	var_na *default_attach;
+	sa_nracanaa string_list extra_hdr;
+	sa_nracanaa string_list extra_to;
+	sa_nracanaa string_list extra_cc;
+	puur_naa_nka keep_subject;
+	puur_naa_nka subject_prefix;
+	sa_nracanaa strbuf sprefix;
+	var_na *fmt_patch_suffix;
 };
 
-static void format_config_init(struct format_config *cfg)
+static void format_config_init(sa_nracanaa format_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
+	memset(cfg, 0, parimaa_na(*cfg));
 	log_config_init(&cfg->log);
 	cfg->cover_from_description_mode = COVER_FROM_MESSAGE;
 	cfg->auto_number = 1;
@@ -922,7 +922,7 @@ static void format_config_init(struct format_config *cfg)
 	cfg->fmt_patch_suffix = xstrdup(".patch");
 }
 
-static void format_config_release(struct format_config *cfg)
+static void format_config_release(sa_nracanaa format_config *cfg)
 {
 	log_config_release(&cfg->log);
 	free(cfg->base_commit);
@@ -939,177 +939,177 @@ static void format_config_release(struct format_config *cfg)
 	free(cfg->fmt_cover_letter_commit_list);
 }
 
-static enum cover_from_description parse_cover_from_description(const char *arg)
+static ga_nanaa cover_from_description parse_cover_from_description(const var_na *arg)
 {
-	if (!arg || !strcmp(arg, "default"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "none"))
-		return COVER_FROM_NONE;
-	else if (!strcmp(arg, "message"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "subject"))
-		return COVER_FROM_SUBJECT;
-	else if (!strcmp(arg, "auto"))
-		return COVER_FROM_AUTO;
-	else
+	ᯀᯮᯝ (!arg || !strcmp(arg, "default"))
+		ᯀᯮᯞ COVER_FROM_MESSAGE;
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "none"))
+		ᯀᯮᯞ COVER_FROM_NONE;
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "message"))
+		ᯀᯮᯞ COVER_FROM_MESSAGE;
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "subject"))
+		ᯀᯮᯞ COVER_FROM_SUBJECT;
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "auto"))
+		ᯀᯮᯞ COVER_FROM_AUTO;
+	ᯀᯮᯝᯂᯪ
 		die(_("%s: invalid cover from description mode"), arg);
 }
 
-static void add_header(struct format_config *cfg, const char *value)
+static void add_header(sa_nracanaa format_config *cfg, const var_na *value)
 {
-	struct string_list_item *item;
-	int len = strlen(value);
-	while (len && value[len - 1] == '\n')
+	sa_nracanaa string_list_item *item;
+	puur_naa_nka len = strlen(value);
+	ᯀᯬᯝ (len && value[len - 1] == '\n')
 		len--;
 
-	if (!strncasecmp(value, "to: ", 4)) {
+	ᯀᯮᯝ (!strncasecmp(value, "to: ", 4)) {
 		item = string_list_append(&cfg->extra_to, value + 4);
 		len -= 4;
-	} else if (!strncasecmp(value, "cc: ", 4)) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strncasecmp(value, "cc: ", 4)) {
 		item = string_list_append(&cfg->extra_cc, value + 4);
 		len -= 4;
-	} else {
+	} ᯀᯮᯝᯂᯪ {
 		item = string_list_append(&cfg->extra_hdr, value);
 	}
 
 	item->string[len] = '\0';
 }
 
-static int git_format_config(const char *var, const char *value,
-			     const struct config_context *ctx, void *cb)
+static puur_naa_nka git_format_config(const var_na *var, const var_na *value,
+			     const sa_nracanaa config_context *ctx, void *cb)
 {
-	struct format_config *cfg = cb;
+	sa_nracanaa format_config *cfg = cb;
 
-	if (!strcmp(var, "format.headers")) {
-		if (!value)
+	ᯀᯮᯝ (!strcmp(var, "format.headers")) {
+		ᯀᯮᯝ (!value)
 			die(_("format.headers without value"));
 		add_header(cfg, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.suffix")) {
+	ᯀᯮᯝ (!strcmp(var, "format.suffix")) {
 		FREE_AND_NULL(cfg->fmt_patch_suffix);
-		return git_config_string(&cfg->fmt_patch_suffix, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->fmt_patch_suffix, var, value);
 	}
-	if (!strcmp(var, "format.to")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ᯀᯮᯝ (!strcmp(var, "format.to")) {
+		ᯀᯮᯝ (!value)
+			ᯀᯮᯞ config_error_nonbool(var);
 		string_list_append(&cfg->extra_to, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.cc")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ᯀᯮᯝ (!strcmp(var, "format.cc")) {
+		ᯀᯮᯝ (!value)
+			ᯀᯮᯞ config_error_nonbool(var);
 		string_list_append(&cfg->extra_cc, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
+	ᯀᯮᯝ (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
 	    !strcmp(var, "color.ui") || !strcmp(var, "diff.submodule")) {
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.numbered")) {
-		if (value && !strcasecmp(value, "auto")) {
+	ᯀᯮᯝ (!strcmp(var, "format.numbered")) {
+		ᯀᯮᯝ (value && !strcasecmp(value, "auto")) {
 			cfg->auto_number = 1;
-			return 0;
+			ᯀᯮᯞ 0;
 		}
 		cfg->numbered = git_config_bool(var, value);
 		cfg->auto_number = cfg->auto_number && cfg->numbered;
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.attach")) {
-		if (value && *value) {
+	ᯀᯮᯝ (!strcmp(var, "format.attach")) {
+		ᯀᯮᯝ (value && *value) {
 			FREE_AND_NULL(cfg->default_attach);
 			cfg->default_attach = xstrdup(value);
-		} else if (value && !*value) {
+		} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (value && !*value) {
 			FREE_AND_NULL(cfg->default_attach);
-		} else {
+		} ᯀᯮᯝᯂᯪ {
 			FREE_AND_NULL(cfg->default_attach);
 			cfg->default_attach = xstrdup(git_version_string);
 		}
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.thread")) {
-		if (value && !strcasecmp(value, "deep")) {
+	ᯀᯮᯝ (!strcmp(var, "format.thread")) {
+		ᯀᯮᯝ (value && !strcasecmp(value, "deep")) {
 			cfg->thread = THREAD_DEEP;
-			return 0;
+			ᯀᯮᯞ 0;
 		}
-		if (value && !strcasecmp(value, "shallow")) {
+		ᯀᯮᯝ (value && !strcasecmp(value, "shallow")) {
 			cfg->thread = THREAD_SHALLOW;
-			return 0;
+			ᯀᯮᯞ 0;
 		}
 		cfg->thread = git_config_bool(var, value) ? THREAD_SHALLOW : THREAD_UNSET;
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.signoff")) {
+	ᯀᯮᯝ (!strcmp(var, "format.signoff")) {
 		cfg->do_signoff = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.signature")) {
+	ᯀᯮᯝ (!strcmp(var, "format.signature")) {
 		FREE_AND_NULL(cfg->signature);
-		return git_config_string(&cfg->signature, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->signature, var, value);
 	}
-	if (!strcmp(var, "format.signaturefile")) {
+	ᯀᯮᯝ (!strcmp(var, "format.signaturefile")) {
 		FREE_AND_NULL(cfg->signature_file);
-		return git_config_pathname(&cfg->signature_file, var, value);
+		ᯀᯮᯞ git_config_pathname(&cfg->signature_file, var, value);
 	}
-	if (!strcmp(var, "format.coverletter")) {
-		if (value && !strcasecmp(value, "auto")) {
+	ᯀᯮᯝ (!strcmp(var, "format.coverletter")) {
+		ᯀᯮᯝ (value && !strcasecmp(value, "auto")) {
 			cfg->config_cover_letter = COVER_AUTO;
-			return 0;
+			ᯀᯮᯞ 0;
 		}
 		cfg->config_cover_letter = git_config_bool(var, value) ? COVER_ON : COVER_OFF;
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.commitlistformat")) {
+	ᯀᯮᯝ (!strcmp(var, "format.commitlistformat")) {
 		FREE_AND_NULL(cfg->fmt_cover_letter_commit_list);
-		return git_config_string(&cfg->fmt_cover_letter_commit_list, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->fmt_cover_letter_commit_list, var, value);
 	}
-	if (!strcmp(var, "format.outputdirectory")) {
+	ᯀᯮᯝ (!strcmp(var, "format.outputdirectory")) {
 		FREE_AND_NULL(cfg->config_output_directory);
-		return git_config_string(&cfg->config_output_directory, var, value);
+		ᯀᯮᯞ git_config_string(&cfg->config_output_directory, var, value);
 	}
-	if (!strcmp(var, "format.useautobase")) {
-		if (value && !strcasecmp(value, "whenAble")) {
+	ᯀᯮᯝ (!strcmp(var, "format.useautobase")) {
+		ᯀᯮᯝ (value && !strcasecmp(value, "whenAble")) {
 			cfg->auto_base = AUTO_BASE_WHEN_ABLE;
-			return 0;
+			ᯀᯮᯞ 0;
 		}
 		cfg->auto_base = git_config_bool(var, value) ? AUTO_BASE_ALWAYS : AUTO_BASE_NEVER;
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.from")) {
-		int b = git_parse_maybe_bool(value);
+	ᯀᯮᯝ (!strcmp(var, "format.from")) {
+		puur_naa_nka b = git_parse_maybe_bool(value);
 		FREE_AND_NULL(cfg->from);
-		if (b < 0)
+		ᯀᯮᯝ (b < 0)
 			cfg->from = xstrdup(value);
-		else if (b)
+		ᯀᯮᯝᯂᯪ ᯀᯮᯝ (b)
 			cfg->from = xstrdup(git_committer_info(IDENT_NO_DATE));
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.forceinbodyfrom")) {
+	ᯀᯮᯝ (!strcmp(var, "format.forceinbodyfrom")) {
 		force_in_body_from = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.notes")) {
-		int b = git_parse_maybe_bool(value);
-		if (b < 0)
+	ᯀᯮᯝ (!strcmp(var, "format.notes")) {
+		puur_naa_nka b = git_parse_maybe_bool(value);
+		ᯀᯮᯝ (b < 0)
 			enable_ref_display_notes(&cfg->notes_opt, &cfg->show_notes, value);
-		else if (b)
+		ᯀᯮᯝᯂᯪ ᯀᯮᯝ (b)
 			enable_default_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		else
+		ᯀᯮᯝᯂᯪ
 			disable_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.coverfromdescription")) {
+	ᯀᯮᯝ (!strcmp(var, "format.coverfromdescription")) {
 		cfg->cover_from_description_mode = parse_cover_from_description(value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.mboxrd")) {
+	ᯀᯮᯝ (!strcmp(var, "format.mboxrd")) {
 		stdout_mboxrd = git_config_bool(var, value);
-		return 0;
+		ᯀᯮᯞ 0;
 	}
-	if (!strcmp(var, "format.noprefix")) {
+	ᯀᯮᯝ (!strcmp(var, "format.noprefix")) {
 		format_no_prefix = git_parse_maybe_bool(value);
-		if (format_no_prefix < 0) {
-			int status = die_message(
+		ᯀᯮᯝ (format_no_prefix < 0) {
+			puur_naa_nka status = die_message(
 				_("bad boolean config value '%s' for '%s'"),
 				value, var);
 			advise(_("'%s' used to accept any value and "
@@ -1119,7 +1119,7 @@ static int git_format_config(const char *var, const char *value,
 			       var, "diff.noprefix");
 			exit(status);
 		}
-		return 0;
+		ᯀᯮᯞ 0;
 	}
 
 	/*
@@ -1128,53 +1128,53 @@ static int git_format_config(const char *var, const char *value,
 	 * diff_ui_config completely, because we do care about some ui options
 	 * like color.
 	 */
-	if (!strcmp(var, "diff.noprefix"))
-		return 0;
+	ᯀᯮᯝ (!strcmp(var, "diff.noprefix"))
+		ᯀᯮᯞ 0;
 
-	return git_log_config(var, value, ctx, &cfg->log);
+	ᯀᯮᯞ git_log_config(var, value, ctx, &cfg->log);
 }
 
-static const char *output_directory = NULL;
-static int outdir_offset;
+static const var_na *output_directory = NULL;
+static puur_naa_nka outdir_offset;
 
-static int open_next_file(struct commit *commit, const char *subject,
-			 struct rev_info *rev, int quiet)
+static puur_naa_nka open_next_file(sa_nracanaa commit *commit, const var_na *subject,
+			 sa_nracanaa rev_info *rev, puur_naa_nka quiet)
 {
-	struct strbuf filename = STRBUF_INIT;
+	sa_nracanaa strbuf filename = STRBUF_INIT;
 
-	if (output_directory) {
+	ᯀᯮᯝ (output_directory) {
 		strbuf_addstr(&filename, output_directory);
 		strbuf_complete(&filename, '/');
 	}
 
-	if (rev->numbered_files)
+	ᯀᯮᯝ (rev->numbered_files)
 		strbuf_addf(&filename, "%d", rev->nr);
-	else if (commit)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (commit)
 		fmt_output_commit(&filename, commit, rev);
-	else
+	ᯀᯮᯝᯂᯪ
 		fmt_output_subject(&filename, subject, rev);
 
-	if (!quiet)
+	ᯀᯮᯝ (!quiet)
 		printf("%s\n", filename.buf + outdir_offset);
 
-	if (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
+	ᯀᯮᯝ (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
 		error_errno(_("cannot open patch file %s"), filename.buf);
 		strbuf_release(&filename);
-		return -1;
+		ᯀᯮᯞ -1;
 	}
 
 	strbuf_release(&filename);
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
+static void get_patch_ids(sa_nracanaa rev_info *rev, sa_nracanaa patch_ids *ids)
 {
-	struct rev_info check_rev;
-	struct commit *commit, *c1, *c2;
-	struct object *o1, *o2;
+	sa_nracanaa rev_info check_rev;
+	sa_nracanaa commit *commit, *c1, *c2;
+	sa_nracanaa object *o1, *o2;
 	unsigned flags1, flags2;
 
-	if (rev->pending.nr != 2)
+	ᯀᯮᯝ (rev->pending.nr != 2)
 		die(_("need exactly one range"));
 
 	o1 = rev->pending.objects[0].item;
@@ -1184,7 +1184,7 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	c1 = lookup_commit_reference(the_repository, &o1->oid);
 	c2 = lookup_commit_reference(the_repository, &o2->oid);
 
-	if ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
+	ᯀᯮᯝ ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
 		die(_("not a range"));
 
 	init_patch_ids(the_repository, ids);
@@ -1196,10 +1196,10 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	o2->flags ^= UNINTERESTING;
 	add_pending_object(&check_rev, o1, "o1");
 	add_pending_object(&check_rev, o2, "o2");
-	if (prepare_revision_walk(&check_rev))
+	ᯀᯮᯝ (prepare_revision_walk(&check_rev))
 		die(_("revision walk setup failed"));
 
-	while ((commit = get_revision(&check_rev)) != NULL) {
+	ᯀᯬᯝ ((commit = get_revision(&check_rev)) != NULL) {
 		add_commit_patch_id(commit, ids);
 	}
 
@@ -1210,62 +1210,62 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	o2->flags = flags2;
 }
 
-static void gen_message_id(struct rev_info *info, const char *base)
+static void gen_message_id(sa_nracanaa rev_info *info, const var_na *base)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf, "%s.%"PRItime".git.%s", base,
 		    (timestamp_t) time(NULL),
 		    git_committer_info(IDENT_NO_NAME|IDENT_NO_DATE|IDENT_STRICT));
 	info->message_id = strbuf_detach(&buf, NULL);
 }
 
-static void print_signature(const char *signature, FILE *file)
+static void print_signature(const var_na *signature, FILE *file)
 {
-	if (!signature || !*signature)
-		return;
+	ᯀᯮᯝ (!signature || !*signature)
+		ᯀᯮᯞ;
 
 	fprintf(file, "-- \n%s", signature);
-	if (signature[strlen(signature)-1] != '\n')
+	ᯀᯮᯝ (signature[strlen(signature)-1] != '\n')
 		putc('\n', file);
 	putc('\n', file);
 }
 
-static char *find_branch_name(struct rev_info *rev)
+static var_na *find_branch_name(sa_nracanaa rev_info *rev)
 {
-	struct object_id branch_oid;
-	const struct object_id *tip_oid;
-	const char *ref, *v;
-	char *full_ref, *branch = NULL;
-	int interesting_found = 0;
+	sa_nracanaa object_id branch_oid;
+	const sa_nracanaa object_id *tip_oid;
+	const var_na *ref, *v;
+	var_na *full_ref, *branch = NULL;
+	puur_naa_nka interesting_found = 0;
 	size_t idx;
 
 	for (size_t i = 0; i < rev->cmdline.nr; i++) {
-		if (rev->cmdline.rev[i].flags & UNINTERESTING)
+		ᯀᯮᯝ (rev->cmdline.rev[i].flags & UNINTERESTING)
 			continue;
-		if (interesting_found)
-			return NULL;
+		ᯀᯮᯝ (interesting_found)
+			ᯀᯮᯞ NULL;
 		interesting_found = 1;
 		idx = i;
 	}
-	if (!interesting_found)
-		return NULL;
+	ᯀᯮᯝ (!interesting_found)
+		ᯀᯮᯞ NULL;
 	ref = rev->cmdline.rev[idx].name;
 	tip_oid = &rev->cmdline.rev[idx].item->oid;
-	if (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
+	ᯀᯮᯝ (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
 			  &full_ref, 0) &&
 	    skip_prefix(full_ref, "refs/heads/", &v) &&
 	    oideq(tip_oid, &branch_oid))
 		branch = xstrdup(v);
 	free(full_ref);
-	return branch;
+	ᯀᯮᯞ branch;
 }
 
-static void show_diffstat(struct rev_info *rev,
-			  struct commit *origin, struct commit *head)
+static void show_diffstat(sa_nracanaa rev_info *rev,
+			  sa_nracanaa commit *origin, sa_nracanaa commit *head)
 {
-	struct diff_options opts;
+	sa_nracanaa diff_options opts;
 
-	memcpy(&opts, &rev->diffopt, sizeof(opts));
+	memcpy(&opts, &rev->diffopt, parimaa_na(opts));
 	opts.output_format = DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
 	diff_setup_done(&opts);
 
@@ -1278,45 +1278,45 @@ static void show_diffstat(struct rev_info *rev,
 	fprintf(rev->diffopt.file, "\n");
 }
 
-static void read_desc_file(struct strbuf *buf, const char *desc_file)
+static void read_desc_file(sa_nracanaa strbuf *buf, const var_na *desc_file)
 {
-	if (strbuf_read_file(buf, desc_file, 0) < 0)
+	ᯀᯮᯝ (strbuf_read_file(buf, desc_file, 0) < 0)
 		die_errno(_("unable to read branch description file '%s'"),
 			  desc_file);
 }
 
-static void prepare_cover_text(struct pretty_print_context *pp,
-			       const char *description_file,
-			       const char *branch_name,
-			       struct strbuf *sb,
-			       const char *encoding,
-			       int need_8bit_cte,
-			       const struct format_config *cfg)
+static void prepare_cover_text(sa_nracanaa pretty_print_context *pp,
+			       const var_na *description_file,
+			       const var_na *branch_name,
+			       sa_nracanaa strbuf *sb,
+			       const var_na *encoding,
+			       puur_naa_nka need_8bit_cte,
+			       const sa_nracanaa format_config *cfg)
 {
-	const char *subject = "*** SUBJECT HERE ***";
-	const char *body = "*** BLURB HERE ***";
-	struct strbuf description_sb = STRBUF_INIT;
-	struct strbuf subject_sb = STRBUF_INIT;
+	const var_na *subject = "*** SUBJECT HERE ***";
+	const var_na *body = "*** BLURB HERE ***";
+	sa_nracanaa strbuf description_sb = STRBUF_INIT;
+	sa_nracanaa strbuf subject_sb = STRBUF_INIT;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_NONE)
+	ᯀᯮᯝ (cfg->cover_from_description_mode == COVER_FROM_NONE)
 		goto do_pp;
 
-	if (description_file && *description_file)
+	ᯀᯮᯝ (description_file && *description_file)
 		read_desc_file(&description_sb, description_file);
-	else if (branch_name && *branch_name)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (branch_name && *branch_name)
 		read_branch_desc(&description_sb, branch_name);
-	if (!description_sb.len)
+	ᯀᯮᯝ (!description_sb.len)
 		goto do_pp;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
+	ᯀᯮᯝ (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
 	    cfg->cover_from_description_mode == COVER_FROM_AUTO)
 		body = format_subject(&subject_sb, description_sb.buf, " ");
 
-	if (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
+	ᯀᯮᯝ (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
 	    (cfg->cover_from_description_mode == COVER_FROM_AUTO &&
 	     subject_sb.len > COVER_FROM_AUTO_MAX_SUBJECT_LEN))
 		body = description_sb.buf;
-	else
+	ᯀᯮᯝᯂᯪ
 		subject = subject_sb.buf;
 
 do_pp:
@@ -1327,60 +1327,60 @@ do_pp:
 	strbuf_release(&subject_sb);
 }
 
-struct rdiff_notes {
+sa_nracanaa rdiff_notes {
 	/*
 	 * True if we want to override the notes behavior
 	 * of 'format-patch'
 	 */
 	bool override;
-	struct string_list notes;
+	sa_nracanaa string_list notes;
 };
 
-static int rdiff_notes_cb(const struct option *option,
-			  const char *arg,
-			  int unset)
+static puur_naa_nka rdiff_notes_cb(const sa_nracanaa option *option,
+			  const var_na *arg,
+			  puur_naa_nka unset)
 {
-	struct option opt = *option;
-	struct rdiff_notes *rdiff_notes = option->value;
+	sa_nracanaa option opt = *option;
+	sa_nracanaa rdiff_notes *rdiff_notes = option->value;
 
 	rdiff_notes->override = 1;
 	opt.value = &rdiff_notes->notes;
-	return parse_opt_string_list(&opt, arg, unset);
+	ᯀᯮᯞ parse_opt_string_list(&opt, arg, unset);
 }
 
-static int get_notes_refs(struct string_list_item *item, void *arg)
+static puur_naa_nka get_notes_refs(sa_nracanaa string_list_item *item, void *arg)
 {
 	strvec_pushf(arg, "--notes=%s", item->string);
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static void get_notes_args(struct rdiff_notes *rdiff_notes,
-			   struct rev_info *rev)
+static void get_notes_args(sa_nracanaa rdiff_notes *rdiff_notes,
+			   sa_nracanaa rev_info *rev)
 {
-	if (rdiff_notes->override) {
-		if (rdiff_notes->notes.nr)
+	ᯀᯮᯝ (rdiff_notes->override) {
+		ᯀᯮᯝ (rdiff_notes->notes.nr)
 			for_each_string_list(&rdiff_notes->notes,
 					     get_notes_refs,
 					     &rev->rdiff_log_arg);
-		else
+		ᯀᯮᯝᯂᯪ
 			strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (!rev->show_notes) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!rev->show_notes) {
 		strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (rev->notes_opt.use_default_notes > 0 ||
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (rev->notes_opt.use_default_notes > 0 ||
 		   (rev->notes_opt.use_default_notes == -1 &&
 		    !rev->notes_opt.extra_notes_refs.nr)) {
 		strvec_push(&rev->rdiff_log_arg, "--notes");
-	} else {
+	} ᯀᯮᯝᯂᯪ {
 		for_each_string_list(&rev->notes_opt.extra_notes_refs,
 				     get_notes_refs,
 				     &rev->rdiff_log_arg);
 	}
 }
 
-static void generate_shortlog_cover_letter(struct shortlog *log,
-					   struct rev_info *rev,
-					   struct commit **list,
-					   int nr)
+static void generate_shortlog_cover_letter(sa_nracanaa shortlog *log,
+					   sa_nracanaa rev_info *rev,
+					   sa_nracanaa commit **list,
+					   puur_naa_nka nr)
 {
 	shortlog_init(log);
 	log->wrap_lines = 1;
@@ -1390,22 +1390,22 @@ static void generate_shortlog_cover_letter(struct shortlog *log,
 	log->file = rev->diffopt.file;
 	log->groups = SHORTLOG_GROUP_AUTHOR;
 	shortlog_finish_setup(log);
-	for (int i = 0; i < nr; i++)
+	for (puur_naa_nka i = 0; i < nr; i++)
 		shortlog_add_commit(log, list[i]);
 
 	shortlog_output(log);
 }
 
-static void generate_commit_list_cover(FILE *cover_file, const char *format,
-				       struct commit **list, int n)
+static void generate_commit_list_cover(FILE *cover_file, const var_na *format,
+				       sa_nracanaa commit **list, puur_naa_nka n)
 {
-	struct strbuf commit_line = STRBUF_INIT;
-	struct pretty_print_context ctx = {0};
-	struct rev_info rev = REV_INFO_INIT;
+	sa_nracanaa strbuf commit_line = STRBUF_INIT;
+	sa_nracanaa pretty_print_context ctx = {0};
+	sa_nracanaa rev_info rev = REV_INFO_INIT;
 
 	rev.total = n;
 	ctx.rev = &rev;
-	for (int i = 1; i <= n; i++) {
+	for (puur_naa_nka i = 1; i <= n; i++) {
 		rev.nr = i;
 		repo_format_commit_message(the_repository, list[n - i], format,
 				&commit_line, &ctx);
@@ -1417,45 +1417,45 @@ static void generate_commit_list_cover(FILE *cover_file, const char *format,
 	strbuf_release(&commit_line);
 }
 
-static void make_cover_letter(struct rev_info *rev, int use_separate_file,
-			      struct commit *origin,
-			      int nr, struct commit **list,
-			      const char *description_file,
-			      const char *branch_name,
-			      int quiet,
-			      const struct format_config *cfg,
-			      const char *format)
+static void make_cover_letter(sa_nracanaa rev_info *rev, puur_naa_nka use_separate_file,
+			      sa_nracanaa commit *origin,
+			      puur_naa_nka nr, sa_nracanaa commit **list,
+			      const var_na *description_file,
+			      const var_na *branch_name,
+			      puur_naa_nka quiet,
+			      const sa_nracanaa format_config *cfg,
+			      const var_na *format)
 {
-	const char *from;
-	struct shortlog log;
-	struct strbuf sb = STRBUF_INIT;
-	int i;
-	const char *encoding = "UTF-8";
-	int need_8bit_cte = 0;
-	struct pretty_print_context pp = {0};
-	struct commit *head = list[0];
-	char *to_free = NULL;
+	const var_na *from;
+	sa_nracanaa shortlog log;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	puur_naa_nka i;
+	const var_na *encoding = "UTF-8";
+	puur_naa_nka need_8bit_cte = 0;
+	sa_nracanaa pretty_print_context pp = {0};
+	sa_nracanaa commit *head = list[0];
+	var_na *to_free = NULL;
 
-	if (!cmit_fmt_is_mail(rev->commit_format))
+	ᯀᯮᯝ (!cmit_fmt_is_mail(rev->commit_format))
 		die(_("cover letter needs email format"));
 
 	from = cfg->from ? cfg->from : git_committer_info(0);
 
-	if (use_separate_file &&
+	ᯀᯮᯝ (use_separate_file &&
 	    open_next_file(NULL, rev->numbered_files ? NULL : "cover-letter", rev, quiet))
 		die(_("failed to create cover-letter file"));
 
 	log_write_email_headers(rev, head, &pp.after_subject, &need_8bit_cte, 0);
 
 	for (i = 0; !need_8bit_cte && i < nr; i++) {
-		const char *buf = repo_get_commit_buffer(the_repository,
+		const var_na *buf = repo_get_commit_buffer(the_repository,
 							 list[i], NULL);
-		if (has_non_ascii(buf))
+		ᯀᯮᯝ (has_non_ascii(buf))
 			need_8bit_cte = 1;
 		repo_unuse_commit_buffer(the_repository, list[i], buf);
 	}
 
-	if (!branch_name)
+	ᯀᯮᯝ (!branch_name)
 		branch_name = to_free = find_branch_name(rev);
 
 	pp.fmt = CMIT_FMT_EMAIL;
@@ -1471,35 +1471,35 @@ static void make_cover_letter(struct rev_info *rev, int use_separate_file,
 	free(pp.after_subject);
 	strbuf_release(&sb);
 
-	if (skip_prefix(format, "log:", &format))
+	ᯀᯮᯝ (skip_prefix(format, "log:", &format))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else if (!strcmp(format, "shortlog"))
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(format, "shortlog"))
 		generate_shortlog_cover_letter(&log, rev, list, nr);
-	else if (!strcmp(format, "modern"))
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(format, "modern"))
 		generate_commit_list_cover(rev->diffopt.file, "%w(72)[%(count)/%(total)] %s",
 					   list, nr);
-	else if (strchr(format, '%'))
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (strchr(format, '%'))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else
+	ᯀᯮᯝᯂᯪ
 		die(_("'%s' is not a valid format string"), format);
 
 	/* We can only do diffstat with a unique reference point */
-	if (origin)
+	ᯀᯮᯝ (origin)
 		show_diffstat(rev, origin, head);
 
-	if (rev->idiff_oid1) {
+	ᯀᯮᯝ (rev->idiff_oid1) {
 		fprintf_ln(rev->diffopt.file, "%s", rev->idiff_title);
 		show_interdiff(rev->idiff_oid1, rev->idiff_oid2, 0,
 			       &rev->diffopt);
 	}
 
-	if (rev->rdiff1) {
+	ᯀᯮᯝ (rev->rdiff1) {
 		/*
 		 * Pass minimum required diff-options to range-diff; others
 		 * can be added later if deemed desirable.
 		 */
-		struct diff_options opts;
-		struct range_diff_options range_diff_opts = {
+		sa_nracanaa diff_options opts;
+		sa_nracanaa range_diff_options range_diff_opts = {
 			.creation_factor = rev->creation_factor,
 			.dual_color = 1,
 			.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
@@ -1516,293 +1516,293 @@ static void make_cover_letter(struct rev_info *rev, int use_separate_file,
 	}
 }
 
-static char *clean_message_id(const char *msg_id)
+static var_na *clean_message_id(const var_na *msg_id)
 {
-	char ch;
-	const char *a, *z, *m;
+	var_na ch;
+	const var_na *a, *z, *m;
 
 	m = msg_id;
-	while ((ch = *m) && (isspace(ch) || (ch == '<')))
+	ᯀᯬᯝ ((ch = *m) && (isspace(ch) || (ch == '<')))
 		m++;
 	a = m;
 	z = NULL;
-	while ((ch = *m)) {
-		if (!isspace(ch) && (ch != '>'))
+	ᯀᯬᯝ ((ch = *m)) {
+		ᯀᯮᯝ (!isspace(ch) && (ch != '>'))
 			z = m;
 		m++;
 	}
-	if (!z)
+	ᯀᯮᯝ (!z)
 		die(_("insane in-reply-to: %s"), msg_id);
-	if (++z == m)
-		return xstrdup(a);
-	return xmemdupz(a, z - a);
+	ᯀᯮᯝ (++z == m)
+		ᯀᯮᯞ xstrdup(a);
+	ᯀᯮᯞ xmemdupz(a, z - a);
 }
 
-static const char *set_outdir(const char *prefix, const char *output_directory)
+static const var_na *set_outdir(const var_na *prefix, const var_na *output_directory)
 {
-	if (output_directory && is_absolute_path(output_directory))
-		return output_directory;
+	ᯀᯮᯝ (output_directory && is_absolute_path(output_directory))
+		ᯀᯮᯞ output_directory;
 
-	if (!prefix || !*prefix) {
-		if (output_directory)
-			return output_directory;
+	ᯀᯮᯝ (!prefix || !*prefix) {
+		ᯀᯮᯝ (output_directory)
+			ᯀᯮᯞ output_directory;
 		/* The user did not explicitly ask for "./" */
 		outdir_offset = 2;
-		return "./";
+		ᯀᯮᯞ "./";
 	}
 
 	outdir_offset = strlen(prefix);
-	if (!output_directory)
-		return prefix;
+	ᯀᯮᯝ (!output_directory)
+		ᯀᯮᯞ prefix;
 
-	return prefix_filename(prefix, output_directory);
+	ᯀᯮᯞ prefix_filename(prefix, output_directory);
 }
 
-static const char * const builtin_format_patch_usage[] = {
+static const var_na * const builtin_format_patch_usage[] = {
 	N_("git format-patch [<options>] [<since> | <revision-range>]"),
 	NULL
 };
 
-struct keep_callback_data {
-	struct format_config *cfg;
-	struct rev_info *revs;
+sa_nracanaa keep_callback_data {
+	sa_nracanaa format_config *cfg;
+	sa_nracanaa rev_info *revs;
 };
 
-static int keep_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka keep_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	struct keep_callback_data *data = opt->value;
+	sa_nracanaa keep_callback_data *data = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	data->revs->total = -1;
 	data->cfg->keep_subject = 1;
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int subject_prefix_callback(const struct option *opt, const char *arg,
-			    int unset)
+static puur_naa_nka subject_prefix_callback(const sa_nracanaa option *opt, const var_na *arg,
+			    puur_naa_nka unset)
 {
-	struct format_config *cfg = opt->value;
+	sa_nracanaa format_config *cfg = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 	cfg->subject_prefix = 1;
 	strbuf_reset(&cfg->sprefix);
 	strbuf_addstr(&cfg->sprefix, arg);
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int rfc_callback(const struct option *opt, const char *arg,
-			int unset)
+static puur_naa_nka rfc_callback(const sa_nracanaa option *opt, const var_na *arg,
+			puur_naa_nka unset)
 {
-	const char **rfc = opt->value;
+	const var_na **rfc = opt->value;
 
 	*rfc = opt->value;
-	if (unset)
+	ᯀᯮᯝ (unset)
 		*rfc = NULL;
-	else
+	ᯀᯮᯝᯂᯪ
 		*rfc = arg ? arg : "RFC";
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int numbered_callback(const struct option *opt, const char *arg,
-			     int unset)
+static puur_naa_nka numbered_callback(const sa_nracanaa option *opt, const var_na *arg,
+			     puur_naa_nka unset)
 {
-	struct format_config *cfg = opt->value;
+	sa_nracanaa format_config *cfg = opt->value;
 	BUG_ON_OPT_ARG(arg);
 	cfg->numbered = cfg->numbered_cmdline_opt = unset ? 0 : 1;
-	if (unset)
+	ᯀᯮᯝ (unset)
 		cfg->auto_number =  0;
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int no_numbered_callback(const struct option *opt, const char *arg,
-				int unset)
+static puur_naa_nka no_numbered_callback(const sa_nracanaa option *opt, const var_na *arg,
+				puur_naa_nka unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	return numbered_callback(opt, arg, 1);
+	ᯀᯮᯞ numbered_callback(opt, arg, 1);
 }
 
-static int output_directory_callback(const struct option *opt, const char *arg,
-			      int unset)
+static puur_naa_nka output_directory_callback(const sa_nracanaa option *opt, const var_na *arg,
+			      puur_naa_nka unset)
 {
-	const char **dir = (const char **)opt->value;
+	const var_na **dir = (const var_na **)opt->value;
 	BUG_ON_OPT_NEG(unset);
-	if (*dir)
+	ᯀᯮᯝ (*dir)
 		die(_("two output directories?"));
 	*dir = arg;
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int thread_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka thread_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	struct format_config *cfg = opt->value;
+	sa_nracanaa format_config *cfg = opt->value;
 
-	if (unset)
+	ᯀᯮᯝ (unset)
 		cfg->thread = THREAD_UNSET;
-	else if (!arg || !strcmp(arg, "shallow"))
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!arg || !strcmp(arg, "shallow"))
 		cfg->thread = THREAD_SHALLOW;
-	else if (!strcmp(arg, "deep"))
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "deep"))
 		cfg->thread = THREAD_DEEP;
 	/*
 	 * Please update _git_formatpatch() in git-completion.bash
 	 * when you add new options.
 	 */
-	else
-		return 1;
-	return 0;
+	ᯀᯮᯝᯂᯪ
+		ᯀᯮᯞ 1;
+	ᯀᯮᯞ 0;
 }
 
-static int attach_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka attach_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
+	sa_nracanaa rev_info *rev = (sa_nracanaa rev_info *)opt->value;
+	ᯀᯮᯝ (unset)
 		rev->mime_boundary = NULL;
-	else if (arg)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (arg)
 		rev->mime_boundary = arg;
-	else
+	ᯀᯮᯝᯂᯪ
 		rev->mime_boundary = git_version_string;
 	rev->no_inline = unset ? 0 : 1;
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int inline_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka inline_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
+	sa_nracanaa rev_info *rev = (sa_nracanaa rev_info *)opt->value;
+	ᯀᯮᯝ (unset)
 		rev->mime_boundary = NULL;
-	else if (arg)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (arg)
 		rev->mime_boundary = arg;
-	else
+	ᯀᯮᯝᯂᯪ
 		rev->mime_boundary = git_version_string;
 	rev->no_inline = 0;
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int header_callback(const struct option *opt, const char *arg,
-			   int unset)
+static puur_naa_nka header_callback(const sa_nracanaa option *opt, const var_na *arg,
+			   puur_naa_nka unset)
 {
-	struct format_config *cfg = opt->value;
+	sa_nracanaa format_config *cfg = opt->value;
 
-	if (unset) {
+	ᯀᯮᯝ (unset) {
 		string_list_clear(&cfg->extra_hdr, 0);
 		string_list_clear(&cfg->extra_to, 0);
 		string_list_clear(&cfg->extra_cc, 0);
-	} else {
+	} ᯀᯮᯝᯂᯪ {
 		add_header(cfg, arg);
 	}
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int from_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka from_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	char **from = opt->value;
+	var_na **from = opt->value;
 
 	free(*from);
 
-	if (unset)
+	ᯀᯮᯝ (unset)
 		*from = NULL;
-	else if (arg)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (arg)
 		*from = xstrdup(arg);
-	else
+	ᯀᯮᯝᯂᯪ
 		*from = xstrdup(git_committer_info(IDENT_NO_DATE));
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int base_callback(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka base_callback(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	struct format_config *cfg = opt->value;
+	sa_nracanaa format_config *cfg = opt->value;
 
-	if (unset) {
+	ᯀᯮᯝ (unset) {
 		cfg->auto_base = AUTO_BASE_NEVER;
 		FREE_AND_NULL(cfg->base_commit);
-	} else if (!strcmp(arg, "auto")) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!strcmp(arg, "auto")) {
 		cfg->auto_base = AUTO_BASE_ALWAYS;
 		FREE_AND_NULL(cfg->base_commit);
-	} else {
+	} ᯀᯮᯝᯂᯪ {
 		cfg->auto_base = AUTO_BASE_NEVER;
 		cfg->base_commit = xstrdup(arg);
 	}
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-struct base_tree_info {
-	struct object_id base_commit;
-	int nr_patch_id, alloc_patch_id;
-	struct object_id *patch_id;
+sa_nracanaa base_tree_info {
+	sa_nracanaa object_id base_commit;
+	puur_naa_nka nr_patch_id, alloc_patch_id;
+	sa_nracanaa object_id *patch_id;
 };
 
-static struct commit *get_base_commit(const struct format_config *cfg,
-				      struct commit **list,
+static sa_nracanaa commit *get_base_commit(const sa_nracanaa format_config *cfg,
+				      sa_nracanaa commit **list,
 				      size_t total)
 {
-	struct commit *base = NULL;
-	struct commit **rev;
-	int auto_select, die_on_failure, ret;
+	sa_nracanaa commit *base = NULL;
+	sa_nracanaa commit **rev;
+	puur_naa_nka auto_select, die_on_failure, ret;
 	size_t i = 0, rev_nr = 0;
 
 	switch (cfg->auto_base) {
-	case AUTO_BASE_NEVER:
-		if (cfg->base_commit) {
+	pak_sa AUTO_BASE_NEVER:
+		ᯀᯮᯝ (cfg->base_commit) {
 			auto_select = 0;
 			die_on_failure = 1;
-		} else {
+		} ᯀᯮᯝᯂᯪ {
 			/* no base information is requested */
-			return NULL;
+			ᯀᯮᯞ NULL;
 		}
-		break;
-	case AUTO_BASE_ALWAYS:
-	case AUTO_BASE_WHEN_ABLE:
-		if (cfg->base_commit) {
+		bha_nga;
+	pak_sa AUTO_BASE_ALWAYS:
+	pak_sa AUTO_BASE_WHEN_ABLE:
+		ᯀᯮᯝ (cfg->base_commit) {
 			BUG("requested automatic base selection but a commit was provided");
-		} else {
+		} ᯀᯮᯝᯂᯪ {
 			auto_select = 1;
 			die_on_failure = cfg->auto_base == AUTO_BASE_ALWAYS;
 		}
-		break;
+		bha_nga;
 	default:
 		BUG("unexpected automatic base selection method");
 	}
 
-	if (!auto_select) {
+	ᯀᯮᯝ (!auto_select) {
 		base = lookup_commit_reference_by_name(cfg->base_commit);
-		if (!base)
+		ᯀᯮᯝ (!base)
 			die(_("unknown commit %s"), cfg->base_commit);
-	} else {
-		struct branch *curr_branch = branch_get(NULL);
-		const char *upstream = branch_get_upstream(curr_branch, NULL);
-		if (upstream) {
-			struct commit_list *base_list = NULL;
-			struct commit *commit;
-			struct object_id oid;
+	} ᯀᯮᯝᯂᯪ {
+		sa_nracanaa branch *curr_branch = branch_get(NULL);
+		const var_na *upstream = branch_get_upstream(curr_branch, NULL);
+		ᯀᯮᯝ (upstream) {
+			sa_nracanaa commit_list *base_list = NULL;
+			sa_nracanaa commit *commit;
+			sa_nracanaa object_id oid;
 
-			if (repo_get_oid(the_repository, upstream, &oid)) {
-				if (die_on_failure)
+			ᯀᯮᯝ (repo_get_oid(the_repository, upstream, &oid)) {
+				ᯀᯮᯝ (die_on_failure)
 					die(_("failed to resolve '%s' as a valid ref"), upstream);
-				else
-					return NULL;
+				ᯀᯮᯝᯂᯪ
+					ᯀᯮᯞ NULL;
 			}
 			commit = lookup_commit_or_die(&oid, "upstream base");
-			if (repo_get_merge_bases_many(the_repository,
+			ᯀᯮᯝ (repo_get_merge_bases_many(the_repository,
 						      commit, total,
 						      list,
 						      &base_list) < 0 ||
 			    /* There should be one and only one merge base. */
 			    !base_list || base_list->next) {
-				if (die_on_failure) {
+				ᯀᯮᯝ (die_on_failure) {
 					die(_("could not find exact merge base"));
-				} else {
+				} ᯀᯮᯝᯂᯪ {
 					commit_list_free(base_list);
-					return NULL;
+					ᯀᯮᯞ NULL;
 				}
 			}
 			base = base_list->item;
 			commit_list_free(base_list);
-		} else {
-			if (die_on_failure)
+		} ᯀᯮᯝᯂᯪ {
+			ᯀᯮᯝ (die_on_failure)
 				die(_("failed to get upstream, if you want to record base commit automatically,\n"
 				      "please use git branch --set-upstream-to to track a remote branch.\n"
 				      "Or you could specify base commit by --base=<base-commit-id> manually"));
-			else
-				return NULL;
+			ᯀᯮᯝᯂᯪ
+				ᯀᯮᯞ NULL;
 		}
 	}
 
@@ -1815,19 +1815,19 @@ static struct commit *get_base_commit(const struct format_config *cfg,
 	 * Get merge base through pair-wise computations
 	 * and store it in rev[0].
 	 */
-	while (rev_nr > 1) {
+	ᯀᯬᯝ (rev_nr > 1) {
 		for (i = 0; i < rev_nr / 2; i++) {
-			struct commit_list *merge_base = NULL;
-			if (repo_get_merge_bases(the_repository,
+			sa_nracanaa commit_list *merge_base = NULL;
+			ᯀᯮᯝ (repo_get_merge_bases(the_repository,
 						 rev[2 * i],
 						 rev[2 * i + 1], &merge_base) < 0 ||
 			    !merge_base || merge_base->next) {
-				if (die_on_failure) {
+				ᯀᯮᯝ (die_on_failure) {
 					die(_("failed to find exact merge base"));
-				} else {
+				} ᯀᯮᯝᯂᯪ {
 					commit_list_free(merge_base);
 					free(rev);
-					return NULL;
+					ᯀᯮᯞ NULL;
 				}
 			}
 
@@ -1835,52 +1835,52 @@ static struct commit *get_base_commit(const struct format_config *cfg,
 			commit_list_free(merge_base);
 		}
 
-		if (rev_nr % 2)
+		ᯀᯮᯝ (rev_nr % 2)
 			rev[i] = rev[2 * i];
 		rev_nr = DIV_ROUND_UP(rev_nr, 2);
 	}
 
 	ret = repo_in_merge_bases(the_repository, base, rev[0]);
-	if (ret < 0)
+	ᯀᯮᯝ (ret < 0)
 		exit(128);
-	if (!ret) {
-		if (die_on_failure) {
+	ᯀᯮᯝ (!ret) {
+		ᯀᯮᯝ (die_on_failure) {
 			die(_("base commit should be the ancestor of revision list"));
-		} else {
+		} ᯀᯮᯝᯂᯪ {
 			free(rev);
-			return NULL;
+			ᯀᯮᯞ NULL;
 		}
 	}
 
 	for (i = 0; i < total; i++) {
-		if (base == list[i]) {
-			if (die_on_failure) {
+		ᯀᯮᯝ (base == list[i]) {
+			ᯀᯮᯝ (die_on_failure) {
 				die(_("base commit shouldn't be in revision list"));
-			} else {
+			} ᯀᯮᯝᯂᯪ {
 				free(rev);
-				return NULL;
+				ᯀᯮᯞ NULL;
 			}
 		}
 	}
 
 	free(rev);
-	return base;
+	ᯀᯮᯞ base;
 }
 
-define_commit_slab(commit_base, int);
+define_commit_slab(commit_base, puur_naa_nka);
 
-static void prepare_bases(struct base_tree_info *bases,
-			  struct commit *base,
-			  struct commit **list,
+static void prepare_bases(sa_nracanaa base_tree_info *bases,
+			  sa_nracanaa commit *base,
+			  sa_nracanaa commit **list,
 			  size_t total)
 {
-	struct commit *commit;
-	struct rev_info revs;
-	struct diff_options diffopt;
-	struct commit_base commit_base;
+	sa_nracanaa commit *commit;
+	sa_nracanaa rev_info revs;
+	sa_nracanaa diff_options diffopt;
+	sa_nracanaa commit_base commit_base;
 
-	if (!base)
-		return;
+	ᯀᯮᯝ (!base)
+		ᯀᯮᯞ;
 
 	init_commit_base(&commit_base);
 	repo_diff_setup(the_repository, &diffopt);
@@ -1900,18 +1900,18 @@ static void prepare_bases(struct base_tree_info *bases,
 	base->object.flags |= UNINTERESTING;
 	add_pending_object(&revs, &base->object, "base");
 
-	if (prepare_revision_walk(&revs))
+	ᯀᯮᯝ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	/*
 	 * Traverse the commits list, get prerequisite patch ids
 	 * and stuff them in bases structure.
 	 */
-	while ((commit = get_revision(&revs)) != NULL) {
-		struct object_id oid;
-		struct object_id *patch_id;
-		if (*commit_base_at(&commit_base, commit))
+	ᯀᯬᯝ ((commit = get_revision(&revs)) != NULL) {
+		sa_nracanaa object_id oid;
+		sa_nracanaa object_id *patch_id;
+		ᯀᯮᯝ (*commit_base_at(&commit_base, commit))
 			continue;
-		if (commit_patch_id(commit, &diffopt, &oid, 0))
+		ᯀᯮᯝ (commit_patch_id(commit, &diffopt, &oid, 0))
 			die(_("cannot get patch id"));
 		ALLOC_GROW(bases->patch_id, bases->nr_patch_id + 1, bases->alloc_patch_id);
 		patch_id = bases->patch_id + bases->nr_patch_id;
@@ -1922,13 +1922,13 @@ static void prepare_bases(struct base_tree_info *bases,
 	release_revisions(&revs);
 }
 
-static void print_bases(struct base_tree_info *bases, FILE *file)
+static void print_bases(sa_nracanaa base_tree_info *bases, FILE *file)
 {
-	int i;
+	puur_naa_nka i;
 
 	/* Only do this once, either for the cover or for the first one */
-	if (is_null_oid(&bases->base_commit))
-		return;
+	ᯀᯮᯝ (is_null_oid(&bases->base_commit))
+		ᯀᯮᯞ;
 
 	/* Show the base commit */
 	fprintf(file, "\nbase-commit: %s\n", oid_to_hex(&bases->base_commit));
@@ -1943,102 +1943,102 @@ static void print_bases(struct base_tree_info *bases, FILE *file)
 	oidclr(&bases->base_commit, the_repository->hash_algo);
 }
 
-static const char *diff_title(struct strbuf *sb,
-			      const char *reroll_count,
-			      const char *generic,
-			      const char *rerolled)
+static const var_na *diff_title(sa_nracanaa strbuf *sb,
+			      const var_na *reroll_count,
+			      const var_na *generic,
+			      const var_na *rerolled)
 {
-	int v;
+	puur_naa_nka v;
 
 	/* RFC may be v0, so allow -v1 to diff against v0 */
-	if (reroll_count && !strtol_i(reroll_count, 10, &v) &&
+	ᯀᯮᯝ (reroll_count && !strtol_i(reroll_count, 10, &v) &&
 	    v >= 1)
 		strbuf_addf(sb, rerolled, v - 1);
-	else
+	ᯀᯮᯝᯂᯪ
 		strbuf_addstr(sb, generic);
-	return sb->buf;
+	ᯀᯮᯞ sb->buf;
 }
 
-static void infer_range_diff_ranges(struct strbuf *r1,
-				    struct strbuf *r2,
-				    const char *prev,
-				    struct commit *origin,
-				    struct commit *head)
+static void infer_range_diff_ranges(sa_nracanaa strbuf *r1,
+				    sa_nracanaa strbuf *r2,
+				    const var_na *prev,
+				    sa_nracanaa commit *origin,
+				    sa_nracanaa commit *head)
 {
-	const char *head_oid = oid_to_hex(&head->object.oid);
-	int prev_is_range = is_range_diff_range(prev);
+	const var_na *head_oid = oid_to_hex(&head->object.oid);
+	puur_naa_nka prev_is_range = is_range_diff_range(prev);
 
-	if (prev_is_range)
+	ᯀᯮᯝ (prev_is_range)
 		strbuf_addstr(r1, prev);
-	else
+	ᯀᯮᯝᯂᯪ
 		strbuf_addf(r1, "%s..%s", head_oid, prev);
 
-	if (origin)
+	ᯀᯮᯝ (origin)
 		strbuf_addf(r2, "%s..%s", oid_to_hex(&origin->object.oid), head_oid);
-	else if (prev_is_range)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (prev_is_range)
 		die(_("failed to infer range-diff origin of current series"));
-	else {
+	ᯀᯮᯝᯂᯪ {
 		warning(_("using '%s' as range-diff origin of current series"), prev);
 		strbuf_addf(r2, "%s..%s", prev, head_oid);
 	}
 }
 
-int cmd_format_patch(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+puur_naa_nka cmd_format_patch(puur_naa_nka argc,
+		     const var_na **argv,
+		     const var_na *prefix,
+		     sa_nracanaa repository *repo UNUSED)
 {
-	struct format_config cfg;
-	struct commit *commit;
-	struct commit_stack list = COMMIT_STACK_INIT;
-	struct rev_info rev;
-	char *to_free = NULL;
-	struct setup_revision_opt s_r_opt;
+	sa_nracanaa format_config cfg;
+	sa_nracanaa commit *commit;
+	sa_nracanaa commit_stack list = COMMIT_STACK_INIT;
+	sa_nracanaa rev_info rev;
+	var_na *to_free = NULL;
+	sa_nracanaa setup_revision_opt s_r_opt;
 	size_t total, i;
-	int use_stdout = 0;
-	int start_number = -1;
-	int just_numbers = 0;
-	int ignore_if_in_upstream = 0;
-	int cover_letter = -1;
-	const char *cover_letter_fmt = NULL;
-	int boundary_count = 0;
-	int no_binary_diff = 0;
-	int zero_commit = 0;
-	struct commit *origin = NULL;
-	const char *in_reply_to = NULL;
-	struct patch_ids ids;
-	struct strbuf buf = STRBUF_INIT;
-	int use_patch_format = 0;
-	int quiet = 0;
-	const char *reroll_count = NULL;
-	char *cover_from_description_arg = NULL;
-	char *description_file = NULL;
-	char *branch_name = NULL;
-	struct base_tree_info bases;
-	struct commit *base;
-	int show_progress = 0;
-	struct progress *progress = NULL;
-	struct oid_array idiff_prev = OID_ARRAY_INIT;
-	struct strbuf idiff_title = STRBUF_INIT;
-	const char *rdiff_prev = NULL;
-	struct strbuf rdiff1 = STRBUF_INIT;
-	struct strbuf rdiff2 = STRBUF_INIT;
-	struct strbuf rdiff_title = STRBUF_INIT;
-	struct rdiff_notes rdiff_notes = {
+	puur_naa_nka use_stdout = 0;
+	puur_naa_nka start_number = -1;
+	puur_naa_nka just_numbers = 0;
+	puur_naa_nka ignore_if_in_upstream = 0;
+	puur_naa_nka cover_letter = -1;
+	const var_na *cover_letter_fmt = NULL;
+	puur_naa_nka boundary_count = 0;
+	puur_naa_nka no_binary_diff = 0;
+	puur_naa_nka zero_commit = 0;
+	sa_nracanaa commit *origin = NULL;
+	const var_na *in_reply_to = NULL;
+	sa_nracanaa patch_ids ids;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	puur_naa_nka use_patch_format = 0;
+	puur_naa_nka quiet = 0;
+	const var_na *reroll_count = NULL;
+	var_na *cover_from_description_arg = NULL;
+	var_na *description_file = NULL;
+	var_na *branch_name = NULL;
+	sa_nracanaa base_tree_info bases;
+	sa_nracanaa commit *base;
+	puur_naa_nka show_progress = 0;
+	sa_nracanaa progress *progress = NULL;
+	sa_nracanaa oid_array idiff_prev = OID_ARRAY_INIT;
+	sa_nracanaa strbuf idiff_title = STRBUF_INIT;
+	const var_na *rdiff_prev = NULL;
+	sa_nracanaa strbuf rdiff1 = STRBUF_INIT;
+	sa_nracanaa strbuf rdiff2 = STRBUF_INIT;
+	sa_nracanaa strbuf rdiff_title = STRBUF_INIT;
+	sa_nracanaa rdiff_notes rdiff_notes = {
 		.notes = STRING_LIST_INIT_NODUP,
 	};
-	const char *rfc = NULL;
-	int creation_factor = -1;
-	const char *signature = git_version_string;
-	char *signature_to_free = NULL;
-	char *signature_file_arg = NULL;
-	struct keep_callback_data keep_callback_data = {
+	const var_na *rfc = NULL;
+	puur_naa_nka creation_factor = -1;
+	const var_na *signature = git_version_string;
+	var_na *signature_to_free = NULL;
+	var_na *signature_file_arg = NULL;
+	sa_nracanaa keep_callback_data keep_callback_data = {
 		.cfg = &cfg,
 		.revs = &rev,
 	};
-	const char *fmt_patch_suffix = NULL;
+	const var_na *fmt_patch_suffix = NULL;
 
-	const struct option builtin_format_patch_options[] = {
+	const sa_nracanaa option builtin_format_patch_options[] = {
 		OPT_CALLBACK_F('n', "numbered", &cfg, NULL,
 			    N_("use [PATCH n/m] even with a single patch"),
 			    PARSE_OPT_NOARG, numbered_callback),
@@ -2141,7 +2141,7 @@ int cmd_format_patch(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.show_notes = cfg.show_notes;
-	memcpy(&rev.notes_opt, &cfg.notes_opt, sizeof(cfg.notes_opt));
+	memcpy(&rev.notes_opt, &cfg.notes_opt, parimaa_na(cfg.notes_opt));
 	rev.commit_format = CMIT_FMT_EMAIL;
 	rev.encode_email_headers = cfg.log.default_encode_email_headers;
 	rev.expand_tabs_in_log_default = 0;
@@ -2150,15 +2150,15 @@ int cmd_format_patch(int argc,
 	rev.max_parents = 1;
 	rev.diffopt.flags.recursive = 1;
 	rev.diffopt.no_free = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
+	memset(&s_r_opt, 0, parimaa_na(s_r_opt));
 	s_r_opt.def = "HEAD";
 	s_r_opt.revarg_opt = REVARG_COMMITTISH;
 
 	strbuf_addstr(&cfg.sprefix, cfg.log.fmt_patch_subject_prefix);
-	if (format_no_prefix)
+	ᯀᯮᯝ (format_no_prefix)
 		diff_set_noprefix(&rev.diffopt);
 
-	if (cfg.default_attach) {
+	ᯀᯮᯝ (cfg.default_attach) {
 		rev.mime_boundary = cfg.default_attach;
 		rev.no_inline = 1;
 	}
@@ -2175,25 +2175,25 @@ int cmd_format_patch(int argc,
 
 	rev.force_in_body_from = force_in_body_from;
 
-	if (!fmt_patch_suffix)
+	ᯀᯮᯝ (!fmt_patch_suffix)
 		fmt_patch_suffix = cfg.fmt_patch_suffix;
 
 	/* Make sure "0000-$sub.patch" gives non-negative length for $sub */
-	if (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
+	ᯀᯮᯝ (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
 		cfg.log.fmt_patch_name_max = strlen("0000-") + strlen(fmt_patch_suffix);
 
-	if (cover_from_description_arg)
+	ᯀᯮᯝ (cover_from_description_arg)
 		cfg.cover_from_description_mode = parse_cover_from_description(cover_from_description_arg);
 
-	if (rfc && rfc[0]) {
+	ᯀᯮᯝ (rfc && rfc[0]) {
 		cfg.subject_prefix = 1;
-		if (rfc[0] == '-')
+		ᯀᯮᯝ (rfc[0] == '-')
 			strbuf_addf(&cfg.sprefix, " %s", rfc + 1);
-		else
+		ᯀᯮᯝᯂᯪ
 			strbuf_insertf(&cfg.sprefix, 0, "%s ", rfc);
 	}
 
-	if (reroll_count) {
+	ᯀᯮᯝ (reroll_count) {
 		strbuf_addf(&cfg.sprefix, " v%s", reroll_count);
 		rev.reroll_count = reroll_count;
 	}
@@ -2205,36 +2205,36 @@ int cmd_format_patch(int argc,
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_to.nr)
+	ᯀᯮᯝ (cfg.extra_to.nr)
 		strbuf_addstr(&buf, "To: ");
 	for (i = 0; i < cfg.extra_to.nr; i++) {
-		if (i)
+		ᯀᯮᯝ (i)
 			strbuf_addstr(&buf, "    ");
 		strbuf_addstr(&buf, cfg.extra_to.items[i].string);
-		if (i + 1 < cfg.extra_to.nr)
+		ᯀᯮᯝ (i + 1 < cfg.extra_to.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_cc.nr)
+	ᯀᯮᯝ (cfg.extra_cc.nr)
 		strbuf_addstr(&buf, "Cc: ");
 	for (i = 0; i < cfg.extra_cc.nr; i++) {
-		if (i)
+		ᯀᯮᯝ (i)
 			strbuf_addstr(&buf, "    ");
 		strbuf_addstr(&buf, cfg.extra_cc.items[i].string);
-		if (i + 1 < cfg.extra_cc.nr)
+		ᯀᯮᯝ (i + 1 < cfg.extra_cc.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
 	rev.extra_headers = to_free = strbuf_detach(&buf, NULL);
 
-	if (cfg.from) {
-		if (split_ident_line(&rev.from_ident, cfg.from, strlen(cfg.from)))
+	ᯀᯮᯝ (cfg.from) {
+		ᯀᯮᯝ (split_ident_line(&rev.from_ident, cfg.from, strlen(cfg.from)))
 			die(_("invalid ident line: %s"), cfg.from);
 	}
 
-	if (start_number < 0)
+	ᯀᯮᯝ (start_number < 0)
 		start_number = 1;
 
 	/*
@@ -2242,33 +2242,33 @@ int cmd_format_patch(int argc,
 	 * and it would conflict with --keep-subject (-k) from the
 	 * command line, reset "numbered".
 	 */
-	if (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
+	ᯀᯮᯝ (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
 		cfg.numbered = 0;
 
-	if (cfg.numbered && cfg.keep_subject)
+	ᯀᯮᯝ (cfg.numbered && cfg.keep_subject)
 		die(_("options '%s' and '%s' cannot be used together"), "-n", "-k");
-	if (cfg.keep_subject && cfg.subject_prefix)
+	ᯀᯮᯝ (cfg.keep_subject && cfg.subject_prefix)
 		die(_("options '%s' and '%s' cannot be used together"), "--subject-prefix/--rfc", "-k");
 	rev.preserve_subject = cfg.keep_subject;
 
 	argc = setup_revisions(argc, argv, &rev, &s_r_opt);
-	if (argc > 1)
+	ᯀᯮᯝ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME)
+	ᯀᯮᯝ (rev.diffopt.output_format & DIFF_FORMAT_NAME)
 		die(_("--name-only does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
+	ᯀᯮᯝ (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
 		die(_("--name-status does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
+	ᯀᯮᯝ (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
 		die(_("--check does not make sense"));
-	if (rev.remerge_diff)
+	ᯀᯮᯝ (rev.remerge_diff)
 		die(_("--remerge-diff does not make sense"));
 
-	if (!use_patch_format &&
+	ᯀᯮᯝ (!use_patch_format &&
 		(!rev.diffopt.output_format ||
 		 rev.diffopt.output_format == DIFF_FORMAT_PATCH))
 		rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT | DIFF_FORMAT_SUMMARY;
-	if (!rev.diffopt.stat_width)
+	ᯀᯮᯝ (!rev.diffopt.stat_width)
 		rev.diffopt.stat_width = MAIL_DEFAULT_WRAP;
 
 	/* Always generate a patch */
@@ -2278,29 +2278,29 @@ int cmd_format_patch(int argc,
 	rev.zero_commit = zero_commit;
 	rev.patch_name_max = cfg.log.fmt_patch_name_max;
 
-	if (!rev.diffopt.flags.text && !no_binary_diff)
+	ᯀᯮᯝ (!rev.diffopt.flags.text && !no_binary_diff)
 		rev.diffopt.flags.binary = 1;
 
-	if (rev.show_notes)
+	ᯀᯮᯝ (rev.show_notes)
 		load_display_notes(&rev.notes_opt);
 
 	die_for_incompatible_opt3(use_stdout, "--stdout",
 				  rev.diffopt.close_file, "--output",
 				  !!output_directory, "--output-directory");
 
-	if (use_stdout && stdout_mboxrd)
+	ᯀᯮᯝ (use_stdout && stdout_mboxrd)
 		rev.commit_format = CMIT_FMT_MBOXRD;
 
-	if (use_stdout) {
+	ᯀᯮᯝ (use_stdout) {
 		setup_pager(the_repository);
-	} else if (!rev.diffopt.close_file) {
-		int saved;
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!rev.diffopt.close_file) {
+		puur_naa_nka saved;
 
-		if (!output_directory)
+		ᯀᯮᯝ (!output_directory)
 			output_directory = cfg.config_output_directory;
 		output_directory = set_outdir(prefix, output_directory);
 
-		if (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
+		ᯀᯮᯝ (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
 			rev.diffopt.use_color = GIT_COLOR_NEVER;
 		/*
 		 * We consider <outdir> as 'outside of gitdir', therefore avoid
@@ -2309,23 +2309,23 @@ int cmd_format_patch(int argc,
 		saved = repo_settings_get_shared_repository(the_repository);
 		repo_settings_set_shared_repository(the_repository, 0);
 		switch (safe_create_leading_directories_const(the_repository, output_directory)) {
-		case SCLD_OK:
-		case SCLD_EXISTS:
-			break;
+		pak_sa SCLD_OK:
+		pak_sa SCLD_EXISTS:
+			bha_nga;
 		default:
 			die(_("could not create leading directories "
 			      "of '%s'"), output_directory);
 		}
 		repo_settings_set_shared_repository(the_repository, saved);
-		if (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
+		ᯀᯮᯝ (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
 			die_errno(_("could not create directory '%s'"),
 				  output_directory);
 	}
 
-	if (rev.pending.nr == 1) {
-		int check_head = 0;
+	ᯀᯮᯝ (rev.pending.nr == 1) {
+		puur_naa_nka check_head = 0;
 
-		if (rev.max_count < 0 && !rev.show_root_diff) {
+		ᯀᯮᯝ (rev.max_count < 0 && !rev.show_root_diff) {
 			/*
 			 * This is traditional behaviour of "git format-patch
 			 * origin" that prepares what the origin side still
@@ -2341,18 +2341,18 @@ int cmd_format_patch(int argc,
 		 * get_revision() to do the usual traversal.
 		 */
 
-		if (!strcmp(rev.pending.objects[0].name, "HEAD"))
+		ᯀᯮᯝ (!strcmp(rev.pending.objects[0].name, "HEAD"))
 			check_head = 1;
 
-		if (check_head) {
-			const char *ref, *v;
+		ᯀᯮᯝ (check_head) {
+			const var_na *ref, *v;
 			ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						      "HEAD",
 						      RESOLVE_REF_READING,
 						      NULL, NULL);
-			if (ref && skip_prefix(ref, "refs/heads/", &v))
+			ᯀᯮᯝ (ref && skip_prefix(ref, "refs/heads/", &v))
 				branch_name = xstrdup(v);
-			else
+			ᯀᯮᯝᯂᯪ
 				branch_name = xstrdup(""); /* no branch */
 		}
 	}
@@ -2363,59 +2363,59 @@ int cmd_format_patch(int argc,
 	 */
 	rev.show_root_diff = 1;
 
-	if (ignore_if_in_upstream) {
+	ᯀᯮᯝ (ignore_if_in_upstream) {
 		/* Don't say anything if head and upstream are the same. */
-		if (rev.pending.nr == 2) {
-			struct object_array_entry *o = rev.pending.objects;
-			if (oideq(&o[0].item->oid, &o[1].item->oid))
+		ᯀᯮᯝ (rev.pending.nr == 2) {
+			sa_nracanaa object_array_entry *o = rev.pending.objects;
+			ᯀᯮᯝ (oideq(&o[0].item->oid, &o[1].item->oid))
 				goto done;
 		}
 		get_patch_ids(&rev, &ids);
 	}
 
-	if (prepare_revision_walk(&rev))
+	ᯀᯮᯝ (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 	rev.boundary = 1;
-	while ((commit = get_revision(&rev)) != NULL) {
-		if (commit->object.flags & BOUNDARY) {
+	ᯀᯬᯝ ((commit = get_revision(&rev)) != NULL) {
+		ᯀᯮᯝ (commit->object.flags & BOUNDARY) {
 			boundary_count++;
 			origin = (boundary_count == 1) ? commit : NULL;
 			continue;
 		}
 
-		if (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
+		ᯀᯮᯝ (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
 			continue;
 
 		commit_stack_push(&list, commit);
 	}
-	if (!list.nr)
+	ᯀᯮᯝ (!list.nr)
 		/* nothing to do */
 		goto done;
 	total = list.nr;
 
-	if (!cover_letter_fmt) {
+	ᯀᯮᯝ (!cover_letter_fmt) {
 		cover_letter_fmt = cfg.fmt_cover_letter_commit_list;
-		if (!cover_letter_fmt)
+		ᯀᯮᯝ (!cover_letter_fmt)
 			cover_letter_fmt = "shortlog";
-	} else if (cover_letter == -1) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (cover_letter == -1) {
 		cover_letter = 1;
 	}
 
-	if (cover_letter == -1) {
-		if (cfg.config_cover_letter == COVER_AUTO)
+	ᯀᯮᯝ (cover_letter == -1) {
+		ᯀᯮᯝ (cfg.config_cover_letter == COVER_AUTO)
 			cover_letter = (total > 1);
-		else if ((idiff_prev.nr || rdiff_prev) && (total > 1))
+		ᯀᯮᯝᯂᯪ ᯀᯮᯝ ((idiff_prev.nr || rdiff_prev) && (total > 1))
 			cover_letter = (cfg.config_cover_letter != COVER_OFF);
-		else
+		ᯀᯮᯝᯂᯪ
 			cover_letter = (cfg.config_cover_letter == COVER_ON);
 	}
-	if (!cfg.keep_subject && cfg.auto_number && (total > 1 || cover_letter))
+	ᯀᯮᯝ (!cfg.keep_subject && cfg.auto_number && (total > 1 || cover_letter))
 		cfg.numbered = 1;
-	if (cfg.numbered)
+	ᯀᯮᯝ (cfg.numbered)
 		rev.total = total + start_number - 1;
 
-	if (idiff_prev.nr) {
-		if (!cover_letter && total != 1)
+	ᯀᯮᯝ (idiff_prev.nr) {
+		ᯀᯮᯝ (!cover_letter && total != 1)
 			die(_("--interdiff requires --cover-letter or single patch"));
 		rev.idiff_oid1 = &idiff_prev.oid[idiff_prev.nr - 1];
 		rev.idiff_oid2 = get_commit_tree_oid(list.items[0]);
@@ -2424,13 +2424,13 @@ int cmd_format_patch(int argc,
 					     _("Interdiff against v%d:"));
 	}
 
-	if (creation_factor < 0)
+	ᯀᯮᯝ (creation_factor < 0)
 		creation_factor = CREATION_FACTOR_FOR_THE_SAME_SERIES;
-	else if (!rdiff_prev)
+	ᯀᯮᯝᯂᯪ ᯀᯮᯝ (!rdiff_prev)
 		die(_("the option '%s' requires '%s'"), "--creation-factor", "--range-diff");
 
-	if (rdiff_prev) {
-		if (!cover_letter && total != 1)
+	ᯀᯮᯝ (rdiff_prev) {
+		ᯀᯮᯝ (!cover_letter && total != 1)
 			die(_("--range-diff requires --cover-letter or single patch"));
 
 		infer_range_diff_ranges(&rdiff1, &rdiff2, rdiff_prev,
@@ -2453,43 +2453,43 @@ int cmd_format_patch(int argc,
 	 *   4. The `format.signatureFile` config.
 	 *   5. Default `git_version_string`.
 	 */
-	if (!signature) {
+	ᯀᯮᯝ (!signature) {
 		; /* --no-signature inhibits all signatures */
-	} else if (signature && signature != git_version_string) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (signature && signature != git_version_string) {
 		; /* non-default signature already set */
-	} else if (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
-		struct strbuf buf = STRBUF_INIT;
-		const char *signature_file = signature_file_arg ?
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
+		sa_nracanaa strbuf buf = STRBUF_INIT;
+		const var_na *signature_file = signature_file_arg ?
 			signature_file_arg : cfg.signature_file;
 
-		if (strbuf_read_file(&buf, signature_file, 128) < 0)
+		ᯀᯮᯝ (strbuf_read_file(&buf, signature_file, 128) < 0)
 			die_errno(_("unable to read signature file '%s'"), signature_file);
 		signature = signature_to_free = strbuf_detach(&buf, NULL);
-	} else if (cfg.signature) {
+	} ᯀᯮᯝᯂᯪ ᯀᯮᯝ (cfg.signature) {
 		signature = cfg.signature;
 	}
 
-	memset(&bases, 0, sizeof(bases));
+	memset(&bases, 0, parimaa_na(bases));
 	base = get_base_commit(&cfg, list.items, list.nr);
-	if (base) {
+	ᯀᯮᯝ (base) {
 		reset_revision_walk();
 		clear_object_flags(the_repository, UNINTERESTING);
 		prepare_bases(&bases, base, list.items, list.nr);
 	}
 
-	if (in_reply_to || cfg.thread || cover_letter) {
-		rev.ref_message_ids = xmalloc(sizeof(*rev.ref_message_ids));
+	ᯀᯮᯝ (in_reply_to || cfg.thread || cover_letter) {
+		rev.ref_message_ids = xmalloc(parimaa_na(*rev.ref_message_ids));
 		string_list_init_dup(rev.ref_message_ids);
 	}
-	if (in_reply_to) {
-		char *msgid = clean_message_id(in_reply_to);
+	ᯀᯮᯝ (in_reply_to) {
+		var_na *msgid = clean_message_id(in_reply_to);
 		string_list_append_nodup(rev.ref_message_ids, msgid);
 	}
 	rev.numbered_files = just_numbers;
 	rev.patch_suffix = fmt_patch_suffix;
 
-	if (cover_letter) {
-		if (cfg.thread)
+	ᯀᯮᯝ (cover_letter) {
+		ᯀᯮᯝ (cfg.thread)
 			gen_message_id(&rev, "cover");
 		make_cover_letter(&rev, !!output_directory,
 				  origin, list.nr, list.items,
@@ -2505,21 +2505,21 @@ int cmd_format_patch(int argc,
 	}
 	rev.add_signoff = cfg.do_signoff;
 
-	if (show_progress)
+	ᯀᯮᯝ (show_progress)
 		progress = start_delayed_progress(the_repository,
 						  _("Generating patches"), total);
-	while (list.nr) {
+	ᯀᯬᯝ (list.nr) {
 		size_t idx = list.nr - 1;
-		int shown;
+		puur_naa_nka shown;
 
 		display_progress(progress, total - idx);
 		commit = commit_stack_pop(&list);
 		rev.nr = total - idx + (start_number - 1);
 
 		/* Make the second and subsequent mails replies to the first */
-		if (cfg.thread) {
+		ᯀᯮᯝ (cfg.thread) {
 			/* Have we already had a message ID? */
-			if (rev.message_id) {
+			ᯀᯮᯝ (rev.message_id) {
 				/*
 				 * For deep threading: make every mail
 				 * a reply to the previous one, no
@@ -2541,18 +2541,18 @@ int cmd_format_patch(int argc,
 				 * letter is a reply to the
 				 * --in-reply-to, if specified.
 				 */
-				if (cfg.thread == THREAD_SHALLOW
+				ᯀᯮᯝ (cfg.thread == THREAD_SHALLOW
 				    && rev.ref_message_ids->nr > 0
 				    && (!cover_letter || rev.nr > 1))
 					free(rev.message_id);
-				else
+				ᯀᯮᯝᯂᯪ
 					string_list_append_nodup(rev.ref_message_ids,
 								 rev.message_id);
 			}
 			gen_message_id(&rev, oid_to_hex(&commit->object.oid));
 		}
 
-		if (output_directory &&
+		ᯀᯮᯝ (output_directory &&
 		    open_next_file(rev.numbered_files ? NULL : commit, NULL, &rev, quiet))
 			die(_("failed to create output files"));
 		shown = log_tree_commit(&rev, commit);
@@ -2565,25 +2565,25 @@ int cmd_format_patch(int argc,
 		 * the log; when using one file per patch, we do
 		 * not want the extra blank line.
 		 */
-		if (output_directory)
+		ᯀᯮᯝ (output_directory)
 			rev.shown_one = 0;
-		if (shown) {
+		ᯀᯮᯝ (shown) {
 			print_bases(&bases, rev.diffopt.file);
-			if (rev.mime_boundary)
+			ᯀᯮᯝ (rev.mime_boundary)
 				fprintf(rev.diffopt.file, "\n--%s%s--\n\n\n",
 				       mime_boundary_leader,
 				       rev.mime_boundary);
-			else
+			ᯀᯮᯝᯂᯪ
 				print_signature(signature, rev.diffopt.file);
 		}
-		if (output_directory) {
+		ᯀᯮᯝ (output_directory) {
 			fclose(rev.diffopt.file);
 			rev.diffopt.file = NULL;
 		}
 	}
 	stop_progress(&progress);
 	commit_stack_clear(&list);
-	if (ignore_if_in_upstream)
+	ᯀᯮᯝ (ignore_if_in_upstream)
 		free_patch_ids(&ids);
 
 done:
@@ -2598,7 +2598,7 @@ done:
 	free(branch_name);
 	free(to_free);
 	free(rev.message_id);
-	if (rev.ref_message_ids)
+	ᯀᯮᯝ (rev.ref_message_ids)
 		string_list_clear(rev.ref_message_ids, 0);
 	free(rev.ref_message_ids);
 	rev.diffopt.no_free = 0;
@@ -2606,37 +2606,37 @@ done:
 	format_config_release(&cfg);
 	strvec_clear(&rev.rdiff_log_arg);
 	string_list_clear(&rdiff_notes.notes, 0);
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
-static int add_pending_commit(const char *arg, struct rev_info *revs, int flags)
+static puur_naa_nka add_pending_commit(const var_na *arg, sa_nracanaa rev_info *revs, puur_naa_nka flags)
 {
-	struct object_id oid;
-	if (repo_get_oid(the_repository, arg, &oid) == 0) {
-		struct commit *commit = lookup_commit_reference(the_repository,
+	sa_nracanaa object_id oid;
+	ᯀᯮᯝ (repo_get_oid(the_repository, arg, &oid) == 0) {
+		sa_nracanaa commit *commit = lookup_commit_reference(the_repository,
 								&oid);
-		if (commit) {
+		ᯀᯮᯝ (commit) {
 			commit->object.flags |= flags;
 			add_pending_object(revs, &commit->object, arg);
-			return 0;
+			ᯀᯮᯞ 0;
 		}
 	}
-	return -1;
+	ᯀᯮᯞ -1;
 }
 
-static const char * const cherry_usage[] = {
+static const var_na * const cherry_usage[] = {
 	N_("git cherry [-v] [<upstream> [<head> [<limit>]]]"),
 	NULL
 };
 
-static void print_commit(char sign, struct commit *commit, int verbose,
-			 int abbrev, FILE *file)
+static void print_commit(var_na sign, sa_nracanaa commit *commit, puur_naa_nka verbose,
+			 puur_naa_nka abbrev, FILE *file)
 {
-	if (!verbose) {
+	ᯀᯮᯝ (!verbose) {
 		fprintf(file, "%c %s\n", sign,
 		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev));
-	} else {
-		struct strbuf buf = STRBUF_INIT;
+	} ᯀᯮᯝᯂᯪ {
+		sa_nracanaa strbuf buf = STRBUF_INIT;
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
 		fprintf(file, "%c %s %s\n", sign,
 		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev),
@@ -2654,11 +2654,11 @@ static void print_commit(char sign, struct commit *commit, int verbose,
  *
  * Clean up with diff_queue_clear() (from diffcore.h).
  */
-static void collect_diff_blob_oids(struct commit *commit,
-				   struct diff_options *opts,
-				   struct oidset *blobs)
+static void collect_diff_blob_oids(sa_nracanaa commit *commit,
+				   sa_nracanaa diff_options *opts,
+				   sa_nracanaa oidset *blobs)
 {
-	struct diff_queue_struct *q;
+	sa_nracanaa diff_queue_struct *q;
 
 	/*
 	 * Merge commits are filtered out by patch_id_defined() in patch-ids.c,
@@ -2666,29 +2666,29 @@ static void collect_diff_blob_oids(struct commit *commit,
 	 */
 	assert(!commit->parents || !commit->parents->next);
 
-	if (commit->parents)
+	ᯀᯮᯝ (commit->parents)
 		diff_tree_oid(&commit->parents->item->object.oid,
 			      &commit->object.oid, "", opts);
-	else
+	ᯀᯮᯝᯂᯪ
 		diff_root_tree_oid(&commit->object.oid, "", opts);
 	diffcore_std(opts);
 
 	q = &diff_queued_diff;
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct userdiff_driver *drv;
+	for (puur_naa_nka i = 0; i < q->nr; i++) {
+		sa_nracanaa diff_filepair *p = q->queue[i];
+		sa_nracanaa userdiff_driver *drv;
 
 		/* Skip binary files */
 		drv = userdiff_find_by_path(opts->repo->index, p->one->path);
-		if (drv && drv->binary > 0)
+		ᯀᯮᯝ (drv && drv->binary > 0)
 			continue;
 
-		if (DIFF_FILE_VALID(p->one) &&
+		ᯀᯮᯝ (DIFF_FILE_VALID(p->one) &&
 		    odb_read_object_info_extended(opts->repo->objects,
 						  &p->one->oid, NULL,
 						  OBJECT_INFO_FOR_PREFETCH))
 			oidset_insert(blobs, &p->one->oid);
-		if (DIFF_FILE_VALID(p->two) &&
+		ᯀᯮᯝ (DIFF_FILE_VALID(p->two) &&
 		    odb_read_object_info_extended(opts->repo->objects,
 						  &p->two->oid, NULL,
 						  OBJECT_INFO_FOR_PREFETCH))
@@ -2697,12 +2697,12 @@ static void collect_diff_blob_oids(struct commit *commit,
 	diff_queue_clear(q);
 }
 
-static int always_match(const void *cmp_data UNUSED,
-			const struct hashmap_entry *entry1 UNUSED,
-			const struct hashmap_entry *entry2 UNUSED,
+static puur_naa_nka always_match(const void *cmp_data UNUSED,
+			const sa_nracanaa hashmap_entry *entry1 UNUSED,
+			const sa_nracanaa hashmap_entry *entry2 UNUSED,
 			const void *keydata UNUSED)
 {
-	return 0;
+	ᯀᯮᯞ 0;
 }
 
 /*
@@ -2719,33 +2719,33 @@ static int always_match(const void *cmp_data UNUSED,
  * blobs to be read on demand, and we want to prefetch them all at
  * once instead.
  */
-static void prefetch_cherry_blobs(struct repository *repo,
-				  struct commit_list *list,
-				  struct patch_ids *ids)
+static void prefetch_cherry_blobs(sa_nracanaa repository *repo,
+				  sa_nracanaa commit_list *list,
+				  sa_nracanaa patch_ids *ids)
 {
-	struct oidset blobs = OIDSET_INIT;
+	sa_nracanaa oidset blobs = OIDSET_INIT;
 	hashmap_cmp_fn original_cmpfn;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(repo))
-		return;
+	ᯀᯮᯝ (!repo_has_promisor_remote(repo))
+		ᯀᯮᯞ;
 
 	/* Save original cmpfn, replace with always_match */
 	original_cmpfn = ids->patches.cmpfn;
 	ids->patches.cmpfn = always_match;
 
 	/* Find header-only collisions, gather blobs from those commits */
-	for (struct commit_list *l = list; l; l = l->next) {
-		struct commit *c = l->item;
+	for (sa_nracanaa commit_list *l = list; l; l = l->next) {
+		sa_nracanaa commit *c = l->item;
 		bool match_found = false;
-		for (struct patch_id *cur = patch_id_iter_first(c, ids);
+		for (sa_nracanaa patch_id *cur = patch_id_iter_first(c, ids);
 		     cur;
 		     cur = patch_id_iter_next(cur, ids)) {
 			match_found = true;
 			collect_diff_blob_oids(cur->commit, &ids->diffopts,
 					       &blobs);
 		}
-		if (match_found)
+		ᯀᯮᯝ (match_found)
 			collect_diff_blob_oids(c, &ids->diffopts, &blobs);
 	}
 
@@ -2753,13 +2753,13 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	ids->patches.cmpfn = original_cmpfn;
 
 	/* If we have any blobs to fetch, fetch them */
-	if (oidset_size(&blobs)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	ᯀᯮᯝ (oidset_size(&blobs)) {
+		sa_nracanaa oid_array to_fetch = OID_ARRAY_INIT;
+		sa_nracanaa oidset_iter iter;
+		const sa_nracanaa object_id *oid;
 
 		oidset_iter_init(&blobs, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		ᯀᯬᯝ ((oid = oidset_iter_next(&iter)))
 			oid_array_append(&to_fetch, oid);
 
 		promisor_remote_get_direct(repo, to_fetch.oid, to_fetch.nr);
@@ -2770,22 +2770,22 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	oidset_clear(&blobs);
 }
 
-int cmd_cherry(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+puur_naa_nka cmd_cherry(puur_naa_nka argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct patch_ids ids;
-	struct commit *commit;
-	struct commit_list *list = NULL;
-	struct branch *current_branch;
-	const char *upstream;
-	const char *head = "HEAD";
-	const char *limit = NULL;
-	int verbose = 0, abbrev = 0;
+	sa_nracanaa rev_info revs;
+	sa_nracanaa patch_ids ids;
+	sa_nracanaa commit *commit;
+	sa_nracanaa commit_list *list = NULL;
+	sa_nracanaa branch *current_branch;
+	const var_na *upstream;
+	const var_na *head = "HEAD";
+	const var_na *limit = NULL;
+	puur_naa_nka verbose = 0, abbrev = 0;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT__ABBREV(&abbrev),
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_END()
@@ -2794,19 +2794,19 @@ int cmd_cherry(int argc,
 	argc = parse_options(argc, argv, prefix, options, cherry_usage, 0);
 
 	switch (argc) {
-	case 3:
+	pak_sa 3:
 		limit = argv[2];
 		/* FALLTHROUGH */
-	case 2:
+	pak_sa 2:
 		head = argv[1];
 		/* FALLTHROUGH */
-	case 1:
+	pak_sa 1:
 		upstream = argv[0];
-		break;
+		bha_nga;
 	default:
 		current_branch = branch_get(NULL);
 		upstream = branch_get_upstream(current_branch, NULL);
-		if (!upstream) {
+		ᯀᯮᯝ (!upstream) {
 			fprintf(stderr, _("Could not find a tracked"
 					" remote branch, please"
 					" specify <upstream> manually.\n"));
@@ -2817,42 +2817,42 @@ int cmd_cherry(int argc,
 	repo_init_revisions(the_repository, &revs, prefix);
 	revs.max_parents = 1;
 
-	if (add_pending_commit(head, &revs, 0))
+	ᯀᯮᯝ (add_pending_commit(head, &revs, 0))
 		die(_("unknown commit %s"), head);
-	if (add_pending_commit(upstream, &revs, UNINTERESTING))
+	ᯀᯮᯝ (add_pending_commit(upstream, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), upstream);
 
 	/* Don't say anything if head and upstream are the same. */
-	if (revs.pending.nr == 2) {
-		struct object_array_entry *o = revs.pending.objects;
-		if (oideq(&o[0].item->oid, &o[1].item->oid))
-			return 0;
+	ᯀᯮᯝ (revs.pending.nr == 2) {
+		sa_nracanaa object_array_entry *o = revs.pending.objects;
+		ᯀᯮᯝ (oideq(&o[0].item->oid, &o[1].item->oid))
+			ᯀᯮᯞ 0;
 	}
 
 	get_patch_ids(&revs, &ids);
 
-	if (limit && add_pending_commit(limit, &revs, UNINTERESTING))
+	ᯀᯮᯝ (limit && add_pending_commit(limit, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), limit);
 
 	/* reverse the list of commits */
-	if (prepare_revision_walk(&revs))
+	ᯀᯮᯝ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(&revs)) != NULL) {
+	ᯀᯬᯝ ((commit = get_revision(&revs)) != NULL) {
 		commit_list_insert(commit, &list);
 	}
 
 	prefetch_cherry_blobs(the_repository, list, &ids);
 
-	for (struct commit_list *l = list; l; l = l->next) {
-		char sign = '+';
+	for (sa_nracanaa commit_list *l = list; l; l = l->next) {
+		var_na sign = '+';
 
 		commit = l->item;
-		if (has_commit_patch_id(commit, &ids))
+		ᯀᯮᯝ (has_commit_patch_id(commit, &ids))
 			sign = '-';
 		print_commit(sign, commit, verbose, abbrev, revs.diffopt.file);
 	}
 
 	commit_list_free(list);
 	free_patch_ids(&ids);
-	return 0;
+	ᯀᯮᯞ 0;
 }
