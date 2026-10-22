@@ -4,32 +4,32 @@
  * Copyright (c) 2006 Junio C Hamano
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#परिभाषय DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "ewah/ewok.h"
-#include "lockfile.h"
-#include "color.h"
-#include "commit.h"
-#include "gettext.h"
-#include "tag.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "diffcore.h"
-#include "preload-index.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "setup.h"
-#include "oid-array.h"
-#include "tree.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "ewah/ewok.h"
+#अन्तर्भाव "lockfile.h"
+#अन्तर्भाव "color.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "tag.h"
+#अन्तर्भाव "diff.h"
+#अन्तर्भाव "diff-merges.h"
+#अन्तर्भाव "diffcore.h"
+#अन्तर्भाव "preload-index.h"
+#अन्तर्भाव "read-cache-ll.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "log-tree.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "oid-array.h"
+#अन्तर्भाव "tree.h"
 
-#define DIFF_NO_INDEX_EXPLICIT 1
-#define DIFF_NO_INDEX_IMPLICIT 2
+#परिभाषय DIFF_NO_सूचकांक_EXPLICIT 1
+#परिभाषय DIFF_NO_सूचकांक_IMPLICIT 2
 
-static const char builtin_diff_usage[] =
+स्थिर ध्रुव वर्ण builtin_diff_usage[] =
 "git diff [<options>] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] --cached [--merge-base] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] [--merge-base] <commit> [<commit>...] <commit> [--] [<path>...]\n"
@@ -39,114 +39,114 @@ static const char builtin_diff_usage[] =
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static const char *blob_path(struct object_array_entry *entry)
+स्थिर ध्रुव वर्ण *blob_मार्गः(संरचना object_array_प्रविष्टिः *प्रविष्टिः)
 {
-	return entry->path ? entry->path : entry->name;
+	प्रत्यागम प्रविष्टिः->मार्गः ? प्रविष्टिः->मार्गः : प्रविष्टिः->name;
 }
 
-static void stuff_change(struct diff_options *opt,
-			 unsigned old_mode, unsigned new_mode,
-			 const struct object_id *old_oid,
-			 const struct object_id *new_oid,
-			 int old_oid_valid,
-			 int new_oid_valid,
-			 const char *old_path,
-			 const char *new_path)
+स्थिर शून्य stuff_change(संरचना diff_options *opt,
+			 अचिह्नित old_बहुलकम्, अचिह्नित new_बहुलकम्,
+			 ध्रुव संरचना object_id *old_oid,
+			 ध्रुव संरचना object_id *new_oid,
+			 पूर्णाङ्क old_oid_valid,
+			 पूर्णाङ्क new_oid_valid,
+			 ध्रुव वर्ण *old_मार्गः,
+			 ध्रुव वर्ण *new_मार्गः)
 {
-	struct diff_filespec *one, *two;
+	संरचना diff_filespec *one, *two;
 
-	if (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
-	    oideq(old_oid, new_oid) && (old_mode == new_mode))
-		return;
+	यदि (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
+	    oideq(old_oid, new_oid) && (old_बहुलकम् == new_बहुलकम्))
+		प्रत्यागम;
 
-	if (opt->flags.reverse_diff) {
-		SWAP(old_mode, new_mode);
+	यदि (opt->flags.reverse_diff) {
+		SWAP(old_बहुलकम्, new_बहुलकम्);
 		SWAP(old_oid, new_oid);
-		SWAP(old_path, new_path);
+		SWAP(old_मार्गः, new_मार्गः);
 	}
 
-	if (opt->prefix &&
-	    (strncmp(old_path, opt->prefix, opt->prefix_length) ||
-	     strncmp(new_path, opt->prefix, opt->prefix_length)))
-		return;
+	यदि (opt->उपसर्गः &&
+	    (वाक्ये_तुलय(old_मार्गः, opt->उपसर्गः, opt->उपसर्गः_दीर्घता) ||
+	     वाक्ये_तुलय(new_मार्गः, opt->उपसर्गः, opt->उपसर्गः_दीर्घता)))
+		प्रत्यागम;
 
-	one = alloc_filespec(old_path);
-	two = alloc_filespec(new_path);
-	fill_filespec(one, old_oid, old_oid_valid, old_mode);
-	fill_filespec(two, new_oid, new_oid_valid, new_mode);
+	one = alloc_filespec(old_मार्गः);
+	two = alloc_filespec(new_मार्गः);
+	fill_filespec(one, old_oid, old_oid_valid, old_बहुलकम्);
+	fill_filespec(two, new_oid, new_oid_valid, new_बहुलकम्);
 
 	diff_queue(&diff_queued_diff, one, two);
 }
 
-static void builtin_diff_b_f(struct rev_info *revs,
-			     int argc, const char **argv UNUSED,
-			     struct object_array_entry **blob)
+स्थिर शून्य builtin_diff_b_f(संरचना rev_info *revs,
+			     पूर्णाङ्क argc, ध्रुव वर्ण **argv अप्रयुक्तम्,
+			     संरचना object_array_प्रविष्टिः **blob)
 {
 	/* Blob vs file in the working tree*/
-	struct stat st;
-	const char *path;
+	संरचना stat st;
+	ध्रुव वर्ण *मार्गः;
 
-	if (argc > 1)
+	यदि (argc > 1)
 		usage(builtin_diff_usage);
 
-	GUARD_PATHSPEC(&revs->prune_data, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
-	path = revs->prune_data.items[0].match;
+	GUARD_PATHSPEC(&revs->prune_दत्त, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
+	मार्गः = revs->prune_दत्त.वस्तूनि[0].मेलनम्;
 
-	if (lstat(path, &st))
-		die_errno(_("failed to stat '%s'"), path);
-	if (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
-		die(_("'%s': not a regular file or symlink"), path);
+	यदि (lstat(मार्गः, &st))
+		die_errno(_("failed to stat '%s'"), मार्गः);
+	यदि (!(S_ISREG(st.st_बहुलकम्) || S_ISLNK(st.st_बहुलकम्)))
+		die(_("'%s': not a regular file or symlink"), मार्गः);
 
-	diff_set_mnemonic_prefix(&revs->diffopt, "o/", "w/");
+	diff_समुच्चयः_mnemonic_उपसर्गः(&revs->diffopt, "o/", "w/");
 
-	if (blob[0]->mode == S_IFINVALID)
-		blob[0]->mode = canon_mode(st.st_mode);
+	यदि (blob[0]->बहुलकम् == S_IFINVALID)
+		blob[0]->बहुलकम् = canon_बहुलकम्(st.st_बहुलकम्);
 
 	stuff_change(&revs->diffopt,
-		     blob[0]->mode, canon_mode(st.st_mode),
+		     blob[0]->बहुलकम्, canon_बहुलकम्(st.st_बहुलकम्),
 		     &blob[0]->item->oid, null_oid(the_hash_algo),
 		     1, 0,
-		     blob[0]->path ? blob[0]->path : path,
-		     path);
+		     blob[0]->मार्गः ? blob[0]->मार्गः : मार्गः,
+		     मार्गः);
 	diffcore_std(&revs->diffopt);
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_blobs(struct rev_info *revs,
-			       int argc, const char **argv UNUSED,
-			       struct object_array_entry **blob)
+स्थिर शून्य builtin_diff_blobs(संरचना rev_info *revs,
+			       पूर्णाङ्क argc, ध्रुव वर्ण **argv अप्रयुक्तम्,
+			       संरचना object_array_प्रविष्टिः **blob)
 {
-	const unsigned mode = canon_mode(S_IFREG | 0644);
+	ध्रुव अचिह्नित बहुलकम् = canon_बहुलकम्(S_IFREG | 0644);
 
-	if (argc > 1)
+	यदि (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (blob[0]->mode == S_IFINVALID)
-		blob[0]->mode = mode;
+	यदि (blob[0]->बहुलकम् == S_IFINVALID)
+		blob[0]->बहुलकम् = बहुलकम्;
 
-	if (blob[1]->mode == S_IFINVALID)
-		blob[1]->mode = mode;
+	यदि (blob[1]->बहुलकम् == S_IFINVALID)
+		blob[1]->बहुलकम् = बहुलकम्;
 
 	stuff_change(&revs->diffopt,
-		     blob[0]->mode, blob[1]->mode,
+		     blob[0]->बहुलकम्, blob[1]->बहुलकम्,
 		     &blob[0]->item->oid, &blob[1]->item->oid,
 		     1, 1,
-		     blob_path(blob[0]), blob_path(blob[1]));
+		     blob_मार्गः(blob[0]), blob_मार्गः(blob[1]));
 	diffcore_std(&revs->diffopt);
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_index(struct rev_info *revs,
-			       int argc, const char **argv)
+स्थिर शून्य builtin_diff_सूचकांक(संरचना rev_info *revs,
+			       पूर्णाङ्क argc, ध्रुव वर्ण **argv)
 {
-	unsigned int option = 0;
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
-			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
-			option |= DIFF_INDEX_MERGE_BASE;
-		else
+	अचिह्नित पूर्णाङ्क option = 0;
+	यावत् (1 < argc) {
+		ध्रुव वर्ण *arg = argv[1];
+		यदि (!वाक्यं_तुलय(arg, "--cached") || !वाक्यं_तुलय(arg, "--staged"))
+			option |= DIFF_सूचकांक_CACHED;
+		अन्यथा यदि (!वाक्यं_तुलय(arg, "--merge-base"))
+			option |= DIFF_सूचकांक_MERGE_आधारः;
+		अन्यथा
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
@@ -154,117 +154,117 @@ static void builtin_diff_index(struct rev_info *revs,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (revs->pending.nr != 1 ||
-	    revs->max_count != -1 || revs->min_age != -1 ||
+	यदि (revs->pending.nr != 1 ||
+	    revs->max_गणनम् != -1 || revs->min_age != -1 ||
 	    revs->max_age != -1)
 		usage(builtin_diff_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository,
+	यदि (!(option & DIFF_सूचकांक_CACHED)) {
+		सज्जता_work_वृक्षः(the_repository);
+		यदि (repo_read_सूचकांक_preload(the_repository,
 					    &revs->diffopt.pathspec, 0) < 0) {
 			die_errno("repo_read_index_preload");
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} अन्यथा यदि (repo_read_सूचकांक(the_repository) < 0) {
 		die_errno("repo_read_cache");
 	}
-	run_diff_index(revs, option);
+	सततम्_diff_सूचकांक(revs, option);
 }
 
-static void builtin_diff_tree(struct rev_info *revs,
-			      int argc, const char **argv,
-			      struct object_array_entry *ent0,
-			      struct object_array_entry *ent1)
+स्थिर शून्य builtin_diff_वृक्षः(संरचना rev_info *revs,
+			      पूर्णाङ्क argc, ध्रुव वर्ण **argv,
+			      संरचना object_array_प्रविष्टिः *ent0,
+			      संरचना object_array_प्रविष्टिः *ent1)
 {
-	const struct object_id *(oid[2]);
-	struct object_id mb_oid;
-	int merge_base = 0;
+	ध्रुव संरचना object_id *(oid[2]);
+	संरचना object_id mb_oid;
+	पूर्णाङ्क merge_आधारः = 0;
 
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--merge-base"))
-			merge_base = 1;
-		else
+	यावत् (1 < argc) {
+		ध्रुव वर्ण *arg = argv[1];
+		यदि (!वाक्यं_तुलय(arg, "--merge-base"))
+			merge_आधारः = 1;
+		अन्यथा
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
 
-	if (merge_base) {
-		diff_get_merge_base(revs, &mb_oid);
+	यदि (merge_आधारः) {
+		diff_get_merge_आधारः(revs, &mb_oid);
 		oid[0] = &mb_oid;
 		oid[1] = &revs->pending.objects[1].item->oid;
-	} else {
-		int swap = 0;
+	} अन्यथा {
+		पूर्णाङ्क swap = 0;
 
 		/*
 		 * We saw two trees, ent0 and ent1.  If ent1 is uninteresting,
 		 * swap them.
 		 */
-		if (ent1->item->flags & UNINTERESTING)
+		यदि (ent1->item->flags & UNINTERESTING)
 			swap = 1;
 		oid[swap] = &ent0->item->oid;
 		oid[1 - swap] = &ent1->item->oid;
 	}
-	diff_tree_oid(oid[0], oid[1], "", &revs->diffopt);
-	log_tree_diff_flush(revs);
+	diff_वृक्षः_oid(oid[0], oid[1], "", &revs->diffopt);
+	log_वृक्षः_diff_flush(revs);
 }
 
-static void builtin_diff_combined(struct rev_info *revs,
-				  int argc, const char **argv UNUSED,
-				  struct object_array_entry *ent,
-				  int ents, int first_non_parent)
+स्थिर शून्य builtin_diff_combined(संरचना rev_info *revs,
+				  पूर्णाङ्क argc, ध्रुव वर्ण **argv अप्रयुक्तम्,
+				  संरचना object_array_प्रविष्टिः *ent,
+				  पूर्णाङ्क ents, पूर्णाङ्क first_non_parent)
 {
-	struct oid_array parents = OID_ARRAY_INIT;
-	int i;
+	संरचना oid_array parents = OID_ARRAY_INIT;
+	पूर्णाङ्क i;
 
-	if (argc > 1)
+	यदि (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (first_non_parent < 0)
+	यदि (first_non_parent < 0)
 		die(_("no merge given, only parents."));
-	if (first_non_parent >= ents)
+	यदि (first_non_parent >= ents)
 		BUG("first_non_parent out of range: %d", first_non_parent);
 
-	diff_merges_set_dense_combined_if_unset(revs);
+	diff_merges_समुच्चयः_dense_combined_if_unset(revs);
 
-	for (i = 0; i < ents; i++) {
-		if (i != first_non_parent)
+	प्रति (i = 0; i < ents; i++) {
+		यदि (i != first_non_parent)
 			oid_array_append(&parents, &ent[i].item->oid);
 	}
-	diff_tree_combined(&ent[first_non_parent].item->oid, &parents, revs);
+	diff_वृक्षः_combined(&ent[first_non_parent].item->oid, &parents, revs);
 	oid_array_clear(&parents);
 }
 
-static void refresh_index_quietly(void)
+स्थिर शून्य refresh_सूचकांक_quietly(शून्य)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
+	संरचना तालकम्_file तालकम्_file = तालकम्_INIT;
+	पूर्णाङ्क fd;
 
-	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (fd < 0)
-		return;
-	discard_index(the_repository->index);
-	repo_read_index(the_repository);
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, NULL, NULL,
-		      NULL);
-	repo_update_index_if_able(the_repository, &lock_file);
+	fd = repo_hold_locked_सूचकांक(the_repository, &तालकम्_file, 0);
+	यदि (fd < 0)
+		प्रत्यागम;
+	discard_सूचकांक(the_repository->सूचकांक);
+	repo_read_सूचकांक(the_repository);
+	refresh_सूचकांक(the_repository->सूचकांक, REFRESH_QUIET|REFRESH_UNMERGED, रिक्त, रिक्त,
+		      रिक्त);
+	repo_update_सूचकांक_if_able(the_repository, &तालकम्_file);
 }
 
-static void builtin_diff_files(struct rev_info *revs, int argc, const char **argv)
+स्थिर शून्य builtin_diff_files(संरचना rev_info *revs, पूर्णाङ्क argc, ध्रुव वर्ण **argv)
 {
-	unsigned int options = 0;
+	अचिह्नित पूर्णाङ्क options = 0;
 
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
-			revs->max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
-			revs->max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
-			revs->max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+	यावत् (1 < argc && argv[1][0] == '-') {
+		यदि (!वाक्यं_तुलय(argv[1], "--base"))
+			revs->max_गणनम् = 1;
+		अन्यथा यदि (!वाक्यं_तुलय(argv[1], "--ours"))
+			revs->max_गणनम् = 2;
+		अन्यथा यदि (!वाक्यं_तुलय(argv[1], "--theirs"))
+			revs->max_गणनम् = 3;
+		अन्यथा यदि (!वाक्यं_तुलय(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else if (!strcmp(argv[1], "-h"))
+		अन्यथा यदि (!वाक्यं_तुलय(argv[1], "-h"))
 			usage(builtin_diff_usage);
-		else {
+		अन्यथा {
 			error(_("invalid option: %s"), argv[1]);
 			usage(builtin_diff_usage);
 		}
@@ -277,22 +277,22 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 	 * dense one, --cc can be explicitly asked for, or just rely
 	 * on the default).
 	 */
-	if (revs->max_count == -1 &&
+	यदि (revs->max_गणनम् == -1 &&
 	    (revs->diffopt.output_format & DIFF_FORMAT_PATCH))
-		diff_merges_set_dense_combined_if_unset(revs);
+		diff_merges_समुच्चयः_dense_combined_if_unset(revs);
 
-	setup_work_tree(the_repository);
-	if (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
+	सज्जता_work_वृक्षः(the_repository);
+	यदि (repo_read_सूचकांक_preload(the_repository, &revs->diffopt.pathspec,
 				    0) < 0) {
 		die_errno("repo_read_index_preload");
 	}
-	run_diff_files(revs, options);
+	सततम्_diff_files(revs, options);
 }
 
-struct symdiff {
-	struct bitmap *skip;
-	int warn;
-	const char *base, *left, *right;
+संरचना symdiff {
+	संरचना bitmap *skip;
+	पूर्णाङ्क warn;
+	ध्रुव वर्ण *आधारः, *वामः, *दक्षिणः;
 };
 
 /*
@@ -314,11 +314,11 @@ struct symdiff {
  * If there is no symmetric diff argument, sym->skip is NULL and
  * sym->warn is cleared.  The remaining fields are not set.
  */
-static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
+स्थिर शून्य symdiff_prepare(संरचना rev_info *rev, संरचना symdiff *sym)
 {
-	int i, is_symdiff = 0, basecount = 0, othercount = 0;
-	int lpos = -1, rpos = -1, basepos = -1;
-	struct bitmap *map = NULL;
+	पूर्णाङ्क i, is_symdiff = 0, basecount = 0, othercount = 0;
+	पूर्णाङ्क lpos = -1, rpos = -1, basepos = -1;
+	संरचना bitmap *map = रिक्त;
 
 	/*
 	 * Use the whence fields to find merge bases and left and
@@ -335,81 +335,81 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	 * so we must check for SYMMETRIC_LEFT too.  The two arrays
 	 * rev->pending.objects and rev->cmdline.rev are parallel.
 	 */
-	for (i = 0; i < rev->cmdline.nr; i++) {
-		struct object *obj = rev->pending.objects[i].item;
-		switch (rev->cmdline.rev[i].whence) {
-		case REV_CMD_MERGE_BASE:
-			if (basepos < 0)
+	प्रति (i = 0; i < rev->cmdline.nr; i++) {
+		संरचना object *obj = rev->pending.objects[i].item;
+		विकल्प (rev->cmdline.rev[i].whence) {
+		पक्ष REV_CMD_MERGE_आधारः:
+			यदि (basepos < 0)
 				basepos = i;
 			basecount++;
-			break;		/* do mark all bases */
-		case REV_CMD_LEFT:
-			if (lpos >= 0)
+			भङ्ग;		/* do mark all bases */
+		पक्ष REV_CMD_वामः:
+			यदि (lpos >= 0)
 				usage(builtin_diff_usage);
 			lpos = i;
-			if (obj->flags & SYMMETRIC_LEFT) {
+			यदि (obj->flags & सममितम्_वामः) {
 				is_symdiff = 1;
-				break;	/* do mark A */
+				भङ्ग;	/* do mark A */
 			}
-			continue;
-		case REV_CMD_RIGHT:
-			if (rpos >= 0)
+			अनुवर्त;
+		पक्ष REV_CMD_दक्षिणः:
+			यदि (rpos >= 0)
 				usage(builtin_diff_usage);
 			rpos = i;
-			continue;	/* don't mark B */
-		case REV_CMD_PARENTS_ONLY:
-		case REV_CMD_REF:
-		case REV_CMD_REV:
+			अनुवर्त;	/* don't mark B */
+		पक्ष REV_CMD_PARENTS_ONLY:
+		पक्ष REV_CMD_REF:
+		पक्ष REV_CMD_REV:
 			othercount++;
-			continue;
+			अनुवर्त;
 		}
-		if (!map)
+		यदि (!map)
 			map = bitmap_new();
-		bitmap_set(map, i);
+		bitmap_समुच्चयः(map, i);
 	}
 
 	/*
 	 * Forbid any additional revs for both A...B and A..B.
 	 */
-	if (lpos >= 0 && othercount > 0)
+	यदि (lpos >= 0 && othercount > 0)
 		usage(builtin_diff_usage);
 
-	if (!is_symdiff) {
+	यदि (!is_symdiff) {
 		bitmap_free(map);
 		sym->warn = 0;
-		sym->skip = NULL;
-		return;
+		sym->skip = रिक्त;
+		प्रत्यागम;
 	}
 
-	sym->left = rev->pending.objects[lpos].name;
-	sym->right = rev->pending.objects[rpos].name;
-	if (basecount == 0)
-		die(_("%s...%s: no merge base"), sym->left, sym->right);
-	sym->base = rev->pending.objects[basepos].name;
+	sym->वामः = rev->pending.objects[lpos].name;
+	sym->दक्षिणः = rev->pending.objects[rpos].name;
+	यदि (basecount == 0)
+		die(_("%s...%s: no merge base"), sym->वामः, sym->दक्षिणः);
+	sym->आधारः = rev->pending.objects[basepos].name;
 	bitmap_unset(map, basepos);	/* unmark the base we want */
 	sym->warn = basecount > 1;
 	sym->skip = map;
 }
 
-static void symdiff_release(struct symdiff *sdiff)
+स्थिर शून्य symdiff_release(संरचना symdiff *sdiff)
 {
 	bitmap_free(sdiff->skip);
 }
 
-int cmd_diff(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+पूर्णाङ्क cmd_diff(पूर्णाङ्क argc,
+	     ध्रुव वर्ण **argv,
+	     ध्रुव वर्ण *उपसर्गः,
+	     संरचना repository *repo अप्रयुक्तम्)
 {
-	int i;
-	struct rev_info rev;
-	struct object_array ent = OBJECT_ARRAY_INIT;
-	int first_non_parent = -1;
-	int blobs = 0, paths = 0;
-	struct object_array_entry *blob[2];
-	int nongit = 0, no_index = 0;
-	int result;
-	struct symdiff sdiff;
+	पूर्णाङ्क i;
+	संरचना rev_info rev;
+	संरचना object_array ent = OBJECT_ARRAY_INIT;
+	पूर्णाङ्क first_non_parent = -1;
+	पूर्णाङ्क blobs = 0, paths = 0;
+	संरचना object_array_प्रविष्टिः *blob[2];
+	पूर्णाङ्क nongit = 0, no_सूचकांक = 0;
+	पूर्णाङ्क परिणाम;
+	संरचना symdiff sdiff;
 
 	/*
 	 * We could get N tree-ish in the rev.pending_objects list.
@@ -444,25 +444,25 @@ int cmd_diff(int argc,
 	 */
 
 	/* Were we asked to do --no-index explicitly? */
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	प्रति (i = 1; i < argc; i++) {
+		यदि (!वाक्यं_तुलय(argv[i], "--")) {
 			i++;
-			break;
+			भङ्ग;
 		}
-		if (!strcmp(argv[i], "--no-index"))
-			no_index = DIFF_NO_INDEX_EXPLICIT;
-		if (argv[i][0] != '-')
-			break;
+		यदि (!वाक्यं_तुलय(argv[i], "--no-index"))
+			no_सूचकांक = DIFF_NO_सूचकांक_EXPLICIT;
+		यदि (argv[i][0] != '-')
+			भङ्ग;
 	}
 
-	prefix = setup_git_directory_gently(the_repository, &nongit);
+	उपसर्गः = सज्जता_git_directory_gently(the_repository, &nongit);
 
-	if (!nongit) {
+	यदि (!nongit) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_पूर्णम्_सूचकांक = 0;
 	}
 
-	if (!no_index) {
+	यदि (!no_सूचकांक) {
 		/*
 		 * Treat git diff with at least one path outside of the
 		 * repo the same as if the command would have been executed
@@ -470,10 +470,10 @@ int cmd_diff(int argc,
 		 * the same way as "git diff --no-index <a> <b>", which acts
 		 * as a colourful "diff" replacement.
 		 */
-		if (nongit || ((argc == i + 2) &&
-			       (!path_inside_repo(the_repository, prefix, argv[i]) ||
-				!path_inside_repo(the_repository, prefix, argv[i + 1]))))
-			no_index = DIFF_NO_INDEX_IMPLICIT;
+		यदि (nongit || ((argc == i + 2) &&
+			       (!मार्गः_inside_repo(the_repository, उपसर्गः, argv[i]) ||
+				!मार्गः_inside_repo(the_repository, उपसर्गः, argv[i + 1]))))
+			no_सूचकांक = DIFF_NO_सूचकांक_IMPLICIT;
 	}
 
 	/*
@@ -482,11 +482,11 @@ int cmd_diff(int argc,
 	 * default to SHA1 here, but may eventually want to change this to be
 	 * configurable via a command line option.
 	 */
-	if (nongit)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	यदि (nongit)
+		repo_समुच्चयः_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, रिक्त);
 
 	/*
 	 * If we are ignoring the fact that our current directory may
@@ -496,15 +496,15 @@ int cmd_diff(int argc,
 	 * the working tree.  Where we came from is recorded in the
 	 * prefix.
 	 */
-	if (no_index && prefix) {
-		if (chdir(prefix))
+	यदि (no_सूचकांक && उपसर्गः) {
+		यदि (chdir(उपसर्गः))
 			die(_("cannot come back to cwd"));
-		prefix = NULL;
+		उपसर्गः = रिक्त;
 	}
 
-	prefix = precompose_argv_prefix(argc, argv, prefix);
+	उपसर्गः = precompose_argv_उपसर्गः(argc, argv, उपसर्गः);
 
-	repo_init_revisions(the_repository, &rev, prefix);
+	repo_init_revisions(the_repository, &rev, उपसर्गः);
 
 	/* Set up defaults that will apply to both no-index and regular diffs. */
 	init_diffstat_widths(&rev.diffopt);
@@ -512,9 +512,9 @@ int cmd_diff(int argc,
 	rev.diffopt.flags.allow_textconv = 1;
 
 	/* If this is a no-index diff, just run it and exit there. */
-	if (no_index)
-		exit(diff_no_index(&rev, the_repository->hash_algo,
-				   no_index == DIFF_NO_INDEX_IMPLICIT,
+	यदि (no_सूचकांक)
+		निर्गच्छ(diff_no_सूचकांक(&rev, the_repository->hash_algo,
+				   no_सूचकांक == DIFF_NO_सूचकांक_IMPLICIT,
 				   argc, argv));
 
 
@@ -522,134 +522,134 @@ int cmd_diff(int argc,
 	 * Otherwise, we are doing the usual "git" diff; set up any
 	 * further defaults that apply to regular diffs.
 	 */
-	rev.diffopt.skip_stat_unmatch = !!diff_auto_refresh_index;
+	rev.diffopt.skip_stat_unmatch = !!diff_auto_refresh_सूचकांक;
 
 	/*
 	 * Default to intent-to-add entries invisible in the
 	 * index. This makes them show up as new files in diff-files
 	 * and not at all in diff-cached.
 	 */
-	rev.diffopt.ita_invisible_in_index = 1;
+	rev.diffopt.ita_invisible_अन्तर्_सूचकांक = 1;
 
-	if (nongit)
+	यदि (nongit)
 		die(_("Not a git repository"));
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	if (!rev.diffopt.output_format) {
+	argc = सज्जता_revisions(argc, argv, &rev, रिक्त);
+	यदि (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
-		diff_setup_done(&rev.diffopt);
+		diff_सज्जता_समाप्तम्(&rev.diffopt);
 	}
 
 	rev.diffopt.flags.recursive = 1;
-	rev.diffopt.rotate_to_strict = 1;
+	rev.diffopt.rotate_गन्तव्यम्_strict = 1;
 
-	setup_diff_pager(&rev.diffopt);
+	सज्जता_diff_pager(&rev.diffopt);
 
 	/*
 	 * Do we have --cached and not have a pending object, then
 	 * default to HEAD by hand.  Eek.
 	 */
-	if (!rev.pending.nr) {
-		int i;
-		for (i = 1; i < argc; i++) {
-			const char *arg = argv[i];
-			if (!strcmp(arg, "--"))
-				break;
-			else if (!strcmp(arg, "--cached") ||
-				 !strcmp(arg, "--staged")) {
-				add_head_to_pending(&rev);
-				if (!rev.pending.nr) {
-					struct tree *tree;
-					tree = lookup_tree(the_repository,
-							   the_repository->hash_algo->empty_tree);
-					add_pending_object(&rev, &tree->object, "HEAD");
+	यदि (!rev.pending.nr) {
+		पूर्णाङ्क i;
+		प्रति (i = 1; i < argc; i++) {
+			ध्रुव वर्ण *arg = argv[i];
+			यदि (!वाक्यं_तुलय(arg, "--"))
+				भङ्ग;
+			अन्यथा यदि (!वाक्यं_तुलय(arg, "--cached") ||
+				 !वाक्यं_तुलय(arg, "--staged")) {
+				सङ्कलय_शीर्ष_गन्तव्यम्_pending(&rev);
+				यदि (!rev.pending.nr) {
+					संरचना वृक्षः *वृक्षः;
+					वृक्षः = lookup_वृक्षः(the_repository,
+							   the_repository->hash_algo->रिक्तानि_वृक्षः);
+					सङ्कलय_pending_object(&rev, &वृक्षः->object, "HEAD");
 				}
-				break;
+				भङ्ग;
 			}
 		}
 	}
 
 	symdiff_prepare(&rev, &sdiff);
-	for (i = 0; i < rev.pending.nr; i++) {
-		struct object_array_entry *entry = &rev.pending.objects[i];
-		struct object *obj = entry->item;
-		const char *name = entry->name;
-		int flags = (obj->flags & UNINTERESTING);
-		if (!obj->parsed)
+	प्रति (i = 0; i < rev.pending.nr; i++) {
+		संरचना object_array_प्रविष्टिः *प्रविष्टिः = &rev.pending.objects[i];
+		संरचना object *obj = प्रविष्टिः->item;
+		ध्रुव वर्ण *name = प्रविष्टिः->name;
+		पूर्णाङ्क flags = (obj->flags & UNINTERESTING);
+		यदि (!obj->parsed)
 			obj = parse_object(the_repository, &obj->oid);
-		obj = deref_tag(the_repository, obj, NULL, 0);
-		if (!obj)
+		obj = deref_चिह्नकम्(the_repository, obj, रिक्त, 0);
+		यदि (!obj)
 			die(_("invalid object '%s' given."), name);
-		if (obj->type == OBJ_COMMIT) {
-			struct tree *tree = repo_get_commit_tree(
-				the_repository, (struct commit *)obj);
-			if (!tree)
+		यदि (obj->type == OBJ_COMMIT) {
+			संरचना वृक्षः *वृक्षः = repo_get_commit_वृक्षः(
+				the_repository, (संरचना commit *)obj);
+			यदि (!वृक्षः)
 				die(_("unable to read tree object for commit '%s'"), name);
-			obj = &tree->object;
+			obj = &वृक्षः->object;
 		}
 
-		if (obj->type == OBJ_TREE) {
-			if (sdiff.skip && bitmap_get(sdiff.skip, i))
-				continue;
+		यदि (obj->type == OBJ_वृक्षः) {
+			यदि (sdiff.skip && bitmap_get(sdiff.skip, i))
+				अनुवर्त;
 			obj->flags |= flags;
-			add_object_array(obj, name, &ent);
-			if (first_non_parent < 0 &&
+			सङ्कलय_object_array(obj, name, &ent);
+			यदि (first_non_parent < 0 &&
 			    (i >= rev.cmdline.nr || /* HEAD by hand. */
 			     rev.cmdline.rev[i].whence != REV_CMD_PARENTS_ONLY))
 				first_non_parent = ent.nr - 1;
-		} else if (obj->type == OBJ_BLOB) {
-			if (2 <= blobs)
+		} अन्यथा यदि (obj->type == OBJ_BLOB) {
+			यदि (2 <= blobs)
 				die(_("more than two blobs given: '%s'"), name);
-			blob[blobs] = entry;
+			blob[blobs] = प्रविष्टिः;
 			blobs++;
 
-		} else {
+		} अन्यथा {
 			die(_("unhandled object '%s' given."), name);
 		}
 	}
-	if (rev.prune_data.nr)
-		paths += rev.prune_data.nr;
+	यदि (rev.prune_दत्त.nr)
+		paths += rev.prune_दत्त.nr;
 
 	/*
 	 * Now, do the arguments look reasonable?
 	 */
-	if (!ent.nr) {
-		switch (blobs) {
-		case 0:
+	यदि (!ent.nr) {
+		विकल्प (blobs) {
+		पक्ष 0:
 			builtin_diff_files(&rev, argc, argv);
-			break;
-		case 1:
-			if (paths != 1)
+			भङ्ग;
+		पक्ष 1:
+			यदि (paths != 1)
 				usage(builtin_diff_usage);
 			builtin_diff_b_f(&rev, argc, argv, blob);
-			break;
-		case 2:
-			if (paths)
+			भङ्ग;
+		पक्ष 2:
+			यदि (paths)
 				usage(builtin_diff_usage);
 			builtin_diff_blobs(&rev, argc, argv, blob);
-			break;
-		default:
+			भङ्ग;
+		स्वभाव:
 			usage(builtin_diff_usage);
 		}
 	}
-	else if (blobs)
+	अन्यथा यदि (blobs)
 		usage(builtin_diff_usage);
-	else if (ent.nr == 1)
-		builtin_diff_index(&rev, argc, argv);
-	else if (ent.nr == 2) {
-		if (sdiff.warn)
+	अन्यथा यदि (ent.nr == 1)
+		builtin_diff_सूचकांक(&rev, argc, argv);
+	अन्यथा यदि (ent.nr == 2) {
+		यदि (sdiff.warn)
 			warning(_("%s...%s: multiple merge bases, using %s"),
-				sdiff.left, sdiff.right, sdiff.base);
-		builtin_diff_tree(&rev, argc, argv,
+				sdiff.वामः, sdiff.दक्षिणः, sdiff.आधारः);
+		builtin_diff_वृक्षः(&rev, argc, argv,
 				  &ent.objects[0], &ent.objects[1]);
-	} else
+	} अन्यथा
 		builtin_diff_combined(&rev, argc, argv,
 				      ent.objects, ent.nr,
 				      first_non_parent);
-	result = diff_result_code(&rev);
-	if (1 < rev.diffopt.skip_stat_unmatch)
-		refresh_index_quietly();
+	परिणाम = diff_परिणाम_संहिता(&rev);
+	यदि (1 < rev.diffopt.skip_stat_unmatch)
+		refresh_सूचकांक_quietly();
 	release_revisions(&rev);
 	object_array_clear(&ent);
 	symdiff_release(&sdiff);
-	return result;
+	प्रत्यागम परिणाम;
 }

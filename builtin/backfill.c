@@ -1,52 +1,52 @@
 /* We need this macro to access core_apply_sparse_checkout */
-#define USE_THE_REPOSITORY_VARIABLE
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "git-compat-util.h"
-#include "config.h"
-#include "parse-options.h"
-#include "repository.h"
-#include "commit.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "object.h"
-#include "odb.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "promisor-remote.h"
-#include "strmap.h"
-#include "string-list.h"
-#include "revision.h"
-#include "trace2.h"
-#include "progress.h"
-#include "packfile.h"
-#include "path-walk.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "git-compat-util.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "repository.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "tree.h"
+#अन्तर्भाव "tree-walk.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "oid-array.h"
+#अन्तर्भाव "oidset.h"
+#अन्तर्भाव "promisor-remote.h"
+#अन्तर्भाव "strmap.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "trace2.h"
+#अन्तर्भाव "progress.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "path-walk.h"
 
-static const char * const builtin_backfill_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_backfill_usage[] = {
 	N_("git backfill [--min-batch-size=<n>] [--[no-]sparse] [--[no-]include-edges] [<revision-range>]"),
-	NULL
+	रिक्त
 };
 
-struct backfill_context {
-	struct repository *repo;
-	struct oid_array current_batch;
-	size_t min_batch_size;
-	int sparse;
-	int include_edges;
-	struct rev_info revs;
+संरचना backfill_context {
+	संरचना repository *repo;
+	संरचना oid_array current_batch;
+	आकार_t min_batch_आकार;
+	पूर्णाङ्क sparse;
+	पूर्णाङ्क include_धाराः;
+	संरचना rev_info revs;
 };
 
-static void backfill_context_clear(struct backfill_context *ctx)
+स्थिर शून्य backfill_context_clear(संरचना backfill_context *ctx)
 {
 	oid_array_clear(&ctx->current_batch);
 }
 
-static void download_batch(struct backfill_context *ctx)
+स्थिर शून्य download_batch(संरचना backfill_context *ctx)
 {
-	promisor_remote_get_direct(ctx->repo,
+	promisor_remote_get_प्रत्यक्षम्(ctx->repo,
 				   ctx->current_batch.oid,
 				   ctx->current_batch.nr);
 	oid_array_clear(&ctx->current_batch);
@@ -58,131 +58,131 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
-			      struct oid_array *list,
-			      enum object_type type,
-			      void *data)
+स्थिर पूर्णाङ्क fill_missing_blobs(ध्रुव वर्ण *मार्गः अप्रयुक्तम्,
+			      संरचना oid_array *list,
+			      गणना object_type type,
+			      शून्य *दत्त)
 {
-	struct backfill_context *ctx = data;
+	संरचना backfill_context *ctx = दत्त;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	यदि (type != OBJ_BLOB)
+		प्रत्यागम 0;
 
-	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+	प्रति (आकार_t i = 0; i < list->nr; i++) {
+		यदि (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	यदि (ctx->current_batch.nr >= ctx->min_batch_आकार)
 		download_batch(ctx);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void reject_unsupported_rev_list_options(struct rev_info *revs)
+स्थिर शून्य reject_unsupported_rev_list_options(संरचना rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	यदि (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	यदि (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	यदि (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	यदि (revs->पङ्क्तिः_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	यदि (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	यदि (!मार्गः_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	यदि (revs->filter.blob_सीमा_मानम्)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+स्थिर पूर्णाङ्क do_backfill(संरचना backfill_context *ctx)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	संरचना मार्गः_walk_info info = मार्गः_WALK_INFO_INIT;
+	पूर्णाङ्क ret;
 
-	if (ctx->sparse) {
+	यदि (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
-			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+		यदि (get_sparse_checkout_patterns(info.pl)) {
+			मार्गः_walk_info_clear(&info);
+			प्रत्यागम error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
-		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
+	यदि (!ctx->revs.pending.nr)
+		सङ्कलय_शीर्ष_गन्तव्यम्_pending(&ctx->revs);
+	यदि (ctx->include_धाराः)
 		ctx->revs.edge_hint = 1;
 
 	info.blobs = 1;
-	info.tags = info.commits = info.trees = 0;
+	info.चिह्नकानि = info.commits = info.trees = 0;
 
 	info.revs = &ctx->revs;
-	info.path_fn = fill_missing_blobs;
-	info.path_fn_data = ctx;
+	info.मार्गः_fn = fill_missing_blobs;
+	info.मार्गः_fn_दत्त = ctx;
 
-	ret = walk_objects_by_path(&info);
+	ret = walk_objects_by_मार्गः(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	यदि (!ret)
 		download_batch(ctx);
 
-	path_walk_info_clear(&info);
-	return ret;
+	मार्गः_walk_info_clear(&info);
+	प्रत्यागम ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+पूर्णाङ्क cmd_backfill(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *उपसर्गः, संरचना repository *repo)
 {
-	int result;
-	struct backfill_context ctx = {
+	पूर्णाङ्क परिणाम;
+	संरचना backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
-		.min_batch_size = 50000,
+		.min_batch_आकार = 50000,
 		.sparse = -1,
 		.revs = REV_INFO_INIT,
-		.include_edges = 1,
+		.include_धाराः = 1,
 	};
-	struct option options[] = {
-		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_size,
+	संरचना option options[] = {
+		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_आकार,
 			     N_("Minimum number of objects to request at a time")),
 		OPT_BOOL(0, "sparse", &ctx.sparse,
 			 N_("Restrict the missing objects to the current sparse-checkout")),
-		OPT_BOOL(0, "include-edges", &ctx.include_edges,
+		OPT_BOOL(0, "include-edges", &ctx.include_धाराः,
 			 N_("Include blobs from boundary commits in the backfill")),
-		OPT_END(),
+		OPT_अन्तः(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, builtin_backfill_usage,
+	argc = parse_options(argc, argv, उपसर्गः, options, builtin_backfill_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_init_revisions(repo, &ctx.revs, prefix);
-	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
+	repo_init_revisions(repo, &ctx.revs, उपसर्गः);
+	argc = सज्जता_revisions(argc, argv, &ctx.revs, रिक्त);
 
-	if (argc > 1)
+	यदि (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, रिक्त);
 
-	if (ctx.sparse < 0)
+	यदि (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
-	result = do_backfill(&ctx);
+	परिणाम = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	प्रत्यागम परिणाम;
 }

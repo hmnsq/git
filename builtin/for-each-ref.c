@@ -1,26 +1,26 @@
-#include "builtin.h"
-#include "commit.h"
-#include "config.h"
-#include "environment.h"
-#include "for-each-ref.h"
-#include "gettext.h"
-#include "object.h"
-#include "parse-options.h"
-#include "ref-filter.h"
-#include "strbuf.h"
-#include "strvec.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "for-each-ref.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "ref-filter.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "strvec.h"
 
-int for_each_ref_core(int argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
+पूर्णाङ्क for_each_ref_core(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *उपसर्गः, संरचना repository *repo, ध्रुव वर्ण *ध्रुव *usage)
 {
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_format format = REF_FORMAT_INIT;
-	unsigned int flags = FILTER_REFS_REGULAR;
-	struct strvec vec = STRVEC_INIT;
+	संरचना ref_क्रमणम् *क्रमणम्;
+	संरचना string_list क्रमणम्_options = STRING_LIST_INIT_DUP;
+	पूर्णाङ्क icase = 0, include_मूलम्_refs = 0, from_stdin = 0;
+	संरचना ref_filter filter = REF_FILTER_INIT;
+	संरचना ref_format format = REF_FORMAT_INIT;
+	अचिह्नित पूर्णाङ्क flags = FILTER_REFS_REGULAR;
+	संरचना strvec vec = STRVEC_INIT;
 
-	struct option opts[] = {
+	संरचना option opts[] = {
 		OPT_BIT('s', "shell", &format.quote_style,
 			N_("quote placeholders suitably for shells"), QUOTE_SHELL),
 		OPT_BIT('p', "perl",  &format.quote_style,
@@ -29,96 +29,96 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 			N_("quote placeholders suitably for python"), QUOTE_PYTHON),
 		OPT_BIT(0 , "tcl",  &format.quote_style,
 			N_("quote placeholders suitably for Tcl"), QUOTE_TCL),
-		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_empty,
+		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_रिक्तानि,
 			N_("do not output a newline after empty formatted refs")),
 
-		OPT_GROUP(""),
-		OPT_INTEGER( 0 , "count", &format.array_opts.max_count, N_("show only <n> matched refs")),
+		OPT_गणः(""),
+		OPT_INTEGER( 0 , "count", &format.array_opts.max_गणनम्, N_("show only <n> matched refs")),
 		OPT_STRING(  0 , "format", &format.format, N_("format"), N_("format to use for the output")),
 		OPT_STRING(  0 , "start-after", &filter.start_after, N_("marker"), N_("start iteration after the provided marker")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
 		OPT_REF_FILTER_EXCLUDE(&filter),
-		OPT_REF_SORT(&sorting_options),
+		OPT_REF_क्रमय(&क्रमणम्_options),
 		OPT_CALLBACK(0, "points-at", &filter.points_at,
 			     N_("object"), N_("print only refs which points at the given object"),
 			     parse_opt_object_name),
 		OPT_MERGED(&filter, N_("print only refs that are merged")),
 		OPT_NO_MERGED(&filter, N_("print only refs that are not merged")),
-		OPT_CONTAINS(&filter.with_commit, N_("print only refs which contain the commit")),
-		OPT_NO_CONTAINS(&filter.no_commit, N_("print only refs which don't contain the commit")),
+		OPT_अन्तर्भवति(&filter.with_commit, N_("print only refs which contain the commit")),
+		OPT_NO_अन्तर्भवति(&filter.no_commit, N_("print only refs which don't contain the commit")),
 		OPT_BOOL(0, "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read reference patterns from stdin")),
-		OPT_BOOL(0, "include-root-refs", &include_root_refs, N_("also include HEAD ref and pseudorefs")),
-		OPT_END(),
+		OPT_BOOL(0, "include-root-refs", &include_मूलम्_refs, N_("also include HEAD ref and pseudorefs")),
+		OPT_अन्तः(),
 	};
 
 	format.format = "%(objectname) %(objecttype)\t%(refname)";
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, रिक्त);
 
 	/* Set default (refname) sorting */
-	string_list_append(&sorting_options, "refname");
+	string_list_append(&क्रमणम्_options, "refname");
 
-	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
-		error("invalid --count argument: `%d'", format.array_opts.max_count);
+	parse_options(argc, argv, उपसर्गः, opts, usage, 0);
+	यदि (format.array_opts.max_गणनम् < 0) {
+		error("invalid --count argument: `%d'", format.array_opts.max_गणनम्);
 		usage_with_options(usage, opts);
 	}
-	if (HAS_MULTI_BITS(format.quote_style)) {
+	यदि (HAS_MULTI_द्वयङ्काः(format.quote_style)) {
 		error("more than one quoting style?");
 		usage_with_options(usage, opts);
 	}
-	if (verify_ref_format(&format))
+	यदि (verify_ref_format(&format))
 		usage_with_options(usage, opts);
 
-	if (filter.start_after && sorting_options.nr > 1)
+	यदि (filter.start_after && क्रमणम्_options.nr > 1)
 		die(_("cannot use --start-after with custom sort options"));
 
-	sorting = ref_sorting_options(&sorting_options);
-	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
+	क्रमणम् = ref_क्रमणम्_options(&क्रमणम्_options);
+	ref_क्रमणम्_समुच्चयः_क्रमय_flags_all(क्रमणम्, REF_क्रमणम्_ICASE, icase);
 	filter.ignore_case = icase;
 
-	if (from_stdin) {
-		struct strbuf line = STRBUF_INIT;
+	यदि (from_stdin) {
+		संरचना strbuf पङ्क्तिः = STRBUF_INIT;
 
-		if (argv[0])
+		यदि (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
-			strvec_push(&vec, line.buf);
+		यावत् (strbuf_getline(&पङ्क्तिः, stdin) != EOF)
+			strvec_प्रक्षिप(&vec, पङ्क्तिः.buf);
 
-		strbuf_release(&line);
+		strbuf_release(&पङ्क्तिः);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
-	} else {
+	} अन्यथा {
 		filter.name_patterns = argv;
 	}
 
-	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
+	यदि (filter.start_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
-		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
+	यदि (include_मूलम्_refs)
+		flags |= FILTER_REFS_मूलम्_REFS | FILTER_REFS_DETACHED_शीर्ष;
 
-	filter.match_as_path = 1;
-	filter_and_format_refs(&filter, flags, sorting, &format);
+	filter.मेलनम्_as_मार्गः = 1;
+	filter_and_format_refs(&filter, flags, क्रमणम्, &format);
 
 	ref_filter_clear(&filter);
-	ref_sorting_release(sorting);
+	ref_क्रमणम्_release(क्रमणम्);
 	strvec_clear(&vec);
-	return 0;
+	प्रत्यागम 0;
 }
 
-int cmd_for_each_ref(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+पूर्णाङ्क cmd_for_each_ref(पूर्णाङ्क argc,
+		     ध्रुव वर्ण **argv,
+		     ध्रुव वर्ण *उपसर्गः,
+		     संरचना repository *repo)
 {
-	static char const * const for_each_ref_usage[] = {
+	स्थिर वर्ण ध्रुव * ध्रुव for_each_ref_usage[] = {
 		N_("git for-each-ref " COMMON_USAGE_FOR_EACH_REF),
-		NULL
+		रिक्त
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
+	प्रत्यागम for_each_ref_core(argc, argv, उपसर्गः, repo, for_each_ref_usage);
 }

@@ -2,73 +2,73 @@
  * Another stupid program, this one parsing the headers of an
  * email to figure out authorship and subject
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "strbuf.h"
-#include "mailinfo.h"
-#include "parse-options.h"
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "abspath.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "mailinfo.h"
+#अन्तर्भाव "parse-options.h"
 
-static const char * const mailinfo_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव mailinfo_usage[] = {
 	/* TRANSLATORS: keep <> in "<" mail ">" info. */
 	N_("git mailinfo [<options>] <msg> <patch> < mail >info"),
-	NULL,
+	रिक्त,
 };
 
-struct metainfo_charset
+संरचना metainfo_charset
 {
-	enum {
+	गणना {
 		CHARSET_DEFAULT,
 		CHARSET_NO_REENCODE,
 		CHARSET_EXPLICIT,
 	} policy;
-	const char *charset;
+	ध्रुव वर्ण *charset;
 };
 
-static int parse_opt_explicit_encoding(const struct option *opt,
-				       const char *arg, int unset)
+स्थिर पूर्णाङ्क parse_opt_explicit_encoding(ध्रुव संरचना option *opt,
+				       ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct metainfo_charset *meta_charset = opt->value;
+	संरचना metainfo_charset *meta_charset = opt->मानम्;
 
 	BUG_ON_OPT_NEG(unset);
 
 	meta_charset->policy = CHARSET_EXPLICIT;
 	meta_charset->charset = arg;
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int unset)
+स्थिर पूर्णाङ्क parse_opt_quoted_cr(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	यदि (mailinfo_parse_quoted_cr_action(arg, opt->मानम्) != 0)
+		प्रत्यागम error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	प्रत्यागम 0;
 }
 
-int cmd_mailinfo(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+पूर्णाङ्क cmd_mailinfo(पूर्णाङ्क argc,
+		 ध्रुव वर्ण **argv,
+		 ध्रुव वर्ण *उपसर्गः,
+		 संरचना repository *repo अप्रयुक्तम्)
 {
-	struct metainfo_charset meta_charset;
-	struct mailinfo mi;
-	int status;
-	char *msgfile, *patchfile;
+	संरचना metainfo_charset meta_charset;
+	संरचना mailinfo mi;
+	पूर्णाङ्क स्थितिः;
+	वर्ण *msgfile, *patchfile;
 
-	struct option options[] = {
-		OPT_BOOL('k', NULL, &mi.keep_subject, N_("keep subject")),
-		OPT_BOOL('b', NULL, &mi.keep_non_patch_brackets_in_subject,
+	संरचना option options[] = {
+		OPT_BOOL('k', रिक्त, &mi.keep_subject, N_("keep subject")),
+		OPT_BOOL('b', रिक्त, &mi.keep_non_patch_brackets_अन्तर्_subject,
 			 N_("keep non patch brackets in subject")),
-		OPT_BOOL('m', "message-id", &mi.add_message_id,
+		OPT_BOOL('m', "message-id", &mi.सङ्कलय_सन्देशः_id,
 			 N_("copy Message-ID to the end of commit message")),
-		OPT_SET_INT_F('u', NULL, &meta_charset.policy,
+		OPT_समुच्चयः_INT_F('u', रिक्त, &meta_charset.policy,
 			      N_("re-code metadata to i18n.commitEncoding"),
 			      CHARSET_DEFAULT, PARSE_OPT_NONEG),
-		OPT_SET_INT_F('n', NULL, &meta_charset.policy,
+		OPT_समुच्चयः_INT_F('n', रिक्त, &meta_charset.policy,
 			      N_("disable charset re-coding of metadata"),
 			      CHARSET_NO_REENCODE, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "encoding", &meta_charset, N_("encoding"),
@@ -78,42 +78,42 @@ int cmd_mailinfo(int argc,
 		OPT_CALLBACK_F(0, "quoted-cr", &mi.quoted_cr, N_("<action>"),
 			       N_("action when quoted CR is found"),
 			       PARSE_OPT_NONEG, parse_opt_quoted_cr),
-		OPT_HIDDEN_BOOL(0, "inbody-headers", &mi.use_inbody_headers,
+		OPT_HIDDEN_BOOL(0, "inbody-headers", &mi.use_inbody_शीर्षकाणि,
 			 N_("use headers in message's body")),
-		OPT_END()
+		OPT_अन्तः()
 	};
 
-	setup_mailinfo(the_repository, &mi);
+	सज्जता_mailinfo(the_repository, &mi);
 	meta_charset.policy = CHARSET_DEFAULT;
 
-	argc = parse_options(argc, argv, prefix, options, mailinfo_usage, 0);
+	argc = parse_options(argc, argv, उपसर्गः, options, mailinfo_usage, 0);
 
-	if (argc != 2)
+	यदि (argc != 2)
 		usage_with_options(mailinfo_usage, options);
 
-	switch (meta_charset.policy) {
-	case CHARSET_DEFAULT:
+	विकल्प (meta_charset.policy) {
+	पक्ष CHARSET_DEFAULT:
 		mi.metainfo_charset = get_commit_output_encoding();
-		break;
-	case CHARSET_NO_REENCODE:
-		mi.metainfo_charset = NULL;
-		break;
-	case CHARSET_EXPLICIT:
-		break;
-	default:
+		भङ्ग;
+	पक्ष CHARSET_NO_REENCODE:
+		mi.metainfo_charset = रिक्त;
+		भङ्ग;
+	पक्ष CHARSET_EXPLICIT:
+		भङ्ग;
+	स्वभाव:
 		BUG("invalid meta_charset.policy");
 	}
 
-	mi.input = stdin;
+	mi.निवेशः = stdin;
 	mi.output = stdout;
 
-	msgfile = prefix_filename(prefix, argv[0]);
-	patchfile = prefix_filename(prefix, argv[1]);
+	msgfile = उपसर्गः_filename(उपसर्गः, argv[0]);
+	patchfile = उपसर्गः_filename(उपसर्गः, argv[1]);
 
-	status = !!mailinfo(&mi, msgfile, patchfile);
+	स्थितिः = !!mailinfo(&mi, msgfile, patchfile);
 	clear_mailinfo(&mi);
 
-	free(msgfile);
-	free(patchfile);
-	return status;
+	मुक्त(msgfile);
+	मुक्त(patchfile);
+	प्रत्यागम स्थितिः;
 }

@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "transport.h"
 
-static const char usage_msg[] =
+स्थिर ध्रुव वर्ण usage_सन्देशः[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -19,70 +19,70 @@ static const char usage_msg[] =
  *
  */
 
-#define MAXCOMMAND 4096
+#परिभाषय MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+स्थिर शून्य command_loop(पूर्णाङ्क निवेशः_fd, पूर्णाङ्क output_fd)
 {
-	char buffer[MAXCOMMAND];
+	वर्ण बफर[MAXCOMMAND];
 
-	while (1) {
-		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+	यावत् (1) {
+		आकार_t i;
+		यदि (!fgets(बफर, MAXCOMMAND - 1, stdin)) {
+			यदि (ferror(stdin))
 				die("Input error");
-			return;
+			प्रत्यागम;
 		}
 		/* Strip end of line characters. */
-		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
-			buffer[--i] = 0;
+		i = वाक्यदैर्घ्यम्(बफर);
+		यावत् (i > 0 && रिक्तम्_वा(बफर[i - 1]))
+			बफर[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
-			printf("*connect\n\n");
+		यदि (!वाक्यं_तुलय(बफर, "capabilities")) {
+			प्रारूप_लिख("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
-			printf("\n");
+		} अन्यथा यदि (starts_with(बफर, "connect ")) {
+			प्रारूप_लिख("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			यदि (bidirectional_transfer_loop(निवेशः_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
-			die("Bad command: %s", buffer);
+			प्रत्यागम;
+		} अन्यथा {
+			die("Bad command: %s", बफर);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णाङ्क cmd_remote_fd(पूर्णाङ्क argc,
+		  ध्रुव वर्ण **argv,
+		  ध्रुव वर्ण *उपसर्गः,
+		  संरचना repository *repo अप्रयुक्तम्)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	पूर्णाङ्क निवेशः_fd = -1;
+	पूर्णाङ्क output_fd = -1;
+	वर्ण *अन्तः;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_रिक्तानि_उपसर्गः(उपसर्गः);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_सन्देशः);
+	यदि (argc != 3)
+		usage(usage_सन्देशः);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	निवेशः_fd = (पूर्णाङ्क)strtoul(argv[2], &अन्तः, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	यदि ((अन्तः == argv[2]) || (*अन्तः != ',' && *अन्तः != '/' && *अन्तः))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	यदि (*अन्तः == '/' || !*अन्तः) {
+		output_fd = निवेशः_fd;
+	} अन्यथा {
+		वर्ण *end2;
+		output_fd = (पूर्णाङ्क)strtoul(अन्तः + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		यदि ((end2 == अन्तः + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(निवेशः_fd, output_fd);
+	प्रत्यागम 0;
 }

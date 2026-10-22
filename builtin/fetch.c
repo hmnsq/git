@@ -2,208 +2,208 @@
  * "git fetch"
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#परिभाषय DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "gettext.h"
-#include "environment.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "oidset.h"
-#include "oid-array.h"
-#include "commit.h"
-#include "string-list.h"
-#include "remote.h"
-#include "transport.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "sigchain.h"
-#include "submodule-config.h"
-#include "submodule.h"
-#include "connected.h"
-#include "strvec.h"
-#include "utf8.h"
-#include "pager.h"
-#include "path.h"
-#include "pkt-line.h"
-#include "list-objects-filter-options.h"
-#include "commit-reach.h"
-#include "branch.h"
-#include "promisor-remote.h"
-#include "commit-graph.h"
-#include "shallow.h"
-#include "trace.h"
-#include "trace2.h"
-#include "bundle-uri.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "advice.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "refs.h"
+#अन्तर्भाव "refspec.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "odb/source.h"
+#अन्तर्भाव "oidset.h"
+#अन्तर्भाव "oid-array.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "remote.h"
+#अन्तर्भाव "transport.h"
+#अन्तर्भाव "run-command.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "sigchain.h"
+#अन्तर्भाव "submodule-config.h"
+#अन्तर्भाव "submodule.h"
+#अन्तर्भाव "connected.h"
+#अन्तर्भाव "strvec.h"
+#अन्तर्भाव "utf8.h"
+#अन्तर्भाव "pager.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "pkt-line.h"
+#अन्तर्भाव "list-objects-filter-options.h"
+#अन्तर्भाव "commit-reach.h"
+#अन्तर्भाव "branch.h"
+#अन्तर्भाव "promisor-remote.h"
+#अन्तर्भाव "commit-graph.h"
+#अन्तर्भाव "shallow.h"
+#अन्तर्भाव "trace.h"
+#अन्तर्भाव "trace2.h"
+#अन्तर्भाव "bundle-uri.h"
 
-#define FORCED_UPDATES_DELAY_WARNING_IN_MS (10 * 1000)
+#परिभाषय FORCED_UPDATES_DELAY_WARNING_अन्तर्_MS (10 * 1000)
 
-static const char * const builtin_fetch_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_fetch_usage[] = {
 	N_("git fetch [<options>] [<repository> [<refspec>...]]"),
 	N_("git fetch [<options>] <group>"),
 	N_("git fetch --multiple [<options>] [(<repository>|<group>)...]"),
 	N_("git fetch --all [<options>]"),
-	NULL
+	रिक्त
 };
 
-enum {
-	TAGS_UNSET = 0,
-	TAGS_DEFAULT = 1,
-	TAGS_SET = 2
+गणना {
+	चिह्नकानि_UNSET = 0,
+	चिह्नकानि_DEFAULT = 1,
+	चिह्नकानि_समुच्चयः = 2
 };
 
-enum display_format {
-	DISPLAY_FORMAT_FULL,
+गणना display_format {
+	DISPLAY_FORMAT_पूर्णम्,
 	DISPLAY_FORMAT_COMPACT,
 	DISPLAY_FORMAT_PORCELAIN,
 };
 
-struct display_state {
-	struct strbuf buf;
+संरचना display_state {
+	संरचना strbuf buf;
 
-	int refcol_width;
-	enum display_format format;
+	पूर्णाङ्क refcol_विस्तारः;
+	गणना display_format format;
 
-	char *url;
-	int url_len, shown_url;
+	वर्ण *url;
+	पूर्णाङ्क url_len, shown_url;
 };
 
-static uint64_t forced_updates_ms = 0;
-static int prefetch = 0;
-static int prune = -1; /* unspecified */
-#define PRUNE_BY_DEFAULT 0 /* do we prune by default? */
+स्थिर uint64_t forced_updates_ms = 0;
+स्थिर पूर्णाङ्क prefetch = 0;
+स्थिर पूर्णाङ्क prune = -1; /* unspecified */
+#परिभाषय PRUNE_BY_DEFAULT 0 /* do we prune by default? */
 
-static int prune_tags = -1; /* unspecified */
-#define PRUNE_TAGS_BY_DEFAULT 0 /* do we prune tags by default? */
+स्थिर पूर्णाङ्क prune_चिह्नकानि = -1; /* unspecified */
+#परिभाषय PRUNE_चिह्नकानि_BY_DEFAULT 0 /* do we prune tags by default? */
 
-static int append, dry_run, force, keep, update_head_ok;
-static int write_fetch_head = 1;
-static int verbosity, deepen_relative, set_upstream, refetch;
-static int progress = -1;
-static int tags = TAGS_DEFAULT, update_shallow, deepen;
-static int atomic_fetch;
-static enum transport_family family;
-static const char *depth;
-static const char *deepen_since;
-static const char *upload_pack;
-static struct string_list deepen_not = STRING_LIST_INIT_NODUP;
-static struct strbuf default_rla = STRBUF_INIT;
-static struct transport *gtransport;
-static struct transport *gsecondary;
-static struct refspec refmap;
-static struct string_list server_options = STRING_LIST_INIT_DUP;
-static struct string_list negotiation_restrict = STRING_LIST_INIT_NODUP;
-static struct string_list negotiation_include = STRING_LIST_INIT_NODUP;
+स्थिर पूर्णाङ्क append, dry_सततम्, force, keep, update_शीर्ष_ok;
+स्थिर पूर्णाङ्क write_fetch_शीर्ष = 1;
+स्थिर पूर्णाङ्क verbosity, deepen_relative, समुच्चयः_upstream, refetch;
+स्थिर पूर्णाङ्क प्रगतिः = -1;
+स्थिर पूर्णाङ्क चिह्नकानि = चिह्नकानि_DEFAULT, update_shallow, deepen;
+स्थिर पूर्णाङ्क atomic_fetch;
+स्थिर गणना transport_family family;
+स्थिर ध्रुव वर्ण *गभीरता;
+स्थिर ध्रुव वर्ण *deepen_since;
+स्थिर ध्रुव वर्ण *upload_pack;
+स्थिर संरचना string_list deepen_not = STRING_LIST_INIT_NODUP;
+स्थिर संरचना strbuf default_rla = STRBUF_INIT;
+स्थिर संरचना transport *gtransport;
+स्थिर संरचना transport *gsecondary;
+स्थिर संरचना refspec refmap;
+स्थिर संरचना string_list server_options = STRING_LIST_INIT_DUP;
+स्थिर संरचना string_list negotiation_restrict = STRING_LIST_INIT_NODUP;
+स्थिर संरचना string_list negotiation_include = STRING_LIST_INIT_NODUP;
 
-struct fetch_config {
-	enum display_format display_format;
-	char *follow_remote_head_raw;
-	int follow_remote_head_seen;
-	int all;
-	int prune;
-	int prune_tags;
-	int show_forced_updates;
-	int recurse_submodules;
-	int parallel;
-	int submodule_fetch_jobs;
+संरचना fetch_config {
+	गणना display_format display_format;
+	वर्ण *follow_remote_शीर्ष_raw;
+	पूर्णाङ्क follow_remote_शीर्ष_आलोकितम्;
+	पूर्णाङ्क all;
+	पूर्णाङ्क prune;
+	पूर्णाङ्क prune_चिह्नकानि;
+	पूर्णाङ्क show_forced_updates;
+	पूर्णाङ्क recurse_submodules;
+	पूर्णाङ्क parallel;
+	पूर्णाङ्क submodule_fetch_jobs;
 };
 
-static int git_fetch_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क git_fetch_config(ध्रुव वर्ण *k, ध्रुव वर्ण *v,
+			    ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	struct fetch_config *fetch_config = cb;
+	संरचना fetch_config *fetch_config = cb;
 
-	if (!strcmp(k, "fetch.all")) {
+	यदि (!वाक्यं_तुलय(k, "fetch.all")) {
 		fetch_config->all = git_config_bool(k, v);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "fetch.prune")) {
+	यदि (!वाक्यं_तुलय(k, "fetch.prune")) {
 		fetch_config->prune = git_config_bool(k, v);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "fetch.prunetags")) {
-		fetch_config->prune_tags = git_config_bool(k, v);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "fetch.prunetags")) {
+		fetch_config->prune_चिह्नकानि = git_config_bool(k, v);
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "fetch.showforcedupdates")) {
+	यदि (!वाक्यं_तुलय(k, "fetch.showforcedupdates")) {
 		fetch_config->show_forced_updates = git_config_bool(k, v);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "submodule.recurse")) {
-		int r = git_config_bool(k, v) ?
+	यदि (!वाक्यं_तुलय(k, "submodule.recurse")) {
+		पूर्णाङ्क r = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
 		fetch_config->recurse_submodules = r;
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "submodule.fetchjobs")) {
+	यदि (!वाक्यं_तुलय(k, "submodule.fetchjobs")) {
 		fetch_config->submodule_fetch_jobs = parse_submodule_fetchjobs(k, v, ctx->kvi);
-		return 0;
-	} else if (!strcmp(k, "fetch.recursesubmodules")) {
+		प्रत्यागम 0;
+	} अन्यथा यदि (!वाक्यं_तुलय(k, "fetch.recursesubmodules")) {
 		fetch_config->recurse_submodules = parse_fetch_recurse_submodules_arg(k, v);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "fetch.parallel")) {
+	यदि (!वाक्यं_तुलय(k, "fetch.parallel")) {
 		fetch_config->parallel = git_config_int(k, v, ctx->kvi);
-		if (fetch_config->parallel < 0)
+		यदि (fetch_config->parallel < 0)
 			die(_("fetch.parallel cannot be negative"));
-		if (!fetch_config->parallel)
+		यदि (!fetch_config->parallel)
 			fetch_config->parallel = online_cpus();
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "fetch.output")) {
-		if (!v)
-			return config_error_nonbool(k);
-		else if (!strcasecmp(v, "full"))
-			fetch_config->display_format = DISPLAY_FORMAT_FULL;
-		else if (!strcasecmp(v, "compact"))
+	यदि (!वाक्यं_तुलय(k, "fetch.output")) {
+		यदि (!v)
+			प्रत्यागम config_error_nonbool(k);
+		अन्यथा यदि (!strcasecmp(v, "full"))
+			fetch_config->display_format = DISPLAY_FORMAT_पूर्णम्;
+		अन्यथा यदि (!strcasecmp(v, "compact"))
 			fetch_config->display_format = DISPLAY_FORMAT_COMPACT;
-		else
+		अन्यथा
 			die(_("invalid value for '%s': '%s'"),
 			    "fetch.output", v);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(k, "fetch.followremotehead")) {
-		free(fetch_config->follow_remote_head_raw);
-		fetch_config->follow_remote_head_raw = xstrdup_or_null(v);
-		fetch_config->follow_remote_head_seen = 1;
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "fetch.followremotehead")) {
+		मुक्त(fetch_config->follow_remote_शीर्ष_raw);
+		fetch_config->follow_remote_शीर्ष_raw = xstrdup_or_null(v);
+		fetch_config->follow_remote_शीर्ष_आलोकितम् = 1;
+		प्रत्यागम 0;
 	}
 
-	return git_default_config(k, v, ctx, cb);
+	प्रत्यागम git_default_config(k, v, ctx, cb);
 }
 
-static enum follow_remote_head_settings get_follow_remote_head(const char *setting)
+स्थिर गणना follow_remote_शीर्ष_settings get_follow_remote_शीर्ष(ध्रुव वर्ण *setting)
 {
-	if (!setting)
+	यदि (!setting)
 		die(_("missing value for 'fetch.followRemoteHEAD'"));
-	else if (!strcmp(setting, "never"))
-		return FOLLOW_REMOTE_NEVER;
-	else if (!strcmp(setting, "create"))
-		return FOLLOW_REMOTE_CREATE;
-	else if (!strcmp(setting, "warn"))
-		return FOLLOW_REMOTE_WARN;
-	else if (!strcmp(setting, "always"))
-		return FOLLOW_REMOTE_ALWAYS;
+	अन्यथा यदि (!वाक्यं_तुलय(setting, "never"))
+		प्रत्यागम FOLLOW_REMOTE_NEVER;
+	अन्यथा यदि (!वाक्यं_तुलय(setting, "create"))
+		प्रत्यागम FOLLOW_REMOTE_CREATE;
+	अन्यथा यदि (!वाक्यं_तुलय(setting, "warn"))
+		प्रत्यागम FOLLOW_REMOTE_WARN;
+	अन्यथा यदि (!वाक्यं_तुलय(setting, "always"))
+		प्रत्यागम FOLLOW_REMOTE_ALWAYS;
 	warning(_("unrecognized fetch.followRemoteHEAD value '%s' ignored"), setting);
-	return BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
+	प्रत्यागम BUILTIN_FOLLOW_REMOTE_शीर्ष_DFLT;
 }
 
-static int parse_refmap_arg(const struct option *opt, const char *arg, int unset)
+स्थिर पूर्णाङ्क parse_refmap_arg(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
@@ -211,50 +211,50 @@ static int parse_refmap_arg(const struct option *opt, const char *arg, int unset
 	 * "git fetch --refmap='' origin foo"
 	 * can be used to tell the command not to store anywhere
 	 */
-	refspec_append(opt->value, arg);
+	refspec_append(opt->मानम्, arg);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void unlock_pack(unsigned int flags)
+स्थिर शून्य unlock_pack(अचिह्नित पूर्णाङ्क flags)
 {
-	if (gtransport)
+	यदि (gtransport)
 		transport_unlock_pack(gtransport, flags);
-	if (gsecondary)
+	यदि (gsecondary)
 		transport_unlock_pack(gsecondary, flags);
 }
 
-static void unlock_pack_atexit(void)
+स्थिर शून्य unlock_pack_atexit(शून्य)
 {
 	unlock_pack(0);
 }
 
-static void unlock_pack_on_signal(int signo)
+स्थिर शून्य unlock_pack_on_signal(पूर्णाङ्क signo)
 {
-	unlock_pack(TRANSPORT_UNLOCK_PACK_IN_SIGNAL_HANDLER);
-	sigchain_pop(signo);
-	raise(signo);
+	unlock_pack(TRANSPORT_UNLOCK_PACK_अन्तर्_SIGNAL_HANDLER);
+	sigchain_निष्कासय(signo);
+	उत्थापय(signo);
 }
 
-static void add_merge_config(struct ref **head,
-			   const struct ref *remote_refs,
-		           struct branch *branch,
-		           struct ref ***tail)
+स्थिर शून्य सङ्कलय_merge_config(संरचना ref **शीर्ष,
+			   ध्रुव संरचना ref *remote_refs,
+		           संरचना branch *branch,
+		           संरचना ref ***पुच्छ)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	for (i = 0; i < branch->merge_nr; i++) {
-		struct ref *rm, **old_tail = *tail;
-		struct refspec_item refspec;
+	प्रति (i = 0; i < branch->merge_nr; i++) {
+		संरचना ref *rm, **old_पुच्छ = *पुच्छ;
+		संरचना refspec_item refspec;
 
-		for (rm = *head; rm; rm = rm->next) {
-			if (branch_merge_matches(branch, i, rm->name)) {
-				rm->fetch_head_status = FETCH_HEAD_MERGE;
-				break;
+		प्रति (rm = *शीर्ष; rm; rm = rm->अग्र) {
+			यदि (branch_merge_matches(branch, i, rm->name)) {
+				rm->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_MERGE;
+				भङ्ग;
 			}
 		}
-		if (rm)
-			continue;
+		यदि (rm)
+			अनुवर्त;
 
 		/*
 		 * Not fetched to a remote-tracking branch?  We need to fetch
@@ -266,122 +266,122 @@ static void add_merge_config(struct ref **head,
 		 * there is no entry in the resulting FETCH_HEAD marked
 		 * for merging.
 		 */
-		memset(&refspec, 0, sizeof(refspec));
+		स्मृतिं_पूरय(&refspec, 0, परिमाण(refspec));
 		refspec.src = branch->merge[i]->src;
-		get_fetch_map(remote_refs, &refspec, tail, 1);
-		for (rm = *old_tail; rm; rm = rm->next)
-			rm->fetch_head_status = FETCH_HEAD_MERGE;
+		get_fetch_map(remote_refs, &refspec, पुच्छ, 1);
+		प्रति (rm = *old_पुच्छ; rm; rm = rm->अग्र)
+			rm->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_MERGE;
 	}
 }
 
-static void create_fetch_oidset(struct ref **head, struct oidset *out)
+स्थिर शून्य create_fetch_oidset(संरचना ref **शीर्ष, संरचना oidset *बहिर्गमनम्)
 {
-	struct ref *rm = *head;
-	while (rm) {
-		oidset_insert(out, &rm->old_oid);
-		rm = rm->next;
+	संरचना ref *rm = *शीर्ष;
+	यावत् (rm) {
+		oidset_निवेशय(बहिर्गमनम्, &rm->old_oid);
+		rm = rm->अग्र;
 	}
 }
 
-struct refname_hash_entry {
-	struct hashmap_entry ent;
-	struct object_id oid;
-	int ignore;
-	char refname[FLEX_ARRAY];
+संरचना refname_hash_प्रविष्टिः {
+	संरचना hashmap_प्रविष्टिः ent;
+	संरचना object_id oid;
+	पूर्णाङ्क ignore;
+	वर्ण refname[FLEX_ARRAY];
 };
 
-static int refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
-				  const struct hashmap_entry *eptr,
-				  const struct hashmap_entry *entry_or_key,
-				  const void *keydata)
+स्थिर पूर्णाङ्क refname_hash_प्रविष्टिः_cmp(ध्रुव शून्य *hashmap_cmp_fn_दत्त अप्रयुक्तम्,
+				  ध्रुव संरचना hashmap_प्रविष्टिः *eptr,
+				  ध्रुव संरचना hashmap_प्रविष्टिः *प्रविष्टिः_or_कुञ्चिका,
+				  ध्रुव शून्य *keydata)
 {
-	const struct refname_hash_entry *e1, *e2;
+	ध्रुव संरचना refname_hash_प्रविष्टिः *e1, *e2;
 
-	e1 = container_of(eptr, const struct refname_hash_entry, ent);
-	e2 = container_of(entry_or_key, const struct refname_hash_entry, ent);
-	return strcmp(e1->refname, keydata ? keydata : e2->refname);
+	e1 = container_सम्बन्धि(eptr, ध्रुव संरचना refname_hash_प्रविष्टिः, ent);
+	e2 = container_सम्बन्धि(प्रविष्टिः_or_कुञ्चिका, ध्रुव संरचना refname_hash_प्रविष्टिः, ent);
+	प्रत्यागम वाक्यं_तुलय(e1->refname, keydata ? keydata : e2->refname);
 }
 
-static struct refname_hash_entry *refname_hash_add(struct hashmap *map,
-						   const char *refname,
-						   const struct object_id *oid)
+स्थिर संरचना refname_hash_प्रविष्टिः *refname_hash_सङ्कलय(संरचना hashmap *map,
+						   ध्रुव वर्ण *refname,
+						   ध्रुव संरचना object_id *oid)
 {
-	struct refname_hash_entry *ent;
-	size_t len = strlen(refname);
+	संरचना refname_hash_प्रविष्टिः *ent;
+	आकार_t len = वाक्यदैर्घ्यम्(refname);
 
 	FLEX_ALLOC_MEM(ent, refname, refname, len);
-	hashmap_entry_init(&ent->ent, strhash(refname));
+	hashmap_प्रविष्टिः_init(&ent->ent, strhash(refname));
 	oidcpy(&ent->oid, oid);
-	hashmap_add(map, &ent->ent);
-	return ent;
+	hashmap_सङ्कलय(map, &ent->ent);
+	प्रत्यागम ent;
 }
 
-static int add_one_refname(const struct reference *ref, void *cbdata)
+स्थिर पूर्णाङ्क सङ्कलय_one_refname(ध्रुव संरचना reference *ref, शून्य *cbdata)
 {
-	struct hashmap *refname_map = cbdata;
+	संरचना hashmap *refname_map = cbdata;
 
-	(void) refname_hash_add(refname_map, ref->name, ref->oid);
-	return 0;
+	(शून्य) refname_hash_सङ्कलय(refname_map, ref->name, ref->oid);
+	प्रत्यागम 0;
 }
 
-static void refname_hash_init(struct hashmap *map)
+स्थिर शून्य refname_hash_init(संरचना hashmap *map)
 {
-	hashmap_init(map, refname_hash_entry_cmp, NULL, 0);
+	hashmap_init(map, refname_hash_प्रविष्टिः_cmp, रिक्त, 0);
 }
 
-static int refname_hash_exists(struct hashmap *map, const char *refname)
+स्थिर पूर्णाङ्क refname_hash_exists(संरचना hashmap *map, ध्रुव वर्ण *refname)
 {
-	return !!hashmap_get_from_hash(map, strhash(refname), refname);
+	प्रत्यागम !!hashmap_get_from_hash(map, strhash(refname), refname);
 }
 
-static void clear_item(struct refname_hash_entry *item)
+स्थिर शून्य clear_item(संरचना refname_hash_प्रविष्टिः *item)
 {
 	item->ignore = 1;
 }
 
 
-static void add_already_queued_tags(const char *refname,
-				    const struct object_id *old_oid UNUSED,
-				    const struct object_id *new_oid,
-				    void *cb_data)
+स्थिर शून्य सङ्कलय_already_queued_चिह्नकानि(ध्रुव वर्ण *refname,
+				    ध्रुव संरचना object_id *old_oid अप्रयुक्तम्,
+				    ध्रुव संरचना object_id *new_oid,
+				    शून्य *cb_दत्त)
 {
-	struct hashmap *queued_tags = cb_data;
-	if (starts_with(refname, "refs/tags/") && new_oid)
-		(void) refname_hash_add(queued_tags, refname, new_oid);
+	संरचना hashmap *queued_चिह्नकानि = cb_दत्त;
+	यदि (starts_with(refname, "refs/tags/") && new_oid)
+		(शून्य) refname_hash_सङ्कलय(queued_चिह्नकानि, refname, new_oid);
 }
 
-static void find_non_local_tags(const struct ref *refs,
-				struct ref_transaction *transaction,
-				struct ref **head,
-				struct ref ***tail)
+स्थिर शून्य find_non_local_चिह्नकानि(ध्रुव संरचना ref *refs,
+				संरचना ref_transaction *transaction,
+				संरचना ref **शीर्ष,
+				संरचना ref ***पुच्छ)
 {
-	struct hashmap existing_refs;
-	struct hashmap remote_refs;
-	struct oidset fetch_oids = OIDSET_INIT;
-	struct string_list remote_refs_list = STRING_LIST_INIT_NODUP;
-	struct string_list_item *remote_ref_item;
-	const struct ref *ref;
-	struct refname_hash_entry *item = NULL;
+	संरचना hashmap existing_refs;
+	संरचना hashmap remote_refs;
+	संरचना oidset fetch_oids = OIDSET_INIT;
+	संरचना string_list remote_refs_list = STRING_LIST_INIT_NODUP;
+	संरचना string_list_item *remote_ref_item;
+	ध्रुव संरचना ref *ref;
+	संरचना refname_hash_प्रविष्टिः *item = रिक्त;
 
 	refname_hash_init(&existing_refs);
 	refname_hash_init(&remote_refs);
-	create_fetch_oidset(head, &fetch_oids);
+	create_fetch_oidset(शीर्ष, &fetch_oids);
 
-	refs_for_each_ref(get_main_ref_store(the_repository), add_one_refname,
+	refs_for_each_ref(get_main_ref_store(the_repository), सङ्कलय_one_refname,
 			  &existing_refs);
 
 	/*
 	 * If we already have a transaction, then we need to filter out all
 	 * tags which have already been queued up.
 	 */
-	if (transaction)
+	यदि (transaction)
 		ref_transaction_for_each_queued_update(transaction,
-						       add_already_queued_tags,
+						       सङ्कलय_already_queued_चिह्नकानि,
 						       &existing_refs);
 
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
-			continue;
+	प्रति (ref = refs; ref; ref = ref->अग्र) {
+		यदि (!starts_with(ref->name, "refs/tags/"))
+			अनुवर्त;
 
 		/*
 		 * The peeled ref always follows the matching base
@@ -389,15 +389,15 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to fetch then we can mark the ref entry in the list
 		 * as one to ignore by setting util to NULL.
 		 */
-		if (ends_with(ref->name, "^{}")) {
-			if (item &&
+		यदि (अन्ताः_with(ref->name, "^{}")) {
+			यदि (item &&
 			    !odb_has_object(the_repository->objects, &ref->old_oid, 0) &&
-			    !oidset_contains(&fetch_oids, &ref->old_oid) &&
+			    !oidset_अन्तर्भवति(&fetch_oids, &ref->old_oid) &&
 			    !odb_has_object(the_repository->objects, &item->oid, 0) &&
-			    !oidset_contains(&fetch_oids, &item->oid))
+			    !oidset_अन्तर्भवति(&fetch_oids, &item->oid))
 				clear_item(item);
-			item = NULL;
-			continue;
+			item = रिक्त;
+			अनुवर्त;
 		}
 
 		/*
@@ -406,30 +406,30 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to check if it is a lightweight tag that we want to
 		 * fetch.
 		 */
-		if (item &&
+		यदि (item &&
 		    !odb_has_object(the_repository->objects, &item->oid, 0) &&
-		    !oidset_contains(&fetch_oids, &item->oid))
+		    !oidset_अन्तर्भवति(&fetch_oids, &item->oid))
 			clear_item(item);
 
-		item = NULL;
+		item = रिक्त;
 
 		/* skip duplicates and refs that we already have */
-		if (refname_hash_exists(&remote_refs, ref->name) ||
+		यदि (refname_hash_exists(&remote_refs, ref->name) ||
 		    refname_hash_exists(&existing_refs, ref->name))
-			continue;
+			अनुवर्त;
 
-		item = refname_hash_add(&remote_refs, ref->name, &ref->old_oid);
-		string_list_insert(&remote_refs_list, ref->name);
+		item = refname_hash_सङ्कलय(&remote_refs, ref->name, &ref->old_oid);
+		string_list_निवेशय(&remote_refs_list, ref->name);
 	}
-	hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
+	hashmap_clear_and_free(&existing_refs, संरचना refname_hash_प्रविष्टिः, ent);
 
 	/*
 	 * We may have a final lightweight tag that needs to be
 	 * checked to see if it needs fetching.
 	 */
-	if (item &&
+	यदि (item &&
 	    !odb_has_object(the_repository->objects, &item->oid, 0) &&
-	    !oidset_contains(&fetch_oids, &item->oid))
+	    !oidset_अन्तर्भवति(&fetch_oids, &item->oid))
 		clear_item(item);
 
 	/*
@@ -437,60 +437,60 @@ static void find_non_local_tags(const struct ref *refs,
 	 * add them to the list of refs to be fetched
 	 */
 	for_each_string_list_item(remote_ref_item, &remote_refs_list) {
-		const char *refname = remote_ref_item->string;
-		struct ref *rm;
-		unsigned int hash = strhash(refname);
+		ध्रुव वर्ण *refname = remote_ref_item->string;
+		संरचना ref *rm;
+		अचिह्नित पूर्णाङ्क hash = strhash(refname);
 
-		item = hashmap_get_entry_from_hash(&remote_refs, hash, refname,
-					struct refname_hash_entry, ent);
-		if (!item)
+		item = hashmap_get_प्रविष्टिः_from_hash(&remote_refs, hash, refname,
+					संरचना refname_hash_प्रविष्टिः, ent);
+		यदि (!item)
 			BUG("unseen remote ref?");
 
 		/* Unless we have already decided to ignore this item... */
-		if (item->ignore)
-			continue;
+		यदि (item->ignore)
+			अनुवर्त;
 
 		rm = alloc_ref(item->refname);
 		rm->peer_ref = alloc_ref(item->refname);
 		oidcpy(&rm->old_oid, &item->oid);
-		**tail = rm;
-		*tail = &rm->next;
+		**पुच्छ = rm;
+		*पुच्छ = &rm->अग्र;
 	}
-	hashmap_clear_and_free(&remote_refs, struct refname_hash_entry, ent);
+	hashmap_clear_and_free(&remote_refs, संरचना refname_hash_प्रविष्टिः, ent);
 	string_list_clear(&remote_refs_list, 0);
 	oidset_clear(&fetch_oids);
 }
 
-static void filter_prefetch_refspec(struct refspec *rs)
+स्थिर शून्य filter_prefetch_refspec(संरचना refspec *rs)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	if (!prefetch)
-		return;
+	यदि (!prefetch)
+		प्रत्यागम;
 
-	for (i = 0; i < rs->nr; i++) {
-		struct strbuf new_dst = STRBUF_INIT;
-		char *old_dst;
-		const char *sub = NULL;
+	प्रति (i = 0; i < rs->nr; i++) {
+		संरचना strbuf new_dst = STRBUF_INIT;
+		वर्ण *old_dst;
+		ध्रुव वर्ण *sub = रिक्त;
 
-		if (rs->items[i].negative)
-			continue;
-		if (!rs->items[i].dst ||
-		    (rs->items[i].src &&
-		     starts_with(rs->items[i].src,
-				 ref_namespace[NAMESPACE_TAGS].ref))) {
-			int j;
+		यदि (rs->वस्तूनि[i].negative)
+			अनुवर्त;
+		यदि (!rs->वस्तूनि[i].dst ||
+		    (rs->वस्तूनि[i].src &&
+		     starts_with(rs->वस्तूनि[i].src,
+				 ref_namespace[NAMESPACE_चिह्नकानि].ref))) {
+			पूर्णाङ्क j;
 
-			refspec_item_clear(&rs->items[i]);
+			refspec_item_clear(&rs->वस्तूनि[i]);
 
-			for (j = i + 1; j < rs->nr; j++)
-				rs->items[j - 1] = rs->items[j];
+			प्रति (j = i + 1; j < rs->nr; j++)
+				rs->वस्तूनि[j - 1] = rs->वस्तूनि[j];
 			rs->nr--;
 			i--;
-			continue;
+			अनुवर्त;
 		}
 
-		old_dst = rs->items[i].dst;
+		old_dst = rs->वस्तूनि[i].dst;
 		strbuf_addstr(&new_dst, ref_namespace[NAMESPACE_PREFETCH].ref);
 
 		/*
@@ -498,48 +498,48 @@ static void filter_prefetch_refspec(struct refspec *rs)
 		 * sub after that prefix. Otherwise, start at
 		 * the beginning of the string.
 		 */
-		if (!skip_prefix(old_dst, "refs/", &sub))
+		यदि (!skip_उपसर्गः(old_dst, "refs/", &sub))
 			sub = old_dst;
 		strbuf_addstr(&new_dst, sub);
 
-		rs->items[i].dst = strbuf_detach(&new_dst, NULL);
-		rs->items[i].force = 1;
+		rs->वस्तूनि[i].dst = strbuf_detach(&new_dst, रिक्त);
+		rs->वस्तूनि[i].force = 1;
 
-		free(old_dst);
+		मुक्त(old_dst);
 	}
 }
 
-static struct ref *get_ref_map(struct remote *remote,
-			       const struct ref *remote_refs,
-			       struct refspec *rs,
-			       int tags, int *autotags)
+स्थिर संरचना ref *get_ref_map(संरचना remote *remote,
+			       ध्रुव संरचना ref *remote_refs,
+			       संरचना refspec *rs,
+			       पूर्णाङ्क चिह्नकानि, पूर्णाङ्क *autotags)
 {
-	int i;
-	struct ref *rm;
-	struct ref *ref_map = NULL;
-	struct ref **tail = &ref_map;
+	पूर्णाङ्क i;
+	संरचना ref *rm;
+	संरचना ref *ref_map = रिक्त;
+	संरचना ref **पुच्छ = &ref_map;
 
 	/* opportunistically-updated references: */
-	struct ref *orefs = NULL, **oref_tail = &orefs;
+	संरचना ref *orefs = रिक्त, **oref_पुच्छ = &orefs;
 
-	struct hashmap existing_refs;
-	int existing_refs_populated = 0;
+	संरचना hashmap existing_refs;
+	पूर्णाङ्क existing_refs_populated = 0;
 
 	filter_prefetch_refspec(rs);
-	if (remote)
+	यदि (remote)
 		filter_prefetch_refspec(&remote->fetch);
 
-	if (rs->nr) {
-		struct refspec *fetch_refspec;
+	यदि (rs->nr) {
+		संरचना refspec *fetch_refspec;
 
-		for (i = 0; i < rs->nr; i++) {
-			get_fetch_map(remote_refs, &rs->items[i], &tail, 0);
-			if (rs->items[i].dst && rs->items[i].dst[0])
+		प्रति (i = 0; i < rs->nr; i++) {
+			get_fetch_map(remote_refs, &rs->वस्तूनि[i], &पुच्छ, 0);
+			यदि (rs->वस्तूनि[i].dst && rs->वस्तूनि[i].dst[0])
 				*autotags = 1;
 		}
 		/* Merge everything on the command line (but not --tags) */
-		for (rm = ref_map; rm; rm = rm->next)
-			rm->fetch_head_status = FETCH_HEAD_MERGE;
+		प्रति (rm = ref_map; rm; rm = rm->अग्र)
+			rm->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_MERGE;
 
 		/*
 		 * For any refs that we happen to be fetching via
@@ -561,31 +561,31 @@ static struct ref *get_ref_map(struct remote *remote,
 		 * by ref_remove_duplicates() in favor of one of these
 		 * opportunistic entries with FETCH_HEAD_IGNORE.
 		 */
-		if (refmap.nr)
+		यदि (refmap.nr)
 			fetch_refspec = &refmap;
-		else
+		अन्यथा
 			fetch_refspec = &remote->fetch;
 
-		for (i = 0; i < fetch_refspec->nr; i++)
-			get_fetch_map(ref_map, &fetch_refspec->items[i], &oref_tail, 1);
-	} else if (refmap.nr) {
+		प्रति (i = 0; i < fetch_refspec->nr; i++)
+			get_fetch_map(ref_map, &fetch_refspec->वस्तूनि[i], &oref_पुच्छ, 1);
+	} अन्यथा यदि (refmap.nr) {
 		die("--refmap option is only meaningful with command-line refspec(s)");
-	} else {
+	} अन्यथा {
 		/* Use the defaults */
-		struct branch *branch = branch_get(NULL);
-		int has_merge = branch_has_merge_config(branch);
-		if (remote &&
+		संरचना branch *branch = branch_get(रिक्त);
+		पूर्णाङ्क has_merge = branch_has_merge_config(branch);
+		यदि (remote &&
 		    (remote->fetch.nr ||
 		     /* Note: has_merge implies non-NULL branch->remote_name */
-		     (has_merge && !strcmp(branch->remote_name, remote->name)))) {
-			for (i = 0; i < remote->fetch.nr; i++) {
-				get_fetch_map(remote_refs, &remote->fetch.items[i], &tail, 0);
-				if (remote->fetch.items[i].dst &&
-				    remote->fetch.items[i].dst[0])
+		     (has_merge && !वाक्यं_तुलय(branch->remote_name, remote->name)))) {
+			प्रति (i = 0; i < remote->fetch.nr; i++) {
+				get_fetch_map(remote_refs, &remote->fetch.वस्तूनि[i], &पुच्छ, 0);
+				यदि (remote->fetch.वस्तूनि[i].dst &&
+				    remote->fetch.वस्तूनि[i].dst[0])
 					*autotags = 1;
-				if (!i && !has_merge && ref_map &&
-				    !remote->fetch.items[0].pattern)
-					ref_map->fetch_head_status = FETCH_HEAD_MERGE;
+				यदि (!i && !has_merge && ref_map &&
+				    !remote->fetch.वस्तूनि[0].आदर्शः)
+					ref_map->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_MERGE;
 			}
 			/*
 			 * if the remote we're fetching from is the same
@@ -594,35 +594,35 @@ static struct ref *get_ref_map(struct remote *remote,
 			 *
 			 * Note: has_merge implies non-NULL branch->remote_name
 			 */
-			if (has_merge &&
-			    !strcmp(branch->remote_name, remote->name))
-				add_merge_config(&ref_map, remote_refs, branch, &tail);
-		} else if (!prefetch) {
+			यदि (has_merge &&
+			    !वाक्यं_तुलय(branch->remote_name, remote->name))
+				सङ्कलय_merge_config(&ref_map, remote_refs, branch, &पुच्छ);
+		} अन्यथा यदि (!prefetch) {
 			ref_map = get_remote_ref(remote_refs, "HEAD");
-			if (!ref_map)
+			यदि (!ref_map)
 				die(_("couldn't find remote ref HEAD"));
-			ref_map->fetch_head_status = FETCH_HEAD_MERGE;
-			tail = &ref_map->next;
+			ref_map->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_MERGE;
+			पुच्छ = &ref_map->अग्र;
 		}
 	}
 
-	if (tags == TAGS_SET) {
-		struct refspec_item tag_refspec;
+	यदि (चिह्नकानि == चिह्नकानि_समुच्चयः) {
+		संरचना refspec_item चिह्नकम्_refspec;
 
 		/* also fetch all tags */
-		refspec_item_init_push(&tag_refspec, TAG_REFSPEC,
+		refspec_item_init_प्रक्षिप(&चिह्नकम्_refspec, चिह्नकम्_REFSPEC,
 				       the_hash_algo);
-		get_fetch_map(remote_refs, &tag_refspec, &tail, 0);
-		refspec_item_clear(&tag_refspec);
-	} else if (tags == TAGS_DEFAULT && *autotags) {
-		find_non_local_tags(remote_refs, NULL, &ref_map, &tail);
+		get_fetch_map(remote_refs, &चिह्नकम्_refspec, &पुच्छ, 0);
+		refspec_item_clear(&चिह्नकम्_refspec);
+	} अन्यथा यदि (चिह्नकानि == चिह्नकानि_DEFAULT && *autotags) {
+		find_non_local_चिह्नकानि(remote_refs, रिक्त, &ref_map, &पुच्छ);
 	}
 
 	/* Now append any refs to be updated opportunistically: */
-	*tail = orefs;
-	for (rm = orefs; rm; rm = rm->next) {
-		rm->fetch_head_status = FETCH_HEAD_IGNORE;
-		tail = &rm->next;
+	*पुच्छ = orefs;
+	प्रति (rm = orefs; rm; rm = rm->अग्र) {
+		rm->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_IGNORE;
+		पुच्छ = &rm->अग्र;
 	}
 
 	/*
@@ -630,92 +630,92 @@ static struct ref *get_ref_map(struct remote *remote,
 	 * necessary as negative refspecs might remove an otherwise conflicting
 	 * duplicate.
 	 */
-	if (rs->nr)
+	यदि (rs->nr)
 		ref_map = apply_negative_refspecs(ref_map, rs);
-	else
+	अन्यथा
 		ref_map = apply_negative_refspecs(ref_map, &remote->fetch);
 
 	ref_map = ref_remove_duplicates(ref_map);
 
-	for (rm = ref_map; rm; rm = rm->next) {
-		if (rm->peer_ref) {
-			const char *refname = rm->peer_ref->name;
-			struct refname_hash_entry *peer_item;
-			unsigned int hash = strhash(refname);
+	प्रति (rm = ref_map; rm; rm = rm->अग्र) {
+		यदि (rm->peer_ref) {
+			ध्रुव वर्ण *refname = rm->peer_ref->name;
+			संरचना refname_hash_प्रविष्टिः *peer_item;
+			अचिह्नित पूर्णाङ्क hash = strhash(refname);
 
-			if (!existing_refs_populated) {
+			यदि (!existing_refs_populated) {
 				refname_hash_init(&existing_refs);
 				refs_for_each_ref(get_main_ref_store(the_repository),
-						  add_one_refname,
+						  सङ्कलय_one_refname,
 						  &existing_refs);
 				existing_refs_populated = 1;
 			}
 
-			peer_item = hashmap_get_entry_from_hash(&existing_refs,
+			peer_item = hashmap_get_प्रविष्टिः_from_hash(&existing_refs,
 						hash, refname,
-						struct refname_hash_entry, ent);
-			if (peer_item) {
-				struct object_id *old_oid = &peer_item->oid;
+						संरचना refname_hash_प्रविष्टिः, ent);
+			यदि (peer_item) {
+				संरचना object_id *old_oid = &peer_item->oid;
 				oidcpy(&rm->peer_ref->old_oid, old_oid);
 			}
 		}
 	}
-	if (existing_refs_populated)
-		hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
+	यदि (existing_refs_populated)
+		hashmap_clear_and_free(&existing_refs, संरचना refname_hash_प्रविष्टिः, ent);
 
-	return ref_map;
+	प्रत्यागम ref_map;
 }
 
-static int s_update_ref(const char *action,
-			struct ref *ref,
-			struct ref_transaction *transaction,
-			int check_old)
+स्थिर पूर्णाङ्क s_update_ref(ध्रुव वर्ण *action,
+			संरचना ref *ref,
+			संरचना ref_transaction *transaction,
+			पूर्णाङ्क check_old)
 {
-	char *msg;
-	char *rla = getenv("GIT_REFLOG_ACTION");
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	वर्ण *सन्देशः;
+	वर्ण *rla = getenv("GIT_REFLOG_ACTION");
+	संरचना strbuf err = STRBUF_INIT;
+	पूर्णाङ्क ret;
 
-	if (dry_run)
-		return 0;
-	if (!rla)
+	यदि (dry_सततम्)
+		प्रत्यागम 0;
+	यदि (!rla)
 		rla = default_rla.buf;
-	msg = xstrfmt("%s: %s", rla, action);
+	सन्देशः = xstrfmt("%s: %s", rla, action);
 
 	ret = ref_transaction_update(transaction, ref->name, &ref->new_oid,
-				     check_old ? &ref->old_oid : NULL,
-				     NULL, NULL, 0, msg, &err);
+				     check_old ? &ref->old_oid : रिक्त,
+				     रिक्त, रिक्त, 0, सन्देशः, &err);
 
-	if (ret)
+	यदि (ret)
 		error("%s", err.buf);
 	strbuf_release(&err);
-	free(msg);
-	return ret;
+	मुक्त(सन्देशः);
+	प्रत्यागम ret;
 }
 
-static int refcol_width(const struct ref *ref_map, int compact_format)
+स्थिर पूर्णाङ्क refcol_विस्तारः(ध्रुव संरचना ref *ref_map, पूर्णाङ्क compact_format)
 {
-	const struct ref *ref;
-	int max, width = 10;
+	ध्रुव संरचना ref *ref;
+	पूर्णाङ्क max, विस्तारः = 10;
 
-	max = term_columns();
-	if (compact_format)
+	max = पदांशः_columns();
+	यदि (compact_format)
 		max = max * 2 / 3;
 
-	for (ref = ref_map; ref; ref = ref->next) {
-		int rlen, llen = 0, len;
+	प्रति (ref = ref_map; ref; ref = ref->अग्र) {
+		पूर्णाङ्क rlen, llen = 0, len;
 
-		if (ref->status == REF_STATUS_REJECT_SHALLOW ||
+		यदि (ref->स्थितिः == REF_स्थितिः_REJECT_SHALLOW ||
 		    !ref->peer_ref ||
-		    !strcmp(ref->name, "HEAD"))
-			continue;
+		    !वाक्यं_तुलय(ref->name, "HEAD"))
+			अनुवर्त;
 
 		/* uptodate lines are only shown on high verbosity level */
-		if (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
-			continue;
+		यदि (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
+			अनुवर्त;
 
 		rlen = utf8_strwidth(prettify_refname(ref->name));
-		if (!compact_format)
+		यदि (!compact_format)
 			llen = utf8_strwidth(prettify_refname(ref->peer_ref->name));
 
 		/*
@@ -725,163 +725,163 @@ static int refcol_width(const struct ref *ref_map, int compact_format)
 		 * will be printed in update_local_ref)
 		 */
 		len = 21 /* flag and summary */ + rlen + 4 /* -> */ + llen;
-		if (len >= max)
-			continue;
+		यदि (len >= max)
+			अनुवर्त;
 
-		if (width < rlen)
-			width = rlen;
+		यदि (विस्तारः < rlen)
+			विस्तारः = rlen;
 	}
 
-	return width;
+	प्रत्यागम विस्तारः;
 }
 
-static void display_state_init(struct display_state *display_state, struct ref *ref_map,
-			       const char *raw_url, enum display_format format)
+स्थिर शून्य display_state_init(संरचना display_state *display_state, संरचना ref *ref_map,
+			       ध्रुव वर्ण *raw_url, गणना display_format format)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	memset(display_state, 0, sizeof(*display_state));
+	स्मृतिं_पूरय(display_state, 0, परिमाण(*display_state));
 	strbuf_init(&display_state->buf, 0);
 	display_state->format = format;
 
-	if (raw_url)
+	यदि (raw_url)
 		display_state->url = transport_anonymize_url(raw_url);
-	else
+	अन्यथा
 		display_state->url = xstrdup("foreign");
 
-	display_state->url_len = strlen(display_state->url);
-	for (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
+	display_state->url_len = वाक्यदैर्घ्यम्(display_state->url);
+	प्रति (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
 		;
 	display_state->url_len = i + 1;
-	if (4 < i && !strncmp(".git", display_state->url + i - 3, 4))
+	यदि (4 < i && !वाक्ये_तुलय(".git", display_state->url + i - 3, 4))
 		display_state->url_len = i - 3;
 
-	if (verbosity < 0)
-		return;
+	यदि (verbosity < 0)
+		प्रत्यागम;
 
-	switch (display_state->format) {
-	case DISPLAY_FORMAT_FULL:
-	case DISPLAY_FORMAT_COMPACT:
-		display_state->refcol_width = refcol_width(ref_map,
+	विकल्प (display_state->format) {
+	पक्ष DISPLAY_FORMAT_पूर्णम्:
+	पक्ष DISPLAY_FORMAT_COMPACT:
+		display_state->refcol_विस्तारः = refcol_विस्तारः(ref_map,
 							   display_state->format == DISPLAY_FORMAT_COMPACT);
-		break;
-	case DISPLAY_FORMAT_PORCELAIN:
+		भङ्ग;
+	पक्ष DISPLAY_FORMAT_PORCELAIN:
 		/* We don't need to precompute anything here. */
-		break;
-	default:
+		भङ्ग;
+	स्वभाव:
 		BUG("unexpected display format %d", display_state->format);
 	}
 }
 
-static void display_state_release(struct display_state *display_state)
+स्थिर शून्य display_state_release(संरचना display_state *display_state)
 {
 	strbuf_release(&display_state->buf);
-	free(display_state->url);
+	मुक्त(display_state->url);
 }
 
-static void print_remote_to_local(struct display_state *display_state,
-				  const char *remote, const char *local)
+स्थिर शून्य print_remote_गन्तव्यम्_local(संरचना display_state *display_state,
+				  ध्रुव वर्ण *remote, ध्रुव वर्ण *local)
 {
 	strbuf_addf(&display_state->buf, "%-*s -> %s",
-		    display_state->refcol_width, remote, local);
+		    display_state->refcol_विस्तारः, remote, local);
 }
 
-static int find_and_replace(struct strbuf *haystack,
-			    const char *needle,
-			    const char *placeholder)
+स्थिर पूर्णाङ्क find_and_replace(संरचना strbuf *haystack,
+			    ध्रुव वर्ण *needle,
+			    ध्रुव वर्ण *placeholder)
 {
-	const char *p = NULL;
-	int plen, nlen;
+	ध्रुव वर्ण *p = रिक्त;
+	पूर्णाङ्क plen, nlen;
 
-	nlen = strlen(needle);
-	if (ends_with(haystack->buf, needle))
+	nlen = वाक्यदैर्घ्यम्(needle);
+	यदि (अन्ताः_with(haystack->buf, needle))
 		p = haystack->buf + haystack->len - nlen;
-	else
-		p = strstr(haystack->buf, needle);
-	if (!p)
-		return 0;
+	अन्यथा
+		p = वाक्ये_अन्विष(haystack->buf, needle);
+	यदि (!p)
+		प्रत्यागम 0;
 
-	if (p > haystack->buf && p[-1] != '/')
-		return 0;
+	यदि (p > haystack->buf && p[-1] != '/')
+		प्रत्यागम 0;
 
-	plen = strlen(p);
-	if (plen > nlen && p[nlen] != '/')
-		return 0;
+	plen = वाक्यदैर्घ्यम्(p);
+	यदि (plen > nlen && p[nlen] != '/')
+		प्रत्यागम 0;
 
 	strbuf_splice(haystack, p - haystack->buf, nlen,
-		      placeholder, strlen(placeholder));
-	return 1;
+		      placeholder, वाक्यदैर्घ्यम्(placeholder));
+	प्रत्यागम 1;
 }
 
-static void print_compact(struct display_state *display_state,
-			  const char *remote, const char *local)
+स्थिर शून्य print_compact(संरचना display_state *display_state,
+			  ध्रुव वर्ण *remote, ध्रुव वर्ण *local)
 {
-	struct strbuf r = STRBUF_INIT;
-	struct strbuf l = STRBUF_INIT;
+	संरचना strbuf r = STRBUF_INIT;
+	संरचना strbuf l = STRBUF_INIT;
 
-	if (!strcmp(remote, local)) {
-		strbuf_addf(&display_state->buf, "%-*s -> *", display_state->refcol_width, remote);
-		return;
+	यदि (!वाक्यं_तुलय(remote, local)) {
+		strbuf_addf(&display_state->buf, "%-*s -> *", display_state->refcol_विस्तारः, remote);
+		प्रत्यागम;
 	}
 
 	strbuf_addstr(&r, remote);
 	strbuf_addstr(&l, local);
 
-	if (!find_and_replace(&r, local, "*"))
+	यदि (!find_and_replace(&r, local, "*"))
 		find_and_replace(&l, remote, "*");
-	print_remote_to_local(display_state, r.buf, l.buf);
+	print_remote_गन्तव्यम्_local(display_state, r.buf, l.buf);
 
 	strbuf_release(&r);
 	strbuf_release(&l);
 }
 
-static void display_ref_update(struct display_state *display_state, char code,
-			       const char *summary, const char *error,
-			       const char *remote, const char *local,
-			       const struct object_id *old_oid,
-			       const struct object_id *new_oid,
-			       int summary_width)
+स्थिर शून्य display_ref_update(संरचना display_state *display_state, वर्ण संहिता,
+			       ध्रुव वर्ण *summary, ध्रुव वर्ण *error,
+			       ध्रुव वर्ण *remote, ध्रुव वर्ण *local,
+			       ध्रुव संरचना object_id *old_oid,
+			       ध्रुव संरचना object_id *new_oid,
+			       पूर्णाङ्क summary_विस्तारः)
 {
 	FILE *f = stderr;
 
-	if (verbosity < 0)
-		return;
+	यदि (verbosity < 0)
+		प्रत्यागम;
 
 	strbuf_reset(&display_state->buf);
 
-	switch (display_state->format) {
-	case DISPLAY_FORMAT_FULL:
-	case DISPLAY_FORMAT_COMPACT: {
-		int width;
+	विकल्प (display_state->format) {
+	पक्ष DISPLAY_FORMAT_पूर्णम्:
+	पक्ष DISPLAY_FORMAT_COMPACT: {
+		पूर्णाङ्क विस्तारः;
 
-		if (!display_state->shown_url) {
+		यदि (!display_state->shown_url) {
 			strbuf_addf(&display_state->buf, _("From %.*s\n"),
 				    display_state->url_len, display_state->url);
 			display_state->shown_url = 1;
 		}
 
-		width = (summary_width + strlen(summary) - gettext_width(summary));
+		विस्तारः = (summary_विस्तारः + वाक्यदैर्घ्यम्(summary) - gettext_विस्तारः(summary));
 		remote = prettify_refname(remote);
 		local = prettify_refname(local);
 
-		strbuf_addf(&display_state->buf, " %c %-*s ", code, width, summary);
+		strbuf_addf(&display_state->buf, " %c %-*s ", संहिता, विस्तारः, summary);
 
-		if (display_state->format != DISPLAY_FORMAT_COMPACT)
-			print_remote_to_local(display_state, remote, local);
-		else
+		यदि (display_state->format != DISPLAY_FORMAT_COMPACT)
+			print_remote_गन्तव्यम्_local(display_state, remote, local);
+		अन्यथा
 			print_compact(display_state, remote, local);
 
-		if (error)
+		यदि (error)
 			strbuf_addf(&display_state->buf, "  (%s)", error);
 
-		break;
+		भङ्ग;
 	}
-	case DISPLAY_FORMAT_PORCELAIN:
-		strbuf_addf(&display_state->buf, "%c %s %s %s", code,
-			    oid_to_hex(old_oid), oid_to_hex(new_oid), local);
+	पक्ष DISPLAY_FORMAT_PORCELAIN:
+		strbuf_addf(&display_state->buf, "%c %s %s %s", संहिता,
+			    oid_गन्तव्यम्_hex(old_oid), oid_गन्तव्यम्_hex(new_oid), local);
 		f = stdout;
-		break;
-	default:
+		भङ्ग;
+	स्वभाव:
 		BUG("unexpected display format %d", display_state->format);
 	};
 	strbuf_addch(&display_state->buf, '\n');
@@ -889,44 +889,44 @@ static void display_ref_update(struct display_state *display_state, char code,
 	fputs(display_state->buf.buf, f);
 }
 
-struct ref_update_display_info {
+संरचना ref_update_display_info {
 	bool failed;
-	char success_code;
-	char fail_code;
-	char *summary;
-	char *fail_detail;
-	char *success_detail;
-	char *ref;
-	char *remote;
-	struct object_id old_oid;
-	struct object_id new_oid;
+	वर्ण success_संहिता;
+	वर्ण fail_संहिता;
+	वर्ण *summary;
+	वर्ण *fail_detail;
+	वर्ण *success_detail;
+	वर्ण *ref;
+	वर्ण *remote;
+	संरचना object_id old_oid;
+	संरचना object_id new_oid;
 };
 
-struct ref_update_display_info_array {
-	struct ref_update_display_info *info;
-	size_t alloc, nr;
+संरचना ref_update_display_info_array {
+	संरचना ref_update_display_info *info;
+	आकार_t alloc, nr;
 };
 
-static struct ref_update_display_info *ref_update_display_info_append(
-					   struct ref_update_display_info_array *array,
-					   char success_code,
-					   char fail_code,
-					   const char *summary,
-					   const char *success_detail,
-					   const char *fail_detail,
-					   const char *ref,
-					   const char *remote,
-					   const struct object_id *old_oid,
-					   const struct object_id *new_oid)
+स्थिर संरचना ref_update_display_info *ref_update_display_info_append(
+					   संरचना ref_update_display_info_array *array,
+					   वर्ण success_संहिता,
+					   वर्ण fail_संहिता,
+					   ध्रुव वर्ण *summary,
+					   ध्रुव वर्ण *success_detail,
+					   ध्रुव वर्ण *fail_detail,
+					   ध्रुव वर्ण *ref,
+					   ध्रुव वर्ण *remote,
+					   ध्रुव संरचना object_id *old_oid,
+					   ध्रुव संरचना object_id *new_oid)
 {
-	struct ref_update_display_info *info;
+	संरचना ref_update_display_info *info;
 
 	ALLOC_GROW(array->info, array->nr + 1, array->alloc);
 	info = &array->info[array->nr++];
 
 	info->failed = false;
-	info->success_code = success_code;
-	info->fail_code = fail_code;
+	info->success_संहिता = success_संहिता;
+	info->fail_संहिता = fail_संहिता;
 	info->summary = xstrdup(summary);
 	info->success_detail = xstrdup_or_null(success_detail);
 	info->fail_detail = xstrdup_or_null(fail_detail);
@@ -936,101 +936,101 @@ static struct ref_update_display_info *ref_update_display_info_append(
 	oidcpy(&info->old_oid, old_oid);
 	oidcpy(&info->new_oid, new_oid);
 
-	return info;
+	प्रत्यागम info;
 }
 
-static void ref_update_display_info_set_failed(struct ref_update_display_info *info)
+स्थिर शून्य ref_update_display_info_समुच्चयः_failed(संरचना ref_update_display_info *info)
 {
 	info->failed = true;
 }
 
-static void ref_update_display_info_free(struct ref_update_display_info *info)
+स्थिर शून्य ref_update_display_info_free(संरचना ref_update_display_info *info)
 {
-	free(info->summary);
-	free(info->success_detail);
-	free(info->fail_detail);
-	free(info->remote);
-	free(info->ref);
+	मुक्त(info->summary);
+	मुक्त(info->success_detail);
+	मुक्त(info->fail_detail);
+	मुक्त(info->remote);
+	मुक्त(info->ref);
 }
 
-static void ref_update_display_info_display(struct ref_update_display_info *info,
-					    struct display_state *display_state,
-					    int summary_width)
+स्थिर शून्य ref_update_display_info_display(संरचना ref_update_display_info *info,
+					    संरचना display_state *display_state,
+					    पूर्णाङ्क summary_विस्तारः)
 {
 	display_ref_update(display_state,
-			   info->failed ? info->fail_code : info->success_code,
+			   info->failed ? info->fail_संहिता : info->success_संहिता,
 			   info->summary,
 			   info->failed ? info->fail_detail : info->success_detail,
 			   info->remote, info->ref, &info->old_oid,
-			   &info->new_oid, summary_width);
+			   &info->new_oid, summary_विस्तारः);
 }
 
-static int update_local_ref(struct ref *ref,
-			    struct ref_transaction *transaction,
-			    const struct ref *remote_ref,
-			    const struct fetch_config *config,
-			    struct ref_update_display_info_array *display_array)
+स्थिर पूर्णाङ्क update_local_ref(संरचना ref *ref,
+			    संरचना ref_transaction *transaction,
+			    ध्रुव संरचना ref *remote_ref,
+			    ध्रुव संरचना fetch_config *config,
+			    संरचना ref_update_display_info_array *display_array)
 {
-	struct commit *current = NULL, *updated;
-	int fast_forward = 0;
+	संरचना commit *current = रिक्त, *updated;
+	पूर्णाङ्क fast_forward = 0;
 
-	if (!odb_has_object(the_repository->objects, &ref->new_oid,
+	यदि (!odb_has_object(the_repository->objects, &ref->new_oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
-		die(_("object %s not found"), oid_to_hex(&ref->new_oid));
+		die(_("object %s not found"), oid_गन्तव्यम्_hex(&ref->new_oid));
 
-	if (oideq(&ref->old_oid, &ref->new_oid)) {
-		if (verbosity > 0)
+	यदि (oideq(&ref->old_oid, &ref->new_oid)) {
+		यदि (verbosity > 0)
 			ref_update_display_info_append(display_array, '=', '=',
-						       _("[up to date]"), NULL,
-						       NULL, ref->name,
+						       _("[up to date]"), रिक्त,
+						       रिक्त, ref->name,
 						       remote_ref->name, &ref->old_oid,
 						       &ref->new_oid);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!update_head_ok &&
+	यदि (!update_शीर्ष_ok &&
 	    !is_null_oid(&ref->old_oid) &&
-	    branch_checked_out(ref->name)) {
-		struct ref_update_display_info *info;
+	    branch_checked_बहिर्गमनम्(ref->name)) {
+		संरचना ref_update_display_info *info;
 		/*
 		 * If this is the head, and it's not okay to update
 		 * the head, and the old value of the head isn't empty...
 		 */
 		info = ref_update_display_info_append(display_array, '!', '!',
-						      _("[rejected]"), NULL,
+						      _("[rejected]"), रिक्त,
 						      _("can't fetch into checked-out branch"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		ref_update_display_info_set_failed(info);
-		return 1;
+		ref_update_display_info_समुच्चयः_failed(info);
+		प्रत्यागम 1;
 	}
 
-	if (!is_null_oid(&ref->old_oid) &&
+	यदि (!is_null_oid(&ref->old_oid) &&
 	    starts_with(ref->name, "refs/tags/")) {
-		struct ref_update_display_info *info;
+		संरचना ref_update_display_info *info;
 
-		if (force || ref->force) {
-			int r;
+		यदि (force || ref->force) {
+			पूर्णाङ्क r;
 
 			r = s_update_ref("updating tag", ref, transaction, 0);
 
 			info = ref_update_display_info_append(display_array, 't', '!',
-							      _("[tag update]"), NULL,
+							      _("[tag update]"), रिक्त,
 							      _("unable to update local ref"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
-			if (r)
-				ref_update_display_info_set_failed(info);
+			यदि (r)
+				ref_update_display_info_समुच्चयः_failed(info);
 
-			return r;
-		} else {
+			प्रत्यागम r;
+		} अन्यथा {
 			info = ref_update_display_info_append(display_array, '!', '!',
-							      _("[rejected]"), NULL,
+							      _("[rejected]"), रिक्त,
 							      _("would clobber existing tag"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
-			ref_update_display_info_set_failed(info);
-			return 1;
+			ref_update_display_info_समुच्चयः_failed(info);
+			प्रत्यागम 1;
 		}
 	}
 
@@ -1038,79 +1038,79 @@ static int update_local_ref(struct ref *ref,
 						 &ref->old_oid, 1);
 	updated = lookup_commit_reference_gently(the_repository,
 						 &ref->new_oid, 1);
-	if (!current || !updated) {
-		struct ref_update_display_info *info;
-		const char *msg;
-		const char *what;
-		int r;
+	यदि (!current || !updated) {
+		संरचना ref_update_display_info *info;
+		ध्रुव वर्ण *सन्देशः;
+		ध्रुव वर्ण *what;
+		पूर्णाङ्क r;
 		/*
 		 * Nicely describe the new ref we're fetching.
 		 * Base this on the remote's ref name, as it's
 		 * more likely to follow a standard layout.
 		 */
-		if (starts_with(remote_ref->name, "refs/tags/")) {
-			msg = "storing tag";
+		यदि (starts_with(remote_ref->name, "refs/tags/")) {
+			सन्देशः = "storing tag";
 			what = _("[new tag]");
-		} else if (starts_with(remote_ref->name, "refs/heads/")) {
-			msg = "storing head";
+		} अन्यथा यदि (starts_with(remote_ref->name, "refs/heads/")) {
+			सन्देशः = "storing head";
 			what = _("[new branch]");
-		} else {
-			msg = "storing ref";
+		} अन्यथा {
+			सन्देशः = "storing ref";
 			what = _("[new ref]");
 		}
 
-		r = s_update_ref(msg, ref, transaction, 0);
+		r = s_update_ref(सन्देशः, ref, transaction, 0);
 
 		info = ref_update_display_info_append(display_array, '*', '!',
-						      what, NULL,
+						      what, रिक्त,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
-			ref_update_display_info_set_failed(info);
+		यदि (r)
+			ref_update_display_info_समुच्चयः_failed(info);
 
-		return r;
+		प्रत्यागम r;
 	}
 
-	if (config->show_forced_updates) {
+	यदि (config->show_forced_updates) {
 		uint64_t t_before = getnanotime();
-		fast_forward = repo_in_merge_bases(the_repository, current,
+		fast_forward = repo_अन्तर्_merge_bases(the_repository, current,
 						   updated);
-		if (fast_forward < 0)
-			die(NULL);
+		यदि (fast_forward < 0)
+			die(रिक्त);
 		forced_updates_ms += (getnanotime() - t_before) / 1000000;
-	} else {
+	} अन्यथा {
 		fast_forward = 1;
 	}
 
-	if (fast_forward) {
-		struct ref_update_display_info *info;
-		struct strbuf quickref = STRBUF_INIT;
-		int r;
+	यदि (fast_forward) {
+		संरचना ref_update_display_info *info;
+		संरचना strbuf quickref = STRBUF_INIT;
+		पूर्णाङ्क r;
 
-		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
+		strbuf_सङ्कलय_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "..");
-		strbuf_add_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
+		strbuf_सङ्कलय_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
 		r = s_update_ref("fast-forward", ref, transaction, 1);
 
 		info = ref_update_display_info_append(display_array, ' ', '!',
-						      quickref.buf, NULL,
+						      quickref.buf, रिक्त,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
-			ref_update_display_info_set_failed(info);
+		यदि (r)
+			ref_update_display_info_समुच्चयः_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else if (force || ref->force) {
-		struct ref_update_display_info *info;
-		struct strbuf quickref = STRBUF_INIT;
-		int r;
+		प्रत्यागम r;
+	} अन्यथा यदि (force || ref->force) {
+		संरचना ref_update_display_info *info;
+		संरचना strbuf quickref = STRBUF_INIT;
+		पूर्णाङ्क r;
 
-		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
+		strbuf_सङ्कलय_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "...");
-		strbuf_add_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
+		strbuf_सङ्कलय_unique_abbrev(&quickref, &ref->new_oid, DEFAULT_ABBREV);
 		r = s_update_ref("forced-update", ref, transaction, 1);
 
 		info = ref_update_display_info_append(display_array, '+', '!',
@@ -1119,90 +1119,90 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 
-		if (r)
-			ref_update_display_info_set_failed(info);
+		यदि (r)
+			ref_update_display_info_समुच्चयः_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else {
-		struct ref_update_display_info *info;
+		प्रत्यागम r;
+	} अन्यथा {
+		संरचना ref_update_display_info *info;
 		info = ref_update_display_info_append(display_array, '!', '!',
-						      _("[rejected]"), NULL,
+						      _("[rejected]"), रिक्त,
 						      _("non-fast-forward"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		ref_update_display_info_set_failed(info);
-		return 1;
+		ref_update_display_info_समुच्चयः_failed(info);
+		प्रत्यागम 1;
 	}
 }
 
-static const struct object_id *iterate_ref_map(void *cb_data)
+स्थिर ध्रुव संरचना object_id *iterate_ref_map(शून्य *cb_दत्त)
 {
-	struct ref **rm = cb_data;
-	struct ref *ref = *rm;
+	संरचना ref **rm = cb_दत्त;
+	संरचना ref *ref = *rm;
 
-	while (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
-		ref = ref->next;
-	if (!ref)
-		return NULL;
-	*rm = ref->next;
-	return &ref->old_oid;
+	यावत् (ref && ref->स्थितिः == REF_स्थितिः_REJECT_SHALLOW)
+		ref = ref->अग्र;
+	यदि (!ref)
+		प्रत्यागम रिक्त;
+	*rm = ref->अग्र;
+	प्रत्यागम &ref->old_oid;
 }
 
-struct fetch_head {
+संरचना fetch_शीर्ष {
 	FILE *fp;
-	struct strbuf buf;
+	संरचना strbuf buf;
 };
 
-static int open_fetch_head(struct fetch_head *fetch_head)
+स्थिर पूर्णाङ्क open_fetch_शीर्ष(संरचना fetch_शीर्ष *fetch_शीर्ष)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	ध्रुव वर्ण *filename = git_मार्गः_fetch_शीर्ष(the_repository);
 
-	if (write_fetch_head) {
-		fetch_head->fp = fopen(filename, "a");
-		if (!fetch_head->fp)
-			return error_errno(_("cannot open '%s'"), filename);
-		strbuf_init(&fetch_head->buf, 0);
-	} else {
-		fetch_head->fp = NULL;
+	यदि (write_fetch_शीर्ष) {
+		fetch_शीर्ष->fp = fopen(filename, "a");
+		यदि (!fetch_शीर्ष->fp)
+			प्रत्यागम error_errno(_("cannot open '%s'"), filename);
+		strbuf_init(&fetch_शीर्ष->buf, 0);
+	} अन्यथा {
+		fetch_शीर्ष->fp = रिक्त;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void append_fetch_head(struct fetch_head *fetch_head,
-			      const struct object_id *old_oid,
-			      enum fetch_head_status fetch_head_status,
-			      const char *note,
-			      const char *url, size_t url_len)
+स्थिर शून्य append_fetch_शीर्ष(संरचना fetch_शीर्ष *fetch_शीर्ष,
+			      ध्रुव संरचना object_id *old_oid,
+			      गणना fetch_शीर्ष_स्थितिः fetch_शीर्ष_स्थितिः,
+			      ध्रुव वर्ण *note,
+			      ध्रुव वर्ण *url, आकार_t url_len)
 {
-	char old_oid_hex[GIT_MAX_HEXSZ + 1];
-	const char *merge_status_marker;
-	size_t i;
+	वर्ण old_oid_hex[GIT_MAX_HEXSZ + 1];
+	ध्रुव वर्ण *merge_स्थितिः_marker;
+	आकार_t i;
 
-	if (!fetch_head->fp)
-		return;
+	यदि (!fetch_शीर्ष->fp)
+		प्रत्यागम;
 
-	switch (fetch_head_status) {
-	case FETCH_HEAD_NOT_FOR_MERGE:
-		merge_status_marker = "not-for-merge";
-		break;
-	case FETCH_HEAD_MERGE:
-		merge_status_marker = "";
-		break;
-	default:
+	विकल्प (fetch_शीर्ष_स्थितिः) {
+	पक्ष FETCH_शीर्ष_NOT_FOR_MERGE:
+		merge_स्थितिः_marker = "not-for-merge";
+		भङ्ग;
+	पक्ष FETCH_शीर्ष_MERGE:
+		merge_स्थितिः_marker = "";
+		भङ्ग;
+	स्वभाव:
 		/* do not write anything to FETCH_HEAD */
-		return;
+		प्रत्यागम;
 	}
 
-	strbuf_addf(&fetch_head->buf, "%s\t%s\t%s",
-		    oid_to_hex_r(old_oid_hex, old_oid), merge_status_marker, note);
-	for (i = 0; i < url_len; ++i)
-		if ('\n' == url[i])
-			strbuf_addstr(&fetch_head->buf, "\\n");
-		else
-			strbuf_addch(&fetch_head->buf, url[i]);
-	strbuf_addch(&fetch_head->buf, '\n');
+	strbuf_addf(&fetch_शीर्ष->buf, "%s\t%s\t%s",
+		    oid_गन्तव्यम्_hex_r(old_oid_hex, old_oid), merge_स्थितिः_marker, note);
+	प्रति (i = 0; i < url_len; ++i)
+		यदि ('\n' == url[i])
+			strbuf_addstr(&fetch_शीर्ष->buf, "\\n");
+		अन्यथा
+			strbuf_addch(&fetch_शीर्ष->buf, url[i]);
+	strbuf_addch(&fetch_शीर्ष->buf, '\n');
 
 	/*
 	 * When using an atomic fetch, we do not want to update FETCH_HEAD if
@@ -1210,59 +1210,59 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 	 * updates to a buffer first and only commit it as soon as all
 	 * references have been successfully updated.
 	 */
-	if (!atomic_fetch) {
-		strbuf_write(&fetch_head->buf, fetch_head->fp);
-		strbuf_reset(&fetch_head->buf);
+	यदि (!atomic_fetch) {
+		strbuf_write(&fetch_शीर्ष->buf, fetch_शीर्ष->fp);
+		strbuf_reset(&fetch_शीर्ष->buf);
 	}
 }
 
-static void commit_fetch_head(struct fetch_head *fetch_head)
+स्थिर शून्य commit_fetch_शीर्ष(संरचना fetch_शीर्ष *fetch_शीर्ष)
 {
-	if (!fetch_head->fp || !atomic_fetch)
-		return;
-	strbuf_write(&fetch_head->buf, fetch_head->fp);
+	यदि (!fetch_शीर्ष->fp || !atomic_fetch)
+		प्रत्यागम;
+	strbuf_write(&fetch_शीर्ष->buf, fetch_शीर्ष->fp);
 }
 
-static void close_fetch_head(struct fetch_head *fetch_head)
+स्थिर शून्य close_fetch_शीर्ष(संरचना fetch_शीर्ष *fetch_शीर्ष)
 {
-	if (!fetch_head->fp)
-		return;
+	यदि (!fetch_शीर्ष->fp)
+		प्रत्यागम;
 
-	fclose(fetch_head->fp);
-	strbuf_release(&fetch_head->buf);
+	fclose(fetch_शीर्ष->fp);
+	strbuf_release(&fetch_शीर्ष->buf);
 }
 
-static const char warn_show_forced_updates[] =
+स्थिर ध्रुव वर्ण warn_show_forced_updates[] =
 N_("fetch normally indicates which branches had a forced update,\n"
    "but that check has been disabled; to re-enable, use '--show-forced-updates'\n"
    "flag or run 'git config fetch.showForcedUpdates true'");
-static const char warn_time_show_forced_updates[] =
+स्थिर ध्रुव वर्ण warn_time_show_forced_updates[] =
 N_("it took %.2f seconds to check forced updates; you can use\n"
    "'--no-show-forced-updates' or run 'git config fetch.showForcedUpdates false'\n"
    "to avoid this check\n");
 
-static int store_updated_refs(struct display_state *display_state,
-			      int connectivity_checked,
-			      struct ref_transaction *transaction, struct ref *ref_map,
-			      struct fetch_head *fetch_head,
-			      const struct fetch_config *config,
-			      struct ref_update_display_info_array *display_array)
+स्थिर पूर्णाङ्क store_updated_refs(संरचना display_state *display_state,
+			      पूर्णाङ्क connectivity_checked,
+			      संरचना ref_transaction *transaction, संरचना ref *ref_map,
+			      संरचना fetch_शीर्ष *fetch_शीर्ष,
+			      ध्रुव संरचना fetch_config *config,
+			      संरचना ref_update_display_info_array *display_array)
 {
-	int rc = 0;
-	struct strbuf note = STRBUF_INIT;
-	const char *what, *kind;
-	struct ref *rm;
-	int want_status;
+	पूर्णाङ्क rc = 0;
+	संरचना strbuf note = STRBUF_INIT;
+	ध्रुव वर्ण *what, *विधा;
+	संरचना ref *rm;
+	पूर्णाङ्क want_स्थितिः;
 
-	if (!connectivity_checked) {
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	यदि (!connectivity_checked) {
+		संरचना check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.exclude_hidden_refs_section = "fetch";
 		rm = ref_map;
-		if (check_connected(iterate_ref_map, &rm, &opt)) {
+		यदि (check_connected(iterate_ref_map, &rm, &opt)) {
 			rc = error(_("%s did not send all necessary objects"),
 				   display_state->url);
-			goto abort;
+			गच्छ abort;
 		}
 	}
 
@@ -1271,17 +1271,17 @@ static int store_updated_refs(struct display_state *display_state,
 	 * merged entries are written before not-for-merge. That lets readers
 	 * use FETCH_HEAD as a refname to refer to the ref to be merged.
 	 */
-	for (want_status = FETCH_HEAD_MERGE;
-	     want_status <= FETCH_HEAD_IGNORE;
-	     want_status++) {
-		for (rm = ref_map; rm; rm = rm->next) {
-			struct ref *ref = NULL;
+	प्रति (want_स्थितिः = FETCH_शीर्ष_MERGE;
+	     want_स्थितिः <= FETCH_शीर्ष_IGNORE;
+	     want_स्थितिः++) {
+		प्रति (rm = ref_map; rm; rm = rm->अग्र) {
+			संरचना ref *ref = रिक्त;
 
-			if (rm->status == REF_STATUS_REJECT_SHALLOW) {
-				if (want_status == FETCH_HEAD_MERGE)
+			यदि (rm->स्थितिः == REF_स्थितिः_REJECT_SHALLOW) {
+				यदि (want_स्थितिः == FETCH_शीर्ष_MERGE)
 					warning(_("rejected %s because shallow roots are not allowed to be updated"),
 						rm->peer_ref ? rm->peer_ref->name : rm->name);
-				continue;
+				अनुवर्त;
 			}
 
 			/*
@@ -1293,8 +1293,8 @@ static int store_updated_refs(struct display_state *display_state,
 			 * in case FETCH_HEAD is not to be updated, so we can
 			 * skip the classification in that case.
 			 */
-			if (fetch_head->fp) {
-				struct commit *commit = NULL;
+			यदि (fetch_शीर्ष->fp) {
+				संरचना commit *commit = रिक्त;
 
 				/*
 				 * References in "refs/tags/" are often going to point
@@ -1304,63 +1304,63 @@ static int store_updated_refs(struct display_state *display_state,
 				 * regress performance in repositories with many
 				 * annotated tags.
 				 */
-				if (!starts_with(rm->name, "refs/tags/"))
-					commit = lookup_commit_in_graph(the_repository, &rm->old_oid);
-				if (!commit) {
+				यदि (!starts_with(rm->name, "refs/tags/"))
+					commit = lookup_commit_अन्तर्_graph(the_repository, &rm->old_oid);
+				यदि (!commit) {
 					commit = lookup_commit_reference_gently(the_repository,
 										&rm->old_oid,
 										1);
-					if (!commit)
-						rm->fetch_head_status = FETCH_HEAD_NOT_FOR_MERGE;
+					यदि (!commit)
+						rm->fetch_शीर्ष_स्थितिः = FETCH_शीर्ष_NOT_FOR_MERGE;
 				}
 			}
 
-			if (rm->fetch_head_status != want_status)
-				continue;
+			यदि (rm->fetch_शीर्ष_स्थितिः != want_स्थितिः)
+				अनुवर्त;
 
-			if (rm->peer_ref) {
+			यदि (rm->peer_ref) {
 				ref = alloc_ref(rm->peer_ref->name);
 				oidcpy(&ref->old_oid, &rm->peer_ref->old_oid);
 				oidcpy(&ref->new_oid, &rm->old_oid);
 				ref->force = rm->peer_ref->force;
 			}
 
-			if (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
+			यदि (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
 			    (!rm->peer_ref || !oideq(&ref->old_oid, &ref->new_oid))) {
 				check_for_new_submodule_commits(&rm->old_oid);
 			}
 
-			if (!strcmp(rm->name, "HEAD")) {
-				kind = "";
+			यदि (!वाक्यं_तुलय(rm->name, "HEAD")) {
+				विधा = "";
 				what = "";
-			} else if (skip_prefix(rm->name, "refs/heads/", &what)) {
-				kind = "branch";
-			} else if (skip_prefix(rm->name, "refs/tags/", &what)) {
-				kind = "tag";
-			} else if (skip_prefix(rm->name, "refs/remotes/", &what)) {
-				kind = "remote-tracking branch";
-			} else {
-				kind = "";
+			} अन्यथा यदि (skip_उपसर्गः(rm->name, "refs/heads/", &what)) {
+				विधा = "branch";
+			} अन्यथा यदि (skip_उपसर्गः(rm->name, "refs/tags/", &what)) {
+				विधा = "tag";
+			} अन्यथा यदि (skip_उपसर्गः(rm->name, "refs/remotes/", &what)) {
+				विधा = "remote-tracking branch";
+			} अन्यथा {
+				विधा = "";
 				what = rm->name;
 			}
 
 			strbuf_reset(&note);
-			if (*what) {
-				if (*kind)
-					strbuf_addf(&note, "%s ", kind);
+			यदि (*what) {
+				यदि (*विधा)
+					strbuf_addf(&note, "%s ", विधा);
 				strbuf_addf(&note, "'%s' of ", what);
 			}
 
-			append_fetch_head(fetch_head, &rm->old_oid,
-					  rm->fetch_head_status,
+			append_fetch_शीर्ष(fetch_शीर्ष, &rm->old_oid,
+					  rm->fetch_शीर्ष_स्थितिः,
 					  note.buf, display_state->url,
 					  display_state->url_len);
 
-			if (ref) {
+			यदि (ref) {
 				rc |= update_local_ref(ref, transaction, rm,
 						       config, display_array);
-				free(ref);
-			} else if (write_fetch_head || dry_run) {
+				मुक्त(ref);
+			} अन्यथा यदि (write_fetch_शीर्ष || dry_सततम्) {
 				/*
 				 * Display fetches written to FETCH_HEAD (or
 				 * would be written to FETCH_HEAD, if --dry-run
@@ -1368,18 +1368,18 @@ static int store_updated_refs(struct display_state *display_state,
 				 */
 
 				ref_update_display_info_append(display_array, '*', '*',
-							       *kind ? kind : "branch",
-							       NULL, NULL, "FETCH_HEAD",
+							       *विधा ? विधा : "branch",
+							       रिक्त, रिक्त, "FETCH_HEAD",
 							       rm->name, &rm->new_oid,
 							       &rm->old_oid);
 			}
 		}
 	}
 
-	if (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
-		if (!config->show_forced_updates) {
+	यदि (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
+		यदि (!config->show_forced_updates) {
 			warning(_(warn_show_forced_updates));
-		} else if (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_IN_MS) {
+		} अन्यथा यदि (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_अन्तर्_MS) {
 			warning(_(warn_time_show_forced_updates),
 				forced_updates_ms / 1000.0);
 		}
@@ -1387,7 +1387,7 @@ static int store_updated_refs(struct display_state *display_state,
 
  abort:
 	strbuf_release(&note);
-	return rc;
+	प्रत्यागम rc;
 }
 
 /*
@@ -1395,11 +1395,11 @@ static int store_updated_refs(struct display_state *display_state,
  * everything we are going to fetch already exists and is connected
  * locally.
  */
-static int check_exist_and_connected(struct ref *ref_map)
+स्थिर पूर्णाङ्क check_exist_and_connected(संरचना ref *ref_map)
 {
-	struct ref *rm = ref_map;
-	struct check_connected_options opt = CHECK_CONNECTED_INIT;
-	struct ref *r;
+	संरचना ref *rm = ref_map;
+	संरचना check_connected_options opt = CHECK_CONNECTED_INIT;
+	संरचना ref *r;
 
 	/*
 	 * If we are deepening a shallow clone we already have these
@@ -1408,286 +1408,286 @@ static int check_exist_and_connected(struct ref *ref_map)
 	 * really need to perform.  Claiming failure now will ensure
 	 * we perform the network exchange to deepen our history.
 	 */
-	if (deepen)
-		return -1;
+	यदि (deepen)
+		प्रत्यागम -1;
 
 	/*
 	 * Similarly, if we need to refetch, we always want to perform a full
 	 * fetch ignoring existing objects.
 	 */
-	if (refetch)
-		return -1;
+	यदि (refetch)
+		प्रत्यागम -1;
 
 
 	/*
 	 * check_connected() allows objects to merely be promised, but
 	 * we need all direct targets to exist.
 	 */
-	for (r = rm; r; r = r->next) {
-		if (!odb_has_object(the_repository->objects, &r->old_oid,
+	प्रति (r = rm; r; r = r->अग्र) {
+		यदि (!odb_has_object(the_repository->objects, &r->old_oid,
 				    ODB_HAS_OBJECT_RECHECK_PACKED))
-			return -1;
+			प्रत्यागम -1;
 	}
 
 	opt.quiet = 1;
 	opt.exclude_hidden_refs_section = "fetch";
-	return check_connected(iterate_ref_map, &rm, &opt);
+	प्रत्यागम check_connected(iterate_ref_map, &rm, &opt);
 }
 
-static int fetch_and_consume_refs(struct display_state *display_state,
-				  struct transport *transport,
-				  struct ref_transaction *transaction,
-				  struct ref *ref_map,
-				  struct fetch_head *fetch_head,
-				  const struct fetch_config *config,
-				  struct ref_update_display_info_array *display_array)
+स्थिर पूर्णाङ्क fetch_and_consume_refs(संरचना display_state *display_state,
+				  संरचना transport *transport,
+				  संरचना ref_transaction *transaction,
+				  संरचना ref *ref_map,
+				  संरचना fetch_शीर्ष *fetch_शीर्ष,
+				  ध्रुव संरचना fetch_config *config,
+				  संरचना ref_update_display_info_array *display_array)
 {
-	int connectivity_checked = 1;
-	int ret;
+	पूर्णाङ्क connectivity_checked = 1;
+	पूर्णाङ्क ret;
 
 	/*
 	 * We don't need to perform a fetch in case we can already satisfy all
 	 * refs.
 	 */
 	ret = check_exist_and_connected(ref_map);
-	if (ret) {
+	यदि (ret) {
 		trace2_region_enter("fetch", "fetch_refs", the_repository);
 		ret = transport_fetch_refs(transport, ref_map);
 		trace2_region_leave("fetch", "fetch_refs", the_repository);
-		if (ret)
-			goto out;
+		यदि (ret)
+			गच्छ बहिर्गमनम्;
 		connectivity_checked = transport->smart_options ?
 			transport->smart_options->connectivity_checked : 0;
 	}
 
 	trace2_region_enter("fetch", "consume_refs", the_repository);
 	ret = store_updated_refs(display_state, connectivity_checked,
-				 transaction, ref_map, fetch_head, config,
+				 transaction, ref_map, fetch_शीर्ष, config,
 				 display_array);
 	trace2_region_leave("fetch", "consume_refs", the_repository);
 
-out:
+बहिर्गमनम्:
 	transport_unlock_pack(transport, 0);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int prune_refs(struct display_state *display_state,
-		      struct refspec *rs,
-		      struct ref_transaction *transaction,
-		      struct ref *ref_map)
+स्थिर पूर्णाङ्क prune_refs(संरचना display_state *display_state,
+		      संरचना refspec *rs,
+		      संरचना ref_transaction *transaction,
+		      संरचना ref *ref_map)
 {
-	int result = 0;
-	struct ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
-	struct strbuf err = STRBUF_INIT;
-	struct string_list refnames = STRING_LIST_INIT_NODUP;
+	पूर्णाङ्क परिणाम = 0;
+	संरचना ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
+	संरचना strbuf err = STRBUF_INIT;
+	संरचना string_list refnames = STRING_LIST_INIT_NODUP;
 
-	for (ref = stale_refs; ref; ref = ref->next)
+	प्रति (ref = stale_refs; ref; ref = ref->अग्र)
 		string_list_append(&refnames, ref->name);
 
-	if (!dry_run) {
-		if (transaction) {
-			for (ref = stale_refs; ref; ref = ref->next) {
-				result = ref_transaction_delete(transaction, ref->name, NULL,
-								NULL, 0, "fetch: prune", &err);
-				if (result)
-					goto cleanup;
+	यदि (!dry_सततम्) {
+		यदि (transaction) {
+			प्रति (ref = stale_refs; ref; ref = ref->अग्र) {
+				परिणाम = ref_transaction_delete(transaction, ref->name, रिक्त,
+								रिक्त, 0, "fetch: prune", &err);
+				यदि (परिणाम)
+					गच्छ cleanup;
 			}
-		} else {
-			result = refs_delete_refs(get_main_ref_store(the_repository),
+		} अन्यथा {
+			परिणाम = refs_delete_refs(get_main_ref_store(the_repository),
 						  "fetch: prune", &refnames,
 						  0);
 		}
 	}
 
-	if (verbosity >= 0) {
-		int summary_width = transport_summary_width(stale_refs);
+	यदि (verbosity >= 0) {
+		पूर्णाङ्क summary_विस्तारः = transport_summary_विस्तारः(stale_refs);
 
-		for (ref = stale_refs; ref; ref = ref->next) {
-			display_ref_update(display_state, '-', _("[deleted]"), NULL,
+		प्रति (ref = stale_refs; ref; ref = ref->अग्र) {
+			display_ref_update(display_state, '-', _("[deleted]"), रिक्त,
 					   _("(none)"), ref->name,
 					   &ref->new_oid, &ref->old_oid,
-					   summary_width);
+					   summary_विस्तारः);
 		}
-		string_list_sort(&refnames);
+		string_list_क्रमय(&refnames);
 		refs_warn_dangling_symrefs(get_main_ref_store(the_repository),
-					   stderr, "   ", dry_run, &refnames);
+					   stderr, "   ", dry_सततम्, &refnames);
 	}
 
 cleanup:
 	string_list_clear(&refnames, 0);
 	strbuf_release(&err);
 	free_refs(stale_refs);
-	return result;
+	प्रत्यागम परिणाम;
 }
 
-static void check_not_current_branch(struct ref *ref_map)
+स्थिर शून्य check_not_current_branch(संरचना ref *ref_map)
 {
-	const char *path;
-	for (; ref_map; ref_map = ref_map->next)
-		if (ref_map->peer_ref &&
+	ध्रुव वर्ण *मार्गः;
+	प्रति (; ref_map; ref_map = ref_map->अग्र)
+		यदि (ref_map->peer_ref &&
 		    starts_with(ref_map->peer_ref->name, "refs/heads/") &&
-		    (path = branch_checked_out(ref_map->peer_ref->name)))
+		    (मार्गः = branch_checked_बहिर्गमनम्(ref_map->peer_ref->name)))
 			die(_("refusing to fetch into branch '%s' "
 			      "checked out at '%s'"),
-			    ref_map->peer_ref->name, path);
+			    ref_map->peer_ref->name, मार्गः);
 }
 
-static int truncate_fetch_head(void)
+स्थिर पूर्णाङ्क truncate_fetch_शीर्ष(शून्य)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	ध्रुव वर्ण *filename = git_मार्गः_fetch_शीर्ष(the_repository);
 	FILE *fp = fopen_for_writing(filename);
 
-	if (!fp)
-		return error_errno(_("cannot open '%s'"), filename);
+	यदि (!fp)
+		प्रत्यागम error_errno(_("cannot open '%s'"), filename);
 	fclose(fp);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void set_option(struct transport *transport, const char *name, const char *value)
+स्थिर शून्य समुच्चयः_option(संरचना transport *transport, ध्रुव वर्ण *name, ध्रुव वर्ण *मानम्)
 {
-	int r = transport_set_option(transport, name, value);
-	if (r < 0)
+	पूर्णाङ्क r = transport_समुच्चयः_option(transport, name, मानम्);
+	यदि (r < 0)
 		die(_("option \"%s\" value \"%s\" is not valid for %s"),
-		    name, value, transport->url);
-	if (r > 0)
+		    name, मानम्, transport->url);
+	यदि (r > 0)
 		warning(_("option \"%s\" is ignored for %s"),
 			name, transport->url);
 }
 
 
-static int add_oid(const struct reference *ref, void *cb_data)
+स्थिर पूर्णाङ्क सङ्कलय_oid(ध्रुव संरचना reference *ref, शून्य *cb_दत्त)
 {
-	struct oid_array *oids = cb_data;
+	संरचना oid_array *oids = cb_दत्त;
 
 	oid_array_append(oids, ref->oid);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void add_negotiation_tips(struct string_list *input_list,
-				 struct oid_array **output_list,
-				 const char *argname)
+स्थिर शून्य सङ्कलय_negotiation_tips(संरचना string_list *निवेशः_list,
+				 संरचना oid_array **output_list,
+				 ध्रुव वर्ण *argname)
 {
-	struct oid_array *oids = xcalloc(1, sizeof(*oids));
-	int i;
+	संरचना oid_array *oids = xcalloc(1, परिमाण(*oids));
+	पूर्णाङ्क i;
 
-	for (i = 0; i < input_list->nr; i++) {
-		const char *s = input_list->items[i].string;
-		struct refs_for_each_ref_options opts = {
-			.pattern = s,
+	प्रति (i = 0; i < निवेशः_list->nr; i++) {
+		ध्रुव वर्ण *s = निवेशः_list->वस्तूनि[i].string;
+		संरचना refs_for_each_ref_options opts = {
+			.आदर्शः = s,
 		};
-		int old_nr;
-		if (!has_glob_specials(s)) {
-			struct object_id oid;
+		पूर्णाङ्क old_nr;
+		यदि (!has_glob_specials(s)) {
+			संरचना object_id oid;
 
 			/* Ignore missing reference. */
-			if (repo_get_oid(the_repository, s, &oid))
-				continue;
+			यदि (repo_get_oid(the_repository, s, &oid))
+				अनुवर्त;
 			/* Fail on missing object pointed by ref. */
-			if (!odb_has_object(the_repository->objects, &oid, 0))
+			यदि (!odb_has_object(the_repository->objects, &oid, 0))
 				die(_("the object %s does not exist"), s);
 
 			oid_array_append(oids, &oid);
-			continue;
+			अनुवर्त;
 		}
 		old_nr = oids->nr;
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      add_oid, oids, &opts);
-		if (old_nr == oids->nr)
+				      सङ्कलय_oid, oids, &opts);
+		यदि (old_nr == oids->nr)
 			warning(_("ignoring %s=%s because it does not match any refs"),
 				argname, s);
 	}
 	*output_list = oids;
 }
 
-static struct transport *prepare_transport(struct remote *remote, int deepen,
-					   struct list_objects_filter_options *filter_options)
+स्थिर संरचना transport *prepare_transport(संरचना remote *remote, पूर्णाङ्क deepen,
+					   संरचना list_objects_filter_options *filter_options)
 {
-	struct transport *transport;
+	संरचना transport *transport;
 
-	transport = transport_get(remote, NULL);
-	transport_set_verbosity(transport, verbosity, progress);
+	transport = transport_get(remote, रिक्त);
+	transport_समुच्चयः_verbosity(transport, verbosity, प्रगतिः);
 	transport->family = family;
-	if (upload_pack)
-		set_option(transport, TRANS_OPT_UPLOADPACK, upload_pack);
-	if (keep)
-		set_option(transport, TRANS_OPT_KEEP, "yes");
-	if (depth)
-		set_option(transport, TRANS_OPT_DEPTH, depth);
-	if (deepen && deepen_since)
-		set_option(transport, TRANS_OPT_DEEPEN_SINCE, deepen_since);
-	if (deepen && deepen_not.nr)
-		set_option(transport, TRANS_OPT_DEEPEN_NOT,
-			   (const char *)&deepen_not);
-	if (deepen_relative)
-		set_option(transport, TRANS_OPT_DEEPEN_RELATIVE, "yes");
-	if (update_shallow)
-		set_option(transport, TRANS_OPT_UPDATE_SHALLOW, "yes");
-	if (refetch)
-		set_option(transport, TRANS_OPT_REFETCH, "yes");
-	if (filter_options->choice) {
-		const char *spec =
+	यदि (upload_pack)
+		समुच्चयः_option(transport, TRANS_OPT_UPLOADPACK, upload_pack);
+	यदि (keep)
+		समुच्चयः_option(transport, TRANS_OPT_KEEP, "yes");
+	यदि (गभीरता)
+		समुच्चयः_option(transport, TRANS_OPT_गभीरता, गभीरता);
+	यदि (deepen && deepen_since)
+		समुच्चयः_option(transport, TRANS_OPT_DEEPEN_SINCE, deepen_since);
+	यदि (deepen && deepen_not.nr)
+		समुच्चयः_option(transport, TRANS_OPT_DEEPEN_NOT,
+			   (ध्रुव वर्ण *)&deepen_not);
+	यदि (deepen_relative)
+		समुच्चयः_option(transport, TRANS_OPT_DEEPEN_RELATIVE, "yes");
+	यदि (update_shallow)
+		समुच्चयः_option(transport, TRANS_OPT_UPDATE_SHALLOW, "yes");
+	यदि (refetch)
+		समुच्चयः_option(transport, TRANS_OPT_REFETCH, "yes");
+	यदि (filter_options->choice) {
+		ध्रुव वर्ण *spec =
 			expand_list_objects_filter_spec(filter_options);
-		set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER, spec);
-		set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
+		समुच्चयः_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER, spec);
+		समुच्चयः_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
-	if (negotiation_restrict.nr) {
-		if (transport->smart_options)
-			add_negotiation_tips(&negotiation_restrict,
+	यदि (negotiation_restrict.nr) {
+		यदि (transport->smart_options)
+			सङ्कलय_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else
+		अन्यथा
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-restrict");
-	} else if (remote->negotiation_restrict.nr) {
-		struct string_list_item *item;
+	} अन्यथा यदि (remote->negotiation_restrict.nr) {
+		संरचना string_list_item *item;
 		for_each_string_list_item(item, &remote->negotiation_restrict)
 			string_list_append(&negotiation_restrict, item->string);
-		if (transport->smart_options)
-			add_negotiation_tips(&negotiation_restrict,
+		यदि (transport->smart_options)
+			सङ्कलय_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else {
-			struct strbuf config_name = STRBUF_INIT;
+		अन्यथा {
+			संरचना strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationRestrict", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
 				config_name.buf);
 			strbuf_release(&config_name);
 		}
 	}
-	if (negotiation_include.nr) {
-		if (transport->smart_options)
-			add_negotiation_tips(&negotiation_include,
+	यदि (negotiation_include.nr) {
+		यदि (transport->smart_options)
+			सङ्कलय_negotiation_tips(&negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		else
+		अन्यथा
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-include");
-	} else if (remote->negotiation_include.nr) {
-		if (transport->smart_options) {
-			add_negotiation_tips(&remote->negotiation_include,
+	} अन्यथा यदि (remote->negotiation_include.nr) {
+		यदि (transport->smart_options) {
+			सङ्कलय_negotiation_tips(&remote->negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		} else {
-			struct strbuf config_name = STRBUF_INIT;
+		} अन्यथा {
+			संरचना strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationInclude", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
 				config_name.buf);
 			strbuf_release(&config_name);
 		}
 	}
-	return transport;
+	प्रत्यागम transport;
 }
 
-static int backfill_tags(struct display_state *display_state,
-			 struct transport *transport,
-			 struct ref_transaction *transaction,
-			 struct ref *ref_map,
-			 struct fetch_head *fetch_head,
-			 const struct fetch_config *config,
-			 struct ref_update_display_info_array *display_array,
-			 struct list_objects_filter_options *filter_options)
+स्थिर पूर्णाङ्क backfill_चिह्नकानि(संरचना display_state *display_state,
+			 संरचना transport *transport,
+			 संरचना ref_transaction *transaction,
+			 संरचना ref *ref_map,
+			 संरचना fetch_शीर्ष *fetch_शीर्ष,
+			 ध्रुव संरचना fetch_config *config,
+			 संरचना ref_update_display_info_array *display_array,
+			 संरचना list_objects_filter_options *filter_options)
 {
-	int retcode, cannot_reuse;
+	पूर्णाङ्क retcode, cannot_reuse;
 
 	/*
 	 * Once we have set TRANS_OPT_DEEPEN_SINCE, we can't unset it
@@ -1698,33 +1698,33 @@ static int backfill_tags(struct display_state *display_state,
 	 */
 	cannot_reuse = transport->cannot_reuse ||
 		deepen_since || deepen_not.nr;
-	if (cannot_reuse) {
+	यदि (cannot_reuse) {
 		gsecondary = prepare_transport(transport->remote, 0, filter_options);
 		transport = gsecondary;
 	}
 
-	transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, NULL);
-	transport_set_option(transport, TRANS_OPT_DEPTH, "0");
-	transport_set_option(transport, TRANS_OPT_DEEPEN_RELATIVE, NULL);
+	transport_समुच्चयः_option(transport, TRANS_OPT_FOLLOWTAGS, रिक्त);
+	transport_समुच्चयः_option(transport, TRANS_OPT_गभीरता, "0");
+	transport_समुच्चयः_option(transport, TRANS_OPT_DEEPEN_RELATIVE, रिक्त);
 	retcode = fetch_and_consume_refs(display_state, transport, transaction, ref_map,
-					 fetch_head, config, display_array);
+					 fetch_शीर्ष, config, display_array);
 
-	if (gsecondary) {
+	यदि (gsecondary) {
 		transport_disconnect(gsecondary);
-		gsecondary = NULL;
+		gsecondary = रिक्त;
 	}
 
-	return retcode;
+	प्रत्यागम retcode;
 }
 
-static const char *strip_refshead(const char *name){
-	skip_prefix(name, "refs/heads/", &name);
-	return name;
+स्थिर ध्रुव वर्ण *strip_refshead(ध्रुव वर्ण *name){
+	skip_उपसर्गः(name, "refs/heads/", &name);
+	प्रत्यागम name;
 }
 
-static void set_head_advice_msg(const char *remote, const char *head_name)
+स्थिर शून्य समुच्चयः_शीर्ष_advice_सन्देशः(ध्रुव वर्ण *remote, ध्रुव वर्ण *शीर्ष_name)
 {
-	const char message_advice_set_head[] =
+	ध्रुव वर्ण सन्देशः_advice_समुच्चयः_शीर्ष[] =
 	N_("Run 'git remote set-head %s %s' to follow the change, or modify\n"
 	   "either of the 'remote.%s.followRemoteHEAD' or 'fetch.followRemoteHEAD'\n"
 	   "configuration variables to handle the situation differently.\n\n"
@@ -1733,124 +1733,124 @@ static void set_head_advice_msg(const char *remote, const char *head_name)
 	   "    git config set remote.%s.followRemoteHEAD warn-if-not-%s\n\n"
 	   "will suppress the warning until the remote changes HEAD to something else.");
 
-	advise_if_enabled(ADVICE_FETCH_SET_HEAD_WARN, _(message_advice_set_head),
-			remote, head_name, remote, remote, head_name);
+	advise_if_enabled(ADVICE_FETCH_समुच्चयः_शीर्ष_WARN, _(सन्देशः_advice_समुच्चयः_शीर्ष),
+			remote, शीर्ष_name, remote, remote, शीर्ष_name);
 }
 
-static void warn_set_head(const char *remote, const char *head_name,
-			struct strbuf *buf_prev, int updateres) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+स्थिर शून्य warn_समुच्चयः_शीर्ष(ध्रुव वर्ण *remote, ध्रुव वर्ण *शीर्ष_name,
+			संरचना strbuf *buf_पूर्व, पूर्णाङ्क updateres) {
+	संरचना strbuf buf_उपसर्गः = STRBUF_INIT;
+	ध्रुव वर्ण *पूर्व_शीर्ष = रिक्त;
 
-	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
-	skip_prefix(buf_prev->buf, buf_prefix.buf, &prev_head);
+	strbuf_addf(&buf_उपसर्गः, "refs/remotes/%s/", remote);
+	skip_उपसर्गः(buf_पूर्व->buf, buf_उपसर्गः.buf, &पूर्व_शीर्ष);
 
-	if (prev_head && strcmp(prev_head, head_name)) {
-		printf("'HEAD' at '%s' is '%s', but we have '%s' locally.\n",
-			remote, head_name, prev_head);
-		set_head_advice_msg(remote, head_name);
+	यदि (पूर्व_शीर्ष && वाक्यं_तुलय(पूर्व_शीर्ष, शीर्ष_name)) {
+		प्रारूप_लिख("'HEAD' at '%s' is '%s', but we have '%s' locally.\n",
+			remote, शीर्ष_name, पूर्व_शीर्ष);
+		समुच्चयः_शीर्ष_advice_सन्देशः(remote, शीर्ष_name);
 	}
-	else if (updateres && buf_prev->len) {
-		printf("'HEAD' at '%s' is '%s', "
+	अन्यथा यदि (updateres && buf_पूर्व->len) {
+		प्रारूप_लिख("'HEAD' at '%s' is '%s', "
 			"but we have a detached HEAD pointing to '%s' locally.\n",
-			remote, head_name, buf_prev->buf);
-		set_head_advice_msg(remote, head_name);
+			remote, शीर्ष_name, buf_पूर्व->buf);
+		समुच्चयः_शीर्ष_advice_सन्देशः(remote, शीर्ष_name);
 	}
-	strbuf_release(&buf_prefix);
+	strbuf_release(&buf_उपसर्गः);
 }
 
-static int set_head(const struct ref *remote_refs, struct remote *remote,
-			int follow_remote_head)
+स्थिर पूर्णाङ्क समुच्चयः_शीर्ष(ध्रुव संरचना ref *remote_refs, संरचना remote *remote,
+			पूर्णाङ्क follow_remote_शीर्ष)
 {
-	int result = 0, create_only, baremirror, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
-		      b_local_head = STRBUF_INIT;
-	const char *no_warn_branch = remote->no_warn_branch;
-	char *head_name = NULL;
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	पूर्णाङ्क परिणाम = 0, create_only, baremirror, was_detached;
+	संरचना strbuf b_शीर्ष = STRBUF_INIT, b_remote_शीर्ष = STRBUF_INIT,
+		      b_local_शीर्ष = STRBUF_INIT;
+	ध्रुव वर्ण *no_warn_branch = remote->no_warn_branch;
+	वर्ण *शीर्ष_name = रिक्त;
+	संरचना ref *ref, *matches;
+	संरचना ref *fetch_map = रिक्त, **fetch_map_पुच्छ = &fetch_map;
+	संरचना refspec_item refspec = {
 		.force = 0,
-		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.आदर्शः = 1,
+		.src = (वर्ण *) "refs/heads/*",
+		.dst = (वर्ण *) "refs/heads/*",
 	};
-	struct string_list heads = STRING_LIST_INIT_DUP;
-	struct ref_store *refs = get_main_ref_store(the_repository);
+	संरचना string_list heads = STRING_LIST_INIT_DUP;
+	संरचना ref_store *refs = get_main_ref_store(the_repository);
 
-	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
-	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
-				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next) {
+	get_fetch_map(remote_refs, &refspec, &fetch_map_पुच्छ, 0);
+	matches = guess_remote_शीर्ष(find_ref_by_name(remote_refs, "HEAD"),
+				    fetch_map, REMOTE_GUESS_शीर्ष_ALL);
+	प्रति (ref = matches; ref; ref = ref->अग्र) {
 		string_list_append(&heads, strip_refshead(ref->name));
 	}
 
-	if (!heads.nr)
-		result = 1;
-	else if (heads.nr > 1)
-		result = 1;
-	else
-		head_name = xstrdup(heads.items[0].string);
+	यदि (!heads.nr)
+		परिणाम = 1;
+	अन्यथा यदि (heads.nr > 1)
+		परिणाम = 1;
+	अन्यथा
+		शीर्ष_name = xstrdup(heads.वस्तूनि[0].string);
 
-	if (!head_name)
-		goto cleanup;
+	यदि (!शीर्ष_name)
+		गच्छ cleanup;
 	baremirror = is_bare_repository(the_repository) && remote->mirror;
-	create_only = follow_remote_head == FOLLOW_REMOTE_ALWAYS ? 0 : !baremirror;
-	if (baremirror) {
-		strbuf_addstr(&b_head, "HEAD");
-		strbuf_addf(&b_remote_head, "refs/heads/%s", head_name);
-	} else {
-		strbuf_addf(&b_head, "refs/remotes/%s/HEAD", remote->name);
-		strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", remote->name, head_name);
+	create_only = follow_remote_शीर्ष == FOLLOW_REMOTE_ALWAYS ? 0 : !baremirror;
+	यदि (baremirror) {
+		strbuf_addstr(&b_शीर्ष, "HEAD");
+		strbuf_addf(&b_remote_शीर्ष, "refs/heads/%s", शीर्ष_name);
+	} अन्यथा {
+		strbuf_addf(&b_शीर्ष, "refs/remotes/%s/HEAD", remote->name);
+		strbuf_addf(&b_remote_शीर्ष, "refs/remotes/%s/%s", remote->name, शीर्ष_name);
 	}
 	/* make sure it's valid */
-	if (!baremirror && !refs_ref_exists(refs, b_remote_head.buf)) {
-		result = 1;
-		goto cleanup;
+	यदि (!baremirror && !refs_ref_exists(refs, b_remote_शीर्ष.buf)) {
+		परिणाम = 1;
+		गच्छ cleanup;
 	}
-	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
-					"fetch", &b_local_head, create_only);
-	if (was_detached == -1) {
-		result = 1;
-		goto cleanup;
+	was_detached = refs_update_symref_extended(refs, b_शीर्ष.buf, b_remote_शीर्ष.buf,
+					"fetch", &b_local_शीर्ष, create_only);
+	यदि (was_detached == -1) {
+		परिणाम = 1;
+		गच्छ cleanup;
 	}
-	if (verbosity >= 0 &&
-		follow_remote_head == FOLLOW_REMOTE_WARN &&
-		(!no_warn_branch || strcmp(no_warn_branch, head_name)))
-		warn_set_head(remote->name, head_name, &b_local_head, was_detached);
+	यदि (verbosity >= 0 &&
+		follow_remote_शीर्ष == FOLLOW_REMOTE_WARN &&
+		(!no_warn_branch || वाक्यं_तुलय(no_warn_branch, शीर्ष_name)))
+		warn_समुच्चयः_शीर्ष(remote->name, शीर्ष_name, &b_local_शीर्ष, was_detached);
 
 cleanup:
-	free(head_name);
+	मुक्त(शीर्ष_name);
 	free_refs(fetch_map);
 	free_refs(matches);
 	string_list_clear(&heads, 0);
-	strbuf_release(&b_head);
-	strbuf_release(&b_local_head);
-	strbuf_release(&b_remote_head);
-	return result;
+	strbuf_release(&b_शीर्ष);
+	strbuf_release(&b_local_शीर्ष);
+	strbuf_release(&b_remote_शीर्ष);
+	प्रत्यागम परिणाम;
 }
 
-struct ref_rejection_data {
-	int *retcode;
-	bool conflict_msg_shown;
-	bool case_sensitive_msg_shown;
-	const char *remote_name;
-	struct strmap *rejected_refs;
+संरचना ref_rejection_दत्त {
+	पूर्णाङ्क *retcode;
+	bool conflict_सन्देशः_shown;
+	bool case_sensitive_सन्देशः_shown;
+	ध्रुव वर्ण *remote_name;
+	संरचना strmap *rejected_refs;
 };
 
-static void ref_transaction_rejection_handler(const char *refname,
-					      const struct object_id *old_oid UNUSED,
-					      const struct object_id *new_oid UNUSED,
-					      const char *old_target UNUSED,
-					      const char *new_target UNUSED,
-					      enum ref_transaction_error err,
-					      const char *details,
-					      void *cb_data)
+स्थिर शून्य ref_transaction_rejection_handler(ध्रुव वर्ण *refname,
+					      ध्रुव संरचना object_id *old_oid अप्रयुक्तम्,
+					      ध्रुव संरचना object_id *new_oid अप्रयुक्तम्,
+					      ध्रुव वर्ण *old_target अप्रयुक्तम्,
+					      ध्रुव वर्ण *new_target अप्रयुक्तम्,
+					      गणना ref_transaction_error err,
+					      ध्रुव वर्ण *details,
+					      शून्य *cb_दत्त)
 {
-	struct ref_rejection_data *data = cb_data;
+	संरचना ref_rejection_दत्त *दत्त = cb_दत्त;
 
-	if (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
-	    !data->case_sensitive_msg_shown) {
+	यदि (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
+	    !दत्त->case_sensitive_सन्देशः_shown) {
 		error(_("You're on a case-insensitive filesystem, and the remote you are\n"
 			"trying to fetch from has references that only differ in casing. It\n"
 			"is impossible to store such references with the 'files' backend. You\n"
@@ -1861,41 +1861,41 @@ static void ref_transaction_rejection_handler(const char *refname,
 			"Please keep in mind that not all implementations of Git support this\n"
 			"new format yet. So if you use tools other than Git to access this\n"
 			"repository it may not be an option to migrate to reftables.\n"));
-		data->case_sensitive_msg_shown = true;
-	} else if (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
-		   !data->conflict_msg_shown) {
+		दत्त->case_sensitive_सन्देशः_shown = true;
+	} अन्यथा यदि (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
+		   !दत्त->conflict_सन्देशः_shown) {
 		error(_("some local refs could not be updated; try running\n"
 			" 'git remote prune %s' to remove any old, conflicting "
-			"branches"), data->remote_name);
-		data->conflict_msg_shown = true;
-	} else {
-		if (details)
+			"branches"), दत्त->remote_name);
+		दत्त->conflict_सन्देशः_shown = true;
+	} अन्यथा {
+		यदि (details)
 			error("%s", details);
-		else
+		अन्यथा
 			error(_("fetching ref %s failed: %s"),
-			      refname, ref_transaction_error_msg(err));
+			      refname, ref_transaction_error_सन्देशः(err));
 	}
 
-	strmap_put(data->rejected_refs, refname, NULL);
-	*data->retcode = 1;
+	strmap_put(दत्त->rejected_refs, refname, रिक्त);
+	*दत्त->retcode = 1;
 }
 
 /*
  * Commit the reference transaction. If it isn't an atomic transaction, handle
  * rejected updates as part of using batched updates.
  */
-static int commit_ref_transaction(struct ref_transaction **transaction,
-				  bool is_atomic, const char *remote_name,
-				  struct strmap *rejected_refs,
-				  struct strbuf *err)
+स्थिर पूर्णाङ्क commit_ref_transaction(संरचना ref_transaction **transaction,
+				  bool is_atomic, ध्रुव वर्ण *remote_name,
+				  संरचना strmap *rejected_refs,
+				  संरचना strbuf *err)
 {
-	int retcode = ref_transaction_commit(*transaction, err);
-	if (retcode)
-		goto out;
+	पूर्णाङ्क retcode = ref_transaction_commit(*transaction, err);
+	यदि (retcode)
+		गच्छ बहिर्गमनम्;
 
-	if (!is_atomic) {
-		struct ref_rejection_data data = {
-			.conflict_msg_shown = 0,
+	यदि (!is_atomic) {
+		संरचना ref_rejection_दत्त दत्त = {
+			.conflict_सन्देशः_shown = 0,
 			.remote_name = remote_name,
 			.retcode = &retcode,
 			.rejected_refs = rejected_refs,
@@ -1903,97 +1903,97 @@ static int commit_ref_transaction(struct ref_transaction **transaction,
 
 		ref_transaction_for_each_rejected_update(*transaction,
 							 ref_transaction_rejection_handler,
-							 &data);
+							 &दत्त);
 	}
 
-out:
+बहिर्गमनम्:
 	ref_transaction_free(*transaction);
-	*transaction = NULL;
-	return retcode;
+	*transaction = रिक्त;
+	प्रत्यागम retcode;
 }
 
-static void collect_updated_tips(struct oidset *tips, struct ref *ref_map)
+स्थिर शून्य collect_updated_tips(संरचना oidset *tips, संरचना ref *ref_map)
 {
-	struct ref *rm;
-	for (rm = ref_map; rm; rm = rm->next) {
-		struct commit *commit;
+	संरचना ref *rm;
+	प्रति (rm = ref_map; rm; rm = rm->अग्र) {
+		संरचना commit *commit;
 		/*
 		 * Shallow-rejected refs are not stored and their history
 		 * is incomplete, so skip them.
 		 */
-		if (rm->status == REF_STATUS_REJECT_SHALLOW)
-			continue;
-		if (is_null_oid(&rm->old_oid))
-			continue;
-		if (rm->peer_ref &&
+		यदि (rm->स्थितिः == REF_स्थितिः_REJECT_SHALLOW)
+			अनुवर्त;
+		यदि (is_null_oid(&rm->old_oid))
+			अनुवर्त;
+		यदि (rm->peer_ref &&
 		    oideq(&rm->old_oid, &rm->peer_ref->old_oid))
-			continue;
+			अनुवर्त;
 		commit = lookup_commit_reference_gently(the_repository,
 							&rm->old_oid, 1);
-		if (commit)
-			oidset_insert(tips, &commit->object.oid);
+		यदि (commit)
+			oidset_निवेशय(tips, &commit->object.oid);
 	}
 }
 
-static int do_fetch(struct transport *transport,
-		    struct refspec *rs,
-		    const struct fetch_config *config,
-		    struct list_objects_filter_options *filter_options,
-		    struct oidset *updated_tips)
+स्थिर पूर्णाङ्क do_fetch(संरचना transport *transport,
+		    संरचना refspec *rs,
+		    ध्रुव संरचना fetch_config *config,
+		    संरचना list_objects_filter_options *filter_options,
+		    संरचना oidset *updated_tips)
 {
-	struct ref_transaction *transaction = NULL;
-	struct ref *ref_map = NULL;
-	struct display_state display_state = { 0 };
-	int autotags = (transport->remote->fetch_tags == 1);
-	int retcode = 0;
-	const struct ref *remote_refs;
-	struct transport_ls_refs_options transport_ls_refs_options =
+	संरचना ref_transaction *transaction = रिक्त;
+	संरचना ref *ref_map = रिक्त;
+	संरचना display_state display_state = { 0 };
+	पूर्णाङ्क autotags = (transport->remote->fetch_चिह्नकानि == 1);
+	पूर्णाङ्क retcode = 0;
+	ध्रुव संरचना ref *remote_refs;
+	संरचना transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	struct fetch_head fetch_head = { 0 };
-	struct strbuf err = STRBUF_INIT;
-	struct ref_update_display_info_array display_array = { 0 };
-	struct strmap rejected_refs = STRMAP_INIT;
-	int summary_width = 0;
-	int follow_remote_head = FOLLOW_REMOTE_NEVER;
+	संरचना fetch_शीर्ष fetch_शीर्ष = { 0 };
+	संरचना strbuf err = STRBUF_INIT;
+	संरचना ref_update_display_info_array display_array = { 0 };
+	संरचना strmap rejected_refs = STRMAP_INIT;
+	पूर्णाङ्क summary_विस्तारः = 0;
+	पूर्णाङ्क follow_remote_शीर्ष = FOLLOW_REMOTE_NEVER;
 
-	if (tags == TAGS_DEFAULT) {
-		if (transport->remote->fetch_tags == 2)
-			tags = TAGS_SET;
-		if (transport->remote->fetch_tags == -1)
-			tags = TAGS_UNSET;
+	यदि (चिह्नकानि == चिह्नकानि_DEFAULT) {
+		यदि (transport->remote->fetch_चिह्नकानि == 2)
+			चिह्नकानि = चिह्नकानि_समुच्चयः;
+		यदि (transport->remote->fetch_चिह्नकानि == -1)
+			चिह्नकानि = चिह्नकानि_UNSET;
 	}
 
 	/* if not appending, truncate FETCH_HEAD */
-	if (!append && write_fetch_head) {
-		retcode = truncate_fetch_head();
-		if (retcode)
-			goto cleanup;
+	यदि (!append && write_fetch_शीर्ष) {
+		retcode = truncate_fetch_शीर्ष();
+		यदि (retcode)
+			गच्छ cleanup;
 	}
 
-	if (rs->nr) {
+	यदि (rs->nr) {
 		refspec_ref_prefixes(rs, &transport_ls_refs_options.ref_prefixes);
-	} else {
-		struct branch *branch = branch_get(NULL);
+	} अन्यथा {
+		संरचना branch *branch = branch_get(रिक्त);
 
-		if (transport->remote->fetch.nr) {
+		यदि (transport->remote->fetch.nr) {
 			refspec_ref_prefixes(&transport->remote->fetch,
 					     &transport_ls_refs_options.ref_prefixes);
 			/*
 			 * See remote.c's handling of remote.<name>.followRemoteHEAD
 			 * for the analogous, still-unresolved case.
 			 */
-			if (transport->remote->follow_remote_head)
-				follow_remote_head = transport->remote->follow_remote_head;
-			else if (config->follow_remote_head_seen)
-				follow_remote_head = get_follow_remote_head(config->follow_remote_head_raw);
-			else
-				follow_remote_head = BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
+			यदि (transport->remote->follow_remote_शीर्ष)
+				follow_remote_शीर्ष = transport->remote->follow_remote_शीर्ष;
+			अन्यथा यदि (config->follow_remote_शीर्ष_आलोकितम्)
+				follow_remote_शीर्ष = get_follow_remote_शीर्ष(config->follow_remote_शीर्ष_raw);
+			अन्यथा
+				follow_remote_शीर्ष = BUILTIN_FOLLOW_REMOTE_शीर्ष_DFLT;
 		}
-		if (branch && branch_has_merge_config(branch) &&
-		    !strcmp(branch->remote_name, transport->remote->name)) {
-			int i;
-			for (i = 0; i < branch->merge_nr; i++) {
-				strvec_push(&transport_ls_refs_options.ref_prefixes,
+		यदि (branch && branch_has_merge_config(branch) &&
+		    !वाक्यं_तुलय(branch->remote_name, transport->remote->name)) {
+			पूर्णाङ्क i;
+			प्रति (i = 0; i < branch->merge_nr; i++) {
+				strvec_प्रक्षिप(&transport_ls_refs_options.ref_prefixes,
 					    branch->merge[i]->src);
 			}
 		}
@@ -2002,69 +2002,69 @@ static int do_fetch(struct transport *transport,
 		 * If there are no refs specified to fetch, then we just
 		 * fetch HEAD; mention that to narrow the advertisement.
 		 */
-		if (!transport_ls_refs_options.ref_prefixes.nr)
-			strvec_push(&transport_ls_refs_options.ref_prefixes,
+		यदि (!transport_ls_refs_options.ref_prefixes.nr)
+			strvec_प्रक्षिप(&transport_ls_refs_options.ref_prefixes,
 				    "HEAD");
 	}
 
-	if (tags == TAGS_SET || tags == TAGS_DEFAULT)
-		strvec_push(&transport_ls_refs_options.ref_prefixes,
+	यदि (चिह्नकानि == चिह्नकानि_समुच्चयः || चिह्नकानि == चिह्नकानि_DEFAULT)
+		strvec_प्रक्षिप(&transport_ls_refs_options.ref_prefixes,
 			    "refs/tags/");
 
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER)
-		strvec_push(&transport_ls_refs_options.ref_prefixes,
+	यदि (follow_remote_शीर्ष != FOLLOW_REMOTE_NEVER)
+		strvec_प्रक्षिप(&transport_ls_refs_options.ref_prefixes,
 			    "HEAD");
 
 	/*
 	 * Only initiate ref listing if we have at least one ref we want to
 	 * know about.
 	 */
-	if (transport_ls_refs_options.ref_prefixes.nr) {
+	यदि (transport_ls_refs_options.ref_prefixes.nr) {
 		trace2_region_enter("fetch", "remote_refs", the_repository);
 		remote_refs = transport_get_remote_refs(transport,
 							&transport_ls_refs_options);
 		trace2_region_leave("fetch", "remote_refs", the_repository);
-	} else
-		remote_refs = NULL;
+	} अन्यथा
+		remote_refs = रिक्त;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
 
 	ref_map = get_ref_map(transport->remote, remote_refs, rs,
-			      tags, &autotags);
-	if (!update_head_ok)
+			      चिह्नकानि, &autotags);
+	यदि (!update_शीर्ष_ok)
 		check_not_current_branch(ref_map);
 
-	retcode = open_fetch_head(&fetch_head);
-	if (retcode)
-		goto cleanup;
+	retcode = open_fetch_शीर्ष(&fetch_शीर्ष);
+	यदि (retcode)
+		गच्छ cleanup;
 
 	display_state_init(&display_state, ref_map, transport->url,
 			   config->display_format);
 
-	if (atomic_fetch) {
+	यदि (atomic_fetch) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  0, &err);
-		if (!transaction) {
+		यदि (!transaction) {
 			retcode = -1;
-			goto cleanup;
+			गच्छ cleanup;
 		}
 	}
 
-	if (tags == TAGS_DEFAULT && autotags)
-		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
-	if (prune) {
+	यदि (चिह्नकानि == चिह्नकानि_DEFAULT && autotags)
+		transport_समुच्चयः_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
+	यदि (prune) {
 		/*
 		 * We only prune based on refspecs specified
 		 * explicitly (via command line or configuration); we
 		 * don't care whether --tags was specified.
 		 */
-		if (rs->nr) {
+		यदि (rs->nr) {
 			retcode = prune_refs(&display_state, rs, transaction, ref_map);
-		} else {
+		} अन्यथा {
 			retcode = prune_refs(&display_state, &transport->remote->fetch,
 					     transaction, ref_map);
 		}
-		if (retcode != 0)
+		यदि (retcode != 0)
 			retcode = 1;
 	}
 
@@ -2077,30 +2077,30 @@ static int do_fetch(struct transport *transport,
 	 * can delete and create refs (with F/D conflicts) in the same transaction
 	 * and this can be moved above the 'prune_refs()' block.
 	 */
-	if (!transaction) {
+	यदि (!transaction) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  REF_TRANSACTION_ALLOW_FAILURE, &err);
-		if (!transaction) {
+		यदि (!transaction) {
 			retcode = -1;
-			goto cleanup;
+			गच्छ cleanup;
 		}
 	}
 
-	if (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
-				   &fetch_head, config, &display_array)) {
+	यदि (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
+				   &fetch_शीर्ष, config, &display_array)) {
 		retcode = 1;
-		goto cleanup;
+		गच्छ cleanup;
 	}
 
 	/*
 	 * If neither --no-tags nor --tags was specified, do automated tag
 	 * following.
 	 */
-	if (tags == TAGS_DEFAULT && autotags) {
-		struct ref *tags_ref_map = NULL, **tail = &tags_ref_map;
+	यदि (चिह्नकानि == चिह्नकानि_DEFAULT && autotags) {
+		संरचना ref *चिह्नकानि_ref_map = रिक्त, **पुच्छ = &चिह्नकानि_ref_map;
 
-		find_non_local_tags(remote_refs, transaction, &tags_ref_map, &tail);
-		if (tags_ref_map) {
+		find_non_local_चिह्नकानि(remote_refs, transaction, &चिह्नकानि_ref_map, &पुच्छ);
+		यदि (चिह्नकानि_ref_map) {
 			/*
 			 * If backfilling of tags fails then we want to tell
 			 * the user so, but we have to continue regardless to
@@ -2109,19 +2109,19 @@ static int do_fetch(struct transport *transport,
 			 * when `--atomic` is passed: in that case we'll abort
 			 * the transaction and don't commit anything.
 			 */
-			if (backfill_tags(&display_state, transport, transaction, tags_ref_map,
-					  &fetch_head, config, &display_array, filter_options))
+			यदि (backfill_चिह्नकानि(&display_state, transport, transaction, चिह्नकानि_ref_map,
+					  &fetch_शीर्ष, config, &display_array, filter_options))
 				retcode = 1;
 		}
 
-		free_refs(tags_ref_map);
+		free_refs(चिह्नकानि_ref_map);
 	}
 
-	if (retcode)
-		goto cleanup;
+	यदि (retcode)
+		गच्छ cleanup;
 
-	if (verbosity >= 0)
-		summary_width = transport_summary_width(ref_map);
+	यदि (verbosity >= 0)
+		summary_विस्तारः = transport_summary_विस्तारः(ref_map);
 
 	retcode = commit_ref_transaction(&transaction, atomic_fetch,
 					 transport->remote->name,
@@ -2130,17 +2130,17 @@ static int do_fetch(struct transport *transport,
 	 * With '--atomic', bail out if the transaction fails. Without '--atomic',
 	 * continue to fetch head and perform other post-fetch operations.
 	 */
-	if (retcode && atomic_fetch)
-		goto cleanup;
+	यदि (retcode && atomic_fetch)
+		गच्छ cleanup;
 
-	commit_fetch_head(&fetch_head);
+	commit_fetch_शीर्ष(&fetch_शीर्ष);
 
 	collect_updated_tips(updated_tips, ref_map);
 
-	if (set_upstream) {
-		struct branch *branch = branch_get("HEAD");
-		struct ref *rm;
-		struct ref *source_ref = NULL;
+	यदि (समुच्चयः_upstream) {
+		संरचना branch *branch = branch_get("HEAD");
+		संरचना ref *rm;
+		संरचना ref *source_ref = रिक्त;
 
 		/*
 		 * We're setting the upstream configuration for the
@@ -2152,50 +2152,50 @@ static int do_fetch(struct transport *transport,
 		 * request ambiguous and err on the safe side by doing
 		 * nothing and just emit a warning.
 		 */
-		for (rm = ref_map; rm; rm = rm->next) {
-			if (!rm->peer_ref) {
-				if (source_ref) {
+		प्रति (rm = ref_map; rm; rm = rm->अग्र) {
+			यदि (!rm->peer_ref) {
+				यदि (source_ref) {
 					warning(_("multiple branches detected, incompatible with --set-upstream"));
-					goto cleanup;
-				} else {
+					गच्छ cleanup;
+				} अन्यथा {
 					source_ref = rm;
 				}
 			}
 		}
-		if (source_ref) {
-			if (!branch) {
-				const char *shortname = source_ref->name;
-				skip_prefix(shortname, "refs/heads/", &shortname);
+		यदि (source_ref) {
+			यदि (!branch) {
+				ध्रुव वर्ण *shortname = source_ref->name;
+				skip_उपसर्गः(shortname, "refs/heads/", &shortname);
 
 				warning(_("could not set upstream of HEAD to '%s' from '%s' when "
 					  "it does not point to any branch."),
 					shortname, transport->remote->name);
-				goto cleanup;
+				गच्छ cleanup;
 			}
 
-			if (!strcmp(source_ref->name, "HEAD") ||
+			यदि (!वाक्यं_तुलय(source_ref->name, "HEAD") ||
 			    starts_with(source_ref->name, "refs/heads/"))
 				install_branch_config(0,
 						      branch->name,
 						      transport->remote->name,
 						      source_ref->name);
-			else if (starts_with(source_ref->name, "refs/remotes/"))
+			अन्यथा यदि (starts_with(source_ref->name, "refs/remotes/"))
 				warning(_("not setting upstream for a remote remote-tracking branch"));
-			else if (starts_with(source_ref->name, "refs/tags/"))
+			अन्यथा यदि (starts_with(source_ref->name, "refs/tags/"))
 				warning(_("not setting upstream for a remote tag"));
-			else
+			अन्यथा
 				warning(_("unknown branch type"));
-		} else {
+		} अन्यथा {
 			warning(_("no source branch found;\n"
 				  "you need to specify exactly one branch with the --set-upstream option"));
 		}
 	}
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER) {
+	यदि (follow_remote_शीर्ष != FOLLOW_REMOTE_NEVER) {
 		/*
 		 * Way too many cases where this can go wrong so let's just
 		 * ignore errors and fail silently for now.
 		 */
-		set_head(remote_refs, transport->remote, follow_remote_head);
+		समुच्चयः_शीर्ष(remote_refs, transport->remote, follow_remote_शीर्ष);
 	}
 
 cleanup:
@@ -2203,160 +2203,160 @@ cleanup:
 	 * When using batched updates, we want to commit the non-rejected
 	 * updates and also handle the rejections.
 	 */
-	if (retcode && !atomic_fetch && transaction)
+	यदि (retcode && !atomic_fetch && transaction)
 		commit_ref_transaction(&transaction, false,
 				       transport->remote->name,
 				       &rejected_refs, &err);
 
-	for (size_t i = 0; i < display_array.nr; i++) {
-		struct ref_update_display_info *info = &display_array.info[i];
+	प्रति (आकार_t i = 0; i < display_array.nr; i++) {
+		संरचना ref_update_display_info *info = &display_array.info[i];
 
-		if (!info->failed && strmap_contains(&rejected_refs, info->ref))
-			ref_update_display_info_set_failed(info);
-		ref_update_display_info_display(info, &display_state, summary_width);
+		यदि (!info->failed && strmap_अन्तर्भवति(&rejected_refs, info->ref))
+			ref_update_display_info_समुच्चयः_failed(info);
+		ref_update_display_info_display(info, &display_state, summary_विस्तारः);
 		ref_update_display_info_free(info);
 	}
 
-	if (retcode) {
-		if (err.len) {
+	यदि (retcode) {
+		यदि (err.len) {
 			error("%s", err.buf);
 			strbuf_reset(&err);
 		}
-		if (transaction && ref_transaction_abort(transaction, &err) &&
+		यदि (transaction && ref_transaction_abort(transaction, &err) &&
 		    err.len)
 			error("%s", err.buf);
-		transaction = NULL;
+		transaction = रिक्त;
 	}
 
-	if (transaction)
+	यदि (transaction)
 		ref_transaction_free(transaction);
 
-	free(display_array.info);
+	मुक्त(display_array.info);
 	strmap_clear(&rejected_refs, 0);
 	display_state_release(&display_state);
-	close_fetch_head(&fetch_head);
+	close_fetch_शीर्ष(&fetch_शीर्ष);
 	strbuf_release(&err);
 	free_refs(ref_map);
-	return retcode;
+	प्रत्यागम retcode;
 }
 
-static int get_one_remote_for_fetch(struct remote *remote, void *priv)
+स्थिर पूर्णाङ्क get_one_remote_for_fetch(संरचना remote *remote, शून्य *priv)
 {
-	struct string_list *list = priv;
-	if (!remote->skip_default_update)
+	संरचना string_list *list = priv;
+	यदि (!remote->skip_default_update)
 		string_list_append(list, remote->name);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void add_options_to_argv(struct strvec *argv,
-				const struct fetch_config *config)
+स्थिर शून्य सङ्कलय_options_गन्तव्यम्_argv(संरचना strvec *argv,
+				ध्रुव संरचना fetch_config *config)
 {
-	if (dry_run)
-		strvec_push(argv, "--dry-run");
-	if (prune != -1)
-		strvec_push(argv, prune ? "--prune" : "--no-prune");
-	if (prune_tags != -1)
-		strvec_push(argv, prune_tags ? "--prune-tags" : "--no-prune-tags");
-	if (update_head_ok)
-		strvec_push(argv, "--update-head-ok");
-	if (force)
-		strvec_push(argv, "--force");
-	if (keep)
-		strvec_push(argv, "--keep");
-	if (config->recurse_submodules == RECURSE_SUBMODULES_ON)
-		strvec_push(argv, "--recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(argv, "--no-recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(argv, "--recurse-submodules=on-demand");
-	if (tags == TAGS_SET)
-		strvec_push(argv, "--tags");
-	else if (tags == TAGS_UNSET)
-		strvec_push(argv, "--no-tags");
-	if (verbosity >= 2)
-		strvec_push(argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(argv, "-q");
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(argv, "--ipv6");
-	if (!write_fetch_head)
-		strvec_push(argv, "--no-write-fetch-head");
-	if (config->display_format == DISPLAY_FORMAT_PORCELAIN)
+	यदि (dry_सततम्)
+		strvec_प्रक्षिप(argv, "--dry-run");
+	यदि (prune != -1)
+		strvec_प्रक्षिप(argv, prune ? "--prune" : "--no-prune");
+	यदि (prune_चिह्नकानि != -1)
+		strvec_प्रक्षिप(argv, prune_चिह्नकानि ? "--prune-tags" : "--no-prune-tags");
+	यदि (update_शीर्ष_ok)
+		strvec_प्रक्षिप(argv, "--update-head-ok");
+	यदि (force)
+		strvec_प्रक्षिप(argv, "--force");
+	यदि (keep)
+		strvec_प्रक्षिप(argv, "--keep");
+	यदि (config->recurse_submodules == RECURSE_SUBMODULES_ON)
+		strvec_प्रक्षिप(argv, "--recurse-submodules");
+	अन्यथा यदि (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_प्रक्षिप(argv, "--no-recurse-submodules");
+	अन्यथा यदि (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_प्रक्षिप(argv, "--recurse-submodules=on-demand");
+	यदि (चिह्नकानि == चिह्नकानि_समुच्चयः)
+		strvec_प्रक्षिप(argv, "--tags");
+	अन्यथा यदि (चिह्नकानि == चिह्नकानि_UNSET)
+		strvec_प्रक्षिप(argv, "--no-tags");
+	यदि (verbosity >= 2)
+		strvec_प्रक्षिप(argv, "-v");
+	यदि (verbosity >= 1)
+		strvec_प्रक्षिप(argv, "-v");
+	अन्यथा यदि (verbosity < 0)
+		strvec_प्रक्षिप(argv, "-q");
+	यदि (family == TRANSPORT_FAMILY_IPV4)
+		strvec_प्रक्षिप(argv, "--ipv4");
+	अन्यथा यदि (family == TRANSPORT_FAMILY_IPV6)
+		strvec_प्रक्षिप(argv, "--ipv6");
+	यदि (!write_fetch_शीर्ष)
+		strvec_प्रक्षिप(argv, "--no-write-fetch-head");
+	यदि (config->display_format == DISPLAY_FORMAT_PORCELAIN)
 		strvec_pushf(argv, "--porcelain");
 }
 
 /* Fetch multiple remotes in parallel */
 
-struct parallel_fetch_state {
-	const char **argv;
-	struct string_list *remotes;
-	int next, result;
-	const struct fetch_config *config;
+संरचना parallel_fetch_state {
+	ध्रुव वर्ण **argv;
+	संरचना string_list *remotes;
+	पूर्णाङ्क अग्र, परिणाम;
+	ध्रुव संरचना fetch_config *config;
 };
 
-static int fetch_next_remote(struct child_process *cp,
-			     struct strbuf *out UNUSED,
-			     void *cb, void **task_cb)
+स्थिर पूर्णाङ्क fetch_अग्र_remote(संरचना child_process *cp,
+			     संरचना strbuf *बहिर्गमनम् अप्रयुक्तम्,
+			     शून्य *cb, शून्य **task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	char *remote;
+	संरचना parallel_fetch_state *state = cb;
+	वर्ण *remote;
 
-	if (state->next < 0 || state->next >= state->remotes->nr)
-		return 0;
+	यदि (state->अग्र < 0 || state->अग्र >= state->remotes->nr)
+		प्रत्यागम 0;
 
-	remote = state->remotes->items[state->next++].string;
+	remote = state->remotes->वस्तूनि[state->अग्र++].string;
 	*task_cb = remote;
 
-	strvec_pushv(&cp->args, state->argv);
-	strvec_push(&cp->args, remote);
+	strvec_pushv(&cp->तर्काः, state->argv);
+	strvec_प्रक्षिप(&cp->तर्काः, remote);
 	cp->git_cmd = 1;
 
-	if (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
-		printf(_("Fetching %s\n"), remote);
+	यदि (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
+		प्रारूप_लिख(_("Fetching %s\n"), remote);
 
-	return 1;
+	प्रत्यागम 1;
 }
 
-static int fetch_failed_to_start(struct strbuf *out UNUSED,
-				 void *cb, void *task_cb)
+स्थिर पूर्णाङ्क fetch_failed_गन्तव्यम्_start(संरचना strbuf *बहिर्गमनम् अप्रयुक्तम्,
+				 शून्य *cb, शून्य *task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	const char *remote = task_cb;
+	संरचना parallel_fetch_state *state = cb;
+	ध्रुव वर्ण *remote = task_cb;
 
-	state->result = error(_("could not fetch %s"), remote);
+	state->परिणाम = error(_("could not fetch %s"), remote);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int fetch_finished(int result, struct strbuf *out,
-			  void *cb, void *task_cb)
+स्थिर पूर्णाङ्क fetch_परिसमाप्तम्(पूर्णाङ्क परिणाम, संरचना strbuf *बहिर्गमनम्,
+			  शून्य *cb, शून्य *task_cb)
 {
-	struct parallel_fetch_state *state = cb;
-	const char *remote = task_cb;
+	संरचना parallel_fetch_state *state = cb;
+	ध्रुव वर्ण *remote = task_cb;
 
-	if (result) {
-		strbuf_addf(out, _("could not fetch '%s' (exit code: %d)\n"),
-			    remote, result);
-		state->result = -1;
+	यदि (परिणाम) {
+		strbuf_addf(बहिर्गमनम्, _("could not fetch '%s' (exit code: %d)\n"),
+			    remote, परिणाम);
+		state->परिणाम = -1;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int fetch_multiple(struct string_list *list, int max_children,
-			  const struct fetch_config *config)
+स्थिर पूर्णाङ्क fetch_गुणजः(संरचना string_list *list, पूर्णाङ्क max_children,
+			  ध्रुव संरचना fetch_config *config)
 {
-	int i, result = 0;
-	struct strvec argv = STRVEC_INIT;
+	पूर्णाङ्क i, परिणाम = 0;
+	संरचना strvec argv = STRVEC_INIT;
 
-	if (!append && write_fetch_head) {
-		int errcode = truncate_fetch_head();
-		if (errcode)
-			return errcode;
+	यदि (!append && write_fetch_शीर्ष) {
+		पूर्णाङ्क errcode = truncate_fetch_शीर्ष();
+		यदि (errcode)
+			प्रत्यागम errcode;
 	}
 
 	/*
@@ -2365,69 +2365,69 @@ static int fetch_multiple(struct string_list *list, int max_children,
 	 */
 	strvec_pushl(&argv, "-c", "fetch.bundleURI=",
 		     "fetch", "--append", "--no-auto-gc",
-		     "--no-write-commit-graph", NULL);
-	for (i = 0; i < server_options.nr; i++)
-		strvec_pushf(&argv, "--server-option=%s", server_options.items[i].string);
-	add_options_to_argv(&argv, config);
+		     "--no-write-commit-graph", रिक्त);
+	प्रति (i = 0; i < server_options.nr; i++)
+		strvec_pushf(&argv, "--server-option=%s", server_options.वस्तूनि[i].string);
+	सङ्कलय_options_गन्तव्यम्_argv(&argv, config);
 
-	if (max_children != 1 && list->nr != 1) {
-		struct parallel_fetch_state state = { argv.v, list, 0, 0, config };
-		const struct run_process_parallel_opts opts = {
+	यदि (max_children != 1 && list->nr != 1) {
+		संरचना parallel_fetch_state state = { argv.v, list, 0, 0, config };
+		ध्रुव संरचना सततम्_process_parallel_opts opts = {
 			.tr2_category = "fetch",
 			.tr2_label = "parallel/fetch",
 
 			.processes = max_children,
 
-			.get_next_task = &fetch_next_remote,
-			.start_failure = &fetch_failed_to_start,
-			.task_finished = &fetch_finished,
-			.data = &state,
+			.get_अग्र_task = &fetch_अग्र_remote,
+			.start_failure = &fetch_failed_गन्तव्यम्_start,
+			.task_परिसमाप्तम् = &fetch_परिसमाप्तम्,
+			.दत्त = &state,
 		};
 
-		strvec_push(&argv, "--end-of-options");
+		strvec_प्रक्षिप(&argv, "--end-of-options");
 
-		run_processes_parallel(&opts);
-		result = state.result;
-	} else
-		for (i = 0; i < list->nr; i++) {
-			const char *name = list->items[i].string;
-			struct child_process cmd = CHILD_PROCESS_INIT;
+		सततम्_processes_parallel(&opts);
+		परिणाम = state.परिणाम;
+	} अन्यथा
+		प्रति (i = 0; i < list->nr; i++) {
+			ध्रुव वर्ण *name = list->वस्तूनि[i].string;
+			संरचना child_process cmd = CHILD_PROCESS_INIT;
 
-			strvec_pushv(&cmd.args, argv.v);
-			strvec_push(&cmd.args, name);
-			if (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
-				printf(_("Fetching %s\n"), name);
+			strvec_pushv(&cmd.तर्काः, argv.v);
+			strvec_प्रक्षिप(&cmd.तर्काः, name);
+			यदि (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
+				प्रारूप_लिख(_("Fetching %s\n"), name);
 			cmd.git_cmd = 1;
-			if (run_command(&cmd)) {
+			यदि (सततम्_command(&cmd)) {
 				error(_("could not fetch %s"), name);
-				result = 1;
+				परिणाम = 1;
 			}
 		}
 
 	strvec_clear(&argv);
-	return !!result;
+	प्रत्यागम !!परिणाम;
 }
 
 /*
  * Fetching from the promisor remote should use the given filter-spec
  * or inherit the default filter-spec from the config.
  */
-static inline void fetch_one_setup_partial(struct remote *remote,
-					   struct list_objects_filter_options *filter_options)
+स्थिर अन्तःस्थ शून्य fetch_one_सज्जता_partial(संरचना remote *remote,
+					   संरचना list_objects_filter_options *filter_options)
 {
 	/*
 	 * Explicit --no-filter argument overrides everything, regardless
 	 * of any prior partial clones and fetches.
 	 */
-	if (filter_options->no_filter)
-		return;
+	यदि (filter_options->no_filter)
+		प्रत्यागम;
 
 	/*
 	 * If no prior partial clone/fetch and the current fetch DID NOT
 	 * request a partial-fetch, do a normal fetch.
 	 */
-	if (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
-		return;
+	यदि (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
+		प्रत्यागम;
 
 	/*
 	 * If this is a partial-fetch request, we enable partial on
@@ -2435,9 +2435,9 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * filter-spec as the default for subsequent fetches to this
 	 * remote if there is currently no default filter-spec.
 	 */
-	if (filter_options->choice) {
-		partial_clone_register(remote->name, filter_options);
-		return;
+	यदि (filter_options->choice) {
+		partial_clone_पञ्जिकाकोशः(remote->name, filter_options);
+		प्रत्यागम;
 	}
 
 	/*
@@ -2445,137 +2445,137 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * explicitly given filter-spec or inherit the filter-spec from
 	 * the config.
 	 */
-	if (!filter_options->choice)
+	यदि (!filter_options->choice)
 		partial_clone_get_default_filter_spec(filter_options, remote->name);
-	return;
+	प्रत्यागम;
 }
 
-static int fetch_one(struct remote *remote, int argc, const char **argv,
-		     int prune_tags_ok, int use_stdin_refspecs,
-		     const struct fetch_config *config,
-		     struct list_objects_filter_options *filter_options,
-		     struct oidset *updated_tips)
+स्थिर पूर्णाङ्क fetch_one(संरचना remote *remote, पूर्णाङ्क argc, ध्रुव वर्ण **argv,
+		     पूर्णाङ्क prune_चिह्नकानि_ok, पूर्णाङ्क use_stdin_refspecs,
+		     ध्रुव संरचना fetch_config *config,
+		     संरचना list_objects_filter_options *filter_options,
+		     संरचना oidset *updated_tips)
 {
-	struct refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
-	int i;
-	int exit_code;
-	int maybe_prune_tags;
-	int remote_via_config = remote_is_configured(remote, 0);
+	संरचना refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
+	पूर्णाङ्क i;
+	पूर्णाङ्क exit_संहिता;
+	पूर्णाङ्क maybe_prune_चिह्नकानि;
+	पूर्णाङ्क remote_द्वारा_config = remote_is_configured(remote, 0);
 
-	if (!remote)
+	यदि (!remote)
 		die(_("no remote repository specified; please specify either a URL or a\n"
 		      "remote name from which new revisions should be fetched"));
 
 	gtransport = prepare_transport(remote, 1, filter_options);
 
-	if (prune < 0) {
+	यदि (prune < 0) {
 		/* no command line request */
-		if (0 <= remote->prune)
+		यदि (0 <= remote->prune)
 			prune = remote->prune;
-		else if (0 <= config->prune)
+		अन्यथा यदि (0 <= config->prune)
 			prune = config->prune;
-		else
+		अन्यथा
 			prune = PRUNE_BY_DEFAULT;
 	}
 
-	if (prune_tags < 0) {
+	यदि (prune_चिह्नकानि < 0) {
 		/* no command line request */
-		if (0 <= remote->prune_tags)
-			prune_tags = remote->prune_tags;
-		else if (0 <= config->prune_tags)
-			prune_tags = config->prune_tags;
-		else
-			prune_tags = PRUNE_TAGS_BY_DEFAULT;
+		यदि (0 <= remote->prune_चिह्नकानि)
+			prune_चिह्नकानि = remote->prune_चिह्नकानि;
+		अन्यथा यदि (0 <= config->prune_चिह्नकानि)
+			prune_चिह्नकानि = config->prune_चिह्नकानि;
+		अन्यथा
+			prune_चिह्नकानि = PRUNE_चिह्नकानि_BY_DEFAULT;
 	}
 
-	maybe_prune_tags = prune_tags_ok && prune_tags;
-	if (maybe_prune_tags && remote_via_config)
-		refspec_append(&remote->fetch, TAG_REFSPEC);
+	maybe_prune_चिह्नकानि = prune_चिह्नकानि_ok && prune_चिह्नकानि;
+	यदि (maybe_prune_चिह्नकानि && remote_द्वारा_config)
+		refspec_append(&remote->fetch, चिह्नकम्_REFSPEC);
 
-	if (maybe_prune_tags && (argc || !remote_via_config))
-		refspec_append(&rs, TAG_REFSPEC);
+	यदि (maybe_prune_चिह्नकानि && (argc || !remote_द्वारा_config))
+		refspec_append(&rs, चिह्नकम्_REFSPEC);
 
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "tag")) {
+	प्रति (i = 0; i < argc; i++) {
+		यदि (!वाक्यं_तुलय(argv[i], "tag")) {
 			i++;
-			if (i >= argc)
+			यदि (i >= argc)
 				die(_("you need to specify a tag name"));
 
 			refspec_appendf(&rs, "refs/tags/%s:refs/tags/%s",
 					argv[i], argv[i]);
-		} else {
+		} अन्यथा {
 			refspec_append(&rs, argv[i]);
 		}
 	}
 
-	if (use_stdin_refspecs) {
-		struct strbuf line = STRBUF_INIT;
-		while (strbuf_getline_lf(&line, stdin) != EOF)
-			refspec_append(&rs, line.buf);
-		strbuf_release(&line);
+	यदि (use_stdin_refspecs) {
+		संरचना strbuf पङ्क्तिः = STRBUF_INIT;
+		यावत् (strbuf_getline_lf(&पङ्क्तिः, stdin) != EOF)
+			refspec_append(&rs, पङ्क्तिः.buf);
+		strbuf_release(&पङ्क्तिः);
 	}
 
-	if (server_options.nr)
+	यदि (server_options.nr)
 		gtransport->server_options = &server_options;
 
-	sigchain_push_common(unlock_pack_on_signal);
+	sigchain_प्रक्षिप_common(unlock_pack_on_signal);
 	atexit(unlock_pack_atexit);
-	sigchain_push(SIGPIPE, SIG_IGN);
-	exit_code = do_fetch(gtransport, &rs, config, filter_options,
+	sigchain_प्रक्षिप(SIGPIPE, SIG_IGN);
+	exit_संहिता = do_fetch(gtransport, &rs, config, filter_options,
 			     updated_tips);
-	sigchain_pop(SIGPIPE);
+	sigchain_निष्कासय(SIGPIPE);
 	refspec_clear(&rs);
 	transport_disconnect(gtransport);
-	gtransport = NULL;
-	return exit_code;
+	gtransport = रिक्त;
+	प्रत्यागम exit_संहिता;
 }
 
-int cmd_fetch(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+पूर्णाङ्क cmd_fetch(पूर्णाङ्क argc,
+	      ध्रुव वर्ण **argv,
+	      ध्रुव वर्ण *उपसर्गः,
+	      संरचना repository *repo अप्रयुक्तम्)
 {
-	struct fetch_config config = {
-		.display_format = DISPLAY_FORMAT_FULL,
-		.follow_remote_head_raw = NULL,
-		.follow_remote_head_seen = 0,
+	संरचना fetch_config config = {
+		.display_format = DISPLAY_FORMAT_पूर्णम्,
+		.follow_remote_शीर्ष_raw = रिक्त,
+		.follow_remote_शीर्ष_आलोकितम् = 0,
 		.prune = -1,
-		.prune_tags = -1,
+		.prune_चिह्नकानि = -1,
 		.show_forced_updates = 1,
 		.recurse_submodules = RECURSE_SUBMODULES_DEFAULT,
 		.parallel = 1,
 		.submodule_fetch_jobs = -1,
 	};
-	const char *submodule_prefix = "";
-	const char *bundle_uri;
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	struct remote *remote = NULL;
-	int all = -1, multiple = 0;
-	int result = 0;
-	int prune_tags_ok = 1;
-	int enable_auto_gc = 1;
-	int unshallow = 0;
-	int max_jobs = -1;
-	int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
-	int recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
-	int fetch_write_commit_graph = -1;
-	int stdin_refspecs = 0;
-	int negotiate_only = 0;
-	int porcelain = 0;
-	int i;
-	enum {
+	ध्रुव वर्ण *submodule_उपसर्गः = "";
+	ध्रुव वर्ण *bundle_uri;
+	संरचना string_list list = STRING_LIST_INIT_DUP;
+	संरचना list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
+	संरचना remote *remote = रिक्त;
+	पूर्णाङ्क all = -1, गुणजः = 0;
+	पूर्णाङ्क परिणाम = 0;
+	पूर्णाङ्क prune_चिह्नकानि_ok = 1;
+	पूर्णाङ्क enable_auto_gc = 1;
+	पूर्णाङ्क unshallow = 0;
+	पूर्णाङ्क max_jobs = -1;
+	पूर्णाङ्क recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+	पूर्णाङ्क recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
+	पूर्णाङ्क fetch_write_commit_graph = -1;
+	पूर्णाङ्क stdin_refspecs = 0;
+	पूर्णाङ्क negotiate_only = 0;
+	पूर्णाङ्क porcelain = 0;
+	पूर्णाङ्क i;
+	गणना {
 		GRAPH_WRITE_REACHABLE,
 		GRAPH_WRITE_TIPS,
 		GRAPH_WRITE_SKIP,
-	} graph_write_mode = GRAPH_WRITE_REACHABLE;
-	struct oidset updated_tips = OIDSET_INIT;
+	} graph_write_बहुलकम् = GRAPH_WRITE_REACHABLE;
+	संरचना oidset updated_tips = OIDSET_INIT;
 
-	struct option builtin_fetch_options[] = {
+	संरचना option builtin_fetch_options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_BOOL(0, "all", &all,
 			 N_("fetch from all remotes")),
-		OPT_BOOL(0, "set-upstream", &set_upstream,
+		OPT_BOOL(0, "set-upstream", &समुच्चयः_upstream,
 			 N_("set upstream for git pull/fetch")),
 		OPT_BOOL('a', "append", &append,
 			 N_("append to .git/FETCH_HEAD instead of overwriting")),
@@ -2584,33 +2584,33 @@ int cmd_fetch(int argc,
 		OPT_STRING(0, "upload-pack", &upload_pack, N_("path"),
 			   N_("path to upload pack on remote end")),
 		OPT__FORCE(&force, N_("force overwrite of local reference"), 0),
-		OPT_BOOL('m', "multiple", &multiple,
+		OPT_BOOL('m', "multiple", &गुणजः,
 			 N_("fetch from multiple remotes")),
-		OPT_SET_INT('t', "tags", &tags,
-			    N_("fetch all tags and associated objects"), TAGS_SET),
-		OPT_SET_INT('n', NULL, &tags,
-			    N_("do not fetch all tags (--no-tags)"), TAGS_UNSET),
+		OPT_समुच्चयः_INT('t', "tags", &चिह्नकानि,
+			    N_("fetch all tags and associated objects"), चिह्नकानि_समुच्चयः),
+		OPT_समुच्चयः_INT('n', रिक्त, &चिह्नकानि,
+			    N_("do not fetch all tags (--no-tags)"), चिह्नकानि_UNSET),
 		OPT_INTEGER('j', "jobs", &max_jobs,
 			    N_("number of submodules fetched in parallel")),
 		OPT_BOOL(0, "prefetch", &prefetch,
 			 N_("modify the refspec to place all refs within refs/prefetch/")),
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remote-tracking branches no longer on remote")),
-		OPT_BOOL('P', "prune-tags", &prune_tags,
+		OPT_BOOL('P', "prune-tags", &prune_चिह्नकानि,
 			 N_("prune local tags no longer on remote and clobber changed tags")),
 		OPT_CALLBACK_F(0, "recurse-submodules", &recurse_submodules_cli, N_("on-demand"),
 			    N_("control recursive fetching of submodules"),
 			    PARSE_OPT_OPTARG, option_fetch_parse_recurse_submodules),
-		OPT_BOOL(0, "dry-run", &dry_run,
+		OPT_BOOL(0, "dry-run", &dry_सततम्,
 			 N_("dry run")),
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
-		OPT_BOOL(0, "write-fetch-head", &write_fetch_head,
+		OPT_BOOL(0, "write-fetch-head", &write_fetch_शीर्ष,
 			 N_("write fetched references to the FETCH_HEAD file")),
 		OPT_BOOL('k', "keep", &keep, N_("keep downloaded pack")),
-		OPT_BOOL('u', "update-head-ok", &update_head_ok,
+		OPT_BOOL('u', "update-head-ok", &update_शीर्ष_ok,
 			    N_("allow updating of HEAD ref")),
-		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
-		OPT_STRING(0, "depth", &depth, N_("depth"),
+		OPT_BOOL(0, "progress", &प्रगतिः, N_("force progress reporting")),
+		OPT_STRING(0, "depth", &गभीरता, N_("depth"),
 			   N_("deepen history of shallow clone")),
 		OPT_STRING(0, "shallow-since", &deepen_since, N_("time"),
 			   N_("deepen history of shallow repository based on time")),
@@ -2618,16 +2618,16 @@ int cmd_fetch(int argc,
 				N_("deepen history of shallow clone, excluding ref")),
 		OPT_INTEGER(0, "deepen", &deepen_relative,
 			    N_("deepen history of shallow clone")),
-		OPT_SET_INT_F(0, "unshallow", &unshallow,
+		OPT_समुच्चयः_INT_F(0, "unshallow", &unshallow,
 			      N_("convert to a complete repository"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "refetch", &refetch,
+		OPT_समुच्चयः_INT_F(0, "refetch", &refetch,
 			      N_("re-fetch without negotiating common commits"),
 			      1, PARSE_OPT_NONEG),
 		{
 			.type = OPTION_STRING,
 			.long_name = "submodule-prefix",
-			.value = &submodule_prefix,
+			.मानम् = &submodule_उपसर्गः,
 			.argh = N_("dir"),
 			.help = N_("prepend this to submodule path output"),
 			.flags = PARSE_OPT_HIDDEN,
@@ -2661,77 +2661,77 @@ int cmd_fetch(int argc,
 			 N_("write the commit-graph after fetching")),
 		OPT_BOOL(0, "stdin", &stdin_refspecs,
 			 N_("accept refspecs from stdin")),
-		OPT_END()
+		OPT_अन्तः()
 	};
 
 	filter_options.allow_auto_filter = 1;
 
 	refspec_init_fetch(&refmap, the_hash_algo);
 
-	packet_trace_identity("fetch");
+	packet_trace_तटस्थः("fetch");
 
 	/* Record the command line for the reflog */
 	strbuf_addstr(&default_rla, "fetch");
-	for (i = 1; i < argc; i++) {
+	प्रति (i = 1; i < argc; i++) {
 		/* This handles non-URLs gracefully */
-		char *anon = transport_anonymize_url(argv[i]);
+		वर्ण *anon = transport_anonymize_url(argv[i]);
 
 		strbuf_addf(&default_rla, " %s", anon);
-		free(anon);
+		मुक्त(anon);
 	}
 
 	repo_config(the_repository, git_fetch_config, &config);
-	if (the_repository->gitdir) {
+	यदि (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_पूर्णम्_सूचकांक = 0;
 	}
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, उपसर्गः,
 			     builtin_fetch_options, builtin_fetch_usage, 0);
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	यदि (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		config.recurse_submodules = recurse_submodules_cli;
 
-	if (negotiate_only) {
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_OFF:
-		case RECURSE_SUBMODULES_DEFAULT:
+	यदि (negotiate_only) {
+		विकल्प (recurse_submodules_cli) {
+		पक्ष RECURSE_SUBMODULES_OFF:
+		पक्ष RECURSE_SUBMODULES_DEFAULT:
 			/*
 			 * --negotiate-only should never recurse into
 			 * submodules. Skip it by setting recurse_submodules to
 			 * RECURSE_SUBMODULES_OFF.
 			 */
 			config.recurse_submodules = RECURSE_SUBMODULES_OFF;
-			break;
+			भङ्ग;
 
-		default:
+		स्वभाव:
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--negotiate-only", "--recurse-submodules");
 		}
 	}
 
-	if (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
-		int *sfjc = config.submodule_fetch_jobs == -1
-			    ? &config.submodule_fetch_jobs : NULL;
-		int *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
-			  ? &config.recurse_submodules : NULL;
+	यदि (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
+		पूर्णाङ्क *sfjc = config.submodule_fetch_jobs == -1
+			    ? &config.submodule_fetch_jobs : रिक्त;
+		पूर्णाङ्क *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
+			  ? &config.recurse_submodules : रिक्त;
 
 		fetch_config_from_gitmodules(the_repository, sfjc, rs);
 	}
 
 
-	if (porcelain) {
-		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_OFF:
-		case RECURSE_SUBMODULES_DEFAULT:
+	यदि (porcelain) {
+		विकल्प (recurse_submodules_cli) {
+		पक्ष RECURSE_SUBMODULES_OFF:
+		पक्ष RECURSE_SUBMODULES_DEFAULT:
 			/*
 			 * Reference updates in submodules would be ambiguous
 			 * in porcelain mode, so we reject this combination.
 			 */
 			config.recurse_submodules = RECURSE_SUBMODULES_OFF;
-			break;
+			भङ्ग;
 
-		default:
+		स्वभाव:
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--porcelain", "--recurse-submodules");
 		}
@@ -2739,40 +2739,40 @@ int cmd_fetch(int argc,
 		config.display_format = DISPLAY_FORMAT_PORCELAIN;
 	}
 
-	if (deepen_relative) {
-		if (deepen_relative < 0)
+	यदि (deepen_relative) {
+		यदि (deepen_relative < 0)
 			die(_("negative depth in --deepen is not supported"));
-		if (depth)
+		यदि (गभीरता)
 			die(_("options '%s' and '%s' cannot be used together"), "--deepen", "--depth");
-		depth = xstrfmt("%d", deepen_relative);
+		गभीरता = xstrfmt("%d", deepen_relative);
 	}
-	if (unshallow) {
-		if (depth)
+	यदि (unshallow) {
+		यदि (गभीरता)
 			die(_("options '%s' and '%s' cannot be used together"), "--depth", "--unshallow");
-		else if (!is_repository_shallow(the_repository))
+		अन्यथा यदि (!is_repository_shallow(the_repository))
 			die(_("--unshallow on a complete repository does not make sense"));
-		else
-			depth = xstrfmt("%d", INFINITE_DEPTH);
+		अन्यथा
+			गभीरता = xstrfmt("%d", INFINITE_गभीरता);
 	}
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (depth && atoi(depth) < 1)
-		die(_("depth %s is not a positive number"), depth);
-	if (depth || deepen_since || deepen_not.nr)
+	यदि (गभीरता && atoi(गभीरता) < 1)
+		die(_("depth %s is not a positive number"), गभीरता);
+	यदि (गभीरता || deepen_since || deepen_not.nr)
 		deepen = 1;
 
 	/* FETCH_HEAD never gets updated in --dry-run mode */
-	if (dry_run)
-		write_fetch_head = 0;
+	यदि (dry_सततम्)
+		write_fetch_शीर्ष = 0;
 
-	if (!max_jobs)
+	यदि (!max_jobs)
 		max_jobs = online_cpus();
 
-	if (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
-	    fetch_bundle_uri(the_repository, bundle_uri, NULL))
+	यदि (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
+	    fetch_bundle_uri(the_repository, bundle_uri, रिक्त))
 		warning(_("failed to fetch bundles from '%s'"), bundle_uri);
 
-	if (all < 0) {
+	यदि (all < 0) {
 		/*
 		 * no --[no-]all given;
 		 * only use config option if no remote was explicitly specified
@@ -2780,112 +2780,112 @@ int cmd_fetch(int argc,
 		all = (!argc) ? config.all : 0;
 	}
 
-	if (all) {
-		if (argc == 1)
+	यदि (all) {
+		यदि (argc == 1)
 			die(_("fetch --all does not take a repository argument"));
-		else if (argc > 1)
+		अन्यथा यदि (argc > 1)
 			die(_("fetch --all does not make sense with refspecs"));
 
-		(void) for_each_remote(get_one_remote_for_fetch, &list);
+		(शून्य) for_each_remote(get_one_remote_for_fetch, &list);
 
 		/* do not do fetch_multiple() of one */
-		if (list.nr == 1)
-			remote = remote_get(list.items[0].string);
-	} else if (argc == 0) {
+		यदि (list.nr == 1)
+			remote = remote_get(list.वस्तूनि[0].string);
+	} अन्यथा यदि (argc == 0) {
 		/* No arguments -- use default remote */
-		remote = remote_get(NULL);
-	} else if (multiple) {
+		remote = remote_get(रिक्त);
+	} अन्यथा यदि (गुणजः) {
 		/* All arguments are assumed to be remotes or groups */
-		for (i = 0; i < argc; i++)
-			if (!add_remote_or_group(argv[i], &list))
+		प्रति (i = 0; i < argc; i++)
+			यदि (!सङ्कलय_remote_or_गणः(argv[i], &list))
 				die(_("no such remote or remote group: %s"),
 				    argv[i]);
-	} else {
+	} अन्यथा {
 		/* Single remote or group */
-		(void) add_remote_or_group(argv[0], &list);
-		if (list.nr > 1) {
+		(शून्य) सङ्कलय_remote_or_गणः(argv[0], &list);
+		यदि (list.nr > 1) {
 			/* More than one remote */
-			if (argc > 1)
+			यदि (argc > 1)
 				die(_("fetching a group and specifying refspecs does not make sense"));
-		} else {
+		} अन्यथा {
 			/* Zero or one remotes */
 			remote = remote_get(argv[0]);
-			prune_tags_ok = (argc == 1);
+			prune_चिह्नकानि_ok = (argc == 1);
 			argc--;
 			argv++;
 		}
 	}
 	string_list_remove_duplicates(&list, 0);
 
-	if (negotiate_only) {
-		struct oidset acked_commits = OIDSET_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	यदि (negotiate_only) {
+		संरचना oidset acked_commits = OIDSET_INIT;
+		संरचना oidset_iter iter;
+		ध्रुव संरचना object_id *oid;
 
 		trace2_region_enter("fetch", "negotiate-only", the_repository);
-		if (!remote)
+		यदि (!remote)
 			die(_("must supply remote when using --negotiate-only"));
 		gtransport = prepare_transport(remote, 1, &filter_options);
 
-		if (!gtransport->smart_options) {
+		यदि (!gtransport->smart_options) {
 			warning(_("protocol does not support --negotiate-only, exiting"));
-			result = 1;
+			परिणाम = 1;
 			trace2_region_leave("fetch", "negotiate-only", the_repository);
-			goto cleanup;
+			गच्छ cleanup;
 		}
-		if (!gtransport->smart_options->negotiation_restrict_tips)
+		यदि (!gtransport->smart_options->negotiation_restrict_tips)
 			die(_("%s needs one or more %s"), "--negotiate-only",
 			    "--negotiation-restrict=*");
 
 		gtransport->smart_options->acked_commits = &acked_commits;
 
-		if (server_options.nr)
+		यदि (server_options.nr)
 			gtransport->server_options = &server_options;
-		result = transport_fetch_refs(gtransport, NULL);
-		gtransport->smart_options->acked_commits = NULL;
+		परिणाम = transport_fetch_refs(gtransport, रिक्त);
+		gtransport->smart_options->acked_commits = रिक्त;
 
 		oidset_iter_init(&acked_commits, &iter);
-		while ((oid = oidset_iter_next(&iter)))
-			printf("%s\n", oid_to_hex(oid));
+		यावत् ((oid = oidset_iter_अग्र(&iter)))
+			प्रारूप_लिख("%s\n", oid_गन्तव्यम्_hex(oid));
 		oidset_clear(&acked_commits);
 		trace2_region_leave("fetch", "negotiate-only", the_repository);
-	} else if (remote) {
-		if (filter_options.choice || repo_has_promisor_remote(the_repository)) {
+	} अन्यथा यदि (remote) {
+		यदि (filter_options.choice || repo_has_promisor_remote(the_repository)) {
 			trace2_region_enter("fetch", "setup-partial", the_repository);
-			fetch_one_setup_partial(remote, &filter_options);
+			fetch_one_सज्जता_partial(remote, &filter_options);
 			trace2_region_leave("fetch", "setup-partial", the_repository);
 		}
 		trace2_region_enter("fetch", "fetch-one", the_repository);
-		result = fetch_one(remote, argc, argv, prune_tags_ok, stdin_refspecs,
+		परिणाम = fetch_one(remote, argc, argv, prune_चिह्नकानि_ok, stdin_refspecs,
 				   &config, &filter_options, &updated_tips);
-		if (prepare_commit_graph(the_repository)) {
-			if (oidset_size(&updated_tips))
-				graph_write_mode = GRAPH_WRITE_TIPS;
-			else
-				graph_write_mode = GRAPH_WRITE_SKIP;
+		यदि (prepare_commit_graph(the_repository)) {
+			यदि (oidset_आकार(&updated_tips))
+				graph_write_बहुलकम् = GRAPH_WRITE_TIPS;
+			अन्यथा
+				graph_write_बहुलकम् = GRAPH_WRITE_SKIP;
 		}
 		trace2_region_leave("fetch", "fetch-one", the_repository);
-	} else {
-		int max_children = max_jobs;
+	} अन्यथा {
+		पूर्णाङ्क max_children = max_jobs;
 
-		if (filter_options.choice)
+		यदि (filter_options.choice)
 			die(_("--filter can only be used with the remote "
 			      "configured in extensions.partialclone"));
 
-		if (atomic_fetch)
+		यदि (atomic_fetch)
 			die(_("--atomic can only be used when fetching "
 			      "from one remote"));
 
-		if (stdin_refspecs)
+		यदि (stdin_refspecs)
 			die(_("--stdin can only be used when fetching "
 			      "from one remote"));
 
-		if (max_children < 0)
+		यदि (max_children < 0)
 			max_children = config.parallel;
 
 		/* TODO should this also die if we have a previous partial-clone? */
 		trace2_region_enter("fetch", "fetch-multiple", the_repository);
-		result = fetch_multiple(&list, max_children, &config);
+		परिणाम = fetch_गुणजः(&list, max_children, &config);
 		trace2_region_leave("fetch", "fetch-multiple", the_repository);
 	}
 
@@ -2898,25 +2898,25 @@ int cmd_fetch(int argc,
 	 * the fetched history from each remote, so there is no need
 	 * to fetch submodules from here.
 	 */
-	if (!result && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
-		struct strvec options = STRVEC_INIT;
-		int max_children = max_jobs;
+	यदि (!परिणाम && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
+		संरचना strvec options = STRVEC_INIT;
+		पूर्णाङ्क max_children = max_jobs;
 
-		if (max_children < 0)
+		यदि (max_children < 0)
 			max_children = config.submodule_fetch_jobs;
-		if (max_children < 0)
+		यदि (max_children < 0)
 			max_children = config.parallel;
 
-		add_options_to_argv(&options, &config);
-		trace2_region_enter_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_prefix);
-		result = fetch_submodules(the_repository,
+		सङ्कलय_options_गन्तव्यम्_argv(&options, &config);
+		trace2_region_enter_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_उपसर्गः);
+		परिणाम = fetch_submodules(the_repository,
 					  &options,
-					  submodule_prefix,
+					  submodule_उपसर्गः,
 					  config.recurse_submodules,
 					  recurse_submodules_default,
 					  verbosity < 0,
 					  max_children);
-		trace2_region_leave_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_prefix);
+		trace2_region_leave_printf("fetch", "recurse-submodule", the_repository, "%s", submodule_उपसर्गः);
 		strvec_clear(&options);
 	}
 
@@ -2928,61 +2928,61 @@ int cmd_fetch(int argc,
 	 * whenever objects were not fetched e.g. if we already have all
 	 * of them.
 	 */
-	if (negotiate_only)
-		goto cleanup;
+	यदि (negotiate_only)
+		गच्छ cleanup;
 
 	prepare_repo_settings(the_repository);
-	if (fetch_write_commit_graph > 0 ||
+	यदि (fetch_write_commit_graph > 0 ||
 	    (fetch_write_commit_graph < 0 &&
 	     the_repository->settings.fetch_write_commit_graph)) {
-		int commit_graph_flags = COMMIT_GRAPH_WRITE_SPLIT;
+		पूर्णाङ्क commit_graph_flags = COMMIT_GRAPH_WRITE_विभज;
 
-		if (progress)
-			commit_graph_flags |= COMMIT_GRAPH_WRITE_PROGRESS;
+		यदि (प्रगतिः)
+			commit_graph_flags |= COMMIT_GRAPH_WRITE_प्रगतिः;
 
-		if (graph_write_mode != GRAPH_WRITE_SKIP) {
+		यदि (graph_write_बहुलकम् != GRAPH_WRITE_SKIP) {
 			trace2_region_enter("fetch", "write-commit-graph",
 					    the_repository);
-			if (graph_write_mode == GRAPH_WRITE_TIPS)
+			यदि (graph_write_बहुलकम् == GRAPH_WRITE_TIPS)
 				write_commit_graph(
 					the_repository,
-					the_repository->objects->source->path,
-					NULL, &updated_tips,
-					commit_graph_flags, NULL);
-			else
+					the_repository->objects->source->मार्गः,
+					रिक्त, &updated_tips,
+					commit_graph_flags, रिक्त);
+			अन्यथा
 				write_commit_graph_reachable(
 					the_repository,
-					the_repository->objects->source->path,
-					commit_graph_flags, NULL);
+					the_repository->objects->source->मार्गः,
+					commit_graph_flags, रिक्त);
 			trace2_region_leave("fetch", "write-commit-graph",
 					    the_repository);
 		}
 	}
 
-	if (enable_auto_gc) {
-		if (refetch) {
+	यदि (enable_auto_gc) {
+		यदि (refetch) {
 			/*
 			 * Hint auto-maintenance strongly to encourage repacking,
 			 * but respect config settings disabling it.
 			 */
-			int opt_val;
-			if (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
+			पूर्णाङ्क opt_val;
+			यदि (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
-				git_config_push_parameter("gc.autoPackLimit=1");
+			यदि (opt_val != 0)
+				git_config_प्रक्षिप_parameter("gc.autoPackLimit=1");
 
-			if (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
+			यदि (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
-				git_config_push_parameter("maintenance.incremental-repack.auto=-1");
+			यदि (opt_val != 0)
+				git_config_प्रक्षिप_parameter("maintenance.incremental-repack.auto=-1");
 		}
-		run_auto_maintenance(the_repository, verbosity < 0);
+		सततम्_auto_maintenance(the_repository, verbosity < 0);
 	}
 
  cleanup:
 	oidset_clear(&updated_tips);
 	string_list_clear(&list, 0);
 	list_objects_filter_release(&filter_options);
-	free(config.follow_remote_head_raw);
-	return result;
+	मुक्त(config.follow_remote_शीर्ष_raw);
+	प्रत्यागम परिणाम;
 }

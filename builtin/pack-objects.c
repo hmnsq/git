@@ -1,77 +1,77 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#परिभाषय DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "attr.h"
-#include "object.h"
-#include "commit.h"
-#include "tag.h"
-#include "delta.h"
-#include "pack.h"
-#include "pack-revindex.h"
-#include "csum-file.h"
-#include "tree-walk.h"
-#include "diff.h"
-#include "revision.h"
-#include "list-objects.h"
-#include "list-objects-filter-options.h"
-#include "pack-objects.h"
-#include "progress.h"
-#include "refs.h"
-#include "thread-utils.h"
-#include "pack-bitmap.h"
-#include "delta-islands.h"
-#include "reachable.h"
-#include "oid-array.h"
-#include "strvec.h"
-#include "strmap.h"
-#include "list.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-file-convert.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "replace-object.h"
-#include "dir.h"
-#include "midx.h"
-#include "trace2.h"
-#include "shallow.h"
-#include "promisor-remote.h"
-#include "pack-mtimes.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "blob.h"
-#include "tree.h"
-#include "path-walk.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "attr.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "tag.h"
+#अन्तर्भाव "delta.h"
+#अन्तर्भाव "pack.h"
+#अन्तर्भाव "pack-revindex.h"
+#अन्तर्भाव "csum-file.h"
+#अन्तर्भाव "tree-walk.h"
+#अन्तर्भाव "diff.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "list-objects.h"
+#अन्तर्भाव "list-objects-filter-options.h"
+#अन्तर्भाव "pack-objects.h"
+#अन्तर्भाव "progress.h"
+#अन्तर्भाव "refs.h"
+#अन्तर्भाव "thread-utils.h"
+#अन्तर्भाव "pack-bitmap.h"
+#अन्तर्भाव "delta-islands.h"
+#अन्तर्भाव "reachable.h"
+#अन्तर्भाव "oid-array.h"
+#अन्तर्भाव "strvec.h"
+#अन्तर्भाव "strmap.h"
+#अन्तर्भाव "list.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "object-file-convert.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "odb/streaming.h"
+#अन्तर्भाव "replace-object.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "midx.h"
+#अन्तर्भाव "trace2.h"
+#अन्तर्भाव "shallow.h"
+#अन्तर्भाव "promisor-remote.h"
+#अन्तर्भाव "pack-mtimes.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "pkt-line.h"
+#अन्तर्भाव "blob.h"
+#अन्तर्भाव "tree.h"
+#अन्तर्भाव "path-walk.h"
 
 /*
  * Objects we are going to pack are collected in the `to_pack` structure.
  * It contains an array (dynamically expanded) of the object data, and a map
  * that can resolve SHA1s to their position in the array.
  */
-static struct packing_data to_pack;
+स्थिर संरचना packing_दत्त गन्तव्यम्_pack;
 
-static inline struct object_entry *oe_delta(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+स्थिर अन्तःस्थ संरचना object_प्रविष्टिः *oe_delta(
+		ध्रुव संरचना packing_दत्त *pack,
+		ध्रुव संरचना object_प्रविष्टिः *e)
 {
-	if (!e->delta_idx)
-		return NULL;
-	if (e->ext_base)
-		return &pack->ext_bases[e->delta_idx - 1];
-	else
-		return &pack->objects[e->delta_idx - 1];
+	यदि (!e->delta_idx)
+		प्रत्यागम रिक्त;
+	यदि (e->ext_आधारः)
+		प्रत्यागम &pack->ext_bases[e->delta_idx - 1];
+	अन्यथा
+		प्रत्यागम &pack->objects[e->delta_idx - 1];
 }
 
-static inline size_t oe_delta_size(struct packing_data *pack,
-				   const struct object_entry *e)
+स्थिर अन्तःस्थ आकार_t oe_delta_आकार(संरचना packing_दत्त *pack,
+				   ध्रुव संरचना object_प्रविष्टिः *e)
 {
-	if (e->delta_size_valid)
-		return e->delta_size_;
+	यदि (e->delta_आकार_valid)
+		प्रत्यागम e->delta_आकार;
 
 	/*
 	 * pack->delta_size[] can't be NULL because oe_set_delta_size()
@@ -81,115 +81,115 @@ static inline size_t oe_delta_size(struct packing_data *pack,
 	 * delta_size_valid is also false), then the caller must never
 	 * call oe_delta_size().
 	 */
-	return pack->delta_size[e - pack->objects];
+	प्रत्यागम pack->delta_आकार_2[e - pack->objects];
 }
 
-size_t oe_get_size_slow(struct packing_data *pack,
-			const struct object_entry *e);
+आकार_t oe_get_आकार_slow(संरचना packing_दत्त *pack,
+			ध्रुव संरचना object_प्रविष्टिः *e);
 
-static inline size_t oe_size(struct packing_data *pack,
-			     const struct object_entry *e)
+स्थिर अन्तःस्थ आकार_t oe_आकार(संरचना packing_दत्त *pack,
+			     ध्रुव संरचना object_प्रविष्टिः *e)
 {
-	if (e->size_valid)
-		return e->size_;
+	यदि (e->आकार_valid)
+		प्रत्यागम e->आकार_2;
 
-	return oe_get_size_slow(pack, e);
+	प्रत्यागम oe_get_आकार_slow(pack, e);
 }
 
-static inline void oe_set_delta(struct packing_data *pack,
-				struct object_entry *e,
-				struct object_entry *delta)
+स्थिर अन्तःस्थ शून्य oe_समुच्चयः_delta(संरचना packing_दत्त *pack,
+				संरचना object_प्रविष्टिः *e,
+				संरचना object_प्रविष्टिः *delta)
 {
-	if (delta)
+	यदि (delta)
 		e->delta_idx = (delta - pack->objects) + 1;
-	else
+	अन्यथा
 		e->delta_idx = 0;
 }
 
-static inline struct object_entry *oe_delta_sibling(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+स्थिर अन्तःस्थ संरचना object_प्रविष्टिः *oe_delta_sibling(
+		ध्रुव संरचना packing_दत्त *pack,
+		ध्रुव संरचना object_प्रविष्टिः *e)
 {
-	if (e->delta_sibling_idx)
-		return &pack->objects[e->delta_sibling_idx - 1];
-	return NULL;
+	यदि (e->delta_sibling_idx)
+		प्रत्यागम &pack->objects[e->delta_sibling_idx - 1];
+	प्रत्यागम रिक्त;
 }
 
-static inline struct object_entry *oe_delta_child(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+स्थिर अन्तःस्थ संरचना object_प्रविष्टिः *oe_delta_child(
+		ध्रुव संरचना packing_दत्त *pack,
+		ध्रुव संरचना object_प्रविष्टिः *e)
 {
-	if (e->delta_child_idx)
-		return &pack->objects[e->delta_child_idx - 1];
-	return NULL;
+	यदि (e->delta_child_idx)
+		प्रत्यागम &pack->objects[e->delta_child_idx - 1];
+	प्रत्यागम रिक्त;
 }
 
-static inline void oe_set_delta_child(struct packing_data *pack,
-				      struct object_entry *e,
-				      struct object_entry *delta)
+स्थिर अन्तःस्थ शून्य oe_समुच्चयः_delta_child(संरचना packing_दत्त *pack,
+				      संरचना object_प्रविष्टिः *e,
+				      संरचना object_प्रविष्टिः *delta)
 {
-	if (delta)
+	यदि (delta)
 		e->delta_child_idx = (delta - pack->objects) + 1;
-	else
+	अन्यथा
 		e->delta_child_idx = 0;
 }
 
-static inline void oe_set_delta_sibling(struct packing_data *pack,
-					struct object_entry *e,
-					struct object_entry *delta)
+स्थिर अन्तःस्थ शून्य oe_समुच्चयः_delta_sibling(संरचना packing_दत्त *pack,
+					संरचना object_प्रविष्टिः *e,
+					संरचना object_प्रविष्टिः *delta)
 {
-	if (delta)
+	यदि (delta)
 		e->delta_sibling_idx = (delta - pack->objects) + 1;
-	else
+	अन्यथा
 		e->delta_sibling_idx = 0;
 }
 
-static inline void oe_set_size(struct packing_data *pack,
-			       struct object_entry *e,
-			       size_t size)
+स्थिर अन्तःस्थ शून्य oe_समुच्चयः_आकार(संरचना packing_दत्त *pack,
+			       संरचना object_प्रविष्टिः *e,
+			       आकार_t आकार)
 {
-	if (size < pack->oe_size_limit) {
-		e->size_ = size;
-		e->size_valid = 1;
-	} else {
-		e->size_valid = 0;
-		if (oe_get_size_slow(pack, e) != size)
+	यदि (आकार < pack->oe_आकार_सीमा) {
+		e->आकार_2 = आकार;
+		e->आकार_valid = 1;
+	} अन्यथा {
+		e->आकार_valid = 0;
+		यदि (oe_get_आकार_slow(pack, e) != आकार)
 			BUG("'size' is supposed to be the object size!");
 	}
 }
 
-static inline void oe_set_delta_size(struct packing_data *pack,
-				     struct object_entry *e,
-				     size_t size)
+स्थिर अन्तःस्थ शून्य oe_समुच्चयः_delta_आकार(संरचना packing_दत्त *pack,
+				     संरचना object_प्रविष्टिः *e,
+				     आकार_t आकार)
 {
-	if (size < pack->oe_delta_size_limit) {
-		e->delta_size_ = size;
-		e->delta_size_valid = 1;
-	} else {
-		packing_data_lock(pack);
-		if (!pack->delta_size)
-			ALLOC_ARRAY(pack->delta_size, pack->nr_alloc);
-		packing_data_unlock(pack);
+	यदि (आकार < pack->oe_delta_आकार_सीमा) {
+		e->delta_आकार = आकार;
+		e->delta_आकार_valid = 1;
+	} अन्यथा {
+		packing_दत्त_तालकम्(pack);
+		यदि (!pack->delta_आकार_2)
+			ALLOC_ARRAY(pack->delta_आकार_2, pack->nr_alloc);
+		packing_दत्त_unlock(pack);
 
-		pack->delta_size[e - pack->objects] = size;
-		e->delta_size_valid = 0;
+		pack->delta_आकार_2[e - pack->objects] = आकार;
+		e->delta_आकार_valid = 0;
 	}
 }
 
-#define IN_PACK(obj) oe_in_pack(&to_pack, obj)
-#define SIZE(obj) oe_size(&to_pack, obj)
-#define SET_SIZE(obj,size) oe_set_size(&to_pack, obj, size)
-#define DELTA_SIZE(obj) oe_delta_size(&to_pack, obj)
-#define DELTA(obj) oe_delta(&to_pack, obj)
-#define DELTA_CHILD(obj) oe_delta_child(&to_pack, obj)
-#define DELTA_SIBLING(obj) oe_delta_sibling(&to_pack, obj)
-#define SET_DELTA(obj, val) oe_set_delta(&to_pack, obj, val)
-#define SET_DELTA_EXT(obj, oid) oe_set_delta_ext(&to_pack, obj, oid)
-#define SET_DELTA_SIZE(obj, val) oe_set_delta_size(&to_pack, obj, val)
-#define SET_DELTA_CHILD(obj, val) oe_set_delta_child(&to_pack, obj, val)
-#define SET_DELTA_SIBLING(obj, val) oe_set_delta_sibling(&to_pack, obj, val)
+#परिभाषय अन्तर्_PACK(obj) oe_अन्तर्_pack(&गन्तव्यम्_pack, obj)
+#परिभाषय आकार_3(obj) oe_आकार(&गन्तव्यम्_pack, obj)
+#परिभाषय समुच्चयः_आकार(obj,आकार) oe_समुच्चयः_आकार(&गन्तव्यम्_pack, obj, आकार)
+#परिभाषय DELTA_आकार(obj) oe_delta_आकार(&गन्तव्यम्_pack, obj)
+#परिभाषय DELTA(obj) oe_delta(&गन्तव्यम्_pack, obj)
+#परिभाषय DELTA_CHILD(obj) oe_delta_child(&गन्तव्यम्_pack, obj)
+#परिभाषय DELTA_SIBLING(obj) oe_delta_sibling(&गन्तव्यम्_pack, obj)
+#परिभाषय समुच्चयः_DELTA(obj, val) oe_समुच्चयः_delta(&गन्तव्यम्_pack, obj, val)
+#परिभाषय समुच्चयः_DELTA_EXT(obj, oid) oe_समुच्चयः_delta_ext(&गन्तव्यम्_pack, obj, oid)
+#परिभाषय समुच्चयः_DELTA_आकार(obj, val) oe_समुच्चयः_delta_आकार(&गन्तव्यम्_pack, obj, val)
+#परिभाषय समुच्चयः_DELTA_CHILD(obj, val) oe_समुच्चयः_delta_child(&गन्तव्यम्_pack, obj, val)
+#परिभाषय समुच्चयः_DELTA_SIBLING(obj, val) oe_समुच्चयः_delta_sibling(&गन्तव्यम्_pack, obj, val)
 
-static const char *const pack_usage[] = {
+स्थिर ध्रुव वर्ण *ध्रुव pack_usage[] = {
 	N_("git pack-objects [-q | --progress | --all-progress] [--all-progress-implied]\n"
 	   "                 [--no-reuse-delta] [--delta-base-offset] [--non-empty]\n"
 	   "                 [--local] [--incremental] [--window=<n>] [--depth=<n>]\n"
@@ -198,728 +198,728 @@ static const char *const pack_usage[] = {
 	   "                 [--stdout [--filter=<filter-spec>] | <base-name>]\n"
 	   "                 [--shallow] [--keep-true-parents] [--[no-]sparse]\n"
 	   "                 [--name-hash-version=<n>] [--path-walk] < <object-list>"),
-	NULL
+	रिक्त
 };
 
-static struct pack_idx_entry **written_list;
-static uint32_t nr_result, nr_written, nr_seen;
-static struct bitmap_index *bitmap_git;
-static uint32_t write_layer;
+स्थिर संरचना pack_idx_प्रविष्टिः **written_list;
+स्थिर uint32_t nr_परिणाम, nr_written, nr_आलोकितम्;
+स्थिर संरचना bitmap_सूचकांक *bitmap_git;
+स्थिर uint32_t write_layer;
 
-static int non_empty;
-static int reuse_delta = 1, reuse_object = 1;
-static int keep_unreachable, unpack_unreachable, include_tag;
-static timestamp_t unpack_unreachable_expiration;
-static int pack_loose_unreachable;
-static int cruft;
-static int shallow = 0;
-static timestamp_t cruft_expiration;
-static int local;
-static int have_non_local_packs;
-static int incremental;
-static int ignore_packed_keep_on_disk;
-static int ignore_packed_keep_in_core;
-static int ignore_packed_keep_in_core_open;
-static int ignore_packed_keep_in_core_has_cruft;
-static int allow_ofs_delta;
-static struct pack_idx_option pack_idx_opts;
-static const char *base_name;
-static int progress = 1;
-static int window = 10;
-static unsigned long pack_size_limit;
-static int depth = 50;
-static int delta_search_threads;
-static int pack_to_stdout;
-static int sparse;
-static int thin;
-static int path_walk = -1;
-static int num_preferred_base;
-static struct progress *progress_state;
+स्थिर पूर्णाङ्क non_रिक्तानि;
+स्थिर पूर्णाङ्क reuse_delta = 1, reuse_object = 1;
+स्थिर पूर्णाङ्क keep_unreachable, unpack_unreachable, include_चिह्नकम्;
+स्थिर timestamp_t unpack_unreachable_expiration;
+स्थिर पूर्णाङ्क pack_loose_unreachable;
+स्थिर पूर्णाङ्क cruft;
+स्थिर पूर्णाङ्क shallow = 0;
+स्थिर timestamp_t cruft_expiration;
+स्थिर पूर्णाङ्क local;
+स्थिर पूर्णाङ्क have_non_local_packs;
+स्थिर पूर्णाङ्क incremental;
+स्थिर पूर्णाङ्क ignore_packed_keep_on_disk;
+स्थिर पूर्णाङ्क ignore_packed_keep_अन्तर्_core;
+स्थिर पूर्णाङ्क ignore_packed_keep_अन्तर्_core_open;
+स्थिर पूर्णाङ्क ignore_packed_keep_अन्तर्_core_has_cruft;
+स्थिर पूर्णाङ्क allow_ofs_delta;
+स्थिर संरचना pack_idx_option pack_idx_opts;
+स्थिर ध्रुव वर्ण *आधारः_name;
+स्थिर पूर्णाङ्क प्रगतिः = 1;
+स्थिर पूर्णाङ्क गवाक्षः = 10;
+स्थिर अचिह्नित दीर्घ pack_आकार_सीमा;
+स्थिर पूर्णाङ्क गभीरता = 50;
+स्थिर पूर्णाङ्क delta_अन्वेषणम्_तन्तवः;
+स्थिर पूर्णाङ्क pack_गन्तव्यम्_stdout;
+स्थिर पूर्णाङ्क sparse;
+स्थिर पूर्णाङ्क thin;
+स्थिर पूर्णाङ्क मार्गः_walk = -1;
+स्थिर पूर्णाङ्क अङ्कः_preferred_आधारः;
+स्थिर संरचना प्रगतिः *प्रगतिः_state;
 
-static struct bitmapped_pack *reuse_packfiles;
-static size_t reuse_packfiles_nr;
-static size_t reuse_packfiles_used_nr;
-static uint32_t reuse_packfile_objects;
-static struct bitmap *reuse_packfile_bitmap;
+स्थिर संरचना bitmapped_pack *reuse_packfiles;
+स्थिर आकार_t reuse_packfiles_nr;
+स्थिर आकार_t reuse_packfiles_प्रयुक्तम्_nr;
+स्थिर uint32_t reuse_packfile_objects;
+स्थिर संरचना bitmap *reuse_packfile_bitmap;
 
-static int use_bitmap_index_default = 1;
-static int use_bitmap_index = -1;
-static enum {
+स्थिर पूर्णाङ्क use_bitmap_सूचकांक_default = 1;
+स्थिर पूर्णाङ्क use_bitmap_सूचकांक = -1;
+स्थिर गणना {
 	NO_PACK_REUSE = 0,
 	SINGLE_PACK_REUSE,
 	MULTI_PACK_REUSE,
 } allow_pack_reuse = SINGLE_PACK_REUSE;
-static enum {
+स्थिर गणना {
 	WRITE_BITMAP_FALSE = 0,
 	WRITE_BITMAP_QUIET,
 	WRITE_BITMAP_TRUE,
-} write_bitmap_index;
-static uint16_t write_bitmap_options = BITMAP_OPT_HASH_CACHE;
+} write_bitmap_सूचकांक;
+स्थिर uint16_t write_bitmap_options = BITMAP_OPT_HASH_CACHE;
 
-static int exclude_promisor_objects;
-static int exclude_promisor_objects_best_effort;
+स्थिर पूर्णाङ्क exclude_promisor_objects;
+स्थिर पूर्णाङ्क exclude_promisor_objects_best_effort;
 
-static int use_delta_islands;
+स्थिर पूर्णाङ्क use_delta_islands;
 
-static size_t delta_cache_size = 0;
-static size_t max_delta_cache_size = DEFAULT_DELTA_CACHE_SIZE;
-static unsigned long cache_max_small_delta_size = 1000;
+स्थिर आकार_t delta_cache_आकार = 0;
+स्थिर आकार_t max_delta_cache_आकार = DEFAULT_DELTA_CACHE_आकार;
+स्थिर अचिह्नित दीर्घ cache_max_small_delta_आकार = 1000;
 
-static unsigned long window_memory_limit = 0;
+स्थिर अचिह्नित दीर्घ गवाक्षः_स्मृतिः_सीमा = 0;
 
-static struct string_list uri_protocols = STRING_LIST_INIT_NODUP;
+स्थिर संरचना string_list uri_protocols = STRING_LIST_INIT_NODUP;
 
-enum missing_action {
+गणना missing_action {
 	MA_ERROR = 0,      /* fail if any missing objects are encountered */
 	MA_ALLOW_ANY,      /* silently allow ALL missing objects */
 	MA_ALLOW_PROMISOR, /* silently allow all missing PROMISOR objects */
 };
-static enum missing_action arg_missing_action;
-static show_object_fn fn_show_object;
+स्थिर गणना missing_action arg_missing_action;
+स्थिर show_object_fn fn_show_object;
 
-struct configured_exclusion {
-	struct oidmap_entry e;
-	char *pack_hash_hex;
-	char *uri;
+संरचना configured_exclusion {
+	संरचना oidmap_प्रविष्टिः e;
+	वर्ण *pack_hash_hex;
+	वर्ण *uri;
 };
-static struct oidmap configured_exclusions;
+स्थिर संरचना oidmap configured_exclusions;
 
-static struct oidset excluded_by_config;
-static int name_hash_version = -1;
+स्थिर संरचना oidset excluded_by_config;
+स्थिर पूर्णाङ्क name_hash_संस्करणम् = -1;
 
-enum stdin_packs_mode {
-	STDIN_PACKS_MODE_NONE,
-	STDIN_PACKS_MODE_STANDARD,
-	STDIN_PACKS_MODE_FOLLOW,
+गणना stdin_packs_बहुलकम् {
+	STDIN_PACKS_बहुलकम्_NONE,
+	STDIN_PACKS_बहुलकम्_STANDARD,
+	STDIN_PACKS_बहुलकम्_FOLLOW,
 };
 
 /**
  * Check whether the name_hash_version chosen by user input is appropriate,
  * and also validate whether it is compatible with other features.
  */
-static void validate_name_hash_version(void)
+स्थिर शून्य validate_name_hash_संस्करणम्(शून्य)
 {
-	if (name_hash_version < 1 || name_hash_version > 2)
-		die(_("invalid --name-hash-version option: %d"), name_hash_version);
-	if (write_bitmap_index && name_hash_version != 1) {
+	यदि (name_hash_संस्करणम् < 1 || name_hash_संस्करणम् > 2)
+		die(_("invalid --name-hash-version option: %d"), name_hash_संस्करणम्);
+	यदि (write_bitmap_सूचकांक && name_hash_संस्करणम् != 1) {
 		warning(_("currently, --write-bitmap-index requires --name-hash-version=1"));
-		name_hash_version = 1;
+		name_hash_संस्करणम् = 1;
 	}
 }
 
-static inline uint32_t pack_name_hash_fn(const char *name)
+स्थिर अन्तःस्थ uint32_t pack_name_hash_fn(ध्रुव वर्ण *name)
 {
-	static int seen_version = -1;
+	स्थिर पूर्णाङ्क आलोकितम्_संस्करणम् = -1;
 
-	if (seen_version < 0)
-		seen_version = name_hash_version;
-	else if (seen_version != name_hash_version)
+	यदि (आलोकितम्_संस्करणम् < 0)
+		आलोकितम्_संस्करणम् = name_hash_संस्करणम्;
+	अन्यथा यदि (आलोकितम्_संस्करणम् != name_hash_संस्करणम्)
 		BUG("name hash version changed from %d to %d mid-process",
-		    seen_version, name_hash_version);
+		    आलोकितम्_संस्करणम्, name_hash_संस्करणम्);
 
-	switch (name_hash_version) {
-	case 1:
-		return pack_name_hash(name);
+	विकल्प (name_hash_संस्करणम्) {
+	पक्ष 1:
+		प्रत्यागम pack_name_hash(name);
 
-	case 2:
-		return pack_name_hash_v2((const unsigned char *)name);
+	पक्ष 2:
+		प्रत्यागम pack_name_hash_v2((ध्रुव अचिह्नित वर्ण *)name);
 
-	default:
-		BUG("invalid name-hash version: %d", name_hash_version);
+	स्वभाव:
+		BUG("invalid name-hash version: %d", name_hash_संस्करणम्);
 	}
 }
 
 /*
  * stats
  */
-static uint32_t written, written_delta;
-static uint32_t reused, reused_delta;
+स्थिर uint32_t written, written_delta;
+स्थिर uint32_t reused, reused_delta;
 
 /*
  * Indexed commits
  */
-static struct commit **indexed_commits;
-static unsigned int indexed_commits_nr;
-static unsigned int indexed_commits_alloc;
+स्थिर संरचना commit **अनुक्रमितम्_commits;
+स्थिर अचिह्नित पूर्णाङ्क अनुक्रमितम्_commits_nr;
+स्थिर अचिह्नित पूर्णाङ्क अनुक्रमितम्_commits_alloc;
 
-static void index_commit_for_bitmap(struct commit *commit)
+स्थिर शून्य सूचकांक_commit_for_bitmap(संरचना commit *commit)
 {
-	if (indexed_commits_nr >= indexed_commits_alloc) {
-		indexed_commits_alloc = (indexed_commits_alloc + 32) * 2;
-		REALLOC_ARRAY(indexed_commits, indexed_commits_alloc);
+	यदि (अनुक्रमितम्_commits_nr >= अनुक्रमितम्_commits_alloc) {
+		अनुक्रमितम्_commits_alloc = (अनुक्रमितम्_commits_alloc + 32) * 2;
+		REALLOC_ARRAY(अनुक्रमितम्_commits, अनुक्रमितम्_commits_alloc);
 	}
 
-	indexed_commits[indexed_commits_nr++] = commit;
+	अनुक्रमितम्_commits[अनुक्रमितम्_commits_nr++] = commit;
 }
 
-static void *get_delta(struct object_entry *entry)
+स्थिर शून्य *get_delta(संरचना object_प्रविष्टिः *प्रविष्टिः)
 {
-	unsigned long size, base_size;
-	size_t delta_size;
-	void *buf, *base_buf, *delta_buf;
-	enum object_type type;
-	size_t size_st = 0, base_size_st = 0;
+	अचिह्नित दीर्घ आकार, आधारः_आकार;
+	आकार_t delta_आकार_2;
+	शून्य *buf, *आधारः_buf, *delta_buf;
+	गणना object_type type;
+	आकार_t आकार_st = 0, आधारः_आकार_st = 0;
 
-	buf = odb_read_object(the_repository->objects, &entry->idx.oid,
-			      &type, &size_st);
-	size = cast_size_t_to_ulong(size_st);
-	if (!buf)
-		die(_("unable to read %s"), oid_to_hex(&entry->idx.oid));
-	base_buf = odb_read_object(the_repository->objects,
-				   &DELTA(entry)->idx.oid, &type,
-				   &base_size_st);
-	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base_buf)
+	buf = odb_read_object(the_repository->objects, &प्रविष्टिः->idx.oid,
+			      &type, &आकार_st);
+	आकार = cast_आकार_t_गन्तव्यम्_ulong(आकार_st);
+	यदि (!buf)
+		die(_("unable to read %s"), oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
+	आधारः_buf = odb_read_object(the_repository->objects,
+				   &DELTA(प्रविष्टिः)->idx.oid, &type,
+				   &आधारः_आकार_st);
+	आधारः_आकार = cast_आकार_t_गन्तव्यम्_ulong(आधारः_आकार_st);
+	यदि (!आधारः_buf)
 		die("unable to read %s",
-		    oid_to_hex(&DELTA(entry)->idx.oid));
-	delta_buf = diff_delta(base_buf, base_size,
-			       buf, size, &delta_size, 0);
+		    oid_गन्तव्यम्_hex(&DELTA(प्रविष्टिः)->idx.oid));
+	delta_buf = diff_delta(आधारः_buf, आधारः_आकार,
+			       buf, आकार, &delta_आकार_2, 0);
 	/*
 	 * We successfully computed this delta once but dropped it for
 	 * memory reasons. Something is very wrong if this time we
 	 * recompute and create a different delta.
 	 */
-	if (!delta_buf || delta_size != DELTA_SIZE(entry))
+	यदि (!delta_buf || delta_आकार_2 != DELTA_आकार(प्रविष्टिः))
 		BUG("delta size changed");
-	free(buf);
-	free(base_buf);
-	return delta_buf;
+	मुक्त(buf);
+	मुक्त(आधारः_buf);
+	प्रत्यागम delta_buf;
 }
 
-static unsigned long do_compress(void **pptr, unsigned long size)
+स्थिर अचिह्नित दीर्घ do_compress(शून्य **pptr, अचिह्नित दीर्घ आकार)
 {
-	git_zstream stream;
-	void *in, *out;
-	unsigned long maxsize;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream प्रवाहः;
+	शून्य *अन्तर्, *बहिर्गमनम्;
+	अचिह्नित दीर्घ maxsize;
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
 
-	git_deflate_init(&stream, cfg->pack_compression_level);
-	maxsize = git_deflate_bound(&stream, size);
+	git_deflate_init(&प्रवाहः, cfg->pack_compression_level);
+	maxsize = git_deflate_bound(&प्रवाहः, आकार);
 
-	in = *pptr;
-	out = xmalloc(maxsize);
-	*pptr = out;
+	अन्तर् = *pptr;
+	बहिर्गमनम् = xmalloc(maxsize);
+	*pptr = बहिर्गमनम्;
 
-	stream.next_in = in;
-	stream.avail_in = size;
-	stream.next_out = out;
-	stream.avail_out = maxsize;
-	while (git_deflate(&stream, Z_FINISH) == Z_OK)
+	प्रवाहः.अग्र_अन्तर् = अन्तर्;
+	प्रवाहः.avail_अन्तर् = आकार;
+	प्रवाहः.अग्र_बहिर्गमनम् = बहिर्गमनम्;
+	प्रवाहः.avail_बहिर्गमनम् = maxsize;
+	यावत् (git_deflate(&प्रवाहः, Z_FINISH) == Z_OK)
 		; /* nothing */
-	git_deflate_end(&stream);
+	git_deflate_अन्तः(&प्रवाहः);
 
-	free(in);
-	return stream.total_out;
+	मुक्त(अन्तर्);
+	प्रत्यागम प्रवाहः.योग_बहिर्गमनम्;
 }
 
-static unsigned long write_large_blob_data(struct odb_stream *st, struct hashfile *f,
-					   const struct object_id *oid)
+स्थिर अचिह्नित दीर्घ write_large_blob_दत्त(संरचना odb_प्रवाहः *st, संरचना hashfile *f,
+					   ध्रुव संरचना object_id *oid)
 {
-	git_zstream stream;
-	unsigned char ibuf[1024 * 16];
-	unsigned char obuf[1024 * 16];
-	unsigned long olen = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream प्रवाहः;
+	अचिह्नित वर्ण ibuf[1024 * 16];
+	अचिह्नित वर्ण obuf[1024 * 16];
+	अचिह्नित दीर्घ olen = 0;
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
 
-	git_deflate_init(&stream, cfg->pack_compression_level);
+	git_deflate_init(&प्रवाहः, cfg->pack_compression_level);
 
-	for (;;) {
+	प्रति (;;) {
 		ssize_t readlen;
-		int zret = Z_OK;
-		readlen = odb_stream_read(st, ibuf, sizeof(ibuf));
-		if (readlen == -1)
-			die(_("unable to read %s"), oid_to_hex(oid));
+		पूर्णाङ्क zret = Z_OK;
+		readlen = odb_प्रवाहः_read(st, ibuf, परिमाण(ibuf));
+		यदि (readlen == -1)
+			die(_("unable to read %s"), oid_गन्तव्यम्_hex(oid));
 
-		stream.next_in = ibuf;
-		stream.avail_in = readlen;
-		while ((stream.avail_in || readlen == 0) &&
+		प्रवाहः.अग्र_अन्तर् = ibuf;
+		प्रवाहः.avail_अन्तर् = readlen;
+		यावत् ((प्रवाहः.avail_अन्तर् || readlen == 0) &&
 		       (zret == Z_OK || zret == Z_BUF_ERROR)) {
-			stream.next_out = obuf;
-			stream.avail_out = sizeof(obuf);
-			zret = git_deflate(&stream, readlen ? 0 : Z_FINISH);
-			hashwrite(f, obuf, stream.next_out - obuf);
-			olen += stream.next_out - obuf;
+			प्रवाहः.अग्र_बहिर्गमनम् = obuf;
+			प्रवाहः.avail_बहिर्गमनम् = परिमाण(obuf);
+			zret = git_deflate(&प्रवाहः, readlen ? 0 : Z_FINISH);
+			hashwrite(f, obuf, प्रवाहः.अग्र_बहिर्गमनम् - obuf);
+			olen += प्रवाहः.अग्र_बहिर्गमनम् - obuf;
 		}
-		if (stream.avail_in)
+		यदि (प्रवाहः.avail_अन्तर्)
 			die(_("deflate error (%d)"), zret);
-		if (readlen == 0) {
-			if (zret != Z_STREAM_END)
+		यदि (readlen == 0) {
+			यदि (zret != Z_प्रवाहः_अन्तः)
 				die(_("deflate error (%d)"), zret);
-			break;
+			भङ्ग;
 		}
 	}
-	git_deflate_end(&stream);
-	return olen;
+	git_deflate_अन्तः(&प्रवाहः);
+	प्रत्यागम olen;
 }
 
 /*
  * we are going to reuse the existing object data as is.  make
  * sure it is not corrupt.
  */
-static int check_pack_inflate(struct packed_git *p,
-		struct pack_window **w_curs,
-		off_t offset,
+स्थिर पूर्णाङ्क check_pack_inflate(संरचना packed_git *p,
+		संरचना pack_गवाक्षः **w_curs,
+		off_t विस्थापनम्,
 		off_t len,
-		size_t expect)
+		आकार_t expect)
 {
-	git_zstream stream;
-	unsigned char fakebuf[4096], *in;
-	int st;
+	git_zstream प्रवाहः;
+	अचिह्नित वर्ण fakebuf[4096], *अन्तर्;
+	पूर्णाङ्क st;
 
-	memset(&stream, 0, sizeof(stream));
-	git_inflate_init(&stream);
-	do {
-		in = use_pack(p, w_curs, offset, &stream.avail_in);
-		stream.next_in = in;
-		stream.next_out = fakebuf;
-		stream.avail_out = sizeof(fakebuf);
-		st = git_inflate(&stream, Z_FINISH);
-		offset += stream.next_in - in;
-	} while (st == Z_OK || st == Z_BUF_ERROR);
-	git_inflate_end(&stream);
-	return (st == Z_STREAM_END &&
-		stream.total_out == expect &&
-		stream.total_in == len) ? 0 : -1;
+	स्मृतिं_पूरय(&प्रवाहः, 0, परिमाण(प्रवाहः));
+	git_inflate_init(&प्रवाहः);
+	कुरु {
+		अन्तर् = use_pack(p, w_curs, विस्थापनम्, &प्रवाहः.avail_अन्तर्);
+		प्रवाहः.अग्र_अन्तर् = अन्तर्;
+		प्रवाहः.अग्र_बहिर्गमनम् = fakebuf;
+		प्रवाहः.avail_बहिर्गमनम् = परिमाण(fakebuf);
+		st = git_inflate(&प्रवाहः, Z_FINISH);
+		विस्थापनम् += प्रवाहः.अग्र_अन्तर् - अन्तर्;
+	} यावत् (st == Z_OK || st == Z_BUF_ERROR);
+	git_inflate_अन्तः(&प्रवाहः);
+	प्रत्यागम (st == Z_प्रवाहः_अन्तः &&
+		प्रवाहः.योग_बहिर्गमनम् == expect &&
+		प्रवाहः.योग_अन्तर् == len) ? 0 : -1;
 }
 
-static void copy_pack_data(struct hashfile *f,
-		struct packed_git *p,
-		struct pack_window **w_curs,
-		off_t offset,
+स्थिर शून्य copy_pack_दत्त(संरचना hashfile *f,
+		संरचना packed_git *p,
+		संरचना pack_गवाक्षः **w_curs,
+		off_t विस्थापनम्,
 		off_t len)
 {
-	unsigned char *in;
-	size_t avail;
+	अचिह्नित वर्ण *अन्तर्;
+	आकार_t avail;
 
-	while (len) {
-		in = use_pack(p, w_curs, offset, &avail);
-		if (avail > len)
-			avail = (unsigned long)len;
-		hashwrite(f, in, avail);
-		offset += avail;
+	यावत् (len) {
+		अन्तर् = use_pack(p, w_curs, विस्थापनम्, &avail);
+		यदि (avail > len)
+			avail = (अचिह्नित दीर्घ)len;
+		hashwrite(f, अन्तर्, avail);
+		विस्थापनम् += avail;
 		len -= avail;
 	}
 }
 
-static inline int oe_size_greater_than(struct packing_data *pack,
-				       const struct object_entry *lhs,
-				       size_t rhs)
+स्थिर अन्तःस्थ पूर्णाङ्क oe_आकार_greater_than(संरचना packing_दत्त *pack,
+				       ध्रुव संरचना object_प्रविष्टिः *lhs,
+				       आकार_t rhs)
 {
-	if (lhs->size_valid)
-		return lhs->size_ > rhs;
-	if (rhs < pack->oe_size_limit) /* rhs < 2^x <= lhs ? */
-		return 1;
-	return oe_get_size_slow(pack, lhs) > rhs;
+	यदि (lhs->आकार_valid)
+		प्रत्यागम lhs->आकार_2 > rhs;
+	यदि (rhs < pack->oe_आकार_सीमा) /* rhs < 2^x <= lhs ? */
+		प्रत्यागम 1;
+	प्रत्यागम oe_get_आकार_slow(pack, lhs) > rhs;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static unsigned long write_no_reuse_object(struct hashfile *f, struct object_entry *entry,
-					   unsigned long limit, int usable_delta)
+स्थिर अचिह्नित दीर्घ write_no_reuse_object(संरचना hashfile *f, संरचना object_प्रविष्टिः *प्रविष्टिः,
+					   अचिह्नित दीर्घ सीमा, पूर्णाङ्क usable_delta)
 {
-	unsigned long size, datalen;
-	unsigned char header[MAX_PACK_OBJECT_HEADER],
-		      dheader[MAX_PACK_OBJECT_HEADER];
-	unsigned hdrlen;
-	enum object_type type;
-	void *buf;
-	struct odb_stream *st = NULL;
-	const unsigned hashsz = the_hash_algo->rawsz;
+	अचिह्नित दीर्घ आकार, datalen;
+	अचिह्नित वर्ण शीर्षकम्[MAX_PACK_OBJECT_शीर्षकम्],
+		      dheader[MAX_PACK_OBJECT_शीर्षकम्];
+	अचिह्नित hdrlen;
+	गणना object_type type;
+	शून्य *buf;
+	संरचना odb_प्रवाहः *st = रिक्त;
+	ध्रुव अचिह्नित hashsz = the_hash_algo->rawsz;
 
-	if (!usable_delta) {
-		if (oe_type(entry) == OBJ_BLOB &&
-		    oe_size_greater_than(&to_pack, entry,
-					 repo_settings_get_big_file_threshold(the_repository)) &&
-		    (st = odb_stream_from_object(the_repository->objects, &entry->idx.oid,
-						 NULL)) != NULL) {
-			buf = NULL;
+	यदि (!usable_delta) {
+		यदि (oe_type(प्रविष्टिः) == OBJ_BLOB &&
+		    oe_आकार_greater_than(&गन्तव्यम्_pack, प्रविष्टिः,
+					 repo_settings_get_big_file_देहली(the_repository)) &&
+		    (st = odb_प्रवाहः_from_object(the_repository->objects, &प्रविष्टिः->idx.oid,
+						 रिक्त)) != रिक्त) {
+			buf = रिक्त;
 			type = st->type;
-			size = st->size;
-		} else {
-			size_t size_st = 0;
+			आकार = st->आकार;
+		} अन्यथा {
+			आकार_t आकार_st = 0;
 			buf = odb_read_object(the_repository->objects,
-					      &entry->idx.oid, &type,
-					      &size_st);
-			size = cast_size_t_to_ulong(size_st);
-			if (!buf)
+					      &प्रविष्टिः->idx.oid, &type,
+					      &आकार_st);
+			आकार = cast_आकार_t_गन्तव्यम्_ulong(आकार_st);
+			यदि (!buf)
 				die(_("unable to read %s"),
-				    oid_to_hex(&entry->idx.oid));
+				    oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
 		}
 		/*
 		 * make sure no cached delta data remains from a
 		 * previous attempt before a pack split occurred.
 		 */
-		FREE_AND_NULL(entry->delta_data);
-		entry->z_delta_size = 0;
-	} else if (entry->delta_data) {
-		size = DELTA_SIZE(entry);
-		buf = entry->delta_data;
-		entry->delta_data = NULL;
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+		FREE_AND_NULL(प्रविष्टिः->delta_दत्त);
+		प्रविष्टिः->z_delta_आकार = 0;
+	} अन्यथा यदि (प्रविष्टिः->delta_दत्त) {
+		आकार = DELTA_आकार(प्रविष्टिः);
+		buf = प्रविष्टिः->delta_दत्त;
+		प्रविष्टिः->delta_दत्त = रिक्त;
+		type = (allow_ofs_delta && DELTA(प्रविष्टिः)->idx.विस्थापनम्) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
-	} else {
-		buf = get_delta(entry);
-		size = DELTA_SIZE(entry);
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+	} अन्यथा {
+		buf = get_delta(प्रविष्टिः);
+		आकार = DELTA_आकार(प्रविष्टिः);
+		type = (allow_ofs_delta && DELTA(प्रविष्टिः)->idx.विस्थापनम्) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
 	}
 
-	if (st)	/* large blob case, just assume we don't compress well */
-		datalen = size;
-	else if (entry->z_delta_size)
-		datalen = entry->z_delta_size;
-	else
-		datalen = do_compress(&buf, size);
+	यदि (st)	/* large blob case, just assume we don't compress well */
+		datalen = आकार;
+	अन्यथा यदि (प्रविष्टिः->z_delta_आकार)
+		datalen = प्रविष्टिः->z_delta_आकार;
+	अन्यथा
+		datalen = do_compress(&buf, आकार);
 
 	/*
 	 * The object header is a byte of 'type' followed by zero or
 	 * more bytes of length.
 	 */
-	hdrlen = encode_in_pack_object_header(header, sizeof(header),
-					      type, size);
+	hdrlen = encode_अन्तर्_pack_object_शीर्षकम्(शीर्षकम्, परिमाण(शीर्षकम्),
+					      type, आकार);
 
-	if (type == OBJ_OFS_DELTA) {
+	यदि (type == OBJ_OFS_DELTA) {
 		/*
 		 * Deltas with relative base contain an additional
 		 * encoding of the relative offset for the delta
 		 * base from this object's position in the pack.
 		 */
-		off_t ofs = entry->idx.offset - DELTA(entry)->idx.offset;
-		unsigned pos = sizeof(dheader) - 1;
+		off_t ofs = प्रविष्टिः->idx.विस्थापनम् - DELTA(प्रविष्टिः)->idx.विस्थापनम्;
+		अचिह्नित pos = परिमाण(dheader) - 1;
 		dheader[pos] = ofs & 127;
-		while (ofs >>= 7)
+		यावत् (ofs >>= 7)
 			dheader[--pos] = 128 | (--ofs & 127);
-		if (limit && hdrlen + sizeof(dheader) - pos + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+		यदि (सीमा && hdrlen + परिमाण(dheader) - pos + datalen + hashsz >= सीमा) {
+			यदि (st)
+				odb_प्रवाहः_close(st);
+			मुक्त(buf);
+			प्रत्यागम 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, dheader + pos, sizeof(dheader) - pos);
-		hdrlen += sizeof(dheader) - pos;
-	} else if (type == OBJ_REF_DELTA) {
+		hashwrite(f, शीर्षकम्, hdrlen);
+		hashwrite(f, dheader + pos, परिमाण(dheader) - pos);
+		hdrlen += परिमाण(dheader) - pos;
+	} अन्यथा यदि (type == OBJ_REF_DELTA) {
 		/*
 		 * Deltas with a base reference contain
 		 * additional bytes for the base object ID.
 		 */
-		if (limit && hdrlen + hashsz + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+		यदि (सीमा && hdrlen + hashsz + datalen + hashsz >= सीमा) {
+			यदि (st)
+				odb_प्रवाहः_close(st);
+			मुक्त(buf);
+			प्रत्यागम 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, DELTA(entry)->idx.oid.hash, hashsz);
+		hashwrite(f, शीर्षकम्, hdrlen);
+		hashwrite(f, DELTA(प्रविष्टिः)->idx.oid.hash, hashsz);
 		hdrlen += hashsz;
-	} else {
-		if (limit && hdrlen + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+	} अन्यथा {
+		यदि (सीमा && hdrlen + datalen + hashsz >= सीमा) {
+			यदि (st)
+				odb_प्रवाहः_close(st);
+			मुक्त(buf);
+			प्रत्यागम 0;
 		}
-		hashwrite(f, header, hdrlen);
+		hashwrite(f, शीर्षकम्, hdrlen);
 	}
-	if (st) {
-		datalen = write_large_blob_data(st, f, &entry->idx.oid);
-		odb_stream_close(st);
-	} else {
+	यदि (st) {
+		datalen = write_large_blob_दत्त(st, f, &प्रविष्टिः->idx.oid);
+		odb_प्रवाहः_close(st);
+	} अन्यथा {
 		hashwrite(f, buf, datalen);
-		free(buf);
+		मुक्त(buf);
 	}
 
-	return hdrlen + datalen;
+	प्रत्यागम hdrlen + datalen;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static off_t write_reuse_object(struct hashfile *f, struct object_entry *entry,
-				unsigned long limit, int usable_delta)
+स्थिर off_t write_reuse_object(संरचना hashfile *f, संरचना object_प्रविष्टिः *प्रविष्टिः,
+				अचिह्नित दीर्घ सीमा, पूर्णाङ्क usable_delta)
 {
-	struct packed_git *p = IN_PACK(entry);
-	struct pack_window *w_curs = NULL;
+	संरचना packed_git *p = अन्तर्_PACK(प्रविष्टिः);
+	संरचना pack_गवाक्षः *w_curs = रिक्त;
 	uint32_t pos;
-	off_t offset, cur;
-	enum object_type type = oe_type(entry);
-	enum object_type in_pack_type;
+	off_t विस्थापनम्, cur;
+	गणना object_type type = oe_type(प्रविष्टिः);
+	गणना object_type अन्तर्_pack_type;
 	off_t datalen;
-	unsigned char header[MAX_PACK_OBJECT_HEADER],
-		      dheader[MAX_PACK_OBJECT_HEADER];
-	unsigned hdrlen;
-	const unsigned hashsz = the_hash_algo->rawsz;
-	size_t entry_size;
+	अचिह्नित वर्ण शीर्षकम्[MAX_PACK_OBJECT_शीर्षकम्],
+		      dheader[MAX_PACK_OBJECT_शीर्षकम्];
+	अचिह्नित hdrlen;
+	ध्रुव अचिह्नित hashsz = the_hash_algo->rawsz;
+	आकार_t प्रविष्टिः_आकार;
 
-	cur = entry->in_pack_offset;
-	in_pack_type = unpack_object_header(p, &w_curs, &cur, &entry_size);
-	if (in_pack_type < 0)
+	cur = प्रविष्टिः->अन्तर्_pack_विस्थापनम्;
+	अन्तर्_pack_type = unpack_object_शीर्षकम्(p, &w_curs, &cur, &प्रविष्टिः_आकार);
+	यदि (अन्तर्_pack_type < 0)
 		die(_("write_reuse_object: unable to parse object header of %s"),
-		    oid_to_hex(&entry->idx.oid));
+		    oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
 
-	if (DELTA(entry))
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+	यदि (DELTA(प्रविष्टिः))
+		type = (allow_ofs_delta && DELTA(प्रविष्टिः)->idx.विस्थापनम्) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
-	hdrlen = encode_in_pack_object_header(header, sizeof(header),
-					      type, entry_size);
+	hdrlen = encode_अन्तर्_pack_object_शीर्षकम्(शीर्षकम्, परिमाण(शीर्षकम्),
+					      type, प्रविष्टिः_आकार);
 
-	offset = entry->in_pack_offset;
-	if (offset_to_pack_pos(p, offset, &pos) < 0)
+	विस्थापनम् = प्रविष्टिः->अन्तर्_pack_विस्थापनम्;
+	यदि (विस्थापनम्_गन्तव्यम्_pack_pos(p, विस्थापनम्, &pos) < 0)
 		die(_("write_reuse_object: could not locate %s, expected at "
 		      "offset %"PRIuMAX" in pack %s"),
-		    oid_to_hex(&entry->idx.oid), (uintmax_t)offset,
+		    oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid), (uintmax_t)विस्थापनम्,
 		    p->pack_name);
-	datalen = pack_pos_to_offset(p, pos + 1) - offset;
-	if (!pack_to_stdout && p->index_version > 1 &&
-	    check_pack_crc(p, &w_curs, offset, datalen,
-			   pack_pos_to_index(p, pos))) {
+	datalen = pack_pos_गन्तव्यम्_विस्थापनम्(p, pos + 1) - विस्थापनम्;
+	यदि (!pack_गन्तव्यम्_stdout && p->सूचकांक_संस्करणम् > 1 &&
+	    check_pack_crc(p, &w_curs, विस्थापनम्, datalen,
+			   pack_pos_गन्तव्यम्_सूचकांक(p, pos))) {
 		error(_("bad packed object CRC for %s"),
-		      oid_to_hex(&entry->idx.oid));
+		      oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
 		unuse_pack(&w_curs);
-		return write_no_reuse_object(f, entry, limit, usable_delta);
+		प्रत्यागम write_no_reuse_object(f, प्रविष्टिः, सीमा, usable_delta);
 	}
 
-	offset += entry->in_pack_header_size;
-	datalen -= entry->in_pack_header_size;
+	विस्थापनम् += प्रविष्टिः->अन्तर्_pack_शीर्षकम्_आकार;
+	datalen -= प्रविष्टिः->अन्तर्_pack_शीर्षकम्_आकार;
 
-	if (!pack_to_stdout && p->index_version == 1 &&
-	    check_pack_inflate(p, &w_curs, offset, datalen, entry_size)) {
+	यदि (!pack_गन्तव्यम्_stdout && p->सूचकांक_संस्करणम् == 1 &&
+	    check_pack_inflate(p, &w_curs, विस्थापनम्, datalen, प्रविष्टिः_आकार)) {
 		error(_("corrupt packed object for %s"),
-		      oid_to_hex(&entry->idx.oid));
+		      oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
 		unuse_pack(&w_curs);
-		return write_no_reuse_object(f, entry, limit, usable_delta);
+		प्रत्यागम write_no_reuse_object(f, प्रविष्टिः, सीमा, usable_delta);
 	}
 
-	if (type == OBJ_OFS_DELTA) {
-		off_t ofs = entry->idx.offset - DELTA(entry)->idx.offset;
-		unsigned pos = sizeof(dheader) - 1;
+	यदि (type == OBJ_OFS_DELTA) {
+		off_t ofs = प्रविष्टिः->idx.विस्थापनम् - DELTA(प्रविष्टिः)->idx.विस्थापनम्;
+		अचिह्नित pos = परिमाण(dheader) - 1;
 		dheader[pos] = ofs & 127;
-		while (ofs >>= 7)
+		यावत् (ofs >>= 7)
 			dheader[--pos] = 128 | (--ofs & 127);
-		if (limit && hdrlen + sizeof(dheader) - pos + datalen + hashsz >= limit) {
+		यदि (सीमा && hdrlen + परिमाण(dheader) - pos + datalen + hashsz >= सीमा) {
 			unuse_pack(&w_curs);
-			return 0;
+			प्रत्यागम 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, dheader + pos, sizeof(dheader) - pos);
-		hdrlen += sizeof(dheader) - pos;
+		hashwrite(f, शीर्षकम्, hdrlen);
+		hashwrite(f, dheader + pos, परिमाण(dheader) - pos);
+		hdrlen += परिमाण(dheader) - pos;
 		reused_delta++;
-	} else if (type == OBJ_REF_DELTA) {
-		if (limit && hdrlen + hashsz + datalen + hashsz >= limit) {
+	} अन्यथा यदि (type == OBJ_REF_DELTA) {
+		यदि (सीमा && hdrlen + hashsz + datalen + hashsz >= सीमा) {
 			unuse_pack(&w_curs);
-			return 0;
+			प्रत्यागम 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, DELTA(entry)->idx.oid.hash, hashsz);
+		hashwrite(f, शीर्षकम्, hdrlen);
+		hashwrite(f, DELTA(प्रविष्टिः)->idx.oid.hash, hashsz);
 		hdrlen += hashsz;
 		reused_delta++;
-	} else {
-		if (limit && hdrlen + datalen + hashsz >= limit) {
+	} अन्यथा {
+		यदि (सीमा && hdrlen + datalen + hashsz >= सीमा) {
 			unuse_pack(&w_curs);
-			return 0;
+			प्रत्यागम 0;
 		}
-		hashwrite(f, header, hdrlen);
+		hashwrite(f, शीर्षकम्, hdrlen);
 	}
-	copy_pack_data(f, p, &w_curs, offset, datalen);
+	copy_pack_दत्त(f, p, &w_curs, विस्थापनम्, datalen);
 	unuse_pack(&w_curs);
 	reused++;
-	return hdrlen + datalen;
+	प्रत्यागम hdrlen + datalen;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static off_t write_object(struct hashfile *f,
-			  struct object_entry *entry,
-			  off_t write_offset)
+स्थिर off_t write_object(संरचना hashfile *f,
+			  संरचना object_प्रविष्टिः *प्रविष्टिः,
+			  off_t write_विस्थापनम्)
 {
-	unsigned long limit;
+	अचिह्नित दीर्घ सीमा;
 	off_t len;
-	int usable_delta, to_reuse;
+	पूर्णाङ्क usable_delta, गन्तव्यम्_reuse;
 
-	if (!pack_to_stdout)
-		crc32_begin(f);
+	यदि (!pack_गन्तव्यम्_stdout)
+		चक्रीयपरीक्षा_32_begin(f);
 
 	/* apply size limit if limited packsize and not first object */
-	if (!pack_size_limit || !nr_written)
-		limit = 0;
-	else if (pack_size_limit <= write_offset)
+	यदि (!pack_आकार_सीमा || !nr_written)
+		सीमा = 0;
+	अन्यथा यदि (pack_आकार_सीमा <= write_विस्थापनम्)
 		/*
 		 * the earlier object did not fit the limit; avoid
 		 * mistaking this with unlimited (i.e. limit = 0).
 		 */
-		limit = 1;
-	else
-		limit = pack_size_limit - write_offset;
+		सीमा = 1;
+	अन्यथा
+		सीमा = pack_आकार_सीमा - write_विस्थापनम्;
 
-	if (!DELTA(entry))
+	यदि (!DELTA(प्रविष्टिः))
 		usable_delta = 0;	/* no delta */
-	else if (!pack_size_limit)
+	अन्यथा यदि (!pack_आकार_सीमा)
 	       usable_delta = 1;	/* unlimited packfile */
-	else if (DELTA(entry)->idx.offset == (off_t)-1)
+	अन्यथा यदि (DELTA(प्रविष्टिः)->idx.विस्थापनम् == (off_t)-1)
 		usable_delta = 0;	/* base was written to another pack */
-	else if (DELTA(entry)->idx.offset)
+	अन्यथा यदि (DELTA(प्रविष्टिः)->idx.विस्थापनम्)
 		usable_delta = 1;	/* base already exists in this pack */
-	else
+	अन्यथा
 		usable_delta = 0;	/* base could end up in another pack */
 
-	if (!reuse_object)
-		to_reuse = 0;	/* explicit */
-	else if (!IN_PACK(entry))
-		to_reuse = 0;	/* can't reuse what we don't have */
-	else if (oe_type(entry) == OBJ_REF_DELTA ||
-		 oe_type(entry) == OBJ_OFS_DELTA)
+	यदि (!reuse_object)
+		गन्तव्यम्_reuse = 0;	/* explicit */
+	अन्यथा यदि (!अन्तर्_PACK(प्रविष्टिः))
+		गन्तव्यम्_reuse = 0;	/* can't reuse what we don't have */
+	अन्यथा यदि (oe_type(प्रविष्टिः) == OBJ_REF_DELTA ||
+		 oe_type(प्रविष्टिः) == OBJ_OFS_DELTA)
 				/* check_object() decided it for us ... */
-		to_reuse = usable_delta;
+		गन्तव्यम्_reuse = usable_delta;
 				/* ... but pack split may override that */
-	else if (oe_type(entry) != entry->in_pack_type)
-		to_reuse = 0;	/* pack has delta which is unusable */
-	else if (DELTA(entry))
-		to_reuse = 0;	/* we want to pack afresh */
-	else
-		to_reuse = 1;	/* we have it in-pack undeltified,
+	अन्यथा यदि (oe_type(प्रविष्टिः) != प्रविष्टिः->अन्तर्_pack_type)
+		गन्तव्यम्_reuse = 0;	/* pack has delta which is unusable */
+	अन्यथा यदि (DELTA(प्रविष्टिः))
+		गन्तव्यम्_reuse = 0;	/* we want to pack afresh */
+	अन्यथा
+		गन्तव्यम्_reuse = 1;	/* we have it in-pack undeltified,
 				 * and we do not need to deltify it.
 				 */
 
-	if (!to_reuse)
-		len = write_no_reuse_object(f, entry, limit, usable_delta);
-	else
-		len = write_reuse_object(f, entry, limit, usable_delta);
-	if (!len)
-		return 0;
+	यदि (!गन्तव्यम्_reuse)
+		len = write_no_reuse_object(f, प्रविष्टिः, सीमा, usable_delta);
+	अन्यथा
+		len = write_reuse_object(f, प्रविष्टिः, सीमा, usable_delta);
+	यदि (!len)
+		प्रत्यागम 0;
 
-	if (usable_delta)
+	यदि (usable_delta)
 		written_delta++;
 	written++;
-	if (!pack_to_stdout)
-		entry->idx.crc32 = crc32_end(f);
-	return len;
+	यदि (!pack_गन्तव्यम्_stdout)
+		प्रविष्टिः->idx.चक्रीयपरीक्षा_32 = चक्रीयपरीक्षा_32_अन्तः(f);
+	प्रत्यागम len;
 }
 
-enum write_one_status {
+गणना write_one_स्थितिः {
 	WRITE_ONE_SKIP = -1, /* already written */
 	WRITE_ONE_BREAK = 0, /* writing this will bust the limit; not written */
-	WRITE_ONE_WRITTEN = 1, /* normal */
+	WRITE_ONE_WRITTEN = 1, /*प्रसामान्यम्*/
 	WRITE_ONE_RECURSIVE = 2 /* already scheduled to be written */
 };
 
-static enum write_one_status write_one(struct hashfile *f,
-				       struct object_entry *e,
-				       off_t *offset)
+स्थिर गणना write_one_स्थितिः write_one(संरचना hashfile *f,
+				       संरचना object_प्रविष्टिः *e,
+				       off_t *विस्थापनम्)
 {
-	off_t size;
-	int recursing;
+	off_t आकार;
+	पूर्णाङ्क recursing;
 
 	/*
 	 * we set offset to 1 (which is an impossible value) to mark
 	 * the fact that this object is involved in "write its base
 	 * first before writing a deltified object" recursion.
 	 */
-	recursing = (e->idx.offset == 1);
-	if (recursing) {
+	recursing = (e->idx.विस्थापनम् == 1);
+	यदि (recursing) {
 		warning(_("recursive delta detected for object %s"),
-			oid_to_hex(&e->idx.oid));
-		return WRITE_ONE_RECURSIVE;
-	} else if (e->idx.offset || e->preferred_base) {
+			oid_गन्तव्यम्_hex(&e->idx.oid));
+		प्रत्यागम WRITE_ONE_RECURSIVE;
+	} अन्यथा यदि (e->idx.विस्थापनम् || e->preferred_आधारः) {
 		/* offset is non zero if object is written already. */
-		return WRITE_ONE_SKIP;
+		प्रत्यागम WRITE_ONE_SKIP;
 	}
 
 	/* if we are deltified, write out base object first. */
-	if (DELTA(e)) {
-		e->idx.offset = 1; /* now recurse */
-		switch (write_one(f, DELTA(e), offset)) {
-		case WRITE_ONE_RECURSIVE:
+	यदि (DELTA(e)) {
+		e->idx.विस्थापनम् = 1; /* now recurse */
+		विकल्प (write_one(f, DELTA(e), विस्थापनम्)) {
+		पक्ष WRITE_ONE_RECURSIVE:
 			/* we cannot depend on this one */
-			SET_DELTA(e, NULL);
-			break;
-		default:
-			break;
-		case WRITE_ONE_BREAK:
-			e->idx.offset = recursing;
-			return WRITE_ONE_BREAK;
+			समुच्चयः_DELTA(e, रिक्त);
+			भङ्ग;
+		स्वभाव:
+			भङ्ग;
+		पक्ष WRITE_ONE_BREAK:
+			e->idx.विस्थापनम् = recursing;
+			प्रत्यागम WRITE_ONE_BREAK;
 		}
 	}
 
-	e->idx.offset = *offset;
-	size = write_object(f, e, *offset);
-	if (!size) {
-		e->idx.offset = recursing;
-		return WRITE_ONE_BREAK;
+	e->idx.विस्थापनम् = *विस्थापनम्;
+	आकार = write_object(f, e, *विस्थापनम्);
+	यदि (!आकार) {
+		e->idx.विस्थापनम् = recursing;
+		प्रत्यागम WRITE_ONE_BREAK;
 	}
 	written_list[nr_written++] = &e->idx;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(*offset, size))
+	यदि (signed_सङ्कलय_overflows(*विस्थापनम्, आकार))
 		die(_("pack too large for current definition of off_t"));
-	*offset += size;
-	return WRITE_ONE_WRITTEN;
+	*विस्थापनम् += आकार;
+	प्रत्यागम WRITE_ONE_WRITTEN;
 }
 
-static int mark_tagged(const struct reference *ref, void *cb_data UNUSED)
+स्थिर पूर्णाङ्क mark_tagged(ध्रुव संरचना reference *ref, शून्य *cb_दत्त अप्रयुक्तम्)
 {
-	struct object_id peeled;
-	struct object_entry *entry = packlist_find(&to_pack, ref->oid);
+	संरचना object_id peeled;
+	संरचना object_प्रविष्टिः *प्रविष्टिः = packlist_find(&गन्तव्यम्_pack, ref->oid);
 
-	if (entry)
-		entry->tagged = 1;
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
-		entry = packlist_find(&to_pack, &peeled);
-		if (entry)
-			entry->tagged = 1;
+	यदि (प्रविष्टिः)
+		प्रविष्टिः->tagged = 1;
+	यदि (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+		प्रविष्टिः = packlist_find(&गन्तव्यम्_pack, &peeled);
+		यदि (प्रविष्टिः)
+			प्रविष्टिः->tagged = 1;
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static inline unsigned char oe_layer(struct packing_data *pack,
-				     struct object_entry *e)
+स्थिर अन्तःस्थ अचिह्नित वर्ण oe_layer(संरचना packing_दत्त *pack,
+				     संरचना object_प्रविष्टिः *e)
 {
-	if (!pack->layer)
-		return 0;
-	return pack->layer[e - pack->objects];
+	यदि (!pack->layer)
+		प्रत्यागम 0;
+	प्रत्यागम pack->layer[e - pack->objects];
 }
 
-static inline void add_to_write_order(struct object_entry **wo,
-			       unsigned int *endp,
-			       struct object_entry *e)
+स्थिर अन्तःस्थ शून्य सङ्कलय_गन्तव्यम्_write_क्रमः(संरचना object_प्रविष्टिः **wo,
+			       अचिह्नित पूर्णाङ्क *endp,
+			       संरचना object_प्रविष्टिः *e)
 {
-	if (e->filled || oe_layer(&to_pack, e) != write_layer)
-		return;
+	यदि (e->filled || oe_layer(&गन्तव्यम्_pack, e) != write_layer)
+		प्रत्यागम;
 	wo[(*endp)++] = e;
 	e->filled = 1;
 }
 
-static void add_descendants_to_write_order(struct object_entry **wo,
-					   unsigned int *endp,
-					   struct object_entry *e)
+स्थिर शून्य सङ्कलय_descendants_गन्तव्यम्_write_क्रमः(संरचना object_प्रविष्टिः **wo,
+					   अचिह्नित पूर्णाङ्क *endp,
+					   संरचना object_प्रविष्टिः *e)
 {
-	int add_to_order = 1;
-	while (e) {
-		if (add_to_order) {
-			struct object_entry *s;
+	पूर्णाङ्क सङ्कलय_गन्तव्यम्_क्रमः = 1;
+	यावत् (e) {
+		यदि (सङ्कलय_गन्तव्यम्_क्रमः) {
+			संरचना object_प्रविष्टिः *s;
 			/* add this node... */
-			add_to_write_order(wo, endp, e);
+			सङ्कलय_गन्तव्यम्_write_क्रमः(wo, endp, e);
 			/* all its siblings... */
-			for (s = DELTA_SIBLING(e); s; s = DELTA_SIBLING(s)) {
-				add_to_write_order(wo, endp, s);
+			प्रति (s = DELTA_SIBLING(e); s; s = DELTA_SIBLING(s)) {
+				सङ्कलय_गन्तव्यम्_write_क्रमः(wo, endp, s);
 			}
 		}
 		/* drop down a level to add left subtree nodes if possible */
-		if (DELTA_CHILD(e)) {
-			add_to_order = 1;
+		यदि (DELTA_CHILD(e)) {
+			सङ्कलय_गन्तव्यम्_क्रमः = 1;
 			e = DELTA_CHILD(e);
-		} else {
-			add_to_order = 0;
+		} अन्यथा {
+			सङ्कलय_गन्तव्यम्_क्रमः = 0;
 			/* our sibling might have some children, it is next */
-			if (DELTA_SIBLING(e)) {
+			यदि (DELTA_SIBLING(e)) {
 				e = DELTA_SIBLING(e);
-				continue;
+				अनुवर्त;
 			}
 			/* go back to our parent node */
 			e = DELTA(e);
-			while (e && !DELTA_SIBLING(e)) {
+			यावत् (e && !DELTA_SIBLING(e)) {
 				/* we're on the right side of a subtree, keep
 				 * going up until we can go right again */
 				e = DELTA(e);
 			}
-			if (!e) {
+			यदि (!e) {
 				/* done- we hit our original root node */
-				return;
+				प्रत्यागम;
 			}
 			/* pass it off to sibling at this level */
 			e = DELTA_SIBLING(e);
@@ -927,78 +927,78 @@ static void add_descendants_to_write_order(struct object_entry **wo,
 	};
 }
 
-static void add_family_to_write_order(struct object_entry **wo,
-				      unsigned int *endp,
-				      struct object_entry *e)
+स्थिर शून्य सङ्कलय_family_गन्तव्यम्_write_क्रमः(संरचना object_प्रविष्टिः **wo,
+				      अचिह्नित पूर्णाङ्क *endp,
+				      संरचना object_प्रविष्टिः *e)
 {
-	struct object_entry *root;
+	संरचना object_प्रविष्टिः *मूलम्;
 
-	for (root = e; DELTA(root); root = DELTA(root))
+	प्रति (मूलम् = e; DELTA(मूलम्); मूलम् = DELTA(मूलम्))
 		; /* nothing */
-	add_descendants_to_write_order(wo, endp, root);
+	सङ्कलय_descendants_गन्तव्यम्_write_क्रमः(wo, endp, मूलम्);
 }
 
-static void compute_layer_order(struct object_entry **wo, unsigned int *wo_end)
+स्थिर शून्य compute_layer_क्रमः(संरचना object_प्रविष्टिः **wo, अचिह्नित पूर्णाङ्क *wo_अन्तः)
 {
-	unsigned int i, last_untagged;
-	struct object_entry *objects = to_pack.objects;
+	अचिह्नित पूर्णाङ्क i, चरमः_untagged;
+	संरचना object_प्रविष्टिः *objects = गन्तव्यम्_pack.objects;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		if (objects[i].tagged)
-			break;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	प्रति (i = 0; i < गन्तव्यम्_pack.nr_objects; i++) {
+		यदि (objects[i].tagged)
+			भङ्ग;
+		सङ्कलय_गन्तव्यम्_write_क्रमः(wo, wo_अन्तः, &objects[i]);
 	}
-	last_untagged = i;
+	चरमः_untagged = i;
 
 	/*
 	 * Then fill all the tagged tips.
 	 */
-	for (; i < to_pack.nr_objects; i++) {
-		if (objects[i].tagged)
-			add_to_write_order(wo, wo_end, &objects[i]);
+	प्रति (; i < गन्तव्यम्_pack.nr_objects; i++) {
+		यदि (objects[i].tagged)
+			सङ्कलय_गन्तव्यम्_write_क्रमः(wo, wo_अन्तः, &objects[i]);
 	}
 
 	/*
 	 * And then all remaining commits and tags.
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_COMMIT &&
-		    oe_type(&objects[i]) != OBJ_TAG)
-			continue;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	प्रति (i = चरमः_untagged; i < गन्तव्यम्_pack.nr_objects; i++) {
+		यदि (oe_type(&objects[i]) != OBJ_COMMIT &&
+		    oe_type(&objects[i]) != OBJ_चिह्नकम्)
+			अनुवर्त;
+		सङ्कलय_गन्तव्यम्_write_क्रमः(wo, wo_अन्तः, &objects[i]);
 	}
 
 	/*
 	 * And then all the trees.
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_TREE)
-			continue;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	प्रति (i = चरमः_untagged; i < गन्तव्यम्_pack.nr_objects; i++) {
+		यदि (oe_type(&objects[i]) != OBJ_वृक्षः)
+			अनुवर्त;
+		सङ्कलय_गन्तव्यम्_write_क्रमः(wo, wo_अन्तः, &objects[i]);
 	}
 
 	/*
 	 * Finally all the rest in really tight order
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (!objects[i].filled && oe_layer(&to_pack, &objects[i]) == write_layer)
-			add_family_to_write_order(wo, wo_end, &objects[i]);
+	प्रति (i = चरमः_untagged; i < गन्तव्यम्_pack.nr_objects; i++) {
+		यदि (!objects[i].filled && oe_layer(&गन्तव्यम्_pack, &objects[i]) == write_layer)
+			सङ्कलय_family_गन्तव्यम्_write_क्रमः(wo, wo_अन्तः, &objects[i]);
 	}
 }
 
-static struct object_entry **compute_write_order(void)
+स्थिर संरचना object_प्रविष्टिः **compute_write_क्रमः(शून्य)
 {
 	uint32_t max_layers = 1;
-	unsigned int i, wo_end;
+	अचिह्नित पूर्णाङ्क i, wo_अन्तः;
 
-	struct object_entry **wo;
-	struct object_entry *objects = to_pack.objects;
+	संरचना object_प्रविष्टिः **wo;
+	संरचना object_प्रविष्टिः *objects = गन्तव्यम्_pack.objects;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
+	प्रति (i = 0; i < गन्तव्यम्_pack.nr_objects; i++) {
 		objects[i].tagged = 0;
 		objects[i].filled = 0;
-		SET_DELTA_CHILD(&objects[i], NULL);
-		SET_DELTA_SIBLING(&objects[i], NULL);
+		समुच्चयः_DELTA_CHILD(&objects[i], रिक्त);
+		समुच्चयः_DELTA_SIBLING(&objects[i], रिक्त);
 	}
 
 	/*
@@ -1006,37 +1006,37 @@ static struct object_entry **compute_write_order(void)
 	 * Make sure delta_sibling is sorted in the original
 	 * recency order.
 	 */
-	for (i = to_pack.nr_objects; i > 0;) {
-		struct object_entry *e = &objects[--i];
-		if (!DELTA(e))
-			continue;
+	प्रति (i = गन्तव्यम्_pack.nr_objects; i > 0;) {
+		संरचना object_प्रविष्टिः *e = &objects[--i];
+		यदि (!DELTA(e))
+			अनुवर्त;
 		/* Mark me as the first child */
 		e->delta_sibling_idx = DELTA(e)->delta_child_idx;
-		SET_DELTA_CHILD(DELTA(e), e);
+		समुच्चयः_DELTA_CHILD(DELTA(e), e);
 	}
 
 	/*
 	 * Mark objects that are at the tip of tags.
 	 */
-	refs_for_each_tag_ref(get_main_ref_store(the_repository), mark_tagged,
-			      NULL);
+	refs_for_each_चिह्नकम्_ref(get_main_ref_store(the_repository), mark_tagged,
+			      रिक्त);
 
-	if (use_delta_islands) {
-		max_layers = compute_pack_layers(&to_pack);
+	यदि (use_delta_islands) {
+		max_layers = compute_pack_layers(&गन्तव्यम्_pack);
 		free_island_marks();
 	}
 
-	ALLOC_ARRAY(wo, to_pack.nr_objects);
-	wo_end = 0;
+	ALLOC_ARRAY(wo, गन्तव्यम्_pack.nr_objects);
+	wo_अन्तः = 0;
 
-	for (; write_layer < max_layers; ++write_layer)
-		compute_layer_order(wo, &wo_end);
+	प्रति (; write_layer < max_layers; ++write_layer)
+		compute_layer_क्रमः(wo, &wo_अन्तः);
 
-	if (wo_end != to_pack.nr_objects)
+	यदि (wo_अन्तः != गन्तव्यम्_pack.nr_objects)
 		die(_("ordered %u objects, expected %"PRIu32),
-		    wo_end, to_pack.nr_objects);
+		    wo_अन्तः, गन्तव्यम्_pack.nr_objects);
 
-	return wo;
+	प्रत्यागम wo;
 }
 
 
@@ -1046,7 +1046,7 @@ static struct object_entry **compute_write_order(void)
  * packfile.
  */
 
-static struct reused_chunk {
+स्थिर संरचना reused_chunk {
 	/* The offset of the first object of this chunk in the original
 	 * packfile. */
 	off_t original;
@@ -1054,18 +1054,18 @@ static struct reused_chunk {
 	 * this chunk in the generated packfile. */
 	off_t difference;
 } *reused_chunks;
-static int reused_chunks_nr;
-static int reused_chunks_alloc;
+स्थिर पूर्णाङ्क reused_chunks_nr;
+स्थिर पूर्णाङ्क reused_chunks_alloc;
 
-static void record_reused_object(off_t where, off_t offset)
+स्थिर शून्य लेखः_reused_object(off_t where, off_t विस्थापनम्)
 {
-	if (reused_chunks_nr && reused_chunks[reused_chunks_nr-1].difference == offset)
-		return;
+	यदि (reused_chunks_nr && reused_chunks[reused_chunks_nr-1].difference == विस्थापनम्)
+		प्रत्यागम;
 
 	ALLOC_GROW(reused_chunks, reused_chunks_nr + 1,
 		   reused_chunks_alloc);
 	reused_chunks[reused_chunks_nr].original = where;
-	reused_chunks[reused_chunks_nr].difference = offset;
+	reused_chunks[reused_chunks_nr].difference = विस्थापनम्;
 	reused_chunks_nr++;
 }
 
@@ -1075,16 +1075,16 @@ static void record_reused_object(off_t where, off_t offset)
  * chunk that contains it (which implicitly ends at the start
  * of the next chunk.
  */
-static off_t find_reused_offset(off_t where)
+स्थिर off_t find_reused_विस्थापनम्(off_t where)
 {
-	int lo = 0, hi = reused_chunks_nr;
-	while (lo < hi) {
-		int mi = lo + ((hi - lo) / 2);
-		if (where == reused_chunks[mi].original)
-			return reused_chunks[mi].difference;
-		if (where < reused_chunks[mi].original)
+	पूर्णाङ्क lo = 0, hi = reused_chunks_nr;
+	यावत् (lo < hi) {
+		पूर्णाङ्क mi = lo + ((hi - lo) / 2);
+		यदि (where == reused_chunks[mi].original)
+			प्रत्यागम reused_chunks[mi].difference;
+		यदि (where < reused_chunks[mi].original)
 			hi = mi;
-		else
+		अन्यथा
 			lo = mi + 1;
 	}
 
@@ -1092,99 +1092,99 @@ static off_t find_reused_offset(off_t where)
 	 * The first chunk starts at zero, so we can't have gone below
 	 * there.
 	 */
-	assert(lo);
-	return reused_chunks[lo-1].difference;
+	प्रतिज्ञा(lo);
+	प्रत्यागम reused_chunks[lo-1].difference;
 }
 
-static void write_reused_pack_one(struct packed_git *reuse_packfile,
-				  size_t pos, struct hashfile *out,
+स्थिर शून्य write_reused_pack_one(संरचना packed_git *reuse_packfile,
+				  आकार_t pos, संरचना hashfile *बहिर्गमनम्,
 				  off_t pack_start,
-				  struct pack_window **w_curs)
+				  संरचना pack_गवाक्षः **w_curs)
 {
-	off_t offset, next, cur;
-	enum object_type type;
-	size_t size;
+	off_t विस्थापनम्, अग्र, cur;
+	गणना object_type type;
+	आकार_t आकार;
 
-	offset = pack_pos_to_offset(reuse_packfile, pos);
-	next = pack_pos_to_offset(reuse_packfile, pos + 1);
+	विस्थापनम् = pack_pos_गन्तव्यम्_विस्थापनम्(reuse_packfile, pos);
+	अग्र = pack_pos_गन्तव्यम्_विस्थापनम्(reuse_packfile, pos + 1);
 
-	record_reused_object(offset,
-			     offset - (hashfile_total(out) - pack_start));
+	लेखः_reused_object(विस्थापनम्,
+			     विस्थापनम् - (hashfile_योग(बहिर्गमनम्) - pack_start));
 
-	cur = offset;
-	type = unpack_object_header(reuse_packfile, w_curs, &cur, &size);
-	assert(type >= 0);
+	cur = विस्थापनम्;
+	type = unpack_object_शीर्षकम्(reuse_packfile, w_curs, &cur, &आकार);
+	प्रतिज्ञा(type >= 0);
 
-	if (type == OBJ_OFS_DELTA) {
-		off_t base_offset;
+	यदि (type == OBJ_OFS_DELTA) {
+		off_t आधारः_विस्थापनम्;
 		off_t fixup;
 
-		unsigned char header[MAX_PACK_OBJECT_HEADER];
-		unsigned len;
+		अचिह्नित वर्ण शीर्षकम्[MAX_PACK_OBJECT_शीर्षकम्];
+		अचिह्नित len;
 
-		base_offset = get_delta_base(reuse_packfile, w_curs, &cur, type, offset);
-		assert(base_offset != 0);
+		आधारः_विस्थापनम् = get_delta_आधारः(reuse_packfile, w_curs, &cur, type, विस्थापनम्);
+		प्रतिज्ञा(आधारः_विस्थापनम् != 0);
 
 		/* Convert to REF_DELTA if we must... */
-		if (!allow_ofs_delta) {
-			uint32_t base_pos;
-			struct object_id base_oid;
+		यदि (!allow_ofs_delta) {
+			uint32_t आधारः_pos;
+			संरचना object_id आधारः_oid;
 
-			if (offset_to_pack_pos(reuse_packfile, base_offset, &base_pos) < 0)
+			यदि (विस्थापनम्_गन्तव्यम्_pack_pos(reuse_packfile, आधारः_विस्थापनम्, &आधारः_pos) < 0)
 				die(_("expected object at offset %"PRIuMAX" "
 				      "in pack %s"),
-				    (uintmax_t)base_offset,
+				    (uintmax_t)आधारः_विस्थापनम्,
 				    reuse_packfile->pack_name);
 
-			nth_packed_object_id(&base_oid, reuse_packfile,
-					     pack_pos_to_index(reuse_packfile, base_pos));
+			nth_packed_object_id(&आधारः_oid, reuse_packfile,
+					     pack_pos_गन्तव्यम्_सूचकांक(reuse_packfile, आधारः_pos));
 
-			len = encode_in_pack_object_header(header, sizeof(header),
-							   OBJ_REF_DELTA, size);
-			hashwrite(out, header, len);
-			hashwrite(out, base_oid.hash, the_hash_algo->rawsz);
-			copy_pack_data(out, reuse_packfile, w_curs, cur, next - cur);
-			return;
+			len = encode_अन्तर्_pack_object_शीर्षकम्(शीर्षकम्, परिमाण(शीर्षकम्),
+							   OBJ_REF_DELTA, आकार);
+			hashwrite(बहिर्गमनम्, शीर्षकम्, len);
+			hashwrite(बहिर्गमनम्, आधारः_oid.hash, the_hash_algo->rawsz);
+			copy_pack_दत्त(बहिर्गमनम्, reuse_packfile, w_curs, cur, अग्र - cur);
+			प्रत्यागम;
 		}
 
 		/* Otherwise see if we need to rewrite the offset... */
-		fixup = find_reused_offset(offset) -
-			find_reused_offset(base_offset);
-		if (fixup) {
-			unsigned char ofs_header[MAX_PACK_OBJECT_HEADER];
-			unsigned i, ofs_len;
-			off_t ofs = offset - base_offset - fixup;
+		fixup = find_reused_विस्थापनम्(विस्थापनम्) -
+			find_reused_विस्थापनम्(आधारः_विस्थापनम्);
+		यदि (fixup) {
+			अचिह्नित वर्ण ofs_शीर्षकम्[MAX_PACK_OBJECT_शीर्षकम्];
+			अचिह्नित i, ofs_len;
+			off_t ofs = विस्थापनम् - आधारः_विस्थापनम् - fixup;
 
-			len = encode_in_pack_object_header(header, sizeof(header),
-							   OBJ_OFS_DELTA, size);
+			len = encode_अन्तर्_pack_object_शीर्षकम्(शीर्षकम्, परिमाण(शीर्षकम्),
+							   OBJ_OFS_DELTA, आकार);
 
-			i = sizeof(ofs_header) - 1;
-			ofs_header[i] = ofs & 127;
-			while (ofs >>= 7)
-				ofs_header[--i] = 128 | (--ofs & 127);
+			i = परिमाण(ofs_शीर्षकम्) - 1;
+			ofs_शीर्षकम्[i] = ofs & 127;
+			यावत् (ofs >>= 7)
+				ofs_शीर्षकम्[--i] = 128 | (--ofs & 127);
 
-			ofs_len = sizeof(ofs_header) - i;
+			ofs_len = परिमाण(ofs_शीर्षकम्) - i;
 
-			hashwrite(out, header, len);
-			hashwrite(out, ofs_header + sizeof(ofs_header) - ofs_len, ofs_len);
-			copy_pack_data(out, reuse_packfile, w_curs, cur, next - cur);
-			return;
+			hashwrite(बहिर्गमनम्, शीर्षकम्, len);
+			hashwrite(बहिर्गमनम्, ofs_शीर्षकम् + परिमाण(ofs_शीर्षकम्) - ofs_len, ofs_len);
+			copy_pack_दत्त(बहिर्गमनम्, reuse_packfile, w_curs, cur, अग्र - cur);
+			प्रत्यागम;
 		}
 
 		/* ...otherwise we have no fixup, and can write it verbatim */
 	}
 
-	copy_pack_data(out, reuse_packfile, w_curs, offset, next - offset);
+	copy_pack_दत्त(बहिर्गमनम्, reuse_packfile, w_curs, विस्थापनम्, अग्र - विस्थापनम्);
 }
 
-static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
-					 struct hashfile *out,
-					 struct pack_window **w_curs)
+स्थिर आकार_t write_reused_pack_verbatim(संरचना bitmapped_pack *reuse_packfile,
+					 संरचना hashfile *बहिर्गमनम्,
+					 संरचना pack_गवाक्षः **w_curs)
 {
-	size_t pos = 0;
-	size_t end;
+	आकार_t pos = 0;
+	आकार_t अन्तः;
 
-	if (reuse_packfile->bitmap_pos) {
+	यदि (reuse_packfile->bitmap_pos) {
 		/*
 		 * We can't reuse whole chunks verbatim out of
 		 * non-preferred packs since we can't guarantee that
@@ -1202,7 +1202,7 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 		 * write_reused_pack(), which inspects and reuses
 		 * individual bits.
 		 */
-		return reuse_packfile->bitmap_pos / BITS_IN_EWORD;
+		प्रत्यागम reuse_packfile->bitmap_pos / द्वयङ्काः_अन्तर्_EWORD;
 	}
 
 	/*
@@ -1214,58 +1214,58 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 	 * contains fewer than BITS_IN_EWORD objects), then we'll
 	 * inspect bits one-by-one in write_reused_pack().
 	 */
-	end = reuse_packfile->bitmap_nr / BITS_IN_EWORD;
-	if (reuse_packfile_bitmap->word_alloc < end)
+	अन्तः = reuse_packfile->bitmap_nr / द्वयङ्काः_अन्तर्_EWORD;
+	यदि (reuse_packfile_bitmap->word_alloc < अन्तः)
 		BUG("fewer words than expected in reuse_packfile_bitmap");
 
-	while (pos < end && reuse_packfile_bitmap->words[pos] == (eword_t)~0)
+	यावत् (pos < अन्तः && reuse_packfile_bitmap->शब्दाः[pos] == (eword_t)~0)
 		pos++;
 
-	if (pos) {
-		off_t to_write;
+	यदि (pos) {
+		off_t गन्तव्यम्_write;
 
-		written = (pos * BITS_IN_EWORD);
-		to_write = pack_pos_to_offset(reuse_packfile->p, written)
-			- sizeof(struct pack_header);
+		written = (pos * द्वयङ्काः_अन्तर्_EWORD);
+		गन्तव्यम्_write = pack_pos_गन्तव्यम्_विस्थापनम्(reuse_packfile->p, written)
+			- परिमाण(संरचना pack_शीर्षकम्);
 
 		/* We're recording one chunk, not one object. */
-		record_reused_object(sizeof(struct pack_header), 0);
-		hashflush(out);
-		copy_pack_data(out, reuse_packfile->p, w_curs,
-			sizeof(struct pack_header), to_write);
+		लेखः_reused_object(परिमाण(संरचना pack_शीर्षकम्), 0);
+		hashflush(बहिर्गमनम्);
+		copy_pack_दत्त(बहिर्गमनम्, reuse_packfile->p, w_curs,
+			परिमाण(संरचना pack_शीर्षकम्), गन्तव्यम्_write);
 
-		display_progress(progress_state, written);
+		display_प्रगतिः(प्रगतिः_state, written);
 	}
-	return pos;
+	प्रत्यागम pos;
 }
 
-static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
-			      struct hashfile *f)
+स्थिर शून्य write_reused_pack(संरचना bitmapped_pack *reuse_packfile,
+			      संरचना hashfile *f)
 {
-	size_t i = reuse_packfile->bitmap_pos / BITS_IN_EWORD;
-	uint32_t offset;
-	off_t pack_start = hashfile_total(f) - sizeof(struct pack_header);
-	struct pack_window *w_curs = NULL;
+	आकार_t i = reuse_packfile->bitmap_pos / द्वयङ्काः_अन्तर्_EWORD;
+	uint32_t विस्थापनम्;
+	off_t pack_start = hashfile_योग(f) - परिमाण(संरचना pack_शीर्षकम्);
+	संरचना pack_गवाक्षः *w_curs = रिक्त;
 
-	if (allow_ofs_delta)
+	यदि (allow_ofs_delta)
 		i = write_reused_pack_verbatim(reuse_packfile, f, &w_curs);
 
-	for (; i < reuse_packfile_bitmap->word_alloc; ++i) {
-		eword_t word = reuse_packfile_bitmap->words[i];
-		size_t pos = (i * BITS_IN_EWORD);
+	प्रति (; i < reuse_packfile_bitmap->word_alloc; ++i) {
+		eword_t word = reuse_packfile_bitmap->शब्दाः[i];
+		आकार_t pos = (i * द्वयङ्काः_अन्तर्_EWORD);
 
-		for (offset = 0; offset < BITS_IN_EWORD; ++offset) {
+		प्रति (विस्थापनम् = 0; विस्थापनम् < द्वयङ्काः_अन्तर्_EWORD; ++विस्थापनम्) {
 			uint32_t pack_pos;
-			if ((word >> offset) == 0)
-				break;
+			यदि ((word >> विस्थापनम्) == 0)
+				भङ्ग;
 
-			offset += ewah_bit_ctz64(word >> offset);
-			if (pos + offset < reuse_packfile->bitmap_pos)
-				continue;
-			if (pos + offset >= reuse_packfile->bitmap_pos + reuse_packfile->bitmap_nr)
-				goto done;
+			विस्थापनम् += ewah_bit_ctz64(word >> विस्थापनम्);
+			यदि (pos + विस्थापनम् < reuse_packfile->bitmap_pos)
+				अनुवर्त;
+			यदि (pos + विस्थापनम् >= reuse_packfile->bitmap_pos + reuse_packfile->bitmap_nr)
+				गच्छ समाप्तम्;
 
-			if (reuse_packfile->bitmap_pos) {
+			यदि (reuse_packfile->bitmap_pos) {
 				/*
 				 * When doing multi-pack reuse on a
 				 * non-preferred pack, translate bit positions
@@ -1273,84 +1273,84 @@ static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
 				 * pack-relative positions before attempting
 				 * reuse.
 				 */
-				struct multi_pack_index *m = reuse_packfile->from_midx;
+				संरचना multi_pack_सूचकांक *m = reuse_packfile->from_midx;
 				uint32_t midx_pos;
 				off_t pack_ofs;
 
-				if (!m)
+				यदि (!m)
 					BUG("non-zero bitmap position without MIDX");
 
-				midx_pos = pack_pos_to_midx(m, pos + offset);
-				pack_ofs = nth_midxed_offset(m, midx_pos);
+				midx_pos = pack_pos_गन्तव्यम्_midx(m, pos + विस्थापनम्);
+				pack_ofs = nth_midxed_विस्थापनम्(m, midx_pos);
 
-				if (offset_to_pack_pos(reuse_packfile->p,
+				यदि (विस्थापनम्_गन्तव्यम्_pack_pos(reuse_packfile->p,
 						       pack_ofs, &pack_pos) < 0)
 					BUG("could not find expected object at offset %"PRIuMAX" in pack %s",
 					    (uintmax_t)pack_ofs,
 					    pack_basename(reuse_packfile->p));
-			} else {
+			} अन्यथा {
 				/*
 				 * Can use bit positions directly, even for MIDX
 				 * bitmaps. See comment in try_partial_reuse()
 				 * for why.
 				 */
-				pack_pos = pos + offset;
+				pack_pos = pos + विस्थापनम्;
 			}
 
 			write_reused_pack_one(reuse_packfile->p, pack_pos, f,
 					      pack_start, &w_curs);
-			display_progress(progress_state, ++written);
+			display_प्रगतिः(प्रगतिः_state, ++written);
 		}
 	}
 
-done:
+समाप्तम्:
 	unuse_pack(&w_curs);
 }
 
-static void write_excluded_by_configs(void)
+स्थिर शून्य write_excluded_by_configs(शून्य)
 {
-	struct oidset_iter iter;
-	const struct object_id *oid;
+	संरचना oidset_iter iter;
+	ध्रुव संरचना object_id *oid;
 
 	oidset_iter_init(&excluded_by_config, &iter);
-	while ((oid = oidset_iter_next(&iter))) {
-		struct configured_exclusion *ex =
+	यावत् ((oid = oidset_iter_अग्र(&iter))) {
+		संरचना configured_exclusion *ex =
 			oidmap_get(&configured_exclusions, oid);
 
-		if (!ex)
+		यदि (!ex)
 			BUG("configured exclusion wasn't configured");
-		write_in_full(1, ex->pack_hash_hex, strlen(ex->pack_hash_hex));
-		write_in_full(1, " ", 1);
-		write_in_full(1, ex->uri, strlen(ex->uri));
-		write_in_full(1, "\n", 1);
+		write_अन्तर्_पूर्णम्(1, ex->pack_hash_hex, वाक्यदैर्घ्यम्(ex->pack_hash_hex));
+		write_अन्तर्_पूर्णम्(1, " ", 1);
+		write_अन्तर्_पूर्णम्(1, ex->uri, वाक्यदैर्घ्यम्(ex->uri));
+		write_अन्तर्_पूर्णम्(1, "\n", 1);
 	}
 }
 
-static const char no_split_warning[] = N_(
+स्थिर ध्रुव वर्ण no_विभज_warning[] = N_(
 "disabling bitmap writing, packs are split due to pack.packSizeLimit"
 );
 
-static void write_pack_file(void)
+स्थिर शून्य write_pack_file(शून्य)
 {
 	uint32_t i = 0, j;
-	struct hashfile *f;
-	off_t offset;
-	uint32_t nr_remaining = nr_result;
-	time_t last_mtime = 0;
-	struct object_entry **write_order;
-	off_t bytes_written = 0;
+	संरचना hashfile *f;
+	off_t विस्थापनम्;
+	uint32_t nr_remaining = nr_परिणाम;
+	time_t चरमः_mtime = 0;
+	संरचना object_प्रविष्टिः **write_क्रमः;
+	off_t अष्टकानि_written = 0;
 
-	if (progress > pack_to_stdout)
-		progress_state = start_progress(the_repository,
-						_("Writing objects"), nr_result);
-	ALLOC_ARRAY(written_list, to_pack.nr_objects);
-	write_order = compute_write_order();
+	यदि (प्रगतिः > pack_गन्तव्यम्_stdout)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
+						_("Writing objects"), nr_परिणाम);
+	ALLOC_ARRAY(written_list, गन्तव्यम्_pack.nr_objects);
+	write_क्रमः = compute_write_क्रमः();
 
-	do {
-		unsigned char hash[GIT_MAX_RAWSZ];
-		char *pack_tmp_name = NULL;
+	कुरु {
+		अचिह्नित वर्ण hash[GIT_MAX_RAWSZ];
+		वर्ण *pack_tmp_name = रिक्त;
 
-		if (pack_to_stdout) {
+		यदि (pack_गन्तव्यम्_stdout) {
 			/*
 			 * This command is most often invoked via
 			 * git-upload-pack(1), which will typically chunk data
@@ -1360,40 +1360,40 @@ static void write_pack_file(void)
 			 * Note that we need to subtract one though to
 			 * accommodate for the sideband byte.
 			 */
-			struct hashfd_options opts = {
-				.progress = progress_state,
-				.buffer_len = LARGE_PACKET_DATA_MAX - 1,
+			संरचना hashfd_options opts = {
+				.प्रगतिः = प्रगतिः_state,
+				.बफर_len = LARGE_PACKET_दत्त_MAX - 1,
 			};
 			f = hashfd_ext(the_repository->hash_algo, 1,
 				       "<stdout>", &opts);
-		} else {
+		} अन्यथा {
 			f = create_tmp_packfile(the_repository, &pack_tmp_name);
 		}
 
-		offset = write_pack_header(f, nr_remaining);
+		विस्थापनम् = write_pack_शीर्षकम्(f, nr_remaining);
 
-		if (reuse_packfiles_nr) {
-			assert(pack_to_stdout);
-			for (j = 0; j < reuse_packfiles_nr; j++) {
+		यदि (reuse_packfiles_nr) {
+			प्रतिज्ञा(pack_गन्तव्यम्_stdout);
+			प्रति (j = 0; j < reuse_packfiles_nr; j++) {
 				reused_chunks_nr = 0;
 				write_reused_pack(&reuse_packfiles[j], f);
-				if (reused_chunks_nr)
-					reuse_packfiles_used_nr++;
+				यदि (reused_chunks_nr)
+					reuse_packfiles_प्रयुक्तम्_nr++;
 			}
-			offset = hashfile_total(f);
+			विस्थापनम् = hashfile_योग(f);
 		}
 
 		nr_written = 0;
-		for (; i < to_pack.nr_objects; i++) {
-			struct object_entry *e = write_order[i];
-			if (write_one(f, e, &offset) == WRITE_ONE_BREAK)
-				break;
-			display_progress(progress_state, written);
+		प्रति (; i < गन्तव्यम्_pack.nr_objects; i++) {
+			संरचना object_प्रविष्टिः *e = write_क्रमः[i];
+			यदि (write_one(f, e, &विस्थापनम्) == WRITE_ONE_BREAK)
+				भङ्ग;
+			display_प्रगतिः(प्रगतिः_state, written);
 		}
 
-		bytes_written += hashfile_total(f) +
+		अष्टकानि_written += hashfile_योग(f) +
 			the_repository->hash_algo->rawsz;
-		if (pack_to_stdout) {
+		यदि (pack_गन्तव्यम्_stdout) {
 			/*
 			 * We never fsync when writing to stdout since we may
 			 * not be writing to an actual pack file. For instance,
@@ -1402,33 +1402,33 @@ static void write_pack_file(void)
 			 * synchronization with the reader on some platforms.
 			 */
 			finalize_hashfile(f, hash, FSYNC_COMPONENT_NONE,
-					  CSUM_HASH_IN_STREAM | CSUM_CLOSE);
-		} else if (nr_written == nr_remaining) {
+					  CSUM_HASH_अन्तर्_प्रवाहः | CSUM_CLOSE);
+		} अन्यथा यदि (nr_written == nr_remaining) {
 			finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK,
-					  CSUM_HASH_IN_STREAM | CSUM_FSYNC | CSUM_CLOSE);
-		} else {
+					  CSUM_HASH_अन्तर्_प्रवाहः | CSUM_FSYNC | CSUM_CLOSE);
+		} अन्यथा {
 			/*
 			 * If we wrote the wrong number of entries in the
 			 * header, rewrite it like in fast-import.
 			 */
 
-			int fd = finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK, 0);
-			fixup_pack_header_footer(the_hash_algo, fd, hash,
+			पूर्णाङ्क fd = finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK, 0);
+			fixup_pack_शीर्षकम्_footer(the_hash_algo, fd, hash,
 						 pack_tmp_name, nr_written,
-						 hash, offset);
+						 hash, विस्थापनम्);
 			close(fd);
-			if (write_bitmap_index) {
-				if (write_bitmap_index != WRITE_BITMAP_QUIET)
-					warning(_(no_split_warning));
-				write_bitmap_index = 0;
+			यदि (write_bitmap_सूचकांक) {
+				यदि (write_bitmap_सूचकांक != WRITE_BITMAP_QUIET)
+					warning(_(no_विभज_warning));
+				write_bitmap_सूचकांक = 0;
 			}
 		}
 
-		if (!pack_to_stdout) {
-			struct stat st;
-			struct strbuf tmpname = STRBUF_INIT;
-			struct bitmap_writer bitmap_writer;
-			char *idx_tmp_name = NULL;
+		यदि (!pack_गन्तव्यम्_stdout) {
+			संरचना stat st;
+			संरचना strbuf tmpname = STRBUF_INIT;
+			संरचना bitmap_writer bitmap_writer;
+			वर्ण *idx_tmp_name = रिक्त;
 
 			/*
 			 * Packs are runtime accessed in their mtime
@@ -1437,97 +1437,97 @@ static void write_pack_file(void)
 			 * packs then we should modify the mtime of later ones
 			 * to preserve this property.
 			 */
-			if (stat(pack_tmp_name, &st) < 0) {
+			यदि (stat(pack_tmp_name, &st) < 0) {
 				warning_errno(_("failed to stat %s"), pack_tmp_name);
-			} else if (!last_mtime) {
-				last_mtime = st.st_mtime;
-			} else {
-				struct utimbuf utb;
+			} अन्यथा यदि (!चरमः_mtime) {
+				चरमः_mtime = st.st_mtime;
+			} अन्यथा {
+				संरचना utimbuf utb;
 				utb.actime = st.st_atime;
-				utb.modtime = --last_mtime;
-				if (utime(pack_tmp_name, &utb) < 0)
+				utb.modtime = --चरमः_mtime;
+				यदि (utime(pack_tmp_name, &utb) < 0)
 					warning_errno(_("failed utime() on %s"), pack_tmp_name);
 			}
 
-			strbuf_addf(&tmpname, "%s-%s.", base_name,
-				    hash_to_hex(hash));
+			strbuf_addf(&tmpname, "%s-%s.", आधारः_name,
+				    hash_गन्तव्यम्_hex(hash));
 
-			if (write_bitmap_index) {
+			यदि (write_bitmap_सूचकांक) {
 				bitmap_writer_init(&bitmap_writer,
-						   the_repository, &to_pack,
-						   NULL);
-				bitmap_writer_set_checksum(&bitmap_writer, hash);
-				bitmap_writer_build_type_index(&bitmap_writer,
+						   the_repository, &गन्तव्यम्_pack,
+						   रिक्त);
+				bitmap_writer_समुच्चयः_checksum(&bitmap_writer, hash);
+				bitmap_writer_build_type_सूचकांक(&bitmap_writer,
 							       written_list);
 			}
 
-			if (cruft)
+			यदि (cruft)
 				pack_idx_opts.flags |= WRITE_MTIMES;
 
 			stage_tmp_packfiles(the_repository, &tmpname,
 					    pack_tmp_name, written_list,
-					    nr_written, &to_pack,
+					    nr_written, &गन्तव्यम्_pack,
 					    &pack_idx_opts, hash,
 					    &idx_tmp_name);
 
-			if (write_bitmap_index) {
-				size_t tmpname_len = tmpname.len;
+			यदि (write_bitmap_सूचकांक) {
+				आकार_t tmpname_len = tmpname.len;
 
 				strbuf_addstr(&tmpname, "bitmap");
-				stop_progress(&progress_state);
+				stop_प्रगतिः(&प्रगतिः_state);
 
-				bitmap_writer_show_progress(&bitmap_writer,
-							    progress);
+				bitmap_writer_show_प्रगतिः(&bitmap_writer,
+							    प्रगतिः);
 				bitmap_writer_select_commits(&bitmap_writer,
-							     indexed_commits,
-							     indexed_commits_nr);
-				if (bitmap_writer_build(&bitmap_writer) < 0)
+							     अनुक्रमितम्_commits,
+							     अनुक्रमितम्_commits_nr);
+				यदि (bitmap_writer_build(&bitmap_writer) < 0)
 					die(_("failed to write bitmap index"));
 				bitmap_writer_finish(&bitmap_writer,
 						     written_list,
 						     tmpname.buf, write_bitmap_options);
 				bitmap_writer_free(&bitmap_writer);
-				write_bitmap_index = 0;
+				write_bitmap_सूचकांक = 0;
 				strbuf_setlen(&tmpname, tmpname_len);
 			}
 
 			rename_tmp_packfile_idx(the_repository, &tmpname, &idx_tmp_name);
 
-			free(idx_tmp_name);
+			मुक्त(idx_tmp_name);
 			strbuf_release(&tmpname);
-			free(pack_tmp_name);
-			puts(hash_to_hex(hash));
+			मुक्त(pack_tmp_name);
+			पङ्क्तिं_लिख(hash_गन्तव्यम्_hex(hash));
 		}
 
 		/* mark written objects as written to previous pack */
-		for (j = 0; j < nr_written; j++) {
-			written_list[j]->offset = (off_t)-1;
+		प्रति (j = 0; j < nr_written; j++) {
+			written_list[j]->विस्थापनम् = (off_t)-1;
 		}
 		nr_remaining -= nr_written;
-	} while (nr_remaining && i < to_pack.nr_objects);
+	} यावत् (nr_remaining && i < गन्तव्यम्_pack.nr_objects);
 
-	free(written_list);
-	free(write_order);
-	stop_progress(&progress_state);
-	if (written != nr_result)
+	मुक्त(written_list);
+	मुक्त(write_क्रमः);
+	stop_प्रगतिः(&प्रगतिः_state);
+	यदि (written != nr_परिणाम)
 		die(_("wrote %"PRIu32" objects while expecting %"PRIu32),
-		    written, nr_result);
-	trace2_data_intmax("pack-objects", the_repository,
-			   "write_pack_file/wrote", nr_result);
-	trace2_data_intmax("pack-objects", the_repository,
-			   "write_pack_file/wrote_bytes", bytes_written);
+		    written, nr_परिणाम);
+	trace2_दत्त_intmax("pack-objects", the_repository,
+			   "write_pack_file/wrote", nr_परिणाम);
+	trace2_दत्त_intmax("pack-objects", the_repository,
+			   "write_pack_file/wrote_bytes", अष्टकानि_written);
 }
 
-static int no_try_delta(const char *path)
+स्थिर पूर्णाङ्क no_try_delta(ध्रुव वर्ण *मार्गः)
 {
-	static struct attr_check *check;
+	स्थिर संरचना attr_check *check;
 
-	if (!check)
-		check = attr_check_initl("delta", NULL);
-	git_check_attr(the_repository->index, path, check);
-	if (ATTR_FALSE(check->items[0].value))
-		return 1;
-	return 0;
+	यदि (!check)
+		check = attr_check_initl("delta", रिक्त);
+	git_check_attr(the_repository->सूचकांक, मार्गः, check);
+	यदि (ATTR_FALSE(check->वस्तूनि[0].मानम्))
+		प्रत्यागम 1;
+	प्रत्यागम 0;
 }
 
 /*
@@ -1540,45 +1540,45 @@ static int no_try_delta(const char *path)
  * found the item, since that saves us from having to look it up again a
  * few lines later when we want to add the new entry.
  */
-static int have_duplicate_entry(const struct object_id *oid,
-				int exclude)
+स्थिर पूर्णाङ्क have_duplicate_प्रविष्टिः(ध्रुव संरचना object_id *oid,
+				पूर्णाङ्क exclude)
 {
-	struct object_entry *entry;
+	संरचना object_प्रविष्टिः *प्रविष्टिः;
 
-	if (reuse_packfile_bitmap &&
-	    bitmap_walk_contains(bitmap_git, reuse_packfile_bitmap, oid))
-		return 1;
+	यदि (reuse_packfile_bitmap &&
+	    bitmap_walk_अन्तर्भवति(bitmap_git, reuse_packfile_bitmap, oid))
+		प्रत्यागम 1;
 
-	entry = packlist_find(&to_pack, oid);
-	if (!entry)
-		return 0;
+	प्रविष्टिः = packlist_find(&गन्तव्यम्_pack, oid);
+	यदि (!प्रविष्टिः)
+		प्रत्यागम 0;
 
-	if (exclude) {
-		if (!entry->preferred_base)
-			nr_result--;
-		entry->preferred_base = 1;
+	यदि (exclude) {
+		यदि (!प्रविष्टिः->preferred_आधारः)
+			nr_परिणाम--;
+		प्रविष्टिः->preferred_आधारः = 1;
 	}
 
-	return 1;
+	प्रत्यागम 1;
 }
 
-static int want_cruft_object_mtime(struct repository *r,
-				   const struct object_id *oid,
-				   unsigned flags, uint32_t mtime)
+स्थिर पूर्णाङ्क want_cruft_object_mtime(संरचना repository *r,
+				   ध्रुव संरचना object_id *oid,
+				   अचिह्नित flags, uint32_t mtime)
 {
-	struct odb_source_files *files = odb_source_files_downcast(r->objects->source);
+	संरचना odb_source_files *files = odb_source_files_downcast(r->objects->source);
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		struct packed_git **cache = packfile_store_get_kept_pack_cache(dir->packed, flags);
+	प्रति (संरचना odb_files_dir *dir = files->dirs; dir; dir = dir->अग्र) {
+		संरचना packed_git **cache = packfile_store_get_kept_pack_cache(dir->packed, flags);
 
-		for (; *cache; cache++) {
-			struct packed_git *p = *cache;
+		प्रति (; *cache; cache++) {
+			संरचना packed_git *p = *cache;
 			off_t ofs;
 			uint32_t candidate_mtime;
 
-			ofs = find_pack_entry_one(oid, p);
-			if (!ofs)
-				continue;
+			ofs = find_pack_प्रविष्टिः_one(oid, p);
+			यदि (!ofs)
+				अनुवर्त;
 
 			/*
 			 * We have a copy of the object 'oid' in a non-cruft
@@ -1586,8 +1586,8 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * regardless of what the existing copy's mtime is since
 			 * it is outside of a cruft pack.
 			 */
-			if (!p->is_cruft)
-				return 0;
+			यदि (!p->is_cruft)
+				प्रत्यागम 0;
 
 			/*
 			 * If we have a copy of the object 'oid' in a cruft
@@ -1595,12 +1595,12 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * that object, or, if that can't be loaded, assume the
 			 * pack's mtime itself.
 			 */
-			if (!load_pack_mtimes(p)) {
+			यदि (!आरोपय_pack_mtimes(p)) {
 				uint32_t pos;
-				if (offset_to_pack_pos(p, ofs, &pos) < 0)
-					continue;
+				यदि (विस्थापनम्_गन्तव्यम्_pack_pos(p, ofs, &pos) < 0)
+					अनुवर्त;
 				candidate_mtime = nth_packed_mtime(p, pos);
-			} else {
+			} अन्यथा {
 				candidate_mtime = p->mtime;
 			}
 
@@ -1610,24 +1610,24 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * we are considering. We can thus avoid packing an
 			 * additional copy of that object.
 			 */
-			if (mtime <= candidate_mtime)
-				return 0;
+			यदि (mtime <= candidate_mtime)
+				प्रत्यागम 0;
 		}
 	}
 
-	return -1;
+	प्रत्यागम -1;
 }
 
-static int want_found_object(const struct object_id *oid, int exclude,
-			     struct packed_git *p, uint32_t mtime)
+स्थिर पूर्णाङ्क want_प्राप्तम्_object(ध्रुव संरचना object_id *oid, पूर्णाङ्क exclude,
+			     संरचना packed_git *p, uint32_t mtime)
 {
-	if (exclude)
-		return 1;
-	if (incremental)
-		return 0;
+	यदि (exclude)
+		प्रत्यागम 1;
+	यदि (incremental)
+		प्रत्यागम 0;
 
-	if (!is_pack_valid(p))
-		return -1;
+	यदि (!is_pack_valid(p))
+		प्रत्यागम -1;
 
 	/*
 	 * When asked to do --local (do not include an object that appears in a
@@ -1648,14 +1648,14 @@ static int want_found_object(const struct object_id *oid, int exclude,
 	 * Objects in packs borrowed from elsewhere are discarded regardless of
 	 * if they appear in other packs that weren't borrowed.
 	 */
-	if (local && !p->pack_local)
-		return 0;
+	यदि (local && !p->pack_local)
+		प्रत्यागम 0;
 
 	/*
 	 * Then handle .keep first, as we have a fast(er) path there.
 	 */
-	if (ignore_packed_keep_on_disk || ignore_packed_keep_in_core ||
-	    ignore_packed_keep_in_core_open) {
+	यदि (ignore_packed_keep_on_disk || ignore_packed_keep_अन्तर्_core ||
+	    ignore_packed_keep_अन्तर्_core_open) {
 		/*
 		 * Set the flags for the kept-pack cache to be the ones we want
 		 * to ignore.
@@ -1664,38 +1664,38 @@ static int want_found_object(const struct object_id *oid, int exclude,
 		 * then we want to search through the on-disk keep and ignore
 		 * the in-core ones.
 		 */
-		unsigned flags = 0;
-		if (ignore_packed_keep_on_disk)
+		अचिह्नित flags = 0;
+		यदि (ignore_packed_keep_on_disk)
 			flags |= KEPT_PACK_ON_DISK;
-		if (ignore_packed_keep_in_core)
-			flags |= KEPT_PACK_IN_CORE;
-		if (ignore_packed_keep_in_core_open)
-			flags |= KEPT_PACK_IN_CORE_OPEN;
+		यदि (ignore_packed_keep_अन्तर्_core)
+			flags |= KEPT_PACK_अन्तर्_CORE;
+		यदि (ignore_packed_keep_अन्तर्_core_open)
+			flags |= KEPT_PACK_अन्तर्_CORE_OPEN;
 
 		/*
 		 * If the object is in a pack that we want to ignore, *and* we
 		 * don't have any cruft packs that are being retained, we can
 		 * abort quickly.
 		 */
-		if (!ignore_packed_keep_in_core_has_cruft) {
-			if (ignore_packed_keep_on_disk && p->pack_keep)
-				return 0;
-			if (ignore_packed_keep_in_core && p->pack_keep_in_core)
-				return 0;
-			if (ignore_packed_keep_in_core_open && p->pack_keep_in_core_open)
-				return 0;
-			if (has_object_kept_pack(p->repo, oid, flags))
-				return 0;
-		} else {
+		यदि (!ignore_packed_keep_अन्तर्_core_has_cruft) {
+			यदि (ignore_packed_keep_on_disk && p->pack_keep)
+				प्रत्यागम 0;
+			यदि (ignore_packed_keep_अन्तर्_core && p->pack_keep_अन्तर्_core)
+				प्रत्यागम 0;
+			यदि (ignore_packed_keep_अन्तर्_core_open && p->pack_keep_अन्तर्_core_open)
+				प्रत्यागम 0;
+			यदि (has_object_kept_pack(p->repo, oid, flags))
+				प्रत्यागम 0;
+		} अन्यथा {
 			/*
 			 * But if there is at least one cruft pack which
 			 * is being kept, we only want to include the
 			 * provided object if it has a strictly greater
 			 * mtime than any existing cruft copy.
 			 */
-			if (!want_cruft_object_mtime(p->repo, oid, flags,
+			यदि (!want_cruft_object_mtime(p->repo, oid, flags,
 						     mtime))
-				return 0;
+				प्रत्यागम 0;
 		}
 	}
 
@@ -1704,37 +1704,37 @@ static int want_found_object(const struct object_id *oid, int exclude,
 	 * keep-packs, or the object is not in one. Keep checking other
 	 * conditions...
 	 */
-	if (!local || !have_non_local_packs)
-		return 1;
+	यदि (!local || !have_non_local_packs)
+		प्रत्यागम 1;
 
 	/* we don't know yet; keep looking for more packs */
-	return -1;
+	प्रत्यागम -1;
 }
 
-static int want_object_in_pack_one(struct packed_git *p,
-				   const struct object_id *oid,
-				   int exclude,
-				   struct packed_git **found_pack,
-				   off_t *found_offset,
-				   uint32_t found_mtime)
+स्थिर पूर्णाङ्क want_object_अन्तर्_pack_one(संरचना packed_git *p,
+				   ध्रुव संरचना object_id *oid,
+				   पूर्णाङ्क exclude,
+				   संरचना packed_git **प्राप्तम्_pack,
+				   off_t *प्राप्तम्_विस्थापनम्,
+				   uint32_t प्राप्तम्_mtime)
 {
-	off_t offset;
+	off_t विस्थापनम्;
 
-	if (p == *found_pack)
-		offset = *found_offset;
-	else
-		offset = find_pack_entry_one(oid, p);
+	यदि (p == *प्राप्तम्_pack)
+		विस्थापनम् = *प्राप्तम्_विस्थापनम्;
+	अन्यथा
+		विस्थापनम् = find_pack_प्रविष्टिः_one(oid, p);
 
-	if (offset) {
-		if (!*found_pack) {
-			if (!is_pack_valid(p))
-				return -1;
-			*found_offset = offset;
-			*found_pack = p;
+	यदि (विस्थापनम्) {
+		यदि (!*प्राप्तम्_pack) {
+			यदि (!is_pack_valid(p))
+				प्रत्यागम -1;
+			*प्राप्तम्_विस्थापनम् = विस्थापनम्;
+			*प्राप्तम्_pack = p;
 		}
-		return want_found_object(oid, exclude, p, found_mtime);
+		प्रत्यागम want_प्राप्तम्_object(oid, exclude, p, प्राप्तम्_mtime);
 	}
-	return -1;
+	प्रत्यागम -1;
 }
 
 /*
@@ -1746,25 +1746,25 @@ static int want_object_in_pack_one(struct packed_git *p,
  * function finds if there is any pack that has the object and returns the pack
  * and its offset in these variables.
  */
-static int want_object_in_pack_mtime(const struct object_id *oid,
-				     int exclude,
-				     struct packed_git **found_pack,
-				     off_t *found_offset,
-				     uint32_t found_mtime)
+स्थिर पूर्णाङ्क want_object_अन्तर्_pack_mtime(ध्रुव संरचना object_id *oid,
+				     पूर्णाङ्क exclude,
+				     संरचना packed_git **प्राप्तम्_pack,
+				     off_t *प्राप्तम्_विस्थापनम्,
+				     uint32_t प्राप्तम्_mtime)
 {
-	struct odb_source_files *files =
+	संरचना odb_source_files *files =
 		odb_source_files_downcast(the_repository->objects->source);
-	int want;
-	struct packfile_list_entry *e;
+	पूर्णाङ्क want;
+	संरचना packfile_list_प्रविष्टिः *e;
 
-	if (!exclude && local) {
+	यदि (!exclude && local) {
 		/*
 		 * Note that we start iterating at `dirs->next` so that we
 		 * skip the local object directory.
 		 */
-		for (struct odb_files_dir *dir = files->dirs->next; dir; dir = dir->next)
-			if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-				return 0;
+		प्रति (संरचना odb_files_dir *dir = files->dirs->अग्र; dir; dir = dir->अग्र)
+			यदि (!odb_source_read_object_info(&dir->loose->आधारः, oid, रिक्त, 0, रिक्त))
+				प्रत्यागम 0;
 	}
 
 	/*
@@ -1772,412 +1772,412 @@ static int want_object_in_pack_mtime(const struct object_id *oid,
 	 * pack - in the usual case when neither --local was given nor .keep files
 	 * are present we will determine the answer right now.
 	 */
-	if (*found_pack) {
-		want = want_found_object(oid, exclude, *found_pack,
-					 found_mtime);
-		if (want != -1)
-			return want;
+	यदि (*प्राप्तम्_pack) {
+		want = want_प्राप्तम्_object(oid, exclude, *प्राप्तम्_pack,
+					 प्राप्तम्_mtime);
+		यदि (want != -1)
+			प्रत्यागम want;
 
-		*found_pack = NULL;
-		*found_offset = 0;
+		*प्राप्तम्_pack = रिक्त;
+		*प्राप्तम्_विस्थापनम् = 0;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		struct multi_pack_index *m = get_multi_pack_index(dir->packed);
-		struct pack_entry e;
+	प्रति (संरचना odb_files_dir *dir = files->dirs; dir; dir = dir->अग्र) {
+		संरचना multi_pack_सूचकांक *m = get_multi_pack_सूचकांक(dir->packed);
+		संरचना pack_प्रविष्टिः e;
 
-		if (m && midx_fill_entry(m, oid, &e, NULL) == MIDX_FILL_HIT) {
-			want = want_object_in_pack_one(e.p, oid, exclude, found_pack, found_offset, found_mtime);
-			if (want != -1)
-				return want;
+		यदि (m && midx_fill_प्रविष्टिः(m, oid, &e, रिक्त) == MIDX_FILL_लब्धम्) {
+			want = want_object_अन्तर्_pack_one(e.p, oid, exclude, प्राप्तम्_pack, प्राप्तम्_विस्थापनम्, प्राप्तम्_mtime);
+			यदि (want != -1)
+				प्रत्यागम want;
 		}
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		for (e = dir->packed->packs.head; e; e = e->next) {
-			struct packed_git *p = e->pack;
-			want = want_object_in_pack_one(p, oid, exclude, found_pack, found_offset, found_mtime);
-			if (!exclude && want > 0)
+	प्रति (संरचना odb_files_dir *dir = files->dirs; dir; dir = dir->अग्र) {
+		प्रति (e = dir->packed->packs.शीर्ष; e; e = e->अग्र) {
+			संरचना packed_git *p = e->pack;
+			want = want_object_अन्तर्_pack_one(p, oid, exclude, प्राप्तम्_pack, प्राप्तम्_विस्थापनम्, प्राप्तम्_mtime);
+			यदि (!exclude && want > 0)
 				packfile_list_prepend(&dir->packed->packs, p);
-			if (want != -1)
-				return want;
+			यदि (want != -1)
+				प्रत्यागम want;
 		}
 	}
 
-	if (uri_protocols.nr) {
-		struct configured_exclusion *ex =
+	यदि (uri_protocols.nr) {
+		संरचना configured_exclusion *ex =
 			oidmap_get(&configured_exclusions, oid);
-		int i;
-		const char *p;
+		पूर्णाङ्क i;
+		ध्रुव वर्ण *p;
 
-		if (ex) {
-			for (i = 0; i < uri_protocols.nr; i++) {
-				if (skip_prefix(ex->uri,
-						uri_protocols.items[i].string,
+		यदि (ex) {
+			प्रति (i = 0; i < uri_protocols.nr; i++) {
+				यदि (skip_उपसर्गः(ex->uri,
+						uri_protocols.वस्तूनि[i].string,
 						&p) &&
 				    *p == ':') {
-					oidset_insert(&excluded_by_config, oid);
-					return 0;
+					oidset_निवेशय(&excluded_by_config, oid);
+					प्रत्यागम 0;
 				}
 			}
 		}
 	}
 
-	return 1;
+	प्रत्यागम 1;
 }
 
-static inline int want_object_in_pack(const struct object_id *oid,
-				      int exclude,
-				      struct packed_git **found_pack,
-				      off_t *found_offset)
+स्थिर अन्तःस्थ पूर्णाङ्क want_object_अन्तर्_pack(ध्रुव संरचना object_id *oid,
+				      पूर्णाङ्क exclude,
+				      संरचना packed_git **प्राप्तम्_pack,
+				      off_t *प्राप्तम्_विस्थापनम्)
 {
-	return want_object_in_pack_mtime(oid, exclude, found_pack, found_offset,
+	प्रत्यागम want_object_अन्तर्_pack_mtime(oid, exclude, प्राप्तम्_pack, प्राप्तम्_विस्थापनम्,
 					 0);
 }
 
-static struct object_entry *create_object_entry(const struct object_id *oid,
-						enum object_type type,
+स्थिर संरचना object_प्रविष्टिः *create_object_प्रविष्टिः(ध्रुव संरचना object_id *oid,
+						गणना object_type type,
 						uint32_t hash,
-						int exclude,
-						int no_try_delta,
-						struct packed_git *found_pack,
-						off_t found_offset)
+						पूर्णाङ्क exclude,
+						पूर्णाङ्क no_try_delta,
+						संरचना packed_git *प्राप्तम्_pack,
+						off_t प्राप्तम्_विस्थापनम्)
 {
-	struct object_entry *entry;
+	संरचना object_प्रविष्टिः *प्रविष्टिः;
 
-	entry = packlist_alloc(&to_pack, oid);
-	entry->hash = hash;
-	oe_set_type(entry, type);
-	if (exclude)
-		entry->preferred_base = 1;
-	else
-		nr_result++;
-	if (found_pack) {
-		oe_set_in_pack(&to_pack, entry, found_pack);
-		entry->in_pack_offset = found_offset;
+	प्रविष्टिः = packlist_alloc(&गन्तव्यम्_pack, oid);
+	प्रविष्टिः->hash = hash;
+	oe_समुच्चयः_type(प्रविष्टिः, type);
+	यदि (exclude)
+		प्रविष्टिः->preferred_आधारः = 1;
+	अन्यथा
+		nr_परिणाम++;
+	यदि (प्राप्तम्_pack) {
+		oe_समुच्चयः_अन्तर्_pack(&गन्तव्यम्_pack, प्रविष्टिः, प्राप्तम्_pack);
+		प्रविष्टिः->अन्तर्_pack_विस्थापनम् = प्राप्तम्_विस्थापनम्;
 	}
 
-	entry->no_try_delta = no_try_delta;
+	प्रविष्टिः->no_try_delta = no_try_delta;
 
-	return entry;
+	प्रत्यागम प्रविष्टिः;
 }
 
-static const char no_closure_warning[] = N_(
+स्थिर ध्रुव वर्ण no_संवृतिः_warning[] = N_(
 "disabling bitmap writing, as some objects are not being packed"
 );
 
-static void add_object_entry(const struct object_id *oid, enum object_type type,
-			     const char *name, int exclude)
+स्थिर शून्य सङ्कलय_object_प्रविष्टिः(ध्रुव संरचना object_id *oid, गणना object_type type,
+			     ध्रुव वर्ण *name, पूर्णाङ्क exclude)
 {
-	struct packed_git *found_pack = NULL;
-	off_t found_offset = 0;
+	संरचना packed_git *प्राप्तम्_pack = रिक्त;
+	off_t प्राप्तम्_विस्थापनम् = 0;
 
-	display_progress(progress_state, ++nr_seen);
+	display_प्रगतिः(प्रगतिः_state, ++nr_आलोकितम्);
 
-	if (have_duplicate_entry(oid, exclude))
-		return;
+	यदि (have_duplicate_प्रविष्टिः(oid, exclude))
+		प्रत्यागम;
 
-	if (!want_object_in_pack(oid, exclude, &found_pack, &found_offset)) {
+	यदि (!want_object_अन्तर्_pack(oid, exclude, &प्राप्तम्_pack, &प्राप्तम्_विस्थापनम्)) {
 		/* The pack is missing an object, so it will not have closure */
-		if (write_bitmap_index) {
-			if (write_bitmap_index != WRITE_BITMAP_QUIET)
-				warning(_(no_closure_warning));
-			write_bitmap_index = 0;
+		यदि (write_bitmap_सूचकांक) {
+			यदि (write_bitmap_सूचकांक != WRITE_BITMAP_QUIET)
+				warning(_(no_संवृतिः_warning));
+			write_bitmap_सूचकांक = 0;
 		}
-		return;
+		प्रत्यागम;
 	}
 
-	create_object_entry(oid, type, pack_name_hash_fn(name),
+	create_object_प्रविष्टिः(oid, type, pack_name_hash_fn(name),
 			    exclude, name && no_try_delta(name),
-			    found_pack, found_offset);
+			    प्राप्तम्_pack, प्राप्तम्_विस्थापनम्);
 }
 
-static int add_object_entry_from_bitmap(const struct object_id *oid,
-					enum object_type type,
-					int flags UNUSED, uint32_t name_hash,
-					struct packed_git *pack, off_t offset,
-					void *payload UNUSED)
+स्थिर पूर्णाङ्क सङ्कलय_object_प्रविष्टिः_from_bitmap(ध्रुव संरचना object_id *oid,
+					गणना object_type type,
+					पूर्णाङ्क flags अप्रयुक्तम्, uint32_t name_hash,
+					संरचना packed_git *pack, off_t विस्थापनम्,
+					शून्य *payload अप्रयुक्तम्)
 {
-	display_progress(progress_state, ++nr_seen);
+	display_प्रगतिः(प्रगतिः_state, ++nr_आलोकितम्);
 
-	if (have_duplicate_entry(oid, 0))
-		return 0;
+	यदि (have_duplicate_प्रविष्टिः(oid, 0))
+		प्रत्यागम 0;
 
-	if (!want_object_in_pack(oid, 0, &pack, &offset))
-		return 0;
+	यदि (!want_object_अन्तर्_pack(oid, 0, &pack, &विस्थापनम्))
+		प्रत्यागम 0;
 
-	create_object_entry(oid, type, name_hash, 0, 0, pack, offset);
-	return 0;
+	create_object_प्रविष्टिः(oid, type, name_hash, 0, 0, pack, विस्थापनम्);
+	प्रत्यागम 0;
 }
 
-struct pbase_tree_cache {
-	struct object_id oid;
-	int ref;
-	int temporary;
-	void *tree_data;
-	unsigned long tree_size;
+संरचना pbase_वृक्षः_cache {
+	संरचना object_id oid;
+	पूर्णाङ्क ref;
+	पूर्णाङ्क temporary;
+	शून्य *वृक्षः_दत्त;
+	अचिह्नित दीर्घ वृक्षः_आकार;
 };
 
-static struct pbase_tree_cache *(pbase_tree_cache[256]);
-static int pbase_tree_cache_ix(const struct object_id *oid)
+स्थिर संरचना pbase_वृक्षः_cache *(pbase_वृक्षः_cache[256]);
+स्थिर पूर्णाङ्क pbase_वृक्षः_cache_ix(ध्रुव संरचना object_id *oid)
 {
-	return oid->hash[0] % ARRAY_SIZE(pbase_tree_cache);
+	प्रत्यागम oid->hash[0] % ARRAY_आकार(pbase_वृक्षः_cache);
 }
-static int pbase_tree_cache_ix_incr(int ix)
+स्थिर पूर्णाङ्क pbase_वृक्षः_cache_ix_incr(पूर्णाङ्क ix)
 {
-	return (ix+1) % ARRAY_SIZE(pbase_tree_cache);
+	प्रत्यागम (ix+1) % ARRAY_आकार(pbase_वृक्षः_cache);
 }
 
-static struct pbase_tree {
-	struct pbase_tree *next;
+स्थिर संरचना pbase_वृक्षः {
+	संरचना pbase_वृक्षः *अग्र;
 	/* This is a phony "cache" entry; we are not
 	 * going to evict it or find it through _get()
 	 * mechanism -- this is for the toplevel node that
 	 * would almost always change with any commit.
 	 */
-	struct pbase_tree_cache pcache;
-} *pbase_tree;
+	संरचना pbase_वृक्षः_cache pcache;
+} *pbase_वृक्षः;
 
-static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
+स्थिर संरचना pbase_वृक्षः_cache *pbase_वृक्षः_get(ध्रुव संरचना object_id *oid)
 {
-	struct pbase_tree_cache *ent, *nent;
-	void *data;
-	unsigned long size;
-	size_t size_st = 0;
-	enum object_type type;
-	int neigh;
-	int my_ix = pbase_tree_cache_ix(oid);
-	int available_ix = -1;
+	संरचना pbase_वृक्षः_cache *ent, *nent;
+	शून्य *दत्त;
+	अचिह्नित दीर्घ आकार;
+	आकार_t आकार_st = 0;
+	गणना object_type type;
+	पूर्णाङ्क neigh;
+	पूर्णाङ्क my_ix = pbase_वृक्षः_cache_ix(oid);
+	पूर्णाङ्क उपलब्धम्_ix = -1;
 
 	/* pbase-tree-cache acts as a limited hashtable.
 	 * your object will be found at your index or within a few
 	 * slots after that slot if it is cached.
 	 */
-	for (neigh = 0; neigh < 8; neigh++) {
-		ent = pbase_tree_cache[my_ix];
-		if (ent && oideq(&ent->oid, oid)) {
+	प्रति (neigh = 0; neigh < 8; neigh++) {
+		ent = pbase_वृक्षः_cache[my_ix];
+		यदि (ent && oideq(&ent->oid, oid)) {
 			ent->ref++;
-			return ent;
+			प्रत्यागम ent;
 		}
-		else if (((available_ix < 0) && (!ent || !ent->ref)) ||
-			 ((0 <= available_ix) &&
-			  (!ent && pbase_tree_cache[available_ix])))
-			available_ix = my_ix;
-		if (!ent)
-			break;
-		my_ix = pbase_tree_cache_ix_incr(my_ix);
+		अन्यथा यदि (((उपलब्धम्_ix < 0) && (!ent || !ent->ref)) ||
+			 ((0 <= उपलब्धम्_ix) &&
+			  (!ent && pbase_वृक्षः_cache[उपलब्धम्_ix])))
+			उपलब्धम्_ix = my_ix;
+		यदि (!ent)
+			भङ्ग;
+		my_ix = pbase_वृक्षः_cache_ix_incr(my_ix);
 	}
 
 	/* Did not find one.  Either we got a bogus request or
 	 * we need to read and perhaps cache.
 	 */
-	data = odb_read_object(the_repository->objects, oid, &type, &size_st);
-	size = cast_size_t_to_ulong(size_st);
-	if (!data)
-		return NULL;
-	if (type != OBJ_TREE) {
-		free(data);
-		return NULL;
+	दत्त = odb_read_object(the_repository->objects, oid, &type, &आकार_st);
+	आकार = cast_आकार_t_गन्तव्यम्_ulong(आकार_st);
+	यदि (!दत्त)
+		प्रत्यागम रिक्त;
+	यदि (type != OBJ_वृक्षः) {
+		मुक्त(दत्त);
+		प्रत्यागम रिक्त;
 	}
 
 	/* We need to either cache or return a throwaway copy */
 
-	if (available_ix < 0)
-		ent = NULL;
-	else {
-		ent = pbase_tree_cache[available_ix];
-		my_ix = available_ix;
+	यदि (उपलब्धम्_ix < 0)
+		ent = रिक्त;
+	अन्यथा {
+		ent = pbase_वृक्षः_cache[उपलब्धम्_ix];
+		my_ix = उपलब्धम्_ix;
 	}
 
-	if (!ent) {
-		nent = xmalloc(sizeof(*nent));
-		nent->temporary = (available_ix < 0);
+	यदि (!ent) {
+		nent = xmalloc(परिमाण(*nent));
+		nent->temporary = (उपलब्धम्_ix < 0);
 	}
-	else {
+	अन्यथा {
 		/* evict and reuse */
-		free(ent->tree_data);
+		मुक्त(ent->वृक्षः_दत्त);
 		nent = ent;
 	}
 	oidcpy(&nent->oid, oid);
-	nent->tree_data = data;
-	nent->tree_size = size;
+	nent->वृक्षः_दत्त = दत्त;
+	nent->वृक्षः_आकार = आकार;
 	nent->ref = 1;
-	if (!nent->temporary)
-		pbase_tree_cache[my_ix] = nent;
-	return nent;
+	यदि (!nent->temporary)
+		pbase_वृक्षः_cache[my_ix] = nent;
+	प्रत्यागम nent;
 }
 
-static void pbase_tree_put(struct pbase_tree_cache *cache)
+स्थिर शून्य pbase_वृक्षः_put(संरचना pbase_वृक्षः_cache *cache)
 {
-	if (!cache->temporary) {
+	यदि (!cache->temporary) {
 		cache->ref--;
-		return;
+		प्रत्यागम;
 	}
-	free(cache->tree_data);
-	free(cache);
+	मुक्त(cache->वृक्षः_दत्त);
+	मुक्त(cache);
 }
 
-static size_t name_cmp_len(const char *name)
+स्थिर आकार_t name_cmp_len(ध्रुव वर्ण *name)
 {
-	return strcspn(name, "\n/");
+	प्रत्यागम strcspn(name, "\n/");
 }
 
-static void add_pbase_object(struct tree_desc *tree,
-			     const char *name,
-			     size_t cmplen,
-			     const char *fullname)
+स्थिर शून्य सङ्कलय_pbase_object(संरचना वृक्षः_desc *वृक्षः,
+			     ध्रुव वर्ण *name,
+			     आकार_t cmplen,
+			     ध्रुव वर्ण *fullname)
 {
-	struct name_entry entry;
-	int cmp;
+	संरचना name_प्रविष्टिः प्रविष्टिः;
+	पूर्णाङ्क cmp;
 
-	while (tree_entry(tree,&entry)) {
-		if (S_ISGITLINK(entry.mode))
-			continue;
-		cmp = tree_entry_len(&entry) != cmplen ? 1 :
-		      memcmp(name, entry.path, cmplen);
-		if (cmp > 0)
-			continue;
-		if (cmp < 0)
-			return;
-		if (name[cmplen] != '/') {
-			add_object_entry(&entry.oid,
-					 object_type(entry.mode),
+	यावत् (वृक्षः_प्रविष्टिः(वृक्षः,&प्रविष्टिः)) {
+		यदि (S_ISGITLINK(प्रविष्टिः.बहुलकम्))
+			अनुवर्त;
+		cmp = वृक्षः_प्रविष्टिः_len(&प्रविष्टिः) != cmplen ? 1 :
+		      memcmp(name, प्रविष्टिः.मार्गः, cmplen);
+		यदि (cmp > 0)
+			अनुवर्त;
+		यदि (cmp < 0)
+			प्रत्यागम;
+		यदि (name[cmplen] != '/') {
+			सङ्कलय_object_प्रविष्टिः(&प्रविष्टिः.oid,
+					 object_type(प्रविष्टिः.बहुलकम्),
 					 fullname, 1);
-			return;
+			प्रत्यागम;
 		}
-		if (S_ISDIR(entry.mode)) {
-			struct tree_desc sub;
-			struct pbase_tree_cache *tree;
-			const char *down = name+cmplen+1;
-			size_t downlen = name_cmp_len(down);
+		यदि (S_ISDIR(प्रविष्टिः.बहुलकम्)) {
+			संरचना वृक्षः_desc sub;
+			संरचना pbase_वृक्षः_cache *वृक्षः;
+			ध्रुव वर्ण *अधस्तात् = name+cmplen+1;
+			आकार_t downlen = name_cmp_len(अधस्तात्);
 
-			tree = pbase_tree_get(&entry.oid);
-			if (!tree)
-				return;
-			init_tree_desc(&sub, &tree->oid,
-				       tree->tree_data, tree->tree_size);
+			वृक्षः = pbase_वृक्षः_get(&प्रविष्टिः.oid);
+			यदि (!वृक्षः)
+				प्रत्यागम;
+			init_वृक्षः_desc(&sub, &वृक्षः->oid,
+				       वृक्षः->वृक्षः_दत्त, वृक्षः->वृक्षः_आकार);
 
-			add_pbase_object(&sub, down, downlen, fullname);
-			pbase_tree_put(tree);
+			सङ्कलय_pbase_object(&sub, अधस्तात्, downlen, fullname);
+			pbase_वृक्षः_put(वृक्षः);
 		}
 	}
 }
 
-static unsigned *done_pbase_paths;
-static int done_pbase_paths_num;
-static int done_pbase_paths_alloc;
-static int done_pbase_path_pos(unsigned hash)
+स्थिर अचिह्नित *समाप्तम्_pbase_paths;
+स्थिर पूर्णाङ्क समाप्तम्_pbase_paths_अङ्कः;
+स्थिर पूर्णाङ्क समाप्तम्_pbase_paths_alloc;
+स्थिर पूर्णाङ्क समाप्तम्_pbase_मार्गः_pos(अचिह्नित hash)
 {
-	int lo = 0;
-	int hi = done_pbase_paths_num;
-	while (lo < hi) {
-		int mi = lo + (hi - lo) / 2;
-		if (done_pbase_paths[mi] == hash)
-			return mi;
-		if (done_pbase_paths[mi] < hash)
+	पूर्णाङ्क lo = 0;
+	पूर्णाङ्क hi = समाप्तम्_pbase_paths_अङ्कः;
+	यावत् (lo < hi) {
+		पूर्णाङ्क mi = lo + (hi - lo) / 2;
+		यदि (समाप्तम्_pbase_paths[mi] == hash)
+			प्रत्यागम mi;
+		यदि (समाप्तम्_pbase_paths[mi] < hash)
 			hi = mi;
-		else
+		अन्यथा
 			lo = mi + 1;
 	}
-	return -lo-1;
+	प्रत्यागम -lo-1;
 }
 
-static int check_pbase_path(unsigned hash)
+स्थिर पूर्णाङ्क check_pbase_मार्गः(अचिह्नित hash)
 {
-	int pos = done_pbase_path_pos(hash);
-	if (0 <= pos)
-		return 1;
+	पूर्णाङ्क pos = समाप्तम्_pbase_मार्गः_pos(hash);
+	यदि (0 <= pos)
+		प्रत्यागम 1;
 	pos = -pos - 1;
-	ALLOC_GROW(done_pbase_paths,
-		   done_pbase_paths_num + 1,
-		   done_pbase_paths_alloc);
-	done_pbase_paths_num++;
-	if (pos < done_pbase_paths_num)
-		MOVE_ARRAY(done_pbase_paths + pos + 1, done_pbase_paths + pos,
-			   done_pbase_paths_num - pos - 1);
-	done_pbase_paths[pos] = hash;
-	return 0;
+	ALLOC_GROW(समाप्तम्_pbase_paths,
+		   समाप्तम्_pbase_paths_अङ्कः + 1,
+		   समाप्तम्_pbase_paths_alloc);
+	समाप्तम्_pbase_paths_अङ्कः++;
+	यदि (pos < समाप्तम्_pbase_paths_अङ्कः)
+		MOVE_ARRAY(समाप्तम्_pbase_paths + pos + 1, समाप्तम्_pbase_paths + pos,
+			   समाप्तम्_pbase_paths_अङ्कः - pos - 1);
+	समाप्तम्_pbase_paths[pos] = hash;
+	प्रत्यागम 0;
 }
 
-static void add_preferred_base_object(const char *name)
+स्थिर शून्य सङ्कलय_preferred_आधारः_object(ध्रुव वर्ण *name)
 {
-	struct pbase_tree *it;
-	size_t cmplen;
-	unsigned hash = pack_name_hash_fn(name);
+	संरचना pbase_वृक्षः *it;
+	आकार_t cmplen;
+	अचिह्नित hash = pack_name_hash_fn(name);
 
-	if (!num_preferred_base || check_pbase_path(hash))
-		return;
+	यदि (!अङ्कः_preferred_आधारः || check_pbase_मार्गः(hash))
+		प्रत्यागम;
 
 	cmplen = name_cmp_len(name);
-	for (it = pbase_tree; it; it = it->next) {
-		if (cmplen == 0) {
-			add_object_entry(&it->pcache.oid, OBJ_TREE, NULL, 1);
+	प्रति (it = pbase_वृक्षः; it; it = it->अग्र) {
+		यदि (cmplen == 0) {
+			सङ्कलय_object_प्रविष्टिः(&it->pcache.oid, OBJ_वृक्षः, रिक्त, 1);
 		}
-		else {
-			struct tree_desc tree;
-			init_tree_desc(&tree, &it->pcache.oid,
-				       it->pcache.tree_data, it->pcache.tree_size);
-			add_pbase_object(&tree, name, cmplen, name);
+		अन्यथा {
+			संरचना वृक्षः_desc वृक्षः;
+			init_वृक्षः_desc(&वृक्षः, &it->pcache.oid,
+				       it->pcache.वृक्षः_दत्त, it->pcache.वृक्षः_आकार);
+			सङ्कलय_pbase_object(&वृक्षः, name, cmplen, name);
 		}
 	}
 }
 
-static void add_preferred_base(struct object_id *oid)
+स्थिर शून्य सङ्कलय_preferred_आधारः(संरचना object_id *oid)
 {
-	struct pbase_tree *it;
-	void *data;
-	unsigned long size;
-	size_t size_st = 0;
-	struct object_id tree_oid;
+	संरचना pbase_वृक्षः *it;
+	शून्य *दत्त;
+	अचिह्नित दीर्घ आकार;
+	आकार_t आकार_st = 0;
+	संरचना object_id वृक्षः_oid;
 
-	if (window <= num_preferred_base++)
-		return;
+	यदि (गवाक्षः <= अङ्कः_preferred_आधारः++)
+		प्रत्यागम;
 
-	data = odb_read_object_peeled(the_repository->objects, oid,
-				      OBJ_TREE, &size_st, &tree_oid);
-	size = cast_size_t_to_ulong(size_st);
-	if (!data)
-		return;
+	दत्त = odb_read_object_peeled(the_repository->objects, oid,
+				      OBJ_वृक्षः, &आकार_st, &वृक्षः_oid);
+	आकार = cast_आकार_t_गन्तव्यम्_ulong(आकार_st);
+	यदि (!दत्त)
+		प्रत्यागम;
 
-	for (it = pbase_tree; it; it = it->next) {
-		if (oideq(&it->pcache.oid, &tree_oid)) {
-			free(data);
-			return;
+	प्रति (it = pbase_वृक्षः; it; it = it->अग्र) {
+		यदि (oideq(&it->pcache.oid, &वृक्षः_oid)) {
+			मुक्त(दत्त);
+			प्रत्यागम;
 		}
 	}
 
 	CALLOC_ARRAY(it, 1);
-	it->next = pbase_tree;
-	pbase_tree = it;
+	it->अग्र = pbase_वृक्षः;
+	pbase_वृक्षः = it;
 
-	oidcpy(&it->pcache.oid, &tree_oid);
-	it->pcache.tree_data = data;
-	it->pcache.tree_size = size;
+	oidcpy(&it->pcache.oid, &वृक्षः_oid);
+	it->pcache.वृक्षः_दत्त = दत्त;
+	it->pcache.वृक्षः_आकार = आकार;
 }
 
-static void cleanup_preferred_base(void)
+स्थिर शून्य cleanup_preferred_आधारः(शून्य)
 {
-	struct pbase_tree *it;
-	unsigned i;
+	संरचना pbase_वृक्षः *it;
+	अचिह्नित i;
 
-	it = pbase_tree;
-	pbase_tree = NULL;
-	while (it) {
-		struct pbase_tree *tmp = it;
-		it = tmp->next;
-		free(tmp->pcache.tree_data);
-		free(tmp);
+	it = pbase_वृक्षः;
+	pbase_वृक्षः = रिक्त;
+	यावत् (it) {
+		संरचना pbase_वृक्षः *tmp = it;
+		it = tmp->अग्र;
+		मुक्त(tmp->pcache.वृक्षः_दत्त);
+		मुक्त(tmp);
 	}
 
-	for (i = 0; i < ARRAY_SIZE(pbase_tree_cache); i++) {
-		if (!pbase_tree_cache[i])
-			continue;
-		free(pbase_tree_cache[i]->tree_data);
-		FREE_AND_NULL(pbase_tree_cache[i]);
+	प्रति (i = 0; i < ARRAY_आकार(pbase_वृक्षः_cache); i++) {
+		यदि (!pbase_वृक्षः_cache[i])
+			अनुवर्त;
+		मुक्त(pbase_वृक्षः_cache[i]->वृक्षः_दत्त);
+		FREE_AND_NULL(pbase_वृक्षः_cache[i]);
 	}
 
-	FREE_AND_NULL(done_pbase_paths);
-	done_pbase_paths_num = done_pbase_paths_alloc = 0;
+	FREE_AND_NULL(समाप्तम्_pbase_paths);
+	समाप्तम्_pbase_paths_अङ्कः = समाप्तम्_pbase_paths_alloc = 0;
 }
 
 /*
@@ -2191,22 +2191,22 @@ static void cleanup_preferred_base(void)
  * deltify other objects against, in order to avoid
  * circular deltas.
  */
-static int can_reuse_delta(const struct object_id *base_oid,
-			   struct object_entry *delta,
-			   struct object_entry **base_out)
+स्थिर पूर्णाङ्क can_reuse_delta(ध्रुव संरचना object_id *आधारः_oid,
+			   संरचना object_प्रविष्टिः *delta,
+			   संरचना object_प्रविष्टिः **आधारः_बहिर्गमनम्)
 {
-	struct object_entry *base;
+	संरचना object_प्रविष्टिः *आधारः;
 
 	/*
 	 * First see if we're already sending the base (or it's explicitly in
 	 * our "excluded" list).
 	 */
-	base = packlist_find(&to_pack, base_oid);
-	if (base) {
-		if (!in_same_island(&delta->idx.oid, &base->idx.oid))
-			return 0;
-		*base_out = base;
-		return 1;
+	आधारः = packlist_find(&गन्तव्यम्_pack, आधारः_oid);
+	यदि (आधारः) {
+		यदि (!अन्तर्_same_island(&delta->idx.oid, &आधारः->idx.oid))
+			प्रत्यागम 0;
+		*आधारः_बहिर्गमनम् = आधारः;
+		प्रत्यागम 1;
 	}
 
 	/*
@@ -2214,150 +2214,150 @@ static int can_reuse_delta(const struct object_id *base_oid,
 	 * even if it was buried too deep in history to make it into the
 	 * packing list.
 	 */
-	if (thin && bitmap_has_oid_in_uninteresting(bitmap_git, base_oid)) {
-		if (use_delta_islands) {
-			if (!in_same_island(&delta->idx.oid, base_oid))
-				return 0;
+	यदि (thin && bitmap_has_oid_अन्तर्_uninteresting(bitmap_git, आधारः_oid)) {
+		यदि (use_delta_islands) {
+			यदि (!अन्तर्_same_island(&delta->idx.oid, आधारः_oid))
+				प्रत्यागम 0;
 		}
-		*base_out = NULL;
-		return 1;
+		*आधारः_बहिर्गमनम् = रिक्त;
+		प्रत्यागम 1;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void prefetch_to_pack(uint32_t object_index_start) {
-	struct oid_array to_fetch = OID_ARRAY_INIT;
+स्थिर शून्य prefetch_गन्तव्यम्_pack(uint32_t object_सूचकांक_start) {
+	संरचना oid_array गन्तव्यम्_fetch = OID_ARRAY_INIT;
 	uint32_t i;
 
-	for (i = object_index_start; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = to_pack.objects + i;
+	प्रति (i = object_सूचकांक_start; i < गन्तव्यम्_pack.nr_objects; i++) {
+		संरचना object_प्रविष्टिः *प्रविष्टिः = गन्तव्यम्_pack.objects + i;
 
-		if (!odb_read_object_info_extended(the_repository->objects,
-						   &entry->idx.oid,
-						   NULL,
+		यदि (!odb_read_object_info_extended(the_repository->objects,
+						   &प्रविष्टिः->idx.oid,
+						   रिक्त,
 						   OBJECT_INFO_FOR_PREFETCH))
-			continue;
-		oid_array_append(&to_fetch, &entry->idx.oid);
+			अनुवर्त;
+		oid_array_append(&गन्तव्यम्_fetch, &प्रविष्टिः->idx.oid);
 	}
-	promisor_remote_get_direct(the_repository,
-				   to_fetch.oid, to_fetch.nr);
-	oid_array_clear(&to_fetch);
+	promisor_remote_get_प्रत्यक्षम्(the_repository,
+				   गन्तव्यम्_fetch.oid, गन्तव्यम्_fetch.nr);
+	oid_array_clear(&गन्तव्यम्_fetch);
 }
 
-static void check_object(struct object_entry *entry, uint32_t object_index)
+स्थिर शून्य check_object(संरचना object_प्रविष्टिः *प्रविष्टिः, uint32_t object_सूचकांक)
 {
-	size_t canonical_size;
-	enum object_type type;
-	struct object_info oi = {.typep = &type, .sizep = &canonical_size};
+	आकार_t canonical_आकार;
+	गणना object_type type;
+	संरचना object_info oi = {.typep = &type, .sizep = &canonical_आकार};
 
-	if (IN_PACK(entry)) {
-		struct packed_git *p = IN_PACK(entry);
-		struct pack_window *w_curs = NULL;
-		int have_base = 0;
-		struct object_id base_ref;
-		struct object_entry *base_entry;
-		size_t used, used_0, avail;
+	यदि (अन्तर्_PACK(प्रविष्टिः)) {
+		संरचना packed_git *p = अन्तर्_PACK(प्रविष्टिः);
+		संरचना pack_गवाक्षः *w_curs = रिक्त;
+		पूर्णाङ्क have_आधारः = 0;
+		संरचना object_id आधारः_ref;
+		संरचना object_प्रविष्टिः *आधारः_प्रविष्टिः;
+		आकार_t प्रयुक्तम्_2, प्रयुक्तम्_0, avail;
 		off_t ofs;
-		unsigned char *buf, c;
-		enum object_type type;
-		size_t in_pack_size;
+		अचिह्नित वर्ण *buf, c;
+		गणना object_type type;
+		आकार_t अन्तर्_pack_आकार;
 
-		buf = use_pack(p, &w_curs, entry->in_pack_offset, &avail);
+		buf = use_pack(p, &w_curs, प्रविष्टिः->अन्तर्_pack_विस्थापनम्, &avail);
 
 		/*
 		 * We want in_pack_type even if we do not reuse delta
 		 * since non-delta representations could still be reused.
 		 */
-		used = unpack_object_header_buffer(buf, avail,
+		प्रयुक्तम्_2 = unpack_object_शीर्षकम्_बफर(buf, avail,
 						   &type,
-						   &in_pack_size);
-		if (used == 0)
-			goto give_up;
+						   &अन्तर्_pack_आकार);
+		यदि (प्रयुक्तम्_2 == 0)
+			गच्छ give_ऊर्ध्वम्;
 
-		if (type < 0)
+		यदि (type < 0)
 			BUG("invalid type %d", type);
-		entry->in_pack_type = type;
+		प्रविष्टिः->अन्तर्_pack_type = type;
 
 		/*
 		 * Determine if this is a delta and if so whether we can
 		 * reuse it or not.  Otherwise let's find out as cheaply as
 		 * possible what the actual type and size for this object is.
 		 */
-		switch (entry->in_pack_type) {
-		default:
+		विकल्प (प्रविष्टिः->अन्तर्_pack_type) {
+		स्वभाव:
 			/* Not a delta hence we've already got all we need. */
-			oe_set_type(entry, entry->in_pack_type);
-			SET_SIZE(entry, in_pack_size);
-			entry->in_pack_header_size = used;
-			if (oe_type(entry) < OBJ_COMMIT || oe_type(entry) > OBJ_BLOB)
-				goto give_up;
+			oe_समुच्चयः_type(प्रविष्टिः, प्रविष्टिः->अन्तर्_pack_type);
+			समुच्चयः_आकार(प्रविष्टिः, अन्तर्_pack_आकार);
+			प्रविष्टिः->अन्तर्_pack_शीर्षकम्_आकार = प्रयुक्तम्_2;
+			यदि (oe_type(प्रविष्टिः) < OBJ_COMMIT || oe_type(प्रविष्टिः) > OBJ_BLOB)
+				गच्छ give_ऊर्ध्वम्;
 			unuse_pack(&w_curs);
-			return;
-		case OBJ_REF_DELTA:
-			if (reuse_delta && !entry->preferred_base) {
-				oidread(&base_ref,
+			प्रत्यागम;
+		पक्ष OBJ_REF_DELTA:
+			यदि (reuse_delta && !प्रविष्टिः->preferred_आधारः) {
+				oidread(&आधारः_ref,
 					use_pack(p, &w_curs,
-						 entry->in_pack_offset + used,
-						 NULL),
+						 प्रविष्टिः->अन्तर्_pack_विस्थापनम् + प्रयुक्तम्_2,
+						 रिक्त),
 					the_repository->hash_algo);
-				have_base = 1;
+				have_आधारः = 1;
 			}
-			entry->in_pack_header_size = used + the_hash_algo->rawsz;
-			break;
-		case OBJ_OFS_DELTA:
+			प्रविष्टिः->अन्तर्_pack_शीर्षकम्_आकार = प्रयुक्तम्_2 + the_hash_algo->rawsz;
+			भङ्ग;
+		पक्ष OBJ_OFS_DELTA:
 			buf = use_pack(p, &w_curs,
-				       entry->in_pack_offset + used, NULL);
-			used_0 = 0;
-			c = buf[used_0++];
+				       प्रविष्टिः->अन्तर्_pack_विस्थापनम् + प्रयुक्तम्_2, रिक्त);
+			प्रयुक्तम्_0 = 0;
+			c = buf[प्रयुक्तम्_0++];
 			ofs = c & 127;
-			while (c & 128) {
+			यावत् (c & 128) {
 				ofs += 1;
-				if (!ofs || MSB(ofs, 7)) {
+				यदि (!ofs || MSB(ofs, 7)) {
 					error(_("delta base offset overflow in pack for %s"),
-					      oid_to_hex(&entry->idx.oid));
-					goto give_up;
+					      oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
+					गच्छ give_ऊर्ध्वम्;
 				}
-				c = buf[used_0++];
+				c = buf[प्रयुक्तम्_0++];
 				ofs = (ofs << 7) + (c & 127);
 			}
-			ofs = entry->in_pack_offset - ofs;
-			if (ofs <= 0 || ofs >= entry->in_pack_offset) {
+			ofs = प्रविष्टिः->अन्तर्_pack_विस्थापनम् - ofs;
+			यदि (ofs <= 0 || ofs >= प्रविष्टिः->अन्तर्_pack_विस्थापनम्) {
 				error(_("delta base offset out of bound for %s"),
-				      oid_to_hex(&entry->idx.oid));
-				goto give_up;
+				      oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
+				गच्छ give_ऊर्ध्वम्;
 			}
-			if (reuse_delta && !entry->preferred_base) {
+			यदि (reuse_delta && !प्रविष्टिः->preferred_आधारः) {
 				uint32_t pos;
-				if (offset_to_pack_pos(p, ofs, &pos) < 0)
-					goto give_up;
-				if (!nth_packed_object_id(&base_ref, p,
-							  pack_pos_to_index(p, pos)))
-					have_base = 1;
+				यदि (विस्थापनम्_गन्तव्यम्_pack_pos(p, ofs, &pos) < 0)
+					गच्छ give_ऊर्ध्वम्;
+				यदि (!nth_packed_object_id(&आधारः_ref, p,
+							  pack_pos_गन्तव्यम्_सूचकांक(p, pos)))
+					have_आधारः = 1;
 			}
-			entry->in_pack_header_size = used + used_0;
-			break;
+			प्रविष्टिः->अन्तर्_pack_शीर्षकम्_आकार = प्रयुक्तम्_2 + प्रयुक्तम्_0;
+			भङ्ग;
 		}
 
-		if (have_base &&
-		    can_reuse_delta(&base_ref, entry, &base_entry)) {
-			oe_set_type(entry, entry->in_pack_type);
-			SET_SIZE(entry, in_pack_size); /* delta size */
-			SET_DELTA_SIZE(entry, in_pack_size);
+		यदि (have_आधारः &&
+		    can_reuse_delta(&आधारः_ref, प्रविष्टिः, &आधारः_प्रविष्टिः)) {
+			oe_समुच्चयः_type(प्रविष्टिः, प्रविष्टिः->अन्तर्_pack_type);
+			समुच्चयः_आकार(प्रविष्टिः, अन्तर्_pack_आकार); /* delta size */
+			समुच्चयः_DELTA_आकार(प्रविष्टिः, अन्तर्_pack_आकार);
 
-			if (base_entry) {
-				SET_DELTA(entry, base_entry);
-				entry->delta_sibling_idx = base_entry->delta_child_idx;
-				SET_DELTA_CHILD(base_entry, entry);
-			} else {
-				SET_DELTA_EXT(entry, &base_ref);
+			यदि (आधारः_प्रविष्टिः) {
+				समुच्चयः_DELTA(प्रविष्टिः, आधारः_प्रविष्टिः);
+				प्रविष्टिः->delta_sibling_idx = आधारः_प्रविष्टिः->delta_child_idx;
+				समुच्चयः_DELTA_CHILD(आधारः_प्रविष्टिः, प्रविष्टिः);
+			} अन्यथा {
+				समुच्चयः_DELTA_EXT(प्रविष्टिः, &आधारः_ref);
 			}
 
 			unuse_pack(&w_curs);
-			return;
+			प्रत्यागम;
 		}
 
-		if (oe_type(entry)) {
+		यदि (oe_type(प्रविष्टिः)) {
 			off_t delta_pos;
 
 			/*
@@ -2365,14 +2365,14 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 			 * final object type is.  Let's extract the actual
 			 * object size from the delta header.
 			 */
-			delta_pos = entry->in_pack_offset + entry->in_pack_header_size;
-			canonical_size = get_size_from_delta(p, &w_curs,
+			delta_pos = प्रविष्टिः->अन्तर्_pack_विस्थापनम् + प्रविष्टिः->अन्तर्_pack_शीर्षकम्_आकार;
+			canonical_आकार = get_आकार_from_delta(p, &w_curs,
 							     delta_pos);
-			if (canonical_size == 0)
-				goto give_up;
-			SET_SIZE(entry, canonical_size);
+			यदि (canonical_आकार == 0)
+				गच्छ give_ऊर्ध्वम्;
+			समुच्चयः_आकार(प्रविष्टिः, canonical_आकार);
 			unuse_pack(&w_curs);
-			return;
+			प्रत्यागम;
 		}
 
 		/*
@@ -2380,25 +2380,25 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 		 * with odb_read_object_info() to find about the object type
 		 * at this point...
 		 */
-		give_up:
+		give_ऊर्ध्वम्:
 		unuse_pack(&w_curs);
 	}
 
-	if (odb_read_object_info_extended(the_repository->objects, &entry->idx.oid, &oi,
+	यदि (odb_read_object_info_extended(the_repository->objects, &प्रविष्टिः->idx.oid, &oi,
 					  OBJECT_INFO_SKIP_FETCH_OBJECT | OBJECT_INFO_LOOKUP_REPLACE) < 0) {
-		if (repo_has_promisor_remote(the_repository)) {
-			prefetch_to_pack(object_index);
-			if (odb_read_object_info_extended(the_repository->objects, &entry->idx.oid, &oi,
+		यदि (repo_has_promisor_remote(the_repository)) {
+			prefetch_गन्तव्यम्_pack(object_सूचकांक);
+			यदि (odb_read_object_info_extended(the_repository->objects, &प्रविष्टिः->idx.oid, &oi,
 							  OBJECT_INFO_SKIP_FETCH_OBJECT | OBJECT_INFO_LOOKUP_REPLACE) < 0)
 				type = -1;
-		} else {
+		} अन्यथा {
 			type = -1;
 		}
 	}
-	oe_set_type(entry, type);
-	if (entry->type_valid) {
-		SET_SIZE(entry, canonical_size);
-	} else {
+	oe_समुच्चयः_type(प्रविष्टिः, type);
+	यदि (प्रविष्टिः->type_valid) {
+		समुच्चयः_आकार(प्रविष्टिः, canonical_आकार);
+	} अन्यथा {
 		/*
 		 * Bad object type is checked in prepare_pack().  This is
 		 * to permit a missing preferred base object to be ignored
@@ -2408,23 +2408,23 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 	}
 }
 
-static int pack_offset_sort(const void *_a, const void *_b)
+स्थिर पूर्णाङ्क pack_विस्थापनम्_क्रमय(ध्रुव शून्य *_a, ध्रुव शून्य *_b)
 {
-	const struct object_entry *a = *(struct object_entry **)_a;
-	const struct object_entry *b = *(struct object_entry **)_b;
-	const struct packed_git *a_in_pack = IN_PACK(a);
-	const struct packed_git *b_in_pack = IN_PACK(b);
+	ध्रुव संरचना object_प्रविष्टिः *a = *(संरचना object_प्रविष्टिः **)_a;
+	ध्रुव संरचना object_प्रविष्टिः *b = *(संरचना object_प्रविष्टिः **)_b;
+	ध्रुव संरचना packed_git *a_अन्तर्_pack = अन्तर्_PACK(a);
+	ध्रुव संरचना packed_git *b_अन्तर्_pack = अन्तर्_PACK(b);
 
 	/* avoid filesystem trashing with loose objects */
-	if (!a_in_pack && !b_in_pack)
-		return oidcmp(&a->idx.oid, &b->idx.oid);
+	यदि (!a_अन्तर्_pack && !b_अन्तर्_pack)
+		प्रत्यागम oidcmp(&a->idx.oid, &b->idx.oid);
 
-	if (a_in_pack < b_in_pack)
-		return -1;
-	if (a_in_pack > b_in_pack)
-		return 1;
-	return a->in_pack_offset < b->in_pack_offset ? -1 :
-			(a->in_pack_offset > b->in_pack_offset);
+	यदि (a_अन्तर्_pack < b_अन्तर्_pack)
+		प्रत्यागम -1;
+	यदि (a_अन्तर्_pack > b_अन्तर्_pack)
+		प्रत्यागम 1;
+	प्रत्यागम a->अन्तर्_pack_विस्थापनम् < b->अन्तर्_pack_विस्थापनम् ? -1 :
+			(a->अन्तर्_pack_विस्थापनम् > b->अन्तर्_pack_विस्थापनम्);
 }
 
 /*
@@ -2440,40 +2440,40 @@ static int pack_offset_sort(const void *_a, const void *_b)
  *
  *   3. Resetting our delta depth, as we are now a base object.
  */
-static void drop_reused_delta(struct object_entry *entry)
+स्थिर शून्य drop_reused_delta(संरचना object_प्रविष्टिः *प्रविष्टिः)
 {
-	unsigned *idx = &to_pack.objects[entry->delta_idx - 1].delta_child_idx;
-	struct object_info oi = OBJECT_INFO_INIT;
-	enum object_type type;
-	size_t size;
+	अचिह्नित *idx = &गन्तव्यम्_pack.objects[प्रविष्टिः->delta_idx - 1].delta_child_idx;
+	संरचना object_info oi = OBJECT_INFO_INIT;
+	गणना object_type type;
+	आकार_t आकार;
 
-	while (*idx) {
-		struct object_entry *oe = &to_pack.objects[*idx - 1];
+	यावत् (*idx) {
+		संरचना object_प्रविष्टिः *oe = &गन्तव्यम्_pack.objects[*idx - 1];
 
-		if (oe == entry)
+		यदि (oe == प्रविष्टिः)
 			*idx = oe->delta_sibling_idx;
-		else
+		अन्यथा
 			idx = &oe->delta_sibling_idx;
 	}
-	SET_DELTA(entry, NULL);
-	entry->depth = 0;
+	समुच्चयः_DELTA(प्रविष्टिः, रिक्त);
+	प्रविष्टिः->गभीरता = 0;
 
-	oi.sizep = &size;
+	oi.sizep = &आकार;
 	oi.typep = &type;
-	if (packed_object_info(NULL, IN_PACK(entry), entry->in_pack_offset, &oi) < 0) {
+	यदि (packed_object_info(रिक्त, अन्तर्_PACK(प्रविष्टिः), प्रविष्टिः->अन्तर्_pack_विस्थापनम्, &oi) < 0) {
 		/*
 		 * We failed to get the info from this pack for some reason;
 		 * fall back to odb_read_object_info, which may find another copy.
 		 * And if that fails, the error will be recorded in oe_type(entry)
 		 * and dealt with in prepare_pack().
 		 */
-		oe_set_type(entry,
+		oe_समुच्चयः_type(प्रविष्टिः,
 			    odb_read_object_info(the_repository->objects,
-						 &entry->idx.oid, &size));
-	} else {
-		oe_set_type(entry, type);
+						 &प्रविष्टिः->idx.oid, &आकार));
+	} अन्यथा {
+		oe_समुच्चयः_type(प्रविष्टिः, type);
 	}
-	SET_SIZE(entry, size);
+	समुच्चयः_आकार(प्रविष्टिः, आकार);
 }
 
 /*
@@ -2484,7 +2484,7 @@ static void drop_reused_delta(struct object_entry *entry)
  * We also detect too-long reused chains that would violate our --depth
  * limit.
  */
-static void break_delta_chains(struct object_entry *entry)
+स्थिर शून्य break_delta_chains(संरचना object_प्रविष्टिः *प्रविष्टिः)
 {
 	/*
 	 * The actual depth of each object we will write is stored as an int,
@@ -2492,20 +2492,20 @@ static void break_delta_chains(struct object_entry *entry)
 	 * changes based no that limit, we may potentially go as deep as the
 	 * number of objects, which is elsewhere bounded to a uint32_t.
 	 */
-	uint32_t total_depth;
-	struct object_entry *cur, *next;
+	uint32_t योग_गभीरता;
+	संरचना object_प्रविष्टिः *cur, *अग्र;
 
-	for (cur = entry, total_depth = 0;
+	प्रति (cur = प्रविष्टिः, योग_गभीरता = 0;
 	     cur;
-	     cur = DELTA(cur), total_depth++) {
-		if (cur->dfs_state == DFS_DONE) {
+	     cur = DELTA(cur), योग_गभीरता++) {
+		यदि (cur->dfs_state == DFS_समाप्तम्) {
 			/*
 			 * We've already seen this object and know it isn't
 			 * part of a cycle. We do need to append its depth
 			 * to our count.
 			 */
-			total_depth += cur->depth;
-			break;
+			योग_गभीरता += cur->गभीरता;
+			भङ्ग;
 		}
 
 		/*
@@ -2513,7 +2513,7 @@ static void break_delta_chains(struct object_entry *entry)
 		 * other cruft which made its way into the state variable)
 		 * is a bug.
 		 */
-		if (cur->dfs_state != DFS_NONE)
+		यदि (cur->dfs_state != DFS_NONE)
 			BUG("confusing delta dfs state in first pass: %d",
 			    cur->dfs_state);
 
@@ -2522,9 +2522,9 @@ static void break_delta_chains(struct object_entry *entry)
 		 * it's not a delta, we're done traversing, but we'll mark it
 		 * done to save time on future traversals.
 		 */
-		if (!DELTA(cur)) {
-			cur->dfs_state = DFS_DONE;
-			break;
+		यदि (!DELTA(cur)) {
+			cur->dfs_state = DFS_समाप्तम्;
+			भङ्ग;
 		}
 
 		/*
@@ -2544,11 +2544,11 @@ static void break_delta_chains(struct object_entry *entry)
 		 * If we instead cut D->B, then the depth of A is correct at 3.
 		 * We keep all commits in the chain that we examined.
 		 */
-		cur->dfs_state = DFS_ACTIVE;
-		if (DELTA(cur)->dfs_state == DFS_ACTIVE) {
+		cur->dfs_state = DFS_सक्रिय;
+		यदि (DELTA(cur)->dfs_state == DFS_सक्रिय) {
 			drop_reused_delta(cur);
-			cur->dfs_state = DFS_DONE;
-			break;
+			cur->dfs_state = DFS_समाप्तम्;
+			भङ्ग;
 		}
 	}
 
@@ -2559,8 +2559,8 @@ static void break_delta_chains(struct object_entry *entry)
 	 * delta, we need to keep going to look for more depth cuts. So we need
 	 * an extra "next" pointer to keep going after we reset cur->delta.
 	 */
-	for (cur = entry; cur; cur = next) {
-		next = DELTA(cur);
+	प्रति (cur = प्रविष्टिः; cur; cur = अग्र) {
+		अग्र = DELTA(cur);
 
 		/*
 		 * We should have a chain of zero or more ACTIVE states down to
@@ -2568,9 +2568,9 @@ static void break_delta_chains(struct object_entry *entry)
 		 * has no bases, or we've already handled them in a previous
 		 * call.
 		 */
-		if (cur->dfs_state == DFS_DONE)
-			break;
-		else if (cur->dfs_state != DFS_ACTIVE)
+		यदि (cur->dfs_state == DFS_समाप्तम्)
+			भङ्ग;
+		अन्यथा यदि (cur->dfs_state != DFS_सक्रिय)
 			BUG("confusing delta dfs state in second pass: %d",
 			    cur->dfs_state);
 
@@ -2592,48 +2592,48 @@ static void break_delta_chains(struct object_entry *entry)
 		 * entry whose final depth is supposed to be zero, we snip it
 		 * from its delta base, thereby making it so.
 		 */
-		cur->depth = (total_depth--) % (depth + 1);
-		if (!cur->depth)
+		cur->गभीरता = (योग_गभीरता--) % (गभीरता + 1);
+		यदि (!cur->गभीरता)
 			drop_reused_delta(cur);
 
-		cur->dfs_state = DFS_DONE;
+		cur->dfs_state = DFS_समाप्तम्;
 	}
 }
 
-static void get_object_details(void)
+स्थिर शून्य get_object_details(शून्य)
 {
 	uint32_t i;
-	struct object_entry **sorted_by_offset;
+	संरचना object_प्रविष्टिः **sorted_by_विस्थापनम्;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Counting objects"),
-						to_pack.nr_objects);
+						गन्तव्यम्_pack.nr_objects);
 
-	CALLOC_ARRAY(sorted_by_offset, to_pack.nr_objects);
-	for (i = 0; i < to_pack.nr_objects; i++)
-		sorted_by_offset[i] = to_pack.objects + i;
-	QSORT(sorted_by_offset, to_pack.nr_objects, pack_offset_sort);
+	CALLOC_ARRAY(sorted_by_विस्थापनम्, गन्तव्यम्_pack.nr_objects);
+	प्रति (i = 0; i < गन्तव्यम्_pack.nr_objects; i++)
+		sorted_by_विस्थापनम्[i] = गन्तव्यम्_pack.objects + i;
+	QSORT(sorted_by_विस्थापनम्, गन्तव्यम्_pack.nr_objects, pack_विस्थापनम्_क्रमय);
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = sorted_by_offset[i];
-		check_object(entry, i);
-		if (entry->type_valid &&
-		    oe_size_greater_than(&to_pack, entry,
-					 repo_settings_get_big_file_threshold(the_repository)))
-			entry->no_try_delta = 1;
-		display_progress(progress_state, i + 1);
+	प्रति (i = 0; i < गन्तव्यम्_pack.nr_objects; i++) {
+		संरचना object_प्रविष्टिः *प्रविष्टिः = sorted_by_विस्थापनम्[i];
+		check_object(प्रविष्टिः, i);
+		यदि (प्रविष्टिः->type_valid &&
+		    oe_आकार_greater_than(&गन्तव्यम्_pack, प्रविष्टिः,
+					 repo_settings_get_big_file_देहली(the_repository)))
+			प्रविष्टिः->no_try_delta = 1;
+		display_प्रगतिः(प्रगतिः_state, i + 1);
 	}
-	stop_progress(&progress_state);
+	stop_प्रगतिः(&प्रगतिः_state);
 
 	/*
 	 * This must happen in a second pass, since we rely on the delta
 	 * information for the whole list being completed.
 	 */
-	for (i = 0; i < to_pack.nr_objects; i++)
-		break_delta_chains(&to_pack.objects[i]);
+	प्रति (i = 0; i < गन्तव्यम्_pack.nr_objects; i++)
+		break_delta_chains(&गन्तव्यम्_pack.objects[i]);
 
-	free(sorted_by_offset);
+	मुक्त(sorted_by_विस्थापनम्);
 }
 
 /*
@@ -2645,74 +2645,74 @@ static void get_object_details(void)
  * one.  The deepest deltas are therefore the oldest objects which are
  * less susceptible to be accessed often.
  */
-static int type_size_sort(const void *_a, const void *_b)
+स्थिर पूर्णाङ्क type_आकार_क्रमय(ध्रुव शून्य *_a, ध्रुव शून्य *_b)
 {
-	const struct object_entry *a = *(struct object_entry **)_a;
-	const struct object_entry *b = *(struct object_entry **)_b;
-	const enum object_type a_type = oe_type(a);
-	const enum object_type b_type = oe_type(b);
-	const unsigned long a_size = SIZE(a);
-	const unsigned long b_size = SIZE(b);
+	ध्रुव संरचना object_प्रविष्टिः *a = *(संरचना object_प्रविष्टिः **)_a;
+	ध्रुव संरचना object_प्रविष्टिः *b = *(संरचना object_प्रविष्टिः **)_b;
+	ध्रुव गणना object_type a_type = oe_type(a);
+	ध्रुव गणना object_type b_type = oe_type(b);
+	ध्रुव अचिह्नित दीर्घ a_आकार = आकार_3(a);
+	ध्रुव अचिह्नित दीर्घ b_आकार = आकार_3(b);
 
-	if (a_type > b_type)
-		return -1;
-	if (a_type < b_type)
-		return 1;
-	if (a->hash > b->hash)
-		return -1;
-	if (a->hash < b->hash)
-		return 1;
-	if (a->preferred_base > b->preferred_base)
-		return -1;
-	if (a->preferred_base < b->preferred_base)
-		return 1;
-	if (use_delta_islands) {
-		const int island_cmp = island_delta_cmp(&a->idx.oid, &b->idx.oid);
-		if (island_cmp)
-			return island_cmp;
+	यदि (a_type > b_type)
+		प्रत्यागम -1;
+	यदि (a_type < b_type)
+		प्रत्यागम 1;
+	यदि (a->hash > b->hash)
+		प्रत्यागम -1;
+	यदि (a->hash < b->hash)
+		प्रत्यागम 1;
+	यदि (a->preferred_आधारः > b->preferred_आधारः)
+		प्रत्यागम -1;
+	यदि (a->preferred_आधारः < b->preferred_आधारः)
+		प्रत्यागम 1;
+	यदि (use_delta_islands) {
+		ध्रुव पूर्णाङ्क island_cmp = island_delta_cmp(&a->idx.oid, &b->idx.oid);
+		यदि (island_cmp)
+			प्रत्यागम island_cmp;
 	}
-	if (a_size > b_size)
-		return -1;
-	if (a_size < b_size)
-		return 1;
-	return a < b ? -1 : (a > b);  /* newest first */
+	यदि (a_आकार > b_आकार)
+		प्रत्यागम -1;
+	यदि (a_आकार < b_आकार)
+		प्रत्यागम 1;
+	प्रत्यागम a < b ? -1 : (a > b);  /* newest first */
 }
 
-struct unpacked {
-	struct object_entry *entry;
-	void *data;
-	struct delta_index *index;
-	unsigned depth;
+संरचना unpacked {
+	संरचना object_प्रविष्टिः *प्रविष्टिः;
+	शून्य *दत्त;
+	संरचना delta_सूचकांक *सूचकांक;
+	अचिह्नित गभीरता;
 };
 
-static int delta_cacheable(size_t src_size, size_t trg_size,
-			   size_t delta_size)
+स्थिर पूर्णाङ्क delta_cacheable(आकार_t src_आकार, आकार_t trg_आकार,
+			   आकार_t delta_आकार_2)
 {
-	if (max_delta_cache_size && delta_cache_size + delta_size > max_delta_cache_size)
-		return 0;
+	यदि (max_delta_cache_आकार && delta_cache_आकार + delta_आकार_2 > max_delta_cache_आकार)
+		प्रत्यागम 0;
 
-	if (delta_size < cache_max_small_delta_size)
-		return 1;
+	यदि (delta_आकार_2 < cache_max_small_delta_आकार)
+		प्रत्यागम 1;
 
 	/* cache delta, if objects are large enough compared to delta size */
-	if ((src_size >> 20) + (trg_size >> 21) > (delta_size >> 10))
-		return 1;
+	यदि ((src_आकार >> 20) + (trg_आकार >> 21) > (delta_आकार_2 >> 10))
+		प्रत्यागम 1;
 
-	return 0;
+	प्रत्यागम 0;
 }
 
 /* Protect delta_cache_size */
-static pthread_mutex_t cache_mutex;
-#define cache_lock()		pthread_mutex_lock(&cache_mutex)
-#define cache_unlock()		pthread_mutex_unlock(&cache_mutex)
+स्थिर pthread_mutex_t cache_mutex;
+#परिभाषय cache_तालकम्()		pthread_mutex_तालकम्(&cache_mutex)
+#परिभाषय cache_unlock()		pthread_mutex_unlock(&cache_mutex)
 
 /*
  * Protect object list partitioning (e.g. struct thread_param) and
  * progress_state
  */
-static pthread_mutex_t progress_mutex;
-#define progress_lock()		pthread_mutex_lock(&progress_mutex)
-#define progress_unlock()	pthread_mutex_unlock(&progress_mutex)
+स्थिर pthread_mutex_t प्रगतिः_mutex;
+#परिभाषय प्रगतिः_तालकम्()		pthread_mutex_तालकम्(&प्रगतिः_mutex)
+#परिभाषय प्रगतिः_unlock()	pthread_mutex_unlock(&प्रगतिः_mutex)
 
 /*
  * Access to struct object_entry is unprotected since each thread owns
@@ -2721,40 +2721,40 @@ static pthread_mutex_t progress_mutex;
  * progress_mutex for protection.
  */
 
-static inline int oe_size_less_than(struct packing_data *pack,
-				    const struct object_entry *lhs,
-				    size_t rhs)
+स्थिर अन्तःस्थ पूर्णाङ्क oe_आकार_less_than(संरचना packing_दत्त *pack,
+				    ध्रुव संरचना object_प्रविष्टिः *lhs,
+				    आकार_t rhs)
 {
-	if (lhs->size_valid)
-		return lhs->size_ < rhs;
-	if (rhs < pack->oe_size_limit) /* rhs < 2^x <= lhs ? */
-		return 0;
-	return oe_get_size_slow(pack, lhs) < rhs;
+	यदि (lhs->आकार_valid)
+		प्रत्यागम lhs->आकार_2 < rhs;
+	यदि (rhs < pack->oe_आकार_सीमा) /* rhs < 2^x <= lhs ? */
+		प्रत्यागम 0;
+	प्रत्यागम oe_get_आकार_slow(pack, lhs) < rhs;
 }
 
-static inline void oe_set_tree_depth(struct packing_data *pack,
-				     struct object_entry *e,
-				     unsigned int tree_depth)
+स्थिर अन्तःस्थ शून्य oe_समुच्चयः_वृक्षः_गभीरता(संरचना packing_दत्त *pack,
+				     संरचना object_प्रविष्टिः *e,
+				     अचिह्नित पूर्णाङ्क वृक्षः_गभीरता)
 {
-	if (!pack->tree_depth)
-		CALLOC_ARRAY(pack->tree_depth, pack->nr_alloc);
-	pack->tree_depth[e - pack->objects] = tree_depth;
+	यदि (!pack->वृक्षः_गभीरता)
+		CALLOC_ARRAY(pack->वृक्षः_गभीरता, pack->nr_alloc);
+	pack->वृक्षः_गभीरता[e - pack->objects] = वृक्षः_गभीरता;
 }
 
-static void record_tree_depth(const struct object_id *oid, const char *name)
+स्थिर शून्य लेखः_वृक्षः_गभीरता(ध्रुव संरचना object_id *oid, ध्रुव वर्ण *name)
 {
-	const char *p;
-	unsigned depth;
-	struct object_entry *ent;
+	ध्रुव वर्ण *p;
+	अचिह्नित गभीरता;
+	संरचना object_प्रविष्टिः *ent;
 
 	/* the empty string is a root tree, which is depth 0 */
-	depth = *name ? 1 : 0;
-	for (p = strchr(name, '/'); p; p = strchr(p + 1, '/'))
-		depth++;
+	गभीरता = *name ? 1 : 0;
+	प्रति (p = strchr(name, '/'); p; p = strchr(p + 1, '/'))
+		गभीरता++;
 
-	ent = packlist_find(&to_pack, oid);
-	if (ent && depth > oe_tree_depth(&to_pack, ent))
-		oe_set_tree_depth(&to_pack, ent, depth);
+	ent = packlist_find(&गन्तव्यम्_pack, oid);
+	यदि (ent && गभीरता > oe_वृक्षः_गभीरता(&गन्तव्यम्_pack, ent))
+		oe_समुच्चयः_वृक्षः_गभीरता(&गन्तव्यम्_pack, ent, गभीरता);
 }
 
 /*
@@ -2762,57 +2762,57 @@ static void record_tree_depth(const struct object_id *oid, const char *name)
  * reconstruction (so non-deltas are true object sizes, but deltas
  * return the size of the delta data).
  */
-size_t oe_get_size_slow(struct packing_data *pack,
-			const struct object_entry *e)
+आकार_t oe_get_आकार_slow(संरचना packing_दत्त *pack,
+			ध्रुव संरचना object_प्रविष्टिः *e)
 {
-	struct packed_git *p;
-	struct pack_window *w_curs;
-	unsigned char *buf;
-	enum object_type type;
-	size_t used, avail, size;
+	संरचना packed_git *p;
+	संरचना pack_गवाक्षः *w_curs;
+	अचिह्नित वर्ण *buf;
+	गणना object_type type;
+	आकार_t प्रयुक्तम्_2, avail, आकार;
 
-	if (e->type_ != OBJ_OFS_DELTA && e->type_ != OBJ_REF_DELTA) {
-		size_t sz;
-		packing_data_lock(&to_pack);
-		if (odb_read_object_info(the_repository->objects,
+	यदि (e->type_ != OBJ_OFS_DELTA && e->type_ != OBJ_REF_DELTA) {
+		आकार_t sz;
+		packing_दत्त_तालकम्(&गन्तव्यम्_pack);
+		यदि (odb_read_object_info(the_repository->objects,
 					 &e->idx.oid, &sz) < 0)
 			die(_("unable to get size of %s"),
-			    oid_to_hex(&e->idx.oid));
-		packing_data_unlock(&to_pack);
-		return sz;
+			    oid_गन्तव्यम्_hex(&e->idx.oid));
+		packing_दत्त_unlock(&गन्तव्यम्_pack);
+		प्रत्यागम sz;
 	}
 
-	p = oe_in_pack(pack, e);
-	if (!p)
+	p = oe_अन्तर्_pack(pack, e);
+	यदि (!p)
 		BUG("when e->type is a delta, it must belong to a pack");
 
-	packing_data_lock(&to_pack);
-	w_curs = NULL;
-	buf = use_pack(p, &w_curs, e->in_pack_offset, &avail);
-	used = unpack_object_header_buffer(buf, avail, &type, &size);
-	if (used == 0)
+	packing_दत्त_तालकम्(&गन्तव्यम्_pack);
+	w_curs = रिक्त;
+	buf = use_pack(p, &w_curs, e->अन्तर्_pack_विस्थापनम्, &avail);
+	प्रयुक्तम्_2 = unpack_object_शीर्षकम्_बफर(buf, avail, &type, &आकार);
+	यदि (प्रयुक्तम्_2 == 0)
 		die(_("unable to parse object header of %s"),
-		    oid_to_hex(&e->idx.oid));
+		    oid_गन्तव्यम्_hex(&e->idx.oid));
 
 	unuse_pack(&w_curs);
-	packing_data_unlock(&to_pack);
-	return size;
+	packing_दत्त_unlock(&गन्तव्यम्_pack);
+	प्रत्यागम आकार;
 }
 
-static int try_delta(struct unpacked *trg, struct unpacked *src,
-		     unsigned max_depth, size_t *mem_usage)
+स्थिर पूर्णाङ्क try_delta(संरचना unpacked *trg, संरचना unpacked *src,
+		     अचिह्नित max_गभीरता, आकार_t *mem_usage)
 {
-	struct object_entry *trg_entry = trg->entry;
-	struct object_entry *src_entry = src->entry;
-	unsigned long trg_size, src_size, sizediff, max_size, sz;
-	size_t delta_size;
-	unsigned ref_depth;
-	enum object_type type;
-	void *delta_buf;
+	संरचना object_प्रविष्टिः *trg_प्रविष्टिः = trg->प्रविष्टिः;
+	संरचना object_प्रविष्टिः *src_प्रविष्टिः = src->प्रविष्टिः;
+	अचिह्नित दीर्घ trg_आकार, src_आकार, sizediff, max_आकार, sz;
+	आकार_t delta_आकार_2;
+	अचिह्नित ref_गभीरता;
+	गणना object_type type;
+	शून्य *delta_buf;
 
 	/* Don't bother doing diffs between different types */
-	if (oe_type(trg_entry) != oe_type(src_entry))
-		return -1;
+	यदि (oe_type(trg_प्रविष्टिः) != oe_type(src_प्रविष्टिः))
+		प्रत्यागम -1;
 
 	/*
 	 * We do not bother to try a delta that we discarded on an
@@ -2822,110 +2822,110 @@ static int try_delta(struct unpacked *trg, struct unpacked *src,
 	 * it, we will still save the transfer cost, as we already know
 	 * the other side has it and we won't send src_entry at all.
 	 */
-	if (reuse_delta && IN_PACK(trg_entry) &&
-	    IN_PACK(trg_entry) == IN_PACK(src_entry) &&
-	    !src_entry->preferred_base &&
-	    trg_entry->in_pack_type != OBJ_REF_DELTA &&
-	    trg_entry->in_pack_type != OBJ_OFS_DELTA)
-		return 0;
+	यदि (reuse_delta && अन्तर्_PACK(trg_प्रविष्टिः) &&
+	    अन्तर्_PACK(trg_प्रविष्टिः) == अन्तर्_PACK(src_प्रविष्टिः) &&
+	    !src_प्रविष्टिः->preferred_आधारः &&
+	    trg_प्रविष्टिः->अन्तर्_pack_type != OBJ_REF_DELTA &&
+	    trg_प्रविष्टिः->अन्तर्_pack_type != OBJ_OFS_DELTA)
+		प्रत्यागम 0;
 
 	/* Let's not bust the allowed depth. */
-	if (src->depth >= max_depth)
-		return 0;
+	यदि (src->गभीरता >= max_गभीरता)
+		प्रत्यागम 0;
 
 	/* Now some size filtering heuristics. */
-	trg_size = SIZE(trg_entry);
-	if (!DELTA(trg_entry)) {
-		max_size = trg_size/2 - the_hash_algo->rawsz;
-		ref_depth = 1;
-	} else {
-		max_size = DELTA_SIZE(trg_entry);
-		ref_depth = trg->depth;
+	trg_आकार = आकार_3(trg_प्रविष्टिः);
+	यदि (!DELTA(trg_प्रविष्टिः)) {
+		max_आकार = trg_आकार/2 - the_hash_algo->rawsz;
+		ref_गभीरता = 1;
+	} अन्यथा {
+		max_आकार = DELTA_आकार(trg_प्रविष्टिः);
+		ref_गभीरता = trg->गभीरता;
 	}
-	max_size = (uint64_t)max_size * (max_depth - src->depth) /
-						(max_depth - ref_depth + 1);
-	if (max_size == 0)
-		return 0;
-	src_size = SIZE(src_entry);
-	sizediff = src_size < trg_size ? trg_size - src_size : 0;
-	if (sizediff >= max_size)
-		return 0;
-	if (trg_size < src_size / 32)
-		return 0;
+	max_आकार = (uint64_t)max_आकार * (max_गभीरता - src->गभीरता) /
+						(max_गभीरता - ref_गभीरता + 1);
+	यदि (max_आकार == 0)
+		प्रत्यागम 0;
+	src_आकार = आकार_3(src_प्रविष्टिः);
+	sizediff = src_आकार < trg_आकार ? trg_आकार - src_आकार : 0;
+	यदि (sizediff >= max_आकार)
+		प्रत्यागम 0;
+	यदि (trg_आकार < src_आकार / 32)
+		प्रत्यागम 0;
 
-	if (!in_same_island(&trg->entry->idx.oid, &src->entry->idx.oid))
-		return 0;
+	यदि (!अन्तर्_same_island(&trg->प्रविष्टिः->idx.oid, &src->प्रविष्टिः->idx.oid))
+		प्रत्यागम 0;
 
 	/* Load data if not already done */
-	if (!trg->data) {
-		size_t sz_st = 0;
-		packing_data_lock(&to_pack);
-		trg->data = odb_read_object(the_repository->objects,
-					    &trg_entry->idx.oid, &type,
+	यदि (!trg->दत्त) {
+		आकार_t sz_st = 0;
+		packing_दत्त_तालकम्(&गन्तव्यम्_pack);
+		trg->दत्त = odb_read_object(the_repository->objects,
+					    &trg_प्रविष्टिः->idx.oid, &type,
 					    &sz_st);
-		sz = cast_size_t_to_ulong(sz_st);
-		packing_data_unlock(&to_pack);
-		if (!trg->data)
+		sz = cast_आकार_t_गन्तव्यम्_ulong(sz_st);
+		packing_दत्त_unlock(&गन्तव्यम्_pack);
+		यदि (!trg->दत्त)
 			die(_("object %s cannot be read"),
-			    oid_to_hex(&trg_entry->idx.oid));
-		if (sz != trg_size)
+			    oid_गन्तव्यम्_hex(&trg_प्रविष्टिः->idx.oid));
+		यदि (sz != trg_आकार)
 			die(_("object %s inconsistent object length (%"PRIuMAX" vs %"PRIuMAX")"),
-			    oid_to_hex(&trg_entry->idx.oid), (uintmax_t)sz,
-			    (uintmax_t)trg_size);
+			    oid_गन्तव्यम्_hex(&trg_प्रविष्टिः->idx.oid), (uintmax_t)sz,
+			    (uintmax_t)trg_आकार);
 		*mem_usage += sz;
 	}
-	if (!src->data) {
-		size_t sz_st = 0;
-		packing_data_lock(&to_pack);
-		src->data = odb_read_object(the_repository->objects,
-					    &src_entry->idx.oid, &type,
+	यदि (!src->दत्त) {
+		आकार_t sz_st = 0;
+		packing_दत्त_तालकम्(&गन्तव्यम्_pack);
+		src->दत्त = odb_read_object(the_repository->objects,
+					    &src_प्रविष्टिः->idx.oid, &type,
 					    &sz_st);
-		sz = cast_size_t_to_ulong(sz_st);
-		packing_data_unlock(&to_pack);
-		if (!src->data) {
-			if (src_entry->preferred_base) {
-				static int warned = 0;
-				if (!warned++)
+		sz = cast_आकार_t_गन्तव्यम्_ulong(sz_st);
+		packing_दत्त_unlock(&गन्तव्यम्_pack);
+		यदि (!src->दत्त) {
+			यदि (src_प्रविष्टिः->preferred_आधारः) {
+				स्थिर पूर्णाङ्क warned = 0;
+				यदि (!warned++)
 					warning(_("object %s cannot be read"),
-						oid_to_hex(&src_entry->idx.oid));
+						oid_गन्तव्यम्_hex(&src_प्रविष्टिः->idx.oid));
 				/*
 				 * Those objects are not included in the
 				 * resulting pack.  Be resilient and ignore
 				 * them if they can't be read, in case the
 				 * pack could be created nevertheless.
 				 */
-				return 0;
+				प्रत्यागम 0;
 			}
 			die(_("object %s cannot be read"),
-			    oid_to_hex(&src_entry->idx.oid));
+			    oid_गन्तव्यम्_hex(&src_प्रविष्टिः->idx.oid));
 		}
-		if (sz != src_size)
+		यदि (sz != src_आकार)
 			die(_("object %s inconsistent object length (%"PRIuMAX" vs %"PRIuMAX")"),
-			    oid_to_hex(&src_entry->idx.oid), (uintmax_t)sz,
-			    (uintmax_t)src_size);
+			    oid_गन्तव्यम्_hex(&src_प्रविष्टिः->idx.oid), (uintmax_t)sz,
+			    (uintmax_t)src_आकार);
 		*mem_usage += sz;
 	}
-	if (!src->index) {
-		src->index = create_delta_index(src->data, src_size);
-		if (!src->index) {
-			static int warned = 0;
-			if (!warned++)
+	यदि (!src->सूचकांक) {
+		src->सूचकांक = create_delta_सूचकांक(src->दत्त, src_आकार);
+		यदि (!src->सूचकांक) {
+			स्थिर पूर्णाङ्क warned = 0;
+			यदि (!warned++)
 				warning(_("suboptimal pack - out of memory"));
-			return 0;
+			प्रत्यागम 0;
 		}
-		*mem_usage += sizeof_delta_index(src->index);
+		*mem_usage += sizeof_delta_सूचकांक(src->सूचकांक);
 	}
 
-	delta_buf = create_delta(src->index, trg->data, trg_size, &delta_size, max_size);
-	if (!delta_buf)
-		return 0;
+	delta_buf = create_delta(src->सूचकांक, trg->दत्त, trg_आकार, &delta_आकार_2, max_आकार);
+	यदि (!delta_buf)
+		प्रत्यागम 0;
 
-	if (DELTA(trg_entry)) {
+	यदि (DELTA(trg_प्रविष्टिः)) {
 		/* Prefer only shallower same-sized deltas. */
-		if (delta_size == DELTA_SIZE(trg_entry) &&
-		    src->depth + 1 >= trg->depth) {
-			free(delta_buf);
-			return 0;
+		यदि (delta_आकार_2 == DELTA_आकार(trg_प्रविष्टिः) &&
+		    src->गभीरता + 1 >= trg->गभीरता) {
+			मुक्त(delta_buf);
+			प्रत्यागम 0;
 		}
 	}
 
@@ -2934,126 +2934,126 @@ static int try_delta(struct unpacked *trg, struct unpacked *src,
 	 * accounting lock.  Compiler will optimize the strangeness
 	 * away when NO_PTHREADS is defined.
 	 */
-	free(trg_entry->delta_data);
-	cache_lock();
-	if (trg_entry->delta_data) {
-		delta_cache_size -= DELTA_SIZE(trg_entry);
-		trg_entry->delta_data = NULL;
+	मुक्त(trg_प्रविष्टिः->delta_दत्त);
+	cache_तालकम्();
+	यदि (trg_प्रविष्टिः->delta_दत्त) {
+		delta_cache_आकार -= DELTA_आकार(trg_प्रविष्टिः);
+		trg_प्रविष्टिः->delta_दत्त = रिक्त;
 	}
-	if (delta_cacheable(src_size, trg_size, delta_size)) {
-		delta_cache_size += delta_size;
+	यदि (delta_cacheable(src_आकार, trg_आकार, delta_आकार_2)) {
+		delta_cache_आकार += delta_आकार_2;
 		cache_unlock();
-		trg_entry->delta_data = xrealloc(delta_buf, delta_size);
-	} else {
+		trg_प्रविष्टिः->delta_दत्त = xrealloc(delta_buf, delta_आकार_2);
+	} अन्यथा {
 		cache_unlock();
-		free(delta_buf);
+		मुक्त(delta_buf);
 	}
 
-	SET_DELTA(trg_entry, src_entry);
-	SET_DELTA_SIZE(trg_entry, delta_size);
-	trg->depth = src->depth + 1;
+	समुच्चयः_DELTA(trg_प्रविष्टिः, src_प्रविष्टिः);
+	समुच्चयः_DELTA_आकार(trg_प्रविष्टिः, delta_आकार_2);
+	trg->गभीरता = src->गभीरता + 1;
 
-	return 1;
+	प्रत्यागम 1;
 }
 
-static unsigned int check_delta_limit(struct object_entry *me, unsigned int n)
+स्थिर अचिह्नित पूर्णाङ्क check_delta_सीमा(संरचना object_प्रविष्टिः *me, अचिह्नित पूर्णाङ्क n)
 {
-	struct object_entry *child = DELTA_CHILD(me);
-	unsigned int m = n;
-	while (child) {
-		const unsigned int c = check_delta_limit(child, n + 1);
-		if (m < c)
+	संरचना object_प्रविष्टिः *child = DELTA_CHILD(me);
+	अचिह्नित पूर्णाङ्क m = n;
+	यावत् (child) {
+		ध्रुव अचिह्नित पूर्णाङ्क c = check_delta_सीमा(child, n + 1);
+		यदि (m < c)
 			m = c;
 		child = DELTA_SIBLING(child);
 	}
-	return m;
+	प्रत्यागम m;
 }
 
-static size_t free_unpacked(struct unpacked *n)
+स्थिर आकार_t free_unpacked(संरचना unpacked *n)
 {
-	size_t freed_mem = sizeof_delta_index(n->index);
-	free_delta_index(n->index);
-	n->index = NULL;
-	if (n->data) {
-		freed_mem += SIZE(n->entry);
-		FREE_AND_NULL(n->data);
+	आकार_t freed_mem = sizeof_delta_सूचकांक(n->सूचकांक);
+	free_delta_सूचकांक(n->सूचकांक);
+	n->सूचकांक = रिक्त;
+	यदि (n->दत्त) {
+		freed_mem += आकार_3(n->प्रविष्टिः);
+		FREE_AND_NULL(n->दत्त);
 	}
-	n->entry = NULL;
-	n->depth = 0;
-	return freed_mem;
+	n->प्रविष्टिः = रिक्त;
+	n->गभीरता = 0;
+	प्रत्यागम freed_mem;
 }
 
-static void find_deltas(struct object_entry **list, unsigned *list_size,
-			int window, int depth, unsigned *processed)
+स्थिर शून्य find_deltas(संरचना object_प्रविष्टिः **list, अचिह्नित *list_आकार,
+			पूर्णाङ्क गवाक्षः, पूर्णाङ्क गभीरता, अचिह्नित *processed)
 {
-	uint32_t i, idx = 0, count = 0;
-	struct unpacked *array;
-	size_t mem_usage = 0;
+	uint32_t i, idx = 0, गणनम् = 0;
+	संरचना unpacked *array;
+	आकार_t mem_usage = 0;
 
-	CALLOC_ARRAY(array, window);
+	CALLOC_ARRAY(array, गवाक्षः);
 
-	for (;;) {
-		struct object_entry *entry;
-		struct unpacked *n = array + idx;
-		int j, max_depth, best_base = -1;
+	प्रति (;;) {
+		संरचना object_प्रविष्टिः *प्रविष्टिः;
+		संरचना unpacked *n = array + idx;
+		पूर्णाङ्क j, max_गभीरता, best_आधारः = -1;
 
-		progress_lock();
-		if (!*list_size) {
-			progress_unlock();
-			break;
+		प्रगतिः_तालकम्();
+		यदि (!*list_आकार) {
+			प्रगतिः_unlock();
+			भङ्ग;
 		}
-		entry = *list++;
-		(*list_size)--;
-		if (!entry->preferred_base) {
+		प्रविष्टिः = *list++;
+		(*list_आकार)--;
+		यदि (!प्रविष्टिः->preferred_आधारः) {
 			(*processed)++;
-			display_progress(progress_state, *processed);
+			display_प्रगतिः(प्रगतिः_state, *processed);
 		}
-		progress_unlock();
+		प्रगतिः_unlock();
 
 		mem_usage -= free_unpacked(n);
-		n->entry = entry;
+		n->प्रविष्टिः = प्रविष्टिः;
 
-		while (window_memory_limit &&
-		       mem_usage > window_memory_limit &&
-		       count > 1) {
-			const uint32_t tail = (idx + window - count) % window;
-			mem_usage -= free_unpacked(array + tail);
-			count--;
+		यावत् (गवाक्षः_स्मृतिः_सीमा &&
+		       mem_usage > गवाक्षः_स्मृतिः_सीमा &&
+		       गणनम् > 1) {
+			ध्रुव uint32_t पुच्छ = (idx + गवाक्षः - गणनम्) % गवाक्षः;
+			mem_usage -= free_unpacked(array + पुच्छ);
+			गणनम्--;
 		}
 
 		/* We do not compute delta to *create* objects we are not
 		 * going to pack.
 		 */
-		if (entry->preferred_base)
-			goto next;
+		यदि (प्रविष्टिः->preferred_आधारः)
+			गच्छ अग्र;
 
 		/*
 		 * If the current object is at pack edge, take the depth the
 		 * objects that depend on the current object into account
 		 * otherwise they would become too deep.
 		 */
-		max_depth = depth;
-		if (DELTA_CHILD(entry)) {
-			max_depth -= check_delta_limit(entry, 0);
-			if (max_depth <= 0)
-				goto next;
+		max_गभीरता = गभीरता;
+		यदि (DELTA_CHILD(प्रविष्टिः)) {
+			max_गभीरता -= check_delta_सीमा(प्रविष्टिः, 0);
+			यदि (max_गभीरता <= 0)
+				गच्छ अग्र;
 		}
 
-		j = window;
-		while (--j > 0) {
-			int ret;
+		j = गवाक्षः;
+		यावत् (--j > 0) {
+			पूर्णाङ्क ret;
 			uint32_t other_idx = idx + j;
-			struct unpacked *m;
-			if (other_idx >= window)
-				other_idx -= window;
+			संरचना unpacked *m;
+			यदि (other_idx >= गवाक्षः)
+				other_idx -= गवाक्षः;
 			m = array + other_idx;
-			if (!m->entry)
-				break;
-			ret = try_delta(n, m, max_depth, &mem_usage);
-			if (ret < 0)
-				break;
-			else if (ret > 0)
-				best_base = other_idx;
+			यदि (!m->प्रविष्टिः)
+				भङ्ग;
+			ret = try_delta(n, m, max_गभीरता, &mem_usage);
+			यदि (ret < 0)
+				भङ्ग;
+			अन्यथा यदि (ret > 0)
+				best_आधारः = other_idx;
 		}
 
 		/*
@@ -3070,19 +3070,19 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 		 * instead, as we can afford spending more time compressing
 		 * between writes at that moment.
 		 */
-		if (entry->delta_data && !pack_to_stdout) {
-			unsigned long size;
+		यदि (प्रविष्टिः->delta_दत्त && !pack_गन्तव्यम्_stdout) {
+			अचिह्नित दीर्घ आकार;
 
-			size = do_compress(&entry->delta_data, DELTA_SIZE(entry));
-			if (size < (1U << OE_Z_DELTA_BITS)) {
-				entry->z_delta_size = size;
-				cache_lock();
-				delta_cache_size -= DELTA_SIZE(entry);
-				delta_cache_size += entry->z_delta_size;
+			आकार = do_compress(&प्रविष्टिः->delta_दत्त, DELTA_आकार(प्रविष्टिः));
+			यदि (आकार < (1U << OE_Z_DELTA_द्वयङ्काः)) {
+				प्रविष्टिः->z_delta_आकार = आकार;
+				cache_तालकम्();
+				delta_cache_आकार -= DELTA_आकार(प्रविष्टिः);
+				delta_cache_आकार += प्रविष्टिः->z_delta_आकार;
 				cache_unlock();
-			} else {
-				FREE_AND_NULL(entry->delta_data);
-				entry->z_delta_size = 0;
+			} अन्यथा {
+				FREE_AND_NULL(प्रविष्टिः->delta_दत्त);
+				प्रविष्टिः->z_delta_आकार = 0;
 			}
 		}
 
@@ -3090,39 +3090,39 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 		 * depth, leaving it in the window is pointless.  we
 		 * should evict it first.
 		 */
-		if (DELTA(entry) && max_depth <= n->depth)
-			continue;
+		यदि (DELTA(प्रविष्टिः) && max_गभीरता <= n->गभीरता)
+			अनुवर्त;
 
 		/*
 		 * Move the best delta base up in the window, after the
 		 * currently deltified object, to keep it longer.  It will
 		 * be the first base object to be attempted next.
 		 */
-		if (DELTA(entry)) {
-			struct unpacked swap = array[best_base];
-			int dist = (window + idx - best_base) % window;
-			int dst = best_base;
-			while (dist--) {
-				int src = (dst + 1) % window;
+		यदि (DELTA(प्रविष्टिः)) {
+			संरचना unpacked swap = array[best_आधारः];
+			पूर्णाङ्क dist = (गवाक्षः + idx - best_आधारः) % गवाक्षः;
+			पूर्णाङ्क dst = best_आधारः;
+			यावत् (dist--) {
+				पूर्णाङ्क src = (dst + 1) % गवाक्षः;
 				array[dst] = array[src];
 				dst = src;
 			}
 			array[dst] = swap;
 		}
 
-		next:
+		अग्र:
 		idx++;
-		if (count + 1 < window)
-			count++;
-		if (idx >= window)
+		यदि (गणनम् + 1 < गवाक्षः)
+			गणनम्++;
+		यदि (idx >= गवाक्षः)
 			idx = 0;
 	}
 
-	for (i = 0; i < window; ++i) {
-		free_delta_index(array[i].index);
-		free(array[i].data);
+	प्रति (i = 0; i < गवाक्षः; ++i) {
+		free_delta_सूचकांक(array[i].सूचकांक);
+		मुक्त(array[i].दत्त);
 	}
-	free(array);
+	मुक्त(array);
 }
 
 /*
@@ -3141,55 +3141,55 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
  * most work left to hand it to the idle worker.
  */
 
-struct thread_params {
+संरचना thread_params {
 	pthread_t thread;
-	struct object_entry **list;
-	struct packing_region *regions;
-	unsigned list_size;
-	unsigned remaining;
-	int window;
-	int depth;
-	int working;
-	int data_ready;
+	संरचना object_प्रविष्टिः **list;
+	संरचना packing_region *regions;
+	अचिह्नित list_आकार;
+	अचिह्नित remaining;
+	पूर्णाङ्क गवाक्षः;
+	पूर्णाङ्क गभीरता;
+	पूर्णाङ्क working;
+	पूर्णाङ्क दत्त_ready;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
-	unsigned *processed;
+	अचिह्नित *processed;
 };
 
-static pthread_cond_t progress_cond;
+स्थिर pthread_cond_t प्रगतिः_cond;
 
 /*
  * Mutex and conditional variable can't be statically-initialized on Windows.
  */
-static void init_threaded_search(void)
+स्थिर शून्य init_threaded_अन्वेषणम्(शून्य)
 {
-	pthread_mutex_init(&cache_mutex, NULL);
-	pthread_mutex_init(&progress_mutex, NULL);
-	pthread_cond_init(&progress_cond, NULL);
+	pthread_mutex_init(&cache_mutex, रिक्त);
+	pthread_mutex_init(&प्रगतिः_mutex, रिक्त);
+	pthread_cond_init(&प्रगतिः_cond, रिक्त);
 }
 
-static void cleanup_threaded_search(void)
+स्थिर शून्य cleanup_threaded_अन्वेषणम्(शून्य)
 {
-	pthread_cond_destroy(&progress_cond);
+	pthread_cond_destroy(&प्रगतिः_cond);
 	pthread_mutex_destroy(&cache_mutex);
-	pthread_mutex_destroy(&progress_mutex);
+	pthread_mutex_destroy(&प्रगतिः_mutex);
 }
 
-static void *threaded_find_deltas(void *arg)
+स्थिर शून्य *threaded_find_deltas(शून्य *arg)
 {
-	struct thread_params *me = arg;
+	संरचना thread_params *me = arg;
 
-	progress_lock();
-	while (me->remaining) {
-		progress_unlock();
+	प्रगतिः_तालकम्();
+	यावत् (me->remaining) {
+		प्रगतिः_unlock();
 
 		find_deltas(me->list, &me->remaining,
-			    me->window, me->depth, me->processed);
+			    me->गवाक्षः, me->गभीरता, me->processed);
 
-		progress_lock();
+		प्रगतिः_तालकम्();
 		me->working = 0;
-		pthread_cond_signal(&progress_cond);
-		progress_unlock();
+		pthread_cond_signal(&प्रगतिः_cond);
+		प्रगतिः_unlock();
 
 		/*
 		 * We must not set ->data_ready before we wait on the
@@ -3199,76 +3199,76 @@ static void *threaded_find_deltas(void *arg)
 		 * was initialized to 0 before this thread was spawned
 		 * and we reset it to 0 right away.
 		 */
-		pthread_mutex_lock(&me->mutex);
-		while (!me->data_ready)
+		pthread_mutex_तालकम्(&me->mutex);
+		यावत् (!me->दत्त_ready)
 			pthread_cond_wait(&me->cond, &me->mutex);
-		me->data_ready = 0;
+		me->दत्त_ready = 0;
 		pthread_mutex_unlock(&me->mutex);
 
-		progress_lock();
+		प्रगतिः_तालकम्();
 	}
-	progress_unlock();
+	प्रगतिः_unlock();
 	/* leave ->working 1 so that this doesn't get more work assigned */
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
-static void ll_find_deltas(struct object_entry **list, unsigned list_size,
-			   int window, int depth, unsigned *processed)
+स्थिर शून्य ll_find_deltas(संरचना object_प्रविष्टिः **list, अचिह्नित list_आकार,
+			   पूर्णाङ्क गवाक्षः, पूर्णाङ्क गभीरता, अचिह्नित *processed)
 {
-	struct thread_params *p;
-	int i, ret, active_threads = 0;
+	संरचना thread_params *p;
+	पूर्णाङ्क i, ret, सक्रिय_तन्तवः = 0;
 
-	init_threaded_search();
+	init_threaded_अन्वेषणम्();
 
-	if (delta_search_threads <= 1) {
-		find_deltas(list, &list_size, window, depth, processed);
-		cleanup_threaded_search();
-		return;
+	यदि (delta_अन्वेषणम्_तन्तवः <= 1) {
+		find_deltas(list, &list_आकार, गवाक्षः, गभीरता, processed);
+		cleanup_threaded_अन्वेषणम्();
+		प्रत्यागम;
 	}
-	if (progress > pack_to_stdout)
+	यदि (प्रगतिः > pack_गन्तव्यम्_stdout)
 		fprintf_ln(stderr, _("Delta compression using up to %d threads"),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			   delta_अन्वेषणम्_तन्तवः);
+	CALLOC_ARRAY(p, delta_अन्वेषणम्_तन्तवः);
 
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = list_size / (delta_search_threads - i);
+	प्रति (i = 0; i < delta_अन्वेषणम्_तन्तवः; i++) {
+		अचिह्नित sub_आकार = list_आकार / (delta_अन्वेषणम्_तन्तवः - i);
 
 		/* don't use too small segments or no deltas will be found */
-		if (sub_size < 2*window && i+1 < delta_search_threads)
-			sub_size = 0;
+		यदि (sub_आकार < 2*गवाक्षः && i+1 < delta_अन्वेषणम्_तन्तवः)
+			sub_आकार = 0;
 
-		p[i].window = window;
-		p[i].depth = depth;
+		p[i].गवाक्षः = गवाक्षः;
+		p[i].गभीरता = गभीरता;
 		p[i].processed = processed;
 		p[i].working = 1;
-		p[i].data_ready = 0;
+		p[i].दत्त_ready = 0;
 
 		/* try to split chunks on "path" boundaries */
-		while (sub_size && sub_size < list_size &&
-		       list[sub_size]->hash &&
-		       list[sub_size]->hash == list[sub_size-1]->hash)
-			sub_size++;
+		यावत् (sub_आकार && sub_आकार < list_आकार &&
+		       list[sub_आकार]->hash &&
+		       list[sub_आकार]->hash == list[sub_आकार-1]->hash)
+			sub_आकार++;
 
 		p[i].list = list;
-		p[i].list_size = sub_size;
-		p[i].remaining = sub_size;
+		p[i].list_आकार = sub_आकार;
+		p[i].remaining = sub_आकार;
 
-		list += sub_size;
-		list_size -= sub_size;
+		list += sub_आकार;
+		list_आकार -= sub_आकार;
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		if (!p[i].list_size)
-			continue;
-		pthread_mutex_init(&p[i].mutex, NULL);
-		pthread_cond_init(&p[i].cond, NULL);
-		ret = pthread_create(&p[i].thread, NULL,
+	प्रति (i = 0; i < delta_अन्वेषणम्_तन्तवः; i++) {
+		यदि (!p[i].list_आकार)
+			अनुवर्त;
+		pthread_mutex_init(&p[i].mutex, रिक्त);
+		pthread_cond_init(&p[i].cond, रिक्त);
+		ret = pthread_create(&p[i].thread, रिक्त,
 				     threaded_find_deltas, &p[i]);
-		if (ret)
+		यदि (ret)
 			die(_("unable to create thread: %s"), strerror(ret));
-		active_threads++;
+		सक्रिय_तन्तवः++;
 	}
 
 	/*
@@ -3279,78 +3279,78 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 	 * until the remaining object list segments are simply too short
 	 * to be worth splitting anymore.
 	 */
-	while (active_threads) {
-		struct thread_params *target = NULL;
-		struct thread_params *victim = NULL;
-		unsigned sub_size = 0;
+	यावत् (सक्रिय_तन्तवः) {
+		संरचना thread_params *target = रिक्त;
+		संरचना thread_params *victim = रिक्त;
+		अचिह्नित sub_आकार = 0;
 
-		progress_lock();
-		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
-				if (!p[i].working)
+		प्रगतिः_तालकम्();
+		प्रति (;;) {
+			प्रति (i = 0; !target && i < delta_अन्वेषणम्_तन्तवः; i++)
+				यदि (!p[i].working)
 					target = &p[i];
-			if (target)
-				break;
-			pthread_cond_wait(&progress_cond, &progress_mutex);
+			यदि (target)
+				भङ्ग;
+			pthread_cond_wait(&प्रगतिः_cond, &प्रगतिः_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
-			if (p[i].remaining > 2*window &&
+		प्रति (i = 0; i < delta_अन्वेषणम्_तन्तवः; i++)
+			यदि (p[i].remaining > 2*गवाक्षः &&
 			    (!victim || victim->remaining < p[i].remaining))
 				victim = &p[i];
-		if (victim) {
-			sub_size = victim->remaining / 2;
-			list = victim->list + victim->list_size - sub_size;
-			while (sub_size && list[0]->hash &&
+		यदि (victim) {
+			sub_आकार = victim->remaining / 2;
+			list = victim->list + victim->list_आकार - sub_आकार;
+			यावत् (sub_आकार && list[0]->hash &&
 			       list[0]->hash == list[-1]->hash) {
 				list++;
-				sub_size--;
+				sub_आकार--;
 			}
-			if (!sub_size) {
+			यदि (!sub_आकार) {
 				/*
 				 * It is possible for some "paths" to have
 				 * so many objects that no hash boundary
 				 * might be found.  Let's just steal the
 				 * exact half in that case.
 				 */
-				sub_size = victim->remaining / 2;
-				list -= sub_size;
+				sub_आकार = victim->remaining / 2;
+				list -= sub_आकार;
 			}
 			target->list = list;
-			victim->list_size -= sub_size;
-			victim->remaining -= sub_size;
+			victim->list_आकार -= sub_आकार;
+			victim->remaining -= sub_आकार;
 		}
-		target->list_size = sub_size;
-		target->remaining = sub_size;
+		target->list_आकार = sub_आकार;
+		target->remaining = sub_आकार;
 		target->working = 1;
-		progress_unlock();
+		प्रगतिः_unlock();
 
-		pthread_mutex_lock(&target->mutex);
-		target->data_ready = 1;
+		pthread_mutex_तालकम्(&target->mutex);
+		target->दत्त_ready = 1;
 		pthread_cond_signal(&target->cond);
 		pthread_mutex_unlock(&target->mutex);
 
-		if (!sub_size) {
-			pthread_join(target->thread, NULL);
+		यदि (!sub_आकार) {
+			pthread_join(target->thread, रिक्त);
 			pthread_cond_destroy(&target->cond);
 			pthread_mutex_destroy(&target->mutex);
-			active_threads--;
+			सक्रिय_तन्तवः--;
 		}
 	}
-	cleanup_threaded_search();
-	free(p);
+	cleanup_threaded_अन्वेषणम्();
+	मुक्त(p);
 }
 
-static int obj_is_packed(const struct object_id *oid)
+स्थिर पूर्णाङ्क obj_is_packed(ध्रुव संरचना object_id *oid)
 {
-	return packlist_find(&to_pack, oid) ||
+	प्रत्यागम packlist_find(&गन्तव्यम्_pack, oid) ||
 		(reuse_packfile_bitmap &&
-		 bitmap_walk_contains(bitmap_git, reuse_packfile_bitmap, oid));
+		 bitmap_walk_अन्तर्भवति(bitmap_git, reuse_packfile_bitmap, oid));
 }
 
-static void add_tag_chain(const struct object_id *oid)
+स्थिर शून्य सङ्कलय_चिह्नकम्_chain(ध्रुव संरचना object_id *oid)
 {
-	struct tag *tag;
+	संरचना चिह्नकम् *चिह्नकम्;
 
 	/*
 	 * We catch duplicates already in add_object_entry(), but we'd
@@ -3359,128 +3359,128 @@ static void add_tag_chain(const struct object_id *oid)
 	 * it was included via bitmaps, we would not have parsed it
 	 * previously).
 	 */
-	if (obj_is_packed(oid))
-		return;
+	यदि (obj_is_packed(oid))
+		प्रत्यागम;
 
-	tag = lookup_tag(the_repository, oid);
-	while (1) {
-		if (!tag || parse_tag(the_repository, tag) || !tag->tagged)
+	चिह्नकम् = lookup_चिह्नकम्(the_repository, oid);
+	यावत् (1) {
+		यदि (!चिह्नकम् || parse_चिह्नकम्(the_repository, चिह्नकम्) || !चिह्नकम्->tagged)
 			die(_("unable to pack objects reachable from tag %s"),
-			    oid_to_hex(oid));
+			    oid_गन्तव्यम्_hex(oid));
 
-		add_object_entry(&tag->object.oid, OBJ_TAG, NULL, 0);
+		सङ्कलय_object_प्रविष्टिः(&चिह्नकम्->object.oid, OBJ_चिह्नकम्, रिक्त, 0);
 
-		if (tag->tagged->type != OBJ_TAG)
-			return;
+		यदि (चिह्नकम्->tagged->type != OBJ_चिह्नकम्)
+			प्रत्यागम;
 
-		tag = (struct tag *)tag->tagged;
+		चिह्नकम् = (संरचना चिह्नकम् *)चिह्नकम्->tagged;
 	}
 }
 
-static int add_ref_tag(const struct reference *ref, void *cb_data UNUSED)
+स्थिर पूर्णाङ्क सङ्कलय_ref_चिह्नकम्(ध्रुव संरचना reference *ref, शून्य *cb_दत्त अप्रयुक्तम्)
 {
-	struct object_id peeled;
+	संरचना object_id peeled;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled) &&
+	यदि (!reference_get_peeled_oid(the_repository, ref, &peeled) &&
 	    obj_is_packed(&peeled))
-		add_tag_chain(ref->oid);
-	return 0;
+		सङ्कलय_चिह्नकम्_chain(ref->oid);
+	प्रत्यागम 0;
 }
 
-static int should_attempt_deltas(struct object_entry *entry)
+स्थिर पूर्णाङ्क should_attempt_deltas(संरचना object_प्रविष्टिः *प्रविष्टिः)
 {
-	if (DELTA(entry))
+	यदि (DELTA(प्रविष्टिः))
 		/* This happens if we decided to reuse existing
 		 * delta from a pack. "reuse_delta &&" is implied.
 		 */
-		return 0;
+		प्रत्यागम 0;
 
-	if (!entry->type_valid ||
-	    oe_size_less_than(&to_pack, entry, 50))
-		return 0;
+	यदि (!प्रविष्टिः->type_valid ||
+	    oe_आकार_less_than(&गन्तव्यम्_pack, प्रविष्टिः, 50))
+		प्रत्यागम 0;
 
-	if (entry->no_try_delta)
-		return 0;
+	यदि (प्रविष्टिः->no_try_delta)
+		प्रत्यागम 0;
 
-	if (!entry->preferred_base) {
-		if (oe_type(entry) < 0)
+	यदि (!प्रविष्टिः->preferred_आधारः) {
+		यदि (oe_type(प्रविष्टिः) < 0)
 			die(_("unable to get type of object %s"),
-				oid_to_hex(&entry->idx.oid));
-	} else if (oe_type(entry) < 0) {
+				oid_गन्तव्यम्_hex(&प्रविष्टिः->idx.oid));
+	} अन्यथा यदि (oe_type(प्रविष्टिः) < 0) {
 		/*
 		 * This object is not found, but we
 		 * don't have to include it anyway.
 		 */
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	return 1;
+	प्रत्यागम 1;
 }
 
-static void find_deltas_for_region(struct object_entry *list,
-				   struct packing_region *region,
-				   unsigned int *processed)
+स्थिर शून्य find_deltas_for_region(संरचना object_प्रविष्टिः *list,
+				   संरचना packing_region *region,
+				   अचिह्नित पूर्णाङ्क *processed)
 {
-	struct object_entry **delta_list;
-	unsigned int delta_list_nr = 0;
+	संरचना object_प्रविष्टिः **delta_list;
+	अचिह्नित पूर्णाङ्क delta_list_nr = 0;
 
 	ALLOC_ARRAY(delta_list, region->nr);
-	for (size_t i = 0; i < region->nr; i++) {
-		struct object_entry *entry = list + region->start + i;
-		if (should_attempt_deltas(entry))
-			delta_list[delta_list_nr++] = entry;
+	प्रति (आकार_t i = 0; i < region->nr; i++) {
+		संरचना object_प्रविष्टिः *प्रविष्टिः = list + region->start + i;
+		यदि (should_attempt_deltas(प्रविष्टिः))
+			delta_list[delta_list_nr++] = प्रविष्टिः;
 	}
 
-	QSORT(delta_list, delta_list_nr, type_size_sort);
-	find_deltas(delta_list, &delta_list_nr, window, depth, processed);
-	free(delta_list);
+	QSORT(delta_list, delta_list_nr, type_आकार_क्रमय);
+	find_deltas(delta_list, &delta_list_nr, गवाक्षः, गभीरता, processed);
+	मुक्त(delta_list);
 }
 
-static void find_deltas_by_region(struct object_entry *list,
-				  struct packing_region *regions,
-				  size_t start, size_t nr)
+स्थिर शून्य find_deltas_by_region(संरचना object_प्रविष्टिः *list,
+				  संरचना packing_region *regions,
+				  आकार_t start, आकार_t nr)
 {
-	unsigned int processed = 0;
-	size_t progress_nr;
+	अचिह्नित पूर्णाङ्क processed = 0;
+	आकार_t प्रगतिः_nr;
 
-	if (!nr)
-		return;
+	यदि (!nr)
+		प्रत्यागम;
 
-	progress_nr = regions[nr - 1].start + regions[nr - 1].nr;
+	प्रगतिः_nr = regions[nr - 1].start + regions[nr - 1].nr;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Compressing objects by path"),
-						progress_nr);
+						प्रगतिः_nr);
 
-	while (nr--)
+	यावत् (nr--)
 		find_deltas_for_region(list,
 				       &regions[start++],
 				       &processed);
 
-	display_progress(progress_state, progress_nr);
-	stop_progress(&progress_state);
+	display_प्रगतिः(प्रगतिः_state, प्रगतिः_nr);
+	stop_प्रगतिः(&प्रगतिः_state);
 }
 
-static void *threaded_find_deltas_by_path(void *arg)
+स्थिर शून्य *threaded_find_deltas_by_मार्गः(शून्य *arg)
 {
-	struct thread_params *me = arg;
+	संरचना thread_params *me = arg;
 
-	progress_lock();
-	while (me->remaining) {
-		while (me->remaining) {
-			progress_unlock();
-			find_deltas_for_region(to_pack.objects,
+	प्रगतिः_तालकम्();
+	यावत् (me->remaining) {
+		यावत् (me->remaining) {
+			प्रगतिः_unlock();
+			find_deltas_for_region(गन्तव्यम्_pack.objects,
 					       me->regions,
 					       me->processed);
-			progress_lock();
+			प्रगतिः_तालकम्();
 			me->remaining--;
 			me->regions++;
 		}
 
 		me->working = 0;
-		pthread_cond_signal(&progress_cond);
-		progress_unlock();
+		pthread_cond_signal(&प्रगतिः_cond);
+		प्रगतिः_unlock();
 
 		/*
 		 * We must not set ->data_ready before we wait on the
@@ -3490,80 +3490,80 @@ static void *threaded_find_deltas_by_path(void *arg)
 		 * was initialized to 0 before this thread was spawned
 		 * and we reset it to 0 right away.
 		 */
-		pthread_mutex_lock(&me->mutex);
-		while (!me->data_ready)
+		pthread_mutex_तालकम्(&me->mutex);
+		यावत् (!me->दत्त_ready)
 			pthread_cond_wait(&me->cond, &me->mutex);
-		me->data_ready = 0;
+		me->दत्त_ready = 0;
 		pthread_mutex_unlock(&me->mutex);
 
-		progress_lock();
+		प्रगतिः_तालकम्();
 	}
-	progress_unlock();
+	प्रगतिः_unlock();
 	/* leave ->working 1 so that this doesn't get more work assigned */
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
-static void ll_find_deltas_by_region(struct object_entry *list,
-				     struct packing_region *regions,
+स्थिर शून्य ll_find_deltas_by_region(संरचना object_प्रविष्टिः *list,
+				     संरचना packing_region *regions,
 				     uint32_t start, uint32_t nr)
 {
-	struct thread_params *p;
-	int i, ret, active_threads = 0;
-	unsigned int processed = 0;
-	uint32_t progress_nr;
-	init_threaded_search();
+	संरचना thread_params *p;
+	पूर्णाङ्क i, ret, सक्रिय_तन्तवः = 0;
+	अचिह्नित पूर्णाङ्क processed = 0;
+	uint32_t प्रगतिः_nr;
+	init_threaded_अन्वेषणम्();
 
-	if (!nr)
-		return;
+	यदि (!nr)
+		प्रत्यागम;
 
-	progress_nr =  regions[nr - 1].start + regions[nr - 1].nr;
-	if (delta_search_threads <= 1) {
+	प्रगतिः_nr =  regions[nr - 1].start + regions[nr - 1].nr;
+	यदि (delta_अन्वेषणम्_तन्तवः <= 1) {
 		find_deltas_by_region(list, regions, start, nr);
-		cleanup_threaded_search();
-		return;
+		cleanup_threaded_अन्वेषणम्();
+		प्रत्यागम;
 	}
 
-	if (progress > pack_to_stdout)
+	यदि (प्रगतिः > pack_गन्तव्यम्_stdout)
 		fprintf_ln(stderr,
 			   Q_("Path-based delta compression using up to %d thread",
 			      "Path-based delta compression using up to %d threads",
-			      delta_search_threads),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			      delta_अन्वेषणम्_तन्तवः),
+			   delta_अन्वेषणम्_तन्तवः);
+	CALLOC_ARRAY(p, delta_अन्वेषणम्_तन्तवः);
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Compressing objects by path"),
-						progress_nr);
+						प्रगतिः_nr);
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = nr / (delta_search_threads - i);
+	प्रति (i = 0; i < delta_अन्वेषणम्_तन्तवः; i++) {
+		अचिह्नित sub_आकार = nr / (delta_अन्वेषणम्_तन्तवः - i);
 
-		p[i].window = window;
-		p[i].depth = depth;
+		p[i].गवाक्षः = गवाक्षः;
+		p[i].गभीरता = गभीरता;
 		p[i].processed = &processed;
 		p[i].working = 1;
-		p[i].data_ready = 0;
+		p[i].दत्त_ready = 0;
 
 		p[i].regions = regions;
-		p[i].list_size = sub_size;
-		p[i].remaining = sub_size;
+		p[i].list_आकार = sub_आकार;
+		p[i].remaining = sub_आकार;
 
-		regions += sub_size;
-		nr -= sub_size;
+		regions += sub_आकार;
+		nr -= sub_आकार;
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		if (!p[i].list_size)
-			continue;
-		pthread_mutex_init(&p[i].mutex, NULL);
-		pthread_cond_init(&p[i].cond, NULL);
-		ret = pthread_create(&p[i].thread, NULL,
-				     threaded_find_deltas_by_path, &p[i]);
-		if (ret)
+	प्रति (i = 0; i < delta_अन्वेषणम्_तन्तवः; i++) {
+		यदि (!p[i].list_आकार)
+			अनुवर्त;
+		pthread_mutex_init(&p[i].mutex, रिक्त);
+		pthread_cond_init(&p[i].cond, रिक्त);
+		ret = pthread_create(&p[i].thread, रिक्त,
+				     threaded_find_deltas_by_मार्गः, &p[i]);
+		यदि (ret)
 			die(_("unable to create thread: %s"), strerror(ret));
-		active_threads++;
+		सक्रिय_तन्तवः++;
 	}
 
 	/*
@@ -3574,63 +3574,63 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 	 * until the remaining object list segments are simply too short
 	 * to be worth splitting anymore.
 	 */
-	while (active_threads) {
-		struct thread_params *target = NULL;
-		struct thread_params *victim = NULL;
-		unsigned sub_size = 0;
+	यावत् (सक्रिय_तन्तवः) {
+		संरचना thread_params *target = रिक्त;
+		संरचना thread_params *victim = रिक्त;
+		अचिह्नित sub_आकार = 0;
 
-		progress_lock();
-		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
-				if (!p[i].working)
+		प्रगतिः_तालकम्();
+		प्रति (;;) {
+			प्रति (i = 0; !target && i < delta_अन्वेषणम्_तन्तवः; i++)
+				यदि (!p[i].working)
 					target = &p[i];
-			if (target)
-				break;
-			pthread_cond_wait(&progress_cond, &progress_mutex);
+			यदि (target)
+				भङ्ग;
+			pthread_cond_wait(&प्रगतिः_cond, &प्रगतिः_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
-			if (p[i].remaining > 2*window &&
+		प्रति (i = 0; i < delta_अन्वेषणम्_तन्तवः; i++)
+			यदि (p[i].remaining > 2*गवाक्षः &&
 			    (!victim || victim->remaining < p[i].remaining))
 				victim = &p[i];
-		if (victim) {
-			sub_size = victim->remaining / 2;
-			target->regions = victim->regions + victim->remaining - sub_size;
-			victim->list_size -= sub_size;
-			victim->remaining -= sub_size;
+		यदि (victim) {
+			sub_आकार = victim->remaining / 2;
+			target->regions = victim->regions + victim->remaining - sub_आकार;
+			victim->list_आकार -= sub_आकार;
+			victim->remaining -= sub_आकार;
 		}
-		target->list_size = sub_size;
-		target->remaining = sub_size;
+		target->list_आकार = sub_आकार;
+		target->remaining = sub_आकार;
 		target->working = 1;
-		progress_unlock();
+		प्रगतिः_unlock();
 
-		pthread_mutex_lock(&target->mutex);
-		target->data_ready = 1;
+		pthread_mutex_तालकम्(&target->mutex);
+		target->दत्त_ready = 1;
 		pthread_cond_signal(&target->cond);
 		pthread_mutex_unlock(&target->mutex);
 
-		if (!sub_size) {
-			pthread_join(target->thread, NULL);
+		यदि (!sub_आकार) {
+			pthread_join(target->thread, रिक्त);
 			pthread_cond_destroy(&target->cond);
 			pthread_mutex_destroy(&target->mutex);
-			active_threads--;
+			सक्रिय_तन्तवः--;
 		}
 	}
-	cleanup_threaded_search();
-	free(p);
+	cleanup_threaded_अन्वेषणम्();
+	मुक्त(p);
 
-	display_progress(progress_state, progress_nr);
-	stop_progress(&progress_state);
+	display_प्रगतिः(प्रगतिः_state, प्रगतिः_nr);
+	stop_प्रगतिः(&प्रगतिः_state);
 }
 
-static void prepare_pack(int window, int depth)
+स्थिर शून्य prepare_pack(पूर्णाङ्क गवाक्षः, पूर्णाङ्क गभीरता)
 {
-	struct object_entry **delta_list;
+	संरचना object_प्रविष्टिः **delta_list;
 	uint32_t i, nr_deltas;
-	unsigned n;
+	अचिह्नित n;
 
-	if (use_delta_islands)
-		resolve_tree_islands(the_repository, progress, &to_pack);
+	यदि (use_delta_islands)
+		resolve_वृक्षः_islands(the_repository, प्रगतिः, &गन्तव्यम्_pack);
 
 	get_object_details();
 
@@ -3641,187 +3641,187 @@ static void prepare_pack(int window, int depth)
 	 * should validate everything they get anyway so no need to incur
 	 * the additional cost here in that case.
 	 */
-	if (!pack_to_stdout)
+	यदि (!pack_गन्तव्यम्_stdout)
 		do_check_packed_object_crc = 1;
 
-	if (!to_pack.nr_objects || !window || !depth)
-		return;
+	यदि (!गन्तव्यम्_pack.nr_objects || !गवाक्षः || !गभीरता)
+		प्रत्यागम;
 
-	if (path_walk)
-		ll_find_deltas_by_region(to_pack.objects, to_pack.regions,
-					 0, to_pack.nr_regions);
+	यदि (मार्गः_walk)
+		ll_find_deltas_by_region(गन्तव्यम्_pack.objects, गन्तव्यम्_pack.regions,
+					 0, गन्तव्यम्_pack.nr_regions);
 
-	ALLOC_ARRAY(delta_list, to_pack.nr_objects);
+	ALLOC_ARRAY(delta_list, गन्तव्यम्_pack.nr_objects);
 	nr_deltas = n = 0;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = to_pack.objects + i;
+	प्रति (i = 0; i < गन्तव्यम्_pack.nr_objects; i++) {
+		संरचना object_प्रविष्टिः *प्रविष्टिः = गन्तव्यम्_pack.objects + i;
 
-		if (!should_attempt_deltas(entry))
-			continue;
+		यदि (!should_attempt_deltas(प्रविष्टिः))
+			अनुवर्त;
 
-		if (!entry->preferred_base)
+		यदि (!प्रविष्टिः->preferred_आधारः)
 			nr_deltas++;
 
-		delta_list[n++] = entry;
+		delta_list[n++] = प्रविष्टिः;
 	}
 
-	if (nr_deltas && n > 1) {
-		unsigned nr_done = 0;
+	यदि (nr_deltas && n > 1) {
+		अचिह्नित nr_समाप्तम् = 0;
 
-		if (progress)
-			progress_state = start_progress(the_repository,
+		यदि (प्रगतिः)
+			प्रगतिः_state = start_प्रगतिः(the_repository,
 							_("Compressing objects"),
 							nr_deltas);
-		QSORT(delta_list, n, type_size_sort);
-		ll_find_deltas(delta_list, n, window+1, depth, &nr_done);
-		stop_progress(&progress_state);
-		if (nr_done != nr_deltas)
+		QSORT(delta_list, n, type_आकार_क्रमय);
+		ll_find_deltas(delta_list, n, गवाक्षः+1, गभीरता, &nr_समाप्तम्);
+		stop_प्रगतिः(&प्रगतिः_state);
+		यदि (nr_समाप्तम् != nr_deltas)
 			die(_("inconsistency with delta count"));
 	}
-	free(delta_list);
+	मुक्त(delta_list);
 }
 
-static int git_pack_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क git_pack_config(ध्रुव वर्ण *k, ध्रुव वर्ण *v,
+			   ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	if (!strcmp(k, "pack.window")) {
-		window = git_config_int(k, v, ctx->kvi);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "pack.window")) {
+		गवाक्षः = git_config_int(k, v, ctx->kvi);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.windowmemory")) {
-		window_memory_limit = git_config_ulong(k, v, ctx->kvi);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "pack.windowmemory")) {
+		गवाक्षः_स्मृतिः_सीमा = git_config_ulong(k, v, ctx->kvi);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.depth")) {
-		depth = git_config_int(k, v, ctx->kvi);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "pack.depth")) {
+		गभीरता = git_config_int(k, v, ctx->kvi);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.deltacachesize")) {
-		max_delta_cache_size = git_config_size_t(k, v, ctx->kvi);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "pack.deltacachesize")) {
+		max_delta_cache_आकार = git_config_आकार_t(k, v, ctx->kvi);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.deltacachelimit")) {
-		cache_max_small_delta_size = git_config_int(k, v, ctx->kvi);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "pack.deltacachelimit")) {
+		cache_max_small_delta_आकार = git_config_int(k, v, ctx->kvi);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.writebitmaphashcache")) {
-		if (git_config_bool(k, v))
+	यदि (!वाक्यं_तुलय(k, "pack.writebitmaphashcache")) {
+		यदि (git_config_bool(k, v))
 			write_bitmap_options |= BITMAP_OPT_HASH_CACHE;
-		else
+		अन्यथा
 			write_bitmap_options &= ~BITMAP_OPT_HASH_CACHE;
 	}
 
-	if (!strcmp(k, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(k, v))
-			write_bitmap_options |= BITMAP_OPT_LOOKUP_TABLE;
-		else
-			write_bitmap_options &= ~BITMAP_OPT_LOOKUP_TABLE;
+	यदि (!वाक्यं_तुलय(k, "pack.writebitmaplookuptable")) {
+		यदि (git_config_bool(k, v))
+			write_bitmap_options |= BITMAP_OPT_LOOKUP_सारणी;
+		अन्यथा
+			write_bitmap_options &= ~BITMAP_OPT_LOOKUP_सारणी;
 	}
 
-	if (!strcmp(k, "pack.usebitmaps")) {
-		use_bitmap_index_default = git_config_bool(k, v);
-		return 0;
+	यदि (!वाक्यं_तुलय(k, "pack.usebitmaps")) {
+		use_bitmap_सूचकांक_default = git_config_bool(k, v);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.allowpackreuse")) {
-		int res = git_parse_maybe_bool_text(v);
-		if (res < 0) {
-			if (!strcasecmp(v, "single"))
+	यदि (!वाक्यं_तुलय(k, "pack.allowpackreuse")) {
+		पूर्णाङ्क res = git_parse_maybe_bool_text(v);
+		यदि (res < 0) {
+			यदि (!strcasecmp(v, "single"))
 				allow_pack_reuse = SINGLE_PACK_REUSE;
-			else if (!strcasecmp(v, "multi"))
+			अन्यथा यदि (!strcasecmp(v, "multi"))
 				allow_pack_reuse = MULTI_PACK_REUSE;
-			else
+			अन्यथा
 				die(_("invalid pack.allowPackReuse value: '%s'"), v);
-		} else if (res) {
+		} अन्यथा यदि (res) {
 			allow_pack_reuse = SINGLE_PACK_REUSE;
-		} else {
+		} अन्यथा {
 			allow_pack_reuse = NO_PACK_REUSE;
 		}
-		return 0;
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.threads")) {
-		delta_search_threads = git_config_int(k, v, ctx->kvi);
-		if (delta_search_threads < 0)
+	यदि (!वाक्यं_तुलय(k, "pack.threads")) {
+		delta_अन्वेषणम्_तन्तवः = git_config_int(k, v, ctx->kvi);
+		यदि (delta_अन्वेषणम्_तन्तवः < 0)
 			die(_("invalid number of threads specified (%d)"),
-			    delta_search_threads);
-		if (!HAVE_THREADS && delta_search_threads != 1) {
+			    delta_अन्वेषणम्_तन्तवः);
+		यदि (!HAVE_तन्तवः && delta_अन्वेषणम्_तन्तवः != 1) {
 			warning(_("no threads support, ignoring %s"), k);
-			delta_search_threads = 0;
+			delta_अन्वेषणम्_तन्तवः = 0;
 		}
-		return 0;
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.indexversion")) {
-		pack_idx_opts.version = git_config_int(k, v, ctx->kvi);
-		if (pack_idx_opts.version > 2)
+	यदि (!वाक्यं_तुलय(k, "pack.indexversion")) {
+		pack_idx_opts.संस्करणम् = git_config_int(k, v, ctx->kvi);
+		यदि (pack_idx_opts.संस्करणम् > 2)
 			die(_("bad pack.indexVersion=%"PRIu32),
-			    pack_idx_opts.version);
-		return 0;
+			    pack_idx_opts.संस्करणम्);
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "pack.writereverseindex")) {
-		if (git_config_bool(k, v))
+	यदि (!वाक्यं_तुलय(k, "pack.writereverseindex")) {
+		यदि (git_config_bool(k, v))
 			pack_idx_opts.flags |= WRITE_REV;
-		else
+		अन्यथा
 			pack_idx_opts.flags &= ~WRITE_REV;
-		return 0;
+		प्रत्यागम 0;
 	}
-	if (!strcmp(k, "uploadpack.blobpackfileuri")) {
-		struct configured_exclusion *ex;
-		const char *oid_end, *pack_end;
+	यदि (!वाक्यं_तुलय(k, "uploadpack.blobpackfileuri")) {
+		संरचना configured_exclusion *ex;
+		ध्रुव वर्ण *oid_अन्तः, *pack_अन्तः;
 		/*
 		 * Stores the pack hash. This is not a true object ID, but is
 		 * of the same form.
 		 */
-		struct object_id pack_hash;
+		संरचना object_id pack_hash;
 
-		if (!v)
-			return config_error_nonbool(k);
+		यदि (!v)
+			प्रत्यागम config_error_nonbool(k);
 
-		ex = xmalloc(sizeof(*ex));
-		if (parse_oid_hex(v, &ex->e.oid, &oid_end) ||
-		    *oid_end != ' ' ||
-		    parse_oid_hex(oid_end + 1, &pack_hash, &pack_end) ||
-		    *pack_end != ' ')
+		ex = xmalloc(परिमाण(*ex));
+		यदि (parse_oid_hex(v, &ex->e.oid, &oid_अन्तः) ||
+		    *oid_अन्तः != ' ' ||
+		    parse_oid_hex(oid_अन्तः + 1, &pack_hash, &pack_अन्तः) ||
+		    *pack_अन्तः != ' ')
 			die(_("value of uploadpack.blobpackfileuri must be "
 			      "of the form '<object-hash> <pack-hash> <uri>' (got '%s')"), v);
-		if (oidmap_get(&configured_exclusions, &ex->e.oid))
+		यदि (oidmap_get(&configured_exclusions, &ex->e.oid))
 			die(_("object already configured in another "
 			      "uploadpack.blobpackfileuri (got '%s')"), v);
-		ex->pack_hash_hex = xcalloc(1, pack_end - oid_end);
-		memcpy(ex->pack_hash_hex, oid_end + 1, pack_end - oid_end - 1);
-		ex->uri = xstrdup(pack_end + 1);
+		ex->pack_hash_hex = xcalloc(1, pack_अन्तः - oid_अन्तः);
+		स्मृतिं_प्रतिलिख(ex->pack_hash_hex, oid_अन्तः + 1, pack_अन्तः - oid_अन्तः - 1);
+		ex->uri = xstrdup(pack_अन्तः + 1);
 		oidmap_put(&configured_exclusions, ex);
 	}
-	return git_default_config(k, v, ctx, cb);
+	प्रत्यागम git_default_config(k, v, ctx, cb);
 }
 
 /* Counters for trace2 output when in --stdin-packs mode. */
-static int stdin_packs_found_nr;
-static int stdin_packs_hints_nr;
+स्थिर पूर्णाङ्क stdin_packs_प्राप्तम्_nr;
+स्थिर पूर्णाङ्क stdin_packs_hints_nr;
 
-static int add_object_entry_from_pack(const struct object_id *oid,
-				      struct packed_git *p,
+स्थिर पूर्णाङ्क सङ्कलय_object_प्रविष्टिः_from_pack(ध्रुव संरचना object_id *oid,
+				      संरचना packed_git *p,
 				      uint32_t pos,
-				      void *_data)
+				      शून्य *दत्त_2)
 {
 	off_t ofs;
-	struct object_info oi = OBJECT_INFO_INIT;
-	enum object_type type = OBJ_NONE;
+	संरचना object_info oi = OBJECT_INFO_INIT;
+	गणना object_type type = OBJ_NONE;
 
-	display_progress(progress_state, ++nr_seen);
+	display_प्रगतिः(प्रगतिः_state, ++nr_आलोकितम्);
 
-	if (have_duplicate_entry(oid, 0))
-		return 0;
+	यदि (have_duplicate_प्रविष्टिः(oid, 0))
+		प्रत्यागम 0;
 
-	stdin_packs_found_nr++;
+	stdin_packs_प्राप्तम्_nr++;
 
-	ofs = nth_packed_object_offset(p, pos);
+	ofs = nth_packed_object_विस्थापनम्(p, pos);
 
 	oi.typep = &type;
-	if (packed_object_info(NULL, p, ofs, &oi) < 0) {
+	यदि (packed_object_info(रिक्त, p, ofs, &oi) < 0) {
 		die(_("could not get type of object %s in pack %s"),
-		    oid_to_hex(oid), p->pack_name);
-	} else if (type == OBJ_COMMIT) {
-		struct rev_info *revs = _data;
+		    oid_गन्तव्यम्_hex(oid), p->pack_name);
+	} अन्यथा यदि (type == OBJ_COMMIT) {
+		संरचना rev_info *revs = दत्त_2;
 		/*
 		 * commits in included packs are used as starting points
 		 * for the subsequent revision walk
@@ -3834,30 +3834,30 @@ static int add_object_entry_from_pack(const struct object_id *oid,
 		 * However, we'll only add those objects to the packing
 		 * list after checking `want_object_in_pack()` below.
 		 */
-		add_pending_oid(revs, NULL, oid, 0);
+		सङ्कलय_pending_oid(revs, रिक्त, oid, 0);
 	}
 
-	if (!want_object_in_pack(oid, 0, &p, &ofs))
-		return 0;
+	यदि (!want_object_अन्तर्_pack(oid, 0, &p, &ofs))
+		प्रत्यागम 0;
 
-	create_object_entry(oid, type, 0, 0, 0, p, ofs);
+	create_object_प्रविष्टिः(oid, type, 0, 0, 0, p, ofs);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void show_object_pack_hint(struct object *object, const char *name,
-				  void *data)
+स्थिर शून्य show_object_pack_hint(संरचना object *object, ध्रुव वर्ण *name,
+				  शून्य *दत्त)
 {
-	enum stdin_packs_mode mode = *(enum stdin_packs_mode *)data;
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
-		if (object->type == OBJ_BLOB &&
+	गणना stdin_packs_बहुलकम् बहुलकम् = *(गणना stdin_packs_बहुलकम् *)दत्त;
+	यदि (बहुलकम् == STDIN_PACKS_बहुलकम्_FOLLOW) {
+		यदि (object->type == OBJ_BLOB &&
 		    !odb_has_object(the_repository->objects, &object->oid, 0))
-			return;
-		add_object_entry(&object->oid, object->type, name, 0);
-	} else {
-		struct object_entry *oe = packlist_find(&to_pack, &object->oid);
-		if (!oe)
-			return;
+			प्रत्यागम;
+		सङ्कलय_object_प्रविष्टिः(&object->oid, object->type, name, 0);
+	} अन्यथा {
+		संरचना object_प्रविष्टिः *oe = packlist_find(&गन्तव्यम्_pack, &object->oid);
+		यदि (!oe)
+			प्रत्यागम;
 
 		/*
 		 * Our 'to_pack' list was constructed by iterating all
@@ -3876,13 +3876,13 @@ static void show_object_pack_hint(struct object *object, const char *name,
 	}
 }
 
-static void show_commit_pack_hint(struct commit *commit, void *data)
+स्थिर शून्य show_commit_pack_hint(संरचना commit *commit, शून्य *दत्त)
 {
-	enum stdin_packs_mode mode = *(enum stdin_packs_mode *)data;
+	गणना stdin_packs_बहुलकम् बहुलकम् = *(गणना stdin_packs_बहुलकम् *)दत्त;
 
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
-		show_object_pack_hint((struct object *)commit, "", data);
-		return;
+	यदि (बहुलकम् == STDIN_PACKS_बहुलकम्_FOLLOW) {
+		show_object_pack_hint((संरचना object *)commit, "", दत्त);
+		प्रत्यागम;
 	}
 
 	/* nothing to do; commits don't have a namehash */
@@ -3908,59 +3908,59 @@ static void show_commit_pack_hint(struct commit *commit, void *data)
  * STDIN_PACK_EXCLUDE_OPEN are used as traversal tips when invoked
  * with --stdin-packs=follow.
  */
-enum stdin_pack_info_kind {
+गणना stdin_pack_info_विधा {
 	STDIN_PACK_INCLUDE = (1<<0),
 	STDIN_PACK_EXCLUDE_CLOSED = (1<<1),
 	STDIN_PACK_EXCLUDE_OPEN = (1<<2),
 };
 
-struct stdin_pack_info {
-	struct packed_git *p;
-	enum stdin_pack_info_kind kind;
+संरचना stdin_pack_info {
+	संरचना packed_git *p;
+	गणना stdin_pack_info_विधा विधा;
 };
 
-static int pack_mtime_cmp(const void *_a, const void *_b)
+स्थिर पूर्णाङ्क pack_mtime_cmp(ध्रुव शून्य *_a, ध्रुव शून्य *_b)
 {
-	struct stdin_pack_info *a = ((const struct string_list_item*)_a)->util;
-	struct stdin_pack_info *b = ((const struct string_list_item*)_b)->util;
+	संरचना stdin_pack_info *a = ((ध्रुव संरचना string_list_item*)_a)->util;
+	संरचना stdin_pack_info *b = ((ध्रुव संरचना string_list_item*)_b)->util;
 
 	/*
 	 * order packs by descending mtime so that objects are laid out
 	 * roughly as newest-to-oldest
 	 */
-	if (a->p->mtime < b->p->mtime)
-		return 1;
-	else if (b->p->mtime < a->p->mtime)
-		return -1;
-	else
-		return 0;
+	यदि (a->p->mtime < b->p->mtime)
+		प्रत्यागम 1;
+	अन्यथा यदि (b->p->mtime < a->p->mtime)
+		प्रत्यागम -1;
+	अन्यथा
+		प्रत्यागम 0;
 }
 
-static int stdin_packs_include_check_obj(struct object *obj, void *data UNUSED)
+स्थिर पूर्णाङ्क stdin_packs_include_check_obj(संरचना object *obj, शून्य *दत्त अप्रयुक्तम्)
 {
-	return !has_object_kept_pack(to_pack.repo, &obj->oid,
-				     KEPT_PACK_IN_CORE);
+	प्रत्यागम !has_object_kept_pack(गन्तव्यम्_pack.repo, &obj->oid,
+				     KEPT_PACK_अन्तर्_CORE);
 }
 
-static int stdin_packs_include_check(struct commit *commit, void *data)
+स्थिर पूर्णाङ्क stdin_packs_include_check(संरचना commit *commit, शून्य *दत्त)
 {
-	return stdin_packs_include_check_obj((struct object *)commit, data);
+	प्रत्यागम stdin_packs_include_check_obj((संरचना object *)commit, दत्त);
 }
 
-static void stdin_packs_add_pack_entries(struct strmap *packs,
-					 struct rev_info *revs)
+स्थिर शून्य stdin_packs_सङ्कलय_pack_entries(संरचना strmap *packs,
+					 संरचना rev_info *revs)
 {
-	struct string_list keys = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	संरचना string_list कुञ्चिकाः = STRING_LIST_INIT_NODUP;
+	संरचना string_list_item *item;
+	संरचना hashmap_iter iter;
+	संरचना strmap_प्रविष्टिः *प्रविष्टिः;
 
-	strmap_for_each_entry(packs, &iter, entry) {
-		struct stdin_pack_info *info = entry->value;
-		if (!info->p)
-			die(_("could not find pack '%s'"), entry->key);
+	strmap_for_each_प्रविष्टिः(packs, &iter, प्रविष्टिः) {
+		संरचना stdin_pack_info *info = प्रविष्टिः->मानम्;
+		यदि (!info->p)
+			die(_("could not find pack '%s'"), प्रविष्टिः->कुञ्चिका);
 
-		string_list_append(&keys, entry->key)->util = info;
+		string_list_append(&कुञ्चिकाः, प्रविष्टिः->कुञ्चिका)->util = info;
 	}
 
 	/*
@@ -3968,12 +3968,12 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 	 * string_list_item's ->util pointer, which string_list_sort() does not
 	 * provide.
 	 */
-	QSORT(keys.items, keys.nr, pack_mtime_cmp);
+	QSORT(कुञ्चिकाः.वस्तूनि, कुञ्चिकाः.nr, pack_mtime_cmp);
 
-	for_each_string_list_item(item, &keys) {
-		struct stdin_pack_info *info = item->util;
+	for_each_string_list_item(item, &कुञ्चिकाः) {
+		संरचना stdin_pack_info *info = item->util;
 
-		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
+		यदि (info->विधा & STDIN_PACK_EXCLUDE_OPEN) {
 			/*
 			 * When open-excluded packs ("!") are present, stop
 			 * the parent walk at closed-excluded ("^") packs.
@@ -3984,59 +3984,59 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 			revs->include_check_obj = stdin_packs_include_check_obj;
 		}
 
-		if ((info->kind & STDIN_PACK_INCLUDE) ||
-		    (info->kind & STDIN_PACK_EXCLUDE_OPEN))
-			for_each_object_in_pack(info->p,
-						add_object_entry_from_pack,
+		यदि ((info->विधा & STDIN_PACK_INCLUDE) ||
+		    (info->विधा & STDIN_PACK_EXCLUDE_OPEN))
+			for_each_object_अन्तर्_pack(info->p,
+						सङ्कलय_object_प्रविष्टिः_from_pack,
 						revs,
-						ODB_FOR_EACH_OBJECT_PACK_ORDER);
+						ODB_FOR_EACH_OBJECT_PACK_क्रमः);
 	}
 
-	string_list_clear(&keys, 0);
+	string_list_clear(&कुञ्चिकाः, 0);
 }
 
-static void stdin_packs_read_input(struct rev_info *revs,
-				   enum stdin_packs_mode mode)
+स्थिर शून्य stdin_packs_read_निवेशः(संरचना rev_info *revs,
+				   गणना stdin_packs_बहुलकम् बहुलकम्)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strmap packs = STRMAP_INIT;
-	struct packed_git *p;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना strmap packs = STRMAP_INIT;
+	संरचना packed_git *p;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		struct stdin_pack_info *info;
-		enum stdin_pack_info_kind kind = STDIN_PACK_INCLUDE;
-		const char *key = buf.buf;
+	यावत् (strbuf_getline(&buf, stdin) != EOF) {
+		संरचना stdin_pack_info *info;
+		गणना stdin_pack_info_विधा विधा = STDIN_PACK_INCLUDE;
+		ध्रुव वर्ण *कुञ्चिका = buf.buf;
 
-		if (!*key)
-			continue;
-		else if (*key == '^')
-			kind = STDIN_PACK_EXCLUDE_CLOSED;
-		else if (*key == '!' && mode == STDIN_PACKS_MODE_FOLLOW)
-			kind = STDIN_PACK_EXCLUDE_OPEN;
+		यदि (!*कुञ्चिका)
+			अनुवर्त;
+		अन्यथा यदि (*कुञ्चिका == '^')
+			विधा = STDIN_PACK_EXCLUDE_CLOSED;
+		अन्यथा यदि (*कुञ्चिका == '!' && बहुलकम् == STDIN_PACKS_बहुलकम्_FOLLOW)
+			विधा = STDIN_PACK_EXCLUDE_OPEN;
 
-		if (kind != STDIN_PACK_INCLUDE)
-			key++;
+		यदि (विधा != STDIN_PACK_INCLUDE)
+			कुञ्चिका++;
 
-		info = strmap_get(&packs, key);
-		if (!info) {
+		info = strmap_get(&packs, कुञ्चिका);
+		यदि (!info) {
 			CALLOC_ARRAY(info, 1);
-			strmap_put(&packs, key, info);
+			strmap_put(&packs, कुञ्चिका, info);
 		}
 
-		info->kind |= kind;
+		info->विधा |= विधा;
 
 		strbuf_reset(&buf);
 	}
 
 	repo_for_each_pack(the_repository, p) {
-		struct stdin_pack_info *info;
+		संरचना stdin_pack_info *info;
 
 		info = strmap_get(&packs, pack_basename(p));
-		if (!info)
-			continue;
+		यदि (!info)
+			अनुवर्त;
 
-		if (info->kind & STDIN_PACK_INCLUDE) {
-			if (exclude_promisor_objects && p->pack_promisor)
+		यदि (info->विधा & STDIN_PACK_INCLUDE) {
+			यदि (exclude_promisor_objects && p->pack_promisor)
 				die(_("packfile %s is a promisor but --exclude-promisor-objects was given"), p->pack_name);
 
 			/*
@@ -4045,21 +4045,21 @@ static void stdin_packs_read_input(struct rev_info *revs,
 			 * later on in e.g.  pack_mtime_cmp(), excluded
 			 * packs are handled below.
 			 */
-			if (!is_pack_valid(p))
+			यदि (!is_pack_valid(p))
 				die(_("packfile %s cannot be accessed"), p->pack_name);
 		}
 
-		if (info->kind & STDIN_PACK_EXCLUDE_CLOSED) {
+		यदि (info->विधा & STDIN_PACK_EXCLUDE_CLOSED) {
 			/*
 			 * Marking excluded packs as kept in-core so
 			 * that later calls to add_object_entry()
 			 * discards any objects that are also found in
 			 * excluded packs.
 			 */
-			p->pack_keep_in_core = 1;
+			p->pack_keep_अन्तर्_core = 1;
 		}
 
-		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
+		यदि (info->विधा & STDIN_PACK_EXCLUDE_OPEN) {
 			/*
 			 * Marking excluded open packs as kept in-core
 			 * (open) for the same reason as we marked
@@ -4070,25 +4070,25 @@ static void stdin_packs_read_input(struct rev_info *revs,
 			 * are not guaranteed to have closure.
 			 *
 			 */
-			p->pack_keep_in_core_open = 1;
+			p->pack_keep_अन्तर्_core_open = 1;
 		}
 
 		info->p = p;
 	}
 
-	stdin_packs_add_pack_entries(&packs, revs);
+	stdin_packs_सङ्कलय_pack_entries(&packs, revs);
 
 	strbuf_release(&buf);
 	strmap_clear(&packs, 1);
 }
 
-static void add_unreachable_loose_objects(struct rev_info *revs);
+स्थिर शून्य सङ्कलय_unreachable_loose_objects(संरचना rev_info *revs);
 
-static void read_stdin_packs(struct repository *repo,
-			     enum stdin_packs_mode mode, int rev_list_unpacked)
+स्थिर शून्य read_stdin_packs(संरचना repository *repo,
+			     गणना stdin_packs_बहुलकम् बहुलकम्, पूर्णाङ्क rev_list_unpacked)
 {
-	int prev_fetch_if_missing = repo->fetch_if_missing;
-	struct rev_info revs;
+	पूर्णाङ्क पूर्व_fetch_if_missing = repo->fetch_if_missing;
+	संरचना rev_info revs;
 
 	/*
 	 * The revision walk may hit objects that are promised, only. As the
@@ -4097,7 +4097,7 @@ static void read_stdin_packs(struct repository *repo,
 	 */
 	repo->fetch_if_missing = 0;
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, रिक्त);
 	/*
 	 * Use a revision walk to fill in the namehash of objects in the include
 	 * packs. To save time, we'll avoid traversing through objects that are
@@ -4108,69 +4108,69 @@ static void read_stdin_packs(struct repository *repo,
 	 * an optimization during delta selection.
 	 */
 	revs.no_kept_objects = 1;
-	revs.keep_pack_cache_flags |= KEPT_PACK_IN_CORE;
+	revs.keep_pack_cache_flags |= KEPT_PACK_अन्तर्_CORE;
 	revs.blob_objects = 1;
-	revs.tree_objects = 1;
-	revs.tag_objects = 1;
+	revs.वृक्षः_objects = 1;
+	revs.चिह्नकम्_objects = 1;
 	revs.ignore_missing_links = 1;
 	revs.exclude_promisor_objects = exclude_promisor_objects;
 
 	/* avoids adding objects in excluded packs */
-	ignore_packed_keep_in_core = 1;
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
+	ignore_packed_keep_अन्तर्_core = 1;
+	यदि (बहुलकम् == STDIN_PACKS_बहुलकम्_FOLLOW) {
 		/*
 		 * In '--stdin-packs=follow' mode, additionally ignore
 		 * objects in excluded-open packs to prevent them from
 		 * appearing in the resulting pack.
 		 */
-		ignore_packed_keep_in_core_open = 1;
+		ignore_packed_keep_अन्तर्_core_open = 1;
 	}
-	stdin_packs_read_input(&revs, mode);
-	if (rev_list_unpacked)
-		add_unreachable_loose_objects(&revs);
+	stdin_packs_read_निवेशः(&revs, बहुलकम्);
+	यदि (rev_list_unpacked)
+		सङ्कलय_unreachable_loose_objects(&revs);
 
-	if (prepare_revision_walk(&revs))
+	यदि (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	traverse_commit_list(&revs,
 			     show_commit_pack_hint,
 			     show_object_pack_hint,
-			     &mode);
+			     &बहुलकम्);
 
 	release_revisions(&revs);
 
-	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_found",
-			   stdin_packs_found_nr);
-	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_hints",
+	trace2_दत्त_intmax("pack-objects", the_repository, "stdin_packs_found",
+			   stdin_packs_प्राप्तम्_nr);
+	trace2_दत्त_intmax("pack-objects", the_repository, "stdin_packs_hints",
 			   stdin_packs_hints_nr);
 
-	repo->fetch_if_missing = prev_fetch_if_missing;
+	repo->fetch_if_missing = पूर्व_fetch_if_missing;
 }
 
-static void add_cruft_object_entry(const struct object_id *oid, enum object_type type,
-				   struct packed_git *pack, off_t offset,
-				   const char *name, uint32_t mtime)
+स्थिर शून्य सङ्कलय_cruft_object_प्रविष्टिः(ध्रुव संरचना object_id *oid, गणना object_type type,
+				   संरचना packed_git *pack, off_t विस्थापनम्,
+				   ध्रुव वर्ण *name, uint32_t mtime)
 {
-	struct object_entry *entry;
+	संरचना object_प्रविष्टिः *प्रविष्टिः;
 
-	display_progress(progress_state, ++nr_seen);
+	display_प्रगतिः(प्रगतिः_state, ++nr_आलोकितम्);
 
-	entry = packlist_find(&to_pack, oid);
-	if (entry) {
-		if (name) {
-			entry->hash = pack_name_hash_fn(name);
-			entry->no_try_delta = no_try_delta(name);
+	प्रविष्टिः = packlist_find(&गन्तव्यम्_pack, oid);
+	यदि (प्रविष्टिः) {
+		यदि (name) {
+			प्रविष्टिः->hash = pack_name_hash_fn(name);
+			प्रविष्टिः->no_try_delta = no_try_delta(name);
 		}
-	} else {
-		if (!want_object_in_pack_mtime(oid, 0, &pack, &offset, mtime))
-			return;
-		if (!pack && type == OBJ_BLOB) {
-			struct odb_source_files *files =
+	} अन्यथा {
+		यदि (!want_object_अन्तर्_pack_mtime(oid, 0, &pack, &विस्थापनम्, mtime))
+			प्रत्यागम;
+		यदि (!pack && type == OBJ_BLOB) {
+			संरचना odb_source_files *files =
 				odb_source_files_downcast(the_repository->objects->source);
-			int found = 0;
+			पूर्णाङ्क प्राप्तम्_2 = 0;
 
-			for (struct odb_files_dir *dir = files->dirs; !found && dir; dir = dir->next)
-				if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-					found = 1;
+			प्रति (संरचना odb_files_dir *dir = files->dirs; !प्राप्तम्_2 && dir; dir = dir->अग्र)
+				यदि (!odb_source_read_object_info(&dir->loose->आधारः, oid, रिक्त, 0, रिक्त))
+					प्राप्तम्_2 = 1;
 
 			/*
 			 * If a traversed tree has a missing blob then we want
@@ -4185,21 +4185,21 @@ static void add_cruft_object_entry(const struct object_id *oid, enum object_type
 			 * limited to "ensure non-tip blobs which don't exist in
 			 * packs do exist via loose objects". Confused?
 			 */
-			if (!found)
-				return;
+			यदि (!प्राप्तम्_2)
+				प्रत्यागम;
 		}
 
-		entry = create_object_entry(oid, type, pack_name_hash_fn(name),
+		प्रविष्टिः = create_object_प्रविष्टिः(oid, type, pack_name_hash_fn(name),
 					    0, name && no_try_delta(name),
-					    pack, offset);
+					    pack, विस्थापनम्);
 	}
 
-	if (mtime > oe_cruft_mtime(&to_pack, entry))
-		oe_set_cruft_mtime(&to_pack, entry, mtime);
-	return;
+	यदि (mtime > oe_cruft_mtime(&गन्तव्यम्_pack, प्रविष्टिः))
+		oe_समुच्चयः_cruft_mtime(&गन्तव्यम्_pack, प्रविष्टिः, mtime);
+	प्रत्यागम;
 }
 
-static void show_cruft_object(struct object *obj, const char *name, void *data UNUSED)
+स्थिर शून्य show_cruft_object(संरचना object *obj, ध्रुव वर्ण *name, शून्य *दत्त अप्रयुक्तम्)
 {
 	/*
 	 * if we did not record it earlier, it's at least as old as our
@@ -4211,69 +4211,69 @@ static void show_cruft_object(struct object *obj, const char *name, void *data U
 	 * if obj does appear in the packing list, this call is a noop (or may
 	 * set the namehash).
 	 */
-	add_cruft_object_entry(&obj->oid, obj->type, NULL, 0, name, cruft_expiration);
+	सङ्कलय_cruft_object_प्रविष्टिः(&obj->oid, obj->type, रिक्त, 0, name, cruft_expiration);
 }
 
-static void show_cruft_commit(struct commit *commit, void *data)
+स्थिर शून्य show_cruft_commit(संरचना commit *commit, शून्य *दत्त)
 {
-	show_cruft_object((struct object*)commit, NULL, data);
+	show_cruft_object((संरचना object*)commit, रिक्त, दत्त);
 }
 
-static int cruft_include_check_obj(struct object *obj, void *data UNUSED)
+स्थिर पूर्णाङ्क cruft_include_check_obj(संरचना object *obj, शून्य *दत्त अप्रयुक्तम्)
 {
-	return !has_object_kept_pack(to_pack.repo, &obj->oid, KEPT_PACK_IN_CORE);
+	प्रत्यागम !has_object_kept_pack(गन्तव्यम्_pack.repo, &obj->oid, KEPT_PACK_अन्तर्_CORE);
 }
 
-static int cruft_include_check(struct commit *commit, void *data)
+स्थिर पूर्णाङ्क cruft_include_check(संरचना commit *commit, शून्य *दत्त)
 {
-	return cruft_include_check_obj((struct object*)commit, data);
+	प्रत्यागम cruft_include_check_obj((संरचना object*)commit, दत्त);
 }
 
-static void set_cruft_mtime(const struct object *object,
-			    struct packed_git *pack,
-			    off_t offset, time_t mtime)
+स्थिर शून्य समुच्चयः_cruft_mtime(ध्रुव संरचना object *object,
+			    संरचना packed_git *pack,
+			    off_t विस्थापनम्, time_t mtime)
 {
-	add_cruft_object_entry(&object->oid, object->type, pack, offset, NULL,
+	सङ्कलय_cruft_object_प्रविष्टिः(&object->oid, object->type, pack, विस्थापनम्, रिक्त,
 			       mtime);
 }
 
-static void mark_pack_kept_in_core(struct string_list *packs, unsigned keep)
+स्थिर शून्य mark_pack_kept_अन्तर्_core(संरचना string_list *packs, अचिह्नित keep)
 {
-	struct string_list_item *item = NULL;
+	संरचना string_list_item *item = रिक्त;
 	for_each_string_list_item(item, packs) {
-		struct packed_git *p = item->util;
-		if (!p)
+		संरचना packed_git *p = item->util;
+		यदि (!p)
 			die(_("could not find pack '%s'"), item->string);
-		if (p->is_cruft && keep)
-			ignore_packed_keep_in_core_has_cruft = 1;
-		p->pack_keep_in_core = keep;
+		यदि (p->is_cruft && keep)
+			ignore_packed_keep_अन्तर्_core_has_cruft = 1;
+		p->pack_keep_अन्तर्_core = keep;
 	}
 }
 
-static void add_objects_in_unpacked_packs(void);
+स्थिर शून्य सङ्कलय_objects_अन्तर्_unpacked_packs(शून्य);
 
-static void enumerate_cruft_objects(void)
+स्थिर शून्य enumerate_cruft_objects(शून्य)
 {
-	if (progress)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Enumerating cruft objects"), 0);
 
-	add_objects_in_unpacked_packs();
-	add_unreachable_loose_objects(NULL);
+	सङ्कलय_objects_अन्तर्_unpacked_packs();
+	सङ्कलय_unreachable_loose_objects(रिक्त);
 
-	stop_progress(&progress_state);
+	stop_प्रगतिः(&प्रगतिः_state);
 }
 
-static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs)
+स्थिर शून्य enumerate_and_traverse_cruft_objects(संरचना string_list *fresh_packs)
 {
-	struct packed_git *p;
-	struct rev_info revs;
-	int ret;
+	संरचना packed_git *p;
+	संरचना rev_info revs;
+	पूर्णाङ्क ret;
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, रिक्त);
 
-	revs.tag_objects = 1;
-	revs.tree_objects = 1;
+	revs.चिह्नकम्_objects = 1;
+	revs.वृक्षः_objects = 1;
 	revs.blob_objects = 1;
 
 	revs.include_check = cruft_include_check;
@@ -4281,14 +4281,14 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 
 	revs.ignore_missing_links = 1;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Enumerating cruft objects"), 0);
-	ret = add_unseen_recent_objects_to_traversal(&revs, cruft_expiration,
-						     set_cruft_mtime, 1);
-	stop_progress(&progress_state);
+	ret = सङ्कलय_unseen_recent_objects_गन्तव्यम्_traversal(&revs, cruft_expiration,
+						     समुच्चयः_cruft_mtime, 1);
+	stop_प्रगतिः(&प्रगतिः_state);
 
-	if (ret)
+	यदि (ret)
 		die(_("unable to add cruft objects"));
 
 	/*
@@ -4296,54 +4296,54 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 	 * unknown packs do not halt the reachability traversal early.
 	 */
 	repo_for_each_pack(the_repository, p)
-		p->pack_keep_in_core = 0;
-	mark_pack_kept_in_core(fresh_packs, 1);
+		p->pack_keep_अन्तर्_core = 0;
+	mark_pack_kept_अन्तर्_core(fresh_packs, 1);
 
-	if (prepare_revision_walk(&revs))
+	यदि (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	if (progress)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Traversing cruft objects"), 0);
-	nr_seen = 0;
-	traverse_commit_list(&revs, show_cruft_commit, show_cruft_object, NULL);
+	nr_आलोकितम् = 0;
+	traverse_commit_list(&revs, show_cruft_commit, show_cruft_object, रिक्त);
 
-	stop_progress(&progress_state);
+	stop_प्रगतिः(&प्रगतिः_state);
 	release_revisions(&revs);
 }
 
-static void read_cruft_objects(void)
+स्थिर शून्य read_cruft_objects(शून्य)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list discard_packs = STRING_LIST_INIT_DUP;
-	struct string_list fresh_packs = STRING_LIST_INIT_DUP;
-	struct packed_git *p;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना string_list discard_packs = STRING_LIST_INIT_DUP;
+	संरचना string_list fresh_packs = STRING_LIST_INIT_DUP;
+	संरचना packed_git *p;
 
-	ignore_packed_keep_in_core = 1;
+	ignore_packed_keep_अन्तर्_core = 1;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (!buf.len)
-			continue;
+	यावत् (strbuf_getline(&buf, stdin) != EOF) {
+		यदि (!buf.len)
+			अनुवर्त;
 
-		if (*buf.buf == '-')
+		यदि (*buf.buf == '-')
 			string_list_append(&discard_packs, buf.buf + 1);
-		else
+		अन्यथा
 			string_list_append(&fresh_packs, buf.buf);
 	}
 
-	string_list_sort(&discard_packs);
-	string_list_sort(&fresh_packs);
+	string_list_क्रमय(&discard_packs);
+	string_list_क्रमय(&fresh_packs);
 
 	repo_for_each_pack(the_repository, p) {
-		const char *pack_name = pack_basename(p);
-		struct string_list_item *item;
+		ध्रुव वर्ण *pack_name = pack_basename(p);
+		संरचना string_list_item *item;
 
 		item = string_list_lookup(&fresh_packs, pack_name);
-		if (!item)
+		यदि (!item)
 			item = string_list_lookup(&discard_packs, pack_name);
 
-		if (item) {
+		यदि (item) {
 			item->util = p;
-		} else {
+		} अन्यथा {
 			/*
 			 * This pack wasn't mentioned in either the "fresh" or
 			 * "discard" list, so the caller didn't know about it.
@@ -4353,16 +4353,16 @@ static void read_cruft_objects(void)
 			 * unmark it before starting the traversal so it doesn't
 			 * halt the traversal early.
 			 */
-			p->pack_keep_in_core = 1;
+			p->pack_keep_अन्तर्_core = 1;
 		}
 	}
 
-	mark_pack_kept_in_core(&fresh_packs, 1);
-	mark_pack_kept_in_core(&discard_packs, 0);
+	mark_pack_kept_अन्तर्_core(&fresh_packs, 1);
+	mark_pack_kept_अन्तर्_core(&discard_packs, 0);
 
-	if (cruft_expiration)
+	यदि (cruft_expiration)
 		enumerate_and_traverse_cruft_objects(&fresh_packs);
-	else
+	अन्यथा
 		enumerate_cruft_objects();
 
 	strbuf_release(&buf);
@@ -4370,195 +4370,195 @@ static void read_cruft_objects(void)
 	string_list_clear(&fresh_packs, 0);
 }
 
-static void read_object_list_from_stdin(void)
+स्थिर शून्य read_object_list_from_stdin(शून्य)
 {
-	char line[GIT_MAX_HEXSZ + 1 + PATH_MAX + 2];
-	struct object_id oid;
-	const char *p;
+	वर्ण पङ्क्तिः[GIT_MAX_HEXSZ + 1 + मार्गः_MAX + 2];
+	संरचना object_id oid;
+	ध्रुव वर्ण *p;
 
-	for (;;) {
-		if (!fgets(line, sizeof(line), stdin)) {
-			if (feof(stdin))
-				break;
-			if (!ferror(stdin))
+	प्रति (;;) {
+		यदि (!fgets(पङ्क्तिः, परिमाण(पङ्क्तिः), stdin)) {
+			यदि (feof(stdin))
+				भङ्ग;
+			यदि (!ferror(stdin))
 				BUG("fgets returned NULL, not EOF, not error!");
-			if (errno != EINTR)
+			यदि (errno != EINTR)
 				die_errno("fgets");
 			clearerr(stdin);
-			continue;
+			अनुवर्त;
 		}
-		if (line[0] == '-') {
-			if (get_oid_hex(line+1, &oid))
+		यदि (पङ्क्तिः[0] == '-') {
+			यदि (get_oid_hex(पङ्क्तिः+1, &oid))
 				die(_("expected edge object ID, got garbage:\n %s"),
-				    line);
-			add_preferred_base(&oid);
-			continue;
+				    पङ्क्तिः);
+			सङ्कलय_preferred_आधारः(&oid);
+			अनुवर्त;
 		}
-		if (parse_oid_hex(line, &oid, &p))
-			die(_("expected object ID, got garbage:\n %s"), line);
+		यदि (parse_oid_hex(पङ्क्तिः, &oid, &p))
+			die(_("expected object ID, got garbage:\n %s"), पङ्क्तिः);
 
-		add_preferred_base_object(p + 1);
-		add_object_entry(&oid, OBJ_NONE, p + 1, 0);
+		सङ्कलय_preferred_आधारः_object(p + 1);
+		सङ्कलय_object_प्रविष्टिः(&oid, OBJ_NONE, p + 1, 0);
 	}
 }
 
-static void show_commit(struct commit *commit, void *data UNUSED)
+स्थिर शून्य show_commit(संरचना commit *commit, शून्य *दत्त अप्रयुक्तम्)
 {
-	add_object_entry(&commit->object.oid, OBJ_COMMIT, NULL, 0);
+	सङ्कलय_object_प्रविष्टिः(&commit->object.oid, OBJ_COMMIT, रिक्त, 0);
 
-	if (write_bitmap_index)
-		index_commit_for_bitmap(commit);
+	यदि (write_bitmap_सूचकांक)
+		सूचकांक_commit_for_bitmap(commit);
 
-	if (use_delta_islands)
+	यदि (use_delta_islands)
 		propagate_island_marks(the_repository, commit);
 }
 
-static void show_object(struct object *obj, const char *name,
-			void *data UNUSED)
+स्थिर शून्य show_object(संरचना object *obj, ध्रुव वर्ण *name,
+			शून्य *दत्त अप्रयुक्तम्)
 {
-	add_preferred_base_object(name);
-	add_object_entry(&obj->oid, obj->type, name, 0);
+	सङ्कलय_preferred_आधारः_object(name);
+	सङ्कलय_object_प्रविष्टिः(&obj->oid, obj->type, name, 0);
 
-	if (use_delta_islands)
-		record_tree_depth(&obj->oid, name);
+	यदि (use_delta_islands)
+		लेखः_वृक्षः_गभीरता(&obj->oid, name);
 }
 
-static void show_object__ma_allow_any(struct object *obj, const char *name, void *data)
+स्थिर शून्य show_object__ma_allow_any(संरचना object *obj, ध्रुव वर्ण *name, शून्य *दत्त)
 {
-	assert(arg_missing_action == MA_ALLOW_ANY);
+	प्रतिज्ञा(arg_missing_action == MA_ALLOW_ANY);
 
 	/*
 	 * Quietly ignore ALL missing objects.  This avoids problems with
 	 * staging them now and getting an odd error later.
 	 */
-	if (!odb_has_object(the_repository->objects, &obj->oid, 0))
-		return;
+	यदि (!odb_has_object(the_repository->objects, &obj->oid, 0))
+		प्रत्यागम;
 
-	show_object(obj, name, data);
+	show_object(obj, name, दत्त);
 }
 
-static void show_object__ma_allow_promisor(struct object *obj, const char *name, void *data)
+स्थिर शून्य show_object__ma_allow_promisor(संरचना object *obj, ध्रुव वर्ण *name, शून्य *दत्त)
 {
-	assert(arg_missing_action == MA_ALLOW_PROMISOR);
+	प्रतिज्ञा(arg_missing_action == MA_ALLOW_PROMISOR);
 
 	/*
 	 * Quietly ignore EXPECTED missing objects.  This avoids problems with
 	 * staging them now and getting an odd error later.
 	 */
-	if (!odb_has_object(the_repository->objects, &obj->oid, 0) &&
-	    is_promisor_object(to_pack.repo, &obj->oid))
-		return;
+	यदि (!odb_has_object(the_repository->objects, &obj->oid, 0) &&
+	    is_promisor_object(गन्तव्यम्_pack.repo, &obj->oid))
+		प्रत्यागम;
 
-	show_object(obj, name, data);
+	show_object(obj, name, दत्त);
 }
 
-static int option_parse_missing_action(const struct option *opt,
-				       const char *arg, int unset)
+स्थिर पूर्णाङ्क option_parse_missing_action(ध्रुव संरचना option *opt,
+				       ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct repository *repo = opt->value;
+	संरचना repository *repo = opt->मानम्;
 
-	assert(arg);
-	assert(!unset);
+	प्रतिज्ञा(arg);
+	प्रतिज्ञा(!unset);
 
-	if (!strcmp(arg, "error")) {
+	यदि (!वाक्यं_तुलय(arg, "error")) {
 		arg_missing_action = MA_ERROR;
 		fn_show_object = show_object;
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(arg, "allow-any")) {
+	यदि (!वाक्यं_तुलय(arg, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	if (!strcmp(arg, "allow-promisor")) {
+	यदि (!वाक्यं_तुलय(arg, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_promisor;
-		return 0;
+		प्रत्यागम 0;
 	}
 
 	die(_("invalid value for '%s': '%s'"), "--missing", arg);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void show_edge(struct commit *commit)
+स्थिर शून्य show_edge(संरचना commit *commit)
 {
-	add_preferred_base(&commit->object.oid);
+	सङ्कलय_preferred_आधारः(&commit->object.oid);
 }
 
-static int add_object_in_unpacked_pack(const struct object_id *oid,
-				       struct object_info *oi,
-				       void *data UNUSED)
+स्थिर पूर्णाङ्क सङ्कलय_object_अन्तर्_unpacked_pack(ध्रुव संरचना object_id *oid,
+				       संरचना object_info *oi,
+				       शून्य *दत्त अप्रयुक्तम्)
 {
-	if (cruft) {
-		add_cruft_object_entry(oid, OBJ_NONE, oi->source_infop->u.packed.pack,
-				       oi->source_infop->u.packed.offset, NULL,
+	यदि (cruft) {
+		सङ्कलय_cruft_object_प्रविष्टिः(oid, OBJ_NONE, oi->source_infop->u.packed.pack,
+				       oi->source_infop->u.packed.विस्थापनम्, रिक्त,
 				       *oi->mtimep);
-	} else {
-		add_object_entry(oid, OBJ_NONE, "", 0);
+	} अन्यथा {
+		सङ्कलय_object_प्रविष्टिः(oid, OBJ_NONE, "", 0);
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void add_objects_in_unpacked_packs(void)
+स्थिर शून्य सङ्कलय_objects_अन्तर्_unpacked_packs(शून्य)
 {
-	struct odb_source_files *files =
-		odb_source_files_downcast(to_pack.repo->objects->source);
+	संरचना odb_source_files *files =
+		odb_source_files_downcast(गन्तव्यम्_pack.repo->objects->source);
 	time_t mtime;
-	struct odb_for_each_object_options opts = {
-		.flags = ODB_FOR_EACH_OBJECT_PACK_ORDER |
+	संरचना odb_for_each_object_options opts = {
+		.flags = ODB_FOR_EACH_OBJECT_PACK_क्रमः |
 			 ODB_FOR_EACH_OBJECT_LOCAL_ONLY |
-			 ODB_FOR_EACH_OBJECT_SKIP_IN_CORE_KEPT_PACKS |
+			 ODB_FOR_EACH_OBJECT_SKIP_अन्तर्_CORE_KEPT_PACKS |
 			 ODB_FOR_EACH_OBJECT_SKIP_ON_DISK_KEPT_PACKS,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
+	संरचना odb_source_info source_info;
+	संरचना object_info oi = {
 		.mtimep = &mtime,
 		.source_infop = &source_info,
 	};
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!dir->local)
-			continue;
+	प्रति (संरचना odb_files_dir *dir = files->dirs; dir; dir = dir->अग्र) {
+		यदि (!dir->local)
+			अनुवर्त;
 
-		if (odb_source_for_each_object(&dir->packed->base, &oi,
-					       add_object_in_unpacked_pack, NULL, &opts))
+		यदि (odb_source_for_each_object(&dir->packed->आधारः, &oi,
+					       सङ्कलय_object_अन्तर्_unpacked_pack, रिक्त, &opts))
 			die(_("cannot open pack index"));
 	}
 }
 
-static int add_loose_object(const struct object_id *oid, const char *path,
-			    void *data)
+स्थिर पूर्णाङ्क सङ्कलय_loose_object(ध्रुव संरचना object_id *oid, ध्रुव वर्ण *मार्गः,
+			    शून्य *दत्त)
 {
-	struct rev_info *revs = data;
-	enum object_type type = odb_read_object_info(the_repository->objects, oid, NULL);
+	संरचना rev_info *revs = दत्त;
+	गणना object_type type = odb_read_object_info(the_repository->objects, oid, रिक्त);
 
-	if (type < 0) {
-		warning(_("loose object at %s could not be examined"), path);
-		return 0;
+	यदि (type < 0) {
+		warning(_("loose object at %s could not be examined"), मार्गः);
+		प्रत्यागम 0;
 	}
 
-	if (cruft) {
-		struct stat st;
-		if (stat(path, &st) < 0) {
-			if (errno == ENOENT)
-				return 0;
-			return error_errno("unable to stat %s", oid_to_hex(oid));
+	यदि (cruft) {
+		संरचना stat st;
+		यदि (stat(मार्गः, &st) < 0) {
+			यदि (errno == ENOENT)
+				प्रत्यागम 0;
+			प्रत्यागम error_errno("unable to stat %s", oid_गन्तव्यम्_hex(oid));
 		}
 
-		add_cruft_object_entry(oid, type, NULL, 0, NULL,
+		सङ्कलय_cruft_object_प्रविष्टिः(oid, type, रिक्त, 0, रिक्त,
 				       st.st_mtime);
-	} else {
-		add_object_entry(oid, type, "", 0);
+	} अन्यथा {
+		सङ्कलय_object_प्रविष्टिः(oid, type, "", 0);
 	}
 
-	if (revs && type == OBJ_COMMIT)
-		add_pending_oid(revs, NULL, oid, 0);
+	यदि (revs && type == OBJ_COMMIT)
+		सङ्कलय_pending_oid(revs, रिक्त, oid, 0);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
 /*
@@ -4566,36 +4566,36 @@ static int add_loose_object(const struct object_id *oid, const char *path,
  * add_object_entry will weed out duplicates, so we just add every
  * loose object we find.
  */
-static void add_unreachable_loose_objects(struct rev_info *revs)
+स्थिर शून्य सङ्कलय_unreachable_loose_objects(संरचना rev_info *revs)
 {
-	for_each_loose_file_in_source(the_repository->objects->source,
-				      add_loose_object, NULL, NULL, revs);
+	for_each_loose_file_अन्तर्_source(the_repository->objects->source,
+				      सङ्कलय_loose_object, रिक्त, रिक्त, revs);
 }
 
-static int has_sha1_pack_kept_or_nonlocal(const struct object_id *oid)
+स्थिर पूर्णाङ्क has_sha1_pack_kept_or_nonlocal(ध्रुव संरचना object_id *oid)
 {
-	static struct packed_git *last_found = NULL;
-	struct packed_git *p;
+	स्थिर संरचना packed_git *चरमः_प्राप्तम् = रिक्त;
+	संरचना packed_git *p;
 
-	if (last_found && find_pack_entry_one(oid, last_found))
-		return 1;
+	यदि (चरमः_प्राप्तम् && find_pack_प्रविष्टिः_one(oid, चरमः_प्राप्तम्))
+		प्रत्यागम 1;
 
 	repo_for_each_pack(the_repository, p) {
 		/*
 		 * We have already checked `last_found`, so there is no need to
 		 * re-check here.
 		 */
-		if (p == last_found)
-			continue;
+		यदि (p == चरमः_प्राप्तम्)
+			अनुवर्त;
 
-		if ((!p->pack_local || p->pack_keep || p->pack_keep_in_core) &&
-		    find_pack_entry_one(oid, p)) {
-			last_found = p;
-			return 1;
+		यदि ((!p->pack_local || p->pack_keep || p->pack_keep_अन्तर्_core) &&
+		    find_pack_प्रविष्टिः_one(oid, p)) {
+			चरमः_प्राप्तम् = p;
+			प्रत्यागम 1;
 		}
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
 /*
@@ -4605,83 +4605,83 @@ static int has_sha1_pack_kept_or_nonlocal(const struct object_id *oid)
  *
  * This is filled by get_object_list.
  */
-static struct oid_array recent_objects;
+स्थिर संरचना oid_array recent_objects;
 
-static int loosened_object_can_be_discarded(const struct object_id *oid,
+स्थिर पूर्णाङ्क loosened_object_can_be_discarded(ध्रुव संरचना object_id *oid,
 					    timestamp_t mtime)
 {
-	if (!unpack_unreachable_expiration)
-		return 0;
-	if (mtime > unpack_unreachable_expiration)
-		return 0;
-	if (oid_array_lookup(&recent_objects, oid) >= 0)
-		return 0;
-	return 1;
+	यदि (!unpack_unreachable_expiration)
+		प्रत्यागम 0;
+	यदि (mtime > unpack_unreachable_expiration)
+		प्रत्यागम 0;
+	यदि (oid_array_lookup(&recent_objects, oid) >= 0)
+		प्रत्यागम 0;
+	प्रत्यागम 1;
 }
 
-static int force_object_loose(struct odb_source *source,
-			      const struct object_id *oid,
-			      const time_t *mtime)
+स्थिर पूर्णाङ्क force_object_loose(संरचना odb_source *source,
+			      ध्रुव संरचना object_id *oid,
+			      ध्रुव time_t *mtime)
 {
-	struct odb_source_files *files = odb_source_files_downcast(source);
-	const struct git_hash_algo *compat = source->odb->repo->compat_hash_algo;
-	struct object_info oi = OBJECT_INFO_INIT;
-	struct object_id compat_oid, *compat_oid_p = NULL;
-	enum object_type type;
-	void *buf = NULL;
-	size_t len;
-	int ret;
+	संरचना odb_source_files *files = odb_source_files_downcast(source);
+	ध्रुव संरचना git_hash_algo *compat = source->odb->repo->compat_hash_algo;
+	संरचना object_info oi = OBJECT_INFO_INIT;
+	संरचना object_id compat_oid, *compat_oid_p = रिक्त;
+	गणना object_type type;
+	शून्य *buf = रिक्त;
+	आकार_t len;
+	पूर्णाङ्क ret;
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next)
-		if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-			return 0;
+	प्रति (संरचना odb_files_dir *dir = files->dirs; dir; dir = dir->अग्र)
+		यदि (!odb_source_read_object_info(&dir->loose->आधारः, oid, रिक्त, 0, रिक्त))
+			प्रत्यागम 0;
 
 	oi.typep = &type;
 	oi.sizep = &len;
 	oi.contentp = &buf;
-	if (odb_read_object_info_extended(source->odb, oid, &oi, 0)) {
-		ret = error(_("cannot read object for %s"), oid_to_hex(oid));
-		goto out;
+	यदि (odb_read_object_info_extended(source->odb, oid, &oi, 0)) {
+		ret = error(_("cannot read object for %s"), oid_गन्तव्यम्_hex(oid));
+		गच्छ बहिर्गमनम्;
 	}
 
-	if (compat) {
-		if (repo_oid_to_algop(source->odb->repo, oid, compat, &compat_oid)) {
+	यदि (compat) {
+		यदि (repo_oid_गन्तव्यम्_algop(source->odb->repo, oid, compat, &compat_oid)) {
 			ret = error(_("cannot map object %s to %s"),
-				    oid_to_hex(oid), compat->name);
-			goto out;
+				    oid_गन्तव्यम्_hex(oid), compat->name);
+			गच्छ बहिर्गमनम्;
 		}
 
 		compat_oid_p = &compat_oid;
 	}
 
-	ret = odb_source_write_object(&files->dirs->loose->base, buf, len, type, oid,
+	ret = odb_source_write_object(&files->dirs->loose->आधारः, buf, len, type, oid,
 				      compat_oid_p, mtime, 0);
 
-out:
-	free(buf);
-	return ret;
+बहिर्गमनम्:
+	मुक्त(buf);
+	प्रत्यागम ret;
 }
 
-static void loosen_unused_packed_objects(void)
+स्थिर शून्य loosen_अप्रयुक्तम्_packed_objects(शून्य)
 {
-	struct packed_git *p;
+	संरचना packed_git *p;
 	uint32_t i;
 	uint32_t loosened_objects_nr = 0;
-	struct object_id oid;
+	संरचना object_id oid;
 
 	repo_for_each_pack(the_repository, p) {
-		if (!p->pack_local || p->pack_keep || p->pack_keep_in_core)
-			continue;
+		यदि (!p->pack_local || p->pack_keep || p->pack_keep_अन्तर्_core)
+			अनुवर्त;
 
-		if (open_pack_index(p))
+		यदि (open_pack_सूचकांक(p))
 			die(_("cannot open pack index"));
 
-		for (i = 0; i < p->num_objects; i++) {
+		प्रति (i = 0; i < p->अङ्कः_objects; i++) {
 			nth_packed_object_id(&oid, p, i);
-			if (!packlist_find(&to_pack, &oid) &&
+			यदि (!packlist_find(&गन्तव्यम्_pack, &oid) &&
 			    !has_sha1_pack_kept_or_nonlocal(&oid) &&
 			    !loosened_object_can_be_discarded(&oid, p->mtime)) {
-				if (force_object_loose(the_repository->objects->source,
+				यदि (force_object_loose(the_repository->objects->source,
 						       &oid, &p->mtime))
 					die(_("unable to force loose object"));
 				loosened_objects_nr++;
@@ -4689,7 +4689,7 @@ static void loosen_unused_packed_objects(void)
 		}
 	}
 
-	trace2_data_intmax("pack-objects", the_repository,
+	trace2_दत्त_intmax("pack-objects", the_repository,
 			   "loosen_unused_packed_objects/loosened", loosened_objects_nr);
 }
 
@@ -4698,20 +4698,20 @@ static void loosen_unused_packed_objects(void)
  * reader of the pack might not understand, and which would therefore prevent
  * blind reuse of what we have on disk.
  */
-static int pack_options_allow_reuse(void)
+स्थिर पूर्णाङ्क pack_options_allow_reuse(शून्य)
 {
-	return allow_pack_reuse != NO_PACK_REUSE &&
-	       pack_to_stdout &&
+	प्रत्यागम allow_pack_reuse != NO_PACK_REUSE &&
+	       pack_गन्तव्यम्_stdout &&
 	       !ignore_packed_keep_on_disk &&
-	       !ignore_packed_keep_in_core &&
+	       !ignore_packed_keep_अन्तर्_core &&
 	       (!local || !have_non_local_packs) &&
 	       !incremental;
 }
 
-static int get_object_list_from_bitmap(struct rev_info *revs)
+स्थिर पूर्णाङ्क get_object_list_from_bitmap(संरचना rev_info *revs)
 {
-	if (!(bitmap_git = prepare_bitmap_walk(revs, 0)))
-		return -1;
+	यदि (!(bitmap_git = prepare_bitmap_walk(revs, 0)))
+		प्रत्यागम -1;
 
 	/*
 	 * For now, force the name-hash version to be 1 since that
@@ -4720,108 +4720,108 @@ static int get_object_list_from_bitmap(struct rev_info *revs)
 	 * allowing readers to know the version that was used during
 	 * the bitmap write.
 	 */
-	name_hash_version = 1;
+	name_hash_संस्करणम् = 1;
 
-	if (pack_options_allow_reuse())
+	यदि (pack_options_allow_reuse())
 		reuse_partial_packfile_from_bitmap(bitmap_git,
 						   &reuse_packfiles,
 						   &reuse_packfiles_nr,
 						   &reuse_packfile_bitmap,
 						   allow_pack_reuse == MULTI_PACK_REUSE);
 
-	if (reuse_packfiles) {
+	यदि (reuse_packfiles) {
 		reuse_packfile_objects = bitmap_popcount(reuse_packfile_bitmap);
-		if (!reuse_packfile_objects)
+		यदि (!reuse_packfile_objects)
 			BUG("expected non-empty reuse bitmap");
 
-		nr_result += reuse_packfile_objects;
-		nr_seen += reuse_packfile_objects;
-		display_progress(progress_state, nr_seen);
+		nr_परिणाम += reuse_packfile_objects;
+		nr_आलोकितम् += reuse_packfile_objects;
+		display_प्रगतिः(प्रगतिः_state, nr_आलोकितम्);
 	}
 
 	traverse_bitmap_commit_list(bitmap_git, revs,
-				    &add_object_entry_from_bitmap);
-	return 0;
+				    &सङ्कलय_object_प्रविष्टिः_from_bitmap);
+	प्रत्यागम 0;
 }
 
-static void record_recent_object(struct object *obj,
-				 const char *name UNUSED,
-				 void *data UNUSED)
+स्थिर शून्य लेखः_recent_object(संरचना object *obj,
+				 ध्रुव वर्ण *name अप्रयुक्तम्,
+				 शून्य *दत्त अप्रयुक्तम्)
 {
 	oid_array_append(&recent_objects, &obj->oid);
 }
 
-static void record_recent_commit(struct commit *commit, void *data UNUSED)
+स्थिर शून्य लेखः_recent_commit(संरचना commit *commit, शून्य *दत्त अप्रयुक्तम्)
 {
 	oid_array_append(&recent_objects, &commit->object.oid);
 }
 
-static int mark_bitmap_preferred_tip(const struct reference *ref, void *data UNUSED)
+स्थिर पूर्णाङ्क mark_bitmap_preferred_tip(ध्रुव संरचना reference *ref, शून्य *दत्त अप्रयुक्तम्)
 {
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct object *object;
+	ध्रुव संरचना object_id *maybe_peeled = ref->oid;
+	संरचना object_id peeled;
+	संरचना object *object;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	यदि (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
 
 	object = parse_object_or_die(the_repository, maybe_peeled, ref->name);
-	if (object->type == OBJ_COMMIT)
+	यदि (object->type == OBJ_COMMIT)
 		object->flags |= NEEDS_BITMAP;
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static inline int is_oid_uninteresting(struct repository *repo,
-				       struct object_id *oid)
+स्थिर अन्तःस्थ पूर्णाङ्क is_oid_uninteresting(संरचना repository *repo,
+				       संरचना object_id *oid)
 {
-	struct object *o = lookup_object(repo, oid);
-	return !o || (o->flags & UNINTERESTING);
+	संरचना object *o = lookup_object(repo, oid);
+	प्रत्यागम !o || (o->flags & UNINTERESTING);
 }
 
-static int add_objects_by_path(const char *path,
-			       struct oid_array *oids,
-			       enum object_type type,
-			       void *data)
+स्थिर पूर्णाङ्क सङ्कलय_objects_by_मार्गः(ध्रुव वर्ण *मार्गः,
+			       संरचना oid_array *oids,
+			       गणना object_type type,
+			       शून्य *दत्त)
 {
-	size_t oe_start = to_pack.nr_objects;
-	size_t oe_end;
-	unsigned int *processed = data;
+	आकार_t oe_start = गन्तव्यम्_pack.nr_objects;
+	आकार_t oe_अन्तः;
+	अचिह्नित पूर्णाङ्क *processed = दत्त;
 
 	/*
 	 * First, add all objects to the packing data, including the ones
 	 * marked UNINTERESTING (translated to 'exclude') as they can be
 	 * used as delta bases.
 	 */
-	for (size_t i = 0; i < oids->nr; i++) {
-		int exclude;
-		struct object_info oi = OBJECT_INFO_INIT;
-		struct object_id *oid = &oids->oid[i];
+	प्रति (आकार_t i = 0; i < oids->nr; i++) {
+		पूर्णाङ्क exclude;
+		संरचना object_info oi = OBJECT_INFO_INIT;
+		संरचना object_id *oid = &oids->oid[i];
 
 		/* Skip objects that do not exist locally. */
-		if ((exclude_promisor_objects || arg_missing_action != MA_ERROR) &&
+		यदि ((exclude_promisor_objects || arg_missing_action != MA_ERROR) &&
 		    odb_read_object_info_extended(the_repository->objects, oid, &oi,
 						  OBJECT_INFO_FOR_PREFETCH) < 0)
-			continue;
+			अनुवर्त;
 
 		exclude = is_oid_uninteresting(the_repository, oid);
 
-		if (exclude && !thin)
-			continue;
+		यदि (exclude && !thin)
+			अनुवर्त;
 
-		add_object_entry(oid, type, path, exclude);
+		सङ्कलय_object_प्रविष्टिः(oid, type, मार्गः, exclude);
 
-		if (type == OBJ_COMMIT) {
-			struct commit *commit;
+		यदि (type == OBJ_COMMIT) {
+			संरचना commit *commit;
 
-			if (!write_bitmap_index && !use_delta_islands)
-				continue;
+			यदि (!write_bitmap_सूचकांक && !use_delta_islands)
+				अनुवर्त;
 
 			commit = lookup_commit(the_repository, oid);
-			if (!commit)
-				die(_("could not find commit %s"), oid_to_hex(oid));
-			if (write_bitmap_index)
-				index_commit_for_bitmap(commit);
+			यदि (!commit)
+				die(_("could not find commit %s"), oid_गन्तव्यम्_hex(oid));
+			यदि (write_bitmap_सूचकांक)
+				सूचकांक_commit_for_bitmap(commit);
 			/*
 			 * Skip island propagation for boundary commits.
 			 * The regular traversal's show_commit() is only
@@ -4830,42 +4830,42 @@ static int add_objects_by_path(const char *path,
 			 * would only be a no-op anyway (boundary commits
 			 * are not in island_marks).
 			 */
-			if (use_delta_islands && !exclude)
+			यदि (use_delta_islands && !exclude)
 				propagate_island_marks(the_repository, commit);
-		} else if (type == OBJ_TREE && use_delta_islands) {
-			record_tree_depth(oid, path);
+		} अन्यथा यदि (type == OBJ_वृक्षः && use_delta_islands) {
+			लेखः_वृक्षः_गभीरता(oid, मार्गः);
 		}
 	}
 
-	oe_end = to_pack.nr_objects;
+	oe_अन्तः = गन्तव्यम्_pack.nr_objects;
 
 	/* We can skip delta calculations if it is a no-op. */
-	if (oe_end == oe_start || !window)
-		return 0;
+	यदि (oe_अन्तः == oe_start || !गवाक्षः)
+		प्रत्यागम 0;
 
-	ALLOC_GROW(to_pack.regions,
-		   to_pack.nr_regions + 1,
-		   to_pack.nr_regions_alloc);
+	ALLOC_GROW(गन्तव्यम्_pack.regions,
+		   गन्तव्यम्_pack.nr_regions + 1,
+		   गन्तव्यम्_pack.nr_regions_alloc);
 
-	to_pack.regions[to_pack.nr_regions].start = oe_start;
-	to_pack.regions[to_pack.nr_regions].nr = oe_end - oe_start;
-	to_pack.nr_regions++;
+	गन्तव्यम्_pack.regions[गन्तव्यम्_pack.nr_regions].start = oe_start;
+	गन्तव्यम्_pack.regions[गन्तव्यम्_pack.nr_regions].nr = oe_अन्तः - oe_start;
+	गन्तव्यम्_pack.nr_regions++;
 
 	*processed += oids->nr;
-	display_progress(progress_state, *processed);
+	display_प्रगतिः(प्रगतिः_state, *processed);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int get_object_list_path_walk(struct rev_info *revs)
+स्थिर पूर्णाङ्क get_object_list_मार्गः_walk(संरचना rev_info *revs)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	unsigned int processed = 0;
-	int result;
+	संरचना मार्गः_walk_info info = मार्गः_WALK_INFO_INIT;
+	अचिह्नित पूर्णाङ्क processed = 0;
+	पूर्णाङ्क परिणाम;
 
 	info.revs = revs;
-	info.path_fn = add_objects_by_path;
-	info.path_fn_data = &processed;
+	info.मार्गः_fn = सङ्कलय_objects_by_मार्गः;
+	info.मार्गः_fn_दत्त = &processed;
 
 	/*
 	 * Path-walk needs boundary commits to discover thin-pack bases, but
@@ -4884,26 +4884,26 @@ static int get_object_list_path_walk(struct rev_info *revs)
 	info.edge_aggressive = shallow;
 
 	trace2_region_enter("pack-objects", "path-walk", revs->repo);
-	result = walk_objects_by_path(&info);
+	परिणाम = walk_objects_by_मार्गः(&info);
 	trace2_region_leave("pack-objects", "path-walk", revs->repo);
 
-	path_walk_info_clear(&info);
+	मार्गः_walk_info_clear(&info);
 
-	return result;
+	प्रत्यागम परिणाम;
 }
 
-static void get_object_list(struct rev_info *revs, struct strvec *argv)
+स्थिर शून्य get_object_list(संरचना rev_info *revs, संरचना strvec *argv)
 {
-	struct setup_revision_opt s_r_opt = {
+	संरचना सज्जता_revision_opt s_r_opt = {
 		.allow_exclude_promisor_objects = 1,
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char line[1000];
-	int flags = 0;
-	int save_warning;
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
+	वर्ण पङ्क्तिः[1000];
+	पूर्णाङ्क flags = 0;
+	पूर्णाङ्क save_warning;
 
-	save_commit_buffer = 0;
-	setup_revisions_from_strvec(argv, revs, &s_r_opt);
+	save_commit_बफर = 0;
+	सज्जता_revisions_from_strvec(argv, revs, &s_r_opt);
 
 	/* make sure shallows are read */
 	is_repository_shallow(the_repository);
@@ -4911,246 +4911,246 @@ static void get_object_list(struct rev_info *revs, struct strvec *argv)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	while (fgets(line, sizeof(line), stdin) != NULL) {
-		int len = strlen(line);
-		if (len && line[len - 1] == '\n')
-			line[--len] = 0;
-		if (!len)
-			break;
-		if (*line == '-') {
-			if (!strcmp(line, "--not")) {
+	यावत् (fgets(पङ्क्तिः, परिमाण(पङ्क्तिः), stdin) != रिक्त) {
+		पूर्णाङ्क len = वाक्यदैर्घ्यम्(पङ्क्तिः);
+		यदि (len && पङ्क्तिः[len - 1] == '\n')
+			पङ्क्तिः[--len] = 0;
+		यदि (!len)
+			भङ्ग;
+		यदि (*पङ्क्तिः == '-') {
+			यदि (!वाक्यं_तुलय(पङ्क्तिः, "--not")) {
 				flags ^= UNINTERESTING;
-				write_bitmap_index = 0;
-				continue;
+				write_bitmap_सूचकांक = 0;
+				अनुवर्त;
 			}
-			if (starts_with(line, "--shallow ")) {
-				struct object_id oid;
-				if (get_oid_hex(line + 10, &oid))
-					die("not an object name '%s'", line + 10);
-				register_shallow(the_repository, &oid);
-				use_bitmap_index = 0;
-				continue;
+			यदि (starts_with(पङ्क्तिः, "--shallow ")) {
+				संरचना object_id oid;
+				यदि (get_oid_hex(पङ्क्तिः + 10, &oid))
+					die("not an object name '%s'", पङ्क्तिः + 10);
+				पञ्जिकाकोशः_shallow(the_repository, &oid);
+				use_bitmap_सूचकांक = 0;
+				अनुवर्त;
 			}
-			die(_("not a rev '%s'"), line);
+			die(_("not a rev '%s'"), पङ्क्तिः);
 		}
-		if (handle_revision_arg(line, revs, flags, REVARG_CANNOT_BE_FILENAME))
-			die(_("bad revision '%s'"), line);
+		यदि (handle_revision_arg(पङ्क्तिः, revs, flags, REVARG_CANNOT_BE_FILENAME))
+			die(_("bad revision '%s'"), पङ्क्तिः);
 	}
 
 	cfg->warn_on_object_refname_ambiguity = save_warning;
 
-	if (use_bitmap_index && !get_object_list_from_bitmap(revs))
-		return;
+	यदि (use_bitmap_सूचकांक && !get_object_list_from_bitmap(revs))
+		प्रत्यागम;
 
-	if (use_delta_islands)
-		load_delta_islands(the_repository, progress);
+	यदि (use_delta_islands)
+		आरोपय_delta_islands(the_repository, प्रगतिः);
 
-	if (write_bitmap_index)
+	यदि (write_bitmap_सूचकांक)
 		for_each_preferred_bitmap_tip(the_repository, mark_bitmap_preferred_tip,
-					      NULL);
+					      रिक्त);
 
-	if (!fn_show_object)
+	यदि (!fn_show_object)
 		fn_show_object = show_object;
 
-	if (path_walk) {
-		if (get_object_list_path_walk(revs)) {
+	यदि (मार्गः_walk) {
+		यदि (get_object_list_मार्गः_walk(revs)) {
 			warning(_("failed to pack objects via path-walk"));
-			path_walk = 0;
+			मार्गः_walk = 0;
 		}
 	}
 
-	if (!path_walk) {
-		if (prepare_revision_walk(revs))
+	यदि (!मार्गः_walk) {
+		यदि (prepare_revision_walk(revs))
 			die(_("revision walk setup failed"));
-		mark_edges_uninteresting(revs, show_edge, sparse);
+		mark_धाराः_uninteresting(revs, show_edge, sparse);
 		traverse_commit_list(revs,
 				show_commit, fn_show_object,
-				NULL);
+				रिक्त);
 	}
 
-	if (unpack_unreachable_expiration) {
+	यदि (unpack_unreachable_expiration) {
 		revs->ignore_missing_links = 1;
-		if (add_unseen_recent_objects_to_traversal(revs,
-				unpack_unreachable_expiration, NULL, 0))
+		यदि (सङ्कलय_unseen_recent_objects_गन्तव्यम्_traversal(revs,
+				unpack_unreachable_expiration, रिक्त, 0))
 			die(_("unable to add recent objects"));
-		if (prepare_revision_walk(revs))
+		यदि (prepare_revision_walk(revs))
 			die(_("revision walk setup failed"));
-		traverse_commit_list(revs, record_recent_commit,
-				     record_recent_object, NULL);
+		traverse_commit_list(revs, लेखः_recent_commit,
+				     लेखः_recent_object, रिक्त);
 	}
 
-	if (keep_unreachable)
-		add_objects_in_unpacked_packs();
-	if (pack_loose_unreachable)
-		add_unreachable_loose_objects(NULL);
-	if (unpack_unreachable)
-		loosen_unused_packed_objects();
+	यदि (keep_unreachable)
+		सङ्कलय_objects_अन्तर्_unpacked_packs();
+	यदि (pack_loose_unreachable)
+		सङ्कलय_unreachable_loose_objects(रिक्त);
+	यदि (unpack_unreachable)
+		loosen_अप्रयुक्तम्_packed_objects();
 
 	oid_array_clear(&recent_objects);
 }
 
-static void add_extra_kept_packs(const struct string_list *names)
+स्थिर शून्य सङ्कलय_extra_kept_packs(ध्रुव संरचना string_list *नामानि)
 {
-	struct packed_git *p;
+	संरचना packed_git *p;
 
-	if (!names->nr)
-		return;
+	यदि (!नामानि->nr)
+		प्रत्यागम;
 
 	repo_for_each_pack(the_repository, p) {
-		const char *name = basename(p->pack_name);
-		int i;
+		ध्रुव वर्ण *name = basename(p->pack_name);
+		पूर्णाङ्क i;
 
-		if (!p->pack_local)
-			continue;
+		यदि (!p->pack_local)
+			अनुवर्त;
 
-		for (i = 0; i < names->nr; i++)
-			if (!fspathcmp(name, names->items[i].string))
-				break;
+		प्रति (i = 0; i < नामानि->nr; i++)
+			यदि (!fspathcmp(name, नामानि->वस्तूनि[i].string))
+				भङ्ग;
 
-		if (i < names->nr) {
-			p->pack_keep_in_core = 1;
-			ignore_packed_keep_in_core = 1;
-			continue;
+		यदि (i < नामानि->nr) {
+			p->pack_keep_अन्तर्_core = 1;
+			ignore_packed_keep_अन्तर्_core = 1;
+			अनुवर्त;
 		}
 	}
 }
 
-static int option_parse_quiet(const struct option *opt, const char *arg,
-			      int unset)
+स्थिर पूर्णाङ्क option_parse_quiet(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg,
+			      पूर्णाङ्क unset)
 {
-	int *val = opt->value;
+	पूर्णाङ्क *val = opt->मानम्;
 
 	BUG_ON_OPT_ARG(arg);
 
-	if (!unset)
+	यदि (!unset)
 		*val = 0;
-	else if (!*val)
+	अन्यथा यदि (!*val)
 		*val = 1;
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int option_parse_index_version(const struct option *opt,
-				      const char *arg, int unset)
+स्थिर पूर्णाङ्क option_parse_सूचकांक_संस्करणम्(ध्रुव संरचना option *opt,
+				      ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct pack_idx_option *popts = opt->value;
-	char *c;
-	const char *val = arg;
+	संरचना pack_idx_option *popts = opt->मानम्;
+	वर्ण *c;
+	ध्रुव वर्ण *val = arg;
 
 	BUG_ON_OPT_NEG(unset);
 
-	popts->version = strtoul(val, &c, 10);
-	if (popts->version > 2)
+	popts->संस्करणम् = strtoul(val, &c, 10);
+	यदि (popts->संस्करणम् > 2)
 		die(_("unsupported index version %s"), val);
-	if (*c == ',' && c[1])
-		popts->off32_limit = strtoul(c+1, &c, 0);
-	if (*c || popts->off32_limit & 0x80000000)
+	यदि (*c == ',' && c[1])
+		popts->off32_सीमा = strtoul(c+1, &c, 0);
+	यदि (*c || popts->off32_सीमा & 0x80000000)
 		die(_("bad index version '%s'"), val);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int option_parse_unpack_unreachable(const struct option *opt UNUSED,
-					   const char *arg, int unset)
+स्थिर पूर्णाङ्क option_parse_unpack_unreachable(ध्रुव संरचना option *opt अप्रयुक्तम्,
+					   ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	if (unset) {
+	यदि (unset) {
 		unpack_unreachable = 0;
 		unpack_unreachable_expiration = 0;
 	}
-	else {
+	अन्यथा {
 		unpack_unreachable = 1;
-		if (arg)
+		यदि (arg)
 			unpack_unreachable_expiration = approxidate(arg);
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int option_parse_cruft_expiration(const struct option *opt UNUSED,
-					 const char *arg, int unset)
+स्थिर पूर्णाङ्क option_parse_cruft_expiration(ध्रुव संरचना option *opt अप्रयुक्तम्,
+					 ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	if (unset) {
+	यदि (unset) {
 		cruft = 0;
 		cruft_expiration = 0;
-	} else {
+	} अन्यथा {
 		cruft = 1;
-		if (arg)
+		यदि (arg)
 			cruft_expiration = approxidate(arg);
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int is_not_in_promisor_pack_obj(struct object *obj, void *data UNUSED)
+स्थिर पूर्णाङ्क is_not_अन्तर्_promisor_pack_obj(संरचना object *obj, शून्य *दत्त अप्रयुक्तम्)
 {
-	struct odb_source_info source_info;
-	struct object_info info = {
+	संरचना odb_source_info source_info;
+	संरचना object_info info = {
 		.source_infop = &source_info,
 	};
 
-	if (odb_read_object_info_extended(the_repository->objects, &obj->oid, &info, 0))
+	यदि (odb_read_object_info_extended(the_repository->objects, &obj->oid, &info, 0))
 		BUG("should_include_obj should only be called on existing objects");
-	return source_info.source->type != ODB_SOURCE_PACKED || !source_info.u.packed.pack->pack_promisor;
+	प्रत्यागम source_info.source->type != ODB_SOURCE_PACKED || !source_info.u.packed.pack->pack_promisor;
 }
 
-static int is_not_in_promisor_pack(struct commit *commit, void *data) {
-	return is_not_in_promisor_pack_obj((struct object *) commit, data);
+स्थिर पूर्णाङ्क is_not_अन्तर्_promisor_pack(संरचना commit *commit, शून्य *दत्त) {
+	प्रत्यागम is_not_अन्तर्_promisor_pack_obj((संरचना object *) commit, दत्त);
 }
 
-static int parse_stdin_packs_mode(const struct option *opt, const char *arg,
-				  int unset)
+स्थिर पूर्णाङ्क parse_stdin_packs_बहुलकम्(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg,
+				  पूर्णाङ्क unset)
 {
-	enum stdin_packs_mode *mode = opt->value;
+	गणना stdin_packs_बहुलकम् *बहुलकम् = opt->मानम्;
 
-	if (unset)
-		*mode = STDIN_PACKS_MODE_NONE;
-	else if (!arg || !*arg)
-		*mode = STDIN_PACKS_MODE_STANDARD;
-	else if (!strcmp(arg, "follow"))
-		*mode = STDIN_PACKS_MODE_FOLLOW;
-	else
+	यदि (unset)
+		*बहुलकम् = STDIN_PACKS_बहुलकम्_NONE;
+	अन्यथा यदि (!arg || !*arg)
+		*बहुलकम् = STDIN_PACKS_बहुलकम्_STANDARD;
+	अन्यथा यदि (!वाक्यं_तुलय(arg, "follow"))
+		*बहुलकम् = STDIN_PACKS_बहुलकम्_FOLLOW;
+	अन्यथा
 		die(_("invalid value for '%s': '%s'"), opt->long_name, arg);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-int cmd_pack_objects(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+पूर्णाङ्क cmd_pack_objects(पूर्णाङ्क argc,
+		     ध्रुव वर्ण **argv,
+		     ध्रुव वर्ण *उपसर्गः,
+		     संरचना repository *repo)
 {
-	int use_internal_rev_list = 0;
-	int all_progress_implied = 0;
-	struct strvec rp = STRVEC_INIT;
-	int rev_list_unpacked = 0, rev_list_all = 0, rev_list_reflog = 0;
-	int rev_list_index = 0;
-	enum stdin_packs_mode stdin_packs = STDIN_PACKS_MODE_NONE;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct list_objects_filter_options filter_options =
+	पूर्णाङ्क use_आन्तरिकम्_rev_list = 0;
+	पूर्णाङ्क all_प्रगतिः_implied = 0;
+	संरचना strvec rp = STRVEC_INIT;
+	पूर्णाङ्क rev_list_unpacked = 0, rev_list_all = 0, rev_list_reflog = 0;
+	पूर्णाङ्क rev_list_सूचकांक = 0;
+	गणना stdin_packs_बहुलकम् stdin_packs = STDIN_PACKS_बहुलकम्_NONE;
+	संरचना string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	संरचना list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
 
-	struct option pack_objects_options[] = {
-		OPT_CALLBACK_F('q', "quiet", &progress, NULL,
+	संरचना option pack_objects_options[] = {
+		OPT_CALLBACK_F('q', "quiet", &प्रगतिः, रिक्त,
 			       N_("do not show progress meter"),
 			       PARSE_OPT_NOARG, option_parse_quiet),
-		OPT_SET_INT(0, "progress", &progress,
+		OPT_समुच्चयः_INT(0, "progress", &प्रगतिः,
 			    N_("show progress meter"), 1),
-		OPT_SET_INT(0, "all-progress", &progress,
+		OPT_समुच्चयः_INT(0, "all-progress", &प्रगतिः,
 			    N_("show progress meter during object writing phase"), 2),
 		OPT_BOOL(0, "all-progress-implied",
-			 &all_progress_implied,
+			 &all_प्रगतिः_implied,
 			 N_("similar to --all-progress when progress meter is shown")),
 		OPT_CALLBACK_F(0, "index-version", &pack_idx_opts, N_("<version>[,<offset>]"),
 		  N_("write the pack index file in the specified idx format version"),
-		  PARSE_OPT_NONEG, option_parse_index_version),
-		OPT_UNSIGNED(0, "max-pack-size", &pack_size_limit,
+		  PARSE_OPT_NONEG, option_parse_सूचकांक_संस्करणम्),
+		OPT_UNSIGNED(0, "max-pack-size", &pack_आकार_सीमा,
 			     N_("maximum size of each output pack file")),
 		OPT_BOOL(0, "local", &local,
 			 N_("ignore borrowed objects from alternate object store")),
 		OPT_BOOL(0, "incremental", &incremental,
 			 N_("ignore packed objects")),
-		OPT_INTEGER(0, "window", &window,
+		OPT_INTEGER(0, "window", &गवाक्षः,
 			    N_("limit pack window by objects")),
-		OPT_UNSIGNED(0, "window-memory", &window_memory_limit,
+		OPT_UNSIGNED(0, "window-memory", &गवाक्षः_स्मृतिः_सीमा,
 			     N_("limit pack window by memory in addition to object limit")),
-		OPT_INTEGER(0, "depth", &depth,
+		OPT_INTEGER(0, "depth", &गभीरता,
 			    N_("maximum length of delta chain allowed in the resulting pack")),
 		OPT_BOOL(0, "reuse-delta", &reuse_delta,
 			 N_("reuse existing deltas")),
@@ -5158,47 +5158,47 @@ int cmd_pack_objects(int argc,
 			 N_("reuse existing objects")),
 		OPT_BOOL(0, "delta-base-offset", &allow_ofs_delta,
 			 N_("use OFS_DELTA objects")),
-		OPT_INTEGER(0, "threads", &delta_search_threads,
+		OPT_INTEGER(0, "threads", &delta_अन्वेषणम्_तन्तवः,
 			    N_("use threads when searching for best delta matches")),
-		OPT_BOOL(0, "non-empty", &non_empty,
+		OPT_BOOL(0, "non-empty", &non_रिक्तानि,
 			 N_("do not create an empty pack output")),
-		OPT_BOOL(0, "revs", &use_internal_rev_list,
+		OPT_BOOL(0, "revs", &use_आन्तरिकम्_rev_list,
 			 N_("read revision arguments from standard input")),
-		OPT_SET_INT_F(0, "unpacked", &rev_list_unpacked,
+		OPT_समुच्चयः_INT_F(0, "unpacked", &rev_list_unpacked,
 			      N_("limit the objects to those that are not yet packed"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "all", &rev_list_all,
+		OPT_समुच्चयः_INT_F(0, "all", &rev_list_all,
 			      N_("include objects reachable from any reference"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "reflog", &rev_list_reflog,
+		OPT_समुच्चयः_INT_F(0, "reflog", &rev_list_reflog,
 			      N_("include objects referred by reflog entries"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "indexed-objects", &rev_list_index,
+		OPT_समुच्चयः_INT_F(0, "indexed-objects", &rev_list_सूचकांक,
 			      N_("include objects referred to by the index"),
 			      1, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "stdin-packs", &stdin_packs, N_("mode"),
 			     N_("read packs from stdin"),
-			     PARSE_OPT_OPTARG, parse_stdin_packs_mode),
-		OPT_BOOL(0, "stdout", &pack_to_stdout,
+			     PARSE_OPT_OPTARG, parse_stdin_packs_बहुलकम्),
+		OPT_BOOL(0, "stdout", &pack_गन्तव्यम्_stdout,
 			 N_("output pack to stdout")),
-		OPT_BOOL(0, "include-tag", &include_tag,
+		OPT_BOOL(0, "include-tag", &include_चिह्नकम्,
 			 N_("include tag objects that refer to objects to be packed")),
 		OPT_BOOL(0, "keep-unreachable", &keep_unreachable,
 			 N_("keep unreachable objects")),
 		OPT_BOOL(0, "pack-loose-unreachable", &pack_loose_unreachable,
 			 N_("pack loose unreachable objects")),
-		OPT_CALLBACK_F(0, "unpack-unreachable", NULL, N_("time"),
+		OPT_CALLBACK_F(0, "unpack-unreachable", रिक्त, N_("time"),
 		  N_("unpack unreachable objects newer than <time>"),
 		  PARSE_OPT_OPTARG, option_parse_unpack_unreachable),
 		OPT_BOOL(0, "cruft", &cruft, N_("create a cruft pack")),
-		OPT_CALLBACK_F(0, "cruft-expiration", NULL, N_("time"),
+		OPT_CALLBACK_F(0, "cruft-expiration", रिक्त, N_("time"),
 		  N_("expire cruft objects older than <time>"),
 		  PARSE_OPT_OPTARG, option_parse_cruft_expiration),
 		OPT_BOOL(0, "sparse", &sparse,
 			 N_("use the sparse reachability algorithm")),
 		OPT_BOOL(0, "thin", &thin,
 			 N_("create thin packs")),
-		OPT_BOOL(0, "path-walk", &path_walk,
+		OPT_BOOL(0, "path-walk", &मार्गः_walk,
 			 N_("use the path-walk API to walk objects when possible")),
 		OPT_BOOL(0, "shallow", &shallow,
 			 N_("create packs suitable for shallow fetches")),
@@ -5210,13 +5210,13 @@ int cmd_pack_objects(int argc,
 			    N_("pack compression level")),
 		OPT_BOOL(0, "keep-true-parents", &grafts_keep_true_parents,
 			 N_("do not hide commits by grafts")),
-		OPT_BOOL(0, "use-bitmap-index", &use_bitmap_index,
+		OPT_BOOL(0, "use-bitmap-index", &use_bitmap_सूचकांक,
 			 N_("use a bitmap index if available to speed up counting objects")),
-		OPT_SET_INT(0, "write-bitmap-index", &write_bitmap_index,
+		OPT_समुच्चयः_INT(0, "write-bitmap-index", &write_bitmap_सूचकांक,
 			    N_("write a bitmap index together with the pack index"),
 			    WRITE_BITMAP_TRUE),
-		OPT_SET_INT_F(0, "write-bitmap-index-quiet",
-			      &write_bitmap_index,
+		OPT_समुच्चयः_INT_F(0, "write-bitmap-index-quiet",
+			      &write_bitmap_सूचकांक,
 			      N_("write a bitmap index if possible"),
 			      WRITE_BITMAP_QUIET, PARSE_OPT_HIDDEN),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
@@ -5233,168 +5233,168 @@ int cmd_pack_objects(int argc,
 		OPT_STRING_LIST(0, "uri-protocol", &uri_protocols,
 				N_("protocol"),
 				N_("exclude any configured uploadpack.blobpackfileuri with this protocol")),
-		OPT_INTEGER(0, "name-hash-version", &name_hash_version,
+		OPT_INTEGER(0, "name-hash-version", &name_hash_संस्करणम्,
 			 N_("use the specified name-hash function to group similar objects")),
-		OPT_END(),
+		OPT_अन्तः(),
 	};
 
-	if (DFS_NUM_STATES > (1 << OE_DFS_STATE_BITS))
+	यदि (DFS_अङ्कः_अवस्थाः > (1 << OE_DFS_STATE_द्वयङ्काः))
 		BUG("too many dfs states, increase OE_DFS_STATE_BITS");
 
 	disable_replace_refs();
 
 	sparse = git_env_bool("GIT_TEST_PACK_SPARSE", -1);
-	if (the_repository->gitdir) {
+	यदि (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		if (sparse < 0)
+		यदि (sparse < 0)
 			sparse = the_repository->settings.pack_use_sparse;
-		if (the_repository->settings.pack_use_multi_pack_reuse)
+		यदि (the_repository->settings.pack_use_multi_pack_reuse)
 			allow_pack_reuse = MULTI_PACK_REUSE;
 	}
 
 	reset_pack_idx_option(&pack_idx_opts);
 	pack_idx_opts.flags |= WRITE_REV;
-	repo_config(the_repository, git_pack_config, NULL);
-	if (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
+	repo_config(the_repository, git_pack_config, रिक्त);
+	यदि (git_env_bool(GIT_TEST_NO_WRITE_REV_सूचकांक, 0))
 		pack_idx_opts.flags &= ~WRITE_REV;
 
-	progress = isatty(2);
-	argc = parse_options(argc, argv, prefix, pack_objects_options,
+	प्रगतिः = isatty(2);
+	argc = parse_options(argc, argv, उपसर्गः, pack_objects_options,
 			     pack_usage, 0);
 
-	if (argc) {
-		base_name = argv[0];
+	यदि (argc) {
+		आधारः_name = argv[0];
 		argc--;
 	}
-	if (pack_to_stdout != !base_name || argc)
+	यदि (pack_गन्तव्यम्_stdout != !आधारः_name || argc)
 		usage_with_options(pack_usage, pack_objects_options);
 
-	if (path_walk < 0) {
-		if (use_bitmap_index > 0 ||
-		    !use_internal_rev_list)
-			path_walk = 0;
-		else if (the_repository->gitdir &&
-			 the_repository->settings.pack_use_path_walk)
-			path_walk = 1;
-		else
-			path_walk = git_env_bool("GIT_TEST_PACK_PATH_WALK", 0);
+	यदि (मार्गः_walk < 0) {
+		यदि (use_bitmap_सूचकांक > 0 ||
+		    !use_आन्तरिकम्_rev_list)
+			मार्गः_walk = 0;
+		अन्यथा यदि (the_repository->gitdir &&
+			 the_repository->settings.pack_use_मार्गः_walk)
+			मार्गः_walk = 1;
+		अन्यथा
+			मार्गः_walk = git_env_bool("GIT_TEST_PACK_PATH_WALK", 0);
 	}
 
-	if (depth < 0)
-		depth = 0;
-	if (depth >= (1 << OE_DEPTH_BITS)) {
+	यदि (गभीरता < 0)
+		गभीरता = 0;
+	यदि (गभीरता >= (1 << OE_गभीरता_द्वयङ्काः)) {
 		warning(_("delta chain depth %d is too deep, forcing %d"),
-			depth, (1 << OE_DEPTH_BITS) - 1);
-		depth = (1 << OE_DEPTH_BITS) - 1;
+			गभीरता, (1 << OE_गभीरता_द्वयङ्काः) - 1);
+		गभीरता = (1 << OE_गभीरता_द्वयङ्काः) - 1;
 	}
-	if (cache_max_small_delta_size >= (1U << OE_Z_DELTA_BITS)) {
+	यदि (cache_max_small_delta_आकार >= (1U << OE_Z_DELTA_द्वयङ्काः)) {
 		warning(_("pack.deltaCacheLimit is too high, forcing %d"),
-			(1U << OE_Z_DELTA_BITS) - 1);
-		cache_max_small_delta_size = (1U << OE_Z_DELTA_BITS) - 1;
+			(1U << OE_Z_DELTA_द्वयङ्काः) - 1);
+		cache_max_small_delta_आकार = (1U << OE_Z_DELTA_द्वयङ्काः) - 1;
 	}
-	if (window < 0)
-		window = 0;
+	यदि (गवाक्षः < 0)
+		गवाक्षः = 0;
 
-	strvec_push(&rp, "pack-objects");
+	strvec_प्रक्षिप(&rp, "pack-objects");
 
-	if (path_walk) {
-		const char *option = NULL;
-		if (!path_walk_filter_compatible(&filter_options))
+	यदि (मार्गः_walk) {
+		ध्रुव वर्ण *option = रिक्त;
+		यदि (!मार्गः_walk_filter_compatible(&filter_options))
 			option = "--filter";
 
-		if (option) {
+		यदि (option) {
 			warning(_("cannot use %s with %s"),
 				option, "--path-walk");
-			path_walk = 0;
+			मार्गः_walk = 0;
 		}
 	}
-	if (path_walk) {
-		strvec_push(&rp, "--objects");
-	} else if (thin) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, shallow
+	यदि (मार्गः_walk) {
+		strvec_प्रक्षिप(&rp, "--objects");
+	} अन्यथा यदि (thin) {
+		use_आन्तरिकम्_rev_list = 1;
+		strvec_प्रक्षिप(&rp, shallow
 				? "--objects-edge-aggressive"
 				: "--objects-edge");
-	} else
-		strvec_push(&rp, "--objects");
+	} अन्यथा
+		strvec_प्रक्षिप(&rp, "--objects");
 
-	if (rev_list_all) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--all");
+	यदि (rev_list_all) {
+		use_आन्तरिकम्_rev_list = 1;
+		strvec_प्रक्षिप(&rp, "--all");
 	}
-	if (rev_list_reflog) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--reflog");
+	यदि (rev_list_reflog) {
+		use_आन्तरिकम्_rev_list = 1;
+		strvec_प्रक्षिप(&rp, "--reflog");
 	}
-	if (rev_list_index) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--indexed-objects");
+	यदि (rev_list_सूचकांक) {
+		use_आन्तरिकम्_rev_list = 1;
+		strvec_प्रक्षिप(&rp, "--indexed-objects");
 	}
-	if (rev_list_unpacked && !stdin_packs) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--unpacked");
+	यदि (rev_list_unpacked && !stdin_packs) {
+		use_आन्तरिकम्_rev_list = 1;
+		strvec_प्रक्षिप(&rp, "--unpacked");
 	}
 
 	die_for_incompatible_opt2(exclude_promisor_objects,
 				  "--exclude-promisor-objects",
 				  exclude_promisor_objects_best_effort,
 				  "--exclude-promisor-objects-best-effort");
-	if (exclude_promisor_objects) {
+	यदि (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 
 		/* --stdin-packs handles promisor objects separately. */
-		if (!stdin_packs) {
-			use_internal_rev_list = 1;
-			strvec_push(&rp, "--exclude-promisor-objects");
+		यदि (!stdin_packs) {
+			use_आन्तरिकम्_rev_list = 1;
+			strvec_प्रक्षिप(&rp, "--exclude-promisor-objects");
 		}
-	} else if (exclude_promisor_objects_best_effort) {
-		use_internal_rev_list = 1;
+	} अन्यथा यदि (exclude_promisor_objects_best_effort) {
+		use_आन्तरिकम्_rev_list = 1;
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
 		/* revs configured below */
 	}
-	if (unpack_unreachable || keep_unreachable || pack_loose_unreachable)
-		use_internal_rev_list = 1;
+	यदि (unpack_unreachable || keep_unreachable || pack_loose_unreachable)
+		use_आन्तरिकम्_rev_list = 1;
 
-	if (!reuse_object)
+	यदि (!reuse_object)
 		reuse_delta = 0;
-	if (cfg->pack_compression_level == -1)
+	यदि (cfg->pack_compression_level == -1)
 		cfg->pack_compression_level = Z_DEFAULT_COMPRESSION;
-	else if (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_BEST_COMPRESSION)
+	अन्यथा यदि (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_BEST_COMPRESSION)
 		die(_("bad pack compression level %d"), cfg->pack_compression_level);
 
-	if (!delta_search_threads)	/* --threads=0 means autodetect */
-		delta_search_threads = online_cpus();
+	यदि (!delta_अन्वेषणम्_तन्तवः)	/* --threads=0 means autodetect */
+		delta_अन्वेषणम्_तन्तवः = online_cpus();
 
-	if (!HAVE_THREADS && delta_search_threads != 1)
+	यदि (!HAVE_तन्तवः && delta_अन्वेषणम्_तन्तवः != 1)
 		warning(_("no threads support, ignoring --threads"));
-	if (!pack_to_stdout && !pack_size_limit)
-		pack_size_limit = pack_size_limit_cfg;
-	if (pack_to_stdout && pack_size_limit)
+	यदि (!pack_गन्तव्यम्_stdout && !pack_आकार_सीमा)
+		pack_आकार_सीमा = pack_आकार_सीमा_cfg;
+	यदि (pack_गन्तव्यम्_stdout && pack_आकार_सीमा)
 		die(_("--max-pack-size cannot be used to build a pack for transfer"));
-	if (pack_size_limit && pack_size_limit < 1024*1024) {
+	यदि (pack_आकार_सीमा && pack_आकार_सीमा < 1024*1024) {
 		warning(_("minimum pack size limit is 1 MiB"));
-		pack_size_limit = 1024*1024;
+		pack_आकार_सीमा = 1024*1024;
 	}
 
-	if (!pack_to_stdout && thin)
+	यदि (!pack_गन्तव्यम्_stdout && thin)
 		die(_("--thin cannot be used to build an indexable pack"));
 
 	die_for_incompatible_opt2(keep_unreachable, "--keep-unreachable",
 				  unpack_unreachable, "--unpack-unreachable");
-	if (!rev_list_all || !rev_list_reflog || !rev_list_index)
+	यदि (!rev_list_all || !rev_list_reflog || !rev_list_सूचकांक)
 		unpack_unreachable_expiration = 0;
 
 	die_for_incompatible_opt2(stdin_packs, "--stdin-packs",
 				  filter_options.choice, "--filter");
 
 
-	if (stdin_packs && use_internal_rev_list)
+	यदि (stdin_packs && use_आन्तरिकम्_rev_list)
 		die(_("cannot use internal rev list with --stdin-packs"));
 
-	if (cruft) {
-		if (use_internal_rev_list)
+	यदि (cruft) {
+		यदि (use_आन्तरिकम्_rev_list)
 			die(_("cannot use internal rev list with --cruft"));
 		die_for_incompatible_opt2(stdin_packs, "--stdin-packs",
 					  cruft, "--cruft");
@@ -5409,95 +5409,95 @@ int cmd_pack_objects(int argc,
 	 * - to use more robust pack-generation codepath (avoiding possible
 	 *   bugs in bitmap code and possible bitmap index corruption).
 	 */
-	if (!pack_to_stdout)
-		use_bitmap_index_default = 0;
+	यदि (!pack_गन्तव्यम्_stdout)
+		use_bitmap_सूचकांक_default = 0;
 
-	if (use_bitmap_index < 0)
-		use_bitmap_index = use_bitmap_index_default;
+	यदि (use_bitmap_सूचकांक < 0)
+		use_bitmap_सूचकांक = use_bitmap_सूचकांक_default;
 
 	/* "hard" reasons not to use bitmaps; these just won't work at all */
-	if (!use_internal_rev_list || (!pack_to_stdout && write_bitmap_index) || is_repository_shallow(the_repository))
-		use_bitmap_index = 0;
+	यदि (!use_आन्तरिकम्_rev_list || (!pack_गन्तव्यम्_stdout && write_bitmap_सूचकांक) || is_repository_shallow(the_repository))
+		use_bitmap_सूचकांक = 0;
 
-	if (pack_to_stdout || !rev_list_all)
-		write_bitmap_index = 0;
+	यदि (pack_गन्तव्यम्_stdout || !rev_list_all)
+		write_bitmap_सूचकांक = 0;
 
-	if (name_hash_version < 0)
-		name_hash_version = (int)git_env_ulong("GIT_TEST_NAME_HASH_VERSION", 1);
+	यदि (name_hash_संस्करणम् < 0)
+		name_hash_संस्करणम् = (पूर्णाङ्क)git_env_ulong("GIT_TEST_NAME_HASH_VERSION", 1);
 
-	validate_name_hash_version();
+	validate_name_hash_संस्करणम्();
 
-	if (use_delta_islands)
-		strvec_push(&rp, "--topo-order");
+	यदि (use_delta_islands)
+		strvec_प्रक्षिप(&rp, "--topo-order");
 
-	if (progress && all_progress_implied)
-		progress = 2;
+	यदि (प्रगतिः && all_प्रगतिः_implied)
+		प्रगतिः = 2;
 
-	add_extra_kept_packs(&keep_pack_list);
-	if (ignore_packed_keep_on_disk) {
-		struct packed_git *p;
+	सङ्कलय_extra_kept_packs(&keep_pack_list);
+	यदि (ignore_packed_keep_on_disk) {
+		संरचना packed_git *p;
 
 		repo_for_each_pack(the_repository, p)
-			if (p->pack_local && p->pack_keep)
-				break;
-		if (!p) /* no keep-able packs found */
+			यदि (p->pack_local && p->pack_keep)
+				भङ्ग;
+		यदि (!p) /* no keep-able packs found */
 			ignore_packed_keep_on_disk = 0;
 	}
-	if (local) {
+	यदि (local) {
 		/*
 		 * unlike ignore_packed_keep_on_disk above, we do not
 		 * want to unset "local" based on looking at packs, as
 		 * it also covers non-local objects
 		 */
-		struct packed_git *p;
+		संरचना packed_git *p;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local) {
+			यदि (!p->pack_local) {
 				have_non_local_packs = 1;
-				break;
+				भङ्ग;
 			}
 		}
 	}
 
 	trace2_region_enter("pack-objects", "enumerate-objects",
 			    the_repository);
-	prepare_packing_data(the_repository, &to_pack);
+	prepare_packing_दत्त(the_repository, &गन्तव्यम्_pack);
 
-	if (progress && !cruft)
-		progress_state = start_progress(the_repository,
+	यदि (प्रगतिः && !cruft)
+		प्रगतिः_state = start_प्रगतिः(the_repository,
 						_("Enumerating objects"), 0);
-	if (stdin_packs) {
+	यदि (stdin_packs) {
 		read_stdin_packs(repo, stdin_packs, rev_list_unpacked);
-	} else if (cruft) {
+	} अन्यथा यदि (cruft) {
 		read_cruft_objects();
-	} else if (!use_internal_rev_list) {
+	} अन्यथा यदि (!use_आन्तरिकम्_rev_list) {
 		read_object_list_from_stdin();
-	} else {
-		struct rev_info revs;
+	} अन्यथा {
+		संरचना rev_info revs;
 
-		repo_init_revisions(the_repository, &revs, NULL);
+		repo_init_revisions(the_repository, &revs, रिक्त);
 		list_objects_filter_copy(&revs.filter, &filter_options);
-		if (exclude_promisor_objects_best_effort) {
-			revs.include_check = is_not_in_promisor_pack;
-			revs.include_check_obj = is_not_in_promisor_pack_obj;
+		यदि (exclude_promisor_objects_best_effort) {
+			revs.include_check = is_not_अन्तर्_promisor_pack;
+			revs.include_check_obj = is_not_अन्तर्_promisor_pack_obj;
 		}
 		get_object_list(&revs, &rp);
 		release_revisions(&revs);
 	}
-	cleanup_preferred_base();
-	if (include_tag && nr_result)
-		refs_for_each_tag_ref(get_main_ref_store(the_repository),
-				      add_ref_tag, NULL);
-	stop_progress(&progress_state);
+	cleanup_preferred_आधारः();
+	यदि (include_चिह्नकम् && nr_परिणाम)
+		refs_for_each_चिह्नकम्_ref(get_main_ref_store(the_repository),
+				      सङ्कलय_ref_चिह्नकम्, रिक्त);
+	stop_प्रगतिः(&प्रगतिः_state);
 	trace2_region_leave("pack-objects", "enumerate-objects",
 			    the_repository);
 
-	if (non_empty && !nr_result)
-		goto cleanup;
-	if (nr_result) {
+	यदि (non_रिक्तानि && !nr_परिणाम)
+		गच्छ cleanup;
+	यदि (nr_परिणाम) {
 		trace2_region_enter("pack-objects", "prepare-pack",
 				    the_repository);
-		prepare_pack(window, depth);
+		prepare_pack(गवाक्षः, गभीरता);
 		trace2_region_leave("pack-objects", "prepare-pack",
 				    the_repository);
 	}
@@ -5507,27 +5507,27 @@ int cmd_pack_objects(int argc,
 	write_pack_file();
 	trace2_region_leave("pack-objects", "write-pack-file", the_repository);
 
-	if (progress)
+	यदि (प्रगतिः)
 		fprintf_ln(stderr,
 			   _("Total %"PRIu32" (delta %"PRIu32"),"
 			     " reused %"PRIu32" (delta %"PRIu32"),"
 			     " pack-reused %"PRIu32" (from %"PRIuMAX")"),
 			   written, written_delta, reused, reused_delta,
 			   reuse_packfile_objects,
-			   (uintmax_t)reuse_packfiles_used_nr);
+			   (uintmax_t)reuse_packfiles_प्रयुक्तम्_nr);
 
-	trace2_data_intmax("pack-objects", the_repository, "written", written);
-	trace2_data_intmax("pack-objects", the_repository, "written/delta", written_delta);
-	trace2_data_intmax("pack-objects", the_repository, "reused", reused);
-	trace2_data_intmax("pack-objects", the_repository, "reused/delta", reused_delta);
-	trace2_data_intmax("pack-objects", the_repository, "pack-reused", reuse_packfile_objects);
-	trace2_data_intmax("pack-objects", the_repository, "packs-reused", reuse_packfiles_used_nr);
+	trace2_दत्त_intmax("pack-objects", the_repository, "written", written);
+	trace2_दत्त_intmax("pack-objects", the_repository, "written/delta", written_delta);
+	trace2_दत्त_intmax("pack-objects", the_repository, "reused", reused);
+	trace2_दत्त_intmax("pack-objects", the_repository, "reused/delta", reused_delta);
+	trace2_दत्त_intmax("pack-objects", the_repository, "pack-reused", reuse_packfile_objects);
+	trace2_दत्त_intmax("pack-objects", the_repository, "packs-reused", reuse_packfiles_प्रयुक्तम्_nr);
 
 cleanup:
-	clear_packing_data(&to_pack);
+	clear_packing_दत्त(&गन्तव्यम्_pack);
 	list_objects_filter_release(&filter_options);
 	string_list_clear(&keep_pack_list, 0);
 	strvec_clear(&rp);
 
-	return 0;
+	प्रत्यागम 0;
 }

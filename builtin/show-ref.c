@@ -1,17 +1,17 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs/refs-internal.h"
-#include "object-name.h"
-#include "odb.h"
-#include "object.h"
-#include "string-list.h"
-#include "parse-options.h"
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "refs/refs-internal.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "parse-options.h"
 
-static const char * const show_ref_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव show_ref_usage[] = {
 	N_("git show-ref [--head] [-d | --dereference]\n"
 	   "             [-s | --hash[=<n>]] [--abbrev[=<n>]] [--branches] [--tags]\n"
 	   "             [--] [<pattern>...]"),
@@ -20,98 +20,98 @@ static const char * const show_ref_usage[] = {
 	   "             [--] [<ref>...]"),
 	N_("git show-ref --exclude-existing[=<pattern>]"),
 	N_("git show-ref --exists <ref>"),
-	NULL
+	रिक्त
 };
 
-struct show_one_options {
-	int quiet;
-	int hash_only;
-	int abbrev;
-	int deref_tags;
+संरचना show_one_options {
+	पूर्णाङ्क quiet;
+	पूर्णाङ्क hash_only;
+	पूर्णाङ्क abbrev;
+	पूर्णाङ्क deref_चिह्नकानि;
 };
 
-static void show_one(const struct show_one_options *opts,
-		     const struct reference *ref)
+स्थिर शून्य show_one(ध्रुव संरचना show_one_options *opts,
+		     ध्रुव संरचना reference *ref)
 {
-	const char *hex;
-	struct object_id peeled;
+	ध्रुव वर्ण *hex;
+	संरचना object_id peeled;
 
-	if (!odb_has_object(the_repository->objects, ref->oid,
+	यदि (!odb_has_object(the_repository->objects, ref->oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die("git show-ref: bad ref %s (%s)", ref->name,
-		    oid_to_hex(ref->oid));
+		    oid_गन्तव्यम्_hex(ref->oid));
 
-	if (opts->quiet)
-		return;
+	यदि (opts->quiet)
+		प्रत्यागम;
 
 	hex = repo_find_unique_abbrev(the_repository, ref->oid, opts->abbrev);
-	if (opts->hash_only)
-		printf("%s\n", hex);
-	else
-		printf("%s %s\n", hex, ref->name);
+	यदि (opts->hash_only)
+		प्रारूप_लिख("%s\n", hex);
+	अन्यथा
+		प्रारूप_लिख("%s %s\n", hex, ref->name);
 
-	if (!opts->deref_tags)
-		return;
+	यदि (!opts->deref_चिह्नकानि)
+		प्रत्यागम;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	यदि (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		hex = repo_find_unique_abbrev(the_repository, &peeled, opts->abbrev);
-		printf("%s %s^{}\n", hex, ref->name);
+		प्रारूप_लिख("%s %s^{}\n", hex, ref->name);
 	}
 }
 
-struct show_ref_data {
-	const struct show_one_options *show_one_opts;
-	const char **patterns;
-	int found_match;
-	int show_head;
+संरचना show_ref_दत्त {
+	ध्रुव संरचना show_one_options *show_one_opts;
+	ध्रुव वर्ण **patterns;
+	पूर्णाङ्क प्राप्तम्_मेलनम्;
+	पूर्णाङ्क show_शीर्ष;
 };
 
-static int show_ref(const struct reference *ref, void *cbdata)
+स्थिर पूर्णाङ्क show_ref(ध्रुव संरचना reference *ref, शून्य *cbdata)
 {
-	struct show_ref_data *data = cbdata;
+	संरचना show_ref_दत्त *दत्त = cbdata;
 
-	if (data->show_head && !strcmp(ref->name, "HEAD"))
-		goto match;
+	यदि (दत्त->show_शीर्ष && !वाक्यं_तुलय(ref->name, "HEAD"))
+		गच्छ मेलनम्;
 
-	if (data->patterns) {
-		int reflen = strlen(ref->name);
-		const char **p = data->patterns, *m;
-		while ((m = *p++) != NULL) {
-			int len = strlen(m);
-			if (len > reflen)
-				continue;
-			if (memcmp(m, ref->name + reflen - len, len))
-				continue;
-			if (len == reflen)
-				goto match;
-			if (ref->name[reflen - len - 1] == '/')
-				goto match;
+	यदि (दत्त->patterns) {
+		पूर्णाङ्क reflen = वाक्यदैर्घ्यम्(ref->name);
+		ध्रुव वर्ण **p = दत्त->patterns, *m;
+		यावत् ((m = *p++) != रिक्त) {
+			पूर्णाङ्क len = वाक्यदैर्घ्यम्(m);
+			यदि (len > reflen)
+				अनुवर्त;
+			यदि (memcmp(m, ref->name + reflen - len, len))
+				अनुवर्त;
+			यदि (len == reflen)
+				गच्छ मेलनम्;
+			यदि (ref->name[reflen - len - 1] == '/')
+				गच्छ मेलनम्;
 		}
-		return 0;
+		प्रत्यागम 0;
 	}
 
-match:
-	data->found_match++;
+मेलनम्:
+	दत्त->प्राप्तम्_मेलनम्++;
 
-	show_one(data->show_one_opts, ref);
+	show_one(दत्त->show_one_opts, ref);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int add_existing(const struct reference *ref, void *cbdata)
+स्थिर पूर्णाङ्क सङ्कलय_existing(ध्रुव संरचना reference *ref, शून्य *cbdata)
 {
-	struct string_list *list = (struct string_list *)cbdata;
-	string_list_insert(list, ref->name);
-	return 0;
+	संरचना string_list *list = (संरचना string_list *)cbdata;
+	string_list_निवेशय(list, ref->name);
+	प्रत्यागम 0;
 }
 
-struct exclude_existing_options {
+संरचना exclude_existing_options {
 	/*
 	 * We need an explicit `enabled` field because it is perfectly valid
 	 * for `pattern` to be `NULL` even if `--exclude-existing` was given.
 	 */
-	int enabled;
-	const char *pattern;
+	पूर्णाङ्क enabled;
+	ध्रुव वर्ण *आदर्शः;
 };
 
 /*
@@ -123,202 +123,202 @@ struct exclude_existing_options {
  * (4) ignore if refname is a ref that exists in the local repository;
  * (5) otherwise output the line.
  */
-static int cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
+स्थिर पूर्णाङ्क cmd_show_ref__exclude_existing(ध्रुव संरचना exclude_existing_options *opts)
 {
-	struct string_list existing_refs = STRING_LIST_INIT_DUP;
-	char buf[1024];
-	int patternlen = opts->pattern ? strlen(opts->pattern) : 0;
+	संरचना string_list existing_refs = STRING_LIST_INIT_DUP;
+	वर्ण buf[1024];
+	पूर्णाङ्क patternlen = opts->आदर्शः ? वाक्यदैर्घ्यम्(opts->आदर्शः) : 0;
 
-	refs_for_each_ref(get_main_ref_store(the_repository), add_existing,
+	refs_for_each_ref(get_main_ref_store(the_repository), सङ्कलय_existing,
 			  &existing_refs);
-	while (fgets(buf, sizeof(buf), stdin)) {
-		char *ref;
-		int len = strlen(buf);
+	यावत् (fgets(buf, परिमाण(buf), stdin)) {
+		वर्ण *ref;
+		पूर्णाङ्क len = वाक्यदैर्घ्यम्(buf);
 
-		if (len > 0 && buf[len - 1] == '\n')
+		यदि (len > 0 && buf[len - 1] == '\n')
 			buf[--len] = '\0';
-		if (3 <= len && !strcmp(buf + len - 3, "^{}")) {
+		यदि (3 <= len && !वाक्यं_तुलय(buf + len - 3, "^{}")) {
 			len -= 3;
 			buf[len] = '\0';
 		}
-		for (ref = buf + len; buf < ref; ref--)
-			if (isspace(ref[-1]))
-				break;
-		if (opts->pattern) {
-			int reflen = buf + len - ref;
-			if (reflen < patternlen)
-				continue;
-			if (strncmp(ref, opts->pattern, patternlen))
-				continue;
+		प्रति (ref = buf + len; buf < ref; ref--)
+			यदि (रिक्तम्_वा(ref[-1]))
+				भङ्ग;
+		यदि (opts->आदर्शः) {
+			पूर्णाङ्क reflen = buf + len - ref;
+			यदि (reflen < patternlen)
+				अनुवर्त;
+			यदि (वाक्ये_तुलय(ref, opts->आदर्शः, patternlen))
+				अनुवर्त;
 		}
-		if (check_refname_format(ref, 0)) {
+		यदि (check_refname_format(ref, 0)) {
 			warning("ref '%s' ignored", ref);
-			continue;
+			अनुवर्त;
 		}
-		if (!string_list_has_string(&existing_refs, ref)) {
-			printf("%s\n", buf);
+		यदि (!string_list_has_string(&existing_refs, ref)) {
+			प्रारूप_लिख("%s\n", buf);
 		}
 	}
 
 	string_list_clear(&existing_refs, 0);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
-				const char **refs)
+स्थिर पूर्णाङ्क cmd_show_ref__verify(ध्रुव संरचना show_one_options *show_one_opts,
+				ध्रुव वर्ण **refs)
 {
-	if (!refs || !*refs)
+	यदि (!refs || !*refs)
 		die("--verify requires a reference");
 
-	while (*refs) {
-		struct object_id oid;
+	यावत् (*refs) {
+		संरचना object_id oid;
 
-		if ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
+		यदि ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
 		    !refs_read_ref(get_main_ref_store(the_repository), *refs, &oid)) {
-			struct reference ref = {
+			संरचना reference ref = {
 				.name = *refs,
 				.oid = &oid,
 			};
 
 			show_one(show_one_opts, &ref);
-		} else if (!show_one_opts->quiet) {
+		} अन्यथा यदि (!show_one_opts->quiet) {
 			die("'%s' - not a valid ref", *refs);
-		} else {
-			return 1;
+		} अन्यथा {
+			प्रत्यागम 1;
 		}
 
 		refs++;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-struct patterns_options {
-	int show_head;
-	int branches_only;
-	int tags_only;
+संरचना patterns_options {
+	पूर्णाङ्क show_शीर्ष;
+	पूर्णाङ्क branches_only;
+	पूर्णाङ्क चिह्नकानि_only;
 };
 
-static int cmd_show_ref__patterns(const struct patterns_options *opts,
-				  const struct show_one_options *show_one_opts,
-				  const char **patterns)
+स्थिर पूर्णाङ्क cmd_show_ref__patterns(ध्रुव संरचना patterns_options *opts,
+				  ध्रुव संरचना show_one_options *show_one_opts,
+				  ध्रुव वर्ण **patterns)
 {
-	struct show_ref_data show_ref_data = {
+	संरचना show_ref_दत्त show_ref_दत्त = {
 		.show_one_opts = show_one_opts,
-		.show_head = opts->show_head,
+		.show_शीर्ष = opts->show_शीर्ष,
 	};
 
-	if (patterns && *patterns)
-		show_ref_data.patterns = patterns;
+	यदि (patterns && *patterns)
+		show_ref_दत्त.patterns = patterns;
 
-	if (opts->show_head)
-		refs_head_ref(get_main_ref_store(the_repository), show_ref,
-			      &show_ref_data);
-	if (opts->branches_only || opts->tags_only) {
-		struct refs_for_each_ref_options for_each_ref_opts = { 0 };
+	यदि (opts->show_शीर्ष)
+		refs_शीर्ष_ref(get_main_ref_store(the_repository), show_ref,
+			      &show_ref_दत्त);
+	यदि (opts->branches_only || opts->चिह्नकानि_only) {
+		संरचना refs_for_each_ref_options for_each_ref_opts = { 0 };
 
-		if (opts->branches_only) {
-			for_each_ref_opts.prefix = "refs/heads/";
+		यदि (opts->branches_only) {
+			for_each_ref_opts.उपसर्गः = "refs/heads/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
-					      show_ref, &show_ref_data, &for_each_ref_opts);
+					      show_ref, &show_ref_दत्त, &for_each_ref_opts);
 		}
 
-		if (opts->tags_only) {
-			for_each_ref_opts.prefix = "refs/tags/";
+		यदि (opts->चिह्नकानि_only) {
+			for_each_ref_opts.उपसर्गः = "refs/tags/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
-					      show_ref, &show_ref_data, &for_each_ref_opts);
+					      show_ref, &show_ref_दत्त, &for_each_ref_opts);
 		}
-	} else {
+	} अन्यथा {
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  show_ref, &show_ref_data);
+				  show_ref, &show_ref_दत्त);
 	}
-	if (!show_ref_data.found_match)
-		return 1;
+	यदि (!show_ref_दत्त.प्राप्तम्_मेलनम्)
+		प्रत्यागम 1;
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int cmd_show_ref__exists(const char **refs)
+स्थिर पूर्णाङ्क cmd_show_ref__exists(ध्रुव वर्ण **refs)
 {
-	struct strbuf unused_referent = STRBUF_INIT;
-	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
-	const char *ref;
-	int ret = 0;
+	संरचना strbuf अप्रयुक्तम्_referent = STRBUF_INIT;
+	संरचना object_id अप्रयुक्तम्_oid;
+	अचिह्नित पूर्णाङ्क अप्रयुक्तम्_type;
+	पूर्णाङ्क failure_errno = 0;
+	ध्रुव वर्ण *ref;
+	पूर्णाङ्क ret = 0;
 
-	if (!refs || !*refs)
+	यदि (!refs || !*refs)
 		die("--exists requires a reference");
 	ref = *refs++;
-	if (*refs)
+	यदि (*refs)
 		die("--exists requires exactly one reference");
 
-	if (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
-			      &unused_oid, &unused_referent, &unused_type,
+	यदि (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
+			      &अप्रयुक्तम्_oid, &अप्रयुक्तम्_referent, &अप्रयुक्तम्_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		यदि (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} अन्यथा {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
 		}
 
-		goto out;
+		गच्छ बहिर्गमनम्;
 	}
 
-out:
-	strbuf_release(&unused_referent);
-	return ret;
+बहिर्गमनम्:
+	strbuf_release(&अप्रयुक्तम्_referent);
+	प्रत्यागम ret;
 }
 
-static int hash_callback(const struct option *opt, const char *arg, int unset)
+स्थिर पूर्णाङ्क hash_callback(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct show_one_options *opts = opt->value;
-	struct option abbrev_opt = *opt;
+	संरचना show_one_options *opts = opt->मानम्;
+	संरचना option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
 	/* Use full length SHA1 if no argument */
-	if (!arg)
-		return 0;
+	यदि (!arg)
+		प्रत्यागम 0;
 
-	abbrev_opt.value = &opts->abbrev;
-	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
+	abbrev_opt.मानम् = &opts->abbrev;
+	प्रत्यागम parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
-static int exclude_existing_callback(const struct option *opt, const char *arg,
-				     int unset)
+स्थिर पूर्णाङ्क exclude_existing_callback(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg,
+				     पूर्णाङ्क unset)
 {
-	struct exclude_existing_options *opts = opt->value;
+	संरचना exclude_existing_options *opts = opt->मानम्;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
-	opts->pattern = arg;
-	return 0;
+	opts->आदर्शः = arg;
+	प्रत्यागम 0;
 }
 
-int cmd_show_ref(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+पूर्णाङ्क cmd_show_ref(पूर्णाङ्क argc,
+ध्रुव वर्ण **argv,
+ध्रुव वर्ण *उपसर्गः,
+संरचना repository *repo अप्रयुक्तम्)
 {
-	struct exclude_existing_options exclude_existing_opts = {0};
-	struct patterns_options patterns_opts = {0};
-	struct show_one_options show_one_opts = {0};
-	int verify = 0, exists = 0;
-	const struct option show_ref_options[] = {
-		OPT_BOOL(0, "tags", &patterns_opts.tags_only, N_("only show tags (can be combined with --branches)")),
+	संरचना exclude_existing_options exclude_existing_opts = {0};
+	संरचना patterns_options patterns_opts = {0};
+	संरचना show_one_options show_one_opts = {0};
+	पूर्णाङ्क verify = 0, exists = 0;
+	ध्रुव संरचना option show_ref_options[] = {
+		OPT_BOOL(0, "tags", &patterns_opts.चिह्नकानि_only, N_("only show tags (can be combined with --branches)")),
 		OPT_BOOL(0, "branches", &patterns_opts.branches_only, N_("only show branches (can be combined with --tags)")),
 		OPT_HIDDEN_BOOL(0, "heads", &patterns_opts.branches_only,
 				N_("deprecated synonym for --branches")),
 		OPT_BOOL(0, "exists", &exists, N_("check for reference existence without resolving")),
 		OPT_BOOL(0, "verify", &verify, N_("stricter reference checking, "
 			    "requires exact ref path")),
-		OPT_HIDDEN_BOOL('h', NULL, &patterns_opts.show_head,
+		OPT_HIDDEN_BOOL('h', रिक्त, &patterns_opts.show_शीर्ष,
 				N_("show the HEAD reference, even if it would be filtered out")),
-		OPT_BOOL(0, "head", &patterns_opts.show_head,
+		OPT_BOOL(0, "head", &patterns_opts.show_शीर्ष,
 		  N_("show the HEAD reference, even if it would be filtered out")),
-		OPT_BOOL('d', "dereference", &show_one_opts.deref_tags,
+		OPT_BOOL('d', "dereference", &show_one_opts.deref_चिह्नकानि,
 			    N_("dereference tags into object IDs")),
 		OPT_CALLBACK_F('s', "hash", &show_one_opts, N_("n"),
 			       N_("only show SHA1 hash using <n> digits"),
@@ -329,24 +329,24 @@ struct repository *repo UNUSED)
 		OPT_CALLBACK_F(0, "exclude-existing", &exclude_existing_opts,
 			       N_("pattern"), N_("show refs from stdin that aren't in local repository"),
 			       PARSE_OPT_OPTARG | PARSE_OPT_NONEG, exclude_existing_callback),
-		OPT_END()
+		OPT_अन्तः()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
-	argc = parse_options(argc, argv, prefix, show_ref_options,
+	argc = parse_options(argc, argv, उपसर्गः, show_ref_options,
 			     show_ref_usage, 0);
 
 	die_for_incompatible_opt3(exclude_existing_opts.enabled, "--exclude-existing",
 				  verify, "--verify",
 				  exists, "--exists");
 
-	if (exclude_existing_opts.enabled)
-		return cmd_show_ref__exclude_existing(&exclude_existing_opts);
-	else if (verify)
-		return cmd_show_ref__verify(&show_one_opts, argv);
-	else if (exists)
-		return cmd_show_ref__exists(argv);
-	else
-		return cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
+	यदि (exclude_existing_opts.enabled)
+		प्रत्यागम cmd_show_ref__exclude_existing(&exclude_existing_opts);
+	अन्यथा यदि (verify)
+		प्रत्यागम cmd_show_ref__verify(&show_one_opts, argv);
+	अन्यथा यदि (exists)
+		प्रत्यागम cmd_show_ref__exists(argv);
+	अन्यथा
+		प्रत्यागम cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
 }

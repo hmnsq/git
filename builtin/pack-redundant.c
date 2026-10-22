@@ -6,440 +6,440 @@
 *
 */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
 
-#include "packfile.h"
-#include "odb.h"
-#include "strbuf.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "strbuf.h"
 
-#define BLKSIZE 512
+#परिभाषय BLKSIZE 512
 
-static const char pack_redundant_usage[] =
+स्थिर ध्रुव वर्ण pack_redundant_usage[] =
 "git pack-redundant [--verbose] [--alt-odb] (--all | <pack-filename>...)";
 
-static int load_all_packs, verbose, alt_odb;
+स्थिर पूर्णाङ्क आरोपय_all_packs, verbose, alt_odb;
 
-struct llist_item {
-	struct llist_item *next;
-	struct object_id oid;
+संरचना llist_item {
+	संरचना llist_item *अग्र;
+	संरचना object_id oid;
 };
-static struct llist {
-	struct llist_item *front;
-	struct llist_item *back;
-	size_t size;
+स्थिर संरचना llist {
+	संरचना llist_item *front;
+	संरचना llist_item *पृष्ठभागः;
+	आकार_t आकार;
 } *all_objects; /* all objects which must be present in local packfiles */
 
-static struct pack_list {
-	struct pack_list *next;
-	struct packed_git *pack;
-	struct llist *unique_objects;
-	struct llist *remaining_objects;
-	size_t all_objects_size;
-} *local_packs = NULL, *altodb_packs = NULL;
+स्थिर संरचना pack_list {
+	संरचना pack_list *अग्र;
+	संरचना packed_git *pack;
+	संरचना llist *unique_objects;
+	संरचना llist *remaining_objects;
+	आकार_t all_objects_आकार;
+} *local_packs = रिक्त, *altodb_packs = रिक्त;
 
-static struct llist_item *free_nodes;
+स्थिर संरचना llist_item *free_nodes;
 
-static inline void llist_item_put(struct llist_item *item)
+स्थिर अन्तःस्थ शून्य llist_item_put(संरचना llist_item *item)
 {
-	item->next = free_nodes;
+	item->अग्र = free_nodes;
 	free_nodes = item;
 }
 
-static inline struct llist_item *llist_item_get(void)
+स्थिर अन्तःस्थ संरचना llist_item *llist_item_get(शून्य)
 {
-	struct llist_item *new_item;
-	if ( free_nodes ) {
+	संरचना llist_item *new_item;
+	यदि ( free_nodes ) {
 		new_item = free_nodes;
-		free_nodes = free_nodes->next;
-	} else {
-		int i = 1;
+		free_nodes = free_nodes->अग्र;
+	} अन्यथा {
+		पूर्णाङ्क i = 1;
 		ALLOC_ARRAY(new_item, BLKSIZE);
-		for (; i < BLKSIZE; i++)
+		प्रति (; i < BLKSIZE; i++)
 			llist_item_put(&new_item[i]);
 	}
-	return new_item;
+	प्रत्यागम new_item;
 }
 
-static inline void llist_init(struct llist **list)
+स्थिर अन्तःस्थ शून्य llist_init(संरचना llist **list)
 {
-	*list = xmalloc(sizeof(struct llist));
-	(*list)->front = (*list)->back = NULL;
-	(*list)->size = 0;
+	*list = xmalloc(परिमाण(संरचना llist));
+	(*list)->front = (*list)->पृष्ठभागः = रिक्त;
+	(*list)->आकार = 0;
 }
 
-static void llist_free(struct llist *list)
+स्थिर शून्य llist_free(संरचना llist *list)
 {
-	for (struct llist_item *i = list->front, *next; i; i = next) {
-		next = i->next;
+	प्रति (संरचना llist_item *i = list->front, *अग्र; i; i = अग्र) {
+		अग्र = i->अग्र;
 		llist_item_put(i);
 	}
-	free(list);
+	मुक्त(list);
 }
 
-static struct llist * llist_copy(struct llist *list)
+स्थिर संरचना llist * llist_copy(संरचना llist *list)
 {
-	struct llist *ret;
-	struct llist_item *new_item, *old_item, *prev;
+	संरचना llist *ret;
+	संरचना llist_item *new_item, *old_item, *पूर्व;
 
 	llist_init(&ret);
 
-	if ((ret->size = list->size) == 0)
-		return ret;
+	यदि ((ret->आकार = list->आकार) == 0)
+		प्रत्यागम ret;
 
 	new_item = ret->front = llist_item_get();
 	new_item->oid = list->front->oid;
 
-	old_item = list->front->next;
-	while (old_item) {
-		prev = new_item;
+	old_item = list->front->अग्र;
+	यावत् (old_item) {
+		पूर्व = new_item;
 		new_item = llist_item_get();
-		prev->next = new_item;
+		पूर्व->अग्र = new_item;
 		new_item->oid = old_item->oid;
-		old_item = old_item->next;
+		old_item = old_item->अग्र;
 	}
-	new_item->next = NULL;
-	ret->back = new_item;
+	new_item->अग्र = रिक्त;
+	ret->पृष्ठभागः = new_item;
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
-					      struct llist_item *after,
-					      const unsigned char *oid)
+स्थिर अन्तःस्थ संरचना llist_item *llist_निवेशय(संरचना llist *list,
+					      संरचना llist_item *after,
+					      ध्रुव अचिह्नित वर्ण *oid)
 {
-	struct llist_item *new_item = llist_item_get();
+	संरचना llist_item *new_item = llist_item_get();
 	oidread(&new_item->oid, oid, the_repository->hash_algo);
-	new_item->next = NULL;
+	new_item->अग्र = रिक्त;
 
-	if (after) {
-		new_item->next = after->next;
-		after->next = new_item;
-		if (after == list->back)
-			list->back = new_item;
-	} else {/* insert in front */
-		if (list->size == 0)
-			list->back = new_item;
-		else
-			new_item->next = list->front;
+	यदि (after) {
+		new_item->अग्र = after->अग्र;
+		after->अग्र = new_item;
+		यदि (after == list->पृष्ठभागः)
+			list->पृष्ठभागः = new_item;
+	} अन्यथा {/* insert in front */
+		यदि (list->आकार == 0)
+			list->पृष्ठभागः = new_item;
+		अन्यथा
+			new_item->अग्र = list->front;
 		list->front = new_item;
 	}
-	list->size++;
-	return new_item;
+	list->आकार++;
+	प्रत्यागम new_item;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
-						   const unsigned char *oid)
+स्थिर अन्तःस्थ संरचना llist_item *llist_निवेशय_पृष्ठभागः(संरचना llist *list,
+						   ध्रुव अचिह्नित वर्ण *oid)
 {
-	return llist_insert(list, list->back, oid);
+	प्रत्यागम llist_निवेशय(list, list->पृष्ठभागः, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
-			const struct object_id *oid, struct llist_item *hint)
+स्थिर अन्तःस्थ संरचना llist_item *llist_निवेशय_sorted_unique(संरचना llist *list,
+			ध्रुव संरचना object_id *oid, संरचना llist_item *hint)
 {
-	struct llist_item *prev = NULL, *l;
+	संरचना llist_item *पूर्व = रिक्त, *l;
 
-	l = (hint == NULL) ? list->front : hint;
-	while (l) {
-		int cmp = oidcmp(&l->oid, oid);
-		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+	l = (hint == रिक्त) ? list->front : hint;
+	यावत् (l) {
+		पूर्णाङ्क cmp = oidcmp(&l->oid, oid);
+		यदि (cmp > 0) { /* we insert before this entry */
+			प्रत्यागम llist_निवेशय(list, पूर्व, oid->hash);
 		}
-		if (!cmp) { /* already exists */
-			return l;
+		यदि (!cmp) { /* already exists */
+			प्रत्यागम l;
 		}
-		prev = l;
-		l = l->next;
+		पूर्व = l;
+		l = l->अग्र;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	प्रत्यागम llist_निवेशय_पृष्ठभागः(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
-static inline struct llist_item * llist_sorted_remove(struct llist *list, const unsigned char *oid, struct llist_item *hint)
+स्थिर अन्तःस्थ संरचना llist_item * llist_sorted_remove(संरचना llist *list, ध्रुव अचिह्नित वर्ण *oid, संरचना llist_item *hint)
 {
-	struct llist_item *prev, *l;
+	संरचना llist_item *पूर्व, *l;
 
 redo_from_start:
-	l = (hint == NULL) ? list->front : hint;
-	prev = NULL;
-	while (l) {
-		const int cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
-		if (cmp > 0) /* not in list, since sorted */
-			return prev;
-		if (!cmp) { /* found */
-			if (!prev) {
-				if (hint != NULL && hint != list->front) {
+	l = (hint == रिक्त) ? list->front : hint;
+	पूर्व = रिक्त;
+	यावत् (l) {
+		ध्रुव पूर्णाङ्क cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
+		यदि (cmp > 0) /* not in list, since sorted */
+			प्रत्यागम पूर्व;
+		यदि (!cmp) { /*प्राप्तम्*/
+			यदि (!पूर्व) {
+				यदि (hint != रिक्त && hint != list->front) {
 					/* we don't know the previous element */
-					hint = NULL;
-					goto redo_from_start;
+					hint = रिक्त;
+					गच्छ redo_from_start;
 				}
-				list->front = l->next;
-			} else
-				prev->next = l->next;
-			if (l == list->back)
-				list->back = prev;
+				list->front = l->अग्र;
+			} अन्यथा
+				पूर्व->अग्र = l->अग्र;
+			यदि (l == list->पृष्ठभागः)
+				list->पृष्ठभागः = पूर्व;
 			llist_item_put(l);
-			list->size--;
-			return prev;
+			list->आकार--;
+			प्रत्यागम पूर्व;
 		}
-		prev = l;
-		l = l->next;
+		पूर्व = l;
+		l = l->अग्र;
 	}
-	return prev;
+	प्रत्यागम पूर्व;
 }
 
 /* computes A\B */
-static void llist_sorted_difference_inplace(struct llist *A,
-				     struct llist *B)
+स्थिर शून्य llist_sorted_difference_inplace(संरचना llist *A,
+				     संरचना llist *B)
 {
-	struct llist_item *hint, *b;
+	संरचना llist_item *hint, *b;
 
-	hint = NULL;
+	hint = रिक्त;
 	b = B->front;
 
-	while (b) {
+	यावत् (b) {
 		hint = llist_sorted_remove(A, b->oid.hash, hint);
-		b = b->next;
+		b = b->अग्र;
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
-					   struct pack_list *entry)
+स्थिर अन्तःस्थ संरचना pack_list * pack_list_निवेशय(संरचना pack_list **pl,
+					   संरचना pack_list *प्रविष्टिः)
 {
-	struct pack_list *p = xmalloc(sizeof(struct pack_list));
-	memcpy(p, entry, sizeof(struct pack_list));
-	p->next = *pl;
+	संरचना pack_list *p = xmalloc(परिमाण(संरचना pack_list));
+	स्मृतिं_प्रतिलिख(p, प्रविष्टिः, परिमाण(संरचना pack_list));
+	p->अग्र = *pl;
 	*pl = p;
-	return p;
+	प्रत्यागम p;
 }
 
-static void pack_list_free(struct pack_list *pl)
+स्थिर शून्य pack_list_free(संरचना pack_list *pl)
 {
-	for (struct pack_list *next; pl; pl = next) {
-		next = pl->next;
-		free(pl);
+	प्रति (संरचना pack_list *अग्र; pl; pl = अग्र) {
+		अग्र = pl->अग्र;
+		मुक्त(pl);
 	}
 }
 
-static inline size_t pack_list_size(struct pack_list *pl)
+स्थिर अन्तःस्थ आकार_t pack_list_आकार(संरचना pack_list *pl)
 {
-	size_t ret = 0;
-	while (pl) {
+	आकार_t ret = 0;
+	यावत् (pl) {
 		ret++;
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
-	return ret;
+	प्रत्यागम ret;
 }
 
-static struct pack_list * pack_list_difference(const struct pack_list *A,
-					       const struct pack_list *B)
+स्थिर संरचना pack_list * pack_list_difference(ध्रुव संरचना pack_list *A,
+					       ध्रुव संरचना pack_list *B)
 {
-	struct pack_list *ret;
-	const struct pack_list *pl;
+	संरचना pack_list *ret;
+	ध्रुव संरचना pack_list *pl;
 
-	if (!A)
-		return NULL;
+	यदि (!A)
+		प्रत्यागम रिक्त;
 
 	pl = B;
-	while (pl != NULL) {
-		if (A->pack == pl->pack)
-			return pack_list_difference(A->next, B);
-		pl = pl->next;
+	यावत् (pl != रिक्त) {
+		यदि (A->pack == pl->pack)
+			प्रत्यागम pack_list_difference(A->अग्र, B);
+		pl = pl->अग्र;
 	}
-	ret = xmalloc(sizeof(struct pack_list));
-	memcpy(ret, A, sizeof(struct pack_list));
-	ret->next = pack_list_difference(A->next, B);
-	return ret;
+	ret = xmalloc(परिमाण(संरचना pack_list));
+	स्मृतिं_प्रतिलिख(ret, A, परिमाण(संरचना pack_list));
+	ret->अग्र = pack_list_difference(A->अग्र, B);
+	प्रत्यागम ret;
 }
 
-static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
+स्थिर शून्य cmp_two_packs(संरचना pack_list *p1, संरचना pack_list *p2)
 {
-	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	struct llist_item *p1_hint = NULL, *p2_hint = NULL;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	आकार_t p1_off = 0, p2_off = 0, p1_चरणः, p2_चरणः;
+	ध्रुव अचिह्नित वर्ण *p1_आधारः, *p2_आधारः;
+	संरचना llist_item *p1_hint = रिक्त, *p2_hint = रिक्त;
+	ध्रुव अचिह्नित पूर्णाङ्क hashsz = the_hash_algo->rawsz;
 
-	if (!p1->unique_objects)
+	यदि (!p1->unique_objects)
 		p1->unique_objects = llist_copy(p1->remaining_objects);
-	if (!p2->unique_objects)
+	यदि (!p2->unique_objects)
 		p2->unique_objects = llist_copy(p2->remaining_objects);
 
-	p1_base = p1->pack->index_data;
-	p2_base = p2->pack->index_data;
-	p1_base += 256 * 4 + ((p1->pack->index_version < 2) ? 4 : 8);
-	p2_base += 256 * 4 + ((p2->pack->index_version < 2) ? 4 : 8);
-	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
-	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
+	p1_आधारः = p1->pack->सूचकांक_दत्त;
+	p2_आधारः = p2->pack->सूचकांक_दत्त;
+	p1_आधारः += 256 * 4 + ((p1->pack->सूचकांक_संस्करणम् < 2) ? 4 : 8);
+	p2_आधारः += 256 * 4 + ((p2->pack->सूचकांक_संस्करणम् < 2) ? 4 : 8);
+	p1_चरणः = hashsz + ((p1->pack->सूचकांक_संस्करणम् < 2) ? 4 : 0);
+	p2_चरणः = hashsz + ((p2->pack->सूचकांक_संस्करणम् < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
-	       p2_off < p2->pack->num_objects * p2_step)
+	यावत् (p1_off < p1->pack->अङ्कः_objects * p1_चरणः &&
+	       p2_off < p2->pack->अङ्कः_objects * p2_चरणः)
 	{
-		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		ध्रुव पूर्णाङ्क cmp = hashcmp(p1_आधारः + p1_off, p2_आधारः + p2_off,
 					the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		यदि (cmp == 0) {
 			p1_hint = llist_sorted_remove(p1->unique_objects,
-					p1_base + p1_off,
+					p1_आधारः + p1_off,
 					p1_hint);
 			p2_hint = llist_sorted_remove(p2->unique_objects,
-					p1_base + p1_off,
+					p1_आधारः + p1_off,
 					p2_hint);
-			p1_off += p1_step;
-			p2_off += p2_step;
-			continue;
+			p1_off += p1_चरणः;
+			p2_off += p2_चरणः;
+			अनुवर्त;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
-			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
-			p2_off += p2_step;
+		यदि (cmp < 0) { /* p1 has the object, p2 doesn't */
+			p1_off += p1_चरणः;
+		} अन्यथा { /* p2 has the object, p1 doesn't */
+			p2_off += p2_चरणः;
 		}
 	}
 }
 
-static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
+स्थिर आकार_t sizeof_union(संरचना packed_git *p1, संरचना packed_git *p2)
 {
-	size_t ret = 0;
-	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	आकार_t ret = 0;
+	आकार_t p1_off = 0, p2_off = 0, p1_चरणः, p2_चरणः;
+	ध्रुव अचिह्नित वर्ण *p1_आधारः, *p2_आधारः;
+	ध्रुव अचिह्नित पूर्णाङ्क hashsz = the_hash_algo->rawsz;
 
-	p1_base = p1->index_data;
-	p2_base = p2->index_data;
-	p1_base += 256 * 4 + ((p1->index_version < 2) ? 4 : 8);
-	p2_base += 256 * 4 + ((p2->index_version < 2) ? 4 : 8);
-	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
-	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
+	p1_आधारः = p1->सूचकांक_दत्त;
+	p2_आधारः = p2->सूचकांक_दत्त;
+	p1_आधारः += 256 * 4 + ((p1->सूचकांक_संस्करणम् < 2) ? 4 : 8);
+	p2_आधारः += 256 * 4 + ((p2->सूचकांक_संस्करणम् < 2) ? 4 : 8);
+	p1_चरणः = hashsz + ((p1->सूचकांक_संस्करणम् < 2) ? 4 : 0);
+	p2_चरणः = hashsz + ((p2->सूचकांक_संस्करणम् < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
-	       p2_off < p2->num_objects * p2_step)
+	यावत् (p1_off < p1->अङ्कः_objects * p1_चरणः &&
+	       p2_off < p2->अङ्कः_objects * p2_चरणः)
 	{
-		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		पूर्णाङ्क cmp = hashcmp(p1_आधारः + p1_off, p2_आधारः + p2_off,
 				  the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		यदि (cmp == 0) {
 			ret++;
-			p1_off += p1_step;
-			p2_off += p2_step;
-			continue;
+			p1_off += p1_चरणः;
+			p2_off += p2_चरणः;
+			अनुवर्त;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
-			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
-			p2_off += p2_step;
+		यदि (cmp < 0) { /* p1 has the object, p2 doesn't */
+			p1_off += p1_चरणः;
+		} अन्यथा { /* p2 has the object, p1 doesn't */
+			p2_off += p2_चरणः;
 		}
 	}
-	return ret;
+	प्रत्यागम ret;
 }
 
 /* another O(n^2) function ... */
-static size_t get_pack_redundancy(struct pack_list *pl)
+स्थिर आकार_t get_pack_redundancy(संरचना pack_list *pl)
 {
-	struct pack_list *subset;
-	size_t ret = 0;
+	संरचना pack_list *subset;
+	आकार_t ret = 0;
 
-	if (!pl)
-		return 0;
+	यदि (!pl)
+		प्रत्यागम 0;
 
-	while ((subset = pl->next)) {
-		while (subset) {
+	यावत् ((subset = pl->अग्र)) {
+		यावत् (subset) {
 			ret += sizeof_union(pl->pack, subset->pack);
-			subset = subset->next;
+			subset = subset->अग्र;
 		}
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
-	return ret;
+	प्रत्यागम ret;
 }
 
-static inline off_t pack_set_bytecount(struct pack_list *pl)
+स्थिर अन्तःस्थ off_t pack_समुच्चयः_bytecount(संरचना pack_list *pl)
 {
 	off_t ret = 0;
-	while (pl) {
-		ret += pl->pack->pack_size;
-		ret += pl->pack->index_size;
-		pl = pl->next;
+	यावत् (pl) {
+		ret += pl->pack->pack_आकार;
+		ret += pl->pack->सूचकांक_आकार;
+		pl = pl->अग्र;
 	}
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int cmp_remaining_objects(const void *a, const void *b)
+स्थिर पूर्णाङ्क cmp_remaining_objects(ध्रुव शून्य *a, ध्रुव शून्य *b)
 {
-	struct pack_list *pl_a = *((struct pack_list **)a);
-	struct pack_list *pl_b = *((struct pack_list **)b);
+	संरचना pack_list *pl_a = *((संरचना pack_list **)a);
+	संरचना pack_list *pl_b = *((संरचना pack_list **)b);
 
-	if (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
+	यदि (pl_a->remaining_objects->आकार == pl_b->remaining_objects->आकार) {
 		/* have the same remaining_objects, big pack first */
-		if (pl_a->all_objects_size == pl_b->all_objects_size)
-			return 0;
-		else if (pl_a->all_objects_size < pl_b->all_objects_size)
-			return 1;
-		else
-			return -1;
-	} else if (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
+		यदि (pl_a->all_objects_आकार == pl_b->all_objects_आकार)
+			प्रत्यागम 0;
+		अन्यथा यदि (pl_a->all_objects_आकार < pl_b->all_objects_आकार)
+			प्रत्यागम 1;
+		अन्यथा
+			प्रत्यागम -1;
+	} अन्यथा यदि (pl_a->remaining_objects->आकार < pl_b->remaining_objects->आकार) {
 		/* sort by remaining objects, more objects first */
-		return 1;
-	} else {
-		return -1;
+		प्रत्यागम 1;
+	} अन्यथा {
+		प्रत्यागम -1;
 	}
 }
 
 /* Sort pack_list, greater size of remaining_objects first */
-static void sort_pack_list(struct pack_list **pl)
+स्थिर शून्य क्रमय_pack_list(संरचना pack_list **pl)
 {
-	struct pack_list **ary, *p;
-	size_t n = pack_list_size(*pl);
+	संरचना pack_list **ary, *p;
+	आकार_t n = pack_list_आकार(*pl);
 
-	if (n < 2)
-		return;
+	यदि (n < 2)
+		प्रत्यागम;
 
 	/* prepare an array of packed_list for easier sorting */
 	CALLOC_ARRAY(ary, n);
-	for (n = 0, p = *pl; p; p = p->next)
+	प्रति (n = 0, p = *pl; p; p = p->अग्र)
 		ary[n++] = p;
 
 	QSORT(ary, n, cmp_remaining_objects);
 
 	/* link them back again */
-	for (size_t i = 0; i < n - 1; i++)
-		ary[i]->next = ary[i + 1];
-	ary[n - 1]->next = NULL;
+	प्रति (आकार_t i = 0; i < n - 1; i++)
+		ary[i]->अग्र = ary[i + 1];
+	ary[n - 1]->अग्र = रिक्त;
 	*pl = ary[0];
 
-	free(ary);
+	मुक्त(ary);
 }
 
 
-static void minimize(struct pack_list **min)
+स्थिर शून्य minimize(संरचना pack_list **min)
 {
-	struct pack_list *pl, *unique = NULL, *non_unique = NULL;
-	struct llist *missing, *unique_pack_objects;
+	संरचना pack_list *pl, *unique = रिक्त, *non_unique = रिक्त;
+	संरचना llist *missing, *unique_pack_objects;
 
 	pl = local_packs;
-	while (pl) {
-		if (pl->unique_objects->size)
-			pack_list_insert(&unique, pl);
-		else
-			pack_list_insert(&non_unique, pl);
-		pl = pl->next;
+	यावत् (pl) {
+		यदि (pl->unique_objects->आकार)
+			pack_list_निवेशय(&unique, pl);
+		अन्यथा
+			pack_list_निवेशय(&non_unique, pl);
+		pl = pl->अग्र;
 	}
 	/* find out which objects are missing from the set of unique packs */
 	missing = llist_copy(all_objects);
 	pl = unique;
-	while (pl) {
+	यावत् (pl) {
 		llist_sorted_difference_inplace(missing, pl->remaining_objects);
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
 
 	*min = unique;
 
 	/* return if there are no objects missing from the unique set */
-	if (missing->size == 0) {
+	यदि (missing->आकार == 0) {
 		llist_free(missing);
 		pack_list_free(non_unique);
-		return;
+		प्रत्यागम;
 	}
 
 	unique_pack_objects = llist_copy(all_objects);
@@ -447,27 +447,27 @@ static void minimize(struct pack_list **min)
 
 	/* remove unique pack objects from the non_unique packs */
 	pl = non_unique;
-	while (pl) {
+	यावत् (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, unique_pack_objects);
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
 
-	while (non_unique) {
-		struct pack_list *next;
+	यावत् (non_unique) {
+		संरचना pack_list *अग्र;
 
 		/* sort the non_unique packs, greater size of remaining_objects first */
-		sort_pack_list(&non_unique);
-		if (non_unique->remaining_objects->size == 0)
-			break;
+		क्रमय_pack_list(&non_unique);
+		यदि (non_unique->remaining_objects->आकार == 0)
+			भङ्ग;
 
-		pack_list_insert(min, non_unique);
+		pack_list_निवेशय(min, non_unique);
 
-		for (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
+		प्रति (pl = non_unique->अग्र; pl && pl->remaining_objects->आकार > 0;  pl = pl->अग्र)
 			llist_sorted_difference_inplace(pl->remaining_objects, non_unique->remaining_objects);
 
-		next = non_unique->next;
-		free(non_unique);
-		non_unique = next;
+		अग्र = non_unique->अग्र;
+		मुक्त(non_unique);
+		non_unique = अग्र;
 	}
 
 	pack_list_free(non_unique);
@@ -475,223 +475,223 @@ static void minimize(struct pack_list **min)
 	llist_free(missing);
 }
 
-static void load_all_objects(void)
+स्थिर शून्य आरोपय_all_objects(शून्य)
 {
-	struct pack_list *pl = local_packs;
-	struct llist_item *hint, *l;
+	संरचना pack_list *pl = local_packs;
+	संरचना llist_item *hint, *l;
 
 	llist_init(&all_objects);
 
-	while (pl) {
-		hint = NULL;
+	यावत् (pl) {
+		hint = रिक्त;
 		l = pl->remaining_objects->front;
-		while (l) {
-			hint = llist_insert_sorted_unique(all_objects,
+		यावत् (l) {
+			hint = llist_निवेशय_sorted_unique(all_objects,
 							  &l->oid, hint);
-			l = l->next;
+			l = l->अग्र;
 		}
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
 	/* remove objects present in remote packs */
 	pl = altodb_packs;
-	while (pl) {
+	यावत् (pl) {
 		llist_sorted_difference_inplace(all_objects, pl->remaining_objects);
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
 }
 
 /* this scales like O(n^2) */
-static void cmp_local_packs(void)
+स्थिर शून्य cmp_local_packs(शून्य)
 {
-	struct pack_list *subset, *pl = local_packs;
+	संरचना pack_list *subset, *pl = local_packs;
 
 	/* only one packfile */
-	if (!pl->next) {
+	यदि (!pl->अग्र) {
 		llist_init(&pl->unique_objects);
-		return;
+		प्रत्यागम;
 	}
 
-	while ((subset = pl)) {
-		while ((subset = subset->next))
+	यावत् ((subset = pl)) {
+		यावत् ((subset = subset->अग्र))
 			cmp_two_packs(pl, subset);
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
 }
 
-static void scan_alt_odb_packs(void)
+स्थिर शून्य अवलोकनम्_alt_odb_packs(शून्य)
 {
-	struct pack_list *local, *alt;
+	संरचना pack_list *local, *alt;
 
 	alt = altodb_packs;
-	while (alt) {
+	यावत् (alt) {
 		local = local_packs;
-		while (local) {
+		यावत् (local) {
 			llist_sorted_difference_inplace(local->remaining_objects,
 							alt->remaining_objects);
-			local = local->next;
+			local = local->अग्र;
 		}
-		alt = alt->next;
+		alt = alt->अग्र;
 	}
 }
 
-static struct pack_list * add_pack(struct packed_git *p)
+स्थिर संरचना pack_list * सङ्कलय_pack(संरचना packed_git *p)
 {
-	struct pack_list l;
-	size_t off = 0, step;
-	const unsigned char *base;
+	संरचना pack_list l;
+	आकार_t off = 0, चरणः;
+	ध्रुव अचिह्नित वर्ण *आधारः;
 
-	if (!p->pack_local && !(alt_odb || verbose))
-		return NULL;
+	यदि (!p->pack_local && !(alt_odb || verbose))
+		प्रत्यागम रिक्त;
 
 	l.pack = p;
 	llist_init(&l.remaining_objects);
 
-	if (open_pack_index(p)) {
+	यदि (open_pack_सूचकांक(p)) {
 		llist_free(l.remaining_objects);
-		return NULL;
+		प्रत्यागम रिक्त;
 	}
 
-	base = p->index_data;
-	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
-	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
-		llist_insert_back(l.remaining_objects, base + off);
-		off += step;
+	आधारः = p->सूचकांक_दत्त;
+	आधारः += 256 * 4 + ((p->सूचकांक_संस्करणम् < 2) ? 4 : 8);
+	चरणः = the_hash_algo->rawsz + ((p->सूचकांक_संस्करणम् < 2) ? 4 : 0);
+	यावत् (off < p->अङ्कः_objects * चरणः) {
+		llist_निवेशय_पृष्ठभागः(l.remaining_objects, आधारः + off);
+		off += चरणः;
 	}
-	l.all_objects_size = l.remaining_objects->size;
-	l.unique_objects = NULL;
-	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
-	else
-		return pack_list_insert(&altodb_packs, &l);
+	l.all_objects_आकार = l.remaining_objects->आकार;
+	l.unique_objects = रिक्त;
+	यदि (p->pack_local)
+		प्रत्यागम pack_list_निवेशय(&local_packs, &l);
+	अन्यथा
+		प्रत्यागम pack_list_निवेशय(&altodb_packs, &l);
 }
 
-static struct pack_list * add_pack_file(const char *filename)
+स्थिर संरचना pack_list * सङ्कलय_pack_file(ध्रुव वर्ण *filename)
 {
-	struct packed_git *p;
+	संरचना packed_git *p;
 
-	if (strlen(filename) < 40)
+	यदि (वाक्यदैर्घ्यम्(filename) < 40)
 		die("Bad pack filename: %s", filename);
 
 	repo_for_each_pack(the_repository, p)
-		if (strstr(p->pack_name, filename))
-			return add_pack(p);
+		यदि (वाक्ये_अन्विष(p->pack_name, filename))
+			प्रत्यागम सङ्कलय_pack(p);
 	die("Filename %s not found in packed_git", filename);
 }
 
-static void load_all(void)
+स्थिर शून्य आरोपय_all(शून्य)
 {
-	struct packed_git *p;
+	संरचना packed_git *p;
 
 	repo_for_each_pack(the_repository, p)
-		add_pack(p);
+		सङ्कलय_pack(p);
 }
 
-int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED) {
-	int i; int i_still_use_this = 0; struct pack_list *min = NULL, *red, *pl;
-	struct llist *ignore;
-	struct strbuf idx_name = STRBUF_INIT;
-	char buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
+पूर्णाङ्क cmd_pack_redundant(पूर्णाङ्क argc, ध्रुव वर्ण **argv, ध्रुव वर्ण *उपसर्गः अप्रयुक्तम्, संरचना repository *repo अप्रयुक्तम्) {
+	पूर्णाङ्क i; पूर्णाङ्क i_still_use_this = 0; संरचना pack_list *min = रिक्त, *red, *pl;
+	संरचना llist *ignore;
+	संरचना strbuf idx_name = STRBUF_INIT;
+	वर्ण buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
 
 	show_usage_if_asked(argc, argv, pack_redundant_usage);
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--")) {
+	प्रति (i = 1; i < argc; i++) {
+		ध्रुव वर्ण *arg = argv[i];
+		यदि (!वाक्यं_तुलय(arg, "--")) {
 			i++;
-			break;
+			भङ्ग;
 		}
-		if (!strcmp(arg, "--all")) {
-			load_all_packs = 1;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, "--all")) {
+			आरोपय_all_packs = 1;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--verbose")) {
+		यदि (!वाक्यं_तुलय(arg, "--verbose")) {
 			verbose = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--alt-odb")) {
+		यदि (!वाक्यं_तुलय(arg, "--alt-odb")) {
 			alt_odb = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--i-still-use-this")) {
+		यदि (!वाक्यं_तुलय(arg, "--i-still-use-this")) {
 			i_still_use_this = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (*arg == '-')
+		यदि (*arg == '-')
 			usage(pack_redundant_usage);
-		else
-			break;
+		अन्यथा
+			भङ्ग;
 	}
 
-	if (!i_still_use_this)
-		you_still_use_that("git pack-redundant", NULL);
+	यदि (!i_still_use_this)
+		you_still_use_that("git pack-redundant", रिक्त);
 
-	if (load_all_packs)
-		load_all();
-	else
-		while (*(argv + i) != NULL)
-			add_pack_file(*(argv + i++));
+	यदि (आरोपय_all_packs)
+		आरोपय_all();
+	अन्यथा
+		यावत् (*(argv + i) != रिक्त)
+			सङ्कलय_pack_file(*(argv + i++));
 
-	if (!local_packs)
+	यदि (!local_packs)
 		die("Zero packs found!");
 
-	load_all_objects();
+	आरोपय_all_objects();
 
-	if (alt_odb)
-		scan_alt_odb_packs();
+	यदि (alt_odb)
+		अवलोकनम्_alt_odb_packs();
 
 	/* ignore objects given on stdin */
 	llist_init(&ignore);
-	if (!isatty(0)) {
-		struct object_id oid;
-		while (fgets(buf, sizeof(buf), stdin)) {
-			if (get_oid_hex(buf, &oid))
+	यदि (!isatty(0)) {
+		संरचना object_id oid;
+		यावत् (fgets(buf, परिमाण(buf), stdin)) {
+			यदि (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
-			llist_insert_sorted_unique(ignore, &oid, NULL);
+			llist_निवेशय_sorted_unique(ignore, &oid, रिक्त);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);
 	pl = local_packs;
-	while (pl) {
+	यावत् (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, ignore);
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
 
 	cmp_local_packs();
 
 	minimize(&min);
 
-	if (verbose) {
+	यदि (verbose) {
 		fprintf(stderr, "There are %lu packs available in alt-odbs.\n",
-			(unsigned long)pack_list_size(altodb_packs));
+			(अचिह्नित दीर्घ)pack_list_आकार(altodb_packs));
 		fprintf(stderr, "The smallest (bytewise) set of packs is:\n");
 		pl = min;
-		while (pl) {
+		यावत् (pl) {
 			fprintf(stderr, "\t%s\n", pl->pack->pack_name);
-			pl = pl->next;
+			pl = pl->अग्र;
 		}
 		fprintf(stderr, "containing %lu duplicate objects "
 				"with a total size of %lukb.\n",
-			(unsigned long)get_pack_redundancy(min),
-			(unsigned long)pack_set_bytecount(min)/1024);
+			(अचिह्नित दीर्घ)get_pack_redundancy(min),
+			(अचिह्नित दीर्घ)pack_समुच्चयः_bytecount(min)/1024);
 		fprintf(stderr, "A total of %lu unique objects were considered.\n",
-			(unsigned long)all_objects->size);
+			(अचिह्नित दीर्घ)all_objects->आकार);
 		fprintf(stderr, "Redundant packs (with indexes):\n");
 	}
 	pl = red = pack_list_difference(local_packs, min);
-	while (pl) {
-		printf("%s\n%s\n",
+	यावत् (pl) {
+		प्रारूप_लिख("%s\n%s\n",
 		       odb_pack_name(pl->pack->repo, &idx_name, pl->pack->hash, "idx"),
 		       pl->pack->pack_name);
-		pl = pl->next;
+		pl = pl->अग्र;
 	}
-	if (verbose)
+	यदि (verbose)
 		fprintf(stderr, "%luMB of redundant packs in total.\n",
-			(unsigned long)pack_set_bytecount(red)/(1024*1024));
+			(अचिह्नित दीर्घ)pack_समुच्चयः_bytecount(red)/(1024*1024));
 
 	pack_list_free(red);
 	pack_list_free(min);
 	llist_free(ignore);
 	strbuf_release(&idx_name);
-	return 0;
+	प्रत्यागम 0;
 }

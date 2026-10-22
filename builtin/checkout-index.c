@@ -5,109 +5,109 @@
  *
  */
 
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#परिभाषय DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "parse-options.h"
-#include "entry.h"
-#include "parallel-checkout.h"
-#include "read-cache-ll.h"
-#include "setup.h"
-#include "sparse-index.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "lockfile.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "cache-tree.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "entry.h"
+#अन्तर्भाव "parallel-checkout.h"
+#अन्तर्भाव "read-cache-ll.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "sparse-index.h"
 
-#define CHECKOUT_ALL 4
-static int nul_term_line;
-static int checkout_stage; /* default to checkout stage0 */
-static int ignore_skip_worktree; /* default to 0 */
-static int to_tempfile = -1;
-static char topath[4][TEMPORARY_FILENAME_LENGTH + 1];
+#परिभाषय CHECKOUT_ALL 4
+स्थिर पूर्णाङ्क nul_पदांशः_पङ्क्तिः;
+स्थिर पूर्णाङ्क checkout_stage; /* default to checkout stage0 */
+स्थिर पूर्णाङ्क ignore_skip_worktree; /* default to 0 */
+स्थिर पूर्णाङ्क गन्तव्यम्_tempfile = -1;
+स्थिर वर्ण topath[4][TEMPORARY_FILENAME_दीर्घता + 1];
 
-static struct checkout state = CHECKOUT_INIT;
+स्थिर संरचना checkout state = CHECKOUT_INIT;
 
-static void write_tempfile_record(const char *name, const char *prefix)
+स्थिर शून्य write_tempfile_लेखः(ध्रुव वर्ण *name, ध्रुव वर्ण *उपसर्गः)
 {
-	int i;
-	int have_tempname = 0;
+	पूर्णाङ्क i;
+	पूर्णाङ्क have_tempname = 0;
 
-	if (CHECKOUT_ALL == checkout_stage) {
-		for (i = 1; i < 4; i++)
-			if (topath[i][0]) {
+	यदि (CHECKOUT_ALL == checkout_stage) {
+		प्रति (i = 1; i < 4; i++)
+			यदि (topath[i][0]) {
 				have_tempname = 1;
-				break;
+				भङ्ग;
 			}
 
-		if (have_tempname) {
-			for (i = 1; i < 4; i++) {
-				if (i > 1)
-					putchar(' ');
-				if (topath[i][0])
+		यदि (have_tempname) {
+			प्रति (i = 1; i < 4; i++) {
+				यदि (i > 1)
+					अक्षरं_लिख(' ');
+				यदि (topath[i][0])
 					fputs(topath[i], stdout);
-				else
-					putchar('.');
+				अन्यथा
+					अक्षरं_लिख('.');
 			}
 		}
-	} else if (topath[checkout_stage][0]) {
+	} अन्यथा यदि (topath[checkout_stage][0]) {
 		have_tempname = 1;
 		fputs(topath[checkout_stage], stdout);
 	}
 
-	if (have_tempname) {
-		putchar('\t');
-		write_name_quoted_relative(name, prefix, stdout,
-					   nul_term_line ? '\0' : '\n');
+	यदि (have_tempname) {
+		अक्षरं_लिख('\t');
+		write_name_quoted_relative(name, उपसर्गः, stdout,
+					   nul_पदांशः_पङ्क्तिः ? '\0' : '\n');
 	}
 
-	for (i = 0; i < 4; i++) {
+	प्रति (i = 0; i < 4; i++) {
 		topath[i][0] = 0;
 	}
 }
 
-static int checkout_file(struct index_state *index, const char *name, const char *prefix)
+स्थिर पूर्णाङ्क checkout_file(संरचना सूचकांक_state *सूचकांक, ध्रुव वर्ण *name, ध्रुव वर्ण *उपसर्गः)
 {
-	int namelen = strlen(name);
-	int pos = index_name_pos(index, name, namelen);
-	int has_same_name = 0;
-	int is_file = 0;
-	int is_skipped = 1;
-	int did_checkout = 0;
-	int errs = 0;
+	पूर्णाङ्क namelen = वाक्यदैर्घ्यम्(name);
+	पूर्णाङ्क pos = सूचकांक_name_pos(सूचकांक, name, namelen);
+	पूर्णाङ्क has_same_name = 0;
+	पूर्णाङ्क is_file = 0;
+	पूर्णाङ्क is_skipped = 1;
+	पूर्णाङ्क did_checkout = 0;
+	पूर्णाङ्क errs = 0;
 
-	if (pos < 0)
+	यदि (pos < 0)
 		pos = -pos - 1;
 
-	while (pos < index->cache_nr) {
-		struct cache_entry *ce = index->cache[pos];
-		if (ce_namelen(ce) != namelen ||
+	यावत् (pos < सूचकांक->cache_nr) {
+		संरचना cache_प्रविष्टिः *ce = सूचकांक->cache[pos];
+		यदि (ce_namelen(ce) != namelen ||
 		    memcmp(ce->name, name, namelen))
-			break;
+			भङ्ग;
 		has_same_name = 1;
 		pos++;
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			break;
+		यदि (S_ISSPARSEDIR(ce->ce_बहुलकम्))
+			भङ्ग;
 		is_file = 1;
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			break;
+		यदि (!ignore_skip_worktree && ce_skip_worktree(ce))
+			भङ्ग;
 		is_skipped = 0;
-		if (ce_stage(ce) != checkout_stage
+		यदि (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
+			अनुवर्त;
 		did_checkout = 1;
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		यदि (checkout_प्रविष्टिः(ce, &state,
+				   गन्तव्यम्_tempfile ? topath[ce_stage(ce)] : रिक्त,
+				   रिक्त) < 0)
 			errs++;
 	}
 
-	if (did_checkout) {
-		if (to_tempfile)
-			write_tempfile_record(name, prefix);
-		return errs > 0 ? -1 : 0;
+	यदि (did_checkout) {
+		यदि (गन्तव्यम्_tempfile)
+			write_tempfile_लेखः(name, उपसर्गः);
+		प्रत्यागम errs > 0 ? -1 : 0;
 	}
 
 	/*
@@ -115,38 +115,38 @@ static int checkout_file(struct index_state *index, const char *name, const char
 	 * because we did find an entry but it was stage 0, that's not an
 	 * error.
 	 */
-	if (has_same_name && checkout_stage == CHECKOUT_ALL)
-		return 0;
+	यदि (has_same_name && checkout_stage == CHECKOUT_ALL)
+		प्रत्यागम 0;
 
-	if (!state.quiet) {
+	यदि (!state.quiet) {
 		fprintf(stderr, "git checkout-index: %s ", name);
-		if (!has_same_name)
+		यदि (!has_same_name)
 			fprintf(stderr, "is not in the cache");
-		else if (!is_file)
+		अन्यथा यदि (!is_file)
 			fprintf(stderr, "is a sparse directory");
-		else if (is_skipped)
+		अन्यथा यदि (is_skipped)
 			fprintf(stderr, "has skip-worktree enabled; "
 					"use '--ignore-skip-worktree-bits' to checkout");
-		else if (checkout_stage)
+		अन्यथा यदि (checkout_stage)
 			fprintf(stderr, "does not exist at stage %d",
 				checkout_stage);
-		else
+		अन्यथा
 			fprintf(stderr, "is unmerged");
 		fputc('\n', stderr);
 	}
-	return -1;
+	प्रत्यागम -1;
 }
 
-static int checkout_all(struct index_state *index, const char *prefix, int prefix_length)
+स्थिर पूर्णाङ्क checkout_all(संरचना सूचकांक_state *सूचकांक, ध्रुव वर्ण *उपसर्गः, पूर्णाङ्क उपसर्गः_दीर्घता)
 {
-	int i, errs = 0;
-	struct cache_entry *last_ce = NULL;
+	पूर्णाङ्क i, errs = 0;
+	संरचना cache_प्रविष्टिः *चरमः_ce = रिक्त;
 
-	for (i = 0; i < index->cache_nr ; i++) {
-		struct cache_entry *ce = index->cache[i];
+	प्रति (i = 0; i < सूचकांक->cache_nr ; i++) {
+		संरचना cache_प्रविष्टिः *ce = सूचकांक->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			if (!ce_skip_worktree(ce))
+		यदि (S_ISSPARSEDIR(ce->ce_बहुलकम्)) {
+			यदि (!ce_skip_worktree(ce))
 				BUG("sparse directory '%s' does not have skip-worktree set", ce->name);
 
 			/*
@@ -155,76 +155,76 @@ static int checkout_all(struct index_state *index, const char *prefix, int prefi
 			 * the loop on the current index position (now pointing to the
 			 * first entry inside the expanded sparse directory).
 			 */
-			if (ignore_skip_worktree) {
-				ensure_full_index(index);
-				ce = index->cache[i];
+			यदि (ignore_skip_worktree) {
+				ensure_पूर्णम्_सूचकांक(सूचकांक);
+				ce = सूचकांक->cache[i];
 			}
 		}
 
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			continue;
-		if (ce_stage(ce) != checkout_stage
+		यदि (!ignore_skip_worktree && ce_skip_worktree(ce))
+			अनुवर्त;
+		यदि (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
-		if (prefix && *prefix &&
-		    (ce_namelen(ce) <= prefix_length ||
-		     memcmp(prefix, ce->name, prefix_length)))
-			continue;
-		if (last_ce && to_tempfile) {
-			if (ce_namelen(last_ce) != ce_namelen(ce)
-			    || memcmp(last_ce->name, ce->name, ce_namelen(ce)))
-				write_tempfile_record(last_ce->name, prefix);
+			अनुवर्त;
+		यदि (उपसर्गः && *उपसर्गः &&
+		    (ce_namelen(ce) <= उपसर्गः_दीर्घता ||
+		     memcmp(उपसर्गः, ce->name, उपसर्गः_दीर्घता)))
+			अनुवर्त;
+		यदि (चरमः_ce && गन्तव्यम्_tempfile) {
+			यदि (ce_namelen(चरमः_ce) != ce_namelen(ce)
+			    || memcmp(चरमः_ce->name, ce->name, ce_namelen(ce)))
+				write_tempfile_लेखः(चरमः_ce->name, उपसर्गः);
 		}
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		यदि (checkout_प्रविष्टिः(ce, &state,
+				   गन्तव्यम्_tempfile ? topath[ce_stage(ce)] : रिक्त,
+				   रिक्त) < 0)
 			errs++;
-		last_ce = ce;
+		चरमः_ce = ce;
 	}
-	if (last_ce && to_tempfile)
-		write_tempfile_record(last_ce->name, prefix);
-	return !!errs;
+	यदि (चरमः_ce && गन्तव्यम्_tempfile)
+		write_tempfile_लेखः(चरमः_ce->name, उपसर्गः);
+	प्रत्यागम !!errs;
 }
 
-static const char * const builtin_checkout_index_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_checkout_सूचकांक_usage[] = {
 	N_("git checkout-index [<options>] [--] [<file>...]"),
-	NULL
+	रिक्त
 };
 
-static int option_parse_stage(const struct option *opt,
-			      const char *arg, int unset)
+स्थिर पूर्णाङ्क option_parse_stage(ध्रुव संरचना option *opt,
+			      ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	int *stage = opt->value;
+	पूर्णाङ्क *stage = opt->मानम्;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "all")) {
+	यदि (!वाक्यं_तुलय(arg, "all")) {
 		*stage = CHECKOUT_ALL;
-	} else {
-		int ch = arg[0];
-		if ('1' <= ch && ch <= '3')
+	} अन्यथा {
+		पूर्णाङ्क ch = arg[0];
+		यदि ('1' <= ch && ch <= '3')
 			*stage = arg[0] - '0';
-		else
+		अन्यथा
 			die(_("stage should be between 1 and 3 or all"));
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-int cmd_checkout_index(int argc,
-		       const char **argv,
-		       const char *prefix,
-		       struct repository *repo)
+पूर्णाङ्क cmd_checkout_सूचकांक(पूर्णाङ्क argc,
+		       ध्रुव वर्ण **argv,
+		       ध्रुव वर्ण *उपसर्गः,
+		       संरचना repository *repo)
 {
-	int i;
-	struct lock_file lock_file = LOCK_INIT;
-	int all = 0;
-	int read_from_stdin = 0;
-	int prefix_length;
-	int force = 0, quiet = 0, not_new = 0;
-	int index_opt = 0;
-	int err = 0;
-	int pc_workers, pc_threshold;
-	struct option builtin_checkout_index_options[] = {
+	पूर्णाङ्क i;
+	संरचना तालकम्_file तालकम्_file = तालकम्_INIT;
+	पूर्णाङ्क all = 0;
+	पूर्णाङ्क read_from_stdin = 0;
+	पूर्णाङ्क उपसर्गः_दीर्घता;
+	पूर्णाङ्क force = 0, quiet = 0, not_new = 0;
+	पूर्णाङ्क सूचकांक_opt = 0;
+	पूर्णाङ्क err = 0;
+	पूर्णाङ्क pc_workers, pc_देहली;
+	संरचना option builtin_checkout_सूचकांक_options[] = {
 		OPT_BOOL('a', "all", &all,
 			N_("check out all files in the index")),
 		OPT_BOOL(0, "ignore-skip-worktree-bits", &ignore_skip_worktree,
@@ -234,117 +234,117 @@ int cmd_checkout_index(int argc,
 			N_("no warning for existing files and files not in index")),
 		OPT_BOOL('n', "no-create", &not_new,
 			N_("don't checkout new files")),
-		OPT_BOOL('u', "index", &index_opt,
+		OPT_BOOL('u', "index", &सूचकांक_opt,
 			 N_("update stat information in the index file")),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', रिक्त, &nul_पदांशः_पङ्क्तिः,
 			N_("paths are separated with NUL character")),
 		OPT_BOOL(0, "stdin", &read_from_stdin,
 			N_("read list of paths from the standard input")),
-		OPT_BOOL(0, "temp", &to_tempfile,
+		OPT_BOOL(0, "temp", &गन्तव्यम्_tempfile,
 			N_("write the content to temporary files")),
-		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
+		OPT_STRING(0, "prefix", &state.आधारः_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
 		OPT_CALLBACK_F(0, "stage", &checkout_stage, "(1|2|3|all)",
 			N_("copy out the files from named stage"),
 			PARSE_OPT_NONEG, option_parse_stage),
-		OPT_END()
+		OPT_अन्तः()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_checkout_index_usage,
-					 builtin_checkout_index_options);
-	repo_config(repo, git_default_config, NULL);
-	prefix_length = prefix ? strlen(prefix) : 0;
+					 builtin_checkout_सूचकांक_usage,
+					 builtin_checkout_सूचकांक_options);
+	repo_config(repo, git_default_config, रिक्त);
+	उपसर्गः_दीर्घता = उपसर्गः ? वाक्यदैर्घ्यम्(उपसर्गः) : 0;
 
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_पूर्णम्_सूचकांक = 0;
 
-	if (repo_read_index(repo) < 0) {
+	यदि (repo_read_सूचकांक(repo) < 0) {
 		die("invalid cache");
 	}
 
-	argc = parse_options(argc, argv, prefix, builtin_checkout_index_options,
-			builtin_checkout_index_usage, 0);
-	state.istate = repo->index;
+	argc = parse_options(argc, argv, उपसर्गः, builtin_checkout_सूचकांक_options,
+			builtin_checkout_सूचकांक_usage, 0);
+	state.istate = repo->सूचकांक;
 	state.force = force;
 	state.quiet = quiet;
 	state.not_new = not_new;
 
-	if (!state.base_dir)
-		state.base_dir = "";
-	state.base_dir_len = strlen(state.base_dir);
+	यदि (!state.आधारः_dir)
+		state.आधारः_dir = "";
+	state.आधारः_dir_len = वाक्यदैर्घ्यम्(state.आधारः_dir);
 
-	if (to_tempfile < 0)
-		to_tempfile = (checkout_stage == CHECKOUT_ALL);
-	if (!to_tempfile && checkout_stage == CHECKOUT_ALL)
+	यदि (गन्तव्यम्_tempfile < 0)
+		गन्तव्यम्_tempfile = (checkout_stage == CHECKOUT_ALL);
+	यदि (!गन्तव्यम्_tempfile && checkout_stage == CHECKOUT_ALL)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--stage=all", "--no-temp");
 
 	/*
 	 * when --prefix is specified we do not want to update cache.
 	 */
-	if (index_opt && !state.base_dir_len && !to_tempfile) {
+	यदि (सूचकांक_opt && !state.आधारः_dir_len && !गन्तव्यम्_tempfile) {
 		state.refresh_cache = 1;
-		state.istate = repo->index;
-		repo_hold_locked_index(repo, &lock_file,
-				       LOCK_DIE_ON_ERROR);
+		state.istate = repo->सूचकांक;
+		repo_hold_locked_सूचकांक(repo, &तालकम्_file,
+				       तालकम्_DIE_ON_ERROR);
 	}
 
-	get_parallel_checkout_configs(&pc_workers, &pc_threshold);
-	if (pc_workers > 1)
+	get_parallel_checkout_configs(&pc_workers, &pc_देहली);
+	यदि (pc_workers > 1)
 		init_parallel_checkout();
 
 	/* Check out named files first */
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		char *p;
+	प्रति (i = 0; i < argc; i++) {
+		ध्रुव वर्ण *arg = argv[i];
+		वर्ण *p;
 
-		if (all)
+		यदि (all)
 			die("git checkout-index: don't mix '--all' and explicit filenames");
-		if (read_from_stdin)
+		यदि (read_from_stdin)
 			die("git checkout-index: don't mix '--stdin' and explicit filenames");
-		p = prefix_path(repo, prefix, prefix_length, arg);
-		err |= checkout_file(repo->index, p, prefix);
-		free(p);
+		p = उपसर्गः_मार्गः(repo, उपसर्गः, उपसर्गः_दीर्घता, arg);
+		err |= checkout_file(repo->सूचकांक, p, उपसर्गः);
+		मुक्त(p);
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	यदि (read_from_stdin) {
+		संरचना strbuf buf = STRBUF_INIT;
+		संरचना strbuf unquoted = STRBUF_INIT;
 		strbuf_getline_fn getline_fn;
 
-		if (all)
+		यदि (all)
 			die("git checkout-index: don't mix '--all' and '--stdin'");
 
-		getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		getline_fn = nul_पदांशः_पङ्क्तिः ? strbuf_getline_nul : strbuf_getline_lf;
+		यावत् (getline_fn(&buf, stdin) != EOF) {
+			वर्ण *p;
+			यदि (!nul_पदांशः_पङ्क्तिः && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				यदि (unquote_c_style(&unquoted, buf.buf, रिक्त))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
-			p = prefix_path(repo, prefix, prefix_length, buf.buf);
-			err |= checkout_file(repo->index, p, prefix);
-			free(p);
+			p = उपसर्गः_मार्गः(repo, उपसर्गः, उपसर्गः_दीर्घता, buf.buf);
+			err |= checkout_file(repo->सूचकांक, p, उपसर्गः);
+			मुक्त(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
 	}
 
-	if (all)
-		err |= checkout_all(repo->index, prefix, prefix_length);
+	यदि (all)
+		err |= checkout_all(repo->सूचकांक, उपसर्गः, उपसर्गः_दीर्घता);
 
-	if (pc_workers > 1)
-		err |= run_parallel_checkout(&state, pc_workers, pc_threshold,
-					     NULL, NULL);
+	यदि (pc_workers > 1)
+		err |= सततम्_parallel_checkout(&state, pc_workers, pc_देहली,
+					     रिक्त, रिक्त);
 
-	if (err)
-		return 1;
+	यदि (err)
+		प्रत्यागम 1;
 
-	if (is_lock_file_locked(&lock_file) &&
-	    write_locked_index(repo->index, &lock_file, COMMIT_LOCK))
+	यदि (is_तालकम्_file_locked(&तालकम्_file) &&
+	    write_locked_सूचकांक(repo->सूचकांक, &तालकम्_file, COMMIT_तालकम्))
 		die("Unable to write new index file");
-	return 0;
+	प्रत्यागम 0;
 }

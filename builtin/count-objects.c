@@ -3,176 +3,176 @@
  *
  * Copyright (c) 2006 Junio C Hamano
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+स्थिर अचिह्नित दीर्घ garbage;
+स्थिर off_t आकार_garbage;
+स्थिर पूर्णाङ्क verbose;
+स्थिर अचिह्नित दीर्घ loose, packed, packed_loose;
+स्थिर off_t loose_आकार;
 
-static const char *bits_to_msg(unsigned seen_bits)
+स्थिर ध्रुव वर्ण *द्वयङ्काः_गन्तव्यम्_सन्देशः(अचिह्नित आलोकितम्_द्वयङ्काः)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	विकल्प (आलोकितम्_द्वयङ्काः) {
+	पक्ष 0:
+		प्रत्यागम "no corresponding .idx or .pack";
+	पक्ष PACKDIR_FILE_GARBAGE:
+		प्रत्यागम "garbage found";
+	पक्ष PACKDIR_FILE_PACK:
+		प्रत्यागम "no corresponding .idx";
+	पक्ष PACKDIR_FILE_IDX:
+		प्रत्यागम "no corresponding .pack";
+	पक्ष PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	स्वभाव:
+		प्रत्यागम रिक्त;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+स्थिर शून्य real_report_garbage(अचिह्नित आलोकितम्_द्वयङ्काः, ध्रुव वर्ण *मार्गः)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	संरचना stat st;
+	ध्रुव वर्ण *desc = द्वयङ्काः_गन्तव्यम्_सन्देशः(आलोकितम्_द्वयङ्काः);
 
-	if (!desc)
-		return;
+	यदि (!desc)
+		प्रत्यागम;
 
-	if (!stat(path, &st))
-		size_garbage += st.st_size;
-	warning("%s: %s", desc, path);
+	यदि (!stat(मार्गः, &st))
+		आकार_garbage += st.st_आकार;
+	warning("%s: %s", desc, मार्गः);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+स्थिर शून्य loose_garbage(ध्रुव वर्ण *मार्गः)
 {
-	if (verbose)
-		report_garbage(PACKDIR_FILE_GARBAGE, path);
+	यदि (verbose)
+		report_garbage(PACKDIR_FILE_GARBAGE, मार्गः);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+स्थिर पूर्णाङ्क गणनम्_loose(ध्रुव संरचना object_id *oid, ध्रुव वर्ण *मार्गः,
+		       शून्य *दत्त अप्रयुक्तम्)
 {
-	struct stat st;
+	संरचना stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
-		loose_garbage(path);
-	else {
-		loose_size += on_disk_bytes(st);
+	यदि (lstat(मार्गः, &st) || !S_ISREG(st.st_बहुलकम्))
+		loose_garbage(मार्गः);
+	अन्यथा {
+		loose_आकार += on_disk_अष्टकानि(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		यदि (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+स्थिर पूर्णाङ्क गणनम्_cruft(ध्रुव वर्ण *basename अप्रयुक्तम्, ध्रुव वर्ण *मार्गः,
+		       शून्य *दत्त अप्रयुक्तम्)
 {
-	loose_garbage(path);
-	return 0;
+	loose_garbage(मार्गः);
+	प्रत्यागम 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+स्थिर पूर्णाङ्क print_alternate(संरचना odb_files_dir *alternate, शून्य *दत्त अप्रयुक्तम्)
 {
-	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
-	putchar('\n');
-	return 0;
+	प्रारूप_लिख("alternate: ");
+	quote_c_style(alternate->abspath, रिक्त, stdout, 0);
+	अक्षरं_लिख('\n');
+	प्रत्यागम 0;
 }
 
-static char const * const count_objects_usage[] = {
+स्थिर वर्ण ध्रुव * ध्रुव गणनम्_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	रिक्त
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+पूर्णाङ्क cmd_गणनम्_objects(पूर्णाङ्क argc,
+		      ध्रुव वर्ण **argv,
+		      ध्रुव वर्ण *उपसर्गः,
+		      संरचना repository *repo अप्रयुक्तम्)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	पूर्णाङ्क human_readable = 0;
+	संरचना option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
-		OPT_END(),
+		OPT_अन्तः(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, उपसर्गः, opts, गणनम्_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
-		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	यदि (argc)
+		usage_with_options(गणनम्_objects_usage, opts);
+	यदि (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
-	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+	for_each_loose_file_अन्तर्_source(the_repository->objects->source,
+				      गणनम्_loose, गणनम्_cruft, रिक्त, रिक्त);
 
-	if (verbose) {
-		struct packed_git *p;
-		unsigned long num_pack = 0;
-		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+	यदि (verbose) {
+		संरचना packed_git *p;
+		अचिह्नित दीर्घ अङ्कः_pack = 0;
+		off_t आकार_pack = 0;
+		संरचना strbuf loose_buf = STRBUF_INIT;
+		संरचना strbuf pack_buf = STRBUF_INIT;
+		संरचना strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
-			packed += p->num_objects;
-			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			यदि (!p->pack_local)
+				अनुवर्त;
+			यदि (open_pack_सूचकांक(p))
+				अनुवर्त;
+			packed += p->अङ्कः_objects;
+			आकार_pack += p->pack_आकार + p->सूचकांक_आकार;
+			अङ्कः_pack++;
 		}
 
-		if (human_readable) {
-			strbuf_humanise_bytes(&loose_buf, loose_size);
-			strbuf_humanise_bytes(&pack_buf, size_pack);
-			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		यदि (human_readable) {
+			strbuf_humanise_अष्टकानि(&loose_buf, loose_आकार);
+			strbuf_humanise_अष्टकानि(&pack_buf, आकार_pack);
+			strbuf_humanise_अष्टकानि(&garbage_buf, आकार_garbage);
+		} अन्यथा {
 			strbuf_addf(&loose_buf, "%lu",
-				    (unsigned long)(loose_size / 1024));
+				    (अचिह्नित दीर्घ)(loose_आकार / 1024));
 			strbuf_addf(&pack_buf, "%lu",
-				    (unsigned long)(size_pack / 1024));
+				    (अचिह्नित दीर्घ)(आकार_pack / 1024));
 			strbuf_addf(&garbage_buf, "%lu",
-				    (unsigned long)(size_garbage / 1024));
+				    (अचिह्नित दीर्घ)(आकार_garbage / 1024));
 		}
 
-		printf("count: %lu\n", loose);
-		printf("size: %s\n", loose_buf.buf);
-		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
-		printf("size-pack: %s\n", pack_buf.buf);
-		printf("prune-packable: %lu\n", packed_loose);
-		printf("garbage: %lu\n", garbage);
-		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		प्रारूप_लिख("count: %lu\n", loose);
+		प्रारूप_लिख("size: %s\n", loose_buf.buf);
+		प्रारूप_लिख("in-pack: %lu\n", packed);
+		प्रारूप_लिख("packs: %lu\n", अङ्कः_pack);
+		प्रारूप_लिख("size-pack: %s\n", pack_buf.buf);
+		प्रारूप_लिख("prune-packable: %lu\n", packed_loose);
+		प्रारूप_लिख("garbage: %lu\n", garbage);
+		प्रारूप_लिख("size-garbage: %s\n", garbage_buf.buf);
+		odb_for_each_alternate(the_repository->objects, print_alternate, रिक्त);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
-			strbuf_humanise_bytes(&buf, loose_size);
-		else
+	} अन्यथा {
+		संरचना strbuf buf = STRBUF_INIT;
+		यदि (human_readable)
+			strbuf_humanise_अष्टकानि(&buf, loose_आकार);
+		अन्यथा
 			strbuf_addf(&buf, "%lu kilobytes",
-				    (unsigned long)(loose_size / 1024));
-		printf("%lu objects, %s\n", loose, buf.buf);
+				    (अचिह्नित दीर्घ)(loose_आकार / 1024));
+		प्रारूप_लिख("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	प्रत्यागम 0;
 }

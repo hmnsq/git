@@ -1,43 +1,43 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
+#परिभाषय DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "revision.h"
-#include "list-objects.h"
-#include "list-objects-filter-options.h"
-#include "object.h"
-#include "object-name.h"
-#include "object-file.h"
-#include "odb.h"
-#include "pack-bitmap.h"
-#include "parse-options.h"
-#include "log-tree.h"
-#include "graph.h"
-#include "bisect.h"
-#include "progress.h"
-#include "reflog-walk.h"
-#include "oidset.h"
-#include "oidmap.h"
-#include "packfile.h"
-#include "commit-reach.h"
-#include "quote.h"
-#include "strbuf.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "diff.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "revision.h"
+#अन्तर्भाव "list-objects.h"
+#अन्तर्भाव "list-objects-filter-options.h"
+#अन्तर्भाव "object.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "pack-bitmap.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "log-tree.h"
+#अन्तर्भाव "graph.h"
+#अन्तर्भाव "bisect.h"
+#अन्तर्भाव "progress.h"
+#अन्तर्भाव "reflog-walk.h"
+#अन्तर्भाव "oidset.h"
+#अन्तर्भाव "oidmap.h"
+#अन्तर्भाव "packfile.h"
+#अन्तर्भाव "commit-reach.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "strbuf.h"
 
-struct rev_list_info {
-	struct rev_info *revs;
-	int flags;
-	int show_timestamp;
-	int hdr_termination;
-	const char *header_prefix;
+संरचना rev_list_info {
+	संरचना rev_info *revs;
+	पूर्णाङ्क flags;
+	पूर्णाङ्क show_timestamp;
+	पूर्णाङ्क hdr_termination;
+	ध्रुव वर्ण *शीर्षकम्_उपसर्गः;
 };
 
-static const char rev_list_usage[] =
+स्थिर ध्रुव वर्ण rev_list_usage[] =
 "git rev-list [<options>] <commit>... [--] [<path>...]\n"
 "\n"
 "  limiting output:\n"
@@ -81,130 +81,130 @@ static const char rev_list_usage[] =
 "    --bisect-all"
 ;
 
-static struct progress *progress;
-static unsigned progress_counter;
+स्थिर संरचना प्रगतिः *प्रगतिः;
+स्थिर अचिह्नित प्रगतिः_गणक;
 
-static struct oidset omitted_objects;
-static int arg_print_omitted; /* print objects omitted by filter */
+स्थिर संरचना oidset omitted_objects;
+स्थिर पूर्णाङ्क arg_print_omitted; /* print objects omitted by filter */
 
-struct missing_objects_map_entry {
-	struct oidmap_entry entry;
-	char *path;
-	unsigned type;
+संरचना missing_objects_map_प्रविष्टिः {
+	संरचना oidmap_प्रविष्टिः प्रविष्टिः;
+	वर्ण *मार्गः;
+	अचिह्नित type;
 };
 
-static void missing_objects_map_entry_free(void *e)
+स्थिर शून्य missing_objects_map_प्रविष्टिः_free(शून्य *e)
 {
-	struct missing_objects_map_entry *entry =
-		container_of(e, struct missing_objects_map_entry, entry);
+	संरचना missing_objects_map_प्रविष्टिः *प्रविष्टिः =
+		container_सम्बन्धि(e, संरचना missing_objects_map_प्रविष्टिः, प्रविष्टिः);
 
-	free(entry->path);
-	free(entry);
+	मुक्त(प्रविष्टिः->मार्गः);
+	मुक्त(प्रविष्टिः);
 }
 
-static struct oidmap missing_objects;
-enum missing_action {
+स्थिर संरचना oidmap missing_objects;
+गणना missing_action {
 	MA_ERROR = 0,    /* fail if any missing objects are encountered */
 	MA_ALLOW_ANY,    /* silently allow ALL missing objects */
 	MA_PRINT,        /* print ALL missing objects in special section */
 	MA_PRINT_INFO,   /* same as MA_PRINT but also prints missing object info */
 	MA_ALLOW_PROMISOR, /* silently allow all missing PROMISOR objects */
 };
-static enum missing_action arg_missing_action;
-static int arg_missing_only;
+स्थिर गणना missing_action arg_missing_action;
+स्थिर पूर्णाङ्क arg_missing_only;
 
-static inline int should_collect_missing(void)
+स्थिर अन्तःस्थ पूर्णाङ्क should_collect_missing(शून्य)
 {
-	return arg_missing_action == MA_PRINT ||
+	प्रत्यागम arg_missing_action == MA_PRINT ||
 	       arg_missing_action == MA_PRINT_INFO;
 }
 
 /* display only the oid of each object encountered */
-static int arg_show_object_names = 1;
+स्थिर पूर्णाङ्क arg_show_object_नामानि = 1;
 
-#define DEFAULT_OIDSET_SIZE     (16*1024)
+#परिभाषय DEFAULT_OIDSET_आकार     (16*1024)
 
-static char line_term = '\n';
-static char info_term = ' ';
+स्थिर वर्ण पङ्क्तिः_पदांशः = '\n';
+स्थिर वर्ण info_पदांशः = ' ';
 
-static int show_disk_usage;
-static off_t total_disk_usage;
-static int human_readable;
+स्थिर पूर्णाङ्क show_disk_usage;
+स्थिर off_t योग_disk_usage;
+स्थिर पूर्णाङ्क human_readable;
 
-static off_t get_object_disk_usage(struct object *obj)
+स्थिर off_t get_object_disk_usage(संरचना object *obj)
 {
-	off_t size;
-	struct object_info oi = OBJECT_INFO_INIT;
-	oi.disk_sizep = &size;
-	if (odb_read_object_info_extended(the_repository->objects,
+	off_t आकार;
+	संरचना object_info oi = OBJECT_INFO_INIT;
+	oi.disk_sizep = &आकार;
+	यदि (odb_read_object_info_extended(the_repository->objects,
 					  &obj->oid, &oi, 0) < 0)
-		die(_("unable to get disk usage of %s"), oid_to_hex(&obj->oid));
-	return size;
+		die(_("unable to get disk usage of %s"), oid_गन्तव्यम्_hex(&obj->oid));
+	प्रत्यागम आकार;
 }
 
-static void add_missing_object_entry(struct object_id *oid, const char *path,
-				     unsigned type)
+स्थिर शून्य सङ्कलय_missing_object_प्रविष्टिः(संरचना object_id *oid, ध्रुव वर्ण *मार्गः,
+				     अचिह्नित type)
 {
-	struct missing_objects_map_entry *entry;
+	संरचना missing_objects_map_प्रविष्टिः *प्रविष्टिः;
 
-	if (oidmap_get(&missing_objects, oid))
-		return;
+	यदि (oidmap_get(&missing_objects, oid))
+		प्रत्यागम;
 
-	CALLOC_ARRAY(entry, 1);
-	entry->entry.oid = *oid;
-	entry->type = type;
-	if (path)
-		entry->path = xstrdup(path);
-	oidmap_put(&missing_objects, entry);
+	CALLOC_ARRAY(प्रविष्टिः, 1);
+	प्रविष्टिः->प्रविष्टिः.oid = *oid;
+	प्रविष्टिः->type = type;
+	यदि (मार्गः)
+		प्रविष्टिः->मार्गः = xstrdup(मार्गः);
+	oidmap_put(&missing_objects, प्रविष्टिः);
 }
 
-static void print_missing_object(struct missing_objects_map_entry *entry,
-				 int print_missing_info)
+स्थिर शून्य print_missing_object(संरचना missing_objects_map_प्रविष्टिः *प्रविष्टिः,
+				 पूर्णाङ्क print_missing_info)
 {
-	struct strbuf sb = STRBUF_INIT;
+	संरचना strbuf sb = STRBUF_INIT;
 
 	/*
 	 * --missing-only filters present objects out of the walk output.
 	 * It still uses the selected --missing= format for missing ones,
 	 * except the human "?" prefix is omitted (script-friendly OIDs).
 	 */
-	if (arg_missing_only && line_term)
-		printf("%s", oid_to_hex(&entry->entry.oid));
-	else if (line_term)
-		printf("?%s", oid_to_hex(&entry->entry.oid));
-	else
-		printf("%s%cmissing=yes", oid_to_hex(&entry->entry.oid),
-		       info_term);
+	यदि (arg_missing_only && पङ्क्तिः_पदांशः)
+		प्रारूप_लिख("%s", oid_गन्तव्यम्_hex(&प्रविष्टिः->प्रविष्टिः.oid));
+	अन्यथा यदि (पङ्क्तिः_पदांशः)
+		प्रारूप_लिख("?%s", oid_गन्तव्यम्_hex(&प्रविष्टिः->प्रविष्टिः.oid));
+	अन्यथा
+		प्रारूप_लिख("%s%cmissing=yes", oid_गन्तव्यम्_hex(&प्रविष्टिः->प्रविष्टिः.oid),
+		       info_पदांशः);
 
-	if (!print_missing_info) {
-		putchar(line_term);
-		return;
+	यदि (!print_missing_info) {
+		अक्षरं_लिख(पङ्क्तिः_पदांशः);
+		प्रत्यागम;
 	}
 
-	if (entry->path && *entry->path) {
-		strbuf_addf(&sb, "%cpath=", info_term);
+	यदि (प्रविष्टिः->मार्गः && *प्रविष्टिः->मार्गः) {
+		strbuf_addf(&sb, "%cpath=", info_पदांशः);
 
-		if (line_term) {
-			struct strbuf path = STRBUF_INIT;
+		यदि (पङ्क्तिः_पदांशः) {
+			संरचना strbuf मार्गः = STRBUF_INIT;
 
-			quote_path(entry->path, NULL, &path, QUOTE_PATH_QUOTE_SP);
-			strbuf_addbuf(&sb, &path);
+			quote_मार्गः(प्रविष्टिः->मार्गः, रिक्त, &मार्गः, QUOTE_मार्गः_QUOTE_SP);
+			strbuf_addbuf(&sb, &मार्गः);
 
-			strbuf_release(&path);
-		} else {
-			strbuf_addstr(&sb, entry->path);
+			strbuf_release(&मार्गः);
+		} अन्यथा {
+			strbuf_addstr(&sb, प्रविष्टिः->मार्गः);
 		}
 	}
-	if (entry->type)
-		strbuf_addf(&sb, "%ctype=%s", info_term, type_name(entry->type));
+	यदि (प्रविष्टिः->type)
+		strbuf_addf(&sb, "%ctype=%s", info_पदांशः, type_name(प्रविष्टिः->type));
 
-	fwrite(sb.buf, sizeof(char), sb.len, stdout);
-	putchar(line_term);
+	fwrite(sb.buf, परिमाण(वर्ण), sb.len, stdout);
+	अक्षरं_लिख(पङ्क्तिः_पदांशः);
 
 	strbuf_release(&sb);
 }
 
-static inline void finish_object__ma(struct object *obj, const char *name)
+स्थिर अन्तःस्थ शून्य finish_object__ma(संरचना object *obj, ध्रुव वर्ण *name)
 {
 	/*
 	 * Whether or not we try to dynamically fetch missing objects
@@ -212,137 +212,137 @@ static inline void finish_object__ma(struct object *obj, const char *name)
 	 * can either print, allow (ignore), or conditionally allow
 	 * (ignore) them.
 	 */
-	switch (arg_missing_action) {
-	case MA_ERROR:
+	विकल्प (arg_missing_action) {
+	पक्ष MA_ERROR:
 		die("missing %s object '%s'",
-		    type_name(obj->type), oid_to_hex(&obj->oid));
-		return;
+		    type_name(obj->type), oid_गन्तव्यम्_hex(&obj->oid));
+		प्रत्यागम;
 
-	case MA_ALLOW_ANY:
-		return;
+	पक्ष MA_ALLOW_ANY:
+		प्रत्यागम;
 
-	case MA_PRINT:
-	case MA_PRINT_INFO:
-		add_missing_object_entry(&obj->oid, name, obj->type);
-		return;
+	पक्ष MA_PRINT:
+	पक्ष MA_PRINT_INFO:
+		सङ्कलय_missing_object_प्रविष्टिः(&obj->oid, name, obj->type);
+		प्रत्यागम;
 
-	case MA_ALLOW_PROMISOR:
-		if (is_promisor_object(the_repository, &obj->oid))
-			return;
+	पक्ष MA_ALLOW_PROMISOR:
+		यदि (is_promisor_object(the_repository, &obj->oid))
+			प्रत्यागम;
 		die("unexpected missing %s object '%s'",
-		    type_name(obj->type), oid_to_hex(&obj->oid));
-		return;
+		    type_name(obj->type), oid_गन्तव्यम्_hex(&obj->oid));
+		प्रत्यागम;
 
-	default:
+	स्वभाव:
 		BUG("unhandled missing_action");
-		return;
+		प्रत्यागम;
 	}
 }
 
-static void finish_commit(struct commit *commit)
+स्थिर शून्य finish_commit(संरचना commit *commit)
 {
 	commit_list_free(commit->parents);
-	commit->parents = NULL;
-	free_commit_buffer(the_repository->parsed_objects,
+	commit->parents = रिक्त;
+	free_commit_बफर(the_repository->parsed_objects,
 			   commit);
 }
 
-static void show_commit(struct commit *commit, void *data)
+स्थिर शून्य show_commit(संरचना commit *commit, शून्य *दत्त)
 {
-	struct rev_list_info *info = data;
-	struct rev_info *revs = info->revs;
+	संरचना rev_list_info *info = दत्त;
+	संरचना rev_info *revs = info->revs;
 
-	display_progress(progress, ++progress_counter);
+	display_प्रगतिः(प्रगतिः, ++प्रगतिः_गणक);
 
-	if (revs->do_not_die_on_missing_objects &&
-	    oidset_contains(&revs->missing_commits, &commit->object.oid)) {
-		finish_object__ma(&commit->object, NULL);
-		return;
+	यदि (revs->do_not_die_on_missing_objects &&
+	    oidset_अन्तर्भवति(&revs->missing_commits, &commit->object.oid)) {
+		finish_object__ma(&commit->object, रिक्त);
+		प्रत्यागम;
 	}
 
-	if (arg_missing_only) {
+	यदि (arg_missing_only) {
 		finish_commit(commit);
-		return;
+		प्रत्यागम;
 	}
 
-	if (show_disk_usage)
-		total_disk_usage += get_object_disk_usage(&commit->object);
+	यदि (show_disk_usage)
+		योग_disk_usage += get_object_disk_usage(&commit->object);
 
-	if (info->flags & REV_LIST_QUIET) {
+	यदि (info->flags & REV_LIST_QUIET) {
 		finish_commit(commit);
-		return;
+		प्रत्यागम;
 	}
 
 	graph_show_commit(revs->graph);
 
-	if (revs->count) {
-		if (commit->object.flags & PATCHSAME)
-			revs->count_same++;
-		else if (commit->object.flags & SYMMETRIC_LEFT)
-			revs->count_left++;
-		else
-			revs->count_right++;
+	यदि (revs->गणनम्) {
+		यदि (commit->object.flags & PATCHSAME)
+			revs->गणनम्_same++;
+		अन्यथा यदि (commit->object.flags & सममितम्_वामः)
+			revs->गणनम्_वामः++;
+		अन्यथा
+			revs->गणनम्_दक्षिणः++;
 		finish_commit(commit);
-		return;
+		प्रत्यागम;
 	}
 
-	if (info->show_timestamp)
-		printf("%"PRItime" ", commit->date);
-	if (info->header_prefix)
-		fputs(info->header_prefix, stdout);
+	यदि (info->show_timestamp)
+		प्रारूप_लिख("%"PRItime" ", commit->date);
+	यदि (info->शीर्षकम्_उपसर्गः)
+		fputs(info->शीर्षकम्_उपसर्गः, stdout);
 
-	if (revs->include_header) {
-		if (!revs->graph && line_term)
+	यदि (revs->include_शीर्षकम्) {
+		यदि (!revs->graph && पङ्क्तिः_पदांशः)
 			fputs(get_revision_mark(revs, commit), stdout);
-		if (revs->abbrev_commit && revs->abbrev)
+		यदि (revs->abbrev_commit && revs->abbrev)
 			fputs(repo_find_unique_abbrev(the_repository, &commit->object.oid, revs->abbrev),
 			      stdout);
-		else
-			fputs(oid_to_hex(&commit->object.oid), stdout);
+		अन्यथा
+			fputs(oid_गन्तव्यम्_hex(&commit->object.oid), stdout);
 
-		if (!line_term) {
-			if (commit->object.flags & BOUNDARY)
-				printf("%cboundary=yes", info_term);
+		यदि (!पङ्क्तिः_पदांशः) {
+			यदि (commit->object.flags & BOUNDARY)
+				प्रारूप_लिख("%cboundary=yes", info_पदांशः);
 		}
 	}
-	if (revs->print_parents) {
-		struct commit_list *parents = commit->parents;
-		while (parents) {
-			printf(" %s", oid_to_hex(&parents->item->object.oid));
-			parents = parents->next;
+	यदि (revs->print_parents) {
+		संरचना commit_list *parents = commit->parents;
+		यावत् (parents) {
+			प्रारूप_लिख(" %s", oid_गन्तव्यम्_hex(&parents->item->object.oid));
+			parents = parents->अग्र;
 		}
 	}
-	if (revs->children.name) {
-		struct commit_list *children;
+	यदि (revs->children.name) {
+		संरचना commit_list *children;
 
 		children = lookup_decoration(&revs->children, &commit->object);
-		while (children) {
-			printf(" %s", oid_to_hex(&children->item->object.oid));
-			children = children->next;
+		यावत् (children) {
+			प्रारूप_लिख(" %s", oid_गन्तव्यम्_hex(&children->item->object.oid));
+			children = children->अग्र;
 		}
 	}
 	show_decorations(revs, commit);
-	if (revs->commit_format == CMIT_FMT_ONELINE)
-		putchar(' ');
-	else if (revs->include_header)
-		putchar(line_term);
+	यदि (revs->commit_format == CMIT_FMT_ONELINE)
+		अक्षरं_लिख(' ');
+	अन्यथा यदि (revs->include_शीर्षकम्)
+		अक्षरं_लिख(पङ्क्तिः_पदांशः);
 
-	if (revs->verbose_header) {
-		struct strbuf buf = STRBUF_INIT;
-		struct pretty_print_context ctx = {0};
+	यदि (revs->verbose_शीर्षकम्) {
+		संरचना strbuf buf = STRBUF_INIT;
+		संरचना pretty_print_context ctx = {0};
 		ctx.abbrev = revs->abbrev;
-		ctx.date_mode = revs->date_mode;
-		ctx.date_mode_explicit = revs->date_mode_explicit;
+		ctx.date_बहुलकम् = revs->date_बहुलकम्;
+		ctx.date_बहुलकम्_explicit = revs->date_बहुलकम्_explicit;
 		ctx.fmt = revs->commit_format;
 		ctx.output_encoding = get_log_output_encoding();
 		ctx.color = revs->diffopt.use_color;
 		ctx.rev = revs;
 		pretty_print_commit(&ctx, commit, &buf);
-		if (buf.len) {
-			if (revs->commit_format != CMIT_FMT_ONELINE)
+		यदि (buf.len) {
+			यदि (revs->commit_format != CMIT_FMT_ONELINE)
 				graph_show_oneline(revs->graph);
 
-			graph_show_commit_msg(revs->graph, stdout, &buf);
+			graph_show_commit_सन्देशः(revs->graph, stdout, &buf);
 
 			/*
 			 * Add a newline after the commit message.
@@ -359,58 +359,58 @@ static void show_commit(struct commit *commit, void *data)
 			 * happens with CMIT_FMT_USERFORMAT when the
 			 * format doesn't explicitly end in a newline.)
 			 */
-			if (buf.len && buf.buf[buf.len - 1] == '\n')
+			यदि (buf.len && buf.buf[buf.len - 1] == '\n')
 				graph_show_padding(revs->graph);
-			putchar(info->hdr_termination);
-		} else {
+			अक्षरं_लिख(info->hdr_termination);
+		} अन्यथा {
 			/*
 			 * If the message buffer is empty, just show
 			 * the rest of the graph output for this
 			 * commit.
 			 */
-			if (graph_show_remainder(revs->graph))
-				putchar('\n');
-			if (revs->commit_format == CMIT_FMT_ONELINE)
-				putchar('\n');
+			यदि (graph_show_remainder(revs->graph))
+				अक्षरं_लिख('\n');
+			यदि (revs->commit_format == CMIT_FMT_ONELINE)
+				अक्षरं_लिख('\n');
 		}
 		strbuf_release(&buf);
-	} else {
-		if (graph_show_remainder(revs->graph))
-			putchar('\n');
+	} अन्यथा {
+		यदि (graph_show_remainder(revs->graph))
+			अक्षरं_लिख('\n');
 	}
 	maybe_flush_or_die(stdout, "stdout");
 	finish_commit(commit);
 }
 
-static int finish_object(struct object *obj, const char *name, void *cb_data)
+स्थिर पूर्णाङ्क finish_object(संरचना object *obj, ध्रुव वर्ण *name, शून्य *cb_दत्त)
 {
-	struct rev_list_info *info = cb_data;
-	if (odb_read_object_info_extended(the_repository->objects,
-					  &obj->oid, NULL, 0) < 0) {
+	संरचना rev_list_info *info = cb_दत्त;
+	यदि (odb_read_object_info_extended(the_repository->objects,
+					  &obj->oid, रिक्त, 0) < 0) {
 		finish_object__ma(obj, name);
-		return 1;
+		प्रत्यागम 1;
 	}
-	if (info->revs->verify_objects && !obj->parsed && obj->type != OBJ_COMMIT)
+	यदि (info->revs->verify_objects && !obj->parsed && obj->type != OBJ_COMMIT)
 		parse_object(the_repository, &obj->oid);
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void show_object(struct object *obj, const char *name, void *cb_data)
+स्थिर शून्य show_object(संरचना object *obj, ध्रुव वर्ण *name, शून्य *cb_दत्त)
 {
-	struct rev_list_info *info = cb_data;
-	struct rev_info *revs = info->revs;
+	संरचना rev_list_info *info = cb_दत्त;
+	संरचना rev_info *revs = info->revs;
 
-	if (finish_object(obj, name, cb_data))
-		return;
-	display_progress(progress, ++progress_counter);
-	if (arg_missing_only)
-		return;
-	if (show_disk_usage)
-		total_disk_usage += get_object_disk_usage(obj);
-	if (info->flags & REV_LIST_QUIET)
-		return;
+	यदि (finish_object(obj, name, cb_दत्त))
+		प्रत्यागम;
+	display_प्रगतिः(प्रगतिः, ++प्रगतिः_गणक);
+	यदि (arg_missing_only)
+		प्रत्यागम;
+	यदि (show_disk_usage)
+		योग_disk_usage += get_object_disk_usage(obj);
+	यदि (info->flags & REV_LIST_QUIET)
+		प्रत्यागम;
 
-	if (revs->count) {
+	यदि (revs->गणनम्) {
 		/*
 		 * The object count is always accumulated in the .count_right
 		 * field for traversal that is not a left-right traversal,
@@ -418,53 +418,53 @@ static void show_object(struct object *obj, const char *name, void *cb_data)
 		 * wants to count non-commit objects, which is handled by
 		 * the show_object() callback, does not ask for .left_right.
 		 */
-		revs->count_right++;
-		return;
+		revs->गणनम्_दक्षिणः++;
+		प्रत्यागम;
 	}
 
-	printf("%s", oid_to_hex(&obj->oid));
+	प्रारूप_लिख("%s", oid_गन्तव्यम्_hex(&obj->oid));
 
-	if (arg_show_object_names) {
-		if (line_term) {
-			putchar(info_term);
-			for (const char *p = name; *p && *p != '\n'; p++)
-				putchar(*p);
-		} else if (*name) {
-			printf("%cpath=%s", info_term, name);
+	यदि (arg_show_object_नामानि) {
+		यदि (पङ्क्तिः_पदांशः) {
+			अक्षरं_लिख(info_पदांशः);
+			प्रति (ध्रुव वर्ण *p = name; *p && *p != '\n'; p++)
+				अक्षरं_लिख(*p);
+		} अन्यथा यदि (*name) {
+			प्रारूप_लिख("%cpath=%s", info_पदांशः, name);
 		}
 	}
 
-	putchar(line_term);
+	अक्षरं_लिख(पङ्क्तिः_पदांशः);
 }
 
-static void show_edge(struct commit *commit)
+स्थिर शून्य show_edge(संरचना commit *commit)
 {
-	printf("-%s\n", oid_to_hex(&commit->object.oid));
+	प्रारूप_लिख("-%s\n", oid_गन्तव्यम्_hex(&commit->object.oid));
 }
 
-static void print_var_str(const char *var, const char *val)
+स्थिर शून्य print_var_str(ध्रुव वर्ण *var, ध्रुव वर्ण *val)
 {
-	printf("%s='%s'\n", var, val);
+	प्रारूप_लिख("%s='%s'\n", var, val);
 }
 
-static void print_var_int(const char *var, int val)
+स्थिर शून्य print_var_int(ध्रुव वर्ण *var, पूर्णाङ्क val)
 {
-	printf("%s=%d\n", var, val);
+	प्रारूप_लिख("%s=%d\n", var, val);
 }
 
-static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
+स्थिर पूर्णाङ्क show_bisect_vars(संरचना rev_list_info *info, पूर्णाङ्क reaches, पूर्णाङ्क all)
 {
-	int cnt, flags = info->flags;
-	char hex[GIT_MAX_HEXSZ + 1] = "";
-	struct commit_list *tried;
-	struct rev_info *revs = info->revs;
+	पूर्णाङ्क cnt, flags = info->flags;
+	वर्ण hex[GIT_MAX_HEXSZ + 1] = "";
+	संरचना commit_list *tried;
+	संरचना rev_info *revs = info->revs;
 
-	if (!revs->commits)
-		return 1;
+	यदि (!revs->commits)
+		प्रत्यागम 1;
 
 	revs->commits = filter_skipped(revs->commits, &tried,
 				       flags & BISECT_SHOW_ALL,
-				       NULL, NULL);
+				       रिक्त, रिक्त);
 
 	/*
 	 * revs->commits can reach "reaches" commits among
@@ -476,15 +476,15 @@ static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
 	 * to test, as we already know one bad one.
 	 */
 	cnt = all - reaches;
-	if (cnt < reaches)
+	यदि (cnt < reaches)
 		cnt = reaches;
 
-	if (revs->commits)
-		oid_to_hex_r(hex, &revs->commits->item->object.oid);
+	यदि (revs->commits)
+		oid_गन्तव्यम्_hex_r(hex, &revs->commits->item->object.oid);
 
-	if (flags & BISECT_SHOW_ALL) {
+	यदि (flags & BISECT_SHOW_ALL) {
 		traverse_commit_list(revs, show_commit, show_object, info);
-		printf("------\n");
+		प्रारूप_लिख("------\n");
 	}
 
 	print_var_str("bisect_rev", hex);
@@ -492,168 +492,168 @@ static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
 	print_var_int("bisect_good", all - reaches - 1);
 	print_var_int("bisect_bad", reaches - 1);
 	print_var_int("bisect_all", all);
-	print_var_int("bisect_steps", estimate_bisect_steps(all));
+	print_var_int("bisect_steps", estimate_bisect_चरणाः(all));
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int show_object_fast(
-	const struct object_id *oid,
-	enum object_type type UNUSED,
-	int exclude UNUSED,
-	uint32_t name_hash UNUSED,
-	struct packed_git *found_pack UNUSED,
-	off_t found_offset UNUSED,
-	void *payload UNUSED)
+स्थिर पूर्णाङ्क show_object_fast(
+	ध्रुव संरचना object_id *oid,
+	गणना object_type type अप्रयुक्तम्,
+	पूर्णाङ्क exclude अप्रयुक्तम्,
+	uint32_t name_hash अप्रयुक्तम्,
+	संरचना packed_git *प्राप्तम्_pack अप्रयुक्तम्,
+	off_t प्राप्तम्_विस्थापनम् अप्रयुक्तम्,
+	शून्य *payload अप्रयुक्तम्)
 {
-	fprintf(stdout, "%s\n", oid_to_hex(oid));
-	return 0;
+	fprintf(stdout, "%s\n", oid_गन्तव्यम्_hex(oid));
+	प्रत्यागम 0;
 }
 
-static void print_disk_usage(off_t size)
+स्थिर शून्य print_disk_usage(off_t आकार)
 {
-	struct strbuf sb = STRBUF_INIT;
-	if (human_readable)
-		strbuf_humanise_bytes(&sb, size);
-	else
-		strbuf_addf(&sb, "%"PRIuMAX, (uintmax_t)size);
-	puts(sb.buf);
+	संरचना strbuf sb = STRBUF_INIT;
+	यदि (human_readable)
+		strbuf_humanise_अष्टकानि(&sb, आकार);
+	अन्यथा
+		strbuf_addf(&sb, "%"PRIuMAX, (uintmax_t)आकार);
+	पङ्क्तिं_लिख(sb.buf);
 	strbuf_release(&sb);
 }
 
-static inline int parse_missing_action_value(struct repository *repo,
-					     const char *value)
+स्थिर अन्तःस्थ पूर्णाङ्क parse_missing_action_मानम्(संरचना repository *repo,
+					     ध्रुव वर्ण *मानम्)
 {
-	if (!strcmp(value, "error")) {
+	यदि (!वाक्यं_तुलय(मानम्, "error")) {
 		arg_missing_action = MA_ERROR;
-		return 1;
+		प्रत्यागम 1;
 	}
 
-	if (!strcmp(value, "allow-any")) {
+	यदि (!वाक्यं_तुलय(मानम्, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
-		return 1;
+		प्रत्यागम 1;
 	}
 
-	if (!strcmp(value, "print")) {
+	यदि (!वाक्यं_तुलय(मानम्, "print")) {
 		arg_missing_action = MA_PRINT;
 		repo->fetch_if_missing = 0;
-		return 1;
+		प्रत्यागम 1;
 	}
 
-	if (!strcmp(value, "print-info")) {
+	यदि (!वाक्यं_तुलय(मानम्, "print-info")) {
 		arg_missing_action = MA_PRINT_INFO;
 		repo->fetch_if_missing = 0;
-		return 1;
+		प्रत्यागम 1;
 	}
 
-	if (!strcmp(value, "allow-promisor")) {
+	यदि (!वाक्यं_तुलय(मानम्, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
 		repo->fetch_if_missing = 0;
-		return 1;
+		प्रत्यागम 1;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static int try_bitmap_count(struct rev_info *revs,
-			    int filter_provided_objects)
+स्थिर पूर्णाङ्क try_bitmap_गणनम्(संरचना rev_info *revs,
+			    पूर्णाङ्क filter_provided_objects)
 {
-	uint32_t commit_count = 0,
-		 tag_count = 0,
-		 tree_count = 0,
-		 blob_count = 0;
-	int max_count;
-	struct bitmap_index *bitmap_git;
+	uint32_t commit_गणनम् = 0,
+		 चिह्नकम्_गणनम् = 0,
+		 वृक्षः_गणनम् = 0,
+		 blob_गणनम् = 0;
+	पूर्णाङ्क max_गणनम्;
+	संरचना bitmap_सूचकांक *bitmap_git;
 
 	/* This function only handles counting, not general traversal. */
-	if (!revs->count)
-		return -1;
+	यदि (!revs->गणनम्)
+		प्रत्यागम -1;
 
 	/*
 	 * A bitmap result can't know left/right, etc, because we don't
 	 * actually traverse.
 	 */
-	if (revs->left_right || revs->cherry_mark)
-		return -1;
+	यदि (revs->वामः_दक्षिणः || revs->cherry_mark)
+		प्रत्यागम -1;
 
 	/*
 	 * If we're counting reachable objects, we can't handle a max count of
 	 * commits to traverse, since we don't know which objects go with which
 	 * commit.
 	 */
-	if (revs->max_count >= 0 &&
-	    (revs->tag_objects || revs->tree_objects || revs->blob_objects))
-		return -1;
+	यदि (revs->max_गणनम् >= 0 &&
+	    (revs->चिह्नकम्_objects || revs->वृक्षः_objects || revs->blob_objects))
+		प्रत्यागम -1;
 
 	/*
 	 * This must be saved before doing any walking, since the revision
 	 * machinery will count it down to zero while traversing.
 	 */
-	max_count = revs->max_count;
+	max_गणनम् = revs->max_गणनम्;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
-	if (!bitmap_git)
-		return -1;
+	यदि (!bitmap_git)
+		प्रत्यागम -1;
 
-	count_bitmap_commit_list(bitmap_git, &commit_count,
-				 revs->tree_objects ? &tree_count : NULL,
-				 revs->blob_objects ? &blob_count : NULL,
-				 revs->tag_objects ? &tag_count : NULL);
-	if (max_count >= 0 && max_count < commit_count)
-		commit_count = max_count;
+	गणनम्_bitmap_commit_list(bitmap_git, &commit_गणनम्,
+				 revs->वृक्षः_objects ? &वृक्षः_गणनम् : रिक्त,
+				 revs->blob_objects ? &blob_गणनम् : रिक्त,
+				 revs->चिह्नकम्_objects ? &चिह्नकम्_गणनम् : रिक्त);
+	यदि (max_गणनम् >= 0 && max_गणनम् < commit_गणनम्)
+		commit_गणनम् = max_गणनम्;
 
-	printf("%d\n", commit_count + tree_count + blob_count + tag_count);
-	free_bitmap_index(bitmap_git);
-	return 0;
+	प्रारूप_लिख("%d\n", commit_गणनम् + वृक्षः_गणनम् + blob_गणनम् + चिह्नकम्_गणनम्);
+	free_bitmap_सूचकांक(bitmap_git);
+	प्रत्यागम 0;
 }
 
-static int try_bitmap_traversal(struct rev_info *revs,
-				int filter_provided_objects)
+स्थिर पूर्णाङ्क try_bitmap_traversal(संरचना rev_info *revs,
+				पूर्णाङ्क filter_provided_objects)
 {
-	struct bitmap_index *bitmap_git;
+	संरचना bitmap_सूचकांक *bitmap_git;
 
 	/*
 	 * We can't use a bitmap result with a traversal limit, since the set
 	 * of commits we'd get would be essentially random.
 	 */
-	if (revs->max_count >= 0)
-		return -1;
+	यदि (revs->max_गणनम् >= 0)
+		प्रत्यागम -1;
 
 	/*
 	 * We can't know which commits were left/right in a single traversal,
 	 * and we don't yet know how to traverse them separately.
 	 */
-	if (revs->left_right)
-		return -1;
+	यदि (revs->वामः_दक्षिणः)
+		प्रत्यागम -1;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
-	if (!bitmap_git)
-		return -1;
+	यदि (!bitmap_git)
+		प्रत्यागम -1;
 
 	traverse_bitmap_commit_list(bitmap_git, revs, &show_object_fast);
-	free_bitmap_index(bitmap_git);
-	return 0;
+	free_bitmap_सूचकांक(bitmap_git);
+	प्रत्यागम 0;
 }
 
-static int try_bitmap_disk_usage(struct rev_info *revs,
-				 int filter_provided_objects)
+स्थिर पूर्णाङ्क try_bitmap_disk_usage(संरचना rev_info *revs,
+				 पूर्णाङ्क filter_provided_objects)
 {
-	struct bitmap_index *bitmap_git;
-	off_t size_from_bitmap;
+	संरचना bitmap_सूचकांक *bitmap_git;
+	off_t आकार_from_bitmap;
 
-	if (!show_disk_usage)
-		return -1;
+	यदि (!show_disk_usage)
+		प्रत्यागम -1;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
-	if (!bitmap_git)
-		return -1;
+	यदि (!bitmap_git)
+		प्रत्यागम -1;
 
-	size_from_bitmap = get_disk_usage_from_bitmap(bitmap_git, revs);
-	print_disk_usage(size_from_bitmap);
+	आकार_from_bitmap = get_disk_usage_from_bitmap(bitmap_git, revs);
+	print_disk_usage(आकार_from_bitmap);
 
-	free_bitmap_index(bitmap_git);
-	return 0;
+	free_bitmap_सूचकांक(bitmap_git);
+	प्रत्यागम 0;
 }
 
 /*
@@ -663,47 +663,47 @@ static int try_bitmap_disk_usage(struct rev_info *revs,
  *
  * If this algorithm doesn't apply, then no changes are made to revs.
  */
-static void prepare_maximal_independent(struct rev_info *revs)
+स्थिर शून्य prepare_maximal_independent(संरचना rev_info *revs)
 {
-	struct commit_list *c;
+	संरचना commit_list *c;
 
-	if (!revs->maximal_only)
-		return;
+	यदि (!revs->maximal_only)
+		प्रत्यागम;
 
-	for (c = revs->commits; c; c = c->next) {
-		if (c->item->object.flags & UNINTERESTING)
-			return;
+	प्रति (c = revs->commits; c; c = c->अग्र) {
+		यदि (c->item->object.flags & UNINTERESTING)
+			प्रत्यागम;
 	}
 
-	if (revs->limited ||
-	    revs->topo_order ||
+	यदि (revs->limited ||
+	    revs->topo_क्रमः ||
 	    revs->first_parent_only ||
 	    revs->reverse ||
-	    revs->max_count >= 0 ||
-	    revs->skip_count >= 0 ||
+	    revs->max_गणनम् >= 0 ||
+	    revs->skip_गणनम् >= 0 ||
 	    revs->min_age != (timestamp_t)-1 ||
 	    revs->max_age != (timestamp_t)-1 ||
 	    revs->min_parents > 0 ||
 	    revs->max_parents >= 0 ||
-	    revs->prune_data.nr ||
-	    revs->count ||
-	    revs->left_right ||
+	    revs->prune_दत्त.nr ||
+	    revs->गणनम् ||
+	    revs->वामः_दक्षिणः ||
 	    revs->boundary ||
-	    revs->tag_objects ||
-	    revs->tree_objects ||
+	    revs->चिह्नकम्_objects ||
+	    revs->वृक्षः_objects ||
 	    revs->blob_objects ||
 	    revs->filter.choice ||
 	    revs->reflog_info ||
 	    revs->diff ||
-	    revs->grep_filter.pattern_list ||
-	    revs->grep_filter.header_list ||
-	    revs->verbose_header ||
+	    revs->grep_filter.आदर्शः_list ||
+	    revs->grep_filter.शीर्षकम्_list ||
+	    revs->verbose_शीर्षकम् ||
 	    revs->print_parents ||
 	    revs->edge_hint ||
 	    revs->unpacked ||
 	    revs->no_kept_objects ||
-	    revs->line_level_traverse)
-		return;
+	    revs->पङ्क्तिः_level_traverse)
+		प्रत्यागम;
 
 	reduce_heads_replace(&revs->commits);
 
@@ -711,32 +711,32 @@ static void prepare_maximal_independent(struct rev_info *revs)
 	revs->no_walk = 1;
 }
 
-int cmd_rev_list(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+पूर्णाङ्क cmd_rev_list(पूर्णाङ्क argc,
+		 ध्रुव वर्ण **argv,
+		 ध्रुव वर्ण *उपसर्गः,
+		 संरचना repository *repo)
 {
-	struct rev_info revs;
-	struct rev_list_info info;
-	struct setup_revision_opt s_r_opt = {
+	संरचना rev_info revs;
+	संरचना rev_list_info info;
+	संरचना सज्जता_revision_opt s_r_opt = {
 		.allow_exclude_promisor_objects = 1,
 	};
-	int i;
-	int bisect_list = 0;
-	int bisect_show_vars = 0;
-	int bisect_find_all = 0;
-	int use_bitmap_index = 0;
-	int filter_provided_objects = 0;
-	const char *show_progress = NULL;
-	int ret = 0;
+	पूर्णाङ्क i;
+	पूर्णाङ्क bisect_list = 0;
+	पूर्णाङ्क bisect_show_vars = 0;
+	पूर्णाङ्क bisect_find_all = 0;
+	पूर्णाङ्क use_bitmap_सूचकांक = 0;
+	पूर्णाङ्क filter_provided_objects = 0;
+	ध्रुव वर्ण *show_प्रगतिः = रिक्त;
+	पूर्णाङ्क ret = 0;
 
 	show_usage_if_asked(argc, argv, rev_list_usage);
 
-	repo_config(the_repository, git_default_config, NULL);
-	repo_init_revisions(the_repository, &revs, prefix);
+	repo_config(the_repository, git_default_config, रिक्त);
+	repo_init_revisions(the_repository, &revs, उपसर्गः);
 	revs.abbrev = DEFAULT_ABBREV;
 	revs.commit_format = CMIT_FMT_UNSPECIFIED;
-	revs.include_header = 1;
+	revs.include_शीर्षकम् = 1;
 
 	/*
 	 * Scan the argument list before invoking setup_revisions(), so that we
@@ -764,121 +764,121 @@ int cmd_rev_list(int argc,
 	 * the `--missing=...` and `--exclude-promisor-objects`
 	 * options below.
 	 */
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--exclude-promisor-objects")) {
+	प्रति (i = 1; i < argc; i++) {
+		ध्रुव वर्ण *arg = argv[i];
+		यदि (!वाक्यं_तुलय(arg, "--exclude-promisor-objects")) {
 			repo->fetch_if_missing = 0;
 			revs.exclude_promisor_objects = 1;
-		} else if (skip_prefix(arg, "--missing=", &arg)) {
-			parse_missing_action_value(repo, arg);
-		} else if (!strcmp(arg, "--missing-only")) {
+		} अन्यथा यदि (skip_उपसर्गः(arg, "--missing=", &arg)) {
+			parse_missing_action_मानम्(repo, arg);
+		} अन्यथा यदि (!वाक्यं_तुलय(arg, "--missing-only")) {
 			arg_missing_only = 1;
-		} else if (!strcmp(arg, "-z")) {
-			line_term = '\0';
-			info_term = '\0';
+		} अन्यथा यदि (!वाक्यं_तुलय(arg, "-z")) {
+			पङ्क्तिः_पदांशः = '\0';
+			info_पदांशः = '\0';
 		}
 	}
 
-	if (arg_missing_only && !should_collect_missing())
+	यदि (arg_missing_only && !should_collect_missing())
 		die(_("--missing-only requires --missing=print or --missing=print-info"));
 
 	die_for_incompatible_opt2(revs.exclude_promisor_objects,
 				  "--exclude_promisor_objects",
 				  arg_missing_action, "--missing");
 
-	if (arg_missing_action)
+	यदि (arg_missing_action)
 		revs.do_not_die_on_missing_objects = 1;
 
-	argc = setup_revisions(argc, argv, &revs, &s_r_opt);
+	argc = सज्जता_revisions(argc, argv, &revs, &s_r_opt);
 
-	memset(&info, 0, sizeof(info));
+	स्मृतिं_पूरय(&info, 0, परिमाण(info));
 	info.revs = &revs;
-	if (revs.bisect)
+	यदि (revs.bisect)
 		bisect_list = 1;
 
-	if (revs.diffopt.flags.quick)
+	यदि (revs.diffopt.flags.शीघ्र)
 		info.flags |= REV_LIST_QUIET;
-	for (i = 1 ; i < argc; i++) {
-		const char *arg = argv[i];
+	प्रति (i = 1 ; i < argc; i++) {
+		ध्रुव वर्ण *arg = argv[i];
 
-		if (!strcmp(arg, "--header")) {
-			revs.verbose_header = 1;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, "--header")) {
+			revs.verbose_शीर्षकम् = 1;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--timestamp")) {
+		यदि (!वाक्यं_तुलय(arg, "--timestamp")) {
 			info.show_timestamp = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--bisect")) {
+		यदि (!वाक्यं_तुलय(arg, "--bisect")) {
 			bisect_list = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--bisect-all")) {
+		यदि (!वाक्यं_तुलय(arg, "--bisect-all")) {
 			bisect_list = 1;
 			bisect_find_all = 1;
 			info.flags |= BISECT_SHOW_ALL;
 			revs.show_decorations = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--bisect-vars")) {
+		यदि (!वाक्यं_तुलय(arg, "--bisect-vars")) {
 			bisect_list = 1;
 			bisect_show_vars = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--use-bitmap-index")) {
-			use_bitmap_index = 1;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, "--use-bitmap-index")) {
+			use_bitmap_सूचकांक = 1;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--test-bitmap")) {
+		यदि (!वाक्यं_तुलय(arg, "--test-bitmap")) {
 			test_bitmap_walk(&revs);
-			goto cleanup;
+			गच्छ cleanup;
 		}
-		if (skip_prefix(arg, "--progress=", &arg)) {
-			show_progress = arg;
-			continue;
+		यदि (skip_उपसर्गः(arg, "--progress=", &arg)) {
+			show_प्रगतिः = arg;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--filter-provided-objects")) {
+		यदि (!वाक्यं_तुलय(arg, "--filter-provided-objects")) {
 			filter_provided_objects = 1;
-			continue;
+			अनुवर्त;
 		}
-		if (!strcmp(arg, "--filter-print-omitted")) {
+		यदि (!वाक्यं_तुलय(arg, "--filter-print-omitted")) {
 			arg_print_omitted = 1;
-			continue;
+			अनुवर्त;
 		}
 
-		if (!strcmp(arg, "--exclude-promisor-objects"))
-			continue; /* already handled above */
-		if (skip_prefix(arg, "--missing=", &arg))
-			continue; /* already handled above */
+		यदि (!वाक्यं_तुलय(arg, "--exclude-promisor-objects"))
+			अनुवर्त; /* already handled above */
+		यदि (skip_उपसर्गः(arg, "--missing=", &arg))
+			अनुवर्त; /* already handled above */
 
-		if (!strcmp(arg, ("--no-object-names"))) {
-			arg_show_object_names = 0;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, ("--no-object-names"))) {
+			arg_show_object_नामानि = 0;
+			अनुवर्त;
 		}
 
-		if (!strcmp(arg, ("--object-names"))) {
-			arg_show_object_names = 1;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, ("--object-names"))) {
+			arg_show_object_नामानि = 1;
+			अनुवर्त;
 		}
 
-		if (!strcmp(arg, ("--commit-header"))) {
-			revs.include_header = 1;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, ("--commit-header"))) {
+			revs.include_शीर्षकम् = 1;
+			अनुवर्त;
 		}
 
-		if (!strcmp(arg, ("--no-commit-header"))) {
-			revs.include_header = 0;
-			continue;
+		यदि (!वाक्यं_तुलय(arg, ("--no-commit-header"))) {
+			revs.include_शीर्षकम् = 0;
+			अनुवर्त;
 		}
 
-		if (skip_prefix(arg, "--disk-usage", &arg)) {
-			if (*arg == '=') {
-				if (!strcmp(++arg, "human")) {
+		यदि (skip_उपसर्गः(arg, "--disk-usage", &arg)) {
+			यदि (*arg == '=') {
+				यदि (!वाक्यं_तुलय(++arg, "human")) {
 					human_readable = 1;
-				} else
+				} अन्यथा
 					die(_("invalid value for '%s': '%s', the only allowed format is '%s'"),
 					    "--disk-usage=<format>", arg, "human");
-			} else if (*arg) {
+			} अन्यथा यदि (*arg) {
 				/*
 				 * Arguably should goto a label to continue chain of ifs?
 				 * Doesn't matter unless we try to add --disk-usage-foo
@@ -888,11 +888,11 @@ int cmd_rev_list(int argc,
 			}
 			show_disk_usage = 1;
 			info.flags |= REV_LIST_QUIET;
-			continue;
+			अनुवर्त;
 		}
 
-		if (!strcmp(arg, "--missing-only"))
-			continue;
+		यदि (!वाक्यं_तुलय(arg, "--missing-only"))
+			अनुवर्त;
 
 		usage(rev_list_usage);
 
@@ -903,162 +903,162 @@ int cmd_rev_list(int argc,
 	 * is not an inherent limitation and support may be implemented in the
 	 * future.
 	 */
-	if (!line_term) {
-		if (revs.graph || revs.verbose_header || show_disk_usage ||
-		    info.show_timestamp || info.header_prefix || bisect_list ||
-		    use_bitmap_index || revs.edge_hint || revs.left_right ||
+	यदि (!पङ्क्तिः_पदांशः) {
+		यदि (revs.graph || revs.verbose_शीर्षकम् || show_disk_usage ||
+		    info.show_timestamp || info.शीर्षकम्_उपसर्गः || bisect_list ||
+		    use_bitmap_सूचकांक || revs.edge_hint || revs.वामः_दक्षिणः ||
 		    revs.cherry_mark)
 			die(_("-z option used with unsupported option"));
 	}
 
-	if (revs.commit_format != CMIT_FMT_USERFORMAT)
-		revs.include_header = 1;
-	if (revs.commit_format != CMIT_FMT_UNSPECIFIED) {
+	यदि (revs.commit_format != CMIT_FMT_USERFORMAT)
+		revs.include_शीर्षकम् = 1;
+	यदि (revs.commit_format != CMIT_FMT_UNSPECIFIED) {
 		/* The command line has a --pretty  */
 		info.hdr_termination = '\n';
-		if (revs.commit_format == CMIT_FMT_ONELINE || !revs.include_header)
-			info.header_prefix = "";
-		else
-			info.header_prefix = "commit ";
+		यदि (revs.commit_format == CMIT_FMT_ONELINE || !revs.include_शीर्षकम्)
+			info.शीर्षकम्_उपसर्गः = "";
+		अन्यथा
+			info.शीर्षकम्_उपसर्गः = "commit ";
 	}
-	else if (revs.verbose_header)
+	अन्यथा यदि (revs.verbose_शीर्षकम्)
 		/* Only --header was specified */
 		revs.commit_format = CMIT_FMT_RAW;
 
-	if ((!revs.commits && reflog_walk_empty(revs.reflog_info) &&
-	     (!(revs.tag_objects || revs.tree_objects || revs.blob_objects) &&
+	यदि ((!revs.commits && reflog_walk_रिक्तानि(revs.reflog_info) &&
+	     (!(revs.चिह्नकम्_objects || revs.वृक्षः_objects || revs.blob_objects) &&
 	      !revs.pending.nr) &&
-	     !revs.rev_input_given && !revs.read_from_stdin) ||
+	     !revs.rev_निवेशः_given && !revs.read_from_stdin) ||
 	    revs.diff)
 		usage(rev_list_usage);
 
-	if (revs.show_notes)
+	यदि (revs.show_notes)
 		die(_("rev-list does not support display of notes"));
 
-	if (revs.count &&
-	    (revs.tag_objects || revs.tree_objects || revs.blob_objects) &&
-	    (revs.left_right || revs.cherry_mark))
+	यदि (revs.गणनम् &&
+	    (revs.चिह्नकम्_objects || revs.वृक्षः_objects || revs.blob_objects) &&
+	    (revs.वामः_दक्षिणः || revs.cherry_mark))
 		die(_("marked counting and '%s' cannot be used together"), "--objects");
 
 	die_for_incompatible_opt2(arg_missing_only, "--missing-only",
-				  revs.count, "--count");
+				  revs.गणनम्, "--count");
 	die_for_incompatible_opt2(arg_missing_only, "--missing-only",
 				  show_disk_usage, "--disk-usage");
 
-	save_commit_buffer = (revs.verbose_header ||
-			      revs.grep_filter.pattern_list ||
-			      revs.grep_filter.header_list);
-	if (bisect_list)
+	save_commit_बफर = (revs.verbose_शीर्षकम् ||
+			      revs.grep_filter.आदर्शः_list ||
+			      revs.grep_filter.शीर्षकम्_list);
+	यदि (bisect_list)
 		revs.limited = 1;
 
-	if (show_progress)
-		progress = start_delayed_progress(the_repository,
-						  show_progress, 0);
+	यदि (show_प्रगतिः)
+		प्रगतिः = start_delayed_प्रगतिः(the_repository,
+						  show_प्रगतिः, 0);
 
-	if (use_bitmap_index) {
-		if (!try_bitmap_count(&revs, filter_provided_objects))
-			goto cleanup;
-		if (!try_bitmap_disk_usage(&revs, filter_provided_objects))
-			goto cleanup;
-		if (!try_bitmap_traversal(&revs, filter_provided_objects))
-			goto cleanup;
+	यदि (use_bitmap_सूचकांक) {
+		यदि (!try_bitmap_गणनम्(&revs, filter_provided_objects))
+			गच्छ cleanup;
+		यदि (!try_bitmap_disk_usage(&revs, filter_provided_objects))
+			गच्छ cleanup;
+		यदि (!try_bitmap_traversal(&revs, filter_provided_objects))
+			गच्छ cleanup;
 	}
 
-	if (prepare_revision_walk(&revs))
+	यदि (prepare_revision_walk(&revs))
 		die("revision walk setup failed");
 
 	prepare_maximal_independent(&revs);
 
-	if (revs.tree_objects)
-		mark_edges_uninteresting(&revs, show_edge, 0);
+	यदि (revs.वृक्षः_objects)
+		mark_धाराः_uninteresting(&revs, show_edge, 0);
 
-	if (bisect_list) {
-		int reaches, all;
-		unsigned bisect_flags = 0;
+	यदि (bisect_list) {
+		पूर्णाङ्क reaches, all;
+		अचिह्नित bisect_flags = 0;
 
-		if (bisect_find_all)
+		यदि (bisect_find_all)
 			bisect_flags |= FIND_BISECTION_ALL;
 
-		if (revs.first_parent_only)
+		यदि (revs.first_parent_only)
 			bisect_flags |= FIND_BISECTION_FIRST_PARENT_ONLY;
 
 		find_bisection(&revs.commits, &reaches, &all, bisect_flags);
 
-		if (bisect_show_vars) {
+		यदि (bisect_show_vars) {
 			ret = show_bisect_vars(&info, reaches, all);
-			goto cleanup;
+			गच्छ cleanup;
 		}
 	}
 
-	if (filter_provided_objects) {
-		struct commit_list *c;
-		for (i = 0; i < revs.pending.nr; i++) {
-			struct object_array_entry *pending = revs.pending.objects + i;
+	यदि (filter_provided_objects) {
+		संरचना commit_list *c;
+		प्रति (i = 0; i < revs.pending.nr; i++) {
+			संरचना object_array_प्रविष्टिः *pending = revs.pending.objects + i;
 			pending->item->flags |= NOT_USER_GIVEN;
 		}
-		for (c = revs.commits; c; c = c->next)
+		प्रति (c = revs.commits; c; c = c->अग्र)
 			c->item->object.flags |= NOT_USER_GIVEN;
 	}
 
-	if (arg_print_omitted)
-		oidset_init(&omitted_objects, DEFAULT_OIDSET_SIZE);
-	if (should_collect_missing()) {
-		struct oidset_iter iter;
-		struct object_id *oid;
+	यदि (arg_print_omitted)
+		oidset_init(&omitted_objects, DEFAULT_OIDSET_आकार);
+	यदि (should_collect_missing()) {
+		संरचना oidset_iter iter;
+		संरचना object_id *oid;
 
-		oidmap_init(&missing_objects, DEFAULT_OIDSET_SIZE);
+		oidmap_init(&missing_objects, DEFAULT_OIDSET_आकार);
 		oidset_iter_init(&revs.missing_commits, &iter);
 
 		/* Add missing tips */
-		while ((oid = oidset_iter_next(&iter)))
-			add_missing_object_entry(oid, NULL, 0);
+		यावत् ((oid = oidset_iter_अग्र(&iter)))
+			सङ्कलय_missing_object_प्रविष्टिः(oid, रिक्त, 0);
 
 		oidset_clear(&revs.missing_commits);
 	}
 
 	traverse_commit_list_filtered(
 		&revs, show_commit, show_object, &info,
-		(arg_print_omitted ? &omitted_objects : NULL));
+		(arg_print_omitted ? &omitted_objects : रिक्त));
 
-	if (arg_print_omitted) {
-		struct oidset_iter iter;
-		struct object_id *oid;
+	यदि (arg_print_omitted) {
+		संरचना oidset_iter iter;
+		संरचना object_id *oid;
 		oidset_iter_init(&omitted_objects, &iter);
-		while ((oid = oidset_iter_next(&iter)))
-			printf("~%s\n", oid_to_hex(oid));
+		यावत् ((oid = oidset_iter_अग्र(&iter)))
+			प्रारूप_लिख("~%s\n", oid_गन्तव्यम्_hex(oid));
 		oidset_clear(&omitted_objects);
 	}
-	if (should_collect_missing()) {
-		struct missing_objects_map_entry *entry;
-		struct oidmap_iter iter;
+	यदि (should_collect_missing()) {
+		संरचना missing_objects_map_प्रविष्टिः *प्रविष्टिः;
+		संरचना oidmap_iter iter;
 
 		oidmap_iter_init(&missing_objects, &iter);
 
-		while ((entry = oidmap_iter_next(&iter))) {
-			print_missing_object(entry, arg_missing_action ==
+		यावत् ((प्रविष्टिः = oidmap_iter_अग्र(&iter))) {
+			print_missing_object(प्रविष्टिः, arg_missing_action ==
 							    MA_PRINT_INFO);
 		}
 
-		oidmap_clear_with_free(&missing_objects, missing_objects_map_entry_free);
+		oidmap_clear_with_free(&missing_objects, missing_objects_map_प्रविष्टिः_free);
 	}
 
-	stop_progress(&progress);
+	stop_प्रगतिः(&प्रगतिः);
 
-	if (revs.count) {
-		if (revs.left_right && revs.cherry_mark)
-			printf("%d\t%d\t%d\n", revs.count_left, revs.count_right, revs.count_same);
-		else if (revs.left_right)
-			printf("%d\t%d\n", revs.count_left, revs.count_right);
-		else if (revs.cherry_mark)
-			printf("%d\t%d\n", revs.count_left + revs.count_right, revs.count_same);
-		else
-			printf("%d\n", revs.count_left + revs.count_right);
+	यदि (revs.गणनम्) {
+		यदि (revs.वामः_दक्षिणः && revs.cherry_mark)
+			प्रारूप_लिख("%d\t%d\t%d\n", revs.गणनम्_वामः, revs.गणनम्_दक्षिणः, revs.गणनम्_same);
+		अन्यथा यदि (revs.वामः_दक्षिणः)
+			प्रारूप_लिख("%d\t%d\n", revs.गणनम्_वामः, revs.गणनम्_दक्षिणः);
+		अन्यथा यदि (revs.cherry_mark)
+			प्रारूप_लिख("%d\t%d\n", revs.गणनम्_वामः + revs.गणनम्_दक्षिणः, revs.गणनम्_same);
+		अन्यथा
+			प्रारूप_लिख("%d\n", revs.गणनम्_वामः + revs.गणनम्_दक्षिणः);
 	}
 
-	if (show_disk_usage)
-		print_disk_usage(total_disk_usage);
+	यदि (show_disk_usage)
+		print_disk_usage(योग_disk_usage);
 
 cleanup:
 	release_revisions(&revs);
-	return ret;
+	प्रत्यागम ret;
 }

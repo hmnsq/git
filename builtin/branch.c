@@ -5,32 +5,32 @@
  * Based on git-branch.sh by Junio C Hamano.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#परिभाषय USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "color.h"
-#include "editor.h"
-#include "environment.h"
-#include "refs.h"
-#include "commit.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "remote.h"
-#include "parse-options.h"
-#include "branch.h"
-#include "path.h"
-#include "string-list.h"
-#include "strmap.h"
-#include "column.h"
-#include "utf8.h"
-#include "ref-filter.h"
-#include "worktree.h"
-#include "help.h"
-#include "advice.h"
-#include "commit-reach.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "color.h"
+#अन्तर्भाव "editor.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "refs.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "remote.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "branch.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "strmap.h"
+#अन्तर्भाव "column.h"
+#अन्तर्भाव "utf8.h"
+#अन्तर्भाव "ref-filter.h"
+#अन्तर्भाव "worktree.h"
+#अन्तर्भाव "help.h"
+#अन्तर्भाव "advice.h"
+#अन्तर्भाव "commit-reach.h"
 
-static const char * const builtin_branch_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_branch_usage[] = {
 	N_("git branch [<options>] [-r | -a] [--merged] [--no-merged] [(--forked <branch>)...]"),
 	N_("git branch [<options>] [-f] [--recurse-submodules] <branch-name> [<start-point>]"),
 	N_("git branch [<options>] [-l] [<pattern>...]"),
@@ -41,25 +41,25 @@ static const char * const builtin_branch_usage[] = {
 	N_("git branch [<options>] [-r | -a] [--format]"),
 	N_("git branch [<options>] (--delete-merged <pattern>)... "
 	   "[<branch-pattern>...]"),
-	NULL
+	रिक्त
 };
 
-static const char *head;
-static struct object_id head_oid;
-static int recurse_submodules = 0;
-static int submodule_propagate_branches = 0;
+स्थिर ध्रुव वर्ण *शीर्ष;
+स्थिर संरचना object_id शीर्ष_oid;
+स्थिर पूर्णाङ्क recurse_submodules = 0;
+स्थिर पूर्णाङ्क submodule_propagate_branches = 0;
 
-static enum git_colorbool branch_use_color = GIT_COLOR_UNKNOWN;
-static char branch_colors[][COLOR_MAXLEN] = {
+स्थिर गणना git_colorbool branch_use_color = GIT_COLOR_UNKNOWN;
+स्थिर वर्ण branch_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
-	GIT_COLOR_NORMAL,       /* PLAIN */
+	GIT_COLOR_प्रसामान्यम्,       /* PLAIN */
 	GIT_COLOR_RED,          /* REMOTE */
-	GIT_COLOR_NORMAL,       /* LOCAL */
+	GIT_COLOR_प्रसामान्यम्,       /* LOCAL */
 	GIT_COLOR_GREEN,        /* CURRENT */
 	GIT_COLOR_BLUE,         /* UPSTREAM */
 	GIT_COLOR_CYAN,         /* WORKTREE */
 };
-enum color_branch {
+गणना color_branch {
 	BRANCH_COLOR_RESET = 0,
 	BRANCH_COLOR_PLAIN = 1,
 	BRANCH_COLOR_REMOTE = 2,
@@ -69,7 +69,7 @@ enum color_branch {
 	BRANCH_COLOR_WORKTREE = 6
 };
 
-static const char *color_branch_slots[] = {
+स्थिर ध्रुव वर्ण *color_branch_slots[] = {
 	[BRANCH_COLOR_RESET]	= "reset",
 	[BRANCH_COLOR_PLAIN]	= "plain",
 	[BRANCH_COLOR_REMOTE]	= "remote",
@@ -79,61 +79,61 @@ static const char *color_branch_slots[] = {
 	[BRANCH_COLOR_WORKTREE] = "worktree",
 };
 
-static struct string_list output = STRING_LIST_INIT_DUP;
-static unsigned int colopts;
+स्थिर संरचना string_list output = STRING_LIST_INIT_DUP;
+स्थिर अचिह्नित पूर्णाङ्क colopts;
 
 define_list_config_array(color_branch_slots);
 
-static int git_branch_config(const char *var, const char *value,
-			     const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क git_branch_config(ध्रुव वर्ण *var, ध्रुव वर्ण *मानम्,
+			     ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	const char *slot_name;
+	ध्रुव वर्ण *slot_name;
 
-	if (!strcmp(var, "branch.sort")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(cb, value);
-		return 0;
-	}
-
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "branch", &colopts);
-	if (!strcmp(var, "color.branch")) {
-		branch_use_color = git_config_colorbool(var, value);
-		return 0;
-	}
-	if (skip_prefix(var, "color.branch.", &slot_name)) {
-		int slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
-		if (slot < 0)
-			return 0;
-		if (!value)
-			return config_error_nonbool(var);
-		return color_parse(value, branch_colors[slot]);
-	}
-	if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value);
-		return 0;
-	}
-	if (!strcasecmp(var, "submodule.propagateBranches")) {
-		submodule_propagate_branches = git_config_bool(var, value);
-		return 0;
+	यदि (!वाक्यं_तुलय(var, "branch.sort")) {
+		यदि (!मानम्)
+			प्रत्यागम config_error_nonbool(var);
+		string_list_append(cb, मानम्);
+		प्रत्यागम 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	यदि (starts_with(var, "column."))
+		प्रत्यागम git_column_config(var, मानम्, "branch", &colopts);
+	यदि (!वाक्यं_तुलय(var, "color.branch")) {
+		branch_use_color = git_config_colorbool(var, मानम्);
+		प्रत्यागम 0;
+	}
+	यदि (skip_उपसर्गः(var, "color.branch.", &slot_name)) {
+		पूर्णाङ्क slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
+		यदि (slot < 0)
+			प्रत्यागम 0;
+		यदि (!मानम्)
+			प्रत्यागम config_error_nonbool(var);
+		प्रत्यागम color_parse(मानम्, branch_colors[slot]);
+	}
+	यदि (!वाक्यं_तुलय(var, "submodule.recurse")) {
+		recurse_submodules = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
+	}
+	यदि (!strcasecmp(var, "submodule.propagateBranches")) {
+		submodule_propagate_branches = git_config_bool(var, मानम्);
+		प्रत्यागम 0;
+	}
 
-	return git_default_config(var, value, ctx, cb);
+	यदि (git_color_config(var, मानम्, cb) < 0)
+		प्रत्यागम -1;
+
+	प्रत्यागम git_default_config(var, मानम्, ctx, cb);
 }
 
-static const char *branch_get_color(enum color_branch ix)
+स्थिर ध्रुव वर्ण *branch_get_color(गणना color_branch ix)
 {
-	if (want_color(branch_use_color))
-		return branch_colors[ix];
-	return "";
+	यदि (want_color(branch_use_color))
+		प्रत्यागम branch_colors[ix];
+	प्रत्यागम "";
 }
 
-static int branch_merged(int kind, const char *name,
-			 struct commit *rev, struct commit *head_rev)
+स्थिर पूर्णाङ्क branch_merged(पूर्णाङ्क विधा, ध्रुव वर्ण *name,
+			 संरचना commit *rev, संरचना commit *शीर्ष_rev)
 {
 	/*
 	 * This checks whether the merge bases of branch and HEAD (or
@@ -141,30 +141,30 @@ static int branch_merged(int kind, const char *name,
 	 * branch, which means that the branch has already been merged
 	 * safely to HEAD (or the other branch).
 	 */
-	struct commit *reference_rev = NULL;
-	const char *reference_name = NULL;
-	void *reference_name_to_free = NULL;
-	int merged;
+	संरचना commit *reference_rev = रिक्त;
+	ध्रुव वर्ण *reference_name = रिक्त;
+	शून्य *reference_name_गन्तव्यम्_free = रिक्त;
+	पूर्णाङ्क merged;
 
-	if (kind == FILTER_REFS_BRANCHES) {
-		struct branch *branch = branch_get(name);
-		const char *upstream = branch_get_upstream(branch, NULL);
-		struct object_id oid;
+	यदि (विधा == FILTER_REFS_BRANCHES) {
+		संरचना branch *branch = branch_get(name);
+		ध्रुव वर्ण *upstream = branch_get_upstream(branch, रिक्त);
+		संरचना object_id oid;
 
-		if (upstream &&
-		    (reference_name = reference_name_to_free =
+		यदि (upstream &&
+		    (reference_name = reference_name_गन्तव्यम्_free =
 		     refs_resolve_refdup(get_main_ref_store(the_repository), upstream, RESOLVE_REF_READING,
-					 &oid, NULL)) != NULL)
+					 &oid, रिक्त)) != रिक्त)
 			reference_rev = lookup_commit_reference(the_repository,
 								&oid);
 	}
-	if (!reference_rev)
-		reference_rev = head_rev;
+	यदि (!reference_rev)
+		reference_rev = शीर्ष_rev;
 
-	merged = reference_rev ? repo_in_merge_bases(the_repository, rev,
+	merged = reference_rev ? repo_अन्तर्_merge_bases(the_repository, rev,
 						     reference_rev) : 0;
-	if (merged < 0)
-		exit(128);
+	यदि (merged < 0)
+		निर्गच्छ(128);
 
 	/*
 	 * After the safety valve is fully redefined to "check with
@@ -176,128 +176,128 @@ static int branch_merged(int kind, const char *name,
 	 * the reminder either: they have already established that the
 	 * branch has an upstream, so HEAD is irrelevant to the decision.
 	 */
-	if (head_rev && head_rev != reference_rev) {
-		int expect = repo_in_merge_bases(the_repository, rev, head_rev);
-		if (expect < 0)
-			exit(128);
-		if (expect == merged)
+	यदि (शीर्ष_rev && शीर्ष_rev != reference_rev) {
+		पूर्णाङ्क expect = repo_अन्तर्_merge_bases(the_repository, rev, शीर्ष_rev);
+		यदि (expect < 0)
+			निर्गच्छ(128);
+		यदि (expect == merged)
 			; /* okay */
-		else if (merged)
+		अन्यथा यदि (merged)
 			warning(_("deleting branch '%s' that has been merged to\n"
 				"         '%s', but not yet merged to HEAD"),
 				name, reference_name);
-		else
+		अन्यथा
 			warning(_("not deleting branch '%s' that is not yet merged to\n"
 				"         '%s', even though it is merged to HEAD"),
 				name, reference_name);
 	}
-	free(reference_name_to_free);
-	return merged;
+	मुक्त(reference_name_गन्तव्यम्_free);
+	प्रत्यागम merged;
 }
 
-enum delete_branch_flags {
+गणना delete_branch_flags {
 	DELETE_BRANCH_FORCE = (1 << 0),
 	DELETE_BRANCH_QUIET = (1 << 1),
 	DELETE_BRANCH_SKIP_UNMERGED = (1 << 2),
-	DELETE_BRANCH_NO_HEAD_FALLBACK = (1 << 3),
-	DELETE_BRANCH_DRY_RUN = (1 << 4),
+	DELETE_BRANCH_NO_शीर्ष_FALLBACK = (1 << 3),
+	DELETE_BRANCH_DRY_सततम् = (1 << 4),
 };
 
-static int check_branch_commit(const char *branchname, const char *refname,
-			       const struct object_id *oid, struct commit *head_rev,
-			       int kinds, unsigned int flags)
+स्थिर पूर्णाङ्क check_branch_commit(ध्रुव वर्ण *branchname, ध्रुव वर्ण *refname,
+			       ध्रुव संरचना object_id *oid, संरचना commit *शीर्ष_rev,
+			       पूर्णाङ्क kinds, अचिह्नित पूर्णाङ्क flags)
 {
-	struct commit *rev = lookup_commit_reference(the_repository, oid);
-	if (!(flags & DELETE_BRANCH_FORCE) && !rev) {
+	संरचना commit *rev = lookup_commit_reference(the_repository, oid);
+	यदि (!(flags & DELETE_BRANCH_FORCE) && !rev) {
 		error(_("couldn't look up commit object for '%s'"), refname);
-		return -1;
+		प्रत्यागम -1;
 	}
-	if (!(flags & DELETE_BRANCH_FORCE) &&
-	    !branch_merged(kinds, branchname, rev, head_rev)) {
-		if (!(flags & DELETE_BRANCH_SKIP_UNMERGED)) {
+	यदि (!(flags & DELETE_BRANCH_FORCE) &&
+	    !branch_merged(kinds, branchname, rev, शीर्ष_rev)) {
+		यदि (!(flags & DELETE_BRANCH_SKIP_UNMERGED)) {
 			error(_("the branch '%s' is not fully merged"),
 			      branchname);
 			advise_if_enabled(ADVICE_FORCE_DELETE_BRANCH,
 					  _("If you are sure you want to delete it, "
 					  "run 'git branch -D %s'"), branchname);
 		}
-		return -1;
+		प्रत्यागम -1;
 	}
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void delete_branch_config(const char *branchname)
+स्थिर शून्य delete_branch_config(ध्रुव वर्ण *branchname)
 {
-	struct strbuf buf = STRBUF_INIT;
+	संरचना strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf, "branch.%s", branchname);
-	if (repo_config_rename_section(the_repository, buf.buf, NULL) < 0)
+	यदि (repo_config_rename_section(the_repository, buf.buf, रिक्त) < 0)
 		warning(_("update of config-file failed"));
 	strbuf_release(&buf);
 }
 
-static int delete_branches(int argc, const char **argv, int kinds,
-			   unsigned int flags)
+स्थिर पूर्णाङ्क delete_branches(पूर्णाङ्क argc, ध्रुव वर्ण **argv, पूर्णाङ्क kinds,
+			   अचिह्नित पूर्णाङ्क flags)
 {
-	struct commit *head_rev = NULL;
-	struct object_id oid;
-	char *name = NULL;
-	const char *fmt;
-	int i;
-	int ret = 0;
-	int remote_branch = 0;
-	struct strbuf bname = STRBUF_INIT;
-	enum interpret_branch_kind allowed_interpret;
-	struct string_list refs_to_delete = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	int branch_name_pos;
-	const char *fmt_remotes = "refs/remotes/%s";
+	संरचना commit *शीर्ष_rev = रिक्त;
+	संरचना object_id oid;
+	वर्ण *name = रिक्त;
+	ध्रुव वर्ण *fmt;
+	पूर्णाङ्क i;
+	पूर्णाङ्क ret = 0;
+	पूर्णाङ्क remote_branch = 0;
+	संरचना strbuf bname = STRBUF_INIT;
+	गणना interpret_branch_विधा allowed_interpret;
+	संरचना string_list refs_गन्तव्यम्_delete = STRING_LIST_INIT_DUP;
+	संरचना string_list_item *item;
+	पूर्णाङ्क branch_name_pos;
+	ध्रुव वर्ण *fmt_remotes = "refs/remotes/%s";
 
-	switch (kinds) {
-	case FILTER_REFS_REMOTES:
+	विकल्प (kinds) {
+	पक्ष FILTER_REFS_REMOTES:
 		fmt = fmt_remotes;
 		/* For subsequent UI messages */
 		remote_branch = 1;
 		allowed_interpret = INTERPRET_BRANCH_REMOTE;
 
 		flags |= DELETE_BRANCH_FORCE;
-		break;
-	case FILTER_REFS_BRANCHES:
+		भङ्ग;
+	पक्ष FILTER_REFS_BRANCHES:
 		fmt = "refs/heads/%s";
 		allowed_interpret = INTERPRET_BRANCH_LOCAL;
-		break;
-	default:
+		भङ्ग;
+	स्वभाव:
 		die(_("cannot use -a with -d"));
 	}
 	branch_name_pos = strcspn(fmt, "%");
 
-	if (!(flags & DELETE_BRANCH_FORCE) &&
-	    !(flags & DELETE_BRANCH_NO_HEAD_FALLBACK))
-		head_rev = lookup_commit_reference(the_repository, &head_oid);
+	यदि (!(flags & DELETE_BRANCH_FORCE) &&
+	    !(flags & DELETE_BRANCH_NO_शीर्ष_FALLBACK))
+		शीर्ष_rev = lookup_commit_reference(the_repository, &शीर्ष_oid);
 
-	for (i = 0; i < argc; i++, strbuf_reset(&bname)) {
-		char *target = NULL;
-		int ref_flags = 0;
+	प्रति (i = 0; i < argc; i++, strbuf_reset(&bname)) {
+		वर्ण *target = रिक्त;
+		पूर्णाङ्क ref_flags = 0;
 
 		copy_branchname(the_repository, &bname,
 				argv[i], allowed_interpret);
-		free(name);
+		मुक्त(name);
 		name = mkpathdup(fmt, bname.buf);
 
-		if (kinds == FILTER_REFS_BRANCHES) {
-			const char *path;
-			if ((path = branch_bisecting(name))) {
+		यदि (kinds == FILTER_REFS_BRANCHES) {
+			ध्रुव वर्ण *मार्गः;
+			यदि ((मार्गः = branch_bisecting(name))) {
 				error(_("cannot delete branch '%s' "
 					"used by worktree at '%s' for bisect"),
-					      bname.buf, path);
+					      bname.buf, मार्गः);
 				ret = 1;
-				continue;
+				अनुवर्त;
 			}
-			if ((path = branch_checked_out(name))) {
+			यदि ((मार्गः = branch_checked_बहिर्गमनम्(name))) {
 				error(_("cannot delete branch '%s' "
 					"used by worktree at '%s'"),
-				      bname.buf, path);
+				      bname.buf, मार्गः);
 				ret = 1;
-				continue;
+				अनुवर्त;
 			}
 		}
 
@@ -307,12 +307,12 @@ static int delete_branches(int argc, const char **argv, int kinds,
 					     | RESOLVE_REF_NO_RECURSE
 					     | RESOLVE_REF_ALLOW_BAD_NAME,
 					     &oid, &ref_flags);
-		if (!target) {
-			if (remote_branch) {
+		यदि (!target) {
+			यदि (remote_branch) {
 				error(_("remote-tracking branch '%s' not found"), bname.buf);
-			} else {
-				char *virtual_name = mkpathdup(fmt_remotes, bname.buf);
-				char *virtual_target = refs_resolve_refdup(get_main_ref_store(the_repository),
+			} अन्यथा {
+				वर्ण *virtual_name = mkpathdup(fmt_remotes, bname.buf);
+				वर्ण *virtual_target = refs_resolve_refdup(get_main_ref_store(the_repository),
 									   virtual_name,
 									   RESOLVE_REF_READING
 									   | RESOLVE_REF_NO_RECURSE
@@ -321,108 +321,108 @@ static int delete_branches(int argc, const char **argv, int kinds,
 									   &ref_flags);
 				FREE_AND_NULL(virtual_name);
 
-				if (virtual_target)
+				यदि (virtual_target)
 					error(_("branch '%s' not found.\n"
 						"Did you forget --remote?"),
 						bname.buf);
-				else
+				अन्यथा
 					error(_("branch '%s' not found"), bname.buf);
 				FREE_AND_NULL(virtual_target);
 			}
 			ret = 1;
-			continue;
+			अनुवर्त;
 		}
 
-		if (!(ref_flags & (REF_ISSYMREF|REF_ISBROKEN)) &&
-		    check_branch_commit(bname.buf, name, &oid, head_rev, kinds,
+		यदि (!(ref_flags & (REF_ISSYMREF|REF_ISBROKEN)) &&
+		    check_branch_commit(bname.buf, name, &oid, शीर्ष_rev, kinds,
 					flags)) {
-			if (!(flags & DELETE_BRANCH_SKIP_UNMERGED))
+			यदि (!(flags & DELETE_BRANCH_SKIP_UNMERGED))
 				ret = 1;
-			goto next;
+			गच्छ अग्र;
 		}
 
-		item = string_list_append(&refs_to_delete, name);
+		item = string_list_append(&refs_गन्तव्यम्_delete, name);
 		item->util = xstrdup((ref_flags & REF_ISBROKEN) ? "broken"
 				    : (ref_flags & REF_ISSYMREF) ? target
 				    : repo_find_unique_abbrev(the_repository, &oid, DEFAULT_ABBREV));
 
-	next:
-		free(target);
+	अग्र:
+		मुक्त(target);
 	}
 
-	if (!(flags & DELETE_BRANCH_DRY_RUN) &&
-	    refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
+	यदि (!(flags & DELETE_BRANCH_DRY_सततम्) &&
+	    refs_delete_refs(get_main_ref_store(the_repository), रिक्त, &refs_गन्तव्यम्_delete, REF_NO_DEREF))
 		ret = 1;
 
-	for_each_string_list_item(item, &refs_to_delete) {
-		char *describe_ref = item->util;
-		char *name = item->string;
-		if (flags & DELETE_BRANCH_DRY_RUN) {
-			if (!(flags & DELETE_BRANCH_QUIET))
-				printf(remote_branch
+	for_each_string_list_item(item, &refs_गन्तव्यम्_delete) {
+		वर्ण *describe_ref = item->util;
+		वर्ण *name = item->string;
+		यदि (flags & DELETE_BRANCH_DRY_सततम्) {
+			यदि (!(flags & DELETE_BRANCH_QUIET))
+				प्रारूप_लिख(remote_branch
 					? _("Would delete remote-tracking branch %s (was %s).\n")
 					: _("Would delete branch %s (was %s).\n"),
 					name + branch_name_pos, describe_ref);
-		} else if (!refs_ref_exists(get_main_ref_store(the_repository), name)) {
-			char *refname = name + branch_name_pos;
-			if (!(flags & DELETE_BRANCH_QUIET))
-				printf(remote_branch
+		} अन्यथा यदि (!refs_ref_exists(get_main_ref_store(the_repository), name)) {
+			वर्ण *refname = name + branch_name_pos;
+			यदि (!(flags & DELETE_BRANCH_QUIET))
+				प्रारूप_लिख(remote_branch
 					? _("Deleted remote-tracking branch %s (was %s).\n")
 					: _("Deleted branch %s (was %s).\n"),
 					name + branch_name_pos, describe_ref);
 
 			delete_branch_config(refname);
 		}
-		free(describe_ref);
+		मुक्त(describe_ref);
 	}
-	string_list_clear(&refs_to_delete, 0);
+	string_list_clear(&refs_गन्तव्यम्_delete, 0);
 
-	free(name);
+	मुक्त(name);
 	strbuf_release(&bname);
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-static int calc_maxwidth(struct ref_array *refs, int remote_bonus)
+स्थिर पूर्णाङ्क calc_maxwidth(संरचना ref_array *refs, पूर्णाङ्क remote_bonus)
 {
-	int i, max = 0;
-	for (i = 0; i < refs->nr; i++) {
-		struct ref_array_item *it = refs->items[i];
-		const char *desc = it->refname;
-		int w;
+	पूर्णाङ्क i, max = 0;
+	प्रति (i = 0; i < refs->nr; i++) {
+		संरचना ref_array_item *it = refs->वस्तूनि[i];
+		ध्रुव वर्ण *desc = it->refname;
+		पूर्णाङ्क w;
 
-		skip_prefix(it->refname, "refs/heads/", &desc);
-		skip_prefix(it->refname, "refs/remotes/", &desc);
-		if (it->kind == FILTER_REFS_DETACHED_HEAD) {
-			char *head_desc = get_head_description();
-			w = utf8_strwidth(head_desc);
-			free(head_desc);
-		} else
+		skip_उपसर्गः(it->refname, "refs/heads/", &desc);
+		skip_उपसर्गः(it->refname, "refs/remotes/", &desc);
+		यदि (it->विधा == FILTER_REFS_DETACHED_शीर्ष) {
+			वर्ण *शीर्ष_desc = get_शीर्ष_description();
+			w = utf8_strwidth(शीर्ष_desc);
+			मुक्त(शीर्ष_desc);
+		} अन्यथा
 			w = utf8_strwidth(desc);
 
-		if (it->kind == FILTER_REFS_REMOTES)
+		यदि (it->विधा == FILTER_REFS_REMOTES)
 			w += remote_bonus;
-		if (w > max)
+		यदि (w > max)
 			max = w;
 	}
-	return max;
+	प्रत्यागम max;
 }
 
-static const char *quote_literal_for_format(const char *s)
+स्थिर ध्रुव वर्ण *quote_literal_for_format(ध्रुव वर्ण *s)
 {
-	static struct strbuf buf = STRBUF_INIT;
+	स्थिर संरचना strbuf buf = STRBUF_INIT;
 
 	strbuf_reset(&buf);
-	while (strbuf_expand_step(&buf, &s))
+	यावत् (strbuf_expand_चरणः(&buf, &s))
 		strbuf_addstr(&buf, "%%");
-	return buf.buf;
+	प्रत्यागम buf.buf;
 }
 
-static char *build_format(struct ref_filter *filter, int maxwidth, const char *remote_prefix)
+स्थिर वर्ण *build_format(संरचना ref_filter *filter, पूर्णाङ्क maxwidth, ध्रुव वर्ण *remote_उपसर्गः)
 {
-	struct strbuf fmt = STRBUF_INIT;
-	struct strbuf local = STRBUF_INIT;
-	struct strbuf remote = STRBUF_INIT;
+	संरचना strbuf fmt = STRBUF_INIT;
+	संरचना strbuf local = STRBUF_INIT;
+	संरचना strbuf remote = STRBUF_INIT;
 
 	strbuf_addf(&local, "%%(if)%%(HEAD)%%(then)* %s%%(else)%%(if)%%(worktreepath)%%(then)+ %s%%(else)  %s%%(end)%%(end)",
 			branch_get_color(BRANCH_COLOR_CURRENT),
@@ -431,21 +431,21 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 	strbuf_addf(&remote, "  %s",
 		    branch_get_color(BRANCH_COLOR_REMOTE));
 
-	if (filter->verbose) {
-		struct strbuf obname = STRBUF_INIT;
+	यदि (filter->verbose) {
+		संरचना strbuf obname = STRBUF_INIT;
 
-		if (filter->abbrev < 0)
+		यदि (filter->abbrev < 0)
 			strbuf_addf(&obname, "%%(objectname:short)");
-		else if (!filter->abbrev)
+		अन्यथा यदि (!filter->abbrev)
 			strbuf_addf(&obname, "%%(objectname)");
-		else
+		अन्यथा
 			strbuf_addf(&obname, "%%(objectname:short=%d)", filter->abbrev);
 
 		strbuf_addf(&local, "%%(align:%d,left)%%(refname:lstrip=2)%%(end)", maxwidth);
 		strbuf_addstr(&local, branch_get_color(BRANCH_COLOR_RESET));
 		strbuf_addf(&local, " %s ", obname.buf);
 
-		if (filter->verbose > 1)
+		यदि (filter->verbose > 1)
 		{
 			strbuf_addf(&local, "%%(if:notequals=*)%%(HEAD)%%(then)%%(if)%%(worktreepath)%%(then)(%s%%(worktreepath)%s) %%(end)%%(end)",
 				    branch_get_color(BRANCH_COLOR_WORKTREE), branch_get_color(BRANCH_COLOR_RESET));
@@ -453,20 +453,20 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 				    "%%(then): %%(upstream:track,nobracket)%%(end)] %%(end)%%(contents:subject)",
 				    branch_get_color(BRANCH_COLOR_UPSTREAM), branch_get_color(BRANCH_COLOR_RESET));
 		}
-		else
+		अन्यथा
 			strbuf_addf(&local, "%%(if)%%(upstream:track)%%(then)%%(upstream:track) %%(end)%%(contents:subject)");
 
 		strbuf_addf(&remote, "%%(align:%d,left)%s%%(refname:lstrip=2)%%(end)%s"
 			    "%%(if)%%(symref)%%(then) -> %%(symref:short)"
 			    "%%(else) %s %%(contents:subject)%%(end)",
-			    maxwidth, quote_literal_for_format(remote_prefix),
+			    maxwidth, quote_literal_for_format(remote_उपसर्गः),
 			    branch_get_color(BRANCH_COLOR_RESET), obname.buf);
 		strbuf_release(&obname);
-	} else {
+	} अन्यथा {
 		strbuf_addf(&local, "%%(refname:lstrip=2)%s%%(if)%%(symref)%%(then) -> %%(symref:short)%%(end)",
 			    branch_get_color(BRANCH_COLOR_RESET));
 		strbuf_addf(&remote, "%s%%(refname:lstrip=2)%s%%(if)%%(symref)%%(then) -> %%(symref:short)%%(end)",
-			    quote_literal_for_format(remote_prefix),
+			    quote_literal_for_format(remote_उपसर्गः),
 			    branch_get_color(BRANCH_COLOR_RESET));
 	}
 
@@ -474,102 +474,102 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 
 	strbuf_release(&local);
 	strbuf_release(&remote);
-	return strbuf_detach(&fmt, NULL);
+	प्रत्यागम strbuf_detach(&fmt, रिक्त);
 }
 
-static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sorting,
-			   struct ref_format *format, struct string_list *output)
+स्थिर शून्य print_ref_list(संरचना ref_filter *filter, संरचना ref_क्रमणम् *क्रमणम्,
+			   संरचना ref_format *format, संरचना string_list *output)
 {
-	int i;
-	struct ref_array array;
-	int maxwidth = 0;
-	const char *remote_prefix = "";
-	char *to_free = NULL;
+	पूर्णाङ्क i;
+	संरचना ref_array array;
+	पूर्णाङ्क maxwidth = 0;
+	ध्रुव वर्ण *remote_उपसर्गः = "";
+	वर्ण *गन्तव्यम्_free = रिक्त;
 
 	/*
 	 * If we are listing more than just remote branches,
 	 * then remote branches will have a "remotes/" prefix.
 	 * We need to account for this in the width.
 	 */
-	if (filter->kind != FILTER_REFS_REMOTES)
-		remote_prefix = "remotes/";
+	यदि (filter->विधा != FILTER_REFS_REMOTES)
+		remote_उपसर्गः = "remotes/";
 
-	memset(&array, 0, sizeof(array));
+	स्मृतिं_पूरय(&array, 0, परिमाण(array));
 
-	filter_refs(&array, filter, filter->kind);
+	filter_refs(&array, filter, filter->विधा);
 
-	if (filter->verbose)
-		maxwidth = calc_maxwidth(&array, strlen(remote_prefix));
+	यदि (filter->verbose)
+		maxwidth = calc_maxwidth(&array, वाक्यदैर्घ्यम्(remote_उपसर्गः));
 
-	if (!format->format)
-		format->format = to_free = build_format(filter, maxwidth, remote_prefix);
+	यदि (!format->format)
+		format->format = गन्तव्यम्_free = build_format(filter, maxwidth, remote_उपसर्गः);
 	format->use_color = branch_use_color;
 
-	if (verify_ref_format(format))
+	यदि (verify_ref_format(format))
 		die(_("unable to parse format string"));
 
 	filter_ahead_behind(the_repository, &array);
-	ref_array_sort(sorting, &array);
+	ref_array_क्रमय(क्रमणम्, &array);
 
-	if (column_active(colopts)) {
-		struct strbuf out = STRBUF_INIT, err = STRBUF_INIT;
+	यदि (column_सक्रिय(colopts)) {
+		संरचना strbuf बहिर्गमनम् = STRBUF_INIT, err = STRBUF_INIT;
 
-		assert(!filter->verbose && "--column and --verbose are incompatible");
+		प्रतिज्ञा(!filter->verbose && "--column and --verbose are incompatible");
 
-		for (i = 0; i < array.nr; i++) {
+		प्रति (i = 0; i < array.nr; i++) {
 			strbuf_reset(&err);
-			strbuf_reset(&out);
-			if (format_ref_array_item(array.items[i], format, &out, &err))
+			strbuf_reset(&बहिर्गमनम्);
+			यदि (format_ref_array_item(array.वस्तूनि[i], format, &बहिर्गमनम्, &err))
 				die("%s", err.buf);
 
 			/* format to a string_list to let print_columns() do its job */
-			string_list_append(output, out.buf);
+			string_list_append(output, बहिर्गमनम्.buf);
 		}
 
 		strbuf_release(&err);
-		strbuf_release(&out);
-	} else {
+		strbuf_release(&बहिर्गमनम्);
+	} अन्यथा {
 		print_formatted_ref_array(&array, format);
 	}
 
 	ref_array_clear(&array);
-	free(to_free);
+	मुक्त(गन्तव्यम्_free);
 }
 
-static void print_current_branch_name(void)
+स्थिर शून्य print_current_branch_name(शून्य)
 {
-	int flags;
-	const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-						      "HEAD", 0, NULL, &flags);
-	const char *shortname;
-	if (!refname)
+	पूर्णाङ्क flags;
+	ध्रुव वर्ण *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
+						      "HEAD", 0, रिक्त, &flags);
+	ध्रुव वर्ण *shortname;
+	यदि (!refname)
 		die(_("could not resolve HEAD"));
-	else if (!(flags & REF_ISSYMREF))
-		return;
-	else if (skip_prefix(refname, "refs/heads/", &shortname))
-		puts(shortname);
-	else
+	अन्यथा यदि (!(flags & REF_ISSYMREF))
+		प्रत्यागम;
+	अन्यथा यदि (skip_उपसर्गः(refname, "refs/heads/", &shortname))
+		पङ्क्तिं_लिख(shortname);
+	अन्यथा
 		die(_("HEAD (%s) points outside of refs/heads/"), refname);
 }
 
-static void reject_rebase_or_bisect_branch(struct worktree **worktrees,
-					   const char *target)
+स्थिर शून्य reject_rebase_or_bisect_branch(संरचना worktree **worktrees,
+					   ध्रुव वर्ण *target)
 {
-	int i;
+	पूर्णाङ्क i;
 
-	for (i = 0; worktrees[i]; i++) {
-		struct worktree *wt = worktrees[i];
+	प्रति (i = 0; worktrees[i]; i++) {
+		संरचना worktree *wt = worktrees[i];
 
-		if (!wt->is_detached)
-			continue;
+		यदि (!wt->is_detached)
+			अनुवर्त;
 
-		if (is_worktree_being_rebased(wt, target))
+		यदि (is_worktree_being_rebased(wt, target))
 			die(_("branch %s is being rebased at %s"),
-			    target, wt->path);
+			    target, wt->मार्गः);
 
-		if (is_worktree_being_bisected(wt, target))
+		यदि (is_worktree_being_bisected(wt, target))
 			die(_("branch %s is being bisected at %s"),
-			    target, wt->path);
+			    target, wt->मार्गः);
 	}
 }
 
@@ -578,74 +578,74 @@ static void reject_rebase_or_bisect_branch(struct worktree **worktrees,
  * This will be used when renaming a branch. Returns 0 if successful, non-zero
  * otherwise.
  */
-static int replace_each_worktree_head_symref(struct worktree **worktrees,
-					     const char *oldref, const char *newref,
-					     const char *logmsg)
+स्थिर पूर्णाङ्क replace_each_worktree_शीर्ष_symref(संरचना worktree **worktrees,
+					     ध्रुव वर्ण *oldref, ध्रुव वर्ण *newref,
+					     ध्रुव वर्ण *logmsg)
 {
-	int ret = 0;
-	int i;
+	पूर्णाङ्क ret = 0;
+	पूर्णाङ्क i;
 
-	for (i = 0; worktrees[i]; i++) {
-		struct ref_store *refs;
+	प्रति (i = 0; worktrees[i]; i++) {
+		संरचना ref_store *refs;
 
-		if (worktrees[i]->is_detached)
-			continue;
-		if (!worktrees[i]->head_ref)
-			continue;
-		if (strcmp(oldref, worktrees[i]->head_ref))
-			continue;
+		यदि (worktrees[i]->is_detached)
+			अनुवर्त;
+		यदि (!worktrees[i]->शीर्ष_ref)
+			अनुवर्त;
+		यदि (वाक्यं_तुलय(oldref, worktrees[i]->शीर्ष_ref))
+			अनुवर्त;
 
 		refs = get_worktree_ref_store(worktrees[i]);
-		if (refs_update_symref(refs, "HEAD", newref, logmsg))
+		यदि (refs_update_symref(refs, "HEAD", newref, logmsg))
 			ret = error(_("HEAD of working tree %s is not updated"),
-				    worktrees[i]->path);
+				    worktrees[i]->मार्गः);
 	}
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-#define IS_HEAD 1
-#define IS_ORPHAN 2
+#परिभाषय IS_शीर्ष 1
+#परिभाषय IS_ORPHAN 2
 
-static void copy_or_rename_branch(const char *oldname, const char *newname, int copy, int force)
+स्थिर शून्य copy_or_rename_branch(ध्रुव वर्ण *oldname, ध्रुव वर्ण *newname, पूर्णाङ्क copy, पूर्णाङ्क force)
 {
-	struct strbuf oldref = STRBUF_INIT, newref = STRBUF_INIT, logmsg = STRBUF_INIT;
-	struct strbuf oldsection = STRBUF_INIT, newsection = STRBUF_INIT;
-	const char *interpreted_oldname = NULL;
-	const char *interpreted_newname = NULL;
-	int recovery = 0, oldref_usage = 0;
-	struct worktree **worktrees = get_worktrees(the_repository);
+	संरचना strbuf oldref = STRBUF_INIT, newref = STRBUF_INIT, logmsg = STRBUF_INIT;
+	संरचना strbuf oldsection = STRBUF_INIT, newsection = STRBUF_INIT;
+	ध्रुव वर्ण *interpreted_oldname = रिक्त;
+	ध्रुव वर्ण *interpreted_newname = रिक्त;
+	पूर्णाङ्क recovery = 0, oldref_usage = 0;
+	संरचना worktree **worktrees = get_worktrees(the_repository);
 
-	if (check_branch_ref(the_repository, &oldref, oldname)) {
+	यदि (check_branch_ref(the_repository, &oldref, oldname)) {
 		/*
 		 * Bad name --- this could be an attempt to rename a
 		 * ref that we used to allow to be created by accident.
 		 */
-		if (refs_ref_exists(get_main_ref_store(the_repository), oldref.buf))
+		यदि (refs_ref_exists(get_main_ref_store(the_repository), oldref.buf))
 			recovery = 1;
-		else {
-			int code = die_message(_("invalid branch name: '%s'"), oldname);
+		अन्यथा {
+			पूर्णाङ्क संहिता = die_सन्देशः(_("invalid branch name: '%s'"), oldname);
 			advise_if_enabled(ADVICE_REF_SYNTAX,
 					  _("See 'git help check-ref-format'"));
-			exit(code);
+			निर्गच्छ(संहिता);
 		}
 	}
 
-	for (int i = 0; worktrees[i]; i++) {
-		struct worktree *wt = worktrees[i];
+	प्रति (पूर्णाङ्क i = 0; worktrees[i]; i++) {
+		संरचना worktree *wt = worktrees[i];
 
-		if (wt->head_ref && !strcmp(oldref.buf, wt->head_ref)) {
-			oldref_usage |= IS_HEAD;
-			if (is_null_oid(&wt->head_oid))
+		यदि (wt->शीर्ष_ref && !वाक्यं_तुलय(oldref.buf, wt->शीर्ष_ref)) {
+			oldref_usage |= IS_शीर्ष;
+			यदि (is_null_oid(&wt->शीर्ष_oid))
 				oldref_usage |= IS_ORPHAN;
-			break;
+			भङ्ग;
 		}
 	}
 
-	if ((copy || !(oldref_usage & IS_HEAD)) && !refs_ref_exists(get_main_ref_store(the_repository), oldref.buf)) {
-		if (oldref_usage & IS_HEAD)
+	यदि ((copy || !(oldref_usage & IS_शीर्ष)) && !refs_ref_exists(get_main_ref_store(the_repository), oldref.buf)) {
+		यदि (oldref_usage & IS_शीर्ष)
 			die(_("no commit on branch '%s' yet"), oldname);
-		else
+		अन्यथा
 			die(_("no branch named '%s'"), oldname);
 	}
 
@@ -653,42 +653,42 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 	 * A command like "git branch -M currentbranch currentbranch" cannot
 	 * cause the worktree to become inconsistent with HEAD, so allow it.
 	 */
-	if (!strcmp(oldname, newname))
+	यदि (!वाक्यं_तुलय(oldname, newname))
 		validate_branchname(newname, &newref);
-	else
+	अन्यथा
 		validate_new_branchname(newname, &newref, force);
 
 	reject_rebase_or_bisect_branch(worktrees, oldref.buf);
 
-	if (!skip_prefix(oldref.buf, "refs/heads/", &interpreted_oldname) ||
-	    !skip_prefix(newref.buf, "refs/heads/", &interpreted_newname)) {
+	यदि (!skip_उपसर्गः(oldref.buf, "refs/heads/", &interpreted_oldname) ||
+	    !skip_उपसर्गः(newref.buf, "refs/heads/", &interpreted_newname)) {
 		BUG("expected prefix missing for refs");
 	}
 
-	if (copy)
+	यदि (copy)
 		strbuf_addf(&logmsg, "Branch: copied %s to %s",
 			    oldref.buf, newref.buf);
-	else
+	अन्यथा
 		strbuf_addf(&logmsg, "Branch: renamed %s to %s",
 			    oldref.buf, newref.buf);
 
-	if (!copy && !(oldref_usage & IS_ORPHAN) &&
+	यदि (!copy && !(oldref_usage & IS_ORPHAN) &&
 	    refs_rename_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
 		die(_("branch rename failed"));
-	if (copy && refs_copy_existing_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
+	यदि (copy && refs_copy_existing_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
 		die(_("branch copy failed"));
 
-	if (recovery) {
-		if (copy)
+	यदि (recovery) {
+		यदि (copy)
 			warning(_("created a copy of a misnamed branch '%s'"),
 				interpreted_oldname);
-		else
+		अन्यथा
 			warning(_("renamed a misnamed branch '%s' away"),
 				interpreted_oldname);
 	}
 
-	if (!copy && (oldref_usage & IS_HEAD) &&
-	    replace_each_worktree_head_symref(worktrees, oldref.buf, newref.buf,
+	यदि (!copy && (oldref_usage & IS_शीर्ष) &&
+	    replace_each_worktree_शीर्ष_symref(worktrees, oldref.buf, newref.buf,
 					      logmsg.buf))
 		die(_("branch renamed to %s, but HEAD is not updated"), newname);
 
@@ -696,9 +696,9 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 
 	strbuf_addf(&oldsection, "branch.%s", interpreted_oldname);
 	strbuf_addf(&newsection, "branch.%s", interpreted_newname);
-	if (!copy && repo_config_rename_section(the_repository, oldsection.buf, newsection.buf) < 0)
+	यदि (!copy && repo_config_rename_section(the_repository, oldsection.buf, newsection.buf) < 0)
 		die(_("branch is renamed, but update of config-file failed"));
-	if (copy && strcmp(interpreted_oldname, interpreted_newname) &&
+	यदि (copy && वाक्यं_तुलय(interpreted_oldname, interpreted_newname) &&
 	    repo_config_copy_section(the_repository, oldsection.buf, newsection.buf) < 0)
 		die(_("branch is copied, but update of config-file failed"));
 	strbuf_release(&oldref);
@@ -708,322 +708,322 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 	free_worktrees(worktrees);
 }
 
-static int parse_opt_forked(const struct option *opt, const char *arg, int unset)
+स्थिर पूर्णाङ्क parse_opt_forked(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct ref_filter *filter = opt->value;
+	संरचना ref_filter *filter = opt->मानम्;
 
 	BUG_ON_OPT_NEG(unset);
-	if (ref_filter_forked_add(filter, arg) < 0)
+	यदि (ref_filter_forked_सङ्कलय(filter, arg) < 0)
 		die(_("'%s' is not a valid branch or pattern"), arg);
-	return 0;
+	प्रत्यागम 0;
 }
 
-struct stacked_branch_data {
-	struct strset *deletable_branch_names;
-	struct strset *protected_branch_names;
+संरचना stacked_branch_दत्त {
+	संरचना strset *deletable_branch_नामानि;
+	संरचना strset *protected_branch_नामानि;
 };
 
-static int collect_stacked_branch_base(const struct reference *ref,
-				       void *cb_data)
+स्थिर पूर्णाङ्क collect_stacked_branch_आधारः(ध्रुव संरचना reference *ref,
+				       शून्य *cb_दत्त)
 {
-	struct stacked_branch_data *data = cb_data;
-	const char *branch_name;
-	struct branch *branch;
-	const char *upstream_refname;
-	const char *upstream_branch_name;
+	संरचना stacked_branch_दत्त *दत्त = cb_दत्त;
+	ध्रुव वर्ण *branch_name;
+	संरचना branch *branch;
+	ध्रुव वर्ण *upstream_refname;
+	ध्रुव वर्ण *upstream_branch_name;
 
-	if (!skip_prefix(ref->name, "refs/heads/", &branch_name))
+	यदि (!skip_उपसर्गः(ref->name, "refs/heads/", &branch_name))
 		BUG("expected local branch ref, got '%s'", ref->name);
-	if (strset_contains(data->deletable_branch_names, branch_name))
-		return 0;
+	यदि (strset_अन्तर्भवति(दत्त->deletable_branch_नामानि, branch_name))
+		प्रत्यागम 0;
 
 	branch = branch_get(branch_name);
-	upstream_refname = branch_get_upstream(branch, NULL);
-	if (!upstream_refname ||
-	    !skip_prefix(upstream_refname, "refs/heads/",
+	upstream_refname = branch_get_upstream(branch, रिक्त);
+	यदि (!upstream_refname ||
+	    !skip_उपसर्गः(upstream_refname, "refs/heads/",
 			 &upstream_branch_name) ||
-	    !strset_contains(data->deletable_branch_names,
+	    !strset_अन्तर्भवति(दत्त->deletable_branch_नामानि,
 			    upstream_branch_name))
-		return 0;
+		प्रत्यागम 0;
 
-	strset_add(data->protected_branch_names, upstream_branch_name);
-	return 0;
+	strset_सङ्कलय(दत्त->protected_branch_नामानि, upstream_branch_name);
+	प्रत्यागम 0;
 }
 
-static void protect_stacked_branch_bases(struct ref_store *refs,
-					 struct strset *deletable_branch_names,
-					 struct strset *protected_branch_names)
+स्थिर शून्य protect_stacked_branch_bases(संरचना ref_store *refs,
+					 संरचना strset *deletable_branch_नामानि,
+					 संरचना strset *protected_branch_नामानि)
 {
-	struct stacked_branch_data data = {
-		.deletable_branch_names = deletable_branch_names,
-		.protected_branch_names = protected_branch_names,
+	संरचना stacked_branch_दत्त दत्त = {
+		.deletable_branch_नामानि = deletable_branch_नामानि,
+		.protected_branch_नामानि = protected_branch_नामानि,
 	};
-	struct refs_for_each_ref_options opts = {
-		.prefix = "refs/heads/",
+	संरचना refs_for_each_ref_options opts = {
+		.उपसर्गः = "refs/heads/",
 	};
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	संरचना hashmap_iter iter;
+	संरचना strmap_प्रविष्टिः *प्रविष्टिः;
 
-	refs_for_each_ref_ext(refs, collect_stacked_branch_base, &data, &opts);
+	refs_for_each_ref_ext(refs, collect_stacked_branch_आधारः, &दत्त, &opts);
 
-	strset_for_each_entry(protected_branch_names, &iter, entry)
-		strset_remove(deletable_branch_names, entry->key);
+	strset_for_each_प्रविष्टिः(protected_branch_नामानि, &iter, प्रविष्टिः)
+		strset_remove(deletable_branch_नामानि, प्रविष्टिः->कुञ्चिका);
 }
 
-static void clear_deleted_upstreams(struct strset *protected_branch_names,
-				    struct strset *deletable_branch_names)
+स्थिर शून्य clear_deleted_upstreams(संरचना strset *protected_branch_नामानि,
+				    संरचना strset *deletable_branch_नामानि)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	संरचना strbuf कुञ्चिका = STRBUF_INIT;
+	संरचना hashmap_iter iter;
+	संरचना strmap_प्रविष्टिः *प्रविष्टिः;
 
-	strset_for_each_entry(protected_branch_names, &iter, entry) {
-		struct branch *branch = branch_get(entry->key);
-		const char *upstream_refname = branch_get_upstream(branch, NULL);
-		const char *upstream_branch_name;
+	strset_for_each_प्रविष्टिः(protected_branch_नामानि, &iter, प्रविष्टिः) {
+		संरचना branch *branch = branch_get(प्रविष्टिः->कुञ्चिका);
+		ध्रुव वर्ण *upstream_refname = branch_get_upstream(branch, रिक्त);
+		ध्रुव वर्ण *upstream_branch_name;
 
-		if (!upstream_refname ||
-		    !skip_prefix(upstream_refname, "refs/heads/",
+		यदि (!upstream_refname ||
+		    !skip_उपसर्गः(upstream_refname, "refs/heads/",
 				 &upstream_branch_name) ||
-		    !strset_contains(deletable_branch_names,
+		    !strset_अन्तर्भवति(deletable_branch_नामानि,
 				    upstream_branch_name))
-			continue;
+			अनुवर्त;
 
-		strbuf_addf(&key, "branch.%s.merge", branch->name);
-		repo_config_set_gently(the_repository, key.buf, NULL);
-		strbuf_reset(&key);
-		strbuf_addf(&key, "branch.%s.remote", branch->name);
-		repo_config_set_gently(the_repository, key.buf, NULL);
-		strbuf_reset(&key);
+		strbuf_addf(&कुञ्चिका, "branch.%s.merge", branch->name);
+		repo_config_समुच्चयः_gently(the_repository, कुञ्चिका.buf, रिक्त);
+		strbuf_reset(&कुञ्चिका);
+		strbuf_addf(&कुञ्चिका, "branch.%s.remote", branch->name);
+		repo_config_समुच्चयः_gently(the_repository, कुञ्चिका.buf, रिक्त);
+		strbuf_reset(&कुञ्चिका);
 	}
 
-	strbuf_release(&key);
+	strbuf_release(&कुञ्चिका);
 }
 
-static int branch_pushes_to_upstream(struct branch *branch,
-				     const char *upstream)
+स्थिर पूर्णाङ्क branch_pushes_गन्तव्यम्_upstream(संरचना branch *branch,
+				     ध्रुव वर्ण *upstream)
 {
-	struct remote *remote = remote_get(remote_for_branch(branch, NULL));
-	char *push_refname = NULL;
-	char *tracking = NULL;
-	int ret = 0;
+	संरचना remote *remote = remote_get(remote_for_branch(branch, रिक्त));
+	वर्ण *प्रक्षिप_refname = रिक्त;
+	वर्ण *tracking = रिक्त;
+	पूर्णाङ्क ret = 0;
 
-	if (!remote)
-		return 0;
-	if (remote->push.nr)
-		push_refname = apply_refspecs(&remote->push, branch->refname);
-	else
-		push_refname = xstrdup(branch->refname);
-	if (push_refname)
-		tracking = apply_refspecs(&remote->fetch, push_refname);
-	if (tracking && !strcmp(tracking, upstream))
+	यदि (!remote)
+		प्रत्यागम 0;
+	यदि (remote->प्रक्षिप.nr)
+		प्रक्षिप_refname = apply_refspecs(&remote->प्रक्षिप, branch->refname);
+	अन्यथा
+		प्रक्षिप_refname = xstrdup(branch->refname);
+	यदि (प्रक्षिप_refname)
+		tracking = apply_refspecs(&remote->fetch, प्रक्षिप_refname);
+	यदि (tracking && !वाक्यं_तुलय(tracking, upstream))
 		ret = 1;
 
-	free(push_refname);
-	free(tracking);
-	return ret;
+	मुक्त(प्रक्षिप_refname);
+	मुक्त(tracking);
+	प्रत्यागम ret;
 }
 
-static int delete_merged_branches(const struct strvec *upstreams,
-				 const char **argv, unsigned int flags)
+स्थिर पूर्णाङ्क delete_merged_branches(ध्रुव संरचना strvec *upstreams,
+				 ध्रुव वर्ण **argv, अचिह्नित पूर्णाङ्क flags)
 {
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array candidates = { 0 };
-	struct strset deletable_branch_names = STRSET_INIT;
-	struct strset protected_branch_names = STRSET_INIT;
-	struct strvec branches_to_delete = STRVEC_INIT;
-	struct strbuf key = STRBUF_INIT;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
-	int ret = 0;
+	संरचना ref_store *refs = get_main_ref_store(the_repository);
+	संरचना ref_filter filter = REF_FILTER_INIT;
+	संरचना ref_array candidates = { 0 };
+	संरचना strset deletable_branch_नामानि = STRSET_INIT;
+	संरचना strset protected_branch_नामानि = STRSET_INIT;
+	संरचना strvec branches_गन्तव्यम्_delete = STRVEC_INIT;
+	संरचना strbuf कुञ्चिका = STRBUF_INIT;
+	संरचना hashmap_iter iter;
+	संरचना strmap_प्रविष्टिः *प्रविष्टिः;
+	पूर्णाङ्क ret = 0;
 
-	for (size_t i = 0; i < upstreams->nr; i++)
-		if (ref_filter_forked_add(&filter, upstreams->v[i]) < 0)
+	प्रति (आकार_t i = 0; i < upstreams->nr; i++)
+		यदि (ref_filter_forked_सङ्कलय(&filter, upstreams->v[i]) < 0)
 			die(_("'%s' is not a valid branch or pattern"),
 			    upstreams->v[i]);
 
-	filter.kind = FILTER_REFS_BRANCHES;
+	filter.विधा = FILTER_REFS_BRANCHES;
 	filter.name_patterns = argv;
-	filter_refs(&candidates, &filter, filter.kind);
+	filter_refs(&candidates, &filter, filter.विधा);
 
-	for (int i = 0; i < candidates.nr; i++) {
-		const char *branch_refname = candidates.items[i]->refname;
-		const char *branch_name;
-		struct branch *branch;
-		const char *upstream_refname;
-		int opt_out;
+	प्रति (पूर्णाङ्क i = 0; i < candidates.nr; i++) {
+		ध्रुव वर्ण *branch_refname = candidates.वस्तूनि[i]->refname;
+		ध्रुव वर्ण *branch_name;
+		संरचना branch *branch;
+		ध्रुव वर्ण *upstream_refname;
+		पूर्णाङ्क opt_बहिर्गमनम्;
 
-		if (!skip_prefix(branch_refname, "refs/heads/", &branch_name))
+		यदि (!skip_उपसर्गः(branch_refname, "refs/heads/", &branch_name))
 			BUG("filter returned non-branch ref '%s'", branch_refname);
-		if (branch_checked_out(branch_refname))
-			continue;
+		यदि (branch_checked_बहिर्गमनम्(branch_refname))
+			अनुवर्त;
 
 		branch = branch_get(branch_name);
-		upstream_refname = branch_get_upstream(branch, NULL);
-		if (!upstream_refname || !refs_ref_exists(refs, upstream_refname))
-			continue;
-		if (branch_pushes_to_upstream(branch, upstream_refname))
-			continue;
-		if (check_branch_commit(branch_name, branch_name,
-					&candidates.items[i]->objectname, NULL,
+		upstream_refname = branch_get_upstream(branch, रिक्त);
+		यदि (!upstream_refname || !refs_ref_exists(refs, upstream_refname))
+			अनुवर्त;
+		यदि (branch_pushes_गन्तव्यम्_upstream(branch, upstream_refname))
+			अनुवर्त;
+		यदि (check_branch_commit(branch_name, branch_name,
+					&candidates.वस्तूनि[i]->objectname, रिक्त,
 					FILTER_REFS_BRANCHES, DELETE_BRANCH_SKIP_UNMERGED))
-			continue;
+			अनुवर्त;
 
-		strbuf_reset(&key);
-		strbuf_addf(&key, "branch.%s.deletemerged", branch_name);
-		if (!repo_config_get_bool(the_repository, key.buf, &opt_out) &&
-		    !opt_out) {
-			if (!(flags & DELETE_BRANCH_QUIET))
+		strbuf_reset(&कुञ्चिका);
+		strbuf_addf(&कुञ्चिका, "branch.%s.deletemerged", branch_name);
+		यदि (!repo_config_get_bool(the_repository, कुञ्चिका.buf, &opt_बहिर्गमनम्) &&
+		    !opt_बहिर्गमनम्) {
+			यदि (!(flags & DELETE_BRANCH_QUIET))
 				fprintf(stderr,
 					_("Skipping '%s' (branch.%s.deleteMerged is false)\n"),
 					branch_name, branch_name);
-			continue;
+			अनुवर्त;
 		}
 
-		strset_add(&deletable_branch_names, branch_name);
+		strset_सङ्कलय(&deletable_branch_नामानि, branch_name);
 	}
 
-	protect_stacked_branch_bases(refs, &deletable_branch_names,
-				     &protected_branch_names);
+	protect_stacked_branch_bases(refs, &deletable_branch_नामानि,
+				     &protected_branch_नामानि);
 
-	strset_for_each_entry(&deletable_branch_names, &iter, entry)
-		strvec_push(&branches_to_delete, entry->key);
+	strset_for_each_प्रविष्टिः(&deletable_branch_नामानि, &iter, प्रविष्टिः)
+		strvec_प्रक्षिप(&branches_गन्तव्यम्_delete, प्रविष्टिः->कुञ्चिका);
 
-	if (branches_to_delete.nr)
-		ret = delete_branches(branches_to_delete.nr, branches_to_delete.v,
+	यदि (branches_गन्तव्यम्_delete.nr)
+		ret = delete_branches(branches_गन्तव्यम्_delete.nr, branches_गन्तव्यम्_delete.v,
 				      FILTER_REFS_BRANCHES,
 				      DELETE_BRANCH_SKIP_UNMERGED |
-				      DELETE_BRANCH_NO_HEAD_FALLBACK |
+				      DELETE_BRANCH_NO_शीर्ष_FALLBACK |
 				      flags);
 
-	if (!ret && !(flags & DELETE_BRANCH_DRY_RUN))
-		clear_deleted_upstreams(&protected_branch_names,
-					&deletable_branch_names);
+	यदि (!ret && !(flags & DELETE_BRANCH_DRY_सततम्))
+		clear_deleted_upstreams(&protected_branch_नामानि,
+					&deletable_branch_नामानि);
 
-	strbuf_release(&key);
-	strvec_clear(&branches_to_delete);
-	strset_clear(&protected_branch_names);
-	strset_clear(&deletable_branch_names);
+	strbuf_release(&कुञ्चिका);
+	strvec_clear(&branches_गन्तव्यम्_delete);
+	strset_clear(&protected_branch_नामानि);
+	strset_clear(&deletable_branch_नामानि);
 	ref_array_clear(&candidates);
 	ref_filter_clear(&filter);
-	return ret;
+	प्रत्यागम ret;
 }
 
-static GIT_PATH_FUNC(edit_description, "EDIT_DESCRIPTION")
+स्थिर GIT_मार्गः_FUNC(edit_description, "EDIT_DESCRIPTION")
 
-static int edit_branch_description(const char *branch_name)
+स्थिर पूर्णाङ्क edit_branch_description(ध्रुव वर्ण *branch_name)
 {
-	int exists;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
+	पूर्णाङ्क exists;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना strbuf name = STRBUF_INIT;
 
 	exists = !read_branch_desc(&buf, branch_name);
-	if (!buf.len || buf.buf[buf.len-1] != '\n')
+	यदि (!buf.len || buf.buf[buf.len-1] != '\n')
 		strbuf_addch(&buf, '\n');
-	strbuf_commented_addf(&buf, comment_line_str,
+	strbuf_commented_addf(&buf, comment_पङ्क्तिः_str,
 		    _("Please edit the description for the branch\n"
 		      "  %s\n"
 		      "Lines starting with '%s' will be stripped.\n"),
-		    branch_name, comment_line_str);
+		    branch_name, comment_पङ्क्तिः_str);
 	write_file_buf(edit_description(), buf.buf, buf.len);
 	strbuf_reset(&buf);
-	if (launch_editor(edit_description(), &buf, NULL)) {
+	यदि (launch_editor(edit_description(), &buf, रिक्त)) {
 		strbuf_release(&buf);
-		return -1;
+		प्रत्यागम -1;
 	}
-	strbuf_stripspace(&buf, comment_line_str);
+	strbuf_stripspace(&buf, comment_पङ्क्तिः_str);
 
 	strbuf_addf(&name, "branch.%s.description", branch_name);
-	if (buf.len || exists)
-		repo_config_set(the_repository, name.buf, buf.len ? buf.buf : NULL);
+	यदि (buf.len || exists)
+		repo_config_समुच्चयः(the_repository, name.buf, buf.len ? buf.buf : रिक्त);
 	strbuf_release(&name);
 	strbuf_release(&buf);
 
-	return 0;
+	प्रत्यागम 0;
 }
 
-static void die_if_upstream_looks_like_remote(const char *new_upstream, const char *branch_name)
+स्थिर शून्य die_if_upstream_looks_like_remote(ध्रुव वर्ण *new_upstream, ध्रुव वर्ण *branch_name)
 {
-	struct strbuf remote_ref = STRBUF_INIT;
-	int code;
+	संरचना strbuf remote_ref = STRBUF_INIT;
+	पूर्णाङ्क संहिता;
 
-	if (strchr(new_upstream, '/') ||
+	यदि (strchr(new_upstream, '/') ||
 	    !remote_is_configured(remote_get(new_upstream), 0))
-		return;
+		प्रत्यागम;
 
 	strbuf_addf(&remote_ref, "refs/remotes/%s/%s", new_upstream, branch_name);
-	if (!refs_ref_exists(get_main_ref_store(the_repository), remote_ref.buf)) {
+	यदि (!refs_ref_exists(get_main_ref_store(the_repository), remote_ref.buf)) {
 		strbuf_release(&remote_ref);
-		return;
+		प्रत्यागम;
 	}
 
-	code = die_message(_("--set-upstream-to takes a single <remote>/<branch> argument"));
-	advise_if_enabled(ADVICE_SET_UPSTREAM_FAILURE,
+	संहिता = die_सन्देशः(_("--set-upstream-to takes a single <remote>/<branch> argument"));
+	advise_if_enabled(ADVICE_समुच्चयः_UPSTREAM_FAILURE,
 			  _("Did you mean to use: git branch --set-upstream-to=%s/%s?"),
 			  new_upstream, branch_name);
 	strbuf_release(&remote_ref);
-	exit(code);
+	निर्गच्छ(संहिता);
 }
 
-int cmd_branch(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+पूर्णाङ्क cmd_branch(पूर्णाङ्क argc,
+	       ध्रुव वर्ण **argv,
+	       ध्रुव वर्ण *उपसर्गः,
+	       संरचना repository *repo अप्रयुक्तम्)
 {
 	/* possible actions */
-	int delete = 0, rename = 0, copy = 0, list = 0,
+	पूर्णाङ्क delete = 0, rename = 0, copy = 0, list = 0,
 	    unset_upstream = 0, show_current = 0, edit_description = 0;
-	struct strvec delete_merged = STRVEC_INIT;
-	int dry_run = 0;
-	const char *new_upstream = NULL;
-	int noncreate_actions = 0;
+	संरचना strvec delete_merged = STRVEC_INIT;
+	पूर्णाङ्क dry_सततम् = 0;
+	ध्रुव वर्ण *new_upstream = रिक्त;
+	पूर्णाङ्क noncreate_actions = 0;
 	/* possible options */
-	int reflog = 0, quiet = 0, icase = 0, force = 0,
+	पूर्णाङ्क reflog = 0, quiet = 0, icase = 0, force = 0,
 	    recurse_submodules_explicit = 0;
-	enum branch_track track;
-	struct ref_filter filter = REF_FILTER_INIT;
-	static struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	struct ref_format format = REF_FORMAT_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int ret;
+	गणना branch_track track;
+	संरचना ref_filter filter = REF_FILTER_INIT;
+	स्थिर संरचना ref_क्रमणम् *क्रमणम्;
+	संरचना string_list क्रमणम्_options = STRING_LIST_INIT_DUP;
+	संरचना ref_format format = REF_FORMAT_INIT;
+	संरचना repo_config_मानानि *cfg = repo_config_मानानि(the_repository);
+	पूर्णाङ्क ret;
 
-	struct option options[] = {
-		OPT_GROUP(N_("Generic options")),
+	संरचना option options[] = {
+		OPT_गणः(N_("Generic options")),
 		OPT__VERBOSE(&filter.verbose,
 			N_("show hash and subject, give twice for upstream branch")),
 		OPT__QUIET(&quiet, N_("suppress informational messages")),
 		OPT_CALLBACK_F('t', "track",  &track, "(direct|inherit)",
 			N_("set branch tracking configuration"),
 			PARSE_OPT_OPTARG,
-			parse_opt_tracking_mode),
-		OPT_SET_INT_F(0, "set-upstream", &track, N_("do not use"),
+			parse_opt_tracking_बहुलकम्),
+		OPT_समुच्चयः_INT_F(0, "set-upstream", &track, N_("do not use"),
 			BRANCH_TRACK_OVERRIDE, PARSE_OPT_HIDDEN),
 		OPT_STRING('u', "set-upstream-to", &new_upstream, N_("upstream"), N_("change the upstream info")),
 		OPT_BOOL(0, "unset-upstream", &unset_upstream, N_("unset the upstream info")),
 		OPT__COLOR(&branch_use_color, N_("use colored output")),
-		OPT_SET_INT_F('r', "remotes",     &filter.kind, N_("act on remote-tracking branches"),
+		OPT_समुच्चयः_INT_F('r', "remotes",     &filter.विधा, N_("act on remote-tracking branches"),
 			      FILTER_REFS_REMOTES,
 			      PARSE_OPT_NONEG),
-		OPT_CONTAINS(&filter.with_commit, N_("print only branches that contain the commit")),
-		OPT_NO_CONTAINS(&filter.no_commit, N_("print only branches that don't contain the commit")),
+		OPT_अन्तर्भवति(&filter.with_commit, N_("print only branches that contain the commit")),
+		OPT_NO_अन्तर्भवति(&filter.no_commit, N_("print only branches that don't contain the commit")),
 		OPT_WITH(&filter.with_commit, N_("print only branches that contain the commit")),
 		OPT_WITHOUT(&filter.no_commit, N_("print only branches that don't contain the commit")),
 		OPT__ABBREV(&filter.abbrev),
 
-		OPT_GROUP(N_("Specific git-branch actions:")),
-		OPT_SET_INT_F('a', "all", &filter.kind, N_("list both remote-tracking and local branches"),
+		OPT_गणः(N_("Specific git-branch actions:")),
+		OPT_समुच्चयः_INT_F('a', "all", &filter.विधा, N_("list both remote-tracking and local branches"),
 			      FILTER_REFS_REMOTES | FILTER_REFS_BRANCHES,
 			      PARSE_OPT_NONEG),
 		OPT_BIT('d', "delete", &delete, N_("delete fully merged branch"), 1),
-		OPT_BIT('D', NULL, &delete, N_("delete branch (even if not merged)"), 2),
+		OPT_BIT('D', रिक्त, &delete, N_("delete branch (even if not merged)"), 2),
 		OPT_BIT('m', "move", &rename, N_("move/rename a branch and its reflog"), 1),
-		OPT_BIT('M', NULL, &rename, N_("move/rename a branch, even if target exists"), 2),
-		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_empty,
+		OPT_BIT('M', रिक्त, &rename, N_("move/rename a branch, even if target exists"), 2),
+		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_रिक्तानि,
 			N_("do not output a newline after empty formatted refs")),
 		OPT_BIT('c', "copy", &copy, N_("copy a branch and its reflog"), 1),
-		OPT_BIT('C', NULL, &copy, N_("copy a branch, even if target exists"), 2),
+		OPT_BIT('C', रिक्त, &copy, N_("copy a branch, even if target exists"), 2),
 		OPT_BOOL('l', "list", &list, N_("list branch names")),
 		OPT_BOOL(0, "show-current", &show_current, N_("show current branch name")),
 		OPT_BOOL(0, "create-reflog", &reflog, N_("create the branch's reflog")),
@@ -1032,7 +1032,7 @@ int cmd_branch(int argc,
 		OPT_CALLBACK_F(0, "delete-merged", &delete_merged, N_("pattern"),
 			N_("delete merged branches whose upstream matches <pattern> (repeatable)"),
 			PARSE_OPT_NONEG, parse_opt_strvec),
-		OPT_BOOL(0, "dry-run", &dry_run,
+		OPT_BOOL(0, "dry-run", &dry_सततम्,
 			N_("with --delete-merged, only print which branches would be deleted")),
 		OPT__FORCE(&force, N_("force creation, move/rename, deletion"), PARSE_OPT_NOCOMPLETE),
 		OPT_MERGED(&filter, N_("print only branches that are merged")),
@@ -1041,18 +1041,18 @@ int cmd_branch(int argc,
 			N_("print only branches whose upstream matches <branch> (repeatable)"),
 			PARSE_OPT_NONEG, parse_opt_forked),
 		OPT_COLUMN(0, "column", &colopts, N_("list branches in columns")),
-		OPT_REF_SORT(&sorting_options),
+		OPT_REF_क्रमय(&क्रमणम्_options),
 		OPT_CALLBACK(0, "points-at", &filter.points_at, N_("object"),
 			N_("print only branches of the object"), parse_opt_object_name),
 		OPT_BOOL('i', "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_BOOL(0, "recurse-submodules", &recurse_submodules_explicit, N_("recurse through submodules")),
 		OPT_STRING(  0 , "format", &format.format, N_("format"), N_("format to use for the output")),
-		OPT_END(),
+		OPT_अन्तः(),
 	};
 
-	setup_ref_filter_porcelain_msg();
+	सज्जता_ref_filter_porcelain_सन्देशः();
 
-	filter.kind = FILTER_REFS_BRANCHES;
+	filter.विधा = FILTER_REFS_BRANCHES;
 	filter.abbrev = -1;
 
 	show_usage_with_options_if_asked(argc, argv,
@@ -1062,30 +1062,30 @@ int cmd_branch(int argc,
 	 * Try to set sort keys from config. If config does not set any,
 	 * fall back on default (refname) sorting.
 	 */
-	repo_config(the_repository, git_branch_config, &sorting_options);
-	if (!sorting_options.nr)
-		string_list_append(&sorting_options, "refname");
+	repo_config(the_repository, git_branch_config, &क्रमणम्_options);
+	यदि (!क्रमणम्_options.nr)
+		string_list_append(&क्रमणम्_options, "refname");
 
 	track = cfg->branch_track;
 
-	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   0, &head_oid, NULL);
-	if (!head)
+	शीर्ष = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
+				   0, &शीर्ष_oid, रिक्त);
+	यदि (!शीर्ष)
 		die(_("failed to resolve HEAD as a valid ref"));
-	if (!strcmp(head, "HEAD"))
+	यदि (!वाक्यं_तुलय(शीर्ष, "HEAD"))
 		filter.detached = 1;
-	else if (!skip_prefix(head, "refs/heads/", &head))
+	अन्यथा यदि (!skip_उपसर्गः(शीर्ष, "refs/heads/", &शीर्ष))
 		die(_("HEAD not found below refs/heads!"));
 
-	argc = parse_options(argc, argv, prefix, options, builtin_branch_usage,
+	argc = parse_options(argc, argv, उपसर्गः, options, builtin_branch_usage,
 			     0);
 
-	if (!delete && !rename && !copy && !edit_description && !new_upstream &&
+	यदि (!delete && !rename && !copy && !edit_description && !new_upstream &&
 	    !show_current && !unset_upstream && !delete_merged.nr &&
 	    argc == 0)
 		list = 1;
 
-	if (filter.with_commit || filter.no_commit ||
+	यदि (filter.with_commit || filter.no_commit ||
 	    filter.reachable_from || filter.unreachable_from ||
 	    filter.points_at.nr || filter.forked.nr)
 		list = 1;
@@ -1093,16 +1093,16 @@ int cmd_branch(int argc,
 	noncreate_actions = !!delete + !!rename + !!copy + !!new_upstream +
 			    !!show_current + !!list + !!edit_description +
 			    !!unset_upstream + !!delete_merged.nr;
-	if (noncreate_actions > 1)
+	यदि (noncreate_actions > 1)
 		usage_with_options(builtin_branch_usage, options);
 
-	if (dry_run && !delete_merged.nr)
+	यदि (dry_सततम् && !delete_merged.nr)
 		die(_("--dry-run requires --delete-merged"));
 
-	if (recurse_submodules_explicit) {
-		if (!submodule_propagate_branches)
+	यदि (recurse_submodules_explicit) {
+		यदि (!submodule_propagate_branches)
 			die(_("branch with --recurse-submodules can only be used if submodule.propagateBranches is enabled"));
-		if (noncreate_actions)
+		यदि (noncreate_actions)
 			die(_("--recurse-submodules can only be used to create branches"));
 	}
 
@@ -1110,46 +1110,46 @@ int cmd_branch(int argc,
 		(recurse_submodules || recurse_submodules_explicit) &&
 		submodule_propagate_branches;
 
-	if (filter.abbrev == -1)
+	यदि (filter.abbrev == -1)
 		filter.abbrev = DEFAULT_ABBREV;
 	filter.ignore_case = icase;
 
 	finalize_colopts(&colopts, -1);
-	if (filter.verbose) {
-		if (explicitly_enable_column(colopts))
+	यदि (filter.verbose) {
+		यदि (explicitly_enable_column(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "--verbose");
 		colopts = 0;
 	}
 
-	if (force) {
+	यदि (force) {
 		delete *= 2;
 		rename *= 2;
 		copy *= 2;
 	}
 
-	if (list)
-		setup_auto_pager("branch", 1);
+	यदि (list)
+		सज्जता_auto_pager("branch", 1);
 
-	if (delete) {
-		if (!argc)
+	यदि (delete) {
+		यदि (!argc)
 			die(_("branch name required"));
-		ret = delete_branches(argc, argv, filter.kind,
+		ret = delete_branches(argc, argv, filter.विधा,
 				      (delete > 1 ? DELETE_BRANCH_FORCE : 0) |
 				      (quiet ? DELETE_BRANCH_QUIET : 0));
-		goto out;
-	} else if (delete_merged.nr) {
+		गच्छ बहिर्गमनम्;
+	} अन्यथा यदि (delete_merged.nr) {
 		ret = delete_merged_branches(&delete_merged, argv,
 					     (quiet ? DELETE_BRANCH_QUIET : 0) |
-					     (dry_run ? DELETE_BRANCH_DRY_RUN : 0));
-		goto out;
-	} else if (show_current) {
+					     (dry_सततम् ? DELETE_BRANCH_DRY_सततम् : 0));
+		गच्छ बहिर्गमनम्;
+	} अन्यथा यदि (show_current) {
 		print_current_branch_name();
 		ret = 0;
-		goto out;
-	} else if (list) {
+		गच्छ बहिर्गमनम्;
+	} अन्यथा यदि (list) {
 		/*  git branch --list also shows HEAD when it is detached */
-		if ((filter.kind & FILTER_REFS_BRANCHES) && filter.detached)
-			filter.kind |= FILTER_REFS_DETACHED_HEAD;
+		यदि ((filter.विधा & FILTER_REFS_BRANCHES) && filter.detached)
+			filter.विधा |= FILTER_REFS_DETACHED_शीर्ष;
 		filter.name_patterns = argv;
 		/*
 		 * If no sorting parameter is given then we default to sorting
@@ -1158,88 +1158,88 @@ int cmd_branch(int argc,
 		 * local branches 'refs/heads/...' and finally remote-tracking
 		 * branches 'refs/remotes/...'.
 		 */
-		sorting = ref_sorting_options(&sorting_options);
-		ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
-		ref_sorting_set_sort_flags_all(
-			sorting, REF_SORTING_DETACHED_HEAD_FIRST, 1);
-		print_ref_list(&filter, sorting, &format, &output);
-		print_columns(&output, colopts, NULL);
+		क्रमणम् = ref_क्रमणम्_options(&क्रमणम्_options);
+		ref_क्रमणम्_समुच्चयः_क्रमय_flags_all(क्रमणम्, REF_क्रमणम्_ICASE, icase);
+		ref_क्रमणम्_समुच्चयः_क्रमय_flags_all(
+			क्रमणम्, REF_क्रमणम्_DETACHED_शीर्ष_FIRST, 1);
+		print_ref_list(&filter, क्रमणम्, &format, &output);
+		print_columns(&output, colopts, रिक्त);
 		string_list_clear(&output, 0);
-		ref_sorting_release(sorting);
+		ref_क्रमणम्_release(क्रमणम्);
 		ref_filter_clear(&filter);
 
 		ret = 0;
-		goto out;
-	} else if (edit_description) {
-		const char *branch_name;
-		struct strbuf branch_ref = STRBUF_INIT;
-		struct strbuf buf = STRBUF_INIT;
+		गच्छ बहिर्गमनम्;
+	} अन्यथा यदि (edit_description) {
+		ध्रुव वर्ण *branch_name;
+		संरचना strbuf branch_ref = STRBUF_INIT;
+		संरचना strbuf buf = STRBUF_INIT;
 
-		if (!argc) {
-			if (filter.detached)
+		यदि (!argc) {
+			यदि (filter.detached)
 				die(_("cannot give description to detached HEAD"));
-			branch_name = head;
-		} else if (argc == 1) {
+			branch_name = शीर्ष;
+		} अन्यथा यदि (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch_name = buf.buf;
-		} else {
+		} अन्यथा {
 			die(_("cannot edit description of more than one branch"));
 		}
 
 		strbuf_addf(&branch_ref, "refs/heads/%s", branch_name);
-		if (!refs_ref_exists(get_main_ref_store(the_repository), branch_ref.buf)) {
-			error((!argc || branch_checked_out(branch_ref.buf))
+		यदि (!refs_ref_exists(get_main_ref_store(the_repository), branch_ref.buf)) {
+			error((!argc || branch_checked_बहिर्गमनम्(branch_ref.buf))
 			      ? _("no commit on branch '%s' yet")
 			      : _("no branch named '%s'"),
 			      branch_name);
 			ret = 1;
-		} else if (!edit_branch_description(branch_name)) {
+		} अन्यथा यदि (!edit_branch_description(branch_name)) {
 			ret = 0; /* happy */
-		} else {
+		} अन्यथा {
 			ret = 1;
 		}
 
 		strbuf_release(&branch_ref);
 		strbuf_release(&buf);
 
-		goto out;
-	} else if (copy || rename) {
-		if (!argc)
+		गच्छ बहिर्गमनम्;
+	} अन्यथा यदि (copy || rename) {
+		यदि (!argc)
 			die(_("branch name required"));
-		else if ((argc == 1) && filter.detached)
+		अन्यथा यदि ((argc == 1) && filter.detached)
 			die(copy? _("cannot copy the current branch while not on any")
 				: _("cannot rename the current branch while not on any"));
-		else if (argc == 1)
-			copy_or_rename_branch(head, argv[0], copy, copy + rename > 1);
-		else if (argc == 2)
+		अन्यथा यदि (argc == 1)
+			copy_or_rename_branch(शीर्ष, argv[0], copy, copy + rename > 1);
+		अन्यथा यदि (argc == 2)
 			copy_or_rename_branch(argv[0], argv[1], copy, copy + rename > 1);
-		else
+		अन्यथा
 			die(copy? _("too many branches for a copy operation")
 				: _("too many arguments for a rename operation"));
-	} else if (new_upstream) {
-		struct branch *branch;
-		struct strbuf buf = STRBUF_INIT;
+	} अन्यथा यदि (new_upstream) {
+		संरचना branch *branch;
+		संरचना strbuf buf = STRBUF_INIT;
 
-		if (!argc)
-			branch = branch_get(NULL);
-		else if (argc == 1) {
+		यदि (!argc)
+			branch = branch_get(रिक्त);
+		अन्यथा यदि (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch = branch_get(buf.buf);
-		} else
+		} अन्यथा
 			die(_("too many arguments to set new upstream"));
 
-		if (!branch) {
-			if (!argc || !strcmp(argv[0], "HEAD"))
+		यदि (!branch) {
+			यदि (!argc || !वाक्यं_तुलय(argv[0], "HEAD"))
 				die(_("could not set upstream of HEAD to %s when "
 				      "it does not point to any branch"),
 				    new_upstream);
 			die(_("no such branch '%s'"), argv[0]);
 		}
 
-		if (!refs_ref_exists(get_main_ref_store(the_repository), branch->refname)) {
-			if (!argc || branch_checked_out(branch->refname))
+		यदि (!refs_ref_exists(get_main_ref_store(the_repository), branch->refname)) {
+			यदि (!argc || branch_checked_बहिर्गमनम्(branch->refname))
 				die(_("no commit on branch '%s' yet"), branch->name);
 			/*
 			 * Check the advice up front to avoid the ref
@@ -1247,73 +1247,73 @@ int cmd_branch(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (argc == 1 &&
-			    advice_enabled(ADVICE_SET_UPSTREAM_FAILURE))
+			यदि (argc == 1 &&
+			    advice_enabled(ADVICE_समुच्चयः_UPSTREAM_FAILURE))
 				die_if_upstream_looks_like_remote(new_upstream, argv[0]);
 			die(_("branch '%s' does not exist"), branch->name);
 		}
 
-		dwim_and_setup_tracking(the_repository, branch->name,
+		dwim_and_सज्जता_tracking(the_repository, branch->name,
 					new_upstream, BRANCH_TRACK_OVERRIDE,
 					quiet);
 		strbuf_release(&buf);
-	} else if (unset_upstream) {
-		struct branch *branch;
-		struct strbuf buf = STRBUF_INIT;
+	} अन्यथा यदि (unset_upstream) {
+		संरचना branch *branch;
+		संरचना strbuf buf = STRBUF_INIT;
 
-		if (!argc)
-			branch = branch_get(NULL);
-		else if (argc == 1) {
+		यदि (!argc)
+			branch = branch_get(रिक्त);
+		अन्यथा यदि (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch = branch_get(buf.buf);
-		} else
+		} अन्यथा
 			die(_("too many arguments to unset upstream"));
 
-		if (!branch) {
-			if (!argc || !strcmp(argv[0], "HEAD"))
+		यदि (!branch) {
+			यदि (!argc || !वाक्यं_तुलय(argv[0], "HEAD"))
 				die(_("could not unset upstream of HEAD when "
 				      "it does not point to any branch"));
 			die(_("no such branch '%s'"), argv[0]);
 		}
 
-		if (!branch_has_merge_config(branch))
+		यदि (!branch_has_merge_config(branch))
 			die(_("branch '%s' has no upstream information"), branch->name);
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "branch.%s.remote", branch->name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
+		repo_config_समुच्चयः_multivar(the_repository, buf.buf, रिक्त, रिक्त, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "branch.%s.merge", branch->name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
+		repo_config_समुच्चयः_multivar(the_repository, buf.buf, रिक्त, रिक्त, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_release(&buf);
-	} else if (!noncreate_actions && argc > 0 && argc <= 2) {
-		const char *branch_name = argv[0];
-		const char *start_name = argc == 2 ? argv[1] : head;
+	} अन्यथा यदि (!noncreate_actions && argc > 0 && argc <= 2) {
+		ध्रुव वर्ण *branch_name = argv[0];
+		ध्रुव वर्ण *start_name = argc == 2 ? argv[1] : शीर्ष;
 
-		if (filter.kind != FILTER_REFS_BRANCHES)
+		यदि (filter.विधा != FILTER_REFS_BRANCHES)
 			die(_("the -a, and -r, options to 'git branch' do not take a branch name.\n"
 				  "Did you mean to use: -a|-r --list <pattern>?"));
 
-		if (track == BRANCH_TRACK_OVERRIDE)
+		यदि (track == BRANCH_TRACK_OVERRIDE)
 			die(_("the '--set-upstream' option is no longer supported. Please use '--track' or '--set-upstream-to' instead"));
 
-		if (recurse_submodules) {
+		यदि (recurse_submodules) {
 			create_branches_recursively(the_repository, branch_name,
-						    start_name, NULL, force,
+						    start_name, रिक्त, force,
 						    reflog, quiet, track, 0);
 			ret = 0;
-			goto out;
+			गच्छ बहिर्गमनम्;
 		}
 		create_branch(the_repository, branch_name, start_name, force, 0,
 			      reflog, quiet, track, 0);
-	} else
+	} अन्यथा
 		usage_with_options(builtin_branch_usage, options);
 
 	ret = 0;
 
-out:
+बहिर्गमनम्:
 	strvec_clear(&delete_merged);
-	string_list_clear(&sorting_options, 0);
-	return ret;
+	string_list_clear(&क्रमणम्_options, 0);
+	प्रत्यागम ret;
 }
