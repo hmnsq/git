@@ -2,66 +2,66 @@
  * Copyright (c) 2006 Franck Bui-Huu
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "archive.h"
-#include "pkt-line.h"
-#include "setup.h"
-#include "sideband.h"
-#include "run-command.h"
-#include "strvec.h"
+#ضمن "builtin.h"
+#ضمن "archive.h"
+#ضمن "pkt-line.h"
+#ضمن "setup.h"
+#ضمن "sideband.h"
+#ضمن "run-command.h"
+#ضمن "strvec.h"
 
-static const char upload_archive_usage[] =
+ساكن ثابت حرف upload_archive_usage[] =
 	"git upload-archive <repository>";
 
-static const char deadchild[] =
+ساكن ثابت حرف deadchild[] =
 "git upload-archive: archiver died with error";
 
 #define MAX_ARGS (64)
 
-int cmd_upload_archive_writer(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo UNUSED)
+صحيح cmd_upload_archive_writer(صحيح argc,
+			      ثابت حرف **argv,
+			      ثابت حرف *prefix,
+			      بنية repository *repo UNUSED)
 {
-	struct strvec sent_argv = STRVEC_INIT;
-	const char *arg_cmd = "argument ";
-	int ret;
+	بنية strvec sent_argv = STRVEC_INIT;
+	ثابت حرف *arg_cmd = "argument ";
+	صحيح ret;
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
-	if (argc != 2)
+	إذا (argc != 2)
 		usage(upload_archive_usage);
 
-	if (!enter_repo(the_repository, argv[1], 0))
+	إذا (!enter_repo(the_repository, argv[1], 0))
 		die("'%s' does not appear to be a git repository", argv[1]);
 
 	init_archivers();
 
 	/* put received options in sent_argv[] */
-	strvec_push(&sent_argv, "git-upload-archive");
-	for (;;) {
-		char *buf = packet_read_line(0, NULL);
-		if (!buf)
-			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
+	strvec_ادفع(&sent_argv, "git-upload-archive");
+	لكل (;;) {
+		حرف *buf = packet_read_سطر(0, عدم);
+		إذا (!buf)
+			اكسر;	/* got a flush */
+		إذا (sent_argv.nr > MAX_ARGS)
 			die("Too many options (>%d)", MAX_ARGS - 1);
 
-		if (!starts_with(buf, arg_cmd))
+		إذا (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
-		strvec_push(&sent_argv, buf + strlen(arg_cmd));
+		strvec_ادفع(&sent_argv, buf + strlen(arg_cmd));
 	}
 
 	/* parse all options sent by the client */
 	ret = write_archive(sent_argv.nr, sent_argv.v, prefix,
-			    the_repository, NULL, 1);
+			    the_repository, عدم, 1);
 
 	strvec_clear(&sent_argv);
-	return ret;
+	إرجاع ret;
 }
 
 __attribute__((format (printf, 1, 2)))
-static void error_clnt(const char *fmt, ...)
+ساكن فراغ error_clnt(ثابت حرف *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	بنية strbuf buf = STRBUF_INIT;
 	va_list params;
 
 	va_start(params, fmt);
@@ -71,25 +71,25 @@ static void error_clnt(const char *fmt, ...)
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+ساكن ssize_t process_إدخال(صحيح child_fd, صحيح band)
 {
-	char buf[16384];
-	ssize_t sz = read(child_fd, buf, sizeof(buf));
-	if (sz < 0) {
-		if (errno != EAGAIN && errno != EINTR)
+	حرف buf[16384];
+	ssize_t sz = اقرأ(child_fd, buf, حجم(buf));
+	إذا (sz < 0) {
+		إذا (errno != EAGAIN && errno != EINTR)
 			error_clnt("read error: %s\n", strerror(errno));
-		return sz;
+		إرجاع sz;
 	}
 	send_sideband(1, band, buf, sz, LARGE_PACKET_MAX);
-	return sz;
+	إرجاع sz;
 }
 
-int cmd_upload_archive(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+صحيح cmd_upload_archive(صحيح argc,
+ثابت حرف **argv,
+ثابت حرف *prefix,
+بنية repository *repo UNUSED)
 {
-	struct child_process writer = CHILD_PROCESS_INIT;
+	بنية child_process writer = CHILD_PROCESS_INIT;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
@@ -104,10 +104,10 @@ struct repository *repo UNUSED)
 	 */
 	writer.out = writer.err = -1;
 	writer.git_cmd = 1;
-	strvec_push(&writer.args, "upload-archive--writer");
+	strvec_ادفع(&writer.args, "upload-archive--writer");
 	strvec_pushv(&writer.args, argv + 1);
-	if (start_command(&writer)) {
-		int err = errno;
+	إذا (start_command(&writer)) {
+		صحيح err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
 		die("upload-archive: %s", strerror(err));
 	}
@@ -115,33 +115,33 @@ struct repository *repo UNUSED)
 	packet_write_fmt(1, "ACK\n");
 	packet_flush(1);
 
-	while (1) {
-		struct pollfd pfd[2];
+	بينما (1) {
+		بنية pollfd pfd[2];
 
 		pfd[0].fd = writer.out;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = writer.err;
 		pfd[1].events = POLLIN;
-		if (poll(pfd, 2, -1) < 0) {
-			if (errno != EINTR) {
+		إذا (poll(pfd, 2, -1) < 0) {
+			إذا (errno != EINTR) {
 				error_errno("poll failed resuming");
 				sleep(1);
 			}
-			continue;
+			استمر;
 		}
-		if (pfd[1].revents & POLLIN)
+		إذا (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
-				continue;
-		if (pfd[0].revents & POLLIN)
+			إذا (process_إدخال(pfd[1].fd, 2))
+				استمر;
+		إذا (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
-				continue;
+			إذا (process_إدخال(pfd[0].fd, 1))
+				استمر;
 
-		if (finish_command(&writer))
+		إذا (finish_command(&writer))
 			error_clnt("%s", deadchild);
 		packet_flush(1);
-		break;
+		اكسر;
 	}
-	return 0;
+	إرجاع 0;
 }

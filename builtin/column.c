@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "strbuf.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "column.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "gettext.h"
+#ضمن "strbuf.h"
+#ضمن "parse-options.h"
+#ضمن "string-list.h"
+#ضمن "column.h"
 
-static const char * const builtin_column_usage[] = {
+ساكن ثابت حرف * ثابت builtin_column_usage[] = {
 	N_("git column [<options>]"),
-	NULL
+	عدم
 };
-static unsigned int colopts;
+ساكن unsigned صحيح colopts;
 
-static int column_config(const char *var, const char *value,
-			 const struct config_context *ctx UNUSED, void *cb)
+ساكن صحيح column_config(ثابت حرف *var, ثابت حرف *قيمة,
+			 ثابت بنية config_context *ctx UNUSED, فراغ *cb)
 {
-	return git_column_config(var, value, cb, &colopts);
+	إرجاع git_column_config(var, قيمة, cb, &colopts);
 }
 
-int cmd_column(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+صحيح cmd_column(صحيح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *prefix,
+	       بنية repository *repo UNUSED)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct strbuf sb = STRBUF_INIT;
-	struct column_options copts;
-	const char *command = NULL, *real_command = NULL;
-	struct option options[] = {
+	بنية string_list list = STRING_LIST_INIT_DUP;
+	بنية strbuf sb = STRBUF_INIT;
+	بنية column_options copts;
+	ثابت حرف *command = عدم, *real_command = عدم;
+	بنية option options[] = {
 		OPT_STRING(0, "command", &real_command, N_("name"), N_("lookup config vars")),
 		OPT_COLUMN(0, "mode", &colopts, N_("layout to use")),
 		OPT_UNSIGNED(0, "raw-mode", &colopts, N_("layout to use")),
@@ -40,29 +40,29 @@ int cmd_column(int argc,
 	};
 
 	/* This one is special and must be the first one */
-	if (argc > 1 && starts_with(argv[1], "--command=")) {
+	إذا (argc > 1 && starts_with(argv[1], "--command=")) {
 		command = argv[1] + 10;
-		repo_config(the_repository, column_config, (void *)command);
-	} else
-		repo_config(the_repository, column_config, NULL);
+		repo_config(the_repository, column_config, (فراغ *)command);
+	} وإلا
+		repo_config(the_repository, column_config, عدم);
 
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, حجم(copts));
 	copts.padding = 1;
 	argc = parse_options(argc, argv, prefix, options, builtin_column_usage, 0);
-	if (copts.padding < 0)
+	إذا (copts.padding < 0)
 		die(_("%s must be non-negative"), "--padding");
-	if (argc)
+	إذا (argc)
 		usage_with_options(builtin_column_usage, options);
-	if (real_command || command) {
-		if (!real_command || !command || strcmp(real_command, command))
+	إذا (real_command || command) {
+		إذا (!real_command || !command || strcmp(real_command, command))
 			die(_("--command must be the first argument"));
 	}
 	finalize_colopts(&colopts, -1);
-	while (!strbuf_getline(&sb, stdin))
+	بينما (!strbuf_getline(&sb, stdin))
 		string_list_append(&list, sb.buf);
 
 	print_columns(&list, colopts, &copts);
 	strbuf_release(&sb);
 	string_list_clear(&list, 0);
-	return 0;
+	إرجاع 0;
 }

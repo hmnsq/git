@@ -4,144 +4,144 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "branch.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refspec.h"
-#include "run-command.h"
-#include "remote.h"
-#include "transport.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "send-pack.h"
-#include "trace2.h"
-#include "color.h"
+#ضمن "builtin.h"
+#ضمن "advice.h"
+#ضمن "branch.h"
+#ضمن "config.h"
+#ضمن "dir.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "refspec.h"
+#ضمن "run-command.h"
+#ضمن "remote.h"
+#ضمن "transport.h"
+#ضمن "parse-options.h"
+#ضمن "pkt-line.h"
+#ضمن "submodule.h"
+#ضمن "submodule-config.h"
+#ضمن "send-pack.h"
+#ضمن "trace2.h"
+#ضمن "color.h"
 
-static const char * const push_usage[] = {
+ساكن ثابت حرف * ثابت ادفع_usage[] = {
 	N_("git push [<options>] [<repository> [<refspec>...]]"),
-	NULL,
+	عدم,
 };
 
-static enum git_colorbool push_use_color = GIT_COLOR_UNKNOWN;
-static char push_colors[][COLOR_MAXLEN] = {
+ساكن تعداد git_colorbool ادفع_use_color = GIT_COLOR_UNKNOWN;
+ساكن حرف ادفع_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
 	GIT_COLOR_RED,	/* ERROR */
 };
 
-enum color_push {
-	PUSH_COLOR_RESET = 0,
-	PUSH_COLOR_ERROR = 1
+تعداد color_ادفع {
+	ادفع_COLOR_RESET = 0,
+	ادفع_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+ساكن صحيح parse_ادفع_color_slot(ثابت حرف *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	إذا (!strcasecmp(slot, "reset"))
+		إرجاع ادفع_COLOR_RESET;
+	إذا (!strcasecmp(slot, "error"))
+		إرجاع ادفع_COLOR_ERROR;
+	إرجاع -1;
 }
 
-static const char *push_get_color(enum color_push ix)
+ساكن ثابت حرف *ادفع_get_color(تعداد color_ادفع ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	إذا (want_color_stderr(ادفع_use_color))
+		إرجاع ادفع_colors[ix];
+	إرجاع "";
 }
 
-static int thin = 1;
-static int deleterefs;
-static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static enum transport_family family;
+ساكن صحيح thin = 1;
+ساكن صحيح deleterefs;
+ساكن ثابت حرف *receivepack;
+ساكن صحيح verbosity;
+ساكن صحيح progress = -1;
+ساكن صحيح recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+ساكن تعداد transport_family family;
 
-static struct push_cas_option cas;
+ساكن بنية ادفع_cas_option cas;
 
-static struct refspec rs;
+ساكن بنية refspec rs;
 
-static struct string_list push_options_config = STRING_LIST_INIT_DUP;
+ساكن بنية string_list ادفع_options_config = STRING_LIST_INIT_DUP;
 
-static void refspec_append_mapped(struct refspec *refspec, const char *ref,
-				  struct remote *remote, struct ref *matched)
+ساكن فراغ refspec_append_mapped(بنية refspec *refspec, ثابت حرف *ref,
+				  بنية remote *remote, بنية ref *matched)
 {
-	const char *branch_name;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ثابت حرف *branch_name;
+	بنية repo_config_قيم *cfg = repo_config_قيم(the_repository);
 
-	if (remote->push.nr) {
-		struct refspec_item query = {
+	إذا (remote->ادفع.nr) {
+		بنية refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		إذا (!refspec_find_match(&remote->ادفع, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
-			free(query.dst);
-			return;
+			حرر(query.dst);
+			إرجاع;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	إذا (cfg->ادفع_default == ادفع_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
-		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		بنية branch *branch = branch_get(branch_name);
+		إذا (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			إرجاع;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+ساكن فراغ set_refspecs(ثابت حرف **refs, صحيح nr, بنية remote *remote)
 {
-	struct ref *local_refs = NULL;
-	int i;
+	بنية ref *local_refs = عدم;
+	صحيح i;
 
-	for (i = 0; i < nr; i++) {
-		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+	لكل (i = 0; i < nr; i++) {
+		ثابت حرف *ref = refs[i];
+		إذا (!strcmp("tag", ref)) {
+			إذا (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			إذا (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			وإلا
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} وإلا إذا (deleterefs) {
+			إذا (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
-			struct ref *matched = NULL;
+		} وإلا إذا (!strchr(ref, ':')) {
+			بنية ref *matched = عدم;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			إذا (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			إذا (تعداد_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			وإلا
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} وإلا
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
 }
 
-static NORETURN void die_push_simple(struct branch *branch,
-				     struct remote *remote)
+ساكن NORETURN فراغ die_ادفع_simple(بنية branch *branch,
+				     بنية remote *remote)
 {
 	/*
 	 * There's no point in using shorten_unambiguous_ref here,
@@ -151,10 +151,10 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * upstream to a non-branch, we should probably be showing
 	 * them the big ugly fully qualified ref.
 	 */
-	const char *advice_pushdefault_maybe = "";
-	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ثابت حرف *advice_pushdefault_maybe = "";
+	ثابت حرف *advice_automergesimple_maybe = "";
+	ثابت حرف *short_upstream = branch->merge[0]->src;
+	بنية repo_config_قيم *cfg = repo_config_قيم(the_repository);
 
 	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
 
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	إذا (cfg->ادفع_default == ادفع_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	إذا (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -188,23 +188,23 @@ static NORETURN void die_push_simple(struct branch *branch,
 	    advice_automergesimple_maybe);
 }
 
-static const char message_detached_head_die[] =
+ساكن ثابت حرف message_detached_head_die[] =
 	N_("You are not currently on a branch.\n"
 	   "To push the history leading to the current (detached HEAD)\n"
 	   "state now, use\n"
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+ساكن ثابت حرف *get_upstream_ref(صحيح flags, بنية branch *branch, ثابت حرف *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	إذا (branch->merge_nr == 0 && (flags & TRANSPORT_ادفع_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		إرجاع branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
-		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	إذا (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+		ثابت حرف *advice_autosetup_maybe = "";
+		إذا (!(flags & TRANSPORT_ادفع_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,61 +221,61 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	إذا (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	إرجاع branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+ساكن فراغ setup_default_ادفع_refspecs(صحيح *flags, بنية remote *remote)
 {
-	struct branch *branch;
-	const char *dst;
-	int same_remote;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	بنية branch *branch;
+	ثابت حرف *dst;
+	صحيح same_remote;
+	بنية repo_config_قيم *cfg = repo_config_قيم(the_repository);
 
-	switch (cfg->push_default) {
-	case PUSH_DEFAULT_MATCHING:
+	بدل (cfg->ادفع_default) {
+	حالة ادفع_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		إرجاع;
 
-	case PUSH_DEFAULT_NOTHING:
+	حالة ادفع_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
-	default:
-		break;
+		إرجاع;
+	افتراضي:
+		اكسر;
 	}
 
-	branch = branch_get(NULL);
-	if (!branch)
+	branch = branch_get(عدم);
+	إذا (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
-	same_remote = !strcmp(remote->name, remote_for_branch(branch, NULL));
+	same_remote = !strcmp(remote->name, remote_for_branch(branch, عدم));
 
-	switch (cfg->push_default) {
-	default:
-	case PUSH_DEFAULT_UNSPECIFIED:
-	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
-			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
-			die_push_simple(branch, remote);
-		break;
+	بدل (cfg->ادفع_default) {
+	افتراضي:
+	حالة ادفع_DEFAULT_UNSPECIFIED:
+	حالة ادفع_DEFAULT_SIMPLE:
+		إذا (!same_remote)
+			اكسر;
+		إذا (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+			die_ادفع_simple(branch, remote);
+		اكسر;
 
-	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+	حالة ادفع_DEFAULT_UPSTREAM:
+		إذا (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
 			    remote->name, branch->name);
 		dst = get_upstream_ref(*flags, branch, remote->name);
-		break;
+		اكسر;
 
-	case PUSH_DEFAULT_CURRENT:
-		break;
+	حالة ادفع_DEFAULT_CURRENT:
+		اكسر;
 	}
 
 	/*
@@ -283,496 +283,496 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
-		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
+	إذا ((*flags & TRANSPORT_ادفع_AUTO_UPSTREAM) && branch->merge_nr == 0)
+		*flags |= TRANSPORT_ادفع_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
 }
 
-static const char message_advice_pull_before_push[] =
+ساكن ثابت حرف message_advice_pull_before_ادفع[] =
 	N_("Updates were rejected because the tip of your current branch is behind\n"
 	   "its remote counterpart. If you want to integrate the remote changes,\n"
 	   "use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_checkout_pull_push[] =
+ساكن ثابت حرف message_advice_checkout_pull_ادفع[] =
 	N_("Updates were rejected because a pushed branch tip is behind its remote\n"
 	   "counterpart. If you want to integrate the remote changes, use 'git pull'\n"
 	   "before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_fetch_first[] =
+ساكن ثابت حرف message_advice_ref_fetch_first[] =
 	N_("Updates were rejected because the remote contains work that you do not\n"
 	   "have locally. This is usually caused by another repository pushing to\n"
 	   "the same ref. If you want to integrate the remote changes, use\n"
 	   "'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_already_exists[] =
+ساكن ثابت حرف message_advice_ref_already_exists[] =
 	N_("Updates were rejected because the tag already exists in the remote.");
 
-static const char message_advice_ref_needs_force[] =
+ساكن ثابت حرف message_advice_ref_needs_force[] =
 	N_("You cannot update a remote ref that points at a non-commit object,\n"
 	   "or update a remote ref to make it point at a non-commit object,\n"
 	   "without using the '--force' option.\n");
 
-static const char message_advice_ref_needs_update[] =
+ساكن ثابت حرف message_advice_ref_needs_update[] =
 	N_("Updates were rejected because the tip of the remote-tracking branch has\n"
 	   "been updated since the last checkout. If you want to integrate the\n"
 	   "remote changes, use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static void advise_pull_before_push(void)
+ساكن فراغ advise_pull_before_ادفع(فراغ)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_pull_before_push));
+	إذا (!advice_enabled(ADVICE_ادفع_NON_FF_CURRENT) || !advice_enabled(ADVICE_ادفع_UPDATE_REJECTED))
+		إرجاع;
+	advise(_(message_advice_pull_before_ادفع));
 }
 
-static void advise_checkout_pull_push(void)
+ساكن فراغ advise_checkout_pull_ادفع(فراغ)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_checkout_pull_push));
+	إذا (!advice_enabled(ADVICE_ادفع_NON_FF_MATCHING) || !advice_enabled(ADVICE_ادفع_UPDATE_REJECTED))
+		إرجاع;
+	advise(_(message_advice_checkout_pull_ادفع));
 }
 
-static void advise_ref_already_exists(void)
+ساكن فراغ advise_ref_already_exists(فراغ)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	إذا (!advice_enabled(ADVICE_ادفع_ALREADY_EXISTS) || !advice_enabled(ADVICE_ادفع_UPDATE_REJECTED))
+		إرجاع;
 	advise(_(message_advice_ref_already_exists));
 }
 
-static void advise_ref_fetch_first(void)
+ساكن فراغ advise_ref_fetch_first(فراغ)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	إذا (!advice_enabled(ADVICE_ادفع_FETCH_FIRST) || !advice_enabled(ADVICE_ادفع_UPDATE_REJECTED))
+		إرجاع;
 	advise(_(message_advice_ref_fetch_first));
 }
 
-static void advise_ref_needs_force(void)
+ساكن فراغ advise_ref_needs_force(فراغ)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	إذا (!advice_enabled(ADVICE_ادفع_NEEDS_FORCE) || !advice_enabled(ADVICE_ادفع_UPDATE_REJECTED))
+		إرجاع;
 	advise(_(message_advice_ref_needs_force));
 }
 
-static void advise_ref_needs_update(void)
+ساكن فراغ advise_ref_needs_update(فراغ)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	إذا (!advice_enabled(ADVICE_ادفع_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_ادفع_UPDATE_REJECTED))
+		إرجاع;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+ساكن صحيح ادفع_with_options(بنية transport *transport, بنية refspec *rs,
+			     صحيح flags)
 {
-	int err;
-	unsigned int reject_reasons;
-	char *anon_url = transport_anonymize_url(transport->url);
+	صحيح err;
+	unsigned صحيح reject_reasons;
+	حرف *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	إذا (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
-	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
+	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : عدم);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	إذا (!is_empty_cas(&cas)) {
+		إذا (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	إذا (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
-	err = transport_push(the_repository, transport,
+	err = transport_ادفع(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
+	إذا (err != 0) {
+		fprintf(stderr, "%s", ادفع_get_color(ادفع_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
+		fprintf(stderr, "%s", ادفع_get_color(ادفع_COLOR_RESET));
 	}
 
 	err |= transport_disconnect(transport);
-	free(anon_url);
-	if (!err)
-		return 0;
+	حرر(anon_url);
+	إذا (!err)
+		إرجاع 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
-		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
-		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	إذا (reject_reasons & REJECT_NON_FF_HEAD) {
+		advise_pull_before_ادفع();
+	} وإلا إذا (reject_reasons & REJECT_NON_FF_OTHER) {
+		advise_checkout_pull_ادفع();
+	} وإلا إذا (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} وإلا إذا (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} وإلا إذا (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} وإلا إذا (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	إرجاع 1;
 }
 
-static int do_push(int flags,
-		   const struct string_list *push_options,
-		   struct remote *remote)
+ساكن صحيح do_ادفع(صحيح flags,
+		   ثابت بنية string_list *ادفع_options,
+		   بنية remote *remote)
 {
-	int errs;
-	struct strvec *url;
-	struct refspec *push_refspec = &rs;
+	صحيح errs;
+	بنية strvec *url;
+	بنية refspec *ادفع_refspec = &rs;
 
-	if (push_options->nr)
-		flags |= TRANSPORT_PUSH_OPTIONS;
+	إذا (ادفع_options->nr)
+		flags |= TRANSPORT_ادفع_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
-			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
-			setup_default_push_refspecs(&flags, remote);
+	إذا (!ادفع_refspec->nr && !(flags & TRANSPORT_ادفع_ALL)) {
+		إذا (remote->ادفع.nr) {
+			ادفع_refspec = &remote->ادفع;
+		} وإلا إذا (!(flags & TRANSPORT_ادفع_MIRROR))
+			setup_default_ادفع_refspecs(&flags, remote);
 	}
 	errs = 0;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
-		struct transport *transport =
+	url = ادفع_url_of_remote(remote);
+	لكل (size_t i = 0; i < url->nr; i++) {
+		بنية transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
-			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		إذا (flags & TRANSPORT_ادفع_OPTIONS)
+			transport->ادفع_options = ادفع_options;
+		إذا (ادفع_with_options(transport, ادفع_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	إرجاع !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+ساكن صحيح option_parse_recurse_submodules(ثابت بنية option *opt,
+				   ثابت حرف *arg, صحيح unset)
 {
-	int *recurse_submodules = opt->value;
+	صحيح *recurse_submodules = opt->قيمة;
 
-	if (unset)
+	إذا (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	وإلا {
+		إذا (!strcmp(arg, "only-is-on-demand")) {
+			إذا (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
-			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
+		} وإلا {
+			*recurse_submodules = parse_ادفع_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	إرجاع 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+ساكن فراغ set_ادفع_cert_flags(صحيح *flags, صحيح v)
 {
-	switch (v) {
-	case SEND_PACK_PUSH_CERT_NEVER:
-		*flags &= ~(TRANSPORT_PUSH_CERT_ALWAYS | TRANSPORT_PUSH_CERT_IF_ASKED);
-		break;
-	case SEND_PACK_PUSH_CERT_ALWAYS:
-		*flags |= TRANSPORT_PUSH_CERT_ALWAYS;
-		*flags &= ~TRANSPORT_PUSH_CERT_IF_ASKED;
-		break;
-	case SEND_PACK_PUSH_CERT_IF_ASKED:
-		*flags |= TRANSPORT_PUSH_CERT_IF_ASKED;
-		*flags &= ~TRANSPORT_PUSH_CERT_ALWAYS;
-		break;
+	بدل (v) {
+	حالة SEND_PACK_ادفع_CERT_NEVER:
+		*flags &= ~(TRANSPORT_ادفع_CERT_ALWAYS | TRANSPORT_ادفع_CERT_IF_ASKED);
+		اكسر;
+	حالة SEND_PACK_ادفع_CERT_ALWAYS:
+		*flags |= TRANSPORT_ادفع_CERT_ALWAYS;
+		*flags &= ~TRANSPORT_ادفع_CERT_IF_ASKED;
+		اكسر;
+	حالة SEND_PACK_ادفع_CERT_IF_ASKED:
+		*flags |= TRANSPORT_ادفع_CERT_IF_ASKED;
+		*flags &= ~TRANSPORT_ادفع_CERT_ALWAYS;
+		اكسر;
 	}
 }
 
 
-static int git_push_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+ساكن صحيح git_ادفع_config(ثابت حرف *k, ثابت حرف *v,
+			   ثابت بنية config_context *ctx, فراغ *cb)
 {
-	const char *slot_name;
-	int *flags = cb;
+	ثابت حرف *slot_name;
+	صحيح *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
-			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
-			break;
-		case 1:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+	إذا (!strcmp(k, "push.followtags")) {
+		إذا (git_config_bool(k, v))
+			*flags |= TRANSPORT_ادفع_FOLLOW_TAGS;
+		وإلا
+			*flags &= ~TRANSPORT_ادفع_FOLLOW_TAGS;
+		إرجاع 0;
+	} وإلا إذا (!strcmp(k, "push.autosetupremote")) {
+		إذا (git_config_bool(k, v))
+			*flags |= TRANSPORT_ادفع_AUTO_UPSTREAM;
+		إرجاع 0;
+	} وإلا إذا (!strcmp(k, "push.gpgsign")) {
+		بدل (git_parse_maybe_bool(v)) {
+		حالة 0:
+			set_ادفع_cert_flags(flags, SEND_PACK_ادفع_CERT_NEVER);
+			اكسر;
+		حالة 1:
+			set_ادفع_cert_flags(flags, SEND_PACK_ادفع_CERT_ALWAYS);
+			اكسر;
+		افتراضي:
+			إذا (!strcasecmp(v, "if-asked"))
+				set_ادفع_cert_flags(flags, SEND_PACK_ادفع_CERT_IF_ASKED);
+			وإلا
+				إرجاع error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
-		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} وإلا إذا (!strcmp(k, "push.recursesubmodules")) {
+		recurse_submodules = parse_ادفع_recurse_submodules_arg(k, v);
+	} وإلا إذا (!strcmp(k, "submodule.recurse")) {
+		صحيح val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
-		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
-			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+	} وإلا إذا (!strcmp(k, "push.pushoption")) {
+		إرجاع parse_transport_option(k, v, &ادفع_options_config);
+	} وإلا إذا (!strcmp(k, "color.push")) {
+		ادفع_use_color = git_config_colorbool(k, v);
+		إرجاع 0;
+	} وإلا إذا (skip_prefix(k, "color.push.", &slot_name)) {
+		صحيح slot = parse_ادفع_color_slot(slot_name);
+		إذا (slot < 0)
+			إرجاع 0;
+		إذا (!v)
+			إرجاع config_error_nonbool(k);
+		إرجاع color_parse(v, ادفع_colors[slot]);
+	} وإلا إذا (!strcmp(k, "push.useforceifincludes")) {
+		إذا (git_config_bool(k, v))
+			*flags |= TRANSPORT_ادفع_FORCE_IF_INCLUDES;
+		وإلا
+			*flags &= ~TRANSPORT_ادفع_FORCE_IF_INCLUDES;
+		إرجاع 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	إرجاع git_default_config(k, v, ctx, عدم);
 }
 
-static int push_multiple(struct string_list *list,
-			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
-			 const char **refspecs,
-			 int refspec_nr)
+ساكن صحيح ادفع_multiple(بنية string_list *list,
+			 ثابت بنية string_list *ادفع_options,
+			 صحيح flags,
+			 صحيح tags,
+			 ثابت حرف **refspecs,
+			 صحيح refspec_nr)
 {
-	int result = 0;
+	صحيح result = 0;
 	size_t i;
-	struct strvec argv = STRVEC_INIT;
+	بنية strvec argv = STRVEC_INIT;
 
-	strvec_push(&argv, "push");
+	strvec_ادفع(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
-		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
-		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
-		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
-		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
-		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
-		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
-		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
-		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
-		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
-		strvec_push(&argv, "--mirror");
+	إذا (flags & TRANSPORT_ادفع_FORCE)
+		strvec_ادفع(&argv, "--force");
+	إذا (flags & TRANSPORT_ادفع_DRY_RUN)
+		strvec_ادفع(&argv, "--dry-run");
+	إذا (flags & TRANSPORT_ادفع_PORCELAIN)
+		strvec_ادفع(&argv, "--porcelain");
+	إذا (flags & TRANSPORT_ادفع_PRUNE)
+		strvec_ادفع(&argv, "--prune");
+	إذا (flags & TRANSPORT_ادفع_NO_HOOK)
+		strvec_ادفع(&argv, "--no-verify");
+	إذا (flags & TRANSPORT_ادفع_FOLLOW_TAGS)
+		strvec_ادفع(&argv, "--follow-tags");
+	إذا (flags & TRANSPORT_ادفع_SET_UPSTREAM)
+		strvec_ادفع(&argv, "--set-upstream");
+	إذا (flags & TRANSPORT_ادفع_FORCE_IF_INCLUDES)
+		strvec_ادفع(&argv, "--force-if-includes");
+	إذا (flags & TRANSPORT_ادفع_ALL)
+		strvec_ادفع(&argv, "--all");
+	إذا (flags & TRANSPORT_ادفع_MIRROR)
+		strvec_ادفع(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
-		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
-		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
-		strvec_push(&argv, "--no-thin");
+	إذا (flags & TRANSPORT_ادفع_CERT_ALWAYS)
+		strvec_ادفع(&argv, "--signed=yes");
+	وإلا إذا (flags & TRANSPORT_ادفع_CERT_IF_ASKED)
+		strvec_ادفع(&argv, "--signed=if-asked");
+	إذا (!thin)
+		strvec_ادفع(&argv, "--no-thin");
 
-	if (deleterefs)
-		strvec_push(&argv, "--delete");
+	إذا (deleterefs)
+		strvec_ادفع(&argv, "--delete");
 
-	if (receivepack)
+	إذا (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
-		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(&argv, "-q");
-	if (progress > 0)
-		strvec_push(&argv, "--progress");
-	else if (progress == 0)
-		strvec_push(&argv, "--no-progress");
+	إذا (verbosity >= 2)
+		strvec_ادفع(&argv, "-v");
+	إذا (verbosity >= 1)
+		strvec_ادفع(&argv, "-v");
+	وإلا إذا (verbosity < 0)
+		strvec_ادفع(&argv, "-q");
+	إذا (progress > 0)
+		strvec_ادفع(&argv, "--progress");
+	وإلا إذا (progress == 0)
+		strvec_ادفع(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(&argv, "--ipv6");
+	إذا (family == TRANSPORT_FAMILY_IPV4)
+		strvec_ادفع(&argv, "--ipv4");
+	وإلا إذا (family == TRANSPORT_FAMILY_IPV6)
+		strvec_ادفع(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
-		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
-		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(&argv, "--recurse-submodules=no");
+	إذا (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+		strvec_ادفع(&argv, "--recurse-submodules=check");
+	وإلا إذا (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_ادفع(&argv, "--recurse-submodules=on-demand");
+	وإلا إذا (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+		strvec_ادفع(&argv, "--recurse-submodules=only");
+	وإلا إذا (recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_ادفع(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
-		strvec_push(&argv, "--tags");
+	إذا (tags)
+		strvec_ادفع(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	لكل (i = 0; i < ادفع_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
-			     push_options->items[i].string);
+			     ادفع_options->عناصر[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	لكل (i = 0; i < cas.nr; i++) {
+		إذا (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} وإلا إذا (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
-			strvec_push(&argv, "--force-with-lease");
+		} وإلا {
+			strvec_ادفع(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
-		const char *name = list->items[i].string;
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+	لكل (i = 0; i < list->nr; i++) {
+		ثابت حرف *name = list->عناصر[i].string;
+		بنية child_process cmd = CHILD_PROCESS_INIT;
+		صحيح j;
 
 		strvec_pushv(&cmd.args, argv.v);
-		strvec_push(&cmd.args, name);
+		strvec_ادفع(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
-			strvec_push(&cmd.args, refspecs[j]);
+		لكل (j = 0; j < refspec_nr; j++)
+			strvec_ادفع(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		إذا (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		إذا (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	إرجاع result;
 }
 
-static void die_if_repo_looks_like_ref(const char *repo)
+ساكن فراغ die_if_repo_looks_like_ref(ثابت حرف *repo)
 {
-	const char *slash = strchr(repo, '/');
-	struct strbuf name = STRBUF_INIT;
-	int code;
+	ثابت حرف *slash = strchr(repo, '/');
+	بنية strbuf name = STRBUF_INIT;
+	صحيح code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	إذا (!slash || !slash[1] || file_exists(repo))
+		إرجاع;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	إذا (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		إرجاع;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
-	advise_if_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF,
+	advise_if_enabled(ADVICE_ادفع_REPO_LOOKS_LIKE_REF,
 			  _("Did you mean to use: git push %s %s?"),
 			  name.buf, slash + 1);
 	strbuf_release(&name);
 	exit(code);
 }
 
-int cmd_push(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+صحيح cmd_ادفع(صحيح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *prefix,
+	     بنية repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
-	const char *repo = NULL;	/* default repository */
-	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
-	struct string_list remote_group = STRING_LIST_INIT_DUP;
-	struct string_list *push_options;
-	const struct string_list_item *item;
+	صحيح flags = 0;
+	صحيح tags = 0;
+	صحيح ادفع_cert = -1;
+	صحيح rc = 0;
+	صحيح base_flags;
+	ثابت حرف *repo = عدم;	/* default repository */
+	بنية string_list ادفع_options_cmdline = STRING_LIST_INIT_DUP;
+	بنية string_list remote_group = STRING_LIST_INIT_DUP;
+	بنية string_list *ادفع_options;
+	ثابت بنية string_list_item *item;
 
-	struct option options[] = {
+	بنية option options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_STRING( 0 , "repo", &repo, N_("repository"), N_("repository")),
-		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_PUSH_ALL),
+		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_ادفع_ALL),
 		OPT_ALIAS( 0 , "branches", "all"),
 		OPT_BIT( 0 , "mirror", &flags, N_("mirror all refs"),
-			    (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE)),
+			    (TRANSPORT_ادفع_MIRROR|TRANSPORT_ادفع_FORCE)),
 		OPT_BOOL('d', "delete", &deleterefs, N_("delete refs")),
 		OPT_BOOL( 0 , "tags", &tags, N_("push tags (can't be used with --all or --branches or --mirror)")),
-		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_PUSH_DRY_RUN),
-		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_PUSH_PORCELAIN),
-		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_PUSH_FORCE),
+		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_ادفع_DRY_RUN),
+		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_ادفع_PORCELAIN),
+		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_ادفع_FORCE),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 			       N_("require old value of ref to be at this value"),
-			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_push_cas_option),
+			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_ادفع_cas_option),
 		OPT_BIT(0, TRANS_OPT_FORCE_IF_INCLUDES, &flags,
 			N_("require remote updates to be integrated locally"),
-			TRANSPORT_PUSH_FORCE_IF_INCLUDES),
+			TRANSPORT_ادفع_FORCE_IF_INCLUDES),
 		OPT_CALLBACK(0, "recurse-submodules", &recurse_submodules, "(check|on-demand|no)",
 			     N_("control recursive pushing of submodules"), option_parse_recurse_submodules),
 		OPT_BOOL_F( 0 , "thin", &thin, N_("use thin pack"), PARSE_OPT_NOCOMPLETE),
 		OPT_STRING( 0 , "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING( 0 , "exec", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_BIT('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
-			TRANSPORT_PUSH_SET_UPSTREAM),
+			TRANSPORT_ادفع_SET_UPSTREAM),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
 		OPT_BIT(0, "prune", &flags, N_("prune locally removed refs"),
-			TRANSPORT_PUSH_PRUNE),
-		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_PUSH_NO_HOOK),
+			TRANSPORT_ادفع_PRUNE),
+		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_ادفع_NO_HOOK),
 		OPT_BIT(0, "follow-tags", &flags, N_("push missing but relevant tags"),
-			TRANSPORT_PUSH_FOLLOW_TAGS),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-				PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_PUSH_ATOMIC),
-		OPT_STRING_LIST('o', "push-option", &push_options_cmdline, N_("server-specific"), N_("option to transmit")),
+			TRANSPORT_ادفع_FOLLOW_TAGS),
+		OPT_CALLBACK_F(0, "signed", &ادفع_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+				PARSE_OPT_OPTARG, option_parse_ادفع_signed),
+		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_ادفع_ATOMIC),
+		OPT_STRING_LIST('o', "push-option", &ادفع_options_cmdline, N_("server-specific"), N_("option to transmit")),
 		OPT_IPVERSION(&family),
 		OPT_END()
 	};
 
 	packet_trace_identity("push");
-	repo_config(the_repository, git_push_config, &flags);
-	argc = parse_options(argc, argv, prefix, options, push_usage, 0);
-	push_options = (push_options_cmdline.nr
-		? &push_options_cmdline
-		: &push_options_config);
-	set_push_cert_flags(&flags, push_cert);
+	repo_config(the_repository, git_ادفع_config, &flags);
+	argc = parse_options(argc, argv, prefix, options, ادفع_usage, 0);
+	ادفع_options = (ادفع_options_cmdline.nr
+		? &ادفع_options_cmdline
+		: &ادفع_options_config);
+	set_ادفع_cert_flags(&flags, ادفع_cert);
 
-	refspec_init_push(&rs, the_hash_algo);
+	refspec_init_ادفع(&rs, the_hash_algo);
 
 	die_for_incompatible_opt4(deleterefs, "--delete",
 				  tags, "--tags",
-				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
-				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+				  flags & TRANSPORT_ادفع_ALL, "--all/--branches",
+				  flags & TRANSPORT_ادفع_MIRROR, "--mirror");
+	إذا (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	إذا (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	وإلا إذا (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	وإلا إذا (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	إذا (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
-			struct remote *r;
+	إذا (repo) {
+		إذا (!add_remote_or_group(repo, &remote_group)) {
+			بنية remote *r;
 
 			/*
 			 * Check the advice up front to avoid the remote
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			إذا (advice_enabled(ADVICE_ادفع_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			إذا (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
-		struct remote *r = pushremote_get(NULL);
-		if (!r)
+	} وإلا {
+		بنية remote *r = pushremote_get(عدم);
+		إذا (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	إذا (!is_empty_cas(&cas) && (flags & TRANSPORT_ادفع_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
-	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+	for_each_string_list_item(item, ادفع_options)
+		إذا (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	إذا (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
-			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			صحيح inner_flags = base_flags;
+			بنية remote *r = pushremote_get(remote_group.عناصر[0].string);
+			إذا (!r)
 				die(_("no such remote or remote group: %s"),
-				    remote_group.items[0].string);
+				    remote_group.عناصر[0].string);
 
-			if (r->mirror)
-				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
+			إذا (r->mirror)
+				inner_flags |= (TRANSPORT_ادفع_MIRROR|TRANSPORT_ادفع_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			إذا (inner_flags & TRANSPORT_ادفع_ALL) {
+				إذا (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			إذا (inner_flags & TRANSPORT_ادفع_MIRROR) {
+				إذا (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
-			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
+			rs = (بنية refspec) REFSPEC_INIT_ادفع(the_hash_algo);
 
-			if (tags)
+			إذا (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			إذا (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
-			rc = do_push(inner_flags, push_options, r);
+			rc = do_ادفع(inner_flags, ادفع_options, r);
 		}
-	} else {
+	} وإلا {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,22 +876,22 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		إذا (flags & TRANSPORT_ادفع_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
-		rc = push_multiple(&remote_group, push_options, flags,
+		rc = ادفع_multiple(&remote_group, ادفع_options, flags,
 				   tags,
-				   argc > 1 ? argv + 1 : NULL,
+				   argc > 1 ? argv + 1 : عدم,
 				   argc > 1 ? argc - 1 : 0);
 	}
 
-	string_list_clear(&push_options_cmdline, 0);
-	string_list_clear(&push_options_config, 0);
+	string_list_clear(&ادفع_options_cmdline, 0);
+	string_list_clear(&ادفع_options_config, 0);
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
-		usage_with_options(push_usage, options);
-	else
-		return rc;
+	إذا (rc == -1)
+		usage_with_options(ادفع_usage, options);
+	وإلا
+		إرجاع rc;
 }
