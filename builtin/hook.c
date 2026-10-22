@@ -1,208 +1,208 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hook.h"
-#include "parse-options.h"
-#include "thread-utils.h"
+#تعریف_کړه USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hook.h"
+#ضمن "parse-options.h"
+#ضمن "thread-utils.h"
 
-#define BUILTIN_HOOK_RUN_USAGE \
+#تعریف_کړه BUILTIN_HOOK_پرلپسې_USAGE \
 	N_("git hook run [--allow-unknown-hook-name] [--ignore-missing] [--to-stdin=<path>] [(-j|--jobs) <n>]\n" \
 	   "<hook-name> [-- <hook-args>]")
-#define BUILTIN_HOOK_LIST_USAGE \
+#تعریف_کړه BUILTIN_HOOK_LIST_USAGE \
 	N_("git hook list [--allow-unknown-hook-name] [-z] [--show-scope] <hook-name>")
 
-static const char * const builtin_hook_usage[] = {
-	BUILTIN_HOOK_RUN_USAGE,
+ساكن ثابت حرف * ثابت builtin_hook_usage[] = {
+	BUILTIN_HOOK_پرلپسې_USAGE,
 	BUILTIN_HOOK_LIST_USAGE,
-	NULL
+	عدم
 };
 
-static const char * const builtin_hook_run_usage[] = {
-	BUILTIN_HOOK_RUN_USAGE,
-	NULL
+ساكن ثابت حرف * ثابت builtin_hook_پرلپسې_usage[] = {
+	BUILTIN_HOOK_پرلپسې_USAGE,
+	عدم
 };
 
-static int list(int argc, const char **argv, const char *prefix,
-		 struct repository *repo)
+ساكن صحيح list(صحيح argc, ثابت حرف **argv, ثابت حرف *مختاړی,
+		 بنية repository *repo)
 {
-	static const char *const builtin_hook_list_usage[] = {
+	ساكن ثابت حرف *ثابت builtin_hook_list_usage[] = {
 		BUILTIN_HOOK_LIST_USAGE,
-		NULL
+		عدم
 	};
-	struct string_list *head;
-	struct string_list_item *item;
-	const char *hookname = NULL;
-	int line_terminator = '\n';
-	int show_scope = 0;
-	int allow_unknown = 0;
-	int ret = 0;
+	بنية string_list *سر;
+	بنية string_list_توکی *توکی;
+	ثابت حرف *hookname = عدم;
+	صحيح کرښه_terminator = '\n';
+	صحيح show_scope = 0;
+	صحيح allow_unknown = 0;
+	صحيح ret = 0;
 
-	struct option list_options[] = {
-		OPT_SET_INT('z', NULL, &line_terminator,
+	بنية option list_options[] = {
+		OPT_سېټ_INT('z', عدم, &کرښه_terminator,
 			    N_("use NUL as line terminator"), '\0'),
 		OPT_BOOL(0, "show-scope", &show_scope,
 			 N_("show the config scope that defined each hook")),
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
 			 N_("allow running a hook with a non-native hook name")),
-		OPT_END(),
+		OPT_پای_ټکی(),
 	};
 
-	argc = parse_options(argc, argv, prefix, list_options,
+	argc = parse_options(argc, argv, مختاړی, list_options,
 			     builtin_hook_list_usage, 0);
 
 	/*
 	 * The only unnamed argument provided should be the hook-name; if we add
 	 * arguments later they probably should be caught by parse_options.
 	 */
-	if (argc != 1)
-		usage_msg_opt(_("you must specify a hook event name to list"),
+	إذا (argc != 1)
+		usage_پیغام_opt(_("you must specify a hook event name to list"),
 			      builtin_hook_list_usage, list_options);
 
 	hookname = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hookname)) {
+	إذا (!allow_unknown && !is_معلوم_hook(hookname)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hookname);
-		return 1;
+		أرجع 1;
 	}
 
-	head = list_hooks(repo, hookname, NULL);
+	سر = list_hooks(repo, hookname, عدم);
 
-	if (!head->nr) {
+	إذا (!سر->nr) {
 		warning(_("no hooks found for event '%s'"), hookname);
 		ret = 1; /* no hooks found */
-		goto cleanup;
+		اذهب cleanup;
 	}
 
-	for_each_string_list_item(item, head) {
-		struct hook *h = item->util;
+	for_each_string_list_توکی(توکی, سر) {
+		بنية hook *h = توکی->util;
 
-		switch (h->kind) {
-		case HOOK_TRADITIONAL:
-			printf("%s%c", _("hook from hookdir"), line_terminator);
-			break;
-		case HOOK_CONFIGURED: {
-			const char *name = h->u.configured.friendly_name;
-			const char *scope = show_scope ?
-				config_scope_name(h->u.configured.scope) : NULL;
+		بدل (h->ډول) {
+		حالة HOOK_TRADITIONAL:
+			چاپ_کړه("%s%c", _("hook from hookdir"), کرښه_terminator);
+			اكسر;
+		حالة HOOK_CONFIGURED: {
+			ثابت حرف *name = h->u.configured.friendly_name;
+			ثابت حرف *scope = show_scope ?
+				config_scope_name(h->u.configured.scope) : عدم;
 			/*
 			 * Show the most relevant disable reason. Event-level
 			 * takes precedence: if the whole event is off, that
 			 * is what the user needs to know. The per-hook
 			 * "disabled" surfaces once the event is re-enabled.
 			 */
-			const char *disability =
+			ثابت حرف *disability =
 				h->u.configured.event_disabled ? "event-disabled\t" :
 				h->u.configured.disabled       ? "disabled\t"       :
 								 "";
-			if (scope)
-				printf("%s\t%s%s%c", scope, disability, name,
-				       line_terminator);
-			else
-				printf("%s%s%c", disability, name,
-				       line_terminator);
-			break;
+			إذا (scope)
+				چاپ_کړه("%s\t%s%s%c", scope, disability, name,
+				       کرښه_terminator);
+			وإلا
+				چاپ_کړه("%s%s%c", disability, name,
+				       کرښه_terminator);
+			اكسر;
 		}
-		default:
+		افتراضي:
 			BUG("unknown hook kind");
 		}
 	}
 
 cleanup:
-	string_list_clear_func(head, hook_free);
-	free(head);
-	return ret;
+	string_list_clear_func(سر, hook_free);
+	حرر(سر);
+	أرجع ret;
 }
 
-static int run(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+ساكن صحيح پرلپسې(صحيح argc, ثابت حرف **argv, ثابت حرف *مختاړی,
+	       بنية repository *repo ناکارول_شوی)
 {
-	int i;
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	int ignore_missing = 0;
-	int allow_unknown = 0;
-	int jobs = 0;
-	const char *hook_name;
-	struct option run_options[] = {
+	صحيح i;
+	بنية پرلپسې_hooks_opt opt = پرلپسې_HOOKS_OPT_INIT;
+	صحيح ignore_missing = 0;
+	صحيح allow_unknown = 0;
+	صحيح jobs = 0;
+	ثابت حرف *hook_name;
+	بنية option پرلپسې_options[] = {
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
 			 N_("allow running a hook with a non-native hook name")),
 		OPT_BOOL(0, "ignore-missing", &ignore_missing,
 			 N_("silently ignore missing requested <hook-name>")),
-		OPT_STRING(0, "to-stdin", &opt.path_to_stdin, N_("path"),
+		OPT_STRING(0, "to-stdin", &opt.لار_منزل_stdin, N_("path"),
 			   N_("file to read into hooks' stdin")),
 		OPT_INTEGER('j', "jobs", &jobs,
 			    N_("run up to <n> hooks simultaneously (-1 for CPU count)")),
-		OPT_END(),
+		OPT_پای_ټکی(),
 	};
-	int ret;
+	صحيح ret;
 
-	argc = parse_options(argc, argv, prefix, run_options,
-			     builtin_hook_run_usage,
+	argc = parse_options(argc, argv, مختاړی, پرلپسې_options,
+			     builtin_hook_پرلپسې_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (jobs == -1)
+	إذا (jobs == -1)
 		opt.jobs = online_cpus();
-	else if (jobs < 0)
+	وإلا إذا (jobs < 0)
 		die(_("invalid value for -j: %d"
 		     " (use -1 for CPU count or a"
 		     " positive integer)"), jobs);
-	else
+	وإلا
 		opt.jobs = jobs;
 
-	if (!argc)
-		goto usage;
+	إذا (!argc)
+		اذهب usage;
 
 	/*
 	 * Having a -- for "run" when providing <hook-args> is
 	 * mandatory.
 	 */
-	if (argc > 1 && strcmp(argv[1], "--") &&
+	إذا (argc > 1 && strcmp(argv[1], "--") &&
 	    strcmp(argv[1], "--end-of-options"))
-		goto usage;
+		اذهب usage;
 
 	/* Add our arguments, start after -- */
-	for (i = 2 ; i < argc; i++)
-		strvec_push(&opt.args, argv[i]);
+	لكل (i = 2 ; i < argc; i++)
+		strvec_ټېل(&opt.دلیلونه, argv[i]);
 
 	/* Need to take into account core.hooksPath */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
 	hook_name = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hook_name)) {
+	إذا (!allow_unknown && !is_معلوم_hook(hook_name)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hook_name);
-		return 1;
+		أرجع 1;
 	}
 
-	if (!ignore_missing)
+	إذا (!ignore_missing)
 		opt.error_if_missing = 1;
-	ret = run_hooks_opt(the_repository, hook_name, &opt);
-	if (ret < 0) /* error() return */
+	ret = پرلپسې_hooks_opt(the_repository, hook_name, &opt);
+	إذا (ret < 0) /* error() return */
 		ret = 1;
-	return ret;
+	أرجع ret;
 usage:
-	usage_with_options(builtin_hook_run_usage, run_options);
+	usage_with_options(builtin_hook_پرلپسې_usage, پرلپسې_options);
 }
 
-int cmd_hook(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+صحيح cmd_hook(صحيح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *مختاړی,
+	     بنية repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_hook_options[] = {
-		OPT_SUBCOMMAND("run", &fn, run),
+	parse_opt_subcommand_fn *fn = عدم;
+	بنية option builtin_hook_options[] = {
+		OPT_SUBCOMMAND("run", &fn, پرلپسې),
 		OPT_SUBCOMMAND("list", &fn, list),
-		OPT_END(),
+		OPT_پای_ټکی(),
 	};
 
-	argc = parse_options(argc, argv, NULL, builtin_hook_options,
+	argc = parse_options(argc, argv, عدم, builtin_hook_options,
 			     builtin_hook_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	أرجع fn(argc, argv, مختاړی, repo);
 }

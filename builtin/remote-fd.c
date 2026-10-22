@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#ضمن "builtin.h"
+#ضمن "transport.h"
 
-static const char usage_msg[] =
+ساكن ثابت حرف usage_پیغام[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -19,70 +19,70 @@ static const char usage_msg[] =
  *
  */
 
-#define MAXCOMMAND 4096
+#تعریف_کړه MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+ساكن فراغ command_loop(صحيح ننوت_fd, صحيح output_fd)
 {
-	char buffer[MAXCOMMAND];
+	حرف بفر[MAXCOMMAND];
 
-	while (1) {
-		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+	طالما (1) {
+		اندازه_t i;
+		إذا (!fgets(بفر, MAXCOMMAND - 1, stdin)) {
+			إذا (ferror(stdin))
 				die("Input error");
-			return;
+			أرجع;
 		}
 		/* Strip end of line characters. */
-		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
-			buffer[--i] = 0;
+		i = مزي_اوږدوالی(بفر);
+		طالما (i > 0 && که_تشه(بفر[i - 1]))
+			بفر[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
-			printf("*connect\n\n");
+		إذا (!strcmp(بفر, "capabilities")) {
+			چاپ_کړه("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
-			printf("\n");
+		} وإلا إذا (starts_with(بفر, "connect ")) {
+			چاپ_کړه("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			إذا (bidirectional_transfer_loop(ننوت_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
-			die("Bad command: %s", buffer);
+			أرجع;
+		} وإلا {
+			die("Bad command: %s", بفر);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+صحيح cmd_remote_fd(صحيح argc,
+		  ثابت حرف **argv,
+		  ثابت حرف *مختاړی,
+		  بنية repository *repo ناکارول_شوی)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	صحيح ننوت_fd = -1;
+	صحيح output_fd = -1;
+	حرف *پای_ټکی;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_تشه_مختاړی(مختاړی);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_پیغام);
+	إذا (argc != 3)
+		usage(usage_پیغام);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	ننوت_fd = (صحيح)strtoul(argv[2], &پای_ټکی, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	إذا ((پای_ټکی == argv[2]) || (*پای_ټکی != ',' && *پای_ټکی != '/' && *پای_ټکی))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	إذا (*پای_ټکی == '/' || !*پای_ټکی) {
+		output_fd = ننوت_fd;
+	} وإلا {
+		حرف *end2;
+		output_fd = (صحيح)strtoul(پای_ټکی + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		إذا ((end2 == پای_ټکی + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(ننوت_fd, output_fd);
+	أرجع 0;
 }

@@ -1,163 +1,163 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "commit-reach.h"
+#تعریف_کړه USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "commit.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "parse-options.h"
+#ضمن "commit-reach.h"
 
-static int show_merge_base(struct commit **rev, size_t rev_nr, int show_all)
+ساكن صحيح show_یوځای_بنسټ(بنية commit **rev, اندازه_t rev_nr, صحيح show_all)
 {
-	enum merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
-	struct commit_list *result = NULL, *r;
+	تعداد یوځای_بنسټ_flags flags = show_all ? یوځای_بنسټ_پیدا_کړه_ALL : 0;
+	بنية commit_list *پایله = عدم, *r;
 
-	if (repo_get_merge_bases_many_dirty(the_repository, rev[0],
+	إذا (repo_get_یوځای_bases_many_dirty(the_repository, rev[0],
 					    rev_nr - 1, rev + 1,
-					    flags, &result) < 0) {
-		commit_list_free(result);
-		return -1;
+					    flags, &پایله) < 0) {
+		commit_list_free(پایله);
+		أرجع -1;
 	}
 
-	if (!result)
-		return 1;
+	إذا (!پایله)
+		أرجع 1;
 
-	for (r = result; r; r = r->next) {
-		printf("%s\n", oid_to_hex(&r->item->object.oid));
-		if (!show_all)
-			break;
+	لكل (r = پایله; r; r = r->بل) {
+		چاپ_کړه("%s\n", oid_منزل_hex(&r->توکی->object.oid));
+		إذا (!show_all)
+			اكسر;
 	}
 
-	commit_list_free(result);
-	return 0;
+	commit_list_free(پایله);
+	أرجع 0;
 }
 
-static const char * const merge_base_usage[] = {
+ساكن ثابت حرف * ثابت یوځای_بنسټ_usage[] = {
 	N_("git merge-base [-a | --all] <commit> <commit>..."),
 	N_("git merge-base [-a | --all] --octopus <commit>..."),
 	N_("git merge-base --is-ancestor <commit> <commit>"),
 	N_("git merge-base --independent <commit>..."),
 	N_("git merge-base --fork-point <ref> [<commit>]"),
-	NULL
+	عدم
 };
 
-static struct commit *get_commit_reference(const char *arg)
+ساكن بنية commit *get_commit_reference(ثابت حرف *arg)
 {
-	struct object_id revkey;
-	struct commit *r;
+	بنية object_id revkey;
+	بنية commit *r;
 
-	if (repo_get_oid(the_repository, arg, &revkey))
+	إذا (repo_get_oid(the_repository, arg, &revkey))
 		die("Not a valid object name %s", arg);
 	r = lookup_commit_reference(the_repository, &revkey);
-	if (!r)
+	إذا (!r)
 		die("Not a valid commit name %s", arg);
 
-	return r;
+	أرجع r;
 }
 
-static int handle_independent(int count, const char **args)
+ساكن صحيح handle_independent(صحيح شمېر, ثابت حرف **دلیلونه)
 {
-	struct commit_list *revs = NULL, *rev;
-	int i;
+	بنية commit_list *revs = عدم, *rev;
+	صحيح i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	لكل (i = شمېر - 1; i >= 0; i--)
+		commit_list_ورننباسه(get_commit_reference(دلیلونه[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
-	if (!revs)
-		return 1;
+	إذا (!revs)
+		أرجع 1;
 
-	for (rev = revs; rev; rev = rev->next)
-		printf("%s\n", oid_to_hex(&rev->item->object.oid));
+	لكل (rev = revs; rev; rev = rev->بل)
+		چاپ_کړه("%s\n", oid_منزل_hex(&rev->توکی->object.oid));
 
 	commit_list_free(revs);
-	return 0;
+	أرجع 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+ساكن صحيح handle_octopus(صحيح شمېر, ثابت حرف **دلیلونه, صحيح show_all)
 {
-	struct commit_list *revs = NULL;
-	struct commit_list *result = NULL, *rev;
-	int i;
+	بنية commit_list *revs = عدم;
+	بنية commit_list *پایله = عدم, *rev;
+	صحيح i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	لكل (i = شمېر - 1; i >= 0; i--)
+		commit_list_ورننباسه(get_commit_reference(دلیلونه[i]), &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0) {
+	إذا (get_octopus_یوځای_bases(revs, &پایله) < 0) {
 		commit_list_free(revs);
-		commit_list_free(result);
-		return 128;
+		commit_list_free(پایله);
+		أرجع 128;
 	}
 	commit_list_free(revs);
-	reduce_heads_replace(&result);
+	reduce_heads_replace(&پایله);
 
-	if (!result)
-		return 1;
+	إذا (!پایله)
+		أرجع 1;
 
-	for (rev = result; rev; rev = rev->next) {
-		printf("%s\n", oid_to_hex(&rev->item->object.oid));
-		if (!show_all)
-			break;
+	لكل (rev = پایله; rev; rev = rev->بل) {
+		چاپ_کړه("%s\n", oid_منزل_hex(&rev->توکی->object.oid));
+		إذا (!show_all)
+			اكسر;
 	}
 
-	commit_list_free(result);
-	return 0;
+	commit_list_free(پایله);
+	أرجع 0;
 }
 
-static int handle_is_ancestor(int argc, const char **argv)
+ساكن صحيح handle_is_ancestor(صحيح argc, ثابت حرف **argv)
 {
-	struct commit *one, *two;
-	int ret;
+	بنية commit *one, *two;
+	صحيح ret;
 
-	if (argc != 2)
+	إذا (argc != 2)
 		die("--is-ancestor takes exactly two commits");
 	one = get_commit_reference(argv[0]);
 	two = get_commit_reference(argv[1]);
-	ret = repo_in_merge_bases(the_repository, one, two);
-	if (ret < 0)
-		exit(128);
-	if (ret)
-		return 0;
-	else
-		return 1;
+	ret = repo_دننه_یوځای_bases(the_repository, one, two);
+	إذا (ret < 0)
+		وتل(128);
+	إذا (ret)
+		أرجع 0;
+	وإلا
+		أرجع 1;
 }
 
-static int handle_fork_point(int argc, const char **argv)
+ساكن صحيح handle_fork_ټکی(صحيح argc, ثابت حرف **argv)
 {
-	struct object_id oid;
-	struct commit *derived, *fork_point;
-	const char *commitname;
+	بنية object_id oid;
+	بنية commit *derived, *fork_ټکی;
+	ثابت حرف *commitname;
 
 	commitname = (argc == 2) ? argv[1] : "HEAD";
-	if (repo_get_oid(the_repository, commitname, &oid))
+	إذا (repo_get_oid(the_repository, commitname, &oid))
 		die("Not a valid object name: '%s'", commitname);
 
 	derived = lookup_commit_reference(the_repository, &oid);
 
-	fork_point = get_fork_point(argv[0], derived);
+	fork_ټکی = get_fork_ټکی(argv[0], derived);
 
-	if (!fork_point)
-		return 1;
+	إذا (!fork_ټکی)
+		أرجع 1;
 
-	printf("%s\n", oid_to_hex(&fork_point->object.oid));
-	return 0;
+	چاپ_کړه("%s\n", oid_منزل_hex(&fork_ټکی->object.oid));
+	أرجع 0;
 }
 
-int cmd_merge_base(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_یوځای_بنسټ(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *مختاړی,
+		   بنية repository *repo ناکارول_شوی)
 {
-	struct commit **rev;
-	size_t rev_nr = 0;
-	int show_all = 0;
-	int cmdmode = 0;
-	int ret;
+	بنية commit **rev;
+	اندازه_t rev_nr = 0;
+	صحيح show_all = 0;
+	صحيح cmdmode = 0;
+	صحيح ret;
 
-	struct option options[] = {
+	بنية option options[] = {
 		OPT_BOOL('a', "all", &show_all, N_("output all common ancestors")),
 		OPT_CMDMODE(0, "octopus", &cmdmode,
 			    N_("find ancestors for a single n-way merge"), 'o'),
@@ -167,44 +167,44 @@ int cmd_merge_base(int argc,
 			    N_("is the first one ancestor of the other?"), 'a'),
 		OPT_CMDMODE(0, "fork-point", &cmdmode,
 			    N_("find where <commit> forked from reflog of <ref>"), 'f'),
-		OPT_END()
+		OPT_پای_ټکی()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, options, merge_base_usage, 0);
+	repo_config(the_repository, git_default_config, عدم);
+	argc = parse_options(argc, argv, مختاړی, options, یوځای_بنسټ_usage, 0);
 
-	if (cmdmode == 'a') {
-		if (argc < 2)
-			usage_with_options(merge_base_usage, options);
-		if (show_all)
+	إذا (cmdmode == 'a') {
+		إذا (argc < 2)
+			usage_with_options(یوځای_بنسټ_usage, options);
+		إذا (show_all)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--is-ancestor", "--all");
-		return handle_is_ancestor(argc, argv);
+		أرجع handle_is_ancestor(argc, argv);
 	}
 
-	if (cmdmode == 'r' && show_all)
+	إذا (cmdmode == 'r' && show_all)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--independent", "--all");
 
-	if (cmdmode == 'o')
-		return handle_octopus(argc, argv, show_all);
+	إذا (cmdmode == 'o')
+		أرجع handle_octopus(argc, argv, show_all);
 
-	if (cmdmode == 'r')
-		return handle_independent(argc, argv);
+	إذا (cmdmode == 'r')
+		أرجع handle_independent(argc, argv);
 
-	if (cmdmode == 'f') {
-		if (argc < 1 || 2 < argc)
-			usage_with_options(merge_base_usage, options);
-		return handle_fork_point(argc, argv);
+	إذا (cmdmode == 'f') {
+		إذا (argc < 1 || 2 < argc)
+			usage_with_options(یوځای_بنسټ_usage, options);
+		أرجع handle_fork_ټکی(argc, argv);
 	}
 
-	if (argc < 2)
-		usage_with_options(merge_base_usage, options);
+	إذا (argc < 2)
+		usage_with_options(یوځای_بنسټ_usage, options);
 
 	ALLOC_ARRAY(rev, argc);
-	while (argc-- > 0)
+	طالما (argc-- > 0)
 		rev[rev_nr++] = get_commit_reference(*argv++);
-	ret = show_merge_base(rev, rev_nr, show_all);
-	free(rev);
-	return ret;
+	ret = show_یوځای_بنسټ(rev, rev_nr, show_all);
+	حرر(rev);
+	أرجع ret;
 }

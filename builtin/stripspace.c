@@ -1,73 +1,73 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#تعریف_کړه USE_THE_REPOSITORY_VARIABLE
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "setup.h"
+#ضمن "strbuf.h"
+#ضمن "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+ساكن فراغ comment_کرښې(بنية strbuf *buf)
 {
-	char *msg;
-	size_t len;
+	حرف *پیغام;
+	اندازه_t len;
 
-	msg = strbuf_detach(buf, &len);
-	strbuf_add_commented_lines(buf, msg, len, comment_line_str);
-	free(msg);
+	پیغام = strbuf_detach(buf, &len);
+	strbuf_جمع_کړه_commented_کرښې(buf, پیغام, len, comment_کرښه_str);
+	حرر(پیغام);
 }
 
-static const char * const stripspace_usage[] = {
+ساكن ثابت حرف * ثابت stripspace_usage[] = {
 	"git stripspace [-s | --strip-comments]",
 	"git stripspace [-c | --comment-lines]",
-	NULL
+	عدم
 };
 
-enum stripspace_mode {
+تعداد stripspace_ډېرپېښ {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
-	COMMENT_LINES
+	COMMENT_کرښې
 };
 
-int cmd_stripspace(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+صحيح cmd_stripspace(صحيح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *مختاړی,
+		   بنية repository *repo ناکارول_شوی)
 {
-	struct strbuf buf = STRBUF_INIT;
-	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	بنية strbuf buf = STRBUF_INIT;
+	تعداد stripspace_ډېرپېښ ډېرپېښ = STRIP_DEFAULT;
+	صحيح nongit;
 
-	const struct option options[] = {
-		OPT_CMDMODE('s', "strip-comments", &mode,
+	ثابت بنية option options[] = {
+		OPT_CMDMODE('s', "strip-comments", &ډېرپېښ,
 			    N_("skip and remove all lines starting with comment character"),
 			    STRIP_COMMENTS),
-		OPT_CMDMODE('c', "comment-lines", &mode,
+		OPT_CMDMODE('c', "comment-lines", &ډېرپېښ,
 			    N_("prepend comment character and space to each line"),
-			    COMMENT_LINES),
-		OPT_END()
+			    COMMENT_کرښې),
+		OPT_پای_ټکی()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	argc = parse_options(argc, argv, مختاړی, options, stripspace_usage, 0);
+	إذا (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
-		setup_git_directory_gently(the_repository, &nongit);
-		repo_config(the_repository, git_default_config, NULL);
+	إذا (ډېرپېښ == STRIP_COMMENTS || ډېرپېښ == COMMENT_کرښې) {
+		تیاری_git_directory_gently(the_repository, &nongit);
+		repo_config(the_repository, git_default_config, عدم);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	إذا (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	إذا (ډېرپېښ == STRIP_DEFAULT || ډېرپېښ == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
-			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
-		comment_lines(&buf);
+			  ډېرپېښ == STRIP_COMMENTS ? comment_کرښه_str : عدم);
+	وإلا
+		comment_کرښې(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	أرجع 0;
 }

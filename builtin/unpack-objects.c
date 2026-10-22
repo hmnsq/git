@@ -1,106 +1,106 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کړه USE_THE_REPOSITORY_VARIABLE
+#تعریف_کړه DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "git-zlib.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "odb/transaction.h"
-#include "object.h"
-#include "delta.h"
-#include "pack.h"
-#include "blob.h"
-#include "replace-object.h"
-#include "strbuf.h"
-#include "progress.h"
-#include "decorate.h"
-#include "fsck.h"
-#include "packfile.h"
+#ضمن "builtin.h"
+#ضمن "config.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "git-zlib.h"
+#ضمن "hex.h"
+#ضمن "object-file.h"
+#ضمن "odb.h"
+#ضمن "odb/streaming.h"
+#ضمن "odb/transaction.h"
+#ضمن "object.h"
+#ضمن "delta.h"
+#ضمن "pack.h"
+#ضمن "blob.h"
+#ضمن "replace-object.h"
+#ضمن "strbuf.h"
+#ضمن "progress.h"
+#ضمن "decorate.h"
+#ضمن "fsck.h"
+#ضمن "packfile.h"
 
-static int dry_run, quiet, recover, has_errors, strict;
-static const char unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
+ساكن صحيح dry_پرلپسې, quiet, recover, has_errors, strict;
+ساكن ثابت حرف unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
 
-static unsigned char buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int offset, len;
-static off_t consumed_bytes;
-static off_t max_input_size;
-static struct git_hash_ctx ctx;
-static struct fsck_options fsck_options;
-static struct progress *progress;
+ساكن بینښه حرف بفر[DEFAULT_IO_بفر_اندازه];
+ساكن بینښه صحيح دننه_واټن, len;
+ساكن off_t consumed_بایټونه;
+ساكن off_t max_ننوت_اندازه;
+ساكن بنية git_hash_ctx ctx;
+ساكن بنية fsck_options fsck_options;
+ساكن بنية پرمختګ *پرمختګ;
 
 /*
  * When running under --strict mode, objects whose reachability are
  * suspect are kept in core without getting written in the object
  * store.
  */
-struct obj_buffer {
-	char *buffer;
-	unsigned long size;
+بنية obj_بفر {
+	حرف *بفر;
+	بینښه اوږد اندازه;
 };
 
-static struct decoration obj_decorate;
+ساكن بنية decoration obj_decorate;
 
-static struct obj_buffer *lookup_object_buffer(struct object *base)
+ساكن بنية obj_بفر *lookup_object_بفر(بنية object *بنسټ)
 {
-	return lookup_decoration(&obj_decorate, base);
+	أرجع lookup_decoration(&obj_decorate, بنسټ);
 }
 
-static void add_object_buffer(struct object *object, char *buffer, unsigned long size)
+ساكن فراغ جمع_کړه_object_بفر(بنية object *object, حرف *بفر, بینښه اوږد اندازه)
 {
-	struct obj_buffer *obj;
+	بنية obj_بفر *obj;
 	CALLOC_ARRAY(obj, 1);
-	obj->buffer = buffer;
-	obj->size = size;
-	if (add_decoration(&obj_decorate, object, obj))
-		die("object %s tried to add buffer twice!", oid_to_hex(&object->oid));
+	obj->بفر = بفر;
+	obj->اندازه = اندازه;
+	إذا (جمع_کړه_decoration(&obj_decorate, object, obj))
+		die("object %s tried to add buffer twice!", oid_منزل_hex(&object->oid));
 }
 
 /*
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+ساكن فراغ *fill(صحيح min)
 {
-	if (min <= len)
-		return buffer + offset;
-	if (min > sizeof(buffer))
+	إذا (min <= len)
+		أرجع بفر + دننه_واټن;
+	إذا (min > حجم(بفر))
 		die("cannot fill %d bytes", min);
-	if (offset) {
-		git_hash_update(&ctx, buffer, offset);
-		memmove(buffer, buffer + offset, len);
-		offset = 0;
+	إذا (دننه_واټن) {
+		git_hash_update(&ctx, بفر, دننه_واټن);
+		memmove(بفر, بفر + دننه_واټن, len);
+		دننه_واټن = 0;
 	}
-	do {
-		ssize_t ret = xread(0, buffer + len, sizeof(buffer) - len);
-		if (ret <= 0) {
-			if (!ret)
+	افعل {
+		ssize_t ret = xread(0, بفر + len, حجم(بفر) - len);
+		إذا (ret <= 0) {
+			إذا (!ret)
 				die("early EOF");
 			die_errno("read error on input");
 		}
 		len += ret;
-	} while (len < min);
-	return buffer;
+	} طالما (len < min);
+	أرجع بفر;
 }
 
-static void use(int bytes)
+ساكن فراغ use(صحيح بایټونه)
 {
-	if (bytes > len)
+	إذا (بایټونه > len)
 		die("used more bytes than were available");
-	len -= bytes;
-	offset += bytes;
+	len -= بایټونه;
+	دننه_واټن += بایټونه;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	إذا (signed_جمع_کړه_overflows(consumed_بایټونه, بایټونه))
 		die("pack too large for current definition of off_t");
-	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size)
+	consumed_بایټونه += بایټونه;
+	إذا (max_ننوت_اندازه && consumed_بایټونه > max_ننوت_اندازه)
 		die(_("pack exceeds maximum allowed size"));
-	display_throughput(progress, consumed_bytes);
+	display_throughput(پرمختګ, consumed_بایټونه);
 }
 
 /*
@@ -114,99 +114,99 @@ static void use(int bytes)
  * allocated buffer which is reused to hold temporary zstream output
  * and return NULL instead of returning garbage data.
  */
-static void *get_data(unsigned long size)
+ساكن فراغ *get_معلومات(بینښه اوږد اندازه)
 {
-	git_zstream stream;
-	unsigned long bufsize = dry_run && size > 8192 ? 8192 : size;
-	void *buf = xmallocz(bufsize);
+	git_zstream بهیر;
+	بینښه اوږد bufsize = dry_پرلپسې && اندازه > 8192 ? 8192 : اندازه;
+	فراغ *buf = xmallocz(bufsize);
 
-	memset(&stream, 0, sizeof(stream));
+	memset(&بهیر, 0, حجم(بهیر));
 
-	stream.next_out = buf;
-	stream.avail_out = bufsize;
-	stream.next_in = fill(1);
-	stream.avail_in = len;
-	git_inflate_init(&stream);
+	بهیر.بل_بهر = buf;
+	بهیر.avail_بهر = bufsize;
+	بهیر.بل_دننه = fill(1);
+	بهیر.avail_دننه = len;
+	git_inflate_init(&بهیر);
 
-	for (;;) {
-		int ret = git_inflate(&stream, 0);
-		use(len - stream.avail_in);
-		if (stream.total_out == size && ret == Z_STREAM_END)
-			break;
-		if (ret != Z_OK) {
+	لكل (;;) {
+		صحيح ret = git_inflate(&بهیر, 0);
+		use(len - بهیر.avail_دننه);
+		إذا (بهیر.ټول_بهر == اندازه && ret == Z_بهیر_پای_ټکی)
+			اكسر;
+		إذا (ret != Z_OK) {
 			error("inflate returned %d", ret);
 			FREE_AND_NULL(buf);
-			if (!recover)
-				exit(1);
+			إذا (!recover)
+				وتل(1);
 			has_errors = 1;
-			break;
+			اكسر;
 		}
-		stream.next_in = fill(1);
-		stream.avail_in = len;
-		if (dry_run) {
+		بهیر.بل_دننه = fill(1);
+		بهیر.avail_دننه = len;
+		إذا (dry_پرلپسې) {
 			/* reuse the buffer in dry_run mode */
-			stream.next_out = buf;
-			stream.avail_out = bufsize > size - stream.total_out ?
-						   size - stream.total_out :
+			بهیر.بل_بهر = buf;
+			بهیر.avail_بهر = bufsize > اندازه - بهیر.ټول_بهر ?
+						   اندازه - بهیر.ټول_بهر :
 						   bufsize;
 		}
 	}
-	git_inflate_end(&stream);
-	if (dry_run)
+	git_inflate_پای_ټکی(&بهیر);
+	إذا (dry_پرلپسې)
 		FREE_AND_NULL(buf);
-	return buf;
+	أرجع buf;
 }
 
-struct delta_info {
-	struct object_id base_oid;
-	unsigned nr;
-	off_t base_offset;
-	unsigned long size;
-	void *delta;
-	struct delta_info *next;
+بنية delta_info {
+	بنية object_id بنسټ_oid;
+	بینښه nr;
+	off_t بنسټ_دننه_واټن;
+	بینښه اوږد اندازه;
+	فراغ *delta;
+	بنية delta_info *بل;
 };
 
-static struct delta_info *delta_list;
+ساكن بنية delta_info *delta_list;
 
-static void add_delta_to_list(unsigned nr, const struct object_id *base_oid,
-			      off_t base_offset,
-			      void *delta, unsigned long size)
+ساكن فراغ جمع_کړه_delta_منزل_list(بینښه nr, ثابت بنية object_id *بنسټ_oid,
+			      off_t بنسټ_دننه_واټن,
+			      فراغ *delta, بینښه اوږد اندازه)
 {
-	struct delta_info *info = xmalloc(sizeof(*info));
+	بنية delta_info *info = xmalloc(حجم(*info));
 
-	oidcpy(&info->base_oid, base_oid);
-	info->base_offset = base_offset;
-	info->size = size;
+	oidcpy(&info->بنسټ_oid, بنسټ_oid);
+	info->بنسټ_دننه_واټن = بنسټ_دننه_واټن;
+	info->اندازه = اندازه;
 	info->delta = delta;
 	info->nr = nr;
-	info->next = delta_list;
+	info->بل = delta_list;
 	delta_list = info;
 }
 
-struct obj_info {
-	off_t offset;
-	struct object_id oid;
-	struct object *obj;
+بنية obj_info {
+	off_t دننه_واټن;
+	بنية object_id oid;
+	بنية object *obj;
 };
 
 /* Remember to update object flag allocation in object.h */
-#define FLAG_OPEN (1u<<20)
-#define FLAG_WRITTEN (1u<<21)
+#تعریف_کړه FLAG_OPEN (1u<<20)
+#تعریف_کړه FLAG_WRITTEN (1u<<21)
 
-static struct obj_info *obj_list;
-static unsigned nr_objects;
+ساكن بنية obj_info *obj_list;
+ساكن بینښه nr_objects;
 
 /*
  * Called only from check_object() after it verified this object
  * is Ok.
  */
-static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
+ساكن فراغ write_cached_object(بنية object *obj, بنية obj_بفر *obj_buf)
 {
-	struct object_id oid;
+	بنية object_id oid;
 
-	if (odb_write_object(the_repository->objects, obj_buf->buffer, obj_buf->size,
+	إذا (odb_write_object(the_repository->objects, obj_buf->بفر, obj_buf->اندازه,
 			     obj->type, &oid) < 0)
-		die("failed to write object %s", oid_to_hex(&obj->oid));
+		die("failed to write object %s", oid_منزل_hex(&obj->oid));
 	obj->flags |= FLAG_WRITTEN;
 }
 
@@ -215,417 +215,417 @@ static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
  * that have reachability requirements and calls this function.
  * Verify its reachability and validity recursively and write it out.
  */
-static int check_object(struct object *obj, enum object_type type,
-			void *data UNUSED,
-			struct fsck_options *options UNUSED)
+ساكن صحيح check_object(بنية object *obj, تعداد object_type type,
+			فراغ *معلومات ناکارول_شوی,
+			بنية fsck_options *options ناکارول_شوی)
 {
-	struct obj_buffer *obj_buf;
+	بنية obj_بفر *obj_buf;
 
-	if (!obj)
-		return 1;
+	إذا (!obj)
+		أرجع 1;
 
-	if (obj->flags & FLAG_WRITTEN)
-		return 0;
+	إذا (obj->flags & FLAG_WRITTEN)
+		أرجع 0;
 
-	if (type != OBJ_ANY && obj->type != type)
+	إذا (type != OBJ_ANY && obj->type != type)
 		die("object type mismatch");
 
-	if (!(obj->flags & FLAG_OPEN)) {
-		size_t size;
-		int type = odb_read_object_info(the_repository->objects, &obj->oid, &size);
-		if (type != obj->type || type <= 0)
+	إذا (!(obj->flags & FLAG_OPEN)) {
+		اندازه_t اندازه;
+		صحيح type = odb_read_object_info(the_repository->objects, &obj->oid, &اندازه);
+		إذا (type != obj->type || type <= 0)
 			die("object of unexpected type");
 		obj->flags |= FLAG_WRITTEN;
-		return 0;
+		أرجع 0;
 	}
 
-	obj_buf = lookup_object_buffer(obj);
-	if (!obj_buf)
-		die("Whoops! Cannot find object '%s'", oid_to_hex(&obj->oid));
-	if (fsck_object(obj, obj_buf->buffer, obj_buf->size, &fsck_options))
+	obj_buf = lookup_object_بفر(obj);
+	إذا (!obj_buf)
+		die("Whoops! Cannot find object '%s'", oid_منزل_hex(&obj->oid));
+	إذا (fsck_object(obj, obj_buf->بفر, obj_buf->اندازه, &fsck_options))
 		die("fsck error in packed object");
 	fsck_options.walk = check_object;
-	if (fsck_walk(obj, NULL, &fsck_options))
-		die("Error on reachable objects of %s", oid_to_hex(&obj->oid));
+	إذا (fsck_walk(obj, عدم, &fsck_options))
+		die("Error on reachable objects of %s", oid_منزل_hex(&obj->oid));
 	write_cached_object(obj, obj_buf);
-	return 0;
+	أرجع 0;
 }
 
-static void write_rest(void)
+ساكن فراغ write_rest(فراغ)
 {
-	unsigned i;
-	for (i = 0; i < nr_objects; i++) {
-		if (obj_list[i].obj)
-			check_object(obj_list[i].obj, OBJ_ANY, NULL, NULL);
+	بینښه i;
+	لكل (i = 0; i < nr_objects; i++) {
+		إذا (obj_list[i].obj)
+			check_object(obj_list[i].obj, OBJ_ANY, عدم, عدم);
 	}
 }
 
-static void added_object(unsigned nr, enum object_type type,
-			 void *data, unsigned long size);
+ساكن فراغ added_object(بینښه nr, تعداد object_type type,
+			 فراغ *معلومات, بینښه اوږد اندازه);
 
 /*
  * Write out nr-th object from the list, now we know the contents
  * of it.  Under --strict, this buffers structured objects in-core,
  * to be checked at the end.
  */
-static void write_object(unsigned nr, enum object_type type,
-			 void *buf, unsigned long size)
+ساكن فراغ write_object(بینښه nr, تعداد object_type type,
+			 فراغ *buf, بینښه اوږد اندازه)
 {
-	if (!strict) {
-		if (odb_write_object(the_repository->objects, buf, size, type,
+	إذا (!strict) {
+		إذا (odb_write_object(the_repository->objects, buf, اندازه, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
-		added_object(nr, type, buf, size);
-		free(buf);
-		obj_list[nr].obj = NULL;
-	} else if (type == OBJ_BLOB) {
-		struct blob *blob;
-		if (odb_write_object(the_repository->objects, buf, size, type,
+		added_object(nr, type, buf, اندازه);
+		حرر(buf);
+		obj_list[nr].obj = عدم;
+	} وإلا إذا (type == OBJ_BLOB) {
+		بنية blob *blob;
+		إذا (odb_write_object(the_repository->objects, buf, اندازه, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
-		added_object(nr, type, buf, size);
-		free(buf);
+		added_object(nr, type, buf, اندازه);
+		حرر(buf);
 
 		blob = lookup_blob(the_repository, &obj_list[nr].oid);
-		if (blob)
+		إذا (blob)
 			blob->object.flags |= FLAG_WRITTEN;
-		else
+		وإلا
 			die("invalid blob object");
-		obj_list[nr].obj = NULL;
-	} else {
-		struct object *obj;
-		int eaten;
-		hash_object_file(the_hash_algo, buf, size, type,
+		obj_list[nr].obj = عدم;
+	} وإلا {
+		بنية object *obj;
+		صحيح eaten;
+		hash_object_file(the_hash_algo, buf, اندازه, type,
 				 &obj_list[nr].oid);
-		added_object(nr, type, buf, size);
-		obj = parse_object_buffer(the_repository, &obj_list[nr].oid,
-					  type, size, buf,
+		added_object(nr, type, buf, اندازه);
+		obj = parse_object_بفر(the_repository, &obj_list[nr].oid,
+					  type, اندازه, buf,
 					  &eaten);
-		if (!obj)
+		إذا (!obj)
 			die("invalid %s", type_name(type));
-		add_object_buffer(obj, buf, size);
+		جمع_کړه_object_بفر(obj, buf, اندازه);
 		obj->flags |= FLAG_OPEN;
 		obj_list[nr].obj = obj;
 	}
 }
 
-static void resolve_delta(unsigned nr, enum object_type type,
-			  void *base, unsigned long base_size,
-			  void *delta, unsigned long delta_size)
+ساكن فراغ resolve_delta(بینښه nr, تعداد object_type type,
+			  فراغ *بنسټ, بینښه اوږد بنسټ_اندازه,
+			  فراغ *delta, بینښه اوږد delta_اندازه_2)
 {
-	void *result;
-	size_t result_size;
+	فراغ *پایله;
+	اندازه_t پایله_اندازه;
 
-	result = patch_delta(base, base_size,
-			     delta, delta_size,
-			     &result_size);
-	if (!result)
+	پایله = patch_delta(بنسټ, بنسټ_اندازه,
+			     delta, delta_اندازه_2,
+			     &پایله_اندازه);
+	إذا (!پایله)
 		die("failed to apply delta");
-	free(delta);
-	write_object(nr, type, result, result_size);
+	حرر(delta);
+	write_object(nr, type, پایله, پایله_اندازه);
 }
 
 /*
  * We now know the contents of an object (which is nr-th in the pack);
  * resolve all the deltified objects that are based on it.
  */
-static void added_object(unsigned nr, enum object_type type,
-			 void *data, unsigned long size)
+ساكن فراغ added_object(بینښه nr, تعداد object_type type,
+			 فراغ *معلومات, بینښه اوږد اندازه)
 {
-	struct delta_info **p = &delta_list;
-	struct delta_info *info;
+	بنية delta_info **p = &delta_list;
+	بنية delta_info *info;
 
-	while ((info = *p) != NULL) {
-		if (oideq(&info->base_oid, &obj_list[nr].oid) ||
-		    info->base_offset == obj_list[nr].offset) {
-			*p = info->next;
+	طالما ((info = *p) != عدم) {
+		إذا (oideq(&info->بنسټ_oid, &obj_list[nr].oid) ||
+		    info->بنسټ_دننه_واټن == obj_list[nr].دننه_واټن) {
+			*p = info->بل;
 			p = &delta_list;
-			resolve_delta(info->nr, type, data, size,
-				      info->delta, info->size);
-			free(info);
-			continue;
+			resolve_delta(info->nr, type, معلومات, اندازه,
+				      info->delta, info->اندازه);
+			حرر(info);
+			استمر;
 		}
-		p = &info->next;
+		p = &info->بل;
 	}
 }
 
-static void unpack_non_delta_entry(enum object_type type, unsigned long size,
-				   unsigned nr)
+ساكن فراغ unpack_non_delta_ثبت(تعداد object_type type, بینښه اوږد اندازه,
+				   بینښه nr)
 {
-	void *buf = get_data(size);
+	فراغ *buf = get_معلومات(اندازه);
 
-	if (buf)
-		write_object(nr, type, buf, size);
+	إذا (buf)
+		write_object(nr, type, buf, اندازه);
 }
 
-struct zlib_stream {
-	struct odb_stream base;
+بنية zlib_بهیر {
+	بنية odb_بهیر بنسټ;
 	git_zstream *zstream;
-	int status;
+	صحيح حالت;
 };
 
-static ssize_t zlib_stream_read(struct odb_stream *in_stream,
-				char *buf, size_t buf_len)
+ساكن ssize_t zlib_بهیر_read(بنية odb_بهیر *دننه_بهیر,
+				حرف *buf, اندازه_t buf_len)
 {
-	struct zlib_stream *data = container_of(in_stream, struct zlib_stream, base);
-	git_zstream *zstream = data->zstream;
+	بنية zlib_بهیر *معلومات = container_د(دننه_بهیر, بنية zlib_بهیر, بنسټ);
+	git_zstream *zstream = معلومات->zstream;
 
-	if (data->status != Z_OK)
-		return 0;
+	إذا (معلومات->حالت != Z_OK)
+		أرجع 0;
 
-	zstream->next_out = (unsigned char *) buf;
-	zstream->avail_out = buf_len;
+	zstream->بل_بهر = (بینښه حرف *) buf;
+	zstream->avail_بهر = buf_len;
 
-	while (data->status == Z_OK && zstream->avail_out == buf_len) {
-		zstream->next_in = fill(1);
-		zstream->avail_in = len;
-		data->status = git_inflate(zstream, 0);
-		use(len - zstream->avail_in);
+	طالما (معلومات->حالت == Z_OK && zstream->avail_بهر == buf_len) {
+		zstream->بل_دننه = fill(1);
+		zstream->avail_دننه = len;
+		معلومات->حالت = git_inflate(zstream, 0);
+		use(len - zstream->avail_دننه);
 	}
 
-	return buf_len - zstream->avail_out;
+	أرجع buf_len - zstream->avail_بهر;
 }
 
-static void stream_blob(unsigned long size, unsigned nr)
+ساكن فراغ بهیر_blob(بینښه اوږد اندازه, بینښه nr)
 {
 	git_zstream zstream = { 0 };
-	struct zlib_stream in_stream = {
-		.base = {
-			.read = zlib_stream_read,
-			.size = size,
+	بنية zlib_بهیر دننه_بهیر = {
+		.بنسټ = {
+			.اقرأ = zlib_بهیر_read,
+			.اندازه = اندازه,
 			.type = OBJ_BLOB,
 		},
 		.zstream = &zstream,
-		.status = Z_OK,
+		.حالت = Z_OK,
 	};
-	struct obj_info *info = &obj_list[nr];
+	بنية obj_info *info = &obj_list[nr];
 
 	git_inflate_init(&zstream);
 
-	if (odb_write_object_stream(the_repository->objects, &in_stream.base, &info->oid))
+	إذا (odb_write_object_بهیر(the_repository->objects, &دننه_بهیر.بنسټ, &info->oid))
 		die(_("failed to write object in stream"));
 
-	if (in_stream.status != Z_STREAM_END)
-		die(_("inflate returned (%d)"), in_stream.status);
-	git_inflate_end(&zstream);
+	إذا (دننه_بهیر.حالت != Z_بهیر_پای_ټکی)
+		die(_("inflate returned (%d)"), دننه_بهیر.حالت);
+	git_inflate_پای_ټکی(&zstream);
 
-	if (strict) {
-		struct blob *blob = lookup_blob(the_repository, &info->oid);
+	إذا (strict) {
+		بنية blob *blob = lookup_blob(the_repository, &info->oid);
 
-		if (!blob)
+		إذا (!blob)
 			die(_("invalid blob object from stream"));
 		blob->object.flags |= FLAG_WRITTEN;
 	}
-	info->obj = NULL;
+	info->obj = عدم;
 }
 
-static int resolve_against_held(unsigned nr, const struct object_id *base,
-				void *delta_data, unsigned long delta_size)
+ساكن صحيح resolve_against_held(بینښه nr, ثابت بنية object_id *بنسټ,
+				فراغ *delta_معلومات, بینښه اوږد delta_اندازه_2)
 {
-	struct object *obj;
-	struct obj_buffer *obj_buffer;
-	obj = lookup_object(the_repository, base);
-	if (!obj)
-		return 0;
-	obj_buffer = lookup_object_buffer(obj);
-	if (!obj_buffer)
-		return 0;
-	resolve_delta(nr, obj->type, obj_buffer->buffer,
-		      obj_buffer->size, delta_data, delta_size);
-	return 1;
+	بنية object *obj;
+	بنية obj_بفر *obj_بفر;
+	obj = lookup_object(the_repository, بنسټ);
+	إذا (!obj)
+		أرجع 0;
+	obj_بفر = lookup_object_بفر(obj);
+	إذا (!obj_بفر)
+		أرجع 0;
+	resolve_delta(nr, obj->type, obj_بفر->بفر,
+		      obj_بفر->اندازه, delta_معلومات, delta_اندازه_2);
+	أرجع 1;
 }
 
-static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
-			       unsigned nr)
+ساكن فراغ unpack_delta_ثبت(تعداد object_type type, بینښه اوږد delta_اندازه_2,
+			       بینښه nr)
 {
-	void *delta_data, *base;
-	unsigned long base_size;
-	size_t base_size_st = 0;
-	struct object_id base_oid;
+	فراغ *delta_معلومات, *بنسټ;
+	بینښه اوږد بنسټ_اندازه;
+	اندازه_t بنسټ_اندازه_st = 0;
+	بنية object_id بنسټ_oid;
 
-	if (type == OBJ_REF_DELTA) {
-		oidread(&base_oid, fill(the_hash_algo->rawsz), the_repository->hash_algo);
+	إذا (type == OBJ_REF_DELTA) {
+		oidread(&بنسټ_oid, fill(the_hash_algo->rawsz), the_repository->hash_algo);
 		use(the_hash_algo->rawsz);
-		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
-		if (odb_has_object(the_repository->objects, &base_oid,
+		delta_معلومات = get_معلومات(delta_اندازه_2);
+		إذا (!delta_معلومات)
+			أرجع;
+		إذا (odb_has_object(the_repository->objects, &بنسټ_oid,
 				   ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 			; /* Ok we have this one */
-		else if (resolve_against_held(nr, &base_oid,
-					      delta_data, delta_size))
-			return; /* we are done */
-		else {
+		وإلا إذا (resolve_against_held(nr, &بنسټ_oid,
+					      delta_معلومات, delta_اندازه_2))
+			أرجع; /* we are done */
+		وإلا {
 			/* cannot resolve yet --- queue it */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
-			add_delta_to_list(nr, &base_oid, 0, delta_data, delta_size);
-			return;
+			جمع_کړه_delta_منزل_list(nr, &بنسټ_oid, 0, delta_معلومات, delta_اندازه_2);
+			أرجع;
 		}
-	} else {
-		unsigned base_found = 0;
-		unsigned char *pack, c;
-		off_t base_offset;
-		unsigned lo, mid, hi;
+	} وإلا {
+		بینښه بنسټ_وموندل = 0;
+		بینښه حرف *pack, c;
+		off_t بنسټ_دننه_واټن;
+		بینښه lo, mid, hi;
 
 		pack = fill(1);
 		c = *pack;
 		use(1);
-		base_offset = c & 127;
-		while (c & 128) {
-			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
+		بنسټ_دننه_واټن = c & 127;
+		طالما (c & 128) {
+			بنسټ_دننه_واټن += 1;
+			إذا (!بنسټ_دننه_واټن || MSB(بنسټ_دننه_واټن, 7))
 				die("offset value overflow for delta base object");
 			pack = fill(1);
 			c = *pack;
 			use(1);
-			base_offset = (base_offset << 7) + (c & 127);
+			بنسټ_دننه_واټن = (بنسټ_دننه_واټن << 7) + (c & 127);
 		}
-		base_offset = obj_list[nr].offset - base_offset;
-		if (base_offset <= 0 || base_offset >= obj_list[nr].offset)
+		بنسټ_دننه_واټن = obj_list[nr].دننه_واټن - بنسټ_دننه_واټن;
+		إذا (بنسټ_دننه_واټن <= 0 || بنسټ_دننه_واټن >= obj_list[nr].دننه_واټن)
 			die("offset value out of bound for delta base object");
 
-		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
+		delta_معلومات = get_معلومات(delta_اندازه_2);
+		إذا (!delta_معلومات)
+			أرجع;
 		lo = 0;
 		hi = nr;
-		while (lo < hi) {
+		طالما (lo < hi) {
 			mid = lo + (hi - lo) / 2;
-			if (base_offset < obj_list[mid].offset) {
+			إذا (بنسټ_دننه_واټن < obj_list[mid].دننه_واټن) {
 				hi = mid;
-			} else if (base_offset > obj_list[mid].offset) {
+			} وإلا إذا (بنسټ_دننه_واټن > obj_list[mid].دننه_واټن) {
 				lo = mid + 1;
-			} else {
-				oidcpy(&base_oid, &obj_list[mid].oid);
-				base_found = !is_null_oid(&base_oid);
-				break;
+			} وإلا {
+				oidcpy(&بنسټ_oid, &obj_list[mid].oid);
+				بنسټ_وموندل = !is_null_oid(&بنسټ_oid);
+				اكسر;
 			}
 		}
-		if (!base_found) {
+		إذا (!بنسټ_وموندل) {
 			/*
 			 * The delta base object is itself a delta that
 			 * has not been resolved yet.
 			 */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
-			add_delta_to_list(nr, null_oid(the_hash_algo), base_offset,
-					  delta_data, delta_size);
-			return;
+			جمع_کړه_delta_منزل_list(nr, null_oid(the_hash_algo), بنسټ_دننه_واټن,
+					  delta_معلومات, delta_اندازه_2);
+			أرجع;
 		}
 	}
 
-	if (resolve_against_held(nr, &base_oid, delta_data, delta_size))
-		return;
+	إذا (resolve_against_held(nr, &بنسټ_oid, delta_معلومات, delta_اندازه_2))
+		أرجع;
 
-	base = odb_read_object(the_repository->objects, &base_oid,
-			       &type, &base_size_st);
-	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base) {
+	بنسټ = odb_read_object(the_repository->objects, &بنسټ_oid,
+			       &type, &بنسټ_اندازه_st);
+	بنسټ_اندازه = cast_اندازه_t_منزل_ulong(بنسټ_اندازه_st);
+	إذا (!بنسټ) {
 		error("failed to read delta-pack base object %s",
-		      oid_to_hex(&base_oid));
-		if (!recover)
-			exit(1);
+		      oid_منزل_hex(&بنسټ_oid));
+		إذا (!recover)
+			وتل(1);
 		has_errors = 1;
-		return;
+		أرجع;
 	}
-	resolve_delta(nr, type, base, base_size, delta_data, delta_size);
-	free(base);
+	resolve_delta(nr, type, بنسټ, بنسټ_اندازه, delta_معلومات, delta_اندازه_2);
+	حرر(بنسټ);
 }
 
-static void unpack_one(unsigned nr)
+ساكن فراغ unpack_one(بینښه nr)
 {
-	unsigned shift;
-	unsigned char *pack;
-	size_t size, c;
-	enum object_type type;
+	بینښه ښويدنه;
+	بینښه حرف *pack;
+	اندازه_t اندازه, c;
+	تعداد object_type type;
 
-	obj_list[nr].offset = consumed_bytes;
+	obj_list[nr].دننه_واټن = consumed_بایټونه;
 
 	pack = fill(1);
 	c = *pack;
 	use(1);
 	type = (c >> 4) & 7;
-	size = (c & 15);
-	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	اندازه = (c & 15);
+	ښويدنه = 4;
+	طالما (c & 0x80) {
+		إذا ((bitsizeof(اندازه_t) - 7) < ښويدنه)
 			die(_("object size too large for this platform"));
 		pack = fill(1);
 		c = *pack;
 		use(1);
-		size += (c & 0x7f) << shift;
-		shift += 7;
+		اندازه += (c & 0x7f) << ښويدنه;
+		ښويدنه += 7;
 	}
 
-	switch (type) {
-	case OBJ_BLOB:
-		if (!dry_run &&
-		    size > repo_settings_get_big_file_threshold(the_repository)) {
-			stream_blob(size, nr);
-			return;
+	بدل (type) {
+	حالة OBJ_BLOB:
+		إذا (!dry_پرلپسې &&
+		    اندازه > repo_settings_get_big_file_پوله(the_repository)) {
+			بهیر_blob(اندازه, nr);
+			أرجع;
 		}
 		/* fallthrough */
-	case OBJ_COMMIT:
-	case OBJ_TREE:
-	case OBJ_TAG:
-		unpack_non_delta_entry(type, size, nr);
-		return;
-	case OBJ_REF_DELTA:
-	case OBJ_OFS_DELTA:
-		unpack_delta_entry(type, size, nr);
-		return;
-	default:
+	حالة OBJ_COMMIT:
+	حالة OBJ_ونه:
+	حالة OBJ_نښان:
+		unpack_non_delta_ثبت(type, اندازه, nr);
+		أرجع;
+	حالة OBJ_REF_DELTA:
+	حالة OBJ_OFS_DELTA:
+		unpack_delta_ثبت(type, اندازه, nr);
+		أرجع;
+	افتراضي:
 		error("bad object type %d", type);
 		has_errors = 1;
-		if (recover)
-			return;
-		exit(1);
+		إذا (recover)
+			أرجع;
+		وتل(1);
 	}
 }
 
-static void unpack_all(void)
+ساكن فراغ unpack_all(فراغ)
 {
-	int i;
-	unsigned char *hdr = fill(sizeof(struct pack_header));
-	struct odb_transaction *transaction;
+	صحيح i;
+	بینښه حرف *hdr = fill(حجم(بنية pack_سرلیک));
+	بنية odb_transaction *transaction;
 
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	إذا (get_be32(hdr) != PACK_SIGNATURE)
 		die("bad pack file");
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	إذا (!pack_نسخه_ok_native(get_be32(hdr)))
 		die("unknown pack file version %"PRIu32,
 		    get_be32(hdr));
 	hdr += 4;
 	nr_objects = get_be32(hdr);
-	use(sizeof(struct pack_header));
+	use(حجم(بنية pack_سرلیک));
 
-	if (!quiet)
-		progress = start_progress(the_repository,
+	إذا (!quiet)
+		پرمختګ = پیل_پرمختګ(the_repository,
 					  _("Unpacking objects"), nr_objects);
 	CALLOC_ARRAY(obj_list, nr_objects);
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	for (i = 0; i < nr_objects; i++) {
+	لكل (i = 0; i < nr_objects; i++) {
 		unpack_one(i);
-		display_progress(progress, i + 1);
+		display_پرمختګ(پرمختګ, i + 1);
 	}
 	odb_transaction_commit_and_finalize_or_die(transaction);
-	stop_progress(&progress);
+	stop_پرمختګ(&پرمختګ);
 
-	if (delta_list)
+	إذا (delta_list)
 		die("unresolved deltas left after unpacking");
 }
 
-int cmd_unpack_objects(int argc,
-		       const char **argv,
-		       const char *prefix UNUSED,
-		       struct repository *repo)
+صحيح cmd_unpack_objects(صحيح argc,
+		       ثابت حرف **argv,
+		       ثابت حرف *مختاړی ناکارول_شوی,
+		       بنية repository *repo)
 {
-	int i;
-	struct object_id oid;
-	struct git_hash_ctx tmp_ctx;
+	صحيح i;
+	بنية object_id oid;
+	بنية git_hash_ctx tmp_ctx;
 
 	disable_replace_refs();
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, عدم);
 
 	quiet = !isatty(2);
 
@@ -633,40 +633,40 @@ int cmd_unpack_objects(int argc,
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
 
-	for (i = 1 ; i < argc; i++) {
-		const char *arg = argv[i];
+	لكل (i = 1 ; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "-n")) {
-				dry_run = 1;
-				continue;
+		إذا (*arg == '-') {
+			إذا (!strcmp(arg, "-n")) {
+				dry_پرلپسې = 1;
+				استمر;
 			}
-			if (!strcmp(arg, "-q")) {
+			إذا (!strcmp(arg, "-q")) {
 				quiet = 1;
-				continue;
+				استمر;
 			}
-			if (!strcmp(arg, "-r")) {
+			إذا (!strcmp(arg, "-r")) {
 				recover = 1;
-				continue;
+				استمر;
 			}
-			if (!strcmp(arg, "--strict")) {
+			إذا (!strcmp(arg, "--strict")) {
 				strict = 1;
-				continue;
+				استمر;
 			}
-			if (skip_prefix(arg, "--strict=", &arg)) {
+			إذا (skip_مختاړی(arg, "--strict=", &arg)) {
 				strict = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-				continue;
+				fsck_سېټ_پیغام_types(&fsck_options, arg);
+				استمر;
 			}
-			if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
-							     buffer, &len) < 0)
+			إذا (skip_مختاړی(arg, "--pack_header=", &arg)) {
+				إذا (parse_pack_سرلیک_option(arg,
+							     بفر, &len) < 0)
 					die(_("bad --pack_header: %s"), arg);
-				continue;
+				استمر;
 			}
-			if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
-				continue;
+			إذا (skip_مختاړی(arg, "--max-input-size=", &arg)) {
+				max_ننوت_اندازه = strtoumax(arg, عدم, 10);
+				استمر;
 			}
 			usage(unpack_usage);
 		}
@@ -676,23 +676,23 @@ int cmd_unpack_objects(int argc,
 	}
 	git_hash_init(&ctx, the_hash_algo);
 	unpack_all();
-	git_hash_update(&ctx, buffer, offset);
+	git_hash_update(&ctx, بفر, دننه_واټن);
 	git_hash_init(&tmp_ctx, the_hash_algo);
 	git_hash_clone(&tmp_ctx, &ctx);
 	git_hash_final_oid(&oid, &tmp_ctx);
-	if (strict) {
+	إذا (strict) {
 		write_rest();
-		if (fsck_finish(&fsck_options))
+		إذا (fsck_پای(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
-	if (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
+	إذا (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
 		    the_repository->hash_algo))
 		die("final sha1 did not match");
 	use(the_hash_algo->rawsz);
 
 	/* Write the last part of the buffer to stdout */
-	write_in_full(1, buffer + offset, len);
+	write_دننه_ډک(1, بفر + دننه_واټن, len);
 
 	/* All done */
-	return has_errors;
+	أرجع has_errors;
 }

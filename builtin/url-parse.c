@@ -1,135 +1,135 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "url.h"
-#include "urlmatch.h"
+#ضمن "builtin.h"
+#ضمن "gettext.h"
+#ضمن "parse-options.h"
+#ضمن "url.h"
+#ضمن "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+ساكن ثابت حرف * ثابت builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
-	NULL
+	عدم
 };
 
-static char *component_arg;
+ساكن حرف *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+ساكن بنية option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
-	OPT_END(),
+	OPT_پای_ټکی(),
 };
 
-enum url_component {
+تعداد url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
 	URL_PASSWORD,
 	URL_HOST,
-	URL_PORT,
-	URL_PATH,
+	URL_پورټ,
+	URL_لار,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+ساكن فراغ parse_or_die(ثابت حرف *url, بنية url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	إذا (url_is_local_not_ssh(url)) {
+		إذا (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		إذا (has_dos_drive_مختاړی(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	إذا (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+ساكن تعداد url_component get_component_or_die(ثابت حرف *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	إذا (!strcmp("path", arg))
+		أرجع URL_لار;
+	إذا (!strcmp("host", arg))
+		أرجع URL_HOST;
+	إذا (!strcmp("scheme", arg))
+		أرجع URL_SCHEME;
+	إذا (!strcmp("user", arg))
+		أرجع URL_USER;
+	إذا (!strcmp("password", arg))
+		أرجع URL_PASSWORD;
+	إذا (!strcmp("port", arg))
+		أرجع URL_پورټ;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+ساكن حرف *ایستل_component(تعداد url_component component,
+			       بنية url_info *info)
 {
-	size_t offset, length;
+	اندازه_t دننه_واټن, اوږدتیا;
 
-	switch (component) {
-	case URL_SCHEME:
-		offset = 0;
-		length = info->scheme_len;
-		break;
-	case URL_USER:
-		offset = info->user_off;
-		length = info->user_len;
-		break;
-	case URL_PASSWORD:
-		offset = info->passwd_off;
-		length = info->passwd_len;
-		break;
-	case URL_HOST:
-		offset = info->host_off;
-		length = info->host_len;
-		break;
-	case URL_PORT:
-		offset = info->port_off;
-		length = info->port_len;
-		break;
-	case URL_PATH:
-		offset = info->path_off;
-		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+	بدل (component) {
+	حالة URL_SCHEME:
+		دننه_واټن = 0;
+		اوږدتیا = info->scheme_len;
+		اكسر;
+	حالة URL_USER:
+		دننه_واټن = info->user_off;
+		اوږدتیا = info->user_len;
+		اكسر;
+	حالة URL_PASSWORD:
+		دننه_واټن = info->passwd_off;
+		اوږدتیا = info->passwd_len;
+		اكسر;
+	حالة URL_HOST:
+		دننه_واټن = info->host_off;
+		اوږدتیا = info->host_len;
+		اكسر;
+	حالة URL_پورټ:
+		دننه_واټن = info->پورټ_off;
+		اوږدتیا = info->پورټ_len;
+		اكسر;
+	حالة URL_لار:
+		دننه_واټن = info->لار_off;
+		اوږدتیا = info->لار_len;
+		اكسر;
+	حالة URL_NONE:
+		أرجع عدم;
 	}
 
-	return xstrndup(info->url + offset, length);
+	أرجع xstrndup(info->url + دننه_واټن, اوږدتیا);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+صحيح cmd_url_parse(صحيح argc,
+		  ثابت حرف **argv,
+		  ثابت حرف *مختاړی,
+		  بنية repository *repo ناکارول_شوی)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	بنية url_info info;
+	تعداد url_component selected = URL_NONE;
+	حرف *extracted;
+	صحيح i;
 
-	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
+	argc = parse_options(argc, argv, مختاړی, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	إذا (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	إذا (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	لكل (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
-			extracted = extract_component(selected, &info);
-			if (extracted) {
+		إذا (selected != URL_NONE) {
+			extracted = ایستل_component(selected, &info);
+			إذا (extracted) {
 				puts(extracted);
-				free(extracted);
+				حرر(extracted);
 			}
 		}
 
-		free(info.url);
+		حرر(info.url);
 	}
 
-	return 0;
+	أرجع 0;
 }

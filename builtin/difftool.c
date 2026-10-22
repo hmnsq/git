@@ -12,275 +12,275 @@
  * Copyright (C) 2016 Johannes Schindelin
  */
 
-#include "builtin.h"
+#ضمن "builtin.h"
 
-#include "abspath.h"
-#include "config.h"
-#include "copy.h"
-#include "run-command.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "repository.h"
-#include "sparse-index.h"
-#include "strvec.h"
-#include "strbuf.h"
-#include "lockfile.h"
-#include "object-file.h"
-#include "odb.h"
-#include "dir.h"
-#include "entry.h"
-#include "setup.h"
+#ضمن "abspath.h"
+#ضمن "config.h"
+#ضمن "copy.h"
+#ضمن "run-command.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "parse-options.h"
+#ضمن "path.h"
+#ضمن "read-cache-ll.h"
+#ضمن "repository.h"
+#ضمن "sparse-index.h"
+#ضمن "strvec.h"
+#ضمن "strbuf.h"
+#ضمن "lockfile.h"
+#ضمن "object-file.h"
+#ضمن "odb.h"
+#ضمن "dir.h"
+#ضمن "entry.h"
+#ضمن "setup.h"
 
-static const char *const builtin_difftool_usage[] = {
+ساكن ثابت حرف *ثابت builtin_difftool_usage[] = {
 	N_("git difftool [<options>] [<commit> [<commit>]] [--] [<path>...]"),
-	NULL
+	عدم
 };
 
-struct difftool_options {
-	int has_symlinks;
-	int symlinks;
-	int trust_exit_code;
+بنية difftool_options {
+	صحيح has_symlinks;
+	صحيح symlinks;
+	صحيح trust_exit_کوډ;
 };
 
-static int difftool_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+ساكن صحيح difftool_config(ثابت حرف *var, ثابت حرف *ارزښت,
+			   ثابت بنية config_context *ctx, فراغ *cb)
 {
-	struct difftool_options *dt_options = (struct difftool_options *)cb;
-	if (!strcmp(var, "difftool.trustexitcode")) {
-		dt_options->trust_exit_code = git_config_bool(var, value);
-		return 0;
+	بنية difftool_options *dt_options = (بنية difftool_options *)cb;
+	إذا (!strcmp(var, "difftool.trustexitcode")) {
+		dt_options->trust_exit_کوډ = git_config_bool(var, ارزښت);
+		أرجع 0;
 	}
-	if (!strcmp(var, "core.symlinks")) {
-		dt_options->has_symlinks = git_config_bool(var, value);
-		return 0;
+	إذا (!strcmp(var, "core.symlinks")) {
+		dt_options->has_symlinks = git_config_bool(var, ارزښت);
+		أرجع 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	أرجع git_default_config(var, ارزښت, ctx, cb);
 }
 
-static int print_tool_help(void)
+ساكن صحيح print_tool_help(فراغ)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية ماشوم_process cmd = ماشوم_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "mergetool", "--tool-help=diff", NULL);
-	return run_command(&cmd);
+	strvec_pushl(&cmd.دلیلونه, "mergetool", "--tool-help=diff", عدم);
+	أرجع پرلپسې_command(&cmd);
 }
 
-static int parse_index_info(struct repository *repo,
-			    char *p, int *mode1, int *mode2,
-			    struct object_id *oid1, struct object_id *oid2,
-			    char *status)
+ساكن صحيح parse_شاخص_info(بنية repository *repo,
+			    حرف *p, صحيح *mode1, صحيح *mode2,
+			    بنية object_id *oid1, بنية object_id *oid2,
+			    حرف *حالت)
 {
-	if (*p != ':')
-		return error("expected ':', got '%c'", *p);
-	*mode1 = (int)strtol(p + 1, &p, 8);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	*mode2 = (int)strtol(p + 1, &p, 8);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	if (parse_oid_hex_algop(++p, oid1, (const char **)&p, repo->hash_algo))
-		return error("expected object ID, got '%s'", p);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	if (parse_oid_hex_algop(++p, oid2, (const char **)&p, repo->hash_algo))
-		return error("expected object ID, got '%s'", p);
-	if (*p != ' ')
-		return error("expected ' ', got '%c'", *p);
-	*status = *++p;
-	if (!*status)
-		return error("missing status");
-	if (p[1] && !isdigit(p[1]))
-		return error("unexpected trailer: '%s'", p + 1);
-	return 0;
+	إذا (*p != ':')
+		أرجع error("expected ':', got '%c'", *p);
+	*mode1 = (صحيح)strtol(p + 1, &p, 8);
+	إذا (*p != ' ')
+		أرجع error("expected ' ', got '%c'", *p);
+	*mode2 = (صحيح)strtol(p + 1, &p, 8);
+	إذا (*p != ' ')
+		أرجع error("expected ' ', got '%c'", *p);
+	إذا (parse_oid_hex_algop(++p, oid1, (ثابت حرف **)&p, repo->hash_algo))
+		أرجع error("expected object ID, got '%s'", p);
+	إذا (*p != ' ')
+		أرجع error("expected ' ', got '%c'", *p);
+	إذا (parse_oid_hex_algop(++p, oid2, (ثابت حرف **)&p, repo->hash_algo))
+		أرجع error("expected object ID, got '%s'", p);
+	إذا (*p != ' ')
+		أرجع error("expected ' ', got '%c'", *p);
+	*حالت = *++p;
+	إذا (!*حالت)
+		أرجع error("missing status");
+	إذا (p[1] && !که_عدد(p[1]))
+		أرجع error("unexpected trailer: '%s'", p + 1);
+	أرجع 0;
 }
 
 /*
  * Remove any trailing slash from $workdir
  * before starting to avoid double slashes in symlink targets.
  */
-static void add_path(struct strbuf *buf, size_t base_len, const char *path)
+ساكن فراغ جمع_کړه_لار(بنية strbuf *buf, اندازه_t بنسټ_len, ثابت حرف *لار)
 {
-	strbuf_setlen(buf, base_len);
-	if (buf->len && buf->buf[buf->len - 1] != '/')
+	strbuf_setlen(buf, بنسټ_len);
+	إذا (buf->len && buf->buf[buf->len - 1] != '/')
 		strbuf_addch(buf, '/');
-	strbuf_addstr(buf, path);
+	strbuf_addstr(buf, لار);
 }
 
 /*
  * Determine whether we can simply reuse the file in the worktree.
  */
-static int use_wt_file(struct repository *repo,
-		       const char *workdir, const char *name,
-		       struct object_id *oid)
+ساكن صحيح use_wt_file(بنية repository *repo,
+		       ثابت حرف *workdir, ثابت حرف *name,
+		       بنية object_id *oid)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct stat st;
-	int use = 0;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية stat st;
+	صحيح use = 0;
 
 	strbuf_addstr(&buf, workdir);
-	add_path(&buf, buf.len, name);
+	جمع_کړه_لار(&buf, buf.len, name);
 
-	if (!lstat(buf.buf, &st) && !S_ISLNK(st.st_mode)) {
-		struct object_id wt_oid;
-		int fd = open(buf.buf, O_RDONLY);
+	إذا (!lstat(buf.buf, &st) && !S_ISLNK(st.st_ډېرپېښ)) {
+		بنية object_id wt_oid;
+		صحيح fd = open(buf.buf, O_RDONLY);
 
-		if (fd >= 0 &&
-		    !index_fd(repo->index, &wt_oid, fd, &st, OBJ_BLOB, name, 0)) {
-			if (is_null_oid(oid)) {
+		إذا (fd >= 0 &&
+		    !شاخص_fd(repo->شاخص, &wt_oid, fd, &st, OBJ_BLOB, name, 0)) {
+			إذا (is_null_oid(oid)) {
 				oidcpy(oid, &wt_oid);
 				use = 1;
-			} else if (oideq(oid, &wt_oid))
+			} وإلا إذا (oideq(oid, &wt_oid))
 				use = 1;
 		}
 	}
 
 	strbuf_release(&buf);
 
-	return use;
+	أرجع use;
 }
 
-struct working_tree_entry {
-	struct hashmap_entry entry;
-	char path[FLEX_ARRAY];
+بنية working_ونه_ثبت {
+	بنية hashmap_ثبت ثبت;
+	حرف لار[FLEX_ARRAY];
 };
 
-static int working_tree_entry_cmp(const void *cmp_data UNUSED,
-				  const struct hashmap_entry *eptr,
-				  const struct hashmap_entry *entry_or_key,
-				  const void *keydata UNUSED)
+ساكن صحيح working_ونه_ثبت_cmp(ثابت فراغ *cmp_معلومات ناکارول_شوی,
+				  ثابت بنية hashmap_ثبت *eptr,
+				  ثابت بنية hashmap_ثبت *ثبت_or_کلی,
+				  ثابت فراغ *keydata ناکارول_شوی)
 {
-	const struct working_tree_entry *a, *b;
+	ثابت بنية working_ونه_ثبت *a, *b;
 
-	a = container_of(eptr, const struct working_tree_entry, entry);
-	b = container_of(entry_or_key, const struct working_tree_entry, entry);
+	a = container_د(eptr, ثابت بنية working_ونه_ثبت, ثبت);
+	b = container_د(ثبت_or_کلی, ثابت بنية working_ونه_ثبت, ثبت);
 
-	return strcmp(a->path, b->path);
+	أرجع strcmp(a->لار, b->لار);
 }
 
 /*
  * The `left` and `right` entries hold paths for the symlinks hashmap,
  * and a SHA-1 surrounded by brief text for submodules.
  */
-struct pair_entry {
-	struct hashmap_entry entry;
-	char left[PATH_MAX], right[PATH_MAX];
-	const char path[FLEX_ARRAY];
+بنية pair_ثبت {
+	بنية hashmap_ثبت ثبت;
+	حرف کیڼ[لار_MAX], ښی[لار_MAX];
+	ثابت حرف لار[FLEX_ARRAY];
 };
 
-static int pair_cmp(const void *cmp_data UNUSED,
-		    const struct hashmap_entry *eptr,
-		    const struct hashmap_entry *entry_or_key,
-		    const void *keydata UNUSED)
+ساكن صحيح pair_cmp(ثابت فراغ *cmp_معلومات ناکارول_شوی,
+		    ثابت بنية hashmap_ثبت *eptr,
+		    ثابت بنية hashmap_ثبت *ثبت_or_کلی,
+		    ثابت فراغ *keydata ناکارول_شوی)
 {
-	const struct pair_entry *a, *b;
+	ثابت بنية pair_ثبت *a, *b;
 
-	a = container_of(eptr, const struct pair_entry, entry);
-	b = container_of(entry_or_key, const struct pair_entry, entry);
+	a = container_د(eptr, ثابت بنية pair_ثبت, ثبت);
+	b = container_د(ثبت_or_کلی, ثابت بنية pair_ثبت, ثبت);
 
-	return strcmp(a->path, b->path);
+	أرجع strcmp(a->لار, b->لار);
 }
 
-static void add_left_or_right(struct hashmap *map, const char *path,
-			      const char *content, int is_right)
+ساكن فراغ جمع_کړه_کیڼ_or_ښی(بنية hashmap *map, ثابت حرف *لار,
+			      ثابت حرف *content, صحيح is_ښی)
 {
-	struct pair_entry *e, *existing;
+	بنية pair_ثبت *e, *existing;
 
-	FLEX_ALLOC_STR(e, path, path);
-	hashmap_entry_init(&e->entry, strhash(path));
-	existing = hashmap_get_entry(map, e, entry, NULL);
-	if (existing) {
-		free(e);
+	FLEX_ALLOC_STR(e, لار, لار);
+	hashmap_ثبت_init(&e->ثبت, strhash(لار));
+	existing = hashmap_get_ثبت(map, e, ثبت, عدم);
+	إذا (existing) {
+		حرر(e);
 		e = existing;
-	} else {
-		e->left[0] = e->right[0] = '\0';
-		hashmap_add(map, &e->entry);
+	} وإلا {
+		e->کیڼ[0] = e->ښی[0] = '\0';
+		hashmap_جمع_کړه(map, &e->ثبت);
 	}
-	strlcpy(is_right ? e->right : e->left, content, PATH_MAX);
+	strlcpy(is_ښی ? e->ښی : e->کیڼ, content, لار_MAX);
 }
 
-struct path_entry {
-	struct hashmap_entry entry;
-	char path[FLEX_ARRAY];
+بنية لار_ثبت {
+	بنية hashmap_ثبت ثبت;
+	حرف لار[FLEX_ARRAY];
 };
 
-static int path_entry_cmp(const void *cmp_data UNUSED,
-			  const struct hashmap_entry *eptr,
-			  const struct hashmap_entry *entry_or_key,
-			  const void *key)
+ساكن صحيح لار_ثبت_cmp(ثابت فراغ *cmp_معلومات ناکارول_شوی,
+			  ثابت بنية hashmap_ثبت *eptr,
+			  ثابت بنية hashmap_ثبت *ثبت_or_کلی,
+			  ثابت فراغ *کلی)
 {
-	const struct path_entry *a, *b;
+	ثابت بنية لار_ثبت *a, *b;
 
-	a = container_of(eptr, const struct path_entry, entry);
-	b = container_of(entry_or_key, const struct path_entry, entry);
+	a = container_د(eptr, ثابت بنية لار_ثبت, ثبت);
+	b = container_د(ثبت_or_کلی, ثابت بنية لار_ثبت, ثبت);
 
-	return strcmp(a->path, key ? key : b->path);
+	أرجع strcmp(a->لار, کلی ? کلی : b->لار);
 }
 
-static void changed_files(struct repository *repo,
-			  struct hashmap *result, const char *index_path,
-			  const char *workdir)
+ساكن فراغ بدل_شوی_files(بنية repository *repo,
+			  بنية hashmap *پایله, ثابت حرف *شاخص_لار,
+			  ثابت حرف *workdir)
 {
-	struct child_process update_index = CHILD_PROCESS_INIT;
-	struct child_process diff_files = CHILD_PROCESS_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	const char *git_dir = absolute_path(repo_get_git_dir(repo));
+	بنية ماشوم_process update_شاخص = ماشوم_PROCESS_INIT;
+	بنية ماشوم_process diff_files = ماشوم_PROCESS_INIT;
+	بنية strbuf buf = STRBUF_INIT;
+	ثابت حرف *git_dir = absolute_لار(repo_get_git_dir(repo));
 	FILE *fp;
 
-	strvec_pushl(&update_index.args,
+	strvec_pushl(&update_شاخص.دلیلونه,
 		     "--git-dir", git_dir, "--work-tree", workdir,
 		     "update-index", "--really-refresh", "-q",
-		     "--unmerged", NULL);
-	update_index.no_stdin = 1;
-	update_index.no_stdout = 1;
-	update_index.no_stderr = 1;
-	update_index.git_cmd = 1;
-	update_index.use_shell = 0;
-	update_index.clean_on_exit = 1;
-	update_index.dir = workdir;
-	strvec_pushf(&update_index.env, "GIT_INDEX_FILE=%s", index_path);
+		     "--unmerged", عدم);
+	update_شاخص.no_stdin = 1;
+	update_شاخص.no_stdout = 1;
+	update_شاخص.no_stderr = 1;
+	update_شاخص.git_cmd = 1;
+	update_شاخص.use_shell = 0;
+	update_شاخص.clean_on_exit = 1;
+	update_شاخص.dir = workdir;
+	strvec_pushf(&update_شاخص.env, "GIT_INDEX_FILE=%s", شاخص_لار);
 	/* Ignore any errors of update-index */
-	run_command(&update_index);
+	پرلپسې_command(&update_شاخص);
 
-	strvec_pushl(&diff_files.args,
+	strvec_pushl(&diff_files.دلیلونه,
 		     "--git-dir", git_dir, "--work-tree", workdir,
-		     "diff-files", "--name-only", "-z", NULL);
+		     "diff-files", "--name-only", "-z", عدم);
 	diff_files.no_stdin = 1;
 	diff_files.git_cmd = 1;
 	diff_files.use_shell = 0;
 	diff_files.clean_on_exit = 1;
-	diff_files.out = -1;
+	diff_files.بهر = -1;
 	diff_files.dir = workdir;
-	strvec_pushf(&diff_files.env, "GIT_INDEX_FILE=%s", index_path);
-	if (start_command(&diff_files))
+	strvec_pushf(&diff_files.env, "GIT_INDEX_FILE=%s", شاخص_لار);
+	إذا (پیل_command(&diff_files))
 		die("could not obtain raw diff");
-	fp = xfdopen(diff_files.out, "r");
-	while (!strbuf_getline_nul(&buf, fp)) {
-		struct path_entry *entry;
-		FLEX_ALLOC_STR(entry, path, buf.buf);
-		hashmap_entry_init(&entry->entry, strhash(buf.buf));
-		hashmap_add(result, &entry->entry);
+	fp = xfdopen(diff_files.بهر, "r");
+	طالما (!strbuf_getline_nul(&buf, fp)) {
+		بنية لار_ثبت *ثبت;
+		FLEX_ALLOC_STR(ثبت, لار, buf.buf);
+		hashmap_ثبت_init(&ثبت->ثبت, strhash(buf.buf));
+		hashmap_جمع_کړه(پایله, &ثبت->ثبت);
 	}
 	fclose(fp);
-	if (finish_command(&diff_files))
+	إذا (پای_command(&diff_files))
 		die("diff-files did not exit properly");
 	strbuf_release(&buf);
 }
 
-static int ensure_leading_directories(struct repository *repo, char *path)
+ساكن صحيح ensure_leading_directories(بنية repository *repo, حرف *لار)
 {
-	switch (safe_create_leading_directories(repo, path)) {
-		case SCLD_OK:
-		case SCLD_EXISTS:
-			return 0;
-		default:
-			return error(_("could not create leading directories "
-				       "of '%s'"), path);
+	بدل (خوندي_create_leading_directories(repo, لار)) {
+		حالة SCLD_OK:
+		حالة SCLD_EXISTS:
+			أرجع 0;
+		افتراضي:
+			أرجع error(_("could not create leading directories "
+				       "of '%s'"), لار);
 	}
 }
 
@@ -302,51 +302,51 @@ static int ensure_leading_directories(struct repository *repo, char *path)
  * to compare the readlink(2) result as text, even on a filesystem that is
  * capable of doing a symbolic link.
  */
-static char *get_symlink(struct repository *repo,
-			 struct difftool_options *dt_options,
-			 const struct object_id *oid, const char *path)
+ساكن حرف *get_symlink(بنية repository *repo,
+			 بنية difftool_options *dt_options,
+			 ثابت بنية object_id *oid, ثابت حرف *لار)
 {
-	char *data;
-	if (is_null_oid(oid)) {
+	حرف *معلومات;
+	إذا (is_null_oid(oid)) {
 		/* The symlink is unknown to Git so read from the filesystem */
-		struct strbuf link = STRBUF_INIT;
-		if (dt_options->has_symlinks) {
-			if (strbuf_readlink(&link, path, strlen(path)))
-				die(_("could not read symlink %s"), path);
-		} else if (strbuf_read_file(&link, path, 128))
-			die(_("could not read symlink file %s"), path);
+		بنية strbuf link = STRBUF_INIT;
+		إذا (dt_options->has_symlinks) {
+			إذا (strbuf_readlink(&link, لار, مزي_اوږدوالی(لار)))
+				die(_("could not read symlink %s"), لار);
+		} وإلا إذا (strbuf_read_file(&link, لار, 128))
+			die(_("could not read symlink file %s"), لار);
 
-		data = strbuf_detach(&link, NULL);
-	} else {
-		enum object_type type;
-		size_t size;
-		data = odb_read_object(repo->objects, oid, &type, &size);
-		if (!data)
+		معلومات = strbuf_detach(&link, عدم);
+	} وإلا {
+		تعداد object_type type;
+		اندازه_t اندازه;
+		معلومات = odb_read_object(repo->objects, oid, &type, &اندازه);
+		إذا (!معلومات)
 			die(_("could not read object %s for symlink %s"),
-				oid_to_hex(oid), path);
+				oid_منزل_hex(oid), لار);
 	}
 
-	return data;
+	أرجع معلومات;
 }
 
-static int checkout_path(unsigned mode, struct object_id *oid,
-			 const char *path, const struct checkout *state)
+ساكن صحيح checkout_لار(بینښه ډېرپېښ, بنية object_id *oid,
+			 ثابت حرف *لار, ثابت بنية checkout *state)
 {
-	struct cache_entry *ce;
-	int ret;
+	بنية cache_ثبت *ce;
+	صحيح ret;
 
-	ce = make_transient_cache_entry(mode, oid, path, 0, NULL);
-	ret = checkout_entry(ce, state, NULL, NULL);
+	ce = make_transient_cache_ثبت(ډېرپېښ, oid, لار, 0, عدم);
+	ret = checkout_ثبت(ce, state, عدم, عدم);
 
-	discard_cache_entry(ce);
-	return ret;
+	discard_cache_ثبت(ce);
+	أرجع ret;
 }
 
-static void write_file_in_directory(struct repository *repo,
-				    struct strbuf *dir, size_t dir_len,
-				    const char *path, const char *content)
+ساكن فراغ write_file_دننه_directory(بنية repository *repo,
+				    بنية strbuf *dir, اندازه_t dir_len,
+				    ثابت حرف *لار, ثابت حرف *content)
 {
-	add_path(dir, dir_len, path);
+	جمع_کړه_لار(dir, dir_len, لار);
 	ensure_leading_directories(repo, dir->buf);
 	unlink(dir->buf);
 	write_file(dir->buf, "%s", content);
@@ -358,204 +358,204 @@ static void write_file_in_directory(struct repository *repo,
  * as text files, resulting in behavior that is analogous to what "git diff"
  * displays for symlink and submodule diffs.
  */
-static void write_standin_files(struct repository *repo,
-				struct pair_entry *entry,
-				struct strbuf *ldir, size_t ldir_len,
-				struct strbuf *rdir, size_t rdir_len)
+ساكن فراغ write_standin_files(بنية repository *repo,
+				بنية pair_ثبت *ثبت,
+				بنية strbuf *ldir, اندازه_t ldir_len,
+				بنية strbuf *rdir, اندازه_t rdir_len)
 {
-	if (*entry->left)
-		write_file_in_directory(repo, ldir, ldir_len, entry->path, entry->left);
-	if (*entry->right)
-		write_file_in_directory(repo, rdir, rdir_len, entry->path, entry->right);
+	إذا (*ثبت->کیڼ)
+		write_file_دننه_directory(repo, ldir, ldir_len, ثبت->لار, ثبت->کیڼ);
+	إذا (*ثبت->ښی)
+		write_file_دننه_directory(repo, rdir, rdir_len, ثبت->لار, ثبت->ښی);
 }
 
-static int run_dir_diff(struct repository *repo,
-			struct difftool_options *dt_options,
-			const char *extcmd, const char *prefix,
-			struct child_process *child)
+ساكن صحيح پرلپسې_dir_diff(بنية repository *repo,
+			بنية difftool_options *dt_options,
+			ثابت حرف *extcmd, ثابت حرف *مختاړی,
+			بنية ماشوم_process *ماشوم)
 {
-	struct strbuf info = STRBUF_INIT, lpath = STRBUF_INIT;
-	struct strbuf rpath = STRBUF_INIT, buf = STRBUF_INIT;
-	struct strbuf ldir = STRBUF_INIT, rdir = STRBUF_INIT;
-	struct strbuf wtdir = STRBUF_INIT;
-	struct strbuf tmpdir = STRBUF_INIT;
-	char *lbase_dir = NULL, *rbase_dir = NULL;
-	size_t ldir_len, rdir_len, wtdir_len;
-	const char *workdir, *tmp;
-	int ret = 0;
-	size_t i;
-	FILE *fp = NULL;
-	struct hashmap working_tree_dups = HASHMAP_INIT(working_tree_entry_cmp,
-							NULL);
-	struct hashmap submodules = HASHMAP_INIT(pair_cmp, NULL);
-	struct hashmap symlinks2 = HASHMAP_INIT(pair_cmp, NULL);
-	struct hashmap_iter iter;
-	struct pair_entry *entry;
-	struct index_state wtindex = INDEX_STATE_INIT(repo);
-	struct checkout lstate, rstate;
-	int err = 0;
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	struct hashmap wt_modified = HASHMAP_INIT(path_entry_cmp, NULL);
-	struct hashmap tmp_modified = HASHMAP_INIT(path_entry_cmp, NULL);
-	int indices_loaded = 0;
+	بنية strbuf info = STRBUF_INIT, lpath = STRBUF_INIT;
+	بنية strbuf rpath = STRBUF_INIT, buf = STRBUF_INIT;
+	بنية strbuf ldir = STRBUF_INIT, rdir = STRBUF_INIT;
+	بنية strbuf wtdir = STRBUF_INIT;
+	بنية strbuf tmpdir = STRBUF_INIT;
+	حرف *lbase_dir = عدم, *rbase_dir = عدم;
+	اندازه_t ldir_len, rdir_len, wtdir_len;
+	ثابت حرف *workdir, *tmp;
+	صحيح ret = 0;
+	اندازه_t i;
+	FILE *fp = عدم;
+	بنية hashmap working_ونه_dups = HASHMAP_INIT(working_ونه_ثبت_cmp,
+							عدم);
+	بنية hashmap submodules = HASHMAP_INIT(pair_cmp, عدم);
+	بنية hashmap symlinks2 = HASHMAP_INIT(pair_cmp, عدم);
+	بنية hashmap_iter iter;
+	بنية pair_ثبت *ثبت;
+	بنية شاخص_state wtindex = شاخص_STATE_INIT(repo);
+	بنية checkout lstate, rstate;
+	صحيح err = 0;
+	بنية ماشوم_process cmd = ماشوم_PROCESS_INIT;
+	بنية hashmap wt_modified = HASHMAP_INIT(لار_ثبت_cmp, عدم);
+	بنية hashmap tmp_modified = HASHMAP_INIT(لار_ثبت_cmp, عدم);
+	صحيح indices_loaded = 0;
 
-	workdir = repo_get_work_tree(repo);
+	workdir = repo_get_work_ونه(repo);
 
 	/* Setup temp directories */
 	tmp = getenv("TMPDIR");
-	strbuf_add_absolute_path(&tmpdir, tmp ? tmp : "/tmp");
+	strbuf_جمع_کړه_absolute_لار(&tmpdir, tmp ? tmp : "/tmp");
 	strbuf_trim_trailing_dir_sep(&tmpdir);
 	strbuf_addstr(&tmpdir, "/git-difftool.XXXXXX");
-	if (!mkdtemp(tmpdir.buf)) {
+	إذا (!mkdtemp(tmpdir.buf)) {
 		ret = error("could not create '%s'", tmpdir.buf);
-		goto finish;
+		اذهب پای;
 	}
 	strbuf_addf(&ldir, "%s/left/", tmpdir.buf);
 	strbuf_addf(&rdir, "%s/right/", tmpdir.buf);
 	strbuf_addstr(&wtdir, workdir);
-	if (!wtdir.len || !is_dir_sep(wtdir.buf[wtdir.len - 1]))
+	إذا (!wtdir.len || !is_dir_sep(wtdir.buf[wtdir.len - 1]))
 		strbuf_addch(&wtdir, '/');
 	mkdir(ldir.buf, 0700);
 	mkdir(rdir.buf, 0700);
 
-	memset(&lstate, 0, sizeof(lstate));
-	lstate.base_dir = lbase_dir = xstrdup(ldir.buf);
-	lstate.base_dir_len = ldir.len;
+	memset(&lstate, 0, حجم(lstate));
+	lstate.بنسټ_dir = lbase_dir = xstrdup(ldir.buf);
+	lstate.بنسټ_dir_len = ldir.len;
 	lstate.force = 1;
-	memset(&rstate, 0, sizeof(rstate));
-	rstate.base_dir = rbase_dir = xstrdup(rdir.buf);
-	rstate.base_dir_len = rdir.len;
+	memset(&rstate, 0, حجم(rstate));
+	rstate.بنسټ_dir = rbase_dir = xstrdup(rdir.buf);
+	rstate.بنسټ_dir_len = rdir.len;
 	rstate.force = 1;
 
 	ldir_len = ldir.len;
 	rdir_len = rdir.len;
 	wtdir_len = wtdir.len;
 
-	child->no_stdin = 1;
-	child->git_cmd = 1;
-	child->use_shell = 0;
-	child->clean_on_exit = 1;
-	child->dir = prefix;
-	child->out = -1;
-	if (start_command(child))
+	ماشوم->no_stdin = 1;
+	ماشوم->git_cmd = 1;
+	ماشوم->use_shell = 0;
+	ماشوم->clean_on_exit = 1;
+	ماشوم->dir = مختاړی;
+	ماشوم->بهر = -1;
+	إذا (پیل_command(ماشوم))
 		die("could not obtain raw diff");
-	fp = xfdopen(child->out, "r");
+	fp = xfdopen(ماشوم->بهر, "r");
 
 	/* Build index info for left and right sides of the diff */
 	i = 0;
-	while (!strbuf_getline_nul(&info, fp)) {
-		int lmode, rmode;
-		struct object_id loid, roid;
-		char status;
-		const char *src_path, *dst_path;
+	طالما (!strbuf_getline_nul(&info, fp)) {
+		صحيح lmode, rmode;
+		بنية object_id loid, roid;
+		حرف حالت;
+		ثابت حرف *src_لار, *dst_لار;
 
-		if (starts_with(info.buf, "::"))
+		إذا (starts_with(info.buf, "::"))
 			die(N_("combined diff formats ('-c' and '--cc') are "
 			       "not supported in\n"
 			       "directory diff mode ('-d' and '--dir-diff')."));
 
-		if (parse_index_info(repo, info.buf, &lmode, &rmode, &loid, &roid, &status))
-			break;
-		if (strbuf_getline_nul(&lpath, fp))
-			break;
-		src_path = lpath.buf;
+		إذا (parse_شاخص_info(repo, info.buf, &lmode, &rmode, &loid, &roid, &حالت))
+			اكسر;
+		إذا (strbuf_getline_nul(&lpath, fp))
+			اكسر;
+		src_لار = lpath.buf;
 
 		i++;
-		if (status != 'C' && status != 'R') {
-			dst_path = src_path;
-		} else {
-			if (strbuf_getline_nul(&rpath, fp))
-				break;
-			dst_path = rpath.buf;
+		إذا (حالت != 'C' && حالت != 'R') {
+			dst_لار = src_لار;
+		} وإلا {
+			إذا (strbuf_getline_nul(&rpath, fp))
+				اكسر;
+			dst_لار = rpath.buf;
 		}
 
-		if (S_ISGITLINK(lmode) || S_ISGITLINK(rmode)) {
+		إذا (S_ISGITLINK(lmode) || S_ISGITLINK(rmode)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "Subproject commit %s",
-				    oid_to_hex(&loid));
-			add_left_or_right(&submodules, src_path, buf.buf, 0);
+				    oid_منزل_hex(&loid));
+			جمع_کړه_کیڼ_or_ښی(&submodules, src_لار, buf.buf, 0);
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "Subproject commit %s",
-				    oid_to_hex(&roid));
-			if (oideq(&loid, &roid))
+				    oid_منزل_hex(&roid));
+			إذا (oideq(&loid, &roid))
 				strbuf_addstr(&buf, "-dirty");
-			add_left_or_right(&submodules, dst_path, buf.buf, 1);
-			continue;
+			جمع_کړه_کیڼ_or_ښی(&submodules, dst_لار, buf.buf, 1);
+			استمر;
 		}
 
-		if (S_ISLNK(lmode)) {
-			char *content = get_symlink(repo, dt_options, &loid, src_path);
-			add_left_or_right(&symlinks2, src_path, content, 0);
-			free(content);
+		إذا (S_ISLNK(lmode)) {
+			حرف *content = get_symlink(repo, dt_options, &loid, src_لار);
+			جمع_کړه_کیڼ_or_ښی(&symlinks2, src_لار, content, 0);
+			حرر(content);
 		}
 
-		if (S_ISLNK(rmode)) {
-			char *content = get_symlink(repo, dt_options, &roid, dst_path);
-			add_left_or_right(&symlinks2, dst_path, content, 1);
-			free(content);
+		إذا (S_ISLNK(rmode)) {
+			حرف *content = get_symlink(repo, dt_options, &roid, dst_لار);
+			جمع_کړه_کیڼ_or_ښی(&symlinks2, dst_لار, content, 1);
+			حرر(content);
 		}
 
-		if (lmode && status != 'C') {
-			if (checkout_path(lmode, &loid, src_path, &lstate)) {
-				ret = error("could not write '%s'", src_path);
-				goto finish;
+		إذا (lmode && حالت != 'C') {
+			إذا (checkout_لار(lmode, &loid, src_لار, &lstate)) {
+				ret = error("could not write '%s'", src_لار);
+				اذهب پای;
 			}
 		}
 
-		if (rmode && !S_ISLNK(rmode)) {
-			struct working_tree_entry *entry;
+		إذا (rmode && !S_ISLNK(rmode)) {
+			بنية working_ونه_ثبت *ثبت;
 
 			/* Avoid duplicate working_tree entries */
-			FLEX_ALLOC_STR(entry, path, dst_path);
-			hashmap_entry_init(&entry->entry, strhash(dst_path));
-			if (hashmap_get(&working_tree_dups, &entry->entry,
-					NULL)) {
-				free(entry);
-				continue;
+			FLEX_ALLOC_STR(ثبت, لار, dst_لار);
+			hashmap_ثبت_init(&ثبت->ثبت, strhash(dst_لار));
+			إذا (hashmap_get(&working_ونه_dups, &ثبت->ثبت,
+					عدم)) {
+				حرر(ثبت);
+				استمر;
 			}
-			hashmap_add(&working_tree_dups, &entry->entry);
+			hashmap_جمع_کړه(&working_ونه_dups, &ثبت->ثبت);
 
-			if (!use_wt_file(repo, workdir, dst_path, &roid)) {
-				if (checkout_path(rmode, &roid, dst_path,
+			إذا (!use_wt_file(repo, workdir, dst_لار, &roid)) {
+				إذا (checkout_لار(rmode, &roid, dst_لار,
 						  &rstate)) {
 					ret = error("could not write '%s'",
-						    dst_path);
-					goto finish;
+						    dst_لار);
+					اذهب پای;
 				}
-			} else if (!is_null_oid(&roid)) {
+			} وإلا إذا (!is_null_oid(&roid)) {
 				/*
 				 * Changes in the working tree need special
 				 * treatment since they are not part of the
 				 * index.
 				 */
-				struct cache_entry *ce2 =
-					make_cache_entry(&wtindex, rmode, &roid,
-							 dst_path, 0, 0);
+				بنية cache_ثبت *ce2 =
+					make_cache_ثبت(&wtindex, rmode, &roid,
+							 dst_لار, 0, 0);
 
-				add_index_entry(&wtindex, ce2,
-						ADD_CACHE_JUST_APPEND);
+				جمع_کړه_شاخص_ثبت(&wtindex, ce2,
+						جمع_کړه_CACHE_JUST_APPEND);
 
-				add_path(&rdir, rdir_len, dst_path);
-				if (ensure_leading_directories(repo, rdir.buf)) {
+				جمع_کړه_لار(&rdir, rdir_len, dst_لار);
+				إذا (ensure_leading_directories(repo, rdir.buf)) {
 					ret = error("could not create "
 						    "directory for '%s'",
-						    dst_path);
-					goto finish;
+						    dst_لار);
+					اذهب پای;
 				}
-				add_path(&wtdir, wtdir_len, dst_path);
-				if (dt_options->symlinks) {
-					if (symlink(wtdir.buf, rdir.buf)) {
+				جمع_کړه_لار(&wtdir, wtdir_len, dst_لار);
+				إذا (dt_options->symlinks) {
+					إذا (symlink(wtdir.buf, rdir.buf)) {
 						ret = error_errno("could not symlink '%s' to '%s'", wtdir.buf, rdir.buf);
-						goto finish;
+						اذهب پای;
 					}
-				} else {
-					struct stat st;
-					if (stat(wtdir.buf, &st))
-						st.st_mode = 0644;
-					if (copy_file(repo, rdir.buf, wtdir.buf,
-						      st.st_mode)) {
+				} وإلا {
+					بنية stat st;
+					إذا (stat(wtdir.buf, &st))
+						st.st_ډېرپېښ = 0644;
+					إذا (copy_file(repo, rdir.buf, wtdir.buf,
+						      st.st_ډېرپېښ)) {
 						ret = error("could not copy '%s' to '%s'", wtdir.buf, rdir.buf);
-						goto finish;
+						اذهب پای;
 					}
 				}
 			}
@@ -563,23 +563,23 @@ static int run_dir_diff(struct repository *repo,
 	}
 
 	fclose(fp);
-	fp = NULL;
-	if (finish_command(child)) {
+	fp = عدم;
+	إذا (پای_command(ماشوم)) {
 		ret = error("error occurred running diff --raw");
-		goto finish;
+		اذهب پای;
 	}
 
-	if (!i)
-		goto finish;
+	إذا (!i)
+		اذهب پای;
 
 	/*
 	 * Changes to submodules require special treatment.This loop writes a
 	 * temporary file to both the left and right directories to show the
 	 * change in the recorded SHA1 for the submodule.
 	 */
-	hashmap_for_each_entry(&submodules, &iter, entry,
-				entry /* member name */) {
-		write_standin_files(repo, entry, &ldir, ldir_len, &rdir, rdir_len);
+	hashmap_for_each_ثبت(&submodules, &iter, ثبت,
+				ثبت /* member name */) {
+		write_standin_files(repo, ثبت, &ldir, ldir_len, &rdir, rdir_len);
 	}
 
 	/*
@@ -587,27 +587,27 @@ static int run_dir_diff(struct repository *repo,
 	 * shows only the link itself, not the contents of the link target.
 	 * This loop replicates that behavior.
 	 */
-	hashmap_for_each_entry(&symlinks2, &iter, entry,
-				entry /* member name */) {
+	hashmap_for_each_ثبت(&symlinks2, &iter, ثبت,
+				ثبت /* member name */) {
 
-		write_standin_files(repo, entry, &ldir, ldir_len, &rdir, rdir_len);
+		write_standin_files(repo, ثبت, &ldir, ldir_len, &rdir, rdir_len);
 	}
 
 	strbuf_setlen(&ldir, ldir_len);
 	strbuf_setlen(&rdir, rdir_len);
 
-	if (extcmd) {
-		strvec_push(&cmd.args, extcmd);
-	} else {
-		strvec_push(&cmd.args, "difftool--helper");
+	إذا (extcmd) {
+		strvec_ټېل(&cmd.دلیلونه, extcmd);
+	} وإلا {
+		strvec_ټېل(&cmd.دلیلونه, "difftool--helper");
 		cmd.git_cmd = 1;
 		setenv("GIT_DIFFTOOL_DIRDIFF", "true", 1);
 	}
-	strvec_pushl(&cmd.args, ldir.buf, rdir.buf, NULL);
-	ret = run_command(&cmd);
+	strvec_pushl(&cmd.دلیلونه, ldir.buf, rdir.buf, عدم);
+	ret = پرلپسې_command(&cmd);
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(&wtindex);
+	ensure_ډک_شاخص(&wtindex);
 
 	/*
 	 * If the diff includes working copy files and those
@@ -620,72 +620,72 @@ static int run_dir_diff(struct repository *repo,
 	 * in the common case of --symlinks and the difftool updating
 	 * files through the symlink.
 	 */
-	for (i = 0; i < wtindex.cache_nr; i++) {
-		struct hashmap_entry dummy;
-		const char *name = wtindex.cache[i]->name;
-		struct stat st;
+	لكل (i = 0; i < wtindex.cache_nr; i++) {
+		بنية hashmap_ثبت dummy;
+		ثابت حرف *name = wtindex.cache[i]->name;
+		بنية stat st;
 
-		add_path(&rdir, rdir_len, name);
-		if (lstat(rdir.buf, &st))
-			continue;
+		جمع_کړه_لار(&rdir, rdir_len, name);
+		إذا (lstat(rdir.buf, &st))
+			استمر;
 
-		if ((dt_options->symlinks && S_ISLNK(st.st_mode)) || !S_ISREG(st.st_mode))
-			continue;
+		إذا ((dt_options->symlinks && S_ISLNK(st.st_ډېرپېښ)) || !S_ISREG(st.st_ډېرپېښ))
+			استمر;
 
-		if (!indices_loaded) {
-			struct lock_file lock = LOCK_INIT;
+		إذا (!indices_loaded) {
+			بنية قلف_file قلف = قلف_INIT;
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "%s/wtindex", tmpdir.buf);
-			if (repo_hold_lock_file_for_update(repo, &lock, buf.buf, 0) < 0 ||
-			    write_locked_index(&wtindex, &lock, COMMIT_LOCK)) {
+			إذا (repo_hold_قلف_file_for_update(repo, &قلف, buf.buf, 0) < 0 ||
+			    write_locked_شاخص(&wtindex, &قلف, COMMIT_قلف)) {
 				ret = error("could not write %s", buf.buf);
-				goto finish;
+				اذهب پای;
 			}
-			changed_files(repo, &wt_modified, buf.buf, workdir);
+			بدل_شوی_files(repo, &wt_modified, buf.buf, workdir);
 			strbuf_setlen(&rdir, rdir_len);
-			changed_files(repo, &tmp_modified, buf.buf, rdir.buf);
-			add_path(&rdir, rdir_len, name);
+			بدل_شوی_files(repo, &tmp_modified, buf.buf, rdir.buf);
+			جمع_کړه_لار(&rdir, rdir_len, name);
 			indices_loaded = 1;
 		}
 
-		hashmap_entry_init(&dummy, strhash(name));
-		if (hashmap_get(&tmp_modified, &dummy, name)) {
-			add_path(&wtdir, wtdir_len, name);
-			if (hashmap_get(&wt_modified, &dummy, name)) {
+		hashmap_ثبت_init(&dummy, strhash(name));
+		إذا (hashmap_get(&tmp_modified, &dummy, name)) {
+			جمع_کړه_لار(&wtdir, wtdir_len, name);
+			إذا (hashmap_get(&wt_modified, &dummy, name)) {
 				warning(_("both files modified: '%s' and '%s'."),
 					wtdir.buf, rdir.buf);
 				warning(_("working tree file has been left."));
 				warning("%s", "");
 				err = 1;
-			} else if (unlink(wtdir.buf) ||
-				   copy_file(repo, wtdir.buf, rdir.buf, st.st_mode))
+			} وإلا إذا (unlink(wtdir.buf) ||
+				   copy_file(repo, wtdir.buf, rdir.buf, st.st_ډېرپېښ))
 				warning_errno(_("could not copy '%s' to '%s'"),
 					      rdir.buf, wtdir.buf);
 		}
 	}
 
-	if (err) {
+	إذا (err) {
 		warning(_("temporary files exist in '%s'."), tmpdir.buf);
 		warning(_("you may want to cleanup or recover these."));
 		ret = 1;
-	} else {
+	} وإلا {
 		remove_dir_recursively(&tmpdir, 0);
-		if (ret)
+		إذا (ret)
 			warning(_("failed: %d"), ret);
 	}
 
-finish:
-	if (fp)
+پای:
+	إذا (fp)
 		fclose(fp);
 
-	hashmap_clear_and_free(&working_tree_dups, struct working_tree_entry, entry);
-	hashmap_clear_and_free(&wt_modified, struct path_entry, entry);
-	hashmap_clear_and_free(&tmp_modified, struct path_entry, entry);
-	hashmap_clear_and_free(&submodules, struct pair_entry, entry);
-	hashmap_clear_and_free(&symlinks2, struct pair_entry, entry);
-	release_index(&wtindex);
-	free(lbase_dir);
-	free(rbase_dir);
+	hashmap_clear_and_free(&working_ونه_dups, بنية working_ونه_ثبت, ثبت);
+	hashmap_clear_and_free(&wt_modified, بنية لار_ثبت, ثبت);
+	hashmap_clear_and_free(&tmp_modified, بنية لار_ثبت, ثبت);
+	hashmap_clear_and_free(&submodules, بنية pair_ثبت, ثبت);
+	hashmap_clear_and_free(&symlinks2, بنية pair_ثبت, ثبت);
+	release_شاخص(&wtindex);
+	حرر(lbase_dir);
+	حرر(rbase_dir);
 	strbuf_release(&info);
 	strbuf_release(&lpath);
 	strbuf_release(&rpath);
@@ -695,46 +695,46 @@ finish:
 	strbuf_release(&buf);
 	strbuf_release(&tmpdir);
 
-	return (ret < 0) ? 1 : ret;
+	أرجع (ret < 0) ? 1 : ret;
 }
 
-static int run_file_diff(int prompt, const char *prefix,
-			 struct child_process *child)
+ساكن صحيح پرلپسې_file_diff(صحيح prompt, ثابت حرف *مختاړی,
+			 بنية ماشوم_process *ماشوم)
 {
-	strvec_push(&child->env, "GIT_PAGER=");
-	strvec_push(&child->env, "GIT_EXTERNAL_DIFF=git-difftool--helper");
-	if (prompt > 0)
-		strvec_push(&child->env, "GIT_DIFFTOOL_PROMPT=true");
-	else if (!prompt)
-		strvec_push(&child->env, "GIT_DIFFTOOL_NO_PROMPT=true");
+	strvec_ټېل(&ماشوم->env, "GIT_PAGER=");
+	strvec_ټېل(&ماشوم->env, "GIT_EXTERNAL_DIFF=git-difftool--helper");
+	إذا (prompt > 0)
+		strvec_ټېل(&ماشوم->env, "GIT_DIFFTOOL_PROMPT=true");
+	وإلا إذا (!prompt)
+		strvec_ټېل(&ماشوم->env, "GIT_DIFFTOOL_NO_PROMPT=true");
 
-	child->git_cmd = 1;
-	child->dir = prefix;
+	ماشوم->git_cmd = 1;
+	ماشوم->dir = مختاړی;
 
-	return run_command(child);
+	أرجع پرلپسې_command(ماشوم);
 }
 
-int cmd_difftool(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+صحيح cmd_difftool(صحيح argc,
+		 ثابت حرف **argv,
+		 ثابت حرف *مختاړی,
+		 بنية repository *repo)
 {
-	int use_gui_tool = -1, dir_diff = 0, prompt = -1, tool_help = 0, no_index = 0;
-	static char *difftool_cmd = NULL, *extcmd = NULL;
-	struct difftool_options dt_options = {
+	صحيح use_gui_tool = -1, dir_diff = 0, prompt = -1, tool_help = 0, no_شاخص = 0;
+	ساكن حرف *difftool_cmd = عدم, *extcmd = عدم;
+	بنية difftool_options dt_options = {
 		.has_symlinks = 1,
 		.symlinks = 1,
-		.trust_exit_code = 0
+		.trust_exit_کوډ = 0
 	};
-	struct option builtin_difftool_options[] = {
+	بنية option builtin_difftool_options[] = {
 		OPT_BOOL('g', "gui", &use_gui_tool,
 			 N_("use `diff.guitool` instead of `diff.tool`")),
 		OPT_BOOL('d', "dir-diff", &dir_diff,
 			 N_("perform a full-directory diff")),
-		OPT_SET_INT_F('y', "no-prompt", &prompt,
+		OPT_سېټ_INT_F('y', "no-prompt", &prompt,
 			N_("do not prompt before launching a diff tool"),
 			0, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "prompt", &prompt, NULL,
+		OPT_سېټ_INT_F(0, "prompt", &prompt, عدم,
 			1, PARSE_OPT_NONEG | PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "symlinks", &dt_options.symlinks,
 			 N_("use symlinks in dir-diff mode")),
@@ -743,34 +743,34 @@ int cmd_difftool(int argc,
 		OPT_BOOL(0, "tool-help", &tool_help,
 			 N_("print a list of diff tools that may be used with "
 			    "`--tool`")),
-		OPT_BOOL(0, "trust-exit-code", &dt_options.trust_exit_code,
+		OPT_BOOL(0, "trust-exit-code", &dt_options.trust_exit_کوډ,
 			 N_("make 'git-difftool' exit when an invoked diff "
 			    "tool returns a non-zero exit code")),
 		OPT_STRING('x', "extcmd", &extcmd, N_("command"),
 			   N_("specify a custom command for viewing diffs")),
-		OPT_BOOL(0, "no-index", &no_index, N_("passed to `diff`")),
-		OPT_END()
+		OPT_BOOL(0, "no-index", &no_شاخص, N_("passed to `diff`")),
+		OPT_پای_ټکی()
 	};
-	struct child_process child = CHILD_PROCESS_INIT;
+	بنية ماشوم_process ماشوم = ماشوم_PROCESS_INIT;
 
 	repo_config(repo, difftool_config, &dt_options);
 	dt_options.symlinks = dt_options.has_symlinks;
 
-	argc = parse_options(argc, argv, prefix, builtin_difftool_options,
+	argc = parse_options(argc, argv, مختاړی, builtin_difftool_options,
 			     builtin_difftool_usage, PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (tool_help)
-		return print_tool_help();
+	إذا (tool_help)
+		أرجع print_tool_help();
 
-	if (!no_index && !startup_info->have_repository)
+	إذا (!no_شاخص && !startup_info->have_repository)
 		die(_("difftool requires worktree or --no-index"));
 
-	if (!no_index){
-		setup_work_tree(repo);
-		setenv(GIT_DIR_ENVIRONMENT, absolute_path(repo_get_git_dir(repo)), 1);
-		setenv(GIT_WORK_TREE_ENVIRONMENT, absolute_path(repo_get_work_tree(repo)), 1);
-	} else if (dir_diff)
+	إذا (!no_شاخص){
+		تیاری_work_ونه(repo);
+		setenv(GIT_DIR_ENVIRONMENT, absolute_لار(repo_get_git_dir(repo)), 1);
+		setenv(GIT_WORK_ونه_ENVIRONMENT, absolute_لار(repo_get_work_ونه(repo)), 1);
+	} وإلا إذا (dir_diff)
 		die(_("options '%s' and '%s' cannot be used together"), "--dir-diff", "--no-index");
 
 	die_for_incompatible_opt3(use_gui_tool == 1, "--gui",
@@ -782,27 +782,27 @@ int cmd_difftool(int argc,
 	 * empty or unset means "use the difftool.guiDefault config or default to
 	 * false".
 	 */
-	if (use_gui_tool == 1)
+	إذا (use_gui_tool == 1)
 		setenv("GIT_MERGETOOL_GUI", "true", 1);
-	else if (use_gui_tool == 0)
+	وإلا إذا (use_gui_tool == 0)
 		setenv("GIT_MERGETOOL_GUI", "false", 1);
 
-	if (difftool_cmd) {
-		if (*difftool_cmd)
+	إذا (difftool_cmd) {
+		إذا (*difftool_cmd)
 			setenv("GIT_DIFF_TOOL", difftool_cmd, 1);
-		else
+		وإلا
 			die(_("no <tool> given for --tool=<tool>"));
 	}
 
-	if (extcmd) {
-		if (*extcmd)
+	إذا (extcmd) {
+		إذا (*extcmd)
 			setenv("GIT_DIFFTOOL_EXTCMD", extcmd, 1);
-		else
+		وإلا
 			die(_("no <cmd> given for --extcmd=<cmd>"));
 	}
 
 	setenv("GIT_DIFFTOOL_TRUST_EXIT_CODE",
-	       dt_options.trust_exit_code ? "true" : "false", 1);
+	       dt_options.trust_exit_کوډ ? "true" : "false", 1);
 
 	/*
 	 * In directory diff mode, 'git-difftool--helper' is called once
@@ -810,14 +810,14 @@ int cmd_difftool(int argc,
 	 * will invoke a separate instance of 'git-difftool--helper' for
 	 * each file that changed.
 	 */
-	strvec_push(&child.args, "diff");
-	if (no_index)
-		strvec_push(&child.args, "--no-index");
-	if (dir_diff)
-		strvec_pushl(&child.args, "--raw", "--no-abbrev", "-z", NULL);
-	strvec_pushv(&child.args, argv);
+	strvec_ټېل(&ماشوم.دلیلونه, "diff");
+	إذا (no_شاخص)
+		strvec_ټېل(&ماشوم.دلیلونه, "--no-index");
+	إذا (dir_diff)
+		strvec_pushl(&ماشوم.دلیلونه, "--raw", "--no-abbrev", "-z", عدم);
+	strvec_pushv(&ماشوم.دلیلونه, argv);
 
-	if (dir_diff)
-		return run_dir_diff(repo, &dt_options, extcmd, prefix, &child);
-	return run_file_diff(prompt, prefix, &child);
+	إذا (dir_diff)
+		أرجع پرلپسې_dir_diff(repo, &dt_options, extcmd, مختاړی, &ماشوم);
+	أرجع پرلپسې_file_diff(prompt, مختاړی, &ماشوم);
 }
