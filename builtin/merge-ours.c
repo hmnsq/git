@@ -14,13 +14,13 @@
 #include "environment.h"
 #include "diff.h"
 
-static const char builtin_merge_ours_usage[] =
+static const var_na builtin_merge_ours_usage[] =
 	"git merge-ours <base>... -- HEAD <remote>...";
 
-int cmd_merge_ours(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+puur_naa_nka cmd_merge_ours(puur_naa_nka argc,
+		   const var_na **argv,
+		   const var_na *prefix UNUSED,
+		   sa_nracanaa repository *repo)
 {
 	show_usage_if_asked(argc, argv, builtin_merge_ours_usage);
 
@@ -33,9 +33,9 @@ int cmd_merge_ours(int argc,
 	 * commit.  The index must match HEAD, or this merge cannot go
 	 * through.
 	 */
-	if (repo_read_index(repo) < 0)
+	ᰀᰧ (repo_read_index(repo) < 0)
 		die_errno("read_cache failed");
-	if (index_differs_from(repo, "HEAD", NULL, 0))
-		return 2;
-	return 0;
+	ᰀᰧ (index_differs_from(repo, "HEAD", NULL, 0))
+		ᰀᰧᰌ 2;
+	ᰀᰧᰌ 0;
 }

@@ -38,93 +38,93 @@
  * "merges", returns REBASE_MERGES. If value is a invalid value, dies with
  * a fatal error if fatal is true, otherwise returns REBASE_INVALID.
  */
-static enum rebase_type parse_config_rebase(const char *key, const char *value,
-		int fatal)
+static ga_nanaa rebase_type parse_config_rebase(const var_na *key, const var_na *value,
+		puur_naa_nka fatal)
 {
-	enum rebase_type v = rebase_parse_value(value);
-	if (v != REBASE_INVALID)
-		return v;
+	ga_nanaa rebase_type v = rebase_parse_value(value);
+	ᰀᰧ (v != REBASE_INVALID)
+		ᰀᰧᰌ v;
 
-	if (fatal)
+	ᰀᰧ (fatal)
 		die(_("invalid value for '%s': '%s'"), key, value);
-	else
+	ᰀᰧᰀ
 		error(_("invalid value for '%s': '%s'"), key, value);
 
-	return REBASE_INVALID;
+	ᰀᰧᰌ REBASE_INVALID;
 }
 
 /**
  * Callback for --rebase, which parses arg with parse_config_rebase().
  */
-static int parse_opt_rebase(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka parse_opt_rebase(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	enum rebase_type *value = opt->value;
+	ga_nanaa rebase_type *value = opt->value;
 
-	if (arg)
+	ᰀᰧ (arg)
 		*value = parse_config_rebase("--rebase", arg, 0);
-	else
+	ᰀᰧᰀ
 		*value = unset ? REBASE_FALSE : REBASE_TRUE;
-	return *value == REBASE_INVALID ? -1 : 0;
+	ᰀᰧᰌ *value == REBASE_INVALID ? -1 : 0;
 }
 
-static const char * const pull_usage[] = {
+static const var_na * const pull_usage[] = {
 	N_("git pull [<options>] [<repository> [<refspec>...]]"),
 	NULL
 };
 
 /* Shared options */
-static int opt_verbosity;
-static const char *opt_progress;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+static puur_naa_nka opt_verbosity;
+static const var_na *opt_progress;
+static puur_naa_nka recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+static puur_naa_nka recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
 
 /* Options passed to git-merge or git-rebase */
-static enum rebase_type opt_rebase = -1;
-static const char *opt_diffstat;
-static const char *opt_log;
-static const char *opt_signoff;
-static const char *opt_squash;
-static const char *opt_commit;
-static const char *opt_edit;
-static const char *cleanup_arg;
-static char *opt_ff;
-static const char *opt_verify_signatures;
-static const char *opt_verify;
-static int opt_autostash = -1;
-static int config_rebase_autostash;
-static int config_pull_autostash = -1;
-static int check_trust_level = 1;
-static struct strvec opt_strategies = STRVEC_INIT;
-static struct strvec opt_strategy_opts = STRVEC_INIT;
-static const char *opt_gpg_sign;
-static int opt_allow_unrelated_histories;
+static ga_nanaa rebase_type opt_rebase = -1;
+static const var_na *opt_diffstat;
+static const var_na *opt_log;
+static const var_na *opt_signoff;
+static const var_na *opt_squash;
+static const var_na *opt_commit;
+static const var_na *opt_edit;
+static const var_na *cleanup_arg;
+static var_na *opt_ff;
+static const var_na *opt_verify_signatures;
+static const var_na *opt_verify;
+static puur_naa_nka opt_autostash = -1;
+static puur_naa_nka config_rebase_autostash;
+static puur_naa_nka config_pull_autostash = -1;
+static puur_naa_nka check_trust_level = 1;
+static sa_nracanaa strvec opt_strategies = STRVEC_INIT;
+static sa_nracanaa strvec opt_strategy_opts = STRVEC_INIT;
+static const var_na *opt_gpg_sign;
+static puur_naa_nka opt_allow_unrelated_histories;
 
 /* Options passed to git-fetch */
-static const char *opt_all;
-static const char *opt_append;
-static const char *opt_upload_pack;
-static int opt_force;
-static const char *opt_tags;
-static const char *opt_prune;
-static const char *max_children;
-static int opt_dry_run;
-static const char *opt_keep;
-static const char *opt_depth;
-static const char *opt_unshallow;
-static const char *opt_update_shallow;
-static const char *opt_refmap;
-static const char *opt_ipv4;
-static const char *opt_ipv6;
-static int opt_show_forced_updates = -1;
-static const char *set_upstream;
-static struct strvec opt_fetch = STRVEC_INIT;
+static const var_na *opt_all;
+static const var_na *opt_append;
+static const var_na *opt_upload_pack;
+static puur_naa_nka opt_force;
+static const var_na *opt_tags;
+static const var_na *opt_prune;
+static const var_na *max_children;
+static puur_naa_nka opt_dry_run;
+static const var_na *opt_keep;
+static const var_na *opt_depth;
+static const var_na *opt_unshallow;
+static const var_na *opt_update_shallow;
+static const var_na *opt_refmap;
+static const var_na *opt_ipv4;
+static const var_na *opt_ipv6;
+static puur_naa_nka opt_show_forced_updates = -1;
+static const var_na *set_upstream;
+static sa_nracanaa strvec opt_fetch = STRVEC_INIT;
 
 /**
  * Pushes "-q" or "-v" switches into arr to match the opt_verbosity level.
  */
-static void argv_push_verbosity(struct strvec *arr)
+static void argv_push_verbosity(sa_nracanaa strvec *arr)
 {
-	int verbosity;
+	puur_naa_nka verbosity;
 
 	for (verbosity = opt_verbosity; verbosity > 0; verbosity--)
 		strvec_push(arr, "-v");
@@ -136,23 +136,23 @@ static void argv_push_verbosity(struct strvec *arr)
 /**
  * Pushes "-f" switches into arr to match the opt_force level.
  */
-static void argv_push_force(struct strvec *arr)
+static void argv_push_force(sa_nracanaa strvec *arr)
 {
-	int force = opt_force;
-	while (force-- > 0)
+	puur_naa_nka force = opt_force;
+	ᰀᰬ (force-- > 0)
 		strvec_push(arr, "-f");
 }
 
 /**
  * Sets the GIT_REFLOG_ACTION environment variable to the concatenation of argv
  */
-static void set_reflog_message(int argc, const char **argv)
+static void set_reflog_message(puur_naa_nka argc, const var_na **argv)
 {
-	int i;
-	struct strbuf msg = STRBUF_INIT;
+	puur_naa_nka i;
+	sa_nracanaa strbuf msg = STRBUF_INIT;
 
 	for (i = 0; i < argc; i++) {
-		if (i)
+		ᰀᰧ (i)
 			strbuf_addch(&msg, ' ');
 		strbuf_addstr(&msg, argv[i]);
 	}
@@ -168,22 +168,22 @@ static void set_reflog_message(int argc, const char **argv)
  * "--ff-only". Otherwise, if pull.ff is set to an invalid value, die with an
  * error.
  */
-static const char *config_get_ff(void)
+static const var_na *config_get_ff(void)
 {
-	const char *value;
+	const var_na *value;
 
-	if (repo_config_get_value(the_repository, "pull.ff", &value))
-		return NULL;
+	ᰀᰧ (repo_config_get_value(the_repository, "pull.ff", &value))
+		ᰀᰧᰌ NULL;
 
 	switch (git_parse_maybe_bool(value)) {
-	case 0:
-		return "--no-ff";
-	case 1:
-		return "--ff";
+	pak_sa 0:
+		ᰀᰧᰌ "--no-ff";
+	pak_sa 1:
+		ᰀᰧᰌ "--ff";
 	}
 
-	if (!strcmp(value, "only"))
-		return "--ff-only";
+	ᰀᰧ (!strcmp(value, "only"))
+		ᰀᰧᰌ "--ff-only";
 
 	die(_("invalid value for '%s': '%s'"), "pull.ff", value);
 }
@@ -195,38 +195,38 @@ static const char *config_get_ff(void)
  * looks for the value of "pull.rebase". If both configuration keys do not
  * exist, returns REBASE_FALSE.
  */
-static enum rebase_type config_get_rebase(int *rebase_unspecified)
+static ga_nanaa rebase_type config_get_rebase(puur_naa_nka *rebase_unspecified)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *value;
+	sa_nracanaa branch *curr_branch = branch_get("HEAD");
+	const var_na *value;
 
-	if (curr_branch) {
-		char *key = xstrfmt("branch.%s.rebase", curr_branch->name);
+	ᰀᰧ (curr_branch) {
+		var_na *key = xstrfmt("branch.%s.rebase", curr_branch->name);
 
-		if (!repo_config_get_value(the_repository, key, &value)) {
-			enum rebase_type ret = parse_config_rebase(key, value, 1);
+		ᰀᰧ (!repo_config_get_value(the_repository, key, &value)) {
+			ga_nanaa rebase_type ret = parse_config_rebase(key, value, 1);
 			free(key);
-			return ret;
+			ᰀᰧᰌ ret;
 		}
 
 		free(key);
 	}
 
-	if (!repo_config_get_value(the_repository, "pull.rebase", &value))
-		return parse_config_rebase("pull.rebase", value, 1);
+	ᰀᰧ (!repo_config_get_value(the_repository, "pull.rebase", &value))
+		ᰀᰧᰌ parse_config_rebase("pull.rebase", value, 1);
 
 	*rebase_unspecified = 1;
 
-	return REBASE_FALSE;
+	ᰀᰧᰌ REBASE_FALSE;
 }
 
 /**
  * Read config variables.
  */
-static int git_pull_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+static puur_naa_nka git_pull_config(const var_na *var, const var_na *value,
+			   const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "rebase.autostash")) {
+	ᰀᰧ (!strcmp(var, "rebase.autostash")) {
 		/*
 		 * run_rebase() also reads this option. The reason we handle it here is
 		 * that when pull.rebase is true, a fast-forward may occur without
@@ -236,38 +236,38 @@ static int git_pull_config(const char *var, const char *value,
 		 * run_merge() handles merge.autostash, so we don't handle it here.
 		 */
 		config_rebase_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "pull.autostash")) {
+		ᰀᰧᰌ 0;
+	} ᰀᰧᰀ ᰀᰧ (!strcmp(var, "pull.autostash")) {
 		config_pull_autostash = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "submodule.recurse")) {
+		ᰀᰧᰌ 0;
+	} ᰀᰧᰀ ᰀᰧ (!strcmp(var, "submodule.recurse")) {
 		recurse_submodules = git_config_bool(var, value) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
-		return 0;
-	} else if (!strcmp(var, "gpg.mintrustlevel")) {
+		ᰀᰧᰌ 0;
+	} ᰀᰧᰀ ᰀᰧ (!strcmp(var, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ᰀᰧᰌ git_default_config(var, value, ctx, cb);
 }
 
 /**
  * Appends merge candidates from FETCH_HEAD that are not marked not-for-merge
  * into merge_heads.
  */
-static void get_merge_heads(struct oid_array *merge_heads)
+static void get_merge_heads(sa_nracanaa oid_array *merge_heads)
 {
-	const char *filename = git_path_fetch_head(the_repository);
+	const var_na *filename = git_path_fetch_head(the_repository);
 	FILE *fp;
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	sa_nracanaa object_id oid;
 
 	fp = xfopen(filename, "r");
-	while (strbuf_getline_lf(&sb, fp) != EOF) {
-		const char *p;
-		if (parse_oid_hex(sb.buf, &oid, &p))
+	ᰀᰬ (strbuf_getline_lf(&sb, fp) != EOF) {
+		const var_na *p;
+		ᰀᰧ (parse_oid_hex(sb.buf, &oid, &p))
 			continue;  /* invalid line: does not start with object ID */
-		if (starts_with(p, "\tnot-for-merge\t"))
+		ᰀᰧ (starts_with(p, "\tnot-for-merge\t"))
 			continue;  /* ref is not-for-merge */
 		oid_array_append(merge_heads, &oid);
 	}
@@ -279,15 +279,15 @@ static void get_merge_heads(struct oid_array *merge_heads)
  * Used by die_no_merge_candidates() as a for_each_remote() callback to
  * retrieve the name of the remote if the repository only has one remote.
  */
-static int get_only_remote(struct remote *remote, void *cb_data)
+static puur_naa_nka get_only_remote(sa_nracanaa remote *remote, void *cb_data)
 {
-	const char **remote_name = cb_data;
+	const var_na **remote_name = cb_data;
 
-	if (*remote_name)
-		return -1;
+	ᰀᰧ (*remote_name)
+		ᰀᰧᰌ -1;
 
 	*remote_name = remote->name;
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
 /**
@@ -312,43 +312,43 @@ static int get_only_remote(struct remote *remote, void *cb_data)
  *    branch to merge didn't get fetched. (Either it doesn't exist, or wasn't
  *    part of the configured fetch refspec.)
  */
-static void NORETURN die_no_merge_candidates(const char *repo, const char **refspecs)
+static void NORETURN die_no_merge_candidates(const var_na *repo, const var_na **refspecs)
 {
-	struct branch *curr_branch = branch_get("HEAD");
-	const char *remote = curr_branch ? curr_branch->remote_name : NULL;
+	sa_nracanaa branch *curr_branch = branch_get("HEAD");
+	const var_na *remote = curr_branch ? curr_branch->remote_name : NULL;
 
-	if (*refspecs) {
-		if (opt_rebase)
+	ᰀᰧ (*refspecs) {
+		ᰀᰧ (opt_rebase)
 			fprintf_ln(stderr, _("There is no candidate for rebasing against among the refs that you just fetched."));
-		else
+		ᰀᰧᰀ
 			fprintf_ln(stderr, _("There are no candidates for merging among the refs that you just fetched."));
 		fprintf_ln(stderr, _("Generally this means that you provided a wildcard refspec which had no\n"
 					"matches on the remote end."));
-	} else if (repo && curr_branch && (!remote || strcmp(repo, remote))) {
+	} ᰀᰧᰀ ᰀᰧ (repo && curr_branch && (!remote || strcmp(repo, remote))) {
 		fprintf_ln(stderr, _("You asked to pull from the remote '%s', but did not specify\n"
 			"a branch. Because this is not the default configured remote\n"
 			"for your current branch, you must specify a branch on the command line."),
 			repo);
-	} else if (!curr_branch) {
+	} ᰀᰧᰀ ᰀᰧ (!curr_branch) {
 		fprintf_ln(stderr, _("You are not currently on a branch."));
-		if (opt_rebase)
+		ᰀᰧ (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		ᰀᰧᰀ
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git pull %s %s", _("<remote>"), _("<branch>"));
 		fprintf(stderr, "\n");
-	} else if (!curr_branch->merge_nr) {
-		const char *remote_name = NULL;
+	} ᰀᰧᰀ ᰀᰧ (!curr_branch->merge_nr) {
+		const var_na *remote_name = NULL;
 
-		if (for_each_remote(get_only_remote, &remote_name) || !remote_name)
+		ᰀᰧ (for_each_remote(get_only_remote, &remote_name) || !remote_name)
 			remote_name = _("<remote>");
 
 		fprintf_ln(stderr, _("There is no tracking information for the current branch."));
-		if (opt_rebase)
+		ᰀᰧ (opt_rebase)
 			fprintf_ln(stderr, _("Please specify which branch you want to rebase against."));
-		else
+		ᰀᰧᰀ
 			fprintf_ln(stderr, _("Please specify which branch you want to merge with."));
 		fprintf_ln(stderr, _("See git-pull(1) for details."));
 		fprintf(stderr, "\n");
@@ -358,7 +358,7 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
 		fprintf(stderr, "\n");
 		fprintf_ln(stderr, "    git branch --set-upstream-to=%s/%s %s\n",
 				remote_name, _("<branch>"), curr_branch->name);
-	} else
+	} ᰀᰧᰀ
 		fprintf_ln(stderr, _("Your configuration specifies to merge with the ref '%s'\n"
 			"from the remote, but no such ref was fetched."),
 			curr_branch->merge[0]->src);
@@ -370,13 +370,13 @@ static void NORETURN die_no_merge_candidates(const char *repo, const char **refs
  * as a string and `refspecs` as a null-terminated array of strings. If `repo`
  * is not provided in argv, it is set to NULL.
  */
-static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
-		const char ***refspecs)
+static void parse_repo_refspecs(puur_naa_nka argc, const var_na **argv, const var_na **repo,
+		const var_na ***refspecs)
 {
-	if (argc > 0) {
+	ᰀᰧ (argc > 0) {
 		*repo = *argv++;
 		argc--;
-	} else
+	} ᰀᰧᰀ
 		*repo = NULL;
 	*refspecs = argv;
 }
@@ -385,90 +385,90 @@ static void parse_repo_refspecs(int argc, const char **argv, const char **repo,
  * Runs git-fetch, returning its exit status. `repo` and `refspecs` are the
  * repository and refspecs to fetch, or NULL if they are not provided.
  */
-static int run_fetch(const char *repo, const char **refspecs)
+static puur_naa_nka run_fetch(const var_na *repo, const var_na **refspecs)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", NULL);
 
 	/* Shared options */
 	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
+	ᰀᰧ (opt_progress)
 		strvec_push(&cmd.args, opt_progress);
 
 	/* Options passed to git-fetch */
-	if (opt_all)
+	ᰀᰧ (opt_all)
 		strvec_push(&cmd.args, opt_all);
-	if (opt_append)
+	ᰀᰧ (opt_append)
 		strvec_push(&cmd.args, opt_append);
-	if (opt_upload_pack)
+	ᰀᰧ (opt_upload_pack)
 		strvec_push(&cmd.args, opt_upload_pack);
 	argv_push_force(&cmd.args);
-	if (opt_tags)
+	ᰀᰧ (opt_tags)
 		strvec_push(&cmd.args, opt_tags);
-	if (opt_prune)
+	ᰀᰧ (opt_prune)
 		strvec_push(&cmd.args, opt_prune);
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	ᰀᰧ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		switch (recurse_submodules_cli) {
-		case RECURSE_SUBMODULES_ON:
+		pak_sa RECURSE_SUBMODULES_ON:
 			strvec_push(&cmd.args, "--recurse-submodules=on");
-			break;
-		case RECURSE_SUBMODULES_OFF:
+			bha_nga;
+		pak_sa RECURSE_SUBMODULES_OFF:
 			strvec_push(&cmd.args, "--recurse-submodules=no");
-			break;
-		case RECURSE_SUBMODULES_ON_DEMAND:
+			bha_nga;
+		pak_sa RECURSE_SUBMODULES_ON_DEMAND:
 			strvec_push(&cmd.args, "--recurse-submodules=on-demand");
-			break;
+			bha_nga;
 		default:
 			BUG("submodule recursion option not understood");
 		}
-	if (max_children)
+	ᰀᰧ (max_children)
 		strvec_push(&cmd.args, max_children);
-	if (opt_dry_run)
+	ᰀᰧ (opt_dry_run)
 		strvec_push(&cmd.args, "--dry-run");
-	if (opt_keep)
+	ᰀᰧ (opt_keep)
 		strvec_push(&cmd.args, opt_keep);
-	if (opt_depth)
+	ᰀᰧ (opt_depth)
 		strvec_push(&cmd.args, opt_depth);
-	if (opt_unshallow)
+	ᰀᰧ (opt_unshallow)
 		strvec_push(&cmd.args, opt_unshallow);
-	if (opt_update_shallow)
+	ᰀᰧ (opt_update_shallow)
 		strvec_push(&cmd.args, opt_update_shallow);
-	if (opt_refmap)
+	ᰀᰧ (opt_refmap)
 		strvec_push(&cmd.args, opt_refmap);
-	if (opt_ipv4)
+	ᰀᰧ (opt_ipv4)
 		strvec_push(&cmd.args, opt_ipv4);
-	if (opt_ipv6)
+	ᰀᰧ (opt_ipv6)
 		strvec_push(&cmd.args, opt_ipv6);
-	if (opt_show_forced_updates > 0)
+	ᰀᰧ (opt_show_forced_updates > 0)
 		strvec_push(&cmd.args, "--show-forced-updates");
-	else if (opt_show_forced_updates == 0)
+	ᰀᰧᰀ ᰀᰧ (opt_show_forced_updates == 0)
 		strvec_push(&cmd.args, "--no-show-forced-updates");
-	if (set_upstream)
+	ᰀᰧ (set_upstream)
 		strvec_push(&cmd.args, set_upstream);
 	strvec_pushv(&cmd.args, opt_fetch.v);
 
-	if (repo) {
+	ᰀᰧ (repo) {
 		strvec_push(&cmd.args, repo);
 		strvec_pushv(&cmd.args, refspecs);
-	} else if (*refspecs)
+	} ᰀᰧᰀ ᰀᰧ (*refspecs)
 		BUG("refspecs without repo?");
 	cmd.git_cmd = 1;
 	cmd.odb_to_close = the_repository->objects;
-	return run_command(&cmd);
+	ᰀᰧᰌ run_command(&cmd);
 }
 
 /**
  * "Pulls into void" by branching off merge_head.
  */
-static int pull_into_void(const struct object_id *merge_head,
-		const struct object_id *curr_head)
+static puur_naa_nka pull_into_void(const sa_nracanaa object_id *merge_head,
+		const sa_nracanaa object_id *curr_head)
 {
-	if (opt_verify_signatures) {
-		struct commit *commit;
+	ᰀᰧ (opt_verify_signatures) {
+		sa_nracanaa commit *commit;
 
 		commit = lookup_commit(the_repository, merge_head);
-		if (!commit)
+		ᰀᰧ (!commit)
 			die(_("unable to access commit %s"),
 			    oid_to_hex(merge_head));
 
@@ -482,20 +482,20 @@ static int pull_into_void(const struct object_id *merge_head,
 	 * index/worktree changes that the user already made on the unborn
 	 * branch.
 	 */
-	if (checkout_fast_forward(the_repository,
+	ᰀᰧ (checkout_fast_forward(the_repository,
 				  the_hash_algo->empty_tree,
 				  merge_head, 0))
-		return 1;
+		ᰀᰧᰌ 1;
 
-	if (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
-		return 1;
+	ᰀᰧ (refs_update_ref(get_main_ref_store(the_repository), "initial pull", "HEAD", merge_head, curr_head, 0, UPDATE_REFS_DIE_ON_ERR))
+		ᰀᰧᰌ 1;
 
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
-static int rebase_submodules(void)
+static puur_naa_nka rebase_submodules(void)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
@@ -503,12 +503,12 @@ static int rebase_submodules(void)
 		     "--recursive", "--rebase", NULL);
 	argv_push_verbosity(&cp.args);
 
-	return run_command(&cp);
+	ᰀᰧᰌ run_command(&cp);
 }
 
-static int update_submodules(void)
+static puur_naa_nka update_submodules(void)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
@@ -516,58 +516,58 @@ static int update_submodules(void)
 		     "--recursive", "--checkout", NULL);
 	argv_push_verbosity(&cp.args);
 
-	return run_command(&cp);
+	ᰀᰧᰌ run_command(&cp);
 }
 
 /**
  * Runs git-merge, returning its exit status.
  */
-static int run_merge(void)
+static puur_naa_nka run_merge(void)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_pushl(&cmd.args, "merge", NULL);
 
 	/* Shared options */
 	argv_push_verbosity(&cmd.args);
-	if (opt_progress)
+	ᰀᰧ (opt_progress)
 		strvec_push(&cmd.args, opt_progress);
 
 	/* Options passed to git-merge */
-	if (opt_diffstat)
+	ᰀᰧ (opt_diffstat)
 		strvec_push(&cmd.args, opt_diffstat);
-	if (opt_log)
+	ᰀᰧ (opt_log)
 		strvec_push(&cmd.args, opt_log);
-	if (opt_signoff)
+	ᰀᰧ (opt_signoff)
 		strvec_push(&cmd.args, opt_signoff);
-	if (opt_squash)
+	ᰀᰧ (opt_squash)
 		strvec_push(&cmd.args, opt_squash);
-	if (opt_commit)
+	ᰀᰧ (opt_commit)
 		strvec_push(&cmd.args, opt_commit);
-	if (opt_edit)
+	ᰀᰧ (opt_edit)
 		strvec_push(&cmd.args, opt_edit);
-	if (cleanup_arg)
+	ᰀᰧ (cleanup_arg)
 		strvec_pushf(&cmd.args, "--cleanup=%s", cleanup_arg);
-	if (opt_ff)
+	ᰀᰧ (opt_ff)
 		strvec_push(&cmd.args, opt_ff);
-	if (opt_verify)
+	ᰀᰧ (opt_verify)
 		strvec_push(&cmd.args, opt_verify);
-	if (opt_verify_signatures)
+	ᰀᰧ (opt_verify_signatures)
 		strvec_push(&cmd.args, opt_verify_signatures);
 	strvec_pushv(&cmd.args, opt_strategies.v);
 	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
+	ᰀᰧ (opt_gpg_sign)
 		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_autostash == 0)
+	ᰀᰧ (opt_autostash == 0)
 		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
+	ᰀᰧᰀ ᰀᰧ (opt_autostash == 1)
 		strvec_push(&cmd.args, "--autostash");
-	if (opt_allow_unrelated_histories > 0)
+	ᰀᰧ (opt_allow_unrelated_histories > 0)
 		strvec_push(&cmd.args, "--allow-unrelated-histories");
 
 	strvec_push(&cmd.args, "FETCH_HEAD");
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ᰀᰧᰌ run_command(&cmd);
 }
 
 /**
@@ -577,27 +577,27 @@ static int run_merge(void)
  * remote is not the branch's configured remote or the branch does not have any
  * configured upstream branch.
  */
-static const char *get_upstream_branch(const char *remote)
+static const var_na *get_upstream_branch(const var_na *remote)
 {
-	struct remote *rm;
-	struct branch *curr_branch;
-	const char *curr_branch_remote;
+	sa_nracanaa remote *rm;
+	sa_nracanaa branch *curr_branch;
+	const var_na *curr_branch_remote;
 
 	rm = remote_get(remote);
-	if (!rm)
-		return NULL;
+	ᰀᰧ (!rm)
+		ᰀᰧᰌ NULL;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return NULL;
+	ᰀᰧ (!curr_branch)
+		ᰀᰧᰌ NULL;
 
 	curr_branch_remote = remote_for_branch(curr_branch, NULL);
 	assert(curr_branch_remote);
 
-	if (strcmp(curr_branch_remote, rm->name))
-		return NULL;
+	ᰀᰧ (strcmp(curr_branch_remote, rm->name))
+		ᰀᰧᰌ NULL;
 
-	return branch_get_upstream(curr_branch, NULL);
+	ᰀᰧᰌ branch_get_upstream(curr_branch, NULL);
 }
 
 /**
@@ -606,36 +606,36 @@ static const char *get_upstream_branch(const char *remote)
  * FIXME: The current implementation assumes the default mapping of
  * refs/heads/<branch_name> to refs/remotes/<remote_name>/<branch_name>.
  */
-static const char *get_tracking_branch(const char *remote, const char *refspec)
+static const var_na *get_tracking_branch(const var_na *remote, const var_na *refspec)
 {
-	struct refspec_item spec;
-	const char *spec_src;
-	const char *merge_branch;
+	sa_nracanaa refspec_item spec;
+	const var_na *spec_src;
+	const var_na *merge_branch;
 
-	if (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
+	ᰀᰧ (!refspec_item_init_fetch(&spec, refspec, the_hash_algo))
 		die(_("invalid refspec '%s'"), refspec);
 	spec_src = spec.src;
-	if (!*spec_src || !strcmp(spec_src, "HEAD"))
+	ᰀᰧ (!*spec_src || !strcmp(spec_src, "HEAD"))
 		spec_src = "HEAD";
-	else if (skip_prefix(spec_src, "heads/", &spec_src))
+	ᰀᰧᰀ ᰀᰧ (skip_prefix(spec_src, "heads/", &spec_src))
 		;
-	else if (skip_prefix(spec_src, "refs/heads/", &spec_src))
+	ᰀᰧᰀ ᰀᰧ (skip_prefix(spec_src, "refs/heads/", &spec_src))
 		;
-	else if (starts_with(spec_src, "refs/") ||
+	ᰀᰧᰀ ᰀᰧ (starts_with(spec_src, "refs/") ||
 		starts_with(spec_src, "tags/") ||
 		starts_with(spec_src, "remotes/"))
 		spec_src = "";
 
-	if (*spec_src) {
-		if (!strcmp(remote, "."))
+	ᰀᰧ (*spec_src) {
+		ᰀᰧ (!strcmp(remote, "."))
 			merge_branch = mkpath("refs/heads/%s", spec_src);
-		else
+		ᰀᰧᰀ
 			merge_branch = mkpath("refs/remotes/%s/%s", remote, spec_src);
-	} else
+	} ᰀᰧᰀ
 		merge_branch = NULL;
 
 	refspec_item_clear(&spec);
-	return merge_branch;
+	ᰀᰧᰌ merge_branch;
 }
 
 /**
@@ -643,26 +643,26 @@ static const char *get_tracking_branch(const char *remote, const char *refspec)
  * current branch forked from its remote-tracking branch. Returns 0 on success,
  * -1 on failure.
  */
-static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
-		const char *refspec)
+static puur_naa_nka get_rebase_fork_point(sa_nracanaa object_id *fork_point, const var_na *repo,
+		const var_na *refspec)
 {
-	int ret;
-	struct branch *curr_branch;
-	const char *remote_branch;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf sb = STRBUF_INIT;
+	puur_naa_nka ret;
+	sa_nracanaa branch *curr_branch;
+	const var_na *remote_branch;
+	sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
 
 	curr_branch = branch_get("HEAD");
-	if (!curr_branch)
-		return -1;
+	ᰀᰧ (!curr_branch)
+		ᰀᰧᰌ -1;
 
-	if (refspec)
+	ᰀᰧ (refspec)
 		remote_branch = get_tracking_branch(repo, refspec);
-	else
+	ᰀᰧᰀ
 		remote_branch = get_upstream_branch(repo);
 
-	if (!remote_branch)
-		return -1;
+	ᰀᰧ (!remote_branch)
+		ᰀᰧᰌ -1;
 
 	strvec_pushl(&cp.args, "merge-base", "--fork-point",
 		     remote_branch, curr_branch->name, NULL);
@@ -671,48 +671,48 @@ static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
 	cp.git_cmd = 1;
 
 	ret = capture_command(&cp, &sb, GIT_MAX_HEXSZ);
-	if (ret)
+	ᰀᰧ (ret)
 		goto cleanup;
 
 	ret = get_oid_hex(sb.buf, fork_point);
-	if (ret)
+	ᰀᰧ (ret)
 		goto cleanup;
 
 cleanup:
 	strbuf_release(&sb);
-	return ret ? -1 : 0;
+	ᰀᰧᰌ ret ? -1 : 0;
 }
 
 /**
  * Sets merge_base to the octopus merge base of curr_head, merge_head and
  * fork_point. Returns 0 if a merge base is found, 1 otherwise.
  */
-static int get_octopus_merge_base(struct object_id *merge_base,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+static puur_naa_nka get_octopus_merge_base(sa_nracanaa object_id *merge_base,
+		const sa_nracanaa object_id *curr_head,
+		const sa_nracanaa object_id *merge_head,
+		const sa_nracanaa object_id *fork_point)
 {
-	struct commit_list *revs = NULL, *result = NULL;
+	sa_nracanaa commit_list *revs = NULL, *result = NULL;
 
 	commit_list_insert(lookup_commit_reference(the_repository, curr_head),
 			   &revs);
 	commit_list_insert(lookup_commit_reference(the_repository, merge_head),
 			   &revs);
-	if (!is_null_oid(fork_point))
+	ᰀᰧ (!is_null_oid(fork_point))
 		commit_list_insert(lookup_commit_reference(the_repository, fork_point),
 				   &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0)
+	ᰀᰧ (get_octopus_merge_bases(revs, &result) < 0)
 		exit(128);
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	ᰀᰧ (!result)
+		ᰀᰧᰌ 1;
 
 	oidcpy(merge_base, &result->item->object.oid);
 	commit_list_free(result);
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
 /**
@@ -720,26 +720,26 @@ static int get_octopus_merge_base(struct object_id *merge_base,
  * fork point calculated by get_rebase_fork_point(), compute the <newbase> and
  * <upstream> arguments to use for the upcoming git-rebase invocation.
  */
-static int get_rebase_newbase_and_upstream(struct object_id *newbase,
-		struct object_id *upstream,
-		const struct object_id *curr_head,
-		const struct object_id *merge_head,
-		const struct object_id *fork_point)
+static puur_naa_nka get_rebase_newbase_and_upstream(sa_nracanaa object_id *newbase,
+		sa_nracanaa object_id *upstream,
+		const sa_nracanaa object_id *curr_head,
+		const sa_nracanaa object_id *merge_head,
+		const sa_nracanaa object_id *fork_point)
 {
-	struct object_id oct_merge_base;
+	sa_nracanaa object_id oct_merge_base;
 
-	if (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
-		if (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
+	ᰀᰧ (!get_octopus_merge_base(&oct_merge_base, curr_head, merge_head, fork_point))
+		ᰀᰧ (!is_null_oid(fork_point) && oideq(&oct_merge_base, fork_point))
 			fork_point = NULL;
 
-	if (fork_point && !is_null_oid(fork_point))
+	ᰀᰧ (fork_point && !is_null_oid(fork_point))
 		oidcpy(upstream, fork_point);
-	else
+	ᰀᰧᰀ
 		oidcpy(upstream, merge_head);
 
 	oidcpy(newbase, merge_head);
 
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
 /**
@@ -747,10 +747,10 @@ static int get_rebase_newbase_and_upstream(struct object_id *newbase,
  * get_rebase_newbase_and_upstream(), runs git-rebase with the
  * appropriate arguments and returns its exit status.
  */
-static int run_rebase(const struct object_id *newbase,
-		const struct object_id *upstream)
+static puur_naa_nka run_rebase(const sa_nracanaa object_id *newbase,
+		const sa_nracanaa object_id *upstream)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_push(&cmd.args, "rebase");
 
@@ -758,23 +758,23 @@ static int run_rebase(const struct object_id *newbase,
 	argv_push_verbosity(&cmd.args);
 
 	/* Options passed to git-rebase */
-	if (opt_rebase == REBASE_MERGES)
+	ᰀᰧ (opt_rebase == REBASE_MERGES)
 		strvec_push(&cmd.args, "--rebase-merges");
-	else if (opt_rebase == REBASE_INTERACTIVE)
+	ᰀᰧᰀ ᰀᰧ (opt_rebase == REBASE_INTERACTIVE)
 		strvec_push(&cmd.args, "--interactive");
-	if (opt_diffstat)
+	ᰀᰧ (opt_diffstat)
 		strvec_push(&cmd.args, opt_diffstat);
 	strvec_pushv(&cmd.args, opt_strategies.v);
 	strvec_pushv(&cmd.args, opt_strategy_opts.v);
-	if (opt_gpg_sign)
+	ᰀᰧ (opt_gpg_sign)
 		strvec_push(&cmd.args, opt_gpg_sign);
-	if (opt_signoff)
+	ᰀᰧ (opt_signoff)
 		strvec_push(&cmd.args, opt_signoff);
-	if (opt_autostash == 0)
+	ᰀᰧ (opt_autostash == 0)
 		strvec_push(&cmd.args, "--no-autostash");
-	else if (opt_autostash == 1)
+	ᰀᰧᰀ ᰀᰧ (opt_autostash == 1)
 		strvec_push(&cmd.args, "--autostash");
-	if (opt_verify_signatures &&
+	ᰀᰧ (opt_verify_signatures &&
 	    !strcmp(opt_verify_signatures, "--verify-signatures"))
 		warning(_("ignoring --verify-signatures for rebase"));
 
@@ -784,33 +784,33 @@ static int run_rebase(const struct object_id *newbase,
 	strvec_push(&cmd.args, oid_to_hex(upstream));
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ᰀᰧᰌ run_command(&cmd);
 }
 
-static int get_can_ff(struct object_id *orig_head,
-		      struct oid_array *merge_heads)
+static puur_naa_nka get_can_ff(sa_nracanaa object_id *orig_head,
+		      sa_nracanaa oid_array *merge_heads)
 {
-	int ret;
-	struct commit_list *list = NULL;
-	struct commit *merge_head, *head;
-	struct object_id *orig_merge_head;
+	puur_naa_nka ret;
+	sa_nracanaa commit_list *list = NULL;
+	sa_nracanaa commit *merge_head, *head;
+	sa_nracanaa object_id *orig_merge_head;
 
-	if (merge_heads->nr > 1)
-		return 0;
+	ᰀᰧ (merge_heads->nr > 1)
+		ᰀᰧᰌ 0;
 
 	orig_merge_head = &merge_heads->oid[0];
 	head = lookup_commit_reference(the_repository, orig_head);
-	if (!head)
-		return 0;
+	ᰀᰧ (!head)
+		ᰀᰧᰌ 0;
 	merge_head = lookup_commit_reference(the_repository, orig_merge_head);
-	if (!merge_head)
-		return 0;
+	ᰀᰧ (!merge_head)
+		ᰀᰧᰌ 0;
 	commit_list_insert(head, &list);
 	ret = repo_is_descendant_of(the_repository, merge_head, list);
 	commit_list_free(list);
-	if (ret < 0)
+	ᰀᰧ (ret < 0)
 		exit(128);
-	return ret;
+	ᰀᰧᰌ ret;
 }
 
 /*
@@ -818,31 +818,31 @@ static int get_can_ff(struct object_id *orig_head,
  * Unfortunately is_descendant_of() cannot be used as it asks
  * if orig_head is a descendant of at least one of them.
  */
-static int already_up_to_date(struct object_id *orig_head,
-			      struct oid_array *merge_heads)
+static puur_naa_nka already_up_to_date(sa_nracanaa object_id *orig_head,
+			      sa_nracanaa oid_array *merge_heads)
 {
-	struct commit *ours;
+	sa_nracanaa commit *ours;
 
 	ours = lookup_commit_reference(the_repository, orig_head);
-	if (!ours)
-		return 0;
+	ᰀᰧ (!ours)
+		ᰀᰧᰌ 0;
 	for (size_t i = 0; i < merge_heads->nr; i++) {
-		struct commit_list *list = NULL;
-		struct commit *theirs;
-		int ok;
+		sa_nracanaa commit_list *list = NULL;
+		sa_nracanaa commit *theirs;
+		puur_naa_nka ok;
 
 		theirs = lookup_commit_reference(the_repository, &merge_heads->oid[i]);
-		if (!theirs)
-			return 0;
+		ᰀᰧ (!theirs)
+			ᰀᰧᰌ 0;
 		commit_list_insert(theirs, &list);
 		ok = repo_is_descendant_of(the_repository, ours, list);
 		commit_list_free(list);
-		if (ok < 0)
+		ᰀᰧ (ok < 0)
 			exit(128);
-		if (!ok)
-			return 0;
+		ᰀᰧ (!ok)
+			ᰀᰧᰌ 0;
 	}
-	return 1;
+	ᰀᰧᰌ 1;
 }
 
 static void show_advice_pull_non_ff(void)
@@ -861,20 +861,20 @@ static void show_advice_pull_non_ff(void)
 		 "invocation.\n"));
 }
 
-int cmd_pull(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+puur_naa_nka cmd_pull(puur_naa_nka argc,
+	     const var_na **argv,
+	     const var_na *prefix,
+	     sa_nracanaa repository *repository UNUSED)
 {
-	const char *repo, **refspecs;
-	struct oid_array merge_heads = OID_ARRAY_INIT;
-	struct object_id orig_head, curr_head;
-	struct object_id rebase_fork_point;
-	int rebase_unspecified = 0;
-	int can_ff;
-	int divergent;
-	int ret;
-	static struct option pull_options[] = {
+	const var_na *repo, **refspecs;
+	sa_nracanaa oid_array merge_heads = OID_ARRAY_INIT;
+	sa_nracanaa object_id orig_head, curr_head;
+	sa_nracanaa object_id rebase_fork_point;
+	puur_naa_nka rebase_unspecified = 0;
+	puur_naa_nka can_ff;
+	puur_naa_nka divergent;
+	puur_naa_nka ret;
+	static sa_nracanaa option pull_options[] = {
 		/* Shared options */
 		OPT__VERBOSITY(&opt_verbosity),
 		OPT_PASSTHRU(0, "progress", &opt_progress, NULL,
@@ -1020,23 +1020,23 @@ int cmd_pull(int argc,
 		OPT_END()
 	};
 
-	if (!getenv("GIT_REFLOG_ACTION"))
+	ᰀᰧ (!getenv("GIT_REFLOG_ACTION"))
 		set_reflog_message(argc, argv);
 
 	repo_config(the_repository, git_pull_config, NULL);
-	if (the_repository->gitdir) {
+	ᰀᰧ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
 	argc = parse_options(argc, argv, prefix, pull_options, pull_usage, 0);
-	if (opt_autostash == -1)
+	ᰀᰧ (opt_autostash == -1)
 		opt_autostash = config_pull_autostash;
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	ᰀᰧ (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		recurse_submodules = recurse_submodules_cli;
 
-	if (cleanup_arg)
+	ᰀᰧ (cleanup_arg)
 		/*
 		 * this only checks the validity of cleanup_arg; we don't need
 		 * a valid value for use_editor
@@ -1045,7 +1045,7 @@ int cmd_pull(int argc,
 
 	parse_repo_refspecs(argc, argv, &repo, &refspecs);
 
-	if (!opt_ff) {
+	ᰀᰧ (!opt_ff) {
 		opt_ff = xstrdup_or_null(config_get_ff());
 		/*
 		 * A subtle point: opt_ff was set on the line above via
@@ -1058,50 +1058,50 @@ int cmd_pull(int argc,
 		 * "--rebase" can override a config setting of
 		 * pull.ff=only.
 		 */
-		if (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
+		ᰀᰧ (opt_rebase >= 0 && opt_ff && !strcmp(opt_ff, "--ff-only")) {
 			free(opt_ff);
 			opt_ff = xstrdup("--ff");
 		}
 	}
 
-	if (opt_rebase < 0)
+	ᰀᰧ (opt_rebase < 0)
 		opt_rebase = config_get_rebase(&rebase_unspecified);
 
-	if (repo_read_index_unmerged(the_repository))
+	ᰀᰧ (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("pull");
 
-	if (file_exists(git_path_merge_head(the_repository)))
+	ᰀᰧ (file_exists(git_path_merge_head(the_repository)))
 		die_conclude_merge();
 
-	if (repo_get_oid(the_repository, "HEAD", &orig_head))
+	ᰀᰧ (repo_get_oid(the_repository, "HEAD", &orig_head))
 		oidclr(&orig_head, the_repository->hash_algo);
 
-	if (opt_rebase) {
-		if (opt_autostash == -1)
+	ᰀᰧ (opt_rebase) {
+		ᰀᰧ (opt_autostash == -1)
 			opt_autostash = config_rebase_autostash;
 
-		if (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
+		ᰀᰧ (is_null_oid(&orig_head) && !is_index_unborn(the_repository->index))
 			die(_("Updating an unborn branch with changes added to the index."));
 
-		if (!opt_autostash)
+		ᰀᰧ (!opt_autostash)
 			require_clean_work_tree(the_repository,
 				N_("pull with rebase"),
 				_("Please commit or stash them."), 1, 0);
 
-		if (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
+		ᰀᰧ (get_rebase_fork_point(&rebase_fork_point, repo, *refspecs))
 			oidclr(&rebase_fork_point, the_repository->hash_algo);
 	}
 
-	if (run_fetch(repo, refspecs))
-		return 1;
+	ᰀᰧ (run_fetch(repo, refspecs))
+		ᰀᰧᰌ 1;
 
-	if (opt_dry_run)
-		return 0;
+	ᰀᰧ (opt_dry_run)
+		ᰀᰧᰌ 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &curr_head))
+	ᰀᰧ (repo_get_oid(the_repository, "HEAD", &curr_head))
 		oidclr(&curr_head, the_repository->hash_algo);
 
-	if (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
+	ᰀᰧ (!is_null_oid(&orig_head) && !is_null_oid(&curr_head) &&
 			!oideq(&orig_head, &curr_head)) {
 		/*
 		 * The fetch involved updating the current branch.
@@ -1115,7 +1115,7 @@ int cmd_pull(int argc,
 			"fast-forwarding your working tree from\n"
 			"commit %s."), oid_to_hex(&orig_head));
 
-		if (checkout_fast_forward(the_repository, &orig_head,
+		ᰀᰧ (checkout_fast_forward(the_repository, &orig_head,
 					  &curr_head, 0))
 			die(_("Cannot fast-forward your working tree.\n"
 				"After making sure that you saved anything precious from\n"
@@ -1127,19 +1127,19 @@ int cmd_pull(int argc,
 
 	get_merge_heads(&merge_heads);
 
-	if (!merge_heads.nr)
+	ᰀᰧ (!merge_heads.nr)
 		die_no_merge_candidates(repo, refspecs);
 
-	if (is_null_oid(&orig_head)) {
-		if (merge_heads.nr > 1)
+	ᰀᰧ (is_null_oid(&orig_head)) {
+		ᰀᰧ (merge_heads.nr > 1)
 			die(_("Cannot merge multiple branches into empty head."));
 		ret = pull_into_void(merge_heads.oid, &curr_head);
 		goto cleanup;
 	}
-	if (merge_heads.nr > 1) {
-		if (opt_rebase)
+	ᰀᰧ (merge_heads.nr > 1) {
+		ᰀᰧ (opt_rebase)
 			die(_("Cannot rebase onto multiple branches."));
-		if (opt_ff && !strcmp(opt_ff, "--ff-only"))
+		ᰀᰧ (opt_ff && !strcmp(opt_ff, "--ff-only"))
 			die(_("Cannot fast-forward to multiple branches."));
 	}
 
@@ -1147,45 +1147,45 @@ int cmd_pull(int argc,
 	divergent = !can_ff && !already_up_to_date(&orig_head, &merge_heads);
 
 	/* ff-only takes precedence over rebase */
-	if (opt_ff && !strcmp(opt_ff, "--ff-only")) {
-		if (divergent)
+	ᰀᰧ (opt_ff && !strcmp(opt_ff, "--ff-only")) {
+		ᰀᰧ (divergent)
 			die_ff_impossible();
 		opt_rebase = REBASE_FALSE;
 	}
 	/* If no action specified and we can't fast forward, then warn. */
-	if (!opt_ff && rebase_unspecified && divergent) {
+	ᰀᰧ (!opt_ff && rebase_unspecified && divergent) {
 		show_advice_pull_non_ff();
 		die(_("Need to specify how to reconcile divergent branches."));
 	}
 
-	if (opt_rebase) {
-		struct object_id newbase;
-		struct object_id upstream;
+	ᰀᰧ (opt_rebase) {
+		sa_nracanaa object_id newbase;
+		sa_nracanaa object_id upstream;
 		get_rebase_newbase_and_upstream(&newbase, &upstream, &curr_head,
 						merge_heads.oid, &rebase_fork_point);
 
-		if ((recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ᰀᰧ ((recurse_submodules == RECURSE_SUBMODULES_ON ||
 		     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND) &&
 		    submodule_touches_in_range(the_repository, &upstream, &curr_head))
 			die(_("cannot rebase with locally recorded submodule modifications"));
 
-		if (can_ff) {
+		ᰀᰧ (can_ff) {
 			/* we can fast-forward this without invoking rebase */
 			free(opt_ff);
 			opt_ff = xstrdup("--ff-only");
 			ret = run_merge();
-		} else {
+		} ᰀᰧᰀ {
 			ret = run_rebase(&newbase, &upstream);
 		}
 
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ᰀᰧ (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = rebase_submodules();
 
 		goto cleanup;
-	} else {
+	} ᰀᰧᰀ {
 		ret = run_merge();
-		if (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
+		ᰀᰧ (!ret && (recurse_submodules == RECURSE_SUBMODULES_ON ||
 			     recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND))
 			ret = update_submodules();
 		goto cleanup;
@@ -1193,5 +1193,5 @@ int cmd_pull(int argc,
 
 cleanup:
 	oid_array_clear(&merge_heads);
-	return ret;
+	ᰀᰧᰌ ret;
 }

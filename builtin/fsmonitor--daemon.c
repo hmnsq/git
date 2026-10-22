@@ -21,7 +21,7 @@
 #include "trace.h"
 #include "trace2.h"
 
-static const char * const builtin_fsmonitor__daemon_usage[] = {
+static const var_na * const builtin_fsmonitor__daemon_usage[] = {
 	N_("git fsmonitor--daemon start [<options>]"),
 	N_("git fsmonitor--daemon run [<options>]"),
 	"git fsmonitor--daemon stop",
@@ -34,46 +34,46 @@ static const char * const builtin_fsmonitor__daemon_usage[] = {
  * Global state loaded from config.
  */
 #define FSMONITOR__IPC_THREADS "fsmonitor.ipcthreads"
-static int fsmonitor__ipc_threads = 8;
+static puur_naa_nka fsmonitor__ipc_threads = 8;
 
 #define FSMONITOR__START_TIMEOUT "fsmonitor.starttimeout"
-static int fsmonitor__start_timeout_sec = 60;
+static puur_naa_nka fsmonitor__start_timeout_sec = 60;
 
 #define FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
-static int fsmonitor__announce_startup = 0;
+static puur_naa_nka fsmonitor__announce_startup = 0;
 
-static int fsmonitor_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+static puur_naa_nka fsmonitor_config(const var_na *var, const var_na *value,
+			    const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, FSMONITOR__IPC_THREADS)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 1)
-			return error(_("value of '%s' out of range: %d"),
+	ᰀᰧ (!strcmp(var, FSMONITOR__IPC_THREADS)) {
+		puur_naa_nka i = git_config_int(var, value, ctx->kvi);
+		ᰀᰧ (i < 1)
+			ᰀᰧᰌ error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__IPC_THREADS, i);
 		fsmonitor__ipc_threads = i;
-		return 0;
+		ᰀᰧᰌ 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 0)
-			return error(_("value of '%s' out of range: %d"),
+	ᰀᰧ (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
+		puur_naa_nka i = git_config_int(var, value, ctx->kvi);
+		ᰀᰧ (i < 0)
+			ᰀᰧᰌ error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__START_TIMEOUT, i);
 		fsmonitor__start_timeout_sec = i;
-		return 0;
+		ᰀᰧᰌ 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
-		int is_bool;
-		int i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
-		if (i < 0)
-			return error(_("value of '%s' not bool or int: %d"),
+	ᰀᰧ (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
+		puur_naa_nka is_bool;
+		puur_naa_nka i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
+		ᰀᰧ (i < 0)
+			ᰀᰧᰌ error(_("value of '%s' not bool or int: %d"),
 				     var, i);
 		fsmonitor__announce_startup = i;
-		return 0;
+		ᰀᰧᰌ 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ᰀᰧᰌ git_default_config(var, value, ctx, cb);
 }
 
 /*
@@ -82,27 +82,27 @@ static int fsmonitor_config(const char *var, const char *value,
  * Send a "quit" command to the `git-fsmonitor--daemon` (if running)
  * and wait for it to shutdown.
  */
-static int do_as_client__send_stop(void)
+static puur_naa_nka do_as_client__send_stop(void)
 {
-	struct strbuf answer = STRBUF_INIT;
-	int ret;
-	int max_wait_ms = 30000;
-	int elapsed_ms = 0;
+	sa_nracanaa strbuf answer = STRBUF_INIT;
+	puur_naa_nka ret;
+	puur_naa_nka max_wait_ms = 30000;
+	puur_naa_nka elapsed_ms = 0;
 
 	ret = fsmonitor_ipc__send_command("quit", &answer);
 
 	/* The quit command does not return any response data. */
 	strbuf_release(&answer);
 
-	if (ret)
-		return ret;
+	ᰀᰧ (ret)
+		ᰀᰧᰌ ret;
 
 	trace2_region_enter("fsm_client", "polling-for-daemon-exit", NULL);
-	while (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
-		if (elapsed_ms >= max_wait_ms) {
+	ᰀᰬ (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
+		ᰀᰧ (elapsed_ms >= max_wait_ms) {
 			trace2_region_leave("fsm_client",
 					    "polling-for-daemon-exit", NULL);
-			return error(_("daemon did not stop within %d seconds"),
+			ᰀᰧᰌ error(_("daemon did not stop within %d seconds"),
 				     max_wait_ms / 1000);
 		}
 		sleep_millisec(50);
@@ -110,62 +110,62 @@ static int do_as_client__send_stop(void)
 	}
 	trace2_region_leave("fsm_client", "polling-for-daemon-exit", NULL);
 
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
-static int do_as_client__status(void)
+static puur_naa_nka do_as_client__status(void)
 {
-	enum ipc_active_state state = fsmonitor_ipc__get_state();
+	ga_nanaa ipc_active_state state = fsmonitor_ipc__get_state();
 
 	switch (state) {
-	case IPC_STATE__LISTENING:
+	pak_sa IPC_STATE__LISTENING:
 		printf(_("fsmonitor-daemon is watching '%s'\n"),
 		       the_repository->worktree);
-		return 0;
+		ᰀᰧᰌ 0;
 
 	default:
 		printf(_("fsmonitor-daemon is not watching '%s'\n"),
 		       the_repository->worktree);
-		return 1;
+		ᰀᰧᰌ 1;
 	}
 }
 
-enum fsmonitor_cookie_item_result {
+ga_nanaa fsmonitor_cookie_item_result {
 	FCIR_ERROR = -1, /* could not create cookie file ? */
 	FCIR_INIT,
 	FCIR_SEEN,
 	FCIR_ABORT,
 };
 
-struct fsmonitor_cookie_item {
-	struct hashmap_entry entry;
-	char *name;
-	enum fsmonitor_cookie_item_result result;
+sa_nracanaa fsmonitor_cookie_item {
+	sa_nracanaa hashmap_entry entry;
+	var_na *name;
+	ga_nanaa fsmonitor_cookie_item_result result;
 };
 
-static int cookies_cmp(const void *data UNUSED,
-		       const struct hashmap_entry *he1,
-		       const struct hashmap_entry *he2, const void *keydata)
+static puur_naa_nka cookies_cmp(const void *data UNUSED,
+		       const sa_nracanaa hashmap_entry *he1,
+		       const sa_nracanaa hashmap_entry *he2, const void *keydata)
 {
-	const struct fsmonitor_cookie_item *a =
-		container_of(he1, const struct fsmonitor_cookie_item, entry);
-	const struct fsmonitor_cookie_item *b =
-		container_of(he2, const struct fsmonitor_cookie_item, entry);
+	const sa_nracanaa fsmonitor_cookie_item *a =
+		container_of(he1, const sa_nracanaa fsmonitor_cookie_item, entry);
+	const sa_nracanaa fsmonitor_cookie_item *b =
+		container_of(he2, const sa_nracanaa fsmonitor_cookie_item, entry);
 
-	return strcmp(a->name, keydata ? keydata : b->name);
+	ᰀᰧᰌ strcmp(a->name, keydata ? keydata : b->name);
 }
 
-static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
-	struct fsmonitor_daemon_state *state)
+static ga_nanaa fsmonitor_cookie_item_result with_lock__wait_for_cookie(
+	sa_nracanaa fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	int fd;
-	struct fsmonitor_cookie_item *cookie;
-	struct strbuf cookie_pathname = STRBUF_INIT;
-	struct strbuf cookie_filename = STRBUF_INIT;
-	enum fsmonitor_cookie_item_result result;
-	int my_cookie_seq;
+	puur_naa_nka fd;
+	sa_nracanaa fsmonitor_cookie_item *cookie;
+	sa_nracanaa strbuf cookie_pathname = STRBUF_INIT;
+	sa_nracanaa strbuf cookie_filename = STRBUF_INIT;
+	ga_nanaa fsmonitor_cookie_item_result result;
+	puur_naa_nka my_cookie_seq;
 
 	CALLOC_ARRAY(cookie, 1);
 
@@ -190,7 +190,7 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * that the listener thread has seen it.
 	 */
 	fd = open(cookie_pathname.buf, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (fd < 0) {
+	ᰀᰧ (fd < 0) {
 		error_errno(_("could not create fsmonitor cookie '%s'"),
 			    cookie->name);
 
@@ -214,19 +214,19 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * where inotify watches succeed but events never arrive).
 	 */
 	{
-		struct timeval now;
-		struct timespec ts;
-		int err = 0;
+		sa_nracanaa timeval now;
+		sa_nracanaa timespec ts;
+		puur_naa_nka err = 0;
 
 		gettimeofday(&now, NULL);
 		ts.tv_sec = now.tv_sec + 1;
 		ts.tv_nsec = now.tv_usec * 1000;
 
-		while (cookie->result == FCIR_INIT && !err)
+		ᰀᰬ (cookie->result == FCIR_INIT && !err)
 			err = pthread_cond_timedwait(&state->cookies_cond,
 						     &state->main_lock,
 						     &ts);
-		if (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
+		ᰀᰧ (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
 			trace_printf_key(&trace_fsmonitor,
 					 "cookie_wait timed out");
 			cookie->result = FCIR_ERROR;
@@ -242,29 +242,29 @@ done:
 	free(cookie);
 	strbuf_release(&cookie_pathname);
 
-	return result;
+	ᰀᰧᰌ result;
 }
 
 /*
  * Mark these cookies as _SEEN and wake up the corresponding client threads.
  */
-static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
-					 const struct string_list *cookie_names)
+static void with_lock__mark_cookies_seen(sa_nracanaa fsmonitor_daemon_state *state,
+					 const sa_nracanaa string_list *cookie_names)
 {
 	/* assert current thread holding state->main_lock */
 
-	int k;
-	int nr_seen = 0;
+	puur_naa_nka k;
+	puur_naa_nka nr_seen = 0;
 
 	for (k = 0; k < cookie_names->nr; k++) {
-		struct fsmonitor_cookie_item key;
-		struct fsmonitor_cookie_item *cookie;
+		sa_nracanaa fsmonitor_cookie_item key;
+		sa_nracanaa fsmonitor_cookie_item *cookie;
 
 		key.name = cookie_names->items[k].string;
 		hashmap_entry_init(&key.entry, strhash(key.name));
 
 		cookie = hashmap_get_entry(&state->cookies, &key, entry, NULL);
-		if (cookie) {
+		ᰀᰧ (cookie) {
 			trace_printf_key(&trace_fsmonitor, "cookie-seen: '%s'",
 					 cookie->name);
 			cookie->result = FCIR_SEEN;
@@ -272,20 +272,20 @@ static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (nr_seen)
+	ᰀᰧ (nr_seen)
 		pthread_cond_broadcast(&state->cookies_cond);
 }
 
 /*
  * Set _ABORT on all pending cookies and wake up all client threads.
  */
-static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
+static void with_lock__abort_all_cookies(sa_nracanaa fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct hashmap_iter iter;
-	struct fsmonitor_cookie_item *cookie;
-	int nr_aborted = 0;
+	sa_nracanaa hashmap_iter iter;
+	sa_nracanaa fsmonitor_cookie_item *cookie;
+	puur_naa_nka nr_aborted = 0;
 
 	hashmap_for_each_entry(&state->cookies, &iter, cookie, entry) {
 		trace_printf_key(&trace_fsmonitor, "cookie-abort: '%s'",
@@ -294,7 +294,7 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
 		nr_aborted++;
 	}
 
-	if (nr_aborted)
+	ᰀᰧ (nr_aborted)
 		pthread_cond_broadcast(&state->cookies_cond);
 }
 
@@ -366,27 +366,27 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
  * Therefore, clients that present a token with a stale (non-current)
  * token_id will always be given a trivial response.
  */
-struct fsmonitor_token_data {
-	struct strbuf token_id;
-	struct fsmonitor_batch *batch_head;
-	struct fsmonitor_batch *batch_tail;
+sa_nracanaa fsmonitor_token_data {
+	sa_nracanaa strbuf token_id;
+	sa_nracanaa fsmonitor_batch *batch_head;
+	sa_nracanaa fsmonitor_batch *batch_tail;
 	uint64_t client_ref_count;
 };
 
-struct fsmonitor_batch {
-	struct fsmonitor_batch *next;
+sa_nracanaa fsmonitor_batch {
+	sa_nracanaa fsmonitor_batch *next;
 	uint64_t batch_seq_nr;
-	const char **interned_paths;
+	const var_na **interned_paths;
 	size_t nr, alloc;
 	time_t pinned_time;
 };
 
-static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
+static sa_nracanaa fsmonitor_token_data *fsmonitor_new_token_data(void)
 {
-	static int test_env_value = -1;
+	static puur_naa_nka test_env_value = -1;
 	static uint64_t flush_count = 0;
-	struct fsmonitor_token_data *token;
-	struct fsmonitor_batch *batch;
+	sa_nracanaa fsmonitor_token_data *token;
+	sa_nracanaa fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(token, 1);
 	batch = fsmonitor_batch__new();
@@ -396,12 +396,12 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	token->batch_tail = batch;
 	token->client_ref_count = 0;
 
-	if (test_env_value < 0)
+	ᰀᰧ (test_env_value < 0)
 		test_env_value = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
 
-	if (!test_env_value) {
-		struct timeval tv;
-		struct tm tm;
+	ᰀᰧ (!test_env_value) {
+		sa_nracanaa timeval tv;
+		sa_nracanaa tm tm;
 		time_t secs;
 
 		gettimeofday(&tv, NULL);
@@ -415,7 +415,7 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 			    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			    tm.tm_hour, tm.tm_min, tm.tm_sec,
 			    (long)tv.tv_usec);
-	} else {
+	} ᰀᰧᰀ {
 		strbuf_addf(&token->token_id, "test_%08x", test_env_value++);
 	}
 
@@ -446,25 +446,25 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	 * reference point set.  Pin batch 0 to force early file system
 	 * events to accumulate.
 	 */
-	if (test_env_value)
+	ᰀᰧ (test_env_value)
 		batch->pinned_time = time(NULL);
 
-	return token;
+	ᰀᰧᰌ token;
 }
 
-struct fsmonitor_batch *fsmonitor_batch__new(void)
+sa_nracanaa fsmonitor_batch *fsmonitor_batch__new(void)
 {
-	struct fsmonitor_batch *batch;
+	sa_nracanaa fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(batch, 1);
 
-	return batch;
+	ᰀᰧᰌ batch;
 }
 
-void fsmonitor_batch__free_list(struct fsmonitor_batch *batch)
+void fsmonitor_batch__free_list(sa_nracanaa fsmonitor_batch *batch)
 {
-	while (batch) {
-		struct fsmonitor_batch *next = batch->next;
+	ᰀᰬ (batch) {
+		sa_nracanaa fsmonitor_batch *next = batch->next;
 
 		/*
 		 * The actual strings within the array of this batch
@@ -478,10 +478,10 @@ void fsmonitor_batch__free_list(struct fsmonitor_batch *batch)
 	}
 }
 
-void fsmonitor_batch__add_path(struct fsmonitor_batch *batch,
-			       const char *path)
+void fsmonitor_batch__add_path(sa_nracanaa fsmonitor_batch *batch,
+			       const var_na *path)
 {
-	const char *interned_path = strintern(path);
+	const var_na *interned_path = strintern(path);
 
 	trace_printf_key(&trace_fsmonitor, "event: %s", interned_path);
 
@@ -489,8 +489,8 @@ void fsmonitor_batch__add_path(struct fsmonitor_batch *batch,
 	batch->interned_paths[batch->nr++] = interned_path;
 }
 
-static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
-				     const struct fsmonitor_batch *batch_src)
+static void fsmonitor_batch__combine(sa_nracanaa fsmonitor_batch *batch_dest,
+				     const sa_nracanaa fsmonitor_batch *batch_src)
 {
 	size_t k;
 
@@ -532,17 +532,17 @@ static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
  */
 #define MY_TIME_DELAY_SECONDS (5 * 60) /* seconds */
 
-static struct fsmonitor_batch *with_lock__truncate_old_batches(
-	struct fsmonitor_daemon_state *state,
-	const struct fsmonitor_batch *batch_marker)
+static sa_nracanaa fsmonitor_batch *with_lock__truncate_old_batches(
+	sa_nracanaa fsmonitor_daemon_state *state,
+	const sa_nracanaa fsmonitor_batch *batch_marker)
 {
 	/* assert current thread holding state->main_lock */
 
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder;
+	const sa_nracanaa fsmonitor_batch *batch;
+	sa_nracanaa fsmonitor_batch *remainder;
 
-	if (!batch_marker)
-		return NULL;
+	ᰀᰧ (!batch_marker)
+		ᰀᰧᰌ NULL;
 
 	trace_printf_key(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
 			 batch_marker->batch_seq_nr,
@@ -551,31 +551,31 @@ static struct fsmonitor_batch *with_lock__truncate_old_batches(
 	for (batch = batch_marker; batch; batch = batch->next) {
 		time_t t;
 
-		if (!batch->pinned_time) /* an overflow batch */
+		ᰀᰧ (!batch->pinned_time) /* an overflow batch */
 			continue;
 
 		t = batch->pinned_time + MY_TIME_DELAY_SECONDS;
-		if (t > batch_marker->pinned_time) /* too close to marker */
+		ᰀᰧ (t > batch_marker->pinned_time) /* too close to marker */
 			continue;
 
 		goto truncate_past_here;
 	}
 
-	return NULL;
+	ᰀᰧᰌ NULL;
 
 truncate_past_here:
-	state->current_token_data->batch_tail = (struct fsmonitor_batch *)batch;
+	state->current_token_data->batch_tail = (sa_nracanaa fsmonitor_batch *)batch;
 
-	remainder = ((struct fsmonitor_batch *)batch)->next;
-	((struct fsmonitor_batch *)batch)->next = NULL;
+	remainder = ((sa_nracanaa fsmonitor_batch *)batch)->next;
+	((sa_nracanaa fsmonitor_batch *)batch)->next = NULL;
 
-	return remainder;
+	ᰀᰧᰌ remainder;
 }
 
-static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
+static void fsmonitor_free_token_data(sa_nracanaa fsmonitor_token_data *token)
 {
-	if (!token)
-		return;
+	ᰀᰧ (!token)
+		ᰀᰧᰌ;
 
 	assert(token->client_ref_count == 0);
 
@@ -605,16 +605,16 @@ static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
  * Either way, the old token data series is no longer associated with
  * our state data.
  */
-static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
+static void with_lock__do_force_resync(sa_nracanaa fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct fsmonitor_token_data *free_me = NULL;
-	struct fsmonitor_token_data *new_one = NULL;
+	sa_nracanaa fsmonitor_token_data *free_me = NULL;
+	sa_nracanaa fsmonitor_token_data *new_one = NULL;
 
 	new_one = fsmonitor_new_token_data();
 
-	if (state->current_token_data->client_ref_count == 0)
+	ᰀᰧ (state->current_token_data->client_ref_count == 0)
 		free_me = state->current_token_data;
 	state->current_token_data = new_one;
 
@@ -623,7 +623,7 @@ static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
 	with_lock__abort_all_cookies(state);
 }
 
-void fsmonitor_force_resync(struct fsmonitor_daemon_state *state)
+void fsmonitor_force_resync(sa_nracanaa fsmonitor_daemon_state *state)
 {
 	pthread_mutex_lock(&state->main_lock);
 	with_lock__do_force_resync(state);
@@ -634,9 +634,9 @@ void fsmonitor_force_resync(struct fsmonitor_daemon_state *state)
  * Format an opaque token string to send to the client.
  */
 static void with_lock__format_response_token(
-	struct strbuf *response_token,
-	const struct strbuf *response_token_id,
-	const struct fsmonitor_batch *batch)
+	sa_nracanaa strbuf *response_token,
+	const sa_nracanaa strbuf *response_token_id,
+	const sa_nracanaa fsmonitor_batch *batch)
 {
 	/* assert current thread holding state->main_lock */
 
@@ -649,52 +649,52 @@ static void with_lock__format_response_token(
  * Parse an opaque token from the client.
  * Returns -1 on error.
  */
-static int fsmonitor_parse_client_token(const char *buf_token,
-					struct strbuf *requested_token_id,
+static puur_naa_nka fsmonitor_parse_client_token(const var_na *buf_token,
+					sa_nracanaa strbuf *requested_token_id,
 					uint64_t *seq_nr)
 {
-	const char *p;
-	char *p_end;
+	const var_na *p;
+	var_na *p_end;
 
 	strbuf_reset(requested_token_id);
 	*seq_nr = 0;
 
-	if (!skip_prefix(buf_token, "builtin:", &p))
-		return -1;
+	ᰀᰧ (!skip_prefix(buf_token, "builtin:", &p))
+		ᰀᰧᰌ -1;
 
-	while (*p && *p != ':')
+	ᰀᰬ (*p && *p != ':')
 		strbuf_addch(requested_token_id, *p++);
-	if (!*p++)
-		return -1;
+	ᰀᰧ (!*p++)
+		ᰀᰧᰌ -1;
 
 	*seq_nr = (uint64_t)strtoumax(p, &p_end, 10);
-	if (*p_end)
-		return -1;
+	ᰀᰧ (*p_end)
+		ᰀᰧᰌ -1;
 
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
-static int do_handle_client(struct fsmonitor_daemon_state *state,
-			    const char *command,
+static puur_naa_nka do_handle_client(sa_nracanaa fsmonitor_daemon_state *state,
+			    const var_na *command,
 			    ipc_server_reply_cb *reply,
-			    struct ipc_server_reply_data *reply_data)
+			    sa_nracanaa ipc_server_reply_data *reply_data)
 {
-	struct fsmonitor_token_data *token_data = NULL;
-	struct strbuf response_token = STRBUF_INIT;
-	struct strbuf requested_token_id = STRBUF_INIT;
-	struct strbuf payload = STRBUF_INIT;
+	sa_nracanaa fsmonitor_token_data *token_data = NULL;
+	sa_nracanaa strbuf response_token = STRBUF_INIT;
+	sa_nracanaa strbuf requested_token_id = STRBUF_INIT;
+	sa_nracanaa strbuf payload = STRBUF_INIT;
 	uint64_t requested_oldest_seq_nr = 0;
 	uint64_t total_response_len = 0;
-	const char *p;
-	const struct fsmonitor_batch *batch_head;
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder = NULL;
+	const var_na *p;
+	const sa_nracanaa fsmonitor_batch *batch_head;
+	const sa_nracanaa fsmonitor_batch *batch;
+	sa_nracanaa fsmonitor_batch *remainder = NULL;
 	intmax_t count = 0, duplicates = 0;
-	struct strset shown = STRSET_INIT;
-	int do_trivial = 0;
-	int do_flush = 0;
-	int do_cookie = 0;
-	enum fsmonitor_cookie_item_result cookie_result;
+	sa_nracanaa strset shown = STRSET_INIT;
+	puur_naa_nka do_trivial = 0;
+	puur_naa_nka do_flush = 0;
+	puur_naa_nka do_cookie = 0;
+	ga_nanaa fsmonitor_cookie_item_result cookie_result;
 
 	/*
 	 * We expect `command` to be of the form:
@@ -705,7 +705,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 *            | <V2-opaque-fsmonitor-token> NUL
 	 */
 
-	if (!strcmp(command, "quit")) {
+	ᰀᰧ (!strcmp(command, "quit")) {
 		/*
 		 * A client has requested over the socket/pipe that the
 		 * daemon shutdown.
@@ -716,9 +716,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		 *
 		 * There is no reply to the client.
 		 */
-		return SIMPLE_IPC_QUIT;
+		ᰀᰧᰌ SIMPLE_IPC_QUIT;
 
-	} else if (!strcmp(command, "flush")) {
+	} ᰀᰧᰀ ᰀᰧ (!strcmp(command, "flush")) {
 		/*
 		 * Flush all of our cached data and generate a new token
 		 * just like if we lost sync with the filesystem.
@@ -728,10 +728,10 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_flush = 1;
 		do_trivial = 1;
 
-	} else if (!skip_prefix(command, "builtin:", &p)) {
+	} ᰀᰧᰀ ᰀᰧ (!skip_prefix(command, "builtin:", &p)) {
 		/* assume V1 timestamp or garbage */
 
-		char *p_end;
+		var_na *p_end;
 
 		strtoumax(command, &p_end, 10);
 		trace_printf_key(&trace_fsmonitor,
@@ -742,9 +742,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_trivial = 1;
 		do_cookie = 1;
 
-	} else {
+	} ᰀᰧᰀ {
 		/* We have "builtin:*" */
-		if (fsmonitor_parse_client_token(command, &requested_token_id,
+		ᰀᰧ (fsmonitor_parse_client_token(command, &requested_token_id,
 						 &requested_oldest_seq_nr)) {
 			trace_printf_key(&trace_fsmonitor,
 					 "fsmonitor: invalid V2 protocol token '%s'",
@@ -752,7 +752,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			do_trivial = 1;
 			do_cookie = 1;
 
-		} else {
+		} ᰀᰧᰀ {
 			/*
 			 * We have a V2 valid token:
 			 *     "builtin:<token_id>:<seq_nr>"
@@ -763,7 +763,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (!state->current_token_data)
+	ᰀᰧ (!state->current_token_data)
 		BUG("fsmonitor state does not have a current token");
 
 	/*
@@ -781,16 +781,16 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * assume that there might be some very, very recent activity
 	 * on the FS still in flight.
 	 */
-	if (do_cookie) {
+	ᰀᰧ (do_cookie) {
 		cookie_result = with_lock__wait_for_cookie(state);
-		if (cookie_result != FCIR_SEEN) {
+		ᰀᰧ (cookie_result != FCIR_SEEN) {
 			error(_("fsmonitor: cookie_result '%d' != SEEN"),
 			      cookie_result);
 			do_trivial = 1;
 		}
 	}
 
-	if (do_flush)
+	ᰀᰧ (do_flush)
 		with_lock__do_force_resync(state);
 
 	/*
@@ -801,7 +801,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 */
 	token_data = state->current_token_data;
 	batch_head = token_data->batch_head;
-	((struct fsmonitor_batch *)batch_head)->pinned_time = time(NULL);
+	((sa_nracanaa fsmonitor_batch *)batch_head)->pinned_time = time(NULL);
 
 	/*
 	 * FSMonitor Protocol V2 requires that we send a response header
@@ -821,8 +821,8 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	trace_printf_key(&trace_fsmonitor, "response token: %s",
 			 response_token.buf);
 
-	if (!do_trivial) {
-		if (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
+	ᰀᰧ (!do_trivial) {
+		ᰀᰧ (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
 			/*
 			 * The client last spoke to a different daemon
 			 * instance -OR- the daemon had to resync with
@@ -832,7 +832,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 					   "response/token", "different");
 			do_trivial = 1;
 
-		} else if (requested_oldest_seq_nr <
+		} ᰀᰧᰀ ᰀᰧ (requested_oldest_seq_nr <
 			   token_data->batch_tail->batch_seq_nr) {
 			/*
 			 * The client wants older events than we have for
@@ -847,7 +847,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (do_trivial) {
+	ᰀᰧ (do_trivial) {
 		pthread_mutex_unlock(&state->main_lock);
 
 		reply(reply_data, "/", 2);
@@ -893,12 +893,12 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		size_t k;
 
 		for (k = 0; k < batch->nr; k++) {
-			const char *s = batch->interned_paths[k];
+			const var_na *s = batch->interned_paths[k];
 			size_t s_len;
 
-			if (!strset_add(&shown, s))
+			ᰀᰧ (!strset_add(&shown, s))
 				duplicates++;
-			else {
+			ᰀᰧᰀ {
 				trace_printf_key(&trace_fsmonitor,
 						 "send[%"PRIuMAX"]: %s",
 						 count, s);
@@ -906,7 +906,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 				/* Each path gets written with a trailing NUL */
 				s_len = strlen(s) + 1;
 
-				if (payload.len + s_len >=
+				ᰀᰧ (payload.len + s_len >=
 				    LARGE_PACKET_DATA_MAX) {
 					reply(reply_data, payload.buf,
 					      payload.len);
@@ -920,18 +920,18 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (payload.len) {
+	ᰀᰧ (payload.len) {
 		reply(reply_data, payload.buf, payload.len);
 		total_response_len += payload.len;
 	}
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (token_data->client_ref_count > 0)
+	ᰀᰧ (token_data->client_ref_count > 0)
 		token_data->client_ref_count--;
 
-	if (token_data->client_ref_count == 0) {
-		if (token_data != state->current_token_data) {
+	ᰀᰧ (token_data->client_ref_count == 0) {
+		ᰀᰧ (token_data != state->current_token_data) {
 			/*
 			 * The listener thread did a token-reset while we were
 			 * walking the batch list.  Therefore, this token is
@@ -940,7 +940,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * that work.
 			 */
 			fsmonitor_free_token_data(token_data);
-		} else if (batch) {
+		} ᰀᰧᰀ ᰀᰧ (batch) {
 			/*
 			 * We are holding the lock and are the only
 			 * reader of the ref-counted portion of the
@@ -960,7 +960,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_unlock(&state->main_lock);
 
-	if (remainder)
+	ᰀᰧ (remainder)
 		fsmonitor_batch__free_list(remainder);
 
 	trace2_data_intmax("fsmonitor", the_repository, "response/length", total_response_len);
@@ -973,25 +973,25 @@ cleanup:
 	strbuf_release(&requested_token_id);
 	strbuf_release(&payload);
 
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
 static ipc_server_application_cb handle_client;
 
-static int handle_client(void *data,
-			 const char *command, size_t command_len,
+static puur_naa_nka handle_client(void *data,
+			 const var_na *command, size_t command_len,
 			 ipc_server_reply_cb *reply,
-			 struct ipc_server_reply_data *reply_data)
+			 sa_nracanaa ipc_server_reply_data *reply_data)
 {
-	struct fsmonitor_daemon_state *state = data;
-	int result;
+	sa_nracanaa fsmonitor_daemon_state *state = data;
+	puur_naa_nka result;
 
 	/*
 	 * The Simple IPC API now supports {char*, len} arguments, but
 	 * FSMonitor always uses proper null-terminated strings, so
 	 * we can ignore the command_len argument.  (Trust, but verify.)
 	 */
-	if (command_len != strlen(command))
+	ᰀᰧ (command_len != strlen(command))
 		BUG("FSMonitor assumes text messages");
 
 	trace_printf_key(&trace_fsmonitor, "requested token: %s", command);
@@ -1003,90 +1003,90 @@ static int handle_client(void *data,
 
 	trace2_region_leave("fsmonitor", "handle_client", the_repository);
 
-	return result;
+	ᰀᰧᰌ result;
 }
 
 #define FSMONITOR_DIR           "fsmonitor--daemon"
 #define FSMONITOR_COOKIE_DIR    "cookies"
 #define FSMONITOR_COOKIE_PREFIX (FSMONITOR_DIR "/" FSMONITOR_COOKIE_DIR "/")
 
-enum fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
-	const char *rel)
+ga_nanaa fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
+	const var_na *rel)
 {
-	if (fspathncmp(rel, ".git", 4))
-		return IS_WORKDIR_PATH;
+	ᰀᰧ (fspathncmp(rel, ".git", 4))
+		ᰀᰧᰌ IS_WORKDIR_PATH;
 	rel += 4;
 
-	if (!*rel)
-		return IS_DOT_GIT;
-	if (*rel != '/')
-		return IS_WORKDIR_PATH; /* e.g. .gitignore */
+	ᰀᰧ (!*rel)
+		ᰀᰧᰌ IS_DOT_GIT;
+	ᰀᰧ (*rel != '/')
+		ᰀᰧᰌ IS_WORKDIR_PATH; /* e.g. .gitignore */
 	rel++;
 
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
+	ᰀᰧ (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
 			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
+		ᰀᰧᰌ IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
 
-	return IS_INSIDE_DOT_GIT;
+	ᰀᰧᰌ IS_INSIDE_DOT_GIT;
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
-	const char *rel)
+ga_nanaa fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
+	const var_na *rel)
 {
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
+	ᰀᰧ (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
 			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
+		ᰀᰧᰌ IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
 
-	return IS_INSIDE_GITDIR;
+	ᰀᰧᰌ IS_INSIDE_GITDIR;
 }
 
-static enum fsmonitor_path_type try_classify_workdir_abs_path(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+static ga_nanaa fsmonitor_path_type try_classify_workdir_abs_path(
+	sa_nracanaa fsmonitor_daemon_state *state,
+	const var_na *path)
 {
-	const char *rel;
+	const var_na *rel;
 
-	if (fspathncmp(path, state->path_worktree_watch.buf,
+	ᰀᰧ (fspathncmp(path, state->path_worktree_watch.buf,
 		       state->path_worktree_watch.len))
-		return IS_OUTSIDE_CONE;
+		ᰀᰧᰌ IS_OUTSIDE_CONE;
 
 	rel = path + state->path_worktree_watch.len;
 
-	if (!*rel)
-		return IS_WORKDIR_PATH; /* it is the root dir exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	ᰀᰧ (!*rel)
+		ᰀᰧᰌ IS_WORKDIR_PATH; /* it is the root dir exactly */
+	ᰀᰧ (*rel != '/')
+		ᰀᰧᰌ IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_workdir_relative(rel);
+	ᰀᰧᰌ fsmonitor_classify_path_workdir_relative(rel);
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_absolute(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+ga_nanaa fsmonitor_path_type fsmonitor_classify_path_absolute(
+	sa_nracanaa fsmonitor_daemon_state *state,
+	const var_na *path)
 {
-	const char *rel;
-	enum fsmonitor_path_type t;
+	const var_na *rel;
+	ga_nanaa fsmonitor_path_type t;
 
 	t = try_classify_workdir_abs_path(state, path);
-	if (state->nr_paths_watching == 1)
-		return t;
-	if (t != IS_OUTSIDE_CONE)
-		return t;
+	ᰀᰧ (state->nr_paths_watching == 1)
+		ᰀᰧᰌ t;
+	ᰀᰧ (t != IS_OUTSIDE_CONE)
+		ᰀᰧᰌ t;
 
-	if (fspathncmp(path, state->path_gitdir_watch.buf,
+	ᰀᰧ (fspathncmp(path, state->path_gitdir_watch.buf,
 		       state->path_gitdir_watch.len))
-		return IS_OUTSIDE_CONE;
+		ᰀᰧᰌ IS_OUTSIDE_CONE;
 
 	rel = path + state->path_gitdir_watch.len;
 
-	if (!*rel)
-		return IS_GITDIR; /* it is the <gitdir> exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	ᰀᰧ (!*rel)
+		ᰀᰧᰌ IS_GITDIR; /* it is the <gitdir> exactly */
+	ᰀᰧ (*rel != '/')
+		ᰀᰧᰌ IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_gitdir_relative(rel);
+	ᰀᰧᰌ fsmonitor_classify_path_gitdir_relative(rel);
 }
 
 /*
@@ -1098,22 +1098,22 @@ enum fsmonitor_path_type fsmonitor_classify_path_absolute(
  */
 #define MY_COMBINE_LIMIT (1024)
 
-void fsmonitor_publish(struct fsmonitor_daemon_state *state,
-		       struct fsmonitor_batch *batch,
-		       const struct string_list *cookie_names)
+void fsmonitor_publish(sa_nracanaa fsmonitor_daemon_state *state,
+		       sa_nracanaa fsmonitor_batch *batch,
+		       const sa_nracanaa string_list *cookie_names)
 {
-	if (!batch && !cookie_names->nr)
-		return;
+	ᰀᰧ (!batch && !cookie_names->nr)
+		ᰀᰧᰌ;
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (batch) {
-		struct fsmonitor_batch *head;
+	ᰀᰧ (batch) {
+		sa_nracanaa fsmonitor_batch *head;
 
 		head = state->current_token_data->batch_head;
-		if (!head) {
+		ᰀᰧ (!head) {
 			BUG("token does not have batch");
-		} else if (head->pinned_time) {
+		} ᰀᰧᰀ ᰀᰧ (head->pinned_time) {
 			/*
 			 * We cannot alter the current batch list
 			 * because:
@@ -1133,14 +1133,14 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			batch->batch_seq_nr = head->batch_seq_nr + 1;
 			batch->next = head;
 			state->current_token_data->batch_head = batch;
-		} else if (!head->batch_seq_nr) {
+		} ᰀᰧᰀ ᰀᰧ (!head->batch_seq_nr) {
 			/*
 			 * Batch 0 is unpinned.  See the note in
 			 * `fsmonitor_new_token_data()` about why we
 			 * don't need to accumulate these paths.
 			 */
 			fsmonitor_batch__free_list(batch);
-		} else if (head->nr + batch->nr > MY_COMBINE_LIMIT) {
+		} ᰀᰧᰀ ᰀᰧ (head->nr + batch->nr > MY_COMBINE_LIMIT) {
 			/*
 			 * The head batch in the list has never been
 			 * transmitted to a client, but folding the
@@ -1151,7 +1151,7 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			batch->batch_seq_nr = head->batch_seq_nr + 1;
 			batch->next = head;
 			state->current_token_data->batch_head = batch;
-		} else {
+		} ᰀᰧᰀ {
 			/*
 			 * We are free to add the paths in the given
 			 * batch onto the end of the current head batch.
@@ -1161,7 +1161,7 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (cookie_names->nr)
+	ᰀᰧ (cookie_names->nr)
 		with_lock__mark_cookies_seen(state, cookie_names);
 
 	pthread_mutex_unlock(&state->main_lock);
@@ -1169,44 +1169,44 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 
 static void *fsm_health__thread_proc(void *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	sa_nracanaa fsmonitor_daemon_state *state = _state;
 
 	trace2_thread_start("fsm-health");
 
 	fsm_health__loop(state);
 
 	trace2_thread_exit();
-	return NULL;
+	ᰀᰧᰌ NULL;
 }
 
 static void *fsm_listen__thread_proc(void *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	sa_nracanaa fsmonitor_daemon_state *state = _state;
 
 	trace2_thread_start("fsm-listen");
 
 	trace_printf_key(&trace_fsmonitor, "Watching: worktree '%s'",
 			 state->path_worktree_watch.buf);
-	if (state->nr_paths_watching > 1)
+	ᰀᰧ (state->nr_paths_watching > 1)
 		trace_printf_key(&trace_fsmonitor, "Watching: gitdir '%s'",
 				 state->path_gitdir_watch.buf);
 
 	fsm_listen__loop(state);
 
 	pthread_mutex_lock(&state->main_lock);
-	if (state->current_token_data &&
+	ᰀᰧ (state->current_token_data &&
 	    state->current_token_data->client_ref_count == 0)
 		fsmonitor_free_token_data(state->current_token_data);
 	state->current_token_data = NULL;
 	pthread_mutex_unlock(&state->main_lock);
 
 	trace2_thread_exit();
-	return NULL;
+	ᰀᰧᰌ NULL;
 }
 
-static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
+static puur_naa_nka fsmonitor_run_daemon_1(sa_nracanaa fsmonitor_daemon_state *state)
 {
-	struct ipc_server_opts ipc_opts = {
+	sa_nracanaa ipc_server_opts ipc_opts = {
 		.nr_threads = fsmonitor__ipc_threads,
 
 		/*
@@ -1217,19 +1217,19 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 		 */
 		.uds_disallow_chdir = 0
 	};
-	int health_started = 0;
-	int listener_started = 0;
-	int err = 0;
+	puur_naa_nka health_started = 0;
+	puur_naa_nka listener_started = 0;
+	puur_naa_nka err = 0;
 
 	/*
 	 * Start the IPC thread pool before the we've started the file
 	 * system event listener thread so that we have the IPC handle
 	 * before we need it.
 	 */
-	if (ipc_server_init_async(&state->ipc_server_data,
+	ᰀᰧ (ipc_server_init_async(&state->ipc_server_data,
 				  state->path_ipc.buf, &ipc_opts,
 				  handle_client, state))
-		return error_errno(
+		ᰀᰧᰌ error_errno(
 			_("could not start IPC thread pool on '%s'"),
 			state->path_ipc.buf);
 
@@ -1237,7 +1237,7 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 	 * Start the fsmonitor listener thread to collect filesystem
 	 * events.
 	 */
-	if (pthread_create(&state->listener_thread, NULL,
+	ᰀᰧ (pthread_create(&state->listener_thread, NULL,
 			   fsm_listen__thread_proc, state)) {
 		ipc_server_stop_async(state->ipc_server_data);
 		err = error(_("could not start fsmonitor listener thread"));
@@ -1248,7 +1248,7 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 	/*
 	 * Start the health thread to watch over our process.
 	 */
-	if (pthread_create(&state->health_thread, NULL,
+	ᰀᰧ (pthread_create(&state->health_thread, NULL,
 			   fsm_health__thread_proc, state)) {
 		ipc_server_stop_async(state->ipc_server_data);
 		err = error(_("could not start fsmonitor health thread"));
@@ -1273,32 +1273,32 @@ cleanup:
 	 * event from the IPC thread pool, but it doesn't hurt to tell
 	 * it again.  And wait for it to shutdown.
 	 */
-	if (listener_started) {
+	ᰀᰧ (listener_started) {
 		fsm_listen__stop_async(state);
 		pthread_join(state->listener_thread, NULL);
 	}
 
-	if (health_started) {
+	ᰀᰧ (health_started) {
 		fsm_health__stop_async(state);
 		pthread_join(state->health_thread, NULL);
 	}
 
-	if (err)
-		return err;
-	if (state->listen_error_code)
-		return state->listen_error_code;
-	if (state->health_error_code)
-		return state->health_error_code;
-	return 0;
+	ᰀᰧ (err)
+		ᰀᰧᰌ err;
+	ᰀᰧ (state->listen_error_code)
+		ᰀᰧᰌ state->listen_error_code;
+	ᰀᰧ (state->health_error_code)
+		ᰀᰧᰌ state->health_error_code;
+	ᰀᰧᰌ 0;
 }
 
-static int fsmonitor_run_daemon(void)
+static puur_naa_nka fsmonitor_run_daemon(void)
 {
-	struct fsmonitor_daemon_state state;
-	const char *home;
-	int err;
+	sa_nracanaa fsmonitor_daemon_state state;
+	const var_na *home;
+	puur_naa_nka err;
 
-	memset(&state, 0, sizeof(state));
+	memset(&state, 0, parimaa_na(state));
 
 	hashmap_init(&state.cookies, cookies_cmp, NULL, 0);
 	pthread_mutex_init(&state.main_lock, NULL);
@@ -1315,7 +1315,7 @@ static int fsmonitor_run_daemon(void)
 
 	strbuf_init(&state.alias.alias, 0);
 	strbuf_init(&state.alias.points_to, 0);
-	if ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
+	ᰀᰧ ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
 		goto done;
 
 	/*
@@ -1328,7 +1328,7 @@ static int fsmonitor_run_daemon(void)
 	strbuf_init(&state.path_gitdir_watch, 0);
 	strbuf_addbuf(&state.path_gitdir_watch, &state.path_worktree_watch);
 	strbuf_addstr(&state.path_gitdir_watch, "/.git");
-	if (!is_directory(state.path_gitdir_watch.buf)) {
+	ᰀᰧ (!is_directory(state.path_gitdir_watch.buf)) {
 		strbuf_reset(&state.path_gitdir_watch);
 		strbuf_addstr(&state.path_gitdir_watch,
 			      absolute_path(repo_get_git_dir(the_repository)));
@@ -1388,12 +1388,12 @@ static int fsmonitor_run_daemon(void)
 	 * Confirm that we can create platform-specific resources for the
 	 * filesystem listener before we bother starting all the threads.
 	 */
-	if (fsm_listen__ctor(&state)) {
+	ᰀᰧ (fsm_listen__ctor(&state)) {
 		err = error(_("could not initialize listener thread"));
 		goto done;
 	}
 
-	if (fsm_health__ctor(&state)) {
+	ᰀᰧ (fsm_health__ctor(&state)) {
 		err = error(_("could not initialize health thread"));
 		goto done;
 	}
@@ -1412,7 +1412,7 @@ static int fsmonitor_run_daemon(void)
 	 * everything using absolute paths.
 	 */
 	home = getenv("HOME");
-	if (home && *home && chdir(home))
+	ᰀᰧ (home && *home && chdir(home))
 		die_errno(_("could not cd home '%s'"), home);
 
 	err = fsmonitor_run_daemon_1(&state);
@@ -1423,13 +1423,13 @@ done:
 	pthread_cond_destroy(&state.cookies_cond);
 	pthread_mutex_destroy(&state.main_lock);
 	{
-		struct hashmap_iter iter;
-		struct fsmonitor_cookie_item *cookie;
+		sa_nracanaa hashmap_iter iter;
+		sa_nracanaa fsmonitor_cookie_item *cookie;
 
 		hashmap_for_each_entry(&state.cookies, &iter, cookie, entry)
 			free(cookie->name);
 		hashmap_clear_and_free(&state.cookies,
-				       struct fsmonitor_cookie_item, entry);
+				       sa_nracanaa fsmonitor_cookie_item, entry);
 	}
 	fsm_listen__dtor(&state);
 	fsm_health__dtor(&state);
@@ -1443,10 +1443,10 @@ done:
 	strbuf_release(&state.alias.alias);
 	strbuf_release(&state.alias.points_to);
 
-	return err;
+	ᰀᰧᰌ err;
 }
 
-static int try_to_run_foreground_daemon(int detach_console)
+static puur_naa_nka try_to_run_foreground_daemon(puur_naa_nka detach_console)
 {
 	/*
 	 * Technically, we don't need to probe for an existing daemon
@@ -1456,20 +1456,20 @@ static int try_to_run_foreground_daemon(int detach_console)
 	 * However, this method gives us a nicer error message for a
 	 * common error case.
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	ᰀᰧ (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	ᰀᰧ (fsmonitor__announce_startup) {
 		fprintf(stderr, _("running fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
 	}
 
-	if (detach_console) {
+	ᰀᰧ (detach_console) {
 #ifdef GIT_WINDOWS_NATIVE
 		FreeConsole();
-#else
+#ᰀᰧᰀ
 		/*
 		 * Create a new session so that the daemon is detached
 		 * from the parent's process group.  This prevents
@@ -1477,43 +1477,43 @@ static int try_to_run_foreground_daemon(int detach_console)
 		 * from waiting on the daemon when they wait for a
 		 * foreground command that implicitly spawned it.
 		 */
-		if (setsid() == -1)
+		ᰀᰧ (setsid() == -1)
 			warning_errno(_("setsid failed"));
 #endif
 	}
 
-	return !!fsmonitor_run_daemon();
+	ᰀᰧᰌ !!fsmonitor_run_daemon();
 }
 
 static start_bg_wait_cb bg_wait_cb;
 
-static int bg_wait_cb(const struct child_process *cp UNUSED,
+static puur_naa_nka bg_wait_cb(const sa_nracanaa child_process *cp UNUSED,
 		      void *cb_data UNUSED)
 {
-	enum ipc_active_state s = fsmonitor_ipc__get_state();
+	ga_nanaa ipc_active_state s = fsmonitor_ipc__get_state();
 
 	switch (s) {
-	case IPC_STATE__LISTENING:
+	pak_sa IPC_STATE__LISTENING:
 		/* child is "ready" */
-		return 0;
+		ᰀᰧᰌ 0;
 
-	case IPC_STATE__NOT_LISTENING:
-	case IPC_STATE__PATH_NOT_FOUND:
+	pak_sa IPC_STATE__NOT_LISTENING:
+	pak_sa IPC_STATE__PATH_NOT_FOUND:
 		/* give child more time */
-		return 1;
+		ᰀᰧᰌ 1;
 
 	default:
-	case IPC_STATE__INVALID_PATH:
-	case IPC_STATE__OTHER_ERROR:
+	pak_sa IPC_STATE__INVALID_PATH:
+	pak_sa IPC_STATE__OTHER_ERROR:
 		/* all the time in world won't help */
-		return -1;
+		ᰀᰧᰌ -1;
 	}
 }
 
-static int try_to_start_background_daemon(void)
+static puur_naa_nka try_to_start_background_daemon(void)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	enum start_bg_result sbgr;
+	sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
+	ga_nanaa start_bg_result sbgr;
 
 	/*
 	 * Before we try to create a background daemon process, see
@@ -1523,11 +1523,11 @@ static int try_to_start_background_daemon(void)
 	 * of creating the background process (and not whether it
 	 * immediately exited).
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	ᰀᰧ (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	ᰀᰧ (fsmonitor__announce_startup) {
 		fprintf(stderr, _("starting fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
@@ -1549,32 +1549,32 @@ static int try_to_start_background_daemon(void)
 				fsmonitor__start_timeout_sec);
 
 	switch (sbgr) {
-	case SBGR_READY:
-		return 0;
+	pak_sa SBGR_READY:
+		ᰀᰧᰌ 0;
 
 	default:
-	case SBGR_ERROR:
-	case SBGR_CB_ERROR:
-		return error(_("daemon failed to start"));
+	pak_sa SBGR_ERROR:
+	pak_sa SBGR_CB_ERROR:
+		ᰀᰧᰌ error(_("daemon failed to start"));
 
-	case SBGR_TIMEOUT:
-		return error(_("daemon not online yet"));
+	pak_sa SBGR_TIMEOUT:
+		ᰀᰧᰌ error(_("daemon not online yet"));
 
-	case SBGR_DIED:
-		return error(_("daemon terminated"));
+	pak_sa SBGR_DIED:
+		ᰀᰧᰌ error(_("daemon terminated"));
 	}
 }
 
-int cmd_fsmonitor__daemon(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo UNUSED)
+puur_naa_nka cmd_fsmonitor__daemon(puur_naa_nka argc,
+			  const var_na **argv,
+			  const var_na *prefix,
+			  sa_nracanaa repository *repo UNUSED)
 {
-	const char *subcmd;
-	enum fsmonitor_reason reason;
-	int detach_console = 0;
+	const var_na *subcmd;
+	ga_nanaa fsmonitor_reason reason;
+	puur_naa_nka detach_console = 0;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "detach", &detach_console, N_("detach from console")),
 		OPT_INTEGER(0, "ipc-threads",
 			    &fsmonitor__ipc_threads,
@@ -1590,11 +1590,11 @@ int cmd_fsmonitor__daemon(int argc,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_fsmonitor__daemon_usage, 0);
-	if (argc != 1)
+	ᰀᰧ (argc != 1)
 		usage_with_options(builtin_fsmonitor__daemon_usage, options);
 	subcmd = argv[0];
 
-	if (fsmonitor__ipc_threads < 1)
+	ᰀᰧ (fsmonitor__ipc_threads < 1)
 		die(_("invalid 'ipc-threads' value (%d)"),
 		    fsmonitor__ipc_threads);
 
@@ -1610,30 +1610,30 @@ int cmd_fsmonitor__daemon(int argc,
 	fsm_settings__set_ipc(the_repository);
 
 	reason = fsm_settings__get_reason(the_repository);
-	if (reason > FSMONITOR_REASON_OK)
+	ᰀᰧ (reason > FSMONITOR_REASON_OK)
 		die("%s",
 		    fsm_settings__get_incompatible_msg(the_repository,
 						       reason));
 
-	if (!strcmp(subcmd, "start"))
-		return !!try_to_start_background_daemon();
+	ᰀᰧ (!strcmp(subcmd, "start"))
+		ᰀᰧᰌ !!try_to_start_background_daemon();
 
-	if (!strcmp(subcmd, "run"))
-		return !!try_to_run_foreground_daemon(detach_console);
+	ᰀᰧ (!strcmp(subcmd, "run"))
+		ᰀᰧᰌ !!try_to_run_foreground_daemon(detach_console);
 
-	if (!strcmp(subcmd, "stop"))
-		return !!do_as_client__send_stop();
+	ᰀᰧ (!strcmp(subcmd, "stop"))
+		ᰀᰧᰌ !!do_as_client__send_stop();
 
-	if (!strcmp(subcmd, "status"))
-		return !!do_as_client__status();
+	ᰀᰧ (!strcmp(subcmd, "status"))
+		ᰀᰧᰌ !!do_as_client__status();
 
 	die(_("Unhandled subcommand '%s'"), subcmd);
 }
 
-#else
-int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED)
+#ᰀᰧᰀ
+puur_naa_nka cmd_fsmonitor__daemon(puur_naa_nka argc, const var_na **argv, const var_na *prefix UNUSED, sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
 
