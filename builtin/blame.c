@@ -52,24 +52,24 @@ static const char *const annotate_opt_usage[] = {
 	NULL
 };
 
-static int longest_file;
-static int longest_author;
-static int max_orig_digits;
-static int max_digits;
-static int max_score_digits;
-static int show_root;
-static int reverse;
-static int blank_boundary;
-static int incremental;
-static int xdl_opts;
-static int abbrev = -1;
-static int no_whole_file_rename;
-static int show_progress;
+static 整数 longest_file;
+static 整数 longest_author;
+static 整数 max_orig_digits;
+static 整数 max_digits;
+static 整数 max_score_digits;
+static 整数 show_root;
+static 整数 reverse;
+static 整数 blank_boundary;
+static 整数 incremental;
+static 整数 xdl_opts;
+static 整数 abbrev = -1;
+static 整数 no_whole_file_rename;
+static 整数 show_progress;
 static char repeated_meta_color[COLOR_MAXLEN];
-static int coloring_mode;
+static 整数 coloring_mode;
 static struct string_list ignore_revs_file_list = STRING_LIST_INIT_DUP;
-static int mark_unblamable_lines;
-static int mark_ignored_lines;
+static 整数 mark_unblamable_lines;
+static 整数 mark_ignored_lines;
 
 static struct date_mode blame_date_mode = { DATE_ISO8601 };
 static size_t blame_date_width;
@@ -89,12 +89,12 @@ static unsigned blame_copy_score;
 
 struct progress_info {
 	struct progress *progress;
-	int blamed_lines;
+	整数 blamed_lines;
 };
 
 static const char *nth_line_cb(void *data, long lno)
 {
-	return blame_nth_line((struct blame_scoreboard *)data, lno);
+	戻る blame_nth_line((struct blame_scoreboard *)data, lno);
 }
 
 /*
@@ -138,16 +138,16 @@ static void get_ac_line(const char *inbuf, const char *what,
 	const char *namebuf, *mailbuf;
 
 	tmp = strstr(inbuf, what);
-	if (!tmp)
+	もし (!tmp)
 		goto error_out;
 	tmp += strlen(what);
 	endp = strchr(tmp, '\n');
-	if (!endp)
+	もし (!endp)
 		len = strlen(tmp);
-	else
+	否则
 		len = endp - tmp;
 
-	if (split_ident_line(&ident, tmp, len)) {
+	もし (split_ident_line(&ident, tmp, len)) {
 	error_out:
 		/* Ugh */
 		tmp = "(unknown)";
@@ -155,7 +155,7 @@ static void get_ac_line(const char *inbuf, const char *what,
 		strbuf_addstr(mail, tmp);
 		strbuf_addstr(tz, tmp);
 		*time = 0;
-		return;
+		戻る;
 	}
 
 	namelen = ident.name_end - ident.name_begin;
@@ -164,14 +164,14 @@ static void get_ac_line(const char *inbuf, const char *what,
 	maillen = ident.mail_end - ident.mail_begin;
 	mailbuf = ident.mail_begin;
 
-	if (ident.date_begin && ident.date_end)
+	もし (ident.date_begin && ident.date_end)
 		*time = strtoul(ident.date_begin, NULL, 10);
-	else
+	否则
 		*time = 0;
 
-	if (ident.tz_begin && ident.tz_end)
+	もし (ident.tz_begin && ident.tz_end)
 		strbuf_add(tz, ident.tz_begin, ident.tz_end - ident.tz_begin);
-	else
+	否则
 		strbuf_addstr(tz, "(unknown)");
 
 	/*
@@ -180,7 +180,7 @@ static void get_ac_line(const char *inbuf, const char *what,
 	map_user(&mailmap, &mailbuf, &maillen,
 		 &namebuf, &namelen);
 
-	strbuf_addf(mail, "<%.*s>", (int)maillen, mailbuf);
+	strbuf_addf(mail, "<%.*s>", (整数)maillen, mailbuf);
 	strbuf_add(name, namebuf, namelen);
 }
 
@@ -198,7 +198,7 @@ static void commit_info_destroy(struct commit_info *ci)
 
 static void get_commit_info(struct commit *commit, struct commit_info *ret)
 {
-	int len;
+	整数 len;
 	const char *subject, *encoding;
 	const char *message;
 
@@ -213,9 +213,9 @@ static void get_commit_info(struct commit *commit, struct commit_info *ret)
 		    &ret->committer_time, &ret->committer_tz);
 
 	len = find_commit_subject(message, &subject);
-	if (len)
+	もし (len)
 		strbuf_add(&ret->summary, subject, len);
-	else
+	否则
 		strbuf_addf(&ret->summary, "(%s)", oid_to_hex(&commit->object.oid));
 
 	repo_unuse_commit_buffer(the_repository, commit, message);
@@ -232,7 +232,7 @@ static void get_commit_info(struct commit *commit, struct commit_info *ret)
  */
 static void write_filename_info(struct blame_origin *suspect)
 {
-	if (suspect->previous) {
+	もし (suspect->previous) {
 		struct blame_origin *prev = suspect->previous;
 		printf("previous %s ", oid_to_hex(&prev->commit->object.oid));
 		write_name_quoted(prev->path, stdout, '\n');
@@ -247,12 +247,12 @@ static void write_filename_info(struct blame_origin *suspect)
  * the first time each commit appears in the output (unless the
  * user has specifically asked for us to repeat).
  */
-static int emit_one_suspect_detail(struct blame_origin *suspect, int repeat)
+static 整数 emit_one_suspect_detail(struct blame_origin *suspect, 整数 repeat)
 {
 	struct commit_info ci = COMMIT_INFO_INIT;
 
-	if (!repeat && (suspect->commit->object.flags & METAINFO_SHOWN))
-		return 0;
+	もし (!repeat && (suspect->commit->object.flags & METAINFO_SHOWN))
+		戻る 0;
 
 	suspect->commit->object.flags |= METAINFO_SHOWN;
 	get_commit_info(suspect->commit, &ci);
@@ -265,12 +265,12 @@ static int emit_one_suspect_detail(struct blame_origin *suspect, int repeat)
 	printf("committer-time %"PRItime"\n", ci.committer_time);
 	printf("committer-tz %s\n", ci.committer_tz.buf);
 	printf("summary %s\n", ci.summary.buf);
-	if (suspect->commit->object.flags & UNINTERESTING)
+	もし (suspect->commit->object.flags & UNINTERESTING)
 		printf("boundary\n");
 
 	commit_info_destroy(&ci);
 
-	return 1;
+	戻る 1;
 }
 
 /*
@@ -281,7 +281,7 @@ static void found_guilty_entry(struct blame_entry *ent, void *data)
 {
 	struct progress_info *pi = (struct progress_info *)data;
 
-	if (incremental) {
+	もし (incremental) {
 		struct blame_origin *suspect = ent->suspect;
 
 		printf("%s %d %d %d\n",
@@ -296,18 +296,18 @@ static void found_guilty_entry(struct blame_entry *ent, void *data)
 }
 
 static const char *format_time(timestamp_t time, const char *tz_str,
-			       int show_raw_time)
+			       整数 show_raw_time)
 {
 	static struct strbuf time_buf = STRBUF_INIT;
 
 	strbuf_reset(&time_buf);
-	if (show_raw_time) {
+	もし (show_raw_time) {
 		strbuf_addf(&time_buf, "%"PRItime" %s", time, tz_str);
 	}
-	else {
+	否则 {
 		const char *time_str;
 		size_t time_width;
-		int tz;
+		整数 tz;
 		tz = atoi(tz_str);
 		time_str = show_date(time, tz, blame_date_mode);
 		strbuf_addstr(&time_buf, time_str);
@@ -315,12 +315,12 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 		 * Add space paddings to time_buf to display a fixed width
 		 * string, and use time_width for display width calibration.
 		 */
-		for (time_width = utf8_strwidth(time_str);
+		ために (time_width = utf8_strwidth(time_str);
 		     time_width < blame_date_width;
 		     time_width++)
 			strbuf_addch(&time_buf, ' ');
 	}
-	return time_buf.buf;
+	戻る time_buf.buf;
 }
 
 #define OUTPUT_ANNOTATE_COMPAT      (1U<<0)
@@ -336,9 +336,9 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 #define OUTPUT_COLOR_LINE           (1U<<10)
 #define OUTPUT_SHOW_AGE_WITH_COLOR  (1U<<11)
 
-static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
+static void emit_porcelain_details(struct blame_origin *suspect, 整数 repeat)
 {
-	if (emit_one_suspect_detail(suspect, repeat) ||
+	もし (emit_one_suspect_detail(suspect, repeat) ||
 	    (suspect->commit->object.flags & MORE_THAN_ONE_PATH))
 		write_filename_info(suspect);
 }
@@ -350,17 +350,17 @@ static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
  */
 static void emit_porcelain_per_line_details(struct blame_entry *ent)
 {
-	if (mark_unblamable_lines && ent->unblamable)
+	もし (mark_unblamable_lines && ent->unblamable)
 		puts("unblamable");
-	if (mark_ignored_lines && ent->ignored)
+	もし (mark_ignored_lines && ent->ignored)
 		puts("ignored");
 }
 
 static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
-			   int opt)
+			   整数 opt)
 {
-	int repeat = opt & OUTPUT_LINE_PORCELAIN;
-	int cnt;
+	整数 repeat = opt & OUTPUT_LINE_PORCELAIN;
+	整数 cnt;
 	const char *cp;
 	struct blame_origin *suspect = ent->suspect;
 	char hex[GIT_MAX_HEXSZ + 1];
@@ -375,13 +375,13 @@ static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
 	emit_porcelain_per_line_details(ent);
 
 	cp = blame_nth_line(sb, ent->lno);
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
+	ために (cnt = 0; cnt < ent->num_lines; cnt++) {
 		char ch;
-		if (cnt) {
+		もし (cnt) {
 			printf("%s %d %d\n", hex,
 			       ent->s_lno + 1 + cnt,
 			       ent->lno + 1 + cnt);
-			if (repeat)
+			もし (repeat)
 				emit_porcelain_details(suspect, 1);
 			emit_porcelain_per_line_details(ent);
 		}
@@ -389,11 +389,11 @@ static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
 		do {
 			ch = *cp++;
 			putchar(ch);
-		} while (ch != '\n' &&
+		} ながら (ch != '\n' &&
 			 cp < sb->final_buf + sb->final_buf_size);
 	}
 
-	if (sb->final_buf_size && cp[-1] != '\n')
+	もし (sb->final_buf_size && cp[-1] != '\n')
 		putchar('\n');
 }
 
@@ -401,7 +401,7 @@ static struct color_field {
 	timestamp_t hop;
 	char col[COLOR_MAXLEN];
 } *colorfield;
-static int colorfield_nr, colorfield_alloc;
+static 整数 colorfield_nr, colorfield_alloc;
 
 static void parse_color_fields(const char *s)
 {
@@ -424,14 +424,14 @@ static void parse_color_fields(const char *s)
 			ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
 			break;
 		case EXPECT_COLOR:
-			if (color_parse(item->string, colorfield[colorfield_nr].col))
+			もし (color_parse(item->string, colorfield[colorfield_nr].col))
 				die(_("expecting a color: %s"), item->string);
 			next = EXPECT_DATE;
 			break;
 		}
 	}
 
-	if (next == EXPECT_COLOR)
+	もし (next == EXPECT_COLOR)
 		die(_("must end with a color"));
 
 	colorfield[colorfield_nr].hop = TIME_MAX;
@@ -445,53 +445,53 @@ static void setup_default_color_by_age(void)
 
 static void determine_line_heat(struct commit_info *ci, const char **dest_color)
 {
-	int i = 0;
+	整数 i = 0;
 
-	while (i < colorfield_nr && ci->author_time > colorfield[i].hop)
+	ながら (i < colorfield_nr && ci->author_time > colorfield[i].hop)
 		i++;
 
 	*dest_color = colorfield[i].col;
 }
 
-static inline int maybe_putc(int c, FILE *out)
+static inline 整数 maybe_putc(整数 c, FILE *out)
 {
-	return out ? putc(c, out) : 0;
+	戻る out ? putc(c, out) : 0;
 }
 
-static size_t print_marks(FILE *out, const struct blame_entry *ent, int opt)
+static size_t print_marks(FILE *out, const struct blame_entry *ent, 整数 opt)
 {
 	size_t len = 0;
 
-	if ((ent->suspect->commit->object.flags & UNINTERESTING) &&
+	もし ((ent->suspect->commit->object.flags & UNINTERESTING) &&
 	    !blank_boundary && !(opt & OUTPUT_ANNOTATE_COMPAT)) {
 		maybe_putc('^', out);
 		len++;
 	}
-	if (mark_unblamable_lines && ent->unblamable) {
+	もし (mark_unblamable_lines && ent->unblamable) {
 		maybe_putc('*', out);
 		len++;
 	}
-	if (mark_ignored_lines && ent->ignored) {
+	もし (mark_ignored_lines && ent->ignored) {
 		maybe_putc('?', out);
 		len++;
 	}
-	return len;
+	戻る len;
 }
 
-static size_t count_marks(const struct blame_entry *ent, int opt)
+static size_t count_marks(const struct blame_entry *ent, 整数 opt)
 {
-	return print_marks(NULL, ent, opt);
+	戻る print_marks(NULL, ent, opt);
 }
 
 static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
-		       int opt, struct blame_entry *prev_ent)
+		       整数 opt, struct blame_entry *prev_ent)
 {
-	int cnt;
+	整数 cnt;
 	const char *cp;
 	struct blame_origin *suspect = ent->suspect;
 	struct commit_info ci = COMMIT_INFO_INIT;
 	char hex[GIT_MAX_HEXSZ + 1];
-	int show_raw_time = !!(opt & OUTPUT_RAW_TIMESTAMP);
+	整数 show_raw_time = !!(opt & OUTPUT_RAW_TIMESTAMP);
 	const char *default_color = NULL, *color = NULL, *reset = NULL;
 
 	get_commit_info(suspect->commit, &ci);
@@ -499,70 +499,70 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 
 	cp = blame_nth_line(sb, ent->lno);
 
-	if (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
+	もし (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
 		determine_line_heat(&ci, &default_color);
 		color = default_color;
 		reset = GIT_COLOR_RESET;
 	}
 
-	if (abbrev < MINIMUM_ABBREV)
+	もし (abbrev < MINIMUM_ABBREV)
 		BUG("abbreviation is smaller than minimum length: %d < %d",
 		    abbrev, MINIMUM_ABBREV);
 
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
+	ために (cnt = 0; cnt < ent->num_lines; cnt++) {
 		char ch;
 		size_t length = (opt & OUTPUT_LONG_OBJECT_NAME) ?
 			the_hash_algo->hexsz : (size_t) abbrev;
 
-		if (opt & OUTPUT_COLOR_LINE) {
-			if (cnt > 0 ||
+		もし (opt & OUTPUT_COLOR_LINE) {
+			もし (cnt > 0 ||
 			    (prev_ent &&
 			     oideq(&suspect->commit->object.oid,
 				   &prev_ent->suspect->commit->object.oid))) {
 				color = repeated_meta_color;
 				reset = GIT_COLOR_RESET;
-			} else  {
+			} 否则  {
 				color = default_color ? default_color : NULL;
 				reset = default_color ? GIT_COLOR_RESET : NULL;
 			}
 		}
-		if (color)
+		もし (color)
 			fputs(color, stdout);
 
-		if ((suspect->commit->object.flags & UNINTERESTING) &&
+		もし ((suspect->commit->object.flags & UNINTERESTING) &&
 		    blank_boundary)
 			memset(hex, ' ', strlen(hex));
 		length -= print_marks(stdout, ent, opt);
 
-		printf("%.*s", (int)(length < GIT_MAX_HEXSZ ? length : GIT_MAX_HEXSZ), hex);
-		if (opt & OUTPUT_ANNOTATE_COMPAT) {
+		printf("%.*s", (整数)(length < GIT_MAX_HEXSZ ? length : GIT_MAX_HEXSZ), hex);
+		もし (opt & OUTPUT_ANNOTATE_COMPAT) {
 			const char *name;
-			if (opt & OUTPUT_SHOW_EMAIL)
+			もし (opt & OUTPUT_SHOW_EMAIL)
 				name = ci.author_mail.buf;
-			else
+			否则
 				name = ci.author.buf;
 			printf("\t(%10s\t%10s\t%d)", name,
 			       format_time(ci.author_time, ci.author_tz.buf,
 					   show_raw_time),
 			       ent->lno + 1 + cnt);
-		} else {
-			if (opt & OUTPUT_SHOW_SCORE)
+		} 否则 {
+			もし (opt & OUTPUT_SHOW_SCORE)
 				printf(" %*d %02d",
 				       max_score_digits, ent->score,
 				       ent->suspect->refcnt);
-			if (opt & OUTPUT_SHOW_NAME)
+			もし (opt & OUTPUT_SHOW_NAME)
 				printf(" %-*.*s", longest_file, longest_file,
 				       suspect->path);
-			if (opt & OUTPUT_SHOW_NUMBER)
+			もし (opt & OUTPUT_SHOW_NUMBER)
 				printf(" %*d", max_orig_digits,
 				       ent->s_lno + 1 + cnt);
 
-			if (!(opt & OUTPUT_NO_AUTHOR)) {
+			もし (!(opt & OUTPUT_NO_AUTHOR)) {
 				const char *name;
-				int pad;
-				if (opt & OUTPUT_SHOW_EMAIL)
+				整数 pad;
+				もし (opt & OUTPUT_SHOW_EMAIL)
 					name = ci.author_mail.buf;
-				else
+				否则
 					name = ci.author.buf;
 				pad = longest_author - utf8_strwidth(name);
 				printf(" (%s%*s %10s",
@@ -574,34 +574,34 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 			printf(" %*d) ",
 			       max_digits, ent->lno + 1 + cnt);
 		}
-		if (reset)
+		もし (reset)
 			fputs(reset, stdout);
 		do {
 			ch = *cp++;
 			putchar(ch);
-		} while (ch != '\n' &&
+		} ながら (ch != '\n' &&
 			 cp < sb->final_buf + sb->final_buf_size);
 	}
 
-	if (sb->final_buf_size && cp[-1] != '\n')
+	もし (sb->final_buf_size && cp[-1] != '\n')
 		putchar('\n');
 
 	commit_info_destroy(&ci);
 }
 
-static void output(struct blame_scoreboard *sb, int option)
+static void output(struct blame_scoreboard *sb, 整数 option)
 {
 	struct blame_entry *ent, *prev_ent = NULL;
 
-	if (option & OUTPUT_PORCELAIN) {
-		for (ent = sb->ent; ent; ent = ent->next) {
-			int count = 0;
+	もし (option & OUTPUT_PORCELAIN) {
+		ために (ent = sb->ent; ent; ent = ent->next) {
+			整数 count = 0;
 			struct blame_origin *suspect;
 			struct commit *commit = ent->suspect->commit;
-			if (commit->object.flags & MORE_THAN_ONE_PATH)
+			もし (commit->object.flags & MORE_THAN_ONE_PATH)
 				continue;
-			for (suspect = get_blame_suspects(commit); suspect; suspect = suspect->next) {
-				if (suspect->guilty && count++) {
+			ために (suspect = get_blame_suspects(commit); suspect; suspect = suspect->next) {
+				もし (suspect->guilty && count++) {
 					commit->object.flags |= MORE_THAN_ONE_PATH;
 					break;
 				}
@@ -609,10 +609,10 @@ static void output(struct blame_scoreboard *sb, int option)
 		}
 	}
 
-	for (ent = sb->ent; ent; ent = ent->next) {
-		if (option & OUTPUT_PORCELAIN)
+	ために (ent = sb->ent; ent; ent = ent->next) {
+		もし (option & OUTPUT_PORCELAIN)
 			emit_porcelain(sb, ent, option);
-		else {
+		否则 {
 			emit_other(sb, ent, option, prev_ent);
 			prev_ent = ent;
 		}
@@ -624,99 +624,99 @@ static void output(struct blame_scoreboard *sb, int option)
  * support git's cvsserver that wants to give a linear history
  * to its clients.
  */
-static int read_ancestry(const char *graft_file)
+static 整数 read_ancestry(const char *graft_file)
 {
 	FILE *fp = fopen_or_warn(graft_file, "r");
 	struct strbuf buf = STRBUF_INIT;
-	if (!fp)
-		return -1;
-	while (!strbuf_getwholeline(&buf, fp, '\n')) {
+	もし (!fp)
+		戻る -1;
+	ながら (!strbuf_getwholeline(&buf, fp, '\n')) {
 		/* The format is just "Commit Parent1 Parent2 ...\n" */
 		struct commit_graft *graft = read_graft_line(&buf);
-		if (graft)
+		もし (graft)
 			register_commit_graft(the_repository, graft, 0);
 	}
 	fclose(fp);
 	strbuf_release(&buf);
-	return 0;
+	戻る 0;
 }
 
-static int update_auto_abbrev(int auto_abbrev, struct blame_origin *suspect)
+static 整数 update_auto_abbrev(整数 auto_abbrev, struct blame_origin *suspect)
 {
 	const char *uniq = repo_find_unique_abbrev(the_repository,
 						   &suspect->commit->object.oid,
 						   auto_abbrev);
-	int len = strlen(uniq);
-	if (auto_abbrev < len)
-		return len;
-	return auto_abbrev;
+	整数 len = strlen(uniq);
+	もし (auto_abbrev < len)
+		戻る len;
+	戻る auto_abbrev;
 }
 
 /*
  * How many columns do we need to show line numbers, authors,
  * and filenames?
  */
-static void find_alignment(struct blame_scoreboard *sb, int *option)
+static void find_alignment(struct blame_scoreboard *sb, 整数 *option)
 {
-	int longest_src_lines = 0;
-	int longest_dst_lines = 0;
+	整数 longest_src_lines = 0;
+	整数 longest_dst_lines = 0;
 	unsigned largest_score = 0;
 	struct blame_entry *e;
-	int compute_auto_abbrev = (abbrev < 0);
-	int auto_abbrev = DEFAULT_ABBREV;
+	整数 compute_auto_abbrev = (abbrev < 0);
+	整数 auto_abbrev = DEFAULT_ABBREV;
 	size_t max_marks_count = 0;
 
-	for (e = sb->ent; e; e = e->next) {
+	ために (e = sb->ent; e; e = e->next) {
 		struct blame_origin *suspect = e->suspect;
-		int num;
+		整数 num;
 		size_t marks_count = count_marks(e, *option);
 
-		if (max_marks_count < marks_count)
+		もし (max_marks_count < marks_count)
 			max_marks_count = marks_count;
-		if (compute_auto_abbrev)
+		もし (compute_auto_abbrev)
 			auto_abbrev = update_auto_abbrev(auto_abbrev, suspect);
-		if (strcmp(suspect->path, sb->path))
+		もし (strcmp(suspect->path, sb->path))
 			*option |= OUTPUT_SHOW_NAME;
 		num = strlen(suspect->path);
-		if (longest_file < num)
+		もし (longest_file < num)
 			longest_file = num;
-		if (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
+		もし (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
 			struct commit_info ci = COMMIT_INFO_INIT;
 			suspect->commit->object.flags |= METAINFO_SHOWN;
 			get_commit_info(suspect->commit, &ci);
-			if (*option & OUTPUT_SHOW_EMAIL)
+			もし (*option & OUTPUT_SHOW_EMAIL)
 				num = utf8_strwidth(ci.author_mail.buf);
-			else
+			否则
 				num = utf8_strwidth(ci.author.buf);
-			if (longest_author < num)
+			もし (longest_author < num)
 				longest_author = num;
 			commit_info_destroy(&ci);
 		}
 		num = e->s_lno + e->num_lines;
-		if (longest_src_lines < num)
+		もし (longest_src_lines < num)
 			longest_src_lines = num;
 		num = e->lno + e->num_lines;
-		if (longest_dst_lines < num)
+		もし (longest_dst_lines < num)
 			longest_dst_lines = num;
-		if (largest_score < blame_entry_score(sb, e))
+		もし (largest_score < blame_entry_score(sb, e))
 			largest_score = blame_entry_score(sb, e);
 	}
 	max_orig_digits = decimal_width(longest_src_lines);
 	max_digits = decimal_width(longest_dst_lines);
 	max_score_digits = decimal_width(largest_score);
 
-	if (compute_auto_abbrev)
+	もし (compute_auto_abbrev)
 		abbrev = auto_abbrev;
-	if (abbrev < (int)the_hash_algo->hexsz) {
+	もし (abbrev < (整数)the_hash_algo->hexsz) {
 		abbrev += max_marks_count;
-		if (abbrev > (int)the_hash_algo->hexsz)
+		もし (abbrev > (整数)the_hash_algo->hexsz)
 			abbrev = the_hash_algo->hexsz;
 	}
 }
 
-static void sanity_check_on_fail(struct blame_scoreboard *sb, int baa)
+static void sanity_check_on_fail(struct blame_scoreboard *sb, 整数 baa)
 {
-	int opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_NUMBER | OUTPUT_SHOW_NAME;
+	整数 opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_NUMBER | OUTPUT_SHOW_NAME;
 	find_alignment(sb, &opt);
 	output(sb, opt);
 	die("Baa %d!", baa);
@@ -726,113 +726,113 @@ static unsigned parse_score(const char *arg)
 {
 	char *end;
 	unsigned long score = strtoul(arg, &end, 10);
-	if (*end)
-		return 0;
-	return score;
+	もし (*end)
+		戻る 0;
+	戻る score;
 }
 
 static char *add_prefix(const char *prefix, const char *path)
 {
-	return prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, path);
+	戻る prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, path);
 }
 
-static int git_blame_config(const char *var, const char *value,
+static 整数 git_blame_config(const char *var, const char *value,
 			    const struct config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "blame.showroot")) {
+	もし (!strcmp(var, "blame.showroot")) {
 		show_root = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "blame.blankboundary")) {
+	もし (!strcmp(var, "blame.blankboundary")) {
 		blank_boundary = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "blame.showemail")) {
-		int *output_option = cb;
-		if (git_config_bool(var, value))
+	もし (!strcmp(var, "blame.showemail")) {
+		整数 *output_option = cb;
+		もし (git_config_bool(var, value))
 			*output_option |= OUTPUT_SHOW_EMAIL;
-		else
+		否则
 			*output_option &= ~OUTPUT_SHOW_EMAIL;
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "blame.date")) {
-		if (!value)
-			return config_error_nonbool(var);
+	もし (!strcmp(var, "blame.date")) {
+		もし (!value)
+			戻る config_error_nonbool(var);
 		parse_date_format(value, &blame_date_mode);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "blame.ignorerevsfile")) {
+	もし (!strcmp(var, "blame.ignorerevsfile")) {
 		char *str;
-		int ret;
+		整数 ret;
 
 		ret = git_config_pathname(&str, var, value);
-		if (ret)
-			return ret;
-		if (str)
+		もし (ret)
+			戻る ret;
+		もし (str)
 			string_list_insert(&ignore_revs_file_list, str);
 		free(str);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "blame.markunblamablelines")) {
+	もし (!strcmp(var, "blame.markunblamablelines")) {
 		mark_unblamable_lines = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "blame.markignoredlines")) {
+	もし (!strcmp(var, "blame.markignoredlines")) {
 		mark_ignored_lines = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "color.blame.repeatedlines")) {
-		if (color_parse_mem(value, strlen(value), repeated_meta_color))
+	もし (!strcmp(var, "color.blame.repeatedlines")) {
+		もし (color_parse_mem(value, strlen(value), repeated_meta_color))
 			warning(_("invalid value for '%s': '%s'"),
 				"color.blame.repeatedLines", value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "color.blame.highlightrecent")) {
+	もし (!strcmp(var, "color.blame.highlightrecent")) {
 		parse_color_fields(value);
-		return 0;
+		戻る 0;
 	}
 
-	if (!strcmp(var, "blame.coloring")) {
-		if (!value)
-			return config_error_nonbool(var);
-		if (!strcmp(value, "repeatedLines")) {
+	もし (!strcmp(var, "blame.coloring")) {
+		もし (!value)
+			戻る config_error_nonbool(var);
+		もし (!strcmp(value, "repeatedLines")) {
 			coloring_mode |= OUTPUT_COLOR_LINE;
-		} else if (!strcmp(value, "highlightRecent")) {
+		} 否则 もし (!strcmp(value, "highlightRecent")) {
 			coloring_mode |= OUTPUT_SHOW_AGE_WITH_COLOR;
-		} else if (!strcmp(value, "none")) {
+		} 否则 もし (!strcmp(value, "none")) {
 			coloring_mode &= ~(OUTPUT_COLOR_LINE |
 					    OUTPUT_SHOW_AGE_WITH_COLOR);
-		} else {
+		} 否则 {
 			warning(_("invalid value for '%s': '%s'"),
 				"blame.coloring", value);
-			return 0;
+			戻る 0;
 		}
 	}
 
-	if (!strcmp(var, "diff.algorithm")) {
+	もし (!strcmp(var, "diff.algorithm")) {
 		long diff_algorithm;
-		if (!value)
-			return config_error_nonbool(var);
+		もし (!value)
+			戻る config_error_nonbool(var);
 		diff_algorithm = parse_algorithm_value(value);
-		if (diff_algorithm < 0)
-			return error(_("unknown value for config '%s': %s"),
+		もし (diff_algorithm < 0)
+			戻る error(_("unknown value for config '%s': %s"),
 				     var, value);
 		xdl_opts &= ~XDF_DIFF_ALGORITHM_MASK;
 		xdl_opts |= diff_algorithm;
-		return 0;
+		戻る 0;
 	}
 
-	if (git_diff_heuristic_config(var, value, cb) < 0)
-		return -1;
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	もし (git_diff_heuristic_config(var, value, cb) < 0)
+		戻る -1;
+	もし (userdiff_config(var, value) < 0)
+		戻る -1;
 
-	return git_default_config(var, value, ctx, cb);
+	戻る git_default_config(var, value, ctx, cb);
 }
 
-static int blame_copy_callback(const struct option *option, const char *arg, int unset)
+static 整数 blame_copy_callback(const struct option *option, const char *arg, 整数 unset)
 {
-	int *opt = option->value;
+	整数 *opt = option->value;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -843,89 +843,89 @@ static int blame_copy_callback(const struct option *option, const char *arg, int
 	 * -C -C -C enables copy from existing files for
 	 *          everybody
 	 */
-	if (*opt & PICKAXE_BLAME_COPY_HARDER)
+	もし (*opt & PICKAXE_BLAME_COPY_HARDER)
 		*opt |= PICKAXE_BLAME_COPY_HARDEST;
-	if (*opt & PICKAXE_BLAME_COPY)
+	もし (*opt & PICKAXE_BLAME_COPY)
 		*opt |= PICKAXE_BLAME_COPY_HARDER;
 	*opt |= PICKAXE_BLAME_COPY | PICKAXE_BLAME_MOVE;
 
-	if (arg)
+	もし (arg)
 		blame_copy_score = parse_score(arg);
-	return 0;
+	戻る 0;
 }
 
-static int blame_move_callback(const struct option *option, const char *arg, int unset)
+static 整数 blame_move_callback(const struct option *option, const char *arg, 整数 unset)
 {
-	int *opt = option->value;
+	整数 *opt = option->value;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*opt |= PICKAXE_BLAME_MOVE;
 
-	if (arg)
+	もし (arg)
 		blame_move_score = parse_score(arg);
-	return 0;
+	戻る 0;
 }
 
-static int blame_diff_algorithm_minimal(const struct option *option,
-					const char *arg, int unset)
+static 整数 blame_diff_algorithm_minimal(const struct option *option,
+					const char *arg, 整数 unset)
 {
-	int *opt = option->value;
+	整数 *opt = option->value;
 
 	BUG_ON_OPT_ARG(arg);
 
 	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
-	if (!unset)
+	もし (!unset)
 		*opt |= XDF_NEED_MINIMAL;
 
-	return 0;
+	戻る 0;
 }
 
-static int blame_diff_algorithm_callback(const struct option *option,
-					 const char *arg, int unset)
+static 整数 blame_diff_algorithm_callback(const struct option *option,
+					 const char *arg, 整数 unset)
 {
-	int *opt = option->value;
+	整数 *opt = option->value;
 	long value = parse_algorithm_value(arg);
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (value < 0)
-		return error(_("option diff-algorithm accepts \"myers\", "
+	もし (value < 0)
+		戻る error(_("option diff-algorithm accepts \"myers\", "
 			       "\"minimal\", \"patience\" and \"histogram\""));
 
 	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
 	*opt |= value;
 
-	return 0;
+	戻る 0;
 }
 
-static int is_a_rev(const char *name)
+static 整数 is_a_rev(const char *name)
 {
 	struct object_id oid;
 
-	if (repo_get_oid(the_repository, name, &oid))
-		return 0;
-	return OBJ_NONE < odb_read_object_info(the_repository->objects, &oid, NULL);
+	もし (repo_get_oid(the_repository, name, &oid))
+		戻る 0;
+	戻る OBJ_NONE < odb_read_object_info(the_repository->objects, &oid, NULL);
 }
 
-static int peel_to_commit_oid(struct object_id *oid_ret, void *cbdata)
+static 整数 peel_to_commit_oid(struct object_id *oid_ret, void *cbdata)
 {
 	struct repository *r = ((struct blame_scoreboard *)cbdata)->repo;
 	struct object_id oid;
 
 	oidcpy(&oid, oid_ret);
-	while (1) {
+	ながら (1) {
 		struct object *obj;
-		int kind = odb_read_object_info(r->objects, &oid, NULL);
-		if (kind == OBJ_COMMIT) {
+		整数 kind = odb_read_object_info(r->objects, &oid, NULL);
+		もし (kind == OBJ_COMMIT) {
 			oidcpy(oid_ret, &oid);
-			return 0;
+			戻る 0;
 		}
-		if (kind != OBJ_TAG)
-			return -1;
+		もし (kind != OBJ_TAG)
+			戻る -1;
 		obj = deref_tag(r, parse_object(r, &oid), NULL, 0);
-		if (!obj)
-			return -1;
+		もし (!obj)
+			戻る -1;
 		oidcpy(&oid, &obj->oid);
 	}
 }
@@ -939,22 +939,22 @@ static void build_ignorelist(struct blame_scoreboard *sb,
 
 	oidset_init(&sb->ignore_list, 0);
 	for_each_string_list_item(i, ignore_revs_file_list) {
-		if (!strcmp(i->string, ""))
+		もし (!strcmp(i->string, ""))
 			oidset_clear(&sb->ignore_list);
-		else
+		否则
 			oidset_parse_file_carefully(&sb->ignore_list, i->string,
 						    the_repository->hash_algo,
 						    peel_to_commit_oid, sb);
 	}
 	for_each_string_list_item(i, ignore_rev_list) {
-		if (repo_get_oid_committish(the_repository, i->string, &oid) ||
+		もし (repo_get_oid_committish(the_repository, i->string, &oid) ||
 		    peel_to_commit_oid(&oid, sb))
 			die(_("cannot find revision %s to ignore"), i->string);
 		oidset_insert(&sb->ignore_list, &oid);
 	}
 }
 
-int cmd_blame(int argc,
+整数 cmd_blame(整数 argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo UNUSED)
@@ -969,8 +969,8 @@ int cmd_blame(int argc,
 
 	struct string_list range_list = STRING_LIST_INIT_NODUP;
 	struct string_list ignore_rev_list = STRING_LIST_INIT_NODUP;
-	int output_option = 0, opt = 0;
-	int show_stats = 0;
+	整数 output_option = 0, opt = 0;
+	整数 show_stats = 0;
 	const char *revs_file = NULL;
 	const char *contents_from = NULL;
 	const struct option options[] = {
@@ -1011,9 +1011,9 @@ int cmd_blame(int argc,
 	};
 
 	struct parse_opt_ctx_t ctx;
-	int cmd_is_annotate = !strcmp(argv[0], "annotate");
+	整数 cmd_is_annotate = !strcmp(argv[0], "annotate");
 	struct range_set ranges;
-	unsigned int range_i;
+	unsigned 整数 range_i;
 	long anchor;
 	long num_lines = 0;
 	const char *str_usage = cmd_is_annotate ? annotate_usage : blame_usage;
@@ -1032,7 +1032,7 @@ int cmd_blame(int argc,
 
 	parse_options_start(&ctx, argc, argv, prefix, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
-	for (;;) {
+	ために (;;) {
 		switch (parse_options_step(&ctx, options, opt_usage)) {
 		case PARSE_OPT_NON_OPTION:
 		case PARSE_OPT_UNKNOWN:
@@ -1046,12 +1046,12 @@ int cmd_blame(int argc,
 		case PARSE_OPT_COMPLETE:
 			exit(0);
 		case PARSE_OPT_DONE:
-			if (ctx.argv[0])
+			もし (ctx.argv[0])
 				dashdash_pos = ctx.cpidx;
 			goto parse_done;
 		}
 
-		if (!strcmp(ctx.argv[0], "--reverse")) {
+		もし (!strcmp(ctx.argv[0], "--reverse")) {
 			ctx.argv[0] = "--children";
 			reverse = 1;
 		}
@@ -1067,23 +1067,23 @@ parse_done:
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (incremental || (output_option & OUTPUT_PORCELAIN)) {
-		if (show_progress > 0)
+	もし (incremental || (output_option & OUTPUT_PORCELAIN)) {
+		もし (show_progress > 0)
 			die(_("--progress can't be used with --incremental or porcelain formats"));
 		show_progress = 0;
-	} else if (show_progress < 0)
+	} 否则 もし (show_progress < 0)
 		show_progress = isatty(2);
 
-	if (!abbrev)
+	もし (!abbrev)
 		abbrev = the_hash_algo->hexsz;
 
-	if (revs_file && read_ancestry(revs_file))
+	もし (revs_file && read_ancestry(revs_file))
 		die_errno("reading graft file '%s' failed", revs_file);
 
-	if (cmd_is_annotate) {
+	もし (cmd_is_annotate) {
 		output_option |= OUTPUT_ANNOTATE_COMPAT;
 		blame_date_mode.type = DATE_ISO8601;
-	} else {
+	} 否则 {
 		blame_date_mode = revs.date_mode;
 	}
 
@@ -1132,7 +1132,7 @@ parse_done:
 	}
 	blame_date_width -= 1; /* strip the null */
 
-	if (revs.diffopt.flags.find_copies_harder)
+	もし (revs.diffopt.flags.find_copies_harder)
 		opt |= (PICKAXE_BLAME_COPY | PICKAXE_BLAME_MOVE |
 			PICKAXE_BLAME_COPY_HARDER);
 
@@ -1154,10 +1154,10 @@ parse_done:
 	 * Note that we must strip out <path> from the arguments: we do not
 	 * want the path pruning but we may want "bottom" processing.
 	 */
-	if (dashdash_pos) {
+	もし (dashdash_pos) {
 		switch (argc - dashdash_pos - 1) {
 		case 2: /* (1b) */
-			if (argc != 4)
+			もし (argc != 4)
 				usage_with_options(opt_usage, options);
 			/* reorder for the new way: <rev> -- <path> */
 			argv[1] = argv[3];
@@ -1171,14 +1171,14 @@ parse_done:
 		default:
 			usage_with_options(opt_usage, options);
 		}
-	} else {
-		if (argc < 2)
+	} 否则 {
+		もし (argc < 2)
 			usage_with_options(opt_usage, options);
-		if (argc == 3 && is_a_rev(argv[argc - 1])) { /* (2b) */
+		もし (argc == 3 && is_a_rev(argv[argc - 1])) { /* (2b) */
 			path = add_prefix(prefix, argv[1]);
 			argv[1] = argv[2];
-		} else {	/* (2a) */
-			if (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_tree(the_repository))
+		} 否则 {	/* (2a) */
+			もし (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_tree(the_repository))
 				die("missing <path> to blame");
 			path = add_prefix(prefix, argv[argc - 1]);
 		}
@@ -1187,11 +1187,11 @@ parse_done:
 
 	revs.disable_stdin = 1;
 	setup_revisions(argc, argv, &revs, NULL);
-	if (!revs.pending.nr && is_bare_repository(the_repository)) {
+	もし (!revs.pending.nr && is_bare_repository(the_repository)) {
 		struct commit *head_commit;
 		struct object_id head_oid;
 
-		if (!refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", RESOLVE_REF_READING,
+		もし (!refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", RESOLVE_REF_READING,
 					     &head_oid, NULL) ||
 		    !(head_commit = lookup_commit_reference_gently(revs.repo,
 							     &head_oid, 1)))
@@ -1215,30 +1215,30 @@ parse_done:
 	 * Changed-path Bloom filters are disabled when looking
 	 * for copies.
 	 */
-	if (!(opt & PICKAXE_BLAME_COPY))
+	もし (!(opt & PICKAXE_BLAME_COPY))
 		setup_blame_bloom_data(&sb);
 
 	lno = sb.num_lines;
 
-	if (lno && !range_list.nr)
+	もし (lno && !range_list.nr)
 		string_list_append(&range_list, "1");
 
 	anchor = 1;
 	range_set_init(&ranges, range_list.nr);
-	for (range_i = 0; range_i < range_list.nr; ++range_i) {
+	ために (range_i = 0; range_i < range_list.nr; ++range_i) {
 		long bottom, top;
-		if (parse_range_arg(range_list.items[range_i].string,
+		もし (parse_range_arg(range_list.items[range_i].string,
 				    nth_line_cb, &sb, lno, anchor,
 				    &bottom, &top, sb.path,
 				    the_repository->index))
 			usage(str_usage);
-		if ((!lno && (top || bottom)) || lno < bottom)
+		もし ((!lno && (top || bottom)) || lno < bottom)
 			die(Q_("file %s has only %lu line",
 			       "file %s has only %lu lines",
 			       lno), sb.path, lno);
-		if (bottom < 1)
+		もし (bottom < 1)
 			bottom = 1;
-		if (top < 1 || lno < top)
+		もし (top < 1 || lno < top)
 			top = lno;
 		bottom--;
 		range_set_append_unsafe(&ranges, bottom, top);
@@ -1246,12 +1246,12 @@ parse_done:
 	}
 	sort_and_merge_range_set(&ranges);
 
-	for (range_i = ranges.nr; range_i > 0; --range_i) {
+	ために (range_i = ranges.nr; range_i > 0; --range_i) {
 		const struct range *r = &ranges.ranges[range_i - 1];
 		ent = blame_entry_prepend(ent, r->start, r->end, o);
 		num_lines += (r->end - r->start);
 	}
-	if (!num_lines)
+	もし (!num_lines)
 		num_lines = sb.num_lines;
 
 	o->suspects = ent;
@@ -1264,9 +1264,9 @@ parse_done:
 
 	sb.ent = NULL;
 
-	if (blame_move_score)
+	もし (blame_move_score)
 		sb.move_score = blame_move_score;
-	if (blame_copy_score)
+	もし (blame_copy_score)
 		sb.copy_score = blame_copy_score;
 
 	sb.debug = DEBUG_BLAME;
@@ -1280,7 +1280,7 @@ parse_done:
 
 	sb.found_guilty_entry = &found_guilty_entry;
 	sb.found_guilty_entry_data = &pi;
-	if (show_progress)
+	もし (show_progress)
 		pi.progress = start_delayed_progress(the_repository,
 						     _("Blaming lines"),
 						     num_lines);
@@ -1289,39 +1289,39 @@ parse_done:
 
 	stop_progress(&pi.progress);
 
-	if (!incremental)
+	もし (!incremental)
 		setup_pager(the_repository);
-	else
+	否则
 		goto cleanup;
 
 	blame_sort_final(&sb);
 
 	blame_coalesce(&sb);
 
-	if (!(output_option & (OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR)))
+	もし (!(output_option & (OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR)))
 		output_option |= coloring_mode;
 
-	if (!(output_option & OUTPUT_PORCELAIN)) {
+	もし (!(output_option & OUTPUT_PORCELAIN)) {
 		find_alignment(&sb, &output_option);
-		if (!*repeated_meta_color &&
+		もし (!*repeated_meta_color &&
 		    (output_option & OUTPUT_COLOR_LINE))
 			xsnprintf(repeated_meta_color,
 				  sizeof(repeated_meta_color),
 				  "%s", GIT_COLOR_CYAN);
 	}
-	if (output_option & OUTPUT_ANNOTATE_COMPAT)
+	もし (output_option & OUTPUT_ANNOTATE_COMPAT)
 		output_option &= ~(OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR);
 
 	output(&sb, output_option);
 
-	if (show_stats) {
+	もし (show_stats) {
 		printf("num read blob: %d\n", sb.num_read_blob);
 		printf("num get patch: %d\n", sb.num_get_patch);
 		printf("num commits: %d\n", sb.num_commits);
 	}
 
 cleanup:
-	for (ent = sb.ent; ent; ) {
+	ために (ent = sb.ent; ent; ) {
 		struct blame_entry *e = ent->next;
 		free(ent);
 		ent = e;
@@ -1330,5 +1330,5 @@ cleanup:
 	free(path);
 	cleanup_scoreboard(&sb);
 	release_revisions(&revs);
-	return 0;
+	戻る 0;
 }

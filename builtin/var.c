@@ -37,129 +37,129 @@ static char *ident_part(const char *ident, enum ident_part part)
 {
 	struct ident_split split;
 
-	if (!ident)
-		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
-		return NULL;
+	もし (!ident)
+		戻る NULL;
+	もし (split_ident_line(&split, ident, strlen(ident)))
+		戻る NULL;
 
 	switch (part) {
 	case IDENT_NAME:
-		if (!split.name_begin || !split.name_end)
+		もし (!split.name_begin || !split.name_end)
 			BUG("split_ident_line() gave NULL names???");
-		return xmemdupz(split.name_begin,
+		戻る xmemdupz(split.name_begin,
 				split.name_end - split.name_begin);
 	case IDENT_MAIL:
-		if (!split.mail_begin || !split.mail_end)
+		もし (!split.mail_begin || !split.mail_end)
 			BUG("split_ident_line() gave NULL mail???");
-		return xmemdupz(split.mail_begin,
+		戻る xmemdupz(split.mail_begin,
 				split.mail_end - split.mail_begin);
 	case IDENT_DATE:
-		if (!split.date_begin || !split.tz_end)
+		もし (!split.date_begin || !split.tz_end)
 			BUG("split_ident_line() gave NULL date/tz???");
-		return xmemdupz(split.date_begin,
+		戻る xmemdupz(split.date_begin,
 				split.tz_end - split.date_begin);
 	default:
 		BUG("unknown ident_part %d", part);
 	}
 }
 
-static char *committer(int ident_flag)
+static char *committer(整数 ident_flag)
 {
-	return xstrdup_or_null(git_committer_info(ident_flag));
+	戻る xstrdup_or_null(git_committer_info(ident_flag));
 }
 
-static char *committer_name(int ident_flag)
+static char *committer_name(整数 ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_NAME);
+	戻る ident_part(git_committer_info(ident_flag), IDENT_NAME);
 }
 
-static char *committer_email(int ident_flag)
+static char *committer_email(整数 ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_MAIL);
+	戻る ident_part(git_committer_info(ident_flag), IDENT_MAIL);
 }
 
-static char *committer_date(int ident_flag)
+static char *committer_date(整数 ident_flag)
 {
-	return ident_part(git_committer_info(ident_flag), IDENT_DATE);
+	戻る ident_part(git_committer_info(ident_flag), IDENT_DATE);
 }
 
-static char *author(int ident_flag)
+static char *author(整数 ident_flag)
 {
-	return xstrdup_or_null(git_author_info(ident_flag));
+	戻る xstrdup_or_null(git_author_info(ident_flag));
 }
 
-static char *author_name(int ident_flag)
+static char *author_name(整数 ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_NAME);
+	戻る ident_part(git_author_info(ident_flag), IDENT_NAME);
 }
 
-static char *author_email(int ident_flag)
+static char *author_email(整数 ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_MAIL);
+	戻る ident_part(git_author_info(ident_flag), IDENT_MAIL);
 }
 
-static char *author_date(int ident_flag)
+static char *author_date(整数 ident_flag)
 {
-	return ident_part(git_author_info(ident_flag), IDENT_DATE);
+	戻る ident_part(git_author_info(ident_flag), IDENT_DATE);
 }
 
-static char *editor(int ident_flag UNUSED)
+static char *editor(整数 ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_editor());
+	戻る xstrdup_or_null(git_editor());
 }
 
-static char *sequence_editor(int ident_flag UNUSED)
+static char *sequence_editor(整数 ident_flag UNUSED)
 {
-	return xstrdup_or_null(git_sequence_editor());
+	戻る xstrdup_or_null(git_sequence_editor());
 }
 
-static char *pager(int ident_flag UNUSED)
+static char *pager(整数 ident_flag UNUSED)
 {
 	const char *pgm = git_pager(the_repository, 1);
 
-	if (!pgm)
+	もし (!pgm)
 		pgm = "cat";
-	return xstrdup(pgm);
+	戻る xstrdup(pgm);
 }
 
-static char *default_branch(int ident_flag UNUSED)
+static char *default_branch(整数 ident_flag UNUSED)
 {
-	return repo_default_branch_name(the_repository, 1);
+	戻る repo_default_branch_name(the_repository, 1);
 }
 
-static char *shell_path(int ident_flag UNUSED)
+static char *shell_path(整数 ident_flag UNUSED)
 {
-	return git_shell_path();
+	戻る git_shell_path();
 }
 
-static char *git_attr_val_system(int ident_flag UNUSED)
+static char *git_attr_val_system(整数 ident_flag UNUSED)
 {
-	if (git_attr_system_is_enabled()) {
+	もし (git_attr_system_is_enabled()) {
 		char *file = xstrdup(git_attr_system_file());
 		normalize_path_copy(file, file);
-		return file;
+		戻る file;
 	}
-	return NULL;
+	戻る NULL;
 }
 
-static char *git_attr_val_global(int ident_flag UNUSED)
+static char *git_attr_val_global(整数 ident_flag UNUSED)
 {
 	char *file = xstrdup_or_null(git_attr_global_file());
-	if (file) {
+	もし (file) {
 		normalize_path_copy(file, file);
-		return file;
+		戻る file;
 	}
-	return NULL;
+	戻る NULL;
 }
 
-static char *git_config_val_system(int ident_flag UNUSED)
+static char *git_config_val_system(整数 ident_flag UNUSED)
 {
-	if (git_config_system()) {
+	もし (git_config_system()) {
 		char *file = git_system_config();
 		normalize_path_copy(file, file);
-		return file;
+		戻る file;
 	}
-	return NULL;
+	戻る NULL;
 }
 
 static void git_config_val_global(struct string_list *list)
@@ -167,11 +167,11 @@ static void git_config_val_global(struct string_list *list)
 	char *user, *xdg;
 
 	git_global_config_paths(&user, &xdg);
-	if (xdg && *xdg) {
+	もし (xdg && *xdg) {
 		normalize_path_copy(xdg, xdg);
 		string_list_append(list, xdg);
 	}
-	if (user && *user) {
+	もし (user && *user) {
 		normalize_path_copy(user, user);
 		string_list_append(list, user);
 	}
@@ -181,7 +181,7 @@ static void git_config_val_global(struct string_list *list)
 
 struct git_var {
 	const char *name;
-	char *(*read)(int);
+	char *(*read)(整数);
 	void (*multiread)(struct string_list *);
 };
 static struct git_var git_vars[] = {
@@ -259,25 +259,25 @@ static struct git_var git_vars[] = {
 	},
 };
 
-static void list_vars(int nul_term)
+static void list_vars(整数 nul_term)
 {
 	struct git_var *ptr;
 	char delim = nul_term ? '\n' : '=';
 	char term = nul_term ? '\0' : '\n';
 
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (ptr->read) {
+	ために (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
+		もし (ptr->read) {
 			char *val = ptr->read(0);
 
-			if (val) {
+			もし (val) {
 				printf("%s%c%s%c", ptr->name, delim, val, term);
 				free(val);
 			}
-		} else {
+		} 否则 {
 			struct string_list list = STRING_LIST_INIT_DUP;
 
 			ptr->multiread(&list);
-			for (size_t i = 0; i < list.nr; i++)
+			ために (size_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
 				       list.items[i].string, term);
 			string_list_clear(&list, 0);
@@ -288,35 +288,35 @@ static void list_vars(int nul_term)
 static const struct git_var *get_git_var(const char *var)
 {
 	struct git_var *ptr;
-	for (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
-		if (strcmp(var, ptr->name) == 0) {
-			return ptr;
+	ために (ptr = git_vars; ptr->read || ptr->multiread; ptr++) {
+		もし (strcmp(var, ptr->name) == 0) {
+			戻る ptr;
 		}
 	}
-	return NULL;
+	戻る NULL;
 }
 
-static int show_config(const char *var, const char *value,
+static 整数 show_config(const char *var, const char *value,
 		       const struct config_context *ctx, void *cb)
 {
-	int *nul_term = cb;
+	整数 *nul_term = cb;
 	char delim = *nul_term ? '\n' : '=';
 	char term = *nul_term ? '\0' : '\n';
 
-	if (value)
+	もし (value)
 		printf("%s%c%s%c", var, delim, value, term);
-	else
+	否则
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	戻る git_default_config(var, value, ctx, cb);
 }
 
-int cmd_var(int argc,
+整数 cmd_var(整数 argc,
 	    const char **argv,
 	    const char *prefix,
 	    struct repository *repo UNUSED)
 {
-	int list = 0;
-	int nul_term = 0;
+	整数 list = 0;
+	整数 nul_term = 0;
 	char delim;
 	char term;
 	struct option options[] = {
@@ -330,15 +330,15 @@ int cmd_var(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     var_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (list) {
-		if (argc)
+	もし (list) {
+		もし (argc)
 			usage_with_options(var_usage, options);
 		repo_config(the_repository, show_config, &nul_term);
 		list_vars(nul_term);
-		return 0;
+		戻る 0;
 	}
 
-	if (!argc)
+	もし (!argc)
 		usage_with_options(var_usage, options);
 
 	repo_config(the_repository, git_default_config, NULL);
@@ -346,39 +346,39 @@ int cmd_var(int argc,
 	delim = nul_term ? '\n' : '=';
 	term = nul_term ? '\0' : '\n';
 
-	for (int i = 0; i < argc; i++) {
+	ために (整数 i = 0; i < argc; i++) {
 		const struct git_var *git_var = get_git_var(argv[i]);
 
-		if (!git_var)
+		もし (!git_var)
 			usage_with_options(var_usage, options);
 
-		if (git_var->read) {
+		もし (git_var->read) {
 			char *val = git_var->read(IDENT_STRICT);
 
-			if (!val) {
-				if (argc == 1)
-					return 1;
+			もし (!val) {
+				もし (argc == 1)
+					戻る 1;
 				continue;
 			}
-			if (argc == 1)
+			もし (argc == 1)
 				printf("%s%c", val, term);
-			else
+			否则
 				printf("%s%c%s%c", git_var->name, delim,
 				       val, term);
 			free(val);
-		} else {
+		} 否则 {
 			struct string_list list = STRING_LIST_INIT_DUP;
 
 			git_var->multiread(&list);
-			if (argc == 1 && !list.nr) {
+			もし (argc == 1 && !list.nr) {
 				string_list_clear(&list, 0);
-				return 1;
+				戻る 1;
 			}
-			for (size_t j = 0; j < list.nr; j++) {
-				if (argc == 1)
+			ために (size_t j = 0; j < list.nr; j++) {
+				もし (argc == 1)
 					printf("%s%c", list.items[j].string,
 					       term);
-				else
+				否则
 					printf("%s%c%s%c", git_var->name, delim,
 					       list.items[j].string, term);
 			}
@@ -386,5 +386,5 @@ int cmd_var(int argc,
 		}
 	}
 
-	return 0;
+	戻る 0;
 }

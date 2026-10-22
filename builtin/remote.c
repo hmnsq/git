@@ -95,21 +95,21 @@ static const char * const builtin_remote_seturl_usage[] = {
 #define GET_HEAD_NAMES (1<<1)
 #define GET_PUSH_REF_STATES (1<<2)
 
-static int verbose;
+static 整数 verbose;
 
-static int fetch_remote(const char *name)
+static 整数 fetch_remote(const char *name)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_push(&cmd.args, "fetch");
-	if (verbose)
+	もし (verbose)
 		strvec_push(&cmd.args, "-v");
 	strvec_push(&cmd.args, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	もし (run_command(&cmd))
+		戻る error(_("Could not fetch %s"), name);
+	戻る 0;
 }
 
 enum {
@@ -124,14 +124,14 @@ enum {
 #define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
 
 static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+		       const char *remotename, 整数 mirror, struct strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	もし (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	否则
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
 	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
@@ -141,50 +141,50 @@ static const char mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+static 整数 parse_mirror_opt(const struct option *opt, const char *arg, 整数 not)
 {
 	unsigned *mirror = opt->value;
-	if (not)
+	もし (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	否则 もし (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	否则 もし (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
+	否则 もし (!strcmp(arg, "push"))
 		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	否则
+		戻る error(_("unknown --mirror argument: %s"), arg);
+	戻る 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+static 整数 check_remote_collision(struct remote *remote, void *data)
 {
 	const char *name = data;
 	const char *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	もし (skip_prefix(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	もし (skip_prefix(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	戻る 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
+static 整数 add(整数 argc, const char **argv, const char *prefix,
 	       struct repository *repo UNUSED)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
+	整数 fetch = 0, fetch_tags = TAGS_DEFAULT;
 	unsigned mirror = MIRROR_NONE;
 	struct string_list track = STRING_LIST_INIT_NODUP;
 	const char *master = NULL;
 	struct remote *remote;
 	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
 	const char *name, *url;
-	int result = 0;
+	整数 result = 0;
 
 	struct option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
@@ -204,24 +204,24 @@ static int add(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_add_usage, 0);
 
-	if (argc != 2)
+	もし (argc != 2)
 		usage_with_options(builtin_remote_add_usage, options);
 
-	if (mirror && master)
+	もし (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	もし (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	もし (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(name))
+	もし (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
 	for_each_remote(check_remote_collision, (void *)name);
@@ -229,43 +229,43 @@ static int add(int argc, const char **argv, const char *prefix,
 	strbuf_addf(&buf, "remote.%s.url", name);
 	repo_config_set(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	もし (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		もし (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
+		ために (size_t i = 0; i < track.nr; i++) {
 			add_branch(buf.buf, track.items[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	もし (mirror & MIRROR_PUSH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
 		repo_config_set(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	もし (fetch_tags != TAGS_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
 		repo_config_set(the_repository, buf.buf,
 				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
+	もし (fetch && fetch_remote(name)) {
 		result = 1;
 		goto out;
 	}
 
-	if (master) {
+	もし (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+		もし (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
 			result = error(_("Could not setup master '%s'"), master);
 	}
 
@@ -274,7 +274,7 @@ out:
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	戻る result;
 }
 
 struct branch_info {
@@ -289,11 +289,11 @@ static struct string_list branch_list = STRING_LIST_INIT_DUP;
 static const char *abbrev_ref(const char *name, const char *prefix)
 {
 	skip_prefix(name, prefix, &name);
-	return name;
+	戻る name;
 }
 #define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
+static 整数 config_read_branches(const char *key, const char *value,
 				const struct config_context *ctx UNUSED,
 				void *data UNUSED)
 {
@@ -304,37 +304,37 @@ static int config_read_branches(const char *key, const char *value,
 	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
 	size_t key_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	もし (!starts_with(key, "branch."))
+		戻る 0;
 
 	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	もし (strip_suffix(key, ".remote", &key_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
+	否则 もし (strip_suffix(key, ".merge", &key_len))
 		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	否则 もし (strip_suffix(key, ".rebase", &key_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
+	否则 もし (strip_suffix(key, ".pushremote", &key_len))
 		type = PUSH_REMOTE;
-	else
-		return 0;
+	否则
+		戻る 0;
 
 	name = xmemdupz(key, key_len);
 	item = string_list_insert(&branch_list, name);
 
-	if (!item->util)
+	もし (!item->util)
 		item->util = xcalloc(1, sizeof(struct branch_info));
 	info = item->util;
 	switch (type) {
 	case REMOTE:
-		if (info->remote_name)
+		もし (info->remote_name)
 			warning(_("more than one %s"), orig_key);
 		info->remote_name = xstrdup(value);
 		break;
 	case MERGE: {
 		const char *space = strchr(value, ' ');
 		value = abbrev_branch(value);
-		while (space) {
+		ながら (space) {
 			char *merge;
 			merge = xstrndup(value, space - value);
 			string_list_append(&info->merge, merge);
@@ -350,12 +350,12 @@ static int config_read_branches(const char *key, const char *value,
 		 * truth value with >= REBASE_TRUE.
 		 */
 		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		もし (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
 				  "'true'"), name, value);
 		break;
 	case PUSH_REMOTE:
-		if (info->push_remote_name)
+		もし (info->push_remote_name)
 			warning(_("more than one %s"), orig_key);
 		info->push_remote_name = xstrdup(value);
 		break;
@@ -364,20 +364,20 @@ static int config_read_branches(const char *key, const char *value,
 	}
 
 	free(name);
-	return 0;
+	戻る 0;
 }
 
 static void read_branches(void)
 {
-	if (branch_list.nr)
-		return;
+	もし (branch_list.nr)
+		戻る;
 	repo_config(the_repository, config_read_branches, NULL);
 }
 
 struct ref_states {
 	struct remote *remote;
 	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+	整数 queried;
 };
 
 #define REF_STATES_INIT { \
@@ -389,27 +389,27 @@ struct ref_states {
 	.push = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+static 整数 get_ref_states(const struct ref *remote_refs, struct ref_states *states)
 {
 	struct ref *fetch_map = NULL, **tail = &fetch_map;
 	struct ref *ref, *stale_refs;
-	int i;
+	整数 i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	ために (i = 0; i < states->remote->fetch.nr; i++)
+		もし (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
 			die(_("Could not get fetch map for refspec %s"),
 				states->remote->fetch.items[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
+	ために (ref = fetch_map; ref; ref = ref->next) {
+		もし (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
 			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+		否则 もし (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
 			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
+		否则
 			string_list_append(&states->tracked, abbrev_branch(ref->name));
 	}
 	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
+	ために (ref = stale_refs; ref; ref = ref->next) {
 		struct string_list_item *item =
 			string_list_append(&states->stale, abbrev_branch(ref->name));
 		item->util = xstrdup(ref->name);
@@ -422,12 +422,12 @@ static int get_ref_states(const struct ref *remote_refs, struct ref_states *stat
 	string_list_sort(&states->tracked);
 	string_list_sort(&states->stale);
 
-	return 0;
+	戻る 0;
 }
 
 struct push_info {
 	char *dest;
-	int forced;
+	整数 forced;
 	enum {
 		PUSH_STATUS_CREATE = 0,
 		PUSH_STATUS_DELETE,
@@ -438,24 +438,24 @@ struct push_info {
 	} status;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
+static 整数 get_push_ref_states(const struct ref *remote_refs,
 	struct ref_states *states)
 {
 	struct remote *remote = states->remote;
 	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	もし (remote->mirror)
+		戻る 0;
 
 	local_refs = get_local_heads();
 	push_map = copy_ref_list(remote_refs);
 
 	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
+	ために (ref = push_map; ref; ref = ref->next) {
 		struct string_list_item *item;
 		struct push_info *info;
 
-		if (!ref->peer_ref)
+		もし (!ref->peer_ref)
 			continue;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
@@ -466,47 +466,47 @@ static int get_push_ref_states(const struct ref *remote_refs,
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
+		もし (is_null_oid(&ref->new_oid)) {
 			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
+		} 否则 もし (oideq(&ref->old_oid, &ref->new_oid))
 			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
+		否则 もし (is_null_oid(&ref->old_oid))
 			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		否则 もし (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
 			info->status = PUSH_STATUS_FASTFORWARD;
-		else
+		否则
 			info->status = PUSH_STATUS_OUTOFDATE;
 	}
 	free_refs(local_refs);
 	free_refs(push_map);
-	return 0;
+	戻る 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+static 整数 get_push_ref_states_noquery(struct ref_states *states)
 {
-	int i;
+	整数 i;
 	struct remote *remote = states->remote;
 	struct string_list_item *item;
 	struct push_info *info;
 
-	if (remote->mirror)
-		return 0;
+	もし (remote->mirror)
+		戻る 0;
 
-	if (!remote->push.nr) {
+	もし (!remote->push.nr) {
 		item = string_list_append(&states->push, _("(matching)"));
 		info = item->util = xcalloc(1, sizeof(struct push_info));
 		info->status = PUSH_STATUS_NOTQUERIED;
 		info->dest = xstrdup(item->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
+	ために (i = 0; i < remote->push.nr; i++) {
 		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
+		もし (spec->matching)
 			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
+		否则 もし (strlen(spec->src))
 			item = string_list_append(&states->push, spec->src);
-		else
+		否则
 			item = string_list_append(&states->push, _("(delete)"));
 
 		info = item->util = xcalloc(1, sizeof(struct push_info));
@@ -514,10 +514,10 @@ static int get_push_ref_states_noquery(struct ref_states *states)
 		info->status = PUSH_STATUS_NOTQUERIED;
 		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
 	}
-	return 0;
+	戻る 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+static 整数 get_head_names(const struct ref *remote_refs, struct ref_states *states)
 {
 	struct ref *ref, *matches;
 	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
@@ -531,12 +531,12 @@ static int get_head_names(const struct ref *remote_refs, struct ref_states *stat
 	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
 	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
 				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
+	ために (ref = matches; ref; ref = ref->next)
 		string_list_append(&states->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	戻る 0;
 }
 
 struct known_remote {
@@ -549,19 +549,19 @@ struct known_remotes {
 	struct known_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+static 整数 add_known_remote(struct remote *remote, void *cb_data)
 {
 	struct known_remotes *all = cb_data;
 	struct known_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	もし (!strcmp(all->to_delete->name, remote->name))
+		戻る 0;
 
 	r = xmalloc(sizeof(*r));
 	r->remote = remote;
 	r->next = all->list;
 	all->list = r;
-	return 0;
+	戻る 0;
 }
 
 struct branches_for_remote {
@@ -570,7 +570,7 @@ struct branches_for_remote {
 	struct known_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+static 整数 add_branch_for_removal(const struct reference *ref, void *cb_data)
 {
 	struct branches_for_remote *branches = cb_data;
 	struct refspec_item refspec;
@@ -578,33 +578,33 @@ static int add_branch_for_removal(const struct reference *ref, void *cb_data)
 
 	memset(&refspec, 0, sizeof(refspec));
 	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
+	もし (remote_find_tracking(branches->remote, &refspec))
+		戻る 0;
 	free(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
+	ために (kr = branches->keep->list; kr; kr = kr->next) {
 		memset(&refspec, 0, sizeof(refspec));
 		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
+		もし (!remote_find_tracking(kr->remote, &refspec)) {
 			free(refspec.src);
-			return 0;
+			戻る 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	もし (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		もし (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		戻る 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	戻る 0;
 }
 
 struct rename_info {
@@ -627,11 +627,11 @@ static void compute_renamed_ref(struct rename_info *rename,
 		      rename->new_name, strlen(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
+static 整数 rename_one_reflog_entry(const char *old_refname,
 				   struct object_id *old_oid,
 				   struct object_id *new_oid,
 				   const char *committer,
-				   timestamp_t timestamp, int tz,
+				   timestamp_t timestamp, 整数 tz,
 				   const char *msg, void *cb_data)
 {
 	struct rename_info *rename = cb_data;
@@ -641,11 +641,11 @@ static int rename_one_reflog_entry(const char *old_refname,
 	struct strbuf mail = STRBUF_INIT;
 	struct ident_split ident;
 	const char *date;
-	int error;
+	整数 error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	もし (split_ident_line(&ident, committer, strlen(committer)) < 0) {
 		error = -1;
 		goto out;
 	}
@@ -666,23 +666,23 @@ out:
 	strbuf_release(&identity);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	戻る error;
 }
 
-static int rename_one_reflog(const char *old_refname,
+static 整数 rename_one_reflog(const char *old_refname,
 			     const struct object_id *old_oid,
 			     struct rename_info *rename)
 {
 	struct strbuf new_refname = STRBUF_INIT;
 	struct strbuf message = STRBUF_INIT;
-	int error;
+	整数 error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	もし (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		戻る 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
 					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
+	もし (error < 0)
 		goto out;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
@@ -701,27 +701,27 @@ static int rename_one_reflog(const char *old_refname,
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
 					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+	もし (error < 0)
+		戻る error;
 
 out:
 	strbuf_release(&new_refname);
 	strbuf_release(&message);
-	return error;
+	戻る error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+static 整数 rename_one_ref(const struct reference *ref, void *cb_data)
 {
 	struct strbuf new_referent = STRBUF_INIT;
 	struct strbuf new_refname = STRBUF_INIT;
 	struct rename_info *rename = cb_data;
 	const struct object_id *oid = ref->oid;
 	const char *referent = ref->target;
-	int error;
+	整数 error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	もし (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -737,18 +737,18 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
 				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
+	もし (error < 0)
 		goto out;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
 				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
 				       NULL, rename->err);
-	if (error < 0)
+	もし (error < 0)
 		goto out;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
+	もし (error < 0)
 		goto out;
 
 	display_progress(rename->progress, ++rename->progress_nr);
@@ -756,35 +756,35 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 out:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	戻る error;
 }
 
-static int migrate_file(struct remote *remote)
+static 整数 migrate_file(struct remote *remote)
 {
 	struct strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
+	ために (size_t i = 0; i < remote->url.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
+	ために (整数 i = 0; i < remote->push.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
+	ために (整数 i = 0; i < remote->fetch.nr; i++)
 		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
 #ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
+	もし (remote->origin == REMOTE_REMOTES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
+	否则 もし (remote->origin == REMOTE_BRANCHES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
 #endif /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	戻る 0;
 }
 
 struct push_default_info
@@ -792,25 +792,25 @@ struct push_default_info
 	const char *old_name;
 	enum config_scope scope;
 	struct strbuf origin;
-	int linenr;
+	整数 linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
+static 整数 config_read_push_default(const char *key, const char *value,
 	const struct config_context *ctx, void *cb)
 {
 	const struct key_value_info *kvi = ctx->kvi;
 
 	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
+	もし (strcmp(key, "remote.pushdefault") ||
 	    !value || strcmp(value, info->old_name))
-		return 0;
+		戻る 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	戻る 0;
 }
 
 static void handle_push_default(const char* old_name, const char* new_name)
@@ -822,16 +822,16 @@ static void handle_push_default(const char* old_name, const char* new_name)
 		.linenr = -1,
 	};
 	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	もし (push_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	否则 もし (push_default.scope >= CONFIG_SCOPE_LOCAL) {
+		整数 result = repo_config_set_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		もし (new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		否则 もし (!new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} 否则 もし (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
@@ -853,10 +853,10 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
+static 整数 mv(整数 argc, const char **argv, const char *prefix,
 	      struct repository *repo UNUSED)
 {
-	int show_progress = isatty(2);
+	整数 show_progress = isatty(2);
 	struct option options[] = {
 		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
 		OPT_END()
@@ -867,39 +867,39 @@ static int mv(int argc, const char **argv, const char *prefix,
 	struct rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	整数 refspecs_need_update = 0;
+	整数 result = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	もし (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	もし (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
 		exit(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	もし (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		戻る migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	もし (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
 		exit(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	もし (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+	もし (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
 		result = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
 		goto out;
@@ -907,20 +907,20 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+	ために (整数 i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
 		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
+	もし (refspecs_need_update) {
 		struct refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
+		もし (!rename.transaction)
 			goto out;
 
-		if (show_progress)
+		もし (show_progress)
 			rename.progress = start_delayed_progress(the_repository,
 								 _("Renaming remote references"), 0);
 
@@ -930,34 +930,34 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		もし (result < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
 		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		もし (result < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			もし (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
 			die(NULL);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	もし (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
 		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
+		ために (整数 i = 0; i < oldremote->fetch.nr; i++) {
 			char *ptr;
 
 			strbuf_reset(&buf2);
 			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
 			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			もし (ptr) {
 				strbuf_splice(&buf2,
 					      ptr-buf2.buf + strlen(":refs/remotes/"),
 					      strlen(rename.old_name), rename.new_name,
 					      strlen(rename.new_name));
-			} else
+			} 否则
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
@@ -968,24 +968,24 @@ static int mv(int argc, const char **argv, const char *prefix,
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
+	ために (size_t i = 0; i < branch_list.nr; i++) {
 		struct string_list_item *item = branch_list.items + i;
 		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+		もし (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.remote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		もし (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
+	もし (refspecs_need_update) {
 		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+		もし (result < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
 		stop_progress(&rename.progress);
@@ -1000,10 +1000,10 @@ out:
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	戻る result;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
+static 整数 rm(整数 argc, const char **argv, const char *prefix,
 	      struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -1015,7 +1015,7 @@ static int rm(int argc, const char **argv, const char *prefix,
 	struct string_list branches = STRING_LIST_INIT_DUP;
 	struct string_list skipped = STRING_LIST_INIT_DUP;
 	struct branches_for_remote cb_data;
-	int result;
+	整数 result;
 
 	memset(&cb_data, 0, sizeof(cb_data));
 	cb_data.branches = &branches;
@@ -1024,11 +1024,11 @@ static int rm(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	もし (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	もし (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
 		exit(2);
 	}
@@ -1037,25 +1037,25 @@ static int rm(int argc, const char **argv, const char *prefix,
 	for_each_remote(add_known_remote, &known_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
+	ために (size_t i = 0; i < branch_list.nr; i++) {
 		struct string_list_item *item = branch_list.items + i;
 		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+		もし (info->remote_name && !strcmp(info->remote_name, remote->name)) {
 			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+			ために (k = keys; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
 						item->string, *k);
 				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+				もし (result && result != CONFIG_NOTHING_SET)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		もし (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
 			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			もし (result && result != CONFIG_NOTHING_SET)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1070,28 +1070,28 @@ static int rm(int argc, const char **argv, const char *prefix,
 				   add_branch_for_removal, &cb_data);
 	strbuf_release(&buf);
 
-	if (!result)
+	もし (!result)
 		result = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	もし (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		ために (size_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
 				skipped.items[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	もし (!result) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
+		もし (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
 			result = error(_("Could not remove config section '%s'"), buf.buf);
 			goto out;
 		}
@@ -1100,13 +1100,13 @@ static int rm(int argc, const char **argv, const char *prefix,
 	}
 
 out:
-	for (struct known_remote *r = known_remotes.list; r;) {
+	ために (struct known_remote *r = known_remotes.list; r;) {
 		struct known_remote *next = r->next;
 		free(r);
 		r = next;
 	}
 	strbuf_release(&buf);
-	return result;
+	戻る result;
 }
 
 static void clear_push_info(void *util, const char *string UNUSED)
@@ -1126,35 +1126,35 @@ static void free_remote_ref_states(struct ref_states *states)
 	string_list_clear_func(&states->push, clear_push_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+static 整数 append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
 {
 	struct ref_states *states = cb_data;
 	struct refspec_item refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	もし (ref->flags & REF_ISSYMREF)
+		戻る 0;
 
 	memset(&refspec, 0, sizeof(refspec));
 	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
+	もし (!remote_find_tracking(states->remote, &refspec)) {
 		string_list_append(&states->tracked, abbrev_branch(refspec.src));
 		free(refspec.src);
 	}
 
-	return 0;
+	戻る 0;
 }
 
-static int get_remote_ref_states(const char *name,
+static 整数 get_remote_ref_states(const char *name,
 				 struct ref_states *states,
-				 int query)
+				 整数 query)
 {
 	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	もし (!states->remote)
+		戻る error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
+	もし (query) {
 		struct transport *transport;
 		const struct ref *remote_refs;
 
@@ -1162,28 +1162,28 @@ static int get_remote_ref_states(const char *name,
 		remote_refs = transport_get_remote_refs(transport, NULL);
 
 		states->queried = 1;
-		if (query & GET_REF_STATES)
+		もし (query & GET_REF_STATES)
 			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
+		もし (query & GET_HEAD_NAMES)
 			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
+		もし (query & GET_PUSH_REF_STATES)
 			get_push_ref_states(remote_refs, states);
 		transport_disconnect(transport);
-	} else {
+	} 否则 {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  append_ref_to_tracked_list, states);
 		string_list_sort(&states->tracked);
 		get_push_ref_states_noquery(states);
 	}
 
-	return 0;
+	戻る 0;
 }
 
 struct show_info {
 	struct string_list list;
 	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+	整数 width, width2;
+	整数 any_rebase;
 };
 
 #define SHOW_INFO_INIT { \
@@ -1191,135 +1191,135 @@ struct show_info {
 	.states = REF_STATES_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+static 整数 add_remote_to_show_info(struct string_list_item *item, void *cb_data)
 {
 	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
+	整数 n = strlen(item->string);
+	もし (n > info->width)
 		info->width = n;
 	string_list_insert(&info->list, item->string);
-	return 0;
+	戻る 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+static 整数 show_remote_info_item(struct string_list_item *item, void *cb_data)
 {
 	struct show_info *info = cb_data;
 	struct ref_states *states = &info->states;
 	const char *name = item->string;
 
-	if (states->queried) {
+	もし (states->queried) {
 		const char *fmt = "%s";
 		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+		もし (string_list_has_string(&states->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
 			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+		} 否则 もし (string_list_has_string(&states->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		否则 もし (string_list_has_string(&states->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		否则 もし (string_list_has_string(&states->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		否则
 			arg = _(" ???");
 		printf("    %-*s", info->width, name);
 		printf(fmt, arg);
 		printf("\n");
-	} else
+	} 否则
 		printf("    %s\n", name);
 
-	return 0;
+	戻る 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+static 整数 add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
 {
 	struct show_info *show_info = cb_data;
 	struct ref_states *states = &show_info->states;
 	struct branch_info *branch_info = branch_item->util;
 	struct string_list_item *item;
-	int n;
+	整数 n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
+	もし (!branch_info->merge.nr || !branch_info->remote_name ||
 	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
+		戻る 0;
+	もし ((n = strlen(branch_item->string)) > show_info->width)
 		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	もし (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
 	item = string_list_insert(&show_info->list, branch_item->string);
 	item->util = branch_info;
 
-	return 0;
+	戻る 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+static 整数 show_local_info_item(struct string_list_item *item, void *cb_data)
 {
 	struct show_info *show_info = cb_data;
 	struct branch_info *branch_info = item->util;
 	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	整数 width = show_info->width + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	もし (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
 			item->string);
-		return 0;
+		戻る 0;
 	}
 
 	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
+	もし (branch_info->rebase >= REBASE_TRUE) {
 		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
+		もし (branch_info->rebase == REBASE_INTERACTIVE)
 			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
+		否则 もし (branch_info->rebase == REBASE_MERGES)
 			msg = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
+		否则
 			msg = _("rebases onto remote %s");
 		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
+		戻る 0;
+	} 否则 もし (show_info->any_rebase) {
 		printf_ln(_(" merges with remote %s"), merge->items[0].string);
 		width++;
-	} else {
+	} 否则 {
 		printf_ln(_("merges with remote %s"), merge->items[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
+	ために (size_t i = 1; i < merge->nr; i++)
 		printf(_("%-*s    and with remote %s\n"), width, "",
 		       merge->items[i].string);
 
-	return 0;
+	戻る 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+static 整数 add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
 {
 	struct show_info *show_info = cb_data;
 	struct push_info *push_info = push_item->util;
 	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
+	整数 n;
+	もし ((n = strlen(push_item->string)) > show_info->width)
 		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	もし ((n = strlen(push_info->dest)) > show_info->width2)
 		show_info->width2 = n;
 	item = string_list_append(&show_info->list, push_item->string);
 	item->util = push_item->util;
-	return 0;
+	戻る 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+static 整数 cmp_string_with_push(const void *va, const void *vb)
 {
 	const struct string_list_item *a = va;
 	const struct string_list_item *b = vb;
 	const struct push_info *a_push = a->util;
 	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	整数 cmp = strcmp(a->string, b->string);
+	戻る cmp ? cmp : strcmp(a_push->dest, b_push->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+static 整数 show_push_info_item(struct string_list_item *item, void *cb_data)
 {
 	struct show_info *show_info = cb_data;
 	struct push_info *push_info = item->util;
@@ -1345,83 +1345,83 @@ static int show_push_info_item(struct string_list_item *item, void *cb_data)
 	case PUSH_STATUS_NOTQUERIED:
 		break;
 	}
-	if (status) {
-		if (push_info->forced)
+	もし (status) {
+		もし (push_info->forced)
 			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
 			       show_info->width2, push_info->dest, status);
-		else
+		否则
 			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
 			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
+	} 否则 {
+		もし (push_info->forced)
 			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
 			       push_info->dest);
-		else
+		否则
 			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
 			       push_info->dest);
 	}
-	return 0;
+	戻る 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+static 整数 get_one_entry(struct remote *remote, void *priv)
 {
 	struct string_list *list = priv;
 	struct strbuf remote_info_buf = STRBUF_INIT;
 	struct strvec *url;
 
-	if (remote->url.nr > 0) {
+	もし (remote->url.nr > 0) {
 		struct strbuf promisor_config = STRBUF_INIT;
 		const char *partial_clone_filter = NULL;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		もし (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
 				strbuf_detach(&remote_info_buf, NULL);
-	} else
+	} 否则
 		string_list_append(list, remote->name)->util = NULL;
 	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+	ために (size_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
 				strbuf_detach(&remote_info_buf, NULL);
 	}
 
-	return 0;
+	戻る 0;
 }
 
-static int show_all(void)
+static 整数 show_all(void)
 {
 	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	整数 result;
 
 	result = for_each_remote(get_one_entry, &list);
 
-	if (!result) {
+	もし (!result) {
 		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
+		ために (size_t i = 0; i < list.nr; i++) {
 			struct string_list_item *item = list.items + i;
-			if (verbose)
+			もし (verbose)
 				printf("%s\t%s\n", item->string,
 					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
+			否则 {
+				もし (i && !strcmp((item - 1)->string, item->string))
 					continue;
 				printf("%s\n", item->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	戻る result;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
+static 整数 show(整数 argc, const char **argv, const char *prefix,
 		struct repository *repo UNUSED)
 {
-	int no_query = 0, result = 0, query_flag = 0;
+	整数 no_query = 0, result = 0, query_flag = 0;
 	struct option options[] = {
 		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
 		OPT_END()
@@ -1432,13 +1432,13 @@ static int show(int argc, const char **argv, const char *prefix,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	もし (argc < 1)
+		戻る show_all();
 
-	if (!no_query)
+	もし (!no_query)
 		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
 
-	for (; argc; argc--, argv++) {
+	ために (; argc; argc--, argv++) {
 		size_t i;
 		struct strvec *url;
 
@@ -1447,25 +1447,25 @@ static int show(int argc, const char **argv, const char *prefix,
 		printf_ln(_("* remote %s"), *argv);
 		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
 		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		ために (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		もし (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		もし (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		否则 もし (!info.states.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
+		否则 もし (info.states.heads.nr == 1)
 			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
+		否则 {
 			printf(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
+			ために (i = 0; i < info.states.heads.nr; i++)
 				printf("    %s\n", info.states.heads.items[i].string);
 		}
 
@@ -1475,7 +1475,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
 		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		もし (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
@@ -1487,7 +1487,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		info.width = 0;
 		info.any_rebase = 0;
 		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		もし (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
@@ -1495,13 +1495,13 @@ static int show(int argc, const char **argv, const char *prefix,
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		もし (info.states.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
 		info.width = info.width2 = 0;
 		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
 		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		もし (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
@@ -1512,40 +1512,40 @@ static int show(int argc, const char **argv, const char *prefix,
 		free_remote_ref_states(&info.states);
 	}
 
-	return result;
+	戻る result;
 }
 
 static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
+			struct strbuf *b_local_head, 整数 was_detached) {
 	struct strbuf buf_prefix = STRBUF_INIT;
 	const char *prev_head = NULL;
 
 	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
 	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
 
-	if (prev_head && !strcmp(prev_head, head_name))
+	もし (prev_head && !strcmp(prev_head, head_name))
 		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
 			remote, head_name);
-	else if (prev_head)
+	否则 もし (prev_head)
 		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
 			remote, prev_head, head_name);
-	else if (!b_local_head->len)
+	否则 もし (!b_local_head->len)
 		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
 			remote, head_name);
-	else if (was_detached && b_local_head->len)
+	否则 もし (was_detached && b_local_head->len)
 		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
-	else
+	否则
 		printf(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
 			remote, b_local_head->buf, head_name);
 	strbuf_release(&buf_prefix);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
+static 整数 set_head(整数 argc, const char **argv, const char *prefix,
 		    struct repository *repo UNUSED)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
+	整数 opt_a = 0, opt_d = 0, result = 0, was_detached;
 	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
 		b_local_head = STRBUF_INIT;
 	char *head_name = NULL;
@@ -1563,50 +1563,50 @@ static int set_head(int argc, const char **argv, const char *prefix,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	もし (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
 	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
+	もし (!opt_a && !opt_d && argc == 2) {
 		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
+	} 否则 もし (opt_a && !opt_d && argc == 1) {
 		struct ref_states states = REF_STATES_INIT;
 		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
+		もし (!states.heads.nr)
 			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
+		否则 もし (states.heads.nr > 1) {
 			result |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			ために (size_t i = 0; i < states.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
 					argv[0], states.heads.items[i].string);
-		} else
+		} 否则
 			head_name = xstrdup(states.heads.items[0].string);
 		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
+	} 否则 もし (opt_d && !opt_a && argc == 1) {
+		もし (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
 			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+	} 否则
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
+	もし (!head_name)
 		goto cleanup;
 	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
+	もし (!refs_ref_exists(refs, b_remote_head.buf)) {
 		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
 		goto cleanup;
 	}
 	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
 			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
+	もし (was_detached == -1) {
 		result |= error(_("Could not set up %s"), b_head.buf);
 		goto cleanup;
 	}
-	if (opt_a)
+	もし (opt_a)
 		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
+	もし (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
 		struct strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
@@ -1619,21 +1619,21 @@ cleanup:
 	strbuf_release(&b_head);
 	strbuf_release(&b_remote_head);
 	strbuf_release(&b_local_head);
-	return result;
+	戻る result;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+static 整数 prune_remote(const char *remote, 整数 dry_run)
 {
-	int result = 0;
+	整数 result = 0;
 	struct ref_states states = REF_STATES_INIT;
 	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
 	struct string_list_item *item;
 
 	get_remote_ref_states(remote, &states, GET_REF_STATES);
 
-	if (!states.stale.nr) {
+	もし (!states.stale.nr) {
 		free_remote_ref_states(&states);
-		return 0;
+		戻る 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
@@ -1643,17 +1643,17 @@ static int prune_remote(const char *remote, int dry_run)
 		string_list_append(&refs_to_prune, item->util);
 	string_list_sort(&refs_to_prune);
 
-	if (!dry_run)
+	もし (!dry_run)
 		result |= refs_delete_refs(get_main_ref_store(the_repository),
 					   "remote: prune", &refs_to_prune, 0);
 
 	for_each_string_list_item(item, &states.stale) {
 		const char *refname = item->util;
 
-		if (dry_run)
+		もし (dry_run)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		否则
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
@@ -1663,13 +1663,13 @@ static int prune_remote(const char *remote, int dry_run)
 
 	string_list_clear(&refs_to_prune, 0);
 	free_remote_ref_states(&states);
-	return result;
+	戻る result;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
+static 整数 prune(整数 argc, const char **argv, const char *prefix,
 		 struct repository *repo UNUSED)
 {
-	int dry_run = 0, result = 0;
+	整数 dry_run = 0, result = 0;
 	struct option options[] = {
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT_END()
@@ -1678,37 +1678,37 @@ static int prune(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	もし (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
+	ために (; argc; argc--, argv++)
 		result |= prune_remote(*argv, dry_run);
 
-	return result;
+	戻る result;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
+static 整数 get_remote_default(const char *key, const char *value UNUSED,
 			      const struct config_context *ctx UNUSED,
 			      void *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
+	もし (strcmp(key, "remotes.default") == 0) {
+		整数 *found = priv;
 		*found = 1;
 	}
-	return 0;
+	戻る 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
+static 整数 update(整数 argc, const char **argv, const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int i, prune = -1;
+	整数 i, prune = -1;
 	struct option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
 		OPT_END()
 	};
 	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	整数 default_defined = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_update_usage,
@@ -1716,31 +1716,31 @@ static int update(int argc, const char **argv, const char *prefix,
 
 	strvec_push(&cmd.args, "fetch");
 
-	if (prune != -1)
+	もし (prune != -1)
 		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
+	もし (verbose)
 		strvec_push(&cmd.args, "-v");
 	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
+	もし (argc < 2)
 		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
+	ために (i = 1; i < argc; i++)
 		strvec_push(&cmd.args, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	もし (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
+		もし (!default_defined) {
 			strvec_pop(&cmd.args);
 			strvec_push(&cmd.args, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	戻る run_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+static 整数 remove_all_fetch_refspecs(const char *key)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	戻る repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
@@ -1748,17 +1748,17 @@ static void add_branches(struct remote *remote, const char **branches,
 			 const char *key)
 {
 	const char *remotename = remote->name;
-	int mirror = remote->mirror;
+	整数 mirror = remote->mirror;
 	struct strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
+	ために (; *branches; branches++)
 		add_branch(key, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+static 整数 set_remote_branches(const char *remotename, const char **branches,
+				整数 add_mode)
 {
 	struct strbuf key = STRBUF_INIT;
 	struct remote *remote;
@@ -1766,25 +1766,25 @@ static int set_remote_branches(const char *remotename, const char **branches,
 	strbuf_addf(&key, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	もし (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
+	もし (!add_mode && remove_all_fetch_refspecs(key.buf)) {
 		strbuf_release(&key);
-		return 1;
+		戻る 1;
 	}
 	add_branches(remote, branches, key.buf);
 
 	strbuf_release(&key);
-	return 0;
+	戻る 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
+static 整数 set_branches(整数 argc, const char **argv, const char *prefix,
 			struct repository *repo UNUSED)
 {
-	int add_mode = 0;
+	整数 add_mode = 0;
 	struct option options[] = {
 		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
 		OPT_END()
@@ -1792,19 +1792,19 @@ static int set_branches(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	もし (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
 	argv[argc] = NULL;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	戻る set_remote_branches(argv[0], argv + 1, add_mode);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
+static 整数 get_url(整数 argc, const char **argv, const char *prefix,
 		   struct repository *repo UNUSED)
 {
-	int push_mode = 0, all_mode = 0;
+	整数 push_mode = 0, all_mode = 0;
 	const char *remotename = NULL;
 	struct remote *remote;
 	struct strvec *url;
@@ -1818,34 +1818,34 @@ static int get_url(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	もし (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	もし (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
 	url = push_mode ? push_url_of_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	もし (all_mode) {
+		ために (size_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} 否则 {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	戻る 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
+static 整数 set_url(整数 argc, const char **argv, const char *prefix,
 		   struct repository *repo UNUSED)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
+	整数 push_mode = 0, add_mode = 0, delete_mode = 0;
+	整数 matches = 0, negative_matches = 0;
 	const char *remotename = NULL;
 	const char *newurl = NULL;
 	const char *oldurl = NULL;
@@ -1866,71 +1866,71 @@ static int set_url(int argc, const char **argv, const char *prefix,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	もし (add_mode && delete_mode)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	もし (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	もし (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	もし (delete_mode)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	もし (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
 		exit(2);
 	}
 
-	if (push_mode) {
+	もし (push_mode) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} 否则 {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
+	もし ((!oldurl && !delete_mode) || add_mode) {
+		もし (add_mode)
 			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
+		否则
 			repo_config_set(the_repository, name_buf.buf, newurl);
 		goto out;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	もし (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	ために (size_t i = 0; i < urlset->nr; i++)
+		もし (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
 			matches++;
-		else
+		否则
 			negative_matches++;
-	if (!delete_mode && !matches)
+	もし (!delete_mode && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	もし (delete_mode && !negative_matches && !push_mode)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
+	もし (!delete_mode)
 		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
+	否则
 		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
 out:
 	strbuf_release(&name_buf);
-	return 0;
+	戻る 0;
 }
 
-int cmd_remote(int argc,
+整数 cmd_remote(整数 argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo)
@@ -1955,13 +1955,13 @@ int cmd_remote(int argc,
 	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	もし (fn) {
+		戻る !!fn(argc, argv, prefix, repo);
+	} 否则 {
+		もし (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		戻る !!show_all();
 	}
 }

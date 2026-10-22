@@ -38,12 +38,12 @@ static const char * const cherry_pick_usage[] = {
 
 static const char *action_name(const struct replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
+	戻る opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
 }
 
 static const char * const *revert_or_cherry_pick_usage(struct replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
+	戻る opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
 }
 
 enum empty_action {
@@ -53,41 +53,41 @@ enum empty_action {
 	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
 };
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+static 整数 parse_opt_empty(const struct option *opt, const char *arg, 整数 unset)
 {
-	int *opt_value = opt->value;
+	整数 *opt_value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
+	もし (!strcmp(arg, "stop"))
 		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
+	否则 もし (!strcmp(arg, "drop"))
 		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
+	否则 もし (!strcmp(arg, "keep"))
 		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	否则
+		戻る error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	戻る 0;
 }
 
-static int option_parse_m(const struct option *opt,
-			  const char *arg, int unset)
+static 整数 option_parse_m(const struct option *opt,
+			  const char *arg, 整数 unset)
 {
 	struct replay_opts *replay = opt->value;
 	char *end;
 
-	if (unset) {
+	もし (unset) {
 		replay->mainline = 0;
-		return 0;
+		戻る 0;
 	}
 
 	replay->mainline = strtol(arg, &end, 10);
-	if (*end || replay->mainline <= 0)
-		return error(_("option `%s' expects a number greater than zero"),
+	もし (*end || replay->mainline <= 0)
+		戻る error(_("option `%s' expects a number greater than zero"),
 			     opt->long_name);
 
-	return 0;
+	戻る 0;
 }
 
 LAST_ARG_MUST_BE_NULL
@@ -97,17 +97,17 @@ static void verify_opt_compatible(const char *me, const char *base_opt, ...)
 	va_list ap;
 
 	va_start(ap, base_opt);
-	while ((this_opt = va_arg(ap, const char *))) {
-		if (va_arg(ap, int))
+	ながら ((this_opt = va_arg(ap, const char *))) {
+		もし (va_arg(ap, 整数))
 			break;
 	}
 	va_end(ap);
 
-	if (this_opt)
+	もし (this_opt)
 		die(_("%s: %s cannot be used with %s"), me, this_opt, base_opt);
 }
 
-static int run_sequencer(int argc, const char **argv, const char *prefix,
+static 整数 run_sequencer(整数 argc, const char **argv, const char *prefix,
 			 struct replay_opts *opts)
 {
 	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
@@ -117,7 +117,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	const char *strategy = &sentinel_value;
 	const char *gpg_sign = &sentinel_value;
 	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
-	int cmd = 0, ret;
+	整数 cmd = 0, ret;
 	struct option base_options[] = {
 		OPT_CMDMODE(0, "quit", &cmd, N_("end revert or cherry-pick sequence"), 'q'),
 		OPT_CMDMODE(0, "continue", &cmd, N_("resume revert or cherry-pick sequence"), 'c'),
@@ -148,7 +148,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	};
 	struct option *options = base_options;
 
-	if (opts->action == REPLAY_PICK) {
+	もし (opts->action == REPLAY_PICK) {
 		struct option cp_extra[] = {
 			OPT_BOOL('x', NULL, &opts->record_origin, N_("append commit name")),
 			OPT_BOOL(0, "ff", &opts->allow_ff, N_("allow fast-forward")),
@@ -161,7 +161,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			OPT_END(),
 		};
 		options = parse_options_concat(options, cp_extra);
-	} else if (opts->action == REPLAY_REVERT) {
+	} 否则 もし (opts->action == REPLAY_REVERT) {
 		struct option cp_extra[] = {
 			OPT_BOOL(0, "reference", &opts->commit_use_reference,
 				 N_("use the 'reference' format to refer to commits")),
@@ -177,30 +177,30 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (opts->action == REPLAY_PICK) {
+	もし (opts->action == REPLAY_PICK) {
 		opts->drop_redundant_commits = (empty_opt == DROP_EMPTY_COMMIT);
 		opts->keep_redundant_commits = opts->keep_redundant_commits || (empty_opt == KEEP_EMPTY_COMMIT);
 	}
 
 	/* implies allow_empty */
-	if (opts->keep_redundant_commits)
+	もし (opts->keep_redundant_commits)
 		opts->allow_empty = 1;
 
-	if (cleanup_arg) {
+	もし (cleanup_arg) {
 		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
 	/* Check for incompatible command line arguments */
-	if (cmd) {
+	もし (cmd) {
 		const char *this_operation;
-		if (cmd == 'q')
+		もし (cmd == 'q')
 			this_operation = "--quit";
-		else if (cmd == 'c')
+		否则 もし (cmd == 'c')
 			this_operation = "--continue";
-		else if (cmd == 's')
+		否则 もし (cmd == 's')
 			this_operation = "--skip";
-		else {
+		否则 {
 			assert(cmd == 'a');
 			this_operation = "--abort";
 		}
@@ -220,12 +220,12 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				NULL);
 	}
 
-	if (!opts->strategy && opts->default_strategy) {
+	もし (!opts->strategy && opts->default_strategy) {
 		opts->strategy = opts->default_strategy;
 		opts->default_strategy = NULL;
 	}
 
-	if (opts->allow_ff)
+	もし (opts->allow_ff)
 		verify_opt_compatible(me, "--ff",
 				"--signoff", opts->signoff,
 				"--no-commit", opts->no_commit,
@@ -233,63 +233,63 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				"--edit", opts->edit > 0,
 				NULL);
 
-	if (cmd) {
+	もし (cmd) {
 		opts->revs = NULL;
-	} else {
+	} 否则 {
 		struct setup_revision_opt s_r_opt;
 		opts->revs = xmalloc(sizeof(*opts->revs));
 		repo_init_revisions(the_repository, opts->revs, NULL);
 		opts->revs->no_walk = 1;
 		opts->revs->unsorted_input = 1;
-		if (argc < 2)
+		もし (argc < 2)
 			usage_with_options(usage_str, options);
-		if (!strcmp(argv[1], "-"))
+		もし (!strcmp(argv[1], "-"))
 			argv[1] = "@{-1}";
 		memset(&s_r_opt, 0, sizeof(s_r_opt));
 		s_r_opt.assume_dashdash = 1;
 		argc = setup_revisions(argc, argv, opts->revs, &s_r_opt);
 	}
 
-	if (argc > 1)
+	もし (argc > 1)
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
+	もし (gpg_sign != &sentinel_value) {
 		free(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
+	もし (strategy != &sentinel_value) {
 		free(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}
 	free(options);
 
-	if (cmd == 'q') {
+	もし (cmd == 'q') {
 		ret = sequencer_remove_state(opts);
-		if (!ret)
+		もし (!ret)
 			remove_branch_state(the_repository, 0);
-		return ret;
+		戻る ret;
 	}
-	if (cmd == 'a')
-		return sequencer_rollback(the_repository, opts);
-	if (cmd == 'c')
+	もし (cmd == 'a')
+		戻る sequencer_rollback(the_repository, opts);
+	もし (cmd == 'c')
 		ret = sequencer_continue(the_repository, opts);
-	else if (cmd == 's')
+	否则 もし (cmd == 's')
 		ret = sequencer_skip(the_repository, opts);
-	else
+	否则
 		ret = sequencer_pick_revisions(the_repository, opts);
-	if (!ret)
+	もし (!ret)
 		run_auto_maintenance(the_repository, opts->quiet);
-	return ret;
+	戻る ret;
 }
 
-int cmd_revert(int argc,
+整数 cmd_revert(整数 argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo UNUSED)
 {
 	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	整数 res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -297,19 +297,19 @@ int cmd_revert(int argc,
 	opts.action = REPLAY_REVERT;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	もし (res < 0)
 		die(_("revert failed"));
 	replay_opts_release(&opts);
-	return res;
+	戻る res;
 }
 
-int cmd_cherry_pick(int argc,
+整数 cmd_cherry_pick(整数 argc,
 const char **argv,
 const char *prefix,
 struct repository *repo UNUSED)
 {
 	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	整数 res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -317,8 +317,8 @@ struct repository *repo UNUSED)
 	opts.action = REPLAY_PICK;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	もし (res < 0)
 		die(_("cherry-pick failed"));
 	replay_opts_release(&opts);
-	return res;
+	戻る res;
 }

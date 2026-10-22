@@ -38,23 +38,23 @@
 #define DO_NOREV	2
 #define DO_FLAGS	4
 #define DO_NONFLAGS	8
-static int filter = ~0;
+static 整数 filter = ~0;
 
 static const char *def;
 
 #define NORMAL 0
 #define REVERSED 1
-static int show_type = NORMAL;
+static 整数 show_type = NORMAL;
 
 #define SHOW_SYMBOLIC_ASIS 1
 #define SHOW_SYMBOLIC_FULL 2
-static int symbolic;
-static int abbrev;
-static int abbrev_ref;
-static int abbrev_ref_strict;
-static int output_sq;
+static 整数 symbolic;
+static 整数 abbrev;
+static 整数 abbrev_ref;
+static 整数 abbrev_ref_strict;
+static 整数 output_sq;
 
-static int stuck_long;
+static 整数 stuck_long;
 static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
 
 /*
@@ -62,7 +62,7 @@ static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
  * others are about output format or other details.
  * This sorts it all out.
  */
-static int is_rev_argument(const char *arg)
+static 整数 is_rev_argument(const char *arg)
 {
 	static const char *rev_args[] = {
 		"--all",
@@ -98,57 +98,57 @@ static int is_rev_argument(const char *arg)
 	const char **p = rev_args;
 
 	/* accept -<digit>, like traditional "head" */
-	if ((*arg == '-') && isdigit(arg[1]))
-		return 1;
+	もし ((*arg == '-') && isdigit(arg[1]))
+		戻る 1;
 
-	for (;;) {
+	ために (;;) {
 		const char *str = *p++;
-		int len;
-		if (!str)
-			return 0;
+		整数 len;
+		もし (!str)
+			戻る 0;
 		len = strlen(str);
-		if (!strcmp(arg, str) ||
+		もし (!strcmp(arg, str) ||
 		    (str[len-1] == '=' && !strncmp(arg, str, len)))
-			return 1;
+			戻る 1;
 	}
 }
 
 /* Output argument as a string, either SQ or normal */
 static void show(const char *arg)
 {
-	if (output_sq) {
-		int sq = '\'', ch;
+	もし (output_sq) {
+		整数 sq = '\'', ch;
 
 		putchar(sq);
-		while ((ch = *arg++)) {
-			if (ch == sq)
+		ながら ((ch = *arg++)) {
+			もし (ch == sq)
 				fputs("'\\'", stdout);
 			putchar(ch);
 		}
 		putchar(sq);
 		putchar(' ');
 	}
-	else
+	否则
 		puts(arg);
 }
 
 /* Like show(), but with a negation prefix according to type */
-static void show_with_type(int type, const char *arg)
+static void show_with_type(整数 type, const char *arg)
 {
-	if (type != show_type)
+	もし (type != show_type)
 		putchar('^');
 	show(arg);
 }
 
 /* Output a revision, only if filter allows it */
-static void show_rev(int type, const struct object_id *oid, const char *name)
+static void show_rev(整数 type, const struct object_id *oid, const char *name)
 {
-	if (!(filter & DO_REVS))
-		return;
+	もし (!(filter & DO_REVS))
+		戻る;
 	def = NULL;
 
-	if ((symbolic || abbrev_ref) && name) {
-		if (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
+	もし ((symbolic || abbrev_ref) && name) {
+		もし (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
 			struct object_id discard;
 			char *full;
 
@@ -165,7 +165,7 @@ static void show_rev(int type, const struct object_id *oid, const char *name)
 				 */
 				break;
 			case 1: /* happy */
-				if (abbrev_ref) {
+				もし (abbrev_ref) {
 					char *old = full;
 					full = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 									    full,
@@ -179,63 +179,63 @@ static void show_rev(int type, const struct object_id *oid, const char *name)
 				break;
 			}
 			free(full);
-		} else {
+		} 否则 {
 			show_with_type(type, name);
 		}
 	}
-	else if (abbrev)
+	否则 もし (abbrev)
 		show_with_type(type,
 			       repo_find_unique_abbrev(the_repository, oid, abbrev));
-	else
+	否则
 		show_with_type(type, oid_to_hex(oid));
 }
 
 /* Output a flag, only if filter allows it. */
-static int show_flag(const char *arg)
+static 整数 show_flag(const char *arg)
 {
-	if (!(filter & DO_FLAGS))
-		return 0;
-	if (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
+	もし (!(filter & DO_FLAGS))
+		戻る 0;
+	もし (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
 		show(arg);
-		return 1;
+		戻る 1;
 	}
-	return 0;
+	戻る 0;
 }
 
-static int show_default(void)
+static 整数 show_default(void)
 {
 	const char *s = def;
 
-	if (s) {
+	もし (s) {
 		struct object_id oid;
 
 		def = NULL;
-		if (!repo_get_oid(the_repository, s, &oid)) {
+		もし (!repo_get_oid(the_repository, s, &oid)) {
 			show_rev(NORMAL, &oid, s);
-			return 1;
+			戻る 1;
 		}
 	}
-	return 0;
+	戻る 0;
 }
 
-static int show_reference(const struct reference *ref, void *cb_data UNUSED)
+static 整数 show_reference(const struct reference *ref, void *cb_data UNUSED)
 {
-	if (ref_excluded(&ref_excludes, ref->name))
-		return 0;
+	もし (ref_excluded(&ref_excludes, ref->name))
+		戻る 0;
 	show_rev(NORMAL, ref->oid, ref->name);
-	return 0;
+	戻る 0;
 }
 
-static int anti_reference(const struct reference *ref, void *cb_data UNUSED)
+static 整数 anti_reference(const struct reference *ref, void *cb_data UNUSED)
 {
 	show_rev(REVERSED, ref->oid, ref->name);
-	return 0;
+	戻る 0;
 }
 
-static int show_abbrev(const struct object_id *oid, void *cb_data UNUSED)
+static 整数 show_abbrev(const struct object_id *oid, void *cb_data UNUSED)
 {
 	show_rev(NORMAL, oid, NULL);
-	return 0;
+	戻る 0;
 }
 
 static void show_datestring(const char *flag, const char *datestr)
@@ -243,30 +243,30 @@ static void show_datestring(const char *flag, const char *datestr)
 	char *buffer;
 
 	/* date handling requires both flags and revs */
-	if ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
-		return;
+	もし ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
+		戻る;
 	buffer = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
 	show(buffer);
 	free(buffer);
 }
 
-static int show_file(const char *arg, int output_prefix)
+static 整数 show_file(const char *arg, 整数 output_prefix)
 {
 	show_default();
-	if ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
-		if (output_prefix) {
+	もし ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
+		もし (output_prefix) {
 			const char *prefix = the_repository->prefix;
 			char *fname = prefix_filename(prefix, arg);
 			show(fname);
 			free(fname);
-		} else
+		} 否则
 			show(arg);
-		return 1;
+		戻る 1;
 	}
-	return 0;
+	戻る 0;
 }
 
-static int try_difference(const char *arg)
+static 整数 try_difference(const char *arg)
 {
 	const char *dotdot;
 	struct object_id start_oid;
@@ -274,114 +274,114 @@ static int try_difference(const char *arg)
 	const char *end;
 	const char *start;
 	char *to_free;
-	int symmetric;
+	整数 symmetric;
 	static const char head_by_default[] = "HEAD";
 
-	if (!(dotdot = strstr(arg, "..")))
-		return 0;
+	もし (!(dotdot = strstr(arg, "..")))
+		戻る 0;
 	start = to_free = xmemdupz(arg, dotdot - arg);
 	end = dotdot + 2;
 	symmetric = (*end == '.');
 	end += symmetric;
 
-	if (!*end)
+	もし (!*end)
 		end = head_by_default;
-	if (dotdot == arg)
+	もし (dotdot == arg)
 		start = head_by_default;
 
-	if (start == head_by_default && end == head_by_default &&
+	もし (start == head_by_default && end == head_by_default &&
 	    !symmetric) {
 		/*
 		 * Just ".."?  That is not a range but the
 		 * pathspec for the parent directory.
 		 */
 		free(to_free);
-		return 0;
+		戻る 0;
 	}
 
-	if (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
+	もし (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
 		show_rev(NORMAL, &end_oid, end);
 		show_rev(symmetric ? NORMAL : REVERSED, &start_oid, start);
-		if (symmetric) {
+		もし (symmetric) {
 			struct commit_list *exclude = NULL;
 			struct commit *a, *b;
 			a = lookup_commit_reference(the_repository, &start_oid);
 			b = lookup_commit_reference(the_repository, &end_oid);
-			if (!a || !b) {
+			もし (!a || !b) {
 				free(to_free);
-				return 0;
+				戻る 0;
 			}
-			if (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
+			もし (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
 				exit(128);
-			while (exclude) {
+			ながら (exclude) {
 				struct commit *commit = pop_commit(&exclude);
 				show_rev(REVERSED, &commit->object.oid, NULL);
 			}
 		}
 		free(to_free);
-		return 1;
+		戻る 1;
 	}
 	free(to_free);
-	return 0;
+	戻る 0;
 }
 
-static int try_parent_shorthands(const char *arg)
+static 整数 try_parent_shorthands(const char *arg)
 {
 	const char *mark;
 	struct object_id oid;
 	struct commit *commit;
 	struct commit_list *parents;
-	int parent_number;
-	int include_rev = 0;
-	int include_parents = 0;
-	int exclude_parent = 0;
+	整数 parent_number;
+	整数 include_rev = 0;
+	整数 include_parents = 0;
+	整数 exclude_parent = 0;
 	char *to_free;
 
-	if ((mark = strstr(arg, "^!"))) {
+	もし ((mark = strstr(arg, "^!"))) {
 		include_rev = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^@"))) {
+		もし (mark[2])
+			戻る 0;
+	} 否则 もし ((mark = strstr(arg, "^@"))) {
 		include_parents = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^-"))) {
+		もし (mark[2])
+			戻る 0;
+	} 否则 もし ((mark = strstr(arg, "^-"))) {
 		include_rev = 1;
 		exclude_parent = 1;
 
-		if (mark[2]) {
+		もし (mark[2]) {
 			char *end;
 			exclude_parent = strtoul(mark + 2, &end, 10);
-			if (*end != '\0' || !exclude_parent)
-				return 0;
+			もし (*end != '\0' || !exclude_parent)
+				戻る 0;
 		}
-	} else
-		return 0;
+	} 否则
+		戻る 0;
 
 	arg = to_free = xmemdupz(arg, mark - arg);
-	if (repo_get_oid_committish(the_repository, arg, &oid) ||
+	もし (repo_get_oid_committish(the_repository, arg, &oid) ||
 	    !(commit = lookup_commit_reference(the_repository, &oid))) {
 		free(to_free);
-		return 0;
+		戻る 0;
 	}
 
-	if (exclude_parent &&
+	もし (exclude_parent &&
 	    exclude_parent > commit_list_count(commit->parents)) {
 		free(to_free);
-		return 0;
+		戻る 0;
 	}
 
-	if (include_rev)
+	もし (include_rev)
 		show_rev(NORMAL, &oid, arg);
-	for (parents = commit->parents, parent_number = 1;
+	ために (parents = commit->parents, parent_number = 1;
 	     parents;
 	     parents = parents->next, parent_number++) {
 		char *name = NULL;
 
-		if (exclude_parent && parent_number != exclude_parent)
+		もし (exclude_parent && parent_number != exclude_parent)
 			continue;
 
-		if (symbolic)
+		もし (symbolic)
 			name = xstrfmt("%s^%d", arg, parent_number);
 		show_rev(include_parents ? NORMAL : REVERSED,
 			 &parents->item->object.oid, name);
@@ -389,46 +389,46 @@ static int try_parent_shorthands(const char *arg)
 	}
 
 	free(to_free);
-	return 1;
+	戻る 1;
 }
 
-static int parseopt_dump(const struct option *o, const char *arg, int unset)
+static 整数 parseopt_dump(const struct option *o, const char *arg, 整数 unset)
 {
 	struct strbuf *parsed = o->value;
-	if (unset)
+	もし (unset)
 		strbuf_addf(parsed, " --no-%s", o->long_name);
-	else if (o->short_name && (o->long_name == NULL || !stuck_long))
+	否则 もし (o->short_name && (o->long_name == NULL || !stuck_long))
 		strbuf_addf(parsed, " -%c", o->short_name);
-	else
+	否则
 		strbuf_addf(parsed, " --%s", o->long_name);
-	if (arg) {
-		if (!stuck_long)
+	もし (arg) {
+		もし (!stuck_long)
 			strbuf_addch(parsed, ' ');
-		else if (o->long_name)
+		否则 もし (o->long_name)
 			strbuf_addch(parsed, '=');
 		sq_quote_buf(parsed, arg);
 	}
-	return 0;
+	戻る 0;
 }
 
 static const char *skipspaces(const char *s)
 {
-	while (isspace(*s))
+	ながら (isspace(*s))
 		s++;
-	return s;
+	戻る s;
 }
 
 static char *findspace(const char *s)
 {
-	for (; *s; s++)
-		if (isspace(*s))
-			return (char*)s;
-	return NULL;
+	ために (; *s; s++)
+		もし (isspace(*s))
+			戻る (char*)s;
+	戻る NULL;
 }
 
-static int cmd_parseopt(int argc, const char **argv, const char *prefix)
+static 整数 cmd_parseopt(整数 argc, const char **argv, const char *prefix)
 {
-	int keep_dashdash = 0, stop_at_non_option = 0;
+	整数 keep_dashdash = 0, stop_at_non_option = 0;
 	char const * const parseopt_usage[] = {
 		N_("git rev-parse --parseopt [<options>] -- [<args>...]"),
 		NULL
@@ -452,16 +452,16 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 	strbuf_addstr(&parsed, "set --");
 	argc = parse_options(argc, argv, prefix, parseopt_opts, parseopt_usage,
 	                     PARSE_OPT_KEEP_DASHDASH);
-	if (argc < 1 || strcmp(argv[0], "--"))
+	もし (argc < 1 || strcmp(argv[0], "--"))
 		usage_with_options(parseopt_usage, parseopt_opts);
 
 	/* get the usage up to the first line with a -- on it */
-	for (;;) {
+	ために (;;) {
 		strbuf_reset(&sb);
-		if (strbuf_getline(&sb, stdin) == EOF)
+		もし (strbuf_getline(&sb, stdin) == EOF)
 			die(_("premature end of input"));
-		if (!strcmp("--", sb.buf)) {
-			if (!usage.nr)
+		もし (!strcmp("--", sb.buf)) {
+			もし (!usage.nr)
 				die(_("no usage string given before the `--' separator"));
 			break;
 		}
@@ -470,12 +470,12 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 	}
 
 	/* parse: (<short>|<short>,<long>|<long>)[*=?!]*<arghint>? SP+ <help> */
-	while (strbuf_getline(&sb, stdin) != EOF) {
+	ながら (strbuf_getline(&sb, stdin) != EOF) {
 		const char *s;
 		char *help;
 		struct option *o;
 
-		if (!sb.len)
+		もし (!sb.len)
 			continue;
 
 		ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
@@ -483,7 +483,7 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 
 		o = &opts[opts_nr++];
 		help = findspace(sb.buf);
-		if (!help || sb.buf == help) {
+		もし (!help || sb.buf == help) {
 			o->type = OPTION_GROUP;
 			o->help = xstrdup(skipspaces(sb.buf));
 			continue;
@@ -499,25 +499,25 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 
 		/* name(s) */
 		s = strpbrk(sb.buf, "*=?!");
-		if (!s)
+		もし (!s)
 			s = help;
 
-		if (s == sb.buf)
+		もし (s == sb.buf)
 			die(_("missing opt-spec before option flags"));
 
-		if (s - sb.buf == 1) { /* short option only */
+		もし (s - sb.buf == 1) { /* short option only */
 			o->short_name = *sb.buf;
-		} else if (sb.buf[1] != ',') { /* long option only */
+		} 否则 もし (sb.buf[1] != ',') { /* long option only */
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf), sb.buf);
-		} else {
+						    (整数)(s - sb.buf), sb.buf);
+		} 否则 {
 			o->short_name = *sb.buf;
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf - 2), sb.buf + 2);
+						    (整数)(s - sb.buf - 2), sb.buf + 2);
 		}
 
 		/* flags */
-		while (s < help) {
+		ながら (s < help) {
 			switch (*s++) {
 			case '=':
 				o->flags &= ~PARSE_OPT_NOARG;
@@ -537,7 +537,7 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 			break;
 		}
 
-		if (s < help)
+		もし (s < help)
 			o->argh = xmemdupz(s, help - s);
 	}
 	strbuf_release(&sb);
@@ -558,31 +558,31 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 	strbuf_release(&sb);
 	strvec_clear(&longnames);
 	strvec_clear(&usage);
-	for (size_t i = 0; i < opts_nr; i++) {
+	ために (size_t i = 0; i < opts_nr; i++) {
 		free((char *) opts[i].help);
 		free((char *) opts[i].argh);
 	}
 	free(opts);
-	return 0;
+	戻る 0;
 }
 
-static int cmd_sq_quote(int argc, const char **argv)
+static 整数 cmd_sq_quote(整数 argc, const char **argv)
 {
 	struct strbuf buf = STRBUF_INIT;
 
-	if (argc)
+	もし (argc)
 		sq_quote_argv(&buf, argv);
 	printf("%s\n", buf.buf);
 	strbuf_release(&buf);
 
-	return 0;
+	戻る 0;
 }
 
-static void die_no_single_rev(int quiet)
+static void die_no_single_rev(整数 quiet)
 {
-	if (quiet)
+	もし (quiet)
 		exit(1);
-	else
+	否则
 		die(_("Needed a single revision"));
 }
 
@@ -597,24 +597,24 @@ N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
  * Parse "opt" or "opt=<value>", setting value respectively to either
  * NULL or the string after "=".
  */
-static int opt_with_value(const char *arg, const char *opt, const char **value)
+static 整数 opt_with_value(const char *arg, const char *opt, const char **value)
 {
-	if (skip_prefix(arg, opt, &arg)) {
-		if (!*arg) {
+	もし (skip_prefix(arg, opt, &arg)) {
+		もし (!*arg) {
 			*value = NULL;
-			return 1;
+			戻る 1;
 		}
-		if (*arg++ == '=') {
+		もし (*arg++ == '=') {
 			*value = arg;
-			return 1;
+			戻る 1;
 		}
 	}
-	return 0;
+	戻る 0;
 }
 
 static void handle_ref_opt(const char *pattern, const char *prefix)
 {
-	if (pattern) {
+	もし (pattern) {
 		struct refs_for_each_ref_options opts = {
 			.pattern = pattern,
 			.prefix = prefix,
@@ -622,7 +622,7 @@ static void handle_ref_opt(const char *pattern, const char *prefix)
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
 				      show_reference, NULL, &opts);
-	} else {
+	} 否则 {
 		struct refs_for_each_ref_options opts = {
 			.prefix = prefix,
 			.trim_prefix = strlen(prefix),
@@ -659,7 +659,7 @@ static void print_path(const char *path, const char *prefix,
 	struct strbuf sb = STRBUF_INIT;
 	enum path_format fmt;
 
-	if (format == FORMAT_DEFAULT) {
+	もし (format == FORMAT_DEFAULT) {
 		switch (def) {
 		case DEFAULT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
@@ -675,7 +675,7 @@ static void print_path(const char *path, const char *prefix,
 			fmt = PATH_FORMAT_UNMODIFIED;
 			break;
 		}
-	} else {
+	} 否则 {
 		switch (format) {
 		case FORMAT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
@@ -695,71 +695,71 @@ static void print_path(const char *path, const char *prefix,
 	strbuf_release(&sb);
 }
 
-int cmd_rev_parse(int argc,
+整数 cmd_rev_parse(整数 argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
+	整数 i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
 	const struct git_hash_algo *output_algo = NULL;
 	const struct git_hash_algo *compat = NULL;
-	int did_repo_setup = 0;
-	int has_dashdash = 0;
-	int output_prefix = 0;
+	整数 did_repo_setup = 0;
+	整数 has_dashdash = 0;
+	整数 output_prefix = 0;
 	struct object_id oid;
-	unsigned int flags = 0;
+	unsigned 整数 flags = 0;
 	const char *name = NULL;
 	struct strbuf buf = STRBUF_INIT;
-	int seen_end_of_options = 0;
+	整数 seen_end_of_options = 0;
 	enum format_type format = FORMAT_DEFAULT;
 
 	show_usage_if_asked(argc, argv, builtin_rev_parse_usage);
 
-	if (argc > 1 && !strcmp("--parseopt", argv[1]))
-		return cmd_parseopt(argc - 1, argv + 1, prefix);
+	もし (argc > 1 && !strcmp("--parseopt", argv[1]))
+		戻る cmd_parseopt(argc - 1, argv + 1, prefix);
 
-	if (argc > 1 && !strcmp("--sq-quote", argv[1]))
-		return cmd_sq_quote(argc - 2, argv + 2);
+	もし (argc > 1 && !strcmp("--sq-quote", argv[1]))
+		戻る cmd_sq_quote(argc - 2, argv + 2);
 
-	if (argc > 1 && !strcmp("-h", argv[1]))
+	もし (argc > 1 && !strcmp("-h", argv[1]))
 		usage(builtin_rev_parse_usage);
 
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	ために (i = 1; i < argc; i++) {
+		もし (!strcmp(argv[i], "--")) {
 			has_dashdash = 1;
 			break;
 		}
 	}
 
 	/* No options; just report on whether we're in a git repo or not. */
-	if (argc == 1) {
+	もし (argc == 1) {
 		setup_git_directory(the_repository);
 		repo_config(the_repository, git_default_config, NULL);
-		return 0;
+		戻る 0;
 	}
 
-	for (i = 1; i < argc; i++) {
+	ために (i = 1; i < argc; i++) {
 		const char *arg = argv[i];
 
-		if (as_is) {
-			if (show_file(arg, output_prefix) && as_is < 2)
+		もし (as_is) {
+			もし (show_file(arg, output_prefix) && as_is < 2)
 				verify_filename(the_repository, prefix, arg, 0);
 			continue;
 		}
 
-		if (!seen_end_of_options) {
-			if (!strcmp(arg, "--local-env-vars")) {
-				int i;
-				for (i = 0; local_repo_env[i]; i++)
+		もし (!seen_end_of_options) {
+			もし (!strcmp(arg, "--local-env-vars")) {
+				整数 i;
+				ために (i = 0; local_repo_env[i]; i++)
 					printf("%s\n", local_repo_env[i]);
 				continue;
 			}
-			if (!strcmp(arg, "--resolve-git-dir")) {
+			もし (!strcmp(arg, "--resolve-git-dir")) {
 				const char *gitdir = argv[++i];
-				if (!gitdir)
+				もし (!gitdir)
 					die(_("--resolve-git-dir requires an argument"));
 				gitdir = resolve_gitdir(gitdir);
-				if (!gitdir)
+				もし (!gitdir)
 					die(_("not a gitdir '%s'"), argv[i]);
 				puts(gitdir);
 				continue;
@@ -767,7 +767,7 @@ int cmd_rev_parse(int argc,
 		}
 
 		/* The rest of the options require a git repository. */
-		if (!did_repo_setup) {
+		もし (!did_repo_setup) {
 			prefix = setup_git_directory(the_repository);
 			repo_config(the_repository, git_default_config, NULL);
 			did_repo_setup = 1;
@@ -777,17 +777,17 @@ int cmd_rev_parse(int argc,
 			compat = the_repository->compat_hash_algo;
 		}
 
-		if (!strcmp(arg, "--")) {
+		もし (!strcmp(arg, "--")) {
 			as_is = 2;
 			/* Pass on the "--" if we show anything but files.. */
-			if (filter & (DO_FLAGS | DO_REVS))
+			もし (filter & (DO_FLAGS | DO_REVS))
 				show_file(arg, 0);
 			continue;
 		}
 
-		if (!seen_end_of_options && *arg == '-') {
-			if (!strcmp(arg, "--git-path")) {
-				if (!argv[i + 1])
+		もし (!seen_end_of_options && *arg == '-') {
+			もし (!strcmp(arg, "--git-path")) {
+				もし (!argv[i + 1])
 					die(_("--git-path requires an argument"));
 				print_path(repo_git_path_replace(the_repository, &buf,
 								 "%s", argv[i + 1]), prefix,
@@ -796,145 +796,145 @@ int cmd_rev_parse(int argc,
 				i++;
 				continue;
 			}
-			if (!strcmp(arg,"-n")) {
-				if (++i >= argc)
+			もし (!strcmp(arg,"-n")) {
+				もし (++i >= argc)
 					die(_("-n requires an argument"));
-				if ((filter & DO_FLAGS) && (filter & DO_REVS)) {
+				もし ((filter & DO_FLAGS) && (filter & DO_REVS)) {
 					show(arg);
 					show(argv[i]);
 				}
 				continue;
 			}
-			if (starts_with(arg, "-n")) {
-				if ((filter & DO_FLAGS) && (filter & DO_REVS))
+			もし (starts_with(arg, "-n")) {
+				もし ((filter & DO_FLAGS) && (filter & DO_REVS))
 					show(arg);
 				continue;
 			}
-			if (opt_with_value(arg, "--path-format", &arg)) {
-				if (!arg)
+			もし (opt_with_value(arg, "--path-format", &arg)) {
+				もし (!arg)
 					die(_("--path-format requires an argument"));
-				if (!strcmp(arg, "absolute")) {
+				もし (!strcmp(arg, "absolute")) {
 					format = FORMAT_CANONICAL;
-				} else if (!strcmp(arg, "relative")) {
+				} 否则 もし (!strcmp(arg, "relative")) {
 					format = FORMAT_RELATIVE;
-				} else {
+				} 否则 {
 					die(_("unknown argument to --path-format: %s"), arg);
 				}
 				continue;
 			}
-			if (!strcmp(arg, "--default")) {
+			もし (!strcmp(arg, "--default")) {
 				def = argv[++i];
-				if (!def)
+				もし (!def)
 					die(_("--default requires an argument"));
 				continue;
 			}
-			if (!strcmp(arg, "--prefix")) {
+			もし (!strcmp(arg, "--prefix")) {
 				prefix = argv[++i];
-				if (!prefix)
+				もし (!prefix)
 					die(_("--prefix requires an argument"));
 				FREE_AND_NULL(the_repository->prefix);
 				the_repository->prefix = xstrdup(prefix);
 				output_prefix = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--revs-only")) {
+			もし (!strcmp(arg, "--revs-only")) {
 				filter &= ~DO_NOREV;
 				continue;
 			}
-			if (!strcmp(arg, "--no-revs")) {
+			もし (!strcmp(arg, "--no-revs")) {
 				filter &= ~DO_REVS;
 				continue;
 			}
-			if (!strcmp(arg, "--flags")) {
+			もし (!strcmp(arg, "--flags")) {
 				filter &= ~DO_NONFLAGS;
 				continue;
 			}
-			if (!strcmp(arg, "--no-flags")) {
+			もし (!strcmp(arg, "--no-flags")) {
 				filter &= ~DO_FLAGS;
 				continue;
 			}
-			if (!strcmp(arg, "--verify")) {
+			もし (!strcmp(arg, "--verify")) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
+			もし (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
 				quiet = 1;
 				flags |= GET_OID_QUIETLY;
 				continue;
 			}
-			if (opt_with_value(arg, "--output-object-format", &arg)) {
-				if (!arg)
+			もし (opt_with_value(arg, "--output-object-format", &arg)) {
+				もし (!arg)
 					die(_("no object format specified"));
-				if (!strcmp(arg, the_hash_algo->name) ||
+				もし (!strcmp(arg, the_hash_algo->name) ||
 				    !strcmp(arg, "storage")) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = the_hash_algo;
 					continue;
 				}
-				else if (compat && !strcmp(arg, compat->name)) {
+				否则 もし (compat && !strcmp(arg, compat->name)) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = compat;
 					continue;
 				}
-				else die(_("unsupported object format: %s"), arg);
+				否则 die(_("unsupported object format: %s"), arg);
 			}
-			if (opt_with_value(arg, "--short", &arg)) {
+			もし (opt_with_value(arg, "--short", &arg)) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				abbrev = DEFAULT_ABBREV;
-				if (!arg)
+				もし (!arg)
 					continue;
 				abbrev = strtoul(arg, NULL, 10);
-				if (abbrev < MINIMUM_ABBREV)
+				もし (abbrev < MINIMUM_ABBREV)
 					abbrev = MINIMUM_ABBREV;
-				else if ((int)the_hash_algo->hexsz <= abbrev)
+				否则 もし ((整数)the_hash_algo->hexsz <= abbrev)
 					abbrev = the_hash_algo->hexsz;
 				continue;
 			}
-			if (!strcmp(arg, "--sq")) {
+			もし (!strcmp(arg, "--sq")) {
 				output_sq = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--not")) {
+			もし (!strcmp(arg, "--not")) {
 				show_type ^= REVERSED;
 				continue;
 			}
-			if (!strcmp(arg, "--symbolic")) {
+			もし (!strcmp(arg, "--symbolic")) {
 				symbolic = SHOW_SYMBOLIC_ASIS;
 				continue;
 			}
-			if (!strcmp(arg, "--symbolic-full-name")) {
+			もし (!strcmp(arg, "--symbolic-full-name")) {
 				symbolic = SHOW_SYMBOLIC_FULL;
 				continue;
 			}
-			if (opt_with_value(arg, "--abbrev-ref", &arg)) {
+			もし (opt_with_value(arg, "--abbrev-ref", &arg)) {
 				abbrev_ref = 1;
 				abbrev_ref_strict =
 					repo_settings_get_warn_ambiguous_refs(the_repository);
-				if (arg) {
-					if (!strcmp(arg, "strict"))
+				もし (arg) {
+					もし (!strcmp(arg, "strict"))
 						abbrev_ref_strict = 1;
-					else if (!strcmp(arg, "loose"))
+					否则 もし (!strcmp(arg, "loose"))
 						abbrev_ref_strict = 0;
-					else
+					否则
 						die(_("unknown mode for --abbrev-ref: %s"),
 						    arg);
 				}
 				continue;
 			}
-			if (!strcmp(arg, "--all")) {
+			もし (!strcmp(arg, "--all")) {
 				refs_for_each_ref(get_main_ref_store(the_repository),
 						  show_reference, NULL);
 				clear_ref_exclusions(&ref_excludes);
 				continue;
 			}
-			if (skip_prefix(arg, "--disambiguate=", &arg)) {
+			もし (skip_prefix(arg, "--disambiguate=", &arg)) {
 				repo_for_each_abbrev(the_repository, arg, the_hash_algo,
 						     show_abbrev, NULL);
 				continue;
 			}
-			if (!strcmp(arg, "--bisect")) {
+			もし (!strcmp(arg, "--bisect")) {
 				char *prefix;
 				char *term_bad = NULL;
 				char *term_good = NULL;
@@ -954,73 +954,73 @@ int cmd_rev_parse(int argc,
 				free(term_bad);
 				continue;
 			}
-			if (opt_with_value(arg, "--branches", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			もし (opt_with_value(arg, "--branches", &arg)) {
+				もし (ref_excludes.hidden_refs_configured)
+					戻る error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--branches");
 				handle_ref_opt(arg, "refs/heads/");
 				continue;
 			}
-			if (opt_with_value(arg, "--tags", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			もし (opt_with_value(arg, "--tags", &arg)) {
+				もし (ref_excludes.hidden_refs_configured)
+					戻る error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--tags");
 				handle_ref_opt(arg, "refs/tags/");
 				continue;
 			}
-			if (skip_prefix(arg, "--glob=", &arg)) {
+			もし (skip_prefix(arg, "--glob=", &arg)) {
 				handle_ref_opt(arg, NULL);
 				continue;
 			}
-			if (opt_with_value(arg, "--remotes", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			もし (opt_with_value(arg, "--remotes", &arg)) {
+				もし (ref_excludes.hidden_refs_configured)
+					戻る error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--remotes");
 				handle_ref_opt(arg, "refs/remotes/");
 				continue;
 			}
-			if (skip_prefix(arg, "--exclude=", &arg)) {
+			もし (skip_prefix(arg, "--exclude=", &arg)) {
 				add_ref_exclusion(&ref_excludes, arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--exclude-hidden=", &arg)) {
+			もし (skip_prefix(arg, "--exclude-hidden=", &arg)) {
 				exclude_hidden_refs(&ref_excludes, arg);
 				continue;
 			}
-			if (!strcmp(arg, "--show-toplevel")) {
+			もし (!strcmp(arg, "--show-toplevel")) {
 				const char *work_tree = repo_get_work_tree(the_repository);
-				if (work_tree)
+				もし (work_tree)
 					print_path(work_tree, prefix, format, DEFAULT_UNMODIFIED);
-				else
+				否则
 					die(_("this operation must be run in a work tree"));
 				continue;
 			}
-			if (!strcmp(arg, "--show-superproject-working-tree")) {
+			もし (!strcmp(arg, "--show-superproject-working-tree")) {
 				struct strbuf superproject = STRBUF_INIT;
-				if (get_superproject_working_tree(&superproject))
+				もし (get_superproject_working_tree(&superproject))
 					print_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
 				strbuf_release(&superproject);
 				continue;
 			}
-			if (!strcmp(arg, "--show-prefix")) {
-				if (prefix)
+			もし (!strcmp(arg, "--show-prefix")) {
+				もし (prefix)
 					puts(prefix);
-				else
+				否则
 					putchar('\n');
 				continue;
 			}
-			if (!strcmp(arg, "--show-cdup")) {
+			もし (!strcmp(arg, "--show-cdup")) {
 				const char *pfx = prefix;
-				if (!is_inside_work_tree(the_repository)) {
+				もし (!is_inside_work_tree(the_repository)) {
 					const char *work_tree =
 						repo_get_work_tree(the_repository);
-					if (work_tree)
+					もし (work_tree)
 						printf("%s\n", work_tree);
 					continue;
 				}
-				while (pfx) {
+				ながら (pfx) {
 					pfx = strchr(pfx, '/');
-					if (pfx) {
+					もし (pfx) {
 						pfx++;
 						printf("../");
 					}
@@ -1028,26 +1028,26 @@ int cmd_rev_parse(int argc,
 				putchar('\n');
 				continue;
 			}
-			if (!strcmp(arg, "--git-dir") ||
+			もし (!strcmp(arg, "--git-dir") ||
 			    !strcmp(arg, "--absolute-git-dir")) {
 				const char *gitdir = getenv(GIT_DIR_ENVIRONMENT);
 				char *cwd;
-				int len;
+				整数 len;
 				enum format_type wanted = format;
-				if (arg[2] == 'g') {	/* --git-dir */
-					if (gitdir) {
+				もし (arg[2] == 'g') {	/* --git-dir */
+					もし (gitdir) {
 						print_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
 						continue;
 					}
-					if (!prefix) {
+					もし (!prefix) {
 						print_path(".git", prefix, format, DEFAULT_UNMODIFIED);
 						continue;
 					}
-				} else {		/* --absolute-git-dir */
+				} 否则 {		/* --absolute-git-dir */
 					wanted = FORMAT_CANONICAL;
-					if (!gitdir && !prefix)
+					もし (!gitdir && !prefix)
 						gitdir = ".git";
-					if (gitdir) {
+					もし (gitdir) {
 						struct strbuf realpath = STRBUF_INIT;
 						strbuf_realpath(&realpath, gitdir, 1);
 						puts(realpath.buf);
@@ -1063,132 +1063,132 @@ int cmd_rev_parse(int argc,
 				print_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
 				continue;
 			}
-			if (!strcmp(arg, "--git-common-dir")) {
+			もし (!strcmp(arg, "--git-common-dir")) {
 				print_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
 				continue;
 			}
-			if (!strcmp(arg, "--is-inside-git-dir")) {
+			もし (!strcmp(arg, "--is-inside-git-dir")) {
 				printf("%s\n", is_inside_git_dir(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--is-inside-work-tree")) {
+			もし (!strcmp(arg, "--is-inside-work-tree")) {
 				printf("%s\n", is_inside_work_tree(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--is-bare-repository")) {
+			もし (!strcmp(arg, "--is-bare-repository")) {
 				printf("%s\n", is_bare_repository(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--is-shallow-repository")) {
+			もし (!strcmp(arg, "--is-shallow-repository")) {
 				printf("%s\n",
 						is_repository_shallow(the_repository) ? "true"
 						: "false");
 				continue;
 			}
-			if (!strcmp(arg, "--shared-index-path")) {
-				if (repo_read_index(the_repository) < 0)
+			もし (!strcmp(arg, "--shared-index-path")) {
+				もし (repo_read_index(the_repository) < 0)
 					die(_("Could not read the index"));
-				if (the_repository->index->split_index) {
+				もし (the_repository->index->split_index) {
 					const struct object_id *oid = &the_repository->index->split_index->base_oid;
 					const char *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
 					print_path(path, prefix, format, DEFAULT_RELATIVE);
 				}
 				continue;
 			}
-			if (skip_prefix(arg, "--since=", &arg)) {
+			もし (skip_prefix(arg, "--since=", &arg)) {
 				show_datestring("--max-age=", arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--after=", &arg)) {
+			もし (skip_prefix(arg, "--after=", &arg)) {
 				show_datestring("--max-age=", arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--before=", &arg)) {
+			もし (skip_prefix(arg, "--before=", &arg)) {
 				show_datestring("--min-age=", arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--until=", &arg)) {
+			もし (skip_prefix(arg, "--until=", &arg)) {
 				show_datestring("--min-age=", arg);
 				continue;
 			}
-			if (opt_with_value(arg, "--show-object-format", &arg)) {
+			もし (opt_with_value(arg, "--show-object-format", &arg)) {
 				const char *val = arg ? arg : "storage";
 
-				if (strcmp(val, "storage") &&
+				もし (strcmp(val, "storage") &&
 				    strcmp(val, "compat") &&
 				    strcmp(val, "input") &&
 				    strcmp(val, "output"))
 					die(_("unknown mode for --show-object-format: %s"),
 					    arg);
 
-				if (!strcmp(val, "compat")) {
-					if (the_repository->compat_hash_algo)
+				もし (!strcmp(val, "compat")) {
+					もし (the_repository->compat_hash_algo)
 						puts(the_repository->compat_hash_algo->name);
-					else
+					否则
 						putchar('\n');
-				} else {
+				} 否则 {
 					puts(the_hash_algo->name);
 				}
 				continue;
 			}
-			if (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
+			もし (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
 				puts(ref_storage_format_to_name(the_repository->ref_storage_format));
 				continue;
 			}
-			if (!strcmp(arg, "--end-of-options")) {
+			もし (!strcmp(arg, "--end-of-options")) {
 				seen_end_of_options = 1;
-				if (filter & (DO_FLAGS | DO_REVS))
+				もし (filter & (DO_FLAGS | DO_REVS))
 					show_file(arg, 0);
 				continue;
 			}
-			if (show_flag(arg) && verify)
+			もし (show_flag(arg) && verify)
 				die_no_single_rev(quiet);
 			continue;
 		}
 
 		/* Not a flag argument */
-		if (try_difference(arg))
+		もし (try_difference(arg))
 			continue;
-		if (try_parent_shorthands(arg))
+		もし (try_parent_shorthands(arg))
 			continue;
 		name = arg;
 		type = NORMAL;
-		if (*arg == '^') {
+		もし (*arg == '^') {
 			name++;
 			type = REVERSED;
 		}
-		if (!repo_get_oid_with_flags(the_repository, name, &oid,
+		もし (!repo_get_oid_with_flags(the_repository, name, &oid,
 					     flags)) {
-			if (output_algo)
+			もし (output_algo)
 				repo_oid_to_algop(the_repository, &oid,
 						  output_algo, &oid);
-			if (verify)
+			もし (verify)
 				revs_count++;
-			else
+			否则
 				show_rev(type, &oid, name);
 			continue;
 		}
-		if (verify)
+		もし (verify)
 			die_no_single_rev(quiet);
-		if (has_dashdash)
+		もし (has_dashdash)
 			die(_("bad revision '%s'"), arg);
 		as_is = 1;
-		if (!show_file(arg, output_prefix))
+		もし (!show_file(arg, output_prefix))
 			continue;
 		verify_filename(the_repository, prefix, arg, 1);
 	}
 	strbuf_release(&buf);
-	if (verify) {
-		if (revs_count == 1) {
+	もし (verify) {
+		もし (revs_count == 1) {
 			show_rev(type, &oid, name);
-			return 0;
-		} else if (revs_count == 0 && show_default())
-			return 0;
+			戻る 0;
+		} 否则 もし (revs_count == 0 && show_default())
+			戻る 0;
 		die_no_single_rev(quiet);
-	} else
+	} 否则
 		show_default();
-	return 0;
+	戻る 0;
 }

@@ -31,9 +31,9 @@
 struct rev_name {
 	const char *tip_name;
 	timestamp_t taggerdate;
-	int generation;
-	int distance;
-	int from_tag;
+	整数 generation;
+	整数 distance;
+	整数 from_tag;
 };
 
 define_commit_slab(commit_rev_name, struct rev_name);
@@ -53,13 +53,13 @@ static void disable_cutoff(void)
 static void set_commit_cutoff(struct commit *commit)
 {
 
-	if (cutoff > commit->date)
+	もし (cutoff > commit->date)
 		cutoff = commit->date;
 
-	if (generation_cutoff) {
+	もし (generation_cutoff) {
 		timestamp_t generation = commit_graph_generation(commit);
 
-		if (generation_cutoff > generation)
+		もし (generation_cutoff > generation)
 			generation_cutoff = generation;
 	}
 }
@@ -69,11 +69,11 @@ static void set_commit_cutoff(struct commit *commit)
  */
 static void adjust_cutoff_timestamp_for_slop(void)
 {
-	if (cutoff) {
+	もし (cutoff) {
 		/* check for underflow */
-		if (cutoff > TIME_MIN + CUTOFF_DATE_SLOP)
+		もし (cutoff > TIME_MIN + CUTOFF_DATE_SLOP)
 			cutoff = cutoff - CUTOFF_DATE_SLOP;
-		else
+		否则
 			cutoff = TIME_MIN;
 	}
 }
@@ -81,105 +81,105 @@ static void adjust_cutoff_timestamp_for_slop(void)
 /* Check if a commit is before the cutoff. Prioritize generation numbers
  * first, but use the commit timestamp if we lack generation data.
  */
-static int commit_is_before_cutoff(struct commit *commit)
+static 整数 commit_is_before_cutoff(struct commit *commit)
 {
-	if (generation_cutoff < GENERATION_NUMBER_INFINITY)
-		return generation_cutoff &&
+	もし (generation_cutoff < GENERATION_NUMBER_INFINITY)
+		戻る generation_cutoff &&
 			commit_graph_generation(commit) < generation_cutoff;
 
-	return commit->date < cutoff;
+	戻る commit->date < cutoff;
 }
 
 /* How many generations are maximally preferred over _one_ merge traversal? */
 #define MERGE_TRAVERSAL_WEIGHT 65535
 
-static int is_valid_rev_name(const struct rev_name *name)
+static 整数 is_valid_rev_name(const struct rev_name *name)
 {
-	return name && name->tip_name;
+	戻る name && name->tip_name;
 }
 
 static struct rev_name *get_commit_rev_name(const struct commit *commit)
 {
 	struct rev_name *name = commit_rev_name_peek(&rev_names, commit);
 
-	return is_valid_rev_name(name) ? name : NULL;
+	戻る is_valid_rev_name(name) ? name : NULL;
 }
 
-static int effective_distance(int distance, int generation)
+static 整数 effective_distance(整数 distance, 整数 generation)
 {
-	return distance + (generation > 0 ? MERGE_TRAVERSAL_WEIGHT : 0);
+	戻る distance + (generation > 0 ? MERGE_TRAVERSAL_WEIGHT : 0);
 }
 
-static int is_better_name(struct rev_name *name,
+static 整数 is_better_name(struct rev_name *name,
 			  timestamp_t taggerdate,
-			  int generation,
-			  int distance,
-			  int from_tag)
+			  整数 generation,
+			  整数 distance,
+			  整数 from_tag)
 {
-	int name_distance = effective_distance(name->distance, name->generation);
-	int new_distance = effective_distance(distance, generation);
+	整数 name_distance = effective_distance(name->distance, name->generation);
+	整数 new_distance = effective_distance(distance, generation);
 
 	/* If both are tags, we prefer the nearer one. */
-	if (from_tag && name->from_tag)
-		return name_distance > new_distance;
+	もし (from_tag && name->from_tag)
+		戻る name_distance > new_distance;
 
 	/* Favor a tag over a non-tag. */
-	if (name->from_tag != from_tag)
-		return from_tag;
+	もし (name->from_tag != from_tag)
+		戻る from_tag;
 
 	/*
 	 * We are now looking at two non-tags.  Tiebreak to favor
 	 * shorter hops.
 	 */
-	if (name_distance != new_distance)
-		return name_distance > new_distance;
+	もし (name_distance != new_distance)
+		戻る name_distance > new_distance;
 
 	/* ... or tiebreak to favor older date */
-	if (name->taggerdate != taggerdate)
-		return name->taggerdate > taggerdate;
+	もし (name->taggerdate != taggerdate)
+		戻る name->taggerdate > taggerdate;
 
 	/* keep the current one if we cannot decide */
-	return 0;
+	戻る 0;
 }
 
 static struct rev_name *create_or_update_name(struct commit *commit,
 					      timestamp_t taggerdate,
-					      int generation, int distance,
-					      int from_tag)
+					      整数 generation, 整数 distance,
+					      整数 from_tag)
 {
 	struct rev_name *name = commit_rev_name_at(&rev_names, commit);
 
-	if (is_valid_rev_name(name) &&
+	もし (is_valid_rev_name(name) &&
 	    !is_better_name(name, taggerdate, generation, distance, from_tag))
-		return NULL;
+		戻る NULL;
 
 	name->taggerdate = taggerdate;
 	name->generation = generation;
 	name->distance = distance;
 	name->from_tag = from_tag;
 
-	return name;
+	戻る name;
 }
 
-static char *get_parent_name(const struct rev_name *name, int parent_number,
+static char *get_parent_name(const struct rev_name *name, 整数 parent_number,
 			     struct mem_pool *string_pool)
 {
 	size_t len;
 
 	strip_suffix(name->tip_name, "^0", &len);
-	if (name->generation > 0) {
-		return mem_pool_strfmt(string_pool, "%.*s~%d^%d",
-				       (int)len, name->tip_name,
+	もし (name->generation > 0) {
+		戻る mem_pool_strfmt(string_pool, "%.*s~%d^%d",
+				       (整数)len, name->tip_name,
 				       name->generation, parent_number);
-	} else {
-		return mem_pool_strfmt(string_pool, "%.*s^%d",
-				       (int)len, name->tip_name, parent_number);
+	} 否则 {
+		戻る mem_pool_strfmt(string_pool, "%.*s^%d",
+				       (整数)len, name->tip_name, parent_number);
 	}
 }
 
 static void name_rev(struct commit *start_commit,
 		const char *tip_name, timestamp_t taggerdate,
-		int from_tag, int deref, struct mem_pool *string_pool)
+		整数 from_tag, 整数 deref, struct mem_pool *string_pool)
 {
 	struct commit_stack stack = COMMIT_STACK_INIT;
 	struct commit *commit;
@@ -187,43 +187,43 @@ static void name_rev(struct commit *start_commit,
 	struct rev_name *start_name;
 
 	repo_parse_commit(the_repository, start_commit);
-	if (commit_is_before_cutoff(start_commit))
-		return;
+	もし (commit_is_before_cutoff(start_commit))
+		戻る;
 
 	start_name = create_or_update_name(start_commit, taggerdate, 0, 0,
 					   from_tag);
-	if (!start_name)
-		return;
-	if (deref)
+	もし (!start_name)
+		戻る;
+	もし (deref)
 		start_name->tip_name = mem_pool_strfmt(string_pool, "%s^0",
 						       tip_name);
-	else
+	否则
 		start_name->tip_name = mem_pool_strdup(string_pool, tip_name);
 
 	commit_stack_push(&stack, start_commit);
 
-	while ((commit = commit_stack_pop(&stack))) {
+	ながら ((commit = commit_stack_pop(&stack))) {
 		struct rev_name *name = get_commit_rev_name(commit);
 		struct commit_list *parents;
-		int parent_number = 1;
+		整数 parent_number = 1;
 
 		parents_to_queue.nr = 0;
 
-		for (parents = commit->parents;
+		ために (parents = commit->parents;
 				parents;
 				parents = parents->next, parent_number++) {
 			struct commit *parent = parents->item;
 			struct rev_name *parent_name;
-			int generation, distance;
+			整数 generation, distance;
 
 			repo_parse_commit(the_repository, parent);
-			if (commit_is_before_cutoff(parent))
+			もし (commit_is_before_cutoff(parent))
 				continue;
 
-			if (parent_number > 1) {
+			もし (parent_number > 1) {
 				generation = 0;
 				distance = name->distance + MERGE_TRAVERSAL_WEIGHT;
-			} else {
+			} 否则 {
 				generation = name->generation + 1;
 				distance = name->distance + 1;
 			}
@@ -231,20 +231,20 @@ static void name_rev(struct commit *start_commit,
 			parent_name = create_or_update_name(parent, taggerdate,
 							    generation,
 							    distance, from_tag);
-			if (parent_name) {
-				if (parent_number > 1)
+			もし (parent_name) {
+				もし (parent_number > 1)
 					parent_name->tip_name =
 						get_parent_name(name,
 								parent_number,
 								string_pool);
-				else
+				否则
 					parent_name->tip_name = name->tip_name;
 				commit_stack_push(&parents_to_queue, parent);
 			}
 		}
 
 		/* The first parent must come out first from the stack */
-		while (parents_to_queue.nr)
+		ながら (parents_to_queue.nr)
 			commit_stack_push(&stack,
 					  commit_stack_pop(&parents_to_queue));
 	}
@@ -253,23 +253,23 @@ static void name_rev(struct commit *start_commit,
 	commit_stack_clear(&parents_to_queue);
 }
 
-static int subpath_matches(const char *path, const char *filter)
+static 整数 subpath_matches(const char *path, const char *filter)
 {
 	const char *subpath = path;
 
-	while (subpath) {
-		if (!wildmatch(filter, subpath, 0))
-			return subpath - path;
+	ながら (subpath) {
+		もし (!wildmatch(filter, subpath, 0))
+			戻る subpath - path;
 		subpath = strchr(subpath, '/');
-		if (subpath)
+		もし (subpath)
 			subpath++;
 	}
-	return -1;
+	戻る -1;
 }
 
 struct name_ref_data {
-	int tags_only;
-	int name_only;
+	整数 tags_only;
+	整数 name_only;
 	struct string_list ref_filters;
 	struct string_list exclude_filters;
 };
@@ -292,13 +292,13 @@ enum stdin_mode {
 struct command {
 	enum command_type type;
 	union {
-		int name_only;
+		整数 name_only;
 		struct pretty_format *pretty_format;
 	} u;
 };
 
 static void init_name_rev_command(struct command *cmd,
-				  int name_only)
+				  整数 name_only)
 {
 	cmd->type = NAME_REV;
 	cmd->u.name_only = name_only;
@@ -317,26 +317,26 @@ static struct tip_table {
 		const char *refname;
 		struct commit *commit;
 		timestamp_t taggerdate;
-		unsigned int from_tag:1;
-		unsigned int deref:1;
+		unsigned 整数 from_tag:1;
+		unsigned 整数 deref:1;
 	} *table;
-	int nr;
-	int alloc;
-	int sorted;
+	整数 nr;
+	整数 alloc;
+	整数 sorted;
 } tip_table;
 
 static void add_to_tip_table(const struct object_id *oid, const char *refname,
-			     int shorten_unambiguous, struct commit *commit,
-			     timestamp_t taggerdate, int from_tag, int deref)
+			     整数 shorten_unambiguous, struct commit *commit,
+			     timestamp_t taggerdate, 整数 from_tag, 整数 deref)
 {
 	char *short_refname = NULL;
 
-	if (shorten_unambiguous)
+	もし (shorten_unambiguous)
 		short_refname = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 							     refname, 0);
-	else if (skip_prefix(refname, "refs/heads/", &refname))
+	否则 もし (skip_prefix(refname, "refs/heads/", &refname))
 		; /* refname already advanced */
-	else
+	否则
 		skip_prefix(refname, "refs/", &refname);
 
 	ALLOC_GROW(tip_table.table, tip_table.nr + 1, tip_table.alloc);
@@ -351,53 +351,53 @@ static void add_to_tip_table(const struct object_id *oid, const char *refname,
 	tip_table.sorted = 0;
 }
 
-static int tipcmp(const void *a_, const void *b_)
+static 整数 tipcmp(const void *a_, const void *b_)
 {
 	const struct tip_table_entry *a = a_, *b = b_;
-	return oidcmp(&a->oid, &b->oid);
+	戻る oidcmp(&a->oid, &b->oid);
 }
 
-static int cmp_by_tag_and_age(const void *a_, const void *b_)
+static 整数 cmp_by_tag_and_age(const void *a_, const void *b_)
 {
 	const struct tip_table_entry *a = a_, *b = b_;
-	int cmp;
+	整数 cmp;
 
 	/* Prefer tags. */
 	cmp = b->from_tag - a->from_tag;
-	if (cmp)
-		return cmp;
+	もし (cmp)
+		戻る cmp;
 
 	/* Older is better. */
-	if (a->taggerdate < b->taggerdate)
-		return -1;
-	return a->taggerdate != b->taggerdate;
+	もし (a->taggerdate < b->taggerdate)
+		戻る -1;
+	戻る a->taggerdate != b->taggerdate;
 }
 
-static int name_ref(const struct reference *ref, void *cb_data)
+static 整数 name_ref(const struct reference *ref, void *cb_data)
 {
 	struct object *o = parse_object(the_repository, ref->oid);
 	struct name_ref_data *data = cb_data;
-	int can_abbreviate_output = data->tags_only && data->name_only;
-	int deref = 0;
-	int from_tag = 0;
+	整数 can_abbreviate_output = data->tags_only && data->name_only;
+	整数 deref = 0;
+	整数 from_tag = 0;
 	struct commit *commit = NULL;
 	timestamp_t taggerdate = TIME_MAX;
 
-	if (data->tags_only && !starts_with(ref->name, "refs/tags/"))
-		return 0;
+	もし (data->tags_only && !starts_with(ref->name, "refs/tags/"))
+		戻る 0;
 
-	if (data->exclude_filters.nr) {
+	もし (data->exclude_filters.nr) {
 		struct string_list_item *item;
 
 		for_each_string_list_item(item, &data->exclude_filters) {
-			if (subpath_matches(ref->name, item->string) >= 0)
-				return 0;
+			もし (subpath_matches(ref->name, item->string) >= 0)
+				戻る 0;
 		}
 	}
 
-	if (data->ref_filters.nr) {
+	もし (data->ref_filters.nr) {
 		struct string_list_item *item;
-		int matched = 0;
+		整数 matched = 0;
 
 		/* See if any of the patterns match. */
 		for_each_string_list_item(item, &data->ref_filters) {
@@ -425,42 +425,42 @@ static int name_ref(const struct reference *ref, void *cb_data)
 		}
 
 		/* If none of the patterns matched, stop now */
-		if (!matched)
-			return 0;
+		もし (!matched)
+			戻る 0;
 	}
 
-	while (o && o->type == OBJ_TAG) {
+	ながら (o && o->type == OBJ_TAG) {
 		struct tag *t = (struct tag *) o;
-		if (!t->tagged)
+		もし (!t->tagged)
 			break; /* broken repository */
 		o = parse_object(the_repository, &t->tagged->oid);
 		deref = 1;
 		taggerdate = t->date;
 	}
-	if (o && o->type == OBJ_COMMIT) {
+	もし (o && o->type == OBJ_COMMIT) {
 		commit = (struct commit *)o;
 		from_tag = starts_with(ref->name, "refs/tags/");
-		if (taggerdate == TIME_MAX)
+		もし (taggerdate == TIME_MAX)
 			taggerdate = commit->date;
 	}
 
 	add_to_tip_table(ref->oid, ref->name, can_abbreviate_output,
 			 commit, taggerdate, from_tag, deref);
-	return 0;
+	戻る 0;
 }
 
 static void name_tips(struct mem_pool *string_pool)
 {
-	int i;
+	整数 i;
 
 	/*
 	 * Try to set better names first, so that worse ones spread
 	 * less.
 	 */
 	QSORT(tip_table.table, tip_table.nr, cmp_by_tag_and_age);
-	for (i = 0; i < tip_table.nr; i++) {
+	ために (i = 0; i < tip_table.nr; i++) {
 		struct tip_table_entry *e = &tip_table.table[i];
-		if (e->commit) {
+		もし (e->commit) {
 			name_rev(e->commit, e->refname, e->taggerdate,
 				 e->from_tag, e->deref, string_pool);
 		}
@@ -470,26 +470,26 @@ static void name_tips(struct mem_pool *string_pool)
 static const struct object_id *nth_tip_table_ent(size_t ix, const void *table_)
 {
 	const struct tip_table_entry *table = table_;
-	return &table[ix].oid;
+	戻る &table[ix].oid;
 }
 
 static const char *get_exact_ref_match(const struct object *o)
 {
-	int found;
+	整数 found;
 
-	if (!tip_table.table || !tip_table.nr)
-		return NULL;
+	もし (!tip_table.table || !tip_table.nr)
+		戻る NULL;
 
-	if (!tip_table.sorted) {
+	もし (!tip_table.sorted) {
 		QSORT(tip_table.table, tip_table.nr, tipcmp);
 		tip_table.sorted = 1;
 	}
 
 	found = oid_pos(&o->oid, tip_table.table, tip_table.nr,
 			nth_tip_table_ent);
-	if (0 <= found)
-		return tip_table.table[found].refname;
-	return NULL;
+	もし (0 <= found)
+		戻る tip_table.table[found].refname;
+	戻る NULL;
 }
 
 /* may return a constant string or use "buf" as scratch space */
@@ -498,21 +498,21 @@ static const char *get_rev_name(const struct object *o, struct strbuf *buf)
 	struct rev_name *n;
 	const struct commit *c;
 
-	if (o->type != OBJ_COMMIT)
-		return get_exact_ref_match(o);
+	もし (o->type != OBJ_COMMIT)
+		戻る get_exact_ref_match(o);
 	c = (const struct commit *) o;
 	n = get_commit_rev_name(c);
-	if (!n)
-		return NULL;
+	もし (!n)
+		戻る NULL;
 
-	if (!n->generation) {
-		return n->tip_name;
-	} else {
+	もし (!n->generation) {
+		戻る n->tip_name;
+	} 否则 {
 		strbuf_reset(buf);
 		strbuf_addstr(buf, n->tip_name);
 		strbuf_strip_suffix(buf, "^0");
 		strbuf_addf(buf, "~%d", n->generation);
-		return buf->buf;
+		戻る buf->buf;
 	}
 }
 
@@ -522,7 +522,7 @@ static const char *get_format_rev(const struct commit *c,
 {
 	strbuf_reset(buf);
 
-	if (format_ctx->want.notes) {
+	もし (format_ctx->want.notes) {
 		struct strbuf notebuf = STRBUF_INIT;
 
 		format_display_notes(&c->object.oid, &notebuf,
@@ -534,28 +534,28 @@ static const char *get_format_rev(const struct commit *c,
 	pretty_print_commit(&format_ctx->ctx, c, buf);
 	FREE_AND_NULL(format_ctx->ctx.notes_message);
 
-	return buf->buf;
+	戻る buf->buf;
 }
 
 static void show_name(const struct object *obj,
 		      const char *caller_name,
-		      int always, int allow_undefined, int name_only)
+		      整数 always, 整数 allow_undefined, 整数 name_only)
 {
 	const char *name;
 	const struct object_id *oid = &obj->oid;
 	struct strbuf buf = STRBUF_INIT;
 
-	if (!name_only)
+	もし (!name_only)
 		printf("%s ", caller_name ? caller_name : oid_to_hex(oid));
 	name = get_rev_name(obj, &buf);
-	if (name)
+	もし (name)
 		printf("%s\n", name);
-	else if (allow_undefined)
+	否则 もし (allow_undefined)
 		printf("undefined\n");
-	else if (always)
+	否则 もし (always)
 		printf("%s\n",
 		       repo_find_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
-	else
+	否则
 		die("cannot describe '%s'", oid_to_hex(oid));
 	strbuf_release(&buf);
 }
@@ -570,22 +570,22 @@ static char const * const name_rev_usage[] = {
 static void name_rev_line(char *p, struct command *cmd)
 {
 	struct strbuf buf = STRBUF_INIT;
-	int counter = 0;
+	整数 counter = 0;
 	char *p_start;
 	const unsigned hexsz = the_hash_algo->hexsz;
 
-	for (p_start = p; *p; p++) {
+	ために (p_start = p; *p; p++) {
 #define ishex(x) (isdigit((x)) || ((x) >= 'a' && (x) <= 'f'))
-		if (!ishex(*p)) {
+		もし (!ishex(*p)) {
 			counter = 0;
-		} else if (++counter == hexsz &&
+		} 否则 もし (++counter == hexsz &&
 			   !ishex(*(p + 1))) {
 			struct object_id oid;
 			const char *name = NULL;
 			char c = *(p + 1);
-			int p_len = p - p_start + 1;
+			整数 p_len = p - p_start + 1;
 			struct object *o = NULL;
-			int oid_ret = 1;
+			整数 oid_ret = 1;
 
 			counter = 0;
 
@@ -595,27 +595,27 @@ static void name_rev_line(char *p, struct command *cmd)
 
 			switch (cmd->type) {
 			case NAME_REV:
-				if (!oid_ret)
+				もし (!oid_ret)
 					o = lookup_object(the_repository, &oid);
-				if (o)
+				もし (o)
 					name = get_rev_name(o, &buf);
-				if (!name)
+				もし (!name)
 					continue;
-				if (cmd->u.name_only)
+				もし (cmd->u.name_only)
 					printf("%.*s%s", p_len - hexsz, p_start, name);
-				else
+				否则
 					printf("%.*s (%s)", p_len, p_start, name);
 				break;
 			case FORMAT_REV:
-				if (!oid_ret)
+				もし (!oid_ret)
 					o = parse_object(the_repository, &oid);
-				if (o && o->type == OBJ_COMMIT)
+				もし (o && o->type == OBJ_COMMIT)
 					name = get_format_rev((const struct commit *)o,
 							      cmd->u.pretty_format,
 							      &buf);
-				if (name)
+				もし (name)
 					printf("%.*s%s", p_len - hexsz, p_start, name);
-				else
+				否则
 					printf("%.*s", p_len, p_start);
 				break;
 			default:
@@ -627,13 +627,13 @@ static void name_rev_line(char *p, struct command *cmd)
 	}
 
 	/* flush */
-	if (p_start != p)
+	もし (p_start != p)
 		fwrite(p_start, p - p_start, 1, stdout);
 
 	strbuf_release(&buf);
 }
 
-int cmd_name_rev(int argc,
+整数 cmd_name_rev(整数 argc,
 		 const char **argv,
 		 const char *prefix,
 		 struct repository *repo UNUSED)
@@ -642,9 +642,9 @@ int cmd_name_rev(int argc,
 	struct object_array revs = OBJECT_ARRAY_INIT;
 
 #ifndef WITH_BREAKING_CHANGES
-	int transform_stdin = 0;
+	整数 transform_stdin = 0;
 #endif
-	int all = 0, annotate_stdin = 0, allow_undefined = 1, always = 0, peel_tag = 0;
+	整数 all = 0, annotate_stdin = 0, allow_undefined = 1, always = 0, peel_tag = 0;
 	struct name_ref_data data = { 0, 0, STRING_LIST_INIT_NODUP, STRING_LIST_INIT_NODUP };
 	struct command cmd;
 	struct option opts[] = {
@@ -679,7 +679,7 @@ int cmd_name_rev(int argc,
 	init_name_rev_command(&cmd, data.name_only);
 
 #ifndef WITH_BREAKING_CHANGES
-	if (transform_stdin) {
+	もし (transform_stdin) {
 		warning("--stdin is deprecated. Please use --annotate-stdin instead, "
 					"which is functionally equivalent.\n"
 					"This option will be removed in a future release.");
@@ -687,19 +687,19 @@ int cmd_name_rev(int argc,
 	}
 #endif
 
-	if (all + annotate_stdin + !!argc > 1) {
+	もし (all + annotate_stdin + !!argc > 1) {
 		error("Specify either a list, or --all, not both!");
 		usage_with_options(name_rev_usage, opts);
 	}
-	if (all || annotate_stdin)
+	もし (all || annotate_stdin)
 		disable_cutoff();
 
-	for (; argc; argc--, argv++) {
+	ために (; argc; argc--, argv++) {
 		struct object_id oid;
 		struct object *object;
 		struct commit *commit;
 
-		if (repo_get_oid(the_repository, *argv, &oid)) {
+		もし (repo_get_oid(the_repository, *argv, &oid)) {
 			fprintf(stderr, "Could not get sha1 for %s. Skipping.\n",
 					*argv);
 			continue;
@@ -707,24 +707,24 @@ int cmd_name_rev(int argc,
 
 		commit = NULL;
 		object = parse_object(the_repository, &oid);
-		if (object) {
+		もし (object) {
 			struct object *peeled = deref_tag(the_repository,
 							  object, *argv, 0);
-			if (peeled && peeled->type == OBJ_COMMIT)
+			もし (peeled && peeled->type == OBJ_COMMIT)
 				commit = (struct commit *)peeled;
 		}
 
-		if (!object) {
+		もし (!object) {
 			fprintf(stderr, "Could not get object for %s. Skipping.\n",
 					*argv);
 			continue;
 		}
 
-		if (commit)
+		もし (commit)
 			set_commit_cutoff(commit);
 
-		if (peel_tag) {
-			if (!commit) {
+		もし (peel_tag) {
+			もし (!commit) {
 				fprintf(stderr, "Could not get commit for %s. Skipping.\n",
 					*argv);
 				continue;
@@ -739,28 +739,28 @@ int cmd_name_rev(int argc,
 	refs_for_each_ref(get_main_ref_store(the_repository), name_ref, &data);
 	name_tips(&string_pool);
 
-	if (annotate_stdin) {
+	もし (annotate_stdin) {
 		struct strbuf sb = STRBUF_INIT;
 
-		while (strbuf_getline(&sb, stdin) != EOF) {
+		ながら (strbuf_getline(&sb, stdin) != EOF) {
 			strbuf_addch(&sb, '\n');
 			name_rev_line(sb.buf, &cmd);
 		}
 		strbuf_release(&sb);
-	} else if (all) {
-		int i, max;
+	} 否则 もし (all) {
+		整数 i, max;
 
 		max = get_max_object_index(the_repository);
-		for (i = 0; i < max; i++) {
+		ために (i = 0; i < max; i++) {
 			struct object *obj = get_indexed_object(the_repository, i);
-			if (!obj || obj->type != OBJ_COMMIT)
+			もし (!obj || obj->type != OBJ_COMMIT)
 				continue;
 			show_name(obj, NULL,
 				  always, allow_undefined, data.name_only);
 		}
-	} else {
-		int i;
-		for (i = 0; i < revs.nr; i++)
+	} 否则 {
+		整数 i;
+		ために (i = 0; i < revs.nr; i++)
 			show_name(revs.objects[i].item, revs.objects[i].name,
 				  always, allow_undefined, data.name_only);
 	}
@@ -769,7 +769,7 @@ int cmd_name_rev(int argc,
 	string_list_clear(&data.exclude_filters, 0);
 	mem_pool_discard(&string_pool, 0);
 	object_array_clear(&revs);
-	return 0;
+	戻る 0;
 }
 
 struct format_nul_data {
@@ -777,26 +777,26 @@ struct format_nul_data {
 	bool nul_output;
 };
 
-static int format_nul_cb(const struct option *option,
+static 整数 format_nul_cb(const struct option *option,
 			 const char *arg,
-			 int unset)
+			 整数 unset)
 {
 	struct format_nul_data *data = option->value;
 	data->nul_input = 1;
 	data->nul_output = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	戻る 0;
 }
 
 static enum stdin_mode parse_stdin_mode(const char *stdin_mode)
 {
-	if (!strcmp(stdin_mode, "text"))
-		return TEXT;
-	else if (!strcmp(stdin_mode, "revs") ||
+	もし (!strcmp(stdin_mode, "text"))
+		戻る TEXT;
+	否则 もし (!strcmp(stdin_mode, "revs") ||
 		 !strcmp(stdin_mode, "rev"))
-		return REVS;
-	else
+		戻る REVS;
+	否则
 		die(_("'%s' needs to be either text, revs, or rev"),
 		    "--stdin-mode");
 }
@@ -808,7 +808,7 @@ static char const *const format_rev_usage[] = {
 	NULL
 };
 
-int cmd_format_rev(int argc,
+整数 cmd_format_rev(整数 argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
@@ -844,14 +844,14 @@ int cmd_format_rev(int argc,
 
 	argc = parse_options(argc, argv, prefix, opts, format_rev_usage, 0);
 
-	if (argc > 0) {
+	もし (argc > 0) {
 		error(_("too many arguments"));
 		usage_with_options(format_rev_usage, opts);
 	}
 
-	if (!format)
+	もし (!format)
 		die(_("'%s' is required"), "--format");
-	if (!stdin_mode_arg)
+	もし (!stdin_mode_arg)
 		die(_("'%s' is required"), "--stdin-mode");
 
 	getline_fn = nul_data.nul_input ? strbuf_getline_nul : strbuf_getline_lf;
@@ -870,8 +870,8 @@ int cmd_format_rev(int argc,
 
 	userformat_find_requirements(format,
 				     &format_pp.want);
-	if (format_pp.want.notes) {
-		int ignore_show_notes = 0;
+	もし (format_pp.want.notes) {
+		整数 ignore_show_notes = 0;
 		struct string_list_item *n;
 
 		for_each_string_list_item(n, &notes)
@@ -885,7 +885,7 @@ int cmd_format_rev(int argc,
 
 	switch (stdin_mode) {
 	case TEXT:
-		while (getline_fn(&scratch_buf, stdin) != EOF) {
+		ながら (getline_fn(&scratch_buf, stdin) != EOF) {
 			name_rev_line(scratch_buf.buf, &cmd);
 			/*
 			 * We do not pass on the terminator to name_rev_line,
@@ -896,26 +896,26 @@ int cmd_format_rev(int argc,
 		}
 		break;
 	case REVS:
-		while (getline_fn(&scratch_buf, stdin) != EOF) {
+		ながら (getline_fn(&scratch_buf, stdin) != EOF) {
 			struct object_id oid;
 			struct object *object;
 			struct object *peeled;
 
-			if (repo_get_oid(the_repository, scratch_buf.buf, &oid)) {
+			もし (repo_get_oid(the_repository, scratch_buf.buf, &oid)) {
 				fprintf(stderr, "Could not get object name for %s. Skipping.\n",
 					scratch_buf.buf);
 				continue;
 			}
 
 			object = parse_object(the_repository, &oid);
-			if (!object) {
+			もし (!object) {
 				fprintf(stderr, "Could not get object for %s. Skipping.\n",
 					scratch_buf.buf);
 				continue;
 			}
 
 			peeled = deref_tag(the_repository, object, scratch_buf.buf, 0);
-			if (!peeled || peeled->type != OBJ_COMMIT) {
+			もし (!peeled || peeled->type != OBJ_COMMIT) {
 				fprintf(stderr,
 					"Could not get commit for %s. Skipping.\n",
 					scratch_buf.buf);
@@ -936,5 +936,5 @@ int cmd_format_rev(int argc,
 	strbuf_release(&scratch_buf);
 	string_list_clear(&notes, 0);
 	release_display_notes(&format_notes_opt);
-	return 0;
+	戻る 0;
 }

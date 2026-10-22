@@ -31,7 +31,7 @@ struct last_modified_entry {
 	const char path[FLEX_ARRAY];
 };
 
-static int last_modified_entry_hashcmp(const void *unused UNUSED,
+static 整数 last_modified_entry_hashcmp(const void *unused UNUSED,
 				       const struct hashmap_entry *hent1,
 				       const struct hashmap_entry *hent2,
 				       const void *path)
@@ -40,7 +40,7 @@ static int last_modified_entry_hashcmp(const void *unused UNUSED,
 		container_of(hent1, const struct last_modified_entry, hashent);
 	const struct last_modified_entry *ent2 =
 		container_of(hent2, const struct last_modified_entry, hashent);
-	return strcmp(ent1->path, path ? path : ent2->path);
+	戻る strcmp(ent1->path, path ? path : ent2->path);
 }
 
 /*
@@ -55,7 +55,7 @@ struct last_modified {
 	struct rev_info rev;
 	bool show_trees;
 	bool nul_termination;
-	int max_depth;
+	整数 max_depth;
 
 	const char **all_paths;
 	size_t all_paths_nr;
@@ -68,16 +68,16 @@ struct last_modified {
 static struct bitmap *active_paths_for(struct last_modified *lm, struct commit *c)
 {
 	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (!*bitmap)
+	もし (!*bitmap)
 		*bitmap = bitmap_word_alloc(lm->all_paths_nr / BITS_IN_EWORD + 1);
 
-	return *bitmap;
+	戻る *bitmap;
 }
 
 static void active_paths_free(struct last_modified *lm, struct commit *c)
 {
 	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (*bitmap) {
+	もし (*bitmap) {
 		bitmap_free(*bitmap);
 		*bitmap = NULL;
 	}
@@ -107,14 +107,14 @@ static void add_path_from_diff(struct diff_queue_struct *q,
 {
 	struct last_modified *lm = data;
 
-	for (int i = 0; i < q->nr; i++) {
+	ために (整数 i = 0; i < q->nr; i++) {
 		struct diff_filepair *p = q->queue[i];
 		struct last_modified_entry *ent;
 		const char *path = p->two->path;
 
 		FLEX_ALLOC_STR(ent, path, path);
 		oidcpy(&ent->oid, &p->two->oid);
-		if (lm->rev.bloom_filter_settings)
+		もし (lm->rev.bloom_filter_settings)
 			bloom_key_fill(&ent->key, path, strlen(path),
 				       lm->rev.bloom_filter_settings);
 		hashmap_entry_init(&ent->hashent, strhash(ent->path));
@@ -122,9 +122,9 @@ static void add_path_from_diff(struct diff_queue_struct *q,
 	}
 }
 
-static int populate_paths_from_revs(struct last_modified *lm)
+static 整数 populate_paths_from_revs(struct last_modified *lm)
 {
-	int num_interesting = 0, ret = 0;
+	整数 num_interesting = 0, ret = 0;
 	struct diff_options diffopt;
 
 	/*
@@ -140,18 +140,18 @@ static int populate_paths_from_revs(struct last_modified *lm)
 	diffopt.format_callback = add_path_from_diff;
 	diffopt.format_callback_data = lm;
 
-	for (size_t i = 0; i < lm->rev.pending.nr; i++) {
+	ために (size_t i = 0; i < lm->rev.pending.nr; i++) {
 		struct object_array_entry *obj = lm->rev.pending.objects + i;
 
-		if (obj->item->flags & UNINTERESTING)
+		もし (obj->item->flags & UNINTERESTING)
 			continue;
 
-		if (num_interesting++) {
+		もし (num_interesting++) {
 			ret = error(_("last-modified can only operate on one commit at a time"));
 			goto out;
 		}
 
-		if (!repo_peel_to_type(lm->rev.repo, obj->path, 0, obj->item, OBJ_COMMIT)) {
+		もし (!repo_peel_to_type(lm->rev.repo, obj->path, 0, obj->item, OBJ_COMMIT)) {
 			ret = error(_("revision argument '%s' is a %s, not a commit-ish"), obj->name, type_name(obj->item->type));
 			goto out;
 		}
@@ -164,20 +164,20 @@ static int populate_paths_from_revs(struct last_modified *lm)
 out:
 	clear_pathspec(&diffopt.pathspec);
 
-	return ret;
+	戻る ret;
 }
 
 static void last_modified_emit(struct last_modified *lm,
 			       const char *path, const struct commit *commit)
 
 {
-	if (commit->object.flags & BOUNDARY)
+	もし (commit->object.flags & BOUNDARY)
 		putchar('^');
 	printf("%s\t", oid_to_hex(&commit->object.oid));
 
-	if (lm->nul_termination)
+	もし (lm->nul_termination)
 		printf("%s%c", path, '\0');
-	else
+	否则
 		write_name_quoted(path, stdout, '\n');
 }
 
@@ -189,15 +189,15 @@ static void mark_path(const char *path, const struct object_id *oid,
 	/* Is it even a path that we are interested in? */
 	ent = hashmap_get_entry_from_hash(&data->lm->paths, strhash(path), path,
 					  struct last_modified_entry, hashent);
-	if (!ent)
-		return;
+	もし (!ent)
+		戻る;
 
 	/*
 	 * Is it arriving at a version of interest, or is it from a side branch
 	 * which did not contribute to the final state?
 	 */
-	if (oid && !oideq(oid, &ent->oid))
-		return;
+	もし (oid && !oideq(oid, &ent->oid))
+		戻る;
 
 	last_modified_emit(data->lm, path, data->commit);
 
@@ -211,7 +211,7 @@ static void last_modified_diff(struct diff_queue_struct *q,
 {
 	struct last_modified_callback_data *data = cbdata;
 
-	for (int i = 0; i < q->nr; i++) {
+	ために (整数 i = 0; i < q->nr; i++) {
 		struct diff_filepair *p = q->queue[i];
 		switch (p->status) {
 		case DIFF_STATUS_DELETED:
@@ -262,43 +262,43 @@ static bool maybe_changed_path(struct last_modified *lm,
 	struct last_modified_entry *ent;
 	struct hashmap_iter iter;
 
-	if (!lm->rev.bloom_filter_settings)
-		return true;
+	もし (!lm->rev.bloom_filter_settings)
+		戻る true;
 
-	if (commit_graph_generation(origin) == GENERATION_NUMBER_INFINITY)
-		return true;
+	もし (commit_graph_generation(origin) == GENERATION_NUMBER_INFINITY)
+		戻る true;
 
 	filter = get_bloom_filter(lm->rev.repo, origin);
-	if (!filter)
-		return true;
+	もし (!filter)
+		戻る true;
 
 	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent) {
-		if (active && !bitmap_get(active, ent->diff_idx))
+		もし (active && !bitmap_get(active, ent->diff_idx))
 			continue;
 
-		if (bloom_filter_contains(filter, &ent->key,
+		もし (bloom_filter_contains(filter, &ent->key,
 					  lm->rev.bloom_filter_settings))
-			return true;
+			戻る true;
 	}
-	return false;
+	戻る false;
 }
 
 static void process_parent(struct last_modified *lm,
 			   struct prio_queue *queue,
 			   struct commit *c, struct bitmap *active_c,
-			   struct commit *parent, int parent_i)
+			   struct commit *parent, 整数 parent_i)
 {
 	struct bitmap *active_p;
 
-	if (repo_parse_commit(lm->rev.repo, parent))
-		return;
+	もし (repo_parse_commit(lm->rev.repo, parent))
+		戻る;
 	active_p = active_paths_for(lm, parent);
 
 	/*
 	 * The first time entering this function for this commit (i.e. first parent)
 	 * see if Bloom filters will tell us it's worth to do the diff.
 	 */
-	if (parent_i || maybe_changed_path(lm, c, active_c)) {
+	もし (parent_i || maybe_changed_path(lm, c, active_c)) {
 		diff_tree_oid(&parent->object.oid,
 			      &c->object.oid, "", &lm->rev.diffopt);
 		diffcore_std(&lm->rev.diffopt);
@@ -311,40 +311,40 @@ static void process_parent(struct last_modified *lm,
 	 * First, collect all paths that are *not* TREESAME in 'scratch'.
 	 * Then, pass paths that *are* TREESAME and active to the parent.
 	 */
-	for (int i = 0; i < diff_queued_diff.nr; i++) {
+	ために (整数 i = 0; i < diff_queued_diff.nr; i++) {
 		struct diff_filepair *fp = diff_queued_diff.queue[i];
 		const char *path = fp->two->path;
 		struct last_modified_entry *ent =
 			hashmap_get_entry_from_hash(&lm->paths, strhash(path), path,
 						    struct last_modified_entry, hashent);
-		if (ent) {
+		もし (ent) {
 			size_t k = ent->diff_idx;
-			if (bitmap_get(active_c, k))
+			もし (bitmap_get(active_c, k))
 				bitmap_set(lm->scratch, k);
 		}
 	}
-	for (size_t i = 0; i < lm->all_paths_nr; i++) {
-		if (bitmap_get(active_c, i) && !bitmap_get(lm->scratch, i))
+	ために (size_t i = 0; i < lm->all_paths_nr; i++) {
+		もし (bitmap_get(active_c, i) && !bitmap_get(lm->scratch, i))
 			pass_to_parent(active_c, active_p, i);
 	}
 
 	/*
 	 * If parent has any active paths, put it on the queue (if not already).
 	 */
-	if (!bitmap_is_empty(active_p) && !(parent->object.flags & PARENT1)) {
+	もし (!bitmap_is_empty(active_p) && !(parent->object.flags & PARENT1)) {
 		parent->object.flags |= PARENT1;
 		prio_queue_put(queue, parent);
 	}
-	if (!(parent->object.flags & PARENT1))
+	もし (!(parent->object.flags & PARENT1))
 		active_paths_free(lm, parent);
 
 	MEMZERO_ARRAY(lm->scratch->words, lm->scratch->word_alloc);
 	diff_queue_clear(&diff_queued_diff);
 }
 
-static int last_modified_run(struct last_modified *lm)
+static 整数 last_modified_run(struct last_modified *lm)
 {
-	int max_count, queue_popped = 0;
+	整数 max_count, queue_popped = 0;
 	struct commit *c, *n;
 	struct prio_queue queue = { compare_commits_by_gen_then_commit_date };
 	struct prio_queue not_queue = { compare_commits_by_gen_then_commit_date };
@@ -368,13 +368,13 @@ static int last_modified_run(struct last_modified *lm)
 	 *
 	 * Loop through each such commit, and place it in the appropriate queue.
 	 */
-	for (list = lm->rev.commits; list; list = list->next) {
+	ために (list = lm->rev.commits; list; list = list->next) {
 		struct commit *c = list->item;
 
-		if (c->object.flags & BOTTOM) {
+		もし (c->object.flags & BOTTOM) {
 			prio_queue_put(&not_queue, c);
 			c->object.flags |= PARENT2;
-		} else if (!(c->object.flags & PARENT1)) {
+		} 否则 もし (!(c->object.flags & PARENT1)) {
 			/*
 			 * If the commit is a starting point (and hasn't been
 			 * seen yet), then initialize the set of interesting
@@ -386,17 +386,17 @@ static int last_modified_run(struct last_modified *lm)
 			c->object.flags |= PARENT1;
 
 			active = active_paths_for(lm, c);
-			for (size_t i = 0; i < lm->all_paths_nr; i++)
+			ために (size_t i = 0; i < lm->all_paths_nr; i++)
 				bitmap_set(active, i);
 		}
 	}
 
-	while ((c = prio_queue_get(&queue))) {
-		int parent_i;
+	ながら ((c = prio_queue_get(&queue))) {
+		整数 parent_i;
 		struct commit_list *p;
 		struct bitmap *active_c = active_paths_for(lm, c);
 
-		if ((0 <= max_count && max_count < ++queue_popped) ||
+		もし ((0 <= max_count && max_count < ++queue_popped) ||
 		    (c->object.flags & PARENT2)) {
 			/*
 			 * Either a boundary commit, or we have already seen too
@@ -415,23 +415,23 @@ static int last_modified_run(struct last_modified *lm)
 		 * Otherwise, make sure that 'c' isn't reachable from anything
 		 * in the '--not' queue.
 		 */
-		if (repo_parse_commit(lm->rev.repo, c))
+		もし (repo_parse_commit(lm->rev.repo, c))
 			goto cleanup;
 
-		while ((n = prio_queue_get(&not_queue))) {
+		ながら ((n = prio_queue_get(&not_queue))) {
 			struct commit_list *np;
 
-			if (repo_parse_commit(lm->rev.repo, n))
+			もし (repo_parse_commit(lm->rev.repo, n))
 				continue;
 
-			for (np = n->parents; np; np = np->next) {
-				if (!(np->item->object.flags & PARENT2)) {
+			ために (np = n->parents; np; np = np->next) {
+				もし (!(np->item->object.flags & PARENT2)) {
 					prio_queue_put(&not_queue, np->item);
 					np->item->object.flags |= PARENT2;
 				}
 			}
 
-			if (commit_graph_generation(n) < commit_graph_generation(c))
+			もし (commit_graph_generation(n) < commit_graph_generation(c))
 				break;
 		}
 
@@ -439,12 +439,12 @@ static int last_modified_run(struct last_modified *lm)
 		 * Look at each parent and pass on each path that's TREESAME
 		 * with that parent. Stop early when no active paths remain.
 		 */
-		for (p = c->parents, parent_i = 0; p; p = p->next, parent_i++) {
+		ために (p = c->parents, parent_i = 0; p; p = p->next, parent_i++) {
 			process_parent(lm, &queue,
 				       c, active_c,
 				       p->item, parent_i);
 
-			if (bitmap_is_empty(active_c))
+			もし (bitmap_is_empty(active_c))
 				break;
 		}
 
@@ -452,10 +452,10 @@ static int last_modified_run(struct last_modified *lm)
 		 * Paths that remain active, or not TREESAME with any parent,
 		 * were changed by 'c'.
 		 */
-		if (!bitmap_is_empty(active_c))  {
+		もし (!bitmap_is_empty(active_c))  {
 			data.commit = c;
-			for (size_t i = 0; i < lm->all_paths_nr; i++) {
-				if (bitmap_get(active_c, i))
+			ために (size_t i = 0; i < lm->all_paths_nr; i++) {
+				もし (bitmap_get(active_c, i))
 					mark_path(lm->all_paths[i], NULL, &data);
 			}
 		}
@@ -464,7 +464,7 @@ cleanup:
 		active_paths_free(lm, c);
 	}
 
-	if (hashmap_get_size(&lm->paths))
+	もし (hashmap_get_size(&lm->paths))
 		BUG("paths remaining beyond boundary in last-modified");
 
 	clear_prio_queue(&not_queue);
@@ -472,11 +472,11 @@ cleanup:
 	clear_active_paths_for_commit(&lm->active_paths);
 	bitmap_free(lm->scratch);
 
-	return 0;
+	戻る 0;
 }
 
-static int last_modified_init(struct last_modified *lm, struct repository *r,
-			      const char *prefix, int argc, const char **argv)
+static 整数 last_modified_init(struct last_modified *lm, struct repository *r,
+			      const char *prefix, 整数 argc, const char **argv)
 {
 	struct hashmap_iter iter;
 	struct last_modified_entry *ent;
@@ -497,15 +497,15 @@ static int last_modified_init(struct last_modified *lm, struct repository *r,
 	lm->rev.diffopt.max_depth_valid = lm->max_depth >= 0;
 
 	argc = setup_revisions(argc, argv, &lm->rev, NULL);
-	if (argc > 1) {
+	もし (argc > 1) {
 		error(_("unknown last-modified argument: %s"), argv[1]);
-		return argc;
+		戻る argc;
 	}
 
 	lm->rev.bloom_filter_settings = get_bloom_filter_settings(lm->rev.repo);
 
-	if (populate_paths_from_revs(lm) < 0)
-		return -1;
+	もし (populate_paths_from_revs(lm) < 0)
+		戻る -1;
 
 	CALLOC_ARRAY(lm->all_paths, hashmap_get_size(&lm->paths));
 	lm->all_paths_nr = 0;
@@ -514,13 +514,13 @@ static int last_modified_init(struct last_modified *lm, struct repository *r,
 		lm->all_paths[ent->diff_idx] = ent->path;
 	}
 
-	return 0;
+	戻る 0;
 }
 
-int cmd_last_modified(int argc, const char **argv, const char *prefix,
+整数 cmd_last_modified(整数 argc, const char **argv, const char *prefix,
 		      struct repository *repo)
 {
-	int ret;
+	整数 ret;
 	struct last_modified lm = { 0 };
 
 	const char * const last_modified_usage[] = {
@@ -549,18 +549,18 @@ int cmd_last_modified(int argc, const char **argv, const char *prefix,
 	repo_config(repo, git_default_config, NULL);
 
 	ret = last_modified_init(&lm, repo, prefix, argc, argv);
-	if (ret > 0)
+	もし (ret > 0)
 		usage_with_options(last_modified_usage,
 				   last_modified_options);
-	if (ret)
+	もし (ret)
 		goto out;
 
 	ret = last_modified_run(&lm);
-	if (ret)
+	もし (ret)
 		goto out;
 
 out:
 	last_modified_release(&lm);
 
-	return ret;
+	戻る ret;
 }

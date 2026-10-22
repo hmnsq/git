@@ -20,13 +20,13 @@ static const char diff_files_usage[] =
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_files(int argc,
+整数 cmd_diff_files(整数 argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
 {
 	struct rev_info rev;
-	int result;
+	整数 result;
 	unsigned options = 0;
 
 	show_usage_if_asked(argc, argv, diff_files_usage);
@@ -48,20 +48,20 @@ int cmd_diff_files(int argc,
 	prefix = precompose_argv_prefix(argc, argv, prefix);
 
 	argc = setup_revisions(argc, argv, &rev, NULL);
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
+	ながら (1 < argc && argv[1][0] == '-') {
+		もし (!strcmp(argv[1], "--base"))
 			rev.max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
+		否则 もし (!strcmp(argv[1], "--ours"))
 			rev.max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
+		否则 もし (!strcmp(argv[1], "--theirs"))
 			rev.max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+		否则 もし (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else
+		否则
 			usage(diff_files_usage);
 		argv++; argc--;
 	}
-	if (!rev.diffopt.output_format)
+	もし (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 	rev.diffopt.rotate_to_strict = 1;
 
@@ -70,7 +70,7 @@ int cmd_diff_files(int argc,
 	 * rev.max_count is reasonable (0 <= n <= 3), and
 	 * there is no other revision filtering parameters.
 	 */
-	if (rev.pending.nr ||
+	もし (rev.pending.nr ||
 	    rev.min_age != -1 || rev.max_age != -1 ||
 	    3 < rev.max_count)
 		usage(diff_files_usage);
@@ -80,14 +80,14 @@ int cmd_diff_files(int argc,
 	 * was not asked to.  "diff-files -c -p" should not densify
 	 * (the user should ask with "diff-files --cc" explicitly).
 	 */
-	if (rev.max_count == -1 &&
+	もし (rev.max_count == -1 &&
 	    (rev.diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(&rev);
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0)
+	もし (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0)
 		die_errno("repo_read_index_preload");
 	run_diff_files(&rev, options);
 	result = diff_result_code(&rev);
 	release_revisions(&rev);
-	return result;
+	戻る result;
 }

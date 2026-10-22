@@ -10,14 +10,14 @@
 #include "strbuf.h"
 #include "strvec.h"
 
-int for_each_ref_core(int argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
+整数 for_each_ref_core(整数 argc, const char **argv, const char *prefix, struct repository *repo, const char *const *usage)
 {
 	struct ref_sorting *sorting;
 	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
+	整数 icase = 0, include_root_refs = 0, from_stdin = 0;
 	struct ref_filter filter = REF_FILTER_INIT;
 	struct ref_format format = REF_FORMAT_INIT;
-	unsigned int flags = FILTER_REFS_REGULAR;
+	unsigned 整数 flags = FILTER_REFS_REGULAR;
 	struct strvec vec = STRVEC_INIT;
 
 	struct option opts[] = {
@@ -60,45 +60,45 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	string_list_append(&sorting_options, "refname");
 
 	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
+	もし (format.array_opts.max_count < 0) {
 		error("invalid --count argument: `%d'", format.array_opts.max_count);
 		usage_with_options(usage, opts);
 	}
-	if (HAS_MULTI_BITS(format.quote_style)) {
+	もし (HAS_MULTI_BITS(format.quote_style)) {
 		error("more than one quoting style?");
 		usage_with_options(usage, opts);
 	}
-	if (verify_ref_format(&format))
+	もし (verify_ref_format(&format))
 		usage_with_options(usage, opts);
 
-	if (filter.start_after && sorting_options.nr > 1)
+	もし (filter.start_after && sorting_options.nr > 1)
 		die(_("cannot use --start-after with custom sort options"));
 
 	sorting = ref_sorting_options(&sorting_options);
 	ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
 	filter.ignore_case = icase;
 
-	if (from_stdin) {
+	もし (from_stdin) {
 		struct strbuf line = STRBUF_INIT;
 
-		if (argv[0])
+		もし (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
+		ながら (strbuf_getline(&line, stdin) != EOF)
 			strvec_push(&vec, line.buf);
 
 		strbuf_release(&line);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
-	} else {
+	} 否则 {
 		filter.name_patterns = argv;
 	}
 
-	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
+	もし (filter.start_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
+	もし (include_root_refs)
 		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
 
 	filter.match_as_path = 1;
@@ -107,10 +107,10 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	ref_filter_clear(&filter);
 	ref_sorting_release(sorting);
 	strvec_clear(&vec);
-	return 0;
+	戻る 0;
 }
 
-int cmd_for_each_ref(int argc,
+整数 cmd_for_each_ref(整数 argc,
 		     const char **argv,
 		     const char *prefix,
 		     struct repository *repo)
@@ -120,5 +120,5 @@ int cmd_for_each_ref(int argc,
 		NULL
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
+	戻る for_each_ref_core(argc, argv, prefix, repo, for_each_ref_usage);
 }

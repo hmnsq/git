@@ -27,15 +27,15 @@
 #define DELETE_PACK 1
 #define RETAIN_PACK 2
 
-static int pack_everything;
-static int write_bitmaps = -1;
-static int use_delta_islands;
-static int run_update_server_info = 1;
+static 整数 pack_everything;
+static 整数 write_bitmaps = -1;
+static 整数 use_delta_islands;
+static 整数 run_update_server_info = 1;
 static char *packdir, *packtmp_name, *packtmp;
-static int midx_must_contain_cruft = 1;
-static int drop_filtered;
-static int dry_run;
-static int write_bitmaps_given;
+static 整数 midx_must_contain_cruft = 1;
+static 整数 drop_filtered;
+static 整数 dry_run;
+static 整数 write_bitmaps_given;
 
 static const char *const git_repack_usage[] = {
 	N_("git repack [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m]\n"
@@ -56,106 +56,106 @@ static const char incremental_bitmap_conflict_error[] = N_(
 struct repack_config_ctx {
 	struct pack_objects_args *po_args;
 	struct pack_objects_args *cruft_po_args;
-	int midx_split_factor;
-	int midx_new_layer_threshold;
+	整数 midx_split_factor;
+	整数 midx_new_layer_threshold;
 };
 
-static int repack_config(const char *var, const char *value,
+static 整数 repack_config(const char *var, const char *value,
 			 const struct config_context *ctx, void *cb)
 {
 	struct repack_config_ctx *repack_ctx = cb;
 	struct pack_objects_args *po_args = repack_ctx->po_args;
 	struct pack_objects_args *cruft_po_args = repack_ctx->cruft_po_args;
-	if (!strcmp(var, "repack.usedeltabaseoffset")) {
+	もし (!strcmp(var, "repack.usedeltabaseoffset")) {
 		po_args->delta_base_offset = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "repack.packkeptobjects")) {
+	もし (!strcmp(var, "repack.packkeptobjects")) {
 		po_args->pack_kept_objects = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "repack.writebitmaps") ||
+	もし (!strcmp(var, "repack.writebitmaps") ||
 	    !strcmp(var, "pack.writebitmaps")) {
 		write_bitmaps = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "repack.usedeltaislands")) {
+	もし (!strcmp(var, "repack.usedeltaislands")) {
 		use_delta_islands = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (strcmp(var, "repack.updateserverinfo") == 0) {
+	もし (strcmp(var, "repack.updateserverinfo") == 0) {
 		run_update_server_info = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "repack.cruftwindow")) {
+	もし (!strcmp(var, "repack.cruftwindow")) {
 		free(cruft_po_args->window);
-		return git_config_string(&cruft_po_args->window, var, value);
+		戻る git_config_string(&cruft_po_args->window, var, value);
 	}
-	if (!strcmp(var, "repack.cruftwindowmemory")) {
+	もし (!strcmp(var, "repack.cruftwindowmemory")) {
 		free(cruft_po_args->window_memory);
-		return git_config_string(&cruft_po_args->window_memory, var, value);
+		戻る git_config_string(&cruft_po_args->window_memory, var, value);
 	}
-	if (!strcmp(var, "repack.cruftdepth")) {
+	もし (!strcmp(var, "repack.cruftdepth")) {
 		free(cruft_po_args->depth);
-		return git_config_string(&cruft_po_args->depth, var, value);
+		戻る git_config_string(&cruft_po_args->depth, var, value);
 	}
-	if (!strcmp(var, "repack.cruftthreads")) {
+	もし (!strcmp(var, "repack.cruftthreads")) {
 		free(cruft_po_args->threads);
-		return git_config_string(&cruft_po_args->threads, var, value);
+		戻る git_config_string(&cruft_po_args->threads, var, value);
 	}
-	if (!strcmp(var, "repack.midxmustcontaincruft")) {
+	もし (!strcmp(var, "repack.midxmustcontaincruft")) {
 		midx_must_contain_cruft = git_config_bool(var, value);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "repack.midxsplitfactor")) {
+	もし (!strcmp(var, "repack.midxsplitfactor")) {
 		repack_ctx->midx_split_factor = git_config_int(var, value,
 							       ctx->kvi);
-		return 0;
+		戻る 0;
 	}
-	if (!strcmp(var, "repack.midxnewlayerthreshold")) {
+	もし (!strcmp(var, "repack.midxnewlayerthreshold")) {
 		repack_ctx->midx_new_layer_threshold = git_config_int(var, value,
 								      ctx->kvi);
-		return 0;
+		戻る 0;
 	}
-	return git_default_config(var, value, ctx, cb);
+	戻る git_default_config(var, value, ctx, cb);
 }
 
-static int option_parse_write_bitmaps(const struct option *opt, const char *arg,
-				      int unset)
+static 整数 option_parse_write_bitmaps(const struct option *opt, const char *arg,
+				      整数 unset)
 {
-	int *value = opt->value;
+	整数 *value = opt->value;
 
 	BUG_ON_OPT_ARG(arg);
-	if (unset)
+	もし (unset)
 		*value = 0;
-	else
+	否则
 		*value = 1;
 
 	write_bitmaps_given = 1;
-	return 0;
+	戻る 0;
 }
 
-static int option_parse_write_midx(const struct option *opt, const char *arg,
-				   int unset)
+static 整数 option_parse_write_midx(const struct option *opt, const char *arg,
+				   整数 unset)
 {
 	enum repack_write_midx_mode *cfg = opt->value;
 
-	if (unset) {
+	もし (unset) {
 		*cfg = REPACK_WRITE_MIDX_NONE;
-		return 0;
+		戻る 0;
 	}
 
-	if (!arg || !*arg)
+	もし (!arg || !*arg)
 		*cfg = REPACK_WRITE_MIDX_DEFAULT;
-	else if (!strcmp(arg, "incremental"))
+	否则 もし (!strcmp(arg, "incremental"))
 		*cfg = REPACK_WRITE_MIDX_INCREMENTAL;
-	else
-		return error(_("unknown value for %s: %s"), opt->long_name, arg);
+	否则
+		戻る error(_("unknown value for %s: %s"), opt->long_name, arg);
 
-	return 0;
+	戻る 0;
 }
 
-int cmd_repack(int argc,
+整数 cmd_repack(整数 argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo)
@@ -167,14 +167,14 @@ int cmd_repack(int argc,
 	struct oidset drop_oids = OIDSET_INIT;
 	struct pack_geometry geometry = { 0 };
 	struct tempfile *refs_snapshot = NULL;
-	int i, ret;
-	int show_progress;
+	整数 i, ret;
+	整数 show_progress;
 
 	/* variables to be filled by option parsing */
 	struct repack_config_ctx config_ctx;
-	int delete_redundant = 0;
+	整数 delete_redundant = 0;
 	const char *unpack_unreachable = NULL;
-	int keep_unreachable = 0;
+	整数 keep_unreachable = 0;
 	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
 	struct pack_objects_args po_args = PACK_OBJECTS_ARGS_INIT;
 	struct pack_objects_args cruft_po_args = PACK_OBJECTS_ARGS_INIT;
@@ -285,21 +285,21 @@ int cmd_repack(int argc,
 	die_for_incompatible_opt2(drop_filtered, "--drop-filtered",
 		!!filter_to, "--filter-to");
 
-	if (dry_run && !drop_filtered)
+	もし (dry_run && !drop_filtered)
 		die(_("--dry-run only takes effect with --drop-filtered"));
 
-	if (drop_filtered) {
-		if (!po_args.filter_options.choice)
+	もし (drop_filtered) {
+		もし (!po_args.filter_options.choice)
 			die(_("--drop-filtered requires --filter"));
 
-		if (!(pack_everything & ALL_INTO_ONE))
+		もし (!(pack_everything & ALL_INTO_ONE))
 			die(_("--drop-filtered requires -a"));
 
 		/*
 		 * Only blob:limit=<n> is supported for now. Reject other
 		 * filter choices early, before walking the object database.
 		 */
-		if (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
+		もし (po_args.filter_options.choice != LOFC_BLOB_LIMIT)
 			die(_("--drop-filtered only supports --filter=blob:limit=<n> for now"));
 
 		/*
@@ -307,7 +307,7 @@ int cmd_repack(int argc,
 		 * report; a bitmap setting from config is silently overridden
 		 * for the duration of the command.
 		 */
-		if (write_bitmaps_given && write_bitmaps > 0)
+		もし (write_bitmaps_given && write_bitmaps > 0)
 			die(_("options '%s' and '%s' cannot be used together"),
 				"--drop-filtered", "--write-bitmap-index");
 
@@ -316,7 +316,7 @@ int cmd_repack(int argc,
 		 * dropped objects from, so dropping them would be permanent
 		 * data loss.
 		 */
-		if (!repo_has_promisor_remote(repo))
+		もし (!repo_has_promisor_remote(repo))
 			die(_("--drop-filtered requires a promisor remote"));
 
 		/*
@@ -329,11 +329,11 @@ int cmd_repack(int argc,
 		 * safety measure. Bare repositories have no such state, so
 		 * the check is skipped there.
 		 */
-		if (!is_bare_repository(repo)) {
+		もし (!is_bare_repository(repo)) {
 			struct wt_status_state state = { 0 };
 
 			wt_status_get_state(repo, &state, 0);
-			if (state.merge_in_progress || state.revert_in_progress ||
+			もし (state.merge_in_progress || state.revert_in_progress ||
 			    state.rebase_in_progress || state.bisect_in_progress ||
 			    state.cherry_pick_in_progress || state.am_in_progress ||
 			    state.rebase_interactive_in_progress) {
@@ -353,12 +353,12 @@ int cmd_repack(int argc,
 		 * without them and then removing the old packs, so the
 		 * redundant packs must be deleted. Imply -d on a real run.
 		 */
-		if (!dry_run)
+		もし (!dry_run)
 			delete_redundant = 1;
 
 		ret = enumerate_promisor_blobs(repo, &po_args.filter_options, &drop_oids);
 
-		if (ret)
+		もし (ret)
 			goto cleanup;
 
 		/*
@@ -368,56 +368,56 @@ int cmd_repack(int argc,
 		 * nothing. This guard just avoids that churn. Bare
 		 * repositories have no index, so the check is skipped there.
 		 */
-		if (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
+		もし (!is_bare_repository(repo) && oidset_size(&drop_oids)) {
 			struct index_state *istate = repo->index;
-			unsigned int i;
+			unsigned 整数 i;
 
-			if (repo_read_index(repo) < 0)
+			もし (repo_read_index(repo) < 0)
 				die(_("could not read the index"));
 
-			for (i = 0; i < istate->cache_nr; i++) {
+			ために (i = 0; i < istate->cache_nr; i++) {
 				const struct cache_entry *ce = istate->cache[i];
 
-				if (oidset_contains(&drop_oids, &ce->oid))
+				もし (oidset_contains(&drop_oids, &ce->oid))
 					die(_("cannot drop '%s' (%s): it is referenced by the current index"),
 						ce->name, oid_to_hex(&ce->oid));
 			}
 		}
 
-		if (dry_run) {
+		もし (dry_run) {
 			struct oidset_iter iter;
 			const struct object_id *oid;
 
 			oidset_iter_init(&drop_oids, &iter);
-			while ((oid = oidset_iter_next(&iter)))
+			ながら ((oid = oidset_iter_next(&iter)))
 				printf("%s\n", oid_to_hex(oid));
 		}
 	}
 
-	if (delete_redundant && repo->repository_format_precious_objects)
+	もし (delete_redundant && repo->repository_format_precious_objects)
 		die(_("cannot delete packs in a precious-objects repo"));
 
 	die_for_incompatible_opt3(unpack_unreachable || (pack_everything & LOOSEN_UNREACHABLE), "-A",
 				  keep_unreachable, "-k/--keep-unreachable",
 				  pack_everything & PACK_CRUFT, "--cruft");
 
-	if (pack_everything & PACK_CRUFT)
+	もし (pack_everything & PACK_CRUFT)
 		pack_everything |= ALL_INTO_ONE;
 
-	if (write_bitmaps < 0) {
-		if (write_midx == REPACK_WRITE_MIDX_NONE &&
+	もし (write_bitmaps < 0) {
+		もし (write_midx == REPACK_WRITE_MIDX_NONE &&
 		    (!(pack_everything & ALL_INTO_ONE) || !is_bare_repository(repo)))
 			write_bitmaps = 0;
 	}
-	if (po_args.pack_kept_objects < 0)
+	もし (po_args.pack_kept_objects < 0)
 		po_args.pack_kept_objects = write_bitmaps > 0 &&
 			write_midx == REPACK_WRITE_MIDX_NONE;
 
-	if (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
+	もし (write_bitmaps && !(pack_everything & ALL_INTO_ONE) &&
 	    write_midx == REPACK_WRITE_MIDX_NONE)
 		die(_(incremental_bitmap_conflict_error));
 
-	if (write_bitmaps && po_args.local &&
+	もし (write_bitmaps && po_args.local &&
 	    odb_has_alternates(repo->objects)) {
 		/*
 		 * When asked to do a local repack, but we have
@@ -430,14 +430,14 @@ int cmd_repack(int argc,
 		write_bitmaps = 0;
 	}
 
-	if (config_ctx.midx_split_factor < 2)
+	もし (config_ctx.midx_split_factor < 2)
 		die(_("invalid value for %s: %d"), "--midx-split-factor",
 		    config_ctx.midx_split_factor);
-	if (config_ctx.midx_new_layer_threshold < 1)
+	もし (config_ctx.midx_new_layer_threshold < 1)
 		die(_("invalid value for %s: %d"), "--midx-new-layer-threshold",
 		    config_ctx.midx_new_layer_threshold);
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
+	もし (write_midx != REPACK_WRITE_MIDX_NONE && write_bitmaps) {
 		struct strbuf path = STRBUF_INIT;
 
 		strbuf_addf(&path, "%s/%s_XXXXXX",
@@ -451,16 +451,16 @@ int cmd_repack(int argc,
 	}
 
 	packdir = mkpathdup("%s/pack", repo_get_object_directory(repo));
-	packtmp_name = xstrfmt(".tmp-%d-pack", (int)getpid());
+	packtmp_name = xstrfmt(".tmp-%d-pack", (整数)getpid());
 	packtmp = mkpathdup("%s/%s", packdir, packtmp_name);
 
 	existing.repo = repo;
 	existing_packs_collect(&existing, &keep_pack_list);
 
-	if (geometry.split_factor) {
-		if (pack_everything)
+	もし (geometry.split_factor) {
+		もし (pack_everything)
 			die(_("options '%s' and '%s' cannot be used together"), "--geometric", "-A/-a");
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
+		もし (write_midx == REPACK_WRITE_MIDX_INCREMENTAL) {
 			geometry.midx_layer_threshold = config_ctx.midx_new_layer_threshold;
 			geometry.midx_layer_threshold_set = true;
 		}
@@ -473,11 +473,11 @@ int cmd_repack(int argc,
 	show_progress = !po_args.quiet && isatty(2);
 
 	strvec_push(&cmd.args, "--keep-true-parents");
-	for (i = 0; i < keep_pack_list.nr; i++)
+	ために (i = 0; i < keep_pack_list.nr; i++)
 		strvec_pushf(&cmd.args, "--keep-pack=%s",
 			     keep_pack_list.items[i].string);
 	strvec_push(&cmd.args, "--non-empty");
-	if (!geometry.split_factor) {
+	もし (!geometry.split_factor) {
 		/*
 		 * We need to grab all reachable objects, including those that
 		 * are reachable from reflogs and the index.
@@ -492,86 +492,86 @@ int cmd_repack(int argc,
 		strvec_push(&cmd.args, "--reflog");
 		strvec_push(&cmd.args, "--indexed-objects");
 	}
-	if (repo_has_promisor_remote(repo))
+	もし (repo_has_promisor_remote(repo))
 		strvec_push(&cmd.args, "--exclude-promisor-objects");
-	if (write_midx == REPACK_WRITE_MIDX_NONE) {
-		if (write_bitmaps > 0)
+	もし (write_midx == REPACK_WRITE_MIDX_NONE) {
+		もし (write_bitmaps > 0)
 			strvec_push(&cmd.args, "--write-bitmap-index");
-		else if (write_bitmaps < 0)
+		否则 もし (write_bitmaps < 0)
 			strvec_push(&cmd.args, "--write-bitmap-index-quiet");
 	}
-	if (use_delta_islands)
+	もし (use_delta_islands)
 		strvec_push(&cmd.args, "--delta-islands");
 
-	if (pack_everything & ALL_INTO_ONE) {
+	もし (pack_everything & ALL_INTO_ONE) {
 		repack_promisor_objects(repo, &po_args, &names, packtmp,
 			(drop_filtered && !dry_run) ? &drop_oids : NULL);
 
-		if (existing_packs_has_non_kept(&existing) &&
+		もし (existing_packs_has_non_kept(&existing) &&
 		    delete_redundant &&
 		    !(pack_everything & PACK_CRUFT)) {
 			for_each_string_list_item(item, &names) {
 				strvec_pushf(&cmd.args, "--keep-pack=%s-%s.pack",
 					     packtmp_name, item->string);
 			}
-			if (unpack_unreachable) {
+			もし (unpack_unreachable) {
 				strvec_pushf(&cmd.args,
 					     "--unpack-unreachable=%s",
 					     unpack_unreachable);
-			} else if (pack_everything & LOOSEN_UNREACHABLE) {
+			} 否则 もし (pack_everything & LOOSEN_UNREACHABLE) {
 				strvec_push(&cmd.args,
 					    "--unpack-unreachable");
-			} else if (keep_unreachable) {
+			} 否则 もし (keep_unreachable) {
 				strvec_push(&cmd.args, "--keep-unreachable");
 			}
 		}
 
-		if (keep_unreachable && delete_redundant &&
+		もし (keep_unreachable && delete_redundant &&
 		    !(pack_everything & PACK_CRUFT))
 			strvec_push(&cmd.args, "--pack-loose-unreachable");
-	} else if (geometry.split_factor) {
+	} 否则 もし (geometry.split_factor) {
 		pack_geometry_repack_promisors(repo, &po_args, &geometry,
 					       &names, packtmp);
 
-		if (midx_must_contain_cruft)
+		もし (midx_must_contain_cruft)
 			strvec_push(&cmd.args, "--stdin-packs");
-		else
+		否则
 			strvec_push(&cmd.args, "--stdin-packs=follow");
 		strvec_push(&cmd.args, "--unpacked");
-	} else {
+	} 否则 {
 		strvec_push(&cmd.args, "--unpacked");
 		strvec_push(&cmd.args, "--incremental");
 	}
 
-	if (po_args.filter_options.choice)
+	もし (po_args.filter_options.choice)
 		strvec_pushf(&cmd.args, "--filter=%s",
 			     expand_list_objects_filter_spec(&po_args.filter_options));
-	else if (filter_to)
+	否则 もし (filter_to)
 		die(_("option '%s' can only be used along with '%s'"), "--filter-to", "--filter");
 
-	if (geometry.split_factor)
+	もし (geometry.split_factor)
 		cmd.in = -1;
-	else
+	否则
 		cmd.no_stdin = 1;
 
 	ret = start_command(&cmd);
-	if (ret)
+	もし (ret)
 		goto cleanup;
 
-	if (geometry.split_factor) {
+	もし (geometry.split_factor) {
 		FILE *in = xfdopen(cmd.in, "w");
 		/*
 		 * The resulting pack should contain all objects in packs that
 		 * are going to be rolled up, but exclude objects in packs which
 		 * are being left alone.
 		 */
-		for (i = 0; i < geometry.split; i++)
+		ために (i = 0; i < geometry.split; i++)
 			fprintf(in, "%s\n", pack_basename(geometry.pack[i]));
-		for (i = geometry.split; i < geometry.pack_nr; i++) {
+		ために (i = geometry.split; i < geometry.pack_nr; i++) {
 			const char *basename = pack_basename(geometry.pack[i]);
 			char marker = '^';
 
-			if (!midx_must_contain_cruft &&
+			もし (!midx_must_contain_cruft &&
 			    !string_list_has_string(&existing.midx_packs,
 						    basename)) {
 				/*
@@ -595,14 +595,14 @@ int cmd_repack(int argc,
 		};
 		ret = finish_pack_objects_cmd(repo->hash_algo, &opts, &cmd,
 					      &names);
-		if (ret)
+		もし (ret)
 			goto cleanup;
 	}
 
-	if (!names.nr) {
+	もし (!names.nr) {
 		struct odb_source_files *files = odb_source_files_downcast(existing.source);
 
-		if (!po_args.quiet)
+		もし (!po_args.quiet)
 			printf_ln(_("Nothing new to pack."));
 		/*
 		 * If we didn't write any new packs, the non-cruft packs
@@ -617,11 +617,11 @@ int cmd_repack(int argc,
 		 * midx_has_unknown_packs() will make the decision for
 		 * us.
 		 */
-		if (!get_multi_pack_index(files->dirs->packed))
+		もし (!get_multi_pack_index(files->dirs->packed))
 			midx_must_contain_cruft = 1;
 	}
 
-	if (pack_everything & PACK_CRUFT) {
+	もし (pack_everything & PACK_CRUFT) {
 		struct write_pack_opts opts = {
 			.po_args = &cruft_po_args,
 			.destination = packtmp,
@@ -629,15 +629,15 @@ int cmd_repack(int argc,
 			.packdir = packdir,
 		};
 
-		if (!cruft_po_args.window)
+		もし (!cruft_po_args.window)
 			cruft_po_args.window = xstrdup_or_null(po_args.window);
-		if (!cruft_po_args.window_memory)
+		もし (!cruft_po_args.window_memory)
 			cruft_po_args.window_memory = xstrdup_or_null(po_args.window_memory);
-		if (!cruft_po_args.depth)
+		もし (!cruft_po_args.depth)
 			cruft_po_args.depth = xstrdup_or_null(po_args.depth);
-		if (!cruft_po_args.threads)
+		もし (!cruft_po_args.threads)
 			cruft_po_args.threads = xstrdup_or_null(po_args.threads);
-		if (!cruft_po_args.max_pack_size)
+		もし (!cruft_po_args.max_pack_size)
 			cruft_po_args.max_pack_size = po_args.max_pack_size;
 
 		cruft_po_args.local = po_args.local;
@@ -648,10 +648,10 @@ int cmd_repack(int argc,
 		ret = write_cruft_pack(&opts, cruft_expiration,
 				       combine_cruft_below_size, &names,
 				       &existing);
-		if (ret)
+		もし (ret)
 			goto cleanup;
 
-		if (delete_redundant && expire_to) {
+		もし (delete_redundant && expire_to) {
 			/*
 			 * If `--expire-to` is given with `-d`, it's possible
 			 * that we're about to prune some objects. With cruft
@@ -683,12 +683,12 @@ int cmd_repack(int argc,
 			opts.destination = expire_to;
 			ret = write_cruft_pack(&opts, NULL, 0ul, &names,
 					       &existing);
-			if (ret)
+			もし (ret)
 				goto cleanup;
 		}
 	}
 
-	if (po_args.filter_options.choice && !drop_filtered) {
+	もし (po_args.filter_options.choice && !drop_filtered) {
 		struct write_pack_opts opts = {
 			.po_args = &po_args,
 			.destination = filter_to,
@@ -696,11 +696,11 @@ int cmd_repack(int argc,
 			.packtmp = packtmp,
 		};
 
-		if (!opts.destination)
+		もし (!opts.destination)
 			opts.destination = packtmp;
 
 		ret = write_filtered_pack(&opts, &existing, &names);
-		if (ret)
+		もし (ret)
 			goto cleanup;
 	}
 
@@ -716,13 +716,13 @@ int cmd_repack(int argc,
 				       packtmp);
 	/* End of pack replacement. */
 
-	if (delete_redundant && pack_everything & ALL_INTO_ONE) {
-		if (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
+	もし (delete_redundant && pack_everything & ALL_INTO_ONE) {
+		もし (write_midx == REPACK_WRITE_MIDX_INCREMENTAL)
 			existing_packs_retain_midx_packs(&existing);
 		existing_packs_mark_for_deletion(&existing, &names);
 	}
 
-	if (write_midx != REPACK_WRITE_MIDX_NONE) {
+	もし (write_midx != REPACK_WRITE_MIDX_NONE) {
 		struct repack_write_midx_opts opts = {
 			.existing = &existing,
 			.geometry = &geometry,
@@ -738,42 +738,42 @@ int cmd_repack(int argc,
 		};
 
 		ret = repack_write_midx(&opts);
-		if (ret)
+		もし (ret)
 			goto cleanup;
 	}
 
 	odb_reprepare(repo->objects);
 
-	if (delete_redundant) {
-		int opts = 0;
+	もし (delete_redundant) {
+		整数 opts = 0;
 		bool wrote_incremental_midx = write_midx == REPACK_WRITE_MIDX_INCREMENTAL;
 
 		existing_packs_remove_redundant(&existing, packdir,
 						wrote_incremental_midx);
 
-		if (geometry.split_factor)
+		もし (geometry.split_factor)
 			pack_geometry_remove_redundant(&geometry, &names,
 						       &existing, packdir,
 						       wrote_incremental_midx);
-		if (show_progress)
+		もし (show_progress)
 			opts |= PRUNE_PACKED_VERBOSE;
 		prune_packed_objects(opts);
 
-		if (!keep_unreachable &&
+		もし (!keep_unreachable &&
 		    (!(pack_everything & LOOSEN_UNREACHABLE) ||
 		     unpack_unreachable) &&
 		    is_repository_shallow(repo))
 			prune_shallow(PRUNE_QUICK);
 	}
 
-	if (run_update_server_info)
+	もし (run_update_server_info)
 		update_server_info(repo, 0);
 
-	if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
+	もし (git_env_bool(GIT_TEST_MULTI_PACK_INDEX, 0)) {
 		struct odb_source_files *files = odb_source_files_downcast(existing.source);
 		unsigned flags = 0;
 
-		if (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
+		もし (git_env_bool(GIT_TEST_MULTI_PACK_INDEX_WRITE_INCREMENTAL, 0))
 			flags |= MIDX_WRITE_INCREMENTAL;
 		write_midx_file(files->dirs->packed, NULL, NULL, flags);
 	}
@@ -787,5 +787,5 @@ cleanup:
 	pack_objects_args_release(&po_args);
 	pack_objects_args_release(&cruft_po_args);
 
-	return ret;
+	戻る ret;
 }

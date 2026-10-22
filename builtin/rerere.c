@@ -16,29 +16,29 @@ static const char * const rerere_usage[] = {
 	NULL,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+static 整数 outf(void *dummy UNUSED, mmfile_t *ptr, 整数 nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	整数 i;
+	ために (i = 0; i < nbuf; i++)
+		もし (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			戻る -1;
+	戻る 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
+static 整数 diff_two(const char *file1, const char *label1,
 		const char *file2, const char *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
 	xdemitcb_t ecb = { .out_line = outf };
 	mmfile_t minus, plus;
-	int ret;
+	整数 ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
+	もし (read_mmfile(&minus, file1))
+		戻る -1;
+	もし (read_mmfile(&plus, file2)) {
 		free(minus.ptr);
-		return -1;
+		戻る -1;
 	}
 
 	printf("--- a/%s\n+++ b/%s\n", label1, label2);
@@ -51,16 +51,16 @@ static int diff_two(const char *file1, const char *label1,
 
 	free(minus.ptr);
 	free(plus.ptr);
-	return ret;
+	戻る ret;
 }
 
-int cmd_rerere(int argc,
+整数 cmd_rerere(整数 argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo UNUSED)
 {
 	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	整数 autoupdate = -1, flags = 0;
 
 	struct option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
@@ -72,19 +72,19 @@ int cmd_rerere(int argc,
 
 	repo_config(the_repository, git_xmerge_config, NULL);
 
-	if (autoupdate == 1)
+	もし (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	もし (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	もし (argc < 1)
+		戻る repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
+	もし (!strcmp(argv[0], "forget")) {
 		struct pathspec pathspec;
-		int ret;
+		整数 ret;
 
-		if (argc < 2)
+		もし (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		戻る ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	もし (!strcmp(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} 否则 もし (!strcmp(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	否则 もし (!strcmp(argv[0], "status")) {
+		もし (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
+			戻る 0;
+		ために (size_t i = 0; i < merge_rr.nr; i++)
 			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+	} 否则 もし (!strcmp(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
+		ために (size_t i = 0; i < merge_rr.nr; i++) {
+			もし (merge_rr.items[i].util != RERERE_RESOLVED)
 				printf("%s\n", merge_rr.items[i].string);
-			else
+			否则
 				/* prepare for later call to
 				 * string_list_clear() */
 				merge_rr.items[i].util = NULL;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
+	} 否则 もし (!strcmp(argv[0], "diff")) {
 		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+		もし (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
+			戻る 0;
+		ために (size_t i = 0; i < merge_rr.nr; i++) {
 			const char *path = merge_rr.items[i].string;
 			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+			もし (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
 				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} 否则
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	戻る 0;
 }

@@ -115,8 +115,8 @@ struct note_msg {
 };
 
 struct note_data {
-	int use_editor;
-	int stripspace;
+	整数 use_editor;
+	整数 stripspace;
 	char *edit_path;
 	struct strbuf buf;
 	struct note_msg **messages;
@@ -126,41 +126,41 @@ struct note_data {
 
 static void free_note_data(struct note_data *d)
 {
-	if (d->edit_path) {
+	もし (d->edit_path) {
 		unlink_or_warn(d->edit_path);
 		free(d->edit_path);
 	}
 	strbuf_release(&d->buf);
 
-	while (d->msg_nr--) {
+	ながら (d->msg_nr--) {
 		strbuf_release(&d->messages[d->msg_nr]->buf);
 		free(d->messages[d->msg_nr]);
 	}
 	free(d->messages);
 }
 
-static int list_each_note(const struct object_id *object_oid,
+static 整数 list_each_note(const struct object_id *object_oid,
 			  const struct object_id *note_oid,
 			  char *note_path UNUSED,
 			  void *cb_data UNUSED)
 {
 	printf("%s %s\n", oid_to_hex(note_oid), oid_to_hex(object_oid));
-	return 0;
+	戻る 0;
 }
 
-static void copy_obj_to_fd(int fd, const struct object_id *oid)
+static void copy_obj_to_fd(整数 fd, const struct object_id *oid)
 {
 	size_t size;
 	enum object_type type;
 	char *buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (buf) {
-		if (size)
+	もし (buf) {
+		もし (size)
 			write_or_die(fd, buf, size);
 		free(buf);
 	}
 }
 
-static void write_commented_object(int fd, const struct object_id *object)
+static void write_commented_object(整数 fd, const struct object_id *object)
 {
 	struct child_process show = CHILD_PROCESS_INIT;
 	struct strbuf buf = STRBUF_INIT;
@@ -173,11 +173,11 @@ static void write_commented_object(int fd, const struct object_id *object)
 	show.out = -1;
 	show.err = 0;
 	show.git_cmd = 1;
-	if (start_command(&show))
+	もし (start_command(&show))
 		die(_("unable to start 'show' for object '%s'"),
 		    oid_to_hex(object));
 
-	if (strbuf_read(&buf, show.out, 0) < 0)
+	もし (strbuf_read(&buf, show.out, 0) < 0)
 		die_errno(_("could not read 'show' output"));
 	strbuf_add_commented_lines(&cbuf, buf.buf, buf.len, comment_line_str);
 	write_or_die(fd, cbuf.buf, cbuf.len);
@@ -185,7 +185,7 @@ static void write_commented_object(int fd, const struct object_id *object)
 	strbuf_release(&cbuf);
 	strbuf_release(&buf);
 
-	if (finish_command(&show))
+	もし (finish_command(&show))
 		die(_("failed to finish 'show' for object '%s'"),
 		    oid_to_hex(object));
 }
@@ -193,17 +193,17 @@ static void write_commented_object(int fd, const struct object_id *object)
 static void prepare_note_data(const struct object_id *object, struct note_data *d,
 		const struct object_id *old_note)
 {
-	if (d->use_editor || !d->msg_nr) {
-		int fd;
+	もし (d->use_editor || !d->msg_nr) {
+		整数 fd;
 		struct strbuf buf = STRBUF_INIT;
 
 		/* write the template message before editing: */
 		d->edit_path = repo_git_path(the_repository, "NOTES_EDITMSG");
 		fd = xopen(d->edit_path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-		if (d->msg_nr)
+		もし (d->msg_nr)
 			write_or_die(fd, d->buf.buf, d->buf.len);
-		else if (old_note)
+		否则 もし (old_note)
 			copy_obj_to_fd(fd, old_note);
 
 		strbuf_addch(&buf, '\n');
@@ -219,21 +219,21 @@ static void prepare_note_data(const struct object_id *object, struct note_data *
 		strbuf_release(&buf);
 		strbuf_reset(&d->buf);
 
-		if (launch_editor(d->edit_path, &d->buf, NULL)) {
+		もし (launch_editor(d->edit_path, &d->buf, NULL)) {
 			die(_("please supply the note contents using either -m or -F option"));
 		}
-		if (d->stripspace)
+		もし (d->stripspace)
 			strbuf_stripspace(&d->buf, comment_line_str);
 	}
 }
 
 static void write_note_data(struct note_data *d, struct object_id *oid)
 {
-	if (odb_write_object(the_repository->objects, d->buf.buf,
+	もし (odb_write_object(the_repository->objects, d->buf.buf,
 			     d->buf.len, OBJ_BLOB, oid)) {
-		int status = die_message(_("unable to write note object"));
+		整数 status = die_message(_("unable to write note object"));
 
-		if (d->edit_path)
+		もし (d->edit_path)
 			die_message(_("the note contents have been left in %s"),
 				    d->edit_path);
 		exit(status);
@@ -244,11 +244,11 @@ static void append_separator(struct strbuf *message)
 {
 	size_t sep_len = 0;
 
-	if (!separator)
-		return;
-	else if ((sep_len = strlen(separator)) && separator[sep_len - 1] == '\n')
+	もし (!separator)
+		戻る;
+	否则 もし ((sep_len = strlen(separator)) && separator[sep_len - 1] == '\n')
 		strbuf_addstr(message, separator);
-	else
+	否则
 		strbuf_addf(message, "%s%s", separator, "\n");
 }
 
@@ -257,12 +257,12 @@ static void concat_messages(struct note_data *d)
 	struct strbuf msg = STRBUF_INIT;
 	size_t i;
 
-	for (i = 0; i < d->msg_nr ; i++) {
-		if (d->buf.len)
+	ために (i = 0; i < d->msg_nr ; i++) {
+		もし (d->buf.len)
 			append_separator(&d->buf);
 		strbuf_add(&msg, d->messages[i]->buf.buf, d->messages[i]->buf.len);
 		strbuf_addbuf(&d->buf, &msg);
-		if ((d->stripspace == UNSPECIFIED &&
+		もし ((d->stripspace == UNSPECIFIED &&
 		     d->messages[i]->stripspace == STRIPSPACE) ||
 		    d->stripspace == STRIPSPACE)
 			strbuf_stripspace(&d->buf, NULL);
@@ -271,7 +271,7 @@ static void concat_messages(struct note_data *d)
 	strbuf_release(&msg);
 }
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+static 整数 parse_msg_arg(const struct option *opt, const char *arg, 整数 unset)
 {
 	struct note_data *d = opt->value;
 	struct note_msg *msg = xmalloc(sizeof(*msg));
@@ -283,10 +283,10 @@ static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
 	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
 	d->messages[d->msg_nr - 1] = msg;
 	msg->stripspace = STRIPSPACE;
-	return 0;
+	戻る 0;
 }
 
-static int parse_file_arg(const struct option *opt, const char *arg, int unset)
+static 整数 parse_file_arg(const struct option *opt, const char *arg, 整数 unset)
 {
 	struct note_data *d = opt->value;
 	struct note_msg *msg = xmalloc(sizeof(*msg));
@@ -294,19 +294,19 @@ static int parse_file_arg(const struct option *opt, const char *arg, int unset)
 	BUG_ON_OPT_NEG(unset);
 
 	strbuf_init(&msg->buf , 0);
-	if (!strcmp(arg, "-")) {
-		if (strbuf_read(&msg->buf, 0, 1024) < 0)
+	もし (!strcmp(arg, "-")) {
+		もし (strbuf_read(&msg->buf, 0, 1024) < 0)
 			die_errno(_("cannot read '%s'"), arg);
-	} else if (strbuf_read_file(&msg->buf, arg, 1024) < 0)
+	} 否则 もし (strbuf_read_file(&msg->buf, arg, 1024) < 0)
 		die_errno(_("could not open or read '%s'"), arg);
 
 	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
 	d->messages[d->msg_nr - 1] = msg;
 	msg->stripspace = STRIPSPACE;
-	return 0;
+	戻る 0;
 }
 
-static int parse_reuse_arg(const struct option *opt, const char *arg, int unset)
+static 整数 parse_reuse_arg(const struct option *opt, const char *arg, 整数 unset)
 {
 	struct note_data *d = opt->value;
 	struct note_msg *msg = xmalloc(sizeof(*msg));
@@ -318,11 +318,11 @@ static int parse_reuse_arg(const struct option *opt, const char *arg, int unset)
 	BUG_ON_OPT_NEG(unset);
 
 	strbuf_init(&msg->buf, 0);
-	if (repo_get_oid(the_repository, arg, &object))
+	もし (repo_get_oid(the_repository, arg, &object))
 		die(_("failed to resolve '%s' as a valid ref."), arg);
-	if (!(value = odb_read_object(the_repository->objects, &object, &type, &len)))
+	もし (!(value = odb_read_object(the_repository->objects, &object, &type, &len)))
 		die(_("failed to read object '%s'."), arg);
-	if (type != OBJ_BLOB) {
+	もし (type != OBJ_BLOB) {
 		strbuf_release(&msg->buf);
 		free(value);
 		free(msg);
@@ -336,67 +336,67 @@ static int parse_reuse_arg(const struct option *opt, const char *arg, int unset)
 	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
 	d->messages[d->msg_nr - 1] = msg;
 	msg->stripspace = NO_STRIPSPACE;
-	return 0;
+	戻る 0;
 }
 
-static int parse_reedit_arg(const struct option *opt, const char *arg, int unset)
+static 整数 parse_reedit_arg(const struct option *opt, const char *arg, 整数 unset)
 {
 	struct note_data *d = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	d->use_editor = 1;
-	return parse_reuse_arg(opt, arg, unset);
+	戻る parse_reuse_arg(opt, arg, unset);
 }
 
-static int parse_separator_arg(const struct option *opt, const char *arg,
-			       int unset)
+static 整数 parse_separator_arg(const struct option *opt, const char *arg,
+			       整数 unset)
 {
-	if (unset)
+	もし (unset)
 		*(const char **)opt->value = NULL;
-	else
+	否则
 		*(const char **)opt->value = arg ? arg : "\n";
-	return 0;
+	戻る 0;
 }
 
-static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
+static 整数 notes_copy_from_stdin(整数 force, const char *rewrite_cmd)
 {
 	struct strbuf buf = STRBUF_INIT;
 	struct notes_rewrite_cfg *c = NULL;
 	struct notes_tree *t = NULL;
-	int ret = 0;
+	整数 ret = 0;
 	const char *msg = "Notes added by 'git notes copy'";
 
-	if (rewrite_cmd) {
+	もし (rewrite_cmd) {
 		c = init_copy_notes_for_rewrite(rewrite_cmd);
-		if (!c)
-			return 0;
-	} else {
+		もし (!c)
+			戻る 0;
+	} 否则 {
 		init_notes(NULL, NULL, NULL, NOTES_INIT_WRITABLE);
 		t = &default_notes_tree;
 	}
 
-	while (strbuf_getline_lf(&buf, stdin) != EOF) {
+	ながら (strbuf_getline_lf(&buf, stdin) != EOF) {
 		struct object_id from_obj, to_obj;
 		struct string_list split = STRING_LIST_INIT_NODUP;
-		int err;
+		整数 err;
 
 		string_list_split_in_place_f(&split, buf.buf, " ", -1,
 					     STRING_LIST_SPLIT_TRIM);
-		if (split.nr < 2)
+		もし (split.nr < 2)
 			die(_("malformed input line: '%s'."), buf.buf);
-		if (repo_get_oid(the_repository, split.items[0].string, &from_obj))
+		もし (repo_get_oid(the_repository, split.items[0].string, &from_obj))
 			die(_("failed to resolve '%s' as a valid ref."),
 			    split.items[0].string);
-		if (repo_get_oid(the_repository, split.items[1].string, &to_obj))
+		もし (repo_get_oid(the_repository, split.items[1].string, &to_obj))
 			die(_("failed to resolve '%s' as a valid ref."),
 			    split.items[1].string);
 
-		if (rewrite_cmd)
+		もし (rewrite_cmd)
 			err = copy_note_for_rewrite(c, &from_obj, &to_obj);
-		else
+		否则
 			err = copy_note(t, &from_obj, &to_obj, force,
 					combine_notes_overwrite);
 
-		if (err) {
+		もし (err) {
 			error(_("failed to copy notes from '%s' to '%s'"),
 			      split.items[0].string, split.items[1].string);
 			ret = 1;
@@ -405,18 +405,18 @@ static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
 		string_list_clear(&split, 0);
 	}
 
-	if (!rewrite_cmd) {
+	もし (!rewrite_cmd) {
 		commit_notes(the_repository, t, msg);
 		free_notes(t);
-	} else {
+	} 否则 {
 		finish_copy_notes_for_rewrite(the_repository, c, msg);
 	}
 	strbuf_release(&buf);
-	return ret;
+	戻る ret;
 }
 
 static struct notes_tree *init_notes_check(const char *subcommand,
-					   int flags)
+					   整数 flags)
 {
 	struct notes_tree *t;
 	const char *ref;
@@ -424,61 +424,61 @@ static struct notes_tree *init_notes_check(const char *subcommand,
 	t = &default_notes_tree;
 
 	ref = (flags & NOTES_INIT_WRITABLE) ? t->update_ref : t->ref;
-	if (!starts_with(ref, "refs/notes/"))
+	もし (!starts_with(ref, "refs/notes/"))
 		/*
 		 * TRANSLATORS: the first %s will be replaced by a git
 		 * notes command: 'add', 'merge', 'remove', etc.
 		 */
 		die(_("refusing to %s notes in %s (outside of refs/notes/)"),
 		    subcommand, ref);
-	return t;
+	戻る t;
 }
 
-static int list(int argc, const char **argv, const char *prefix,
+static 整数 list(整数 argc, const char **argv, const char *prefix,
 		struct repository *repo UNUSED)
 {
 	struct notes_tree *t;
 	struct object_id object;
 	const struct object_id *note;
-	int retval = -1;
+	整数 retval = -1;
 	struct option options[] = {
 		OPT_END()
 	};
 
-	if (argc)
+	もし (argc)
 		argc = parse_options(argc, argv, prefix, options,
 				     git_notes_list_usage, 0);
 
-	if (1 < argc) {
+	もし (1 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_list_usage, options);
 	}
 
 	t = init_notes_check("list", 0);
-	if (argc) {
-		if (repo_get_oid(the_repository, argv[0], &object))
+	もし (argc) {
+		もし (repo_get_oid(the_repository, argv[0], &object))
 			die(_("failed to resolve '%s' as a valid ref."), argv[0]);
 		note = get_note(t, &object);
-		if (note) {
+		もし (note) {
 			puts(oid_to_hex(note));
 			retval = 0;
-		} else
+		} 否则
 			retval = error(_("no note found for object %s."),
 				       oid_to_hex(&object));
-	} else
+	} 否则
 		retval = for_each_note(t, 0, list_each_note, NULL);
 
 	free_notes(t);
-	return retval;
+	戻る retval;
 }
 
-static int append_edit(int argc, const char **argv, const char *prefix,
+static 整数 append_edit(整数 argc, const char **argv, const char *prefix,
 		       struct repository *repo UNUSED);
 
-static int add(int argc, const char **argv, const char *prefix,
+static 整数 add(整数 argc, const char **argv, const char *prefix,
 	       struct repository *repo)
 {
-	int force = 0, allow_empty = 0;
+	整数 force = 0, allow_empty = 0;
 	const char *object_ref;
 	struct notes_tree *t;
 	struct object_id object, new_note;
@@ -515,28 +515,28 @@ static int add(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_add_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (2 < argc) {
+	もし (2 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_add_usage, options);
 	}
 
-	if (d.msg_nr)
+	もし (d.msg_nr)
 		concat_messages(&d);
 
 	object_ref = argc > 1 ? argv[1] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	もし (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check("add", NOTES_INIT_WRITABLE);
 	note = get_note(t, &object);
 
-	if (note) {
-		if (!force) {
+	もし (note) {
+		もし (!force) {
 			free_notes(t);
-			if (d.msg_nr) {
+			もし (d.msg_nr) {
 				free_note_data(&d);
-				return error(_("Cannot add notes. "
+				戻る error(_("Cannot add notes. "
 					"Found existing notes for object %s. "
 					"Use '-f' to overwrite existing notes"),
 					oid_to_hex(&object));
@@ -549,20 +549,20 @@ static int add(int argc, const char **argv, const char *prefix,
 			 * argv[0-1].
 			 */
 			argv[0] = "edit";
-			return append_edit(argc, argv, prefix, repo);
+			戻る append_edit(argc, argv, prefix, repo);
 		}
 		fprintf(stderr, _("Overwriting existing notes for object %s\n"),
 			oid_to_hex(&object));
 	}
 
 	prepare_note_data(&object, &d, note);
-	if (d.buf.len || allow_empty) {
+	もし (d.buf.len || allow_empty) {
 		write_note_data(&d, &new_note);
-		if (add_note(t, &object, &new_note, combine_notes_overwrite))
+		もし (add_note(t, &object, &new_note, combine_notes_overwrite))
 			BUG("combine_notes_overwrite failed");
 		commit_notes(the_repository, t,
 			     "Notes added by 'git notes add'");
-	} else {
+	} 否则 {
 		fprintf(stderr, _("Removing note for object %s\n"),
 			oid_to_hex(&object));
 		remove_note(t, object.hash);
@@ -572,13 +572,13 @@ static int add(int argc, const char **argv, const char *prefix,
 
 	free_note_data(&d);
 	free_notes(t);
-	return 0;
+	戻る 0;
 }
 
-static int copy(int argc, const char **argv, const char *prefix,
+static 整数 copy(整数 argc, const char **argv, const char *prefix,
 		struct repository *repo UNUSED)
 {
-	int retval = 0, force = 0, from_stdin = 0;
+	整数 retval = 0, force = 0, from_stdin = 0;
 	const struct object_id *from_note, *note;
 	const char *object_ref;
 	struct object_id object, from_obj;
@@ -596,37 +596,37 @@ static int copy(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_copy_usage,
 			     0);
 
-	if (from_stdin || rewrite_cmd) {
-		if (argc) {
+	もし (from_stdin || rewrite_cmd) {
+		もし (argc) {
 			error(_("too many arguments"));
 			usage_with_options(git_notes_copy_usage, options);
-		} else {
-			return notes_copy_from_stdin(force, rewrite_cmd);
+		} 否则 {
+			戻る notes_copy_from_stdin(force, rewrite_cmd);
 		}
 	}
 
-	if (argc < 1) {
+	もし (argc < 1) {
 		error(_("too few arguments"));
 		usage_with_options(git_notes_copy_usage, options);
 	}
-	if (2 < argc) {
+	もし (2 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_copy_usage, options);
 	}
 
-	if (repo_get_oid(the_repository, argv[0], &from_obj))
+	もし (repo_get_oid(the_repository, argv[0], &from_obj))
 		die(_("failed to resolve '%s' as a valid ref."), argv[0]);
 
 	object_ref = 1 < argc ? argv[1] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	もし (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check("copy", NOTES_INIT_WRITABLE);
 	note = get_note(t, &object);
 
-	if (note) {
-		if (!force) {
+	もし (note) {
+		もし (!force) {
 			retval = error(_("Cannot copy notes. Found existing "
 				       "notes for object %s. Use '-f' to "
 				       "overwrite existing notes"),
@@ -638,25 +638,25 @@ static int copy(int argc, const char **argv, const char *prefix,
 	}
 
 	from_note = get_note(t, &from_obj);
-	if (!from_note) {
+	もし (!from_note) {
 		retval = error(_("missing notes on source object %s. Cannot "
 			       "copy."), oid_to_hex(&from_obj));
 		goto out;
 	}
 
-	if (add_note(t, &object, from_note, combine_notes_overwrite))
+	もし (add_note(t, &object, from_note, combine_notes_overwrite))
 		BUG("combine_notes_overwrite failed");
 	commit_notes(the_repository, t,
 		     "Notes added by 'git notes copy'");
 out:
 	free_notes(t);
-	return retval;
+	戻る retval;
 }
 
-static int append_edit(int argc, const char **argv, const char *prefix,
+static 整数 append_edit(整数 argc, const char **argv, const char *prefix,
 		       struct repository *repo UNUSED)
 {
-	int allow_empty = 0;
+	整数 allow_empty = 0;
 	const char *object_ref;
 	struct notes_tree *t;
 	struct object_id object, new_note;
@@ -689,20 +689,20 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 			N_("remove unnecessary whitespace")),
 		OPT_END()
 	};
-	int edit = !strcmp(argv[0], "edit");
+	整数 edit = !strcmp(argv[0], "edit");
 
 	usage = edit ? git_notes_edit_usage : git_notes_append_usage;
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (2 < argc) {
+	もし (2 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(usage, options);
 	}
 
-	if (d.msg_nr) {
+	もし (d.msg_nr) {
 		concat_messages(&d);
-		if (edit)
+		もし (edit)
 			fprintf(stderr, _("The -m/-F/-c/-C options have been "
 				"deprecated for the 'edit' subcommand.\n"
 				"Please use 'git notes add -f -m/-F/-c/-C' "
@@ -711,7 +711,7 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 
 	object_ref = 1 < argc ? argv[1] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	もし (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check(argv[0], NOTES_INIT_WRITABLE);
@@ -719,18 +719,18 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 
 	prepare_note_data(&object, &d, edit && note ? note : NULL);
 
-	if (note && !edit) {
+	もし (note && !edit) {
 		/* Append buf to previous note contents */
 		size_t size;
 		enum object_type type;
 		struct strbuf buf = STRBUF_INIT;
 		char *prev_buf = odb_read_object(the_repository->objects, note, &type, &size);
 
-		if (!prev_buf)
+		もし (!prev_buf)
 			die(_("unable to read %s"), oid_to_hex(note));
-		if (size)
+		もし (size)
 			strbuf_add(&buf, prev_buf, size);
-		if (d.buf.len && size)
+		もし (d.buf.len && size)
 			append_separator(&buf);
 		strbuf_insert(&d.buf, 0, buf.buf, buf.len);
 
@@ -738,12 +738,12 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 		strbuf_release(&buf);
 	}
 
-	if (d.buf.len || allow_empty) {
+	もし (d.buf.len || allow_empty) {
 		write_note_data(&d, &new_note);
-		if (add_note(t, &object, &new_note, combine_notes_overwrite))
+		もし (add_note(t, &object, &new_note, combine_notes_overwrite))
 			BUG("combine_notes_overwrite failed");
 		logmsg = xstrfmt("Notes added by 'git notes %s'", argv[0]);
-	} else {
+	} 否则 {
 		fprintf(stderr, _("Removing note for object %s\n"),
 			oid_to_hex(&object));
 		remove_note(t, object.hash);
@@ -754,17 +754,17 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 	free(logmsg);
 	free_note_data(&d);
 	free_notes(t);
-	return 0;
+	戻る 0;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
+static 整数 show(整数 argc, const char **argv, const char *prefix,
 		struct repository *repo UNUSED)
 {
 	const char *object_ref;
 	struct notes_tree *t;
 	struct object_id object;
 	const struct object_id *note;
-	int retval;
+	整数 retval;
 	struct option options[] = {
 		OPT_END()
 	};
@@ -772,49 +772,49 @@ static int show(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_show_usage,
 			     0);
 
-	if (1 < argc) {
+	もし (1 < argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_show_usage, options);
 	}
 
 	object_ref = argc ? argv[0] : "HEAD";
 
-	if (repo_get_oid(the_repository, object_ref, &object))
+	もし (repo_get_oid(the_repository, object_ref, &object))
 		die(_("failed to resolve '%s' as a valid ref."), object_ref);
 
 	t = init_notes_check("show", 0);
 	note = get_note(t, &object);
 
-	if (!note)
+	もし (!note)
 		retval = error(_("no note found for object %s."),
 			       oid_to_hex(&object));
-	else {
+	否则 {
 		const char *show_args[3] = {"show", oid_to_hex(note), NULL};
 		retval = execv_git_cmd(show_args);
 	}
 	free_notes(t);
-	return retval;
+	戻る retval;
 }
 
-static int merge_abort(struct notes_merge_options *o)
+static 整数 merge_abort(struct notes_merge_options *o)
 {
-	int ret = 0;
+	整数 ret = 0;
 
 	/*
 	 * Remove .git/NOTES_MERGE_PARTIAL and .git/NOTES_MERGE_REF, and call
 	 * notes_merge_abort() to remove .git/NOTES_MERGE_WORKTREE.
 	 */
 
-	if (refs_delete_ref(get_main_ref_store(the_repository), NULL, "NOTES_MERGE_PARTIAL", NULL, 0))
+	もし (refs_delete_ref(get_main_ref_store(the_repository), NULL, "NOTES_MERGE_PARTIAL", NULL, 0))
 		ret += error(_("failed to delete ref NOTES_MERGE_PARTIAL"));
-	if (refs_delete_ref(get_main_ref_store(the_repository), NULL, "NOTES_MERGE_REF", NULL, REF_NO_DEREF))
+	もし (refs_delete_ref(get_main_ref_store(the_repository), NULL, "NOTES_MERGE_REF", NULL, REF_NO_DEREF))
 		ret += error(_("failed to delete ref NOTES_MERGE_REF"));
-	if (notes_merge_abort(o))
+	もし (notes_merge_abort(o))
 		ret += error(_("failed to remove 'git notes merge' worktree"));
-	return ret;
+	戻る ret;
 }
 
-static int merge_commit(struct notes_merge_options *o)
+static 整数 merge_commit(struct notes_merge_options *o)
 {
 	struct strbuf msg = STRBUF_INIT;
 	struct object_id oid, parent_oid;
@@ -822,23 +822,23 @@ static int merge_commit(struct notes_merge_options *o)
 	struct commit *partial;
 	struct pretty_print_context pretty_ctx;
 	void *local_ref_to_free;
-	int ret;
+	整数 ret;
 
 	/*
 	 * Read partial merge result from .git/NOTES_MERGE_PARTIAL,
 	 * and target notes ref from .git/NOTES_MERGE_REF.
 	 */
 
-	if (repo_get_oid(the_repository, "NOTES_MERGE_PARTIAL", &oid))
+	もし (repo_get_oid(the_repository, "NOTES_MERGE_PARTIAL", &oid))
 		die(_("failed to read ref NOTES_MERGE_PARTIAL"));
-	else if (!(partial = lookup_commit_reference(the_repository, &oid)))
+	否则 もし (!(partial = lookup_commit_reference(the_repository, &oid)))
 		die(_("could not find commit from NOTES_MERGE_PARTIAL."));
-	else if (repo_parse_commit(the_repository, partial))
+	否则 もし (repo_parse_commit(the_repository, partial))
 		die(_("could not parse commit from NOTES_MERGE_PARTIAL."));
 
-	if (partial->parents)
+	もし (partial->parents)
 		oidcpy(&parent_oid, &partial->parents->item->object.oid);
-	else
+	否则
 		oidclr(&parent_oid, the_repository->hash_algo);
 
 	init_notes(&t, "NOTES_MERGE_PARTIAL", combine_notes_overwrite, 0);
@@ -846,10 +846,10 @@ static int merge_commit(struct notes_merge_options *o)
 	o->local_ref = local_ref_to_free =
 		refs_resolve_refdup(get_main_ref_store(the_repository),
 				    "NOTES_MERGE_REF", 0, &oid, NULL);
-	if (!o->local_ref)
+	もし (!o->local_ref)
 		die(_("failed to resolve NOTES_MERGE_REF"));
 
-	if (notes_merge_commit(o, &t, partial, &oid))
+	もし (notes_merge_commit(o, &t, partial, &oid))
 		die(_("failed to finalize notes merge"));
 
 	/* Reuse existing commit message in reflog message */
@@ -867,32 +867,32 @@ static int merge_commit(struct notes_merge_options *o)
 	strbuf_release(&msg);
 	ret = merge_abort(o);
 	free(local_ref_to_free);
-	return ret;
+	戻る ret;
 }
 
-static int git_config_get_notes_strategy(const char *key,
+static 整数 git_config_get_notes_strategy(const char *key,
 					 enum notes_merge_strategy *strategy)
 {
 	char *value;
 
-	if (repo_config_get_string(the_repository, key, &value))
-		return 1;
-	if (parse_notes_merge_strategy(value, strategy))
+	もし (repo_config_get_string(the_repository, key, &value))
+		戻る 1;
+	もし (parse_notes_merge_strategy(value, strategy))
 		git_die_config(the_repository, key, _("unknown notes merge strategy %s"), value);
 
 	free(value);
-	return 0;
+	戻る 0;
 }
 
-static int merge(int argc, const char **argv, const char *prefix,
+static 整数 merge(整数 argc, const char **argv, const char *prefix,
 		 struct repository *repo UNUSED)
 {
 	struct strbuf remote_ref = STRBUF_INIT, msg = STRBUF_INIT;
 	struct object_id result_oid;
 	struct notes_tree *t;
 	struct notes_merge_options o;
-	int do_merge = 0, do_commit = 0, do_abort = 0;
-	int verbosity = 0, result;
+	整数 do_merge = 0, do_commit = 0, do_abort = 0;
+	整数 verbosity = 0, result;
 	const char *strategy = NULL;
 	struct option options[] = {
 		OPT_GROUP(N_("General options")),
@@ -916,17 +916,17 @@ static int merge(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_notes_merge_usage, 0);
 
-	if (strategy || do_commit + do_abort == 0)
+	もし (strategy || do_commit + do_abort == 0)
 		do_merge = 1;
-	if (do_merge + do_commit + do_abort != 1) {
+	もし (do_merge + do_commit + do_abort != 1) {
 		error(_("cannot mix --commit, --abort or -s/--strategy"));
 		usage_with_options(git_notes_merge_usage, options);
 	}
 
-	if (do_merge && argc != 1) {
+	もし (do_merge && argc != 1) {
 		error(_("must specify a notes ref to merge"));
 		usage_with_options(git_notes_merge_usage, options);
-	} else if (!do_merge && argc) {
+	} 否则 もし (!do_merge && argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_merge_usage, options);
 	}
@@ -934,10 +934,10 @@ static int merge(int argc, const char **argv, const char *prefix,
 	init_notes_merge_options(the_repository, &o);
 	o.verbosity = verbosity + NOTES_MERGE_VERBOSITY_DEFAULT;
 
-	if (do_abort)
-		return merge_abort(&o);
-	if (do_commit)
-		return merge_commit(&o);
+	もし (do_abort)
+		戻る merge_abort(&o);
+	もし (do_commit)
+		戻る merge_commit(&o);
 
 	notes_ref = default_notes_ref(the_repository);
 	o.local_ref = notes_ref;
@@ -947,22 +947,22 @@ static int merge(int argc, const char **argv, const char *prefix,
 
 	t = init_notes_check("merge", NOTES_INIT_WRITABLE);
 
-	if (strategy) {
-		if (parse_notes_merge_strategy(strategy, &o.strategy)) {
+	もし (strategy) {
+		もし (parse_notes_merge_strategy(strategy, &o.strategy)) {
 			error(_("unknown -s/--strategy: %s"), strategy);
 			usage_with_options(git_notes_merge_usage, options);
 		}
-	} else {
+	} 否则 {
 		struct strbuf merge_key = STRBUF_INIT;
 		const char *short_ref = NULL;
 
-		if (!skip_prefix(o.local_ref, "refs/notes/", &short_ref))
+		もし (!skip_prefix(o.local_ref, "refs/notes/", &short_ref))
 			BUG("local ref %s is outside of refs/notes/",
 			    o.local_ref);
 
 		strbuf_addf(&merge_key, "notes.%s.mergeStrategy", short_ref);
 
-		if (git_config_get_notes_strategy(merge_key.buf, &o.strategy))
+		もし (git_config_get_notes_strategy(merge_key.buf, &o.strategy))
 			git_config_get_notes_strategy("notes.mergeStrategy", &o.strategy);
 
 		strbuf_release(&merge_key);
@@ -974,12 +974,12 @@ static int merge(int argc, const char **argv, const char *prefix,
 
 	result = notes_merge(&o, t, &result_oid);
 
-	if (result >= 0) /* Merge resulted (trivially) in result_oid */
+	もし (result >= 0) /* Merge resulted (trivially) in result_oid */
 		/* Update default notes ref with new commit */
 		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
 				notes_ref, &result_oid, NULL, 0,
 				UPDATE_REFS_DIE_ON_ERR);
-	else { /* Merge has unresolved conflicts */
+	否则 { /* Merge has unresolved conflicts */
 		struct worktree **worktrees;
 		const struct worktree *wt;
 		char *path;
@@ -992,11 +992,11 @@ static int merge(int argc, const char **argv, const char *prefix,
 		worktrees = get_worktrees(the_repository);
 		wt = find_shared_symref(worktrees, "NOTES_MERGE_REF",
 					notes_ref);
-		if (wt)
+		もし (wt)
 			die(_("a notes merge into %s is already in-progress at %s"),
 			    notes_ref, wt->path);
 		free_worktrees(worktrees);
-		if (refs_update_symref(get_main_ref_store(the_repository), "NOTES_MERGE_REF", notes_ref, NULL))
+		もし (refs_update_symref(get_main_ref_store(the_repository), "NOTES_MERGE_REF", notes_ref, NULL))
 			die(_("failed to store link to current notes ref (%s)"),
 			    notes_ref);
 
@@ -1012,30 +1012,30 @@ static int merge(int argc, const char **argv, const char *prefix,
 	free(notes_ref);
 	strbuf_release(&remote_ref);
 	strbuf_release(&msg);
-	return result < 0; /* return non-zero on conflicts */
+	戻る result < 0; /* return non-zero on conflicts */
 }
 
 #define IGNORE_MISSING 1
 
-static int remove_one_note(struct notes_tree *t, const char *name, unsigned flag)
+static 整数 remove_one_note(struct notes_tree *t, const char *name, unsigned flag)
 {
-	int status;
+	整数 status;
 	struct object_id oid;
-	if (repo_get_oid(the_repository, name, &oid))
-		return error(_("Failed to resolve '%s' as a valid ref."), name);
+	もし (repo_get_oid(the_repository, name, &oid))
+		戻る error(_("Failed to resolve '%s' as a valid ref."), name);
 	status = remove_note(t, oid.hash);
-	if (status)
+	もし (status)
 		fprintf(stderr, _("Object %s has no note\n"), name);
-	else
+	否则
 		fprintf(stderr, _("Removing note for object %s\n"), name);
-	return (flag & IGNORE_MISSING) ? 0 : status;
+	戻る (flag & IGNORE_MISSING) ? 0 : status;
 }
 
-static int remove_cmd(int argc, const char **argv, const char *prefix,
+static 整数 remove_cmd(整数 argc, const char **argv, const char *prefix,
 		      struct repository *repo UNUSED)
 {
 	unsigned flag = 0;
-	int from_stdin = 0;
+	整数 from_stdin = 0;
 	struct option options[] = {
 		OPT_BIT(0, "ignore-missing", &flag,
 			N_("attempt to remove non-existent note is not an error"),
@@ -1045,41 +1045,41 @@ static int remove_cmd(int argc, const char **argv, const char *prefix,
 		OPT_END()
 	};
 	struct notes_tree *t;
-	int retval = 0;
+	整数 retval = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_notes_remove_usage, 0);
 
 	t = init_notes_check("remove", NOTES_INIT_WRITABLE);
 
-	if (!argc && !from_stdin) {
+	もし (!argc && !from_stdin) {
 		retval = remove_one_note(t, "HEAD", flag);
-	} else {
-		while (*argv) {
+	} 否则 {
+		ながら (*argv) {
 			retval |= remove_one_note(t, *argv, flag);
 			argv++;
 		}
 	}
-	if (from_stdin) {
+	もし (from_stdin) {
 		struct strbuf sb = STRBUF_INIT;
-		while (strbuf_getwholeline(&sb, stdin, '\n') != EOF) {
+		ながら (strbuf_getwholeline(&sb, stdin, '\n') != EOF) {
 			strbuf_rtrim(&sb);
 			retval |= remove_one_note(t, sb.buf, flag);
 		}
 		strbuf_release(&sb);
 	}
-	if (!retval)
+	もし (!retval)
 		commit_notes(the_repository, t,
 			     "Notes removed by 'git notes remove'");
 	free_notes(t);
-	return retval;
+	戻る retval;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
+static 整数 prune(整数 argc, const char **argv, const char *prefix,
 		 struct repository *repo UNUSED)
 {
 	struct notes_tree *t;
-	int show_only = 0, verbose = 0;
+	整数 show_only = 0, verbose = 0;
 	struct option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned notes")),
@@ -1089,7 +1089,7 @@ static int prune(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options, git_notes_prune_usage,
 			     0);
 
-	if (argc) {
+	もし (argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_prune_usage, options);
 	}
@@ -1098,14 +1098,14 @@ static int prune(int argc, const char **argv, const char *prefix,
 
 	prune_notes(t, (verbose ? NOTES_PRUNE_VERBOSE : 0) |
 		(show_only ? NOTES_PRUNE_VERBOSE|NOTES_PRUNE_DRYRUN : 0) );
-	if (!show_only)
+	もし (!show_only)
 		commit_notes(the_repository, t,
 			     "Notes removed by 'git notes prune'");
 	free_notes(t);
-	return 0;
+	戻る 0;
 }
 
-static int get_ref(int argc, const char **argv, const char *prefix,
+static 整数 get_ref(整数 argc, const char **argv, const char *prefix,
 		   struct repository *repo UNUSED)
 {
 	struct option options[] = { OPT_END() };
@@ -1113,7 +1113,7 @@ static int get_ref(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_notes_get_ref_usage, 0);
 
-	if (argc) {
+	もし (argc) {
 		error(_("too many arguments"));
 		usage_with_options(git_notes_get_ref_usage, options);
 	}
@@ -1121,10 +1121,10 @@ static int get_ref(int argc, const char **argv, const char *prefix,
 	notes_ref = default_notes_ref(the_repository);
 	puts(notes_ref);
 	free(notes_ref);
-	return 0;
+	戻る 0;
 }
 
-int cmd_notes(int argc,
+整数 cmd_notes(整数 argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo)
@@ -1150,15 +1150,15 @@ int cmd_notes(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, options, git_notes_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
-	if (!fn) {
-		if (argc) {
+	もし (!fn) {
+		もし (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(git_notes_usage, options);
 		}
 		fn = list;
 	}
 
-	if (override_notes_ref) {
+	もし (override_notes_ref) {
 		struct strbuf sb = STRBUF_INIT;
 		strbuf_addstr(&sb, override_notes_ref);
 		expand_notes_ref(&sb);
@@ -1166,5 +1166,5 @@ int cmd_notes(int argc,
 		strbuf_release(&sb);
 	}
 
-	return !!fn(argc, argv, prefix, repo);
+	戻る !!fn(argc, argv, prefix, repo);
 }

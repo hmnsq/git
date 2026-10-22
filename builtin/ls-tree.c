@@ -24,30 +24,30 @@ static const char * const ls_tree_usage[] = {
 };
 
 static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+			      const enum object_type type, unsigned 整数 padded)
 {
 	static const char padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
 	size_t orig_len = line->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	もし (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+		もし (odb_read_object_info(the_repository->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
 		strbuf_add_uint(line, size);
-	} else {
+	} 否则 {
 		strbuf_addstr(line, "-");
 	}
 	len = line->len - orig_len;
-	if (len < min_len)
+	もし (len < min_len)
 		strbuf_insert(line, orig_len, padding, min_len - len);
 }
 
 struct ls_tree_options {
 	unsigned null_termination:1;
-	int abbrev;
+	整数 abbrev;
 	enum ls_tree_path_options {
 		LS_RECURSIVE = 1 << 0,
 		LS_TREE_ONLY = 1 << 1,
@@ -58,71 +58,71 @@ struct ls_tree_options {
 	const char *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
+static 整数 show_recursive(struct ls_tree_options *options, const char *base,
 			  size_t baselen, const char *pathname)
 {
-	int i;
+	整数 i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	もし (options->ls_options & LS_RECURSIVE)
+		戻る 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	もし (!options->pathspec.nr)
+		戻る 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
+	ために (i = 0; i < options->pathspec.nr; i++) {
 		const char *spec = options->pathspec.items[i].match;
 		size_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
+		もし (strncmp(base, spec, baselen))
 			continue;
 		len = strlen(pathname);
 		spec += baselen;
 		speclen = strlen(spec);
-		if (speclen <= len)
+		もし (speclen <= len)
 			continue;
-		if (spec[len] && spec[len] != '/')
+		もし (spec[len] && spec[len] != '/')
 			continue;
-		if (memcmp(pathname, spec, len))
+		もし (memcmp(pathname, spec, len))
 			continue;
-		return 1;
+		戻る 1;
 	}
-	return 0;
+	戻る 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
+static 整数 show_tree_fmt(const struct object_id *oid, struct strbuf *base,
 			 const char *pathname, unsigned mode, void *context)
 {
 	struct ls_tree_options *options = context;
-	int recurse = 0;
+	整数 recurse = 0;
 	struct strbuf sb = STRBUF_INIT;
 	enum object_type type = object_type(mode);
 	const char *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
+	もし (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
 		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	もし (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
+		戻る recurse;
+	もし (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
+		戻る 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	ながら (strbuf_expand_step(&sb, &format)) {
 		size_t len;
 
-		if (skip_prefix(format, "%", &format))
+		もし (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		否则 もし ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		否则 もし (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		否则 もし (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		否则 もし (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		否则 もし (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
+		否则 もし (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
+		否则 もし (skip_prefix(format, "(path)", &format)) {
 			const char *name;
 			const char *prefix = options->prefix;
 			struct strbuf sbuf = STRBUF_INIT;
@@ -133,33 +133,33 @@ static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
 			quote_c_style(name, &sb, NULL, 0);
 			strbuf_setlen(base, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} 否则
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	戻る recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
+static 整数 show_tree_common(struct ls_tree_options *options, 整数 *recurse,
 			    struct strbuf *base, const char *pathname,
 			    enum object_type type)
 {
-	int ret = -1;
+	整数 ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	もし (type == OBJ_BLOB) {
+		もし (options->ls_options & LS_TREE_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
+	} 否则 もし (type == OBJ_TREE &&
 		   show_recursive(options, base->buf, base->len, pathname)) {
 		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+		もし (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	戻る ret;
 }
 
 static void show_tree_common_default_long(struct ls_tree_options *options,
@@ -171,7 +171,7 @@ static void show_tree_common_default_long(struct ls_tree_options *options,
 
 	strbuf_addstr(base, pathname);
 
-	if (options->null_termination) {
+	もし (options->null_termination) {
 		struct strbuf sb = STRBUF_INIT;
 		const char *name = relative_path(base->buf, prefix, &sb);
 
@@ -179,54 +179,54 @@ static void show_tree_common_default_long(struct ls_tree_options *options,
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} 否则 {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 
 	strbuf_setlen(base, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
+static 整数 show_tree_default(const struct object_id *oid, struct strbuf *base,
 			     const char *pathname, unsigned mode,
 			     void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	整数 early;
+	整数 recurse;
 	enum object_type type = object_type(mode);
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	もし (early >= 0)
+		戻る early;
 
 	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
 	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	戻る recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
+static 整数 show_tree_long(const struct object_id *oid, struct strbuf *base,
 			  const char *pathname, unsigned mode,
 			  void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	整数 early;
+	整数 recurse;
 	char size_text[24];
 	enum object_type type = object_type(mode);
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	もし (early >= 0)
+		戻る early;
 
-	if (type == OBJ_BLOB) {
+	もし (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
+		もし (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
 			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
+		否则
 			xsnprintf(size_text, sizeof(size_text),
 				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
+	} 否则 {
 		xsnprintf(size_text, sizeof(size_text), "-");
 	}
 
@@ -234,28 +234,28 @@ static int show_tree_long(const struct object_id *oid, struct strbuf *base,
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
 	       size_text);
 	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	戻る recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
+static 整数 show_tree_name_only(const struct object_id *oid UNUSED,
 			       struct strbuf *base,
 			       const char *pathname, unsigned mode,
 			       void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	整数 early;
+	整数 recurse;
 	const size_t baselen = base->len;
 	enum object_type type = object_type(mode);
 	const char *prefix;
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	もし (early >= 0)
+		戻る early;
 
 	prefix = options->prefix;
 	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
+	もし (options->null_termination) {
 		struct strbuf sb = STRBUF_INIT;
 		const char *name = relative_path(base->buf, prefix, &sb);
 
@@ -263,35 +263,35 @@ static int show_tree_name_only(const struct object_id *oid UNUSED,
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} 否则 {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 	strbuf_setlen(base, baselen);
-	return recurse;
+	戻る recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
+static 整数 show_tree_object(const struct object_id *oid, struct strbuf *base,
 			    const char *pathname, unsigned mode,
 			    void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	整数 early;
+	整数 recurse;
 	enum object_type type = object_type(mode);
 	const char *str;
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	もし (early >= 0)
+		戻る early;
 
 	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	もし (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} 否则  {
 		puts(str);
 	}
-	return recurse;
+	戻る recurse;
 }
 
 enum ls_tree_cmdmode {
@@ -335,18 +335,18 @@ static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
 	},
 };
 
-int cmd_ls_tree(int argc,
+整数 cmd_ls_tree(整数 argc,
 		const char **argv,
 		const char *prefix,
 		struct repository *repo UNUSED)
 {
 	struct object_id oid;
 	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
+	整数 i, full_tree = 0;
+	整数 full_name = !prefix || !*prefix;
 	read_tree_fn_t fn = NULL;
 	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
+	整数 null_termination = 0;
 	struct ls_tree_options options = { 0 };
 	const struct option ls_tree_options[] = {
 		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
@@ -376,7 +376,7 @@ int cmd_ls_tree(int argc,
 		OPT_END()
 	};
 	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	整数 ret;
 
 	repo_config(the_repository, git_default_config, NULL);
 
@@ -384,7 +384,7 @@ int cmd_ls_tree(int argc,
 			     ls_tree_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
+	もし (full_tree)
 		prefix = NULL;
 	options.prefix = full_name ? NULL : prefix;
 
@@ -393,21 +393,21 @@ int cmd_ls_tree(int argc,
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
+	もし (cmdmode == MODE_NAME_STATUS)
 		cmdmode = MODE_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
+	もし ( (LS_TREE_ONLY|LS_RECURSIVE) ==
 	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
+	もし (options.format && cmdmode)
 		usage_msg_opt(
 			_("--format can't be combined with other format-altering options"),
 			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
+	もし (argc < 1)
 		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+	もし (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -421,25 +421,25 @@ int cmd_ls_tree(int argc,
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
+	ために (i = 0; i < options.pathspec.nr; i++)
 		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
 	options.pathspec.has_wildcard = 0;
 	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	もし (!tree)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
+	ながら (m2f) {
+		もし (!m2f->fmt) {
 			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
+		} 否则 もし (options.format && !strcmp(options.format, m2f->fmt)) {
 			cmdmode = m2f->mode;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} 否则 もし (!options.format && cmdmode == m2f->mode) {
 			fn = m2f->fn;
-		} else {
+		} 否则 {
 			m2f++;
 			continue;
 		}
@@ -448,5 +448,5 @@ int cmd_ls_tree(int argc,
 
 	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	戻る ret;
 }

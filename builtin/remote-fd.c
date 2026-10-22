@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+static void command_loop(整数 input_fd, 整数 output_fd)
 {
 	char buffer[MAXCOMMAND];
 
-	while (1) {
+	ながら (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		もし (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			もし (ferror(stdin))
 				die("Input error");
-			return;
+			戻る;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ながら (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		もし (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} 否则 もし (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			もし (bidirectional_transfer_loop(input_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			戻る;
+		} 否则 {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
+整数 cmd_remote_fd(整数 argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
+	整数 input_fd = -1;
+	整数 output_fd = -1;
 	char *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
+	もし (argc != 3)
 		usage(usage_msg);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	input_fd = (整数)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	もし ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
+	もし (*end == '/' || !*end) {
 		output_fd = input_fd;
-	} else {
+	} 否则 {
 		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+		output_fd = (整数)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		もし ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
 	command_loop(input_fd, output_fd);
-	return 0;
+	戻る 0;
 }

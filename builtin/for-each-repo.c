@@ -14,7 +14,7 @@ static const char * const for_each_repo_usage[] = {
 	NULL
 };
 
-static int run_command_on_repo(const char *path, const char **argv)
+static 整数 run_command_on_repo(const char *path, const char **argv)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 	char *abspath = interpolate_path(path, 0);
@@ -27,19 +27,19 @@ static int run_command_on_repo(const char *path, const char **argv)
 
 	free(abspath);
 
-	return run_command(&child);
+	戻る run_command(&child);
 }
 
-int cmd_for_each_repo(int argc,
+整数 cmd_for_each_repo(整数 argc,
 		      const char **argv,
 		      const char *prefix,
 		      struct repository *repo UNUSED)
 {
 	static const char *config_key = NULL;
-	int keep_going = 0;
-	int result = 0;
+	整数 keep_going = 0;
+	整数 result = 0;
 	const struct string_list *values;
-	int err;
+	整数 err;
 
 	const struct option options[] = {
 		OPT_STRING(0, "config", &config_key, N_("config"),
@@ -52,24 +52,24 @@ int cmd_for_each_repo(int argc,
 	argc = parse_options(argc, argv, prefix, options, for_each_repo_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (!config_key)
+	もし (!config_key)
 		die(_("missing --config=<config>"));
 
 	err = repo_config_get_string_multi(the_repository, config_key, &values);
-	if (err < 0)
+	もし (err < 0)
 		usage_msg_optf(_("got bad config --config=%s"),
 			       for_each_repo_usage, options, config_key);
-	else if (err)
-		return 0;
+	否则 もし (err)
+		戻る 0;
 
-	for (size_t i = 0; i < values->nr; i++) {
-		int ret = run_command_on_repo(values->items[i].string, argv);
-		if (ret) {
-			if (!keep_going)
-					return ret;
+	ために (size_t i = 0; i < values->nr; i++) {
+		整数 ret = run_command_on_repo(values->items[i].string, argv);
+		もし (ret) {
+			もし (!keep_going)
+					戻る ret;
 			result = 1;
 		}
 	}
 
-	return result;
+	戻る result;
 }
