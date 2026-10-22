@@ -17,10 +17,10 @@ struct credential_cache_entry {
 	timestamp_t expiration;
 };
 static struct credential_cache_entry *entries;
-static int entries_nr;
-static int entries_alloc;
+static целое entries_nr;
+static целое entries_alloc;
 
-static void cache_credential(struct credential *c, int timeout)
+static void cache_credential(struct credential *c, целое timeout)
 {
 	struct credential_cache_entry *e;
 
@@ -35,23 +35,23 @@ static void cache_credential(struct credential *c, int timeout)
 
 static struct credential_cache_entry *lookup_credential(const struct credential *c)
 {
-	int i;
-	for (i = 0; i < entries_nr; i++) {
+	целое i;
+	для (i = 0; i < entries_nr; i++) {
 		struct credential *e = &entries[i].item;
-		if (credential_match(c, e, 0))
-			return &entries[i];
+		если (credential_match(c, e, 0))
+			вернуть &entries[i];
 	}
-	return NULL;
+	вернуть NULL;
 }
 
-static void remove_credential(const struct credential *c, int match_password)
+static void remove_credential(const struct credential *c, целое match_password)
 {
 	struct credential_cache_entry *e;
 
-	int i;
-	for (i = 0; i < entries_nr; i++) {
+	целое i;
+	для (i = 0; i < entries_nr; i++) {
 		e = &entries[i];
-		if (credential_match(c, &e->item, match_password))
+		если (credential_match(c, &e->item, match_password))
 			e->expiration = 0;
 	}
 }
@@ -59,7 +59,7 @@ static void remove_credential(const struct credential *c, int match_password)
 static timestamp_t check_expirations(void)
 {
 	static timestamp_t wait_for_entry_until;
-	int i = 0;
+	целое i = 0;
 	timestamp_t now = time(NULL);
 	timestamp_t next = TIME_MAX;
 
@@ -68,14 +68,14 @@ static timestamp_t check_expirations(void)
 	 * and store a credential before we decide there's no point in
 	 * keeping the daemon around.
 	 */
-	if (!wait_for_entry_until)
+	если (!wait_for_entry_until)
 		wait_for_entry_until = now + 30;
 
-	while (i < entries_nr) {
-		if (entries[i].expiration <= now) {
+	пока (i < entries_nr) {
+		если (entries[i].expiration <= now) {
 			entries_nr--;
 			credential_clear(&entries[i].item);
-			if (i != entries_nr)
+			если (i != entries_nr)
 				memcpy(&entries[i], &entries[entries_nr], sizeof(*entries));
 			/*
 			 * Stick around 30 seconds in case a new credential
@@ -84,77 +84,77 @@ static timestamp_t check_expirations(void)
 			 */
 			wait_for_entry_until = now + 30;
 		}
-		else {
-			if (entries[i].expiration < next)
+		иначе {
+			если (entries[i].expiration < next)
 				next = entries[i].expiration;
 			i++;
 		}
 	}
 
-	if (!entries_nr) {
-		if (wait_for_entry_until <= now)
-			return 0;
+	если (!entries_nr) {
+		если (wait_for_entry_until <= now)
+			вернуть 0;
 		next = wait_for_entry_until;
 	}
 
-	return next - now;
+	вернуть next - now;
 }
 
-static int read_request(FILE *fh, struct credential *c,
-			struct strbuf *action, int *timeout)
+static целое read_request(FILE *fh, struct credential *c,
+			struct strbuf *action, целое *timeout)
 {
 	static struct strbuf item = STRBUF_INIT;
 	const char *p;
 
 	strbuf_getline_lf(&item, fh);
-	if (!skip_prefix(item.buf, "action=", &p))
-		return error("client sent bogus action line: %s", item.buf);
+	если (!skip_prefix(item.buf, "action=", &p))
+		вернуть error("client sent bogus action line: %s", item.buf);
 	strbuf_addstr(action, p);
 
 	strbuf_getline_lf(&item, fh);
-	if (!skip_prefix(item.buf, "timeout=", &p))
-		return error("client sent bogus timeout line: %s", item.buf);
+	если (!skip_prefix(item.buf, "timeout=", &p))
+		вернуть error("client sent bogus timeout line: %s", item.buf);
 	*timeout = atoi(p);
 
 	credential_set_all_capabilities(c, CREDENTIAL_OP_INITIAL);
 
-	if (credential_read(c, fh, CREDENTIAL_OP_HELPER) < 0)
-		return -1;
-	return 0;
+	если (credential_read(c, fh, CREDENTIAL_OP_HELPER) < 0)
+		вернуть -1;
+	вернуть 0;
 }
 
 static void serve_one_client(FILE *in, FILE *out)
 {
 	struct credential c = CREDENTIAL_INIT;
 	struct strbuf action = STRBUF_INIT;
-	int timeout = -1;
+	целое timeout = -1;
 
-	if (read_request(in, &c, &action, &timeout) < 0)
+	если (read_request(in, &c, &action, &timeout) < 0)
 		/* ignore error */ ;
-	else if (!strcmp(action.buf, "get")) {
+	иначе если (!strcmp(action.buf, "get")) {
 		struct credential_cache_entry *e = lookup_credential(&c);
-		if (e) {
+		если (e) {
 			e->item.capa_authtype.request_initial = 1;
 			e->item.capa_authtype.request_helper = 1;
 
 			fprintf(out, "capability[]=authtype\n");
-			if (e->item.username)
+			если (e->item.username)
 				fprintf(out, "username=%s\n", e->item.username);
-			if (e->item.password)
+			если (e->item.password)
 				fprintf(out, "password=%s\n", e->item.password);
-			if (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.authtype)
+			если (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.authtype)
 				fprintf(out, "authtype=%s\n", e->item.authtype);
-			if (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.credential)
+			если (credential_has_capability(&c.capa_authtype, CREDENTIAL_OP_RESPONSE) && e->item.credential)
 				fprintf(out, "credential=%s\n", e->item.credential);
-			if (e->item.password_expiry_utc != TIME_MAX)
+			если (e->item.password_expiry_utc != TIME_MAX)
 				fprintf(out, "password_expiry_utc=%"PRItime"\n",
 					e->item.password_expiry_utc);
-			if (e->item.oauth_refresh_token)
+			если (e->item.oauth_refresh_token)
 				fprintf(out, "oauth_refresh_token=%s\n",
 					e->item.oauth_refresh_token);
 		}
 	}
-	else if (!strcmp(action.buf, "exit")) {
+	иначе если (!strcmp(action.buf, "exit")) {
 		/*
 		 * It's important that we clean up our socket first, and then
 		 * signal the client only once we have finished the cleanup.
@@ -165,58 +165,58 @@ static void serve_one_client(FILE *in, FILE *out)
 		 */
 		exit(0);
 	}
-	else if (!strcmp(action.buf, "erase"))
+	иначе если (!strcmp(action.buf, "erase"))
 		remove_credential(&c, 1);
-	else if (!strcmp(action.buf, "store")) {
-		if (timeout < 0)
+	иначе если (!strcmp(action.buf, "store")) {
+		если (timeout < 0)
 			warning("cache client didn't specify a timeout");
-		else if ((!c.username || !c.password) && (!c.authtype && !c.credential))
+		иначе если ((!c.username || !c.password) && (!c.authtype && !c.credential))
 			warning("cache client gave us a partial credential");
-		else if (c.ephemeral)
+		иначе если (c.ephemeral)
 			warning("not storing ephemeral credential");
-		else {
+		иначе {
 			remove_credential(&c, 0);
 			cache_credential(&c, timeout);
 		}
 	}
-	else
+	иначе
 		warning("cache client sent unknown action: %s", action.buf);
 
 	credential_clear(&c);
 	strbuf_release(&action);
 }
 
-static int serve_cache_loop(int fd)
+static целое serve_cache_loop(целое fd)
 {
 	struct pollfd pfd;
 	timestamp_t wakeup;
 
 	wakeup = check_expirations();
-	if (!wakeup)
-		return 0;
+	если (!wakeup)
+		вернуть 0;
 
 	pfd.fd = fd;
 	pfd.events = POLLIN;
-	if (poll(&pfd, 1, 1000 * wakeup) < 0) {
-		if (errno != EINTR)
+	если (poll(&pfd, 1, 1000 * wakeup) < 0) {
+		если (errno != EINTR)
 			die_errno("poll failed");
-		return 1;
+		вернуть 1;
 	}
 
-	if (pfd.revents & POLLIN) {
-		int client, client2;
+	если (pfd.revents & POLLIN) {
+		целое client, client2;
 		FILE *in, *out;
 
 		client = accept(fd, NULL, NULL);
-		if (client < 0) {
+		если (client < 0) {
 			warning_errno("accept failed");
-			return 1;
+			вернуть 1;
 		}
 		client2 = dup(client);
-		if (client2 < 0) {
+		если (client2 < 0) {
 			warning_errno("dup failed");
 			close(client);
-			return 1;
+			вернуть 1;
 		}
 
 		in = xfdopen(client, "r");
@@ -225,26 +225,26 @@ static int serve_cache_loop(int fd)
 		fclose(in);
 		fclose(out);
 	}
-	return 1;
+	вернуть 1;
 }
 
-static void serve_cache(const char *socket_path, int debug)
+static void serve_cache(const char *socket_path, целое debug)
 {
 	struct unix_stream_listen_opts opts = UNIX_STREAM_LISTEN_OPTS_INIT;
-	int fd;
+	целое fd;
 
 	fd = unix_stream_listen(socket_path, &opts);
-	if (fd < 0)
+	если (fd < 0)
 		die_errno("unable to bind to '%s'", socket_path);
 
 	printf("ok\n");
 	fclose(stdout);
-	if (!debug) {
-		if (!freopen("/dev/null", "w", stderr))
+	если (!debug) {
+		если (!freopen("/dev/null", "w", stderr))
 			die_errno("unable to point stderr to /dev/null");
 	}
 
-	while (serve_cache_loop(fd))
+	пока (serve_cache_loop(fd))
 		; /* nothing */
 
 	close(fd);
@@ -261,23 +261,23 @@ static void init_socket_directory(const char *path)
 	char *path_copy = xstrdup(path);
 	char *dir = dirname(path_copy);
 
-	if (!stat(dir, &st)) {
-		if (st.st_mode & 077)
+	если (!stat(dir, &st)) {
+		если (st.st_mode & 077)
 			die(_(permissions_advice), dir);
-	} else {
+	} иначе {
 		/*
 		 * We must be sure to create the directory with the correct mode,
 		 * not just chmod it after the fact; otherwise, there is a race
 		 * condition in which somebody can chdir to it, sleep, then try to open
 		 * our protected socket.
 		 */
-		if (safe_create_leading_directories_const(the_repository, dir) < 0)
+		если (safe_create_leading_directories_const(the_repository, dir) < 0)
 			die_errno("unable to create directories for '%s'", dir);
-		if (mkdir(dir, 0700) < 0)
+		если (mkdir(dir, 0700) < 0)
 			die_errno("unable to mkdir '%s'", dir);
 	}
 
-	if (chdir(dir))
+	если (chdir(dir))
 		/*
 		 * We don't actually care what our cwd is; we chdir here just to
 		 * be a friendly daemon and avoid tying up our original cwd.
@@ -288,19 +288,19 @@ static void init_socket_directory(const char *path)
 	free(path_copy);
 }
 
-int cmd_credential_cache_daemon(int argc,
+целое cmd_credential_cache_daemon(целое argc,
 				const char **argv,
 				const char *prefix,
 				struct repository *repo UNUSED)
 {
 	struct tempfile *socket_file;
 	const char *socket_path;
-	int ignore_sighup = 0;
+	целое ignore_sighup = 0;
 	static const char *usage[] = {
 		"git credential-cache--daemon [--debug] <socket-path>",
 		NULL
 	};
-	int debug = 0;
+	целое debug = 0;
 	const struct option options[] = {
 		OPT_BOOL(0, "debug", &debug,
 			 N_("print debugging messages to stderr")),
@@ -312,29 +312,29 @@ int cmd_credential_cache_daemon(int argc,
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 	socket_path = argv[0];
 
-	if (!have_unix_sockets())
+	если (!have_unix_sockets())
 		die(_("credential-cache--daemon unavailable; no unix socket support"));
-	if (!socket_path)
+	если (!socket_path)
 		usage_with_options(usage, options);
 
-	if (!is_absolute_path(socket_path))
+	если (!is_absolute_path(socket_path))
 		die("socket directory must be an absolute path");
 
 	init_socket_directory(socket_path);
 	socket_file = register_tempfile(socket_path);
 
-	if (ignore_sighup)
+	если (ignore_sighup)
 		signal(SIGHUP, SIG_IGN);
 
 	serve_cache(socket_path, debug);
 	delete_tempfile(&socket_file);
 
-	return 0;
+	вернуть 0;
 }
 
-#else
+#иначе
 
-int cmd_credential_cache_daemon(int argc,
+целое cmd_credential_cache_daemon(целое argc,
 const char **argv,
 const char *prefix,
 struct repository *repo UNUSED)

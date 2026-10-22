@@ -40,28 +40,28 @@ enum color_push {
 	PUSH_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+static целое parse_push_color_slot(const char *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	если (!strcasecmp(slot, "reset"))
+		вернуть PUSH_COLOR_RESET;
+	если (!strcasecmp(slot, "error"))
+		вернуть PUSH_COLOR_ERROR;
+	вернуть -1;
 }
 
 static const char *push_get_color(enum color_push ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	если (want_color_stderr(push_use_color))
+		вернуть push_colors[ix];
+	вернуть "";
 }
 
-static int thin = 1;
-static int deleterefs;
+static целое thin = 1;
+static целое deleterefs;
 static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+static целое verbosity;
+static целое progress = -1;
+static целое recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
 static enum transport_family family;
 
 static struct push_cas_option cas;
@@ -76,65 +76,65 @@ static void refspec_append_mapped(struct refspec *refspec, const char *ref,
 	const char *branch_name;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	if (remote->push.nr) {
+	если (remote->push.nr) {
 		struct refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		если (!refspec_find_match(&remote->push, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
 			free(query.dst);
-			return;
+			вернуть;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	если (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
 		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		если (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			вернуть;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+static void set_refspecs(const char **refs, целое nr, struct remote *remote)
 {
 	struct ref *local_refs = NULL;
-	int i;
+	целое i;
 
-	for (i = 0; i < nr; i++) {
+	для (i = 0; i < nr; i++) {
 		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+		если (!strcmp("tag", ref)) {
+			если (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			если (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			иначе
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} иначе если (deleterefs) {
+			если (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
+		} иначе если (!strchr(ref, ':')) {
 			struct ref *matched = NULL;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			если (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			если (count_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			иначе
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} иначе
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	если (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	если (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -195,16 +195,16 @@ static const char message_detached_head_die[] =
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+static const char *get_upstream_ref(целое flags, struct branch *branch, const char *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	если (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		вернуть branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+	если (!branch->merge_nr || !branch->merge || !branch->remote_name) {
 		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+		если (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,35 +221,35 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	если (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	вернуть branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+static void setup_default_push_refspecs(целое *flags, struct remote *remote)
 {
 	struct branch *branch;
 	const char *dst;
-	int same_remote;
+	целое same_remote;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	switch (cfg->push_default) {
 	case PUSH_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		вернуть;
 
 	case PUSH_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
+		вернуть;
 	default:
 		break;
 	}
 
 	branch = branch_get(NULL);
-	if (!branch)
+	если (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
@@ -259,14 +259,14 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	default:
 	case PUSH_DEFAULT_UNSPECIFIED:
 	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
+		если (!same_remote)
 			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+		если (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
 			die_push_simple(branch, remote);
 		break;
 
 	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+		если (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
@@ -283,7 +283,7 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
+	если ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
 		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
@@ -324,75 +324,75 @@ static const char message_advice_ref_needs_update[] =
 
 static void advise_pull_before_push(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	если (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		вернуть;
 	advise(_(message_advice_pull_before_push));
 }
 
 static void advise_checkout_pull_push(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	если (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		вернуть;
 	advise(_(message_advice_checkout_pull_push));
 }
 
 static void advise_ref_already_exists(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	если (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		вернуть;
 	advise(_(message_advice_ref_already_exists));
 }
 
 static void advise_ref_fetch_first(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	если (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		вернуть;
 	advise(_(message_advice_ref_fetch_first));
 }
 
 static void advise_ref_needs_force(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	если (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		вернуть;
 	advise(_(message_advice_ref_needs_force));
 }
 
 static void advise_ref_needs_update(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	если (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		вернуть;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+static целое push_with_options(struct transport *transport, struct refspec *rs,
+			     целое flags)
 {
-	int err;
-	unsigned int reject_reasons;
+	целое err;
+	unsigned целое reject_reasons;
 	char *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	если (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
 	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	если (!is_empty_cas(&cas)) {
+		если (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	если (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
 	err = transport_push(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
+	если (err != 0) {
 		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
 		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
@@ -400,78 +400,78 @@ static int push_with_options(struct transport *transport, struct refspec *rs,
 
 	err |= transport_disconnect(transport);
 	free(anon_url);
-	if (!err)
-		return 0;
+	если (!err)
+		вернуть 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
+	если (reject_reasons & REJECT_NON_FF_HEAD) {
 		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
+	} иначе если (reject_reasons & REJECT_NON_FF_OTHER) {
 		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	} иначе если (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} иначе если (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} иначе если (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} иначе если (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	вернуть 1;
 }
 
-static int do_push(int flags,
+static целое do_push(целое flags,
 		   const struct string_list *push_options,
 		   struct remote *remote)
 {
-	int errs;
+	целое errs;
 	struct strvec *url;
 	struct refspec *push_refspec = &rs;
 
-	if (push_options->nr)
+	если (push_options->nr)
 		flags |= TRANSPORT_PUSH_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
+	если (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
+		если (remote->push.nr) {
 			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
+		} иначе если (!(flags & TRANSPORT_PUSH_MIRROR))
 			setup_default_push_refspecs(&flags, remote);
 	}
 	errs = 0;
 	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+	для (size_t i = 0; i < url->nr; i++) {
 		struct transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
+		если (flags & TRANSPORT_PUSH_OPTIONS)
 			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		если (push_with_options(transport, push_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	вернуть !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+static целое option_parse_recurse_submodules(const struct option *opt,
+				   const char *arg, целое unset)
 {
-	int *recurse_submodules = opt->value;
+	целое *recurse_submodules = opt->value;
 
-	if (unset)
+	если (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	иначе {
+		если (!strcmp(arg, "only-is-on-demand")) {
+			если (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
+		} иначе {
 			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	вернуть 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+static void set_push_cert_flags(целое *flags, целое v)
 {
 	switch (v) {
 	case SEND_PACK_PUSH_CERT_NEVER:
@@ -489,23 +489,23 @@ static void set_push_cert_flags(int *flags, int v)
 }
 
 
-static int git_push_config(const char *k, const char *v,
+static целое git_push_config(const char *k, const char *v,
 			   const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
-	int *flags = cb;
+	целое *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
+	если (!strcmp(k, "push.followtags")) {
+		если (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
+		иначе
 			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
+		вернуть 0;
+	} иначе если (!strcmp(k, "push.autosetupremote")) {
+		если (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
+		вернуть 0;
+	} иначе если (!strcmp(k, "push.gpgsign")) {
 		switch (git_parse_maybe_bool(v)) {
 		case 0:
 			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
@@ -514,170 +514,170 @@ static int git_push_config(const char *k, const char *v,
 			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
 			break;
 		default:
-			if (!strcasecmp(v, "if-asked"))
+			если (!strcasecmp(v, "if-asked"))
 				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+			иначе
+				вернуть error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
+	} иначе если (!strcmp(k, "push.recursesubmodules")) {
 		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} иначе если (!strcmp(k, "submodule.recurse")) {
+		целое val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
+	} иначе если (!strcmp(k, "push.pushoption")) {
+		вернуть parse_transport_option(k, v, &push_options_config);
+	} иначе если (!strcmp(k, "color.push")) {
 		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
+		вернуть 0;
+	} иначе если (skip_prefix(k, "color.push.", &slot_name)) {
+		целое slot = parse_push_color_slot(slot_name);
+		если (slot < 0)
+			вернуть 0;
+		если (!v)
+			вернуть config_error_nonbool(k);
+		вернуть color_parse(v, push_colors[slot]);
+	} иначе если (!strcmp(k, "push.useforceifincludes")) {
+		если (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
+		иначе
 			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+		вернуть 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	вернуть git_default_config(k, v, ctx, NULL);
 }
 
-static int push_multiple(struct string_list *list,
+static целое push_multiple(struct string_list *list,
 			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
+			 целое flags,
+			 целое tags,
 			 const char **refspecs,
-			 int refspec_nr)
+			 целое refspec_nr)
 {
-	int result = 0;
+	целое result = 0;
 	size_t i;
 	struct strvec argv = STRVEC_INIT;
 
 	strvec_push(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
+	если (flags & TRANSPORT_PUSH_FORCE)
 		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
+	если (flags & TRANSPORT_PUSH_DRY_RUN)
 		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
+	если (flags & TRANSPORT_PUSH_PORCELAIN)
 		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
+	если (flags & TRANSPORT_PUSH_PRUNE)
 		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
+	если (flags & TRANSPORT_PUSH_NO_HOOK)
 		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
+	если (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
 		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
+	если (flags & TRANSPORT_PUSH_SET_UPSTREAM)
 		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
+	если (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
 		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
+	если (flags & TRANSPORT_PUSH_ALL)
 		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
+	если (flags & TRANSPORT_PUSH_MIRROR)
 		strvec_push(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
+	если (flags & TRANSPORT_PUSH_CERT_ALWAYS)
 		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
+	иначе если (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
 		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
+	если (!thin)
 		strvec_push(&argv, "--no-thin");
 
-	if (deleterefs)
+	если (deleterefs)
 		strvec_push(&argv, "--delete");
 
-	if (receivepack)
+	если (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
+	если (verbosity >= 2)
 		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
+	если (verbosity >= 1)
 		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
+	иначе если (verbosity < 0)
 		strvec_push(&argv, "-q");
-	if (progress > 0)
+	если (progress > 0)
 		strvec_push(&argv, "--progress");
-	else if (progress == 0)
+	иначе если (progress == 0)
 		strvec_push(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
+	если (family == TRANSPORT_FAMILY_IPV4)
 		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
+	иначе если (family == TRANSPORT_FAMILY_IPV6)
 		strvec_push(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	если (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	иначе если (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	иначе если (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
+	иначе если (recurse_submodules == RECURSE_SUBMODULES_OFF)
 		strvec_push(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
+	если (tags)
 		strvec_push(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	для (i = 0; i < push_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
 			     push_options->items[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	для (i = 0; i < cas.nr; i++) {
+		если (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} иначе если (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
+		} иначе {
 			strvec_push(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
+	для (i = 0; i < list->nr; i++) {
 		const char *name = list->items[i].string;
 		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+		целое j;
 
 		strvec_pushv(&cmd.args, argv.v);
 		strvec_push(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
+		для (j = 0; j < refspec_nr; j++)
 			strvec_push(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		если (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		если (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	вернуть result;
 }
 
 static void die_if_repo_looks_like_ref(const char *repo)
 {
 	const char *slash = strchr(repo, '/');
 	struct strbuf name = STRBUF_INIT;
-	int code;
+	целое code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	если (!slash || !slash[1] || file_exists(repo))
+		вернуть;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	если (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		вернуть;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
@@ -688,16 +688,16 @@ static void die_if_repo_looks_like_ref(const char *repo)
 	exit(code);
 }
 
-int cmd_push(int argc,
+целое cmd_push(целое argc,
 	     const char **argv,
 	     const char *prefix,
 	     struct repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
+	целое flags = 0;
+	целое tags = 0;
+	целое push_cert = -1;
+	целое rc = 0;
+	целое base_flags;
 	const char *repo = NULL;	/* default repository */
 	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
 	struct string_list remote_group = STRING_LIST_INIT_DUP;
@@ -757,21 +757,21 @@ int cmd_push(int argc,
 				  tags, "--tags",
 				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
 				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+	если (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	если (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	иначе если (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	иначе если (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	если (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
+	если (repo) {
+		если (!add_remote_or_group(repo, &remote_group)) {
 			struct remote *r;
 
 			/*
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			если (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			если (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
+	} иначе {
 		struct remote *r = pushremote_get(NULL);
-		if (!r)
+		если (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	если (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
 	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+		если (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	если (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
+			целое inner_flags = base_flags;
 			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			если (!r)
 				die(_("no such remote or remote group: %s"),
 				    remote_group.items[0].string);
 
-			if (r->mirror)
+			если (r->mirror)
 				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			если (inner_flags & TRANSPORT_PUSH_ALL) {
+				если (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			если (inner_flags & TRANSPORT_PUSH_MIRROR) {
+				если (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
 			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
 
-			if (tags)
+			если (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			если (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
 			rc = do_push(inner_flags, push_options, r);
 		}
-	} else {
+	} иначе {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,7 +876,7 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		если (flags & TRANSPORT_PUSH_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
 		rc = push_multiple(&remote_group, push_options, flags,
@@ -890,8 +890,8 @@ int cmd_push(int argc,
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
+	если (rc == -1)
 		usage_with_options(push_usage, options);
-	else
-		return rc;
+	иначе
+		вернуть rc;
 }

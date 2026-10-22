@@ -53,7 +53,7 @@ static const char * const builtin_bundle_unbundle_usage[] = {
 	NULL
 };
 
-static int parse_options_cmd_bundle(int argc,
+static целое parse_options_cmd_bundle(целое argc,
 		const char **argv,
 		const char* prefix,
 		const char * const usagestr[],
@@ -61,17 +61,17 @@ static int parse_options_cmd_bundle(int argc,
 		char **bundle_file) {
 	argc = parse_options(argc, argv, NULL, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (!argc)
+	если (!argc)
 		usage_msg_opt(_("need a <file> argument"), usagestr, options);
 	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
-	return argc;
+	вернуть argc;
 }
 
-static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
+static целое cmd_bundle_create(целое argc, const char **argv, const char *prefix,
 			     struct repository *repo UNUSED)
 {
-	int progress = isatty(STDERR_FILENO);
-	int version = -1;
+	целое progress = isatty(STDERR_FILENO);
+	целое version = -1;
 	struct option options[] = {
 		OPT_NEGBIT('q', "quiet", &progress,
 			   N_("do not show progress meter"), 1),
@@ -86,42 +86,42 @@ static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
 		OPT_END()
 	};
 	char *bundle_file;
-	int ret;
+	целое ret;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_create_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	если (!startup_info->have_repository)
 		die(_("Need a repository to create a bundle."));
 	ret = !!create_bundle(the_repository, bundle_file, argc, argv, version, progress);
 	free(bundle_file);
-	return ret;
+	вернуть ret;
 }
 
 /*
  * Similar to read_bundle_header(), but handle "-" as stdin.
  */
-static int open_bundle(const char *path, struct bundle_header *header,
+static целое open_bundle(const char *path, struct bundle_header *header,
 		       const char **name)
 {
-	if (!strcmp(path, "-")) {
-		if (name)
+	если (!strcmp(path, "-")) {
+		если (name)
 			*name = "<stdin>";
-		return read_bundle_header_fd(0, header, "<stdin>");
+		вернуть read_bundle_header_fd(0, header, "<stdin>");
 	}
 
-	if (name)
+	если (name)
 		*name = path;
-	return read_bundle_header(path, header);
+	вернуть read_bundle_header(path, header);
 }
 
-static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
+static целое cmd_bundle_verify(целое argc, const char **argv, const char *prefix,
 			     struct repository *repo UNUSED) {
 	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int quiet = 0;
-	int ret;
+	целое bundle_fd = -1;
+	целое quiet = 0;
+	целое ret;
 	struct option options[] = {
 		OPT_BOOL('q', "quiet", &quiet,
 			    N_("do not show bundle details")),
@@ -134,17 +134,17 @@ static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
 			builtin_bundle_verify_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository) {
+	если (!startup_info->have_repository) {
 		ret = error(_("need a repository to verify a bundle"));
 		goto cleanup;
 	}
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
+	если ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
 		ret = 1;
 		goto cleanup;
 	}
 	close(bundle_fd);
-	if (verify_bundle(the_repository, &header,
+	если (verify_bundle(the_repository, &header,
 			  quiet ? VERIFY_BUNDLE_QUIET : VERIFY_BUNDLE_VERBOSE)) {
 		ret = 1;
 		goto cleanup;
@@ -155,14 +155,14 @@ static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
 cleanup:
 	free(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	вернуть ret;
 }
 
-static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix,
+static целое cmd_bundle_list_heads(целое argc, const char **argv, const char *prefix,
 				 struct repository *repo UNUSED) {
 	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
+	целое bundle_fd = -1;
+	целое ret;
 	struct option options[] = {
 		OPT_END()
 	};
@@ -172,7 +172,7 @@ static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix
 			builtin_bundle_list_heads_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	если ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
 		ret = 1;
 		goto cleanup;
 	}
@@ -181,15 +181,15 @@ static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix
 cleanup:
 	free(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	вернуть ret;
 }
 
-static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
+static целое cmd_bundle_unbundle(целое argc, const char **argv, const char *prefix,
 			       struct repository *repo UNUSED) {
 	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	int progress = isatty(2);
+	целое bundle_fd = -1;
+	целое ret;
+	целое progress = isatty(2);
 
 	struct option options[] = {
 		OPT_BOOL(0, "progress", &progress,
@@ -203,14 +203,14 @@ static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	если (!startup_info->have_repository)
 		die(_("Need a repository to unbundle."));
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	если ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
 		ret = 1;
 		goto cleanup;
 	}
-	if (progress)
+	если (progress)
 		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
 			     _("Unbundling objects"), NULL);
 	ret = !!unbundle(the_repository, &header, bundle_fd,
@@ -221,10 +221,10 @@ static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
 cleanup:
 	strvec_clear(&extra_index_pack_args);
 	free(bundle_file);
-	return ret;
+	вернуть ret;
 }
 
-int cmd_bundle(int argc,
+целое cmd_bundle(целое argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo)
@@ -243,5 +243,5 @@ int cmd_bundle(int argc,
 
 	packet_trace_identity("bundle");
 
-	return !!fn(argc, argv, prefix, repo);
+	вернуть !!fn(argc, argv, prefix, repo);
 }

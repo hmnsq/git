@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+static void command_loop(целое input_fd, целое output_fd)
 {
 	char buffer[MAXCOMMAND];
 
-	while (1) {
+	пока (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		если (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			если (ferror(stdin))
 				die("Input error");
-			return;
+			вернуть;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		пока (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		если (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} иначе если (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			если (bidirectional_transfer_loop(input_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			вернуть;
+		} иначе {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
+целое cmd_remote_fd(целое argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
+	целое input_fd = -1;
+	целое output_fd = -1;
 	char *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
+	если (argc != 3)
 		usage(usage_msg);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	input_fd = (целое)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	если ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
+	если (*end == '/' || !*end) {
 		output_fd = input_fd;
-	} else {
+	} иначе {
 		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+		output_fd = (целое)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		если ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
 	command_loop(input_fd, output_fd);
-	return 0;
+	вернуть 0;
 }

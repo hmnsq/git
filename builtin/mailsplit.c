@@ -15,51 +15,51 @@
 static const char git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+static целое is_from_line(const char *line, целое len)
 {
 	const char *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
-		return 0;
+	если (len < 20 || memcmp("From ", line, 5))
+		вернуть 0;
 
 	colon = line + len - 2;
 	line += 5;
-	for (;;) {
-		if (colon < line)
-			return 0;
-		if (*--colon == ':')
+	для (;;) {
+		если (colon < line)
+			вернуть 0;
+		если (*--colon == ':')
 			break;
 	}
 
-	if (!isdigit(colon[-4]) ||
+	если (!isdigit(colon[-4]) ||
 	    !isdigit(colon[-2]) ||
 	    !isdigit(colon[-1]) ||
 	    !isdigit(colon[ 1]) ||
 	    !isdigit(colon[ 2]))
-		return 0;
+		вернуть 0;
 
 	/* year */
-	if (strtol(colon+3, NULL, 10) <= 90)
-		return 0;
+	если (strtol(colon+3, NULL, 10) <= 90)
+		вернуть 0;
 
 	/* Ok, close enough */
-	return 1;
+	вернуть 1;
 }
 
 static struct strbuf buf = STRBUF_INIT;
-static int keep_cr;
-static int mboxrd;
+static целое keep_cr;
+static целое mboxrd;
 
-static int is_gtfrom(const struct strbuf *buf)
+static целое is_gtfrom(const struct strbuf *buf)
 {
 	size_t min = strlen(">From ");
 	size_t ngt;
 
-	if (buf->len < min)
-		return 0;
+	если (buf->len < min)
+		вернуть 0;
 
 	ngt = strspn(buf->buf, ">");
-	return ngt && starts_with(buf->buf + ngt, "From ");
+	вернуть ngt && starts_with(buf->buf + ngt, "From ");
 }
 
 /* Called with the first line (potentially partial)
@@ -67,14 +67,14 @@ static int is_gtfrom(const struct strbuf *buf)
  * the Unix "From " line.  Write it into the specified
  * file.
  */
-static int split_one(FILE *mbox, const char *name, int allow_bare)
+static целое split_one(FILE *mbox, const char *name, целое allow_bare)
 {
 	FILE *output;
-	int fd;
-	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	целое fd;
+	целое status = 0;
+	целое is_bare = !is_from_line(buf.buf, buf.len);
 
-	if (is_bare && !allow_bare) {
+	если (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
 		exit(1);
 	}
@@ -84,54 +84,54 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	/* Copy it out, while searching for a line that begins with
 	 * "From " and having something that looks like a date format.
 	 */
-	for (;;) {
-		if (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
+	для (;;) {
+		если (!keep_cr && buf.len > 1 && buf.buf[buf.len-1] == '\n' &&
 			buf.buf[buf.len-2] == '\r') {
 			strbuf_setlen(&buf, buf.len-2);
 			strbuf_addch(&buf, '\n');
 		}
 
-		if (mboxrd && is_gtfrom(&buf))
+		если (mboxrd && is_gtfrom(&buf))
 			strbuf_remove(&buf, 0, 1);
 
-		if (fwrite(buf.buf, 1, buf.len, output) != buf.len)
+		если (fwrite(buf.buf, 1, buf.len, output) != buf.len)
 			die_errno("cannot write output");
 
-		if (strbuf_getwholeline(&buf, mbox, '\n')) {
-			if (feof(mbox)) {
+		если (strbuf_getwholeline(&buf, mbox, '\n')) {
+			если (feof(mbox)) {
 				status = 1;
 				break;
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
+		если (!is_bare && is_from_line(buf.buf, buf.len))
 			break; /* done with one message */
 	}
 	fclose(output);
-	return status;
+	вернуть status;
 }
 
-static int populate_maildir_list(struct string_list *list, const char *path)
+static целое populate_maildir_list(struct string_list *list, const char *path)
 {
 	DIR *dir;
 	struct dirent *dent;
 	char *name = NULL;
 	const char *subs[] = { "cur", "new", NULL };
 	const char **sub;
-	int ret = -1;
+	целое ret = -1;
 
-	for (sub = subs; *sub; ++sub) {
+	для (sub = subs; *sub; ++sub) {
 		free(name);
 		name = xstrfmt("%s/%s", path, *sub);
-		if (!(dir = opendir(name))) {
-			if (errno == ENOENT)
+		если (!(dir = opendir(name))) {
+			если (errno == ENOENT)
 				continue;
 			error_errno("cannot opendir %s", name);
 			goto out;
 		}
 
-		while ((dent = readdir(dir)) != NULL) {
-			if (dent->d_name[0] == '.')
+		пока ((dent = readdir(dir)) != NULL) {
+			если (dent->d_name[0] == '.')
 				continue;
 			free(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
@@ -145,56 +145,56 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 
 out:
 	free(name);
-	return ret;
+	вернуть ret;
 }
 
-static int maildir_filename_cmp(const char *a, const char *b)
+static целое maildir_filename_cmp(const char *a, const char *b)
 {
-	while (*a && *b) {
-		if (isdigit(*a) && isdigit(*b)) {
-			long int na, nb;
+	пока (*a && *b) {
+		если (isdigit(*a) && isdigit(*b)) {
+			long целое na, nb;
 			na = strtol(a, (char **)&a, 10);
 			nb = strtol(b, (char **)&b, 10);
-			if (na != nb)
-				return na - nb;
+			если (na != nb)
+				вернуть na - nb;
 			/* strtol advanced our pointers */
 		}
-		else {
-			if (*a != *b)
-				return (unsigned char)*a - (unsigned char)*b;
+		иначе {
+			если (*a != *b)
+				вернуть (unsigned char)*a - (unsigned char)*b;
 			a++;
 			b++;
 		}
 	}
-	return (unsigned char)*a - (unsigned char)*b;
+	вернуть (unsigned char)*a - (unsigned char)*b;
 }
 
-static int split_maildir(const char *maildir, const char *dir,
-	int nr_prec, int skip)
+static целое split_maildir(const char *maildir, const char *dir,
+	целое nr_prec, целое skip)
 {
 	char *file = NULL;
 	FILE *f = NULL;
-	int ret = -1;
+	целое ret = -1;
 	struct string_list list = STRING_LIST_INIT_DUP;
 
 	list.cmp = maildir_filename_cmp;
 
-	if (populate_maildir_list(&list, maildir) < 0)
+	если (populate_maildir_list(&list, maildir) < 0)
 		goto out;
 
-	for (size_t i = 0; i < list.nr; i++) {
+	для (size_t i = 0; i < list.nr; i++) {
 		char *name;
 
 		free(file);
 		file = xstrfmt("%s/%s", maildir, list.items[i].string);
 
 		f = fopen(file, "r");
-		if (!f) {
+		если (!f) {
 			error_errno("cannot open mail %s", file);
 			goto out;
 		}
 
-		if (strbuf_getwholeline(&buf, f, '\n')) {
+		если (strbuf_getwholeline(&buf, f, '\n')) {
 			error_errno("cannot read mail %s", file);
 			goto out;
 		}
@@ -209,75 +209,75 @@ static int split_maildir(const char *maildir, const char *dir,
 
 	ret = skip;
 out:
-	if (f)
+	если (f)
 		fclose(f);
 	free(file);
 	string_list_clear(&list, 1);
-	return ret;
+	вернуть ret;
 }
 
-static int split_mbox(const char *file, const char *dir, int allow_bare,
-		      int nr_prec, int skip)
+static целое split_mbox(const char *file, const char *dir, целое allow_bare,
+		      целое nr_prec, целое skip)
 {
-	int ret = -1;
-	int peek;
+	целое ret = -1;
+	целое peek;
 
 	FILE *f = !strcmp(file, "-") ? stdin : fopen(file, "r");
-	int file_done = 0;
+	целое file_done = 0;
 
-	if (!f) {
+	если (!f) {
 		error_errno("cannot open mbox %s", file);
 		goto out;
 	}
 
-	if (isatty(fileno(f)))
+	если (isatty(fileno(f)))
 		warning(_("reading patches from stdin/tty..."));
 
 	do {
 		peek = fgetc(f);
-		if (peek == EOF) {
-			if (f == stdin)
+		если (peek == EOF) {
+			если (f == stdin)
 				/* empty stdin is OK */
 				ret = skip;
-			else {
+			иначе {
 				fclose(f);
 				error(_("empty mbox: '%s'"), file);
 			}
 			goto out;
 		}
-	} while (isspace(peek));
+	} пока (isspace(peek));
 	ungetc(peek, f);
 
-	if (strbuf_getwholeline(&buf, f, '\n')) {
+	если (strbuf_getwholeline(&buf, f, '\n')) {
 		/* empty stdin is OK */
-		if (f != stdin) {
+		если (f != stdin) {
 			error("cannot read mbox %s", file);
 			goto out;
 		}
 		file_done = 1;
 	}
 
-	while (!file_done) {
+	пока (!file_done) {
 		char *name = xstrfmt("%s/%0*d", dir, nr_prec, ++skip);
 		file_done = split_one(f, name, allow_bare);
 		free(name);
 	}
 
-	if (f != stdin)
+	если (f != stdin)
 		fclose(f);
 
 	ret = skip;
 out:
-	return ret;
+	вернуть ret;
 }
 
-int cmd_mailsplit(int argc,
+целое cmd_mailsplit(целое argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
-	int allow_bare = 0;
+	целое nr = 0, nr_prec = 4, num = 0;
+	целое allow_bare = 0;
 	const char *dir = NULL;
 	const char **argp;
 	static const char *stdin_only[] = { "-", NULL };
@@ -286,36 +286,36 @@ int cmd_mailsplit(int argc,
 
 	show_usage_if_asked(argc, argv, git_mailsplit_usage);
 
-	for (argp = argv+1; *argp; argp++) {
+	для (argp = argv+1; *argp; argp++) {
 		const char *arg = *argp;
 
-		if (arg[0] != '-')
+		если (arg[0] != '-')
 			break;
 		/* do flags here */
-		if ( arg[1] == 'd' ) {
+		если ( arg[1] == 'd' ) {
 			nr_prec = strtol(arg+2, NULL, 10);
-			if (nr_prec < 3 || 10 <= nr_prec)
+			если (nr_prec < 3 || 10 <= nr_prec)
 				usage(git_mailsplit_usage);
 			continue;
-		} else if ( arg[1] == 'f' ) {
+		} иначе если ( arg[1] == 'f' ) {
 			nr = strtol(arg+2, NULL, 10);
-		} else if ( arg[1] == 'b' && !arg[2] ) {
+		} иначе если ( arg[1] == 'b' && !arg[2] ) {
 			allow_bare = 1;
-		} else if (!strcmp(arg, "--keep-cr")) {
+		} иначе если (!strcmp(arg, "--keep-cr")) {
 			keep_cr = 1;
-		} else if ( arg[1] == 'o' && arg[2] ) {
+		} иначе если ( arg[1] == 'o' && arg[2] ) {
 			dir = arg+2;
-		} else if (!strcmp(arg, "--mboxrd")) {
+		} иначе если (!strcmp(arg, "--mboxrd")) {
 			mboxrd = 1;
-		} else if ( arg[1] == '-' && !arg[2] ) {
+		} иначе если ( arg[1] == '-' && !arg[2] ) {
 			argp++;	/* -- marks end of options */
 			break;
-		} else {
+		} иначе {
 			die("unknown option: %s", arg);
 		}
 	}
 
-	if ( !dir ) {
+	если ( !dir ) {
 		/* Backwards compatibility: if no -o specified, accept
 		   <mbox> <dir> or just <dir> */
 		switch (argc - (argp-argv)) {
@@ -331,41 +331,41 @@ int cmd_mailsplit(int argc,
 		default:
 			usage(git_mailsplit_usage);
 		}
-	} else {
+	} иначе {
 		/* New usage: if no more argument, parse stdin */
-		if ( !*argp )
+		если ( !*argp )
 			argp = stdin_only;
 	}
 
-	while (*argp) {
+	пока (*argp) {
 		const char *arg = *argp++;
 		struct stat argstat;
-		int ret = 0;
+		целое ret = 0;
 
-		if (arg[0] == '-' && arg[1] == 0) {
+		если (arg[0] == '-' && arg[1] == 0) {
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
-			if (ret < 0) {
+			если (ret < 0) {
 				error("cannot split patches from stdin");
-				return 1;
+				вернуть 1;
 			}
 			num += (ret - nr);
 			nr = ret;
 			continue;
 		}
 
-		if (stat(arg, &argstat) == -1) {
+		если (stat(arg, &argstat) == -1) {
 			error_errno("cannot stat %s", arg);
-			return 1;
+			вернуть 1;
 		}
 
-		if (S_ISDIR(argstat.st_mode))
+		если (S_ISDIR(argstat.st_mode))
 			ret = split_maildir(arg, dir, nr_prec, nr);
-		else
+		иначе
 			ret = split_mbox(arg, dir, allow_bare, nr_prec, nr);
 
-		if (ret < 0) {
+		если (ret < 0) {
 			error("cannot split patches from %s", arg);
-			return 1;
+			вернуть 1;
 		}
 		num += (ret - nr);
 		nr = ret;
@@ -373,5 +373,5 @@ int cmd_mailsplit(int argc,
 
 	printf("%d\n", num);
 
-	return 0;
+	вернуть 0;
 }

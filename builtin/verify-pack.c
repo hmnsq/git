@@ -10,25 +10,25 @@
 #define VERIFY_PACK_VERBOSE 01
 #define VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+static целое verify_one_pack(const char *path, unsigned целое flags, const char *hash_algo)
 {
 	struct child_process index_pack = CHILD_PROCESS_INIT;
 	struct strvec *argv = &index_pack.args;
 	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	целое verbose = flags & VERIFY_PACK_VERBOSE;
+	целое stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	целое err;
 
 	strvec_push(argv, "index-pack");
 
-	if (stat_only)
+	если (stat_only)
 		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
+	иначе если (verbose)
 		strvec_push(argv, "--verify-stat");
-	else
+	иначе
 		strvec_push(argv, "--verify");
 
-	if (hash_algo)
+	если (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
@@ -36,7 +36,7 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
 	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
+	если (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
 	strvec_push(argv, arg.buf);
@@ -45,17 +45,17 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 
 	err = run_command(&index_pack);
 
-	if (verbose || stat_only) {
-		if (err)
+	если (verbose || stat_only) {
+		если (err)
 			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
+		иначе {
+			если (!stat_only)
 				printf("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	вернуть err;
 }
 
 static const char * const verify_pack_usage[] = {
@@ -63,15 +63,15 @@ static const char * const verify_pack_usage[] = {
 	NULL
 };
 
-int cmd_verify_pack(int argc,
+целое cmd_verify_pack(целое argc,
 		    const char **argv,
 		    const char *prefix,
 		    struct repository *repo UNUSED)
 {
-	int err = 0;
-	unsigned int flags = 0;
+	целое err = 0;
+	unsigned целое flags = 0;
 	const char *object_format = NULL;
-	int i;
+	целое i;
 	const struct option verify_pack_options[] = {
 		OPT_BIT('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
@@ -85,12 +85,12 @@ int cmd_verify_pack(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	если (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	для (i = 0; i < argc; i++) {
+		если (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	вернуть err;
 }

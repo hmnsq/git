@@ -54,13 +54,13 @@ enum batch_mode {
 
 struct batch_options {
 	struct list_objects_filter_options objects_filter;
-	int enabled;
-	int follow_symlinks;
+	целое enabled;
+	целое follow_symlinks;
 	enum batch_mode batch_mode;
-	int buffer_output;
-	int all_objects;
-	int unordered;
-	int transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
+	целое buffer_output;
+	целое all_objects;
+	целое unordered;
+	целое transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
 	char input_delim;
 	char output_delim;
 	const char *format;
@@ -69,7 +69,7 @@ struct batch_options {
 static const char *force_path;
 
 static struct string_list mailmap = STRING_LIST_INIT_NODUP;
-static int use_mailmap;
+static целое use_mailmap;
 
 static char *replace_idents_using_mailmap(char *, size_t *);
 
@@ -81,8 +81,8 @@ static char *replace_idents_using_mailmap(char *, size_t *);
  */
 static void load_mailmap(void)
 {
-	if (mailmap.strdup_strings)
-		return;
+	если (mailmap.strdup_strings)
+		вернуть;
 
 	read_mailmap(the_repository, &mailmap);
 }
@@ -95,44 +95,44 @@ static char *replace_idents_using_mailmap(char *object_buf, size_t *size)
 	strbuf_attach(&sb, object_buf, *size, *size + 1);
 	apply_mailmap_to_header(&sb, headers, &mailmap);
 	*size = sb.len;
-	return strbuf_detach(&sb, NULL);
+	вернуть strbuf_detach(&sb, NULL);
 }
 
-static int filter_object(const char *path, unsigned mode,
+static целое filter_object(const char *path, unsigned mode,
 			 const struct object_id *oid,
 			 char **buf, size_t *size)
 {
 	enum object_type type;
 
 	*buf = odb_read_object(the_repository->objects, oid, &type, size);
-	if (!*buf)
-		return error(_("cannot read object %s '%s'"),
+	если (!*buf)
+		вернуть error(_("cannot read object %s '%s'"),
 			     oid_to_hex(oid), path);
-	if ((type == OBJ_BLOB) && S_ISREG(mode)) {
+	если ((type == OBJ_BLOB) && S_ISREG(mode)) {
 		struct strbuf strbuf = STRBUF_INIT;
 		struct checkout_metadata meta;
 
 		init_checkout_metadata(&meta, NULL, NULL, oid);
-		if (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
+		если (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
 			free(*buf);
 			*size = strbuf.len;
 			*buf = strbuf_detach(&strbuf, NULL);
 		}
 	}
 
-	return 0;
+	вернуть 0;
 }
 
-static int stream_blob(const struct object_id *oid)
+static целое stream_blob(const struct object_id *oid)
 {
-	if (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
+	если (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
 		die("unable to stream %s to stdout", oid_to_hex(oid));
-	return 0;
+	вернуть 0;
 }
 
-static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
+static целое cat_one_file(целое opt, const char *exp_type, const char *obj_name)
 {
-	int ret;
+	целое ret;
 	struct object_id oid;
 	enum object_type type;
 	char *buf;
@@ -145,24 +145,24 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		GET_OID_ONLY_TO_DIE |
 		GET_OID_HASH_ANY;
 	const char *path = force_path;
-	const int opt_cw = (opt == 'c' || opt == 'w');
-	if (!path && opt_cw)
+	const целое opt_cw = (opt == 'c' || opt == 'w');
+	если (!path && opt_cw)
 		get_oid_flags |= GET_OID_REQUIRE_PATH;
 
-	if (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
+	если (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
 				 &obj_context))
 		die("Not a valid object name %s", obj_name);
 
-	if (!path)
+	если (!path)
 		path = obj_context.path;
-	if (obj_context.mode == S_IFINVALID)
+	если (obj_context.mode == S_IFINVALID)
 		obj_context.mode = 0100644;
 
 	buf = NULL;
 	switch (opt) {
 	case 't':
 		oi.typep = &type;
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		если (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 		printf("%s\n", type_name(type));
 		ret = 0;
@@ -171,15 +171,15 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 	case 's':
 		oi.sizep = &size;
 
-		if (use_mailmap) {
+		если (use_mailmap) {
 			oi.typep = &type;
 			oi.contentp = (void**)&buf;
 		}
 
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		если (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 
-		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
+		если (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
 			buf = replace_idents_using_mailmap(buf, &size);
 
 		printf("%"PRIuMAX"\n", (uintmax_t)size);
@@ -193,7 +193,7 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 
 	case 'w':
 
-		if (filter_object(path, obj_context.mode,
+		если (filter_object(path, obj_context.mode,
 				  &oid, &buf, &size)) {
 			ret = -1;
 			goto cleanup;
@@ -203,22 +203,22 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 	case 'c':
 	{
 		unsigned long size_ul = 0;
-		int textconv_ret = textconv_object(the_repository, path,
+		целое textconv_ret = textconv_object(the_repository, path,
 						   obj_context.mode, &oid, 1,
 						   &buf, &size_ul);
 		size = size_ul;
-		if (textconv_ret)
+		если (textconv_ret)
 			break;
 	}
 		/* else fallthrough */
 
 	case 'p':
 		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+		если (type < 0)
 			die("Not a valid object name %s", obj_name);
 
 		/* custom pretty-print here */
-		if (type == OBJ_TREE) {
+		если (type == OBJ_TREE) {
 			const char *ls_args[3] = { NULL };
 			ls_args[0] =  "ls-tree";
 			ls_args[1] =  obj_name;
@@ -226,16 +226,16 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 			goto cleanup;
 		}
 
-		if (type == OBJ_BLOB) {
+		если (type == OBJ_BLOB) {
 			ret = stream_blob(&oid);
 			goto cleanup;
 		}
 		buf = odb_read_object(the_repository->objects, &oid,
 				      &type, &size);
-		if (!buf)
+		если (!buf)
 			die("Cannot read object %s", obj_name);
 
-		if (use_mailmap)
+		если (use_mailmap)
 			buf = replace_idents_using_mailmap(buf, &size);
 
 		/* otherwise just spit out the data */
@@ -245,26 +245,26 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 	{
 		enum object_type exp_type_id = type_from_string(exp_type);
 
-		if (exp_type_id == OBJ_BLOB) {
+		если (exp_type_id == OBJ_BLOB) {
 			struct object_id blob_oid;
-			if (odb_read_object_info(the_repository->objects,
+			если (odb_read_object_info(the_repository->objects,
 						 &oid, NULL) == OBJ_TAG) {
 				char *buffer = odb_read_object(the_repository->objects,
 							       &oid, &type, &size);
 				const char *target;
 
-				if (!buffer)
+				если (!buffer)
 					die(_("unable to read %s"), oid_to_hex(&oid));
 
-				if (!skip_prefix(buffer, "object ", &target) ||
+				если (!skip_prefix(buffer, "object ", &target) ||
 				    get_oid_hex_algop(target, &blob_oid,
 						      &hash_algos[oid.algo]))
 					die("%s not a valid tag", oid_to_hex(&oid));
 				free(buffer);
-			} else
+			} иначе
 				oidcpy(&blob_oid, &oid);
 
-			if (odb_read_object_info(the_repository->objects,
+			если (odb_read_object_info(the_repository->objects,
 						 &blob_oid, NULL) == OBJ_BLOB) {
 				ret = stream_blob(&blob_oid);
 				goto cleanup;
@@ -279,7 +279,7 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		buf = odb_read_object_peeled(the_repository->objects, &oid,
 					     exp_type_id, &size, NULL);
 
-		if (use_mailmap)
+		если (use_mailmap)
 			buf = replace_idents_using_mailmap(buf, &size);
 		break;
 	}
@@ -287,7 +287,7 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		die("git cat-file: unknown option: %s", exp_type);
 	}
 
-	if (!buf)
+	если (!buf)
 		die("git cat-file %s: bad file", obj_name);
 
 	write_or_die(1, buf, size);
@@ -295,7 +295,7 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 cleanup:
 	free(buf);
 	object_context_release(&obj_context);
-	return ret;
+	вернуть ret;
 }
 
 struct expand_data {
@@ -311,14 +311,14 @@ struct expand_data {
 	 * If mark_query is true, we do not expand anything, but rather
 	 * just mark the object_info with items we wish to query.
 	 */
-	int mark_query;
+	целое mark_query;
 
 	/*
 	 * Whether to split the input on whitespace before feeding it to
 	 * get_sha1; this is decided during the mark_query phase based on
 	 * whether we have a %(rest) token in our format.
 	 */
-	int split_on_whitespace;
+	целое split_on_whitespace;
 
 	/*
 	 * After a mark_query run, this object_info is set up to be
@@ -352,85 +352,85 @@ struct expand_data {
 	.remote_allowed_atoms = STRING_LIST_INIT_NODUP, \
 }
 
-static int is_atom(const char *atom, const char *s, int slen)
+static целое is_atom(const char *atom, const char *s, целое slen)
 {
-	int alen = strlen(atom);
-	return alen == slen && !memcmp(atom, s, alen);
+	целое alen = strlen(atom);
+	вернуть alen == slen && !memcmp(atom, s, alen);
 }
 
-static int expand_atom(struct strbuf *sb, const char *atom, int len,
+static целое expand_atom(struct strbuf *sb, const char *atom, целое len,
 		       struct expand_data *data)
 {
-	if (data->is_remote) {
+	если (data->is_remote) {
 		size_t i;
-		for (i = 0; i < data->remote_allowed_atoms.nr; i++)
-			if (is_atom(data->remote_allowed_atoms.items[i].string,
+		для (i = 0; i < data->remote_allowed_atoms.nr; i++)
+			если (is_atom(data->remote_allowed_atoms.items[i].string,
 				    atom, len))
 				break;
-		if (i == data->remote_allowed_atoms.nr)
-			return 1;
+		если (i == data->remote_allowed_atoms.nr)
+			вернуть 1;
 	}
 
-	if (is_atom("objectname", atom, len)) {
-		if (!data->mark_query)
+	если (is_atom("objectname", atom, len)) {
+		если (!data->mark_query)
 			strbuf_add_oid_hex(sb, &data->oid);
-	} else if (is_atom("objecttype", atom, len)) {
-		if (data->mark_query) {
+	} иначе если (is_atom("objecttype", atom, len)) {
+		если (data->mark_query) {
 			data->info.typep = &data->type;
-		} else {
+		} иначе {
 			const char *t = type_name(data->type);
 			strbuf_addstr(sb, t ? t : "");
 		}
-	} else if (is_atom("objectsize", atom, len)) {
-		if (data->mark_query)
+	} иначе если (is_atom("objectsize", atom, len)) {
+		если (data->mark_query)
 			data->info.sizep = &data->size;
-		else
+		иначе
 			strbuf_add_uint(sb, data->size);
-	} else if (is_atom("objectsize:disk", atom, len)) {
-		if (data->mark_query)
+	} иначе если (is_atom("objectsize:disk", atom, len)) {
+		если (data->mark_query)
 			data->info.disk_sizep = &data->disk_size;
-		else
+		иначе
 			strbuf_add_uint(sb, data->disk_size);
-	} else if (is_atom("rest", atom, len)) {
-		if (data->mark_query)
+	} иначе если (is_atom("rest", atom, len)) {
+		если (data->mark_query)
 			data->split_on_whitespace = 1;
-		else if (data->rest)
+		иначе если (data->rest)
 			strbuf_addstr(sb, data->rest);
-	} else if (is_atom("deltabase", atom, len)) {
-		if (data->mark_query)
+	} иначе если (is_atom("deltabase", atom, len)) {
+		если (data->mark_query)
 			data->info.delta_base_oid = &data->delta_base_oid;
-		else
+		иначе
 			strbuf_add_oid_hex(sb, &data->delta_base_oid);
-	} else if (is_atom("objectmode", atom, len)) {
-		if (!data->mark_query && !(S_IFINVALID == data->mode))
+	} иначе если (is_atom("objectmode", atom, len)) {
+		если (!data->mark_query && !(S_IFINVALID == data->mode))
 			strbuf_addf(sb, "%06o", data->mode);
-	} else
-		return 0;
-	return 1;
+	} иначе
+		вернуть 0;
+	вернуть 1;
 }
 
 static void expand_format(struct strbuf *sb, const char *start,
 			  struct expand_data *data)
 {
-	while (strbuf_expand_step(sb, &start)) {
+	пока (strbuf_expand_step(sb, &start)) {
 		const char *end;
 
-		if (skip_prefix(start, "%", &start) || *start != '(')
+		если (skip_prefix(start, "%", &start) || *start != '(')
 			strbuf_addch(sb, '%');
-		else if ((end = strchr(start + 1, ')')) &&
+		иначе если ((end = strchr(start + 1, ')')) &&
 			 expand_atom(sb, start + 1, end - start - 1, data))
 			start = end + 1;
-		else
+		иначе
 			strbuf_expand_bad_format(start, "cat-file");
 	}
 }
 
-static void batch_write(struct batch_options *opt, const void *data, int len)
+static void batch_write(struct batch_options *opt, const void *data, целое len)
 {
-	if (opt->buffer_output) {
-		if (fwrite(data, 1, len, stdout) != len)
+	если (opt->buffer_output) {
+		если (fwrite(data, 1, len, stdout) != len)
 			die_errno("unable to write to stdout");
-	} else
+	} иначе
 		write_or_die(1, data, len);
 }
 
@@ -440,58 +440,58 @@ static void print_object_or_die(struct batch_options *opt, struct expand_data *d
 
 	assert(data->info.typep);
 
-	if (data->type == OBJ_BLOB) {
-		if (opt->buffer_output)
+	если (data->type == OBJ_BLOB) {
+		если (opt->buffer_output)
 			fflush(stdout);
-		if (opt->transform_mode) {
+		если (opt->transform_mode) {
 			char *contents;
 			size_t size;
 
-			if (!data->rest)
+			если (!data->rest)
 				die("missing path for '%s'", oid_to_hex(oid));
 
-			if (opt->transform_mode == 'w') {
-				if (filter_object(data->rest, 0100644, oid,
+			если (opt->transform_mode == 'w') {
+				если (filter_object(data->rest, 0100644, oid,
 						  &contents, &size))
 					die("could not convert '%s' %s",
 					    oid_to_hex(oid), data->rest);
-			} else if (opt->transform_mode == 'c') {
+			} иначе если (opt->transform_mode == 'c') {
 				enum object_type type;
 				unsigned long size_ul = 0;
-				if (textconv_object(the_repository,
+				если (textconv_object(the_repository,
 						    data->rest, 0100644, oid,
 						    1, &contents, &size_ul))
 					size = size_ul;
-				else
+				иначе
 					contents = odb_read_object(the_repository->objects,
 								   oid, &type, &size);
-				if (!contents)
+				если (!contents)
 					die("could not convert '%s' %s",
 					    oid_to_hex(oid), data->rest);
-			} else
+			} иначе
 				BUG("invalid transform_mode: %c", opt->transform_mode);
 			batch_write(opt, contents, size);
 			free(contents);
-		} else {
+		} иначе {
 			stream_blob(oid);
 		}
 	}
-	else {
+	иначе {
 		enum object_type type;
 		size_t size;
 		void *contents;
 
 		contents = odb_read_object(the_repository->objects, oid,
 					   &type, &size);
-		if (!contents)
+		если (!contents)
 			die("object %s disappeared", oid_to_hex(oid));
 
-		if (use_mailmap)
+		если (use_mailmap)
 			contents = replace_idents_using_mailmap(contents, &size);
 
-		if (type != data->type)
+		если (type != data->type)
 			die("object %s changed type!?", oid_to_hex(oid));
-		if (data->info.sizep && size != data->size && !use_mailmap)
+		если (data->info.sizep && size != data->size && !use_mailmap)
 			die("object %s changed size!?", oid_to_hex(oid));
 
 		batch_write(opt, contents, size);
@@ -532,69 +532,69 @@ static void batch_object_write(const char *obj_name,
 			       struct packed_git *pack,
 			       off_t offset)
 {
-	if (!data->skip_object_info) {
-		int ret;
+	если (!data->skip_object_info) {
+		целое ret;
 
-		if (use_mailmap ||
+		если (use_mailmap ||
 		    opt->objects_filter.choice == LOFC_BLOB_NONE ||
 		    opt->objects_filter.choice == LOFC_BLOB_LIMIT ||
 		    opt->objects_filter.choice == LOFC_OBJECT_TYPE)
 			data->info.typep = &data->type;
-		if (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
+		если (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
 			data->info.sizep = &data->size;
 
-		if (pack)
+		если (pack)
 			ret = packed_object_info(NULL, pack, offset, &data->info);
-		else
+		иначе
 			ret = odb_read_object_info_extended(the_repository->objects,
 							    &data->oid, &data->info,
 							    OBJECT_INFO_LOOKUP_REPLACE);
-		if (ret < 0) {
-			if (data->mode == S_IFGITLINK)
+		если (ret < 0) {
+			если (data->mode == S_IFGITLINK)
 				report_object_status(opt, NULL, &data->oid, "submodule");
-			else
+			иначе
 				report_object_status(opt, obj_name, &data->oid, "missing");
-			return;
+			вернуть;
 		}
 
 		switch (opt->objects_filter.choice) {
 		case LOFC_DISABLED:
 			break;
 		case LOFC_BLOB_NONE:
-			if (data->type == OBJ_BLOB) {
-				if (!opt->all_objects)
+			если (data->type == OBJ_BLOB) {
+				если (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				вернуть;
 			}
 			break;
 		case LOFC_BLOB_LIMIT:
-			if (data->type == OBJ_BLOB &&
+			если (data->type == OBJ_BLOB &&
 			    data->size >= opt->objects_filter.blob_limit_value) {
-				if (!opt->all_objects)
+				если (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				вернуть;
 			}
 			break;
 		case LOFC_OBJECT_TYPE:
-			if (data->type != opt->objects_filter.object_type) {
-				if (!opt->all_objects)
+			если (data->type != opt->objects_filter.object_type) {
+				если (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				вернуть;
 			}
 			break;
 		default:
 			BUG("unsupported objects filter");
 		}
 
-		if (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
+		если (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
 			char *buf = NULL;
 
 			buf = odb_read_object(the_repository->objects, &data->oid,
 					      &data->type, &data->size);
-			if (!buf)
+			если (!buf)
 				die(_("unable to read %s"), oid_to_hex(&data->oid));
 			buf = replace_idents_using_mailmap(buf, &data->size);
 
@@ -604,16 +604,16 @@ static void batch_object_write(const char *obj_name,
 
 	strbuf_reset(scratch);
 
-	if (!opt->format) {
+	если (!opt->format) {
 		print_default_format(scratch, data, opt);
-	} else {
+	} иначе {
 		expand_format(scratch, opt->format, data);
 		strbuf_addch(scratch, opt->output_delim);
 	}
 
 	batch_write(opt, scratch->buf, scratch->len);
 
-	if (opt->batch_mode == BATCH_MODE_CONTENTS) {
+	если (opt->batch_mode == BATCH_MODE_CONTENTS) {
 		print_object_or_die(opt, data);
 		batch_write(opt, &opt->output_delim, 1);
 	}
@@ -625,14 +625,14 @@ static void batch_one_object(const char *obj_name,
 			     struct expand_data *data)
 {
 	struct object_context ctx = {0};
-	int flags =
+	целое flags =
 		GET_OID_HASH_ANY |
 		(opt->follow_symlinks ? GET_OID_FOLLOW_SYMLINKS : 0);
 	enum get_oid_result result;
 
 	result = get_oid_with_context(the_repository, obj_name,
 				      flags, &data->oid, &ctx);
-	if (result != FOUND) {
+	если (result != FOUND) {
 		switch (result) {
 		case MISSING_OBJECT:
 			report_object_status(opt, obj_name, &data->oid, "missing");
@@ -665,7 +665,7 @@ static void batch_one_object(const char *obj_name,
 		goto out;
 	}
 
-	if (ctx.mode == 0) {
+	если (ctx.mode == 0) {
 		printf("symlink %"PRIuMAX"%c%s%c",
 		       (uintmax_t)ctx.symlink_path.len,
 		       opt->output_delim, ctx.symlink_path.buf, opt->output_delim);
@@ -680,46 +680,46 @@ out:
 	object_context_release(&ctx);
 }
 
-static int get_remote_info(int argc,
+static целое get_remote_info(целое argc,
 			   const char **argv,
 			   struct fetch_object_info_results *results,
 			   struct oid_array *object_info_oids)
 {
-	int retval = 0;
+	целое retval = 0;
 	struct remote *remote = NULL;
 	struct object_id oid;
 	struct transport *gtransport;
 
 	remote = remote_get(argv[0]);
-	if (!remote)
+	если (!remote)
 		die(_("must supply valid remote when using remote-object-info"));
 
 	oid_array_clear(object_info_oids);
-	for (size_t i = 1; i < argc; i++) {
-		if (get_oid_hex(argv[i], &oid)) {
+	для (size_t i = 1; i < argc; i++) {
+		если (get_oid_hex(argv[i], &oid)) {
 			size_t len = strlen(argv[i]);
 
-			if (len < the_hash_algo->hexsz && len >= 4) {
+			если (len < the_hash_algo->hexsz && len >= 4) {
 				size_t j;
-				for (j = 0; j < len; j++)
-					if (!isxdigit(argv[i][j]))
+				для (j = 0; j < len; j++)
+					если (!isxdigit(argv[i][j]))
 						break;
-				if (j == len)
+				если (j == len)
 					die(_("remote-object-info does not support "
 					      "short oids, %d characters required"),
-					    (int)the_hash_algo->hexsz);
+					    (целое)the_hash_algo->hexsz);
 			}
 			die(_("not a valid object name '%s'"), argv[i]);
 		}
 		oid_array_append(object_info_oids, &oid);
 	}
 
-	if (!object_info_oids->nr)
+	если (!object_info_oids->nr)
 		die(_("remote-object-info requires objects"));
 
 	gtransport = transport_get(remote, NULL);
 
-	if (!gtransport->smart_options) {
+	если (!gtransport->smart_options) {
 		retval = -1;
 		goto cleanup;
 	}
@@ -728,7 +728,7 @@ static int get_remote_info(int argc,
 					     results);
 cleanup:
 	transport_disconnect(gtransport);
-	return retval;
+	вернуть retval;
 }
 
 struct object_cb_data {
@@ -738,38 +738,38 @@ struct object_cb_data {
 	struct strbuf *scratch;
 };
 
-static int batch_object_cb(const struct object_id *oid, void *vdata)
+static целое batch_object_cb(const struct object_id *oid, void *vdata)
 {
 	struct object_cb_data *data = vdata;
 	oidcpy(&data->expand->oid, oid);
 	batch_object_write(NULL, data->scratch, data->opt, data->expand,
 			   NULL, 0);
-	return 0;
+	вернуть 0;
 }
 
-static int collect_object(const struct object_id *oid,
+static целое collect_object(const struct object_id *oid,
 			  struct packed_git *pack UNUSED,
 			  off_t offset UNUSED,
 			  void *data)
 {
 	oid_array_append(data, oid);
-	return 0;
+	вернуть 0;
 }
 
-static int batch_unordered_object(const struct object_id *oid,
+static целое batch_unordered_object(const struct object_id *oid,
 				  struct packed_git *pack,
 				  off_t offset,
 				  void *vdata)
 {
 	struct object_cb_data *data = vdata;
 
-	if (oidset_insert(data->seen, oid))
-		return 0;
+	если (oidset_insert(data->seen, oid))
+		вернуть 0;
 
 	oidcpy(&data->expand->oid, oid);
 	batch_object_write(NULL, data->scratch, data->opt, data->expand,
 			   pack, offset);
-	return 0;
+	вернуть 0;
 }
 
 typedef void (*parse_cmd_fn_t)(struct batch_options *, const char *,
@@ -808,10 +808,10 @@ static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
 {
 	use_mailmap = git_parse_maybe_bool(line);
 
-	if (use_mailmap < 0)
+	если (use_mailmap < 0)
 		die(_("mailmap: invalid boolean '%s'"), line);
 
-	if (use_mailmap)
+	если (use_mailmap)
 		load_mailmap();
 }
 
@@ -819,44 +819,44 @@ static void parse_cmd_remote_object_info(struct batch_options *opt,
 					 const char *line, struct strbuf *output,
 					 struct expand_data *data)
 {
-	int count;
+	целое count;
 	const char **argv;
 	char *line_to_split;
 	struct fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
 	struct oid_array object_info_oids = OID_ARRAY_INIT;
 
-	if (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
+	если (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
 		die(_("remote-object-info command too long"));
 
 	line_to_split = xstrdup(line);
 	count = split_cmdline(line_to_split, &argv);
-	if (count < 0)
+	если (count < 0)
 		die(_("remote-object-info: failed to parse command line: %s"),
 		    split_cmdline_strerror(count));
-	if (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
+	если (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
 		die(_("remote-object-info supports at most %d objects"),
 		    MAX_ALLOWED_OBJ_LIMIT);
 
-	if (data->info.sizep)
+	если (data->info.sizep)
 		results.wants_size = 1;
-	if (data->info.typep)
+	если (data->info.typep)
 		results.wants_type = 1;
 
-	if (get_remote_info(count, argv, &results, &object_info_oids))
+	если (get_remote_info(count, argv, &results, &object_info_oids))
 		die(_("failed to get object info from the remote: %s"), argv[0]);
 
 	string_list_clear(&data->remote_allowed_atoms, 0);
 	string_list_append(&data->remote_allowed_atoms, "objectname");
-	if (results.sizes)
+	если (results.sizes)
 		string_list_append(&data->remote_allowed_atoms, "objectsize");
-	if (results.types)
+	если (results.types)
 		string_list_append(&data->remote_allowed_atoms, "objecttype");
 
 	data->skip_object_info = 1;
-	for (size_t i = 0; i < results.nr; i++) {
+	для (size_t i = 0; i < results.nr; i++) {
 		data->oid = object_info_oids.oid[i];
 
-		if (results.unrecognized[i]) {
+		если (results.unrecognized[i]) {
 			report_object_status(opt, oid_to_hex(&data->oid),
 					     &data->oid, "missing");
 			continue;
@@ -866,10 +866,10 @@ static void parse_cmd_remote_object_info(struct batch_options *opt,
 		 * When reaching here, it means remote-object-info can retrieve
 		 * information from server without downloading them.
 		 */
-		if (results.sizes)
+		если (results.sizes)
 			data->size = results.sizes[i];
 
-		if (results.types)
+		если (results.types)
 			data->type = results.types[i];
 
 		opt->batch_mode = BATCH_MODE_INFO;
@@ -891,10 +891,10 @@ static void dispatch_calls(struct batch_options *opt,
 		struct queued_cmd *cmd,
 		size_t nr)
 {
-	if (!opt->buffer_output)
+	если (!opt->buffer_output)
 		die(_("flush is only for --buffer mode"));
 
-	for (size_t i = 0; i < nr; i++)
+	для (size_t i = 0; i < nr; i++)
 		cmd[i].fn(opt, cmd[i].line, output, data);
 
 	fflush(stdout);
@@ -902,7 +902,7 @@ static void dispatch_calls(struct batch_options *opt,
 
 static void free_cmds(struct queued_cmd *cmd, size_t *nr)
 {
-	for (size_t i = 0; i < *nr; i++)
+	для (size_t i = 0; i < *nr; i++)
 		FREE_AND_NULL(cmd[i].line);
 
 	*nr = 0;
@@ -929,28 +929,28 @@ static void batch_objects_command(struct batch_options *opt,
 	struct queued_cmd *queued_cmd = NULL;
 	size_t alloc = 0, nr = 0;
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
+	пока (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
 		const struct parse_cmd *cmd = NULL;
 		const char *p = NULL, *cmd_end;
 		struct queued_cmd call = {0};
 
-		if (!input.len)
+		если (!input.len)
 			die(_("empty command in input"));
-		if (isspace(*input.buf))
+		если (isspace(*input.buf))
 			die(_("whitespace before command: '%s'"), input.buf);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (!skip_prefix(input.buf, commands[i].name, &cmd_end))
+		для (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
+			если (!skip_prefix(input.buf, commands[i].name, &cmd_end))
 				continue;
 
 			cmd = &commands[i];
-			if (cmd->takes_args) {
-				if (*cmd_end != ' ')
+			если (cmd->takes_args) {
+				если (*cmd_end != ' ')
 					die(_("%s requires arguments"),
 					    commands[i].name);
 
 				p = cmd_end + 1;
-			} else if (*cmd_end) {
+			} иначе если (*cmd_end) {
 				die(_("%s takes no arguments"),
 				    commands[i].name);
 			}
@@ -958,15 +958,15 @@ static void batch_objects_command(struct batch_options *opt,
 			break;
 		}
 
-		if (!cmd)
+		если (!cmd)
 			die(_("unknown command: '%s'"), input.buf);
 
-		if (!strcmp(cmd->name, "flush")) {
+		если (!strcmp(cmd->name, "flush")) {
 			dispatch_calls(opt, output, data, queued_cmd, nr);
 			free_cmds(queued_cmd, &nr);
-		} else if (!opt->buffer_output) {
+		} иначе если (!opt->buffer_output) {
 			cmd->fn(opt, p, output, data);
-		} else {
+		} иначе {
 			ALLOC_GROW(queued_cmd, nr + 1, alloc);
 			call.fn = cmd->fn;
 			call.line = xstrdup_or_null(p);
@@ -974,7 +974,7 @@ static void batch_objects_command(struct batch_options *opt,
 		}
 	}
 
-	if (opt->buffer_output &&
+	если (opt->buffer_output &&
 	    nr &&
 	    !git_env_bool("GIT_TEST_CAT_FILE_NO_FLUSH_ON_EXIT", 0)) {
 		dispatch_calls(opt, output, data, queued_cmd, nr);
@@ -988,7 +988,7 @@ static void batch_objects_command(struct batch_options *opt,
 
 #define DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
 
-typedef int (*for_each_object_fn)(const struct object_id *oid, struct packed_git *pack,
+typedef целое (*for_each_object_fn)(const struct object_id *oid, struct packed_git *pack,
 				  off_t offset, void *data);
 
 struct for_each_object_payload {
@@ -996,16 +996,16 @@ struct for_each_object_payload {
 	void *payload;
 };
 
-static int batch_one_object_oi(const struct object_id *oid,
+static целое batch_one_object_oi(const struct object_id *oid,
 			       struct object_info *oi,
 			       void *_payload)
 {
 	struct for_each_object_payload *payload = _payload;
-	if (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
-		return payload->callback(oid, oi->source_infop->u.packed.pack,
+	если (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
+		вернуть payload->callback(oid, oi->source_infop->u.packed.pack,
 					 oi->source_infop->u.packed.offset,
 					 payload->payload);
-	return payload->callback(oid, NULL, 0, payload->payload);
+	вернуть payload->callback(oid, NULL, 0, payload->payload);
 }
 
 static void batch_each_object(struct batch_options *opt,
@@ -1030,14 +1030,14 @@ static void batch_each_object(struct batch_options *opt,
 				batch_one_object_oi, &payload, &opts);
 }
 
-static int batch_objects(struct batch_options *opt)
+static целое batch_objects(struct batch_options *opt)
 {
 	struct strbuf input = STRBUF_INIT;
 	struct strbuf output = STRBUF_INIT;
 	struct expand_data data = EXPAND_DATA_INIT;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int save_warning;
-	int retval = 0;
+	целое save_warning;
+	целое retval = 0;
 
 	/*
 	 * Expand once with our special mark_query flag, which will prime the
@@ -1050,27 +1050,27 @@ static int batch_objects(struct batch_options *opt)
 		      &data);
 	data.mark_query = 0;
 	strbuf_release(&output);
-	if (opt->transform_mode)
+	если (opt->transform_mode)
 		data.split_on_whitespace = 1;
 
-	if (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
+	если (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
 		opt->format = NULL;
 	/*
 	 * If we are printing out the object, then always fill in the type,
 	 * since we will want to decide whether or not to stream.
 	 */
-	if (opt->batch_mode == BATCH_MODE_CONTENTS)
+	если (opt->batch_mode == BATCH_MODE_CONTENTS)
 		data.info.typep = &data.type;
 
-	if (opt->all_objects) {
+	если (opt->all_objects) {
 		struct object_cb_data cb;
 		struct object_info empty = OBJECT_INFO_INIT;
 
-		if (!memcmp(&data.info, &empty, sizeof(empty)) &&
+		если (!memcmp(&data.info, &empty, sizeof(empty)) &&
 		    opt->objects_filter.choice == LOFC_DISABLED)
 			data.skip_object_info = 1;
 
-		if (repo_has_promisor_remote(the_repository))
+		если (repo_has_promisor_remote(the_repository))
 			warning("This repository uses promisor remotes. Some objects may not be loaded.");
 
 		disable_replace_refs();
@@ -1079,7 +1079,7 @@ static int batch_objects(struct batch_options *opt)
 		cb.expand = &data;
 		cb.scratch = &output;
 
-		if (opt->unordered) {
+		если (opt->unordered) {
 			struct oidset seen = OIDSET_INIT;
 
 			cb.seen = &seen;
@@ -1088,7 +1088,7 @@ static int batch_objects(struct batch_options *opt)
 					  ODB_FOR_EACH_OBJECT_PACK_ORDER, &cb);
 
 			oidset_clear(&seen);
-		} else {
+		} иначе {
 			struct oid_array sa = OID_ARRAY_INIT;
 
 			batch_each_object(opt, collect_object, 0, &sa);
@@ -1098,7 +1098,7 @@ static int batch_objects(struct batch_options *opt)
 		}
 
 		strbuf_release(&output);
-		return 0;
+		вернуть 0;
 	}
 
 	/*
@@ -1111,21 +1111,21 @@ static int batch_objects(struct batch_options *opt)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	if (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
+	если (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
 		batch_objects_command(opt, &output, &data);
 		goto cleanup;
 	}
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		if (data.split_on_whitespace) {
+	пока (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
+		если (data.split_on_whitespace) {
 			/*
 			 * Split at first whitespace, tying off the beginning
 			 * of the string and saving the remainder (or NULL) in
 			 * data.rest.
 			 */
 			char *p = strpbrk(input.buf, " \t");
-			if (p) {
-				while (*p && strchr(" \t", *p))
+			если (p) {
+				пока (*p && strchr(" \t", *p))
 					*p++ = '\0';
 			}
 			data.rest = p;
@@ -1139,62 +1139,62 @@ static int batch_objects(struct batch_options *opt)
 	strbuf_release(&output);
 	string_list_clear(&data.remote_allowed_atoms, 0);
 	cfg->warn_on_object_refname_ambiguity = save_warning;
-	return retval;
+	вернуть retval;
 }
 
-static int git_cat_file_config(const char *var, const char *value,
+static целое git_cat_file_config(const char *var, const char *value,
 			       const struct config_context *ctx, void *cb)
 {
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	если (userdiff_config(var, value) < 0)
+		вернуть -1;
 
-	return git_default_config(var, value, ctx, cb);
+	вернуть git_default_config(var, value, ctx, cb);
 }
 
-static int batch_option_callback(const struct option *opt,
+static целое batch_option_callback(const struct option *opt,
 				 const char *arg,
-				 int unset)
+				 целое unset)
 {
 	struct batch_options *bo = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (bo->enabled) {
-		return error(_("only one batch option may be specified"));
+	если (bo->enabled) {
+		вернуть error(_("only one batch option may be specified"));
 	}
 
 	bo->enabled = 1;
 
-	if (!strcmp(opt->long_name, "batch"))
+	если (!strcmp(opt->long_name, "batch"))
 		bo->batch_mode = BATCH_MODE_CONTENTS;
-	else if (!strcmp(opt->long_name, "batch-check"))
+	иначе если (!strcmp(opt->long_name, "batch-check"))
 		bo->batch_mode = BATCH_MODE_INFO;
-	else if (!strcmp(opt->long_name, "batch-command"))
+	иначе если (!strcmp(opt->long_name, "batch-command"))
 		bo->batch_mode = BATCH_MODE_QUEUE_AND_DISPATCH;
-	else
+	иначе
 		BUG("%s given to batch-option-callback", opt->long_name);
 
 	bo->format = arg;
 
-	return 0;
+	вернуть 0;
 }
 
-int cmd_cat_file(int argc,
+целое cmd_cat_file(целое argc,
 		 const char **argv,
 		 const char *prefix,
 		 struct repository *repo UNUSED)
 {
-	int opt = 0;
-	int opt_cw = 0;
-	int opt_epts = 0;
+	целое opt = 0;
+	целое opt_cw = 0;
+	целое opt_epts = 0;
 	const char *exp_type = NULL, *obj_name = NULL;
 	struct batch_options batch = {
 		.objects_filter = LIST_OBJECTS_FILTER_INIT,
 	};
-	int unknown_type = 0;
-	int input_nul_terminated = 0;
-	int nul_terminated = 0;
-	int ret;
+	целое unknown_type = 0;
+	целое input_nul_terminated = 0;
+	целое nul_terminated = 0;
+	целое ret;
 
 	const char * const builtin_catfile_usage[] = {
 		N_("git cat-file <type> <object>"),
@@ -1266,7 +1266,7 @@ int cmd_cat_file(int argc,
 	opt_cw = (opt == 'c' || opt == 'w');
 	opt_epts = (opt == 'e' || opt == 'p' || opt == 't' || opt == 's');
 
-	if (use_mailmap)
+	если (use_mailmap)
 		load_mailmap();
 
 	switch (batch.objects_filter.choice) {
@@ -1275,7 +1275,7 @@ int cmd_cat_file(int argc,
 	case LOFC_BLOB_NONE:
 	case LOFC_BLOB_LIMIT:
 	case LOFC_OBJECT_TYPE:
-		if (!batch.enabled)
+		если (!batch.enabled)
 			usage(_("objects filter only supported in batch mode"));
 		break;
 	default:
@@ -1284,56 +1284,56 @@ int cmd_cat_file(int argc,
 	}
 
 	/* --batch-all-objects? */
-	if (opt == 'b')
+	если (opt == 'b')
 		batch.all_objects = 1;
 
 	/* Option compatibility */
-	if (force_path && !opt_cw)
+	если (force_path && !opt_cw)
 		usage_msg_optf(_("'%s=<%s>' needs '%s' or '%s'"),
 			       builtin_catfile_usage, options,
 			       "--path", _("path|tree-ish"), "--filters",
 			       "--textconv");
 
 	/* Option compatibility with batch mode */
-	if (batch.enabled)
+	если (batch.enabled)
 		;
-	else if (batch.follow_symlinks)
+	иначе если (batch.follow_symlinks)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--follow-symlinks");
-	else if (batch.buffer_output >= 0)
+	иначе если (batch.buffer_output >= 0)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--buffer");
-	else if (batch.all_objects)
+	иначе если (batch.all_objects)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--batch-all-objects");
-	else if (input_nul_terminated)
+	иначе если (input_nul_terminated)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-z");
-	else if (nul_terminated)
+	иначе если (nul_terminated)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-Z");
 
 	batch.input_delim = batch.output_delim = '\n';
-	if (input_nul_terminated)
+	если (input_nul_terminated)
 		batch.input_delim = '\0';
-	if (nul_terminated)
+	если (nul_terminated)
 		batch.input_delim = batch.output_delim = '\0';
 
 	/* Batch defaults */
-	if (batch.buffer_output < 0)
+	если (batch.buffer_output < 0)
 		batch.buffer_output = batch.all_objects;
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
 	/* Return early if we're in batch mode? */
-	if (batch.enabled) {
-		if (opt_cw)
+	если (batch.enabled) {
+		если (opt_cw)
 			batch.transform_mode = opt;
-		else if (opt && opt != 'b')
+		иначе если (opt && opt != 'b')
 			usage_msg_optf(_("'-%c' is incompatible with batch mode"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc)
+		иначе если (argc)
 			usage_msg_opt(_("batch modes take no arguments"),
 				      builtin_catfile_usage, options);
 
@@ -1341,29 +1341,29 @@ int cmd_cat_file(int argc,
 		goto out;
 	}
 
-	if (opt) {
-		if (!argc && opt == 'c')
+	если (opt) {
+		если (!argc && opt == 'c')
 			usage_msg_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--textconv");
-		else if (!argc && opt == 'w')
+		иначе если (!argc && opt == 'w')
 			usage_msg_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--filters");
-		else if (!argc && opt_epts)
+		иначе если (!argc && opt_epts)
 			usage_msg_optf(_("<object> required with '-%c'"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc == 1)
+		иначе если (argc == 1)
 			obj_name = argv[0];
-		else
+		иначе
 			usage_msg_opt(_("too many arguments"), builtin_catfile_usage,
 				      options);
-	} else if (!argc) {
+	} иначе если (!argc) {
 		usage_with_options(builtin_catfile_usage, options);
-	} else if (argc != 2) {
+	} иначе если (argc != 2) {
 		usage_msg_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
 			      builtin_catfile_usage, options, argc);
-	} else if (argc) {
+	} иначе если (argc) {
 		exp_type = argv[0];
 		obj_name = argv[1];
 	}
@@ -1372,5 +1372,5 @@ int cmd_cat_file(int argc,
 
 out:
 	list_objects_filter_release(&batch.objects_filter);
-	return ret;
+	вернуть ret;
 }

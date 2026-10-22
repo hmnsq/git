@@ -17,22 +17,22 @@ N_("git range-diff [<options>] <base> <old-tip> <new-tip>"),
 NULL
 };
 
-static int parse_max_memory(const struct option *opt, const char *arg, int unset)
+static целое parse_max_memory(const struct option *opt, const char *arg, целое unset)
 {
 	size_t *max_memory = opt->value;
 	uintmax_t val;
 
-	if (unset)
-		return 0;
+	если (unset)
+		вернуть 0;
 
-	if (!git_parse_unsigned(arg, &val, SIZE_MAX))
-		return error(_("invalid max-memory value: %s"), arg);
+	если (!git_parse_unsigned(arg, &val, SIZE_MAX))
+		вернуть error(_("invalid max-memory value: %s"), arg);
 
 	*max_memory = (size_t)val;
-	return 0;
+	вернуть 0;
 }
 
-int cmd_range_diff(int argc,
+целое cmd_range_diff(целое argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
@@ -46,7 +46,7 @@ int cmd_range_diff(int argc,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
+	целое simple_color = -1, left_only = 0, right_only = 0;
 	struct option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
 			    &range_diff_opts.creation_factor,
@@ -71,7 +71,7 @@ int cmd_range_diff(int argc,
 		OPT_END()
 	};
 	struct option *options;
-	int i, dash_dash = -1, res = 0;
+	целое i, dash_dash = -1, res = 0;
 	struct strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
 	struct object_id oid;
 	const char *three_dots = NULL;
@@ -87,37 +87,37 @@ int cmd_range_diff(int argc,
 	diff_setup_done(&diffopt);
 
 	/* force color when --dual-color was used */
-	if (!simple_color)
+	если (!simple_color)
 		diffopt.use_color = GIT_COLOR_ALWAYS;
 
 	/* If `--diff-merges` was specified, imply `--merges` */
-	if (diff_merges_arg.nr) {
+	если (diff_merges_arg.nr) {
 		range_diff_opts.include_merges = 1;
 		strvec_pushv(&log_arg, diff_merges_arg.v);
 	}
 
-	for (i = 0; i < argc; i++)
-		if (!strcmp(argv[i], "--")) {
+	для (i = 0; i < argc; i++)
+		если (!strcmp(argv[i], "--")) {
 			dash_dash = i;
 			break;
 		}
 
-	if (dash_dash == 3 ||
+	если (dash_dash == 3 ||
 	    (dash_dash < 0 && argc > 2 &&
 	     !repo_get_oid_committish(the_repository, argv[0], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[1], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[2], &oid))) {
-		if (dash_dash < 0)
+		если (dash_dash < 0)
 			; /* already validated arguments */
-		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
+		иначе если (repo_get_oid_committish(the_repository, argv[0], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
+		иначе если (repo_get_oid_committish(the_repository, argv[1], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
-		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
+		иначе если (repo_get_oid_committish(the_repository, argv[2], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
@@ -127,17 +127,17 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 3 : dash_dash));
-	} else if (dash_dash == 2 ||
+	} иначе если (dash_dash == 2 ||
 		   (dash_dash < 0 && argc > 1 &&
 		    is_range_diff_range(argv[0]) &&
 		    is_range_diff_range(argv[1]))) {
-		if (dash_dash < 0)
+		если (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!is_range_diff_range(argv[0]))
+		иначе если (!is_range_diff_range(argv[0]))
 			usage_msg_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (!is_range_diff_range(argv[1]))
+		иначе если (!is_range_diff_range(argv[1]))
 			usage_msg_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
@@ -147,30 +147,30 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 2 : dash_dash));
-	} else if (dash_dash == 1 ||
+	} иначе если (dash_dash == 1 ||
 		   (dash_dash < 0 && argc > 0 &&
 		    (three_dots = strstr(argv[0], "...")))) {
 		const char *a, *b;
-		int a_len;
+		целое a_len;
 
-		if (dash_dash < 0)
+		если (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!(three_dots = strstr(argv[0], "...")))
+		иначе если (!(three_dots = strstr(argv[0], "...")))
 			usage_msg_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
-		if (three_dots == argv[0]) {
+		если (three_dots == argv[0]) {
 			a = "HEAD";
 			a_len = strlen(a);
-		} else {
+		} иначе {
 			a = argv[0];
-			a_len = (int)(three_dots - a);
+			a_len = (целое)(three_dots - a);
 		}
 
-		if (three_dots[3])
+		если (three_dots[3])
 			b = three_dots + 3;
-		else
+		иначе
 			b = "HEAD";
 
 		strbuf_addf(&range1, "%s..%.*s", b, a_len, a);
@@ -178,7 +178,7 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
-	} else
+	} иначе
 		usage_msg_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
@@ -193,5 +193,5 @@ int cmd_range_diff(int argc,
 	strbuf_release(&range1);
 	strbuf_release(&range2);
 
-	return res;
+	вернуть res;
 }

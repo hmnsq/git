@@ -34,46 +34,46 @@ static const char * const builtin_fsmonitor__daemon_usage[] = {
  * Global state loaded from config.
  */
 #define FSMONITOR__IPC_THREADS "fsmonitor.ipcthreads"
-static int fsmonitor__ipc_threads = 8;
+static целое fsmonitor__ipc_threads = 8;
 
 #define FSMONITOR__START_TIMEOUT "fsmonitor.starttimeout"
-static int fsmonitor__start_timeout_sec = 60;
+static целое fsmonitor__start_timeout_sec = 60;
 
 #define FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
-static int fsmonitor__announce_startup = 0;
+static целое fsmonitor__announce_startup = 0;
 
-static int fsmonitor_config(const char *var, const char *value,
+static целое fsmonitor_config(const char *var, const char *value,
 			    const struct config_context *ctx, void *cb)
 {
-	if (!strcmp(var, FSMONITOR__IPC_THREADS)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 1)
-			return error(_("value of '%s' out of range: %d"),
+	если (!strcmp(var, FSMONITOR__IPC_THREADS)) {
+		целое i = git_config_int(var, value, ctx->kvi);
+		если (i < 1)
+			вернуть error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__IPC_THREADS, i);
 		fsmonitor__ipc_threads = i;
-		return 0;
+		вернуть 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 0)
-			return error(_("value of '%s' out of range: %d"),
+	если (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
+		целое i = git_config_int(var, value, ctx->kvi);
+		если (i < 0)
+			вернуть error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__START_TIMEOUT, i);
 		fsmonitor__start_timeout_sec = i;
-		return 0;
+		вернуть 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
-		int is_bool;
-		int i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
-		if (i < 0)
-			return error(_("value of '%s' not bool or int: %d"),
+	если (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
+		целое is_bool;
+		целое i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
+		если (i < 0)
+			вернуть error(_("value of '%s' not bool or int: %d"),
 				     var, i);
 		fsmonitor__announce_startup = i;
-		return 0;
+		вернуть 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	вернуть git_default_config(var, value, ctx, cb);
 }
 
 /*
@@ -82,27 +82,27 @@ static int fsmonitor_config(const char *var, const char *value,
  * Send a "quit" command to the `git-fsmonitor--daemon` (if running)
  * and wait for it to shutdown.
  */
-static int do_as_client__send_stop(void)
+static целое do_as_client__send_stop(void)
 {
 	struct strbuf answer = STRBUF_INIT;
-	int ret;
-	int max_wait_ms = 30000;
-	int elapsed_ms = 0;
+	целое ret;
+	целое max_wait_ms = 30000;
+	целое elapsed_ms = 0;
 
 	ret = fsmonitor_ipc__send_command("quit", &answer);
 
 	/* The quit command does not return any response data. */
 	strbuf_release(&answer);
 
-	if (ret)
-		return ret;
+	если (ret)
+		вернуть ret;
 
 	trace2_region_enter("fsm_client", "polling-for-daemon-exit", NULL);
-	while (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
-		if (elapsed_ms >= max_wait_ms) {
+	пока (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
+		если (elapsed_ms >= max_wait_ms) {
 			trace2_region_leave("fsm_client",
 					    "polling-for-daemon-exit", NULL);
-			return error(_("daemon did not stop within %d seconds"),
+			вернуть error(_("daemon did not stop within %d seconds"),
 				     max_wait_ms / 1000);
 		}
 		sleep_millisec(50);
@@ -110,10 +110,10 @@ static int do_as_client__send_stop(void)
 	}
 	trace2_region_leave("fsm_client", "polling-for-daemon-exit", NULL);
 
-	return 0;
+	вернуть 0;
 }
 
-static int do_as_client__status(void)
+static целое do_as_client__status(void)
 {
 	enum ipc_active_state state = fsmonitor_ipc__get_state();
 
@@ -121,12 +121,12 @@ static int do_as_client__status(void)
 	case IPC_STATE__LISTENING:
 		printf(_("fsmonitor-daemon is watching '%s'\n"),
 		       the_repository->worktree);
-		return 0;
+		вернуть 0;
 
 	default:
 		printf(_("fsmonitor-daemon is not watching '%s'\n"),
 		       the_repository->worktree);
-		return 1;
+		вернуть 1;
 	}
 }
 
@@ -143,7 +143,7 @@ struct fsmonitor_cookie_item {
 	enum fsmonitor_cookie_item_result result;
 };
 
-static int cookies_cmp(const void *data UNUSED,
+static целое cookies_cmp(const void *data UNUSED,
 		       const struct hashmap_entry *he1,
 		       const struct hashmap_entry *he2, const void *keydata)
 {
@@ -152,7 +152,7 @@ static int cookies_cmp(const void *data UNUSED,
 	const struct fsmonitor_cookie_item *b =
 		container_of(he2, const struct fsmonitor_cookie_item, entry);
 
-	return strcmp(a->name, keydata ? keydata : b->name);
+	вернуть strcmp(a->name, keydata ? keydata : b->name);
 }
 
 static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
@@ -160,12 +160,12 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 {
 	/* assert current thread holding state->main_lock */
 
-	int fd;
+	целое fd;
 	struct fsmonitor_cookie_item *cookie;
 	struct strbuf cookie_pathname = STRBUF_INIT;
 	struct strbuf cookie_filename = STRBUF_INIT;
 	enum fsmonitor_cookie_item_result result;
-	int my_cookie_seq;
+	целое my_cookie_seq;
 
 	CALLOC_ARRAY(cookie, 1);
 
@@ -190,7 +190,7 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * that the listener thread has seen it.
 	 */
 	fd = open(cookie_pathname.buf, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (fd < 0) {
+	если (fd < 0) {
 		error_errno(_("could not create fsmonitor cookie '%s'"),
 			    cookie->name);
 
@@ -216,17 +216,17 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	{
 		struct timeval now;
 		struct timespec ts;
-		int err = 0;
+		целое err = 0;
 
 		gettimeofday(&now, NULL);
 		ts.tv_sec = now.tv_sec + 1;
 		ts.tv_nsec = now.tv_usec * 1000;
 
-		while (cookie->result == FCIR_INIT && !err)
+		пока (cookie->result == FCIR_INIT && !err)
 			err = pthread_cond_timedwait(&state->cookies_cond,
 						     &state->main_lock,
 						     &ts);
-		if (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
+		если (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
 			trace_printf_key(&trace_fsmonitor,
 					 "cookie_wait timed out");
 			cookie->result = FCIR_ERROR;
@@ -242,7 +242,7 @@ done:
 	free(cookie);
 	strbuf_release(&cookie_pathname);
 
-	return result;
+	вернуть result;
 }
 
 /*
@@ -253,10 +253,10 @@ static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
 {
 	/* assert current thread holding state->main_lock */
 
-	int k;
-	int nr_seen = 0;
+	целое k;
+	целое nr_seen = 0;
 
-	for (k = 0; k < cookie_names->nr; k++) {
+	для (k = 0; k < cookie_names->nr; k++) {
 		struct fsmonitor_cookie_item key;
 		struct fsmonitor_cookie_item *cookie;
 
@@ -264,7 +264,7 @@ static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
 		hashmap_entry_init(&key.entry, strhash(key.name));
 
 		cookie = hashmap_get_entry(&state->cookies, &key, entry, NULL);
-		if (cookie) {
+		если (cookie) {
 			trace_printf_key(&trace_fsmonitor, "cookie-seen: '%s'",
 					 cookie->name);
 			cookie->result = FCIR_SEEN;
@@ -272,7 +272,7 @@ static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (nr_seen)
+	если (nr_seen)
 		pthread_cond_broadcast(&state->cookies_cond);
 }
 
@@ -285,7 +285,7 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
 
 	struct hashmap_iter iter;
 	struct fsmonitor_cookie_item *cookie;
-	int nr_aborted = 0;
+	целое nr_aborted = 0;
 
 	hashmap_for_each_entry(&state->cookies, &iter, cookie, entry) {
 		trace_printf_key(&trace_fsmonitor, "cookie-abort: '%s'",
@@ -294,7 +294,7 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
 		nr_aborted++;
 	}
 
-	if (nr_aborted)
+	если (nr_aborted)
 		pthread_cond_broadcast(&state->cookies_cond);
 }
 
@@ -383,7 +383,7 @@ struct fsmonitor_batch {
 
 static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 {
-	static int test_env_value = -1;
+	static целое test_env_value = -1;
 	static uint64_t flush_count = 0;
 	struct fsmonitor_token_data *token;
 	struct fsmonitor_batch *batch;
@@ -396,10 +396,10 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	token->batch_tail = batch;
 	token->client_ref_count = 0;
 
-	if (test_env_value < 0)
+	если (test_env_value < 0)
 		test_env_value = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
 
-	if (!test_env_value) {
+	если (!test_env_value) {
 		struct timeval tv;
 		struct tm tm;
 		time_t secs;
@@ -415,7 +415,7 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 			    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			    tm.tm_hour, tm.tm_min, tm.tm_sec,
 			    (long)tv.tv_usec);
-	} else {
+	} иначе {
 		strbuf_addf(&token->token_id, "test_%08x", test_env_value++);
 	}
 
@@ -446,10 +446,10 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	 * reference point set.  Pin batch 0 to force early file system
 	 * events to accumulate.
 	 */
-	if (test_env_value)
+	если (test_env_value)
 		batch->pinned_time = time(NULL);
 
-	return token;
+	вернуть token;
 }
 
 struct fsmonitor_batch *fsmonitor_batch__new(void)
@@ -458,12 +458,12 @@ struct fsmonitor_batch *fsmonitor_batch__new(void)
 
 	CALLOC_ARRAY(batch, 1);
 
-	return batch;
+	вернуть batch;
 }
 
 void fsmonitor_batch__free_list(struct fsmonitor_batch *batch)
 {
-	while (batch) {
+	пока (batch) {
 		struct fsmonitor_batch *next = batch->next;
 
 		/*
@@ -498,7 +498,7 @@ static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
 		   batch_dest->nr + batch_src->nr + 1,
 		   batch_dest->alloc);
 
-	for (k = 0; k < batch_src->nr; k++)
+	для (k = 0; k < batch_src->nr; k++)
 		batch_dest->interned_paths[batch_dest->nr++] =
 			batch_src->interned_paths[k];
 }
@@ -541,27 +541,27 @@ static struct fsmonitor_batch *with_lock__truncate_old_batches(
 	const struct fsmonitor_batch *batch;
 	struct fsmonitor_batch *remainder;
 
-	if (!batch_marker)
-		return NULL;
+	если (!batch_marker)
+		вернуть NULL;
 
 	trace_printf_key(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
 			 batch_marker->batch_seq_nr,
 			 (uint64_t)batch_marker->pinned_time);
 
-	for (batch = batch_marker; batch; batch = batch->next) {
+	для (batch = batch_marker; batch; batch = batch->next) {
 		time_t t;
 
-		if (!batch->pinned_time) /* an overflow batch */
+		если (!batch->pinned_time) /* an overflow batch */
 			continue;
 
 		t = batch->pinned_time + MY_TIME_DELAY_SECONDS;
-		if (t > batch_marker->pinned_time) /* too close to marker */
+		если (t > batch_marker->pinned_time) /* too close to marker */
 			continue;
 
 		goto truncate_past_here;
 	}
 
-	return NULL;
+	вернуть NULL;
 
 truncate_past_here:
 	state->current_token_data->batch_tail = (struct fsmonitor_batch *)batch;
@@ -569,13 +569,13 @@ truncate_past_here:
 	remainder = ((struct fsmonitor_batch *)batch)->next;
 	((struct fsmonitor_batch *)batch)->next = NULL;
 
-	return remainder;
+	вернуть remainder;
 }
 
 static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
 {
-	if (!token)
-		return;
+	если (!token)
+		вернуть;
 
 	assert(token->client_ref_count == 0);
 
@@ -614,7 +614,7 @@ static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
 
 	new_one = fsmonitor_new_token_data();
 
-	if (state->current_token_data->client_ref_count == 0)
+	если (state->current_token_data->client_ref_count == 0)
 		free_me = state->current_token_data;
 	state->current_token_data = new_one;
 
@@ -649,7 +649,7 @@ static void with_lock__format_response_token(
  * Parse an opaque token from the client.
  * Returns -1 on error.
  */
-static int fsmonitor_parse_client_token(const char *buf_token,
+static целое fsmonitor_parse_client_token(const char *buf_token,
 					struct strbuf *requested_token_id,
 					uint64_t *seq_nr)
 {
@@ -659,22 +659,22 @@ static int fsmonitor_parse_client_token(const char *buf_token,
 	strbuf_reset(requested_token_id);
 	*seq_nr = 0;
 
-	if (!skip_prefix(buf_token, "builtin:", &p))
-		return -1;
+	если (!skip_prefix(buf_token, "builtin:", &p))
+		вернуть -1;
 
-	while (*p && *p != ':')
+	пока (*p && *p != ':')
 		strbuf_addch(requested_token_id, *p++);
-	if (!*p++)
-		return -1;
+	если (!*p++)
+		вернуть -1;
 
 	*seq_nr = (uint64_t)strtoumax(p, &p_end, 10);
-	if (*p_end)
-		return -1;
+	если (*p_end)
+		вернуть -1;
 
-	return 0;
+	вернуть 0;
 }
 
-static int do_handle_client(struct fsmonitor_daemon_state *state,
+static целое do_handle_client(struct fsmonitor_daemon_state *state,
 			    const char *command,
 			    ipc_server_reply_cb *reply,
 			    struct ipc_server_reply_data *reply_data)
@@ -691,9 +691,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	struct fsmonitor_batch *remainder = NULL;
 	intmax_t count = 0, duplicates = 0;
 	struct strset shown = STRSET_INIT;
-	int do_trivial = 0;
-	int do_flush = 0;
-	int do_cookie = 0;
+	целое do_trivial = 0;
+	целое do_flush = 0;
+	целое do_cookie = 0;
 	enum fsmonitor_cookie_item_result cookie_result;
 
 	/*
@@ -705,7 +705,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 *            | <V2-opaque-fsmonitor-token> NUL
 	 */
 
-	if (!strcmp(command, "quit")) {
+	если (!strcmp(command, "quit")) {
 		/*
 		 * A client has requested over the socket/pipe that the
 		 * daemon shutdown.
@@ -716,9 +716,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		 *
 		 * There is no reply to the client.
 		 */
-		return SIMPLE_IPC_QUIT;
+		вернуть SIMPLE_IPC_QUIT;
 
-	} else if (!strcmp(command, "flush")) {
+	} иначе если (!strcmp(command, "flush")) {
 		/*
 		 * Flush all of our cached data and generate a new token
 		 * just like if we lost sync with the filesystem.
@@ -728,7 +728,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_flush = 1;
 		do_trivial = 1;
 
-	} else if (!skip_prefix(command, "builtin:", &p)) {
+	} иначе если (!skip_prefix(command, "builtin:", &p)) {
 		/* assume V1 timestamp or garbage */
 
 		char *p_end;
@@ -742,9 +742,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_trivial = 1;
 		do_cookie = 1;
 
-	} else {
+	} иначе {
 		/* We have "builtin:*" */
-		if (fsmonitor_parse_client_token(command, &requested_token_id,
+		если (fsmonitor_parse_client_token(command, &requested_token_id,
 						 &requested_oldest_seq_nr)) {
 			trace_printf_key(&trace_fsmonitor,
 					 "fsmonitor: invalid V2 protocol token '%s'",
@@ -752,7 +752,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			do_trivial = 1;
 			do_cookie = 1;
 
-		} else {
+		} иначе {
 			/*
 			 * We have a V2 valid token:
 			 *     "builtin:<token_id>:<seq_nr>"
@@ -763,7 +763,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (!state->current_token_data)
+	если (!state->current_token_data)
 		BUG("fsmonitor state does not have a current token");
 
 	/*
@@ -781,16 +781,16 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * assume that there might be some very, very recent activity
 	 * on the FS still in flight.
 	 */
-	if (do_cookie) {
+	если (do_cookie) {
 		cookie_result = with_lock__wait_for_cookie(state);
-		if (cookie_result != FCIR_SEEN) {
+		если (cookie_result != FCIR_SEEN) {
 			error(_("fsmonitor: cookie_result '%d' != SEEN"),
 			      cookie_result);
 			do_trivial = 1;
 		}
 	}
 
-	if (do_flush)
+	если (do_flush)
 		with_lock__do_force_resync(state);
 
 	/*
@@ -821,8 +821,8 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	trace_printf_key(&trace_fsmonitor, "response token: %s",
 			 response_token.buf);
 
-	if (!do_trivial) {
-		if (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
+	если (!do_trivial) {
+		если (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
 			/*
 			 * The client last spoke to a different daemon
 			 * instance -OR- the daemon had to resync with
@@ -832,7 +832,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 					   "response/token", "different");
 			do_trivial = 1;
 
-		} else if (requested_oldest_seq_nr <
+		} иначе если (requested_oldest_seq_nr <
 			   token_data->batch_tail->batch_seq_nr) {
 			/*
 			 * The client wants older events than we have for
@@ -847,7 +847,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (do_trivial) {
+	если (do_trivial) {
 		pthread_mutex_unlock(&state->main_lock);
 
 		reply(reply_data, "/", 2);
@@ -887,18 +887,18 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * values.
 	 */
 	strset_init_with_options(&shown, NULL, 0);
-	for (batch = batch_head;
+	для (batch = batch_head;
 	     batch && batch->batch_seq_nr > requested_oldest_seq_nr;
 	     batch = batch->next) {
 		size_t k;
 
-		for (k = 0; k < batch->nr; k++) {
+		для (k = 0; k < batch->nr; k++) {
 			const char *s = batch->interned_paths[k];
 			size_t s_len;
 
-			if (!strset_add(&shown, s))
+			если (!strset_add(&shown, s))
 				duplicates++;
-			else {
+			иначе {
 				trace_printf_key(&trace_fsmonitor,
 						 "send[%"PRIuMAX"]: %s",
 						 count, s);
@@ -906,7 +906,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 				/* Each path gets written with a trailing NUL */
 				s_len = strlen(s) + 1;
 
-				if (payload.len + s_len >=
+				если (payload.len + s_len >=
 				    LARGE_PACKET_DATA_MAX) {
 					reply(reply_data, payload.buf,
 					      payload.len);
@@ -920,18 +920,18 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (payload.len) {
+	если (payload.len) {
 		reply(reply_data, payload.buf, payload.len);
 		total_response_len += payload.len;
 	}
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (token_data->client_ref_count > 0)
+	если (token_data->client_ref_count > 0)
 		token_data->client_ref_count--;
 
-	if (token_data->client_ref_count == 0) {
-		if (token_data != state->current_token_data) {
+	если (token_data->client_ref_count == 0) {
+		если (token_data != state->current_token_data) {
 			/*
 			 * The listener thread did a token-reset while we were
 			 * walking the batch list.  Therefore, this token is
@@ -940,7 +940,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * that work.
 			 */
 			fsmonitor_free_token_data(token_data);
-		} else if (batch) {
+		} иначе если (batch) {
 			/*
 			 * We are holding the lock and are the only
 			 * reader of the ref-counted portion of the
@@ -960,7 +960,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_unlock(&state->main_lock);
 
-	if (remainder)
+	если (remainder)
 		fsmonitor_batch__free_list(remainder);
 
 	trace2_data_intmax("fsmonitor", the_repository, "response/length", total_response_len);
@@ -973,25 +973,25 @@ cleanup:
 	strbuf_release(&requested_token_id);
 	strbuf_release(&payload);
 
-	return 0;
+	вернуть 0;
 }
 
 static ipc_server_application_cb handle_client;
 
-static int handle_client(void *data,
+static целое handle_client(void *data,
 			 const char *command, size_t command_len,
 			 ipc_server_reply_cb *reply,
 			 struct ipc_server_reply_data *reply_data)
 {
 	struct fsmonitor_daemon_state *state = data;
-	int result;
+	целое result;
 
 	/*
 	 * The Simple IPC API now supports {char*, len} arguments, but
 	 * FSMonitor always uses proper null-terminated strings, so
 	 * we can ignore the command_len argument.  (Trust, but verify.)
 	 */
-	if (command_len != strlen(command))
+	если (command_len != strlen(command))
 		BUG("FSMonitor assumes text messages");
 
 	trace_printf_key(&trace_fsmonitor, "requested token: %s", command);
@@ -1003,7 +1003,7 @@ static int handle_client(void *data,
 
 	trace2_region_leave("fsmonitor", "handle_client", the_repository);
 
-	return result;
+	вернуть result;
 }
 
 #define FSMONITOR_DIR           "fsmonitor--daemon"
@@ -1013,31 +1013,31 @@ static int handle_client(void *data,
 enum fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
 	const char *rel)
 {
-	if (fspathncmp(rel, ".git", 4))
-		return IS_WORKDIR_PATH;
+	если (fspathncmp(rel, ".git", 4))
+		вернуть IS_WORKDIR_PATH;
 	rel += 4;
 
-	if (!*rel)
-		return IS_DOT_GIT;
-	if (*rel != '/')
-		return IS_WORKDIR_PATH; /* e.g. .gitignore */
+	если (!*rel)
+		вернуть IS_DOT_GIT;
+	если (*rel != '/')
+		вернуть IS_WORKDIR_PATH; /* e.g. .gitignore */
 	rel++;
 
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
+	если (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
 			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
+		вернуть IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
 
-	return IS_INSIDE_DOT_GIT;
+	вернуть IS_INSIDE_DOT_GIT;
 }
 
 enum fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
 	const char *rel)
 {
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
+	если (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
 			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
+		вернуть IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
 
-	return IS_INSIDE_GITDIR;
+	вернуть IS_INSIDE_GITDIR;
 }
 
 static enum fsmonitor_path_type try_classify_workdir_abs_path(
@@ -1046,19 +1046,19 @@ static enum fsmonitor_path_type try_classify_workdir_abs_path(
 {
 	const char *rel;
 
-	if (fspathncmp(path, state->path_worktree_watch.buf,
+	если (fspathncmp(path, state->path_worktree_watch.buf,
 		       state->path_worktree_watch.len))
-		return IS_OUTSIDE_CONE;
+		вернуть IS_OUTSIDE_CONE;
 
 	rel = path + state->path_worktree_watch.len;
 
-	if (!*rel)
-		return IS_WORKDIR_PATH; /* it is the root dir exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	если (!*rel)
+		вернуть IS_WORKDIR_PATH; /* it is the root dir exactly */
+	если (*rel != '/')
+		вернуть IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_workdir_relative(rel);
+	вернуть fsmonitor_classify_path_workdir_relative(rel);
 }
 
 enum fsmonitor_path_type fsmonitor_classify_path_absolute(
@@ -1069,24 +1069,24 @@ enum fsmonitor_path_type fsmonitor_classify_path_absolute(
 	enum fsmonitor_path_type t;
 
 	t = try_classify_workdir_abs_path(state, path);
-	if (state->nr_paths_watching == 1)
-		return t;
-	if (t != IS_OUTSIDE_CONE)
-		return t;
+	если (state->nr_paths_watching == 1)
+		вернуть t;
+	если (t != IS_OUTSIDE_CONE)
+		вернуть t;
 
-	if (fspathncmp(path, state->path_gitdir_watch.buf,
+	если (fspathncmp(path, state->path_gitdir_watch.buf,
 		       state->path_gitdir_watch.len))
-		return IS_OUTSIDE_CONE;
+		вернуть IS_OUTSIDE_CONE;
 
 	rel = path + state->path_gitdir_watch.len;
 
-	if (!*rel)
-		return IS_GITDIR; /* it is the <gitdir> exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	если (!*rel)
+		вернуть IS_GITDIR; /* it is the <gitdir> exactly */
+	если (*rel != '/')
+		вернуть IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_gitdir_relative(rel);
+	вернуть fsmonitor_classify_path_gitdir_relative(rel);
 }
 
 /*
@@ -1102,18 +1102,18 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 		       struct fsmonitor_batch *batch,
 		       const struct string_list *cookie_names)
 {
-	if (!batch && !cookie_names->nr)
-		return;
+	если (!batch && !cookie_names->nr)
+		вернуть;
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (batch) {
+	если (batch) {
 		struct fsmonitor_batch *head;
 
 		head = state->current_token_data->batch_head;
-		if (!head) {
+		если (!head) {
 			BUG("token does not have batch");
-		} else if (head->pinned_time) {
+		} иначе если (head->pinned_time) {
 			/*
 			 * We cannot alter the current batch list
 			 * because:
@@ -1133,14 +1133,14 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			batch->batch_seq_nr = head->batch_seq_nr + 1;
 			batch->next = head;
 			state->current_token_data->batch_head = batch;
-		} else if (!head->batch_seq_nr) {
+		} иначе если (!head->batch_seq_nr) {
 			/*
 			 * Batch 0 is unpinned.  See the note in
 			 * `fsmonitor_new_token_data()` about why we
 			 * don't need to accumulate these paths.
 			 */
 			fsmonitor_batch__free_list(batch);
-		} else if (head->nr + batch->nr > MY_COMBINE_LIMIT) {
+		} иначе если (head->nr + batch->nr > MY_COMBINE_LIMIT) {
 			/*
 			 * The head batch in the list has never been
 			 * transmitted to a client, but folding the
@@ -1151,7 +1151,7 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			batch->batch_seq_nr = head->batch_seq_nr + 1;
 			batch->next = head;
 			state->current_token_data->batch_head = batch;
-		} else {
+		} иначе {
 			/*
 			 * We are free to add the paths in the given
 			 * batch onto the end of the current head batch.
@@ -1161,7 +1161,7 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	if (cookie_names->nr)
+	если (cookie_names->nr)
 		with_lock__mark_cookies_seen(state, cookie_names);
 
 	pthread_mutex_unlock(&state->main_lock);
@@ -1176,7 +1176,7 @@ static void *fsm_health__thread_proc(void *_state)
 	fsm_health__loop(state);
 
 	trace2_thread_exit();
-	return NULL;
+	вернуть NULL;
 }
 
 static void *fsm_listen__thread_proc(void *_state)
@@ -1187,24 +1187,24 @@ static void *fsm_listen__thread_proc(void *_state)
 
 	trace_printf_key(&trace_fsmonitor, "Watching: worktree '%s'",
 			 state->path_worktree_watch.buf);
-	if (state->nr_paths_watching > 1)
+	если (state->nr_paths_watching > 1)
 		trace_printf_key(&trace_fsmonitor, "Watching: gitdir '%s'",
 				 state->path_gitdir_watch.buf);
 
 	fsm_listen__loop(state);
 
 	pthread_mutex_lock(&state->main_lock);
-	if (state->current_token_data &&
+	если (state->current_token_data &&
 	    state->current_token_data->client_ref_count == 0)
 		fsmonitor_free_token_data(state->current_token_data);
 	state->current_token_data = NULL;
 	pthread_mutex_unlock(&state->main_lock);
 
 	trace2_thread_exit();
-	return NULL;
+	вернуть NULL;
 }
 
-static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
+static целое fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 {
 	struct ipc_server_opts ipc_opts = {
 		.nr_threads = fsmonitor__ipc_threads,
@@ -1217,19 +1217,19 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 		 */
 		.uds_disallow_chdir = 0
 	};
-	int health_started = 0;
-	int listener_started = 0;
-	int err = 0;
+	целое health_started = 0;
+	целое listener_started = 0;
+	целое err = 0;
 
 	/*
 	 * Start the IPC thread pool before the we've started the file
 	 * system event listener thread so that we have the IPC handle
 	 * before we need it.
 	 */
-	if (ipc_server_init_async(&state->ipc_server_data,
+	если (ipc_server_init_async(&state->ipc_server_data,
 				  state->path_ipc.buf, &ipc_opts,
 				  handle_client, state))
-		return error_errno(
+		вернуть error_errno(
 			_("could not start IPC thread pool on '%s'"),
 			state->path_ipc.buf);
 
@@ -1237,7 +1237,7 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 	 * Start the fsmonitor listener thread to collect filesystem
 	 * events.
 	 */
-	if (pthread_create(&state->listener_thread, NULL,
+	если (pthread_create(&state->listener_thread, NULL,
 			   fsm_listen__thread_proc, state)) {
 		ipc_server_stop_async(state->ipc_server_data);
 		err = error(_("could not start fsmonitor listener thread"));
@@ -1248,7 +1248,7 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 	/*
 	 * Start the health thread to watch over our process.
 	 */
-	if (pthread_create(&state->health_thread, NULL,
+	если (pthread_create(&state->health_thread, NULL,
 			   fsm_health__thread_proc, state)) {
 		ipc_server_stop_async(state->ipc_server_data);
 		err = error(_("could not start fsmonitor health thread"));
@@ -1273,30 +1273,30 @@ cleanup:
 	 * event from the IPC thread pool, but it doesn't hurt to tell
 	 * it again.  And wait for it to shutdown.
 	 */
-	if (listener_started) {
+	если (listener_started) {
 		fsm_listen__stop_async(state);
 		pthread_join(state->listener_thread, NULL);
 	}
 
-	if (health_started) {
+	если (health_started) {
 		fsm_health__stop_async(state);
 		pthread_join(state->health_thread, NULL);
 	}
 
-	if (err)
-		return err;
-	if (state->listen_error_code)
-		return state->listen_error_code;
-	if (state->health_error_code)
-		return state->health_error_code;
-	return 0;
+	если (err)
+		вернуть err;
+	если (state->listen_error_code)
+		вернуть state->listen_error_code;
+	если (state->health_error_code)
+		вернуть state->health_error_code;
+	вернуть 0;
 }
 
-static int fsmonitor_run_daemon(void)
+static целое fsmonitor_run_daemon(void)
 {
 	struct fsmonitor_daemon_state state;
 	const char *home;
-	int err;
+	целое err;
 
 	memset(&state, 0, sizeof(state));
 
@@ -1315,7 +1315,7 @@ static int fsmonitor_run_daemon(void)
 
 	strbuf_init(&state.alias.alias, 0);
 	strbuf_init(&state.alias.points_to, 0);
-	if ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
+	если ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
 		goto done;
 
 	/*
@@ -1328,7 +1328,7 @@ static int fsmonitor_run_daemon(void)
 	strbuf_init(&state.path_gitdir_watch, 0);
 	strbuf_addbuf(&state.path_gitdir_watch, &state.path_worktree_watch);
 	strbuf_addstr(&state.path_gitdir_watch, "/.git");
-	if (!is_directory(state.path_gitdir_watch.buf)) {
+	если (!is_directory(state.path_gitdir_watch.buf)) {
 		strbuf_reset(&state.path_gitdir_watch);
 		strbuf_addstr(&state.path_gitdir_watch,
 			      absolute_path(repo_get_git_dir(the_repository)));
@@ -1388,12 +1388,12 @@ static int fsmonitor_run_daemon(void)
 	 * Confirm that we can create platform-specific resources for the
 	 * filesystem listener before we bother starting all the threads.
 	 */
-	if (fsm_listen__ctor(&state)) {
+	если (fsm_listen__ctor(&state)) {
 		err = error(_("could not initialize listener thread"));
 		goto done;
 	}
 
-	if (fsm_health__ctor(&state)) {
+	если (fsm_health__ctor(&state)) {
 		err = error(_("could not initialize health thread"));
 		goto done;
 	}
@@ -1412,7 +1412,7 @@ static int fsmonitor_run_daemon(void)
 	 * everything using absolute paths.
 	 */
 	home = getenv("HOME");
-	if (home && *home && chdir(home))
+	если (home && *home && chdir(home))
 		die_errno(_("could not cd home '%s'"), home);
 
 	err = fsmonitor_run_daemon_1(&state);
@@ -1443,10 +1443,10 @@ done:
 	strbuf_release(&state.alias.alias);
 	strbuf_release(&state.alias.points_to);
 
-	return err;
+	вернуть err;
 }
 
-static int try_to_run_foreground_daemon(int detach_console)
+static целое try_to_run_foreground_daemon(целое detach_console)
 {
 	/*
 	 * Technically, we don't need to probe for an existing daemon
@@ -1456,20 +1456,20 @@ static int try_to_run_foreground_daemon(int detach_console)
 	 * However, this method gives us a nicer error message for a
 	 * common error case.
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	если (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	если (fsmonitor__announce_startup) {
 		fprintf(stderr, _("running fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
 	}
 
-	if (detach_console) {
+	если (detach_console) {
 #ifdef GIT_WINDOWS_NATIVE
 		FreeConsole();
-#else
+#иначе
 		/*
 		 * Create a new session so that the daemon is detached
 		 * from the parent's process group.  This prevents
@@ -1477,17 +1477,17 @@ static int try_to_run_foreground_daemon(int detach_console)
 		 * from waiting on the daemon when they wait for a
 		 * foreground command that implicitly spawned it.
 		 */
-		if (setsid() == -1)
+		если (setsid() == -1)
 			warning_errno(_("setsid failed"));
 #endif
 	}
 
-	return !!fsmonitor_run_daemon();
+	вернуть !!fsmonitor_run_daemon();
 }
 
 static start_bg_wait_cb bg_wait_cb;
 
-static int bg_wait_cb(const struct child_process *cp UNUSED,
+static целое bg_wait_cb(const struct child_process *cp UNUSED,
 		      void *cb_data UNUSED)
 {
 	enum ipc_active_state s = fsmonitor_ipc__get_state();
@@ -1495,22 +1495,22 @@ static int bg_wait_cb(const struct child_process *cp UNUSED,
 	switch (s) {
 	case IPC_STATE__LISTENING:
 		/* child is "ready" */
-		return 0;
+		вернуть 0;
 
 	case IPC_STATE__NOT_LISTENING:
 	case IPC_STATE__PATH_NOT_FOUND:
 		/* give child more time */
-		return 1;
+		вернуть 1;
 
 	default:
 	case IPC_STATE__INVALID_PATH:
 	case IPC_STATE__OTHER_ERROR:
 		/* all the time in world won't help */
-		return -1;
+		вернуть -1;
 	}
 }
 
-static int try_to_start_background_daemon(void)
+static целое try_to_start_background_daemon(void)
 {
 	struct child_process cp = CHILD_PROCESS_INIT;
 	enum start_bg_result sbgr;
@@ -1523,11 +1523,11 @@ static int try_to_start_background_daemon(void)
 	 * of creating the background process (and not whether it
 	 * immediately exited).
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	если (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	если (fsmonitor__announce_startup) {
 		fprintf(stderr, _("starting fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
@@ -1550,29 +1550,29 @@ static int try_to_start_background_daemon(void)
 
 	switch (sbgr) {
 	case SBGR_READY:
-		return 0;
+		вернуть 0;
 
 	default:
 	case SBGR_ERROR:
 	case SBGR_CB_ERROR:
-		return error(_("daemon failed to start"));
+		вернуть error(_("daemon failed to start"));
 
 	case SBGR_TIMEOUT:
-		return error(_("daemon not online yet"));
+		вернуть error(_("daemon not online yet"));
 
 	case SBGR_DIED:
-		return error(_("daemon terminated"));
+		вернуть error(_("daemon terminated"));
 	}
 }
 
-int cmd_fsmonitor__daemon(int argc,
+целое cmd_fsmonitor__daemon(целое argc,
 			  const char **argv,
 			  const char *prefix,
 			  struct repository *repo UNUSED)
 {
 	const char *subcmd;
 	enum fsmonitor_reason reason;
-	int detach_console = 0;
+	целое detach_console = 0;
 
 	struct option options[] = {
 		OPT_BOOL(0, "detach", &detach_console, N_("detach from console")),
@@ -1590,11 +1590,11 @@ int cmd_fsmonitor__daemon(int argc,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_fsmonitor__daemon_usage, 0);
-	if (argc != 1)
+	если (argc != 1)
 		usage_with_options(builtin_fsmonitor__daemon_usage, options);
 	subcmd = argv[0];
 
-	if (fsmonitor__ipc_threads < 1)
+	если (fsmonitor__ipc_threads < 1)
 		die(_("invalid 'ipc-threads' value (%d)"),
 		    fsmonitor__ipc_threads);
 
@@ -1610,28 +1610,28 @@ int cmd_fsmonitor__daemon(int argc,
 	fsm_settings__set_ipc(the_repository);
 
 	reason = fsm_settings__get_reason(the_repository);
-	if (reason > FSMONITOR_REASON_OK)
+	если (reason > FSMONITOR_REASON_OK)
 		die("%s",
 		    fsm_settings__get_incompatible_msg(the_repository,
 						       reason));
 
-	if (!strcmp(subcmd, "start"))
-		return !!try_to_start_background_daemon();
+	если (!strcmp(subcmd, "start"))
+		вернуть !!try_to_start_background_daemon();
 
-	if (!strcmp(subcmd, "run"))
-		return !!try_to_run_foreground_daemon(detach_console);
+	если (!strcmp(subcmd, "run"))
+		вернуть !!try_to_run_foreground_daemon(detach_console);
 
-	if (!strcmp(subcmd, "stop"))
-		return !!do_as_client__send_stop();
+	если (!strcmp(subcmd, "stop"))
+		вернуть !!do_as_client__send_stop();
 
-	if (!strcmp(subcmd, "status"))
-		return !!do_as_client__status();
+	если (!strcmp(subcmd, "status"))
+		вернуть !!do_as_client__status();
 
 	die(_("Unhandled subcommand '%s'"), subcmd);
 }
 
-#else
-int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED)
+#иначе
+целое cmd_fsmonitor__daemon(целое argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED)
 {
 	struct option options[] = {
 		OPT_END()

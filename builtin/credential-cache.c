@@ -16,63 +16,63 @@
 
 #ifdef GIT_WINDOWS_NATIVE
 
-static int connection_closed(int error)
+static целое connection_closed(целое error)
 {
-	return (error == EINVAL);
+	вернуть (error == EINVAL);
 }
 
-static int connection_fatally_broken(int error)
+static целое connection_fatally_broken(целое error)
 {
-	return (error != ENOENT) && (error != ENETDOWN);
+	вернуть (error != ENOENT) && (error != ENETDOWN);
 }
 
-#else
+#иначе
 
-static int connection_closed(int error)
+static целое connection_closed(целое error)
 {
-	return error == ECONNRESET || error == ECONNABORTED;
+	вернуть error == ECONNRESET || error == ECONNABORTED;
 }
 
-static int connection_fatally_broken(int error)
+static целое connection_fatally_broken(целое error)
 {
-	return (error != ENOENT) && (error != ECONNREFUSED);
+	вернуть (error != ENOENT) && (error != ECONNREFUSED);
 }
 
 #endif
 
-static int send_request(const char *socket, const struct strbuf *out)
+static целое send_request(const char *socket, const struct strbuf *out)
 {
-	int got_data = 0;
-	int fd = unix_stream_connect(socket, 0);
+	целое got_data = 0;
+	целое fd = unix_stream_connect(socket, 0);
 
-	if (fd < 0)
-		return -1;
+	если (fd < 0)
+		вернуть -1;
 
-	if (write_in_full(fd, out->buf, out->len) < 0)
+	если (write_in_full(fd, out->buf, out->len) < 0)
 		die_errno("unable to write to cache daemon");
 	shutdown(fd, SHUT_WR);
 
-	while (1) {
+	пока (1) {
 		char in[1024];
-		int r;
+		целое r;
 
 		r = read_in_full(fd, in, sizeof(in));
-		if (r == 0 || (r < 0 && connection_closed(errno)))
+		если (r == 0 || (r < 0 && connection_closed(errno)))
 			break;
-		if (r < 0)
+		если (r < 0)
 			die_errno("read error from cache daemon");
 		write_or_die(1, in, r);
 		got_data = 1;
 	}
 	close(fd);
-	return got_data;
+	вернуть got_data;
 }
 
 static void spawn_daemon(const char *socket)
 {
 	struct child_process daemon = CHILD_PROCESS_INIT;
 	char buf[128];
-	int r;
+	целое r;
 
 	strvec_pushl(&daemon.args,
 		     "credential-cache--daemon", socket,
@@ -81,36 +81,36 @@ static void spawn_daemon(const char *socket)
 	daemon.no_stdin = 1;
 	daemon.out = -1;
 
-	if (start_command(&daemon))
+	если (start_command(&daemon))
 		die_errno("unable to start cache daemon");
 	r = read_in_full(daemon.out, buf, sizeof(buf));
-	if (r < 0)
+	если (r < 0)
 		die_errno("unable to read result code from cache daemon");
-	if (r != 3 || memcmp(buf, "ok\n", 3))
+	если (r != 3 || memcmp(buf, "ok\n", 3))
 		die("cache daemon did not start: %.*s", r, buf);
 
 	child_process_clear(&daemon);
 	close(daemon.out);
 }
 
-static void do_cache(const char *socket, const char *action, int timeout,
-		     int flags)
+static void do_cache(const char *socket, const char *action, целое timeout,
+		     целое flags)
 {
 	struct strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "action=%s\n", action);
 	strbuf_addf(&buf, "timeout=%d\n", timeout);
-	if (flags & FLAG_RELAY) {
-		if (strbuf_read(&buf, 0, 0) < 0)
+	если (flags & FLAG_RELAY) {
+		если (strbuf_read(&buf, 0, 0) < 0)
 			die_errno("unable to relay credential");
 	}
 
-	if (send_request(socket, &buf) < 0) {
-		if (connection_fatally_broken(errno))
+	если (send_request(socket, &buf) < 0) {
+		если (connection_fatally_broken(errno))
 			die_errno("unable to connect to cache daemon");
-		if (flags & FLAG_SPAWN) {
+		если (flags & FLAG_SPAWN) {
 			spawn_daemon(socket);
-			if (send_request(socket, &buf) < 0)
+			если (send_request(socket, &buf) < 0)
 				die_errno("unable to connect to cache daemon");
 		}
 	}
@@ -122,12 +122,12 @@ static char *get_socket_path(void)
 	struct stat sb;
 	char *old_dir, *socket;
 	old_dir = interpolate_path("~/.git-credential-cache", 0);
-	if (old_dir && !stat(old_dir, &sb) && S_ISDIR(sb.st_mode))
+	если (old_dir && !stat(old_dir, &sb) && S_ISDIR(sb.st_mode))
 		socket = xstrfmt("%s/socket", old_dir);
-	else
+	иначе
 		socket = xdg_cache_home("credential/socket");
 	free(old_dir);
-	return socket;
+	вернуть socket;
 }
 
 static void announce_capabilities(void)
@@ -137,14 +137,14 @@ static void announce_capabilities(void)
 	credential_announce_capabilities(&c, stdout);
 }
 
-int cmd_credential_cache(int argc,
+целое cmd_credential_cache(целое argc,
 			 const char **argv,
 			 const char *prefix,
 			 struct repository *repo UNUSED)
 {
 	const char *socket_path_arg = NULL;
 	char *socket_path;
-	int timeout = 900;
+	целое timeout = 900;
 	const char *op;
 	const char * const usage[] = {
 		"git credential-cache [<options>] <action>",
@@ -159,37 +159,37 @@ int cmd_credential_cache(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (!argc)
+	если (!argc)
 		usage_with_options(usage, options);
 	op = argv[0];
 
-	if (!have_unix_sockets())
+	если (!have_unix_sockets())
 		die(_("credential-cache unavailable; no unix socket support"));
 
 	socket_path = xstrdup_or_null(socket_path_arg);
-	if (!socket_path)
+	если (!socket_path)
 		socket_path = get_socket_path();
-	if (!socket_path)
+	если (!socket_path)
 		die("unable to find a suitable socket path; use --socket");
 
-	if (!strcmp(op, "exit"))
+	если (!strcmp(op, "exit"))
 		do_cache(socket_path, op, timeout, 0);
-	else if (!strcmp(op, "get") || !strcmp(op, "erase"))
+	иначе если (!strcmp(op, "get") || !strcmp(op, "erase"))
 		do_cache(socket_path, op, timeout, FLAG_RELAY);
-	else if (!strcmp(op, "store"))
+	иначе если (!strcmp(op, "store"))
 		do_cache(socket_path, op, timeout, FLAG_RELAY|FLAG_SPAWN);
-	else if (!strcmp(op, "capability"))
+	иначе если (!strcmp(op, "capability"))
 		announce_capabilities();
-	else
+	иначе
 		; /* ignore unknown operation */
 
 	free(socket_path);
-	return 0;
+	вернуть 0;
 }
 
-#else
+#иначе
 
-int cmd_credential_cache(int argc, const char **argv, const char *prefix,
+целое cmd_credential_cache(целое argc, const char **argv, const char *prefix,
 			 struct repository *repo UNUSED)
 {
 	const char * const usage[] = {

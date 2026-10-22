@@ -22,11 +22,11 @@
 #include "fsck.h"
 #include "packfile.h"
 
-static int dry_run, quiet, recover, has_errors, strict;
+static целое dry_run, quiet, recover, has_errors, strict;
 static const char unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
 
 static unsigned char buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int offset, len;
+static unsigned целое offset, len;
 static off_t consumed_bytes;
 static off_t max_input_size;
 static struct git_hash_ctx ctx;
@@ -47,7 +47,7 @@ static struct decoration obj_decorate;
 
 static struct obj_buffer *lookup_object_buffer(struct object *base)
 {
-	return lookup_decoration(&obj_decorate, base);
+	вернуть lookup_decoration(&obj_decorate, base);
 }
 
 static void add_object_buffer(struct object *object, char *buffer, unsigned long size)
@@ -56,7 +56,7 @@ static void add_object_buffer(struct object *object, char *buffer, unsigned long
 	CALLOC_ARRAY(obj, 1);
 	obj->buffer = buffer;
 	obj->size = size;
-	if (add_decoration(&obj_decorate, object, obj))
+	если (add_decoration(&obj_decorate, object, obj))
 		die("object %s tried to add buffer twice!", oid_to_hex(&object->oid));
 }
 
@@ -64,41 +64,41 @@ static void add_object_buffer(struct object *object, char *buffer, unsigned long
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+static void *fill(целое min)
 {
-	if (min <= len)
-		return buffer + offset;
-	if (min > sizeof(buffer))
+	если (min <= len)
+		вернуть buffer + offset;
+	если (min > sizeof(buffer))
 		die("cannot fill %d bytes", min);
-	if (offset) {
+	если (offset) {
 		git_hash_update(&ctx, buffer, offset);
 		memmove(buffer, buffer + offset, len);
 		offset = 0;
 	}
 	do {
 		ssize_t ret = xread(0, buffer + len, sizeof(buffer) - len);
-		if (ret <= 0) {
-			if (!ret)
+		если (ret <= 0) {
+			если (!ret)
 				die("early EOF");
 			die_errno("read error on input");
 		}
 		len += ret;
-	} while (len < min);
-	return buffer;
+	} пока (len < min);
+	вернуть buffer;
 }
 
-static void use(int bytes)
+static void use(целое bytes)
 {
-	if (bytes > len)
+	если (bytes > len)
 		die("used more bytes than were available");
 	len -= bytes;
 	offset += bytes;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	если (signed_add_overflows(consumed_bytes, bytes))
 		die("pack too large for current definition of off_t");
 	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size)
+	если (max_input_size && consumed_bytes > max_input_size)
 		die(_("pack exceeds maximum allowed size"));
 	display_throughput(progress, consumed_bytes);
 }
@@ -128,22 +128,22 @@ static void *get_data(unsigned long size)
 	stream.avail_in = len;
 	git_inflate_init(&stream);
 
-	for (;;) {
-		int ret = git_inflate(&stream, 0);
+	для (;;) {
+		целое ret = git_inflate(&stream, 0);
 		use(len - stream.avail_in);
-		if (stream.total_out == size && ret == Z_STREAM_END)
+		если (stream.total_out == size && ret == Z_STREAM_END)
 			break;
-		if (ret != Z_OK) {
+		если (ret != Z_OK) {
 			error("inflate returned %d", ret);
 			FREE_AND_NULL(buf);
-			if (!recover)
+			если (!recover)
 				exit(1);
 			has_errors = 1;
 			break;
 		}
 		stream.next_in = fill(1);
 		stream.avail_in = len;
-		if (dry_run) {
+		если (dry_run) {
 			/* reuse the buffer in dry_run mode */
 			stream.next_out = buf;
 			stream.avail_out = bufsize > size - stream.total_out ?
@@ -152,9 +152,9 @@ static void *get_data(unsigned long size)
 		}
 	}
 	git_inflate_end(&stream);
-	if (dry_run)
+	если (dry_run)
 		FREE_AND_NULL(buf);
-	return buf;
+	вернуть buf;
 }
 
 struct delta_info {
@@ -204,7 +204,7 @@ static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
 {
 	struct object_id oid;
 
-	if (odb_write_object(the_repository->objects, obj_buf->buffer, obj_buf->size,
+	если (odb_write_object(the_repository->objects, obj_buf->buffer, obj_buf->size,
 			     obj->type, &oid) < 0)
 		die("failed to write object %s", oid_to_hex(&obj->oid));
 	obj->flags |= FLAG_WRITTEN;
@@ -215,47 +215,47 @@ static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
  * that have reachability requirements and calls this function.
  * Verify its reachability and validity recursively and write it out.
  */
-static int check_object(struct object *obj, enum object_type type,
+static целое check_object(struct object *obj, enum object_type type,
 			void *data UNUSED,
 			struct fsck_options *options UNUSED)
 {
 	struct obj_buffer *obj_buf;
 
-	if (!obj)
-		return 1;
+	если (!obj)
+		вернуть 1;
 
-	if (obj->flags & FLAG_WRITTEN)
-		return 0;
+	если (obj->flags & FLAG_WRITTEN)
+		вернуть 0;
 
-	if (type != OBJ_ANY && obj->type != type)
+	если (type != OBJ_ANY && obj->type != type)
 		die("object type mismatch");
 
-	if (!(obj->flags & FLAG_OPEN)) {
+	если (!(obj->flags & FLAG_OPEN)) {
 		size_t size;
-		int type = odb_read_object_info(the_repository->objects, &obj->oid, &size);
-		if (type != obj->type || type <= 0)
+		целое type = odb_read_object_info(the_repository->objects, &obj->oid, &size);
+		если (type != obj->type || type <= 0)
 			die("object of unexpected type");
 		obj->flags |= FLAG_WRITTEN;
-		return 0;
+		вернуть 0;
 	}
 
 	obj_buf = lookup_object_buffer(obj);
-	if (!obj_buf)
+	если (!obj_buf)
 		die("Whoops! Cannot find object '%s'", oid_to_hex(&obj->oid));
-	if (fsck_object(obj, obj_buf->buffer, obj_buf->size, &fsck_options))
+	если (fsck_object(obj, obj_buf->buffer, obj_buf->size, &fsck_options))
 		die("fsck error in packed object");
 	fsck_options.walk = check_object;
-	if (fsck_walk(obj, NULL, &fsck_options))
+	если (fsck_walk(obj, NULL, &fsck_options))
 		die("Error on reachable objects of %s", oid_to_hex(&obj->oid));
 	write_cached_object(obj, obj_buf);
-	return 0;
+	вернуть 0;
 }
 
 static void write_rest(void)
 {
 	unsigned i;
-	for (i = 0; i < nr_objects; i++) {
-		if (obj_list[i].obj)
+	для (i = 0; i < nr_objects; i++) {
+		если (obj_list[i].obj)
 			check_object(obj_list[i].obj, OBJ_ANY, NULL, NULL);
 	}
 }
@@ -271,37 +271,37 @@ static void added_object(unsigned nr, enum object_type type,
 static void write_object(unsigned nr, enum object_type type,
 			 void *buf, unsigned long size)
 {
-	if (!strict) {
-		if (odb_write_object(the_repository->objects, buf, size, type,
+	если (!strict) {
+		если (odb_write_object(the_repository->objects, buf, size, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
 		added_object(nr, type, buf, size);
 		free(buf);
 		obj_list[nr].obj = NULL;
-	} else if (type == OBJ_BLOB) {
+	} иначе если (type == OBJ_BLOB) {
 		struct blob *blob;
-		if (odb_write_object(the_repository->objects, buf, size, type,
+		если (odb_write_object(the_repository->objects, buf, size, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
 		added_object(nr, type, buf, size);
 		free(buf);
 
 		blob = lookup_blob(the_repository, &obj_list[nr].oid);
-		if (blob)
+		если (blob)
 			blob->object.flags |= FLAG_WRITTEN;
-		else
+		иначе
 			die("invalid blob object");
 		obj_list[nr].obj = NULL;
-	} else {
+	} иначе {
 		struct object *obj;
-		int eaten;
+		целое eaten;
 		hash_object_file(the_hash_algo, buf, size, type,
 				 &obj_list[nr].oid);
 		added_object(nr, type, buf, size);
 		obj = parse_object_buffer(the_repository, &obj_list[nr].oid,
 					  type, size, buf,
 					  &eaten);
-		if (!obj)
+		если (!obj)
 			die("invalid %s", type_name(type));
 		add_object_buffer(obj, buf, size);
 		obj->flags |= FLAG_OPEN;
@@ -319,7 +319,7 @@ static void resolve_delta(unsigned nr, enum object_type type,
 	result = patch_delta(base, base_size,
 			     delta, delta_size,
 			     &result_size);
-	if (!result)
+	если (!result)
 		die("failed to apply delta");
 	free(delta);
 	write_object(nr, type, result, result_size);
@@ -335,8 +335,8 @@ static void added_object(unsigned nr, enum object_type type,
 	struct delta_info **p = &delta_list;
 	struct delta_info *info;
 
-	while ((info = *p) != NULL) {
-		if (oideq(&info->base_oid, &obj_list[nr].oid) ||
+	пока ((info = *p) != NULL) {
+		если (oideq(&info->base_oid, &obj_list[nr].oid) ||
 		    info->base_offset == obj_list[nr].offset) {
 			*p = info->next;
 			p = &delta_list;
@@ -354,14 +354,14 @@ static void unpack_non_delta_entry(enum object_type type, unsigned long size,
 {
 	void *buf = get_data(size);
 
-	if (buf)
+	если (buf)
 		write_object(nr, type, buf, size);
 }
 
 struct zlib_stream {
 	struct odb_stream base;
 	git_zstream *zstream;
-	int status;
+	целое status;
 };
 
 static ssize_t zlib_stream_read(struct odb_stream *in_stream,
@@ -370,20 +370,20 @@ static ssize_t zlib_stream_read(struct odb_stream *in_stream,
 	struct zlib_stream *data = container_of(in_stream, struct zlib_stream, base);
 	git_zstream *zstream = data->zstream;
 
-	if (data->status != Z_OK)
-		return 0;
+	если (data->status != Z_OK)
+		вернуть 0;
 
 	zstream->next_out = (unsigned char *) buf;
 	zstream->avail_out = buf_len;
 
-	while (data->status == Z_OK && zstream->avail_out == buf_len) {
+	пока (data->status == Z_OK && zstream->avail_out == buf_len) {
 		zstream->next_in = fill(1);
 		zstream->avail_in = len;
 		data->status = git_inflate(zstream, 0);
 		use(len - zstream->avail_in);
 	}
 
-	return buf_len - zstream->avail_out;
+	вернуть buf_len - zstream->avail_out;
 }
 
 static void stream_blob(unsigned long size, unsigned nr)
@@ -402,37 +402,37 @@ static void stream_blob(unsigned long size, unsigned nr)
 
 	git_inflate_init(&zstream);
 
-	if (odb_write_object_stream(the_repository->objects, &in_stream.base, &info->oid))
+	если (odb_write_object_stream(the_repository->objects, &in_stream.base, &info->oid))
 		die(_("failed to write object in stream"));
 
-	if (in_stream.status != Z_STREAM_END)
+	если (in_stream.status != Z_STREAM_END)
 		die(_("inflate returned (%d)"), in_stream.status);
 	git_inflate_end(&zstream);
 
-	if (strict) {
+	если (strict) {
 		struct blob *blob = lookup_blob(the_repository, &info->oid);
 
-		if (!blob)
+		если (!blob)
 			die(_("invalid blob object from stream"));
 		blob->object.flags |= FLAG_WRITTEN;
 	}
 	info->obj = NULL;
 }
 
-static int resolve_against_held(unsigned nr, const struct object_id *base,
+static целое resolve_against_held(unsigned nr, const struct object_id *base,
 				void *delta_data, unsigned long delta_size)
 {
 	struct object *obj;
 	struct obj_buffer *obj_buffer;
 	obj = lookup_object(the_repository, base);
-	if (!obj)
-		return 0;
+	если (!obj)
+		вернуть 0;
 	obj_buffer = lookup_object_buffer(obj);
-	if (!obj_buffer)
-		return 0;
+	если (!obj_buffer)
+		вернуть 0;
 	resolve_delta(nr, obj->type, obj_buffer->buffer,
 		      obj_buffer->size, delta_data, delta_size);
-	return 1;
+	вернуть 1;
 }
 
 static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
@@ -443,25 +443,25 @@ static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
 	size_t base_size_st = 0;
 	struct object_id base_oid;
 
-	if (type == OBJ_REF_DELTA) {
+	если (type == OBJ_REF_DELTA) {
 		oidread(&base_oid, fill(the_hash_algo->rawsz), the_repository->hash_algo);
 		use(the_hash_algo->rawsz);
 		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
-		if (odb_has_object(the_repository->objects, &base_oid,
+		если (!delta_data)
+			вернуть;
+		если (odb_has_object(the_repository->objects, &base_oid,
 				   ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 			; /* Ok we have this one */
-		else if (resolve_against_held(nr, &base_oid,
+		иначе если (resolve_against_held(nr, &base_oid,
 					      delta_data, delta_size))
-			return; /* we are done */
-		else {
+			вернуть; /* we are done */
+		иначе {
 			/* cannot resolve yet --- queue it */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
 			add_delta_to_list(nr, &base_oid, 0, delta_data, delta_size);
-			return;
+			вернуть;
 		}
-	} else {
+	} иначе {
 		unsigned base_found = 0;
 		unsigned char *pack, c;
 		off_t base_offset;
@@ -471,9 +471,9 @@ static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
 		c = *pack;
 		use(1);
 		base_offset = c & 127;
-		while (c & 128) {
+		пока (c & 128) {
 			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
+			если (!base_offset || MSB(base_offset, 7))
 				die("offset value overflow for delta base object");
 			pack = fill(1);
 			c = *pack;
@@ -481,27 +481,27 @@ static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
 			base_offset = (base_offset << 7) + (c & 127);
 		}
 		base_offset = obj_list[nr].offset - base_offset;
-		if (base_offset <= 0 || base_offset >= obj_list[nr].offset)
+		если (base_offset <= 0 || base_offset >= obj_list[nr].offset)
 			die("offset value out of bound for delta base object");
 
 		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
+		если (!delta_data)
+			вернуть;
 		lo = 0;
 		hi = nr;
-		while (lo < hi) {
+		пока (lo < hi) {
 			mid = lo + (hi - lo) / 2;
-			if (base_offset < obj_list[mid].offset) {
+			если (base_offset < obj_list[mid].offset) {
 				hi = mid;
-			} else if (base_offset > obj_list[mid].offset) {
+			} иначе если (base_offset > obj_list[mid].offset) {
 				lo = mid + 1;
-			} else {
+			} иначе {
 				oidcpy(&base_oid, &obj_list[mid].oid);
 				base_found = !is_null_oid(&base_oid);
 				break;
 			}
 		}
-		if (!base_found) {
+		если (!base_found) {
 			/*
 			 * The delta base object is itself a delta that
 			 * has not been resolved yet.
@@ -509,23 +509,23 @@ static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
 			add_delta_to_list(nr, null_oid(the_hash_algo), base_offset,
 					  delta_data, delta_size);
-			return;
+			вернуть;
 		}
 	}
 
-	if (resolve_against_held(nr, &base_oid, delta_data, delta_size))
-		return;
+	если (resolve_against_held(nr, &base_oid, delta_data, delta_size))
+		вернуть;
 
 	base = odb_read_object(the_repository->objects, &base_oid,
 			       &type, &base_size_st);
 	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base) {
+	если (!base) {
 		error("failed to read delta-pack base object %s",
 		      oid_to_hex(&base_oid));
-		if (!recover)
+		если (!recover)
 			exit(1);
 		has_errors = 1;
-		return;
+		вернуть;
 	}
 	resolve_delta(nr, type, base, base_size, delta_data, delta_size);
 	free(base);
@@ -546,8 +546,8 @@ static void unpack_one(unsigned nr)
 	type = (c >> 4) & 7;
 	size = (c & 15);
 	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	пока (c & 0x80) {
+		если ((bitsizeof(size_t) - 7) < shift)
 			die(_("object size too large for this platform"));
 		pack = fill(1);
 		c = *pack;
@@ -558,68 +558,68 @@ static void unpack_one(unsigned nr)
 
 	switch (type) {
 	case OBJ_BLOB:
-		if (!dry_run &&
+		если (!dry_run &&
 		    size > repo_settings_get_big_file_threshold(the_repository)) {
 			stream_blob(size, nr);
-			return;
+			вернуть;
 		}
 		/* fallthrough */
 	case OBJ_COMMIT:
 	case OBJ_TREE:
 	case OBJ_TAG:
 		unpack_non_delta_entry(type, size, nr);
-		return;
+		вернуть;
 	case OBJ_REF_DELTA:
 	case OBJ_OFS_DELTA:
 		unpack_delta_entry(type, size, nr);
-		return;
+		вернуть;
 	default:
 		error("bad object type %d", type);
 		has_errors = 1;
-		if (recover)
-			return;
+		если (recover)
+			вернуть;
 		exit(1);
 	}
 }
 
 static void unpack_all(void)
 {
-	int i;
+	целое i;
 	unsigned char *hdr = fill(sizeof(struct pack_header));
 	struct odb_transaction *transaction;
 
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	если (get_be32(hdr) != PACK_SIGNATURE)
 		die("bad pack file");
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	если (!pack_version_ok_native(get_be32(hdr)))
 		die("unknown pack file version %"PRIu32,
 		    get_be32(hdr));
 	hdr += 4;
 	nr_objects = get_be32(hdr);
 	use(sizeof(struct pack_header));
 
-	if (!quiet)
+	если (!quiet)
 		progress = start_progress(the_repository,
 					  _("Unpacking objects"), nr_objects);
 	CALLOC_ARRAY(obj_list, nr_objects);
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	for (i = 0; i < nr_objects; i++) {
+	для (i = 0; i < nr_objects; i++) {
 		unpack_one(i);
 		display_progress(progress, i + 1);
 	}
 	odb_transaction_commit_and_finalize_or_die(transaction);
 	stop_progress(&progress);
 
-	if (delta_list)
+	если (delta_list)
 		die("unresolved deltas left after unpacking");
 }
 
-int cmd_unpack_objects(int argc,
+целое cmd_unpack_objects(целое argc,
 		       const char **argv,
 		       const char *prefix UNUSED,
 		       struct repository *repo)
 {
-	int i;
+	целое i;
 	struct object_id oid;
 	struct git_hash_ctx tmp_ctx;
 
@@ -633,38 +633,38 @@ int cmd_unpack_objects(int argc,
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
 
-	for (i = 1 ; i < argc; i++) {
+	для (i = 1 ; i < argc; i++) {
 		const char *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "-n")) {
+		если (*arg == '-') {
+			если (!strcmp(arg, "-n")) {
 				dry_run = 1;
 				continue;
 			}
-			if (!strcmp(arg, "-q")) {
+			если (!strcmp(arg, "-q")) {
 				quiet = 1;
 				continue;
 			}
-			if (!strcmp(arg, "-r")) {
+			если (!strcmp(arg, "-r")) {
 				recover = 1;
 				continue;
 			}
-			if (!strcmp(arg, "--strict")) {
+			если (!strcmp(arg, "--strict")) {
 				strict = 1;
 				continue;
 			}
-			if (skip_prefix(arg, "--strict=", &arg)) {
+			если (skip_prefix(arg, "--strict=", &arg)) {
 				strict = 1;
 				fsck_set_msg_types(&fsck_options, arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
+			если (skip_prefix(arg, "--pack_header=", &arg)) {
+				если (parse_pack_header_option(arg,
 							     buffer, &len) < 0)
 					die(_("bad --pack_header: %s"), arg);
 				continue;
 			}
-			if (skip_prefix(arg, "--max-input-size=", &arg)) {
+			если (skip_prefix(arg, "--max-input-size=", &arg)) {
 				max_input_size = strtoumax(arg, NULL, 10);
 				continue;
 			}
@@ -680,12 +680,12 @@ int cmd_unpack_objects(int argc,
 	git_hash_init(&tmp_ctx, the_hash_algo);
 	git_hash_clone(&tmp_ctx, &ctx);
 	git_hash_final_oid(&oid, &tmp_ctx);
-	if (strict) {
+	если (strict) {
 		write_rest();
-		if (fsck_finish(&fsck_options))
+		если (fsck_finish(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
-	if (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
+	если (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
 		    the_repository->hash_algo))
 		die("final sha1 did not match");
 	use(the_hash_algo->rawsz);
@@ -694,5 +694,5 @@ int cmd_unpack_objects(int argc,
 	write_in_full(1, buffer + offset, len);
 
 	/* All done */
-	return has_errors;
+	вернуть has_errors;
 }

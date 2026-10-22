@@ -14,41 +14,41 @@ static const char * const git_symbolic_ref_usage[] = {
 	NULL
 };
 
-static int check_symref(const char *HEAD, int quiet, int shorten, int recurse, int print)
+static целое check_symref(const char *HEAD, целое quiet, целое shorten, целое recurse, целое print)
 {
-	int resolve_flags, flag;
+	целое resolve_flags, flag;
 	const char *refname;
 
 	resolve_flags = (recurse ? 0 : RESOLVE_REF_NO_RECURSE);
 	refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 					  HEAD, resolve_flags, NULL, &flag);
 
-	if (!refname)
+	если (!refname)
 		die("No such ref: %s", HEAD);
-	else if (!(flag & REF_ISSYMREF)) {
-		if (!quiet)
+	иначе если (!(flag & REF_ISSYMREF)) {
+		если (!quiet)
 			die("ref %s is not a symbolic ref", HEAD);
-		else
-			return 1;
+		иначе
+			вернуть 1;
 	}
-	if (print) {
+	если (print) {
 		char *to_free = NULL;
-		if (shorten)
+		если (shorten)
 			refname = to_free = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 									 refname,
 									 0);
 		puts(refname);
 		free(to_free);
 	}
-	return 0;
+	вернуть 0;
 }
 
-int cmd_symbolic_ref(int argc,
+целое cmd_symbolic_ref(целое argc,
 		     const char **argv,
 		     const char *prefix,
 		     struct repository *repo UNUSED)
 {
-	int quiet = 0, delete = 0, shorten = 0, recurse = 1, ret = 0;
+	целое quiet = 0, delete = 0, shorten = 0, recurse = 1, ret = 0;
 	const char *msg = NULL;
 	struct option options[] = {
 		OPT__QUIET(&quiet,
@@ -63,18 +63,18 @@ int cmd_symbolic_ref(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, options,
 			     git_symbolic_ref_usage, 0);
-	if (msg && !*msg)
+	если (msg && !*msg)
 		die("Refusing to perform update with empty message");
 
-	if (delete) {
-		if (argc != 1)
+	если (delete) {
+		если (argc != 1)
 			usage_with_options(git_symbolic_ref_usage, options);
 		ret = check_symref(argv[0], 1, 0, 0, 0);
-		if (ret)
+		если (ret)
 			die("Cannot delete %s, not a symbolic ref", argv[0]);
-		if (!strcmp(argv[0], "HEAD"))
+		если (!strcmp(argv[0], "HEAD"))
 			die("deleting '%s' is not allowed", argv[0]);
-		return refs_delete_ref(get_main_ref_store(the_repository),
+		вернуть refs_delete_ref(get_main_ref_store(the_repository),
 				       NULL, argv[0], NULL, REF_NO_DEREF);
 	}
 
@@ -83,10 +83,10 @@ int cmd_symbolic_ref(int argc,
 		ret = check_symref(argv[0], quiet, shorten, recurse, 1);
 		break;
 	case 2:
-		if (!strcmp(argv[0], "HEAD") &&
+		если (!strcmp(argv[0], "HEAD") &&
 		    !starts_with(argv[1], "refs/"))
 			die("Refusing to point HEAD outside of refs/");
-		if (check_refname_format(argv[1], REFNAME_ALLOW_ONELEVEL) < 0)
+		если (check_refname_format(argv[1], REFNAME_ALLOW_ONELEVEL) < 0)
 			die("Refusing to set '%s' to invalid ref '%s'", argv[0], argv[1]);
 		ret = !!refs_update_symref(get_main_ref_store(the_repository),
 					   argv[0], argv[1], msg);
@@ -94,5 +94,5 @@ int cmd_symbolic_ref(int argc,
 	default:
 		usage_with_options(git_symbolic_ref_usage, options);
 	}
-	return ret;
+	вернуть ret;
 }

@@ -47,7 +47,7 @@ static void change_data_free(void *util, const char *str UNUSED)
 	free(d);
 }
 
-static int fill_commit_message(struct repository *repo,
+static целое fill_commit_message(struct repository *repo,
 			       const struct object_id *old_tree,
 			       const struct object_id *new_tree,
 			       const char *default_message,
@@ -73,44 +73,44 @@ static int fill_commit_message(struct repository *repo,
 	s.committable = 1;
 
 	s.fp = fopen(path, "w");
-	if (!s.fp)
-		return error_errno(_("could not open '%s'"), path);
+	если (!s.fp)
+		вернуть error_errno(_("could not open '%s'"), path);
 
 	strbuf_addstr(out, default_message);
 	strbuf_addch(out, '\n');
 	strbuf_commented_addf(out, comment_line_str, hint, action, comment_line_str);
-	if (fwrite(out->buf, 1, out->len, s.fp) != out->len)
+	если (fwrite(out->buf, 1, out->len, s.fp) != out->len)
 		die_errno(_("could not write to '%s'"), path);
 
 	wt_status_collect_changes_trees(&s, old_tree, new_tree);
 	wt_status_print(&s);
 	wt_status_collect_free_buffers(&s);
 	string_list_clear_func(&s.change, change_data_free);
-	if (fclose(s.fp))
+	если (fclose(s.fp))
 		die_errno(_("could not write to '%s'"), path);
 
 	strbuf_reset(out);
-	if (launch_editor(path, out, NULL)) {
+	если (launch_editor(path, out, NULL)) {
 		fprintf(stderr, _("Aborting commit as launching the editor failed.\n"));
-		return -1;
+		вернуть -1;
 	}
 	strbuf_stripspace(out, comment_line_str);
 
 	cleanup_message(out, COMMIT_MSG_CLEANUP_ALL, 0);
 
-	if (!out->len) {
+	если (!out->len) {
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		return -1;
+		вернуть -1;
 	}
 
-	return 0;
+	вернуть 0;
 }
 
 enum commit_tree_flags {
 	COMMIT_TREE_EDIT_MESSAGE = (1 << 0),
 };
 
-static int commit_tree_ext(struct repository *repo,
+static целое commit_tree_ext(struct repository *repo,
 			   const char *action,
 			   struct commit *commit_with_message,
 			   const char *message_template,
@@ -134,24 +134,24 @@ static int commit_tree_ext(struct repository *repo,
 	struct object_id rewritten_commit_oid;
 	char *original_author = NULL;
 	size_t len;
-	int ret;
+	целое ret;
 
 	/* We retain authorship of the original commit. */
 	original_message = repo_logmsg_reencode(repo, commit_with_message, NULL, NULL);
 	ptr = find_commit_header(original_message, "author", &len);
-	if (ptr)
+	если (ptr)
 		original_author = xmemdupz(ptr, len);
 	find_commit_subject(original_message, &original_body);
 
-	if (!message_template)
+	если (!message_template)
 		message_template = original_body;
 
-	if (flags & COMMIT_TREE_EDIT_MESSAGE) {
+	если (flags & COMMIT_TREE_EDIT_MESSAGE) {
 		ret = fill_commit_message(repo, old_tree, new_tree,
 					  message_template, action, &commit_message);
-		if (ret < 0)
+		если (ret < 0)
 			goto out;
-	} else {
+	} иначе {
 		strbuf_addstr(&commit_message, message_template);
 	}
 
@@ -161,7 +161,7 @@ static int commit_tree_ext(struct repository *repo,
 	ret = commit_tree_extended(commit_message.buf, commit_message.len, new_tree,
 				   parents, &rewritten_commit_oid, original_author,
 				   NULL, NULL, original_extra_headers);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	*out = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
@@ -171,29 +171,29 @@ out:
 	strbuf_release(&commit_message);
 	free(original_author);
 	repo_unuse_commit_buffer(repo, commit_with_message, original_message);
-	return ret;
+	вернуть ret;
 }
 
-static int first_parent_tree_oid(struct repository *repo,
+static целое first_parent_tree_oid(struct repository *repo,
 				 struct commit *commit,
 				 struct object_id *out)
 {
 	struct commit *parent = commit->parents ? commit->parents->item : NULL;
 
-	if (!parent) {
+	если (!parent) {
 		oidcpy(out, repo->hash_algo->empty_tree);
-		return 0;
+		вернуть 0;
 	}
 
-	if (repo_parse_commit(repo, parent))
-		return error(_("unable to parse parent commit %s"),
+	если (repo_parse_commit(repo, parent))
+		вернуть error(_("unable to parse parent commit %s"),
 			     oid_to_hex(&parent->object.oid));
 
 	oidcpy(out, &repo_get_commit_tree(repo, parent)->object.oid);
-	return 0;
+	вернуть 0;
 }
 
-static int commit_tree_with_edited_message(struct repository *repo,
+static целое commit_tree_with_edited_message(struct repository *repo,
 					   const char *action,
 					   struct commit *original,
 					   struct commit **out)
@@ -203,10 +203,10 @@ static int commit_tree_with_edited_message(struct repository *repo,
 
 	tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	если (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
+		вернуть -1;
 
-	return commit_tree_ext(repo, action, original, NULL, original->parents,
+	вернуть commit_tree_ext(repo, action, original, NULL, original->parents,
 			       &parent_tree_oid, tree_oid, out, COMMIT_TREE_EDIT_MESSAGE);
 }
 
@@ -216,29 +216,29 @@ enum ref_action {
 	REF_ACTION_HEAD,
 };
 
-static int parse_ref_action(const struct option *opt, const char *value, int unset)
+static целое parse_ref_action(const struct option *opt, const char *value, целое unset)
 {
 	enum ref_action *action = opt->value;
 
 	BUG_ON_OPT_NEG_NOARG(unset, value);
-	if (!strcmp(value, "branches")) {
+	если (!strcmp(value, "branches")) {
 		*action = REF_ACTION_BRANCHES;
-	} else if (!strcmp(value, "head")) {
+	} иначе если (!strcmp(value, "head")) {
 		*action = REF_ACTION_HEAD;
-	} else {
-		return error(_("%s expects one of 'branches' or 'head'"),
+	} иначе {
+		вернуть error(_("%s expects one of 'branches' or 'head'"),
 			     opt->long_name);
 	}
 
-	return 0;
+	вернуть 0;
 }
 
-static int revwalk_contains_merges(struct repository *repo,
+static целое revwalk_contains_merges(struct repository *repo,
 				   const struct strvec *revwalk_args)
 {
 	struct strvec args = STRVEC_INIT;
 	struct rev_info revs;
-	int ret;
+	целое ret;
 
 	strvec_pushv(&args, revwalk_args->v);
 	strvec_push(&args, "--min-parents=2");
@@ -246,15 +246,15 @@ static int revwalk_contains_merges(struct repository *repo,
 	repo_init_revisions(repo, &revs, NULL);
 
 	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr != 1)
+	если (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
-	if (prepare_revision_walk(&revs) < 0) {
+	если (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
 		goto out;
 	}
 
-	if (get_revision(&revs)) {
+	если (get_revision(&revs)) {
 		ret = error(_("replaying merge commits is not supported yet!"));
 		goto out;
 	}
@@ -265,16 +265,16 @@ static int revwalk_contains_merges(struct repository *repo,
 out:
 	release_revisions(&revs);
 	strvec_clear(&args);
-	return ret;
+	вернуть ret;
 }
 
-static int setup_revwalk(struct repository *repo,
+static целое setup_revwalk(struct repository *repo,
 			 enum ref_action action,
 			 struct commit *original,
 			 struct rev_info *revs)
 {
 	struct strvec args = STRVEC_INIT;
-	int ret;
+	целое ret;
 
 	repo_init_revisions(repo, revs, NULL);
 	strvec_push(&args, "ignored");
@@ -298,12 +298,12 @@ static int setup_revwalk(struct repository *repo,
 	 * update it. Otherwise we'll update (or print) all descendant
 	 * branches.
 	 */
-	if (action == REF_ACTION_HEAD) {
+	если (action == REF_ACTION_HEAD) {
 		struct commit_list *from_list = NULL;
 		struct commit *head;
 
 		head = lookup_commit_reference_by_name("HEAD");
-		if (!head) {
+		если (!head) {
 			ret = error(_("cannot look up HEAD"));
 			goto out;
 		}
@@ -312,54 +312,54 @@ static int setup_revwalk(struct repository *repo,
 		ret = repo_is_descendant_of(repo, head, from_list);
 		commit_list_free(from_list);
 
-		if (ret < 0) {
+		если (ret < 0) {
 			ret = error(_("cannot determine descendance"));
 			goto out;
-		} else if (!ret) {
+		} иначе если (!ret) {
 			ret = error(_("rewritten commit must be an ancestor "
 				      "of HEAD when using --update-refs=head"));
 			goto out;
 		}
 
 		strvec_push(&args, "HEAD");
-	} else {
+	} иначе {
 		strvec_push(&args, "--branches");
 		strvec_push(&args, "HEAD");
 	}
 
 	ret = revwalk_contains_merges(repo, &args);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	setup_revisions_from_strvec(&args, revs, NULL);
-	if (args.nr != 1)
+	если (args.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
 	ret = 0;
 
 out:
 	strvec_clear(&args);
-	return ret;
+	вернуть ret;
 }
 
-static int handle_ref_update(struct ref_transaction *transaction,
+static целое handle_ref_update(struct ref_transaction *transaction,
 			     const char *refname,
 			     const struct object_id *new_oid,
 			     const struct object_id *old_oid,
 			     const char *reflog_msg,
 			     struct strbuf *err)
 {
-	if (!transaction) {
+	если (!transaction) {
 		printf("update %s %s %s\n",
 		       refname, oid_to_hex(new_oid), oid_to_hex(old_oid));
-		return 0;
+		вернуть 0;
 	}
 
-	return ref_transaction_update(transaction, refname, new_oid, old_oid,
+	вернуть ref_transaction_update(transaction, refname, new_oid, old_oid,
 				      NULL, NULL, 0, reflog_msg, err);
 }
 
-static int compute_pending_ref_updates(struct rev_info *revs,
+static целое compute_pending_ref_updates(struct rev_info *revs,
 				       enum ref_action action,
 				       struct commit *original,
 				       struct commit *rewritten,
@@ -372,8 +372,8 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	};
 	char hex[GIT_MAX_HEXSZ + 1];
 	bool detached_head;
-	int head_flags = 0;
-	int ret;
+	целое head_flags = 0;
+	целое ret;
 
 	refs_read_ref_full(get_main_ref_store(revs->repo), "HEAD",
 			   RESOLVE_REF_NO_RECURSE, NULL, &head_flags);
@@ -382,10 +382,10 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	opts.onto = oid_to_hex_r(hex, &rewritten->object.oid);
 
 	ret = replay_revisions(revs, &opts, result);
-	if (ret)
-		return ret;
+	если (ret)
+		вернуть ret;
 
-	if (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
+	если (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
 		BUG("unsupported ref action %d", action);
 
 	/*
@@ -393,15 +393,15 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	 * ancestors of `rewritten`, so we need to manually
 	 * handle updating references that point to `original`.
 	 */
-	for (decoration = get_name_decoration(&original->object);
+	для (decoration = get_name_decoration(&original->object);
 	     decoration;
 	     decoration = decoration->next)
 	{
-		if (decoration->type != DECORATION_REF_LOCAL &&
+		если (decoration->type != DECORATION_REF_LOCAL &&
 		    decoration->type != DECORATION_REF_HEAD)
 			continue;
 
-		if (action == REF_ACTION_HEAD &&
+		если (action == REF_ACTION_HEAD &&
 		    decoration->type != DECORATION_REF_HEAD)
 			continue;
 
@@ -410,7 +410,7 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 		 * detached. If it's not we'd already update the branch
 		 * it is pointing to.
 		 */
-		if (action == REF_ACTION_BRANCHES &&
+		если (action == REF_ACTION_BRANCHES &&
 		    decoration->type == DECORATION_REF_HEAD &&
 		    !detached_head)
 			continue;
@@ -420,41 +420,41 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 					   &rewritten->object.oid);
 	}
 
-	return 0;
+	вернуть 0;
 }
 
-static int apply_pending_ref_updates(struct repository *repo,
+static целое apply_pending_ref_updates(struct repository *repo,
 				     const struct replay_result *result,
 				     const char *reflog_msg,
-				     int dry_run)
+				     целое dry_run)
 {
 	struct ref_transaction *transaction = NULL;
 	struct strbuf err = STRBUF_INIT;
-	int ret;
+	целое ret;
 
-	if (!dry_run) {
+	если (!dry_run) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &err);
-		if (!transaction) {
+		если (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"), err.buf);
 			goto out;
 		}
 	}
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
+	для (size_t i = 0; i < result->updates_nr; i++) {
 		ret = handle_ref_update(transaction,
 					result->updates[i].refname,
 					&result->updates[i].new_oid,
 					&result->updates[i].old_oid,
 					reflog_msg, &err);
-		if (ret) {
+		если (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result->updates[i].refname, err.buf);
 			goto out;
 		}
 	}
 
-	if (transaction && ref_transaction_commit(transaction, &err)) {
+	если (transaction && ref_transaction_commit(transaction, &err)) {
 		ret = error(_("failed to commit ref transaction: %s"), err.buf);
 		goto out;
 	}
@@ -464,64 +464,64 @@ static int apply_pending_ref_updates(struct repository *repo,
 out:
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return ret;
+	вернуть ret;
 }
 
-static int handle_reference_updates(struct rev_info *revs,
+static целое handle_reference_updates(struct rev_info *revs,
 				    enum ref_action action,
 				    struct commit *original,
 				    struct commit *rewritten,
 				    const char *reflog_msg,
-				    int dry_run,
+				    целое dry_run,
 				    enum replay_empty_commit_action empty)
 {
 	struct replay_result result = { 0 };
-	int ret;
+	целое ret;
 
 	ret = compute_pending_ref_updates(revs, action, original, rewritten,
 					  empty, &result);
-	if (ret)
+	если (ret)
 		goto out;
 
 	ret = apply_pending_ref_updates(revs->repo, &result, reflog_msg, dry_run);
 
 out:
 	replay_result_release(&result);
-	return ret;
+	вернуть ret;
 }
 
-static int commit_became_empty(struct repository *repo,
+static целое commit_became_empty(struct repository *repo,
 			       struct commit *original,
 			       struct tree *result)
 {
 	struct object_id parent_tree_oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	если (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
+		вернуть -1;
 
-	return oideq(&result->object.oid, &parent_tree_oid);
+	вернуть oideq(&result->object.oid, &parent_tree_oid);
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+static целое parse_opt_empty(const struct option *opt, const char *arg, целое unset)
 {
 	enum replay_empty_commit_action *value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "drop"))
+	если (!strcmp(arg, "drop"))
 		*value = REPLAY_EMPTY_COMMIT_DROP;
-	else if (!strcmp(arg, "keep"))
+	иначе если (!strcmp(arg, "keep"))
 		*value = REPLAY_EMPTY_COMMIT_KEEP;
-	else if (!strcmp(arg, "abort"))
+	иначе если (!strcmp(arg, "abort"))
 		*value = REPLAY_EMPTY_COMMIT_ABORT;
-	else
+	иначе
 		die(_("unrecognized '--empty=' action '%s'; "
 		      "valid values are \"drop\", \"keep\", and \"abort\"."), arg);
 
-	return 0;
+	вернуть 0;
 }
 
-static int cmd_history_fixup(int argc,
+static целое cmd_history_fixup(целое argc,
 			     const char **argv,
 			     const char *prefix,
 			     struct repository *repo)
@@ -533,7 +533,7 @@ static int cmd_history_fixup(int argc,
 	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
 	enum ref_action action = REF_ACTION_DEFAULT;
 	enum commit_tree_flags flags = 0;
-	int dry_run = 0;
+	целое dry_run = 0;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
@@ -555,26 +555,26 @@ static int cmd_history_fixup(int argc,
 	struct tree *head_tree, *original_tree, *index_tree;
 	struct rev_info revs = { 0 };
 	bool skip_commit = false;
-	int ret;
+	целое ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	если (argc != 1) {
 		ret = error(_("command expects a single revision"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	если (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	if (is_bare_repository(repo)) {
+	если (is_bare_repository(repo)) {
 		ret = error(_("cannot run fixup in a bare repository"));
 		goto out;
 	}
 
 	/* Resolve the original commit, which is the one we want to fix up. */
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	если (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
@@ -584,23 +584,23 @@ static int cmd_history_fixup(int argc,
 	 * changes are expressed as a diff from HEAD's tree to the index tree.
 	 */
 	head_commit = lookup_commit_reference_by_name("HEAD");
-	if (!head_commit) {
+	если (!head_commit) {
 		ret = error(_("cannot look up HEAD"));
 		goto out;
 	}
 
 	head_tree = repo_get_commit_tree(repo, head_commit);
-	if (!head_tree) {
+	если (!head_tree) {
 		ret = error(_("cannot get tree for HEAD"));
 		goto out;
 	}
 
-	if (repo_read_index(repo) < 0) {
+	если (repo_read_index(repo) < 0) {
 		ret = error(_("unable to read index"));
 		goto out;
 	}
 
-	if (!repo_index_has_changes(repo, head_tree, NULL)) {
+	если (!repo_index_has_changes(repo, head_tree, NULL)) {
 		ret = error(_("nothing to fixup: no staged changes"));
 		goto out;
 	}
@@ -610,13 +610,13 @@ static int cmd_history_fixup(int argc,
 	 * three-way merge: it is HEAD's tree with the staged changes applied.
 	 */
 	index_tree = write_in_core_index_as_tree(repo, repo->index);
-	if (!index_tree) {
+	если (!index_tree) {
 		ret = error(_("unable to write index as a tree"));
 		goto out;
 	}
 
 	original_tree = repo_get_commit_tree(repo, original);
-	if (!original_tree) {
+	если (!original_tree) {
 		ret = error(_("cannot get tree for commit %s"), argv[0]);
 		goto out;
 	}
@@ -634,20 +634,20 @@ static int cmd_history_fixup(int argc,
 	merge_incore_nonrecursive(&merge_opts, head_tree,
 				  original_tree, index_tree, &merge_result);
 
-	if (merge_result.clean < 0) {
+	если (merge_result.clean < 0) {
 		ret = error(_("merge failed while applying fixup"));
 		goto out;
 	}
 
-	if (!merge_result.clean) {
+	если (!merge_result.clean) {
 		ret = error(_("fixup would produce conflicts; aborting"));
 		goto out;
 	}
 
 	ret = commit_became_empty(repo, original, merge_result.tree);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
-	if (ret > 0) {
+	если (ret > 0) {
 		switch (empty) {
 		case REPLAY_EMPTY_COMMIT_DROP:
 			/*
@@ -662,7 +662,7 @@ static int cmd_history_fixup(int argc,
 			 * this restriction to exist other than a technical
 			 * limitation.
 			 */
-			if (!rewritten) {
+			если (!rewritten) {
 				ret = error(_("cannot drop root commit %s: "
 					      "it has no parent to replay onto"),
 					    argv[0]);
@@ -681,14 +681,14 @@ static int cmd_history_fixup(int argc,
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
+	если (ret)
 		goto out;
 
-	if (!skip_commit) {
+	если (!skip_commit) {
 		ret = commit_tree_ext(repo, "fixup", original, NULL, original->parents,
 				      &original_tree->object.oid, &merge_result.tree->object.oid,
 				      &rewritten, flags);
-		if (ret < 0) {
+		если (ret < 0) {
 			ret = error(_("failed writing fixed-up commit"));
 			goto out;
 		}
@@ -698,7 +698,7 @@ static int cmd_history_fixup(int argc,
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, empty);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -709,10 +709,10 @@ out:
 	merge_finalize(&merge_opts, &merge_result);
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	вернуть ret;
 }
 
-static int cmd_history_reword(int argc,
+static целое cmd_history_reword(целое argc,
 			      const char **argv,
 			      const char *prefix,
 			      struct repository *repo)
@@ -722,7 +722,7 @@ static int cmd_history_reword(int argc,
 		NULL,
 	};
 	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
+	целое dry_run = 0;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
@@ -734,30 +734,30 @@ static int cmd_history_reword(int argc,
 	struct strbuf reflog_msg = STRBUF_INIT;
 	struct commit *original, *rewritten;
 	struct rev_info revs = { 0 };
-	int ret;
+	целое ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	если (argc != 1) {
 		ret = error(_("command expects a single revision"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	если (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	если (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
+	если (ret)
 		goto out;
 
 	ret = commit_tree_with_edited_message(repo, "reworded", original, &rewritten);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed writing reworded commit"));
 		goto out;
 	}
@@ -766,7 +766,7 @@ static int cmd_history_reword(int argc,
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -776,10 +776,10 @@ static int cmd_history_reword(int argc,
 out:
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	вернуть ret;
 }
 
-static int write_ondisk_index(struct repository *repo,
+static целое write_ondisk_index(struct repository *repo,
 			      struct object_id *oid,
 			      const char *path)
 {
@@ -788,7 +788,7 @@ static int write_ondisk_index(struct repository *repo,
 	struct tree_desc tree_desc;
 	struct index_state index;
 	struct tree *tree;
-	int ret;
+	целое ret;
 
 	index_state_init(&index, repo);
 
@@ -797,25 +797,25 @@ static int write_ondisk_index(struct repository *repo,
 	opts.dst_index = &index;
 
 	tree = repo_parse_tree_indirect(repo, oid);
-	if (!tree) {
+	если (!tree) {
 		ret = error(_("unable to parse tree %s"), oid_to_hex(oid));
 		goto out;
 	}
 	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
 
-	if (unpack_trees(1, &tree_desc, &opts)) {
+	если (unpack_trees(1, &tree_desc, &opts)) {
 		ret = error(_("unable to populate index with tree"));
 		goto out;
 	}
 
 	prime_cache_tree(repo, &index, tree);
 
-	if (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
+	если (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
 		ret = error_errno(_("unable to acquire index lock"));
 		goto out;
 	}
 
-	if (write_locked_index(&index, &lock, COMMIT_LOCK)) {
+	если (write_locked_index(&index, &lock, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
 		goto out;
 	}
@@ -825,10 +825,10 @@ static int write_ondisk_index(struct repository *repo,
 out:
 	rollback_lock_file(&lock);
 	release_index(&index);
-	return ret;
+	вернуть ret;
 }
 
-static int split_commit(struct repository *repo,
+static целое split_commit(struct repository *repo,
 			struct commit *original,
 			struct pathspec *pathspec,
 			struct commit **out)
@@ -843,9 +843,9 @@ static int split_commit(struct repository *repo,
 	struct commit *first_commit, *second_commit;
 	struct commit_list *parents = NULL;
 	struct tree *split_tree;
-	int ret;
+	целое ret;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
+	если (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
 		ret = -1;
 		goto out;
 	}
@@ -859,11 +859,11 @@ static int split_commit(struct repository *repo,
 	repo_git_path_replace(repo, &index_file, "%s", "history-split.index");
 
 	ret = write_ondisk_index(repo, &parent_tree_oid, index_file.buf);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	ret = read_index_from(&index, index_file.buf, repo->gitdir);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed reading temporary index"));
 		goto out;
 	}
@@ -871,11 +871,11 @@ static int split_commit(struct repository *repo,
 	oid_to_hex_r(original_commit_oid, &original->object.oid);
 	ret = run_add_p_index(repo, &index, index_file.buf, &interactive_opts,
 			      original_commit_oid, pathspec, ADD_P_DISALLOW_EDIT);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	split_tree = write_in_core_index_as_tree(repo, &index);
-	if (!split_tree) {
+	если (!split_tree) {
 		ret = error(_("failed split tree"));
 		goto out;
 	}
@@ -888,10 +888,10 @@ static int split_commit(struct repository *repo,
 	 * original commit would become empty. Consequently, if we see that the
 	 * new tree ID matches either of those trees we abort.
 	 */
-	if (oideq(&split_tree->object.oid, &parent_tree_oid)) {
+	если (oideq(&split_tree->object.oid, &parent_tree_oid)) {
 		ret = error(_("split commit is empty"));
 		goto out;
-	} else if (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
+	} иначе если (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
 		ret = error(_("split commit tree matches original commit"));
 		goto out;
 	}
@@ -902,7 +902,7 @@ static int split_commit(struct repository *repo,
 	 */
 	ret = commit_tree_ext(repo, "split-out", original, NULL, original->parents, &parent_tree_oid,
 			      &split_tree->object.oid, &first_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed writing first commit"));
 		goto out;
 	}
@@ -919,7 +919,7 @@ static int split_commit(struct repository *repo,
 
 	ret = commit_tree_ext(repo, "split-out", original, NULL, parents, old_tree_oid,
 			      new_tree_oid, &second_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed writing second commit"));
 		goto out;
 	}
@@ -928,15 +928,15 @@ static int split_commit(struct repository *repo,
 	ret = 0;
 
 out:
-	if (index_file.len)
+	если (index_file.len)
 		unlink(index_file.buf);
 	strbuf_release(&index_file);
 	commit_list_free(parents);
 	release_index(&index);
-	return ret;
+	вернуть ret;
 }
 
-static int cmd_history_split(int argc,
+static целое cmd_history_split(целое argc,
 			     const char **argv,
 			     const char *prefix,
 			     struct repository *repo)
@@ -946,7 +946,7 @@ static int cmd_history_split(int argc,
 		NULL,
 	};
 	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
+	целое dry_run = 0;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control ref update behavior"),
@@ -959,16 +959,16 @@ static int cmd_history_split(int argc,
 	struct strbuf reflog_msg = STRBUF_INIT;
 	struct pathspec pathspec = { 0 };
 	struct rev_info revs = { 0 };
-	int ret;
+	целое ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc < 1) {
+	если (argc < 1) {
 		ret = error(_("command expects a committish"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	если (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	parse_pathspec(&pathspec, 0,
@@ -978,29 +978,29 @@ static int cmd_history_split(int argc,
 		       prefix, argv + 1);
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	если (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
-	if (original->parents && original->parents->next) {
+	если (original->parents && original->parents->next) {
 		ret = error(_("cannot split up merge commit"));
 		goto out;
 	}
 
 	ret = split_commit(repo, original, &pathspec, &rewritten);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	strbuf_addf(&reflog_msg, "split: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
 				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -1011,7 +1011,7 @@ out:
 	strbuf_release(&reflog_msg);
 	clear_pathspec(&pathspec);
 	release_revisions(&revs);
-	return ret;
+	вернуть ret;
 }
 
 #define SQUASH_SEEN (1u << 11)
@@ -1020,26 +1020,26 @@ out:
 
 static bool is_autosquash_subject(const char *s)
 {
-	return starts_with(s, "amend!") || starts_with(s, "fixup!") ||
+	вернуть starts_with(s, "amend!") || starts_with(s, "fixup!") ||
 		starts_with(s, "squash!");
 }
 
 static bool skip_one_autosquash_prefix(const char *s, const char **out)
 {
-	if (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
+	если (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
 	    skip_prefix(s, "squash!", out)) {
-		while (**out == ' ')
+		пока (**out == ' ')
 			(*out)++;
-		return true;
+		вернуть true;
 	}
-	return false;
+	вернуть false;
 }
 
 static void truncate_message_to_subject(struct strbuf *msg)
 {
 	const char *eos = strstr(msg->buf, "\n\n");
 
-	if (eos)
+	если (eos)
 		strbuf_setlen(msg, eos - msg->buf + 1);
 }
 
@@ -1064,78 +1064,78 @@ static void subject_data_clear(struct subject_data *data)
 	strbuf_release(&data->squash_message);
 }
 
-static int squash_amend_message(struct repository *repo,
+static целое squash_amend_message(struct repository *repo,
 				struct commit *commit,
 				struct subject_data *data,
 				unsigned flags)
 {
 	const char *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	пока (isspace(*body))
 		body++;
 
-	if (!*body) {
+	если (!*body) {
 		warning(_("ignoring %s (%s): message body is empty"),
 			repo_find_unique_abbrev(repo, &commit->object.oid,
 						DEFAULT_ABBREV),
 			data->subject.buf);
-		return 0;
+		вернуть 0;
 	}
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "squash!"))
-			return error(_("squashing %s (%s) would overwrite "
+	если (data->edit_message) {
+		вернуть 0;
+	} иначе если (flags & SQUASH_AMEND_TARGET) {
+		если (starts_with(data->squash_message.buf, "squash!"))
+			вернуть error(_("squashing %s (%s) would overwrite "
 				       "'squash!' message, please combine them "
 				       "using '--edit'"),
 				     repo_find_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
-		if (starts_with(data->squash_message.buf, "fixup!"))
+		если (starts_with(data->squash_message.buf, "fixup!"))
 			strbuf_splice(&data->squash_message, 0, 5, "amend!", 5);
-		if (starts_with(data->squash_message.buf, "amend!")) {
+		если (starts_with(data->squash_message.buf, "amend!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_addch(&data->squash_message, '\n');
-		} else {
+		} иначе {
 			strbuf_reset(&data->squash_message);
 		}
 		strbuf_addstr(&data->squash_message, body);
 		strbuf_complete_line(&data->squash_message);
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} иначе {
+		вернуть error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			     repo_find_unique_abbrev(repo, &commit->object.oid,
 						     DEFAULT_ABBREV),
 			     data->subject.buf);
 	}
-	return 0;
+	вернуть 0;
 }
 
-static int squash_squash_message(struct repository *repo,
+static целое squash_squash_message(struct repository *repo,
 				struct commit *commit,
 				struct subject_data *data,
 				unsigned flags)
 {
 	const char *body = data->message + data->subject.len;
 
-	while (isspace(*body))
+	пока (isspace(*body))
 		body++;
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "fixup!")) {
+	если (data->edit_message) {
+		вернуть 0;
+	} иначе если (flags & SQUASH_AMEND_TARGET) {
+		если (starts_with(data->squash_message.buf, "fixup!")) {
 			truncate_message_to_subject(&data->squash_message);
 			strbuf_splice(&data->squash_message, 0, 5, "squash", 6);
 		}
-		if (starts_with(data->squash_message.buf, "squash!")) {
+		если (starts_with(data->squash_message.buf, "squash!")) {
 			strbuf_addch(&data->squash_message, '\n');
 			strbuf_addstr(&data->squash_message, body);
 			strbuf_complete_line(&data->squash_message);
-		} else {
-			return error(_("squashing %s (%s) would discard its "
+		} иначе {
+			вернуть error(_("squashing %s (%s) would discard its "
 				       "message, please combine them using "
 				       "'--edit'"),
 				     repo_find_unique_abbrev(repo,
@@ -1143,31 +1143,31 @@ static int squash_squash_message(struct repository *repo,
 							     DEFAULT_ABBREV),
 				     data->subject.buf);
 		}
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} иначе {
+		вернуть error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
 			      repo_find_unique_abbrev(repo, &commit->object.oid,
 						      DEFAULT_ABBREV),
 			      data->subject.buf);
 	}
-	return 0;
+	вернуть 0;
 }
 
-static int squash_check_can_autosquash(struct repository *repo,
+static целое squash_check_can_autosquash(struct repository *repo,
 				       struct commit *commit,
 				       struct subject_data *data,
 				       unsigned flags)
 {
 	commit->object.flags |= flags & SQUASH_AMEND_TARGET;
-	if (starts_with(data->subject.buf, "amend!"))
-		return squash_amend_message(repo, commit, data, flags);
-	else if (starts_with(data->subject.buf, "squash!"))
-		return squash_squash_message(repo, commit, data, flags);
+	если (starts_with(data->subject.buf, "amend!"))
+		вернуть squash_amend_message(repo, commit, data, flags);
+	иначе если (starts_with(data->subject.buf, "squash!"))
+		вернуть squash_squash_message(repo, commit, data, flags);
 
-	return 0;
+	вернуть 0;
 }
 
-static int squash_check_autosquash_subject(struct repository *repo,
+static целое squash_check_autosquash_subject(struct repository *repo,
 					   struct commit *commit,
 					   struct subject_data *data)
 {
@@ -1187,10 +1187,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 *
 	 * and squashed the first fixup separately from the second
 	 */
-	while (skip_one_autosquash_prefix(s, &s)) {
+	пока (skip_one_autosquash_prefix(s, &s)) {
 		unsigned flags = strintmap_get(&data->subjects, s);
-		if (flags)
-			return squash_check_can_autosquash(repo, commit, data, flags);
+		если (flags)
+			вернуть squash_check_can_autosquash(repo, commit, data, flags);
 	}
 	/*
 	 * Allow "fixup! <hex object id>", but not "fixup! HEAD^" or
@@ -1199,10 +1199,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 * squashed together.
 	 */
 	target = lookup_commit_reference_by_name(s);
-	if (target && starts_with(oid_to_hex(&target->object.oid), s)) {
+	если (target && starts_with(oid_to_hex(&target->object.oid), s)) {
 		unsigned flags =
 			target->object.flags & (SQUASH_SEEN | SQUASH_AMEND_TARGET);
-		if (!flags) {
+		если (!flags) {
 			const char *subject_start;
 			const char *buffer = repo_logmsg_reencode(repo, target,
 								  NULL, NULL);
@@ -1214,41 +1214,41 @@ static int squash_check_autosquash_subject(struct repository *repo,
 			free(subject);
 			repo_unuse_commit_buffer(repo, target, buffer);
 		}
-		if (flags)
-			return squash_check_can_autosquash(repo, commit,
+		если (flags)
+			вернуть squash_check_can_autosquash(repo, commit,
 							   data, flags);
 	}
 	/* Try subject prefix matches */
 	strintmap_for_each_entry(&data->subjects, &iter, entry) {
 		s = data->subject.buf;
-		while(skip_one_autosquash_prefix(s, &s)) {
-			if (starts_with(entry->key, s)) {
+		пока(skip_one_autosquash_prefix(s, &s)) {
+			если (starts_with(entry->key, s)) {
 				unsigned value = (intptr_t)entry->value;
 
-				return squash_check_can_autosquash(repo, commit,
+				вернуть squash_check_can_autosquash(repo, commit,
 								   data, value);
 			}
 		}
 	}
-	return error(_("cannot squash %s (%s): its target is not being "
+	вернуть error(_("cannot squash %s (%s): its target is not being "
 		       "squashed"),
 		       repo_find_unique_abbrev(repo, &commit->object.oid,
 					       DEFAULT_ABBREV),
 		       data->subject.buf);
 }
 
-static int squash_check_subject(struct repository *repo,
+static целое squash_check_subject(struct repository *repo,
 				struct commit *commit,
 				struct subject_data *data)
 {
-	int ret = 0;
+	целое ret = 0;
 	const char *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
 	size_t subject_len = find_commit_subject(buf, &data->message);
 
 	strbuf_reset(&data->subject);
 	strbuf_add(&data->subject, data->message, subject_len);
 
-	if (!strintmap_get_size(&data->subjects)) {
+	если (!strintmap_get_size(&data->subjects)) {
 		const char *s;
 
 		strbuf_addstr(&data->squash_message, data->message);
@@ -1262,21 +1262,21 @@ static int squash_check_subject(struct repository *repo,
 		skip_one_autosquash_prefix(s, &s);
 		strintmap_set(&data->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
 		commit->object.flags |= SQUASH_AMEND_TARGET;
-	} else if (is_autosquash_subject(data->subject.buf)) {
+	} иначе если (is_autosquash_subject(data->subject.buf)) {
 		ret = squash_check_autosquash_subject(repo, commit, data);
-	} else {
+	} иначе {
 		strintmap_set(&data->subjects, data->subject.buf, SQUASH_SEEN);
 	}
 	repo_unuse_commit_buffer(repo, commit, buf);
-	return ret;
+	вернуть ret;
 }
 
-static int build_squash_message(struct repository *repo,
+static целое build_squash_message(struct repository *repo,
 				const struct strbuf *todo_buf,
 				struct strbuf *out);
 
-static int setup_squash_revisions(struct repository *repo,
-				  int argc, const char **argv,
+static целое setup_squash_revisions(struct repository *repo,
+				  целое argc, const char **argv,
 				  struct rev_info *revs)
 {
 	repo_init_revisions(repo, revs, NULL);
@@ -1289,10 +1289,10 @@ static int setup_squash_revisions(struct repository *repo,
 	revs->ancestry_path_implicit_bottoms = 1;
 
 	argc = setup_revisions(argc, argv, revs, NULL);
-	if (argc > 1)
-		return error(_("unrecognized argument: %s"), argv[1]);
+	если (argc > 1)
+		вернуть error(_("unrecognized argument: %s"), argv[1]);
 
-	if (revs->reverse != 1 || revs->topo_order != 1 ||
+	если (revs->reverse != 1 || revs->topo_order != 1 ||
 	    revs->sort_order != REV_SORT_IN_GRAPH_ORDER ||
 	    revs->simplify_history != 0 || revs->boundary == 1 ||
 	    revs->ancestry_path != 1 || revs->limited != 1 ||
@@ -1314,11 +1314,11 @@ static int setup_squash_revisions(struct repository *repo,
 	 * something, as in "<base>..<tip>". A revision range with no such
 	 * bottom commit cannot be squashed.
 	 */
-	for (size_t i = 0; i < revs->cmdline.nr; i++)
-		if (revs->cmdline.rev[i].flags & BOTTOM)
-			return 0;
+	для (size_t i = 0; i < revs->cmdline.nr; i++)
+		если (revs->cmdline.rev[i].flags & BOTTOM)
+			вернуть 0;
 
-	return error(_("not a '<base>..<tip>' revision range"));
+	вернуть error(_("not a '<base>..<tip>' revision range"));
 }
 
 /*
@@ -1326,10 +1326,10 @@ static int setup_squash_revisions(struct repository *repo,
  * parent after the oldest commit must either be selected or also be a parent
  * of the oldest commit.
  */
-static int resolve_squash_range(struct repository *repo,
+static целое resolve_squash_range(struct repository *repo,
 				bool update_branches,
 				bool edit_message,
-				int argc, const char **argv,
+				целое argc, const char **argv,
 				struct commit **oldest_out,
 				struct commit **tip_out,
 				char **message_out)
@@ -1338,38 +1338,38 @@ static int resolve_squash_range(struct repository *repo,
 	struct subject_data subject_data = SUBJECT_DATA_INIT;
 	struct commit *commit, *oldest = NULL, *tip = NULL;
 	struct strbuf todo_buf = STRBUF_INIT;
-	int ret, tip_count = 0;
+	целое ret, tip_count = 0;
 	bool walk_started = false;
 	struct ref_filter filter = REF_FILTER_INIT;
 	struct ref_array refs = { 0 };
 
 	subject_data.edit_message = edit_message;
 	ret = setup_squash_revisions(repo, argc, argv, &revs);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
-	if (prepare_revision_walk(&revs) < 0) {
+	если (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
 		goto out;
 	}
 	walk_started = true;
-	while ((commit = get_revision(&revs))) {
+	пока ((commit = get_revision(&revs))) {
 		struct commit_list *p;
 
-		if (edit_message)
+		если (edit_message)
 			strbuf_addf(&todo_buf, "pick %s\n",
 				    oid_to_hex(&commit->object.oid));
 
-		if (!commit->parents) {
+		если (!commit->parents) {
 			ret = error(_("cannot squash down to root commit"));
 			goto out;
 		}
-		for (p = commit->parents; oldest && p; p = p->next) {
+		для (p = commit->parents; oldest && p; p = p->next) {
 			struct commit_list *q;
 			struct object *o;
 			bool seen;
 
-			if (repo_parse_commit(repo, p->item)) {
+			если (repo_parse_commit(repo, p->item)) {
 				ret = error(_("cannot parse commit"));
 				goto out;
 			}
@@ -1379,13 +1379,13 @@ static int resolve_squash_range(struct repository *repo,
 			 * Allow parents that match the parents of the
 			 * squashed commit.
 			 */
-			for (q = oldest->parents; !seen && q; q = q->next) {
-				if (p->item == q->item) {
+			для (q = oldest->parents; !seen && q; q = q->next) {
+				если (p->item == q->item) {
 					seen = true;
 					commit_list_insert(commit, &filter.with_commit);
 				}
 			}
-			if (!seen) {
+			если (!seen) {
 				ret = error(_("parent %s of commit %s is "
 					      "outside the revision range"),
 					    repo_find_unique_abbrev(repo, &o->oid,
@@ -1395,16 +1395,16 @@ static int resolve_squash_range(struct repository *repo,
 								    DEFAULT_ABBREV));
 				goto out;
 			}
-			if (o->flags & SQUASH_TIP) {
+			если (o->flags & SQUASH_TIP) {
 				tip_count--;
 				o->flags &= ~SQUASH_TIP;
 			}
 		}
-		if (!oldest) {
+		если (!oldest) {
 			commit_list_insert(commit, &filter.with_commit);
 			oldest = commit;
 		}
-		if (squash_check_subject(repo, commit, &subject_data)) {
+		если (squash_check_subject(repo, commit, &subject_data)) {
 			ret = -1;
 			goto out;
 		}
@@ -1416,29 +1416,29 @@ static int resolve_squash_range(struct repository *repo,
 	reset_revision_walk();
 	walk_started = false;
 
-	if (!tip_count) {
+	если (!tip_count) {
 		ret = error(_("the revision range is empty"));
 		goto out;
-	} else if (tip_count != 1) {
+	} иначе если (tip_count != 1) {
 		ret = error(_("the revision range contains more than one tip "
 			      "commit"));
 		goto out;
-	} else if (oldest == tip) {
+	} иначе если (oldest == tip) {
 		ret = error(_("the revision range holds a single commit; "
 			      "nothing to squash"));
 		goto out;
-	} else if (!oldest->parents) {
+	} иначе если (!oldest->parents) {
 		BUG("an in-range commit must have a parent");
 	}
 
 	commit_list_insert(tip, &filter.no_commit);
 	filter.kind = FILTER_REFS_BRANCHES;
-	if (update_branches &&
+	если (update_branches &&
 	    filter_refs(&refs, &filter, filter.kind)) {
 		ret = error(_("could not filter refs"));
 		goto out;
 	}
-	if (refs.nr) {
+	если (refs.nr) {
 		struct ref_format format = REF_FORMAT_INIT;
 		struct ref_sorting *sorting;
 		struct string_list sorting_options = STRING_LIST_INIT_DUP;
@@ -1446,15 +1446,15 @@ static int resolve_squash_range(struct repository *repo,
 		struct strbuf err = STRBUF_INIT;
 
 		format.format = "%(refname:short)";
-		if (verify_ref_format(&format))
+		если (verify_ref_format(&format))
 			BUG("invalid branch format");
 		string_list_append(&sorting_options, "refname");
 		sorting = ref_sorting_options(&sorting_options);
 		ref_array_sort(sorting, &refs);
-		for (int i = 0; i < refs.nr; i++) {
+		для (целое i = 0; i < refs.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_addstr(&branches, "\n  ");
-			if (format_ref_array_item(refs.items[i], &format,
+			если (format_ref_array_item(refs.items[i], &format,
 						  &branches, &err))
 				BUG("could not format branch name: %s", err.buf);
 		}
@@ -1473,11 +1473,11 @@ static int resolve_squash_range(struct repository *repo,
 		string_list_clear(&sorting_options, 0);
 		goto out;
 	}
-	if (edit_message) {
+	если (edit_message) {
 		strbuf_reset(&subject_data.squash_message);
 		ret = build_squash_message(repo, &todo_buf,
 					   &subject_data.squash_message);
-		if (ret < 0)
+		если (ret < 0)
 			goto out;
 	}
 
@@ -1490,43 +1490,43 @@ out:
 	strbuf_release(&todo_buf);
 	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP |
 			   SQUASH_AMEND_TARGET);
-	if (walk_started)
+	если (walk_started)
 		reset_revision_walk();
 	subject_data_clear(&subject_data);
 	release_revisions(&revs);
 	ref_filter_clear(&filter);
 	ref_array_clear(&refs);
-	return ret;
+	вернуть ret;
 }
 
-static bool amend_replaces_target(struct todo_list *todo, int target)
+static bool amend_replaces_target(struct todo_list *todo, целое target)
 {
-	for (int i = target + 1; i < todo->nr &&
+	для (целое i = target + 1; i < todo->nr &&
 				 todo->items[i].command != TODO_PICK; i++) {
-		if (todo->items[i].command == TODO_SQUASH)
-			return false;
-		if (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
-			return true;
+		если (todo->items[i].command == TODO_SQUASH)
+			вернуть false;
+		если (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
+			вернуть true;
 	}
-	return false;
+	вернуть false;
 }
 
-static int build_squash_message(struct repository *repo,
+static целое build_squash_message(struct repository *repo,
 				const struct strbuf *todo_buf,
 				struct strbuf *out)
 {
 	struct todo_list todo = TODO_LIST_INIT;
 	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int nr_commits, ret;
+	целое nr_commits, ret;
 
-	if (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
+	если (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
 	    todo_list_rearrange_squash(&todo) < 0) {
 		ret = error(_("could not prepare the squash message"));
 		goto out;
 	}
 
 	nr_commits = todo.nr;
-	for (int i = 0; i < nr_commits; i++) {
+	для (целое i = 0; i < nr_commits; i++) {
 		struct todo_item *item = &todo.items[i];
 		const char *message, *body;
 		size_t commented_len;
@@ -1534,22 +1534,22 @@ static int build_squash_message(struct repository *repo,
 
 		squashing = item->command == TODO_SQUASH ||
 			    (item->flags & TODO_REPLACE_FIXUP_MSG);
-		if (item->command == TODO_PICK)
+		если (item->command == TODO_PICK)
 			skip = amend_replaces_target(&todo, i);
-		else
+		иначе
 			skip = !squashing;
 
 		message = repo_logmsg_reencode(repo, item->commit, NULL, NULL);
 		find_commit_subject(message, &body);
 
-		if (skip)
+		если (skip)
 			commented_len = strlen(body);
-		else if (squashing)
+		иначе если (squashing)
 			commented_len = squash_subject_comment_len(body, 1);
-		else
+		иначе
 			commented_len = 0;
 
-		if (!i)
+		если (!i)
 			add_squash_combination_header(out, nr_commits);
 		strbuf_addch(out, '\n');
 		add_squash_message_header(out, i + 1, skip);
@@ -1566,10 +1566,10 @@ static int build_squash_message(struct repository *repo,
 out:
 	todo_list_release(&todo);
 	replay_opts_release(&opts);
-	return ret;
+	вернуть ret;
 }
 
-static int cmd_history_squash(int argc,
+static целое cmd_history_squash(целое argc,
 			      const char **argv,
 			      const char *prefix,
 			      struct repository *repo)
@@ -1579,8 +1579,8 @@ static int cmd_history_squash(int argc,
 		NULL,
 	};
 	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	int edit = 1;
+	целое dry_run = 0;
+	целое edit = 1;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
@@ -1596,17 +1596,17 @@ static int cmd_history_squash(int argc,
 	const struct object_id *base_tree_oid, *tip_tree_oid;
 	char *message_template = NULL;
 	struct rev_info revs = { 0 };
-	int ret;
+	целое ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_ARGV0);
-	if (argc < 2) {
+	если (argc < 2) {
 		ret = error(_("command expects a revision range"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	если (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	strbuf_addstr(&reflog_msg, "squash: updating ");
@@ -1616,11 +1616,11 @@ static int cmd_history_squash(int argc,
 				   edit,
 				   argc, argv, &oldest, &tip,
 				   &message_template);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	ret = setup_revwalk(repo, action, tip, &revs);
-	if (ret < 0)
+	если (ret < 0)
 		goto out;
 
 	base_tree_oid = &repo_get_commit_tree(repo,
@@ -1631,7 +1631,7 @@ static int cmd_history_squash(int argc,
 			      oldest->parents, base_tree_oid, tip_tree_oid,
 			      &rewritten,
 			      edit ? COMMIT_TREE_EDIT_MESSAGE : 0);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed writing squashed commit"));
 		goto out;
 	}
@@ -1639,7 +1639,7 @@ static int cmd_history_squash(int argc,
 	ret = handle_reference_updates(&revs, action, tip, rewritten,
 				       reflog_msg.buf, dry_run,
 				       REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -1650,10 +1650,10 @@ out:
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
 	free(message_template);
-	return ret;
+	вернуть ret;
 }
 
-static int update_worktree(struct repository *repo,
+static целое update_worktree(struct repository *repo,
 			   const struct commit *old_head,
 			   const struct commit *new_head,
 			   bool dry_run)
@@ -1662,12 +1662,12 @@ static int update_worktree(struct repository *repo,
 		.oid_from = &old_head->object.oid,
 		.oid = &new_head->object.oid,
 	};
-	if (dry_run)
+	если (dry_run)
 		opts.flags |= RESET_WORKING_TREE_DRY_RUN;
-	return reset_working_tree(repo, &opts);
+	вернуть reset_working_tree(repo, &opts);
 }
 
-static int find_head_tree_change(struct repository *repo,
+static целое find_head_tree_change(struct repository *repo,
 				 const struct replay_result *result,
 				 struct commit **old_head,
 				 struct commit **new_head,
@@ -1677,47 +1677,47 @@ static int find_head_tree_change(struct repository *repo,
 	struct commit *old_head_commit, *new_head_commit;
 	struct tree *old_head_tree, *new_head_tree;
 	const char *head_target;
-	int head_flags;
+	целое head_flags;
 
 	*changed = false;
 
 	head_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
 					      RESOLVE_REF_NO_RECURSE | RESOLVE_REF_READING,
 					      NULL, &head_flags);
-	if (!head_target)
-		return error(_("cannot look up HEAD"));
+	если (!head_target)
+		вернуть error(_("cannot look up HEAD"));
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
-		if (!strcmp(result->updates[i].refname, head_target)) {
+	для (size_t i = 0; i < result->updates_nr; i++) {
+		если (!strcmp(result->updates[i].refname, head_target)) {
 			head_update = &result->updates[i];
 			break;
 		}
 	}
 
-	if (!head_update)
-		return 0;
+	если (!head_update)
+		вернуть 0;
 
 	old_head_commit = lookup_commit_reference(repo, &head_update->old_oid);
 	new_head_commit = lookup_commit_reference(repo, &head_update->new_oid);
-	if (!old_head_commit || !new_head_commit)
-		return error(_("cannot resolve HEAD commit"));
+	если (!old_head_commit || !new_head_commit)
+		вернуть error(_("cannot resolve HEAD commit"));
 
 	old_head_tree = repo_get_commit_tree(repo, old_head_commit);
 	new_head_tree = repo_get_commit_tree(repo, new_head_commit);
-	if (!old_head_tree || !new_head_tree)
-		return error(_("cannot resolve tree for HEAD"));
+	если (!old_head_tree || !new_head_tree)
+		вернуть error(_("cannot resolve tree for HEAD"));
 
-	if (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
-		return 0;
+	если (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
+		вернуть 0;
 
 	*old_head = old_head_commit;
 	*new_head = new_head_commit;
 	*changed = true;
 
-	return 0;
+	вернуть 0;
 }
 
-static int cmd_history_drop(int argc,
+static целое cmd_history_drop(целое argc,
 			    const char **argv,
 			    const char *prefix,
 			    struct repository *repo)
@@ -1728,7 +1728,7 @@ static int cmd_history_drop(int argc,
 	};
 	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
 	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
+	целое dry_run = 0;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
@@ -1746,43 +1746,43 @@ static int cmd_history_drop(int argc,
 	struct replay_result result = { 0 };
 	struct commit *old_head, *new_head;
 	bool head_moves = false;
-	int ret;
+	целое ret;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	если (argc != 1) {
 		ret = error(_("command expects a single revision"));
 		goto out;
 	}
 	repo_config(repo, git_default_config, NULL);
 
-	if (action == REF_ACTION_DEFAULT)
+	если (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	если (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
 		goto out;
 	}
 
-	if (!original->parents) {
+	если (!original->parents) {
 		ret = error(_("cannot drop root commit %s: "
 			      "it has no parent to replay onto"),
 			    argv[0]);
 		goto out;
-	} else if (original->parents->next) {
+	} иначе если (original->parents->next) {
 		ret = error(_("cannot drop merge commit: %s"), argv[0]);
 		goto out;
 	}
 
 	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
+	если (ret)
 		goto out;
 
 	rewritten = original->parents->item;
 
 	ret = compute_pending_ref_updates(&revs, action, original, rewritten,
 					  empty, &result);
-	if (ret) {
+	если (ret) {
 		ret = error(_("failed replaying descendants"));
 		goto out;
 	}
@@ -1796,13 +1796,13 @@ static int cmd_history_drop(int argc,
 	 * inconsistent repository state. So we first perform a dry-run merge
 	 * here before updating refs.
 	 */
-	if (!is_bare_repository(repo)) {
+	если (!is_bare_repository(repo)) {
 		ret = find_head_tree_change(repo, &result, &old_head,
 					    &new_head, &head_moves);
-		if (ret < 0)
+		если (ret < 0)
 			goto out;
 
-		if (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
+		если (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
 			ret = error(_("dropping this commit would "
 				      "overwrite local changes; aborting"));
 			goto out;
@@ -1811,12 +1811,12 @@ static int cmd_history_drop(int argc,
 
 	strbuf_addf(&reflog_msg, "drop: dropping %s", argv[0]);
 	ret = apply_pending_ref_updates(repo, &result, reflog_msg.buf, dry_run);
-	if (ret < 0) {
+	если (ret < 0) {
 		ret = error(_("failed to update references"));
 		goto out;
 	}
 
-	if (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
+	если (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
 		ret = error(_("could not update working tree to new commit %s"),
 			    oid_to_hex(&new_head->object.oid));
 		goto out;
@@ -1828,10 +1828,10 @@ out:
 	replay_result_release(&result);
 	strbuf_release(&reflog_msg);
 	release_revisions(&revs);
-	return ret;
+	вернуть ret;
 }
 
-int cmd_history(int argc,
+целое cmd_history(целое argc,
 		const char **argv,
 		const char *prefix,
 		struct repository *repo)
@@ -1855,5 +1855,5 @@ int cmd_history(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	return fn(argc, argv, prefix, repo);
+	вернуть fn(argc, argv, prefix, repo);
 }

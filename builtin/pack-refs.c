@@ -2,7 +2,7 @@
 #include "gettext.h"
 #include "pack-refs.h"
 
-int cmd_pack_refs(int argc,
+целое cmd_pack_refs(целое argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo)
@@ -12,5 +12,5 @@ int cmd_pack_refs(int argc,
 		NULL
 	};
 
-	return pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
+	вернуть pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
 }

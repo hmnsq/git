@@ -27,77 +27,77 @@ static char *collapse_slashes(const char *refname)
 	char prev = '/';
 	char *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
+	пока ((ch = *refname++) != '\0') {
+		если (prev == '/' && ch == prev)
 			continue;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	вернуть ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+static целое check_ref_format_branch(const char *arg)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *name;
-	int nongit;
+	целое nongit;
 
 	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
+	если (check_branch_ref(the_repository, &sb, arg) ||
 	    !skip_prefix(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
 	printf("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	вернуть 0;
 }
 
-int cmd_check_ref_format(int argc,
+целое cmd_check_ref_format(целое argc,
 			 const char **argv,
 			 const char *prefix,
 			 struct repository *repo UNUSED)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
+	целое i;
+	целое normalize = 0;
+	целое flags = 0;
 	const char *refname;
 	char *to_free = NULL;
-	int ret = 1;
+	целое ret = 1;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	если (argc == 3 && !strcmp(argv[1], "--branch"))
+		вернуть check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	для (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		если (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		иначе если (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		иначе если (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
+		иначе если (!strcmp(argv[i], "--refspec-pattern"))
 			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		иначе
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	если (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
+	если (normalize)
 		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
+	если (check_refname_format(refname, flags))
 		goto cleanup;
-	if (normalize)
+	если (normalize)
 		printf("%s\n", refname);
 
 	ret = 0;
 cleanup:
 	free(to_free);
-	return ret;
+	вернуть ret;
 }

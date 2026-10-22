@@ -18,12 +18,12 @@ static const char * const write_tree_usage[] = {
 	NULL
 };
 
-int cmd_write_tree(int argc,
+целое cmd_write_tree(целое argc,
 		   const char **argv,
 		   const char *cmd_prefix,
 		   struct repository *repo UNUSED)
 {
-	int flags = 0, ret;
+	целое flags = 0, ret;
 	const char *tree_prefix = NULL;
 	struct object_id oid;
 	const char *me = "git-write-tree";
@@ -68,5 +68,5 @@ int cmd_write_tree(int argc,
 		die("%s: prefix %s not found", me, tree_prefix);
 		break;
 	}
-	return ret;
+	вернуть ret;
 }
