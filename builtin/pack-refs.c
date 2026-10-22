@@ -2,15 +2,15 @@
 #include "gettext.h"
 #include "pack-refs.h"
 
-int cmd_pack_refs(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo)
+ཧྲིལ cmd_pack_refs(ཧྲིལ argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo)
 {
-	static char const * const pack_refs_usage[] = {
+	static var_na const * const pack_refs_usage[] = {
 		N_("git pack-refs " PACK_REFS_OPTS),
 		NULL
 	};
 
-	return pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
+	ལོག pack_refs_core(argc, argv, prefix, repo, pack_refs_usage);
 }

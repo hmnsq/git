@@ -10,25 +10,25 @@
 #define VERIFY_PACK_VERBOSE 01
 #define VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+static ཧྲིལ verify_one_pack(const var_na *path, unsigned ཧྲིལ flags, const var_na *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	sa_nracanaa child_process index_pack = CHILD_PROCESS_INIT;
+	sa_nracanaa strvec *argv = &index_pack.args;
+	sa_nracanaa strbuf arg = STRBUF_INIT;
+	ཧྲིལ verbose = flags & VERIFY_PACK_VERBOSE;
+	ཧྲིལ stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	ཧྲིལ err;
 
 	strvec_push(argv, "index-pack");
 
-	if (stat_only)
+	གལ་སྲིད (stat_only)
 		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
+	དེ་མིན གལ་སྲིད (verbose)
 		strvec_push(argv, "--verify-stat");
-	else
+	དེ་མིན
 		strvec_push(argv, "--verify");
 
-	if (hash_algo)
+	གལ་སྲིད (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
@@ -36,7 +36,7 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
 	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
+	གལ་སྲིད (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
 	strvec_push(argv, arg.buf);
@@ -45,34 +45,34 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 
 	err = run_command(&index_pack);
 
-	if (verbose || stat_only) {
-		if (err)
+	གལ་སྲིད (verbose || stat_only) {
+		གལ་སྲིད (err)
 			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
+		དེ་མིན {
+			གལ་སྲིད (!stat_only)
 				printf("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	ལོག err;
 }
 
-static const char * const verify_pack_usage[] = {
+static const var_na * const verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
 	NULL
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ཧྲིལ cmd_verify_pack(ཧྲིལ argc,
+		    const var_na **argv,
+		    const var_na *prefix,
+		    sa_nracanaa repository *repo UNUSED)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
+	ཧྲིལ err = 0;
+	unsigned ཧྲིལ flags = 0;
+	const var_na *object_format = NULL;
+	ཧྲིལ i;
+	const sa_nracanaa option verify_pack_options[] = {
 		OPT_BIT('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
 		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
@@ -85,12 +85,12 @@ int cmd_verify_pack(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	གལ་སྲིད (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	དོན་ལུ (i = 0; i < argc; i++) {
+		གལ་སྲིད (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	ལོག err;
 }

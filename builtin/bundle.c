@@ -25,7 +25,7 @@
 #define BUILTIN_BUNDLE_UNBUNDLE_USAGE \
 	N_("git bundle unbundle [--progress] <file> [<refname>...]")
 
-static char const * const builtin_bundle_usage[] = {
+static var_na const * const builtin_bundle_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
 	BUILTIN_BUNDLE_VERIFY_USAGE,
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
@@ -33,46 +33,46 @@ static char const * const builtin_bundle_usage[] = {
 	NULL,
 };
 
-static const char * const builtin_bundle_create_usage[] = {
+static const var_na * const builtin_bundle_create_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
 	NULL
 };
 
-static const char * const builtin_bundle_verify_usage[] = {
+static const var_na * const builtin_bundle_verify_usage[] = {
 	BUILTIN_BUNDLE_VERIFY_USAGE,
 	NULL
 };
 
-static const char * const builtin_bundle_list_heads_usage[] = {
+static const var_na * const builtin_bundle_list_heads_usage[] = {
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
 	NULL
 };
 
-static const char * const builtin_bundle_unbundle_usage[] = {
+static const var_na * const builtin_bundle_unbundle_usage[] = {
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
 	NULL
 };
 
-static int parse_options_cmd_bundle(int argc,
-		const char **argv,
-		const char* prefix,
-		const char * const usagestr[],
-		const struct option options[],
-		char **bundle_file) {
+static ཧྲིལ parse_options_cmd_bundle(ཧྲིལ argc,
+		const var_na **argv,
+		const var_na* prefix,
+		const var_na * const usagestr[],
+		const sa_nracanaa option options[],
+		var_na **bundle_file) {
 	argc = parse_options(argc, argv, NULL, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (!argc)
+	གལ་སྲིད (!argc)
 		usage_msg_opt(_("need a <file> argument"), usagestr, options);
 	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
-	return argc;
+	ལོག argc;
 }
 
-static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+static ཧྲིལ cmd_bundle_create(ཧྲིལ argc, const var_na **argv, const var_na *prefix,
+			     sa_nracanaa repository *repo UNUSED)
 {
-	int progress = isatty(STDERR_FILENO);
-	int version = -1;
-	struct option options[] = {
+	ཧྲིལ progress = isatty(STDERR_FILENO);
+	ཧྲིལ version = -1;
+	sa_nracanaa option options[] = {
 		OPT_NEGBIT('q', "quiet", &progress,
 			   N_("do not show progress meter"), 1),
 		OPT_BIT(0, "progress", &progress,
@@ -85,66 +85,66 @@ static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
 			    N_("specify bundle format version")),
 		OPT_END()
 	};
-	char *bundle_file;
-	int ret;
+	var_na *bundle_file;
+	ཧྲིལ ret;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_create_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	གལ་སྲིད (!startup_info->have_repository)
 		die(_("Need a repository to create a bundle."));
 	ret = !!create_bundle(the_repository, bundle_file, argc, argv, version, progress);
 	free(bundle_file);
-	return ret;
+	ལོག ret;
 }
 
 /*
  * Similar to read_bundle_header(), but handle "-" as stdin.
  */
-static int open_bundle(const char *path, struct bundle_header *header,
-		       const char **name)
+static ཧྲིལ open_bundle(const var_na *path, sa_nracanaa bundle_header *header,
+		       const var_na **name)
 {
-	if (!strcmp(path, "-")) {
-		if (name)
+	གལ་སྲིད (!strcmp(path, "-")) {
+		གལ་སྲིད (name)
 			*name = "<stdin>";
-		return read_bundle_header_fd(0, header, "<stdin>");
+		ལོག read_bundle_header_fd(0, header, "<stdin>");
 	}
 
-	if (name)
+	གལ་སྲིད (name)
 		*name = path;
-	return read_bundle_header(path, header);
+	ལོག read_bundle_header(path, header);
 }
 
-static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int quiet = 0;
-	int ret;
-	struct option options[] = {
+static ཧྲིལ cmd_bundle_verify(ཧྲིལ argc, const var_na **argv, const var_na *prefix,
+			     sa_nracanaa repository *repo UNUSED) {
+	sa_nracanaa bundle_header header = BUNDLE_HEADER_INIT;
+	ཧྲིལ bundle_fd = -1;
+	ཧྲིལ quiet = 0;
+	ཧྲིལ ret;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('q', "quiet", &quiet,
 			    N_("do not show bundle details")),
 		OPT_END()
 	};
-	char *bundle_file;
-	const char *name;
+	var_na *bundle_file;
+	const var_na *name;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_verify_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository) {
+	གལ་སྲིད (!startup_info->have_repository) {
 		ret = error(_("need a repository to verify a bundle"));
 		goto cleanup;
 	}
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
+	གལ་སྲིད ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
 		ret = 1;
 		goto cleanup;
 	}
 	close(bundle_fd);
-	if (verify_bundle(the_repository, &header,
+	གལ་སྲིད (verify_bundle(the_repository, &header,
 			  quiet ? VERIFY_BUNDLE_QUIET : VERIFY_BUNDLE_VERBOSE)) {
 		ret = 1;
 		goto cleanup;
@@ -155,24 +155,24 @@ static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
 cleanup:
 	free(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	ལོག ret;
 }
 
-static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	struct option options[] = {
+static ཧྲིལ cmd_bundle_list_heads(ཧྲིལ argc, const var_na **argv, const var_na *prefix,
+				 sa_nracanaa repository *repo UNUSED) {
+	sa_nracanaa bundle_header header = BUNDLE_HEADER_INIT;
+	ཧྲིལ bundle_fd = -1;
+	ཧྲིལ ret;
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
-	char *bundle_file;
+	var_na *bundle_file;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_list_heads_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	གལ་སྲིད ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
 		ret = 1;
 		goto cleanup;
 	}
@@ -181,36 +181,36 @@ static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix
 cleanup:
 	free(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	ལོག ret;
 }
 
-static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
-			       struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	int progress = isatty(2);
+static ཧྲིལ cmd_bundle_unbundle(ཧྲིལ argc, const var_na **argv, const var_na *prefix,
+			       sa_nracanaa repository *repo UNUSED) {
+	sa_nracanaa bundle_header header = BUNDLE_HEADER_INIT;
+	ཧྲིལ bundle_fd = -1;
+	ཧྲིལ ret;
+	ཧྲིལ progress = isatty(2);
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "progress", &progress,
 			 N_("show progress meter")),
 		OPT_END()
 	};
-	char *bundle_file;
-	struct strvec extra_index_pack_args = STRVEC_INIT;
+	var_na *bundle_file;
+	sa_nracanaa strvec extra_index_pack_args = STRVEC_INIT;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	གལ་སྲིད (!startup_info->have_repository)
 		die(_("Need a repository to unbundle."));
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	གལ་སྲིད ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
 		ret = 1;
 		goto cleanup;
 	}
-	if (progress)
+	གལ་སྲིད (progress)
 		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
 			     _("Unbundling objects"), NULL);
 	ret = !!unbundle(the_repository, &header, bundle_fd,
@@ -221,16 +221,16 @@ static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
 cleanup:
 	strvec_clear(&extra_index_pack_args);
 	free(bundle_file);
-	return ret;
+	ལོག ret;
 }
 
-int cmd_bundle(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ཧྲིལ cmd_bundle(ཧྲིལ argc,
+	       const var_na **argv,
+	       const var_na *prefix,
+	       sa_nracanaa repository *repo)
 {
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_SUBCOMMAND("create", &fn, cmd_bundle_create),
 		OPT_SUBCOMMAND("verify", &fn, cmd_bundle_verify),
 		OPT_SUBCOMMAND("list-heads", &fn, cmd_bundle_list_heads),
@@ -243,5 +243,5 @@ int cmd_bundle(int argc,
 
 	packet_trace_identity("bundle");
 
-	return !!fn(argc, argv, prefix, repo);
+	ལོག !!fn(argc, argv, prefix, repo);
 }

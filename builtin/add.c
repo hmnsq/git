@@ -27,128 +27,128 @@
 #include "merge-ll.h"
 #include "apply.h"
 
-static const char * const builtin_add_usage[] = {
+static const var_na * const builtin_add_usage[] = {
 	N_("git add [<options>] [--] <pathspec>..."),
 	NULL
 };
-static int patch_interactive, add_interactive, edit_interactive;
-static struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-static int take_worktree_changes;
-static int add_renormalize;
-static int add_resolved;
-static int pathspec_file_nul;
-static int include_sparse;
-static const char *pathspec_from_file;
+static ཧྲིལ patch_interactive, add_interactive, edit_interactive;
+static sa_nracanaa interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+static ཧྲིལ take_worktree_changes;
+static ཧྲིལ add_renormalize;
+static ཧྲིལ add_resolved;
+static ཧྲིལ pathspec_file_nul;
+static ཧྲིལ include_sparse;
+static const var_na *pathspec_from_file;
 
-static int chmod_pathspec(struct repository *repo,
-			  struct pathspec *pathspec,
-			  char flip,
-			  int show_only)
+static ཧྲིལ chmod_pathspec(sa_nracanaa repository *repo,
+			  sa_nracanaa pathspec *pathspec,
+			  var_na flip,
+			  ཧྲིལ show_only)
 {
-	int ret = 0;
+	ཧྲིལ ret = 0;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
-		struct cache_entry *ce = repo->index->cache[i];
-		int err;
+	དོན་ལུ (size_t i = 0; i < repo->index->cache_nr; i++) {
+		sa_nracanaa cache_entry *ce = repo->index->cache[i];
+		ཧྲིལ err;
 
-		if (!include_sparse &&
+		གལ་སྲིད (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
 		     !path_in_sparse_checkout(ce->name, repo->index)))
 			continue;
 
-		if (pathspec && !ce_path_match(repo->index, ce, pathspec, NULL))
+		གལ་སྲིད (pathspec && !ce_path_match(repo->index, ce, pathspec, NULL))
 			continue;
 
-		if (!show_only)
+		གལ་སྲིད (!show_only)
 			err = chmod_index_entry(repo->index, ce, flip);
-		else
+		དེ་མིན
 			err = S_ISREG(ce->ce_mode) ? 0 : -1;
 
-		if (err < 0)
+		གལ་སྲིད (err < 0)
 			ret = error(_("cannot chmod %cx '%s'"), flip, ce->name);
 	}
 
-	return ret;
+	ལོག ret;
 }
 
-static int renormalize_tracked_files(struct repository *repo,
-				     const struct pathspec *pathspec,
-				     int flags)
+static ཧྲིལ renormalize_tracked_files(sa_nracanaa repository *repo,
+				     const sa_nracanaa pathspec *pathspec,
+				     ཧྲིལ flags)
 {
-	int retval = 0;
+	ཧྲིལ retval = 0;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
-		struct cache_entry *ce = repo->index->cache[i];
+	དོན་ལུ (size_t i = 0; i < repo->index->cache_nr; i++) {
+		sa_nracanaa cache_entry *ce = repo->index->cache[i];
 
-		if (!include_sparse &&
+		གལ་སྲིད (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
 		     !path_in_sparse_checkout(ce->name, repo->index)))
 			continue;
-		if (ce_stage(ce))
+		གལ་སྲིད (ce_stage(ce))
 			continue; /* do not touch unmerged paths */
-		if (!S_ISREG(ce->ce_mode) && !S_ISLNK(ce->ce_mode))
+		གལ་སྲིད (!S_ISREG(ce->ce_mode) && !S_ISLNK(ce->ce_mode))
 			continue; /* do not touch non blobs */
-		if (pathspec && !ce_path_match(repo->index, ce, pathspec, NULL))
+		གལ་སྲིད (pathspec && !ce_path_match(repo->index, ce, pathspec, NULL))
 			continue;
 		retval |= add_file_to_index(repo->index, ce->name,
 					    flags | ADD_CACHE_RENORMALIZE);
 	}
 
-	return retval;
+	ལོག retval;
 }
 
-static char *prune_directory(struct repository *repo,
-			     struct dir_struct *dir,
-			     struct pathspec *pathspec,
-			     int prefix)
+static var_na *prune_directory(sa_nracanaa repository *repo,
+			     sa_nracanaa dir_struct *dir,
+			     sa_nracanaa pathspec *pathspec,
+			     ཧྲིལ prefix)
 {
-	char *seen;
-	int i;
-	struct dir_entry **src, **dst;
+	var_na *seen;
+	ཧྲིལ i;
+	sa_nracanaa dir_entry **src, **dst;
 
 	seen = xcalloc(pathspec->nr, 1);
 
 	src = dst = dir->entries;
 	i = dir->nr;
-	while (--i >= 0) {
-		struct dir_entry *entry = *src++;
-		if (dir_path_match(repo->index, entry, pathspec, prefix, seen))
+	སྐབས (--i >= 0) {
+		sa_nracanaa dir_entry *entry = *src++;
+		གལ་སྲིད (dir_path_match(repo->index, entry, pathspec, prefix, seen))
 			*dst++ = entry;
 	}
 	dir->nr = dst - dir->entries;
 	add_pathspec_matches_against_index(pathspec, repo->index, seen,
 					   PS_IGNORE_SKIP_WORKTREE);
-	return seen;
+	ལོག seen;
 }
 
-static int refresh(struct repository *repo, int verbose, const struct pathspec *pathspec)
+static ཧྲིལ refresh(sa_nracanaa repository *repo, ཧྲིལ verbose, const sa_nracanaa pathspec *pathspec)
 {
-	char *seen;
-	int i, ret = 0;
-	char *skip_worktree_seen = NULL;
-	struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
-	unsigned int flags = REFRESH_IGNORE_SKIP_WORKTREE |
+	var_na *seen;
+	ཧྲིལ i, ret = 0;
+	var_na *skip_worktree_seen = NULL;
+	sa_nracanaa string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	unsigned ཧྲིལ flags = REFRESH_IGNORE_SKIP_WORKTREE |
 		    (verbose ? REFRESH_IN_PORCELAIN : REFRESH_QUIET);
 
 	seen = xcalloc(pathspec->nr, 1);
 	refresh_index(repo->index, flags, pathspec, seen,
 		      _("Unstaged changes after refreshing the index:"));
-	for (i = 0; i < pathspec->nr; i++) {
-		if (!seen[i]) {
-			const char *path = pathspec->items[i].original;
+	དོན་ལུ (i = 0; i < pathspec->nr; i++) {
+		གལ་སྲིད (!seen[i]) {
+			const var_na *path = pathspec->items[i].original;
 
-			if (matches_skip_worktree(pathspec, i, &skip_worktree_seen) ||
+			གལ་སྲིད (matches_skip_worktree(pathspec, i, &skip_worktree_seen) ||
 			    !path_in_sparse_checkout(path, repo->index)) {
 				string_list_append(&only_match_skip_worktree,
 						   pathspec->items[i].original);
-			} else {
+			} དེ་མིན {
 				die(_("pathspec '%s' did not match any files"),
 				    pathspec->items[i].original);
 			}
 		}
 	}
 
-	if (only_match_skip_worktree.nr) {
+	གལ་སྲིད (only_match_skip_worktree.nr) {
 		advise_on_updating_sparse_paths(&only_match_skip_worktree);
 		ret = 1;
 	}
@@ -156,16 +156,16 @@ static int refresh(struct repository *repo, int verbose, const struct pathspec *
 	free(seen);
 	free(skip_worktree_seen);
 	string_list_clear(&only_match_skip_worktree, 0);
-	return ret;
+	ལོག ret;
 }
 
-int interactive_add(struct repository *repo,
-		    const char **argv,
-		    const char *prefix,
-		    int patch, struct interactive_options *interactive_opts)
+ཧྲིལ interactive_add(sa_nracanaa repository *repo,
+		    const var_na **argv,
+		    const var_na *prefix,
+		    ཧྲིལ patch, sa_nracanaa interactive_options *interactive_opts)
 {
-	struct pathspec pathspec;
-	int ret;
+	sa_nracanaa pathspec pathspec;
+	ཧྲིལ ret;
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_FULL |
@@ -173,30 +173,30 @@ int interactive_add(struct repository *repo,
 		       PATHSPEC_PREFIX_ORIGIN,
 		       prefix, argv);
 
-	if (patch)
+	གལ་སྲིད (patch)
 		ret = !!run_add_p(repo, ADD_P_ADD, interactive_opts, NULL, &pathspec, 0);
-	else
+	དེ་མིན
 		ret = !!run_add_i(repo, &pathspec, interactive_opts);
 
 	clear_pathspec(&pathspec);
-	return ret;
+	ལོག ret;
 }
 
-static int edit_patch(struct repository *repo,
-		      int argc,
-		      const char **argv,
-		      const char *prefix)
+static ཧྲིལ edit_patch(sa_nracanaa repository *repo,
+		      ཧྲིལ argc,
+		      const var_na **argv,
+		      const var_na *prefix)
 {
-	char *file = repo_git_path(repo, "ADD_EDIT.patch");
-	struct apply_state state;
-	const char *apply_argv[2];
-	struct rev_info rev;
-	int out;
-	struct stat st;
+	var_na *file = repo_git_path(repo, "ADD_EDIT.patch");
+	sa_nracanaa apply_state state;
+	const var_na *apply_argv[2];
+	sa_nracanaa rev_info rev;
+	ཧྲིལ out;
+	sa_nracanaa stat st;
 
 	repo_config(repo, git_diff_basic_config, NULL);
 
-	if (repo_read_index(repo) < 0)
+	གལ་སྲིད (repo_read_index(repo) < 0)
 		die(_("could not read the index"));
 
 	repo_init_revisions(repo, &rev, prefix);
@@ -211,54 +211,54 @@ static int edit_patch(struct repository *repo,
 	rev.diffopt.close_file = 1;
 	run_diff_files(&rev, 0);
 
-	if (launch_editor(file, NULL, NULL))
+	གལ་སྲིད (launch_editor(file, NULL, NULL))
 		die(_("editing patch failed"));
 
-	if (stat(file, &st))
+	གལ་སྲིད (stat(file, &st))
 		die_errno(_("could not stat '%s'"), file);
-	if (!st.st_size)
+	གལ་སྲིད (!st.st_size)
 		die(_("empty patch. aborted"));
 
 	apply_argv[0] = file;
 	apply_argv[1] = NULL;
-	if (init_apply_state(&state, repo, NULL))
+	གལ་སྲིད (init_apply_state(&state, repo, NULL))
 		die(_("could not initialize apply state"));
 	state.cached = 1;
-	if (check_apply_state(&state, 0))
+	གལ་སྲིད (check_apply_state(&state, 0))
 		die(_("could not check apply state"));
-	if (apply_all_patches(&state, 1, apply_argv, APPLY_OPT_RECOUNT))
+	གལ་སྲིད (apply_all_patches(&state, 1, apply_argv, APPLY_OPT_RECOUNT))
 		die(_("could not apply '%s'"), file);
 	clear_apply_state(&state);
 
 	unlink(file);
 	free(file);
 	release_revisions(&rev);
-	return 0;
+	ལོག 0;
 }
 
-static const char ignore_error[] =
+static const var_na ignore_error[] =
 N_("The following paths are ignored by one of your .gitignore files:\n");
 
-static int verbose, show_only, ignored_too, refresh_only;
-static int ignore_add_errors, intent_to_add, ignore_missing;
-static int warn_on_embedded_repo = 1;
+static ཧྲིལ verbose, show_only, ignored_too, refresh_only;
+static ཧྲིལ ignore_add_errors, intent_to_add, ignore_missing;
+static ཧྲིལ warn_on_embedded_repo = 1;
 
 #define ADDREMOVE_DEFAULT 1
-static int addremove = ADDREMOVE_DEFAULT;
-static int addremove_explicit = -1; /* unspecified */
+static ཧྲིལ addremove = ADDREMOVE_DEFAULT;
+static ཧྲིལ addremove_explicit = -1; /* unspecified */
 
-static char *chmod_arg;
+static var_na *chmod_arg;
 
-static int ignore_removal_cb(const struct option *opt, const char *arg, int unset)
+static ཧྲིལ ignore_removal_cb(const sa_nracanaa option *opt, const var_na *arg, ཧྲིལ unset)
 {
 	BUG_ON_OPT_ARG(arg);
 
 	/* if we are told to ignore, we are not adding removals */
-	*(int *)opt->value = !unset ? 0 : 1;
-	return 0;
+	*(ཧྲིལ *)opt->value = !unset ? 0 : 1;
+	ལོག 0;
 }
 
-static struct option builtin_add_options[] = {
+static sa_nracanaa option builtin_add_options[] = {
 	OPT__DRY_RUN(&show_only, N_("dry run")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
@@ -292,22 +292,22 @@ static struct option builtin_add_options[] = {
 	OPT_END(),
 };
 
-static int add_config(const char *var, const char *value,
-		      const struct config_context *ctx, void *cb)
+static ཧྲིལ add_config(const var_na *var, const var_na *value,
+		      const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "add.ignoreerrors") ||
+	གལ་སྲིད (!strcmp(var, "add.ignoreerrors") ||
 	    !strcmp(var, "add.ignore-errors")) {
 		ignore_add_errors = git_config_bool(var, value);
-		return 0;
+		ལོག 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	གལ་སྲིད (git_color_config(var, value, cb) < 0)
+		ལོག -1;
 
-	return git_default_config(var, value, ctx, cb);
+	ལོག git_default_config(var, value, ctx, cb);
 }
 
-static const char embedded_advice[] = N_(
+static const var_na embedded_advice[] = N_(
 "You've added another git repository inside your current repository.\n"
 "Clones of the outer repository will not contain the contents of\n"
 "the embedded repository and will not know how to obtain it.\n"
@@ -323,22 +323,22 @@ static const char embedded_advice[] = N_(
 "See \"git help submodule\" for more information."
 );
 
-static void check_embedded_repo(const char *path)
+static void check_embedded_repo(const var_na *path)
 {
-	struct strbuf name = STRBUF_INIT;
-	static int adviced_on_embedded_repo = 0;
+	sa_nracanaa strbuf name = STRBUF_INIT;
+	static ཧྲིལ adviced_on_embedded_repo = 0;
 
-	if (!warn_on_embedded_repo)
-		return;
-	if (!ends_with(path, "/"))
-		return;
+	གལ་སྲིད (!warn_on_embedded_repo)
+		ལོག;
+	གལ་སྲིད (!ends_with(path, "/"))
+		ལོག;
 
 	/* Drop trailing slash for aesthetics */
 	strbuf_addstr(&name, path);
 	strbuf_strip_suffix(&name, "/");
 
 	warning(_("adding embedded git repository: %s"), name.buf);
-	if (!adviced_on_embedded_repo) {
+	གལ་སྲིད (!adviced_on_embedded_repo) {
 		advise_if_enabled(ADVICE_ADD_EMBEDDED_REPO,
 				  embedded_advice, name.buf, name.buf);
 		adviced_on_embedded_repo = 1;
@@ -347,131 +347,131 @@ static void check_embedded_repo(const char *path)
 	strbuf_release(&name);
 }
 
-static int add_files(struct repository *repo, struct dir_struct *dir, int flags)
+static ཧྲིལ add_files(sa_nracanaa repository *repo, sa_nracanaa dir_struct *dir, ཧྲིལ flags)
 {
-	int i, exit_status = 0;
-	struct string_list matched_sparse_paths = STRING_LIST_INIT_NODUP;
+	ཧྲིལ i, exit_status = 0;
+	sa_nracanaa string_list matched_sparse_paths = STRING_LIST_INIT_NODUP;
 
-	if (dir->ignored_nr) {
+	གལ་སྲིད (dir->ignored_nr) {
 		fprintf(stderr, _(ignore_error));
-		for (i = 0; i < dir->ignored_nr; i++)
+		དོན་ལུ (i = 0; i < dir->ignored_nr; i++)
 			fprintf(stderr, "%s\n", dir->ignored[i]->name);
 		advise_if_enabled(ADVICE_ADD_IGNORED_FILE,
 				  _("Use -f if you really want to add them."));
 		exit_status = 1;
 	}
 
-	for (i = 0; i < dir->nr; i++) {
-		if (!include_sparse &&
+	དོན་ལུ (i = 0; i < dir->nr; i++) {
+		གལ་སྲིད (!include_sparse &&
 		    !path_in_sparse_checkout(dir->entries[i]->name, repo->index)) {
 			string_list_append(&matched_sparse_paths,
 					   dir->entries[i]->name);
 			continue;
 		}
-		if (add_file_to_index(repo->index, dir->entries[i]->name, flags)) {
-			if (!ignore_add_errors)
+		གལ་སྲིད (add_file_to_index(repo->index, dir->entries[i]->name, flags)) {
+			གལ་སྲིད (!ignore_add_errors)
 				die(_("adding files failed"));
 			exit_status = 1;
-		} else {
+		} དེ་མིན {
 			check_embedded_repo(dir->entries[i]->name);
 		}
 	}
 
-	if (matched_sparse_paths.nr) {
+	གལ་སྲིད (matched_sparse_paths.nr) {
 		advise_on_updating_sparse_paths(&matched_sparse_paths);
 		exit_status = 1;
 	}
 
 	string_list_clear(&matched_sparse_paths, 0);
 
-	return exit_status;
+	ལོག exit_status;
 }
 
-static int failed_to_add(int flags, const char *path)
+static ཧྲིལ failed_to_add(ཧྲིལ flags, const var_na *path)
 {
-	if (!(flags & ADD_CACHE_IGNORE_ERRORS))
+	གལ་སྲིད (!(flags & ADD_CACHE_IGNORE_ERRORS))
 		die(_("updating file '%s' failed"), path);
-	return 1;
+	ལོག 1;
 }
 
-static int add_resolved_files(struct repository *repo,
-			      const struct pathspec *pathspec,
-			      int flags)
+static ཧྲིལ add_resolved_files(sa_nracanaa repository *repo,
+			      const sa_nracanaa pathspec *pathspec,
+			      ཧྲིལ flags)
 {
-	struct index_state *istate = repo->index;
-	struct string_list unmerged_paths = STRING_LIST_INIT_DUP;
-	struct string_list unresolved_paths = STRING_LIST_INIT_DUP;
-	int exit_status = 0;
+	sa_nracanaa index_state *istate = repo->index;
+	sa_nracanaa string_list unmerged_paths = STRING_LIST_INIT_DUP;
+	sa_nracanaa string_list unresolved_paths = STRING_LIST_INIT_DUP;
+	ཧྲིལ exit_status = 0;
 	size_t i;
 
-	for (i = 0; i < istate->cache_nr; i++) {
-		struct cache_entry *ce = istate->cache[i];
-		if (!ce_stage(ce))
+	དོན་ལུ (i = 0; i < istate->cache_nr; i++) {
+		sa_nracanaa cache_entry *ce = istate->cache[i];
+		གལ་སྲིད (!ce_stage(ce))
 			continue;
-		if (pathspec->nr && !ce_path_match(istate, ce, pathspec, NULL))
+		གལ་སྲིད (pathspec->nr && !ce_path_match(istate, ce, pathspec, NULL))
 			continue;
-		if (!unmerged_paths.nr ||
+		གལ་སྲིད (!unmerged_paths.nr ||
 		    strcmp(unmerged_paths.items[unmerged_paths.nr - 1].string, ce->name))
 			string_list_append(&unmerged_paths, ce->name);
 	}
 
-	if (!unmerged_paths.nr) {
+	གལ་སྲིད (!unmerged_paths.nr) {
 		string_list_clear(&unmerged_paths, 0);
-		return 0;
+		ལོག 0;
 	}
 
-	for (i = 0; i < unmerged_paths.nr; i++) {
-		const char *path = unmerged_paths.items[i].string;
-		struct stat st;
+	དོན་ལུ (i = 0; i < unmerged_paths.nr; i++) {
+		const var_na *path = unmerged_paths.items[i].string;
+		sa_nracanaa stat st;
 
-		if (!lstat(path, &st) && S_ISREG(st.st_mode)) {
-			if (has_conflict_markers(istate, path))
+		གལ་སྲིད (!lstat(path, &st) && S_ISREG(st.st_mode)) {
+			གལ་སྲིད (has_conflict_markers(istate, path))
 				string_list_append(&unresolved_paths, path);
 		}
 	}
 
-	if (unresolved_paths.nr) {
-		struct strbuf sb = STRBUF_INIT;
-		for (i = 0; i < unresolved_paths.nr; i++)
+	གལ་སྲིད (unresolved_paths.nr) {
+		sa_nracanaa strbuf sb = STRBUF_INIT;
+		དོན་ལུ (i = 0; i < unresolved_paths.nr; i++)
 			strbuf_addf(&sb, "\t%s\n", unresolved_paths.items[i].string);
 		die(_("the following paths still have conflict markers:\n%s"), sb.buf);
 	}
 
-	for (i = 0; i < unmerged_paths.nr; i++) {
-		const char *path = unmerged_paths.items[i].string;
-		struct stat st;
+	དོན་ལུ (i = 0; i < unmerged_paths.nr; i++) {
+		const var_na *path = unmerged_paths.items[i].string;
+		sa_nracanaa stat st;
 
-		if (lstat(path, &st)) {
-			if (errno != ENOENT)
+		གལ་སྲིད (lstat(path, &st)) {
+			གལ་སྲིད (errno != ENOENT)
 				die_errno(_("cannot lstat: '%s'"), path);
-			if (remove_file_from_index_with_flags(istate, path, flags))
+			གལ་སྲིད (remove_file_from_index_with_flags(istate, path, flags))
 				exit_status = failed_to_add(flags, path);
-		} else {
-			if (add_file_to_index(istate, path, flags))
+		} དེ་མིན {
+			གལ་སྲིད (add_file_to_index(istate, path, flags))
 				exit_status = failed_to_add(flags, path);
 		}
 	}
 
 	string_list_clear(&unmerged_paths, 0);
 	string_list_clear(&unresolved_paths, 0);
-	return exit_status;
+	ལོག exit_status;
 }
 
-int cmd_add(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo)
+ཧྲིལ cmd_add(ཧྲིལ argc,
+	    const var_na **argv,
+	    const var_na *prefix,
+	    sa_nracanaa repository *repo)
 {
-	int exit_status = 0;
-	struct pathspec pathspec;
-	struct dir_struct dir = DIR_INIT;
-	int flags;
-	int add_new_files;
-	int require_pathspec;
-	char *seen = NULL;
-	char *ps_matched = NULL;
-	struct lock_file lock_file = LOCK_INIT;
-	struct odb_transaction *transaction = NULL;
+	ཧྲིལ exit_status = 0;
+	sa_nracanaa pathspec pathspec;
+	sa_nracanaa dir_struct dir = DIR_INIT;
+	ཧྲིལ flags;
+	ཧྲིལ add_new_files;
+	ཧྲིལ require_pathspec;
+	var_na *seen = NULL;
+	var_na *ps_matched = NULL;
+	sa_nracanaa lock_file lock_file = LOCK_INIT;
+	sa_nracanaa odb_transaction *transaction = NULL;
 
 	repo_config(repo, add_config, NULL);
 
@@ -481,49 +481,49 @@ int cmd_add(int argc,
 	prepare_repo_settings(repo);
 	repo->settings.command_requires_full_index = 0;
 
-	if (interactive_opts.context < -1)
+	གལ་སྲིད (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	གལ་སྲིད (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (patch_interactive)
+	གལ་སྲིད (patch_interactive)
 		add_interactive = 1;
-	if (add_interactive) {
-		if (show_only)
+	གལ་སྲིད (add_interactive) {
+		གལ་སྲིད (show_only)
 			die(_("options '%s' and '%s' cannot be used together"), "--dry-run", "--interactive/--patch");
-		if (pathspec_from_file)
+		གལ་སྲིད (pathspec_from_file)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--interactive/--patch");
 		exit(interactive_add(repo, argv + 1, prefix, patch_interactive, &interactive_opts));
-	} else {
-		if (interactive_opts.context != -1)
+	} དེ་མིན {
+		གལ་སྲིད (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--interactive/--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		གལ་སྲིད (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--interactive/--patch");
-		if (!interactive_opts.auto_advance)
+		གལ་སྲིད (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--interactive/--patch");
 	}
 
-	if (edit_interactive) {
-		if (pathspec_from_file)
+	གལ་སྲིད (edit_interactive) {
+		གལ་སྲིད (pathspec_from_file)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--edit");
-		return(edit_patch(repo, argc, argv, prefix));
+		ལོག(edit_patch(repo, argc, argv, prefix));
 	}
 	argc--;
 	argv++;
 
-	if (0 <= addremove_explicit)
+	གལ་སྲིད (0 <= addremove_explicit)
 		addremove = addremove_explicit;
-	else if (take_worktree_changes && ADDREMOVE_DEFAULT)
+	དེ་མིན གལ་སྲིད (take_worktree_changes && ADDREMOVE_DEFAULT)
 		addremove = 0; /* "-u" was given but not "-A" */
 
 	die_for_incompatible_opt3(take_worktree_changes, "-u/--update",
 				  0 < addremove_explicit, "-A/--all",
 				  add_resolved, "--resolved");
 
-	if (!show_only && ignore_missing)
+	གལ་སྲིད (!show_only && ignore_missing)
 		die(_("the option '%s' requires '%s'"), "--ignore-missing", "--dry-run");
 
-	if (chmod_arg && ((chmod_arg[0] != '-' && chmod_arg[0] != '+') ||
+	གལ་སྲིད (chmod_arg && ((chmod_arg[0] != '-' && chmod_arg[0] != '+') ||
 			  chmod_arg[1] != 'x' || chmod_arg[2]))
 		die(_("--chmod param '%s' must be either -x or +x"), chmod_arg);
 
@@ -544,26 +544,26 @@ int cmd_add(int argc,
 		       PATHSPEC_SYMLINK_LEADING_PATH,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (pathspec.nr)
+	གལ་སྲིད (pathspec_from_file) {
+		གལ་སྲིད (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_FULL |
 				    PATHSPEC_SYMLINK_LEADING_PATH,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} དེ་མིན གལ་སྲིད (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (require_pathspec && pathspec.nr == 0) {
+	གལ་སྲིད (require_pathspec && pathspec.nr == 0) {
 		fprintf(stderr, _("Nothing specified, nothing added.\n"));
 		advise_if_enabled(ADVICE_ADD_EMPTY_PATHSPEC,
 				  _("Maybe you wanted to say 'git add .'?"));
-		return 0;
+		ལོག 0;
 	}
 
-	if (!take_worktree_changes && !add_resolved &&
+	གལ་སྲིད (!take_worktree_changes && !add_resolved &&
 	    addremove_explicit < 0 && pathspec.nr)
 		/* Turn "git add pathspec..." to "git add -A pathspec..." */
 		addremove = 1;
@@ -575,38 +575,38 @@ int cmd_add(int argc,
 		 (!(addremove || take_worktree_changes)
 		  ? ADD_CACHE_IGNORE_REMOVAL : 0));
 
-	if (repo_read_index_preload(repo, &pathspec, 0) < 0)
+	གལ་སྲིད (repo_read_index_preload(repo, &pathspec, 0) < 0)
 		die(_("index file corrupt"));
 
 	die_in_unpopulated_submodule(repo->index, prefix);
 	die_path_inside_submodule(repo->index, &pathspec);
 
-	if (add_new_files) {
-		int baselen;
+	གལ་སྲིད (add_new_files) {
+		ཧྲིལ baselen;
 
 		/* Set up the default git porcelain excludes */
-		if (!ignored_too) {
+		གལ་སྲིད (!ignored_too) {
 			dir.flags |= DIR_COLLECT_IGNORED;
 			setup_standard_excludes(&dir);
 		}
 
 		/* This picks up the paths that are not tracked */
 		baselen = fill_directory(&dir, repo->index, &pathspec);
-		if (pathspec.nr)
+		གལ་སྲིད (pathspec.nr)
 			seen = prune_directory(repo, &dir, &pathspec, baselen);
 	}
 
-	if (refresh_only) {
+	གལ་སྲིད (refresh_only) {
 		exit_status |= refresh(repo, verbose, &pathspec);
 		goto finish;
 	}
 
-	if (pathspec.nr) {
-		int i;
-		char *skip_worktree_seen = NULL;
-		struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	གལ་སྲིད (pathspec.nr) {
+		ཧྲིལ i;
+		var_na *skip_worktree_seen = NULL;
+		sa_nracanaa string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
 
-		if (!seen)
+		གལ་སྲིད (!seen)
 			seen = find_pathspecs_matching_against_index(&pathspec,
 					repo->index, PS_IGNORE_SKIP_WORKTREE);
 
@@ -621,15 +621,15 @@ int cmd_add(int argc,
 			       PATHSPEC_EXCLUDE |
 			       PATHSPEC_ATTR);
 
-		for (i = 0; i < pathspec.nr; i++) {
-			const char *path = pathspec.items[i].match;
+		དོན་ལུ (i = 0; i < pathspec.nr; i++) {
+			const var_na *path = pathspec.items[i].match;
 
-			if (pathspec.items[i].magic & PATHSPEC_EXCLUDE)
+			གལ་སྲིད (pathspec.items[i].magic & PATHSPEC_EXCLUDE)
 				continue;
-			if (seen[i])
+			གལ་སྲིད (seen[i])
 				continue;
 
-			if (!include_sparse &&
+			གལ་སྲིད (!include_sparse &&
 			    matches_skip_worktree(&pathspec, i, &skip_worktree_seen)) {
 				string_list_append(&only_match_skip_worktree,
 						   pathspec.items[i].original);
@@ -637,24 +637,24 @@ int cmd_add(int argc,
 			}
 
 			/* Don't complain at 'git add .' on empty repo */
-			if (!path[0])
+			གལ་སྲིད (!path[0])
 				continue;
 
-			if ((pathspec.items[i].magic & (PATHSPEC_GLOB | PATHSPEC_ICASE)) ||
+			གལ་སྲིད ((pathspec.items[i].magic & (PATHSPEC_GLOB | PATHSPEC_ICASE)) ||
 			    !file_exists(path)) {
-				if (ignore_missing) {
-					int dtype = DT_UNKNOWN;
-					if (is_excluded(&dir, repo->index, path, &dtype))
+				གལ་སྲིད (ignore_missing) {
+					ཧྲིལ dtype = DT_UNKNOWN;
+					གལ་སྲིད (is_excluded(&dir, repo->index, path, &dtype))
 						dir_add_ignored(&dir, repo->index,
 								path, pathspec.items[i].len);
-				} else
+				} དེ་མིན
 					die(_("pathspec '%s' did not match any files"),
 					    pathspec.items[i].original);
 			}
 		}
 
 
-		if (only_match_skip_worktree.nr) {
+		གལ་སྲིད (only_match_skip_worktree.nr) {
 			advise_on_updating_sparse_paths(&only_match_skip_worktree);
 			exit_status = 1;
 		}
@@ -667,33 +667,33 @@ int cmd_add(int argc,
 	odb_transaction_begin_or_die(repo->objects, &transaction, 0);
 
 	ps_matched = xcalloc(pathspec.nr, 1);
-	if (add_resolved)
+	གལ་སྲིད (add_resolved)
 		exit_status |= add_resolved_files(repo, &pathspec, flags);
-	else if (add_renormalize)
+	དེ་མིན གལ་སྲིད (add_renormalize)
 		exit_status |= renormalize_tracked_files(repo, &pathspec, flags);
-	else
+	དེ་མིན
 		exit_status |= add_files_to_cache(repo, prefix,
 						  &pathspec, ps_matched,
 						  include_sparse, flags, ignored_too);
 
-	if (take_worktree_changes && !add_renormalize && !ignore_add_errors &&
+	གལ་སྲིད (take_worktree_changes && !add_renormalize && !ignore_add_errors &&
 	    report_path_error(ps_matched, &pathspec))
 		exit(128);
 
-	if (add_new_files)
+	གལ་སྲིད (add_new_files)
 		exit_status |= add_files(repo, &dir, flags);
 
-	if (chmod_arg && pathspec.nr)
+	གལ་སྲིད (chmod_arg && pathspec.nr)
 		exit_status |= chmod_pathspec(repo, &pathspec, chmod_arg[0], show_only);
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
 finish:
-	if (write_locked_index(repo->index, &lock_file,
+	གལ་སྲིད (write_locked_index(repo->index, &lock_file,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("unable to write new index file"));
 
 	free(ps_matched);
 	dir_clear(&dir);
 	clear_pathspec(&pathspec);
-	return exit_status;
+	ལོག exit_status;
 }
