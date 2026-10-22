@@ -1,35 +1,35 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pkt-line.h"
-#include "parse-options.h"
-#include "protocol.h"
-#include "replace-object.h"
-#include "upload-pack.h"
-#include "serve.h"
-#include "setup.h"
-#include "commit.h"
-#include "environment.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "exec-cmd.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "protocol.h"
+#ಅನ್ತರ್ಭಾವ "replace-object.h"
+#ಅನ್ತರ್ಭಾವ "upload-pack.h"
+#ಅನ್ತರ್ಭಾವ "serve.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
 
-static const char * const upload_pack_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ upload_pack_usage[] = {
 	N_("git-upload-pack [--[no-]strict] [--timeout=<n>] [--stateless-rpc]\n"
 	   "                [--advertise-refs] <directory>"),
-	NULL
+	ಖಾಲಿ
 };
 
-int cmd_upload_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_upload_pack(ಪೂರ್ಣಾಂಕ argc,
+		    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		    ರಚನೆ repository *repo ಬಳಸದ)
 {
-	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
-	struct option options[] = {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *dir;
+	ಪೂರ್ಣಾಂಕ strict = 0;
+	ಪೂರ್ಣಾಂಕ advertise_refs = 0;
+	ಪೂರ್ಣಾಂಕ stateless_rpc = 0;
+	ಪೂರ್ಣಾಂಕ timeout = 0;
+	ರಚನೆ option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
 		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs,
@@ -39,51 +39,51 @@ int cmd_upload_pack(int argc,
 			 N_("do not try <directory>/.git/ if <directory> is no Git directory")),
 		OPT_INTEGER(0, "timeout", &timeout,
 			    N_("interrupt transfer after <n> seconds of inactivity")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	unsigned enter_repo_flags = ENTER_REPO_ANY_OWNER_OK;
+	ಚಿಹ್ನೆರಹಿತ enter_repo_flags = ENTER_REPO_ANY_OWNER_OK;
 
-	packet_trace_identity("upload-pack");
+	packet_trace_ತಟಸ್ಥ("upload-pack");
 	disable_replace_refs();
-	save_commit_buffer = 0;
+	save_commit_ಬಫರ್ = 0;
 	xsetenv(NO_LAZY_FETCH_ENVIRONMENT, "1", 0);
 
-	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	ಆದರೆ (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
-	setup_path();
+	ಸಿದ್ಧತೆ_ಮಾರ್ಗ();
 
 	dir = argv[0];
 
-	if (strict)
+	ಆದರೆ (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	ಆದರೆ (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
-		if (advertise_refs)
+	ಆಯ್ಕೆ (determine_protocol_ಆವೃತ್ತಿ_server()) {
+	ಸ್ಥಿತಿ protocol_v2:
+		ಆದರೆ (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
-		break;
-	case protocol_v1:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		ಆದರೆ (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
+	ಸ್ಥಿತಿ protocol_v0:
 		upload_pack(advertise_refs, stateless_rpc, timeout);
-		break;
-	case protocol_unknown_version:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ protocol_unknown_ಆವೃತ್ತಿ:
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

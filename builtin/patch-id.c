@@ -1,249 +1,249 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "setup.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hash.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
 
-static void flush_current_id(size_t patchlen, struct object_id *id, struct object_id *result)
+ಸ್ಥಿರ ಶೂನ್ಯ flush_current_id(ಗಾತ್ರ_t patchlen, ರಚನೆ object_id *id, ರಚನೆ object_id *ಫಲಿತಾಂಶ)
 {
-	if (patchlen)
-		printf("%s %s\n", oid_to_hex(result), oid_to_hex(id));
+	ಆದರೆ (patchlen)
+		ಬರೆ("%s %s\n", oid_ಗಮ್ಯ_hex(ಫಲಿತಾಂಶ), oid_ಗಮ್ಯ_hex(id));
 }
 
-static size_t remove_space(char *line)
+ಸ್ಥಿರ ಗಾತ್ರ_t remove_space(ಅಕ್ಷರ *ಸಾಲು)
 {
-	char *src = line;
-	char *dst = line;
-	unsigned char c;
+	ಅಕ್ಷರ *src = ಸಾಲು;
+	ಅಕ್ಷರ *dst = ಸಾಲು;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ c;
 
-	while ((c = *src++) != '\0') {
-		if (!isspace(c))
+	ಆಗ ((c = *src++) != '\0') {
+		ಆದರೆ (!ಖಾಲಿಯೇ(c))
 			*dst++ = c;
 	}
-	return dst - line;
+	ಹಿಂತಿರುಗಿ dst - ಸಾಲು;
 }
 
-static int scan_hunk_header(const char *p, int *p_before, int *p_after)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಪರಿಶೀಲನೆ_hunk_ಶೀರ್ಷಿಕೆ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p, ಪೂರ್ಣಾಂಕ *p_before, ಪೂರ್ಣಾಂಕ *p_after)
 {
-	static const char digits[] = "0123456789";
-	const char *q, *r;
-	int n;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ digits[] = "0123456789";
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *q, *r;
+	ಪೂರ್ಣಾಂಕ n;
 
 	q = p + 4;
 	n = strspn(q, digits);
-	if (q[n] == ',') {
+	ಆದರೆ (q[n] == ',') {
 		q += n + 1;
 		*p_before = atoi(q);
 		n = strspn(q, digits);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		*p_before = 1;
 	}
 
-	if (n == 0 || q[n] != ' ' || q[n+1] != '+')
-		return 0;
+	ಆದರೆ (n == 0 || q[n] != ' ' || q[n+1] != '+')
+		ಹಿಂತಿರುಗಿ 0;
 
 	r = q + n + 2;
 	n = strspn(r, digits);
-	if (r[n] == ',') {
+	ಆದರೆ (r[n] == ',') {
 		r += n + 1;
 		*p_after = atoi(r);
 		n = strspn(r, digits);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		*p_after = 1;
 	}
-	if (n == 0)
-		return 0;
+	ಆದರೆ (n == 0)
+		ಹಿಂತಿರುಗಿ 0;
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static size_t get_one_patchid(struct object_id *next_oid, struct object_id *result,
-			      struct strbuf *line_buf, int stable, int verbatim)
+ಸ್ಥಿರ ಗಾತ್ರ_t get_one_patchid(ರಚನೆ object_id *ಮುಂದಿನ_oid, ರಚನೆ object_id *ಫಲಿತಾಂಶ,
+			      ರಚನೆ strbuf *ಸಾಲು_buf, ಪೂರ್ಣಾಂಕ stable, ಪೂರ್ಣಾಂಕ verbatim)
 {
-	size_t patchlen = 0;
-	int found_next = 0;
-	int before = -1, after = -1;
-	int diff_is_binary = 0;
-	char pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
-	struct git_hash_ctx ctx;
+	ಗಾತ್ರ_t patchlen = 0;
+	ಪೂರ್ಣಾಂಕ ಸಿಕ್ಕಿತು_ಮುಂದಿನ = 0;
+	ಪೂರ್ಣಾಂಕ before = -1, after = -1;
+	ಪೂರ್ಣಾಂಕ diff_is_ದ್ವಿಮಾನ = 0;
+	ಅಕ್ಷರ pre_oid_str[GIT_MAX_HEXSZ + 1], post_oid_str[GIT_MAX_HEXSZ + 1];
+	ರಚನೆ git_hash_ctx ctx;
 
 	git_hash_init(&ctx, the_hash_algo);
-	oidclr(result, the_repository->hash_algo);
+	oidclr(ಫಲಿತಾಂಶ, the_repository->hash_algo);
 
-	while (strbuf_getwholeline(line_buf, stdin, '\n') != EOF) {
-		char *line = line_buf->buf;
-		const char *p = line;
-		size_t len;
+	ಆಗ (strbuf_getwholeline(ಸಾಲು_buf, stdin, '\n') != EOF) {
+		ಅಕ್ಷರ *ಸಾಲು = ಸಾಲು_buf->buf;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p = ಸಾಲು;
+		ಗಾತ್ರ_t len;
 
 		/* Possibly skip over the prefix added by "log" or "format-patch" */
-		if (!skip_prefix(line, "commit ", &p) &&
-		    !skip_prefix(line, "From ", &p) &&
-		    starts_with(line, "\\ ") && 12 < strlen(line)) {
-			if (verbatim)
-				git_hash_update(&ctx, line, strlen(line));
-			continue;
+		ಆದರೆ (!skip_ಪೂರ್ವಪ್ರತ್ಯಯ(ಸಾಲು, "commit ", &p) &&
+		    !skip_ಪೂರ್ವಪ್ರತ್ಯಯ(ಸಾಲು, "From ", &p) &&
+		    starts_with(ಸಾಲು, "\\ ") && 12 < ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಸಾಲು)) {
+			ಆದರೆ (verbatim)
+				git_hash_update(&ctx, ಸಾಲು, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಸಾಲು));
+			ಮುಂದುವರಿ;
 		}
 
-		if (!get_oid_hex(p, next_oid)) {
-			found_next = 1;
-			break;
+		ಆದರೆ (!get_oid_hex(p, ಮುಂದಿನ_oid)) {
+			ಸಿಕ್ಕಿತು_ಮುಂದಿನ = 1;
+			ನಿಲ್ಲಿಸು;
 		}
 
 		/* Ignore commit comments */
-		if (!patchlen && !starts_with(line, "diff "))
-			continue;
+		ಆದರೆ (!patchlen && !starts_with(ಸಾಲು, "diff "))
+			ಮುಂದುವರಿ;
 
 		/* Parsing diff header?  */
-		if (before == -1) {
-			if (starts_with(line, "GIT binary patch") ||
-			    starts_with(line, "Binary files")) {
-				diff_is_binary = 1;
+		ಆದರೆ (before == -1) {
+			ಆದರೆ (starts_with(ಸಾಲು, "GIT binary patch") ||
+			    starts_with(ಸಾಲು, "Binary files")) {
+				diff_is_ದ್ವಿಮಾನ = 1;
 				before = 0;
 				git_hash_update(&ctx, pre_oid_str,
-						strlen(pre_oid_str));
+						ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(pre_oid_str));
 				git_hash_update(&ctx, post_oid_str,
-						strlen(post_oid_str));
-				if (stable)
-					flush_one_hunk(result, &ctx);
-				continue;
-			} else if (skip_prefix(line, "index ", &p)) {
-				char *oid1_end = strstr(line, "..");
-				char *oid2_end = NULL;
-				if (oid1_end)
-					oid2_end = strstr(oid1_end, " ");
-				if (!oid2_end)
-					oid2_end = line + strlen(line) - 1;
-				if (oid1_end != NULL && oid2_end != NULL) {
-					*oid1_end = *oid2_end = '\0';
+						ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(post_oid_str));
+				ಆದರೆ (stable)
+					flush_one_hunk(ಫಲಿತಾಂಶ, &ctx);
+				ಮುಂದುವರಿ;
+			} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(ಸಾಲು, "index ", &p)) {
+				ಅಕ್ಷರ *oid1_ಕೊನೆ = ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(ಸಾಲು, "..");
+				ಅಕ್ಷರ *oid2_ಕೊನೆ = ಖಾಲಿ;
+				ಆದರೆ (oid1_ಕೊನೆ)
+					oid2_ಕೊನೆ = ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(oid1_ಕೊನೆ, " ");
+				ಆದರೆ (!oid2_ಕೊನೆ)
+					oid2_ಕೊನೆ = ಸಾಲು + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಸಾಲು) - 1;
+				ಆದರೆ (oid1_ಕೊನೆ != ಖಾಲಿ && oid2_ಕೊನೆ != ಖಾಲಿ) {
+					*oid1_ಕೊನೆ = *oid2_ಕೊನೆ = '\0';
 					strlcpy(pre_oid_str, p, GIT_MAX_HEXSZ + 1);
-					strlcpy(post_oid_str, oid1_end + 2, GIT_MAX_HEXSZ + 1);
+					strlcpy(post_oid_str, oid1_ಕೊನೆ + 2, GIT_MAX_HEXSZ + 1);
 				}
-				continue;
-			} else if (starts_with(line, "--- "))
+				ಮುಂದುವರಿ;
+			} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (starts_with(ಸಾಲು, "--- "))
 				before = after = 1;
-			else if (!isalpha(line[0]))
-				break;
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!ಅಕ್ಷರವೇ(ಸಾಲು[0]))
+				ನಿಲ್ಲಿಸು;
 		}
 
-		if (diff_is_binary) {
-			if (starts_with(line, "diff ")) {
-				diff_is_binary = 0;
+		ಆದರೆ (diff_is_ದ್ವಿಮಾನ) {
+			ಆದರೆ (starts_with(ಸಾಲು, "diff ")) {
+				diff_is_ದ್ವಿಮಾನ = 0;
 				before = -1;
 			}
-			continue;
+			ಮುಂದುವರಿ;
 		}
 
 		/* Looking for a valid hunk header?  */
-		if (before == 0 && after == 0) {
-			if (starts_with(line, "@@ -")) {
+		ಆದರೆ (before == 0 && after == 0) {
+			ಆದರೆ (starts_with(ಸಾಲು, "@@ -")) {
 				/* Parse next hunk, but ignore line numbers.  */
-				scan_hunk_header(line, &before, &after);
-				continue;
+				ಪರಿಶೀಲನೆ_hunk_ಶೀರ್ಷಿಕೆ(ಸಾಲು, &before, &after);
+				ಮುಂದುವರಿ;
 			}
 
 			/* Split at the end of the patch.  */
-			if (!starts_with(line, "diff "))
-				break;
+			ಆದರೆ (!starts_with(ಸಾಲು, "diff "))
+				ನಿಲ್ಲಿಸು;
 
 			/* Else we're parsing another header.  */
-			if (stable)
-				flush_one_hunk(result, &ctx);
+			ಆದರೆ (stable)
+				flush_one_hunk(ಫಲಿತಾಂಶ, &ctx);
 			before = after = -1;
 		}
 
 		/* If we get here, we're inside a hunk.  */
-		if (line[0] == '-' || line[0] == ' ')
+		ಆದರೆ (ಸಾಲು[0] == '-' || ಸಾಲು[0] == ' ')
 			before--;
-		if (line[0] == '+' || line[0] == ' ')
+		ಆದರೆ (ಸಾಲು[0] == '+' || ಸಾಲು[0] == ' ')
 			after--;
 
 		/* Add line to hash algo (possibly removing whitespace) */
-		len = verbatim ? strlen(line) : remove_space(line);
+		len = verbatim ? ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಸಾಲು) : remove_space(ಸಾಲು);
 		patchlen += len;
-		git_hash_update(&ctx, line, len);
+		git_hash_update(&ctx, ಸಾಲು, len);
 	}
 
-	if (!found_next)
-		oidclr(next_oid, the_repository->hash_algo);
+	ಆದರೆ (!ಸಿಕ್ಕಿತು_ಮುಂದಿನ)
+		oidclr(ಮುಂದಿನ_oid, the_repository->hash_algo);
 
-	flush_one_hunk(result, &ctx);
+	flush_one_hunk(ಫಲಿತಾಂಶ, &ctx);
 	git_hash_discard(&ctx);
 
-	return patchlen;
+	ಹಿಂತಿರುಗಿ patchlen;
 }
 
-static void generate_id_list(int stable, int verbatim)
+ಸ್ಥಿರ ಶೂನ್ಯ generate_id_list(ಪೂರ್ಣಾಂಕ stable, ಪೂರ್ಣಾಂಕ verbatim)
 {
-	struct object_id oid, n, result;
-	size_t patchlen;
-	struct strbuf line_buf = STRBUF_INIT;
+	ರಚನೆ object_id oid, n, ಫಲಿತಾಂಶ;
+	ಗಾತ್ರ_t patchlen;
+	ರಚನೆ strbuf ಸಾಲು_buf = STRBUF_INIT;
 
 	oidclr(&oid, the_repository->hash_algo);
-	while (!feof(stdin)) {
-		patchlen = get_one_patchid(&n, &result, &line_buf, stable, verbatim);
-		flush_current_id(patchlen, &oid, &result);
+	ಆಗ (!feof(stdin)) {
+		patchlen = get_one_patchid(&n, &ಫಲಿತಾಂಶ, &ಸಾಲು_buf, stable, verbatim);
+		flush_current_id(patchlen, &oid, &ಫಲಿತಾಂಶ);
 		oidcpy(&oid, &n);
 	}
-	strbuf_release(&line_buf);
+	strbuf_release(&ಸಾಲು_buf);
 }
 
-static const char *const patch_id_usage[] = {
-	N_("git patch-id [--stable | --unstable | --verbatim]"), NULL
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ patch_id_usage[] = {
+	N_("git patch-id [--stable | --unstable | --verbatim]"), ಖಾಲಿ
 };
 
-struct patch_id_opts {
-	int stable;
-	int verbatim;
+ರಚನೆ patch_id_opts {
+	ಪೂರ್ಣಾಂಕ stable;
+	ಪೂರ್ಣಾಂಕ verbatim;
 };
 
-static int git_patch_id_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ git_patch_id_config(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *var, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ,
+			       ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	struct patch_id_opts *opts = cb;
+	ರಚನೆ patch_id_opts *opts = cb;
 
-	if (!strcmp(var, "patchid.stable")) {
-		opts->stable = git_config_bool(var, value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "patchid.stable")) {
+		opts->stable = git_config_bool(var, ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "patchid.verbatim")) {
-		opts->verbatim = git_config_bool(var, value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "patchid.verbatim")) {
+		opts->verbatim = git_config_bool(var, ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	ಹಿಂತಿರುಗಿ git_default_config(var, ಮೌಲ್ಯ, ctx, cb);
 }
 
-int cmd_patch_id(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_patch_id(ಪೂರ್ಣಾಂಕ argc,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		 ರಚನೆ repository *repo ಬಳಸದ)
 {
 	/* if nothing is set, default to unstable */
-	struct patch_id_opts config = {0, 0};
-	int opts = 0;
-	struct option builtin_patch_id_options[] = {
+	ರಚನೆ patch_id_opts config = {0, 0};
+	ಪೂರ್ಣಾಂಕ opts = 0;
+	ರಚನೆ option builtin_patch_id_options[] = {
 		OPT_CMDMODE(0, "unstable", &opts,
 		    N_("use the unstable patch ID algorithm"), 1),
 		OPT_CMDMODE(0, "stable", &opts,
 		    N_("use the stable patch ID algorithm"), 2),
 		OPT_CMDMODE(0, "verbatim", &opts,
 			N_("don't strip whitespace from the patch"), 3),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
 	repo_config(the_repository, git_patch_id_config, &config);
 
 	/* verbatim implies stable */
-	if (config.verbatim)
+	ಆದರೆ (config.verbatim)
 		config.stable = 1;
 
-	argc = parse_options(argc, argv, prefix, builtin_patch_id_options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, builtin_patch_id_options,
 			     patch_id_usage, 0);
 
 	/*
@@ -255,10 +255,10 @@ int cmd_patch_id(int argc,
 	 * NEEDSWORK: This hack should be removed in favor of converting
 	 * the code that computes patch IDs to always use SHA1.
 	 */
-	if (!the_hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	ಆದರೆ (!the_hash_algo)
+		repo_ಗಣ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	generate_id_list(opts ? opts > 1 : config.stable,
 			 opts ? opts == 3 : config.verbatim);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

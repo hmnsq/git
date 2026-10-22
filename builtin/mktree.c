@@ -3,208 +3,208 @@
  *
  * Copyright (c) Junio C Hamano, 2006, 2009
  */
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "quote.h"
-#include "strbuf.h"
-#include "tree.h"
-#include "parse-options.h"
-#include "object-file.h"
-#include "odb.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "tree.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "object-file.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
 
-static struct treeent {
-	unsigned mode;
-	struct object_id oid;
-	int len;
-	char name[FLEX_ARRAY];
+ಸ್ಥಿರ ರಚನೆ treeent {
+	ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ;
+	ರಚನೆ object_id oid;
+	ಪೂರ್ಣಾಂಕ len;
+	ಅಕ್ಷರ name[FLEX_ARRAY];
 } **entries;
-static int alloc, used;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ alloc, ಬಳಸಿದ_2;
 
-static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
+ಸ್ಥಿರ ಶೂನ್ಯ append_ಗಮ್ಯ_ವೃಕ್ಷ(ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ, ರಚನೆ object_id *oid, ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	struct treeent *ent;
-	size_t len = strlen(path);
-	if (strchr(path, '/'))
-		die("path %s contains slash", path);
+	ರಚನೆ treeent *ent;
+	ಗಾತ್ರ_t len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಮಾರ್ಗ);
+	ಆದರೆ (strchr(ಮಾರ್ಗ, '/'))
+		die("path %s contains slash", ಮಾರ್ಗ);
 
-	FLEX_ALLOC_MEM(ent, name, path, len);
-	ent->mode = mode;
+	FLEX_ALLOC_MEM(ent, name, ಮಾರ್ಗ, len);
+	ent->ಬಹುಲಕ = ಬಹುಲಕ;
 	ent->len = len;
 	oidcpy(&ent->oid, oid);
 
-	ALLOC_GROW(entries, used + 1, alloc);
-	entries[used++] = ent;
+	ALLOC_GROW(entries, ಬಳಸಿದ_2 + 1, alloc);
+	entries[ಬಳಸಿದ_2++] = ent;
 }
 
-static int ent_compare(const void *a_, const void *b_)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ent_compare(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *a_, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *b_)
 {
-	struct treeent *a = *(struct treeent **)a_;
-	struct treeent *b = *(struct treeent **)b_;
-	return base_name_compare(a->name, a->len, a->mode,
-				 b->name, b->len, b->mode);
+	ರಚನೆ treeent *a = *(ರಚನೆ treeent **)a_;
+	ರಚನೆ treeent *b = *(ರಚನೆ treeent **)b_;
+	ಹಿಂತಿರುಗಿ ತಳ_name_compare(a->name, a->len, a->ಬಹುಲಕ,
+				 b->name, b->len, b->ಬಹುಲಕ);
 }
 
-static void write_tree(struct repository *repo, struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ write_ವೃಕ್ಷ(ರಚನೆ repository *repo, ರಚನೆ object_id *oid)
 {
-	struct strbuf buf;
-	size_t size;
-	int i;
+	ರಚನೆ strbuf buf;
+	ಗಾತ್ರ_t ಗಾತ್ರ_2;
+	ಪೂರ್ಣಾಂಕ i;
 
-	QSORT(entries, used, ent_compare);
-	for (size = i = 0; i < used; i++)
-		size += 32 + entries[i]->len;
+	QSORT(entries, ಬಳಸಿದ_2, ent_compare);
+	ಗಾಗಿ (ಗಾತ್ರ_2 = i = 0; i < ಬಳಸಿದ_2; i++)
+		ಗಾತ್ರ_2 += 32 + entries[i]->len;
 
-	strbuf_init(&buf, size);
-	for (i = 0; i < used; i++) {
-		struct treeent *ent = entries[i];
-		strbuf_addf(&buf, "%o %s%c", ent->mode, ent->name, '\0');
-		strbuf_add(&buf, ent->oid.hash, repo->hash_algo->rawsz);
+	strbuf_init(&buf, ಗಾತ್ರ_2);
+	ಗಾಗಿ (i = 0; i < ಬಳಸಿದ_2; i++) {
+		ರಚನೆ treeent *ent = entries[i];
+		strbuf_addf(&buf, "%o %s%c", ent->ಬಹುಲಕ, ent->name, '\0');
+		strbuf_ಕೂಡಿಸು(&buf, ent->oid.hash, repo->hash_algo->rawsz);
 	}
 
-	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_TREE, oid);
+	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_ವೃಕ್ಷ, oid);
 	strbuf_release(&buf);
 }
 
-static const char *const mktree_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ mktree_usage[] = {
 	"git mktree [-z] [--missing] [--batch]",
-	NULL
+	ಖಾಲಿ
 };
 
-static void mktree_line(struct repository *repo, char *buf, int nul_term_line, int allow_missing)
+ಸ್ಥಿರ ಶೂನ್ಯ mktree_ಸಾಲು(ರಚನೆ repository *repo, ಅಕ್ಷರ *buf, ಪೂರ್ಣಾಂಕ nul_ಪದ_ಸಾಲು, ಪೂರ್ಣಾಂಕ allow_missing)
 {
-	char *ptr, *ntr;
-	const char *p;
-	unsigned mode;
-	enum object_type mode_type; /* object type derived from mode */
-	enum object_type obj_type; /* object type derived from sha */
-	struct object_info oi = OBJECT_INFO_INIT;
-	char *path, *to_free = NULL;
-	struct object_id oid;
+	ಅಕ್ಷರ *ptr, *ntr;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p;
+	ಚಿಹ್ನೆರಹಿತ ಬಹುಲಕ;
+	ಎಣಿಕೆ object_type ಬಹುಲಕ_type; /* object type derived from mode */
+	ಎಣಿಕೆ object_type obj_type; /* object type derived from sha */
+	ರಚನೆ object_info oi = OBJECT_INFO_INIT;
+	ಅಕ್ಷರ *ಮಾರ್ಗ, *ಗಮ್ಯ_free = ಖಾಲಿ;
+	ರಚನೆ object_id oid;
 
 	ptr = buf;
 	/*
 	 * Read non-recursive ls-tree output format:
 	 *     mode SP type SP sha1 TAB name
 	 */
-	mode = strtoul(ptr, &ntr, 8);
-	if (ptr == ntr || !ntr || *ntr != ' ')
+	ಬಹುಲಕ = strtoul(ptr, &ntr, 8);
+	ಆದರೆ (ptr == ntr || !ntr || *ntr != ' ')
 		die("input format error: %s", buf);
 	ptr = ntr + 1; /* type */
 	ntr = strchr(ptr, ' ');
-	if (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
+	ಆದರೆ (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
 	    *p != '\t')
 		die("input format error: %s", buf);
 
 	/* It is perfectly normal if we do not have a commit from a submodule */
-	if (S_ISGITLINK(mode))
+	ಆದರೆ (S_ISGITLINK(ಬಹುಲಕ))
 		allow_missing = 1;
 
 
 	*ntr++ = 0; /* now at the beginning of SHA1 */
 
-	path = (char *)p + 1;  /* at the beginning of name */
-	if (!nul_term_line && path[0] == '"') {
-		struct strbuf p_uq = STRBUF_INIT;
-		if (unquote_c_style(&p_uq, path, NULL))
+	ಮಾರ್ಗ = (ಅಕ್ಷರ *)p + 1;  /* at the beginning of name */
+	ಆದರೆ (!nul_ಪದ_ಸಾಲು && ಮಾರ್ಗ[0] == '"') {
+		ರಚನೆ strbuf p_uq = STRBUF_INIT;
+		ಆದರೆ (unquote_c_style(&p_uq, ಮಾರ್ಗ, ಖಾಲಿ))
 			die("invalid quoting");
-		path = to_free = strbuf_detach(&p_uq, NULL);
+		ಮಾರ್ಗ = ಗಮ್ಯ_free = strbuf_detach(&p_uq, ಖಾಲಿ);
 	}
 
 	/*
 	 * Object type is redundantly derivable three ways.
 	 * These should all agree.
 	 */
-	mode_type = object_type(mode);
-	if (mode_type != type_from_string(ptr)) {
+	ಬಹುಲಕ_type = object_type(ಬಹುಲಕ);
+	ಆದರೆ (ಬಹುಲಕ_type != type_from_string(ptr)) {
 		die("entry '%s' object type (%s) doesn't match mode type (%s)",
-			path, ptr, type_name(mode_type));
+			ಮಾರ್ಗ, ptr, type_name(ಬಹುಲಕ_type));
 	}
 
 	/* Check the type of object identified by oid without fetching objects */
 	oi.typep = &obj_type;
-	if (odb_read_object_info_extended(repo->objects, &oid, &oi,
+	ಆದರೆ (odb_read_object_info_extended(repo->objects, &oid, &oi,
 					  OBJECT_INFO_LOOKUP_REPLACE |
 					  OBJECT_INFO_SKIP_FETCH_OBJECT) < 0)
 		obj_type = -1;
 
-	if (obj_type < 0) {
-		if (allow_missing) {
+	ಆದರೆ (obj_type < 0) {
+		ಆದರೆ (allow_missing) {
 			; /* no problem - missing objects are presumed to be of the right type */
-		} else {
-			die("entry '%s' object %s is unavailable", path, oid_to_hex(&oid));
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			die("entry '%s' object %s is unavailable", ಮಾರ್ಗ, oid_ಗಮ್ಯ_hex(&oid));
 		}
-	} else {
-		if (obj_type != mode_type) {
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (obj_type != ಬಹುಲಕ_type) {
 			/*
 			 * The object exists but is of the wrong type.
 			 * This is a problem regardless of allow_missing
 			 * because the new tree entry will never be correct.
 			 */
 			die("entry '%s' object %s is a %s but specified type was (%s)",
-				path, oid_to_hex(&oid), type_name(obj_type), type_name(mode_type));
+				ಮಾರ್ಗ, oid_ಗಮ್ಯ_hex(&oid), type_name(obj_type), type_name(ಬಹುಲಕ_type));
 		}
 	}
 
-	append_to_tree(mode, &oid, path);
-	free(to_free);
+	append_ಗಮ್ಯ_ವೃಕ್ಷ(ಬಹುಲಕ, &oid, ಮಾರ್ಗ);
+	ಬಿಡುಗಡೆ(ಗಮ್ಯ_free);
 }
 
-int cmd_mktree(int ac,
-	       const char **av,
-	       const char *prefix,
-	       struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_mktree(ಪೂರ್ಣಾಂಕ ac,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **av,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	       ರಚನೆ repository *repo)
 {
-	struct strbuf sb = STRBUF_INIT;
-	struct object_id oid;
-	int nul_term_line = 0;
-	int allow_missing = 0;
-	int is_batch_mode = 0;
-	int got_eof = 0;
+	ರಚನೆ strbuf sb = STRBUF_INIT;
+	ರಚನೆ object_id oid;
+	ಪೂರ್ಣಾಂಕ nul_ಪದ_ಸಾಲು = 0;
+	ಪೂರ್ಣಾಂಕ allow_missing = 0;
+	ಪೂರ್ಣಾಂಕ is_batch_ಬಹುಲಕ = 0;
+	ಪೂರ್ಣಾಂಕ got_eof = 0;
 	strbuf_getline_fn getline_fn;
 
-	const struct option option[] = {
-		OPT_BOOL('z', NULL, &nul_term_line, N_("input is NUL terminated")),
-		OPT_SET_INT( 0 , "missing", &allow_missing, N_("allow missing objects"), 1),
-		OPT_SET_INT( 0 , "batch", &is_batch_mode, N_("allow creation of more than one tree"), 1),
-		OPT_END()
+	ಸ್ಥಿರಾಂಕ ರಚನೆ option option[] = {
+		OPT_BOOL('z', ಖಾಲಿ, &nul_ಪದ_ಸಾಲು, N_("input is NUL terminated")),
+		OPT_ಗಣ_INT( 0 , "missing", &allow_missing, N_("allow missing objects"), 1),
+		OPT_ಗಣ_INT( 0 , "batch", &is_batch_ಬಹುಲಕ, N_("allow creation of more than one tree"), 1),
+		OPT_ಕೊನೆ()
 	};
 
-	ac = parse_options(ac, av, prefix, option, mktree_usage, 0);
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	ac = parse_options(ac, av, ಪೂರ್ವಪ್ರತ್ಯಯ, option, mktree_usage, 0);
+	getline_fn = nul_ಪದ_ಸಾಲು ? strbuf_getline_nul : strbuf_getline_lf;
 
-	while (!got_eof) {
-		while (1) {
-			if (getline_fn(&sb, stdin) == EOF) {
+	ಆಗ (!got_eof) {
+		ಆಗ (1) {
+			ಆದರೆ (getline_fn(&sb, stdin) == EOF) {
 				got_eof = 1;
-				break;
+				ನಿಲ್ಲಿಸು;
 			}
-			if (sb.buf[0] == '\0') {
+			ಆದರೆ (sb.buf[0] == '\0') {
 				/* empty lines denote tree boundaries in batch mode */
-				if (is_batch_mode)
-					break;
+				ಆದರೆ (is_batch_ಬಹುಲಕ)
+					ನಿಲ್ಲಿಸು;
 				die("input format error: (blank line only valid in batch mode)");
 			}
-			mktree_line(repo, sb.buf, nul_term_line, allow_missing);
+			mktree_ಸಾಲು(repo, sb.buf, nul_ಪದ_ಸಾಲು, allow_missing);
 		}
-		if (is_batch_mode && got_eof && used < 1) {
+		ಆದರೆ (is_batch_ಬಹುಲಕ && got_eof && ಬಳಸಿದ_2 < 1) {
 			/*
 			 * Execution gets here if the last tree entry is terminated with a
 			 * new-line.  The final new-line has been made optional to be
 			 * consistent with the original non-batch behaviour of mktree.
 			 */
 			; /* skip creating an empty tree */
-		} else {
-			write_tree(repo, &oid);
-			puts(oid_to_hex(&oid));
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			write_ವೃಕ್ಷ(repo, &oid);
+			puts(oid_ಗಮ್ಯ_hex(&oid));
 			fflush(stdout);
 		}
-		for (int i = 0; i < used; i++)
-			free(entries[i]);
-		used=0; /* reset tree entry buffer for re-use in batch mode */
+		ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < ಬಳಸಿದ_2; i++)
+			ಬಿಡುಗಡೆ(entries[i]);
+		ಬಳಸಿದ_2=0; /* reset tree entry buffer for re-use in batch mode */
 	}
-	free(entries);
+	ಬಿಡುಗಡೆ(entries);
 	strbuf_release(&sb);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

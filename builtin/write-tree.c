@@ -3,70 +3,70 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "tree.h"
-#include "cache-tree.h"
-#include "parse-options.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "tree.h"
+#ಅನ್ತರ್ಭಾವ "cache-tree.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ write_ವೃಕ್ಷ_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
-	NULL
+	ಖಾಲಿ
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_write_ವೃಕ್ಷ(ಪೂರ್ಣಾಂಕ argc,
+		   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cmd_ಪೂರ್ವಪ್ರತ್ಯಯ,
+		   ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
-		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
-			WRITE_TREE_MISSING_OK),
-		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
+	ಪೂರ್ಣಾಂಕ flags = 0, ret;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ವೃಕ್ಷ_ಪೂರ್ವಪ್ರತ್ಯಯ = ಖಾಲಿ;
+	ರಚನೆ object_id oid;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *me = "git-write-tree";
+	ರಚನೆ option write_ವೃಕ್ಷ_options[] = {
+		OPT_ಬಿಟ್(0, "missing-ok", &flags, N_("allow missing objects"),
+			WRITE_ವೃಕ್ಷ_MISSING_OK),
+		OPT_STRING(0, "prefix", &ವೃಕ್ಷ_ಪೂರ್ವಪ್ರತ್ಯಯ, N_("<prefix>/"),
 			   N_("write tree object for a subdirectory <prefix>")),
 		{
-			.type = OPTION_BIT,
+			.type = OPTION_ಬಿಟ್,
 			.long_name = "ignore-cache-tree",
-			.value = &flags,
-			.precision = sizeof(flags),
+			.ಮೌಲ್ಯ = &flags,
+			.precision = ಗಾತ್ರ(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
-			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
+			.defval = WRITE_ವೃಕ್ಷ_IGNORE_CACHE_ವೃಕ್ಷ,
 		},
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
-			     write_tree_usage, 0);
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
+	argc = parse_options(argc, argv, cmd_ಪೂರ್ವಪ್ರತ್ಯಯ, write_ವೃಕ್ಷ_options,
+			     write_ವೃಕ್ಷ_usage, 0);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ = 0;
 
-	ret = write_index_as_tree(&oid, the_repository->index,
-				  repo_get_index_file(the_repository),
-				  flags, tree_prefix);
-	switch (ret) {
-	case 0:
-		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+	ret = write_ಸೂಚ್ಯಂಕ_as_ವೃಕ್ಷ(&oid, the_repository->ಸೂಚ್ಯಂಕ,
+				  repo_get_ಸೂಚ್ಯಂಕ_file(the_repository),
+				  flags, ವೃಕ್ಷ_ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆಯ್ಕೆ (ret) {
+	ಸ್ಥಿತಿ 0:
+		ಬರೆ("%s\n", oid_ಗಮ್ಯ_hex(&oid));
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ WRITE_ವೃಕ್ಷ_UNREADABLE_ಸೂಚ್ಯಂಕ:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ WRITE_ವೃಕ್ಷ_UNMERGED_ಸೂಚ್ಯಂಕ:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
-		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ WRITE_ವೃಕ್ಷ_ಪೂರ್ವಪ್ರತ್ಯಯ_ERROR:
+		die("%s: prefix %s not found", me, ವೃಕ್ಷ_ಪೂರ್ವಪ್ರತ್ಯಯ);
+		ನಿಲ್ಲಿಸು;
 	}
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }

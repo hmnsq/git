@@ -2,73 +2,73 @@
  * Another stupid program, this one parsing the headers of an
  * email to figure out authorship and subject
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "strbuf.h"
-#include "mailinfo.h"
-#include "parse-options.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "mailinfo.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
 
-static const char * const mailinfo_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ mailinfo_usage[] = {
 	/* TRANSLATORS: keep <> in "<" mail ">" info. */
 	N_("git mailinfo [<options>] <msg> <patch> < mail >info"),
-	NULL,
+	ಖಾಲಿ,
 };
 
-struct metainfo_charset
+ರಚನೆ metainfo_charset
 {
-	enum {
+	ಎಣಿಕೆ {
 		CHARSET_DEFAULT,
 		CHARSET_NO_REENCODE,
 		CHARSET_EXPLICIT,
 	} policy;
-	const char *charset;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *charset;
 };
 
-static int parse_opt_explicit_encoding(const struct option *opt,
-				       const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_opt_explicit_encoding(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct metainfo_charset *meta_charset = opt->value;
+	ರಚನೆ metainfo_charset *meta_charset = opt->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_NEG(unset);
 
 	meta_charset->policy = CHARSET_EXPLICIT;
 	meta_charset->charset = arg;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_opt_quoted_cr(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	ಆದರೆ (mailinfo_parse_quoted_cr_action(arg, opt->ಮೌಲ್ಯ) != 0)
+		ಹಿಂತಿರುಗಿ error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_mailinfo(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_mailinfo(ಪೂರ್ಣಾಂಕ argc,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct metainfo_charset meta_charset;
-	struct mailinfo mi;
-	int status;
-	char *msgfile, *patchfile;
+	ರಚನೆ metainfo_charset meta_charset;
+	ರಚನೆ mailinfo mi;
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2;
+	ಅಕ್ಷರ *msgfile, *patchfile;
 
-	struct option options[] = {
-		OPT_BOOL('k', NULL, &mi.keep_subject, N_("keep subject")),
-		OPT_BOOL('b', NULL, &mi.keep_non_patch_brackets_in_subject,
+	ರಚನೆ option options[] = {
+		OPT_BOOL('k', ಖಾಲಿ, &mi.keep_subject, N_("keep subject")),
+		OPT_BOOL('b', ಖಾಲಿ, &mi.keep_non_patch_brackets_ಒಳ_subject,
 			 N_("keep non patch brackets in subject")),
-		OPT_BOOL('m', "message-id", &mi.add_message_id,
+		OPT_BOOL('m', "message-id", &mi.ಕೂಡಿಸು_ಸಂದೇಶ_id,
 			 N_("copy Message-ID to the end of commit message")),
-		OPT_SET_INT_F('u', NULL, &meta_charset.policy,
+		OPT_ಗಣ_INT_F('u', ಖಾಲಿ, &meta_charset.policy,
 			      N_("re-code metadata to i18n.commitEncoding"),
 			      CHARSET_DEFAULT, PARSE_OPT_NONEG),
-		OPT_SET_INT_F('n', NULL, &meta_charset.policy,
+		OPT_ಗಣ_INT_F('n', ಖಾಲಿ, &meta_charset.policy,
 			      N_("disable charset re-coding of metadata"),
 			      CHARSET_NO_REENCODE, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "encoding", &meta_charset, N_("encoding"),
@@ -78,42 +78,42 @@ int cmd_mailinfo(int argc,
 		OPT_CALLBACK_F(0, "quoted-cr", &mi.quoted_cr, N_("<action>"),
 			       N_("action when quoted CR is found"),
 			       PARSE_OPT_NONEG, parse_opt_quoted_cr),
-		OPT_HIDDEN_BOOL(0, "inbody-headers", &mi.use_inbody_headers,
+		OPT_HIDDEN_BOOL(0, "inbody-headers", &mi.use_inbody_ಶೀರ್ಷಿಕೆಗಳು,
 			 N_("use headers in message's body")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	setup_mailinfo(the_repository, &mi);
+	ಸಿದ್ಧತೆ_mailinfo(the_repository, &mi);
 	meta_charset.policy = CHARSET_DEFAULT;
 
-	argc = parse_options(argc, argv, prefix, options, mailinfo_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, mailinfo_usage, 0);
 
-	if (argc != 2)
+	ಆದರೆ (argc != 2)
 		usage_with_options(mailinfo_usage, options);
 
-	switch (meta_charset.policy) {
-	case CHARSET_DEFAULT:
+	ಆಯ್ಕೆ (meta_charset.policy) {
+	ಸ್ಥಿತಿ CHARSET_DEFAULT:
 		mi.metainfo_charset = get_commit_output_encoding();
-		break;
-	case CHARSET_NO_REENCODE:
-		mi.metainfo_charset = NULL;
-		break;
-	case CHARSET_EXPLICIT:
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ CHARSET_NO_REENCODE:
+		mi.metainfo_charset = ಖಾಲಿ;
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ CHARSET_EXPLICIT:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("invalid meta_charset.policy");
 	}
 
-	mi.input = stdin;
+	mi.ಒಳಹರಿವು = stdin;
 	mi.output = stdout;
 
-	msgfile = prefix_filename(prefix, argv[0]);
-	patchfile = prefix_filename(prefix, argv[1]);
+	msgfile = ಪೂರ್ವಪ್ರತ್ಯಯ_filename(ಪೂರ್ವಪ್ರತ್ಯಯ, argv[0]);
+	patchfile = ಪೂರ್ವಪ್ರತ್ಯಯ_filename(ಪೂರ್ವಪ್ರತ್ಯಯ, argv[1]);
 
-	status = !!mailinfo(&mi, msgfile, patchfile);
+	ಸ್ಥಿತಿ_2 = !!mailinfo(&mi, msgfile, patchfile);
 	clear_mailinfo(&mi);
 
-	free(msgfile);
-	free(patchfile);
-	return status;
+	ಬಿಡುಗಡೆ(msgfile);
+	ಬಿಡುಗಡೆ(patchfile);
+	ಹಿಂತಿರುಗಿ ಸ್ಥಿತಿ_2;
 }

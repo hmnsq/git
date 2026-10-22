@@ -1,65 +1,65 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "commit.h"
-#include "tag.h"
-#include "refs.h"
-#include "object-name.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "hash-lookup.h"
-#include "commit-slab.h"
-#include "commit-graph.h"
-#include "wildmatch.h"
-#include "mem-pool.h"
-#include "pretty.h"
-#include "revision.h"
-#include "notes.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "tag.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "pager.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "hash-lookup.h"
+#ಅನ್ತರ್ಭಾವ "commit-slab.h"
+#ಅನ್ತರ್ಭಾವ "commit-graph.h"
+#ಅನ್ತರ್ಭಾವ "wildmatch.h"
+#ಅನ್ತರ್ಭಾವ "mem-pool.h"
+#ಅನ್ತರ್ಭಾವ "pretty.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "notes.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
 /*
  * One day.  See the 'name a rev shortly after epoch' test in t6120 when
  * changing this value
  */
-#define CUTOFF_DATE_SLOP 86400
+#ವ್ಯಾಖ್ಯಾನಿಸು CUTOFF_DATE_SLOP 86400
 
-struct rev_name {
-	const char *tip_name;
+ರಚನೆ rev_name {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *tip_name;
 	timestamp_t taggerdate;
-	int generation;
-	int distance;
-	int from_tag;
+	ಪೂರ್ಣಾಂಕ generation;
+	ಪೂರ್ಣಾಂಕ ದೂರ;
+	ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್;
 };
 
-define_commit_slab(commit_rev_name, struct rev_name);
+define_commit_slab(commit_rev_name, ರಚನೆ rev_name);
 
-static timestamp_t generation_cutoff = GENERATION_NUMBER_INFINITY;
-static timestamp_t cutoff = TIME_MAX;
-static struct commit_rev_name rev_names;
+ಸ್ಥಿರ timestamp_t generation_cutoff = GENERATION_ಸಂಖ್ಯೆ_INFINITY;
+ಸ್ಥಿರ timestamp_t cutoff = ಸಮಯ_MAX;
+ಸ್ಥಿರ ರಚನೆ commit_rev_name rev_ಹೆಸರುಗಳು;
 
 /* Disable the cutoff checks entirely */
-static void disable_cutoff(void)
+ಸ್ಥಿರ ಶೂನ್ಯ disable_cutoff(ಶೂನ್ಯ)
 {
 	generation_cutoff = 0;
 	cutoff = 0;
 }
 
 /* Cutoff searching any commits older than this one */
-static void set_commit_cutoff(struct commit *commit)
+ಸ್ಥಿರ ಶೂನ್ಯ ಗಣ_commit_cutoff(ರಚನೆ commit *commit)
 {
 
-	if (cutoff > commit->date)
+	ಆದರೆ (cutoff > commit->date)
 		cutoff = commit->date;
 
-	if (generation_cutoff) {
-		timestamp_t generation = commit_graph_generation(commit);
+	ಆದರೆ (generation_cutoff) {
+		timestamp_t generation = commit_ನಕ್ಷೆ_generation(commit);
 
-		if (generation_cutoff > generation)
+		ಆದರೆ (generation_cutoff > generation)
 			generation_cutoff = generation;
 	}
 }
@@ -67,340 +67,340 @@ static void set_commit_cutoff(struct commit *commit)
 /* adjust the commit date cutoff with a slop to allow for slightly incorrect
  * commit timestamps in case of clock skew.
  */
-static void adjust_cutoff_timestamp_for_slop(void)
+ಸ್ಥಿರ ಶೂನ್ಯ adjust_cutoff_timestamp_for_slop(ಶೂನ್ಯ)
 {
-	if (cutoff) {
+	ಆದರೆ (cutoff) {
 		/* check for underflow */
-		if (cutoff > TIME_MIN + CUTOFF_DATE_SLOP)
+		ಆದರೆ (cutoff > ಸಮಯ_MIN + CUTOFF_DATE_SLOP)
 			cutoff = cutoff - CUTOFF_DATE_SLOP;
-		else
-			cutoff = TIME_MIN;
+		ಇಲ್ಲದಿದ್ದರೆ
+			cutoff = ಸಮಯ_MIN;
 	}
 }
 
 /* Check if a commit is before the cutoff. Prioritize generation numbers
  * first, but use the commit timestamp if we lack generation data.
  */
-static int commit_is_before_cutoff(struct commit *commit)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ commit_is_before_cutoff(ರಚನೆ commit *commit)
 {
-	if (generation_cutoff < GENERATION_NUMBER_INFINITY)
-		return generation_cutoff &&
-			commit_graph_generation(commit) < generation_cutoff;
+	ಆದರೆ (generation_cutoff < GENERATION_ಸಂಖ್ಯೆ_INFINITY)
+		ಹಿಂತಿರುಗಿ generation_cutoff &&
+			commit_ನಕ್ಷೆ_generation(commit) < generation_cutoff;
 
-	return commit->date < cutoff;
+	ಹಿಂತಿರುಗಿ commit->date < cutoff;
 }
 
 /* How many generations are maximally preferred over _one_ merge traversal? */
-#define MERGE_TRAVERSAL_WEIGHT 65535
+#ವ್ಯಾಖ್ಯಾನಿಸು ವಿಲೀನ_TRAVERSAL_ತೂಕ 65535
 
-static int is_valid_rev_name(const struct rev_name *name)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ is_valid_rev_name(ಸ್ಥಿರಾಂಕ ರಚನೆ rev_name *name)
 {
-	return name && name->tip_name;
+	ಹಿಂತಿರುಗಿ name && name->tip_name;
 }
 
-static struct rev_name *get_commit_rev_name(const struct commit *commit)
+ಸ್ಥಿರ ರಚನೆ rev_name *get_commit_rev_name(ಸ್ಥಿರಾಂಕ ರಚನೆ commit *commit)
 {
-	struct rev_name *name = commit_rev_name_peek(&rev_names, commit);
+	ರಚನೆ rev_name *name = commit_rev_name_peek(&rev_ಹೆಸರುಗಳು, commit);
 
-	return is_valid_rev_name(name) ? name : NULL;
+	ಹಿಂತಿರುಗಿ is_valid_rev_name(name) ? name : ಖಾಲಿ;
 }
 
-static int effective_distance(int distance, int generation)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ effective_ದೂರ(ಪೂರ್ಣಾಂಕ ದೂರ, ಪೂರ್ಣಾಂಕ generation)
 {
-	return distance + (generation > 0 ? MERGE_TRAVERSAL_WEIGHT : 0);
+	ಹಿಂತಿರುಗಿ ದೂರ + (generation > 0 ? ವಿಲೀನ_TRAVERSAL_ತೂಕ : 0);
 }
 
-static int is_better_name(struct rev_name *name,
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ is_better_name(ರಚನೆ rev_name *name,
 			  timestamp_t taggerdate,
-			  int generation,
-			  int distance,
-			  int from_tag)
+			  ಪೂರ್ಣಾಂಕ generation,
+			  ಪೂರ್ಣಾಂಕ ದೂರ,
+			  ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್)
 {
-	int name_distance = effective_distance(name->distance, name->generation);
-	int new_distance = effective_distance(distance, generation);
+	ಪೂರ್ಣಾಂಕ name_ದೂರ = effective_ದೂರ(name->ದೂರ, name->generation);
+	ಪೂರ್ಣಾಂಕ new_ದೂರ = effective_ದೂರ(ದೂರ, generation);
 
 	/* If both are tags, we prefer the nearer one. */
-	if (from_tag && name->from_tag)
-		return name_distance > new_distance;
+	ಆದರೆ (from_ಟ್ಯಾಗ್ && name->from_ಟ್ಯಾಗ್)
+		ಹಿಂತಿರುಗಿ name_ದೂರ > new_ದೂರ;
 
 	/* Favor a tag over a non-tag. */
-	if (name->from_tag != from_tag)
-		return from_tag;
+	ಆದರೆ (name->from_ಟ್ಯಾಗ್ != from_ಟ್ಯಾಗ್)
+		ಹಿಂತಿರುಗಿ from_ಟ್ಯಾಗ್;
 
 	/*
 	 * We are now looking at two non-tags.  Tiebreak to favor
 	 * shorter hops.
 	 */
-	if (name_distance != new_distance)
-		return name_distance > new_distance;
+	ಆದರೆ (name_ದೂರ != new_ದೂರ)
+		ಹಿಂತಿರುಗಿ name_ದೂರ > new_ದೂರ;
 
 	/* ... or tiebreak to favor older date */
-	if (name->taggerdate != taggerdate)
-		return name->taggerdate > taggerdate;
+	ಆದರೆ (name->taggerdate != taggerdate)
+		ಹಿಂತಿರುಗಿ name->taggerdate > taggerdate;
 
 	/* keep the current one if we cannot decide */
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static struct rev_name *create_or_update_name(struct commit *commit,
+ಸ್ಥಿರ ರಚನೆ rev_name *create_or_update_name(ರಚನೆ commit *commit,
 					      timestamp_t taggerdate,
-					      int generation, int distance,
-					      int from_tag)
+					      ಪೂರ್ಣಾಂಕ generation, ಪೂರ್ಣಾಂಕ ದೂರ,
+					      ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್)
 {
-	struct rev_name *name = commit_rev_name_at(&rev_names, commit);
+	ರಚನೆ rev_name *name = commit_rev_name_at(&rev_ಹೆಸರುಗಳು, commit);
 
-	if (is_valid_rev_name(name) &&
-	    !is_better_name(name, taggerdate, generation, distance, from_tag))
-		return NULL;
+	ಆದರೆ (is_valid_rev_name(name) &&
+	    !is_better_name(name, taggerdate, generation, ದೂರ, from_ಟ್ಯಾಗ್))
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	name->taggerdate = taggerdate;
 	name->generation = generation;
-	name->distance = distance;
-	name->from_tag = from_tag;
+	name->ದೂರ = ದೂರ;
+	name->from_ಟ್ಯಾಗ್ = from_ಟ್ಯಾಗ್;
 
-	return name;
+	ಹಿಂತಿರುಗಿ name;
 }
 
-static char *get_parent_name(const struct rev_name *name, int parent_number,
-			     struct mem_pool *string_pool)
+ಸ್ಥಿರ ಅಕ್ಷರ *get_ಪೋಷಕ_name(ಸ್ಥಿರಾಂಕ ರಚನೆ rev_name *name, ಪೂರ್ಣಾಂಕ ಪೋಷಕ_ಸಂಖ್ಯೆ,
+			     ರಚನೆ mem_pool *string_pool)
 {
-	size_t len;
+	ಗಾತ್ರ_t len;
 
 	strip_suffix(name->tip_name, "^0", &len);
-	if (name->generation > 0) {
-		return mem_pool_strfmt(string_pool, "%.*s~%d^%d",
-				       (int)len, name->tip_name,
-				       name->generation, parent_number);
-	} else {
-		return mem_pool_strfmt(string_pool, "%.*s^%d",
-				       (int)len, name->tip_name, parent_number);
+	ಆದರೆ (name->generation > 0) {
+		ಹಿಂತಿರುಗಿ mem_pool_strfmt(string_pool, "%.*s~%d^%d",
+				       (ಪೂರ್ಣಾಂಕ)len, name->tip_name,
+				       name->generation, ಪೋಷಕ_ಸಂಖ್ಯೆ);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಹಿಂತಿರುಗಿ mem_pool_strfmt(string_pool, "%.*s^%d",
+				       (ಪೂರ್ಣಾಂಕ)len, name->tip_name, ಪೋಷಕ_ಸಂಖ್ಯೆ);
 	}
 }
 
-static void name_rev(struct commit *start_commit,
-		const char *tip_name, timestamp_t taggerdate,
-		int from_tag, int deref, struct mem_pool *string_pool)
+ಸ್ಥಿರ ಶೂನ್ಯ name_rev(ರಚನೆ commit *ಆರಂಭ_commit,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *tip_name, timestamp_t taggerdate,
+		ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್, ಪೂರ್ಣಾಂಕ deref, ರಚನೆ mem_pool *string_pool)
 {
-	struct commit_stack stack = COMMIT_STACK_INIT;
-	struct commit *commit;
-	struct commit_stack parents_to_queue = COMMIT_STACK_INIT;
-	struct rev_name *start_name;
+	ರಚನೆ commit_ರಾಶಿ ರಾಶಿ = COMMIT_ರಾಶಿ_INIT;
+	ರಚನೆ commit *commit;
+	ರಚನೆ commit_ರಾಶಿ parents_ಗಮ್ಯ_ಸರತಿ = COMMIT_ರಾಶಿ_INIT;
+	ರಚನೆ rev_name *ಆರಂಭ_name;
 
-	repo_parse_commit(the_repository, start_commit);
-	if (commit_is_before_cutoff(start_commit))
-		return;
+	repo_parse_commit(the_repository, ಆರಂಭ_commit);
+	ಆದರೆ (commit_is_before_cutoff(ಆರಂಭ_commit))
+		ಹಿಂತಿರುಗಿ;
 
-	start_name = create_or_update_name(start_commit, taggerdate, 0, 0,
-					   from_tag);
-	if (!start_name)
-		return;
-	if (deref)
-		start_name->tip_name = mem_pool_strfmt(string_pool, "%s^0",
+	ಆರಂಭ_name = create_or_update_name(ಆರಂಭ_commit, taggerdate, 0, 0,
+					   from_ಟ್ಯಾಗ್);
+	ಆದರೆ (!ಆರಂಭ_name)
+		ಹಿಂತಿರುಗಿ;
+	ಆದರೆ (deref)
+		ಆರಂಭ_name->tip_name = mem_pool_strfmt(string_pool, "%s^0",
 						       tip_name);
-	else
-		start_name->tip_name = mem_pool_strdup(string_pool, tip_name);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಆರಂಭ_name->tip_name = mem_pool_strdup(string_pool, tip_name);
 
-	commit_stack_push(&stack, start_commit);
+	commit_ರಾಶಿ_ತಳ್ಳು(&ರಾಶಿ, ಆರಂಭ_commit);
 
-	while ((commit = commit_stack_pop(&stack))) {
-		struct rev_name *name = get_commit_rev_name(commit);
-		struct commit_list *parents;
-		int parent_number = 1;
+	ಆಗ ((commit = commit_ರಾಶಿ_ತೆಗೆ(&ರಾಶಿ))) {
+		ರಚನೆ rev_name *name = get_commit_rev_name(commit);
+		ರಚನೆ commit_list *parents;
+		ಪೂರ್ಣಾಂಕ ಪೋಷಕ_ಸಂಖ್ಯೆ = 1;
 
-		parents_to_queue.nr = 0;
+		parents_ಗಮ್ಯ_ಸರತಿ.nr = 0;
 
-		for (parents = commit->parents;
+		ಗಾಗಿ (parents = commit->parents;
 				parents;
-				parents = parents->next, parent_number++) {
-			struct commit *parent = parents->item;
-			struct rev_name *parent_name;
-			int generation, distance;
+				parents = parents->ಮುಂದಿನ, ಪೋಷಕ_ಸಂಖ್ಯೆ++) {
+			ರಚನೆ commit *ಪೋಷಕ = parents->ಅಂಶ;
+			ರಚನೆ rev_name *ಪೋಷಕ_name;
+			ಪೂರ್ಣಾಂಕ generation, ದೂರ;
 
-			repo_parse_commit(the_repository, parent);
-			if (commit_is_before_cutoff(parent))
-				continue;
+			repo_parse_commit(the_repository, ಪೋಷಕ);
+			ಆದರೆ (commit_is_before_cutoff(ಪೋಷಕ))
+				ಮುಂದುವರಿ;
 
-			if (parent_number > 1) {
+			ಆದರೆ (ಪೋಷಕ_ಸಂಖ್ಯೆ > 1) {
 				generation = 0;
-				distance = name->distance + MERGE_TRAVERSAL_WEIGHT;
-			} else {
+				ದೂರ = name->ದೂರ + ವಿಲೀನ_TRAVERSAL_ತೂಕ;
+			} ಇಲ್ಲದಿದ್ದರೆ {
 				generation = name->generation + 1;
-				distance = name->distance + 1;
+				ದೂರ = name->ದೂರ + 1;
 			}
 
-			parent_name = create_or_update_name(parent, taggerdate,
+			ಪೋಷಕ_name = create_or_update_name(ಪೋಷಕ, taggerdate,
 							    generation,
-							    distance, from_tag);
-			if (parent_name) {
-				if (parent_number > 1)
-					parent_name->tip_name =
-						get_parent_name(name,
-								parent_number,
+							    ದೂರ, from_ಟ್ಯಾಗ್);
+			ಆದರೆ (ಪೋಷಕ_name) {
+				ಆದರೆ (ಪೋಷಕ_ಸಂಖ್ಯೆ > 1)
+					ಪೋಷಕ_name->tip_name =
+						get_ಪೋಷಕ_name(name,
+								ಪೋಷಕ_ಸಂಖ್ಯೆ,
 								string_pool);
-				else
-					parent_name->tip_name = name->tip_name;
-				commit_stack_push(&parents_to_queue, parent);
+				ಇಲ್ಲದಿದ್ದರೆ
+					ಪೋಷಕ_name->tip_name = name->tip_name;
+				commit_ರಾಶಿ_ತಳ್ಳು(&parents_ಗಮ್ಯ_ಸರತಿ, ಪೋಷಕ);
 			}
 		}
 
 		/* The first parent must come out first from the stack */
-		while (parents_to_queue.nr)
-			commit_stack_push(&stack,
-					  commit_stack_pop(&parents_to_queue));
+		ಆಗ (parents_ಗಮ್ಯ_ಸರತಿ.nr)
+			commit_ರಾಶಿ_ತಳ್ಳು(&ರಾಶಿ,
+					  commit_ರಾಶಿ_ತೆಗೆ(&parents_ಗಮ್ಯ_ಸರತಿ));
 	}
 
-	commit_stack_clear(&stack);
-	commit_stack_clear(&parents_to_queue);
+	commit_ರಾಶಿ_clear(&ರಾಶಿ);
+	commit_ರಾಶಿ_clear(&parents_ಗಮ್ಯ_ಸರತಿ);
 }
 
-static int subpath_matches(const char *path, const char *filter)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ subpath_matches(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filter)
 {
-	const char *subpath = path;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *subpath = ಮಾರ್ಗ;
 
-	while (subpath) {
-		if (!wildmatch(filter, subpath, 0))
-			return subpath - path;
+	ಆಗ (subpath) {
+		ಆದರೆ (!wildmatch(filter, subpath, 0))
+			ಹಿಂತಿರುಗಿ subpath - ಮಾರ್ಗ;
 		subpath = strchr(subpath, '/');
-		if (subpath)
+		ಆದರೆ (subpath)
 			subpath++;
 	}
-	return -1;
+	ಹಿಂತಿರುಗಿ -1;
 }
 
-struct name_ref_data {
-	int tags_only;
-	int name_only;
-	struct string_list ref_filters;
-	struct string_list exclude_filters;
+ರಚನೆ name_ref_ದತ್ತಾಂಶ {
+	ಪೂರ್ಣಾಂಕ ಟ್ಯಾಗುಗಳು_only;
+	ಪೂರ್ಣಾಂಕ name_only;
+	ರಚನೆ string_list ref_filters;
+	ರಚನೆ string_list exclude_filters;
 };
 
-struct pretty_format {
-	struct pretty_print_context ctx;
-	struct userformat_want want;
+ರಚನೆ pretty_format {
+	ರಚನೆ pretty_print_context ctx;
+	ರಚನೆ userformat_want want;
 };
 
-enum command_type {
+ಎಣಿಕೆ command_type {
 	NAME_REV = 1,
 	FORMAT_REV = 2,
 };
 
-enum stdin_mode {
-    TEXT = 1,
+ಎಣಿಕೆ stdin_ಬಹುಲಕ {
+    ಪಠ್ಯ_2 = 1,
     REVS = 2,
 };
 
-struct command {
-	enum command_type type;
-	union {
-		int name_only;
-		struct pretty_format *pretty_format;
+ರಚನೆ command {
+	ಎಣಿಕೆ command_type type;
+	ಒಕ್ಕೂಟ {
+		ಪೂರ್ಣಾಂಕ name_only;
+		ರಚನೆ pretty_format *pretty_format;
 	} u;
 };
 
-static void init_name_rev_command(struct command *cmd,
-				  int name_only)
+ಸ್ಥಿರ ಶೂನ್ಯ init_name_rev_command(ರಚನೆ command *cmd,
+				  ಪೂರ್ಣಾಂಕ name_only)
 {
 	cmd->type = NAME_REV;
 	cmd->u.name_only = name_only;
 }
 
-static void init_format_rev_command(struct command *cmd,
-				    struct pretty_format *pretty_format)
+ಸ್ಥಿರ ಶೂನ್ಯ init_format_rev_command(ರಚನೆ command *cmd,
+				    ರಚನೆ pretty_format *pretty_format)
 {
 	cmd->type = FORMAT_REV;
 	cmd->u.pretty_format = pretty_format;
 }
 
-static struct tip_table {
-	struct tip_table_entry {
-		struct object_id oid;
-		const char *refname;
-		struct commit *commit;
+ಸ್ಥಿರ ರಚನೆ tip_ಕೋಷ್ಟಕ {
+	ರಚನೆ tip_ಕೋಷ್ಟಕ_ನಮೂದು {
+		ರಚನೆ object_id oid;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *refname;
+		ರಚನೆ commit *commit;
 		timestamp_t taggerdate;
-		unsigned int from_tag:1;
-		unsigned int deref:1;
-	} *table;
-	int nr;
-	int alloc;
-	int sorted;
-} tip_table;
+		ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್:1;
+		ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ deref:1;
+	} *ಕೋಷ್ಟಕ;
+	ಪೂರ್ಣಾಂಕ nr;
+	ಪೂರ್ಣಾಂಕ alloc;
+	ಪೂರ್ಣಾಂಕ sorted;
+} tip_ಕೋಷ್ಟಕ;
 
-static void add_to_tip_table(const struct object_id *oid, const char *refname,
-			     int shorten_unambiguous, struct commit *commit,
-			     timestamp_t taggerdate, int from_tag, int deref)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_ಗಮ್ಯ_tip_ಕೋಷ್ಟಕ(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *refname,
+			     ಪೂರ್ಣಾಂಕ shorten_unambiguous, ರಚನೆ commit *commit,
+			     timestamp_t taggerdate, ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್, ಪೂರ್ಣಾಂಕ deref)
 {
-	char *short_refname = NULL;
+	ಅಕ್ಷರ *short_refname = ಖಾಲಿ;
 
-	if (shorten_unambiguous)
+	ಆದರೆ (shorten_unambiguous)
 		short_refname = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 							     refname, 0);
-	else if (skip_prefix(refname, "refs/heads/", &refname))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(refname, "refs/heads/", &refname))
 		; /* refname already advanced */
-	else
-		skip_prefix(refname, "refs/", &refname);
+	ಇಲ್ಲದಿದ್ದರೆ
+		skip_ಪೂರ್ವಪ್ರತ್ಯಯ(refname, "refs/", &refname);
 
-	ALLOC_GROW(tip_table.table, tip_table.nr + 1, tip_table.alloc);
-	oidcpy(&tip_table.table[tip_table.nr].oid, oid);
-	tip_table.table[tip_table.nr].refname = short_refname ?
+	ALLOC_GROW(tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ, tip_ಕೋಷ್ಟಕ.nr + 1, tip_ಕೋಷ್ಟಕ.alloc);
+	oidcpy(&tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[tip_ಕೋಷ್ಟಕ.nr].oid, oid);
+	tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[tip_ಕೋಷ್ಟಕ.nr].refname = short_refname ?
 		short_refname : xstrdup(refname);
-	tip_table.table[tip_table.nr].commit = commit;
-	tip_table.table[tip_table.nr].taggerdate = taggerdate;
-	tip_table.table[tip_table.nr].from_tag = from_tag;
-	tip_table.table[tip_table.nr].deref = deref;
-	tip_table.nr++;
-	tip_table.sorted = 0;
+	tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[tip_ಕೋಷ್ಟಕ.nr].commit = commit;
+	tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[tip_ಕೋಷ್ಟಕ.nr].taggerdate = taggerdate;
+	tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[tip_ಕೋಷ್ಟಕ.nr].from_ಟ್ಯಾಗ್ = from_ಟ್ಯಾಗ್;
+	tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[tip_ಕೋಷ್ಟಕ.nr].deref = deref;
+	tip_ಕೋಷ್ಟಕ.nr++;
+	tip_ಕೋಷ್ಟಕ.sorted = 0;
 }
 
-static int tipcmp(const void *a_, const void *b_)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ tipcmp(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *a_, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *b_)
 {
-	const struct tip_table_entry *a = a_, *b = b_;
-	return oidcmp(&a->oid, &b->oid);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ tip_ಕೋಷ್ಟಕ_ನಮೂದು *a = a_, *b = b_;
+	ಹಿಂತಿರುಗಿ oidcmp(&a->oid, &b->oid);
 }
 
-static int cmp_by_tag_and_age(const void *a_, const void *b_)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmp_by_ಟ್ಯಾಗ್_and_age(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *a_, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *b_)
 {
-	const struct tip_table_entry *a = a_, *b = b_;
-	int cmp;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ tip_ಕೋಷ್ಟಕ_ನಮೂದು *a = a_, *b = b_;
+	ಪೂರ್ಣಾಂಕ cmp;
 
 	/* Prefer tags. */
-	cmp = b->from_tag - a->from_tag;
-	if (cmp)
-		return cmp;
+	cmp = b->from_ಟ್ಯಾಗ್ - a->from_ಟ್ಯಾಗ್;
+	ಆದರೆ (cmp)
+		ಹಿಂತಿರುಗಿ cmp;
 
 	/* Older is better. */
-	if (a->taggerdate < b->taggerdate)
-		return -1;
-	return a->taggerdate != b->taggerdate;
+	ಆದರೆ (a->taggerdate < b->taggerdate)
+		ಹಿಂತಿರುಗಿ -1;
+	ಹಿಂತಿರುಗಿ a->taggerdate != b->taggerdate;
 }
 
-static int name_ref(const struct reference *ref, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ name_ref(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct object *o = parse_object(the_repository, ref->oid);
-	struct name_ref_data *data = cb_data;
-	int can_abbreviate_output = data->tags_only && data->name_only;
-	int deref = 0;
-	int from_tag = 0;
-	struct commit *commit = NULL;
-	timestamp_t taggerdate = TIME_MAX;
+	ರಚನೆ object *o = parse_object(the_repository, ref->oid);
+	ರಚನೆ name_ref_ದತ್ತಾಂಶ *ದತ್ತಾಂಶ = cb_ದತ್ತಾಂಶ;
+	ಪೂರ್ಣಾಂಕ can_abbreviate_output = ದತ್ತಾಂಶ->ಟ್ಯಾಗುಗಳು_only && ದತ್ತಾಂಶ->name_only;
+	ಪೂರ್ಣಾಂಕ deref = 0;
+	ಪೂರ್ಣಾಂಕ from_ಟ್ಯಾಗ್ = 0;
+	ರಚನೆ commit *commit = ಖಾಲಿ;
+	timestamp_t taggerdate = ಸಮಯ_MAX;
 
-	if (data->tags_only && !starts_with(ref->name, "refs/tags/"))
-		return 0;
+	ಆದರೆ (ದತ್ತಾಂಶ->ಟ್ಯಾಗುಗಳು_only && !starts_with(ref->name, "refs/tags/"))
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (data->exclude_filters.nr) {
-		struct string_list_item *item;
+	ಆದರೆ (ದತ್ತಾಂಶ->exclude_filters.nr) {
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
 
-		for_each_string_list_item(item, &data->exclude_filters) {
-			if (subpath_matches(ref->name, item->string) >= 0)
-				return 0;
+		for_each_string_list_ಅಂಶ(ಅಂಶ, &ದತ್ತಾಂಶ->exclude_filters) {
+			ಆದರೆ (subpath_matches(ref->name, ಅಂಶ->string) >= 0)
+				ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
-	if (data->ref_filters.nr) {
-		struct string_list_item *item;
-		int matched = 0;
+	ಆದರೆ (ದತ್ತಾಂಶ->ref_filters.nr) {
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+		ಪೂರ್ಣಾಂಕ matched = 0;
 
 		/* See if any of the patterns match. */
-		for_each_string_list_item(item, &data->ref_filters) {
+		for_each_string_list_ಅಂಶ(ಅಂಶ, &ದತ್ತಾಂಶ->ref_filters) {
 			/*
 			 * Check all patterns even after finding a match, so
 			 * that we can see if a match with a subpath exists.
@@ -411,181 +411,181 @@ static int name_ref(const struct reference *ref, void *cb_data)
 			 * shouldn't stop when seeing 'refs/tags/v1.4' matches
 			 * 'refs/tags/v*'.  We should show it as 'v1.4'.
 			 */
-			switch (subpath_matches(ref->name, item->string)) {
-			case -1: /* did not match */
-				break;
-			case 0: /* matched fully */
+			ಆಯ್ಕೆ (subpath_matches(ref->name, ಅಂಶ->string)) {
+			ಸ್ಥಿತಿ -1: /* did not match */
+				ನಿಲ್ಲಿಸು;
+			ಸ್ಥಿತಿ 0: /* matched fully */
 				matched = 1;
-				break;
-			default: /* matched subpath */
+				ನಿಲ್ಲಿಸು;
+			ಪೂರ್ವನಿಯೋಜಿತ: /* matched subpath */
 				matched = 1;
 				can_abbreviate_output = 1;
-				break;
+				ನಿಲ್ಲಿಸು;
 			}
 		}
 
 		/* If none of the patterns matched, stop now */
-		if (!matched)
-			return 0;
+		ಆದರೆ (!matched)
+			ಹಿಂತಿರುಗಿ 0;
 	}
 
-	while (o && o->type == OBJ_TAG) {
-		struct tag *t = (struct tag *) o;
-		if (!t->tagged)
-			break; /* broken repository */
+	ಆಗ (o && o->type == OBJ_ಟ್ಯಾಗ್) {
+		ರಚನೆ ಟ್ಯಾಗ್ *t = (ರಚನೆ ಟ್ಯಾಗ್ *) o;
+		ಆದರೆ (!t->tagged)
+			ನಿಲ್ಲಿಸು; /* broken repository */
 		o = parse_object(the_repository, &t->tagged->oid);
 		deref = 1;
 		taggerdate = t->date;
 	}
-	if (o && o->type == OBJ_COMMIT) {
-		commit = (struct commit *)o;
-		from_tag = starts_with(ref->name, "refs/tags/");
-		if (taggerdate == TIME_MAX)
+	ಆದರೆ (o && o->type == OBJ_COMMIT) {
+		commit = (ರಚನೆ commit *)o;
+		from_ಟ್ಯಾಗ್ = starts_with(ref->name, "refs/tags/");
+		ಆದರೆ (taggerdate == ಸಮಯ_MAX)
 			taggerdate = commit->date;
 	}
 
-	add_to_tip_table(ref->oid, ref->name, can_abbreviate_output,
-			 commit, taggerdate, from_tag, deref);
-	return 0;
+	ಕೂಡಿಸು_ಗಮ್ಯ_tip_ಕೋಷ್ಟಕ(ref->oid, ref->name, can_abbreviate_output,
+			 commit, taggerdate, from_ಟ್ಯಾಗ್, deref);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void name_tips(struct mem_pool *string_pool)
+ಸ್ಥಿರ ಶೂನ್ಯ name_tips(ರಚನೆ mem_pool *string_pool)
 {
-	int i;
+	ಪೂರ್ಣಾಂಕ i;
 
 	/*
 	 * Try to set better names first, so that worse ones spread
 	 * less.
 	 */
-	QSORT(tip_table.table, tip_table.nr, cmp_by_tag_and_age);
-	for (i = 0; i < tip_table.nr; i++) {
-		struct tip_table_entry *e = &tip_table.table[i];
-		if (e->commit) {
+	QSORT(tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ, tip_ಕೋಷ್ಟಕ.nr, cmp_by_ಟ್ಯಾಗ್_and_age);
+	ಗಾಗಿ (i = 0; i < tip_ಕೋಷ್ಟಕ.nr; i++) {
+		ರಚನೆ tip_ಕೋಷ್ಟಕ_ನಮೂದು *e = &tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[i];
+		ಆದರೆ (e->commit) {
 			name_rev(e->commit, e->refname, e->taggerdate,
-				 e->from_tag, e->deref, string_pool);
+				 e->from_ಟ್ಯಾಗ್, e->deref, string_pool);
 		}
 	}
 }
 
-static const struct object_id *nth_tip_table_ent(size_t ix, const void *table_)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *nth_tip_ಕೋಷ್ಟಕ_ent(ಗಾತ್ರ_t ix, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *ಕೋಷ್ಟಕ_2)
 {
-	const struct tip_table_entry *table = table_;
-	return &table[ix].oid;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ tip_ಕೋಷ್ಟಕ_ನಮೂದು *ಕೋಷ್ಟಕ = ಕೋಷ್ಟಕ_2;
+	ಹಿಂತಿರುಗಿ &ಕೋಷ್ಟಕ[ix].oid;
 }
 
-static const char *get_exact_ref_match(const struct object *o)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *get_exact_ref_ಹೊಂದಿಕೆ(ಸ್ಥಿರಾಂಕ ರಚನೆ object *o)
 {
-	int found;
+	ಪೂರ್ಣಾಂಕ ಸಿಕ್ಕಿತು_2;
 
-	if (!tip_table.table || !tip_table.nr)
-		return NULL;
+	ಆದರೆ (!tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ || !tip_ಕೋಷ್ಟಕ.nr)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (!tip_table.sorted) {
-		QSORT(tip_table.table, tip_table.nr, tipcmp);
-		tip_table.sorted = 1;
+	ಆದರೆ (!tip_ಕೋಷ್ಟಕ.sorted) {
+		QSORT(tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ, tip_ಕೋಷ್ಟಕ.nr, tipcmp);
+		tip_ಕೋಷ್ಟಕ.sorted = 1;
 	}
 
-	found = oid_pos(&o->oid, tip_table.table, tip_table.nr,
-			nth_tip_table_ent);
-	if (0 <= found)
-		return tip_table.table[found].refname;
-	return NULL;
+	ಸಿಕ್ಕಿತು_2 = oid_pos(&o->oid, tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ, tip_ಕೋಷ್ಟಕ.nr,
+			nth_tip_ಕೋಷ್ಟಕ_ent);
+	ಆದರೆ (0 <= ಸಿಕ್ಕಿತು_2)
+		ಹಿಂತಿರುಗಿ tip_ಕೋಷ್ಟಕ.ಕೋಷ್ಟಕ[ಸಿಕ್ಕಿತು_2].refname;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 /* may return a constant string or use "buf" as scratch space */
-static const char *get_rev_name(const struct object *o, struct strbuf *buf)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *get_rev_name(ಸ್ಥಿರಾಂಕ ರಚನೆ object *o, ರಚನೆ strbuf *buf)
 {
-	struct rev_name *n;
-	const struct commit *c;
+	ರಚನೆ rev_name *n;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ commit *c;
 
-	if (o->type != OBJ_COMMIT)
-		return get_exact_ref_match(o);
-	c = (const struct commit *) o;
+	ಆದರೆ (o->type != OBJ_COMMIT)
+		ಹಿಂತಿರುಗಿ get_exact_ref_ಹೊಂದಿಕೆ(o);
+	c = (ಸ್ಥಿರಾಂಕ ರಚನೆ commit *) o;
 	n = get_commit_rev_name(c);
-	if (!n)
-		return NULL;
+	ಆದರೆ (!n)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (!n->generation) {
-		return n->tip_name;
-	} else {
+	ಆದರೆ (!n->generation) {
+		ಹಿಂತಿರುಗಿ n->tip_name;
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		strbuf_reset(buf);
 		strbuf_addstr(buf, n->tip_name);
 		strbuf_strip_suffix(buf, "^0");
 		strbuf_addf(buf, "~%d", n->generation);
-		return buf->buf;
+		ಹಿಂತಿರುಗಿ buf->buf;
 	}
 }
 
-static const char *get_format_rev(const struct commit *c,
-				  struct pretty_format *format_ctx,
-				  struct strbuf *buf)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *get_format_rev(ಸ್ಥಿರಾಂಕ ರಚನೆ commit *c,
+				  ರಚನೆ pretty_format *format_ctx,
+				  ರಚನೆ strbuf *buf)
 {
 	strbuf_reset(buf);
 
-	if (format_ctx->want.notes) {
-		struct strbuf notebuf = STRBUF_INIT;
+	ಆದರೆ (format_ctx->want.notes) {
+		ರಚನೆ strbuf notebuf = STRBUF_INIT;
 
 		format_display_notes(&c->object.oid, &notebuf,
 				     get_log_output_encoding(),
 				     format_ctx->ctx.fmt == CMIT_FMT_USERFORMAT);
-		format_ctx->ctx.notes_message = strbuf_detach(&notebuf, NULL);
+		format_ctx->ctx.notes_ಸಂದೇಶ = strbuf_detach(&notebuf, ಖಾಲಿ);
 	}
 
 	pretty_print_commit(&format_ctx->ctx, c, buf);
-	FREE_AND_NULL(format_ctx->ctx.notes_message);
+	FREE_AND_NULL(format_ctx->ctx.notes_ಸಂದೇಶ);
 
-	return buf->buf;
+	ಹಿಂತಿರುಗಿ buf->buf;
 }
 
-static void show_name(const struct object *obj,
-		      const char *caller_name,
-		      int always, int allow_undefined, int name_only)
+ಸ್ಥಿರ ಶೂನ್ಯ show_name(ಸ್ಥಿರಾಂಕ ರಚನೆ object *obj,
+		      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *caller_name,
+		      ಪೂರ್ಣಾಂಕ always, ಪೂರ್ಣಾಂಕ allow_undefined, ಪೂರ್ಣಾಂಕ name_only)
 {
-	const char *name;
-	const struct object_id *oid = &obj->oid;
-	struct strbuf buf = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid = &obj->oid;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
 
-	if (!name_only)
-		printf("%s ", caller_name ? caller_name : oid_to_hex(oid));
+	ಆದರೆ (!name_only)
+		ಬರೆ("%s ", caller_name ? caller_name : oid_ಗಮ್ಯ_hex(oid));
 	name = get_rev_name(obj, &buf);
-	if (name)
-		printf("%s\n", name);
-	else if (allow_undefined)
-		printf("undefined\n");
-	else if (always)
-		printf("%s\n",
-		       repo_find_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
-	else
-		die("cannot describe '%s'", oid_to_hex(oid));
+	ಆದರೆ (name)
+		ಬರೆ("%s\n", name);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (allow_undefined)
+		ಬರೆ("undefined\n");
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (always)
+		ಬರೆ("%s\n",
+		       repo_ಕಂಡುಹಿಡಿ_unique_abbrev(the_repository, oid, DEFAULT_ABBREV));
+	ಇಲ್ಲದಿದ್ದರೆ
+		die("cannot describe '%s'", oid_ಗಮ್ಯ_hex(oid));
 	strbuf_release(&buf);
 }
 
-static char const * const name_rev_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ name_rev_usage[] = {
 	N_("git name-rev [<options>] <commit>..."),
 	N_("git name-rev [<options>] --all"),
 	N_("git name-rev [<options>] --annotate-stdin"),
-	NULL
+	ಖಾಲಿ
 };
 
-static void name_rev_line(char *p, struct command *cmd)
+ಸ್ಥಿರ ಶೂನ್ಯ name_rev_ಸಾಲು(ಅಕ್ಷರ *p, ರಚನೆ command *cmd)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int counter = 0;
-	char *p_start;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ counter = 0;
+	ಅಕ್ಷರ *p_ಆರಂಭ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ hexsz = the_hash_algo->hexsz;
 
-	for (p_start = p; *p; p++) {
-#define ishex(x) (isdigit((x)) || ((x) >= 'a' && (x) <= 'f'))
-		if (!ishex(*p)) {
+	ಗಾಗಿ (p_ಆರಂಭ = p; *p; p++) {
+#ವ್ಯಾಖ್ಯಾನಿಸು ishex(x) (ಅಂಕಿಯೇ((x)) || ((x) >= 'a' && (x) <= 'f'))
+		ಆದರೆ (!ishex(*p)) {
 			counter = 0;
-		} else if (++counter == hexsz &&
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (++counter == hexsz &&
 			   !ishex(*(p + 1))) {
-			struct object_id oid;
-			const char *name = NULL;
-			char c = *(p + 1);
-			int p_len = p - p_start + 1;
-			struct object *o = NULL;
-			int oid_ret = 1;
+			ರಚನೆ object_id oid;
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name = ಖಾಲಿ;
+			ಅಕ್ಷರ c = *(p + 1);
+			ಪೂರ್ಣಾಂಕ p_len = p - p_ಆರಂಭ + 1;
+			ರಚನೆ object *o = ಖಾಲಿ;
+			ಪೂರ್ಣಾಂಕ oid_ret = 1;
 
 			counter = 0;
 
@@ -593,348 +593,348 @@ static void name_rev_line(char *p, struct command *cmd)
 			oid_ret = repo_get_oid(the_repository, p - (hexsz - 1), &oid);
 			*(p + 1) = c;
 
-			switch (cmd->type) {
-			case NAME_REV:
-				if (!oid_ret)
+			ಆಯ್ಕೆ (cmd->type) {
+			ಸ್ಥಿತಿ NAME_REV:
+				ಆದರೆ (!oid_ret)
 					o = lookup_object(the_repository, &oid);
-				if (o)
+				ಆದರೆ (o)
 					name = get_rev_name(o, &buf);
-				if (!name)
-					continue;
-				if (cmd->u.name_only)
-					printf("%.*s%s", p_len - hexsz, p_start, name);
-				else
-					printf("%.*s (%s)", p_len, p_start, name);
-				break;
-			case FORMAT_REV:
-				if (!oid_ret)
+				ಆದರೆ (!name)
+					ಮುಂದುವರಿ;
+				ಆದರೆ (cmd->u.name_only)
+					ಬರೆ("%.*s%s", p_len - hexsz, p_ಆರಂಭ, name);
+				ಇಲ್ಲದಿದ್ದರೆ
+					ಬರೆ("%.*s (%s)", p_len, p_ಆರಂಭ, name);
+				ನಿಲ್ಲಿಸು;
+			ಸ್ಥಿತಿ FORMAT_REV:
+				ಆದರೆ (!oid_ret)
 					o = parse_object(the_repository, &oid);
-				if (o && o->type == OBJ_COMMIT)
-					name = get_format_rev((const struct commit *)o,
+				ಆದರೆ (o && o->type == OBJ_COMMIT)
+					name = get_format_rev((ಸ್ಥಿರಾಂಕ ರಚನೆ commit *)o,
 							      cmd->u.pretty_format,
 							      &buf);
-				if (name)
-					printf("%.*s%s", p_len - hexsz, p_start, name);
-				else
-					printf("%.*s", p_len, p_start);
-				break;
-			default:
+				ಆದರೆ (name)
+					ಬರೆ("%.*s%s", p_len - hexsz, p_ಆರಂಭ, name);
+				ಇಲ್ಲದಿದ್ದರೆ
+					ಬರೆ("%.*s", p_len, p_ಆರಂಭ);
+				ನಿಲ್ಲಿಸು;
+			ಪೂರ್ವನಿಯೋಜಿತ:
 				BUG("uncovered case: %d", cmd->type);
 			}
 
-			p_start = p + 1;
+			p_ಆರಂಭ = p + 1;
 		}
 	}
 
 	/* flush */
-	if (p_start != p)
-		fwrite(p_start, p - p_start, 1, stdout);
+	ಆದರೆ (p_ಆರಂಭ != p)
+		fwrite(p_ಆರಂಭ, p - p_ಆರಂಭ, 1, stdout);
 
 	strbuf_release(&buf);
 }
 
-int cmd_name_rev(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_name_rev(ಪೂರ್ಣಾಂಕ argc,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct mem_pool string_pool;
-	struct object_array revs = OBJECT_ARRAY_INIT;
+	ರಚನೆ mem_pool string_pool;
+	ರಚನೆ object_array revs = OBJECT_ARRAY_INIT;
 
-#ifndef WITH_BREAKING_CHANGES
-	int transform_stdin = 0;
-#endif
-	int all = 0, annotate_stdin = 0, allow_undefined = 1, always = 0, peel_tag = 0;
-	struct name_ref_data data = { 0, 0, STRING_LIST_INIT_NODUP, STRING_LIST_INIT_NODUP };
-	struct command cmd;
-	struct option opts[] = {
-		OPT_BOOL(0, "name-only", &data.name_only, N_("print only ref-based names (no object names)")),
-		OPT_BOOL(0, "tags", &data.tags_only, N_("only use tags to name the commits")),
-		OPT_STRING_LIST(0, "refs", &data.ref_filters, N_("pattern"),
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ WITH_BREAKING_CHANGES
+	ಪೂರ್ಣಾಂಕ transform_stdin = 0;
+#ಆದರೆ_ಅಂತ್ಯ
+	ಪೂರ್ಣಾಂಕ all = 0, annotate_stdin = 0, allow_undefined = 1, always = 0, peel_ಟ್ಯಾಗ್ = 0;
+	ರಚನೆ name_ref_ದತ್ತಾಂಶ ದತ್ತಾಂಶ = { 0, 0, STRING_LIST_INIT_NODUP, STRING_LIST_INIT_NODUP };
+	ರಚನೆ command cmd;
+	ರಚನೆ option opts[] = {
+		OPT_BOOL(0, "name-only", &ದತ್ತಾಂಶ.name_only, N_("print only ref-based names (no object names)")),
+		OPT_BOOL(0, "tags", &ದತ್ತಾಂಶ.ಟ್ಯಾಗುಗಳು_only, N_("only use tags to name the commits")),
+		OPT_STRING_LIST(0, "refs", &ದತ್ತಾಂಶ.ref_filters, N_("pattern"),
 				N_("only use refs matching <pattern>")),
-		OPT_STRING_LIST(0, "exclude", &data.exclude_filters, N_("pattern"),
+		OPT_STRING_LIST(0, "exclude", &ದತ್ತಾಂಶ.exclude_filters, N_("pattern"),
 				N_("ignore refs matching <pattern>")),
-		OPT_GROUP(""),
+		OPT_ಗುಂಪು(""),
 		OPT_BOOL(0, "all", &all, N_("list all commits reachable from all refs")),
-#ifndef WITH_BREAKING_CHANGES
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ WITH_BREAKING_CHANGES
 		OPT_BOOL_F(0,
 			   "stdin",
 			   &transform_stdin,
 			   N_("deprecated: use --annotate-stdin instead"),
 			   PARSE_OPT_HIDDEN),
-#endif /* WITH_BREAKING_CHANGES */
+#ಆದರೆ_ಅಂತ್ಯ /* WITH_BREAKING_CHANGES */
 		OPT_BOOL(0, "annotate-stdin", &annotate_stdin, N_("annotate text from stdin")),
 		OPT_BOOL(0, "undefined", &allow_undefined, N_("allow to print `undefined` names (default)")),
 		OPT_BOOL(0, "always", &always,
 			 N_("show abbreviated commit object as fallback")),
-		OPT_HIDDEN_BOOL(0, "peel-tag", &peel_tag,
+		OPT_HIDDEN_BOOL(0, "peel-tag", &peel_ಟ್ಯಾಗ್,
 				N_("dereference tags in the input (internal use)")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
 	mem_pool_init(&string_pool, 0);
-	init_commit_rev_name(&rev_names);
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, opts, name_rev_usage, 0);
-	init_name_rev_command(&cmd, data.name_only);
+	init_commit_rev_name(&rev_ಹೆಸರುಗಳು);
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, opts, name_rev_usage, 0);
+	init_name_rev_command(&cmd, ದತ್ತಾಂಶ.name_only);
 
-#ifndef WITH_BREAKING_CHANGES
-	if (transform_stdin) {
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ WITH_BREAKING_CHANGES
+	ಆದರೆ (transform_stdin) {
 		warning("--stdin is deprecated. Please use --annotate-stdin instead, "
 					"which is functionally equivalent.\n"
 					"This option will be removed in a future release.");
 		annotate_stdin = 1;
 	}
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-	if (all + annotate_stdin + !!argc > 1) {
+	ಆದರೆ (all + annotate_stdin + !!argc > 1) {
 		error("Specify either a list, or --all, not both!");
 		usage_with_options(name_rev_usage, opts);
 	}
-	if (all || annotate_stdin)
+	ಆದರೆ (all || annotate_stdin)
 		disable_cutoff();
 
-	for (; argc; argc--, argv++) {
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
+	ಗಾಗಿ (; argc; argc--, argv++) {
+		ರಚನೆ object_id oid;
+		ರಚನೆ object *object;
+		ರಚನೆ commit *commit;
 
-		if (repo_get_oid(the_repository, *argv, &oid)) {
+		ಆದರೆ (repo_get_oid(the_repository, *argv, &oid)) {
 			fprintf(stderr, "Could not get sha1 for %s. Skipping.\n",
 					*argv);
-			continue;
+			ಮುಂದುವರಿ;
 		}
 
-		commit = NULL;
+		commit = ಖಾಲಿ;
 		object = parse_object(the_repository, &oid);
-		if (object) {
-			struct object *peeled = deref_tag(the_repository,
+		ಆದರೆ (object) {
+			ರಚನೆ object *peeled = deref_ಟ್ಯಾಗ್(the_repository,
 							  object, *argv, 0);
-			if (peeled && peeled->type == OBJ_COMMIT)
-				commit = (struct commit *)peeled;
+			ಆದರೆ (peeled && peeled->type == OBJ_COMMIT)
+				commit = (ರಚನೆ commit *)peeled;
 		}
 
-		if (!object) {
+		ಆದರೆ (!object) {
 			fprintf(stderr, "Could not get object for %s. Skipping.\n",
 					*argv);
-			continue;
+			ಮುಂದುವರಿ;
 		}
 
-		if (commit)
-			set_commit_cutoff(commit);
+		ಆದರೆ (commit)
+			ಗಣ_commit_cutoff(commit);
 
-		if (peel_tag) {
-			if (!commit) {
+		ಆದರೆ (peel_ಟ್ಯಾಗ್) {
+			ಆದರೆ (!commit) {
 				fprintf(stderr, "Could not get commit for %s. Skipping.\n",
 					*argv);
-				continue;
+				ಮುಂದುವರಿ;
 			}
-			object = (struct object *)commit;
+			object = (ರಚನೆ object *)commit;
 		}
-		add_object_array(object, *argv, &revs);
+		ಕೂಡಿಸು_object_array(object, *argv, &revs);
 	}
 
 	adjust_cutoff_timestamp_for_slop();
 
-	refs_for_each_ref(get_main_ref_store(the_repository), name_ref, &data);
+	refs_for_each_ref(get_main_ref_store(the_repository), name_ref, &ದತ್ತಾಂಶ);
 	name_tips(&string_pool);
 
-	if (annotate_stdin) {
-		struct strbuf sb = STRBUF_INIT;
+	ಆದರೆ (annotate_stdin) {
+		ರಚನೆ strbuf sb = STRBUF_INIT;
 
-		while (strbuf_getline(&sb, stdin) != EOF) {
+		ಆಗ (strbuf_getline(&sb, stdin) != EOF) {
 			strbuf_addch(&sb, '\n');
-			name_rev_line(sb.buf, &cmd);
+			name_rev_ಸಾಲು(sb.buf, &cmd);
 		}
 		strbuf_release(&sb);
-	} else if (all) {
-		int i, max;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (all) {
+		ಪೂರ್ಣಾಂಕ i, max;
 
-		max = get_max_object_index(the_repository);
-		for (i = 0; i < max; i++) {
-			struct object *obj = get_indexed_object(the_repository, i);
-			if (!obj || obj->type != OBJ_COMMIT)
-				continue;
-			show_name(obj, NULL,
-				  always, allow_undefined, data.name_only);
+		max = get_max_object_ಸೂಚ್ಯಂಕ(the_repository);
+		ಗಾಗಿ (i = 0; i < max; i++) {
+			ರಚನೆ object *obj = get_ಸೂಚ್ಯಂಕಿತ_object(the_repository, i);
+			ಆದರೆ (!obj || obj->type != OBJ_COMMIT)
+				ಮುಂದುವರಿ;
+			show_name(obj, ಖಾಲಿ,
+				  always, allow_undefined, ದತ್ತಾಂಶ.name_only);
 		}
-	} else {
-		int i;
-		for (i = 0; i < revs.nr; i++)
-			show_name(revs.objects[i].item, revs.objects[i].name,
-				  always, allow_undefined, data.name_only);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಪೂರ್ಣಾಂಕ i;
+		ಗಾಗಿ (i = 0; i < revs.nr; i++)
+			show_name(revs.objects[i].ಅಂಶ, revs.objects[i].name,
+				  always, allow_undefined, ದತ್ತಾಂಶ.name_only);
 	}
 
-	string_list_clear(&data.ref_filters, 0);
-	string_list_clear(&data.exclude_filters, 0);
+	string_list_clear(&ದತ್ತಾಂಶ.ref_filters, 0);
+	string_list_clear(&ದತ್ತಾಂಶ.exclude_filters, 0);
 	mem_pool_discard(&string_pool, 0);
 	object_array_clear(&revs);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct format_nul_data {
-	bool nul_input;
+ರಚನೆ format_nul_ದತ್ತಾಂಶ {
+	bool nul_ಒಳಹರಿವು;
 	bool nul_output;
 };
 
-static int format_nul_cb(const struct option *option,
-			 const char *arg,
-			 int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ format_nul_cb(ಸ್ಥಿರಾಂಕ ರಚನೆ option *option,
+			 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+			 ಪೂರ್ಣಾಂಕ unset)
 {
-	struct format_nul_data *data = option->value;
-	data->nul_input = 1;
-	data->nul_output = 1;
+	ರಚನೆ format_nul_ದತ್ತಾಂಶ *ದತ್ತಾಂಶ = option->ಮೌಲ್ಯ;
+	ದತ್ತಾಂಶ->nul_ಒಳಹರಿವು = 1;
+	ದತ್ತಾಂಶ->nul_output = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static enum stdin_mode parse_stdin_mode(const char *stdin_mode)
+ಸ್ಥಿರ ಎಣಿಕೆ stdin_ಬಹುಲಕ parse_stdin_ಬಹುಲಕ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *stdin_ಬಹುಲಕ)
 {
-	if (!strcmp(stdin_mode, "text"))
-		return TEXT;
-	else if (!strcmp(stdin_mode, "revs") ||
-		 !strcmp(stdin_mode, "rev"))
-		return REVS;
-	else
+	ಆದರೆ (!strcmp(stdin_ಬಹುಲಕ, "text"))
+		ಹಿಂತಿರುಗಿ ಪಠ್ಯ_2;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(stdin_ಬಹುಲಕ, "revs") ||
+		 !strcmp(stdin_ಬಹುಲಕ, "rev"))
+		ಹಿಂತಿರುಗಿ REVS;
+	ಇಲ್ಲದಿದ್ದರೆ
 		die(_("'%s' needs to be either text, revs, or rev"),
 		    "--stdin-mode");
 }
 
-static char const *const format_rev_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ *ಸ್ಥಿರಾಂಕ format_rev_usage[] = {
 	N_("(EXPERIMENTAL!) git format-rev --stdin-mode=<mode> "
 	   "--format=<pretty> [--[no-]notes=<ref>] "
 	   "[-z] [--[no-]null-output] [--[no-]null-input]"),
-	NULL
+	ಖಾಲಿ
 };
 
-int cmd_format_rev(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_format_rev(ಪೂರ್ಣಾಂಕ argc,
+		   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		   ರಚನೆ repository *repo ಬಳಸದ)
 {
-	const char *format = NULL;
-	enum stdin_mode stdin_mode;
-	const char *stdin_mode_arg = NULL;
-	struct format_nul_data nul_data = { 0, 0 };
-	char output_terminator;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format = ಖಾಲಿ;
+	ಎಣಿಕೆ stdin_ಬಹುಲಕ stdin_ಬಹುಲಕ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *stdin_ಬಹುಲಕ_arg = ಖಾಲಿ;
+	ರಚನೆ format_nul_ದತ್ತಾಂಶ nul_ದತ್ತಾಂಶ = { 0, 0 };
+	ಅಕ್ಷರ output_terminator;
 	strbuf_getline_fn getline_fn;
-	struct display_notes_opt format_notes_opt;
-	struct rev_info format_rev = REV_INFO_INIT;
-	struct pretty_format format_pp = { 0 };
-	struct string_list notes = STRING_LIST_INIT_NODUP;
-	struct strbuf scratch_buf = STRBUF_INIT;
-	struct command cmd;
-	struct option opts[] = {
+	ರಚನೆ display_notes_opt format_notes_opt;
+	ರಚನೆ rev_info format_rev = REV_INFO_INIT;
+	ರಚನೆ pretty_format format_pp = { 0 };
+	ರಚನೆ string_list notes = STRING_LIST_INIT_NODUP;
+	ರಚನೆ strbuf scratch_buf = STRBUF_INIT;
+	ರಚನೆ command cmd;
+	ರಚನೆ option opts[] = {
 		OPT_STRING(0, "format", &format, N_("format"),
 			   N_("pretty format to use")),
-		OPT_STRING(0, "stdin-mode", &stdin_mode_arg, N_("stdin-mode"),
+		OPT_STRING(0, "stdin-mode", &stdin_ಬಹುಲಕ_arg, N_("stdin-mode"),
 			   N_("how revs are processed")),
 		OPT_STRING_LIST(0, "notes", &notes, N_("notes"),
 				N_("display notes for pretty format")),
-		OPT_CALLBACK_F('z', "null", &nul_data, N_("z"),
+		OPT_CALLBACK_F('z', "null", &nul_ದತ್ತಾಂಶ, N_("z"),
 			       N_("Use NUL for input and output termination"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG, format_nul_cb),
-		OPT_BOOL(0, "null-input", &nul_data.nul_input,
+		OPT_BOOL(0, "null-input", &nul_ದತ್ತಾಂಶ.nul_ಒಳಹರಿವು,
 			 N_("Use NUL for input termination")),
-		OPT_BOOL(0, "null-output", &nul_data.nul_output,
+		OPT_BOOL(0, "null-output", &nul_ದತ್ತಾಂಶ.nul_output,
 			 N_("Use NUL for output termination")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
-	argc = parse_options(argc, argv, prefix, opts, format_rev_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, opts, format_rev_usage, 0);
 
-	if (argc > 0) {
+	ಆದರೆ (argc > 0) {
 		error(_("too many arguments"));
 		usage_with_options(format_rev_usage, opts);
 	}
 
-	if (!format)
+	ಆದರೆ (!format)
 		die(_("'%s' is required"), "--format");
-	if (!stdin_mode_arg)
+	ಆದರೆ (!stdin_ಬಹುಲಕ_arg)
 		die(_("'%s' is required"), "--stdin-mode");
 
-	getline_fn = nul_data.nul_input ? strbuf_getline_nul : strbuf_getline_lf;
-	output_terminator = nul_data.nul_output ? '\0' : '\n';
+	getline_fn = nul_ದತ್ತಾಂಶ.nul_ಒಳಹರಿವು ? strbuf_getline_nul : strbuf_getline_lf;
+	output_terminator = nul_ದತ್ತಾಂಶ.nul_output ? '\0' : '\n';
 
 	init_display_notes(&format_notes_opt);
-	stdin_mode = parse_stdin_mode(stdin_mode_arg);
+	stdin_ಬಹುಲಕ = parse_stdin_ಬಹುಲಕ(stdin_ಬಹುಲಕ_arg);
 
 	get_commit_format(format, &format_rev);
 	format_pp.ctx.rev = &format_rev;
 	format_pp.ctx.fmt = format_rev.commit_format;
 	format_pp.ctx.abbrev = format_rev.abbrev;
-	format_pp.ctx.date_mode_explicit = format_rev.date_mode_explicit;
-	format_pp.ctx.date_mode = format_rev.date_mode;
+	format_pp.ctx.date_ಬಹುಲಕ_explicit = format_rev.date_ಬಹುಲಕ_explicit;
+	format_pp.ctx.date_ಬಹುಲಕ = format_rev.date_ಬಹುಲಕ;
 	format_pp.ctx.color = GIT_COLOR_AUTO;
 
-	userformat_find_requirements(format,
+	userformat_ಕಂಡುಹಿಡಿ_requirements(format,
 				     &format_pp.want);
-	if (format_pp.want.notes) {
-		int ignore_show_notes = 0;
-		struct string_list_item *n;
+	ಆದರೆ (format_pp.want.notes) {
+		ಪೂರ್ಣಾಂಕ ignore_show_notes = 0;
+		ರಚನೆ string_list_ಅಂಶ *n;
 
-		for_each_string_list_item(n, &notes)
+		for_each_string_list_ಅಂಶ(n, &notes)
 			enable_ref_display_notes(&format_notes_opt,
 						 &ignore_show_notes,
 						 n->string);
-		load_display_notes(&format_notes_opt);
+		ತುಂಬು_display_notes(&format_notes_opt);
 	}
 
 	init_format_rev_command(&cmd, &format_pp);
 
-	switch (stdin_mode) {
-	case TEXT:
-		while (getline_fn(&scratch_buf, stdin) != EOF) {
-			name_rev_line(scratch_buf.buf, &cmd);
+	ಆಯ್ಕೆ (stdin_ಬಹುಲಕ) {
+	ಸ್ಥಿತಿ ಪಠ್ಯ_2:
+		ಆಗ (getline_fn(&scratch_buf, stdin) != EOF) {
+			name_rev_ಸಾಲು(scratch_buf.buf, &cmd);
 			/*
 			 * We do not pass on the terminator to name_rev_line,
 			 * unlike name-rev.
 			 */
-			printf("%c", output_terminator);
+			ಬರೆ("%c", output_terminator);
 			maybe_flush_or_die(stdout, "stdout");
 		}
-		break;
-	case REVS:
-		while (getline_fn(&scratch_buf, stdin) != EOF) {
-			struct object_id oid;
-			struct object *object;
-			struct object *peeled;
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ REVS:
+		ಆಗ (getline_fn(&scratch_buf, stdin) != EOF) {
+			ರಚನೆ object_id oid;
+			ರಚನೆ object *object;
+			ರಚನೆ object *peeled;
 
-			if (repo_get_oid(the_repository, scratch_buf.buf, &oid)) {
+			ಆದರೆ (repo_get_oid(the_repository, scratch_buf.buf, &oid)) {
 				fprintf(stderr, "Could not get object name for %s. Skipping.\n",
 					scratch_buf.buf);
-				continue;
+				ಮುಂದುವರಿ;
 			}
 
 			object = parse_object(the_repository, &oid);
-			if (!object) {
+			ಆದರೆ (!object) {
 				fprintf(stderr, "Could not get object for %s. Skipping.\n",
 					scratch_buf.buf);
-				continue;
+				ಮುಂದುವರಿ;
 			}
 
-			peeled = deref_tag(the_repository, object, scratch_buf.buf, 0);
-			if (!peeled || peeled->type != OBJ_COMMIT) {
+			peeled = deref_ಟ್ಯಾಗ್(the_repository, object, scratch_buf.buf, 0);
+			ಆದರೆ (!peeled || peeled->type != OBJ_COMMIT) {
 				fprintf(stderr,
 					"Could not get commit for %s. Skipping.\n",
 					scratch_buf.buf);
-				continue;
+				ಮುಂದುವರಿ;
 			}
 
-			get_format_rev((struct commit *)peeled,
+			get_format_rev((ರಚನೆ commit *)peeled,
 				       &format_pp, &scratch_buf);
-			printf("%s%c", scratch_buf.buf, output_terminator);
+			ಬರೆ("%s%c", scratch_buf.buf, output_terminator);
 			maybe_flush_or_die(stdout, "stdout");
 			strbuf_release(&scratch_buf);
 		}
-		break;
-	default:
-		BUG("uncovered case: %d", stdin_mode);
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
+		BUG("uncovered case: %d", stdin_ಬಹುಲಕ);
 	}
 
 	strbuf_release(&scratch_buf);
 	string_list_clear(&notes, 0);
 	release_display_notes(&format_notes_opt);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

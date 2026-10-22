@@ -1,27 +1,27 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "date.h"
-#include "gettext.h"
-#include "ident.h"
-#include "parse-options.h"
-#include "path.h"
-#include "transport.h"
-#include "remote.h"
-#include "string-list.h"
-#include "strbuf.h"
-#include "run-command.h"
-#include "rebase.h"
-#include "refs.h"
-#include "refspec.h"
-#include "odb.h"
-#include "strvec.h"
-#include "commit-reach.h"
-#include "progress.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "advice.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "date.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "ident.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "transport.h"
+#ಅನ್ತರ್ಭಾವ "remote.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "rebase.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "refspec.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "strvec.h"
+#ಅನ್ತರ್ಭಾವ "commit-reach.h"
+#ಅನ್ತರ್ಭಾವ "progress.h"
 
-static const char * const builtin_remote_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_usage[] = {
 	"git remote [-v | --verbose]",
 	N_("git remote add [-t <branch>] [-m <master>] [-f] [--tags | --no-tags] [--mirror=<fetch|push>] <name> <url>"),
 	N_("git remote rename [--[no-]progress] <old> <new>"),
@@ -35,655 +35,655 @@ static const char * const builtin_remote_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_add_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_ಕೂಡಿಸು_usage[] = {
 	N_("git remote add [<options>] <name> <url>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_rename_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_rename_usage[] = {
 	N_("git remote rename [--[no-]progress] <old> <new>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_rm_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_rm_usage[] = {
 	N_("git remote remove <name>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_sethead_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_sethead_usage[] = {
 	N_("git remote set-head <name> (-a | --auto | -d | --delete | <branch>)"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_setbranches_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_setbranches_usage[] = {
 	N_("git remote set-branches <name> <branch>..."),
 	N_("git remote set-branches --add <name> <branch>..."),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_show_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_show_usage[] = {
 	N_("git remote show [<options>] <name>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_prune_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_prune_usage[] = {
 	N_("git remote prune [<options>] <name>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_update_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_update_usage[] = {
 	N_("git remote update [<options>] [<group> | <remote>]..."),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_geturl_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_geturl_usage[] = {
 	N_("git remote get-url [--push] [--all] <name>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_remote_seturl_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_remote_seturl_usage[] = {
 	N_("git remote set-url [--push] <name> <newurl> [<oldurl>]"),
 	N_("git remote set-url --add <name> <newurl>"),
 	N_("git remote set-url --delete <name> <url>"),
-	NULL
+	ಖಾಲಿ
 };
 
-#define GET_REF_STATES (1<<0)
-#define GET_HEAD_NAMES (1<<1)
-#define GET_PUSH_REF_STATES (1<<2)
+#ವ್ಯಾಖ್ಯಾನಿಸು GET_REF_ಸ್ಥಿತಿಗಳು (1<<0)
+#ವ್ಯಾಖ್ಯಾನಿಸು GET_ತಲೆ_ಹೆಸರುಗಳು (1<<1)
+#ವ್ಯಾಖ್ಯಾನಿಸು GET_ತಳ್ಳು_REF_ಸ್ಥಿತಿಗಳು (1<<2)
 
-static int verbose;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ verbose;
 
-static int fetch_remote(const char *name)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ fetch_remote(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ರಚನೆ ಮಗು_process cmd = ಮಗು_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "fetch");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, name);
+	strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "fetch");
+	ಆದರೆ (verbose)
+		strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "-v");
+	strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
-	if (run_command(&cmd))
-		return error(_("Could not fetch %s"), name);
-	return 0;
+	ಆದರೆ (ಸತತ_command(&cmd))
+		ಹಿಂತಿರುಗಿ error(_("Could not fetch %s"), name);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-enum {
-	TAGS_UNSET = 0,
-	TAGS_DEFAULT = 1,
-	TAGS_SET = 2
+ಎಣಿಕೆ {
+	ಟ್ಯಾಗುಗಳು_UNSET = 0,
+	ಟ್ಯಾಗುಗಳು_DEFAULT = 1,
+	ಟ್ಯಾಗುಗಳು_ಗಣ = 2
 };
 
-#define MIRROR_NONE 0
-#define MIRROR_FETCH 1
-#define MIRROR_PUSH 2
-#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
+#ವ್ಯಾಖ್ಯಾನಿಸು MIRROR_NONE 0
+#ವ್ಯಾಖ್ಯಾನಿಸು MIRROR_FETCH 1
+#ವ್ಯಾಖ್ಯಾನಿಸು MIRROR_ತಳ್ಳು 2
+#ವ್ಯಾಖ್ಯಾನಿಸು MIRROR_BOTH (MIRROR_FETCH|MIRROR_ತಳ್ಳು)
 
-static void add_branch(const char *key, const char *branchname,
-		       const char *remotename, int mirror, struct strbuf *tmp)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_branch(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *branchname,
+		       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remotename, ಪೂರ್ಣಾಂಕ mirror, ರಚನೆ strbuf *tmp)
 {
 	strbuf_reset(tmp);
 	strbuf_addch(tmp, '+');
-	if (mirror)
+	ಆದರೆ (mirror)
 		strbuf_addf(tmp, "refs/%s:refs/%s",
 				branchname, branchname);
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
-	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
+	repo_config_ಗಣ_multivar(the_repository, ಕೀಲಿ, tmp->buf, "^$", 0);
 }
 
-static const char mirror_advice[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ mirror_advice[] =
 N_("--mirror is dangerous and deprecated; please\n"
    "\t use --mirror=fetch or --mirror=push instead");
 
-static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_mirror_opt(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ not)
 {
-	unsigned *mirror = opt->value;
-	if (not)
+	ಚಿಹ್ನೆರಹಿತ *mirror = opt->ಮೌಲ್ಯ;
+	ಆದರೆ (not)
 		*mirror = MIRROR_NONE;
-	else if (!arg) {
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!arg) {
 		warning("%s", _(mirror_advice));
 		*mirror = MIRROR_BOTH;
 	}
-	else if (!strcmp(arg, "fetch"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
-	else if (!strcmp(arg, "push"))
-		*mirror = MIRROR_PUSH;
-	else
-		return error(_("unknown --mirror argument: %s"), arg);
-	return 0;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(arg, "push"))
+		*mirror = MIRROR_ತಳ್ಳು;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ error(_("unknown --mirror argument: %s"), arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int check_remote_collision(struct remote *remote, void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_remote_collision(ರಚನೆ remote *remote, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	const char *name = data;
-	const char *p;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name = ದತ್ತಾಂಶ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p;
 
-	if (skip_prefix(name, remote->name, &p) && *p == '/')
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(name, remote->name, &p) && *p == '/')
 		die(_("remote name '%s' is a subset of existing remote '%s'"),
 		    name, remote->name);
-	if (skip_prefix(remote->name, name, &p) && *p == '/')
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(remote->name, name, &p) && *p == '/')
 		die(_("remote name '%s' is a superset of existing remote '%s'"),
 		    name, remote->name);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int add(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	       ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int fetch = 0, fetch_tags = TAGS_DEFAULT;
-	unsigned mirror = MIRROR_NONE;
-	struct string_list track = STRING_LIST_INIT_NODUP;
-	const char *master = NULL;
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
-	const char *name, *url;
-	int result = 0;
+	ಪೂರ್ಣಾಂಕ fetch = 0, fetch_ಟ್ಯಾಗುಗಳು = ಟ್ಯಾಗುಗಳು_DEFAULT;
+	ಚಿಹ್ನೆರಹಿತ mirror = MIRROR_NONE;
+	ರಚನೆ string_list track = STRING_LIST_INIT_NODUP;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *master = ಖಾಲಿ;
+	ರಚನೆ remote *remote;
+	ರಚನೆ strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, *url;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ = 0;
 
-	struct option options[] = {
+	ರಚನೆ option options[] = {
 		OPT_BOOL('f', "fetch", &fetch, N_("fetch the remote branches")),
-		OPT_SET_INT(0, "tags", &fetch_tags,
+		OPT_ಗಣ_INT(0, "tags", &fetch_ಟ್ಯಾಗುಗಳು,
 			    N_("import all tags and associated objects when fetching\n"
 			       "or do not fetch any tag at all (--no-tags)"),
-			    TAGS_SET),
+			    ಟ್ಯಾಗುಗಳು_ಗಣ),
 		OPT_STRING_LIST('t', "track", &track, N_("branch"),
 				N_("branch(es) to track")),
 		OPT_STRING('m', "master", &master, N_("branch"), N_("master branch")),
 		OPT_CALLBACK_F(0, "mirror", &mirror, "(push|fetch)",
 			N_("set up remote as a mirror to push to or fetch from"),
 			PARSE_OPT_OPTARG | PARSE_OPT_COMP_ARG, parse_mirror_opt),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
-			     builtin_remote_add_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
+			     builtin_remote_ಕೂಡಿಸು_usage, 0);
 
-	if (argc != 2)
-		usage_with_options(builtin_remote_add_usage, options);
+	ಆದರೆ (argc != 2)
+		usage_with_options(builtin_remote_ಕೂಡಿಸು_usage, options);
 
-	if (mirror && master)
+	ಆದರೆ (mirror && master)
 		die(_("specifying a master branch makes no sense with --mirror"));
-	if (mirror && !(mirror & MIRROR_FETCH) && track.nr)
+	ಆದರೆ (mirror && !(mirror & MIRROR_FETCH) && track.nr)
 		die(_("specifying branches to track makes sense only with fetch mirrors"));
 
 	name = argv[0];
 	url = argv[1];
 
 	remote = remote_get(name);
-	if (remote_is_configured(remote, 1)) {
+	ಆದರೆ (remote_is_configured(remote, 1)) {
 		error(_("remote %s already exists."), name);
-		exit(3);
+		ನಿರ್ಗಮಿಸು(3);
 	}
 
-	if (!valid_remote_name(name))
+	ಆದರೆ (!valid_remote_name(name))
 		die(_("'%s' is not a valid remote name"), name);
 
-	for_each_remote(check_remote_collision, (void *)name);
+	for_each_remote(check_remote_collision, (ಶೂನ್ಯ *)name);
 
 	strbuf_addf(&buf, "remote.%s.url", name);
-	repo_config_set(the_repository, buf.buf, url);
+	repo_config_ಗಣ(the_repository, buf.buf, url);
 
-	if (!mirror || mirror & MIRROR_FETCH) {
+	ಆದರೆ (!mirror || mirror & MIRROR_FETCH) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", name);
-		if (track.nr == 0)
+		ಆದರೆ (track.nr == 0)
 			string_list_append(&track, "*");
-		for (size_t i = 0; i < track.nr; i++) {
-			add_branch(buf.buf, track.items[i].string,
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < track.nr; i++) {
+			ಕೂಡಿಸು_branch(buf.buf, track.ವಸ್ತುಗಳು[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	ಆದರೆ (mirror & MIRROR_ತಳ್ಳು) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
-		repo_config_set(the_repository, buf.buf, "true");
+		repo_config_ಗಣ(the_repository, buf.buf, "true");
 	}
 
-	if (fetch_tags != TAGS_DEFAULT) {
+	ಆದರೆ (fetch_ಟ್ಯಾಗುಗಳು != ಟ್ಯಾಗುಗಳು_DEFAULT) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.tagOpt", name);
-		repo_config_set(the_repository, buf.buf,
-				fetch_tags == TAGS_SET ? "--tags" : "--no-tags");
+		repo_config_ಗಣ(the_repository, buf.buf,
+				fetch_ಟ್ಯಾಗುಗಳು == ಟ್ಯಾಗುಗಳು_ಗಣ ? "--tags" : "--no-tags");
 	}
 
-	if (fetch && fetch_remote(name)) {
-		result = 1;
-		goto out;
+	ಆದರೆ (fetch && fetch_remote(name)) {
+		ಫಲಿತಾಂಶ = 1;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	if (master) {
+	ಆದರೆ (master) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/HEAD", name);
 
 		strbuf_reset(&buf2);
 		strbuf_addf(&buf2, "refs/remotes/%s/%s", name, master);
 
-		if (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
-			result = error(_("Could not setup master '%s'"), master);
+		ಆದರೆ (refs_update_symref(get_main_ref_store(the_repository), buf.buf, buf2.buf, "remote add"))
+			ಫಲಿತಾಂಶ = error(_("Could not setup master '%s'"), master);
 	}
 
-out:
+ಹೊರಹೋಗು:
 	strbuf_release(&buf);
 	strbuf_release(&buf2);
 	string_list_clear(&track, 0);
 
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-struct branch_info {
-	char *remote_name;
-	struct string_list merge;
-	enum rebase_type rebase;
-	char *push_remote_name;
+ರಚನೆ branch_info {
+	ಅಕ್ಷರ *remote_name;
+	ರಚನೆ string_list ವಿಲೀನ;
+	ಎಣಿಕೆ rebase_type rebase;
+	ಅಕ್ಷರ *ತಳ್ಳು_remote_name;
 };
 
-static struct string_list branch_list = STRING_LIST_INIT_DUP;
+ಸ್ಥಿರ ರಚನೆ string_list branch_list = STRING_LIST_INIT_DUP;
 
-static const char *abbrev_ref(const char *name, const char *prefix)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *abbrev_ref(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
-	skip_prefix(name, prefix, &name);
-	return name;
+	skip_ಪೂರ್ವಪ್ರತ್ಯಯ(name, ಪೂರ್ವಪ್ರತ್ಯಯ, &name);
+	ಹಿಂತಿರುಗಿ name;
 }
-#define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
+#ವ್ಯಾಖ್ಯಾನಿಸು abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
-				const struct config_context *ctx UNUSED,
-				void *data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ config_read_branches(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ,
+				ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx ಬಳಸದ,
+				ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	const char *orig_key = key;
-	char *name;
-	struct string_list_item *item;
-	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
-	size_t key_len;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *orig_ಕೀಲಿ = ಕೀಲಿ;
+	ಅಕ್ಷರ *name;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ರಚನೆ branch_info *info;
+	ಎಣಿಕೆ { REMOTE, ವಿಲೀನ_2, REBASE, ತಳ್ಳು_REMOTE } type;
+	ಗಾತ್ರ_t ಕೀಲಿ_len;
 
-	if (!starts_with(key, "branch."))
-		return 0;
+	ಆದರೆ (!starts_with(ಕೀಲಿ, "branch."))
+		ಹಿಂತಿರುಗಿ 0;
 
-	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	ಕೀಲಿ += ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("branch.");
+	ಆದರೆ (strip_suffix(ಕೀಲಿ, ".remote", &ಕೀಲಿ_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
-		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strip_suffix(ಕೀಲಿ, ".merge", &ಕೀಲಿ_len))
+		type = ವಿಲೀನ_2;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strip_suffix(ಕೀಲಿ, ".rebase", &ಕೀಲಿ_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
-		type = PUSH_REMOTE;
-	else
-		return 0;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strip_suffix(ಕೀಲಿ, ".pushremote", &ಕೀಲಿ_len))
+		type = ತಳ್ಳು_REMOTE;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ 0;
 
-	name = xmemdupz(key, key_len);
-	item = string_list_insert(&branch_list, name);
+	name = xmemdupz(ಕೀಲಿ, ಕೀಲಿ_len);
+	ಅಂಶ = string_list_ಸೇರಿಸು(&branch_list, name);
 
-	if (!item->util)
-		item->util = xcalloc(1, sizeof(struct branch_info));
-	info = item->util;
-	switch (type) {
-	case REMOTE:
-		if (info->remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->remote_name = xstrdup(value);
-		break;
-	case MERGE: {
-		const char *space = strchr(value, ' ');
-		value = abbrev_branch(value);
-		while (space) {
-			char *merge;
-			merge = xstrndup(value, space - value);
-			string_list_append(&info->merge, merge);
-			value = abbrev_branch(space + 1);
-			space = strchr(value, ' ');
+	ಆದರೆ (!ಅಂಶ->util)
+		ಅಂಶ->util = xcalloc(1, ಗಾತ್ರ(ರಚನೆ branch_info));
+	info = ಅಂಶ->util;
+	ಆಯ್ಕೆ (type) {
+	ಸ್ಥಿತಿ REMOTE:
+		ಆದರೆ (info->remote_name)
+			warning(_("more than one %s"), orig_ಕೀಲಿ);
+		info->remote_name = xstrdup(ಮೌಲ್ಯ);
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ವಿಲೀನ_2: {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *space = strchr(ಮೌಲ್ಯ, ' ');
+		ಮೌಲ್ಯ = abbrev_branch(ಮೌಲ್ಯ);
+		ಆಗ (space) {
+			ಅಕ್ಷರ *ವಿಲೀನ;
+			ವಿಲೀನ = xstrndup(ಮೌಲ್ಯ, space - ಮೌಲ್ಯ);
+			string_list_append(&info->ವಿಲೀನ, ವಿಲೀನ);
+			ಮೌಲ್ಯ = abbrev_branch(space + 1);
+			space = strchr(ಮೌಲ್ಯ, ' ');
 		}
-		string_list_append(&info->merge, xstrdup(value));
-		break;
+		string_list_append(&info->ವಿಲೀನ, xstrdup(ಮೌಲ್ಯ));
+		ನಿಲ್ಲಿಸು;
 	}
-	case REBASE:
+	ಸ್ಥಿತಿ REBASE:
 		/*
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
-		info->rebase = rebase_parse_value(value);
-		if (info->rebase == REBASE_INVALID)
+		info->rebase = rebase_parse_ಮೌಲ್ಯ(ಮೌಲ್ಯ);
+		ಆದರೆ (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
-				  "'true'"), name, value);
-		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->push_remote_name = xstrdup(value);
-		break;
-	default:
+				  "'true'"), name, ಮೌಲ್ಯ);
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ತಳ್ಳು_REMOTE:
+		ಆದರೆ (info->ತಳ್ಳು_remote_name)
+			warning(_("more than one %s"), orig_ಕೀಲಿ);
+		info->ತಳ್ಳು_remote_name = xstrdup(ಮೌಲ್ಯ);
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("unexpected type=%d", type);
 	}
 
-	free(name);
-	return 0;
+	ಬಿಡುಗಡೆ(name);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void read_branches(void)
+ಸ್ಥಿರ ಶೂನ್ಯ read_branches(ಶೂನ್ಯ)
 {
-	if (branch_list.nr)
-		return;
-	repo_config(the_repository, config_read_branches, NULL);
+	ಆದರೆ (branch_list.nr)
+		ಹಿಂತಿರುಗಿ;
+	repo_config(the_repository, config_read_branches, ಖಾಲಿ);
 }
 
-struct ref_states {
-	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
-	int queried;
+ರಚನೆ ref_ಸ್ಥಿತಿಗಳು {
+	ರಚನೆ remote *remote;
+	ರಚನೆ string_list new_refs, skipped, stale, tracked, heads, ತಳ್ಳು;
+	ಪೂರ್ಣಾಂಕ queried;
 };
 
-#define REF_STATES_INIT { \
+#ವ್ಯಾಖ್ಯಾನಿಸು REF_ಸ್ಥಿತಿಗಳು_INIT { \
 	.new_refs = STRING_LIST_INIT_DUP, \
 	.skipped = STRING_LIST_INIT_DUP, \
 	.stale = STRING_LIST_INIT_DUP, \
 	.tracked = STRING_LIST_INIT_DUP, \
 	.heads = STRING_LIST_INIT_DUP, \
-	.push = STRING_LIST_INIT_DUP, \
+	.ತಳ್ಳು = STRING_LIST_INIT_DUP, \
 }
 
-static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ref_ಸ್ಥಿತಿಗಳು(ಸ್ಥಿರಾಂಕ ರಚನೆ ref *remote_refs, ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು)
 {
-	struct ref *fetch_map = NULL, **tail = &fetch_map;
-	struct ref *ref, *stale_refs;
-	int i;
+	ರಚನೆ ref *fetch_map = ಖಾಲಿ, **ಬಾಲ = &fetch_map;
+	ರಚನೆ ref *ref, *stale_refs;
+	ಪೂರ್ಣಾಂಕ i;
 
-	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+	ಗಾಗಿ (i = 0; i < ಸ್ಥಿತಿಗಳು->remote->fetch.nr; i++)
+		ಆದರೆ (get_fetch_map(remote_refs, &ಸ್ಥಿತಿಗಳು->remote->fetch.ವಸ್ತುಗಳು[i], &ಬಾಲ, 1))
 			die(_("Could not get fetch map for refspec %s"),
-				states->remote->fetch.items[i].raw);
+				ಸ್ಥಿತಿಗಳು->remote->fetch.ವಸ್ತುಗಳು[i].raw);
 
-	for (ref = fetch_map; ref; ref = ref->next) {
-		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
-			string_list_append(&states->skipped, abbrev_branch(ref->name));
-		else if (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
-			string_list_append(&states->new_refs, abbrev_branch(ref->name));
-		else
-			string_list_append(&states->tracked, abbrev_branch(ref->name));
+	ಗಾಗಿ (ref = fetch_map; ref; ref = ref->ಮುಂದಿನ) {
+		ಆದರೆ (refname_matches_negative_refspec_ಅಂಶ(ref->name, &ಸ್ಥಿತಿಗಳು->remote->fetch))
+			string_list_append(&ಸ್ಥಿತಿಗಳು->skipped, abbrev_branch(ref->name));
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!ref->peer_ref || !refs_ref_exists(get_main_ref_store(the_repository), ref->peer_ref->name))
+			string_list_append(&ಸ್ಥಿತಿಗಳು->new_refs, abbrev_branch(ref->name));
+		ಇಲ್ಲದಿದ್ದರೆ
+			string_list_append(&ಸ್ಥಿತಿಗಳು->tracked, abbrev_branch(ref->name));
 	}
-	stale_refs = get_stale_heads(&states->remote->fetch, fetch_map);
-	for (ref = stale_refs; ref; ref = ref->next) {
-		struct string_list_item *item =
-			string_list_append(&states->stale, abbrev_branch(ref->name));
-		item->util = xstrdup(ref->name);
+	stale_refs = get_stale_heads(&ಸ್ಥಿತಿಗಳು->remote->fetch, fetch_map);
+	ಗಾಗಿ (ref = stale_refs; ref; ref = ref->ಮುಂದಿನ) {
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ =
+			string_list_append(&ಸ್ಥಿತಿಗಳು->stale, abbrev_branch(ref->name));
+		ಅಂಶ->util = xstrdup(ref->name);
 	}
 	free_refs(stale_refs);
 	free_refs(fetch_map);
 
-	string_list_sort(&states->new_refs);
-	string_list_sort(&states->skipped);
-	string_list_sort(&states->tracked);
-	string_list_sort(&states->stale);
+	string_list_ವಿಂಗಡಿಸು(&ಸ್ಥಿತಿಗಳು->new_refs);
+	string_list_ವಿಂಗಡಿಸು(&ಸ್ಥಿತಿಗಳು->skipped);
+	string_list_ವಿಂಗಡಿಸು(&ಸ್ಥಿತಿಗಳು->tracked);
+	string_list_ವಿಂಗಡಿಸು(&ಸ್ಥಿತಿಗಳು->stale);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct push_info {
-	char *dest;
-	int forced;
-	enum {
-		PUSH_STATUS_CREATE = 0,
-		PUSH_STATUS_DELETE,
-		PUSH_STATUS_UPTODATE,
-		PUSH_STATUS_FASTFORWARD,
-		PUSH_STATUS_OUTOFDATE,
-		PUSH_STATUS_NOTQUERIED
-	} status;
+ರಚನೆ ತಳ್ಳು_info {
+	ಅಕ್ಷರ *dest;
+	ಪೂರ್ಣಾಂಕ forced;
+	ಎಣಿಕೆ {
+		ತಳ್ಳು_ಸ್ಥಿತಿ_CREATE = 0,
+		ತಳ್ಳು_ಸ್ಥಿತಿ_DELETE,
+		ತಳ್ಳು_ಸ್ಥಿತಿ_UPTODATE,
+		ತಳ್ಳು_ಸ್ಥಿತಿ_FASTFORWARD,
+		ತಳ್ಳು_ಸ್ಥಿತಿ_OUTOFDATE,
+		ತಳ್ಳು_ಸ್ಥಿತಿ_NOTQUERIED
+	} ಸ್ಥಿತಿ_2;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
-	struct ref_states *states)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ತಳ್ಳು_ref_ಸ್ಥಿತಿಗಳು(ಸ್ಥಿರಾಂಕ ರಚನೆ ref *remote_refs,
+	ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು)
 {
-	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
-	if (remote->mirror)
-		return 0;
+	ರಚನೆ remote *remote = ಸ್ಥಿತಿಗಳು->remote;
+	ರಚನೆ ref *ref, *local_refs, *ತಳ್ಳು_map;
+	ಆದರೆ (remote->mirror)
+		ಹಿಂತಿರುಗಿ 0;
 
 	local_refs = get_local_heads();
-	push_map = copy_ref_list(remote_refs);
+	ತಳ್ಳು_map = copy_ref_list(remote_refs);
 
-	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
+	ಹೊಂದಿಕೆ_ತಳ್ಳು_refs(local_refs, &ತಳ್ಳು_map, &remote->ತಳ್ಳು, ಹೊಂದಿಕೆ_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
-		struct string_list_item *item;
-		struct push_info *info;
+	ಗಾಗಿ (ref = ತಳ್ಳು_map; ref; ref = ref->ಮುಂದಿನ) {
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+		ರಚನೆ ತಳ್ಳು_info *info;
 
-		if (!ref->peer_ref)
-			continue;
+		ಆದರೆ (!ref->peer_ref)
+			ಮುಂದುವರಿ;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
-		item = string_list_append(&states->push,
+		ಅಂಶ = string_list_append(&ಸ್ಥಿತಿಗಳು->ತಳ್ಳು,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
-		info = item->util;
+		ಅಂಶ->util = xcalloc(1, ಗಾತ್ರ(ರಚನೆ ತಳ್ಳು_info));
+		info = ಅಂಶ->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
-		if (is_null_oid(&ref->new_oid)) {
-			info->status = PUSH_STATUS_DELETE;
-		} else if (oideq(&ref->old_oid, &ref->new_oid))
-			info->status = PUSH_STATUS_UPTODATE;
-		else if (is_null_oid(&ref->old_oid))
-			info->status = PUSH_STATUS_CREATE;
-		else if (odb_has_object(the_repository->objects, &ref->old_oid,
+		ಆದರೆ (is_null_oid(&ref->new_oid)) {
+			info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_DELETE;
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (oideq(&ref->old_oid, &ref->new_oid))
+			info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_UPTODATE;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (is_null_oid(&ref->old_oid))
+			info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_CREATE;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
-			info->status = PUSH_STATUS_FASTFORWARD;
-		else
-			info->status = PUSH_STATUS_OUTOFDATE;
+			info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_FASTFORWARD;
+		ಇಲ್ಲದಿದ್ದರೆ
+			info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_OUTOFDATE;
 	}
 	free_refs(local_refs);
-	free_refs(push_map);
-	return 0;
+	free_refs(ತಳ್ಳು_map);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ತಳ್ಳು_ref_ಸ್ಥಿತಿಗಳು_noquery(ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು)
 {
-	int i;
-	struct remote *remote = states->remote;
-	struct string_list_item *item;
-	struct push_info *info;
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ remote *remote = ಸ್ಥಿತಿಗಳು->remote;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ರಚನೆ ತಳ್ಳು_info *info;
 
-	if (remote->mirror)
-		return 0;
+	ಆದರೆ (remote->mirror)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (!remote->push.nr) {
-		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
-		info->status = PUSH_STATUS_NOTQUERIED;
-		info->dest = xstrdup(item->string);
+	ಆದರೆ (!remote->ತಳ್ಳು.nr) {
+		ಅಂಶ = string_list_append(&ಸ್ಥಿತಿಗಳು->ತಳ್ಳು, _("(matching)"));
+		info = ಅಂಶ->util = xcalloc(1, ಗಾತ್ರ(ರಚನೆ ತಳ್ಳು_info));
+		info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_NOTQUERIED;
+		info->dest = xstrdup(ಅಂಶ->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
-		if (spec->matching)
-			item = string_list_append(&states->push, _("(matching)"));
-		else if (strlen(spec->src))
-			item = string_list_append(&states->push, spec->src);
-		else
-			item = string_list_append(&states->push, _("(delete)"));
+	ಗಾಗಿ (i = 0; i < remote->ತಳ್ಳು.nr; i++) {
+		ಸ್ಥಿರಾಂಕ ರಚನೆ refspec_ಅಂಶ *spec = &remote->ತಳ್ಳು.ವಸ್ತುಗಳು[i];
+		ಆದರೆ (spec->matching)
+			ಅಂಶ = string_list_append(&ಸ್ಥಿತಿಗಳು->ತಳ್ಳು, _("(matching)"));
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(spec->src))
+			ಅಂಶ = string_list_append(&ಸ್ಥಿತಿಗಳು->ತಳ್ಳು, spec->src);
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಅಂಶ = string_list_append(&ಸ್ಥಿತಿಗಳು->ತಳ್ಳು, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = ಅಂಶ->util = xcalloc(1, ಗಾತ್ರ(ರಚನೆ ತಳ್ಳು_info));
 		info->forced = spec->force;
-		info->status = PUSH_STATUS_NOTQUERIED;
-		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
+		info->ಸ್ಥಿತಿ_2 = ತಳ್ಳು_ಸ್ಥಿತಿ_NOTQUERIED;
+		info->dest = xstrdup(spec->dst ? spec->dst : ಅಂಶ->string);
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_head_names(const struct ref *remote_refs, struct ref_states *states)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ತಲೆ_ಹೆಸರುಗಳು(ಸ್ಥಿರಾಂಕ ರಚನೆ ref *remote_refs, ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು)
 {
-	struct ref *ref, *matches;
-	struct ref *fetch_map = NULL, **fetch_map_tail = &fetch_map;
-	struct refspec_item refspec = {
+	ರಚನೆ ref *ref, *matches;
+	ರಚನೆ ref *fetch_map = ಖಾಲಿ, **fetch_map_ಬಾಲ = &fetch_map;
+	ರಚನೆ refspec_ಅಂಶ refspec = {
 		.force = 0,
-		.pattern = 1,
-		.src = (char *) "refs/heads/*",
-		.dst = (char *) "refs/heads/*",
+		.ನಮೂನೆ = 1,
+		.src = (ಅಕ್ಷರ *) "refs/heads/*",
+		.dst = (ಅಕ್ಷರ *) "refs/heads/*",
 	};
 
-	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
-	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
-				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next)
-		string_list_append(&states->heads, abbrev_branch(ref->name));
+	get_fetch_map(remote_refs, &refspec, &fetch_map_ಬಾಲ, 0);
+	matches = guess_remote_ತಲೆ(ಕಂಡುಹಿಡಿ_ref_by_name(remote_refs, "HEAD"),
+				    fetch_map, REMOTE_GUESS_ತಲೆ_ALL);
+	ಗಾಗಿ (ref = matches; ref; ref = ref->ಮುಂದಿನ)
+		string_list_append(&ಸ್ಥಿತಿಗಳು->heads, abbrev_branch(ref->name));
 
 	free_refs(fetch_map);
 	free_refs(matches);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct known_remote {
-	struct known_remote *next;
-	struct remote *remote;
+ರಚನೆ ತಿಳಿದ_remote {
+	ರಚನೆ ತಿಳಿದ_remote *ಮುಂದಿನ;
+	ರಚನೆ remote *remote;
 };
 
-struct known_remotes {
-	struct remote *to_delete;
-	struct known_remote *list;
+ರಚನೆ ತಿಳಿದ_remotes {
+	ರಚನೆ remote *ಗಮ್ಯ_delete;
+	ರಚನೆ ತಿಳಿದ_remote *list;
 };
 
-static int add_known_remote(struct remote *remote, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_ತಿಳಿದ_remote(ರಚನೆ remote *remote, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct known_remotes *all = cb_data;
-	struct known_remote *r;
+	ರಚನೆ ತಿಳಿದ_remotes *all = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ ತಿಳಿದ_remote *r;
 
-	if (!strcmp(all->to_delete->name, remote->name))
-		return 0;
+	ಆದರೆ (!strcmp(all->ಗಮ್ಯ_delete->name, remote->name))
+		ಹಿಂತಿರುಗಿ 0;
 
-	r = xmalloc(sizeof(*r));
+	r = xmalloc(ಗಾತ್ರ(*r));
 	r->remote = remote;
-	r->next = all->list;
+	r->ಮುಂದಿನ = all->list;
 	all->list = r;
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct branches_for_remote {
-	struct remote *remote;
-	struct string_list *branches, *skipped;
-	struct known_remotes *keep;
+ರಚನೆ branches_for_remote {
+	ರಚನೆ remote *remote;
+	ರಚನೆ string_list *branches, *skipped;
+	ರಚನೆ ತಿಳಿದ_remotes *keep;
 };
 
-static int add_branch_for_removal(const struct reference *ref, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_branch_for_removal(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct branches_for_remote *branches = cb_data;
-	struct refspec_item refspec;
-	struct known_remote *kr;
+	ರಚನೆ branches_for_remote *branches = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ refspec_ಅಂಶ refspec;
+	ರಚನೆ ತಿಳಿದ_remote *kr;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (remote_find_tracking(branches->remote, &refspec))
-		return 0;
-	free(refspec.src);
+	memset(&refspec, 0, ಗಾತ್ರ(refspec));
+	refspec.dst = (ಅಕ್ಷರ *)ref->name;
+	ಆದರೆ (remote_ಕಂಡುಹಿಡಿ_tracking(branches->remote, &refspec))
+		ಹಿಂತಿರುಗಿ 0;
+	ಬಿಡುಗಡೆ(refspec.src);
 
 	/* don't delete a branch if another remote also uses it */
-	for (kr = branches->keep->list; kr; kr = kr->next) {
-		memset(&refspec, 0, sizeof(refspec));
-		refspec.dst = (char *)ref->name;
-		if (!remote_find_tracking(kr->remote, &refspec)) {
-			free(refspec.src);
-			return 0;
+	ಗಾಗಿ (kr = branches->keep->list; kr; kr = kr->ಮುಂದಿನ) {
+		memset(&refspec, 0, ಗಾತ್ರ(refspec));
+		refspec.dst = (ಅಕ್ಷರ *)ref->name;
+		ಆದರೆ (!remote_ಕಂಡುಹಿಡಿ_tracking(kr->remote, &refspec)) {
+			ಬಿಡುಗಡೆ(refspec.src);
+			ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
 	/* don't delete non-remote-tracking refs */
-	if (!starts_with(ref->name, "refs/remotes/")) {
+	ಆದರೆ (!starts_with(ref->name, "refs/remotes/")) {
 		/* advise user how to delete local branches */
-		if (starts_with(ref->name, "refs/heads/"))
+		ಆದರೆ (starts_with(ref->name, "refs/heads/"))
 			string_list_append(branches->skipped,
 					   abbrev_branch(ref->name));
 		/* silently skip over other non-remote refs */
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
 	string_list_append(branches->branches, ref->name);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct rename_info {
-	const char *old_name;
-	const char *new_name;
-	struct ref_transaction *transaction;
-	struct progress *progress;
-	struct strbuf *err;
-	uint32_t progress_nr;
-	uint64_t index;
+ರಚನೆ rename_info {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *old_name;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *new_name;
+	ರಚನೆ ref_transaction *transaction;
+	ರಚನೆ ಪ್ರಗತಿ *ಪ್ರಗತಿ;
+	ರಚನೆ strbuf *err;
+	uint32_t ಪ್ರಗತಿ_nr;
+	uint64_t ಸೂಚ್ಯಂಕ;
 };
 
-static void compute_renamed_ref(struct rename_info *rename,
-				const char *refname,
-				struct strbuf *out)
+ಸ್ಥಿರ ಶೂನ್ಯ compute_renamed_ref(ರಚನೆ rename_info *rename,
+				ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *refname,
+				ರಚನೆ strbuf *ಹೊರಹೋಗು)
 {
-	strbuf_reset(out);
-	strbuf_addstr(out, refname);
-	strbuf_splice(out, strlen("refs/remotes/"), strlen(rename->old_name),
-		      rename->new_name, strlen(rename->new_name));
+	strbuf_reset(ಹೊರಹೋಗು);
+	strbuf_addstr(ಹೊರಹೋಗು, refname);
+	strbuf_splice(ಹೊರಹೋಗು, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("refs/remotes/"), ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(rename->old_name),
+		      rename->new_name, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(rename->new_name));
 }
 
-static int rename_one_reflog_entry(const char *old_refname,
-				   struct object_id *old_oid,
-				   struct object_id *new_oid,
-				   const char *committer,
-				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ rename_one_reflog_ನಮೂದು(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *old_refname,
+				   ರಚನೆ object_id *old_oid,
+				   ರಚನೆ object_id *new_oid,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *committer,
+				   timestamp_t timestamp, ಪೂರ್ಣಾಂಕ tz,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct rename_info *rename = cb_data;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf identity = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
-	struct strbuf mail = STRBUF_INIT;
-	struct ident_split ident;
-	const char *date;
-	int error;
+	ರಚನೆ rename_info *rename = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ strbuf new_refname = STRBUF_INIT;
+	ರಚನೆ strbuf ತಟಸ್ಥ = STRBUF_INIT;
+	ರಚನೆ strbuf name = STRBUF_INIT;
+	ರಚನೆ strbuf mail = STRBUF_INIT;
+	ರಚನೆ ident_ವಿಭಜಿಸು ident;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *date;
+	ಪೂರ್ಣಾಂಕ error;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	ಆದರೆ (ವಿಭಜಿಸು_ident_ಸಾಲು(&ident, committer, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(committer)) < 0) {
 		error = -1;
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	strbuf_add(&name, ident.name_begin, ident.name_end - ident.name_begin);
-	strbuf_add(&mail, ident.mail_begin, ident.mail_end - ident.mail_begin);
+	strbuf_ಕೂಡಿಸು(&name, ident.name_begin, ident.name_ಕೊನೆ - ident.name_begin);
+	strbuf_ಕೂಡಿಸು(&mail, ident.mail_begin, ident.mail_ಕೊನೆ - ident.mail_begin);
 
-	date = show_date(timestamp, tz, DATE_MODE(NORMAL));
-	strbuf_addstr(&identity, fmt_ident(name.buf, mail.buf,
+	date = show_date(timestamp, tz, DATE_ಬಹುಲಕ(ಸಾಮಾನ್ಯ));
+	strbuf_addstr(&ತಟಸ್ಥ, fmt_ident(name.buf, mail.buf,
 					  WANT_BLANK_IDENT, date, 0));
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
-					      new_oid, old_oid, identity.buf, msg,
-					      rename->index++, rename->err);
+					      new_oid, old_oid, ತಟಸ್ಥ.buf, ಸಂದೇಶ,
+					      rename->ಸೂಚ್ಯಂಕ++, rename->err);
 
-out:
+ಹೊರಹೋಗು:
 	strbuf_release(&new_refname);
-	strbuf_release(&identity);
+	strbuf_release(&ತಟಸ್ಥ);
 	strbuf_release(&name);
 	strbuf_release(&mail);
-	return error;
+	ಹಿಂತಿರುಗಿ error;
 }
 
-static int rename_one_reflog(const char *old_refname,
-			     const struct object_id *old_oid,
-			     struct rename_info *rename)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ rename_one_reflog(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *old_refname,
+			     ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *old_oid,
+			     ರಚನೆ rename_info *rename)
 {
-	struct strbuf new_refname = STRBUF_INIT;
-	struct strbuf message = STRBUF_INIT;
-	int error;
+	ರಚನೆ strbuf new_refname = STRBUF_INIT;
+	ರಚನೆ strbuf ಸಂದೇಶ_2 = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ error;
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
-		return 0;
+	ಆದರೆ (!refs_reflog_exists(get_main_ref_store(the_repository), old_refname))
+		ಹಿಂತಿರುಗಿ 0;
 
 	error = refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 old_refname, rename_one_reflog_entry, rename);
-	if (error < 0)
-		goto out;
+					 old_refname, rename_one_reflog_ನಮೂದು, rename);
+	ಆದರೆ (error < 0)
+		ಹೋಗು ಹೊರಹೋಗು;
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
@@ -695,33 +695,33 @@ static int rename_one_reflog(const char *old_refname,
 	 * Furthermore, we only append the entry in case the reference
 	 * resolves. Missing references shouldn't have reflogs anyway.
 	 */
-	strbuf_addf(&message, "remote: renamed %s to %s", old_refname,
+	strbuf_addf(&ಸಂದೇಶ_2, "remote: renamed %s to %s", old_refname,
 		    new_refname.buf);
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
 					      old_oid, old_oid, git_committer_info(0),
-					      message.buf, rename->index++, rename->err);
-	if (error < 0)
-		return error;
+					      ಸಂದೇಶ_2.buf, rename->ಸೂಚ್ಯಂಕ++, rename->err);
+	ಆದರೆ (error < 0)
+		ಹಿಂತಿರುಗಿ error;
 
-out:
+ಹೊರಹೋಗು:
 	strbuf_release(&new_refname);
-	strbuf_release(&message);
-	return error;
+	strbuf_release(&ಸಂದೇಶ_2);
+	ಹಿಂತಿರುಗಿ error;
 }
 
-static int rename_one_ref(const struct reference *ref, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ rename_one_ref(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct strbuf new_referent = STRBUF_INIT;
-	struct strbuf new_refname = STRBUF_INIT;
-	struct rename_info *rename = cb_data;
-	const struct object_id *oid = ref->oid;
-	const char *referent = ref->target;
-	int error;
+	ರಚನೆ strbuf new_referent = STRBUF_INIT;
+	ರಚನೆ strbuf new_refname = STRBUF_INIT;
+	ರಚನೆ rename_info *rename = cb_ದತ್ತಾಂಶ;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid = ref->oid;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *referent = ref->ಗುರಿ;
+	ಪೂರ್ಣಾಂಕ error;
 
 	compute_renamed_ref(rename, ref->name, &new_refname);
 
-	if (ref->flags & REF_ISSYMREF) {
+	ಆದರೆ (ref->flags & REF_ISSYMREF) {
 		/*
 		 * Stupidly enough `referent` is not pointing to the immediate
 		 * target of a symref, but it's the recursively resolved value.
@@ -730,121 +730,121 @@ static int rename_one_ref(const struct reference *ref, void *cb_data)
 		 */
 		referent = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						   ref->name, RESOLVE_REF_NO_RECURSE,
-						   NULL, NULL);
+						   ಖಾಲಿ, ಖಾಲಿ);
 		compute_renamed_ref(rename, referent, &new_referent);
-		oid = NULL;
+		oid = ಖಾಲಿ;
 	}
 
 	error = ref_transaction_delete(rename->transaction, ref->name,
-				       oid, referent, REF_NO_DEREF, NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       oid, referent, REF_NO_DEREF, ಖಾಲಿ, rename->err);
+	ಆದರೆ (error < 0)
+		ಹೋಗು ಹೊರಹೋಗು;
 
 	error = ref_transaction_update(rename->transaction, new_refname.buf, oid, null_oid(the_hash_algo),
-				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : NULL, NULL,
+				       (ref->flags & REF_ISSYMREF) ? new_referent.buf : ಖಾಲಿ, ಖಾಲಿ,
 				       REF_SKIP_CREATE_REFLOG | REF_NO_DEREF | REF_SKIP_OID_VERIFICATION,
-				       NULL, rename->err);
-	if (error < 0)
-		goto out;
+				       ಖಾಲಿ, rename->err);
+	ಆದರೆ (error < 0)
+		ಹೋಗು ಹೊರಹೋಗು;
 
 	error = rename_one_reflog(ref->name, oid, rename);
-	if (error < 0)
-		goto out;
+	ಆದರೆ (error < 0)
+		ಹೋಗು ಹೊರಹೋಗು;
 
-	display_progress(rename->progress, ++rename->progress_nr);
+	display_ಪ್ರಗತಿ(rename->ಪ್ರಗತಿ, ++rename->ಪ್ರಗತಿ_nr);
 
-out:
+ಹೊರಹೋಗು:
 	strbuf_release(&new_referent);
 	strbuf_release(&new_refname);
-	return error;
+	ಹಿಂತಿರುಗಿ error;
 }
 
-static int migrate_file(struct remote *remote)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ migrate_file(ರಚನೆ remote *remote)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "remote.%s.url", remote->name);
-	for (size_t i = 0; i < remote->url.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < remote->url.nr; i++)
+		repo_config_ಗಣ_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < remote->ತಳ್ಳು.nr; i++)
+		repo_config_ಗಣ_multivar(the_repository, buf.buf, remote->ತಳ್ಳು.ವಸ್ತುಗಳು[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
-	for (int i = 0; i < remote->fetch.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
-#ifndef WITH_BREAKING_CHANGES
-	if (remote->origin == REMOTE_REMOTES)
-		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < remote->fetch.nr; i++)
+		repo_config_ಗಣ_multivar(the_repository, buf.buf, remote->fetch.ವಸ್ತುಗಳು[i].raw, "^$", 0);
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ WITH_BREAKING_CHANGES
+	ಆದರೆ (remote->origin == REMOTE_REMOTES)
+		unlink_or_warn(repo_git_ಮಾರ್ಗ_replace(the_repository, &buf,
 						     "remotes/%s", remote->name));
-	else if (remote->origin == REMOTE_BRANCHES)
-		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (remote->origin == REMOTE_BRANCHES)
+		unlink_or_warn(repo_git_ಮಾರ್ಗ_replace(the_repository, &buf,
 						     "branches/%s", remote->name));
-#endif /* WITH_BREAKING_CHANGES */
+#ಆದರೆ_ಅಂತ್ಯ /* WITH_BREAKING_CHANGES */
 	strbuf_release(&buf);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct push_default_info
+ರಚನೆ ತಳ್ಳು_default_info
 {
-	const char *old_name;
-	enum config_scope scope;
-	struct strbuf origin;
-	int linenr;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *old_name;
+	ಎಣಿಕೆ config_scope scope;
+	ರಚನೆ strbuf origin;
+	ಪೂರ್ಣಾಂಕ linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
-	const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ config_read_ತಳ್ಳು_default(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ,
+	ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ಕೀಲಿ_ಮೌಲ್ಯ_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
-	    !value || strcmp(value, info->old_name))
-		return 0;
+	ರಚನೆ ತಳ್ಳು_default_info* info = cb;
+	ಆದರೆ (strcmp(ಕೀಲಿ, "remote.pushdefault") ||
+	    !ಮೌಲ್ಯ || strcmp(ಮೌಲ್ಯ, info->old_name))
+		ಹಿಂತಿರುಗಿ 0;
 
 	info->scope = kvi->scope;
 	strbuf_reset(&info->origin);
 	strbuf_addstr(&info->origin, config_origin_type_name(kvi->origin_type));
 	info->linenr = kvi->linenr;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_ತಳ್ಳು_default(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* old_name, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* new_name)
 {
-	struct push_default_info push_default = {
+	ರಚನೆ ತಳ್ಳು_default_info ತಳ್ಳು_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
-	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	repo_config(the_repository, config_read_ತಳ್ಳು_default, &ತಳ್ಳು_default);
+	ಆದರೆ (ತಳ್ಳು_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
-		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ತಳ್ಳು_default.scope >= CONFIG_SCOPE_LOCAL) {
+		ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ = repo_config_ಗಣ_gently(the_repository, "remote.pushDefault",
 						    new_name);
-		if (new_name && result && result != CONFIG_NOTHING_SET)
+		ಆದರೆ (new_name && ಫಲಿತಾಂಶ && ಫಲಿತಾಂಶ != CONFIG_NOTHING_ಗಣ)
 			die(_("could not set '%s'"), "remote.pushDefault");
-		else if (!new_name && result && result != CONFIG_NOTHING_SET)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!new_name && ಫಲಿತಾಂಶ && ಫಲಿತಾಂಶ != CONFIG_NOTHING_ಗಣ)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ತಳ್ಳು_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
 			  "now names the non-existent remote '%s'"),
-			config_scope_name(push_default.scope),
-			push_default.origin.buf, push_default.linenr,
+			config_scope_name(ತಳ್ಳು_default.scope),
+			ತಳ್ಳು_default.origin.buf, ತಳ್ಳು_default.linenr,
 			old_name);
 	}
 
-	strbuf_release(&push_default.origin);
+	strbuf_release(&ತಳ್ಳು_default.origin);
 }
 
-static const char conflicting_remote_refs_advice[] = N_(
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ conflicting_remote_refs_advice[] = N_(
 	"The remote you are trying to rename has conflicting references in the\n"
 	"new target refspec. This is most likely caused by you trying to nest\n"
 	"a remote into itself, e.g. by renaming 'parent' into 'parent/child'\n"
@@ -853,209 +853,209 @@ static const char conflicting_remote_refs_advice[] = N_(
 	"If that is the case, you can address this by first renaming the\n"
 	"remote to a different name.\n");
 
-static int mv(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ mv(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	      ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int show_progress = isatty(2);
-	struct option options[] = {
-		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
-		OPT_END()
+	ಪೂರ್ಣಾಂಕ show_ಪ್ರಗತಿ = isatty(2);
+	ರಚನೆ option options[] = {
+		OPT_BOOL(0, "progress", &show_ಪ್ರಗತಿ, N_("force progress reporting")),
+		OPT_ಕೊನೆ()
 	};
-	struct remote *oldremote, *newremote;
-	struct strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
+	ರಚನೆ remote *oldremote, *newremote;
+	ರಚನೆ strbuf buf = STRBUF_INIT, buf2 = STRBUF_INIT, buf3 = STRBUF_INIT,
 		old_remote_context = STRBUF_INIT, err = STRBUF_INIT;
-	struct rename_info rename = {
+	ರಚನೆ rename_info rename = {
 		.err = &err,
 	};
-	int refspecs_need_update = 0;
-	int result = 0;
+	ಪೂರ್ಣಾಂಕ refspecs_need_update = 0;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_rename_usage, 0);
 
-	if (argc != 2)
+	ಆದರೆ (argc != 2)
 		usage_with_options(builtin_remote_rename_usage, options);
 
 	rename.old_name = argv[0];
 	rename.new_name = argv[1];
 
 	oldremote = remote_get(rename.old_name);
-	if (!remote_is_configured(oldremote, 1)) {
+	ಆದರೆ (!remote_is_configured(oldremote, 1)) {
 		error(_("No such remote: '%s'"), rename.old_name);
-		exit(2);
+		ನಿರ್ಗಮಿಸು(2);
 	}
 
-	if (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
-		return migrate_file(oldremote);
+	ಆದರೆ (!strcmp(rename.old_name, rename.new_name) && oldremote->origin != REMOTE_CONFIG)
+		ಹಿಂತಿರುಗಿ migrate_file(oldremote);
 
 	newremote = remote_get(rename.new_name);
-	if (remote_is_configured(newremote, 1)) {
+	ಆದರೆ (remote_is_configured(newremote, 1)) {
 		error(_("remote %s already exists."), rename.new_name);
-		exit(3);
+		ನಿರ್ಗಮಿಸು(3);
 	}
 
-	if (!valid_remote_name(rename.new_name))
+	ಆದರೆ (!valid_remote_name(rename.new_name))
 		die(_("'%s' is not a valid remote name"), rename.new_name);
 
 	strbuf_addf(&buf, "remote.%s", rename.old_name);
 	strbuf_addf(&buf2, "remote.%s", rename.new_name);
-	if (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
-		result = error(_("Could not rename config section '%s' to '%s'"),
+	ಆದರೆ (repo_config_rename_section(the_repository, buf.buf, buf2.buf) < 1) {
+		ಫಲಿತಾಂಶ = error(_("Could not rename config section '%s' to '%s'"),
 			       buf.buf, buf2.buf);
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
-	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
-		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
+		refspecs_need_update = !!ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(oldremote->fetch.ವಸ್ತುಗಳು[i].raw,
 						old_remote_context.buf);
 
-	if (refspecs_need_update) {
-		struct refs_for_each_ref_options opts = {
+	ಆದರೆ (refspecs_need_update) {
+		ರಚನೆ refs_for_each_ref_options opts = {
 			.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 		};
 		rename.transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							       0, &err);
-		if (!rename.transaction)
-			goto out;
+		ಆದರೆ (!rename.transaction)
+			ಹೋಗು ಹೊರಹೋಗು;
 
-		if (show_progress)
-			rename.progress = start_delayed_progress(the_repository,
+		ಆದರೆ (show_ಪ್ರಗತಿ)
+			rename.ಪ್ರಗತಿ = ಆರಂಭ_delayed_ಪ್ರಗತಿ(the_repository,
 								 _("Renaming remote references"), 0);
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "refs/remotes/%s/", rename.old_name);
-		opts.prefix = buf.buf;
+		opts.ಪೂರ್ವಪ್ರತ್ಯಯ = buf.buf;
 
-		result = refs_for_each_ref_ext(get_main_ref_store(the_repository),
+		ಫಲಿತಾಂಶ = refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					       rename_one_ref, &rename, &opts);
-		if (result < 0)
+		ಆದರೆ (ಫಲಿತಾಂಶ < 0)
 			die(_("queueing remote ref renames failed: %s"), rename.err->buf);
 
-		result = ref_transaction_prepare(rename.transaction, &err);
-		if (result < 0) {
+		ಫಲಿತಾಂಶ = ref_transaction_prepare(rename.transaction, &err);
+		ಆದರೆ (ಫಲಿತಾಂಶ < 0) {
 			error("renaming remote references failed: %s", err.buf);
-			if (result == REF_TRANSACTION_ERROR_NAME_CONFLICT)
+			ಆದರೆ (ಫಲಿತಾಂಶ == REF_TRANSACTION_ERROR_NAME_CONFLICT)
 				advise(conflicting_remote_refs_advice);
-			die(NULL);
+			die(ಖಾಲಿ);
 		}
 	}
 
-	if (oldremote->fetch.nr) {
+	ಆದರೆ (oldremote->fetch.nr) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.fetch", rename.new_name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
-		for (int i = 0; i < oldremote->fetch.nr; i++) {
-			char *ptr;
+		repo_config_ಗಣ_multivar(the_repository, buf.buf, ಖಾಲಿ, ಖಾಲಿ, CONFIG_FLAGS_MULTI_REPLACE);
+		ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < oldremote->fetch.nr; i++) {
+			ಅಕ್ಷರ *ptr;
 
 			strbuf_reset(&buf2);
-			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
-			ptr = strstr(buf2.buf, old_remote_context.buf);
-			if (ptr) {
+			strbuf_addstr(&buf2, oldremote->fetch.ವಸ್ತುಗಳು[i].raw);
+			ptr = ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(buf2.buf, old_remote_context.buf);
+			ಆದರೆ (ptr) {
 				strbuf_splice(&buf2,
-					      ptr-buf2.buf + strlen(":refs/remotes/"),
-					      strlen(rename.old_name), rename.new_name,
-					      strlen(rename.new_name));
-			} else
+					      ptr-buf2.buf + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(":refs/remotes/"),
+					      ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(rename.old_name), rename.new_name,
+					      ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(rename.new_name));
+			} ಇಲ್ಲದಿದ್ದರೆ
 				warning(_("Not updating non-default fetch refspec\n"
 					  "\t%s\n"
 					  "\tPlease update the configuration manually if necessary."),
 					buf2.buf);
 
-			repo_config_set_multivar(the_repository, buf.buf, buf2.buf, "^$", 0);
+			repo_config_ಗಣ_multivar(the_repository, buf.buf, buf2.buf, "^$", 0);
 		}
 	}
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < branch_list.nr; i++) {
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ = branch_list.ವಸ್ತುಗಳು + i;
+		ರಚನೆ branch_info *info = ಅಂಶ->util;
+		ಆದರೆ (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.remote", item->string);
-			repo_config_set(the_repository, buf.buf, rename.new_name);
+			strbuf_addf(&buf, "branch.%s.remote", ಅಂಶ->string);
+			repo_config_ಗಣ(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		ಆದರೆ (info->ತಳ್ಳು_remote_name && !strcmp(info->ತಳ್ಳು_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
-			repo_config_set(the_repository, buf.buf, rename.new_name);
+			strbuf_addf(&buf, "branch.%s.pushRemote", ಅಂಶ->string);
+			repo_config_ಗಣ(the_repository, buf.buf, rename.new_name);
 		}
 	}
 
-	if (refspecs_need_update) {
-		result = ref_transaction_commit(rename.transaction, &err);
-		if (result < 0)
+	ಆದರೆ (refspecs_need_update) {
+		ಫಲಿತಾಂಶ = ref_transaction_commit(rename.transaction, &err);
+		ಆದರೆ (ಫಲಿತಾಂಶ < 0)
 			die(_("renaming remote refs failed: %s"), rename.err->buf);
 
-		stop_progress(&rename.progress);
+		stop_ಪ್ರಗತಿ(&rename.ಪ್ರಗತಿ);
 
-		handle_push_default(rename.old_name, rename.new_name);
+		handle_ತಳ್ಳು_default(rename.old_name, rename.new_name);
 	}
 
-out:
+ಹೊರಹೋಗು:
 	ref_transaction_free(rename.transaction);
 	strbuf_release(&old_remote_context);
 	strbuf_release(&buf);
 	strbuf_release(&buf2);
 	strbuf_release(&buf3);
 	strbuf_release(&err);
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static int rm(int argc, const char **argv, const char *prefix,
-	      struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ rm(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	      ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct option options[] = {
-		OPT_END()
+	ರಚನೆ option options[] = {
+		OPT_ಕೊನೆ()
 	};
-	struct remote *remote;
-	struct strbuf buf = STRBUF_INIT;
-	struct known_remotes known_remotes = { NULL, NULL };
-	struct string_list branches = STRING_LIST_INIT_DUP;
-	struct string_list skipped = STRING_LIST_INIT_DUP;
-	struct branches_for_remote cb_data;
-	int result;
+	ರಚನೆ remote *remote;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ರಚನೆ ತಿಳಿದ_remotes ತಿಳಿದ_remotes = { ಖಾಲಿ, ಖಾಲಿ };
+	ರಚನೆ string_list branches = STRING_LIST_INIT_DUP;
+	ರಚನೆ string_list skipped = STRING_LIST_INIT_DUP;
+	ರಚನೆ branches_for_remote cb_ದತ್ತಾಂಶ;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
 
-	memset(&cb_data, 0, sizeof(cb_data));
-	cb_data.branches = &branches;
-	cb_data.skipped = &skipped;
-	cb_data.keep = &known_remotes;
+	memset(&cb_ದತ್ತಾಂಶ, 0, ಗಾತ್ರ(cb_ದತ್ತಾಂಶ));
+	cb_ದತ್ತಾಂಶ.branches = &branches;
+	cb_ದತ್ತಾಂಶ.skipped = &skipped;
+	cb_ದತ್ತಾಂಶ.keep = &ತಿಳಿದ_remotes;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_rm_usage, 0);
-	if (argc != 1)
+	ಆದರೆ (argc != 1)
 		usage_with_options(builtin_remote_rm_usage, options);
 
 	remote = remote_get(argv[0]);
-	if (!remote_is_configured(remote, 1)) {
+	ಆದರೆ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote: '%s'"), argv[0]);
-		exit(2);
+		ನಿರ್ಗಮಿಸು(2);
 	}
 
-	known_remotes.to_delete = remote;
-	for_each_remote(add_known_remote, &known_remotes);
+	ತಿಳಿದ_remotes.ಗಮ್ಯ_delete = remote;
+	for_each_remote(ಕೂಡಿಸು_ತಿಳಿದ_remote, &ತಿಳಿದ_remotes);
 
 	read_branches();
-	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
-		struct branch_info *info = item->util;
-		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < branch_list.nr; i++) {
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ = branch_list.ವಸ್ತುಗಳು + i;
+		ರಚನೆ branch_info *info = ಅಂಶ->util;
+		ಆದರೆ (info->remote_name && !strcmp(info->remote_name, remote->name)) {
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿಗಳು[] = { "remote", "merge", ಖಾಲಿ }, **k;
+			ಗಾಗಿ (k = ಕೀಲಿಗಳು; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
-						item->string, *k);
-				result = repo_config_set_gently(the_repository, buf.buf, NULL);
-				if (result && result != CONFIG_NOTHING_SET)
+						ಅಂಶ->string, *k);
+				ಫಲಿತಾಂಶ = repo_config_ಗಣ_gently(the_repository, buf.buf, ಖಾಲಿ);
+				ಆದರೆ (ಫಲಿತಾಂಶ && ಫಲಿತಾಂಶ != CONFIG_NOTHING_ಗಣ)
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		ಆದರೆ (info->ತಳ್ಳು_remote_name && !strcmp(info->ತಳ್ಳು_remote_name, remote->name)) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
-			result = repo_config_set_gently(the_repository, buf.buf, NULL);
-			if (result && result != CONFIG_NOTHING_SET)
+			strbuf_addf(&buf, "branch.%s.pushremote", ಅಂಶ->string);
+			ಫಲಿತಾಂಶ = repo_config_ಗಣ_gently(the_repository, buf.buf, ಖಾಲಿ);
+			ಆದರೆ (ಫಲಿತಾಂಶ && ಫಲಿತಾಂಶ != CONFIG_NOTHING_ಗಣ)
 				die(_("could not unset '%s'"), buf.buf);
 		}
 	}
@@ -1065,903 +1065,903 @@ static int rm(int argc, const char **argv, const char *prefix,
 	 * the branches one by one, since for_each_ref() relies on cached
 	 * refs, which are invalidated when deleting a branch.
 	 */
-	cb_data.remote = remote;
-	result = refs_for_each_ref(get_main_ref_store(the_repository),
-				   add_branch_for_removal, &cb_data);
+	cb_ದತ್ತಾಂಶ.remote = remote;
+	ಫಲಿತಾಂಶ = refs_for_each_ref(get_main_ref_store(the_repository),
+				   ಕೂಡಿಸು_branch_for_removal, &cb_ದತ್ತಾಂಶ);
 	strbuf_release(&buf);
 
-	if (!result)
-		result = refs_delete_refs(get_main_ref_store(the_repository),
+	ಆದರೆ (!ಫಲಿತಾಂಶ)
+		ಫಲಿತಾಂಶ = refs_delete_refs(get_main_ref_store(the_repository),
 					  "remote: remove", &branches,
 					  REF_NO_DEREF);
 	string_list_clear(&branches, 0);
 
-	if (skipped.nr) {
+	ಆದರೆ (skipped.nr) {
 		fprintf_ln(stderr,
 			   Q_("Note: A branch outside the refs/remotes/ hierarchy was not removed;\n"
 			      "to delete it, use:",
 			      "Note: Some branches outside the refs/remotes/ hierarchy were not removed;\n"
 			      "to delete them, use:",
 			      skipped.nr));
-		for (size_t i = 0; i < skipped.nr; i++)
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
-				skipped.items[i].string);
+				skipped.ವಸ್ತುಗಳು[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
-	if (!result) {
+	ಆದರೆ (!ಫಲಿತಾಂಶ) {
 		strbuf_addf(&buf, "remote.%s", remote->name);
-		if (repo_config_rename_section(the_repository, buf.buf, NULL) < 1) {
-			result = error(_("Could not remove config section '%s'"), buf.buf);
-			goto out;
+		ಆದರೆ (repo_config_rename_section(the_repository, buf.buf, ಖಾಲಿ) < 1) {
+			ಫಲಿತಾಂಶ = error(_("Could not remove config section '%s'"), buf.buf);
+			ಹೋಗು ಹೊರಹೋಗು;
 		}
 
-		handle_push_default(remote->name, NULL);
+		handle_ತಳ್ಳು_default(remote->name, ಖಾಲಿ);
 	}
 
-out:
-	for (struct known_remote *r = known_remotes.list; r;) {
-		struct known_remote *next = r->next;
-		free(r);
-		r = next;
+ಹೊರಹೋಗು:
+	ಗಾಗಿ (ರಚನೆ ತಿಳಿದ_remote *r = ತಿಳಿದ_remotes.list; r;) {
+		ರಚನೆ ತಿಳಿದ_remote *ಮುಂದಿನ = r->ಮುಂದಿನ;
+		ಬಿಡುಗಡೆ(r);
+		r = ಮುಂದಿನ;
 	}
 	strbuf_release(&buf);
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ clear_ತಳ್ಳು_info(ಶೂನ್ಯ *util, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *string ಬಳಸದ)
 {
-	struct push_info *info = util;
-	free(info->dest);
-	free(info);
+	ರಚನೆ ತಳ್ಳು_info *info = util;
+	ಬಿಡುಗಡೆ(info->dest);
+	ಬಿಡುಗಡೆ(info);
 }
 
-static void free_remote_ref_states(struct ref_states *states)
+ಸ್ಥಿರ ಶೂನ್ಯ free_remote_ref_ಸ್ಥಿತಿಗಳು(ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು)
 {
-	string_list_clear(&states->new_refs, 0);
-	string_list_clear(&states->skipped, 0);
-	string_list_clear(&states->stale, 1);
-	string_list_clear(&states->tracked, 0);
-	string_list_clear(&states->heads, 0);
-	string_list_clear_func(&states->push, clear_push_info);
+	string_list_clear(&ಸ್ಥಿತಿಗಳು->new_refs, 0);
+	string_list_clear(&ಸ್ಥಿತಿಗಳು->skipped, 0);
+	string_list_clear(&ಸ್ಥಿತಿಗಳು->stale, 1);
+	string_list_clear(&ಸ್ಥಿತಿಗಳು->tracked, 0);
+	string_list_clear(&ಸ್ಥಿತಿಗಳು->heads, 0);
+	string_list_clear_func(&ಸ್ಥಿತಿಗಳು->ತಳ್ಳು, clear_ತಳ್ಳು_info);
 }
 
-static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ append_ref_ಗಮ್ಯ_tracked_list(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct ref_states *states = cb_data;
-	struct refspec_item refspec;
+	ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ refspec_ಅಂಶ refspec;
 
-	if (ref->flags & REF_ISSYMREF)
-		return 0;
+	ಆದರೆ (ref->flags & REF_ISSYMREF)
+		ಹಿಂತಿರುಗಿ 0;
 
-	memset(&refspec, 0, sizeof(refspec));
-	refspec.dst = (char *)ref->name;
-	if (!remote_find_tracking(states->remote, &refspec)) {
-		string_list_append(&states->tracked, abbrev_branch(refspec.src));
-		free(refspec.src);
+	memset(&refspec, 0, ಗಾತ್ರ(refspec));
+	refspec.dst = (ಅಕ್ಷರ *)ref->name;
+	ಆದರೆ (!remote_ಕಂಡುಹಿಡಿ_tracking(ಸ್ಥಿತಿಗಳು->remote, &refspec)) {
+		string_list_append(&ಸ್ಥಿತಿಗಳು->tracked, abbrev_branch(refspec.src));
+		ಬಿಡುಗಡೆ(refspec.src);
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_remote_ref_states(const char *name,
-				 struct ref_states *states,
-				 int query)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_remote_ref_ಸ್ಥಿತಿಗಳು(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name,
+				 ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು,
+				 ಪೂರ್ಣಾಂಕ query)
 {
-	states->remote = remote_get(name);
-	if (!states->remote)
-		return error(_("No such remote: '%s'"), name);
+	ಸ್ಥಿತಿಗಳು->remote = remote_get(name);
+	ಆದರೆ (!ಸ್ಥಿತಿಗಳು->remote)
+		ಹಿಂತಿರುಗಿ error(_("No such remote: '%s'"), name);
 
 	read_branches();
 
-	if (query) {
-		struct transport *transport;
-		const struct ref *remote_refs;
+	ಆದರೆ (query) {
+		ರಚನೆ transport *transport;
+		ಸ್ಥಿರಾಂಕ ರಚನೆ ref *remote_refs;
 
-		transport = transport_get(states->remote, states->remote->url.v[0]);
-		remote_refs = transport_get_remote_refs(transport, NULL);
+		transport = transport_get(ಸ್ಥಿತಿಗಳು->remote, ಸ್ಥಿತಿಗಳು->remote->url.v[0]);
+		remote_refs = transport_get_remote_refs(transport, ಖಾಲಿ);
 
-		states->queried = 1;
-		if (query & GET_REF_STATES)
-			get_ref_states(remote_refs, states);
-		if (query & GET_HEAD_NAMES)
-			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
-			get_push_ref_states(remote_refs, states);
+		ಸ್ಥಿತಿಗಳು->queried = 1;
+		ಆದರೆ (query & GET_REF_ಸ್ಥಿತಿಗಳು)
+			get_ref_ಸ್ಥಿತಿಗಳು(remote_refs, ಸ್ಥಿತಿಗಳು);
+		ಆದರೆ (query & GET_ತಲೆ_ಹೆಸರುಗಳು)
+			get_ತಲೆ_ಹೆಸರುಗಳು(remote_refs, ಸ್ಥಿತಿಗಳು);
+		ಆದರೆ (query & GET_ತಳ್ಳು_REF_ಸ್ಥಿತಿಗಳು)
+			get_ತಳ್ಳು_ref_ಸ್ಥಿತಿಗಳು(remote_refs, ಸ್ಥಿತಿಗಳು);
 		transport_disconnect(transport);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_ref_to_tracked_list, states);
-		string_list_sort(&states->tracked);
-		get_push_ref_states_noquery(states);
+				  append_ref_ಗಮ್ಯ_tracked_list, ಸ್ಥಿತಿಗಳು);
+		string_list_ವಿಂಗಡಿಸು(&ಸ್ಥಿತಿಗಳು->tracked);
+		get_ತಳ್ಳು_ref_ಸ್ಥಿತಿಗಳು_noquery(ಸ್ಥಿತಿಗಳು);
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct show_info {
-	struct string_list list;
-	struct ref_states states;
-	int width, width2;
-	int any_rebase;
+ರಚನೆ show_info {
+	ರಚನೆ string_list list;
+	ರಚನೆ ref_ಸ್ಥಿತಿಗಳು ಸ್ಥಿತಿಗಳು;
+	ಪೂರ್ಣಾಂಕ ಅಗಲ, width2;
+	ಪೂರ್ಣಾಂಕ any_rebase;
 };
 
-#define SHOW_INFO_INIT { \
+#ವ್ಯಾಖ್ಯಾನಿಸು SHOW_INFO_INIT { \
 	.list = STRING_LIST_INIT_DUP, \
-	.states = REF_STATES_INIT, \
+	.ಸ್ಥಿತಿಗಳು = REF_ಸ್ಥಿತಿಗಳು_INIT, \
 }
 
-static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_remote_ಗಮ್ಯ_show_info(ರಚನೆ string_list_ಅಂಶ *ಅಂಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct show_info *info = cb_data;
-	int n = strlen(item->string);
-	if (n > info->width)
-		info->width = n;
-	string_list_insert(&info->list, item->string);
-	return 0;
+	ರಚನೆ show_info *info = cb_ದತ್ತಾಂಶ;
+	ಪೂರ್ಣಾಂಕ n = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಅಂಶ->string);
+	ಆದರೆ (n > info->ಅಗಲ)
+		info->ಅಗಲ = n;
+	string_list_ಸೇರಿಸು(&info->list, ಅಂಶ->string);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int show_remote_info_item(struct string_list_item *item, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_remote_info_ಅಂಶ(ರಚನೆ string_list_ಅಂಶ *ಅಂಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct show_info *info = cb_data;
-	struct ref_states *states = &info->states;
-	const char *name = item->string;
+	ರಚನೆ show_info *info = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು = &info->ಸ್ಥಿತಿಗಳು;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name = ಅಂಶ->string;
 
-	if (states->queried) {
-		const char *fmt = "%s";
-		const char *arg = "";
-		if (string_list_has_string(&states->new_refs, name)) {
+	ಆದರೆ (ಸ್ಥಿತಿಗಳು->queried) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *fmt = "%s";
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg = "";
+		ಆದರೆ (string_list_has_string(&ಸ್ಥಿತಿಗಳು->new_refs, name)) {
 			fmt = _(" new (next fetch will store in remotes/%s)");
-			arg = states->remote->name;
-		} else if (string_list_has_string(&states->tracked, name))
+			arg = ಸ್ಥಿತಿಗಳು->remote->name;
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (string_list_has_string(&ಸ್ಥಿತಿಗಳು->tracked, name))
 			arg = _(" tracked");
-		else if (string_list_has_string(&states->skipped, name))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (string_list_has_string(&ಸ್ಥಿತಿಗಳು->skipped, name))
 			arg = _(" skipped");
-		else if (string_list_has_string(&states->stale, name))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (string_list_has_string(&ಸ್ಥಿತಿಗಳು->stale, name))
 			arg = _(" stale (use 'git remote prune' to remove)");
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			arg = _(" ???");
-		printf("    %-*s", info->width, name);
-		printf(fmt, arg);
-		printf("\n");
-	} else
-		printf("    %s\n", name);
+		ಬರೆ("    %-*s", info->ಅಗಲ, name);
+		ಬರೆ(fmt, arg);
+		ಬರೆ("\n");
+	} ಇಲ್ಲದಿದ್ದರೆ
+		ಬರೆ("    %s\n", name);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int add_local_to_show_info(struct string_list_item *branch_item, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_local_ಗಮ್ಯ_show_info(ರಚನೆ string_list_ಅಂಶ *branch_ಅಂಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct show_info *show_info = cb_data;
-	struct ref_states *states = &show_info->states;
-	struct branch_info *branch_info = branch_item->util;
-	struct string_list_item *item;
-	int n;
+	ರಚನೆ show_info *show_info = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ ref_ಸ್ಥಿತಿಗಳು *ಸ್ಥಿತಿಗಳು = &show_info->ಸ್ಥಿತಿಗಳು;
+	ರಚನೆ branch_info *branch_info = branch_ಅಂಶ->util;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ಪೂರ್ಣಾಂಕ n;
 
-	if (!branch_info->merge.nr || !branch_info->remote_name ||
-	    strcmp(states->remote->name, branch_info->remote_name))
-		return 0;
-	if ((n = strlen(branch_item->string)) > show_info->width)
-		show_info->width = n;
-	if (branch_info->rebase >= REBASE_TRUE)
+	ಆದರೆ (!branch_info->ವಿಲೀನ.nr || !branch_info->remote_name ||
+	    strcmp(ಸ್ಥಿತಿಗಳು->remote->name, branch_info->remote_name))
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ ((n = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(branch_ಅಂಶ->string)) > show_info->ಅಗಲ)
+		show_info->ಅಗಲ = n;
+	ಆದರೆ (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
-	item = string_list_insert(&show_info->list, branch_item->string);
-	item->util = branch_info;
+	ಅಂಶ = string_list_ಸೇರಿಸು(&show_info->list, branch_ಅಂಶ->string);
+	ಅಂಶ->util = branch_info;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int show_local_info_item(struct string_list_item *item, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_local_info_ಅಂಶ(ರಚನೆ string_list_ಅಂಶ *ಅಂಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct show_info *show_info = cb_data;
-	struct branch_info *branch_info = item->util;
-	struct string_list *merge = &branch_info->merge;
-	int width = show_info->width + 4;
+	ರಚನೆ show_info *show_info = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ branch_info *branch_info = ಅಂಶ->util;
+	ರಚನೆ string_list *ವಿಲೀನ = &branch_info->ವಿಲೀನ;
+	ಪೂರ್ಣಾಂಕ ಅಗಲ = show_info->ಅಗಲ + 4;
 
-	if (branch_info->rebase >= REBASE_TRUE && branch_info->merge.nr > 1) {
+	ಆದರೆ (branch_info->rebase >= REBASE_TRUE && branch_info->ವಿಲೀನ.nr > 1) {
 		error(_("invalid branch.%s.merge; cannot rebase onto > 1 branch"),
-			item->string);
-		return 0;
+			ಅಂಶ->string);
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	printf("    %-*s ", show_info->width, item->string);
-	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
-		if (branch_info->rebase == REBASE_INTERACTIVE)
-			msg = _("rebases interactively onto remote %s");
-		else if (branch_info->rebase == REBASE_MERGES)
-			msg = _("rebases interactively (with merges) onto "
+	ಬರೆ("    %-*s ", show_info->ಅಗಲ, ಅಂಶ->string);
+	ಆದರೆ (branch_info->rebase >= REBASE_TRUE) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ;
+		ಆದರೆ (branch_info->rebase == REBASE_INTERACTIVE)
+			ಸಂದೇಶ = _("rebases interactively onto remote %s");
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (branch_info->rebase == REBASE_MERGES)
+			ಸಂದೇಶ = _("rebases interactively (with merges) onto "
 				"remote %s");
-		else
-			msg = _("rebases onto remote %s");
-		printf_ln(msg, merge->items[0].string);
-		return 0;
-	} else if (show_info->any_rebase) {
-		printf_ln(_(" merges with remote %s"), merge->items[0].string);
-		width++;
-	} else {
-		printf_ln(_("merges with remote %s"), merge->items[0].string);
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಸಂದೇಶ = _("rebases onto remote %s");
+		printf_ln(ಸಂದೇಶ, ವಿಲೀನ->ವಸ್ತುಗಳು[0].string);
+		ಹಿಂತಿರುಗಿ 0;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (show_info->any_rebase) {
+		printf_ln(_(" merges with remote %s"), ವಿಲೀನ->ವಸ್ತುಗಳು[0].string);
+		ಅಗಲ++;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		printf_ln(_("merges with remote %s"), ವಿಲೀನ->ವಸ್ತುಗಳು[0].string);
 	}
-	for (size_t i = 1; i < merge->nr; i++)
-		printf(_("%-*s    and with remote %s\n"), width, "",
-		       merge->items[i].string);
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 1; i < ವಿಲೀನ->nr; i++)
+		ಬರೆ(_("%-*s    and with remote %s\n"), ಅಗಲ, "",
+		       ವಿಲೀನ->ವಸ್ತುಗಳು[i].string);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_ತಳ್ಳು_ಗಮ್ಯ_show_info(ರಚನೆ string_list_ಅಂಶ *ತಳ್ಳು_ಅಂಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
-	struct string_list_item *item;
-	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
-		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	ರಚನೆ show_info *show_info = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ ತಳ್ಳು_info *ತಳ್ಳು_info = ತಳ್ಳು_ಅಂಶ->util;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ಪೂರ್ಣಾಂಕ n;
+	ಆದರೆ ((n = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ತಳ್ಳು_ಅಂಶ->string)) > show_info->ಅಗಲ)
+		show_info->ಅಗಲ = n;
+	ಆದರೆ ((n = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ತಳ್ಳು_info->dest)) > show_info->width2)
 		show_info->width2 = n;
-	item = string_list_append(&show_info->list, push_item->string);
-	item->util = push_item->util;
-	return 0;
+	ಅಂಶ = string_list_append(&show_info->list, ತಳ್ಳು_ಅಂಶ->string);
+	ಅಂಶ->util = ತಳ್ಳು_ಅಂಶ->util;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmp_string_with_ತಳ್ಳು(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *va, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *vb)
 {
-	const struct string_list_item *a = va;
-	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
-	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ string_list_ಅಂಶ *a = va;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ string_list_ಅಂಶ *b = vb;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ತಳ್ಳು_info *a_ತಳ್ಳು = a->util;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ತಳ್ಳು_info *b_ತಳ್ಳು = b->util;
+	ಪೂರ್ಣಾಂಕ cmp = strcmp(a->string, b->string);
+	ಹಿಂತಿರುಗಿ cmp ? cmp : strcmp(a_ತಳ್ಳು->dest, b_ತಳ್ಳು->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_ತಳ್ಳು_info_ಅಂಶ(ರಚನೆ string_list_ಅಂಶ *ಅಂಶ, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
-	const char *src = item->string, *status = NULL;
+	ರಚನೆ show_info *show_info = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ ತಳ್ಳು_info *ತಳ್ಳು_info = ಅಂಶ->util;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *src = ಅಂಶ->string, *ಸ್ಥಿತಿ_2 = ಖಾಲಿ;
 
-	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
-		status = _("create");
-		break;
-	case PUSH_STATUS_DELETE:
-		status = _("delete");
+	ಆಯ್ಕೆ (ತಳ್ಳು_info->ಸ್ಥಿತಿ_2) {
+	ಸ್ಥಿತಿ ತಳ್ಳು_ಸ್ಥಿತಿ_CREATE:
+		ಸ್ಥಿತಿ_2 = _("create");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ತಳ್ಳು_ಸ್ಥಿತಿ_DELETE:
+		ಸ್ಥಿತಿ_2 = _("delete");
 		src = _("(none)");
-		break;
-	case PUSH_STATUS_UPTODATE:
-		status = _("up to date");
-		break;
-	case PUSH_STATUS_FASTFORWARD:
-		status = _("fast-forwardable");
-		break;
-	case PUSH_STATUS_OUTOFDATE:
-		status = _("local out of date");
-		break;
-	case PUSH_STATUS_NOTQUERIED:
-		break;
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ತಳ್ಳು_ಸ್ಥಿತಿ_UPTODATE:
+		ಸ್ಥಿತಿ_2 = _("up to date");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ತಳ್ಳು_ಸ್ಥಿತಿ_FASTFORWARD:
+		ಸ್ಥಿತಿ_2 = _("fast-forwardable");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ತಳ್ಳು_ಸ್ಥಿತಿ_OUTOFDATE:
+		ಸ್ಥಿತಿ_2 = _("local out of date");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ ತಳ್ಳು_ಸ್ಥಿತಿ_NOTQUERIED:
+		ನಿಲ್ಲಿಸು;
 	}
-	if (status) {
-		if (push_info->forced)
-			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-		else
-			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
-	} else {
-		if (push_info->forced)
-			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
-			       push_info->dest);
-		else
-			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
-			       push_info->dest);
+	ಆದರೆ (ಸ್ಥಿತಿ_2) {
+		ಆದರೆ (ತಳ್ಳು_info->forced)
+			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->ಅಗಲ, src,
+			       show_info->width2, ತಳ್ಳು_info->dest, ಸ್ಥಿತಿ_2);
+		ಇಲ್ಲದಿದ್ದರೆ
+			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->ಅಗಲ, src,
+			       show_info->width2, ತಳ್ಳು_info->dest, ಸ್ಥಿತಿ_2);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (ತಳ್ಳು_info->forced)
+			printf_ln(_("    %-*s forces to %s"), show_info->ಅಗಲ, src,
+			       ತಳ್ಳು_info->dest);
+		ಇಲ್ಲದಿದ್ದರೆ
+			printf_ln(_("    %-*s pushes to %s"), show_info->ಅಗಲ, src,
+			       ತಳ್ಳು_info->dest);
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_one_entry(struct remote *remote, void *priv)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_one_ನಮೂದು(ರಚನೆ remote *remote, ಶೂನ್ಯ *priv)
 {
-	struct string_list *list = priv;
-	struct strbuf remote_info_buf = STRBUF_INIT;
-	struct strvec *url;
+	ರಚನೆ string_list *list = priv;
+	ರಚನೆ strbuf remote_info_buf = STRBUF_INIT;
+	ರಚನೆ strvec *url;
 
-	if (remote->url.nr > 0) {
-		struct strbuf promisor_config = STRBUF_INIT;
-		const char *partial_clone_filter = NULL;
+	ಆದರೆ (remote->url.nr > 0) {
+		ರಚನೆ strbuf promisor_config = STRBUF_INIT;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *partial_clone_filter = ಖಾಲಿ;
 
 		strbuf_addf(&promisor_config, "remote.%s.partialclonefilter", remote->name);
 		strbuf_addf(&remote_info_buf, "%s (fetch)", remote->url.v[0]);
-		if (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
+		ಆದರೆ (!repo_config_get_string_tmp(the_repository, promisor_config.buf, &partial_clone_filter))
 			strbuf_addf(&remote_info_buf, " [%s]", partial_clone_filter);
 
 		strbuf_release(&promisor_config);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
-	} else
-		string_list_append(list, remote->name)->util = NULL;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+				strbuf_detach(&remote_info_buf, ಖಾಲಿ);
+	} ಇಲ್ಲದಿದ್ದರೆ
+		string_list_append(list, remote->name)->util = ಖಾಲಿ;
+	url = ತಳ್ಳು_url_ದ_remote(remote);
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
-				strbuf_detach(&remote_info_buf, NULL);
+				strbuf_detach(&remote_info_buf, ಖಾಲಿ);
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int show_all(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_all(ಶೂನ್ಯ)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	int result;
+	ರಚನೆ string_list list = STRING_LIST_INIT_DUP;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
 
-	result = for_each_remote(get_one_entry, &list);
+	ಫಲಿತಾಂಶ = for_each_remote(get_one_ನಮೂದು, &list);
 
-	if (!result) {
-		string_list_sort(&list);
-		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
-			if (verbose)
-				printf("%s\t%s\n", item->string,
-					item->util ? (const char *)item->util : "");
-			else {
-				if (i && !strcmp((item - 1)->string, item->string))
-					continue;
-				printf("%s\n", item->string);
+	ಆದರೆ (!ಫಲಿತಾಂಶ) {
+		string_list_ವಿಂಗಡಿಸು(&list);
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < list.nr; i++) {
+			ರಚನೆ string_list_ಅಂಶ *ಅಂಶ = list.ವಸ್ತುಗಳು + i;
+			ಆದರೆ (verbose)
+				ಬರೆ("%s\t%s\n", ಅಂಶ->string,
+					ಅಂಶ->util ? (ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *)ಅಂಶ->util : "");
+			ಇಲ್ಲದಿದ್ದರೆ {
+				ಆದರೆ (i && !strcmp((ಅಂಶ - 1)->string, ಅಂಶ->string))
+					ಮುಂದುವರಿ;
+				ಬರೆ("%s\n", ಅಂಶ->string);
 			}
 		}
 	}
 	string_list_clear(&list, 1);
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static int show(int argc, const char **argv, const char *prefix,
-		struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int no_query = 0, result = 0, query_flag = 0;
-	struct option options[] = {
-		OPT_BOOL('n', NULL, &no_query, N_("do not query remotes")),
-		OPT_END()
+	ಪೂರ್ಣಾಂಕ no_query = 0, ಫಲಿತಾಂಶ = 0, query_flag = 0;
+	ರಚನೆ option options[] = {
+		OPT_BOOL('n', ಖಾಲಿ, &no_query, N_("do not query remotes")),
+		OPT_ಕೊನೆ()
 	};
-	struct show_info info = SHOW_INFO_INIT;
+	ರಚನೆ show_info info = SHOW_INFO_INIT;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_show_usage,
 			     0);
 
-	if (argc < 1)
-		return show_all();
+	ಆದರೆ (argc < 1)
+		ಹಿಂತಿರುಗಿ show_all();
 
-	if (!no_query)
-		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
+	ಆದರೆ (!no_query)
+		query_flag = (GET_REF_ಸ್ಥಿತಿಗಳು | GET_ತಲೆ_ಹೆಸರುಗಳು | GET_ತಳ್ಳು_REF_ಸ್ಥಿತಿಗಳು);
 
-	for (; argc; argc--, argv++) {
-		size_t i;
-		struct strvec *url;
+	ಗಾಗಿ (; argc; argc--, argv++) {
+		ಗಾತ್ರ_t i;
+		ರಚನೆ strvec *url;
 
-		get_remote_ref_states(*argv, &info.states, query_flag);
+		get_remote_ref_ಸ್ಥಿತಿಗಳು(*argv, &info.ಸ್ಥಿತಿಗಳು, query_flag);
 
 		printf_ln(_("* remote %s"), *argv);
-		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
-		url = push_url_of_remote(info.states.remote);
-		for (i = 0; i < url->nr; i++)
+		printf_ln(_("  Fetch URL: %s"), info.ಸ್ಥಿತಿಗಳು.remote->url.v[0]);
+		url = ತಳ್ಳು_url_ದ_remote(info.ಸ್ಥಿತಿಗಳು.remote);
+		ಗಾಗಿ (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
 			 * with the one in " Fetch URL: %s"
 			 * translation.
 			 */
 			printf_ln(_("  Push  URL: %s"), url->v[i]);
-		if (!i)
+		ಆದರೆ (!i)
 			printf_ln(_("  Push  URL: %s"), _("(no URL)"));
-		if (no_query)
+		ಆದರೆ (no_query)
 			printf_ln(_("  HEAD branch: %s"), _("(not queried)"));
-		else if (!info.states.heads.nr)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!info.ಸ್ಥಿತಿಗಳು.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
-		else if (info.states.heads.nr == 1)
-			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
-		else {
-			printf(_("  HEAD branch (remote HEAD is ambiguous,"
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (info.ಸ್ಥಿತಿಗಳು.heads.nr == 1)
+			printf_ln(_("  HEAD branch: %s"), info.ಸ್ಥಿತಿಗಳು.heads.ವಸ್ತುಗಳು[0].string);
+		ಇಲ್ಲದಿದ್ದರೆ {
+			ಬರೆ(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
-			for (i = 0; i < info.states.heads.nr; i++)
-				printf("    %s\n", info.states.heads.items[i].string);
+			ಗಾಗಿ (i = 0; i < info.ಸ್ಥಿತಿಗಳು.heads.nr; i++)
+				ಬರೆ("    %s\n", info.ಸ್ಥಿತಿಗಳು.heads.ವಸ್ತುಗಳು[i].string);
 		}
 
 		/* remote branch info */
-		info.width = 0;
-		for_each_string_list(&info.states.new_refs, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.skipped, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.tracked, add_remote_to_show_info, &info);
-		for_each_string_list(&info.states.stale, add_remote_to_show_info, &info);
-		if (info.list.nr)
+		info.ಅಗಲ = 0;
+		for_each_string_list(&info.ಸ್ಥಿತಿಗಳು.new_refs, ಕೂಡಿಸು_remote_ಗಮ್ಯ_show_info, &info);
+		for_each_string_list(&info.ಸ್ಥಿತಿಗಳು.skipped, ಕೂಡಿಸು_remote_ಗಮ್ಯ_show_info, &info);
+		for_each_string_list(&info.ಸ್ಥಿತಿಗಳು.tracked, ಕೂಡಿಸು_remote_ಗಮ್ಯ_show_info, &info);
+		for_each_string_list(&info.ಸ್ಥಿತಿಗಳು.stale, ಕೂಡಿಸು_remote_ಗಮ್ಯ_show_info, &info);
+		ಆದರೆ (info.list.nr)
 			printf_ln(Q_("  Remote branch:%s",
 				     "  Remote branches:%s",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_remote_info_item, &info);
+		for_each_string_list(&info.list, show_remote_info_ಅಂಶ, &info);
 		string_list_clear(&info.list, 0);
 
 		/* git pull info */
-		info.width = 0;
+		info.ಅಗಲ = 0;
 		info.any_rebase = 0;
-		for_each_string_list(&branch_list, add_local_to_show_info, &info);
-		if (info.list.nr)
+		for_each_string_list(&branch_list, ಕೂಡಿಸು_local_ಗಮ್ಯ_show_info, &info);
+		ಆದರೆ (info.list.nr)
 			printf_ln(Q_("  Local branch configured for 'git pull':",
 				     "  Local branches configured for 'git pull':",
 				     info.list.nr));
-		for_each_string_list(&info.list, show_local_info_item, &info);
+		for_each_string_list(&info.list, show_local_info_ಅಂಶ, &info);
 		string_list_clear(&info.list, 0);
 
 		/* git push info */
-		if (info.states.remote->mirror)
+		ಆದರೆ (info.ಸ್ಥಿತಿಗಳು.remote->mirror)
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
-		info.width = info.width2 = 0;
-		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
-		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
-		if (info.list.nr)
+		info.ಅಗಲ = info.width2 = 0;
+		for_each_string_list(&info.ಸ್ಥಿತಿಗಳು.ತಳ್ಳು, ಕೂಡಿಸು_ತಳ್ಳು_ಗಮ್ಯ_show_info, &info);
+		QSORT(info.list.ವಸ್ತುಗಳು, info.list.nr, cmp_string_with_ತಳ್ಳು);
+		ಆದರೆ (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_push_info_item, &info);
+		for_each_string_list(&info.list, show_ತಳ್ಳು_info_ಅಂಶ, &info);
 		string_list_clear(&info.list, 0);
 
-		free_remote_ref_states(&info.states);
+		free_remote_ref_ಸ್ಥಿತಿಗಳು(&info.ಸ್ಥಿತಿಗಳು);
 	}
 
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static void report_set_head_auto(const char *remote, const char *head_name,
-			struct strbuf *b_local_head, int was_detached) {
-	struct strbuf buf_prefix = STRBUF_INIT;
-	const char *prev_head = NULL;
+ಸ್ಥಿರ ಶೂನ್ಯ report_ಗಣ_ತಲೆ_auto(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remote, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಲೆ_name,
+			ರಚನೆ strbuf *b_local_ತಲೆ, ಪೂರ್ಣಾಂಕ was_detached) {
+	ರಚನೆ strbuf buf_ಪೂರ್ವಪ್ರತ್ಯಯ = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *prev_ತಲೆ = ಖಾಲಿ;
 
-	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
-	skip_prefix(b_local_head->buf, buf_prefix.buf, &prev_head);
+	strbuf_addf(&buf_ಪೂರ್ವಪ್ರತ್ಯಯ, "refs/remotes/%s/", remote);
+	skip_ಪೂರ್ವಪ್ರತ್ಯಯ(b_local_ತಲೆ->buf, buf_ಪೂರ್ವಪ್ರತ್ಯಯ.buf, &prev_ತಲೆ);
 
-	if (prev_head && !strcmp(prev_head, head_name))
-		printf(_("'%s/HEAD' is unchanged and points to '%s'\n"),
-			remote, head_name);
-	else if (prev_head)
-		printf(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
-			remote, prev_head, head_name);
-	else if (!b_local_head->len)
-		printf(_("'%s/HEAD' is now created and points to '%s'\n"),
-			remote, head_name);
-	else if (was_detached && b_local_head->len)
-		printf(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
-			remote, b_local_head->buf, head_name);
-	else
-		printf(_("'%s/HEAD' used to point to '%s' "
+	ಆದರೆ (prev_ತಲೆ && !strcmp(prev_ತಲೆ, ತಲೆ_name))
+		ಬರೆ(_("'%s/HEAD' is unchanged and points to '%s'\n"),
+			remote, ತಲೆ_name);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (prev_ತಲೆ)
+		ಬರೆ(_("'%s/HEAD' has changed from '%s' and now points to '%s'\n"),
+			remote, prev_ತಲೆ, ತಲೆ_name);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!b_local_ತಲೆ->len)
+		ಬರೆ(_("'%s/HEAD' is now created and points to '%s'\n"),
+			remote, ತಲೆ_name);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (was_detached && b_local_ತಲೆ->len)
+		ಬರೆ(_("'%s/HEAD' was detached at '%s' and now points to '%s'\n"),
+			remote, b_local_ತಲೆ->buf, ತಲೆ_name);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಬರೆ(_("'%s/HEAD' used to point to '%s' "
 			"(which is not a remote branch), but now points to '%s'\n"),
-			remote, b_local_head->buf, head_name);
-	strbuf_release(&buf_prefix);
+			remote, b_local_ತಲೆ->buf, ತಲೆ_name);
+	strbuf_release(&buf_ಪೂರ್ವಪ್ರತ್ಯಯ);
 }
 
-static int set_head(int argc, const char **argv, const char *prefix,
-		    struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಗಣ_ತಲೆ(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		    ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int opt_a = 0, opt_d = 0, result = 0, was_detached;
-	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
-		b_local_head = STRBUF_INIT;
-	char *head_name = NULL;
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct remote *remote;
+	ಪೂರ್ಣಾಂಕ opt_a = 0, opt_d = 0, ಫಲಿತಾಂಶ = 0, was_detached;
+	ರಚನೆ strbuf b_ತಲೆ = STRBUF_INIT, b_remote_ತಲೆ = STRBUF_INIT,
+		b_local_ತಲೆ = STRBUF_INIT;
+	ಅಕ್ಷರ *ತಲೆ_name = ಖಾಲಿ;
+	ರಚನೆ ref_store *refs = get_main_ref_store(the_repository);
+	ರಚನೆ remote *remote;
 
-	struct option options[] = {
+	ರಚನೆ option options[] = {
 		OPT_BOOL('a', "auto", &opt_a,
 			 N_("set refs/remotes/<name>/HEAD according to remote")),
 		OPT_BOOL('d', "delete", &opt_d,
 			 N_("delete refs/remotes/<name>/HEAD")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_sethead_usage, 0);
 
 	/* All modes require at least a remote name. */
-	if (!argc)
+	ಆದರೆ (!argc)
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	strbuf_addf(&b_head, "refs/remotes/%s/HEAD", argv[0]);
+	strbuf_addf(&b_ತಲೆ, "refs/remotes/%s/HEAD", argv[0]);
 	remote = remote_get(argv[0]);
 
-	if (!opt_a && !opt_d && argc == 2) {
-		head_name = xstrdup(argv[1]);
-	} else if (opt_a && !opt_d && argc == 1) {
-		struct ref_states states = REF_STATES_INIT;
-		get_remote_ref_states(argv[0], &states, GET_HEAD_NAMES);
-		if (!states.heads.nr)
-			result |= error(_("Cannot determine remote HEAD"));
-		else if (states.heads.nr > 1) {
-			result |= error(_("Multiple remote HEAD branches. "
+	ಆದರೆ (!opt_a && !opt_d && argc == 2) {
+		ತಲೆ_name = xstrdup(argv[1]);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (opt_a && !opt_d && argc == 1) {
+		ರಚನೆ ref_ಸ್ಥಿತಿಗಳು ಸ್ಥಿತಿಗಳು = REF_ಸ್ಥಿತಿಗಳು_INIT;
+		get_remote_ref_ಸ್ಥಿತಿಗಳು(argv[0], &ಸ್ಥಿತಿಗಳು, GET_ತಲೆ_ಹೆಸರುಗಳು);
+		ಆದರೆ (!ಸ್ಥಿತಿಗಳು.heads.nr)
+			ಫಲಿತಾಂಶ |= error(_("Cannot determine remote HEAD"));
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಸ್ಥಿತಿಗಳು.heads.nr > 1) {
+			ಫಲಿತಾಂಶ |= error(_("Multiple remote HEAD branches. "
 					  "Please choose one explicitly with:"));
-			for (size_t i = 0; i < states.heads.nr; i++)
+			ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ಸ್ಥಿತಿಗಳು.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
-					argv[0], states.heads.items[i].string);
-		} else
-			head_name = xstrdup(states.heads.items[0].string);
-		free_remote_ref_states(&states);
-	} else if (opt_d && !opt_a && argc == 1) {
-		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
-			result |= error(_("Could not delete %s"), b_head.buf);
-	} else
+					argv[0], ಸ್ಥಿತಿಗಳು.heads.ವಸ್ತುಗಳು[i].string);
+		} ಇಲ್ಲದಿದ್ದರೆ
+			ತಲೆ_name = xstrdup(ಸ್ಥಿತಿಗಳು.heads.ವಸ್ತುಗಳು[0].string);
+		free_remote_ref_ಸ್ಥಿತಿಗಳು(&ಸ್ಥಿತಿಗಳು);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (opt_d && !opt_a && argc == 1) {
+		ಆದರೆ (refs_delete_ref(refs, ಖಾಲಿ, b_ತಲೆ.buf, ಖಾಲಿ, REF_NO_DEREF))
+			ಫಲಿತಾಂಶ |= error(_("Could not delete %s"), b_ತಲೆ.buf);
+	} ಇಲ್ಲದಿದ್ದರೆ
 		usage_with_options(builtin_remote_sethead_usage, options);
 
-	if (!head_name)
-		goto cleanup;
-	strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", argv[0], head_name);
-	if (!refs_ref_exists(refs, b_remote_head.buf)) {
-		result |= error(_("Not a valid ref: %s"), b_remote_head.buf);
-		goto cleanup;
+	ಆದರೆ (!ತಲೆ_name)
+		ಹೋಗು cleanup;
+	strbuf_addf(&b_remote_ತಲೆ, "refs/remotes/%s/%s", argv[0], ತಲೆ_name);
+	ಆದರೆ (!refs_ref_exists(refs, b_remote_ತಲೆ.buf)) {
+		ಫಲಿತಾಂಶ |= error(_("Not a valid ref: %s"), b_remote_ತಲೆ.buf);
+		ಹೋಗು cleanup;
 	}
-	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
-			"remote set-head", &b_local_head, 0);
-	if (was_detached == -1) {
-		result |= error(_("Could not set up %s"), b_head.buf);
-		goto cleanup;
+	was_detached = refs_update_symref_extended(refs, b_ತಲೆ.buf, b_remote_ತಲೆ.buf,
+			"remote set-head", &b_local_ತಲೆ, 0);
+	ಆದರೆ (was_detached == -1) {
+		ಫಲಿತಾಂಶ |= error(_("Could not set up %s"), b_ತಲೆ.buf);
+		ಹೋಗು cleanup;
 	}
-	if (opt_a)
-		report_set_head_auto(argv[0], head_name, &b_local_head, was_detached);
-	if (remote->follow_remote_head == FOLLOW_REMOTE_ALWAYS) {
-		struct strbuf config_name = STRBUF_INIT;
+	ಆದರೆ (opt_a)
+		report_ಗಣ_ತಲೆ_auto(argv[0], ತಲೆ_name, &b_local_ತಲೆ, was_detached);
+	ಆದರೆ (remote->follow_remote_ತಲೆ == FOLLOW_REMOTE_ALWAYS) {
+		ರಚನೆ strbuf config_name = STRBUF_INIT;
 		strbuf_addf(&config_name,
 			"remote.%s.followremotehead", remote->name);
-		repo_config_set(the_repository, config_name.buf, "warn");
+		repo_config_ಗಣ(the_repository, config_name.buf, "warn");
 		strbuf_release(&config_name);
 	}
 
 cleanup:
-	free(head_name);
-	strbuf_release(&b_head);
-	strbuf_release(&b_remote_head);
-	strbuf_release(&b_local_head);
-	return result;
+	ಬಿಡುಗಡೆ(ತಲೆ_name);
+	strbuf_release(&b_ತಲೆ);
+	strbuf_release(&b_remote_ತಲೆ);
+	strbuf_release(&b_local_ತಲೆ);
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static int prune_remote(const char *remote, int dry_run)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ prune_remote(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remote, ಪೂರ್ಣಾಂಕ dry_ಸತತ)
 {
-	int result = 0;
-	struct ref_states states = REF_STATES_INIT;
-	struct string_list refs_to_prune = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ = 0;
+	ರಚನೆ ref_ಸ್ಥಿತಿಗಳು ಸ್ಥಿತಿಗಳು = REF_ಸ್ಥಿತಿಗಳು_INIT;
+	ರಚನೆ string_list refs_ಗಮ್ಯ_prune = STRING_LIST_INIT_NODUP;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
 
-	get_remote_ref_states(remote, &states, GET_REF_STATES);
+	get_remote_ref_ಸ್ಥಿತಿಗಳು(remote, &ಸ್ಥಿತಿಗಳು, GET_REF_ಸ್ಥಿತಿಗಳು);
 
-	if (!states.stale.nr) {
-		free_remote_ref_states(&states);
-		return 0;
+	ಆದರೆ (!ಸ್ಥಿತಿಗಳು.stale.nr) {
+		free_remote_ref_ಸ್ಥಿತಿಗಳು(&ಸ್ಥಿತಿಗಳು);
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
 	printf_ln(_("Pruning %s"), remote);
-	printf_ln(_("URL: %s"), states.remote->url.v[0]);
+	printf_ln(_("URL: %s"), ಸ್ಥಿತಿಗಳು.remote->url.v[0]);
 
-	for_each_string_list_item(item, &states.stale)
-		string_list_append(&refs_to_prune, item->util);
-	string_list_sort(&refs_to_prune);
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &ಸ್ಥಿತಿಗಳು.stale)
+		string_list_append(&refs_ಗಮ್ಯ_prune, ಅಂಶ->util);
+	string_list_ವಿಂಗಡಿಸು(&refs_ಗಮ್ಯ_prune);
 
-	if (!dry_run)
-		result |= refs_delete_refs(get_main_ref_store(the_repository),
-					   "remote: prune", &refs_to_prune, 0);
+	ಆದರೆ (!dry_ಸತತ)
+		ಫಲಿತಾಂಶ |= refs_delete_refs(get_main_ref_store(the_repository),
+					   "remote: prune", &refs_ಗಮ್ಯ_prune, 0);
 
-	for_each_string_list_item(item, &states.stale) {
-		const char *refname = item->util;
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &ಸ್ಥಿತಿಗಳು.stale) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *refname = ಅಂಶ->util;
 
-		if (dry_run)
+		ಆದರೆ (dry_ಸತತ)
 			printf_ln(_(" * [would prune] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			printf_ln(_(" * [pruned] %s"),
 			       abbrev_ref(refname, "refs/remotes/"));
 	}
 
 	refs_warn_dangling_symrefs(get_main_ref_store(the_repository),
-				   stdout, " ", dry_run, &refs_to_prune);
+				   stdout, " ", dry_ಸತತ, &refs_ಗಮ್ಯ_prune);
 
-	string_list_clear(&refs_to_prune, 0);
-	free_remote_ref_states(&states);
-	return result;
+	string_list_clear(&refs_ಗಮ್ಯ_prune, 0);
+	free_remote_ref_ಸ್ಥಿತಿಗಳು(&ಸ್ಥಿತಿಗಳು);
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static int prune(int argc, const char **argv, const char *prefix,
-		 struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ prune(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int dry_run = 0, result = 0;
-	struct option options[] = {
-		OPT__DRY_RUN(&dry_run, N_("dry run")),
-		OPT_END()
+	ಪೂರ್ಣಾಂಕ dry_ಸತತ = 0, ಫಲಿತಾಂಶ = 0;
+	ರಚನೆ option options[] = {
+		OPT_DRY_ಸತತ(&dry_ಸತತ, N_("dry run")),
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_prune_usage, 0);
 
-	if (argc < 1)
+	ಆದರೆ (argc < 1)
 		usage_with_options(builtin_remote_prune_usage, options);
 
-	for (; argc; argc--, argv++)
-		result |= prune_remote(*argv, dry_run);
+	ಗಾಗಿ (; argc; argc--, argv++)
+		ಫಲಿತಾಂಶ |= prune_remote(*argv, dry_ಸತತ);
 
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
-			      const struct config_context *ctx UNUSED,
-			      void *priv)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_remote_default(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ ಬಳಸದ,
+			      ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx ಬಳಸದ,
+			      ಶೂನ್ಯ *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
-		int *found = priv;
-		*found = 1;
+	ಆದರೆ (strcmp(ಕೀಲಿ, "remotes.default") == 0) {
+		ಪೂರ್ಣಾಂಕ *ಸಿಕ್ಕಿತು_2 = priv;
+		*ಸಿಕ್ಕಿತು_2 = 1;
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int update(int argc, const char **argv, const char *prefix,
-		  struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ update(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		  ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int i, prune = -1;
-	struct option options[] = {
+	ಪೂರ್ಣಾಂಕ i, prune = -1;
+	ರಚನೆ option options[] = {
 		OPT_BOOL('p', "prune", &prune,
 			 N_("prune remotes after fetching")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int default_defined = 0;
+	ರಚನೆ ಮಗು_process cmd = ಮಗು_PROCESS_INIT;
+	ಪೂರ್ಣಾಂಕ default_defined = 0;
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_update_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "fetch");
 
-	if (prune != -1)
-		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
-	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, "--multiple");
-	if (argc < 2)
-		strvec_push(&cmd.args, "default");
-	for (i = 1; i < argc; i++)
-		strvec_push(&cmd.args, argv[i]);
+	ಆದರೆ (prune != -1)
+		strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, prune ? "--prune" : "--no-prune");
+	ಆದರೆ (verbose)
+		strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "-v");
+	strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "--multiple");
+	ಆದರೆ (argc < 2)
+		strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "default");
+	ಗಾಗಿ (i = 1; i < argc; i++)
+		strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	ಆದರೆ (strcmp(cmd.ವಾದಗಳು.v[cmd.ವಾದಗಳು.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
-		if (!default_defined) {
-			strvec_pop(&cmd.args);
-			strvec_push(&cmd.args, "--all");
+		ಆದರೆ (!default_defined) {
+			strvec_ತೆಗೆ(&cmd.ವಾದಗಳು);
+			strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, "--all");
 		}
 	}
 
 	cmd.git_cmd = 1;
-	return run_command(&cmd);
+	ಹಿಂತಿರುಗಿ ಸತತ_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ remove_all_fetch_refspecs(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	ಹಿಂತಿರುಗಿ repo_config_ಗಣ_multivar_gently(the_repository, ಕೀಲಿ, ಖಾಲಿ, ಖಾಲಿ,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
-static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_branches(ರಚನೆ remote *remote, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **branches,
+			 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ)
 {
-	const char *remotename = remote->name;
-	int mirror = remote->mirror;
-	struct strbuf refspec = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remotename = remote->name;
+	ಪೂರ್ಣಾಂಕ mirror = remote->mirror;
+	ರಚನೆ strbuf refspec = STRBUF_INIT;
 
-	for (; *branches; branches++)
-		add_branch(key, *branches, remotename, mirror, &refspec);
+	ಗಾಗಿ (; *branches; branches++)
+		ಕೂಡಿಸು_branch(ಕೀಲಿ, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
 
-static int set_remote_branches(const char *remotename, const char **branches,
-				int add_mode)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಗಣ_remote_branches(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remotename, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **branches,
+				ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_ಬಹುಲಕ)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct remote *remote;
+	ರಚನೆ strbuf ಕೀಲಿ = STRBUF_INIT;
+	ರಚನೆ remote *remote;
 
-	strbuf_addf(&key, "remote.%s.fetch", remotename);
+	strbuf_addf(&ಕೀಲಿ, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ಆದರೆ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		ನಿರ್ಗಮಿಸು(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
-		strbuf_release(&key);
-		return 1;
+	ಆದರೆ (!ಕೂಡಿಸು_ಬಹುಲಕ && remove_all_fetch_refspecs(ಕೀಲಿ.buf)) {
+		strbuf_release(&ಕೀಲಿ);
+		ಹಿಂತಿರುಗಿ 1;
 	}
-	add_branches(remote, branches, key.buf);
+	ಕೂಡಿಸು_branches(remote, branches, ಕೀಲಿ.buf);
 
-	strbuf_release(&key);
-	return 0;
+	strbuf_release(&ಕೀಲಿ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int set_branches(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಗಣ_branches(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int add_mode = 0;
-	struct option options[] = {
-		OPT_BOOL('\0', "add", &add_mode, N_("add branch")),
-		OPT_END()
+	ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_ಬಹುಲಕ = 0;
+	ರಚನೆ option options[] = {
+		OPT_BOOL('\0', "add", &ಕೂಡಿಸು_ಬಹುಲಕ, N_("add branch")),
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_setbranches_usage, 0);
-	if (argc == 0) {
+	ಆದರೆ (argc == 0) {
 		error(_("no remote specified"));
 		usage_with_options(builtin_remote_setbranches_usage, options);
 	}
-	argv[argc] = NULL;
+	argv[argc] = ಖಾಲಿ;
 
-	return set_remote_branches(argv[0], argv + 1, add_mode);
+	ಹಿಂತಿರುಗಿ ಗಣ_remote_branches(argv[0], argv + 1, ಕೂಡಿಸು_ಬಹುಲಕ);
 }
 
-static int get_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_url(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		   ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int push_mode = 0, all_mode = 0;
-	const char *remotename = NULL;
-	struct remote *remote;
-	struct strvec *url;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	ಪೂರ್ಣಾಂಕ ತಳ್ಳು_ಬಹುಲಕ = 0, all_ಬಹುಲಕ = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remotename = ಖಾಲಿ;
+	ರಚನೆ remote *remote;
+	ರಚನೆ strvec *url;
+	ರಚನೆ option options[] = {
+		OPT_BOOL('\0', "push", &ತಳ್ಳು_ಬಹುಲಕ,
 			 N_("query push URLs rather than fetch URLs")),
-		OPT_BOOL('\0', "all", &all_mode,
+		OPT_BOOL('\0', "all", &all_ಬಹುಲಕ,
 			 N_("return all URLs")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_geturl_usage, 0);
 
-	if (argc != 1)
+	ಆದರೆ (argc != 1)
 		usage_with_options(builtin_remote_geturl_usage, options);
 
 	remotename = argv[0];
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ಆದರೆ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		ನಿರ್ಗಮಿಸು(2);
 	}
 
-	url = push_mode ? push_url_of_remote(remote) : &remote->url;
+	url = ತಳ್ಳು_ಬಹುಲಕ ? ತಳ್ಳು_url_ದ_remote(remote) : &remote->url;
 
-	if (all_mode) {
-		for (size_t i = 0; i < url->nr; i++)
+	ಆದರೆ (all_ಬಹುಲಕ) {
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < url->nr; i++)
 			printf_ln("%s", url->v[i]);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		printf_ln("%s", url->v[0]);
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int set_url(int argc, const char **argv, const char *prefix,
-		   struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಗಣ_url(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		   ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
-	int matches = 0, negative_matches = 0;
-	const char *remotename = NULL;
-	const char *newurl = NULL;
-	const char *oldurl = NULL;
-	struct remote *remote;
+	ಪೂರ್ಣಾಂಕ ತಳ್ಳು_ಬಹುಲಕ = 0, ಕೂಡಿಸು_ಬಹುಲಕ = 0, delete_ಬಹುಲಕ = 0;
+	ಪೂರ್ಣಾಂಕ matches = 0, negative_matches = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remotename = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *newurl = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *oldurl = ಖಾಲಿ;
+	ರಚನೆ remote *remote;
 	regex_t old_regex;
-	struct strvec *urlset;
-	struct strbuf name_buf = STRBUF_INIT;
-	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+	ರಚನೆ strvec *urlset;
+	ರಚನೆ strbuf name_buf = STRBUF_INIT;
+	ರಚನೆ option options[] = {
+		OPT_BOOL('\0', "push", &ತಳ್ಳು_ಬಹುಲಕ,
 			 N_("manipulate push URLs")),
-		OPT_BOOL('\0', "add", &add_mode,
+		OPT_BOOL('\0', "add", &ಕೂಡಿಸು_ಬಹುಲಕ,
 			 N_("add URL")),
-		OPT_BOOL('\0', "delete", &delete_mode,
+		OPT_BOOL('\0', "delete", &delete_ಬಹುಲಕ,
 			    N_("delete URLs")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     builtin_remote_seturl_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	if (add_mode && delete_mode)
+	ಆದರೆ (ಕೂಡಿಸು_ಬಹುಲಕ && delete_ಬಹುಲಕ)
 		die(_("--add --delete doesn't make sense"));
 
-	if (argc < 3 || argc > 4 || ((add_mode || delete_mode) && argc != 3))
+	ಆದರೆ (argc < 3 || argc > 4 || ((ಕೂಡಿಸು_ಬಹುಲಕ || delete_ಬಹುಲಕ) && argc != 3))
 		usage_with_options(builtin_remote_seturl_usage, options);
 
 	remotename = argv[1];
 	newurl = argv[2];
-	if (argc > 3)
+	ಆದರೆ (argc > 3)
 		oldurl = argv[3];
 
-	if (delete_mode)
+	ಆದರೆ (delete_ಬಹುಲಕ)
 		oldurl = newurl;
 
 	remote = remote_get(remotename);
-	if (!remote_is_configured(remote, 1)) {
+	ಆದರೆ (!remote_is_configured(remote, 1)) {
 		error(_("No such remote '%s'"), remotename);
-		exit(2);
+		ನಿರ್ಗಮಿಸು(2);
 	}
 
-	if (push_mode) {
+	ಆದರೆ (ತಳ್ಳು_ಬಹುಲಕ) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		strbuf_addf(&name_buf, "remote.%s.url", remotename);
 		urlset = &remote->url;
 	}
 
 	/* Special cases that add new entry. */
-	if ((!oldurl && !delete_mode) || add_mode) {
-		if (add_mode)
-			repo_config_set_multivar(the_repository, name_buf.buf, newurl,
+	ಆದರೆ ((!oldurl && !delete_ಬಹುಲಕ) || ಕೂಡಿಸು_ಬಹುಲಕ) {
+		ಆದರೆ (ಕೂಡಿಸು_ಬಹುಲಕ)
+			repo_config_ಗಣ_multivar(the_repository, name_buf.buf, newurl,
 						       "^$", 0);
-		else
-			repo_config_set(the_repository, name_buf.buf, newurl);
-		goto out;
+		ಇಲ್ಲದಿದ್ದರೆ
+			repo_config_ಗಣ(the_repository, name_buf.buf, newurl);
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
 	/* Old URL specified. Demand that one matches. */
-	if (regcomp(&old_regex, oldurl, REG_EXTENDED))
+	ಆದರೆ (regcomp(&old_regex, oldurl, REG_EXTENDED))
 		die(_("Invalid old URL pattern: %s"), oldurl);
 
-	for (size_t i = 0; i < urlset->nr; i++)
-		if (!regexec(&old_regex, urlset->v[i], 0, NULL, 0))
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < urlset->nr; i++)
+		ಆದರೆ (!regexec(&old_regex, urlset->v[i], 0, ಖಾಲಿ, 0))
 			matches++;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			negative_matches++;
-	if (!delete_mode && !matches)
+	ಆದರೆ (!delete_ಬಹುಲಕ && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	ಆದರೆ (delete_ಬಹುಲಕ && !negative_matches && !ತಳ್ಳು_ಬಹುಲಕ)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);
 
-	if (!delete_mode)
-		repo_config_set_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
-	else
-		repo_config_set_multivar(the_repository, name_buf.buf, NULL, oldurl,
+	ಆದರೆ (!delete_ಬಹುಲಕ)
+		repo_config_ಗಣ_multivar(the_repository, name_buf.buf, newurl, oldurl, 0);
+	ಇಲ್ಲದಿದ್ದರೆ
+		repo_config_ಗಣ_multivar(the_repository, name_buf.buf, ಖಾಲಿ, oldurl,
 					 CONFIG_FLAGS_MULTI_REPLACE);
-out:
+ಹೊರಹೋಗು:
 	strbuf_release(&name_buf);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_remote(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_remote(ಪೂರ್ಣಾಂಕ argc,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	       ರಚನೆ repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ಖಾಲಿ;
+	ರಚನೆ option options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose; must be placed before a subcommand")),
-		OPT_SUBCOMMAND("add", &fn, add),
+		OPT_SUBCOMMAND("add", &fn, ಕೂಡಿಸು),
 		OPT_SUBCOMMAND("rename", &fn, mv),
-		OPT_SUBCOMMAND_F("rm", &fn, rm, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("rm", &fn, rm, ಖಾಲಿ, PARSE_OPT_NOCOMPLETE),
 		OPT_SUBCOMMAND("remove", &fn, rm),
-		OPT_SUBCOMMAND("set-head", &fn, set_head),
-		OPT_SUBCOMMAND("set-branches", &fn, set_branches),
+		OPT_SUBCOMMAND("set-head", &fn, ಗಣ_ತಲೆ),
+		OPT_SUBCOMMAND("set-branches", &fn, ಗಣ_branches),
 		OPT_SUBCOMMAND("get-url", &fn, get_url),
-		OPT_SUBCOMMAND("set-url", &fn, set_url),
+		OPT_SUBCOMMAND("set-url", &fn, ಗಣ_url),
 		OPT_SUBCOMMAND("show", &fn, show),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("update", &fn, update),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, builtin_remote_usage,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, builtin_remote_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL);
 
-	if (fn) {
-		return !!fn(argc, argv, prefix, repo);
-	} else {
-		if (argc) {
+	ಆದರೆ (fn) {
+		ಹಿಂತಿರುಗಿ !!fn(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, repo);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (argc) {
 			error(_("unknown subcommand: `%s'"), argv[0]);
 			usage_with_options(builtin_remote_usage, options);
 		}
-		return !!show_all();
+		ಹಿಂತಿರುಗಿ !!show_all();
 	}
 }

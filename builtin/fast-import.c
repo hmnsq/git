@@ -1,367 +1,367 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "lockfile.h"
-#include "object.h"
-#include "blob.h"
-#include "tree.h"
-#include "commit.h"
-#include "delta.h"
-#include "pack.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "refs.h"
-#include "csum-file.h"
-#include "quote.h"
-#include "dir.h"
-#include "run-command.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "mem-pool.h"
-#include "commit-reach.h"
-#include "khash.h"
-#include "date.h"
-#include "gpg-interface.h"
-#include "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "lockfile.h"
+#ಅನ್ತರ್ಭಾವ "object.h"
+#ಅನ್ತರ್ಭಾವ "blob.h"
+#ಅನ್ತರ್ಭಾವ "tree.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "delta.h"
+#ಅನ್ತರ್ಭಾವ "pack.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "read-cache-ll.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "csum-file.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "packfile.h"
+#ಅನ್ತರ್ಭಾವ "object-file.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "mem-pool.h"
+#ಅನ್ತರ್ಭಾವ "commit-reach.h"
+#ಅನ್ತರ್ಭಾವ "khash.h"
+#ಅನ್ತರ್ಭಾವ "date.h"
+#ಅನ್ತರ್ಭಾವ "gpg-interface.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
 
-#define PACK_ID_BITS 16
-#define MAX_PACK_ID ((1<<PACK_ID_BITS)-1)
-#define DEPTH_BITS 13
-#define MAX_DEPTH ((1<<DEPTH_BITS)-1)
+#ವ್ಯಾಖ್ಯಾನಿಸು PACK_ID_ಬಿಟ್ಟುಗಳು 16
+#ವ್ಯಾಖ್ಯಾನಿಸು MAX_PACK_ID ((1<<PACK_ID_ಬಿಟ್ಟುಗಳು)-1)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಆಳ_ಬಿಟ್ಟುಗಳು 13
+#ವ್ಯಾಖ್ಯಾನಿಸು MAX_ಆಳ ((1<<ಆಳ_ಬಿಟ್ಟುಗಳು)-1)
 
 /*
  * We abuse the setuid bit on directories to mean "do not delta".
  */
-#define NO_DELTA S_ISUID
+#ವ್ಯಾಖ್ಯಾನಿಸು NO_DELTA S_ISUID
 
 /*
  * The amount of additional space required in order to write an object into the
  * current pack. This is the hash lengths at the end of the pack, plus the
  * length of one object ID.
  */
-#define PACK_SIZE_THRESHOLD (the_hash_algo->rawsz * 3)
+#ವ್ಯಾಖ್ಯಾನಿಸು PACK_ಗಾತ್ರ_ಮಿತಿ (the_hash_algo->rawsz * 3)
 
-struct object_entry {
-	struct pack_idx_entry idx;
-	struct hashmap_entry ent;
-	uint32_t type : TYPE_BITS,
-		pack_id : PACK_ID_BITS,
-		depth : DEPTH_BITS;
+ರಚನೆ object_ನಮೂದು {
+	ರಚನೆ pack_idx_ನಮೂದು idx;
+	ರಚನೆ hashmap_ನಮೂದು ent;
+	uint32_t type : TYPE_ಬಿಟ್ಟುಗಳು,
+		pack_id : PACK_ID_ಬಿಟ್ಟುಗಳು,
+		ಆಳ : ಆಳ_ಬಿಟ್ಟುಗಳು;
 };
 
-static int object_entry_hashcmp(const void *map_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ object_ನಮೂದು_hashcmp(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *map_ದತ್ತಾಂಶ ಬಳಸದ,
+				ಸ್ಥಿರಾಂಕ ರಚನೆ hashmap_ನಮೂದು *eptr,
+				ಸ್ಥಿರಾಂಕ ರಚನೆ hashmap_ನಮೂದು *ನಮೂದು_or_ಕೀಲಿ,
+				ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *keydata)
 {
-	const struct object_id *oid = keydata;
-	const struct object_entry *e1, *e2;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid = keydata;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e1, *e2;
 
-	e1 = container_of(eptr, const struct object_entry, ent);
-	if (oid)
-		return oidcmp(&e1->idx.oid, oid);
+	e1 = container_ದ(eptr, ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು, ent);
+	ಆದರೆ (oid)
+		ಹಿಂತಿರುಗಿ oidcmp(&e1->idx.oid, oid);
 
-	e2 = container_of(entry_or_key, const struct object_entry, ent);
-	return oidcmp(&e1->idx.oid, &e2->idx.oid);
+	e2 = container_ದ(ನಮೂದು_or_ಕೀಲಿ, ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು, ent);
+	ಹಿಂತಿರುಗಿ oidcmp(&e1->idx.oid, &e2->idx.oid);
 }
 
-struct object_entry_pool {
-	struct object_entry_pool *next_pool;
-	struct object_entry *next_free;
-	struct object_entry *end;
-	struct object_entry entries[FLEX_ARRAY]; /* more */
+ರಚನೆ object_ನಮೂದು_pool {
+	ರಚನೆ object_ನಮೂದು_pool *ಮುಂದಿನ_pool;
+	ರಚನೆ object_ನಮೂದು *ಮುಂದಿನ_free;
+	ರಚನೆ object_ನಮೂದು *ಕೊನೆ;
+	ರಚನೆ object_ನಮೂದು entries[FLEX_ARRAY]; /*ಇನ್ನಷ್ಟು*/
 };
 
-struct mark_set {
-	union {
-		struct object_id *oids[1024];
-		struct object_entry *marked[1024];
-		struct mark_set *sets[1024];
-	} data;
-	unsigned int shift;
+ರಚನೆ mark_ಗಣ {
+	ಒಕ್ಕೂಟ {
+		ರಚನೆ object_id *oids[1024];
+		ರಚನೆ object_ನಮೂದು *marked[1024];
+		ರಚನೆ mark_ಗಣ *sets[1024];
+	} ದತ್ತಾಂಶ;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಸರಿಸು;
 };
 
-struct last_object {
-	struct strbuf data;
-	off_t offset;
-	unsigned int depth;
-	unsigned no_swap : 1;
+ರಚನೆ ಕೊನೆಯ_object {
+	ರಚನೆ strbuf ದತ್ತಾಂಶ;
+	off_t ಸ್ಥಾನಾಂತರ;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಆಳ;
+	ಚಿಹ್ನೆರಹಿತ no_ಅದಲುಬದಲು : 1;
 };
 
-struct atom_str {
-	struct atom_str *next_atom;
-	unsigned short str_len;
-	char str_dat[FLEX_ARRAY]; /* more */
+ರಚನೆ atom_str {
+	ರಚನೆ atom_str *ಮುಂದಿನ_atom;
+	ಚಿಹ್ನೆರಹಿತ ಗಿಡ್ಡ str_len;
+	ಅಕ್ಷರ str_dat[FLEX_ARRAY]; /*ಇನ್ನಷ್ಟು*/
 };
 
-struct tree_content;
-struct tree_entry {
-	struct tree_content *tree;
-	struct atom_str *name;
-	struct tree_entry_ms {
-		uint16_t mode;
-		struct object_id oid;
+ರಚನೆ ವೃಕ್ಷ_content;
+ರಚನೆ ವೃಕ್ಷ_ನಮೂದು {
+	ರಚನೆ ವೃಕ್ಷ_content *ವೃಕ್ಷ;
+	ರಚನೆ atom_str *name;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು_ms {
+		uint16_t ಬಹುಲಕ;
+		ರಚನೆ object_id oid;
 	} versions[2];
 };
 
-struct tree_content {
-	unsigned int entry_capacity; /* must match avail_tree_content */
-	unsigned int entry_count;
-	unsigned int delta_depth;
-	struct tree_entry *entries[FLEX_ARRAY]; /* more */
+ರಚನೆ ವೃಕ್ಷ_content {
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ನಮೂದು_ಸಾಮರ್ಥ್ಯ; /* must match avail_tree_content */
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ನಮೂದು_ಎಣಿಕೆ;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ delta_ಆಳ;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *entries[FLEX_ARRAY]; /*ಇನ್ನಷ್ಟು*/
 };
 
-struct avail_tree_content {
-	unsigned int entry_capacity; /* must match tree_content */
-	struct avail_tree_content *next_avail;
+ರಚನೆ avail_ವೃಕ್ಷ_content {
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ನಮೂದು_ಸಾಮರ್ಥ್ಯ; /* must match tree_content */
+	ರಚನೆ avail_ವೃಕ್ಷ_content *ಮುಂದಿನ_avail;
 };
 
-struct branch {
-	struct branch *table_next_branch;
-	struct branch *active_next_branch;
-	const char *name;
-	struct tree_entry branch_tree;
-	uintmax_t last_commit;
-	uintmax_t num_notes;
-	unsigned active : 1;
-	unsigned delete : 1;
-	unsigned pack_id : PACK_ID_BITS;
-	struct object_id oid;
+ರಚನೆ branch {
+	ರಚನೆ branch *ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch;
+	ರಚನೆ branch *ಸಕ್ರಿಯ_ಮುಂದಿನ_branch;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು branch_ವೃಕ್ಷ;
+	uintmax_t ಕೊನೆಯ_commit;
+	uintmax_t ಅಂಕೆ_notes;
+	ಚಿಹ್ನೆರಹಿತ ಸಕ್ರಿಯ : 1;
+	ಚಿಹ್ನೆರಹಿತ delete : 1;
+	ಚಿಹ್ನೆರಹಿತ pack_id : PACK_ID_ಬಿಟ್ಟುಗಳು;
+	ರಚನೆ object_id oid;
 };
 
-struct tag {
-	struct tag *next_tag;
-	const char *name;
-	unsigned int pack_id;
-	struct object_id oid;
+ರಚನೆ ಟ್ಯಾಗ್ {
+	ರಚನೆ ಟ್ಯಾಗ್ *ಮುಂದಿನ_ಟ್ಯಾಗ್;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ pack_id;
+	ರಚನೆ object_id oid;
 };
 
-struct hash_list {
-	struct hash_list *next;
-	struct object_id oid;
+ರಚನೆ hash_list {
+	ರಚನೆ hash_list *ಮುಂದಿನ;
+	ರಚನೆ object_id oid;
 };
 
-typedef enum {
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ಎಣಿಕೆ {
 	WHENSPEC_RAW = 1,
 	WHENSPEC_RAW_PERMISSIVE,
 	WHENSPEC_RFC2822,
 	WHENSPEC_NOW
 } whenspec_type;
 
-struct recent_command {
-	struct recent_command *prev;
-	struct recent_command *next;
-	char *buf;
+ರಚನೆ recent_command {
+	ರಚನೆ recent_command *prev;
+	ರಚನೆ recent_command *ಮುಂದಿನ;
+	ಅಕ್ಷರ *buf;
 };
 
-typedef void (*mark_set_inserter_t)(struct mark_set **s, struct object_id *oid, uintmax_t mark);
-typedef void (*each_mark_fn_t)(uintmax_t mark, void *obj, void *cbp);
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ಶೂನ್ಯ (*mark_ಗಣ_inserter_t)(ರಚನೆ mark_ಗಣ **s, ರಚನೆ object_id *oid, uintmax_t mark);
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ಶೂನ್ಯ (*each_mark_fn_t)(uintmax_t mark, ಶೂನ್ಯ *obj, ಶೂನ್ಯ *cbp);
 
 /* Configured limits on output */
-static unsigned long max_depth = 50;
-static off_t max_packsize;
-static int unpack_limit = 100;
-static int force_update;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ max_ಆಳ = 50;
+ಸ್ಥಿರ off_t max_packsize;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ unpack_ಎಲ್ಲೆ = 100;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ force_update;
 
 /* Stats and misc. counters */
-static uintmax_t alloc_count;
-static uintmax_t marks_set_count;
-static uintmax_t object_count_by_type[1 << TYPE_BITS];
-static uintmax_t duplicate_count_by_type[1 << TYPE_BITS];
-static uintmax_t delta_count_by_type[1 << TYPE_BITS];
-static uintmax_t delta_count_attempts_by_type[1 << TYPE_BITS];
-static unsigned long object_count;
-static unsigned long branch_count;
-static unsigned long branch_load_count;
-static int failure;
-static FILE *pack_edges;
-static int show_stats = 1;
-static int quiet;
-static enum sign_mode signed_tag_mode = SIGN_VERBATIM;
-static enum sign_mode signed_commit_mode = SIGN_VERBATIM;
-static const char *signed_commit_keyid;
-static const char *signed_tag_keyid;
+ಸ್ಥಿರ uintmax_t alloc_ಎಣಿಕೆ;
+ಸ್ಥಿರ uintmax_t marks_ಗಣ_ಎಣಿಕೆ;
+ಸ್ಥಿರ uintmax_t object_ಎಣಿಕೆ_by_type[1 << TYPE_ಬಿಟ್ಟುಗಳು];
+ಸ್ಥಿರ uintmax_t duplicate_ಎಣಿಕೆ_by_type[1 << TYPE_ಬಿಟ್ಟುಗಳು];
+ಸ್ಥಿರ uintmax_t delta_ಎಣಿಕೆ_by_type[1 << TYPE_ಬಿಟ್ಟುಗಳು];
+ಸ್ಥಿರ uintmax_t delta_ಎಣಿಕೆ_attempts_by_type[1 << TYPE_ಬಿಟ್ಟುಗಳು];
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ object_ಎಣಿಕೆ;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ branch_ಎಣಿಕೆ;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ branch_ತುಂಬು_ಎಣಿಕೆ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ failure;
+ಸ್ಥಿರ FILE *pack_ಅಂಚುಗಳು;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_stats = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ quiet;
+ಸ್ಥಿರ ಎಣಿಕೆ sign_ಬಹುಲಕ signed_ಟ್ಯಾಗ್_ಬಹುಲಕ = SIGN_VERBATIM;
+ಸ್ಥಿರ ಎಣಿಕೆ sign_ಬಹುಲಕ signed_commit_ಬಹುಲಕ = SIGN_VERBATIM;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *signed_commit_keyid;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *signed_ಟ್ಯಾಗ್_keyid;
 
 /* Memory pools */
-static struct mem_pool fi_mem_pool = {
-	.block_alloc = 2*1024*1024 - sizeof(struct mp_block),
+ಸ್ಥಿರ ರಚನೆ mem_pool fi_mem_pool = {
+	.ಖಂಡ_alloc = 2*1024*1024 - ಗಾತ್ರ(ರಚನೆ mp_ಖಂಡ),
 };
 
 /* Atom management */
-static unsigned int atom_table_sz = 4451;
-static unsigned int atom_cnt;
-static struct atom_str **atom_table;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ atom_ಕೋಷ್ಟಕ_sz = 4451;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ atom_cnt;
+ಸ್ಥಿರ ರಚನೆ atom_str **atom_ಕೋಷ್ಟಕ;
 
 /* The .pack file being generated */
-static struct pack_idx_option pack_idx_opts;
-static unsigned int pack_id;
-static struct hashfile *pack_file;
-static struct packed_git *pack_data;
-static struct packed_git **all_packs;
-static off_t pack_size;
+ಸ್ಥಿರ ರಚನೆ pack_idx_option pack_idx_opts;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ pack_id;
+ಸ್ಥಿರ ರಚನೆ hashfile *pack_file;
+ಸ್ಥಿರ ರಚನೆ packed_git *pack_ದತ್ತಾಂಶ;
+ಸ್ಥಿರ ರಚನೆ packed_git **all_packs;
+ಸ್ಥಿರ off_t pack_ಗಾತ್ರ;
 
 /* Table of objects we've written. */
-static unsigned int object_entry_alloc = 5000;
-static struct object_entry_pool *blocks;
-static struct hashmap object_table;
-static struct mark_set *marks;
-static char *export_marks_file;
-static char *import_marks_file;
-static int import_marks_file_from_stream;
-static int import_marks_file_ignore_missing;
-static int import_marks_file_done;
-static int relative_marks_paths;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ object_ನಮೂದು_alloc = 5000;
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು_pool *ಖಂಡಗಳು;
+ಸ್ಥಿರ ರಚನೆ hashmap object_ಕೋಷ್ಟಕ;
+ಸ್ಥಿರ ರಚನೆ mark_ಗಣ *marks;
+ಸ್ಥಿರ ಅಕ್ಷರ *export_marks_file;
+ಸ್ಥಿರ ಅಕ್ಷರ *import_marks_file;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ import_marks_file_from_ಹರಿವು;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ import_marks_file_ignore_missing;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ import_marks_file_ಮುಗಿದ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ relative_marks_paths;
 
 /* Our last blob */
-static struct last_object last_blob = {
-	.data = STRBUF_INIT,
+ಸ್ಥಿರ ರಚನೆ ಕೊನೆಯ_object ಕೊನೆಯ_blob = {
+	.ದತ್ತಾಂಶ = STRBUF_INIT,
  };
 
 /* Tree management */
-static unsigned int tree_entry_alloc = 1000;
-static void *avail_tree_entry;
-static unsigned int avail_tree_table_sz = 100;
-static struct avail_tree_content **avail_tree_table;
-static size_t tree_entry_allocd;
-static struct strbuf old_tree = STRBUF_INIT;
-static struct strbuf new_tree = STRBUF_INIT;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_ನಮೂದು_alloc = 1000;
+ಸ್ಥಿರ ಶೂನ್ಯ *avail_ವೃಕ್ಷ_ನಮೂದು;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ_sz = 100;
+ಸ್ಥಿರ ರಚನೆ avail_ವೃಕ್ಷ_content **avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ;
+ಸ್ಥಿರ ಗಾತ್ರ_t ವೃಕ್ಷ_ನಮೂದು_allocd;
+ಸ್ಥಿರ ರಚನೆ strbuf old_ವೃಕ್ಷ = STRBUF_INIT;
+ಸ್ಥಿರ ರಚನೆ strbuf new_ವೃಕ್ಷ = STRBUF_INIT;
 
 /* Branch data */
-static unsigned long max_active_branches = 5;
-static unsigned long cur_active_branches;
-static unsigned long branch_table_sz = 1039;
-static struct branch **branch_table;
-static struct branch *active_branches;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ max_ಸಕ್ರಿಯ_branches = 5;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ cur_ಸಕ್ರಿಯ_branches;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ branch_ಕೋಷ್ಟಕ_sz = 1039;
+ಸ್ಥಿರ ರಚನೆ branch **branch_ಕೋಷ್ಟಕ;
+ಸ್ಥಿರ ರಚನೆ branch *ಸಕ್ರಿಯ_branches;
 
 /* Tag data */
-static struct tag *first_tag;
-static struct tag *last_tag;
+ಸ್ಥಿರ ರಚನೆ ಟ್ಯಾಗ್ *ಮೊದಲ_ಟ್ಯಾಗ್;
+ಸ್ಥಿರ ರಚನೆ ಟ್ಯಾಗ್ *ಕೊನೆಯ_ಟ್ಯಾಗ್;
 
 /* Input stream parsing */
-static whenspec_type whenspec = WHENSPEC_RAW;
-static struct strbuf command_buf = STRBUF_INIT;
-static int unread_command_buf;
-static struct recent_command cmd_hist = {
+ಸ್ಥಿರ whenspec_type whenspec = WHENSPEC_RAW;
+ಸ್ಥಿರ ರಚನೆ strbuf command_buf = STRBUF_INIT;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ unread_command_buf;
+ಸ್ಥಿರ ರಚನೆ recent_command cmd_hist = {
 	.prev = &cmd_hist,
-	.next = &cmd_hist,
+	.ಮುಂದಿನ = &cmd_hist,
 };
-static struct recent_command *cmd_tail = &cmd_hist;
-static struct recent_command *rc_free;
-static unsigned int cmd_save = 100;
-static uintmax_t next_mark;
-static struct strbuf new_data = STRBUF_INIT;
-static int require_explicit_termination;
+ಸ್ಥಿರ ರಚನೆ recent_command *cmd_ಬಾಲ = &cmd_hist;
+ಸ್ಥಿರ ರಚನೆ recent_command *rc_free;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ cmd_save = 100;
+ಸ್ಥಿರ uintmax_t ಮುಂದಿನ_mark;
+ಸ್ಥಿರ ರಚನೆ strbuf new_ದತ್ತಾಂಶ = STRBUF_INIT;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ require_explicit_termination;
 
 /* Signal handling */
-static volatile sig_atomic_t checkpoint_requested;
+ಸ್ಥಿರ ಅಸ್ಥಿರ sig_atomic_t checkpoint_requested;
 
 /* Submodule marks */
-static struct string_list sub_marks_from = STRING_LIST_INIT_DUP;
-static struct string_list sub_marks_to = STRING_LIST_INIT_DUP;
-static kh_oid_map_t *sub_oid_map;
+ಸ್ಥಿರ ರಚನೆ string_list sub_marks_from = STRING_LIST_INIT_DUP;
+ಸ್ಥಿರ ರಚನೆ string_list sub_marks_ಗಮ್ಯ = STRING_LIST_INIT_DUP;
+ಸ್ಥಿರ kh_oid_map_t *sub_oid_map;
 
 /* Where to write output of cat-blob commands */
-static int cat_blob_fd = STDOUT_FILENO;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cat_blob_fd = STDOUT_FILENO;
 
 /* Command state */
-struct fast_import_state {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	int seen_data_command;
-	int allow_unsafe_features;
-	struct option *option;
+ರಚನೆ fast_import_state {
+	ಪೂರ್ಣಾಂಕ argc;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ;
+	ಪೂರ್ಣಾಂಕ ನೋಡಿದ_ದತ್ತಾಂಶ_command;
+	ಪೂರ್ಣಾಂಕ allow_unsafe_features;
+	ರಚನೆ option *option;
 };
 
-static void fast_import_state_init(struct fast_import_state *state,
-				   int argc, const char **argv,
-				   const char *prefix, struct option *option)
+ಸ್ಥಿರ ಶೂನ್ಯ fast_import_state_init(ರಚನೆ fast_import_state *state,
+				   ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ, ರಚನೆ option *option)
 {
-	memset(state, 0, sizeof(*state));
+	memset(state, 0, ಗಾತ್ರ(*state));
 	state->argc = argc;
 	state->argv = argv;
-	state->prefix = prefix;
+	state->ಪೂರ್ವಪ್ರತ್ಯಯ = ಪೂರ್ವಪ್ರತ್ಯಯ;
 	state->option = option;
 }
 
-static void parse_argv(struct fast_import_state *state);
-static void parse_get_mark(struct fast_import_state *state, const char *p);
-static void parse_cat_blob(struct fast_import_state *state, const char *p);
-static void parse_ls(struct fast_import_state *state,
-		     const char *p,
-		     struct branch *b);
+ಸ್ಥಿರ ಶೂನ್ಯ parse_argv(ರಚನೆ fast_import_state *state);
+ಸ್ಥಿರ ಶೂನ್ಯ parse_get_mark(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p);
+ಸ್ಥಿರ ಶೂನ್ಯ parse_cat_blob(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p);
+ಸ್ಥಿರ ಶೂನ್ಯ parse_ls(ರಚನೆ fast_import_state *state,
+		     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+		     ರಚನೆ branch *b);
 
-static void for_each_mark(struct mark_set *m, uintmax_t base, each_mark_fn_t callback, void *p)
+ಸ್ಥಿರ ಶೂನ್ಯ for_each_mark(ರಚನೆ mark_ಗಣ *m, uintmax_t ತಳ, each_mark_fn_t callback, ಶೂನ್ಯ *p)
 {
 	uintmax_t k;
-	if (m->shift) {
-		for (k = 0; k < 1024; k++) {
-			if (m->data.sets[k])
-				for_each_mark(m->data.sets[k], base + (k << m->shift), callback, p);
+	ಆದರೆ (m->ಸರಿಸು) {
+		ಗಾಗಿ (k = 0; k < 1024; k++) {
+			ಆದರೆ (m->ದತ್ತಾಂಶ.sets[k])
+				for_each_mark(m->ದತ್ತಾಂಶ.sets[k], ತಳ + (k << m->ಸರಿಸು), callback, p);
 		}
-	} else {
-		for (k = 0; k < 1024; k++) {
-			if (m->data.marked[k])
-				callback(base + k, m->data.marked[k], p);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಗಾಗಿ (k = 0; k < 1024; k++) {
+			ಆದರೆ (m->ದತ್ತಾಂಶ.marked[k])
+				callback(ತಳ + k, m->ದತ್ತಾಂಶ.marked[k], p);
 		}
 	}
 }
 
-static void dump_marks_fn(uintmax_t mark, void *object, void *cbp) {
-	struct object_entry *e = object;
+ಸ್ಥಿರ ಶೂನ್ಯ dump_marks_fn(uintmax_t mark, ಶೂನ್ಯ *object, ಶೂನ್ಯ *cbp) {
+	ರಚನೆ object_ನಮೂದು *e = object;
 	FILE *f = cbp;
 
-	fprintf(f, ":%" PRIuMAX " %s\n", mark, oid_to_hex(&e->idx.oid));
+	fprintf(f, ":%" PRIuMAX " %s\n", mark, oid_ಗಮ್ಯ_hex(&e->idx.oid));
 }
 
-static void write_branch_report(FILE *rpt, struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ write_branch_report(FILE *rpt, ರಚನೆ branch *b)
 {
 	fprintf(rpt, "%s:\n", b->name);
 
 	fprintf(rpt, "  status      :");
-	if (b->active)
+	ಆದರೆ (b->ಸಕ್ರಿಯ)
 		fputs(" active", rpt);
-	if (b->branch_tree.tree)
+	ಆದರೆ (b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ)
 		fputs(" loaded", rpt);
-	if (is_null_oid(&b->branch_tree.versions[1].oid))
+	ಆದರೆ (is_null_oid(&b->branch_ವೃಕ್ಷ.versions[1].oid))
 		fputs(" dirty", rpt);
 	fputc('\n', rpt);
 
-	fprintf(rpt, "  tip commit  : %s\n", oid_to_hex(&b->oid));
+	fprintf(rpt, "  tip commit  : %s\n", oid_ಗಮ್ಯ_hex(&b->oid));
 	fprintf(rpt, "  old tree    : %s\n",
-		oid_to_hex(&b->branch_tree.versions[0].oid));
+		oid_ಗಮ್ಯ_hex(&b->branch_ವೃಕ್ಷ.versions[0].oid));
 	fprintf(rpt, "  cur tree    : %s\n",
-		oid_to_hex(&b->branch_tree.versions[1].oid));
-	fprintf(rpt, "  commit clock: %" PRIuMAX "\n", b->last_commit);
+		oid_ಗಮ್ಯ_hex(&b->branch_ವೃಕ್ಷ.versions[1].oid));
+	fprintf(rpt, "  commit clock: %" PRIuMAX "\n", b->ಕೊನೆಯ_commit);
 
 	fputs("  last pack   : ", rpt);
-	if (b->pack_id < MAX_PACK_ID)
+	ಆದರೆ (b->pack_id < MAX_PACK_ID)
 		fprintf(rpt, "%u", b->pack_id);
 	fputc('\n', rpt);
 
 	fputc('\n', rpt);
 }
 
-static void write_crash_report(const char *err)
+ಸ್ಥಿರ ಶೂನ್ಯ write_crash_report(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *err)
 {
-	char *loc = repo_git_path(the_repository, "fast_import_crash_%"PRIuMAX, (uintmax_t) getpid());
+	ಅಕ್ಷರ *loc = repo_git_ಮಾರ್ಗ(the_repository, "fast_import_crash_%"PRIuMAX, (uintmax_t) getpid());
 	FILE *rpt = fopen(loc, "w");
-	struct branch *b;
-	unsigned long lu;
-	struct recent_command *rc;
+	ರಚನೆ branch *b;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ lu;
+	ರಚನೆ recent_command *rc;
 
-	if (!rpt) {
+	ಆದರೆ (!rpt) {
 		error_errno(_("can't write crash report %s"), loc);
-		free(loc);
-		return;
+		ಬಿಡುಗಡೆ(loc);
+		ಹಿಂತಿರುಗಿ;
 	}
 
 	fprintf(stderr, _("fast-import: dumping crash report to %s\n"), loc);
@@ -369,7 +369,7 @@ static void write_crash_report(const char *err)
 	fprintf(rpt, "fast-import crash report:\n");
 	fprintf(rpt, "    fast-import process: %"PRIuMAX"\n", (uintmax_t) getpid());
 	fprintf(rpt, "    parent process     : %"PRIuMAX"\n", (uintmax_t) getppid());
-	fprintf(rpt, "    at %s\n", show_date(time(NULL), 0, DATE_MODE(ISO8601)));
+	fprintf(rpt, "    at %s\n", show_date(ಸಮಯ(ಖಾಲಿ), 0, DATE_ಬಹುಲಕ(ISO8601)));
 	fputc('\n', rpt);
 
 	fputs("fatal: ", rpt);
@@ -379,10 +379,10 @@ static void write_crash_report(const char *err)
 	fputc('\n', rpt);
 	fputs("Most Recent Commands Before Crash\n", rpt);
 	fputs("---------------------------------\n", rpt);
-	for (rc = cmd_hist.next; rc != &cmd_hist; rc = rc->next) {
-		if (rc->next == &cmd_hist)
+	ಗಾಗಿ (rc = cmd_hist.ಮುಂದಿನ; rc != &cmd_hist; rc = rc->ಮುಂದಿನ) {
+		ಆದರೆ (rc->ಮುಂದಿನ == &cmd_hist)
 			fputs("* ", rpt);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			fputs("  ", rpt);
 		fputs(rc->buf, rpt);
 		fputc('\n', rpt);
@@ -392,30 +392,30 @@ static void write_crash_report(const char *err)
 	fputs("Active Branch LRU\n", rpt);
 	fputs("-----------------\n", rpt);
 	fprintf(rpt, "    active_branches = %lu cur, %lu max\n",
-		cur_active_branches,
-		max_active_branches);
+		cur_ಸಕ್ರಿಯ_branches,
+		max_ಸಕ್ರಿಯ_branches);
 	fputc('\n', rpt);
 	fputs("  pos  clock name\n", rpt);
 	fputs("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n", rpt);
-	for (b = active_branches, lu = 0; b; b = b->active_next_branch)
+	ಗಾಗಿ (b = ಸಕ್ರಿಯ_branches, lu = 0; b; b = b->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch)
 		fprintf(rpt, "  %2lu) %6" PRIuMAX" %s\n",
-			++lu, b->last_commit, b->name);
+			++lu, b->ಕೊನೆಯ_commit, b->name);
 
 	fputc('\n', rpt);
 	fputs("Inactive Branches\n", rpt);
 	fputs("-----------------\n", rpt);
-	for (lu = 0; lu < branch_table_sz; lu++) {
-		for (b = branch_table[lu]; b; b = b->table_next_branch)
+	ಗಾಗಿ (lu = 0; lu < branch_ಕೋಷ್ಟಕ_sz; lu++) {
+		ಗಾಗಿ (b = branch_ಕೋಷ್ಟಕ[lu]; b; b = b->ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch)
 			write_branch_report(rpt, b);
 	}
 
-	if (first_tag) {
-		struct tag *tg;
+	ಆದರೆ (ಮೊದಲ_ಟ್ಯಾಗ್) {
+		ರಚನೆ ಟ್ಯಾಗ್ *tg;
 		fputc('\n', rpt);
 		fputs("Annotated Tags\n", rpt);
 		fputs("--------------\n", rpt);
-		for (tg = first_tag; tg; tg = tg->next_tag) {
-			fputs(oid_to_hex(&tg->oid), rpt);
+		ಗಾಗಿ (tg = ಮೊದಲ_ಟ್ಯಾಗ್; tg; tg = tg->ಮುಂದಿನ_ಟ್ಯಾಗ್) {
+			fputs(oid_ಗಮ್ಯ_hex(&tg->oid), rpt);
 			fputc(' ', rpt);
 			fputs(tg->name, rpt);
 			fputc('\n', rpt);
@@ -425,367 +425,367 @@ static void write_crash_report(const char *err)
 	fputc('\n', rpt);
 	fputs("Marks\n", rpt);
 	fputs("-----\n", rpt);
-	if (export_marks_file)
+	ಆದರೆ (export_marks_file)
 		fprintf(rpt, "  exported to %s\n", export_marks_file);
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		for_each_mark(marks, 0, dump_marks_fn, rpt);
 
 	fputc('\n', rpt);
 	fputs("-------------------\n", rpt);
 	fputs("END OF CRASH REPORT\n", rpt);
 	fclose(rpt);
-	free(loc);
+	ಬಿಡುಗಡೆ(loc);
 }
 
-static void end_packfile(void);
-static void unkeep_all_packs(void);
-static void dump_marks(void);
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೊನೆ_packfile(ಶೂನ್ಯ);
+ಸ್ಥಿರ ಶೂನ್ಯ unkeep_all_packs(ಶೂನ್ಯ);
+ಸ್ಥಿರ ಶೂನ್ಯ dump_marks(ಶೂನ್ಯ);
 
-static NORETURN void die_nicely(const char *err, va_list params)
+ಸ್ಥಿರ NORETURN ಶೂನ್ಯ die_nicely(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *err, va_list params)
 {
 	va_list cp;
-	static int zombie;
-	report_fn die_message_fn = get_die_message_routine();
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ zombie;
+	report_fn die_ಸಂದೇಶ_fn = get_die_ಸಂದೇಶ_routine();
 
 	va_copy(cp, params);
-	die_message_fn(err, params);
+	die_ಸಂದೇಶ_fn(err, params);
 
-	if (!zombie) {
-		char message[2 * PATH_MAX];
+	ಆದರೆ (!zombie) {
+		ಅಕ್ಷರ ಸಂದೇಶ_2[2 * ಮಾರ್ಗ_MAX];
 
 		zombie = 1;
-		vsnprintf(message, sizeof(message), err, cp);
-		write_crash_report(message);
-		end_packfile();
+		vsnprintf(ಸಂದೇಶ_2, ಗಾತ್ರ(ಸಂದೇಶ_2), err, cp);
+		write_crash_report(ಸಂದೇಶ_2);
+		ಕೊನೆ_packfile();
 		unkeep_all_packs();
 		dump_marks();
 	}
-	exit(128);
+	ನಿರ್ಗಮಿಸು(128);
 }
 
-#ifndef SIGUSR1	/* Windows, for example */
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ SIGUSR1	/* Windows, for example */
 
-static void set_checkpoint_signal(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಗಣ_checkpoint_signal(ಶೂನ್ಯ)
 {
 }
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
-static void checkpoint_signal(int signo UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ checkpoint_signal(ಪೂರ್ಣಾಂಕ signo ಬಳಸದ)
 {
 	checkpoint_requested = 1;
 }
 
-static void set_checkpoint_signal(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಗಣ_checkpoint_signal(ಶೂನ್ಯ)
 {
-	struct sigaction sa;
+	ರಚನೆ sigaction sa;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, ಗಾತ್ರ(sa));
 	sa.sa_handler = checkpoint_signal;
-	sigemptyset(&sa.sa_mask);
+	sigemptyset(&sa.sa_ಮುಖವಾಡ);
 	sa.sa_flags = SA_RESTART;
-	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR1, &sa, ಖಾಲಿ);
 }
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-static void alloc_objects(unsigned int cnt)
+ಸ್ಥಿರ ಶೂನ್ಯ alloc_objects(ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ cnt)
 {
-	struct object_entry_pool *b;
+	ರಚನೆ object_ನಮೂದು_pool *b;
 
-	b = xmalloc(sizeof(struct object_entry_pool)
-		+ cnt * sizeof(struct object_entry));
-	b->next_pool = blocks;
-	b->next_free = b->entries;
-	b->end = b->entries + cnt;
-	blocks = b;
-	alloc_count += cnt;
+	b = xmalloc(ಗಾತ್ರ(ರಚನೆ object_ನಮೂದು_pool)
+		+ cnt * ಗಾತ್ರ(ರಚನೆ object_ನಮೂದು));
+	b->ಮುಂದಿನ_pool = ಖಂಡಗಳು;
+	b->ಮುಂದಿನ_free = b->entries;
+	b->ಕೊನೆ = b->entries + cnt;
+	ಖಂಡಗಳು = b;
+	alloc_ಎಣಿಕೆ += cnt;
 }
 
-static struct object_entry *new_object(struct object_id *oid)
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು *new_object(ರಚನೆ object_id *oid)
 {
-	struct object_entry *e;
+	ರಚನೆ object_ನಮೂದು *e;
 
-	if (blocks->next_free == blocks->end)
-		alloc_objects(object_entry_alloc);
+	ಆದರೆ (ಖಂಡಗಳು->ಮುಂದಿನ_free == ಖಂಡಗಳು->ಕೊನೆ)
+		alloc_objects(object_ನಮೂದು_alloc);
 
-	e = blocks->next_free++;
+	e = ಖಂಡಗಳು->ಮುಂದಿನ_free++;
 	oidcpy(&e->idx.oid, oid);
-	return e;
+	ಹಿಂತಿರುಗಿ e;
 }
 
-static struct object_entry *find_object(struct object_id *oid)
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು *ಕಂಡುಹಿಡಿ_object(ರಚನೆ object_id *oid)
 {
-	return hashmap_get_entry_from_hash(&object_table, oidhash(oid), oid,
-					   struct object_entry, ent);
+	ಹಿಂತಿರುಗಿ hashmap_get_ನಮೂದು_from_hash(&object_ಕೋಷ್ಟಕ, oidhash(oid), oid,
+					   ರಚನೆ object_ನಮೂದು, ent);
 }
 
-static struct object_entry *insert_object(struct object_id *oid)
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು *ಸೇರಿಸು_object(ರಚನೆ object_id *oid)
 {
-	struct object_entry *e;
-	unsigned int hash = oidhash(oid);
+	ರಚನೆ object_ನಮೂದು *e;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hash = oidhash(oid);
 
-	e = hashmap_get_entry_from_hash(&object_table, hash, oid,
-					struct object_entry, ent);
-	if (!e) {
+	e = hashmap_get_ನಮೂದು_from_hash(&object_ಕೋಷ್ಟಕ, hash, oid,
+					ರಚನೆ object_ನಮೂದು, ent);
+	ಆದರೆ (!e) {
 		e = new_object(oid);
-		e->idx.offset = 0;
-		hashmap_entry_init(&e->ent, hash);
-		hashmap_add(&object_table, &e->ent);
+		e->idx.ಸ್ಥಾನಾಂತರ = 0;
+		hashmap_ನಮೂದು_init(&e->ent, hash);
+		hashmap_ಕೂಡಿಸು(&object_ಕೋಷ್ಟಕ, &e->ent);
 	}
 
-	return e;
+	ಹಿಂತಿರುಗಿ e;
 }
 
-static void invalidate_pack_id(unsigned int id)
+ಸ್ಥಿರ ಶೂನ್ಯ invalidate_pack_id(ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ id)
 {
-	unsigned long lu;
-	struct tag *t;
-	struct hashmap_iter iter;
-	struct object_entry *e;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ lu;
+	ರಚನೆ ಟ್ಯಾಗ್ *t;
+	ರಚನೆ hashmap_iter iter;
+	ರಚನೆ object_ನಮೂದು *e;
 
-	hashmap_for_each_entry(&object_table, &iter, e, ent) {
-		if (e->pack_id == id)
+	hashmap_for_each_ನಮೂದು(&object_ಕೋಷ್ಟಕ, &iter, e, ent) {
+		ಆದರೆ (e->pack_id == id)
 			e->pack_id = MAX_PACK_ID;
 	}
 
-	for (lu = 0; lu < branch_table_sz; lu++) {
-		struct branch *b;
+	ಗಾಗಿ (lu = 0; lu < branch_ಕೋಷ್ಟಕ_sz; lu++) {
+		ರಚನೆ branch *b;
 
-		for (b = branch_table[lu]; b; b = b->table_next_branch)
-			if (b->pack_id == id)
+		ಗಾಗಿ (b = branch_ಕೋಷ್ಟಕ[lu]; b; b = b->ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch)
+			ಆದರೆ (b->pack_id == id)
 				b->pack_id = MAX_PACK_ID;
 	}
 
-	for (t = first_tag; t; t = t->next_tag)
-		if (t->pack_id == id)
+	ಗಾಗಿ (t = ಮೊದಲ_ಟ್ಯಾಗ್; t; t = t->ಮುಂದಿನ_ಟ್ಯಾಗ್)
+		ಆದರೆ (t->pack_id == id)
 			t->pack_id = MAX_PACK_ID;
 }
 
-static unsigned int hc_str(const char *s, size_t len)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc_str(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s, ಗಾತ್ರ_t len)
 {
-	unsigned int r = 0;
-	while (len-- > 0)
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ r = 0;
+	ಆಗ (len-- > 0)
 		r = r * 31 + *s++;
-	return r;
+	ಹಿಂತಿರುಗಿ r;
 }
 
-static void insert_mark(struct mark_set **top, uintmax_t idnum, struct object_entry *oe)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸೇರಿಸು_mark(ರಚನೆ mark_ಗಣ **ತುದಿ, uintmax_t idnum, ರಚನೆ object_ನಮೂದು *oe)
 {
-	struct mark_set *s = *top;
+	ರಚನೆ mark_ಗಣ *s = *ತುದಿ;
 
-	while ((idnum >> s->shift) >= 1024) {
-		s = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
-		s->shift = (*top)->shift + 10;
-		s->data.sets[0] = *top;
-		*top = s;
+	ಆಗ ((idnum >> s->ಸರಿಸು) >= 1024) {
+		s = mem_pool_calloc(&fi_mem_pool, 1, ಗಾತ್ರ(ರಚನೆ mark_ಗಣ));
+		s->ಸರಿಸು = (*ತುದಿ)->ಸರಿಸು + 10;
+		s->ದತ್ತಾಂಶ.sets[0] = *ತುದಿ;
+		*ತುದಿ = s;
 	}
-	while (s->shift) {
-		uintmax_t i = idnum >> s->shift;
-		idnum -= i << s->shift;
-		if (!s->data.sets[i]) {
-			s->data.sets[i] = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
-			s->data.sets[i]->shift = s->shift - 10;
+	ಆಗ (s->ಸರಿಸು) {
+		uintmax_t i = idnum >> s->ಸರಿಸು;
+		idnum -= i << s->ಸರಿಸು;
+		ಆದರೆ (!s->ದತ್ತಾಂಶ.sets[i]) {
+			s->ದತ್ತಾಂಶ.sets[i] = mem_pool_calloc(&fi_mem_pool, 1, ಗಾತ್ರ(ರಚನೆ mark_ಗಣ));
+			s->ದತ್ತಾಂಶ.sets[i]->ಸರಿಸು = s->ಸರಿಸು - 10;
 		}
-		s = s->data.sets[i];
+		s = s->ದತ್ತಾಂಶ.sets[i];
 	}
-	if (!s->data.marked[idnum])
-		marks_set_count++;
-	s->data.marked[idnum] = oe;
+	ಆದರೆ (!s->ದತ್ತಾಂಶ.marked[idnum])
+		marks_ಗಣ_ಎಣಿಕೆ++;
+	s->ದತ್ತಾಂಶ.marked[idnum] = oe;
 }
 
-static void *find_mark(struct mark_set *s, uintmax_t idnum)
+ಸ್ಥಿರ ಶೂನ್ಯ *ಕಂಡುಹಿಡಿ_mark(ರಚನೆ mark_ಗಣ *s, uintmax_t idnum)
 {
 	uintmax_t orig_idnum = idnum;
-	struct object_entry *oe = NULL;
-	if ((idnum >> s->shift) < 1024) {
-		while (s && s->shift) {
-			uintmax_t i = idnum >> s->shift;
-			idnum -= i << s->shift;
-			s = s->data.sets[i];
+	ರಚನೆ object_ನಮೂದು *oe = ಖಾಲಿ;
+	ಆದರೆ ((idnum >> s->ಸರಿಸು) < 1024) {
+		ಆಗ (s && s->ಸರಿಸು) {
+			uintmax_t i = idnum >> s->ಸರಿಸು;
+			idnum -= i << s->ಸರಿಸು;
+			s = s->ದತ್ತಾಂಶ.sets[i];
 		}
-		if (s)
-			oe = s->data.marked[idnum];
+		ಆದರೆ (s)
+			oe = s->ದತ್ತಾಂಶ.marked[idnum];
 	}
-	if (!oe)
+	ಆದರೆ (!oe)
 		die(_("mark :%" PRIuMAX " not declared"), orig_idnum);
-	return oe;
+	ಹಿಂತಿರುಗಿ oe;
 }
 
-static struct atom_str *to_atom(const char *s, unsigned short len)
+ಸ್ಥಿರ ರಚನೆ atom_str *ಗಮ್ಯ_atom(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s, ಚಿಹ್ನೆರಹಿತ ಗಿಡ್ಡ len)
 {
-	unsigned int hc = hc_str(s, len) % atom_table_sz;
-	struct atom_str *c;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc = hc_str(s, len) % atom_ಕೋಷ್ಟಕ_sz;
+	ರಚನೆ atom_str *c;
 
-	for (c = atom_table[hc]; c; c = c->next_atom)
-		if (c->str_len == len && !strncmp(s, c->str_dat, len))
-			return c;
+	ಗಾಗಿ (c = atom_ಕೋಷ್ಟಕ[hc]; c; c = c->ಮುಂದಿನ_atom)
+		ಆದರೆ (c->str_len == len && !ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(s, c->str_dat, len))
+			ಹಿಂತಿರುಗಿ c;
 
-	c = mem_pool_alloc(&fi_mem_pool, sizeof(struct atom_str) + len + 1);
+	c = mem_pool_alloc(&fi_mem_pool, ಗಾತ್ರ(ರಚನೆ atom_str) + len + 1);
 	c->str_len = len;
-	memcpy(c->str_dat, s, len);
+	ಸ್ಮರಣೆ_ನಕಲು(c->str_dat, s, len);
 	c->str_dat[len] = 0;
-	c->next_atom = atom_table[hc];
-	atom_table[hc] = c;
+	c->ಮುಂದಿನ_atom = atom_ಕೋಷ್ಟಕ[hc];
+	atom_ಕೋಷ್ಟಕ[hc] = c;
 	atom_cnt++;
-	return c;
+	ಹಿಂತಿರುಗಿ c;
 }
 
-static struct branch *lookup_branch(const char *name)
+ಸ್ಥಿರ ರಚನೆ branch *lookup_branch(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	unsigned int hc = hc_str(name, strlen(name)) % branch_table_sz;
-	struct branch *b;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc = hc_str(name, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name)) % branch_ಕೋಷ್ಟಕ_sz;
+	ರಚನೆ branch *b;
 
-	for (b = branch_table[hc]; b; b = b->table_next_branch)
-		if (!strcmp(name, b->name))
-			return b;
-	return NULL;
+	ಗಾಗಿ (b = branch_ಕೋಷ್ಟಕ[hc]; b; b = b->ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch)
+		ಆದರೆ (!strcmp(name, b->name))
+			ಹಿಂತಿರುಗಿ b;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static struct branch *new_branch(const char *name)
+ಸ್ಥಿರ ರಚನೆ branch *new_branch(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	unsigned int hc = hc_str(name, strlen(name)) % branch_table_sz;
-	struct branch *b = lookup_branch(name);
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc = hc_str(name, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name)) % branch_ಕೋಷ್ಟಕ_sz;
+	ರಚನೆ branch *b = lookup_branch(name);
 
-	if (b)
+	ಆದರೆ (b)
 		die(_("invalid attempt to create duplicate branch: %s"), name);
-	if (check_refname_format(name, REFNAME_ALLOW_ONELEVEL))
+	ಆದರೆ (check_refname_format(name, REFNAME_ALLOW_ONELEVEL))
 		die(_("branch name doesn't conform to Git standards: %s"), name);
 
-	b = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct branch));
+	b = mem_pool_calloc(&fi_mem_pool, 1, ಗಾತ್ರ(ರಚನೆ branch));
 	b->name = mem_pool_strdup(&fi_mem_pool, name);
-	b->table_next_branch = branch_table[hc];
-	b->branch_tree.versions[0].mode = S_IFDIR;
-	b->branch_tree.versions[1].mode = S_IFDIR;
-	b->num_notes = 0;
-	b->active = 0;
+	b->ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch = branch_ಕೋಷ್ಟಕ[hc];
+	b->branch_ವೃಕ್ಷ.versions[0].ಬಹುಲಕ = S_IFDIR;
+	b->branch_ವೃಕ್ಷ.versions[1].ಬಹುಲಕ = S_IFDIR;
+	b->ಅಂಕೆ_notes = 0;
+	b->ಸಕ್ರಿಯ = 0;
 	b->pack_id = MAX_PACK_ID;
-	branch_table[hc] = b;
-	branch_count++;
-	return b;
+	branch_ಕೋಷ್ಟಕ[hc] = b;
+	branch_ಎಣಿಕೆ++;
+	ಹಿಂತಿರುಗಿ b;
 }
 
-static unsigned int hc_entries(unsigned int cnt)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc_entries(ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ cnt)
 {
 	cnt = cnt & 7 ? (cnt / 8) + 1 : cnt / 8;
-	return cnt < avail_tree_table_sz ? cnt : avail_tree_table_sz - 1;
+	ಹಿಂತಿರುಗಿ cnt < avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ_sz ? cnt : avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ_sz - 1;
 }
 
-static struct tree_content *new_tree_content(unsigned int cnt)
+ಸ್ಥಿರ ರಚನೆ ವೃಕ್ಷ_content *new_ವೃಕ್ಷ_content(ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ cnt)
 {
-	struct avail_tree_content *f, *l = NULL;
-	struct tree_content *t;
-	unsigned int hc = hc_entries(cnt);
+	ರಚನೆ avail_ವೃಕ್ಷ_content *f, *l = ಖಾಲಿ;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc = hc_entries(cnt);
 
-	for (f = avail_tree_table[hc]; f; l = f, f = f->next_avail)
-		if (f->entry_capacity >= cnt)
-			break;
+	ಗಾಗಿ (f = avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ[hc]; f; l = f, f = f->ಮುಂದಿನ_avail)
+		ಆದರೆ (f->ನಮೂದು_ಸಾಮರ್ಥ್ಯ >= cnt)
+			ನಿಲ್ಲಿಸು;
 
-	if (f) {
-		if (l)
-			l->next_avail = f->next_avail;
-		else
-			avail_tree_table[hc] = f->next_avail;
-	} else {
+	ಆದರೆ (f) {
+		ಆದರೆ (l)
+			l->ಮುಂದಿನ_avail = f->ಮುಂದಿನ_avail;
+		ಇಲ್ಲದಿದ್ದರೆ
+			avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ[hc] = f->ಮುಂದಿನ_avail;
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		cnt = cnt & 7 ? ((cnt / 8) + 1) * 8 : cnt;
-		f = mem_pool_alloc(&fi_mem_pool, sizeof(*t) + sizeof(t->entries[0]) * cnt);
-		f->entry_capacity = cnt;
+		f = mem_pool_alloc(&fi_mem_pool, ಗಾತ್ರ(*t) + ಗಾತ್ರ(t->entries[0]) * cnt);
+		f->ನಮೂದು_ಸಾಮರ್ಥ್ಯ = cnt;
 	}
 
-	t = (struct tree_content*)f;
-	t->entry_count = 0;
-	t->delta_depth = 0;
-	return t;
+	t = (ರಚನೆ ವೃಕ್ಷ_content*)f;
+	t->ನಮೂದು_ಎಣಿಕೆ = 0;
+	t->delta_ಆಳ = 0;
+	ಹಿಂತಿರುಗಿ t;
 }
 
-static void release_tree_entry(struct tree_entry *e);
-static void release_tree_content(struct tree_content *t)
+ಸ್ಥಿರ ಶೂನ್ಯ release_ವೃಕ್ಷ_ನಮೂದು(ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e);
+ಸ್ಥಿರ ಶೂನ್ಯ release_ವೃಕ್ಷ_content(ರಚನೆ ವೃಕ್ಷ_content *t)
 {
-	struct avail_tree_content *f = (struct avail_tree_content*)t;
-	unsigned int hc = hc_entries(f->entry_capacity);
-	f->next_avail = avail_tree_table[hc];
-	avail_tree_table[hc] = f;
+	ರಚನೆ avail_ವೃಕ್ಷ_content *f = (ರಚನೆ avail_ವೃಕ್ಷ_content*)t;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hc = hc_entries(f->ನಮೂದು_ಸಾಮರ್ಥ್ಯ);
+	f->ಮುಂದಿನ_avail = avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ[hc];
+	avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ[hc] = f;
 }
 
-static void release_tree_content_recursive(struct tree_content *t)
+ಸ್ಥಿರ ಶೂನ್ಯ release_ವೃಕ್ಷ_content_recursive(ರಚನೆ ವೃಕ್ಷ_content *t)
 {
-	unsigned int i;
-	for (i = 0; i < t->entry_count; i++)
-		release_tree_entry(t->entries[i]);
-	release_tree_content(t);
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i;
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++)
+		release_ವೃಕ್ಷ_ನಮೂದು(t->entries[i]);
+	release_ವೃಕ್ಷ_content(t);
 }
 
-static struct tree_content *grow_tree_content(
-	struct tree_content *t,
-	int amt)
+ಸ್ಥಿರ ರಚನೆ ವೃಕ್ಷ_content *grow_ವೃಕ್ಷ_content(
+	ರಚನೆ ವೃಕ್ಷ_content *t,
+	ಪೂರ್ಣಾಂಕ amt)
 {
-	struct tree_content *r = new_tree_content(t->entry_count + amt);
-	r->entry_count = t->entry_count;
-	r->delta_depth = t->delta_depth;
-	COPY_ARRAY(r->entries, t->entries, t->entry_count);
-	release_tree_content(t);
-	return r;
+	ರಚನೆ ವೃಕ್ಷ_content *r = new_ವೃಕ್ಷ_content(t->ನಮೂದು_ಎಣಿಕೆ + amt);
+	r->ನಮೂದು_ಎಣಿಕೆ = t->ನಮೂದು_ಎಣಿಕೆ;
+	r->delta_ಆಳ = t->delta_ಆಳ;
+	COPY_ARRAY(r->entries, t->entries, t->ನಮೂದು_ಎಣಿಕೆ);
+	release_ವೃಕ್ಷ_content(t);
+	ಹಿಂತಿರುಗಿ r;
 }
 
-static struct tree_entry *new_tree_entry(void)
+ಸ್ಥಿರ ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *new_ವೃಕ್ಷ_ನಮೂದು(ಶೂನ್ಯ)
 {
-	struct tree_entry *e;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e;
 
-	if (!avail_tree_entry) {
-		unsigned int n = tree_entry_alloc;
-		tree_entry_allocd += n * sizeof(struct tree_entry);
+	ಆದರೆ (!avail_ವೃಕ್ಷ_ನಮೂದು) {
+		ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ n = ವೃಕ್ಷ_ನಮೂದು_alloc;
+		ವೃಕ್ಷ_ನಮೂದು_allocd += n * ಗಾತ್ರ(ರಚನೆ ವೃಕ್ಷ_ನಮೂದು);
 		ALLOC_ARRAY(e, n);
-		avail_tree_entry = e;
-		while (n-- > 1) {
-			*((void**)e) = e + 1;
+		avail_ವೃಕ್ಷ_ನಮೂದು = e;
+		ಆಗ (n-- > 1) {
+			*((ಶೂನ್ಯ**)e) = e + 1;
 			e++;
 		}
-		*((void**)e) = NULL;
+		*((ಶೂನ್ಯ**)e) = ಖಾಲಿ;
 	}
 
-	e = avail_tree_entry;
-	avail_tree_entry = *((void**)e);
-	return e;
+	e = avail_ವೃಕ್ಷ_ನಮೂದು;
+	avail_ವೃಕ್ಷ_ನಮೂದು = *((ಶೂನ್ಯ**)e);
+	ಹಿಂತಿರುಗಿ e;
 }
 
-static void release_tree_entry(struct tree_entry *e)
+ಸ್ಥಿರ ಶೂನ್ಯ release_ವೃಕ್ಷ_ನಮೂದು(ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e)
 {
-	if (e->tree)
-		release_tree_content_recursive(e->tree);
-	*((void**)e) = avail_tree_entry;
-	avail_tree_entry = e;
+	ಆದರೆ (e->ವೃಕ್ಷ)
+		release_ವೃಕ್ಷ_content_recursive(e->ವೃಕ್ಷ);
+	*((ಶೂನ್ಯ**)e) = avail_ವೃಕ್ಷ_ನಮೂದು;
+	avail_ವೃಕ್ಷ_ನಮೂದು = e;
 }
 
-static struct tree_content *dup_tree_content(struct tree_content *s)
+ಸ್ಥಿರ ರಚನೆ ವೃಕ್ಷ_content *dup_ವೃಕ್ಷ_content(ರಚನೆ ವೃಕ್ಷ_content *s)
 {
-	struct tree_content *d;
-	struct tree_entry *a, *b;
-	unsigned int i;
+	ರಚನೆ ವೃಕ್ಷ_content *d;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *a, *b;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i;
 
-	if (!s)
-		return NULL;
-	d = new_tree_content(s->entry_count);
-	for (i = 0; i < s->entry_count; i++) {
+	ಆದರೆ (!s)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+	d = new_ವೃಕ್ಷ_content(s->ನಮೂದು_ಎಣಿಕೆ);
+	ಗಾಗಿ (i = 0; i < s->ನಮೂದು_ಎಣಿಕೆ; i++) {
 		a = s->entries[i];
-		b = new_tree_entry();
-		memcpy(b, a, sizeof(*a));
-		if (a->tree && is_null_oid(&b->versions[1].oid))
-			b->tree = dup_tree_content(a->tree);
-		else
-			b->tree = NULL;
+		b = new_ವೃಕ್ಷ_ನಮೂದು();
+		ಸ್ಮರಣೆ_ನಕಲು(b, a, ಗಾತ್ರ(*a));
+		ಆದರೆ (a->ವೃಕ್ಷ && is_null_oid(&b->versions[1].oid))
+			b->ವೃಕ್ಷ = dup_ವೃಕ್ಷ_content(a->ವೃಕ್ಷ);
+		ಇಲ್ಲದಿದ್ದರೆ
+			b->ವೃಕ್ಷ = ಖಾಲಿ;
 		d->entries[i] = b;
 	}
-	d->entry_count = s->entry_count;
-	d->delta_depth = s->delta_depth;
+	d->ನಮೂದು_ಎಣಿಕೆ = s->ನಮೂದು_ಎಣಿಕೆ;
+	d->delta_ಆಳ = s->delta_ಆಳ;
 
-	return d;
+	ಹಿಂತಿರುಗಿ d;
 }
 
-static void start_packfile(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಆರಂಭ_packfile(ಶೂನ್ಯ)
 {
-	struct strbuf tmp_file = STRBUF_INIT;
-	struct packed_git *p;
-	int pack_fd;
+	ರಚನೆ strbuf tmp_file = STRBUF_INIT;
+	ರಚನೆ packed_git *p;
+	ಪೂರ್ಣಾಂಕ pack_fd;
 
 	pack_fd = odb_mkstemp(the_repository->objects, &tmp_file,
 			      "pack/tmp_pack_XXXXXX");
@@ -797,441 +797,441 @@ static void start_packfile(void)
 	p->repo = the_repository;
 	pack_file = hashfd(the_repository->hash_algo, pack_fd, p->pack_name);
 
-	pack_data = p;
-	pack_size = write_pack_header(pack_file, 0);
-	object_count = 0;
+	pack_ದತ್ತಾಂಶ = p;
+	pack_ಗಾತ್ರ = write_pack_ಶೀರ್ಷಿಕೆ(pack_file, 0);
+	object_ಎಣಿಕೆ = 0;
 
 	REALLOC_ARRAY(all_packs, pack_id + 1);
 	all_packs[pack_id] = p;
 }
 
-static const char *create_index(void)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *create_ಸೂಚ್ಯಂಕ(ಶೂನ್ಯ)
 {
-	const char *tmpfile;
-	struct pack_idx_entry **idx, **c, **last;
-	struct object_entry *e;
-	struct object_entry_pool *o;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *tmpfile;
+	ರಚನೆ pack_idx_ನಮೂದು **idx, **c, **ಕೊನೆಯ;
+	ರಚನೆ object_ನಮೂದು *e;
+	ರಚನೆ object_ನಮೂದು_pool *o;
 
 	/* Build the table of object IDs. */
-	ALLOC_ARRAY(idx, object_count);
+	ALLOC_ARRAY(idx, object_ಎಣಿಕೆ);
 	c = idx;
-	for (o = blocks; o; o = o->next_pool)
-		for (e = o->next_free; e-- != o->entries;)
-			if (pack_id == e->pack_id)
+	ಗಾಗಿ (o = ಖಂಡಗಳು; o; o = o->ಮುಂದಿನ_pool)
+		ಗಾಗಿ (e = o->ಮುಂದಿನ_free; e-- != o->entries;)
+			ಆದರೆ (pack_id == e->pack_id)
 				*c++ = &e->idx;
-	last = idx + object_count;
-	if (c != last)
+	ಕೊನೆಯ = idx + object_ಎಣಿಕೆ;
+	ಆದರೆ (c != ಕೊನೆಯ)
 		die(_("internal consistency error creating the index"));
 
-	tmpfile = write_idx_file(the_repository, NULL, idx, object_count,
-				 &pack_idx_opts, pack_data->hash);
-	free(idx);
-	return tmpfile;
+	tmpfile = write_idx_file(the_repository, ಖಾಲಿ, idx, object_ಎಣಿಕೆ,
+				 &pack_idx_opts, pack_ದತ್ತಾಂಶ->hash);
+	ಬಿಡುಗಡೆ(idx);
+	ಹಿಂತಿರುಗಿ tmpfile;
 }
 
-static char *keep_pack(const char *curr_index_name)
+ಸ್ಥಿರ ಅಕ್ಷರ *keep_pack(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *curr_ಸೂಚ್ಯಂಕ_name)
 {
-	static const char *keep_msg = "fast-import";
-	struct strbuf name = STRBUF_INIT;
-	int keep_fd;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *keep_ಸಂದೇಶ = "fast-import";
+	ರಚನೆ strbuf name = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ keep_fd;
 
-	odb_pack_name(pack_data->repo, &name, pack_data->hash, "keep");
-	keep_fd = safe_create_file_with_leading_directories(pack_data->repo,
+	odb_pack_name(pack_ದತ್ತಾಂಶ->repo, &name, pack_ದತ್ತಾಂಶ->hash, "keep");
+	keep_fd = ಸುರಕ್ಷಿತ_create_file_with_leading_directories(pack_ದತ್ತಾಂಶ->repo,
 							    name.buf);
-	if (keep_fd < 0)
+	ಆದರೆ (keep_fd < 0)
 		die_errno(_("cannot create keep file"));
-	write_or_die(keep_fd, keep_msg, strlen(keep_msg));
-	if (close(keep_fd))
+	write_or_die(keep_fd, keep_ಸಂದೇಶ, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(keep_ಸಂದೇಶ));
+	ಆದರೆ (close(keep_fd))
 		die_errno(_("failed to write keep file"));
 
-	odb_pack_name(pack_data->repo, &name, pack_data->hash, "pack");
-	if (finalize_object_file(pack_data->repo, pack_data->pack_name, name.buf))
+	odb_pack_name(pack_ದತ್ತಾಂಶ->repo, &name, pack_ದತ್ತಾಂಶ->hash, "pack");
+	ಆದರೆ (finalize_object_file(pack_ದತ್ತಾಂಶ->repo, pack_ದತ್ತಾಂಶ->pack_name, name.buf))
 		die(_("cannot store pack file"));
 
-	odb_pack_name(pack_data->repo, &name, pack_data->hash, "idx");
-	if (finalize_object_file(pack_data->repo, curr_index_name, name.buf))
+	odb_pack_name(pack_ದತ್ತಾಂಶ->repo, &name, pack_ದತ್ತಾಂಶ->hash, "idx");
+	ಆದರೆ (finalize_object_file(pack_ದತ್ತಾಂಶ->repo, curr_ಸೂಚ್ಯಂಕ_name, name.buf))
 		die(_("cannot store index file"));
-	free((void *)curr_index_name);
-	return strbuf_detach(&name, NULL);
+	ಬಿಡುಗಡೆ((ಶೂನ್ಯ *)curr_ಸೂಚ್ಯಂಕ_name);
+	ಹಿಂತಿರುಗಿ strbuf_detach(&name, ಖಾಲಿ);
 }
 
-static void unkeep_all_packs(void)
+ಸ್ಥಿರ ಶೂನ್ಯ unkeep_all_packs(ಶೂನ್ಯ)
 {
-	struct strbuf name = STRBUF_INIT;
-	int k;
+	ರಚನೆ strbuf name = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ k;
 
-	for (k = 0; k < pack_id; k++) {
-		struct packed_git *p = all_packs[k];
+	ಗಾಗಿ (k = 0; k < pack_id; k++) {
+		ರಚನೆ packed_git *p = all_packs[k];
 		odb_pack_name(p->repo, &name, p->hash, "keep");
 		unlink_or_warn(name.buf);
 	}
 	strbuf_release(&name);
 }
 
-static int loosen_small_pack(const struct packed_git *p)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ loosen_small_pack(ಸ್ಥಿರಾಂಕ ರಚನೆ packed_git *p)
 {
-	struct child_process unpack = CHILD_PROCESS_INIT;
+	ರಚನೆ ಮಗು_process unpack = ಮಗು_PROCESS_INIT;
 
-	if (lseek(p->pack_fd, 0, SEEK_SET) < 0)
+	ಆದರೆ (lseek(p->pack_fd, 0, SEEK_ಗಣ) < 0)
 		die_errno(_("failed seeking to start of '%s'"), p->pack_name);
 
-	unpack.in = p->pack_fd;
+	unpack.ಒಳ = p->pack_fd;
 	unpack.git_cmd = 1;
-	unpack.stdout_to_stderr = 1;
-	strvec_push(&unpack.args, "unpack-objects");
-	if (!show_stats)
-		strvec_push(&unpack.args, "-q");
+	unpack.stdout_ಗಮ್ಯ_stderr = 1;
+	strvec_ತಳ್ಳು(&unpack.ವಾದಗಳು, "unpack-objects");
+	ಆದರೆ (!show_stats)
+		strvec_ತಳ್ಳು(&unpack.ವಾದಗಳು, "-q");
 
-	return run_command(&unpack);
+	ಹಿಂತಿರುಗಿ ಸತತ_command(&unpack);
 }
 
-static void end_packfile(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೊನೆ_packfile(ಶೂನ್ಯ)
 {
-	static int running;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ running;
 
-	if (running || !pack_data)
-		return;
+	ಆದರೆ (running || !pack_ದತ್ತಾಂಶ)
+		ಹಿಂತಿರುಗಿ;
 
 	running = 1;
-	clear_delta_base_cache();
-	if (object_count) {
-		struct odb_source_files *files = odb_source_files_downcast(pack_data->repo->objects->source);
-		struct packed_git *new_p;
-		struct object_id cur_pack_oid;
-		char *idx_name;
-		int i;
-		struct branch *b;
-		struct tag *t;
+	clear_delta_ತಳ_cache();
+	ಆದರೆ (object_ಎಣಿಕೆ) {
+		ರಚನೆ odb_ಮೂಲ_files *files = odb_ಮೂಲ_files_downcast(pack_ದತ್ತಾಂಶ->repo->objects->ಮೂಲ);
+		ರಚನೆ packed_git *new_p;
+		ರಚನೆ object_id cur_pack_oid;
+		ಅಕ್ಷರ *idx_name;
+		ಪೂರ್ಣಾಂಕ i;
+		ರಚನೆ branch *b;
+		ರಚನೆ ಟ್ಯಾಗ್ *t;
 
-		close_pack_windows(pack_data);
+		close_pack_windows(pack_ದತ್ತಾಂಶ);
 		finalize_hashfile(pack_file, cur_pack_oid.hash, FSYNC_COMPONENT_PACK, 0);
-		fixup_pack_header_footer(the_hash_algo, pack_data->pack_fd,
-					 pack_data->hash, pack_data->pack_name,
-					 object_count, cur_pack_oid.hash,
-					 pack_size);
+		fixup_pack_ಶೀರ್ಷಿಕೆ_footer(the_hash_algo, pack_ದತ್ತಾಂಶ->pack_fd,
+					 pack_ದತ್ತಾಂಶ->hash, pack_ದತ್ತಾಂಶ->pack_name,
+					 object_ಎಣಿಕೆ, cur_pack_oid.hash,
+					 pack_ಗಾತ್ರ);
 
-		if (object_count <= unpack_limit) {
-			if (!loosen_small_pack(pack_data)) {
+		ಆದರೆ (object_ಎಣಿಕೆ <= unpack_ಎಲ್ಲೆ) {
+			ಆದರೆ (!loosen_small_pack(pack_ದತ್ತಾಂಶ)) {
 				invalidate_pack_id(pack_id);
-				goto discard_pack;
+				ಹೋಗು discard_pack;
 			}
 		}
 
-		close(pack_data->pack_fd);
-		idx_name = keep_pack(create_index());
+		close(pack_ದತ್ತಾಂಶ->pack_fd);
+		idx_name = keep_pack(create_ಸೂಚ್ಯಂಕ());
 
 		/* Register the packfile with core git's machinery. */
-		new_p = packfile_store_load_pack(files->dirs->packed, idx_name, 1);
-		if (!new_p)
+		new_p = packfile_store_ತುಂಬು_pack(files->dirs->packed, idx_name, 1);
+		ಆದರೆ (!new_p)
 			die(_("core Git rejected index %s"), idx_name);
 		all_packs[pack_id] = new_p;
-		free(idx_name);
+		ಬಿಡುಗಡೆ(idx_name);
 
 		/* Print the boundary */
-		if (pack_edges) {
-			fprintf(pack_edges, "%s:", new_p->pack_name);
-			for (i = 0; i < branch_table_sz; i++) {
-				for (b = branch_table[i]; b; b = b->table_next_branch) {
-					if (b->pack_id == pack_id)
-						fprintf(pack_edges, " %s",
-							oid_to_hex(&b->oid));
+		ಆದರೆ (pack_ಅಂಚುಗಳು) {
+			fprintf(pack_ಅಂಚುಗಳು, "%s:", new_p->pack_name);
+			ಗಾಗಿ (i = 0; i < branch_ಕೋಷ್ಟಕ_sz; i++) {
+				ಗಾಗಿ (b = branch_ಕೋಷ್ಟಕ[i]; b; b = b->ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch) {
+					ಆದರೆ (b->pack_id == pack_id)
+						fprintf(pack_ಅಂಚುಗಳು, " %s",
+							oid_ಗಮ್ಯ_hex(&b->oid));
 				}
 			}
-			for (t = first_tag; t; t = t->next_tag) {
-				if (t->pack_id == pack_id)
-					fprintf(pack_edges, " %s",
-						oid_to_hex(&t->oid));
+			ಗಾಗಿ (t = ಮೊದಲ_ಟ್ಯಾಗ್; t; t = t->ಮುಂದಿನ_ಟ್ಯಾಗ್) {
+				ಆದರೆ (t->pack_id == pack_id)
+					fprintf(pack_ಅಂಚುಗಳು, " %s",
+						oid_ಗಮ್ಯ_hex(&t->oid));
 			}
-			fputc('\n', pack_edges);
-			fflush(pack_edges);
+			fputc('\n', pack_ಅಂಚುಗಳು);
+			fflush(pack_ಅಂಚುಗಳು);
 		}
 
 		pack_id++;
 	}
-	else {
+	ಇಲ್ಲದಿದ್ದರೆ {
 discard_pack:
-		close(pack_data->pack_fd);
-		unlink_or_warn(pack_data->pack_name);
+		close(pack_ದತ್ತಾಂಶ->pack_fd);
+		unlink_or_warn(pack_ದತ್ತಾಂಶ->pack_name);
 	}
-	FREE_AND_NULL(pack_data);
+	FREE_AND_NULL(pack_ದತ್ತಾಂಶ);
 	running = 0;
 
 	/* We can't carry a delta across packfiles. */
-	strbuf_release(&last_blob.data);
-	last_blob.offset = 0;
-	last_blob.depth = 0;
+	strbuf_release(&ಕೊನೆಯ_blob.ದತ್ತಾಂಶ);
+	ಕೊನೆಯ_blob.ಸ್ಥಾನಾಂತರ = 0;
+	ಕೊನೆಯ_blob.ಆಳ = 0;
 }
 
-static void cycle_packfile(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಚಕ್ರ_packfile(ಶೂನ್ಯ)
 {
-	end_packfile();
-	start_packfile();
+	ಕೊನೆ_packfile();
+	ಆರಂಭ_packfile();
 }
 
-static int store_object(
-	enum object_type type,
-	struct strbuf *dat,
-	struct last_object *last,
-	struct object_id *oidout,
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ store_object(
+	ಎಣಿಕೆ object_type type,
+	ರಚನೆ strbuf *dat,
+	ರಚನೆ ಕೊನೆಯ_object *ಕೊನೆಯ,
+	ರಚನೆ object_id *oidout,
 	uintmax_t mark)
 {
-	struct odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
-	void *out, *delta;
-	struct object_entry *e;
-	unsigned char hdr[96];
-	struct object_id oid;
-	unsigned long hdrlen, deltalen = 0;
-	struct git_hash_ctx c;
+	ರಚನೆ odb_ಮೂಲ_files *files = odb_ಮೂಲ_files_downcast(the_repository->objects->ಮೂಲ);
+	ಶೂನ್ಯ *ಹೊರಹೋಗು, *delta;
+	ರಚನೆ object_ನಮೂದು *e;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ hdr[96];
+	ರಚನೆ object_id oid;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ hdrlen, deltalen = 0;
+	ರಚನೆ git_hash_ctx c;
 	git_zstream s;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	hdrlen = format_object_header((char *)hdr, sizeof(hdr), type,
+	hdrlen = format_object_ಶೀರ್ಷಿಕೆ((ಅಕ್ಷರ *)hdr, ಗಾತ್ರ(hdr), type,
 				      dat->len);
 	git_hash_init(&c, the_hash_algo);
 	git_hash_update(&c, hdr, hdrlen);
 	git_hash_update(&c, dat->buf, dat->len);
 	git_hash_final_oid(&oid, &c);
-	if (oidout)
+	ಆದರೆ (oidout)
 		oidcpy(oidout, &oid);
 
-	e = insert_object(&oid);
-	if (mark)
-		insert_mark(&marks, mark, e);
-	if (e->idx.offset) {
-		duplicate_count_by_type[type]++;
-		return 1;
+	e = ಸೇರಿಸು_object(&oid);
+	ಆದರೆ (mark)
+		ಸೇರಿಸು_mark(&marks, mark, e);
+	ಆದರೆ (e->idx.ಸ್ಥಾನಾಂತರ) {
+		duplicate_ಎಣಿಕೆ_by_type[type]++;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
-			continue;
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ) {
+		ಆದರೆ (!packfile_list_ಕಂಡುಹಿಡಿ_oid(packfile_store_get_packs(dir->packed), &oid))
+			ಮುಂದುವರಿ;
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
-		e->idx.offset = 1; /* just not zero! */
-		duplicate_count_by_type[type]++;
-		return 1;
+		e->idx.ಸ್ಥಾನಾಂತರ = 1; /* just not zero! */
+		duplicate_ಎಣಿಕೆ_by_type[type]++;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
-	if (last && last->data.len && last->data.buf && last->depth < max_depth
+	ಆದರೆ (ಕೊನೆಯ && ಕೊನೆಯ->ದತ್ತಾಂಶ.len && ಕೊನೆಯ->ದತ್ತಾಂಶ.buf && ಕೊನೆಯ->ಆಳ < max_ಆಳ
 		&& dat->len > the_hash_algo->rawsz) {
-		size_t deltalen_st;
+		ಗಾತ್ರ_t deltalen_st;
 
-		delta_count_attempts_by_type[type]++;
-		delta = diff_delta(last->data.buf, last->data.len,
+		delta_ಎಣಿಕೆ_attempts_by_type[type]++;
+		delta = diff_delta(ಕೊನೆಯ->ದತ್ತಾಂಶ.buf, ಕೊನೆಯ->ದತ್ತಾಂಶ.len,
 			dat->buf, dat->len,
 			&deltalen_st, dat->len - the_hash_algo->rawsz);
-		deltalen = cast_size_t_to_ulong(deltalen_st);
-	} else
-		delta = NULL;
+		deltalen = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(deltalen_st);
+	} ಇಲ್ಲದಿದ್ದರೆ
+		delta = ಖಾಲಿ;
 
 	git_deflate_init(&s, cfg->pack_compression_level);
-	if (delta) {
-		s.next_in = delta;
-		s.avail_in = deltalen;
-	} else {
-		s.next_in = (void *)dat->buf;
-		s.avail_in = dat->len;
+	ಆದರೆ (delta) {
+		s.ಮುಂದಿನ_ಒಳ = delta;
+		s.avail_ಒಳ = deltalen;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		s.ಮುಂದಿನ_ಒಳ = (ಶೂನ್ಯ *)dat->buf;
+		s.avail_ಒಳ = dat->len;
 	}
-	s.avail_out = git_deflate_bound(&s, s.avail_in);
-	s.next_out = out = xmalloc(s.avail_out);
-	while (git_deflate(&s, Z_FINISH) == Z_OK)
+	s.avail_ಹೊರಹೋಗು = git_deflate_bound(&s, s.avail_ಒಳ);
+	s.ಮುಂದಿನ_ಹೊರಹೋಗು = ಹೊರಹೋಗು = xmalloc(s.avail_ಹೊರಹೋಗು);
+	ಆಗ (git_deflate(&s, Z_ಮುಕ್ತಾಯ) == Z_OK)
 		; /* nothing */
-	git_deflate_end(&s);
+	git_deflate_ಕೊನೆ(&s);
 
 	/* Determine if we should auto-checkpoint. */
-	if ((max_packsize
-		&& (pack_size + PACK_SIZE_THRESHOLD + s.total_out) > max_packsize)
-		|| (pack_size + PACK_SIZE_THRESHOLD + s.total_out) < pack_size) {
+	ಆದರೆ ((max_packsize
+		&& (pack_ಗಾತ್ರ + PACK_ಗಾತ್ರ_ಮಿತಿ + s.ಒಟ್ಟು_ಹೊರಹೋಗು) > max_packsize)
+		|| (pack_ಗಾತ್ರ + PACK_ಗಾತ್ರ_ಮಿತಿ + s.ಒಟ್ಟು_ಹೊರಹೋಗು) < pack_ಗಾತ್ರ) {
 
 		/* This new object needs to *not* have the current pack_id. */
 		e->pack_id = pack_id + 1;
-		cycle_packfile();
+		ಚಕ್ರ_packfile();
 
 		/* We cannot carry a delta into the new pack. */
-		if (delta) {
+		ಆದರೆ (delta) {
 			FREE_AND_NULL(delta);
 
 			git_deflate_init(&s, cfg->pack_compression_level);
-			s.next_in = (void *)dat->buf;
-			s.avail_in = dat->len;
-			s.avail_out = git_deflate_bound(&s, s.avail_in);
-			s.next_out = out = xrealloc(out, s.avail_out);
-			while (git_deflate(&s, Z_FINISH) == Z_OK)
+			s.ಮುಂದಿನ_ಒಳ = (ಶೂನ್ಯ *)dat->buf;
+			s.avail_ಒಳ = dat->len;
+			s.avail_ಹೊರಹೋಗು = git_deflate_bound(&s, s.avail_ಒಳ);
+			s.ಮುಂದಿನ_ಹೊರಹೋಗು = ಹೊರಹೋಗು = xrealloc(ಹೊರಹೋಗು, s.avail_ಹೊರಹೋಗು);
+			ಆಗ (git_deflate(&s, Z_ಮುಕ್ತಾಯ) == Z_OK)
 				; /* nothing */
-			git_deflate_end(&s);
+			git_deflate_ಕೊನೆ(&s);
 		}
 	}
 
 	e->type = type;
 	e->pack_id = pack_id;
-	e->idx.offset = pack_size;
-	object_count++;
-	object_count_by_type[type]++;
+	e->idx.ಸ್ಥಾನಾಂತರ = pack_ಗಾತ್ರ;
+	object_ಎಣಿಕೆ++;
+	object_ಎಣಿಕೆ_by_type[type]++;
 
-	crc32_begin(pack_file);
+	ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_begin(pack_file);
 
-	if (delta) {
-		off_t ofs = e->idx.offset - last->offset;
-		unsigned pos = sizeof(hdr) - 1;
+	ಆದರೆ (delta) {
+		off_t ofs = e->idx.ಸ್ಥಾನಾಂತರ - ಕೊನೆಯ->ಸ್ಥಾನಾಂತರ;
+		ಚಿಹ್ನೆರಹಿತ pos = ಗಾತ್ರ(hdr) - 1;
 
-		delta_count_by_type[type]++;
-		e->depth = last->depth + 1;
+		delta_ಎಣಿಕೆ_by_type[type]++;
+		e->ಆಳ = ಕೊನೆಯ->ಆಳ + 1;
 
-		hdrlen = encode_in_pack_object_header(hdr, sizeof(hdr),
+		hdrlen = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(hdr, ಗಾತ್ರ(hdr),
 						      OBJ_OFS_DELTA, deltalen);
 		hashwrite(pack_file, hdr, hdrlen);
-		pack_size += hdrlen;
+		pack_ಗಾತ್ರ += hdrlen;
 
 		hdr[pos] = ofs & 127;
-		while (ofs >>= 7)
+		ಆಗ (ofs >>= 7)
 			hdr[--pos] = 128 | (--ofs & 127);
-		hashwrite(pack_file, hdr + pos, sizeof(hdr) - pos);
-		pack_size += sizeof(hdr) - pos;
-	} else {
-		e->depth = 0;
-		hdrlen = encode_in_pack_object_header(hdr, sizeof(hdr),
+		hashwrite(pack_file, hdr + pos, ಗಾತ್ರ(hdr) - pos);
+		pack_ಗಾತ್ರ += ಗಾತ್ರ(hdr) - pos;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		e->ಆಳ = 0;
+		hdrlen = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(hdr, ಗಾತ್ರ(hdr),
 						      type, dat->len);
 		hashwrite(pack_file, hdr, hdrlen);
-		pack_size += hdrlen;
+		pack_ಗಾತ್ರ += hdrlen;
 	}
 
-	hashwrite(pack_file, out, s.total_out);
-	pack_size += s.total_out;
+	hashwrite(pack_file, ಹೊರಹೋಗು, s.ಒಟ್ಟು_ಹೊರಹೋಗು);
+	pack_ಗಾತ್ರ += s.ಒಟ್ಟು_ಹೊರಹೋಗು;
 
-	e->idx.crc32 = crc32_end(pack_file);
+	e->idx.ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32 = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_ಕೊನೆ(pack_file);
 
-	free(out);
-	free(delta);
-	if (last) {
-		if (last->no_swap) {
-			last->data = *dat;
-		} else {
-			strbuf_swap(&last->data, dat);
+	ಬಿಡುಗಡೆ(ಹೊರಹೋಗು);
+	ಬಿಡುಗಡೆ(delta);
+	ಆದರೆ (ಕೊನೆಯ) {
+		ಆದರೆ (ಕೊನೆಯ->no_ಅದಲುಬದಲು) {
+			ಕೊನೆಯ->ದತ್ತಾಂಶ = *dat;
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			strbuf_ಅದಲುಬದಲು(&ಕೊನೆಯ->ದತ್ತಾಂಶ, dat);
 		}
-		last->offset = e->idx.offset;
-		last->depth = e->depth;
+		ಕೊನೆಯ->ಸ್ಥಾನಾಂತರ = e->idx.ಸ್ಥಾನಾಂತರ;
+		ಕೊನೆಯ->ಆಳ = e->ಆಳ;
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void truncate_pack(struct hashfile_checkpoint *checkpoint)
+ಸ್ಥಿರ ಶೂನ್ಯ truncate_pack(ರಚನೆ hashfile_checkpoint *checkpoint)
 {
-	if (hashfile_truncate(pack_file, checkpoint))
+	ಆದರೆ (hashfile_truncate(pack_file, checkpoint))
 		die_errno(_("cannot truncate pack to skip duplicate"));
-	pack_size = checkpoint->offset;
+	pack_ಗಾತ್ರ = checkpoint->ಸ್ಥಾನಾಂತರ;
 }
 
-static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
+ಸ್ಥಿರ ಶೂನ್ಯ ಹರಿವು_blob(uintmax_t len, ರಚನೆ object_id *oidout, uintmax_t mark)
 {
-	struct odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
-	size_t in_sz = 64 * 1024, out_sz = 64 * 1024;
-	unsigned char *in_buf = xmalloc(in_sz);
-	unsigned char *out_buf = xmalloc(out_sz);
-	struct object_entry *e;
-	struct object_id oid;
-	unsigned long hdrlen;
-	off_t offset;
-	struct git_hash_ctx c;
+	ರಚನೆ odb_ಮೂಲ_files *files = odb_ಮೂಲ_files_downcast(the_repository->objects->ಮೂಲ);
+	ಗಾತ್ರ_t ಒಳ_sz = 64 * 1024, ಹೊರಹೋಗು_sz = 64 * 1024;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ಒಳ_buf = xmalloc(ಒಳ_sz);
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ಹೊರಹೋಗು_buf = xmalloc(ಹೊರಹೋಗು_sz);
+	ರಚನೆ object_ನಮೂದು *e;
+	ರಚನೆ object_id oid;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ hdrlen;
+	off_t ಸ್ಥಾನಾಂತರ;
+	ರಚನೆ git_hash_ctx c;
 	git_zstream s;
-	struct hashfile_checkpoint checkpoint;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int status = Z_OK;
+	ರಚನೆ hashfile_checkpoint checkpoint;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2 = Z_OK;
 
 	/* Determine if we should auto-checkpoint. */
-	if ((max_packsize
-		&& (pack_size + PACK_SIZE_THRESHOLD + len) > max_packsize)
-		|| (pack_size + PACK_SIZE_THRESHOLD + len) < pack_size)
-		cycle_packfile();
+	ಆದರೆ ((max_packsize
+		&& (pack_ಗಾತ್ರ + PACK_ಗಾತ್ರ_ಮಿತಿ + len) > max_packsize)
+		|| (pack_ಗಾತ್ರ + PACK_ಗಾತ್ರ_ಮಿತಿ + len) < pack_ಗಾತ್ರ)
+		ಚಕ್ರ_packfile();
 
 	hashfile_checkpoint_init(pack_file, &checkpoint);
 	hashfile_checkpoint(pack_file, &checkpoint);
-	offset = checkpoint.offset;
+	ಸ್ಥಾನಾಂತರ = checkpoint.ಸ್ಥಾನಾಂತರ;
 
-	hdrlen = format_object_header((char *)out_buf, out_sz, OBJ_BLOB, len);
+	hdrlen = format_object_ಶೀರ್ಷಿಕೆ((ಅಕ್ಷರ *)ಹೊರಹೋಗು_buf, ಹೊರಹೋಗು_sz, OBJ_BLOB, len);
 
 	git_hash_init(&c, the_hash_algo);
-	git_hash_update(&c, out_buf, hdrlen);
+	git_hash_update(&c, ಹೊರಹೋಗು_buf, hdrlen);
 
-	crc32_begin(pack_file);
+	ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_begin(pack_file);
 
 	git_deflate_init(&s, cfg->pack_compression_level);
 
-	hdrlen = encode_in_pack_object_header(out_buf, out_sz, OBJ_BLOB, len);
+	hdrlen = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(ಹೊರಹೋಗು_buf, ಹೊರಹೋಗು_sz, OBJ_BLOB, len);
 
-	s.next_out = out_buf + hdrlen;
-	s.avail_out = out_sz - hdrlen;
+	s.ಮುಂದಿನ_ಹೊರಹೋಗು = ಹೊರಹೋಗು_buf + hdrlen;
+	s.avail_ಹೊರಹೋಗು = ಹೊರಹೋಗು_sz - hdrlen;
 
-	while (status != Z_STREAM_END) {
-		if (0 < len && !s.avail_in) {
-			size_t cnt = in_sz < len ? in_sz : (size_t)len;
-			size_t n = fread(in_buf, 1, cnt, stdin);
-			if (!n && feof(stdin))
+	ಆಗ (ಸ್ಥಿತಿ_2 != Z_ಹರಿವು_ಕೊನೆ) {
+		ಆದರೆ (0 < len && !s.avail_ಒಳ) {
+			ಗಾತ್ರ_t cnt = ಒಳ_sz < len ? ಒಳ_sz : (ಗಾತ್ರ_t)len;
+			ಗಾತ್ರ_t n = fread(ಒಳ_buf, 1, cnt, stdin);
+			ಆದರೆ (!n && feof(stdin))
 				die(_("EOF in data (%" PRIuMAX " bytes remaining)"), len);
 
-			git_hash_update(&c, in_buf, n);
-			s.next_in = in_buf;
-			s.avail_in = n;
+			git_hash_update(&c, ಒಳ_buf, n);
+			s.ಮುಂದಿನ_ಒಳ = ಒಳ_buf;
+			s.avail_ಒಳ = n;
 			len -= n;
 		}
 
-		status = git_deflate(&s, len ? 0 : Z_FINISH);
+		ಸ್ಥಿತಿ_2 = git_deflate(&s, len ? 0 : Z_ಮುಕ್ತಾಯ);
 
-		if (!s.avail_out || status == Z_STREAM_END) {
-			size_t n = s.next_out - out_buf;
-			hashwrite(pack_file, out_buf, n);
-			pack_size += n;
-			s.next_out = out_buf;
-			s.avail_out = out_sz;
+		ಆದರೆ (!s.avail_ಹೊರಹೋಗು || ಸ್ಥಿತಿ_2 == Z_ಹರಿವು_ಕೊನೆ) {
+			ಗಾತ್ರ_t n = s.ಮುಂದಿನ_ಹೊರಹೋಗು - ಹೊರಹೋಗು_buf;
+			hashwrite(pack_file, ಹೊರಹೋಗು_buf, n);
+			pack_ಗಾತ್ರ += n;
+			s.ಮುಂದಿನ_ಹೊರಹೋಗು = ಹೊರಹೋಗು_buf;
+			s.avail_ಹೊರಹೋಗು = ಹೊರಹೋಗು_sz;
 		}
 
-		switch (status) {
-		case Z_OK:
-		case Z_BUF_ERROR:
-		case Z_STREAM_END:
-			continue;
-		default:
-			die(_("unexpected deflate failure: %d"), status);
+		ಆಯ್ಕೆ (ಸ್ಥಿತಿ_2) {
+		ಸ್ಥಿತಿ Z_OK:
+		ಸ್ಥಿತಿ Z_BUF_ERROR:
+		ಸ್ಥಿತಿ Z_ಹರಿವು_ಕೊನೆ:
+			ಮುಂದುವರಿ;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			die(_("unexpected deflate failure: %d"), ಸ್ಥಿತಿ_2);
 		}
 	}
-	git_deflate_end(&s);
+	git_deflate_ಕೊನೆ(&s);
 	git_hash_final_oid(&oid, &c);
 
-	if (oidout)
+	ಆದರೆ (oidout)
 		oidcpy(oidout, &oid);
 
-	e = insert_object(&oid);
+	e = ಸೇರಿಸು_object(&oid);
 
-	if (mark)
-		insert_mark(&marks, mark, e);
+	ಆದರೆ (mark)
+		ಸೇರಿಸು_mark(&marks, mark, e);
 
-	if (e->idx.offset) {
-		duplicate_count_by_type[OBJ_BLOB]++;
+	ಆದರೆ (e->idx.ಸ್ಥಾನಾಂತರ) {
+		duplicate_ಎಣಿಕೆ_by_type[OBJ_BLOB]++;
 		truncate_pack(&checkpoint);
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
-			continue;
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ) {
+		ಆದರೆ (!packfile_list_ಕಂಡುಹಿಡಿ_oid(packfile_store_get_packs(dir->packed), &oid))
+			ಮುಂದುವರಿ;
 		e->type = OBJ_BLOB;
 		e->pack_id = MAX_PACK_ID;
-		e->idx.offset = 1; /* just not zero! */
-		duplicate_count_by_type[OBJ_BLOB]++;
+		e->idx.ಸ್ಥಾನಾಂತರ = 1; /* just not zero! */
+		duplicate_ಎಣಿಕೆ_by_type[OBJ_BLOB]++;
 		truncate_pack(&checkpoint);
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	e->depth = 0;
+	e->ಆಳ = 0;
 	e->type = OBJ_BLOB;
 	e->pack_id = pack_id;
-	e->idx.offset = offset;
-	e->idx.crc32 = crc32_end(pack_file);
-	object_count++;
-	object_count_by_type[OBJ_BLOB]++;
+	e->idx.ಸ್ಥಾನಾಂತರ = ಸ್ಥಾನಾಂತರ;
+	e->idx.ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32 = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_ಕೊನೆ(pack_file);
+	object_ಎಣಿಕೆ++;
+	object_ಎಣಿಕೆ_by_type[OBJ_BLOB]++;
 
-out:
-	free(in_buf);
-	free(out_buf);
+ಹೊರಹೋಗು:
+	ಬಿಡುಗಡೆ(ಒಳ_buf);
+	ಬಿಡುಗಡೆ(ಹೊರಹೋಗು_buf);
 	hashfile_checkpoint_release(&checkpoint);
 }
 
@@ -1253,15 +1253,15 @@ out:
  * instance did not write out to a packfile.  Callers must test for
  * this condition and use read_sha1_file() instead.
  */
-static void *gfi_unpack_entry(
-	struct object_entry *oe,
-	unsigned long *sizep)
+ಸ್ಥಿರ ಶೂನ್ಯ *gfi_unpack_ನಮೂದು(
+	ರಚನೆ object_ನಮೂದು *oe,
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ *sizep)
 {
-	enum object_type type;
-	size_t size_st = 0;
-	void *data;
-	struct packed_git *p = all_packs[oe->pack_id];
-	if (p == pack_data && p->pack_size < (pack_size + the_hash_algo->rawsz)) {
+	ಎಣಿಕೆ object_type type;
+	ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
+	ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+	ರಚನೆ packed_git *p = all_packs[oe->pack_id];
+	ಆದರೆ (p == pack_ದತ್ತಾಂಶ && p->pack_ಗಾತ್ರ < (pack_ಗಾತ್ರ + the_hash_algo->rawsz)) {
 		/* The object is stored in the packfile we are writing to
 		 * and we have modified it since the last time we scanned
 		 * back to read a previously written object.  If an old
@@ -1279,211 +1279,211 @@ static void *gfi_unpack_entry(
 		 * at least rawsz bytes within any window it maps.  But
 		 * we don't actually create the footer here.
 		 */
-		p->pack_size = pack_size + the_hash_algo->rawsz;
+		p->pack_ಗಾತ್ರ = pack_ಗಾತ್ರ + the_hash_algo->rawsz;
 	}
-	data = unpack_entry(the_repository, p, oe->idx.offset, &type, &size_st);
-	if (sizep)
-		*sizep = cast_size_t_to_ulong(size_st);
-	return data;
+	ದತ್ತಾಂಶ = unpack_ನಮೂದು(the_repository, p, oe->idx.ಸ್ಥಾನಾಂತರ, &type, &ಗಾತ್ರ_st);
+	ಆದರೆ (sizep)
+		*sizep = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+	ಹಿಂತಿರುಗಿ ದತ್ತಾಂಶ;
 }
 
-static void load_tree(struct tree_entry *root)
+ಸ್ಥಿರ ಶೂನ್ಯ ತುಂಬು_ವೃಕ್ಷ(ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು)
 {
-	struct object_id *oid = &root->versions[1].oid;
-	struct object_entry *myoe;
-	struct tree_content *t;
-	unsigned long size;
-	char *buf;
-	const char *c;
+	ರಚನೆ object_id *oid = &ಬೇರು->versions[1].oid;
+	ರಚನೆ object_ನಮೂದು *myoe;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+	ಅಕ್ಷರ *buf;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *c;
 
-	root->tree = t = new_tree_content(8);
-	if (is_null_oid(oid))
-		return;
+	ಬೇರು->ವೃಕ್ಷ = t = new_ವೃಕ್ಷ_content(8);
+	ಆದರೆ (is_null_oid(oid))
+		ಹಿಂತಿರುಗಿ;
 
-	myoe = find_object(oid);
-	if (myoe && myoe->pack_id != MAX_PACK_ID) {
-		if (myoe->type != OBJ_TREE)
-			die(_("not a tree: %s"), oid_to_hex(oid));
-		t->delta_depth = myoe->depth;
-		buf = gfi_unpack_entry(myoe, &size);
-		if (!buf)
-			die(_("can't load tree %s"), oid_to_hex(oid));
-	} else {
-		enum object_type type;
-		size_t size_st = 0;
+	myoe = ಕಂಡುಹಿಡಿ_object(oid);
+	ಆದರೆ (myoe && myoe->pack_id != MAX_PACK_ID) {
+		ಆದರೆ (myoe->type != OBJ_ವೃಕ್ಷ)
+			die(_("not a tree: %s"), oid_ಗಮ್ಯ_hex(oid));
+		t->delta_ಆಳ = myoe->ಆಳ;
+		buf = gfi_unpack_ನಮೂದು(myoe, &ಗಾತ್ರ_2);
+		ಆದರೆ (!buf)
+			die(_("can't load tree %s"), oid_ಗಮ್ಯ_hex(oid));
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಎಣಿಕೆ object_type type;
+		ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
-				      &size_st);
-		size = cast_size_t_to_ulong(size_st);
-		if (!buf || type != OBJ_TREE)
-			die(_("can't load tree %s"), oid_to_hex(oid));
+				      &ಗಾತ್ರ_st);
+		ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+		ಆದರೆ (!buf || type != OBJ_ವೃಕ್ಷ)
+			die(_("can't load tree %s"), oid_ಗಮ್ಯ_hex(oid));
 	}
 
 	c = buf;
-	while (c != (buf + size)) {
-		struct tree_entry *e = new_tree_entry();
+	ಆಗ (c != (buf + ಗಾತ್ರ_2)) {
+		ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e = new_ವೃಕ್ಷ_ನಮೂದು();
 
-		if (t->entry_count == t->entry_capacity)
-			root->tree = t = grow_tree_content(t, t->entry_count);
-		t->entries[t->entry_count++] = e;
+		ಆದರೆ (t->ನಮೂದು_ಎಣಿಕೆ == t->ನಮೂದು_ಸಾಮರ್ಥ್ಯ)
+			ಬೇರು->ವೃಕ್ಷ = t = grow_ವೃಕ್ಷ_content(t, t->ನಮೂದು_ಎಣಿಕೆ);
+		t->entries[t->ನಮೂದು_ಎಣಿಕೆ++] = e;
 
-		e->tree = NULL;
-		c = parse_mode(c, &e->versions[1].mode);
-		if (!c)
-			die(_("corrupt mode in %s"), oid_to_hex(oid));
-		e->versions[0].mode = e->versions[1].mode;
-		e->name = to_atom(c, strlen(c));
+		e->ವೃಕ್ಷ = ಖಾಲಿ;
+		c = parse_ಬಹುಲಕ(c, &e->versions[1].ಬಹುಲಕ);
+		ಆದರೆ (!c)
+			die(_("corrupt mode in %s"), oid_ಗಮ್ಯ_hex(oid));
+		e->versions[0].ಬಹುಲಕ = e->versions[1].ಬಹುಲಕ;
+		e->name = ಗಮ್ಯ_atom(c, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(c));
 		c += e->name->str_len + 1;
-		oidread(&e->versions[0].oid, (unsigned char *)c,
+		oidread(&e->versions[0].oid, (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *)c,
 			the_repository->hash_algo);
-		oidread(&e->versions[1].oid, (unsigned char *)c,
+		oidread(&e->versions[1].oid, (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *)c,
 			the_repository->hash_algo);
 		c += the_hash_algo->rawsz;
 	}
-	free(buf);
+	ಬಿಡುಗಡೆ(buf);
 }
 
-static int tecmp0 (const void *_a, const void *_b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ tecmp0 (ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_a, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_b)
 {
-	struct tree_entry *a = *((struct tree_entry**)_a);
-	struct tree_entry *b = *((struct tree_entry**)_b);
-	return base_name_compare(
-		a->name->str_dat, a->name->str_len, a->versions[0].mode,
-		b->name->str_dat, b->name->str_len, b->versions[0].mode);
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *a = *((ರಚನೆ ವೃಕ್ಷ_ನಮೂದು**)_a);
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *b = *((ರಚನೆ ವೃಕ್ಷ_ನಮೂದು**)_b);
+	ಹಿಂತಿರುಗಿ ತಳ_name_compare(
+		a->name->str_dat, a->name->str_len, a->versions[0].ಬಹುಲಕ,
+		b->name->str_dat, b->name->str_len, b->versions[0].ಬಹುಲಕ);
 }
 
-static int tecmp1 (const void *_a, const void *_b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ tecmp1 (ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_a, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_b)
 {
-	struct tree_entry *a = *((struct tree_entry**)_a);
-	struct tree_entry *b = *((struct tree_entry**)_b);
-	return base_name_compare(
-		a->name->str_dat, a->name->str_len, a->versions[1].mode,
-		b->name->str_dat, b->name->str_len, b->versions[1].mode);
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *a = *((ರಚನೆ ವೃಕ್ಷ_ನಮೂದು**)_a);
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *b = *((ರಚನೆ ವೃಕ್ಷ_ನಮೂದು**)_b);
+	ಹಿಂತಿರುಗಿ ತಳ_name_compare(
+		a->name->str_dat, a->name->str_len, a->versions[1].ಬಹುಲಕ,
+		b->name->str_dat, b->name->str_len, b->versions[1].ಬಹುಲಕ);
 }
 
-static void mktree(struct tree_content *t, int v, struct strbuf *b)
+ಸ್ಥಿರ ಶೂನ್ಯ mktree(ರಚನೆ ವೃಕ್ಷ_content *t, ಪೂರ್ಣಾಂಕ v, ರಚನೆ strbuf *b)
 {
-	size_t maxlen = 0;
-	unsigned int i;
+	ಗಾತ್ರ_t maxlen = 0;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i;
 
-	if (!v)
-		QSORT(t->entries, t->entry_count, tecmp0);
-	else
-		QSORT(t->entries, t->entry_count, tecmp1);
+	ಆದರೆ (!v)
+		QSORT(t->entries, t->ನಮೂದು_ಎಣಿಕೆ, tecmp0);
+	ಇಲ್ಲದಿದ್ದರೆ
+		QSORT(t->entries, t->ನಮೂದು_ಎಣಿಕೆ, tecmp1);
 
-	for (i = 0; i < t->entry_count; i++) {
-		if (t->entries[i]->versions[v].mode)
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
+		ಆದರೆ (t->entries[i]->versions[v].ಬಹುಲಕ)
 			maxlen += t->entries[i]->name->str_len + 34;
 	}
 
 	strbuf_reset(b);
 	strbuf_grow(b, maxlen);
-	for (i = 0; i < t->entry_count; i++) {
-		struct tree_entry *e = t->entries[i];
-		if (!e->versions[v].mode)
-			continue;
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
+		ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e = t->entries[i];
+		ಆದರೆ (!e->versions[v].ಬಹುಲಕ)
+			ಮುಂದುವರಿ;
 		strbuf_addf(b, "%o %s%c",
-			(unsigned int)(e->versions[v].mode & ~NO_DELTA),
+			(ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ)(e->versions[v].ಬಹುಲಕ & ~NO_DELTA),
 			e->name->str_dat, '\0');
-		strbuf_add(b, e->versions[v].oid.hash, the_hash_algo->rawsz);
+		strbuf_ಕೂಡಿಸು(b, e->versions[v].oid.hash, the_hash_algo->rawsz);
 	}
 }
 
-static void store_tree(struct tree_entry *root)
+ಸ್ಥಿರ ಶೂನ್ಯ store_ವೃಕ್ಷ(ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು)
 {
-	struct tree_content *t;
-	unsigned int i, j, del;
-	struct last_object lo = { STRBUF_INIT, 0, 0, /* no_swap */ 1 };
-	struct object_entry *le = NULL;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, j, del;
+	ರಚನೆ ಕೊನೆಯ_object lo = { STRBUF_INIT, 0, 0, /* no_swap */ 1 };
+	ರಚನೆ object_ನಮೂದು *le = ಖಾಲಿ;
 
-	if (!is_null_oid(&root->versions[1].oid))
-		return;
+	ಆದರೆ (!is_null_oid(&ಬೇರು->versions[1].oid))
+		ಹಿಂತಿರುಗಿ;
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
+	ಆದರೆ (!ಬೇರು->ವೃಕ್ಷ)
+		ತುಂಬು_ವೃಕ್ಷ(ಬೇರು);
+	t = ಬೇರು->ವೃಕ್ಷ;
 
-	for (i = 0; i < t->entry_count; i++) {
-		if (t->entries[i]->tree)
-			store_tree(t->entries[i]);
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
+		ಆದರೆ (t->entries[i]->ವೃಕ್ಷ)
+			store_ವೃಕ್ಷ(t->entries[i]);
 	}
 
-	if (!(root->versions[0].mode & NO_DELTA))
-		le = find_object(&root->versions[0].oid);
-	if (S_ISDIR(root->versions[0].mode) && le && le->pack_id == pack_id) {
-		mktree(t, 0, &old_tree);
-		lo.data = old_tree;
-		lo.offset = le->idx.offset;
-		lo.depth = t->delta_depth;
+	ಆದರೆ (!(ಬೇರು->versions[0].ಬಹುಲಕ & NO_DELTA))
+		le = ಕಂಡುಹಿಡಿ_object(&ಬೇರು->versions[0].oid);
+	ಆದರೆ (S_ISDIR(ಬೇರು->versions[0].ಬಹುಲಕ) && le && le->pack_id == pack_id) {
+		mktree(t, 0, &old_ವೃಕ್ಷ);
+		lo.ದತ್ತಾಂಶ = old_ವೃಕ್ಷ;
+		lo.ಸ್ಥಾನಾಂತರ = le->idx.ಸ್ಥಾನಾಂತರ;
+		lo.ಆಳ = t->delta_ಆಳ;
 	}
 
-	mktree(t, 1, &new_tree);
-	store_object(OBJ_TREE, &new_tree, &lo, &root->versions[1].oid, 0);
+	mktree(t, 1, &new_ವೃಕ್ಷ);
+	store_object(OBJ_ವೃಕ್ಷ, &new_ವೃಕ್ಷ, &lo, &ಬೇರು->versions[1].oid, 0);
 
-	t->delta_depth = lo.depth;
-	for (i = 0, j = 0, del = 0; i < t->entry_count; i++) {
-		struct tree_entry *e = t->entries[i];
-		if (e->versions[1].mode) {
-			e->versions[0].mode = e->versions[1].mode;
+	t->delta_ಆಳ = lo.ಆಳ;
+	ಗಾಗಿ (i = 0, j = 0, del = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
+		ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e = t->entries[i];
+		ಆದರೆ (e->versions[1].ಬಹುಲಕ) {
+			e->versions[0].ಬಹುಲಕ = e->versions[1].ಬಹುಲಕ;
 			oidcpy(&e->versions[0].oid, &e->versions[1].oid);
 			t->entries[j++] = e;
-		} else {
-			release_tree_entry(e);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			release_ವೃಕ್ಷ_ನಮೂದು(e);
 			del++;
 		}
 	}
-	t->entry_count -= del;
+	t->ನಮೂದು_ಎಣಿಕೆ -= del;
 }
 
-static void tree_content_replace(
-	struct tree_entry *root,
-	const struct object_id *oid,
-	const uint16_t mode,
-	struct tree_content *newtree)
+ಸ್ಥಿರ ಶೂನ್ಯ ವೃಕ್ಷ_content_replace(
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು,
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+	ಸ್ಥಿರಾಂಕ uint16_t ಬಹುಲಕ,
+	ರಚನೆ ವೃಕ್ಷ_content *newtree)
 {
-	if (!S_ISDIR(mode))
+	ಆದರೆ (!S_ISDIR(ಬಹುಲಕ))
 		die(_("root cannot be a non-directory"));
-	oidclr(&root->versions[0].oid, the_repository->hash_algo);
-	oidcpy(&root->versions[1].oid, oid);
-	if (root->tree)
-		release_tree_content_recursive(root->tree);
-	root->tree = newtree;
+	oidclr(&ಬೇರು->versions[0].oid, the_repository->hash_algo);
+	oidcpy(&ಬೇರು->versions[1].oid, oid);
+	ಆದರೆ (ಬೇರು->ವೃಕ್ಷ)
+		release_ವೃಕ್ಷ_content_recursive(ಬೇರು->ವೃಕ್ಷ);
+	ಬೇರು->ವೃಕ್ಷ = newtree;
 }
 
-static int tree_content_set(
-	struct tree_entry *root,
-	const char *p,
-	const struct object_id *oid,
-	const uint16_t mode,
-	struct tree_content *subtree)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_content_ಗಣ(
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು,
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+	ಸ್ಥಿರಾಂಕ uint16_t ಬಹುಲಕ,
+	ರಚನೆ ವೃಕ್ಷ_content *subtree)
 {
-	struct tree_content *t;
-	const char *slash1;
-	unsigned int i, n;
-	struct tree_entry *e;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *slash1;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, n;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
-	if (!n)
+	ಆದರೆ (!n)
 		die(_("empty path component found in input"));
-	if (!*slash1 && !S_ISDIR(mode) && subtree)
+	ಆದರೆ (!*slash1 && !S_ISDIR(ಬಹುಲಕ) && subtree)
 		die(_("non-directories cannot have subtrees"));
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	ಆದರೆ (!ಬೇರು->ವೃಕ್ಷ)
+		ತುಂಬು_ವೃಕ್ಷ(ಬೇರು);
+	t = ಬೇರು->ವೃಕ್ಷ;
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
-			if (!*slash1) {
-				if (!S_ISDIR(mode)
-						&& e->versions[1].mode == mode
+		ಆದರೆ (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+			ಆದರೆ (!*slash1) {
+				ಆದರೆ (!S_ISDIR(ಬಹುಲಕ)
+						&& e->versions[1].ಬಹುಲಕ == ಬಹುಲಕ
 						&& oideq(&e->versions[1].oid, oid))
-					return 0;
-				e->versions[1].mode = mode;
+					ಹಿಂತಿರುಗಿ 0;
+				e->versions[1].ಬಹುಲಕ = ಬಹುಲಕ;
 				oidcpy(&e->versions[1].oid, oid);
-				if (e->tree)
-					release_tree_content_recursive(e->tree);
-				e->tree = subtree;
+				ಆದರೆ (e->ವೃಕ್ಷ)
+					release_ವೃಕ್ಷ_content_recursive(e->ವೃಕ್ಷ);
+				e->ವೃಕ್ಷ = subtree;
 
 				/*
 				 * We need to leave e->versions[0].sha1 alone
@@ -1498,262 +1498,262 @@ static int tree_content_set(
 				 * So let's just explicitly disable deltas
 				 * for the subtree.
 				 */
-				if (S_ISDIR(e->versions[0].mode))
-					e->versions[0].mode |= NO_DELTA;
+				ಆದರೆ (S_ISDIR(e->versions[0].ಬಹುಲಕ))
+					e->versions[0].ಬಹುಲಕ |= NO_DELTA;
 
-				oidclr(&root->versions[1].oid, the_repository->hash_algo);
-				return 1;
+				oidclr(&ಬೇರು->versions[1].oid, the_repository->hash_algo);
+				ಹಿಂತಿರುಗಿ 1;
 			}
-			if (!S_ISDIR(e->versions[1].mode)) {
-				e->tree = new_tree_content(8);
-				e->versions[1].mode = S_IFDIR;
+			ಆದರೆ (!S_ISDIR(e->versions[1].ಬಹುಲಕ)) {
+				e->ವೃಕ್ಷ = new_ವೃಕ್ಷ_content(8);
+				e->versions[1].ಬಹುಲಕ = S_IFDIR;
 			}
-			if (!e->tree)
-				load_tree(e);
-			if (tree_content_set(e, slash1 + 1, oid, mode, subtree)) {
-				oidclr(&root->versions[1].oid, the_repository->hash_algo);
-				return 1;
+			ಆದರೆ (!e->ವೃಕ್ಷ)
+				ತುಂಬು_ವೃಕ್ಷ(e);
+			ಆದರೆ (ವೃಕ್ಷ_content_ಗಣ(e, slash1 + 1, oid, ಬಹುಲಕ, subtree)) {
+				oidclr(&ಬೇರು->versions[1].oid, the_repository->hash_algo);
+				ಹಿಂತಿರುಗಿ 1;
 			}
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
-	if (t->entry_count == t->entry_capacity)
-		root->tree = t = grow_tree_content(t, t->entry_count);
-	e = new_tree_entry();
-	e->name = to_atom(p, n);
-	e->versions[0].mode = 0;
+	ಆದರೆ (t->ನಮೂದು_ಎಣಿಕೆ == t->ನಮೂದು_ಸಾಮರ್ಥ್ಯ)
+		ಬೇರು->ವೃಕ್ಷ = t = grow_ವೃಕ್ಷ_content(t, t->ನಮೂದು_ಎಣಿಕೆ);
+	e = new_ವೃಕ್ಷ_ನಮೂದು();
+	e->name = ಗಮ್ಯ_atom(p, n);
+	e->versions[0].ಬಹುಲಕ = 0;
 	oidclr(&e->versions[0].oid, the_repository->hash_algo);
-	t->entries[t->entry_count++] = e;
-	if (*slash1) {
-		e->tree = new_tree_content(8);
-		e->versions[1].mode = S_IFDIR;
-		tree_content_set(e, slash1 + 1, oid, mode, subtree);
-	} else {
-		e->tree = subtree;
-		e->versions[1].mode = mode;
+	t->entries[t->ನಮೂದು_ಎಣಿಕೆ++] = e;
+	ಆದರೆ (*slash1) {
+		e->ವೃಕ್ಷ = new_ವೃಕ್ಷ_content(8);
+		e->versions[1].ಬಹುಲಕ = S_IFDIR;
+		ವೃಕ್ಷ_content_ಗಣ(e, slash1 + 1, oid, ಬಹುಲಕ, subtree);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		e->ವೃಕ್ಷ = subtree;
+		e->versions[1].ಬಹುಲಕ = ಬಹುಲಕ;
 		oidcpy(&e->versions[1].oid, oid);
 	}
-	oidclr(&root->versions[1].oid, the_repository->hash_algo);
-	return 1;
+	oidclr(&ಬೇರು->versions[1].oid, the_repository->hash_algo);
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int tree_content_remove(
-	struct tree_entry *root,
-	const char *p,
-	struct tree_entry *backup_leaf,
-	int allow_root)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_content_remove(
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು,
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *backup_ಎಲೆ,
+	ಪೂರ್ಣಾಂಕ allow_ಬೇರು)
 {
-	struct tree_content *t;
-	const char *slash1;
-	unsigned int i, n;
-	struct tree_entry *e;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *slash1;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, n;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
 
-	if (!root->tree)
-		load_tree(root);
+	ಆದರೆ (!ಬೇರು->ವೃಕ್ಷ)
+		ತುಂಬು_ವೃಕ್ಷ(ಬೇರು);
 
-	if (!*p && allow_root) {
-		e = root;
-		goto del_entry;
+	ಆದರೆ (!*p && allow_ಬೇರು) {
+		e = ಬೇರು;
+		ಹೋಗು del_ನಮೂದು;
 	}
 
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	t = ಬೇರು->ವೃಕ್ಷ;
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
-			if (*slash1 && !S_ISDIR(e->versions[1].mode))
+		ಆದರೆ (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+			ಆದರೆ (*slash1 && !S_ISDIR(e->versions[1].ಬಹುಲಕ))
 				/*
 				 * If p names a file in some subdirectory, and a
 				 * file or symlink matching the name of the
 				 * parent directory of p exists, then p cannot
 				 * exist and need not be deleted.
 				 */
-				return 1;
-			if (!*slash1 || !S_ISDIR(e->versions[1].mode))
-				goto del_entry;
-			if (!e->tree)
-				load_tree(e);
-			if (tree_content_remove(e, slash1 + 1, backup_leaf, 0)) {
-				for (n = 0; n < e->tree->entry_count; n++) {
-					if (e->tree->entries[n]->versions[1].mode) {
-						oidclr(&root->versions[1].oid,
+				ಹಿಂತಿರುಗಿ 1;
+			ಆದರೆ (!*slash1 || !S_ISDIR(e->versions[1].ಬಹುಲಕ))
+				ಹೋಗು del_ನಮೂದು;
+			ಆದರೆ (!e->ವೃಕ್ಷ)
+				ತುಂಬು_ವೃಕ್ಷ(e);
+			ಆದರೆ (ವೃಕ್ಷ_content_remove(e, slash1 + 1, backup_ಎಲೆ, 0)) {
+				ಗಾಗಿ (n = 0; n < e->ವೃಕ್ಷ->ನಮೂದು_ಎಣಿಕೆ; n++) {
+					ಆದರೆ (e->ವೃಕ್ಷ->entries[n]->versions[1].ಬಹುಲಕ) {
+						oidclr(&ಬೇರು->versions[1].oid,
 						       the_repository->hash_algo);
-						return 1;
+						ಹಿಂತಿರುಗಿ 1;
 					}
 				}
-				backup_leaf = NULL;
-				goto del_entry;
+				backup_ಎಲೆ = ಖಾಲಿ;
+				ಹೋಗು del_ನಮೂದು;
 			}
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 
-del_entry:
-	if (backup_leaf)
-		memcpy(backup_leaf, e, sizeof(*backup_leaf));
-	else if (e->tree)
-		release_tree_content_recursive(e->tree);
-	e->tree = NULL;
-	e->versions[1].mode = 0;
+del_ನಮೂದು:
+	ಆದರೆ (backup_ಎಲೆ)
+		ಸ್ಮರಣೆ_ನಕಲು(backup_ಎಲೆ, e, ಗಾತ್ರ(*backup_ಎಲೆ));
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (e->ವೃಕ್ಷ)
+		release_ವೃಕ್ಷ_content_recursive(e->ವೃಕ್ಷ);
+	e->ವೃಕ್ಷ = ಖಾಲಿ;
+	e->versions[1].ಬಹುಲಕ = 0;
 	oidclr(&e->versions[1].oid, the_repository->hash_algo);
-	oidclr(&root->versions[1].oid, the_repository->hash_algo);
-	return 1;
+	oidclr(&ಬೇರು->versions[1].oid, the_repository->hash_algo);
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int tree_content_get(
-	struct tree_entry *root,
-	const char *p,
-	struct tree_entry *leaf,
-	int allow_root)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_content_get(
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು,
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಎಲೆ,
+	ಪೂರ್ಣಾಂಕ allow_ಬೇರು)
 {
-	struct tree_content *t;
-	const char *slash1;
-	unsigned int i, n;
-	struct tree_entry *e;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *slash1;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, n;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
-	if (!n && !allow_root)
+	ಆದರೆ (!n && !allow_ಬೇರು)
 		die(_("empty path component found in input"));
 
-	if (!root->tree)
-		load_tree(root);
+	ಆದರೆ (!ಬೇರು->ವೃಕ್ಷ)
+		ತುಂಬು_ವೃಕ್ಷ(ಬೇರು);
 
-	if (!n) {
-		e = root;
-		goto found_entry;
+	ಆದರೆ (!n) {
+		e = ಬೇರು;
+		ಹೋಗು ಸಿಕ್ಕಿತು_ನಮೂದು;
 	}
 
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	t = ಬೇರು->ವೃಕ್ಷ;
+	ಗಾಗಿ (i = 0; i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
-			if (!*slash1)
-				goto found_entry;
-			if (!S_ISDIR(e->versions[1].mode))
-				return 0;
-			if (!e->tree)
-				load_tree(e);
-			return tree_content_get(e, slash1 + 1, leaf, 0);
+		ಆದರೆ (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+			ಆದರೆ (!*slash1)
+				ಹೋಗು ಸಿಕ್ಕಿತು_ನಮೂದು;
+			ಆದರೆ (!S_ISDIR(e->versions[1].ಬಹುಲಕ))
+				ಹಿಂತಿರುಗಿ 0;
+			ಆದರೆ (!e->ವೃಕ್ಷ)
+				ತುಂಬು_ವೃಕ್ಷ(e);
+			ಹಿಂತಿರುಗಿ ವೃಕ್ಷ_content_get(e, slash1 + 1, ಎಲೆ, 0);
 		}
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 
-found_entry:
-	memcpy(leaf, e, sizeof(*leaf));
-	if (e->tree && is_null_oid(&e->versions[1].oid))
-		leaf->tree = dup_tree_content(e->tree);
-	else
-		leaf->tree = NULL;
-	return 1;
+ಸಿಕ್ಕಿತು_ನಮೂದು:
+	ಸ್ಮರಣೆ_ನಕಲು(ಎಲೆ, e, ಗಾತ್ರ(*ಎಲೆ));
+	ಆದರೆ (e->ವೃಕ್ಷ && is_null_oid(&e->versions[1].oid))
+		ಎಲೆ->ವೃಕ್ಷ = dup_ವೃಕ್ಷ_content(e->ವೃಕ್ಷ);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಎಲೆ->ವೃಕ್ಷ = ಖಾಲಿ;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int update_branch(struct branch *b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ update_branch(ರಚನೆ branch *b)
 {
-	static const char *msg = "fast-import";
-	struct ref_transaction *transaction;
-	struct object_id old_oid;
-	struct strbuf err = STRBUF_INIT;
-	static const char *replace_prefix = "refs/replace/";
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ = "fast-import";
+	ರಚನೆ ref_transaction *transaction;
+	ರಚನೆ object_id old_oid;
+	ರಚನೆ strbuf err = STRBUF_INIT;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *replace_ಪೂರ್ವಪ್ರತ್ಯಯ = "refs/replace/";
 
-	if (starts_with(b->name, replace_prefix) &&
-	    !strcmp(b->name + strlen(replace_prefix),
-		    oid_to_hex(&b->oid))) {
-		if (!quiet)
+	ಆದರೆ (starts_with(b->name, replace_ಪೂರ್ವಪ್ರತ್ಯಯ) &&
+	    !strcmp(b->name + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(replace_ಪೂರ್ವಪ್ರತ್ಯಯ),
+		    oid_ಗಮ್ಯ_hex(&b->oid))) {
+		ಆದರೆ (!quiet)
 			warning(_("dropping %s since it would point to "
 				  "itself (i.e. to %s)"),
-				b->name, oid_to_hex(&b->oid));
+				b->name, oid_ಗಮ್ಯ_hex(&b->oid));
 		refs_delete_ref(get_main_ref_store(the_repository),
-				NULL, b->name, NULL, 0);
-		return 0;
+				ಖಾಲಿ, b->name, ಖಾಲಿ, 0);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (is_null_oid(&b->oid)) {
-		if (b->delete)
+	ಆದರೆ (is_null_oid(&b->oid)) {
+		ಆದರೆ (b->delete)
 			refs_delete_ref(get_main_ref_store(the_repository),
-					NULL, b->name, NULL, 0);
-		return 0;
+					ಖಾಲಿ, b->name, ಖಾಲಿ, 0);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (refs_read_ref(get_main_ref_store(the_repository), b->name, &old_oid))
+	ಆದರೆ (refs_read_ref(get_main_ref_store(the_repository), b->name, &old_oid))
 		oidclr(&old_oid, the_repository->hash_algo);
-	if (!force_update && !is_null_oid(&old_oid)) {
-		struct commit *old_cmit, *new_cmit;
-		int ret;
+	ಆದರೆ (!force_update && !is_null_oid(&old_oid)) {
+		ರಚನೆ commit *old_cmit, *new_cmit;
+		ಪೂರ್ಣಾಂಕ ret;
 
 		old_cmit = lookup_commit_reference_gently(the_repository,
 							  &old_oid, 0);
 		new_cmit = lookup_commit_reference_gently(the_repository,
 							  &b->oid, 0);
-		if (!old_cmit || !new_cmit)
-			return error(_("branch %s is missing commits."), b->name);
+		ಆದರೆ (!old_cmit || !new_cmit)
+			ಹಿಂತಿರುಗಿ error(_("branch %s is missing commits."), b->name);
 
-		ret = repo_in_merge_bases(the_repository, old_cmit, new_cmit);
-		if (ret < 0)
-			exit(128);
-		if (!ret) {
+		ret = repo_ಒಳ_ವಿಲೀನ_bases(the_repository, old_cmit, new_cmit);
+		ಆದರೆ (ret < 0)
+			ನಿರ್ಗಮಿಸು(128);
+		ಆದರೆ (!ret) {
 			warning(_("not updating %s"
 				  " (new tip %s does not contain %s)"),
-				b->name, oid_to_hex(&b->oid),
-				oid_to_hex(&old_oid));
-			return -1;
+				b->name, oid_ಗಮ್ಯ_hex(&b->oid),
+				oid_ಗಮ್ಯ_hex(&old_oid));
+			ಹಿಂತಿರುಗಿ -1;
 		}
 	}
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	ಆದರೆ (!transaction ||
 	    ref_transaction_update(transaction, b->name, &b->oid, &old_oid,
-				   NULL, NULL, 0, msg, &err) ||
+				   ಖಾಲಿ, ಖಾಲಿ, 0, ಸಂದೇಶ, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
 		ref_transaction_free(transaction);
 		error("%s", err.buf);
 		strbuf_release(&err);
-		return -1;
+		ಹಿಂತಿರುಗಿ -1;
 	}
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void dump_branches(void)
+ಸ್ಥಿರ ಶೂನ್ಯ dump_branches(ಶೂನ್ಯ)
 {
-	unsigned int i;
-	struct branch *b;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ branch *b;
 
-	for (i = 0; i < branch_table_sz; i++) {
-		for (b = branch_table[i]; b; b = b->table_next_branch)
+	ಗಾಗಿ (i = 0; i < branch_ಕೋಷ್ಟಕ_sz; i++) {
+		ಗಾಗಿ (b = branch_ಕೋಷ್ಟಕ[i]; b; b = b->ಕೋಷ್ಟಕ_ಮುಂದಿನ_branch)
 			failure |= update_branch(b);
 	}
 }
 
-static void dump_tags(void)
+ಸ್ಥಿರ ಶೂನ್ಯ dump_ಟ್ಯಾಗುಗಳು(ಶೂನ್ಯ)
 {
-	static const char *msg = "fast-import";
-	struct tag *t;
-	struct strbuf ref_name = STRBUF_INIT;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_transaction *transaction;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ = "fast-import";
+	ರಚನೆ ಟ್ಯಾಗ್ *t;
+	ರಚನೆ strbuf ref_name = STRBUF_INIT;
+	ರಚನೆ strbuf err = STRBUF_INIT;
+	ರಚನೆ ref_transaction *transaction;
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction) {
+	ಆದರೆ (!transaction) {
 		failure |= error("%s", err.buf);
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
-	for (t = first_tag; t; t = t->next_tag) {
+	ಗಾಗಿ (t = ಮೊದಲ_ಟ್ಯಾಗ್; t; t = t->ಮುಂದಿನ_ಟ್ಯಾಗ್) {
 		strbuf_reset(&ref_name);
 		strbuf_addf(&ref_name, "refs/tags/%s", t->name);
 
-		if (ref_transaction_update(transaction, ref_name.buf,
-					   &t->oid, NULL, NULL, NULL,
-					   0, msg, &err)) {
+		ಆದರೆ (ref_transaction_update(transaction, ref_name.buf,
+					   &t->oid, ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ,
+					   0, ಸಂದೇಶ, &err)) {
 			failure |= error("%s", err.buf);
-			goto cleanup;
+			ಹೋಗು cleanup;
 		}
 	}
-	if (ref_transaction_commit(transaction, &err))
+	ಆದರೆ (ref_transaction_commit(transaction, &err))
 		failure |= error("%s", err.buf);
 
  cleanup:
@@ -1762,424 +1762,424 @@ static void dump_tags(void)
 	strbuf_release(&err);
 }
 
-static void dump_marks(void)
+ಸ್ಥಿರ ಶೂನ್ಯ dump_marks(ಶೂನ್ಯ)
 {
-	struct lock_file mark_lock = LOCK_INIT;
+	ರಚನೆ ಬೀಗ_file mark_ಬೀಗ = ಬೀಗ_INIT;
 	FILE *f;
 
-	if (!export_marks_file || (import_marks_file && !import_marks_file_done))
-		return;
+	ಆದರೆ (!export_marks_file || (import_marks_file && !import_marks_file_ಮುಗಿದ))
+		ಹಿಂತಿರುಗಿ;
 
-	if (safe_create_leading_directories_const(the_repository, export_marks_file)) {
+	ಆದರೆ (ಸುರಕ್ಷಿತ_create_leading_directories_const(the_repository, export_marks_file)) {
 		failure |= error_errno(_("unable to create leading directories of %s"),
 				       export_marks_file);
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	if (hold_lock_file_for_update(&mark_lock, export_marks_file, 0) < 0) {
+	ಆದರೆ (hold_ಬೀಗ_file_for_update(&mark_ಬೀಗ, export_marks_file, 0) < 0) {
 		failure |= error_errno(_("unable to write marks file %s"),
 				       export_marks_file);
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	f = fdopen_lock_file(&mark_lock, "w");
-	if (!f) {
-		int saved_errno = errno;
-		rollback_lock_file(&mark_lock);
+	f = fdopen_ಬೀಗ_file(&mark_ಬೀಗ, "w");
+	ಆದರೆ (!f) {
+		ಪೂರ್ಣಾಂಕ saved_errno = errno;
+		rollback_ಬೀಗ_file(&mark_ಬೀಗ);
 		failure |= error(_("unable to write marks file %s: %s"),
 			export_marks_file, strerror(saved_errno));
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 
 	for_each_mark(marks, 0, dump_marks_fn, f);
-	if (commit_lock_file(&mark_lock)) {
+	ಆದರೆ (commit_ಬೀಗ_file(&mark_ಬೀಗ)) {
 		failure |= error_errno(_("unable to write file %s"),
 				       export_marks_file);
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 }
 
-static void insert_object_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸೇರಿಸು_object_ನಮೂದು(ರಚನೆ mark_ಗಣ **s, ರಚನೆ object_id *oid, uintmax_t mark)
 {
-	struct object_entry *e;
-	e = find_object(oid);
-	if (!e) {
-		enum object_type type = odb_read_object_info(the_repository->objects,
-							     oid, NULL);
-		if (type < 0)
-			die(_("object not found: %s"), oid_to_hex(oid));
-		e = insert_object(oid);
+	ರಚನೆ object_ನಮೂದು *e;
+	e = ಕಂಡುಹಿಡಿ_object(oid);
+	ಆದರೆ (!e) {
+		ಎಣಿಕೆ object_type type = odb_read_object_info(the_repository->objects,
+							     oid, ಖಾಲಿ);
+		ಆದರೆ (type < 0)
+			die(_("object not found: %s"), oid_ಗಮ್ಯ_hex(oid));
+		e = ಸೇರಿಸು_object(oid);
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
-		e->idx.offset = 1; /* just not zero! */
+		e->idx.ಸ್ಥಾನಾಂತರ = 1; /* just not zero! */
 	}
-	insert_mark(s, mark, e);
+	ಸೇರಿಸು_mark(s, mark, e);
 }
 
-static void insert_oid_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸೇರಿಸು_oid_ನಮೂದು(ರಚನೆ mark_ಗಣ **s, ರಚನೆ object_id *oid, uintmax_t mark)
 {
-	insert_mark(s, mark, xmemdupz(oid, sizeof(*oid)));
+	ಸೇರಿಸು_mark(s, mark, xmemdupz(oid, ಗಾತ್ರ(*oid)));
 }
 
-static void read_mark_file(struct mark_set **s, FILE *f, mark_set_inserter_t inserter)
+ಸ್ಥಿರ ಶೂನ್ಯ read_mark_file(ರಚನೆ mark_ಗಣ **s, FILE *f, mark_ಗಣ_inserter_t inserter)
 {
-	char line[512];
-	while (fgets(line, sizeof(line), f)) {
+	ಅಕ್ಷರ ಸಾಲು[512];
+	ಆಗ (fgets(ಸಾಲು, ಗಾತ್ರ(ಸಾಲು), f)) {
 		uintmax_t mark;
-		char *end;
-		struct object_id oid;
+		ಅಕ್ಷರ *ಕೊನೆ;
+		ರಚನೆ object_id oid;
 
 		/* Ensure SHA-1 objects are padded with zeros. */
-		memset(oid.hash, 0, sizeof(oid.hash));
+		memset(oid.hash, 0, ಗಾತ್ರ(oid.hash));
 
-		end = strchr(line, '\n');
-		if (line[0] != ':' || !end)
-			die(_("corrupt mark line: %s"), line);
-		*end = 0;
-		mark = strtoumax(line + 1, &end, 10);
-		if (!mark || end == line + 1
-			|| *end != ' '
-			|| get_oid_hex_any(end + 1, &oid) == GIT_HASH_UNKNOWN)
-			die(_("corrupt mark line: %s"), line);
+		ಕೊನೆ = strchr(ಸಾಲು, '\n');
+		ಆದರೆ (ಸಾಲು[0] != ':' || !ಕೊನೆ)
+			die(_("corrupt mark line: %s"), ಸಾಲು);
+		*ಕೊನೆ = 0;
+		mark = strtoumax(ಸಾಲು + 1, &ಕೊನೆ, 10);
+		ಆದರೆ (!mark || ಕೊನೆ == ಸಾಲು + 1
+			|| *ಕೊನೆ != ' '
+			|| get_oid_hex_any(ಕೊನೆ + 1, &oid) == GIT_HASH_UNKNOWN)
+			die(_("corrupt mark line: %s"), ಸಾಲು);
 		inserter(s, &oid, mark);
 	}
 }
 
-static void read_marks(void)
+ಸ್ಥಿರ ಶೂನ್ಯ read_marks(ಶೂನ್ಯ)
 {
 	FILE *f = fopen(import_marks_file, "r");
-	if (f)
+	ಆದರೆ (f)
 		;
-	else if (import_marks_file_ignore_missing && errno == ENOENT)
-		goto done; /* Marks file does not exist */
-	else
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (import_marks_file_ignore_missing && errno == ENOENT)
+		ಹೋಗು ಮುಗಿದ; /* Marks file does not exist */
+	ಇಲ್ಲದಿದ್ದರೆ
 		die_errno(_("cannot read '%s'"), import_marks_file);
-	read_mark_file(&marks, f, insert_object_entry);
+	read_mark_file(&marks, f, ಸೇರಿಸು_object_ನಮೂದು);
 	fclose(f);
-done:
-	import_marks_file_done = 1;
+ಮುಗಿದ:
+	import_marks_file_ಮುಗಿದ = 1;
 }
 
 
-static int read_next_command(struct fast_import_state *state)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ read_ಮುಂದಿನ_command(ರಚನೆ fast_import_state *state)
 {
-	static int stdin_eof = 0;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ stdin_eof = 0;
 
-	if (stdin_eof) {
+	ಆದರೆ (stdin_eof) {
 		unread_command_buf = 0;
-		return EOF;
+		ಹಿಂತಿರುಗಿ EOF;
 	}
 
-	for (;;) {
-		if (unread_command_buf) {
+	ಗಾಗಿ (;;) {
+		ಆದರೆ (unread_command_buf) {
 			unread_command_buf = 0;
-		} else {
-			struct recent_command *rc;
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ರಚನೆ recent_command *rc;
 
 			stdin_eof = strbuf_getline_lf(&command_buf, stdin);
-			if (stdin_eof)
-				return EOF;
+			ಆದರೆ (stdin_eof)
+				ಹಿಂತಿರುಗಿ EOF;
 
-			if (!state->seen_data_command
+			ಆದರೆ (!state->ನೋಡಿದ_ದತ್ತಾಂಶ_command
 				&& !starts_with(command_buf.buf, "feature ")
 				&& !starts_with(command_buf.buf, "option ")) {
 				parse_argv(state);
 			}
 
 			rc = rc_free;
-			if (rc)
-				rc_free = rc->next;
-			else {
-				rc = cmd_hist.next;
-				cmd_hist.next = rc->next;
-				cmd_hist.next->prev = &cmd_hist;
-				free(rc->buf);
+			ಆದರೆ (rc)
+				rc_free = rc->ಮುಂದಿನ;
+			ಇಲ್ಲದಿದ್ದರೆ {
+				rc = cmd_hist.ಮುಂದಿನ;
+				cmd_hist.ಮುಂದಿನ = rc->ಮುಂದಿನ;
+				cmd_hist.ಮುಂದಿನ->prev = &cmd_hist;
+				ಬಿಡುಗಡೆ(rc->buf);
 			}
 
 			rc->buf = xstrdup(command_buf.buf);
-			rc->prev = cmd_tail;
-			rc->next = cmd_hist.prev;
-			rc->prev->next = rc;
-			cmd_tail = rc;
+			rc->prev = cmd_ಬಾಲ;
+			rc->ಮುಂದಿನ = cmd_hist.prev;
+			rc->prev->ಮುಂದಿನ = rc;
+			cmd_ಬಾಲ = rc;
 		}
-		if (command_buf.buf[0] == '#')
-			continue;
-		return 0;
+		ಆದರೆ (command_buf.buf[0] == '#')
+			ಮುಂದುವರಿ;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 }
 
-static void skip_optional_lf(void)
+ಸ್ಥಿರ ಶೂನ್ಯ skip_optional_lf(ಶೂನ್ಯ)
 {
-	int term_char = fgetc(stdin);
-	if (term_char != '\n' && term_char != EOF)
-		ungetc(term_char, stdin);
+	ಪೂರ್ಣಾಂಕ ಪದ_char = fgetc(stdin);
+	ಆದರೆ (ಪದ_char != '\n' && ಪದ_char != EOF)
+		ungetc(ಪದ_char, stdin);
 }
 
-static void parse_mark(struct fast_import_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_mark(ರಚನೆ fast_import_state *state)
 {
-	const char *v;
-	if (skip_prefix(command_buf.buf, "mark :", &v)) {
-		next_mark = strtoumax(v, NULL, 10);
-		read_next_command(state);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v;
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "mark :", &v)) {
+		ಮುಂದಿನ_mark = strtoumax(v, ಖಾಲಿ, 10);
+		read_ಮುಂದಿನ_command(state);
 	}
-	else
-		next_mark = 0;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಮುಂದಿನ_mark = 0;
 }
 
-static void parse_original_identifier(struct fast_import_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_original_identifier(ರಚನೆ fast_import_state *state)
 {
-	const char *v;
-	if (skip_prefix(command_buf.buf, "original-oid ", &v))
-		read_next_command(state);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v;
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "original-oid ", &v))
+		read_ಮುಂದಿನ_command(state);
 }
 
-static int parse_data(struct strbuf *sb, uintmax_t limit, uintmax_t *len_res)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_ದತ್ತಾಂಶ(ರಚನೆ strbuf *sb, uintmax_t ಎಲ್ಲೆ, uintmax_t *len_res)
 {
-	const char *data;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ದತ್ತಾಂಶ;
 	strbuf_reset(sb);
 
-	if (!skip_prefix(command_buf.buf, "data ", &data))
+	ಆದರೆ (!skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "data ", &ದತ್ತಾಂಶ))
 		die(_("expected 'data n' command, found: %s"), command_buf.buf);
 
-	if (skip_prefix(data, "<<", &data)) {
-		char *term = xstrdup(data);
-		size_t term_len = command_buf.len - (data - command_buf.buf);
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(ದತ್ತಾಂಶ, "<<", &ದತ್ತಾಂಶ)) {
+		ಅಕ್ಷರ *ಪದ = xstrdup(ದತ್ತಾಂಶ);
+		ಗಾತ್ರ_t ಪದ_len = command_buf.len - (ದತ್ತಾಂಶ - command_buf.buf);
 
-		for (;;) {
-			if (strbuf_getline_lf(&command_buf, stdin) == EOF)
-				die(_("EOF in data (terminator '%s' not found)"), term);
-			if (term_len == command_buf.len
-				&& !strcmp(term, command_buf.buf))
-				break;
+		ಗಾಗಿ (;;) {
+			ಆದರೆ (strbuf_getline_lf(&command_buf, stdin) == EOF)
+				die(_("EOF in data (terminator '%s' not found)"), ಪದ);
+			ಆದರೆ (ಪದ_len == command_buf.len
+				&& !strcmp(ಪದ, command_buf.buf))
+				ನಿಲ್ಲಿಸು;
 			strbuf_addbuf(sb, &command_buf);
 			strbuf_addch(sb, '\n');
 		}
-		free(term);
+		ಬಿಡುಗಡೆ(ಪದ);
 	}
-	else {
-		uintmax_t len = strtoumax(data, NULL, 10);
-		size_t n = 0, length = (size_t)len;
+	ಇಲ್ಲದಿದ್ದರೆ {
+		uintmax_t len = strtoumax(ದತ್ತಾಂಶ, ಖಾಲಿ, 10);
+		ಗಾತ್ರ_t n = 0, ಉದ್ದಳತೆ = (ಗಾತ್ರ_t)len;
 
-		if (limit && limit < len) {
+		ಆದರೆ (ಎಲ್ಲೆ && ಎಲ್ಲೆ < len) {
 			*len_res = len;
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		if (length < len)
+		ಆದರೆ (ಉದ್ದಳತೆ < len)
 			die(_("data is too large to use in this context"));
 
-		while (n < length) {
-			size_t s = strbuf_fread(sb, length - n, stdin);
-			if (!s && feof(stdin))
+		ಆಗ (n < ಉದ್ದಳತೆ) {
+			ಗಾತ್ರ_t s = strbuf_fread(sb, ಉದ್ದಳತೆ - n, stdin);
+			ಆದರೆ (!s && feof(stdin))
 				die(_("EOF in data (%lu bytes remaining)"),
-					(unsigned long)(length - n));
+					(ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ)(ಉದ್ದಳತೆ - n));
 			n += s;
 		}
 	}
 
 	skip_optional_lf();
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int validate_raw_date(const char *src, struct strbuf *result, int strict)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ validate_raw_date(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *src, ರಚನೆ strbuf *ಫಲಿತಾಂಶ, ಪೂರ್ಣಾಂಕ strict)
 {
-	const char *orig_src = src;
-	char *endp;
-	unsigned long num;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *orig_src = src;
+	ಅಕ್ಷರ *endp;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಅಂಕೆ;
 
 	errno = 0;
 
-	num = strtoul(src, &endp, 10);
+	ಅಂಕೆ = strtoul(src, &endp, 10);
 	/*
 	 * NEEDSWORK: perhaps check for reasonable values? For example, we
 	 *            could error on values representing times more than a
 	 *            day in the future.
 	 */
-	if (errno || endp == src || *endp != ' ')
-		return -1;
+	ಆದರೆ (errno || endp == src || *endp != ' ')
+		ಹಿಂತಿರುಗಿ -1;
 
 	src = endp + 1;
-	if (*src != '-' && *src != '+')
-		return -1;
+	ಆದರೆ (*src != '-' && *src != '+')
+		ಹಿಂತಿರುಗಿ -1;
 
-	num = strtoul(src + 1, &endp, 10);
+	ಅಂಕೆ = strtoul(src + 1, &endp, 10);
 	/*
 	 * NEEDSWORK: check for brokenness other than num > 1400, such as
 	 *            (num % 100) >= 60, or ((num % 100) % 15) != 0 ?
 	 */
-	if (errno || endp == src + 1 || *endp || /* did not parse */
-	    (strict && (1400 < num))             /* parsed a broken timezone */
+	ಆದರೆ (errno || endp == src + 1 || *endp || /* did not parse */
+	    (strict && (1400 < ಅಂಕೆ))             /* parsed a broken timezone */
 	   )
-		return -1;
+		ಹಿಂತಿರುಗಿ -1;
 
-	strbuf_addstr(result, orig_src);
-	return 0;
+	strbuf_addstr(ಫಲಿತಾಂಶ, orig_src);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static char *parse_ident(const char *buf)
+ಸ್ಥಿರ ಅಕ್ಷರ *parse_ident(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *buf)
 {
-	const char *ltgt;
-	size_t name_len;
-	struct strbuf ident = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ltgt;
+	ಗಾತ್ರ_t name_len;
+	ರಚನೆ strbuf ident = STRBUF_INIT;
 
 	/* ensure there is a space delimiter even if there is no name */
-	if (*buf == '<')
+	ಆದರೆ (*buf == '<')
 		--buf;
 
 	ltgt = buf + strcspn(buf, "<>");
-	if (*ltgt != '<')
+	ಆದರೆ (*ltgt != '<')
 		die(_("missing < in ident string: %s"), buf);
-	if (ltgt != buf && ltgt[-1] != ' ')
+	ಆದರೆ (ltgt != buf && ltgt[-1] != ' ')
 		die(_("missing space before < in ident string: %s"), buf);
 	ltgt = ltgt + 1 + strcspn(ltgt + 1, "<>");
-	if (*ltgt != '>')
+	ಆದರೆ (*ltgt != '>')
 		die(_("missing > in ident string: %s"), buf);
 	ltgt++;
-	if (*ltgt != ' ')
+	ಆದರೆ (*ltgt != ' ')
 		die(_("missing space after > in ident string: %s"), buf);
 	ltgt++;
 	name_len = ltgt - buf;
-	strbuf_add(&ident, buf, name_len);
+	strbuf_ಕೂಡಿಸು(&ident, buf, name_len);
 
-	switch (whenspec) {
-	case WHENSPEC_RAW:
-		if (validate_raw_date(ltgt, &ident, 1) < 0)
+	ಆಯ್ಕೆ (whenspec) {
+	ಸ್ಥಿತಿ WHENSPEC_RAW:
+		ಆದರೆ (validate_raw_date(ltgt, &ident, 1) < 0)
 			die(_("invalid raw date \"%s\" in ident: %s"), ltgt, buf);
-		break;
-	case WHENSPEC_RAW_PERMISSIVE:
-		if (validate_raw_date(ltgt, &ident, 0) < 0)
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ WHENSPEC_RAW_PERMISSIVE:
+		ಆದರೆ (validate_raw_date(ltgt, &ident, 0) < 0)
 			die(_("invalid raw date \"%s\" in ident: %s"), ltgt, buf);
-		break;
-	case WHENSPEC_RFC2822:
-		if (parse_date(ltgt, &ident) < 0)
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ WHENSPEC_RFC2822:
+		ಆದರೆ (parse_date(ltgt, &ident) < 0)
 			die(_("invalid rfc2822 date \"%s\" in ident: %s"), ltgt, buf);
-		break;
-	case WHENSPEC_NOW:
-		if (strcmp("now", ltgt))
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ WHENSPEC_NOW:
+		ಆದರೆ (strcmp("now", ltgt))
 			die(_("date in ident must be 'now': %s"), buf);
 		datestamp(&ident);
-		break;
+		ನಿಲ್ಲಿಸು;
 	}
 
-	return strbuf_detach(&ident, NULL);
+	ಹಿಂತಿರುಗಿ strbuf_detach(&ident, ಖಾಲಿ);
 }
 
-static void parse_and_store_blob(
-	struct last_object *last,
-	struct object_id *oidout,
+ಸ್ಥಿರ ಶೂನ್ಯ parse_and_store_blob(
+	ರಚನೆ ಕೊನೆಯ_object *ಕೊನೆಯ,
+	ರಚನೆ object_id *oidout,
 	uintmax_t mark)
 {
-	static struct strbuf buf = STRBUF_INIT;
+	ಸ್ಥಿರ ರಚನೆ strbuf buf = STRBUF_INIT;
 	uintmax_t len;
 
-	if (parse_data(&buf, repo_settings_get_big_file_threshold(the_repository), &len))
-		store_object(OBJ_BLOB, &buf, last, oidout, mark);
-	else {
-		if (last) {
-			strbuf_release(&last->data);
-			last->offset = 0;
-			last->depth = 0;
+	ಆದರೆ (parse_ದತ್ತಾಂಶ(&buf, repo_settings_get_big_file_ಮಿತಿ(the_repository), &len))
+		store_object(OBJ_BLOB, &buf, ಕೊನೆಯ, oidout, mark);
+	ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (ಕೊನೆಯ) {
+			strbuf_release(&ಕೊನೆಯ->ದತ್ತಾಂಶ);
+			ಕೊನೆಯ->ಸ್ಥಾನಾಂತರ = 0;
+			ಕೊನೆಯ->ಆಳ = 0;
 		}
-		stream_blob(len, oidout, mark);
+		ಹರಿವು_blob(len, oidout, mark);
 		skip_optional_lf();
 	}
 }
 
-static void parse_new_blob(struct fast_import_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_new_blob(ರಚನೆ fast_import_state *state)
 {
-	read_next_command(state);
+	read_ಮುಂದಿನ_command(state);
 	parse_mark(state);
 	parse_original_identifier(state);
-	parse_and_store_blob(&last_blob, NULL, next_mark);
+	parse_and_store_blob(&ಕೊನೆಯ_blob, ಖಾಲಿ, ಮುಂದಿನ_mark);
 }
 
-static void unload_one_branch(void)
+ಸ್ಥಿರ ಶೂನ್ಯ unload_one_branch(ಶೂನ್ಯ)
 {
-	while (cur_active_branches
-		&& cur_active_branches >= max_active_branches) {
+	ಆಗ (cur_ಸಕ್ರಿಯ_branches
+		&& cur_ಸಕ್ರಿಯ_branches >= max_ಸಕ್ರಿಯ_branches) {
 		uintmax_t min_commit = ULONG_MAX;
-		struct branch *e, *l = NULL, *p = NULL;
+		ರಚನೆ branch *e, *l = ಖಾಲಿ, *p = ಖಾಲಿ;
 
-		for (e = active_branches; e; e = e->active_next_branch) {
-			if (e->last_commit < min_commit) {
+		ಗಾಗಿ (e = ಸಕ್ರಿಯ_branches; e; e = e->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch) {
+			ಆದರೆ (e->ಕೊನೆಯ_commit < min_commit) {
 				p = l;
-				min_commit = e->last_commit;
+				min_commit = e->ಕೊನೆಯ_commit;
 			}
 			l = e;
 		}
 
-		if (p) {
-			e = p->active_next_branch;
-			p->active_next_branch = e->active_next_branch;
-		} else {
-			e = active_branches;
-			active_branches = e->active_next_branch;
+		ಆದರೆ (p) {
+			e = p->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch;
+			p->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch = e->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch;
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			e = ಸಕ್ರಿಯ_branches;
+			ಸಕ್ರಿಯ_branches = e->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch;
 		}
-		e->active = 0;
-		e->active_next_branch = NULL;
-		if (e->branch_tree.tree) {
-			release_tree_content_recursive(e->branch_tree.tree);
-			e->branch_tree.tree = NULL;
+		e->ಸಕ್ರಿಯ = 0;
+		e->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch = ಖಾಲಿ;
+		ಆದರೆ (e->branch_ವೃಕ್ಷ.ವೃಕ್ಷ) {
+			release_ವೃಕ್ಷ_content_recursive(e->branch_ವೃಕ್ಷ.ವೃಕ್ಷ);
+			e->branch_ವೃಕ್ಷ.ವೃಕ್ಷ = ಖಾಲಿ;
 		}
-		cur_active_branches--;
+		cur_ಸಕ್ರಿಯ_branches--;
 	}
 }
 
-static void load_branch(struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ ತುಂಬು_branch(ರಚನೆ branch *b)
 {
-	load_tree(&b->branch_tree);
-	if (!b->active) {
-		b->active = 1;
-		b->active_next_branch = active_branches;
-		active_branches = b;
-		cur_active_branches++;
-		branch_load_count++;
+	ತುಂಬು_ವೃಕ್ಷ(&b->branch_ವೃಕ್ಷ);
+	ಆದರೆ (!b->ಸಕ್ರಿಯ) {
+		b->ಸಕ್ರಿಯ = 1;
+		b->ಸಕ್ರಿಯ_ಮುಂದಿನ_branch = ಸಕ್ರಿಯ_branches;
+		ಸಕ್ರಿಯ_branches = b;
+		cur_ಸಕ್ರಿಯ_branches++;
+		branch_ತುಂಬು_ಎಣಿಕೆ++;
 	}
 }
 
-static unsigned char convert_num_notes_to_fanout(uintmax_t num_notes)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ convert_ಅಂಕೆ_notes_ಗಮ್ಯ_fanout(uintmax_t ಅಂಕೆ_notes)
 {
-	unsigned char fanout = 0;
-	while ((num_notes >>= 8))
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ fanout = 0;
+	ಆಗ ((ಅಂಕೆ_notes >>= 8))
 		fanout++;
-	return fanout;
+	ಹಿಂತಿರುಗಿ fanout;
 }
 
-static void construct_path_with_fanout(const char *hex_sha1,
-		unsigned char fanout, char *path)
+ಸ್ಥಿರ ಶೂನ್ಯ construct_ಮಾರ್ಗ_with_fanout(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *hex_sha1,
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ fanout, ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	unsigned int i = 0, j = 0;
-	if (fanout >= the_hash_algo->rawsz)
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i = 0, j = 0;
+	ಆದರೆ (fanout >= the_hash_algo->rawsz)
 		die(_("too large fanout (%u)"), fanout);
-	while (fanout) {
-		path[i++] = hex_sha1[j++];
-		path[i++] = hex_sha1[j++];
-		path[i++] = '/';
+	ಆಗ (fanout) {
+		ಮಾರ್ಗ[i++] = hex_sha1[j++];
+		ಮಾರ್ಗ[i++] = hex_sha1[j++];
+		ಮಾರ್ಗ[i++] = '/';
 		fanout--;
 	}
-	memcpy(path + i, hex_sha1 + j, the_hash_algo->hexsz - j);
-	path[i + the_hash_algo->hexsz - j] = '\0';
+	ಸ್ಮರಣೆ_ನಕಲು(ಮಾರ್ಗ + i, hex_sha1 + j, the_hash_algo->hexsz - j);
+	ಮಾರ್ಗ[i + the_hash_algo->hexsz - j] = '\0';
 }
 
-static uintmax_t do_change_note_fanout(
-		struct tree_entry *orig_root, struct tree_entry *root,
-		char *hex_oid, unsigned int hex_oid_len,
-		char *fullpath, unsigned int fullpath_len,
-		unsigned char fanout)
+ಸ್ಥಿರ uintmax_t do_change_note_fanout(
+		ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *orig_ಬೇರು, ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು,
+		ಅಕ್ಷರ *hex_oid, ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ hex_oid_len,
+		ಅಕ್ಷರ *fullpath, ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ fullpath_len,
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ fanout)
 {
-	struct tree_content *t;
-	struct tree_entry *e, leaf;
-	unsigned int i, tmp_hex_oid_len, tmp_fullpath_len;
-	uintmax_t num_notes = 0;
-	struct object_id oid;
+	ರಚನೆ ವೃಕ್ಷ_content *t;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *e, ಎಲೆ;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, tmp_hex_oid_len, tmp_fullpath_len;
+	uintmax_t ಅಂಕೆ_notes = 0;
+	ರಚನೆ object_id oid;
 	/* hex oid + '/' between each pair of hex digits + NUL */
-	char realpath[GIT_MAX_HEXSZ + ((GIT_MAX_HEXSZ / 2) - 1) + 1];
-	const unsigned hexsz = the_hash_algo->hexsz;
+	ಅಕ್ಷರ realpath[GIT_MAX_HEXSZ + ((GIT_MAX_HEXSZ / 2) - 1) + 1];
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ hexsz = the_hash_algo->hexsz;
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
+	ಆದರೆ (!ಬೇರು->ವೃಕ್ಷ)
+		ತುಂಬು_ವೃಕ್ಷ(ಬೇರು);
+	t = ಬೇರು->ವೃಕ್ಷ;
 
-	for (i = 0; t && i < t->entry_count; i++) {
+	ಗಾಗಿ (i = 0; t && i < t->ನಮೂದು_ಎಣಿಕೆ; i++) {
 		e = t->entries[i];
 		tmp_hex_oid_len = hex_oid_len + e->name->str_len;
 		tmp_fullpath_len = fullpath_len;
@@ -2192,57 +2192,57 @@ static uintmax_t do_change_note_fanout(
 		 * Also, each path component in a note entry must be a multiple
 		 * of 2 chars.
 		 */
-		if (!e->versions[1].mode ||
+		ಆದರೆ (!e->versions[1].ಬಹುಲಕ ||
 		    tmp_hex_oid_len > hexsz ||
 		    e->name->str_len % 2)
-			continue;
+			ಮುಂದುವರಿ;
 
 		/* This _may_ be a note entry, or a subdir containing notes */
-		memcpy(hex_oid + hex_oid_len, e->name->str_dat,
+		ಸ್ಮರಣೆ_ನಕಲು(hex_oid + hex_oid_len, e->name->str_dat,
 		       e->name->str_len);
-		if (tmp_fullpath_len)
+		ಆದರೆ (tmp_fullpath_len)
 			fullpath[tmp_fullpath_len++] = '/';
-		memcpy(fullpath + tmp_fullpath_len, e->name->str_dat,
+		ಸ್ಮರಣೆ_ನಕಲು(fullpath + tmp_fullpath_len, e->name->str_dat,
 		       e->name->str_len);
 		tmp_fullpath_len += e->name->str_len;
 		fullpath[tmp_fullpath_len] = '\0';
 
-		if (tmp_hex_oid_len == hexsz && !get_oid_hex(hex_oid, &oid)) {
+		ಆದರೆ (tmp_hex_oid_len == hexsz && !get_oid_hex(hex_oid, &oid)) {
 			/* This is a note entry */
-			if (fanout == 0xff) {
+			ಆದರೆ (fanout == 0xff) {
 				/* Counting mode, no rename */
-				num_notes++;
-				continue;
+				ಅಂಕೆ_notes++;
+				ಮುಂದುವರಿ;
 			}
-			construct_path_with_fanout(hex_oid, fanout, realpath);
-			if (!strcmp(fullpath, realpath)) {
+			construct_ಮಾರ್ಗ_with_fanout(hex_oid, fanout, realpath);
+			ಆದರೆ (!strcmp(fullpath, realpath)) {
 				/* Note entry is in correct location */
-				num_notes++;
-				continue;
+				ಅಂಕೆ_notes++;
+				ಮುಂದುವರಿ;
 			}
 
 			/* Rename fullpath to realpath */
-			if (!tree_content_remove(orig_root, fullpath, &leaf, 0))
+			ಆದರೆ (!ವೃಕ್ಷ_content_remove(orig_ಬೇರು, fullpath, &ಎಲೆ, 0))
 				die(_("failed to remove path %s"), fullpath);
-			tree_content_set(orig_root, realpath,
-				&leaf.versions[1].oid,
-				leaf.versions[1].mode,
-				leaf.tree);
-		} else if (S_ISDIR(e->versions[1].mode)) {
+			ವೃಕ್ಷ_content_ಗಣ(orig_ಬೇರು, realpath,
+				&ಎಲೆ.versions[1].oid,
+				ಎಲೆ.versions[1].ಬಹುಲಕ,
+				ಎಲೆ.ವೃಕ್ಷ);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (S_ISDIR(e->versions[1].ಬಹುಲಕ)) {
 			/* This is a subdir that may contain note entries */
-			num_notes += do_change_note_fanout(orig_root, e,
+			ಅಂಕೆ_notes += do_change_note_fanout(orig_ಬೇರು, e,
 				hex_oid, tmp_hex_oid_len,
 				fullpath, tmp_fullpath_len, fanout);
 		}
 
 		/* The above may have reallocated the current tree_content */
-		t = root->tree;
+		t = ಬೇರು->ವೃಕ್ಷ;
 	}
-	return num_notes;
+	ಹಿಂತಿರುಗಿ ಅಂಕೆ_notes;
 }
 
-static uintmax_t change_note_fanout(struct tree_entry *root,
-		unsigned char fanout)
+ಸ್ಥಿರ uintmax_t change_note_fanout(ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು,
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ fanout)
 {
 	/*
 	 * The size of path is due to one slash between every two hex digits,
@@ -2250,32 +2250,32 @@ static uintmax_t change_note_fanout(struct tree_entry *root,
 	 * the number of slashes is one less than half the number of hex
 	 * characters.
 	 */
-	char hex_oid[GIT_MAX_HEXSZ], path[GIT_MAX_HEXSZ + (GIT_MAX_HEXSZ / 2) - 1 + 1];
-	return do_change_note_fanout(root, root, hex_oid, 0, path, 0, fanout);
+	ಅಕ್ಷರ hex_oid[GIT_MAX_HEXSZ], ಮಾರ್ಗ[GIT_MAX_HEXSZ + (GIT_MAX_HEXSZ / 2) - 1 + 1];
+	ಹಿಂತಿರುಗಿ do_change_note_fanout(ಬೇರು, ಬೇರು, hex_oid, 0, ಮಾರ್ಗ, 0, fanout);
 }
 
-static int parse_mapped_oid_hex(const char *hex, struct object_id *oid, const char **end)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_mapped_oid_hex(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *hex, ರಚನೆ object_id *oid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **ಕೊನೆ)
 {
-	int algo;
+	ಪೂರ್ಣಾಂಕ algo;
 	khiter_t it;
 
 	/* Make SHA-1 object IDs have all-zero padding. */
-	memset(oid->hash, 0, sizeof(oid->hash));
+	memset(oid->hash, 0, ಗಾತ್ರ(oid->hash));
 
-	algo = parse_oid_hex_any(hex, oid, end);
-	if (algo == GIT_HASH_UNKNOWN)
-		return -1;
+	algo = parse_oid_hex_any(hex, oid, ಕೊನೆ);
+	ಆದರೆ (algo == GIT_HASH_UNKNOWN)
+		ಹಿಂತಿರುಗಿ -1;
 
 	it = kh_get_oid_map(sub_oid_map, *oid);
 	/* No such object? */
-	if (it == kh_end(sub_oid_map)) {
+	ಆದರೆ (it == kh_ಕೊನೆ(sub_oid_map)) {
 		/* If we're using the same algorithm, pass it through. */
-		if (hash_algos[algo].format_id == the_hash_algo->format_id)
-			return 0;
-		return -1;
+		ಆದರೆ (hash_algos[algo].format_id == the_hash_algo->format_id)
+			ಹಿಂತಿರುಗಿ 0;
+		ಹಿಂತಿರುಗಿ -1;
 	}
-	oidcpy(oid, kh_value(sub_oid_map, it));
-	return 0;
+	oidcpy(oid, kh_ಮೌಲ್ಯ(sub_oid_map, it));
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
@@ -2288,47 +2288,47 @@ static int parse_mapped_oid_hex(const char *hex, struct object_id *oid, const ch
  * Complain if the following character is not what is expected,
  * either a space or end of the string.
  */
-static uintmax_t parse_mark_ref(const char *p, char **endptr)
+ಸ್ಥಿರ uintmax_t parse_mark_ref(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p, ಅಕ್ಷರ **endptr)
 {
 	uintmax_t mark;
 
-	assert(*p == ':');
+	ಪ್ರತಿಜ್ಞಾ(*p == ':');
 	p++;
 	mark = strtoumax(p, endptr, 10);
-	if (*endptr == p)
+	ಆದರೆ (*endptr == p)
 		die(_("no value after ':' in mark: %s"), command_buf.buf);
-	return mark;
+	ಹಿಂತಿರುಗಿ mark;
 }
 
 /*
  * Parse the mark reference, and complain if this is not the end of
  * the string.
  */
-static uintmax_t parse_mark_ref_eol(const char *p)
+ಸ್ಥಿರ uintmax_t parse_mark_ref_eol(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p)
 {
-	char *end;
+	ಅಕ್ಷರ *ಕೊನೆ;
 	uintmax_t mark;
 
-	mark = parse_mark_ref(p, &end);
-	if (*end != '\0')
+	mark = parse_mark_ref(p, &ಕೊನೆ);
+	ಆದರೆ (*ಕೊನೆ != '\0')
 		die(_("garbage after mark: %s"), command_buf.buf);
-	return mark;
+	ಹಿಂತಿರುಗಿ mark;
 }
 
 /*
  * Parse the mark reference, demanding a trailing space. Update *p to
  * point to the first character after the space.
  */
-static uintmax_t parse_mark_ref_space(const char **p)
+ಸ್ಥಿರ uintmax_t parse_mark_ref_space(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **p)
 {
 	uintmax_t mark;
-	char *end;
+	ಅಕ್ಷರ *ಕೊನೆ;
 
-	mark = parse_mark_ref(*p, &end);
-	if (*end++ != ' ')
+	mark = parse_mark_ref(*p, &ಕೊನೆ);
+	ಆದರೆ (*ಕೊನೆ++ != ' ')
 		die(_("missing space after mark: %s"), command_buf.buf);
-	*p = end;
-	return mark;
+	*p = ಕೊನೆ;
+	ಹಿಂತಿರುಗಿ mark;
 }
 
 /*
@@ -2337,23 +2337,23 @@ static uintmax_t parse_mark_ref_space(const char **p)
  * contain spaces only if `is_last_field` is nonzero; otherwise, it stops
  * parsing at the first space.
  */
-static void parse_path(struct strbuf *sb, const char *p, const char **endp,
-		int is_last_field, const char *field)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_ಮಾರ್ಗ(ರಚನೆ strbuf *sb, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **endp,
+		ಪೂರ್ಣಾಂಕ is_ಕೊನೆಯ_ಕ್ಷೇತ್ರ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕ್ಷೇತ್ರ)
 {
-	if (*p == '"') {
-		if (unquote_c_style(sb, p, endp))
-			die(_("invalid %s: %s"), field, command_buf.buf);
-		if (strlen(sb->buf) != sb->len)
-			die(_("NUL in %s: %s"), field, command_buf.buf);
-	} else {
+	ಆದರೆ (*p == '"') {
+		ಆದರೆ (unquote_c_style(sb, p, endp))
+			die(_("invalid %s: %s"), ಕ್ಷೇತ್ರ, command_buf.buf);
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(sb->buf) != sb->len)
+			die(_("NUL in %s: %s"), ಕ್ಷೇತ್ರ, command_buf.buf);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		/*
 		 * Unless we are parsing the last field of a line,
 		 * SP is the end of this field.
 		 */
-		*endp = is_last_field
-			? p + strlen(p)
+		*endp = is_ಕೊನೆಯ_ಕ್ಷೇತ್ರ
+			? p + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(p)
 			: strchrnul(p, ' ');
-		strbuf_add(sb, p, *endp - p);
+		strbuf_ಕೂಡಿಸು(sb, p, *endp - p);
 	}
 }
 
@@ -2361,13 +2361,13 @@ static void parse_path(struct strbuf *sb, const char *p, const char **endp,
  * Parse the path string into the strbuf, and complain if this is not the end of
  * the string. Unquoted strings may contain spaces.
  */
-static void parse_path_eol(struct strbuf *sb, const char *p, const char *field)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_ಮಾರ್ಗ_eol(ರಚನೆ strbuf *sb, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕ್ಷೇತ್ರ)
 {
-	const char *end;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೊನೆ;
 
-	parse_path(sb, p, &end, 1, field);
-	if (*end)
-		die(_("garbage after %s: %s"), field, command_buf.buf);
+	parse_ಮಾರ್ಗ(sb, p, &ಕೊನೆ, 1, ಕ್ಷೇತ್ರ);
+	ಆದರೆ (*ಕೊನೆ)
+		die(_("garbage after %s: %s"), ಕ್ಷೇತ್ರ, command_buf.buf);
 }
 
 /*
@@ -2375,73 +2375,73 @@ static void parse_path_eol(struct strbuf *sb, const char *p, const char *field)
  * Unquoted strings may not contain spaces. Update *endp to point to the first
  * character after the space.
  */
-static void parse_path_space(struct strbuf *sb, const char *p,
-		const char **endp, const char *field)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_ಮಾರ್ಗ_space(ರಚನೆ strbuf *sb, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **endp, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕ್ಷೇತ್ರ)
 {
-	parse_path(sb, p, endp, 0, field);
-	if (**endp != ' ')
-		die(_("missing space after %s: %s"), field, command_buf.buf);
+	parse_ಮಾರ್ಗ(sb, p, endp, 0, ಕ್ಷೇತ್ರ);
+	ಆದರೆ (**endp != ' ')
+		die(_("missing space after %s: %s"), ಕ್ಷೇತ್ರ, command_buf.buf);
 	(*endp)++;
 }
 
-static void file_change_m(struct fast_import_state *state,
-			  const char *p,
-			  struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ file_change_m(ರಚನೆ fast_import_state *state,
+			  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+			  ರಚನೆ branch *b)
 {
-	static struct strbuf path = STRBUF_INIT;
-	struct object_entry *oe;
-	struct object_id oid;
-	uint16_t mode, inline_data = 0;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಮಾರ್ಗ = STRBUF_INIT;
+	ರಚನೆ object_ನಮೂದು *oe;
+	ರಚನೆ object_id oid;
+	uint16_t ಬಹುಲಕ, inline_ದತ್ತಾಂಶ = 0;
 
-	p = parse_mode(p, &mode);
-	if (!p)
+	p = parse_ಬಹುಲಕ(p, &ಬಹುಲಕ);
+	ಆದರೆ (!p)
 		die(_("corrupt mode: %s"), command_buf.buf);
-	switch (mode) {
-	case 0644:
-	case 0755:
-		mode |= S_IFREG;
-	case S_IFREG | 0644:
-	case S_IFREG | 0755:
-	case S_IFLNK:
-	case S_IFDIR:
-	case S_IFGITLINK:
+	ಆಯ್ಕೆ (ಬಹುಲಕ) {
+	ಸ್ಥಿತಿ 0644:
+	ಸ್ಥಿತಿ 0755:
+		ಬಹುಲಕ |= S_IFREG;
+	ಸ್ಥಿತಿ S_IFREG | 0644:
+	ಸ್ಥಿತಿ S_IFREG | 0755:
+	ಸ್ಥಿತಿ S_IFLNK:
+	ಸ್ಥಿತಿ S_IFDIR:
+	ಸ್ಥಿತಿ S_IFGITLINK:
 		/* ok */
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		die(_("corrupt mode: %s"), command_buf.buf);
 	}
 
-	if (*p == ':') {
-		oe = find_mark(marks, parse_mark_ref_space(&p));
+	ಆದರೆ (*p == ':') {
+		oe = ಕಂಡುಹಿಡಿ_mark(marks, parse_mark_ref_space(&p));
 		oidcpy(&oid, &oe->idx.oid);
-	} else if (skip_prefix(p, "inline ", &p)) {
-		inline_data = 1;
-		oe = NULL; /* not used with inline_data, but makes gcc happy */
-	} else {
-		if (parse_mapped_oid_hex(p, &oid, &p))
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(p, "inline ", &p)) {
+		inline_ದತ್ತಾಂಶ = 1;
+		oe = ಖಾಲಿ; /* not used with inline_data, but makes gcc happy */
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (parse_mapped_oid_hex(p, &oid, &p))
 			die(_("invalid dataref: %s"), command_buf.buf);
-		oe = find_object(&oid);
-		if (*p++ != ' ')
+		oe = ಕಂಡುಹಿಡಿ_object(&oid);
+		ಆದರೆ (*p++ != ' ')
 			die(_("missing space after SHA1: %s"), command_buf.buf);
 	}
 
-	strbuf_reset(&path);
-	parse_path_eol(&path, p, "path");
+	strbuf_reset(&ಮಾರ್ಗ);
+	parse_ಮಾರ್ಗ_eol(&ಮಾರ್ಗ, p, "path");
 
 	/* Git does not track empty, non-toplevel directories. */
-	if (S_ISDIR(mode) &&
-	    is_empty_tree_oid(&oid, the_repository->hash_algo) &&
-	    *path.buf) {
-		tree_content_remove(&b->branch_tree, path.buf, NULL, 0);
-		return;
+	ಆದರೆ (S_ISDIR(ಬಹುಲಕ) &&
+	    is_ಖಾಲಿಗಳು_ವೃಕ್ಷ_oid(&oid, the_repository->hash_algo) &&
+	    *ಮಾರ್ಗ.buf) {
+		ವೃಕ್ಷ_content_remove(&b->branch_ವೃಕ್ಷ, ಮಾರ್ಗ.buf, ಖಾಲಿ, 0);
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	if (S_ISGITLINK(mode)) {
-		if (inline_data)
+	ಆದರೆ (S_ISGITLINK(ಬಹುಲಕ)) {
+		ಆದರೆ (inline_ದತ್ತಾಂಶ)
 			die(_("Git links cannot be specified 'inline': %s"),
 				command_buf.buf);
-		else if (oe) {
-			if (oe->type != OBJ_COMMIT)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (oe) {
+			ಆದರೆ (oe->type != OBJ_COMMIT)
 				die(_("not a commit (actually a %s): %s"),
 					type_name(oe->type), command_buf.buf);
 		}
@@ -2449,98 +2449,98 @@ static void file_change_m(struct fast_import_state *state,
 		 * Accept the sha1 without checking; it expected to be in
 		 * another repository.
 		 */
-	} else if (inline_data) {
-		if (S_ISDIR(mode))
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (inline_ದತ್ತಾಂಶ) {
+		ಆದರೆ (S_ISDIR(ಬಹುಲಕ))
 			die(_("directories cannot be specified 'inline': %s"),
 				command_buf.buf);
-		while (read_next_command(state) != EOF) {
-			const char *v;
-			if (skip_prefix(command_buf.buf, "cat-blob ", &v))
+		ಆಗ (read_ಮುಂದಿನ_command(state) != EOF) {
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v;
+			ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "cat-blob ", &v))
 				parse_cat_blob(state, v);
-			else {
-				parse_and_store_blob(&last_blob, &oid, 0);
-				break;
+			ಇಲ್ಲದಿದ್ದರೆ {
+				parse_and_store_blob(&ಕೊನೆಯ_blob, &oid, 0);
+				ನಿಲ್ಲಿಸು;
 			}
 		}
-	} else {
-		enum object_type expected = S_ISDIR(mode) ?
-						OBJ_TREE: OBJ_BLOB;
-		enum object_type type = oe ? oe->type :
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಎಣಿಕೆ object_type expected = S_ISDIR(ಬಹುಲಕ) ?
+						OBJ_ವೃಕ್ಷ: OBJ_BLOB;
+		ಎಣಿಕೆ object_type type = oe ? oe->type :
 					odb_read_object_info(the_repository->objects,
-							     &oid, NULL);
-		if (type < 0)
+							     &oid, ಖಾಲಿ);
+		ಆದರೆ (type < 0)
 			die(_("%s not found: %s"),
-			    S_ISDIR(mode) ?  _("tree") : _("blob"),
+			    S_ISDIR(ಬಹುಲಕ) ?  _("tree") : _("blob"),
 			    command_buf.buf);
-		if (type != expected)
+		ಆದರೆ (type != expected)
 			die(_("not a %s (actually a %s): %s"),
 				type_name(expected), type_name(type),
 				command_buf.buf);
 	}
 
-	if (!*path.buf) {
-		tree_content_replace(&b->branch_tree, &oid, mode, NULL);
-		return;
+	ಆದರೆ (!*ಮಾರ್ಗ.buf) {
+		ವೃಕ್ಷ_content_replace(&b->branch_ವೃಕ್ಷ, &oid, ಬಹುಲಕ, ಖಾಲಿ);
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	if (!verify_path(path.buf, mode))
-		die(_("invalid path '%s'"), path.buf);
-	tree_content_set(&b->branch_tree, path.buf, &oid, mode, NULL);
+	ಆದರೆ (!verify_ಮಾರ್ಗ(ಮಾರ್ಗ.buf, ಬಹುಲಕ))
+		die(_("invalid path '%s'"), ಮಾರ್ಗ.buf);
+	ವೃಕ್ಷ_content_ಗಣ(&b->branch_ವೃಕ್ಷ, ಮಾರ್ಗ.buf, &oid, ಬಹುಲಕ, ಖಾಲಿ);
 }
 
-static void file_change_d(const char *p, struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ file_change_d(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p, ರಚನೆ branch *b)
 {
-	static struct strbuf path = STRBUF_INIT;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಮಾರ್ಗ = STRBUF_INIT;
 
-	strbuf_reset(&path);
-	parse_path_eol(&path, p, "path");
-	tree_content_remove(&b->branch_tree, path.buf, NULL, 1);
+	strbuf_reset(&ಮಾರ್ಗ);
+	parse_ಮಾರ್ಗ_eol(&ಮಾರ್ಗ, p, "path");
+	ವೃಕ್ಷ_content_remove(&b->branch_ವೃಕ್ಷ, ಮಾರ್ಗ.buf, ಖಾಲಿ, 1);
 }
 
-static void file_change_cr(const char *p, struct branch *b, int rename)
+ಸ್ಥಿರ ಶೂನ್ಯ file_change_cr(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p, ರಚನೆ branch *b, ಪೂರ್ಣಾಂಕ rename)
 {
-	static struct strbuf source = STRBUF_INIT;
-	static struct strbuf dest = STRBUF_INIT;
-	struct tree_entry leaf;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಮೂಲ = STRBUF_INIT;
+	ಸ್ಥಿರ ರಚನೆ strbuf dest = STRBUF_INIT;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು ಎಲೆ;
 
-	strbuf_reset(&source);
-	parse_path_space(&source, p, &p, "source");
+	strbuf_reset(&ಮೂಲ);
+	parse_ಮಾರ್ಗ_space(&ಮೂಲ, p, &p, "source");
 	strbuf_reset(&dest);
-	parse_path_eol(&dest, p, "dest");
+	parse_ಮಾರ್ಗ_eol(&dest, p, "dest");
 
-	memset(&leaf, 0, sizeof(leaf));
-	if (rename)
-		tree_content_remove(&b->branch_tree, source.buf, &leaf, 1);
-	else
-		tree_content_get(&b->branch_tree, source.buf, &leaf, 1);
-	if (!leaf.versions[1].mode)
-		die(_("path %s not in branch"), source.buf);
-	if (!*dest.buf) {	/* C "path/to/subdir" "" */
-		tree_content_replace(&b->branch_tree,
-			&leaf.versions[1].oid,
-			leaf.versions[1].mode,
-			leaf.tree);
-		return;
+	memset(&ಎಲೆ, 0, ಗಾತ್ರ(ಎಲೆ));
+	ಆದರೆ (rename)
+		ವೃಕ್ಷ_content_remove(&b->branch_ವೃಕ್ಷ, ಮೂಲ.buf, &ಎಲೆ, 1);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ವೃಕ್ಷ_content_get(&b->branch_ವೃಕ್ಷ, ಮೂಲ.buf, &ಎಲೆ, 1);
+	ಆದರೆ (!ಎಲೆ.versions[1].ಬಹುಲಕ)
+		die(_("path %s not in branch"), ಮೂಲ.buf);
+	ಆದರೆ (!*dest.buf) {	/* C "path/to/subdir" "" */
+		ವೃಕ್ಷ_content_replace(&b->branch_ವೃಕ್ಷ,
+			&ಎಲೆ.versions[1].oid,
+			ಎಲೆ.versions[1].ಬಹುಲಕ,
+			ಎಲೆ.ವೃಕ್ಷ);
+		ಹಿಂತಿರುಗಿ;
 	}
-	if (!verify_path(dest.buf, leaf.versions[1].mode))
+	ಆದರೆ (!verify_ಮಾರ್ಗ(dest.buf, ಎಲೆ.versions[1].ಬಹುಲಕ))
 		die(_("invalid path '%s'"), dest.buf);
-	tree_content_set(&b->branch_tree, dest.buf,
-		&leaf.versions[1].oid,
-		leaf.versions[1].mode,
-		leaf.tree);
+	ವೃಕ್ಷ_content_ಗಣ(&b->branch_ವೃಕ್ಷ, dest.buf,
+		&ಎಲೆ.versions[1].oid,
+		ಎಲೆ.versions[1].ಬಹುಲಕ,
+		ಎಲೆ.ವೃಕ್ಷ);
 }
 
-static void note_change_n(struct fast_import_state *state,
-			  const char *p,
-			  struct branch *b,
-			  unsigned char *old_fanout)
+ಸ್ಥಿರ ಶೂನ್ಯ note_change_n(ರಚನೆ fast_import_state *state,
+			  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+			  ರಚನೆ branch *b,
+			  ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *old_fanout)
 {
-	struct object_entry *oe;
-	struct branch *s;
-	struct object_id oid, commit_oid;
-	char path[GIT_MAX_RAWSZ * 3];
-	uint16_t inline_data = 0;
-	unsigned char new_fanout;
+	ರಚನೆ object_ನಮೂದು *oe;
+	ರಚನೆ branch *s;
+	ರಚನೆ object_id oid, commit_oid;
+	ಅಕ್ಷರ ಮಾರ್ಗ[GIT_MAX_RAWSZ * 3];
+	uint16_t inline_ದತ್ತಾಂಶ = 0;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ new_fanout;
 
 	/*
 	 * When loading a branch, we don't traverse its tree to count the real
@@ -2552,397 +2552,397 @@ static void note_change_n(struct fast_import_state *state,
 	 * when b->num_notes == 0. If the notes tree is truly empty, the
 	 * calculation should not take long.
 	 */
-	if (b->num_notes == 0 && *old_fanout == 0) {
+	ಆದರೆ (b->ಅಂಕೆ_notes == 0 && *old_fanout == 0) {
 		/* Invoke change_note_fanout() in "counting mode". */
-		b->num_notes = change_note_fanout(&b->branch_tree, 0xff);
-		*old_fanout = convert_num_notes_to_fanout(b->num_notes);
+		b->ಅಂಕೆ_notes = change_note_fanout(&b->branch_ವೃಕ್ಷ, 0xff);
+		*old_fanout = convert_ಅಂಕೆ_notes_ಗಮ್ಯ_fanout(b->ಅಂಕೆ_notes);
 	}
 
 	/* Now parse the notemodify command. */
 	/* <dataref> or 'inline' */
-	if (*p == ':') {
-		oe = find_mark(marks, parse_mark_ref_space(&p));
+	ಆದರೆ (*p == ':') {
+		oe = ಕಂಡುಹಿಡಿ_mark(marks, parse_mark_ref_space(&p));
 		oidcpy(&oid, &oe->idx.oid);
-	} else if (skip_prefix(p, "inline ", &p)) {
-		inline_data = 1;
-		oe = NULL; /* not used with inline_data, but makes gcc happy */
-	} else {
-		if (parse_mapped_oid_hex(p, &oid, &p))
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(p, "inline ", &p)) {
+		inline_ದತ್ತಾಂಶ = 1;
+		oe = ಖಾಲಿ; /* not used with inline_data, but makes gcc happy */
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (parse_mapped_oid_hex(p, &oid, &p))
 			die(_("invalid dataref: %s"), command_buf.buf);
-		oe = find_object(&oid);
-		if (*p++ != ' ')
+		oe = ಕಂಡುಹಿಡಿ_object(&oid);
+		ಆದರೆ (*p++ != ' ')
 			die(_("missing space after SHA1: %s"), command_buf.buf);
 	}
 
 	/* <commit-ish> */
 	s = lookup_branch(p);
-	if (s) {
-		if (is_null_oid(&s->oid))
+	ಆದರೆ (s) {
+		ಆದರೆ (is_null_oid(&s->oid))
 			die(_("can't add a note on empty branch."));
 		oidcpy(&commit_oid, &s->oid);
-	} else if (*p == ':') {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*p == ':') {
 		uintmax_t commit_mark = parse_mark_ref_eol(p);
-		struct object_entry *commit_oe = find_mark(marks, commit_mark);
-		if (commit_oe->type != OBJ_COMMIT)
+		ರಚನೆ object_ನಮೂದು *commit_oe = ಕಂಡುಹಿಡಿ_mark(marks, commit_mark);
+		ಆದರೆ (commit_oe->type != OBJ_COMMIT)
 			die(_("mark :%" PRIuMAX " not a commit"), commit_mark);
 		oidcpy(&commit_oid, &commit_oe->idx.oid);
-	} else if (!repo_get_oid(the_repository, p, &commit_oid)) {
-		size_t size;
-		char *buf = odb_read_object_peeled(the_repository->objects,
-						   &commit_oid, OBJ_COMMIT, &size,
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!repo_get_oid(the_repository, p, &commit_oid)) {
+		ಗಾತ್ರ_t ಗಾತ್ರ_2;
+		ಅಕ್ಷರ *buf = odb_read_object_peeled(the_repository->objects,
+						   &commit_oid, OBJ_COMMIT, &ಗಾತ್ರ_2,
 						   &commit_oid);
-		if (!buf || size < the_hash_algo->hexsz + 6)
+		ಆದರೆ (!buf || ಗಾತ್ರ_2 < the_hash_algo->hexsz + 6)
 			die(_("not a valid commit: %s"), p);
-		free(buf);
-	} else
+		ಬಿಡುಗಡೆ(buf);
+	} ಇಲ್ಲದಿದ್ದರೆ
 		die(_("invalid ref name or SHA1 expression: %s"), p);
 
-	if (inline_data) {
-		read_next_command(state);
-		parse_and_store_blob(&last_blob, &oid, 0);
-	} else if (oe) {
-		if (oe->type != OBJ_BLOB)
+	ಆದರೆ (inline_ದತ್ತಾಂಶ) {
+		read_ಮುಂದಿನ_command(state);
+		parse_and_store_blob(&ಕೊನೆಯ_blob, &oid, 0);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (oe) {
+		ಆದರೆ (oe->type != OBJ_BLOB)
 			die(_("not a blob (actually a %s): %s"),
 				type_name(oe->type), command_buf.buf);
-	} else if (!is_null_oid(&oid)) {
-		enum object_type type = odb_read_object_info(the_repository->objects, &oid,
-							NULL);
-		if (type < 0)
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!is_null_oid(&oid)) {
+		ಎಣಿಕೆ object_type type = odb_read_object_info(the_repository->objects, &oid,
+							ಖಾಲಿ);
+		ಆದರೆ (type < 0)
 			die(_("blob not found: %s"), command_buf.buf);
-		if (type != OBJ_BLOB)
+		ಆದರೆ (type != OBJ_BLOB)
 			die(_("not a blob (actually a %s): %s"),
 			    type_name(type), command_buf.buf);
 	}
 
-	construct_path_with_fanout(oid_to_hex(&commit_oid), *old_fanout, path);
-	if (tree_content_remove(&b->branch_tree, path, NULL, 0))
-		b->num_notes--;
+	construct_ಮಾರ್ಗ_with_fanout(oid_ಗಮ್ಯ_hex(&commit_oid), *old_fanout, ಮಾರ್ಗ);
+	ಆದರೆ (ವೃಕ್ಷ_content_remove(&b->branch_ವೃಕ್ಷ, ಮಾರ್ಗ, ಖಾಲಿ, 0))
+		b->ಅಂಕೆ_notes--;
 
-	if (is_null_oid(&oid))
-		return; /* nothing to insert */
+	ಆದರೆ (is_null_oid(&oid))
+		ಹಿಂತಿರುಗಿ; /* nothing to insert */
 
-	b->num_notes++;
-	new_fanout = convert_num_notes_to_fanout(b->num_notes);
-	construct_path_with_fanout(oid_to_hex(&commit_oid), new_fanout, path);
-	tree_content_set(&b->branch_tree, path, &oid, S_IFREG | 0644, NULL);
+	b->ಅಂಕೆ_notes++;
+	new_fanout = convert_ಅಂಕೆ_notes_ಗಮ್ಯ_fanout(b->ಅಂಕೆ_notes);
+	construct_ಮಾರ್ಗ_with_fanout(oid_ಗಮ್ಯ_hex(&commit_oid), new_fanout, ಮಾರ್ಗ);
+	ವೃಕ್ಷ_content_ಗಣ(&b->branch_ವೃಕ್ಷ, ಮಾರ್ಗ, &oid, S_IFREG | 0644, ಖಾಲಿ);
 }
 
-static void file_change_deleteall(struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ file_change_deleteall(ರಚನೆ branch *b)
 {
-	release_tree_content_recursive(b->branch_tree.tree);
-	oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-	oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-	load_tree(&b->branch_tree);
-	b->num_notes = 0;
+	release_ವೃಕ್ಷ_content_recursive(b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ);
+	oidclr(&b->branch_ವೃಕ್ಷ.versions[0].oid, the_repository->hash_algo);
+	oidclr(&b->branch_ವೃಕ್ಷ.versions[1].oid, the_repository->hash_algo);
+	ತುಂಬು_ವೃಕ್ಷ(&b->branch_ವೃಕ್ಷ);
+	b->ಅಂಕೆ_notes = 0;
 }
 
-static void parse_from_commit(struct branch *b, char *buf, unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_from_commit(ರಚನೆ branch *b, ಅಕ್ಷರ *buf, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	if (!buf || size < the_hash_algo->hexsz + 6)
-		die(_("not a valid commit: %s"), oid_to_hex(&b->oid));
-	if (memcmp("tree ", buf, 5)
-		|| get_oid_hex(buf + 5, &b->branch_tree.versions[1].oid))
-		die(_("the commit %s is corrupt"), oid_to_hex(&b->oid));
-	oidcpy(&b->branch_tree.versions[0].oid,
-	       &b->branch_tree.versions[1].oid);
+	ಆದರೆ (!buf || ಗಾತ್ರ_2 < the_hash_algo->hexsz + 6)
+		die(_("not a valid commit: %s"), oid_ಗಮ್ಯ_hex(&b->oid));
+	ಆದರೆ (memcmp("tree ", buf, 5)
+		|| get_oid_hex(buf + 5, &b->branch_ವೃಕ್ಷ.versions[1].oid))
+		die(_("the commit %s is corrupt"), oid_ಗಮ್ಯ_hex(&b->oid));
+	oidcpy(&b->branch_ವೃಕ್ಷ.versions[0].oid,
+	       &b->branch_ವೃಕ್ಷ.versions[1].oid);
 }
 
-static void parse_from_existing(struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_from_existing(ರಚನೆ branch *b)
 {
-	if (is_null_oid(&b->oid)) {
-		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-	} else {
-		unsigned long size;
-		size_t size_st = 0;
-		char *buf;
+	ಆದರೆ (is_null_oid(&b->oid)) {
+		oidclr(&b->branch_ವೃಕ್ಷ.versions[0].oid, the_repository->hash_algo);
+		oidclr(&b->branch_ವೃಕ್ಷ.versions[1].oid, the_repository->hash_algo);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+		ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
+		ಅಕ್ಷರ *buf;
 
 		buf = odb_read_object_peeled(the_repository->objects, &b->oid,
-					     OBJ_COMMIT, &size_st, &b->oid);
-		size = cast_size_t_to_ulong(size_st);
-		parse_from_commit(b, buf, size);
-		free(buf);
+					     OBJ_COMMIT, &ಗಾತ್ರ_st, &b->oid);
+		ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+		parse_from_commit(b, buf, ಗಾತ್ರ_2);
+		ಬಿಡುಗಡೆ(buf);
 	}
 }
 
-static int parse_objectish(struct fast_import_state *state,
-			   struct branch *b,
-			   const char *objectish)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_objectish(ರಚನೆ fast_import_state *state,
+			   ರಚನೆ branch *b,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *objectish)
 {
-	struct branch *s;
-	struct object_id oid;
+	ರಚನೆ branch *s;
+	ರಚನೆ object_id oid;
 
-	oidcpy(&oid, &b->branch_tree.versions[1].oid);
+	oidcpy(&oid, &b->branch_ವೃಕ್ಷ.versions[1].oid);
 
 	s = lookup_branch(objectish);
-	if (b == s)
+	ಆದರೆ (b == s)
 		die(_("can't create a branch from itself: %s"), b->name);
-	else if (s) {
-		struct object_id *t = &s->branch_tree.versions[1].oid;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (s) {
+		ರಚನೆ object_id *t = &s->branch_ವೃಕ್ಷ.versions[1].oid;
 		oidcpy(&b->oid, &s->oid);
-		oidcpy(&b->branch_tree.versions[0].oid, t);
-		oidcpy(&b->branch_tree.versions[1].oid, t);
-	} else if (*objectish == ':') {
+		oidcpy(&b->branch_ವೃಕ್ಷ.versions[0].oid, t);
+		oidcpy(&b->branch_ವೃಕ್ಷ.versions[1].oid, t);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*objectish == ':') {
 		uintmax_t idnum = parse_mark_ref_eol(objectish);
-		struct object_entry *oe = find_mark(marks, idnum);
-		if (oe->type != OBJ_COMMIT)
+		ರಚನೆ object_ನಮೂದು *oe = ಕಂಡುಹಿಡಿ_mark(marks, idnum);
+		ಆದರೆ (oe->type != OBJ_COMMIT)
 			die(_("mark :%" PRIuMAX " not a commit"), idnum);
-		if (!oideq(&b->oid, &oe->idx.oid)) {
+		ಆದರೆ (!oideq(&b->oid, &oe->idx.oid)) {
 			oidcpy(&b->oid, &oe->idx.oid);
-			if (oe->pack_id != MAX_PACK_ID) {
-				unsigned long size;
-				char *buf = gfi_unpack_entry(oe, &size);
-				parse_from_commit(b, buf, size);
-				free(buf);
-			} else
+			ಆದರೆ (oe->pack_id != MAX_PACK_ID) {
+				ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+				ಅಕ್ಷರ *buf = gfi_unpack_ನಮೂದು(oe, &ಗಾತ್ರ_2);
+				parse_from_commit(b, buf, ಗಾತ್ರ_2);
+				ಬಿಡುಗಡೆ(buf);
+			} ಇಲ್ಲದಿದ್ದರೆ
 				parse_from_existing(b);
 		}
-	} else if (!repo_get_oid(the_repository, objectish, &b->oid)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!repo_get_oid(the_repository, objectish, &b->oid)) {
 		parse_from_existing(b);
-		if (is_null_oid(&b->oid))
+		ಆದರೆ (is_null_oid(&b->oid))
 			b->delete = 1;
 	}
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		die(_("invalid ref name or SHA1 expression: %s"), objectish);
 
-	if (b->branch_tree.tree && !oideq(&oid, &b->branch_tree.versions[1].oid)) {
-		release_tree_content_recursive(b->branch_tree.tree);
-		b->branch_tree.tree = NULL;
+	ಆದರೆ (b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ && !oideq(&oid, &b->branch_ವೃಕ್ಷ.versions[1].oid)) {
+		release_ವೃಕ್ಷ_content_recursive(b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ);
+		b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ = ಖಾಲಿ;
 	}
 
-	read_next_command(state);
-	return 1;
+	read_ಮುಂದಿನ_command(state);
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int parse_from(struct fast_import_state *state, struct branch *b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_from(ರಚನೆ fast_import_state *state, ರಚನೆ branch *b)
 {
-	const char *from;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *from;
 
-	if (!skip_prefix(command_buf.buf, "from ", &from))
-		return 0;
+	ಆದರೆ (!skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "from ", &from))
+		ಹಿಂತಿರುಗಿ 0;
 
-	return parse_objectish(state, b, from);
+	ಹಿಂತಿರುಗಿ parse_objectish(state, b, from);
 }
 
-static int parse_objectish_with_prefix(struct fast_import_state *state,
-				       struct branch *b,
-				       const char *prefix)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_objectish_with_ಪೂರ್ವಪ್ರತ್ಯಯ(ರಚನೆ fast_import_state *state,
+				       ರಚನೆ branch *b,
+				       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
-	const char *base;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ;
 
-	if (!skip_prefix(command_buf.buf, prefix, &base))
-		return 0;
+	ಆದರೆ (!skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, ಪೂರ್ವಪ್ರತ್ಯಯ, &ತಳ))
+		ಹಿಂತಿರುಗಿ 0;
 
-	return parse_objectish(state, b, base);
+	ಹಿಂತಿರುಗಿ parse_objectish(state, b, ತಳ);
 }
 
-static struct hash_list *parse_merge(struct fast_import_state *state,
-				     unsigned int *count)
+ಸ್ಥಿರ ರಚನೆ hash_list *parse_ವಿಲೀನ(ರಚನೆ fast_import_state *state,
+				     ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *ಎಣಿಕೆ_2)
 {
-	struct hash_list *list = NULL, **tail = &list, *n;
-	const char *from;
-	struct branch *s;
+	ರಚನೆ hash_list *list = ಖಾಲಿ, **ಬಾಲ = &list, *n;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *from;
+	ರಚನೆ branch *s;
 
-	*count = 0;
-	while (skip_prefix(command_buf.buf, "merge ", &from)) {
-		n = xmalloc(sizeof(*n));
+	*ಎಣಿಕೆ_2 = 0;
+	ಆಗ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "merge ", &from)) {
+		n = xmalloc(ಗಾತ್ರ(*n));
 		s = lookup_branch(from);
-		if (s)
+		ಆದರೆ (s)
 			oidcpy(&n->oid, &s->oid);
-		else if (*from == ':') {
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*from == ':') {
 			uintmax_t idnum = parse_mark_ref_eol(from);
-			struct object_entry *oe = find_mark(marks, idnum);
-			if (oe->type != OBJ_COMMIT)
+			ರಚನೆ object_ನಮೂದು *oe = ಕಂಡುಹಿಡಿ_mark(marks, idnum);
+			ಆದರೆ (oe->type != OBJ_COMMIT)
 				die(_("mark :%" PRIuMAX " not a commit"), idnum);
 			oidcpy(&n->oid, &oe->idx.oid);
-		} else if (!repo_get_oid(the_repository, from, &n->oid)) {
-			size_t size;
-			char *buf = odb_read_object_peeled(the_repository->objects,
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!repo_get_oid(the_repository, from, &n->oid)) {
+			ಗಾತ್ರ_t ಗಾತ್ರ_2;
+			ಅಕ್ಷರ *buf = odb_read_object_peeled(the_repository->objects,
 							   &n->oid, OBJ_COMMIT,
-							   &size, &n->oid);
-			if (!buf || size < the_hash_algo->hexsz + 6)
+							   &ಗಾತ್ರ_2, &n->oid);
+			ಆದರೆ (!buf || ಗಾತ್ರ_2 < the_hash_algo->hexsz + 6)
 				die(_("not a valid commit: %s"), from);
-			free(buf);
-		} else
+			ಬಿಡುಗಡೆ(buf);
+		} ಇಲ್ಲದಿದ್ದರೆ
 			die(_("invalid ref name or SHA1 expression: %s"), from);
 
-		n->next = NULL;
-		*tail = n;
-		tail = &n->next;
+		n->ಮುಂದಿನ = ಖಾಲಿ;
+		*ಬಾಲ = n;
+		ಬಾಲ = &n->ಮುಂದಿನ;
 
-		(*count)++;
-		read_next_command(state);
+		(*ಎಣಿಕೆ_2)++;
+		read_ಮುಂದಿನ_command(state);
 	}
-	return list;
+	ಹಿಂತಿರುಗಿ list;
 }
 
-struct signature_data {
-	char *hash_algo;      /* "sha1" or "sha256" */
-	char *sig_format;     /* "openpgp", "x509", "ssh", or "unknown" */
-	struct strbuf data;   /* The actual signature data */
+ರಚನೆ signature_ದತ್ತಾಂಶ {
+	ಅಕ್ಷರ *hash_algo;      /* "sha1" or "sha256" */
+	ಅಕ್ಷರ *sig_format;     /* "openpgp", "x509", "ssh", or "unknown" */
+	ರಚನೆ strbuf ದತ್ತಾಂಶ;   /* The actual signature data */
 };
 
-static void parse_one_signature(struct fast_import_state *state,
-				struct signature_data *sig,
-				const char *v)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_one_signature(ರಚನೆ fast_import_state *state,
+				ರಚನೆ signature_ದತ್ತಾಂಶ *sig,
+				ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v)
 {
-	char *args = xstrdup(v); /* Will be freed when sig->hash_algo is freed */
-	char *space = strchr(args, ' ');
+	ಅಕ್ಷರ *ವಾದಗಳು = xstrdup(v); /* Will be freed when sig->hash_algo is freed */
+	ಅಕ್ಷರ *space = strchr(ವಾದಗಳು, ' ');
 
-	if (!space)
+	ಆದರೆ (!space)
 		die(_("expected gpgsig format: 'gpgsig <hash-algo> <signature-format>', "
-		      "got 'gpgsig %s'"), args);
+		      "got 'gpgsig %s'"), ವಾದಗಳು);
 	*space = '\0';
 
-	sig->hash_algo = args;
+	sig->hash_algo = ವಾದಗಳು;
 	sig->sig_format = space + 1;
 
 	/* Validate hash algorithm */
-	if (strcmp(sig->hash_algo, "sha1") &&
+	ಆದರೆ (strcmp(sig->hash_algo, "sha1") &&
 	    strcmp(sig->hash_algo, "sha256"))
 		die(_("unknown git hash algorithm in gpgsig: '%s'"), sig->hash_algo);
 
 	/* Validate signature format */
-	if (!valid_signature_format(sig->sig_format))
+	ಆದರೆ (!valid_signature_format(sig->sig_format))
 		die(_("invalid signature format in gpgsig: '%s'"), sig->sig_format);
-	if (!strcmp(sig->sig_format, "unknown"))
+	ಆದರೆ (!strcmp(sig->sig_format, "unknown"))
 		warning(_("'unknown' signature format in gpgsig"));
 
 	/* Read signature data */
-	read_next_command(state);
-	parse_data(&sig->data, 0, NULL);
+	read_ಮುಂದಿನ_command(state);
+	parse_ದತ್ತಾಂಶ(&sig->ದತ್ತಾಂಶ, 0, ಖಾಲಿ);
 }
 
-static void discard_one_signature(struct fast_import_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ discard_one_signature(ರಚನೆ fast_import_state *state)
 {
-	struct strbuf data = STRBUF_INIT;
+	ರಚನೆ strbuf ದತ್ತಾಂಶ = STRBUF_INIT;
 
-	read_next_command(state);
-	parse_data(&data, 0, NULL);
-	strbuf_release(&data);
+	read_ಮುಂದಿನ_command(state);
+	parse_ದತ್ತಾಂಶ(&ದತ್ತಾಂಶ, 0, ಖಾಲಿ);
+	strbuf_release(&ದತ್ತಾಂಶ);
 }
 
-static void add_gpgsig_to_commit(struct strbuf *commit_data,
-				 const char *header,
-				 struct signature_data *sig)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_gpgsig_ಗಮ್ಯ_commit(ರಚನೆ strbuf *commit_ದತ್ತಾಂಶ,
+				 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಶೀರ್ಷಿಕೆ,
+				 ರಚನೆ signature_ದತ್ತಾಂಶ *sig)
 {
-	struct string_list siglines = STRING_LIST_INIT_NODUP;
+	ರಚನೆ string_list siglines = STRING_LIST_INIT_NODUP;
 
-	if (!sig || !sig->hash_algo)
-		return;
+	ಆದರೆ (!sig || !sig->hash_algo)
+		ಹಿಂತಿರುಗಿ;
 
-	strbuf_addstr(commit_data, header);
-	string_list_split_in_place(&siglines, sig->data.buf, "\n", -1);
-	strbuf_add_separated_string_list(commit_data, "\n ", &siglines);
-	strbuf_addch(commit_data, '\n');
+	strbuf_addstr(commit_ದತ್ತಾಂಶ, ಶೀರ್ಷಿಕೆ);
+	string_list_ವಿಭಜಿಸು_ಒಳ_ಇರಿಸು(&siglines, sig->ದತ್ತಾಂಶ.buf, "\n", -1);
+	strbuf_ಕೂಡಿಸು_separated_string_list(commit_ದತ್ತಾಂಶ, "\n ", &siglines);
+	strbuf_addch(commit_ದತ್ತಾಂಶ, '\n');
 	string_list_clear(&siglines, 1);
-	strbuf_release(&sig->data);
-	free(sig->hash_algo);
+	strbuf_release(&sig->ದತ್ತಾಂಶ);
+	ಬಿಡುಗಡೆ(sig->hash_algo);
 }
 
-static void store_signature(struct signature_data *stored_sig,
-			    struct signature_data *new_sig,
-			    const char *hash_type)
+ಸ್ಥಿರ ಶೂನ್ಯ store_signature(ರಚನೆ signature_ದತ್ತಾಂಶ *stored_sig,
+			    ರಚನೆ signature_ದತ್ತಾಂಶ *new_sig,
+			    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *hash_type)
 {
-	if (stored_sig->hash_algo) {
+	ಆದರೆ (stored_sig->hash_algo) {
 		warning(_("multiple %s signatures found, "
 			  "ignoring additional signature"),
 			hash_type);
-		strbuf_release(&new_sig->data);
-		free(new_sig->hash_algo);
-	} else {
+		strbuf_release(&new_sig->ದತ್ತಾಂಶ);
+		ಬಿಡುಗಡೆ(new_sig->hash_algo);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		*stored_sig = *new_sig;
 	}
 }
 
-static void import_one_signature(struct fast_import_state *state,
-				 struct signature_data *sig_sha1,
-				 struct signature_data *sig_sha256,
-				 const char *v)
+ಸ್ಥಿರ ಶೂನ್ಯ import_one_signature(ರಚನೆ fast_import_state *state,
+				 ರಚನೆ signature_ದತ್ತಾಂಶ *sig_sha1,
+				 ರಚನೆ signature_ದತ್ತಾಂಶ *sig_sha256,
+				 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v)
 {
-	struct signature_data sig = { NULL, NULL, STRBUF_INIT };
+	ರಚನೆ signature_ದತ್ತಾಂಶ sig = { ಖಾಲಿ, ಖಾಲಿ, STRBUF_INIT };
 
 	parse_one_signature(state, &sig, v);
 
-	if (!strcmp(sig.hash_algo, "sha1"))
+	ಆದರೆ (!strcmp(sig.hash_algo, "sha1"))
 		store_signature(sig_sha1, &sig, "SHA-1");
-	else if (!strcmp(sig.hash_algo, "sha256"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(sig.hash_algo, "sha256"))
 		store_signature(sig_sha256, &sig, "SHA-256");
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		die(_("parse_one_signature() returned unknown hash algo"));
 }
 
-static void finalize_commit_buffer(struct strbuf *new_data,
-				   struct signature_data *sig_sha1,
-				   struct signature_data *sig_sha256,
-				   struct strbuf *msg)
+ಸ್ಥಿರ ಶೂನ್ಯ finalize_commit_ಬಫರ್(ರಚನೆ strbuf *new_ದತ್ತಾಂಶ,
+				   ರಚನೆ signature_ದತ್ತಾಂಶ *sig_sha1,
+				   ರಚನೆ signature_ದತ್ತಾಂಶ *sig_sha256,
+				   ರಚನೆ strbuf *ಸಂದೇಶ)
 {
-	add_gpgsig_to_commit(new_data, "gpgsig ", sig_sha1);
-	add_gpgsig_to_commit(new_data, "gpgsig-sha256 ", sig_sha256);
+	ಕೂಡಿಸು_gpgsig_ಗಮ್ಯ_commit(new_ದತ್ತಾಂಶ, "gpgsig ", sig_sha1);
+	ಕೂಡಿಸು_gpgsig_ಗಮ್ಯ_commit(new_ದತ್ತಾಂಶ, "gpgsig-sha256 ", sig_sha256);
 
-	strbuf_addch(new_data, '\n');
-	strbuf_addbuf(new_data, msg);
+	strbuf_addch(new_ದತ್ತಾಂಶ, '\n');
+	strbuf_addbuf(new_ದತ್ತಾಂಶ, ಸಂದೇಶ);
 }
 
-static void warn_invalid_signature(struct signature_check *check,
-				   const char *msg, enum sign_mode mode)
+ಸ್ಥಿರ ಶೂನ್ಯ warn_invalid_signature(ರಚನೆ signature_check *check,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ, ಎಣಿಕೆ sign_ಬಹುಲಕ ಬಹುಲಕ)
 {
-	const char *signer = check->signer ? check->signer : _("unknown");
-	const char *subject;
-	int subject_len = find_commit_subject(msg, &subject);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *signer = check->signer ? check->signer : _("unknown");
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *subject;
+	ಪೂರ್ಣಾಂಕ subject_len = ಕಂಡುಹಿಡಿ_commit_subject(ಸಂದೇಶ, &subject);
 
-	switch (mode) {
-	case SIGN_STRIP_IF_INVALID:
-		if (subject_len > 100)
+	ಆಯ್ಕೆ (ಬಹುಲಕ) {
+	ಸ್ಥಿತಿ SIGN_STRIP_IF_INVALID:
+		ಆದರೆ (subject_len > 100)
 			warning(_("stripping invalid signature for commit '%.100s...'\n"
 				  "  allegedly by %s"), subject, signer);
-		else if (subject_len > 0)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (subject_len > 0)
 			warning(_("stripping invalid signature for commit '%.*s'\n"
 				  "  allegedly by %s"), subject_len, subject, signer);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			warning(_("stripping invalid signature for commit\n"
 				  "  allegedly by %s"), signer);
-		break;
-	case SIGN_SIGN_IF_INVALID:
-		if (subject_len > 100)
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ SIGN_SIGN_IF_INVALID:
+		ಆದರೆ (subject_len > 100)
 			warning(_("replacing invalid signature for commit '%.100s...'\n"
 				  "  allegedly by %s"), subject, signer);
-		else if (subject_len > 0)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (subject_len > 0)
 			warning(_("replacing invalid signature for commit '%.*s'\n"
 				  "  allegedly by %s"), subject_len, subject, signer);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			warning(_("replacing invalid signature for commit\n"
 				  "  allegedly by %s"), signer);
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("unsupported signing mode");
 	}
 }
 
-static void handle_signature_if_invalid(struct strbuf *new_data,
-					struct signature_data *sig_sha1,
-					struct signature_data *sig_sha256,
-					struct strbuf *msg,
-					enum sign_mode mode)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_signature_if_invalid(ರಚನೆ strbuf *new_ದತ್ತಾಂಶ,
+					ರಚನೆ signature_ದತ್ತಾಂಶ *sig_sha1,
+					ರಚನೆ signature_ದತ್ತಾಂಶ *sig_sha256,
+					ರಚನೆ strbuf *ಸಂದೇಶ,
+					ಎಣಿಕೆ sign_ಬಹುಲಕ ಬಹುಲಕ)
 {
-	struct strbuf tmp_buf = STRBUF_INIT;
-	struct signature_check signature_check = { 0 };
-	int ret;
+	ರಚನೆ strbuf tmp_buf = STRBUF_INIT;
+	ರಚನೆ signature_check signature_check = { 0 };
+	ಪೂರ್ಣಾಂಕ ret;
 
 	/* Check signature in a temporary commit buffer */
-	strbuf_addbuf(&tmp_buf, new_data);
-	finalize_commit_buffer(&tmp_buf, sig_sha1, sig_sha256, msg);
-	ret = verify_commit_buffer(tmp_buf.buf, tmp_buf.len, &signature_check);
+	strbuf_addbuf(&tmp_buf, new_ದತ್ತಾಂಶ);
+	finalize_commit_ಬಫರ್(&tmp_buf, sig_sha1, sig_sha256, ಸಂದೇಶ);
+	ret = verify_commit_ಬಫರ್(tmp_buf.buf, tmp_buf.len, &signature_check);
 
-	if (ret) {
-		if (mode == SIGN_ABORT_IF_INVALID)
+	ಆದರೆ (ret) {
+		ಆದರೆ (ಬಹುಲಕ == SIGN_ABORT_IF_INVALID)
 			die(_("aborting due to invalid signature"));
 
-		warn_invalid_signature(&signature_check, msg->buf, mode);
+		warn_invalid_signature(&signature_check, ಸಂದೇಶ->buf, ಬಹುಲಕ);
 
-		if (mode == SIGN_SIGN_IF_INVALID) {
-			struct strbuf signature = STRBUF_INIT;
-			struct strbuf payload = STRBUF_INIT;
+		ಆದರೆ (ಬಹುಲಕ == SIGN_SIGN_IF_INVALID) {
+			ರಚನೆ strbuf signature = STRBUF_INIT;
+			ರಚನೆ strbuf payload = STRBUF_INIT;
 
 			/*
 			 * NEEDSWORK: To properly support interoperability mode
@@ -2954,376 +2954,376 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 			 * generated. Thus, attempting to sign commit signatures
 			 * in interoperability mode is currently unsupported.
 			 */
-			if (the_repository->compat_hash_algo)
+			ಆದರೆ (the_repository->compat_hash_algo)
 				die(_("signing commits in interoperability mode is unsupported"));
 
 			strbuf_addstr(&payload, signature_check.payload);
-			if (sign_buffer(&payload, &signature, signed_commit_keyid,
-					SIGN_BUFFER_USE_DEFAULT_KEY))
+			ಆದರೆ (sign_ಬಫರ್(&payload, &signature, signed_commit_keyid,
+					SIGN_ಬಫರ್_USE_DEFAULT_ಕೀಲಿ))
 				die(_("failed to sign commit object"));
-			add_header_signature(new_data, &signature, the_hash_algo);
+			ಕೂಡಿಸು_ಶೀರ್ಷಿಕೆ_signature(new_ದತ್ತಾಂಶ, &signature, the_hash_algo);
 
 			strbuf_release(&signature);
 			strbuf_release(&payload);
 		}
 
-		finalize_commit_buffer(new_data, NULL, NULL, msg);
-	} else {
-		strbuf_swap(new_data, &tmp_buf);
+		finalize_commit_ಬಫರ್(new_ದತ್ತಾಂಶ, ಖಾಲಿ, ಖಾಲಿ, ಸಂದೇಶ);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		strbuf_ಅದಲುಬದಲು(new_ದತ್ತಾಂಶ, &tmp_buf);
 	}
 
 	signature_check_clear(&signature_check);
 	strbuf_release(&tmp_buf);
 }
 
-static void parse_new_commit(struct fast_import_state *state, const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_new_commit(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	static struct strbuf msg = STRBUF_INIT;
-	struct signature_data sig_sha1 = { NULL, NULL, STRBUF_INIT };
-	struct signature_data sig_sha256 = { NULL, NULL, STRBUF_INIT };
-	struct branch *b;
-	char *author = NULL;
-	char *committer = NULL;
-	char *encoding = NULL;
-	struct hash_list *merge_list = NULL;
-	unsigned int merge_count;
-	unsigned char prev_fanout, new_fanout;
-	const char *v;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಸಂದೇಶ = STRBUF_INIT;
+	ರಚನೆ signature_ದತ್ತಾಂಶ sig_sha1 = { ಖಾಲಿ, ಖಾಲಿ, STRBUF_INIT };
+	ರಚನೆ signature_ದತ್ತಾಂಶ sig_sha256 = { ಖಾಲಿ, ಖಾಲಿ, STRBUF_INIT };
+	ರಚನೆ branch *b;
+	ಅಕ್ಷರ *author = ಖಾಲಿ;
+	ಅಕ್ಷರ *committer = ಖಾಲಿ;
+	ಅಕ್ಷರ *encoding = ಖಾಲಿ;
+	ರಚನೆ hash_list *ವಿಲೀನ_list = ಖಾಲಿ;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ವಿಲೀನ_ಎಣಿಕೆ;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ prev_fanout, new_fanout;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v;
 
 	b = lookup_branch(arg);
-	if (!b)
+	ಆದರೆ (!b)
 		b = new_branch(arg);
 
-	read_next_command(state);
+	read_ಮುಂದಿನ_command(state);
 	parse_mark(state);
 	parse_original_identifier(state);
-	if (skip_prefix(command_buf.buf, "author ", &v)) {
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "author ", &v)) {
 		author = parse_ident(v);
-		read_next_command(state);
+		read_ಮುಂದಿನ_command(state);
 	}
-	if (skip_prefix(command_buf.buf, "committer ", &v)) {
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "committer ", &v)) {
 		committer = parse_ident(v);
-		read_next_command(state);
+		read_ಮುಂದಿನ_command(state);
 	}
-	if (!committer)
+	ಆದರೆ (!committer)
 		die(_("expected committer but didn't get one"));
 
-	while (skip_prefix(command_buf.buf, "gpgsig ", &v)) {
-		switch (signed_commit_mode) {
+	ಆಗ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "gpgsig ", &v)) {
+		ಆಯ್ಕೆ (signed_commit_ಬಹುಲಕ) {
 
 		/* First, modes that don't need the signature to be parsed */
-		case SIGN_ABORT:
+		ಸ್ಥಿತಿ SIGN_ABORT:
 			die(_("encountered signed commit; use "
 			      "--signed-commits=<mode> to handle it"));
-		case SIGN_WARN_STRIP:
+		ಸ್ಥಿತಿ SIGN_WARN_STRIP:
 			warning(_("stripping a commit signature"));
 			/* fallthru */
-		case SIGN_STRIP:
+		ಸ್ಥಿತಿ SIGN_STRIP:
 			discard_one_signature(state);
-			break;
+			ನಿಲ್ಲಿಸು;
 
 		/* Second, modes that parse the signature */
-		case SIGN_WARN_VERBATIM:
+		ಸ್ಥಿತಿ SIGN_WARN_VERBATIM:
 			warning(_("importing a commit signature verbatim"));
 			/* fallthru */
-		case SIGN_VERBATIM:
-		case SIGN_STRIP_IF_INVALID:
-		case SIGN_SIGN_IF_INVALID:
-		case SIGN_ABORT_IF_INVALID:
+		ಸ್ಥಿತಿ SIGN_VERBATIM:
+		ಸ್ಥಿತಿ SIGN_STRIP_IF_INVALID:
+		ಸ್ಥಿತಿ SIGN_SIGN_IF_INVALID:
+		ಸ್ಥಿತಿ SIGN_ABORT_IF_INVALID:
 			import_one_signature(state, &sig_sha1, &sig_sha256, v);
-			break;
+			ನಿಲ್ಲಿಸು;
 
 		/* Third, BUG */
-		default:
-			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			BUG("invalid signed_commit_mode value %d", signed_commit_ಬಹುಲಕ);
 		}
-		read_next_command(state);
+		read_ಮುಂದಿನ_command(state);
 	}
 
-	if (skip_prefix(command_buf.buf, "encoding ", &v)) {
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "encoding ", &v)) {
 		encoding = xstrdup(v);
-		read_next_command(state);
+		read_ಮುಂದಿನ_command(state);
 	}
-	parse_data(&msg, 0, NULL);
-	read_next_command(state);
+	parse_ದತ್ತಾಂಶ(&ಸಂದೇಶ, 0, ಖಾಲಿ);
+	read_ಮುಂದಿನ_command(state);
 	parse_from(state, b);
-	merge_list = parse_merge(state, &merge_count);
+	ವಿಲೀನ_list = parse_ವಿಲೀನ(state, &ವಿಲೀನ_ಎಣಿಕೆ);
 
 	/* ensure the branch is active/loaded */
-	if (!b->branch_tree.tree || !max_active_branches) {
+	ಆದರೆ (!b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ || !max_ಸಕ್ರಿಯ_branches) {
 		unload_one_branch();
-		load_branch(b);
+		ತುಂಬು_branch(b);
 	}
 
-	prev_fanout = convert_num_notes_to_fanout(b->num_notes);
+	prev_fanout = convert_ಅಂಕೆ_notes_ಗಮ್ಯ_fanout(b->ಅಂಕೆ_notes);
 
 	/* file_change* */
-	while (command_buf.len > 0) {
-		if (skip_prefix(command_buf.buf, "M ", &v))
+	ಆಗ (command_buf.len > 0) {
+		ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "M ", &v))
 			file_change_m(state, v, b);
-		else if (skip_prefix(command_buf.buf, "D ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "D ", &v))
 			file_change_d(v, b);
-		else if (skip_prefix(command_buf.buf, "R ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "R ", &v))
 			file_change_cr(v, b, 1);
-		else if (skip_prefix(command_buf.buf, "C ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "C ", &v))
 			file_change_cr(v, b, 0);
-		else if (skip_prefix(command_buf.buf, "N ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "N ", &v))
 			note_change_n(state, v, b, &prev_fanout);
-		else if (!strcmp("deleteall", command_buf.buf))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp("deleteall", command_buf.buf))
 			file_change_deleteall(b);
-		else if (skip_prefix(command_buf.buf, "ls ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "ls ", &v))
 			parse_ls(state, v, b);
-		else if (skip_prefix(command_buf.buf, "cat-blob ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "cat-blob ", &v))
 			parse_cat_blob(state, v);
-		else {
+		ಇಲ್ಲದಿದ್ದರೆ {
 			unread_command_buf = 1;
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
-		if (read_next_command(state) == EOF)
-			break;
+		ಆದರೆ (read_ಮುಂದಿನ_command(state) == EOF)
+			ನಿಲ್ಲಿಸು;
 	}
 
-	new_fanout = convert_num_notes_to_fanout(b->num_notes);
-	if (new_fanout != prev_fanout)
-		b->num_notes = change_note_fanout(&b->branch_tree, new_fanout);
+	new_fanout = convert_ಅಂಕೆ_notes_ಗಮ್ಯ_fanout(b->ಅಂಕೆ_notes);
+	ಆದರೆ (new_fanout != prev_fanout)
+		b->ಅಂಕೆ_notes = change_note_fanout(&b->branch_ವೃಕ್ಷ, new_fanout);
 
 	/* build the tree and the commit */
-	store_tree(&b->branch_tree);
-	oidcpy(&b->branch_tree.versions[0].oid,
-	       &b->branch_tree.versions[1].oid);
+	store_ವೃಕ್ಷ(&b->branch_ವೃಕ್ಷ);
+	oidcpy(&b->branch_ವೃಕ್ಷ.versions[0].oid,
+	       &b->branch_ವೃಕ್ಷ.versions[1].oid);
 
-	strbuf_reset(&new_data);
-	strbuf_addf(&new_data, "tree %s\n",
-		oid_to_hex(&b->branch_tree.versions[1].oid));
-	if (!is_null_oid(&b->oid))
-		strbuf_addf(&new_data, "parent %s\n",
-			    oid_to_hex(&b->oid));
-	while (merge_list) {
-		struct hash_list *next = merge_list->next;
-		strbuf_addf(&new_data, "parent %s\n",
-			    oid_to_hex(&merge_list->oid));
-		free(merge_list);
-		merge_list = next;
+	strbuf_reset(&new_ದತ್ತಾಂಶ);
+	strbuf_addf(&new_ದತ್ತಾಂಶ, "tree %s\n",
+		oid_ಗಮ್ಯ_hex(&b->branch_ವೃಕ್ಷ.versions[1].oid));
+	ಆದರೆ (!is_null_oid(&b->oid))
+		strbuf_addf(&new_ದತ್ತಾಂಶ, "parent %s\n",
+			    oid_ಗಮ್ಯ_hex(&b->oid));
+	ಆಗ (ವಿಲೀನ_list) {
+		ರಚನೆ hash_list *ಮುಂದಿನ = ವಿಲೀನ_list->ಮುಂದಿನ;
+		strbuf_addf(&new_ದತ್ತಾಂಶ, "parent %s\n",
+			    oid_ಗಮ್ಯ_hex(&ವಿಲೀನ_list->oid));
+		ಬಿಡುಗಡೆ(ವಿಲೀನ_list);
+		ವಿಲೀನ_list = ಮುಂದಿನ;
 	}
-	strbuf_addf(&new_data,
+	strbuf_addf(&new_ದತ್ತಾಂಶ,
 		"author %s\n"
 		"committer %s\n",
 		author ? author : committer, committer);
-	if (encoding)
-		strbuf_addf(&new_data,
+	ಆದರೆ (encoding)
+		strbuf_addf(&new_ದತ್ತಾಂಶ,
 			"encoding %s\n",
 			encoding);
 
-	if ((signed_commit_mode == SIGN_STRIP_IF_INVALID ||
-	     signed_commit_mode == SIGN_SIGN_IF_INVALID ||
-	     signed_commit_mode == SIGN_ABORT_IF_INVALID) &&
+	ಆದರೆ ((signed_commit_ಬಹುಲಕ == SIGN_STRIP_IF_INVALID ||
+	     signed_commit_ಬಹುಲಕ == SIGN_SIGN_IF_INVALID ||
+	     signed_commit_ಬಹುಲಕ == SIGN_ABORT_IF_INVALID) &&
 	    (sig_sha1.hash_algo || sig_sha256.hash_algo))
-		handle_signature_if_invalid(&new_data, &sig_sha1, &sig_sha256,
-					    &msg, signed_commit_mode);
-	else
-		finalize_commit_buffer(&new_data, &sig_sha1, &sig_sha256, &msg);
+		handle_signature_if_invalid(&new_ದತ್ತಾಂಶ, &sig_sha1, &sig_sha256,
+					    &ಸಂದೇಶ, signed_commit_ಬಹುಲಕ);
+	ಇಲ್ಲದಿದ್ದರೆ
+		finalize_commit_ಬಫರ್(&new_ದತ್ತಾಂಶ, &sig_sha1, &sig_sha256, &ಸಂದೇಶ);
 
-	free(author);
-	free(committer);
-	free(encoding);
+	ಬಿಡುಗಡೆ(author);
+	ಬಿಡುಗಡೆ(committer);
+	ಬಿಡುಗಡೆ(encoding);
 
-	if (!store_object(OBJ_COMMIT, &new_data, NULL, &b->oid, next_mark))
+	ಆದರೆ (!store_object(OBJ_COMMIT, &new_ದತ್ತಾಂಶ, ಖಾಲಿ, &b->oid, ಮುಂದಿನ_mark))
 		b->pack_id = pack_id;
-	b->last_commit = object_count_by_type[OBJ_COMMIT];
+	b->ಕೊನೆಯ_commit = object_ಎಣಿಕೆ_by_type[OBJ_COMMIT];
 }
 
-static void handle_tag_signature_if_invalid(struct strbuf *buf,
-					    struct strbuf *msg,
-					    size_t sig_offset)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_ಟ್ಯಾಗ್_signature_if_invalid(ರಚನೆ strbuf *buf,
+					    ರಚನೆ strbuf *ಸಂದೇಶ,
+					    ಗಾತ್ರ_t sig_ಸ್ಥಾನಾಂತರ)
 {
-	struct strbuf signature = STRBUF_INIT;
-	struct strbuf payload = STRBUF_INIT;
-	struct signature_check sigc = { 0 };
+	ರಚನೆ strbuf signature = STRBUF_INIT;
+	ರಚನೆ strbuf payload = STRBUF_INIT;
+	ರಚನೆ signature_check sigc = { 0 };
 
 	strbuf_addbuf(&payload, buf);
 	strbuf_addch(&payload, '\n');
-	strbuf_add(&payload, msg->buf, sig_offset);
-	strbuf_add(&signature, msg->buf + sig_offset, msg->len - sig_offset);
+	strbuf_ಕೂಡಿಸು(&payload, ಸಂದೇಶ->buf, sig_ಸ್ಥಾನಾಂತರ);
+	strbuf_ಕೂಡಿಸು(&signature, ಸಂದೇಶ->buf + sig_ಸ್ಥಾನಾಂತರ, ಸಂದೇಶ->len - sig_ಸ್ಥಾನಾಂತರ);
 
-	sigc.payload_type = SIGNATURE_PAYLOAD_TAG;
+	sigc.payload_type = SIGNATURE_PAYLOAD_ಟ್ಯಾಗ್;
 	sigc.payload = strbuf_detach(&payload, &sigc.payload_len);
 
-	if (!check_signature(&sigc, signature.buf, signature.len))
-		goto out;
+	ಆದರೆ (!check_signature(&sigc, signature.buf, signature.len))
+		ಹೋಗು ಹೊರಹೋಗು;
 
-	if (signed_tag_mode == SIGN_ABORT_IF_INVALID)
+	ಆದರೆ (signed_ಟ್ಯಾಗ್_ಬಹುಲಕ == SIGN_ABORT_IF_INVALID)
 		die(_("aborting due to invalid signature"));
 
-	strbuf_setlen(msg, sig_offset);
+	strbuf_setlen(ಸಂದೇಶ, sig_ಸ್ಥಾನಾಂತರ);
 
-	if (signed_tag_mode == SIGN_SIGN_IF_INVALID) {
+	ಆದರೆ (signed_ಟ್ಯಾಗ್_ಬಹುಲಕ == SIGN_SIGN_IF_INVALID) {
 		strbuf_attach(&payload, sigc.payload, sigc.payload_len,
 			      sigc.payload_len + 1);
-		sigc.payload = NULL;
+		sigc.payload = ಖಾಲಿ;
 		strbuf_reset(&signature);
 
-		if (sign_buffer(&payload, &signature, signed_tag_keyid,
-				SIGN_BUFFER_USE_DEFAULT_KEY))
+		ಆದರೆ (sign_ಬಫರ್(&payload, &signature, signed_ಟ್ಯಾಗ್_keyid,
+				SIGN_ಬಫರ್_USE_DEFAULT_ಕೀಲಿ))
 			die(_("failed to sign tag object"));
 
-		strbuf_addbuf(msg, &signature);
+		strbuf_addbuf(ಸಂದೇಶ, &signature);
 	}
 
-out:
+ಹೊರಹೋಗು:
 	signature_check_clear(&sigc);
 	strbuf_release(&signature);
 	strbuf_release(&payload);
 }
 
-static void handle_tag_signature(struct strbuf *buf, struct strbuf *msg, const char *name)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_ಟ್ಯಾಗ್_signature(ರಚನೆ strbuf *buf, ರಚನೆ strbuf *ಸಂದೇಶ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	size_t sig_offset = parse_signed_buffer(msg->buf, msg->len);
+	ಗಾತ್ರ_t sig_ಸ್ಥಾನಾಂತರ = parse_signed_ಬಫರ್(ಸಂದೇಶ->buf, ಸಂದೇಶ->len);
 
 	/* If there is no signature, there is nothing to do. */
-	if (sig_offset >= msg->len)
-		return;
+	ಆದರೆ (sig_ಸ್ಥಾನಾಂತರ >= ಸಂದೇಶ->len)
+		ಹಿಂತಿರುಗಿ;
 
-	switch (signed_tag_mode) {
+	ಆಯ್ಕೆ (signed_ಟ್ಯಾಗ್_ಬಹುಲಕ) {
 
 	/* First, modes that don't change anything */
-	case SIGN_WARN_VERBATIM:
+	ಸ್ಥಿತಿ SIGN_WARN_VERBATIM:
 		warning(_("importing a tag signature verbatim for tag '%s'"), name);
 		/* fallthru */
-	case SIGN_VERBATIM:
+	ಸ್ಥಿತಿ SIGN_VERBATIM:
 		/* Nothing to do, the signature will be put into the imported tag. */
-		break;
+		ನಿಲ್ಲಿಸು;
 
 	/* Second, modes that remove the signature */
-	case SIGN_WARN_STRIP:
+	ಸ್ಥಿತಿ SIGN_WARN_STRIP:
 		warning(_("stripping a tag signature for tag '%s'"), name);
 		/* fallthru */
-	case SIGN_STRIP:
+	ಸ್ಥಿತಿ SIGN_STRIP:
 		/* Truncate the buffer to remove the signature */
-		strbuf_setlen(msg, sig_offset);
-		break;
-	case SIGN_ABORT_IF_INVALID:
-	case SIGN_SIGN_IF_INVALID:
-	case SIGN_STRIP_IF_INVALID:
-		handle_tag_signature_if_invalid(buf, msg, sig_offset);
-		break;
+		strbuf_setlen(ಸಂದೇಶ, sig_ಸ್ಥಾನಾಂತರ);
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ SIGN_ABORT_IF_INVALID:
+	ಸ್ಥಿತಿ SIGN_SIGN_IF_INVALID:
+	ಸ್ಥಿತಿ SIGN_STRIP_IF_INVALID:
+		handle_ಟ್ಯಾಗ್_signature_if_invalid(buf, ಸಂದೇಶ, sig_ಸ್ಥಾನಾಂತರ);
+		ನಿಲ್ಲಿಸು;
 
 	/* Third, aborting modes */
-	case SIGN_ABORT:
+	ಸ್ಥಿತಿ SIGN_ABORT:
 		die(_("encountered signed tag; use "
 		      "--signed-tags=<mode> to handle it"));
-	default:
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("invalid signed_tag_mode value %d from tag '%s'",
-		    signed_tag_mode, name);
+		    signed_ಟ್ಯಾಗ್_ಬಹುಲಕ, name);
 	}
 }
 
-static void parse_new_tag(struct fast_import_state *state, const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_new_ಟ್ಯಾಗ್(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	static struct strbuf msg = STRBUF_INIT;
-	const char *from;
-	char *tagger;
-	struct branch *s;
-	struct tag *t;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಸಂದೇಶ = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *from;
+	ಅಕ್ಷರ *tagger;
+	ರಚನೆ branch *s;
+	ರಚನೆ ಟ್ಯಾಗ್ *t;
 	uintmax_t from_mark = 0;
-	struct object_id oid;
-	enum object_type type;
-	const char *v;
+	ರಚನೆ object_id oid;
+	ಎಣಿಕೆ object_type type;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v;
 
-	t = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct tag));
+	t = mem_pool_calloc(&fi_mem_pool, 1, ಗಾತ್ರ(ರಚನೆ ಟ್ಯಾಗ್));
 	t->name = mem_pool_strdup(&fi_mem_pool, arg);
-	if (last_tag)
-		last_tag->next_tag = t;
-	else
-		first_tag = t;
-	last_tag = t;
-	read_next_command(state);
+	ಆದರೆ (ಕೊನೆಯ_ಟ್ಯಾಗ್)
+		ಕೊನೆಯ_ಟ್ಯಾಗ್->ಮುಂದಿನ_ಟ್ಯಾಗ್ = t;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಮೊದಲ_ಟ್ಯಾಗ್ = t;
+	ಕೊನೆಯ_ಟ್ಯಾಗ್ = t;
+	read_ಮುಂದಿನ_command(state);
 	parse_mark(state);
 
 	/* from ... */
-	if (!skip_prefix(command_buf.buf, "from ", &from))
+	ಆದರೆ (!skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "from ", &from))
 		die(_("expected 'from' command, got '%s'"), command_buf.buf);
 	s = lookup_branch(from);
-	if (s) {
-		if (is_null_oid(&s->oid))
+	ಆದರೆ (s) {
+		ಆದರೆ (is_null_oid(&s->oid))
 			die(_("can't tag an empty branch."));
 		oidcpy(&oid, &s->oid);
 		type = OBJ_COMMIT;
-	} else if (*from == ':') {
-		struct object_entry *oe;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*from == ':') {
+		ರಚನೆ object_ನಮೂದು *oe;
 		from_mark = parse_mark_ref_eol(from);
-		oe = find_mark(marks, from_mark);
+		oe = ಕಂಡುಹಿಡಿ_mark(marks, from_mark);
 		type = oe->type;
 		oidcpy(&oid, &oe->idx.oid);
-	} else if (!repo_get_oid(the_repository, from, &oid)) {
-		struct object_entry *oe = find_object(&oid);
-		if (!oe) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!repo_get_oid(the_repository, from, &oid)) {
+		ರಚನೆ object_ನಮೂದು *oe = ಕಂಡುಹಿಡಿ_object(&oid);
+		ಆದರೆ (!oe) {
 			type = odb_read_object_info(the_repository->objects,
-						    &oid, NULL);
-			if (type < 0)
+						    &oid, ಖಾಲಿ);
+			ಆದರೆ (type < 0)
 				die(_("not a valid object: %s"), from);
-		} else
+		} ಇಲ್ಲದಿದ್ದರೆ
 			type = oe->type;
-	} else
+	} ಇಲ್ಲದಿದ್ದರೆ
 		die(_("invalid ref name or SHA1 expression: %s"), from);
-	read_next_command(state);
+	read_ಮುಂದಿನ_command(state);
 
 	/* original-oid ... */
 	parse_original_identifier(state);
 
 	/* tagger ... */
-	if (skip_prefix(command_buf.buf, "tagger ", &v)) {
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "tagger ", &v)) {
 		tagger = parse_ident(v);
-		read_next_command(state);
-	} else
-		tagger = NULL;
+		read_ಮುಂದಿನ_command(state);
+	} ಇಲ್ಲದಿದ್ದರೆ
+		tagger = ಖಾಲಿ;
 
 	/* tag payload/message */
-	parse_data(&msg, 0, NULL);
+	parse_ದತ್ತಾಂಶ(&ಸಂದೇಶ, 0, ಖಾಲಿ);
 
 	/* build the tag object */
-	strbuf_reset(&new_data);
+	strbuf_reset(&new_ದತ್ತಾಂಶ);
 
-	strbuf_addf(&new_data,
+	strbuf_addf(&new_ದತ್ತಾಂಶ,
 		    "object %s\n"
 		    "type %s\n"
 		    "tag %s\n",
-		    oid_to_hex(&oid), type_name(type), t->name);
-	if (tagger)
-		strbuf_addf(&new_data,
+		    oid_ಗಮ್ಯ_hex(&oid), type_name(type), t->name);
+	ಆದರೆ (tagger)
+		strbuf_addf(&new_ದತ್ತಾಂಶ,
 			    "tagger %s\n", tagger);
 
-	handle_tag_signature(&new_data, &msg, t->name);
+	handle_ಟ್ಯಾಗ್_signature(&new_ದತ್ತಾಂಶ, &ಸಂದೇಶ, t->name);
 
-	strbuf_addch(&new_data, '\n');
-	strbuf_addbuf(&new_data, &msg);
-	free(tagger);
+	strbuf_addch(&new_ದತ್ತಾಂಶ, '\n');
+	strbuf_addbuf(&new_ದತ್ತಾಂಶ, &ಸಂದೇಶ);
+	ಬಿಡುಗಡೆ(tagger);
 
-	if (store_object(OBJ_TAG, &new_data, NULL, &t->oid, next_mark))
+	ಆದರೆ (store_object(OBJ_ಟ್ಯಾಗ್, &new_ದತ್ತಾಂಶ, ಖಾಲಿ, &t->oid, ಮುಂದಿನ_mark))
 		t->pack_id = MAX_PACK_ID;
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		t->pack_id = pack_id;
 }
 
-static void parse_reset_branch(struct fast_import_state *state, const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_reset_branch(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	struct branch *b;
-	const char *tag_name;
+	ರಚನೆ branch *b;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಟ್ಯಾಗ್_name;
 
 	b = lookup_branch(arg);
-	if (b) {
+	ಆದರೆ (b) {
 		oidclr(&b->oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-		if (b->branch_tree.tree) {
-			release_tree_content_recursive(b->branch_tree.tree);
-			b->branch_tree.tree = NULL;
+		oidclr(&b->branch_ವೃಕ್ಷ.versions[0].oid, the_repository->hash_algo);
+		oidclr(&b->branch_ವೃಕ್ಷ.versions[1].oid, the_repository->hash_algo);
+		ಆದರೆ (b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ) {
+			release_ವೃಕ್ಷ_content_recursive(b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ);
+			b->branch_ವೃಕ್ಷ.ವೃಕ್ಷ = ಖಾಲಿ;
 		}
 	}
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		b = new_branch(arg);
-	read_next_command(state);
+	read_ಮುಂದಿನ_command(state);
 	parse_from(state, b);
-	if (b->delete && skip_prefix(b->name, "refs/tags/", &tag_name)) {
+	ಆದರೆ (b->delete && skip_ಪೂರ್ವಪ್ರತ್ಯಯ(b->name, "refs/tags/", &ಟ್ಯಾಗ್_name)) {
 		/*
 		 * Elsewhere, we call dump_branches() before dump_tags(),
 		 * and dump_branches() will handle ref deletions first, so
@@ -3333,332 +3333,332 @@ static void parse_reset_branch(struct fast_import_state *state, const char *arg)
 		 * NEEDSWORK: replace list of tags with hashmap for faster
 		 * deletion?
 		 */
-		struct tag *t, *prev = NULL;
-		for (t = first_tag; t; t = t->next_tag) {
-			if (!strcmp(t->name, tag_name))
-				break;
+		ರಚನೆ ಟ್ಯಾಗ್ *t, *prev = ಖಾಲಿ;
+		ಗಾಗಿ (t = ಮೊದಲ_ಟ್ಯಾಗ್; t; t = t->ಮುಂದಿನ_ಟ್ಯಾಗ್) {
+			ಆದರೆ (!strcmp(t->name, ಟ್ಯಾಗ್_name))
+				ನಿಲ್ಲಿಸು;
 			prev = t;
 		}
-		if (t) {
-			if (prev)
-				prev->next_tag = t->next_tag;
-			else
-				first_tag = t->next_tag;
-			if (!t->next_tag)
-				last_tag = prev;
+		ಆದರೆ (t) {
+			ಆದರೆ (prev)
+				prev->ಮುಂದಿನ_ಟ್ಯಾಗ್ = t->ಮುಂದಿನ_ಟ್ಯಾಗ್;
+			ಇಲ್ಲದಿದ್ದರೆ
+				ಮೊದಲ_ಟ್ಯಾಗ್ = t->ಮುಂದಿನ_ಟ್ಯಾಗ್;
+			ಆದರೆ (!t->ಮುಂದಿನ_ಟ್ಯಾಗ್)
+				ಕೊನೆಯ_ಟ್ಯಾಗ್ = prev;
 			/* There is no mem_pool_free(t) function to call. */
 		}
 	}
-	if (command_buf.len > 0)
+	ಆದರೆ (command_buf.len > 0)
 		unread_command_buf = 1;
 }
 
-static void cat_blob_write(const char *buf, unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ cat_blob_write(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *buf, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	if (write_in_full(cat_blob_fd, buf, size) < 0)
+	ಆದರೆ (write_ಒಳ_ತುಂಬಿದ(cat_blob_fd, buf, ಗಾತ್ರ_2) < 0)
 		die_errno(_("write to frontend failed"));
 }
 
-static void cat_blob(struct object_entry *oe, struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ cat_blob(ರಚನೆ object_ನಮೂದು *oe, ರಚನೆ object_id *oid)
 {
-	struct strbuf line = STRBUF_INIT;
-	struct iovec iov[3];
-	unsigned long size;
-	enum object_type type = 0;
-	char *buf;
+	ರಚನೆ strbuf ಸಾಲು = STRBUF_INIT;
+	ರಚನೆ iovec iov[3];
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+	ಎಣಿಕೆ object_type type = 0;
+	ಅಕ್ಷರ *buf;
 
-	if (!oe || oe->pack_id == MAX_PACK_ID) {
-		size_t size_st = 0;
+	ಆದರೆ (!oe || oe->pack_id == MAX_PACK_ID) {
+		ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
-				      &size_st);
-		size = cast_size_t_to_ulong(size_st);
-	} else {
+				      &ಗಾತ್ರ_st);
+		ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		type = oe->type;
-		buf = gfi_unpack_entry(oe, &size);
+		buf = gfi_unpack_ನಮೂದು(oe, &ಗಾತ್ರ_2);
 	}
 
 	/*
 	 * Output based on batch_one_object() from cat-file.c.
 	 */
-	if (type <= 0) {
-		strbuf_reset(&line);
-		strbuf_addf(&line, "%s missing\n", oid_to_hex(oid));
-		cat_blob_write(line.buf, line.len);
-		strbuf_release(&line);
-		free(buf);
-		return;
+	ಆದರೆ (type <= 0) {
+		strbuf_reset(&ಸಾಲು);
+		strbuf_addf(&ಸಾಲು, "%s missing\n", oid_ಗಮ್ಯ_hex(oid));
+		cat_blob_write(ಸಾಲು.buf, ಸಾಲು.len);
+		strbuf_release(&ಸಾಲು);
+		ಬಿಡುಗಡೆ(buf);
+		ಹಿಂತಿರುಗಿ;
 	}
-	if (!buf)
-		die(_("can't read object %s"), oid_to_hex(oid));
-	if (type != OBJ_BLOB)
+	ಆದರೆ (!buf)
+		die(_("can't read object %s"), oid_ಗಮ್ಯ_hex(oid));
+	ಆದರೆ (type != OBJ_BLOB)
 		die(_("object %s is a %s but a blob was expected."),
-		    oid_to_hex(oid), type_name(type));
-	strbuf_reset(&line);
-	strbuf_addf(&line, "%s %s %"PRIuMAX"\n", oid_to_hex(oid),
-		    type_name(type), (uintmax_t)size);
+		    oid_ಗಮ್ಯ_hex(oid), type_name(type));
+	strbuf_reset(&ಸಾಲು);
+	strbuf_addf(&ಸಾಲು, "%s %s %"PRIuMAX"\n", oid_ಗಮ್ಯ_hex(oid),
+		    type_name(type), (uintmax_t)ಗಾತ್ರ_2);
 
 	/*
 	 * Write the header, the payload and the trailing newline with a
 	 * single writev(3p) call instead of three separate write(3p) calls.
 	 */
-	iov[0].iov_base = line.buf;
-	iov[0].iov_len = line.len;
-	iov[1].iov_base = buf;
-	iov[1].iov_len = size;
-	iov[2].iov_base = (void *) "\n";
+	iov[0].iov_ತಳ = ಸಾಲು.buf;
+	iov[0].iov_len = ಸಾಲು.len;
+	iov[1].iov_ತಳ = buf;
+	iov[1].iov_len = ಗಾತ್ರ_2;
+	iov[2].iov_ತಳ = (ಶೂನ್ಯ *) "\n";
 	iov[2].iov_len = 1;
 
-	if (writev_in_full(cat_blob_fd, iov, ARRAY_SIZE(iov)) < 0)
+	ಆದರೆ (writev_ಒಳ_ತುಂಬಿದ(cat_blob_fd, iov, ARRAY_ಗಾತ್ರ(iov)) < 0)
 		die_errno(_("write to frontend failed"));
-	strbuf_release(&line);
-	if (oe && oe->pack_id == pack_id) {
-		last_blob.offset = oe->idx.offset;
-		strbuf_attach(&last_blob.data, buf, size, size + 1);
-		last_blob.depth = oe->depth;
-	} else
-		free(buf);
+	strbuf_release(&ಸಾಲು);
+	ಆದರೆ (oe && oe->pack_id == pack_id) {
+		ಕೊನೆಯ_blob.ಸ್ಥಾನಾಂತರ = oe->idx.ಸ್ಥಾನಾಂತರ;
+		strbuf_attach(&ಕೊನೆಯ_blob.ದತ್ತಾಂಶ, buf, ಗಾತ್ರ_2, ಗಾತ್ರ_2 + 1);
+		ಕೊನೆಯ_blob.ಆಳ = oe->ಆಳ;
+	} ಇಲ್ಲದಿದ್ದರೆ
+		ಬಿಡುಗಡೆ(buf);
 }
 
-static void parse_get_mark(struct fast_import_state *state UNUSED,
-			   const char *p)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_get_mark(ರಚನೆ fast_import_state *state ಬಳಸದ,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p)
 {
-	struct object_entry *oe;
-	char output[GIT_MAX_HEXSZ + 2];
+	ರಚನೆ object_ನಮೂದು *oe;
+	ಅಕ್ಷರ output[GIT_MAX_HEXSZ + 2];
 
 	/* get-mark SP <object> LF */
-	if (*p != ':')
+	ಆದರೆ (*p != ':')
 		die(_("not a mark: %s"), p);
 
-	oe = find_mark(marks, parse_mark_ref_eol(p));
-	if (!oe)
+	oe = ಕಂಡುಹಿಡಿ_mark(marks, parse_mark_ref_eol(p));
+	ಆದರೆ (!oe)
 		die(_("unknown mark: %s"), command_buf.buf);
 
-	xsnprintf(output, sizeof(output), "%s\n", oid_to_hex(&oe->idx.oid));
+	xsnprintf(output, ಗಾತ್ರ(output), "%s\n", oid_ಗಮ್ಯ_hex(&oe->idx.oid));
 	cat_blob_write(output, the_hash_algo->hexsz + 1);
 }
 
-static void parse_cat_blob(struct fast_import_state *state UNUSED,
-			   const char *p)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_cat_blob(ರಚನೆ fast_import_state *state ಬಳಸದ,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p)
 {
-	struct object_entry *oe;
-	struct object_id oid;
+	ರಚನೆ object_ನಮೂದು *oe;
+	ರಚನೆ object_id oid;
 
 	/* cat-blob SP <object> LF */
-	if (*p == ':') {
-		oe = find_mark(marks, parse_mark_ref_eol(p));
-		if (!oe)
+	ಆದರೆ (*p == ':') {
+		oe = ಕಂಡುಹಿಡಿ_mark(marks, parse_mark_ref_eol(p));
+		ಆದರೆ (!oe)
 			die(_("unknown mark: %s"), command_buf.buf);
 		oidcpy(&oid, &oe->idx.oid);
-	} else {
-		if (parse_mapped_oid_hex(p, &oid, &p))
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (parse_mapped_oid_hex(p, &oid, &p))
 			die(_("invalid dataref: %s"), command_buf.buf);
-		if (*p)
+		ಆದರೆ (*p)
 			die(_("garbage after SHA1: %s"), command_buf.buf);
-		oe = find_object(&oid);
+		oe = ಕಂಡುಹಿಡಿ_object(&oid);
 	}
 
 	cat_blob(oe, &oid);
 }
 
-static struct object_entry *dereference(struct object_entry *oe,
-					struct object_id *oid)
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು *dereference(ರಚನೆ object_ನಮೂದು *oe,
+					ರಚನೆ object_id *oid)
 {
-	unsigned long size;
-	char *buf = NULL;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+	ಅಕ್ಷರ *buf = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ hexsz = the_hash_algo->hexsz;
 
-	if (!oe) {
-		enum object_type type = odb_read_object_info(the_repository->objects,
-							     oid, NULL);
-		if (type < 0)
-			die(_("object not found: %s"), oid_to_hex(oid));
+	ಆದರೆ (!oe) {
+		ಎಣಿಕೆ object_type type = odb_read_object_info(the_repository->objects,
+							     oid, ಖಾಲಿ);
+		ಆದರೆ (type < 0)
+			die(_("object not found: %s"), oid_ಗಮ್ಯ_hex(oid));
 		/* cache it! */
-		oe = insert_object(oid);
+		oe = ಸೇರಿಸು_object(oid);
 		oe->type = type;
 		oe->pack_id = MAX_PACK_ID;
-		oe->idx.offset = 1;
+		oe->idx.ಸ್ಥಾನಾಂತರ = 1;
 	}
-	switch (oe->type) {
-	case OBJ_TREE:	/* easy case. */
-		return oe;
-	case OBJ_COMMIT:
-	case OBJ_TAG:
-		break;
-	default:
+	ಆಯ್ಕೆ (oe->type) {
+	ಸ್ಥಿತಿ OBJ_ವೃಕ್ಷ:	/* easy case. */
+		ಹಿಂತಿರುಗಿ oe;
+	ಸ್ಥಿತಿ OBJ_COMMIT:
+	ಸ್ಥಿತಿ OBJ_ಟ್ಯಾಗ್:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		die(_("not a tree-ish: %s"), command_buf.buf);
 	}
 
-	if (oe->pack_id != MAX_PACK_ID) {	/* in a pack being written */
-		buf = gfi_unpack_entry(oe, &size);
-	} else {
-		enum object_type unused;
-		size_t size_st = 0;
+	ಆದರೆ (oe->pack_id != MAX_PACK_ID) {	/* in a pack being written */
+		buf = gfi_unpack_ನಮೂದು(oe, &ಗಾತ್ರ_2);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಎಣಿಕೆ object_type ಬಳಸದ_2;
+		ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
 		buf = odb_read_object(the_repository->objects, oid,
-				      &unused, &size_st);
-		size = cast_size_t_to_ulong(size_st);
+				      &ಬಳಸದ_2, &ಗಾತ್ರ_st);
+		ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
 	}
-	if (!buf)
-		die(_("can't load object %s"), oid_to_hex(oid));
+	ಆದರೆ (!buf)
+		die(_("can't load object %s"), oid_ಗಮ್ಯ_hex(oid));
 
 	/* Peel one layer. */
-	switch (oe->type) {
-	case OBJ_TAG:
-		if (size < hexsz + strlen("object ") ||
-		    get_oid_hex(buf + strlen("object "), oid))
+	ಆಯ್ಕೆ (oe->type) {
+	ಸ್ಥಿತಿ OBJ_ಟ್ಯಾಗ್:
+		ಆದರೆ (ಗಾತ್ರ_2 < hexsz + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("object ") ||
+		    get_oid_hex(buf + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("object "), oid))
 			die(_("invalid SHA1 in tag: %s"), command_buf.buf);
-		break;
-	case OBJ_COMMIT:
-		if (size < hexsz + strlen("tree ") ||
-		    get_oid_hex(buf + strlen("tree "), oid))
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ OBJ_COMMIT:
+		ಆದರೆ (ಗಾತ್ರ_2 < hexsz + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("tree ") ||
+		    get_oid_hex(buf + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ("tree "), oid))
 			die(_("invalid SHA1 in commit: %s"), command_buf.buf);
 	}
 
-	free(buf);
-	return find_object(oid);
+	ಬಿಡುಗಡೆ(buf);
+	ಹಿಂತಿರುಗಿ ಕಂಡುಹಿಡಿ_object(oid);
 }
 
-static void insert_mapped_mark(uintmax_t mark, void *object, void *cbp)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸೇರಿಸು_mapped_mark(uintmax_t mark, ಶೂನ್ಯ *object, ಶೂನ್ಯ *cbp)
 {
-	struct object_id *fromoid = object;
-	struct object_id *tooid = find_mark(cbp, mark);
-	int ret;
+	ರಚನೆ object_id *fromoid = object;
+	ರಚನೆ object_id *tooid = ಕಂಡುಹಿಡಿ_mark(cbp, mark);
+	ಪೂರ್ಣಾಂಕ ret;
 	khiter_t it;
 
 	it = kh_put_oid_map(sub_oid_map, *fromoid, &ret);
 	/* We've already seen this object. */
-	if (ret == 0)
-		return;
-	kh_value(sub_oid_map, it) = tooid;
+	ಆದರೆ (ret == 0)
+		ಹಿಂತಿರುಗಿ;
+	kh_ಮೌಲ್ಯ(sub_oid_map, it) = tooid;
 }
 
-static void build_mark_map_one(struct mark_set *from, struct mark_set *to)
+ಸ್ಥಿರ ಶೂನ್ಯ build_mark_map_one(ರಚನೆ mark_ಗಣ *from, ರಚನೆ mark_ಗಣ *ಗಮ್ಯ)
 {
-	for_each_mark(from, 0, insert_mapped_mark, to);
+	for_each_mark(from, 0, ಸೇರಿಸು_mapped_mark, ಗಮ್ಯ);
 }
 
-static void build_mark_map(struct string_list *from, struct string_list *to)
+ಸ್ಥಿರ ಶೂನ್ಯ build_mark_map(ರಚನೆ string_list *from, ರಚನೆ string_list *ಗಮ್ಯ)
 {
-	struct string_list_item *fromp, *top;
+	ರಚನೆ string_list_ಅಂಶ *fromp, *ತುದಿ;
 
 	sub_oid_map = kh_init_oid_map();
 
-	for_each_string_list_item(fromp, from) {
-		top = string_list_lookup(to, fromp->string);
-		if (!fromp->util) {
+	for_each_string_list_ಅಂಶ(fromp, from) {
+		ತುದಿ = string_list_lookup(ಗಮ್ಯ, fromp->string);
+		ಆದರೆ (!fromp->util) {
 			die(_("missing from marks for submodule '%s'"), fromp->string);
-		} else if (!top || !top->util) {
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!ತುದಿ || !ತುದಿ->util) {
 			die(_("missing to marks for submodule '%s'"), fromp->string);
 		}
-		build_mark_map_one(fromp->util, top->util);
+		build_mark_map_one(fromp->util, ತುದಿ->util);
 	}
 }
 
-static struct object_entry *parse_treeish_dataref(const char **p)
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು *parse_treeish_dataref(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **p)
 {
-	struct object_id oid;
-	struct object_entry *e;
+	ರಚನೆ object_id oid;
+	ರಚನೆ object_ನಮೂದು *e;
 
-	if (**p == ':') {	/* <mark> */
-		e = find_mark(marks, parse_mark_ref_space(p));
-		if (!e)
+	ಆದರೆ (**p == ':') {	/* <mark> */
+		e = ಕಂಡುಹಿಡಿ_mark(marks, parse_mark_ref_space(p));
+		ಆದರೆ (!e)
 			die(_("unknown mark: %s"), command_buf.buf);
 		oidcpy(&oid, &e->idx.oid);
-	} else {	/* <sha1> */
-		if (parse_mapped_oid_hex(*p, &oid, p))
+	} ಇಲ್ಲದಿದ್ದರೆ {	/* <sha1> */
+		ಆದರೆ (parse_mapped_oid_hex(*p, &oid, p))
 			die(_("invalid dataref: %s"), command_buf.buf);
-		e = find_object(&oid);
-		if (*(*p)++ != ' ')
+		e = ಕಂಡುಹಿಡಿ_object(&oid);
+		ಆದರೆ (*(*p)++ != ' ')
 			die(_("missing space after tree-ish: %s"), command_buf.buf);
 	}
 
-	while (!e || e->type != OBJ_TREE)
+	ಆಗ (!e || e->type != OBJ_ವೃಕ್ಷ)
 		e = dereference(e, &oid);
-	return e;
+	ಹಿಂತಿರುಗಿ e;
 }
 
-static void print_ls(int mode, const unsigned char *hash, const char *path)
+ಸ್ಥಿರ ಶೂನ್ಯ print_ls(ಪೂರ್ಣಾಂಕ ಬಹುಲಕ, ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *hash, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	static struct strbuf line = STRBUF_INIT;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಸಾಲು = STRBUF_INIT;
 
 	/* See show_tree(). */
-	const char *type =
-		S_ISGITLINK(mode) ? commit_type :
-		S_ISDIR(mode) ? tree_type :
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *type =
+		S_ISGITLINK(ಬಹುಲಕ) ? commit_type :
+		S_ISDIR(ಬಹುಲಕ) ? ವೃಕ್ಷ_type :
 		blob_type;
 
-	if (!mode) {
+	ಆದರೆ (!ಬಹುಲಕ) {
 		/* missing SP path LF */
-		strbuf_reset(&line);
-		strbuf_addstr(&line, "missing ");
-		quote_c_style(path, &line, NULL, 0);
-		strbuf_addch(&line, '\n');
-	} else {
+		strbuf_reset(&ಸಾಲು);
+		strbuf_addstr(&ಸಾಲು, "missing ");
+		quote_c_style(ಮಾರ್ಗ, &ಸಾಲು, ಖಾಲಿ, 0);
+		strbuf_addch(&ಸಾಲು, '\n');
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		/* mode SP type SP object_name TAB path LF */
-		strbuf_reset(&line);
-		strbuf_addf(&line, "%06o %s %s\t",
-				mode & ~NO_DELTA, type, hash_to_hex(hash));
-		quote_c_style(path, &line, NULL, 0);
-		strbuf_addch(&line, '\n');
+		strbuf_reset(&ಸಾಲು);
+		strbuf_addf(&ಸಾಲು, "%06o %s %s\t",
+				ಬಹುಲಕ & ~NO_DELTA, type, hash_ಗಮ್ಯ_hex(hash));
+		quote_c_style(ಮಾರ್ಗ, &ಸಾಲು, ಖಾಲಿ, 0);
+		strbuf_addch(&ಸಾಲು, '\n');
 	}
-	cat_blob_write(line.buf, line.len);
+	cat_blob_write(ಸಾಲು.buf, ಸಾಲು.len);
 }
 
-static void parse_ls(struct fast_import_state *state UNUSED,
-		     const char *p,
-		     struct branch *b)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_ls(ರಚನೆ fast_import_state *state ಬಳಸದ,
+		     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p,
+		     ರಚನೆ branch *b)
 {
-	static struct strbuf path = STRBUF_INIT;
-	struct tree_entry *root = NULL;
-	struct tree_entry leaf = {NULL};
+	ಸ್ಥಿರ ರಚನೆ strbuf ಮಾರ್ಗ = STRBUF_INIT;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು *ಬೇರು = ಖಾಲಿ;
+	ರಚನೆ ವೃಕ್ಷ_ನಮೂದು ಎಲೆ = {ಖಾಲಿ};
 
 	/* ls SP (<tree-ish> SP)? <path> */
-	if (*p == '"') {
-		if (!b)
+	ಆದರೆ (*p == '"') {
+		ಆದರೆ (!b)
 			die(_("not in a commit: %s"), command_buf.buf);
-		root = &b->branch_tree;
-	} else {
-		struct object_entry *e = parse_treeish_dataref(&p);
-		root = new_tree_entry();
-		oidcpy(&root->versions[1].oid, &e->idx.oid);
-		if (!is_null_oid(&root->versions[1].oid))
-			root->versions[1].mode = S_IFDIR;
-		load_tree(root);
+		ಬೇರು = &b->branch_ವೃಕ್ಷ;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ರಚನೆ object_ನಮೂದು *e = parse_treeish_dataref(&p);
+		ಬೇರು = new_ವೃಕ್ಷ_ನಮೂದು();
+		oidcpy(&ಬೇರು->versions[1].oid, &e->idx.oid);
+		ಆದರೆ (!is_null_oid(&ಬೇರು->versions[1].oid))
+			ಬೇರು->versions[1].ಬಹುಲಕ = S_IFDIR;
+		ತುಂಬು_ವೃಕ್ಷ(ಬೇರು);
 	}
-	strbuf_reset(&path);
-	parse_path_eol(&path, p, "path");
-	tree_content_get(root, path.buf, &leaf, 1);
+	strbuf_reset(&ಮಾರ್ಗ);
+	parse_ಮಾರ್ಗ_eol(&ಮಾರ್ಗ, p, "path");
+	ವೃಕ್ಷ_content_get(ಬೇರು, ಮಾರ್ಗ.buf, &ಎಲೆ, 1);
 	/*
 	 * A directory in preparation would have a sha1 of zero
 	 * until it is saved.  Save, for simplicity.
 	 */
-	if (S_ISDIR(leaf.versions[1].mode))
-		store_tree(&leaf);
+	ಆದರೆ (S_ISDIR(ಎಲೆ.versions[1].ಬಹುಲಕ))
+		store_ವೃಕ್ಷ(&ಎಲೆ);
 
-	print_ls(leaf.versions[1].mode, leaf.versions[1].oid.hash, path.buf);
-	if (leaf.tree)
-		release_tree_content_recursive(leaf.tree);
-	if (!b || root != &b->branch_tree)
-		release_tree_entry(root);
+	print_ls(ಎಲೆ.versions[1].ಬಹುಲಕ, ಎಲೆ.versions[1].oid.hash, ಮಾರ್ಗ.buf);
+	ಆದರೆ (ಎಲೆ.ವೃಕ್ಷ)
+		release_ವೃಕ್ಷ_content_recursive(ಎಲೆ.ವೃಕ್ಷ);
+	ಆದರೆ (!b || ಬೇರು != &b->branch_ವೃಕ್ಷ)
+		release_ವೃಕ್ಷ_ನಮೂದು(ಬೇರು);
 }
 
-static void checkpoint(void)
+ಸ್ಥಿರ ಶೂನ್ಯ checkpoint(ಶೂನ್ಯ)
 {
 	checkpoint_requested = 0;
-	if (object_count) {
-		cycle_packfile();
+	ಆದರೆ (object_ಎಣಿಕೆ) {
+		ಚಕ್ರ_packfile();
 	}
 	dump_branches();
-	dump_tags();
+	dump_ಟ್ಯಾಗುಗಳು();
 	dump_marks();
 }
 
-static void parse_checkpoint(struct fast_import_state *state UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_checkpoint(ರಚನೆ fast_import_state *state ಬಳಸದ)
 {
 	checkpoint_requested = 1;
 	skip_optional_lf();
 }
 
-static void parse_progress(struct fast_import_state *state UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_ಪ್ರಗತಿ(ರಚನೆ fast_import_state *state ಬಳಸದ)
 {
 	fwrite(command_buf.buf, 1, command_buf.len, stdout);
 	fputc('\n', stdout);
@@ -3666,472 +3666,472 @@ static void parse_progress(struct fast_import_state *state UNUSED)
 	skip_optional_lf();
 }
 
-static void parse_alias(struct fast_import_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_alias(ರಚನೆ fast_import_state *state)
 {
-	struct object_entry *e;
-	struct branch b;
+	ರಚನೆ object_ನಮೂದು *e;
+	ರಚನೆ branch b;
 
 	skip_optional_lf();
-	read_next_command(state);
+	read_ಮುಂದಿನ_command(state);
 
 	/* mark ... */
 	parse_mark(state);
-	if (!next_mark)
+	ಆದರೆ (!ಮುಂದಿನ_mark)
 		die(_("expected 'mark' command, got %s"), command_buf.buf);
 
 	/* to ... */
-	memset(&b, 0, sizeof(b));
-	if (!parse_objectish_with_prefix(state, &b, "to "))
+	memset(&b, 0, ಗಾತ್ರ(b));
+	ಆದರೆ (!parse_objectish_with_ಪೂರ್ವಪ್ರತ್ಯಯ(state, &b, "to "))
 		die(_("expected 'to' command, got %s"), command_buf.buf);
-	e = find_object(&b.oid);
-	assert(e);
-	insert_mark(&marks, next_mark, e);
+	e = ಕಂಡುಹಿಡಿ_object(&b.oid);
+	ಪ್ರತಿಜ್ಞಾ(e);
+	ಸೇರಿಸು_mark(&marks, ಮುಂದಿನ_mark, e);
 }
 
-static char* make_fast_import_path(struct fast_import_state *state,
-				   const char *path)
+ಸ್ಥಿರ ಅಕ್ಷರ* make_fast_import_ಮಾರ್ಗ(ರಚನೆ fast_import_state *state,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	if (!relative_marks_paths || is_absolute_path(path))
-		return prefix_filename(state->prefix, path);
-	return repo_git_path(the_repository, "info/fast-import/%s", path);
+	ಆದರೆ (!relative_marks_paths || is_absolute_ಮಾರ್ಗ(ಮಾರ್ಗ))
+		ಹಿಂತಿರುಗಿ ಪೂರ್ವಪ್ರತ್ಯಯ_filename(state->ಪೂರ್ವಪ್ರತ್ಯಯ, ಮಾರ್ಗ);
+	ಹಿಂತಿರುಗಿ repo_git_ಮಾರ್ಗ(the_repository, "info/fast-import/%s", ಮಾರ್ಗ);
 }
 
-static void option_import_marks(struct fast_import_state *state,
-				const char *marks,
-				int from_stream,
-				int ignore_missing)
+ಸ್ಥಿರ ಶೂನ್ಯ option_import_marks(ರಚನೆ fast_import_state *state,
+				ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *marks,
+				ಪೂರ್ಣಾಂಕ from_ಹರಿವು,
+				ಪೂರ್ಣಾಂಕ ignore_missing)
 {
-	if (import_marks_file) {
-		if (from_stream)
+	ಆದರೆ (import_marks_file) {
+		ಆದರೆ (from_ಹರಿವು)
 			die(_("only one import-marks command allowed per stream"));
 
 		/* read previous mark file */
-		if(!import_marks_file_from_stream)
+		ಆದರೆ(!import_marks_file_from_ಹರಿವು)
 			read_marks();
 	}
 
-	free(import_marks_file);
-	import_marks_file = make_fast_import_path(state, marks);
-	import_marks_file_from_stream = from_stream;
+	ಬಿಡುಗಡೆ(import_marks_file);
+	import_marks_file = make_fast_import_ಮಾರ್ಗ(state, marks);
+	import_marks_file_from_ಹರಿವು = from_ಹರಿವು;
 	import_marks_file_ignore_missing = ignore_missing;
 }
 
-static void option_date_format(const char *fmt)
+ಸ್ಥಿರ ಶೂನ್ಯ option_date_format(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *fmt)
 {
-	if (!strcmp(fmt, "raw"))
+	ಆದರೆ (!strcmp(fmt, "raw"))
 		whenspec = WHENSPEC_RAW;
-	else if (!strcmp(fmt, "raw-permissive"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(fmt, "raw-permissive"))
 		whenspec = WHENSPEC_RAW_PERMISSIVE;
-	else if (!strcmp(fmt, "rfc2822"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(fmt, "rfc2822"))
 		whenspec = WHENSPEC_RFC2822;
-	else if (!strcmp(fmt, "now"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(fmt, "now"))
 		whenspec = WHENSPEC_NOW;
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		die(_("unknown --date-format argument %s"), fmt);
 }
 
-static unsigned long ulong_arg(const char *option, const char *arg)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ulong_arg(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	char *endptr;
-	unsigned long rv = strtoul(arg, &endptr, 0);
-	if (strchr(arg, '-') || endptr == arg || *endptr)
+	ಅಕ್ಷರ *endptr;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ rv = strtoul(arg, &endptr, 0);
+	ಆದರೆ (strchr(arg, '-') || endptr == arg || *endptr)
 		die(_("%s: argument must be a non-negative integer"), option);
-	return rv;
+	ಹಿಂತಿರುಗಿ rv;
 }
 
-static void option_depth(const char *depth)
+ಸ್ಥಿರ ಶೂನ್ಯ option_ಆಳ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಆಳ)
 {
-	max_depth = ulong_arg("--depth", depth);
-	if (max_depth > MAX_DEPTH)
-		die(_("--depth cannot exceed %u"), MAX_DEPTH);
+	max_ಆಳ = ulong_arg("--depth", ಆಳ);
+	ಆದರೆ (max_ಆಳ > MAX_ಆಳ)
+		die(_("--depth cannot exceed %u"), MAX_ಆಳ);
 }
 
-static void option_active_branches(const char *branches)
+ಸ್ಥಿರ ಶೂನ್ಯ option_ಸಕ್ರಿಯ_branches(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *branches)
 {
-	max_active_branches = ulong_arg("--active-branches", branches);
+	max_ಸಕ್ರಿಯ_branches = ulong_arg("--active-branches", branches);
 }
 
-static void option_export_marks(struct fast_import_state *state,
-				const char *marks)
+ಸ್ಥಿರ ಶೂನ್ಯ option_export_marks(ರಚನೆ fast_import_state *state,
+				ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *marks)
 {
-	free(export_marks_file);
-	export_marks_file = make_fast_import_path(state, marks);
+	ಬಿಡುಗಡೆ(export_marks_file);
+	export_marks_file = make_fast_import_ಮಾರ್ಗ(state, marks);
 }
 
-static void option_cat_blob_fd(struct fast_import_state *state UNUSED,
-			       const char *fd)
+ಸ್ಥಿರ ಶೂನ್ಯ option_cat_blob_fd(ರಚನೆ fast_import_state *state ಬಳಸದ,
+			       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *fd)
 {
-	unsigned long n = ulong_arg("--cat-blob-fd", fd);
-	if (n > (unsigned long) INT_MAX)
-		die(_("--cat-blob-fd cannot exceed %d"), INT_MAX);
-	cat_blob_fd = (int) n;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ n = ulong_arg("--cat-blob-fd", fd);
+	ಆದರೆ (n > (ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ) ಗರಿಷ್ಠ_ಪೂರ್ಣಾಂಕ)
+		die(_("--cat-blob-fd cannot exceed %d"), ಗರಿಷ್ಠ_ಪೂರ್ಣಾಂಕ);
+	cat_blob_fd = (ಪೂರ್ಣಾಂಕ) n;
 }
 
-static void option_export_pack_edges(struct fast_import_state *state,
-				     const char *edges)
+ಸ್ಥಿರ ಶೂನ್ಯ option_export_pack_ಅಂಚುಗಳು(ರಚನೆ fast_import_state *state,
+				     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಅಂಚುಗಳು)
 {
-	char *fn = prefix_filename(state->prefix, edges);
-	if (pack_edges)
-		fclose(pack_edges);
-	pack_edges = xfopen(fn, "a");
-	free(fn);
+	ಅಕ್ಷರ *fn = ಪೂರ್ವಪ್ರತ್ಯಯ_filename(state->ಪೂರ್ವಪ್ರತ್ಯಯ, ಅಂಚುಗಳು);
+	ಆದರೆ (pack_ಅಂಚುಗಳು)
+		fclose(pack_ಅಂಚುಗಳು);
+	pack_ಅಂಚುಗಳು = xfopen(fn, "a");
+	ಬಿಡುಗಡೆ(fn);
 }
 
-static void option_rewrite_submodules(struct fast_import_state *state,
-				      const char *arg,
-				      struct string_list *list)
+ಸ್ಥಿರ ಶೂನ್ಯ option_rewrite_submodules(ರಚನೆ fast_import_state *state,
+				      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+				      ರಚನೆ string_list *list)
 {
-	struct mark_set *ms;
+	ರಚನೆ mark_ಗಣ *ms;
 	FILE *fp;
-	char *s = xstrdup(arg);
-	char *f = strchr(s, ':');
-	if (!f)
+	ಅಕ್ಷರ *s = xstrdup(arg);
+	ಅಕ್ಷರ *f = strchr(s, ':');
+	ಆದರೆ (!f)
 		die(_("expected format name:filename for submodule rewrite option"));
 	*f = '\0';
 	f++;
 	CALLOC_ARRAY(ms, 1);
 
-	f = prefix_filename(state->prefix, f);
+	f = ಪೂರ್ವಪ್ರತ್ಯಯ_filename(state->ಪೂರ್ವಪ್ರತ್ಯಯ, f);
 	fp = fopen(f, "r");
-	if (!fp)
+	ಆದರೆ (!fp)
 		die_errno(_("cannot read '%s'"), f);
-	read_mark_file(&ms, fp, insert_oid_entry);
+	read_mark_file(&ms, fp, ಸೇರಿಸು_oid_ನಮೂದು);
 	fclose(fp);
-	free(f);
+	ಬಿಡುಗಡೆ(f);
 
-	string_list_insert(list, s)->util = ms;
+	string_list_ಸೇರಿಸು(list, s)->util = ms;
 
-	free(s);
+	ಬಿಡುಗಡೆ(s);
 }
 
-static void option_max_pack_size(const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ option_max_pack_ಗಾತ್ರ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	unsigned long v;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ v;
 
-	if (!git_parse_ulong(arg, &v))
+	ಆದರೆ (!git_parse_ulong(arg, &v))
 		die(_("--max-pack-size: argument must be a non-negative integer"));
-	if (v < 8192) {
+	ಆದರೆ (v < 8192) {
 		warning(_("max-pack-size is now in bytes, assuming --max-pack-size=%lum"), v);
 		v *= 1024 * 1024;
-	} else if (v < 1024 * 1024) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (v < 1024 * 1024) {
 		warning(_("minimum max-pack-size is 1 MiB"));
 		v = 1024 * 1024;
 	}
 	max_packsize = v;
 }
 
-static void option_big_file_threshold(const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ option_big_file_ಮಿತಿ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	unsigned long v;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ v;
 
-	if (!git_parse_ulong(arg, &v))
+	ಆದರೆ (!git_parse_ulong(arg, &v))
 		die(_("--big-file-threshold: argument must be a non-negative integer"));
-	repo_settings_set_big_file_threshold(the_repository, v);
+	repo_settings_ಗಣ_big_file_ಮಿತಿ(the_repository, v);
 }
 
-static void option_signed_commits(const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ option_signed_commits(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	if (parse_sign_mode(arg, &signed_commit_mode, &signed_commit_keyid))
+	ಆದರೆ (parse_sign_ಬಹುಲಕ(arg, &signed_commit_ಬಹುಲಕ, &signed_commit_keyid))
 		usagef(_("unknown --signed-commits mode '%s'"), arg);
 }
 
-static void option_signed_tags(const char *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ option_signed_ಟ್ಯಾಗುಗಳು(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	if (parse_sign_mode(arg, &signed_tag_mode, &signed_tag_keyid))
+	ಆದರೆ (parse_sign_ಬಹುಲಕ(arg, &signed_ಟ್ಯಾಗ್_ಬಹುಲಕ, &signed_ಟ್ಯಾಗ್_keyid))
 		usagef(_("unknown --signed-tags mode '%s'"), arg);
 }
 
-static void option_quiet(void)
+ಸ್ಥಿರ ಶೂನ್ಯ option_quiet(ಶೂನ್ಯ)
 {
 	show_stats = 0;
 	quiet = 1;
 }
 
-static int parse_one_option(struct fast_import_state *state, const char *option)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_one_option(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option)
 {
-	if (skip_prefix(option, "max-pack-size=", &option)) {
-		option_max_pack_size(option);
-	} else if (skip_prefix(option, "big-file-threshold=", &option)) {
-		option_big_file_threshold(option);
-	} else if (skip_prefix(option, "depth=", &option)) {
-		option_depth(option);
-	} else if (skip_prefix(option, "active-branches=", &option)) {
-		option_active_branches(option);
-	} else if (skip_prefix(option, "export-pack-edges=", &option)) {
-		option_export_pack_edges(state, option);
-	} else if (skip_prefix(option, "signed-commits=", &option)) {
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "max-pack-size=", &option)) {
+		option_max_pack_ಗಾತ್ರ(option);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "big-file-threshold=", &option)) {
+		option_big_file_ಮಿತಿ(option);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "depth=", &option)) {
+		option_ಆಳ(option);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "active-branches=", &option)) {
+		option_ಸಕ್ರಿಯ_branches(option);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "export-pack-edges=", &option)) {
+		option_export_pack_ಅಂಚುಗಳು(state, option);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "signed-commits=", &option)) {
 		option_signed_commits(option);
-	} else if (skip_prefix(option, "signed-tags=", &option)) {
-		option_signed_tags(option);
-	} else if (!strcmp(option, "quiet")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(option, "signed-tags=", &option)) {
+		option_signed_ಟ್ಯಾಗುಗಳು(option);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(option, "quiet")) {
 		option_quiet();
-	} else if (!strcmp(option, "stats")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(option, "stats")) {
 		show_stats = 1;
-	} else if (!strcmp(option, "allow-unsafe-features")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(option, "allow-unsafe-features")) {
 		; /* already handled during early option parsing */
-	} else {
-		return 0;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static void check_unsafe_feature(struct fast_import_state *state,
-				 const char *feature)
+ಸ್ಥಿರ ಶೂನ್ಯ check_unsafe_feature(ರಚನೆ fast_import_state *state,
+				 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *feature)
 {
-	if (!state->allow_unsafe_features)
+	ಆದರೆ (!state->allow_unsafe_features)
 		die(_("feature '%s' forbidden in input without --allow-unsafe-features"),
 		    feature);
 }
 
-static int parse_one_feature(struct fast_import_state *state,
-			     const char *feature)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_one_feature(ರಚನೆ fast_import_state *state,
+			     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *feature)
 {
-	const char *arg;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg;
 
-	if (skip_prefix(feature, "date-format=", &arg)) {
+	ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(feature, "date-format=", &arg)) {
 		option_date_format(arg);
-	} else if (skip_prefix(feature, "import-marks=", &arg)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(feature, "import-marks=", &arg)) {
 		check_unsafe_feature(state, "import-marks");
 		option_import_marks(state, arg, 1, 0);
-	} else if (skip_prefix(feature, "import-marks-if-exists=", &arg)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(feature, "import-marks-if-exists=", &arg)) {
 		check_unsafe_feature(state, "import-marks-if-exists");
 		option_import_marks(state, arg, 1, 1);
-	} else if (skip_prefix(feature, "export-marks=", &arg)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(feature, "export-marks=", &arg)) {
 		check_unsafe_feature(state, feature);
 		option_export_marks(state, arg);
-	} else if (!strcmp(feature, "alias")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "alias")) {
 		; /* Don't die - this feature is supported */
-	} else if (skip_prefix(feature, "rewrite-submodules-to=", &arg)) {
-		option_rewrite_submodules(state, arg, &sub_marks_to);
-	} else if (skip_prefix(feature, "rewrite-submodules-from=", &arg)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(feature, "rewrite-submodules-to=", &arg)) {
+		option_rewrite_submodules(state, arg, &sub_marks_ಗಮ್ಯ);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(feature, "rewrite-submodules-from=", &arg)) {
 		option_rewrite_submodules(state, arg, &sub_marks_from);
-	} else if (!strcmp(feature, "get-mark")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "get-mark")) {
 		; /* Don't die - this feature is supported */
-	} else if (!strcmp(feature, "cat-blob")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "cat-blob")) {
 		; /* Don't die - this feature is supported */
-	} else if (!strcmp(feature, "relative-marks")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "relative-marks")) {
 		relative_marks_paths = 1;
-	} else if (!strcmp(feature, "no-relative-marks")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "no-relative-marks")) {
 		relative_marks_paths = 0;
-	} else if (!strcmp(feature, "done")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "done")) {
 		require_explicit_termination = 1;
-	} else if (!strcmp(feature, "force")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "force")) {
 		force_update = 1;
-	} else if (!strcmp(feature, "notes") || !strcmp(feature, "ls")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(feature, "notes") || !strcmp(feature, "ls")) {
 		; /* do nothing; we have the feature */
-	} else {
-		return 0;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static void parse_feature(struct fast_import_state *state, const char *feature)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_feature(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *feature)
 {
-	if (state->seen_data_command)
+	ಆದರೆ (state->ನೋಡಿದ_ದತ್ತಾಂಶ_command)
 		die(_("got feature command '%s' after data command"), feature);
 
-	if (parse_one_feature(state, feature))
-		return;
+	ಆದರೆ (parse_one_feature(state, feature))
+		ಹಿಂತಿರುಗಿ;
 
 	die(_("this version of fast-import does not support feature %s."), feature);
 }
 
-static void parse_option(struct fast_import_state *state, const char *option)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_option(ರಚನೆ fast_import_state *state, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option)
 {
-	if (state->seen_data_command)
+	ಆದರೆ (state->ನೋಡಿದ_ದತ್ತಾಂಶ_command)
 		die(_("got option command '%s' after data command"), option);
 
-	if (parse_one_option(state, option))
-		return;
+	ಆದರೆ (parse_one_option(state, option))
+		ಹಿಂತಿರುಗಿ;
 
 	die(_("this version of fast-import does not support option: %s"), option);
 }
 
-static void git_pack_config(void)
+ಸ್ಥಿರ ಶೂನ್ಯ git_pack_config(ಶೂನ್ಯ)
 {
-	int indexversion_value;
-	int limit;
-	unsigned long packsizelimit_value;
+	ಪೂರ್ಣಾಂಕ indexversion_ಮೌಲ್ಯ;
+	ಪೂರ್ಣಾಂಕ ಎಲ್ಲೆ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ packsizelimit_ಮೌಲ್ಯ;
 
-	if (!repo_config_get_ulong(the_repository, "pack.depth", &max_depth)) {
-		if (max_depth > MAX_DEPTH)
-			max_depth = MAX_DEPTH;
+	ಆದರೆ (!repo_config_get_ulong(the_repository, "pack.depth", &max_ಆಳ)) {
+		ಆದರೆ (max_ಆಳ > MAX_ಆಳ)
+			max_ಆಳ = MAX_ಆಳ;
 	}
-	if (!repo_config_get_int(the_repository, "pack.indexversion", &indexversion_value)) {
-		pack_idx_opts.version = indexversion_value;
-		if (pack_idx_opts.version > 2)
+	ಆದರೆ (!repo_config_get_int(the_repository, "pack.indexversion", &indexversion_ಮೌಲ್ಯ)) {
+		pack_idx_opts.ಆವೃತ್ತಿ = indexversion_ಮೌಲ್ಯ;
+		ಆದರೆ (pack_idx_opts.ಆವೃತ್ತಿ > 2)
 			git_die_config(the_repository, "pack.indexversion",
-				       "bad pack.indexVersion=%"PRIu32, pack_idx_opts.version);
+				       "bad pack.indexVersion=%"PRIu32, pack_idx_opts.ಆವೃತ್ತಿ);
 	}
-	if (!repo_config_get_ulong(the_repository, "pack.packsizelimit", &packsizelimit_value))
-		max_packsize = packsizelimit_value;
+	ಆದರೆ (!repo_config_get_ulong(the_repository, "pack.packsizelimit", &packsizelimit_ಮೌಲ್ಯ))
+		max_packsize = packsizelimit_ಮೌಲ್ಯ;
 
-	if (!repo_config_get_int(the_repository, "fastimport.unpacklimit", &limit))
-		unpack_limit = limit;
-	else if (!repo_config_get_int(the_repository, "transfer.unpacklimit", &limit))
-		unpack_limit = limit;
+	ಆದರೆ (!repo_config_get_int(the_repository, "fastimport.unpacklimit", &ಎಲ್ಲೆ))
+		unpack_ಎಲ್ಲೆ = ಎಲ್ಲೆ;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!repo_config_get_int(the_repository, "transfer.unpacklimit", &ಎಲ್ಲೆ))
+		unpack_ಎಲ್ಲೆ = ಎಲ್ಲೆ;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
 }
 
-static const char *const fast_import_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ fast_import_usage[] = {
 	N_("git fast-import [<options>]"),
-	NULL
+	ಖಾಲಿ
 };
 
-static void parse_argv(struct fast_import_state *state)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_argv(ರಚನೆ fast_import_state *state)
 {
-	int argc = parse_options(state->argc, state->argv, state->prefix,
+	ಪೂರ್ಣಾಂಕ argc = parse_options(state->argc, state->argv, state->ಪೂರ್ವಪ್ರತ್ಯಯ,
 				 state->option, fast_import_usage,
 				 PARSE_OPT_KEEP_ARGV0);
 
-	if (argc > 1)
+	ಆದರೆ (argc > 1)
 		usage_with_options(fast_import_usage, state->option);
 
-	state->seen_data_command = 1;
-	if (import_marks_file)
+	state->ನೋಡಿದ_ದತ್ತಾಂಶ_command = 1;
+	ಆದರೆ (import_marks_file)
 		read_marks();
-	build_mark_map(&sub_marks_from, &sub_marks_to);
+	build_mark_map(&sub_marks_from, &sub_marks_ಗಮ್ಯ);
 }
 
-static int option_parse_date_format(const struct option *opt UNUSED,
-				    const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_date_format(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+				    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_date_format(arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_export_pack_edges(const struct option *opt,
-					  const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_export_pack_ಅಂಚುಗಳು(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+					  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_export_pack_edges(opt->value, arg);
-	return 0;
+	option_export_pack_ಅಂಚುಗಳು(opt->ಮೌಲ್ಯ, arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_max_pack_size(const struct option *opt UNUSED,
-				      const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_max_pack_ಗಾತ್ರ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+				      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_max_pack_size(arg);
-	return 0;
+	option_max_pack_ಗಾತ್ರ(arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_big_file_threshold(const struct option *opt UNUSED,
-					   const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_big_file_ಮಿತಿ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+					   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_big_file_threshold(arg);
-	return 0;
+	option_big_file_ಮಿತಿ(arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_signed_commits(const struct option *opt UNUSED,
-				       const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_signed_commits(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+				       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_signed_commits(arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_signed_tags(const struct option *opt UNUSED,
-				    const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_signed_ಟ್ಯಾಗುಗಳು(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+				    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_signed_tags(arg);
-	return 0;
+	option_signed_ಟ್ಯಾಗುಗಳು(arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_rewrite_submodules_from(const struct option *opt,
-						const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_rewrite_submodules_from(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+						ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_rewrite_submodules(opt->value, arg, &sub_marks_from);
-	return 0;
+	option_rewrite_submodules(opt->ಮೌಲ್ಯ, arg, &sub_marks_from);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_rewrite_submodules_to(const struct option *opt,
-					      const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_rewrite_submodules_ಗಮ್ಯ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+					      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_rewrite_submodules(opt->value, arg, &sub_marks_to);
-	return 0;
+	option_rewrite_submodules(opt->ಮೌಲ್ಯ, arg, &sub_marks_ಗಮ್ಯ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_cat_blob_fd(const struct option *opt,
-				    const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_cat_blob_fd(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_cat_blob_fd(opt->value, arg);
-	return 0;
+	option_cat_blob_fd(opt->ಮೌಲ್ಯ, arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_import_marks(const struct option *opt,
-				     const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_import_marks(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_import_marks(opt->value, arg, 0, 0);
-	return 0;
+	option_import_marks(opt->ಮೌಲ್ಯ, arg, 0, 0);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_import_marks_if_exists(const struct option *opt,
-					       const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_import_marks_if_exists(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+					       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_import_marks(opt->value, arg, 0, 1);
-	return 0;
+	option_import_marks(opt->ಮೌಲ್ಯ, arg, 0, 1);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_export_marks(const struct option *opt,
-				     const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_export_marks(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_export_marks(opt->value, arg);
-	return 0;
+	option_export_marks(opt->ಮೌಲ್ಯ, arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_depth(const struct option *opt UNUSED,
-			      const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_ಆಳ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+			      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_depth(arg);
-	return 0;
+	option_ಆಳ(arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_active_branches(const struct option *opt UNUSED,
-					const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_ಸಕ್ರಿಯ_branches(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+					ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_active_branches(arg);
-	return 0;
+	option_ಸಕ್ರಿಯ_branches(arg);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_quiet(const struct option *opt UNUSED,
-			      const char *arg UNUSED, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_quiet(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+			      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg ಬಳಸದ, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_quiet();
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_fast_import(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_fast_import(ಪೂರ್ಣಾಂಕ argc,
+		    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		    ರಚನೆ repository *repo)
 {
-	struct fast_import_state state;
+	ರಚನೆ fast_import_state state;
 
-	struct option fast_import_options[] = {
-		OPT_GROUP(N_("Common")),
-		OPT_CALLBACK_F(0, "date-format", NULL, N_("fmt"),
+	ರಚನೆ option fast_import_options[] = {
+		OPT_ಗುಂಪು(N_("Common")),
+		OPT_CALLBACK_F(0, "date-format", ಖಾಲಿ, N_("fmt"),
 			       N_("format of the commit/tag dates"),
 			       PARSE_OPT_NONEG, option_parse_date_format),
 		OPT_BOOL_F(0, "stats", &show_stats,
 			   N_("display some basic statistics (objects, packfiles and memory)"),
 			   PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "quiet", NULL, NULL,
+		OPT_CALLBACK_F(0, "quiet", ಖಾಲಿ, ಖಾಲಿ,
 			       N_("disable the output shown by --stats"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			       option_parse_quiet),
@@ -4139,19 +4139,19 @@ int cmd_fast_import(int argc,
 			   N_("force updating modified existing branches"), PARSE_OPT_NONEG),
 		OPT_BOOL_F(0, "done", &require_explicit_termination,
 			   N_("require a terminating 'done' command"), PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "max-pack-size", NULL, N_("n"),
+		OPT_CALLBACK_F(0, "max-pack-size", ಖಾಲಿ, N_("n"),
 			       N_("maximum size of each output pack file"),
-			       PARSE_OPT_NONEG, option_parse_max_pack_size),
-		OPT_CALLBACK_F(0, "big-file-threshold", NULL, N_("n"),
+			       PARSE_OPT_NONEG, option_parse_max_pack_ಗಾತ್ರ),
+		OPT_CALLBACK_F(0, "big-file-threshold", ಖಾಲಿ, N_("n"),
 			       N_("maximum size of a blob that will be deltified"),
-			       PARSE_OPT_NONEG, option_parse_big_file_threshold),
-		OPT_CALLBACK_F(0, "depth", NULL, N_("n"),
+			       PARSE_OPT_NONEG, option_parse_big_file_ಮಿತಿ),
+		OPT_CALLBACK_F(0, "depth", ಖಾಲಿ, N_("n"),
 			       N_("maximum delta depth"),
-			       PARSE_OPT_NONEG, option_parse_depth),
-		OPT_CALLBACK_F(0, "active-branches", NULL, N_("n"),
+			       PARSE_OPT_NONEG, option_parse_ಆಳ),
+		OPT_CALLBACK_F(0, "active-branches", ಖಾಲಿ, N_("n"),
 			       N_("maximum number of branches to maintain active"),
-			       PARSE_OPT_NONEG, option_parse_active_branches),
-		OPT_GROUP(N_("Marks")),
+			       PARSE_OPT_NONEG, option_parse_ಸಕ್ರಿಯ_branches),
+		OPT_ಗುಂಪು(N_("Marks")),
 		OPT_CALLBACK_F(0, "import-marks", &state, N_("file"),
 			       N_("import marks from <file>"),
 			       PARSE_OPT_NONEG, option_parse_import_marks),
@@ -4163,50 +4163,50 @@ int cmd_fast_import(int argc,
 			       PARSE_OPT_NONEG, option_parse_export_marks),
 		OPT_BOOL(0, "relative-marks", &relative_marks_paths,
 			 N_("are --(import|export)-marks= paths relative to '.git/info/fast-import'?")),
-		OPT_GROUP(N_("Submodule rewrite")),
+		OPT_ಗುಂಪು(N_("Submodule rewrite")),
 		OPT_CALLBACK_F(0, "rewrite-submodules-from", &state, N_("name:filename"),
 			       N_("rewrite object IDs for submodule <name> from <filename>"),
 			       PARSE_OPT_NONEG, option_parse_rewrite_submodules_from),
 		OPT_CALLBACK_F(0, "rewrite-submodules-to", &state, N_("name:filename"),
 			       N_("rewrite object IDs for submodule <name> to <filename>"),
-			       PARSE_OPT_NONEG, option_parse_rewrite_submodules_to),
-		OPT_GROUP(N_("Signing")),
-		OPT_CALLBACK_F(0, "signed-commits", NULL, N_("mode"),
+			       PARSE_OPT_NONEG, option_parse_rewrite_submodules_ಗಮ್ಯ),
+		OPT_ಗುಂಪು(N_("Signing")),
+		OPT_CALLBACK_F(0, "signed-commits", ಖಾಲಿ, N_("mode"),
 			       N_("how to handle signed commits"),
 			       PARSE_OPT_NONEG, option_parse_signed_commits),
-		OPT_CALLBACK_F(0, "signed-tags", NULL, N_("mode"),
+		OPT_CALLBACK_F(0, "signed-tags", ಖಾಲಿ, N_("mode"),
 			       N_("how to handle signed tags"),
-			       PARSE_OPT_NONEG, option_parse_signed_tags),
-		OPT_HIDDEN_GROUP(N_("Advanced")),
+			       PARSE_OPT_NONEG, option_parse_signed_ಟ್ಯಾಗುಗಳು),
+		OPT_HIDDEN_ಗುಂಪು(N_("Advanced")),
 		OPT_BOOL_F(0, "allow-unsafe-features", &state.allow_unsafe_features,
 			   N_("allow unsafe mark commands from the stream"),
 			   PARSE_OPT_HIDDEN | PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "export-pack-edges", &state, N_("file"),
 			       N_("dump edge commits to <file>"),
 			       PARSE_OPT_HIDDEN | PARSE_OPT_NONEG,
-			       option_parse_export_pack_edges),
+			       option_parse_export_pack_ಅಂಚುಗಳು),
 		OPT_CALLBACK_F(0, "cat-blob-fd", &state, N_("fd"),
 			       N_("write some responses to <fd> instead of stdout"),
 			       PARSE_OPT_HIDDEN | PARSE_OPT_NONEG,
 			       option_parse_cat_blob_fd),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
 	show_usage_with_options_if_asked(argc, argv, fast_import_usage, fast_import_options);
 
-	fast_import_state_init(&state, argc, argv, prefix, fast_import_options);
+	fast_import_state_init(&state, argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, fast_import_options);
 
 	reset_pack_idx_option(&pack_idx_opts);
 	git_pack_config();
 
-	alloc_objects(object_entry_alloc);
+	alloc_objects(object_ನಮೂದು_alloc);
 	strbuf_init(&command_buf, 0);
-	CALLOC_ARRAY(atom_table, atom_table_sz);
-	CALLOC_ARRAY(branch_table, branch_table_sz);
-	CALLOC_ARRAY(avail_tree_table, avail_tree_table_sz);
-	marks = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
+	CALLOC_ARRAY(atom_ಕೋಷ್ಟಕ, atom_ಕೋಷ್ಟಕ_sz);
+	CALLOC_ARRAY(branch_ಕೋಷ್ಟಕ, branch_ಕೋಷ್ಟಕ_sz);
+	CALLOC_ARRAY(avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ, avail_ವೃಕ್ಷ_ಕೋಷ್ಟಕ_sz);
+	marks = mem_pool_calloc(&fi_mem_pool, 1, ಗಾತ್ರ(ರಚನೆ mark_ಗಣ));
 
-	hashmap_init(&object_table, object_entry_hashcmp, NULL, 0);
+	hashmap_init(&object_ಕೋಷ್ಟಕ, object_ನಮೂದು_hashcmp, ಖಾಲಿ, 0);
 
 	/*
 	 * We don't parse most options until after we've seen the set of
@@ -4224,102 +4224,102 @@ int cmd_fast_import(int argc,
 	 * still refused. This errs on the safe side, but should be fixed by
 	 * teaching this scan about the options that take a value.
 	 */
-	for (int i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (*arg != '-' || !strcmp(arg, "--"))
-			break;
-		if (!strcmp(arg, "--allow-unsafe-features"))
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 1; i < argc; i++) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg = argv[i];
+		ಆದರೆ (*arg != '-' || !strcmp(arg, "--"))
+			ನಿಲ್ಲಿಸು;
+		ಆದರೆ (!strcmp(arg, "--allow-unsafe-features"))
 			state.allow_unsafe_features = 1;
 	}
 
-	rc_free = mem_pool_alloc(&fi_mem_pool, cmd_save * sizeof(*rc_free));
-	for (unsigned int i = 0; i < (cmd_save - 1); i++)
-		rc_free[i].next = &rc_free[i + 1];
-	rc_free[cmd_save - 1].next = NULL;
+	rc_free = mem_pool_alloc(&fi_mem_pool, cmd_save * ಗಾತ್ರ(*rc_free));
+	ಗಾಗಿ (ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i = 0; i < (cmd_save - 1); i++)
+		rc_free[i].ಮುಂದಿನ = &rc_free[i + 1];
+	rc_free[cmd_save - 1].ಮುಂದಿನ = ಖಾಲಿ;
 
-	start_packfile();
-	set_die_routine(die_nicely);
-	set_checkpoint_signal();
-	while (read_next_command(&state) != EOF) {
-		const char *v;
-		if (!strcmp("blob", command_buf.buf))
+	ಆರಂಭ_packfile();
+	ಗಣ_die_routine(die_nicely);
+	ಗಣ_checkpoint_signal();
+	ಆಗ (read_ಮುಂದಿನ_command(&state) != EOF) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v;
+		ಆದರೆ (!strcmp("blob", command_buf.buf))
 			parse_new_blob(&state);
-		else if (skip_prefix(command_buf.buf, "commit ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "commit ", &v))
 			parse_new_commit(&state, v);
-		else if (skip_prefix(command_buf.buf, "tag ", &v))
-			parse_new_tag(&state, v);
-		else if (skip_prefix(command_buf.buf, "reset ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "tag ", &v))
+			parse_new_ಟ್ಯಾಗ್(&state, v);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "reset ", &v))
 			parse_reset_branch(&state, v);
-		else if (skip_prefix(command_buf.buf, "ls ", &v))
-			parse_ls(&state, v, NULL);
-		else if (skip_prefix(command_buf.buf, "cat-blob ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "ls ", &v))
+			parse_ls(&state, v, ಖಾಲಿ);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "cat-blob ", &v))
 			parse_cat_blob(&state, v);
-		else if (skip_prefix(command_buf.buf, "get-mark ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "get-mark ", &v))
 			parse_get_mark(&state, v);
-		else if (!strcmp("checkpoint", command_buf.buf))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp("checkpoint", command_buf.buf))
 			parse_checkpoint(&state);
-		else if (!strcmp("done", command_buf.buf))
-			break;
-		else if (!strcmp("alias", command_buf.buf))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp("done", command_buf.buf))
+			ನಿಲ್ಲಿಸು;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp("alias", command_buf.buf))
 			parse_alias(&state);
-		else if (starts_with(command_buf.buf, "progress "))
-			parse_progress(&state);
-		else if (skip_prefix(command_buf.buf, "feature ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (starts_with(command_buf.buf, "progress "))
+			parse_ಪ್ರಗತಿ(&state);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "feature ", &v))
 			parse_feature(&state, v);
-		else if (skip_prefix(command_buf.buf, "option git ", &v))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(command_buf.buf, "option git ", &v))
 			parse_option(&state, v);
-		else if (starts_with(command_buf.buf, "option "))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (starts_with(command_buf.buf, "option "))
 			/* ignore non-git options*/;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			die(_("unsupported command: %s"), command_buf.buf);
 
-		if (checkpoint_requested)
+		ಆದರೆ (checkpoint_requested)
 			checkpoint();
 	}
 
 	/* argv hasn't been parsed yet, do so */
-	if (!state.seen_data_command)
+	ಆದರೆ (!state.ನೋಡಿದ_ದತ್ತಾಂಶ_command)
 		parse_argv(&state);
 
-	if (require_explicit_termination && feof(stdin))
+	ಆದರೆ (require_explicit_termination && feof(stdin))
 		die(_("stream ends early"));
 
-	end_packfile();
+	ಕೊನೆ_packfile();
 
 	dump_branches();
-	dump_tags();
+	dump_ಟ್ಯಾಗುಗಳು();
 	unkeep_all_packs();
 	dump_marks();
 
-	if (pack_edges)
-		fclose(pack_edges);
+	ಆದರೆ (pack_ಅಂಚುಗಳು)
+		fclose(pack_ಅಂಚುಗಳು);
 
-	if (show_stats) {
-		uintmax_t total_count = 0, duplicate_count = 0;
-		for (size_t i = 0; i < ARRAY_SIZE(object_count_by_type); i++)
-			total_count += object_count_by_type[i];
-		for (size_t i = 0; i < ARRAY_SIZE(duplicate_count_by_type); i++)
-			duplicate_count += duplicate_count_by_type[i];
+	ಆದರೆ (show_stats) {
+		uintmax_t ಒಟ್ಟು_ಎಣಿಕೆ = 0, duplicate_ಎಣಿಕೆ = 0;
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ARRAY_ಗಾತ್ರ(object_ಎಣಿಕೆ_by_type); i++)
+			ಒಟ್ಟು_ಎಣಿಕೆ += object_ಎಣಿಕೆ_by_type[i];
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ARRAY_ಗಾತ್ರ(duplicate_ಎಣಿಕೆ_by_type); i++)
+			duplicate_ಎಣಿಕೆ += duplicate_ಎಣಿಕೆ_by_type[i];
 
 		fprintf(stderr, "%s statistics:\n", argv[0]);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
-		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_count);
-		fprintf(stderr, "Total objects:   %10" PRIuMAX " (%10" PRIuMAX " duplicates                  )\n", total_count, duplicate_count);
-		fprintf(stderr, "      blobs  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_BLOB], duplicate_count_by_type[OBJ_BLOB], delta_count_by_type[OBJ_BLOB], delta_count_attempts_by_type[OBJ_BLOB]);
-		fprintf(stderr, "      trees  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_TREE], duplicate_count_by_type[OBJ_TREE], delta_count_by_type[OBJ_TREE], delta_count_attempts_by_type[OBJ_TREE]);
-		fprintf(stderr, "      commits:   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_COMMIT], duplicate_count_by_type[OBJ_COMMIT], delta_count_by_type[OBJ_COMMIT], delta_count_attempts_by_type[OBJ_COMMIT]);
-		fprintf(stderr, "      tags   :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_TAG], duplicate_count_by_type[OBJ_TAG], delta_count_by_type[OBJ_TAG], delta_count_attempts_by_type[OBJ_TAG]);
-		fprintf(stderr, "Total branches:  %10lu (%10lu loads     )\n", branch_count, branch_load_count);
-		fprintf(stderr, "      marks:     %10" PRIuMAX " (%10" PRIuMAX " unique    )\n", (((uintmax_t)1) << marks->shift) * 1024, marks_set_count);
+		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_ಎಣಿಕೆ);
+		fprintf(stderr, "Total objects:   %10" PRIuMAX " (%10" PRIuMAX " duplicates                  )\n", ಒಟ್ಟು_ಎಣಿಕೆ, duplicate_ಎಣಿಕೆ);
+		fprintf(stderr, "      blobs  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_ಎಣಿಕೆ_by_type[OBJ_BLOB], duplicate_ಎಣಿಕೆ_by_type[OBJ_BLOB], delta_ಎಣಿಕೆ_by_type[OBJ_BLOB], delta_ಎಣಿಕೆ_attempts_by_type[OBJ_BLOB]);
+		fprintf(stderr, "      trees  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_ಎಣಿಕೆ_by_type[OBJ_ವೃಕ್ಷ], duplicate_ಎಣಿಕೆ_by_type[OBJ_ವೃಕ್ಷ], delta_ಎಣಿಕೆ_by_type[OBJ_ವೃಕ್ಷ], delta_ಎಣಿಕೆ_attempts_by_type[OBJ_ವೃಕ್ಷ]);
+		fprintf(stderr, "      commits:   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_ಎಣಿಕೆ_by_type[OBJ_COMMIT], duplicate_ಎಣಿಕೆ_by_type[OBJ_COMMIT], delta_ಎಣಿಕೆ_by_type[OBJ_COMMIT], delta_ಎಣಿಕೆ_attempts_by_type[OBJ_COMMIT]);
+		fprintf(stderr, "      tags   :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_ಎಣಿಕೆ_by_type[OBJ_ಟ್ಯಾಗ್], duplicate_ಎಣಿಕೆ_by_type[OBJ_ಟ್ಯಾಗ್], delta_ಎಣಿಕೆ_by_type[OBJ_ಟ್ಯಾಗ್], delta_ಎಣಿಕೆ_attempts_by_type[OBJ_ಟ್ಯಾಗ್]);
+		fprintf(stderr, "Total branches:  %10lu (%10lu loads     )\n", branch_ಎಣಿಕೆ, branch_ತುಂಬು_ಎಣಿಕೆ);
+		fprintf(stderr, "      marks:     %10" PRIuMAX " (%10" PRIuMAX " unique    )\n", (((uintmax_t)1) << marks->ಸರಿಸು) * 1024, marks_ಗಣ_ಎಣಿಕೆ);
 		fprintf(stderr, "      atoms:     %10u\n", atom_cnt);
-		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n", (tree_entry_allocd + fi_mem_pool.pool_alloc + alloc_count*sizeof(struct object_entry))/1024);
-		fprintf(stderr, "       pools:    %10lu KiB\n", (unsigned long)((tree_entry_allocd + fi_mem_pool.pool_alloc) /1024));
-		fprintf(stderr, "     objects:    %10" PRIuMAX " KiB\n", (alloc_count*sizeof(struct object_entry))/1024);
+		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n", (ವೃಕ್ಷ_ನಮೂದು_allocd + fi_mem_pool.pool_alloc + alloc_ಎಣಿಕೆ*ಗಾತ್ರ(ರಚನೆ object_ನಮೂದು))/1024);
+		fprintf(stderr, "       pools:    %10lu KiB\n", (ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ)((ವೃಕ್ಷ_ನಮೂದು_allocd + fi_mem_pool.pool_alloc) /1024));
+		fprintf(stderr, "     objects:    %10" PRIuMAX " KiB\n", (alloc_ಎಣಿಕೆ*ಗಾತ್ರ(ರಚನೆ object_ನಮೂದು))/1024);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
 		pack_report(repo);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
 		fprintf(stderr, "\n");
 	}
 
-	return failure ? 1 : 0;
+	ಹಿಂತಿರುಗಿ failure ? 1 : 0;
 }

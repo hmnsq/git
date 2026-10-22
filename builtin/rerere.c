@@ -1,136 +1,136 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "rerere.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "xdiff/xdiff.h"
-#include "xdiff-interface.h"
-#include "pathspec.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "rerere.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "xdiff/xdiff.h"
+#ಅನ್ತರ್ಭಾವ "xdiff-interface.h"
+#ಅನ್ತರ್ಭಾವ "pathspec.h"
 
-static const char * const rerere_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ rerere_usage[] = {
 	N_("git rerere [clear | forget <pathspec>... | diff | status | remaining | gc]"),
-	NULL,
+	ಖಾಲಿ,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ outf(ಶೂನ್ಯ *dummy ಬಳಸದ, mmfile_t *ptr, ಪೂರ್ಣಾಂಕ nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	ಪೂರ್ಣಾಂಕ i;
+	ಗಾಗಿ (i = 0; i < nbuf; i++)
+		ಆದರೆ (write_ಒಳ_ತುಂಬಿದ(1, ptr[i].ptr, ptr[i].ಗಾತ್ರ_2) < 0)
+			ಹಿಂತಿರುಗಿ -1;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
-		const char *file2, const char *label2)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ diff_two(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file1, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *label1,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file2, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = outf };
+	xdemitcb_t ecb = { .ಹೊರಹೋಗು_ಸಾಲು = outf };
 	mmfile_t minus, plus;
-	int ret;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
-		free(minus.ptr);
-		return -1;
+	ಆದರೆ (read_mmfile(&minus, file1))
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (read_mmfile(&plus, file2)) {
+		ಬಿಡುಗಡೆ(minus.ptr);
+		ಹಿಂತಿರುಗಿ -1;
 	}
 
-	printf("--- a/%s\n+++ b/%s\n", label1, label2);
+	ಬರೆ("--- a/%s\n+++ b/%s\n", label1, label2);
 	fflush(stdout);
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, ಗಾತ್ರ(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, ಗಾತ್ರ(xecfg));
 	xecfg.ctxlen = 3;
 	ret = xdi_diff(&minus, &plus, &xpp, &xecfg, &ecb);
 
-	free(minus.ptr);
-	free(plus.ptr);
-	return ret;
+	ಬಿಡುಗಡೆ(minus.ptr);
+	ಬಿಡುಗಡೆ(plus.ptr);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-int cmd_rerere(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_rerere(ಪೂರ್ಣಾಂಕ argc,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	       ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	ರಚನೆ string_list ವಿಲೀನ_rr = STRING_LIST_INIT_DUP;
+	ಪೂರ್ಣಾಂಕ autoupdate = -1, flags = 0;
 
-	struct option options[] = {
-		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
+	ರಚನೆ option options[] = {
+		OPT_ಗಣ_INT(0, "rerere-autoupdate", &autoupdate,
 			N_("register clean resolutions in index"), 1),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
-	argc = parse_options(argc, argv, prefix, options, rerere_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, rerere_usage, 0);
 
-	repo_config(the_repository, git_xmerge_config, NULL);
+	repo_config(the_repository, git_xmerge_config, ಖಾಲಿ);
 
-	if (autoupdate == 1)
+	ಆದರೆ (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	ಆದರೆ (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	ಆದರೆ (argc < 1)
+		ಹಿಂತಿರುಗಿ repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
-		struct pathspec pathspec;
-		int ret;
+	ಆದರೆ (!strcmp(argv[0], "forget")) {
+		ರಚನೆ pathspec pathspec;
+		ಪೂರ್ಣಾಂಕ ret;
 
-		if (argc < 2)
+		ಆದರೆ (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
-			       prefix, argv + 1);
+			       ಪೂರ್ವಪ್ರತ್ಯಯ, argv + 1);
 
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		ಹಿಂತಿರುಗಿ ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
-		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
-		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	ಆದರೆ (!strcmp(argv[0], "clear")) {
+		rerere_clear(the_repository, &ವಿಲೀನ_rr);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[0], "gc"))
+		rerere_gc(the_repository, &ವಿಲೀನ_rr);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[0], "status")) {
+		ಆದರೆ (ಸಿದ್ಧತೆ_rerere(the_repository, &ವಿಲೀನ_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
-			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
-		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
-				printf("%s\n", merge_rr.items[i].string);
-			else
+			ಹಿಂತಿರುಗಿ 0;
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ವಿಲೀನ_rr.nr; i++)
+			ಬರೆ("%s\n", ವಿಲೀನ_rr.ವಸ್ತುಗಳು[i].string);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[0], "remaining")) {
+		rerere_ಉಳಿದ(the_repository, &ವಿಲೀನ_rr);
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ವಿಲೀನ_rr.nr; i++) {
+			ಆದರೆ (ವಿಲೀನ_rr.ವಸ್ತುಗಳು[i].util != RERERE_RESOLVED)
+				ಬರೆ("%s\n", ವಿಲೀನ_rr.ವಸ್ತುಗಳು[i].string);
+			ಇಲ್ಲದಿದ್ದರೆ
 				/* prepare for later call to
 				 * string_list_clear() */
-				merge_rr.items[i].util = NULL;
+				ವಿಲೀನ_rr.ವಸ್ತುಗಳು[i].util = ಖಾಲಿ;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
-		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[0], "diff")) {
+		ರಚನೆ strbuf buf = STRBUF_INIT;
+		ಆದರೆ (ಸಿದ್ಧತೆ_rerere(the_repository, &ವಿಲೀನ_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			const char *path = merge_rr.items[i].string;
-			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
-				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
+			ಹಿಂತಿರುಗಿ 0;
+		ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ವಿಲೀನ_rr.nr; i++) {
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ = ವಿಲೀನ_rr.ವಸ್ತುಗಳು[i].string;
+			ಸ್ಥಿರಾಂಕ ರಚನೆ rerere_id *id = ವಿಲೀನ_rr.ವಸ್ತುಗಳು[i].util;
+			ಆದರೆ (diff_two(rerere_ಮಾರ್ಗ(&buf, id, "preimage"), ಮಾರ್ಗ, ಮಾರ್ಗ, ಮಾರ್ಗ))
+				die(_("unable to generate diff for '%s'"), rerere_ಮಾರ್ಗ(&buf, id, ಖಾಲಿ));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} ಇಲ್ಲದಿದ್ದರೆ
 		usage_with_options(rerere_usage, options);
 
-	string_list_clear(&merge_rr, 1);
-	return 0;
+	string_list_clear(&ವಿಲೀನ_rr, 1);
+	ಹಿಂತಿರುಗಿ 0;
 }

@@ -2,14 +2,14 @@
  * GIT - The information manager from hell
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
 
-static const char builtin_check_ref_format_usage[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ builtin_check_ref_format_usage[] =
 "git check-ref-format [--normalize] [<options>] <refname>\n"
 "   or: git check-ref-format --branch <branchname-shorthand>";
 
@@ -20,84 +20,84 @@ static const char builtin_check_ref_format_usage[] =
  * This function is similar to normalize_path_copy(), but stripped down
  * to meet check_ref_format's simpler needs.
  */
-static char *collapse_slashes(const char *refname)
+ಸ್ಥಿರ ಅಕ್ಷರ *collapse_slashes(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *refname)
 {
-	char *ret = xmallocz(strlen(refname));
-	char ch;
-	char prev = '/';
-	char *cp = ret;
+	ಅಕ್ಷರ *ret = xmallocz(ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(refname));
+	ಅಕ್ಷರ ch;
+	ಅಕ್ಷರ prev = '/';
+	ಅಕ್ಷರ *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
-			continue;
+	ಆಗ ((ch = *refname++) != '\0') {
+		ಆದರೆ (prev == '/' && ch == prev)
+			ಮುಂದುವರಿ;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_ref_format_branch(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	int nongit;
+	ರಚನೆ strbuf sb = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+	ಪೂರ್ಣಾಂಕ nongit;
 
-	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
-	    !skip_prefix(sb.buf, "refs/heads/", &name))
+	ಸಿದ್ಧತೆ_git_directory_gently(the_repository, &nongit);
+	ಆದರೆ (check_branch_ref(the_repository, &sb, arg) ||
+	    !skip_ಪೂರ್ವಪ್ರತ್ಯಯ(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
-	printf("%s\n", name);
+	ಬರೆ("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_check_ref_format(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_check_ref_format(ಪೂರ್ಣಾಂಕ argc,
+			 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+			 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
-	const char *refname;
-	char *to_free = NULL;
-	int ret = 1;
+	ಪೂರ್ಣಾಂಕ i;
+	ಪೂರ್ಣಾಂಕ normalize = 0;
+	ಪೂರ್ಣಾಂಕ flags = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *refname;
+	ಅಕ್ಷರ *ಗಮ್ಯ_free = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ ret = 1;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_ಖಾಲಿಗಳು_ಪೂರ್ವಪ್ರತ್ಯಯ(ಪೂರ್ವಪ್ರತ್ಯಯ);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	ಆದರೆ (argc == 3 && !strcmp(argv[1], "--branch"))
+		ಹಿಂತಿರುಗಿ check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	ಗಾಗಿ (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		ಆದರೆ (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
-			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[i], "--refspec-pattern"))
+			flags |= REFNAME_REFSPEC_ನಮೂನೆ;
+		ಇಲ್ಲದಿದ್ದರೆ
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	ಆದರೆ (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
-		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
-		goto cleanup;
-	if (normalize)
-		printf("%s\n", refname);
+	ಆದರೆ (normalize)
+		refname = ಗಮ್ಯ_free = collapse_slashes(refname);
+	ಆದರೆ (check_refname_format(refname, flags))
+		ಹೋಗು cleanup;
+	ಆದರೆ (normalize)
+		ಬರೆ("%s\n", refname);
 
 	ret = 0;
 cleanup:
-	free(to_free);
-	return ret;
+	ಬಿಡುಗಡೆ(ಗಮ್ಯ_free);
+	ಹಿಂತಿರುಗಿ ret;
 }

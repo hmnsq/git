@@ -1,767 +1,767 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "commit.h"
-#include "environment.h"
-#include "hash.h"
-#include "hex.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "path.h"
-#include "path-walk.h"
-#include "progress.h"
-#include "quote.h"
-#include "ref-filter.h"
-#include "refs.h"
-#include "revision.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "shallow.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "utf8.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "hash.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "path-walk.h"
+#ಅನ್ತರ್ಭಾವ "progress.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "ref-filter.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "shallow.h"
+#ಅನ್ತರ್ಭಾವ "tree.h"
+#ಅನ್ತರ್ಭಾವ "tree-walk.h"
+#ಅನ್ತರ್ಭಾವ "utf8.h"
 
-#define REPO_INFO_USAGE \
+#ವ್ಯಾಖ್ಯಾನಿಸು REPO_INFO_USAGE \
 	"git repo info [--format=(lines|nul) | -z] [--all | <key>...]", \
 	"git repo info --keys [--format=(lines|nul) | -z]"
 
-#define REPO_STRUCTURE_USAGE \
+#ವ್ಯಾಖ್ಯಾನಿಸು REPO_STRUCTURE_USAGE \
 	"git repo structure [--format=(table|lines|nul) | -z]"
 
-static const char *const repo_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ repo_usage[] = {
 	REPO_INFO_USAGE,
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	ಖಾಲಿ,
 };
 
-static const char *const repo_info_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ repo_info_usage[] = {
 	REPO_INFO_USAGE,
-	NULL,
+	ಖಾಲಿ,
 };
 
-static const char *const repo_structure_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ repo_structure_usage[] = {
 	REPO_STRUCTURE_USAGE,
-	NULL,
+	ಖಾಲಿ,
 };
 
-typedef int get_value_fn(struct repository *repo, struct strbuf *buf);
+ಪ್ರಕಾರವ್ಯಾಖ್ಯೆ ಪೂರ್ಣಾಂಕ get_ಮೌಲ್ಯ_fn(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf);
 
-enum output_format {
-	FORMAT_TABLE,
+ಎಣಿಕೆ output_format {
+	FORMAT_ಕೋಷ್ಟಕ,
 	FORMAT_NEWLINE_TERMINATED,
 	FORMAT_NUL_TERMINATED,
 };
 
-struct repo_info_field {
-	const char *key;
-	get_value_fn *get_value;
+ರಚನೆ repo_info_ಕ್ಷೇತ್ರ {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ;
+	get_ಮೌಲ್ಯ_fn *get_ಮೌಲ್ಯ;
 };
 
-static int get_layout_bare(struct repository *repo UNUSED, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_layout_bare(ರಚನೆ repository *repo ಬಳಸದ, ರಚನೆ strbuf *buf)
 {
 	strbuf_addstr(buf, is_bare_repository(the_repository) ? "true" : "false");
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_layout_shallow(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_layout_shallow(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      is_repository_shallow(repo) ? "true" : "false");
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_object_format(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_object_format(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
 	strbuf_addstr(buf, repo->hash_algo->name);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_path_commondir_absolute(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ಮಾರ್ಗ_commondir_absolute(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	ಆದರೆ (!common_dir)
+		ಹಿಂತಿರುಗಿ error(_("unable to get common directory"));
 
-	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	format_ಮಾರ್ಗ(buf, common_dir, repo->ಪೂರ್ವಪ್ರತ್ಯಯ, ಮಾರ್ಗ_FORMAT_CANONICAL);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_path_commondir_relative(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ಮಾರ್ಗ_commondir_relative(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
-	const char *common_dir = repo_get_common_dir(repo);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	ಆದರೆ (!common_dir)
+		ಹಿಂತಿರುಗಿ error(_("unable to get common directory"));
 
-	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	format_ಮಾರ್ಗ(buf, common_dir, repo->ಪೂರ್ವಪ್ರತ್ಯಯ, ಮಾರ್ಗ_FORMAT_RELATIVE);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_path_gitdir_absolute(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ಮಾರ್ಗ_gitdir_absolute(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	ಆದರೆ (!git_dir)
+		ಹಿಂತಿರುಗಿ error(_("unable to get git directory"));
 
-	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	format_ಮಾರ್ಗ(buf, git_dir, repo->ಪೂರ್ವಪ್ರತ್ಯಯ, ಮಾರ್ಗ_FORMAT_CANONICAL);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_path_gitdir_relative(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_ಮಾರ್ಗ_gitdir_relative(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
-	const char *git_dir = repo_get_git_dir(repo);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	ಆದರೆ (!git_dir)
+		ಹಿಂತಿರುಗಿ error(_("unable to get git directory"));
 
-	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	format_ಮಾರ್ಗ(buf, git_dir, repo->ಪೂರ್ವಪ್ರತ್ಯಯ, ಮಾರ್ಗ_FORMAT_RELATIVE);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_references_format(struct repository *repo, struct strbuf *buf)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_references_format(ರಚನೆ repository *repo, ರಚನೆ strbuf *buf)
 {
 	strbuf_addstr(buf,
-		      ref_storage_format_to_name(repo->ref_storage_format));
-	return 0;
+		      ref_storage_format_ಗಮ್ಯ_name(repo->ref_storage_format));
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /* repo_info_field keys must be in lexicographical order */
-static const struct repo_info_field repo_info_field[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ repo_info_ಕ್ಷೇತ್ರ[] = {
 	{ "layout.bare", get_layout_bare },
 	{ "layout.shallow", get_layout_shallow },
 	{ "object.format", get_object_format },
-	{ "path.commondir.absolute", get_path_commondir_absolute },
-	{ "path.commondir.relative", get_path_commondir_relative },
-	{ "path.gitdir.absolute", get_path_gitdir_absolute },
-	{ "path.gitdir.relative", get_path_gitdir_relative },
+	{ "path.commondir.absolute", get_ಮಾರ್ಗ_commondir_absolute },
+	{ "path.commondir.relative", get_ಮಾರ್ಗ_commondir_relative },
+	{ "path.gitdir.absolute", get_ಮಾರ್ಗ_gitdir_absolute },
+	{ "path.gitdir.relative", get_ಮಾರ್ಗ_gitdir_relative },
 	{ "references.format", get_references_format },
 };
 
-static int repo_info_field_cmp(const void *va, const void *vb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ repo_info_ಕ್ಷೇತ್ರ_cmp(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *va, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *vb)
 {
-	const struct repo_info_field *a = va;
-	const struct repo_info_field *b = vb;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *a = va;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *b = vb;
 
-	return strcmp(a->key, b->key);
+	ಹಿಂತಿರುಗಿ strcmp(a->ಕೀಲಿ, b->ಕೀಲಿ);
 }
 
-static const struct repo_info_field *get_repo_info_field(const char *key)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *get_repo_info_ಕ್ಷೇತ್ರ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ)
 {
-	const struct repo_info_field search_key = { key, NULL };
-	const struct repo_info_field *found = bsearch(&search_key,
-						      repo_info_field,
-						      ARRAY_SIZE(repo_info_field),
-						      sizeof(*found),
-						      repo_info_field_cmp);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ ಹುಡುಕು_ಕೀಲಿ = { ಕೀಲಿ, ಖಾಲಿ };
+	ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *ಸಿಕ್ಕಿತು_2 = bsearch(&ಹುಡುಕು_ಕೀಲಿ,
+						      repo_info_ಕ್ಷೇತ್ರ,
+						      ARRAY_ಗಾತ್ರ(repo_info_ಕ್ಷೇತ್ರ),
+						      ಗಾತ್ರ(*ಸಿಕ್ಕಿತು_2),
+						      repo_info_ಕ್ಷೇತ್ರ_cmp);
 
-	return found;
+	ಹಿಂತಿರುಗಿ ಸಿಕ್ಕಿತು_2;
 }
 
-static void print_field(enum output_format format, const char *key,
-			const char *value)
+ಸ್ಥಿರ ಶೂನ್ಯ print_ಕ್ಷೇತ್ರ(ಎಣಿಕೆ output_format format, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ,
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ)
 {
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
-		printf("%s=", key);
-		quote_c_style(value, NULL, stdout, 0);
-		putchar('\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
-		printf("%s\n%s%c", key, value, '\0');
-		break;
-	default:
+	ಆಯ್ಕೆ (format) {
+	ಸ್ಥಿತಿ FORMAT_NEWLINE_TERMINATED:
+		ಬರೆ("%s=", ಕೀಲಿ);
+		quote_c_style(ಮೌಲ್ಯ, ಖಾಲಿ, stdout, 0);
+		ಅಕ್ಷರ_ಬರೆ('\n');
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FORMAT_NUL_TERMINATED:
+		ಬರೆ("%s\n%s%c", ಕೀಲಿ, ಮೌಲ್ಯ, '\0');
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("not a valid output format: %d", format);
 	}
 }
 
-static int print_fields(int argc, const char **argv,
-			struct repository *repo,
-			enum output_format format)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ print_fields(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+			ರಚನೆ repository *repo,
+			ಎಣಿಕೆ output_format format)
 {
-	int ret = 0;
-	struct strbuf valbuf = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ ret = 0;
+	ರಚನೆ strbuf valbuf = STRBUF_INIT;
 
-	for (int i = 0; i < argc; i++) {
-		const char *key = argv[i];
-		const struct repo_info_field *field = get_repo_info_field(key);
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < argc; i++) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ = argv[i];
+		ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *ಕ್ಷೇತ್ರ = get_repo_info_ಕ್ಷೇತ್ರ(ಕೀಲಿ);
 
-		if (!field) {
-			ret = error(_("key '%s' not found"), key);
-			continue;
+		ಆದರೆ (!ಕ್ಷೇತ್ರ) {
+			ret = error(_("key '%s' not found"), ಕೀಲಿ);
+			ಮುಂದುವರಿ;
 		}
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, key, valbuf.buf);
+		ಕ್ಷೇತ್ರ->get_ಮೌಲ್ಯ(repo, &valbuf);
+		print_ಕ್ಷೇತ್ರ(format, ಕೀಲಿ, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static int print_all_fields(struct repository *repo,
-			    enum output_format format)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ print_all_fields(ರಚನೆ repository *repo,
+			    ಎಣಿಕೆ output_format format)
 {
-	struct strbuf valbuf = STRBUF_INIT;
+	ರಚನೆ strbuf valbuf = STRBUF_INIT;
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ARRAY_ಗಾತ್ರ(repo_info_ಕ್ಷೇತ್ರ); i++) {
+		ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *ಕ್ಷೇತ್ರ = &repo_info_ಕ್ಷೇತ್ರ[i];
 
 		strbuf_reset(&valbuf);
-		field->get_value(repo, &valbuf);
-		print_field(format, field->key, valbuf.buf);
+		ಕ್ಷೇತ್ರ->get_ಮೌಲ್ಯ(repo, &valbuf);
+		print_ಕ್ಷೇತ್ರ(format, ಕ್ಷೇತ್ರ->ಕೀಲಿ, valbuf.buf);
 	}
 
 	strbuf_release(&valbuf);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int print_keys(enum output_format format)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ print_ಕೀಲಿಗಳು(ಎಣಿಕೆ output_format format)
 {
-	char sep;
+	ಅಕ್ಷರ sep;
 
-	switch (format) {
-	case FORMAT_NEWLINE_TERMINATED:
+	ಆಯ್ಕೆ (format) {
+	ಸ್ಥಿತಿ FORMAT_NEWLINE_TERMINATED:
 		sep = '\n';
-		break;
-	case FORMAT_NUL_TERMINATED:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FORMAT_NUL_TERMINATED:
 		sep = '\0';
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		die(_("--keys can only be used with --format=lines or --format=nul"));
 	}
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
-		const struct repo_info_field *field = &repo_info_field[i];
-		printf("%s%c", field->key, sep);
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ARRAY_ಗಾತ್ರ(repo_info_ಕ್ಷೇತ್ರ); i++) {
+		ಸ್ಥಿರಾಂಕ ರಚನೆ repo_info_ಕ್ಷೇತ್ರ *ಕ್ಷೇತ್ರ = &repo_info_ಕ್ಷೇತ್ರ[i];
+		ಬರೆ("%s%c", ಕ್ಷೇತ್ರ->ಕೀಲಿ, sep);
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int parse_format_cb(const struct option *opt,
-			   const char *arg, int unset UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_format_cb(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset ಬಳಸದ)
 {
-	enum output_format *format = opt->value;
+	ಎಣಿಕೆ output_format *format = opt->ಮೌಲ್ಯ;
 
-	if (opt->short_name == 'z')
+	ಆದರೆ (opt->short_name == 'z')
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "nul"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(arg, "nul"))
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "lines"))
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(arg, "lines"))
 		*format = FORMAT_NEWLINE_TERMINATED;
-	else if (!strcmp(arg, "table"))
-		*format = FORMAT_TABLE;
-	else
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(arg, "table"))
+		*format = FORMAT_ಕೋಷ್ಟಕ;
+	ಇಲ್ಲದಿದ್ದರೆ
 		die(_("invalid format '%s'"), arg);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int cmd_repo_info(int argc, const char **argv, const char *prefix,
-			 struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmd_repo_info(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			 ರಚನೆ repository *repo)
 {
-	enum output_format format = FORMAT_NEWLINE_TERMINATED;
-	int all_keys = 0;
-	int show_keys = 0;
-	struct option options[] = {
+	ಎಣಿಕೆ output_format format = FORMAT_NEWLINE_TERMINATED;
+	ಪೂರ್ಣಾಂಕ all_ಕೀಲಿಗಳು = 0;
+	ಪೂರ್ಣಾಂಕ show_ಕೀಲಿಗಳು = 0;
+	ರಚನೆ option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', ಖಾಲಿ, &format, ಖಾಲಿ,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "all", &all_keys, N_("print all keys/values")),
-		OPT_BOOL(0, "keys", &show_keys, N_("show keys")),
-		OPT_END()
+		OPT_BOOL(0, "all", &all_ಕೀಲಿಗಳು, N_("print all keys/values")),
+		OPT_BOOL(0, "keys", &show_ಕೀಲಿಗಳು, N_("show keys")),
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_info_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, repo_info_usage, 0);
 
-	if (show_keys && (all_keys || argc))
+	ಆದರೆ (show_ಕೀಲಿಗಳು && (all_ಕೀಲಿಗಳು || argc))
 		die(_("--keys cannot be used with a <key> or --all"));
 
-	if (show_keys)
-		return print_keys(format);
+	ಆದರೆ (show_ಕೀಲಿಗಳು)
+		ಹಿಂತಿರುಗಿ print_ಕೀಲಿಗಳು(format);
 
-	if (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
+	ಆದರೆ (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
 		die(_("unsupported output format"));
 
-	if (all_keys && argc)
+	ಆದರೆ (all_ಕೀಲಿಗಳು && argc)
 		die(_("--all and <key> cannot be used together"));
 
-	if (all_keys)
-		return print_all_fields(repo, format);
-	else
-		return print_fields(argc, argv, repo, format);
+	ಆದರೆ (all_ಕೀಲಿಗಳು)
+		ಹಿಂತಿರುಗಿ print_all_fields(repo, format);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ print_fields(argc, argv, repo, format);
 }
 
-struct object_data {
-	struct object_id oid;
-	size_t value;
+ರಚನೆ object_ದತ್ತಾಂಶ {
+	ರಚನೆ object_id oid;
+	ಗಾತ್ರ_t ಮೌಲ್ಯ;
 };
 
-struct largest_objects {
-	struct object_data tag_size;
-	struct object_data commit_size;
-	struct object_data tree_size;
-	struct object_data blob_size;
+ರಚನೆ ಅತಿದೊಡ್ಡ_objects {
+	ರಚನೆ object_ದತ್ತಾಂಶ ಟ್ಯಾಗ್_ಗಾತ್ರ;
+	ರಚನೆ object_ದತ್ತಾಂಶ commit_ಗಾತ್ರ;
+	ರಚನೆ object_ದತ್ತಾಂಶ ವೃಕ್ಷ_ಗಾತ್ರ;
+	ರಚನೆ object_ದತ್ತಾಂಶ blob_ಗಾತ್ರ;
 
-	struct object_data parent_count;
-	struct object_data tree_entries;
+	ರಚನೆ object_ದತ್ತಾಂಶ ಪೋಷಕ_ಎಣಿಕೆ;
+	ರಚನೆ object_ದತ್ತಾಂಶ ವೃಕ್ಷ_entries;
 };
 
-struct ref_stats {
-	size_t branches;
-	size_t remotes;
-	size_t tags;
-	size_t others;
+ರಚನೆ ref_stats {
+	ಗಾತ್ರ_t branches;
+	ಗಾತ್ರ_t remotes;
+	ಗಾತ್ರ_t ಟ್ಯಾಗುಗಳು;
+	ಗಾತ್ರ_t others;
 };
 
-struct object_values {
-	size_t tags;
-	size_t commits;
-	size_t trees;
-	size_t blobs;
+ರಚನೆ object_ಮೌಲ್ಯಗಳು {
+	ಗಾತ್ರ_t ಟ್ಯಾಗುಗಳು;
+	ಗಾತ್ರ_t commits;
+	ಗಾತ್ರ_t trees;
+	ಗಾತ್ರ_t blobs;
 };
 
-struct object_stats {
-	struct object_values type_counts;
-	struct object_values inflated_sizes;
-	struct object_values disk_sizes;
-	struct largest_objects largest;
+ರಚನೆ object_stats {
+	ರಚನೆ object_ಮೌಲ್ಯಗಳು type_counts;
+	ರಚನೆ object_ಮೌಲ್ಯಗಳು inflated_sizes;
+	ರಚನೆ object_ಮೌಲ್ಯಗಳು disk_sizes;
+	ರಚನೆ ಅತಿದೊಡ್ಡ_objects ಅತಿದೊಡ್ಡ;
 };
 
-struct repo_structure {
-	struct ref_stats refs;
-	struct object_stats objects;
+ರಚನೆ repo_structure {
+	ರಚನೆ ref_stats refs;
+	ರಚನೆ object_stats objects;
 };
 
-struct stats_table {
-	struct string_list rows;
-	struct string_list annotations;
+ರಚನೆ stats_ಕೋಷ್ಟಕ {
+	ರಚನೆ string_list ಅಡ್ಡಸಾಲುಗಳು;
+	ರಚನೆ string_list annotations;
 
-	int name_col_width;
-	int value_col_width;
-	int unit_col_width;
+	ಪೂರ್ಣಾಂಕ name_ಲಂಬಸಾಲು_ಅಗಲ;
+	ಪೂರ್ಣಾಂಕ ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ;
+	ಪೂರ್ಣಾಂಕ unit_ಲಂಬಸಾಲು_ಅಗಲ;
 };
 
 /*
  * Holds column data that gets stored for each row.
  */
-struct stats_table_entry {
-	char *value;
-	const char *unit;
-	size_t index;
-	struct object_id *oid;
+ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು {
+	ಅಕ್ಷರ *ಮೌಲ್ಯ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *unit;
+	ಗಾತ್ರ_t ಸೂಚ್ಯಂಕ;
+	ರಚನೆ object_id *oid;
 };
 
-static void stats_table_vaddf(struct stats_table *table,
-			      struct stats_table_entry *entry,
-			      const char *format, va_list ap)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_vaddf(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ,
+			      ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು,
+			      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, va_list ap)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
-	char *formatted_name;
-	int name_width;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ಅಕ್ಷರ *formatted_name;
+	ಪೂರ್ಣಾಂಕ name_ಅಗಲ;
 
 	strbuf_vaddf(&buf, format, ap);
-	formatted_name = strbuf_detach(&buf, NULL);
-	name_width = utf8_strwidth(formatted_name);
+	formatted_name = strbuf_detach(&buf, ಖಾಲಿ);
+	name_ಅಗಲ = utf8_strwidth(formatted_name);
 
-	item = string_list_append_nodup(&table->rows, formatted_name);
-	item->util = entry;
+	ಅಂಶ = string_list_append_nodup(&ಕೋಷ್ಟಕ->ಅಡ್ಡಸಾಲುಗಳು, formatted_name);
+	ಅಂಶ->util = ನಮೂದು;
 
-	if (name_width > table->name_col_width)
-		table->name_col_width = name_width;
-	if (!entry)
-		return;
-	if (entry->oid) {
-		entry->index = table->annotations.nr + 1;
-		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)entry->index,
-			    oid_to_hex(entry->oid));
-		string_list_append_nodup(&table->annotations, strbuf_detach(&buf, NULL));
+	ಆದರೆ (name_ಅಗಲ > ಕೋಷ್ಟಕ->name_ಲಂಬಸಾಲು_ಅಗಲ)
+		ಕೋಷ್ಟಕ->name_ಲಂಬಸಾಲು_ಅಗಲ = name_ಅಗಲ;
+	ಆದರೆ (!ನಮೂದು)
+		ಹಿಂತಿರುಗಿ;
+	ಆದರೆ (ನಮೂದು->oid) {
+		ನಮೂದು->ಸೂಚ್ಯಂಕ = ಕೋಷ್ಟಕ->annotations.nr + 1;
+		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)ನಮೂದು->ಸೂಚ್ಯಂಕ,
+			    oid_ಗಮ್ಯ_hex(ನಮೂದು->oid));
+		string_list_append_nodup(&ಕೋಷ್ಟಕ->annotations, strbuf_detach(&buf, ಖಾಲಿ));
 	}
-	if (entry->value) {
-		int value_width = utf8_strwidth(entry->value);
-		if (value_width > table->value_col_width)
-			table->value_col_width = value_width;
+	ಆದರೆ (ನಮೂದು->ಮೌಲ್ಯ) {
+		ಪೂರ್ಣಾಂಕ ಮೌಲ್ಯ_ಅಗಲ = utf8_strwidth(ನಮೂದು->ಮೌಲ್ಯ);
+		ಆದರೆ (ಮೌಲ್ಯ_ಅಗಲ > ಕೋಷ್ಟಕ->ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ)
+			ಕೋಷ್ಟಕ->ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ = ಮೌಲ್ಯ_ಅಗಲ;
 	}
-	if (entry->unit) {
-		int unit_width = utf8_strwidth(entry->unit);
-		if (unit_width > table->unit_col_width)
-			table->unit_col_width = unit_width;
+	ಆದರೆ (ನಮೂದು->unit) {
+		ಪೂರ್ಣಾಂಕ unit_ಅಗಲ = utf8_strwidth(ನಮೂದು->unit);
+		ಆದರೆ (unit_ಅಗಲ > ಕೋಷ್ಟಕ->unit_ಲಂಬಸಾಲು_ಅಗಲ)
+			ಕೋಷ್ಟಕ->unit_ಲಂಬಸಾಲು_ಅಗಲ = unit_ಅಗಲ;
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_addf(struct stats_table *table, const char *format, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_addf(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, ...)
 {
 	va_list ap;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, NULL, format, ap);
-	va_end(ap);
+	va_ಆರಂಭ(ap, format);
+	stats_ಕೋಷ್ಟಕ_vaddf(ಕೋಷ್ಟಕ, ಖಾಲಿ, format, ap);
+	va_ಕೊನೆ(ap);
 }
 
-static void stats_table_count_addf(struct stats_table *table, size_t value,
-				   const char *format, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ, ಗಾತ್ರ_t ಮೌಲ್ಯ,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, ...)
 {
-	struct stats_table_entry *entry;
+	ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	CALLOC_ARRAY(ನಮೂದು, 1);
+	humanise_ಎಣಿಕೆ(ಮೌಲ್ಯ, &ನಮೂದು->ಮೌಲ್ಯ, &ನಮೂದು->unit);
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ಆರಂಭ(ap, format);
+	stats_ಕೋಷ್ಟಕ_vaddf(ಕೋಷ್ಟಕ, ನಮೂದು, format, ap);
+	va_ಕೊನೆ(ap);
 }
 
-static void stats_table_object_count_addf(struct stats_table *table,
-					  struct object_id *oid, size_t value,
-					  const char *format, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_object_ಎಣಿಕೆ_addf(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ,
+					  ರಚನೆ object_id *oid, ಗಾತ್ರ_t ಮೌಲ್ಯ,
+					  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, ...)
 {
-	struct stats_table_entry *entry;
+	ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_count(value, &entry->value, &entry->unit);
+	CALLOC_ARRAY(ನಮೂದು, 1);
+	humanise_ಎಣಿಕೆ(ಮೌಲ್ಯ, &ನಮೂದು->ಮೌಲ್ಯ, &ನಮೂದು->unit);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
-		entry->oid = oid;
+	ಆದರೆ (!is_null_oid(oid))
+		ನಮೂದು->oid = oid;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ಆರಂಭ(ap, format);
+	stats_ಕೋಷ್ಟಕ_vaddf(ಕೋಷ್ಟಕ, ನಮೂದು, format, ap);
+	va_ಕೊನೆ(ap);
 }
 
-static void stats_table_size_addf(struct stats_table *table, size_t value,
-				  const char *format, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ, ಗಾತ್ರ_t ಮೌಲ್ಯ,
+				  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, ...)
 {
-	struct stats_table_entry *entry;
+	ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	CALLOC_ARRAY(ನಮೂದು, 1);
+	humanise_ಬೈಟುಗಳು(ಮೌಲ್ಯ, &ನಮೂದು->ಮೌಲ್ಯ, &ನಮೂದು->unit, HUMANISE_COMPACT);
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ಆರಂಭ(ap, format);
+	stats_ಕೋಷ್ಟಕ_vaddf(ಕೋಷ್ಟಕ, ನಮೂದು, format, ap);
+	va_ಕೊನೆ(ap);
 }
 
-static void stats_table_object_size_addf(struct stats_table *table,
-					 struct object_id *oid, size_t value,
-					 const char *format, ...)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_object_ಗಾತ್ರ_addf(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ,
+					 ರಚನೆ object_id *oid, ಗಾತ್ರ_t ಮೌಲ್ಯ,
+					 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, ...)
 {
-	struct stats_table_entry *entry;
+	ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು;
 	va_list ap;
 
-	CALLOC_ARRAY(entry, 1);
-	humanise_bytes(value, &entry->value, &entry->unit, HUMANISE_COMPACT);
+	CALLOC_ARRAY(ನಮೂದು, 1);
+	humanise_ಬೈಟುಗಳು(ಮೌಲ್ಯ, &ನಮೂದು->ಮೌಲ್ಯ, &ನಮೂದು->unit, HUMANISE_COMPACT);
 
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
-		entry->oid = oid;
+	ಆದರೆ (!is_null_oid(oid))
+		ನಮೂದು->oid = oid;
 
-	va_start(ap, format);
-	stats_table_vaddf(table, entry, format, ap);
-	va_end(ap);
+	va_ಆರಂಭ(ap, format);
+	stats_ಕೋಷ್ಟಕ_vaddf(ಕೋಷ್ಟಕ, ನಮೂದು, format, ap);
+	va_ಕೊನೆ(ap);
 }
 
-static inline size_t get_total_reference_count(struct ref_stats *stats)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಗಾತ್ರ_t get_ಒಟ್ಟು_reference_ಎಣಿಕೆ(ರಚನೆ ref_stats *stats)
 {
-	return stats->branches + stats->remotes + stats->tags + stats->others;
+	ಹಿಂತಿರುಗಿ stats->branches + stats->remotes + stats->ಟ್ಯಾಗುಗಳು + stats->others;
 }
 
-static inline size_t get_total_object_values(struct object_values *values)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಗಾತ್ರ_t get_ಒಟ್ಟು_object_ಮೌಲ್ಯಗಳು(ರಚನೆ object_ಮೌಲ್ಯಗಳು *ಮೌಲ್ಯಗಳು)
 {
-	return values->tags + values->commits + values->trees + values->blobs;
+	ಹಿಂತಿರುಗಿ ಮೌಲ್ಯಗಳು->ಟ್ಯಾಗುಗಳು + ಮೌಲ್ಯಗಳು->commits + ಮೌಲ್ಯಗಳು->trees + ಮೌಲ್ಯಗಳು->blobs;
 }
 
-static void stats_table_setup_structure(struct stats_table *table,
-					struct repo_structure *stats)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_ಸಿದ್ಧತೆ_structure(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ,
+					ರಚನೆ repo_structure *stats)
 {
-	struct object_stats *objects = &stats->objects;
-	struct ref_stats *refs = &stats->refs;
-	size_t inflated_object_total;
-	size_t object_count_total;
-	size_t disk_object_total;
-	size_t ref_total;
+	ರಚನೆ object_stats *objects = &stats->objects;
+	ರಚನೆ ref_stats *refs = &stats->refs;
+	ಗಾತ್ರ_t inflated_object_ಒಟ್ಟು;
+	ಗಾತ್ರ_t object_ಎಣಿಕೆ_ಒಟ್ಟು;
+	ಗಾತ್ರ_t disk_object_ಒಟ್ಟು;
+	ಗಾತ್ರ_t ref_ಒಟ್ಟು;
 
-	ref_total = get_total_reference_count(refs);
-	stats_table_addf(table, "* %s", _("References"));
-	stats_table_count_addf(table, ref_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, refs->branches, "    * %s", _("Branches"));
-	stats_table_count_addf(table, refs->tags, "    * %s", _("Tags"));
-	stats_table_count_addf(table, refs->remotes, "    * %s", _("Remotes"));
-	stats_table_count_addf(table, refs->others, "    * %s", _("Others"));
+	ref_ಒಟ್ಟು = get_ಒಟ್ಟು_reference_ಎಣಿಕೆ(refs);
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "* %s", _("References"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, ref_ಒಟ್ಟು, "  * %s", _("Count"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, refs->branches, "    * %s", _("Branches"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, refs->ಟ್ಯಾಗುಗಳು, "    * %s", _("Tags"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, refs->remotes, "    * %s", _("Remotes"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, refs->others, "    * %s", _("Others"));
 
-	object_count_total = get_total_object_values(&objects->type_counts);
-	stats_table_addf(table, "");
-	stats_table_addf(table, "* %s", _("Reachable objects"));
-	stats_table_count_addf(table, object_count_total, "  * %s", _("Count"));
-	stats_table_count_addf(table, objects->type_counts.commits,
+	object_ಎಣಿಕೆ_ಒಟ್ಟು = get_ಒಟ್ಟು_object_ಮೌಲ್ಯಗಳು(&objects->type_counts);
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "");
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "* %s", _("Reachable objects"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, object_ಎಣಿಕೆ_ಒಟ್ಟು, "  * %s", _("Count"));
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, objects->type_counts.commits,
 			       "    * %s", _("Commits"));
-	stats_table_count_addf(table, objects->type_counts.trees,
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, objects->type_counts.trees,
 			       "    * %s", _("Trees"));
-	stats_table_count_addf(table, objects->type_counts.blobs,
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, objects->type_counts.blobs,
 			       "    * %s", _("Blobs"));
-	stats_table_count_addf(table, objects->type_counts.tags,
+	stats_ಕೋಷ್ಟಕ_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ, objects->type_counts.ಟ್ಯಾಗುಗಳು,
 			       "    * %s", _("Tags"));
 
-	inflated_object_total = get_total_object_values(&objects->inflated_sizes);
-	stats_table_size_addf(table, inflated_object_total,
+	inflated_object_ಒಟ್ಟು = get_ಒಟ್ಟು_object_ಮೌಲ್ಯಗಳು(&objects->inflated_sizes);
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, inflated_object_ಒಟ್ಟು,
 			      "  * %s", _("Inflated size"));
-	stats_table_size_addf(table, objects->inflated_sizes.commits,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->inflated_sizes.commits,
 			      "    * %s", _("Commits"));
-	stats_table_size_addf(table, objects->inflated_sizes.trees,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->inflated_sizes.trees,
 			      "    * %s", _("Trees"));
-	stats_table_size_addf(table, objects->inflated_sizes.blobs,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->inflated_sizes.blobs,
 			      "    * %s", _("Blobs"));
-	stats_table_size_addf(table, objects->inflated_sizes.tags,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->inflated_sizes.ಟ್ಯಾಗುಗಳು,
 			      "    * %s", _("Tags"));
 
-	disk_object_total = get_total_object_values(&objects->disk_sizes);
-	stats_table_size_addf(table, disk_object_total,
+	disk_object_ಒಟ್ಟು = get_ಒಟ್ಟು_object_ಮೌಲ್ಯಗಳು(&objects->disk_sizes);
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, disk_object_ಒಟ್ಟು,
 			      "  * %s", _("Disk size"));
-	stats_table_size_addf(table, objects->disk_sizes.commits,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->disk_sizes.commits,
 			      "    * %s", _("Commits"));
-	stats_table_size_addf(table, objects->disk_sizes.trees,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->disk_sizes.trees,
 			      "    * %s", _("Trees"));
-	stats_table_size_addf(table, objects->disk_sizes.blobs,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->disk_sizes.blobs,
 			      "    * %s", _("Blobs"));
-	stats_table_size_addf(table, objects->disk_sizes.tags,
+	stats_ಕೋಷ್ಟಕ_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ, objects->disk_sizes.ಟ್ಯಾಗುಗಳು,
 			      "    * %s", _("Tags"));
 
-	stats_table_addf(table, "");
-	stats_table_addf(table, "* %s", _("Largest objects"));
-	stats_table_addf(table, "  * %s", _("Commits"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.commit_size.oid,
-				     objects->largest.commit_size.value,
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "");
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "* %s", _("Largest objects"));
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "  * %s", _("Commits"));
+	stats_ಕೋಷ್ಟಕ_object_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ,
+				     &objects->ಅತಿದೊಡ್ಡ.commit_ಗಾತ್ರ.oid,
+				     objects->ಅತಿದೊಡ್ಡ.commit_ಗಾತ್ರ.ಮೌಲ್ಯ,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.parent_count.oid,
-				      objects->largest.parent_count.value,
+	stats_ಕೋಷ್ಟಕ_object_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ,
+				      &objects->ಅತಿದೊಡ್ಡ.ಪೋಷಕ_ಎಣಿಕೆ.oid,
+				      objects->ಅತಿದೊಡ್ಡ.ಪೋಷಕ_ಎಣಿಕೆ.ಮೌಲ್ಯ,
 				      "    * %s", _("Maximum parents"));
-	stats_table_addf(table, "  * %s", _("Trees"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.tree_size.oid,
-				     objects->largest.tree_size.value,
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "  * %s", _("Trees"));
+	stats_ಕೋಷ್ಟಕ_object_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ,
+				     &objects->ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_ಗಾತ್ರ.oid,
+				     objects->ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_ಗಾತ್ರ.ಮೌಲ್ಯ,
 				     "    * %s", _("Maximum size"));
-	stats_table_object_count_addf(table,
-				      &objects->largest.tree_entries.oid,
-				      objects->largest.tree_entries.value,
+	stats_ಕೋಷ್ಟಕ_object_ಎಣಿಕೆ_addf(ಕೋಷ್ಟಕ,
+				      &objects->ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_entries.oid,
+				      objects->ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_entries.ಮೌಲ್ಯ,
 				      "    * %s", _("Maximum entries"));
-	stats_table_addf(table, "  * %s", _("Blobs"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.blob_size.oid,
-				     objects->largest.blob_size.value,
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "  * %s", _("Blobs"));
+	stats_ಕೋಷ್ಟಕ_object_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ,
+				     &objects->ಅತಿದೊಡ್ಡ.blob_ಗಾತ್ರ.oid,
+				     objects->ಅತಿದೊಡ್ಡ.blob_ಗಾತ್ರ.ಮೌಲ್ಯ,
 				     "    * %s", _("Maximum size"));
-	stats_table_addf(table, "  * %s", _("Tags"));
-	stats_table_object_size_addf(table,
-				     &objects->largest.tag_size.oid,
-				     objects->largest.tag_size.value,
+	stats_ಕೋಷ್ಟಕ_addf(ಕೋಷ್ಟಕ, "  * %s", _("Tags"));
+	stats_ಕೋಷ್ಟಕ_object_ಗಾತ್ರ_addf(ಕೋಷ್ಟಕ,
+				     &objects->ಅತಿದೊಡ್ಡ.ಟ್ಯಾಗ್_ಗಾತ್ರ.oid,
+				     objects->ಅತಿದೊಡ್ಡ.ಟ್ಯಾಗ್_ಗಾತ್ರ.ಮೌಲ್ಯ,
 				     "    * %s", _("Maximum size"));
 }
 
-#define INDEX_WIDTH 4
+#ವ್ಯಾಖ್ಯಾನಿಸು ಸೂಚ್ಯಂಕ_ಅಗಲ 4
 
-static void stats_table_print_structure(const struct stats_table *table)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_print_structure(ಸ್ಥಿರಾಂಕ ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ)
 {
-	const char *name_col_title = _("Repository structure");
-	const char *value_col_title = _("Value");
-	int title_name_width = utf8_strwidth(name_col_title);
-	int title_value_width = utf8_strwidth(value_col_title);
-	int name_col_width = table->name_col_width;
-	int value_col_width = table->value_col_width;
-	int unit_col_width = table->unit_col_width;
-	struct string_list_item *item;
-	struct strbuf buf = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name_ಲಂಬಸಾಲು_title = _("Repository structure");
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ_ಲಂಬಸಾಲು_title = _("Value");
+	ಪೂರ್ಣಾಂಕ title_name_ಅಗಲ = utf8_strwidth(name_ಲಂಬಸಾಲು_title);
+	ಪೂರ್ಣಾಂಕ title_ಮೌಲ್ಯ_ಅಗಲ = utf8_strwidth(ಮೌಲ್ಯ_ಲಂಬಸಾಲು_title);
+	ಪೂರ್ಣಾಂಕ name_ಲಂಬಸಾಲು_ಅಗಲ = ಕೋಷ್ಟಕ->name_ಲಂಬಸಾಲು_ಅಗಲ;
+	ಪೂರ್ಣಾಂಕ ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ = ಕೋಷ್ಟಕ->ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ;
+	ಪೂರ್ಣಾಂಕ unit_ಲಂಬಸಾಲು_ಅಗಲ = ಕೋಷ್ಟಕ->unit_ಲಂಬಸಾಲು_ಅಗಲ;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
 
-	if (title_name_width > name_col_width)
-		name_col_width = title_name_width;
-	if (title_value_width > value_col_width + unit_col_width + 1)
-		value_col_width = title_value_width - unit_col_width;
+	ಆದರೆ (title_name_ಅಗಲ > name_ಲಂಬಸಾಲು_ಅಗಲ)
+		name_ಲಂಬಸಾಲು_ಅಗಲ = title_name_ಅಗಲ;
+	ಆದರೆ (title_ಮೌಲ್ಯ_ಅಗಲ > ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ + unit_ಲಂಬಸಾಲು_ಅಗಲ + 1)
+		ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ = title_ಮೌಲ್ಯ_ಅಗಲ - unit_ಲಂಬಸಾಲು_ಅಗಲ;
 
 	strbuf_addstr(&buf, "| ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width + INDEX_WIDTH,
-			  name_col_title);
+	strbuf_utf8_align(&buf, ALIGN_ಎಡ, name_ಲಂಬಸಾಲು_ಅಗಲ + ಸೂಚ್ಯಂಕ_ಅಗಲ,
+			  name_ಲಂಬಸಾಲು_title);
 	strbuf_addstr(&buf, " | ");
-	strbuf_utf8_align(&buf, ALIGN_LEFT,
-			  value_col_width + unit_col_width + 1, value_col_title);
+	strbuf_utf8_align(&buf, ALIGN_ಎಡ,
+			  ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ + unit_ಲಂಬಸಾಲು_ಅಗಲ + 1, ಮೌಲ್ಯ_ಲಂಬಸಾಲು_title);
 	strbuf_addstr(&buf, " |");
-	printf("%s\n", buf.buf);
+	ಬರೆ("%s\n", buf.buf);
 
-	printf("| ");
-	for (int i = 0; i < name_col_width + INDEX_WIDTH; i++)
-		putchar('-');
-	printf(" | ");
-	for (int i = 0; i < value_col_width + unit_col_width + 1; i++)
-		putchar('-');
-	printf(" |\n");
+	ಬರೆ("| ");
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < name_ಲಂಬಸಾಲು_ಅಗಲ + ಸೂಚ್ಯಂಕ_ಅಗಲ; i++)
+		ಅಕ್ಷರ_ಬರೆ('-');
+	ಬರೆ(" | ");
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ + unit_ಲಂಬಸಾಲು_ಅಗಲ + 1; i++)
+		ಅಕ್ಷರ_ಬರೆ('-');
+	ಬರೆ(" |\n");
 
-	for_each_string_list_item(item, &table->rows) {
-		struct stats_table_entry *entry = item->util;
-		const char *value = "";
-		const char *unit = "";
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &ಕೋಷ್ಟಕ->ಅಡ್ಡಸಾಲುಗಳು) {
+		ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು = ಅಂಶ->util;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ = "";
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *unit = "";
 
-		if (entry) {
-			value = entry->value;
-			if (entry->unit)
-				unit = entry->unit;
+		ಆದರೆ (ನಮೂದು) {
+			ಮೌಲ್ಯ = ನಮೂದು->ಮೌಲ್ಯ;
+			ಆದರೆ (ನಮೂದು->unit)
+				unit = ನಮೂದು->unit;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addstr(&buf, "| ");
-		strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width, item->string);
+		strbuf_utf8_align(&buf, ALIGN_ಎಡ, name_ಲಂಬಸಾಲು_ಅಗಲ, ಅಂಶ->string);
 
-		if (entry && entry->oid)
+		ಆದರೆ (ನಮೂದು && ನಮೂದು->oid)
 			strbuf_addf(&buf, " [%" PRIuMAX "]",
-				    (uintmax_t)entry->index);
-		else
-			strbuf_addchars(&buf, ' ', INDEX_WIDTH);
+				    (uintmax_t)ನಮೂದು->ಸೂಚ್ಯಂಕ);
+		ಇಲ್ಲದಿದ್ದರೆ
+			strbuf_addchars(&buf, ' ', ಸೂಚ್ಯಂಕ_ಅಗಲ);
 
 		strbuf_addstr(&buf, " | ");
-		strbuf_utf8_align(&buf, ALIGN_RIGHT, value_col_width, value);
+		strbuf_utf8_align(&buf, ALIGN_ಬಲ, ಮೌಲ್ಯ_ಲಂಬಸಾಲು_ಅಗಲ, ಮೌಲ್ಯ);
 		strbuf_addch(&buf, ' ');
-		strbuf_utf8_align(&buf, ALIGN_LEFT, unit_col_width, unit);
+		strbuf_utf8_align(&buf, ALIGN_ಎಡ, unit_ಲಂಬಸಾಲು_ಅಗಲ, unit);
 		strbuf_addstr(&buf, " |");
-		printf("%s\n", buf.buf);
+		ಬರೆ("%s\n", buf.buf);
 	}
 
-	if (table->annotations.nr) {
-		printf("\n");
-		for_each_string_list_item(item, &table->annotations)
-			printf("%s\n", item->string);
+	ಆದರೆ (ಕೋಷ್ಟಕ->annotations.nr) {
+		ಬರೆ("\n");
+		for_each_string_list_ಅಂಶ(ಅಂಶ, &ಕೋಷ್ಟಕ->annotations)
+			ಬರೆ("%s\n", ಅಂಶ->string);
 	}
 
 	strbuf_release(&buf);
 }
 
-static void stats_table_clear(struct stats_table *table)
+ಸ್ಥಿರ ಶೂನ್ಯ stats_ಕೋಷ್ಟಕ_clear(ರಚನೆ stats_ಕೋಷ್ಟಕ *ಕೋಷ್ಟಕ)
 {
-	struct stats_table_entry *entry;
-	struct string_list_item *item;
+	ರಚನೆ stats_ಕೋಷ್ಟಕ_ನಮೂದು *ನಮೂದು;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
 
-	for_each_string_list_item(item, &table->rows) {
-		entry = item->util;
-		if (entry)
-			free(entry->value);
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &ಕೋಷ್ಟಕ->ಅಡ್ಡಸಾಲುಗಳು) {
+		ನಮೂದು = ಅಂಶ->util;
+		ಆದರೆ (ನಮೂದು)
+			ಬಿಡುಗಡೆ(ನಮೂದು->ಮೌಲ್ಯ);
 	}
 
-	string_list_clear(&table->rows, 1);
-	string_list_clear(&table->annotations, 1);
+	string_list_clear(&ಕೋಷ್ಟಕ->ಅಡ್ಡಸಾಲುಗಳು, 1);
+	string_list_clear(&ಕೋಷ್ಟಕ->annotations, 1);
 }
 
-static inline void print_keyvalue(const char *key, char key_delim, size_t value,
-				  char value_delim)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ print_keyvalue(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ, ಅಕ್ಷರ ಕೀಲಿ_delim, ಗಾತ್ರ_t ಮೌಲ್ಯ,
+				  ಅಕ್ಷರ ಮೌಲ್ಯ_delim)
 {
-	printf("%s%c%" PRIuMAX "%c", key, key_delim, (uintmax_t)value,
-	       value_delim);
+	ಬರೆ("%s%c%" PRIuMAX "%c", ಕೀಲಿ, ಕೀಲಿ_delim, (uintmax_t)ಮೌಲ್ಯ,
+	       ಮೌಲ್ಯ_delim);
 }
 
-static void print_object_data(const char *key, char key_delim,
-			      struct object_data *data, char value_delim)
+ಸ್ಥಿರ ಶೂನ್ಯ print_object_ದತ್ತಾಂಶ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ, ಅಕ್ಷರ ಕೀಲಿ_delim,
+			      ರಚನೆ object_ದತ್ತಾಂಶ *ದತ್ತಾಂಶ, ಅಕ್ಷರ ಮೌಲ್ಯ_delim)
 {
-	print_keyvalue(key, key_delim, data->value, value_delim);
-	printf("%s_oid%c%s%c", key, key_delim, oid_to_hex(&data->oid),
-	       value_delim);
+	print_keyvalue(ಕೀಲಿ, ಕೀಲಿ_delim, ದತ್ತಾಂಶ->ಮೌಲ್ಯ, ಮೌಲ್ಯ_delim);
+	ಬರೆ("%s_oid%c%s%c", ಕೀಲಿ, ಕೀಲಿ_delim, oid_ಗಮ್ಯ_hex(&ದತ್ತಾಂಶ->oid),
+	       ಮೌಲ್ಯ_delim);
 }
 
-static void structure_keyvalue_print(struct repo_structure *stats,
-				     char key_delim, char value_delim)
+ಸ್ಥಿರ ಶೂನ್ಯ structure_keyvalue_print(ರಚನೆ repo_structure *stats,
+				     ಅಕ್ಷರ ಕೀಲಿ_delim, ಅಕ್ಷರ ಮೌಲ್ಯ_delim)
 {
-	print_keyvalue("references.branches.count", key_delim,
-		       stats->refs.branches, value_delim);
-	print_keyvalue("references.tags.count", key_delim,
-		       stats->refs.tags, value_delim);
-	print_keyvalue("references.remotes.count", key_delim,
-		       stats->refs.remotes, value_delim);
-	print_keyvalue("references.others.count", key_delim,
-		       stats->refs.others, value_delim);
+	print_keyvalue("references.branches.count", ಕೀಲಿ_delim,
+		       stats->refs.branches, ಮೌಲ್ಯ_delim);
+	print_keyvalue("references.tags.count", ಕೀಲಿ_delim,
+		       stats->refs.ಟ್ಯಾಗುಗಳು, ಮೌಲ್ಯ_delim);
+	print_keyvalue("references.remotes.count", ಕೀಲಿ_delim,
+		       stats->refs.remotes, ಮೌಲ್ಯ_delim);
+	print_keyvalue("references.others.count", ಕೀಲಿ_delim,
+		       stats->refs.others, ಮೌಲ್ಯ_delim);
 
-	print_keyvalue("objects.commits.count", key_delim,
-		       stats->objects.type_counts.commits, value_delim);
-	print_keyvalue("objects.trees.count", key_delim,
-		       stats->objects.type_counts.trees, value_delim);
-	print_keyvalue("objects.blobs.count", key_delim,
-		       stats->objects.type_counts.blobs, value_delim);
-	print_keyvalue("objects.tags.count", key_delim,
-		       stats->objects.type_counts.tags, value_delim);
+	print_keyvalue("objects.commits.count", ಕೀಲಿ_delim,
+		       stats->objects.type_counts.commits, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.trees.count", ಕೀಲಿ_delim,
+		       stats->objects.type_counts.trees, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.blobs.count", ಕೀಲಿ_delim,
+		       stats->objects.type_counts.blobs, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.tags.count", ಕೀಲಿ_delim,
+		       stats->objects.type_counts.ಟ್ಯಾಗುಗಳು, ಮೌಲ್ಯ_delim);
 
-	print_keyvalue("objects.commits.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.inflated_size", key_delim,
-		       stats->objects.inflated_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.inflated_size", ಕೀಲಿ_delim,
+		       stats->objects.inflated_sizes.commits, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.trees.inflated_size", ಕೀಲಿ_delim,
+		       stats->objects.inflated_sizes.trees, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.blobs.inflated_size", ಕೀಲಿ_delim,
+		       stats->objects.inflated_sizes.blobs, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.tags.inflated_size", ಕೀಲಿ_delim,
+		       stats->objects.inflated_sizes.ಟ್ಯಾಗುಗಳು, ಮೌಲ್ಯ_delim);
 
-	print_keyvalue("objects.commits.disk_size", key_delim,
-		       stats->objects.disk_sizes.commits, value_delim);
-	print_keyvalue("objects.trees.disk_size", key_delim,
-		       stats->objects.disk_sizes.trees, value_delim);
-	print_keyvalue("objects.blobs.disk_size", key_delim,
-		       stats->objects.disk_sizes.blobs, value_delim);
-	print_keyvalue("objects.tags.disk_size", key_delim,
-		       stats->objects.disk_sizes.tags, value_delim);
+	print_keyvalue("objects.commits.disk_size", ಕೀಲಿ_delim,
+		       stats->objects.disk_sizes.commits, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.trees.disk_size", ಕೀಲಿ_delim,
+		       stats->objects.disk_sizes.trees, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.blobs.disk_size", ಕೀಲಿ_delim,
+		       stats->objects.disk_sizes.blobs, ಮೌಲ್ಯ_delim);
+	print_keyvalue("objects.tags.disk_size", ಕೀಲಿ_delim,
+		       stats->objects.disk_sizes.ಟ್ಯಾಗುಗಳು, ಮೌಲ್ಯ_delim);
 
-	print_object_data("objects.commits.max_size", key_delim,
-			  &stats->objects.largest.commit_size, value_delim);
-	print_object_data("objects.trees.max_size", key_delim,
-			  &stats->objects.largest.tree_size, value_delim);
-	print_object_data("objects.blobs.max_size", key_delim,
-			  &stats->objects.largest.blob_size, value_delim);
-	print_object_data("objects.tags.max_size", key_delim,
-			  &stats->objects.largest.tag_size, value_delim);
+	print_object_ದತ್ತಾಂಶ("objects.commits.max_size", ಕೀಲಿ_delim,
+			  &stats->objects.ಅತಿದೊಡ್ಡ.commit_ಗಾತ್ರ, ಮೌಲ್ಯ_delim);
+	print_object_ದತ್ತಾಂಶ("objects.trees.max_size", ಕೀಲಿ_delim,
+			  &stats->objects.ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_ಗಾತ್ರ, ಮೌಲ್ಯ_delim);
+	print_object_ದತ್ತಾಂಶ("objects.blobs.max_size", ಕೀಲಿ_delim,
+			  &stats->objects.ಅತಿದೊಡ್ಡ.blob_ಗಾತ್ರ, ಮೌಲ್ಯ_delim);
+	print_object_ದತ್ತಾಂಶ("objects.tags.max_size", ಕೀಲಿ_delim,
+			  &stats->objects.ಅತಿದೊಡ್ಡ.ಟ್ಯಾಗ್_ಗಾತ್ರ, ಮೌಲ್ಯ_delim);
 
-	print_object_data("objects.commits.max_parents", key_delim,
-			  &stats->objects.largest.parent_count, value_delim);
-	print_object_data("objects.trees.max_entries", key_delim,
-			  &stats->objects.largest.tree_entries, value_delim);
+	print_object_ದತ್ತಾಂಶ("objects.commits.max_parents", ಕೀಲಿ_delim,
+			  &stats->objects.ಅತಿದೊಡ್ಡ.ಪೋಷಕ_ಎಣಿಕೆ, ಮೌಲ್ಯ_delim);
+	print_object_ದತ್ತಾಂಶ("objects.trees.max_entries", ಕೀಲಿ_delim,
+			  &stats->objects.ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_entries, ಮೌಲ್ಯ_delim);
 
 	fflush(stdout);
 }
 
-struct count_references_data {
-	struct ref_stats *stats;
-	struct rev_info *revs;
-	struct progress *progress;
+ರಚನೆ ಎಣಿಕೆ_references_ದತ್ತಾಂಶ {
+	ರಚನೆ ref_stats *stats;
+	ರಚನೆ rev_info *revs;
+	ರಚನೆ ಪ್ರಗತಿ *ಪ್ರಗತಿ;
 };
 
-static int count_references(const struct reference *ref, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಎಣಿಕೆ_references(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct count_references_data *data = cb_data;
-	struct ref_stats *stats = data->stats;
-	size_t ref_count;
+	ರಚನೆ ಎಣಿಕೆ_references_ದತ್ತಾಂಶ *ದತ್ತಾಂಶ = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ ref_stats *stats = ದತ್ತಾಂಶ->stats;
+	ಗಾತ್ರ_t ref_ಎಣಿಕೆ;
 
-	switch (ref_kind_from_refname(ref->name)) {
-	case FILTER_REFS_BRANCHES:
+	ಆಯ್ಕೆ (ref_ಬಗೆ_from_refname(ref->name)) {
+	ಸ್ಥಿತಿ FILTER_REFS_BRANCHES:
 		stats->branches++;
-		break;
-	case FILTER_REFS_REMOTES:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FILTER_REFS_REMOTES:
 		stats->remotes++;
-		break;
-	case FILTER_REFS_TAGS:
-		stats->tags++;
-		break;
-	case FILTER_REFS_OTHERS:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FILTER_REFS_ಟ್ಯಾಗುಗಳು:
+		stats->ಟ್ಯಾಗುಗಳು++;
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FILTER_REFS_OTHERS:
 		stats->others++;
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("unexpected reference type");
 	}
 
@@ -769,228 +769,228 @@ static int count_references(const struct reference *ref, void *cb_data)
 	 * While iterating through references for counting, also add OIDs in
 	 * preparation for the path walk.
 	 */
-	add_pending_oid(data->revs, NULL, ref->oid, 0);
+	ಕೂಡಿಸು_pending_oid(ದತ್ತಾಂಶ->revs, ಖಾಲಿ, ref->oid, 0);
 
-	ref_count = get_total_reference_count(stats);
-	display_progress(data->progress, ref_count);
+	ref_ಎಣಿಕೆ = get_ಒಟ್ಟು_reference_ಎಣಿಕೆ(stats);
+	display_ಪ್ರಗತಿ(ದತ್ತಾಂಶ->ಪ್ರಗತಿ, ref_ಎಣಿಕೆ);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void structure_count_references(struct ref_stats *stats,
-				       struct rev_info *revs,
-				       struct repository *repo,
-				       int show_progress)
+ಸ್ಥಿರ ಶೂನ್ಯ structure_ಎಣಿಕೆ_references(ರಚನೆ ref_stats *stats,
+				       ರಚನೆ rev_info *revs,
+				       ರಚನೆ repository *repo,
+				       ಪೂರ್ಣಾಂಕ show_ಪ್ರಗತಿ)
 {
-	struct count_references_data data = {
+	ರಚನೆ ಎಣಿಕೆ_references_ದತ್ತಾಂಶ ದತ್ತಾಂಶ = {
 		.stats = stats,
 		.revs = revs,
 	};
 
-	if (show_progress)
-		data.progress = start_delayed_progress(repo,
+	ಆದರೆ (show_ಪ್ರಗತಿ)
+		ದತ್ತಾಂಶ.ಪ್ರಗತಿ = ಆರಂಭ_delayed_ಪ್ರಗತಿ(repo,
 						       _("Counting references"), 0);
 
-	refs_for_each_ref(get_main_ref_store(repo), count_references, &data);
-	stop_progress(&data.progress);
+	refs_for_each_ref(get_main_ref_store(repo), ಎಣಿಕೆ_references, &ದತ್ತಾಂಶ);
+	stop_ಪ್ರಗತಿ(&ದತ್ತಾಂಶ.ಪ್ರಗತಿ);
 }
 
-struct count_objects_data {
-	struct object_database *odb;
-	struct object_stats *stats;
-	struct progress *progress;
+ರಚನೆ ಎಣಿಕೆ_objects_ದತ್ತಾಂಶ {
+	ರಚನೆ object_database *odb;
+	ರಚನೆ object_stats *stats;
+	ರಚನೆ ಪ್ರಗತಿ *ಪ್ರಗತಿ;
 };
 
-static void check_largest(struct object_data *data, struct object_id *oid,
-			  size_t value)
+ಸ್ಥಿರ ಶೂನ್ಯ check_ಅತಿದೊಡ್ಡ(ರಚನೆ object_ದತ್ತಾಂಶ *ದತ್ತಾಂಶ, ರಚನೆ object_id *oid,
+			  ಗಾತ್ರ_t ಮೌಲ್ಯ)
 {
-	if (value > data->value || is_null_oid(&data->oid)) {
-		oidcpy(&data->oid, oid);
-		data->value = value;
+	ಆದರೆ (ಮೌಲ್ಯ > ದತ್ತಾಂಶ->ಮೌಲ್ಯ || is_null_oid(&ದತ್ತಾಂಶ->oid)) {
+		oidcpy(&ದತ್ತಾಂಶ->oid, oid);
+		ದತ್ತಾಂಶ->ಮೌಲ್ಯ = ಮೌಲ್ಯ;
 	}
 }
 
-static size_t count_tree_entries(struct object *obj)
+ಸ್ಥಿರ ಗಾತ್ರ_t ಎಣಿಕೆ_ವೃಕ್ಷ_entries(ರಚನೆ object *obj)
 {
-	struct tree *t = object_as_type(obj, OBJ_TREE, 0);
-	struct name_entry entry;
-	struct tree_desc desc;
-	size_t count = 0;
+	ರಚನೆ ವೃಕ್ಷ *t = object_as_type(obj, OBJ_ವೃಕ್ಷ, 0);
+	ರಚನೆ name_ನಮೂದು ನಮೂದು;
+	ರಚನೆ ವೃಕ್ಷ_desc desc;
+	ಗಾತ್ರ_t ಎಣಿಕೆ_2 = 0;
 
-	init_tree_desc(&desc, &t->object.oid, t->buffer, t->size);
-	while (tree_entry(&desc, &entry))
-		count++;
+	init_ವೃಕ್ಷ_desc(&desc, &t->object.oid, t->ಬಫರ್, t->ಗಾತ್ರ_2);
+	ಆಗ (ವೃಕ್ಷ_ನಮೂದು(&desc, &ನಮೂದು))
+		ಎಣಿಕೆ_2++;
 
-	return count;
+	ಹಿಂತಿರುಗಿ ಎಣಿಕೆ_2;
 }
 
-static int count_objects(const char *path UNUSED, struct oid_array *oids,
-			 enum object_type type, void *cb_data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಎಣಿಕೆ_objects(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ ಬಳಸದ, ರಚನೆ oid_array *oids,
+			 ಎಣಿಕೆ object_type type, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ)
 {
-	struct count_objects_data *data = cb_data;
-	struct object_stats *stats = data->stats;
-	size_t object_count;
+	ರಚನೆ ಎಣಿಕೆ_objects_ದತ್ತಾಂಶ *ದತ್ತಾಂಶ = cb_ದತ್ತಾಂಶ;
+	ರಚನೆ object_stats *stats = ದತ್ತಾಂಶ->stats;
+	ಗಾತ್ರ_t object_ಎಣಿಕೆ;
 
-	for (size_t i = 0; i < oids->nr; i++) {
-		struct object_info oi = OBJECT_INFO_INIT;
-		unsigned long inflated;
-		size_t inflated_st = 0;
-		struct commit *commit;
-		struct object *obj;
-		void *content;
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < oids->nr; i++) {
+		ರಚನೆ object_info oi = OBJECT_INFO_INIT;
+		ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ inflated;
+		ಗಾತ್ರ_t inflated_st = 0;
+		ರಚನೆ commit *commit;
+		ರಚನೆ object *obj;
+		ಶೂನ್ಯ *content;
 		off_t disk;
-		int eaten;
+		ಪೂರ್ಣಾಂಕ eaten;
 
 		oi.sizep = &inflated_st;
 		oi.disk_sizep = &disk;
 		oi.contentp = &content;
 
-		if (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
+		ಆದರೆ (odb_read_object_info_extended(ದತ್ತಾಂಶ->odb, &oids->oid[i], &oi,
 						  OBJECT_INFO_SKIP_FETCH_OBJECT |
-						  OBJECT_INFO_QUICK) < 0)
-			continue;
-		inflated = cast_size_t_to_ulong(inflated_st);
+						  OBJECT_INFO_ಶೀಘ್ರ) < 0)
+			ಮುಂದುವರಿ;
+		inflated = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(inflated_st);
 
-		obj = parse_object_buffer(the_repository, &oids->oid[i], type,
+		obj = parse_object_ಬಫರ್(the_repository, &oids->oid[i], type,
 					  inflated, content, &eaten);
 
-		switch (type) {
-		case OBJ_TAG:
-			stats->type_counts.tags++;
-			stats->inflated_sizes.tags += inflated;
-			stats->disk_sizes.tags += disk;
-			check_largest(&stats->largest.tag_size, &oids->oid[i],
+		ಆಯ್ಕೆ (type) {
+		ಸ್ಥಿತಿ OBJ_ಟ್ಯಾಗ್:
+			stats->type_counts.ಟ್ಯಾಗುಗಳು++;
+			stats->inflated_sizes.ಟ್ಯಾಗುಗಳು += inflated;
+			stats->disk_sizes.ಟ್ಯಾಗುಗಳು += disk;
+			check_ಅತಿದೊಡ್ಡ(&stats->ಅತಿದೊಡ್ಡ.ಟ್ಯಾಗ್_ಗಾತ್ರ, &oids->oid[i],
 				      inflated);
-			break;
-		case OBJ_COMMIT:
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ OBJ_COMMIT:
 			commit = object_as_type(obj, OBJ_COMMIT, 0);
 			stats->type_counts.commits++;
 			stats->inflated_sizes.commits += inflated;
 			stats->disk_sizes.commits += disk;
-			check_largest(&stats->largest.commit_size, &oids->oid[i],
+			check_ಅತಿದೊಡ್ಡ(&stats->ಅತಿದೊಡ್ಡ.commit_ಗಾತ್ರ, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.parent_count, &oids->oid[i],
-				      commit_list_count(commit->parents));
-			break;
-		case OBJ_TREE:
+			check_ಅತಿದೊಡ್ಡ(&stats->ಅತಿದೊಡ್ಡ.ಪೋಷಕ_ಎಣಿಕೆ, &oids->oid[i],
+				      commit_list_ಎಣಿಕೆ(commit->parents));
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ OBJ_ವೃಕ್ಷ:
 			stats->type_counts.trees++;
 			stats->inflated_sizes.trees += inflated;
 			stats->disk_sizes.trees += disk;
-			check_largest(&stats->largest.tree_size, &oids->oid[i],
+			check_ಅತಿದೊಡ್ಡ(&stats->ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_ಗಾತ್ರ, &oids->oid[i],
 				      inflated);
-			check_largest(&stats->largest.tree_entries, &oids->oid[i],
-				      count_tree_entries(obj));
-			break;
-		case OBJ_BLOB:
+			check_ಅತಿದೊಡ್ಡ(&stats->ಅತಿದೊಡ್ಡ.ವೃಕ್ಷ_entries, &oids->oid[i],
+				      ಎಣಿಕೆ_ವೃಕ್ಷ_entries(obj));
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ OBJ_BLOB:
 			stats->type_counts.blobs++;
 			stats->inflated_sizes.blobs += inflated;
 			stats->disk_sizes.blobs += disk;
-			check_largest(&stats->largest.blob_size, &oids->oid[i],
+			check_ಅತಿದೊಡ್ಡ(&stats->ಅತಿದೊಡ್ಡ.blob_ಗಾತ್ರ, &oids->oid[i],
 				      inflated);
-			break;
-		default:
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
 			BUG("invalid object type");
 		}
 
-		if (!eaten)
-			free(content);
+		ಆದರೆ (!eaten)
+			ಬಿಡುಗಡೆ(content);
 	}
 
-	object_count = get_total_object_values(&stats->type_counts);
-	display_progress(data->progress, object_count);
+	object_ಎಣಿಕೆ = get_ಒಟ್ಟು_object_ಮೌಲ್ಯಗಳು(&stats->type_counts);
+	display_ಪ್ರಗತಿ(ದತ್ತಾಂಶ->ಪ್ರಗತಿ, object_ಎಣಿಕೆ);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void structure_count_objects(struct object_stats *stats,
-				    struct rev_info *revs,
-				    struct repository *repo, int show_progress)
+ಸ್ಥಿರ ಶೂನ್ಯ structure_ಎಣಿಕೆ_objects(ರಚನೆ object_stats *stats,
+				    ರಚನೆ rev_info *revs,
+				    ರಚನೆ repository *repo, ಪೂರ್ಣಾಂಕ show_ಪ್ರಗತಿ)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	struct count_objects_data data = {
+	ರಚನೆ ಮಾರ್ಗ_walk_info info = ಮಾರ್ಗ_WALK_INFO_INIT;
+	ರಚನೆ ಎಣಿಕೆ_objects_ದತ್ತಾಂಶ ದತ್ತಾಂಶ = {
 		.odb = repo->objects,
 		.stats = stats,
 	};
 
 	info.revs = revs;
-	info.path_fn = count_objects;
-	info.path_fn_data = &data;
+	info.ಮಾರ್ಗ_fn = ಎಣಿಕೆ_objects;
+	info.ಮಾರ್ಗ_fn_ದತ್ತಾಂಶ = &ದತ್ತಾಂಶ;
 
-	if (show_progress)
-		data.progress = start_delayed_progress(repo, _("Counting objects"), 0);
+	ಆದರೆ (show_ಪ್ರಗತಿ)
+		ದತ್ತಾಂಶ.ಪ್ರಗತಿ = ಆರಂಭ_delayed_ಪ್ರಗತಿ(repo, _("Counting objects"), 0);
 
-	walk_objects_by_path(&info);
-	path_walk_info_clear(&info);
-	stop_progress(&data.progress);
+	walk_objects_by_ಮಾರ್ಗ(&info);
+	ಮಾರ್ಗ_walk_info_clear(&info);
+	stop_ಪ್ರಗತಿ(&ದತ್ತಾಂಶ.ಪ್ರಗತಿ);
 }
 
-static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
-			      struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmd_repo_structure(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			      ರಚನೆ repository *repo)
 {
-	struct stats_table table = {
-		.rows = STRING_LIST_INIT_DUP,
+	ರಚನೆ stats_ಕೋಷ್ಟಕ ಕೋಷ್ಟಕ = {
+		.ಅಡ್ಡಸಾಲುಗಳು = STRING_LIST_INIT_DUP,
 		.annotations = STRING_LIST_INIT_DUP,
 	};
-	enum output_format format = FORMAT_TABLE;
-	struct repo_structure stats = { 0 };
-	struct rev_info revs;
-	int show_progress = -1;
-	struct option options[] = {
+	ಎಣಿಕೆ output_format format = FORMAT_ಕೋಷ್ಟಕ;
+	ರಚನೆ repo_structure stats = { 0 };
+	ರಚನೆ rev_info revs;
+	ಪೂರ್ಣಾಂಕ show_ಪ್ರಗತಿ = -1;
+	ರಚನೆ option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
 			       PARSE_OPT_NONEG, parse_format_cb),
-		OPT_CALLBACK_F('z', NULL, &format, NULL,
+		OPT_CALLBACK_F('z', ಖಾಲಿ, &format, ಖಾಲಿ,
 			       N_("synonym for --format=nul"),
 			       PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			       parse_format_cb),
-		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
-		OPT_END()
+		OPT_BOOL(0, "progress", &show_ಪ್ರಗತಿ, N_("show progress")),
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_structure_usage, 0);
-	if (argc)
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, repo_structure_usage, 0);
+	ಆದರೆ (argc)
 		usage(_("too many arguments"));
 
-	repo_init_revisions(repo, &revs, prefix);
+	repo_init_revisions(repo, &revs, ಪೂರ್ವಪ್ರತ್ಯಯ);
 
-	if (show_progress < 0)
-		show_progress = isatty(2);
+	ಆದರೆ (show_ಪ್ರಗತಿ < 0)
+		show_ಪ್ರಗತಿ = isatty(2);
 
-	structure_count_references(&stats.refs, &revs, repo, show_progress);
-	structure_count_objects(&stats.objects, &revs, repo, show_progress);
+	structure_ಎಣಿಕೆ_references(&stats.refs, &revs, repo, show_ಪ್ರಗತಿ);
+	structure_ಎಣಿಕೆ_objects(&stats.objects, &revs, repo, show_ಪ್ರಗತಿ);
 
-	switch (format) {
-	case FORMAT_TABLE:
-		stats_table_setup_structure(&table, &stats);
-		stats_table_print_structure(&table);
-		break;
-	case FORMAT_NEWLINE_TERMINATED:
+	ಆಯ್ಕೆ (format) {
+	ಸ್ಥಿತಿ FORMAT_ಕೋಷ್ಟಕ:
+		stats_ಕೋಷ್ಟಕ_ಸಿದ್ಧತೆ_structure(&ಕೋಷ್ಟಕ, &stats);
+		stats_ಕೋಷ್ಟಕ_print_structure(&ಕೋಷ್ಟಕ);
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FORMAT_NEWLINE_TERMINATED:
 		structure_keyvalue_print(&stats, '=', '\n');
-		break;
-	case FORMAT_NUL_TERMINATED:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ FORMAT_NUL_TERMINATED:
 		structure_keyvalue_print(&stats, '\n', '\0');
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		BUG("invalid output format");
 	}
 
-	stats_table_clear(&table);
+	stats_ಕೋಷ್ಟಕ_clear(&ಕೋಷ್ಟಕ);
 	release_revisions(&revs);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_repo(int argc, const char **argv, const char *prefix,
-	     struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_repo(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	     ರಚನೆ repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ಖಾಲಿ;
+	ರಚನೆ option options[] = {
 		OPT_SUBCOMMAND("info", &fn, cmd_repo_info),
 		OPT_SUBCOMMAND("structure", &fn, cmd_repo_structure),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, repo_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, repo_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	ಹಿಂತಿರುಗಿ fn(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, repo);
 }

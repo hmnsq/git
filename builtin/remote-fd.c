@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "transport.h"
 
-static const char usage_msg[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ usage_ಸಂದೇಶ[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -19,70 +19,70 @@ static const char usage_msg[] =
  *
  */
 
-#define MAXCOMMAND 4096
+#ವ್ಯಾಖ್ಯಾನಿಸು MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+ಸ್ಥಿರ ಶೂನ್ಯ command_loop(ಪೂರ್ಣಾಂಕ ಒಳಹರಿವು_fd, ಪೂರ್ಣಾಂಕ output_fd)
 {
-	char buffer[MAXCOMMAND];
+	ಅಕ್ಷರ ಬಫರ್[MAXCOMMAND];
 
-	while (1) {
-		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+	ಆಗ (1) {
+		ಗಾತ್ರ_t i;
+		ಆದರೆ (!fgets(ಬಫರ್, MAXCOMMAND - 1, stdin)) {
+			ಆದರೆ (ferror(stdin))
 				die("Input error");
-			return;
+			ಹಿಂತಿರುಗಿ;
 		}
 		/* Strip end of line characters. */
-		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
-			buffer[--i] = 0;
+		i = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಬಫರ್);
+		ಆಗ (i > 0 && ಖಾಲಿಯೇ(ಬಫರ್[i - 1]))
+			ಬಫರ್[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
-			printf("*connect\n\n");
+		ಆದರೆ (!strcmp(ಬಫರ್, "capabilities")) {
+			ಬರೆ("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
-			printf("\n");
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (starts_with(ಬಫರ್, "connect ")) {
+			ಬರೆ("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			ಆದರೆ (bidirectional_transfer_loop(ಒಳಹರಿವು_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
-			die("Bad command: %s", buffer);
+			ಹಿಂತಿರುಗಿ;
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			die("Bad command: %s", ಬಫರ್);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_remote_fd(ಪೂರ್ಣಾಂಕ argc,
+		  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		  ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	ಪೂರ್ಣಾಂಕ ಒಳಹರಿವು_fd = -1;
+	ಪೂರ್ಣಾಂಕ output_fd = -1;
+	ಅಕ್ಷರ *ಕೊನೆ;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_ಖಾಲಿಗಳು_ಪೂರ್ವಪ್ರತ್ಯಯ(ಪೂರ್ವಪ್ರತ್ಯಯ);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_ಸಂದೇಶ);
+	ಆದರೆ (argc != 3)
+		usage(usage_ಸಂದೇಶ);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	ಒಳಹರಿವು_fd = (ಪೂರ್ಣಾಂಕ)strtoul(argv[2], &ಕೊನೆ, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	ಆದರೆ ((ಕೊನೆ == argv[2]) || (*ಕೊನೆ != ',' && *ಕೊನೆ != '/' && *ಕೊನೆ))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	ಆದರೆ (*ಕೊನೆ == '/' || !*ಕೊನೆ) {
+		output_fd = ಒಳಹರಿವು_fd;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಅಕ್ಷರ *end2;
+		output_fd = (ಪೂರ್ಣಾಂಕ)strtoul(ಕೊನೆ + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		ಆದರೆ ((end2 == ಕೊನೆ + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(ಒಳಹರಿವು_fd, output_fd);
+	ಹಿಂತಿರುಗಿ 0;
 }

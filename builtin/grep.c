@@ -4,59 +4,59 @@
  * Copyright (c) 2006 Junio C Hamano
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "tag.h"
-#include "tree-walk.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "run-command.h"
-#include "grep.h"
-#include "quote.h"
-#include "dir.h"
-#include "pathspec.h"
-#include "setup.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "pager.h"
-#include "path.h"
-#include "promisor-remote.h"
-#include "read-cache-ll.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "tag.h"
+#ಅನ್ತರ್ಭಾವ "tree-walk.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "grep.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "pathspec.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "submodule.h"
+#ಅನ್ತರ್ಭಾವ "submodule-config.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "odb/source.h"
+#ಅನ್ತರ್ಭಾವ "oid-array.h"
+#ಅನ್ತರ್ಭಾವ "oidset.h"
+#ಅನ್ತರ್ಭಾವ "pager.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "promisor-remote.h"
+#ಅನ್ತರ್ಭಾವ "read-cache-ll.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
-static const char *grep_prefix;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *grep_ಪೂರ್ವಪ್ರತ್ಯಯ;
 
-static char const * const grep_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ grep_usage[] = {
 	N_("git grep [<options>] [-e] <pattern> [<rev>...] [[--] <path>...]"),
-	NULL
+	ಖಾಲಿ
 };
 
-static int recurse_submodules;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ recurse_submodules;
 
-static int num_threads;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಅಂಕೆ_ಎಳೆಗಳು;
 
-static pthread_t *threads;
+ಸ್ಥಿರ pthread_t *ಎಳೆಗಳು;
 
 /* We use one producer thread and THREADS consumer
  * threads. The producer adds struct work_items to 'todo' and the
  * consumers pick work items from the same array.
  */
-struct work_item {
-	struct grep_source source;
-	char done;
-	struct strbuf out;
+ರಚನೆ work_ಅಂಶ {
+	ರಚನೆ grep_ಮೂಲ ಮೂಲ;
+	ಅಕ್ಷರ ಮುಗಿದ;
+	ರಚನೆ strbuf ಹೊರಹೋಗು;
 };
 
 /* In the range [todo_done, todo_start) in 'todo' we have work_items
@@ -68,400 +68,400 @@ struct work_item {
  *
  * The ranges are modulo TODO_SIZE.
  */
-#define TODO_SIZE 128
-static struct work_item todo[TODO_SIZE];
-static int todo_start;
-static int todo_end;
-static int todo_done;
+#ವ್ಯಾಖ್ಯಾನಿಸು TODO_ಗಾತ್ರ 128
+ಸ್ಥಿರ ರಚನೆ work_ಅಂಶ todo[TODO_ಗಾತ್ರ];
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ todo_ಆರಂಭ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ todo_ಕೊನೆ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ todo_ಮುಗಿದ;
 
 /* Has all work items been added? */
-static int all_work_added;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ all_work_added;
 
-static struct repository **repos_to_free;
-static size_t repos_to_free_nr, repos_to_free_alloc;
+ಸ್ಥಿರ ರಚನೆ repository **repos_ಗಮ್ಯ_free;
+ಸ್ಥಿರ ಗಾತ್ರ_t repos_ಗಮ್ಯ_free_nr, repos_ಗಮ್ಯ_free_alloc;
 
 /* This lock protects all the variables above. */
-static pthread_mutex_t grep_mutex;
+ಸ್ಥಿರ pthread_mutex_t grep_mutex;
 
-static inline void grep_lock(void)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ grep_ಬೀಗ(ಶೂನ್ಯ)
 {
-	pthread_mutex_lock(&grep_mutex);
+	pthread_mutex_ಬೀಗ(&grep_mutex);
 }
 
-static inline void grep_unlock(void)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ grep_unlock(ಶೂನ್ಯ)
 {
 	pthread_mutex_unlock(&grep_mutex);
 }
 
 /* Signalled when a new work_item is added to todo. */
-static pthread_cond_t cond_add;
+ಸ್ಥಿರ pthread_cond_t cond_ಕೂಡಿಸು;
 
 /* Signalled when the result from one work_item is written to
  * stdout.
  */
-static pthread_cond_t cond_write;
+ಸ್ಥಿರ pthread_cond_t cond_write;
 
 /* Signalled when we are finished with everything. */
-static pthread_cond_t cond_result;
+ಸ್ಥಿರ pthread_cond_t cond_ಫಲಿತಾಂಶ;
 
-static int skip_first_line;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ skip_ಮೊದಲ_ಸಾಲು;
 
-static void add_work(struct grep_opt *opt, struct grep_source *gs)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_work(ರಚನೆ grep_opt *opt, ರಚನೆ grep_ಮೂಲ *gs)
 {
-	if (opt->binary != GREP_BINARY_TEXT)
-		grep_source_load_driver(gs, opt->repo->index);
+	ಆದರೆ (opt->ದ್ವಿಮಾನ != GREP_ದ್ವಿಮಾನ_ಪಠ್ಯ)
+		grep_ಮೂಲ_ತುಂಬು_driver(gs, opt->repo->ಸೂಚ್ಯಂಕ);
 
-	grep_lock();
+	grep_ಬೀಗ();
 
-	while ((todo_end+1) % ARRAY_SIZE(todo) == todo_done) {
+	ಆಗ ((todo_ಕೊನೆ+1) % ARRAY_ಗಾತ್ರ(todo) == todo_ಮುಗಿದ) {
 		pthread_cond_wait(&cond_write, &grep_mutex);
 	}
 
-	todo[todo_end].source = *gs;
-	todo[todo_end].done = 0;
-	strbuf_reset(&todo[todo_end].out);
-	todo_end = (todo_end + 1) % ARRAY_SIZE(todo);
+	todo[todo_ಕೊನೆ].ಮೂಲ = *gs;
+	todo[todo_ಕೊನೆ].ಮುಗಿದ = 0;
+	strbuf_reset(&todo[todo_ಕೊನೆ].ಹೊರಹೋಗು);
+	todo_ಕೊನೆ = (todo_ಕೊನೆ + 1) % ARRAY_ಗಾತ್ರ(todo);
 
-	pthread_cond_signal(&cond_add);
+	pthread_cond_signal(&cond_ಕೂಡಿಸು);
 	grep_unlock();
 }
 
-static struct work_item *get_work(void)
+ಸ್ಥಿರ ರಚನೆ work_ಅಂಶ *get_work(ಶೂನ್ಯ)
 {
-	struct work_item *ret;
+	ರಚನೆ work_ಅಂಶ *ret;
 
-	grep_lock();
-	while (todo_start == todo_end && !all_work_added) {
-		pthread_cond_wait(&cond_add, &grep_mutex);
+	grep_ಬೀಗ();
+	ಆಗ (todo_ಆರಂಭ == todo_ಕೊನೆ && !all_work_added) {
+		pthread_cond_wait(&cond_ಕೂಡಿಸು, &grep_mutex);
 	}
 
-	if (todo_start == todo_end && all_work_added) {
-		ret = NULL;
-	} else {
-		ret = &todo[todo_start];
-		todo_start = (todo_start + 1) % ARRAY_SIZE(todo);
+	ಆದರೆ (todo_ಆರಂಭ == todo_ಕೊನೆ && all_work_added) {
+		ret = ಖಾಲಿ;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ret = &todo[todo_ಆರಂಭ];
+		todo_ಆರಂಭ = (todo_ಆರಂಭ + 1) % ARRAY_ಗಾತ್ರ(todo);
 	}
 	grep_unlock();
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static void work_done(struct work_item *w)
+ಸ್ಥಿರ ಶೂನ್ಯ work_ಮುಗಿದ(ರಚನೆ work_ಅಂಶ *w)
 {
-	int old_done;
+	ಪೂರ್ಣಾಂಕ old_ಮುಗಿದ;
 
-	grep_lock();
-	w->done = 1;
-	old_done = todo_done;
-	for(; todo[todo_done].done && todo_done != todo_start;
-	    todo_done = (todo_done+1) % ARRAY_SIZE(todo)) {
-		w = &todo[todo_done];
-		if (w->out.len) {
-			const char *p = w->out.buf;
-			size_t len = w->out.len;
+	grep_ಬೀಗ();
+	w->ಮುಗಿದ = 1;
+	old_ಮುಗಿದ = todo_ಮುಗಿದ;
+	ಗಾಗಿ(; todo[todo_ಮುಗಿದ].ಮುಗಿದ && todo_ಮುಗಿದ != todo_ಆರಂಭ;
+	    todo_ಮುಗಿದ = (todo_ಮುಗಿದ+1) % ARRAY_ಗಾತ್ರ(todo)) {
+		w = &todo[todo_ಮುಗಿದ];
+		ಆದರೆ (w->ಹೊರಹೋಗು.len) {
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p = w->ಹೊರಹೋಗು.buf;
+			ಗಾತ್ರ_t len = w->ಹೊರಹೋಗು.len;
 
 			/* Skip the leading hunk mark of the first file. */
-			if (skip_first_line) {
-				while (len) {
+			ಆದರೆ (skip_ಮೊದಲ_ಸಾಲು) {
+				ಆಗ (len) {
 					len--;
-					if (*p++ == '\n')
-						break;
+					ಆದರೆ (*p++ == '\n')
+						ನಿಲ್ಲಿಸು;
 				}
-				skip_first_line = 0;
+				skip_ಮೊದಲ_ಸಾಲು = 0;
 			}
 
 			write_or_die(1, p, len);
 		}
-		grep_source_clear(&w->source);
+		grep_ಮೂಲ_clear(&w->ಮೂಲ);
 	}
 
-	if (old_done != todo_done)
+	ಆದರೆ (old_ಮುಗಿದ != todo_ಮುಗಿದ)
 		pthread_cond_signal(&cond_write);
 
-	if (all_work_added && todo_done == todo_end)
-		pthread_cond_signal(&cond_result);
+	ಆದರೆ (all_work_added && todo_ಮುಗಿದ == todo_ಕೊನೆ)
+		pthread_cond_signal(&cond_ಫಲಿತಾಂಶ);
 
 	grep_unlock();
 }
 
-static void free_repos(void)
+ಸ್ಥಿರ ಶೂನ್ಯ free_repos(ಶೂನ್ಯ)
 {
-	int i;
+	ಪೂರ್ಣಾಂಕ i;
 
-	for (i = 0; i < repos_to_free_nr; i++) {
-		repo_clear(repos_to_free[i]);
-		free(repos_to_free[i]);
+	ಗಾಗಿ (i = 0; i < repos_ಗಮ್ಯ_free_nr; i++) {
+		repo_clear(repos_ಗಮ್ಯ_free[i]);
+		ಬಿಡುಗಡೆ(repos_ಗಮ್ಯ_free[i]);
 	}
-	FREE_AND_NULL(repos_to_free);
-	repos_to_free_nr = 0;
-	repos_to_free_alloc = 0;
+	FREE_AND_NULL(repos_ಗಮ್ಯ_free);
+	repos_ಗಮ್ಯ_free_nr = 0;
+	repos_ಗಮ್ಯ_free_alloc = 0;
 }
 
-static void *run(void *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ *ಸತತ(ಶೂನ್ಯ *arg)
 {
-	int hit = 0;
-	struct grep_opt *opt = arg;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
+	ರಚನೆ grep_opt *opt = arg;
 
-	while (1) {
-		struct work_item *w = get_work();
-		if (!w)
-			break;
+	ಆಗ (1) {
+		ರಚನೆ work_ಅಂಶ *w = get_work();
+		ಆದರೆ (!w)
+			ನಿಲ್ಲಿಸು;
 
 		opt->output_priv = w;
-		hit |= grep_source(opt, &w->source);
-		grep_source_clear_data(&w->source);
-		work_done(w);
+		ದೊರಕಿತು |= grep_ಮೂಲ(opt, &w->ಮೂಲ);
+		grep_ಮೂಲ_clear_ದತ್ತಾಂಶ(&w->ಮೂಲ);
+		work_ಮುಗಿದ(w);
 	}
 	free_grep_patterns(opt);
-	free(opt);
+	ಬಿಡುಗಡೆ(opt);
 
-	return (void*) (intptr_t) hit;
+	ಹಿಂತಿರುಗಿ (ಶೂನ್ಯ*) (intptr_t) ದೊರಕಿತು;
 }
 
-static void strbuf_out(struct grep_opt *opt, const void *buf, size_t size)
+ಸ್ಥಿರ ಶೂನ್ಯ strbuf_ಹೊರಹೋಗು(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *buf, ಗಾತ್ರ_t ಗಾತ್ರ_2)
 {
-	struct work_item *w = opt->output_priv;
-	strbuf_add(&w->out, buf, size);
+	ರಚನೆ work_ಅಂಶ *w = opt->output_priv;
+	strbuf_ಕೂಡಿಸು(&w->ಹೊರಹೋಗು, buf, ಗಾತ್ರ_2);
 }
 
-static void start_threads(struct grep_opt *opt)
+ಸ್ಥಿರ ಶೂನ್ಯ ಆರಂಭ_ಎಳೆಗಳು(ರಚನೆ grep_opt *opt)
 {
-	int i;
+	ಪೂರ್ಣಾಂಕ i;
 
-	pthread_mutex_init(&grep_mutex, NULL);
-	pthread_mutex_init(&grep_attr_mutex, NULL);
-	pthread_cond_init(&cond_add, NULL);
-	pthread_cond_init(&cond_write, NULL);
-	pthread_cond_init(&cond_result, NULL);
+	pthread_mutex_init(&grep_mutex, ಖಾಲಿ);
+	pthread_mutex_init(&grep_attr_mutex, ಖಾಲಿ);
+	pthread_cond_init(&cond_ಕೂಡಿಸು, ಖಾಲಿ);
+	pthread_cond_init(&cond_write, ಖಾಲಿ);
+	pthread_cond_init(&cond_ಫಲಿತಾಂಶ, ಖಾಲಿ);
 	grep_use_locks = 1;
-	enable_obj_read_lock();
+	enable_obj_read_ಬೀಗ();
 
-	for (i = 0; i < ARRAY_SIZE(todo); i++) {
-		strbuf_init(&todo[i].out, 0);
+	ಗಾಗಿ (i = 0; i < ARRAY_ಗಾತ್ರ(todo); i++) {
+		strbuf_init(&todo[i].ಹೊರಹೋಗು, 0);
 	}
 
-	CALLOC_ARRAY(threads, num_threads);
-	for (i = 0; i < num_threads; i++) {
-		int err;
-		struct grep_opt *o = grep_opt_dup(opt);
-		o->output = strbuf_out;
+	CALLOC_ARRAY(ಎಳೆಗಳು, ಅಂಕೆ_ಎಳೆಗಳು);
+	ಗಾಗಿ (i = 0; i < ಅಂಕೆ_ಎಳೆಗಳು; i++) {
+		ಪೂರ್ಣಾಂಕ err;
+		ರಚನೆ grep_opt *o = grep_opt_dup(opt);
+		o->output = strbuf_ಹೊರಹೋಗು;
 		compile_grep_patterns(o);
-		err = pthread_create(&threads[i], NULL, run, o);
+		err = pthread_create(&ಎಳೆಗಳು[i], ಖಾಲಿ, ಸತತ, o);
 
-		if (err)
+		ಆದರೆ (err)
 			die(_("grep: failed to create thread: %s"),
 			    strerror(err));
 	}
 }
 
-static int wait_all(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ wait_all(ಶೂನ್ಯ)
 {
-	int hit = 0;
-	int i;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
+	ಪೂರ್ಣಾಂಕ i;
 
-	if (!HAVE_THREADS)
+	ಆದರೆ (!HAVE_ಎಳೆಗಳು)
 		BUG("Never call this function unless you have started threads");
 
-	grep_lock();
+	grep_ಬೀಗ();
 	all_work_added = 1;
 
 	/* Wait until all work is done. */
-	while (todo_done != todo_end)
-		pthread_cond_wait(&cond_result, &grep_mutex);
+	ಆಗ (todo_ಮುಗಿದ != todo_ಕೊನೆ)
+		pthread_cond_wait(&cond_ಫಲಿತಾಂಶ, &grep_mutex);
 
 	/* Wake up all the consumer threads so they can see that there
 	 * is no more work to do.
 	 */
-	pthread_cond_broadcast(&cond_add);
+	pthread_cond_ಪ್ರಸಾರ(&cond_ಕೂಡಿಸು);
 	grep_unlock();
 
-	for (i = 0; i < num_threads; i++) {
-		void *h;
-		pthread_join(threads[i], &h);
-		hit |= (int) (intptr_t) h;
+	ಗಾಗಿ (i = 0; i < ಅಂಕೆ_ಎಳೆಗಳು; i++) {
+		ಶೂನ್ಯ *h;
+		pthread_join(ಎಳೆಗಳು[i], &h);
+		ದೊರಕಿತು |= (ಪೂರ್ಣಾಂಕ) (intptr_t) h;
 	}
 
-	free(threads);
+	ಬಿಡುಗಡೆ(ಎಳೆಗಳು);
 
 	pthread_mutex_destroy(&grep_mutex);
 	pthread_mutex_destroy(&grep_attr_mutex);
-	pthread_cond_destroy(&cond_add);
+	pthread_cond_destroy(&cond_ಕೂಡಿಸು);
 	pthread_cond_destroy(&cond_write);
-	pthread_cond_destroy(&cond_result);
+	pthread_cond_destroy(&cond_ಫಲಿತಾಂಶ);
 	grep_use_locks = 0;
-	disable_obj_read_lock();
+	disable_obj_read_ಬೀಗ();
 
-	return hit;
+	ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 }
 
-static int grep_cmd_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_cmd_config(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *var, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ,
+			   ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	int st = grep_config(var, value, ctx, cb);
+	ಪೂರ್ಣಾಂಕ st = grep_config(var, ಮೌಲ್ಯ, ctx, cb);
 
-	if (git_color_config(var, value, cb) < 0)
+	ಆದರೆ (git_color_config(var, ಮೌಲ್ಯ, cb) < 0)
 		st = -1;
-	else if (git_default_config(var, value, ctx, cb) < 0)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (git_default_config(var, ಮೌಲ್ಯ, ctx, cb) < 0)
 		st = -1;
 
-	if (!strcmp(var, "grep.threads")) {
-		num_threads = git_config_int(var, value, ctx->kvi);
-		if (num_threads < 0)
+	ಆದರೆ (!strcmp(var, "grep.threads")) {
+		ಅಂಕೆ_ಎಳೆಗಳು = git_config_int(var, ಮೌಲ್ಯ, ctx->kvi);
+		ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು < 0)
 			die(_("invalid number of threads specified (%d) for %s"),
-			    num_threads, var);
-		else if (!HAVE_THREADS && num_threads > 1) {
+			    ಅಂಕೆ_ಎಳೆಗಳು, var);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!HAVE_ಎಳೆಗಳು && ಅಂಕೆ_ಎಳೆಗಳು > 1) {
 			/*
 			 * TRANSLATORS: %s is the configuration
 			 * variable for tweaking threads, currently
 			 * grep.threads
 			 */
 			warning(_("no threads support, ignoring %s"), var);
-			num_threads = 1;
+			ಅಂಕೆ_ಎಳೆಗಳು = 1;
 		}
 	}
 
-	if (!strcmp(var, "submodule.recurse"))
-		recurse_submodules = git_config_bool(var, value);
+	ಆದರೆ (!strcmp(var, "submodule.recurse"))
+		recurse_submodules = git_config_bool(var, ಮೌಲ್ಯ);
 
-	return st;
+	ಹಿಂತಿರುಗಿ st;
 }
 
-static void grep_source_name(struct grep_opt *opt, const char *filename,
-			     int tree_name_len, struct strbuf *out)
+ಸ್ಥಿರ ಶೂನ್ಯ grep_ಮೂಲ_name(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename,
+			     ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_name_len, ರಚನೆ strbuf *ಹೊರಹೋಗು)
 {
-	strbuf_reset(out);
+	strbuf_reset(ಹೊರಹೋಗು);
 
-	if (opt->null_following_name) {
-		if (opt->relative && grep_prefix) {
-			struct strbuf rel_buf = STRBUF_INIT;
-			const char *rel_name =
-				relative_path(filename + tree_name_len,
-					      grep_prefix, &rel_buf);
+	ಆದರೆ (opt->null_following_name) {
+		ಆದರೆ (opt->relative && grep_ಪೂರ್ವಪ್ರತ್ಯಯ) {
+			ರಚನೆ strbuf rel_buf = STRBUF_INIT;
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *rel_name =
+				relative_ಮಾರ್ಗ(filename + ವೃಕ್ಷ_name_len,
+					      grep_ಪೂರ್ವಪ್ರತ್ಯಯ, &rel_buf);
 
-			if (tree_name_len)
-				strbuf_add(out, filename, tree_name_len);
+			ಆದರೆ (ವೃಕ್ಷ_name_len)
+				strbuf_ಕೂಡಿಸು(ಹೊರಹೋಗು, filename, ವೃಕ್ಷ_name_len);
 
-			strbuf_addstr(out, rel_name);
+			strbuf_addstr(ಹೊರಹೋಗು, rel_name);
 			strbuf_release(&rel_buf);
-		} else {
-			strbuf_addstr(out, filename);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			strbuf_addstr(ಹೊರಹೋಗು, filename);
 		}
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	if (opt->relative && grep_prefix)
-		quote_path(filename + tree_name_len, grep_prefix, out, 0);
-	else
-		quote_c_style(filename + tree_name_len, out, NULL, 0);
+	ಆದರೆ (opt->relative && grep_ಪೂರ್ವಪ್ರತ್ಯಯ)
+		quote_ಮಾರ್ಗ(filename + ವೃಕ್ಷ_name_len, grep_ಪೂರ್ವಪ್ರತ್ಯಯ, ಹೊರಹೋಗು, 0);
+	ಇಲ್ಲದಿದ್ದರೆ
+		quote_c_style(filename + ವೃಕ್ಷ_name_len, ಹೊರಹೋಗು, ಖಾಲಿ, 0);
 
-	if (tree_name_len)
-		strbuf_insert(out, 0, filename, tree_name_len);
+	ಆದರೆ (ವೃಕ್ಷ_name_len)
+		strbuf_ಸೇರಿಸು(ಹೊರಹೋಗು, 0, filename, ವೃಕ್ಷ_name_len);
 }
 
-static int grep_oid(struct grep_opt *opt, const struct object_id *oid,
-		     const char *filename, int tree_name_len,
-		     const char *path)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_oid(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+		     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename, ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_name_len,
+		     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	struct strbuf pathbuf = STRBUF_INIT;
-	struct grep_source gs;
+	ರಚನೆ strbuf pathbuf = STRBUF_INIT;
+	ರಚನೆ grep_ಮೂಲ gs;
 
-	grep_source_name(opt, filename, tree_name_len, &pathbuf);
-	grep_source_init_oid(&gs, pathbuf.buf, path, oid, opt->repo);
+	grep_ಮೂಲ_name(opt, filename, ವೃಕ್ಷ_name_len, &pathbuf);
+	grep_ಮೂಲ_init_oid(&gs, pathbuf.buf, ಮಾರ್ಗ, oid, opt->repo);
 	strbuf_release(&pathbuf);
 
-	if (num_threads > 1) {
+	ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು > 1) {
 		/*
 		 * add_work() copies gs and thus assumes ownership of
 		 * its fields, so do not call grep_source_clear()
 		 */
-		add_work(opt, &gs);
-		return 0;
-	} else {
-		int hit;
+		ಕೂಡಿಸು_work(opt, &gs);
+		ಹಿಂತಿರುಗಿ 0;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಪೂರ್ಣಾಂಕ ದೊರಕಿತು;
 
-		hit = grep_source(opt, &gs);
+		ದೊರಕಿತು = grep_ಮೂಲ(opt, &gs);
 
-		grep_source_clear(&gs);
-		return hit;
+		grep_ಮೂಲ_clear(&gs);
+		ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 	}
 }
 
-static int grep_file(struct grep_opt *opt, const char *filename)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_file(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct grep_source gs;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ರಚನೆ grep_ಮೂಲ gs;
 
-	grep_source_name(opt, filename, 0, &buf);
-	grep_source_init_file(&gs, buf.buf, filename);
+	grep_ಮೂಲ_name(opt, filename, 0, &buf);
+	grep_ಮೂಲ_init_file(&gs, buf.buf, filename);
 	strbuf_release(&buf);
 
-	if (num_threads > 1) {
+	ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು > 1) {
 		/*
 		 * add_work() copies gs and thus assumes ownership of
 		 * its fields, so do not call grep_source_clear()
 		 */
-		add_work(opt, &gs);
-		return 0;
-	} else {
-		int hit;
+		ಕೂಡಿಸು_work(opt, &gs);
+		ಹಿಂತಿರುಗಿ 0;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಪೂರ್ಣಾಂಕ ದೊರಕಿತು;
 
-		hit = grep_source(opt, &gs);
+		ದೊರಕಿತು = grep_ಮೂಲ(opt, &gs);
 
-		grep_source_clear(&gs);
-		return hit;
+		grep_ಮೂಲ_clear(&gs);
+		ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 	}
 }
 
-static void append_path(struct grep_opt *opt, const void *data, size_t len)
+ಸ್ಥಿರ ಶೂನ್ಯ append_ಮಾರ್ಗ(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *ದತ್ತಾಂಶ, ಗಾತ್ರ_t len)
 {
-	struct string_list *path_list = opt->output_priv;
+	ರಚನೆ string_list *ಮಾರ್ಗ_list = opt->output_priv;
 
-	if (len == 1 && *(const char *)data == '\0')
-		return;
-	string_list_append_nodup(path_list, xstrndup(data, len));
+	ಆದರೆ (len == 1 && *(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *)ದತ್ತಾಂಶ == '\0')
+		ಹಿಂತಿರುಗಿ;
+	string_list_append_nodup(ಮಾರ್ಗ_list, xstrndup(ದತ್ತಾಂಶ, len));
 }
 
-static void run_pager(struct grep_opt *opt, const char *prefix)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸತತ_pager(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
-	struct string_list *path_list = opt->output_priv;
-	struct child_process child = CHILD_PROCESS_INIT;
-	int i, status;
+	ರಚನೆ string_list *ಮಾರ್ಗ_list = opt->output_priv;
+	ರಚನೆ ಮಗು_process ಮಗು = ಮಗು_PROCESS_INIT;
+	ಪೂರ್ಣಾಂಕ i, ಸ್ಥಿತಿ_2;
 
-	for (i = 0; i < path_list->nr; i++)
-		strvec_push(&child.args, path_list->items[i].string);
-	child.dir = prefix;
-	child.use_shell = 1;
+	ಗಾಗಿ (i = 0; i < ಮಾರ್ಗ_list->nr; i++)
+		strvec_ತಳ್ಳು(&ಮಗು.ವಾದಗಳು, ಮಾರ್ಗ_list->ವಸ್ತುಗಳು[i].string);
+	ಮಗು.dir = ಪೂರ್ವಪ್ರತ್ಯಯ;
+	ಮಗು.use_shell = 1;
 
-	status = run_command(&child);
-	if (status)
-		exit(status);
+	ಸ್ಥಿತಿ_2 = ಸತತ_command(&ಮಗು);
+	ಆದರೆ (ಸ್ಥಿತಿ_2)
+		ನಿರ್ಗಮಿಸು(ಸ್ಥಿತಿ_2);
 }
 
-static int grep_cache(struct grep_opt *opt,
-		      const struct pathspec *pathspec, int cached);
-static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
-		     struct tree_desc *tree, struct strbuf *base, int tn_len,
-		     int check_attr);
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_cache(ರಚನೆ grep_opt *opt,
+		      ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec, ಪೂರ್ಣಾಂಕ cached);
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_ವೃಕ್ಷ(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+		     ರಚನೆ ವೃಕ್ಷ_desc *ವೃಕ್ಷ, ರಚನೆ strbuf *ತಳ, ಪೂರ್ಣಾಂಕ tn_len,
+		     ಪೂರ್ಣಾಂಕ check_attr);
 
-static int grep_submodule(struct grep_opt *opt,
-			  const struct pathspec *pathspec,
-			  const struct object_id *oid,
-			  const char *filename, const char *path, int cached)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_submodule(ರಚನೆ grep_opt *opt,
+			  ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+			  ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+			  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಪೂರ್ಣಾಂಕ cached)
 {
-	struct repository *subrepo;
-	struct repository *superproject = opt->repo;
-	struct grep_opt subopt;
-	int hit = 0;
+	ರಚನೆ repository *subrepo;
+	ರಚನೆ repository *superproject = opt->repo;
+	ರಚನೆ grep_opt subopt;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
 
-	if (!is_submodule_active(superproject, path))
-		return 0;
+	ಆದರೆ (!is_submodule_ಸಕ್ರಿಯ(superproject, ಮಾರ್ಗ))
+		ಹಿಂತಿರುಗಿ 0;
 
-	subrepo = xmalloc(sizeof(*subrepo));
-	if (repo_submodule_init(subrepo, superproject, path, null_oid(opt->repo->hash_algo))) {
-		free(subrepo);
-		return 0;
+	subrepo = xmalloc(ಗಾತ್ರ(*subrepo));
+	ಆದರೆ (repo_submodule_init(subrepo, superproject, ಮಾರ್ಗ, null_oid(opt->repo->hash_algo))) {
+		ಬಿಡುಗಡೆ(subrepo);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	ALLOC_GROW(repos_to_free, repos_to_free_nr + 1, repos_to_free_alloc);
-	repos_to_free[repos_to_free_nr++] = subrepo;
+	ALLOC_GROW(repos_ಗಮ್ಯ_free, repos_ಗಮ್ಯ_free_nr + 1, repos_ಗಮ್ಯ_free_alloc);
+	repos_ಗಮ್ಯ_free[repos_ಗಮ್ಯ_free_nr++] = subrepo;
 
 	/*
 	 * NEEDSWORK: when reading a submodule, the sparsity settings in the
@@ -494,240 +494,240 @@ static int grep_submodule(struct grep_opt *opt,
 	 * thus need to hold the object-read lock to serialize all readers with
 	 * one another.
 	 */
-	obj_read_lock();
+	obj_read_ಬೀಗ();
 	repo_read_gitmodules(subrepo, 0);
 	obj_read_unlock();
 
-	memcpy(&subopt, opt, sizeof(subopt));
+	ಸ್ಮರಣೆ_ನಕಲು(&subopt, opt, ಗಾತ್ರ(subopt));
 	subopt.repo = subrepo;
 
-	if (oid) {
-		enum object_type object_type;
-		struct tree_desc tree;
-		void *data;
-		size_t size;
-		struct strbuf base = STRBUF_INIT;
+	ಆದರೆ (oid) {
+		ಎಣಿಕೆ object_type object_type;
+		ರಚನೆ ವೃಕ್ಷ_desc ವೃಕ್ಷ;
+		ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+		ಗಾತ್ರ_t ಗಾತ್ರ_2;
+		ರಚನೆ strbuf ತಳ = STRBUF_INIT;
 
-		obj_read_lock();
-		object_type = odb_read_object_info(subrepo->objects, oid, NULL);
+		obj_read_ಬೀಗ();
+		object_type = odb_read_object_info(subrepo->objects, oid, ಖಾಲಿ);
 		obj_read_unlock();
-		data = odb_read_object_peeled(subrepo->objects, oid, OBJ_TREE, &size, NULL);
-		if (!data)
-			die(_("unable to read tree (%s)"), oid_to_hex(oid));
+		ದತ್ತಾಂಶ = odb_read_object_peeled(subrepo->objects, oid, OBJ_ವೃಕ್ಷ, &ಗಾತ್ರ_2, ಖಾಲಿ);
+		ಆದರೆ (!ದತ್ತಾಂಶ)
+			die(_("unable to read tree (%s)"), oid_ಗಮ್ಯ_hex(oid));
 
-		strbuf_addstr(&base, filename);
-		strbuf_addch(&base, '/');
+		strbuf_addstr(&ತಳ, filename);
+		strbuf_addch(&ತಳ, '/');
 
-		init_tree_desc(&tree, oid, data, size);
-		hit = grep_tree(&subopt, pathspec, &tree, &base, base.len,
+		init_ವೃಕ್ಷ_desc(&ವೃಕ್ಷ, oid, ದತ್ತಾಂಶ, ಗಾತ್ರ_2);
+		ದೊರಕಿತು = grep_ವೃಕ್ಷ(&subopt, pathspec, &ವೃಕ್ಷ, &ತಳ, ತಳ.len,
 				object_type == OBJ_COMMIT);
-		strbuf_release(&base);
-		free(data);
-	} else {
-		hit = grep_cache(&subopt, pathspec, cached);
+		strbuf_release(&ತಳ);
+		ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ದೊರಕಿತು = grep_cache(&subopt, pathspec, cached);
 	}
 
-	return hit;
+	ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 }
 
-static int grep_cache(struct grep_opt *opt,
-		      const struct pathspec *pathspec, int cached)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_cache(ರಚನೆ grep_opt *opt,
+		      ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec, ಪೂರ್ಣಾಂಕ cached)
 {
-	struct repository *repo = opt->repo;
-	int hit = 0;
-	int nr;
-	struct strbuf name = STRBUF_INIT;
-	int name_base_len = 0;
-	if (repo->submodule_prefix) {
-		name_base_len = strlen(repo->submodule_prefix);
-		strbuf_addstr(&name, repo->submodule_prefix);
+	ರಚನೆ repository *repo = opt->repo;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
+	ಪೂರ್ಣಾಂಕ nr;
+	ರಚನೆ strbuf name = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ name_ತಳ_len = 0;
+	ಆದರೆ (repo->submodule_ಪೂರ್ವಪ್ರತ್ಯಯ) {
+		name_ತಳ_len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(repo->submodule_ಪೂರ್ವಪ್ರತ್ಯಯ);
+		strbuf_addstr(&name, repo->submodule_ಪೂರ್ವಪ್ರತ್ಯಯ);
 	}
 
-	if (repo_read_index(repo) < 0)
+	ಆದರೆ (repo_read_ಸೂಚ್ಯಂಕ(repo) < 0)
 		die(_("index file corrupt"));
 
-	for (nr = 0; nr < repo->index->cache_nr; nr++) {
-		const struct cache_entry *ce = repo->index->cache[nr];
+	ಗಾಗಿ (nr = 0; nr < repo->ಸೂಚ್ಯಂಕ->cache_nr; nr++) {
+		ಸ್ಥಿರಾಂಕ ರಚನೆ cache_ನಮೂದು *ce = repo->ಸೂಚ್ಯಂಕ->cache[nr];
 
-		if (!cached && ce_skip_worktree(ce))
-			continue;
+		ಆದರೆ (!cached && ce_skip_worktree(ce))
+			ಮುಂದುವರಿ;
 
-		strbuf_setlen(&name, name_base_len);
+		strbuf_setlen(&name, name_ತಳ_len);
 		strbuf_addstr(&name, ce->name);
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			enum object_type type;
-			struct tree_desc tree;
-			void *data;
-			size_t size;
+		ಆದರೆ (S_ISSPARSEDIR(ce->ce_ಬಹುಲಕ)) {
+			ಎಣಿಕೆ object_type type;
+			ರಚನೆ ವೃಕ್ಷ_desc ವೃಕ್ಷ;
+			ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+			ಗಾತ್ರ_t ಗಾತ್ರ_2;
 
-			data = odb_read_object(the_repository->objects, &ce->oid,
-					       &type, &size);
-			if (!data)
-				die(_("unable to read tree %s"), oid_to_hex(&ce->oid));
-			init_tree_desc(&tree, &ce->oid, data, size);
+			ದತ್ತಾಂಶ = odb_read_object(the_repository->objects, &ce->oid,
+					       &type, &ಗಾತ್ರ_2);
+			ಆದರೆ (!ದತ್ತಾಂಶ)
+				die(_("unable to read tree %s"), oid_ಗಮ್ಯ_hex(&ce->oid));
+			init_ವೃಕ್ಷ_desc(&ವೃಕ್ಷ, &ce->oid, ದತ್ತಾಂಶ, ಗಾತ್ರ_2);
 
-			hit |= grep_tree(opt, pathspec, &tree, &name, 0, 0);
-			strbuf_setlen(&name, name_base_len);
+			ದೊರಕಿತು |= grep_ವೃಕ್ಷ(opt, pathspec, &ವೃಕ್ಷ, &name, 0, 0);
+			strbuf_setlen(&name, name_ತಳ_len);
 			strbuf_addstr(&name, ce->name);
-			free(data);
-		} else if (S_ISREG(ce->ce_mode) &&
-		    match_pathspec(repo->index, pathspec, name.buf, name.len, 0, NULL,
-				   S_ISDIR(ce->ce_mode) ||
-				   S_ISGITLINK(ce->ce_mode))) {
+			ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (S_ISREG(ce->ce_ಬಹುಲಕ) &&
+		    ಹೊಂದಿಕೆ_pathspec(repo->ಸೂಚ್ಯಂಕ, pathspec, name.buf, name.len, 0, ಖಾಲಿ,
+				   S_ISDIR(ce->ce_ಬಹುಲಕ) ||
+				   S_ISGITLINK(ce->ce_ಬಹುಲಕ))) {
 			/*
 			 * If CE_VALID is on, we assume worktree file and its
 			 * cache entry are identical, even if worktree file has
 			 * been modified, so use cache version instead
 			 */
-			if (cached || (ce->ce_flags & CE_VALID)) {
-				if (ce_stage(ce) || ce_intent_to_add(ce))
-					continue;
-				hit |= grep_oid(opt, &ce->oid, name.buf,
+			ಆದರೆ (cached || (ce->ce_flags & CE_VALID)) {
+				ಆದರೆ (ce_stage(ce) || ce_intent_ಗಮ್ಯ_ಕೂಡಿಸು(ce))
+					ಮುಂದುವರಿ;
+				ದೊರಕಿತು |= grep_oid(opt, &ce->oid, name.buf,
 						 0, name.buf);
-			} else {
-				hit |= grep_file(opt, name.buf);
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				ದೊರಕಿತು |= grep_file(opt, name.buf);
 			}
-		} else if (recurse_submodules && S_ISGITLINK(ce->ce_mode) &&
-			   submodule_path_match(repo->index, pathspec, name.buf, NULL)) {
-			hit |= grep_submodule(opt, pathspec, NULL, ce->name,
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (recurse_submodules && S_ISGITLINK(ce->ce_ಬಹುಲಕ) &&
+			   submodule_ಮಾರ್ಗ_ಹೊಂದಿಕೆ(repo->ಸೂಚ್ಯಂಕ, pathspec, name.buf, ಖಾಲಿ)) {
+			ದೊರಕಿತು |= grep_submodule(opt, pathspec, ಖಾಲಿ, ce->name,
 					      ce->name, cached);
-		} else {
-			continue;
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಮುಂದುವರಿ;
 		}
 
-		if (ce_stage(ce)) {
-			do {
+		ಆದರೆ (ce_stage(ce)) {
+			ಮಾಡು {
 				nr++;
-			} while (nr < repo->index->cache_nr &&
-				 !strcmp(ce->name, repo->index->cache[nr]->name));
+			} ಆಗ (nr < repo->ಸೂಚ್ಯಂಕ->cache_nr &&
+				 !strcmp(ce->name, repo->ಸೂಚ್ಯಂಕ->cache[nr]->name));
 			nr--; /* compensate for loop control */
 		}
-		if (hit && opt->status_only)
-			break;
+		ಆದರೆ (ದೊರಕಿತು && opt->ಸ್ಥಿತಿ_only)
+			ನಿಲ್ಲಿಸು;
 	}
 
 	strbuf_release(&name);
-	return hit;
+	ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 }
 
-static int grep_tree(struct grep_opt *opt, const struct pathspec *pathspec,
-		     struct tree_desc *tree, struct strbuf *base, int tn_len,
-		     int check_attr)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_ವೃಕ್ಷ(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+		     ರಚನೆ ವೃಕ್ಷ_desc *ವೃಕ್ಷ, ರಚನೆ strbuf *ತಳ, ಪೂರ್ಣಾಂಕ tn_len,
+		     ಪೂರ್ಣಾಂಕ check_attr)
 {
-	struct repository *repo = opt->repo;
-	int hit = 0;
-	enum interesting match = entry_not_interesting;
-	struct name_entry entry;
-	int old_baselen = base->len;
-	struct strbuf name = STRBUF_INIT;
-	int name_base_len = 0;
-	if (repo->submodule_prefix) {
-		strbuf_addstr(&name, repo->submodule_prefix);
-		name_base_len = name.len;
+	ರಚನೆ repository *repo = opt->repo;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
+	ಎಣಿಕೆ interesting ಹೊಂದಿಕೆ = ನಮೂದು_not_interesting;
+	ರಚನೆ name_ನಮೂದು ನಮೂದು;
+	ಪೂರ್ಣಾಂಕ old_baselen = ತಳ->len;
+	ರಚನೆ strbuf name = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ name_ತಳ_len = 0;
+	ಆದರೆ (repo->submodule_ಪೂರ್ವಪ್ರತ್ಯಯ) {
+		strbuf_addstr(&name, repo->submodule_ಪೂರ್ವಪ್ರತ್ಯಯ);
+		name_ತಳ_len = name.len;
 	}
 
-	while (tree_entry(tree, &entry)) {
-		int te_len = tree_entry_len(&entry);
+	ಆಗ (ವೃಕ್ಷ_ನಮೂದು(ವೃಕ್ಷ, &ನಮೂದು)) {
+		ಪೂರ್ಣಾಂಕ te_len = ವೃಕ್ಷ_ನಮೂದು_len(&ನಮೂದು);
 
-		if (match != all_entries_interesting) {
-			strbuf_addstr(&name, base->buf + tn_len);
-			match = tree_entry_interesting(repo->index,
-						       &entry, &name,
+		ಆದರೆ (ಹೊಂದಿಕೆ != all_entries_interesting) {
+			strbuf_addstr(&name, ತಳ->buf + tn_len);
+			ಹೊಂದಿಕೆ = ವೃಕ್ಷ_ನಮೂದು_interesting(repo->ಸೂಚ್ಯಂಕ,
+						       &ನಮೂದು, &name,
 						       pathspec);
-			strbuf_setlen(&name, name_base_len);
+			strbuf_setlen(&name, name_ತಳ_len);
 
-			if (match == all_entries_not_interesting)
-				break;
-			if (match == entry_not_interesting)
-				continue;
+			ಆದರೆ (ಹೊಂದಿಕೆ == all_entries_not_interesting)
+				ನಿಲ್ಲಿಸು;
+			ಆದರೆ (ಹೊಂದಿಕೆ == ನಮೂದು_not_interesting)
+				ಮುಂದುವರಿ;
 		}
 
-		strbuf_add(base, entry.path, te_len);
+		strbuf_ಕೂಡಿಸು(ತಳ, ನಮೂದು.ಮಾರ್ಗ, te_len);
 
-		if (S_ISREG(entry.mode)) {
-			hit |= grep_oid(opt, &entry.oid, base->buf, tn_len,
-					 check_attr ? base->buf + tn_len : NULL);
-		} else if (S_ISDIR(entry.mode)) {
-			enum object_type type;
-			struct tree_desc sub;
-			void *data;
-			size_t size;
+		ಆದರೆ (S_ISREG(ನಮೂದು.ಬಹುಲಕ)) {
+			ದೊರಕಿತು |= grep_oid(opt, &ನಮೂದು.oid, ತಳ->buf, tn_len,
+					 check_attr ? ತಳ->buf + tn_len : ಖಾಲಿ);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (S_ISDIR(ನಮೂದು.ಬಹುಲಕ)) {
+			ಎಣಿಕೆ object_type type;
+			ರಚನೆ ವೃಕ್ಷ_desc sub;
+			ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+			ಗಾತ್ರ_t ಗಾತ್ರ_2;
 
-			data = odb_read_object(the_repository->objects,
-					       &entry.oid, &type, &size);
-			if (!data)
+			ದತ್ತಾಂಶ = odb_read_object(the_repository->objects,
+					       &ನಮೂದು.oid, &type, &ಗಾತ್ರ_2);
+			ಆದರೆ (!ದತ್ತಾಂಶ)
 				die(_("unable to read tree (%s)"),
-				    oid_to_hex(&entry.oid));
+				    oid_ಗಮ್ಯ_hex(&ನಮೂದು.oid));
 
-			strbuf_addch(base, '/');
-			init_tree_desc(&sub, &entry.oid, data, size);
-			hit |= grep_tree(opt, pathspec, &sub, base, tn_len,
+			strbuf_addch(ತಳ, '/');
+			init_ವೃಕ್ಷ_desc(&sub, &ನಮೂದು.oid, ದತ್ತಾಂಶ, ಗಾತ್ರ_2);
+			ದೊರಕಿತು |= grep_ವೃಕ್ಷ(opt, pathspec, &sub, ತಳ, tn_len,
 					 check_attr);
-			free(data);
-		} else if (recurse_submodules && S_ISGITLINK(entry.mode)) {
-			hit |= grep_submodule(opt, pathspec, &entry.oid,
-					      base->buf, base->buf + tn_len,
+			ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (recurse_submodules && S_ISGITLINK(ನಮೂದು.ಬಹುಲಕ)) {
+			ದೊರಕಿತು |= grep_submodule(opt, pathspec, &ನಮೂದು.oid,
+					      ತಳ->buf, ತಳ->buf + tn_len,
 					      1); /* ignored */
 		}
 
-		strbuf_setlen(base, old_baselen);
+		strbuf_setlen(ತಳ, old_baselen);
 
-		if (hit && opt->status_only)
-			break;
+		ಆದರೆ (ದೊರಕಿತು && opt->ಸ್ಥಿತಿ_only)
+			ನಿಲ್ಲಿಸು;
 	}
 
 	strbuf_release(&name);
-	return hit;
+	ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 }
 
-static void collect_blob_oids_for_tree(struct repository *repo,
-				       const struct pathspec *pathspec,
-				       struct tree_desc *tree,
-				       struct strbuf *base,
-				       int tn_len,
-				       struct oidset *blob_oids)
+ಸ್ಥಿರ ಶೂನ್ಯ collect_blob_oids_for_ವೃಕ್ಷ(ರಚನೆ repository *repo,
+				       ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+				       ರಚನೆ ವೃಕ್ಷ_desc *ವೃಕ್ಷ,
+				       ರಚನೆ strbuf *ತಳ,
+				       ಪೂರ್ಣಾಂಕ tn_len,
+				       ರಚನೆ oidset *blob_oids)
 {
-	struct name_entry entry;
-	int old_baselen = base->len;
-	struct strbuf name = STRBUF_INIT;
-	enum interesting match = entry_not_interesting;
+	ರಚನೆ name_ನಮೂದು ನಮೂದು;
+	ಪೂರ್ಣಾಂಕ old_baselen = ತಳ->len;
+	ರಚನೆ strbuf name = STRBUF_INIT;
+	ಎಣಿಕೆ interesting ಹೊಂದಿಕೆ = ನಮೂದು_not_interesting;
 
-	while (tree_entry(tree, &entry)) {
-		if (match != all_entries_interesting) {
-			strbuf_addstr(&name, base->buf + tn_len);
-			match = tree_entry_interesting(repo->index,
-						       &entry, &name,
+	ಆಗ (ವೃಕ್ಷ_ನಮೂದು(ವೃಕ್ಷ, &ನಮೂದು)) {
+		ಆದರೆ (ಹೊಂದಿಕೆ != all_entries_interesting) {
+			strbuf_addstr(&name, ತಳ->buf + tn_len);
+			ಹೊಂದಿಕೆ = ವೃಕ್ಷ_ನಮೂದು_interesting(repo->ಸೂಚ್ಯಂಕ,
+						       &ನಮೂದು, &name,
 						       pathspec);
 			strbuf_reset(&name);
 
-			if (match == all_entries_not_interesting)
-				break;
-			if (match == entry_not_interesting)
-				continue;
+			ಆದರೆ (ಹೊಂದಿಕೆ == all_entries_not_interesting)
+				ನಿಲ್ಲಿಸು;
+			ಆದರೆ (ಹೊಂದಿಕೆ == ನಮೂದು_not_interesting)
+				ಮುಂದುವರಿ;
 		}
 
-		strbuf_add(base, entry.path, tree_entry_len(&entry));
+		strbuf_ಕೂಡಿಸು(ತಳ, ನಮೂದು.ಮಾರ್ಗ, ವೃಕ್ಷ_ನಮೂದು_len(&ನಮೂದು));
 
-		if (S_ISREG(entry.mode)) {
-			if (!odb_has_object(repo->objects, &entry.oid, 0))
-				oidset_insert(blob_oids, &entry.oid);
-		} else if (S_ISDIR(entry.mode)) {
-			enum object_type type;
-			struct tree_desc sub_tree;
-			void *data;
-			size_t size;
+		ಆದರೆ (S_ISREG(ನಮೂದು.ಬಹುಲಕ)) {
+			ಆದರೆ (!odb_has_object(repo->objects, &ನಮೂದು.oid, 0))
+				oidset_ಸೇರಿಸು(blob_oids, &ನಮೂದು.oid);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (S_ISDIR(ನಮೂದು.ಬಹುಲಕ)) {
+			ಎಣಿಕೆ object_type type;
+			ರಚನೆ ವೃಕ್ಷ_desc sub_ವೃಕ್ಷ;
+			ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+			ಗಾತ್ರ_t ಗಾತ್ರ_2;
 
-			data = odb_read_object(repo->objects, &entry.oid,
-					       &type, &size);
-			if (!data)
+			ದತ್ತಾಂಶ = odb_read_object(repo->objects, &ನಮೂದು.oid,
+					       &type, &ಗಾತ್ರ_2);
+			ಆದರೆ (!ದತ್ತಾಂಶ)
 				die(_("unable to read tree (%s)"),
-				    oid_to_hex(&entry.oid));
+				    oid_ಗಮ್ಯ_hex(&ನಮೂದು.oid));
 
-			strbuf_addch(base, '/');
-			init_tree_desc(&sub_tree, &entry.oid, data, size);
-			collect_blob_oids_for_tree(repo, pathspec, &sub_tree,
-						   base, tn_len, blob_oids);
-			free(data);
+			strbuf_addch(ತಳ, '/');
+			init_ವೃಕ್ಷ_desc(&sub_ವೃಕ್ಷ, &ನಮೂದು.oid, ದತ್ತಾಂಶ, ಗಾತ್ರ_2);
+			collect_blob_oids_for_ವೃಕ್ಷ(repo, pathspec, &sub_ವೃಕ್ಷ,
+						   ತಳ, tn_len, blob_oids);
+			ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
 		}
 		/*
 		 * ...no else clause for S_ISGITLINK: submodules have their
@@ -735,66 +735,66 @@ static void collect_blob_oids_for_tree(struct repository *repo,
 		 * anyway.
 		 */
 
-		strbuf_setlen(base, old_baselen);
+		strbuf_setlen(ತಳ, old_baselen);
 	}
 
 	strbuf_release(&name);
 }
 
-static void collect_blob_oids_for_treeish(struct grep_opt *opt,
-					  const struct pathspec *pathspec,
-					  const struct object_id *tree_ish_oid,
-					  const char *name,
-					  struct oidset *blob_oids)
+ಸ್ಥಿರ ಶೂನ್ಯ collect_blob_oids_for_treeish(ರಚನೆ grep_opt *opt,
+					  ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+					  ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *ವೃಕ್ಷ_ish_oid,
+					  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name,
+					  ರಚನೆ oidset *blob_oids)
 {
-	struct tree_desc tree;
-	void *data;
-	size_t size;
-	struct strbuf base = STRBUF_INIT;
-	int len;
+	ರಚನೆ ವೃಕ್ಷ_desc ವೃಕ್ಷ;
+	ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+	ಗಾತ್ರ_t ಗಾತ್ರ_2;
+	ರಚನೆ strbuf ತಳ = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ len;
 
-	data = odb_read_object_peeled(opt->repo->objects, tree_ish_oid,
-				      OBJ_TREE, &size, NULL);
+	ದತ್ತಾಂಶ = odb_read_object_peeled(opt->repo->objects, ವೃಕ್ಷ_ish_oid,
+				      OBJ_ವೃಕ್ಷ, &ಗಾತ್ರ_2, ಖಾಲಿ);
 
-	if (!data)
-		return;
+	ಆದರೆ (!ದತ್ತಾಂಶ)
+		ಹಿಂತಿರುಗಿ;
 
-	len = name ? strlen(name) : 0;
-	if (len) {
-		strbuf_add(&base, name, len);
-		strbuf_addch(&base, ':');
+	len = name ? ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name) : 0;
+	ಆದರೆ (len) {
+		strbuf_ಕೂಡಿಸು(&ತಳ, name, len);
+		strbuf_addch(&ತಳ, ':');
 	}
-	init_tree_desc(&tree, tree_ish_oid, data, size);
+	init_ವೃಕ್ಷ_desc(&ವೃಕ್ಷ, ವೃಕ್ಷ_ish_oid, ದತ್ತಾಂಶ, ಗಾತ್ರ_2);
 
-	collect_blob_oids_for_tree(opt->repo, pathspec, &tree,
-				   &base, base.len, blob_oids);
+	collect_blob_oids_for_ವೃಕ್ಷ(opt->repo, pathspec, &ವೃಕ್ಷ,
+				   &ತಳ, ತಳ.len, blob_oids);
 
-	strbuf_release(&base);
-	free(data);
+	strbuf_release(&ತಳ);
+	ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
 }
 
-static void prefetch_grep_blobs(struct grep_opt *opt,
-				const struct pathspec *pathspec,
-				const struct object_array *list)
+ಸ್ಥಿರ ಶೂನ್ಯ prefetch_grep_blobs(ರಚನೆ grep_opt *opt,
+				ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+				ಸ್ಥಿರಾಂಕ ರಚನೆ object_array *list)
 {
-	struct oidset blob_oids = OIDSET_INIT;
+	ರಚನೆ oidset blob_oids = OIDSET_INIT;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(opt->repo))
-		return;
+	ಆದರೆ (!repo_has_promisor_remote(opt->repo))
+		ಹಿಂತಿರುಗಿ;
 
 	/* For each tree, gather the blobs in it */
-	for (int i = 0; i < list->nr; i++) {
-		struct object *real_obj;
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < list->nr; i++) {
+		ರಚನೆ object *real_obj;
 
-		obj_read_lock();
-		real_obj = deref_tag(opt->repo, list->objects[i].item,
-				     NULL, 0);
+		obj_read_ಬೀಗ();
+		real_obj = deref_ಟ್ಯಾಗ್(opt->repo, list->objects[i].ಅಂಶ,
+				     ಖಾಲಿ, 0);
 		obj_read_unlock();
 
-		if (real_obj &&
+		ಆದರೆ (real_obj &&
 		    (real_obj->type == OBJ_COMMIT ||
-		     real_obj->type == OBJ_TREE))
+		     real_obj->type == OBJ_ವೃಕ್ಷ))
 			collect_blob_oids_for_treeish(opt, pathspec,
 						      &real_obj->oid,
 						      list->objects[i].name,
@@ -802,289 +802,289 @@ static void prefetch_grep_blobs(struct grep_opt *opt,
 	}
 
 	/* Prefetch the blobs we found */
-	if (oidset_size(&blob_oids)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	ಆದರೆ (oidset_ಗಾತ್ರ(&blob_oids)) {
+		ರಚನೆ oid_array ಗಮ್ಯ_fetch = OID_ARRAY_INIT;
+		ರಚನೆ oidset_iter iter;
+		ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid;
 
 		oidset_iter_init(&blob_oids, &iter);
-		while ((oid = oidset_iter_next(&iter)))
-			oid_array_append(&to_fetch, oid);
+		ಆಗ ((oid = oidset_iter_ಮುಂದಿನ(&iter)))
+			oid_array_append(&ಗಮ್ಯ_fetch, oid);
 
-		promisor_remote_get_direct(opt->repo, to_fetch.oid, to_fetch.nr);
+		promisor_remote_get_ನೇರ(opt->repo, ಗಮ್ಯ_fetch.oid, ಗಮ್ಯ_fetch.nr);
 
-		oid_array_clear(&to_fetch);
+		oid_array_clear(&ಗಮ್ಯ_fetch);
 	}
 	oidset_clear(&blob_oids);
 }
 
-static int grep_object(struct grep_opt *opt, const struct pathspec *pathspec,
-		       struct object *obj, const char *name, const char *path)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_object(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+		       ರಚನೆ object *obj, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	if (obj->type == OBJ_BLOB)
-		return grep_oid(opt, &obj->oid, name, 0, path);
-	if (obj->type == OBJ_COMMIT || obj->type == OBJ_TREE) {
-		struct tree_desc tree;
-		void *data;
-		size_t size;
-		struct strbuf base;
-		int hit, len;
+	ಆದರೆ (obj->type == OBJ_BLOB)
+		ಹಿಂತಿರುಗಿ grep_oid(opt, &obj->oid, name, 0, ಮಾರ್ಗ);
+	ಆದರೆ (obj->type == OBJ_COMMIT || obj->type == OBJ_ವೃಕ್ಷ) {
+		ರಚನೆ ವೃಕ್ಷ_desc ವೃಕ್ಷ;
+		ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+		ಗಾತ್ರ_t ಗಾತ್ರ_2;
+		ರಚನೆ strbuf ತಳ;
+		ಪೂರ್ಣಾಂಕ ದೊರಕಿತು, len;
 
-		data = odb_read_object_peeled(opt->repo->objects, &obj->oid,
-					      OBJ_TREE, &size, NULL);
-		if (!data)
-			die(_("unable to read tree (%s)"), oid_to_hex(&obj->oid));
+		ದತ್ತಾಂಶ = odb_read_object_peeled(opt->repo->objects, &obj->oid,
+					      OBJ_ವೃಕ್ಷ, &ಗಾತ್ರ_2, ಖಾಲಿ);
+		ಆದರೆ (!ದತ್ತಾಂಶ)
+			die(_("unable to read tree (%s)"), oid_ಗಮ್ಯ_hex(&obj->oid));
 
-		len = name ? strlen(name) : 0;
-		strbuf_init(&base, PATH_MAX + len + 1);
-		if (len) {
-			strbuf_add(&base, name, len);
-			strbuf_addch(&base, ':');
+		len = name ? ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name) : 0;
+		strbuf_init(&ತಳ, ಮಾರ್ಗ_MAX + len + 1);
+		ಆದರೆ (len) {
+			strbuf_ಕೂಡಿಸು(&ತಳ, name, len);
+			strbuf_addch(&ತಳ, ':');
 		}
-		init_tree_desc(&tree, &obj->oid, data, size);
-		hit = grep_tree(opt, pathspec, &tree, &base, base.len,
+		init_ವೃಕ್ಷ_desc(&ವೃಕ್ಷ, &obj->oid, ದತ್ತಾಂಶ, ಗಾತ್ರ_2);
+		ದೊರಕಿತು = grep_ವೃಕ್ಷ(opt, pathspec, &ವೃಕ್ಷ, &ತಳ, ತಳ.len,
 				obj->type == OBJ_COMMIT);
-		strbuf_release(&base);
-		free(data);
-		return hit;
+		strbuf_release(&ತಳ);
+		ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
+		ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 	}
 	die(_("unable to grep from object of type %s"), type_name(obj->type));
 }
 
-static int grep_objects(struct grep_opt *opt, const struct pathspec *pathspec,
-			const struct object_array *list)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_objects(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+			ಸ್ಥಿರಾಂಕ ರಚನೆ object_array *list)
 {
-	unsigned int i;
-	int hit = 0;
-	const unsigned int nr = list->nr;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ nr = list->nr;
 
 	prefetch_grep_blobs(opt, pathspec, list);
 
-	for (i = 0; i < nr; i++) {
-		struct object *real_obj;
+	ಗಾಗಿ (i = 0; i < nr; i++) {
+		ರಚನೆ object *real_obj;
 
-		obj_read_lock();
-		real_obj = deref_tag(opt->repo, list->objects[i].item,
-				     NULL, 0);
+		obj_read_ಬೀಗ();
+		real_obj = deref_ಟ್ಯಾಗ್(opt->repo, list->objects[i].ಅಂಶ,
+				     ಖಾಲಿ, 0);
 		obj_read_unlock();
 
-		if (!real_obj) {
-			char hex[GIT_MAX_HEXSZ + 1];
-			const char *name = list->objects[i].name;
+		ಆದರೆ (!real_obj) {
+			ಅಕ್ಷರ hex[GIT_MAX_HEXSZ + 1];
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name = list->objects[i].name;
 
-			if (!name) {
-				oid_to_hex_r(hex, &list->objects[i].item->oid);
+			ಆದರೆ (!name) {
+				oid_ಗಮ್ಯ_hex_r(hex, &list->objects[i].ಅಂಶ->oid);
 				name = hex;
 			}
 			die(_("invalid object '%s' given."), name);
 		}
 
 		/* load the gitmodules file for this rev */
-		if (recurse_submodules) {
+		ಆದರೆ (recurse_submodules) {
 			submodule_free(opt->repo);
-			obj_read_lock();
+			obj_read_ಬೀಗ();
 			gitmodules_config_oid(the_repository, &real_obj->oid);
 			obj_read_unlock();
 		}
-		if (grep_object(opt, pathspec, real_obj, list->objects[i].name,
-				list->objects[i].path)) {
-			hit = 1;
-			if (opt->status_only)
-				break;
+		ಆದರೆ (grep_object(opt, pathspec, real_obj, list->objects[i].name,
+				list->objects[i].ಮಾರ್ಗ)) {
+			ದೊರಕಿತು = 1;
+			ಆದರೆ (opt->ಸ್ಥಿತಿ_only)
+				ನಿಲ್ಲಿಸು;
 		}
 	}
-	return hit;
+	ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 }
 
-static int grep_directory(struct grep_opt *opt, const struct pathspec *pathspec,
-			  int exc_std, int use_index)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ grep_directory(ರಚನೆ grep_opt *opt, ಸ್ಥಿರಾಂಕ ರಚನೆ pathspec *pathspec,
+			  ಪೂರ್ಣಾಂಕ exc_std, ಪೂರ್ಣಾಂಕ use_ಸೂಚ್ಯಂಕ)
 {
-	struct dir_struct dir = DIR_INIT;
-	int i, hit = 0;
+	ರಚನೆ dir_struct dir = DIR_INIT;
+	ಪೂರ್ಣಾಂಕ i, ದೊರಕಿತು = 0;
 
-	if (!use_index)
+	ಆದರೆ (!use_ಸೂಚ್ಯಂಕ)
 		dir.flags |= DIR_NO_GITLINKS;
-	if (exc_std)
-		setup_standard_excludes(&dir);
+	ಆದರೆ (exc_std)
+		ಸಿದ್ಧತೆ_standard_excludes(&dir);
 
-	fill_directory(&dir, opt->repo->index, pathspec);
-	for (i = 0; i < dir.nr; i++) {
-		hit |= grep_file(opt, dir.entries[i]->name);
-		if (hit && opt->status_only)
-			break;
+	fill_directory(&dir, opt->repo->ಸೂಚ್ಯಂಕ, pathspec);
+	ಗಾಗಿ (i = 0; i < dir.nr; i++) {
+		ದೊರಕಿತು |= grep_file(opt, dir.entries[i]->name);
+		ಆದರೆ (ದೊರಕಿತು && opt->ಸ್ಥಿತಿ_only)
+			ನಿಲ್ಲಿಸು;
 	}
 	dir_clear(&dir);
-	return hit;
+	ಹಿಂತಿರುಗಿ ದೊರಕಿತು;
 }
 
-static int context_callback(const struct option *opt, const char *arg,
-			    int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ context_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+			    ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
-	int value;
-	const char *endp;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
+	ಪೂರ್ಣಾಂಕ ಮೌಲ್ಯ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *endp;
 
-	if (unset) {
+	ಆದರೆ (unset) {
 		grep_opt->pre_context = grep_opt->post_context = 0;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	value = strtol(arg, (char **)&endp, 10);
-	if (*endp) {
-		return error(_("switch `%c' expects a numerical value"),
+	ಮೌಲ್ಯ = strtol(arg, (ಅಕ್ಷರ **)&endp, 10);
+	ಆದರೆ (*endp) {
+		ಹಿಂತಿರುಗಿ error(_("switch `%c' expects a numerical value"),
 			     opt->short_name);
 	}
-	grep_opt->pre_context = grep_opt->post_context = value;
-	return 0;
+	grep_opt->pre_context = grep_opt->post_context = ಮೌಲ್ಯ;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int file_callback(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ file_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
-	int from_stdin;
-	const char *filename = arg;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
+	ಪೂರ್ಣಾಂಕ from_stdin;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename = arg;
 	FILE *patterns;
-	int lno = 0;
-	struct strbuf sb = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ lno = 0;
+	ರಚನೆ strbuf sb = STRBUF_INIT;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!*filename)
+	ಆದರೆ (!*filename)
 		; /* leave it as-is */
-	else
-		filename = prefix_filename_except_for_dash(grep_prefix, filename);
+	ಇಲ್ಲದಿದ್ದರೆ
+		filename = ಪೂರ್ವಪ್ರತ್ಯಯ_filename_except_for_dash(grep_ಪೂರ್ವಪ್ರತ್ಯಯ, filename);
 
 	from_stdin = !strcmp(filename, "-");
 	patterns = from_stdin ? stdin : fopen(filename, "r");
-	if (!patterns)
+	ಆದರೆ (!patterns)
 		die_errno(_("cannot open '%s'"), arg);
-	while (strbuf_getline(&sb, patterns) == 0) {
+	ಆಗ (strbuf_getline(&sb, patterns) == 0) {
 		/* ignore empty line like grep does */
-		if (sb.len == 0)
-			continue;
+		ಆದರೆ (sb.len == 0)
+			ಮುಂದುವರಿ;
 
 		append_grep_pat(grep_opt, sb.buf, sb.len, arg, ++lno,
-				GREP_PATTERN);
+				GREP_ನಮೂನೆ);
 	}
-	if (!from_stdin)
+	ಆದರೆ (!from_stdin)
 		fclose(patterns);
 	strbuf_release(&sb);
-	if (filename != arg)
-		free((void *)filename);
-	return 0;
+	ಆದರೆ (filename != arg)
+		ಬಿಡುಗಡೆ((ಶೂನ್ಯ *)filename);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int not_callback(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ not_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	append_grep_pattern(grep_opt, "--not", "command line", 0, GREP_NOT);
-	return 0;
+	append_grep_ನಮೂನೆ(grep_opt, "--not", "command line", 0, GREP_NOT);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int and_callback(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ and_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	append_grep_pattern(grep_opt, "--and", "command line", 0, GREP_AND);
-	return 0;
+	append_grep_ನಮೂನೆ(grep_opt, "--and", "command line", 0, GREP_AND);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int open_callback(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ open_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	append_grep_pattern(grep_opt, "(", "command line", 0, GREP_OPEN_PAREN);
-	return 0;
+	append_grep_ನಮೂನೆ(grep_opt, "(", "command line", 0, GREP_OPEN_PAREN);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int close_callback(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ close_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	append_grep_pattern(grep_opt, ")", "command line", 0, GREP_CLOSE_PAREN);
-	return 0;
+	append_grep_ನಮೂನೆ(grep_opt, ")", "command line", 0, GREP_CLOSE_PAREN);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int pattern_callback(const struct option *opt, const char *arg,
-			    int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ನಮೂನೆ_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+			    ಪೂರ್ಣಾಂಕ unset)
 {
-	struct grep_opt *grep_opt = opt->value;
+	ರಚನೆ grep_opt *grep_opt = opt->ಮೌಲ್ಯ;
 	BUG_ON_OPT_NEG(unset);
-	append_grep_pattern(grep_opt, arg, "-e option", 0, GREP_PATTERN);
-	return 0;
+	append_grep_ನಮೂನೆ(grep_opt, arg, "-e option", 0, GREP_ನಮೂನೆ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_grep(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_grep(ಪೂರ್ಣಾಂಕ argc,
+	     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	     ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int hit = 0;
-	int cached = 0, untracked = 0, opt_exclude = -1;
-	int seen_dashdash = 0;
-	int external_grep_allowed__ignored;
-	const char *show_in_pager = NULL, *default_pager = "dummy";
-	struct grep_opt opt;
-	struct object_array list = OBJECT_ARRAY_INIT;
-	struct pathspec pathspec;
-	struct string_list path_list = STRING_LIST_INIT_DUP;
-	int i;
-	int dummy;
-	int use_index = 1;
-	int allow_revs;
-	int ret;
+	ಪೂರ್ಣಾಂಕ ದೊರಕಿತು = 0;
+	ಪೂರ್ಣಾಂಕ cached = 0, untracked = 0, opt_exclude = -1;
+	ಪೂರ್ಣಾಂಕ ನೋಡಿದ_dashdash = 0;
+	ಪೂರ್ಣಾಂಕ external_grep_allowed__ignored;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *show_ಒಳ_pager = ಖಾಲಿ, *default_pager = "dummy";
+	ರಚನೆ grep_opt opt;
+	ರಚನೆ object_array list = OBJECT_ARRAY_INIT;
+	ರಚನೆ pathspec pathspec;
+	ರಚನೆ string_list ಮಾರ್ಗ_list = STRING_LIST_INIT_DUP;
+	ಪೂರ್ಣಾಂಕ i;
+	ಪೂರ್ಣಾಂಕ dummy;
+	ಪೂರ್ಣಾಂಕ use_ಸೂಚ್ಯಂಕ = 1;
+	ಪೂರ್ಣಾಂಕ allow_revs;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	struct option options[] = {
+	ರಚನೆ option options[] = {
 		OPT_BOOL(0, "cached", &cached,
 			N_("search in index instead of in the work tree")),
-		OPT_NEGBIT(0, "no-index", &use_index,
+		OPT_NEGBIT(0, "no-index", &use_ಸೂಚ್ಯಂಕ,
 			 N_("find in contents not managed by git"), 1),
 		OPT_BOOL(0, "untracked", &untracked,
 			N_("search in both tracked and untracked files")),
-		OPT_SET_INT(0, "exclude-standard", &opt_exclude,
+		OPT_ಗಣ_INT(0, "exclude-standard", &opt_exclude,
 			    N_("ignore files specified via '.gitignore'"), 1),
 		OPT_BOOL(0, "recurse-submodules", &recurse_submodules,
 			 N_("recursively search in each submodule")),
-		OPT_GROUP(""),
+		OPT_ಗುಂಪು(""),
 		OPT_BOOL('v', "invert-match", &opt.invert,
 			N_("show non-matching lines")),
 		OPT_BOOL('i', "ignore-case", &opt.ignore_case,
 			N_("case insensitive matching")),
-		OPT_BOOL('w', "word-regexp", &opt.word_regexp,
+		OPT_BOOL('w', "word-regexp", &opt.ಶಬ್ದ_regexp,
 			N_("match patterns only at word boundaries")),
-		OPT_SET_INT('a', "text", &opt.binary,
-			N_("process binary files as text"), GREP_BINARY_TEXT),
-		OPT_SET_INT('I', NULL, &opt.binary,
+		OPT_ಗಣ_INT('a', "text", &opt.ದ್ವಿಮಾನ,
+			N_("process binary files as text"), GREP_ದ್ವಿಮಾನ_ಪಠ್ಯ),
+		OPT_ಗಣ_INT('I', ಖಾಲಿ, &opt.ದ್ವಿಮಾನ,
 			N_("don't match patterns in binary files"),
-			GREP_BINARY_NOMATCH),
+			GREP_ದ್ವಿಮಾನ_NOMATCH),
 		OPT_BOOL(0, "textconv", &opt.allow_textconv,
 			 N_("process binary files with textconv filters")),
-		OPT_SET_INT('r', "recursive", &opt.max_depth,
+		OPT_ಗಣ_INT('r', "recursive", &opt.max_ಆಳ,
 			    N_("search in subdirectories (default)"), -1),
-		OPT_INTEGER_F(0, "max-depth", &opt.max_depth,
+		OPT_INTEGER_F(0, "max-depth", &opt.max_ಆಳ,
 			N_("descend at most <n> levels"), PARSE_OPT_NONEG),
-		OPT_GROUP(""),
-		OPT_SET_INT('E', "extended-regexp", &opt.pattern_type_option,
+		OPT_ಗುಂಪು(""),
+		OPT_ಗಣ_INT('E', "extended-regexp", &opt.ನಮೂನೆ_type_option,
 			    N_("use extended POSIX regular expressions"),
-			    GREP_PATTERN_TYPE_ERE),
-		OPT_SET_INT('G', "basic-regexp", &opt.pattern_type_option,
+			    GREP_ನಮೂನೆ_TYPE_ERE),
+		OPT_ಗಣ_INT('G', "basic-regexp", &opt.ನಮೂನೆ_type_option,
 			    N_("use basic POSIX regular expressions (default)"),
-			    GREP_PATTERN_TYPE_BRE),
-		OPT_SET_INT('F', "fixed-strings", &opt.pattern_type_option,
+			    GREP_ನಮೂನೆ_TYPE_BRE),
+		OPT_ಗಣ_INT('F', "fixed-strings", &opt.ನಮೂನೆ_type_option,
 			    N_("interpret patterns as fixed strings"),
-			    GREP_PATTERN_TYPE_FIXED),
-		OPT_SET_INT('P', "perl-regexp", &opt.pattern_type_option,
+			    GREP_ನಮೂನೆ_TYPE_FIXED),
+		OPT_ಗಣ_INT('P', "perl-regexp", &opt.ನಮೂನೆ_type_option,
 			    N_("use Perl-compatible regular expressions"),
-			    GREP_PATTERN_TYPE_PCRE),
-		OPT_GROUP(""),
+			    GREP_ನಮೂನೆ_TYPE_PCRE),
+		OPT_ಗುಂಪು(""),
 		OPT_BOOL('n', "line-number", &opt.linenum, N_("show line numbers")),
 		OPT_BOOL(0, "column", &opt.columnnum, N_("show column number of first match")),
-		OPT_NEGBIT('h', NULL, &opt.pathname, N_("don't show filenames"), 1),
-		OPT_BIT('H', NULL, &opt.pathname, N_("show filenames"), 1),
+		OPT_NEGBIT('h', ಖಾಲಿ, &opt.pathname, N_("don't show filenames"), 1),
+		OPT_ಬಿಟ್('H', ಖಾಲಿ, &opt.pathname, N_("show filenames"), 1),
 		OPT_NEGBIT(0, "full-name", &opt.relative,
 			N_("show filenames relative to top directory"), 1),
 		OPT_BOOL('l', "files-with-matches", &opt.name_only,
@@ -1099,14 +1099,14 @@ int cmd_grep(int argc,
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL('o', "only-matching", &opt.only_matching,
 			N_("show only matching parts of a line")),
-		OPT_BOOL('c', "count", &opt.count,
+		OPT_BOOL('c', "count", &opt.ಎಣಿಕೆ_2,
 			N_("show the number of matches instead of matching lines")),
 		OPT__COLOR(&opt.color, N_("highlight matches")),
 		OPT_BOOL(0, "break", &opt.file_break,
 			N_("print empty line between matches from different files")),
 		OPT_BOOL(0, "heading", &opt.heading,
 			N_("show filename only once above matches from same file")),
-		OPT_GROUP(""),
+		OPT_ಗುಂಪು(""),
 		OPT_CALLBACK('C', "context", &opt, N_("n"),
 			N_("show <n> context lines before and after matches"),
 			context_callback),
@@ -1114,41 +1114,41 @@ int cmd_grep(int argc,
 			N_("show <n> context lines before matches")),
 		OPT_UNSIGNED('A', "after-context", &opt.post_context,
 			N_("show <n> context lines after matches")),
-		OPT_INTEGER(0, "threads", &num_threads,
+		OPT_INTEGER(0, "threads", &ಅಂಕೆ_ಎಳೆಗಳು,
 			N_("use <n> worker threads")),
-		OPT_NUMBER_CALLBACK(&opt, N_("shortcut for -C NUM"),
+		OPT_ಸಂಖ್ಯೆ_CALLBACK(&opt, N_("shortcut for -C NUM"),
 			context_callback),
 		OPT_BOOL('p', "show-function", &opt.funcname,
 			N_("show a line with the function name before matches")),
 		OPT_BOOL('W', "function-context", &opt.funcbody,
 			N_("show the surrounding function")),
-		OPT_GROUP(""),
-		OPT_CALLBACK('f', NULL, &opt, N_("file"),
+		OPT_ಗುಂಪು(""),
+		OPT_CALLBACK('f', ಖಾಲಿ, &opt, N_("file"),
 			N_("read patterns from file"), file_callback),
-		OPT_CALLBACK_F('e', NULL, &opt, N_("pattern"),
-			N_("match <pattern>"), PARSE_OPT_NONEG, pattern_callback),
-		OPT_CALLBACK_F(0, "and", &opt, NULL,
+		OPT_CALLBACK_F('e', ಖಾಲಿ, &opt, N_("pattern"),
+			N_("match <pattern>"), PARSE_OPT_NONEG, ನಮೂನೆ_callback),
+		OPT_CALLBACK_F(0, "and", &opt, ಖಾಲಿ,
 			N_("combine patterns specified with -e"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, and_callback),
 		OPT_BOOL_F(0, "or", &dummy, "", PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "not", &opt, NULL, "",
+		OPT_CALLBACK_F(0, "not", &opt, ಖಾಲಿ, "",
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, not_callback),
-		OPT_CALLBACK_F('(', NULL, &opt, NULL, "",
+		OPT_CALLBACK_F('(', ಖಾಲಿ, &opt, ಖಾಲಿ, "",
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG | PARSE_OPT_NODASH,
 			open_callback),
-		OPT_CALLBACK_F(')', NULL, &opt, NULL, "",
+		OPT_CALLBACK_F(')', ಖಾಲಿ, &opt, ಖಾಲಿ, "",
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG | PARSE_OPT_NODASH,
 			close_callback),
-		OPT__QUIET(&opt.status_only,
+		OPT__QUIET(&opt.ಸ್ಥಿತಿ_only,
 			   N_("indicate hit with exit status without output")),
-		OPT_BOOL(0, "all-match", &opt.all_match,
+		OPT_BOOL(0, "all-match", &opt.all_ಹೊಂದಿಕೆ,
 			N_("show only matches from files that match all patterns")),
-		OPT_GROUP(""),
+		OPT_ಗುಂಪು(""),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'O',
 			.long_name = "open-files-in-pager",
-			.value = &show_in_pager,
+			.ಮೌಲ್ಯ = &show_ಒಳ_pager,
 			.argh = N_("pager"),
 			.help = N_("show matching files in the pager"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_NOCOMPLETE,
@@ -1157,11 +1157,11 @@ int cmd_grep(int argc,
 		OPT_BOOL_F(0, "ext-grep", &external_grep_allowed__ignored,
 			   N_("allow calling of grep(1) (ignored by this build)"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_INTEGER('m', "max-count", &opt.max_count,
+		OPT_INTEGER('m', "max-count", &opt.max_ಎಣಿಕೆ,
 			N_("maximum number of results per file")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	grep_prefix = prefix;
+	grep_ಪೂರ್ವಪ್ರತ್ಯಯ = ಪೂರ್ವಪ್ರತ್ಯಯ;
 
 	grep_init(&opt, the_repository);
 	repo_config(the_repository, grep_cmd_config, &opt);
@@ -1176,26 +1176,26 @@ int cmd_grep(int argc,
 	 * unrecognized non option is the beginning of the refs list
 	 * that continues up to the -- (if exists), and then paths.
 	 */
-	argc = parse_options(argc, argv, prefix, options, grep_usage,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, grep_usage,
 			     PARSE_OPT_KEEP_DASHDASH |
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (the_repository->gitdir) {
+	ಆದರೆ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		the_repository->settings.command_requires_full_index = 0;
+		the_repository->settings.command_requires_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ = 0;
 	}
 
-	if (use_index && !startup_info->have_repository) {
-		int fallback = 0;
+	ಆದರೆ (use_ಸೂಚ್ಯಂಕ && !startup_info->have_repository) {
+		ಪೂರ್ಣಾಂಕ fallback = 0;
 		repo_config_get_bool(the_repository, "grep.fallbacktonoindex", &fallback);
-		if (fallback)
-			use_index = 0;
-		else
+		ಆದರೆ (fallback)
+			use_ಸೂಚ್ಯಂಕ = 0;
+		ಇಲ್ಲದಿದ್ದರೆ
 			/* die the same way as if we did it at the beginning */
-			setup_git_directory(the_repository);
+			ಸಿದ್ಧತೆ_git_directory(the_repository);
 	}
 	/* Ignore --recurse-submodules if --no-index is given or implied */
-	if (!use_index)
+	ಆದರೆ (!use_ಸೂಚ್ಯಂಕ)
 		recurse_submodules = 0;
 
 	/*
@@ -1203,45 +1203,45 @@ int cmd_grep(int argc,
 	 * separating revisions from pathnames if
 	 * we haven't even had any patterns yet
 	 */
-	if (argc > 0 && !opt.pattern_list && !strcmp(argv[0], "--")) {
+	ಆದರೆ (argc > 0 && !opt.ನಮೂನೆ_list && !strcmp(argv[0], "--")) {
 		argv++;
 		argc--;
 	}
 
 	/* First unrecognized non-option token */
-	if (argc > 0 && !opt.pattern_list) {
-		append_grep_pattern(&opt, argv[0], "command line", 0,
-				    GREP_PATTERN);
+	ಆದರೆ (argc > 0 && !opt.ನಮೂನೆ_list) {
+		append_grep_ನಮೂನೆ(&opt, argv[0], "command line", 0,
+				    GREP_ನಮೂನೆ);
 		argv++;
 		argc--;
 	}
 
-	if (show_in_pager == default_pager)
-		show_in_pager = git_pager(the_repository, 1);
-	if (show_in_pager) {
+	ಆದರೆ (show_ಒಳ_pager == default_pager)
+		show_ಒಳ_pager = git_pager(the_repository, 1);
+	ಆದರೆ (show_ಒಳ_pager) {
 		opt.color = GIT_COLOR_NEVER;
 		opt.name_only = 1;
 		opt.null_following_name = 1;
-		opt.output_priv = &path_list;
-		opt.output = append_path;
-		string_list_append(&path_list, show_in_pager);
+		opt.output_priv = &ಮಾರ್ಗ_list;
+		opt.output = append_ಮಾರ್ಗ;
+		string_list_append(&ಮಾರ್ಗ_list, show_ಒಳ_pager);
 	}
 
-	if (!opt.pattern_list)
+	ಆದರೆ (!opt.ನಮೂನೆ_list)
 		die(_("no pattern given"));
 
 	/* --only-matching has no effect with --invert. */
-	if (opt.invert)
+	ಆದರೆ (opt.invert)
 		opt.only_matching = 0;
 
 	/*
 	 * We have to find "--" in a separate pass, because its presence
 	 * influences how we will parse arguments that come before it.
 	 */
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
-			seen_dashdash = 1;
-			break;
+	ಗಾಗಿ (i = 0; i < argc; i++) {
+		ಆದರೆ (!strcmp(argv[i], "--")) {
+			ನೋಡಿದ_dashdash = 1;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
 
@@ -1250,37 +1250,37 @@ int cmd_grep(int argc,
 	 * to it must resolve as a rev. If not, then we stop at the first
 	 * non-rev and assume everything else is a path.
 	 */
-	allow_revs = use_index && !untracked;
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		struct object_id oid;
-		struct object_context oc = {0};
-		struct object *object;
+	allow_revs = use_ಸೂಚ್ಯಂಕ && !untracked;
+	ಗಾಗಿ (i = 0; i < argc; i++) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg = argv[i];
+		ರಚನೆ object_id oid;
+		ರಚನೆ object_context oc = {0};
+		ರಚನೆ object *object;
 
-		if (!strcmp(arg, "--")) {
+		ಆದರೆ (!strcmp(arg, "--")) {
 			i++;
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 
-		if (!allow_revs) {
-			if (seen_dashdash)
+		ಆದರೆ (!allow_revs) {
+			ಆದರೆ (ನೋಡಿದ_dashdash)
 				die(_("--no-index or --untracked cannot be used with revs"));
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 
-		if (get_oid_with_context(the_repository, arg,
-					 GET_OID_RECORD_PATH,
+		ಆದರೆ (get_oid_with_context(the_repository, arg,
+					 GET_OID_ದಾಖಲೆ_ಮಾರ್ಗ,
 					 &oid, &oc)) {
-			if (seen_dashdash)
+			ಆದರೆ (ನೋಡಿದ_dashdash)
 				die(_("unable to resolve revision: %s"), arg);
 			object_context_release(&oc);
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 
 		object = parse_object_or_die(the_repository, &oid, arg);
-		if (!seen_dashdash)
-			verify_non_filename(the_repository, prefix, arg);
-		add_object_array_with_path(object, arg, &list, oc.mode, oc.path);
+		ಆದರೆ (!ನೋಡಿದ_dashdash)
+			verify_non_filename(the_repository, ಪೂರ್ವಪ್ರತ್ಯಯ, arg);
+		ಕೂಡಿಸು_object_array_with_ಮಾರ್ಗ(object, arg, &list, oc.ಬಹುಲಕ, oc.ಮಾರ್ಗ);
 		object_context_release(&oc);
 	}
 
@@ -1288,65 +1288,65 @@ int cmd_grep(int argc,
 	 * Anything left over is presumed to be a path. But in the non-dashdash
 	 * "do what I mean" case, we verify and complain when that isn't true.
 	 */
-	if (!seen_dashdash) {
-		int j;
-		for (j = i; j < argc; j++)
-			verify_filename(the_repository, prefix, argv[j], j == i && allow_revs);
+	ಆದರೆ (!ನೋಡಿದ_dashdash) {
+		ಪೂರ್ಣಾಂಕ j;
+		ಗಾಗಿ (j = i; j < argc; j++)
+			verify_filename(the_repository, ಪೂರ್ವಪ್ರತ್ಯಯ, argv[j], j == i && allow_revs);
 	}
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD |
-		       (opt.max_depth != -1 ? PATHSPEC_MAXDEPTH_VALID : 0),
-		       prefix, argv + i);
-	pathspec.max_depth = opt.max_depth;
+		       (opt.max_ಆಳ != -1 ? PATHSPEC_MAXDEPTH_VALID : 0),
+		       ಪೂರ್ವಪ್ರತ್ಯಯ, argv + i);
+	pathspec.max_ಆಳ = opt.max_ಆಳ;
 	pathspec.recursive = 1;
 	pathspec.recurse_submodules = !!recurse_submodules;
 
-	if (recurse_submodules && untracked)
+	ಆದರೆ (recurse_submodules && untracked)
 		die(_("--untracked not supported with --recurse-submodules"));
 
 	/*
 	 * Optimize out the case where the amount of matches is limited to zero.
 	 * We do this to keep results consistent with GNU grep(1).
 	 */
-	if (opt.max_count == 0) {
+	ಆದರೆ (opt.max_ಎಣಿಕೆ == 0) {
 		ret = 1;
-		goto out;
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	if (show_in_pager) {
-		if (num_threads > 1)
+	ಆದರೆ (show_ಒಳ_pager) {
+		ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು > 1)
 			warning(_("invalid option combination, ignoring --threads"));
-		num_threads = 1;
-	} else if (!HAVE_THREADS && num_threads > 1) {
+		ಅಂಕೆ_ಎಳೆಗಳು = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!HAVE_ಎಳೆಗಳು && ಅಂಕೆ_ಎಳೆಗಳು > 1) {
 		warning(_("no threads support, ignoring --threads"));
-		num_threads = 1;
-	} else if (num_threads < 0)
-		die(_("invalid number of threads specified (%d)"), num_threads);
-	else if (num_threads == 0)
-		num_threads = HAVE_THREADS ? online_cpus() : 1;
+		ಅಂಕೆ_ಎಳೆಗಳು = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು < 0)
+		die(_("invalid number of threads specified (%d)"), ಅಂಕೆ_ಎಳೆಗಳು);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು == 0)
+		ಅಂಕೆ_ಎಳೆಗಳು = HAVE_ಎಳೆಗಳು ? online_cpus() : 1;
 
-	if (num_threads > 1) {
-		if (!HAVE_THREADS)
+	ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು > 1) {
+		ಆದರೆ (!HAVE_ಎಳೆಗಳು)
 			BUG("Somebody got num_threads calculation wrong!");
-		if (!(opt.name_only || opt.unmatch_name_only || opt.count)
+		ಆದರೆ (!(opt.name_only || opt.unmatch_name_only || opt.ಎಣಿಕೆ_2)
 		    && (opt.pre_context || opt.post_context ||
 			opt.file_break || opt.funcbody))
-			skip_first_line = 1;
+			skip_ಮೊದಲ_ಸಾಲು = 1;
 
 		/*
 		 * Pre-read gitmodules (if not read already) and force eager
 		 * initialization of packed_git to prevent racy lazy
 		 * reading/initialization once worker threads are started.
 		 */
-		if (recurse_submodules)
+		ಆದರೆ (recurse_submodules)
 			repo_read_gitmodules(the_repository, 1);
 
-		if (startup_info->have_repository)
+		ಆದರೆ (startup_info->have_repository)
 			odb_prepare(the_repository->objects, 0);
 
-		start_threads(&opt);
-	} else {
+		ಆರಂಭ_ಎಳೆಗಳು(&opt);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		/*
 		 * The compiled patterns on the main path are only
 		 * used when not using threading. Otherwise
@@ -1356,65 +1356,65 @@ int cmd_grep(int argc,
 		compile_grep_patterns(&opt);
 	}
 
-	if (show_in_pager && (cached || list.nr))
+	ಆದರೆ (show_ಒಳ_pager && (cached || list.nr))
 		die(_("--open-files-in-pager only works on the worktree"));
 
-	if (show_in_pager && opt.pattern_list && !opt.pattern_list->next) {
-		const char *pager = path_list.items[0].string;
-		int len = strlen(pager);
+	ಆದರೆ (show_ಒಳ_pager && opt.ನಮೂನೆ_list && !opt.ನಮೂನೆ_list->ಮುಂದಿನ) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *pager = ಮಾರ್ಗ_list.ವಸ್ತುಗಳು[0].string;
+		ಪೂರ್ಣಾಂಕ len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(pager);
 
-		if (len > 4 && is_dir_sep(pager[len - 5]))
+		ಆದರೆ (len > 4 && is_dir_sep(pager[len - 5]))
 			pager += len - 4;
 
-		if (opt.ignore_case && !strcmp("less", pager))
-			string_list_append(&path_list, "-I");
+		ಆದರೆ (opt.ignore_case && !strcmp("less", pager))
+			string_list_append(&ಮಾರ್ಗ_list, "-I");
 
-		if (!strcmp("less", pager) || !strcmp("vi", pager)) {
-			struct strbuf buf = STRBUF_INIT;
+		ಆದರೆ (!strcmp("less", pager) || !strcmp("vi", pager)) {
+			ರಚನೆ strbuf buf = STRBUF_INIT;
 			strbuf_addf(&buf, "+/%s%s",
 					strcmp("less", pager) ? "" : "*",
-					opt.pattern_list->pattern);
-			string_list_append_nodup(&path_list,
-						 strbuf_detach(&buf, NULL));
+					opt.ನಮೂನೆ_list->ನಮೂನೆ);
+			string_list_append_nodup(&ಮಾರ್ಗ_list,
+						 strbuf_detach(&buf, ಖಾಲಿ));
 		}
 	}
 
-	if (!show_in_pager && !opt.status_only)
-		setup_pager(the_repository);
+	ಆದರೆ (!show_ಒಳ_pager && !opt.ಸ್ಥಿತಿ_only)
+		ಸಿದ್ಧತೆ_pager(the_repository);
 
-	die_for_incompatible_opt3(!use_index, "--no-index",
+	die_for_incompatible_opt3(!use_ಸೂಚ್ಯಂಕ, "--no-index",
 				  untracked, "--untracked",
 				  cached, "--cached");
 
-	if (!use_index || untracked) {
-		int use_exclude = (opt_exclude < 0) ? use_index : !!opt_exclude;
-		hit = grep_directory(&opt, &pathspec, use_exclude, use_index);
-	} else if (0 <= opt_exclude) {
+	ಆದರೆ (!use_ಸೂಚ್ಯಂಕ || untracked) {
+		ಪೂರ್ಣಾಂಕ use_exclude = (opt_exclude < 0) ? use_ಸೂಚ್ಯಂಕ : !!opt_exclude;
+		ದೊರಕಿತು = grep_directory(&opt, &pathspec, use_exclude, use_ಸೂಚ್ಯಂಕ);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (0 <= opt_exclude) {
 		die(_("--[no-]exclude-standard cannot be used for tracked contents"));
-	} else if (!list.nr) {
-		if (!cached)
-			setup_work_tree(the_repository);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!list.nr) {
+		ಆದರೆ (!cached)
+			ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
 
-		hit = grep_cache(&opt, &pathspec, cached);
-	} else {
-		if (cached)
+		ದೊರಕಿತು = grep_cache(&opt, &pathspec, cached);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (cached)
 			die(_("both --cached and trees are given"));
 
-		hit = grep_objects(&opt, &pathspec, &list);
+		ದೊರಕಿತು = grep_objects(&opt, &pathspec, &list);
 	}
 
-	if (num_threads > 1)
-		hit |= wait_all();
-	if (hit && show_in_pager)
-		run_pager(&opt, prefix);
+	ಆದರೆ (ಅಂಕೆ_ಎಳೆಗಳು > 1)
+		ದೊರಕಿತು |= wait_all();
+	ಆದರೆ (ದೊರಕಿತು && show_ಒಳ_pager)
+		ಸತತ_pager(&opt, ಪೂರ್ವಪ್ರತ್ಯಯ);
 
-	ret = !hit;
+	ret = !ದೊರಕಿತು;
 
-out:
+ಹೊರಹೋಗು:
 	clear_pathspec(&pathspec);
-	string_list_clear(&path_list, 0);
+	string_list_clear(&ಮಾರ್ಗ_list, 0);
 	free_grep_patterns(&opt);
 	object_array_clear(&list);
 	free_repos();
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }

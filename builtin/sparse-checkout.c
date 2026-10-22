@@ -1,134 +1,134 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "pathspec.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "lockfile.h"
-#include "unpack-trees.h"
-#include "quote.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "worktree.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "object-file.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "pathspec.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "lockfile.h"
+#ಅನ್ತರ್ಭಾವ "unpack-trees.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "sparse-index.h"
+#ಅನ್ತರ್ಭಾವ "worktree.h"
 
-static const char *empty_base = "";
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಖಾಲಿಗಳು_ತಳ = "";
 
-static char const * const builtin_sparse_checkout_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_usage[] = {
 	N_("git sparse-checkout (init | list | set | add | reapply | disable | check-rules | clean) [<options>]"),
-	NULL
+	ಖಾಲಿ
 };
 
-static void write_patterns_to_file(FILE *fp, struct pattern_list *pl)
+ಸ್ಥಿರ ಶೂನ್ಯ write_patterns_ಗಮ್ಯ_file(FILE *fp, ರಚನೆ ನಮೂನೆ_list *pl)
 {
-	int i;
+	ಪೂರ್ಣಾಂಕ i;
 
-	for (i = 0; i < pl->nr; i++) {
-		struct path_pattern *p = pl->patterns[i];
+	ಗಾಗಿ (i = 0; i < pl->nr; i++) {
+		ರಚನೆ ಮಾರ್ಗ_ನಮೂನೆ *p = pl->patterns[i];
 
-		if (p->flags & PATTERN_FLAG_NEGATIVE)
+		ಆದರೆ (p->flags & ನಮೂನೆ_FLAG_NEGATIVE)
 			fprintf(fp, "!");
 
-		fprintf(fp, "%s", p->pattern);
+		fprintf(fp, "%s", p->ನಮೂನೆ);
 
-		if (p->flags & PATTERN_FLAG_MUSTBEDIR)
+		ಆದರೆ (p->flags & ನಮೂನೆ_FLAG_MUSTBEDIR)
 			fprintf(fp, "/");
 
 		fprintf(fp, "\n");
 	}
 }
 
-static char const * const builtin_sparse_checkout_list_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_list_usage[] = {
 	"git sparse-checkout list",
-	NULL
+	ಖಾಲಿ
 };
 
-static int sparse_checkout_list(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_list(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				ರಚನೆ repository *repo ಬಳಸದ)
 {
-	static struct option builtin_sparse_checkout_list_options[] = {
-		OPT_END(),
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_list_options[] = {
+		OPT_ಕೊನೆ(),
 	};
-	struct pattern_list pl;
-	char *sparse_filename;
-	int res;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ ನಮೂನೆ_list pl;
+	ಅಕ್ಷರ *sparse_filename;
+	ಪೂರ್ಣಾಂಕ res;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	ಆದರೆ (!cfg->apply_sparse_checkout)
 		die(_("this worktree is not sparse"));
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			     builtin_sparse_checkout_list_options,
 			     builtin_sparse_checkout_list_usage, 0);
 
-	memset(&pl, 0, sizeof(pl));
+	memset(&pl, 0, ಗಾತ್ರ(pl));
 
 	pl.use_cone_patterns = cfg->core_sparse_checkout_cone;
 
 	sparse_filename = get_sparse_checkout_filename();
-	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, NULL, 0);
-	free(sparse_filename);
+	res = ಕೂಡಿಸು_patterns_from_file_ಗಮ್ಯ_list(sparse_filename, "", 0, &pl, ಖಾಲಿ, 0);
+	ಬಿಡುಗಡೆ(sparse_filename);
 
-	if (res < 0) {
+	ಆದರೆ (res < 0) {
 		warning(_("this worktree is not sparse (sparse-checkout file may not exist)"));
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (pl.use_cone_patterns) {
-		int i;
-		struct pattern_entry *pe;
-		struct hashmap_iter iter;
-		struct string_list sl = STRING_LIST_INIT_DUP;
+	ಆದರೆ (pl.use_cone_patterns) {
+		ಪೂರ್ಣಾಂಕ i;
+		ರಚನೆ ನಮೂನೆ_ನಮೂದು *pe;
+		ರಚನೆ hashmap_iter iter;
+		ರಚನೆ string_list sl = STRING_LIST_INIT_DUP;
 
-		hashmap_for_each_entry(&pl.recursive_hashmap, &iter, pe, ent) {
+		hashmap_for_each_ನಮೂದು(&pl.recursive_hashmap, &iter, pe, ent) {
 			/* pe->pattern starts with "/", skip it */
-			string_list_append(&sl, pe->pattern + 1);
+			string_list_append(&sl, pe->ನಮೂನೆ + 1);
 		}
 
-		string_list_sort_u(&sl, 0);
+		string_list_ವಿಂಗಡಿಸು_u(&sl, 0);
 
-		for (i = 0; i < sl.nr; i++) {
-			quote_c_style(sl.items[i].string, NULL, stdout, 0);
-			printf("\n");
+		ಗಾಗಿ (i = 0; i < sl.nr; i++) {
+			quote_c_style(sl.ವಸ್ತುಗಳು[i].string, ಖಾಲಿ, stdout, 0);
+			ಬರೆ("\n");
 		}
 
 		string_list_clear(&sl, 0);
-	} else {
-		write_patterns_to_file(stdout, &pl);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		write_patterns_ಗಮ್ಯ_file(stdout, &pl);
 	}
 
-	clear_pattern_list(&pl);
+	clear_ನಮೂನೆ_list(&pl);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void clean_tracked_sparse_directories(struct repository *r)
+ಸ್ಥಿರ ಶೂನ್ಯ clean_tracked_sparse_directories(ರಚನೆ repository *r)
 {
-	int i, was_full = 0;
-	struct strbuf path = STRBUF_INIT;
-	size_t pathlen;
-	struct string_list_item *item;
-	struct string_list sparse_dirs = STRING_LIST_INIT_DUP;
+	ಪೂರ್ಣಾಂಕ i, was_ತುಂಬಿದ = 0;
+	ರಚನೆ strbuf ಮಾರ್ಗ = STRBUF_INIT;
+	ಗಾತ್ರ_t pathlen;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ರಚನೆ string_list sparse_dirs = STRING_LIST_INIT_DUP;
 
 	/*
 	 * If we are not using cone mode patterns, then we cannot
 	 * delete directories outside of the sparse cone.
 	 */
-	if (!r || !r->index || !r->worktree)
-		return;
-	if (init_sparse_checkout_patterns(r->index) ||
-	    !r->index->sparse_checkout_patterns->use_cone_patterns)
-		return;
+	ಆದರೆ (!r || !r->ಸೂಚ್ಯಂಕ || !r->worktree)
+		ಹಿಂತಿರುಗಿ;
+	ಆದರೆ (init_sparse_checkout_patterns(r->ಸೂಚ್ಯಂಕ) ||
+	    !r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns->use_cone_patterns)
+		ಹಿಂತಿರುಗಿ;
 
 	/*
 	 * Use the sparse index as a data structure to assist finding
@@ -136,20 +136,20 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * sparse index will not delete directories that contain
 	 * conflicted entries or submodules.
 	 */
-	if (r->index->sparse_index == INDEX_EXPANDED) {
+	ಆದರೆ (r->ಸೂಚ್ಯಂಕ->sparse_ಸೂಚ್ಯಂಕ == ಸೂಚ್ಯಂಕ_EXPANDED) {
 		/*
 		 * If something, such as a merge conflict or other concern,
 		 * prevents us from converting to a sparse index, then do
 		 * not try deleting files.
 		 */
-		if (convert_to_sparse(r->index, SPARSE_INDEX_MEMORY_ONLY))
-			return;
-		was_full = 1;
+		ಆದರೆ (convert_ಗಮ್ಯ_sparse(r->ಸೂಚ್ಯಂಕ, SPARSE_ಸೂಚ್ಯಂಕ_ಸ್ಮರಣೆ_ONLY))
+			ಹಿಂತಿರುಗಿ;
+		was_ತುಂಬಿದ = 1;
 	}
 
-	strbuf_addstr(&path, r->worktree);
-	strbuf_complete(&path, '/');
-	pathlen = path.len;
+	strbuf_addstr(&ಮಾರ್ಗ, r->worktree);
+	strbuf_complete(&ಮಾರ್ಗ, '/');
+	pathlen = ಮಾರ್ಗ.len;
 
 	/*
 	 * Collect directories that have gone out of scope but also
@@ -157,41 +157,41 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	 * store the entries in a list before exploring, since that might
 	 * expand the sparse-index again.
 	 */
-	for (i = 0; i < r->index->cache_nr; i++) {
-		struct cache_entry *ce = r->index->cache[i];
+	ಗಾಗಿ (i = 0; i < r->ಸೂಚ್ಯಂಕ->cache_nr; i++) {
+		ರಚನೆ cache_ನಮೂದು *ce = r->ಸೂಚ್ಯಂಕ->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode) &&
+		ಆದರೆ (S_ISSPARSEDIR(ce->ce_ಬಹುಲಕ) &&
 		    repo_file_exists(r, ce->name))
 			string_list_append(&sparse_dirs, ce->name);
 	}
 
-	for_each_string_list_item(item, &sparse_dirs) {
-		struct dir_struct dir = DIR_INIT;
-		struct pathspec p = { 0 };
-		struct strvec s = STRVEC_INIT;
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &sparse_dirs) {
+		ರಚನೆ dir_struct dir = DIR_INIT;
+		ರಚನೆ pathspec p = { 0 };
+		ರಚನೆ strvec s = STRVEC_INIT;
 
-		strbuf_setlen(&path, pathlen);
-		strbuf_addstr(&path, item->string);
+		strbuf_setlen(&ಮಾರ್ಗ, pathlen);
+		strbuf_addstr(&ಮಾರ್ಗ, ಅಂಶ->string);
 
 		dir.flags |= DIR_SHOW_IGNORED_TOO;
 
-		setup_standard_excludes(&dir);
-		strvec_push(&s, path.buf);
+		ಸಿದ್ಧತೆ_standard_excludes(&dir);
+		strvec_ತಳ್ಳು(&s, ಮಾರ್ಗ.buf);
 
-		parse_pathspec(&p, PATHSPEC_GLOB, 0, NULL, s.v);
-		fill_directory(&dir, r->index, &p);
+		parse_pathspec(&p, PATHSPEC_GLOB, 0, ಖಾಲಿ, s.v);
+		fill_directory(&dir, r->ಸೂಚ್ಯಂಕ, &p);
 
-		if (dir.nr) {
+		ಆದರೆ (dir.nr) {
 			warning(_("directory '%s' contains untracked files,"
 				  " but is not in the sparse-checkout cone"),
-				item->string);
-		} else if (remove_dir_recursively(&path, 0)) {
+				ಅಂಶ->string);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (remove_dir_recursively(&ಮಾರ್ಗ, 0)) {
 			/*
 			 * Removal is "best effort". If something blocks
 			 * the deletion, then continue with a warning.
 			 */
 			warning(_("failed to remove directory '%s'"),
-				item->string);
+				ಅಂಶ->string);
 		}
 
 		strvec_clear(&s);
@@ -200,854 +200,854 @@ static void clean_tracked_sparse_directories(struct repository *r)
 	}
 
 	string_list_clear(&sparse_dirs, 0);
-	strbuf_release(&path);
+	strbuf_release(&ಮಾರ್ಗ);
 
-	if (was_full)
-		ensure_full_index(r->index);
+	ಆದರೆ (was_ತುಂಬಿದ)
+		ensure_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ(r->ಸೂಚ್ಯಂಕ);
 }
 
-static int update_working_directory(struct repository *r,
-				    struct pattern_list *pl)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ update_working_directory(ರಚನೆ repository *r,
+				    ರಚನೆ ನಮೂನೆ_list *pl)
 {
-	enum update_sparsity_result result;
-	struct unpack_trees_options o;
-	struct lock_file lock_file = LOCK_INIT;
-	struct pattern_list *old_pl;
+	ಎಣಿಕೆ update_sparsity_ಫಲಿತಾಂಶ ಫಲಿತಾಂಶ;
+	ರಚನೆ unpack_trees_options o;
+	ರಚನೆ ಬೀಗ_file ಬೀಗ_file = ಬೀಗ_INIT;
+	ರಚನೆ ನಮೂನೆ_list *old_pl;
 
 	/* If no branch has been checked out, there are no updates to make. */
-	if (is_index_unborn(r->index))
-		return UPDATE_SPARSITY_SUCCESS;
+	ಆದರೆ (is_ಸೂಚ್ಯಂಕ_unborn(r->ಸೂಚ್ಯಂಕ))
+		ಹಿಂತಿರುಗಿ UPDATE_SPARSITY_SUCCESS;
 
-	old_pl = r->index->sparse_checkout_patterns;
-	r->index->sparse_checkout_patterns = pl;
+	old_pl = r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns;
+	r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns = pl;
 
-	memset(&o, 0, sizeof(o));
+	memset(&o, 0, ಗಾತ್ರ(o));
 	o.verbose_update = isatty(2);
 	o.update = 1;
-	o.head_idx = -1;
-	o.src_index = r->index;
-	o.dst_index = r->index;
+	o.ತಲೆ_idx = -1;
+	o.src_ಸೂಚ್ಯಂಕ = r->ಸೂಚ್ಯಂಕ;
+	o.dst_ಸೂಚ್ಯಂಕ = r->ಸೂಚ್ಯಂಕ;
 	o.skip_sparse_checkout = 0;
 
-	setup_work_tree(the_repository);
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
 
-	repo_hold_locked_index(r, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_ಸೂಚ್ಯಂಕ(r, &ಬೀಗ_file, ಬೀಗ_DIE_ON_ERROR);
 
-	setup_unpack_trees_porcelain(&o, "sparse-checkout");
-	result = update_sparsity(&o, pl);
+	ಸಿದ್ಧತೆ_unpack_trees_porcelain(&o, "sparse-checkout");
+	ಫಲಿತಾಂಶ = update_sparsity(&o, pl);
 	clear_unpack_trees_porcelain(&o);
 
-	if (result == UPDATE_SPARSITY_WARNINGS)
+	ಆದರೆ (ಫಲಿತಾಂಶ == UPDATE_SPARSITY_WARNINGS)
 		/*
 		 * We don't do any special handling of warnings from untracked
 		 * files in the way or dirty entries that can't be removed.
 		 */
-		result = UPDATE_SPARSITY_SUCCESS;
-	if (result == UPDATE_SPARSITY_SUCCESS)
-		write_locked_index(r->index, &lock_file, COMMIT_LOCK);
-	else
-		rollback_lock_file(&lock_file);
+		ಫಲಿತಾಂಶ = UPDATE_SPARSITY_SUCCESS;
+	ಆದರೆ (ಫಲಿತಾಂಶ == UPDATE_SPARSITY_SUCCESS)
+		write_locked_ಸೂಚ್ಯಂಕ(r->ಸೂಚ್ಯಂಕ, &ಬೀಗ_file, COMMIT_ಬೀಗ);
+	ಇಲ್ಲದಿದ್ದರೆ
+		rollback_ಬೀಗ_file(&ಬೀಗ_file);
 
 	clean_tracked_sparse_directories(r);
 
-	if (r->index->sparse_checkout_patterns != pl) {
-		clear_pattern_list(r->index->sparse_checkout_patterns);
-		FREE_AND_NULL(r->index->sparse_checkout_patterns);
+	ಆದರೆ (r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns != pl) {
+		clear_ನಮೂನೆ_list(r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns);
+		FREE_AND_NULL(r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns);
 	}
-	r->index->sparse_checkout_patterns = old_pl;
+	r->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns = old_pl;
 
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static char *escaped_pattern(char *pattern)
+ಸ್ಥಿರ ಅಕ್ಷರ *escaped_ನಮೂನೆ(ಅಕ್ಷರ *ನಮೂನೆ)
 {
-	char *p = pattern;
-	struct strbuf final = STRBUF_INIT;
+	ಅಕ್ಷರ *p = ನಮೂನೆ;
+	ರಚನೆ strbuf final = STRBUF_INIT;
 
-	while (*p) {
-		if (is_glob_special(*p))
+	ಆಗ (*p) {
+		ಆದರೆ (is_glob_special(*p))
 			strbuf_addch(&final, '\\');
 
 		strbuf_addch(&final, *p);
 		p++;
 	}
 
-	return strbuf_detach(&final, NULL);
+	ಹಿಂತಿರುಗಿ strbuf_detach(&final, ಖಾಲಿ);
 }
 
-static void write_cone_to_file(FILE *fp, struct pattern_list *pl)
+ಸ್ಥಿರ ಶೂನ್ಯ write_cone_ಗಮ್ಯ_file(FILE *fp, ರಚನೆ ನಮೂನೆ_list *pl)
 {
-	int i;
-	struct pattern_entry *pe;
-	struct hashmap_iter iter;
-	struct string_list sl = STRING_LIST_INIT_DUP;
-	struct strbuf parent_pattern = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ ನಮೂನೆ_ನಮೂದು *pe;
+	ರಚನೆ hashmap_iter iter;
+	ರಚನೆ string_list sl = STRING_LIST_INIT_DUP;
+	ರಚನೆ strbuf ಪೋಷಕ_ನಮೂನೆ = STRBUF_INIT;
 
-	hashmap_for_each_entry(&pl->parent_hashmap, &iter, pe, ent) {
-		if (hashmap_get_entry(&pl->recursive_hashmap, pe, ent, NULL))
-			continue;
+	hashmap_for_each_ನಮೂದು(&pl->ಪೋಷಕ_hashmap, &iter, pe, ent) {
+		ಆದರೆ (hashmap_get_ನಮೂದು(&pl->recursive_hashmap, pe, ent, ಖಾಲಿ))
+			ಮುಂದುವರಿ;
 
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
-					     pe->pattern,
-					     &parent_pattern))
-			string_list_append(&sl, pe->pattern);
+		ಆದರೆ (!hashmap_ಒಳಗೊಂಡಿದೆ_ಪೋಷಕ(&pl->recursive_hashmap,
+					     pe->ನಮೂನೆ,
+					     &ಪೋಷಕ_ನಮೂನೆ))
+			string_list_append(&sl, pe->ನಮೂನೆ);
 	}
 
-	string_list_sort_u(&sl, 0);
+	string_list_ವಿಂಗಡಿಸು_u(&sl, 0);
 
 	fprintf(fp, "/*\n!/*/\n");
 
-	for (i = 0; i < sl.nr; i++) {
-		char *pattern = escaped_pattern(sl.items[i].string);
+	ಗಾಗಿ (i = 0; i < sl.nr; i++) {
+		ಅಕ್ಷರ *ನಮೂನೆ = escaped_ನಮೂನೆ(sl.ವಸ್ತುಗಳು[i].string);
 
-		if (strlen(pattern))
-			fprintf(fp, "%s/\n!%s/*/\n", pattern, pattern);
-		free(pattern);
+		ಆದರೆ (ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ನಮೂನೆ))
+			fprintf(fp, "%s/\n!%s/*/\n", ನಮೂನೆ, ನಮೂನೆ);
+		ಬಿಡುಗಡೆ(ನಮೂನೆ);
 	}
 
 	string_list_clear(&sl, 0);
 
-	hashmap_for_each_entry(&pl->recursive_hashmap, &iter, pe, ent) {
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
-					     pe->pattern,
-					     &parent_pattern))
-			string_list_append(&sl, pe->pattern);
+	hashmap_for_each_ನಮೂದು(&pl->recursive_hashmap, &iter, pe, ent) {
+		ಆದರೆ (!hashmap_ಒಳಗೊಂಡಿದೆ_ಪೋಷಕ(&pl->recursive_hashmap,
+					     pe->ನಮೂನೆ,
+					     &ಪೋಷಕ_ನಮೂನೆ))
+			string_list_append(&sl, pe->ನಮೂನೆ);
 	}
 
-	strbuf_release(&parent_pattern);
+	strbuf_release(&ಪೋಷಕ_ನಮೂನೆ);
 
-	string_list_sort_u(&sl, 0);
+	string_list_ವಿಂಗಡಿಸು_u(&sl, 0);
 
-	for (i = 0; i < sl.nr; i++) {
-		char *pattern = escaped_pattern(sl.items[i].string);
-		fprintf(fp, "%s/\n", pattern);
-		free(pattern);
+	ಗಾಗಿ (i = 0; i < sl.nr; i++) {
+		ಅಕ್ಷರ *ನಮೂನೆ = escaped_ನಮೂನೆ(sl.ವಸ್ತುಗಳು[i].string);
+		fprintf(fp, "%s/\n", ನಮೂನೆ);
+		ಬಿಡುಗಡೆ(ನಮೂನೆ);
 	}
 
 	string_list_clear(&sl, 0);
 }
 
-static int write_patterns_and_update(struct repository *repo,
-				     struct pattern_list *pl)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ write_patterns_and_update(ರಚನೆ repository *repo,
+				     ರಚನೆ ನಮೂನೆ_list *pl)
 {
-	char *sparse_filename;
+	ಅಕ್ಷರ *sparse_filename;
 	FILE *fp;
-	struct lock_file lk = LOCK_INIT;
-	int result;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ ಬೀಗ_file lk = ಬೀಗ_INIT;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
 	sparse_filename = get_sparse_checkout_filename();
 
-	if (safe_create_leading_directories(repo, sparse_filename))
+	ಆದರೆ (ಸುರಕ್ಷಿತ_create_leading_directories(repo, sparse_filename))
 		die(_("failed to create directory for sparse-checkout file"));
 
-	repo_hold_lock_file_for_update(repo, &lk, sparse_filename,
-				       LOCK_DIE_ON_ERROR);
+	repo_hold_ಬೀಗ_file_for_update(repo, &lk, sparse_filename,
+				       ಬೀಗ_DIE_ON_ERROR);
 
-	result = update_working_directory(repo, pl);
-	if (result) {
-		rollback_lock_file(&lk);
-		update_working_directory(repo, NULL);
-		goto out;
+	ಫಲಿತಾಂಶ = update_working_directory(repo, pl);
+	ಆದರೆ (ಫಲಿತಾಂಶ) {
+		rollback_ಬೀಗ_file(&lk);
+		update_working_directory(repo, ಖಾಲಿ);
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	fp = fdopen_lock_file(&lk, "w");
-	if (!fp)
-		die_errno(_("unable to fdopen %s"), get_lock_file_path(&lk));
+	fp = fdopen_ಬೀಗ_file(&lk, "w");
+	ಆದರೆ (!fp)
+		die_errno(_("unable to fdopen %s"), get_ಬೀಗ_file_ಮಾರ್ಗ(&lk));
 
-	if (cfg->core_sparse_checkout_cone)
-		write_cone_to_file(fp, pl);
-	else
-		write_patterns_to_file(fp, pl);
+	ಆದರೆ (cfg->core_sparse_checkout_cone)
+		write_cone_ಗಮ್ಯ_file(fp, pl);
+	ಇಲ್ಲದಿದ್ದರೆ
+		write_patterns_ಗಮ್ಯ_file(fp, pl);
 
-	if (commit_lock_file(&lk))
+	ಆದರೆ (commit_ಬೀಗ_file(&lk))
 		die_errno(_("unable to write %s"), sparse_filename);
 
-out:
-	clear_pattern_list(pl);
-	free(sparse_filename);
-	return result;
+ಹೊರಹೋಗು:
+	clear_ನಮೂನೆ_list(pl);
+	ಬಿಡುಗಡೆ(sparse_filename);
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-enum sparse_checkout_mode {
-	MODE_NO_PATTERNS = 0,
-	MODE_ALL_PATTERNS = 1,
-	MODE_CONE_PATTERNS = 2,
+ಎಣಿಕೆ sparse_checkout_ಬಹುಲಕ {
+	ಬಹುಲಕ_NO_PATTERNS = 0,
+	ಬಹುಲಕ_ALL_PATTERNS = 1,
+	ಬಹುಲಕ_CONE_PATTERNS = 2,
 };
 
-static int set_config(struct repository *repo,
-		      enum sparse_checkout_mode mode)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಗಣ_config(ರಚನೆ repository *repo,
+		      ಎಣಿಕೆ sparse_checkout_ಬಹುಲಕ ಬಹುಲಕ)
 {
 	/* Update to use worktree config, if not already. */
-	if (init_worktree_config(repo)) {
+	ಆದರೆ (init_worktree_config(repo)) {
 		error(_("failed to initialize worktree config"));
-		return 1;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
-	if (repo_config_set_worktree_gently(repo,
+	ಆದರೆ (repo_config_ಗಣ_worktree_gently(repo,
 					    "core.sparseCheckout",
-					    mode ? "true" : "false") ||
-	    repo_config_set_worktree_gently(repo,
+					    ಬಹುಲಕ ? "true" : "false") ||
+	    repo_config_ಗಣ_worktree_gently(repo,
 					    "core.sparseCheckoutCone",
-					    mode == MODE_CONE_PATTERNS ?
+					    ಬಹುಲಕ == ಬಹುಲಕ_CONE_PATTERNS ?
 						"true" : "false"))
-		return 1;
+		ಹಿಂತಿರುಗಿ 1;
 
-	if (mode == MODE_NO_PATTERNS)
-		return set_sparse_index_config(repo, 0);
+	ಆದರೆ (ಬಹುಲಕ == ಬಹುಲಕ_NO_PATTERNS)
+		ಹಿಂತಿರುಗಿ ಗಣ_sparse_ಸೂಚ್ಯಂಕ_config(repo, 0);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static enum sparse_checkout_mode update_cone_mode(int *cone_mode) {
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+ಸ್ಥಿರ ಎಣಿಕೆ sparse_checkout_ಬಹುಲಕ update_cone_ಬಹುಲಕ(ಪೂರ್ಣಾಂಕ *cone_ಬಹುಲಕ) {
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
 	/* If not specified, use previous definition of cone mode */
-	if (*cone_mode == -1 && cfg->apply_sparse_checkout)
-		*cone_mode = cfg->core_sparse_checkout_cone;
+	ಆದರೆ (*cone_ಬಹುಲಕ == -1 && cfg->apply_sparse_checkout)
+		*cone_ಬಹುಲಕ = cfg->core_sparse_checkout_cone;
 
 	/* Set cone/non-cone mode appropriately */
 	cfg->apply_sparse_checkout = 1;
-	if (*cone_mode == 1 || *cone_mode == -1) {
+	ಆದರೆ (*cone_ಬಹುಲಕ == 1 || *cone_ಬಹುಲಕ == -1) {
 		cfg->core_sparse_checkout_cone = 1;
-		return MODE_CONE_PATTERNS;
+		ಹಿಂತಿರುಗಿ ಬಹುಲಕ_CONE_PATTERNS;
 	}
 	cfg->core_sparse_checkout_cone = 0;
-	return MODE_ALL_PATTERNS;
+	ಹಿಂತಿರುಗಿ ಬಹುಲಕ_ALL_PATTERNS;
 }
 
-static int update_modes(struct repository *repo, int *cone_mode, int *sparse_index)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ update_modes(ರಚನೆ repository *repo, ಪೂರ್ಣಾಂಕ *cone_ಬಹುಲಕ, ಪೂರ್ಣಾಂಕ *sparse_ಸೂಚ್ಯಂಕ)
 {
-	int mode, record_mode;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ಪೂರ್ಣಾಂಕ ಬಹುಲಕ, ದಾಖಲೆ_ಬಹುಲಕ;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
 	/* Determine if we need to record the mode; ensure sparse checkout on */
-	record_mode = (*cone_mode != -1) || !cfg->apply_sparse_checkout;
+	ದಾಖಲೆ_ಬಹುಲಕ = (*cone_ಬಹುಲಕ != -1) || !cfg->apply_sparse_checkout;
 
-	mode = update_cone_mode(cone_mode);
-	if (record_mode && set_config(repo, mode))
-		return 1;
+	ಬಹುಲಕ = update_cone_ಬಹುಲಕ(cone_ಬಹುಲಕ);
+	ಆದರೆ (ದಾಖಲೆ_ಬಹುಲಕ && ಗಣ_config(repo, ಬಹುಲಕ))
+		ಹಿಂತಿರುಗಿ 1;
 
 	/* Set sparse-index/non-sparse-index mode if specified */
-	if (*sparse_index >= 0) {
-		if (set_sparse_index_config(repo, *sparse_index) < 0)
+	ಆದರೆ (*sparse_ಸೂಚ್ಯಂಕ >= 0) {
+		ಆದರೆ (ಗಣ_sparse_ಸೂಚ್ಯಂಕ_config(repo, *sparse_ಸೂಚ್ಯಂಕ) < 0)
 			die(_("failed to modify sparse-index config"));
 
 		/* force an index rewrite */
-		repo_read_index(repo);
-		repo->index->updated_workdir = 1;
+		repo_read_ಸೂಚ್ಯಂಕ(repo);
+		repo->ಸೂಚ್ಯಂಕ->updated_workdir = 1;
 
-		if (!*sparse_index)
-			ensure_full_index(repo->index);
+		ಆದರೆ (!*sparse_ಸೂಚ್ಯಂಕ)
+			ensure_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ(repo->ಸೂಚ್ಯಂಕ);
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static char const * const builtin_sparse_checkout_init_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_init_usage[] = {
 	"git sparse-checkout init [--cone] [--[no-]sparse-index]",
-	NULL
+	ಖಾಲಿ
 };
 
-static struct sparse_checkout_init_opts {
-	int cone_mode;
-	int sparse_index;
+ಸ್ಥಿರ ರಚನೆ sparse_checkout_init_opts {
+	ಪೂರ್ಣಾಂಕ cone_ಬಹುಲಕ;
+	ಪೂರ್ಣಾಂಕ sparse_ಸೂಚ್ಯಂಕ;
 } init_opts;
 
-static int sparse_checkout_init(int argc, const char **argv, const char *prefix,
-				struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_init(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				ರಚನೆ repository *repo)
 {
-	struct pattern_list pl;
-	char *sparse_filename;
-	int res;
-	struct object_id oid;
+	ರಚನೆ ನಮೂನೆ_list pl;
+	ಅಕ್ಷರ *sparse_filename;
+	ಪೂರ್ಣಾಂಕ res;
+	ರಚನೆ object_id oid;
 
-	static struct option builtin_sparse_checkout_init_options[] = {
-		OPT_BOOL(0, "cone", &init_opts.cone_mode,
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_init_options[] = {
+		OPT_BOOL(0, "cone", &init_opts.cone_ಬಹುಲಕ,
 			 N_("initialize the sparse-checkout in cone mode")),
-		OPT_BOOL(0, "sparse-index", &init_opts.sparse_index,
+		OPT_BOOL(0, "sparse-index", &init_opts.sparse_ಸೂಚ್ಯಂಕ,
 			 N_("toggle the use of a sparse index")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
-	setup_work_tree(the_repository);
-	repo_read_index(repo);
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	repo_read_ಸೂಚ್ಯಂಕ(repo);
 
-	init_opts.cone_mode = -1;
-	init_opts.sparse_index = -1;
+	init_opts.cone_ಬಹುಲಕ = -1;
+	init_opts.sparse_ಸೂಚ್ಯಂಕ = -1;
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			     builtin_sparse_checkout_init_options,
 			     builtin_sparse_checkout_init_usage, 0);
 
-	if (update_modes(repo, &init_opts.cone_mode, &init_opts.sparse_index))
-		return 1;
+	ಆದರೆ (update_modes(repo, &init_opts.cone_ಬಹುಲಕ, &init_opts.sparse_ಸೂಚ್ಯಂಕ))
+		ಹಿಂತಿರುಗಿ 1;
 
-	memset(&pl, 0, sizeof(pl));
+	memset(&pl, 0, ಗಾತ್ರ(pl));
 
 	sparse_filename = get_sparse_checkout_filename();
-	res = add_patterns_from_file_to_list(sparse_filename, "", 0, &pl, NULL, 0);
+	res = ಕೂಡಿಸು_patterns_from_file_ಗಮ್ಯ_list(sparse_filename, "", 0, &pl, ಖಾಲಿ, 0);
 
 	/* If we already have a sparse-checkout file, use it. */
-	if (res >= 0) {
-		free(sparse_filename);
-		clear_pattern_list(&pl);
-		return update_working_directory(repo, NULL);
+	ಆದರೆ (res >= 0) {
+		ಬಿಡುಗಡೆ(sparse_filename);
+		clear_ನಮೂನೆ_list(&pl);
+		ಹಿಂತಿರುಗಿ update_working_directory(repo, ಖಾಲಿ);
 	}
 
-	if (repo_get_oid(repo, "HEAD", &oid)) {
+	ಆದರೆ (repo_get_oid(repo, "HEAD", &oid)) {
 		FILE *fp;
 
 		/* assume we are in a fresh repo, but update the sparse-checkout file */
-		if (safe_create_leading_directories(repo, sparse_filename))
+		ಆದರೆ (ಸುರಕ್ಷಿತ_create_leading_directories(repo, sparse_filename))
 			die(_("unable to create leading directories of %s"),
 			    sparse_filename);
 		fp = xfopen(sparse_filename, "w");
-		if (!fp)
+		ಆದರೆ (!fp)
 			die(_("failed to open '%s'"), sparse_filename);
 
-		free(sparse_filename);
+		ಬಿಡುಗಡೆ(sparse_filename);
 		fprintf(fp, "/*\n!/*/\n");
 		fclose(fp);
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	free(sparse_filename);
+	ಬಿಡುಗಡೆ(sparse_filename);
 
-	add_pattern("/*", empty_base, 0, &pl, 0);
-	add_pattern("!/*/", empty_base, 0, &pl, 0);
-	pl.use_cone_patterns = init_opts.cone_mode;
+	ಕೂಡಿಸು_ನಮೂನೆ("/*", ಖಾಲಿಗಳು_ತಳ, 0, &pl, 0);
+	ಕೂಡಿಸು_ನಮೂನೆ("!/*/", ಖಾಲಿಗಳು_ತಳ, 0, &pl, 0);
+	pl.use_cone_patterns = init_opts.cone_ಬಹುಲಕ;
 
-	return write_patterns_and_update(repo, &pl);
+	ಹಿಂತಿರುಗಿ write_patterns_and_update(repo, &pl);
 }
 
-static void insert_recursive_pattern(struct pattern_list *pl, struct strbuf *path)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸೇರಿಸು_recursive_ನಮೂನೆ(ರಚನೆ ನಮೂನೆ_list *pl, ರಚನೆ strbuf *ಮಾರ್ಗ)
 {
-	struct pattern_entry *e = xmalloc(sizeof(*e));
-	e->patternlen = path->len;
-	e->pattern = strbuf_detach(path, NULL);
-	hashmap_entry_init(&e->ent, fspathhash(e->pattern));
+	ರಚನೆ ನಮೂನೆ_ನಮೂದು *e = xmalloc(ಗಾತ್ರ(*e));
+	e->patternlen = ಮಾರ್ಗ->len;
+	e->ನಮೂನೆ = strbuf_detach(ಮಾರ್ಗ, ಖಾಲಿ);
+	hashmap_ನಮೂದು_init(&e->ent, fspathhash(e->ನಮೂನೆ));
 
-	hashmap_add(&pl->recursive_hashmap, &e->ent);
+	hashmap_ಕೂಡಿಸು(&pl->recursive_hashmap, &e->ent);
 
-	while (e->patternlen) {
-		char *slash = strrchr(e->pattern, '/');
-		char *oldpattern = e->pattern;
-		size_t newlen;
-		struct pattern_entry *dup;
+	ಆಗ (e->patternlen) {
+		ಅಕ್ಷರ *slash = strrchr(e->ನಮೂನೆ, '/');
+		ಅಕ್ಷರ *oldpattern = e->ನಮೂನೆ;
+		ಗಾತ್ರ_t newlen;
+		ರಚನೆ ನಮೂನೆ_ನಮೂದು *dup;
 
-		if (!slash || slash == e->pattern)
-			break;
+		ಆದರೆ (!slash || slash == e->ನಮೂನೆ)
+			ನಿಲ್ಲಿಸು;
 
-		newlen = slash - e->pattern;
-		e = xmalloc(sizeof(struct pattern_entry));
+		newlen = slash - e->ನಮೂನೆ;
+		e = xmalloc(ಗಾತ್ರ(ರಚನೆ ನಮೂನೆ_ನಮೂದು));
 		e->patternlen = newlen;
-		e->pattern = xstrndup(oldpattern, newlen);
-		hashmap_entry_init(&e->ent, fspathhash(e->pattern));
+		e->ನಮೂನೆ = xstrndup(oldpattern, newlen);
+		hashmap_ನಮೂದು_init(&e->ent, fspathhash(e->ನಮೂನೆ));
 
-		dup = hashmap_get_entry(&pl->parent_hashmap, e, ent, NULL);
-		if (!dup) {
-			hashmap_add(&pl->parent_hashmap, &e->ent);
-		} else {
-			free(e->pattern);
-			free(e);
+		dup = hashmap_get_ನಮೂದು(&pl->ಪೋಷಕ_hashmap, e, ent, ಖಾಲಿ);
+		ಆದರೆ (!dup) {
+			hashmap_ಕೂಡಿಸು(&pl->ಪೋಷಕ_hashmap, &e->ent);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಬಿಡುಗಡೆ(e->ನಮೂನೆ);
+			ಬಿಡುಗಡೆ(e);
 			e = dup;
 		}
 	}
 }
 
-static void strbuf_to_cone_pattern(struct strbuf *line, struct pattern_list *pl)
+ಸ್ಥಿರ ಶೂನ್ಯ strbuf_ಗಮ್ಯ_cone_ನಮೂನೆ(ರಚನೆ strbuf *ಸಾಲು, ರಚನೆ ನಮೂನೆ_list *pl)
 {
-	strbuf_trim(line);
+	strbuf_trim(ಸಾಲು);
 
-	strbuf_trim_trailing_dir_sep(line);
+	strbuf_trim_trailing_dir_sep(ಸಾಲು);
 
-	if (strbuf_normalize_path(line))
-		die(_("could not normalize path %s"), line->buf);
+	ಆದರೆ (strbuf_normalize_ಮಾರ್ಗ(ಸಾಲು))
+		die(_("could not normalize path %s"), ಸಾಲು->buf);
 
-	if (!line->len)
-		return;
+	ಆದರೆ (!ಸಾಲು->len)
+		ಹಿಂತಿರುಗಿ;
 
-	if (line->buf[0] != '/')
-		strbuf_insertstr(line, 0, "/");
+	ಆದರೆ (ಸಾಲು->buf[0] != '/')
+		strbuf_insertstr(ಸಾಲು, 0, "/");
 
-	insert_recursive_pattern(pl, line);
+	ಸೇರಿಸು_recursive_ನಮೂನೆ(pl, ಸಾಲು);
 }
 
-static void add_patterns_from_input(struct pattern_list *pl,
-				    int argc, const char **argv,
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_patterns_from_ಒಳಹರಿವು(ರಚನೆ ನಮೂನೆ_list *pl,
+				    ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
 				    FILE *file)
 {
-	int i;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	if (cfg->core_sparse_checkout_cone) {
-		struct strbuf line = STRBUF_INIT;
+	ಆದರೆ (cfg->core_sparse_checkout_cone) {
+		ರಚನೆ strbuf ಸಾಲು = STRBUF_INIT;
 
-		hashmap_init(&pl->recursive_hashmap, pl_hashmap_cmp, NULL, 0);
-		hashmap_init(&pl->parent_hashmap, pl_hashmap_cmp, NULL, 0);
+		hashmap_init(&pl->recursive_hashmap, pl_hashmap_cmp, ಖಾಲಿ, 0);
+		hashmap_init(&pl->ಪೋಷಕ_hashmap, pl_hashmap_cmp, ಖಾಲಿ, 0);
 		pl->use_cone_patterns = 1;
 
-		if (file) {
-			struct strbuf unquoted = STRBUF_INIT;
-			while (!strbuf_getline(&line, file)) {
-				if (line.buf[0] == '"') {
+		ಆದರೆ (file) {
+			ರಚನೆ strbuf unquoted = STRBUF_INIT;
+			ಆಗ (!strbuf_getline(&ಸಾಲು, file)) {
+				ಆದರೆ (ಸಾಲು.buf[0] == '"') {
 					strbuf_reset(&unquoted);
-					if (unquote_c_style(&unquoted, line.buf, NULL))
+					ಆದರೆ (unquote_c_style(&unquoted, ಸಾಲು.buf, ಖಾಲಿ))
 						die(_("unable to unquote C-style string '%s'"),
-						line.buf);
+						ಸಾಲು.buf);
 
-					strbuf_swap(&unquoted, &line);
+					strbuf_ಅದಲುಬದಲು(&unquoted, &ಸಾಲು);
 				}
 
-				strbuf_to_cone_pattern(&line, pl);
+				strbuf_ಗಮ್ಯ_cone_ನಮೂನೆ(&ಸಾಲು, pl);
 			}
 
 			strbuf_release(&unquoted);
-		} else {
-			for (i = 0; i < argc; i++) {
-				strbuf_setlen(&line, 0);
-				strbuf_addstr(&line, argv[i]);
-				strbuf_to_cone_pattern(&line, pl);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಗಾಗಿ (i = 0; i < argc; i++) {
+				strbuf_setlen(&ಸಾಲು, 0);
+				strbuf_addstr(&ಸಾಲು, argv[i]);
+				strbuf_ಗಮ್ಯ_cone_ನಮೂನೆ(&ಸಾಲು, pl);
 			}
 		}
-		strbuf_release(&line);
-	} else {
-		if (file) {
-			struct strbuf line = STRBUF_INIT;
+		strbuf_release(&ಸಾಲು);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (file) {
+			ರಚನೆ strbuf ಸಾಲು = STRBUF_INIT;
 
-			while (!strbuf_getline(&line, file))
-				add_pattern(line.buf, empty_base, 0, pl, 0);
+			ಆಗ (!strbuf_getline(&ಸಾಲು, file))
+				ಕೂಡಿಸು_ನಮೂನೆ(ಸಾಲು.buf, ಖಾಲಿಗಳು_ತಳ, 0, pl, 0);
 
-			strbuf_release(&line);
-		} else {
-			for (i = 0; i < argc; i++)
-				add_pattern(argv[i], empty_base, 0, pl, 0);
+			strbuf_release(&ಸಾಲು);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಗಾಗಿ (i = 0; i < argc; i++)
+				ಕೂಡಿಸು_ನಮೂನೆ(argv[i], ಖಾಲಿಗಳು_ತಳ, 0, pl, 0);
 		}
 	}
 }
 
-enum modify_type {
+ಎಣಿಕೆ modify_type {
 	REPLACE,
-	ADD,
+	ಕೂಡಿಸು_2,
 };
 
-static void add_patterns_cone_mode(int argc, const char **argv,
-				   struct pattern_list *pl,
-				   int use_stdin)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_patterns_cone_ಬಹುಲಕ(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+				   ರಚನೆ ನಮೂನೆ_list *pl,
+				   ಪೂರ್ಣಾಂಕ use_stdin)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct pattern_entry *pe;
-	struct hashmap_iter iter;
-	struct pattern_list existing;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char *sparse_filename = get_sparse_checkout_filename();
+	ರಚನೆ strbuf ಬಫರ್ = STRBUF_INIT;
+	ರಚನೆ ನಮೂನೆ_ನಮೂದು *pe;
+	ರಚನೆ hashmap_iter iter;
+	ರಚನೆ ನಮೂನೆ_list existing;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
+	ಅಕ್ಷರ *sparse_filename = get_sparse_checkout_filename();
 
-	add_patterns_from_input(pl, argc, argv,
-				use_stdin ? stdin : NULL);
+	ಕೂಡಿಸು_patterns_from_ಒಳಹರಿವು(pl, argc, argv,
+				use_stdin ? stdin : ಖಾಲಿ);
 
-	memset(&existing, 0, sizeof(existing));
+	memset(&existing, 0, ಗಾತ್ರ(existing));
 	existing.use_cone_patterns = cfg->core_sparse_checkout_cone;
 
-	if (add_patterns_from_file_to_list(sparse_filename, "", 0,
-					   &existing, NULL, 0))
+	ಆದರೆ (ಕೂಡಿಸು_patterns_from_file_ಗಮ್ಯ_list(sparse_filename, "", 0,
+					   &existing, ಖಾಲಿ, 0))
 		die(_("unable to load existing sparse-checkout patterns"));
-	free(sparse_filename);
+	ಬಿಡುಗಡೆ(sparse_filename);
 
-	if (!existing.use_cone_patterns)
+	ಆದರೆ (!existing.use_cone_patterns)
 		die(_("existing sparse-checkout patterns do not use cone mode"));
 
-	hashmap_for_each_entry(&existing.recursive_hashmap, &iter, pe, ent) {
-		if (!hashmap_contains_parent(&pl->recursive_hashmap,
-					pe->pattern, &buffer) ||
-		    !hashmap_contains_parent(&pl->parent_hashmap,
-					pe->pattern, &buffer)) {
-			strbuf_reset(&buffer);
-			strbuf_addstr(&buffer, pe->pattern);
-			insert_recursive_pattern(pl, &buffer);
+	hashmap_for_each_ನಮೂದು(&existing.recursive_hashmap, &iter, pe, ent) {
+		ಆದರೆ (!hashmap_ಒಳಗೊಂಡಿದೆ_ಪೋಷಕ(&pl->recursive_hashmap,
+					pe->ನಮೂನೆ, &ಬಫರ್) ||
+		    !hashmap_ಒಳಗೊಂಡಿದೆ_ಪೋಷಕ(&pl->ಪೋಷಕ_hashmap,
+					pe->ನಮೂನೆ, &ಬಫರ್)) {
+			strbuf_reset(&ಬಫರ್);
+			strbuf_addstr(&ಬಫರ್, pe->ನಮೂನೆ);
+			ಸೇರಿಸು_recursive_ನಮೂನೆ(pl, &ಬಫರ್);
 		}
 	}
 
-	clear_pattern_list(&existing);
-	strbuf_release(&buffer);
+	clear_ನಮೂನೆ_list(&existing);
+	strbuf_release(&ಬಫರ್);
 }
 
-static void add_patterns_literal(int argc, const char **argv,
-				 struct pattern_list *pl,
-				 int use_stdin)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_patterns_literal(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+				 ರಚನೆ ನಮೂನೆ_list *pl,
+				 ಪೂರ್ಣಾಂಕ use_stdin)
 {
-	char *sparse_filename = get_sparse_checkout_filename();
-	if (add_patterns_from_file_to_list(sparse_filename, "", 0,
-					   pl, NULL, 0))
+	ಅಕ್ಷರ *sparse_filename = get_sparse_checkout_filename();
+	ಆದರೆ (ಕೂಡಿಸು_patterns_from_file_ಗಮ್ಯ_list(sparse_filename, "", 0,
+					   pl, ಖಾಲಿ, 0))
 		die(_("unable to load existing sparse-checkout patterns"));
-	free(sparse_filename);
-	add_patterns_from_input(pl, argc, argv, use_stdin ? stdin : NULL);
+	ಬಿಡುಗಡೆ(sparse_filename);
+	ಕೂಡಿಸು_patterns_from_ಒಳಹರಿವು(pl, argc, argv, use_stdin ? stdin : ಖಾಲಿ);
 }
 
-static int modify_pattern_list(struct repository *repo,
-			       struct strvec *args, int use_stdin,
-			       enum modify_type m)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ modify_ನಮೂನೆ_list(ರಚನೆ repository *repo,
+			       ರಚನೆ strvec *ವಾದಗಳು, ಪೂರ್ಣಾಂಕ use_stdin,
+			       ಎಣಿಕೆ modify_type m)
 {
-	int result;
-	int changed_config = 0;
-	struct pattern_list *pl = xcalloc(1, sizeof(*pl));
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
+	ಪೂರ್ಣಾಂಕ ಬದಲಾಯಿತು_config = 0;
+	ರಚನೆ ನಮೂನೆ_list *pl = xcalloc(1, ಗಾತ್ರ(*pl));
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	switch (m) {
-	case ADD:
-		if (cfg->core_sparse_checkout_cone)
-			add_patterns_cone_mode(args->nr, args->v, pl, use_stdin);
-		else
-			add_patterns_literal(args->nr, args->v, pl, use_stdin);
-		break;
+	ಆಯ್ಕೆ (m) {
+	ಸ್ಥಿತಿ ಕೂಡಿಸು_2:
+		ಆದರೆ (cfg->core_sparse_checkout_cone)
+			ಕೂಡಿಸು_patterns_cone_ಬಹುಲಕ(ವಾದಗಳು->nr, ವಾದಗಳು->v, pl, use_stdin);
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಕೂಡಿಸು_patterns_literal(ವಾದಗಳು->nr, ವಾದಗಳು->v, pl, use_stdin);
+		ನಿಲ್ಲಿಸು;
 
-	case REPLACE:
-		add_patterns_from_input(pl, args->nr, args->v,
-					use_stdin ? stdin : NULL);
-		break;
+	ಸ್ಥಿತಿ REPLACE:
+		ಕೂಡಿಸು_patterns_from_ಒಳಹರಿವು(pl, ವಾದಗಳು->nr, ವಾದಗಳು->v,
+					use_stdin ? stdin : ಖಾಲಿ);
+		ನಿಲ್ಲಿಸು;
 	}
 
-	if (!cfg->apply_sparse_checkout) {
-		set_config(repo, MODE_ALL_PATTERNS);
+	ಆದರೆ (!cfg->apply_sparse_checkout) {
+		ಗಣ_config(repo, ಬಹುಲಕ_ALL_PATTERNS);
 		cfg->apply_sparse_checkout = 1;
-		changed_config = 1;
+		ಬದಲಾಯಿತು_config = 1;
 	}
 
-	result = write_patterns_and_update(repo, pl);
+	ಫಲಿತಾಂಶ = write_patterns_and_update(repo, pl);
 
-	if (result && changed_config)
-		set_config(repo, MODE_NO_PATTERNS);
+	ಆದರೆ (ಫಲಿತಾಂಶ && ಬದಲಾಯಿತು_config)
+		ಗಣ_config(repo, ಬಹುಲಕ_NO_PATTERNS);
 
-	clear_pattern_list(pl);
-	free(pl);
-	return result;
+	clear_ನಮೂನೆ_list(pl);
+	ಬಿಡುಗಡೆ(pl);
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static void sanitize_paths(struct repository *repo,
-			   struct strvec *args,
-			   const char *prefix, int skip_checks)
+ಸ್ಥಿರ ಶೂನ್ಯ sanitize_paths(ರಚನೆ repository *repo,
+			   ರಚನೆ strvec *ವಾದಗಳು,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ, ಪೂರ್ಣಾಂಕ skip_checks)
 {
-	int i;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	if (!args->nr)
-		return;
+	ಆದರೆ (!ವಾದಗಳು->nr)
+		ಹಿಂತಿರುಗಿ;
 
-	if (prefix && *prefix && cfg->core_sparse_checkout_cone) {
+	ಆದರೆ (ಪೂರ್ವಪ್ರತ್ಯಯ && *ಪೂರ್ವಪ್ರತ್ಯಯ && cfg->core_sparse_checkout_cone) {
 		/*
 		 * The args are not pathspecs, so unfortunately we
 		 * cannot imitate how cmd_add() uses parse_pathspec().
 		 */
-		int prefix_len = strlen(prefix);
+		ಪೂರ್ಣಾಂಕ ಪೂರ್ವಪ್ರತ್ಯಯ_len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಪೂರ್ವಪ್ರತ್ಯಯ);
 
-		for (i = 0; i < args->nr; i++) {
-			char *prefixed_path = prefix_path(the_repository, prefix,
-							  prefix_len, args->v[i]);
-			strvec_replace(args, i, prefixed_path);
-			free(prefixed_path);
+		ಗಾಗಿ (i = 0; i < ವಾದಗಳು->nr; i++) {
+			ಅಕ್ಷರ *prefixed_ಮಾರ್ಗ = ಪೂರ್ವಪ್ರತ್ಯಯ_ಮಾರ್ಗ(the_repository, ಪೂರ್ವಪ್ರತ್ಯಯ,
+							  ಪೂರ್ವಪ್ರತ್ಯಯ_len, ವಾದಗಳು->v[i]);
+			strvec_replace(ವಾದಗಳು, i, prefixed_ಮಾರ್ಗ);
+			ಬಿಡುಗಡೆ(prefixed_ಮಾರ್ಗ);
 		}
 	}
 
-	if (skip_checks)
-		return;
+	ಆದರೆ (skip_checks)
+		ಹಿಂತಿರುಗಿ;
 
-	if (prefix && *prefix && !cfg->core_sparse_checkout_cone)
+	ಆದರೆ (ಪೂರ್ವಪ್ರತ್ಯಯ && *ಪೂರ್ವಪ್ರತ್ಯಯ && !cfg->core_sparse_checkout_cone)
 		die(_("please run from the toplevel directory in non-cone mode"));
 
-	if (cfg->core_sparse_checkout_cone) {
-		for (i = 0; i < args->nr; i++) {
-			if (args->v[i][0] == '/')
+	ಆದರೆ (cfg->core_sparse_checkout_cone) {
+		ಗಾಗಿ (i = 0; i < ವಾದಗಳು->nr; i++) {
+			ಆದರೆ (ವಾದಗಳು->v[i][0] == '/')
 				die(_("specify directories rather than patterns (no leading slash)"));
-			if (args->v[i][0] == '!')
+			ಆದರೆ (ವಾದಗಳು->v[i][0] == '!')
 				die(_("specify directories rather than patterns.  If your directory starts with a '!', pass --skip-checks"));
-			if (strpbrk(args->v[i], "*?[]"))
+			ಆದರೆ (strpbrk(ವಾದಗಳು->v[i], "*?[]"))
 				die(_("specify directories rather than patterns.  If your directory really has any of '*?[]\\' in it, pass --skip-checks"));
 		}
 	}
 
-	for (i = 0; i < args->nr; i++) {
-		struct cache_entry *ce;
-		struct index_state *index = repo->index;
-		int pos = index_name_pos(index, args->v[i], strlen(args->v[i]));
+	ಗಾಗಿ (i = 0; i < ವಾದಗಳು->nr; i++) {
+		ರಚನೆ cache_ನಮೂದು *ce;
+		ರಚನೆ ಸೂಚ್ಯಂಕ_state *ಸೂಚ್ಯಂಕ = repo->ಸೂಚ್ಯಂಕ;
+		ಪೂರ್ಣಾಂಕ pos = ಸೂಚ್ಯಂಕ_name_pos(ಸೂಚ್ಯಂಕ, ವಾದಗಳು->v[i], ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ವಾದಗಳು->v[i]));
 
-		if (pos < 0)
-			continue;
-		ce = index->cache[pos];
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			continue;
+		ಆದರೆ (pos < 0)
+			ಮುಂದುವರಿ;
+		ce = ಸೂಚ್ಯಂಕ->cache[pos];
+		ಆದರೆ (S_ISSPARSEDIR(ce->ce_ಬಹುಲಕ))
+			ಮುಂದುವರಿ;
 
-		if (cfg->core_sparse_checkout_cone)
-			die(_("'%s' is not a directory; to treat it as a directory anyway, rerun with --skip-checks"), args->v[i]);
-		else
-			warning(_("pass a leading slash before paths such as '%s' if you want a single file (see NON-CONE PROBLEMS in the git-sparse-checkout manual)."), args->v[i]);
+		ಆದರೆ (cfg->core_sparse_checkout_cone)
+			die(_("'%s' is not a directory; to treat it as a directory anyway, rerun with --skip-checks"), ವಾದಗಳು->v[i]);
+		ಇಲ್ಲದಿದ್ದರೆ
+			warning(_("pass a leading slash before paths such as '%s' if you want a single file (see NON-CONE PROBLEMS in the git-sparse-checkout manual)."), ವಾದಗಳು->v[i]);
 	}
 }
 
-static char const * const builtin_sparse_checkout_add_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_ಕೂಡಿಸು_usage[] = {
 	N_("git sparse-checkout add [--skip-checks] (--stdin | <patterns>)"),
-	NULL
+	ಖಾಲಿ
 };
 
-static struct sparse_checkout_add_opts {
-	int skip_checks;
-	int use_stdin;
-} add_opts;
+ಸ್ಥಿರ ರಚನೆ sparse_checkout_ಕೂಡಿಸು_opts {
+	ಪೂರ್ಣಾಂಕ skip_checks;
+	ಪೂರ್ಣಾಂಕ use_stdin;
+} ಕೂಡಿಸು_opts;
 
-static int sparse_checkout_add(int argc, const char **argv, const char *prefix,
-			       struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_ಕೂಡಿಸು(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			       ರಚನೆ repository *repo)
 {
-	static struct option builtin_sparse_checkout_add_options[] = {
-		OPT_BOOL_F(0, "skip-checks", &add_opts.skip_checks,
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_ಕೂಡಿಸು_options[] = {
+		OPT_BOOL_F(0, "skip-checks", &ಕೂಡಿಸು_opts.skip_checks,
 			   N_("skip some sanity checks on the given paths that might give false positives"),
 			   PARSE_OPT_NONEG),
-		OPT_BOOL(0, "stdin", &add_opts.use_stdin,
+		OPT_BOOL(0, "stdin", &ಕೂಡಿಸು_opts.use_stdin,
 			 N_("read patterns from standard in")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
-	struct strvec patterns = STRVEC_INIT;
-	int ret;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ strvec patterns = STRVEC_INIT;
+	ಪೂರ್ಣಾಂಕ ret;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	ಆದರೆ (!cfg->apply_sparse_checkout)
 		die(_("no sparse-checkout to add to"));
 
-	repo_read_index(repo);
+	repo_read_ಸೂಚ್ಯಂಕ(repo);
 
-	argc = parse_options(argc, argv, prefix,
-			     builtin_sparse_checkout_add_options,
-			     builtin_sparse_checkout_add_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
+			     builtin_sparse_checkout_ಕೂಡಿಸು_options,
+			     builtin_sparse_checkout_ಕೂಡಿಸು_usage, 0);
 
-	for (int i = 0; i < argc; i++)
-		strvec_push(&patterns, argv[i]);
-	sanitize_paths(repo, &patterns, prefix, add_opts.skip_checks);
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < argc; i++)
+		strvec_ತಳ್ಳು(&patterns, argv[i]);
+	sanitize_paths(repo, &patterns, ಪೂರ್ವಪ್ರತ್ಯಯ, ಕೂಡಿಸು_opts.skip_checks);
 
-	ret = modify_pattern_list(repo, &patterns, add_opts.use_stdin, ADD);
+	ret = modify_ನಮೂನೆ_list(repo, &patterns, ಕೂಡಿಸು_opts.use_stdin, ಕೂಡಿಸು_2);
 
 	strvec_clear(&patterns);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static char const * const builtin_sparse_checkout_set_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_ಗಣ_usage[] = {
 	N_("git sparse-checkout set [--[no-]cone] [--[no-]sparse-index] [--skip-checks] (--stdin | <patterns>)"),
-	NULL
+	ಖಾಲಿ
 };
 
-static struct sparse_checkout_set_opts {
-	int cone_mode;
-	int sparse_index;
-	int skip_checks;
-	int use_stdin;
-} set_opts;
+ಸ್ಥಿರ ರಚನೆ sparse_checkout_ಗಣ_opts {
+	ಪೂರ್ಣಾಂಕ cone_ಬಹುಲಕ;
+	ಪೂರ್ಣಾಂಕ sparse_ಸೂಚ್ಯಂಕ;
+	ಪೂರ್ಣಾಂಕ skip_checks;
+	ಪೂರ್ಣಾಂಕ use_stdin;
+} ಗಣ_opts;
 
-static int sparse_checkout_set(int argc, const char **argv, const char *prefix,
-			       struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_ಗಣ(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			       ರಚನೆ repository *repo)
 {
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int default_patterns_nr = 2;
-	const char *default_patterns[] = {"/*", "!/*/", NULL};
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
+	ಪೂರ್ಣಾಂಕ default_patterns_nr = 2;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *default_patterns[] = {"/*", "!/*/", ಖಾಲಿ};
 
-	static struct option builtin_sparse_checkout_set_options[] = {
-		OPT_BOOL(0, "cone", &set_opts.cone_mode,
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_ಗಣ_options[] = {
+		OPT_BOOL(0, "cone", &ಗಣ_opts.cone_ಬಹುಲಕ,
 			 N_("initialize the sparse-checkout in cone mode")),
-		OPT_BOOL(0, "sparse-index", &set_opts.sparse_index,
+		OPT_BOOL(0, "sparse-index", &ಗಣ_opts.sparse_ಸೂಚ್ಯಂಕ,
 			 N_("toggle the use of a sparse index")),
-		OPT_BOOL_F(0, "skip-checks", &set_opts.skip_checks,
+		OPT_BOOL_F(0, "skip-checks", &ಗಣ_opts.skip_checks,
 			   N_("skip some sanity checks on the given paths that might give false positives"),
 			   PARSE_OPT_NONEG),
-		OPT_BOOL_F(0, "stdin", &set_opts.use_stdin,
+		OPT_BOOL_F(0, "stdin", &ಗಣ_opts.use_stdin,
 			   N_("read patterns from standard in"),
 			   PARSE_OPT_NONEG),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
-	struct strvec patterns = STRVEC_INIT;
-	int ret;
+	ರಚನೆ strvec patterns = STRVEC_INIT;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	setup_work_tree(the_repository);
-	repo_read_index(repo);
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	repo_read_ಸೂಚ್ಯಂಕ(repo);
 
-	set_opts.cone_mode = -1;
-	set_opts.sparse_index = -1;
+	ಗಣ_opts.cone_ಬಹುಲಕ = -1;
+	ಗಣ_opts.sparse_ಸೂಚ್ಯಂಕ = -1;
 
-	argc = parse_options(argc, argv, prefix,
-			     builtin_sparse_checkout_set_options,
-			     builtin_sparse_checkout_set_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
+			     builtin_sparse_checkout_ಗಣ_options,
+			     builtin_sparse_checkout_ಗಣ_usage, 0);
 
-	if (update_modes(repo, &set_opts.cone_mode, &set_opts.sparse_index))
-		return 1;
+	ಆದರೆ (update_modes(repo, &ಗಣ_opts.cone_ಬಹುಲಕ, &ಗಣ_opts.sparse_ಸೂಚ್ಯಂಕ))
+		ಹಿಂತಿರುಗಿ 1;
 
 	/*
 	 * Cone mode automatically specifies the toplevel directory.  For
 	 * non-cone mode, if nothing is specified, manually select just the
 	 * top-level directory (much as 'init' would do).
 	 */
-	if (!cfg->core_sparse_checkout_cone && !set_opts.use_stdin && argc == 0) {
-		for (int i = 0; i < default_patterns_nr; i++)
-			strvec_push(&patterns, default_patterns[i]);
-	} else {
-		for (int i = 0; i < argc; i++)
-			strvec_push(&patterns, argv[i]);
-		sanitize_paths(repo, &patterns, prefix, set_opts.skip_checks);
+	ಆದರೆ (!cfg->core_sparse_checkout_cone && !ಗಣ_opts.use_stdin && argc == 0) {
+		ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < default_patterns_nr; i++)
+			strvec_ತಳ್ಳು(&patterns, default_patterns[i]);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 0; i < argc; i++)
+			strvec_ತಳ್ಳು(&patterns, argv[i]);
+		sanitize_paths(repo, &patterns, ಪೂರ್ವಪ್ರತ್ಯಯ, ಗಣ_opts.skip_checks);
 	}
 
-	ret = modify_pattern_list(repo, &patterns, set_opts.use_stdin, REPLACE);
+	ret = modify_ನಮೂನೆ_list(repo, &patterns, ಗಣ_opts.use_stdin, REPLACE);
 
 	strvec_clear(&patterns);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static char const * const builtin_sparse_checkout_reapply_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_reapply_usage[] = {
 	"git sparse-checkout reapply [--[no-]cone] [--[no-]sparse-index]",
-	NULL
+	ಖಾಲಿ
 };
 
-static struct sparse_checkout_reapply_opts {
-	int cone_mode;
-	int sparse_index;
+ಸ್ಥಿರ ರಚನೆ sparse_checkout_reapply_opts {
+	ಪೂರ್ಣಾಂಕ cone_ಬಹುಲಕ;
+	ಪೂರ್ಣಾಂಕ sparse_ಸೂಚ್ಯಂಕ;
 } reapply_opts;
 
-static int sparse_checkout_reapply(int argc, const char **argv,
-				   const char *prefix,
-				   struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_reapply(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				   ರಚನೆ repository *repo)
 {
-	static struct option builtin_sparse_checkout_reapply_options[] = {
-		OPT_BOOL(0, "cone", &reapply_opts.cone_mode,
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_reapply_options[] = {
+		OPT_BOOL(0, "cone", &reapply_opts.cone_ಬಹುಲಕ,
 			 N_("initialize the sparse-checkout in cone mode")),
-		OPT_BOOL(0, "sparse-index", &reapply_opts.sparse_index,
+		OPT_BOOL(0, "sparse-index", &reapply_opts.sparse_ಸೂಚ್ಯಂಕ,
 			 N_("toggle the use of a sparse index")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	ಆದರೆ (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to reapply sparsity patterns"));
 
-	reapply_opts.cone_mode = -1;
-	reapply_opts.sparse_index = -1;
+	reapply_opts.cone_ಬಹುಲಕ = -1;
+	reapply_opts.sparse_ಸೂಚ್ಯಂಕ = -1;
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			     builtin_sparse_checkout_reapply_options,
 			     builtin_sparse_checkout_reapply_usage, 0);
 
-	repo_read_index(repo);
+	repo_read_ಸೂಚ್ಯಂಕ(repo);
 
-	if (update_modes(repo, &reapply_opts.cone_mode, &reapply_opts.sparse_index))
-		return 1;
+	ಆದರೆ (update_modes(repo, &reapply_opts.cone_ಬಹುಲಕ, &reapply_opts.sparse_ಸೂಚ್ಯಂಕ))
+		ಹಿಂತಿರುಗಿ 1;
 
-	return update_working_directory(repo, NULL);
+	ಹಿಂತಿರುಗಿ update_working_directory(repo, ಖಾಲಿ);
 }
 
-static char const * const builtin_sparse_checkout_clean_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_clean_usage[] = {
 	"git sparse-checkout clean [-n|--dry-run]",
-	NULL
+	ಖಾಲಿ
 };
 
-static int list_file_iterator(const char *path, const void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ list_file_iterator(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	const char *msg = data;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ = ದತ್ತಾಂಶ;
 
-	printf(msg, path);
-	return 0;
+	ಬರೆ(ಸಂದೇಶ, ಮಾರ್ಗ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void list_every_file_in_dir(const char *msg,
-				   const char *directory)
+ಸ್ಥಿರ ಶೂನ್ಯ list_every_file_ಒಳ_dir(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *directory)
 {
-	struct strbuf path = STRBUF_INIT;
+	ರಚನೆ strbuf ಮಾರ್ಗ = STRBUF_INIT;
 
-	strbuf_addstr(&path, directory);
-	for_each_file_in_dir(&path, list_file_iterator, msg);
-	strbuf_release(&path);
+	strbuf_addstr(&ಮಾರ್ಗ, directory);
+	for_each_file_ಒಳ_dir(&ಮಾರ್ಗ, list_file_iterator, ಸಂದೇಶ);
+	strbuf_release(&ಮಾರ್ಗ);
 }
 
-static const char *msg_remove = N_("Removing %s\n");
-static const char *msg_would_remove = N_("Would remove %s\n");
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ_remove = N_("Removing %s\n");
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ_would_remove = N_("Would remove %s\n");
 
-static int sparse_checkout_clean(int argc, const char **argv,
-				   const char *prefix,
-				   struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_clean(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				   ರಚನೆ repository *repo)
 {
-	struct strbuf full_path = STRBUF_INIT;
-	const char *msg = msg_remove;
-	size_t worktree_len;
-	int force = 0, dry_run = 0, verbose = 0;
-	int require_force = 1;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ strbuf ತುಂಬಿದ_ಮಾರ್ಗ = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ = ಸಂದೇಶ_remove;
+	ಗಾತ್ರ_t worktree_len;
+	ಪೂರ್ಣಾಂಕ force = 0, dry_ಸತತ = 0, verbose = 0;
+	ಪೂರ್ಣಾಂಕ require_force = 1;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	struct option builtin_sparse_checkout_clean_options[] = {
-		OPT__DRY_RUN(&dry_run, N_("dry run")),
+	ರಚನೆ option builtin_sparse_checkout_clean_options[] = {
+		OPT_DRY_ಸತತ(&dry_ಸತತ, N_("dry run")),
 		OPT__FORCE(&force, N_("force"), PARSE_OPT_NOCOMPLETE),
 		OPT__VERBOSE(&verbose, N_("report each affected file, not just directories")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
-	setup_work_tree(the_repository);
-	if (!cfg->apply_sparse_checkout)
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	ಆದರೆ (!cfg->apply_sparse_checkout)
 		die(_("must be in a sparse-checkout to clean directories"));
-	if (!cfg->core_sparse_checkout_cone)
+	ಆದರೆ (!cfg->core_sparse_checkout_cone)
 		die(_("must be in a cone-mode sparse-checkout to clean directories"));
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			     builtin_sparse_checkout_clean_options,
 			     builtin_sparse_checkout_clean_usage, 0);
 
 	repo_config_get_bool(repo, "clean.requireforce", &require_force);
-	if (require_force && !force && !dry_run)
+	ಆದರೆ (require_force && !force && !dry_ಸತತ)
 		die(_("for safety, refusing to clean without one of --force or --dry-run"));
 
-	if (dry_run)
-		msg = msg_would_remove;
+	ಆದರೆ (dry_ಸತತ)
+		ಸಂದೇಶ = ಸಂದೇಶ_would_remove;
 
-	if (repo_read_index(repo) < 0)
+	ಆದರೆ (repo_read_ಸೂಚ್ಯಂಕ(repo) < 0)
 		die(_("failed to read index"));
 
-	if (convert_to_sparse(repo->index, SPARSE_INDEX_MEMORY_ONLY) ||
-	    repo->index->sparse_index == INDEX_EXPANDED)
+	ಆದರೆ (convert_ಗಮ್ಯ_sparse(repo->ಸೂಚ್ಯಂಕ, SPARSE_ಸೂಚ್ಯಂಕ_ಸ್ಮರಣೆ_ONLY) ||
+	    repo->ಸೂಚ್ಯಂಕ->sparse_ಸೂಚ್ಯಂಕ == ಸೂಚ್ಯಂಕ_EXPANDED)
 		die(_("failed to convert index to a sparse index; resolve merge conflicts and try again"));
 
-	strbuf_addstr(&full_path, repo->worktree);
-	strbuf_addch(&full_path, '/');
-	worktree_len = full_path.len;
+	strbuf_addstr(&ತುಂಬಿದ_ಮಾರ್ಗ, repo->worktree);
+	strbuf_addch(&ತುಂಬಿದ_ಮಾರ್ಗ, '/');
+	worktree_len = ತುಂಬಿದ_ಮಾರ್ಗ.len;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
-		struct cache_entry *ce = repo->index->cache[i];
-		if (!S_ISSPARSEDIR(ce->ce_mode))
-			continue;
-		strbuf_setlen(&full_path, worktree_len);
-		strbuf_add(&full_path, ce->name, ce->ce_namelen);
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < repo->ಸೂಚ್ಯಂಕ->cache_nr; i++) {
+		ರಚನೆ cache_ನಮೂದು *ce = repo->ಸೂಚ್ಯಂಕ->cache[i];
+		ಆದರೆ (!S_ISSPARSEDIR(ce->ce_ಬಹುಲಕ))
+			ಮುಂದುವರಿ;
+		strbuf_setlen(&ತುಂಬಿದ_ಮಾರ್ಗ, worktree_len);
+		strbuf_ಕೂಡಿಸು(&ತುಂಬಿದ_ಮಾರ್ಗ, ce->name, ce->ce_namelen);
 
-		if (!is_directory(full_path.buf))
-			continue;
+		ಆದರೆ (!is_directory(ತುಂಬಿದ_ಮಾರ್ಗ.buf))
+			ಮುಂದುವರಿ;
 
-		if (verbose)
-			list_every_file_in_dir(msg, ce->name);
-		else
-			printf(msg, ce->name);
+		ಆದರೆ (verbose)
+			list_every_file_ಒಳ_dir(ಸಂದೇಶ, ce->name);
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಬರೆ(ಸಂದೇಶ, ce->name);
 
-		if (dry_run <= 0 &&
-		    remove_dir_recursively(&full_path, 0))
+		ಆದರೆ (dry_ಸತತ <= 0 &&
+		    remove_dir_recursively(&ತುಂಬಿದ_ಮಾರ್ಗ, 0))
 			warning_errno(_("failed to remove '%s'"), ce->name);
 	}
 
-	strbuf_release(&full_path);
-	return 0;
+	strbuf_release(&ತುಂಬಿದ_ಮಾರ್ಗ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static char const * const builtin_sparse_checkout_disable_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_disable_usage[] = {
 	"git sparse-checkout disable",
-	NULL
+	ಖಾಲಿ
 };
 
-static int sparse_checkout_disable(int argc, const char **argv,
-				   const char *prefix,
-				   struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_disable(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				   ರಚನೆ repository *repo)
 {
-	static struct option builtin_sparse_checkout_disable_options[] = {
-		OPT_END(),
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_disable_options[] = {
+		OPT_ಕೊನೆ(),
 	};
-	struct pattern_list pl;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ ನಮೂನೆ_list pl;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
 	/*
 	 * We do not exit early if !repo->config_values.apply_sparse_checkout; due to the
@@ -1060,8 +1060,8 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	 * forcibly return to a dense checkout regardless of initial state.
 	 */
 
-	setup_work_tree(the_repository);
-	argc = parse_options(argc, argv, prefix,
+	ಸಿದ್ಧತೆ_work_ವೃಕ್ಷ(the_repository);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			     builtin_sparse_checkout_disable_options,
 			     builtin_sparse_checkout_disable_usage, 0);
 
@@ -1070,142 +1070,142 @@ static int sparse_checkout_disable(int argc, const char **argv,
 	 * are expecting to do that when disabling sparse-checkout.
 	 */
 	give_advice_on_expansion = 0;
-	repo_read_index(repo);
+	repo_read_ಸೂಚ್ಯಂಕ(repo);
 
-	memset(&pl, 0, sizeof(pl));
-	hashmap_init(&pl.recursive_hashmap, pl_hashmap_cmp, NULL, 0);
-	hashmap_init(&pl.parent_hashmap, pl_hashmap_cmp, NULL, 0);
+	memset(&pl, 0, ಗಾತ್ರ(pl));
+	hashmap_init(&pl.recursive_hashmap, pl_hashmap_cmp, ಖಾಲಿ, 0);
+	hashmap_init(&pl.ಪೋಷಕ_hashmap, pl_hashmap_cmp, ಖಾಲಿ, 0);
 	pl.use_cone_patterns = 0;
 	cfg->apply_sparse_checkout = 1;
 
-	add_pattern("/*", empty_base, 0, &pl, 0);
+	ಕೂಡಿಸು_ನಮೂನೆ("/*", ಖಾಲಿಗಳು_ತಳ, 0, &pl, 0);
 
 	prepare_repo_settings(the_repository);
-	repo->settings.sparse_index = 0;
+	repo->settings.sparse_ಸೂಚ್ಯಂಕ = 0;
 
-	if (update_working_directory(repo, &pl))
+	ಆದರೆ (update_working_directory(repo, &pl))
 		die(_("error while refreshing working directory"));
 
-	clear_pattern_list(&pl);
-	return set_config(repo, MODE_NO_PATTERNS);
+	clear_ನಮೂನೆ_list(&pl);
+	ಹಿಂತಿರುಗಿ ಗಣ_config(repo, ಬಹುಲಕ_NO_PATTERNS);
 }
 
-static char const * const builtin_sparse_checkout_check_rules_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_sparse_checkout_check_ನಿಯಮಗಳು_usage[] = {
 	N_("git sparse-checkout check-rules [-z] [--skip-checks]"
 	   "[--[no-]cone] [--rules-file <file>]"),
-	NULL
+	ಖಾಲಿ
 };
 
-static struct sparse_checkout_check_rules_opts {
-	int cone_mode;
-	int null_termination;
-	char *rules_file;
-} check_rules_opts;
+ಸ್ಥಿರ ರಚನೆ sparse_checkout_check_ನಿಯಮಗಳು_opts {
+	ಪೂರ್ಣಾಂಕ cone_ಬಹುಲಕ;
+	ಪೂರ್ಣಾಂಕ null_termination;
+	ಅಕ್ಷರ *ನಿಯಮಗಳು_file;
+} check_ನಿಯಮಗಳು_opts;
 
-static int check_rules(struct repository *repo,
-		       struct pattern_list *pl,
-		       int null_terminated)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_ನಿಯಮಗಳು(ರಚನೆ repository *repo,
+		       ರಚನೆ ನಮೂನೆ_list *pl,
+		       ಪೂರ್ಣಾಂಕ null_terminated)
 {
-	struct strbuf line = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *path;
-	int line_terminator = null_terminated ? 0 : '\n';
+	ರಚನೆ strbuf ಸಾಲು = STRBUF_INIT;
+	ರಚನೆ strbuf unquoted = STRBUF_INIT;
+	ಅಕ್ಷರ *ಮಾರ್ಗ;
+	ಪೂರ್ಣಾಂಕ ಸಾಲು_terminator = null_terminated ? 0 : '\n';
 	strbuf_getline_fn getline_fn = null_terminated ? strbuf_getline_nul
 		: strbuf_getline;
-	repo->index->sparse_checkout_patterns = pl;
-	while (!getline_fn(&line, stdin)) {
-		path = line.buf;
-		if (!null_terminated && line.buf[0] == '"') {
+	repo->ಸೂಚ್ಯಂಕ->sparse_checkout_patterns = pl;
+	ಆಗ (!getline_fn(&ಸಾಲು, stdin)) {
+		ಮಾರ್ಗ = ಸಾಲು.buf;
+		ಆದರೆ (!null_terminated && ಸಾಲು.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, line.buf, NULL))
+			ಆದರೆ (unquote_c_style(&unquoted, ಸಾಲು.buf, ಖಾಲಿ))
 				die(_("unable to unquote C-style string '%s'"),
-					line.buf);
+					ಸಾಲು.buf);
 
-			path = unquoted.buf;
+			ಮಾರ್ಗ = unquoted.buf;
 		}
 
-		if (path_in_sparse_checkout(path, repo->index))
-			write_name_quoted(path, stdout, line_terminator);
+		ಆದರೆ (ಮಾರ್ಗ_ಒಳ_sparse_checkout(ಮಾರ್ಗ, repo->ಸೂಚ್ಯಂಕ))
+			write_name_quoted(ಮಾರ್ಗ, stdout, ಸಾಲು_terminator);
 	}
-	strbuf_release(&line);
+	strbuf_release(&ಸಾಲು);
 	strbuf_release(&unquoted);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int sparse_checkout_check_rules(int argc, const char **argv, const char *prefix,
-				       struct repository *repo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse_checkout_check_ನಿಯಮಗಳು(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				       ರಚನೆ repository *repo)
 {
-	static struct option builtin_sparse_checkout_check_rules_options[] = {
-		OPT_BOOL('z', NULL, &check_rules_opts.null_termination,
+	ಸ್ಥಿರ ರಚನೆ option builtin_sparse_checkout_check_ನಿಯಮಗಳು_options[] = {
+		OPT_BOOL('z', ಖಾಲಿ, &check_ನಿಯಮಗಳು_opts.null_termination,
 			 N_("terminate input and output files by a NUL character")),
-		OPT_BOOL(0, "cone", &check_rules_opts.cone_mode,
+		OPT_BOOL(0, "cone", &check_ನಿಯಮಗಳು_opts.cone_ಬಹುಲಕ,
 			 N_("when used with --rules-file interpret patterns as cone mode patterns")),
-		OPT_FILENAME(0, "rules-file", &check_rules_opts.rules_file,
+		OPT_FILENAME(0, "rules-file", &check_ನಿಯಮಗಳು_opts.ನಿಯಮಗಳು_file,
 			 N_("use patterns in <file> instead of the current ones.")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
 	FILE *fp;
-	int ret;
-	struct pattern_list pl = {0};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char *sparse_filename;
-	check_rules_opts.cone_mode = -1;
+	ಪೂರ್ಣಾಂಕ ret;
+	ರಚನೆ ನಮೂನೆ_list pl = {0};
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
+	ಅಕ್ಷರ *sparse_filename;
+	check_ನಿಯಮಗಳು_opts.cone_ಬಹುಲಕ = -1;
 
-	argc = parse_options(argc, argv, prefix,
-			     builtin_sparse_checkout_check_rules_options,
-			     builtin_sparse_checkout_check_rules_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
+			     builtin_sparse_checkout_check_ನಿಯಮಗಳು_options,
+			     builtin_sparse_checkout_check_ನಿಯಮಗಳು_usage, 0);
 
-	if (check_rules_opts.rules_file && check_rules_opts.cone_mode < 0)
-		check_rules_opts.cone_mode = 1;
+	ಆದರೆ (check_ನಿಯಮಗಳು_opts.ನಿಯಮಗಳು_file && check_ನಿಯಮಗಳು_opts.cone_ಬಹುಲಕ < 0)
+		check_ನಿಯಮಗಳು_opts.cone_ಬಹುಲಕ = 1;
 
-	update_cone_mode(&check_rules_opts.cone_mode);
+	update_cone_ಬಹುಲಕ(&check_ನಿಯಮಗಳು_opts.cone_ಬಹುಲಕ);
 	pl.use_cone_patterns = cfg->core_sparse_checkout_cone;
-	if (check_rules_opts.rules_file) {
-		fp = xfopen(check_rules_opts.rules_file, "r");
-		add_patterns_from_input(&pl, argc, argv, fp);
+	ಆದರೆ (check_ನಿಯಮಗಳು_opts.ನಿಯಮಗಳು_file) {
+		fp = xfopen(check_ನಿಯಮಗಳು_opts.ನಿಯಮಗಳು_file, "r");
+		ಕೂಡಿಸು_patterns_from_ಒಳಹರಿವು(&pl, argc, argv, fp);
 		fclose(fp);
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		sparse_filename = get_sparse_checkout_filename();
-		if (add_patterns_from_file_to_list(sparse_filename, "", 0, &pl,
-						   NULL, 0))
+		ಆದರೆ (ಕೂಡಿಸು_patterns_from_file_ಗಮ್ಯ_list(sparse_filename, "", 0, &pl,
+						   ಖಾಲಿ, 0))
 			die(_("unable to load existing sparse-checkout patterns"));
-		free(sparse_filename);
+		ಬಿಡುಗಡೆ(sparse_filename);
 	}
 
-	ret = check_rules(repo, &pl, check_rules_opts.null_termination);
-	clear_pattern_list(&pl);
-	free(check_rules_opts.rules_file);
-	return ret;
+	ret = check_ನಿಯಮಗಳು(repo, &pl, check_ನಿಯಮಗಳು_opts.null_termination);
+	clear_ನಮೂನೆ_list(&pl);
+	ಬಿಡುಗಡೆ(check_ನಿಯಮಗಳು_opts.ನಿಯಮಗಳು_file);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-int cmd_sparse_checkout(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_sparse_checkout(ಪೂರ್ಣಾಂಕ argc,
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			ರಚನೆ repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_sparse_checkout_options[] = {
+	parse_opt_subcommand_fn *fn = ಖಾಲಿ;
+	ರಚನೆ option builtin_sparse_checkout_options[] = {
 		OPT_SUBCOMMAND("list", &fn, sparse_checkout_list),
 		OPT_SUBCOMMAND("init", &fn, sparse_checkout_init),
-		OPT_SUBCOMMAND("set", &fn, sparse_checkout_set),
-		OPT_SUBCOMMAND("add", &fn, sparse_checkout_add),
+		OPT_SUBCOMMAND("set", &fn, sparse_checkout_ಗಣ),
+		OPT_SUBCOMMAND("add", &fn, sparse_checkout_ಕೂಡಿಸು),
 		OPT_SUBCOMMAND("reapply", &fn, sparse_checkout_reapply),
 		OPT_SUBCOMMAND("clean", &fn, sparse_checkout_clean),
 		OPT_SUBCOMMAND("disable", &fn, sparse_checkout_disable),
-		OPT_SUBCOMMAND("check-rules", &fn, sparse_checkout_check_rules),
-		OPT_END(),
+		OPT_SUBCOMMAND("check-rules", &fn, sparse_checkout_check_ನಿಯಮಗಳು),
+		OPT_ಕೊನೆ(),
 	};
 
-	argc = parse_options(argc, argv, prefix,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			     builtin_sparse_checkout_options,
 			     builtin_sparse_checkout_usage, 0);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
 
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ = 0;
 
-	return fn(argc, argv, prefix, repo);
+	ಹಿಂತಿರುಗಿ fn(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, repo);
 }

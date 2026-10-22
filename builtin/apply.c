@@ -1,26 +1,26 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hash.h"
-#include "apply.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hash.h"
+#ಅನ್ತರ್ಭಾವ "apply.h"
 
-static const char * const apply_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ apply_usage[] = {
 	N_("git apply [<options>] [<patch>...]"),
-	NULL
+	ಖಾಲಿ
 };
 
-int cmd_apply(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_apply(ಪೂರ್ಣಾಂಕ argc,
+	      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	      ರಚನೆ repository *repo)
 {
-	int force_apply = 0;
-	int options = 0;
-	int ret;
-	struct apply_state state;
+	ಪೂರ್ಣಾಂಕ force_apply = 0;
+	ಪೂರ್ಣಾಂಕ options = 0;
+	ಪೂರ್ಣಾಂಕ ret;
+	ರಚನೆ apply_state state;
 
-	if (init_apply_state(&state, the_repository, prefix))
-		exit(128);
+	ಆದರೆ (init_apply_state(&state, the_repository, ಪೂರ್ವಪ್ರತ್ಯಯ))
+		ನಿರ್ಗಮಿಸು(128);
 
 	/*
 	 * We could to redo the "apply.c" machinery to make this
@@ -28,24 +28,24 @@ int cmd_apply(int argc,
 	 * is worth the effort.
 	 * cf. https://lore.kernel.org/git/xmqqcypfcmn4.fsf@gitster.g/
 	 */
-	if (!the_hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	ಆದರೆ (!the_hash_algo)
+		repo_ಗಣ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	argc = apply_parse_options(argc, argv,
 				   &state, &force_apply, &options,
 				   apply_usage);
 
-	if (repo) {
+	ಆದರೆ (repo) {
 		prepare_repo_settings(repo);
-		repo->settings.command_requires_full_index = 0;
+		repo->settings.command_requires_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ = 0;
 	}
 
-	if (check_apply_state(&state, force_apply))
-		exit(128);
+	ಆದರೆ (check_apply_state(&state, force_apply))
+		ನಿರ್ಗಮಿಸು(128);
 
 	ret = apply_all_patches(&state, argc, argv, options);
 
 	clear_apply_state(&state);
 
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }

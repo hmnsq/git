@@ -6,99 +6,99 @@
  * Based on git-merge.sh by Junio C Hamano.
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
 
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "lockfile.h"
-#include "repository.h"
-#include "run-command.h"
-#include "hook.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "refs.h"
-#include "refspec.h"
-#include "commit.h"
-#include "diffcore.h"
-#include "path.h"
-#include "revision.h"
-#include "unpack-trees.h"
-#include "cache-tree.h"
-#include "dir.h"
-#include "color.h"
-#include "rerere.h"
-#include "help.h"
-#include "merge.h"
-#include "merge-ort-wrappers.h"
-#include "resolve-undo.h"
-#include "remote.h"
-#include "fmt-merge-msg.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "tag.h"
-#include "alias.h"
-#include "branch.h"
-#include "commit-reach.h"
-#include "wt-status.h"
-#include "commit-graph.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "advice.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "editor.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "lockfile.h"
+#ಅನ್ತರ್ಭಾವ "repository.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "hook.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
+#ಅನ್ತರ್ಭಾವ "diff-merges.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "refspec.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "diffcore.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "unpack-trees.h"
+#ಅನ್ತರ್ಭಾವ "cache-tree.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "color.h"
+#ಅನ್ತರ್ಭಾವ "rerere.h"
+#ಅನ್ತರ್ಭಾವ "help.h"
+#ಅನ್ತರ್ಭಾವ "merge.h"
+#ಅನ್ತರ್ಭಾವ "merge-ort-wrappers.h"
+#ಅನ್ತರ್ಭಾವ "resolve-undo.h"
+#ಅನ್ತರ್ಭಾವ "remote.h"
+#ಅನ್ತರ್ಭಾವ "fmt-merge-msg.h"
+#ಅನ್ತರ್ಭಾವ "sequencer.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "tag.h"
+#ಅನ್ತರ್ಭಾವ "alias.h"
+#ಅನ್ತರ್ಭಾವ "branch.h"
+#ಅನ್ತರ್ಭಾವ "commit-reach.h"
+#ಅನ್ತರ್ಭಾವ "wt-status.h"
+#ಅನ್ತರ್ಭಾವ "commit-graph.h"
 
-#define DEFAULT_TWOHEAD (1<<0)
-#define DEFAULT_OCTOPUS (1<<1)
-#define NO_FAST_FORWARD (1<<2)
-#define NO_TRIVIAL      (1<<3)
+#ವ್ಯಾಖ್ಯಾನಿಸು DEFAULT_TWOHEAD (1<<0)
+#ವ್ಯಾಖ್ಯಾನಿಸು DEFAULT_OCTOPUS (1<<1)
+#ವ್ಯಾಖ್ಯಾನಿಸು NO_FAST_FORWARD (1<<2)
+#ವ್ಯಾಖ್ಯಾನಿಸು NO_TRIVIAL      (1<<3)
 
-struct strategy {
-	const char *name;
-	unsigned attr;
+ರಚನೆ strategy {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+	ಚಿಹ್ನೆರಹಿತ attr;
 };
 
-static const char * const builtin_merge_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_ವಿಲೀನ_usage[] = {
 	N_("git merge [<options>] [<commit>...]"),
 	"git merge --abort",
 	"git merge --continue",
-	NULL
+	ಖಾಲಿ
 };
 
-#define MERGE_SHOW_DIFFSTAT 1
-#define MERGE_SHOW_COMPACTSUMMARY 2
+#ವ್ಯಾಖ್ಯಾನಿಸು ವಿಲೀನ_SHOW_DIFFSTAT 1
+#ವ್ಯಾಖ್ಯಾನಿಸು ವಿಲೀನ_SHOW_COMPACTSUMMARY 2
 
-static int show_diffstat = MERGE_SHOW_DIFFSTAT, shortlog_len = -1, squash;
-static int option_commit = -1;
-static int option_edit = -1;
-static int allow_trivial = 1, have_message, verify_signatures;
-static int check_trust_level = 1;
-static int overwrite_ignore = 1;
-static struct strbuf merge_msg = STRBUF_INIT;
-static struct strategy **use_strategies;
-static size_t use_strategies_nr, use_strategies_alloc;
-static struct strvec xopts = STRVEC_INIT;
-static const char *branch;
-static char *branch_mergeoptions;
-static int verbosity;
-static int allow_rerere_auto;
-static int abort_current_merge;
-static int quit_current_merge;
-static int continue_current_merge;
-static int allow_unrelated_histories;
-static int show_progress = -1;
-static int default_to_upstream = 1;
-static int signoff;
-static const char *sign_commit;
-static int autostash;
-static int no_verify;
-static char *into_name;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_diffstat = ವಿಲೀನ_SHOW_DIFFSTAT, shortlog_len = -1, squash;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_commit = -1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_edit = -1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ allow_trivial = 1, have_ಸಂದೇಶ, verify_signatures;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_trust_level = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ overwrite_ignore = 1;
+ಸ್ಥಿರ ರಚನೆ strbuf ವಿಲೀನ_ಸಂದೇಶ = STRBUF_INIT;
+ಸ್ಥಿರ ರಚನೆ strategy **use_strategies;
+ಸ್ಥಿರ ಗಾತ್ರ_t use_strategies_nr, use_strategies_alloc;
+ಸ್ಥಿರ ರಚನೆ strvec xopts = STRVEC_INIT;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *branch;
+ಸ್ಥಿರ ಅಕ್ಷರ *branch_mergeoptions;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ verbosity;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ allow_rerere_auto;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ abort_current_ವಿಲೀನ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ quit_current_ವಿಲೀನ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ continue_current_ವಿಲೀನ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ allow_unrelated_histories;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_ಪ್ರಗತಿ = -1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ default_ಗಮ್ಯ_upstream = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ signoff;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *sign_commit;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ autostash;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ no_verify;
+ಸ್ಥಿರ ಅಕ್ಷರ *into_name;
 
-static struct strategy all_strategy[] = {
+ಸ್ಥಿರ ರಚನೆ strategy all_strategy[] = {
 	{ "recursive",  NO_TRIVIAL },
 	{ "octopus",    DEFAULT_OCTOPUS },
 	{ "ort",        DEFAULT_TWOHEAD | NO_TRIVIAL },
@@ -107,118 +107,118 @@ static struct strategy all_strategy[] = {
 	{ "subtree",    NO_FAST_FORWARD | NO_TRIVIAL },
 };
 
-static char *pull_twohead, *pull_octopus;
+ಸ್ಥಿರ ಅಕ್ಷರ *pull_twohead, *pull_octopus;
 
-enum ff_type {
+ಎಣಿಕೆ ff_type {
 	FF_NO,
 	FF_ALLOW,
 	FF_ONLY
 };
 
-static enum ff_type fast_forward = FF_ALLOW;
+ಸ್ಥಿರ ಎಣಿಕೆ ff_type fast_forward = FF_ALLOW;
 
-static char *cleanup_arg;
-static enum commit_msg_cleanup_mode cleanup_mode;
+ಸ್ಥಿರ ಅಕ್ಷರ *cleanup_arg;
+ಸ್ಥಿರ ಎಣಿಕೆ commit_ಸಂದೇಶ_cleanup_ಬಹುಲಕ cleanup_ಬಹುಲಕ;
 
-static int option_parse_message(const struct option *opt,
-				const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_ಸಂದೇಶ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct strbuf *buf = opt->value;
+	ರಚನೆ strbuf *buf = opt->ಮೌಲ್ಯ;
 
-	if (unset)
+	ಆದರೆ (unset)
 		strbuf_setlen(buf, 0);
-	else if (arg) {
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (arg) {
 		strbuf_addf(buf, "%s%s", buf->len ? "\n\n" : "", arg);
-		have_message = 1;
-	} else
-		return error(_("switch `m' requires a value"));
-	return 0;
+		have_ಸಂದೇಶ = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ error(_("switch `m' requires a value"));
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static enum parse_opt_result option_read_message(struct parse_opt_ctx_t *ctx,
-						 const struct option *opt,
-						 const char *arg_not_used,
-						 int unset)
+ಸ್ಥಿರ ಎಣಿಕೆ parse_opt_ಫಲಿತಾಂಶ option_read_ಸಂದೇಶ(ರಚನೆ parse_opt_ctx_t *ctx,
+						 ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+						 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg_not_ಬಳಸಿದ,
+						 ಪೂರ್ಣಾಂಕ unset)
 {
-	struct strbuf *buf = opt->value;
-	const char *arg;
+	ರಚನೆ strbuf *buf = opt->ಮೌಲ್ಯ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg;
 
-	BUG_ON_OPT_ARG(arg_not_used);
-	if (unset)
+	BUG_ON_OPT_ARG(arg_not_ಬಳಸಿದ);
+	ಆದರೆ (unset)
 		BUG("-F cannot be negated");
 
-	if (ctx->opt) {
+	ಆದರೆ (ctx->opt) {
 		arg = ctx->opt;
-		ctx->opt = NULL;
-	} else if (ctx->argc > 1) {
+		ctx->opt = ಖಾಲಿ;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ctx->argc > 1) {
 		ctx->argc--;
 		arg = *++ctx->argv;
-	} else
-		return error(_("option `%s' requires a value"), opt->long_name);
+	} ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ error(_("option `%s' requires a value"), opt->long_name);
 
-	if (buf->len)
+	ಆದರೆ (buf->len)
 		strbuf_addch(buf, '\n');
-	if (ctx->prefix && !is_absolute_path(arg))
-		arg = prefix_filename(ctx->prefix, arg);
-	if (strbuf_read_file(buf, arg, 0) < 0)
-		return error(_("could not read file '%s'"), arg);
-	have_message = 1;
+	ಆದರೆ (ctx->ಪೂರ್ವಪ್ರತ್ಯಯ && !is_absolute_ಮಾರ್ಗ(arg))
+		arg = ಪೂರ್ವಪ್ರತ್ಯಯ_filename(ctx->ಪೂರ್ವಪ್ರತ್ಯಯ, arg);
+	ಆದರೆ (strbuf_read_file(buf, arg, 0) < 0)
+		ಹಿಂತಿರುಗಿ error(_("could not read file '%s'"), arg);
+	have_ಸಂದೇಶ = 1;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static struct strategy *get_strategy(const char *name)
+ಸ್ಥಿರ ರಚನೆ strategy *get_strategy(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	int i;
-	struct strategy *ret;
-	static struct cmdnames main_cmds = {0}, other_cmds = {0};
-	static int loaded;
-	char *default_strategy = NULL;
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ strategy *ret;
+	ಸ್ಥಿರ ರಚನೆ cmdnames main_cmds = {0}, other_cmds = {0};
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ loaded;
+	ಅಕ್ಷರ *default_strategy = ಖಾಲಿ;
 
-	if (!name)
-		return NULL;
+	ಆದರೆ (!name)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (default_strategy &&
+	ಆದರೆ (default_strategy &&
 	    !strcmp(default_strategy, "ort") &&
 	    !strcmp(name, "recursive")) {
 		name = "ort";
 	}
 
-	for (i = 0; i < ARRAY_SIZE(all_strategy); i++)
-		if (!strcmp(name, all_strategy[i].name))
-			return &all_strategy[i];
+	ಗಾಗಿ (i = 0; i < ARRAY_ಗಾತ್ರ(all_strategy); i++)
+		ಆದರೆ (!strcmp(name, all_strategy[i].name))
+			ಹಿಂತಿರುಗಿ &all_strategy[i];
 
-	if (!loaded) {
-		struct cmdnames not_strategies = {0};
+	ಆದರೆ (!loaded) {
+		ರಚನೆ cmdnames not_strategies = {0};
 		loaded = 1;
 
-		load_command_list("git-merge-", &main_cmds, &other_cmds);
-		for (i = 0; i < main_cmds.cnt; i++) {
-			int j, found = 0;
-			struct cmdname *ent = main_cmds.names[i];
-			for (j = 0; !found && j < ARRAY_SIZE(all_strategy); j++)
-				if (!xstrncmpz(all_strategy[j].name, ent->name, ent->len))
-					found = 1;
-			if (!found)
-				add_cmdname(&not_strategies, ent->name, ent->len);
+		ತುಂಬು_command_list("git-merge-", &main_cmds, &other_cmds);
+		ಗಾಗಿ (i = 0; i < main_cmds.cnt; i++) {
+			ಪೂರ್ಣಾಂಕ j, ಸಿಕ್ಕಿತು_2 = 0;
+			ರಚನೆ cmdname *ent = main_cmds.ಹೆಸರುಗಳು[i];
+			ಗಾಗಿ (j = 0; !ಸಿಕ್ಕಿತು_2 && j < ARRAY_ಗಾತ್ರ(all_strategy); j++)
+				ಆದರೆ (!xstrncmpz(all_strategy[j].name, ent->name, ent->len))
+					ಸಿಕ್ಕಿತು_2 = 1;
+			ಆದರೆ (!ಸಿಕ್ಕಿತು_2)
+				ಕೂಡಿಸು_cmdname(&not_strategies, ent->name, ent->len);
 		}
 		exclude_cmds(&main_cmds, &not_strategies);
 
 		cmdnames_release(&not_strategies);
 	}
-	if (!is_in_cmdlist(&main_cmds, name) && !is_in_cmdlist(&other_cmds, name)) {
+	ಆದರೆ (!is_ಒಳ_cmdlist(&main_cmds, name) && !is_ಒಳ_cmdlist(&other_cmds, name)) {
 		fprintf(stderr, _("Could not find merge strategy '%s'.\n"), name);
 		fprintf(stderr, _("Available strategies are:"));
-		for (i = 0; i < main_cmds.cnt; i++)
-			fprintf(stderr, " %s", main_cmds.names[i]->name);
+		ಗಾಗಿ (i = 0; i < main_cmds.cnt; i++)
+			fprintf(stderr, " %s", main_cmds.ಹೆಸರುಗಳು[i]->name);
 		fprintf(stderr, ".\n");
-		if (other_cmds.cnt) {
+		ಆದರೆ (other_cmds.cnt) {
 			fprintf(stderr, _("Available custom strategies are:"));
-			for (i = 0; i < other_cmds.cnt; i++)
-				fprintf(stderr, " %s", other_cmds.names[i]->name);
+			ಗಾಗಿ (i = 0; i < other_cmds.cnt; i++)
+				fprintf(stderr, " %s", other_cmds.ಹೆಸರುಗಳು[i]->name);
 			fprintf(stderr, ".\n");
 		}
-		exit(1);
+		ನಿರ್ಗಮಿಸು(1);
 	}
 
 	CALLOC_ARRAY(ret, 1);
@@ -227,56 +227,56 @@ static struct strategy *get_strategy(const char *name)
 
 	cmdnames_release(&main_cmds);
 	cmdnames_release(&other_cmds);
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static void append_strategy(struct strategy *s)
+ಸ್ಥಿರ ಶೂನ್ಯ append_strategy(ರಚನೆ strategy *s)
 {
 	ALLOC_GROW(use_strategies, use_strategies_nr + 1, use_strategies_alloc);
 	use_strategies[use_strategies_nr++] = s;
 }
 
-static int option_parse_strategy(const struct option *opt UNUSED,
-				 const char *name, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_strategy(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+				 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಪೂರ್ಣಾಂಕ unset)
 {
-	if (unset)
-		return 0;
+	ಆದರೆ (unset)
+		ಹಿಂತಿರುಗಿ 0;
 
 	append_strategy(get_strategy(name));
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_compact_summary(const struct option *opt,
-					const char *name UNUSED, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_compact_summary(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+					ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name ಬಳಸದ, ಪೂರ್ಣಾಂಕ unset)
 {
-	int *setting = opt->value;
+	ಪೂರ್ಣಾಂಕ *setting = opt->ಮೌಲ್ಯ;
 
-	if (unset)
+	ಆದರೆ (unset)
 		*setting = 0;
-	else
-		*setting = MERGE_SHOW_COMPACTSUMMARY;
-	return 0;
+	ಇಲ್ಲದಿದ್ದರೆ
+		*setting = ವಿಲೀನ_SHOW_COMPACTSUMMARY;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static struct option builtin_merge_options[] = {
-	OPT_SET_INT('n', NULL, &show_diffstat,
+ಸ್ಥಿರ ರಚನೆ option builtin_ವಿಲೀನ_options[] = {
+	OPT_ಗಣ_INT('n', ಖಾಲಿ, &show_diffstat,
 		N_("do not show a diffstat at the end of the merge"), 0),
 	OPT_BOOL(0, "stat", &show_diffstat,
 		N_("show a diffstat at the end of the merge")),
 	OPT_BOOL(0, "summary", &show_diffstat, N_("(synonym to --stat)")),
-	OPT_CALLBACK_F(0, "compact-summary", &show_diffstat, NULL,
+	OPT_CALLBACK_F(0, "compact-summary", &show_diffstat, ಖಾಲಿ,
 		       N_("show a compact-summary at the end of the merge"),
 		       PARSE_OPT_NOARG,
 		       option_parse_compact_summary),
 	{
 		.type = OPTION_INTEGER,
 		.long_name = "log",
-		.value = &shortlog_len,
-		.precision = sizeof(shortlog_len),
+		.ಮೌಲ್ಯ = &shortlog_len,
+		.precision = ಗಾತ್ರ(shortlog_len),
 		.argh = N_("n"),
 		.help = N_("add (at most <n>) entries from shortlog to merge commit message"),
 		.flags = PARSE_OPT_OPTARG,
-		.defval = DEFAULT_MERGE_LOG_LEN,
+		.defval = DEFAULT_ವಿಲೀನ_LOG_LEN,
 	},
 	OPT_BOOL(0, "squash", &squash,
 		N_("create a single commit instead of doing a merge")),
@@ -285,47 +285,47 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL('e', "edit", &option_edit,
 		N_("edit message before committing")),
 	OPT_CLEANUP(&cleanup_arg),
-	OPT_SET_INT(0, "ff", &fast_forward, N_("allow fast-forward (default)"), FF_ALLOW),
-	OPT_SET_INT_F(0, "ff-only", &fast_forward,
+	OPT_ಗಣ_INT(0, "ff", &fast_forward, N_("allow fast-forward (default)"), FF_ALLOW),
+	OPT_ಗಣ_INT_F(0, "ff-only", &fast_forward,
 		      N_("abort if fast-forward is not possible"),
 		      FF_ONLY, PARSE_OPT_NONEG),
 	OPT_RERERE_AUTOUPDATE(&allow_rerere_auto),
 	OPT_BOOL(0, "verify-signatures", &verify_signatures,
 		N_("verify that the named commit has a valid GPG signature")),
-	OPT_CALLBACK('s', "strategy", NULL, N_("strategy"),
+	OPT_CALLBACK('s', "strategy", ಖಾಲಿ, N_("strategy"),
 		N_("merge strategy to use"), option_parse_strategy),
 	OPT_STRVEC('X', "strategy-option", &xopts, N_("option=value"),
 		N_("option for selected merge strategy")),
-	OPT_CALLBACK('m', "message", &merge_msg, N_("message"),
+	OPT_CALLBACK('m', "message", &ವಿಲೀನ_ಸಂದೇಶ, N_("message"),
 		N_("merge commit message (for a non-fast-forward merge)"),
-		option_parse_message),
+		option_parse_ಸಂದೇಶ),
 	{
 		.type = OPTION_LOWLEVEL_CALLBACK,
 		.short_name = 'F',
 		.long_name = "file",
-		.value = &merge_msg,
+		.ಮೌಲ್ಯ = &ವಿಲೀನ_ಸಂದೇಶ,
 		.argh = N_("path"),
 		.help = N_("read message from file"),
 		.flags = PARSE_OPT_NONEG,
-		.ll_callback = option_read_message,
+		.ll_callback = option_read_ಸಂದೇಶ,
 	},
 	OPT_STRING(0, "into-name", &into_name, N_("name"),
 		   N_("use <name> instead of the real target")),
 	OPT__VERBOSITY(&verbosity),
-	OPT_BOOL(0, "abort", &abort_current_merge,
+	OPT_BOOL(0, "abort", &abort_current_ವಿಲೀನ,
 		N_("abort the current in-progress merge")),
-	OPT_BOOL(0, "quit", &quit_current_merge,
+	OPT_BOOL(0, "quit", &quit_current_ವಿಲೀನ,
 		N_("--abort but leave index and working tree alone")),
-	OPT_BOOL(0, "continue", &continue_current_merge,
+	OPT_BOOL(0, "continue", &continue_current_ವಿಲೀನ,
 		N_("continue the current in-progress merge")),
 	OPT_BOOL(0, "allow-unrelated-histories", &allow_unrelated_histories,
 		 N_("allow merging unrelated histories")),
-	OPT_SET_INT(0, "progress", &show_progress, N_("force progress reporting"), 1),
+	OPT_ಗಣ_INT(0, "progress", &show_ಪ್ರಗತಿ, N_("force progress reporting"), 1),
 	{
 		.type = OPTION_STRING,
 		.short_name = 'S',
 		.long_name = "gpg-sign",
-		.value = &sign_commit,
+		.ಮೌಲ್ಯ = &sign_commit,
 		.argh = N_("key-id"),
 		.help = N_("GPG sign commit"),
 		.flags = PARSE_OPT_OPTARG,
@@ -335,356 +335,356 @@ static struct option builtin_merge_options[] = {
 	OPT_BOOL(0, "overwrite-ignore", &overwrite_ignore, N_("update ignored files (default)")),
 	OPT_BOOL(0, "signoff", &signoff, N_("add a Signed-off-by trailer")),
 	OPT_BOOL(0, "no-verify", &no_verify, N_("bypass pre-merge-commit and commit-msg hooks")),
-	OPT_END()
+	OPT_ಕೊನೆ()
 };
 
-static int save_state(struct object_id *stash)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ save_state(ರಚನೆ object_id *stash)
 {
-	int len;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf buffer = STRBUF_INIT;
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
-	int rc = -1;
+	ಪೂರ್ಣಾಂಕ len;
+	ರಚನೆ ಮಗು_process cp = ಮಗು_PROCESS_INIT;
+	ರಚನೆ strbuf ಬಫರ್ = STRBUF_INIT;
+	ರಚನೆ ಬೀಗ_file ಬೀಗ_file = ಬೀಗ_INIT;
+	ಪೂರ್ಣಾಂಕ fd;
+	ಪೂರ್ಣಾಂಕ rc = -1;
 
-	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	if (0 <= fd)
-		repo_update_index_if_able(the_repository, &lock_file);
-	rollback_lock_file(&lock_file);
+	fd = repo_hold_locked_ಸೂಚ್ಯಂಕ(the_repository, &ಬೀಗ_file, 0);
+	refresh_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ, REFRESH_QUIET, ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ);
+	ಆದರೆ (0 <= fd)
+		repo_update_ಸೂಚ್ಯಂಕ_if_able(the_repository, &ಬೀಗ_file);
+	rollback_ಬೀಗ_file(&ಬೀಗ_file);
 
-	strvec_pushl(&cp.args, "stash", "create", NULL);
-	cp.out = -1;
+	strvec_pushl(&cp.ವಾದಗಳು, "stash", "create", ಖಾಲಿ);
+	cp.ಹೊರಹೋಗು = -1;
 	cp.git_cmd = 1;
 
-	if (start_command(&cp))
+	ಆದರೆ (ಆರಂಭ_command(&cp))
 		die(_("could not run stash."));
-	len = strbuf_read(&buffer, cp.out, 1024);
-	close(cp.out);
+	len = strbuf_read(&ಬಫರ್, cp.ಹೊರಹೋಗು, 1024);
+	close(cp.ಹೊರಹೋಗು);
 
-	if (finish_command(&cp) || len < 0)
+	ಆದರೆ (ಮುಕ್ತಾಯ_command(&cp) || len < 0)
 		die(_("stash failed"));
-	else if (!len)		/* no changes */
-		goto out;
-	strbuf_setlen(&buffer, buffer.len-1);
-	if (repo_get_oid(the_repository, buffer.buf, stash))
-		die(_("not a valid object: %s"), buffer.buf);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!len)		/* no changes */
+		ಹೋಗು ಹೊರಹೋಗು;
+	strbuf_setlen(&ಬಫರ್, ಬಫರ್.len-1);
+	ಆದರೆ (repo_get_oid(the_repository, ಬಫರ್.buf, stash))
+		die(_("not a valid object: %s"), ಬಫರ್.buf);
 	rc = 0;
-out:
-	strbuf_release(&buffer);
-	return rc;
+ಹೊರಹೋಗು:
+	strbuf_release(&ಬಫರ್);
+	ಹಿಂತಿರುಗಿ rc;
 }
 
-static void read_empty(const struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ read_ಖಾಲಿಗಳು(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ರಚನೆ ಮಗು_process cmd = ಮಗು_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "read-tree", "-m", "-u",
-		     empty_tree_oid_hex(the_repository->hash_algo),
-		     oid_to_hex(oid), NULL);
+	strvec_pushl(&cmd.ವಾದಗಳು, "read-tree", "-m", "-u",
+		     ಖಾಲಿಗಳು_ವೃಕ್ಷ_oid_hex(the_repository->hash_algo),
+		     oid_ಗಮ್ಯ_hex(oid), ಖಾಲಿ);
 	cmd.git_cmd = 1;
 
-	if (run_command(&cmd))
+	ಆದರೆ (ಸತತ_command(&cmd))
 		die(_("read-tree failed"));
 }
 
-static void reset_hard(const struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ reset_hard(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ರಚನೆ ಮಗು_process cmd = ಮಗು_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "read-tree", "-v", "--reset", "-u",
-		     oid_to_hex(oid), NULL);
+	strvec_pushl(&cmd.ವಾದಗಳು, "read-tree", "-v", "--reset", "-u",
+		     oid_ಗಮ್ಯ_hex(oid), ಖಾಲಿ);
 	cmd.git_cmd = 1;
 
-	if (run_command(&cmd))
+	ಆದರೆ (ಸತತ_command(&cmd))
 		die(_("read-tree failed"));
 }
 
-static void restore_state(const struct object_id *head,
-			  const struct object_id *stash)
+ಸ್ಥಿರ ಶೂನ್ಯ restore_state(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *ತಲೆ,
+			  ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *stash)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ರಚನೆ ಮಗು_process cmd = ಮಗು_PROCESS_INIT;
 
-	reset_hard(head);
+	reset_hard(ತಲೆ);
 
-	if (is_null_oid(stash))
-		goto refresh_cache;
+	ಆದರೆ (is_null_oid(stash))
+		ಹೋಗು refresh_cache;
 
-	strvec_pushl(&cmd.args, "stash", "apply", "--index", "--quiet", NULL);
-	strvec_push(&cmd.args, oid_to_hex(stash));
+	strvec_pushl(&cmd.ವಾದಗಳು, "stash", "apply", "--index", "--quiet", ಖಾಲಿ);
+	strvec_ತಳ್ಳು(&cmd.ವಾದಗಳು, oid_ಗಮ್ಯ_hex(stash));
 
 	/*
 	 * It is OK to ignore error here, for example when there was
 	 * nothing to restore.
 	 */
 	cmd.git_cmd = 1;
-	run_command(&cmd);
+	ಸತತ_command(&cmd);
 
 refresh_cache:
-	discard_index(the_repository->index);
-	if (repo_read_index(the_repository) < 0)
+	discard_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ);
+	ಆದರೆ (repo_read_ಸೂಚ್ಯಂಕ(the_repository) < 0)
 		die(_("could not read index"));
 }
 
 /* This is called when no merge was necessary. */
-static void finish_up_to_date(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಮುಕ್ತಾಯ_ಮೇಲೆ_ಗಮ್ಯ_date(ಶೂನ್ಯ)
 {
-	if (verbosity >= 0) {
-		if (squash)
+	ಆದರೆ (verbosity >= 0) {
+		ಆದರೆ (squash)
 			puts(_("Already up to date. (nothing to squash)"));
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			puts(_("Already up to date."));
 	}
-	remove_merge_branch_state(the_repository);
+	remove_ವಿಲೀನ_branch_state(the_repository);
 }
 
-static void squash_message(struct commit *commit, struct commit_list *remoteheads)
+ಸ್ಥಿರ ಶೂನ್ಯ squash_ಸಂದೇಶ(ರಚನೆ commit *commit, ರಚನೆ commit_list *remoteheads)
 {
-	struct rev_info rev;
-	struct strbuf out = STRBUF_INIT;
-	struct commit_list *j;
-	struct pretty_print_context ctx = {0};
+	ರಚನೆ rev_info rev;
+	ರಚನೆ strbuf ಹೊರಹೋಗು = STRBUF_INIT;
+	ರಚನೆ commit_list *j;
+	ರಚನೆ pretty_print_context ctx = {0};
 
-	printf(_("Squash commit -- not updating HEAD\n"));
+	ಬರೆ(_("Squash commit -- not updating HEAD\n"));
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, ಖಾಲಿ);
 	diff_merges_suppress(&rev);
 	rev.commit_format = CMIT_FMT_MEDIUM;
 
 	commit->object.flags |= UNINTERESTING;
-	add_pending_object(&rev, &commit->object, NULL);
+	ಕೂಡಿಸು_pending_object(&rev, &commit->object, ಖಾಲಿ);
 
-	for (j = remoteheads; j; j = j->next)
-		add_pending_object(&rev, &j->item->object, NULL);
+	ಗಾಗಿ (j = remoteheads; j; j = j->ಮುಂದಿನ)
+		ಕೂಡಿಸು_pending_object(&rev, &j->ಅಂಶ->object, ಖಾಲಿ);
 
-	setup_revisions(0, NULL, &rev, NULL);
-	if (prepare_revision_walk(&rev))
+	ಸಿದ್ಧತೆ_revisions(0, ಖಾಲಿ, &rev, ಖಾಲಿ);
+	ಆದರೆ (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 
 	ctx.abbrev = rev.abbrev;
-	ctx.date_mode = rev.date_mode;
+	ctx.date_ಬಹುಲಕ = rev.date_ಬಹುಲಕ;
 	ctx.fmt = rev.commit_format;
 
-	strbuf_addstr(&out, "Squashed commit of the following:\n");
-	while ((commit = get_revision(&rev)) != NULL) {
-		strbuf_addch(&out, '\n');
-		strbuf_addf(&out, "commit %s\n",
-			oid_to_hex(&commit->object.oid));
-		pretty_print_commit(&ctx, commit, &out);
+	strbuf_addstr(&ಹೊರಹೋಗು, "Squashed commit of the following:\n");
+	ಆಗ ((commit = get_revision(&rev)) != ಖಾಲಿ) {
+		strbuf_addch(&ಹೊರಹೋಗು, '\n');
+		strbuf_addf(&ಹೊರಹೋಗು, "commit %s\n",
+			oid_ಗಮ್ಯ_hex(&commit->object.oid));
+		pretty_print_commit(&ctx, commit, &ಹೊರಹೋಗು);
 	}
-	write_file_buf(git_path_squash_msg(the_repository), out.buf, out.len);
-	strbuf_release(&out);
+	write_file_buf(git_ಮಾರ್ಗ_squash_ಸಂದೇಶ(the_repository), ಹೊರಹೋಗು.buf, ಹೊರಹೋಗು.len);
+	strbuf_release(&ಹೊರಹೋಗು);
 	release_revisions(&rev);
 }
 
-static void finish(struct commit *head_commit,
-		   struct commit_list *remoteheads,
-		   const struct object_id *new_head, const char *msg)
+ಸ್ಥಿರ ಶೂನ್ಯ ಮುಕ್ತಾಯ(ರಚನೆ commit *ತಲೆ_commit,
+		   ರಚನೆ commit_list *remoteheads,
+		   ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *new_ತಲೆ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ)
 {
-	struct strbuf reflog_message = STRBUF_INIT;
-	const struct object_id *head = &head_commit->object.oid;
+	ರಚನೆ strbuf reflog_ಸಂದೇಶ_2 = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *ತಲೆ = &ತಲೆ_commit->object.oid;
 
-	if (!msg)
-		strbuf_addstr(&reflog_message, getenv("GIT_REFLOG_ACTION"));
-	else {
-		if (verbosity >= 0)
-			printf("%s\n", msg);
-		strbuf_addf(&reflog_message, "%s: %s",
-			getenv("GIT_REFLOG_ACTION"), msg);
+	ಆದರೆ (!ಸಂದೇಶ)
+		strbuf_addstr(&reflog_ಸಂದೇಶ_2, getenv("GIT_REFLOG_ACTION"));
+	ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (verbosity >= 0)
+			ಬರೆ("%s\n", ಸಂದೇಶ);
+		strbuf_addf(&reflog_ಸಂದೇಶ_2, "%s: %s",
+			getenv("GIT_REFLOG_ACTION"), ಸಂದೇಶ);
 	}
-	if (squash) {
-		squash_message(head_commit, remoteheads);
-	} else {
-		if (verbosity >= 0 && !merge_msg.len)
-			printf(_("No merge message -- not updating HEAD\n"));
-		else {
+	ಆದರೆ (squash) {
+		squash_ಸಂದೇಶ(ತಲೆ_commit, remoteheads);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (verbosity >= 0 && !ವಿಲೀನ_ಸಂದೇಶ.len)
+			ಬರೆ(_("No merge message -- not updating HEAD\n"));
+		ಇಲ್ಲದಿದ್ದರೆ {
 			refs_update_ref(get_main_ref_store(the_repository),
-					reflog_message.buf, "HEAD", new_head,
-					head,
+					reflog_ಸಂದೇಶ_2.buf, "HEAD", new_ತಲೆ,
+					ತಲೆ,
 					0, UPDATE_REFS_DIE_ON_ERR);
 			/*
 			 * We ignore errors in 'gc --auto', since the
 			 * user should see them.
 			 */
-			run_auto_maintenance(the_repository, verbosity < 0);
+			ಸತತ_auto_maintenance(the_repository, verbosity < 0);
 		}
 	}
-	if (new_head && show_diffstat) {
-		struct diff_options opts;
-		repo_diff_setup(the_repository, &opts);
+	ಆದರೆ (new_ತಲೆ && show_diffstat) {
+		ರಚನೆ diff_options opts;
+		repo_diff_ಸಿದ್ಧತೆ(the_repository, &opts);
 		init_diffstat_widths(&opts);
 
-		switch (show_diffstat) {
-		case MERGE_SHOW_DIFFSTAT: /* 1 */
+		ಆಯ್ಕೆ (show_diffstat) {
+		ಸ್ಥಿತಿ ವಿಲೀನ_SHOW_DIFFSTAT: /* 1 */
 			opts.output_format |=
 				DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
-			break;
-		case MERGE_SHOW_COMPACTSUMMARY: /* 2 */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ ವಿಲೀನ_SHOW_COMPACTSUMMARY: /* 2 */
 			opts.output_format |= DIFF_FORMAT_DIFFSTAT;
 			opts.flags.stat_with_summary = 1;
-			break;
-		default:
-			break;
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			ನಿಲ್ಲಿಸು;
 		}
 		opts.detect_rename = DIFF_DETECT_RENAME;
-		diff_setup_done(&opts);
-		diff_tree_oid(head, new_head, "", &opts);
+		diff_ಸಿದ್ಧತೆ_ಮುಗಿದ(&opts);
+		diff_ವೃಕ್ಷ_oid(ತಲೆ, new_ತಲೆ, "", &opts);
 		diffcore_std(&opts);
 		diff_flush(&opts);
 	}
 
 	/* Run a post-merge hook */
-	run_hooks_l(the_repository, "post-merge", squash ? "1" : "0", NULL);
+	ಸತತ_hooks_l(the_repository, "post-merge", squash ? "1" : "0", ಖಾಲಿ);
 
-	if (new_head)
+	ಆದರೆ (new_ತಲೆ)
 		apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				    NULL, NULL, NULL, NULL);
-	strbuf_release(&reflog_message);
+				    ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ);
+	strbuf_release(&reflog_ಸಂದೇಶ_2);
 }
 
 /* Get the name for the merge commit's message. */
-static void merge_name(const char *remote, struct strbuf *msg)
+ಸ್ಥಿರ ಶೂನ್ಯ ವಿಲೀನ_name(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *remote, ರಚನೆ strbuf *ಸಂದೇಶ)
 {
-	struct commit *remote_head;
-	struct object_id branch_head;
-	struct strbuf bname = STRBUF_INIT;
-	struct merge_remote_desc *desc;
-	const char *ptr;
-	char *found_ref = NULL;
-	int len, early;
+	ರಚನೆ commit *remote_ತಲೆ;
+	ರಚನೆ object_id branch_ತಲೆ;
+	ರಚನೆ strbuf bname = STRBUF_INIT;
+	ರಚನೆ ವಿಲೀನ_remote_desc *desc;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ptr;
+	ಅಕ್ಷರ *ಸಿಕ್ಕಿತು_ref = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ len, early;
 
 	copy_branchname(the_repository, &bname, remote, 0);
 	remote = bname.buf;
 
-	oidclr(&branch_head, the_repository->hash_algo);
-	remote_head = get_merge_parent(remote);
-	if (!remote_head)
+	oidclr(&branch_ತಲೆ, the_repository->hash_algo);
+	remote_ತಲೆ = get_ವಿಲೀನ_ಪೋಷಕ(remote);
+	ಆದರೆ (!remote_ತಲೆ)
 		die(_("'%s' does not point to a commit"), remote);
 
-	if (repo_dwim_ref(the_repository, remote, strlen(remote), &branch_head,
-			  &found_ref, 0) > 0) {
-		if (starts_with(found_ref, "refs/heads/")) {
-			strbuf_addf(msg, "%s\t\tbranch '%s' of .\n",
-				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+	ಆದರೆ (repo_dwim_ref(the_repository, remote, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(remote), &branch_ತಲೆ,
+			  &ಸಿಕ್ಕಿತು_ref, 0) > 0) {
+		ಆದರೆ (starts_with(ಸಿಕ್ಕಿತು_ref, "refs/heads/")) {
+			strbuf_addf(ಸಂದೇಶ, "%s\t\tbranch '%s' of .\n",
+				    oid_ಗಮ್ಯ_hex(&branch_ತಲೆ), remote);
+			ಹೋಗು cleanup;
 		}
-		if (starts_with(found_ref, "refs/tags/")) {
-			strbuf_addf(msg, "%s\t\ttag '%s' of .\n",
-				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+		ಆದರೆ (starts_with(ಸಿಕ್ಕಿತು_ref, "refs/tags/")) {
+			strbuf_addf(ಸಂದೇಶ, "%s\t\ttag '%s' of .\n",
+				    oid_ಗಮ್ಯ_hex(&branch_ತಲೆ), remote);
+			ಹೋಗು cleanup;
 		}
-		if (starts_with(found_ref, "refs/remotes/")) {
-			strbuf_addf(msg, "%s\t\tremote-tracking branch '%s' of .\n",
-				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+		ಆದರೆ (starts_with(ಸಿಕ್ಕಿತು_ref, "refs/remotes/")) {
+			strbuf_addf(ಸಂದೇಶ, "%s\t\tremote-tracking branch '%s' of .\n",
+				    oid_ಗಮ್ಯ_hex(&branch_ತಲೆ), remote);
+			ಹೋಗು cleanup;
 		}
 	}
 
 	/* See if remote matches <name>^^^.. or <name>~<number> */
-	for (len = 0, ptr = remote + strlen(remote);
+	ಗಾಗಿ (len = 0, ptr = remote + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(remote);
 	     remote < ptr && ptr[-1] == '^';
 	     ptr--)
 		len++;
-	if (len)
+	ಆದರೆ (len)
 		early = 1;
-	else {
+	ಇಲ್ಲದಿದ್ದರೆ {
 		early = 0;
 		ptr = strrchr(remote, '~');
-		if (ptr) {
-			int seen_nonzero = 0;
+		ಆದರೆ (ptr) {
+			ಪೂರ್ಣಾಂಕ ನೋಡಿದ_nonzero = 0;
 
 			len++; /* count ~ */
-			while (*++ptr && isdigit(*ptr)) {
-				seen_nonzero |= (*ptr != '0');
+			ಆಗ (*++ptr && ಅಂಕಿಯೇ(*ptr)) {
+				ನೋಡಿದ_nonzero |= (*ptr != '0');
 				len++;
 			}
-			if (*ptr)
+			ಆದರೆ (*ptr)
 				len = 0; /* not ...~<number> */
-			else if (seen_nonzero)
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ನೋಡಿದ_nonzero)
 				early = 1;
-			else if (len == 1)
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (len == 1)
 				early = 1; /* "name~" is "name~1"! */
 		}
 	}
-	if (len) {
-		struct strbuf truname = STRBUF_INIT;
+	ಆದರೆ (len) {
+		ರಚನೆ strbuf truname = STRBUF_INIT;
 		strbuf_addf(&truname, "refs/heads/%s", remote);
 		strbuf_setlen(&truname, truname.len - len);
-		if (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
-			strbuf_addf(msg,
+		ಆದರೆ (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
+			strbuf_addf(ಸಂದೇಶ,
 				    "%s\t\tbranch '%s'%s of .\n",
-				    oid_to_hex(&remote_head->object.oid),
+				    oid_ಗಮ್ಯ_hex(&remote_ತಲೆ->object.oid),
 				    truname.buf + 11,
 				    (early ? " (early part)" : ""));
 			strbuf_release(&truname);
-			goto cleanup;
+			ಹೋಗು cleanup;
 		}
 		strbuf_release(&truname);
 	}
 
-	desc = merge_remote_util(remote_head);
-	if (desc && desc->obj && desc->obj->type == OBJ_TAG) {
-		strbuf_addf(msg, "%s\t\t%s '%s'\n",
-			    oid_to_hex(&desc->obj->oid),
+	desc = ವಿಲೀನ_remote_util(remote_ತಲೆ);
+	ಆದರೆ (desc && desc->obj && desc->obj->type == OBJ_ಟ್ಯಾಗ್) {
+		strbuf_addf(ಸಂದೇಶ, "%s\t\t%s '%s'\n",
+			    oid_ಗಮ್ಯ_hex(&desc->obj->oid),
 			    type_name(desc->obj->type),
 			    remote);
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
 
-	strbuf_addf(msg, "%s\t\tcommit '%s'\n",
-		oid_to_hex(&remote_head->object.oid), remote);
+	strbuf_addf(ಸಂದೇಶ, "%s\t\tcommit '%s'\n",
+		oid_ಗಮ್ಯ_hex(&remote_ತಲೆ->object.oid), remote);
 cleanup:
-	free(found_ref);
+	ಬಿಡುಗಡೆ(ಸಿಕ್ಕಿತು_ref);
 	strbuf_release(&bname);
 }
 
-static void parse_branch_merge_options(char *bmo)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_branch_ವಿಲೀನ_options(ಅಕ್ಷರ *bmo)
 {
-	const char **argv;
-	int argc;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv;
+	ಪೂರ್ಣಾಂಕ argc;
 
-	if (!bmo)
-		return;
-	argc = split_cmdline(bmo, &argv);
-	if (argc < 0)
+	ಆದರೆ (!bmo)
+		ಹಿಂತಿರುಗಿ;
+	argc = ವಿಭಜಿಸು_cmdline(bmo, &argv);
+	ಆದರೆ (argc < 0)
 		die(_("Bad branch.%s.mergeoptions string: %s"), branch,
-		    _(split_cmdline_strerror(argc)));
+		    _(ವಿಭಜಿಸು_cmdline_strerror(argc)));
 	REALLOC_ARRAY(argv, argc + 2);
 	MOVE_ARRAY(argv + 1, argv, argc + 1);
 	argc++;
 	argv[0] = "branch.*.mergeoptions";
-	parse_options(argc, argv, NULL, builtin_merge_options,
-		      builtin_merge_usage, 0);
-	free(argv);
+	parse_options(argc, argv, ಖಾಲಿ, builtin_ವಿಲೀನ_options,
+		      builtin_ವಿಲೀನ_usage, 0);
+	ಬಿಡುಗಡೆ(argv);
 }
 
-static int git_merge_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ git_ವಿಲೀನ_config(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *k, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v,
+			    ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	int status;
-	const char *str;
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *str;
 
-	if (branch &&
-	    skip_prefix(k, "branch.", &str) &&
-	    skip_prefix(str, branch, &str) &&
+	ಆದರೆ (branch &&
+	    skip_ಪೂರ್ವಪ್ರತ್ಯಯ(k, "branch.", &str) &&
+	    skip_ಪೂರ್ವಪ್ರತ್ಯಯ(str, branch, &str) &&
 	    !strcmp(str, ".mergeoptions")) {
-		free(branch_mergeoptions);
+		ಬಿಡುಗಡೆ(branch_mergeoptions);
 		branch_mergeoptions = xstrdup(v);
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (!strcmp(k, "merge.diffstat") || !strcmp(k, "merge.stat")) {
-		int val = git_parse_maybe_bool_text(v);
-		switch (val) {
-		case 0:
+	ಆದರೆ (!strcmp(k, "merge.diffstat") || !strcmp(k, "merge.stat")) {
+		ಪೂರ್ಣಾಂಕ val = git_parse_maybe_bool_ಪಠ್ಯ(v);
+		ಆಯ್ಕೆ (val) {
+		ಸ್ಥಿತಿ 0:
 			show_diffstat = 0;
-			break;
-		case 1:
-			show_diffstat = MERGE_SHOW_DIFFSTAT;
-			break;
-		default:
-			if (!strcmp(v, "compact"))
-				show_diffstat = MERGE_SHOW_COMPACTSUMMARY;
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 1:
+			show_diffstat = ವಿಲೀನ_SHOW_DIFFSTAT;
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			ಆದರೆ (!strcmp(v, "compact"))
+				show_diffstat = ವಿಲೀನ_SHOW_COMPACTSUMMARY;
 			/*
 			 * We do not need to have an explicit
 			 *
@@ -694,359 +694,359 @@ static int git_merge_config(const char *k, const char *v,
 			 * here, because the catch-all uses the
 			 * diffstat style anyway.
 			 */
-			else
+			ಇಲ್ಲದಿದ್ದರೆ
 				/*
 				 * A setting from a future?  It is not an
 				 * error grave enough to fail the command.
 				 * proceed using the default one.
 				 */
-				show_diffstat = MERGE_SHOW_DIFFSTAT;
-			break;
+				show_diffstat = ವಿಲೀನ_SHOW_DIFFSTAT;
+			ನಿಲ್ಲಿಸು;
 		}
-	} else if (!strcmp(k, "merge.verifysignatures")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "merge.verifysignatures")) {
 		verify_signatures = git_config_bool(k, v);
-	} else if (!strcmp(k, "pull.twohead")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "pull.twohead")) {
 		FREE_AND_NULL(pull_twohead);
-		return git_config_string(&pull_twohead, k, v);
-	} else if (!strcmp(k, "pull.octopus")) {
+		ಹಿಂತಿರುಗಿ git_config_string(&pull_twohead, k, v);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "pull.octopus")) {
 		FREE_AND_NULL(pull_octopus);
-		return git_config_string(&pull_octopus, k, v);
-	} else if (!strcmp(k, "commit.cleanup")) {
-		return git_config_string(&cleanup_arg, k, v);
-	} else if (!strcmp(k, "merge.ff")) {
-		int boolval = git_parse_maybe_bool(v);
-		if (0 <= boolval) {
+		ಹಿಂತಿರುಗಿ git_config_string(&pull_octopus, k, v);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "commit.cleanup")) {
+		ಹಿಂತಿರುಗಿ git_config_string(&cleanup_arg, k, v);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "merge.ff")) {
+		ಪೂರ್ಣಾಂಕ boolval = git_parse_maybe_bool(v);
+		ಆದರೆ (0 <= boolval) {
 			fast_forward = boolval ? FF_ALLOW : FF_NO;
-		} else if (v && !strcmp(v, "only")) {
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (v && !strcmp(v, "only")) {
 			fast_forward = FF_ONLY;
 		} /* do not barf on values from future versions of git */
-		return 0;
-	} else if (!strcmp(k, "merge.defaulttoupstream")) {
-		default_to_upstream = git_config_bool(k, v);
-		return 0;
-	} else if (!strcmp(k, "commit.gpgsign")) {
-		sign_commit = git_config_bool(k, v) ? "" : NULL;
-		return 0;
-	} else if (!strcmp(k, "gpg.mintrustlevel")) {
+		ಹಿಂತಿರುಗಿ 0;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "merge.defaulttoupstream")) {
+		default_ಗಮ್ಯ_upstream = git_config_bool(k, v);
+		ಹಿಂತಿರುಗಿ 0;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "commit.gpgsign")) {
+		sign_commit = git_config_bool(k, v) ? "" : ಖಾಲಿ;
+		ಹಿಂತಿರುಗಿ 0;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
-	} else if (!strcmp(k, "merge.autostash")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(k, "merge.autostash")) {
 		autostash = git_config_bool(k, v);
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	status = fmt_merge_msg_config(k, v, ctx, cb);
-	if (status)
-		return status;
-	return git_diff_ui_config(k, v, ctx, cb);
+	ಸ್ಥಿತಿ_2 = fmt_ವಿಲೀನ_ಸಂದೇಶ_config(k, v, ctx, cb);
+	ಆದರೆ (ಸ್ಥಿತಿ_2)
+		ಹಿಂತಿರುಗಿ ಸ್ಥಿತಿ_2;
+	ಹಿಂತಿರುಗಿ git_diff_ui_config(k, v, ctx, cb);
 }
 
-static int read_tree_trivial(struct object_id *common, struct object_id *head,
-			     struct object_id *one)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ read_ವೃಕ್ಷ_trivial(ರಚನೆ object_id *common, ರಚನೆ object_id *ತಲೆ,
+			     ರಚನೆ object_id *one)
 {
-	int i, nr_trees = 0;
-	struct tree *trees[MAX_UNPACK_TREES];
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct unpack_trees_options opts;
+	ಪೂರ್ಣಾಂಕ i, nr_trees = 0;
+	ರಚನೆ ವೃಕ್ಷ *trees[MAX_UNPACK_TREES];
+	ರಚನೆ ವೃಕ್ಷ_desc t[MAX_UNPACK_TREES];
+	ರಚನೆ unpack_trees_options opts;
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = 2;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
+	memset(&opts, 0, ಗಾತ್ರ(opts));
+	opts.ತಲೆ_idx = 2;
+	opts.src_ಸೂಚ್ಯಂಕ = the_repository->ಸೂಚ್ಯಂಕ;
+	opts.dst_ಸೂಚ್ಯಂಕ = the_repository->ಸೂಚ್ಯಂಕ;
 	opts.update = 1;
 	opts.verbose_update = 1;
 	opts.trivial_merges_only = 1;
-	opts.merge = 1;
+	opts.ವಿಲೀನ = 1;
 	opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, common);
-	if (!trees[nr_trees++])
-		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, head);
-	if (!trees[nr_trees++])
-		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, one);
-	if (!trees[nr_trees++])
-		return -1;
-	opts.fn = threeway_merge;
-	cache_tree_free(&the_repository->index->cache_tree);
-	for (i = 0; i < nr_trees; i++) {
-		repo_parse_tree(the_repository, trees[i]);
-		init_tree_desc(t+i, &trees[i]->object.oid,
-			       trees[i]->buffer, trees[i]->size);
+	trees[nr_trees] = repo_parse_ವೃಕ್ಷ_ಪರೋಕ್ಷ(the_repository, common);
+	ಆದರೆ (!trees[nr_trees++])
+		ಹಿಂತಿರುಗಿ -1;
+	trees[nr_trees] = repo_parse_ವೃಕ್ಷ_ಪರೋಕ್ಷ(the_repository, ತಲೆ);
+	ಆದರೆ (!trees[nr_trees++])
+		ಹಿಂತಿರುಗಿ -1;
+	trees[nr_trees] = repo_parse_ವೃಕ್ಷ_ಪರೋಕ್ಷ(the_repository, one);
+	ಆದರೆ (!trees[nr_trees++])
+		ಹಿಂತಿರುಗಿ -1;
+	opts.fn = threeway_ವಿಲೀನ;
+	cache_ವೃಕ್ಷ_free(&the_repository->ಸೂಚ್ಯಂಕ->cache_ವೃಕ್ಷ);
+	ಗಾಗಿ (i = 0; i < nr_trees; i++) {
+		repo_parse_ವೃಕ್ಷ(the_repository, trees[i]);
+		init_ವೃಕ್ಷ_desc(t+i, &trees[i]->object.oid,
+			       trees[i]->ಬಫರ್, trees[i]->ಗಾತ್ರ_2);
 	}
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
-	return 0;
+	ಆದರೆ (unpack_trees(nr_trees, t, &opts))
+		ಹಿಂತಿರುಗಿ -1;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void write_tree_trivial(struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ write_ವೃಕ್ಷ_trivial(ರಚನೆ object_id *oid)
 {
-	if (write_index_as_tree(oid, the_repository->index,
-				repo_get_index_file(the_repository),
-				0, NULL))
+	ಆದರೆ (write_ಸೂಚ್ಯಂಕ_as_ವೃಕ್ಷ(oid, the_repository->ಸೂಚ್ಯಂಕ,
+				repo_get_ಸೂಚ್ಯಂಕ_file(the_repository),
+				0, ಖಾಲಿ))
 		die(_("git write-tree failed to write a tree"));
 }
 
-static int try_merge_strategy(const char *strategy, struct commit_list *common,
-			      struct commit_list *remoteheads,
-			      struct commit *head)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ try_ವಿಲೀನ_strategy(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *strategy, ರಚನೆ commit_list *common,
+			      ರಚನೆ commit_list *remoteheads,
+			      ರಚನೆ commit *ತಲೆ)
 {
-	const char *head_arg = "HEAD";
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಲೆ_arg = "HEAD";
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
-					 SKIP_IF_UNCHANGED, 0, NULL, NULL,
-					 NULL) < 0)
+	ಆದರೆ (repo_refresh_and_write_ಸೂಚ್ಯಂಕ(the_repository, REFRESH_QUIET,
+					 SKIP_IF_UNCHANGED, 0, ಖಾಲಿ, ಖಾಲಿ,
+					 ಖಾಲಿ) < 0)
 		die(_("Unable to write index."));
 
-	if (!strcmp(strategy, "recursive") || !strcmp(strategy, "subtree") ||
+	ಆದರೆ (!strcmp(strategy, "recursive") || !strcmp(strategy, "subtree") ||
 	    !strcmp(strategy, "ort")) {
-		struct lock_file lock = LOCK_INIT;
-		int clean, x;
-		struct commit *result;
-		struct commit_list *reversed = NULL;
-		struct merge_options o;
-		struct commit_list *j;
+		ರಚನೆ ಬೀಗ_file ಬೀಗ = ಬೀಗ_INIT;
+		ಪೂರ್ಣಾಂಕ clean, x;
+		ರಚನೆ commit *ಫಲಿತಾಂಶ;
+		ರಚನೆ commit_list *reversed = ಖಾಲಿ;
+		ರಚನೆ ವಿಲೀನ_options o;
+		ರಚನೆ commit_list *j;
 
-		if (remoteheads->next) {
+		ಆದರೆ (remoteheads->ಮುಂದಿನ) {
 			error(_("Not handling anything other than two heads merge."));
-			return 2;
+			ಹಿಂತಿರುಗಿ 2;
 		}
 
-		init_ui_merge_options(&o, the_repository);
-		if (!strcmp(strategy, "subtree"))
-			o.subtree_shift = "";
+		init_ui_ವಿಲೀನ_options(&o, the_repository);
+		ಆದರೆ (!strcmp(strategy, "subtree"))
+			o.subtree_ಸರಿಸು = "";
 
-		o.show_rename_progress =
-			show_progress == -1 ? isatty(2) : show_progress;
+		o.show_rename_ಪ್ರಗತಿ =
+			show_ಪ್ರಗತಿ == -1 ? isatty(2) : show_ಪ್ರಗತಿ;
 
-		for (x = 0; x < xopts.nr; x++)
-			if (parse_merge_opt(&o, xopts.v[x]))
+		ಗಾಗಿ (x = 0; x < xopts.nr; x++)
+			ಆದರೆ (parse_ವಿಲೀನ_opt(&o, xopts.v[x]))
 				die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
-		o.branch1 = head_arg;
-		o.branch2 = merge_remote_util(remoteheads->item)->name;
+		o.branch1 = ತಲೆ_arg;
+		o.branch2 = ವಿಲೀನ_remote_util(remoteheads->ಅಂಶ)->name;
 
-		for (j = common; j; j = j->next)
-			commit_list_insert(j->item, &reversed);
+		ಗಾಗಿ (j = common; j; j = j->ಮುಂದಿನ)
+			commit_list_ಸೇರಿಸು(j->ಅಂಶ, &reversed);
 
-		repo_hold_locked_index(the_repository, &lock,
-				       LOCK_DIE_ON_ERROR);
-		clean = merge_ort_recursive(&o, head, remoteheads->item,
-					    reversed, &result);
+		repo_hold_locked_ಸೂಚ್ಯಂಕ(the_repository, &ಬೀಗ,
+				       ಬೀಗ_DIE_ON_ERROR);
+		clean = ವಿಲೀನ_ort_recursive(&o, ತಲೆ, remoteheads->ಅಂಶ,
+					    reversed, &ಫಲಿತಾಂಶ);
 		commit_list_free(reversed);
 		strbuf_release(&o.obuf);
 
-		if (clean < 0) {
-			rollback_lock_file(&lock);
-			return 2;
+		ಆದರೆ (clean < 0) {
+			rollback_ಬೀಗ_file(&ಬೀಗ);
+			ಹಿಂತಿರುಗಿ 2;
 		}
-		if (write_locked_index(the_repository->index, &lock,
-				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
-			die(_("unable to write %s"), repo_get_index_file(the_repository));
-		return clean ? 0 : 1;
-	} else {
-		return try_merge_command(the_repository,
+		ಆದರೆ (write_locked_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ, &ಬೀಗ,
+				       COMMIT_ಬೀಗ | SKIP_IF_UNCHANGED))
+			die(_("unable to write %s"), repo_get_ಸೂಚ್ಯಂಕ_file(the_repository));
+		ಹಿಂತಿರುಗಿ clean ? 0 : 1;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಹಿಂತಿರುಗಿ try_ವಿಲೀನ_command(the_repository,
 					 strategy, xopts.nr, xopts.v,
-					 common, head_arg, remoteheads);
+					 common, ತಲೆ_arg, remoteheads);
 	}
 }
 
-static void count_diff_files(struct diff_queue_struct *q,
-			     struct diff_options *opt UNUSED, void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ ಎಣಿಕೆ_diff_files(ರಚನೆ diff_ಸರತಿ_struct *q,
+			     ರಚನೆ diff_options *opt ಬಳಸದ, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	int *count = data;
+	ಪೂರ್ಣಾಂಕ *ಎಣಿಕೆ_2 = ದತ್ತಾಂಶ;
 
-	(*count) += q->nr;
+	(*ಎಣಿಕೆ_2) += q->nr;
 }
 
-static int count_unmerged_entries(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಎಣಿಕೆ_unmerged_entries(ಶೂನ್ಯ)
 {
-	int i, ret = 0;
+	ಪೂರ್ಣಾಂಕ i, ret = 0;
 
-	for (i = 0; i < the_repository->index->cache_nr; i++)
-		if (ce_stage(the_repository->index->cache[i]))
+	ಗಾಗಿ (i = 0; i < the_repository->ಸೂಚ್ಯಂಕ->cache_nr; i++)
+		ಆದರೆ (ce_stage(the_repository->ಸೂಚ್ಯಂಕ->cache[i]))
 			ret++;
 
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static void add_strategies(const char *string, unsigned attr)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_strategies(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *string, ಚಿಹ್ನೆರಹಿತ attr)
 {
-	int i;
+	ಪೂರ್ಣಾಂಕ i;
 
-	if (string) {
-		struct string_list list = STRING_LIST_INIT_DUP;
-		struct string_list_item *item;
-		string_list_split(&list, string, " ", -1);
-		for_each_string_list_item(item, &list)
-			append_strategy(get_strategy(item->string));
+	ಆದರೆ (string) {
+		ರಚನೆ string_list list = STRING_LIST_INIT_DUP;
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+		string_list_ವಿಭಜಿಸು(&list, string, " ", -1);
+		for_each_string_list_ಅಂಶ(ಅಂಶ, &list)
+			append_strategy(get_strategy(ಅಂಶ->string));
 		string_list_clear(&list, 0);
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
-	for (i = 0; i < ARRAY_SIZE(all_strategy); i++)
-		if (all_strategy[i].attr & attr)
+	ಗಾಗಿ (i = 0; i < ARRAY_ಗಾತ್ರ(all_strategy); i++)
+		ಆದರೆ (all_strategy[i].attr & attr)
 			append_strategy(&all_strategy[i]);
 
 }
 
-static void read_merge_msg(struct strbuf *msg)
+ಸ್ಥಿರ ಶೂನ್ಯ read_ವಿಲೀನ_ಸಂದೇಶ(ರಚನೆ strbuf *ಸಂದೇಶ)
 {
-	const char *filename = git_path_merge_msg(the_repository);
-	strbuf_reset(msg);
-	if (strbuf_read_file(msg, filename, 0) < 0)
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename = git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository);
+	strbuf_reset(ಸಂದೇಶ);
+	ಆದರೆ (strbuf_read_file(ಸಂದೇಶ, filename, 0) < 0)
 		die_errno(_("Could not read from '%s'"), filename);
 }
 
-static void write_merge_state(struct commit_list *);
-static void abort_commit(struct commit_list *remoteheads, const char *err_msg)
+ಸ್ಥಿರ ಶೂನ್ಯ write_ವಿಲೀನ_state(ರಚನೆ commit_list *);
+ಸ್ಥಿರ ಶೂನ್ಯ abort_commit(ರಚನೆ commit_list *remoteheads, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *err_ಸಂದೇಶ)
 {
-	if (err_msg)
-		error("%s", err_msg);
+	ಆದರೆ (err_ಸಂದೇಶ)
+		error("%s", err_ಸಂದೇಶ);
 	fprintf(stderr,
 		_("Not committing merge; use 'git commit' to complete the merge.\n"));
-	write_merge_state(remoteheads);
-	exit(1);
+	write_ವಿಲೀನ_state(remoteheads);
+	ನಿರ್ಗಮಿಸು(1);
 }
 
-static const char merge_editor_comment[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ ವಿಲೀನ_editor_comment[] =
 N_("Please enter a commit message to explain why this merge is necessary,\n"
    "especially if it merges an updated upstream into a topic branch.\n"
    "\n");
 
-static const char scissors_editor_comment[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ scissors_editor_comment[] =
 N_("An empty message aborts the commit.\n");
 
-static const char no_scissors_editor_comment[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ no_scissors_editor_comment[] =
 N_("Lines starting with '%s' will be ignored, and an empty message aborts\n"
    "the commit.\n");
 
-static void write_merge_heads(struct commit_list *);
-static void prepare_to_commit(struct commit_list *remoteheads)
+ಸ್ಥಿರ ಶೂನ್ಯ write_ವಿಲೀನ_heads(ರಚನೆ commit_list *);
+ಸ್ಥಿರ ಶೂನ್ಯ prepare_ಗಮ್ಯ_commit(ರಚನೆ commit_list *remoteheads)
 {
-	struct strbuf msg = STRBUF_INIT;
-	const char *index_file = repo_get_index_file(the_repository);
+	ರಚನೆ strbuf ಸಂದೇಶ = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸೂಚ್ಯಂಕ_file = repo_get_ಸೂಚ್ಯಂಕ_file(the_repository);
 
-	if (!no_verify) {
-		int invoked_hook;
+	ಆದರೆ (!no_verify) {
+		ಪೂರ್ಣಾಂಕ invoked_hook;
 
-		if (run_commit_hook(0 < option_edit, index_file, &invoked_hook,
-				    "pre-merge-commit", NULL))
-			abort_commit(remoteheads, NULL);
+		ಆದರೆ (ಸತತ_commit_hook(0 < option_edit, ಸೂಚ್ಯಂಕ_file, &invoked_hook,
+				    "pre-merge-commit", ಖಾಲಿ))
+			abort_commit(remoteheads, ಖಾಲಿ);
 		/*
 		 * Re-read the index as pre-merge-commit hook could have updated it,
 		 * and write it out as a tree.  We must do this before we invoke
 		 * the editor and after we invoke run_status above.
 		 */
-		if (invoked_hook)
-			discard_index(the_repository->index);
+		ಆದರೆ (invoked_hook)
+			discard_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ);
 	}
-	read_index_from(the_repository->index, index_file,
+	read_ಸೂಚ್ಯಂಕ_from(the_repository->ಸೂಚ್ಯಂಕ, ಸೂಚ್ಯಂಕ_file,
 			repo_get_git_dir(the_repository));
-	strbuf_addbuf(&msg, &merge_msg);
-	if (squash)
+	strbuf_addbuf(&ಸಂದೇಶ, &ವಿಲೀನ_ಸಂದೇಶ);
+	ಆದರೆ (squash)
 		BUG("the control must not reach here under --squash");
-	if (0 < option_edit) {
-		strbuf_addch(&msg, '\n');
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			wt_status_append_cut_line(&msg);
-			strbuf_commented_addf(&msg, comment_line_str, "\n");
+	ಆದರೆ (0 < option_edit) {
+		strbuf_addch(&ಸಂದೇಶ, '\n');
+		ಆದರೆ (cleanup_ಬಹುಲಕ == COMMIT_ಸಂದೇಶ_CLEANUP_SCISSORS) {
+			wt_ಸ್ಥಿತಿ_append_cut_ಸಾಲು(&ಸಂದೇಶ);
+			strbuf_commented_addf(&ಸಂದೇಶ, comment_ಸಾಲು_str, "\n");
 		}
-		strbuf_commented_addf(&msg, comment_line_str,
-				      _(merge_editor_comment));
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-			strbuf_commented_addf(&msg, comment_line_str,
+		strbuf_commented_addf(&ಸಂದೇಶ, comment_ಸಾಲು_str,
+				      _(ವಿಲೀನ_editor_comment));
+		ಆದರೆ (cleanup_ಬಹುಲಕ == COMMIT_ಸಂದೇಶ_CLEANUP_SCISSORS)
+			strbuf_commented_addf(&ಸಂದೇಶ, comment_ಸಾಲು_str,
 					      _(scissors_editor_comment));
-		else
-			strbuf_commented_addf(&msg, comment_line_str,
-				_(no_scissors_editor_comment), comment_line_str);
+		ಇಲ್ಲದಿದ್ದರೆ
+			strbuf_commented_addf(&ಸಂದೇಶ, comment_ಸಾಲು_str,
+				_(no_scissors_editor_comment), comment_ಸಾಲು_str);
 	}
-	if (signoff)
-		append_signoff(&msg, ignored_log_message_bytes(msg.buf, msg.len), 0);
-	write_merge_heads(remoteheads);
-	write_file_buf(git_path_merge_msg(the_repository), msg.buf, msg.len);
-	if (run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
-			    NULL, "prepare-commit-msg",
-			    git_path_merge_msg(the_repository), "merge", NULL))
-		abort_commit(remoteheads, NULL);
-	if (0 < option_edit) {
-		if (launch_editor(git_path_merge_msg(the_repository), NULL, NULL))
-			abort_commit(remoteheads, NULL);
+	ಆದರೆ (signoff)
+		append_signoff(&ಸಂದೇಶ, ignored_log_ಸಂದೇಶ_ಬೈಟುಗಳು(ಸಂದೇಶ.buf, ಸಂದೇಶ.len), 0);
+	write_ವಿಲೀನ_heads(remoteheads);
+	write_file_buf(git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository), ಸಂದೇಶ.buf, ಸಂದೇಶ.len);
+	ಆದರೆ (ಸತತ_commit_hook(0 < option_edit, repo_get_ಸೂಚ್ಯಂಕ_file(the_repository),
+			    ಖಾಲಿ, "prepare-commit-msg",
+			    git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository), "merge", ಖಾಲಿ))
+		abort_commit(remoteheads, ಖಾಲಿ);
+	ಆದರೆ (0 < option_edit) {
+		ಆದರೆ (launch_editor(git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository), ಖಾಲಿ, ಖಾಲಿ))
+			abort_commit(remoteheads, ಖಾಲಿ);
 	}
 
-	if (!no_verify && run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
-					  NULL, "commit-msg",
-					  git_path_merge_msg(the_repository), NULL))
-		abort_commit(remoteheads, NULL);
+	ಆದರೆ (!no_verify && ಸತತ_commit_hook(0 < option_edit, repo_get_ಸೂಚ್ಯಂಕ_file(the_repository),
+					  ಖಾಲಿ, "commit-msg",
+					  git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository), ಖಾಲಿ))
+		abort_commit(remoteheads, ಖಾಲಿ);
 
-	read_merge_msg(&msg);
-	cleanup_message(&msg, cleanup_mode, 0);
-	if (!msg.len)
+	read_ವಿಲೀನ_ಸಂದೇಶ(&ಸಂದೇಶ);
+	cleanup_ಸಂದೇಶ(&ಸಂದೇಶ, cleanup_ಬಹುಲಕ, 0);
+	ಆದರೆ (!ಸಂದೇಶ.len)
 		abort_commit(remoteheads, _("Empty commit message."));
-	strbuf_release(&merge_msg);
-	strbuf_addbuf(&merge_msg, &msg);
-	strbuf_release(&msg);
+	strbuf_release(&ವಿಲೀನ_ಸಂದೇಶ);
+	strbuf_addbuf(&ವಿಲೀನ_ಸಂದೇಶ, &ಸಂದೇಶ);
+	strbuf_release(&ಸಂದೇಶ);
 }
 
-static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ವಿಲೀನ_trivial(ರಚನೆ commit *ತಲೆ, ರಚನೆ commit_list *remoteheads)
 {
-	struct object_id result_tree, result_commit;
-	struct commit_list *parents = NULL, **pptr = &parents;
+	ರಚನೆ object_id ಫಲಿತಾಂಶ_ವೃಕ್ಷ, ಫಲಿತಾಂಶ_commit;
+	ರಚನೆ commit_list *parents = ಖಾಲಿ, **pptr = &parents;
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
-					 SKIP_IF_UNCHANGED, 0, NULL, NULL,
-					 NULL) < 0)
-		return error(_("Unable to write index."));
+	ಆದರೆ (repo_refresh_and_write_ಸೂಚ್ಯಂಕ(the_repository, REFRESH_QUIET,
+					 SKIP_IF_UNCHANGED, 0, ಖಾಲಿ, ಖಾಲಿ,
+					 ಖಾಲಿ) < 0)
+		ಹಿಂತಿರುಗಿ error(_("Unable to write index."));
 
-	write_tree_trivial(&result_tree);
-	printf(_("Wonderful.\n"));
-	pptr = commit_list_append(head, pptr);
-	pptr = commit_list_append(remoteheads->item, pptr);
-	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, &result_tree, parents,
-			&result_commit, NULL, sign_commit))
+	write_ವೃಕ್ಷ_trivial(&ಫಲಿತಾಂಶ_ವೃಕ್ಷ);
+	ಬರೆ(_("Wonderful.\n"));
+	pptr = commit_list_append(ತಲೆ, pptr);
+	pptr = commit_list_append(remoteheads->ಅಂಶ, pptr);
+	prepare_ಗಮ್ಯ_commit(remoteheads);
+	ಆದರೆ (commit_ವೃಕ್ಷ(ವಿಲೀನ_ಸಂದೇಶ.buf, ವಿಲೀನ_ಸಂದೇಶ.len, &ಫಲಿತಾಂಶ_ವೃಕ್ಷ, parents,
+			&ಫಲಿತಾಂಶ_commit, ಖಾಲಿ, sign_commit))
 		die(_("failed to write commit object"));
-	finish(head, remoteheads, &result_commit, "In-index merge");
+	ಮುಕ್ತಾಯ(ತಲೆ, remoteheads, &ಫಲಿತಾಂಶ_commit, "In-index merge");
 
-	remove_merge_branch_state(the_repository);
+	remove_ವಿಲೀನ_branch_state(the_repository);
 	commit_list_free(parents);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int finish_automerge(struct commit *head,
-			    int head_subsumed,
-			    struct commit_list *common,
-			    struct commit_list *remoteheads,
-			    struct object_id *result_tree,
-			    const char *wt_strategy)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಮುಕ್ತಾಯ_automerge(ರಚನೆ commit *ತಲೆ,
+			    ಪೂರ್ಣಾಂಕ ತಲೆ_subsumed,
+			    ರಚನೆ commit_list *common,
+			    ರಚನೆ commit_list *remoteheads,
+			    ರಚನೆ object_id *ಫಲಿತಾಂಶ_ವೃಕ್ಷ,
+			    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *wt_strategy)
 {
-	struct commit_list *parents = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	struct object_id result_commit;
+	ರಚನೆ commit_list *parents = ಖಾಲಿ;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ರಚನೆ object_id ಫಲಿತಾಂಶ_commit;
 
-	write_tree_trivial(result_tree);
+	write_ವೃಕ್ಷ_trivial(ಫಲಿತಾಂಶ_ವೃಕ್ಷ);
 	commit_list_free(common);
 	parents = remoteheads;
-	if (!head_subsumed || fast_forward == FF_NO)
-		commit_list_insert(head, &parents);
-	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, result_tree, parents,
-			&result_commit, NULL, sign_commit))
+	ಆದರೆ (!ತಲೆ_subsumed || fast_forward == FF_NO)
+		commit_list_ಸೇರಿಸು(ತಲೆ, &parents);
+	prepare_ಗಮ್ಯ_commit(remoteheads);
+	ಆದರೆ (commit_ವೃಕ್ಷ(ವಿಲೀನ_ಸಂದೇಶ.buf, ವಿಲೀನ_ಸಂದೇಶ.len, ಫಲಿತಾಂಶ_ವೃಕ್ಷ, parents,
+			&ಫಲಿತಾಂಶ_commit, ಖಾಲಿ, sign_commit))
 		die(_("failed to write commit object"));
 	strbuf_addf(&buf, "Merge made by the '%s' strategy.", wt_strategy);
-	finish(head, remoteheads, &result_commit, buf.buf);
+	ಮುಕ್ತಾಯ(ತಲೆ, remoteheads, &ಫಲಿತಾಂಶ_commit, buf.buf);
 
 	strbuf_release(&buf);
-	remove_merge_branch_state(the_repository);
+	remove_ವಿಲೀನ_branch_state(the_repository);
 	commit_list_free(parents);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int suggest_conflicts(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ suggest_conflicts(ಶೂನ್ಯ)
 {
-	const char *filename;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename;
 	FILE *fp;
-	struct strbuf msgbuf = STRBUF_INIT;
+	ರಚನೆ strbuf msgbuf = STRBUF_INIT;
 
-	filename = git_path_merge_msg(the_repository);
+	filename = git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository);
 	fp = xfopen(filename, "a");
 
 	/*
@@ -1056,136 +1056,136 @@ static int suggest_conflicts(void)
 	 * Thus, we will get the cleanup mode which is returned when we _are_
 	 * using an editor.
 	 */
-	append_conflicts_hint(the_repository->index, &msgbuf,
-			      get_cleanup_mode(cleanup_arg, 1));
+	append_conflicts_hint(the_repository->ಸೂಚ್ಯಂಕ, &msgbuf,
+			      get_cleanup_ಬಹುಲಕ(cleanup_arg, 1));
 	fputs(msgbuf.buf, fp);
 	strbuf_release(&msgbuf);
 	fclose(fp);
 	repo_rerere(the_repository, allow_rerere_auto);
-	printf(_("Automatic merge failed; "
+	ಬರೆ(_("Automatic merge failed; "
 			"fix conflicts and then commit the result.\n"));
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int evaluate_result(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ evaluate_ಫಲಿತಾಂಶ(ಶೂನ್ಯ)
 {
-	int cnt = 0;
-	struct rev_info rev;
+	ಪೂರ್ಣಾಂಕ cnt = 0;
+	ರಚನೆ rev_info rev;
 
 	/* Check how many files differ. */
 	repo_init_revisions(the_repository, &rev, "");
-	setup_revisions(0, NULL, &rev, NULL);
+	ಸಿದ್ಧತೆ_revisions(0, ಖಾಲಿ, &rev, ಖಾಲಿ);
 	rev.diffopt.output_format |=
 		DIFF_FORMAT_CALLBACK;
-	rev.diffopt.format_callback = count_diff_files;
-	rev.diffopt.format_callback_data = &cnt;
-	run_diff_files(&rev, 0);
+	rev.diffopt.format_callback = ಎಣಿಕೆ_diff_files;
+	rev.diffopt.format_callback_ದತ್ತಾಂಶ = &cnt;
+	ಸತತ_diff_files(&rev, 0);
 
 	/*
 	 * Check how many unmerged entries are
 	 * there.
 	 */
-	cnt += count_unmerged_entries();
+	cnt += ಎಣಿಕೆ_unmerged_entries();
 
 	release_revisions(&rev);
-	return cnt;
+	ಹಿಂತಿರುಗಿ cnt;
 }
 
 /*
  * Pretend as if the user told us to merge with the remote-tracking
  * branch we have for the upstream of the current branch
  */
-static int setup_with_upstream(const char ***argv)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಸಿದ್ಧತೆ_with_upstream(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ ***argv)
 {
-	struct branch *branch = branch_get(NULL);
-	int i;
-	const char **args;
+	ರಚನೆ branch *branch = branch_get(ಖಾಲಿ);
+	ಪೂರ್ಣಾಂಕ i;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **ವಾದಗಳು;
 
-	if (!branch)
+	ಆದರೆ (!branch)
 		die(_("No current branch."));
-	if (!branch->remote_name)
+	ಆದರೆ (!branch->remote_name)
 		die(_("No remote for the current branch."));
-	if (!branch->merge_nr)
+	ಆದರೆ (!branch->ವಿಲೀನ_nr)
 		die(_("No default upstream defined for the current branch."));
 
-	args = xcalloc(st_add(branch->merge_nr, 1), sizeof(char *));
-	for (i = 0; i < branch->merge_nr; i++) {
-		if (!branch->merge[i]->dst)
+	ವಾದಗಳು = xcalloc(st_ಕೂಡಿಸು(branch->ವಿಲೀನ_nr, 1), ಗಾತ್ರ(ಅಕ್ಷರ *));
+	ಗಾಗಿ (i = 0; i < branch->ವಿಲೀನ_nr; i++) {
+		ಆದರೆ (!branch->ವಿಲೀನ[i]->dst)
 			die(_("No remote-tracking branch for %s from %s"),
-			    branch->merge[i]->src, branch->remote_name);
-		args[i] = branch->merge[i]->dst;
+			    branch->ವಿಲೀನ[i]->src, branch->remote_name);
+		ವಾದಗಳು[i] = branch->ವಿಲೀನ[i]->dst;
 	}
-	args[i] = NULL;
-	*argv = args;
-	return i;
+	ವಾದಗಳು[i] = ಖಾಲಿ;
+	*argv = ವಾದಗಳು;
+	ಹಿಂತಿರುಗಿ i;
 }
 
-static void write_merge_heads(struct commit_list *remoteheads)
+ಸ್ಥಿರ ಶೂನ್ಯ write_ವಿಲೀನ_heads(ರಚನೆ commit_list *remoteheads)
 {
-	struct commit_list *j;
-	struct strbuf buf = STRBUF_INIT;
+	ರಚನೆ commit_list *j;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
 
-	for (j = remoteheads; j; j = j->next) {
-		struct object_id *oid;
-		struct commit *c = j->item;
-		struct merge_remote_desc *desc;
+	ಗಾಗಿ (j = remoteheads; j; j = j->ಮುಂದಿನ) {
+		ರಚನೆ object_id *oid;
+		ರಚನೆ commit *c = j->ಅಂಶ;
+		ರಚನೆ ವಿಲೀನ_remote_desc *desc;
 
-		desc = merge_remote_util(c);
-		if (desc && desc->obj) {
+		desc = ವಿಲೀನ_remote_util(c);
+		ಆದರೆ (desc && desc->obj) {
 			oid = &desc->obj->oid;
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			oid = &c->object.oid;
 		}
-		strbuf_addf(&buf, "%s\n", oid_to_hex(oid));
+		strbuf_addf(&buf, "%s\n", oid_ಗಮ್ಯ_hex(oid));
 	}
-	write_file_buf(git_path_merge_head(the_repository), buf.buf, buf.len);
+	write_file_buf(git_ಮಾರ್ಗ_ವಿಲೀನ_ತಲೆ(the_repository), buf.buf, buf.len);
 
 	strbuf_reset(&buf);
-	if (fast_forward == FF_NO)
+	ಆದರೆ (fast_forward == FF_NO)
 		strbuf_addstr(&buf, "no-ff");
-	write_file_buf(git_path_merge_mode(the_repository), buf.buf, buf.len);
+	write_file_buf(git_ಮಾರ್ಗ_ವಿಲೀನ_ಬಹುಲಕ(the_repository), buf.buf, buf.len);
 	strbuf_release(&buf);
 }
 
-static void write_merge_state(struct commit_list *remoteheads)
+ಸ್ಥಿರ ಶೂನ್ಯ write_ವಿಲೀನ_state(ರಚನೆ commit_list *remoteheads)
 {
-	write_merge_heads(remoteheads);
-	strbuf_addch(&merge_msg, '\n');
-	write_file_buf(git_path_merge_msg(the_repository), merge_msg.buf,
-		       merge_msg.len);
+	write_ವಿಲೀನ_heads(remoteheads);
+	strbuf_addch(&ವಿಲೀನ_ಸಂದೇಶ, '\n');
+	write_file_buf(git_ಮಾರ್ಗ_ವಿಲೀನ_ಸಂದೇಶ(the_repository), ವಿಲೀನ_ಸಂದೇಶ.buf,
+		       ವಿಲೀನ_ಸಂದೇಶ.len);
 }
 
-static int default_edit_option(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ default_edit_option(ಶೂನ್ಯ)
 {
-	static const char name[] = "GIT_MERGE_AUTOEDIT";
-	const char *e = getenv(name);
-	struct stat st_stdin, st_stdout;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ name[] = "GIT_MERGE_AUTOEDIT";
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *e = getenv(name);
+	ರಚನೆ stat st_stdin, st_stdout;
 
-	if (have_message)
+	ಆದರೆ (have_ಸಂದೇಶ)
 		/* an explicit -m msg without --[no-]edit */
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (e) {
-		int v = git_parse_maybe_bool(e);
-		if (v < 0)
+	ಆದರೆ (e) {
+		ಪೂರ್ಣಾಂಕ v = git_parse_maybe_bool(e);
+		ಆದರೆ (v < 0)
 			die(_("Bad value '%s' in environment '%s'"), e, name);
-		return v;
+		ಹಿಂತಿರುಗಿ v;
 	}
 
 	/* Use editor if stdin and stdout are the same and is a tty */
-	return (!fstat(0, &st_stdin) &&
+	ಹಿಂತಿರುಗಿ (!fstat(0, &st_stdin) &&
 		!fstat(1, &st_stdout) &&
 		isatty(0) && isatty(1) &&
 		st_stdin.st_dev == st_stdout.st_dev &&
 		st_stdin.st_ino == st_stdout.st_ino &&
-		st_stdin.st_mode == st_stdout.st_mode);
+		st_stdin.st_ಬಹುಲಕ == st_stdout.st_ಬಹುಲಕ);
 }
 
-static struct commit_list *reduce_parents(struct commit *head_commit,
-					  int *head_subsumed,
-					  struct commit_list *remoteheads)
+ಸ್ಥಿರ ರಚನೆ commit_list *reduce_parents(ರಚನೆ commit *ತಲೆ_commit,
+					  ಪೂರ್ಣಾಂಕ *ತಲೆ_subsumed,
+					  ರಚನೆ commit_list *remoteheads)
 {
-	struct commit_list *parents, **remotes;
+	ರಚನೆ commit_list *parents, **remotes;
 
 	/*
 	 * Is the current HEAD reachable from another commit being
@@ -1194,146 +1194,146 @@ static struct commit_list *reduce_parents(struct commit *head_commit,
 	 * this variable to 0 when we find HEAD among the independent
 	 * tips being merged.
 	 */
-	*head_subsumed = 1;
+	*ತಲೆ_subsumed = 1;
 
 	/* Find what parents to record by checking independent ones. */
 	parents = reduce_heads(remoteheads);
 	commit_list_free(remoteheads);
 
-	remoteheads = NULL;
+	remoteheads = ಖಾಲಿ;
 	remotes = &remoteheads;
-	while (parents) {
-		struct commit *commit = pop_commit(&parents);
-		if (commit == head_commit)
-			*head_subsumed = 0;
-		else
-			remotes = &commit_list_insert(commit, remotes)->next;
+	ಆಗ (parents) {
+		ರಚನೆ commit *commit = ತೆಗೆ_commit(&parents);
+		ಆದರೆ (commit == ತಲೆ_commit)
+			*ತಲೆ_subsumed = 0;
+		ಇಲ್ಲದಿದ್ದರೆ
+			remotes = &commit_list_ಸೇರಿಸು(commit, remotes)->ಮುಂದಿನ;
 	}
-	return remoteheads;
+	ಹಿಂತಿರುಗಿ remoteheads;
 }
 
-static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *merge_msg)
+ಸ್ಥಿರ ಶೂನ್ಯ prepare_ವಿಲೀನ_ಸಂದೇಶ(ರಚನೆ strbuf *ವಿಲೀನ_ಹೆಸರುಗಳು, ರಚನೆ strbuf *ವಿಲೀನ_ಸಂದೇಶ)
 {
-	struct fmt_merge_msg_opts opts;
+	ರಚನೆ fmt_ವಿಲೀನ_ಸಂದೇಶ_opts opts;
 
-	memset(&opts, 0, sizeof(opts));
-	opts.add_title = !have_message;
+	memset(&opts, 0, ಗಾತ್ರ(opts));
+	opts.ಕೂಡಿಸು_title = !have_ಸಂದೇಶ;
 	opts.shortlog_len = shortlog_len;
 	opts.credit_people = (0 < option_edit);
 	opts.into_name = into_name;
 
-	fmt_merge_msg(merge_names, merge_msg, &opts);
-	if (merge_msg->len)
-		strbuf_setlen(merge_msg, merge_msg->len - 1);
+	fmt_ವಿಲೀನ_ಸಂದೇಶ(ವಿಲೀನ_ಹೆಸರುಗಳು, ವಿಲೀನ_ಸಂದೇಶ, &opts);
+	ಆದರೆ (ವಿಲೀನ_ಸಂದೇಶ->len)
+		strbuf_setlen(ವಿಲೀನ_ಸಂದೇಶ, ವಿಲೀನ_ಸಂದೇಶ->len - 1);
 }
 
-static void handle_fetch_head(struct commit_list **remotes, struct strbuf *merge_names)
+ಸ್ಥಿರ ಶೂನ್ಯ handle_fetch_ತಲೆ(ರಚನೆ commit_list **remotes, ರಚನೆ strbuf *ವಿಲೀನ_ಹೆಸರುಗಳು)
 {
-	const char *filename;
-	int fd, pos, npos;
-	struct strbuf fetch_head_file = STRBUF_INIT;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *filename;
+	ಪೂರ್ಣಾಂಕ fd, pos, npos;
+	ರಚನೆ strbuf fetch_ತಲೆ_file = STRBUF_INIT;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ hexsz = the_hash_algo->hexsz;
 
-	if (!merge_names)
-		merge_names = &fetch_head_file;
+	ಆದರೆ (!ವಿಲೀನ_ಹೆಸರುಗಳು)
+		ವಿಲೀನ_ಹೆಸರುಗಳು = &fetch_ತಲೆ_file;
 
-	filename = git_path_fetch_head(the_repository);
+	filename = git_ಮಾರ್ಗ_fetch_ತಲೆ(the_repository);
 	fd = xopen(filename, O_RDONLY);
 
-	if (strbuf_read(merge_names, fd, 0) < 0)
+	ಆದರೆ (strbuf_read(ವಿಲೀನ_ಹೆಸರುಗಳು, fd, 0) < 0)
 		die_errno(_("could not read '%s'"), filename);
-	if (close(fd) < 0)
+	ಆದರೆ (close(fd) < 0)
 		die_errno(_("could not close '%s'"), filename);
 
-	for (pos = 0; pos < merge_names->len; pos = npos) {
-		struct object_id oid;
-		char *ptr;
-		struct commit *commit;
+	ಗಾಗಿ (pos = 0; pos < ವಿಲೀನ_ಹೆಸರುಗಳು->len; pos = npos) {
+		ರಚನೆ object_id oid;
+		ಅಕ್ಷರ *ptr;
+		ರಚನೆ commit *commit;
 
-		ptr = strchr(merge_names->buf + pos, '\n');
-		if (ptr)
-			npos = ptr - merge_names->buf + 1;
-		else
-			npos = merge_names->len;
+		ptr = strchr(ವಿಲೀನ_ಹೆಸರುಗಳು->buf + pos, '\n');
+		ಆದರೆ (ptr)
+			npos = ptr - ವಿಲೀನ_ಹೆಸರುಗಳು->buf + 1;
+		ಇಲ್ಲದಿದ್ದರೆ
+			npos = ವಿಲೀನ_ಹೆಸರುಗಳು->len;
 
-		if (npos - pos < hexsz + 2 ||
-		    get_oid_hex(merge_names->buf + pos, &oid))
-			commit = NULL; /* bad */
-		else if (memcmp(merge_names->buf + pos + hexsz, "\t\t", 2))
-			continue; /* not-for-merge */
-		else {
-			char saved = merge_names->buf[pos + hexsz];
-			merge_names->buf[pos + hexsz] = '\0';
-			commit = get_merge_parent(merge_names->buf + pos);
-			merge_names->buf[pos + hexsz] = saved;
+		ಆದರೆ (npos - pos < hexsz + 2 ||
+		    get_oid_hex(ವಿಲೀನ_ಹೆಸರುಗಳು->buf + pos, &oid))
+			commit = ಖಾಲಿ; /* bad */
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (memcmp(ವಿಲೀನ_ಹೆಸರುಗಳು->buf + pos + hexsz, "\t\t", 2))
+			ಮುಂದುವರಿ; /* not-for-merge */
+		ಇಲ್ಲದಿದ್ದರೆ {
+			ಅಕ್ಷರ saved = ವಿಲೀನ_ಹೆಸರುಗಳು->buf[pos + hexsz];
+			ವಿಲೀನ_ಹೆಸರುಗಳು->buf[pos + hexsz] = '\0';
+			commit = get_ವಿಲೀನ_ಪೋಷಕ(ವಿಲೀನ_ಹೆಸರುಗಳು->buf + pos);
+			ವಿಲೀನ_ಹೆಸರುಗಳು->buf[pos + hexsz] = saved;
 		}
-		if (!commit) {
-			if (ptr)
+		ಆದರೆ (!commit) {
+			ಆದರೆ (ptr)
 				*ptr = '\0';
 			die(_("not something we can merge in %s: %s"),
-			    filename, merge_names->buf + pos);
+			    filename, ವಿಲೀನ_ಹೆಸರುಗಳು->buf + pos);
 		}
-		remotes = &commit_list_insert(commit, remotes)->next;
+		remotes = &commit_list_ಸೇರಿಸು(commit, remotes)->ಮುಂದಿನ;
 	}
 
-	if (merge_names == &fetch_head_file)
-		strbuf_release(&fetch_head_file);
+	ಆದರೆ (ವಿಲೀನ_ಹೆಸರುಗಳು == &fetch_ತಲೆ_file)
+		strbuf_release(&fetch_ತಲೆ_file);
 }
 
-static struct commit_list *collect_parents(struct commit *head_commit,
-					   int *head_subsumed,
-					   int argc, const char **argv,
-					   struct strbuf *merge_msg)
+ಸ್ಥಿರ ರಚನೆ commit_list *collect_parents(ರಚನೆ commit *ತಲೆ_commit,
+					   ಪೂರ್ಣಾಂಕ *ತಲೆ_subsumed,
+					   ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+					   ರಚನೆ strbuf *ವಿಲೀನ_ಸಂದೇಶ)
 {
-	int i;
-	struct commit_list *remoteheads = NULL;
-	struct commit_list **remotes = &remoteheads;
-	struct strbuf merge_names = STRBUF_INIT, *autogen = NULL;
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ commit_list *remoteheads = ಖಾಲಿ;
+	ರಚನೆ commit_list **remotes = &remoteheads;
+	ರಚನೆ strbuf ವಿಲೀನ_ಹೆಸರುಗಳು = STRBUF_INIT, *autogen = ಖಾಲಿ;
 
-	if (merge_msg && (!have_message || shortlog_len))
-		autogen = &merge_names;
+	ಆದರೆ (ವಿಲೀನ_ಸಂದೇಶ && (!have_ಸಂದೇಶ || shortlog_len))
+		autogen = &ವಿಲೀನ_ಹೆಸರುಗಳು;
 
-	if (head_commit)
-		remotes = &commit_list_insert(head_commit, remotes)->next;
+	ಆದರೆ (ತಲೆ_commit)
+		remotes = &commit_list_ಸೇರಿಸು(ತಲೆ_commit, remotes)->ಮುಂದಿನ;
 
-	if (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
-		handle_fetch_head(remotes, autogen);
-		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
-	} else {
-		for (i = 0; i < argc; i++) {
-			struct commit *commit = get_merge_parent(argv[i]);
-			if (!commit)
+	ಆದರೆ (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
+		handle_fetch_ತಲೆ(remotes, autogen);
+		remoteheads = reduce_parents(ತಲೆ_commit, ತಲೆ_subsumed, remoteheads);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಗಾಗಿ (i = 0; i < argc; i++) {
+			ರಚನೆ commit *commit = get_ವಿಲೀನ_ಪೋಷಕ(argv[i]);
+			ಆದರೆ (!commit)
 				help_unknown_ref(argv[i], "merge",
 						 _("not something we can merge"));
-			remotes = &commit_list_insert(commit, remotes)->next;
+			remotes = &commit_list_ಸೇರಿಸು(commit, remotes)->ಮುಂದಿನ;
 		}
-		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
-		if (autogen) {
-			struct commit_list *p;
-			for (p = remoteheads; p; p = p->next)
-				merge_name(merge_remote_util(p->item)->name, autogen);
+		remoteheads = reduce_parents(ತಲೆ_commit, ತಲೆ_subsumed, remoteheads);
+		ಆದರೆ (autogen) {
+			ರಚನೆ commit_list *p;
+			ಗಾಗಿ (p = remoteheads; p; p = p->ಮುಂದಿನ)
+				ವಿಲೀನ_name(ವಿಲೀನ_remote_util(p->ಅಂಶ)->name, autogen);
 		}
 	}
 
-	if (autogen) {
-		prepare_merge_message(autogen, merge_msg);
+	ಆದರೆ (autogen) {
+		prepare_ವಿಲೀನ_ಸಂದೇಶ(autogen, ವಿಲೀನ_ಸಂದೇಶ);
 		strbuf_release(autogen);
 	}
 
-	return remoteheads;
+	ಹಿಂತಿರುಗಿ remoteheads;
 }
 
-static int merging_a_throwaway_tag(struct commit *commit)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ merging_a_throwaway_ಟ್ಯಾಗ್(ರಚನೆ commit *commit)
 {
-	char *tag_ref;
-	struct object_id oid;
-	int is_throwaway_tag = 0;
+	ಅಕ್ಷರ *ಟ್ಯಾಗ್_ref;
+	ರಚನೆ object_id oid;
+	ಪೂರ್ಣಾಂಕ is_throwaway_ಟ್ಯಾಗ್ = 0;
 
 	/* Are we merging a tag? */
-	if (!merge_remote_util(commit) ||
-	    !merge_remote_util(commit)->obj ||
-	    merge_remote_util(commit)->obj->type != OBJ_TAG)
-		return is_throwaway_tag;
+	ಆದರೆ (!ವಿಲೀನ_remote_util(commit) ||
+	    !ವಿಲೀನ_remote_util(commit)->obj ||
+	    ವಿಲೀನ_remote_util(commit)->obj->type != OBJ_ಟ್ಯಾಗ್)
+		ಹಿಂತಿರುಗಿ is_throwaway_ಟ್ಯಾಗ್;
 
 	/*
 	 * Now we know we are merging a tag object.  Are we downstream
@@ -1349,161 +1349,161 @@ static int merging_a_throwaway_tag(struct commit *commit)
 	 * by default; otherwise we would not keep the signature
 	 * anywhere.
 	 */
-	tag_ref = xstrfmt("refs/tags/%s",
-			  ((struct tag *)merge_remote_util(commit)->obj)->tag);
-	if (!refs_read_ref(get_main_ref_store(the_repository), tag_ref, &oid) &&
-	    oideq(&oid, &merge_remote_util(commit)->obj->oid))
-		is_throwaway_tag = 0;
-	else
-		is_throwaway_tag = 1;
-	free(tag_ref);
-	return is_throwaway_tag;
+	ಟ್ಯಾಗ್_ref = xstrfmt("refs/tags/%s",
+			  ((ರಚನೆ ಟ್ಯಾಗ್ *)ವಿಲೀನ_remote_util(commit)->obj)->ಟ್ಯಾಗ್);
+	ಆದರೆ (!refs_read_ref(get_main_ref_store(the_repository), ಟ್ಯಾಗ್_ref, &oid) &&
+	    oideq(&oid, &ವಿಲೀನ_remote_util(commit)->obj->oid))
+		is_throwaway_ಟ್ಯಾಗ್ = 0;
+	ಇಲ್ಲದಿದ್ದರೆ
+		is_throwaway_ಟ್ಯಾಗ್ = 1;
+	ಬಿಡುಗಡೆ(ಟ್ಯಾಗ್_ref);
+	ಹಿಂತಿರುಗಿ is_throwaway_ಟ್ಯಾಗ್;
 }
 
-int cmd_merge(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_ವಿಲೀನ(ಪೂರ್ಣಾಂಕ argc,
+	      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	      ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct object_id result_tree, stash, head_oid;
-	struct commit *head_commit;
-	struct strbuf buf = STRBUF_INIT;
-	int i, ret = 0, head_subsumed;
-	int best_cnt = -1, merge_was_ok = 0, automerge_was_ok = 0;
-	struct commit_list *common = NULL;
-	const char *best_strategy = NULL, *wt_strategy = NULL;
-	struct commit_list *remoteheads = NULL, *p;
-	void *branch_to_free, *argv_to_free = NULL;
-	int orig_argc = argc;
-	int merge_log_config = -1;
+	ರಚನೆ object_id ಫಲಿತಾಂಶ_ವೃಕ್ಷ, stash, ತಲೆ_oid;
+	ರಚನೆ commit *ತಲೆ_commit;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ i, ret = 0, ತಲೆ_subsumed;
+	ಪೂರ್ಣಾಂಕ ಉತ್ತಮ_cnt = -1, ವಿಲೀನ_was_ok = 0, automerge_was_ok = 0;
+	ರಚನೆ commit_list *common = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಉತ್ತಮ_strategy = ಖಾಲಿ, *wt_strategy = ಖಾಲಿ;
+	ರಚನೆ commit_list *remoteheads = ಖಾಲಿ, *p;
+	ಶೂನ್ಯ *branch_ಗಮ್ಯ_free, *argv_ಗಮ್ಯ_free = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ orig_argc = argc;
+	ಪೂರ್ಣಾಂಕ ವಿಲೀನ_log_config = -1;
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_merge_usage, builtin_merge_options);
+					 builtin_ವಿಲೀನ_usage, builtin_ವಿಲೀನ_options);
 
-#ifndef WITH_BREAKING_CHANGES
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
-#endif /* !WITH_BREAKING_CHANGES */
+#ಆದರೆ_ಅಂತ್ಯ /* !WITH_BREAKING_CHANGES */
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ = 0;
 
 	/*
 	 * Check if we are _not_ on a detached HEAD, i.e. if there is a
 	 * current branch.
 	 */
-	branch = branch_to_free = refs_resolve_refdup(get_main_ref_store(the_repository),
-						      "HEAD", 0, &head_oid,
-						      NULL);
-	if (branch)
-		skip_prefix(branch, "refs/heads/", &branch);
+	branch = branch_ಗಮ್ಯ_free = refs_resolve_refdup(get_main_ref_store(the_repository),
+						      "HEAD", 0, &ತಲೆ_oid,
+						      ಖಾಲಿ);
+	ಆದರೆ (branch)
+		skip_ಪೂರ್ವಪ್ರತ್ಯಯ(branch, "refs/heads/", &branch);
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_merge_config, &merge_log_config);
+	repo_config(the_repository, git_ವಿಲೀನ_config, &ವಿಲೀನ_log_config);
 
-	if (!branch || is_null_oid(&head_oid))
-		head_commit = NULL;
-	else
-		head_commit = lookup_commit_or_die(&head_oid, "HEAD");
+	ಆದರೆ (!branch || is_null_oid(&ತಲೆ_oid))
+		ತಲೆ_commit = ಖಾಲಿ;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ತಲೆ_commit = lookup_commit_or_die(&ತಲೆ_oid, "HEAD");
 
-	if (branch_mergeoptions)
-		parse_branch_merge_options(branch_mergeoptions);
-	argc = parse_options(argc, argv, prefix, builtin_merge_options,
-			builtin_merge_usage, 0);
-	if (shortlog_len < 0)
-		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
+	ಆದರೆ (branch_mergeoptions)
+		parse_branch_ವಿಲೀನ_options(branch_mergeoptions);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, builtin_ವಿಲೀನ_options,
+			builtin_ವಿಲೀನ_usage, 0);
+	ಆದರೆ (shortlog_len < 0)
+		shortlog_len = (ವಿಲೀನ_log_config > 0) ? ವಿಲೀನ_log_config : 0;
 
-	if (verbosity < 0 && show_progress == -1)
-		show_progress = 0;
+	ಆದರೆ (verbosity < 0 && show_ಪ್ರಗತಿ == -1)
+		show_ಪ್ರಗತಿ = 0;
 
-	if (abort_current_merge) {
-		int nargc = 2;
-		const char *nargv[] = {"reset", "--merge", NULL};
-		char stash_oid_hex[GIT_MAX_HEXSZ + 1];
-		struct object_id stash_oid = {0};
+	ಆದರೆ (abort_current_ವಿಲೀನ) {
+		ಪೂರ್ಣಾಂಕ nargc = 2;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *nargv[] = {"reset", "--merge", ಖಾಲಿ};
+		ಅಕ್ಷರ stash_oid_hex[GIT_MAX_HEXSZ + 1];
+		ರಚನೆ object_id stash_oid = {0};
 
-		if (orig_argc != 2)
-			usage_msg_opt(_("--abort expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+		ಆದರೆ (orig_argc != 2)
+			usage_ಸಂದೇಶ_opt(_("--abort expects no arguments"),
+			      builtin_ವಿಲೀನ_usage, builtin_ವಿಲೀನ_options);
 
-		if (!file_exists(git_path_merge_head(the_repository)))
+		ಆದರೆ (!file_exists(git_ಮಾರ್ಗ_ವಿಲೀನ_ತಲೆ(the_repository)))
 			die(_("There is no merge to abort (MERGE_HEAD missing)."));
 
-		if (!refs_read_ref(get_main_ref_store(the_repository), "MERGE_AUTOSTASH", &stash_oid))
+		ಆದರೆ (!refs_read_ref(get_main_ref_store(the_repository), "MERGE_AUTOSTASH", &stash_oid))
 			refs_delete_ref(get_main_ref_store(the_repository),
 					"", "MERGE_AUTOSTASH", &stash_oid,
 					REF_NO_DEREF);
 
 		/* Invoke 'git reset --merge' */
-		ret = cmd_reset(nargc, nargv, prefix, the_repository);
+		ret = cmd_reset(nargc, nargv, ಪೂರ್ವಪ್ರತ್ಯಯ, the_repository);
 
-		if (!is_null_oid(&stash_oid)) {
-			oid_to_hex_r(stash_oid_hex, &stash_oid);
+		ಆದರೆ (!is_null_oid(&stash_oid)) {
+			oid_ಗಮ್ಯ_hex_r(stash_oid_hex, &stash_oid);
 			apply_autostash_oid(stash_oid_hex);
 		}
 
-		goto done;
+		ಹೋಗು ಮುಗಿದ;
 	}
 
-	if (quit_current_merge) {
-		if (orig_argc != 2)
-			usage_msg_opt(_("--quit expects no arguments"),
-				      builtin_merge_usage,
-				      builtin_merge_options);
+	ಆದರೆ (quit_current_ವಿಲೀನ) {
+		ಆದರೆ (orig_argc != 2)
+			usage_ಸಂದೇಶ_opt(_("--quit expects no arguments"),
+				      builtin_ವಿಲೀನ_usage,
+				      builtin_ವಿಲೀನ_options);
 
-		remove_merge_branch_state(the_repository);
-		goto done;
+		remove_ವಿಲೀನ_branch_state(the_repository);
+		ಹೋಗು ಮುಗಿದ;
 	}
 
-	if (continue_current_merge) {
-		int nargc = 1;
-		const char *nargv[] = {"commit", NULL};
+	ಆದರೆ (continue_current_ವಿಲೀನ) {
+		ಪೂರ್ಣಾಂಕ nargc = 1;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *nargv[] = {"commit", ಖಾಲಿ};
 
-		if (orig_argc != 2)
-			usage_msg_opt(_("--continue expects no arguments"),
-			      builtin_merge_usage, builtin_merge_options);
+		ಆದರೆ (orig_argc != 2)
+			usage_ಸಂದೇಶ_opt(_("--continue expects no arguments"),
+			      builtin_ವಿಲೀನ_usage, builtin_ವಿಲೀನ_options);
 
-		if (!file_exists(git_path_merge_head(the_repository)))
+		ಆದರೆ (!file_exists(git_ಮಾರ್ಗ_ವಿಲೀನ_ತಲೆ(the_repository)))
 			die(_("There is no merge in progress (MERGE_HEAD missing)."));
 
 		/* Invoke 'git commit' */
-		ret = cmd_commit(nargc, nargv, prefix, the_repository);
-		goto done;
+		ret = cmd_commit(nargc, nargv, ಪೂರ್ವಪ್ರತ್ಯಯ, the_repository);
+		ಹೋಗು ಮುಗಿದ;
 	}
 
-	if (repo_read_index_unmerged(the_repository))
+	ಆದರೆ (repo_read_ಸೂಚ್ಯಂಕ_unmerged(the_repository))
 		die_resolve_conflict("merge");
 
-	if (file_exists(git_path_merge_head(the_repository))) {
+	ಆದರೆ (file_exists(git_ಮಾರ್ಗ_ವಿಲೀನ_ತಲೆ(the_repository))) {
 		/*
 		 * There is no unmerged entry, don't advise 'git
 		 * add/rm <file>', just 'git commit'.
 		 */
-		if (advice_enabled(ADVICE_RESOLVE_CONFLICT))
+		ಆದರೆ (advice_enabled(ADVICE_RESOLVE_CONFLICT))
 			die(_("You have not concluded your merge (MERGE_HEAD exists).\n"
 				  "Please, commit your changes before you merge."));
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			die(_("You have not concluded your merge (MERGE_HEAD exists)."));
 	}
-	if (refs_ref_exists(get_main_ref_store(the_repository), "CHERRY_PICK_HEAD")) {
-		if (advice_enabled(ADVICE_RESOLVE_CONFLICT))
+	ಆದರೆ (refs_ref_exists(get_main_ref_store(the_repository), "CHERRY_PICK_HEAD")) {
+		ಆದರೆ (advice_enabled(ADVICE_RESOLVE_CONFLICT))
 			die(_("You have not concluded your cherry-pick (CHERRY_PICK_HEAD exists).\n"
 			    "Please, commit your changes before you merge."));
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			die(_("You have not concluded your cherry-pick (CHERRY_PICK_HEAD exists)."));
 	}
-	resolve_undo_clear_index(the_repository->index);
+	resolve_undo_clear_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ);
 
-	if (option_edit < 0)
+	ಆದರೆ (option_edit < 0)
 		option_edit = default_edit_option();
 
-	cleanup_mode = get_cleanup_mode(cleanup_arg, 0 < option_edit);
+	cleanup_ಬಹುಲಕ = get_cleanup_ಬಹುಲಕ(cleanup_arg, 0 < option_edit);
 
-	if (verbosity < 0)
+	ಆದರೆ (verbosity < 0)
 		show_diffstat = 0;
 
-	if (squash) {
-		if (fast_forward == FF_NO)
+	ಆದರೆ (squash) {
+		ಆದರೆ (fast_forward == FF_NO)
 			die(_("options '%s' and '%s' cannot be used together"), "--squash", "--no-ff.");
-		if (option_commit > 0)
+		ಆದರೆ (option_commit > 0)
 			die(_("options '%s' and '%s' cannot be used together"), "--squash", "--commit.");
 		/*
 		 * squash can now silently disable option_commit - this is not
@@ -1513,54 +1513,54 @@ int cmd_merge(int argc,
 		option_commit = 0;
 	}
 
-	if (option_commit < 0)
+	ಆದರೆ (option_commit < 0)
 		option_commit = 1;
 
-	if (!argc) {
-		if (default_to_upstream) {
-			argc = setup_with_upstream(&argv);
-			argv_to_free = argv;
+	ಆದರೆ (!argc) {
+		ಆದರೆ (default_ಗಮ್ಯ_upstream) {
+			argc = ಸಿದ್ಧತೆ_with_upstream(&argv);
+			argv_ಗಮ್ಯ_free = argv;
 		}
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			die(_("No commit specified and merge.defaultToUpstream not set."));
-	} else if (argc == 1 && !strcmp(argv[0], "-")) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (argc == 1 && !strcmp(argv[0], "-")) {
 		argv[0] = "@{-1}";
 	}
 
-	if (!argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+	ಆದರೆ (!argc)
+		usage_with_options(builtin_ವಿಲೀನ_usage,
+			builtin_ವಿಲೀನ_options);
 
-	if (!head_commit) {
+	ಆದರೆ (!ತಲೆ_commit) {
 		/*
 		 * If the merged head is a valid one there is no reason
 		 * to forbid "git merge" into a branch yet to be born.
 		 * We do the same for "git pull".
 		 */
-		struct object_id *remote_head_oid;
-		if (squash)
+		ರಚನೆ object_id *remote_ತಲೆ_oid;
+		ಆದರೆ (squash)
 			die(_("Squash commit into empty head not supported yet"));
-		if (fast_forward == FF_NO)
+		ಆದರೆ (fast_forward == FF_NO)
 			die(_("Non-fast-forward commit does not make sense into "
 			    "an empty head"));
-		remoteheads = collect_parents(head_commit, &head_subsumed,
-					      argc, argv, NULL);
-		if (!remoteheads)
+		remoteheads = collect_parents(ತಲೆ_commit, &ತಲೆ_subsumed,
+					      argc, argv, ಖಾಲಿ);
+		ಆದರೆ (!remoteheads)
 			die(_("%s - not something we can merge"), argv[0]);
-		if (remoteheads->next)
+		ಆದರೆ (remoteheads->ಮುಂದಿನ)
 			die(_("Can merge only exactly one commit into empty head"));
 
-		if (verify_signatures)
-			verify_merge_signature(remoteheads->item, verbosity,
+		ಆದರೆ (verify_signatures)
+			verify_ವಿಲೀನ_signature(remoteheads->ಅಂಶ, verbosity,
 					       check_trust_level);
 
-		remote_head_oid = &remoteheads->item->object.oid;
-		read_empty(remote_head_oid);
+		remote_ತಲೆ_oid = &remoteheads->ಅಂಶ->object.oid;
+		read_ಖಾಲಿಗಳು(remote_ತಲೆ_oid);
 		refs_update_ref(get_main_ref_store(the_repository),
-				"initial pull", "HEAD", remote_head_oid, NULL,
+				"initial pull", "HEAD", remote_ತಲೆ_oid, ಖಾಲಿ,
 				0,
 				UPDATE_REFS_DIE_ON_ERR);
-		goto done;
+		ಹೋಗು ಮುಗಿದ;
 	}
 
 	/*
@@ -1568,199 +1568,199 @@ int cmd_merge(int argc,
 	 * the standard merge summary message to be appended
 	 * to the given message.
 	 */
-	remoteheads = collect_parents(head_commit, &head_subsumed,
-				      argc, argv, &merge_msg);
+	remoteheads = collect_parents(ತಲೆ_commit, &ತಲೆ_subsumed,
+				      argc, argv, &ವಿಲೀನ_ಸಂದೇಶ);
 
-	if (!head_commit || !argc)
-		usage_with_options(builtin_merge_usage,
-			builtin_merge_options);
+	ಆದರೆ (!ತಲೆ_commit || !argc)
+		usage_with_options(builtin_ವಿಲೀನ_usage,
+			builtin_ವಿಲೀನ_options);
 
-	if (verify_signatures) {
-		for (p = remoteheads; p; p = p->next) {
-			verify_merge_signature(p->item, verbosity,
+	ಆದರೆ (verify_signatures) {
+		ಗಾಗಿ (p = remoteheads; p; p = p->ಮುಂದಿನ) {
+			verify_ವಿಲೀನ_signature(p->ಅಂಶ, verbosity,
 					       check_trust_level);
 		}
 	}
 
 	strbuf_addstr(&buf, "merge");
-	for (p = remoteheads; p; p = p->next)
-		strbuf_addf(&buf, " %s", merge_remote_util(p->item)->name);
+	ಗಾಗಿ (p = remoteheads; p; p = p->ಮುಂದಿನ)
+		strbuf_addf(&buf, " %s", ವಿಲೀನ_remote_util(p->ಅಂಶ)->name);
 	setenv("GIT_REFLOG_ACTION", buf.buf, 0);
 	strbuf_reset(&buf);
 
-	for (p = remoteheads; p; p = p->next) {
-		struct commit *commit = p->item;
+	ಗಾಗಿ (p = remoteheads; p; p = p->ಮುಂದಿನ) {
+		ರಚನೆ commit *commit = p->ಅಂಶ;
 		strbuf_addf(&buf, "GITHEAD_%s",
-			    oid_to_hex(&commit->object.oid));
-		setenv(buf.buf, merge_remote_util(commit)->name, 1);
+			    oid_ಗಮ್ಯ_hex(&commit->object.oid));
+		setenv(buf.buf, ವಿಲೀನ_remote_util(commit)->name, 1);
 		strbuf_reset(&buf);
-		if (fast_forward != FF_ONLY && merging_a_throwaway_tag(commit))
+		ಆದರೆ (fast_forward != FF_ONLY && merging_a_throwaway_ಟ್ಯಾಗ್(commit))
 			fast_forward = FF_NO;
 	}
 
-	if (!use_strategies) {
-		if (!remoteheads)
+	ಆದರೆ (!use_strategies) {
+		ಆದರೆ (!remoteheads)
 			; /* already up-to-date */
-		else if (!remoteheads->next)
-			add_strategies(pull_twohead, DEFAULT_TWOHEAD);
-		else
-			add_strategies(pull_octopus, DEFAULT_OCTOPUS);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!remoteheads->ಮುಂದಿನ)
+			ಕೂಡಿಸು_strategies(pull_twohead, DEFAULT_TWOHEAD);
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಕೂಡಿಸು_strategies(pull_octopus, DEFAULT_OCTOPUS);
 	}
 
-	for (i = 0; i < use_strategies_nr; i++) {
-		if (use_strategies[i]->attr & NO_FAST_FORWARD)
+	ಗಾಗಿ (i = 0; i < use_strategies_nr; i++) {
+		ಆದರೆ (use_strategies[i]->attr & NO_FAST_FORWARD)
 			fast_forward = FF_NO;
-		if (use_strategies[i]->attr & NO_TRIVIAL)
+		ಆದರೆ (use_strategies[i]->attr & NO_TRIVIAL)
 			allow_trivial = 0;
 	}
 
-	if (!remoteheads)
+	ಆದರೆ (!remoteheads)
 		; /* already up-to-date */
-	else if (!remoteheads->next) {
-		if (repo_get_merge_bases(the_repository, head_commit,
-					 remoteheads->item, &common) < 0) {
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!remoteheads->ಮುಂದಿನ) {
+		ಆದರೆ (repo_get_ವಿಲೀನ_bases(the_repository, ತಲೆ_commit,
+					 remoteheads->ಅಂಶ, &common) < 0) {
 			ret = 2;
-			goto done;
+			ಹೋಗು ಮುಗಿದ;
 		}
-	} else {
-		struct commit_list *list = remoteheads;
-		commit_list_insert(head_commit, &list);
-		if (get_octopus_merge_bases(list, &common) < 0) {
-			free(list);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ರಚನೆ commit_list *list = remoteheads;
+		commit_list_ಸೇರಿಸು(ತಲೆ_commit, &list);
+		ಆದರೆ (get_octopus_ವಿಲೀನ_bases(list, &common) < 0) {
+			ಬಿಡುಗಡೆ(list);
 			ret = 2;
-			goto done;
+			ಹೋಗು ಮುಗಿದ;
 		}
-		free(list);
+		ಬಿಡುಗಡೆ(list);
 	}
 
 	refs_update_ref(get_main_ref_store(the_repository),
 			"updating ORIG_HEAD", "ORIG_HEAD",
-			&head_commit->object.oid, NULL, 0,
+			&ತಲೆ_commit->object.oid, ಖಾಲಿ, 0,
 			UPDATE_REFS_DIE_ON_ERR);
 
-	if (remoteheads && !common) {
+	ಆದರೆ (remoteheads && !common) {
 		/* No common ancestors found. */
-		if (!allow_unrelated_histories)
+		ಆದರೆ (!allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		/* otherwise, we need a real merge. */
-	} else if (!remoteheads ||
-		 (!remoteheads->next && !common->next &&
-		  common->item == remoteheads->item)) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!remoteheads ||
+		 (!remoteheads->ಮುಂದಿನ && !common->ಮುಂದಿನ &&
+		  common->ಅಂಶ == remoteheads->ಅಂಶ)) {
 		/*
 		 * If head can reach all the merge then we are up to date.
 		 * but first the most common case of merging one remote.
 		 */
-		finish_up_to_date();
-		goto done;
-	} else if (fast_forward != FF_NO && !remoteheads->next &&
-			!common->next &&
-			oideq(&common->item->object.oid, &head_commit->object.oid)) {
+		ಮುಕ್ತಾಯ_ಮೇಲೆ_ಗಮ್ಯ_date();
+		ಹೋಗು ಮುಗಿದ;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (fast_forward != FF_NO && !remoteheads->ಮುಂದಿನ &&
+			!common->ಮುಂದಿನ &&
+			oideq(&common->ಅಂಶ->object.oid, &ತಲೆ_commit->object.oid)) {
 		/* Again the most common case of merging one remote. */
-		const char *msg = have_message ?
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ = have_ಸಂದೇಶ ?
 			"Fast-forward (no commit created; -m option ignored)" :
 			"Fast-forward";
-		struct commit *commit;
+		ರಚನೆ commit *commit;
 
-		if (verbosity >= 0) {
-			printf(_("Updating %s..%s\n"),
-			       repo_find_unique_abbrev(the_repository, &head_commit->object.oid,
+		ಆದರೆ (verbosity >= 0) {
+			ಬರೆ(_("Updating %s..%s\n"),
+			       repo_ಕಂಡುಹಿಡಿ_unique_abbrev(the_repository, &ತಲೆ_commit->object.oid,
 						       DEFAULT_ABBREV),
-			       repo_find_unique_abbrev(the_repository, &remoteheads->item->object.oid,
+			       repo_ಕಂಡುಹಿಡಿ_unique_abbrev(the_repository, &remoteheads->ಅಂಶ->object.oid,
 						       DEFAULT_ABBREV));
 		}
-		commit = remoteheads->item;
-		if (!commit) {
+		commit = remoteheads->ಅಂಶ;
+		ಆದರೆ (!commit) {
 			ret = 1;
-			goto done;
+			ಹೋಗು ಮುಗಿದ;
 		}
 
-		if (autostash)
+		ಆದರೆ (autostash)
 			create_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-					     NULL, false);
-		if (checkout_fast_forward(the_repository,
-					  &head_commit->object.oid,
+					     ಖಾಲಿ, false);
+		ಆದರೆ (checkout_fast_forward(the_repository,
+					  &ತಲೆ_commit->object.oid,
 					  &commit->object.oid,
 					  overwrite_ignore)) {
 			apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-					    NULL, NULL, NULL, NULL);
+					    ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ);
 			ret = 1;
-			goto done;
+			ಹೋಗು ಮುಗಿದ;
 		}
 
-		finish(head_commit, remoteheads, &commit->object.oid, msg);
-		remove_merge_branch_state(the_repository);
-		goto done;
-	} else if (!remoteheads->next && common->next)
+		ಮುಕ್ತಾಯ(ತಲೆ_commit, remoteheads, &commit->object.oid, ಸಂದೇಶ);
+		remove_ವಿಲೀನ_branch_state(the_repository);
+		ಹೋಗು ಮುಗಿದ;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!remoteheads->ಮುಂದಿನ && common->ಮುಂದಿನ)
 		;
 		/*
 		 * We are not doing octopus and not fast-forward.  Need
 		 * a real merge.
 		 */
-	else if (!remoteheads->next && !common->next && option_commit) {
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!remoteheads->ಮುಂದಿನ && !common->ಮುಂದಿನ && option_commit) {
 		/*
 		 * We are not doing octopus, not fast-forward, and have
 		 * only one common.
 		 */
-		refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-		if (allow_trivial && fast_forward != FF_ONLY) {
+		refresh_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ, REFRESH_QUIET, ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ);
+		ಆದರೆ (allow_trivial && fast_forward != FF_ONLY) {
 			/*
 			 * Must first ensure that index matches HEAD before
 			 * attempting a trivial merge.
 			 */
-			struct tree *head_tree = repo_get_commit_tree(the_repository,
-								      head_commit);
-			struct strbuf sb = STRBUF_INIT;
+			ರಚನೆ ವೃಕ್ಷ *ತಲೆ_ವೃಕ್ಷ = repo_get_commit_ವೃಕ್ಷ(the_repository,
+								      ತಲೆ_commit);
+			ರಚನೆ strbuf sb = STRBUF_INIT;
 
-			if (repo_index_has_changes(the_repository, head_tree,
+			ಆದರೆ (repo_ಸೂಚ್ಯಂಕ_has_changes(the_repository, ತಲೆ_ವೃಕ್ಷ,
 						   &sb)) {
 				error(_("Your local changes to the following files would be overwritten by merge:\n  %s"),
 				      sb.buf);
 				strbuf_release(&sb);
 				ret = 2;
-				goto done;
+				ಹೋಗು ಮುಗಿದ;
 			}
 
 			/* See if it is really trivial. */
 			git_committer_info(IDENT_STRICT);
-			printf(_("Trying really trivial in-index merge...\n"));
-			if (!read_tree_trivial(&common->item->object.oid,
-					       &head_commit->object.oid,
-					       &remoteheads->item->object.oid)) {
-				ret = merge_trivial(head_commit, remoteheads);
-				goto done;
+			ಬರೆ(_("Trying really trivial in-index merge...\n"));
+			ಆದರೆ (!read_ವೃಕ್ಷ_trivial(&common->ಅಂಶ->object.oid,
+					       &ತಲೆ_commit->object.oid,
+					       &remoteheads->ಅಂಶ->object.oid)) {
+				ret = ವಿಲೀನ_trivial(ತಲೆ_commit, remoteheads);
+				ಹೋಗು ಮುಗಿದ;
 			}
-			printf(_("Nope.\n"));
+			ಬರೆ(_("Nope.\n"));
 		}
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		/*
 		 * An octopus.  If we can reach all the remote we are up
 		 * to date.
 		 */
-		int up_to_date = 1;
-		struct commit_list *j;
+		ಪೂರ್ಣಾಂಕ ಮೇಲೆ_ಗಮ್ಯ_date = 1;
+		ರಚನೆ commit_list *j;
 
-		for (j = remoteheads; j; j = j->next) {
-			int ret = repo_in_merge_bases(the_repository,
-						      j->item, head_commit);
-			if (ret < 0)
-				exit(128);
-			if (!ret) {
-				up_to_date = 0;
-				break;
+		ಗಾಗಿ (j = remoteheads; j; j = j->ಮುಂದಿನ) {
+			ಪೂರ್ಣಾಂಕ ret = repo_ಒಳ_ವಿಲೀನ_bases(the_repository,
+						      j->ಅಂಶ, ತಲೆ_commit);
+			ಆದರೆ (ret < 0)
+				ನಿರ್ಗಮಿಸು(128);
+			ಆದರೆ (!ret) {
+				ಮೇಲೆ_ಗಮ್ಯ_date = 0;
+				ನಿಲ್ಲಿಸು;
 			}
 		}
-		if (up_to_date) {
-			finish_up_to_date();
-			goto done;
+		ಆದರೆ (ಮೇಲೆ_ಗಮ್ಯ_date) {
+			ಮುಕ್ತಾಯ_ಮೇಲೆ_ಗಮ್ಯ_date();
+			ಹೋಗು ಮುಗಿದ;
 		}
 	}
 
-	if (fast_forward == FF_ONLY)
+	ಆದರೆ (fast_forward == FF_ONLY)
 		die_ff_impossible();
 
-	if (autostash)
+	ಆದರೆ (autostash)
 		create_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				     NULL, false);
+				     ಖಾಲಿ, false);
 
 	/* We are going to make a new commit. */
 	git_committer_info(IDENT_STRICT);
@@ -1777,17 +1777,17 @@ int cmd_merge(int argc,
 	 * and/or recover from merge strategies bailing while leaving the
 	 * index and working tree polluted.
 	 */
-	if (save_state(&stash))
+	ಆದರೆ (save_state(&stash))
 		oidclr(&stash, the_repository->hash_algo);
 
-	for (i = 0; i < use_strategies_nr; i++) {
-		int ret, cnt;
-		if (i) {
-			printf(_("Rewinding the tree to pristine...\n"));
-			restore_state(&head_commit->object.oid, &stash);
+	ಗಾಗಿ (i = 0; i < use_strategies_nr; i++) {
+		ಪೂರ್ಣಾಂಕ ret, cnt;
+		ಆದರೆ (i) {
+			ಬರೆ(_("Rewinding the tree to pristine...\n"));
+			restore_state(&ತಲೆ_commit->object.oid, &stash);
 		}
-		if (use_strategies_nr != 1)
-			printf(_("Trying merge strategy %s...\n"),
+		ಆದರೆ (use_strategies_nr != 1)
+			ಬರೆ(_("Trying merge strategy %s...\n"),
 				use_strategies[i]->name);
 		/*
 		 * Remember which strategy left the state in the working
@@ -1795,28 +1795,28 @@ int cmd_merge(int argc,
 		 */
 		wt_strategy = use_strategies[i]->name;
 
-		ret = try_merge_strategy(wt_strategy,
+		ret = try_ವಿಲೀನ_strategy(wt_strategy,
 					 common, remoteheads,
-					 head_commit);
+					 ತಲೆ_commit);
 		/*
 		 * The backend exits with 1 when conflicts are
 		 * left to be resolved, with 2 when it does not
 		 * handle the given merge at all.
 		 */
-		if (ret < 2) {
-			if (!ret) {
+		ಆದರೆ (ret < 2) {
+			ಆದರೆ (!ret) {
 				/*
 				 * This strategy worked; no point in trying
 				 * another.
 				 */
-				merge_was_ok = 1;
-				best_strategy = wt_strategy;
-				break;
+				ವಿಲೀನ_was_ok = 1;
+				ಉತ್ತಮ_strategy = wt_strategy;
+				ನಿಲ್ಲಿಸು;
 			}
-			cnt = (use_strategies_nr > 1) ? evaluate_result() : 0;
-			if (best_cnt <= 0 || cnt <= best_cnt) {
-				best_strategy = wt_strategy;
-				best_cnt = cnt;
+			cnt = (use_strategies_nr > 1) ? evaluate_ಫಲಿತಾಂಶ() : 0;
+			ಆದರೆ (ಉತ್ತಮ_cnt <= 0 || cnt <= ಉತ್ತಮ_cnt) {
+				ಉತ್ತಮ_strategy = wt_strategy;
+				ಉತ್ತಮ_cnt = cnt;
 			}
 		}
 	}
@@ -1825,66 +1825,66 @@ int cmd_merge(int argc,
 	 * If we have a resulting tree, that means the strategy module
 	 * auto resolved the merge cleanly.
 	 */
-	if (merge_was_ok && option_commit) {
+	ಆದರೆ (ವಿಲೀನ_was_ok && option_commit) {
 		automerge_was_ok = 1;
-		ret = finish_automerge(head_commit, head_subsumed,
+		ret = ಮುಕ್ತಾಯ_automerge(ತಲೆ_commit, ತಲೆ_subsumed,
 				       common, remoteheads,
-				       &result_tree, wt_strategy);
-		goto done;
+				       &ಫಲಿತಾಂಶ_ವೃಕ್ಷ, wt_strategy);
+		ಹೋಗು ಮುಗಿದ;
 	}
 
 	/*
 	 * Pick the result from the best strategy and have the user fix
 	 * it up.
 	 */
-	if (!best_strategy) {
-		restore_state(&head_commit->object.oid, &stash);
-		if (use_strategies_nr > 1)
+	ಆದರೆ (!ಉತ್ತಮ_strategy) {
+		restore_state(&ತಲೆ_commit->object.oid, &stash);
+		ಆದರೆ (use_strategies_nr > 1)
 			fprintf(stderr,
 				_("No merge strategy handled the merge.\n"));
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			fprintf(stderr, _("Merge with strategy %s failed.\n"),
 				use_strategies[0]->name);
 		apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				    NULL, NULL, NULL, NULL);
+				    ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ, ಖಾಲಿ);
 		ret = 2;
-		goto done;
-	} else if (best_strategy == wt_strategy)
+		ಹೋಗು ಮುಗಿದ;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ಉತ್ತಮ_strategy == wt_strategy)
 		; /* We already have its result in the working tree. */
-	else {
-		printf(_("Rewinding the tree to pristine...\n"));
-		restore_state(&head_commit->object.oid, &stash);
-		printf(_("Using the %s strategy to prepare resolving by hand.\n"),
-			best_strategy);
-		try_merge_strategy(best_strategy, common, remoteheads,
-				   head_commit);
+	ಇಲ್ಲದಿದ್ದರೆ {
+		ಬರೆ(_("Rewinding the tree to pristine...\n"));
+		restore_state(&ತಲೆ_commit->object.oid, &stash);
+		ಬರೆ(_("Using the %s strategy to prepare resolving by hand.\n"),
+			ಉತ್ತಮ_strategy);
+		try_ವಿಲೀನ_strategy(ಉತ್ತಮ_strategy, common, remoteheads,
+				   ತಲೆ_commit);
 	}
 
-	if (squash) {
-		finish(head_commit, remoteheads, NULL, NULL);
+	ಆದರೆ (squash) {
+		ಮುಕ್ತಾಯ(ತಲೆ_commit, remoteheads, ಖಾಲಿ, ಖಾಲಿ);
 
-		git_test_write_commit_graph_or_die(the_repository);
-	} else
-		write_merge_state(remoteheads);
+		git_test_write_commit_ನಕ್ಷೆ_or_die(the_repository);
+	} ಇಲ್ಲದಿದ್ದರೆ
+		write_ವಿಲೀನ_state(remoteheads);
 
-	if (merge_was_ok)
+	ಆದರೆ (ವಿಲೀನ_was_ok)
 		fprintf(stderr, _("Automatic merge went well; "
 			"stopped before committing as requested\n"));
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		ret = suggest_conflicts();
-	if (autostash)
-		printf(_("When finished, apply stashed changes with `git stash pop`\n"));
+	ಆದರೆ (autostash)
+		ಬರೆ(_("When finished, apply stashed changes with `git stash pop`\n"));
 
-done:
-	if (!automerge_was_ok) {
+ಮುಗಿದ:
+	ಆದರೆ (!automerge_was_ok) {
 		commit_list_free(common);
 		commit_list_free(remoteheads);
 	}
 	strbuf_release(&buf);
-	free(branch_to_free);
-	free(argv_to_free);
-	free(pull_twohead);
-	free(pull_octopus);
-	discard_index(the_repository->index);
-	return ret;
+	ಬಿಡುಗಡೆ(branch_ಗಮ್ಯ_free);
+	ಬಿಡುಗಡೆ(argv_ಗಮ್ಯ_free);
+	ಬಿಡುಗಡೆ(pull_twohead);
+	ಬಿಡುಗಡೆ(pull_octopus);
+	discard_ಸೂಚ್ಯಂಕ(the_repository->ಸೂಚ್ಯಂಕ);
+	ಹಿಂತಿರುಗಿ ret;
 }

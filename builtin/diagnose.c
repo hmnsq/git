@@ -1,70 +1,70 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diagnose.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "diagnose.h"
 
-static const char * const diagnose_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ diagnose_usage[] = {
 	N_("git diagnose [(-o | --output-directory) <path>] [(-s | --suffix) <format>]\n"
 	   "             [--mode=<mode>]"),
-	NULL
+	ಖಾಲಿ
 };
 
-int cmd_diagnose(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_diagnose(ಪೂರ್ಣಾಂಕ argc,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct strbuf zip_path = STRBUF_INIT;
-	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode mode = DIAGNOSE_STATS;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	char *prefixed_filename;
+	ರಚನೆ strbuf zip_ಮಾರ್ಗ = STRBUF_INIT;
+	ಸಮಯ_t now = ಸಮಯ(ಖಾಲಿ);
+	ರಚನೆ tm tm;
+	ಎಣಿಕೆ diagnose_ಬಹುಲಕ ಬಹುಲಕ = DIAGNOSE_STATS;
+	ಅಕ್ಷರ *option_output = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option_suffix = "%Y-%m-%d-%H%M";
+	ಅಕ್ಷರ *prefixed_filename;
 
-	const struct option diagnose_options[] = {
+	ಸ್ಥಿರಾಂಕ ರಚನೆ option diagnose_options[] = {
 		OPT_STRING('o', "output-directory", &option_output, N_("path"),
 			   N_("specify a destination for the diagnostics archive")),
 		OPT_STRING('s', "suffix", &option_suffix, N_("format"),
 			   N_("specify a strftime format suffix for the filename")),
-		OPT_CALLBACK_F(0, "mode", &mode, "(stats|all)",
+		OPT_CALLBACK_F(0, "mode", &ಬಹುಲಕ, "(stats|all)",
 			       N_("specify the content of the diagnostic archive"),
 			       PARSE_OPT_NONEG, option_parse_diagnose),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, diagnose_options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, diagnose_options,
 			     diagnose_usage, 0);
 
 	/* Prepare the path to put the result */
-	prefixed_filename = prefix_filename(prefix,
+	prefixed_filename = ಪೂರ್ವಪ್ರತ್ಯಯ_filename(ಪೂರ್ವಪ್ರತ್ಯಯ,
 					    option_output ? option_output : "");
-	strbuf_addstr(&zip_path, prefixed_filename);
-	strbuf_complete(&zip_path, '/');
+	strbuf_addstr(&zip_ಮಾರ್ಗ, prefixed_filename);
+	strbuf_complete(&zip_ಮಾರ್ಗ, '/');
 
-	strbuf_addstr(&zip_path, "git-diagnostics-");
-	strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
-	strbuf_addstr(&zip_path, ".zip");
+	strbuf_addstr(&zip_ಮಾರ್ಗ, "git-diagnostics-");
+	strbuf_addftime(&zip_ಮಾರ್ಗ, option_suffix, localtime_r(&now, &tm), 0, 0);
+	strbuf_addstr(&zip_ಮಾರ್ಗ, ".zip");
 
-	switch (safe_create_leading_directories(the_repository, zip_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
-	default:
+	ಆಯ್ಕೆ (ಸುರಕ್ಷಿತ_create_leading_directories(the_repository, zip_ಮಾರ್ಗ.buf)) {
+	ಸ್ಥಿತಿ SCLD_OK:
+	ಸ್ಥಿತಿ SCLD_EXISTS:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		die_errno(_("could not create leading directories for '%s'"),
-			  zip_path.buf);
+			  zip_ಮಾರ್ಗ.buf);
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	ಆದರೆ (create_diagnostics_archive(the_repository, &zip_ಮಾರ್ಗ, ಬಹುಲಕ))
 		die_errno(_("unable to create diagnostics archive %s"),
-			  zip_path.buf);
+			  zip_ಮಾರ್ಗ.buf);
 
-	free(prefixed_filename);
-	strbuf_release(&zip_path);
-	return 0;
+	ಬಿಡುಗಡೆ(prefixed_filename);
+	strbuf_release(&zip_ಮಾರ್ಗ);
+	ಹಿಂತಿರುಗಿ 0;
 }

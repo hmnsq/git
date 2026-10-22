@@ -5,117 +5,117 @@
  * See COPYING for licensing conditions
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "color.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "diff.h"
-#include "revision.h"
-#include "quote.h"
-#include "string-list.h"
-#include "mailmap.h"
-#include "parse-options.h"
-#include "prio-queue.h"
-#include "utf8.h"
-#include "userdiff.h"
-#include "line-range.h"
-#include "line-log.h"
-#include "progress.h"
-#include "object-name.h"
-#include "odb.h"
-#include "pager.h"
-#include "blame.h"
-#include "refs.h"
-#include "setup.h"
-#include "tag.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "color.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "quote.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "mailmap.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "prio-queue.h"
+#ಅನ್ತರ್ಭಾವ "utf8.h"
+#ಅನ್ತರ್ಭಾವ "userdiff.h"
+#ಅನ್ತರ್ಭಾವ "line-range.h"
+#ಅನ್ತರ್ಭಾವ "line-log.h"
+#ಅನ್ತರ್ಭಾವ "progress.h"
+#ಅನ್ತರ್ಭಾವ "object-name.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "pager.h"
+#ಅನ್ತರ್ಭಾವ "blame.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "tag.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
-static const char blame_usage[] = N_("git blame [<options>] [<rev-opts>] [<rev>] [--] <file>");
-static const char annotate_usage[] = N_("git annotate [<options>] [<rev-opts>] [<rev>] [--] <file>");
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ blame_usage[] = N_("git blame [<options>] [<rev-opts>] [<rev>] [--] <file>");
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ annotate_usage[] = N_("git annotate [<options>] [<rev-opts>] [<rev>] [--] <file>");
 
-static const char *const blame_opt_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ blame_opt_usage[] = {
 	blame_usage,
 	"",
 	N_("<rev-opts> are documented in git-rev-list(1)"),
-	NULL
+	ಖಾಲಿ
 };
 
-static const char *const annotate_opt_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ annotate_opt_usage[] = {
 	annotate_usage,
 	"",
 	N_("<rev-opts> are documented in git-rev-list(1)"),
-	NULL
+	ಖಾಲಿ
 };
 
-static int longest_file;
-static int longest_author;
-static int max_orig_digits;
-static int max_digits;
-static int max_score_digits;
-static int show_root;
-static int reverse;
-static int blank_boundary;
-static int incremental;
-static int xdl_opts;
-static int abbrev = -1;
-static int no_whole_file_rename;
-static int show_progress;
-static char repeated_meta_color[COLOR_MAXLEN];
-static int coloring_mode;
-static struct string_list ignore_revs_file_list = STRING_LIST_INIT_DUP;
-static int mark_unblamable_lines;
-static int mark_ignored_lines;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ longest_file;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ longest_author;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ max_orig_digits;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ max_digits;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ max_score_digits;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_ಬೇರು;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಹಿಮ್ಮುಖ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ blank_boundary;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ incremental;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ xdl_opts;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ abbrev = -1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ no_ಸಂಪೂರ್ಣ_file_rename;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ show_ಪ್ರಗತಿ;
+ಸ್ಥಿರ ಅಕ್ಷರ repeated_meta_color[COLOR_MAXLEN];
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ coloring_ಬಹುಲಕ;
+ಸ್ಥಿರ ರಚನೆ string_list ignore_revs_file_list = STRING_LIST_INIT_DUP;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ mark_unblamable_ಸಾಲುಗಳು;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ mark_ignored_ಸಾಲುಗಳು;
 
-static struct date_mode blame_date_mode = { DATE_ISO8601 };
-static size_t blame_date_width;
+ಸ್ಥಿರ ರಚನೆ date_ಬಹುಲಕ blame_date_ಬಹುಲಕ = { DATE_ISO8601 };
+ಸ್ಥಿರ ಗಾತ್ರ_t blame_date_ಅಗಲ;
 
-static struct string_list mailmap = STRING_LIST_INIT_NODUP;
+ಸ್ಥಿರ ರಚನೆ string_list mailmap = STRING_LIST_INIT_NODUP;
 
-#ifndef DEBUG_BLAME
-#define DEBUG_BLAME 0
-#endif
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ DEBUG_BLAME
+#ವ್ಯಾಖ್ಯಾನಿಸು DEBUG_BLAME 0
+#ಆದರೆ_ಅಂತ್ಯ
 
-static unsigned blame_move_score;
-static unsigned blame_copy_score;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ blame_move_score;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ blame_copy_score;
 
 /* Remember to update object flag allocation in object.h */
-#define METAINFO_SHOWN		(1u<<12)
-#define MORE_THAN_ONE_PATH	(1u<<13)
+#ವ್ಯಾಖ್ಯಾನಿಸು METAINFO_SHOWN		(1u<<12)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಇನ್ನಷ್ಟು_THAN_ONE_ಮಾರ್ಗ	(1u<<13)
 
-struct progress_info {
-	struct progress *progress;
-	int blamed_lines;
+ರಚನೆ ಪ್ರಗತಿ_info {
+	ರಚನೆ ಪ್ರಗತಿ *ಪ್ರಗತಿ;
+	ಪೂರ್ಣಾಂಕ blamed_ಸಾಲುಗಳು;
 };
 
-static const char *nth_line_cb(void *data, long lno)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *nth_ಸಾಲು_cb(ಶೂನ್ಯ *ದತ್ತಾಂಶ, ದೀರ್ಘ lno)
 {
-	return blame_nth_line((struct blame_scoreboard *)data, lno);
+	ಹಿಂತಿರುಗಿ blame_nth_ಸಾಲು((ರಚನೆ blame_scoreboard *)ದತ್ತಾಂಶ, lno);
 }
 
 /*
  * Information on commits, used for output.
  */
-struct commit_info {
-	struct strbuf author;
-	struct strbuf author_mail;
-	timestamp_t author_time;
-	struct strbuf author_tz;
+ರಚನೆ commit_info {
+	ರಚನೆ strbuf author;
+	ರಚನೆ strbuf author_mail;
+	timestamp_t author_ಸಮಯ;
+	ರಚನೆ strbuf author_tz;
 
 	/* filled only when asked for details */
-	struct strbuf committer;
-	struct strbuf committer_mail;
-	timestamp_t committer_time;
-	struct strbuf committer_tz;
+	ರಚನೆ strbuf committer;
+	ರಚನೆ strbuf committer_mail;
+	timestamp_t committer_ಸಮಯ;
+	ರಚನೆ strbuf committer_tz;
 
-	struct strbuf summary;
+	ರಚನೆ strbuf summary;
 };
 
-#define COMMIT_INFO_INIT { \
+#ವ್ಯಾಖ್ಯಾನಿಸು COMMIT_INFO_INIT { \
 	.author = STRBUF_INIT, \
 	.author_mail = STRBUF_INIT, \
 	.author_tz = STRBUF_INIT, \
@@ -128,50 +128,50 @@ struct commit_info {
 /*
  * Parse author/committer line in the commit object buffer
  */
-static void get_ac_line(const char *inbuf, const char *what,
-	struct strbuf *name, struct strbuf *mail,
-	timestamp_t *time, struct strbuf *tz)
+ಸ್ಥಿರ ಶೂನ್ಯ get_ac_ಸಾಲು(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *inbuf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *what,
+	ರಚನೆ strbuf *name, ರಚನೆ strbuf *mail,
+	timestamp_t *ಸಮಯ, ರಚನೆ strbuf *tz)
 {
-	struct ident_split ident;
-	size_t len, maillen, namelen;
-	const char *tmp, *endp;
-	const char *namebuf, *mailbuf;
+	ರಚನೆ ident_ವಿಭಜಿಸು ident;
+	ಗಾತ್ರ_t len, maillen, namelen;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *tmp, *endp;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *namebuf, *mailbuf;
 
-	tmp = strstr(inbuf, what);
-	if (!tmp)
-		goto error_out;
-	tmp += strlen(what);
+	tmp = ಅಕ್ಷರಸರಣಿ_ಹುಡುಕು(inbuf, what);
+	ಆದರೆ (!tmp)
+		ಹೋಗು error_ಹೊರಹೋಗು;
+	tmp += ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(what);
 	endp = strchr(tmp, '\n');
-	if (!endp)
-		len = strlen(tmp);
-	else
+	ಆದರೆ (!endp)
+		len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(tmp);
+	ಇಲ್ಲದಿದ್ದರೆ
 		len = endp - tmp;
 
-	if (split_ident_line(&ident, tmp, len)) {
-	error_out:
+	ಆದರೆ (ವಿಭಜಿಸು_ident_ಸಾಲು(&ident, tmp, len)) {
+	error_ಹೊರಹೋಗು:
 		/* Ugh */
 		tmp = "(unknown)";
 		strbuf_addstr(name, tmp);
 		strbuf_addstr(mail, tmp);
 		strbuf_addstr(tz, tmp);
-		*time = 0;
-		return;
+		*ಸಮಯ = 0;
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	namelen = ident.name_end - ident.name_begin;
+	namelen = ident.name_ಕೊನೆ - ident.name_begin;
 	namebuf = ident.name_begin;
 
-	maillen = ident.mail_end - ident.mail_begin;
+	maillen = ident.mail_ಕೊನೆ - ident.mail_begin;
 	mailbuf = ident.mail_begin;
 
-	if (ident.date_begin && ident.date_end)
-		*time = strtoul(ident.date_begin, NULL, 10);
-	else
-		*time = 0;
+	ಆದರೆ (ident.date_begin && ident.date_ಕೊನೆ)
+		*ಸಮಯ = strtoul(ident.date_begin, ಖಾಲಿ, 10);
+	ಇಲ್ಲದಿದ್ದರೆ
+		*ಸಮಯ = 0;
 
-	if (ident.tz_begin && ident.tz_end)
-		strbuf_add(tz, ident.tz_begin, ident.tz_end - ident.tz_begin);
-	else
+	ಆದರೆ (ident.tz_begin && ident.tz_ಕೊನೆ)
+		strbuf_ಕೂಡಿಸು(tz, ident.tz_begin, ident.tz_ಕೊನೆ - ident.tz_begin);
+	ಇಲ್ಲದಿದ್ದರೆ
 		strbuf_addstr(tz, "(unknown)");
 
 	/*
@@ -180,11 +180,11 @@ static void get_ac_line(const char *inbuf, const char *what,
 	map_user(&mailmap, &mailbuf, &maillen,
 		 &namebuf, &namelen);
 
-	strbuf_addf(mail, "<%.*s>", (int)maillen, mailbuf);
-	strbuf_add(name, namebuf, namelen);
+	strbuf_addf(mail, "<%.*s>", (ಪೂರ್ಣಾಂಕ)maillen, mailbuf);
+	strbuf_ಕೂಡಿಸು(name, namebuf, namelen);
 }
 
-static void commit_info_destroy(struct commit_info *ci)
+ಸ್ಥಿರ ಶೂನ್ಯ commit_info_destroy(ರಚನೆ commit_info *ci)
 {
 
 	strbuf_release(&ci->author);
@@ -196,29 +196,29 @@ static void commit_info_destroy(struct commit_info *ci)
 	strbuf_release(&ci->summary);
 }
 
-static void get_commit_info(struct commit *commit, struct commit_info *ret)
+ಸ್ಥಿರ ಶೂನ್ಯ get_commit_info(ರಚನೆ commit *commit, ರಚನೆ commit_info *ret)
 {
-	int len;
-	const char *subject, *encoding;
-	const char *message;
+	ಪೂರ್ಣಾಂಕ len;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *subject, *encoding;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಂದೇಶ_2;
 
 	encoding = get_log_output_encoding();
-	message = repo_logmsg_reencode(the_repository, commit, NULL, encoding);
-	get_ac_line(message, "\nauthor ",
+	ಸಂದೇಶ_2 = repo_logmsg_reencode(the_repository, commit, ಖಾಲಿ, encoding);
+	get_ac_ಸಾಲು(ಸಂದೇಶ_2, "\nauthor ",
 		    &ret->author, &ret->author_mail,
-		    &ret->author_time, &ret->author_tz);
+		    &ret->author_ಸಮಯ, &ret->author_tz);
 
-	get_ac_line(message, "\ncommitter ",
+	get_ac_ಸಾಲು(ಸಂದೇಶ_2, "\ncommitter ",
 		    &ret->committer, &ret->committer_mail,
-		    &ret->committer_time, &ret->committer_tz);
+		    &ret->committer_ಸಮಯ, &ret->committer_tz);
 
-	len = find_commit_subject(message, &subject);
-	if (len)
-		strbuf_add(&ret->summary, subject, len);
-	else
-		strbuf_addf(&ret->summary, "(%s)", oid_to_hex(&commit->object.oid));
+	len = ಕಂಡುಹಿಡಿ_commit_subject(ಸಂದೇಶ_2, &subject);
+	ಆದರೆ (len)
+		strbuf_ಕೂಡಿಸು(&ret->summary, subject, len);
+	ಇಲ್ಲದಿದ್ದರೆ
+		strbuf_addf(&ret->summary, "(%s)", oid_ಗಮ್ಯ_hex(&commit->object.oid));
 
-	repo_unuse_commit_buffer(the_repository, commit, message);
+	repo_unuse_commit_ಬಫರ್(the_repository, commit, ಸಂದೇಶ_2);
 }
 
 /*
@@ -230,15 +230,15 @@ static void get_commit_info(struct commit *commit, struct commit_info *ret)
  * To allow LF and other nonportable characters in pathnames,
  * they are c-style quoted as needed.
  */
-static void write_filename_info(struct blame_origin *suspect)
+ಸ್ಥಿರ ಶೂನ್ಯ write_filename_info(ರಚನೆ blame_origin *suspect)
 {
-	if (suspect->previous) {
-		struct blame_origin *prev = suspect->previous;
-		printf("previous %s ", oid_to_hex(&prev->commit->object.oid));
-		write_name_quoted(prev->path, stdout, '\n');
+	ಆದರೆ (suspect->ಹಿಂದಿನ) {
+		ರಚನೆ blame_origin *prev = suspect->ಹಿಂದಿನ;
+		ಬರೆ("previous %s ", oid_ಗಮ್ಯ_hex(&prev->commit->object.oid));
+		write_name_quoted(prev->ಮಾರ್ಗ, stdout, '\n');
 	}
-	printf("filename ");
-	write_name_quoted(suspect->path, stdout, '\n');
+	ಬರೆ("filename ");
+	write_name_quoted(suspect->ಮಾರ್ಗ, stdout, '\n');
 }
 
 /*
@@ -247,99 +247,99 @@ static void write_filename_info(struct blame_origin *suspect)
  * the first time each commit appears in the output (unless the
  * user has specifically asked for us to repeat).
  */
-static int emit_one_suspect_detail(struct blame_origin *suspect, int repeat)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ emit_one_suspect_detail(ರಚನೆ blame_origin *suspect, ಪೂರ್ಣಾಂಕ repeat)
 {
-	struct commit_info ci = COMMIT_INFO_INIT;
+	ರಚನೆ commit_info ci = COMMIT_INFO_INIT;
 
-	if (!repeat && (suspect->commit->object.flags & METAINFO_SHOWN))
-		return 0;
+	ಆದರೆ (!repeat && (suspect->commit->object.flags & METAINFO_SHOWN))
+		ಹಿಂತಿರುಗಿ 0;
 
 	suspect->commit->object.flags |= METAINFO_SHOWN;
 	get_commit_info(suspect->commit, &ci);
-	printf("author %s\n", ci.author.buf);
-	printf("author-mail %s\n", ci.author_mail.buf);
-	printf("author-time %"PRItime"\n", ci.author_time);
-	printf("author-tz %s\n", ci.author_tz.buf);
-	printf("committer %s\n", ci.committer.buf);
-	printf("committer-mail %s\n", ci.committer_mail.buf);
-	printf("committer-time %"PRItime"\n", ci.committer_time);
-	printf("committer-tz %s\n", ci.committer_tz.buf);
-	printf("summary %s\n", ci.summary.buf);
-	if (suspect->commit->object.flags & UNINTERESTING)
-		printf("boundary\n");
+	ಬರೆ("author %s\n", ci.author.buf);
+	ಬರೆ("author-mail %s\n", ci.author_mail.buf);
+	ಬರೆ("author-time %"PRItime"\n", ci.author_ಸಮಯ);
+	ಬರೆ("author-tz %s\n", ci.author_tz.buf);
+	ಬರೆ("committer %s\n", ci.committer.buf);
+	ಬರೆ("committer-mail %s\n", ci.committer_mail.buf);
+	ಬರೆ("committer-time %"PRItime"\n", ci.committer_ಸಮಯ);
+	ಬರೆ("committer-tz %s\n", ci.committer_tz.buf);
+	ಬರೆ("summary %s\n", ci.summary.buf);
+	ಆದರೆ (suspect->commit->object.flags & UNINTERESTING)
+		ಬರೆ("boundary\n");
 
 	commit_info_destroy(&ci);
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
 /*
  * The blame_entry is found to be guilty for the range.
  * Show it in incremental output.
  */
-static void found_guilty_entry(struct blame_entry *ent, void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸಿಕ್ಕಿತು_guilty_ನಮೂದು(ರಚನೆ blame_ನಮೂದು *ent, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	struct progress_info *pi = (struct progress_info *)data;
+	ರಚನೆ ಪ್ರಗತಿ_info *pi = (ರಚನೆ ಪ್ರಗತಿ_info *)ದತ್ತಾಂಶ;
 
-	if (incremental) {
-		struct blame_origin *suspect = ent->suspect;
+	ಆದರೆ (incremental) {
+		ರಚನೆ blame_origin *suspect = ent->suspect;
 
-		printf("%s %d %d %d\n",
-		       oid_to_hex(&suspect->commit->object.oid),
-		       ent->s_lno + 1, ent->lno + 1, ent->num_lines);
+		ಬರೆ("%s %d %d %d\n",
+		       oid_ಗಮ್ಯ_hex(&suspect->commit->object.oid),
+		       ent->s_lno + 1, ent->lno + 1, ent->ಅಂಕೆ_ಸಾಲುಗಳು);
 		emit_one_suspect_detail(suspect, 0);
 		write_filename_info(suspect);
 		maybe_flush_or_die(stdout, "stdout");
 	}
-	pi->blamed_lines += ent->num_lines;
-	display_progress(pi->progress, pi->blamed_lines);
+	pi->blamed_ಸಾಲುಗಳು += ent->ಅಂಕೆ_ಸಾಲುಗಳು;
+	display_ಪ್ರಗತಿ(pi->ಪ್ರಗತಿ, pi->blamed_ಸಾಲುಗಳು);
 }
 
-static const char *format_time(timestamp_t time, const char *tz_str,
-			       int show_raw_time)
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format_ಸಮಯ(timestamp_t ಸಮಯ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *tz_str,
+			       ಪೂರ್ಣಾಂಕ show_raw_ಸಮಯ)
 {
-	static struct strbuf time_buf = STRBUF_INIT;
+	ಸ್ಥಿರ ರಚನೆ strbuf ಸಮಯ_buf = STRBUF_INIT;
 
-	strbuf_reset(&time_buf);
-	if (show_raw_time) {
-		strbuf_addf(&time_buf, "%"PRItime" %s", time, tz_str);
+	strbuf_reset(&ಸಮಯ_buf);
+	ಆದರೆ (show_raw_ಸಮಯ) {
+		strbuf_addf(&ಸಮಯ_buf, "%"PRItime" %s", ಸಮಯ, tz_str);
 	}
-	else {
-		const char *time_str;
-		size_t time_width;
-		int tz;
+	ಇಲ್ಲದಿದ್ದರೆ {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸಮಯ_str;
+		ಗಾತ್ರ_t ಸಮಯ_ಅಗಲ;
+		ಪೂರ್ಣಾಂಕ tz;
 		tz = atoi(tz_str);
-		time_str = show_date(time, tz, blame_date_mode);
-		strbuf_addstr(&time_buf, time_str);
+		ಸಮಯ_str = show_date(ಸಮಯ, tz, blame_date_ಬಹುಲಕ);
+		strbuf_addstr(&ಸಮಯ_buf, ಸಮಯ_str);
 		/*
 		 * Add space paddings to time_buf to display a fixed width
 		 * string, and use time_width for display width calibration.
 		 */
-		for (time_width = utf8_strwidth(time_str);
-		     time_width < blame_date_width;
-		     time_width++)
-			strbuf_addch(&time_buf, ' ');
+		ಗಾಗಿ (ಸಮಯ_ಅಗಲ = utf8_strwidth(ಸಮಯ_str);
+		     ಸಮಯ_ಅಗಲ < blame_date_ಅಗಲ;
+		     ಸಮಯ_ಅಗಲ++)
+			strbuf_addch(&ಸಮಯ_buf, ' ');
 	}
-	return time_buf.buf;
+	ಹಿಂತಿರುಗಿ ಸಮಯ_buf.buf;
 }
 
-#define OUTPUT_ANNOTATE_COMPAT      (1U<<0)
-#define OUTPUT_LONG_OBJECT_NAME     (1U<<1)
-#define OUTPUT_RAW_TIMESTAMP        (1U<<2)
-#define OUTPUT_PORCELAIN            (1U<<3)
-#define OUTPUT_SHOW_NAME            (1U<<4)
-#define OUTPUT_SHOW_NUMBER          (1U<<5)
-#define OUTPUT_SHOW_SCORE           (1U<<6)
-#define OUTPUT_NO_AUTHOR            (1U<<7)
-#define OUTPUT_SHOW_EMAIL           (1U<<8)
-#define OUTPUT_LINE_PORCELAIN       (1U<<9)
-#define OUTPUT_COLOR_LINE           (1U<<10)
-#define OUTPUT_SHOW_AGE_WITH_COLOR  (1U<<11)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_ANNOTATE_COMPAT      (1U<<0)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_LONG_OBJECT_NAME     (1U<<1)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_RAW_TIMESTAMP        (1U<<2)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_PORCELAIN            (1U<<3)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_SHOW_NAME            (1U<<4)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_SHOW_ಸಂಖ್ಯೆ          (1U<<5)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_SHOW_SCORE           (1U<<6)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_NO_AUTHOR            (1U<<7)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_SHOW_EMAIL           (1U<<8)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_ಸಾಲು_PORCELAIN       (1U<<9)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_COLOR_ಸಾಲು           (1U<<10)
+#ವ್ಯಾಖ್ಯಾನಿಸು OUTPUT_SHOW_AGE_WITH_COLOR  (1U<<11)
 
-static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
+ಸ್ಥಿರ ಶೂನ್ಯ emit_porcelain_details(ರಚನೆ blame_origin *suspect, ಪೂರ್ಣಾಂಕ repeat)
 {
-	if (emit_one_suspect_detail(suspect, repeat) ||
-	    (suspect->commit->object.flags & MORE_THAN_ONE_PATH))
+	ಆದರೆ (emit_one_suspect_detail(suspect, repeat) ||
+	    (suspect->commit->object.flags & ಇನ್ನಷ್ಟು_THAN_ONE_ಮಾರ್ಗ))
 		write_filename_info(suspect);
 }
 
@@ -348,271 +348,271 @@ static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
  * information which can be clubbed on a commit/file level, should
  * be printed via 'emit_one_suspect_detail()'.
  */
-static void emit_porcelain_per_line_details(struct blame_entry *ent)
+ಸ್ಥಿರ ಶೂನ್ಯ emit_porcelain_ಪ್ರತಿ_ಸಾಲು_details(ರಚನೆ blame_ನಮೂದು *ent)
 {
-	if (mark_unblamable_lines && ent->unblamable)
+	ಆದರೆ (mark_unblamable_ಸಾಲುಗಳು && ent->unblamable)
 		puts("unblamable");
-	if (mark_ignored_lines && ent->ignored)
+	ಆದರೆ (mark_ignored_ಸಾಲುಗಳು && ent->ignored)
 		puts("ignored");
 }
 
-static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
-			   int opt)
+ಸ್ಥಿರ ಶೂನ್ಯ emit_porcelain(ರಚನೆ blame_scoreboard *sb, ರಚನೆ blame_ನಮೂದು *ent,
+			   ಪೂರ್ಣಾಂಕ opt)
 {
-	int repeat = opt & OUTPUT_LINE_PORCELAIN;
-	int cnt;
-	const char *cp;
-	struct blame_origin *suspect = ent->suspect;
-	char hex[GIT_MAX_HEXSZ + 1];
+	ಪೂರ್ಣಾಂಕ repeat = opt & OUTPUT_ಸಾಲು_PORCELAIN;
+	ಪೂರ್ಣಾಂಕ cnt;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cp;
+	ರಚನೆ blame_origin *suspect = ent->suspect;
+	ಅಕ್ಷರ hex[GIT_MAX_HEXSZ + 1];
 
-	oid_to_hex_r(hex, &suspect->commit->object.oid);
-	printf("%s %d %d %d\n",
+	oid_ಗಮ್ಯ_hex_r(hex, &suspect->commit->object.oid);
+	ಬರೆ("%s %d %d %d\n",
 	       hex,
 	       ent->s_lno + 1,
 	       ent->lno + 1,
-	       ent->num_lines);
+	       ent->ಅಂಕೆ_ಸಾಲುಗಳು);
 	emit_porcelain_details(suspect, repeat);
-	emit_porcelain_per_line_details(ent);
+	emit_porcelain_ಪ್ರತಿ_ಸಾಲು_details(ent);
 
-	cp = blame_nth_line(sb, ent->lno);
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
-		char ch;
-		if (cnt) {
-			printf("%s %d %d\n", hex,
+	cp = blame_nth_ಸಾಲು(sb, ent->lno);
+	ಗಾಗಿ (cnt = 0; cnt < ent->ಅಂಕೆ_ಸಾಲುಗಳು; cnt++) {
+		ಅಕ್ಷರ ch;
+		ಆದರೆ (cnt) {
+			ಬರೆ("%s %d %d\n", hex,
 			       ent->s_lno + 1 + cnt,
 			       ent->lno + 1 + cnt);
-			if (repeat)
+			ಆದರೆ (repeat)
 				emit_porcelain_details(suspect, 1);
-			emit_porcelain_per_line_details(ent);
+			emit_porcelain_ಪ್ರತಿ_ಸಾಲು_details(ent);
 		}
-		putchar('\t');
-		do {
+		ಅಕ್ಷರ_ಬರೆ('\t');
+		ಮಾಡು {
 			ch = *cp++;
-			putchar(ch);
-		} while (ch != '\n' &&
-			 cp < sb->final_buf + sb->final_buf_size);
+			ಅಕ್ಷರ_ಬರೆ(ch);
+		} ಆಗ (ch != '\n' &&
+			 cp < sb->final_buf + sb->final_buf_ಗಾತ್ರ);
 	}
 
-	if (sb->final_buf_size && cp[-1] != '\n')
-		putchar('\n');
+	ಆದರೆ (sb->final_buf_ಗಾತ್ರ && cp[-1] != '\n')
+		ಅಕ್ಷರ_ಬರೆ('\n');
 }
 
-static struct color_field {
+ಸ್ಥಿರ ರಚನೆ color_ಕ್ಷೇತ್ರ {
 	timestamp_t hop;
-	char col[COLOR_MAXLEN];
+	ಅಕ್ಷರ ಲಂಬಸಾಲು[COLOR_MAXLEN];
 } *colorfield;
-static int colorfield_nr, colorfield_alloc;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ colorfield_nr, colorfield_alloc;
 
-static void parse_color_fields(const char *s)
+ಸ್ಥಿರ ಶೂನ್ಯ parse_color_fields(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s)
 {
-	struct string_list l = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	enum { EXPECT_DATE, EXPECT_COLOR } next = EXPECT_COLOR;
+	ರಚನೆ string_list l = STRING_LIST_INIT_DUP;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ಎಣಿಕೆ { EXPECT_DATE, EXPECT_COLOR } ಮುಂದಿನ = EXPECT_COLOR;
 
 	colorfield_nr = 0;
 
 	/* Ideally this would be stripped and split at the same time? */
-	string_list_split(&l, s, ",", -1);
+	string_list_ವಿಭಜಿಸು(&l, s, ",", -1);
 	ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
 
-	for_each_string_list_item(item, &l) {
-		switch (next) {
-		case EXPECT_DATE:
-			colorfield[colorfield_nr].hop = approxidate(item->string);
-			next = EXPECT_COLOR;
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &l) {
+		ಆಯ್ಕೆ (ಮುಂದಿನ) {
+		ಸ್ಥಿತಿ EXPECT_DATE:
+			colorfield[colorfield_nr].hop = approxidate(ಅಂಶ->string);
+			ಮುಂದಿನ = EXPECT_COLOR;
 			colorfield_nr++;
 			ALLOC_GROW(colorfield, colorfield_nr + 1, colorfield_alloc);
-			break;
-		case EXPECT_COLOR:
-			if (color_parse(item->string, colorfield[colorfield_nr].col))
-				die(_("expecting a color: %s"), item->string);
-			next = EXPECT_DATE;
-			break;
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ EXPECT_COLOR:
+			ಆದರೆ (color_parse(ಅಂಶ->string, colorfield[colorfield_nr].ಲಂಬಸಾಲು))
+				die(_("expecting a color: %s"), ಅಂಶ->string);
+			ಮುಂದಿನ = EXPECT_DATE;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
 
-	if (next == EXPECT_COLOR)
+	ಆದರೆ (ಮುಂದಿನ == EXPECT_COLOR)
 		die(_("must end with a color"));
 
-	colorfield[colorfield_nr].hop = TIME_MAX;
+	colorfield[colorfield_nr].hop = ಸಮಯ_MAX;
 	string_list_clear(&l, 0);
 }
 
-static void setup_default_color_by_age(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸಿದ್ಧತೆ_default_color_by_age(ಶೂನ್ಯ)
 {
 	parse_color_fields("blue,12 month ago,white,1 month ago,red");
 }
 
-static void determine_line_heat(struct commit_info *ci, const char **dest_color)
+ಸ್ಥಿರ ಶೂನ್ಯ determine_ಸಾಲು_heat(ರಚನೆ commit_info *ci, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **dest_color)
 {
-	int i = 0;
+	ಪೂರ್ಣಾಂಕ i = 0;
 
-	while (i < colorfield_nr && ci->author_time > colorfield[i].hop)
+	ಆಗ (i < colorfield_nr && ci->author_ಸಮಯ > colorfield[i].hop)
 		i++;
 
-	*dest_color = colorfield[i].col;
+	*dest_color = colorfield[i].ಲಂಬಸಾಲು;
 }
 
-static inline int maybe_putc(int c, FILE *out)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ maybe_putc(ಪೂರ್ಣಾಂಕ c, FILE *ಹೊರಹೋಗು)
 {
-	return out ? putc(c, out) : 0;
+	ಹಿಂತಿರುಗಿ ಹೊರಹೋಗು ? putc(c, ಹೊರಹೋಗು) : 0;
 }
 
-static size_t print_marks(FILE *out, const struct blame_entry *ent, int opt)
+ಸ್ಥಿರ ಗಾತ್ರ_t print_marks(FILE *ಹೊರಹೋಗು, ಸ್ಥಿರಾಂಕ ರಚನೆ blame_ನಮೂದು *ent, ಪೂರ್ಣಾಂಕ opt)
 {
-	size_t len = 0;
+	ಗಾತ್ರ_t len = 0;
 
-	if ((ent->suspect->commit->object.flags & UNINTERESTING) &&
+	ಆದರೆ ((ent->suspect->commit->object.flags & UNINTERESTING) &&
 	    !blank_boundary && !(opt & OUTPUT_ANNOTATE_COMPAT)) {
-		maybe_putc('^', out);
+		maybe_putc('^', ಹೊರಹೋಗು);
 		len++;
 	}
-	if (mark_unblamable_lines && ent->unblamable) {
-		maybe_putc('*', out);
+	ಆದರೆ (mark_unblamable_ಸಾಲುಗಳು && ent->unblamable) {
+		maybe_putc('*', ಹೊರಹೋಗು);
 		len++;
 	}
-	if (mark_ignored_lines && ent->ignored) {
-		maybe_putc('?', out);
+	ಆದರೆ (mark_ignored_ಸಾಲುಗಳು && ent->ignored) {
+		maybe_putc('?', ಹೊರಹೋಗು);
 		len++;
 	}
-	return len;
+	ಹಿಂತಿರುಗಿ len;
 }
 
-static size_t count_marks(const struct blame_entry *ent, int opt)
+ಸ್ಥಿರ ಗಾತ್ರ_t ಎಣಿಕೆ_marks(ಸ್ಥಿರಾಂಕ ರಚನೆ blame_ನಮೂದು *ent, ಪೂರ್ಣಾಂಕ opt)
 {
-	return print_marks(NULL, ent, opt);
+	ಹಿಂತಿರುಗಿ print_marks(ಖಾಲಿ, ent, opt);
 }
 
-static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
-		       int opt, struct blame_entry *prev_ent)
+ಸ್ಥಿರ ಶೂನ್ಯ emit_other(ರಚನೆ blame_scoreboard *sb, ರಚನೆ blame_ನಮೂದು *ent,
+		       ಪೂರ್ಣಾಂಕ opt, ರಚನೆ blame_ನಮೂದು *prev_ent)
 {
-	int cnt;
-	const char *cp;
-	struct blame_origin *suspect = ent->suspect;
-	struct commit_info ci = COMMIT_INFO_INIT;
-	char hex[GIT_MAX_HEXSZ + 1];
-	int show_raw_time = !!(opt & OUTPUT_RAW_TIMESTAMP);
-	const char *default_color = NULL, *color = NULL, *reset = NULL;
+	ಪೂರ್ಣಾಂಕ cnt;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *cp;
+	ರಚನೆ blame_origin *suspect = ent->suspect;
+	ರಚನೆ commit_info ci = COMMIT_INFO_INIT;
+	ಅಕ್ಷರ hex[GIT_MAX_HEXSZ + 1];
+	ಪೂರ್ಣಾಂಕ show_raw_ಸಮಯ = !!(opt & OUTPUT_RAW_TIMESTAMP);
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *default_color = ಖಾಲಿ, *color = ಖಾಲಿ, *reset = ಖಾಲಿ;
 
 	get_commit_info(suspect->commit, &ci);
-	oid_to_hex_r(hex, &suspect->commit->object.oid);
+	oid_ಗಮ್ಯ_hex_r(hex, &suspect->commit->object.oid);
 
-	cp = blame_nth_line(sb, ent->lno);
+	cp = blame_nth_ಸಾಲು(sb, ent->lno);
 
-	if (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
-		determine_line_heat(&ci, &default_color);
+	ಆದರೆ (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
+		determine_ಸಾಲು_heat(&ci, &default_color);
 		color = default_color;
 		reset = GIT_COLOR_RESET;
 	}
 
-	if (abbrev < MINIMUM_ABBREV)
+	ಆದರೆ (abbrev < MINIMUM_ABBREV)
 		BUG("abbreviation is smaller than minimum length: %d < %d",
 		    abbrev, MINIMUM_ABBREV);
 
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
-		char ch;
-		size_t length = (opt & OUTPUT_LONG_OBJECT_NAME) ?
-			the_hash_algo->hexsz : (size_t) abbrev;
+	ಗಾಗಿ (cnt = 0; cnt < ent->ಅಂಕೆ_ಸಾಲುಗಳು; cnt++) {
+		ಅಕ್ಷರ ch;
+		ಗಾತ್ರ_t ಉದ್ದಳತೆ = (opt & OUTPUT_LONG_OBJECT_NAME) ?
+			the_hash_algo->hexsz : (ಗಾತ್ರ_t) abbrev;
 
-		if (opt & OUTPUT_COLOR_LINE) {
-			if (cnt > 0 ||
+		ಆದರೆ (opt & OUTPUT_COLOR_ಸಾಲು) {
+			ಆದರೆ (cnt > 0 ||
 			    (prev_ent &&
 			     oideq(&suspect->commit->object.oid,
 				   &prev_ent->suspect->commit->object.oid))) {
 				color = repeated_meta_color;
 				reset = GIT_COLOR_RESET;
-			} else  {
-				color = default_color ? default_color : NULL;
-				reset = default_color ? GIT_COLOR_RESET : NULL;
+			} ಇಲ್ಲದಿದ್ದರೆ  {
+				color = default_color ? default_color : ಖಾಲಿ;
+				reset = default_color ? GIT_COLOR_RESET : ಖಾಲಿ;
 			}
 		}
-		if (color)
+		ಆದರೆ (color)
 			fputs(color, stdout);
 
-		if ((suspect->commit->object.flags & UNINTERESTING) &&
+		ಆದರೆ ((suspect->commit->object.flags & UNINTERESTING) &&
 		    blank_boundary)
-			memset(hex, ' ', strlen(hex));
-		length -= print_marks(stdout, ent, opt);
+			memset(hex, ' ', ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(hex));
+		ಉದ್ದಳತೆ -= print_marks(stdout, ent, opt);
 
-		printf("%.*s", (int)(length < GIT_MAX_HEXSZ ? length : GIT_MAX_HEXSZ), hex);
-		if (opt & OUTPUT_ANNOTATE_COMPAT) {
-			const char *name;
-			if (opt & OUTPUT_SHOW_EMAIL)
+		ಬರೆ("%.*s", (ಪೂರ್ಣಾಂಕ)(ಉದ್ದಳತೆ < GIT_MAX_HEXSZ ? ಉದ್ದಳತೆ : GIT_MAX_HEXSZ), hex);
+		ಆದರೆ (opt & OUTPUT_ANNOTATE_COMPAT) {
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+			ಆದರೆ (opt & OUTPUT_SHOW_EMAIL)
 				name = ci.author_mail.buf;
-			else
+			ಇಲ್ಲದಿದ್ದರೆ
 				name = ci.author.buf;
-			printf("\t(%10s\t%10s\t%d)", name,
-			       format_time(ci.author_time, ci.author_tz.buf,
-					   show_raw_time),
+			ಬರೆ("\t(%10s\t%10s\t%d)", name,
+			       format_ಸಮಯ(ci.author_ಸಮಯ, ci.author_tz.buf,
+					   show_raw_ಸಮಯ),
 			       ent->lno + 1 + cnt);
-		} else {
-			if (opt & OUTPUT_SHOW_SCORE)
-				printf(" %*d %02d",
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಆದರೆ (opt & OUTPUT_SHOW_SCORE)
+				ಬರೆ(" %*d %02d",
 				       max_score_digits, ent->score,
 				       ent->suspect->refcnt);
-			if (opt & OUTPUT_SHOW_NAME)
-				printf(" %-*.*s", longest_file, longest_file,
-				       suspect->path);
-			if (opt & OUTPUT_SHOW_NUMBER)
-				printf(" %*d", max_orig_digits,
+			ಆದರೆ (opt & OUTPUT_SHOW_NAME)
+				ಬರೆ(" %-*.*s", longest_file, longest_file,
+				       suspect->ಮಾರ್ಗ);
+			ಆದರೆ (opt & OUTPUT_SHOW_ಸಂಖ್ಯೆ)
+				ಬರೆ(" %*d", max_orig_digits,
 				       ent->s_lno + 1 + cnt);
 
-			if (!(opt & OUTPUT_NO_AUTHOR)) {
-				const char *name;
-				int pad;
-				if (opt & OUTPUT_SHOW_EMAIL)
+			ಆದರೆ (!(opt & OUTPUT_NO_AUTHOR)) {
+				ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+				ಪೂರ್ಣಾಂಕ pad;
+				ಆದರೆ (opt & OUTPUT_SHOW_EMAIL)
 					name = ci.author_mail.buf;
-				else
+				ಇಲ್ಲದಿದ್ದರೆ
 					name = ci.author.buf;
 				pad = longest_author - utf8_strwidth(name);
-				printf(" (%s%*s %10s",
+				ಬರೆ(" (%s%*s %10s",
 				       name, pad, "",
-				       format_time(ci.author_time,
+				       format_ಸಮಯ(ci.author_ಸಮಯ,
 						   ci.author_tz.buf,
-						   show_raw_time));
+						   show_raw_ಸಮಯ));
 			}
-			printf(" %*d) ",
+			ಬರೆ(" %*d) ",
 			       max_digits, ent->lno + 1 + cnt);
 		}
-		if (reset)
+		ಆದರೆ (reset)
 			fputs(reset, stdout);
-		do {
+		ಮಾಡು {
 			ch = *cp++;
-			putchar(ch);
-		} while (ch != '\n' &&
-			 cp < sb->final_buf + sb->final_buf_size);
+			ಅಕ್ಷರ_ಬರೆ(ch);
+		} ಆಗ (ch != '\n' &&
+			 cp < sb->final_buf + sb->final_buf_ಗಾತ್ರ);
 	}
 
-	if (sb->final_buf_size && cp[-1] != '\n')
-		putchar('\n');
+	ಆದರೆ (sb->final_buf_ಗಾತ್ರ && cp[-1] != '\n')
+		ಅಕ್ಷರ_ಬರೆ('\n');
 
 	commit_info_destroy(&ci);
 }
 
-static void output(struct blame_scoreboard *sb, int option)
+ಸ್ಥಿರ ಶೂನ್ಯ output(ರಚನೆ blame_scoreboard *sb, ಪೂರ್ಣಾಂಕ option)
 {
-	struct blame_entry *ent, *prev_ent = NULL;
+	ರಚನೆ blame_ನಮೂದು *ent, *prev_ent = ಖಾಲಿ;
 
-	if (option & OUTPUT_PORCELAIN) {
-		for (ent = sb->ent; ent; ent = ent->next) {
-			int count = 0;
-			struct blame_origin *suspect;
-			struct commit *commit = ent->suspect->commit;
-			if (commit->object.flags & MORE_THAN_ONE_PATH)
-				continue;
-			for (suspect = get_blame_suspects(commit); suspect; suspect = suspect->next) {
-				if (suspect->guilty && count++) {
-					commit->object.flags |= MORE_THAN_ONE_PATH;
-					break;
+	ಆದರೆ (option & OUTPUT_PORCELAIN) {
+		ಗಾಗಿ (ent = sb->ent; ent; ent = ent->ಮುಂದಿನ) {
+			ಪೂರ್ಣಾಂಕ ಎಣಿಕೆ_2 = 0;
+			ರಚನೆ blame_origin *suspect;
+			ರಚನೆ commit *commit = ent->suspect->commit;
+			ಆದರೆ (commit->object.flags & ಇನ್ನಷ್ಟು_THAN_ONE_ಮಾರ್ಗ)
+				ಮುಂದುವರಿ;
+			ಗಾಗಿ (suspect = get_blame_suspects(commit); suspect; suspect = suspect->ಮುಂದಿನ) {
+				ಆದರೆ (suspect->guilty && ಎಣಿಕೆ_2++) {
+					commit->object.flags |= ಇನ್ನಷ್ಟು_THAN_ONE_ಮಾರ್ಗ;
+					ನಿಲ್ಲಿಸು;
 				}
 			}
 		}
 	}
 
-	for (ent = sb->ent; ent; ent = ent->next) {
-		if (option & OUTPUT_PORCELAIN)
+	ಗಾಗಿ (ent = sb->ent; ent; ent = ent->ಮುಂದಿನ) {
+		ಆದರೆ (option & OUTPUT_PORCELAIN)
 			emit_porcelain(sb, ent, option);
-		else {
+		ಇಲ್ಲದಿದ್ದರೆ {
 			emit_other(sb, ent, option, prev_ent);
 			prev_ent = ent;
 		}
@@ -624,215 +624,215 @@ static void output(struct blame_scoreboard *sb, int option)
  * support git's cvsserver that wants to give a linear history
  * to its clients.
  */
-static int read_ancestry(const char *graft_file)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ read_ancestry(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *graft_file)
 {
 	FILE *fp = fopen_or_warn(graft_file, "r");
-	struct strbuf buf = STRBUF_INIT;
-	if (!fp)
-		return -1;
-	while (!strbuf_getwholeline(&buf, fp, '\n')) {
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ಆದರೆ (!fp)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆಗ (!strbuf_getwholeline(&buf, fp, '\n')) {
 		/* The format is just "Commit Parent1 Parent2 ...\n" */
-		struct commit_graft *graft = read_graft_line(&buf);
-		if (graft)
-			register_commit_graft(the_repository, graft, 0);
+		ರಚನೆ commit_graft *graft = read_graft_ಸಾಲು(&buf);
+		ಆದರೆ (graft)
+			ರಿಜಿಸ್ಟರ್_commit_graft(the_repository, graft, 0);
 	}
 	fclose(fp);
 	strbuf_release(&buf);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int update_auto_abbrev(int auto_abbrev, struct blame_origin *suspect)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ update_auto_abbrev(ಪೂರ್ಣಾಂಕ auto_abbrev, ರಚನೆ blame_origin *suspect)
 {
-	const char *uniq = repo_find_unique_abbrev(the_repository,
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *uniq = repo_ಕಂಡುಹಿಡಿ_unique_abbrev(the_repository,
 						   &suspect->commit->object.oid,
 						   auto_abbrev);
-	int len = strlen(uniq);
-	if (auto_abbrev < len)
-		return len;
-	return auto_abbrev;
+	ಪೂರ್ಣಾಂಕ len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(uniq);
+	ಆದರೆ (auto_abbrev < len)
+		ಹಿಂತಿರುಗಿ len;
+	ಹಿಂತಿರುಗಿ auto_abbrev;
 }
 
 /*
  * How many columns do we need to show line numbers, authors,
  * and filenames?
  */
-static void find_alignment(struct blame_scoreboard *sb, int *option)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕಂಡುಹಿಡಿ_alignment(ರಚನೆ blame_scoreboard *sb, ಪೂರ್ಣಾಂಕ *option)
 {
-	int longest_src_lines = 0;
-	int longest_dst_lines = 0;
-	unsigned largest_score = 0;
-	struct blame_entry *e;
-	int compute_auto_abbrev = (abbrev < 0);
-	int auto_abbrev = DEFAULT_ABBREV;
-	size_t max_marks_count = 0;
+	ಪೂರ್ಣಾಂಕ longest_src_ಸಾಲುಗಳು = 0;
+	ಪೂರ್ಣಾಂಕ longest_dst_ಸಾಲುಗಳು = 0;
+	ಚಿಹ್ನೆರಹಿತ ಅತಿದೊಡ್ಡ_score = 0;
+	ರಚನೆ blame_ನಮೂದು *e;
+	ಪೂರ್ಣಾಂಕ compute_auto_abbrev = (abbrev < 0);
+	ಪೂರ್ಣಾಂಕ auto_abbrev = DEFAULT_ABBREV;
+	ಗಾತ್ರ_t max_marks_ಎಣಿಕೆ = 0;
 
-	for (e = sb->ent; e; e = e->next) {
-		struct blame_origin *suspect = e->suspect;
-		int num;
-		size_t marks_count = count_marks(e, *option);
+	ಗಾಗಿ (e = sb->ent; e; e = e->ಮುಂದಿನ) {
+		ರಚನೆ blame_origin *suspect = e->suspect;
+		ಪೂರ್ಣಾಂಕ ಅಂಕೆ;
+		ಗಾತ್ರ_t marks_ಎಣಿಕೆ = ಎಣಿಕೆ_marks(e, *option);
 
-		if (max_marks_count < marks_count)
-			max_marks_count = marks_count;
-		if (compute_auto_abbrev)
+		ಆದರೆ (max_marks_ಎಣಿಕೆ < marks_ಎಣಿಕೆ)
+			max_marks_ಎಣಿಕೆ = marks_ಎಣಿಕೆ;
+		ಆದರೆ (compute_auto_abbrev)
 			auto_abbrev = update_auto_abbrev(auto_abbrev, suspect);
-		if (strcmp(suspect->path, sb->path))
+		ಆದರೆ (strcmp(suspect->ಮಾರ್ಗ, sb->ಮಾರ್ಗ))
 			*option |= OUTPUT_SHOW_NAME;
-		num = strlen(suspect->path);
-		if (longest_file < num)
-			longest_file = num;
-		if (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
-			struct commit_info ci = COMMIT_INFO_INIT;
+		ಅಂಕೆ = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(suspect->ಮಾರ್ಗ);
+		ಆದರೆ (longest_file < ಅಂಕೆ)
+			longest_file = ಅಂಕೆ;
+		ಆದರೆ (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
+			ರಚನೆ commit_info ci = COMMIT_INFO_INIT;
 			suspect->commit->object.flags |= METAINFO_SHOWN;
 			get_commit_info(suspect->commit, &ci);
-			if (*option & OUTPUT_SHOW_EMAIL)
-				num = utf8_strwidth(ci.author_mail.buf);
-			else
-				num = utf8_strwidth(ci.author.buf);
-			if (longest_author < num)
-				longest_author = num;
+			ಆದರೆ (*option & OUTPUT_SHOW_EMAIL)
+				ಅಂಕೆ = utf8_strwidth(ci.author_mail.buf);
+			ಇಲ್ಲದಿದ್ದರೆ
+				ಅಂಕೆ = utf8_strwidth(ci.author.buf);
+			ಆದರೆ (longest_author < ಅಂಕೆ)
+				longest_author = ಅಂಕೆ;
 			commit_info_destroy(&ci);
 		}
-		num = e->s_lno + e->num_lines;
-		if (longest_src_lines < num)
-			longest_src_lines = num;
-		num = e->lno + e->num_lines;
-		if (longest_dst_lines < num)
-			longest_dst_lines = num;
-		if (largest_score < blame_entry_score(sb, e))
-			largest_score = blame_entry_score(sb, e);
+		ಅಂಕೆ = e->s_lno + e->ಅಂಕೆ_ಸಾಲುಗಳು;
+		ಆದರೆ (longest_src_ಸಾಲುಗಳು < ಅಂಕೆ)
+			longest_src_ಸಾಲುಗಳು = ಅಂಕೆ;
+		ಅಂಕೆ = e->lno + e->ಅಂಕೆ_ಸಾಲುಗಳು;
+		ಆದರೆ (longest_dst_ಸಾಲುಗಳು < ಅಂಕೆ)
+			longest_dst_ಸಾಲುಗಳು = ಅಂಕೆ;
+		ಆದರೆ (ಅತಿದೊಡ್ಡ_score < blame_ನಮೂದು_score(sb, e))
+			ಅತಿದೊಡ್ಡ_score = blame_ನಮೂದು_score(sb, e);
 	}
-	max_orig_digits = decimal_width(longest_src_lines);
-	max_digits = decimal_width(longest_dst_lines);
-	max_score_digits = decimal_width(largest_score);
+	max_orig_digits = decimal_ಅಗಲ(longest_src_ಸಾಲುಗಳು);
+	max_digits = decimal_ಅಗಲ(longest_dst_ಸಾಲುಗಳು);
+	max_score_digits = decimal_ಅಗಲ(ಅತಿದೊಡ್ಡ_score);
 
-	if (compute_auto_abbrev)
+	ಆದರೆ (compute_auto_abbrev)
 		abbrev = auto_abbrev;
-	if (abbrev < (int)the_hash_algo->hexsz) {
-		abbrev += max_marks_count;
-		if (abbrev > (int)the_hash_algo->hexsz)
+	ಆದರೆ (abbrev < (ಪೂರ್ಣಾಂಕ)the_hash_algo->hexsz) {
+		abbrev += max_marks_ಎಣಿಕೆ;
+		ಆದರೆ (abbrev > (ಪೂರ್ಣಾಂಕ)the_hash_algo->hexsz)
 			abbrev = the_hash_algo->hexsz;
 	}
 }
 
-static void sanity_check_on_fail(struct blame_scoreboard *sb, int baa)
+ಸ್ಥಿರ ಶೂನ್ಯ sanity_check_on_fail(ರಚನೆ blame_scoreboard *sb, ಪೂರ್ಣಾಂಕ baa)
 {
-	int opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_NUMBER | OUTPUT_SHOW_NAME;
-	find_alignment(sb, &opt);
+	ಪೂರ್ಣಾಂಕ opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_ಸಂಖ್ಯೆ | OUTPUT_SHOW_NAME;
+	ಕಂಡುಹಿಡಿ_alignment(sb, &opt);
 	output(sb, opt);
 	die("Baa %d!", baa);
 }
 
-static unsigned parse_score(const char *arg)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ parse_score(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg)
 {
-	char *end;
-	unsigned long score = strtoul(arg, &end, 10);
-	if (*end)
-		return 0;
-	return score;
+	ಅಕ್ಷರ *ಕೊನೆ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ score = strtoul(arg, &ಕೊನೆ, 10);
+	ಆದರೆ (*ಕೊನೆ)
+		ಹಿಂತಿರುಗಿ 0;
+	ಹಿಂತಿರುಗಿ score;
 }
 
-static char *add_prefix(const char *prefix, const char *path)
+ಸ್ಥಿರ ಅಕ್ಷರ *ಕೂಡಿಸು_ಪೂರ್ವಪ್ರತ್ಯಯ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	return prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, path);
+	ಹಿಂತಿರುಗಿ ಪೂರ್ವಪ್ರತ್ಯಯ_ಮಾರ್ಗ(the_repository, ಪೂರ್ವಪ್ರತ್ಯಯ, ಪೂರ್ವಪ್ರತ್ಯಯ ? ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಪೂರ್ವಪ್ರತ್ಯಯ) : 0, ಮಾರ್ಗ);
 }
 
-static int git_blame_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ git_blame_config(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *var, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮೌಲ್ಯ,
+			    ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	if (!strcmp(var, "blame.showroot")) {
-		show_root = git_config_bool(var, value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "blame.showroot")) {
+		show_ಬೇರು = git_config_bool(var, ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "blame.blankboundary")) {
-		blank_boundary = git_config_bool(var, value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "blame.blankboundary")) {
+		blank_boundary = git_config_bool(var, ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "blame.showemail")) {
-		int *output_option = cb;
-		if (git_config_bool(var, value))
+	ಆದರೆ (!strcmp(var, "blame.showemail")) {
+		ಪೂರ್ಣಾಂಕ *output_option = cb;
+		ಆದರೆ (git_config_bool(var, ಮೌಲ್ಯ))
 			*output_option |= OUTPUT_SHOW_EMAIL;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			*output_option &= ~OUTPUT_SHOW_EMAIL;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "blame.date")) {
-		if (!value)
-			return config_error_nonbool(var);
-		parse_date_format(value, &blame_date_mode);
-		return 0;
+	ಆದರೆ (!strcmp(var, "blame.date")) {
+		ಆದರೆ (!ಮೌಲ್ಯ)
+			ಹಿಂತಿರುಗಿ config_error_nonbool(var);
+		parse_date_format(ಮೌಲ್ಯ, &blame_date_ಬಹುಲಕ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "blame.ignorerevsfile")) {
-		char *str;
-		int ret;
+	ಆದರೆ (!strcmp(var, "blame.ignorerevsfile")) {
+		ಅಕ್ಷರ *str;
+		ಪೂರ್ಣಾಂಕ ret;
 
-		ret = git_config_pathname(&str, var, value);
-		if (ret)
-			return ret;
-		if (str)
-			string_list_insert(&ignore_revs_file_list, str);
-		free(str);
-		return 0;
+		ret = git_config_pathname(&str, var, ಮೌಲ್ಯ);
+		ಆದರೆ (ret)
+			ಹಿಂತಿರುಗಿ ret;
+		ಆದರೆ (str)
+			string_list_ಸೇರಿಸು(&ignore_revs_file_list, str);
+		ಬಿಡುಗಡೆ(str);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "blame.markunblamablelines")) {
-		mark_unblamable_lines = git_config_bool(var, value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "blame.markunblamablelines")) {
+		mark_unblamable_ಸಾಲುಗಳು = git_config_bool(var, ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "blame.markignoredlines")) {
-		mark_ignored_lines = git_config_bool(var, value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "blame.markignoredlines")) {
+		mark_ignored_ಸಾಲುಗಳು = git_config_bool(var, ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "color.blame.repeatedlines")) {
-		if (color_parse_mem(value, strlen(value), repeated_meta_color))
+	ಆದರೆ (!strcmp(var, "color.blame.repeatedlines")) {
+		ಆದರೆ (color_parse_mem(ಮೌಲ್ಯ, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಮೌಲ್ಯ), repeated_meta_color))
 			warning(_("invalid value for '%s': '%s'"),
-				"color.blame.repeatedLines", value);
-		return 0;
+				"color.blame.repeatedLines", ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(var, "color.blame.highlightrecent")) {
-		parse_color_fields(value);
-		return 0;
+	ಆದರೆ (!strcmp(var, "color.blame.highlightrecent")) {
+		parse_color_fields(ಮೌಲ್ಯ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (!strcmp(var, "blame.coloring")) {
-		if (!value)
-			return config_error_nonbool(var);
-		if (!strcmp(value, "repeatedLines")) {
-			coloring_mode |= OUTPUT_COLOR_LINE;
-		} else if (!strcmp(value, "highlightRecent")) {
-			coloring_mode |= OUTPUT_SHOW_AGE_WITH_COLOR;
-		} else if (!strcmp(value, "none")) {
-			coloring_mode &= ~(OUTPUT_COLOR_LINE |
+	ಆದರೆ (!strcmp(var, "blame.coloring")) {
+		ಆದರೆ (!ಮೌಲ್ಯ)
+			ಹಿಂತಿರುಗಿ config_error_nonbool(var);
+		ಆದರೆ (!strcmp(ಮೌಲ್ಯ, "repeatedLines")) {
+			coloring_ಬಹುಲಕ |= OUTPUT_COLOR_ಸಾಲು;
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(ಮೌಲ್ಯ, "highlightRecent")) {
+			coloring_ಬಹುಲಕ |= OUTPUT_SHOW_AGE_WITH_COLOR;
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(ಮೌಲ್ಯ, "none")) {
+			coloring_ಬಹುಲಕ &= ~(OUTPUT_COLOR_ಸಾಲು |
 					    OUTPUT_SHOW_AGE_WITH_COLOR);
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			warning(_("invalid value for '%s': '%s'"),
-				"blame.coloring", value);
-			return 0;
+				"blame.coloring", ಮೌಲ್ಯ);
+			ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
-	if (!strcmp(var, "diff.algorithm")) {
-		long diff_algorithm;
-		if (!value)
-			return config_error_nonbool(var);
-		diff_algorithm = parse_algorithm_value(value);
-		if (diff_algorithm < 0)
-			return error(_("unknown value for config '%s': %s"),
-				     var, value);
-		xdl_opts &= ~XDF_DIFF_ALGORITHM_MASK;
+	ಆದರೆ (!strcmp(var, "diff.algorithm")) {
+		ದೀರ್ಘ diff_algorithm;
+		ಆದರೆ (!ಮೌಲ್ಯ)
+			ಹಿಂತಿರುಗಿ config_error_nonbool(var);
+		diff_algorithm = parse_algorithm_ಮೌಲ್ಯ(ಮೌಲ್ಯ);
+		ಆದರೆ (diff_algorithm < 0)
+			ಹಿಂತಿರುಗಿ error(_("unknown value for config '%s': %s"),
+				     var, ಮೌಲ್ಯ);
+		xdl_opts &= ~XDF_DIFF_ALGORITHM_ಮುಖವಾಡ;
 		xdl_opts |= diff_algorithm;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (git_diff_heuristic_config(var, value, cb) < 0)
-		return -1;
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	ಆದರೆ (git_diff_heuristic_config(var, ಮೌಲ್ಯ, cb) < 0)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (userdiff_config(var, ಮೌಲ್ಯ) < 0)
+		ಹಿಂತಿರುಗಿ -1;
 
-	return git_default_config(var, value, ctx, cb);
+	ಹಿಂತಿರುಗಿ git_default_config(var, ಮೌಲ್ಯ, ctx, cb);
 }
 
-static int blame_copy_callback(const struct option *option, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ blame_copy_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *option, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	int *opt = option->value;
+	ಪೂರ್ಣಾಂಕ *opt = option->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -843,271 +843,271 @@ static int blame_copy_callback(const struct option *option, const char *arg, int
 	 * -C -C -C enables copy from existing files for
 	 *          everybody
 	 */
-	if (*opt & PICKAXE_BLAME_COPY_HARDER)
+	ಆದರೆ (*opt & PICKAXE_BLAME_COPY_HARDER)
 		*opt |= PICKAXE_BLAME_COPY_HARDEST;
-	if (*opt & PICKAXE_BLAME_COPY)
+	ಆದರೆ (*opt & PICKAXE_BLAME_COPY)
 		*opt |= PICKAXE_BLAME_COPY_HARDER;
 	*opt |= PICKAXE_BLAME_COPY | PICKAXE_BLAME_MOVE;
 
-	if (arg)
+	ಆದರೆ (arg)
 		blame_copy_score = parse_score(arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int blame_move_callback(const struct option *option, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ blame_move_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *option, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	int *opt = option->value;
+	ಪೂರ್ಣಾಂಕ *opt = option->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*opt |= PICKAXE_BLAME_MOVE;
 
-	if (arg)
+	ಆದರೆ (arg)
 		blame_move_score = parse_score(arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int blame_diff_algorithm_minimal(const struct option *option,
-					const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ blame_diff_algorithm_ಕನಿಷ್ಠತಮ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *option,
+					ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	int *opt = option->value;
+	ಪೂರ್ಣಾಂಕ *opt = option->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_ARG(arg);
 
-	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
-	if (!unset)
-		*opt |= XDF_NEED_MINIMAL;
+	*opt &= ~XDF_DIFF_ALGORITHM_ಮುಖವಾಡ;
+	ಆದರೆ (!unset)
+		*opt |= XDF_NEED_ಕನಿಷ್ಠತಮ;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int blame_diff_algorithm_callback(const struct option *option,
-					 const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ blame_diff_algorithm_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *option,
+					 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	int *opt = option->value;
-	long value = parse_algorithm_value(arg);
+	ಪೂರ್ಣಾಂಕ *opt = option->ಮೌಲ್ಯ;
+	ದೀರ್ಘ ಮೌಲ್ಯ = parse_algorithm_ಮೌಲ್ಯ(arg);
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (value < 0)
-		return error(_("option diff-algorithm accepts \"myers\", "
+	ಆದರೆ (ಮೌಲ್ಯ < 0)
+		ಹಿಂತಿರುಗಿ error(_("option diff-algorithm accepts \"myers\", "
 			       "\"minimal\", \"patience\" and \"histogram\""));
 
-	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
-	*opt |= value;
+	*opt &= ~XDF_DIFF_ALGORITHM_ಮುಖವಾಡ;
+	*opt |= ಮೌಲ್ಯ;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int is_a_rev(const char *name)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ is_a_rev(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	struct object_id oid;
+	ರಚನೆ object_id oid;
 
-	if (repo_get_oid(the_repository, name, &oid))
-		return 0;
-	return OBJ_NONE < odb_read_object_info(the_repository->objects, &oid, NULL);
+	ಆದರೆ (repo_get_oid(the_repository, name, &oid))
+		ಹಿಂತಿರುಗಿ 0;
+	ಹಿಂತಿರುಗಿ OBJ_NONE < odb_read_object_info(the_repository->objects, &oid, ಖಾಲಿ);
 }
 
-static int peel_to_commit_oid(struct object_id *oid_ret, void *cbdata)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ peel_ಗಮ್ಯ_commit_oid(ರಚನೆ object_id *oid_ret, ಶೂನ್ಯ *cbdata)
 {
-	struct repository *r = ((struct blame_scoreboard *)cbdata)->repo;
-	struct object_id oid;
+	ರಚನೆ repository *r = ((ರಚನೆ blame_scoreboard *)cbdata)->repo;
+	ರಚನೆ object_id oid;
 
 	oidcpy(&oid, oid_ret);
-	while (1) {
-		struct object *obj;
-		int kind = odb_read_object_info(r->objects, &oid, NULL);
-		if (kind == OBJ_COMMIT) {
+	ಆಗ (1) {
+		ರಚನೆ object *obj;
+		ಪೂರ್ಣಾಂಕ ಬಗೆ = odb_read_object_info(r->objects, &oid, ಖಾಲಿ);
+		ಆದರೆ (ಬಗೆ == OBJ_COMMIT) {
 			oidcpy(oid_ret, &oid);
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		if (kind != OBJ_TAG)
-			return -1;
-		obj = deref_tag(r, parse_object(r, &oid), NULL, 0);
-		if (!obj)
-			return -1;
+		ಆದರೆ (ಬಗೆ != OBJ_ಟ್ಯಾಗ್)
+			ಹಿಂತಿರುಗಿ -1;
+		obj = deref_ಟ್ಯಾಗ್(r, parse_object(r, &oid), ಖಾಲಿ, 0);
+		ಆದರೆ (!obj)
+			ಹಿಂತಿರುಗಿ -1;
 		oidcpy(&oid, &obj->oid);
 	}
 }
 
-static void build_ignorelist(struct blame_scoreboard *sb,
-			     struct string_list *ignore_revs_file_list,
-			     struct string_list *ignore_rev_list)
+ಸ್ಥಿರ ಶೂನ್ಯ build_ignorelist(ರಚನೆ blame_scoreboard *sb,
+			     ರಚನೆ string_list *ignore_revs_file_list,
+			     ರಚನೆ string_list *ignore_rev_list)
 {
-	struct string_list_item *i;
-	struct object_id oid;
+	ರಚನೆ string_list_ಅಂಶ *i;
+	ರಚನೆ object_id oid;
 
 	oidset_init(&sb->ignore_list, 0);
-	for_each_string_list_item(i, ignore_revs_file_list) {
-		if (!strcmp(i->string, ""))
+	for_each_string_list_ಅಂಶ(i, ignore_revs_file_list) {
+		ಆದರೆ (!strcmp(i->string, ""))
 			oidset_clear(&sb->ignore_list);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			oidset_parse_file_carefully(&sb->ignore_list, i->string,
 						    the_repository->hash_algo,
-						    peel_to_commit_oid, sb);
+						    peel_ಗಮ್ಯ_commit_oid, sb);
 	}
-	for_each_string_list_item(i, ignore_rev_list) {
-		if (repo_get_oid_committish(the_repository, i->string, &oid) ||
-		    peel_to_commit_oid(&oid, sb))
+	for_each_string_list_ಅಂಶ(i, ignore_rev_list) {
+		ಆದರೆ (repo_get_oid_committish(the_repository, i->string, &oid) ||
+		    peel_ಗಮ್ಯ_commit_oid(&oid, sb))
 			die(_("cannot find revision %s to ignore"), i->string);
-		oidset_insert(&sb->ignore_list, &oid);
+		oidset_ಸೇರಿಸು(&sb->ignore_list, &oid);
 	}
 }
 
-int cmd_blame(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_blame(ಪೂರ್ಣಾಂಕ argc,
+	      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	      ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct rev_info revs;
-	char *path = NULL;
-	struct blame_scoreboard sb;
-	struct blame_origin *o;
-	struct blame_entry *ent = NULL;
-	long dashdash_pos, lno;
-	struct progress_info pi = { NULL, 0 };
+	ರಚನೆ rev_info revs;
+	ಅಕ್ಷರ *ಮಾರ್ಗ = ಖಾಲಿ;
+	ರಚನೆ blame_scoreboard sb;
+	ರಚನೆ blame_origin *o;
+	ರಚನೆ blame_ನಮೂದು *ent = ಖಾಲಿ;
+	ದೀರ್ಘ dashdash_pos, lno;
+	ರಚನೆ ಪ್ರಗತಿ_info pi = { ಖಾಲಿ, 0 };
 
-	struct string_list range_list = STRING_LIST_INIT_NODUP;
-	struct string_list ignore_rev_list = STRING_LIST_INIT_NODUP;
-	int output_option = 0, opt = 0;
-	int show_stats = 0;
-	const char *revs_file = NULL;
-	const char *contents_from = NULL;
-	const struct option options[] = {
+	ರಚನೆ string_list range_list = STRING_LIST_INIT_NODUP;
+	ರಚನೆ string_list ignore_rev_list = STRING_LIST_INIT_NODUP;
+	ಪೂರ್ಣಾಂಕ output_option = 0, opt = 0;
+	ಪೂರ್ಣಾಂಕ show_stats = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *revs_file = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *contents_from = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ option options[] = {
 		OPT_BOOL(0, "incremental", &incremental, N_("show blame entries as we find them, incrementally")),
-		OPT_BOOL('b', NULL, &blank_boundary, N_("do not show object names of boundary commits (Default: off)")),
-		OPT_BOOL(0, "root", &show_root, N_("do not treat root commits as boundaries (Default: off)")),
+		OPT_BOOL('b', ಖಾಲಿ, &blank_boundary, N_("do not show object names of boundary commits (Default: off)")),
+		OPT_BOOL(0, "root", &show_ಬೇರು, N_("do not treat root commits as boundaries (Default: off)")),
 		OPT_BOOL(0, "show-stats", &show_stats, N_("show work cost statistics")),
-		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
-		OPT_BIT(0, "score-debug", &output_option, N_("show output score for blame entries"), OUTPUT_SHOW_SCORE),
-		OPT_BIT('f', "show-name", &output_option, N_("show original filename (Default: auto)"), OUTPUT_SHOW_NAME),
-		OPT_BIT('n', "show-number", &output_option, N_("show original linenumber (Default: off)"), OUTPUT_SHOW_NUMBER),
-		OPT_BIT('p', "porcelain", &output_option, N_("show in a format designed for machine consumption"), OUTPUT_PORCELAIN),
-		OPT_BIT(0, "line-porcelain", &output_option, N_("show porcelain format with per-line commit information"), OUTPUT_PORCELAIN|OUTPUT_LINE_PORCELAIN),
-		OPT_BIT('c', NULL, &output_option, N_("use the same output mode as git-annotate (Default: off)"), OUTPUT_ANNOTATE_COMPAT),
-		OPT_BIT('t', NULL, &output_option, N_("show raw timestamp (Default: off)"), OUTPUT_RAW_TIMESTAMP),
-		OPT_BIT('l', NULL, &output_option, N_("show long commit SHA1 (Default: off)"), OUTPUT_LONG_OBJECT_NAME),
-		OPT_BIT('s', NULL, &output_option, N_("suppress author name and timestamp (Default: off)"), OUTPUT_NO_AUTHOR),
-		OPT_BIT('e', "show-email", &output_option, N_("show author email instead of name (Default: off)"), OUTPUT_SHOW_EMAIL),
-		OPT_BIT('w', NULL, &xdl_opts, N_("ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
+		OPT_BOOL(0, "progress", &show_ಪ್ರಗತಿ, N_("force progress reporting")),
+		OPT_ಬಿಟ್(0, "score-debug", &output_option, N_("show output score for blame entries"), OUTPUT_SHOW_SCORE),
+		OPT_ಬಿಟ್('f', "show-name", &output_option, N_("show original filename (Default: auto)"), OUTPUT_SHOW_NAME),
+		OPT_ಬಿಟ್('n', "show-number", &output_option, N_("show original linenumber (Default: off)"), OUTPUT_SHOW_ಸಂಖ್ಯೆ),
+		OPT_ಬಿಟ್('p', "porcelain", &output_option, N_("show in a format designed for machine consumption"), OUTPUT_PORCELAIN),
+		OPT_ಬಿಟ್(0, "line-porcelain", &output_option, N_("show porcelain format with per-line commit information"), OUTPUT_PORCELAIN|OUTPUT_ಸಾಲು_PORCELAIN),
+		OPT_ಬಿಟ್('c', ಖಾಲಿ, &output_option, N_("use the same output mode as git-annotate (Default: off)"), OUTPUT_ANNOTATE_COMPAT),
+		OPT_ಬಿಟ್('t', ಖಾಲಿ, &output_option, N_("show raw timestamp (Default: off)"), OUTPUT_RAW_TIMESTAMP),
+		OPT_ಬಿಟ್('l', ಖಾಲಿ, &output_option, N_("show long commit SHA1 (Default: off)"), OUTPUT_LONG_OBJECT_NAME),
+		OPT_ಬಿಟ್('s', ಖಾಲಿ, &output_option, N_("suppress author name and timestamp (Default: off)"), OUTPUT_NO_AUTHOR),
+		OPT_ಬಿಟ್('e', "show-email", &output_option, N_("show author email instead of name (Default: off)"), OUTPUT_SHOW_EMAIL),
+		OPT_ಬಿಟ್('w', ಖಾಲಿ, &xdl_opts, N_("ignore whitespace differences"), XDF_IGNORE_WHITESPACE),
 		OPT_CALLBACK_F(0, "diff-algorithm", &xdl_opts, N_("<algorithm>"),
 			       N_("choose a diff algorithm"),
 			       PARSE_OPT_NONEG, blame_diff_algorithm_callback),
 		OPT_STRING_LIST(0, "ignore-rev", &ignore_rev_list, N_("rev"), N_("ignore <rev> when blaming")),
 		OPT_STRING_LIST(0, "ignore-revs-file", &ignore_revs_file_list, N_("file"), N_("ignore revisions from <file>")),
-		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_LINE),
-		OPT_BIT(0, "color-by-age", &output_option, N_("color lines by age"), OUTPUT_SHOW_AGE_WITH_COLOR),
-		OPT_CALLBACK_F(0, "minimal", &xdl_opts, NULL,
+		OPT_ಬಿಟ್(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_ಸಾಲು),
+		OPT_ಬಿಟ್(0, "color-by-age", &output_option, N_("color lines by age"), OUTPUT_SHOW_AGE_WITH_COLOR),
+		OPT_CALLBACK_F(0, "minimal", &xdl_opts, ಖಾಲಿ,
 			       N_("spend extra cycles to find a better match"),
-			       PARSE_OPT_NOARG | PARSE_OPT_HIDDEN, blame_diff_algorithm_minimal),
-		OPT_STRING('S', NULL, &revs_file, N_("file"), N_("use revisions from <file> instead of calling git-rev-list")),
+			       PARSE_OPT_NOARG | PARSE_OPT_HIDDEN, blame_diff_algorithm_ಕನಿಷ್ಠತಮ),
+		OPT_STRING('S', ಖಾಲಿ, &revs_file, N_("file"), N_("use revisions from <file> instead of calling git-rev-list")),
 		OPT_STRING(0, "contents", &contents_from, N_("file"), N_("use <file>'s contents as the final image")),
-		OPT_CALLBACK_F('C', NULL, &opt, N_("score"), N_("find line copies within and across files"), PARSE_OPT_OPTARG, blame_copy_callback),
-		OPT_CALLBACK_F('M', NULL, &opt, N_("score"), N_("find line movements within and across files"), PARSE_OPT_OPTARG, blame_move_callback),
-		OPT_STRING_LIST('L', NULL, &range_list, N_("range"),
+		OPT_CALLBACK_F('C', ಖಾಲಿ, &opt, N_("score"), N_("find line copies within and across files"), PARSE_OPT_OPTARG, blame_copy_callback),
+		OPT_CALLBACK_F('M', ಖಾಲಿ, &opt, N_("score"), N_("find line movements within and across files"), PARSE_OPT_OPTARG, blame_move_callback),
+		OPT_STRING_LIST('L', ಖಾಲಿ, &range_list, N_("range"),
 				N_("process only line range <start>,<end> or function :<funcname>")),
 		OPT__ABBREV(&abbrev),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	struct parse_opt_ctx_t ctx;
-	int cmd_is_annotate = !strcmp(argv[0], "annotate");
-	struct range_set ranges;
-	unsigned int range_i;
-	long anchor;
-	long num_lines = 0;
-	const char *str_usage = cmd_is_annotate ? annotate_usage : blame_usage;
-	const char *const *opt_usage = cmd_is_annotate ? annotate_opt_usage : blame_opt_usage;
+	ರಚನೆ parse_opt_ctx_t ctx;
+	ಪೂರ್ಣಾಂಕ cmd_is_annotate = !strcmp(argv[0], "annotate");
+	ರಚನೆ range_ಗಣ ranges;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ range_i;
+	ದೀರ್ಘ anchor;
+	ದೀರ್ಘ ಅಂಕೆ_ಸಾಲುಗಳು = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *str_usage = cmd_is_annotate ? annotate_usage : blame_usage;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ *opt_usage = cmd_is_annotate ? annotate_opt_usage : blame_opt_usage;
 
-	setup_default_color_by_age();
+	ಸಿದ್ಧತೆ_default_color_by_age();
 	repo_config(the_repository, git_blame_config, &output_option);
-	repo_init_revisions(the_repository, &revs, NULL);
-	revs.date_mode = blame_date_mode;
+	repo_init_revisions(the_repository, &revs, ಖಾಲಿ);
+	revs.date_ಬಹುಲಕ = blame_date_ಬಹುಲಕ;
 	revs.diffopt.flags.allow_textconv = 1;
 	revs.diffopt.flags.follow_renames = 1;
 
-	save_commit_buffer = 0;
+	save_commit_ಬಫರ್ = 0;
 	dashdash_pos = 0;
-	show_progress = -1;
+	show_ಪ್ರಗತಿ = -1;
 
-	parse_options_start(&ctx, argc, argv, prefix, options,
+	parse_options_ಆರಂಭ(&ctx, argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
-	for (;;) {
-		switch (parse_options_step(&ctx, options, opt_usage)) {
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_UNKNOWN:
-			break;
-		case PARSE_OPT_HELP:
-			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-		case PARSE_OPT_SUBCOMMAND:
-			exit(129);
-		case PARSE_OPT_COMPLETE:
-			exit(0);
-		case PARSE_OPT_DONE:
-			if (ctx.argv[0])
+	ಗಾಗಿ (;;) {
+		ಆಯ್ಕೆ (parse_options_ಹೆಜ್ಜೆ(&ctx, options, opt_usage)) {
+		ಸ್ಥಿತಿ PARSE_OPT_NON_OPTION:
+		ಸ್ಥಿತಿ PARSE_OPT_UNKNOWN:
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ PARSE_OPT_HELP:
+			ನಿರ್ಗಮಿಸು(0);
+		ಸ್ಥಿತಿ PARSE_OPT_HELP_ERROR:
+		ಸ್ಥಿತಿ PARSE_OPT_ERROR:
+		ಸ್ಥಿತಿ PARSE_OPT_SUBCOMMAND:
+			ನಿರ್ಗಮಿಸು(129);
+		ಸ್ಥಿತಿ PARSE_OPT_COMPLETE:
+			ನಿರ್ಗಮಿಸು(0);
+		ಸ್ಥಿತಿ PARSE_OPT_ಮುಗಿದ:
+			ಆದರೆ (ctx.argv[0])
 				dashdash_pos = ctx.cpidx;
-			goto parse_done;
+			ಹೋಗು parse_ಮುಗಿದ;
 		}
 
-		if (!strcmp(ctx.argv[0], "--reverse")) {
+		ಆದರೆ (!strcmp(ctx.argv[0], "--reverse")) {
 			ctx.argv[0] = "--children";
-			reverse = 1;
+			ಹಿಮ್ಮುಖ = 1;
 		}
 		parse_revision_opt(&revs, &ctx, options, opt_usage);
 	}
-parse_done:
-	revision_opts_finish(&revs);
-	no_whole_file_rename = !revs.diffopt.flags.follow_renames;
+parse_ಮುಗಿದ:
+	revision_opts_ಮುಕ್ತಾಯ(&revs);
+	no_ಸಂಪೂರ್ಣ_file_rename = !revs.diffopt.flags.follow_renames;
 	xdl_opts |= revs.diffopt.xdl_opts & XDF_INDENT_HEURISTIC;
 	revs.diffopt.flags.follow_renames = 0;
-	argc = parse_options_end(&ctx);
+	argc = parse_options_ಕೊನೆ(&ctx);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_ತುಂಬಿದ_ಸೂಚ್ಯಂಕ = 0;
 
-	if (incremental || (output_option & OUTPUT_PORCELAIN)) {
-		if (show_progress > 0)
+	ಆದರೆ (incremental || (output_option & OUTPUT_PORCELAIN)) {
+		ಆದರೆ (show_ಪ್ರಗತಿ > 0)
 			die(_("--progress can't be used with --incremental or porcelain formats"));
-		show_progress = 0;
-	} else if (show_progress < 0)
-		show_progress = isatty(2);
+		show_ಪ್ರಗತಿ = 0;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (show_ಪ್ರಗತಿ < 0)
+		show_ಪ್ರಗತಿ = isatty(2);
 
-	if (!abbrev)
+	ಆದರೆ (!abbrev)
 		abbrev = the_hash_algo->hexsz;
 
-	if (revs_file && read_ancestry(revs_file))
+	ಆದರೆ (revs_file && read_ancestry(revs_file))
 		die_errno("reading graft file '%s' failed", revs_file);
 
-	if (cmd_is_annotate) {
+	ಆದರೆ (cmd_is_annotate) {
 		output_option |= OUTPUT_ANNOTATE_COMPAT;
-		blame_date_mode.type = DATE_ISO8601;
-	} else {
-		blame_date_mode = revs.date_mode;
+		blame_date_ಬಹುಲಕ.type = DATE_ISO8601;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		blame_date_ಬಹುಲಕ = revs.date_ಬಹುಲಕ;
 	}
 
 	/* The maximum width used to show the dates */
-	switch (blame_date_mode.type) {
-	case DATE_RFC2822:
-		blame_date_width = sizeof("Thu, 19 Oct 2006 16:00:04 -0700");
-		break;
-	case DATE_ISO8601_STRICT:
-		blame_date_width = sizeof("2006-10-19T16:00:04-07:00");
-		break;
-	case DATE_ISO8601:
-		blame_date_width = sizeof("2006-10-19 16:00:04 -0700");
-		break;
-	case DATE_RAW:
-		blame_date_width = sizeof("1161298804 -0700");
-		break;
-	case DATE_UNIX:
-		blame_date_width = sizeof("1161298804");
-		break;
-	case DATE_SHORT:
-		blame_date_width = sizeof("2006-10-19");
-		break;
-	case DATE_RELATIVE:
+	ಆಯ್ಕೆ (blame_date_ಬಹುಲಕ.type) {
+	ಸ್ಥಿತಿ DATE_RFC2822:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("Thu, 19 Oct 2006 16:00:04 -0700");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_ISO8601_STRICT:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("2006-10-19T16:00:04-07:00");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_ISO8601:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("2006-10-19 16:00:04 -0700");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_RAW:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("1161298804 -0700");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_UNIX:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("1161298804");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_SHORT:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("2006-10-19");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_RELATIVE:
 		/*
 		 * TRANSLATORS: This string is used to tell us the
 		 * maximum display width for a relative timestamp in
@@ -1117,22 +1117,22 @@ parse_done:
 		 * your language may need more or fewer display
 		 * columns.
 		 */
-		blame_date_width = utf8_strwidth(_("4 years, 11 months ago")) + 1; /* add the null */
-		break;
-	case DATE_HUMAN:
+		blame_date_ಅಗಲ = utf8_strwidth(_("4 years, 11 months ago")) + 1; /* add the null */
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_HUMAN:
 		/* If the year is shown, no time is shown */
-		blame_date_width = sizeof("Thu Oct 19 16:00");
-		break;
-	case DATE_NORMAL:
-		blame_date_width = sizeof("Thu Oct 19 16:00:04 2006 -0700");
-		break;
-	case DATE_STRFTIME:
-		blame_date_width = strlen(show_date(0, 0, blame_date_mode)) + 1; /* add the null */
-		break;
+		blame_date_ಅಗಲ = ಗಾತ್ರ("Thu Oct 19 16:00");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_ಸಾಮಾನ್ಯ:
+		blame_date_ಅಗಲ = ಗಾತ್ರ("Thu Oct 19 16:00:04 2006 -0700");
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ DATE_STRFTIME:
+		blame_date_ಅಗಲ = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(show_date(0, 0, blame_date_ಬಹುಲಕ)) + 1; /* add the null */
+		ನಿಲ್ಲಿಸು;
 	}
-	blame_date_width -= 1; /* strip the null */
+	blame_date_ಅಗಲ -= 1; /* strip the null */
 
-	if (revs.diffopt.flags.find_copies_harder)
+	ಆದರೆ (revs.diffopt.flags.ಕಂಡುಹಿಡಿ_copies_harder)
 		opt |= (PICKAXE_BLAME_COPY | PICKAXE_BLAME_MOVE |
 			PICKAXE_BLAME_COPY_HARDER);
 
@@ -1154,181 +1154,181 @@ parse_done:
 	 * Note that we must strip out <path> from the arguments: we do not
 	 * want the path pruning but we may want "bottom" processing.
 	 */
-	if (dashdash_pos) {
-		switch (argc - dashdash_pos - 1) {
-		case 2: /* (1b) */
-			if (argc != 4)
+	ಆದರೆ (dashdash_pos) {
+		ಆಯ್ಕೆ (argc - dashdash_pos - 1) {
+		ಸ್ಥಿತಿ 2: /* (1b) */
+			ಆದರೆ (argc != 4)
 				usage_with_options(opt_usage, options);
 			/* reorder for the new way: <rev> -- <path> */
 			argv[1] = argv[3];
 			argv[3] = argv[2];
 			argv[2] = "--";
 			/* FALLTHROUGH */
-		case 1: /* (1a) */
-			path = add_prefix(prefix, argv[--argc]);
-			argv[argc] = NULL;
-			break;
-		default:
+		ಸ್ಥಿತಿ 1: /* (1a) */
+			ಮಾರ್ಗ = ಕೂಡಿಸು_ಪೂರ್ವಪ್ರತ್ಯಯ(ಪೂರ್ವಪ್ರತ್ಯಯ, argv[--argc]);
+			argv[argc] = ಖಾಲಿ;
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
 			usage_with_options(opt_usage, options);
 		}
-	} else {
-		if (argc < 2)
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (argc < 2)
 			usage_with_options(opt_usage, options);
-		if (argc == 3 && is_a_rev(argv[argc - 1])) { /* (2b) */
-			path = add_prefix(prefix, argv[1]);
+		ಆದರೆ (argc == 3 && is_a_rev(argv[argc - 1])) { /* (2b) */
+			ಮಾರ್ಗ = ಕೂಡಿಸು_ಪೂರ್ವಪ್ರತ್ಯಯ(ಪೂರ್ವಪ್ರತ್ಯಯ, argv[1]);
 			argv[1] = argv[2];
-		} else {	/* (2a) */
-			if (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_tree(the_repository))
+		} ಇಲ್ಲದಿದ್ದರೆ {	/* (2a) */
+			ಆದರೆ (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_ವೃಕ್ಷ(the_repository))
 				die("missing <path> to blame");
-			path = add_prefix(prefix, argv[argc - 1]);
+			ಮಾರ್ಗ = ಕೂಡಿಸು_ಪೂರ್ವಪ್ರತ್ಯಯ(ಪೂರ್ವಪ್ರತ್ಯಯ, argv[argc - 1]);
 		}
 		argv[argc - 1] = "--";
 	}
 
 	revs.disable_stdin = 1;
-	setup_revisions(argc, argv, &revs, NULL);
-	if (!revs.pending.nr && is_bare_repository(the_repository)) {
-		struct commit *head_commit;
-		struct object_id head_oid;
+	ಸಿದ್ಧತೆ_revisions(argc, argv, &revs, ಖಾಲಿ);
+	ಆದರೆ (!revs.pending.nr && is_bare_repository(the_repository)) {
+		ರಚನೆ commit *ತಲೆ_commit;
+		ರಚನೆ object_id ತಲೆ_oid;
 
-		if (!refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", RESOLVE_REF_READING,
-					     &head_oid, NULL) ||
-		    !(head_commit = lookup_commit_reference_gently(revs.repo,
-							     &head_oid, 1)))
+		ಆದರೆ (!refs_resolve_ref_unsafe(get_main_ref_store(the_repository), "HEAD", RESOLVE_REF_READING,
+					     &ತಲೆ_oid, ಖಾಲಿ) ||
+		    !(ತಲೆ_commit = lookup_commit_reference_gently(revs.repo,
+							     &ತಲೆ_oid, 1)))
 			die("no such ref: HEAD");
 
-		add_pending_object(&revs, &head_commit->object, "HEAD");
+		ಕೂಡಿಸು_pending_object(&revs, &ತಲೆ_commit->object, "HEAD");
 	}
 
 	init_scoreboard(&sb);
 	sb.revs = &revs;
 	sb.contents_from = contents_from;
-	sb.reverse = reverse;
+	sb.ಹಿಮ್ಮುಖ = ಹಿಮ್ಮುಖ;
 	sb.repo = the_repository;
-	sb.path = path;
+	sb.ಮಾರ್ಗ = ಮಾರ್ಗ;
 	build_ignorelist(&sb, &ignore_revs_file_list, &ignore_rev_list);
 	string_list_clear(&ignore_revs_file_list, 0);
 	string_list_clear(&ignore_rev_list, 0);
-	setup_scoreboard(&sb, &o);
+	ಸಿದ್ಧತೆ_scoreboard(&sb, &o);
 
 	/*
 	 * Changed-path Bloom filters are disabled when looking
 	 * for copies.
 	 */
-	if (!(opt & PICKAXE_BLAME_COPY))
-		setup_blame_bloom_data(&sb);
+	ಆದರೆ (!(opt & PICKAXE_BLAME_COPY))
+		ಸಿದ್ಧತೆ_blame_bloom_ದತ್ತಾಂಶ(&sb);
 
-	lno = sb.num_lines;
+	lno = sb.ಅಂಕೆ_ಸಾಲುಗಳು;
 
-	if (lno && !range_list.nr)
+	ಆದರೆ (lno && !range_list.nr)
 		string_list_append(&range_list, "1");
 
 	anchor = 1;
-	range_set_init(&ranges, range_list.nr);
-	for (range_i = 0; range_i < range_list.nr; ++range_i) {
-		long bottom, top;
-		if (parse_range_arg(range_list.items[range_i].string,
-				    nth_line_cb, &sb, lno, anchor,
-				    &bottom, &top, sb.path,
-				    the_repository->index))
+	range_ಗಣ_init(&ranges, range_list.nr);
+	ಗಾಗಿ (range_i = 0; range_i < range_list.nr; ++range_i) {
+		ದೀರ್ಘ bottom, ತುದಿ;
+		ಆದರೆ (parse_range_arg(range_list.ವಸ್ತುಗಳು[range_i].string,
+				    nth_ಸಾಲು_cb, &sb, lno, anchor,
+				    &bottom, &ತುದಿ, sb.ಮಾರ್ಗ,
+				    the_repository->ಸೂಚ್ಯಂಕ))
 			usage(str_usage);
-		if ((!lno && (top || bottom)) || lno < bottom)
+		ಆದರೆ ((!lno && (ತುದಿ || bottom)) || lno < bottom)
 			die(Q_("file %s has only %lu line",
 			       "file %s has only %lu lines",
-			       lno), sb.path, lno);
-		if (bottom < 1)
+			       lno), sb.ಮಾರ್ಗ, lno);
+		ಆದರೆ (bottom < 1)
 			bottom = 1;
-		if (top < 1 || lno < top)
-			top = lno;
+		ಆದರೆ (ತುದಿ < 1 || lno < ತುದಿ)
+			ತುದಿ = lno;
 		bottom--;
-		range_set_append_unsafe(&ranges, bottom, top);
-		anchor = top + 1;
+		range_ಗಣ_append_unsafe(&ranges, bottom, ತುದಿ);
+		anchor = ತುದಿ + 1;
 	}
-	sort_and_merge_range_set(&ranges);
+	ವಿಂಗಡಿಸು_and_ವಿಲೀನ_range_ಗಣ(&ranges);
 
-	for (range_i = ranges.nr; range_i > 0; --range_i) {
-		const struct range *r = &ranges.ranges[range_i - 1];
-		ent = blame_entry_prepend(ent, r->start, r->end, o);
-		num_lines += (r->end - r->start);
+	ಗಾಗಿ (range_i = ranges.nr; range_i > 0; --range_i) {
+		ಸ್ಥಿರಾಂಕ ರಚನೆ range *r = &ranges.ranges[range_i - 1];
+		ent = blame_ನಮೂದು_prepend(ent, r->ಆರಂಭ, r->ಕೊನೆ, o);
+		ಅಂಕೆ_ಸಾಲುಗಳು += (r->ಕೊನೆ - r->ಆರಂಭ);
 	}
-	if (!num_lines)
-		num_lines = sb.num_lines;
+	ಆದರೆ (!ಅಂಕೆ_ಸಾಲುಗಳು)
+		ಅಂಕೆ_ಸಾಲುಗಳು = sb.ಅಂಕೆ_ಸಾಲುಗಳು;
 
 	o->suspects = ent;
-	prio_queue_put(&sb.commits, o->commit);
+	prio_ಸರತಿ_put(&sb.commits, o->commit);
 
 	blame_origin_decref(o);
 
-	range_set_release(&ranges);
+	range_ಗಣ_release(&ranges);
 	string_list_clear(&range_list, 0);
 
-	sb.ent = NULL;
+	sb.ent = ಖಾಲಿ;
 
-	if (blame_move_score)
+	ಆದರೆ (blame_move_score)
 		sb.move_score = blame_move_score;
-	if (blame_copy_score)
+	ಆದರೆ (blame_copy_score)
 		sb.copy_score = blame_copy_score;
 
 	sb.debug = DEBUG_BLAME;
 	sb.on_sanity_fail = &sanity_check_on_fail;
 
-	sb.show_root = show_root;
+	sb.show_ಬೇರು = show_ಬೇರು;
 	sb.xdl_opts = xdl_opts;
-	sb.no_whole_file_rename = no_whole_file_rename;
+	sb.no_ಸಂಪೂರ್ಣ_file_rename = no_ಸಂಪೂರ್ಣ_file_rename;
 
 	read_mailmap(the_repository, &mailmap);
 
-	sb.found_guilty_entry = &found_guilty_entry;
-	sb.found_guilty_entry_data = &pi;
-	if (show_progress)
-		pi.progress = start_delayed_progress(the_repository,
+	sb.ಸಿಕ್ಕಿತು_guilty_ನಮೂದು = &ಸಿಕ್ಕಿತು_guilty_ನಮೂದು;
+	sb.ಸಿಕ್ಕಿತು_guilty_ನಮೂದು_ದತ್ತಾಂಶ = &pi;
+	ಆದರೆ (show_ಪ್ರಗತಿ)
+		pi.ಪ್ರಗತಿ = ಆರಂಭ_delayed_ಪ್ರಗತಿ(the_repository,
 						     _("Blaming lines"),
-						     num_lines);
+						     ಅಂಕೆ_ಸಾಲುಗಳು);
 
-	assign_blame(&sb, opt);
+	ನಿಯೋಜಿಸು_blame(&sb, opt);
 
-	stop_progress(&pi.progress);
+	stop_ಪ್ರಗತಿ(&pi.ಪ್ರಗತಿ);
 
-	if (!incremental)
-		setup_pager(the_repository);
-	else
-		goto cleanup;
+	ಆದರೆ (!incremental)
+		ಸಿದ್ಧತೆ_pager(the_repository);
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಹೋಗು cleanup;
 
-	blame_sort_final(&sb);
+	blame_ವಿಂಗಡಿಸು_final(&sb);
 
 	blame_coalesce(&sb);
 
-	if (!(output_option & (OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR)))
-		output_option |= coloring_mode;
+	ಆದರೆ (!(output_option & (OUTPUT_COLOR_ಸಾಲು | OUTPUT_SHOW_AGE_WITH_COLOR)))
+		output_option |= coloring_ಬಹುಲಕ;
 
-	if (!(output_option & OUTPUT_PORCELAIN)) {
-		find_alignment(&sb, &output_option);
-		if (!*repeated_meta_color &&
-		    (output_option & OUTPUT_COLOR_LINE))
+	ಆದರೆ (!(output_option & OUTPUT_PORCELAIN)) {
+		ಕಂಡುಹಿಡಿ_alignment(&sb, &output_option);
+		ಆದರೆ (!*repeated_meta_color &&
+		    (output_option & OUTPUT_COLOR_ಸಾಲು))
 			xsnprintf(repeated_meta_color,
-				  sizeof(repeated_meta_color),
+				  ಗಾತ್ರ(repeated_meta_color),
 				  "%s", GIT_COLOR_CYAN);
 	}
-	if (output_option & OUTPUT_ANNOTATE_COMPAT)
-		output_option &= ~(OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR);
+	ಆದರೆ (output_option & OUTPUT_ANNOTATE_COMPAT)
+		output_option &= ~(OUTPUT_COLOR_ಸಾಲು | OUTPUT_SHOW_AGE_WITH_COLOR);
 
 	output(&sb, output_option);
 
-	if (show_stats) {
-		printf("num read blob: %d\n", sb.num_read_blob);
-		printf("num get patch: %d\n", sb.num_get_patch);
-		printf("num commits: %d\n", sb.num_commits);
+	ಆದರೆ (show_stats) {
+		ಬರೆ("num read blob: %d\n", sb.ಅಂಕೆ_read_blob);
+		ಬರೆ("num get patch: %d\n", sb.ಅಂಕೆ_get_patch);
+		ಬರೆ("num commits: %d\n", sb.ಅಂಕೆ_commits);
 	}
 
 cleanup:
-	for (ent = sb.ent; ent; ) {
-		struct blame_entry *e = ent->next;
-		free(ent);
+	ಗಾಗಿ (ent = sb.ent; ent; ) {
+		ರಚನೆ blame_ನಮೂದು *e = ent->ಮುಂದಿನ;
+		ಬಿಡುಗಡೆ(ent);
 		ent = e;
 	}
 
-	free(path);
+	ಬಿಡುಗಡೆ(ಮಾರ್ಗ);
 	cleanup_scoreboard(&sb);
 	release_revisions(&revs);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

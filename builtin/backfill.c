@@ -1,52 +1,52 @@
 /* We need this macro to access core_apply_sparse_checkout */
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "git-compat-util.h"
-#include "config.h"
-#include "parse-options.h"
-#include "repository.h"
-#include "commit.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "object.h"
-#include "odb.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "promisor-remote.h"
-#include "strmap.h"
-#include "string-list.h"
-#include "revision.h"
-#include "trace2.h"
-#include "progress.h"
-#include "packfile.h"
-#include "path-walk.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "git-compat-util.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "repository.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "tree.h"
+#ಅನ್ತರ್ಭಾವ "tree-walk.h"
+#ಅನ್ತರ್ಭಾವ "object.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "oid-array.h"
+#ಅನ್ತರ್ಭಾವ "oidset.h"
+#ಅನ್ತರ್ಭಾವ "promisor-remote.h"
+#ಅನ್ತರ್ಭಾವ "strmap.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "trace2.h"
+#ಅನ್ತರ್ಭಾವ "progress.h"
+#ಅನ್ತರ್ಭಾವ "packfile.h"
+#ಅನ್ತರ್ಭಾವ "path-walk.h"
 
-static const char * const builtin_backfill_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_backfill_usage[] = {
 	N_("git backfill [--min-batch-size=<n>] [--[no-]sparse] [--[no-]include-edges] [<revision-range>]"),
-	NULL
+	ಖಾಲಿ
 };
 
-struct backfill_context {
-	struct repository *repo;
-	struct oid_array current_batch;
-	size_t min_batch_size;
-	int sparse;
-	int include_edges;
-	struct rev_info revs;
+ರಚನೆ backfill_context {
+	ರಚನೆ repository *repo;
+	ರಚನೆ oid_array current_batch;
+	ಗಾತ್ರ_t min_batch_ಗಾತ್ರ;
+	ಪೂರ್ಣಾಂಕ sparse;
+	ಪೂರ್ಣಾಂಕ include_ಅಂಚುಗಳು;
+	ರಚನೆ rev_info revs;
 };
 
-static void backfill_context_clear(struct backfill_context *ctx)
+ಸ್ಥಿರ ಶೂನ್ಯ backfill_context_clear(ರಚನೆ backfill_context *ctx)
 {
 	oid_array_clear(&ctx->current_batch);
 }
 
-static void download_batch(struct backfill_context *ctx)
+ಸ್ಥಿರ ಶೂನ್ಯ download_batch(ರಚನೆ backfill_context *ctx)
 {
-	promisor_remote_get_direct(ctx->repo,
+	promisor_remote_get_ನೇರ(ctx->repo,
 				   ctx->current_batch.oid,
 				   ctx->current_batch.nr);
 	oid_array_clear(&ctx->current_batch);
@@ -58,131 +58,131 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
-			      struct oid_array *list,
-			      enum object_type type,
-			      void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ fill_missing_blobs(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ ಬಳಸದ,
+			      ರಚನೆ oid_array *list,
+			      ಎಣಿಕೆ object_type type,
+			      ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	struct backfill_context *ctx = data;
+	ರಚನೆ backfill_context *ctx = ದತ್ತಾಂಶ;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	ಆದರೆ (type != OBJ_BLOB)
+		ಹಿಂತಿರುಗಿ 0;
 
-	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < list->nr; i++) {
+		ಆದರೆ (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	ಆದರೆ (ctx->current_batch.nr >= ctx->min_batch_ಗಾತ್ರ)
 		download_batch(ctx);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void reject_unsupported_rev_list_options(struct rev_info *revs)
+ಸ್ಥಿರ ಶೂನ್ಯ reject_unsupported_rev_list_options(ರಚನೆ rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	ಆದರೆ (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	ಆದರೆ (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	ಆದರೆ (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	ಆದರೆ (revs->ಸಾಲು_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	ಆದರೆ (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	ಆದರೆ (!ಮಾರ್ಗ_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	ಆದರೆ (revs->filter.blob_ಎಲ್ಲೆ_ಮೌಲ್ಯ)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ do_backfill(ರಚನೆ backfill_context *ctx)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	ರಚನೆ ಮಾರ್ಗ_walk_info info = ಮಾರ್ಗ_WALK_INFO_INIT;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	if (ctx->sparse) {
+	ಆದರೆ (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
-			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+		ಆದರೆ (get_sparse_checkout_patterns(info.pl)) {
+			ಮಾರ್ಗ_walk_info_clear(&info);
+			ಹಿಂತಿರುಗಿ error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
-		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
-		ctx->revs.edge_hint = 1;
+	ಆದರೆ (!ctx->revs.pending.nr)
+		ಕೂಡಿಸು_ತಲೆ_ಗಮ್ಯ_pending(&ctx->revs);
+	ಆದರೆ (ctx->include_ಅಂಚುಗಳು)
+		ctx->revs.ಅಂಚು_hint = 1;
 
 	info.blobs = 1;
-	info.tags = info.commits = info.trees = 0;
+	info.ಟ್ಯಾಗುಗಳು = info.commits = info.trees = 0;
 
 	info.revs = &ctx->revs;
-	info.path_fn = fill_missing_blobs;
-	info.path_fn_data = ctx;
+	info.ಮಾರ್ಗ_fn = fill_missing_blobs;
+	info.ಮಾರ್ಗ_fn_ದತ್ತಾಂಶ = ctx;
 
-	ret = walk_objects_by_path(&info);
+	ret = walk_objects_by_ಮಾರ್ಗ(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	ಆದರೆ (!ret)
 		download_batch(ctx);
 
-	path_walk_info_clear(&info);
-	return ret;
+	ಮಾರ್ಗ_walk_info_clear(&info);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_backfill(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ, ರಚನೆ repository *repo)
 {
-	int result;
-	struct backfill_context ctx = {
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
+	ರಚನೆ backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
-		.min_batch_size = 50000,
+		.min_batch_ಗಾತ್ರ = 50000,
 		.sparse = -1,
 		.revs = REV_INFO_INIT,
-		.include_edges = 1,
+		.include_ಅಂಚುಗಳು = 1,
 	};
-	struct option options[] = {
-		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_size,
+	ರಚನೆ option options[] = {
+		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_ಗಾತ್ರ,
 			     N_("Minimum number of objects to request at a time")),
 		OPT_BOOL(0, "sparse", &ctx.sparse,
 			 N_("Restrict the missing objects to the current sparse-checkout")),
-		OPT_BOOL(0, "include-edges", &ctx.include_edges,
+		OPT_BOOL(0, "include-edges", &ctx.include_ಅಂಚುಗಳು,
 			 N_("Include blobs from boundary commits in the backfill")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, builtin_backfill_usage,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, builtin_backfill_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_init_revisions(repo, &ctx.revs, prefix);
-	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
+	repo_init_revisions(repo, &ctx.revs, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	argc = ಸಿದ್ಧತೆ_revisions(argc, argv, &ctx.revs, ಖಾಲಿ);
 
-	if (argc > 1)
+	ಆದರೆ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ಖಾಲಿ);
 
-	if (ctx.sparse < 0)
+	ಆದರೆ (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
-	result = do_backfill(&ctx);
+	ಫಲಿತಾಂಶ = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }

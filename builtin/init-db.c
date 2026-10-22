@@ -3,64 +3,64 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
 
-static int guess_repository_type(const char *git_dir)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ guess_repository_type(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *git_dir)
 {
-	const char *slash;
-	char *cwd;
-	int cwd_is_git_dir;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *slash;
+	ಅಕ್ಷರ *cwd;
+	ಪೂರ್ಣಾಂಕ cwd_is_git_dir;
 
 	/*
 	 * "GIT_DIR=. git init" is always bare.
 	 * "GIT_DIR=`pwd` git init" too.
 	 */
-	if (!strcmp(".", git_dir))
-		return 1;
+	ಆದರೆ (!strcmp(".", git_dir))
+		ಹಿಂತಿರುಗಿ 1;
 	cwd = xgetcwd();
 	cwd_is_git_dir = !strcmp(git_dir, cwd);
-	free(cwd);
-	if (cwd_is_git_dir)
-		return 1;
+	ಬಿಡುಗಡೆ(cwd);
+	ಆದರೆ (cwd_is_git_dir)
+		ಹಿಂತಿರುಗಿ 1;
 	/*
 	 * "GIT_DIR=.git or GIT_DIR=something/.git is usually not.
 	 */
-	if (!strcmp(git_dir, ".git"))
-		return 0;
+	ಆದರೆ (!strcmp(git_dir, ".git"))
+		ಹಿಂತಿರುಗಿ 0;
 	slash = strrchr(git_dir, '/');
-	if (slash && !strcmp(slash, "/.git"))
-		return 0;
+	ಆದರೆ (slash && !strcmp(slash, "/.git"))
+		ಹಿಂತಿರುಗಿ 0;
 
 	/*
 	 * Otherwise it is often bare.  At this point
 	 * we are just guessing.
 	 */
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int shared_callback(const struct option *opt, const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ shared_callback(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	*((int *) opt->value) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
-	return 0;
+	*((ಪೂರ್ಣಾಂಕ *) opt->ಮೌಲ್ಯ) = (arg) ? git_config_perm("arg", arg) : PERM_ಗುಂಪು;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static const char *const init_db_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ init_db_usage[] = {
 	N_("git init [-q | --quiet] [--bare] [--template=<template-directory>]\n"
 	   "         [--separate-git-dir <git-dir>] [--object-format=<format>]\n"
 	   "         [--ref-storage-format=<format>]\n"
 	   "         [-b <branch-name> | --initial-branch=<branch-name>]\n"
 	   "         [--shared[=<permissions>]] [<directory>]"),
-	NULL
+	ಖಾಲಿ
 };
 
 /*
@@ -69,33 +69,33 @@ static const char *const init_db_usage[] = {
  * On the other hand, it might just make lookup slower and messier. You
  * be the judge.  The default case is to have one DB per managed directory.
  */
-int cmd_init_db(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_init_db(ಪೂರ್ಣಾಂಕ argc,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		ರಚನೆ repository *repo ಬಳಸದ)
 {
-	char *git_dir;
-	const char *real_git_dir = NULL;
-	char *real_git_dir_to_free = NULL;
-	char *work_tree = NULL;
-	const char *template_dir = NULL;
-	char *template_dir_to_free = NULL;
-	int quiet = 0;
-	int bare = startup_info->force_bare_repository ? 1 : -1;
-	const char *object_format = NULL;
-	const char *ref_storage_format_uri = NULL;
-	const char *initial_branch = NULL;
-	int hash_algo = GIT_HASH_UNKNOWN;
-	int init_shared_repository = -1;
-	const struct option init_db_options[] = {
+	ಅಕ್ಷರ *git_dir;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *real_git_dir = ಖಾಲಿ;
+	ಅಕ್ಷರ *real_git_dir_ಗಮ್ಯ_free = ಖಾಲಿ;
+	ಅಕ್ಷರ *work_ವೃಕ್ಷ = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *template_dir = ಖಾಲಿ;
+	ಅಕ್ಷರ *template_dir_ಗಮ್ಯ_free = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ quiet = 0;
+	ಪೂರ್ಣಾಂಕ bare = startup_info->force_bare_repository ? 1 : -1;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *object_format = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ref_storage_format_uri = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *initial_branch = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ hash_algo = GIT_HASH_UNKNOWN;
+	ಪೂರ್ಣಾಂಕ init_shared_repository = -1;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ option init_db_options[] = {
 		OPT_STRING(0, "template", &template_dir, N_("template-directory"),
 				N_("directory from which templates will be used")),
-		OPT_SET_INT(0, "bare", &bare,
+		OPT_ಗಣ_INT(0, "bare", &bare,
 				N_("create a bare repository"), 1),
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "shared",
-			.value = &init_shared_repository,
+			.ಮೌಲ್ಯ = &init_shared_repository,
 			.argh = N_("permissions"),
 			.help = N_("specify that the git repository is to be shared amongst several users"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -111,87 +111,87 @@ int cmd_init_db(int argc,
 		OPT_STRING(0, "ref-storage-format", &ref_storage_format_uri, N_("format"),
 			   N_("specify the reference storage format to use")),
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	int reinit;
+	ಪೂರ್ಣಾಂಕ reinit;
 
-	argc = parse_options(argc, argv, prefix, init_db_options, init_db_usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, init_db_options, init_db_usage, 0);
 
-	if (real_git_dir && bare == 1)
+	ಆದರೆ (real_git_dir && bare == 1)
 		die(_("options '%s' and '%s' cannot be used together"), "--separate-git-dir", "--bare");
 
-	if (real_git_dir && !is_absolute_path(real_git_dir))
-		real_git_dir = real_git_dir_to_free = real_pathdup(real_git_dir, 1);
+	ಆದರೆ (real_git_dir && !is_absolute_ಮಾರ್ಗ(real_git_dir))
+		real_git_dir = real_git_dir_ಗಮ್ಯ_free = real_pathdup(real_git_dir, 1);
 
-	if (template_dir && *template_dir && !is_absolute_path(template_dir))
-		template_dir = template_dir_to_free = absolute_pathdup(template_dir);
+	ಆದರೆ (template_dir && *template_dir && !is_absolute_ಮಾರ್ಗ(template_dir))
+		template_dir = template_dir_ಗಮ್ಯ_free = absolute_pathdup(template_dir);
 
-	if (argc == 1) {
-		int mkdir_tried = 0;
+	ಆದರೆ (argc == 1) {
+		ಪೂರ್ಣಾಂಕ mkdir_tried = 0;
 	retry:
-		if (chdir(argv[0]) < 0) {
-			if (!mkdir_tried) {
-				int saved;
+		ಆದರೆ (chdir(argv[0]) < 0) {
+			ಆದರೆ (!mkdir_tried) {
+				ಪೂರ್ಣಾಂಕ saved;
 				/*
 				 * At this point we haven't read any configuration,
 				 * and we know shared_repository should always be 0;
 				 * but just in case we play safe.
 				 */
 				saved = repo_settings_get_shared_repository(the_repository);
-				repo_settings_set_shared_repository(the_repository, 0);
-				switch (safe_create_leading_directories_const(the_repository, argv[0])) {
-				case SCLD_OK:
-				case SCLD_PERMS:
-					break;
-				case SCLD_EXISTS:
+				repo_settings_ಗಣ_shared_repository(the_repository, 0);
+				ಆಯ್ಕೆ (ಸುರಕ್ಷಿತ_create_leading_directories_const(the_repository, argv[0])) {
+				ಸ್ಥಿತಿ SCLD_OK:
+				ಸ್ಥಿತಿ SCLD_PERMS:
+					ನಿಲ್ಲಿಸು;
+				ಸ್ಥಿತಿ SCLD_EXISTS:
 					errno = EEXIST;
 					/* fallthru */
-				default:
+				ಪೂರ್ವನಿಯೋಜಿತ:
 					die_errno(_("cannot mkdir %s"), argv[0]);
-					break;
+					ನಿಲ್ಲಿಸು;
 				}
-				repo_settings_set_shared_repository(the_repository, saved);
-				if (mkdir(argv[0], 0777) < 0)
+				repo_settings_ಗಣ_shared_repository(the_repository, saved);
+				ಆದರೆ (mkdir(argv[0], 0777) < 0)
 					die_errno(_("cannot mkdir %s"), argv[0]);
 				mkdir_tried = 1;
-				goto retry;
+				ಹೋಗು retry;
 			}
 			die_errno(_("cannot chdir to %s"), argv[0]);
 		}
-	} else if (0 < argc) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (0 < argc) {
 		usage(init_db_usage[0]);
 	}
-	if (bare == 1) {
-		char *cwd = xgetcwd();
+	ಆದರೆ (bare == 1) {
+		ಅಕ್ಷರ *cwd = xgetcwd();
 		setenv(GIT_DIR_ENVIRONMENT, cwd, argc > 0);
-		free(cwd);
+		ಬಿಡುಗಡೆ(cwd);
 	}
 
-	if (object_format) {
+	ಆದರೆ (object_format) {
 		hash_algo = hash_algo_by_name(object_format);
-		if (hash_algo == GIT_HASH_UNKNOWN)
+		ಆದರೆ (hash_algo == GIT_HASH_UNKNOWN)
 			die(_("unknown hash algorithm '%s'"), object_format);
 	}
 
-	if (init_shared_repository != -1)
-		repo_settings_set_shared_repository(the_repository, init_shared_repository);
+	ಆದರೆ (init_shared_repository != -1)
+		repo_settings_ಗಣ_shared_repository(the_repository, init_shared_repository);
 
 	/*
 	 * GIT_WORK_TREE makes sense only in conjunction with GIT_DIR
 	 * without --bare.  Catch the error early.
 	 */
 	git_dir = xstrdup_or_null(getenv(GIT_DIR_ENVIRONMENT));
-	work_tree = xstrdup_or_null(getenv(GIT_WORK_TREE_ENVIRONMENT));
-	if ((!git_dir || bare == 1) && work_tree)
+	work_ವೃಕ್ಷ = xstrdup_or_null(getenv(GIT_WORK_ವೃಕ್ಷ_ENVIRONMENT));
+	ಆದರೆ ((!git_dir || bare == 1) && work_ವೃಕ್ಷ)
 		die(_("%s (or --work-tree=<directory>) not allowed without "
 			  "specifying %s (or --git-dir=<directory>)"),
-		    GIT_WORK_TREE_ENVIRONMENT,
+		    GIT_WORK_ವೃಕ್ಷ_ENVIRONMENT,
 		    GIT_DIR_ENVIRONMENT);
 
 	/*
 	 * Set up the default .git directory contents
 	 */
-	if (!git_dir)
+	ಆದರೆ (!git_dir)
 		git_dir = xstrdup(DEFAULT_GIT_DIR_ENVIRONMENT);
 
 	/*
@@ -199,72 +199,72 @@ int cmd_init_db(int argc,
 	 * care to ensure that the common .git/ directory is relocated, not
 	 * the worktree-specific .git/worktrees/<id>/ directory.
 	 */
-	if (real_git_dir) {
-		int err;
-		const char *p;
-		struct strbuf sb = STRBUF_INIT;
+	ಆದರೆ (real_git_dir) {
+		ಪೂರ್ಣಾಂಕ err;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p;
+		ರಚನೆ strbuf sb = STRBUF_INIT;
 
 		p = read_gitfile_gently(git_dir, &err);
-		if (p && get_common_dir(&sb, p)) {
-			struct strbuf mainwt = STRBUF_INIT;
+		ಆದರೆ (p && get_common_dir(&sb, p)) {
+			ರಚನೆ strbuf mainwt = STRBUF_INIT;
 
 			strbuf_addbuf(&mainwt, &sb);
 			strbuf_strip_suffix(&mainwt, "/.git");
-			if (chdir(mainwt.buf) < 0)
+			ಆದರೆ (chdir(mainwt.buf) < 0)
 				die_errno(_("cannot chdir to %s"), mainwt.buf);
 			strbuf_release(&mainwt);
-			free(git_dir);
-			git_dir = strbuf_detach(&sb, NULL);
+			ಬಿಡುಗಡೆ(git_dir);
+			git_dir = strbuf_detach(&sb, ಖಾಲಿ);
 		}
 		strbuf_release(&sb);
 	}
 
-	if (bare < 0)
+	ಆದರೆ (bare < 0)
 		bare = guess_repository_type(git_dir);
 
-	if (!bare) {
-		const char *git_dir_parent = strrchr(git_dir, '/');
+	ಆದರೆ (!bare) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *git_dir_ಪೋಷಕ = strrchr(git_dir, '/');
 
-		if (!work_tree) {
-			if (git_dir_parent) {
-				char *rel = xstrndup(git_dir, git_dir_parent - git_dir);
-				work_tree = real_pathdup(rel, 1);
-				free(rel);
-			} else {
-				work_tree = xgetcwd();
+		ಆದರೆ (!work_ವೃಕ್ಷ) {
+			ಆದರೆ (git_dir_ಪೋಷಕ) {
+				ಅಕ್ಷರ *rel = xstrndup(git_dir, git_dir_ಪೋಷಕ - git_dir);
+				work_ವೃಕ್ಷ = real_pathdup(rel, 1);
+				ಬಿಡುಗಡೆ(rel);
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				work_ವೃಕ್ಷ = xgetcwd();
 			}
 		}
 
-		if (access(work_tree, X_OK))
-			die_errno (_("Cannot access work tree '%s'"), work_tree);
-	} else if (real_git_dir) {
+		ಆದರೆ (access(work_ವೃಕ್ಷ, X_OK))
+			die_errno (_("Cannot access work tree '%s'"), work_ವೃಕ್ಷ);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (real_git_dir) {
 		die(_("--separate-git-dir incompatible with bare repository"));
 	}
 
-	create_repository(the_repository, git_dir, real_git_dir, work_tree,
+	create_repository(the_repository, git_dir, real_git_dir, work_ವೃಕ್ಷ,
 			  template_dir, hash_algo, ref_storage_format_uri,
 			  init_shared_repository, &reinit);
 	create_reference_database(the_repository, initial_branch, quiet);
-	create_object_database(the_repository, NULL);
+	create_object_database(the_repository, ಖಾಲಿ);
 
-	if (!quiet) {
-		int len = strlen(git_dir);
+	ಆದರೆ (!quiet) {
+		ಪೂರ್ಣಾಂಕ len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(git_dir);
 
-		if (reinit)
-			printf(repo_settings_get_shared_repository(the_repository)
+		ಆದರೆ (reinit)
+			ಬರೆ(repo_settings_get_shared_repository(the_repository)
 			       ? _("Reinitialized existing shared Git repository in %s%s\n")
 			       : _("Reinitialized existing Git repository in %s%s\n"),
 			       git_dir, len && git_dir[len-1] != '/' ? "/" : "");
-		else
-			printf(repo_settings_get_shared_repository(the_repository)
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಬರೆ(repo_settings_get_shared_repository(the_repository)
 			       ? _("Initialized empty shared Git repository in %s%s\n")
 			       : _("Initialized empty Git repository in %s%s\n"),
 			       git_dir, len && git_dir[len-1] != '/' ? "/" : "");
 	}
 
-	free(template_dir_to_free);
-	free(real_git_dir_to_free);
-	free(work_tree);
-	free(git_dir);
-	return 0;
+	ಬಿಡುಗಡೆ(template_dir_ಗಮ್ಯ_free);
+	ಬಿಡುಗಡೆ(real_git_dir_ಗಮ್ಯ_free);
+	ಬಿಡುಗಡೆ(work_ವೃಕ್ಷ);
+	ಬಿಡುಗಡೆ(git_dir);
+	ಹಿಂತಿರುಗಿ 0;
 }

@@ -1,75 +1,75 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "string-list.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
 
-static const char * const for_each_repo_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ for_each_repo_usage[] = {
 	N_("git for-each-repo --config=<config> [--] <arguments>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static int run_command_on_repo(const char *path, const char **argv)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಸತತ_command_on_repo(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *abspath = interpolate_path(path, 0);
+	ರಚನೆ ಮಗು_process ಮಗು = ಮಗು_PROCESS_INIT;
+	ಅಕ್ಷರ *abspath = interpolate_ಮಾರ್ಗ(ಮಾರ್ಗ, 0);
 
-	sanitize_repo_env(&child.env);
+	sanitize_repo_env(&ಮಗು.env);
 
-	child.git_cmd = 1;
-	strvec_pushl(&child.args, "-C", abspath, NULL);
-	strvec_pushv(&child.args, argv);
+	ಮಗು.git_cmd = 1;
+	strvec_pushl(&ಮಗು.ವಾದಗಳು, "-C", abspath, ಖಾಲಿ);
+	strvec_pushv(&ಮಗು.ವಾದಗಳು, argv);
 
-	free(abspath);
+	ಬಿಡುಗಡೆ(abspath);
 
-	return run_command(&child);
+	ಹಿಂತಿರುಗಿ ಸತತ_command(&ಮಗು);
 }
 
-int cmd_for_each_repo(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_for_each_repo(ಪೂರ್ಣಾಂಕ argc,
+		      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		      ರಚನೆ repository *repo ಬಳಸದ)
 {
-	static const char *config_key = NULL;
-	int keep_going = 0;
-	int result = 0;
-	const struct string_list *values;
-	int err;
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *config_ಕೀಲಿ = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ keep_going = 0;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ = 0;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ string_list *ಮೌಲ್ಯಗಳು;
+	ಪೂರ್ಣಾಂಕ err;
 
-	const struct option options[] = {
-		OPT_STRING(0, "config", &config_key, N_("config"),
+	ಸ್ಥಿರಾಂಕ ರಚನೆ option options[] = {
+		OPT_STRING(0, "config", &config_ಕೀಲಿ, N_("config"),
 			   N_("config key storing a list of repository paths")),
 		OPT_BOOL(0, "keep-going", &keep_going,
 			 N_("keep going even if command fails in a repository")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, for_each_repo_usage,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, for_each_repo_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (!config_key)
+	ಆದರೆ (!config_ಕೀಲಿ)
 		die(_("missing --config=<config>"));
 
-	err = repo_config_get_string_multi(the_repository, config_key, &values);
-	if (err < 0)
-		usage_msg_optf(_("got bad config --config=%s"),
-			       for_each_repo_usage, options, config_key);
-	else if (err)
-		return 0;
+	err = repo_config_get_string_multi(the_repository, config_ಕೀಲಿ, &ಮೌಲ್ಯಗಳು);
+	ಆದರೆ (err < 0)
+		usage_ಸಂದೇಶ_optf(_("got bad config --config=%s"),
+			       for_each_repo_usage, options, config_ಕೀಲಿ);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (err)
+		ಹಿಂತಿರುಗಿ 0;
 
-	for (size_t i = 0; i < values->nr; i++) {
-		int ret = run_command_on_repo(values->items[i].string, argv);
-		if (ret) {
-			if (!keep_going)
-					return ret;
-			result = 1;
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ಮೌಲ್ಯಗಳು->nr; i++) {
+		ಪೂರ್ಣಾಂಕ ret = ಸತತ_command_on_repo(ಮೌಲ್ಯಗಳು->ವಸ್ತುಗಳು[i].string, argv);
+		ಆದರೆ (ret) {
+			ಆದರೆ (!keep_going)
+					ಹಿಂತಿರುಗಿ ret;
+			ಫಲಿತಾಂಶ = 1;
 		}
 	}
 
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }

@@ -1,77 +1,77 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "attr.h"
-#include "object.h"
-#include "commit.h"
-#include "tag.h"
-#include "delta.h"
-#include "pack.h"
-#include "pack-revindex.h"
-#include "csum-file.h"
-#include "tree-walk.h"
-#include "diff.h"
-#include "revision.h"
-#include "list-objects.h"
-#include "list-objects-filter-options.h"
-#include "pack-objects.h"
-#include "progress.h"
-#include "refs.h"
-#include "thread-utils.h"
-#include "pack-bitmap.h"
-#include "delta-islands.h"
-#include "reachable.h"
-#include "oid-array.h"
-#include "strvec.h"
-#include "strmap.h"
-#include "list.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-file-convert.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "replace-object.h"
-#include "dir.h"
-#include "midx.h"
-#include "trace2.h"
-#include "shallow.h"
-#include "promisor-remote.h"
-#include "pack-mtimes.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "blob.h"
-#include "tree.h"
-#include "path-walk.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "attr.h"
+#ಅನ್ತರ್ಭಾವ "object.h"
+#ಅನ್ತರ್ಭಾವ "commit.h"
+#ಅನ್ತರ್ಭಾವ "tag.h"
+#ಅನ್ತರ್ಭಾವ "delta.h"
+#ಅನ್ತರ್ಭಾವ "pack.h"
+#ಅನ್ತರ್ಭಾವ "pack-revindex.h"
+#ಅನ್ತರ್ಭಾವ "csum-file.h"
+#ಅನ್ತರ್ಭಾವ "tree-walk.h"
+#ಅನ್ತರ್ಭಾವ "diff.h"
+#ಅನ್ತರ್ಭಾವ "revision.h"
+#ಅನ್ತರ್ಭಾವ "list-objects.h"
+#ಅನ್ತರ್ಭಾವ "list-objects-filter-options.h"
+#ಅನ್ತರ್ಭಾವ "pack-objects.h"
+#ಅನ್ತರ್ಭಾವ "progress.h"
+#ಅನ್ತರ್ಭಾವ "refs.h"
+#ಅನ್ತರ್ಭಾವ "thread-utils.h"
+#ಅನ್ತರ್ಭಾವ "pack-bitmap.h"
+#ಅನ್ತರ್ಭಾವ "delta-islands.h"
+#ಅನ್ತರ್ಭಾವ "reachable.h"
+#ಅನ್ತರ್ಭಾವ "oid-array.h"
+#ಅನ್ತರ್ಭಾವ "strvec.h"
+#ಅನ್ತರ್ಭಾವ "strmap.h"
+#ಅನ್ತರ್ಭಾವ "list.h"
+#ಅನ್ತರ್ಭಾವ "packfile.h"
+#ಅನ್ತರ್ಭಾವ "object-file.h"
+#ಅನ್ತರ್ಭಾವ "object-file-convert.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "odb/streaming.h"
+#ಅನ್ತರ್ಭಾವ "replace-object.h"
+#ಅನ್ತರ್ಭಾವ "dir.h"
+#ಅನ್ತರ್ಭಾವ "midx.h"
+#ಅನ್ತರ್ಭಾವ "trace2.h"
+#ಅನ್ತರ್ಭಾವ "shallow.h"
+#ಅನ್ತರ್ಭಾವ "promisor-remote.h"
+#ಅನ್ತರ್ಭಾವ "pack-mtimes.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "blob.h"
+#ಅನ್ತರ್ಭಾವ "tree.h"
+#ಅನ್ತರ್ಭಾವ "path-walk.h"
 
 /*
  * Objects we are going to pack are collected in the `to_pack` structure.
  * It contains an array (dynamically expanded) of the object data, and a map
  * that can resolve SHA1s to their position in the array.
  */
-static struct packing_data to_pack;
+ಸ್ಥಿರ ರಚನೆ packing_ದತ್ತಾಂಶ ಗಮ್ಯ_pack;
 
-static inline struct object_entry *oe_delta(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ರಚನೆ object_ನಮೂದು *oe_delta(
+		ಸ್ಥಿರಾಂಕ ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+		ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e)
 {
-	if (!e->delta_idx)
-		return NULL;
-	if (e->ext_base)
-		return &pack->ext_bases[e->delta_idx - 1];
-	else
-		return &pack->objects[e->delta_idx - 1];
+	ಆದರೆ (!e->delta_idx)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+	ಆದರೆ (e->ext_ತಳ)
+		ಹಿಂತಿರುಗಿ &pack->ext_bases[e->delta_idx - 1];
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ &pack->objects[e->delta_idx - 1];
 }
 
-static inline size_t oe_delta_size(struct packing_data *pack,
-				   const struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಗಾತ್ರ_t oe_delta_ಗಾತ್ರ(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				   ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e)
 {
-	if (e->delta_size_valid)
-		return e->delta_size_;
+	ಆದರೆ (e->delta_ಗಾತ್ರ_valid)
+		ಹಿಂತಿರುಗಿ e->delta_ಗಾತ್ರ;
 
 	/*
 	 * pack->delta_size[] can't be NULL because oe_set_delta_size()
@@ -81,115 +81,115 @@ static inline size_t oe_delta_size(struct packing_data *pack,
 	 * delta_size_valid is also false), then the caller must never
 	 * call oe_delta_size().
 	 */
-	return pack->delta_size[e - pack->objects];
+	ಹಿಂತಿರುಗಿ pack->delta_ಗಾತ್ರ_2[e - pack->objects];
 }
 
-size_t oe_get_size_slow(struct packing_data *pack,
-			const struct object_entry *e);
+ಗಾತ್ರ_t oe_get_ಗಾತ್ರ_slow(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+			ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e);
 
-static inline size_t oe_size(struct packing_data *pack,
-			     const struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಗಾತ್ರ_t oe_ಗಾತ್ರ(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+			     ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e)
 {
-	if (e->size_valid)
-		return e->size_;
+	ಆದರೆ (e->ಗಾತ್ರ_valid)
+		ಹಿಂತಿರುಗಿ e->ಗಾತ್ರ_3;
 
-	return oe_get_size_slow(pack, e);
+	ಹಿಂತಿರುಗಿ oe_get_ಗಾತ್ರ_slow(pack, e);
 }
 
-static inline void oe_set_delta(struct packing_data *pack,
-				struct object_entry *e,
-				struct object_entry *delta)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ oe_ಗಣ_delta(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				ರಚನೆ object_ನಮೂದು *e,
+				ರಚನೆ object_ನಮೂದು *delta)
 {
-	if (delta)
+	ಆದರೆ (delta)
 		e->delta_idx = (delta - pack->objects) + 1;
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		e->delta_idx = 0;
 }
 
-static inline struct object_entry *oe_delta_sibling(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ರಚನೆ object_ನಮೂದು *oe_delta_sibling(
+		ಸ್ಥಿರಾಂಕ ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+		ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e)
 {
-	if (e->delta_sibling_idx)
-		return &pack->objects[e->delta_sibling_idx - 1];
-	return NULL;
+	ಆದರೆ (e->delta_sibling_idx)
+		ಹಿಂತಿರುಗಿ &pack->objects[e->delta_sibling_idx - 1];
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static inline struct object_entry *oe_delta_child(
-		const struct packing_data *pack,
-		const struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ರಚನೆ object_ನಮೂದು *oe_delta_ಮಗು(
+		ಸ್ಥಿರಾಂಕ ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+		ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e)
 {
-	if (e->delta_child_idx)
-		return &pack->objects[e->delta_child_idx - 1];
-	return NULL;
+	ಆದರೆ (e->delta_ಮಗು_idx)
+		ಹಿಂತಿರುಗಿ &pack->objects[e->delta_ಮಗು_idx - 1];
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static inline void oe_set_delta_child(struct packing_data *pack,
-				      struct object_entry *e,
-				      struct object_entry *delta)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ oe_ಗಣ_delta_ಮಗು(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				      ರಚನೆ object_ನಮೂದು *e,
+				      ರಚನೆ object_ನಮೂದು *delta)
 {
-	if (delta)
-		e->delta_child_idx = (delta - pack->objects) + 1;
-	else
-		e->delta_child_idx = 0;
+	ಆದರೆ (delta)
+		e->delta_ಮಗು_idx = (delta - pack->objects) + 1;
+	ಇಲ್ಲದಿದ್ದರೆ
+		e->delta_ಮಗು_idx = 0;
 }
 
-static inline void oe_set_delta_sibling(struct packing_data *pack,
-					struct object_entry *e,
-					struct object_entry *delta)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ oe_ಗಣ_delta_sibling(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+					ರಚನೆ object_ನಮೂದು *e,
+					ರಚನೆ object_ನಮೂದು *delta)
 {
-	if (delta)
+	ಆದರೆ (delta)
 		e->delta_sibling_idx = (delta - pack->objects) + 1;
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		e->delta_sibling_idx = 0;
 }
 
-static inline void oe_set_size(struct packing_data *pack,
-			       struct object_entry *e,
-			       size_t size)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ oe_ಗಣ_ಗಾತ್ರ(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+			       ರಚನೆ object_ನಮೂದು *e,
+			       ಗಾತ್ರ_t ಗಾತ್ರ_2)
 {
-	if (size < pack->oe_size_limit) {
-		e->size_ = size;
-		e->size_valid = 1;
-	} else {
-		e->size_valid = 0;
-		if (oe_get_size_slow(pack, e) != size)
+	ಆದರೆ (ಗಾತ್ರ_2 < pack->oe_ಗಾತ್ರ_ಎಲ್ಲೆ) {
+		e->ಗಾತ್ರ_3 = ಗಾತ್ರ_2;
+		e->ಗಾತ್ರ_valid = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		e->ಗಾತ್ರ_valid = 0;
+		ಆದರೆ (oe_get_ಗಾತ್ರ_slow(pack, e) != ಗಾತ್ರ_2)
 			BUG("'size' is supposed to be the object size!");
 	}
 }
 
-static inline void oe_set_delta_size(struct packing_data *pack,
-				     struct object_entry *e,
-				     size_t size)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ oe_ಗಣ_delta_ಗಾತ್ರ(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				     ರಚನೆ object_ನಮೂದು *e,
+				     ಗಾತ್ರ_t ಗಾತ್ರ_2)
 {
-	if (size < pack->oe_delta_size_limit) {
-		e->delta_size_ = size;
-		e->delta_size_valid = 1;
-	} else {
-		packing_data_lock(pack);
-		if (!pack->delta_size)
-			ALLOC_ARRAY(pack->delta_size, pack->nr_alloc);
-		packing_data_unlock(pack);
+	ಆದರೆ (ಗಾತ್ರ_2 < pack->oe_delta_ಗಾತ್ರ_ಎಲ್ಲೆ) {
+		e->delta_ಗಾತ್ರ = ಗಾತ್ರ_2;
+		e->delta_ಗಾತ್ರ_valid = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		packing_ದತ್ತಾಂಶ_ಬೀಗ(pack);
+		ಆದರೆ (!pack->delta_ಗಾತ್ರ_2)
+			ALLOC_ARRAY(pack->delta_ಗಾತ್ರ_2, pack->nr_alloc);
+		packing_ದತ್ತಾಂಶ_unlock(pack);
 
-		pack->delta_size[e - pack->objects] = size;
-		e->delta_size_valid = 0;
+		pack->delta_ಗಾತ್ರ_2[e - pack->objects] = ಗಾತ್ರ_2;
+		e->delta_ಗಾತ್ರ_valid = 0;
 	}
 }
 
-#define IN_PACK(obj) oe_in_pack(&to_pack, obj)
-#define SIZE(obj) oe_size(&to_pack, obj)
-#define SET_SIZE(obj,size) oe_set_size(&to_pack, obj, size)
-#define DELTA_SIZE(obj) oe_delta_size(&to_pack, obj)
-#define DELTA(obj) oe_delta(&to_pack, obj)
-#define DELTA_CHILD(obj) oe_delta_child(&to_pack, obj)
-#define DELTA_SIBLING(obj) oe_delta_sibling(&to_pack, obj)
-#define SET_DELTA(obj, val) oe_set_delta(&to_pack, obj, val)
-#define SET_DELTA_EXT(obj, oid) oe_set_delta_ext(&to_pack, obj, oid)
-#define SET_DELTA_SIZE(obj, val) oe_set_delta_size(&to_pack, obj, val)
-#define SET_DELTA_CHILD(obj, val) oe_set_delta_child(&to_pack, obj, val)
-#define SET_DELTA_SIBLING(obj, val) oe_set_delta_sibling(&to_pack, obj, val)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಒಳ_PACK(obj) oe_ಒಳ_pack(&ಗಮ್ಯ_pack, obj)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಾತ್ರ_4(obj) oe_ಗಾತ್ರ(&ಗಮ್ಯ_pack, obj)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಣ_ಗಾತ್ರ(obj,ಗಾತ್ರ_2) oe_ಗಣ_ಗಾತ್ರ(&ಗಮ್ಯ_pack, obj, ಗಾತ್ರ_2)
+#ವ್ಯಾಖ್ಯಾನಿಸು DELTA_ಗಾತ್ರ(obj) oe_delta_ಗಾತ್ರ(&ಗಮ್ಯ_pack, obj)
+#ವ್ಯಾಖ್ಯಾನಿಸು DELTA(obj) oe_delta(&ಗಮ್ಯ_pack, obj)
+#ವ್ಯಾಖ್ಯಾನಿಸು DELTA_ಮಗು(obj) oe_delta_ಮಗು(&ಗಮ್ಯ_pack, obj)
+#ವ್ಯಾಖ್ಯಾನಿಸು DELTA_SIBLING(obj) oe_delta_sibling(&ಗಮ್ಯ_pack, obj)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಣ_DELTA(obj, val) oe_ಗಣ_delta(&ಗಮ್ಯ_pack, obj, val)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಣ_DELTA_EXT(obj, oid) oe_ಗಣ_delta_ext(&ಗಮ್ಯ_pack, obj, oid)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಣ_DELTA_ಗಾತ್ರ(obj, val) oe_ಗಣ_delta_ಗಾತ್ರ(&ಗಮ್ಯ_pack, obj, val)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಣ_DELTA_ಮಗು(obj, val) oe_ಗಣ_delta_ಮಗು(&ಗಮ್ಯ_pack, obj, val)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಗಣ_DELTA_SIBLING(obj, val) oe_ಗಣ_delta_sibling(&ಗಮ್ಯ_pack, obj, val)
 
-static const char *const pack_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಸ್ಥಿರಾಂಕ pack_usage[] = {
 	N_("git pack-objects [-q | --progress | --all-progress] [--all-progress-implied]\n"
 	   "                 [--no-reuse-delta] [--delta-base-offset] [--non-empty]\n"
 	   "                 [--local] [--incremental] [--window=<n>] [--depth=<n>]\n"
@@ -198,728 +198,728 @@ static const char *const pack_usage[] = {
 	   "                 [--stdout [--filter=<filter-spec>] | <base-name>]\n"
 	   "                 [--shallow] [--keep-true-parents] [--[no-]sparse]\n"
 	   "                 [--name-hash-version=<n>] [--path-walk] < <object-list>"),
-	NULL
+	ಖಾಲಿ
 };
 
-static struct pack_idx_entry **written_list;
-static uint32_t nr_result, nr_written, nr_seen;
-static struct bitmap_index *bitmap_git;
-static uint32_t write_layer;
+ಸ್ಥಿರ ರಚನೆ pack_idx_ನಮೂದು **written_list;
+ಸ್ಥಿರ uint32_t nr_ಫಲಿತಾಂಶ, nr_written, nr_ನೋಡಿದ;
+ಸ್ಥಿರ ರಚನೆ bitmap_ಸೂಚ್ಯಂಕ *bitmap_git;
+ಸ್ಥಿರ uint32_t write_layer;
 
-static int non_empty;
-static int reuse_delta = 1, reuse_object = 1;
-static int keep_unreachable, unpack_unreachable, include_tag;
-static timestamp_t unpack_unreachable_expiration;
-static int pack_loose_unreachable;
-static int cruft;
-static int shallow = 0;
-static timestamp_t cruft_expiration;
-static int local;
-static int have_non_local_packs;
-static int incremental;
-static int ignore_packed_keep_on_disk;
-static int ignore_packed_keep_in_core;
-static int ignore_packed_keep_in_core_open;
-static int ignore_packed_keep_in_core_has_cruft;
-static int allow_ofs_delta;
-static struct pack_idx_option pack_idx_opts;
-static const char *base_name;
-static int progress = 1;
-static int window = 10;
-static unsigned long pack_size_limit;
-static int depth = 50;
-static int delta_search_threads;
-static int pack_to_stdout;
-static int sparse;
-static int thin;
-static int path_walk = -1;
-static int num_preferred_base;
-static struct progress *progress_state;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ non_ಖಾಲಿಗಳು;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ reuse_delta = 1, reuse_object = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ keep_unreachable, unpack_unreachable, include_ಟ್ಯಾಗ್;
+ಸ್ಥಿರ timestamp_t unpack_unreachable_expiration;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pack_loose_unreachable;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cruft;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ shallow = 0;
+ಸ್ಥಿರ timestamp_t cruft_expiration;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ local;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ have_non_local_packs;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ incremental;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ignore_packed_keep_on_disk;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ignore_packed_keep_ಒಳ_core;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ignore_packed_keep_ಒಳ_core_open;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ignore_packed_keep_ಒಳ_core_has_cruft;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ allow_ofs_delta;
+ಸ್ಥಿರ ರಚನೆ pack_idx_option pack_idx_opts;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ತಳ_name;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಪ್ರಗತಿ = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕಿಟಕಿ = 10;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ pack_ಗಾತ್ರ_ಎಲ್ಲೆ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಆಳ = 50;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ delta_ಹುಡುಕು_ಎಳೆಗಳು;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pack_ಗಮ್ಯ_stdout;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ sparse;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ thin;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಮಾರ್ಗ_walk = -1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಅಂಕೆ_preferred_ತಳ;
+ಸ್ಥಿರ ರಚನೆ ಪ್ರಗತಿ *ಪ್ರಗತಿ_state;
 
-static struct bitmapped_pack *reuse_packfiles;
-static size_t reuse_packfiles_nr;
-static size_t reuse_packfiles_used_nr;
-static uint32_t reuse_packfile_objects;
-static struct bitmap *reuse_packfile_bitmap;
+ಸ್ಥಿರ ರಚನೆ bitmapped_pack *reuse_packfiles;
+ಸ್ಥಿರ ಗಾತ್ರ_t reuse_packfiles_nr;
+ಸ್ಥಿರ ಗಾತ್ರ_t reuse_packfiles_ಬಳಸಿದ_nr;
+ಸ್ಥಿರ uint32_t reuse_packfile_objects;
+ಸ್ಥಿರ ರಚನೆ bitmap *reuse_packfile_bitmap;
 
-static int use_bitmap_index_default = 1;
-static int use_bitmap_index = -1;
-static enum {
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ use_bitmap_ಸೂಚ್ಯಂಕ_default = 1;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ use_bitmap_ಸೂಚ್ಯಂಕ = -1;
+ಸ್ಥಿರ ಎಣಿಕೆ {
 	NO_PACK_REUSE = 0,
 	SINGLE_PACK_REUSE,
 	MULTI_PACK_REUSE,
 } allow_pack_reuse = SINGLE_PACK_REUSE;
-static enum {
+ಸ್ಥಿರ ಎಣಿಕೆ {
 	WRITE_BITMAP_FALSE = 0,
 	WRITE_BITMAP_QUIET,
 	WRITE_BITMAP_TRUE,
-} write_bitmap_index;
-static uint16_t write_bitmap_options = BITMAP_OPT_HASH_CACHE;
+} write_bitmap_ಸೂಚ್ಯಂಕ;
+ಸ್ಥಿರ uint16_t write_bitmap_options = BITMAP_OPT_HASH_CACHE;
 
-static int exclude_promisor_objects;
-static int exclude_promisor_objects_best_effort;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ exclude_promisor_objects;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ exclude_promisor_objects_ಉತ್ತಮ_effort;
 
-static int use_delta_islands;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ use_delta_islands;
 
-static size_t delta_cache_size = 0;
-static size_t max_delta_cache_size = DEFAULT_DELTA_CACHE_SIZE;
-static unsigned long cache_max_small_delta_size = 1000;
+ಸ್ಥಿರ ಗಾತ್ರ_t delta_cache_ಗಾತ್ರ = 0;
+ಸ್ಥಿರ ಗಾತ್ರ_t max_delta_cache_ಗಾತ್ರ = DEFAULT_DELTA_CACHE_ಗಾತ್ರ;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ cache_max_small_delta_ಗಾತ್ರ = 1000;
 
-static unsigned long window_memory_limit = 0;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಕಿಟಕಿ_ಸ್ಮರಣೆ_ಎಲ್ಲೆ = 0;
 
-static struct string_list uri_protocols = STRING_LIST_INIT_NODUP;
+ಸ್ಥಿರ ರಚನೆ string_list uri_protocols = STRING_LIST_INIT_NODUP;
 
-enum missing_action {
+ಎಣಿಕೆ missing_action {
 	MA_ERROR = 0,      /* fail if any missing objects are encountered */
 	MA_ALLOW_ANY,      /* silently allow ALL missing objects */
 	MA_ALLOW_PROMISOR, /* silently allow all missing PROMISOR objects */
 };
-static enum missing_action arg_missing_action;
-static show_object_fn fn_show_object;
+ಸ್ಥಿರ ಎಣಿಕೆ missing_action arg_missing_action;
+ಸ್ಥಿರ show_object_fn fn_show_object;
 
-struct configured_exclusion {
-	struct oidmap_entry e;
-	char *pack_hash_hex;
-	char *uri;
+ರಚನೆ configured_exclusion {
+	ರಚನೆ oidmap_ನಮೂದು e;
+	ಅಕ್ಷರ *pack_hash_hex;
+	ಅಕ್ಷರ *uri;
 };
-static struct oidmap configured_exclusions;
+ಸ್ಥಿರ ರಚನೆ oidmap configured_exclusions;
 
-static struct oidset excluded_by_config;
-static int name_hash_version = -1;
+ಸ್ಥಿರ ರಚನೆ oidset excluded_by_config;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ name_hash_ಆವೃತ್ತಿ = -1;
 
-enum stdin_packs_mode {
-	STDIN_PACKS_MODE_NONE,
-	STDIN_PACKS_MODE_STANDARD,
-	STDIN_PACKS_MODE_FOLLOW,
+ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ {
+	STDIN_PACKS_ಬಹುಲಕ_NONE,
+	STDIN_PACKS_ಬಹುಲಕ_STANDARD,
+	STDIN_PACKS_ಬಹುಲಕ_FOLLOW,
 };
 
 /**
  * Check whether the name_hash_version chosen by user input is appropriate,
  * and also validate whether it is compatible with other features.
  */
-static void validate_name_hash_version(void)
+ಸ್ಥಿರ ಶೂನ್ಯ validate_name_hash_ಆವೃತ್ತಿ(ಶೂನ್ಯ)
 {
-	if (name_hash_version < 1 || name_hash_version > 2)
-		die(_("invalid --name-hash-version option: %d"), name_hash_version);
-	if (write_bitmap_index && name_hash_version != 1) {
+	ಆದರೆ (name_hash_ಆವೃತ್ತಿ < 1 || name_hash_ಆವೃತ್ತಿ > 2)
+		die(_("invalid --name-hash-version option: %d"), name_hash_ಆವೃತ್ತಿ);
+	ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ && name_hash_ಆವೃತ್ತಿ != 1) {
 		warning(_("currently, --write-bitmap-index requires --name-hash-version=1"));
-		name_hash_version = 1;
+		name_hash_ಆವೃತ್ತಿ = 1;
 	}
 }
 
-static inline uint32_t pack_name_hash_fn(const char *name)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ uint32_t pack_name_hash_fn(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	static int seen_version = -1;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ನೋಡಿದ_ಆವೃತ್ತಿ = -1;
 
-	if (seen_version < 0)
-		seen_version = name_hash_version;
-	else if (seen_version != name_hash_version)
+	ಆದರೆ (ನೋಡಿದ_ಆವೃತ್ತಿ < 0)
+		ನೋಡಿದ_ಆವೃತ್ತಿ = name_hash_ಆವೃತ್ತಿ;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ನೋಡಿದ_ಆವೃತ್ತಿ != name_hash_ಆವೃತ್ತಿ)
 		BUG("name hash version changed from %d to %d mid-process",
-		    seen_version, name_hash_version);
+		    ನೋಡಿದ_ಆವೃತ್ತಿ, name_hash_ಆವೃತ್ತಿ);
 
-	switch (name_hash_version) {
-	case 1:
-		return pack_name_hash(name);
+	ಆಯ್ಕೆ (name_hash_ಆವೃತ್ತಿ) {
+	ಸ್ಥಿತಿ 1:
+		ಹಿಂತಿರುಗಿ pack_name_hash(name);
 
-	case 2:
-		return pack_name_hash_v2((const unsigned char *)name);
+	ಸ್ಥಿತಿ 2:
+		ಹಿಂತಿರುಗಿ pack_name_hash_v2((ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *)name);
 
-	default:
-		BUG("invalid name-hash version: %d", name_hash_version);
+	ಪೂರ್ವನಿಯೋಜಿತ:
+		BUG("invalid name-hash version: %d", name_hash_ಆವೃತ್ತಿ);
 	}
 }
 
 /*
  * stats
  */
-static uint32_t written, written_delta;
-static uint32_t reused, reused_delta;
+ಸ್ಥಿರ uint32_t written, written_delta;
+ಸ್ಥಿರ uint32_t reused, reused_delta;
 
 /*
  * Indexed commits
  */
-static struct commit **indexed_commits;
-static unsigned int indexed_commits_nr;
-static unsigned int indexed_commits_alloc;
+ಸ್ಥಿರ ರಚನೆ commit **ಸೂಚ್ಯಂಕಿತ_commits;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಸೂಚ್ಯಂಕಿತ_commits_nr;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಸೂಚ್ಯಂಕಿತ_commits_alloc;
 
-static void index_commit_for_bitmap(struct commit *commit)
+ಸ್ಥಿರ ಶೂನ್ಯ ಸೂಚ್ಯಂಕ_commit_for_bitmap(ರಚನೆ commit *commit)
 {
-	if (indexed_commits_nr >= indexed_commits_alloc) {
-		indexed_commits_alloc = (indexed_commits_alloc + 32) * 2;
-		REALLOC_ARRAY(indexed_commits, indexed_commits_alloc);
+	ಆದರೆ (ಸೂಚ್ಯಂಕಿತ_commits_nr >= ಸೂಚ್ಯಂಕಿತ_commits_alloc) {
+		ಸೂಚ್ಯಂಕಿತ_commits_alloc = (ಸೂಚ್ಯಂಕಿತ_commits_alloc + 32) * 2;
+		REALLOC_ARRAY(ಸೂಚ್ಯಂಕಿತ_commits, ಸೂಚ್ಯಂಕಿತ_commits_alloc);
 	}
 
-	indexed_commits[indexed_commits_nr++] = commit;
+	ಸೂಚ್ಯಂಕಿತ_commits[ಸೂಚ್ಯಂಕಿತ_commits_nr++] = commit;
 }
 
-static void *get_delta(struct object_entry *entry)
+ಸ್ಥಿರ ಶೂನ್ಯ *get_delta(ರಚನೆ object_ನಮೂದು *ನಮೂದು)
 {
-	unsigned long size, base_size;
-	size_t delta_size;
-	void *buf, *base_buf, *delta_buf;
-	enum object_type type;
-	size_t size_st = 0, base_size_st = 0;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2, ತಳ_ಗಾತ್ರ;
+	ಗಾತ್ರ_t delta_ಗಾತ್ರ_2;
+	ಶೂನ್ಯ *buf, *ತಳ_buf, *delta_buf;
+	ಎಣಿಕೆ object_type type;
+	ಗಾತ್ರ_t ಗಾತ್ರ_st = 0, ತಳ_ಗಾತ್ರ_st = 0;
 
-	buf = odb_read_object(the_repository->objects, &entry->idx.oid,
-			      &type, &size_st);
-	size = cast_size_t_to_ulong(size_st);
-	if (!buf)
-		die(_("unable to read %s"), oid_to_hex(&entry->idx.oid));
-	base_buf = odb_read_object(the_repository->objects,
-				   &DELTA(entry)->idx.oid, &type,
-				   &base_size_st);
-	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base_buf)
+	buf = odb_read_object(the_repository->objects, &ನಮೂದು->idx.oid,
+			      &type, &ಗಾತ್ರ_st);
+	ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+	ಆದರೆ (!buf)
+		die(_("unable to read %s"), oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
+	ತಳ_buf = odb_read_object(the_repository->objects,
+				   &DELTA(ನಮೂದು)->idx.oid, &type,
+				   &ತಳ_ಗಾತ್ರ_st);
+	ತಳ_ಗಾತ್ರ = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ತಳ_ಗಾತ್ರ_st);
+	ಆದರೆ (!ತಳ_buf)
 		die("unable to read %s",
-		    oid_to_hex(&DELTA(entry)->idx.oid));
-	delta_buf = diff_delta(base_buf, base_size,
-			       buf, size, &delta_size, 0);
+		    oid_ಗಮ್ಯ_hex(&DELTA(ನಮೂದು)->idx.oid));
+	delta_buf = diff_delta(ತಳ_buf, ತಳ_ಗಾತ್ರ,
+			       buf, ಗಾತ್ರ_2, &delta_ಗಾತ್ರ_2, 0);
 	/*
 	 * We successfully computed this delta once but dropped it for
 	 * memory reasons. Something is very wrong if this time we
 	 * recompute and create a different delta.
 	 */
-	if (!delta_buf || delta_size != DELTA_SIZE(entry))
+	ಆದರೆ (!delta_buf || delta_ಗಾತ್ರ_2 != DELTA_ಗಾತ್ರ(ನಮೂದು))
 		BUG("delta size changed");
-	free(buf);
-	free(base_buf);
-	return delta_buf;
+	ಬಿಡುಗಡೆ(buf);
+	ಬಿಡುಗಡೆ(ತಳ_buf);
+	ಹಿಂತಿರುಗಿ delta_buf;
 }
 
-static unsigned long do_compress(void **pptr, unsigned long size)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ do_compress(ಶೂನ್ಯ **pptr, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	git_zstream stream;
-	void *in, *out;
-	unsigned long maxsize;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream ಹರಿವು;
+	ಶೂನ್ಯ *ಒಳ, *ಹೊರಹೋಗು;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ maxsize;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	git_deflate_init(&stream, cfg->pack_compression_level);
-	maxsize = git_deflate_bound(&stream, size);
+	git_deflate_init(&ಹರಿವು, cfg->pack_compression_level);
+	maxsize = git_deflate_bound(&ಹರಿವು, ಗಾತ್ರ_2);
 
-	in = *pptr;
-	out = xmalloc(maxsize);
-	*pptr = out;
+	ಒಳ = *pptr;
+	ಹೊರಹೋಗು = xmalloc(maxsize);
+	*pptr = ಹೊರಹೋಗು;
 
-	stream.next_in = in;
-	stream.avail_in = size;
-	stream.next_out = out;
-	stream.avail_out = maxsize;
-	while (git_deflate(&stream, Z_FINISH) == Z_OK)
+	ಹರಿವು.ಮುಂದಿನ_ಒಳ = ಒಳ;
+	ಹರಿವು.avail_ಒಳ = ಗಾತ್ರ_2;
+	ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು = ಹೊರಹೋಗು;
+	ಹರಿವು.avail_ಹೊರಹೋಗು = maxsize;
+	ಆಗ (git_deflate(&ಹರಿವು, Z_ಮುಕ್ತಾಯ) == Z_OK)
 		; /* nothing */
-	git_deflate_end(&stream);
+	git_deflate_ಕೊನೆ(&ಹರಿವು);
 
-	free(in);
-	return stream.total_out;
+	ಬಿಡುಗಡೆ(ಒಳ);
+	ಹಿಂತಿರುಗಿ ಹರಿವು.ಒಟ್ಟು_ಹೊರಹೋಗು;
 }
 
-static unsigned long write_large_blob_data(struct odb_stream *st, struct hashfile *f,
-					   const struct object_id *oid)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ write_large_blob_ದತ್ತಾಂಶ(ರಚನೆ odb_ಹರಿವು *st, ರಚನೆ hashfile *f,
+					   ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	git_zstream stream;
-	unsigned char ibuf[1024 * 16];
-	unsigned char obuf[1024 * 16];
-	unsigned long olen = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	git_zstream ಹರಿವು;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ibuf[1024 * 16];
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ obuf[1024 * 16];
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ olen = 0;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	git_deflate_init(&stream, cfg->pack_compression_level);
+	git_deflate_init(&ಹರಿವು, cfg->pack_compression_level);
 
-	for (;;) {
+	ಗಾಗಿ (;;) {
 		ssize_t readlen;
-		int zret = Z_OK;
-		readlen = odb_stream_read(st, ibuf, sizeof(ibuf));
-		if (readlen == -1)
-			die(_("unable to read %s"), oid_to_hex(oid));
+		ಪೂರ್ಣಾಂಕ zret = Z_OK;
+		readlen = odb_ಹರಿವು_read(st, ibuf, ಗಾತ್ರ(ibuf));
+		ಆದರೆ (readlen == -1)
+			die(_("unable to read %s"), oid_ಗಮ್ಯ_hex(oid));
 
-		stream.next_in = ibuf;
-		stream.avail_in = readlen;
-		while ((stream.avail_in || readlen == 0) &&
+		ಹರಿವು.ಮುಂದಿನ_ಒಳ = ibuf;
+		ಹರಿವು.avail_ಒಳ = readlen;
+		ಆಗ ((ಹರಿವು.avail_ಒಳ || readlen == 0) &&
 		       (zret == Z_OK || zret == Z_BUF_ERROR)) {
-			stream.next_out = obuf;
-			stream.avail_out = sizeof(obuf);
-			zret = git_deflate(&stream, readlen ? 0 : Z_FINISH);
-			hashwrite(f, obuf, stream.next_out - obuf);
-			olen += stream.next_out - obuf;
+			ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು = obuf;
+			ಹರಿವು.avail_ಹೊರಹೋಗು = ಗಾತ್ರ(obuf);
+			zret = git_deflate(&ಹರಿವು, readlen ? 0 : Z_ಮುಕ್ತಾಯ);
+			hashwrite(f, obuf, ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು - obuf);
+			olen += ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು - obuf;
 		}
-		if (stream.avail_in)
+		ಆದರೆ (ಹರಿವು.avail_ಒಳ)
 			die(_("deflate error (%d)"), zret);
-		if (readlen == 0) {
-			if (zret != Z_STREAM_END)
+		ಆದರೆ (readlen == 0) {
+			ಆದರೆ (zret != Z_ಹರಿವು_ಕೊನೆ)
 				die(_("deflate error (%d)"), zret);
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
-	git_deflate_end(&stream);
-	return olen;
+	git_deflate_ಕೊನೆ(&ಹರಿವು);
+	ಹಿಂತಿರುಗಿ olen;
 }
 
 /*
  * we are going to reuse the existing object data as is.  make
  * sure it is not corrupt.
  */
-static int check_pack_inflate(struct packed_git *p,
-		struct pack_window **w_curs,
-		off_t offset,
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_pack_inflate(ರಚನೆ packed_git *p,
+		ರಚನೆ pack_ಕಿಟಕಿ **w_curs,
+		off_t ಸ್ಥಾನಾಂತರ,
 		off_t len,
-		size_t expect)
+		ಗಾತ್ರ_t expect)
 {
-	git_zstream stream;
-	unsigned char fakebuf[4096], *in;
-	int st;
+	git_zstream ಹರಿವು;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ fakebuf[4096], *ಒಳ;
+	ಪೂರ್ಣಾಂಕ st;
 
-	memset(&stream, 0, sizeof(stream));
-	git_inflate_init(&stream);
-	do {
-		in = use_pack(p, w_curs, offset, &stream.avail_in);
-		stream.next_in = in;
-		stream.next_out = fakebuf;
-		stream.avail_out = sizeof(fakebuf);
-		st = git_inflate(&stream, Z_FINISH);
-		offset += stream.next_in - in;
-	} while (st == Z_OK || st == Z_BUF_ERROR);
-	git_inflate_end(&stream);
-	return (st == Z_STREAM_END &&
-		stream.total_out == expect &&
-		stream.total_in == len) ? 0 : -1;
+	memset(&ಹರಿವು, 0, ಗಾತ್ರ(ಹರಿವು));
+	git_inflate_init(&ಹರಿವು);
+	ಮಾಡು {
+		ಒಳ = use_pack(p, w_curs, ಸ್ಥಾನಾಂತರ, &ಹರಿವು.avail_ಒಳ);
+		ಹರಿವು.ಮುಂದಿನ_ಒಳ = ಒಳ;
+		ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು = fakebuf;
+		ಹರಿವು.avail_ಹೊರಹೋಗು = ಗಾತ್ರ(fakebuf);
+		st = git_inflate(&ಹರಿವು, Z_ಮುಕ್ತಾಯ);
+		ಸ್ಥಾನಾಂತರ += ಹರಿವು.ಮುಂದಿನ_ಒಳ - ಒಳ;
+	} ಆಗ (st == Z_OK || st == Z_BUF_ERROR);
+	git_inflate_ಕೊನೆ(&ಹರಿವು);
+	ಹಿಂತಿರುಗಿ (st == Z_ಹರಿವು_ಕೊನೆ &&
+		ಹರಿವು.ಒಟ್ಟು_ಹೊರಹೋಗು == expect &&
+		ಹರಿವು.ಒಟ್ಟು_ಒಳ == len) ? 0 : -1;
 }
 
-static void copy_pack_data(struct hashfile *f,
-		struct packed_git *p,
-		struct pack_window **w_curs,
-		off_t offset,
+ಸ್ಥಿರ ಶೂನ್ಯ copy_pack_ದತ್ತಾಂಶ(ರಚನೆ hashfile *f,
+		ರಚನೆ packed_git *p,
+		ರಚನೆ pack_ಕಿಟಕಿ **w_curs,
+		off_t ಸ್ಥಾನಾಂತರ,
 		off_t len)
 {
-	unsigned char *in;
-	size_t avail;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ಒಳ;
+	ಗಾತ್ರ_t avail;
 
-	while (len) {
-		in = use_pack(p, w_curs, offset, &avail);
-		if (avail > len)
-			avail = (unsigned long)len;
-		hashwrite(f, in, avail);
-		offset += avail;
+	ಆಗ (len) {
+		ಒಳ = use_pack(p, w_curs, ಸ್ಥಾನಾಂತರ, &avail);
+		ಆದರೆ (avail > len)
+			avail = (ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ)len;
+		hashwrite(f, ಒಳ, avail);
+		ಸ್ಥಾನಾಂತರ += avail;
 		len -= avail;
 	}
 }
 
-static inline int oe_size_greater_than(struct packing_data *pack,
-				       const struct object_entry *lhs,
-				       size_t rhs)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ oe_ಗಾತ್ರ_greater_than(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				       ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *lhs,
+				       ಗಾತ್ರ_t rhs)
 {
-	if (lhs->size_valid)
-		return lhs->size_ > rhs;
-	if (rhs < pack->oe_size_limit) /* rhs < 2^x <= lhs ? */
-		return 1;
-	return oe_get_size_slow(pack, lhs) > rhs;
+	ಆದರೆ (lhs->ಗಾತ್ರ_valid)
+		ಹಿಂತಿರುಗಿ lhs->ಗಾತ್ರ_3 > rhs;
+	ಆದರೆ (rhs < pack->oe_ಗಾತ್ರ_ಎಲ್ಲೆ) /* rhs < 2^x <= lhs ? */
+		ಹಿಂತಿರುಗಿ 1;
+	ಹಿಂತಿರುಗಿ oe_get_ಗಾತ್ರ_slow(pack, lhs) > rhs;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static unsigned long write_no_reuse_object(struct hashfile *f, struct object_entry *entry,
-					   unsigned long limit, int usable_delta)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ write_no_reuse_object(ರಚನೆ hashfile *f, ರಚನೆ object_ನಮೂದು *ನಮೂದು,
+					   ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಎಲ್ಲೆ, ಪೂರ್ಣಾಂಕ usable_delta)
 {
-	unsigned long size, datalen;
-	unsigned char header[MAX_PACK_OBJECT_HEADER],
-		      dheader[MAX_PACK_OBJECT_HEADER];
-	unsigned hdrlen;
-	enum object_type type;
-	void *buf;
-	struct odb_stream *st = NULL;
-	const unsigned hashsz = the_hash_algo->rawsz;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2, datalen;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ಶೀರ್ಷಿಕೆ[MAX_PACK_OBJECT_ಶೀರ್ಷಿಕೆ],
+		      dheader[MAX_PACK_OBJECT_ಶೀರ್ಷಿಕೆ];
+	ಚಿಹ್ನೆರಹಿತ hdrlen;
+	ಎಣಿಕೆ object_type type;
+	ಶೂನ್ಯ *buf;
+	ರಚನೆ odb_ಹರಿವು *st = ಖಾಲಿ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ hashsz = the_hash_algo->rawsz;
 
-	if (!usable_delta) {
-		if (oe_type(entry) == OBJ_BLOB &&
-		    oe_size_greater_than(&to_pack, entry,
-					 repo_settings_get_big_file_threshold(the_repository)) &&
-		    (st = odb_stream_from_object(the_repository->objects, &entry->idx.oid,
-						 NULL)) != NULL) {
-			buf = NULL;
+	ಆದರೆ (!usable_delta) {
+		ಆದರೆ (oe_type(ನಮೂದು) == OBJ_BLOB &&
+		    oe_ಗಾತ್ರ_greater_than(&ಗಮ್ಯ_pack, ನಮೂದು,
+					 repo_settings_get_big_file_ಮಿತಿ(the_repository)) &&
+		    (st = odb_ಹರಿವು_from_object(the_repository->objects, &ನಮೂದು->idx.oid,
+						 ಖಾಲಿ)) != ಖಾಲಿ) {
+			buf = ಖಾಲಿ;
 			type = st->type;
-			size = st->size;
-		} else {
-			size_t size_st = 0;
+			ಗಾತ್ರ_2 = st->ಗಾತ್ರ_2;
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
 			buf = odb_read_object(the_repository->objects,
-					      &entry->idx.oid, &type,
-					      &size_st);
-			size = cast_size_t_to_ulong(size_st);
-			if (!buf)
+					      &ನಮೂದು->idx.oid, &type,
+					      &ಗಾತ್ರ_st);
+			ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+			ಆದರೆ (!buf)
 				die(_("unable to read %s"),
-				    oid_to_hex(&entry->idx.oid));
+				    oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
 		}
 		/*
 		 * make sure no cached delta data remains from a
 		 * previous attempt before a pack split occurred.
 		 */
-		FREE_AND_NULL(entry->delta_data);
-		entry->z_delta_size = 0;
-	} else if (entry->delta_data) {
-		size = DELTA_SIZE(entry);
-		buf = entry->delta_data;
-		entry->delta_data = NULL;
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+		FREE_AND_NULL(ನಮೂದು->delta_ದತ್ತಾಂಶ);
+		ನಮೂದು->z_delta_ಗಾತ್ರ = 0;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ನಮೂದು->delta_ದತ್ತಾಂಶ) {
+		ಗಾತ್ರ_2 = DELTA_ಗಾತ್ರ(ನಮೂದು);
+		buf = ನಮೂದು->delta_ದತ್ತಾಂಶ;
+		ನಮೂದು->delta_ದತ್ತಾಂಶ = ಖಾಲಿ;
+		type = (allow_ofs_delta && DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
-	} else {
-		buf = get_delta(entry);
-		size = DELTA_SIZE(entry);
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		buf = get_delta(ನಮೂದು);
+		ಗಾತ್ರ_2 = DELTA_ಗಾತ್ರ(ನಮೂದು);
+		type = (allow_ofs_delta && DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
 	}
 
-	if (st)	/* large blob case, just assume we don't compress well */
-		datalen = size;
-	else if (entry->z_delta_size)
-		datalen = entry->z_delta_size;
-	else
-		datalen = do_compress(&buf, size);
+	ಆದರೆ (st)	/* large blob case, just assume we don't compress well */
+		datalen = ಗಾತ್ರ_2;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ನಮೂದು->z_delta_ಗಾತ್ರ)
+		datalen = ನಮೂದು->z_delta_ಗಾತ್ರ;
+	ಇಲ್ಲದಿದ್ದರೆ
+		datalen = do_compress(&buf, ಗಾತ್ರ_2);
 
 	/*
 	 * The object header is a byte of 'type' followed by zero or
 	 * more bytes of length.
 	 */
-	hdrlen = encode_in_pack_object_header(header, sizeof(header),
-					      type, size);
+	hdrlen = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(ಶೀರ್ಷಿಕೆ, ಗಾತ್ರ(ಶೀರ್ಷಿಕೆ),
+					      type, ಗಾತ್ರ_2);
 
-	if (type == OBJ_OFS_DELTA) {
+	ಆದರೆ (type == OBJ_OFS_DELTA) {
 		/*
 		 * Deltas with relative base contain an additional
 		 * encoding of the relative offset for the delta
 		 * base from this object's position in the pack.
 		 */
-		off_t ofs = entry->idx.offset - DELTA(entry)->idx.offset;
-		unsigned pos = sizeof(dheader) - 1;
+		off_t ofs = ನಮೂದು->idx.ಸ್ಥಾನಾಂತರ - DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ;
+		ಚಿಹ್ನೆರಹಿತ pos = ಗಾತ್ರ(dheader) - 1;
 		dheader[pos] = ofs & 127;
-		while (ofs >>= 7)
+		ಆಗ (ofs >>= 7)
 			dheader[--pos] = 128 | (--ofs & 127);
-		if (limit && hdrlen + sizeof(dheader) - pos + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+		ಆದರೆ (ಎಲ್ಲೆ && hdrlen + ಗಾತ್ರ(dheader) - pos + datalen + hashsz >= ಎಲ್ಲೆ) {
+			ಆದರೆ (st)
+				odb_ಹರಿವು_close(st);
+			ಬಿಡುಗಡೆ(buf);
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, dheader + pos, sizeof(dheader) - pos);
-		hdrlen += sizeof(dheader) - pos;
-	} else if (type == OBJ_REF_DELTA) {
+		hashwrite(f, ಶೀರ್ಷಿಕೆ, hdrlen);
+		hashwrite(f, dheader + pos, ಗಾತ್ರ(dheader) - pos);
+		hdrlen += ಗಾತ್ರ(dheader) - pos;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (type == OBJ_REF_DELTA) {
 		/*
 		 * Deltas with a base reference contain
 		 * additional bytes for the base object ID.
 		 */
-		if (limit && hdrlen + hashsz + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+		ಆದರೆ (ಎಲ್ಲೆ && hdrlen + hashsz + datalen + hashsz >= ಎಲ್ಲೆ) {
+			ಆದರೆ (st)
+				odb_ಹರಿವು_close(st);
+			ಬಿಡುಗಡೆ(buf);
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, DELTA(entry)->idx.oid.hash, hashsz);
+		hashwrite(f, ಶೀರ್ಷಿಕೆ, hdrlen);
+		hashwrite(f, DELTA(ನಮೂದು)->idx.oid.hash, hashsz);
 		hdrlen += hashsz;
-	} else {
-		if (limit && hdrlen + datalen + hashsz >= limit) {
-			if (st)
-				odb_stream_close(st);
-			free(buf);
-			return 0;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (ಎಲ್ಲೆ && hdrlen + datalen + hashsz >= ಎಲ್ಲೆ) {
+			ಆದರೆ (st)
+				odb_ಹರಿವು_close(st);
+			ಬಿಡುಗಡೆ(buf);
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		hashwrite(f, header, hdrlen);
+		hashwrite(f, ಶೀರ್ಷಿಕೆ, hdrlen);
 	}
-	if (st) {
-		datalen = write_large_blob_data(st, f, &entry->idx.oid);
-		odb_stream_close(st);
-	} else {
+	ಆದರೆ (st) {
+		datalen = write_large_blob_ದತ್ತಾಂಶ(st, f, &ನಮೂದು->idx.oid);
+		odb_ಹರಿವು_close(st);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		hashwrite(f, buf, datalen);
-		free(buf);
+		ಬಿಡುಗಡೆ(buf);
 	}
 
-	return hdrlen + datalen;
+	ಹಿಂತಿರುಗಿ hdrlen + datalen;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static off_t write_reuse_object(struct hashfile *f, struct object_entry *entry,
-				unsigned long limit, int usable_delta)
+ಸ್ಥಿರ off_t write_reuse_object(ರಚನೆ hashfile *f, ರಚನೆ object_ನಮೂದು *ನಮೂದು,
+				ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಎಲ್ಲೆ, ಪೂರ್ಣಾಂಕ usable_delta)
 {
-	struct packed_git *p = IN_PACK(entry);
-	struct pack_window *w_curs = NULL;
+	ರಚನೆ packed_git *p = ಒಳ_PACK(ನಮೂದು);
+	ರಚನೆ pack_ಕಿಟಕಿ *w_curs = ಖಾಲಿ;
 	uint32_t pos;
-	off_t offset, cur;
-	enum object_type type = oe_type(entry);
-	enum object_type in_pack_type;
+	off_t ಸ್ಥಾನಾಂತರ, cur;
+	ಎಣಿಕೆ object_type type = oe_type(ನಮೂದು);
+	ಎಣಿಕೆ object_type ಒಳ_pack_type;
 	off_t datalen;
-	unsigned char header[MAX_PACK_OBJECT_HEADER],
-		      dheader[MAX_PACK_OBJECT_HEADER];
-	unsigned hdrlen;
-	const unsigned hashsz = the_hash_algo->rawsz;
-	size_t entry_size;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ಶೀರ್ಷಿಕೆ[MAX_PACK_OBJECT_ಶೀರ್ಷಿಕೆ],
+		      dheader[MAX_PACK_OBJECT_ಶೀರ್ಷಿಕೆ];
+	ಚಿಹ್ನೆರಹಿತ hdrlen;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ hashsz = the_hash_algo->rawsz;
+	ಗಾತ್ರ_t ನಮೂದು_ಗಾತ್ರ;
 
-	cur = entry->in_pack_offset;
-	in_pack_type = unpack_object_header(p, &w_curs, &cur, &entry_size);
-	if (in_pack_type < 0)
+	cur = ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ;
+	ಒಳ_pack_type = unpack_object_ಶೀರ್ಷಿಕೆ(p, &w_curs, &cur, &ನಮೂದು_ಗಾತ್ರ);
+	ಆದರೆ (ಒಳ_pack_type < 0)
 		die(_("write_reuse_object: unable to parse object header of %s"),
-		    oid_to_hex(&entry->idx.oid));
+		    oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
 
-	if (DELTA(entry))
-		type = (allow_ofs_delta && DELTA(entry)->idx.offset) ?
+	ಆದರೆ (DELTA(ನಮೂದು))
+		type = (allow_ofs_delta && DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ) ?
 			OBJ_OFS_DELTA : OBJ_REF_DELTA;
-	hdrlen = encode_in_pack_object_header(header, sizeof(header),
-					      type, entry_size);
+	hdrlen = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(ಶೀರ್ಷಿಕೆ, ಗಾತ್ರ(ಶೀರ್ಷಿಕೆ),
+					      type, ನಮೂದು_ಗಾತ್ರ);
 
-	offset = entry->in_pack_offset;
-	if (offset_to_pack_pos(p, offset, &pos) < 0)
+	ಸ್ಥಾನಾಂತರ = ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ;
+	ಆದರೆ (ಸ್ಥಾನಾಂತರ_ಗಮ್ಯ_pack_pos(p, ಸ್ಥಾನಾಂತರ, &pos) < 0)
 		die(_("write_reuse_object: could not locate %s, expected at "
 		      "offset %"PRIuMAX" in pack %s"),
-		    oid_to_hex(&entry->idx.oid), (uintmax_t)offset,
+		    oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid), (uintmax_t)ಸ್ಥಾನಾಂತರ,
 		    p->pack_name);
-	datalen = pack_pos_to_offset(p, pos + 1) - offset;
-	if (!pack_to_stdout && p->index_version > 1 &&
-	    check_pack_crc(p, &w_curs, offset, datalen,
-			   pack_pos_to_index(p, pos))) {
+	datalen = pack_pos_ಗಮ್ಯ_ಸ್ಥಾನಾಂತರ(p, pos + 1) - ಸ್ಥಾನಾಂತರ;
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout && p->ಸೂಚ್ಯಂಕ_ಆವೃತ್ತಿ > 1 &&
+	    check_pack_ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ(p, &w_curs, ಸ್ಥಾನಾಂತರ, datalen,
+			   pack_pos_ಗಮ್ಯ_ಸೂಚ್ಯಂಕ(p, pos))) {
 		error(_("bad packed object CRC for %s"),
-		      oid_to_hex(&entry->idx.oid));
+		      oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
 		unuse_pack(&w_curs);
-		return write_no_reuse_object(f, entry, limit, usable_delta);
+		ಹಿಂತಿರುಗಿ write_no_reuse_object(f, ನಮೂದು, ಎಲ್ಲೆ, usable_delta);
 	}
 
-	offset += entry->in_pack_header_size;
-	datalen -= entry->in_pack_header_size;
+	ಸ್ಥಾನಾಂತರ += ನಮೂದು->ಒಳ_pack_ಶೀರ್ಷಿಕೆ_ಗಾತ್ರ;
+	datalen -= ನಮೂದು->ಒಳ_pack_ಶೀರ್ಷಿಕೆ_ಗಾತ್ರ;
 
-	if (!pack_to_stdout && p->index_version == 1 &&
-	    check_pack_inflate(p, &w_curs, offset, datalen, entry_size)) {
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout && p->ಸೂಚ್ಯಂಕ_ಆವೃತ್ತಿ == 1 &&
+	    check_pack_inflate(p, &w_curs, ಸ್ಥಾನಾಂತರ, datalen, ನಮೂದು_ಗಾತ್ರ)) {
 		error(_("corrupt packed object for %s"),
-		      oid_to_hex(&entry->idx.oid));
+		      oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
 		unuse_pack(&w_curs);
-		return write_no_reuse_object(f, entry, limit, usable_delta);
+		ಹಿಂತಿರುಗಿ write_no_reuse_object(f, ನಮೂದು, ಎಲ್ಲೆ, usable_delta);
 	}
 
-	if (type == OBJ_OFS_DELTA) {
-		off_t ofs = entry->idx.offset - DELTA(entry)->idx.offset;
-		unsigned pos = sizeof(dheader) - 1;
+	ಆದರೆ (type == OBJ_OFS_DELTA) {
+		off_t ofs = ನಮೂದು->idx.ಸ್ಥಾನಾಂತರ - DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ;
+		ಚಿಹ್ನೆರಹಿತ pos = ಗಾತ್ರ(dheader) - 1;
 		dheader[pos] = ofs & 127;
-		while (ofs >>= 7)
+		ಆಗ (ofs >>= 7)
 			dheader[--pos] = 128 | (--ofs & 127);
-		if (limit && hdrlen + sizeof(dheader) - pos + datalen + hashsz >= limit) {
+		ಆದರೆ (ಎಲ್ಲೆ && hdrlen + ಗಾತ್ರ(dheader) - pos + datalen + hashsz >= ಎಲ್ಲೆ) {
 			unuse_pack(&w_curs);
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, dheader + pos, sizeof(dheader) - pos);
-		hdrlen += sizeof(dheader) - pos;
+		hashwrite(f, ಶೀರ್ಷಿಕೆ, hdrlen);
+		hashwrite(f, dheader + pos, ಗಾತ್ರ(dheader) - pos);
+		hdrlen += ಗಾತ್ರ(dheader) - pos;
 		reused_delta++;
-	} else if (type == OBJ_REF_DELTA) {
-		if (limit && hdrlen + hashsz + datalen + hashsz >= limit) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (type == OBJ_REF_DELTA) {
+		ಆದರೆ (ಎಲ್ಲೆ && hdrlen + hashsz + datalen + hashsz >= ಎಲ್ಲೆ) {
 			unuse_pack(&w_curs);
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		hashwrite(f, header, hdrlen);
-		hashwrite(f, DELTA(entry)->idx.oid.hash, hashsz);
+		hashwrite(f, ಶೀರ್ಷಿಕೆ, hdrlen);
+		hashwrite(f, DELTA(ನಮೂದು)->idx.oid.hash, hashsz);
 		hdrlen += hashsz;
 		reused_delta++;
-	} else {
-		if (limit && hdrlen + datalen + hashsz >= limit) {
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (ಎಲ್ಲೆ && hdrlen + datalen + hashsz >= ಎಲ್ಲೆ) {
 			unuse_pack(&w_curs);
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		hashwrite(f, header, hdrlen);
+		hashwrite(f, ಶೀರ್ಷಿಕೆ, hdrlen);
 	}
-	copy_pack_data(f, p, &w_curs, offset, datalen);
+	copy_pack_ದತ್ತಾಂಶ(f, p, &w_curs, ಸ್ಥಾನಾಂತರ, datalen);
 	unuse_pack(&w_curs);
 	reused++;
-	return hdrlen + datalen;
+	ಹಿಂತಿರುಗಿ hdrlen + datalen;
 }
 
 /* Return 0 if we will bust the pack-size limit */
-static off_t write_object(struct hashfile *f,
-			  struct object_entry *entry,
-			  off_t write_offset)
+ಸ್ಥಿರ off_t write_object(ರಚನೆ hashfile *f,
+			  ರಚನೆ object_ನಮೂದು *ನಮೂದು,
+			  off_t write_ಸ್ಥಾನಾಂತರ)
 {
-	unsigned long limit;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಎಲ್ಲೆ;
 	off_t len;
-	int usable_delta, to_reuse;
+	ಪೂರ್ಣಾಂಕ usable_delta, ಗಮ್ಯ_reuse;
 
-	if (!pack_to_stdout)
-		crc32_begin(f);
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout)
+		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_begin(f);
 
 	/* apply size limit if limited packsize and not first object */
-	if (!pack_size_limit || !nr_written)
-		limit = 0;
-	else if (pack_size_limit <= write_offset)
+	ಆದರೆ (!pack_ಗಾತ್ರ_ಎಲ್ಲೆ || !nr_written)
+		ಎಲ್ಲೆ = 0;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (pack_ಗಾತ್ರ_ಎಲ್ಲೆ <= write_ಸ್ಥಾನಾಂತರ)
 		/*
 		 * the earlier object did not fit the limit; avoid
 		 * mistaking this with unlimited (i.e. limit = 0).
 		 */
-		limit = 1;
-	else
-		limit = pack_size_limit - write_offset;
+		ಎಲ್ಲೆ = 1;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಎಲ್ಲೆ = pack_ಗಾತ್ರ_ಎಲ್ಲೆ - write_ಸ್ಥಾನಾಂತರ;
 
-	if (!DELTA(entry))
+	ಆದರೆ (!DELTA(ನಮೂದು))
 		usable_delta = 0;	/* no delta */
-	else if (!pack_size_limit)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!pack_ಗಾತ್ರ_ಎಲ್ಲೆ)
 	       usable_delta = 1;	/* unlimited packfile */
-	else if (DELTA(entry)->idx.offset == (off_t)-1)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ == (off_t)-1)
 		usable_delta = 0;	/* base was written to another pack */
-	else if (DELTA(entry)->idx.offset)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (DELTA(ನಮೂದು)->idx.ಸ್ಥಾನಾಂತರ)
 		usable_delta = 1;	/* base already exists in this pack */
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		usable_delta = 0;	/* base could end up in another pack */
 
-	if (!reuse_object)
-		to_reuse = 0;	/* explicit */
-	else if (!IN_PACK(entry))
-		to_reuse = 0;	/* can't reuse what we don't have */
-	else if (oe_type(entry) == OBJ_REF_DELTA ||
-		 oe_type(entry) == OBJ_OFS_DELTA)
+	ಆದರೆ (!reuse_object)
+		ಗಮ್ಯ_reuse = 0;	/* explicit */
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!ಒಳ_PACK(ನಮೂದು))
+		ಗಮ್ಯ_reuse = 0;	/* can't reuse what we don't have */
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (oe_type(ನಮೂದು) == OBJ_REF_DELTA ||
+		 oe_type(ನಮೂದು) == OBJ_OFS_DELTA)
 				/* check_object() decided it for us ... */
-		to_reuse = usable_delta;
+		ಗಮ್ಯ_reuse = usable_delta;
 				/* ... but pack split may override that */
-	else if (oe_type(entry) != entry->in_pack_type)
-		to_reuse = 0;	/* pack has delta which is unusable */
-	else if (DELTA(entry))
-		to_reuse = 0;	/* we want to pack afresh */
-	else
-		to_reuse = 1;	/* we have it in-pack undeltified,
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (oe_type(ನಮೂದು) != ನಮೂದು->ಒಳ_pack_type)
+		ಗಮ್ಯ_reuse = 0;	/* pack has delta which is unusable */
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (DELTA(ನಮೂದು))
+		ಗಮ್ಯ_reuse = 0;	/* we want to pack afresh */
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಗಮ್ಯ_reuse = 1;	/* we have it in-pack undeltified,
 				 * and we do not need to deltify it.
 				 */
 
-	if (!to_reuse)
-		len = write_no_reuse_object(f, entry, limit, usable_delta);
-	else
-		len = write_reuse_object(f, entry, limit, usable_delta);
-	if (!len)
-		return 0;
+	ಆದರೆ (!ಗಮ್ಯ_reuse)
+		len = write_no_reuse_object(f, ನಮೂದು, ಎಲ್ಲೆ, usable_delta);
+	ಇಲ್ಲದಿದ್ದರೆ
+		len = write_reuse_object(f, ನಮೂದು, ಎಲ್ಲೆ, usable_delta);
+	ಆದರೆ (!len)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (usable_delta)
+	ಆದರೆ (usable_delta)
 		written_delta++;
 	written++;
-	if (!pack_to_stdout)
-		entry->idx.crc32 = crc32_end(f);
-	return len;
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout)
+		ನಮೂದು->idx.ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32 = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_ಕೊನೆ(f);
+	ಹಿಂತಿರುಗಿ len;
 }
 
-enum write_one_status {
+ಎಣಿಕೆ write_one_ಸ್ಥಿತಿ {
 	WRITE_ONE_SKIP = -1, /* already written */
 	WRITE_ONE_BREAK = 0, /* writing this will bust the limit; not written */
-	WRITE_ONE_WRITTEN = 1, /* normal */
+	WRITE_ONE_WRITTEN = 1, /*ಸಾಮಾನ್ಯ*/
 	WRITE_ONE_RECURSIVE = 2 /* already scheduled to be written */
 };
 
-static enum write_one_status write_one(struct hashfile *f,
-				       struct object_entry *e,
-				       off_t *offset)
+ಸ್ಥಿರ ಎಣಿಕೆ write_one_ಸ್ಥಿತಿ write_one(ರಚನೆ hashfile *f,
+				       ರಚನೆ object_ನಮೂದು *e,
+				       off_t *ಸ್ಥಾನಾಂತರ)
 {
-	off_t size;
-	int recursing;
+	off_t ಗಾತ್ರ_2;
+	ಪೂರ್ಣಾಂಕ recursing;
 
 	/*
 	 * we set offset to 1 (which is an impossible value) to mark
 	 * the fact that this object is involved in "write its base
 	 * first before writing a deltified object" recursion.
 	 */
-	recursing = (e->idx.offset == 1);
-	if (recursing) {
+	recursing = (e->idx.ಸ್ಥಾನಾಂತರ == 1);
+	ಆದರೆ (recursing) {
 		warning(_("recursive delta detected for object %s"),
-			oid_to_hex(&e->idx.oid));
-		return WRITE_ONE_RECURSIVE;
-	} else if (e->idx.offset || e->preferred_base) {
+			oid_ಗಮ್ಯ_hex(&e->idx.oid));
+		ಹಿಂತಿರುಗಿ WRITE_ONE_RECURSIVE;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (e->idx.ಸ್ಥಾನಾಂತರ || e->preferred_ತಳ) {
 		/* offset is non zero if object is written already. */
-		return WRITE_ONE_SKIP;
+		ಹಿಂತಿರುಗಿ WRITE_ONE_SKIP;
 	}
 
 	/* if we are deltified, write out base object first. */
-	if (DELTA(e)) {
-		e->idx.offset = 1; /* now recurse */
-		switch (write_one(f, DELTA(e), offset)) {
-		case WRITE_ONE_RECURSIVE:
+	ಆದರೆ (DELTA(e)) {
+		e->idx.ಸ್ಥಾನಾಂತರ = 1; /* now recurse */
+		ಆಯ್ಕೆ (write_one(f, DELTA(e), ಸ್ಥಾನಾಂತರ)) {
+		ಸ್ಥಿತಿ WRITE_ONE_RECURSIVE:
 			/* we cannot depend on this one */
-			SET_DELTA(e, NULL);
-			break;
-		default:
-			break;
-		case WRITE_ONE_BREAK:
-			e->idx.offset = recursing;
-			return WRITE_ONE_BREAK;
+			ಗಣ_DELTA(e, ಖಾಲಿ);
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ WRITE_ONE_BREAK:
+			e->idx.ಸ್ಥಾನಾಂತರ = recursing;
+			ಹಿಂತಿರುಗಿ WRITE_ONE_BREAK;
 		}
 	}
 
-	e->idx.offset = *offset;
-	size = write_object(f, e, *offset);
-	if (!size) {
-		e->idx.offset = recursing;
-		return WRITE_ONE_BREAK;
+	e->idx.ಸ್ಥಾನಾಂತರ = *ಸ್ಥಾನಾಂತರ;
+	ಗಾತ್ರ_2 = write_object(f, e, *ಸ್ಥಾನಾಂತರ);
+	ಆದರೆ (!ಗಾತ್ರ_2) {
+		e->idx.ಸ್ಥಾನಾಂತರ = recursing;
+		ಹಿಂತಿರುಗಿ WRITE_ONE_BREAK;
 	}
 	written_list[nr_written++] = &e->idx;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(*offset, size))
+	ಆದರೆ (signed_ಕೂಡಿಸು_overflows(*ಸ್ಥಾನಾಂತರ, ಗಾತ್ರ_2))
 		die(_("pack too large for current definition of off_t"));
-	*offset += size;
-	return WRITE_ONE_WRITTEN;
+	*ಸ್ಥಾನಾಂತರ += ಗಾತ್ರ_2;
+	ಹಿಂತಿರುಗಿ WRITE_ONE_WRITTEN;
 }
 
-static int mark_tagged(const struct reference *ref, void *cb_data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ mark_tagged(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	struct object_id peeled;
-	struct object_entry *entry = packlist_find(&to_pack, ref->oid);
+	ರಚನೆ object_id peeled;
+	ರಚನೆ object_ನಮೂದು *ನಮೂದು = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, ref->oid);
 
-	if (entry)
-		entry->tagged = 1;
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
-		entry = packlist_find(&to_pack, &peeled);
-		if (entry)
-			entry->tagged = 1;
+	ಆದರೆ (ನಮೂದು)
+		ನಮೂದು->tagged = 1;
+	ಆದರೆ (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+		ನಮೂದು = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, &peeled);
+		ಆದರೆ (ನಮೂದು)
+			ನಮೂದು->tagged = 1;
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static inline unsigned char oe_layer(struct packing_data *pack,
-				     struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ oe_layer(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				     ರಚನೆ object_ನಮೂದು *e)
 {
-	if (!pack->layer)
-		return 0;
-	return pack->layer[e - pack->objects];
+	ಆದರೆ (!pack->layer)
+		ಹಿಂತಿರುಗಿ 0;
+	ಹಿಂತಿರುಗಿ pack->layer[e - pack->objects];
 }
 
-static inline void add_to_write_order(struct object_entry **wo,
-			       unsigned int *endp,
-			       struct object_entry *e)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(ರಚನೆ object_ನಮೂದು **wo,
+			       ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *endp,
+			       ರಚನೆ object_ನಮೂದು *e)
 {
-	if (e->filled || oe_layer(&to_pack, e) != write_layer)
-		return;
+	ಆದರೆ (e->filled || oe_layer(&ಗಮ್ಯ_pack, e) != write_layer)
+		ಹಿಂತಿರುಗಿ;
 	wo[(*endp)++] = e;
 	e->filled = 1;
 }
 
-static void add_descendants_to_write_order(struct object_entry **wo,
-					   unsigned int *endp,
-					   struct object_entry *e)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_descendants_ಗಮ್ಯ_write_ಕ್ರಮ(ರಚನೆ object_ನಮೂದು **wo,
+					   ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *endp,
+					   ರಚನೆ object_ನಮೂದು *e)
 {
-	int add_to_order = 1;
-	while (e) {
-		if (add_to_order) {
-			struct object_entry *s;
+	ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_ಗಮ್ಯ_ಕ್ರಮ = 1;
+	ಆಗ (e) {
+		ಆದರೆ (ಕೂಡಿಸು_ಗಮ್ಯ_ಕ್ರಮ) {
+			ರಚನೆ object_ನಮೂದು *s;
 			/* add this node... */
-			add_to_write_order(wo, endp, e);
+			ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(wo, endp, e);
 			/* all its siblings... */
-			for (s = DELTA_SIBLING(e); s; s = DELTA_SIBLING(s)) {
-				add_to_write_order(wo, endp, s);
+			ಗಾಗಿ (s = DELTA_SIBLING(e); s; s = DELTA_SIBLING(s)) {
+				ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(wo, endp, s);
 			}
 		}
 		/* drop down a level to add left subtree nodes if possible */
-		if (DELTA_CHILD(e)) {
-			add_to_order = 1;
-			e = DELTA_CHILD(e);
-		} else {
-			add_to_order = 0;
+		ಆದರೆ (DELTA_ಮಗು(e)) {
+			ಕೂಡಿಸು_ಗಮ್ಯ_ಕ್ರಮ = 1;
+			e = DELTA_ಮಗು(e);
+		} ಇಲ್ಲದಿದ್ದರೆ {
+			ಕೂಡಿಸು_ಗಮ್ಯ_ಕ್ರಮ = 0;
 			/* our sibling might have some children, it is next */
-			if (DELTA_SIBLING(e)) {
+			ಆದರೆ (DELTA_SIBLING(e)) {
 				e = DELTA_SIBLING(e);
-				continue;
+				ಮುಂದುವರಿ;
 			}
 			/* go back to our parent node */
 			e = DELTA(e);
-			while (e && !DELTA_SIBLING(e)) {
+			ಆಗ (e && !DELTA_SIBLING(e)) {
 				/* we're on the right side of a subtree, keep
 				 * going up until we can go right again */
 				e = DELTA(e);
 			}
-			if (!e) {
+			ಆದರೆ (!e) {
 				/* done- we hit our original root node */
-				return;
+				ಹಿಂತಿರುಗಿ;
 			}
 			/* pass it off to sibling at this level */
 			e = DELTA_SIBLING(e);
@@ -927,78 +927,78 @@ static void add_descendants_to_write_order(struct object_entry **wo,
 	};
 }
 
-static void add_family_to_write_order(struct object_entry **wo,
-				      unsigned int *endp,
-				      struct object_entry *e)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_family_ಗಮ್ಯ_write_ಕ್ರಮ(ರಚನೆ object_ನಮೂದು **wo,
+				      ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *endp,
+				      ರಚನೆ object_ನಮೂದು *e)
 {
-	struct object_entry *root;
+	ರಚನೆ object_ನಮೂದು *ಬೇರು;
 
-	for (root = e; DELTA(root); root = DELTA(root))
+	ಗಾಗಿ (ಬೇರು = e; DELTA(ಬೇರು); ಬೇರು = DELTA(ಬೇರು))
 		; /* nothing */
-	add_descendants_to_write_order(wo, endp, root);
+	ಕೂಡಿಸು_descendants_ಗಮ್ಯ_write_ಕ್ರಮ(wo, endp, ಬೇರು);
 }
 
-static void compute_layer_order(struct object_entry **wo, unsigned int *wo_end)
+ಸ್ಥಿರ ಶೂನ್ಯ compute_layer_ಕ್ರಮ(ರಚನೆ object_ನಮೂದು **wo, ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *wo_ಕೊನೆ)
 {
-	unsigned int i, last_untagged;
-	struct object_entry *objects = to_pack.objects;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, ಕೊನೆಯ_untagged;
+	ರಚನೆ object_ನಮೂದು *objects = ಗಮ್ಯ_pack.objects;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		if (objects[i].tagged)
-			break;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	ಗಾಗಿ (i = 0; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ಆದರೆ (objects[i].tagged)
+			ನಿಲ್ಲಿಸು;
+		ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(wo, wo_ಕೊನೆ, &objects[i]);
 	}
-	last_untagged = i;
+	ಕೊನೆಯ_untagged = i;
 
 	/*
 	 * Then fill all the tagged tips.
 	 */
-	for (; i < to_pack.nr_objects; i++) {
-		if (objects[i].tagged)
-			add_to_write_order(wo, wo_end, &objects[i]);
+	ಗಾಗಿ (; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ಆದರೆ (objects[i].tagged)
+			ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(wo, wo_ಕೊನೆ, &objects[i]);
 	}
 
 	/*
 	 * And then all remaining commits and tags.
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_COMMIT &&
-		    oe_type(&objects[i]) != OBJ_TAG)
-			continue;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	ಗಾಗಿ (i = ಕೊನೆಯ_untagged; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ಆದರೆ (oe_type(&objects[i]) != OBJ_COMMIT &&
+		    oe_type(&objects[i]) != OBJ_ಟ್ಯಾಗ್)
+			ಮುಂದುವರಿ;
+		ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(wo, wo_ಕೊನೆ, &objects[i]);
 	}
 
 	/*
 	 * And then all the trees.
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_TREE)
-			continue;
-		add_to_write_order(wo, wo_end, &objects[i]);
+	ಗಾಗಿ (i = ಕೊನೆಯ_untagged; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ಆದರೆ (oe_type(&objects[i]) != OBJ_ವೃಕ್ಷ)
+			ಮುಂದುವರಿ;
+		ಕೂಡಿಸು_ಗಮ್ಯ_write_ಕ್ರಮ(wo, wo_ಕೊನೆ, &objects[i]);
 	}
 
 	/*
 	 * Finally all the rest in really tight order
 	 */
-	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (!objects[i].filled && oe_layer(&to_pack, &objects[i]) == write_layer)
-			add_family_to_write_order(wo, wo_end, &objects[i]);
+	ಗಾಗಿ (i = ಕೊನೆಯ_untagged; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ಆದರೆ (!objects[i].filled && oe_layer(&ಗಮ್ಯ_pack, &objects[i]) == write_layer)
+			ಕೂಡಿಸು_family_ಗಮ್ಯ_write_ಕ್ರಮ(wo, wo_ಕೊನೆ, &objects[i]);
 	}
 }
 
-static struct object_entry **compute_write_order(void)
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು **compute_write_ಕ್ರಮ(ಶೂನ್ಯ)
 {
 	uint32_t max_layers = 1;
-	unsigned int i, wo_end;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ i, wo_ಕೊನೆ;
 
-	struct object_entry **wo;
-	struct object_entry *objects = to_pack.objects;
+	ರಚನೆ object_ನಮೂದು **wo;
+	ರಚನೆ object_ನಮೂದು *objects = ಗಮ್ಯ_pack.objects;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
+	ಗಾಗಿ (i = 0; i < ಗಮ್ಯ_pack.nr_objects; i++) {
 		objects[i].tagged = 0;
 		objects[i].filled = 0;
-		SET_DELTA_CHILD(&objects[i], NULL);
-		SET_DELTA_SIBLING(&objects[i], NULL);
+		ಗಣ_DELTA_ಮಗು(&objects[i], ಖಾಲಿ);
+		ಗಣ_DELTA_SIBLING(&objects[i], ಖಾಲಿ);
 	}
 
 	/*
@@ -1006,37 +1006,37 @@ static struct object_entry **compute_write_order(void)
 	 * Make sure delta_sibling is sorted in the original
 	 * recency order.
 	 */
-	for (i = to_pack.nr_objects; i > 0;) {
-		struct object_entry *e = &objects[--i];
-		if (!DELTA(e))
-			continue;
+	ಗಾಗಿ (i = ಗಮ್ಯ_pack.nr_objects; i > 0;) {
+		ರಚನೆ object_ನಮೂದು *e = &objects[--i];
+		ಆದರೆ (!DELTA(e))
+			ಮುಂದುವರಿ;
 		/* Mark me as the first child */
-		e->delta_sibling_idx = DELTA(e)->delta_child_idx;
-		SET_DELTA_CHILD(DELTA(e), e);
+		e->delta_sibling_idx = DELTA(e)->delta_ಮಗು_idx;
+		ಗಣ_DELTA_ಮಗು(DELTA(e), e);
 	}
 
 	/*
 	 * Mark objects that are at the tip of tags.
 	 */
-	refs_for_each_tag_ref(get_main_ref_store(the_repository), mark_tagged,
-			      NULL);
+	refs_for_each_ಟ್ಯಾಗ್_ref(get_main_ref_store(the_repository), mark_tagged,
+			      ಖಾಲಿ);
 
-	if (use_delta_islands) {
-		max_layers = compute_pack_layers(&to_pack);
+	ಆದರೆ (use_delta_islands) {
+		max_layers = compute_pack_layers(&ಗಮ್ಯ_pack);
 		free_island_marks();
 	}
 
-	ALLOC_ARRAY(wo, to_pack.nr_objects);
-	wo_end = 0;
+	ALLOC_ARRAY(wo, ಗಮ್ಯ_pack.nr_objects);
+	wo_ಕೊನೆ = 0;
 
-	for (; write_layer < max_layers; ++write_layer)
-		compute_layer_order(wo, &wo_end);
+	ಗಾಗಿ (; write_layer < max_layers; ++write_layer)
+		compute_layer_ಕ್ರಮ(wo, &wo_ಕೊನೆ);
 
-	if (wo_end != to_pack.nr_objects)
+	ಆದರೆ (wo_ಕೊನೆ != ಗಮ್ಯ_pack.nr_objects)
 		die(_("ordered %u objects, expected %"PRIu32),
-		    wo_end, to_pack.nr_objects);
+		    wo_ಕೊನೆ, ಗಮ್ಯ_pack.nr_objects);
 
-	return wo;
+	ಹಿಂತಿರುಗಿ wo;
 }
 
 
@@ -1046,7 +1046,7 @@ static struct object_entry **compute_write_order(void)
  * packfile.
  */
 
-static struct reused_chunk {
+ಸ್ಥಿರ ರಚನೆ reused_chunk {
 	/* The offset of the first object of this chunk in the original
 	 * packfile. */
 	off_t original;
@@ -1054,18 +1054,18 @@ static struct reused_chunk {
 	 * this chunk in the generated packfile. */
 	off_t difference;
 } *reused_chunks;
-static int reused_chunks_nr;
-static int reused_chunks_alloc;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ reused_chunks_nr;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ reused_chunks_alloc;
 
-static void record_reused_object(off_t where, off_t offset)
+ಸ್ಥಿರ ಶೂನ್ಯ ದಾಖಲೆ_reused_object(off_t where, off_t ಸ್ಥಾನಾಂತರ)
 {
-	if (reused_chunks_nr && reused_chunks[reused_chunks_nr-1].difference == offset)
-		return;
+	ಆದರೆ (reused_chunks_nr && reused_chunks[reused_chunks_nr-1].difference == ಸ್ಥಾನಾಂತರ)
+		ಹಿಂತಿರುಗಿ;
 
 	ALLOC_GROW(reused_chunks, reused_chunks_nr + 1,
 		   reused_chunks_alloc);
 	reused_chunks[reused_chunks_nr].original = where;
-	reused_chunks[reused_chunks_nr].difference = offset;
+	reused_chunks[reused_chunks_nr].difference = ಸ್ಥಾನಾಂತರ;
 	reused_chunks_nr++;
 }
 
@@ -1075,16 +1075,16 @@ static void record_reused_object(off_t where, off_t offset)
  * chunk that contains it (which implicitly ends at the start
  * of the next chunk.
  */
-static off_t find_reused_offset(off_t where)
+ಸ್ಥಿರ off_t ಕಂಡುಹಿಡಿ_reused_ಸ್ಥಾನಾಂತರ(off_t where)
 {
-	int lo = 0, hi = reused_chunks_nr;
-	while (lo < hi) {
-		int mi = lo + ((hi - lo) / 2);
-		if (where == reused_chunks[mi].original)
-			return reused_chunks[mi].difference;
-		if (where < reused_chunks[mi].original)
+	ಪೂರ್ಣಾಂಕ lo = 0, hi = reused_chunks_nr;
+	ಆಗ (lo < hi) {
+		ಪೂರ್ಣಾಂಕ mi = lo + ((hi - lo) / 2);
+		ಆದರೆ (where == reused_chunks[mi].original)
+			ಹಿಂತಿರುಗಿ reused_chunks[mi].difference;
+		ಆದರೆ (where < reused_chunks[mi].original)
 			hi = mi;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			lo = mi + 1;
 	}
 
@@ -1092,99 +1092,99 @@ static off_t find_reused_offset(off_t where)
 	 * The first chunk starts at zero, so we can't have gone below
 	 * there.
 	 */
-	assert(lo);
-	return reused_chunks[lo-1].difference;
+	ಪ್ರತಿಜ್ಞಾ(lo);
+	ಹಿಂತಿರುಗಿ reused_chunks[lo-1].difference;
 }
 
-static void write_reused_pack_one(struct packed_git *reuse_packfile,
-				  size_t pos, struct hashfile *out,
-				  off_t pack_start,
-				  struct pack_window **w_curs)
+ಸ್ಥಿರ ಶೂನ್ಯ write_reused_pack_one(ರಚನೆ packed_git *reuse_packfile,
+				  ಗಾತ್ರ_t pos, ರಚನೆ hashfile *ಹೊರಹೋಗು,
+				  off_t pack_ಆರಂಭ,
+				  ರಚನೆ pack_ಕಿಟಕಿ **w_curs)
 {
-	off_t offset, next, cur;
-	enum object_type type;
-	size_t size;
+	off_t ಸ್ಥಾನಾಂತರ, ಮುಂದಿನ, cur;
+	ಎಣಿಕೆ object_type type;
+	ಗಾತ್ರ_t ಗಾತ್ರ_2;
 
-	offset = pack_pos_to_offset(reuse_packfile, pos);
-	next = pack_pos_to_offset(reuse_packfile, pos + 1);
+	ಸ್ಥಾನಾಂತರ = pack_pos_ಗಮ್ಯ_ಸ್ಥಾನಾಂತರ(reuse_packfile, pos);
+	ಮುಂದಿನ = pack_pos_ಗಮ್ಯ_ಸ್ಥಾನಾಂತರ(reuse_packfile, pos + 1);
 
-	record_reused_object(offset,
-			     offset - (hashfile_total(out) - pack_start));
+	ದಾಖಲೆ_reused_object(ಸ್ಥಾನಾಂತರ,
+			     ಸ್ಥಾನಾಂತರ - (hashfile_ಒಟ್ಟು(ಹೊರಹೋಗು) - pack_ಆರಂಭ));
 
-	cur = offset;
-	type = unpack_object_header(reuse_packfile, w_curs, &cur, &size);
-	assert(type >= 0);
+	cur = ಸ್ಥಾನಾಂತರ;
+	type = unpack_object_ಶೀರ್ಷಿಕೆ(reuse_packfile, w_curs, &cur, &ಗಾತ್ರ_2);
+	ಪ್ರತಿಜ್ಞಾ(type >= 0);
 
-	if (type == OBJ_OFS_DELTA) {
-		off_t base_offset;
+	ಆದರೆ (type == OBJ_OFS_DELTA) {
+		off_t ತಳ_ಸ್ಥಾನಾಂತರ;
 		off_t fixup;
 
-		unsigned char header[MAX_PACK_OBJECT_HEADER];
-		unsigned len;
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ಶೀರ್ಷಿಕೆ[MAX_PACK_OBJECT_ಶೀರ್ಷಿಕೆ];
+		ಚಿಹ್ನೆರಹಿತ len;
 
-		base_offset = get_delta_base(reuse_packfile, w_curs, &cur, type, offset);
-		assert(base_offset != 0);
+		ತಳ_ಸ್ಥಾನಾಂತರ = get_delta_ತಳ(reuse_packfile, w_curs, &cur, type, ಸ್ಥಾನಾಂತರ);
+		ಪ್ರತಿಜ್ಞಾ(ತಳ_ಸ್ಥಾನಾಂತರ != 0);
 
 		/* Convert to REF_DELTA if we must... */
-		if (!allow_ofs_delta) {
-			uint32_t base_pos;
-			struct object_id base_oid;
+		ಆದರೆ (!allow_ofs_delta) {
+			uint32_t ತಳ_pos;
+			ರಚನೆ object_id ತಳ_oid;
 
-			if (offset_to_pack_pos(reuse_packfile, base_offset, &base_pos) < 0)
+			ಆದರೆ (ಸ್ಥಾನಾಂತರ_ಗಮ್ಯ_pack_pos(reuse_packfile, ತಳ_ಸ್ಥಾನಾಂತರ, &ತಳ_pos) < 0)
 				die(_("expected object at offset %"PRIuMAX" "
 				      "in pack %s"),
-				    (uintmax_t)base_offset,
+				    (uintmax_t)ತಳ_ಸ್ಥಾನಾಂತರ,
 				    reuse_packfile->pack_name);
 
-			nth_packed_object_id(&base_oid, reuse_packfile,
-					     pack_pos_to_index(reuse_packfile, base_pos));
+			nth_packed_object_id(&ತಳ_oid, reuse_packfile,
+					     pack_pos_ಗಮ್ಯ_ಸೂಚ್ಯಂಕ(reuse_packfile, ತಳ_pos));
 
-			len = encode_in_pack_object_header(header, sizeof(header),
-							   OBJ_REF_DELTA, size);
-			hashwrite(out, header, len);
-			hashwrite(out, base_oid.hash, the_hash_algo->rawsz);
-			copy_pack_data(out, reuse_packfile, w_curs, cur, next - cur);
-			return;
+			len = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(ಶೀರ್ಷಿಕೆ, ಗಾತ್ರ(ಶೀರ್ಷಿಕೆ),
+							   OBJ_REF_DELTA, ಗಾತ್ರ_2);
+			hashwrite(ಹೊರಹೋಗು, ಶೀರ್ಷಿಕೆ, len);
+			hashwrite(ಹೊರಹೋಗು, ತಳ_oid.hash, the_hash_algo->rawsz);
+			copy_pack_ದತ್ತಾಂಶ(ಹೊರಹೋಗು, reuse_packfile, w_curs, cur, ಮುಂದಿನ - cur);
+			ಹಿಂತಿರುಗಿ;
 		}
 
 		/* Otherwise see if we need to rewrite the offset... */
-		fixup = find_reused_offset(offset) -
-			find_reused_offset(base_offset);
-		if (fixup) {
-			unsigned char ofs_header[MAX_PACK_OBJECT_HEADER];
-			unsigned i, ofs_len;
-			off_t ofs = offset - base_offset - fixup;
+		fixup = ಕಂಡುಹಿಡಿ_reused_ಸ್ಥಾನಾಂತರ(ಸ್ಥಾನಾಂತರ) -
+			ಕಂಡುಹಿಡಿ_reused_ಸ್ಥಾನಾಂತರ(ತಳ_ಸ್ಥಾನಾಂತರ);
+		ಆದರೆ (fixup) {
+			ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ofs_ಶೀರ್ಷಿಕೆ[MAX_PACK_OBJECT_ಶೀರ್ಷಿಕೆ];
+			ಚಿಹ್ನೆರಹಿತ i, ofs_len;
+			off_t ofs = ಸ್ಥಾನಾಂತರ - ತಳ_ಸ್ಥಾನಾಂತರ - fixup;
 
-			len = encode_in_pack_object_header(header, sizeof(header),
-							   OBJ_OFS_DELTA, size);
+			len = encode_ಒಳ_pack_object_ಶೀರ್ಷಿಕೆ(ಶೀರ್ಷಿಕೆ, ಗಾತ್ರ(ಶೀರ್ಷಿಕೆ),
+							   OBJ_OFS_DELTA, ಗಾತ್ರ_2);
 
-			i = sizeof(ofs_header) - 1;
-			ofs_header[i] = ofs & 127;
-			while (ofs >>= 7)
-				ofs_header[--i] = 128 | (--ofs & 127);
+			i = ಗಾತ್ರ(ofs_ಶೀರ್ಷಿಕೆ) - 1;
+			ofs_ಶೀರ್ಷಿಕೆ[i] = ofs & 127;
+			ಆಗ (ofs >>= 7)
+				ofs_ಶೀರ್ಷಿಕೆ[--i] = 128 | (--ofs & 127);
 
-			ofs_len = sizeof(ofs_header) - i;
+			ofs_len = ಗಾತ್ರ(ofs_ಶೀರ್ಷಿಕೆ) - i;
 
-			hashwrite(out, header, len);
-			hashwrite(out, ofs_header + sizeof(ofs_header) - ofs_len, ofs_len);
-			copy_pack_data(out, reuse_packfile, w_curs, cur, next - cur);
-			return;
+			hashwrite(ಹೊರಹೋಗು, ಶೀರ್ಷಿಕೆ, len);
+			hashwrite(ಹೊರಹೋಗು, ofs_ಶೀರ್ಷಿಕೆ + ಗಾತ್ರ(ofs_ಶೀರ್ಷಿಕೆ) - ofs_len, ofs_len);
+			copy_pack_ದತ್ತಾಂಶ(ಹೊರಹೋಗು, reuse_packfile, w_curs, cur, ಮುಂದಿನ - cur);
+			ಹಿಂತಿರುಗಿ;
 		}
 
 		/* ...otherwise we have no fixup, and can write it verbatim */
 	}
 
-	copy_pack_data(out, reuse_packfile, w_curs, offset, next - offset);
+	copy_pack_ದತ್ತಾಂಶ(ಹೊರಹೋಗು, reuse_packfile, w_curs, ಸ್ಥಾನಾಂತರ, ಮುಂದಿನ - ಸ್ಥಾನಾಂತರ);
 }
 
-static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
-					 struct hashfile *out,
-					 struct pack_window **w_curs)
+ಸ್ಥಿರ ಗಾತ್ರ_t write_reused_pack_verbatim(ರಚನೆ bitmapped_pack *reuse_packfile,
+					 ರಚನೆ hashfile *ಹೊರಹೋಗು,
+					 ರಚನೆ pack_ಕಿಟಕಿ **w_curs)
 {
-	size_t pos = 0;
-	size_t end;
+	ಗಾತ್ರ_t pos = 0;
+	ಗಾತ್ರ_t ಕೊನೆ;
 
-	if (reuse_packfile->bitmap_pos) {
+	ಆದರೆ (reuse_packfile->bitmap_pos) {
 		/*
 		 * We can't reuse whole chunks verbatim out of
 		 * non-preferred packs since we can't guarantee that
@@ -1202,7 +1202,7 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 		 * write_reused_pack(), which inspects and reuses
 		 * individual bits.
 		 */
-		return reuse_packfile->bitmap_pos / BITS_IN_EWORD;
+		ಹಿಂತಿರುಗಿ reuse_packfile->bitmap_pos / ಬಿಟ್ಟುಗಳು_ಒಳ_EWORD;
 	}
 
 	/*
@@ -1214,58 +1214,58 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 	 * contains fewer than BITS_IN_EWORD objects), then we'll
 	 * inspect bits one-by-one in write_reused_pack().
 	 */
-	end = reuse_packfile->bitmap_nr / BITS_IN_EWORD;
-	if (reuse_packfile_bitmap->word_alloc < end)
+	ಕೊನೆ = reuse_packfile->bitmap_nr / ಬಿಟ್ಟುಗಳು_ಒಳ_EWORD;
+	ಆದರೆ (reuse_packfile_bitmap->ಶಬ್ದ_alloc < ಕೊನೆ)
 		BUG("fewer words than expected in reuse_packfile_bitmap");
 
-	while (pos < end && reuse_packfile_bitmap->words[pos] == (eword_t)~0)
+	ಆಗ (pos < ಕೊನೆ && reuse_packfile_bitmap->ಪದಗಳು[pos] == (eword_t)~0)
 		pos++;
 
-	if (pos) {
-		off_t to_write;
+	ಆದರೆ (pos) {
+		off_t ಗಮ್ಯ_write;
 
-		written = (pos * BITS_IN_EWORD);
-		to_write = pack_pos_to_offset(reuse_packfile->p, written)
-			- sizeof(struct pack_header);
+		written = (pos * ಬಿಟ್ಟುಗಳು_ಒಳ_EWORD);
+		ಗಮ್ಯ_write = pack_pos_ಗಮ್ಯ_ಸ್ಥಾನಾಂತರ(reuse_packfile->p, written)
+			- ಗಾತ್ರ(ರಚನೆ pack_ಶೀರ್ಷಿಕೆ);
 
 		/* We're recording one chunk, not one object. */
-		record_reused_object(sizeof(struct pack_header), 0);
-		hashflush(out);
-		copy_pack_data(out, reuse_packfile->p, w_curs,
-			sizeof(struct pack_header), to_write);
+		ದಾಖಲೆ_reused_object(ಗಾತ್ರ(ರಚನೆ pack_ಶೀರ್ಷಿಕೆ), 0);
+		hashflush(ಹೊರಹೋಗು);
+		copy_pack_ದತ್ತಾಂಶ(ಹೊರಹೋಗು, reuse_packfile->p, w_curs,
+			ಗಾತ್ರ(ರಚನೆ pack_ಶೀರ್ಷಿಕೆ), ಗಮ್ಯ_write);
 
-		display_progress(progress_state, written);
+		display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, written);
 	}
-	return pos;
+	ಹಿಂತಿರುಗಿ pos;
 }
 
-static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
-			      struct hashfile *f)
+ಸ್ಥಿರ ಶೂನ್ಯ write_reused_pack(ರಚನೆ bitmapped_pack *reuse_packfile,
+			      ರಚನೆ hashfile *f)
 {
-	size_t i = reuse_packfile->bitmap_pos / BITS_IN_EWORD;
-	uint32_t offset;
-	off_t pack_start = hashfile_total(f) - sizeof(struct pack_header);
-	struct pack_window *w_curs = NULL;
+	ಗಾತ್ರ_t i = reuse_packfile->bitmap_pos / ಬಿಟ್ಟುಗಳು_ಒಳ_EWORD;
+	uint32_t ಸ್ಥಾನಾಂತರ;
+	off_t pack_ಆರಂಭ = hashfile_ಒಟ್ಟು(f) - ಗಾತ್ರ(ರಚನೆ pack_ಶೀರ್ಷಿಕೆ);
+	ರಚನೆ pack_ಕಿಟಕಿ *w_curs = ಖಾಲಿ;
 
-	if (allow_ofs_delta)
+	ಆದರೆ (allow_ofs_delta)
 		i = write_reused_pack_verbatim(reuse_packfile, f, &w_curs);
 
-	for (; i < reuse_packfile_bitmap->word_alloc; ++i) {
-		eword_t word = reuse_packfile_bitmap->words[i];
-		size_t pos = (i * BITS_IN_EWORD);
+	ಗಾಗಿ (; i < reuse_packfile_bitmap->ಶಬ್ದ_alloc; ++i) {
+		eword_t ಶಬ್ದ = reuse_packfile_bitmap->ಪದಗಳು[i];
+		ಗಾತ್ರ_t pos = (i * ಬಿಟ್ಟುಗಳು_ಒಳ_EWORD);
 
-		for (offset = 0; offset < BITS_IN_EWORD; ++offset) {
+		ಗಾಗಿ (ಸ್ಥಾನಾಂತರ = 0; ಸ್ಥಾನಾಂತರ < ಬಿಟ್ಟುಗಳು_ಒಳ_EWORD; ++ಸ್ಥಾನಾಂತರ) {
 			uint32_t pack_pos;
-			if ((word >> offset) == 0)
-				break;
+			ಆದರೆ ((ಶಬ್ದ >> ಸ್ಥಾನಾಂತರ) == 0)
+				ನಿಲ್ಲಿಸು;
 
-			offset += ewah_bit_ctz64(word >> offset);
-			if (pos + offset < reuse_packfile->bitmap_pos)
-				continue;
-			if (pos + offset >= reuse_packfile->bitmap_pos + reuse_packfile->bitmap_nr)
-				goto done;
+			ಸ್ಥಾನಾಂತರ += ewah_ಬಿಟ್_ctz64(ಶಬ್ದ >> ಸ್ಥಾನಾಂತರ);
+			ಆದರೆ (pos + ಸ್ಥಾನಾಂತರ < reuse_packfile->bitmap_pos)
+				ಮುಂದುವರಿ;
+			ಆದರೆ (pos + ಸ್ಥಾನಾಂತರ >= reuse_packfile->bitmap_pos + reuse_packfile->bitmap_nr)
+				ಹೋಗು ಮುಗಿದ;
 
-			if (reuse_packfile->bitmap_pos) {
+			ಆದರೆ (reuse_packfile->bitmap_pos) {
 				/*
 				 * When doing multi-pack reuse on a
 				 * non-preferred pack, translate bit positions
@@ -1273,84 +1273,84 @@ static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
 				 * pack-relative positions before attempting
 				 * reuse.
 				 */
-				struct multi_pack_index *m = reuse_packfile->from_midx;
+				ರಚನೆ multi_pack_ಸೂಚ್ಯಂಕ *m = reuse_packfile->from_midx;
 				uint32_t midx_pos;
 				off_t pack_ofs;
 
-				if (!m)
+				ಆದರೆ (!m)
 					BUG("non-zero bitmap position without MIDX");
 
-				midx_pos = pack_pos_to_midx(m, pos + offset);
-				pack_ofs = nth_midxed_offset(m, midx_pos);
+				midx_pos = pack_pos_ಗಮ್ಯ_midx(m, pos + ಸ್ಥಾನಾಂತರ);
+				pack_ofs = nth_midxed_ಸ್ಥಾನಾಂತರ(m, midx_pos);
 
-				if (offset_to_pack_pos(reuse_packfile->p,
+				ಆದರೆ (ಸ್ಥಾನಾಂತರ_ಗಮ್ಯ_pack_pos(reuse_packfile->p,
 						       pack_ofs, &pack_pos) < 0)
 					BUG("could not find expected object at offset %"PRIuMAX" in pack %s",
 					    (uintmax_t)pack_ofs,
 					    pack_basename(reuse_packfile->p));
-			} else {
+			} ಇಲ್ಲದಿದ್ದರೆ {
 				/*
 				 * Can use bit positions directly, even for MIDX
 				 * bitmaps. See comment in try_partial_reuse()
 				 * for why.
 				 */
-				pack_pos = pos + offset;
+				pack_pos = pos + ಸ್ಥಾನಾಂತರ;
 			}
 
 			write_reused_pack_one(reuse_packfile->p, pack_pos, f,
-					      pack_start, &w_curs);
-			display_progress(progress_state, ++written);
+					      pack_ಆರಂಭ, &w_curs);
+			display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ++written);
 		}
 	}
 
-done:
+ಮುಗಿದ:
 	unuse_pack(&w_curs);
 }
 
-static void write_excluded_by_configs(void)
+ಸ್ಥಿರ ಶೂನ್ಯ write_excluded_by_configs(ಶೂನ್ಯ)
 {
-	struct oidset_iter iter;
-	const struct object_id *oid;
+	ರಚನೆ oidset_iter iter;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid;
 
 	oidset_iter_init(&excluded_by_config, &iter);
-	while ((oid = oidset_iter_next(&iter))) {
-		struct configured_exclusion *ex =
+	ಆಗ ((oid = oidset_iter_ಮುಂದಿನ(&iter))) {
+		ರಚನೆ configured_exclusion *ex =
 			oidmap_get(&configured_exclusions, oid);
 
-		if (!ex)
+		ಆದರೆ (!ex)
 			BUG("configured exclusion wasn't configured");
-		write_in_full(1, ex->pack_hash_hex, strlen(ex->pack_hash_hex));
-		write_in_full(1, " ", 1);
-		write_in_full(1, ex->uri, strlen(ex->uri));
-		write_in_full(1, "\n", 1);
+		write_ಒಳ_ತುಂಬಿದ(1, ex->pack_hash_hex, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ex->pack_hash_hex));
+		write_ಒಳ_ತುಂಬಿದ(1, " ", 1);
+		write_ಒಳ_ತುಂಬಿದ(1, ex->uri, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ex->uri));
+		write_ಒಳ_ತುಂಬಿದ(1, "\n", 1);
 	}
 }
 
-static const char no_split_warning[] = N_(
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ no_ವಿಭಜಿಸು_warning[] = N_(
 "disabling bitmap writing, packs are split due to pack.packSizeLimit"
 );
 
-static void write_pack_file(void)
+ಸ್ಥಿರ ಶೂನ್ಯ write_pack_file(ಶೂನ್ಯ)
 {
 	uint32_t i = 0, j;
-	struct hashfile *f;
-	off_t offset;
-	uint32_t nr_remaining = nr_result;
-	time_t last_mtime = 0;
-	struct object_entry **write_order;
-	off_t bytes_written = 0;
+	ರಚನೆ hashfile *f;
+	off_t ಸ್ಥಾನಾಂತರ;
+	uint32_t nr_ಉಳಿದ = nr_ಫಲಿತಾಂಶ;
+	ಸಮಯ_t ಕೊನೆಯ_mtime = 0;
+	ರಚನೆ object_ನಮೂದು **write_ಕ್ರಮ;
+	off_t ಬೈಟುಗಳು_written = 0;
 
-	if (progress > pack_to_stdout)
-		progress_state = start_progress(the_repository,
-						_("Writing objects"), nr_result);
-	ALLOC_ARRAY(written_list, to_pack.nr_objects);
-	write_order = compute_write_order();
+	ಆದರೆ (ಪ್ರಗತಿ > pack_ಗಮ್ಯ_stdout)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
+						_("Writing objects"), nr_ಫಲಿತಾಂಶ);
+	ALLOC_ARRAY(written_list, ಗಮ್ಯ_pack.nr_objects);
+	write_ಕ್ರಮ = compute_write_ಕ್ರಮ();
 
-	do {
-		unsigned char hash[GIT_MAX_RAWSZ];
-		char *pack_tmp_name = NULL;
+	ಮಾಡು {
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ hash[GIT_MAX_RAWSZ];
+		ಅಕ್ಷರ *pack_tmp_name = ಖಾಲಿ;
 
-		if (pack_to_stdout) {
+		ಆದರೆ (pack_ಗಮ್ಯ_stdout) {
 			/*
 			 * This command is most often invoked via
 			 * git-upload-pack(1), which will typically chunk data
@@ -1360,40 +1360,40 @@ static void write_pack_file(void)
 			 * Note that we need to subtract one though to
 			 * accommodate for the sideband byte.
 			 */
-			struct hashfd_options opts = {
-				.progress = progress_state,
-				.buffer_len = LARGE_PACKET_DATA_MAX - 1,
+			ರಚನೆ hashfd_options opts = {
+				.ಪ್ರಗತಿ = ಪ್ರಗತಿ_state,
+				.ಬಫರ್_len = LARGE_PACKET_ದತ್ತಾಂಶ_MAX - 1,
 			};
 			f = hashfd_ext(the_repository->hash_algo, 1,
 				       "<stdout>", &opts);
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			f = create_tmp_packfile(the_repository, &pack_tmp_name);
 		}
 
-		offset = write_pack_header(f, nr_remaining);
+		ಸ್ಥಾನಾಂತರ = write_pack_ಶೀರ್ಷಿಕೆ(f, nr_ಉಳಿದ);
 
-		if (reuse_packfiles_nr) {
-			assert(pack_to_stdout);
-			for (j = 0; j < reuse_packfiles_nr; j++) {
+		ಆದರೆ (reuse_packfiles_nr) {
+			ಪ್ರತಿಜ್ಞಾ(pack_ಗಮ್ಯ_stdout);
+			ಗಾಗಿ (j = 0; j < reuse_packfiles_nr; j++) {
 				reused_chunks_nr = 0;
 				write_reused_pack(&reuse_packfiles[j], f);
-				if (reused_chunks_nr)
-					reuse_packfiles_used_nr++;
+				ಆದರೆ (reused_chunks_nr)
+					reuse_packfiles_ಬಳಸಿದ_nr++;
 			}
-			offset = hashfile_total(f);
+			ಸ್ಥಾನಾಂತರ = hashfile_ಒಟ್ಟು(f);
 		}
 
 		nr_written = 0;
-		for (; i < to_pack.nr_objects; i++) {
-			struct object_entry *e = write_order[i];
-			if (write_one(f, e, &offset) == WRITE_ONE_BREAK)
-				break;
-			display_progress(progress_state, written);
+		ಗಾಗಿ (; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+			ರಚನೆ object_ನಮೂದು *e = write_ಕ್ರಮ[i];
+			ಆದರೆ (write_one(f, e, &ಸ್ಥಾನಾಂತರ) == WRITE_ONE_BREAK)
+				ನಿಲ್ಲಿಸು;
+			display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, written);
 		}
 
-		bytes_written += hashfile_total(f) +
+		ಬೈಟುಗಳು_written += hashfile_ಒಟ್ಟು(f) +
 			the_repository->hash_algo->rawsz;
-		if (pack_to_stdout) {
+		ಆದರೆ (pack_ಗಮ್ಯ_stdout) {
 			/*
 			 * We never fsync when writing to stdout since we may
 			 * not be writing to an actual pack file. For instance,
@@ -1402,33 +1402,33 @@ static void write_pack_file(void)
 			 * synchronization with the reader on some platforms.
 			 */
 			finalize_hashfile(f, hash, FSYNC_COMPONENT_NONE,
-					  CSUM_HASH_IN_STREAM | CSUM_CLOSE);
-		} else if (nr_written == nr_remaining) {
+					  CSUM_HASH_ಒಳ_ಹರಿವು | CSUM_CLOSE);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (nr_written == nr_ಉಳಿದ) {
 			finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK,
-					  CSUM_HASH_IN_STREAM | CSUM_FSYNC | CSUM_CLOSE);
-		} else {
+					  CSUM_HASH_ಒಳ_ಹರಿವು | CSUM_FSYNC | CSUM_CLOSE);
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			/*
 			 * If we wrote the wrong number of entries in the
 			 * header, rewrite it like in fast-import.
 			 */
 
-			int fd = finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK, 0);
-			fixup_pack_header_footer(the_hash_algo, fd, hash,
+			ಪೂರ್ಣಾಂಕ fd = finalize_hashfile(f, hash, FSYNC_COMPONENT_PACK, 0);
+			fixup_pack_ಶೀರ್ಷಿಕೆ_footer(the_hash_algo, fd, hash,
 						 pack_tmp_name, nr_written,
-						 hash, offset);
+						 hash, ಸ್ಥಾನಾಂತರ);
 			close(fd);
-			if (write_bitmap_index) {
-				if (write_bitmap_index != WRITE_BITMAP_QUIET)
-					warning(_(no_split_warning));
-				write_bitmap_index = 0;
+			ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ) {
+				ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ != WRITE_BITMAP_QUIET)
+					warning(_(no_ವಿಭಜಿಸು_warning));
+				write_bitmap_ಸೂಚ್ಯಂಕ = 0;
 			}
 		}
 
-		if (!pack_to_stdout) {
-			struct stat st;
-			struct strbuf tmpname = STRBUF_INIT;
-			struct bitmap_writer bitmap_writer;
-			char *idx_tmp_name = NULL;
+		ಆದರೆ (!pack_ಗಮ್ಯ_stdout) {
+			ರಚನೆ stat st;
+			ರಚನೆ strbuf tmpname = STRBUF_INIT;
+			ರಚನೆ bitmap_writer bitmap_writer;
+			ಅಕ್ಷರ *idx_tmp_name = ಖಾಲಿ;
 
 			/*
 			 * Packs are runtime accessed in their mtime
@@ -1437,97 +1437,97 @@ static void write_pack_file(void)
 			 * packs then we should modify the mtime of later ones
 			 * to preserve this property.
 			 */
-			if (stat(pack_tmp_name, &st) < 0) {
+			ಆದರೆ (stat(pack_tmp_name, &st) < 0) {
 				warning_errno(_("failed to stat %s"), pack_tmp_name);
-			} else if (!last_mtime) {
-				last_mtime = st.st_mtime;
-			} else {
-				struct utimbuf utb;
+			} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!ಕೊನೆಯ_mtime) {
+				ಕೊನೆಯ_mtime = st.st_mtime;
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				ರಚನೆ utimbuf utb;
 				utb.actime = st.st_atime;
-				utb.modtime = --last_mtime;
-				if (utime(pack_tmp_name, &utb) < 0)
+				utb.modtime = --ಕೊನೆಯ_mtime;
+				ಆದರೆ (utime(pack_tmp_name, &utb) < 0)
 					warning_errno(_("failed utime() on %s"), pack_tmp_name);
 			}
 
-			strbuf_addf(&tmpname, "%s-%s.", base_name,
-				    hash_to_hex(hash));
+			strbuf_addf(&tmpname, "%s-%s.", ತಳ_name,
+				    hash_ಗಮ್ಯ_hex(hash));
 
-			if (write_bitmap_index) {
+			ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ) {
 				bitmap_writer_init(&bitmap_writer,
-						   the_repository, &to_pack,
-						   NULL);
-				bitmap_writer_set_checksum(&bitmap_writer, hash);
-				bitmap_writer_build_type_index(&bitmap_writer,
+						   the_repository, &ಗಮ್ಯ_pack,
+						   ಖಾಲಿ);
+				bitmap_writer_ಗಣ_checksum(&bitmap_writer, hash);
+				bitmap_writer_build_type_ಸೂಚ್ಯಂಕ(&bitmap_writer,
 							       written_list);
 			}
 
-			if (cruft)
+			ಆದರೆ (cruft)
 				pack_idx_opts.flags |= WRITE_MTIMES;
 
 			stage_tmp_packfiles(the_repository, &tmpname,
 					    pack_tmp_name, written_list,
-					    nr_written, &to_pack,
+					    nr_written, &ಗಮ್ಯ_pack,
 					    &pack_idx_opts, hash,
 					    &idx_tmp_name);
 
-			if (write_bitmap_index) {
-				size_t tmpname_len = tmpname.len;
+			ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ) {
+				ಗಾತ್ರ_t tmpname_len = tmpname.len;
 
 				strbuf_addstr(&tmpname, "bitmap");
-				stop_progress(&progress_state);
+				stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 
-				bitmap_writer_show_progress(&bitmap_writer,
-							    progress);
+				bitmap_writer_show_ಪ್ರಗತಿ(&bitmap_writer,
+							    ಪ್ರಗತಿ);
 				bitmap_writer_select_commits(&bitmap_writer,
-							     indexed_commits,
-							     indexed_commits_nr);
-				if (bitmap_writer_build(&bitmap_writer) < 0)
+							     ಸೂಚ್ಯಂಕಿತ_commits,
+							     ಸೂಚ್ಯಂಕಿತ_commits_nr);
+				ಆದರೆ (bitmap_writer_build(&bitmap_writer) < 0)
 					die(_("failed to write bitmap index"));
-				bitmap_writer_finish(&bitmap_writer,
+				bitmap_writer_ಮುಕ್ತಾಯ(&bitmap_writer,
 						     written_list,
 						     tmpname.buf, write_bitmap_options);
 				bitmap_writer_free(&bitmap_writer);
-				write_bitmap_index = 0;
+				write_bitmap_ಸೂಚ್ಯಂಕ = 0;
 				strbuf_setlen(&tmpname, tmpname_len);
 			}
 
 			rename_tmp_packfile_idx(the_repository, &tmpname, &idx_tmp_name);
 
-			free(idx_tmp_name);
+			ಬಿಡುಗಡೆ(idx_tmp_name);
 			strbuf_release(&tmpname);
-			free(pack_tmp_name);
-			puts(hash_to_hex(hash));
+			ಬಿಡುಗಡೆ(pack_tmp_name);
+			puts(hash_ಗಮ್ಯ_hex(hash));
 		}
 
 		/* mark written objects as written to previous pack */
-		for (j = 0; j < nr_written; j++) {
-			written_list[j]->offset = (off_t)-1;
+		ಗಾಗಿ (j = 0; j < nr_written; j++) {
+			written_list[j]->ಸ್ಥಾನಾಂತರ = (off_t)-1;
 		}
-		nr_remaining -= nr_written;
-	} while (nr_remaining && i < to_pack.nr_objects);
+		nr_ಉಳಿದ -= nr_written;
+	} ಆಗ (nr_ಉಳಿದ && i < ಗಮ್ಯ_pack.nr_objects);
 
-	free(written_list);
-	free(write_order);
-	stop_progress(&progress_state);
-	if (written != nr_result)
+	ಬಿಡುಗಡೆ(written_list);
+	ಬಿಡುಗಡೆ(write_ಕ್ರಮ);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
+	ಆದರೆ (written != nr_ಫಲಿತಾಂಶ)
 		die(_("wrote %"PRIu32" objects while expecting %"PRIu32),
-		    written, nr_result);
-	trace2_data_intmax("pack-objects", the_repository,
-			   "write_pack_file/wrote", nr_result);
-	trace2_data_intmax("pack-objects", the_repository,
-			   "write_pack_file/wrote_bytes", bytes_written);
+		    written, nr_ಫಲಿತಾಂಶ);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository,
+			   "write_pack_file/wrote", nr_ಫಲಿತಾಂಶ);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository,
+			   "write_pack_file/wrote_bytes", ಬೈಟುಗಳು_written);
 }
 
-static int no_try_delta(const char *path)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ no_try_delta(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	static struct attr_check *check;
+	ಸ್ಥಿರ ರಚನೆ attr_check *check;
 
-	if (!check)
-		check = attr_check_initl("delta", NULL);
-	git_check_attr(the_repository->index, path, check);
-	if (ATTR_FALSE(check->items[0].value))
-		return 1;
-	return 0;
+	ಆದರೆ (!check)
+		check = attr_check_initl("delta", ಖಾಲಿ);
+	git_check_attr(the_repository->ಸೂಚ್ಯಂಕ, ಮಾರ್ಗ, check);
+	ಆದರೆ (ATTR_FALSE(check->ವಸ್ತುಗಳು[0].ಮೌಲ್ಯ))
+		ಹಿಂತಿರುಗಿ 1;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
@@ -1540,45 +1540,45 @@ static int no_try_delta(const char *path)
  * found the item, since that saves us from having to look it up again a
  * few lines later when we want to add the new entry.
  */
-static int have_duplicate_entry(const struct object_id *oid,
-				int exclude)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ have_duplicate_ನಮೂದು(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				ಪೂರ್ಣಾಂಕ exclude)
 {
-	struct object_entry *entry;
+	ರಚನೆ object_ನಮೂದು *ನಮೂದು;
 
-	if (reuse_packfile_bitmap &&
-	    bitmap_walk_contains(bitmap_git, reuse_packfile_bitmap, oid))
-		return 1;
+	ಆದರೆ (reuse_packfile_bitmap &&
+	    bitmap_walk_ಒಳಗೊಂಡಿದೆ(bitmap_git, reuse_packfile_bitmap, oid))
+		ಹಿಂತಿರುಗಿ 1;
 
-	entry = packlist_find(&to_pack, oid);
-	if (!entry)
-		return 0;
+	ನಮೂದು = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, oid);
+	ಆದರೆ (!ನಮೂದು)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (exclude) {
-		if (!entry->preferred_base)
-			nr_result--;
-		entry->preferred_base = 1;
+	ಆದರೆ (exclude) {
+		ಆದರೆ (!ನಮೂದು->preferred_ತಳ)
+			nr_ಫಲಿತಾಂಶ--;
+		ನಮೂದು->preferred_ತಳ = 1;
 	}
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int want_cruft_object_mtime(struct repository *r,
-				   const struct object_id *oid,
-				   unsigned flags, uint32_t mtime)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ want_cruft_object_mtime(ರಚನೆ repository *r,
+				   ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				   ಚಿಹ್ನೆರಹಿತ flags, uint32_t mtime)
 {
-	struct odb_source_files *files = odb_source_files_downcast(r->objects->source);
+	ರಚನೆ odb_ಮೂಲ_files *files = odb_ಮೂಲ_files_downcast(r->objects->ಮೂಲ);
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		struct packed_git **cache = packfile_store_get_kept_pack_cache(dir->packed, flags);
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ) {
+		ರಚನೆ packed_git **cache = packfile_store_get_kept_pack_cache(dir->packed, flags);
 
-		for (; *cache; cache++) {
-			struct packed_git *p = *cache;
+		ಗಾಗಿ (; *cache; cache++) {
+			ರಚನೆ packed_git *p = *cache;
 			off_t ofs;
 			uint32_t candidate_mtime;
 
-			ofs = find_pack_entry_one(oid, p);
-			if (!ofs)
-				continue;
+			ofs = ಕಂಡುಹಿಡಿ_pack_ನಮೂದು_one(oid, p);
+			ಆದರೆ (!ofs)
+				ಮುಂದುವರಿ;
 
 			/*
 			 * We have a copy of the object 'oid' in a non-cruft
@@ -1586,8 +1586,8 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * regardless of what the existing copy's mtime is since
 			 * it is outside of a cruft pack.
 			 */
-			if (!p->is_cruft)
-				return 0;
+			ಆದರೆ (!p->is_cruft)
+				ಹಿಂತಿರುಗಿ 0;
 
 			/*
 			 * If we have a copy of the object 'oid' in a cruft
@@ -1595,12 +1595,12 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * that object, or, if that can't be loaded, assume the
 			 * pack's mtime itself.
 			 */
-			if (!load_pack_mtimes(p)) {
+			ಆದರೆ (!ತುಂಬು_pack_mtimes(p)) {
 				uint32_t pos;
-				if (offset_to_pack_pos(p, ofs, &pos) < 0)
-					continue;
+				ಆದರೆ (ಸ್ಥಾನಾಂತರ_ಗಮ್ಯ_pack_pos(p, ofs, &pos) < 0)
+					ಮುಂದುವರಿ;
 				candidate_mtime = nth_packed_mtime(p, pos);
-			} else {
+			} ಇಲ್ಲದಿದ್ದರೆ {
 				candidate_mtime = p->mtime;
 			}
 
@@ -1610,24 +1610,24 @@ static int want_cruft_object_mtime(struct repository *r,
 			 * we are considering. We can thus avoid packing an
 			 * additional copy of that object.
 			 */
-			if (mtime <= candidate_mtime)
-				return 0;
+			ಆದರೆ (mtime <= candidate_mtime)
+				ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
-	return -1;
+	ಹಿಂತಿರುಗಿ -1;
 }
 
-static int want_found_object(const struct object_id *oid, int exclude,
-			     struct packed_git *p, uint32_t mtime)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ want_ಸಿಕ್ಕಿತು_object(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid, ಪೂರ್ಣಾಂಕ exclude,
+			     ರಚನೆ packed_git *p, uint32_t mtime)
 {
-	if (exclude)
-		return 1;
-	if (incremental)
-		return 0;
+	ಆದರೆ (exclude)
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (incremental)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (!is_pack_valid(p))
-		return -1;
+	ಆದರೆ (!is_pack_valid(p))
+		ಹಿಂತಿರುಗಿ -1;
 
 	/*
 	 * When asked to do --local (do not include an object that appears in a
@@ -1648,14 +1648,14 @@ static int want_found_object(const struct object_id *oid, int exclude,
 	 * Objects in packs borrowed from elsewhere are discarded regardless of
 	 * if they appear in other packs that weren't borrowed.
 	 */
-	if (local && !p->pack_local)
-		return 0;
+	ಆದರೆ (local && !p->pack_local)
+		ಹಿಂತಿರುಗಿ 0;
 
 	/*
 	 * Then handle .keep first, as we have a fast(er) path there.
 	 */
-	if (ignore_packed_keep_on_disk || ignore_packed_keep_in_core ||
-	    ignore_packed_keep_in_core_open) {
+	ಆದರೆ (ignore_packed_keep_on_disk || ignore_packed_keep_ಒಳ_core ||
+	    ignore_packed_keep_ಒಳ_core_open) {
 		/*
 		 * Set the flags for the kept-pack cache to be the ones we want
 		 * to ignore.
@@ -1664,38 +1664,38 @@ static int want_found_object(const struct object_id *oid, int exclude,
 		 * then we want to search through the on-disk keep and ignore
 		 * the in-core ones.
 		 */
-		unsigned flags = 0;
-		if (ignore_packed_keep_on_disk)
+		ಚಿಹ್ನೆರಹಿತ flags = 0;
+		ಆದರೆ (ignore_packed_keep_on_disk)
 			flags |= KEPT_PACK_ON_DISK;
-		if (ignore_packed_keep_in_core)
-			flags |= KEPT_PACK_IN_CORE;
-		if (ignore_packed_keep_in_core_open)
-			flags |= KEPT_PACK_IN_CORE_OPEN;
+		ಆದರೆ (ignore_packed_keep_ಒಳ_core)
+			flags |= KEPT_PACK_ಒಳ_CORE;
+		ಆದರೆ (ignore_packed_keep_ಒಳ_core_open)
+			flags |= KEPT_PACK_ಒಳ_CORE_OPEN;
 
 		/*
 		 * If the object is in a pack that we want to ignore, *and* we
 		 * don't have any cruft packs that are being retained, we can
 		 * abort quickly.
 		 */
-		if (!ignore_packed_keep_in_core_has_cruft) {
-			if (ignore_packed_keep_on_disk && p->pack_keep)
-				return 0;
-			if (ignore_packed_keep_in_core && p->pack_keep_in_core)
-				return 0;
-			if (ignore_packed_keep_in_core_open && p->pack_keep_in_core_open)
-				return 0;
-			if (has_object_kept_pack(p->repo, oid, flags))
-				return 0;
-		} else {
+		ಆದರೆ (!ignore_packed_keep_ಒಳ_core_has_cruft) {
+			ಆದರೆ (ignore_packed_keep_on_disk && p->pack_keep)
+				ಹಿಂತಿರುಗಿ 0;
+			ಆದರೆ (ignore_packed_keep_ಒಳ_core && p->pack_keep_ಒಳ_core)
+				ಹಿಂತಿರುಗಿ 0;
+			ಆದರೆ (ignore_packed_keep_ಒಳ_core_open && p->pack_keep_ಒಳ_core_open)
+				ಹಿಂತಿರುಗಿ 0;
+			ಆದರೆ (has_object_kept_pack(p->repo, oid, flags))
+				ಹಿಂತಿರುಗಿ 0;
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			/*
 			 * But if there is at least one cruft pack which
 			 * is being kept, we only want to include the
 			 * provided object if it has a strictly greater
 			 * mtime than any existing cruft copy.
 			 */
-			if (!want_cruft_object_mtime(p->repo, oid, flags,
+			ಆದರೆ (!want_cruft_object_mtime(p->repo, oid, flags,
 						     mtime))
-				return 0;
+				ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
@@ -1704,37 +1704,37 @@ static int want_found_object(const struct object_id *oid, int exclude,
 	 * keep-packs, or the object is not in one. Keep checking other
 	 * conditions...
 	 */
-	if (!local || !have_non_local_packs)
-		return 1;
+	ಆದರೆ (!local || !have_non_local_packs)
+		ಹಿಂತಿರುಗಿ 1;
 
 	/* we don't know yet; keep looking for more packs */
-	return -1;
+	ಹಿಂತಿರುಗಿ -1;
 }
 
-static int want_object_in_pack_one(struct packed_git *p,
-				   const struct object_id *oid,
-				   int exclude,
-				   struct packed_git **found_pack,
-				   off_t *found_offset,
-				   uint32_t found_mtime)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ want_object_ಒಳ_pack_one(ರಚನೆ packed_git *p,
+				   ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				   ಪೂರ್ಣಾಂಕ exclude,
+				   ರಚನೆ packed_git **ಸಿಕ್ಕಿತು_pack,
+				   off_t *ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ,
+				   uint32_t ಸಿಕ್ಕಿತು_mtime)
 {
-	off_t offset;
+	off_t ಸ್ಥಾನಾಂತರ;
 
-	if (p == *found_pack)
-		offset = *found_offset;
-	else
-		offset = find_pack_entry_one(oid, p);
+	ಆದರೆ (p == *ಸಿಕ್ಕಿತು_pack)
+		ಸ್ಥಾನಾಂತರ = *ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಸ್ಥಾನಾಂತರ = ಕಂಡುಹಿಡಿ_pack_ನಮೂದು_one(oid, p);
 
-	if (offset) {
-		if (!*found_pack) {
-			if (!is_pack_valid(p))
-				return -1;
-			*found_offset = offset;
-			*found_pack = p;
+	ಆದರೆ (ಸ್ಥಾನಾಂತರ) {
+		ಆದರೆ (!*ಸಿಕ್ಕಿತು_pack) {
+			ಆದರೆ (!is_pack_valid(p))
+				ಹಿಂತಿರುಗಿ -1;
+			*ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ = ಸ್ಥಾನಾಂತರ;
+			*ಸಿಕ್ಕಿತು_pack = p;
 		}
-		return want_found_object(oid, exclude, p, found_mtime);
+		ಹಿಂತಿರುಗಿ want_ಸಿಕ್ಕಿತು_object(oid, exclude, p, ಸಿಕ್ಕಿತು_mtime);
 	}
-	return -1;
+	ಹಿಂತಿರುಗಿ -1;
 }
 
 /*
@@ -1746,25 +1746,25 @@ static int want_object_in_pack_one(struct packed_git *p,
  * function finds if there is any pack that has the object and returns the pack
  * and its offset in these variables.
  */
-static int want_object_in_pack_mtime(const struct object_id *oid,
-				     int exclude,
-				     struct packed_git **found_pack,
-				     off_t *found_offset,
-				     uint32_t found_mtime)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ want_object_ಒಳ_pack_mtime(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				     ಪೂರ್ಣಾಂಕ exclude,
+				     ರಚನೆ packed_git **ಸಿಕ್ಕಿತು_pack,
+				     off_t *ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ,
+				     uint32_t ಸಿಕ್ಕಿತು_mtime)
 {
-	struct odb_source_files *files =
-		odb_source_files_downcast(the_repository->objects->source);
-	int want;
-	struct packfile_list_entry *e;
+	ರಚನೆ odb_ಮೂಲ_files *files =
+		odb_ಮೂಲ_files_downcast(the_repository->objects->ಮೂಲ);
+	ಪೂರ್ಣಾಂಕ want;
+	ರಚನೆ packfile_list_ನಮೂದು *e;
 
-	if (!exclude && local) {
+	ಆದರೆ (!exclude && local) {
 		/*
 		 * Note that we start iterating at `dirs->next` so that we
 		 * skip the local object directory.
 		 */
-		for (struct odb_files_dir *dir = files->dirs->next; dir; dir = dir->next)
-			if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-				return 0;
+		ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs->ಮುಂದಿನ; dir; dir = dir->ಮುಂದಿನ)
+			ಆದರೆ (!odb_ಮೂಲ_read_object_info(&dir->loose->ತಳ, oid, ಖಾಲಿ, 0, ಖಾಲಿ))
+				ಹಿಂತಿರುಗಿ 0;
 	}
 
 	/*
@@ -1772,412 +1772,412 @@ static int want_object_in_pack_mtime(const struct object_id *oid,
 	 * pack - in the usual case when neither --local was given nor .keep files
 	 * are present we will determine the answer right now.
 	 */
-	if (*found_pack) {
-		want = want_found_object(oid, exclude, *found_pack,
-					 found_mtime);
-		if (want != -1)
-			return want;
+	ಆದರೆ (*ಸಿಕ್ಕಿತು_pack) {
+		want = want_ಸಿಕ್ಕಿತು_object(oid, exclude, *ಸಿಕ್ಕಿತು_pack,
+					 ಸಿಕ್ಕಿತು_mtime);
+		ಆದರೆ (want != -1)
+			ಹಿಂತಿರುಗಿ want;
 
-		*found_pack = NULL;
-		*found_offset = 0;
+		*ಸಿಕ್ಕಿತು_pack = ಖಾಲಿ;
+		*ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ = 0;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		struct multi_pack_index *m = get_multi_pack_index(dir->packed);
-		struct pack_entry e;
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ) {
+		ರಚನೆ multi_pack_ಸೂಚ್ಯಂಕ *m = get_multi_pack_ಸೂಚ್ಯಂಕ(dir->packed);
+		ರಚನೆ pack_ನಮೂದು e;
 
-		if (m && midx_fill_entry(m, oid, &e, NULL) == MIDX_FILL_HIT) {
-			want = want_object_in_pack_one(e.p, oid, exclude, found_pack, found_offset, found_mtime);
-			if (want != -1)
-				return want;
+		ಆದರೆ (m && midx_fill_ನಮೂದು(m, oid, &e, ಖಾಲಿ) == MIDX_FILL_ದೊರಕಿತು) {
+			want = want_object_ಒಳ_pack_one(e.p, oid, exclude, ಸಿಕ್ಕಿತು_pack, ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ, ಸಿಕ್ಕಿತು_mtime);
+			ಆದರೆ (want != -1)
+				ಹಿಂತಿರುಗಿ want;
 		}
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		for (e = dir->packed->packs.head; e; e = e->next) {
-			struct packed_git *p = e->pack;
-			want = want_object_in_pack_one(p, oid, exclude, found_pack, found_offset, found_mtime);
-			if (!exclude && want > 0)
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ) {
+		ಗಾಗಿ (e = dir->packed->packs.ತಲೆ; e; e = e->ಮುಂದಿನ) {
+			ರಚನೆ packed_git *p = e->pack;
+			want = want_object_ಒಳ_pack_one(p, oid, exclude, ಸಿಕ್ಕಿತು_pack, ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ, ಸಿಕ್ಕಿತು_mtime);
+			ಆದರೆ (!exclude && want > 0)
 				packfile_list_prepend(&dir->packed->packs, p);
-			if (want != -1)
-				return want;
+			ಆದರೆ (want != -1)
+				ಹಿಂತಿರುಗಿ want;
 		}
 	}
 
-	if (uri_protocols.nr) {
-		struct configured_exclusion *ex =
+	ಆದರೆ (uri_protocols.nr) {
+		ರಚನೆ configured_exclusion *ex =
 			oidmap_get(&configured_exclusions, oid);
-		int i;
-		const char *p;
+		ಪೂರ್ಣಾಂಕ i;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p;
 
-		if (ex) {
-			for (i = 0; i < uri_protocols.nr; i++) {
-				if (skip_prefix(ex->uri,
-						uri_protocols.items[i].string,
+		ಆದರೆ (ex) {
+			ಗಾಗಿ (i = 0; i < uri_protocols.nr; i++) {
+				ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(ex->uri,
+						uri_protocols.ವಸ್ತುಗಳು[i].string,
 						&p) &&
 				    *p == ':') {
-					oidset_insert(&excluded_by_config, oid);
-					return 0;
+					oidset_ಸೇರಿಸು(&excluded_by_config, oid);
+					ಹಿಂತಿರುಗಿ 0;
 				}
 			}
 		}
 	}
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static inline int want_object_in_pack(const struct object_id *oid,
-				      int exclude,
-				      struct packed_git **found_pack,
-				      off_t *found_offset)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ want_object_ಒಳ_pack(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				      ಪೂರ್ಣಾಂಕ exclude,
+				      ರಚನೆ packed_git **ಸಿಕ್ಕಿತು_pack,
+				      off_t *ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ)
 {
-	return want_object_in_pack_mtime(oid, exclude, found_pack, found_offset,
+	ಹಿಂತಿರುಗಿ want_object_ಒಳ_pack_mtime(oid, exclude, ಸಿಕ್ಕಿತು_pack, ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ,
 					 0);
 }
 
-static struct object_entry *create_object_entry(const struct object_id *oid,
-						enum object_type type,
+ಸ್ಥಿರ ರಚನೆ object_ನಮೂದು *create_object_ನಮೂದು(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+						ಎಣಿಕೆ object_type type,
 						uint32_t hash,
-						int exclude,
-						int no_try_delta,
-						struct packed_git *found_pack,
-						off_t found_offset)
+						ಪೂರ್ಣಾಂಕ exclude,
+						ಪೂರ್ಣಾಂಕ no_try_delta,
+						ರಚನೆ packed_git *ಸಿಕ್ಕಿತು_pack,
+						off_t ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ)
 {
-	struct object_entry *entry;
+	ರಚನೆ object_ನಮೂದು *ನಮೂದು;
 
-	entry = packlist_alloc(&to_pack, oid);
-	entry->hash = hash;
-	oe_set_type(entry, type);
-	if (exclude)
-		entry->preferred_base = 1;
-	else
-		nr_result++;
-	if (found_pack) {
-		oe_set_in_pack(&to_pack, entry, found_pack);
-		entry->in_pack_offset = found_offset;
+	ನಮೂದು = packlist_alloc(&ಗಮ್ಯ_pack, oid);
+	ನಮೂದು->hash = hash;
+	oe_ಗಣ_type(ನಮೂದು, type);
+	ಆದರೆ (exclude)
+		ನಮೂದು->preferred_ತಳ = 1;
+	ಇಲ್ಲದಿದ್ದರೆ
+		nr_ಫಲಿತಾಂಶ++;
+	ಆದರೆ (ಸಿಕ್ಕಿತು_pack) {
+		oe_ಗಣ_ಒಳ_pack(&ಗಮ್ಯ_pack, ನಮೂದು, ಸಿಕ್ಕಿತು_pack);
+		ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ = ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ;
 	}
 
-	entry->no_try_delta = no_try_delta;
+	ನಮೂದು->no_try_delta = no_try_delta;
 
-	return entry;
+	ಹಿಂತಿರುಗಿ ನಮೂದು;
 }
 
-static const char no_closure_warning[] = N_(
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ no_ಆವರಣ_warning[] = N_(
 "disabling bitmap writing, as some objects are not being packed"
 );
 
-static void add_object_entry(const struct object_id *oid, enum object_type type,
-			     const char *name, int exclude)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_object_ನಮೂದು(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid, ಎಣಿಕೆ object_type type,
+			     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಪೂರ್ಣಾಂಕ exclude)
 {
-	struct packed_git *found_pack = NULL;
-	off_t found_offset = 0;
+	ರಚನೆ packed_git *ಸಿಕ್ಕಿತು_pack = ಖಾಲಿ;
+	off_t ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ = 0;
 
-	display_progress(progress_state, ++nr_seen);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ++nr_ನೋಡಿದ);
 
-	if (have_duplicate_entry(oid, exclude))
-		return;
+	ಆದರೆ (have_duplicate_ನಮೂದು(oid, exclude))
+		ಹಿಂತಿರುಗಿ;
 
-	if (!want_object_in_pack(oid, exclude, &found_pack, &found_offset)) {
+	ಆದರೆ (!want_object_ಒಳ_pack(oid, exclude, &ಸಿಕ್ಕಿತು_pack, &ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ)) {
 		/* The pack is missing an object, so it will not have closure */
-		if (write_bitmap_index) {
-			if (write_bitmap_index != WRITE_BITMAP_QUIET)
-				warning(_(no_closure_warning));
-			write_bitmap_index = 0;
+		ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ) {
+			ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ != WRITE_BITMAP_QUIET)
+				warning(_(no_ಆವರಣ_warning));
+			write_bitmap_ಸೂಚ್ಯಂಕ = 0;
 		}
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	create_object_entry(oid, type, pack_name_hash_fn(name),
+	create_object_ನಮೂದು(oid, type, pack_name_hash_fn(name),
 			    exclude, name && no_try_delta(name),
-			    found_pack, found_offset);
+			    ಸಿಕ್ಕಿತು_pack, ಸಿಕ್ಕಿತು_ಸ್ಥಾನಾಂತರ);
 }
 
-static int add_object_entry_from_bitmap(const struct object_id *oid,
-					enum object_type type,
-					int flags UNUSED, uint32_t name_hash,
-					struct packed_git *pack, off_t offset,
-					void *payload UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_object_ನಮೂದು_from_bitmap(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+					ಎಣಿಕೆ object_type type,
+					ಪೂರ್ಣಾಂಕ flags ಬಳಸದ, uint32_t name_hash,
+					ರಚನೆ packed_git *pack, off_t ಸ್ಥಾನಾಂತರ,
+					ಶೂನ್ಯ *payload ಬಳಸದ)
 {
-	display_progress(progress_state, ++nr_seen);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ++nr_ನೋಡಿದ);
 
-	if (have_duplicate_entry(oid, 0))
-		return 0;
+	ಆದರೆ (have_duplicate_ನಮೂದು(oid, 0))
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (!want_object_in_pack(oid, 0, &pack, &offset))
-		return 0;
+	ಆದರೆ (!want_object_ಒಳ_pack(oid, 0, &pack, &ಸ್ಥಾನಾಂತರ))
+		ಹಿಂತಿರುಗಿ 0;
 
-	create_object_entry(oid, type, name_hash, 0, 0, pack, offset);
-	return 0;
+	create_object_ನಮೂದು(oid, type, name_hash, 0, 0, pack, ಸ್ಥಾನಾಂತರ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-struct pbase_tree_cache {
-	struct object_id oid;
-	int ref;
-	int temporary;
-	void *tree_data;
-	unsigned long tree_size;
+ರಚನೆ pbase_ವೃಕ್ಷ_cache {
+	ರಚನೆ object_id oid;
+	ಪೂರ್ಣಾಂಕ ref;
+	ಪೂರ್ಣಾಂಕ temporary;
+	ಶೂನ್ಯ *ವೃಕ್ಷ_ದತ್ತಾಂಶ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ವೃಕ್ಷ_ಗಾತ್ರ;
 };
 
-static struct pbase_tree_cache *(pbase_tree_cache[256]);
-static int pbase_tree_cache_ix(const struct object_id *oid)
+ಸ್ಥಿರ ರಚನೆ pbase_ವೃಕ್ಷ_cache *(pbase_ವೃಕ್ಷ_cache[256]);
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pbase_ವೃಕ್ಷ_cache_ix(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	return oid->hash[0] % ARRAY_SIZE(pbase_tree_cache);
+	ಹಿಂತಿರುಗಿ oid->hash[0] % ARRAY_ಗಾತ್ರ(pbase_ವೃಕ್ಷ_cache);
 }
-static int pbase_tree_cache_ix_incr(int ix)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pbase_ವೃಕ್ಷ_cache_ix_incr(ಪೂರ್ಣಾಂಕ ix)
 {
-	return (ix+1) % ARRAY_SIZE(pbase_tree_cache);
+	ಹಿಂತಿರುಗಿ (ix+1) % ARRAY_ಗಾತ್ರ(pbase_ವೃಕ್ಷ_cache);
 }
 
-static struct pbase_tree {
-	struct pbase_tree *next;
+ಸ್ಥಿರ ರಚನೆ pbase_ವೃಕ್ಷ {
+	ರಚನೆ pbase_ವೃಕ್ಷ *ಮುಂದಿನ;
 	/* This is a phony "cache" entry; we are not
 	 * going to evict it or find it through _get()
 	 * mechanism -- this is for the toplevel node that
 	 * would almost always change with any commit.
 	 */
-	struct pbase_tree_cache pcache;
-} *pbase_tree;
+	ರಚನೆ pbase_ವೃಕ್ಷ_cache pcache;
+} *pbase_ವೃಕ್ಷ;
 
-static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
+ಸ್ಥಿರ ರಚನೆ pbase_ವೃಕ್ಷ_cache *pbase_ವೃಕ್ಷ_get(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	struct pbase_tree_cache *ent, *nent;
-	void *data;
-	unsigned long size;
-	size_t size_st = 0;
-	enum object_type type;
-	int neigh;
-	int my_ix = pbase_tree_cache_ix(oid);
-	int available_ix = -1;
+	ರಚನೆ pbase_ವೃಕ್ಷ_cache *ent, *nent;
+	ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+	ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
+	ಎಣಿಕೆ object_type type;
+	ಪೂರ್ಣಾಂಕ neigh;
+	ಪೂರ್ಣಾಂಕ my_ix = pbase_ವೃಕ್ಷ_cache_ix(oid);
+	ಪೂರ್ಣಾಂಕ ಲಭ್ಯ_ix = -1;
 
 	/* pbase-tree-cache acts as a limited hashtable.
 	 * your object will be found at your index or within a few
 	 * slots after that slot if it is cached.
 	 */
-	for (neigh = 0; neigh < 8; neigh++) {
-		ent = pbase_tree_cache[my_ix];
-		if (ent && oideq(&ent->oid, oid)) {
+	ಗಾಗಿ (neigh = 0; neigh < 8; neigh++) {
+		ent = pbase_ವೃಕ್ಷ_cache[my_ix];
+		ಆದರೆ (ent && oideq(&ent->oid, oid)) {
 			ent->ref++;
-			return ent;
+			ಹಿಂತಿರುಗಿ ent;
 		}
-		else if (((available_ix < 0) && (!ent || !ent->ref)) ||
-			 ((0 <= available_ix) &&
-			  (!ent && pbase_tree_cache[available_ix])))
-			available_ix = my_ix;
-		if (!ent)
-			break;
-		my_ix = pbase_tree_cache_ix_incr(my_ix);
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (((ಲಭ್ಯ_ix < 0) && (!ent || !ent->ref)) ||
+			 ((0 <= ಲಭ್ಯ_ix) &&
+			  (!ent && pbase_ವೃಕ್ಷ_cache[ಲಭ್ಯ_ix])))
+			ಲಭ್ಯ_ix = my_ix;
+		ಆದರೆ (!ent)
+			ನಿಲ್ಲಿಸು;
+		my_ix = pbase_ವೃಕ್ಷ_cache_ix_incr(my_ix);
 	}
 
 	/* Did not find one.  Either we got a bogus request or
 	 * we need to read and perhaps cache.
 	 */
-	data = odb_read_object(the_repository->objects, oid, &type, &size_st);
-	size = cast_size_t_to_ulong(size_st);
-	if (!data)
-		return NULL;
-	if (type != OBJ_TREE) {
-		free(data);
-		return NULL;
+	ದತ್ತಾಂಶ = odb_read_object(the_repository->objects, oid, &type, &ಗಾತ್ರ_st);
+	ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+	ಆದರೆ (!ದತ್ತಾಂಶ)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+	ಆದರೆ (type != OBJ_ವೃಕ್ಷ) {
+		ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 	}
 
 	/* We need to either cache or return a throwaway copy */
 
-	if (available_ix < 0)
-		ent = NULL;
-	else {
-		ent = pbase_tree_cache[available_ix];
-		my_ix = available_ix;
+	ಆದರೆ (ಲಭ್ಯ_ix < 0)
+		ent = ಖಾಲಿ;
+	ಇಲ್ಲದಿದ್ದರೆ {
+		ent = pbase_ವೃಕ್ಷ_cache[ಲಭ್ಯ_ix];
+		my_ix = ಲಭ್ಯ_ix;
 	}
 
-	if (!ent) {
-		nent = xmalloc(sizeof(*nent));
-		nent->temporary = (available_ix < 0);
+	ಆದರೆ (!ent) {
+		nent = xmalloc(ಗಾತ್ರ(*nent));
+		nent->temporary = (ಲಭ್ಯ_ix < 0);
 	}
-	else {
+	ಇಲ್ಲದಿದ್ದರೆ {
 		/* evict and reuse */
-		free(ent->tree_data);
+		ಬಿಡುಗಡೆ(ent->ವೃಕ್ಷ_ದತ್ತಾಂಶ);
 		nent = ent;
 	}
 	oidcpy(&nent->oid, oid);
-	nent->tree_data = data;
-	nent->tree_size = size;
+	nent->ವೃಕ್ಷ_ದತ್ತಾಂಶ = ದತ್ತಾಂಶ;
+	nent->ವೃಕ್ಷ_ಗಾತ್ರ = ಗಾತ್ರ_2;
 	nent->ref = 1;
-	if (!nent->temporary)
-		pbase_tree_cache[my_ix] = nent;
-	return nent;
+	ಆದರೆ (!nent->temporary)
+		pbase_ವೃಕ್ಷ_cache[my_ix] = nent;
+	ಹಿಂತಿರುಗಿ nent;
 }
 
-static void pbase_tree_put(struct pbase_tree_cache *cache)
+ಸ್ಥಿರ ಶೂನ್ಯ pbase_ವೃಕ್ಷ_put(ರಚನೆ pbase_ವೃಕ್ಷ_cache *cache)
 {
-	if (!cache->temporary) {
+	ಆದರೆ (!cache->temporary) {
 		cache->ref--;
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
-	free(cache->tree_data);
-	free(cache);
+	ಬಿಡುಗಡೆ(cache->ವೃಕ್ಷ_ದತ್ತಾಂಶ);
+	ಬಿಡುಗಡೆ(cache);
 }
 
-static size_t name_cmp_len(const char *name)
+ಸ್ಥಿರ ಗಾತ್ರ_t name_cmp_len(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	return strcspn(name, "\n/");
+	ಹಿಂತಿರುಗಿ strcspn(name, "\n/");
 }
 
-static void add_pbase_object(struct tree_desc *tree,
-			     const char *name,
-			     size_t cmplen,
-			     const char *fullname)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_pbase_object(ರಚನೆ ವೃಕ್ಷ_desc *ವೃಕ್ಷ,
+			     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name,
+			     ಗಾತ್ರ_t cmplen,
+			     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *fullname)
 {
-	struct name_entry entry;
-	int cmp;
+	ರಚನೆ name_ನಮೂದು ನಮೂದು;
+	ಪೂರ್ಣಾಂಕ cmp;
 
-	while (tree_entry(tree,&entry)) {
-		if (S_ISGITLINK(entry.mode))
-			continue;
-		cmp = tree_entry_len(&entry) != cmplen ? 1 :
-		      memcmp(name, entry.path, cmplen);
-		if (cmp > 0)
-			continue;
-		if (cmp < 0)
-			return;
-		if (name[cmplen] != '/') {
-			add_object_entry(&entry.oid,
-					 object_type(entry.mode),
+	ಆಗ (ವೃಕ್ಷ_ನಮೂದು(ವೃಕ್ಷ,&ನಮೂದು)) {
+		ಆದರೆ (S_ISGITLINK(ನಮೂದು.ಬಹುಲಕ))
+			ಮುಂದುವರಿ;
+		cmp = ವೃಕ್ಷ_ನಮೂದು_len(&ನಮೂದು) != cmplen ? 1 :
+		      memcmp(name, ನಮೂದು.ಮಾರ್ಗ, cmplen);
+		ಆದರೆ (cmp > 0)
+			ಮುಂದುವರಿ;
+		ಆದರೆ (cmp < 0)
+			ಹಿಂತಿರುಗಿ;
+		ಆದರೆ (name[cmplen] != '/') {
+			ಕೂಡಿಸು_object_ನಮೂದು(&ನಮೂದು.oid,
+					 object_type(ನಮೂದು.ಬಹುಲಕ),
 					 fullname, 1);
-			return;
+			ಹಿಂತಿರುಗಿ;
 		}
-		if (S_ISDIR(entry.mode)) {
-			struct tree_desc sub;
-			struct pbase_tree_cache *tree;
-			const char *down = name+cmplen+1;
-			size_t downlen = name_cmp_len(down);
+		ಆದರೆ (S_ISDIR(ನಮೂದು.ಬಹುಲಕ)) {
+			ರಚನೆ ವೃಕ್ಷ_desc sub;
+			ರಚನೆ pbase_ವೃಕ್ಷ_cache *ವೃಕ್ಷ;
+			ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೆಳಕ್ಕೆ = name+cmplen+1;
+			ಗಾತ್ರ_t downlen = name_cmp_len(ಕೆಳಕ್ಕೆ);
 
-			tree = pbase_tree_get(&entry.oid);
-			if (!tree)
-				return;
-			init_tree_desc(&sub, &tree->oid,
-				       tree->tree_data, tree->tree_size);
+			ವೃಕ್ಷ = pbase_ವೃಕ್ಷ_get(&ನಮೂದು.oid);
+			ಆದರೆ (!ವೃಕ್ಷ)
+				ಹಿಂತಿರುಗಿ;
+			init_ವೃಕ್ಷ_desc(&sub, &ವೃಕ್ಷ->oid,
+				       ವೃಕ್ಷ->ವೃಕ್ಷ_ದತ್ತಾಂಶ, ವೃಕ್ಷ->ವೃಕ್ಷ_ಗಾತ್ರ);
 
-			add_pbase_object(&sub, down, downlen, fullname);
-			pbase_tree_put(tree);
+			ಕೂಡಿಸು_pbase_object(&sub, ಕೆಳಕ್ಕೆ, downlen, fullname);
+			pbase_ವೃಕ್ಷ_put(ವೃಕ್ಷ);
 		}
 	}
 }
 
-static unsigned *done_pbase_paths;
-static int done_pbase_paths_num;
-static int done_pbase_paths_alloc;
-static int done_pbase_path_pos(unsigned hash)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ *ಮುಗಿದ_pbase_paths;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಮುಗಿದ_pbase_paths_ಅಂಕೆ;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಮುಗಿದ_pbase_paths_alloc;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಮುಗಿದ_pbase_ಮಾರ್ಗ_pos(ಚಿಹ್ನೆರಹಿತ hash)
 {
-	int lo = 0;
-	int hi = done_pbase_paths_num;
-	while (lo < hi) {
-		int mi = lo + (hi - lo) / 2;
-		if (done_pbase_paths[mi] == hash)
-			return mi;
-		if (done_pbase_paths[mi] < hash)
+	ಪೂರ್ಣಾಂಕ lo = 0;
+	ಪೂರ್ಣಾಂಕ hi = ಮುಗಿದ_pbase_paths_ಅಂಕೆ;
+	ಆಗ (lo < hi) {
+		ಪೂರ್ಣಾಂಕ mi = lo + (hi - lo) / 2;
+		ಆದರೆ (ಮುಗಿದ_pbase_paths[mi] == hash)
+			ಹಿಂತಿರುಗಿ mi;
+		ಆದರೆ (ಮುಗಿದ_pbase_paths[mi] < hash)
 			hi = mi;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			lo = mi + 1;
 	}
-	return -lo-1;
+	ಹಿಂತಿರುಗಿ -lo-1;
 }
 
-static int check_pbase_path(unsigned hash)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_pbase_ಮಾರ್ಗ(ಚಿಹ್ನೆರಹಿತ hash)
 {
-	int pos = done_pbase_path_pos(hash);
-	if (0 <= pos)
-		return 1;
+	ಪೂರ್ಣಾಂಕ pos = ಮುಗಿದ_pbase_ಮಾರ್ಗ_pos(hash);
+	ಆದರೆ (0 <= pos)
+		ಹಿಂತಿರುಗಿ 1;
 	pos = -pos - 1;
-	ALLOC_GROW(done_pbase_paths,
-		   done_pbase_paths_num + 1,
-		   done_pbase_paths_alloc);
-	done_pbase_paths_num++;
-	if (pos < done_pbase_paths_num)
-		MOVE_ARRAY(done_pbase_paths + pos + 1, done_pbase_paths + pos,
-			   done_pbase_paths_num - pos - 1);
-	done_pbase_paths[pos] = hash;
-	return 0;
+	ALLOC_GROW(ಮುಗಿದ_pbase_paths,
+		   ಮುಗಿದ_pbase_paths_ಅಂಕೆ + 1,
+		   ಮುಗಿದ_pbase_paths_alloc);
+	ಮುಗಿದ_pbase_paths_ಅಂಕೆ++;
+	ಆದರೆ (pos < ಮುಗಿದ_pbase_paths_ಅಂಕೆ)
+		MOVE_ARRAY(ಮುಗಿದ_pbase_paths + pos + 1, ಮುಗಿದ_pbase_paths + pos,
+			   ಮುಗಿದ_pbase_paths_ಅಂಕೆ - pos - 1);
+	ಮುಗಿದ_pbase_paths[pos] = hash;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void add_preferred_base_object(const char *name)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_preferred_ತಳ_object(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	struct pbase_tree *it;
-	size_t cmplen;
-	unsigned hash = pack_name_hash_fn(name);
+	ರಚನೆ pbase_ವೃಕ್ಷ *it;
+	ಗಾತ್ರ_t cmplen;
+	ಚಿಹ್ನೆರಹಿತ hash = pack_name_hash_fn(name);
 
-	if (!num_preferred_base || check_pbase_path(hash))
-		return;
+	ಆದರೆ (!ಅಂಕೆ_preferred_ತಳ || check_pbase_ಮಾರ್ಗ(hash))
+		ಹಿಂತಿರುಗಿ;
 
 	cmplen = name_cmp_len(name);
-	for (it = pbase_tree; it; it = it->next) {
-		if (cmplen == 0) {
-			add_object_entry(&it->pcache.oid, OBJ_TREE, NULL, 1);
+	ಗಾಗಿ (it = pbase_ವೃಕ್ಷ; it; it = it->ಮುಂದಿನ) {
+		ಆದರೆ (cmplen == 0) {
+			ಕೂಡಿಸು_object_ನಮೂದು(&it->pcache.oid, OBJ_ವೃಕ್ಷ, ಖಾಲಿ, 1);
 		}
-		else {
-			struct tree_desc tree;
-			init_tree_desc(&tree, &it->pcache.oid,
-				       it->pcache.tree_data, it->pcache.tree_size);
-			add_pbase_object(&tree, name, cmplen, name);
+		ಇಲ್ಲದಿದ್ದರೆ {
+			ರಚನೆ ವೃಕ್ಷ_desc ವೃಕ್ಷ;
+			init_ವೃಕ್ಷ_desc(&ವೃಕ್ಷ, &it->pcache.oid,
+				       it->pcache.ವೃಕ್ಷ_ದತ್ತಾಂಶ, it->pcache.ವೃಕ್ಷ_ಗಾತ್ರ);
+			ಕೂಡಿಸು_pbase_object(&ವೃಕ್ಷ, name, cmplen, name);
 		}
 	}
 }
 
-static void add_preferred_base(struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_preferred_ತಳ(ರಚನೆ object_id *oid)
 {
-	struct pbase_tree *it;
-	void *data;
-	unsigned long size;
-	size_t size_st = 0;
-	struct object_id tree_oid;
+	ರಚನೆ pbase_ವೃಕ್ಷ *it;
+	ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+	ಗಾತ್ರ_t ಗಾತ್ರ_st = 0;
+	ರಚನೆ object_id ವೃಕ್ಷ_oid;
 
-	if (window <= num_preferred_base++)
-		return;
+	ಆದರೆ (ಕಿಟಕಿ <= ಅಂಕೆ_preferred_ತಳ++)
+		ಹಿಂತಿರುಗಿ;
 
-	data = odb_read_object_peeled(the_repository->objects, oid,
-				      OBJ_TREE, &size_st, &tree_oid);
-	size = cast_size_t_to_ulong(size_st);
-	if (!data)
-		return;
+	ದತ್ತಾಂಶ = odb_read_object_peeled(the_repository->objects, oid,
+				      OBJ_ವೃಕ್ಷ, &ಗಾತ್ರ_st, &ವೃಕ್ಷ_oid);
+	ಗಾತ್ರ_2 = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ಗಾತ್ರ_st);
+	ಆದರೆ (!ದತ್ತಾಂಶ)
+		ಹಿಂತಿರುಗಿ;
 
-	for (it = pbase_tree; it; it = it->next) {
-		if (oideq(&it->pcache.oid, &tree_oid)) {
-			free(data);
-			return;
+	ಗಾಗಿ (it = pbase_ವೃಕ್ಷ; it; it = it->ಮುಂದಿನ) {
+		ಆದರೆ (oideq(&it->pcache.oid, &ವೃಕ್ಷ_oid)) {
+			ಬಿಡುಗಡೆ(ದತ್ತಾಂಶ);
+			ಹಿಂತಿರುಗಿ;
 		}
 	}
 
 	CALLOC_ARRAY(it, 1);
-	it->next = pbase_tree;
-	pbase_tree = it;
+	it->ಮುಂದಿನ = pbase_ವೃಕ್ಷ;
+	pbase_ವೃಕ್ಷ = it;
 
-	oidcpy(&it->pcache.oid, &tree_oid);
-	it->pcache.tree_data = data;
-	it->pcache.tree_size = size;
+	oidcpy(&it->pcache.oid, &ವೃಕ್ಷ_oid);
+	it->pcache.ವೃಕ್ಷ_ದತ್ತಾಂಶ = ದತ್ತಾಂಶ;
+	it->pcache.ವೃಕ್ಷ_ಗಾತ್ರ = ಗಾತ್ರ_2;
 }
 
-static void cleanup_preferred_base(void)
+ಸ್ಥಿರ ಶೂನ್ಯ cleanup_preferred_ತಳ(ಶೂನ್ಯ)
 {
-	struct pbase_tree *it;
-	unsigned i;
+	ರಚನೆ pbase_ವೃಕ್ಷ *it;
+	ಚಿಹ್ನೆರಹಿತ i;
 
-	it = pbase_tree;
-	pbase_tree = NULL;
-	while (it) {
-		struct pbase_tree *tmp = it;
-		it = tmp->next;
-		free(tmp->pcache.tree_data);
-		free(tmp);
+	it = pbase_ವೃಕ್ಷ;
+	pbase_ವೃಕ್ಷ = ಖಾಲಿ;
+	ಆಗ (it) {
+		ರಚನೆ pbase_ವೃಕ್ಷ *tmp = it;
+		it = tmp->ಮುಂದಿನ;
+		ಬಿಡುಗಡೆ(tmp->pcache.ವೃಕ್ಷ_ದತ್ತಾಂಶ);
+		ಬಿಡುಗಡೆ(tmp);
 	}
 
-	for (i = 0; i < ARRAY_SIZE(pbase_tree_cache); i++) {
-		if (!pbase_tree_cache[i])
-			continue;
-		free(pbase_tree_cache[i]->tree_data);
-		FREE_AND_NULL(pbase_tree_cache[i]);
+	ಗಾಗಿ (i = 0; i < ARRAY_ಗಾತ್ರ(pbase_ವೃಕ್ಷ_cache); i++) {
+		ಆದರೆ (!pbase_ವೃಕ್ಷ_cache[i])
+			ಮುಂದುವರಿ;
+		ಬಿಡುಗಡೆ(pbase_ವೃಕ್ಷ_cache[i]->ವೃಕ್ಷ_ದತ್ತಾಂಶ);
+		FREE_AND_NULL(pbase_ವೃಕ್ಷ_cache[i]);
 	}
 
-	FREE_AND_NULL(done_pbase_paths);
-	done_pbase_paths_num = done_pbase_paths_alloc = 0;
+	FREE_AND_NULL(ಮುಗಿದ_pbase_paths);
+	ಮುಗಿದ_pbase_paths_ಅಂಕೆ = ಮುಗಿದ_pbase_paths_alloc = 0;
 }
 
 /*
@@ -2191,22 +2191,22 @@ static void cleanup_preferred_base(void)
  * deltify other objects against, in order to avoid
  * circular deltas.
  */
-static int can_reuse_delta(const struct object_id *base_oid,
-			   struct object_entry *delta,
-			   struct object_entry **base_out)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ can_reuse_delta(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *ತಳ_oid,
+			   ರಚನೆ object_ನಮೂದು *delta,
+			   ರಚನೆ object_ನಮೂದು **ತಳ_ಹೊರಹೋಗು)
 {
-	struct object_entry *base;
+	ರಚನೆ object_ನಮೂದು *ತಳ;
 
 	/*
 	 * First see if we're already sending the base (or it's explicitly in
 	 * our "excluded" list).
 	 */
-	base = packlist_find(&to_pack, base_oid);
-	if (base) {
-		if (!in_same_island(&delta->idx.oid, &base->idx.oid))
-			return 0;
-		*base_out = base;
-		return 1;
+	ತಳ = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, ತಳ_oid);
+	ಆದರೆ (ತಳ) {
+		ಆದರೆ (!ಒಳ_same_island(&delta->idx.oid, &ತಳ->idx.oid))
+			ಹಿಂತಿರುಗಿ 0;
+		*ತಳ_ಹೊರಹೋಗು = ತಳ;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
 	/*
@@ -2214,150 +2214,150 @@ static int can_reuse_delta(const struct object_id *base_oid,
 	 * even if it was buried too deep in history to make it into the
 	 * packing list.
 	 */
-	if (thin && bitmap_has_oid_in_uninteresting(bitmap_git, base_oid)) {
-		if (use_delta_islands) {
-			if (!in_same_island(&delta->idx.oid, base_oid))
-				return 0;
+	ಆದರೆ (thin && bitmap_has_oid_ಒಳ_uninteresting(bitmap_git, ತಳ_oid)) {
+		ಆದರೆ (use_delta_islands) {
+			ಆದರೆ (!ಒಳ_same_island(&delta->idx.oid, ತಳ_oid))
+				ಹಿಂತಿರುಗಿ 0;
 		}
-		*base_out = NULL;
-		return 1;
+		*ತಳ_ಹೊರಹೋಗು = ಖಾಲಿ;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void prefetch_to_pack(uint32_t object_index_start) {
-	struct oid_array to_fetch = OID_ARRAY_INIT;
+ಸ್ಥಿರ ಶೂನ್ಯ prefetch_ಗಮ್ಯ_pack(uint32_t object_ಸೂಚ್ಯಂಕ_ಆರಂಭ) {
+	ರಚನೆ oid_array ಗಮ್ಯ_fetch = OID_ARRAY_INIT;
 	uint32_t i;
 
-	for (i = object_index_start; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = to_pack.objects + i;
+	ಗಾಗಿ (i = object_ಸೂಚ್ಯಂಕ_ಆರಂಭ; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ರಚನೆ object_ನಮೂದು *ನಮೂದು = ಗಮ್ಯ_pack.objects + i;
 
-		if (!odb_read_object_info_extended(the_repository->objects,
-						   &entry->idx.oid,
-						   NULL,
+		ಆದರೆ (!odb_read_object_info_extended(the_repository->objects,
+						   &ನಮೂದು->idx.oid,
+						   ಖಾಲಿ,
 						   OBJECT_INFO_FOR_PREFETCH))
-			continue;
-		oid_array_append(&to_fetch, &entry->idx.oid);
+			ಮುಂದುವರಿ;
+		oid_array_append(&ಗಮ್ಯ_fetch, &ನಮೂದು->idx.oid);
 	}
-	promisor_remote_get_direct(the_repository,
-				   to_fetch.oid, to_fetch.nr);
-	oid_array_clear(&to_fetch);
+	promisor_remote_get_ನೇರ(the_repository,
+				   ಗಮ್ಯ_fetch.oid, ಗಮ್ಯ_fetch.nr);
+	oid_array_clear(&ಗಮ್ಯ_fetch);
 }
 
-static void check_object(struct object_entry *entry, uint32_t object_index)
+ಸ್ಥಿರ ಶೂನ್ಯ check_object(ರಚನೆ object_ನಮೂದು *ನಮೂದು, uint32_t object_ಸೂಚ್ಯಂಕ)
 {
-	size_t canonical_size;
-	enum object_type type;
-	struct object_info oi = {.typep = &type, .sizep = &canonical_size};
+	ಗಾತ್ರ_t canonical_ಗಾತ್ರ;
+	ಎಣಿಕೆ object_type type;
+	ರಚನೆ object_info oi = {.typep = &type, .sizep = &canonical_ಗಾತ್ರ};
 
-	if (IN_PACK(entry)) {
-		struct packed_git *p = IN_PACK(entry);
-		struct pack_window *w_curs = NULL;
-		int have_base = 0;
-		struct object_id base_ref;
-		struct object_entry *base_entry;
-		size_t used, used_0, avail;
+	ಆದರೆ (ಒಳ_PACK(ನಮೂದು)) {
+		ರಚನೆ packed_git *p = ಒಳ_PACK(ನಮೂದು);
+		ರಚನೆ pack_ಕಿಟಕಿ *w_curs = ಖಾಲಿ;
+		ಪೂರ್ಣಾಂಕ have_ತಳ = 0;
+		ರಚನೆ object_id ತಳ_ref;
+		ರಚನೆ object_ನಮೂದು *ತಳ_ನಮೂದು;
+		ಗಾತ್ರ_t ಬಳಸಿದ_2, ಬಳಸಿದ_0, avail;
 		off_t ofs;
-		unsigned char *buf, c;
-		enum object_type type;
-		size_t in_pack_size;
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *buf, c;
+		ಎಣಿಕೆ object_type type;
+		ಗಾತ್ರ_t ಒಳ_pack_ಗಾತ್ರ;
 
-		buf = use_pack(p, &w_curs, entry->in_pack_offset, &avail);
+		buf = use_pack(p, &w_curs, ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ, &avail);
 
 		/*
 		 * We want in_pack_type even if we do not reuse delta
 		 * since non-delta representations could still be reused.
 		 */
-		used = unpack_object_header_buffer(buf, avail,
+		ಬಳಸಿದ_2 = unpack_object_ಶೀರ್ಷಿಕೆ_ಬಫರ್(buf, avail,
 						   &type,
-						   &in_pack_size);
-		if (used == 0)
-			goto give_up;
+						   &ಒಳ_pack_ಗಾತ್ರ);
+		ಆದರೆ (ಬಳಸಿದ_2 == 0)
+			ಹೋಗು give_ಮೇಲೆ;
 
-		if (type < 0)
+		ಆದರೆ (type < 0)
 			BUG("invalid type %d", type);
-		entry->in_pack_type = type;
+		ನಮೂದು->ಒಳ_pack_type = type;
 
 		/*
 		 * Determine if this is a delta and if so whether we can
 		 * reuse it or not.  Otherwise let's find out as cheaply as
 		 * possible what the actual type and size for this object is.
 		 */
-		switch (entry->in_pack_type) {
-		default:
+		ಆಯ್ಕೆ (ನಮೂದು->ಒಳ_pack_type) {
+		ಪೂರ್ವನಿಯೋಜಿತ:
 			/* Not a delta hence we've already got all we need. */
-			oe_set_type(entry, entry->in_pack_type);
-			SET_SIZE(entry, in_pack_size);
-			entry->in_pack_header_size = used;
-			if (oe_type(entry) < OBJ_COMMIT || oe_type(entry) > OBJ_BLOB)
-				goto give_up;
+			oe_ಗಣ_type(ನಮೂದು, ನಮೂದು->ಒಳ_pack_type);
+			ಗಣ_ಗಾತ್ರ(ನಮೂದು, ಒಳ_pack_ಗಾತ್ರ);
+			ನಮೂದು->ಒಳ_pack_ಶೀರ್ಷಿಕೆ_ಗಾತ್ರ = ಬಳಸಿದ_2;
+			ಆದರೆ (oe_type(ನಮೂದು) < OBJ_COMMIT || oe_type(ನಮೂದು) > OBJ_BLOB)
+				ಹೋಗು give_ಮೇಲೆ;
 			unuse_pack(&w_curs);
-			return;
-		case OBJ_REF_DELTA:
-			if (reuse_delta && !entry->preferred_base) {
-				oidread(&base_ref,
+			ಹಿಂತಿರುಗಿ;
+		ಸ್ಥಿತಿ OBJ_REF_DELTA:
+			ಆದರೆ (reuse_delta && !ನಮೂದು->preferred_ತಳ) {
+				oidread(&ತಳ_ref,
 					use_pack(p, &w_curs,
-						 entry->in_pack_offset + used,
-						 NULL),
+						 ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ + ಬಳಸಿದ_2,
+						 ಖಾಲಿ),
 					the_repository->hash_algo);
-				have_base = 1;
+				have_ತಳ = 1;
 			}
-			entry->in_pack_header_size = used + the_hash_algo->rawsz;
-			break;
-		case OBJ_OFS_DELTA:
+			ನಮೂದು->ಒಳ_pack_ಶೀರ್ಷಿಕೆ_ಗಾತ್ರ = ಬಳಸಿದ_2 + the_hash_algo->rawsz;
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ OBJ_OFS_DELTA:
 			buf = use_pack(p, &w_curs,
-				       entry->in_pack_offset + used, NULL);
-			used_0 = 0;
-			c = buf[used_0++];
+				       ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ + ಬಳಸಿದ_2, ಖಾಲಿ);
+			ಬಳಸಿದ_0 = 0;
+			c = buf[ಬಳಸಿದ_0++];
 			ofs = c & 127;
-			while (c & 128) {
+			ಆಗ (c & 128) {
 				ofs += 1;
-				if (!ofs || MSB(ofs, 7)) {
+				ಆದರೆ (!ofs || MSB(ofs, 7)) {
 					error(_("delta base offset overflow in pack for %s"),
-					      oid_to_hex(&entry->idx.oid));
-					goto give_up;
+					      oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
+					ಹೋಗು give_ಮೇಲೆ;
 				}
-				c = buf[used_0++];
+				c = buf[ಬಳಸಿದ_0++];
 				ofs = (ofs << 7) + (c & 127);
 			}
-			ofs = entry->in_pack_offset - ofs;
-			if (ofs <= 0 || ofs >= entry->in_pack_offset) {
+			ofs = ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ - ofs;
+			ಆದರೆ (ofs <= 0 || ofs >= ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ) {
 				error(_("delta base offset out of bound for %s"),
-				      oid_to_hex(&entry->idx.oid));
-				goto give_up;
+				      oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
+				ಹೋಗು give_ಮೇಲೆ;
 			}
-			if (reuse_delta && !entry->preferred_base) {
+			ಆದರೆ (reuse_delta && !ನಮೂದು->preferred_ತಳ) {
 				uint32_t pos;
-				if (offset_to_pack_pos(p, ofs, &pos) < 0)
-					goto give_up;
-				if (!nth_packed_object_id(&base_ref, p,
-							  pack_pos_to_index(p, pos)))
-					have_base = 1;
+				ಆದರೆ (ಸ್ಥಾನಾಂತರ_ಗಮ್ಯ_pack_pos(p, ofs, &pos) < 0)
+					ಹೋಗು give_ಮೇಲೆ;
+				ಆದರೆ (!nth_packed_object_id(&ತಳ_ref, p,
+							  pack_pos_ಗಮ್ಯ_ಸೂಚ್ಯಂಕ(p, pos)))
+					have_ತಳ = 1;
 			}
-			entry->in_pack_header_size = used + used_0;
-			break;
+			ನಮೂದು->ಒಳ_pack_ಶೀರ್ಷಿಕೆ_ಗಾತ್ರ = ಬಳಸಿದ_2 + ಬಳಸಿದ_0;
+			ನಿಲ್ಲಿಸು;
 		}
 
-		if (have_base &&
-		    can_reuse_delta(&base_ref, entry, &base_entry)) {
-			oe_set_type(entry, entry->in_pack_type);
-			SET_SIZE(entry, in_pack_size); /* delta size */
-			SET_DELTA_SIZE(entry, in_pack_size);
+		ಆದರೆ (have_ತಳ &&
+		    can_reuse_delta(&ತಳ_ref, ನಮೂದು, &ತಳ_ನಮೂದು)) {
+			oe_ಗಣ_type(ನಮೂದು, ನಮೂದು->ಒಳ_pack_type);
+			ಗಣ_ಗಾತ್ರ(ನಮೂದು, ಒಳ_pack_ಗಾತ್ರ); /* delta size */
+			ಗಣ_DELTA_ಗಾತ್ರ(ನಮೂದು, ಒಳ_pack_ಗಾತ್ರ);
 
-			if (base_entry) {
-				SET_DELTA(entry, base_entry);
-				entry->delta_sibling_idx = base_entry->delta_child_idx;
-				SET_DELTA_CHILD(base_entry, entry);
-			} else {
-				SET_DELTA_EXT(entry, &base_ref);
+			ಆದರೆ (ತಳ_ನಮೂದು) {
+				ಗಣ_DELTA(ನಮೂದು, ತಳ_ನಮೂದು);
+				ನಮೂದು->delta_sibling_idx = ತಳ_ನಮೂದು->delta_ಮಗು_idx;
+				ಗಣ_DELTA_ಮಗು(ತಳ_ನಮೂದು, ನಮೂದು);
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				ಗಣ_DELTA_EXT(ನಮೂದು, &ತಳ_ref);
 			}
 
 			unuse_pack(&w_curs);
-			return;
+			ಹಿಂತಿರುಗಿ;
 		}
 
-		if (oe_type(entry)) {
+		ಆದರೆ (oe_type(ನಮೂದು)) {
 			off_t delta_pos;
 
 			/*
@@ -2365,14 +2365,14 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 			 * final object type is.  Let's extract the actual
 			 * object size from the delta header.
 			 */
-			delta_pos = entry->in_pack_offset + entry->in_pack_header_size;
-			canonical_size = get_size_from_delta(p, &w_curs,
+			delta_pos = ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ + ನಮೂದು->ಒಳ_pack_ಶೀರ್ಷಿಕೆ_ಗಾತ್ರ;
+			canonical_ಗಾತ್ರ = get_ಗಾತ್ರ_from_delta(p, &w_curs,
 							     delta_pos);
-			if (canonical_size == 0)
-				goto give_up;
-			SET_SIZE(entry, canonical_size);
+			ಆದರೆ (canonical_ಗಾತ್ರ == 0)
+				ಹೋಗು give_ಮೇಲೆ;
+			ಗಣ_ಗಾತ್ರ(ನಮೂದು, canonical_ಗಾತ್ರ);
 			unuse_pack(&w_curs);
-			return;
+			ಹಿಂತಿರುಗಿ;
 		}
 
 		/*
@@ -2380,25 +2380,25 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 		 * with odb_read_object_info() to find about the object type
 		 * at this point...
 		 */
-		give_up:
+		give_ಮೇಲೆ:
 		unuse_pack(&w_curs);
 	}
 
-	if (odb_read_object_info_extended(the_repository->objects, &entry->idx.oid, &oi,
+	ಆದರೆ (odb_read_object_info_extended(the_repository->objects, &ನಮೂದು->idx.oid, &oi,
 					  OBJECT_INFO_SKIP_FETCH_OBJECT | OBJECT_INFO_LOOKUP_REPLACE) < 0) {
-		if (repo_has_promisor_remote(the_repository)) {
-			prefetch_to_pack(object_index);
-			if (odb_read_object_info_extended(the_repository->objects, &entry->idx.oid, &oi,
+		ಆದರೆ (repo_has_promisor_remote(the_repository)) {
+			prefetch_ಗಮ್ಯ_pack(object_ಸೂಚ್ಯಂಕ);
+			ಆದರೆ (odb_read_object_info_extended(the_repository->objects, &ನಮೂದು->idx.oid, &oi,
 							  OBJECT_INFO_SKIP_FETCH_OBJECT | OBJECT_INFO_LOOKUP_REPLACE) < 0)
 				type = -1;
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			type = -1;
 		}
 	}
-	oe_set_type(entry, type);
-	if (entry->type_valid) {
-		SET_SIZE(entry, canonical_size);
-	} else {
+	oe_ಗಣ_type(ನಮೂದು, type);
+	ಆದರೆ (ನಮೂದು->type_valid) {
+		ಗಣ_ಗಾತ್ರ(ನಮೂದು, canonical_ಗಾತ್ರ);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		/*
 		 * Bad object type is checked in prepare_pack().  This is
 		 * to permit a missing preferred base object to be ignored
@@ -2408,23 +2408,23 @@ static void check_object(struct object_entry *entry, uint32_t object_index)
 	}
 }
 
-static int pack_offset_sort(const void *_a, const void *_b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pack_ಸ್ಥಾನಾಂತರ_ವಿಂಗಡಿಸು(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_a, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_b)
 {
-	const struct object_entry *a = *(struct object_entry **)_a;
-	const struct object_entry *b = *(struct object_entry **)_b;
-	const struct packed_git *a_in_pack = IN_PACK(a);
-	const struct packed_git *b_in_pack = IN_PACK(b);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *a = *(ರಚನೆ object_ನಮೂದು **)_a;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *b = *(ರಚನೆ object_ನಮೂದು **)_b;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ packed_git *a_ಒಳ_pack = ಒಳ_PACK(a);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ packed_git *b_ಒಳ_pack = ಒಳ_PACK(b);
 
 	/* avoid filesystem trashing with loose objects */
-	if (!a_in_pack && !b_in_pack)
-		return oidcmp(&a->idx.oid, &b->idx.oid);
+	ಆದರೆ (!a_ಒಳ_pack && !b_ಒಳ_pack)
+		ಹಿಂತಿರುಗಿ oidcmp(&a->idx.oid, &b->idx.oid);
 
-	if (a_in_pack < b_in_pack)
-		return -1;
-	if (a_in_pack > b_in_pack)
-		return 1;
-	return a->in_pack_offset < b->in_pack_offset ? -1 :
-			(a->in_pack_offset > b->in_pack_offset);
+	ಆದರೆ (a_ಒಳ_pack < b_ಒಳ_pack)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (a_ಒಳ_pack > b_ಒಳ_pack)
+		ಹಿಂತಿರುಗಿ 1;
+	ಹಿಂತಿರುಗಿ a->ಒಳ_pack_ಸ್ಥಾನಾಂತರ < b->ಒಳ_pack_ಸ್ಥಾನಾಂತರ ? -1 :
+			(a->ಒಳ_pack_ಸ್ಥಾನಾಂತರ > b->ಒಳ_pack_ಸ್ಥಾನಾಂತರ);
 }
 
 /*
@@ -2440,40 +2440,40 @@ static int pack_offset_sort(const void *_a, const void *_b)
  *
  *   3. Resetting our delta depth, as we are now a base object.
  */
-static void drop_reused_delta(struct object_entry *entry)
+ಸ್ಥಿರ ಶೂನ್ಯ drop_reused_delta(ರಚನೆ object_ನಮೂದು *ನಮೂದು)
 {
-	unsigned *idx = &to_pack.objects[entry->delta_idx - 1].delta_child_idx;
-	struct object_info oi = OBJECT_INFO_INIT;
-	enum object_type type;
-	size_t size;
+	ಚಿಹ್ನೆರಹಿತ *idx = &ಗಮ್ಯ_pack.objects[ನಮೂದು->delta_idx - 1].delta_ಮಗು_idx;
+	ರಚನೆ object_info oi = OBJECT_INFO_INIT;
+	ಎಣಿಕೆ object_type type;
+	ಗಾತ್ರ_t ಗಾತ್ರ_2;
 
-	while (*idx) {
-		struct object_entry *oe = &to_pack.objects[*idx - 1];
+	ಆಗ (*idx) {
+		ರಚನೆ object_ನಮೂದು *oe = &ಗಮ್ಯ_pack.objects[*idx - 1];
 
-		if (oe == entry)
+		ಆದರೆ (oe == ನಮೂದು)
 			*idx = oe->delta_sibling_idx;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			idx = &oe->delta_sibling_idx;
 	}
-	SET_DELTA(entry, NULL);
-	entry->depth = 0;
+	ಗಣ_DELTA(ನಮೂದು, ಖಾಲಿ);
+	ನಮೂದು->ಆಳ = 0;
 
-	oi.sizep = &size;
+	oi.sizep = &ಗಾತ್ರ_2;
 	oi.typep = &type;
-	if (packed_object_info(NULL, IN_PACK(entry), entry->in_pack_offset, &oi) < 0) {
+	ಆದರೆ (packed_object_info(ಖಾಲಿ, ಒಳ_PACK(ನಮೂದು), ನಮೂದು->ಒಳ_pack_ಸ್ಥಾನಾಂತರ, &oi) < 0) {
 		/*
 		 * We failed to get the info from this pack for some reason;
 		 * fall back to odb_read_object_info, which may find another copy.
 		 * And if that fails, the error will be recorded in oe_type(entry)
 		 * and dealt with in prepare_pack().
 		 */
-		oe_set_type(entry,
+		oe_ಗಣ_type(ನಮೂದು,
 			    odb_read_object_info(the_repository->objects,
-						 &entry->idx.oid, &size));
-	} else {
-		oe_set_type(entry, type);
+						 &ನಮೂದು->idx.oid, &ಗಾತ್ರ_2));
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		oe_ಗಣ_type(ನಮೂದು, type);
 	}
-	SET_SIZE(entry, size);
+	ಗಣ_ಗಾತ್ರ(ನಮೂದು, ಗಾತ್ರ_2);
 }
 
 /*
@@ -2484,7 +2484,7 @@ static void drop_reused_delta(struct object_entry *entry)
  * We also detect too-long reused chains that would violate our --depth
  * limit.
  */
-static void break_delta_chains(struct object_entry *entry)
+ಸ್ಥಿರ ಶೂನ್ಯ break_delta_chains(ರಚನೆ object_ನಮೂದು *ನಮೂದು)
 {
 	/*
 	 * The actual depth of each object we will write is stored as an int,
@@ -2492,20 +2492,20 @@ static void break_delta_chains(struct object_entry *entry)
 	 * changes based no that limit, we may potentially go as deep as the
 	 * number of objects, which is elsewhere bounded to a uint32_t.
 	 */
-	uint32_t total_depth;
-	struct object_entry *cur, *next;
+	uint32_t ಒಟ್ಟು_ಆಳ;
+	ರಚನೆ object_ನಮೂದು *cur, *ಮುಂದಿನ;
 
-	for (cur = entry, total_depth = 0;
+	ಗಾಗಿ (cur = ನಮೂದು, ಒಟ್ಟು_ಆಳ = 0;
 	     cur;
-	     cur = DELTA(cur), total_depth++) {
-		if (cur->dfs_state == DFS_DONE) {
+	     cur = DELTA(cur), ಒಟ್ಟು_ಆಳ++) {
+		ಆದರೆ (cur->dfs_state == DFS_ಮುಗಿದ) {
 			/*
 			 * We've already seen this object and know it isn't
 			 * part of a cycle. We do need to append its depth
 			 * to our count.
 			 */
-			total_depth += cur->depth;
-			break;
+			ಒಟ್ಟು_ಆಳ += cur->ಆಳ;
+			ನಿಲ್ಲಿಸು;
 		}
 
 		/*
@@ -2513,7 +2513,7 @@ static void break_delta_chains(struct object_entry *entry)
 		 * other cruft which made its way into the state variable)
 		 * is a bug.
 		 */
-		if (cur->dfs_state != DFS_NONE)
+		ಆದರೆ (cur->dfs_state != DFS_NONE)
 			BUG("confusing delta dfs state in first pass: %d",
 			    cur->dfs_state);
 
@@ -2522,9 +2522,9 @@ static void break_delta_chains(struct object_entry *entry)
 		 * it's not a delta, we're done traversing, but we'll mark it
 		 * done to save time on future traversals.
 		 */
-		if (!DELTA(cur)) {
-			cur->dfs_state = DFS_DONE;
-			break;
+		ಆದರೆ (!DELTA(cur)) {
+			cur->dfs_state = DFS_ಮುಗಿದ;
+			ನಿಲ್ಲಿಸು;
 		}
 
 		/*
@@ -2544,11 +2544,11 @@ static void break_delta_chains(struct object_entry *entry)
 		 * If we instead cut D->B, then the depth of A is correct at 3.
 		 * We keep all commits in the chain that we examined.
 		 */
-		cur->dfs_state = DFS_ACTIVE;
-		if (DELTA(cur)->dfs_state == DFS_ACTIVE) {
+		cur->dfs_state = DFS_ಸಕ್ರಿಯ;
+		ಆದರೆ (DELTA(cur)->dfs_state == DFS_ಸಕ್ರಿಯ) {
 			drop_reused_delta(cur);
-			cur->dfs_state = DFS_DONE;
-			break;
+			cur->dfs_state = DFS_ಮುಗಿದ;
+			ನಿಲ್ಲಿಸು;
 		}
 	}
 
@@ -2559,8 +2559,8 @@ static void break_delta_chains(struct object_entry *entry)
 	 * delta, we need to keep going to look for more depth cuts. So we need
 	 * an extra "next" pointer to keep going after we reset cur->delta.
 	 */
-	for (cur = entry; cur; cur = next) {
-		next = DELTA(cur);
+	ಗಾಗಿ (cur = ನಮೂದು; cur; cur = ಮುಂದಿನ) {
+		ಮುಂದಿನ = DELTA(cur);
 
 		/*
 		 * We should have a chain of zero or more ACTIVE states down to
@@ -2568,9 +2568,9 @@ static void break_delta_chains(struct object_entry *entry)
 		 * has no bases, or we've already handled them in a previous
 		 * call.
 		 */
-		if (cur->dfs_state == DFS_DONE)
-			break;
-		else if (cur->dfs_state != DFS_ACTIVE)
+		ಆದರೆ (cur->dfs_state == DFS_ಮುಗಿದ)
+			ನಿಲ್ಲಿಸು;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (cur->dfs_state != DFS_ಸಕ್ರಿಯ)
 			BUG("confusing delta dfs state in second pass: %d",
 			    cur->dfs_state);
 
@@ -2592,48 +2592,48 @@ static void break_delta_chains(struct object_entry *entry)
 		 * entry whose final depth is supposed to be zero, we snip it
 		 * from its delta base, thereby making it so.
 		 */
-		cur->depth = (total_depth--) % (depth + 1);
-		if (!cur->depth)
+		cur->ಆಳ = (ಒಟ್ಟು_ಆಳ--) % (ಆಳ + 1);
+		ಆದರೆ (!cur->ಆಳ)
 			drop_reused_delta(cur);
 
-		cur->dfs_state = DFS_DONE;
+		cur->dfs_state = DFS_ಮುಗಿದ;
 	}
 }
 
-static void get_object_details(void)
+ಸ್ಥಿರ ಶೂನ್ಯ get_object_details(ಶೂನ್ಯ)
 {
 	uint32_t i;
-	struct object_entry **sorted_by_offset;
+	ರಚನೆ object_ನಮೂದು **sorted_by_ಸ್ಥಾನಾಂತರ;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Counting objects"),
-						to_pack.nr_objects);
+						ಗಮ್ಯ_pack.nr_objects);
 
-	CALLOC_ARRAY(sorted_by_offset, to_pack.nr_objects);
-	for (i = 0; i < to_pack.nr_objects; i++)
-		sorted_by_offset[i] = to_pack.objects + i;
-	QSORT(sorted_by_offset, to_pack.nr_objects, pack_offset_sort);
+	CALLOC_ARRAY(sorted_by_ಸ್ಥಾನಾಂತರ, ಗಮ್ಯ_pack.nr_objects);
+	ಗಾಗಿ (i = 0; i < ಗಮ್ಯ_pack.nr_objects; i++)
+		sorted_by_ಸ್ಥಾನಾಂತರ[i] = ಗಮ್ಯ_pack.objects + i;
+	QSORT(sorted_by_ಸ್ಥಾನಾಂತರ, ಗಮ್ಯ_pack.nr_objects, pack_ಸ್ಥಾನಾಂತರ_ವಿಂಗಡಿಸು);
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = sorted_by_offset[i];
-		check_object(entry, i);
-		if (entry->type_valid &&
-		    oe_size_greater_than(&to_pack, entry,
-					 repo_settings_get_big_file_threshold(the_repository)))
-			entry->no_try_delta = 1;
-		display_progress(progress_state, i + 1);
+	ಗಾಗಿ (i = 0; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ರಚನೆ object_ನಮೂದು *ನಮೂದು = sorted_by_ಸ್ಥಾನಾಂತರ[i];
+		check_object(ನಮೂದು, i);
+		ಆದರೆ (ನಮೂದು->type_valid &&
+		    oe_ಗಾತ್ರ_greater_than(&ಗಮ್ಯ_pack, ನಮೂದು,
+					 repo_settings_get_big_file_ಮಿತಿ(the_repository)))
+			ನಮೂದು->no_try_delta = 1;
+		display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, i + 1);
 	}
-	stop_progress(&progress_state);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 
 	/*
 	 * This must happen in a second pass, since we rely on the delta
 	 * information for the whole list being completed.
 	 */
-	for (i = 0; i < to_pack.nr_objects; i++)
-		break_delta_chains(&to_pack.objects[i]);
+	ಗಾಗಿ (i = 0; i < ಗಮ್ಯ_pack.nr_objects; i++)
+		break_delta_chains(&ಗಮ್ಯ_pack.objects[i]);
 
-	free(sorted_by_offset);
+	ಬಿಡುಗಡೆ(sorted_by_ಸ್ಥಾನಾಂತರ);
 }
 
 /*
@@ -2645,74 +2645,74 @@ static void get_object_details(void)
  * one.  The deepest deltas are therefore the oldest objects which are
  * less susceptible to be accessed often.
  */
-static int type_size_sort(const void *_a, const void *_b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ type_ಗಾತ್ರ_ವಿಂಗಡಿಸು(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_a, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_b)
 {
-	const struct object_entry *a = *(struct object_entry **)_a;
-	const struct object_entry *b = *(struct object_entry **)_b;
-	const enum object_type a_type = oe_type(a);
-	const enum object_type b_type = oe_type(b);
-	const unsigned long a_size = SIZE(a);
-	const unsigned long b_size = SIZE(b);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *a = *(ರಚನೆ object_ನಮೂದು **)_a;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *b = *(ರಚನೆ object_ನಮೂದು **)_b;
+	ಸ್ಥಿರಾಂಕ ಎಣಿಕೆ object_type a_type = oe_type(a);
+	ಸ್ಥಿರಾಂಕ ಎಣಿಕೆ object_type b_type = oe_type(b);
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ a_ಗಾತ್ರ = ಗಾತ್ರ_4(a);
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ b_ಗಾತ್ರ = ಗಾತ್ರ_4(b);
 
-	if (a_type > b_type)
-		return -1;
-	if (a_type < b_type)
-		return 1;
-	if (a->hash > b->hash)
-		return -1;
-	if (a->hash < b->hash)
-		return 1;
-	if (a->preferred_base > b->preferred_base)
-		return -1;
-	if (a->preferred_base < b->preferred_base)
-		return 1;
-	if (use_delta_islands) {
-		const int island_cmp = island_delta_cmp(&a->idx.oid, &b->idx.oid);
-		if (island_cmp)
-			return island_cmp;
+	ಆದರೆ (a_type > b_type)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (a_type < b_type)
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (a->hash > b->hash)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (a->hash < b->hash)
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (a->preferred_ತಳ > b->preferred_ತಳ)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (a->preferred_ತಳ < b->preferred_ತಳ)
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (use_delta_islands) {
+		ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ island_cmp = island_delta_cmp(&a->idx.oid, &b->idx.oid);
+		ಆದರೆ (island_cmp)
+			ಹಿಂತಿರುಗಿ island_cmp;
 	}
-	if (a_size > b_size)
-		return -1;
-	if (a_size < b_size)
-		return 1;
-	return a < b ? -1 : (a > b);  /* newest first */
+	ಆದರೆ (a_ಗಾತ್ರ > b_ಗಾತ್ರ)
+		ಹಿಂತಿರುಗಿ -1;
+	ಆದರೆ (a_ಗಾತ್ರ < b_ಗಾತ್ರ)
+		ಹಿಂತಿರುಗಿ 1;
+	ಹಿಂತಿರುಗಿ a < b ? -1 : (a > b);  /* newest first */
 }
 
-struct unpacked {
-	struct object_entry *entry;
-	void *data;
-	struct delta_index *index;
-	unsigned depth;
+ರಚನೆ unpacked {
+	ರಚನೆ object_ನಮೂದು *ನಮೂದು;
+	ಶೂನ್ಯ *ದತ್ತಾಂಶ;
+	ರಚನೆ delta_ಸೂಚ್ಯಂಕ *ಸೂಚ್ಯಂಕ;
+	ಚಿಹ್ನೆರಹಿತ ಆಳ;
 };
 
-static int delta_cacheable(size_t src_size, size_t trg_size,
-			   size_t delta_size)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ delta_cacheable(ಗಾತ್ರ_t src_ಗಾತ್ರ, ಗಾತ್ರ_t trg_ಗಾತ್ರ,
+			   ಗಾತ್ರ_t delta_ಗಾತ್ರ_2)
 {
-	if (max_delta_cache_size && delta_cache_size + delta_size > max_delta_cache_size)
-		return 0;
+	ಆದರೆ (max_delta_cache_ಗಾತ್ರ && delta_cache_ಗಾತ್ರ + delta_ಗಾತ್ರ_2 > max_delta_cache_ಗಾತ್ರ)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (delta_size < cache_max_small_delta_size)
-		return 1;
+	ಆದರೆ (delta_ಗಾತ್ರ_2 < cache_max_small_delta_ಗಾತ್ರ)
+		ಹಿಂತಿರುಗಿ 1;
 
 	/* cache delta, if objects are large enough compared to delta size */
-	if ((src_size >> 20) + (trg_size >> 21) > (delta_size >> 10))
-		return 1;
+	ಆದರೆ ((src_ಗಾತ್ರ >> 20) + (trg_ಗಾತ್ರ >> 21) > (delta_ಗಾತ್ರ_2 >> 10))
+		ಹಿಂತಿರುಗಿ 1;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /* Protect delta_cache_size */
-static pthread_mutex_t cache_mutex;
-#define cache_lock()		pthread_mutex_lock(&cache_mutex)
-#define cache_unlock()		pthread_mutex_unlock(&cache_mutex)
+ಸ್ಥಿರ pthread_mutex_t cache_mutex;
+#ವ್ಯಾಖ್ಯಾನಿಸು cache_ಬೀಗ()		pthread_mutex_ಬೀಗ(&cache_mutex)
+#ವ್ಯಾಖ್ಯಾನಿಸು cache_unlock()		pthread_mutex_unlock(&cache_mutex)
 
 /*
  * Protect object list partitioning (e.g. struct thread_param) and
  * progress_state
  */
-static pthread_mutex_t progress_mutex;
-#define progress_lock()		pthread_mutex_lock(&progress_mutex)
-#define progress_unlock()	pthread_mutex_unlock(&progress_mutex)
+ಸ್ಥಿರ pthread_mutex_t ಪ್ರಗತಿ_mutex;
+#ವ್ಯಾಖ್ಯಾನಿಸು ಪ್ರಗತಿ_ಬೀಗ()		pthread_mutex_ಬೀಗ(&ಪ್ರಗತಿ_mutex)
+#ವ್ಯಾಖ್ಯಾನಿಸು ಪ್ರಗತಿ_unlock()	pthread_mutex_unlock(&ಪ್ರಗತಿ_mutex)
 
 /*
  * Access to struct object_entry is unprotected since each thread owns
@@ -2721,40 +2721,40 @@ static pthread_mutex_t progress_mutex;
  * progress_mutex for protection.
  */
 
-static inline int oe_size_less_than(struct packing_data *pack,
-				    const struct object_entry *lhs,
-				    size_t rhs)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ oe_ಗಾತ್ರ_less_than(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				    ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *lhs,
+				    ಗಾತ್ರ_t rhs)
 {
-	if (lhs->size_valid)
-		return lhs->size_ < rhs;
-	if (rhs < pack->oe_size_limit) /* rhs < 2^x <= lhs ? */
-		return 0;
-	return oe_get_size_slow(pack, lhs) < rhs;
+	ಆದರೆ (lhs->ಗಾತ್ರ_valid)
+		ಹಿಂತಿರುಗಿ lhs->ಗಾತ್ರ_3 < rhs;
+	ಆದರೆ (rhs < pack->oe_ಗಾತ್ರ_ಎಲ್ಲೆ) /* rhs < 2^x <= lhs ? */
+		ಹಿಂತಿರುಗಿ 0;
+	ಹಿಂತಿರುಗಿ oe_get_ಗಾತ್ರ_slow(pack, lhs) < rhs;
 }
 
-static inline void oe_set_tree_depth(struct packing_data *pack,
-				     struct object_entry *e,
-				     unsigned int tree_depth)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಶೂನ್ಯ oe_ಗಣ_ವೃಕ್ಷ_ಆಳ(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+				     ರಚನೆ object_ನಮೂದು *e,
+				     ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ವೃಕ್ಷ_ಆಳ)
 {
-	if (!pack->tree_depth)
-		CALLOC_ARRAY(pack->tree_depth, pack->nr_alloc);
-	pack->tree_depth[e - pack->objects] = tree_depth;
+	ಆದರೆ (!pack->ವೃಕ್ಷ_ಆಳ)
+		CALLOC_ARRAY(pack->ವೃಕ್ಷ_ಆಳ, pack->nr_alloc);
+	pack->ವೃಕ್ಷ_ಆಳ[e - pack->objects] = ವೃಕ್ಷ_ಆಳ;
 }
 
-static void record_tree_depth(const struct object_id *oid, const char *name)
+ಸ್ಥಿರ ಶೂನ್ಯ ದಾಖಲೆ_ವೃಕ್ಷ_ಆಳ(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	const char *p;
-	unsigned depth;
-	struct object_entry *ent;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p;
+	ಚಿಹ್ನೆರಹಿತ ಆಳ;
+	ರಚನೆ object_ನಮೂದು *ent;
 
 	/* the empty string is a root tree, which is depth 0 */
-	depth = *name ? 1 : 0;
-	for (p = strchr(name, '/'); p; p = strchr(p + 1, '/'))
-		depth++;
+	ಆಳ = *name ? 1 : 0;
+	ಗಾಗಿ (p = strchr(name, '/'); p; p = strchr(p + 1, '/'))
+		ಆಳ++;
 
-	ent = packlist_find(&to_pack, oid);
-	if (ent && depth > oe_tree_depth(&to_pack, ent))
-		oe_set_tree_depth(&to_pack, ent, depth);
+	ent = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, oid);
+	ಆದರೆ (ent && ಆಳ > oe_ವೃಕ್ಷ_ಆಳ(&ಗಮ್ಯ_pack, ent))
+		oe_ಗಣ_ವೃಕ್ಷ_ಆಳ(&ಗಮ್ಯ_pack, ent, ಆಳ);
 }
 
 /*
@@ -2762,57 +2762,57 @@ static void record_tree_depth(const struct object_id *oid, const char *name)
  * reconstruction (so non-deltas are true object sizes, but deltas
  * return the size of the delta data).
  */
-size_t oe_get_size_slow(struct packing_data *pack,
-			const struct object_entry *e)
+ಗಾತ್ರ_t oe_get_ಗಾತ್ರ_slow(ರಚನೆ packing_ದತ್ತಾಂಶ *pack,
+			ಸ್ಥಿರಾಂಕ ರಚನೆ object_ನಮೂದು *e)
 {
-	struct packed_git *p;
-	struct pack_window *w_curs;
-	unsigned char *buf;
-	enum object_type type;
-	size_t used, avail, size;
+	ರಚನೆ packed_git *p;
+	ರಚನೆ pack_ಕಿಟಕಿ *w_curs;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *buf;
+	ಎಣಿಕೆ object_type type;
+	ಗಾತ್ರ_t ಬಳಸಿದ_2, avail, ಗಾತ್ರ_2;
 
-	if (e->type_ != OBJ_OFS_DELTA && e->type_ != OBJ_REF_DELTA) {
-		size_t sz;
-		packing_data_lock(&to_pack);
-		if (odb_read_object_info(the_repository->objects,
+	ಆದರೆ (e->type_ != OBJ_OFS_DELTA && e->type_ != OBJ_REF_DELTA) {
+		ಗಾತ್ರ_t sz;
+		packing_ದತ್ತಾಂಶ_ಬೀಗ(&ಗಮ್ಯ_pack);
+		ಆದರೆ (odb_read_object_info(the_repository->objects,
 					 &e->idx.oid, &sz) < 0)
 			die(_("unable to get size of %s"),
-			    oid_to_hex(&e->idx.oid));
-		packing_data_unlock(&to_pack);
-		return sz;
+			    oid_ಗಮ್ಯ_hex(&e->idx.oid));
+		packing_ದತ್ತಾಂಶ_unlock(&ಗಮ್ಯ_pack);
+		ಹಿಂತಿರುಗಿ sz;
 	}
 
-	p = oe_in_pack(pack, e);
-	if (!p)
+	p = oe_ಒಳ_pack(pack, e);
+	ಆದರೆ (!p)
 		BUG("when e->type is a delta, it must belong to a pack");
 
-	packing_data_lock(&to_pack);
-	w_curs = NULL;
-	buf = use_pack(p, &w_curs, e->in_pack_offset, &avail);
-	used = unpack_object_header_buffer(buf, avail, &type, &size);
-	if (used == 0)
+	packing_ದತ್ತಾಂಶ_ಬೀಗ(&ಗಮ್ಯ_pack);
+	w_curs = ಖಾಲಿ;
+	buf = use_pack(p, &w_curs, e->ಒಳ_pack_ಸ್ಥಾನಾಂತರ, &avail);
+	ಬಳಸಿದ_2 = unpack_object_ಶೀರ್ಷಿಕೆ_ಬಫರ್(buf, avail, &type, &ಗಾತ್ರ_2);
+	ಆದರೆ (ಬಳಸಿದ_2 == 0)
 		die(_("unable to parse object header of %s"),
-		    oid_to_hex(&e->idx.oid));
+		    oid_ಗಮ್ಯ_hex(&e->idx.oid));
 
 	unuse_pack(&w_curs);
-	packing_data_unlock(&to_pack);
-	return size;
+	packing_ದತ್ತಾಂಶ_unlock(&ಗಮ್ಯ_pack);
+	ಹಿಂತಿರುಗಿ ಗಾತ್ರ_2;
 }
 
-static int try_delta(struct unpacked *trg, struct unpacked *src,
-		     unsigned max_depth, size_t *mem_usage)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ try_delta(ರಚನೆ unpacked *trg, ರಚನೆ unpacked *src,
+		     ಚಿಹ್ನೆರಹಿತ max_ಆಳ, ಗಾತ್ರ_t *mem_usage)
 {
-	struct object_entry *trg_entry = trg->entry;
-	struct object_entry *src_entry = src->entry;
-	unsigned long trg_size, src_size, sizediff, max_size, sz;
-	size_t delta_size;
-	unsigned ref_depth;
-	enum object_type type;
-	void *delta_buf;
+	ರಚನೆ object_ನಮೂದು *trg_ನಮೂದು = trg->ನಮೂದು;
+	ರಚನೆ object_ನಮೂದು *src_ನಮೂದು = src->ನಮೂದು;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ trg_ಗಾತ್ರ, src_ಗಾತ್ರ, sizediff, max_ಗಾತ್ರ, sz;
+	ಗಾತ್ರ_t delta_ಗಾತ್ರ_2;
+	ಚಿಹ್ನೆರಹಿತ ref_ಆಳ;
+	ಎಣಿಕೆ object_type type;
+	ಶೂನ್ಯ *delta_buf;
 
 	/* Don't bother doing diffs between different types */
-	if (oe_type(trg_entry) != oe_type(src_entry))
-		return -1;
+	ಆದರೆ (oe_type(trg_ನಮೂದು) != oe_type(src_ನಮೂದು))
+		ಹಿಂತಿರುಗಿ -1;
 
 	/*
 	 * We do not bother to try a delta that we discarded on an
@@ -2822,110 +2822,110 @@ static int try_delta(struct unpacked *trg, struct unpacked *src,
 	 * it, we will still save the transfer cost, as we already know
 	 * the other side has it and we won't send src_entry at all.
 	 */
-	if (reuse_delta && IN_PACK(trg_entry) &&
-	    IN_PACK(trg_entry) == IN_PACK(src_entry) &&
-	    !src_entry->preferred_base &&
-	    trg_entry->in_pack_type != OBJ_REF_DELTA &&
-	    trg_entry->in_pack_type != OBJ_OFS_DELTA)
-		return 0;
+	ಆದರೆ (reuse_delta && ಒಳ_PACK(trg_ನಮೂದು) &&
+	    ಒಳ_PACK(trg_ನಮೂದು) == ಒಳ_PACK(src_ನಮೂದು) &&
+	    !src_ನಮೂದು->preferred_ತಳ &&
+	    trg_ನಮೂದು->ಒಳ_pack_type != OBJ_REF_DELTA &&
+	    trg_ನಮೂದು->ಒಳ_pack_type != OBJ_OFS_DELTA)
+		ಹಿಂತಿರುಗಿ 0;
 
 	/* Let's not bust the allowed depth. */
-	if (src->depth >= max_depth)
-		return 0;
+	ಆದರೆ (src->ಆಳ >= max_ಆಳ)
+		ಹಿಂತಿರುಗಿ 0;
 
 	/* Now some size filtering heuristics. */
-	trg_size = SIZE(trg_entry);
-	if (!DELTA(trg_entry)) {
-		max_size = trg_size/2 - the_hash_algo->rawsz;
-		ref_depth = 1;
-	} else {
-		max_size = DELTA_SIZE(trg_entry);
-		ref_depth = trg->depth;
+	trg_ಗಾತ್ರ = ಗಾತ್ರ_4(trg_ನಮೂದು);
+	ಆದರೆ (!DELTA(trg_ನಮೂದು)) {
+		max_ಗಾತ್ರ = trg_ಗಾತ್ರ/2 - the_hash_algo->rawsz;
+		ref_ಆಳ = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		max_ಗಾತ್ರ = DELTA_ಗಾತ್ರ(trg_ನಮೂದು);
+		ref_ಆಳ = trg->ಆಳ;
 	}
-	max_size = (uint64_t)max_size * (max_depth - src->depth) /
-						(max_depth - ref_depth + 1);
-	if (max_size == 0)
-		return 0;
-	src_size = SIZE(src_entry);
-	sizediff = src_size < trg_size ? trg_size - src_size : 0;
-	if (sizediff >= max_size)
-		return 0;
-	if (trg_size < src_size / 32)
-		return 0;
+	max_ಗಾತ್ರ = (uint64_t)max_ಗಾತ್ರ * (max_ಆಳ - src->ಆಳ) /
+						(max_ಆಳ - ref_ಆಳ + 1);
+	ಆದರೆ (max_ಗಾತ್ರ == 0)
+		ಹಿಂತಿರುಗಿ 0;
+	src_ಗಾತ್ರ = ಗಾತ್ರ_4(src_ನಮೂದು);
+	sizediff = src_ಗಾತ್ರ < trg_ಗಾತ್ರ ? trg_ಗಾತ್ರ - src_ಗಾತ್ರ : 0;
+	ಆದರೆ (sizediff >= max_ಗಾತ್ರ)
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (trg_ಗಾತ್ರ < src_ಗಾತ್ರ / 32)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (!in_same_island(&trg->entry->idx.oid, &src->entry->idx.oid))
-		return 0;
+	ಆದರೆ (!ಒಳ_same_island(&trg->ನಮೂದು->idx.oid, &src->ನಮೂದು->idx.oid))
+		ಹಿಂತಿರುಗಿ 0;
 
 	/* Load data if not already done */
-	if (!trg->data) {
-		size_t sz_st = 0;
-		packing_data_lock(&to_pack);
-		trg->data = odb_read_object(the_repository->objects,
-					    &trg_entry->idx.oid, &type,
+	ಆದರೆ (!trg->ದತ್ತಾಂಶ) {
+		ಗಾತ್ರ_t sz_st = 0;
+		packing_ದತ್ತಾಂಶ_ಬೀಗ(&ಗಮ್ಯ_pack);
+		trg->ದತ್ತಾಂಶ = odb_read_object(the_repository->objects,
+					    &trg_ನಮೂದು->idx.oid, &type,
 					    &sz_st);
-		sz = cast_size_t_to_ulong(sz_st);
-		packing_data_unlock(&to_pack);
-		if (!trg->data)
+		sz = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(sz_st);
+		packing_ದತ್ತಾಂಶ_unlock(&ಗಮ್ಯ_pack);
+		ಆದರೆ (!trg->ದತ್ತಾಂಶ)
 			die(_("object %s cannot be read"),
-			    oid_to_hex(&trg_entry->idx.oid));
-		if (sz != trg_size)
+			    oid_ಗಮ್ಯ_hex(&trg_ನಮೂದು->idx.oid));
+		ಆದರೆ (sz != trg_ಗಾತ್ರ)
 			die(_("object %s inconsistent object length (%"PRIuMAX" vs %"PRIuMAX")"),
-			    oid_to_hex(&trg_entry->idx.oid), (uintmax_t)sz,
-			    (uintmax_t)trg_size);
+			    oid_ಗಮ್ಯ_hex(&trg_ನಮೂದು->idx.oid), (uintmax_t)sz,
+			    (uintmax_t)trg_ಗಾತ್ರ);
 		*mem_usage += sz;
 	}
-	if (!src->data) {
-		size_t sz_st = 0;
-		packing_data_lock(&to_pack);
-		src->data = odb_read_object(the_repository->objects,
-					    &src_entry->idx.oid, &type,
+	ಆದರೆ (!src->ದತ್ತಾಂಶ) {
+		ಗಾತ್ರ_t sz_st = 0;
+		packing_ದತ್ತಾಂಶ_ಬೀಗ(&ಗಮ್ಯ_pack);
+		src->ದತ್ತಾಂಶ = odb_read_object(the_repository->objects,
+					    &src_ನಮೂದು->idx.oid, &type,
 					    &sz_st);
-		sz = cast_size_t_to_ulong(sz_st);
-		packing_data_unlock(&to_pack);
-		if (!src->data) {
-			if (src_entry->preferred_base) {
-				static int warned = 0;
-				if (!warned++)
+		sz = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(sz_st);
+		packing_ದತ್ತಾಂಶ_unlock(&ಗಮ್ಯ_pack);
+		ಆದರೆ (!src->ದತ್ತಾಂಶ) {
+			ಆದರೆ (src_ನಮೂದು->preferred_ತಳ) {
+				ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ warned = 0;
+				ಆದರೆ (!warned++)
 					warning(_("object %s cannot be read"),
-						oid_to_hex(&src_entry->idx.oid));
+						oid_ಗಮ್ಯ_hex(&src_ನಮೂದು->idx.oid));
 				/*
 				 * Those objects are not included in the
 				 * resulting pack.  Be resilient and ignore
 				 * them if they can't be read, in case the
 				 * pack could be created nevertheless.
 				 */
-				return 0;
+				ಹಿಂತಿರುಗಿ 0;
 			}
 			die(_("object %s cannot be read"),
-			    oid_to_hex(&src_entry->idx.oid));
+			    oid_ಗಮ್ಯ_hex(&src_ನಮೂದು->idx.oid));
 		}
-		if (sz != src_size)
+		ಆದರೆ (sz != src_ಗಾತ್ರ)
 			die(_("object %s inconsistent object length (%"PRIuMAX" vs %"PRIuMAX")"),
-			    oid_to_hex(&src_entry->idx.oid), (uintmax_t)sz,
-			    (uintmax_t)src_size);
+			    oid_ಗಮ್ಯ_hex(&src_ನಮೂದು->idx.oid), (uintmax_t)sz,
+			    (uintmax_t)src_ಗಾತ್ರ);
 		*mem_usage += sz;
 	}
-	if (!src->index) {
-		src->index = create_delta_index(src->data, src_size);
-		if (!src->index) {
-			static int warned = 0;
-			if (!warned++)
+	ಆದರೆ (!src->ಸೂಚ್ಯಂಕ) {
+		src->ಸೂಚ್ಯಂಕ = create_delta_ಸೂಚ್ಯಂಕ(src->ದತ್ತಾಂಶ, src_ಗಾತ್ರ);
+		ಆದರೆ (!src->ಸೂಚ್ಯಂಕ) {
+			ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ warned = 0;
+			ಆದರೆ (!warned++)
 				warning(_("suboptimal pack - out of memory"));
-			return 0;
+			ಹಿಂತಿರುಗಿ 0;
 		}
-		*mem_usage += sizeof_delta_index(src->index);
+		*mem_usage += sizeof_delta_ಸೂಚ್ಯಂಕ(src->ಸೂಚ್ಯಂಕ);
 	}
 
-	delta_buf = create_delta(src->index, trg->data, trg_size, &delta_size, max_size);
-	if (!delta_buf)
-		return 0;
+	delta_buf = create_delta(src->ಸೂಚ್ಯಂಕ, trg->ದತ್ತಾಂಶ, trg_ಗಾತ್ರ, &delta_ಗಾತ್ರ_2, max_ಗಾತ್ರ);
+	ಆದರೆ (!delta_buf)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (DELTA(trg_entry)) {
+	ಆದರೆ (DELTA(trg_ನಮೂದು)) {
 		/* Prefer only shallower same-sized deltas. */
-		if (delta_size == DELTA_SIZE(trg_entry) &&
-		    src->depth + 1 >= trg->depth) {
-			free(delta_buf);
-			return 0;
+		ಆದರೆ (delta_ಗಾತ್ರ_2 == DELTA_ಗಾತ್ರ(trg_ನಮೂದು) &&
+		    src->ಆಳ + 1 >= trg->ಆಳ) {
+			ಬಿಡುಗಡೆ(delta_buf);
+			ಹಿಂತಿರುಗಿ 0;
 		}
 	}
 
@@ -2934,126 +2934,126 @@ static int try_delta(struct unpacked *trg, struct unpacked *src,
 	 * accounting lock.  Compiler will optimize the strangeness
 	 * away when NO_PTHREADS is defined.
 	 */
-	free(trg_entry->delta_data);
-	cache_lock();
-	if (trg_entry->delta_data) {
-		delta_cache_size -= DELTA_SIZE(trg_entry);
-		trg_entry->delta_data = NULL;
+	ಬಿಡುಗಡೆ(trg_ನಮೂದು->delta_ದತ್ತಾಂಶ);
+	cache_ಬೀಗ();
+	ಆದರೆ (trg_ನಮೂದು->delta_ದತ್ತಾಂಶ) {
+		delta_cache_ಗಾತ್ರ -= DELTA_ಗಾತ್ರ(trg_ನಮೂದು);
+		trg_ನಮೂದು->delta_ದತ್ತಾಂಶ = ಖಾಲಿ;
 	}
-	if (delta_cacheable(src_size, trg_size, delta_size)) {
-		delta_cache_size += delta_size;
+	ಆದರೆ (delta_cacheable(src_ಗಾತ್ರ, trg_ಗಾತ್ರ, delta_ಗಾತ್ರ_2)) {
+		delta_cache_ಗಾತ್ರ += delta_ಗಾತ್ರ_2;
 		cache_unlock();
-		trg_entry->delta_data = xrealloc(delta_buf, delta_size);
-	} else {
+		trg_ನಮೂದು->delta_ದತ್ತಾಂಶ = xrealloc(delta_buf, delta_ಗಾತ್ರ_2);
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		cache_unlock();
-		free(delta_buf);
+		ಬಿಡುಗಡೆ(delta_buf);
 	}
 
-	SET_DELTA(trg_entry, src_entry);
-	SET_DELTA_SIZE(trg_entry, delta_size);
-	trg->depth = src->depth + 1;
+	ಗಣ_DELTA(trg_ನಮೂದು, src_ನಮೂದು);
+	ಗಣ_DELTA_ಗಾತ್ರ(trg_ನಮೂದು, delta_ಗಾತ್ರ_2);
+	trg->ಆಳ = src->ಆಳ + 1;
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static unsigned int check_delta_limit(struct object_entry *me, unsigned int n)
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ check_delta_ಎಲ್ಲೆ(ರಚನೆ object_ನಮೂದು *me, ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ n)
 {
-	struct object_entry *child = DELTA_CHILD(me);
-	unsigned int m = n;
-	while (child) {
-		const unsigned int c = check_delta_limit(child, n + 1);
-		if (m < c)
+	ರಚನೆ object_ನಮೂದು *ಮಗು = DELTA_ಮಗು(me);
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ m = n;
+	ಆಗ (ಮಗು) {
+		ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ c = check_delta_ಎಲ್ಲೆ(ಮಗು, n + 1);
+		ಆದರೆ (m < c)
 			m = c;
-		child = DELTA_SIBLING(child);
+		ಮಗು = DELTA_SIBLING(ಮಗು);
 	}
-	return m;
+	ಹಿಂತಿರುಗಿ m;
 }
 
-static size_t free_unpacked(struct unpacked *n)
+ಸ್ಥಿರ ಗಾತ್ರ_t free_unpacked(ರಚನೆ unpacked *n)
 {
-	size_t freed_mem = sizeof_delta_index(n->index);
-	free_delta_index(n->index);
-	n->index = NULL;
-	if (n->data) {
-		freed_mem += SIZE(n->entry);
-		FREE_AND_NULL(n->data);
+	ಗಾತ್ರ_t freed_mem = sizeof_delta_ಸೂಚ್ಯಂಕ(n->ಸೂಚ್ಯಂಕ);
+	free_delta_ಸೂಚ್ಯಂಕ(n->ಸೂಚ್ಯಂಕ);
+	n->ಸೂಚ್ಯಂಕ = ಖಾಲಿ;
+	ಆದರೆ (n->ದತ್ತಾಂಶ) {
+		freed_mem += ಗಾತ್ರ_4(n->ನಮೂದು);
+		FREE_AND_NULL(n->ದತ್ತಾಂಶ);
 	}
-	n->entry = NULL;
-	n->depth = 0;
-	return freed_mem;
+	n->ನಮೂದು = ಖಾಲಿ;
+	n->ಆಳ = 0;
+	ಹಿಂತಿರುಗಿ freed_mem;
 }
 
-static void find_deltas(struct object_entry **list, unsigned *list_size,
-			int window, int depth, unsigned *processed)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕಂಡುಹಿಡಿ_deltas(ರಚನೆ object_ನಮೂದು **list, ಚಿಹ್ನೆರಹಿತ *list_ಗಾತ್ರ,
+			ಪೂರ್ಣಾಂಕ ಕಿಟಕಿ, ಪೂರ್ಣಾಂಕ ಆಳ, ಚಿಹ್ನೆರಹಿತ *processed)
 {
-	uint32_t i, idx = 0, count = 0;
-	struct unpacked *array;
-	size_t mem_usage = 0;
+	uint32_t i, idx = 0, ಎಣಿಕೆ_2 = 0;
+	ರಚನೆ unpacked *array;
+	ಗಾತ್ರ_t mem_usage = 0;
 
-	CALLOC_ARRAY(array, window);
+	CALLOC_ARRAY(array, ಕಿಟಕಿ);
 
-	for (;;) {
-		struct object_entry *entry;
-		struct unpacked *n = array + idx;
-		int j, max_depth, best_base = -1;
+	ಗಾಗಿ (;;) {
+		ರಚನೆ object_ನಮೂದು *ನಮೂದು;
+		ರಚನೆ unpacked *n = array + idx;
+		ಪೂರ್ಣಾಂಕ j, max_ಆಳ, ಉತ್ತಮ_ತಳ = -1;
 
-		progress_lock();
-		if (!*list_size) {
-			progress_unlock();
-			break;
+		ಪ್ರಗತಿ_ಬೀಗ();
+		ಆದರೆ (!*list_ಗಾತ್ರ) {
+			ಪ್ರಗತಿ_unlock();
+			ನಿಲ್ಲಿಸು;
 		}
-		entry = *list++;
-		(*list_size)--;
-		if (!entry->preferred_base) {
+		ನಮೂದು = *list++;
+		(*list_ಗಾತ್ರ)--;
+		ಆದರೆ (!ನಮೂದು->preferred_ತಳ) {
 			(*processed)++;
-			display_progress(progress_state, *processed);
+			display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, *processed);
 		}
-		progress_unlock();
+		ಪ್ರಗತಿ_unlock();
 
 		mem_usage -= free_unpacked(n);
-		n->entry = entry;
+		n->ನಮೂದು = ನಮೂದು;
 
-		while (window_memory_limit &&
-		       mem_usage > window_memory_limit &&
-		       count > 1) {
-			const uint32_t tail = (idx + window - count) % window;
-			mem_usage -= free_unpacked(array + tail);
-			count--;
+		ಆಗ (ಕಿಟಕಿ_ಸ್ಮರಣೆ_ಎಲ್ಲೆ &&
+		       mem_usage > ಕಿಟಕಿ_ಸ್ಮರಣೆ_ಎಲ್ಲೆ &&
+		       ಎಣಿಕೆ_2 > 1) {
+			ಸ್ಥಿರಾಂಕ uint32_t ಬಾಲ = (idx + ಕಿಟಕಿ - ಎಣಿಕೆ_2) % ಕಿಟಕಿ;
+			mem_usage -= free_unpacked(array + ಬಾಲ);
+			ಎಣಿಕೆ_2--;
 		}
 
 		/* We do not compute delta to *create* objects we are not
 		 * going to pack.
 		 */
-		if (entry->preferred_base)
-			goto next;
+		ಆದರೆ (ನಮೂದು->preferred_ತಳ)
+			ಹೋಗು ಮುಂದಿನ;
 
 		/*
 		 * If the current object is at pack edge, take the depth the
 		 * objects that depend on the current object into account
 		 * otherwise they would become too deep.
 		 */
-		max_depth = depth;
-		if (DELTA_CHILD(entry)) {
-			max_depth -= check_delta_limit(entry, 0);
-			if (max_depth <= 0)
-				goto next;
+		max_ಆಳ = ಆಳ;
+		ಆದರೆ (DELTA_ಮಗು(ನಮೂದು)) {
+			max_ಆಳ -= check_delta_ಎಲ್ಲೆ(ನಮೂದು, 0);
+			ಆದರೆ (max_ಆಳ <= 0)
+				ಹೋಗು ಮುಂದಿನ;
 		}
 
-		j = window;
-		while (--j > 0) {
-			int ret;
+		j = ಕಿಟಕಿ;
+		ಆಗ (--j > 0) {
+			ಪೂರ್ಣಾಂಕ ret;
 			uint32_t other_idx = idx + j;
-			struct unpacked *m;
-			if (other_idx >= window)
-				other_idx -= window;
+			ರಚನೆ unpacked *m;
+			ಆದರೆ (other_idx >= ಕಿಟಕಿ)
+				other_idx -= ಕಿಟಕಿ;
 			m = array + other_idx;
-			if (!m->entry)
-				break;
-			ret = try_delta(n, m, max_depth, &mem_usage);
-			if (ret < 0)
-				break;
-			else if (ret > 0)
-				best_base = other_idx;
+			ಆದರೆ (!m->ನಮೂದು)
+				ನಿಲ್ಲಿಸು;
+			ret = try_delta(n, m, max_ಆಳ, &mem_usage);
+			ಆದರೆ (ret < 0)
+				ನಿಲ್ಲಿಸು;
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ret > 0)
+				ಉತ್ತಮ_ತಳ = other_idx;
 		}
 
 		/*
@@ -3070,19 +3070,19 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 		 * instead, as we can afford spending more time compressing
 		 * between writes at that moment.
 		 */
-		if (entry->delta_data && !pack_to_stdout) {
-			unsigned long size;
+		ಆದರೆ (ನಮೂದು->delta_ದತ್ತಾಂಶ && !pack_ಗಮ್ಯ_stdout) {
+			ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
 
-			size = do_compress(&entry->delta_data, DELTA_SIZE(entry));
-			if (size < (1U << OE_Z_DELTA_BITS)) {
-				entry->z_delta_size = size;
-				cache_lock();
-				delta_cache_size -= DELTA_SIZE(entry);
-				delta_cache_size += entry->z_delta_size;
+			ಗಾತ್ರ_2 = do_compress(&ನಮೂದು->delta_ದತ್ತಾಂಶ, DELTA_ಗಾತ್ರ(ನಮೂದು));
+			ಆದರೆ (ಗಾತ್ರ_2 < (1U << OE_Z_DELTA_ಬಿಟ್ಟುಗಳು)) {
+				ನಮೂದು->z_delta_ಗಾತ್ರ = ಗಾತ್ರ_2;
+				cache_ಬೀಗ();
+				delta_cache_ಗಾತ್ರ -= DELTA_ಗಾತ್ರ(ನಮೂದು);
+				delta_cache_ಗಾತ್ರ += ನಮೂದು->z_delta_ಗಾತ್ರ;
 				cache_unlock();
-			} else {
-				FREE_AND_NULL(entry->delta_data);
-				entry->z_delta_size = 0;
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				FREE_AND_NULL(ನಮೂದು->delta_ದತ್ತಾಂಶ);
+				ನಮೂದು->z_delta_ಗಾತ್ರ = 0;
 			}
 		}
 
@@ -3090,39 +3090,39 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 		 * depth, leaving it in the window is pointless.  we
 		 * should evict it first.
 		 */
-		if (DELTA(entry) && max_depth <= n->depth)
-			continue;
+		ಆದರೆ (DELTA(ನಮೂದು) && max_ಆಳ <= n->ಆಳ)
+			ಮುಂದುವರಿ;
 
 		/*
 		 * Move the best delta base up in the window, after the
 		 * currently deltified object, to keep it longer.  It will
 		 * be the first base object to be attempted next.
 		 */
-		if (DELTA(entry)) {
-			struct unpacked swap = array[best_base];
-			int dist = (window + idx - best_base) % window;
-			int dst = best_base;
-			while (dist--) {
-				int src = (dst + 1) % window;
+		ಆದರೆ (DELTA(ನಮೂದು)) {
+			ರಚನೆ unpacked ಅದಲುಬದಲು_2 = array[ಉತ್ತಮ_ತಳ];
+			ಪೂರ್ಣಾಂಕ dist = (ಕಿಟಕಿ + idx - ಉತ್ತಮ_ತಳ) % ಕಿಟಕಿ;
+			ಪೂರ್ಣಾಂಕ dst = ಉತ್ತಮ_ತಳ;
+			ಆಗ (dist--) {
+				ಪೂರ್ಣಾಂಕ src = (dst + 1) % ಕಿಟಕಿ;
 				array[dst] = array[src];
 				dst = src;
 			}
-			array[dst] = swap;
+			array[dst] = ಅದಲುಬದಲು_2;
 		}
 
-		next:
+		ಮುಂದಿನ:
 		idx++;
-		if (count + 1 < window)
-			count++;
-		if (idx >= window)
+		ಆದರೆ (ಎಣಿಕೆ_2 + 1 < ಕಿಟಕಿ)
+			ಎಣಿಕೆ_2++;
+		ಆದರೆ (idx >= ಕಿಟಕಿ)
 			idx = 0;
 	}
 
-	for (i = 0; i < window; ++i) {
-		free_delta_index(array[i].index);
-		free(array[i].data);
+	ಗಾಗಿ (i = 0; i < ಕಿಟಕಿ; ++i) {
+		free_delta_ಸೂಚ್ಯಂಕ(array[i].ಸೂಚ್ಯಂಕ);
+		ಬಿಡುಗಡೆ(array[i].ದತ್ತಾಂಶ);
 	}
-	free(array);
+	ಬಿಡುಗಡೆ(array);
 }
 
 /*
@@ -3141,55 +3141,55 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
  * most work left to hand it to the idle worker.
  */
 
-struct thread_params {
+ರಚನೆ thread_params {
 	pthread_t thread;
-	struct object_entry **list;
-	struct packing_region *regions;
-	unsigned list_size;
-	unsigned remaining;
-	int window;
-	int depth;
-	int working;
-	int data_ready;
+	ರಚನೆ object_ನಮೂದು **list;
+	ರಚನೆ packing_region *regions;
+	ಚಿಹ್ನೆರಹಿತ list_ಗಾತ್ರ;
+	ಚಿಹ್ನೆರಹಿತ ಉಳಿದ;
+	ಪೂರ್ಣಾಂಕ ಕಿಟಕಿ;
+	ಪೂರ್ಣಾಂಕ ಆಳ;
+	ಪೂರ್ಣಾಂಕ working;
+	ಪೂರ್ಣಾಂಕ ದತ್ತಾಂಶ_ready;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
-	unsigned *processed;
+	ಚಿಹ್ನೆರಹಿತ *processed;
 };
 
-static pthread_cond_t progress_cond;
+ಸ್ಥಿರ pthread_cond_t ಪ್ರಗತಿ_cond;
 
 /*
  * Mutex and conditional variable can't be statically-initialized on Windows.
  */
-static void init_threaded_search(void)
+ಸ್ಥಿರ ಶೂನ್ಯ init_threaded_ಹುಡುಕು(ಶೂನ್ಯ)
 {
-	pthread_mutex_init(&cache_mutex, NULL);
-	pthread_mutex_init(&progress_mutex, NULL);
-	pthread_cond_init(&progress_cond, NULL);
+	pthread_mutex_init(&cache_mutex, ಖಾಲಿ);
+	pthread_mutex_init(&ಪ್ರಗತಿ_mutex, ಖಾಲಿ);
+	pthread_cond_init(&ಪ್ರಗತಿ_cond, ಖಾಲಿ);
 }
 
-static void cleanup_threaded_search(void)
+ಸ್ಥಿರ ಶೂನ್ಯ cleanup_threaded_ಹುಡುಕು(ಶೂನ್ಯ)
 {
-	pthread_cond_destroy(&progress_cond);
+	pthread_cond_destroy(&ಪ್ರಗತಿ_cond);
 	pthread_mutex_destroy(&cache_mutex);
-	pthread_mutex_destroy(&progress_mutex);
+	pthread_mutex_destroy(&ಪ್ರಗತಿ_mutex);
 }
 
-static void *threaded_find_deltas(void *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ *threaded_ಕಂಡುಹಿಡಿ_deltas(ಶೂನ್ಯ *arg)
 {
-	struct thread_params *me = arg;
+	ರಚನೆ thread_params *me = arg;
 
-	progress_lock();
-	while (me->remaining) {
-		progress_unlock();
+	ಪ್ರಗತಿ_ಬೀಗ();
+	ಆಗ (me->ಉಳಿದ) {
+		ಪ್ರಗತಿ_unlock();
 
-		find_deltas(me->list, &me->remaining,
-			    me->window, me->depth, me->processed);
+		ಕಂಡುಹಿಡಿ_deltas(me->list, &me->ಉಳಿದ,
+			    me->ಕಿಟಕಿ, me->ಆಳ, me->processed);
 
-		progress_lock();
+		ಪ್ರಗತಿ_ಬೀಗ();
 		me->working = 0;
-		pthread_cond_signal(&progress_cond);
-		progress_unlock();
+		pthread_cond_signal(&ಪ್ರಗತಿ_cond);
+		ಪ್ರಗತಿ_unlock();
 
 		/*
 		 * We must not set ->data_ready before we wait on the
@@ -3199,76 +3199,76 @@ static void *threaded_find_deltas(void *arg)
 		 * was initialized to 0 before this thread was spawned
 		 * and we reset it to 0 right away.
 		 */
-		pthread_mutex_lock(&me->mutex);
-		while (!me->data_ready)
+		pthread_mutex_ಬೀಗ(&me->mutex);
+		ಆಗ (!me->ದತ್ತಾಂಶ_ready)
 			pthread_cond_wait(&me->cond, &me->mutex);
-		me->data_ready = 0;
+		me->ದತ್ತಾಂಶ_ready = 0;
 		pthread_mutex_unlock(&me->mutex);
 
-		progress_lock();
+		ಪ್ರಗತಿ_ಬೀಗ();
 	}
-	progress_unlock();
+	ಪ್ರಗತಿ_unlock();
 	/* leave ->working 1 so that this doesn't get more work assigned */
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static void ll_find_deltas(struct object_entry **list, unsigned list_size,
-			   int window, int depth, unsigned *processed)
+ಸ್ಥಿರ ಶೂನ್ಯ ll_ಕಂಡುಹಿಡಿ_deltas(ರಚನೆ object_ನಮೂದು **list, ಚಿಹ್ನೆರಹಿತ list_ಗಾತ್ರ,
+			   ಪೂರ್ಣಾಂಕ ಕಿಟಕಿ, ಪೂರ್ಣಾಂಕ ಆಳ, ಚಿಹ್ನೆರಹಿತ *processed)
 {
-	struct thread_params *p;
-	int i, ret, active_threads = 0;
+	ರಚನೆ thread_params *p;
+	ಪೂರ್ಣಾಂಕ i, ret, ಸಕ್ರಿಯ_ಎಳೆಗಳು = 0;
 
-	init_threaded_search();
+	init_threaded_ಹುಡುಕು();
 
-	if (delta_search_threads <= 1) {
-		find_deltas(list, &list_size, window, depth, processed);
-		cleanup_threaded_search();
-		return;
+	ಆದರೆ (delta_ಹುಡುಕು_ಎಳೆಗಳು <= 1) {
+		ಕಂಡುಹಿಡಿ_deltas(list, &list_ಗಾತ್ರ, ಕಿಟಕಿ, ಆಳ, processed);
+		cleanup_threaded_ಹುಡುಕು();
+		ಹಿಂತಿರುಗಿ;
 	}
-	if (progress > pack_to_stdout)
+	ಆದರೆ (ಪ್ರಗತಿ > pack_ಗಮ್ಯ_stdout)
 		fprintf_ln(stderr, _("Delta compression using up to %d threads"),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			   delta_ಹುಡುಕು_ಎಳೆಗಳು);
+	CALLOC_ARRAY(p, delta_ಹುಡುಕು_ಎಳೆಗಳು);
 
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = list_size / (delta_search_threads - i);
+	ಗಾಗಿ (i = 0; i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++) {
+		ಚಿಹ್ನೆರಹಿತ sub_ಗಾತ್ರ = list_ಗಾತ್ರ / (delta_ಹುಡುಕು_ಎಳೆಗಳು - i);
 
 		/* don't use too small segments or no deltas will be found */
-		if (sub_size < 2*window && i+1 < delta_search_threads)
-			sub_size = 0;
+		ಆದರೆ (sub_ಗಾತ್ರ < 2*ಕಿಟಕಿ && i+1 < delta_ಹುಡುಕು_ಎಳೆಗಳು)
+			sub_ಗಾತ್ರ = 0;
 
-		p[i].window = window;
-		p[i].depth = depth;
+		p[i].ಕಿಟಕಿ = ಕಿಟಕಿ;
+		p[i].ಆಳ = ಆಳ;
 		p[i].processed = processed;
 		p[i].working = 1;
-		p[i].data_ready = 0;
+		p[i].ದತ್ತಾಂಶ_ready = 0;
 
 		/* try to split chunks on "path" boundaries */
-		while (sub_size && sub_size < list_size &&
-		       list[sub_size]->hash &&
-		       list[sub_size]->hash == list[sub_size-1]->hash)
-			sub_size++;
+		ಆಗ (sub_ಗಾತ್ರ && sub_ಗಾತ್ರ < list_ಗಾತ್ರ &&
+		       list[sub_ಗಾತ್ರ]->hash &&
+		       list[sub_ಗಾತ್ರ]->hash == list[sub_ಗಾತ್ರ-1]->hash)
+			sub_ಗಾತ್ರ++;
 
 		p[i].list = list;
-		p[i].list_size = sub_size;
-		p[i].remaining = sub_size;
+		p[i].list_ಗಾತ್ರ = sub_ಗಾತ್ರ;
+		p[i].ಉಳಿದ = sub_ಗಾತ್ರ;
 
-		list += sub_size;
-		list_size -= sub_size;
+		list += sub_ಗಾತ್ರ;
+		list_ಗಾತ್ರ -= sub_ಗಾತ್ರ;
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		if (!p[i].list_size)
-			continue;
-		pthread_mutex_init(&p[i].mutex, NULL);
-		pthread_cond_init(&p[i].cond, NULL);
-		ret = pthread_create(&p[i].thread, NULL,
-				     threaded_find_deltas, &p[i]);
-		if (ret)
+	ಗಾಗಿ (i = 0; i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++) {
+		ಆದರೆ (!p[i].list_ಗಾತ್ರ)
+			ಮುಂದುವರಿ;
+		pthread_mutex_init(&p[i].mutex, ಖಾಲಿ);
+		pthread_cond_init(&p[i].cond, ಖಾಲಿ);
+		ret = pthread_create(&p[i].thread, ಖಾಲಿ,
+				     threaded_ಕಂಡುಹಿಡಿ_deltas, &p[i]);
+		ಆದರೆ (ret)
 			die(_("unable to create thread: %s"), strerror(ret));
-		active_threads++;
+		ಸಕ್ರಿಯ_ಎಳೆಗಳು++;
 	}
 
 	/*
@@ -3279,78 +3279,78 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 	 * until the remaining object list segments are simply too short
 	 * to be worth splitting anymore.
 	 */
-	while (active_threads) {
-		struct thread_params *target = NULL;
-		struct thread_params *victim = NULL;
-		unsigned sub_size = 0;
+	ಆಗ (ಸಕ್ರಿಯ_ಎಳೆಗಳು) {
+		ರಚನೆ thread_params *ಗುರಿ = ಖಾಲಿ;
+		ರಚನೆ thread_params *victim = ಖಾಲಿ;
+		ಚಿಹ್ನೆರಹಿತ sub_ಗಾತ್ರ = 0;
 
-		progress_lock();
-		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
-				if (!p[i].working)
-					target = &p[i];
-			if (target)
-				break;
-			pthread_cond_wait(&progress_cond, &progress_mutex);
+		ಪ್ರಗತಿ_ಬೀಗ();
+		ಗಾಗಿ (;;) {
+			ಗಾಗಿ (i = 0; !ಗುರಿ && i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++)
+				ಆದರೆ (!p[i].working)
+					ಗುರಿ = &p[i];
+			ಆದರೆ (ಗುರಿ)
+				ನಿಲ್ಲಿಸು;
+			pthread_cond_wait(&ಪ್ರಗತಿ_cond, &ಪ್ರಗತಿ_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
-			if (p[i].remaining > 2*window &&
-			    (!victim || victim->remaining < p[i].remaining))
+		ಗಾಗಿ (i = 0; i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++)
+			ಆದರೆ (p[i].ಉಳಿದ > 2*ಕಿಟಕಿ &&
+			    (!victim || victim->ಉಳಿದ < p[i].ಉಳಿದ))
 				victim = &p[i];
-		if (victim) {
-			sub_size = victim->remaining / 2;
-			list = victim->list + victim->list_size - sub_size;
-			while (sub_size && list[0]->hash &&
+		ಆದರೆ (victim) {
+			sub_ಗಾತ್ರ = victim->ಉಳಿದ / 2;
+			list = victim->list + victim->list_ಗಾತ್ರ - sub_ಗಾತ್ರ;
+			ಆಗ (sub_ಗಾತ್ರ && list[0]->hash &&
 			       list[0]->hash == list[-1]->hash) {
 				list++;
-				sub_size--;
+				sub_ಗಾತ್ರ--;
 			}
-			if (!sub_size) {
+			ಆದರೆ (!sub_ಗಾತ್ರ) {
 				/*
 				 * It is possible for some "paths" to have
 				 * so many objects that no hash boundary
 				 * might be found.  Let's just steal the
 				 * exact half in that case.
 				 */
-				sub_size = victim->remaining / 2;
-				list -= sub_size;
+				sub_ಗಾತ್ರ = victim->ಉಳಿದ / 2;
+				list -= sub_ಗಾತ್ರ;
 			}
-			target->list = list;
-			victim->list_size -= sub_size;
-			victim->remaining -= sub_size;
+			ಗುರಿ->list = list;
+			victim->list_ಗಾತ್ರ -= sub_ಗಾತ್ರ;
+			victim->ಉಳಿದ -= sub_ಗಾತ್ರ;
 		}
-		target->list_size = sub_size;
-		target->remaining = sub_size;
-		target->working = 1;
-		progress_unlock();
+		ಗುರಿ->list_ಗಾತ್ರ = sub_ಗಾತ್ರ;
+		ಗುರಿ->ಉಳಿದ = sub_ಗಾತ್ರ;
+		ಗುರಿ->working = 1;
+		ಪ್ರಗತಿ_unlock();
 
-		pthread_mutex_lock(&target->mutex);
-		target->data_ready = 1;
-		pthread_cond_signal(&target->cond);
-		pthread_mutex_unlock(&target->mutex);
+		pthread_mutex_ಬೀಗ(&ಗುರಿ->mutex);
+		ಗುರಿ->ದತ್ತಾಂಶ_ready = 1;
+		pthread_cond_signal(&ಗುರಿ->cond);
+		pthread_mutex_unlock(&ಗುರಿ->mutex);
 
-		if (!sub_size) {
-			pthread_join(target->thread, NULL);
-			pthread_cond_destroy(&target->cond);
-			pthread_mutex_destroy(&target->mutex);
-			active_threads--;
+		ಆದರೆ (!sub_ಗಾತ್ರ) {
+			pthread_join(ಗುರಿ->thread, ಖಾಲಿ);
+			pthread_cond_destroy(&ಗುರಿ->cond);
+			pthread_mutex_destroy(&ಗುರಿ->mutex);
+			ಸಕ್ರಿಯ_ಎಳೆಗಳು--;
 		}
 	}
-	cleanup_threaded_search();
-	free(p);
+	cleanup_threaded_ಹುಡುಕು();
+	ಬಿಡುಗಡೆ(p);
 }
 
-static int obj_is_packed(const struct object_id *oid)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ obj_is_packed(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	return packlist_find(&to_pack, oid) ||
+	ಹಿಂತಿರುಗಿ packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, oid) ||
 		(reuse_packfile_bitmap &&
-		 bitmap_walk_contains(bitmap_git, reuse_packfile_bitmap, oid));
+		 bitmap_walk_ಒಳಗೊಂಡಿದೆ(bitmap_git, reuse_packfile_bitmap, oid));
 }
 
-static void add_tag_chain(const struct object_id *oid)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_ಟ್ಯಾಗ್_chain(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	struct tag *tag;
+	ರಚನೆ ಟ್ಯಾಗ್ *ಟ್ಯಾಗ್;
 
 	/*
 	 * We catch duplicates already in add_object_entry(), but we'd
@@ -3359,128 +3359,128 @@ static void add_tag_chain(const struct object_id *oid)
 	 * it was included via bitmaps, we would not have parsed it
 	 * previously).
 	 */
-	if (obj_is_packed(oid))
-		return;
+	ಆದರೆ (obj_is_packed(oid))
+		ಹಿಂತಿರುಗಿ;
 
-	tag = lookup_tag(the_repository, oid);
-	while (1) {
-		if (!tag || parse_tag(the_repository, tag) || !tag->tagged)
+	ಟ್ಯಾಗ್ = lookup_ಟ್ಯಾಗ್(the_repository, oid);
+	ಆಗ (1) {
+		ಆದರೆ (!ಟ್ಯಾಗ್ || parse_ಟ್ಯಾಗ್(the_repository, ಟ್ಯಾಗ್) || !ಟ್ಯಾಗ್->tagged)
 			die(_("unable to pack objects reachable from tag %s"),
-			    oid_to_hex(oid));
+			    oid_ಗಮ್ಯ_hex(oid));
 
-		add_object_entry(&tag->object.oid, OBJ_TAG, NULL, 0);
+		ಕೂಡಿಸು_object_ನಮೂದು(&ಟ್ಯಾಗ್->object.oid, OBJ_ಟ್ಯಾಗ್, ಖಾಲಿ, 0);
 
-		if (tag->tagged->type != OBJ_TAG)
-			return;
+		ಆದರೆ (ಟ್ಯಾಗ್->tagged->type != OBJ_ಟ್ಯಾಗ್)
+			ಹಿಂತಿರುಗಿ;
 
-		tag = (struct tag *)tag->tagged;
+		ಟ್ಯಾಗ್ = (ರಚನೆ ಟ್ಯಾಗ್ *)ಟ್ಯಾಗ್->tagged;
 	}
 }
 
-static int add_ref_tag(const struct reference *ref, void *cb_data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_ref_ಟ್ಯಾಗ್(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *cb_ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	struct object_id peeled;
+	ರಚನೆ object_id peeled;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled) &&
+	ಆದರೆ (!reference_get_peeled_oid(the_repository, ref, &peeled) &&
 	    obj_is_packed(&peeled))
-		add_tag_chain(ref->oid);
-	return 0;
+		ಕೂಡಿಸು_ಟ್ಯಾಗ್_chain(ref->oid);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int should_attempt_deltas(struct object_entry *entry)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ should_attempt_deltas(ರಚನೆ object_ನಮೂದು *ನಮೂದು)
 {
-	if (DELTA(entry))
+	ಆದರೆ (DELTA(ನಮೂದು))
 		/* This happens if we decided to reuse existing
 		 * delta from a pack. "reuse_delta &&" is implied.
 		 */
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (!entry->type_valid ||
-	    oe_size_less_than(&to_pack, entry, 50))
-		return 0;
+	ಆದರೆ (!ನಮೂದು->type_valid ||
+	    oe_ಗಾತ್ರ_less_than(&ಗಮ್ಯ_pack, ನಮೂದು, 50))
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (entry->no_try_delta)
-		return 0;
+	ಆದರೆ (ನಮೂದು->no_try_delta)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (!entry->preferred_base) {
-		if (oe_type(entry) < 0)
+	ಆದರೆ (!ನಮೂದು->preferred_ತಳ) {
+		ಆದರೆ (oe_type(ನಮೂದು) < 0)
 			die(_("unable to get type of object %s"),
-				oid_to_hex(&entry->idx.oid));
-	} else if (oe_type(entry) < 0) {
+				oid_ಗಮ್ಯ_hex(&ನಮೂದು->idx.oid));
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (oe_type(ನಮೂದು) < 0) {
 		/*
 		 * This object is not found, but we
 		 * don't have to include it anyway.
 		 */
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static void find_deltas_for_region(struct object_entry *list,
-				   struct packing_region *region,
-				   unsigned int *processed)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕಂಡುಹಿಡಿ_deltas_for_region(ರಚನೆ object_ನಮೂದು *list,
+				   ರಚನೆ packing_region *region,
+				   ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *processed)
 {
-	struct object_entry **delta_list;
-	unsigned int delta_list_nr = 0;
+	ರಚನೆ object_ನಮೂದು **delta_list;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ delta_list_nr = 0;
 
 	ALLOC_ARRAY(delta_list, region->nr);
-	for (size_t i = 0; i < region->nr; i++) {
-		struct object_entry *entry = list + region->start + i;
-		if (should_attempt_deltas(entry))
-			delta_list[delta_list_nr++] = entry;
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < region->nr; i++) {
+		ರಚನೆ object_ನಮೂದು *ನಮೂದು = list + region->ಆರಂಭ + i;
+		ಆದರೆ (should_attempt_deltas(ನಮೂದು))
+			delta_list[delta_list_nr++] = ನಮೂದು;
 	}
 
-	QSORT(delta_list, delta_list_nr, type_size_sort);
-	find_deltas(delta_list, &delta_list_nr, window, depth, processed);
-	free(delta_list);
+	QSORT(delta_list, delta_list_nr, type_ಗಾತ್ರ_ವಿಂಗಡಿಸು);
+	ಕಂಡುಹಿಡಿ_deltas(delta_list, &delta_list_nr, ಕಿಟಕಿ, ಆಳ, processed);
+	ಬಿಡುಗಡೆ(delta_list);
 }
 
-static void find_deltas_by_region(struct object_entry *list,
-				  struct packing_region *regions,
-				  size_t start, size_t nr)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕಂಡುಹಿಡಿ_deltas_by_region(ರಚನೆ object_ನಮೂದು *list,
+				  ರಚನೆ packing_region *regions,
+				  ಗಾತ್ರ_t ಆರಂಭ, ಗಾತ್ರ_t nr)
 {
-	unsigned int processed = 0;
-	size_t progress_nr;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ processed = 0;
+	ಗಾತ್ರ_t ಪ್ರಗತಿ_nr;
 
-	if (!nr)
-		return;
+	ಆದರೆ (!nr)
+		ಹಿಂತಿರುಗಿ;
 
-	progress_nr = regions[nr - 1].start + regions[nr - 1].nr;
+	ಪ್ರಗತಿ_nr = regions[nr - 1].ಆರಂಭ + regions[nr - 1].nr;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Compressing objects by path"),
-						progress_nr);
+						ಪ್ರಗತಿ_nr);
 
-	while (nr--)
-		find_deltas_for_region(list,
-				       &regions[start++],
+	ಆಗ (nr--)
+		ಕಂಡುಹಿಡಿ_deltas_for_region(list,
+				       &regions[ಆರಂಭ++],
 				       &processed);
 
-	display_progress(progress_state, progress_nr);
-	stop_progress(&progress_state);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ಪ್ರಗತಿ_nr);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 }
 
-static void *threaded_find_deltas_by_path(void *arg)
+ಸ್ಥಿರ ಶೂನ್ಯ *threaded_ಕಂಡುಹಿಡಿ_deltas_by_ಮಾರ್ಗ(ಶೂನ್ಯ *arg)
 {
-	struct thread_params *me = arg;
+	ರಚನೆ thread_params *me = arg;
 
-	progress_lock();
-	while (me->remaining) {
-		while (me->remaining) {
-			progress_unlock();
-			find_deltas_for_region(to_pack.objects,
+	ಪ್ರಗತಿ_ಬೀಗ();
+	ಆಗ (me->ಉಳಿದ) {
+		ಆಗ (me->ಉಳಿದ) {
+			ಪ್ರಗತಿ_unlock();
+			ಕಂಡುಹಿಡಿ_deltas_for_region(ಗಮ್ಯ_pack.objects,
 					       me->regions,
 					       me->processed);
-			progress_lock();
-			me->remaining--;
+			ಪ್ರಗತಿ_ಬೀಗ();
+			me->ಉಳಿದ--;
 			me->regions++;
 		}
 
 		me->working = 0;
-		pthread_cond_signal(&progress_cond);
-		progress_unlock();
+		pthread_cond_signal(&ಪ್ರಗತಿ_cond);
+		ಪ್ರಗತಿ_unlock();
 
 		/*
 		 * We must not set ->data_ready before we wait on the
@@ -3490,80 +3490,80 @@ static void *threaded_find_deltas_by_path(void *arg)
 		 * was initialized to 0 before this thread was spawned
 		 * and we reset it to 0 right away.
 		 */
-		pthread_mutex_lock(&me->mutex);
-		while (!me->data_ready)
+		pthread_mutex_ಬೀಗ(&me->mutex);
+		ಆಗ (!me->ದತ್ತಾಂಶ_ready)
 			pthread_cond_wait(&me->cond, &me->mutex);
-		me->data_ready = 0;
+		me->ದತ್ತಾಂಶ_ready = 0;
 		pthread_mutex_unlock(&me->mutex);
 
-		progress_lock();
+		ಪ್ರಗತಿ_ಬೀಗ();
 	}
-	progress_unlock();
+	ಪ್ರಗತಿ_unlock();
 	/* leave ->working 1 so that this doesn't get more work assigned */
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
-static void ll_find_deltas_by_region(struct object_entry *list,
-				     struct packing_region *regions,
-				     uint32_t start, uint32_t nr)
+ಸ್ಥಿರ ಶೂನ್ಯ ll_ಕಂಡುಹಿಡಿ_deltas_by_region(ರಚನೆ object_ನಮೂದು *list,
+				     ರಚನೆ packing_region *regions,
+				     uint32_t ಆರಂಭ, uint32_t nr)
 {
-	struct thread_params *p;
-	int i, ret, active_threads = 0;
-	unsigned int processed = 0;
-	uint32_t progress_nr;
-	init_threaded_search();
+	ರಚನೆ thread_params *p;
+	ಪೂರ್ಣಾಂಕ i, ret, ಸಕ್ರಿಯ_ಎಳೆಗಳು = 0;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ processed = 0;
+	uint32_t ಪ್ರಗತಿ_nr;
+	init_threaded_ಹುಡುಕು();
 
-	if (!nr)
-		return;
+	ಆದರೆ (!nr)
+		ಹಿಂತಿರುಗಿ;
 
-	progress_nr =  regions[nr - 1].start + regions[nr - 1].nr;
-	if (delta_search_threads <= 1) {
-		find_deltas_by_region(list, regions, start, nr);
-		cleanup_threaded_search();
-		return;
+	ಪ್ರಗತಿ_nr =  regions[nr - 1].ಆರಂಭ + regions[nr - 1].nr;
+	ಆದರೆ (delta_ಹುಡುಕು_ಎಳೆಗಳು <= 1) {
+		ಕಂಡುಹಿಡಿ_deltas_by_region(list, regions, ಆರಂಭ, nr);
+		cleanup_threaded_ಹುಡುಕು();
+		ಹಿಂತಿರುಗಿ;
 	}
 
-	if (progress > pack_to_stdout)
+	ಆದರೆ (ಪ್ರಗತಿ > pack_ಗಮ್ಯ_stdout)
 		fprintf_ln(stderr,
 			   Q_("Path-based delta compression using up to %d thread",
 			      "Path-based delta compression using up to %d threads",
-			      delta_search_threads),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			      delta_ಹುಡುಕು_ಎಳೆಗಳು),
+			   delta_ಹುಡುಕು_ಎಳೆಗಳು);
+	CALLOC_ARRAY(p, delta_ಹುಡುಕು_ಎಳೆಗಳು);
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Compressing objects by path"),
-						progress_nr);
+						ಪ್ರಗತಿ_nr);
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = nr / (delta_search_threads - i);
+	ಗಾಗಿ (i = 0; i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++) {
+		ಚಿಹ್ನೆರಹಿತ sub_ಗಾತ್ರ = nr / (delta_ಹುಡುಕು_ಎಳೆಗಳು - i);
 
-		p[i].window = window;
-		p[i].depth = depth;
+		p[i].ಕಿಟಕಿ = ಕಿಟಕಿ;
+		p[i].ಆಳ = ಆಳ;
 		p[i].processed = &processed;
 		p[i].working = 1;
-		p[i].data_ready = 0;
+		p[i].ದತ್ತಾಂಶ_ready = 0;
 
 		p[i].regions = regions;
-		p[i].list_size = sub_size;
-		p[i].remaining = sub_size;
+		p[i].list_ಗಾತ್ರ = sub_ಗಾತ್ರ;
+		p[i].ಉಳಿದ = sub_ಗಾತ್ರ;
 
-		regions += sub_size;
-		nr -= sub_size;
+		regions += sub_ಗಾತ್ರ;
+		nr -= sub_ಗಾತ್ರ;
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		if (!p[i].list_size)
-			continue;
-		pthread_mutex_init(&p[i].mutex, NULL);
-		pthread_cond_init(&p[i].cond, NULL);
-		ret = pthread_create(&p[i].thread, NULL,
-				     threaded_find_deltas_by_path, &p[i]);
-		if (ret)
+	ಗಾಗಿ (i = 0; i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++) {
+		ಆದರೆ (!p[i].list_ಗಾತ್ರ)
+			ಮುಂದುವರಿ;
+		pthread_mutex_init(&p[i].mutex, ಖಾಲಿ);
+		pthread_cond_init(&p[i].cond, ಖಾಲಿ);
+		ret = pthread_create(&p[i].thread, ಖಾಲಿ,
+				     threaded_ಕಂಡುಹಿಡಿ_deltas_by_ಮಾರ್ಗ, &p[i]);
+		ಆದರೆ (ret)
 			die(_("unable to create thread: %s"), strerror(ret));
-		active_threads++;
+		ಸಕ್ರಿಯ_ಎಳೆಗಳು++;
 	}
 
 	/*
@@ -3574,63 +3574,63 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 	 * until the remaining object list segments are simply too short
 	 * to be worth splitting anymore.
 	 */
-	while (active_threads) {
-		struct thread_params *target = NULL;
-		struct thread_params *victim = NULL;
-		unsigned sub_size = 0;
+	ಆಗ (ಸಕ್ರಿಯ_ಎಳೆಗಳು) {
+		ರಚನೆ thread_params *ಗುರಿ = ಖಾಲಿ;
+		ರಚನೆ thread_params *victim = ಖಾಲಿ;
+		ಚಿಹ್ನೆರಹಿತ sub_ಗಾತ್ರ = 0;
 
-		progress_lock();
-		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
-				if (!p[i].working)
-					target = &p[i];
-			if (target)
-				break;
-			pthread_cond_wait(&progress_cond, &progress_mutex);
+		ಪ್ರಗತಿ_ಬೀಗ();
+		ಗಾಗಿ (;;) {
+			ಗಾಗಿ (i = 0; !ಗುರಿ && i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++)
+				ಆದರೆ (!p[i].working)
+					ಗುರಿ = &p[i];
+			ಆದರೆ (ಗುರಿ)
+				ನಿಲ್ಲಿಸು;
+			pthread_cond_wait(&ಪ್ರಗತಿ_cond, &ಪ್ರಗತಿ_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
-			if (p[i].remaining > 2*window &&
-			    (!victim || victim->remaining < p[i].remaining))
+		ಗಾಗಿ (i = 0; i < delta_ಹುಡುಕು_ಎಳೆಗಳು; i++)
+			ಆದರೆ (p[i].ಉಳಿದ > 2*ಕಿಟಕಿ &&
+			    (!victim || victim->ಉಳಿದ < p[i].ಉಳಿದ))
 				victim = &p[i];
-		if (victim) {
-			sub_size = victim->remaining / 2;
-			target->regions = victim->regions + victim->remaining - sub_size;
-			victim->list_size -= sub_size;
-			victim->remaining -= sub_size;
+		ಆದರೆ (victim) {
+			sub_ಗಾತ್ರ = victim->ಉಳಿದ / 2;
+			ಗುರಿ->regions = victim->regions + victim->ಉಳಿದ - sub_ಗಾತ್ರ;
+			victim->list_ಗಾತ್ರ -= sub_ಗಾತ್ರ;
+			victim->ಉಳಿದ -= sub_ಗಾತ್ರ;
 		}
-		target->list_size = sub_size;
-		target->remaining = sub_size;
-		target->working = 1;
-		progress_unlock();
+		ಗುರಿ->list_ಗಾತ್ರ = sub_ಗಾತ್ರ;
+		ಗುರಿ->ಉಳಿದ = sub_ಗಾತ್ರ;
+		ಗುರಿ->working = 1;
+		ಪ್ರಗತಿ_unlock();
 
-		pthread_mutex_lock(&target->mutex);
-		target->data_ready = 1;
-		pthread_cond_signal(&target->cond);
-		pthread_mutex_unlock(&target->mutex);
+		pthread_mutex_ಬೀಗ(&ಗುರಿ->mutex);
+		ಗುರಿ->ದತ್ತಾಂಶ_ready = 1;
+		pthread_cond_signal(&ಗುರಿ->cond);
+		pthread_mutex_unlock(&ಗುರಿ->mutex);
 
-		if (!sub_size) {
-			pthread_join(target->thread, NULL);
-			pthread_cond_destroy(&target->cond);
-			pthread_mutex_destroy(&target->mutex);
-			active_threads--;
+		ಆದರೆ (!sub_ಗಾತ್ರ) {
+			pthread_join(ಗುರಿ->thread, ಖಾಲಿ);
+			pthread_cond_destroy(&ಗುರಿ->cond);
+			pthread_mutex_destroy(&ಗುರಿ->mutex);
+			ಸಕ್ರಿಯ_ಎಳೆಗಳು--;
 		}
 	}
-	cleanup_threaded_search();
-	free(p);
+	cleanup_threaded_ಹುಡುಕು();
+	ಬಿಡುಗಡೆ(p);
 
-	display_progress(progress_state, progress_nr);
-	stop_progress(&progress_state);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ಪ್ರಗತಿ_nr);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 }
 
-static void prepare_pack(int window, int depth)
+ಸ್ಥಿರ ಶೂನ್ಯ prepare_pack(ಪೂರ್ಣಾಂಕ ಕಿಟಕಿ, ಪೂರ್ಣಾಂಕ ಆಳ)
 {
-	struct object_entry **delta_list;
+	ರಚನೆ object_ನಮೂದು **delta_list;
 	uint32_t i, nr_deltas;
-	unsigned n;
+	ಚಿಹ್ನೆರಹಿತ n;
 
-	if (use_delta_islands)
-		resolve_tree_islands(the_repository, progress, &to_pack);
+	ಆದರೆ (use_delta_islands)
+		resolve_ವೃಕ್ಷ_islands(the_repository, ಪ್ರಗತಿ, &ಗಮ್ಯ_pack);
 
 	get_object_details();
 
@@ -3641,187 +3641,187 @@ static void prepare_pack(int window, int depth)
 	 * should validate everything they get anyway so no need to incur
 	 * the additional cost here in that case.
 	 */
-	if (!pack_to_stdout)
-		do_check_packed_object_crc = 1;
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout)
+		do_check_packed_object_ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = 1;
 
-	if (!to_pack.nr_objects || !window || !depth)
-		return;
+	ಆದರೆ (!ಗಮ್ಯ_pack.nr_objects || !ಕಿಟಕಿ || !ಆಳ)
+		ಹಿಂತಿರುಗಿ;
 
-	if (path_walk)
-		ll_find_deltas_by_region(to_pack.objects, to_pack.regions,
-					 0, to_pack.nr_regions);
+	ಆದರೆ (ಮಾರ್ಗ_walk)
+		ll_ಕಂಡುಹಿಡಿ_deltas_by_region(ಗಮ್ಯ_pack.objects, ಗಮ್ಯ_pack.regions,
+					 0, ಗಮ್ಯ_pack.nr_regions);
 
-	ALLOC_ARRAY(delta_list, to_pack.nr_objects);
+	ALLOC_ARRAY(delta_list, ಗಮ್ಯ_pack.nr_objects);
 	nr_deltas = n = 0;
 
-	for (i = 0; i < to_pack.nr_objects; i++) {
-		struct object_entry *entry = to_pack.objects + i;
+	ಗಾಗಿ (i = 0; i < ಗಮ್ಯ_pack.nr_objects; i++) {
+		ರಚನೆ object_ನಮೂದು *ನಮೂದು = ಗಮ್ಯ_pack.objects + i;
 
-		if (!should_attempt_deltas(entry))
-			continue;
+		ಆದರೆ (!should_attempt_deltas(ನಮೂದು))
+			ಮುಂದುವರಿ;
 
-		if (!entry->preferred_base)
+		ಆದರೆ (!ನಮೂದು->preferred_ತಳ)
 			nr_deltas++;
 
-		delta_list[n++] = entry;
+		delta_list[n++] = ನಮೂದು;
 	}
 
-	if (nr_deltas && n > 1) {
-		unsigned nr_done = 0;
+	ಆದರೆ (nr_deltas && n > 1) {
+		ಚಿಹ್ನೆರಹಿತ nr_ಮುಗಿದ = 0;
 
-		if (progress)
-			progress_state = start_progress(the_repository,
+		ಆದರೆ (ಪ್ರಗತಿ)
+			ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 							_("Compressing objects"),
 							nr_deltas);
-		QSORT(delta_list, n, type_size_sort);
-		ll_find_deltas(delta_list, n, window+1, depth, &nr_done);
-		stop_progress(&progress_state);
-		if (nr_done != nr_deltas)
+		QSORT(delta_list, n, type_ಗಾತ್ರ_ವಿಂಗಡಿಸು);
+		ll_ಕಂಡುಹಿಡಿ_deltas(delta_list, n, ಕಿಟಕಿ+1, ಆಳ, &nr_ಮುಗಿದ);
+		stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
+		ಆದರೆ (nr_ಮುಗಿದ != nr_deltas)
 			die(_("inconsistency with delta count"));
 	}
-	free(delta_list);
+	ಬಿಡುಗಡೆ(delta_list);
 }
 
-static int git_pack_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ git_pack_config(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *k, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *v,
+			   ಸ್ಥಿರಾಂಕ ರಚನೆ config_context *ctx, ಶೂನ್ಯ *cb)
 {
-	if (!strcmp(k, "pack.window")) {
-		window = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ಆದರೆ (!strcmp(k, "pack.window")) {
+		ಕಿಟಕಿ = git_config_int(k, v, ctx->kvi);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.windowmemory")) {
-		window_memory_limit = git_config_ulong(k, v, ctx->kvi);
-		return 0;
+	ಆದರೆ (!strcmp(k, "pack.windowmemory")) {
+		ಕಿಟಕಿ_ಸ್ಮರಣೆ_ಎಲ್ಲೆ = git_config_ulong(k, v, ctx->kvi);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.depth")) {
-		depth = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ಆದರೆ (!strcmp(k, "pack.depth")) {
+		ಆಳ = git_config_int(k, v, ctx->kvi);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.deltacachesize")) {
-		max_delta_cache_size = git_config_size_t(k, v, ctx->kvi);
-		return 0;
+	ಆದರೆ (!strcmp(k, "pack.deltacachesize")) {
+		max_delta_cache_ಗಾತ್ರ = git_config_ಗಾತ್ರ_t(k, v, ctx->kvi);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.deltacachelimit")) {
-		cache_max_small_delta_size = git_config_int(k, v, ctx->kvi);
-		return 0;
+	ಆದರೆ (!strcmp(k, "pack.deltacachelimit")) {
+		cache_max_small_delta_ಗಾತ್ರ = git_config_int(k, v, ctx->kvi);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.writebitmaphashcache")) {
-		if (git_config_bool(k, v))
+	ಆದರೆ (!strcmp(k, "pack.writebitmaphashcache")) {
+		ಆದರೆ (git_config_bool(k, v))
 			write_bitmap_options |= BITMAP_OPT_HASH_CACHE;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			write_bitmap_options &= ~BITMAP_OPT_HASH_CACHE;
 	}
 
-	if (!strcmp(k, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(k, v))
-			write_bitmap_options |= BITMAP_OPT_LOOKUP_TABLE;
-		else
-			write_bitmap_options &= ~BITMAP_OPT_LOOKUP_TABLE;
+	ಆದರೆ (!strcmp(k, "pack.writebitmaplookuptable")) {
+		ಆದರೆ (git_config_bool(k, v))
+			write_bitmap_options |= BITMAP_OPT_LOOKUP_ಕೋಷ್ಟಕ;
+		ಇಲ್ಲದಿದ್ದರೆ
+			write_bitmap_options &= ~BITMAP_OPT_LOOKUP_ಕೋಷ್ಟಕ;
 	}
 
-	if (!strcmp(k, "pack.usebitmaps")) {
-		use_bitmap_index_default = git_config_bool(k, v);
-		return 0;
+	ಆದರೆ (!strcmp(k, "pack.usebitmaps")) {
+		use_bitmap_ಸೂಚ್ಯಂಕ_default = git_config_bool(k, v);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.allowpackreuse")) {
-		int res = git_parse_maybe_bool_text(v);
-		if (res < 0) {
-			if (!strcasecmp(v, "single"))
+	ಆದರೆ (!strcmp(k, "pack.allowpackreuse")) {
+		ಪೂರ್ಣಾಂಕ res = git_parse_maybe_bool_ಪಠ್ಯ(v);
+		ಆದರೆ (res < 0) {
+			ಆದರೆ (!strcasecmp(v, "single"))
 				allow_pack_reuse = SINGLE_PACK_REUSE;
-			else if (!strcasecmp(v, "multi"))
+			ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcasecmp(v, "multi"))
 				allow_pack_reuse = MULTI_PACK_REUSE;
-			else
+			ಇಲ್ಲದಿದ್ದರೆ
 				die(_("invalid pack.allowPackReuse value: '%s'"), v);
-		} else if (res) {
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (res) {
 			allow_pack_reuse = SINGLE_PACK_REUSE;
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			allow_pack_reuse = NO_PACK_REUSE;
 		}
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.threads")) {
-		delta_search_threads = git_config_int(k, v, ctx->kvi);
-		if (delta_search_threads < 0)
+	ಆದರೆ (!strcmp(k, "pack.threads")) {
+		delta_ಹುಡುಕು_ಎಳೆಗಳು = git_config_int(k, v, ctx->kvi);
+		ಆದರೆ (delta_ಹುಡುಕು_ಎಳೆಗಳು < 0)
 			die(_("invalid number of threads specified (%d)"),
-			    delta_search_threads);
-		if (!HAVE_THREADS && delta_search_threads != 1) {
+			    delta_ಹುಡುಕು_ಎಳೆಗಳು);
+		ಆದರೆ (!HAVE_ಎಳೆಗಳು && delta_ಹುಡುಕು_ಎಳೆಗಳು != 1) {
 			warning(_("no threads support, ignoring %s"), k);
-			delta_search_threads = 0;
+			delta_ಹುಡುಕು_ಎಳೆಗಳು = 0;
 		}
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.indexversion")) {
-		pack_idx_opts.version = git_config_int(k, v, ctx->kvi);
-		if (pack_idx_opts.version > 2)
+	ಆದರೆ (!strcmp(k, "pack.indexversion")) {
+		pack_idx_opts.ಆವೃತ್ತಿ = git_config_int(k, v, ctx->kvi);
+		ಆದರೆ (pack_idx_opts.ಆವೃತ್ತಿ > 2)
 			die(_("bad pack.indexVersion=%"PRIu32),
-			    pack_idx_opts.version);
-		return 0;
+			    pack_idx_opts.ಆವೃತ್ತಿ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "pack.writereverseindex")) {
-		if (git_config_bool(k, v))
+	ಆದರೆ (!strcmp(k, "pack.writereverseindex")) {
+		ಆದರೆ (git_config_bool(k, v))
 			pack_idx_opts.flags |= WRITE_REV;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			pack_idx_opts.flags &= ~WRITE_REV;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
-	if (!strcmp(k, "uploadpack.blobpackfileuri")) {
-		struct configured_exclusion *ex;
-		const char *oid_end, *pack_end;
+	ಆದರೆ (!strcmp(k, "uploadpack.blobpackfileuri")) {
+		ರಚನೆ configured_exclusion *ex;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *oid_ಕೊನೆ, *pack_ಕೊನೆ;
 		/*
 		 * Stores the pack hash. This is not a true object ID, but is
 		 * of the same form.
 		 */
-		struct object_id pack_hash;
+		ರಚನೆ object_id pack_hash;
 
-		if (!v)
-			return config_error_nonbool(k);
+		ಆದರೆ (!v)
+			ಹಿಂತಿರುಗಿ config_error_nonbool(k);
 
-		ex = xmalloc(sizeof(*ex));
-		if (parse_oid_hex(v, &ex->e.oid, &oid_end) ||
-		    *oid_end != ' ' ||
-		    parse_oid_hex(oid_end + 1, &pack_hash, &pack_end) ||
-		    *pack_end != ' ')
+		ex = xmalloc(ಗಾತ್ರ(*ex));
+		ಆದರೆ (parse_oid_hex(v, &ex->e.oid, &oid_ಕೊನೆ) ||
+		    *oid_ಕೊನೆ != ' ' ||
+		    parse_oid_hex(oid_ಕೊನೆ + 1, &pack_hash, &pack_ಕೊನೆ) ||
+		    *pack_ಕೊನೆ != ' ')
 			die(_("value of uploadpack.blobpackfileuri must be "
 			      "of the form '<object-hash> <pack-hash> <uri>' (got '%s')"), v);
-		if (oidmap_get(&configured_exclusions, &ex->e.oid))
+		ಆದರೆ (oidmap_get(&configured_exclusions, &ex->e.oid))
 			die(_("object already configured in another "
 			      "uploadpack.blobpackfileuri (got '%s')"), v);
-		ex->pack_hash_hex = xcalloc(1, pack_end - oid_end);
-		memcpy(ex->pack_hash_hex, oid_end + 1, pack_end - oid_end - 1);
-		ex->uri = xstrdup(pack_end + 1);
+		ex->pack_hash_hex = xcalloc(1, pack_ಕೊನೆ - oid_ಕೊನೆ);
+		ಸ್ಮರಣೆ_ನಕಲು(ex->pack_hash_hex, oid_ಕೊನೆ + 1, pack_ಕೊನೆ - oid_ಕೊನೆ - 1);
+		ex->uri = xstrdup(pack_ಕೊನೆ + 1);
 		oidmap_put(&configured_exclusions, ex);
 	}
-	return git_default_config(k, v, ctx, cb);
+	ಹಿಂತಿರುಗಿ git_default_config(k, v, ctx, cb);
 }
 
 /* Counters for trace2 output when in --stdin-packs mode. */
-static int stdin_packs_found_nr;
-static int stdin_packs_hints_nr;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ stdin_packs_ಸಿಕ್ಕಿತು_nr;
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ stdin_packs_hints_nr;
 
-static int add_object_entry_from_pack(const struct object_id *oid,
-				      struct packed_git *p,
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_object_ನಮೂದು_from_pack(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				      ರಚನೆ packed_git *p,
 				      uint32_t pos,
-				      void *_data)
+				      ಶೂನ್ಯ *ದತ್ತಾಂಶ_2)
 {
 	off_t ofs;
-	struct object_info oi = OBJECT_INFO_INIT;
-	enum object_type type = OBJ_NONE;
+	ರಚನೆ object_info oi = OBJECT_INFO_INIT;
+	ಎಣಿಕೆ object_type type = OBJ_NONE;
 
-	display_progress(progress_state, ++nr_seen);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ++nr_ನೋಡಿದ);
 
-	if (have_duplicate_entry(oid, 0))
-		return 0;
+	ಆದರೆ (have_duplicate_ನಮೂದು(oid, 0))
+		ಹಿಂತಿರುಗಿ 0;
 
-	stdin_packs_found_nr++;
+	stdin_packs_ಸಿಕ್ಕಿತು_nr++;
 
-	ofs = nth_packed_object_offset(p, pos);
+	ofs = nth_packed_object_ಸ್ಥಾನಾಂತರ(p, pos);
 
 	oi.typep = &type;
-	if (packed_object_info(NULL, p, ofs, &oi) < 0) {
+	ಆದರೆ (packed_object_info(ಖಾಲಿ, p, ofs, &oi) < 0) {
 		die(_("could not get type of object %s in pack %s"),
-		    oid_to_hex(oid), p->pack_name);
-	} else if (type == OBJ_COMMIT) {
-		struct rev_info *revs = _data;
+		    oid_ಗಮ್ಯ_hex(oid), p->pack_name);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (type == OBJ_COMMIT) {
+		ರಚನೆ rev_info *revs = ದತ್ತಾಂಶ_2;
 		/*
 		 * commits in included packs are used as starting points
 		 * for the subsequent revision walk
@@ -3834,30 +3834,30 @@ static int add_object_entry_from_pack(const struct object_id *oid,
 		 * However, we'll only add those objects to the packing
 		 * list after checking `want_object_in_pack()` below.
 		 */
-		add_pending_oid(revs, NULL, oid, 0);
+		ಕೂಡಿಸು_pending_oid(revs, ಖಾಲಿ, oid, 0);
 	}
 
-	if (!want_object_in_pack(oid, 0, &p, &ofs))
-		return 0;
+	ಆದರೆ (!want_object_ಒಳ_pack(oid, 0, &p, &ofs))
+		ಹಿಂತಿರುಗಿ 0;
 
-	create_object_entry(oid, type, 0, 0, 0, p, ofs);
+	create_object_ನಮೂದು(oid, type, 0, 0, 0, p, ofs);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void show_object_pack_hint(struct object *object, const char *name,
-				  void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ show_object_pack_hint(ರಚನೆ object *object, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name,
+				  ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	enum stdin_packs_mode mode = *(enum stdin_packs_mode *)data;
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
-		if (object->type == OBJ_BLOB &&
+	ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ ಬಹುಲಕ = *(ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ *)ದತ್ತಾಂಶ;
+	ಆದರೆ (ಬಹುಲಕ == STDIN_PACKS_ಬಹುಲಕ_FOLLOW) {
+		ಆದರೆ (object->type == OBJ_BLOB &&
 		    !odb_has_object(the_repository->objects, &object->oid, 0))
-			return;
-		add_object_entry(&object->oid, object->type, name, 0);
-	} else {
-		struct object_entry *oe = packlist_find(&to_pack, &object->oid);
-		if (!oe)
-			return;
+			ಹಿಂತಿರುಗಿ;
+		ಕೂಡಿಸು_object_ನಮೂದು(&object->oid, object->type, name, 0);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ರಚನೆ object_ನಮೂದು *oe = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, &object->oid);
+		ಆದರೆ (!oe)
+			ಹಿಂತಿರುಗಿ;
 
 		/*
 		 * Our 'to_pack' list was constructed by iterating all
@@ -3876,13 +3876,13 @@ static void show_object_pack_hint(struct object *object, const char *name,
 	}
 }
 
-static void show_commit_pack_hint(struct commit *commit, void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ show_commit_pack_hint(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	enum stdin_packs_mode mode = *(enum stdin_packs_mode *)data;
+	ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ ಬಹುಲಕ = *(ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ *)ದತ್ತಾಂಶ;
 
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
-		show_object_pack_hint((struct object *)commit, "", data);
-		return;
+	ಆದರೆ (ಬಹುಲಕ == STDIN_PACKS_ಬಹುಲಕ_FOLLOW) {
+		show_object_pack_hint((ರಚನೆ object *)commit, "", ದತ್ತಾಂಶ);
+		ಹಿಂತಿರುಗಿ;
 	}
 
 	/* nothing to do; commits don't have a namehash */
@@ -3908,59 +3908,59 @@ static void show_commit_pack_hint(struct commit *commit, void *data)
  * STDIN_PACK_EXCLUDE_OPEN are used as traversal tips when invoked
  * with --stdin-packs=follow.
  */
-enum stdin_pack_info_kind {
+ಎಣಿಕೆ stdin_pack_info_ಬಗೆ {
 	STDIN_PACK_INCLUDE = (1<<0),
 	STDIN_PACK_EXCLUDE_CLOSED = (1<<1),
 	STDIN_PACK_EXCLUDE_OPEN = (1<<2),
 };
 
-struct stdin_pack_info {
-	struct packed_git *p;
-	enum stdin_pack_info_kind kind;
+ರಚನೆ stdin_pack_info {
+	ರಚನೆ packed_git *p;
+	ಎಣಿಕೆ stdin_pack_info_ಬಗೆ ಬಗೆ;
 };
 
-static int pack_mtime_cmp(const void *_a, const void *_b)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pack_mtime_cmp(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_a, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *_b)
 {
-	struct stdin_pack_info *a = ((const struct string_list_item*)_a)->util;
-	struct stdin_pack_info *b = ((const struct string_list_item*)_b)->util;
+	ರಚನೆ stdin_pack_info *a = ((ಸ್ಥಿರಾಂಕ ರಚನೆ string_list_ಅಂಶ*)_a)->util;
+	ರಚನೆ stdin_pack_info *b = ((ಸ್ಥಿರಾಂಕ ರಚನೆ string_list_ಅಂಶ*)_b)->util;
 
 	/*
 	 * order packs by descending mtime so that objects are laid out
 	 * roughly as newest-to-oldest
 	 */
-	if (a->p->mtime < b->p->mtime)
-		return 1;
-	else if (b->p->mtime < a->p->mtime)
-		return -1;
-	else
-		return 0;
+	ಆದರೆ (a->p->mtime < b->p->mtime)
+		ಹಿಂತಿರುಗಿ 1;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (b->p->mtime < a->p->mtime)
+		ಹಿಂತಿರುಗಿ -1;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಹಿಂತಿರುಗಿ 0;
 }
 
-static int stdin_packs_include_check_obj(struct object *obj, void *data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ stdin_packs_include_check_obj(ರಚನೆ object *obj, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	return !has_object_kept_pack(to_pack.repo, &obj->oid,
-				     KEPT_PACK_IN_CORE);
+	ಹಿಂತಿರುಗಿ !has_object_kept_pack(ಗಮ್ಯ_pack.repo, &obj->oid,
+				     KEPT_PACK_ಒಳ_CORE);
 }
 
-static int stdin_packs_include_check(struct commit *commit, void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ stdin_packs_include_check(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	return stdin_packs_include_check_obj((struct object *)commit, data);
+	ಹಿಂತಿರುಗಿ stdin_packs_include_check_obj((ರಚನೆ object *)commit, ದತ್ತಾಂಶ);
 }
 
-static void stdin_packs_add_pack_entries(struct strmap *packs,
-					 struct rev_info *revs)
+ಸ್ಥಿರ ಶೂನ್ಯ stdin_packs_ಕೂಡಿಸು_pack_entries(ರಚನೆ strmap *packs,
+					 ರಚನೆ rev_info *revs)
 {
-	struct string_list keys = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	ರಚನೆ string_list ಕೀಲಿಗಳು = STRING_LIST_INIT_NODUP;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
+	ರಚನೆ hashmap_iter iter;
+	ರಚನೆ strmap_ನಮೂದು *ನಮೂದು;
 
-	strmap_for_each_entry(packs, &iter, entry) {
-		struct stdin_pack_info *info = entry->value;
-		if (!info->p)
-			die(_("could not find pack '%s'"), entry->key);
+	strmap_for_each_ನಮೂದು(packs, &iter, ನಮೂದು) {
+		ರಚನೆ stdin_pack_info *info = ನಮೂದು->ಮೌಲ್ಯ;
+		ಆದರೆ (!info->p)
+			die(_("could not find pack '%s'"), ನಮೂದು->ಕೀಲಿ);
 
-		string_list_append(&keys, entry->key)->util = info;
+		string_list_append(&ಕೀಲಿಗಳು, ನಮೂದು->ಕೀಲಿ)->util = info;
 	}
 
 	/*
@@ -3968,12 +3968,12 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 	 * string_list_item's ->util pointer, which string_list_sort() does not
 	 * provide.
 	 */
-	QSORT(keys.items, keys.nr, pack_mtime_cmp);
+	QSORT(ಕೀಲಿಗಳು.ವಸ್ತುಗಳು, ಕೀಲಿಗಳು.nr, pack_mtime_cmp);
 
-	for_each_string_list_item(item, &keys) {
-		struct stdin_pack_info *info = item->util;
+	for_each_string_list_ಅಂಶ(ಅಂಶ, &ಕೀಲಿಗಳು) {
+		ರಚನೆ stdin_pack_info *info = ಅಂಶ->util;
 
-		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
+		ಆದರೆ (info->ಬಗೆ & STDIN_PACK_EXCLUDE_OPEN) {
 			/*
 			 * When open-excluded packs ("!") are present, stop
 			 * the parent walk at closed-excluded ("^") packs.
@@ -3984,59 +3984,59 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 			revs->include_check_obj = stdin_packs_include_check_obj;
 		}
 
-		if ((info->kind & STDIN_PACK_INCLUDE) ||
-		    (info->kind & STDIN_PACK_EXCLUDE_OPEN))
-			for_each_object_in_pack(info->p,
-						add_object_entry_from_pack,
+		ಆದರೆ ((info->ಬಗೆ & STDIN_PACK_INCLUDE) ||
+		    (info->ಬಗೆ & STDIN_PACK_EXCLUDE_OPEN))
+			for_each_object_ಒಳ_pack(info->p,
+						ಕೂಡಿಸು_object_ನಮೂದು_from_pack,
 						revs,
-						ODB_FOR_EACH_OBJECT_PACK_ORDER);
+						ODB_FOR_EACH_OBJECT_PACK_ಕ್ರಮ);
 	}
 
-	string_list_clear(&keys, 0);
+	string_list_clear(&ಕೀಲಿಗಳು, 0);
 }
 
-static void stdin_packs_read_input(struct rev_info *revs,
-				   enum stdin_packs_mode mode)
+ಸ್ಥಿರ ಶೂನ್ಯ stdin_packs_read_ಒಳಹರಿವು(ರಚನೆ rev_info *revs,
+				   ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ ಬಹುಲಕ)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strmap packs = STRMAP_INIT;
-	struct packed_git *p;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ರಚನೆ strmap packs = STRMAP_INIT;
+	ರಚನೆ packed_git *p;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		struct stdin_pack_info *info;
-		enum stdin_pack_info_kind kind = STDIN_PACK_INCLUDE;
-		const char *key = buf.buf;
+	ಆಗ (strbuf_getline(&buf, stdin) != EOF) {
+		ರಚನೆ stdin_pack_info *info;
+		ಎಣಿಕೆ stdin_pack_info_ಬಗೆ ಬಗೆ = STDIN_PACK_INCLUDE;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಕೀಲಿ = buf.buf;
 
-		if (!*key)
-			continue;
-		else if (*key == '^')
-			kind = STDIN_PACK_EXCLUDE_CLOSED;
-		else if (*key == '!' && mode == STDIN_PACKS_MODE_FOLLOW)
-			kind = STDIN_PACK_EXCLUDE_OPEN;
+		ಆದರೆ (!*ಕೀಲಿ)
+			ಮುಂದುವರಿ;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*ಕೀಲಿ == '^')
+			ಬಗೆ = STDIN_PACK_EXCLUDE_CLOSED;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (*ಕೀಲಿ == '!' && ಬಹುಲಕ == STDIN_PACKS_ಬಹುಲಕ_FOLLOW)
+			ಬಗೆ = STDIN_PACK_EXCLUDE_OPEN;
 
-		if (kind != STDIN_PACK_INCLUDE)
-			key++;
+		ಆದರೆ (ಬಗೆ != STDIN_PACK_INCLUDE)
+			ಕೀಲಿ++;
 
-		info = strmap_get(&packs, key);
-		if (!info) {
+		info = strmap_get(&packs, ಕೀಲಿ);
+		ಆದರೆ (!info) {
 			CALLOC_ARRAY(info, 1);
-			strmap_put(&packs, key, info);
+			strmap_put(&packs, ಕೀಲಿ, info);
 		}
 
-		info->kind |= kind;
+		info->ಬಗೆ |= ಬಗೆ;
 
 		strbuf_reset(&buf);
 	}
 
 	repo_for_each_pack(the_repository, p) {
-		struct stdin_pack_info *info;
+		ರಚನೆ stdin_pack_info *info;
 
 		info = strmap_get(&packs, pack_basename(p));
-		if (!info)
-			continue;
+		ಆದರೆ (!info)
+			ಮುಂದುವರಿ;
 
-		if (info->kind & STDIN_PACK_INCLUDE) {
-			if (exclude_promisor_objects && p->pack_promisor)
+		ಆದರೆ (info->ಬಗೆ & STDIN_PACK_INCLUDE) {
+			ಆದರೆ (exclude_promisor_objects && p->pack_promisor)
 				die(_("packfile %s is a promisor but --exclude-promisor-objects was given"), p->pack_name);
 
 			/*
@@ -4045,21 +4045,21 @@ static void stdin_packs_read_input(struct rev_info *revs,
 			 * later on in e.g.  pack_mtime_cmp(), excluded
 			 * packs are handled below.
 			 */
-			if (!is_pack_valid(p))
+			ಆದರೆ (!is_pack_valid(p))
 				die(_("packfile %s cannot be accessed"), p->pack_name);
 		}
 
-		if (info->kind & STDIN_PACK_EXCLUDE_CLOSED) {
+		ಆದರೆ (info->ಬಗೆ & STDIN_PACK_EXCLUDE_CLOSED) {
 			/*
 			 * Marking excluded packs as kept in-core so
 			 * that later calls to add_object_entry()
 			 * discards any objects that are also found in
 			 * excluded packs.
 			 */
-			p->pack_keep_in_core = 1;
+			p->pack_keep_ಒಳ_core = 1;
 		}
 
-		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
+		ಆದರೆ (info->ಬಗೆ & STDIN_PACK_EXCLUDE_OPEN) {
 			/*
 			 * Marking excluded open packs as kept in-core
 			 * (open) for the same reason as we marked
@@ -4070,25 +4070,25 @@ static void stdin_packs_read_input(struct rev_info *revs,
 			 * are not guaranteed to have closure.
 			 *
 			 */
-			p->pack_keep_in_core_open = 1;
+			p->pack_keep_ಒಳ_core_open = 1;
 		}
 
 		info->p = p;
 	}
 
-	stdin_packs_add_pack_entries(&packs, revs);
+	stdin_packs_ಕೂಡಿಸು_pack_entries(&packs, revs);
 
 	strbuf_release(&buf);
 	strmap_clear(&packs, 1);
 }
 
-static void add_unreachable_loose_objects(struct rev_info *revs);
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_unreachable_loose_objects(ರಚನೆ rev_info *revs);
 
-static void read_stdin_packs(struct repository *repo,
-			     enum stdin_packs_mode mode, int rev_list_unpacked)
+ಸ್ಥಿರ ಶೂನ್ಯ read_stdin_packs(ರಚನೆ repository *repo,
+			     ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ ಬಹುಲಕ, ಪೂರ್ಣಾಂಕ rev_list_unpacked)
 {
-	int prev_fetch_if_missing = repo->fetch_if_missing;
-	struct rev_info revs;
+	ಪೂರ್ಣಾಂಕ prev_fetch_if_missing = repo->fetch_if_missing;
+	ರಚನೆ rev_info revs;
 
 	/*
 	 * The revision walk may hit objects that are promised, only. As the
@@ -4097,7 +4097,7 @@ static void read_stdin_packs(struct repository *repo,
 	 */
 	repo->fetch_if_missing = 0;
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, ಖಾಲಿ);
 	/*
 	 * Use a revision walk to fill in the namehash of objects in the include
 	 * packs. To save time, we'll avoid traversing through objects that are
@@ -4108,69 +4108,69 @@ static void read_stdin_packs(struct repository *repo,
 	 * an optimization during delta selection.
 	 */
 	revs.no_kept_objects = 1;
-	revs.keep_pack_cache_flags |= KEPT_PACK_IN_CORE;
+	revs.keep_pack_cache_flags |= KEPT_PACK_ಒಳ_CORE;
 	revs.blob_objects = 1;
-	revs.tree_objects = 1;
-	revs.tag_objects = 1;
+	revs.ವೃಕ್ಷ_objects = 1;
+	revs.ಟ್ಯಾಗ್_objects = 1;
 	revs.ignore_missing_links = 1;
 	revs.exclude_promisor_objects = exclude_promisor_objects;
 
 	/* avoids adding objects in excluded packs */
-	ignore_packed_keep_in_core = 1;
-	if (mode == STDIN_PACKS_MODE_FOLLOW) {
+	ignore_packed_keep_ಒಳ_core = 1;
+	ಆದರೆ (ಬಹುಲಕ == STDIN_PACKS_ಬಹುಲಕ_FOLLOW) {
 		/*
 		 * In '--stdin-packs=follow' mode, additionally ignore
 		 * objects in excluded-open packs to prevent them from
 		 * appearing in the resulting pack.
 		 */
-		ignore_packed_keep_in_core_open = 1;
+		ignore_packed_keep_ಒಳ_core_open = 1;
 	}
-	stdin_packs_read_input(&revs, mode);
-	if (rev_list_unpacked)
-		add_unreachable_loose_objects(&revs);
+	stdin_packs_read_ಒಳಹರಿವು(&revs, ಬಹುಲಕ);
+	ಆದರೆ (rev_list_unpacked)
+		ಕೂಡಿಸು_unreachable_loose_objects(&revs);
 
-	if (prepare_revision_walk(&revs))
+	ಆದರೆ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	traverse_commit_list(&revs,
 			     show_commit_pack_hint,
 			     show_object_pack_hint,
-			     &mode);
+			     &ಬಹುಲಕ);
 
 	release_revisions(&revs);
 
-	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_found",
-			   stdin_packs_found_nr);
-	trace2_data_intmax("pack-objects", the_repository, "stdin_packs_hints",
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "stdin_packs_found",
+			   stdin_packs_ಸಿಕ್ಕಿತು_nr);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "stdin_packs_hints",
 			   stdin_packs_hints_nr);
 
 	repo->fetch_if_missing = prev_fetch_if_missing;
 }
 
-static void add_cruft_object_entry(const struct object_id *oid, enum object_type type,
-				   struct packed_git *pack, off_t offset,
-				   const char *name, uint32_t mtime)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_cruft_object_ನಮೂದು(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid, ಎಣಿಕೆ object_type type,
+				   ರಚನೆ packed_git *pack, off_t ಸ್ಥಾನಾಂತರ,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, uint32_t mtime)
 {
-	struct object_entry *entry;
+	ರಚನೆ object_ನಮೂದು *ನಮೂದು;
 
-	display_progress(progress_state, ++nr_seen);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, ++nr_ನೋಡಿದ);
 
-	entry = packlist_find(&to_pack, oid);
-	if (entry) {
-		if (name) {
-			entry->hash = pack_name_hash_fn(name);
-			entry->no_try_delta = no_try_delta(name);
+	ನಮೂದು = packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, oid);
+	ಆದರೆ (ನಮೂದು) {
+		ಆದರೆ (name) {
+			ನಮೂದು->hash = pack_name_hash_fn(name);
+			ನಮೂದು->no_try_delta = no_try_delta(name);
 		}
-	} else {
-		if (!want_object_in_pack_mtime(oid, 0, &pack, &offset, mtime))
-			return;
-		if (!pack && type == OBJ_BLOB) {
-			struct odb_source_files *files =
-				odb_source_files_downcast(the_repository->objects->source);
-			int found = 0;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (!want_object_ಒಳ_pack_mtime(oid, 0, &pack, &ಸ್ಥಾನಾಂತರ, mtime))
+			ಹಿಂತಿರುಗಿ;
+		ಆದರೆ (!pack && type == OBJ_BLOB) {
+			ರಚನೆ odb_ಮೂಲ_files *files =
+				odb_ಮೂಲ_files_downcast(the_repository->objects->ಮೂಲ);
+			ಪೂರ್ಣಾಂಕ ಸಿಕ್ಕಿತು_2 = 0;
 
-			for (struct odb_files_dir *dir = files->dirs; !found && dir; dir = dir->next)
-				if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-					found = 1;
+			ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; !ಸಿಕ್ಕಿತು_2 && dir; dir = dir->ಮುಂದಿನ)
+				ಆದರೆ (!odb_ಮೂಲ_read_object_info(&dir->loose->ತಳ, oid, ಖಾಲಿ, 0, ಖಾಲಿ))
+					ಸಿಕ್ಕಿತು_2 = 1;
 
 			/*
 			 * If a traversed tree has a missing blob then we want
@@ -4185,21 +4185,21 @@ static void add_cruft_object_entry(const struct object_id *oid, enum object_type
 			 * limited to "ensure non-tip blobs which don't exist in
 			 * packs do exist via loose objects". Confused?
 			 */
-			if (!found)
-				return;
+			ಆದರೆ (!ಸಿಕ್ಕಿತು_2)
+				ಹಿಂತಿರುಗಿ;
 		}
 
-		entry = create_object_entry(oid, type, pack_name_hash_fn(name),
+		ನಮೂದು = create_object_ನಮೂದು(oid, type, pack_name_hash_fn(name),
 					    0, name && no_try_delta(name),
-					    pack, offset);
+					    pack, ಸ್ಥಾನಾಂತರ);
 	}
 
-	if (mtime > oe_cruft_mtime(&to_pack, entry))
-		oe_set_cruft_mtime(&to_pack, entry, mtime);
-	return;
+	ಆದರೆ (mtime > oe_cruft_mtime(&ಗಮ್ಯ_pack, ನಮೂದು))
+		oe_ಗಣ_cruft_mtime(&ಗಮ್ಯ_pack, ನಮೂದು, mtime);
+	ಹಿಂತಿರುಗಿ;
 }
 
-static void show_cruft_object(struct object *obj, const char *name, void *data UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ show_cruft_object(ರಚನೆ object *obj, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
 	/*
 	 * if we did not record it earlier, it's at least as old as our
@@ -4211,69 +4211,69 @@ static void show_cruft_object(struct object *obj, const char *name, void *data U
 	 * if obj does appear in the packing list, this call is a noop (or may
 	 * set the namehash).
 	 */
-	add_cruft_object_entry(&obj->oid, obj->type, NULL, 0, name, cruft_expiration);
+	ಕೂಡಿಸು_cruft_object_ನಮೂದು(&obj->oid, obj->type, ಖಾಲಿ, 0, name, cruft_expiration);
 }
 
-static void show_cruft_commit(struct commit *commit, void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ show_cruft_commit(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	show_cruft_object((struct object*)commit, NULL, data);
+	show_cruft_object((ರಚನೆ object*)commit, ಖಾಲಿ, ದತ್ತಾಂಶ);
 }
 
-static int cruft_include_check_obj(struct object *obj, void *data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cruft_include_check_obj(ರಚನೆ object *obj, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	return !has_object_kept_pack(to_pack.repo, &obj->oid, KEPT_PACK_IN_CORE);
+	ಹಿಂತಿರುಗಿ !has_object_kept_pack(ಗಮ್ಯ_pack.repo, &obj->oid, KEPT_PACK_ಒಳ_CORE);
 }
 
-static int cruft_include_check(struct commit *commit, void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cruft_include_check(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	return cruft_include_check_obj((struct object*)commit, data);
+	ಹಿಂತಿರುಗಿ cruft_include_check_obj((ರಚನೆ object*)commit, ದತ್ತಾಂಶ);
 }
 
-static void set_cruft_mtime(const struct object *object,
-			    struct packed_git *pack,
-			    off_t offset, time_t mtime)
+ಸ್ಥಿರ ಶೂನ್ಯ ಗಣ_cruft_mtime(ಸ್ಥಿರಾಂಕ ರಚನೆ object *object,
+			    ರಚನೆ packed_git *pack,
+			    off_t ಸ್ಥಾನಾಂತರ, ಸಮಯ_t mtime)
 {
-	add_cruft_object_entry(&object->oid, object->type, pack, offset, NULL,
+	ಕೂಡಿಸು_cruft_object_ನಮೂದು(&object->oid, object->type, pack, ಸ್ಥಾನಾಂತರ, ಖಾಲಿ,
 			       mtime);
 }
 
-static void mark_pack_kept_in_core(struct string_list *packs, unsigned keep)
+ಸ್ಥಿರ ಶೂನ್ಯ mark_pack_kept_ಒಳ_core(ರಚನೆ string_list *packs, ಚಿಹ್ನೆರಹಿತ keep)
 {
-	struct string_list_item *item = NULL;
-	for_each_string_list_item(item, packs) {
-		struct packed_git *p = item->util;
-		if (!p)
-			die(_("could not find pack '%s'"), item->string);
-		if (p->is_cruft && keep)
-			ignore_packed_keep_in_core_has_cruft = 1;
-		p->pack_keep_in_core = keep;
+	ರಚನೆ string_list_ಅಂಶ *ಅಂಶ = ಖಾಲಿ;
+	for_each_string_list_ಅಂಶ(ಅಂಶ, packs) {
+		ರಚನೆ packed_git *p = ಅಂಶ->util;
+		ಆದರೆ (!p)
+			die(_("could not find pack '%s'"), ಅಂಶ->string);
+		ಆದರೆ (p->is_cruft && keep)
+			ignore_packed_keep_ಒಳ_core_has_cruft = 1;
+		p->pack_keep_ಒಳ_core = keep;
 	}
 }
 
-static void add_objects_in_unpacked_packs(void);
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_objects_ಒಳ_unpacked_packs(ಶೂನ್ಯ);
 
-static void enumerate_cruft_objects(void)
+ಸ್ಥಿರ ಶೂನ್ಯ enumerate_cruft_objects(ಶೂನ್ಯ)
 {
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Enumerating cruft objects"), 0);
 
-	add_objects_in_unpacked_packs();
-	add_unreachable_loose_objects(NULL);
+	ಕೂಡಿಸು_objects_ಒಳ_unpacked_packs();
+	ಕೂಡಿಸು_unreachable_loose_objects(ಖಾಲಿ);
 
-	stop_progress(&progress_state);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 }
 
-static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs)
+ಸ್ಥಿರ ಶೂನ್ಯ enumerate_and_traverse_cruft_objects(ರಚನೆ string_list *fresh_packs)
 {
-	struct packed_git *p;
-	struct rev_info revs;
-	int ret;
+	ರಚನೆ packed_git *p;
+	ರಚನೆ rev_info revs;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, ಖಾಲಿ);
 
-	revs.tag_objects = 1;
-	revs.tree_objects = 1;
+	revs.ಟ್ಯಾಗ್_objects = 1;
+	revs.ವೃಕ್ಷ_objects = 1;
 	revs.blob_objects = 1;
 
 	revs.include_check = cruft_include_check;
@@ -4281,14 +4281,14 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 
 	revs.ignore_missing_links = 1;
 
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Enumerating cruft objects"), 0);
-	ret = add_unseen_recent_objects_to_traversal(&revs, cruft_expiration,
-						     set_cruft_mtime, 1);
-	stop_progress(&progress_state);
+	ret = ಕೂಡಿಸು_unseen_recent_objects_ಗಮ್ಯ_traversal(&revs, cruft_expiration,
+						     ಗಣ_cruft_mtime, 1);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 
-	if (ret)
+	ಆದರೆ (ret)
 		die(_("unable to add cruft objects"));
 
 	/*
@@ -4296,54 +4296,54 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 	 * unknown packs do not halt the reachability traversal early.
 	 */
 	repo_for_each_pack(the_repository, p)
-		p->pack_keep_in_core = 0;
-	mark_pack_kept_in_core(fresh_packs, 1);
+		p->pack_keep_ಒಳ_core = 0;
+	mark_pack_kept_ಒಳ_core(fresh_packs, 1);
 
-	if (prepare_revision_walk(&revs))
+	ಆದರೆ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	if (progress)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Traversing cruft objects"), 0);
-	nr_seen = 0;
-	traverse_commit_list(&revs, show_cruft_commit, show_cruft_object, NULL);
+	nr_ನೋಡಿದ = 0;
+	traverse_commit_list(&revs, show_cruft_commit, show_cruft_object, ಖಾಲಿ);
 
-	stop_progress(&progress_state);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 	release_revisions(&revs);
 }
 
-static void read_cruft_objects(void)
+ಸ್ಥಿರ ಶೂನ್ಯ read_cruft_objects(ಶೂನ್ಯ)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list discard_packs = STRING_LIST_INIT_DUP;
-	struct string_list fresh_packs = STRING_LIST_INIT_DUP;
-	struct packed_git *p;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
+	ರಚನೆ string_list discard_packs = STRING_LIST_INIT_DUP;
+	ರಚನೆ string_list fresh_packs = STRING_LIST_INIT_DUP;
+	ರಚನೆ packed_git *p;
 
-	ignore_packed_keep_in_core = 1;
+	ignore_packed_keep_ಒಳ_core = 1;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (!buf.len)
-			continue;
+	ಆಗ (strbuf_getline(&buf, stdin) != EOF) {
+		ಆದರೆ (!buf.len)
+			ಮುಂದುವರಿ;
 
-		if (*buf.buf == '-')
+		ಆದರೆ (*buf.buf == '-')
 			string_list_append(&discard_packs, buf.buf + 1);
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			string_list_append(&fresh_packs, buf.buf);
 	}
 
-	string_list_sort(&discard_packs);
-	string_list_sort(&fresh_packs);
+	string_list_ವಿಂಗಡಿಸು(&discard_packs);
+	string_list_ವಿಂಗಡಿಸು(&fresh_packs);
 
 	repo_for_each_pack(the_repository, p) {
-		const char *pack_name = pack_basename(p);
-		struct string_list_item *item;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *pack_name = pack_basename(p);
+		ರಚನೆ string_list_ಅಂಶ *ಅಂಶ;
 
-		item = string_list_lookup(&fresh_packs, pack_name);
-		if (!item)
-			item = string_list_lookup(&discard_packs, pack_name);
+		ಅಂಶ = string_list_lookup(&fresh_packs, pack_name);
+		ಆದರೆ (!ಅಂಶ)
+			ಅಂಶ = string_list_lookup(&discard_packs, pack_name);
 
-		if (item) {
-			item->util = p;
-		} else {
+		ಆದರೆ (ಅಂಶ) {
+			ಅಂಶ->util = p;
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			/*
 			 * This pack wasn't mentioned in either the "fresh" or
 			 * "discard" list, so the caller didn't know about it.
@@ -4353,16 +4353,16 @@ static void read_cruft_objects(void)
 			 * unmark it before starting the traversal so it doesn't
 			 * halt the traversal early.
 			 */
-			p->pack_keep_in_core = 1;
+			p->pack_keep_ಒಳ_core = 1;
 		}
 	}
 
-	mark_pack_kept_in_core(&fresh_packs, 1);
-	mark_pack_kept_in_core(&discard_packs, 0);
+	mark_pack_kept_ಒಳ_core(&fresh_packs, 1);
+	mark_pack_kept_ಒಳ_core(&discard_packs, 0);
 
-	if (cruft_expiration)
+	ಆದರೆ (cruft_expiration)
 		enumerate_and_traverse_cruft_objects(&fresh_packs);
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		enumerate_cruft_objects();
 
 	strbuf_release(&buf);
@@ -4370,195 +4370,195 @@ static void read_cruft_objects(void)
 	string_list_clear(&fresh_packs, 0);
 }
 
-static void read_object_list_from_stdin(void)
+ಸ್ಥಿರ ಶೂನ್ಯ read_object_list_from_stdin(ಶೂನ್ಯ)
 {
-	char line[GIT_MAX_HEXSZ + 1 + PATH_MAX + 2];
-	struct object_id oid;
-	const char *p;
+	ಅಕ್ಷರ ಸಾಲು[GIT_MAX_HEXSZ + 1 + ಮಾರ್ಗ_MAX + 2];
+	ರಚನೆ object_id oid;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *p;
 
-	for (;;) {
-		if (!fgets(line, sizeof(line), stdin)) {
-			if (feof(stdin))
-				break;
-			if (!ferror(stdin))
+	ಗಾಗಿ (;;) {
+		ಆದರೆ (!fgets(ಸಾಲು, ಗಾತ್ರ(ಸಾಲು), stdin)) {
+			ಆದರೆ (feof(stdin))
+				ನಿಲ್ಲಿಸು;
+			ಆದರೆ (!ferror(stdin))
 				BUG("fgets returned NULL, not EOF, not error!");
-			if (errno != EINTR)
+			ಆದರೆ (errno != EINTR)
 				die_errno("fgets");
 			clearerr(stdin);
-			continue;
+			ಮುಂದುವರಿ;
 		}
-		if (line[0] == '-') {
-			if (get_oid_hex(line+1, &oid))
+		ಆದರೆ (ಸಾಲು[0] == '-') {
+			ಆದರೆ (get_oid_hex(ಸಾಲು+1, &oid))
 				die(_("expected edge object ID, got garbage:\n %s"),
-				    line);
-			add_preferred_base(&oid);
-			continue;
+				    ಸಾಲು);
+			ಕೂಡಿಸು_preferred_ತಳ(&oid);
+			ಮುಂದುವರಿ;
 		}
-		if (parse_oid_hex(line, &oid, &p))
-			die(_("expected object ID, got garbage:\n %s"), line);
+		ಆದರೆ (parse_oid_hex(ಸಾಲು, &oid, &p))
+			die(_("expected object ID, got garbage:\n %s"), ಸಾಲು);
 
-		add_preferred_base_object(p + 1);
-		add_object_entry(&oid, OBJ_NONE, p + 1, 0);
+		ಕೂಡಿಸು_preferred_ತಳ_object(p + 1);
+		ಕೂಡಿಸು_object_ನಮೂದು(&oid, OBJ_NONE, p + 1, 0);
 	}
 }
 
-static void show_commit(struct commit *commit, void *data UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ show_commit(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	add_object_entry(&commit->object.oid, OBJ_COMMIT, NULL, 0);
+	ಕೂಡಿಸು_object_ನಮೂದು(&commit->object.oid, OBJ_COMMIT, ಖಾಲಿ, 0);
 
-	if (write_bitmap_index)
-		index_commit_for_bitmap(commit);
+	ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ)
+		ಸೂಚ್ಯಂಕ_commit_for_bitmap(commit);
 
-	if (use_delta_islands)
+	ಆದರೆ (use_delta_islands)
 		propagate_island_marks(the_repository, commit);
 }
 
-static void show_object(struct object *obj, const char *name,
-			void *data UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ show_object(ರಚನೆ object *obj, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name,
+			ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	add_preferred_base_object(name);
-	add_object_entry(&obj->oid, obj->type, name, 0);
+	ಕೂಡಿಸು_preferred_ತಳ_object(name);
+	ಕೂಡಿಸು_object_ನಮೂದು(&obj->oid, obj->type, name, 0);
 
-	if (use_delta_islands)
-		record_tree_depth(&obj->oid, name);
+	ಆದರೆ (use_delta_islands)
+		ದಾಖಲೆ_ವೃಕ್ಷ_ಆಳ(&obj->oid, name);
 }
 
-static void show_object__ma_allow_any(struct object *obj, const char *name, void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ show_object__ma_allow_any(ರಚನೆ object *obj, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	assert(arg_missing_action == MA_ALLOW_ANY);
+	ಪ್ರತಿಜ್ಞಾ(arg_missing_action == MA_ALLOW_ANY);
 
 	/*
 	 * Quietly ignore ALL missing objects.  This avoids problems with
 	 * staging them now and getting an odd error later.
 	 */
-	if (!odb_has_object(the_repository->objects, &obj->oid, 0))
-		return;
+	ಆದರೆ (!odb_has_object(the_repository->objects, &obj->oid, 0))
+		ಹಿಂತಿರುಗಿ;
 
-	show_object(obj, name, data);
+	show_object(obj, name, ದತ್ತಾಂಶ);
 }
 
-static void show_object__ma_allow_promisor(struct object *obj, const char *name, void *data)
+ಸ್ಥಿರ ಶೂನ್ಯ show_object__ma_allow_promisor(ರಚನೆ object *obj, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name, ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	assert(arg_missing_action == MA_ALLOW_PROMISOR);
+	ಪ್ರತಿಜ್ಞಾ(arg_missing_action == MA_ALLOW_PROMISOR);
 
 	/*
 	 * Quietly ignore EXPECTED missing objects.  This avoids problems with
 	 * staging them now and getting an odd error later.
 	 */
-	if (!odb_has_object(the_repository->objects, &obj->oid, 0) &&
-	    is_promisor_object(to_pack.repo, &obj->oid))
-		return;
+	ಆದರೆ (!odb_has_object(the_repository->objects, &obj->oid, 0) &&
+	    is_promisor_object(ಗಮ್ಯ_pack.repo, &obj->oid))
+		ಹಿಂತಿರುಗಿ;
 
-	show_object(obj, name, data);
+	show_object(obj, name, ದತ್ತಾಂಶ);
 }
 
-static int option_parse_missing_action(const struct option *opt,
-				       const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_missing_action(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct repository *repo = opt->value;
+	ರಚನೆ repository *repo = opt->ಮೌಲ್ಯ;
 
-	assert(arg);
-	assert(!unset);
+	ಪ್ರತಿಜ್ಞಾ(arg);
+	ಪ್ರತಿಜ್ಞಾ(!unset);
 
-	if (!strcmp(arg, "error")) {
+	ಆದರೆ (!strcmp(arg, "error")) {
 		arg_missing_action = MA_ERROR;
 		fn_show_object = show_object;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (!strcmp(arg, "allow-any")) {
+	ಆದರೆ (!strcmp(arg, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (!strcmp(arg, "allow-promisor")) {
+	ಆದರೆ (!strcmp(arg, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_promisor;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
 	die(_("invalid value for '%s': '%s'"), "--missing", arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void show_edge(struct commit *commit)
+ಸ್ಥಿರ ಶೂನ್ಯ show_ಅಂಚು(ರಚನೆ commit *commit)
 {
-	add_preferred_base(&commit->object.oid);
+	ಕೂಡಿಸು_preferred_ತಳ(&commit->object.oid);
 }
 
-static int add_object_in_unpacked_pack(const struct object_id *oid,
-				       struct object_info *oi,
-				       void *data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_object_ಒಳ_unpacked_pack(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+				       ರಚನೆ object_info *oi,
+				       ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	if (cruft) {
-		add_cruft_object_entry(oid, OBJ_NONE, oi->source_infop->u.packed.pack,
-				       oi->source_infop->u.packed.offset, NULL,
+	ಆದರೆ (cruft) {
+		ಕೂಡಿಸು_cruft_object_ನಮೂದು(oid, OBJ_NONE, oi->ಮೂಲ_infop->u.packed.pack,
+				       oi->ಮೂಲ_infop->u.packed.ಸ್ಥಾನಾಂತರ, ಖಾಲಿ,
 				       *oi->mtimep);
-	} else {
-		add_object_entry(oid, OBJ_NONE, "", 0);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಕೂಡಿಸು_object_ನಮೂದು(oid, OBJ_NONE, "", 0);
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void add_objects_in_unpacked_packs(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_objects_ಒಳ_unpacked_packs(ಶೂನ್ಯ)
 {
-	struct odb_source_files *files =
-		odb_source_files_downcast(to_pack.repo->objects->source);
-	time_t mtime;
-	struct odb_for_each_object_options opts = {
-		.flags = ODB_FOR_EACH_OBJECT_PACK_ORDER |
+	ರಚನೆ odb_ಮೂಲ_files *files =
+		odb_ಮೂಲ_files_downcast(ಗಮ್ಯ_pack.repo->objects->ಮೂಲ);
+	ಸಮಯ_t mtime;
+	ರಚನೆ odb_for_each_object_options opts = {
+		.flags = ODB_FOR_EACH_OBJECT_PACK_ಕ್ರಮ |
 			 ODB_FOR_EACH_OBJECT_LOCAL_ONLY |
-			 ODB_FOR_EACH_OBJECT_SKIP_IN_CORE_KEPT_PACKS |
+			 ODB_FOR_EACH_OBJECT_SKIP_ಒಳ_CORE_KEPT_PACKS |
 			 ODB_FOR_EACH_OBJECT_SKIP_ON_DISK_KEPT_PACKS,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
+	ರಚನೆ odb_ಮೂಲ_info ಮೂಲ_info;
+	ರಚನೆ object_info oi = {
 		.mtimep = &mtime,
-		.source_infop = &source_info,
+		.ಮೂಲ_infop = &ಮೂಲ_info,
 	};
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!dir->local)
-			continue;
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ) {
+		ಆದರೆ (!dir->local)
+			ಮುಂದುವರಿ;
 
-		if (odb_source_for_each_object(&dir->packed->base, &oi,
-					       add_object_in_unpacked_pack, NULL, &opts))
+		ಆದರೆ (odb_ಮೂಲ_for_each_object(&dir->packed->ತಳ, &oi,
+					       ಕೂಡಿಸು_object_ಒಳ_unpacked_pack, ಖಾಲಿ, &opts))
 			die(_("cannot open pack index"));
 	}
 }
 
-static int add_loose_object(const struct object_id *oid, const char *path,
-			    void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_loose_object(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ,
+			    ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	struct rev_info *revs = data;
-	enum object_type type = odb_read_object_info(the_repository->objects, oid, NULL);
+	ರಚನೆ rev_info *revs = ದತ್ತಾಂಶ;
+	ಎಣಿಕೆ object_type type = odb_read_object_info(the_repository->objects, oid, ಖಾಲಿ);
 
-	if (type < 0) {
-		warning(_("loose object at %s could not be examined"), path);
-		return 0;
+	ಆದರೆ (type < 0) {
+		warning(_("loose object at %s could not be examined"), ಮಾರ್ಗ);
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (cruft) {
-		struct stat st;
-		if (stat(path, &st) < 0) {
-			if (errno == ENOENT)
-				return 0;
-			return error_errno("unable to stat %s", oid_to_hex(oid));
+	ಆದರೆ (cruft) {
+		ರಚನೆ stat st;
+		ಆದರೆ (stat(ಮಾರ್ಗ, &st) < 0) {
+			ಆದರೆ (errno == ENOENT)
+				ಹಿಂತಿರುಗಿ 0;
+			ಹಿಂತಿರುಗಿ error_errno("unable to stat %s", oid_ಗಮ್ಯ_hex(oid));
 		}
 
-		add_cruft_object_entry(oid, type, NULL, 0, NULL,
+		ಕೂಡಿಸು_cruft_object_ನಮೂದು(oid, type, ಖಾಲಿ, 0, ಖಾಲಿ,
 				       st.st_mtime);
-	} else {
-		add_object_entry(oid, type, "", 0);
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಕೂಡಿಸು_object_ನಮೂದು(oid, type, "", 0);
 	}
 
-	if (revs && type == OBJ_COMMIT)
-		add_pending_oid(revs, NULL, oid, 0);
+	ಆದರೆ (revs && type == OBJ_COMMIT)
+		ಕೂಡಿಸು_pending_oid(revs, ಖಾಲಿ, oid, 0);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
@@ -4566,36 +4566,36 @@ static int add_loose_object(const struct object_id *oid, const char *path,
  * add_object_entry will weed out duplicates, so we just add every
  * loose object we find.
  */
-static void add_unreachable_loose_objects(struct rev_info *revs)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_unreachable_loose_objects(ರಚನೆ rev_info *revs)
 {
-	for_each_loose_file_in_source(the_repository->objects->source,
-				      add_loose_object, NULL, NULL, revs);
+	for_each_loose_file_ಒಳ_ಮೂಲ(the_repository->objects->ಮೂಲ,
+				      ಕೂಡಿಸು_loose_object, ಖಾಲಿ, ಖಾಲಿ, revs);
 }
 
-static int has_sha1_pack_kept_or_nonlocal(const struct object_id *oid)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ has_sha1_pack_kept_or_nonlocal(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid)
 {
-	static struct packed_git *last_found = NULL;
-	struct packed_git *p;
+	ಸ್ಥಿರ ರಚನೆ packed_git *ಕೊನೆಯ_ಸಿಕ್ಕಿತು = ಖಾಲಿ;
+	ರಚನೆ packed_git *p;
 
-	if (last_found && find_pack_entry_one(oid, last_found))
-		return 1;
+	ಆದರೆ (ಕೊನೆಯ_ಸಿಕ್ಕಿತು && ಕಂಡುಹಿಡಿ_pack_ನಮೂದು_one(oid, ಕೊನೆಯ_ಸಿಕ್ಕಿತು))
+		ಹಿಂತಿರುಗಿ 1;
 
 	repo_for_each_pack(the_repository, p) {
 		/*
 		 * We have already checked `last_found`, so there is no need to
 		 * re-check here.
 		 */
-		if (p == last_found)
-			continue;
+		ಆದರೆ (p == ಕೊನೆಯ_ಸಿಕ್ಕಿತು)
+			ಮುಂದುವರಿ;
 
-		if ((!p->pack_local || p->pack_keep || p->pack_keep_in_core) &&
-		    find_pack_entry_one(oid, p)) {
-			last_found = p;
-			return 1;
+		ಆದರೆ ((!p->pack_local || p->pack_keep || p->pack_keep_ಒಳ_core) &&
+		    ಕಂಡುಹಿಡಿ_pack_ನಮೂದು_one(oid, p)) {
+			ಕೊನೆಯ_ಸಿಕ್ಕಿತು = p;
+			ಹಿಂತಿರುಗಿ 1;
 		}
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
@@ -4605,83 +4605,83 @@ static int has_sha1_pack_kept_or_nonlocal(const struct object_id *oid)
  *
  * This is filled by get_object_list.
  */
-static struct oid_array recent_objects;
+ಸ್ಥಿರ ರಚನೆ oid_array recent_objects;
 
-static int loosened_object_can_be_discarded(const struct object_id *oid,
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ loosened_object_can_be_discarded(ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
 					    timestamp_t mtime)
 {
-	if (!unpack_unreachable_expiration)
-		return 0;
-	if (mtime > unpack_unreachable_expiration)
-		return 0;
-	if (oid_array_lookup(&recent_objects, oid) >= 0)
-		return 0;
-	return 1;
+	ಆದರೆ (!unpack_unreachable_expiration)
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (mtime > unpack_unreachable_expiration)
+		ಹಿಂತಿರುಗಿ 0;
+	ಆದರೆ (oid_array_lookup(&recent_objects, oid) >= 0)
+		ಹಿಂತಿರುಗಿ 0;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static int force_object_loose(struct odb_source *source,
-			      const struct object_id *oid,
-			      const time_t *mtime)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ force_object_loose(ರಚನೆ odb_ಮೂಲ *ಮೂಲ,
+			      ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *oid,
+			      ಸ್ಥಿರಾಂಕ ಸಮಯ_t *mtime)
 {
-	struct odb_source_files *files = odb_source_files_downcast(source);
-	const struct git_hash_algo *compat = source->odb->repo->compat_hash_algo;
-	struct object_info oi = OBJECT_INFO_INIT;
-	struct object_id compat_oid, *compat_oid_p = NULL;
-	enum object_type type;
-	void *buf = NULL;
-	size_t len;
-	int ret;
+	ರಚನೆ odb_ಮೂಲ_files *files = odb_ಮೂಲ_files_downcast(ಮೂಲ);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ git_hash_algo *compat = ಮೂಲ->odb->repo->compat_hash_algo;
+	ರಚನೆ object_info oi = OBJECT_INFO_INIT;
+	ರಚನೆ object_id compat_oid, *compat_oid_p = ಖಾಲಿ;
+	ಎಣಿಕೆ object_type type;
+	ಶೂನ್ಯ *buf = ಖಾಲಿ;
+	ಗಾತ್ರ_t len;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next)
-		if (!odb_source_read_object_info(&dir->loose->base, oid, NULL, 0, NULL))
-			return 0;
+	ಗಾಗಿ (ರಚನೆ odb_files_dir *dir = files->dirs; dir; dir = dir->ಮುಂದಿನ)
+		ಆದರೆ (!odb_ಮೂಲ_read_object_info(&dir->loose->ತಳ, oid, ಖಾಲಿ, 0, ಖಾಲಿ))
+			ಹಿಂತಿರುಗಿ 0;
 
 	oi.typep = &type;
 	oi.sizep = &len;
 	oi.contentp = &buf;
-	if (odb_read_object_info_extended(source->odb, oid, &oi, 0)) {
-		ret = error(_("cannot read object for %s"), oid_to_hex(oid));
-		goto out;
+	ಆದರೆ (odb_read_object_info_extended(ಮೂಲ->odb, oid, &oi, 0)) {
+		ret = error(_("cannot read object for %s"), oid_ಗಮ್ಯ_hex(oid));
+		ಹೋಗು ಹೊರಹೋಗು;
 	}
 
-	if (compat) {
-		if (repo_oid_to_algop(source->odb->repo, oid, compat, &compat_oid)) {
+	ಆದರೆ (compat) {
+		ಆದರೆ (repo_oid_ಗಮ್ಯ_algop(ಮೂಲ->odb->repo, oid, compat, &compat_oid)) {
 			ret = error(_("cannot map object %s to %s"),
-				    oid_to_hex(oid), compat->name);
-			goto out;
+				    oid_ಗಮ್ಯ_hex(oid), compat->name);
+			ಹೋಗು ಹೊರಹೋಗು;
 		}
 
 		compat_oid_p = &compat_oid;
 	}
 
-	ret = odb_source_write_object(&files->dirs->loose->base, buf, len, type, oid,
+	ret = odb_ಮೂಲ_write_object(&files->dirs->loose->ತಳ, buf, len, type, oid,
 				      compat_oid_p, mtime, 0);
 
-out:
-	free(buf);
-	return ret;
+ಹೊರಹೋಗು:
+	ಬಿಡುಗಡೆ(buf);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static void loosen_unused_packed_objects(void)
+ಸ್ಥಿರ ಶೂನ್ಯ loosen_ಬಳಸದ_packed_objects(ಶೂನ್ಯ)
 {
-	struct packed_git *p;
+	ರಚನೆ packed_git *p;
 	uint32_t i;
 	uint32_t loosened_objects_nr = 0;
-	struct object_id oid;
+	ರಚನೆ object_id oid;
 
 	repo_for_each_pack(the_repository, p) {
-		if (!p->pack_local || p->pack_keep || p->pack_keep_in_core)
-			continue;
+		ಆದರೆ (!p->pack_local || p->pack_keep || p->pack_keep_ಒಳ_core)
+			ಮುಂದುವರಿ;
 
-		if (open_pack_index(p))
+		ಆದರೆ (open_pack_ಸೂಚ್ಯಂಕ(p))
 			die(_("cannot open pack index"));
 
-		for (i = 0; i < p->num_objects; i++) {
+		ಗಾಗಿ (i = 0; i < p->ಅಂಕೆ_objects; i++) {
 			nth_packed_object_id(&oid, p, i);
-			if (!packlist_find(&to_pack, &oid) &&
+			ಆದರೆ (!packlist_ಕಂಡುಹಿಡಿ(&ಗಮ್ಯ_pack, &oid) &&
 			    !has_sha1_pack_kept_or_nonlocal(&oid) &&
 			    !loosened_object_can_be_discarded(&oid, p->mtime)) {
-				if (force_object_loose(the_repository->objects->source,
+				ಆದರೆ (force_object_loose(the_repository->objects->ಮೂಲ,
 						       &oid, &p->mtime))
 					die(_("unable to force loose object"));
 				loosened_objects_nr++;
@@ -4689,7 +4689,7 @@ static void loosen_unused_packed_objects(void)
 		}
 	}
 
-	trace2_data_intmax("pack-objects", the_repository,
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository,
 			   "loosen_unused_packed_objects/loosened", loosened_objects_nr);
 }
 
@@ -4698,20 +4698,20 @@ static void loosen_unused_packed_objects(void)
  * reader of the pack might not understand, and which would therefore prevent
  * blind reuse of what we have on disk.
  */
-static int pack_options_allow_reuse(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ pack_options_allow_reuse(ಶೂನ್ಯ)
 {
-	return allow_pack_reuse != NO_PACK_REUSE &&
-	       pack_to_stdout &&
+	ಹಿಂತಿರುಗಿ allow_pack_reuse != NO_PACK_REUSE &&
+	       pack_ಗಮ್ಯ_stdout &&
 	       !ignore_packed_keep_on_disk &&
-	       !ignore_packed_keep_in_core &&
+	       !ignore_packed_keep_ಒಳ_core &&
 	       (!local || !have_non_local_packs) &&
 	       !incremental;
 }
 
-static int get_object_list_from_bitmap(struct rev_info *revs)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_object_list_from_bitmap(ರಚನೆ rev_info *revs)
 {
-	if (!(bitmap_git = prepare_bitmap_walk(revs, 0)))
-		return -1;
+	ಆದರೆ (!(bitmap_git = prepare_bitmap_walk(revs, 0)))
+		ಹಿಂತಿರುಗಿ -1;
 
 	/*
 	 * For now, force the name-hash version to be 1 since that
@@ -4720,108 +4720,108 @@ static int get_object_list_from_bitmap(struct rev_info *revs)
 	 * allowing readers to know the version that was used during
 	 * the bitmap write.
 	 */
-	name_hash_version = 1;
+	name_hash_ಆವೃತ್ತಿ = 1;
 
-	if (pack_options_allow_reuse())
+	ಆದರೆ (pack_options_allow_reuse())
 		reuse_partial_packfile_from_bitmap(bitmap_git,
 						   &reuse_packfiles,
 						   &reuse_packfiles_nr,
 						   &reuse_packfile_bitmap,
 						   allow_pack_reuse == MULTI_PACK_REUSE);
 
-	if (reuse_packfiles) {
+	ಆದರೆ (reuse_packfiles) {
 		reuse_packfile_objects = bitmap_popcount(reuse_packfile_bitmap);
-		if (!reuse_packfile_objects)
+		ಆದರೆ (!reuse_packfile_objects)
 			BUG("expected non-empty reuse bitmap");
 
-		nr_result += reuse_packfile_objects;
-		nr_seen += reuse_packfile_objects;
-		display_progress(progress_state, nr_seen);
+		nr_ಫಲಿತಾಂಶ += reuse_packfile_objects;
+		nr_ನೋಡಿದ += reuse_packfile_objects;
+		display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, nr_ನೋಡಿದ);
 	}
 
 	traverse_bitmap_commit_list(bitmap_git, revs,
-				    &add_object_entry_from_bitmap);
-	return 0;
+				    &ಕೂಡಿಸು_object_ನಮೂದು_from_bitmap);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void record_recent_object(struct object *obj,
-				 const char *name UNUSED,
-				 void *data UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ ದಾಖಲೆ_recent_object(ರಚನೆ object *obj,
+				 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name ಬಳಸದ,
+				 ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
 	oid_array_append(&recent_objects, &obj->oid);
 }
 
-static void record_recent_commit(struct commit *commit, void *data UNUSED)
+ಸ್ಥಿರ ಶೂನ್ಯ ದಾಖಲೆ_recent_commit(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
 	oid_array_append(&recent_objects, &commit->object.oid);
 }
 
-static int mark_bitmap_preferred_tip(const struct reference *ref, void *data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ mark_bitmap_preferred_tip(ಸ್ಥಿರಾಂಕ ರಚನೆ reference *ref, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct object *object;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *maybe_peeled = ref->oid;
+	ರಚನೆ object_id peeled;
+	ರಚನೆ object *object;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	ಆದರೆ (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
 
 	object = parse_object_or_die(the_repository, maybe_peeled, ref->name);
-	if (object->type == OBJ_COMMIT)
+	ಆದರೆ (object->type == OBJ_COMMIT)
 		object->flags |= NEEDS_BITMAP;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static inline int is_oid_uninteresting(struct repository *repo,
-				       struct object_id *oid)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ is_oid_uninteresting(ರಚನೆ repository *repo,
+				       ರಚನೆ object_id *oid)
 {
-	struct object *o = lookup_object(repo, oid);
-	return !o || (o->flags & UNINTERESTING);
+	ರಚನೆ object *o = lookup_object(repo, oid);
+	ಹಿಂತಿರುಗಿ !o || (o->flags & UNINTERESTING);
 }
 
-static int add_objects_by_path(const char *path,
-			       struct oid_array *oids,
-			       enum object_type type,
-			       void *data)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಕೂಡಿಸು_objects_by_ಮಾರ್ಗ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ,
+			       ರಚನೆ oid_array *oids,
+			       ಎಣಿಕೆ object_type type,
+			       ಶೂನ್ಯ *ದತ್ತಾಂಶ)
 {
-	size_t oe_start = to_pack.nr_objects;
-	size_t oe_end;
-	unsigned int *processed = data;
+	ಗಾತ್ರ_t oe_ಆರಂಭ = ಗಮ್ಯ_pack.nr_objects;
+	ಗಾತ್ರ_t oe_ಕೊನೆ;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ *processed = ದತ್ತಾಂಶ;
 
 	/*
 	 * First, add all objects to the packing data, including the ones
 	 * marked UNINTERESTING (translated to 'exclude') as they can be
 	 * used as delta bases.
 	 */
-	for (size_t i = 0; i < oids->nr; i++) {
-		int exclude;
-		struct object_info oi = OBJECT_INFO_INIT;
-		struct object_id *oid = &oids->oid[i];
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < oids->nr; i++) {
+		ಪೂರ್ಣಾಂಕ exclude;
+		ರಚನೆ object_info oi = OBJECT_INFO_INIT;
+		ರಚನೆ object_id *oid = &oids->oid[i];
 
 		/* Skip objects that do not exist locally. */
-		if ((exclude_promisor_objects || arg_missing_action != MA_ERROR) &&
+		ಆದರೆ ((exclude_promisor_objects || arg_missing_action != MA_ERROR) &&
 		    odb_read_object_info_extended(the_repository->objects, oid, &oi,
 						  OBJECT_INFO_FOR_PREFETCH) < 0)
-			continue;
+			ಮುಂದುವರಿ;
 
 		exclude = is_oid_uninteresting(the_repository, oid);
 
-		if (exclude && !thin)
-			continue;
+		ಆದರೆ (exclude && !thin)
+			ಮುಂದುವರಿ;
 
-		add_object_entry(oid, type, path, exclude);
+		ಕೂಡಿಸು_object_ನಮೂದು(oid, type, ಮಾರ್ಗ, exclude);
 
-		if (type == OBJ_COMMIT) {
-			struct commit *commit;
+		ಆದರೆ (type == OBJ_COMMIT) {
+			ರಚನೆ commit *commit;
 
-			if (!write_bitmap_index && !use_delta_islands)
-				continue;
+			ಆದರೆ (!write_bitmap_ಸೂಚ್ಯಂಕ && !use_delta_islands)
+				ಮುಂದುವರಿ;
 
 			commit = lookup_commit(the_repository, oid);
-			if (!commit)
-				die(_("could not find commit %s"), oid_to_hex(oid));
-			if (write_bitmap_index)
-				index_commit_for_bitmap(commit);
+			ಆದರೆ (!commit)
+				die(_("could not find commit %s"), oid_ಗಮ್ಯ_hex(oid));
+			ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ)
+				ಸೂಚ್ಯಂಕ_commit_for_bitmap(commit);
 			/*
 			 * Skip island propagation for boundary commits.
 			 * The regular traversal's show_commit() is only
@@ -4830,42 +4830,42 @@ static int add_objects_by_path(const char *path,
 			 * would only be a no-op anyway (boundary commits
 			 * are not in island_marks).
 			 */
-			if (use_delta_islands && !exclude)
+			ಆದರೆ (use_delta_islands && !exclude)
 				propagate_island_marks(the_repository, commit);
-		} else if (type == OBJ_TREE && use_delta_islands) {
-			record_tree_depth(oid, path);
+		} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (type == OBJ_ವೃಕ್ಷ && use_delta_islands) {
+			ದಾಖಲೆ_ವೃಕ್ಷ_ಆಳ(oid, ಮಾರ್ಗ);
 		}
 	}
 
-	oe_end = to_pack.nr_objects;
+	oe_ಕೊನೆ = ಗಮ್ಯ_pack.nr_objects;
 
 	/* We can skip delta calculations if it is a no-op. */
-	if (oe_end == oe_start || !window)
-		return 0;
+	ಆದರೆ (oe_ಕೊನೆ == oe_ಆರಂಭ || !ಕಿಟಕಿ)
+		ಹಿಂತಿರುಗಿ 0;
 
-	ALLOC_GROW(to_pack.regions,
-		   to_pack.nr_regions + 1,
-		   to_pack.nr_regions_alloc);
+	ALLOC_GROW(ಗಮ್ಯ_pack.regions,
+		   ಗಮ್ಯ_pack.nr_regions + 1,
+		   ಗಮ್ಯ_pack.nr_regions_alloc);
 
-	to_pack.regions[to_pack.nr_regions].start = oe_start;
-	to_pack.regions[to_pack.nr_regions].nr = oe_end - oe_start;
-	to_pack.nr_regions++;
+	ಗಮ್ಯ_pack.regions[ಗಮ್ಯ_pack.nr_regions].ಆರಂಭ = oe_ಆರಂಭ;
+	ಗಮ್ಯ_pack.regions[ಗಮ್ಯ_pack.nr_regions].nr = oe_ಕೊನೆ - oe_ಆರಂಭ;
+	ಗಮ್ಯ_pack.nr_regions++;
 
 	*processed += oids->nr;
-	display_progress(progress_state, *processed);
+	display_ಪ್ರಗತಿ(ಪ್ರಗತಿ_state, *processed);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int get_object_list_path_walk(struct rev_info *revs)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ get_object_list_ಮಾರ್ಗ_walk(ರಚನೆ rev_info *revs)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	unsigned int processed = 0;
-	int result;
+	ರಚನೆ ಮಾರ್ಗ_walk_info info = ಮಾರ್ಗ_WALK_INFO_INIT;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ processed = 0;
+	ಪೂರ್ಣಾಂಕ ಫಲಿತಾಂಶ;
 
 	info.revs = revs;
-	info.path_fn = add_objects_by_path;
-	info.path_fn_data = &processed;
+	info.ಮಾರ್ಗ_fn = ಕೂಡಿಸು_objects_by_ಮಾರ್ಗ;
+	info.ಮಾರ್ಗ_fn_ದತ್ತಾಂಶ = &processed;
 
 	/*
 	 * Path-walk needs boundary commits to discover thin-pack bases, but
@@ -4881,29 +4881,29 @@ static int get_object_list_path_walk(struct rev_info *revs)
 	 * base objects.
 	 */
 	info.prune_all_uninteresting = sparse;
-	info.edge_aggressive = shallow;
+	info.ಅಂಚು_aggressive = shallow;
 
 	trace2_region_enter("pack-objects", "path-walk", revs->repo);
-	result = walk_objects_by_path(&info);
+	ಫಲಿತಾಂಶ = walk_objects_by_ಮಾರ್ಗ(&info);
 	trace2_region_leave("pack-objects", "path-walk", revs->repo);
 
-	path_walk_info_clear(&info);
+	ಮಾರ್ಗ_walk_info_clear(&info);
 
-	return result;
+	ಹಿಂತಿರುಗಿ ಫಲಿತಾಂಶ;
 }
 
-static void get_object_list(struct rev_info *revs, struct strvec *argv)
+ಸ್ಥಿರ ಶೂನ್ಯ get_object_list(ರಚನೆ rev_info *revs, ರಚನೆ strvec *argv)
 {
-	struct setup_revision_opt s_r_opt = {
+	ರಚನೆ ಸಿದ್ಧತೆ_revision_opt s_r_opt = {
 		.allow_exclude_promisor_objects = 1,
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char line[1000];
-	int flags = 0;
-	int save_warning;
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
+	ಅಕ್ಷರ ಸಾಲು[1000];
+	ಪೂರ್ಣಾಂಕ flags = 0;
+	ಪೂರ್ಣಾಂಕ save_warning;
 
-	save_commit_buffer = 0;
-	setup_revisions_from_strvec(argv, revs, &s_r_opt);
+	save_commit_ಬಫರ್ = 0;
+	ಸಿದ್ಧತೆ_revisions_from_strvec(argv, revs, &s_r_opt);
 
 	/* make sure shallows are read */
 	is_repository_shallow(the_repository);
@@ -4911,246 +4911,246 @@ static void get_object_list(struct rev_info *revs, struct strvec *argv)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	while (fgets(line, sizeof(line), stdin) != NULL) {
-		int len = strlen(line);
-		if (len && line[len - 1] == '\n')
-			line[--len] = 0;
-		if (!len)
-			break;
-		if (*line == '-') {
-			if (!strcmp(line, "--not")) {
+	ಆಗ (fgets(ಸಾಲು, ಗಾತ್ರ(ಸಾಲು), stdin) != ಖಾಲಿ) {
+		ಪೂರ್ಣಾಂಕ len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಸಾಲು);
+		ಆದರೆ (len && ಸಾಲು[len - 1] == '\n')
+			ಸಾಲು[--len] = 0;
+		ಆದರೆ (!len)
+			ನಿಲ್ಲಿಸು;
+		ಆದರೆ (*ಸಾಲು == '-') {
+			ಆದರೆ (!strcmp(ಸಾಲು, "--not")) {
 				flags ^= UNINTERESTING;
-				write_bitmap_index = 0;
-				continue;
+				write_bitmap_ಸೂಚ್ಯಂಕ = 0;
+				ಮುಂದುವರಿ;
 			}
-			if (starts_with(line, "--shallow ")) {
-				struct object_id oid;
-				if (get_oid_hex(line + 10, &oid))
-					die("not an object name '%s'", line + 10);
-				register_shallow(the_repository, &oid);
-				use_bitmap_index = 0;
-				continue;
+			ಆದರೆ (starts_with(ಸಾಲು, "--shallow ")) {
+				ರಚನೆ object_id oid;
+				ಆದರೆ (get_oid_hex(ಸಾಲು + 10, &oid))
+					die("not an object name '%s'", ಸಾಲು + 10);
+				ರಿಜಿಸ್ಟರ್_shallow(the_repository, &oid);
+				use_bitmap_ಸೂಚ್ಯಂಕ = 0;
+				ಮುಂದುವರಿ;
 			}
-			die(_("not a rev '%s'"), line);
+			die(_("not a rev '%s'"), ಸಾಲು);
 		}
-		if (handle_revision_arg(line, revs, flags, REVARG_CANNOT_BE_FILENAME))
-			die(_("bad revision '%s'"), line);
+		ಆದರೆ (handle_revision_arg(ಸಾಲು, revs, flags, REVARG_CANNOT_BE_FILENAME))
+			die(_("bad revision '%s'"), ಸಾಲು);
 	}
 
 	cfg->warn_on_object_refname_ambiguity = save_warning;
 
-	if (use_bitmap_index && !get_object_list_from_bitmap(revs))
-		return;
+	ಆದರೆ (use_bitmap_ಸೂಚ್ಯಂಕ && !get_object_list_from_bitmap(revs))
+		ಹಿಂತಿರುಗಿ;
 
-	if (use_delta_islands)
-		load_delta_islands(the_repository, progress);
+	ಆದರೆ (use_delta_islands)
+		ತುಂಬು_delta_islands(the_repository, ಪ್ರಗತಿ);
 
-	if (write_bitmap_index)
+	ಆದರೆ (write_bitmap_ಸೂಚ್ಯಂಕ)
 		for_each_preferred_bitmap_tip(the_repository, mark_bitmap_preferred_tip,
-					      NULL);
+					      ಖಾಲಿ);
 
-	if (!fn_show_object)
+	ಆದರೆ (!fn_show_object)
 		fn_show_object = show_object;
 
-	if (path_walk) {
-		if (get_object_list_path_walk(revs)) {
+	ಆದರೆ (ಮಾರ್ಗ_walk) {
+		ಆದರೆ (get_object_list_ಮಾರ್ಗ_walk(revs)) {
 			warning(_("failed to pack objects via path-walk"));
-			path_walk = 0;
+			ಮಾರ್ಗ_walk = 0;
 		}
 	}
 
-	if (!path_walk) {
-		if (prepare_revision_walk(revs))
+	ಆದರೆ (!ಮಾರ್ಗ_walk) {
+		ಆದರೆ (prepare_revision_walk(revs))
 			die(_("revision walk setup failed"));
-		mark_edges_uninteresting(revs, show_edge, sparse);
+		mark_ಅಂಚುಗಳು_uninteresting(revs, show_ಅಂಚು, sparse);
 		traverse_commit_list(revs,
 				show_commit, fn_show_object,
-				NULL);
+				ಖಾಲಿ);
 	}
 
-	if (unpack_unreachable_expiration) {
+	ಆದರೆ (unpack_unreachable_expiration) {
 		revs->ignore_missing_links = 1;
-		if (add_unseen_recent_objects_to_traversal(revs,
-				unpack_unreachable_expiration, NULL, 0))
+		ಆದರೆ (ಕೂಡಿಸು_unseen_recent_objects_ಗಮ್ಯ_traversal(revs,
+				unpack_unreachable_expiration, ಖಾಲಿ, 0))
 			die(_("unable to add recent objects"));
-		if (prepare_revision_walk(revs))
+		ಆದರೆ (prepare_revision_walk(revs))
 			die(_("revision walk setup failed"));
-		traverse_commit_list(revs, record_recent_commit,
-				     record_recent_object, NULL);
+		traverse_commit_list(revs, ದಾಖಲೆ_recent_commit,
+				     ದಾಖಲೆ_recent_object, ಖಾಲಿ);
 	}
 
-	if (keep_unreachable)
-		add_objects_in_unpacked_packs();
-	if (pack_loose_unreachable)
-		add_unreachable_loose_objects(NULL);
-	if (unpack_unreachable)
-		loosen_unused_packed_objects();
+	ಆದರೆ (keep_unreachable)
+		ಕೂಡಿಸು_objects_ಒಳ_unpacked_packs();
+	ಆದರೆ (pack_loose_unreachable)
+		ಕೂಡಿಸು_unreachable_loose_objects(ಖಾಲಿ);
+	ಆದರೆ (unpack_unreachable)
+		loosen_ಬಳಸದ_packed_objects();
 
 	oid_array_clear(&recent_objects);
 }
 
-static void add_extra_kept_packs(const struct string_list *names)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_extra_kept_packs(ಸ್ಥಿರಾಂಕ ರಚನೆ string_list *ಹೆಸರುಗಳು)
 {
-	struct packed_git *p;
+	ರಚನೆ packed_git *p;
 
-	if (!names->nr)
-		return;
+	ಆದರೆ (!ಹೆಸರುಗಳು->nr)
+		ಹಿಂತಿರುಗಿ;
 
 	repo_for_each_pack(the_repository, p) {
-		const char *name = basename(p->pack_name);
-		int i;
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name = basename(p->pack_name);
+		ಪೂರ್ಣಾಂಕ i;
 
-		if (!p->pack_local)
-			continue;
+		ಆದರೆ (!p->pack_local)
+			ಮುಂದುವರಿ;
 
-		for (i = 0; i < names->nr; i++)
-			if (!fspathcmp(name, names->items[i].string))
-				break;
+		ಗಾಗಿ (i = 0; i < ಹೆಸರುಗಳು->nr; i++)
+			ಆದರೆ (!fspathcmp(name, ಹೆಸರುಗಳು->ವಸ್ತುಗಳು[i].string))
+				ನಿಲ್ಲಿಸು;
 
-		if (i < names->nr) {
-			p->pack_keep_in_core = 1;
-			ignore_packed_keep_in_core = 1;
-			continue;
+		ಆದರೆ (i < ಹೆಸರುಗಳು->nr) {
+			p->pack_keep_ಒಳ_core = 1;
+			ignore_packed_keep_ಒಳ_core = 1;
+			ಮುಂದುವರಿ;
 		}
 	}
 }
 
-static int option_parse_quiet(const struct option *opt, const char *arg,
-			      int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_quiet(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+			      ಪೂರ್ಣಾಂಕ unset)
 {
-	int *val = opt->value;
+	ಪೂರ್ಣಾಂಕ *val = opt->ಮೌಲ್ಯ;
 
 	BUG_ON_OPT_ARG(arg);
 
-	if (!unset)
+	ಆದರೆ (!unset)
 		*val = 0;
-	else if (!*val)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!*val)
 		*val = 1;
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_index_version(const struct option *opt,
-				      const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_ಸೂಚ್ಯಂಕ_ಆವೃತ್ತಿ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct pack_idx_option *popts = opt->value;
-	char *c;
-	const char *val = arg;
+	ರಚನೆ pack_idx_option *popts = opt->ಮೌಲ್ಯ;
+	ಅಕ್ಷರ *c;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *val = arg;
 
 	BUG_ON_OPT_NEG(unset);
 
-	popts->version = strtoul(val, &c, 10);
-	if (popts->version > 2)
+	popts->ಆವೃತ್ತಿ = strtoul(val, &c, 10);
+	ಆದರೆ (popts->ಆವೃತ್ತಿ > 2)
 		die(_("unsupported index version %s"), val);
-	if (*c == ',' && c[1])
-		popts->off32_limit = strtoul(c+1, &c, 0);
-	if (*c || popts->off32_limit & 0x80000000)
+	ಆದರೆ (*c == ',' && c[1])
+		popts->off32_ಎಲ್ಲೆ = strtoul(c+1, &c, 0);
+	ಆದರೆ (*c || popts->off32_ಎಲ್ಲೆ & 0x80000000)
 		die(_("bad index version '%s'"), val);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_unpack_unreachable(const struct option *opt UNUSED,
-					   const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_unpack_unreachable(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+					   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	if (unset) {
+	ಆದರೆ (unset) {
 		unpack_unreachable = 0;
 		unpack_unreachable_expiration = 0;
 	}
-	else {
+	ಇಲ್ಲದಿದ್ದರೆ {
 		unpack_unreachable = 1;
-		if (arg)
+		ಆದರೆ (arg)
 			unpack_unreachable_expiration = approxidate(arg);
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int option_parse_cruft_expiration(const struct option *opt UNUSED,
-					 const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_cruft_expiration(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt ಬಳಸದ,
+					 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	if (unset) {
+	ಆದರೆ (unset) {
 		cruft = 0;
 		cruft_expiration = 0;
-	} else {
+	} ಇಲ್ಲದಿದ್ದರೆ {
 		cruft = 1;
-		if (arg)
+		ಆದರೆ (arg)
 			cruft_expiration = approxidate(arg);
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int is_not_in_promisor_pack_obj(struct object *obj, void *data UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ is_not_ಒಳ_promisor_pack_obj(ರಚನೆ object *obj, ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ)
 {
-	struct odb_source_info source_info;
-	struct object_info info = {
-		.source_infop = &source_info,
+	ರಚನೆ odb_ಮೂಲ_info ಮೂಲ_info;
+	ರಚನೆ object_info info = {
+		.ಮೂಲ_infop = &ಮೂಲ_info,
 	};
 
-	if (odb_read_object_info_extended(the_repository->objects, &obj->oid, &info, 0))
+	ಆದರೆ (odb_read_object_info_extended(the_repository->objects, &obj->oid, &info, 0))
 		BUG("should_include_obj should only be called on existing objects");
-	return source_info.source->type != ODB_SOURCE_PACKED || !source_info.u.packed.pack->pack_promisor;
+	ಹಿಂತಿರುಗಿ ಮೂಲ_info.ಮೂಲ->type != ODB_ಮೂಲ_PACKED || !ಮೂಲ_info.u.packed.pack->pack_promisor;
 }
 
-static int is_not_in_promisor_pack(struct commit *commit, void *data) {
-	return is_not_in_promisor_pack_obj((struct object *) commit, data);
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ is_not_ಒಳ_promisor_pack(ರಚನೆ commit *commit, ಶೂನ್ಯ *ದತ್ತಾಂಶ) {
+	ಹಿಂತಿರುಗಿ is_not_ಒಳ_promisor_pack_obj((ರಚನೆ object *) commit, ದತ್ತಾಂಶ);
 }
 
-static int parse_stdin_packs_mode(const struct option *opt, const char *arg,
-				  int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_stdin_packs_ಬಹುಲಕ(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+				  ಪೂರ್ಣಾಂಕ unset)
 {
-	enum stdin_packs_mode *mode = opt->value;
+	ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ *ಬಹುಲಕ = opt->ಮೌಲ್ಯ;
 
-	if (unset)
-		*mode = STDIN_PACKS_MODE_NONE;
-	else if (!arg || !*arg)
-		*mode = STDIN_PACKS_MODE_STANDARD;
-	else if (!strcmp(arg, "follow"))
-		*mode = STDIN_PACKS_MODE_FOLLOW;
-	else
+	ಆದರೆ (unset)
+		*ಬಹುಲಕ = STDIN_PACKS_ಬಹುಲಕ_NONE;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!arg || !*arg)
+		*ಬಹುಲಕ = STDIN_PACKS_ಬಹುಲಕ_STANDARD;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(arg, "follow"))
+		*ಬಹುಲಕ = STDIN_PACKS_ಬಹುಲಕ_FOLLOW;
+	ಇಲ್ಲದಿದ್ದರೆ
 		die(_("invalid value for '%s': '%s'"), opt->long_name, arg);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_pack_objects(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_pack_objects(ಪೂರ್ಣಾಂಕ argc,
+		     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		     ರಚನೆ repository *repo)
 {
-	int use_internal_rev_list = 0;
-	int all_progress_implied = 0;
-	struct strvec rp = STRVEC_INIT;
-	int rev_list_unpacked = 0, rev_list_all = 0, rev_list_reflog = 0;
-	int rev_list_index = 0;
-	enum stdin_packs_mode stdin_packs = STDIN_PACKS_MODE_NONE;
-	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
-	struct list_objects_filter_options filter_options =
+	ಪೂರ್ಣಾಂಕ use_ಆಂತರಿಕ_rev_list = 0;
+	ಪೂರ್ಣಾಂಕ all_ಪ್ರಗತಿ_implied = 0;
+	ರಚನೆ strvec rp = STRVEC_INIT;
+	ಪೂರ್ಣಾಂಕ rev_list_unpacked = 0, rev_list_all = 0, rev_list_reflog = 0;
+	ಪೂರ್ಣಾಂಕ rev_list_ಸೂಚ್ಯಂಕ = 0;
+	ಎಣಿಕೆ stdin_packs_ಬಹುಲಕ stdin_packs = STDIN_PACKS_ಬಹುಲಕ_NONE;
+	ರಚನೆ string_list keep_pack_list = STRING_LIST_INIT_NODUP;
+	ರಚನೆ list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ರಚನೆ repo_config_ಮೌಲ್ಯಗಳು *cfg = repo_config_ಮೌಲ್ಯಗಳು(the_repository);
 
-	struct option pack_objects_options[] = {
-		OPT_CALLBACK_F('q', "quiet", &progress, NULL,
+	ರಚನೆ option pack_objects_options[] = {
+		OPT_CALLBACK_F('q', "quiet", &ಪ್ರಗತಿ, ಖಾಲಿ,
 			       N_("do not show progress meter"),
 			       PARSE_OPT_NOARG, option_parse_quiet),
-		OPT_SET_INT(0, "progress", &progress,
+		OPT_ಗಣ_INT(0, "progress", &ಪ್ರಗತಿ,
 			    N_("show progress meter"), 1),
-		OPT_SET_INT(0, "all-progress", &progress,
+		OPT_ಗಣ_INT(0, "all-progress", &ಪ್ರಗತಿ,
 			    N_("show progress meter during object writing phase"), 2),
 		OPT_BOOL(0, "all-progress-implied",
-			 &all_progress_implied,
+			 &all_ಪ್ರಗತಿ_implied,
 			 N_("similar to --all-progress when progress meter is shown")),
 		OPT_CALLBACK_F(0, "index-version", &pack_idx_opts, N_("<version>[,<offset>]"),
 		  N_("write the pack index file in the specified idx format version"),
-		  PARSE_OPT_NONEG, option_parse_index_version),
-		OPT_UNSIGNED(0, "max-pack-size", &pack_size_limit,
+		  PARSE_OPT_NONEG, option_parse_ಸೂಚ್ಯಂಕ_ಆವೃತ್ತಿ),
+		OPT_UNSIGNED(0, "max-pack-size", &pack_ಗಾತ್ರ_ಎಲ್ಲೆ,
 			     N_("maximum size of each output pack file")),
 		OPT_BOOL(0, "local", &local,
 			 N_("ignore borrowed objects from alternate object store")),
 		OPT_BOOL(0, "incremental", &incremental,
 			 N_("ignore packed objects")),
-		OPT_INTEGER(0, "window", &window,
+		OPT_INTEGER(0, "window", &ಕಿಟಕಿ,
 			    N_("limit pack window by objects")),
-		OPT_UNSIGNED(0, "window-memory", &window_memory_limit,
+		OPT_UNSIGNED(0, "window-memory", &ಕಿಟಕಿ_ಸ್ಮರಣೆ_ಎಲ್ಲೆ,
 			     N_("limit pack window by memory in addition to object limit")),
-		OPT_INTEGER(0, "depth", &depth,
+		OPT_INTEGER(0, "depth", &ಆಳ,
 			    N_("maximum length of delta chain allowed in the resulting pack")),
 		OPT_BOOL(0, "reuse-delta", &reuse_delta,
 			 N_("reuse existing deltas")),
@@ -5158,47 +5158,47 @@ int cmd_pack_objects(int argc,
 			 N_("reuse existing objects")),
 		OPT_BOOL(0, "delta-base-offset", &allow_ofs_delta,
 			 N_("use OFS_DELTA objects")),
-		OPT_INTEGER(0, "threads", &delta_search_threads,
+		OPT_INTEGER(0, "threads", &delta_ಹುಡುಕು_ಎಳೆಗಳು,
 			    N_("use threads when searching for best delta matches")),
-		OPT_BOOL(0, "non-empty", &non_empty,
+		OPT_BOOL(0, "non-empty", &non_ಖಾಲಿಗಳು,
 			 N_("do not create an empty pack output")),
-		OPT_BOOL(0, "revs", &use_internal_rev_list,
+		OPT_BOOL(0, "revs", &use_ಆಂತರಿಕ_rev_list,
 			 N_("read revision arguments from standard input")),
-		OPT_SET_INT_F(0, "unpacked", &rev_list_unpacked,
+		OPT_ಗಣ_INT_F(0, "unpacked", &rev_list_unpacked,
 			      N_("limit the objects to those that are not yet packed"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "all", &rev_list_all,
+		OPT_ಗಣ_INT_F(0, "all", &rev_list_all,
 			      N_("include objects reachable from any reference"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "reflog", &rev_list_reflog,
+		OPT_ಗಣ_INT_F(0, "reflog", &rev_list_reflog,
 			      N_("include objects referred by reflog entries"),
 			      1, PARSE_OPT_NONEG),
-		OPT_SET_INT_F(0, "indexed-objects", &rev_list_index,
+		OPT_ಗಣ_INT_F(0, "indexed-objects", &rev_list_ಸೂಚ್ಯಂಕ,
 			      N_("include objects referred to by the index"),
 			      1, PARSE_OPT_NONEG),
 		OPT_CALLBACK_F(0, "stdin-packs", &stdin_packs, N_("mode"),
 			     N_("read packs from stdin"),
-			     PARSE_OPT_OPTARG, parse_stdin_packs_mode),
-		OPT_BOOL(0, "stdout", &pack_to_stdout,
+			     PARSE_OPT_OPTARG, parse_stdin_packs_ಬಹುಲಕ),
+		OPT_BOOL(0, "stdout", &pack_ಗಮ್ಯ_stdout,
 			 N_("output pack to stdout")),
-		OPT_BOOL(0, "include-tag", &include_tag,
+		OPT_BOOL(0, "include-tag", &include_ಟ್ಯಾಗ್,
 			 N_("include tag objects that refer to objects to be packed")),
 		OPT_BOOL(0, "keep-unreachable", &keep_unreachable,
 			 N_("keep unreachable objects")),
 		OPT_BOOL(0, "pack-loose-unreachable", &pack_loose_unreachable,
 			 N_("pack loose unreachable objects")),
-		OPT_CALLBACK_F(0, "unpack-unreachable", NULL, N_("time"),
+		OPT_CALLBACK_F(0, "unpack-unreachable", ಖಾಲಿ, N_("time"),
 		  N_("unpack unreachable objects newer than <time>"),
 		  PARSE_OPT_OPTARG, option_parse_unpack_unreachable),
 		OPT_BOOL(0, "cruft", &cruft, N_("create a cruft pack")),
-		OPT_CALLBACK_F(0, "cruft-expiration", NULL, N_("time"),
+		OPT_CALLBACK_F(0, "cruft-expiration", ಖಾಲಿ, N_("time"),
 		  N_("expire cruft objects older than <time>"),
 		  PARSE_OPT_OPTARG, option_parse_cruft_expiration),
 		OPT_BOOL(0, "sparse", &sparse,
 			 N_("use the sparse reachability algorithm")),
 		OPT_BOOL(0, "thin", &thin,
 			 N_("create thin packs")),
-		OPT_BOOL(0, "path-walk", &path_walk,
+		OPT_BOOL(0, "path-walk", &ಮಾರ್ಗ_walk,
 			 N_("use the path-walk API to walk objects when possible")),
 		OPT_BOOL(0, "shallow", &shallow,
 			 N_("create packs suitable for shallow fetches")),
@@ -5210,13 +5210,13 @@ int cmd_pack_objects(int argc,
 			    N_("pack compression level")),
 		OPT_BOOL(0, "keep-true-parents", &grafts_keep_true_parents,
 			 N_("do not hide commits by grafts")),
-		OPT_BOOL(0, "use-bitmap-index", &use_bitmap_index,
+		OPT_BOOL(0, "use-bitmap-index", &use_bitmap_ಸೂಚ್ಯಂಕ,
 			 N_("use a bitmap index if available to speed up counting objects")),
-		OPT_SET_INT(0, "write-bitmap-index", &write_bitmap_index,
+		OPT_ಗಣ_INT(0, "write-bitmap-index", &write_bitmap_ಸೂಚ್ಯಂಕ,
 			    N_("write a bitmap index together with the pack index"),
 			    WRITE_BITMAP_TRUE),
-		OPT_SET_INT_F(0, "write-bitmap-index-quiet",
-			      &write_bitmap_index,
+		OPT_ಗಣ_INT_F(0, "write-bitmap-index-quiet",
+			      &write_bitmap_ಸೂಚ್ಯಂಕ,
 			      N_("write a bitmap index if possible"),
 			      WRITE_BITMAP_QUIET, PARSE_OPT_HIDDEN),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
@@ -5226,175 +5226,175 @@ int cmd_pack_objects(int argc,
 		OPT_BOOL(0, "exclude-promisor-objects", &exclude_promisor_objects,
 			 N_("do not pack objects in promisor packfiles")),
 		OPT_BOOL(0, "exclude-promisor-objects-best-effort",
-			 &exclude_promisor_objects_best_effort,
+			 &exclude_promisor_objects_ಉತ್ತಮ_effort,
 			 N_("implies --missing=allow-any")),
 		OPT_BOOL(0, "delta-islands", &use_delta_islands,
 			 N_("respect islands during delta compression")),
 		OPT_STRING_LIST(0, "uri-protocol", &uri_protocols,
 				N_("protocol"),
 				N_("exclude any configured uploadpack.blobpackfileuri with this protocol")),
-		OPT_INTEGER(0, "name-hash-version", &name_hash_version,
+		OPT_INTEGER(0, "name-hash-version", &name_hash_ಆವೃತ್ತಿ,
 			 N_("use the specified name-hash function to group similar objects")),
-		OPT_END(),
+		OPT_ಕೊನೆ(),
 	};
 
-	if (DFS_NUM_STATES > (1 << OE_DFS_STATE_BITS))
+	ಆದರೆ (DFS_ಅಂಕೆ_ಸ್ಥಿತಿಗಳು > (1 << OE_DFS_STATE_ಬಿಟ್ಟುಗಳು))
 		BUG("too many dfs states, increase OE_DFS_STATE_BITS");
 
 	disable_replace_refs();
 
 	sparse = git_env_bool("GIT_TEST_PACK_SPARSE", -1);
-	if (the_repository->gitdir) {
+	ಆದರೆ (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
-		if (sparse < 0)
+		ಆದರೆ (sparse < 0)
 			sparse = the_repository->settings.pack_use_sparse;
-		if (the_repository->settings.pack_use_multi_pack_reuse)
+		ಆದರೆ (the_repository->settings.pack_use_multi_pack_reuse)
 			allow_pack_reuse = MULTI_PACK_REUSE;
 	}
 
 	reset_pack_idx_option(&pack_idx_opts);
 	pack_idx_opts.flags |= WRITE_REV;
-	repo_config(the_repository, git_pack_config, NULL);
-	if (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
+	repo_config(the_repository, git_pack_config, ಖಾಲಿ);
+	ಆದರೆ (git_env_bool(GIT_TEST_NO_WRITE_REV_ಸೂಚ್ಯಂಕ, 0))
 		pack_idx_opts.flags &= ~WRITE_REV;
 
-	progress = isatty(2);
-	argc = parse_options(argc, argv, prefix, pack_objects_options,
+	ಪ್ರಗತಿ = isatty(2);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, pack_objects_options,
 			     pack_usage, 0);
 
-	if (argc) {
-		base_name = argv[0];
+	ಆದರೆ (argc) {
+		ತಳ_name = argv[0];
 		argc--;
 	}
-	if (pack_to_stdout != !base_name || argc)
+	ಆದರೆ (pack_ಗಮ್ಯ_stdout != !ತಳ_name || argc)
 		usage_with_options(pack_usage, pack_objects_options);
 
-	if (path_walk < 0) {
-		if (use_bitmap_index > 0 ||
-		    !use_internal_rev_list)
-			path_walk = 0;
-		else if (the_repository->gitdir &&
-			 the_repository->settings.pack_use_path_walk)
-			path_walk = 1;
-		else
-			path_walk = git_env_bool("GIT_TEST_PACK_PATH_WALK", 0);
+	ಆದರೆ (ಮಾರ್ಗ_walk < 0) {
+		ಆದರೆ (use_bitmap_ಸೂಚ್ಯಂಕ > 0 ||
+		    !use_ಆಂತರಿಕ_rev_list)
+			ಮಾರ್ಗ_walk = 0;
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (the_repository->gitdir &&
+			 the_repository->settings.pack_use_ಮಾರ್ಗ_walk)
+			ಮಾರ್ಗ_walk = 1;
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಮಾರ್ಗ_walk = git_env_bool("GIT_TEST_PACK_PATH_WALK", 0);
 	}
 
-	if (depth < 0)
-		depth = 0;
-	if (depth >= (1 << OE_DEPTH_BITS)) {
+	ಆದರೆ (ಆಳ < 0)
+		ಆಳ = 0;
+	ಆದರೆ (ಆಳ >= (1 << OE_ಆಳ_ಬಿಟ್ಟುಗಳು)) {
 		warning(_("delta chain depth %d is too deep, forcing %d"),
-			depth, (1 << OE_DEPTH_BITS) - 1);
-		depth = (1 << OE_DEPTH_BITS) - 1;
+			ಆಳ, (1 << OE_ಆಳ_ಬಿಟ್ಟುಗಳು) - 1);
+		ಆಳ = (1 << OE_ಆಳ_ಬಿಟ್ಟುಗಳು) - 1;
 	}
-	if (cache_max_small_delta_size >= (1U << OE_Z_DELTA_BITS)) {
+	ಆದರೆ (cache_max_small_delta_ಗಾತ್ರ >= (1U << OE_Z_DELTA_ಬಿಟ್ಟುಗಳು)) {
 		warning(_("pack.deltaCacheLimit is too high, forcing %d"),
-			(1U << OE_Z_DELTA_BITS) - 1);
-		cache_max_small_delta_size = (1U << OE_Z_DELTA_BITS) - 1;
+			(1U << OE_Z_DELTA_ಬಿಟ್ಟುಗಳು) - 1);
+		cache_max_small_delta_ಗಾತ್ರ = (1U << OE_Z_DELTA_ಬಿಟ್ಟುಗಳು) - 1;
 	}
-	if (window < 0)
-		window = 0;
+	ಆದರೆ (ಕಿಟಕಿ < 0)
+		ಕಿಟಕಿ = 0;
 
-	strvec_push(&rp, "pack-objects");
+	strvec_ತಳ್ಳು(&rp, "pack-objects");
 
-	if (path_walk) {
-		const char *option = NULL;
-		if (!path_walk_filter_compatible(&filter_options))
+	ಆದರೆ (ಮಾರ್ಗ_walk) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *option = ಖಾಲಿ;
+		ಆದರೆ (!ಮಾರ್ಗ_walk_filter_compatible(&filter_options))
 			option = "--filter";
 
-		if (option) {
+		ಆದರೆ (option) {
 			warning(_("cannot use %s with %s"),
 				option, "--path-walk");
-			path_walk = 0;
+			ಮಾರ್ಗ_walk = 0;
 		}
 	}
-	if (path_walk) {
-		strvec_push(&rp, "--objects");
-	} else if (thin) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, shallow
+	ಆದರೆ (ಮಾರ್ಗ_walk) {
+		strvec_ತಳ್ಳು(&rp, "--objects");
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (thin) {
+		use_ಆಂತರಿಕ_rev_list = 1;
+		strvec_ತಳ್ಳು(&rp, shallow
 				? "--objects-edge-aggressive"
 				: "--objects-edge");
-	} else
-		strvec_push(&rp, "--objects");
+	} ಇಲ್ಲದಿದ್ದರೆ
+		strvec_ತಳ್ಳು(&rp, "--objects");
 
-	if (rev_list_all) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--all");
+	ಆದರೆ (rev_list_all) {
+		use_ಆಂತರಿಕ_rev_list = 1;
+		strvec_ತಳ್ಳು(&rp, "--all");
 	}
-	if (rev_list_reflog) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--reflog");
+	ಆದರೆ (rev_list_reflog) {
+		use_ಆಂತರಿಕ_rev_list = 1;
+		strvec_ತಳ್ಳು(&rp, "--reflog");
 	}
-	if (rev_list_index) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--indexed-objects");
+	ಆದರೆ (rev_list_ಸೂಚ್ಯಂಕ) {
+		use_ಆಂತರಿಕ_rev_list = 1;
+		strvec_ತಳ್ಳು(&rp, "--indexed-objects");
 	}
-	if (rev_list_unpacked && !stdin_packs) {
-		use_internal_rev_list = 1;
-		strvec_push(&rp, "--unpacked");
+	ಆದರೆ (rev_list_unpacked && !stdin_packs) {
+		use_ಆಂತರಿಕ_rev_list = 1;
+		strvec_ತಳ್ಳು(&rp, "--unpacked");
 	}
 
 	die_for_incompatible_opt2(exclude_promisor_objects,
 				  "--exclude-promisor-objects",
-				  exclude_promisor_objects_best_effort,
+				  exclude_promisor_objects_ಉತ್ತಮ_effort,
 				  "--exclude-promisor-objects-best-effort");
-	if (exclude_promisor_objects) {
+	ಆದರೆ (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 
 		/* --stdin-packs handles promisor objects separately. */
-		if (!stdin_packs) {
-			use_internal_rev_list = 1;
-			strvec_push(&rp, "--exclude-promisor-objects");
+		ಆದರೆ (!stdin_packs) {
+			use_ಆಂತರಿಕ_rev_list = 1;
+			strvec_ತಳ್ಳು(&rp, "--exclude-promisor-objects");
 		}
-	} else if (exclude_promisor_objects_best_effort) {
-		use_internal_rev_list = 1;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (exclude_promisor_objects_ಉತ್ತಮ_effort) {
+		use_ಆಂತರಿಕ_rev_list = 1;
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		fn_show_object = show_object__ma_allow_any;
 		/* revs configured below */
 	}
-	if (unpack_unreachable || keep_unreachable || pack_loose_unreachable)
-		use_internal_rev_list = 1;
+	ಆದರೆ (unpack_unreachable || keep_unreachable || pack_loose_unreachable)
+		use_ಆಂತರಿಕ_rev_list = 1;
 
-	if (!reuse_object)
+	ಆದರೆ (!reuse_object)
 		reuse_delta = 0;
-	if (cfg->pack_compression_level == -1)
+	ಆದರೆ (cfg->pack_compression_level == -1)
 		cfg->pack_compression_level = Z_DEFAULT_COMPRESSION;
-	else if (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_BEST_COMPRESSION)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_ಉತ್ತಮ_COMPRESSION)
 		die(_("bad pack compression level %d"), cfg->pack_compression_level);
 
-	if (!delta_search_threads)	/* --threads=0 means autodetect */
-		delta_search_threads = online_cpus();
+	ಆದರೆ (!delta_ಹುಡುಕು_ಎಳೆಗಳು)	/* --threads=0 means autodetect */
+		delta_ಹುಡುಕು_ಎಳೆಗಳು = online_cpus();
 
-	if (!HAVE_THREADS && delta_search_threads != 1)
+	ಆದರೆ (!HAVE_ಎಳೆಗಳು && delta_ಹುಡುಕು_ಎಳೆಗಳು != 1)
 		warning(_("no threads support, ignoring --threads"));
-	if (!pack_to_stdout && !pack_size_limit)
-		pack_size_limit = pack_size_limit_cfg;
-	if (pack_to_stdout && pack_size_limit)
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout && !pack_ಗಾತ್ರ_ಎಲ್ಲೆ)
+		pack_ಗಾತ್ರ_ಎಲ್ಲೆ = pack_ಗಾತ್ರ_ಎಲ್ಲೆ_cfg;
+	ಆದರೆ (pack_ಗಮ್ಯ_stdout && pack_ಗಾತ್ರ_ಎಲ್ಲೆ)
 		die(_("--max-pack-size cannot be used to build a pack for transfer"));
-	if (pack_size_limit && pack_size_limit < 1024*1024) {
+	ಆದರೆ (pack_ಗಾತ್ರ_ಎಲ್ಲೆ && pack_ಗಾತ್ರ_ಎಲ್ಲೆ < 1024*1024) {
 		warning(_("minimum pack size limit is 1 MiB"));
-		pack_size_limit = 1024*1024;
+		pack_ಗಾತ್ರ_ಎಲ್ಲೆ = 1024*1024;
 	}
 
-	if (!pack_to_stdout && thin)
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout && thin)
 		die(_("--thin cannot be used to build an indexable pack"));
 
 	die_for_incompatible_opt2(keep_unreachable, "--keep-unreachable",
 				  unpack_unreachable, "--unpack-unreachable");
-	if (!rev_list_all || !rev_list_reflog || !rev_list_index)
+	ಆದರೆ (!rev_list_all || !rev_list_reflog || !rev_list_ಸೂಚ್ಯಂಕ)
 		unpack_unreachable_expiration = 0;
 
 	die_for_incompatible_opt2(stdin_packs, "--stdin-packs",
 				  filter_options.choice, "--filter");
 
 
-	if (stdin_packs && use_internal_rev_list)
+	ಆದರೆ (stdin_packs && use_ಆಂತರಿಕ_rev_list)
 		die(_("cannot use internal rev list with --stdin-packs"));
 
-	if (cruft) {
-		if (use_internal_rev_list)
+	ಆದರೆ (cruft) {
+		ಆದರೆ (use_ಆಂತರಿಕ_rev_list)
 			die(_("cannot use internal rev list with --cruft"));
 		die_for_incompatible_opt2(stdin_packs, "--stdin-packs",
 					  cruft, "--cruft");
@@ -5409,95 +5409,95 @@ int cmd_pack_objects(int argc,
 	 * - to use more robust pack-generation codepath (avoiding possible
 	 *   bugs in bitmap code and possible bitmap index corruption).
 	 */
-	if (!pack_to_stdout)
-		use_bitmap_index_default = 0;
+	ಆದರೆ (!pack_ಗಮ್ಯ_stdout)
+		use_bitmap_ಸೂಚ್ಯಂಕ_default = 0;
 
-	if (use_bitmap_index < 0)
-		use_bitmap_index = use_bitmap_index_default;
+	ಆದರೆ (use_bitmap_ಸೂಚ್ಯಂಕ < 0)
+		use_bitmap_ಸೂಚ್ಯಂಕ = use_bitmap_ಸೂಚ್ಯಂಕ_default;
 
 	/* "hard" reasons not to use bitmaps; these just won't work at all */
-	if (!use_internal_rev_list || (!pack_to_stdout && write_bitmap_index) || is_repository_shallow(the_repository))
-		use_bitmap_index = 0;
+	ಆದರೆ (!use_ಆಂತರಿಕ_rev_list || (!pack_ಗಮ್ಯ_stdout && write_bitmap_ಸೂಚ್ಯಂಕ) || is_repository_shallow(the_repository))
+		use_bitmap_ಸೂಚ್ಯಂಕ = 0;
 
-	if (pack_to_stdout || !rev_list_all)
-		write_bitmap_index = 0;
+	ಆದರೆ (pack_ಗಮ್ಯ_stdout || !rev_list_all)
+		write_bitmap_ಸೂಚ್ಯಂಕ = 0;
 
-	if (name_hash_version < 0)
-		name_hash_version = (int)git_env_ulong("GIT_TEST_NAME_HASH_VERSION", 1);
+	ಆದರೆ (name_hash_ಆವೃತ್ತಿ < 0)
+		name_hash_ಆವೃತ್ತಿ = (ಪೂರ್ಣಾಂಕ)git_env_ulong("GIT_TEST_NAME_HASH_VERSION", 1);
 
-	validate_name_hash_version();
+	validate_name_hash_ಆವೃತ್ತಿ();
 
-	if (use_delta_islands)
-		strvec_push(&rp, "--topo-order");
+	ಆದರೆ (use_delta_islands)
+		strvec_ತಳ್ಳು(&rp, "--topo-order");
 
-	if (progress && all_progress_implied)
-		progress = 2;
+	ಆದರೆ (ಪ್ರಗತಿ && all_ಪ್ರಗತಿ_implied)
+		ಪ್ರಗತಿ = 2;
 
-	add_extra_kept_packs(&keep_pack_list);
-	if (ignore_packed_keep_on_disk) {
-		struct packed_git *p;
+	ಕೂಡಿಸು_extra_kept_packs(&keep_pack_list);
+	ಆದರೆ (ignore_packed_keep_on_disk) {
+		ರಚನೆ packed_git *p;
 
 		repo_for_each_pack(the_repository, p)
-			if (p->pack_local && p->pack_keep)
-				break;
-		if (!p) /* no keep-able packs found */
+			ಆದರೆ (p->pack_local && p->pack_keep)
+				ನಿಲ್ಲಿಸು;
+		ಆದರೆ (!p) /* no keep-able packs found */
 			ignore_packed_keep_on_disk = 0;
 	}
-	if (local) {
+	ಆದರೆ (local) {
 		/*
 		 * unlike ignore_packed_keep_on_disk above, we do not
 		 * want to unset "local" based on looking at packs, as
 		 * it also covers non-local objects
 		 */
-		struct packed_git *p;
+		ರಚನೆ packed_git *p;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local) {
+			ಆದರೆ (!p->pack_local) {
 				have_non_local_packs = 1;
-				break;
+				ನಿಲ್ಲಿಸು;
 			}
 		}
 	}
 
 	trace2_region_enter("pack-objects", "enumerate-objects",
 			    the_repository);
-	prepare_packing_data(the_repository, &to_pack);
+	prepare_packing_ದತ್ತಾಂಶ(the_repository, &ಗಮ್ಯ_pack);
 
-	if (progress && !cruft)
-		progress_state = start_progress(the_repository,
+	ಆದರೆ (ಪ್ರಗತಿ && !cruft)
+		ಪ್ರಗತಿ_state = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 						_("Enumerating objects"), 0);
-	if (stdin_packs) {
+	ಆದರೆ (stdin_packs) {
 		read_stdin_packs(repo, stdin_packs, rev_list_unpacked);
-	} else if (cruft) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (cruft) {
 		read_cruft_objects();
-	} else if (!use_internal_rev_list) {
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!use_ಆಂತರಿಕ_rev_list) {
 		read_object_list_from_stdin();
-	} else {
-		struct rev_info revs;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ರಚನೆ rev_info revs;
 
-		repo_init_revisions(the_repository, &revs, NULL);
+		repo_init_revisions(the_repository, &revs, ಖಾಲಿ);
 		list_objects_filter_copy(&revs.filter, &filter_options);
-		if (exclude_promisor_objects_best_effort) {
-			revs.include_check = is_not_in_promisor_pack;
-			revs.include_check_obj = is_not_in_promisor_pack_obj;
+		ಆದರೆ (exclude_promisor_objects_ಉತ್ತಮ_effort) {
+			revs.include_check = is_not_ಒಳ_promisor_pack;
+			revs.include_check_obj = is_not_ಒಳ_promisor_pack_obj;
 		}
 		get_object_list(&revs, &rp);
 		release_revisions(&revs);
 	}
-	cleanup_preferred_base();
-	if (include_tag && nr_result)
-		refs_for_each_tag_ref(get_main_ref_store(the_repository),
-				      add_ref_tag, NULL);
-	stop_progress(&progress_state);
+	cleanup_preferred_ತಳ();
+	ಆದರೆ (include_ಟ್ಯಾಗ್ && nr_ಫಲಿತಾಂಶ)
+		refs_for_each_ಟ್ಯಾಗ್_ref(get_main_ref_store(the_repository),
+				      ಕೂಡಿಸು_ref_ಟ್ಯಾಗ್, ಖಾಲಿ);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ_state);
 	trace2_region_leave("pack-objects", "enumerate-objects",
 			    the_repository);
 
-	if (non_empty && !nr_result)
-		goto cleanup;
-	if (nr_result) {
+	ಆದರೆ (non_ಖಾಲಿಗಳು && !nr_ಫಲಿತಾಂಶ)
+		ಹೋಗು cleanup;
+	ಆದರೆ (nr_ಫಲಿತಾಂಶ) {
 		trace2_region_enter("pack-objects", "prepare-pack",
 				    the_repository);
-		prepare_pack(window, depth);
+		prepare_pack(ಕಿಟಕಿ, ಆಳ);
 		trace2_region_leave("pack-objects", "prepare-pack",
 				    the_repository);
 	}
@@ -5507,27 +5507,27 @@ int cmd_pack_objects(int argc,
 	write_pack_file();
 	trace2_region_leave("pack-objects", "write-pack-file", the_repository);
 
-	if (progress)
+	ಆದರೆ (ಪ್ರಗತಿ)
 		fprintf_ln(stderr,
 			   _("Total %"PRIu32" (delta %"PRIu32"),"
 			     " reused %"PRIu32" (delta %"PRIu32"),"
 			     " pack-reused %"PRIu32" (from %"PRIuMAX")"),
 			   written, written_delta, reused, reused_delta,
 			   reuse_packfile_objects,
-			   (uintmax_t)reuse_packfiles_used_nr);
+			   (uintmax_t)reuse_packfiles_ಬಳಸಿದ_nr);
 
-	trace2_data_intmax("pack-objects", the_repository, "written", written);
-	trace2_data_intmax("pack-objects", the_repository, "written/delta", written_delta);
-	trace2_data_intmax("pack-objects", the_repository, "reused", reused);
-	trace2_data_intmax("pack-objects", the_repository, "reused/delta", reused_delta);
-	trace2_data_intmax("pack-objects", the_repository, "pack-reused", reuse_packfile_objects);
-	trace2_data_intmax("pack-objects", the_repository, "packs-reused", reuse_packfiles_used_nr);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "written", written);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "written/delta", written_delta);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "reused", reused);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "reused/delta", reused_delta);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "pack-reused", reuse_packfile_objects);
+	trace2_ದತ್ತಾಂಶ_intmax("pack-objects", the_repository, "packs-reused", reuse_packfiles_ಬಳಸಿದ_nr);
 
 cleanup:
-	clear_packing_data(&to_pack);
+	clear_packing_ದತ್ತಾಂಶ(&ಗಮ್ಯ_pack);
 	list_objects_filter_release(&filter_options);
 	string_list_clear(&keep_pack_list, 0);
 	strvec_clear(&rp);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

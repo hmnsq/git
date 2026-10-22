@@ -4,149 +4,149 @@
  * Copyright (c) 2013, 2014 Christian Couder <chriscool@tuxfamily.org>
  *
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "tempfile.h"
-#include "trailer.h"
-#include "config.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "string-list.h"
+#ಅನ್ತರ್ಭಾವ "tempfile.h"
+#ಅನ್ತರ್ಭಾವ "trailer.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
 
-static const char * const git_interpret_trailers_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ git_interpret_trailers_usage[] = {
 	N_("git interpret-trailers [--in-place] [--trim-empty]\n"
 	   "                       [(--trailer (<key>|<key-alias>)[(=|:)<value>])...]\n"
 	   "                       [--parse] [<file>...]"),
-	NULL
+	ಖಾಲಿ
 };
 
-static enum trailer_where where;
-static enum trailer_if_exists if_exists;
-static enum trailer_if_missing if_missing;
+ಸ್ಥಿರ ಎಣಿಕೆ trailer_where where;
+ಸ್ಥಿರ ಎಣಿಕೆ trailer_if_exists if_exists;
+ಸ್ಥಿರ ಎಣಿಕೆ trailer_if_missing if_missing;
 
-static int option_parse_where(const struct option *opt,
-			      const char *arg, int unset UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_where(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+			      ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset ಬಳಸದ)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	ಹಿಂತಿರುಗಿ trailer_ಗಣ_where(opt->ಮೌಲ್ಯ, arg);
 }
 
-static int option_parse_if_exists(const struct option *opt,
-				  const char *arg, int unset UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_if_exists(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset ಬಳಸದ)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	ಹಿಂತಿರುಗಿ trailer_ಗಣ_if_exists(opt->ಮೌಲ್ಯ, arg);
 }
 
-static int option_parse_if_missing(const struct option *opt,
-				   const char *arg, int unset UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_if_missing(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset ಬಳಸದ)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	ಹಿಂತಿರುಗಿ trailer_ಗಣ_if_missing(opt->ಮೌಲ್ಯ, arg);
 }
 
-static void new_trailers_clear(struct list_head *trailers)
+ಸ್ಥಿರ ಶೂನ್ಯ new_trailers_clear(ರಚನೆ list_ತಲೆ *trailers)
 {
-	struct list_head *pos, *tmp;
-	struct new_trailer_item *item;
+	ರಚನೆ list_ತಲೆ *pos, *tmp;
+	ರಚನೆ new_trailer_ಅಂಶ *ಅಂಶ;
 
-	list_for_each_safe(pos, tmp, trailers) {
-		item = list_entry(pos, struct new_trailer_item, list);
+	list_for_each_ಸುರಕ್ಷಿತ(pos, tmp, trailers) {
+		ಅಂಶ = list_ನಮೂದು(pos, ರಚನೆ new_trailer_ಅಂಶ, list);
 		list_del(pos);
-		free(item);
+		ಬಿಡುಗಡೆ(ಅಂಶ);
 	}
 }
 
-static int option_parse_trailer(const struct option *opt,
-				   const char *arg, int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ option_parse_trailer(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt,
+				   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg, ಪೂರ್ಣಾಂಕ unset)
 {
-	struct list_head *trailers = opt->value;
-	struct new_trailer_item *item;
+	ರಚನೆ list_ತಲೆ *trailers = opt->ಮೌಲ್ಯ;
+	ರಚನೆ new_trailer_ಅಂಶ *ಅಂಶ;
 
-	if (unset) {
+	ಆದರೆ (unset) {
 		new_trailers_clear(trailers);
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	if (!arg)
-		return -1;
+	ಆದರೆ (!arg)
+		ಹಿಂತಿರುಗಿ -1;
 
-	item = xmalloc(sizeof(*item));
-	item->text = arg;
-	item->where = where;
-	item->if_exists = if_exists;
-	item->if_missing = if_missing;
-	list_add_tail(&item->list, trailers);
-	return 0;
+	ಅಂಶ = xmalloc(ಗಾತ್ರ(*ಅಂಶ));
+	ಅಂಶ->ಪಠ್ಯ = arg;
+	ಅಂಶ->where = where;
+	ಅಂಶ->if_exists = if_exists;
+	ಅಂಶ->if_missing = if_missing;
+	list_ಕೂಡಿಸು_ಬಾಲ(&ಅಂಶ->list, trailers);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static int parse_opt_parse(const struct option *opt, const char *arg,
-			   int unset)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_opt_parse(ಸ್ಥಿರಾಂಕ ರಚನೆ option *opt, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg,
+			   ಪೂರ್ಣಾಂಕ unset)
 {
-	struct process_trailer_options *v = opt->value;
+	ರಚನೆ process_trailer_options *v = opt->ಮೌಲ್ಯ;
 	v->only_trailers = 1;
-	v->only_input = 1;
+	v->only_ಒಳಹರಿವು = 1;
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void read_input_file(struct strbuf *sb, const char *file)
+ಸ್ಥಿರ ಶೂನ್ಯ read_ಒಳಹರಿವು_file(ರಚನೆ strbuf *sb, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file)
 {
-	if (file) {
-		if (strbuf_read_file(sb, file, 0) < 0)
+	ಆದರೆ (file) {
+		ಆದರೆ (strbuf_read_file(sb, file, 0) < 0)
 			die_errno(_("could not read input file '%s'"), file);
-	} else {
-		if (strbuf_read(sb, fileno(stdin), 0) < 0)
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (strbuf_read(sb, fileno(stdin), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
-	strbuf_complete_line(sb);
+	strbuf_complete_ಸಾಲು(sb);
 }
 
-static void interpret_trailers(const struct process_trailer_options *opts,
-			       struct list_head *new_trailer_head,
-			       const char *file)
+ಸ್ಥಿರ ಶೂನ್ಯ interpret_trailers(ಸ್ಥಿರಾಂಕ ರಚನೆ process_trailer_options *opts,
+			       ರಚನೆ list_ತಲೆ *new_trailer_ತಲೆ,
+			       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *file)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
-	struct tempfile *tempfile = NULL;
-	int fd = 1;
+	ರಚನೆ strbuf ಒಳಹರಿವು = STRBUF_INIT;
+	ರಚನೆ strbuf ಹೊರಹೋಗು = STRBUF_INIT;
+	ರಚನೆ tempfile *tempfile = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ fd = 1;
 
 	trailer_config_init();
 
-	read_input_file(&input, file);
+	read_ಒಳಹರಿವು_file(&ಒಳಹರಿವು, file);
 
-	if (opts->in_place) {
-		tempfile = trailer_create_in_place_tempfile(file);
-		if (!tempfile)
-			die(NULL);
+	ಆದರೆ (opts->ಒಳ_ಇರಿಸು) {
+		tempfile = trailer_create_ಒಳ_ಇರಿಸು_tempfile(file);
+		ಆದರೆ (!tempfile)
+			die(ಖಾಲಿ);
 		fd = tempfile->fd;
 	}
-	process_trailers(opts, new_trailer_head, &input, &out);
+	process_trailers(opts, new_trailer_ತಲೆ, &ಒಳಹರಿವು, &ಹೊರಹೋಗು);
 
-	if (write_in_full(fd, out.buf, out.len) < 0)
+	ಆದರೆ (write_ಒಳ_ತುಂಬಿದ(fd, ಹೊರಹೋಗು.buf, ಹೊರಹೋಗು.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
-	if (opts->in_place)
-		if (rename_tempfile(&tempfile, file))
+	ಆದರೆ (opts->ಒಳ_ಇರಿಸು)
+		ಆದರೆ (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
-	strbuf_release(&input);
-	strbuf_release(&out);
+	strbuf_release(&ಒಳಹರಿವು);
+	strbuf_release(&ಹೊರಹೋಗು);
 }
 
-int cmd_interpret_trailers(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_interpret_trailers(ಪೂರ್ಣಾಂಕ argc,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+			   ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			   ರಚನೆ repository *repo ಬಳಸದ)
 {
-	struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
-	LIST_HEAD(trailers);
+	ರಚನೆ process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
+	LIST_ತಲೆ(trailers);
 
-	struct option options[] = {
-		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
-		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
+	ರಚನೆ option options[] = {
+		OPT_BOOL(0, "in-place", &opts.ಒಳ_ಇರಿಸು, N_("edit files in place")),
+		OPT_BOOL(0, "trim-empty", &opts.trim_ಖಾಲಿಗಳು, N_("trim empty trailers")),
 
 		OPT_CALLBACK(0, "where", &where, N_("placement"),
 			     N_("where to place the new trailer"), option_parse_where),
@@ -156,38 +156,38 @@ int cmd_interpret_trailers(int argc,
 			     N_("action if trailer is missing"), option_parse_if_missing),
 
 		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
-		OPT_BOOL(0, "only-input", &opts.only_input, N_("do not apply trailer.<key-alias> configuration variables")),
+		OPT_BOOL(0, "only-input", &opts.only_ಒಳಹರಿವು, N_("do not apply trailer.<key-alias> configuration variables")),
 		OPT_BOOL(0, "unfold", &opts.unfold, N_("reformat multiline trailer values as single-line values")),
-		OPT_CALLBACK_F(0, "parse", &opts, NULL, N_("alias for --only-trailers --only-input --unfold"),
+		OPT_CALLBACK_F(0, "parse", &opts, ಖಾಲಿ, N_("alias for --only-trailers --only-input --unfold"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_parse),
 		OPT_BOOL(0, "no-divider", &opts.no_divider, N_("do not treat \"---\" as the end of input")),
 		OPT_CALLBACK(0, "trailer", &trailers, N_("trailer"),
 				N_("trailer(s) to add"), option_parse_trailer),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
-		usage_msg_opt(
+	ಆದರೆ (opts.only_ಒಳಹರಿವು && !list_ಖಾಲಿಗಳು(&trailers))
+		usage_ಸಂದೇಶ_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);
 
-	if (argc) {
-		int i;
-		for (i = 0; i < argc; i++)
+	ಆದರೆ (argc) {
+		ಪೂರ್ಣಾಂಕ i;
+		ಗಾಗಿ (i = 0; i < argc; i++)
 			interpret_trailers(&opts, &trailers, argv[i]);
-	} else {
-		if (opts.in_place)
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಆದರೆ (opts.ಒಳ_ಇರಿಸು)
 			die(_("no input file given for in-place editing"));
-		interpret_trailers(&opts, &trailers, NULL);
+		interpret_trailers(&opts, &trailers, ಖಾಲಿ);
 	}
 
 	new_trailers_clear(&trailers);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }

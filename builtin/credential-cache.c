@@ -1,207 +1,207 @@
-#include "builtin.h"
-#include "credential.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "credential.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "path.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "write-or-die.h"
 
-#ifndef NO_UNIX_SOCKETS
+#ವ್ಯಾಖ್ಯಾನಿತವಾಗದಿದ್ದರೆ NO_UNIX_SOCKETS
 
-#include "unix-socket.h"
-#include "run-command.h"
+#ಅನ್ತರ್ಭಾವ "unix-socket.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
 
-#define FLAG_SPAWN 0x1
-#define FLAG_RELAY 0x2
+#ವ್ಯಾಖ್ಯಾನಿಸು FLAG_SPAWN 0x1
+#ವ್ಯಾಖ್ಯಾನಿಸು FLAG_RELAY 0x2
 
-#ifdef GIT_WINDOWS_NATIVE
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ GIT_WINDOWS_NATIVE
 
-static int connection_closed(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ connection_closed(ಪೂರ್ಣಾಂಕ error)
 {
-	return (error == EINVAL);
+	ಹಿಂತಿರುಗಿ (error == EINVAL);
 }
 
-static int connection_fatally_broken(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ connection_fatally_broken(ಪೂರ್ಣಾಂಕ error)
 {
-	return (error != ENOENT) && (error != ENETDOWN);
+	ಹಿಂತಿರುಗಿ (error != ENOENT) && (error != ENETDOWN);
 }
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
-static int connection_closed(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ connection_closed(ಪೂರ್ಣಾಂಕ error)
 {
-	return error == ECONNRESET || error == ECONNABORTED;
+	ಹಿಂತಿರುಗಿ error == ECONNRESET || error == ECONNABORTED;
 }
 
-static int connection_fatally_broken(int error)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ connection_fatally_broken(ಪೂರ್ಣಾಂಕ error)
 {
-	return (error != ENOENT) && (error != ECONNREFUSED);
+	ಹಿಂತಿರುಗಿ (error != ENOENT) && (error != ECONNREFUSED);
 }
 
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-static int send_request(const char *socket, const struct strbuf *out)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ send_request(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *socket, ಸ್ಥಿರಾಂಕ ರಚನೆ strbuf *ಹೊರಹೋಗು)
 {
-	int got_data = 0;
-	int fd = unix_stream_connect(socket, 0);
+	ಪೂರ್ಣಾಂಕ got_ದತ್ತಾಂಶ = 0;
+	ಪೂರ್ಣಾಂಕ fd = unix_ಹರಿವು_connect(socket, 0);
 
-	if (fd < 0)
-		return -1;
+	ಆದರೆ (fd < 0)
+		ಹಿಂತಿರುಗಿ -1;
 
-	if (write_in_full(fd, out->buf, out->len) < 0)
+	ಆದರೆ (write_ಒಳ_ತುಂಬಿದ(fd, ಹೊರಹೋಗು->buf, ಹೊರಹೋಗು->len) < 0)
 		die_errno("unable to write to cache daemon");
 	shutdown(fd, SHUT_WR);
 
-	while (1) {
-		char in[1024];
-		int r;
+	ಆಗ (1) {
+		ಅಕ್ಷರ ಒಳ[1024];
+		ಪೂರ್ಣಾಂಕ r;
 
-		r = read_in_full(fd, in, sizeof(in));
-		if (r == 0 || (r < 0 && connection_closed(errno)))
-			break;
-		if (r < 0)
+		r = read_ಒಳ_ತುಂಬಿದ(fd, ಒಳ, ಗಾತ್ರ(ಒಳ));
+		ಆದರೆ (r == 0 || (r < 0 && connection_closed(errno)))
+			ನಿಲ್ಲಿಸು;
+		ಆದರೆ (r < 0)
 			die_errno("read error from cache daemon");
-		write_or_die(1, in, r);
-		got_data = 1;
+		write_or_die(1, ಒಳ, r);
+		got_ದತ್ತಾಂಶ = 1;
 	}
 	close(fd);
-	return got_data;
+	ಹಿಂತಿರುಗಿ got_ದತ್ತಾಂಶ;
 }
 
-static void spawn_daemon(const char *socket)
+ಸ್ಥಿರ ಶೂನ್ಯ spawn_daemon(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *socket)
 {
-	struct child_process daemon = CHILD_PROCESS_INIT;
-	char buf[128];
-	int r;
+	ರಚನೆ ಮಗು_process daemon = ಮಗು_PROCESS_INIT;
+	ಅಕ್ಷರ buf[128];
+	ಪೂರ್ಣಾಂಕ r;
 
-	strvec_pushl(&daemon.args,
+	strvec_pushl(&daemon.ವಾದಗಳು,
 		     "credential-cache--daemon", socket,
-		     NULL);
+		     ಖಾಲಿ);
 	daemon.git_cmd = 1;
 	daemon.no_stdin = 1;
-	daemon.out = -1;
+	daemon.ಹೊರಹೋಗು = -1;
 
-	if (start_command(&daemon))
+	ಆದರೆ (ಆರಂಭ_command(&daemon))
 		die_errno("unable to start cache daemon");
-	r = read_in_full(daemon.out, buf, sizeof(buf));
-	if (r < 0)
+	r = read_ಒಳ_ತುಂಬಿದ(daemon.ಹೊರಹೋಗು, buf, ಗಾತ್ರ(buf));
+	ಆದರೆ (r < 0)
 		die_errno("unable to read result code from cache daemon");
-	if (r != 3 || memcmp(buf, "ok\n", 3))
+	ಆದರೆ (r != 3 || memcmp(buf, "ok\n", 3))
 		die("cache daemon did not start: %.*s", r, buf);
 
-	child_process_clear(&daemon);
-	close(daemon.out);
+	ಮಗು_process_clear(&daemon);
+	close(daemon.ಹೊರಹೋಗು);
 }
 
-static void do_cache(const char *socket, const char *action, int timeout,
-		     int flags)
+ಸ್ಥಿರ ಶೂನ್ಯ do_cache(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *socket, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *action, ಪೂರ್ಣಾಂಕ timeout,
+		     ಪೂರ್ಣಾಂಕ flags)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ರಚನೆ strbuf buf = STRBUF_INIT;
 
 	strbuf_addf(&buf, "action=%s\n", action);
 	strbuf_addf(&buf, "timeout=%d\n", timeout);
-	if (flags & FLAG_RELAY) {
-		if (strbuf_read(&buf, 0, 0) < 0)
+	ಆದರೆ (flags & FLAG_RELAY) {
+		ಆದರೆ (strbuf_read(&buf, 0, 0) < 0)
 			die_errno("unable to relay credential");
 	}
 
-	if (send_request(socket, &buf) < 0) {
-		if (connection_fatally_broken(errno))
+	ಆದರೆ (send_request(socket, &buf) < 0) {
+		ಆದರೆ (connection_fatally_broken(errno))
 			die_errno("unable to connect to cache daemon");
-		if (flags & FLAG_SPAWN) {
+		ಆದರೆ (flags & FLAG_SPAWN) {
 			spawn_daemon(socket);
-			if (send_request(socket, &buf) < 0)
+			ಆದರೆ (send_request(socket, &buf) < 0)
 				die_errno("unable to connect to cache daemon");
 		}
 	}
 	strbuf_release(&buf);
 }
 
-static char *get_socket_path(void)
+ಸ್ಥಿರ ಅಕ್ಷರ *get_socket_ಮಾರ್ಗ(ಶೂನ್ಯ)
 {
-	struct stat sb;
-	char *old_dir, *socket;
-	old_dir = interpolate_path("~/.git-credential-cache", 0);
-	if (old_dir && !stat(old_dir, &sb) && S_ISDIR(sb.st_mode))
+	ರಚನೆ stat sb;
+	ಅಕ್ಷರ *old_dir, *socket;
+	old_dir = interpolate_ಮಾರ್ಗ("~/.git-credential-cache", 0);
+	ಆದರೆ (old_dir && !stat(old_dir, &sb) && S_ISDIR(sb.st_ಬಹುಲಕ))
 		socket = xstrfmt("%s/socket", old_dir);
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		socket = xdg_cache_home("credential/socket");
-	free(old_dir);
-	return socket;
+	ಬಿಡುಗಡೆ(old_dir);
+	ಹಿಂತಿರುಗಿ socket;
 }
 
-static void announce_capabilities(void)
+ಸ್ಥಿರ ಶೂನ್ಯ announce_capabilities(ಶೂನ್ಯ)
 {
-	struct credential c = CREDENTIAL_INIT;
+	ರಚನೆ credential c = CREDENTIAL_INIT;
 	c.capa_authtype.request_initial = 1;
 	credential_announce_capabilities(&c, stdout);
 }
 
-int cmd_credential_cache(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_credential_cache(ಪೂರ್ಣಾಂಕ argc,
+			 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+			 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	const char *socket_path_arg = NULL;
-	char *socket_path;
-	int timeout = 900;
-	const char *op;
-	const char * const usage[] = {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *socket_ಮಾರ್ಗ_arg = ಖಾಲಿ;
+	ಅಕ್ಷರ *socket_ಮಾರ್ಗ;
+	ಪೂರ್ಣಾಂಕ timeout = 900;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *op;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ usage[] = {
 		"git credential-cache [<options>] <action>",
-		NULL
+		ಖಾಲಿ
 	};
-	struct option options[] = {
+	ರಚನೆ option options[] = {
 		OPT_INTEGER(0, "timeout", &timeout,
 			    "number of seconds to cache credentials"),
-		OPT_STRING(0, "socket", &socket_path_arg, "path",
+		OPT_STRING(0, "socket", &socket_ಮಾರ್ಗ_arg, "path",
 			   "path of cache-daemon socket"),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (!argc)
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, usage, 0);
+	ಆದರೆ (!argc)
 		usage_with_options(usage, options);
 	op = argv[0];
 
-	if (!have_unix_sockets())
+	ಆದರೆ (!have_unix_sockets())
 		die(_("credential-cache unavailable; no unix socket support"));
 
-	socket_path = xstrdup_or_null(socket_path_arg);
-	if (!socket_path)
-		socket_path = get_socket_path();
-	if (!socket_path)
+	socket_ಮಾರ್ಗ = xstrdup_or_null(socket_ಮಾರ್ಗ_arg);
+	ಆದರೆ (!socket_ಮಾರ್ಗ)
+		socket_ಮಾರ್ಗ = get_socket_ಮಾರ್ಗ();
+	ಆದರೆ (!socket_ಮಾರ್ಗ)
 		die("unable to find a suitable socket path; use --socket");
 
-	if (!strcmp(op, "exit"))
-		do_cache(socket_path, op, timeout, 0);
-	else if (!strcmp(op, "get") || !strcmp(op, "erase"))
-		do_cache(socket_path, op, timeout, FLAG_RELAY);
-	else if (!strcmp(op, "store"))
-		do_cache(socket_path, op, timeout, FLAG_RELAY|FLAG_SPAWN);
-	else if (!strcmp(op, "capability"))
+	ಆದರೆ (!strcmp(op, "exit"))
+		do_cache(socket_ಮಾರ್ಗ, op, timeout, 0);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(op, "get") || !strcmp(op, "erase"))
+		do_cache(socket_ಮಾರ್ಗ, op, timeout, FLAG_RELAY);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(op, "store"))
+		do_cache(socket_ಮಾರ್ಗ, op, timeout, FLAG_RELAY|FLAG_SPAWN);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(op, "capability"))
 		announce_capabilities();
-	else
+	ಇಲ್ಲದಿದ್ದರೆ
 		; /* ignore unknown operation */
 
-	free(socket_path);
-	return 0;
+	ಬಿಡುಗಡೆ(socket_ಮಾರ್ಗ);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-#else
+#ಇಲ್ಲದಿದ್ದರೆ
 
-int cmd_credential_cache(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_credential_cache(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			 ರಚನೆ repository *repo ಬಳಸದ)
 {
-	const char * const usage[] = {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ usage[] = {
 		"git credential-cache [options] <action>",
 		"",
 		"credential-cache is disabled in this build of Git",
-		NULL
+		ಖಾಲಿ
 	};
-	struct option options[] = { OPT_END() };
+	ರಚನೆ option options[] = { OPT_ಕೊನೆ() };
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, usage, 0);
 	die(_("credential-cache unavailable; no unix socket support"));
 }
 
-#endif /* NO_UNIX_SOCKETS */
+#ಆದರೆ_ಅಂತ್ಯ /* NO_UNIX_SOCKETS */

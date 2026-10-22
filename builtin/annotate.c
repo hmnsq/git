@@ -4,33 +4,33 @@
  * Copyright (C) 2006 Ryan Anderson
  */
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "strvec.h"
+#ಅನ್ತರ್ಭಾವ "git-compat-util.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "strvec.h"
 
-int cmd_annotate(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_annotate(ಪೂರ್ಣಾಂಕ argc,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		 ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		 ರಚನೆ repository *repo)
 {
-	struct strvec args = STRVEC_INIT;
-	const char **args_copy;
-	int ret;
+	ರಚನೆ strvec ವಾದಗಳು = STRVEC_INIT;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **ವಾದಗಳು_copy;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	strvec_pushl(&args, "annotate", "-c", NULL);
-	for (int i = 1; i < argc; i++)
-		strvec_push(&args, argv[i]);
+	strvec_pushl(&ವಾದಗಳು, "annotate", "-c", ಖಾಲಿ);
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 1; i < argc; i++)
+		strvec_ತಳ್ಳು(&ವಾದಗಳು, argv[i]);
 
 	/*
 	 * `cmd_blame()` ends up modifying the array, which causes memory leaks
 	 * if we didn't copy the array here.
 	 */
-	CALLOC_ARRAY(args_copy, args.nr + 1);
-	COPY_ARRAY(args_copy, args.v, args.nr);
+	CALLOC_ARRAY(ವಾದಗಳು_copy, ವಾದಗಳು.nr + 1);
+	COPY_ARRAY(ವಾದಗಳು_copy, ವಾದಗಳು.v, ವಾದಗಳು.nr);
 
-	ret = cmd_blame(args.nr, args_copy, prefix, repo);
+	ret = cmd_blame(ವಾದಗಳು.nr, ವಾದಗಳು_copy, ಪೂರ್ವಪ್ರತ್ಯಯ, repo);
 
-	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	strvec_clear(&ವಾದಗಳು);
+	ಬಿಡುಗಡೆ(ವಾದಗಳು_copy);
+	ಹಿಂತಿರುಗಿ ret;
 }

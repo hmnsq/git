@@ -1,101 +1,101 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "transport.h"
-#include "pkt-line.h"
-#include "ref-filter.h"
-#include "remote.h"
-#include "parse-options.h"
-#include "wildmatch.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "transport.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "ref-filter.h"
+#ಅನ್ತರ್ಭಾವ "remote.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "wildmatch.h"
 
-static const char * const ls_remote_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ ls_remote_usage[] = {
 	N_("git ls-remote [--branches] [--tags] [--refs] [--upload-pack=<exec>]\n"
 	   "              [-q | --quiet] [--exit-code] [--get-url] [--sort=<key>]\n"
 	   "              [--symref] [<repository> [<patterns>...]]"),
-	NULL
+	ಖಾಲಿ
 };
 
 /*
  * Is there one among the list of patterns that match the tail part
  * of the path?
  */
-static int tail_match(const struct strvec *pattern, const char *path)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಬಾಲ_ಹೊಂದಿಕೆ(ಸ್ಥಿರಾಂಕ ರಚನೆ strvec *ನಮೂನೆ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	char *pathbuf;
+	ಅಕ್ಷರ *pathbuf;
 
-	if (!pattern->nr)
-		return 1; /* no restriction */
+	ಆದರೆ (!ನಮೂನೆ->nr)
+		ಹಿಂತಿರುಗಿ 1; /* no restriction */
 
-	pathbuf = xstrfmt("/%s", path);
-	for (size_t i = 0; i < pattern->nr; i++) {
-		if (!wildmatch(pattern->v[i], pathbuf, 0)) {
-			free(pathbuf);
-			return 1;
+	pathbuf = xstrfmt("/%s", ಮಾರ್ಗ);
+	ಗಾಗಿ (ಗಾತ್ರ_t i = 0; i < ನಮೂನೆ->nr; i++) {
+		ಆದರೆ (!wildmatch(ನಮೂನೆ->v[i], pathbuf, 0)) {
+			ಬಿಡುಗಡೆ(pathbuf);
+			ಹಿಂತಿರುಗಿ 1;
 		}
 	}
-	free(pathbuf);
-	return 0;
+	ಬಿಡುಗಡೆ(pathbuf);
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int cmd_ls_remote(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_ls_remote(ಪೂರ್ಣಾಂಕ argc,
+		  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		  ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		  ರಚನೆ repository *repo ಬಳಸದ)
 {
-	const char *dest = NULL;
-	unsigned flags = 0;
-	int get_url = 0;
-	int quiet = 0;
-	int status = 0;
-	int show_symref_target = 0;
-	const char *uploadpack = NULL;
-	struct strvec pattern = STRVEC_INIT;
-	struct transport_ls_refs_options transport_options =
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *dest = ಖಾಲಿ;
+	ಚಿಹ್ನೆರಹಿತ flags = 0;
+	ಪೂರ್ಣಾಂಕ get_url = 0;
+	ಪೂರ್ಣಾಂಕ quiet = 0;
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2 = 0;
+	ಪೂರ್ಣಾಂಕ show_symref_ಗುರಿ = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *uploadpack = ಖಾಲಿ;
+	ರಚನೆ strvec ನಮೂನೆ = STRVEC_INIT;
+	ರಚನೆ transport_ls_refs_options transport_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	int i;
-	struct string_list server_options = STRING_LIST_INIT_DUP;
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ string_list server_options = STRING_LIST_INIT_DUP;
 
-	struct remote *remote;
-	struct transport *transport;
-	const struct ref *ref;
-	struct ref_array ref_array;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
+	ರಚನೆ remote *remote;
+	ರಚನೆ transport *transport;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ref *ref;
+	ರಚನೆ ref_array ref_array;
+	ರಚನೆ ref_ವಿಂಗಡಣೆ *ವಿಂಗಡಣೆ;
+	ರಚನೆ string_list ವಿಂಗಡಣೆ_options = STRING_LIST_INIT_DUP;
 
-	struct option options[] = {
+	ರಚನೆ option options[] = {
 		OPT__QUIET(&quiet, N_("do not print remote URL")),
 		OPT_STRING(0, "upload-pack", &uploadpack, N_("exec"),
 			   N_("path of git-upload-pack on the remote host")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "exec",
-			.value = &uploadpack,
+			.ಮೌಲ್ಯ = &uploadpack,
 			.argh = N_("exec"),
 			.help = N_("path of git-upload-pack on the remote host"),
 			.flags = PARSE_OPT_HIDDEN,
 		},
-		OPT_BIT('t', "tags", &flags, N_("limit to tags"), REF_TAGS),
-		OPT_BIT('b', "branches", &flags, N_("limit to branches"), REF_BRANCHES),
-		OPT_BIT_F('h', "heads", &flags,
+		OPT_ಬಿಟ್('t', "tags", &flags, N_("limit to tags"), REF_ಟ್ಯಾಗುಗಳು),
+		OPT_ಬಿಟ್('b', "branches", &flags, N_("limit to branches"), REF_BRANCHES),
+		OPT_ಬಿಟ್_F('h', "heads", &flags,
 			  N_("deprecated synonym for --branches"), REF_BRANCHES,
 			  PARSE_OPT_HIDDEN),
-		OPT_BIT(0, "refs", &flags, N_("do not show peeled tags"), REF_NORMAL),
+		OPT_ಬಿಟ್(0, "refs", &flags, N_("do not show peeled tags"), REF_ಸಾಮಾನ್ಯ),
 		OPT_BOOL(0, "get-url", &get_url,
 			 N_("take url.<base>.insteadOf into account")),
-		OPT_REF_SORT(&sorting_options),
-		OPT_SET_INT_F(0, "exit-code", &status,
+		OPT_REF_ವಿಂಗಡಿಸು(&ವಿಂಗಡಣೆ_options),
+		OPT_ಗಣ_INT_F(0, "exit-code", &ಸ್ಥಿತಿ_2,
 			      N_("exit with exit code 2 if no matching refs are found"),
 			      2, PARSE_OPT_NOCOMPLETE),
-		OPT_BOOL(0, "symref", &show_symref_target,
+		OPT_BOOL(0, "symref", &show_symref_ಗುರಿ,
 			 N_("show underlying ref in addition to the object pointed by it")),
 		OPT_STRING_LIST('o', "server-option", &server_options, N_("server-specific"), N_("option to transmit")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	memset(&ref_array, 0, sizeof(ref_array));
+	memset(&ref_array, 0, ಗಾತ್ರ(ref_array));
 
-	argc = parse_options(argc, argv, prefix, options, ls_remote_usage,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, ls_remote_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	dest = argv[0];
 
@@ -111,74 +111,74 @@ int cmd_ls_remote(int argc,
 	 * remote's object format. Otherwise, we may end up misparsing refspecs
 	 * depending on what object hash the remote uses.
 	 */
-	if (!the_repository->hash_algo)
-		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
+	ಆದರೆ (!the_repository->hash_algo)
+		repo_ಗಣ_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	packet_trace_identity("ls-remote");
+	packet_trace_ತಟಸ್ಥ("ls-remote");
 
-	for (int i = 1; i < argc; i++)
-		strvec_pushf(&pattern, "*/%s", argv[i]);
+	ಗಾಗಿ (ಪೂರ್ಣಾಂಕ i = 1; i < argc; i++)
+		strvec_pushf(&ನಮೂನೆ, "*/%s", argv[i]);
 
-	if (flags & REF_TAGS)
-		strvec_push(&transport_options.ref_prefixes, "refs/tags/");
-	if (flags & REF_BRANCHES)
-		strvec_push(&transport_options.ref_prefixes, "refs/heads/");
+	ಆದರೆ (flags & REF_ಟ್ಯಾಗುಗಳು)
+		strvec_ತಳ್ಳು(&transport_options.ref_prefixes, "refs/tags/");
+	ಆದರೆ (flags & REF_BRANCHES)
+		strvec_ತಳ್ಳು(&transport_options.ref_prefixes, "refs/heads/");
 
 	remote = remote_get(dest);
-	if (!remote) {
-		if (dest)
+	ಆದರೆ (!remote) {
+		ಆದರೆ (dest)
 			die("bad repository '%s'", dest);
 		die("No remote configured to list refs from.");
 	}
 
-	if (get_url) {
-		printf("%s\n", remote->url.v[0]);
-		return 0;
+	ಆದರೆ (get_url) {
+		ಬರೆ("%s\n", remote->url.v[0]);
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	transport = transport_get(remote, NULL);
-	if (uploadpack)
-		transport_set_option(transport, TRANS_OPT_UPLOADPACK, uploadpack);
-	if (server_options.nr)
+	transport = transport_get(remote, ಖಾಲಿ);
+	ಆದರೆ (uploadpack)
+		transport_ಗಣ_option(transport, TRANS_OPT_UPLOADPACK, uploadpack);
+	ಆದರೆ (server_options.nr)
 		transport->server_options = &server_options;
 
 	ref = transport_get_remote_refs(transport, &transport_options);
-	if (ref) {
-		int hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
-		repo_set_hash_algo(the_repository, hash_algo);
+	ಆದರೆ (ref) {
+		ಪೂರ್ಣಾಂಕ hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
+		repo_ಗಣ_hash_algo(the_repository, hash_algo);
 	}
 
-	if (!dest && !quiet)
+	ಆದರೆ (!dest && !quiet)
 		fprintf(stderr, "From %s\n", remote->url.v[0]);
-	for ( ; ref; ref = ref->next) {
-		struct ref_array_item *item;
-		if (!check_ref_type(ref, flags))
-			continue;
-		if (!tail_match(&pattern, ref->name))
-			continue;
-		item = ref_array_push(&ref_array, ref->name, &ref->old_oid, NULL);
-		item->symref = xstrdup_or_null(ref->symref);
+	ಗಾಗಿ ( ; ref; ref = ref->ಮುಂದಿನ) {
+		ರಚನೆ ref_array_ಅಂಶ *ಅಂಶ;
+		ಆದರೆ (!check_ref_type(ref, flags))
+			ಮುಂದುವರಿ;
+		ಆದರೆ (!ಬಾಲ_ಹೊಂದಿಕೆ(&ನಮೂನೆ, ref->name))
+			ಮುಂದುವರಿ;
+		ಅಂಶ = ref_array_ತಳ್ಳು(&ref_array, ref->name, &ref->old_oid, ಖಾಲಿ);
+		ಅಂಶ->symref = xstrdup_or_null(ref->symref);
 	}
 
-	sorting = ref_sorting_options(&sorting_options);
-	ref_array_sort(sorting, &ref_array);
+	ವಿಂಗಡಣೆ = ref_ವಿಂಗಡಣೆ_options(&ವಿಂಗಡಣೆ_options);
+	ref_array_ವಿಂಗಡಿಸು(ವಿಂಗಡಣೆ, &ref_array);
 
-	for (i = 0; i < ref_array.nr; i++) {
-		const struct ref_array_item *ref = ref_array.items[i];
-		if (show_symref_target && ref->symref)
-			printf("ref: %s\t%s\n", ref->symref, ref->refname);
-		printf("%s\t%s\n", oid_to_hex(&ref->objectname), ref->refname);
-		status = 0; /* we found something */
+	ಗಾಗಿ (i = 0; i < ref_array.nr; i++) {
+		ಸ್ಥಿರಾಂಕ ರಚನೆ ref_array_ಅಂಶ *ref = ref_array.ವಸ್ತುಗಳು[i];
+		ಆದರೆ (show_symref_ಗುರಿ && ref->symref)
+			ಬರೆ("ref: %s\t%s\n", ref->symref, ref->refname);
+		ಬರೆ("%s\t%s\n", oid_ಗಮ್ಯ_hex(&ref->objectname), ref->refname);
+		ಸ್ಥಿತಿ_2 = 0; /* we found something */
 	}
 
 	string_list_clear(&server_options, 0);
-	ref_sorting_release(sorting);
+	ref_ವಿಂಗಡಣೆ_release(ವಿಂಗಡಣೆ);
 	ref_array_clear(&ref_array);
-	if (transport_disconnect(transport))
-		status = 1;
+	ಆದರೆ (transport_disconnect(transport))
+		ಸ್ಥಿತಿ_2 = 1;
 	transport_ls_refs_options_release(&transport_options);
 
-	strvec_clear(&pattern);
+	strvec_clear(&ನಮೂನೆ);
 	string_list_clear(&server_options, 0);
-	return status;
+	ಹಿಂತಿರುಗಿ ಸ್ಥಿತಿ_2;
 }

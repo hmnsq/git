@@ -1,96 +1,96 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "run-command.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
 
-#define VERIFY_PACK_VERBOSE 01
-#define VERIFY_PACK_STAT_ONLY 02
+#ವ್ಯಾಖ್ಯಾನಿಸು VERIFY_PACK_VERBOSE 01
+#ವ್ಯಾಖ್ಯಾನಿಸು VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ verify_one_pack(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ flags, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	ರಚನೆ ಮಗು_process ಸೂಚ್ಯಂಕ_pack = ಮಗು_PROCESS_INIT;
+	ರಚನೆ strvec *argv = &ಸೂಚ್ಯಂಕ_pack.ವಾದಗಳು;
+	ರಚನೆ strbuf arg = STRBUF_INIT;
+	ಪೂರ್ಣಾಂಕ verbose = flags & VERIFY_PACK_VERBOSE;
+	ಪೂರ್ಣಾಂಕ stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	ಪೂರ್ಣಾಂಕ err;
 
-	strvec_push(argv, "index-pack");
+	strvec_ತಳ್ಳು(argv, "index-pack");
 
-	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
-		strvec_push(argv, "--verify-stat");
-	else
-		strvec_push(argv, "--verify");
+	ಆದರೆ (stat_only)
+		strvec_ತಳ್ಳು(argv, "--verify-stat-only");
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (verbose)
+		strvec_ತಳ್ಳು(argv, "--verify-stat");
+	ಇಲ್ಲದಿದ್ದರೆ
+		strvec_ತಳ್ಳು(argv, "--verify");
 
-	if (hash_algo)
+	ಆದರೆ (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
 	 * In addition to "foo.pack" we accept "foo.idx" and "foo";
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
-	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
-	    !ends_with(arg.buf, ".pack"))
+	strbuf_addstr(&arg, ಮಾರ್ಗ);
+	ಆದರೆ (strbuf_strip_suffix(&arg, ".idx") ||
+	    !ತುದಿಗಳು_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_ತಳ್ಳು(argv, arg.buf);
 
-	index_pack.git_cmd = 1;
+	ಸೂಚ್ಯಂಕ_pack.git_cmd = 1;
 
-	err = run_command(&index_pack);
+	err = ಸತತ_command(&ಸೂಚ್ಯಂಕ_pack);
 
-	if (verbose || stat_only) {
-		if (err)
-			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
-				printf("%s: ok\n", arg.buf);
+	ಆದರೆ (verbose || stat_only) {
+		ಆದರೆ (err)
+			ಬರೆ("%s: bad\n", arg.buf);
+		ಇಲ್ಲದಿದ್ದರೆ {
+			ಆದರೆ (!stat_only)
+				ಬರೆ("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	ಹಿಂತಿರುಗಿ err;
 }
 
-static const char * const verify_pack_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
-	NULL
+	ಖಾಲಿ
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ಪೂರ್ಣಾಂಕ cmd_verify_pack(ಪೂರ್ಣಾಂಕ argc,
+		    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+		    ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
-		OPT_BIT('v', "verbose", &flags, N_("verbose"),
+	ಪೂರ್ಣಾಂಕ err = 0;
+	ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ flags = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *object_format = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ i;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ option verify_pack_options[] = {
+		OPT_ಬಿಟ್('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
-		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
+		OPT_ಬಿಟ್('s', "stat-only", &flags, N_("show statistics only"),
 			VERIFY_PACK_STAT_ONLY),
 		OPT_STRING(0, "object-format", &object_format, N_("hash"),
 			   N_("specify the hash algorithm to use")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, verify_pack_options,
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	ಆದರೆ (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	ಗಾಗಿ (i = 0; i < argc; i++) {
+		ಆದರೆ (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	ಹಿಂತಿರುಗಿ err;
 }

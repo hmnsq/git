@@ -1,106 +1,106 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ವ್ಯಾಖ್ಯಾನಿಸು DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "git-zlib.h"
-#include "hex.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "odb/transaction.h"
-#include "object.h"
-#include "delta.h"
-#include "pack.h"
-#include "blob.h"
-#include "replace-object.h"
-#include "strbuf.h"
-#include "progress.h"
-#include "decorate.h"
-#include "fsck.h"
-#include "packfile.h"
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "config.h"
+#ಅನ್ತರ್ಭಾವ "environment.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "git-zlib.h"
+#ಅನ್ತರ್ಭಾವ "hex.h"
+#ಅನ್ತರ್ಭಾವ "object-file.h"
+#ಅನ್ತರ್ಭಾವ "odb.h"
+#ಅನ್ತರ್ಭಾವ "odb/streaming.h"
+#ಅನ್ತರ್ಭಾವ "odb/transaction.h"
+#ಅನ್ತರ್ಭಾವ "object.h"
+#ಅನ್ತರ್ಭಾವ "delta.h"
+#ಅನ್ತರ್ಭಾವ "pack.h"
+#ಅನ್ತರ್ಭಾವ "blob.h"
+#ಅನ್ತರ್ಭಾವ "replace-object.h"
+#ಅನ್ತರ್ಭಾವ "strbuf.h"
+#ಅನ್ತರ್ಭಾವ "progress.h"
+#ಅನ್ತರ್ಭಾವ "decorate.h"
+#ಅನ್ತರ್ಭಾವ "fsck.h"
+#ಅನ್ತರ್ಭಾವ "packfile.h"
 
-static int dry_run, quiet, recover, has_errors, strict;
-static const char unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ dry_ಸತತ, quiet, recover, has_errors, strict;
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]";
 
-static unsigned char buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int offset, len;
-static off_t consumed_bytes;
-static off_t max_input_size;
-static struct git_hash_ctx ctx;
-static struct fsck_options fsck_options;
-static struct progress *progress;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ ಬಫರ್[DEFAULT_IO_ಬಫರ್_ಗಾತ್ರ];
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ ಪೂರ್ಣಾಂಕ ಸ್ಥಾನಾಂತರ, len;
+ಸ್ಥಿರ off_t consumed_ಬೈಟುಗಳು;
+ಸ್ಥಿರ off_t max_ಒಳಹರಿವು_ಗಾತ್ರ;
+ಸ್ಥಿರ ರಚನೆ git_hash_ctx ctx;
+ಸ್ಥಿರ ರಚನೆ fsck_options fsck_options;
+ಸ್ಥಿರ ರಚನೆ ಪ್ರಗತಿ *ಪ್ರಗತಿ;
 
 /*
  * When running under --strict mode, objects whose reachability are
  * suspect are kept in core without getting written in the object
  * store.
  */
-struct obj_buffer {
-	char *buffer;
-	unsigned long size;
+ರಚನೆ obj_ಬಫರ್ {
+	ಅಕ್ಷರ *ಬಫರ್;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
 };
 
-static struct decoration obj_decorate;
+ಸ್ಥಿರ ರಚನೆ decoration obj_decorate;
 
-static struct obj_buffer *lookup_object_buffer(struct object *base)
+ಸ್ಥಿರ ರಚನೆ obj_ಬಫರ್ *lookup_object_ಬಫರ್(ರಚನೆ object *ತಳ)
 {
-	return lookup_decoration(&obj_decorate, base);
+	ಹಿಂತಿರುಗಿ lookup_decoration(&obj_decorate, ತಳ);
 }
 
-static void add_object_buffer(struct object *object, char *buffer, unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_object_ಬಫರ್(ರಚನೆ object *object, ಅಕ್ಷರ *ಬಫರ್, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	struct obj_buffer *obj;
+	ರಚನೆ obj_ಬಫರ್ *obj;
 	CALLOC_ARRAY(obj, 1);
-	obj->buffer = buffer;
-	obj->size = size;
-	if (add_decoration(&obj_decorate, object, obj))
-		die("object %s tried to add buffer twice!", oid_to_hex(&object->oid));
+	obj->ಬಫರ್ = ಬಫರ್;
+	obj->ಗಾತ್ರ_2 = ಗಾತ್ರ_2;
+	ಆದರೆ (ಕೂಡಿಸು_decoration(&obj_decorate, object, obj))
+		die("object %s tried to add buffer twice!", oid_ಗಮ್ಯ_hex(&object->oid));
 }
 
 /*
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+ಸ್ಥಿರ ಶೂನ್ಯ *fill(ಪೂರ್ಣಾಂಕ min)
 {
-	if (min <= len)
-		return buffer + offset;
-	if (min > sizeof(buffer))
+	ಆದರೆ (min <= len)
+		ಹಿಂತಿರುಗಿ ಬಫರ್ + ಸ್ಥಾನಾಂತರ;
+	ಆದರೆ (min > ಗಾತ್ರ(ಬಫರ್))
 		die("cannot fill %d bytes", min);
-	if (offset) {
-		git_hash_update(&ctx, buffer, offset);
-		memmove(buffer, buffer + offset, len);
-		offset = 0;
+	ಆದರೆ (ಸ್ಥಾನಾಂತರ) {
+		git_hash_update(&ctx, ಬಫರ್, ಸ್ಥಾನಾಂತರ);
+		memmove(ಬಫರ್, ಬಫರ್ + ಸ್ಥಾನಾಂತರ, len);
+		ಸ್ಥಾನಾಂತರ = 0;
 	}
-	do {
-		ssize_t ret = xread(0, buffer + len, sizeof(buffer) - len);
-		if (ret <= 0) {
-			if (!ret)
+	ಮಾಡು {
+		ssize_t ret = xread(0, ಬಫರ್ + len, ಗಾತ್ರ(ಬಫರ್) - len);
+		ಆದರೆ (ret <= 0) {
+			ಆದರೆ (!ret)
 				die("early EOF");
 			die_errno("read error on input");
 		}
 		len += ret;
-	} while (len < min);
-	return buffer;
+	} ಆಗ (len < min);
+	ಹಿಂತಿರುಗಿ ಬಫರ್;
 }
 
-static void use(int bytes)
+ಸ್ಥಿರ ಶೂನ್ಯ use(ಪೂರ್ಣಾಂಕ ಬೈಟುಗಳು)
 {
-	if (bytes > len)
+	ಆದರೆ (ಬೈಟುಗಳು > len)
 		die("used more bytes than were available");
-	len -= bytes;
-	offset += bytes;
+	len -= ಬೈಟುಗಳು;
+	ಸ್ಥಾನಾಂತರ += ಬೈಟುಗಳು;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	ಆದರೆ (signed_ಕೂಡಿಸು_overflows(consumed_ಬೈಟುಗಳು, ಬೈಟುಗಳು))
 		die("pack too large for current definition of off_t");
-	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size)
+	consumed_ಬೈಟುಗಳು += ಬೈಟುಗಳು;
+	ಆದರೆ (max_ಒಳಹರಿವು_ಗಾತ್ರ && consumed_ಬೈಟುಗಳು > max_ಒಳಹರಿವು_ಗಾತ್ರ)
 		die(_("pack exceeds maximum allowed size"));
-	display_throughput(progress, consumed_bytes);
+	display_throughput(ಪ್ರಗತಿ, consumed_ಬೈಟುಗಳು);
 }
 
 /*
@@ -114,99 +114,99 @@ static void use(int bytes)
  * allocated buffer which is reused to hold temporary zstream output
  * and return NULL instead of returning garbage data.
  */
-static void *get_data(unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ *get_ದತ್ತಾಂಶ(ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	git_zstream stream;
-	unsigned long bufsize = dry_run && size > 8192 ? 8192 : size;
-	void *buf = xmallocz(bufsize);
+	git_zstream ಹರಿವು;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ bufsize = dry_ಸತತ && ಗಾತ್ರ_2 > 8192 ? 8192 : ಗಾತ್ರ_2;
+	ಶೂನ್ಯ *buf = xmallocz(bufsize);
 
-	memset(&stream, 0, sizeof(stream));
+	memset(&ಹರಿವು, 0, ಗಾತ್ರ(ಹರಿವು));
 
-	stream.next_out = buf;
-	stream.avail_out = bufsize;
-	stream.next_in = fill(1);
-	stream.avail_in = len;
-	git_inflate_init(&stream);
+	ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು = buf;
+	ಹರಿವು.avail_ಹೊರಹೋಗು = bufsize;
+	ಹರಿವು.ಮುಂದಿನ_ಒಳ = fill(1);
+	ಹರಿವು.avail_ಒಳ = len;
+	git_inflate_init(&ಹರಿವು);
 
-	for (;;) {
-		int ret = git_inflate(&stream, 0);
-		use(len - stream.avail_in);
-		if (stream.total_out == size && ret == Z_STREAM_END)
-			break;
-		if (ret != Z_OK) {
+	ಗಾಗಿ (;;) {
+		ಪೂರ್ಣಾಂಕ ret = git_inflate(&ಹರಿವು, 0);
+		use(len - ಹರಿವು.avail_ಒಳ);
+		ಆದರೆ (ಹರಿವು.ಒಟ್ಟು_ಹೊರಹೋಗು == ಗಾತ್ರ_2 && ret == Z_ಹರಿವು_ಕೊನೆ)
+			ನಿಲ್ಲಿಸು;
+		ಆದರೆ (ret != Z_OK) {
 			error("inflate returned %d", ret);
 			FREE_AND_NULL(buf);
-			if (!recover)
-				exit(1);
+			ಆದರೆ (!recover)
+				ನಿರ್ಗಮಿಸು(1);
 			has_errors = 1;
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
-		stream.next_in = fill(1);
-		stream.avail_in = len;
-		if (dry_run) {
+		ಹರಿವು.ಮುಂದಿನ_ಒಳ = fill(1);
+		ಹರಿವು.avail_ಒಳ = len;
+		ಆದರೆ (dry_ಸತತ) {
 			/* reuse the buffer in dry_run mode */
-			stream.next_out = buf;
-			stream.avail_out = bufsize > size - stream.total_out ?
-						   size - stream.total_out :
+			ಹರಿವು.ಮುಂದಿನ_ಹೊರಹೋಗು = buf;
+			ಹರಿವು.avail_ಹೊರಹೋಗು = bufsize > ಗಾತ್ರ_2 - ಹರಿವು.ಒಟ್ಟು_ಹೊರಹೋಗು ?
+						   ಗಾತ್ರ_2 - ಹರಿವು.ಒಟ್ಟು_ಹೊರಹೋಗು :
 						   bufsize;
 		}
 	}
-	git_inflate_end(&stream);
-	if (dry_run)
+	git_inflate_ಕೊನೆ(&ಹರಿವು);
+	ಆದರೆ (dry_ಸತತ)
 		FREE_AND_NULL(buf);
-	return buf;
+	ಹಿಂತಿರುಗಿ buf;
 }
 
-struct delta_info {
-	struct object_id base_oid;
-	unsigned nr;
-	off_t base_offset;
-	unsigned long size;
-	void *delta;
-	struct delta_info *next;
+ರಚನೆ delta_info {
+	ರಚನೆ object_id ತಳ_oid;
+	ಚಿಹ್ನೆರಹಿತ nr;
+	off_t ತಳ_ಸ್ಥಾನಾಂತರ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2;
+	ಶೂನ್ಯ *delta;
+	ರಚನೆ delta_info *ಮುಂದಿನ;
 };
 
-static struct delta_info *delta_list;
+ಸ್ಥಿರ ರಚನೆ delta_info *delta_list;
 
-static void add_delta_to_list(unsigned nr, const struct object_id *base_oid,
-			      off_t base_offset,
-			      void *delta, unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ ಕೂಡಿಸು_delta_ಗಮ್ಯ_list(ಚಿಹ್ನೆರಹಿತ nr, ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *ತಳ_oid,
+			      off_t ತಳ_ಸ್ಥಾನಾಂತರ,
+			      ಶೂನ್ಯ *delta, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	struct delta_info *info = xmalloc(sizeof(*info));
+	ರಚನೆ delta_info *info = xmalloc(ಗಾತ್ರ(*info));
 
-	oidcpy(&info->base_oid, base_oid);
-	info->base_offset = base_offset;
-	info->size = size;
+	oidcpy(&info->ತಳ_oid, ತಳ_oid);
+	info->ತಳ_ಸ್ಥಾನಾಂತರ = ತಳ_ಸ್ಥಾನಾಂತರ;
+	info->ಗಾತ್ರ_2 = ಗಾತ್ರ_2;
 	info->delta = delta;
 	info->nr = nr;
-	info->next = delta_list;
+	info->ಮುಂದಿನ = delta_list;
 	delta_list = info;
 }
 
-struct obj_info {
-	off_t offset;
-	struct object_id oid;
-	struct object *obj;
+ರಚನೆ obj_info {
+	off_t ಸ್ಥಾನಾಂತರ;
+	ರಚನೆ object_id oid;
+	ರಚನೆ object *obj;
 };
 
 /* Remember to update object flag allocation in object.h */
-#define FLAG_OPEN (1u<<20)
-#define FLAG_WRITTEN (1u<<21)
+#ವ್ಯಾಖ್ಯಾನಿಸು FLAG_OPEN (1u<<20)
+#ವ್ಯಾಖ್ಯಾನಿಸು FLAG_WRITTEN (1u<<21)
 
-static struct obj_info *obj_list;
-static unsigned nr_objects;
+ಸ್ಥಿರ ರಚನೆ obj_info *obj_list;
+ಸ್ಥಿರ ಚಿಹ್ನೆರಹಿತ nr_objects;
 
 /*
  * Called only from check_object() after it verified this object
  * is Ok.
  */
-static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
+ಸ್ಥಿರ ಶೂನ್ಯ write_cached_object(ರಚನೆ object *obj, ರಚನೆ obj_ಬಫರ್ *obj_buf)
 {
-	struct object_id oid;
+	ರಚನೆ object_id oid;
 
-	if (odb_write_object(the_repository->objects, obj_buf->buffer, obj_buf->size,
+	ಆದರೆ (odb_write_object(the_repository->objects, obj_buf->ಬಫರ್, obj_buf->ಗಾತ್ರ_2,
 			     obj->type, &oid) < 0)
-		die("failed to write object %s", oid_to_hex(&obj->oid));
+		die("failed to write object %s", oid_ಗಮ್ಯ_hex(&obj->oid));
 	obj->flags |= FLAG_WRITTEN;
 }
 
@@ -215,417 +215,417 @@ static void write_cached_object(struct object *obj, struct obj_buffer *obj_buf)
  * that have reachability requirements and calls this function.
  * Verify its reachability and validity recursively and write it out.
  */
-static int check_object(struct object *obj, enum object_type type,
-			void *data UNUSED,
-			struct fsck_options *options UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ check_object(ರಚನೆ object *obj, ಎಣಿಕೆ object_type type,
+			ಶೂನ್ಯ *ದತ್ತಾಂಶ ಬಳಸದ,
+			ರಚನೆ fsck_options *options ಬಳಸದ)
 {
-	struct obj_buffer *obj_buf;
+	ರಚನೆ obj_ಬಫರ್ *obj_buf;
 
-	if (!obj)
-		return 1;
+	ಆದರೆ (!obj)
+		ಹಿಂತಿರುಗಿ 1;
 
-	if (obj->flags & FLAG_WRITTEN)
-		return 0;
+	ಆದರೆ (obj->flags & FLAG_WRITTEN)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (type != OBJ_ANY && obj->type != type)
+	ಆದರೆ (type != OBJ_ANY && obj->type != type)
 		die("object type mismatch");
 
-	if (!(obj->flags & FLAG_OPEN)) {
-		size_t size;
-		int type = odb_read_object_info(the_repository->objects, &obj->oid, &size);
-		if (type != obj->type || type <= 0)
+	ಆದರೆ (!(obj->flags & FLAG_OPEN)) {
+		ಗಾತ್ರ_t ಗಾತ್ರ_2;
+		ಪೂರ್ಣಾಂಕ type = odb_read_object_info(the_repository->objects, &obj->oid, &ಗಾತ್ರ_2);
+		ಆದರೆ (type != obj->type || type <= 0)
 			die("object of unexpected type");
 		obj->flags |= FLAG_WRITTEN;
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
-	obj_buf = lookup_object_buffer(obj);
-	if (!obj_buf)
-		die("Whoops! Cannot find object '%s'", oid_to_hex(&obj->oid));
-	if (fsck_object(obj, obj_buf->buffer, obj_buf->size, &fsck_options))
+	obj_buf = lookup_object_ಬಫರ್(obj);
+	ಆದರೆ (!obj_buf)
+		die("Whoops! Cannot find object '%s'", oid_ಗಮ್ಯ_hex(&obj->oid));
+	ಆದರೆ (fsck_object(obj, obj_buf->ಬಫರ್, obj_buf->ಗಾತ್ರ_2, &fsck_options))
 		die("fsck error in packed object");
 	fsck_options.walk = check_object;
-	if (fsck_walk(obj, NULL, &fsck_options))
-		die("Error on reachable objects of %s", oid_to_hex(&obj->oid));
+	ಆದರೆ (fsck_walk(obj, ಖಾಲಿ, &fsck_options))
+		die("Error on reachable objects of %s", oid_ಗಮ್ಯ_hex(&obj->oid));
 	write_cached_object(obj, obj_buf);
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void write_rest(void)
+ಸ್ಥಿರ ಶೂನ್ಯ write_rest(ಶೂನ್ಯ)
 {
-	unsigned i;
-	for (i = 0; i < nr_objects; i++) {
-		if (obj_list[i].obj)
-			check_object(obj_list[i].obj, OBJ_ANY, NULL, NULL);
+	ಚಿಹ್ನೆರಹಿತ i;
+	ಗಾಗಿ (i = 0; i < nr_objects; i++) {
+		ಆದರೆ (obj_list[i].obj)
+			check_object(obj_list[i].obj, OBJ_ANY, ಖಾಲಿ, ಖಾಲಿ);
 	}
 }
 
-static void added_object(unsigned nr, enum object_type type,
-			 void *data, unsigned long size);
+ಸ್ಥಿರ ಶೂನ್ಯ added_object(ಚಿಹ್ನೆರಹಿತ nr, ಎಣಿಕೆ object_type type,
+			 ಶೂನ್ಯ *ದತ್ತಾಂಶ, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2);
 
 /*
  * Write out nr-th object from the list, now we know the contents
  * of it.  Under --strict, this buffers structured objects in-core,
  * to be checked at the end.
  */
-static void write_object(unsigned nr, enum object_type type,
-			 void *buf, unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ write_object(ಚಿಹ್ನೆರಹಿತ nr, ಎಣಿಕೆ object_type type,
+			 ಶೂನ್ಯ *buf, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	if (!strict) {
-		if (odb_write_object(the_repository->objects, buf, size, type,
+	ಆದರೆ (!strict) {
+		ಆದರೆ (odb_write_object(the_repository->objects, buf, ಗಾತ್ರ_2, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
-		added_object(nr, type, buf, size);
-		free(buf);
-		obj_list[nr].obj = NULL;
-	} else if (type == OBJ_BLOB) {
-		struct blob *blob;
-		if (odb_write_object(the_repository->objects, buf, size, type,
+		added_object(nr, type, buf, ಗಾತ್ರ_2);
+		ಬಿಡುಗಡೆ(buf);
+		obj_list[nr].obj = ಖಾಲಿ;
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (type == OBJ_BLOB) {
+		ರಚನೆ blob *blob;
+		ಆದರೆ (odb_write_object(the_repository->objects, buf, ಗಾತ್ರ_2, type,
 				     &obj_list[nr].oid) < 0)
 			die("failed to write object");
-		added_object(nr, type, buf, size);
-		free(buf);
+		added_object(nr, type, buf, ಗಾತ್ರ_2);
+		ಬಿಡುಗಡೆ(buf);
 
 		blob = lookup_blob(the_repository, &obj_list[nr].oid);
-		if (blob)
+		ಆದರೆ (blob)
 			blob->object.flags |= FLAG_WRITTEN;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			die("invalid blob object");
-		obj_list[nr].obj = NULL;
-	} else {
-		struct object *obj;
-		int eaten;
-		hash_object_file(the_hash_algo, buf, size, type,
+		obj_list[nr].obj = ಖಾಲಿ;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ರಚನೆ object *obj;
+		ಪೂರ್ಣಾಂಕ eaten;
+		hash_object_file(the_hash_algo, buf, ಗಾತ್ರ_2, type,
 				 &obj_list[nr].oid);
-		added_object(nr, type, buf, size);
-		obj = parse_object_buffer(the_repository, &obj_list[nr].oid,
-					  type, size, buf,
+		added_object(nr, type, buf, ಗಾತ್ರ_2);
+		obj = parse_object_ಬಫರ್(the_repository, &obj_list[nr].oid,
+					  type, ಗಾತ್ರ_2, buf,
 					  &eaten);
-		if (!obj)
+		ಆದರೆ (!obj)
 			die("invalid %s", type_name(type));
-		add_object_buffer(obj, buf, size);
+		ಕೂಡಿಸು_object_ಬಫರ್(obj, buf, ಗಾತ್ರ_2);
 		obj->flags |= FLAG_OPEN;
 		obj_list[nr].obj = obj;
 	}
 }
 
-static void resolve_delta(unsigned nr, enum object_type type,
-			  void *base, unsigned long base_size,
-			  void *delta, unsigned long delta_size)
+ಸ್ಥಿರ ಶೂನ್ಯ resolve_delta(ಚಿಹ್ನೆರಹಿತ nr, ಎಣಿಕೆ object_type type,
+			  ಶೂನ್ಯ *ತಳ, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ತಳ_ಗಾತ್ರ,
+			  ಶೂನ್ಯ *delta, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ delta_ಗಾತ್ರ_2)
 {
-	void *result;
-	size_t result_size;
+	ಶೂನ್ಯ *ಫಲಿತಾಂಶ;
+	ಗಾತ್ರ_t ಫಲಿತಾಂಶ_ಗಾತ್ರ;
 
-	result = patch_delta(base, base_size,
-			     delta, delta_size,
-			     &result_size);
-	if (!result)
+	ಫಲಿತಾಂಶ = patch_delta(ತಳ, ತಳ_ಗಾತ್ರ,
+			     delta, delta_ಗಾತ್ರ_2,
+			     &ಫಲಿತಾಂಶ_ಗಾತ್ರ);
+	ಆದರೆ (!ಫಲಿತಾಂಶ)
 		die("failed to apply delta");
-	free(delta);
-	write_object(nr, type, result, result_size);
+	ಬಿಡುಗಡೆ(delta);
+	write_object(nr, type, ಫಲಿತಾಂಶ, ಫಲಿತಾಂಶ_ಗಾತ್ರ);
 }
 
 /*
  * We now know the contents of an object (which is nr-th in the pack);
  * resolve all the deltified objects that are based on it.
  */
-static void added_object(unsigned nr, enum object_type type,
-			 void *data, unsigned long size)
+ಸ್ಥಿರ ಶೂನ್ಯ added_object(ಚಿಹ್ನೆರಹಿತ nr, ಎಣಿಕೆ object_type type,
+			 ಶೂನ್ಯ *ದತ್ತಾಂಶ, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2)
 {
-	struct delta_info **p = &delta_list;
-	struct delta_info *info;
+	ರಚನೆ delta_info **p = &delta_list;
+	ರಚನೆ delta_info *info;
 
-	while ((info = *p) != NULL) {
-		if (oideq(&info->base_oid, &obj_list[nr].oid) ||
-		    info->base_offset == obj_list[nr].offset) {
-			*p = info->next;
+	ಆಗ ((info = *p) != ಖಾಲಿ) {
+		ಆದರೆ (oideq(&info->ತಳ_oid, &obj_list[nr].oid) ||
+		    info->ತಳ_ಸ್ಥಾನಾಂತರ == obj_list[nr].ಸ್ಥಾನಾಂತರ) {
+			*p = info->ಮುಂದಿನ;
 			p = &delta_list;
-			resolve_delta(info->nr, type, data, size,
-				      info->delta, info->size);
-			free(info);
-			continue;
+			resolve_delta(info->nr, type, ದತ್ತಾಂಶ, ಗಾತ್ರ_2,
+				      info->delta, info->ಗಾತ್ರ_2);
+			ಬಿಡುಗಡೆ(info);
+			ಮುಂದುವರಿ;
 		}
-		p = &info->next;
+		p = &info->ಮುಂದಿನ;
 	}
 }
 
-static void unpack_non_delta_entry(enum object_type type, unsigned long size,
-				   unsigned nr)
+ಸ್ಥಿರ ಶೂನ್ಯ unpack_non_delta_ನಮೂದು(ಎಣಿಕೆ object_type type, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2,
+				   ಚಿಹ್ನೆರಹಿತ nr)
 {
-	void *buf = get_data(size);
+	ಶೂನ್ಯ *buf = get_ದತ್ತಾಂಶ(ಗಾತ್ರ_2);
 
-	if (buf)
-		write_object(nr, type, buf, size);
+	ಆದರೆ (buf)
+		write_object(nr, type, buf, ಗಾತ್ರ_2);
 }
 
-struct zlib_stream {
-	struct odb_stream base;
+ರಚನೆ zlib_ಹರಿವು {
+	ರಚನೆ odb_ಹರಿವು ತಳ;
 	git_zstream *zstream;
-	int status;
+	ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2;
 };
 
-static ssize_t zlib_stream_read(struct odb_stream *in_stream,
-				char *buf, size_t buf_len)
+ಸ್ಥಿರ ssize_t zlib_ಹರಿವು_read(ರಚನೆ odb_ಹರಿವು *ಒಳ_ಹರಿವು,
+				ಅಕ್ಷರ *buf, ಗಾತ್ರ_t buf_len)
 {
-	struct zlib_stream *data = container_of(in_stream, struct zlib_stream, base);
-	git_zstream *zstream = data->zstream;
+	ರಚನೆ zlib_ಹರಿವು *ದತ್ತಾಂಶ = container_ದ(ಒಳ_ಹರಿವು, ರಚನೆ zlib_ಹರಿವು, ತಳ);
+	git_zstream *zstream = ದತ್ತಾಂಶ->zstream;
 
-	if (data->status != Z_OK)
-		return 0;
+	ಆದರೆ (ದತ್ತಾಂಶ->ಸ್ಥಿತಿ_2 != Z_OK)
+		ಹಿಂತಿರುಗಿ 0;
 
-	zstream->next_out = (unsigned char *) buf;
-	zstream->avail_out = buf_len;
+	zstream->ಮುಂದಿನ_ಹೊರಹೋಗು = (ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *) buf;
+	zstream->avail_ಹೊರಹೋಗು = buf_len;
 
-	while (data->status == Z_OK && zstream->avail_out == buf_len) {
-		zstream->next_in = fill(1);
-		zstream->avail_in = len;
-		data->status = git_inflate(zstream, 0);
-		use(len - zstream->avail_in);
+	ಆಗ (ದತ್ತಾಂಶ->ಸ್ಥಿತಿ_2 == Z_OK && zstream->avail_ಹೊರಹೋಗು == buf_len) {
+		zstream->ಮುಂದಿನ_ಒಳ = fill(1);
+		zstream->avail_ಒಳ = len;
+		ದತ್ತಾಂಶ->ಸ್ಥಿತಿ_2 = git_inflate(zstream, 0);
+		use(len - zstream->avail_ಒಳ);
 	}
 
-	return buf_len - zstream->avail_out;
+	ಹಿಂತಿರುಗಿ buf_len - zstream->avail_ಹೊರಹೋಗು;
 }
 
-static void stream_blob(unsigned long size, unsigned nr)
+ಸ್ಥಿರ ಶೂನ್ಯ ಹರಿವು_blob(ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ಗಾತ್ರ_2, ಚಿಹ್ನೆರಹಿತ nr)
 {
 	git_zstream zstream = { 0 };
-	struct zlib_stream in_stream = {
-		.base = {
-			.read = zlib_stream_read,
-			.size = size,
+	ರಚನೆ zlib_ಹರಿವು ಒಳ_ಹರಿವು = {
+		.ತಳ = {
+			.ಪಠ = zlib_ಹರಿವು_read,
+			.ಗಾತ್ರ_2 = ಗಾತ್ರ_2,
 			.type = OBJ_BLOB,
 		},
 		.zstream = &zstream,
-		.status = Z_OK,
+		.ಸ್ಥಿತಿ_2 = Z_OK,
 	};
-	struct obj_info *info = &obj_list[nr];
+	ರಚನೆ obj_info *info = &obj_list[nr];
 
 	git_inflate_init(&zstream);
 
-	if (odb_write_object_stream(the_repository->objects, &in_stream.base, &info->oid))
+	ಆದರೆ (odb_write_object_ಹರಿವು(the_repository->objects, &ಒಳ_ಹರಿವು.ತಳ, &info->oid))
 		die(_("failed to write object in stream"));
 
-	if (in_stream.status != Z_STREAM_END)
-		die(_("inflate returned (%d)"), in_stream.status);
-	git_inflate_end(&zstream);
+	ಆದರೆ (ಒಳ_ಹರಿವು.ಸ್ಥಿತಿ_2 != Z_ಹರಿವು_ಕೊನೆ)
+		die(_("inflate returned (%d)"), ಒಳ_ಹರಿವು.ಸ್ಥಿತಿ_2);
+	git_inflate_ಕೊನೆ(&zstream);
 
-	if (strict) {
-		struct blob *blob = lookup_blob(the_repository, &info->oid);
+	ಆದರೆ (strict) {
+		ರಚನೆ blob *blob = lookup_blob(the_repository, &info->oid);
 
-		if (!blob)
+		ಆದರೆ (!blob)
 			die(_("invalid blob object from stream"));
 		blob->object.flags |= FLAG_WRITTEN;
 	}
-	info->obj = NULL;
+	info->obj = ಖಾಲಿ;
 }
 
-static int resolve_against_held(unsigned nr, const struct object_id *base,
-				void *delta_data, unsigned long delta_size)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ resolve_against_held(ಚಿಹ್ನೆರಹಿತ nr, ಸ್ಥಿರಾಂಕ ರಚನೆ object_id *ತಳ,
+				ಶೂನ್ಯ *delta_ದತ್ತಾಂಶ, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ delta_ಗಾತ್ರ_2)
 {
-	struct object *obj;
-	struct obj_buffer *obj_buffer;
-	obj = lookup_object(the_repository, base);
-	if (!obj)
-		return 0;
-	obj_buffer = lookup_object_buffer(obj);
-	if (!obj_buffer)
-		return 0;
-	resolve_delta(nr, obj->type, obj_buffer->buffer,
-		      obj_buffer->size, delta_data, delta_size);
-	return 1;
+	ರಚನೆ object *obj;
+	ರಚನೆ obj_ಬಫರ್ *obj_ಬಫರ್;
+	obj = lookup_object(the_repository, ತಳ);
+	ಆದರೆ (!obj)
+		ಹಿಂತಿರುಗಿ 0;
+	obj_ಬಫರ್ = lookup_object_ಬಫರ್(obj);
+	ಆದರೆ (!obj_ಬಫರ್)
+		ಹಿಂತಿರುಗಿ 0;
+	resolve_delta(nr, obj->type, obj_ಬಫರ್->ಬಫರ್,
+		      obj_ಬಫರ್->ಗಾತ್ರ_2, delta_ದತ್ತಾಂಶ, delta_ಗಾತ್ರ_2);
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-static void unpack_delta_entry(enum object_type type, unsigned long delta_size,
-			       unsigned nr)
+ಸ್ಥಿರ ಶೂನ್ಯ unpack_delta_ನಮೂದು(ಎಣಿಕೆ object_type type, ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ delta_ಗಾತ್ರ_2,
+			       ಚಿಹ್ನೆರಹಿತ nr)
 {
-	void *delta_data, *base;
-	unsigned long base_size;
-	size_t base_size_st = 0;
-	struct object_id base_oid;
+	ಶೂನ್ಯ *delta_ದತ್ತಾಂಶ, *ತಳ;
+	ಚಿಹ್ನೆರಹಿತ ದೀರ್ಘ ತಳ_ಗಾತ್ರ;
+	ಗಾತ್ರ_t ತಳ_ಗಾತ್ರ_st = 0;
+	ರಚನೆ object_id ತಳ_oid;
 
-	if (type == OBJ_REF_DELTA) {
-		oidread(&base_oid, fill(the_hash_algo->rawsz), the_repository->hash_algo);
+	ಆದರೆ (type == OBJ_REF_DELTA) {
+		oidread(&ತಳ_oid, fill(the_hash_algo->rawsz), the_repository->hash_algo);
 		use(the_hash_algo->rawsz);
-		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
-		if (odb_has_object(the_repository->objects, &base_oid,
+		delta_ದತ್ತಾಂಶ = get_ದತ್ತಾಂಶ(delta_ಗಾತ್ರ_2);
+		ಆದರೆ (!delta_ದತ್ತಾಂಶ)
+			ಹಿಂತಿರುಗಿ;
+		ಆದರೆ (odb_has_object(the_repository->objects, &ತಳ_oid,
 				   ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 			; /* Ok we have this one */
-		else if (resolve_against_held(nr, &base_oid,
-					      delta_data, delta_size))
-			return; /* we are done */
-		else {
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (resolve_against_held(nr, &ತಳ_oid,
+					      delta_ದತ್ತಾಂಶ, delta_ಗಾತ್ರ_2))
+			ಹಿಂತಿರುಗಿ; /* we are done */
+		ಇಲ್ಲದಿದ್ದರೆ {
 			/* cannot resolve yet --- queue it */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
-			add_delta_to_list(nr, &base_oid, 0, delta_data, delta_size);
-			return;
+			ಕೂಡಿಸು_delta_ಗಮ್ಯ_list(nr, &ತಳ_oid, 0, delta_ದತ್ತಾಂಶ, delta_ಗಾತ್ರ_2);
+			ಹಿಂತಿರುಗಿ;
 		}
-	} else {
-		unsigned base_found = 0;
-		unsigned char *pack, c;
-		off_t base_offset;
-		unsigned lo, mid, hi;
+	} ಇಲ್ಲದಿದ್ದರೆ {
+		ಚಿಹ್ನೆರಹಿತ ತಳ_ಸಿಕ್ಕಿತು = 0;
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *pack, c;
+		off_t ತಳ_ಸ್ಥಾನಾಂತರ;
+		ಚಿಹ್ನೆರಹಿತ lo, mid, hi;
 
 		pack = fill(1);
 		c = *pack;
 		use(1);
-		base_offset = c & 127;
-		while (c & 128) {
-			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
+		ತಳ_ಸ್ಥಾನಾಂತರ = c & 127;
+		ಆಗ (c & 128) {
+			ತಳ_ಸ್ಥಾನಾಂತರ += 1;
+			ಆದರೆ (!ತಳ_ಸ್ಥಾನಾಂತರ || MSB(ತಳ_ಸ್ಥಾನಾಂತರ, 7))
 				die("offset value overflow for delta base object");
 			pack = fill(1);
 			c = *pack;
 			use(1);
-			base_offset = (base_offset << 7) + (c & 127);
+			ತಳ_ಸ್ಥಾನಾಂತರ = (ತಳ_ಸ್ಥಾನಾಂತರ << 7) + (c & 127);
 		}
-		base_offset = obj_list[nr].offset - base_offset;
-		if (base_offset <= 0 || base_offset >= obj_list[nr].offset)
+		ತಳ_ಸ್ಥಾನಾಂತರ = obj_list[nr].ಸ್ಥಾನಾಂತರ - ತಳ_ಸ್ಥಾನಾಂತರ;
+		ಆದರೆ (ತಳ_ಸ್ಥಾನಾಂತರ <= 0 || ತಳ_ಸ್ಥಾನಾಂತರ >= obj_list[nr].ಸ್ಥಾನಾಂತರ)
 			die("offset value out of bound for delta base object");
 
-		delta_data = get_data(delta_size);
-		if (!delta_data)
-			return;
+		delta_ದತ್ತಾಂಶ = get_ದತ್ತಾಂಶ(delta_ಗಾತ್ರ_2);
+		ಆದರೆ (!delta_ದತ್ತಾಂಶ)
+			ಹಿಂತಿರುಗಿ;
 		lo = 0;
 		hi = nr;
-		while (lo < hi) {
+		ಆಗ (lo < hi) {
 			mid = lo + (hi - lo) / 2;
-			if (base_offset < obj_list[mid].offset) {
+			ಆದರೆ (ತಳ_ಸ್ಥಾನಾಂತರ < obj_list[mid].ಸ್ಥಾನಾಂತರ) {
 				hi = mid;
-			} else if (base_offset > obj_list[mid].offset) {
+			} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ತಳ_ಸ್ಥಾನಾಂತರ > obj_list[mid].ಸ್ಥಾನಾಂತರ) {
 				lo = mid + 1;
-			} else {
-				oidcpy(&base_oid, &obj_list[mid].oid);
-				base_found = !is_null_oid(&base_oid);
-				break;
+			} ಇಲ್ಲದಿದ್ದರೆ {
+				oidcpy(&ತಳ_oid, &obj_list[mid].oid);
+				ತಳ_ಸಿಕ್ಕಿತು = !is_null_oid(&ತಳ_oid);
+				ನಿಲ್ಲಿಸು;
 			}
 		}
-		if (!base_found) {
+		ಆದರೆ (!ತಳ_ಸಿಕ್ಕಿತು) {
 			/*
 			 * The delta base object is itself a delta that
 			 * has not been resolved yet.
 			 */
 			oidclr(&obj_list[nr].oid, the_repository->hash_algo);
-			add_delta_to_list(nr, null_oid(the_hash_algo), base_offset,
-					  delta_data, delta_size);
-			return;
+			ಕೂಡಿಸು_delta_ಗಮ್ಯ_list(nr, null_oid(the_hash_algo), ತಳ_ಸ್ಥಾನಾಂತರ,
+					  delta_ದತ್ತಾಂಶ, delta_ಗಾತ್ರ_2);
+			ಹಿಂತಿರುಗಿ;
 		}
 	}
 
-	if (resolve_against_held(nr, &base_oid, delta_data, delta_size))
-		return;
+	ಆದರೆ (resolve_against_held(nr, &ತಳ_oid, delta_ದತ್ತಾಂಶ, delta_ಗಾತ್ರ_2))
+		ಹಿಂತಿರುಗಿ;
 
-	base = odb_read_object(the_repository->objects, &base_oid,
-			       &type, &base_size_st);
-	base_size = cast_size_t_to_ulong(base_size_st);
-	if (!base) {
+	ತಳ = odb_read_object(the_repository->objects, &ತಳ_oid,
+			       &type, &ತಳ_ಗಾತ್ರ_st);
+	ತಳ_ಗಾತ್ರ = cast_ಗಾತ್ರ_t_ಗಮ್ಯ_ulong(ತಳ_ಗಾತ್ರ_st);
+	ಆದರೆ (!ತಳ) {
 		error("failed to read delta-pack base object %s",
-		      oid_to_hex(&base_oid));
-		if (!recover)
-			exit(1);
+		      oid_ಗಮ್ಯ_hex(&ತಳ_oid));
+		ಆದರೆ (!recover)
+			ನಿರ್ಗಮಿಸು(1);
 		has_errors = 1;
-		return;
+		ಹಿಂತಿರುಗಿ;
 	}
-	resolve_delta(nr, type, base, base_size, delta_data, delta_size);
-	free(base);
+	resolve_delta(nr, type, ತಳ, ತಳ_ಗಾತ್ರ, delta_ದತ್ತಾಂಶ, delta_ಗಾತ್ರ_2);
+	ಬಿಡುಗಡೆ(ತಳ);
 }
 
-static void unpack_one(unsigned nr)
+ಸ್ಥಿರ ಶೂನ್ಯ unpack_one(ಚಿಹ್ನೆರಹಿತ nr)
 {
-	unsigned shift;
-	unsigned char *pack;
-	size_t size, c;
-	enum object_type type;
+	ಚಿಹ್ನೆರಹಿತ ಸರಿಸು;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *pack;
+	ಗಾತ್ರ_t ಗಾತ್ರ_2, c;
+	ಎಣಿಕೆ object_type type;
 
-	obj_list[nr].offset = consumed_bytes;
+	obj_list[nr].ಸ್ಥಾನಾಂತರ = consumed_ಬೈಟುಗಳು;
 
 	pack = fill(1);
 	c = *pack;
 	use(1);
 	type = (c >> 4) & 7;
-	size = (c & 15);
-	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	ಗಾತ್ರ_2 = (c & 15);
+	ಸರಿಸು = 4;
+	ಆಗ (c & 0x80) {
+		ಆದರೆ ((bitsizeof(ಗಾತ್ರ_t) - 7) < ಸರಿಸು)
 			die(_("object size too large for this platform"));
 		pack = fill(1);
 		c = *pack;
 		use(1);
-		size += (c & 0x7f) << shift;
-		shift += 7;
+		ಗಾತ್ರ_2 += (c & 0x7f) << ಸರಿಸು;
+		ಸರಿಸು += 7;
 	}
 
-	switch (type) {
-	case OBJ_BLOB:
-		if (!dry_run &&
-		    size > repo_settings_get_big_file_threshold(the_repository)) {
-			stream_blob(size, nr);
-			return;
+	ಆಯ್ಕೆ (type) {
+	ಸ್ಥಿತಿ OBJ_BLOB:
+		ಆದರೆ (!dry_ಸತತ &&
+		    ಗಾತ್ರ_2 > repo_settings_get_big_file_ಮಿತಿ(the_repository)) {
+			ಹರಿವು_blob(ಗಾತ್ರ_2, nr);
+			ಹಿಂತಿರುಗಿ;
 		}
 		/* fallthrough */
-	case OBJ_COMMIT:
-	case OBJ_TREE:
-	case OBJ_TAG:
-		unpack_non_delta_entry(type, size, nr);
-		return;
-	case OBJ_REF_DELTA:
-	case OBJ_OFS_DELTA:
-		unpack_delta_entry(type, size, nr);
-		return;
-	default:
+	ಸ್ಥಿತಿ OBJ_COMMIT:
+	ಸ್ಥಿತಿ OBJ_ವೃಕ್ಷ:
+	ಸ್ಥಿತಿ OBJ_ಟ್ಯಾಗ್:
+		unpack_non_delta_ನಮೂದು(type, ಗಾತ್ರ_2, nr);
+		ಹಿಂತಿರುಗಿ;
+	ಸ್ಥಿತಿ OBJ_REF_DELTA:
+	ಸ್ಥಿತಿ OBJ_OFS_DELTA:
+		unpack_delta_ನಮೂದು(type, ಗಾತ್ರ_2, nr);
+		ಹಿಂತಿರುಗಿ;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		error("bad object type %d", type);
 		has_errors = 1;
-		if (recover)
-			return;
-		exit(1);
+		ಆದರೆ (recover)
+			ಹಿಂತಿರುಗಿ;
+		ನಿರ್ಗಮಿಸು(1);
 	}
 }
 
-static void unpack_all(void)
+ಸ್ಥಿರ ಶೂನ್ಯ unpack_all(ಶೂನ್ಯ)
 {
-	int i;
-	unsigned char *hdr = fill(sizeof(struct pack_header));
-	struct odb_transaction *transaction;
+	ಪೂರ್ಣಾಂಕ i;
+	ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *hdr = fill(ಗಾತ್ರ(ರಚನೆ pack_ಶೀರ್ಷಿಕೆ));
+	ರಚನೆ odb_transaction *transaction;
 
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	ಆದರೆ (get_be32(hdr) != PACK_SIGNATURE)
 		die("bad pack file");
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	ಆದರೆ (!pack_ಆವೃತ್ತಿ_ok_native(get_be32(hdr)))
 		die("unknown pack file version %"PRIu32,
 		    get_be32(hdr));
 	hdr += 4;
 	nr_objects = get_be32(hdr);
-	use(sizeof(struct pack_header));
+	use(ಗಾತ್ರ(ರಚನೆ pack_ಶೀರ್ಷಿಕೆ));
 
-	if (!quiet)
-		progress = start_progress(the_repository,
+	ಆದರೆ (!quiet)
+		ಪ್ರಗತಿ = ಆರಂಭ_ಪ್ರಗತಿ(the_repository,
 					  _("Unpacking objects"), nr_objects);
 	CALLOC_ARRAY(obj_list, nr_objects);
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	for (i = 0; i < nr_objects; i++) {
+	ಗಾಗಿ (i = 0; i < nr_objects; i++) {
 		unpack_one(i);
-		display_progress(progress, i + 1);
+		display_ಪ್ರಗತಿ(ಪ್ರಗತಿ, i + 1);
 	}
 	odb_transaction_commit_and_finalize_or_die(transaction);
-	stop_progress(&progress);
+	stop_ಪ್ರಗತಿ(&ಪ್ರಗತಿ);
 
-	if (delta_list)
+	ಆದರೆ (delta_list)
 		die("unresolved deltas left after unpacking");
 }
 
-int cmd_unpack_objects(int argc,
-		       const char **argv,
-		       const char *prefix UNUSED,
-		       struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_unpack_objects(ಪೂರ್ಣಾಂಕ argc,
+		       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ ಬಳಸದ,
+		       ರಚನೆ repository *repo)
 {
-	int i;
-	struct object_id oid;
-	struct git_hash_ctx tmp_ctx;
+	ಪೂರ್ಣಾಂಕ i;
+	ರಚನೆ object_id oid;
+	ರಚನೆ git_hash_ctx tmp_ctx;
 
 	disable_replace_refs();
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ಖಾಲಿ);
 
 	quiet = !isatty(2);
 
@@ -633,40 +633,40 @@ int cmd_unpack_objects(int argc,
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
 
-	for (i = 1 ; i < argc; i++) {
-		const char *arg = argv[i];
+	ಗಾಗಿ (i = 1 ; i < argc; i++) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "-n")) {
-				dry_run = 1;
-				continue;
+		ಆದರೆ (*arg == '-') {
+			ಆದರೆ (!strcmp(arg, "-n")) {
+				dry_ಸತತ = 1;
+				ಮುಂದುವರಿ;
 			}
-			if (!strcmp(arg, "-q")) {
+			ಆದರೆ (!strcmp(arg, "-q")) {
 				quiet = 1;
-				continue;
+				ಮುಂದುವರಿ;
 			}
-			if (!strcmp(arg, "-r")) {
+			ಆದರೆ (!strcmp(arg, "-r")) {
 				recover = 1;
-				continue;
+				ಮುಂದುವರಿ;
 			}
-			if (!strcmp(arg, "--strict")) {
+			ಆದರೆ (!strcmp(arg, "--strict")) {
 				strict = 1;
-				continue;
+				ಮುಂದುವರಿ;
 			}
-			if (skip_prefix(arg, "--strict=", &arg)) {
+			ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(arg, "--strict=", &arg)) {
 				strict = 1;
-				fsck_set_msg_types(&fsck_options, arg);
-				continue;
+				fsck_ಗಣ_ಸಂದೇಶ_types(&fsck_options, arg);
+				ಮುಂದುವರಿ;
 			}
-			if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
-							     buffer, &len) < 0)
+			ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(arg, "--pack_header=", &arg)) {
+				ಆದರೆ (parse_pack_ಶೀರ್ಷಿಕೆ_option(arg,
+							     ಬಫರ್, &len) < 0)
 					die(_("bad --pack_header: %s"), arg);
-				continue;
+				ಮುಂದುವರಿ;
 			}
-			if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
-				continue;
+			ಆದರೆ (skip_ಪೂರ್ವಪ್ರತ್ಯಯ(arg, "--max-input-size=", &arg)) {
+				max_ಒಳಹರಿವು_ಗಾತ್ರ = strtoumax(arg, ಖಾಲಿ, 10);
+				ಮುಂದುವರಿ;
 			}
 			usage(unpack_usage);
 		}
@@ -676,23 +676,23 @@ int cmd_unpack_objects(int argc,
 	}
 	git_hash_init(&ctx, the_hash_algo);
 	unpack_all();
-	git_hash_update(&ctx, buffer, offset);
+	git_hash_update(&ctx, ಬಫರ್, ಸ್ಥಾನಾಂತರ);
 	git_hash_init(&tmp_ctx, the_hash_algo);
 	git_hash_clone(&tmp_ctx, &ctx);
 	git_hash_final_oid(&oid, &tmp_ctx);
-	if (strict) {
+	ಆದರೆ (strict) {
 		write_rest();
-		if (fsck_finish(&fsck_options))
+		ಆದರೆ (fsck_ಮುಕ್ತಾಯ(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
-	if (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
+	ಆದರೆ (!hasheq(fill(the_hash_algo->rawsz), oid.hash,
 		    the_repository->hash_algo))
 		die("final sha1 did not match");
 	use(the_hash_algo->rawsz);
 
 	/* Write the last part of the buffer to stdout */
-	write_in_full(1, buffer + offset, len);
+	write_ಒಳ_ತುಂಬಿದ(1, ಬಫರ್ + ಸ್ಥಾನಾಂತರ, len);
 
 	/* All done */
-	return has_errors;
+	ಹಿಂತಿರುಗಿ has_errors;
 }

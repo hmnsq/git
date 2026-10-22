@@ -1,12 +1,12 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "setup.h"
-#include "strvec.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "bundle.h"
+#ವ್ಯಾಖ್ಯಾನಿಸು USE_THE_REPOSITORY_VARIABLE
+#ಅನ್ತರ್ಭಾವ "builtin.h"
+#ಅನ್ತರ್ಭಾವ "abspath.h"
+#ಅನ್ತರ್ಭಾವ "gettext.h"
+#ಅನ್ತರ್ಭಾವ "setup.h"
+#ಅನ್ತರ್ಭಾವ "strvec.h"
+#ಅನ್ತರ್ಭಾವ "parse-options.h"
+#ಅನ್ತರ್ಭಾವ "pkt-line.h"
+#ಅನ್ತರ್ಭಾವ "bundle.h"
 
 /*
  * Basic handler for bundle files to connect repositories via sneakernet.
@@ -15,233 +15,233 @@
  * bundle supporting "fetch", "pull", and "ls-remote".
  */
 
-#define BUILTIN_BUNDLE_CREATE_USAGE \
+#ವ್ಯಾಖ್ಯಾನಿಸು BUILTIN_BUNDLE_CREATE_USAGE \
 	N_("git bundle create [-q | --quiet | --progress]\n" \
 	   "                  [--version=<version>] <file> <git-rev-list-args>")
-#define BUILTIN_BUNDLE_VERIFY_USAGE \
+#ವ್ಯಾಖ್ಯಾನಿಸು BUILTIN_BUNDLE_VERIFY_USAGE \
 	N_("git bundle verify [-q | --quiet] <file>")
-#define BUILTIN_BUNDLE_LIST_HEADS_USAGE \
+#ವ್ಯಾಖ್ಯಾನಿಸು BUILTIN_BUNDLE_LIST_HEADS_USAGE \
 	N_("git bundle list-heads <file> [<refname>...]")
-#define BUILTIN_BUNDLE_UNBUNDLE_USAGE \
+#ವ್ಯಾಖ್ಯಾನಿಸು BUILTIN_BUNDLE_UNBUNDLE_USAGE \
 	N_("git bundle unbundle [--progress] <file> [<refname>...]")
 
-static char const * const builtin_bundle_usage[] = {
+ಸ್ಥಿರ ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ * ಸ್ಥಿರಾಂಕ builtin_bundle_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
 	BUILTIN_BUNDLE_VERIFY_USAGE,
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL,
+	ಖಾಲಿ,
 };
 
-static const char * const builtin_bundle_create_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_bundle_create_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_bundle_verify_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_bundle_verify_usage[] = {
 	BUILTIN_BUNDLE_VERIFY_USAGE,
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_bundle_list_heads_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_bundle_list_heads_usage[] = {
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
-	NULL
+	ಖಾಲಿ
 };
 
-static const char * const builtin_bundle_unbundle_usage[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ builtin_bundle_unbundle_usage[] = {
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL
+	ಖಾಲಿ
 };
 
-static int parse_options_cmd_bundle(int argc,
-		const char **argv,
-		const char* prefix,
-		const char * const usagestr[],
-		const struct option options[],
-		char **bundle_file) {
-	argc = parse_options(argc, argv, NULL, options, usagestr,
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ parse_options_cmd_bundle(ಪೂರ್ಣಾಂಕ argc,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ* ಪೂರ್ವಪ್ರತ್ಯಯ,
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ * ಸ್ಥಿರಾಂಕ usagestr[],
+		ಸ್ಥಿರಾಂಕ ರಚನೆ option options[],
+		ಅಕ್ಷರ **bundle_file) {
+	argc = parse_options(argc, argv, ಖಾಲಿ, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (!argc)
-		usage_msg_opt(_("need a <file> argument"), usagestr, options);
-	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
-	return argc;
+	ಆದರೆ (!argc)
+		usage_ಸಂದೇಶ_opt(_("need a <file> argument"), usagestr, options);
+	*bundle_file = ಪೂರ್ವಪ್ರತ್ಯಯ_filename_except_for_dash(ಪೂರ್ವಪ್ರತ್ಯಯ, argv[0]);
+	ಹಿಂತಿರುಗಿ argc;
 }
 
-static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmd_bundle_create(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			     ರಚನೆ repository *repo ಬಳಸದ)
 {
-	int progress = isatty(STDERR_FILENO);
-	int version = -1;
-	struct option options[] = {
-		OPT_NEGBIT('q', "quiet", &progress,
+	ಪೂರ್ಣಾಂಕ ಪ್ರಗತಿ = isatty(STDERR_FILENO);
+	ಪೂರ್ಣಾಂಕ ಆವೃತ್ತಿ = -1;
+	ರಚನೆ option options[] = {
+		OPT_NEGBIT('q', "quiet", &ಪ್ರಗತಿ,
 			   N_("do not show progress meter"), 1),
-		OPT_BIT(0, "progress", &progress,
+		OPT_ಬಿಟ್(0, "progress", &ಪ್ರಗತಿ,
 			N_("show progress meter"), 1),
-		OPT_BIT_F(0, "all-progress", &progress,
+		OPT_ಬಿಟ್_F(0, "all-progress", &ಪ್ರಗತಿ,
 			  N_("historical; same as --progress"), 1,
 			  PARSE_OPT_HIDDEN),
 		OPT_NOOP_NOARG(0, "all-progress-implied"),
-		OPT_INTEGER(0, "version", &version,
+		OPT_INTEGER(0, "version", &ಆವೃತ್ತಿ,
 			    N_("specify bundle format version")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	char *bundle_file;
-	int ret;
+	ಅಕ್ಷರ *bundle_file;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	argc = parse_options_cmd_bundle(argc, argv, prefix,
+	argc = parse_options_cmd_bundle(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			builtin_bundle_create_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	ಆದರೆ (!startup_info->have_repository)
 		die(_("Need a repository to create a bundle."));
-	ret = !!create_bundle(the_repository, bundle_file, argc, argv, version, progress);
-	free(bundle_file);
-	return ret;
+	ret = !!create_bundle(the_repository, bundle_file, argc, argv, ಆವೃತ್ತಿ, ಪ್ರಗತಿ);
+	ಬಿಡುಗಡೆ(bundle_file);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
 /*
  * Similar to read_bundle_header(), but handle "-" as stdin.
  */
-static int open_bundle(const char *path, struct bundle_header *header,
-		       const char **name)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ open_bundle(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ರಚನೆ bundle_ಶೀರ್ಷಿಕೆ *ಶೀರ್ಷಿಕೆ,
+		       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **name)
 {
-	if (!strcmp(path, "-")) {
-		if (name)
+	ಆದರೆ (!strcmp(ಮಾರ್ಗ, "-")) {
+		ಆದರೆ (name)
 			*name = "<stdin>";
-		return read_bundle_header_fd(0, header, "<stdin>");
+		ಹಿಂತಿರುಗಿ read_bundle_ಶೀರ್ಷಿಕೆ_fd(0, ಶೀರ್ಷಿಕೆ, "<stdin>");
 	}
 
-	if (name)
-		*name = path;
-	return read_bundle_header(path, header);
+	ಆದರೆ (name)
+		*name = ಮಾರ್ಗ;
+	ಹಿಂತಿರುಗಿ read_bundle_ಶೀರ್ಷಿಕೆ(ಮಾರ್ಗ, ಶೀರ್ಷಿಕೆ);
 }
 
-static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int quiet = 0;
-	int ret;
-	struct option options[] = {
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmd_bundle_verify(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			     ರಚನೆ repository *repo ಬಳಸದ) {
+	ರಚನೆ bundle_ಶೀರ್ಷಿಕೆ ಶೀರ್ಷಿಕೆ = BUNDLE_ಶೀರ್ಷಿಕೆ_INIT;
+	ಪೂರ್ಣಾಂಕ bundle_fd = -1;
+	ಪೂರ್ಣಾಂಕ quiet = 0;
+	ಪೂರ್ಣಾಂಕ ret;
+	ರಚನೆ option options[] = {
 		OPT_BOOL('q', "quiet", &quiet,
 			    N_("do not show bundle details")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	char *bundle_file;
-	const char *name;
+	ಅಕ್ಷರ *bundle_file;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
 
-	argc = parse_options_cmd_bundle(argc, argv, prefix,
+	argc = parse_options_cmd_bundle(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			builtin_bundle_verify_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository) {
+	ಆದರೆ (!startup_info->have_repository) {
 		ret = error(_("need a repository to verify a bundle"));
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
+	ಆದರೆ ((bundle_fd = open_bundle(bundle_file, &ಶೀರ್ಷಿಕೆ, &name)) < 0) {
 		ret = 1;
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
 	close(bundle_fd);
-	if (verify_bundle(the_repository, &header,
+	ಆದರೆ (verify_bundle(the_repository, &ಶೀರ್ಷಿಕೆ,
 			  quiet ? VERIFY_BUNDLE_QUIET : VERIFY_BUNDLE_VERBOSE)) {
 		ret = 1;
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
 
 	fprintf(stderr, _("%s is okay\n"), name);
 	ret = 0;
 cleanup:
-	free(bundle_file);
-	bundle_header_release(&header);
-	return ret;
+	ಬಿಡುಗಡೆ(bundle_file);
+	bundle_ಶೀರ್ಷಿಕೆ_release(&ಶೀರ್ಷಿಕೆ);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	struct option options[] = {
-		OPT_END()
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmd_bundle_list_heads(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+				 ರಚನೆ repository *repo ಬಳಸದ) {
+	ರಚನೆ bundle_ಶೀರ್ಷಿಕೆ ಶೀರ್ಷಿಕೆ = BUNDLE_ಶೀರ್ಷಿಕೆ_INIT;
+	ಪೂರ್ಣಾಂಕ bundle_fd = -1;
+	ಪೂರ್ಣಾಂಕ ret;
+	ರಚನೆ option options[] = {
+		OPT_ಕೊನೆ()
 	};
-	char *bundle_file;
+	ಅಕ್ಷರ *bundle_file;
 
-	argc = parse_options_cmd_bundle(argc, argv, prefix,
+	argc = parse_options_cmd_bundle(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			builtin_bundle_list_heads_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	ಆದರೆ ((bundle_fd = open_bundle(bundle_file, &ಶೀರ್ಷಿಕೆ, ಖಾಲಿ)) < 0) {
 		ret = 1;
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
 	close(bundle_fd);
-	ret = !!list_bundle_refs(&header, argc, argv);
+	ret = !!list_bundle_refs(&ಶೀರ್ಷಿಕೆ, argc, argv);
 cleanup:
-	free(bundle_file);
-	bundle_header_release(&header);
-	return ret;
+	ಬಿಡುಗಡೆ(bundle_file);
+	bundle_ಶೀರ್ಷಿಕೆ_release(&ಶೀರ್ಷಿಕೆ);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
-			       struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	int progress = isatty(2);
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmd_bundle_unbundle(ಪೂರ್ಣಾಂಕ argc, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+			       ರಚನೆ repository *repo ಬಳಸದ) {
+	ರಚನೆ bundle_ಶೀರ್ಷಿಕೆ ಶೀರ್ಷಿಕೆ = BUNDLE_ಶೀರ್ಷಿಕೆ_INIT;
+	ಪೂರ್ಣಾಂಕ bundle_fd = -1;
+	ಪೂರ್ಣಾಂಕ ret;
+	ಪೂರ್ಣಾಂಕ ಪ್ರಗತಿ = isatty(2);
 
-	struct option options[] = {
-		OPT_BOOL(0, "progress", &progress,
+	ರಚನೆ option options[] = {
+		OPT_BOOL(0, "progress", &ಪ್ರಗತಿ,
 			 N_("show progress meter")),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
-	char *bundle_file;
-	struct strvec extra_index_pack_args = STRVEC_INIT;
+	ಅಕ್ಷರ *bundle_file;
+	ರಚನೆ strvec extra_ಸೂಚ್ಯಂಕ_pack_ವಾದಗಳು = STRVEC_INIT;
 
-	argc = parse_options_cmd_bundle(argc, argv, prefix,
+	argc = parse_options_cmd_bundle(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	ಆದರೆ (!startup_info->have_repository)
 		die(_("Need a repository to unbundle."));
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	ಆದರೆ ((bundle_fd = open_bundle(bundle_file, &ಶೀರ್ಷಿಕೆ, ಖಾಲಿ)) < 0) {
 		ret = 1;
-		goto cleanup;
+		ಹೋಗು cleanup;
 	}
-	if (progress)
-		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
-			     _("Unbundling objects"), NULL);
-	ret = !!unbundle(the_repository, &header, bundle_fd,
-			 &extra_index_pack_args, NULL) ||
-		list_bundle_refs(&header, argc, argv);
-	bundle_header_release(&header);
+	ಆದರೆ (ಪ್ರಗತಿ)
+		strvec_pushl(&extra_ಸೂಚ್ಯಂಕ_pack_ವಾದಗಳು, "-v", "--progress-title",
+			     _("Unbundling objects"), ಖಾಲಿ);
+	ret = !!unbundle(the_repository, &ಶೀರ್ಷಿಕೆ, bundle_fd,
+			 &extra_ಸೂಚ್ಯಂಕ_pack_ವಾದಗಳು, ಖಾಲಿ) ||
+		list_bundle_refs(&ಶೀರ್ಷಿಕೆ, argc, argv);
+	bundle_ಶೀರ್ಷಿಕೆ_release(&ಶೀರ್ಷಿಕೆ);
 
 cleanup:
-	strvec_clear(&extra_index_pack_args);
-	free(bundle_file);
-	return ret;
+	strvec_clear(&extra_ಸೂಚ್ಯಂಕ_pack_ವಾದಗಳು);
+	ಬಿಡುಗಡೆ(bundle_file);
+	ಹಿಂತಿರುಗಿ ret;
 }
 
-int cmd_bundle(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+ಪೂರ್ಣಾಂಕ cmd_bundle(ಪೂರ್ಣಾಂಕ argc,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **argv,
+	       ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ,
+	       ರಚನೆ repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ಖಾಲಿ;
+	ರಚನೆ option options[] = {
 		OPT_SUBCOMMAND("create", &fn, cmd_bundle_create),
 		OPT_SUBCOMMAND("verify", &fn, cmd_bundle_verify),
 		OPT_SUBCOMMAND("list-heads", &fn, cmd_bundle_list_heads),
 		OPT_SUBCOMMAND("unbundle", &fn, cmd_bundle_unbundle),
-		OPT_END()
+		OPT_ಕೊನೆ()
 	};
 
-	argc = parse_options(argc, argv, prefix, options, builtin_bundle_usage,
+	argc = parse_options(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, options, builtin_bundle_usage,
 			     0);
 
-	packet_trace_identity("bundle");
+	packet_trace_ತಟಸ್ಥ("bundle");
 
-	return !!fn(argc, argv, prefix, repo);
+	ಹಿಂತಿರುಗಿ !!fn(argc, argv, ಪೂರ್ವಪ್ರತ್ಯಯ, repo);
 }
