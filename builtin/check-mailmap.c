@@ -10,7 +10,7 @@
 #include "string-list.h"
 #include "write-or-die.h"
 
-static int use_stdin;
+static 整数 use_stdin;
 static const char *mailmap_file, *mailmap_blob;
 static const char * const check_mailmap_usage[] = {
 N_("git check-mailmap [<options>] <contact>..."),
@@ -30,12 +30,12 @@ static void check_mailmap(struct string_list *mailmap, const char *contact)
 	size_t namelen, maillen;
 	struct ident_split ident;
 
-	if (!split_ident_line(&ident, contact, strlen(contact))) {
+	如果 (!split_ident_line(&ident, contact, strlen(contact))) {
 		name = ident.name_begin;
 		namelen = ident.name_end - ident.name_begin;
 		mail = ident.mail_begin;
 		maillen = ident.mail_end - ident.mail_begin;
-	} else {
+	} 否则 {
 		name = "";
 		namelen = 0;
 		mail = contact;
@@ -44,38 +44,38 @@ static void check_mailmap(struct string_list *mailmap, const char *contact)
 
 	map_user(mailmap, &mail, &maillen, &name, &namelen);
 
-	if (namelen)
-		printf("%.*s ", (int)namelen, name);
-	printf("<%.*s>\n", (int)maillen, mail);
+	如果 (namelen)
+		printf("%.*s ", (整数)namelen, name);
+	printf("<%.*s>\n", (整数)maillen, mail);
 }
 
-int cmd_check_mailmap(int argc,
+整数 cmd_check_mailmap(整数 argc,
 		      const char **argv,
 		      const char *prefix,
 		      struct repository *repo UNUSED)
 {
-	int i;
+	整数 i;
 	struct string_list mailmap = STRING_LIST_INIT_NODUP;
 
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, check_mailmap_options,
 			     check_mailmap_usage, 0);
-	if (argc == 0 && !use_stdin)
+	如果 (argc == 0 && !use_stdin)
 		die(_("no contacts specified"));
 
 	read_mailmap(the_repository, &mailmap);
-	if (mailmap_blob)
+	如果 (mailmap_blob)
 		read_mailmap_blob(the_repository, &mailmap, mailmap_blob);
-	if (mailmap_file)
+	如果 (mailmap_file)
 		read_mailmap_file(&mailmap, mailmap_file, 0);
 
-	for (i = 0; i < argc; ++i)
+	为 (i = 0; i < argc; ++i)
 		check_mailmap(&mailmap, argv[i]);
 	maybe_flush_or_die(stdout, "stdout");
 
-	if (use_stdin) {
+	如果 (use_stdin) {
 		struct strbuf buf = STRBUF_INIT;
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
+		当 (strbuf_getline_lf(&buf, stdin) != EOF) {
 			check_mailmap(&mailmap, buf.buf);
 			maybe_flush_or_die(stdout, "stdout");
 		}
@@ -83,5 +83,5 @@ int cmd_check_mailmap(int argc,
 	}
 
 	clear_mailmap(&mailmap);
-	return 0;
+	返回 0;
 }

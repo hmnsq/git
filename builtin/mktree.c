@@ -16,16 +16,16 @@
 static struct treeent {
 	unsigned mode;
 	struct object_id oid;
-	int len;
+	整数 len;
 	char name[FLEX_ARRAY];
 } **entries;
-static int alloc, used;
+static 整数 alloc, used;
 
 static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
 {
 	struct treeent *ent;
 	size_t len = strlen(path);
-	if (strchr(path, '/'))
+	如果 (strchr(path, '/'))
 		die("path %s contains slash", path);
 
 	FLEX_ALLOC_MEM(ent, name, path, len);
@@ -37,11 +37,11 @@ static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
 	entries[used++] = ent;
 }
 
-static int ent_compare(const void *a_, const void *b_)
+static 整数 ent_compare(const void *a_, const void *b_)
 {
 	struct treeent *a = *(struct treeent **)a_;
 	struct treeent *b = *(struct treeent **)b_;
-	return base_name_compare(a->name, a->len, a->mode,
+	返回 base_name_compare(a->name, a->len, a->mode,
 				 b->name, b->len, b->mode);
 }
 
@@ -49,14 +49,14 @@ static void write_tree(struct repository *repo, struct object_id *oid)
 {
 	struct strbuf buf;
 	size_t size;
-	int i;
+	整数 i;
 
 	QSORT(entries, used, ent_compare);
-	for (size = i = 0; i < used; i++)
+	为 (size = i = 0; i < used; i++)
 		size += 32 + entries[i]->len;
 
 	strbuf_init(&buf, size);
-	for (i = 0; i < used; i++) {
+	为 (i = 0; i < used; i++) {
 		struct treeent *ent = entries[i];
 		strbuf_addf(&buf, "%o %s%c", ent->mode, ent->name, '\0');
 		strbuf_add(&buf, ent->oid.hash, repo->hash_algo->rawsz);
@@ -71,7 +71,7 @@ static const char *const mktree_usage[] = {
 	NULL
 };
 
-static void mktree_line(struct repository *repo, char *buf, int nul_term_line, int allow_missing)
+static void mktree_line(struct repository *repo, char *buf, 整数 nul_term_line, 整数 allow_missing)
 {
 	char *ptr, *ntr;
 	const char *p;
@@ -88,25 +88,25 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	 *     mode SP type SP sha1 TAB name
 	 */
 	mode = strtoul(ptr, &ntr, 8);
-	if (ptr == ntr || !ntr || *ntr != ' ')
+	如果 (ptr == ntr || !ntr || *ntr != ' ')
 		die("input format error: %s", buf);
 	ptr = ntr + 1; /* type */
 	ntr = strchr(ptr, ' ');
-	if (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
+	如果 (!ntr || parse_oid_hex_algop(ntr + 1, &oid, &p, repo->hash_algo) ||
 	    *p != '\t')
 		die("input format error: %s", buf);
 
 	/* It is perfectly normal if we do not have a commit from a submodule */
-	if (S_ISGITLINK(mode))
+	如果 (S_ISGITLINK(mode))
 		allow_missing = 1;
 
 
 	*ntr++ = 0; /* now at the beginning of SHA1 */
 
 	path = (char *)p + 1;  /* at the beginning of name */
-	if (!nul_term_line && path[0] == '"') {
+	如果 (!nul_term_line && path[0] == '"') {
 		struct strbuf p_uq = STRBUF_INIT;
-		if (unquote_c_style(&p_uq, path, NULL))
+		如果 (unquote_c_style(&p_uq, path, NULL))
 			die("invalid quoting");
 		path = to_free = strbuf_detach(&p_uq, NULL);
 	}
@@ -116,26 +116,26 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	 * These should all agree.
 	 */
 	mode_type = object_type(mode);
-	if (mode_type != type_from_string(ptr)) {
+	如果 (mode_type != type_from_string(ptr)) {
 		die("entry '%s' object type (%s) doesn't match mode type (%s)",
 			path, ptr, type_name(mode_type));
 	}
 
 	/* Check the type of object identified by oid without fetching objects */
 	oi.typep = &obj_type;
-	if (odb_read_object_info_extended(repo->objects, &oid, &oi,
+	如果 (odb_read_object_info_extended(repo->objects, &oid, &oi,
 					  OBJECT_INFO_LOOKUP_REPLACE |
 					  OBJECT_INFO_SKIP_FETCH_OBJECT) < 0)
 		obj_type = -1;
 
-	if (obj_type < 0) {
-		if (allow_missing) {
+	如果 (obj_type < 0) {
+		如果 (allow_missing) {
 			; /* no problem - missing objects are presumed to be of the right type */
-		} else {
+		} 否则 {
 			die("entry '%s' object %s is unavailable", path, oid_to_hex(&oid));
 		}
-	} else {
-		if (obj_type != mode_type) {
+	} 否则 {
+		如果 (obj_type != mode_type) {
 			/*
 			 * The object exists but is of the wrong type.
 			 * This is a problem regardless of allow_missing
@@ -150,17 +150,17 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	free(to_free);
 }
 
-int cmd_mktree(int ac,
+整数 cmd_mktree(整数 ac,
 	       const char **av,
 	       const char *prefix,
 	       struct repository *repo)
 {
 	struct strbuf sb = STRBUF_INIT;
 	struct object_id oid;
-	int nul_term_line = 0;
-	int allow_missing = 0;
-	int is_batch_mode = 0;
-	int got_eof = 0;
+	整数 nul_term_line = 0;
+	整数 allow_missing = 0;
+	整数 is_batch_mode = 0;
+	整数 got_eof = 0;
 	strbuf_getline_fn getline_fn;
 
 	const struct option option[] = {
@@ -173,38 +173,38 @@ int cmd_mktree(int ac,
 	ac = parse_options(ac, av, prefix, option, mktree_usage, 0);
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
 
-	while (!got_eof) {
-		while (1) {
-			if (getline_fn(&sb, stdin) == EOF) {
+	当 (!got_eof) {
+		当 (1) {
+			如果 (getline_fn(&sb, stdin) == EOF) {
 				got_eof = 1;
 				break;
 			}
-			if (sb.buf[0] == '\0') {
+			如果 (sb.buf[0] == '\0') {
 				/* empty lines denote tree boundaries in batch mode */
-				if (is_batch_mode)
+				如果 (is_batch_mode)
 					break;
 				die("input format error: (blank line only valid in batch mode)");
 			}
 			mktree_line(repo, sb.buf, nul_term_line, allow_missing);
 		}
-		if (is_batch_mode && got_eof && used < 1) {
+		如果 (is_batch_mode && got_eof && used < 1) {
 			/*
 			 * Execution gets here if the last tree entry is terminated with a
 			 * new-line.  The final new-line has been made optional to be
 			 * consistent with the original non-batch behaviour of mktree.
 			 */
 			; /* skip creating an empty tree */
-		} else {
+		} 否则 {
 			write_tree(repo, &oid);
 			puts(oid_to_hex(&oid));
 			fflush(stdout);
 		}
-		for (int i = 0; i < used; i++)
+		为 (整数 i = 0; i < used; i++)
 			free(entries[i]);
 		used=0; /* reset tree entry buffer for re-use in batch mode */
 	}
 	free(entries);
 	strbuf_release(&sb);
 
-	return 0;
+	返回 0;
 }

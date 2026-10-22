@@ -88,7 +88,7 @@ struct worktree_reflogs {
 	struct string_list reflogs;
 };
 
-static int collect_reflog(const char *ref, void *cb_data)
+static 整数 collect_reflog(const char *ref, void *cb_data)
 {
 	struct worktree_reflogs *cb = cb_data;
 	struct worktree *worktree = cb->worktree;
@@ -98,49 +98,49 @@ static int collect_reflog(const char *ref, void *cb_data)
 	 * Avoid collecting the same shared ref multiple times because
 	 * they are available via all worktrees.
 	 */
-	if (!worktree->is_current &&
+	如果 (!worktree->is_current &&
 	    parse_worktree_ref(ref, NULL, NULL, NULL) == REF_WORKTREE_SHARED)
-		return 0;
+		返回 0;
 
 	strbuf_worktree_ref(worktree, &newref, ref);
 	string_list_append_nodup(&cb->reflogs, strbuf_detach(&newref, NULL));
 
-	return 0;
+	返回 0;
 }
 
-static int expire_unreachable_callback(const struct option *opt,
+static 整数 expire_unreachable_callback(const struct option *opt,
 				 const char *arg,
-				 int unset)
+				 整数 unset)
 {
 	struct reflog_expire_options *opts = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (parse_expiry_date(arg, &opts->expire_unreachable))
+	如果 (parse_expiry_date(arg, &opts->expire_unreachable))
 		die(_("invalid timestamp '%s' given to '--%s'"),
 		    arg, opt->long_name);
 
 	opts->explicit_expiry |= REFLOG_EXPIRE_UNREACH;
-	return 0;
+	返回 0;
 }
 
-static int expire_total_callback(const struct option *opt,
+static 整数 expire_total_callback(const struct option *opt,
 				 const char *arg,
-				 int unset)
+				 整数 unset)
 {
 	struct reflog_expire_options *opts = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (parse_expiry_date(arg, &opts->expire_total))
+	如果 (parse_expiry_date(arg, &opts->expire_total))
 		die(_("invalid timestamp '%s' given to '--%s'"),
 		    arg, opt->long_name);
 
 	opts->explicit_expiry |= REFLOG_EXPIRE_TOTAL;
-	return 0;
+	返回 0;
 }
 
-static int cmd_reflog_show(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_show(整数 argc, const char **argv, const char *prefix,
 			   struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -151,16 +151,16 @@ static int cmd_reflog_show(int argc, const char **argv, const char *prefix,
 		      PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0 |
 		      PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	return cmd_log_reflog(argc, argv, prefix, the_repository);
+	返回 cmd_log_reflog(argc, argv, prefix, the_repository);
 }
 
-static int show_reflog(const char *refname, void *cb_data UNUSED)
+static 整数 show_reflog(const char *refname, void *cb_data UNUSED)
 {
 	printf("%s\n", refname);
-	return 0;
+	返回 0;
 }
 
-static int cmd_reflog_list(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_list(整数 argc, const char **argv, const char *prefix,
 			   struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -169,23 +169,23 @@ static int cmd_reflog_list(int argc, const char **argv, const char *prefix,
 	struct ref_store *ref_store;
 
 	argc = parse_options(argc, argv, prefix, options, reflog_list_usage, 0);
-	if (argc)
-		return error(_("%s does not accept arguments: '%s'"),
+	如果 (argc)
+		返回 error(_("%s does not accept arguments: '%s'"),
 			     "list", argv[0]);
 
 	ref_store = get_main_ref_store(the_repository);
 
-	return refs_for_each_reflog(ref_store, show_reflog, NULL);
+	返回 refs_for_each_reflog(ref_store, show_reflog, NULL);
 }
 
-static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_expire(整数 argc, const char **argv, const char *prefix,
 			     struct repository *repo UNUSED)
 {
 	timestamp_t now = time(NULL);
 	struct reflog_expire_options opts = REFLOG_EXPIRE_OPTIONS_INIT(now);
-	int i, status, do_all, single_worktree = 0;
-	unsigned int flags = 0;
-	int verbose = 0;
+	整数 i, status, do_all, single_worktree = 0;
+	unsigned 整数 flags = 0;
+	整数 verbose = 0;
 	reflog_expiry_should_prune_fn *should_prune_fn = should_expire_reflog_ent;
 	const struct option options[] = {
 		OPT_BIT('n', "dry-run", &flags, N_("do not actually prune any entries"),
@@ -220,7 +220,7 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_expire_usage, 0);
 
-	if (verbose)
+	如果 (verbose)
 		should_prune_fn = should_expire_reflog_ent_verbose;
 
 	/*
@@ -228,22 +228,22 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 	 * even in older repository.  We cannot trust what's reachable
 	 * from reflog if the repository was pruned with older git.
 	 */
-	if (opts.stalefix) {
+	如果 (opts.stalefix) {
 		struct rev_info revs;
 
 		repo_init_revisions(the_repository, &revs, prefix);
 		revs.do_not_die_on_missing_objects = 1;
 		revs.ignore_missing = 1;
 		revs.ignore_missing_links = 1;
-		if (verbose)
+		如果 (verbose)
 			printf(_("Marking reachable objects..."));
 		mark_reachable_objects(&revs, 0, 0, NULL);
 		release_revisions(&revs);
-		if (verbose)
+		如果 (verbose)
 			putchar('\n');
 	}
 
-	if (do_all) {
+	如果 (do_all) {
 		struct worktree_reflogs collected = {
 			.reflogs = STRING_LIST_INIT_DUP,
 		};
@@ -251,8 +251,8 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		struct worktree **worktrees, **p;
 
 		worktrees = get_worktrees(the_repository);
-		for (p = worktrees; *p; p++) {
-			if (single_worktree && !(*p)->is_current)
+		为 (p = worktrees; *p; p++) {
+			如果 (single_worktree && !(*p)->is_current)
 				continue;
 			collected.worktree = *p;
 			refs_for_each_reflog(get_worktree_ref_store(*p),
@@ -277,11 +277,11 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		string_list_clear(&collected.reflogs, 0);
 	}
 
-	for (i = 0; i < argc; i++) {
+	为 (i = 0; i < argc; i++) {
 		char *ref;
 		struct expire_reflog_policy_cb cb = { .opts = opts };
 
-		if (!repo_dwim_log(the_repository, argv[i], strlen(argv[i]), NULL, &ref)) {
+		如果 (!repo_dwim_log(the_repository, argv[i], strlen(argv[i]), NULL, &ref)) {
 			status |= error(_("reflog could not be found: '%s'"), argv[i]);
 			continue;
 		}
@@ -297,15 +297,15 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 
 	reflog_clear_expire_config(&opts);
 
-	return status;
+	返回 status;
 }
 
-static int cmd_reflog_delete(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_delete(整数 argc, const char **argv, const char *prefix,
 			     struct repository *repo UNUSED)
 {
-	int i, status = 0;
-	unsigned int flags = 0;
-	int verbose = 0;
+	整数 i, status = 0;
+	unsigned 整数 flags = 0;
+	整数 verbose = 0;
 
 	const struct option options[] = {
 		OPT_BIT('n', "dry-run", &flags, N_("do not actually prune any entries"),
@@ -322,16 +322,16 @@ static int cmd_reflog_delete(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_delete_usage, 0);
 
-	if (argc < 1)
-		return error(_("no reflog specified to delete"));
+	如果 (argc < 1)
+		返回 error(_("no reflog specified to delete"));
 
-	for (i = 0; i < argc; i++)
+	为 (i = 0; i < argc; i++)
 		status |= reflog_delete(argv[i], flags, verbose);
 
-	return status;
+	返回 status;
 }
 
-static int cmd_reflog_exists(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_exists(整数 argc, const char **argv, const char *prefix,
 			     struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -341,20 +341,20 @@ static int cmd_reflog_exists(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_exists_usage,
 			     0);
-	if (!argc)
+	如果 (!argc)
 		usage_with_options(reflog_exists_usage, options);
 
 	refname = argv[0];
-	if (check_refname_format(refname, REFNAME_ALLOW_ONELEVEL))
+	如果 (check_refname_format(refname, REFNAME_ALLOW_ONELEVEL))
 		die(_("invalid ref format: %s"), refname);
-	return !refs_reflog_exists(get_main_ref_store(the_repository),
+	返回 !refs_reflog_exists(get_main_ref_store(the_repository),
 				   refname);
 }
 
-static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_drop(整数 argc, const char **argv, const char *prefix,
 			   struct repository *repo)
 {
-	int ret = 0, do_all = 0, single_worktree = 0;
+	整数 ret = 0, do_all = 0, single_worktree = 0;
 	const struct option options[] = {
 		OPT_BOOL(0, "all", &do_all, N_("drop the reflogs of all references")),
 		OPT_BOOL(0, "single-worktree", &single_worktree,
@@ -364,10 +364,10 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_drop_usage, 0);
 
-	if (argc && do_all)
+	如果 (argc && do_all)
 		usage(_("references specified along with --all"));
 
-	if (do_all) {
+	如果 (do_all) {
 		struct worktree_reflogs collected = {
 			.reflogs = STRING_LIST_INIT_DUP,
 		};
@@ -375,8 +375,8 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 		struct worktree **worktrees, **p;
 
 		worktrees = get_worktrees(the_repository);
-		for (p = worktrees; *p; p++) {
-			if (single_worktree && !(*p)->is_current)
+		为 (p = worktrees; *p; p++) {
+			如果 (single_worktree && !(*p)->is_current)
 				continue;
 			collected.worktree = *p;
 			refs_for_each_reflog(get_worktree_ref_store(*p),
@@ -389,12 +389,12 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 						     item->string);
 		string_list_clear(&collected.reflogs, 0);
 
-		return ret;
+		返回 ret;
 	}
 
-	for (int i = 0; i < argc; i++) {
+	为 (整数 i = 0; i < argc; i++) {
 		char *ref;
-		if (!repo_dwim_log(repo, argv[i], strlen(argv[i]), NULL, &ref)) {
+		如果 (!repo_dwim_log(repo, argv[i], strlen(argv[i]), NULL, &ref)) {
 			ret |= error(_("reflog could not be found: '%s'"), argv[i]);
 			continue;
 		}
@@ -403,10 +403,10 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 		free(ref);
 	}
 
-	return ret;
+	返回 ret;
 }
 
-static int cmd_reflog_write(int argc, const char **argv, const char *prefix,
+static 整数 cmd_reflog_write(整数 argc, const char **argv, const char *prefix,
 			    struct repository *repo)
 {
 	const struct option options[] = {
@@ -416,55 +416,55 @@ static int cmd_reflog_write(int argc, const char **argv, const char *prefix,
 	struct strbuf err = STRBUF_INIT;
 	struct ref_transaction *tx;
 	const char *ref, *message;
-	int ret;
+	整数 ret;
 
 	repo_config(repo, git_ident_config, NULL);
 
 	argc = parse_options(argc, argv, prefix, options, reflog_write_usage, 0);
-	if (argc != 4)
+	如果 (argc != 4)
 		usage_with_options(reflog_write_usage, options);
 
 	ref = argv[0];
-	if (!is_root_ref(ref) && check_refname_format(ref, 0))
+	如果 (!is_root_ref(ref) && check_refname_format(ref, 0))
 		die(_("invalid reference name: %s"), ref);
 
 	ret = get_oid_hex_algop(argv[1], &old_oid, repo->hash_algo);
-	if (ret)
+	如果 (ret)
 		die(_("invalid old object ID: '%s'"), argv[1]);
-	if (!is_null_oid(&old_oid) && !odb_has_object(repo->objects, &old_oid, 0))
+	如果 (!is_null_oid(&old_oid) && !odb_has_object(repo->objects, &old_oid, 0))
 		die(_("old object '%s' does not exist"), argv[1]);
 
 	ret = get_oid_hex_algop(argv[2], &new_oid, repo->hash_algo);
-	if (ret)
+	如果 (ret)
 		die(_("invalid new object ID: '%s'"), argv[2]);
-	if (!is_null_oid(&new_oid) && !odb_has_object(repo->objects, &new_oid, 0))
+	如果 (!is_null_oid(&new_oid) && !odb_has_object(repo->objects, &new_oid, 0))
 		die(_("new object '%s' does not exist"), argv[2]);
 
 	message = argv[3];
 
 	tx = ref_store_transaction_begin(get_main_ref_store(repo), 0, &err);
-	if (!tx)
+	如果 (!tx)
 		die(_("cannot start transaction: %s"), err.buf);
 
 	ret = ref_transaction_update_reflog(tx, ref, &new_oid, &old_oid,
 					    git_committer_info(0),
 					    message, 0, &err);
-	if (ret)
+	如果 (ret)
 		die(_("cannot queue reflog update: %s"), err.buf);
 
 	ret = ref_transaction_commit(tx, &err);
-	if (ret)
+	如果 (ret)
 		die(_("cannot commit reflog update: %s"), err.buf);
 
 	ref_transaction_free(tx);
 	strbuf_release(&err);
-	return 0;
+	返回 0;
 }
 
 /*
  * main "reflog"
  */
-int cmd_reflog(int argc,
+整数 cmd_reflog(整数 argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repository)
@@ -485,8 +485,8 @@ int cmd_reflog(int argc,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
 			     PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (fn)
-		return fn(argc - 1, argv + 1, prefix, repository);
-	else
-		return cmd_log_reflog(argc, argv, prefix, repository);
+	如果 (fn)
+		返回 fn(argc - 1, argv + 1, prefix, repository);
+	否则
+		返回 cmd_log_reflog(argc, argv, prefix, repository);
 }

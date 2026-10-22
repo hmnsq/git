@@ -27,77 +27,77 @@ static char *collapse_slashes(const char *refname)
 	char prev = '/';
 	char *cp = ret;
 
-	while ((ch = *refname++) != '\0') {
-		if (prev == '/' && ch == prev)
+	当 ((ch = *refname++) != '\0') {
+		如果 (prev == '/' && ch == prev)
 			continue;
 
 		*cp++ = ch;
 		prev = ch;
 	}
 	*cp = '\0';
-	return ret;
+	返回 ret;
 }
 
-static int check_ref_format_branch(const char *arg)
+static 整数 check_ref_format_branch(const char *arg)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *name;
-	int nongit;
+	整数 nongit;
 
 	setup_git_directory_gently(the_repository, &nongit);
-	if (check_branch_ref(the_repository, &sb, arg) ||
+	如果 (check_branch_ref(the_repository, &sb, arg) ||
 	    !skip_prefix(sb.buf, "refs/heads/", &name))
 		die("'%s' is not a valid branch name", arg);
 	printf("%s\n", name);
 	strbuf_release(&sb);
-	return 0;
+	返回 0;
 }
 
-int cmd_check_ref_format(int argc,
+整数 cmd_check_ref_format(整数 argc,
 			 const char **argv,
 			 const char *prefix,
 			 struct repository *repo UNUSED)
 {
-	int i;
-	int normalize = 0;
-	int flags = 0;
+	整数 i;
+	整数 normalize = 0;
+	整数 flags = 0;
 	const char *refname;
 	char *to_free = NULL;
-	int ret = 1;
+	整数 ret = 1;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv,
 			    builtin_check_ref_format_usage);
 
-	if (argc == 3 && !strcmp(argv[1], "--branch"))
-		return check_ref_format_branch(argv[2]);
+	如果 (argc == 3 && !strcmp(argv[1], "--branch"))
+		返回 check_ref_format_branch(argv[2]);
 
-	for (i = 1; i < argc && argv[i][0] == '-'; i++) {
-		if (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
+	为 (i = 1; i < argc && argv[i][0] == '-'; i++) {
+		如果 (!strcmp(argv[i], "--normalize") || !strcmp(argv[i], "--print"))
 			normalize = 1;
-		else if (!strcmp(argv[i], "--allow-onelevel"))
+		否则 如果 (!strcmp(argv[i], "--allow-onelevel"))
 			flags |= REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--no-allow-onelevel"))
+		否则 如果 (!strcmp(argv[i], "--no-allow-onelevel"))
 			flags &= ~REFNAME_ALLOW_ONELEVEL;
-		else if (!strcmp(argv[i], "--refspec-pattern"))
+		否则 如果 (!strcmp(argv[i], "--refspec-pattern"))
 			flags |= REFNAME_REFSPEC_PATTERN;
-		else
+		否则
 			usage(builtin_check_ref_format_usage);
 	}
-	if (! (i == argc - 1))
+	如果 (! (i == argc - 1))
 		usage(builtin_check_ref_format_usage);
 
 	refname = argv[i];
-	if (normalize)
+	如果 (normalize)
 		refname = to_free = collapse_slashes(refname);
-	if (check_refname_format(refname, flags))
+	如果 (check_refname_format(refname, flags))
 		goto cleanup;
-	if (normalize)
+	如果 (normalize)
 		printf("%s\n", refname);
 
 	ret = 0;
 cleanup:
 	free(to_free);
-	return ret;
+	返回 ret;
 }

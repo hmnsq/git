@@ -29,34 +29,34 @@ enum url_component {
 
 static void parse_or_die(const char *url, struct url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	如果 (url_is_local_not_ssh(url)) {
+		如果 (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		如果 (has_dos_drive_prefix(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	如果 (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
 static enum url_component get_component_or_die(const char *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	如果 (!strcmp("path", arg))
+		返回 URL_PATH;
+	如果 (!strcmp("host", arg))
+		返回 URL_HOST;
+	如果 (!strcmp("scheme", arg))
+		返回 URL_SCHEME;
+	如果 (!strcmp("user", arg))
+		返回 URL_USER;
+	如果 (!strcmp("password", arg))
+		返回 URL_PASSWORD;
+	如果 (!strcmp("port", arg))
+		返回 URL_PORT;
 	die("invalid git URL component '%s'", arg);
 }
 
@@ -91,13 +91,13 @@ static char *extract_component(enum url_component component,
 		length = info->path_len;
 		break;
 	case URL_NONE:
-		return NULL;
+		返回 NULL;
 	}
 
-	return xstrndup(info->url + offset, length);
+	返回 xstrndup(info->url + offset, length);
 }
 
-int cmd_url_parse(int argc,
+整数 cmd_url_parse(整数 argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
@@ -105,24 +105,24 @@ int cmd_url_parse(int argc,
 	struct url_info info;
 	enum url_component selected = URL_NONE;
 	char *extracted;
-	int i;
+	整数 i;
 
 	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	如果 (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	如果 (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	为 (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
+		如果 (selected != URL_NONE) {
 			extracted = extract_component(selected, &info);
-			if (extracted) {
+			如果 (extracted) {
 				puts(extracted);
 				free(extracted);
 			}
@@ -131,5 +131,5 @@ int cmd_url_parse(int argc,
 		free(info.url);
 	}
 
-	return 0;
+	返回 0;
 }

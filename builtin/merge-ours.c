@@ -17,7 +17,7 @@
 static const char builtin_merge_ours_usage[] =
 	"git merge-ours <base>... -- HEAD <remote>...";
 
-int cmd_merge_ours(int argc,
+整数 cmd_merge_ours(整数 argc,
 		   const char **argv,
 		   const char *prefix UNUSED,
 		   struct repository *repo)
@@ -33,9 +33,9 @@ int cmd_merge_ours(int argc,
 	 * commit.  The index must match HEAD, or this merge cannot go
 	 * through.
 	 */
-	if (repo_read_index(repo) < 0)
+	如果 (repo_read_index(repo) < 0)
 		die_errno("read_cache failed");
-	if (index_differs_from(repo, "HEAD", NULL, 0))
-		return 2;
-	return 0;
+	如果 (index_differs_from(repo, "HEAD", NULL, 0))
+		返回 2;
+	返回 0;
 }
