@@ -27,10 +27,10 @@
 #include "help.h"
 #include "prompt.h"
 
-static int require_force = -1; /* unset */
-static int interactive;
+static số_nguyên require_force = -1; /* unset */
+static số_nguyên interactive;
 static struct string_list del_list = STRING_LIST_INIT_DUP;
-static unsigned int colopts;
+static unsigned số_nguyên colopts;
 
 static const char *const builtin_clean_usage[] = {
 	N_("git clean [-d] [-f] [-i] [-n] [-q] [-e <pattern>] [-x | -X] [--] [<pathspec>...]"),
@@ -81,7 +81,7 @@ static char clean_colors[][COLOR_MAXLEN] = {
 struct menu_opts {
 	const char *header;
 	const char *prompt;
-	int flags;
+	số_nguyên flags;
 };
 
 #define MENU_RETURN_NO_LOOP		10
@@ -89,8 +89,8 @@ struct menu_opts {
 struct menu_item {
 	char hotkey;
 	const char *title;
-	int selected;
-	int (*fn)(void);
+	số_nguyên selected;
+	số_nguyên (*fn)(void);
 };
 
 enum menu_stuff_type {
@@ -100,51 +100,51 @@ enum menu_stuff_type {
 
 struct menu_stuff {
 	enum menu_stuff_type type;
-	int nr;
+	số_nguyên nr;
 	void *stuff;
 };
 
 define_list_config_array(color_interactive_slots);
 
-static int git_clean_config(const char *var, const char *value,
+static số_nguyên git_clean_config(const char *var, const char *value,
 			    const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "clean", &colopts);
+	nếu (starts_with(var, "column."))
+		trả_về git_column_config(var, value, "clean", &colopts);
 
 	/* honors the color.interactive* config variables which also
 	   applied in git-add--interactive and git-stash */
-	if (!strcmp(var, "color.interactive")) {
+	nếu (!strcmp(var, "color.interactive")) {
 		clean_use_color = git_config_colorbool(var, value);
-		return 0;
+		trả_về 0;
 	}
-	if (skip_prefix(var, "color.interactive.", &slot_name)) {
-		int slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
-		if (slot < 0)
-			return 0;
-		if (!value)
-			return config_error_nonbool(var);
-		return color_parse(value, clean_colors[slot]);
+	nếu (skip_prefix(var, "color.interactive.", &slot_name)) {
+		số_nguyên slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
+		nếu (slot < 0)
+			trả_về 0;
+		nếu (!value)
+			trả_về config_error_nonbool(var);
+		trả_về color_parse(value, clean_colors[slot]);
 	}
 
-	if (!strcmp(var, "clean.requireforce")) {
+	nếu (!strcmp(var, "clean.requireforce")) {
 		require_force = git_config_bool(var, value);
-		return 0;
+		trả_về 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	nếu (git_color_config(var, value, cb) < 0)
+		trả_về -1;
 
-	return git_default_config(var, value, ctx, cb);
+	trả_về git_default_config(var, value, ctx, cb);
 }
 
 static const char *clean_get_color(enum color_clean ix)
 {
-	if (want_color(clean_use_color))
-		return clean_colors[ix];
-	return "";
+	nếu (want_color(clean_use_color))
+		trả_về clean_colors[ix];
+	trả_về "";
 }
 
 static void clean_print_color(enum color_clean ix)
@@ -152,30 +152,30 @@ static void clean_print_color(enum color_clean ix)
 	printf("%s", clean_get_color(ix));
 }
 
-static int exclude_cb(const struct option *opt, const char *arg, int unset)
+static số_nguyên exclude_cb(const struct option *opt, const char *arg, số_nguyên unset)
 {
 	struct string_list *exclude_list = opt->value;
 	BUG_ON_OPT_NEG(unset);
 	string_list_append(exclude_list, arg);
-	return 0;
+	trả_về 0;
 }
 
-static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
-		int dry_run, int quiet, int *dir_gone)
+static số_nguyên remove_dirs(struct strbuf *path, const char *prefix, số_nguyên force_flag,
+		số_nguyên dry_run, số_nguyên quiet, số_nguyên *dir_gone)
 {
 	DIR *dir;
 	struct strbuf quoted = STRBUF_INIT;
 	struct strbuf realpath = STRBUF_INIT;
 	struct strbuf real_ocwd = STRBUF_INIT;
 	struct dirent *e;
-	int res = 0, ret = 0, gone = 1, original_len = path->len, len;
+	số_nguyên res = 0, ret = 0, gone = 1, original_len = path->len, len;
 	struct string_list dels = STRING_LIST_INIT_DUP;
 
 	*dir_gone = 1;
 
-	if ((force_flag & REMOVE_DIR_KEEP_NESTED_GIT) &&
+	nếu ((force_flag & REMOVE_DIR_KEEP_NESTED_GIT) &&
 	    is_nonbare_repository_dir(path)) {
-		if (!quiet) {
+		nếu (!quiet) {
 			quote_path(path->buf, prefix, &quoted, 0);
 			printf(dry_run ?  _(msg_would_skip_git_dir) : _(msg_skip_git_dir),
 					quoted.buf);
@@ -186,11 +186,11 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 	}
 
 	dir = opendir(path->buf);
-	if (!dir) {
+	nếu (!dir) {
 		/* an empty dir could be removed even if it is unreadble */
 		res = dry_run ? 0 : rmdir(path->buf);
-		if (res) {
-			int saved_errno = errno;
+		nếu (res) {
+			số_nguyên saved_errno = errno;
 			quote_path(path->buf, prefix, &quoted, 0);
 			errno = saved_errno;
 			warning_errno(_(msg_warn_remove_failed), quoted.buf);
@@ -203,29 +203,29 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 	strbuf_complete(path, '/');
 
 	len = path->len;
-	while ((e = readdir_skip_dot_and_dotdot(dir)) != NULL) {
+	trong_khi ((e = readdir_skip_dot_and_dotdot(dir)) != NULL) {
 		struct stat st;
 
 		strbuf_setlen(path, len);
 		strbuf_addstr(path, e->d_name);
-		if (lstat(path->buf, &st))
+		nếu (lstat(path->buf, &st))
 			warning_errno(_(msg_warn_lstat_failed), path->buf);
-		else if (S_ISDIR(st.st_mode)) {
-			if (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
+		không_thì nếu (S_ISDIR(st.st_mode)) {
+			nếu (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
 				ret = 1;
-			if (gone) {
+			nếu (gone) {
 				quote_path(path->buf, prefix, &quoted, 0);
 				string_list_append(&dels, quoted.buf);
-			} else
+			} không_thì
 				*dir_gone = 0;
 			continue;
-		} else {
+		} không_thì {
 			res = dry_run ? 0 : unlink(path->buf);
-			if (!res) {
+			nếu (!res) {
 				quote_path(path->buf, prefix, &quoted, 0);
 				string_list_append(&dels, quoted.buf);
-			} else {
-				int saved_errno = errno;
+			} không_thì {
+				số_nguyên saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
 				warning_errno(_(msg_warn_remove_failed), quoted.buf);
@@ -244,7 +244,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 
 	strbuf_setlen(path, original_len);
 
-	if (*dir_gone) {
+	nếu (*dir_gone) {
 		/*
 		 * Normalize path components in path->buf, e.g. change '\' to
 		 * '/' on Windows.
@@ -256,19 +256,19 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 		 * like to transform startup_info->original_cwd to an absolute
 		 * path too.
 		 */
-		 if (startup_info->original_cwd)
+		 nếu (startup_info->original_cwd)
 			 strbuf_realpath(&real_ocwd,
 					 startup_info->original_cwd, 1);
 
-		if (!strbuf_cmp(&realpath, &real_ocwd)) {
+		nếu (!strbuf_cmp(&realpath, &real_ocwd)) {
 			printf("%s", dry_run ? _(msg_would_skip_cwd) : _(msg_skip_cwd));
 			*dir_gone = 0;
-		} else {
+		} không_thì {
 			res = dry_run ? 0 : rmdir(path->buf);
-			if (!res)
+			nếu (!res)
 				*dir_gone = 1;
-			else {
-				int saved_errno = errno;
+			không_thì {
+				số_nguyên saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
 				warning_errno(_(msg_warn_remove_failed), quoted.buf);
@@ -278,9 +278,9 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 		}
 	}
 
-	if (!*dir_gone && !quiet) {
-		int i;
-		for (i = 0; i < dels.nr; i++)
+	nếu (!*dir_gone && !quiet) {
+		số_nguyên i;
+		cho (i = 0; i < dels.nr; i++)
 			printf(dry_run ?  _(msg_would_remove) : _(msg_remove), dels.items[i].string);
 	}
 out:
@@ -288,7 +288,7 @@ out:
 	strbuf_release(&real_ocwd);
 	strbuf_release(&quoted);
 	string_list_clear(&dels, 0);
-	return ret;
+	trả_về ret;
 }
 
 static void pretty_print_dels(void)
@@ -319,7 +319,7 @@ static void pretty_print_dels(void)
 
 static void pretty_print_menus(struct string_list *menu_list)
 {
-	unsigned int local_colopts = 0;
+	unsigned số_nguyên local_colopts = 0;
 	struct column_options copts;
 
 	local_colopts = COL_ENABLED | COL_ROW;
@@ -329,7 +329,7 @@ static void pretty_print_menus(struct string_list *menu_list)
 	print_columns(menu_list, local_colopts, &copts);
 }
 
-static void prompt_help_cmd(int singleton)
+static void prompt_help_cmd(số_nguyên singleton)
 {
 	clean_print_color(CLEAN_COLOR_HELP);
 	printf(singleton ?
@@ -351,34 +351,34 @@ static void prompt_help_cmd(int singleton)
 /*
  * display menu stuff with number prefix and hotkey highlight
  */
-static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
+static void print_highlight_menu_stuff(struct menu_stuff *stuff, số_nguyên **chosen)
 {
 	struct string_list menu_list = STRING_LIST_INIT_DUP;
 	struct strbuf menu = STRBUF_INIT;
 	struct menu_item *menu_item;
 	struct string_list_item *string_list_item;
-	int i;
+	số_nguyên i;
 
 	switch (stuff->type) {
 	default:
 		die("Bad type of menu_stuff when print menu");
 	case MENU_STUFF_TYPE_MENU_ITEM:
 		menu_item = (struct menu_item *)stuff->stuff;
-		for (i = 0; i < stuff->nr; i++, menu_item++) {
+		cho (i = 0; i < stuff->nr; i++, menu_item++) {
 			const char *p;
-			int highlighted = 0;
+			số_nguyên highlighted = 0;
 
 			p = menu_item->title;
-			if ((*chosen)[i] < 0)
+			nếu ((*chosen)[i] < 0)
 				(*chosen)[i] = menu_item->selected ? 1 : 0;
 			strbuf_addf(&menu, "%s%2d: ", (*chosen)[i] ? "*" : " ", i+1);
-			for (; *p; p++) {
-				if (!highlighted && *p == menu_item->hotkey) {
+			cho (; *p; p++) {
+				nếu (!highlighted && *p == menu_item->hotkey) {
 					strbuf_addstr(&menu, clean_get_color(CLEAN_COLOR_PROMPT));
 					strbuf_addch(&menu, *p);
 					strbuf_addstr(&menu, clean_get_color(CLEAN_COLOR_RESET));
 					highlighted = 1;
-				} else {
+				} không_thì {
 					strbuf_addch(&menu, *p);
 				}
 			}
@@ -389,7 +389,7 @@ static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 	case MENU_STUFF_TYPE_STRING_LIST:
 		i = 0;
 		for_each_string_list_item(string_list_item, (struct string_list *)stuff->stuff) {
-			if ((*chosen)[i] < 0)
+			nếu ((*chosen)[i] < 0)
 				(*chosen)[i] = 0;
 			strbuf_addf(&menu, "%s%2d: %s",
 				    (*chosen)[i] ? "*" : " ", i+1, string_list_item->string);
@@ -406,11 +406,11 @@ static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 	string_list_clear(&menu_list, 0);
 }
 
-static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
+static số_nguyên find_unique(const char *choice, struct menu_stuff *menu_stuff)
 {
 	struct menu_item *menu_item;
 	struct string_list_item *string_list_item;
-	int i, len, found = 0;
+	số_nguyên i, len, found = 0;
 
 	len = strlen(choice);
 	switch (menu_stuff->type) {
@@ -419,21 +419,21 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
 	case MENU_STUFF_TYPE_MENU_ITEM:
 
 		menu_item = (struct menu_item *)menu_stuff->stuff;
-		for (i = 0; i < menu_stuff->nr; i++, menu_item++) {
-			if (len == 1 && *choice == menu_item->hotkey) {
+		cho (i = 0; i < menu_stuff->nr; i++, menu_item++) {
+			nếu (len == 1 && *choice == menu_item->hotkey) {
 				found = i + 1;
 				break;
 			}
-			if (!strncasecmp(choice, menu_item->title, len)) {
-				if (found) {
-					if (len == 1) {
+			nếu (!strncasecmp(choice, menu_item->title, len)) {
+				nếu (found) {
+					nếu (len == 1) {
 						/* continue for hotkey matching */
 						found = -1;
-					} else {
+					} không_thì {
 						found = 0;
 						break;
 					}
-				} else {
+				} không_thì {
 					found = i + 1;
 				}
 			}
@@ -441,9 +441,9 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
 		break;
 	case MENU_STUFF_TYPE_STRING_LIST:
 		string_list_item = ((struct string_list *)menu_stuff->stuff)->items;
-		for (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
-			if (!strncasecmp(choice, string_list_item->string, len)) {
-				if (found) {
+		cho (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
+			nếu (!strncasecmp(choice, string_list_item->string, len)) {
+				nếu (found) {
 					found = 0;
 					break;
 				}
@@ -452,7 +452,7 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
 		}
 		break;
 	}
-	return found;
+	trả_về found;
 }
 
 /*
@@ -476,15 +476,15 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
  * The parse result will be saved in array **chosen, and
  * return number of total selections.
  */
-static int parse_choice(struct menu_stuff *menu_stuff,
-			int is_single,
+static số_nguyên parse_choice(struct menu_stuff *menu_stuff,
+			số_nguyên is_single,
 			char *input,
-			int **chosen)
+			số_nguyên **chosen)
 {
 	struct string_list choice = STRING_LIST_INIT_NODUP;
 	struct string_list_item *item;
-	int nr = 0;
-	int i;
+	số_nguyên nr = 0;
+	số_nguyên i;
 
 	string_list_split_in_place_f(&choice, input,
 				     is_single ? "\n" : ", ", -1,
@@ -492,60 +492,60 @@ static int parse_choice(struct menu_stuff *menu_stuff,
 
 	for_each_string_list_item(item, &choice) {
 		const char *string;
-		int choose;
-		int bottom = 0, top = 0;
-		int is_range, is_number;
+		số_nguyên choose;
+		số_nguyên bottom = 0, top = 0;
+		số_nguyên is_range, is_number;
 
 		string = item->string;
-		if (!*string)
+		nếu (!*string)
 			continue;
 
 		/* Input that begins with '-'; unchoose */
-		if (string[0] == '-') {
+		nếu (string[0] == '-') {
 			choose = 0;
 			string++;
-		} else {
+		} không_thì {
 			choose = 1;
 		}
 
 		is_range = 0;
 		is_number = 1;
-		for (const char *p = string; *p; p++) {
-			if ('-' == *p) {
-				if (!is_range) {
+		cho (const char *p = string; *p; p++) {
+			nếu ('-' == *p) {
+				nếu (!is_range) {
 					is_range = 1;
 					is_number = 0;
-				} else {
+				} không_thì {
 					is_number = 0;
 					is_range = 0;
 					break;
 				}
-			} else if (!isdigit(*p)) {
+			} không_thì nếu (!isdigit(*p)) {
 				is_number = 0;
 				is_range = 0;
 				break;
 			}
 		}
 
-		if (is_number) {
+		nếu (is_number) {
 			bottom = atoi(string);
 			top = bottom;
-		} else if (is_range) {
+		} không_thì nếu (is_range) {
 			bottom = atoi(string);
 			/* a range can be specified like 5-7 or 5- */
-			if (!*(strchr(string, '-') + 1))
+			nếu (!*(strchr(string, '-') + 1))
 				top = menu_stuff->nr;
-			else
+			không_thì
 				top = atoi(strchr(string, '-') + 1);
-		} else if (!strcmp(string, "*")) {
+		} không_thì nếu (!strcmp(string, "*")) {
 			bottom = 1;
 			top = menu_stuff->nr;
-		} else {
+		} không_thì {
 			bottom = find_unique(string, menu_stuff);
 			top = bottom;
 		}
 
-		if (top <= 0 || bottom <= 0 || top > menu_stuff->nr || bottom > top ||
+		nếu (top <= 0 || bottom <= 0 || top > menu_stuff->nr || bottom > top ||
 		    (is_single && bottom != top)) {
 			clean_print_color(CLEAN_COLOR_ERROR);
 			printf(_("Huh (%s)?\n"), string);
@@ -553,15 +553,15 @@ static int parse_choice(struct menu_stuff *menu_stuff,
 			continue;
 		}
 
-		for (i = bottom; i <= top; i++)
+		cho (i = bottom; i <= top; i++)
 			(*chosen)[i-1] = choose;
 	}
 
 	string_list_clear(&choice, 0);
 
-	for (i = 0; i < menu_stuff->nr; i++)
+	cho (i = 0; i < menu_stuff->nr; i++)
 		nr += (*chosen)[i];
-	return nr;
+	trả_về nr;
 }
 
 /*
@@ -575,21 +575,21 @@ static int parse_choice(struct menu_stuff *menu_stuff,
  *   - The array ends with EOF.
  *   - If user pressed CTRL-D (i.e. EOF), no selection returned.
  */
-static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
+static số_nguyên *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 {
 	struct strbuf choice = STRBUF_INIT;
-	int *chosen, *result;
-	int nr = 0;
-	int eof = 0;
-	int i;
+	số_nguyên *chosen, *result;
+	số_nguyên nr = 0;
+	số_nguyên eof = 0;
+	số_nguyên i;
 
 	ALLOC_ARRAY(chosen, stuff->nr);
 	/* set chosen as uninitialized */
-	for (i = 0; i < stuff->nr; i++)
+	cho (i = 0; i < stuff->nr; i++)
 		chosen[i] = -1;
 
-	for (;;) {
-		if (opts->header) {
+	cho (;;) {
+		nếu (opts->header) {
 			printf_ln("%s%s%s",
 				  clean_get_color(CLEAN_COLOR_HEADER),
 				  _(opts->header),
@@ -599,10 +599,10 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 		/* chosen will be initialized by print_highlight_menu_stuff */
 		print_highlight_menu_stuff(stuff, &chosen);
 
-		if (opts->flags & MENU_OPTS_LIST_ONLY)
+		nếu (opts->flags & MENU_OPTS_LIST_ONLY)
 			break;
 
-		if (opts->prompt) {
+		nếu (opts->prompt) {
 			printf("%s%s%s%s",
 			       clean_get_color(CLEAN_COLOR_PROMPT),
 			       _(opts->prompt),
@@ -610,19 +610,19 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 			       clean_get_color(CLEAN_COLOR_RESET));
 		}
 
-		if (git_read_line_interactively(&choice) == EOF) {
+		nếu (git_read_line_interactively(&choice) == EOF) {
 			eof = 1;
 			break;
 		}
 
 		/* help for prompt */
-		if (!strcmp(choice.buf, "?")) {
+		nếu (!strcmp(choice.buf, "?")) {
 			prompt_help_cmd(opts->flags & MENU_OPTS_SINGLETON);
 			continue;
 		}
 
 		/* for a multiple-choice menu, press ENTER (empty) will return back */
-		if (!(opts->flags & MENU_OPTS_SINGLETON) && !choice.len)
+		nếu (!(opts->flags & MENU_OPTS_SINGLETON) && !choice.len)
 			break;
 
 		nr = parse_choice(stuff,
@@ -630,32 +630,32 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 				  choice.buf,
 				  &chosen);
 
-		if (opts->flags & MENU_OPTS_SINGLETON) {
-			if (nr)
+		nếu (opts->flags & MENU_OPTS_SINGLETON) {
+			nếu (nr)
 				break;
-		} else if (opts->flags & MENU_OPTS_IMMEDIATE) {
+		} không_thì nếu (opts->flags & MENU_OPTS_IMMEDIATE) {
 			break;
 		}
 	}
 
-	if (eof) {
-		result = xmalloc(sizeof(int));
+	nếu (eof) {
+		result = xmalloc(sizeof(số_nguyên));
 		*result = EOF;
-	} else {
-		int j = 0;
+	} không_thì {
+		số_nguyên j = 0;
 
 		/*
 		 * recalculate nr, if return back from menu directly with
 		 * default selections.
 		 */
-		if (!nr) {
-			for (i = 0; i < stuff->nr; i++)
+		nếu (!nr) {
+			cho (i = 0; i < stuff->nr; i++)
 				nr += chosen[i];
 		}
 
 		CALLOC_ARRAY(result, st_add(nr, 1));
-		for (i = 0; i < stuff->nr && j < nr; i++) {
-			if (chosen[i])
+		cho (i = 0; i < stuff->nr && j < nr; i++) {
+			nếu (chosen[i])
 				result[j++] = i;
 		}
 		result[j] = EOF;
@@ -663,39 +663,39 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 
 	free(chosen);
 	strbuf_release(&choice);
-	return result;
+	trả_về result;
 }
 
-static int clean_cmd(void)
+static số_nguyên clean_cmd(void)
 {
-	return MENU_RETURN_NO_LOOP;
+	trả_về MENU_RETURN_NO_LOOP;
 }
 
-static int filter_by_patterns_cmd(void)
+static số_nguyên filter_by_patterns_cmd(void)
 {
 	struct dir_struct dir = DIR_INIT;
 	struct strbuf confirm = STRBUF_INIT;
 	struct pattern_list *pl;
-	int changed = -1, i;
+	số_nguyên changed = -1, i;
 
-	for (;;) {
+	cho (;;) {
 		struct string_list ignore_list = STRING_LIST_INIT_NODUP;
 		struct string_list_item *item;
 
-		if (!del_list.nr)
+		nếu (!del_list.nr)
 			break;
 
-		if (changed)
+		nếu (changed)
 			pretty_print_dels();
 
 		clean_print_color(CLEAN_COLOR_PROMPT);
 		printf(_("Input ignore patterns>> "));
 		clean_print_color(CLEAN_COLOR_RESET);
-		if (git_read_line_interactively(&confirm) == EOF)
+		nếu (git_read_line_interactively(&confirm) == EOF)
 			putchar('\n');
 
 		/* quit filter_by_pattern mode if press ENTER or Ctrl-D */
-		if (!confirm.len)
+		nếu (!confirm.len)
 			break;
 
 		pl = add_pattern_list(&dir, EXC_CMDL, "manual exclude");
@@ -703,26 +703,26 @@ static int filter_by_patterns_cmd(void)
 		string_list_split_in_place_f(&ignore_list, confirm.buf, " ", -1,
 					     STRING_LIST_SPLIT_TRIM);
 
-		for (i = 0; i < ignore_list.nr; i++) {
+		cho (i = 0; i < ignore_list.nr; i++) {
 			item = &ignore_list.items[i];
-			if (!*item->string)
+			nếu (!*item->string)
 				continue;
 			add_pattern(item->string, "", 0, pl, -(i+1));
 		}
 
 		changed = 0;
 		for_each_string_list_item(item, &del_list) {
-			int dtype = DT_UNKNOWN;
+			số_nguyên dtype = DT_UNKNOWN;
 
-			if (is_excluded(&dir, the_repository->index, item->string, &dtype)) {
+			nếu (is_excluded(&dir, the_repository->index, item->string, &dtype)) {
 				*item->string = '\0';
 				changed++;
 			}
 		}
 
-		if (changed) {
+		nếu (changed) {
 			string_list_remove_empty_items(&del_list, 0);
-		} else {
+		} không_thì {
 			clean_print_color(CLEAN_COLOR_ERROR);
 			printf_ln(_("WARNING: Cannot find items matched by: %s"), confirm.buf);
 			clean_print_color(CLEAN_COLOR_RESET);
@@ -733,16 +733,16 @@ static int filter_by_patterns_cmd(void)
 	}
 
 	strbuf_release(&confirm);
-	return 0;
+	trả_về 0;
 }
 
-static int select_by_numbers_cmd(void)
+static số_nguyên select_by_numbers_cmd(void)
 {
 	struct menu_opts menu_opts;
 	struct menu_stuff menu_stuff;
 	struct string_list_item *items;
-	int *chosen;
-	int i, j;
+	số_nguyên *chosen;
+	số_nguyên i, j;
 
 	menu_opts.header = NULL;
 	menu_opts.prompt = N_("Select items to delete");
@@ -754,14 +754,14 @@ static int select_by_numbers_cmd(void)
 
 	chosen = list_and_choose(&menu_opts, &menu_stuff);
 	items = del_list.items;
-	for (i = 0, j = 0; i < del_list.nr; i++) {
-		if (i < chosen[j]) {
+	cho (i = 0, j = 0; i < del_list.nr; i++) {
+		nếu (i < chosen[j]) {
 			*(items[i].string) = '\0';
-		} else if (i == chosen[j]) {
+		} không_thì nếu (i == chosen[j]) {
 			/* delete selected item */
 			j++;
 			continue;
-		} else {
+		} không_thì {
 			/* end of chosen (chosen[j] == EOF), won't delete */
 			*(items[i].string) = '\0';
 		}
@@ -770,50 +770,50 @@ static int select_by_numbers_cmd(void)
 	string_list_remove_empty_items(&del_list, 0);
 
 	free(chosen);
-	return 0;
+	trả_về 0;
 }
 
-static int ask_each_cmd(void)
+static số_nguyên ask_each_cmd(void)
 {
 	struct strbuf confirm = STRBUF_INIT;
 	struct strbuf buf = STRBUF_INIT;
 	struct string_list_item *item;
 	const char *qname;
-	int changed = 0, eof = 0;
+	số_nguyên changed = 0, eof = 0;
 
 	for_each_string_list_item(item, &del_list) {
 		/* Ctrl-D should stop removing files */
-		if (!eof) {
+		nếu (!eof) {
 			qname = quote_path(item->string, NULL, &buf, 0);
 			/* TRANSLATORS: Make sure to keep [y/N] as is */
 			printf(_("Remove %s [y/N]? "), qname);
-			if (git_read_line_interactively(&confirm) == EOF) {
+			nếu (git_read_line_interactively(&confirm) == EOF) {
 				putchar('\n');
 				eof = 1;
 			}
 		}
-		if (!confirm.len || strncasecmp(confirm.buf, "yes", confirm.len)) {
+		nếu (!confirm.len || strncasecmp(confirm.buf, "yes", confirm.len)) {
 			*item->string = '\0';
 			changed++;
 		}
 	}
 
-	if (changed)
+	nếu (changed)
 		string_list_remove_empty_items(&del_list, 0);
 
 	strbuf_release(&buf);
 	strbuf_release(&confirm);
-	return MENU_RETURN_NO_LOOP;
+	trả_về MENU_RETURN_NO_LOOP;
 }
 
-static int quit_cmd(void)
+static số_nguyên quit_cmd(void)
 {
 	string_list_clear(&del_list, 0);
 	printf(_("Bye.\n"));
-	return MENU_RETURN_NO_LOOP;
+	trả_về MENU_RETURN_NO_LOOP;
 }
 
-static int help_cmd(void)
+static số_nguyên help_cmd(void)
 {
 	clean_print_color(CLEAN_COLOR_HELP);
 	printf_ln(_(
@@ -826,12 +826,12 @@ static int help_cmd(void)
 		    "?                   - help for prompt selection"
 		   ));
 	clean_print_color(CLEAN_COLOR_RESET);
-	return 0;
+	trả_về 0;
 }
 
 static void interactive_main_loop(void)
 {
-	while (del_list.nr) {
+	trong_khi (del_list.nr) {
 		struct menu_opts menu_opts;
 		struct menu_stuff menu_stuff;
 		struct menu_item menus[] = {
@@ -842,7 +842,7 @@ static void interactive_main_loop(void)
 			{'q', "quit",			0, quit_cmd},
 			{'h', "help",			0, help_cmd},
 		};
-		int *chosen;
+		số_nguyên *chosen;
 
 		menu_opts.header = N_("*** Commands ***");
 		menu_opts.prompt = N_("What now");
@@ -862,12 +862,12 @@ static void interactive_main_loop(void)
 
 		chosen = list_and_choose(&menu_opts, &menu_stuff);
 
-		if (*chosen != EOF) {
-			int ret;
+		nếu (*chosen != EOF) {
+			số_nguyên ret;
 			ret = menus[*chosen].fn();
-			if (ret != MENU_RETURN_NO_LOOP) {
+			nếu (ret != MENU_RETURN_NO_LOOP) {
 				FREE_AND_NULL(chosen);
-				if (!del_list.nr) {
+				nếu (!del_list.nr) {
 					clean_print_color(CLEAN_COLOR_ERROR);
 					printf_ln(_("No more files to clean, exiting."));
 					clean_print_color(CLEAN_COLOR_RESET);
@@ -875,7 +875,7 @@ static void interactive_main_loop(void)
 				}
 				continue;
 			}
-		} else {
+		} không_thì {
 			quit_cmd();
 		}
 
@@ -886,26 +886,26 @@ static void interactive_main_loop(void)
 
 static void correct_untracked_entries(struct dir_struct *dir)
 {
-	int src, dst, ign;
+	số_nguyên src, dst, ign;
 
-	for (src = dst = ign = 0; src < dir->nr; src++) {
+	cho (src = dst = ign = 0; src < dir->nr; src++) {
 		/* skip paths in ignored[] that cannot be inside entries[src] */
-		while (ign < dir->ignored_nr &&
+		trong_khi (ign < dir->ignored_nr &&
 		       0 <= cmp_dir_entry(&dir->entries[src], &dir->ignored[ign]))
 			ign++;
 
-		if (ign < dir->ignored_nr &&
+		nếu (ign < dir->ignored_nr &&
 		    check_dir_entry_contains(dir->entries[src], dir->ignored[ign])) {
 			/* entries[src] contains an ignored path, so we drop it */
 			free(dir->entries[src]);
-		} else {
+		} không_thì {
 			struct dir_entry *ent = dir->entries[src++];
 
 			/* entries[src] does not contain an ignored path, so we keep it */
 			dir->entries[dst++] = ent;
 
 			/* then discard paths in entries[] contained inside entries[src] */
-			while (src < dir->nr &&
+			trong_khi (src < dir->nr &&
 			       check_dir_entry_contains(ent, dir->entries[src]))
 				free(dir->entries[src++]);
 
@@ -916,15 +916,15 @@ static void correct_untracked_entries(struct dir_struct *dir)
 	dir->nr = dst;
 }
 
-int cmd_clean(int argc,
+số_nguyên cmd_clean(số_nguyên argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo UNUSED)
 {
-	int i, res;
-	int dry_run = 0, remove_directories = 0, quiet = 0, ignored = 0;
-	int ignored_only = 0, force = 0, errors = 0, gone = 1;
-	int rm_flags = REMOVE_DIR_KEEP_NESTED_GIT;
+	số_nguyên i, res;
+	số_nguyên dry_run = 0, remove_directories = 0, quiet = 0, ignored = 0;
+	số_nguyên ignored_only = 0, force = 0, errors = 0, gone = 1;
+	số_nguyên rm_flags = REMOVE_DIR_KEEP_NESTED_GIT;
 	struct strbuf abs_path = STRBUF_INIT;
 	struct dir_struct dir = DIR_INIT;
 	struct pathspec pathspec;
@@ -953,24 +953,24 @@ int cmd_clean(int argc,
 	argc = parse_options(argc, argv, prefix, options, builtin_clean_usage,
 			     0);
 
-	if (require_force != 0 && !force && !interactive && !dry_run)
+	nếu (require_force != 0 && !force && !interactive && !dry_run)
 		die(_("clean.requireForce is true and -f not given: refusing to clean"));
 
-	if (force > 1)
+	nếu (force > 1)
 		rm_flags = 0;
-	else
+	không_thì
 		dir.flags |= DIR_SKIP_NESTED_GIT;
 
 	dir.flags |= DIR_SHOW_OTHER_DIRECTORIES;
 
-	if (ignored && ignored_only)
+	nếu (ignored && ignored_only)
 		die(_("options '%s' and '%s' cannot be used together"), "-x", "-X");
-	if (!ignored)
+	nếu (!ignored)
 		setup_standard_excludes(&dir);
-	if (ignored_only)
+	nếu (ignored_only)
 		dir.flags |= DIR_SHOW_IGNORED;
 
-	if (argc) {
+	nếu (argc) {
 		/*
 		 * Remaining args implies pathspecs specified, and we should
 		 * recurse within those.
@@ -978,7 +978,7 @@ int cmd_clean(int argc,
 		remove_directories = 1;
 	}
 
-	if (remove_directories && !ignored_only) {
+	nếu (remove_directories && !ignored_only) {
 		/*
 		 * We need to know about ignored files too:
 		 *
@@ -995,7 +995,7 @@ int cmd_clean(int argc,
 		 * recursing into a directory which is itself ignored.
 		 */
 		dir.flags |= DIR_SHOW_IGNORED_TOO;
-		if (!ignored)
+		nếu (!ignored)
 			dir.flags |= DIR_SHOW_IGNORED_TOO_MODE_MATCHING;
 
 		/*
@@ -1013,11 +1013,11 @@ int cmd_clean(int argc,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(the_repository) < 0)
+	nếu (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
-	for (i = 0; i < exclude_list.nr; i++)
+	cho (i = 0; i < exclude_list.nr; i++)
 		add_pattern(exclude_list.items[i].string, "", 0, pl, -(i+1));
 
 	parse_pathspec(&pathspec, 0,
@@ -1027,18 +1027,18 @@ int cmd_clean(int argc,
 	fill_directory(&dir, the_repository->index, &pathspec);
 	correct_untracked_entries(&dir);
 
-	for (i = 0; i < dir.nr; i++) {
+	cho (i = 0; i < dir.nr; i++) {
 		struct dir_entry *ent = dir.entries[i];
 		struct stat st;
 		const char *rel;
 
-		if (!index_name_is_other(the_repository->index, ent->name, ent->len))
+		nếu (!index_name_is_other(the_repository->index, ent->name, ent->len))
 			continue;
 
-		if (lstat(ent->name, &st))
+		nếu (lstat(ent->name, &st))
 			die_errno("Cannot lstat '%s'", ent->name);
 
-		if (S_ISDIR(st.st_mode) && !remove_directories)
+		nếu (S_ISDIR(st.st_mode) && !remove_directories)
 			continue;
 
 		rel = relative_path(ent->name, prefix, &buf);
@@ -1047,14 +1047,14 @@ int cmd_clean(int argc,
 
 	dir_clear(&dir);
 
-	if (interactive && del_list.nr > 0)
+	nếu (interactive && del_list.nr > 0)
 		interactive_main_loop();
 
 	for_each_string_list_item(item, &del_list) {
 		struct stat st;
 
 		strbuf_reset(&abs_path);
-		if (prefix)
+		nếu (prefix)
 			strbuf_addstr(&abs_path, prefix);
 
 		strbuf_addstr(&abs_path, item->string);
@@ -1064,25 +1064,25 @@ int cmd_clean(int argc,
 		 * recursive directory removal, so lstat() here could
 		 * fail with ENOENT.
 		 */
-		if (lstat(abs_path.buf, &st))
+		nếu (lstat(abs_path.buf, &st))
 			continue;
 
-		if (S_ISDIR(st.st_mode)) {
-			if (remove_dirs(&abs_path, prefix, rm_flags, dry_run, quiet, &gone))
+		nếu (S_ISDIR(st.st_mode)) {
+			nếu (remove_dirs(&abs_path, prefix, rm_flags, dry_run, quiet, &gone))
 				errors++;
-			if (gone && !quiet) {
+			nếu (gone && !quiet) {
 				qname = quote_path(item->string, NULL, &buf, 0);
 				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
 			}
-		} else {
+		} không_thì {
 			res = dry_run ? 0 : unlink(abs_path.buf);
-			if (res) {
-				int saved_errno = errno;
+			nếu (res) {
+				số_nguyên saved_errno = errno;
 				qname = quote_path(item->string, NULL, &buf, 0);
 				errno = saved_errno;
 				warning_errno(_(msg_warn_remove_failed), qname);
 				errors++;
-			} else if (!quiet) {
+			} không_thì nếu (!quiet) {
 				qname = quote_path(item->string, NULL, &buf, 0);
 				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
 			}
@@ -1094,5 +1094,5 @@ int cmd_clean(int argc,
 	string_list_clear(&del_list, 0);
 	string_list_clear(&exclude_list, 0);
 	clear_pathspec(&pathspec);
-	return (errors != 0);
+	trả_về (errors != 0);
 }

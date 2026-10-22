@@ -30,14 +30,14 @@ enum stripspace_mode {
 	COMMENT_LINES
 };
 
-int cmd_stripspace(int argc,
+số_nguyên cmd_stripspace(số_nguyên argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
 {
 	struct strbuf buf = STRBUF_INIT;
 	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	số_nguyên nongit;
 
 	const struct option options[] = {
 		OPT_CMDMODE('s', "strip-comments", &mode,
@@ -50,24 +50,24 @@ int cmd_stripspace(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	nếu (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
 		setup_git_directory_gently(the_repository, &nongit);
 		repo_config(the_repository, git_default_config, NULL);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	nếu (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	nếu (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
 			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
+	không_thì
 		comment_lines(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	trả_về 0;
 }

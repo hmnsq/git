@@ -29,34 +29,34 @@ enum url_component {
 
 static void parse_or_die(const char *url, struct url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	nếu (url_is_local_not_ssh(url)) {
+		nếu (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		nếu (has_dos_drive_prefix(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	nếu (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
 static enum url_component get_component_or_die(const char *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	nếu (!strcmp("path", arg))
+		trả_về URL_PATH;
+	nếu (!strcmp("host", arg))
+		trả_về URL_HOST;
+	nếu (!strcmp("scheme", arg))
+		trả_về URL_SCHEME;
+	nếu (!strcmp("user", arg))
+		trả_về URL_USER;
+	nếu (!strcmp("password", arg))
+		trả_về URL_PASSWORD;
+	nếu (!strcmp("port", arg))
+		trả_về URL_PORT;
 	die("invalid git URL component '%s'", arg);
 }
 
@@ -91,13 +91,13 @@ static char *extract_component(enum url_component component,
 		length = info->path_len;
 		break;
 	case URL_NONE:
-		return NULL;
+		trả_về NULL;
 	}
 
-	return xstrndup(info->url + offset, length);
+	trả_về xstrndup(info->url + offset, length);
 }
 
-int cmd_url_parse(int argc,
+số_nguyên cmd_url_parse(số_nguyên argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
@@ -105,24 +105,24 @@ int cmd_url_parse(int argc,
 	struct url_info info;
 	enum url_component selected = URL_NONE;
 	char *extracted;
-	int i;
+	số_nguyên i;
 
 	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	nếu (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	nếu (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	cho (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
+		nếu (selected != URL_NONE) {
 			extracted = extract_component(selected, &info);
-			if (extracted) {
+			nếu (extracted) {
 				puts(extracted);
 				free(extracted);
 			}
@@ -131,5 +131,5 @@ int cmd_url_parse(int argc,
 		free(info.url);
 	}
 
-	return 0;
+	trả_về 0;
 }

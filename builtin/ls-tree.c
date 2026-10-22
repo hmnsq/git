@@ -24,30 +24,30 @@ static const char * const ls_tree_usage[] = {
 };
 
 static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+			      const enum object_type type, unsigned số_nguyên padded)
 {
 	static const char padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
 	size_t orig_len = line->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	nếu (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+		nếu (odb_read_object_info(the_repository->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
 		strbuf_add_uint(line, size);
-	} else {
+	} không_thì {
 		strbuf_addstr(line, "-");
 	}
 	len = line->len - orig_len;
-	if (len < min_len)
+	nếu (len < min_len)
 		strbuf_insert(line, orig_len, padding, min_len - len);
 }
 
 struct ls_tree_options {
 	unsigned null_termination:1;
-	int abbrev;
+	số_nguyên abbrev;
 	enum ls_tree_path_options {
 		LS_RECURSIVE = 1 << 0,
 		LS_TREE_ONLY = 1 << 1,
@@ -58,71 +58,71 @@ struct ls_tree_options {
 	const char *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
+static số_nguyên show_recursive(struct ls_tree_options *options, const char *base,
 			  size_t baselen, const char *pathname)
 {
-	int i;
+	số_nguyên i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	nếu (options->ls_options & LS_RECURSIVE)
+		trả_về 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	nếu (!options->pathspec.nr)
+		trả_về 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
+	cho (i = 0; i < options->pathspec.nr; i++) {
 		const char *spec = options->pathspec.items[i].match;
 		size_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
+		nếu (strncmp(base, spec, baselen))
 			continue;
 		len = strlen(pathname);
 		spec += baselen;
 		speclen = strlen(spec);
-		if (speclen <= len)
+		nếu (speclen <= len)
 			continue;
-		if (spec[len] && spec[len] != '/')
+		nếu (spec[len] && spec[len] != '/')
 			continue;
-		if (memcmp(pathname, spec, len))
+		nếu (memcmp(pathname, spec, len))
 			continue;
-		return 1;
+		trả_về 1;
 	}
-	return 0;
+	trả_về 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
+static số_nguyên show_tree_fmt(const struct object_id *oid, struct strbuf *base,
 			 const char *pathname, unsigned mode, void *context)
 {
 	struct ls_tree_options *options = context;
-	int recurse = 0;
+	số_nguyên recurse = 0;
 	struct strbuf sb = STRBUF_INIT;
 	enum object_type type = object_type(mode);
 	const char *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
+	nếu (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
 		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	nếu (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
+		trả_về recurse;
+	nếu (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
+		trả_về 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	trong_khi (strbuf_expand_step(&sb, &format)) {
 		size_t len;
 
-		if (skip_prefix(format, "%", &format))
+		nếu (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		không_thì nếu ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		không_thì nếu (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		không_thì nếu (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		không_thì nếu (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		không_thì nếu (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
+		không_thì nếu (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
+		không_thì nếu (skip_prefix(format, "(path)", &format)) {
 			const char *name;
 			const char *prefix = options->prefix;
 			struct strbuf sbuf = STRBUF_INIT;
@@ -133,33 +133,33 @@ static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
 			quote_c_style(name, &sb, NULL, 0);
 			strbuf_setlen(base, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} không_thì
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	trả_về recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
+static số_nguyên show_tree_common(struct ls_tree_options *options, số_nguyên *recurse,
 			    struct strbuf *base, const char *pathname,
 			    enum object_type type)
 {
-	int ret = -1;
+	số_nguyên ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	nếu (type == OBJ_BLOB) {
+		nếu (options->ls_options & LS_TREE_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
+	} không_thì nếu (type == OBJ_TREE &&
 		   show_recursive(options, base->buf, base->len, pathname)) {
 		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+		nếu (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	trả_về ret;
 }
 
 static void show_tree_common_default_long(struct ls_tree_options *options,
@@ -171,7 +171,7 @@ static void show_tree_common_default_long(struct ls_tree_options *options,
 
 	strbuf_addstr(base, pathname);
 
-	if (options->null_termination) {
+	nếu (options->null_termination) {
 		struct strbuf sb = STRBUF_INIT;
 		const char *name = relative_path(base->buf, prefix, &sb);
 
@@ -179,54 +179,54 @@ static void show_tree_common_default_long(struct ls_tree_options *options,
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} không_thì {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 
 	strbuf_setlen(base, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
+static số_nguyên show_tree_default(const struct object_id *oid, struct strbuf *base,
 			     const char *pathname, unsigned mode,
 			     void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	số_nguyên early;
+	số_nguyên recurse;
 	enum object_type type = object_type(mode);
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	nếu (early >= 0)
+		trả_về early;
 
 	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
 	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	trả_về recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
+static số_nguyên show_tree_long(const struct object_id *oid, struct strbuf *base,
 			  const char *pathname, unsigned mode,
 			  void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	số_nguyên early;
+	số_nguyên recurse;
 	char size_text[24];
 	enum object_type type = object_type(mode);
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	nếu (early >= 0)
+		trả_về early;
 
-	if (type == OBJ_BLOB) {
+	nếu (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
+		nếu (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
 			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
+		không_thì
 			xsnprintf(size_text, sizeof(size_text),
 				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
+	} không_thì {
 		xsnprintf(size_text, sizeof(size_text), "-");
 	}
 
@@ -234,28 +234,28 @@ static int show_tree_long(const struct object_id *oid, struct strbuf *base,
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
 	       size_text);
 	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	trả_về recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
+static số_nguyên show_tree_name_only(const struct object_id *oid UNUSED,
 			       struct strbuf *base,
 			       const char *pathname, unsigned mode,
 			       void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	số_nguyên early;
+	số_nguyên recurse;
 	const size_t baselen = base->len;
 	enum object_type type = object_type(mode);
 	const char *prefix;
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	nếu (early >= 0)
+		trả_về early;
 
 	prefix = options->prefix;
 	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
+	nếu (options->null_termination) {
 		struct strbuf sb = STRBUF_INIT;
 		const char *name = relative_path(base->buf, prefix, &sb);
 
@@ -263,35 +263,35 @@ static int show_tree_name_only(const struct object_id *oid UNUSED,
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} không_thì {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 	strbuf_setlen(base, baselen);
-	return recurse;
+	trả_về recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
+static số_nguyên show_tree_object(const struct object_id *oid, struct strbuf *base,
 			    const char *pathname, unsigned mode,
 			    void *context)
 {
 	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
+	số_nguyên early;
+	số_nguyên recurse;
 	enum object_type type = object_type(mode);
 	const char *str;
 
 	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	nếu (early >= 0)
+		trả_về early;
 
 	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	nếu (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} không_thì  {
 		puts(str);
 	}
-	return recurse;
+	trả_về recurse;
 }
 
 enum ls_tree_cmdmode {
@@ -335,18 +335,18 @@ static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
 	},
 };
 
-int cmd_ls_tree(int argc,
+số_nguyên cmd_ls_tree(số_nguyên argc,
 		const char **argv,
 		const char *prefix,
 		struct repository *repo UNUSED)
 {
 	struct object_id oid;
 	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
+	số_nguyên i, full_tree = 0;
+	số_nguyên full_name = !prefix || !*prefix;
 	read_tree_fn_t fn = NULL;
 	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
+	số_nguyên null_termination = 0;
 	struct ls_tree_options options = { 0 };
 	const struct option ls_tree_options[] = {
 		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
@@ -376,7 +376,7 @@ int cmd_ls_tree(int argc,
 		OPT_END()
 	};
 	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	số_nguyên ret;
 
 	repo_config(the_repository, git_default_config, NULL);
 
@@ -384,7 +384,7 @@ int cmd_ls_tree(int argc,
 			     ls_tree_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
+	nếu (full_tree)
 		prefix = NULL;
 	options.prefix = full_name ? NULL : prefix;
 
@@ -393,21 +393,21 @@ int cmd_ls_tree(int argc,
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
+	nếu (cmdmode == MODE_NAME_STATUS)
 		cmdmode = MODE_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
+	nếu ( (LS_TREE_ONLY|LS_RECURSIVE) ==
 	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
+	nếu (options.format && cmdmode)
 		usage_msg_opt(
 			_("--format can't be combined with other format-altering options"),
 			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
+	nếu (argc < 1)
 		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+	nếu (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -421,25 +421,25 @@ int cmd_ls_tree(int argc,
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
+	cho (i = 0; i < options.pathspec.nr; i++)
 		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
 	options.pathspec.has_wildcard = 0;
 	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	nếu (!tree)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
+	trong_khi (m2f) {
+		nếu (!m2f->fmt) {
 			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
+		} không_thì nếu (options.format && !strcmp(options.format, m2f->fmt)) {
 			cmdmode = m2f->mode;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} không_thì nếu (!options.format && cmdmode == m2f->mode) {
 			fn = m2f->fn;
-		} else {
+		} không_thì {
 			m2f++;
 			continue;
 		}
@@ -448,5 +448,5 @@ int cmd_ls_tree(int argc,
 
 	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	trả_về ret;
 }

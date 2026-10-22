@@ -8,68 +8,68 @@
 #include "sparse-index.h"
 
 static const char *pgm;
-static int one_shot, quiet;
-static int err;
+static số_nguyên one_shot, quiet;
+static số_nguyên err;
 
-static int merge_entry(int pos, const char *path)
+static số_nguyên merge_entry(số_nguyên pos, const char *path)
 {
-	int found;
+	số_nguyên found;
 	const char *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
 	char hexbuf[4][GIT_MAX_HEXSZ + 1];
 	char ownbuf[4][60];
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	if (pos >= the_repository->index->cache_nr)
+	nếu (pos >= the_repository->index->cache_nr)
 		die("git merge-index: %s not in the cache", path);
 	found = 0;
 	do {
 		const struct cache_entry *ce = the_repository->index->cache[pos];
-		int stage = ce_stage(ce);
+		số_nguyên stage = ce_stage(ce);
 
-		if (strcmp(ce->name, path))
+		nếu (strcmp(ce->name, path))
 			break;
 		found++;
 		oid_to_hex_r(hexbuf[stage], &ce->oid);
 		xsnprintf(ownbuf[stage], sizeof(ownbuf[stage]), "%o", ce->ce_mode);
 		arguments[stage] = hexbuf[stage];
 		arguments[stage + 4] = ownbuf[stage];
-	} while (++pos < the_repository->index->cache_nr);
-	if (!found)
+	} trong_khi (++pos < the_repository->index->cache_nr);
+	nếu (!found)
 		die("git merge-index: %s not in the cache", path);
 
 	strvec_pushv(&cmd.args, arguments);
-	if (run_command(&cmd)) {
-		if (one_shot)
+	nếu (run_command(&cmd)) {
+		nếu (one_shot)
 			err++;
-		else {
-			if (!quiet)
+		không_thì {
+			nếu (!quiet)
 				die("merge program failed");
 			exit(1);
 		}
 	}
-	return found;
+	trả_về found;
 }
 
 static void merge_one_path(const char *path)
 {
-	int pos = index_name_pos(the_repository->index, path, strlen(path));
+	số_nguyên pos = index_name_pos(the_repository->index, path, strlen(path));
 
 	/*
 	 * If it already exists in the cache as stage0, it's
 	 * already merged and there is nothing to do.
 	 */
-	if (pos < 0)
+	nếu (pos < 0)
 		merge_entry(-pos-1, path);
 }
 
 static void merge_all(void)
 {
-	int i;
+	số_nguyên i;
 	/* TODO: audit for interaction with sparse-index. */
 	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
+	cho (i = 0; i < the_repository->index->cache_nr; i++) {
 		const struct cache_entry *ce = the_repository->index->cache[i];
-		if (!ce_stage(ce))
+		nếu (!ce_stage(ce))
 			continue;
 		i += merge_entry(i, ce->name)-1;
 	}
@@ -78,12 +78,12 @@ static void merge_all(void)
 static const char usage_string[] =
 "git merge-index [-o] [-q] <merge-program> (-a | [--] [<filename>...])";
 
-int cmd_merge_index(int argc,
+số_nguyên cmd_merge_index(số_nguyên argc,
 		    const char **argv,
 		    const char *prefix UNUSED,
 		    struct repository *repo UNUSED)
 {
-	int i, force_file = 0;
+	số_nguyên i, force_file = 0;
 
 	/* Without this we cannot rely on waitpid() to tell
 	 * what happened to our children.
@@ -92,7 +92,7 @@ int cmd_merge_index(int argc,
 
 	show_usage_if_asked(argc, argv, usage_string);
 
-	if (argc < 3)
+	nếu (argc < 3)
 		usage(usage_string);
 
 	repo_read_index(the_repository);
@@ -101,23 +101,23 @@ int cmd_merge_index(int argc,
 	ensure_full_index(the_repository->index);
 
 	i = 1;
-	if (!strcmp(argv[i], "-o")) {
+	nếu (!strcmp(argv[i], "-o")) {
 		one_shot = 1;
 		i++;
 	}
-	if (!strcmp(argv[i], "-q")) {
+	nếu (!strcmp(argv[i], "-q")) {
 		quiet = 1;
 		i++;
 	}
 	pgm = argv[i++];
-	for (; i < argc; i++) {
+	cho (; i < argc; i++) {
 		const char *arg = argv[i];
-		if (!force_file && *arg == '-') {
-			if (!strcmp(arg, "--")) {
+		nếu (!force_file && *arg == '-') {
+			nếu (!strcmp(arg, "--")) {
 				force_file = 1;
 				continue;
 			}
-			if (!strcmp(arg, "-a")) {
+			nếu (!strcmp(arg, "-a")) {
 				merge_all();
 				continue;
 			}
@@ -125,7 +125,7 @@ int cmd_merge_index(int argc,
 		}
 		merge_one_path(arg);
 	}
-	if (err && !quiet)
+	nếu (err && !quiet)
 		die("merge program failed");
-	return err;
+	trả_về err;
 }

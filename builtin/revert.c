@@ -38,12 +38,12 @@ static const char * const cherry_pick_usage[] = {
 
 static const char *action_name(const struct replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
+	trả_về opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
 }
 
 static const char * const *revert_or_cherry_pick_usage(struct replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
+	trả_về opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
 }
 
 enum empty_action {
@@ -53,41 +53,41 @@ enum empty_action {
 	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
 };
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+static số_nguyên parse_opt_empty(const struct option *opt, const char *arg, số_nguyên unset)
 {
-	int *opt_value = opt->value;
+	số_nguyên *opt_value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
+	nếu (!strcmp(arg, "stop"))
 		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
+	không_thì nếu (!strcmp(arg, "drop"))
 		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
+	không_thì nếu (!strcmp(arg, "keep"))
 		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	không_thì
+		trả_về error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	trả_về 0;
 }
 
-static int option_parse_m(const struct option *opt,
-			  const char *arg, int unset)
+static số_nguyên option_parse_m(const struct option *opt,
+			  const char *arg, số_nguyên unset)
 {
 	struct replay_opts *replay = opt->value;
 	char *end;
 
-	if (unset) {
+	nếu (unset) {
 		replay->mainline = 0;
-		return 0;
+		trả_về 0;
 	}
 
 	replay->mainline = strtol(arg, &end, 10);
-	if (*end || replay->mainline <= 0)
-		return error(_("option `%s' expects a number greater than zero"),
+	nếu (*end || replay->mainline <= 0)
+		trả_về error(_("option `%s' expects a number greater than zero"),
 			     opt->long_name);
 
-	return 0;
+	trả_về 0;
 }
 
 LAST_ARG_MUST_BE_NULL
@@ -97,17 +97,17 @@ static void verify_opt_compatible(const char *me, const char *base_opt, ...)
 	va_list ap;
 
 	va_start(ap, base_opt);
-	while ((this_opt = va_arg(ap, const char *))) {
-		if (va_arg(ap, int))
+	trong_khi ((this_opt = va_arg(ap, const char *))) {
+		nếu (va_arg(ap, số_nguyên))
 			break;
 	}
 	va_end(ap);
 
-	if (this_opt)
+	nếu (this_opt)
 		die(_("%s: %s cannot be used with %s"), me, this_opt, base_opt);
 }
 
-static int run_sequencer(int argc, const char **argv, const char *prefix,
+static số_nguyên run_sequencer(số_nguyên argc, const char **argv, const char *prefix,
 			 struct replay_opts *opts)
 {
 	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
@@ -117,7 +117,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	const char *strategy = &sentinel_value;
 	const char *gpg_sign = &sentinel_value;
 	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
-	int cmd = 0, ret;
+	số_nguyên cmd = 0, ret;
 	struct option base_options[] = {
 		OPT_CMDMODE(0, "quit", &cmd, N_("end revert or cherry-pick sequence"), 'q'),
 		OPT_CMDMODE(0, "continue", &cmd, N_("resume revert or cherry-pick sequence"), 'c'),
@@ -148,7 +148,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	};
 	struct option *options = base_options;
 
-	if (opts->action == REPLAY_PICK) {
+	nếu (opts->action == REPLAY_PICK) {
 		struct option cp_extra[] = {
 			OPT_BOOL('x', NULL, &opts->record_origin, N_("append commit name")),
 			OPT_BOOL(0, "ff", &opts->allow_ff, N_("allow fast-forward")),
@@ -161,7 +161,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			OPT_END(),
 		};
 		options = parse_options_concat(options, cp_extra);
-	} else if (opts->action == REPLAY_REVERT) {
+	} không_thì nếu (opts->action == REPLAY_REVERT) {
 		struct option cp_extra[] = {
 			OPT_BOOL(0, "reference", &opts->commit_use_reference,
 				 N_("use the 'reference' format to refer to commits")),
@@ -177,30 +177,30 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (opts->action == REPLAY_PICK) {
+	nếu (opts->action == REPLAY_PICK) {
 		opts->drop_redundant_commits = (empty_opt == DROP_EMPTY_COMMIT);
 		opts->keep_redundant_commits = opts->keep_redundant_commits || (empty_opt == KEEP_EMPTY_COMMIT);
 	}
 
 	/* implies allow_empty */
-	if (opts->keep_redundant_commits)
+	nếu (opts->keep_redundant_commits)
 		opts->allow_empty = 1;
 
-	if (cleanup_arg) {
+	nếu (cleanup_arg) {
 		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
 	/* Check for incompatible command line arguments */
-	if (cmd) {
+	nếu (cmd) {
 		const char *this_operation;
-		if (cmd == 'q')
+		nếu (cmd == 'q')
 			this_operation = "--quit";
-		else if (cmd == 'c')
+		không_thì nếu (cmd == 'c')
 			this_operation = "--continue";
-		else if (cmd == 's')
+		không_thì nếu (cmd == 's')
 			this_operation = "--skip";
-		else {
+		không_thì {
 			assert(cmd == 'a');
 			this_operation = "--abort";
 		}
@@ -220,12 +220,12 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				NULL);
 	}
 
-	if (!opts->strategy && opts->default_strategy) {
+	nếu (!opts->strategy && opts->default_strategy) {
 		opts->strategy = opts->default_strategy;
 		opts->default_strategy = NULL;
 	}
 
-	if (opts->allow_ff)
+	nếu (opts->allow_ff)
 		verify_opt_compatible(me, "--ff",
 				"--signoff", opts->signoff,
 				"--no-commit", opts->no_commit,
@@ -233,63 +233,63 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				"--edit", opts->edit > 0,
 				NULL);
 
-	if (cmd) {
+	nếu (cmd) {
 		opts->revs = NULL;
-	} else {
+	} không_thì {
 		struct setup_revision_opt s_r_opt;
 		opts->revs = xmalloc(sizeof(*opts->revs));
 		repo_init_revisions(the_repository, opts->revs, NULL);
 		opts->revs->no_walk = 1;
 		opts->revs->unsorted_input = 1;
-		if (argc < 2)
+		nếu (argc < 2)
 			usage_with_options(usage_str, options);
-		if (!strcmp(argv[1], "-"))
+		nếu (!strcmp(argv[1], "-"))
 			argv[1] = "@{-1}";
 		memset(&s_r_opt, 0, sizeof(s_r_opt));
 		s_r_opt.assume_dashdash = 1;
 		argc = setup_revisions(argc, argv, opts->revs, &s_r_opt);
 	}
 
-	if (argc > 1)
+	nếu (argc > 1)
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
+	nếu (gpg_sign != &sentinel_value) {
 		free(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
+	nếu (strategy != &sentinel_value) {
 		free(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}
 	free(options);
 
-	if (cmd == 'q') {
+	nếu (cmd == 'q') {
 		ret = sequencer_remove_state(opts);
-		if (!ret)
+		nếu (!ret)
 			remove_branch_state(the_repository, 0);
-		return ret;
+		trả_về ret;
 	}
-	if (cmd == 'a')
-		return sequencer_rollback(the_repository, opts);
-	if (cmd == 'c')
+	nếu (cmd == 'a')
+		trả_về sequencer_rollback(the_repository, opts);
+	nếu (cmd == 'c')
 		ret = sequencer_continue(the_repository, opts);
-	else if (cmd == 's')
+	không_thì nếu (cmd == 's')
 		ret = sequencer_skip(the_repository, opts);
-	else
+	không_thì
 		ret = sequencer_pick_revisions(the_repository, opts);
-	if (!ret)
+	nếu (!ret)
 		run_auto_maintenance(the_repository, opts->quiet);
-	return ret;
+	trả_về ret;
 }
 
-int cmd_revert(int argc,
+số_nguyên cmd_revert(số_nguyên argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo UNUSED)
 {
 	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	số_nguyên res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -297,19 +297,19 @@ int cmd_revert(int argc,
 	opts.action = REPLAY_REVERT;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	nếu (res < 0)
 		die(_("revert failed"));
 	replay_opts_release(&opts);
-	return res;
+	trả_về res;
 }
 
-int cmd_cherry_pick(int argc,
+số_nguyên cmd_cherry_pick(số_nguyên argc,
 const char **argv,
 const char *prefix,
 struct repository *repo UNUSED)
 {
 	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	số_nguyên res;
 
 #ifndef WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
@@ -317,8 +317,8 @@ struct repository *repo UNUSED)
 	opts.action = REPLAY_PICK;
 	sequencer_init_config(&opts);
 	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	nếu (res < 0)
 		die(_("cherry-pick failed"));
 	replay_opts_release(&opts);
-	return res;
+	trả_về res;
 }

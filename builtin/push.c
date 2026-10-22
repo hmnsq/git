@@ -40,28 +40,28 @@ enum color_push {
 	PUSH_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+static số_nguyên parse_push_color_slot(const char *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	nếu (!strcasecmp(slot, "reset"))
+		trả_về PUSH_COLOR_RESET;
+	nếu (!strcasecmp(slot, "error"))
+		trả_về PUSH_COLOR_ERROR;
+	trả_về -1;
 }
 
 static const char *push_get_color(enum color_push ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	nếu (want_color_stderr(push_use_color))
+		trả_về push_colors[ix];
+	trả_về "";
 }
 
-static int thin = 1;
-static int deleterefs;
+static số_nguyên thin = 1;
+static số_nguyên deleterefs;
 static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+static số_nguyên verbosity;
+static số_nguyên progress = -1;
+static số_nguyên recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
 static enum transport_family family;
 
 static struct push_cas_option cas;
@@ -76,65 +76,65 @@ static void refspec_append_mapped(struct refspec *refspec, const char *ref,
 	const char *branch_name;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
-	if (remote->push.nr) {
+	nếu (remote->push.nr) {
 		struct refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		nếu (!refspec_find_match(&remote->push, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
 			free(query.dst);
-			return;
+			trả_về;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	nếu (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
 		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		nếu (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			trả_về;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+static void set_refspecs(const char **refs, số_nguyên nr, struct remote *remote)
 {
 	struct ref *local_refs = NULL;
-	int i;
+	số_nguyên i;
 
-	for (i = 0; i < nr; i++) {
+	cho (i = 0; i < nr; i++) {
 		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+		nếu (!strcmp("tag", ref)) {
+			nếu (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			nếu (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			không_thì
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} không_thì nếu (deleterefs) {
+			nếu (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
+		} không_thì nếu (!strchr(ref, ':')) {
 			struct ref *matched = NULL;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			nếu (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			nếu (count_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			không_thì
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} không_thì
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	nếu (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	nếu (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -195,16 +195,16 @@ static const char message_detached_head_die[] =
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+static const char *get_upstream_ref(số_nguyên flags, struct branch *branch, const char *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	nếu (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		trả_về branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+	nếu (!branch->merge_nr || !branch->merge || !branch->remote_name) {
 		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+		nếu (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,35 +221,35 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	nếu (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	trả_về branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+static void setup_default_push_refspecs(số_nguyên *flags, struct remote *remote)
 {
 	struct branch *branch;
 	const char *dst;
-	int same_remote;
+	số_nguyên same_remote;
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
 	switch (cfg->push_default) {
 	case PUSH_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		trả_về;
 
 	case PUSH_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
+		trả_về;
 	default:
 		break;
 	}
 
 	branch = branch_get(NULL);
-	if (!branch)
+	nếu (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
@@ -259,14 +259,14 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	default:
 	case PUSH_DEFAULT_UNSPECIFIED:
 	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
+		nếu (!same_remote)
 			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+		nếu (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
 			die_push_simple(branch, remote);
 		break;
 
 	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+		nếu (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
@@ -283,7 +283,7 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
+	nếu ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
 		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
@@ -324,75 +324,75 @@ static const char message_advice_ref_needs_update[] =
 
 static void advise_pull_before_push(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	nếu (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		trả_về;
 	advise(_(message_advice_pull_before_push));
 }
 
 static void advise_checkout_pull_push(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	nếu (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		trả_về;
 	advise(_(message_advice_checkout_pull_push));
 }
 
 static void advise_ref_already_exists(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	nếu (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		trả_về;
 	advise(_(message_advice_ref_already_exists));
 }
 
 static void advise_ref_fetch_first(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	nếu (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		trả_về;
 	advise(_(message_advice_ref_fetch_first));
 }
 
 static void advise_ref_needs_force(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	nếu (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		trả_về;
 	advise(_(message_advice_ref_needs_force));
 }
 
 static void advise_ref_needs_update(void)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	nếu (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
+		trả_về;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+static số_nguyên push_with_options(struct transport *transport, struct refspec *rs,
+			     số_nguyên flags)
 {
-	int err;
-	unsigned int reject_reasons;
+	số_nguyên err;
+	unsigned số_nguyên reject_reasons;
 	char *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	nếu (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
 	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	nếu (!is_empty_cas(&cas)) {
+		nếu (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	nếu (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
 	err = transport_push(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
+	nếu (err != 0) {
 		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
 		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
@@ -400,78 +400,78 @@ static int push_with_options(struct transport *transport, struct refspec *rs,
 
 	err |= transport_disconnect(transport);
 	free(anon_url);
-	if (!err)
-		return 0;
+	nếu (!err)
+		trả_về 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
+	nếu (reject_reasons & REJECT_NON_FF_HEAD) {
 		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
+	} không_thì nếu (reject_reasons & REJECT_NON_FF_OTHER) {
 		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	} không_thì nếu (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} không_thì nếu (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} không_thì nếu (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} không_thì nếu (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	trả_về 1;
 }
 
-static int do_push(int flags,
+static số_nguyên do_push(số_nguyên flags,
 		   const struct string_list *push_options,
 		   struct remote *remote)
 {
-	int errs;
+	số_nguyên errs;
 	struct strvec *url;
 	struct refspec *push_refspec = &rs;
 
-	if (push_options->nr)
+	nếu (push_options->nr)
 		flags |= TRANSPORT_PUSH_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
+	nếu (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
+		nếu (remote->push.nr) {
 			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
+		} không_thì nếu (!(flags & TRANSPORT_PUSH_MIRROR))
 			setup_default_push_refspecs(&flags, remote);
 	}
 	errs = 0;
 	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
+	cho (size_t i = 0; i < url->nr; i++) {
 		struct transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
+		nếu (flags & TRANSPORT_PUSH_OPTIONS)
 			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		nếu (push_with_options(transport, push_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	trả_về !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+static số_nguyên option_parse_recurse_submodules(const struct option *opt,
+				   const char *arg, số_nguyên unset)
 {
-	int *recurse_submodules = opt->value;
+	số_nguyên *recurse_submodules = opt->value;
 
-	if (unset)
+	nếu (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	không_thì {
+		nếu (!strcmp(arg, "only-is-on-demand")) {
+			nếu (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
+		} không_thì {
 			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	trả_về 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+static void set_push_cert_flags(số_nguyên *flags, số_nguyên v)
 {
 	switch (v) {
 	case SEND_PACK_PUSH_CERT_NEVER:
@@ -489,23 +489,23 @@ static void set_push_cert_flags(int *flags, int v)
 }
 
 
-static int git_push_config(const char *k, const char *v,
+static số_nguyên git_push_config(const char *k, const char *v,
 			   const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
-	int *flags = cb;
+	số_nguyên *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
+	nếu (!strcmp(k, "push.followtags")) {
+		nếu (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
+		không_thì
 			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
+		trả_về 0;
+	} không_thì nếu (!strcmp(k, "push.autosetupremote")) {
+		nếu (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
+		trả_về 0;
+	} không_thì nếu (!strcmp(k, "push.gpgsign")) {
 		switch (git_parse_maybe_bool(v)) {
 		case 0:
 			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
@@ -514,170 +514,170 @@ static int git_push_config(const char *k, const char *v,
 			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
 			break;
 		default:
-			if (!strcasecmp(v, "if-asked"))
+			nếu (!strcasecmp(v, "if-asked"))
 				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+			không_thì
+				trả_về error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
+	} không_thì nếu (!strcmp(k, "push.recursesubmodules")) {
 		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} không_thì nếu (!strcmp(k, "submodule.recurse")) {
+		số_nguyên val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
+	} không_thì nếu (!strcmp(k, "push.pushoption")) {
+		trả_về parse_transport_option(k, v, &push_options_config);
+	} không_thì nếu (!strcmp(k, "color.push")) {
 		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
+		trả_về 0;
+	} không_thì nếu (skip_prefix(k, "color.push.", &slot_name)) {
+		số_nguyên slot = parse_push_color_slot(slot_name);
+		nếu (slot < 0)
+			trả_về 0;
+		nếu (!v)
+			trả_về config_error_nonbool(k);
+		trả_về color_parse(v, push_colors[slot]);
+	} không_thì nếu (!strcmp(k, "push.useforceifincludes")) {
+		nếu (git_config_bool(k, v))
 			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
+		không_thì
 			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+		trả_về 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	trả_về git_default_config(k, v, ctx, NULL);
 }
 
-static int push_multiple(struct string_list *list,
+static số_nguyên push_multiple(struct string_list *list,
 			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
+			 số_nguyên flags,
+			 số_nguyên tags,
 			 const char **refspecs,
-			 int refspec_nr)
+			 số_nguyên refspec_nr)
 {
-	int result = 0;
+	số_nguyên result = 0;
 	size_t i;
 	struct strvec argv = STRVEC_INIT;
 
 	strvec_push(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
+	nếu (flags & TRANSPORT_PUSH_FORCE)
 		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
+	nếu (flags & TRANSPORT_PUSH_DRY_RUN)
 		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
+	nếu (flags & TRANSPORT_PUSH_PORCELAIN)
 		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
+	nếu (flags & TRANSPORT_PUSH_PRUNE)
 		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
+	nếu (flags & TRANSPORT_PUSH_NO_HOOK)
 		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
+	nếu (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
 		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
+	nếu (flags & TRANSPORT_PUSH_SET_UPSTREAM)
 		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
+	nếu (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
 		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
+	nếu (flags & TRANSPORT_PUSH_ALL)
 		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
+	nếu (flags & TRANSPORT_PUSH_MIRROR)
 		strvec_push(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
+	nếu (flags & TRANSPORT_PUSH_CERT_ALWAYS)
 		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
+	không_thì nếu (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
 		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
+	nếu (!thin)
 		strvec_push(&argv, "--no-thin");
 
-	if (deleterefs)
+	nếu (deleterefs)
 		strvec_push(&argv, "--delete");
 
-	if (receivepack)
+	nếu (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
+	nếu (verbosity >= 2)
 		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
+	nếu (verbosity >= 1)
 		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
+	không_thì nếu (verbosity < 0)
 		strvec_push(&argv, "-q");
-	if (progress > 0)
+	nếu (progress > 0)
 		strvec_push(&argv, "--progress");
-	else if (progress == 0)
+	không_thì nếu (progress == 0)
 		strvec_push(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
+	nếu (family == TRANSPORT_FAMILY_IPV4)
 		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
+	không_thì nếu (family == TRANSPORT_FAMILY_IPV6)
 		strvec_push(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	nếu (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	không_thì nếu (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	không_thì nếu (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
+	không_thì nếu (recurse_submodules == RECURSE_SUBMODULES_OFF)
 		strvec_push(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
+	nếu (tags)
 		strvec_push(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	cho (i = 0; i < push_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
 			     push_options->items[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	cho (i = 0; i < cas.nr; i++) {
+		nếu (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} không_thì nếu (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
+		} không_thì {
 			strvec_push(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
+	cho (i = 0; i < list->nr; i++) {
 		const char *name = list->items[i].string;
 		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+		số_nguyên j;
 
 		strvec_pushv(&cmd.args, argv.v);
 		strvec_push(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
+		cho (j = 0; j < refspec_nr; j++)
 			strvec_push(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		nếu (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		nếu (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	trả_về result;
 }
 
 static void die_if_repo_looks_like_ref(const char *repo)
 {
 	const char *slash = strchr(repo, '/');
 	struct strbuf name = STRBUF_INIT;
-	int code;
+	số_nguyên code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	nếu (!slash || !slash[1] || file_exists(repo))
+		trả_về;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	nếu (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		trả_về;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
@@ -688,16 +688,16 @@ static void die_if_repo_looks_like_ref(const char *repo)
 	exit(code);
 }
 
-int cmd_push(int argc,
+số_nguyên cmd_push(số_nguyên argc,
 	     const char **argv,
 	     const char *prefix,
 	     struct repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
+	số_nguyên flags = 0;
+	số_nguyên tags = 0;
+	số_nguyên push_cert = -1;
+	số_nguyên rc = 0;
+	số_nguyên base_flags;
 	const char *repo = NULL;	/* default repository */
 	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
 	struct string_list remote_group = STRING_LIST_INIT_DUP;
@@ -757,21 +757,21 @@ int cmd_push(int argc,
 				  tags, "--tags",
 				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
 				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+	nếu (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	nếu (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	không_thì nếu (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	không_thì nếu (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	nếu (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
+	nếu (repo) {
+		nếu (!add_remote_or_group(repo, &remote_group)) {
 			struct remote *r;
 
 			/*
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			nếu (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			nếu (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
+	} không_thì {
 		struct remote *r = pushremote_get(NULL);
-		if (!r)
+		nếu (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	nếu (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
 	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+		nếu (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	nếu (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
+			số_nguyên inner_flags = base_flags;
 			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			nếu (!r)
 				die(_("no such remote or remote group: %s"),
 				    remote_group.items[0].string);
 
-			if (r->mirror)
+			nếu (r->mirror)
 				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			nếu (inner_flags & TRANSPORT_PUSH_ALL) {
+				nếu (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			nếu (inner_flags & TRANSPORT_PUSH_MIRROR) {
+				nếu (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
 			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
 
-			if (tags)
+			nếu (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			nếu (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
 			rc = do_push(inner_flags, push_options, r);
 		}
-	} else {
+	} không_thì {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,7 +876,7 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		nếu (flags & TRANSPORT_PUSH_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
 		rc = push_multiple(&remote_group, push_options, flags,
@@ -890,8 +890,8 @@ int cmd_push(int argc,
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
+	nếu (rc == -1)
 		usage_with_options(push_usage, options);
-	else
-		return rc;
+	không_thì
+		trả_về rc;
 }

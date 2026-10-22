@@ -27,8 +27,8 @@ struct metainfo_charset
 	const char *charset;
 };
 
-static int parse_opt_explicit_encoding(const struct option *opt,
-				       const char *arg, int unset)
+static số_nguyên parse_opt_explicit_encoding(const struct option *opt,
+				       const char *arg, số_nguyên unset)
 {
 	struct metainfo_charset *meta_charset = opt->value;
 
@@ -37,26 +37,26 @@ static int parse_opt_explicit_encoding(const struct option *opt,
 	meta_charset->policy = CHARSET_EXPLICIT;
 	meta_charset->charset = arg;
 
-	return 0;
+	trả_về 0;
 }
 
-static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int unset)
+static số_nguyên parse_opt_quoted_cr(const struct option *opt, const char *arg, số_nguyên unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	nếu (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
+		trả_về error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	trả_về 0;
 }
 
-int cmd_mailinfo(int argc,
+số_nguyên cmd_mailinfo(số_nguyên argc,
 		 const char **argv,
 		 const char *prefix,
 		 struct repository *repo UNUSED)
 {
 	struct metainfo_charset meta_charset;
 	struct mailinfo mi;
-	int status;
+	số_nguyên status;
 	char *msgfile, *patchfile;
 
 	struct option options[] = {
@@ -88,7 +88,7 @@ int cmd_mailinfo(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, mailinfo_usage, 0);
 
-	if (argc != 2)
+	nếu (argc != 2)
 		usage_with_options(mailinfo_usage, options);
 
 	switch (meta_charset.policy) {
@@ -115,5 +115,5 @@ int cmd_mailinfo(int argc,
 
 	free(msgfile);
 	free(patchfile);
-	return status;
+	trả_về status;
 }

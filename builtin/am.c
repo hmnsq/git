@@ -45,21 +45,21 @@
 /**
  * Returns the length of the first line of msg.
  */
-static int linelen(const char *msg)
+static số_nguyên linelen(const char *msg)
 {
-	return strchrnul(msg, '\n') - msg;
+	trả_về strchrnul(msg, '\n') - msg;
 }
 
 /**
  * Returns true if `str` consists of only whitespace, false otherwise.
  */
-static int str_isspace(const char *str)
+static số_nguyên str_isspace(const char *str)
 {
-	for (; *str; str++)
-		if (!isspace(*str))
-			return 0;
+	cho (; *str; str++)
+		nếu (!isspace(*str))
+			trả_về 0;
 
-	return 1;
+	trả_về 1;
 }
 
 enum patch_format {
@@ -112,8 +112,8 @@ struct am_state {
 	char *dir;
 
 	/* current and last patch numbers, 1-indexed */
-	int cur;
-	int last;
+	số_nguyên cur;
+	số_nguyên last;
 
 	/* commit metadata and message */
 	char *author_name;
@@ -126,27 +126,27 @@ struct am_state {
 	struct object_id orig_commit;
 
 	/* number of digits in patch filename */
-	int prec;
+	số_nguyên prec;
 
 	/* various operating modes and command line options */
-	int interactive;
-	int no_verify;
-	int threeway;
-	int quiet;
-	int signoff; /* enum signoff_type */
-	int utf8;
-	int keep; /* enum keep_type */
-	int message_id;
-	int scissors; /* enum scissors_type */
-	int quoted_cr; /* enum quoted_cr_action */
-	int empty_type; /* enum empty_action */
+	số_nguyên interactive;
+	số_nguyên no_verify;
+	số_nguyên threeway;
+	số_nguyên quiet;
+	số_nguyên signoff; /* enum signoff_type */
+	số_nguyên utf8;
+	số_nguyên keep; /* enum keep_type */
+	số_nguyên message_id;
+	số_nguyên scissors; /* enum scissors_type */
+	số_nguyên quoted_cr; /* enum quoted_cr_action */
+	số_nguyên empty_type; /* enum empty_action */
 	struct strvec git_apply_opts;
 	const char *resolvemsg;
-	int committer_date_is_author_date;
-	int ignore_date;
-	int allow_rerere_autoupdate;
+	số_nguyên committer_date_is_author_date;
+	số_nguyên ignore_date;
+	số_nguyên allow_rerere_autoupdate;
 	const char *sign_commit;
-	int rebasing;
+	số_nguyên rebasing;
 };
 
 /**
@@ -154,7 +154,7 @@ struct am_state {
  */
 static void am_state_init(struct am_state *state)
 {
-	int gpgsign;
+	số_nguyên gpgsign;
 
 	memset(state, 0, sizeof(*state));
 
@@ -173,7 +173,7 @@ static void am_state_init(struct am_state *state)
 
 	strvec_init(&state->git_apply_opts);
 
-	if (!repo_config_get_bool(the_repository, "commit.gpgsign", &gpgsign))
+	nếu (!repo_config_get_bool(the_repository, "commit.gpgsign", &gpgsign))
 		state->sign_commit = gpgsign ? "" : NULL;
 }
 
@@ -190,33 +190,33 @@ static void am_state_release(struct am_state *state)
 	strvec_clear(&state->git_apply_opts);
 }
 
-static int am_option_parse_quoted_cr(const struct option *opt,
-				     const char *arg, int unset)
+static số_nguyên am_option_parse_quoted_cr(const struct option *opt,
+				     const char *arg, số_nguyên unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
-		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
-	return 0;
+	nếu (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
+		trả_về error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
+	trả_về 0;
 }
 
-static int am_option_parse_empty(const struct option *opt,
-				     const char *arg, int unset)
+static số_nguyên am_option_parse_empty(const struct option *opt,
+				     const char *arg, số_nguyên unset)
 {
-	int *opt_value = opt->value;
+	số_nguyên *opt_value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
+	nếu (!strcmp(arg, "stop"))
 		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
+	không_thì nếu (!strcmp(arg, "drop"))
 		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
+	không_thì nếu (!strcmp(arg, "keep"))
 		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	không_thì
+		trả_về error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	trả_về 0;
 }
 
 /**
@@ -224,7 +224,7 @@ static int am_option_parse_empty(const struct option *opt,
  */
 static inline const char *am_path(const struct am_state *state, const char *path)
 {
-	return mkpath("%s/%s", state->dir, path);
+	trả_về mkpath("%s/%s", state->dir, path);
 }
 
 /**
@@ -237,13 +237,13 @@ static void write_state_text(const struct am_state *state,
 }
 
 static void write_state_count(const struct am_state *state,
-			      const char *name, int value)
+			      const char *name, số_nguyên value)
 {
 	write_file(am_path(state, name), "%d", value);
 }
 
 static void write_state_bool(const struct am_state *state,
-			     const char *name, int value)
+			     const char *name, số_nguyên value)
 {
 	write_state_text(state, name, value ? "t" : "f");
 }
@@ -258,7 +258,7 @@ static void say(const struct am_state *state, FILE *fp, const char *fmt, ...)
 	va_list ap;
 
 	va_start(ap, fmt);
-	if (!state->quiet) {
+	nếu (!state->quiet) {
 		vfprintf(fp, fmt, ap);
 		putc('\n', fp);
 	}
@@ -268,17 +268,17 @@ static void say(const struct am_state *state, FILE *fp, const char *fmt, ...)
 /**
  * Returns 1 if there is an am session in progress, 0 otherwise.
  */
-static int am_in_progress(const struct am_state *state)
+static số_nguyên am_in_progress(const struct am_state *state)
 {
 	struct stat st;
 
-	if (lstat(state->dir, &st) < 0 || !S_ISDIR(st.st_mode))
-		return 0;
-	if (lstat(am_path(state, "last"), &st) || !S_ISREG(st.st_mode))
-		return 0;
-	if (lstat(am_path(state, "next"), &st) || !S_ISREG(st.st_mode))
-		return 0;
-	return 1;
+	nếu (lstat(state->dir, &st) < 0 || !S_ISDIR(st.st_mode))
+		trả_về 0;
+	nếu (lstat(am_path(state, "last"), &st) || !S_ISREG(st.st_mode))
+		trả_về 0;
+	nếu (lstat(am_path(state, "next"), &st) || !S_ISREG(st.st_mode))
+		trả_về 0;
+	trả_về 1;
 }
 
 /**
@@ -286,20 +286,20 @@ static int am_in_progress(const struct am_state *state)
  * number of bytes read on success, -1 if the file does not exist. If `trim` is
  * set, trailing whitespace will be removed.
  */
-static int read_state_file(struct strbuf *sb, const struct am_state *state,
-			const char *file, int trim)
+static số_nguyên read_state_file(struct strbuf *sb, const struct am_state *state,
+			const char *file, số_nguyên trim)
 {
 	strbuf_reset(sb);
 
-	if (strbuf_read_file(sb, am_path(state, file), 0) >= 0) {
-		if (trim)
+	nếu (strbuf_read_file(sb, am_path(state, file), 0) >= 0) {
+		nếu (trim)
 			strbuf_trim(sb);
 
-		return sb->len;
+		trả_về sb->len;
 	}
 
-	if (errno == ENOENT)
-		return -1;
+	nếu (errno == ENOENT)
+		trả_về -1;
 
 	die_errno(_("could not read '%s'"), am_path(state, file));
 }
@@ -320,7 +320,7 @@ static int read_state_file(struct strbuf *sb, const struct am_state *state,
  * script, and thus if the file differs from what this function expects, it is
  * better to bail out than to do something that the user does not expect.
  */
-static int read_am_author_script(struct am_state *state)
+static số_nguyên read_am_author_script(struct am_state *state)
 {
 	const char *filename = am_path(state, "author-script");
 
@@ -328,7 +328,7 @@ static int read_am_author_script(struct am_state *state)
 	assert(!state->author_email);
 	assert(!state->author_date);
 
-	return read_author_script(filename, &state->author_name,
+	trả_về read_author_script(filename, &state->author_name,
 				  &state->author_email, &state->author_date, 1);
 }
 
@@ -364,19 +364,19 @@ static void write_author_script(const struct am_state *state)
  *
  * Returns 0 on success, -1 if the file does not exist.
  */
-static int read_commit_msg(struct am_state *state)
+static số_nguyên read_commit_msg(struct am_state *state)
 {
 	struct strbuf sb = STRBUF_INIT;
 
 	assert(!state->msg);
 
-	if (read_state_file(&sb, state, "final-commit", 0) < 0) {
+	nếu (read_state_file(&sb, state, "final-commit", 0) < 0) {
 		strbuf_release(&sb);
-		return -1;
+		trả_về -1;
 	}
 
 	state->msg = strbuf_detach(&sb, &state->msg_len);
-	return 0;
+	trả_về 0;
 }
 
 /**
@@ -395,22 +395,22 @@ static void am_load(struct am_state *state)
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	if (read_state_file(&sb, state, "next", 1) < 0)
+	nếu (read_state_file(&sb, state, "next", 1) < 0)
 		BUG("state file 'next' does not exist");
 	state->cur = strtol(sb.buf, NULL, 10);
 
-	if (read_state_file(&sb, state, "last", 1) < 0)
+	nếu (read_state_file(&sb, state, "last", 1) < 0)
 		BUG("state file 'last' does not exist");
 	state->last = strtol(sb.buf, NULL, 10);
 
-	if (read_am_author_script(state) < 0)
+	nếu (read_am_author_script(state) < 0)
 		die(_("could not parse author script"));
 
 	read_commit_msg(state);
 
-	if (read_state_file(&sb, state, "original-commit", 1) < 0)
+	nếu (read_state_file(&sb, state, "original-commit", 1) < 0)
 		oidclr(&state->orig_commit, the_repository->hash_algo);
-	else if (get_oid_hex(sb.buf, &state->orig_commit) < 0)
+	không_thì nếu (get_oid_hex(sb.buf, &state->orig_commit) < 0)
 		die(_("could not parse %s"), am_path(state, "original-commit"));
 
 	read_state_file(&sb, state, "threeway", 1);
@@ -425,42 +425,42 @@ static void am_load(struct am_state *state)
 	read_state_file(&sb, state, "utf8", 1);
 	state->utf8 = !strcmp(sb.buf, "t");
 
-	if (file_exists(am_path(state, "rerere-autoupdate"))) {
+	nếu (file_exists(am_path(state, "rerere-autoupdate"))) {
 		read_state_file(&sb, state, "rerere-autoupdate", 1);
 		state->allow_rerere_autoupdate = strcmp(sb.buf, "t") ?
 			RERERE_NOAUTOUPDATE : RERERE_AUTOUPDATE;
-	} else {
+	} không_thì {
 		state->allow_rerere_autoupdate = 0;
 	}
 
 	read_state_file(&sb, state, "keep", 1);
-	if (!strcmp(sb.buf, "t"))
+	nếu (!strcmp(sb.buf, "t"))
 		state->keep = KEEP_TRUE;
-	else if (!strcmp(sb.buf, "b"))
+	không_thì nếu (!strcmp(sb.buf, "b"))
 		state->keep = KEEP_NON_PATCH;
-	else
+	không_thì
 		state->keep = KEEP_FALSE;
 
 	read_state_file(&sb, state, "messageid", 1);
 	state->message_id = !strcmp(sb.buf, "t");
 
 	read_state_file(&sb, state, "scissors", 1);
-	if (!strcmp(sb.buf, "t"))
+	nếu (!strcmp(sb.buf, "t"))
 		state->scissors = SCISSORS_TRUE;
-	else if (!strcmp(sb.buf, "f"))
+	không_thì nếu (!strcmp(sb.buf, "f"))
 		state->scissors = SCISSORS_FALSE;
-	else
+	không_thì
 		state->scissors = SCISSORS_UNSET;
 
 	read_state_file(&sb, state, "quoted-cr", 1);
-	if (!*sb.buf)
+	nếu (!*sb.buf)
 		state->quoted_cr = quoted_cr_unset;
-	else if (mailinfo_parse_quoted_cr_action(sb.buf, &state->quoted_cr) != 0)
+	không_thì nếu (mailinfo_parse_quoted_cr_action(sb.buf, &state->quoted_cr) != 0)
 		die(_("could not parse %s"), am_path(state, "quoted-cr"));
 
 	read_state_file(&sb, state, "apply-opt", 1);
 	strvec_clear(&state->git_apply_opts);
-	if (sq_dequote_to_strvec(sb.buf, &state->git_apply_opts) < 0)
+	nếu (sq_dequote_to_strvec(sb.buf, &state->git_apply_opts) < 0)
 		die(_("could not parse %s"), am_path(state, "apply-opt"));
 
 	state->rebasing = !!file_exists(am_path(state, "rebasing"));
@@ -484,39 +484,39 @@ static void am_destroy(const struct am_state *state)
 /**
  * Runs applypatch-msg hook. Returns its exit code.
  */
-static int run_applypatch_msg_hook(struct am_state *state)
+static số_nguyên run_applypatch_msg_hook(struct am_state *state)
 {
-	int ret = 0;
+	số_nguyên ret = 0;
 
 	assert(state->msg);
 
-	if (!state->no_verify) {
+	nếu (!state->no_verify) {
 		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 		strvec_push(&opt.args, am_path(state, "final-commit"));
 		ret = run_hooks_opt(the_repository, "applypatch-msg", &opt);
 	}
 
-	if (!ret) {
+	nếu (!ret) {
 		FREE_AND_NULL(state->msg);
-		if (read_commit_msg(state) < 0)
+		nếu (read_commit_msg(state) < 0)
 			die(_("'%s' was deleted by the applypatch-msg hook"),
 				am_path(state, "final-commit"));
 	}
 
-	return ret;
+	trả_về ret;
 }
 
 /**
  * Runs post-rewrite hook. Returns it exit code.
  */
-static int run_post_rewrite_hook(const struct am_state *state)
+static số_nguyên run_post_rewrite_hook(const struct am_state *state)
 {
 	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
 
 	strvec_push(&opt.args, "rebase");
 	opt.path_to_stdin = am_path(state, "rewritten");
 
-	return run_hooks_opt(the_repository, "post-rewrite", &opt);
+	trả_về run_hooks_opt(the_repository, "post-rewrite", &opt);
 }
 
 /**
@@ -525,48 +525,48 @@ static int run_post_rewrite_hook(const struct am_state *state)
  *
  * Returns 0 on success, -1 on failure.
  */
-static int copy_notes_for_rebase(const struct am_state *state)
+static số_nguyên copy_notes_for_rebase(const struct am_state *state)
 {
 	struct notes_rewrite_cfg *c;
 	struct strbuf sb = STRBUF_INIT;
 	const char *invalid_line = _("Malformed input line: '%s'.");
 	const char *msg = "Notes added by 'git rebase'";
 	FILE *fp;
-	int ret = 0;
+	số_nguyên ret = 0;
 
 	assert(state->rebasing);
 
 	c = init_copy_notes_for_rewrite("rebase");
-	if (!c)
-		return 0;
+	nếu (!c)
+		trả_về 0;
 
 	fp = xfopen(am_path(state, "rewritten"), "r");
 
-	while (!strbuf_getline_lf(&sb, fp)) {
+	trong_khi (!strbuf_getline_lf(&sb, fp)) {
 		struct object_id from_obj, to_obj;
 		const char *p;
 
-		if (sb.len != the_hash_algo->hexsz * 2 + 1) {
+		nếu (sb.len != the_hash_algo->hexsz * 2 + 1) {
 			ret = error(invalid_line, sb.buf);
 			goto finish;
 		}
 
-		if (parse_oid_hex(sb.buf, &from_obj, &p)) {
+		nếu (parse_oid_hex(sb.buf, &from_obj, &p)) {
 			ret = error(invalid_line, sb.buf);
 			goto finish;
 		}
 
-		if (*p != ' ') {
+		nếu (*p != ' ') {
 			ret = error(invalid_line, sb.buf);
 			goto finish;
 		}
 
-		if (get_oid_hex(p + 1, &to_obj)) {
+		nếu (get_oid_hex(p + 1, &to_obj)) {
 			ret = error(invalid_line, sb.buf);
 			goto finish;
 		}
 
-		if (copy_note_for_rewrite(c, &from_obj, &to_obj))
+		nếu (copy_note_for_rewrite(c, &from_obj, &to_obj))
 			ret = error(_("Failed to copy notes from '%s' to '%s'"),
 					oid_to_hex(&from_obj), oid_to_hex(&to_obj));
 	}
@@ -575,7 +575,7 @@ finish:
 	finish_copy_notes_for_rewrite(the_repository, c, msg);
 	fclose(fp);
 	strbuf_release(&sb);
-	return ret;
+	trả_về ret;
 }
 
 /**
@@ -585,29 +585,29 @@ finish:
  *
  * Returns 1 if the file looks like a piece of mail, 0 otherwise.
  */
-static int is_mail(FILE *fp)
+static số_nguyên is_mail(FILE *fp)
 {
 	const char *header_regex = "^[!-9;-~]+:";
 	struct strbuf sb = STRBUF_INIT;
 	regex_t regex;
-	int ret = 1;
+	số_nguyên ret = 1;
 
-	if (fseek(fp, 0L, SEEK_SET))
+	nếu (fseek(fp, 0L, SEEK_SET))
 		die_errno(_("fseek failed"));
 
-	if (regcomp(&regex, header_regex, REG_NOSUB | REG_EXTENDED))
+	nếu (regcomp(&regex, header_regex, REG_NOSUB | REG_EXTENDED))
 		die("invalid pattern: %s", header_regex);
 
-	while (!strbuf_getline(&sb, fp)) {
-		if (!sb.len)
+	trong_khi (!strbuf_getline(&sb, fp)) {
+		nếu (!sb.len)
 			break; /* End of header */
 
 		/* Ignore indented folded lines */
-		if (*sb.buf == '\t' || *sb.buf == ' ')
+		nếu (*sb.buf == '\t' || *sb.buf == ' ')
 			continue;
 
 		/* It's a header if it matches header_regex */
-		if (regexec(&regex, sb.buf, 0, NULL, 0)) {
+		nếu (regexec(&regex, sb.buf, 0, NULL, 0)) {
 			ret = 0;
 			goto done;
 		}
@@ -616,7 +616,7 @@ static int is_mail(FILE *fp)
 done:
 	regfree(&regex);
 	strbuf_release(&sb);
-	return ret;
+	trả_về ret;
 }
 
 /**
@@ -624,7 +624,7 @@ done:
  * returning the PATCH_FORMAT_* enum value. Returns PATCH_FORMAT_UNKNOWN if
  * detection fails.
  */
-static int detect_patch_format(const char **paths)
+static số_nguyên detect_patch_format(const char **paths)
 {
 	enum patch_format ret = PATCH_FORMAT_UNKNOWN;
 	struct strbuf l1 = STRBUF_INIT;
@@ -635,8 +635,8 @@ static int detect_patch_format(const char **paths)
 	/*
 	 * We default to mbox format if input is from stdin and for directories
 	 */
-	if (!*paths || !strcmp(*paths, "-") || is_directory(*paths))
-		return PATCH_FORMAT_MBOX;
+	nếu (!*paths || !strcmp(*paths, "-") || is_directory(*paths))
+		trả_về PATCH_FORMAT_MBOX;
 
 	/*
 	 * Otherwise, check the first few lines of the first patch, starting
@@ -645,22 +645,22 @@ static int detect_patch_format(const char **paths)
 
 	fp = xfopen(*paths, "r");
 
-	while (!strbuf_getline(&l1, fp)) {
-		if (l1.len)
+	trong_khi (!strbuf_getline(&l1, fp)) {
+		nếu (l1.len)
 			break;
 	}
 
-	if (starts_with(l1.buf, "From ") || starts_with(l1.buf, "From: ")) {
+	nếu (starts_with(l1.buf, "From ") || starts_with(l1.buf, "From: ")) {
 		ret = PATCH_FORMAT_MBOX;
 		goto done;
 	}
 
-	if (starts_with(l1.buf, "# This series applies on GIT commit")) {
+	nếu (starts_with(l1.buf, "# This series applies on GIT commit")) {
 		ret = PATCH_FORMAT_STGIT_SERIES;
 		goto done;
 	}
 
-	if (!strcmp(l1.buf, "# HG changeset patch")) {
+	nếu (!strcmp(l1.buf, "# HG changeset patch")) {
 		ret = PATCH_FORMAT_HG;
 		goto done;
 	}
@@ -672,7 +672,7 @@ static int detect_patch_format(const char **paths)
 	 * If the second line is empty and the third is a From, Author or Date
 	 * entry, this is likely an StGit patch.
 	 */
-	if (l1.len && !l2.len &&
+	nếu (l1.len && !l2.len &&
 		(starts_with(l3.buf, "From:") ||
 		 starts_with(l3.buf, "Author:") ||
 		 starts_with(l3.buf, "Date:"))) {
@@ -680,7 +680,7 @@ static int detect_patch_format(const char **paths)
 		goto done;
 	}
 
-	if (l1.len && is_mail(fp)) {
+	nếu (l1.len && is_mail(fp)) {
 		ret = PATCH_FORMAT_MBOX;
 		goto done;
 	}
@@ -690,34 +690,34 @@ done:
 	strbuf_release(&l1);
 	strbuf_release(&l2);
 	strbuf_release(&l3);
-	return ret;
+	trả_về ret;
 }
 
 /**
  * Splits out individual email patches from `paths`, where each path is either
  * a mbox file or a Maildir. Returns 0 on success, -1 on failure.
  */
-static int split_mail_mbox(struct am_state *state, const char **paths,
-				int keep_cr, int mboxrd)
+static số_nguyên split_mail_mbox(struct am_state *state, const char **paths,
+				số_nguyên keep_cr, số_nguyên mboxrd)
 {
 	struct child_process cp = CHILD_PROCESS_INIT;
 	struct strbuf last = STRBUF_INIT;
-	int ret;
+	số_nguyên ret;
 
 	cp.git_cmd = 1;
 	strvec_push(&cp.args, "mailsplit");
 	strvec_pushf(&cp.args, "-d%d", state->prec);
 	strvec_pushf(&cp.args, "-o%s", state->dir);
 	strvec_push(&cp.args, "-b");
-	if (keep_cr)
+	nếu (keep_cr)
 		strvec_push(&cp.args, "--keep-cr");
-	if (mboxrd)
+	nếu (mboxrd)
 		strvec_push(&cp.args, "--mboxrd");
 	strvec_push(&cp.args, "--");
 	strvec_pushv(&cp.args, paths);
 
 	ret = capture_command(&cp, &last, 8);
-	if (ret)
+	nếu (ret)
 		goto exit;
 
 	state->cur = 1;
@@ -725,7 +725,7 @@ static int split_mail_mbox(struct am_state *state, const char **paths,
 
 exit:
 	strbuf_release(&last);
-	return ret ? -1 : 0;
+	trả_về ret ? -1 : 0;
 }
 
 /**
@@ -733,7 +733,7 @@ exit:
  * read from `in`, and the converted patch (in RFC2822 mail format) should be
  * written to `out`. Return 0 on success, or -1 on failure.
  */
-typedef int (*mail_conv_fn)(FILE *out, FILE *in, int keep_cr);
+typedef số_nguyên (*mail_conv_fn)(FILE *out, FILE *in, số_nguyên keep_cr);
 
 /**
  * Calls `fn` for each file in `paths` to convert the foreign patch to the
@@ -741,89 +741,89 @@ typedef int (*mail_conv_fn)(FILE *out, FILE *in, int keep_cr);
  *
  * Returns 0 on success, -1 on failure.
  */
-static int split_mail_conv(mail_conv_fn fn, struct am_state *state,
-			const char **paths, int keep_cr)
+static số_nguyên split_mail_conv(mail_conv_fn fn, struct am_state *state,
+			const char **paths, số_nguyên keep_cr)
 {
 	static const char *stdin_only[] = {"-", NULL};
-	int i;
+	số_nguyên i;
 
-	if (!*paths)
+	nếu (!*paths)
 		paths = stdin_only;
 
-	for (i = 0; *paths; paths++, i++) {
+	cho (i = 0; *paths; paths++, i++) {
 		FILE *in, *out;
 		const char *mail;
-		int ret;
+		số_nguyên ret;
 
-		if (!strcmp(*paths, "-"))
+		nếu (!strcmp(*paths, "-"))
 			in = stdin;
-		else
+		không_thì
 			in = fopen(*paths, "r");
 
-		if (!in)
-			return error_errno(_("could not open '%s' for reading"),
+		nếu (!in)
+			trả_về error_errno(_("could not open '%s' for reading"),
 					   *paths);
 
 		mail = mkpath("%s/%0*d", state->dir, state->prec, i + 1);
 
 		out = fopen(mail, "w");
-		if (!out) {
-			if (in != stdin)
+		nếu (!out) {
+			nếu (in != stdin)
 				fclose(in);
-			return error_errno(_("could not open '%s' for writing"),
+			trả_về error_errno(_("could not open '%s' for writing"),
 					   mail);
 		}
 
 		ret = fn(out, in, keep_cr);
 
 		fclose(out);
-		if (in != stdin)
+		nếu (in != stdin)
 			fclose(in);
 
-		if (ret)
-			return error(_("could not parse patch '%s'"), *paths);
+		nếu (ret)
+			trả_về error(_("could not parse patch '%s'"), *paths);
 	}
 
 	state->cur = 1;
 	state->last = i;
-	return 0;
+	trả_về 0;
 }
 
 /**
  * A split_mail_conv() callback that converts an StGit patch to an RFC2822
  * message suitable for parsing with git-mailinfo.
  */
-static int stgit_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
+static số_nguyên stgit_patch_to_mail(FILE *out, FILE *in, số_nguyên keep_cr UNUSED)
 {
 	struct strbuf sb = STRBUF_INIT;
-	int subject_printed = 0;
+	số_nguyên subject_printed = 0;
 
-	while (!strbuf_getline_lf(&sb, in)) {
+	trong_khi (!strbuf_getline_lf(&sb, in)) {
 		const char *str;
 
-		if (str_isspace(sb.buf))
+		nếu (str_isspace(sb.buf))
 			continue;
-		else if (skip_prefix(sb.buf, "Author:", &str))
+		không_thì nếu (skip_prefix(sb.buf, "Author:", &str))
 			fprintf(out, "From:%s\n", str);
-		else if (starts_with(sb.buf, "From") || starts_with(sb.buf, "Date"))
+		không_thì nếu (starts_with(sb.buf, "From") || starts_with(sb.buf, "Date"))
 			fprintf(out, "%s\n", sb.buf);
-		else if (!subject_printed) {
+		không_thì nếu (!subject_printed) {
 			fprintf(out, "Subject: %s\n", sb.buf);
 			subject_printed = 1;
-		} else {
+		} không_thì {
 			fprintf(out, "\n%s\n", sb.buf);
 			break;
 		}
 	}
 
 	strbuf_reset(&sb);
-	while (strbuf_fread(&sb, 8192, in) > 0) {
+	trong_khi (strbuf_fread(&sb, 8192, in) > 0) {
 		fwrite(sb.buf, 1, sb.len, out);
 		strbuf_reset(&sb);
 	}
 
 	strbuf_release(&sb);
-	return 0;
+	trả_về 0;
 }
 
 /**
@@ -835,30 +835,30 @@ static int stgit_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
  *
  * Returns 0 on success, -1 on failure.
  */
-static int split_mail_stgit_series(struct am_state *state, const char **paths,
-					int keep_cr)
+static số_nguyên split_mail_stgit_series(struct am_state *state, const char **paths,
+					số_nguyên keep_cr)
 {
 	const char *series_dir;
 	char *series_dir_buf;
 	FILE *fp;
 	struct strvec patches = STRVEC_INIT;
 	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	số_nguyên ret;
 
-	if (!paths[0] || paths[1])
-		return error(_("Only one StGIT patch series can be applied at once"));
+	nếu (!paths[0] || paths[1])
+		trả_về error(_("Only one StGIT patch series can be applied at once"));
 
 	series_dir_buf = xstrdup(*paths);
 	series_dir = dirname(series_dir_buf);
 
 	fp = fopen(*paths, "r");
-	if (!fp) {
+	nếu (!fp) {
 		free(series_dir_buf);
-		return error_errno(_("could not open '%s' for reading"), *paths);
+		trả_về error_errno(_("could not open '%s' for reading"), *paths);
 	}
 
-	while (!strbuf_getline_lf(&sb, fp)) {
-		if (*sb.buf == '#')
+	trong_khi (!strbuf_getline_lf(&sb, fp)) {
+		nếu (*sb.buf == '#')
 			continue; /* skip comment lines */
 
 		strvec_push(&patches, mkpath("%s/%s", series_dir, sb.buf));
@@ -871,48 +871,48 @@ static int split_mail_stgit_series(struct am_state *state, const char **paths,
 	ret = split_mail_conv(stgit_patch_to_mail, state, patches.v, keep_cr);
 
 	strvec_clear(&patches);
-	return ret;
+	trả_về ret;
 }
 
 /**
  * A split_patches_conv() callback that converts a mercurial patch to a RFC2822
  * message suitable for parsing with git-mailinfo.
  */
-static int hg_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
+static số_nguyên hg_patch_to_mail(FILE *out, FILE *in, số_nguyên keep_cr UNUSED)
 {
 	struct strbuf sb = STRBUF_INIT;
-	int rc = 0;
+	số_nguyên rc = 0;
 
-	while (!strbuf_getline_lf(&sb, in)) {
+	trong_khi (!strbuf_getline_lf(&sb, in)) {
 		const char *str;
 
-		if (skip_prefix(sb.buf, "# User ", &str))
+		nếu (skip_prefix(sb.buf, "# User ", &str))
 			fprintf(out, "From: %s\n", str);
-		else if (skip_prefix(sb.buf, "# Date ", &str)) {
+		không_thì nếu (skip_prefix(sb.buf, "# Date ", &str)) {
 			timestamp_t timestamp;
 			long tz, tz2;
 			char *end;
 
 			errno = 0;
 			timestamp = parse_timestamp(str, &end, 10);
-			if (errno) {
+			nếu (errno) {
 				rc = error(_("invalid timestamp"));
 				goto exit;
 			}
 
-			if (!skip_prefix(end, " ", &str)) {
+			nếu (!skip_prefix(end, " ", &str)) {
 				rc = error(_("invalid Date line"));
 				goto exit;
 			}
 
 			errno = 0;
 			tz = strtol(str, &end, 10);
-			if (errno) {
+			nếu (errno) {
 				rc = error(_("invalid timezone offset"));
 				goto exit;
 			}
 
-			if (*end) {
+			nếu (*end) {
 				rc = error(_("invalid Date line"));
 				goto exit;
 			}
@@ -923,26 +923,26 @@ static int hg_patch_to_mail(FILE *out, FILE *in, int keep_cr UNUSED)
 			 * UTC. Convert it.
 			 */
 			tz2 = labs(tz) / 3600 * 100 + labs(tz) % 3600 / 60;
-			if (tz > 0)
+			nếu (tz > 0)
 				tz2 = -tz2;
 
 			fprintf(out, "Date: %s\n", show_date(timestamp, tz2, DATE_MODE(RFC2822)));
-		} else if (starts_with(sb.buf, "# ")) {
+		} không_thì nếu (starts_with(sb.buf, "# ")) {
 			continue;
-		} else {
+		} không_thì {
 			fprintf(out, "\n%s\n", sb.buf);
 			break;
 		}
 	}
 
 	strbuf_reset(&sb);
-	while (strbuf_fread(&sb, 8192, in) > 0) {
+	trong_khi (strbuf_fread(&sb, 8192, in) > 0) {
 		fwrite(sb.buf, 1, sb.len, out);
 		strbuf_reset(&sb);
 	}
 exit:
 	strbuf_release(&sb);
-	return rc;
+	trả_về rc;
 }
 
 /**
@@ -962,60 +962,60 @@ exit:
  *
  * Returns 0 on success, -1 on failure.
  */
-static int split_mail(struct am_state *state, enum patch_format patch_format,
-			const char **paths, int keep_cr)
+static số_nguyên split_mail(struct am_state *state, enum patch_format patch_format,
+			const char **paths, số_nguyên keep_cr)
 {
-	if (keep_cr < 0) {
+	nếu (keep_cr < 0) {
 		keep_cr = 0;
 		repo_config_get_bool(the_repository, "am.keepcr", &keep_cr);
 	}
 
 	switch (patch_format) {
 	case PATCH_FORMAT_MBOX:
-		return split_mail_mbox(state, paths, keep_cr, 0);
+		trả_về split_mail_mbox(state, paths, keep_cr, 0);
 	case PATCH_FORMAT_STGIT:
-		return split_mail_conv(stgit_patch_to_mail, state, paths, keep_cr);
+		trả_về split_mail_conv(stgit_patch_to_mail, state, paths, keep_cr);
 	case PATCH_FORMAT_STGIT_SERIES:
-		return split_mail_stgit_series(state, paths, keep_cr);
+		trả_về split_mail_stgit_series(state, paths, keep_cr);
 	case PATCH_FORMAT_HG:
-		return split_mail_conv(hg_patch_to_mail, state, paths, keep_cr);
+		trả_về split_mail_conv(hg_patch_to_mail, state, paths, keep_cr);
 	case PATCH_FORMAT_MBOXRD:
-		return split_mail_mbox(state, paths, keep_cr, 1);
+		trả_về split_mail_mbox(state, paths, keep_cr, 1);
 	default:
 		BUG("invalid patch_format");
 	}
-	return -1;
+	trả_về -1;
 }
 
 /**
  * Setup a new am session for applying patches
  */
 static void am_setup(struct am_state *state, enum patch_format patch_format,
-			const char **paths, int keep_cr)
+			const char **paths, số_nguyên keep_cr)
 {
 	struct object_id curr_head;
 	const char *str;
 	struct strbuf sb = STRBUF_INIT;
 
-	if (!patch_format)
+	nếu (!patch_format)
 		patch_format = detect_patch_format(paths);
 
-	if (!patch_format) {
+	nếu (!patch_format) {
 		fprintf_ln(stderr, _("Patch format detection failed."));
 		die(NULL);
 	}
 
-	if (mkdir(state->dir, 0777) < 0 && errno != EEXIST)
+	nếu (mkdir(state->dir, 0777) < 0 && errno != EEXIST)
 		die_errno(_("failed to create directory '%s'"), state->dir);
 	refs_delete_ref(get_main_ref_store(the_repository), NULL,
 			"REBASE_HEAD", NULL, REF_NO_DEREF);
 
-	if (split_mail(state, patch_format, paths, keep_cr) < 0) {
+	nếu (split_mail(state, patch_format, paths, keep_cr) < 0) {
 		am_destroy(state);
 		die(_("Failed to split patches."));
 	}
 
-	if (state->rebasing)
+	nếu (state->rebasing)
 		state->threeway = 1;
 
 	write_state_bool(state, "threeway", state->threeway);
@@ -1023,7 +1023,7 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
 	write_state_bool(state, "sign", state->signoff);
 	write_state_bool(state, "utf8", state->utf8);
 
-	if (state->allow_rerere_autoupdate)
+	nếu (state->allow_rerere_autoupdate)
 		write_state_bool(state, "rerere-autoupdate",
 			 state->allow_rerere_autoupdate == RERERE_AUTOUPDATE);
 
@@ -1080,21 +1080,21 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
 	sq_quote_argv(&sb, state->git_apply_opts.v);
 	write_state_text(state, "apply-opt", sb.buf);
 
-	if (state->rebasing)
+	nếu (state->rebasing)
 		write_state_text(state, "rebasing", "");
-	else
+	không_thì
 		write_state_text(state, "applying", "");
 
-	if (!repo_get_oid(the_repository, "HEAD", &curr_head)) {
+	nếu (!repo_get_oid(the_repository, "HEAD", &curr_head)) {
 		write_state_text(state, "abort-safety", oid_to_hex(&curr_head));
-		if (!state->rebasing)
+		nếu (!state->rebasing)
 			refs_update_ref(get_main_ref_store(the_repository),
 					"am", "ORIG_HEAD", &curr_head, NULL,
 					0,
 					UPDATE_REFS_DIE_ON_ERR);
-	} else {
+	} không_thì {
 		write_state_text(state, "abort-safety", "");
-		if (!state->rebasing)
+		nếu (!state->rebasing)
 			refs_delete_ref(get_main_ref_store(the_repository),
 					NULL, "ORIG_HEAD", NULL, 0);
 	}
@@ -1132,9 +1132,9 @@ static void am_next(struct am_state *state)
 	refs_delete_ref(get_main_ref_store(the_repository), NULL,
 			"REBASE_HEAD", NULL, REF_NO_DEREF);
 
-	if (!repo_get_oid(the_repository, "HEAD", &head))
+	nếu (!repo_get_oid(the_repository, "HEAD", &head))
 		write_state_text(state, "abort-safety", oid_to_hex(&head));
-	else
+	không_thì
 		write_state_text(state, "abort-safety", "");
 
 	state->cur++;
@@ -1151,7 +1151,7 @@ static const char *msgnum(const struct am_state *state)
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%0*d", state->prec, state->cur);
 
-	return sb.buf;
+	trả_về sb.buf;
 }
 
 /**
@@ -1160,16 +1160,16 @@ static const char *msgnum(const struct am_state *state)
  */
 static void NORETURN die_user_resolve(const struct am_state *state)
 {
-	if (state->resolvemsg) {
+	nếu (state->resolvemsg) {
 		advise_if_enabled(ADVICE_MERGE_CONFLICT, "%s", state->resolvemsg);
-	} else {
+	} không_thì {
 		const char *cmdline = state->interactive ? "git am -i" : "git am";
 		struct strbuf sb = STRBUF_INIT;
 
 		strbuf_addf(&sb, _("When you have resolved this problem, run \"%s --continue\".\n"), cmdline);
 		strbuf_addf(&sb, _("If you prefer to skip this patch, run \"%s --skip\" instead.\n"), cmdline);
 
-		if (advice_enabled(ADVICE_AM_WORK_DIR) &&
+		nếu (advice_enabled(ADVICE_AM_WORK_DIR) &&
 		    is_empty_or_missing_file(am_path(state, "patch")) &&
 		    !repo_index_has_changes(the_repository, NULL, NULL))
 			strbuf_addf(&sb, _("To record the empty patch as an empty commit, run \"%s --allow-empty\".\n"), cmdline);
@@ -1204,7 +1204,7 @@ static void am_append_signoff(struct am_state *state)
  *
  * Returns 1 if the patch should be skipped, 0 otherwise.
  */
-static int parse_mail(struct am_state *state, const char *mail)
+static số_nguyên parse_mail(struct am_state *state, const char *mail)
 {
 	FILE *fp;
 	struct strbuf sb = STRBUF_INIT;
@@ -1212,14 +1212,14 @@ static int parse_mail(struct am_state *state, const char *mail)
 	struct strbuf author_name = STRBUF_INIT;
 	struct strbuf author_date = STRBUF_INIT;
 	struct strbuf author_email = STRBUF_INIT;
-	int ret = 0;
+	số_nguyên ret = 0;
 	struct mailinfo mi;
 
 	setup_mailinfo(the_repository, &mi);
 
-	if (state->utf8)
+	nếu (state->utf8)
 		mi.metainfo_charset = get_commit_output_encoding();
-	else
+	không_thì
 		mi.metainfo_charset = NULL;
 
 	switch (state->keep) {
@@ -1235,7 +1235,7 @@ static int parse_mail(struct am_state *state, const char *mail)
 		BUG("invalid value for state->keep");
 	}
 
-	if (state->message_id)
+	nếu (state->message_id)
 		mi.add_message_id = 1;
 
 	switch (state->scissors) {
@@ -1265,36 +1265,36 @@ static int parse_mail(struct am_state *state, const char *mail)
 
 	mi.input = xfopen(mail, "r");
 	mi.output = xfopen(am_path(state, "info"), "w");
-	if (mailinfo(&mi, am_path(state, "msg"), am_path(state, "patch")))
+	nếu (mailinfo(&mi, am_path(state, "msg"), am_path(state, "patch")))
 		die("could not parse patch");
 
 	fclose(mi.input);
 	fclose(mi.output);
 
-	if (mi.format_flowed)
+	nếu (mi.format_flowed)
 		warning(_("Patch sent with format=flowed; "
 			  "space at the end of lines might be lost."));
 
 	/* Extract message and author information */
 	fp = xfopen(am_path(state, "info"), "r");
-	while (!strbuf_getline_lf(&sb, fp)) {
+	trong_khi (!strbuf_getline_lf(&sb, fp)) {
 		const char *x;
 
-		if (skip_prefix(sb.buf, "Subject: ", &x)) {
-			if (msg.len)
+		nếu (skip_prefix(sb.buf, "Subject: ", &x)) {
+			nếu (msg.len)
 				strbuf_addch(&msg, '\n');
 			strbuf_addstr(&msg, x);
-		} else if (skip_prefix(sb.buf, "Author: ", &x))
+		} không_thì nếu (skip_prefix(sb.buf, "Author: ", &x))
 			strbuf_addstr(&author_name, x);
-		else if (skip_prefix(sb.buf, "Email: ", &x))
+		không_thì nếu (skip_prefix(sb.buf, "Email: ", &x))
 			strbuf_addstr(&author_email, x);
-		else if (skip_prefix(sb.buf, "Date: ", &x))
+		không_thì nếu (skip_prefix(sb.buf, "Date: ", &x))
 			strbuf_addstr(&author_date, x);
 	}
 	fclose(fp);
 
 	/* Skip pine's internal folder data */
-	if (!strcmp(author_name.buf, "Mail System Internal Data")) {
+	nếu (!strcmp(author_name.buf, "Mail System Internal Data")) {
 		ret = 1;
 		goto finish;
 	}
@@ -1322,28 +1322,28 @@ finish:
 	strbuf_release(&author_name);
 	strbuf_release(&sb);
 	clear_mailinfo(&mi);
-	return ret;
+	trả_về ret;
 }
 
 /**
  * Sets commit_id to the commit hash where the mail was generated from.
  * Returns 0 on success, -1 on failure.
  */
-static int get_mail_commit_oid(struct object_id *commit_id, const char *mail)
+static số_nguyên get_mail_commit_oid(struct object_id *commit_id, const char *mail)
 {
 	struct strbuf sb = STRBUF_INIT;
 	FILE *fp = xfopen(mail, "r");
 	const char *x;
-	int ret = 0;
+	số_nguyên ret = 0;
 
-	if (strbuf_getline_lf(&sb, fp) ||
+	nếu (strbuf_getline_lf(&sb, fp) ||
 	    !skip_prefix(sb.buf, "From ", &x) ||
 	    get_oid_hex(x, commit_id) < 0)
 		ret = -1;
 
 	strbuf_release(&sb);
 	fclose(fp);
-	return ret;
+	trả_về ret;
 }
 
 /**
@@ -1360,24 +1360,24 @@ static void get_commit_info(struct am_state *state, struct commit *commit)
 				      get_commit_output_encoding());
 
 	ident_line = find_commit_header(buffer, "author", &ident_len);
-	if (!ident_line)
+	nếu (!ident_line)
 		die(_("missing author line in commit %s"),
 		      oid_to_hex(&commit->object.oid));
-	if (split_ident_line(&id, ident_line, ident_len) < 0)
-		die(_("invalid ident line: %.*s"), (int)ident_len, ident_line);
+	nếu (split_ident_line(&id, ident_line, ident_len) < 0)
+		die(_("invalid ident line: %.*s"), (số_nguyên)ident_len, ident_line);
 
 	assert(!state->author_name);
-	if (id.name_begin)
+	nếu (id.name_begin)
 		state->author_name =
 			xmemdupz(id.name_begin, id.name_end - id.name_begin);
-	else
+	không_thì
 		state->author_name = xstrdup("");
 
 	assert(!state->author_email);
-	if (id.mail_begin)
+	nếu (id.mail_begin)
 		state->author_email =
 			xmemdupz(id.mail_begin, id.mail_end - id.mail_begin);
-	else
+	không_thì
 		state->author_email = xstrdup("");
 
 	assert(!state->author_date);
@@ -1385,7 +1385,7 @@ static void get_commit_info(struct am_state *state, struct commit *commit)
 
 	assert(!state->msg);
 	msg = strstr(buffer, "\n\n");
-	if (!msg)
+	nếu (!msg)
 		die(_("unable to parse commit %s"), oid_to_hex(&commit->object.oid));
 	state->msg = xstrdup(msg + 2);
 	state->msg_len = strlen(state->msg);
@@ -1430,10 +1430,10 @@ static void write_index_patch(const struct am_state *state)
 	struct rev_info rev_info;
 	FILE *fp;
 
-	if (!repo_get_oid(the_repository, "HEAD", &head)) {
+	nếu (!repo_get_oid(the_repository, "HEAD", &head)) {
 		struct commit *commit = lookup_commit_or_die(&head, "HEAD");
 		tree = repo_get_commit_tree(the_repository, commit);
-	} else
+	} không_thì
 		tree = lookup_tree(the_repository,
 				   the_repository->hash_algo->empty_tree);
 
@@ -1461,12 +1461,12 @@ static void write_index_patch(const struct am_state *state)
  *
  * Will always return 0 as the patch should never be skipped.
  */
-static int parse_mail_rebase(struct am_state *state, const char *mail)
+static số_nguyên parse_mail_rebase(struct am_state *state, const char *mail)
 {
 	struct commit *commit;
 	struct object_id commit_oid;
 
-	if (get_mail_commit_oid(&commit_oid, mail) < 0)
+	nếu (get_mail_commit_oid(&commit_oid, mail) < 0)
 		die(_("could not parse %s"), mail);
 
 	commit = lookup_commit_or_die(&commit_oid, mail);
@@ -1481,24 +1481,24 @@ static int parse_mail_rebase(struct am_state *state, const char *mail)
 			"REBASE_HEAD", &commit_oid,
 			NULL, REF_NO_DEREF, UPDATE_REFS_DIE_ON_ERR);
 
-	return 0;
+	trả_về 0;
 }
 
 /**
  * Applies current patch with git-apply. Returns 0 on success, -1 otherwise. If
  * `index_file` is not NULL, the patch will be applied to that index.
  */
-static int run_apply(const struct am_state *state, const char *index_file)
+static số_nguyên run_apply(const struct am_state *state, const char *index_file)
 {
 	struct strvec apply_paths = STRVEC_INIT;
 	struct strvec apply_opts = STRVEC_INIT;
 	struct apply_state apply_state;
-	int res, opts_left;
-	int force_apply = 0;
-	int options = 0;
+	số_nguyên res, opts_left;
+	số_nguyên force_apply = 0;
+	số_nguyên options = 0;
 	const char **apply_argv;
 
-	if (init_apply_state(&apply_state, the_repository, NULL))
+	nếu (init_apply_state(&apply_state, the_repository, NULL))
 		BUG("init_apply_state() failed");
 
 	strvec_push(&apply_opts, "apply");
@@ -1515,23 +1515,23 @@ static int run_apply(const struct am_state *state, const char *index_file)
 					&apply_state, &force_apply, &options,
 					NULL);
 
-	if (opts_left != 0)
+	nếu (opts_left != 0)
 		die("unknown option passed through to git apply");
 
-	if (index_file) {
+	nếu (index_file) {
 		apply_state.index_file = index_file;
 		apply_state.cached = 1;
-	} else
+	} không_thì
 		apply_state.check_index = 1;
 
 	/*
 	 * If we are allowed to fall back on 3-way merge, don't give false
 	 * errors during the initial attempt.
 	 */
-	if (state->threeway && !index_file)
+	nếu (state->threeway && !index_file)
 		apply_state.apply_verbosity = verbosity_silent;
 
-	if (check_apply_state(&apply_state, force_apply))
+	nếu (check_apply_state(&apply_state, force_apply))
 		BUG("check_apply_state() failed");
 
 	strvec_push(&apply_paths, am_path(state, "patch"));
@@ -1543,23 +1543,23 @@ static int run_apply(const struct am_state *state, const char *index_file)
 	clear_apply_state(&apply_state);
 	free(apply_argv);
 
-	if (res)
-		return res;
+	nếu (res)
+		trả_về res;
 
-	if (index_file) {
+	nếu (index_file) {
 		/* Reload index as apply_all_patches() will have modified it. */
 		discard_index(the_repository->index);
 		read_index_from(the_repository->index, index_file,
 				repo_get_git_dir(the_repository));
 	}
 
-	return 0;
+	trả_về 0;
 }
 
 /**
  * Builds an index that contains just the blobs needed for a 3way merge.
  */
-static int build_fake_ancestor(const struct am_state *state, const char *index_file)
+static số_nguyên build_fake_ancestor(const struct am_state *state, const char *index_file)
 {
 	struct child_process cp = CHILD_PROCESS_INIT;
 
@@ -1569,16 +1569,16 @@ static int build_fake_ancestor(const struct am_state *state, const char *index_f
 	strvec_pushf(&cp.args, "--build-fake-ancestor=%s", index_file);
 	strvec_push(&cp.args, am_path(state, "patch"));
 
-	if (run_command(&cp))
-		return -1;
+	nếu (run_command(&cp))
+		trả_về -1;
 
-	return 0;
+	trả_về 0;
 }
 
 /**
  * Attempt a threeway merge, using index_path as the temporary index.
  */
-static int fall_back_threeway(const struct am_state *state, const char *index_path)
+static số_nguyên fall_back_threeway(const struct am_state *state, const char *index_path)
 {
 	struct object_id their_tree, our_tree;
 	struct object_id bases[1] = { 0 };
@@ -1586,21 +1586,21 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 	struct commit *result;
 	char *their_tree_name;
 
-	if (repo_get_oid(the_repository, "HEAD", &our_tree) < 0)
+	nếu (repo_get_oid(the_repository, "HEAD", &our_tree) < 0)
 		oidcpy(&our_tree, the_hash_algo->empty_tree);
 
-	if (build_fake_ancestor(state, index_path))
-		return error("could not build fake ancestor");
+	nếu (build_fake_ancestor(state, index_path))
+		trả_về error("could not build fake ancestor");
 
 	discard_index(the_repository->index);
 	read_index_from(the_repository->index, index_path, repo_get_git_dir(the_repository));
 
-	if (write_index_as_tree(&bases[0], the_repository->index, index_path, 0, NULL))
-		return error(_("Repository lacks necessary blobs to fall back on 3-way merge."));
+	nếu (write_index_as_tree(&bases[0], the_repository->index, index_path, 0, NULL))
+		trả_về error(_("Repository lacks necessary blobs to fall back on 3-way merge."));
 
 	say(state, stdout, _("Using index info to reconstruct a base tree..."));
 
-	if (!state->quiet) {
+	nếu (!state->quiet) {
 		/*
 		 * List paths that needed 3-way fallback, so that the user can
 		 * review them with extra care to spot mismerges.
@@ -1617,12 +1617,12 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 		release_revisions(&rev_info);
 	}
 
-	if (run_apply(state, index_path))
-		return error(_("Did you hand edit your patch?\n"
+	nếu (run_apply(state, index_path))
+		trả_về error(_("Did you hand edit your patch?\n"
 				"It does not apply to blobs recorded in its index."));
 
-	if (write_index_as_tree(&their_tree, the_repository->index, index_path, 0, NULL))
-		return error("could not write tree");
+	nếu (write_index_as_tree(&their_tree, the_repository->index, index_path, 0, NULL))
+		trả_về error("could not write tree");
 
 	say(state, stdout, _("Falling back to patching base and 3-way merge..."));
 
@@ -1645,17 +1645,17 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 	o.ancestor = "constructed fake ancestor";
 	o.detect_directory_renames = MERGE_DIRECTORY_RENAMES_NONE;
 
-	if (state->quiet)
+	nếu (state->quiet)
 		o.verbosity = 0;
 
-	if (merge_ort_generic(&o, &our_tree, &their_tree, 1, bases, &result)) {
+	nếu (merge_ort_generic(&o, &our_tree, &their_tree, 1, bases, &result)) {
 		repo_rerere(the_repository, state->allow_rerere_autoupdate);
 		free(their_tree_name);
-		return error(_("Failed to merge in the changes."));
+		trả_về error(_("Failed to merge in the changes."));
 	}
 
 	free(their_tree_name);
-	return 0;
+	trả_về 0;
 }
 
 /**
@@ -1671,19 +1671,19 @@ static void do_commit(const struct am_state *state)
 	const char *reflog_msg, *author, *committer = NULL;
 	struct strbuf sb = STRBUF_INIT;
 
-	if (!state->no_verify && run_hooks(the_repository, "pre-applypatch"))
+	nếu (!state->no_verify && run_hooks(the_repository, "pre-applypatch"))
 		exit(1);
 
-	if (write_index_as_tree(&tree, the_repository->index,
+	nếu (write_index_as_tree(&tree, the_repository->index,
 				repo_get_index_file(the_repository),
 				0, NULL))
 		die(_("git write-tree failed to write a tree"));
 
-	if (!repo_get_oid_commit(the_repository, "HEAD", &parent)) {
+	nếu (!repo_get_oid_commit(the_repository, "HEAD", &parent)) {
 		old_oid = &parent;
 		commit_list_insert(lookup_commit(the_repository, &parent),
 				   &parents);
-	} else {
+	} không_thì {
 		old_oid = NULL;
 		say(state, stderr, _("applying to an empty history"));
 	}
@@ -1693,7 +1693,7 @@ static void do_commit(const struct am_state *state)
 			state->ignore_date ? NULL : state->author_date,
 			IDENT_STRICT);
 
-	if (state->committer_date_is_author_date)
+	nếu (state->committer_date_is_author_date)
 		committer = fmt_ident(getenv("GIT_COMMITTER_NAME"),
 				      getenv("GIT_COMMITTER_EMAIL"),
 				      WANT_COMMITTER_IDENT,
@@ -1701,13 +1701,13 @@ static void do_commit(const struct am_state *state)
 							 : state->author_date,
 				      IDENT_STRICT);
 
-	if (commit_tree_extended(state->msg, state->msg_len, &tree, parents,
+	nếu (commit_tree_extended(state->msg, state->msg_len, &tree, parents,
 				 &commit, author, committer, state->sign_commit,
 				 NULL))
 		die(_("failed to write commit object"));
 
 	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!reflog_msg)
+	nếu (!reflog_msg)
 		reflog_msg = "am";
 
 	strbuf_addf(&sb, "%s: %.*s", reflog_msg, linelen(state->msg),
@@ -1717,7 +1717,7 @@ static void do_commit(const struct am_state *state)
 			&commit, old_oid, 0,
 			UPDATE_REFS_DIE_ON_ERR);
 
-	if (state->rebasing) {
+	nếu (state->rebasing) {
 		FILE *fp = xfopen(am_path(state, "rewritten"), "a");
 
 		assert(!is_null_oid(&state->orig_commit));
@@ -1738,11 +1738,11 @@ static void do_commit(const struct am_state *state)
  */
 static void validate_resume_state(const struct am_state *state)
 {
-	if (!state->msg)
+	nếu (!state->msg)
 		die(_("cannot resume: %s does not exist."),
 			am_path(state, "final-commit"));
 
-	if (!state->author_name || !state->author_email || !state->author_date)
+	nếu (!state->author_name || !state->author_email || !state->author_date)
 		die(_("cannot resume: %s does not exist."),
 			am_path(state, "author-script"));
 }
@@ -1754,11 +1754,11 @@ static void validate_resume_state(const struct am_state *state)
  * Returns 0 if the user chooses to apply the patch, 1 if the user chooses to
  * skip it.
  */
-static int do_interactive(struct am_state *state)
+static số_nguyên do_interactive(struct am_state *state)
 {
 	assert(state->msg);
 
-	for (;;) {
+	cho (;;) {
 		char reply[64];
 
 		puts(_("Commit Body is:"));
@@ -1772,29 +1772,29 @@ static int do_interactive(struct am_state *state)
 		 * input at this point.
 		 */
 		printf(_("Apply? [y]es/[n]o/[e]dit/[v]iew patch/[a]ccept all: "));
-		if (!fgets(reply, sizeof(reply), stdin))
+		nếu (!fgets(reply, sizeof(reply), stdin))
 			die("unable to read from stdin; aborting");
 
-		if (*reply == 'y' || *reply == 'Y') {
-			return 0;
-		} else if (*reply == 'a' || *reply == 'A') {
+		nếu (*reply == 'y' || *reply == 'Y') {
+			trả_về 0;
+		} không_thì nếu (*reply == 'a' || *reply == 'A') {
 			state->interactive = 0;
-			return 0;
-		} else if (*reply == 'n' || *reply == 'N') {
-			return 1;
-		} else if (*reply == 'e' || *reply == 'E') {
+			trả_về 0;
+		} không_thì nếu (*reply == 'n' || *reply == 'N') {
+			trả_về 1;
+		} không_thì nếu (*reply == 'e' || *reply == 'E') {
 			struct strbuf msg = STRBUF_INIT;
 
-			if (!launch_editor(am_path(state, "final-commit"), &msg, NULL)) {
+			nếu (!launch_editor(am_path(state, "final-commit"), &msg, NULL)) {
 				free(state->msg);
 				state->msg = strbuf_detach(&msg, &state->msg_len);
 			}
 			strbuf_release(&msg);
-		} else if (*reply == 'v' || *reply == 'V') {
+		} không_thì nếu (*reply == 'v' || *reply == 'V') {
 			const char *pager = git_pager(the_repository, 1);
 			struct child_process cp = CHILD_PROCESS_INIT;
 
-			if (!pager)
+			nếu (!pager)
 				pager = "cat";
 			prepare_pager_args(&cp, pager);
 			strvec_push(&cp.args, am_path(state, "patch"));
@@ -1810,58 +1810,58 @@ static int do_interactive(struct am_state *state)
  * well as the state directory's "patch" file is used as-is for applying the
  * patch and committing it.
  */
-static void am_run(struct am_state *state, int resume)
+static void am_run(struct am_state *state, số_nguyên resume)
 {
 	struct strbuf sb = STRBUF_INIT;
 
 	unlink(am_path(state, "dirtyindex"));
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+	nếu (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
 					 NULL, NULL, NULL) < 0)
 		die(_("unable to write index file"));
 
-	if (repo_index_has_changes(the_repository, NULL, &sb)) {
+	nếu (repo_index_has_changes(the_repository, NULL, &sb)) {
 		write_state_bool(state, "dirtyindex", 1);
 		die(_("Dirty index: cannot apply patches (dirty: %s)"), sb.buf);
 	}
 
 	strbuf_release(&sb);
 
-	while (state->cur <= state->last) {
+	trong_khi (state->cur <= state->last) {
 		const char *mail = am_path(state, msgnum(state));
-		int apply_status;
-		int to_keep;
+		số_nguyên apply_status;
+		số_nguyên to_keep;
 
 		reset_ident_date();
 
-		if (!file_exists(mail))
+		nếu (!file_exists(mail))
 			goto next;
 
-		if (resume) {
+		nếu (resume) {
 			validate_resume_state(state);
-		} else {
-			int skip;
+		} không_thì {
+			số_nguyên skip;
 
-			if (state->rebasing)
+			nếu (state->rebasing)
 				skip = parse_mail_rebase(state, mail);
-			else
+			không_thì
 				skip = parse_mail(state, mail);
 
-			if (skip)
+			nếu (skip)
 				goto next; /* mail should be skipped */
 
-			if (state->signoff)
+			nếu (state->signoff)
 				am_append_signoff(state);
 
 			write_author_script(state);
 			write_commit_msg(state);
 		}
 
-		if (state->interactive && do_interactive(state))
+		nếu (state->interactive && do_interactive(state))
 			goto next;
 
 		to_keep = 0;
-		if (is_empty_or_missing_file(am_path(state, "patch"))) {
+		nếu (is_empty_or_missing_file(am_path(state, "patch"))) {
 			switch (state->empty_type) {
 			case DROP_EMPTY_COMMIT:
 				say(state, stdout, _("Skipping: %.*s"), linelen(state->msg), state->msg);
@@ -1879,16 +1879,16 @@ static void am_run(struct am_state *state, int resume)
 			}
 		}
 
-		if (run_applypatch_msg_hook(state))
+		nếu (run_applypatch_msg_hook(state))
 			exit(1);
-		if (to_keep)
+		nếu (to_keep)
 			goto commit;
 
 		say(state, stdout, _("Applying: %.*s"), linelen(state->msg), state->msg);
 
 		apply_status = run_apply(state, NULL);
 
-		if (apply_status && state->threeway) {
+		nếu (apply_status && state->threeway) {
 			struct strbuf sb = STRBUF_INIT;
 
 			strbuf_addstr(&sb, am_path(state, "patch-merge-index"));
@@ -1899,18 +1899,18 @@ static void am_run(struct am_state *state, int resume)
 			 * Applying the patch to an earlier tree and merging
 			 * the result may have produced the same tree as ours.
 			 */
-			if (!apply_status &&
+			nếu (!apply_status &&
 			    !repo_index_has_changes(the_repository, NULL, NULL)) {
 				say(state, stdout, _("No changes -- Patch already applied."));
 				goto next;
 			}
 		}
 
-		if (apply_status) {
+		nếu (apply_status) {
 			printf_ln(_("Patch failed at %s %.*s"), msgnum(state),
 				linelen(state->msg), state->msg);
 
-			if (advice_enabled(ADVICE_AM_WORK_DIR))
+			nếu (advice_enabled(ADVICE_AM_WORK_DIR))
 				advise(_("Use 'git am --show-current-patch=diff' to see the failed patch"));
 
 			die_user_resolve(state);
@@ -1922,12 +1922,12 @@ commit:
 next:
 		am_next(state);
 
-		if (resume)
+		nếu (resume)
 			am_load(state);
 		resume = 0;
 	}
 
-	if (!is_empty_or_missing_file(am_path(state, "rewritten"))) {
+	nếu (!is_empty_or_missing_file(am_path(state, "rewritten"))) {
 		assert(state->rebasing);
 		copy_notes_for_rebase(state);
 		run_post_rewrite_hook(state);
@@ -1937,7 +1937,7 @@ next:
 	 * In rebasing mode, it's up to the caller to take care of
 	 * housekeeping.
 	 */
-	if (!state->rebasing) {
+	nếu (!state->rebasing) {
 		am_destroy(state);
 		run_auto_maintenance(the_repository, state->quiet);
 	}
@@ -1949,16 +1949,16 @@ next:
  * trust and commit what the user has in the index and working tree. If `allow_empty`
  * is true, commit as an empty commit when index has not changed and lacking a patch.
  */
-static void am_resolve(struct am_state *state, int allow_empty)
+static void am_resolve(struct am_state *state, số_nguyên allow_empty)
 {
 	validate_resume_state(state);
 
 	say(state, stdout, _("Applying: %.*s"), linelen(state->msg), state->msg);
 
-	if (!repo_index_has_changes(the_repository, NULL, NULL)) {
-		if (allow_empty && is_empty_or_missing_file(am_path(state, "patch"))) {
+	nếu (!repo_index_has_changes(the_repository, NULL, NULL)) {
+		nếu (allow_empty && is_empty_or_missing_file(am_path(state, "patch"))) {
 			printf_ln(_("No changes - recorded it as an empty commit."));
-		} else {
+		} không_thì {
 			printf_ln(_("No changes - did you forget to use 'git add'?\n"
 				    "If there is nothing left to stage, chances are that something else\n"
 				    "already introduced the same changes; you might want to skip this patch."));
@@ -1966,16 +1966,16 @@ static void am_resolve(struct am_state *state, int allow_empty)
 		}
 	}
 
-	if (unmerged_index(the_repository->index)) {
+	nếu (unmerged_index(the_repository->index)) {
 		printf_ln(_("You still have unmerged paths in your index.\n"
 			"You should 'git add' each file with resolved conflicts to mark them as such.\n"
 			"You might run `git rm` on a file to accept \"deleted by them\" for it."));
 		die_user_resolve(state);
 	}
 
-	if (state->interactive) {
+	nếu (state->interactive) {
 		write_index_patch(state);
-		if (do_interactive(state))
+		nếu (do_interactive(state))
 			goto next;
 	}
 
@@ -1994,14 +1994,14 @@ next:
  * true, any unmerged entries will be discarded. Returns 0 on success, -1 on
  * failure.
  */
-static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
+static số_nguyên fast_forward_to(struct tree *head, struct tree *remote, số_nguyên reset)
 {
 	struct lock_file lock_file = LOCK_INIT;
 	struct unpack_trees_options opts;
 	struct tree_desc t[2];
 
-	if (repo_parse_tree(the_repository, head) || repo_parse_tree(the_repository, remote))
-		return -1;
+	nếu (repo_parse_tree(the_repository, head) || repo_parse_tree(the_repository, remote))
+		trả_về -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
@@ -2019,29 +2019,29 @@ static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
 	init_tree_desc(&t[0], &head->object.oid, head->buffer, head->size);
 	init_tree_desc(&t[1], &remote->object.oid, remote->buffer, remote->size);
 
-	if (unpack_trees(2, t, &opts)) {
+	nếu (unpack_trees(2, t, &opts)) {
 		rollback_lock_file(&lock_file);
-		return -1;
+		trả_về -1;
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	nếu (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
 
-	return 0;
+	trả_về 0;
 }
 
 /**
  * Merges a tree into the index. The index's stat info will take precedence
  * over the merged tree's. Returns 0 on success, -1 on failure.
  */
-static int merge_tree(struct tree *tree)
+static số_nguyên merge_tree(struct tree *tree)
 {
 	struct lock_file lock_file = LOCK_INIT;
 	struct unpack_trees_options opts;
 	struct tree_desc t[1];
 
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	nếu (repo_parse_tree(the_repository, tree))
+		trả_về -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
@@ -2053,57 +2053,57 @@ static int merge_tree(struct tree *tree)
 	opts.fn = oneway_merge;
 	init_tree_desc(&t[0], &tree->object.oid, tree->buffer, tree->size);
 
-	if (unpack_trees(1, t, &opts)) {
+	nếu (unpack_trees(1, t, &opts)) {
 		rollback_lock_file(&lock_file);
-		return -1;
+		trả_về -1;
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	nếu (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
 
-	return 0;
+	trả_về 0;
 }
 
 /**
  * Clean the index without touching entries that are not modified between
  * `head` and `remote`.
  */
-static int clean_index(const struct object_id *head, const struct object_id *remote)
+static số_nguyên clean_index(const struct object_id *head, const struct object_id *remote)
 {
 	struct tree *head_tree, *remote_tree, *index_tree;
 	struct object_id index;
 
 	head_tree = repo_parse_tree_indirect(the_repository, head);
-	if (!head_tree)
-		return error(_("Could not parse object '%s'."), oid_to_hex(head));
+	nếu (!head_tree)
+		trả_về error(_("Could not parse object '%s'."), oid_to_hex(head));
 
 	remote_tree = repo_parse_tree_indirect(the_repository, remote);
-	if (!remote_tree)
-		return error(_("Could not parse object '%s'."), oid_to_hex(remote));
+	nếu (!remote_tree)
+		trả_về error(_("Could not parse object '%s'."), oid_to_hex(remote));
 
 	repo_read_index_unmerged(the_repository);
 
-	if (fast_forward_to(head_tree, head_tree, 1))
-		return -1;
+	nếu (fast_forward_to(head_tree, head_tree, 1))
+		trả_về -1;
 
-	if (write_index_as_tree(&index, the_repository->index,
+	nếu (write_index_as_tree(&index, the_repository->index,
 				repo_get_index_file(the_repository),
 				0, NULL))
-		return -1;
+		trả_về -1;
 
 	index_tree = repo_parse_tree_indirect(the_repository, &index);
-	if (!index_tree)
-		return error(_("Could not parse object '%s'."), oid_to_hex(&index));
+	nếu (!index_tree)
+		trả_về error(_("Could not parse object '%s'."), oid_to_hex(&index));
 
-	if (fast_forward_to(index_tree, remote_tree, 0))
-		return -1;
+	nếu (fast_forward_to(index_tree, remote_tree, 0))
+		trả_về -1;
 
-	if (merge_tree(remote_tree))
-		return -1;
+	nếu (merge_tree(remote_tree))
+		trả_về -1;
 
 	remove_branch_state(the_repository, 0);
 
-	return 0;
+	trả_về 0;
 }
 
 /**
@@ -2125,13 +2125,13 @@ static void am_skip(struct am_state *state)
 
 	am_rerere_clear();
 
-	if (repo_get_oid(the_repository, "HEAD", &head))
+	nếu (repo_get_oid(the_repository, "HEAD", &head))
 		oidcpy(&head, the_hash_algo->empty_tree);
 
-	if (clean_index(&head, &head))
+	nếu (clean_index(&head, &head))
 		die(_("failed to clean index"));
 
-	if (state->rebasing) {
+	nếu (state->rebasing) {
 		FILE *fp = xfopen(am_path(state, "rewritten"), "a");
 
 		assert(!is_null_oid(&state->orig_commit));
@@ -2152,31 +2152,31 @@ static void am_skip(struct am_state *state)
  * 1. git-am previously failed because the index was dirty.
  * 2. HEAD has moved since git-am previously failed.
  */
-static int safe_to_abort(const struct am_state *state)
+static số_nguyên safe_to_abort(const struct am_state *state)
 {
 	struct strbuf sb = STRBUF_INIT;
 	struct object_id abort_safety, head;
 
-	if (file_exists(am_path(state, "dirtyindex")))
-		return 0;
+	nếu (file_exists(am_path(state, "dirtyindex")))
+		trả_về 0;
 
-	if (read_state_file(&sb, state, "abort-safety", 1) > 0) {
-		if (get_oid_hex(sb.buf, &abort_safety))
+	nếu (read_state_file(&sb, state, "abort-safety", 1) > 0) {
+		nếu (get_oid_hex(sb.buf, &abort_safety))
 			die(_("could not parse %s"), am_path(state, "abort-safety"));
-	} else
+	} không_thì
 		oidclr(&abort_safety, the_repository->hash_algo);
 	strbuf_release(&sb);
 
-	if (repo_get_oid(the_repository, "HEAD", &head))
+	nếu (repo_get_oid(the_repository, "HEAD", &head))
 		oidclr(&head, the_repository->hash_algo);
 
-	if (oideq(&head, &abort_safety))
-		return 1;
+	nếu (oideq(&head, &abort_safety))
+		trả_về 1;
 
 	warning(_("You seem to have moved HEAD since the last 'am' failure.\n"
 		"Not rewinding to ORIG_HEAD"));
 
-	return 0;
+	trả_về 0;
 }
 
 /**
@@ -2185,12 +2185,12 @@ static int safe_to_abort(const struct am_state *state)
 static void am_abort(struct am_state *state)
 {
 	struct object_id curr_head, orig_head;
-	int has_curr_head, has_orig_head;
+	số_nguyên has_curr_head, has_orig_head;
 	char *curr_branch;
 
-	if (!safe_to_abort(state)) {
+	nếu (!safe_to_abort(state)) {
 		am_destroy(state);
-		return;
+		trả_về;
 	}
 
 	am_rerere_clear();
@@ -2198,22 +2198,22 @@ static void am_abort(struct am_state *state)
 	curr_branch = refs_resolve_refdup(get_main_ref_store(the_repository),
 					  "HEAD", 0, &curr_head, NULL);
 	has_curr_head = curr_branch && !is_null_oid(&curr_head);
-	if (!has_curr_head)
+	nếu (!has_curr_head)
 		oidcpy(&curr_head, the_hash_algo->empty_tree);
 
 	has_orig_head = !repo_get_oid(the_repository, "ORIG_HEAD", &orig_head);
-	if (!has_orig_head)
+	nếu (!has_orig_head)
 		oidcpy(&orig_head, the_hash_algo->empty_tree);
 
-	if (clean_index(&curr_head, &orig_head))
+	nếu (clean_index(&curr_head, &orig_head))
 		die(_("failed to clean index"));
 
-	if (has_orig_head)
+	nếu (has_orig_head)
 		refs_update_ref(get_main_ref_store(the_repository),
 				"am --abort", "HEAD", &orig_head,
 				has_curr_head ? &curr_head : NULL, 0,
 				UPDATE_REFS_DIE_ON_ERR);
-	else if (curr_branch)
+	không_thì nếu (curr_branch)
 		refs_delete_ref(get_main_ref_store(the_repository), NULL,
 				curr_branch, NULL, REF_NO_DEREF);
 
@@ -2221,19 +2221,19 @@ static void am_abort(struct am_state *state)
 	am_destroy(state);
 }
 
-static int show_patch(struct am_state *state, enum resume_type resume_mode)
+static số_nguyên show_patch(struct am_state *state, enum resume_type resume_mode)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *patch_path;
-	int len;
+	số_nguyên len;
 
-	if (!is_null_oid(&state->orig_commit)) {
+	nếu (!is_null_oid(&state->orig_commit)) {
 		struct child_process cmd = CHILD_PROCESS_INIT;
 
 		strvec_pushl(&cmd.args, "show", oid_to_hex(&state->orig_commit),
 			     "--", NULL);
 		cmd.git_cmd = 1;
-		return run_command(&cmd);
+		trả_về run_command(&cmd);
 	}
 
 	switch (resume_mode) {
@@ -2248,79 +2248,79 @@ static int show_patch(struct am_state *state, enum resume_type resume_mode)
 	}
 
 	len = strbuf_read_file(&sb, patch_path, 0);
-	if (len < 0)
+	nếu (len < 0)
 		die_errno(_("failed to read '%s'"), patch_path);
 
 	setup_pager(the_repository);
 	write_in_full(1, sb.buf, sb.len);
 	strbuf_release(&sb);
-	return 0;
+	trả_về 0;
 }
 
 /**
  * parse_options() callback that validates and sets opt->value to the
  * PATCH_FORMAT_* enum value corresponding to `arg`.
  */
-static int parse_opt_patchformat(const struct option *opt, const char *arg, int unset)
+static số_nguyên parse_opt_patchformat(const struct option *opt, const char *arg, số_nguyên unset)
 {
-	int *opt_value = opt->value;
+	số_nguyên *opt_value = opt->value;
 
-	if (unset)
+	nếu (unset)
 		*opt_value = PATCH_FORMAT_UNKNOWN;
-	else if (!strcmp(arg, "mbox"))
+	không_thì nếu (!strcmp(arg, "mbox"))
 		*opt_value = PATCH_FORMAT_MBOX;
-	else if (!strcmp(arg, "stgit"))
+	không_thì nếu (!strcmp(arg, "stgit"))
 		*opt_value = PATCH_FORMAT_STGIT;
-	else if (!strcmp(arg, "stgit-series"))
+	không_thì nếu (!strcmp(arg, "stgit-series"))
 		*opt_value = PATCH_FORMAT_STGIT_SERIES;
-	else if (!strcmp(arg, "hg"))
+	không_thì nếu (!strcmp(arg, "hg"))
 		*opt_value = PATCH_FORMAT_HG;
-	else if (!strcmp(arg, "mboxrd"))
+	không_thì nếu (!strcmp(arg, "mboxrd"))
 		*opt_value = PATCH_FORMAT_MBOXRD;
 	/*
 	 * Please update $__git_patchformat in git-completion.bash
 	 * when you add new options
 	 */
-	else
-		return error(_("invalid value for '%s': '%s'"),
+	không_thì
+		trả_về error(_("invalid value for '%s': '%s'"),
 			     "--patch-format", arg);
-	return 0;
+	trả_về 0;
 }
 
-static int parse_opt_show_current_patch(const struct option *opt, const char *arg, int unset)
+static số_nguyên parse_opt_show_current_patch(const struct option *opt, const char *arg, số_nguyên unset)
 {
-	int *opt_value = opt->value;
+	số_nguyên *opt_value = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
+	nếu (!arg)
 		*opt_value = opt->defval;
-	else if (!strcmp(arg, "raw"))
+	không_thì nếu (!strcmp(arg, "raw"))
 		*opt_value = RESUME_SHOW_PATCH_RAW;
-	else if (!strcmp(arg, "diff"))
+	không_thì nếu (!strcmp(arg, "diff"))
 		*opt_value = RESUME_SHOW_PATCH_DIFF;
 	/*
 	 * Please update $__git_showcurrentpatch in git-completion.bash
 	 * when you add new options
 	 */
-	else
-		return error(_("invalid value for '%s': '%s'"),
+	không_thì
+		trả_về error(_("invalid value for '%s': '%s'"),
 			     "--show-current-patch", arg);
-	return 0;
+	trả_về 0;
 }
 
-int cmd_am(int argc,
+số_nguyên cmd_am(số_nguyên argc,
 	   const char **argv,
 	   const char *prefix,
 	   struct repository *repo UNUSED)
 {
 	struct am_state state;
-	int binary = -1;
-	int keep_cr = -1;
-	int patch_format = PATCH_FORMAT_UNKNOWN;
+	số_nguyên binary = -1;
+	số_nguyên keep_cr = -1;
+	số_nguyên patch_format = PATCH_FORMAT_UNKNOWN;
 	enum resume_type resume_mode = RESUME_FALSE;
-	int in_progress;
-	int ret = 0;
+	số_nguyên in_progress;
+	số_nguyên ret = 0;
 
 	const char * const usage[] = {
 		N_("git am [<options>] [(<mbox> | <Maildir>)...]"),
@@ -2452,22 +2452,22 @@ int cmd_am(int argc,
 	am_state_init(&state);
 
 	in_progress = am_in_progress(&state);
-	if (in_progress)
+	nếu (in_progress)
 		am_load(&state);
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (binary >= 0)
+	nếu (binary >= 0)
 		fprintf_ln(stderr, _("The -b/--binary option has been a no-op for long time, and\n"
 				"it will be removed. Please do not use it anymore."));
 
 	/* Ensure a valid committer ident can be constructed */
 	git_committer_info(IDENT_STRICT);
 
-	if (repo_read_index_preload(the_repository, NULL, 0) < 0)
+	nếu (repo_read_index_preload(the_repository, NULL, 0) < 0)
 		die(_("failed to read the index"));
 
-	if (in_progress) {
+	nếu (in_progress) {
 		/*
 		 * Catch user error to feed us patches when there is a session
 		 * in progress:
@@ -2479,29 +2479,29 @@ int cmd_am(int argc,
 		 *    intend to feed us a patch but wanted to continue
 		 *    unattended.
 		 */
-		if (argc || (resume_mode == RESUME_FALSE && !isatty(0)))
+		nếu (argc || (resume_mode == RESUME_FALSE && !isatty(0)))
 			die(_("previous rebase directory %s still exists but mbox given."),
 				state.dir);
 
-		if (resume_mode == RESUME_FALSE)
+		nếu (resume_mode == RESUME_FALSE)
 			resume_mode = RESUME_APPLY;
 
-		if (state.signoff == SIGNOFF_EXPLICIT)
+		nếu (state.signoff == SIGNOFF_EXPLICIT)
 			am_append_signoff(&state);
-	} else {
+	} không_thì {
 		struct strvec paths = STRVEC_INIT;
-		int i;
+		số_nguyên i;
 
 		/*
 		 * Handle stray state directory in the independent-run case. In
 		 * the --rebasing case, it is up to the caller to take care of
 		 * stray directories.
 		 */
-		if (file_exists(state.dir) && !state.rebasing) {
-			if (resume_mode == RESUME_ABORT || resume_mode == RESUME_QUIT) {
+		nếu (file_exists(state.dir) && !state.rebasing) {
+			nếu (resume_mode == RESUME_ABORT || resume_mode == RESUME_QUIT) {
 				am_destroy(&state);
 				am_state_release(&state);
-				return 0;
+				trả_về 0;
 			}
 
 			die(_("Stray %s directory found.\n"
@@ -2509,17 +2509,17 @@ int cmd_am(int argc,
 				state.dir);
 		}
 
-		if (resume_mode)
+		nếu (resume_mode)
 			die(_("Resolve operation not in progress, we are not resuming."));
 
-		for (i = 0; i < argc; i++) {
-			if (is_absolute_path(argv[i]) || !prefix)
+		cho (i = 0; i < argc; i++) {
+			nếu (is_absolute_path(argv[i]) || !prefix)
 				strvec_push(&paths, argv[i]);
-			else
+			không_thì
 				strvec_push(&paths, mkpath("%s/%s", prefix, argv[i]));
 		}
 
-		if (state.interactive && !paths.nr)
+		nếu (state.interactive && !paths.nr)
 			die(_("interactive mode requires patches on the command line"));
 
 		am_setup(&state, patch_format, paths.v, keep_cr);
@@ -2558,5 +2558,5 @@ int cmd_am(int argc,
 
 	am_state_release(&state);
 
-	return ret;
+	trả_về ret;
 }

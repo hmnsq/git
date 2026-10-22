@@ -16,29 +16,29 @@ static const char * const rerere_usage[] = {
 	NULL,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+static số_nguyên outf(void *dummy UNUSED, mmfile_t *ptr, số_nguyên nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	số_nguyên i;
+	cho (i = 0; i < nbuf; i++)
+		nếu (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			trả_về -1;
+	trả_về 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
+static số_nguyên diff_two(const char *file1, const char *label1,
 		const char *file2, const char *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
 	xdemitcb_t ecb = { .out_line = outf };
 	mmfile_t minus, plus;
-	int ret;
+	số_nguyên ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
+	nếu (read_mmfile(&minus, file1))
+		trả_về -1;
+	nếu (read_mmfile(&plus, file2)) {
 		free(minus.ptr);
-		return -1;
+		trả_về -1;
 	}
 
 	printf("--- a/%s\n+++ b/%s\n", label1, label2);
@@ -51,16 +51,16 @@ static int diff_two(const char *file1, const char *label1,
 
 	free(minus.ptr);
 	free(plus.ptr);
-	return ret;
+	trả_về ret;
 }
 
-int cmd_rerere(int argc,
+số_nguyên cmd_rerere(số_nguyên argc,
 	       const char **argv,
 	       const char *prefix,
 	       struct repository *repo UNUSED)
 {
 	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	số_nguyên autoupdate = -1, flags = 0;
 
 	struct option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
@@ -72,19 +72,19 @@ int cmd_rerere(int argc,
 
 	repo_config(the_repository, git_xmerge_config, NULL);
 
-	if (autoupdate == 1)
+	nếu (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	nếu (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	nếu (argc < 1)
+		trả_về repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
+	nếu (!strcmp(argv[0], "forget")) {
 		struct pathspec pathspec;
-		int ret;
+		số_nguyên ret;
 
-		if (argc < 2)
+		nếu (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		trả_về ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	nếu (!strcmp(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} không_thì nếu (!strcmp(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	không_thì nếu (!strcmp(argv[0], "status")) {
+		nếu (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
+			trả_về 0;
+		cho (size_t i = 0; i < merge_rr.nr; i++)
 			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+	} không_thì nếu (!strcmp(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
+		cho (size_t i = 0; i < merge_rr.nr; i++) {
+			nếu (merge_rr.items[i].util != RERERE_RESOLVED)
 				printf("%s\n", merge_rr.items[i].string);
-			else
+			không_thì
 				/* prepare for later call to
 				 * string_list_clear() */
 				merge_rr.items[i].util = NULL;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
+	} không_thì nếu (!strcmp(argv[0], "diff")) {
 		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+		nếu (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
+			trả_về 0;
+		cho (size_t i = 0; i < merge_rr.nr; i++) {
 			const char *path = merge_rr.items[i].string;
 			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+			nếu (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
 				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} không_thì
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	trả_về 0;
 }

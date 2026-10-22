@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+static void command_loop(số_nguyên input_fd, số_nguyên output_fd)
 {
 	char buffer[MAXCOMMAND];
 
-	while (1) {
+	trong_khi (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		nếu (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			nếu (ferror(stdin))
 				die("Input error");
-			return;
+			trả_về;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		trong_khi (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		nếu (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} không_thì nếu (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			nếu (bidirectional_transfer_loop(input_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			trả_về;
+		} không_thì {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
+số_nguyên cmd_remote_fd(số_nguyên argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
+	số_nguyên input_fd = -1;
+	số_nguyên output_fd = -1;
 	char *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
+	nếu (argc != 3)
 		usage(usage_msg);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	input_fd = (số_nguyên)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	nếu ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
+	nếu (*end == '/' || !*end) {
 		output_fd = input_fd;
-	} else {
+	} không_thì {
 		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+		output_fd = (số_nguyên)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		nếu ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
 	command_loop(input_fd, output_fd);
-	return 0;
+	trả_về 0;
 }

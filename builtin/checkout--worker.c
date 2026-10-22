@@ -11,20 +11,20 @@
 #include "pkt-line.h"
 #include "read-cache-ll.h"
 
-static void packet_to_pc_item(const char *buffer, int len,
+static void packet_to_pc_item(const char *buffer, số_nguyên len,
 			      struct parallel_checkout_item *pc_item)
 {
 	const struct pc_item_fixed_portion *fixed_portion;
 	const char *variant;
 	char *encoding;
 
-	if (len < sizeof(struct pc_item_fixed_portion))
+	nếu (len < sizeof(struct pc_item_fixed_portion))
 		BUG("checkout worker received too short item (got %dB, exp %dB)",
-		    len, (int)sizeof(struct pc_item_fixed_portion));
+		    len, (số_nguyên)sizeof(struct pc_item_fixed_portion));
 
 	fixed_portion = (struct pc_item_fixed_portion *)buffer;
 
-	if (len - sizeof(struct pc_item_fixed_portion) !=
+	nếu (len - sizeof(struct pc_item_fixed_portion) !=
 		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
 		BUG("checkout worker received corrupted item");
 
@@ -36,11 +36,11 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	nếu (fixed_portion->working_tree_encoding_len) {
 		encoding = xmemdupz(variant,
 				    fixed_portion->working_tree_encoding_len);
 		variant += fixed_portion->working_tree_encoding_len;
-	} else {
+	} không_thì {
 		encoding = NULL;
 	}
 
@@ -65,10 +65,10 @@ static void report_result(struct parallel_checkout_item *pc_item)
 	res.id = pc_item->id;
 	res.status = pc_item->status;
 
-	if (pc_item->status == PC_ITEM_WRITTEN) {
+	nếu (pc_item->status == PC_ITEM_WRITTEN) {
 		res.st = pc_item->st;
 		size = sizeof(res);
-	} else {
+	} không_thì {
 		size = PC_ITEM_RESULT_BASE_SIZE;
 	}
 
@@ -87,20 +87,20 @@ static void worker_loop(struct checkout *state)
 	struct parallel_checkout_item *items = NULL;
 	size_t i, nr = 0, alloc = 0;
 
-	while (1) {
-		int len = packet_read(0, packet_buffer, sizeof(packet_buffer),
+	trong_khi (1) {
+		số_nguyên len = packet_read(0, packet_buffer, sizeof(packet_buffer),
 				      0);
 
-		if (len < 0)
+		nếu (len < 0)
 			BUG("packet_read() returned negative value");
-		else if (!len)
+		không_thì nếu (!len)
 			break;
 
 		ALLOC_GROW(items, nr + 1, alloc);
 		packet_to_pc_item(packet_buffer, len, &items[nr++]);
 	}
 
-	for (i = 0; i < nr; i++) {
+	cho (i = 0; i < nr; i++) {
 		struct parallel_checkout_item *pc_item = &items[i];
 		write_pc_item(pc_item, state);
 		report_result(pc_item);
@@ -117,7 +117,7 @@ static const char * const checkout_worker_usage[] = {
 	NULL
 };
 
-int cmd_checkout__worker(int argc,
+số_nguyên cmd_checkout__worker(số_nguyên argc,
 			 const char **argv,
 			 const char *prefix,
 			 struct repository *repo UNUSED)
@@ -136,10 +136,10 @@ int cmd_checkout__worker(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, checkout_worker_options,
 			     checkout_worker_usage, 0);
-	if (argc > 0)
+	nếu (argc > 0)
 		usage_with_options(checkout_worker_usage, checkout_worker_options);
 
-	if (state.base_dir)
+	nếu (state.base_dir)
 		state.base_dir_len = strlen(state.base_dir);
 
 	/*
@@ -150,5 +150,5 @@ int cmd_checkout__worker(int argc,
 	state.refresh_cache = 1;
 
 	worker_loop(&state);
-	return 0;
+	trả_về 0;
 }

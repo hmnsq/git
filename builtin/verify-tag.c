@@ -20,12 +20,12 @@ static const char * const verify_tag_usage[] = {
 		NULL
 };
 
-int cmd_verify_tag(int argc,
+số_nguyên cmd_verify_tag(số_nguyên argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
+	số_nguyên i = 1, verbose = 0, had_error = 0;
 	unsigned flags = 0;
 	struct ref_format format = REF_FORMAT_INIT;
 	const struct option verify_tag_options[] = {
@@ -39,35 +39,35 @@ int cmd_verify_tag(int argc,
 
 	argc = parse_options(argc, argv, prefix, verify_tag_options,
 			     verify_tag_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	nếu (argc <= i)
 		usage_with_options(verify_tag_usage, verify_tag_options);
 
-	if (verbose)
+	nếu (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
-	if (format.format) {
-		if (verify_ref_format(&format))
+	nếu (format.format) {
+		nếu (verify_ref_format(&format))
 			usage_with_options(verify_tag_usage,
 					   verify_tag_options);
 		flags |= GPG_VERIFY_OMIT_STATUS;
 	}
 
-	while (i < argc) {
+	trong_khi (i < argc) {
 		struct object_id oid;
 		const char *name = argv[i++];
 
-		if (repo_get_oid(repo, name, &oid)) {
+		nếu (repo_get_oid(repo, name, &oid)) {
 			had_error = !!error("tag '%s' not found.", name);
 			continue;
 		}
 
-		if (gpg_verify_tag(repo, &oid, name, flags)) {
+		nếu (gpg_verify_tag(repo, &oid, name, flags)) {
 			had_error = 1;
 			continue;
 		}
 
-		if (format.format)
+		nếu (format.format)
 			pretty_print_ref(name, &oid, NULL, &format);
 	}
-	return had_error;
+	trả_về had_error;
 }

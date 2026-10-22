@@ -19,16 +19,16 @@ static const char * const upload_pack_usage[] = {
 	NULL
 };
 
-int cmd_upload_pack(int argc,
+số_nguyên cmd_upload_pack(số_nguyên argc,
 		    const char **argv,
 		    const char *prefix,
 		    struct repository *repo UNUSED)
 {
 	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
+	số_nguyên strict = 0;
+	số_nguyên advertise_refs = 0;
+	số_nguyên stateless_rpc = 0;
+	số_nguyên timeout = 0;
 	struct option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
@@ -50,23 +50,23 @@ int cmd_upload_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	nếu (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
 	setup_path();
 
 	dir = argv[0];
 
-	if (strict)
+	nếu (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	nếu (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
 	switch (determine_protocol_version_server()) {
 	case protocol_v2:
-		if (advertise_refs)
+		nếu (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		không_thì
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
 		break;
 	case protocol_v1:
@@ -74,7 +74,7 @@ int cmd_upload_pack(int argc,
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		nếu (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
@@ -85,5 +85,5 @@ int cmd_upload_pack(int argc,
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	trả_về 0;
 }

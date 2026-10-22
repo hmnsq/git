@@ -32,7 +32,7 @@ static char *strip_escapes(const char *str, const char *service,
 	const char **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
+	số_nguyên escape = 0;
 	char special = 0;
 	const char *service_noprefix = service;
 	struct strbuf ret = STRBUF_INIT;
@@ -44,8 +44,8 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
+	trong_khi (str[rpos] && (escape || str[rpos] != ' ')) {
+		nếu (escape) {
 			switch (str[rpos]) {
 			case ' ':
 			case '%':
@@ -55,7 +55,7 @@ static char *strip_escapes(const char *str, const char *service,
 			case 'G':
 			case 'V':
 				special = str[rpos];
-				if (rpos == 1)
+				nếu (rpos == 1)
 					break;
 				/* fallthrough */
 			default:
@@ -63,14 +63,14 @@ static char *strip_escapes(const char *str, const char *service,
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} không_thì
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	nếu (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	nếu (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,8 +79,8 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
+	trong_khi (str[rpos] && (escape || str[rpos] != ' ')) {
+		nếu (escape) {
 			switch (str[rpos]) {
 			case ' ':
 			case '%':
@@ -94,7 +94,7 @@ static char *strip_escapes(const char *str, const char *service,
 				break;
 			}
 			escape = 0;
-		} else
+		} không_thì
 			switch (str[rpos]) {
 			case '%':
 				escape = 1;
@@ -108,38 +108,38 @@ static char *strip_escapes(const char *str, const char *service,
 	switch (special) {
 	case 'G':
 		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
+		trả_về NULL;
 	case 'V':
 		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
+		trả_về NULL;
 	default:
-		return strbuf_detach(&ret, NULL);
+		trả_về strbuf_detach(&ret, NULL);
 	}
 }
 
 static void parse_argv(struct strvec *out, const char *arg, const char *service)
 {
-	while (*arg) {
+	trong_khi (*arg) {
 		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
+		nếu (expanded)
 			strvec_push(out, expanded);
 		free(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
+static void send_git_request(số_nguyên stdin_fd, const char *serv, const char *repo,
 	const char *vhost)
 {
-	if (!vhost)
+	nếu (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	không_thì
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+static số_nguyên run_child(const char *arg, const char *service)
 {
-	int r;
+	số_nguyên r;
 	struct child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
@@ -147,55 +147,55 @@ static int run_child(const char *arg, const char *service)
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	nếu (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	nếu (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	nếu (!r)
 		r = finish_command(&child);
-	else
+	không_thì
 		finish_command(&child);
-	return r;
+	trả_về r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+static số_nguyên command_loop(const char *child)
 {
 	char buffer[MAXCOMMAND];
 
-	while (1) {
+	trong_khi (1) {
 		size_t i;
 		const char *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		nếu (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			nếu (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		trong_khi (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		nếu (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} không_thì nếu (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			trả_về run_child(child, arg);
+		} không_thì {
 			fprintf(stderr, "Bad command");
-			return 1;
+			trả_về 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
+số_nguyên cmd_remote_ext(số_nguyên argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
@@ -204,8 +204,8 @@ int cmd_remote_ext(int argc,
 
 	show_usage_if_asked(argc, argv, usage_msg);
 
-	if (argc != 3)
+	nếu (argc != 3)
 		usage(usage_msg);
 
-	return command_loop(argv[2]);
+	trả_về command_loop(argv[2]);
 }

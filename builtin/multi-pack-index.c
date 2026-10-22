@@ -70,29 +70,29 @@ static struct opts_multi_pack_index {
 	char *refs_snapshot;
 	unsigned long batch_size;
 	unsigned flags;
-	int stdin_packs;
+	số_nguyên stdin_packs;
 } opts;
 
 
-static int parse_object_dir(const struct option *opt, const char *arg,
-			    int unset)
+static số_nguyên parse_object_dir(const struct option *opt, const char *arg,
+			    số_nguyên unset)
 {
 	char **value = opt->value;
 	free(*value);
-	if (unset)
+	nếu (unset)
 		*value = xstrdup(the_repository->objects->source->path);
-	else
+	không_thì
 		*value = real_pathdup(arg, 1);
-	return 0;
+	trả_về 0;
 }
 
 static struct odb_source_packed *handle_object_dir_option(struct repository *repo)
 {
 	struct odb_files_dir *dir = odb_source_files_find_dir(repo->objects, opts.object_dir);
-	if (!dir)
+	nếu (!dir)
 		die(_("object directory is not an alternate of the current repository: '%s'"),
 		    opts.object_dir);
-	return dir->packed;
+	trả_về dir->packed;
 }
 
 static struct option common_opts[] = {
@@ -107,24 +107,24 @@ static struct option common_opts[] = {
 
 static struct option *add_common_options(struct option *prev)
 {
-	return parse_options_concat(common_opts, prev);
+	trả_về parse_options_concat(common_opts, prev);
 }
 
-static int git_multi_pack_index_write_config(const char *var, const char *value,
+static số_nguyên git_multi_pack_index_write_config(const char *var, const char *value,
 					     const struct config_context *ctx UNUSED,
 					     void *cb UNUSED)
 {
-	if (!strcmp(var, "pack.writebitmaphashcache")) {
-		if (git_config_bool(var, value))
+	nếu (!strcmp(var, "pack.writebitmaphashcache")) {
+		nếu (git_config_bool(var, value))
 			opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
-		else
+		không_thì
 			opts.flags &= ~MIDX_WRITE_BITMAP_HASH_CACHE;
 	}
 
-	if (!strcmp(var, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(var, value))
+	nếu (!strcmp(var, "pack.writebitmaplookuptable")) {
+		nếu (git_config_bool(var, value))
 			opts.flags |= MIDX_WRITE_BITMAP_LOOKUP_TABLE;
-		else
+		không_thì
 			opts.flags &= ~MIDX_WRITE_BITMAP_LOOKUP_TABLE;
 	}
 
@@ -132,20 +132,20 @@ static int git_multi_pack_index_write_config(const char *var, const char *value,
 	 * We should never make a fall-back call to 'git_default_config', since
 	 * this was already called in 'cmd_multi_pack_index()'.
 	 */
-	return 0;
+	trả_về 0;
 }
 
 static void read_packs_from_stdin(struct string_list *to)
 {
 	struct strbuf buf = STRBUF_INIT;
-	while (strbuf_getline(&buf, stdin) != EOF)
+	trong_khi (strbuf_getline(&buf, stdin) != EOF)
 		string_list_append(to, buf.buf);
 	string_list_sort(to);
 
 	strbuf_release(&buf);
 }
 
-static int cmd_multi_pack_index_write(int argc, const char **argv,
+static số_nguyên cmd_multi_pack_index_write(số_nguyên argc, const char **argv,
 				      const char *prefix,
 				      struct repository *repo)
 {
@@ -170,7 +170,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 		OPT_END(),
 	};
 	struct odb_source_packed *packed_source;
-	int ret;
+	số_nguyên ret;
 
 	opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
 
@@ -180,16 +180,16 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	nếu (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_write_usage,
 			     0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(builtin_multi_pack_index_write_usage,
 				   options);
 
-	if (opts.flags & MIDX_WRITE_NO_CHAIN &&
+	nếu (opts.flags & MIDX_WRITE_NO_CHAIN &&
 	    !(opts.flags & MIDX_WRITE_INCREMENTAL)) {
 		error(_("cannot use %s without %s"),
 		      "--no-write-chain-file", "--incremental");
@@ -197,7 +197,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 				   options);
 	}
 
-	if (opts.incremental_base &&
+	nếu (opts.incremental_base &&
 	    !(opts.flags & MIDX_WRITE_NO_CHAIN)) {
 		error(_("cannot use --base without --no-write-chain-file"));
 		usage_with_options(builtin_multi_pack_index_write_usage,
@@ -208,7 +208,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 
 	FREE_AND_NULL(options);
 
-	if (opts.stdin_packs) {
+	nếu (opts.stdin_packs) {
 		struct string_list packs = STRING_LIST_INIT_DUP;
 
 		read_packs_from_stdin(&packs);
@@ -221,7 +221,7 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 		string_list_clear(&packs, 0);
 		free(opts.refs_snapshot);
 
-		return ret;
+		trả_về ret;
 
 	}
 
@@ -229,10 +229,10 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 			      opts.refs_snapshot, opts.flags);
 
 	free(opts.refs_snapshot);
-	return ret;
+	trả_về ret;
 }
 
-static int cmd_multi_pack_index_compact(int argc, const char **argv,
+static số_nguyên cmd_multi_pack_index_compact(số_nguyên argc, const char **argv,
 					const char *prefix,
 					struct repository *repo)
 {
@@ -240,7 +240,7 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 	struct multi_pack_index *from_midx = NULL;
 	struct multi_pack_index *to_midx = NULL;
 	struct odb_source_packed *packed_source;
-	int ret;
+	số_nguyên ret;
 
 	struct option *options;
 	static struct option builtin_multi_pack_index_compact_options[] = {
@@ -262,17 +262,17 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	nếu (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_compact_usage,
 			     0);
 
-	if (argc != 2)
+	nếu (argc != 2)
 		usage_with_options(builtin_multi_pack_index_compact_usage,
 				   options);
 
-	if (opts.flags & MIDX_WRITE_NO_CHAIN &&
+	nếu (opts.flags & MIDX_WRITE_NO_CHAIN &&
 	    !(opts.flags & MIDX_WRITE_INCREMENTAL)) {
 		error(_("cannot use %s without %s"),
 		      "--no-write-chain-file", "--incremental");
@@ -286,34 +286,34 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 
 	m = get_multi_pack_index(packed_source);
 
-	for (cur = m; cur && !(from_midx && to_midx); cur = cur->base_midx) {
+	cho (cur = m; cur && !(from_midx && to_midx); cur = cur->base_midx) {
 		const char *midx_csum = midx_get_checksum_hex(cur);
 
-		if (!from_midx && !strcmp(midx_csum, argv[0]))
+		nếu (!from_midx && !strcmp(midx_csum, argv[0]))
 			from_midx = cur;
-		if (!to_midx && !strcmp(midx_csum, argv[1]))
+		nếu (!to_midx && !strcmp(midx_csum, argv[1]))
 			to_midx = cur;
 	}
 
-	if (!from_midx)
+	nếu (!from_midx)
 		die(_("could not find MIDX: %s"), argv[0]);
-	if (!to_midx)
+	nếu (!to_midx)
 		die(_("could not find MIDX: %s"), argv[1]);
-	if (from_midx == to_midx)
+	nếu (from_midx == to_midx)
 		die(_("MIDX compaction endpoints must be unique"));
 
-	for (m = from_midx; m; m = m->base_midx) {
-		if (m == to_midx)
+	cho (m = from_midx; m; m = m->base_midx) {
+		nếu (m == to_midx)
 			die(_("MIDX %s must be an ancestor of %s"), argv[0], argv[1]);
 	}
 
 	ret = write_midx_file_compact(packed_source, from_midx, to_midx,
 				      opts.incremental_base, opts.flags);
 
-	return ret;
+	trả_về ret;
 }
 
-static int cmd_multi_pack_index_verify(int argc, const char **argv,
+static số_nguyên cmd_multi_pack_index_verify(số_nguyên argc, const char **argv,
 				       const char *prefix,
 				       struct repository *repo UNUSED)
 {
@@ -327,22 +327,22 @@ static int cmd_multi_pack_index_verify(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	nếu (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_verify_usage,
 			     0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(builtin_multi_pack_index_verify_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return verify_midx_file(packed_source, opts.flags);
+	trả_về verify_midx_file(packed_source, opts.flags);
 }
 
-static int cmd_multi_pack_index_expire(int argc, const char **argv,
+static số_nguyên cmd_multi_pack_index_expire(số_nguyên argc, const char **argv,
 				       const char *prefix,
 				       struct repository *repo UNUSED)
 {
@@ -356,22 +356,22 @@ static int cmd_multi_pack_index_expire(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	nếu (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options, builtin_multi_pack_index_expire_usage,
 			     0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(builtin_multi_pack_index_expire_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return expire_midx_packs(packed_source, opts.flags);
+	trả_về expire_midx_packs(packed_source, opts.flags);
 }
 
-static int cmd_multi_pack_index_repack(int argc, const char **argv,
+static số_nguyên cmd_multi_pack_index_repack(số_nguyên argc, const char **argv,
 				       const char *prefix,
 				       struct repository *repo UNUSED)
 {
@@ -387,28 +387,28 @@ static int cmd_multi_pack_index_repack(int argc, const char **argv,
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	nếu (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_multi_pack_index_repack_usage,
 			     0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(builtin_multi_pack_index_repack_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return midx_repack(packed_source, (size_t)opts.batch_size, opts.flags);
+	trả_về midx_repack(packed_source, (size_t)opts.batch_size, opts.flags);
 }
 
-int cmd_multi_pack_index(int argc,
+số_nguyên cmd_multi_pack_index(số_nguyên argc,
 			 const char **argv,
 			 const char *prefix,
 			 struct repository *repo)
 {
-	int res;
+	số_nguyên res;
 	parse_opt_subcommand_fn *fn = NULL;
 	struct option builtin_multi_pack_index_options[] = {
 		OPT_SUBCOMMAND("repack", &fn, cmd_multi_pack_index_repack),
@@ -424,7 +424,7 @@ int cmd_multi_pack_index(int argc,
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	if (the_repository &&
+	nếu (the_repository &&
 	    the_repository->objects &&
 	    the_repository->objects->source)
 		opts.object_dir = xstrdup(the_repository->objects->source->path);
@@ -436,5 +436,5 @@ int cmd_multi_pack_index(int argc,
 	res = fn(argc, argv, prefix, repo);
 
 	free(opts.object_dir);
-	return res;
+	trả_về res;
 }

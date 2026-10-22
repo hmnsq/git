@@ -43,14 +43,14 @@ static char const * const builtin_commit_graph_usage[] = {
 
 static struct opts_commit_graph {
 	const char *obj_dir;
-	int reachable;
-	int stdin_packs;
-	int stdin_commits;
-	int append;
-	int split;
-	int shallow;
-	int progress;
-	int enable_changed_paths;
+	số_nguyên reachable;
+	số_nguyên stdin_packs;
+	số_nguyên stdin_commits;
+	số_nguyên append;
+	số_nguyên split;
+	số_nguyên shallow;
+	số_nguyên progress;
+	số_nguyên enable_changed_paths;
 } opts;
 
 static struct option common_opts[] = {
@@ -62,10 +62,10 @@ static struct option common_opts[] = {
 
 static struct option *add_common_options(struct option *to)
 {
-	return parse_options_concat(common_opts, to);
+	trả_về parse_options_concat(common_opts, to);
 }
 
-static int graph_verify(int argc, const char **argv, const char *prefix,
+static số_nguyên graph_verify(số_nguyên argc, const char **argv, const char *prefix,
 			struct repository *repo UNUSED)
 {
 	struct commit_graph *graph = NULL;
@@ -73,11 +73,11 @@ static int graph_verify(int argc, const char **argv, const char *prefix,
 	char *graph_name;
 	char *chain_name;
 	enum { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
-	int fd;
+	số_nguyên fd;
 	struct stat st;
-	int flags = 0;
-	int incomplete_chain = 0;
-	int ret;
+	số_nguyên flags = 0;
+	số_nguyên incomplete_chain = 0;
+	số_nguyên ret;
 
 	static struct option builtin_commit_graph_verify_options[] = {
 		OPT_BOOL(0, "shallow", &opts.shallow,
@@ -94,144 +94,144 @@ static int graph_verify(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_commit_graph_verify_usage, 0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(builtin_commit_graph_verify_usage, options);
 
-	if (!opts.obj_dir)
+	nếu (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.shallow)
+	nếu (opts.shallow)
 		flags |= COMMIT_GRAPH_VERIFY_SHALLOW;
-	if (opts.progress)
+	nếu (opts.progress)
 		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
 
 	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	nếu (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
 	graph_name = get_commit_graph_filename(dir->abspath);
 	chain_name = get_commit_graph_chain_filename(dir->abspath);
-	if (open_commit_graph(graph_name, &fd, &st))
+	nếu (open_commit_graph(graph_name, &fd, &st))
 		opened = OPENED_GRAPH;
-	else if (errno != ENOENT)
+	không_thì nếu (errno != ENOENT)
 		die_errno(_("Could not open commit-graph '%s'"), graph_name);
-	else if (open_commit_graph_chain(chain_name, &fd, &st,
+	không_thì nếu (open_commit_graph_chain(chain_name, &fd, &st,
 					 the_repository->hash_algo))
 		opened = OPENED_CHAIN;
-	else if (errno != ENOENT)
+	không_thì nếu (errno != ENOENT)
 		die_errno(_("could not open commit-graph chain '%s'"), chain_name);
 
 	FREE_AND_NULL(graph_name);
 	FREE_AND_NULL(chain_name);
 	FREE_AND_NULL(options);
 
-	if (opened == OPENED_NONE)
-		return 0;
-	else if (opened == OPENED_GRAPH)
+	nếu (opened == OPENED_NONE)
+		trả_về 0;
+	không_thì nếu (opened == OPENED_GRAPH)
 		graph = load_commit_graph_one_fd_st(the_repository, dir->abspath, fd, &st);
-	else
+	không_thì
 		graph = load_commit_graph_chain_fd_st(the_repository->objects, fd, &st,
 						      &incomplete_chain);
 
-	if (!graph)
-		return 1;
+	nếu (!graph)
+		trả_về 1;
 
 	ret = verify_commit_graph(graph, flags);
 	free_commit_graph(graph);
 
-	if (incomplete_chain) {
+	nếu (incomplete_chain) {
 		error("one or more commit-graph chain files could not be loaded");
 		ret |= 1;
 	}
 
-	return ret;
+	trả_về ret;
 }
 
-extern int read_replace_refs;
+extern số_nguyên read_replace_refs;
 static struct commit_graph_opts write_opts;
 
-static int write_option_parse_split(const struct option *opt, const char *arg,
-				    int unset)
+static số_nguyên write_option_parse_split(const struct option *opt, const char *arg,
+				    số_nguyên unset)
 {
 	enum commit_graph_split_flags *flags = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
 	opts.split = 1;
-	if (!arg)
-		return 0;
+	nếu (!arg)
+		trả_về 0;
 
-	if (!strcmp(arg, "no-merge"))
+	nếu (!strcmp(arg, "no-merge"))
 		*flags = COMMIT_GRAPH_SPLIT_MERGE_PROHIBITED;
-	else if (!strcmp(arg, "replace"))
+	không_thì nếu (!strcmp(arg, "replace"))
 		*flags = COMMIT_GRAPH_SPLIT_REPLACE;
-	else
+	không_thì
 		die(_("unrecognized --split argument, %s"), arg);
 
-	return 0;
+	trả_về 0;
 }
 
-static int read_one_commit(struct oidset *commits, struct progress *progress,
+static số_nguyên read_one_commit(struct oidset *commits, struct progress *progress,
 			   const char *hash)
 {
 	struct object *result;
 	struct object_id oid;
 	const char *end;
 
-	if (parse_oid_hex(hash, &oid, &end))
-		return error(_("unexpected non-hex object ID: %s"), hash);
+	nếu (parse_oid_hex(hash, &oid, &end))
+		trả_về error(_("unexpected non-hex object ID: %s"), hash);
 
 	result = deref_tag(the_repository, parse_object(the_repository, &oid),
 			   NULL, 0);
-	if (!result)
-		return error(_("invalid object: %s"), hash);
-	else if (object_as_type(result, OBJ_COMMIT, 1))
+	nếu (!result)
+		trả_về error(_("invalid object: %s"), hash);
+	không_thì nếu (object_as_type(result, OBJ_COMMIT, 1))
 		oidset_insert(commits, &result->oid);
 
 	display_progress(progress, oidset_size(commits));
 
-	return 0;
+	trả_về 0;
 }
 
-static int write_option_max_new_filters(const struct option *opt,
+static số_nguyên write_option_max_new_filters(const struct option *opt,
 					const char *arg,
-					int unset)
+					số_nguyên unset)
 {
-	int *to = opt->value;
-	if (unset)
+	số_nguyên *to = opt->value;
+	nếu (unset)
 		*to = -1;
-	else {
+	không_thì {
 		const char *s;
 		*to = strtol(arg, (char **)&s, 10);
-		if (*s)
-			return error(_("option `%s' expects a numerical value"),
+		nếu (*s)
+			trả_về error(_("option `%s' expects a numerical value"),
 				     "max-new-filters");
 	}
-	return 0;
+	trả_về 0;
 }
 
-static int git_commit_graph_write_config(const char *var, const char *value,
+static số_nguyên git_commit_graph_write_config(const char *var, const char *value,
 					 const struct config_context *ctx,
 					 void *cb UNUSED)
 {
-	if (!strcmp(var, "commitgraph.maxnewfilters"))
+	nếu (!strcmp(var, "commitgraph.maxnewfilters"))
 		write_opts.max_new_filters = git_config_int(var, value, ctx->kvi);
-	else if (!strcmp(var, "commitgraph.changedpaths"))
+	không_thì nếu (!strcmp(var, "commitgraph.changedpaths"))
 		opts.enable_changed_paths = git_config_bool(var, value) ? 1 : -1;
 	/*
 	 * No need to fall-back to 'git_default_config', since this was already
 	 * called in 'cmd_commit_graph()'.
 	 */
-	return 0;
+	trả_về 0;
 }
 
-static int graph_write(int argc, const char **argv, const char *prefix,
+static số_nguyên graph_write(số_nguyên argc, const char **argv, const char *prefix,
 		       struct repository *repo UNUSED)
 {
 	struct string_list pack_indexes = STRING_LIST_INIT_DUP;
 	struct strbuf buf = STRBUF_INIT;
 	struct oidset commits = OIDSET_INIT;
 	struct odb_files_dir *dir = NULL;
-	int result = 0;
+	số_nguyên result = 0;
 	enum commit_graph_write_flags flags = 0;
 	struct progress *progress = NULL;
 
@@ -279,58 +279,58 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_commit_graph_write_usage, 0);
-	if (argc)
+	nếu (argc)
 		usage_with_options(builtin_commit_graph_write_usage, options);
 
-	if (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
+	nếu (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
 		die(_("use at most one of --reachable, --stdin-commits, or --stdin-packs"));
-	if (!opts.obj_dir)
+	nếu (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.append)
+	nếu (opts.append)
 		flags |= COMMIT_GRAPH_WRITE_APPEND;
-	if (opts.split)
+	nếu (opts.split)
 		flags |= COMMIT_GRAPH_WRITE_SPLIT;
-	if (opts.progress)
+	nếu (opts.progress)
 		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
-	if (!opts.enable_changed_paths)
+	nếu (!opts.enable_changed_paths)
 		flags |= COMMIT_GRAPH_NO_WRITE_BLOOM_FILTERS;
-	if (opts.enable_changed_paths == 1 ||
+	nếu (opts.enable_changed_paths == 1 ||
 	    git_env_bool(GIT_TEST_COMMIT_GRAPH_CHANGED_PATHS, 0))
 		flags |= COMMIT_GRAPH_WRITE_BLOOM_FILTERS;
 
 	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	nếu (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
-	if (opts.reachable) {
-		if (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
+	nếu (opts.reachable) {
+		nếu (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
 			result = 1;
 		goto cleanup;
 	}
 
-	if (opts.stdin_packs) {
+	nếu (opts.stdin_packs) {
 		struct strbuf packname = STRBUF_INIT;
 		size_t dirlen;
 
 		strbuf_addf(&packname, "%s/pack/", dir->abspath);
 		dirlen = packname.len;
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
+		trong_khi (strbuf_getline(&buf, stdin) != EOF) {
 			strbuf_setlen(&packname, dirlen);
 			strbuf_addbuf(&packname, &buf);
 			string_list_append(&pack_indexes, packname.buf);
 		}
 
 		strbuf_release(&packname);
-	} else if (opts.stdin_commits) {
+	} không_thì nếu (opts.stdin_commits) {
 		oidset_init(&commits, 0);
-		if (opts.progress)
+		nếu (opts.progress)
 			progress = start_delayed_progress(
 				the_repository,
 				_("Collecting commits from input"), 0);
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
-			if (read_one_commit(&commits, progress, buf.buf)) {
+		trong_khi (strbuf_getline(&buf, stdin) != EOF) {
+			nếu (read_one_commit(&commits, progress, buf.buf)) {
 				result = 1;
 				stop_progress(&progress);
 				goto cleanup;
@@ -340,7 +340,7 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 		stop_progress(&progress);
 	}
 
-	if (write_commit_graph(the_repository, dir->abspath,
+	nếu (write_commit_graph(the_repository, dir->abspath,
 			       opts.stdin_packs ? &pack_indexes : NULL,
 			       opts.stdin_commits ? &commits : NULL,
 			       flags,
@@ -352,10 +352,10 @@ cleanup:
 	string_list_clear(&pack_indexes, 0);
 	strbuf_release(&buf);
 	oidset_clear(&commits);
-	return result;
+	trả_về result;
 }
 
-int cmd_commit_graph(int argc,
+số_nguyên cmd_commit_graph(số_nguyên argc,
 		     const char **argv,
 		     const char *prefix,
 		     struct repository *repo)
@@ -377,5 +377,5 @@ int cmd_commit_graph(int argc,
 			     builtin_commit_graph_usage, 0);
 	FREE_AND_NULL(options);
 
-	return fn(argc, argv, prefix, repo);
+	trả_về fn(argc, argv, prefix, repo);
 }

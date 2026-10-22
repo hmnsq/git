@@ -8,12 +8,12 @@ static const char * const prune_packed_usage[] = {
 	NULL
 };
 
-int cmd_prune_packed(int argc,
+số_nguyên cmd_prune_packed(số_nguyên argc,
 		     const char **argv,
 		     const char *prefix,
 		     struct repository *repo UNUSED)
 {
-	int opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
+	số_nguyên opts = isatty(2) ? PRUNE_PACKED_VERBOSE : 0;
 	const struct option prune_packed_options[] = {
 		OPT_BIT('n', "dry-run", &opts, N_("dry run"),
 			PRUNE_PACKED_DRY_RUN),
@@ -25,11 +25,11 @@ int cmd_prune_packed(int argc,
 	argc = parse_options(argc, argv, prefix, prune_packed_options,
 			     prune_packed_usage, 0);
 
-	if (argc > 0)
+	nếu (argc > 0)
 		usage_msg_opt(_("too many arguments"),
 			      prune_packed_usage,
 			      prune_packed_options);
 
 	prune_packed_objects(opts);
-	return 0;
+	trả_về 0;
 }

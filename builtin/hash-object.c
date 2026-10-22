@@ -20,12 +20,12 @@
 #include "strbuf.h"
 #include "write-or-die.h"
 
-static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
+static void hash_fd(số_nguyên fd, const char *type, const char *path, unsigned flags)
 {
 	struct stat st;
 	struct object_id oid;
 
-	if (fstat(fd, &st) < 0 ||
+	nếu (fstat(fd, &st) < 0 ||
 	    index_fd(the_repository->index, &oid, fd, &st,
 		     type_from_string(type), path, flags))
 		die((flags & INDEX_WRITE_OBJECT)
@@ -38,20 +38,20 @@ static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
 static void hash_object(const char *path, const char *type, const char *vpath,
 			unsigned flags)
 {
-	int fd;
+	số_nguyên fd;
 	fd = xopen(path, O_RDONLY);
 	hash_fd(fd, type, vpath, flags);
 }
 
-static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
+static void hash_stdin_paths(const char *type, số_nguyên no_filters, unsigned flags)
 {
 	struct strbuf buf = STRBUF_INIT;
 	struct strbuf unquoted = STRBUF_INIT;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (buf.buf[0] == '"') {
+	trong_khi (strbuf_getline(&buf, stdin) != EOF) {
+		nếu (buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			nếu (unquote_c_style(&unquoted, buf.buf, NULL))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
@@ -61,7 +61,7 @@ static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
 	strbuf_release(&unquoted);
 }
 
-int cmd_hash_object(int argc,
+số_nguyên cmd_hash_object(số_nguyên argc,
 		    const char **argv,
 		    const char *prefix,
 		    struct repository *repo UNUSED)
@@ -73,10 +73,10 @@ int cmd_hash_object(int argc,
 		NULL
 	};
 	const char *type = blob_type;
-	int hashstdin = 0;
-	int stdin_paths = 0;
-	int no_filters = 0;
-	int nongit = 0;
+	số_nguyên hashstdin = 0;
+	số_nguyên stdin_paths = 0;
+	số_nguyên no_filters = 0;
+	số_nguyên nongit = 0;
 	unsigned flags = INDEX_FORMAT_CHECK;
 	const char *vpath = NULL;
 	char *vpath_free = NULL;
@@ -93,65 +93,65 @@ int cmd_hash_object(int argc,
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
 	};
-	int i;
+	số_nguyên i;
 	const char *errstr = NULL;
 
 	argc = parse_options(argc, argv, prefix, hash_object_options,
 			     hash_object_usage, 0);
 
-	if (flags & INDEX_WRITE_OBJECT)
+	nếu (flags & INDEX_WRITE_OBJECT)
 		prefix = setup_git_directory(the_repository);
-	else
+	không_thì
 		prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (nongit && !the_hash_algo)
+	nếu (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	if (vpath && prefix) {
+	nếu (vpath && prefix) {
 		vpath_free = prefix_filename(prefix, vpath);
 		vpath = vpath_free;
 	}
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	if (stdin_paths) {
-		if (hashstdin)
+	nếu (stdin_paths) {
+		nếu (hashstdin)
 			errstr = "Can't use --stdin-paths with --stdin";
-		else if (argc)
+		không_thì nếu (argc)
 			errstr = "Can't specify files with --stdin-paths";
-		else if (vpath)
+		không_thì nếu (vpath)
 			errstr = "Can't use --stdin-paths with --path";
 	}
-	else {
-		if (hashstdin > 1)
+	không_thì {
+		nếu (hashstdin > 1)
 			errstr = "Multiple --stdin arguments are not supported";
-		if (vpath && no_filters)
+		nếu (vpath && no_filters)
 			errstr = "Can't use --path with --no-filters";
 	}
 
-	if (errstr) {
+	nếu (errstr) {
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
 
-	if (hashstdin)
+	nếu (hashstdin)
 		hash_fd(0, type, vpath, flags);
 
-	for (i = 0 ; i < argc; i++) {
+	cho (i = 0 ; i < argc; i++) {
 		const char *arg = argv[i];
 		char *to_free = NULL;
 
-		if (prefix)
+		nếu (prefix)
 			arg = to_free = prefix_filename(prefix, arg);
 		hash_object(arg, type, no_filters ? NULL : vpath ? vpath : arg,
 			    flags);
 		free(to_free);
 	}
 
-	if (stdin_paths)
+	nếu (stdin_paths)
 		hash_stdin_paths(type, no_filters, flags);
 
 	free(vpath_free);
 
-	return 0;
+	trả_về 0;
 }
