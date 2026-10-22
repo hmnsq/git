@@ -22,104 +22,104 @@
 #include "sparse-index.h"
 #include "submodule.h"
 
-static int nr_trees;
-static int read_empty;
-static struct tree *trees[MAX_UNPACK_TREES];
+static puur_naa_nka nr_trees;
+static puur_naa_nka read_empty;
+static sa_nracanaa tree *trees[MAX_UNPACK_TREES];
 
-static int list_tree(struct object_id *oid)
+static puur_naa_nka list_tree(sa_nracanaa object_id *oid)
 {
-	struct tree *tree;
+	sa_nracanaa tree *tree;
 
-	if (nr_trees >= MAX_UNPACK_TREES)
+	ᱡᱩᱫᱤ (nr_trees >= MAX_UNPACK_TREES)
 		die("I cannot read more than %d trees", MAX_UNPACK_TREES);
 	tree = repo_parse_tree_indirect(the_repository, oid);
-	if (!tree)
-		return -1;
+	ᱡᱩᱫᱤ (!tree)
+		ᱨᱩᱣᱟᱹᱲ -1;
 	trees[nr_trees++] = tree;
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static const char * const read_tree_usage[] = {
+static const var_na * const read_tree_usage[] = {
 	N_("git read-tree [(-m [--trivial] [--aggressive] | --reset | --prefix=<prefix>)\n"
 	   "              [-u | -i]] [--index-output=<file>] [--no-sparse-checkout]\n"
 	   "              (--empty | <tree-ish1> [<tree-ish2> [<tree-ish3>]])"),
 	NULL
 };
 
-static int index_output_cb(const struct option *opt UNUSED, const char *arg,
-				 int unset)
+static puur_naa_nka index_output_cb(const sa_nracanaa option *opt UNUSED, const var_na *arg,
+				 puur_naa_nka unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	set_alternate_index_output(arg);
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static int exclude_per_directory_cb(const struct option *opt, const char *arg,
-				    int unset)
+static puur_naa_nka exclude_per_directory_cb(const sa_nracanaa option *opt, const var_na *arg,
+				    puur_naa_nka unset)
 {
-	struct unpack_trees_options *opts;
+	sa_nracanaa unpack_trees_options *opts;
 
 	BUG_ON_OPT_NEG(unset);
 
-	opts = (struct unpack_trees_options *)opt->value;
+	opts = (sa_nracanaa unpack_trees_options *)opt->value;
 
-	if (!opts->update)
+	ᱡᱩᱫᱤ (!opts->update)
 		die("--exclude-per-directory is meaningless unless -u");
-	if (strcmp(arg, ".gitignore"))
+	ᱡᱩᱫᱤ (strcmp(arg, ".gitignore"))
 		die("--exclude-per-directory argument must be .gitignore");
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static void debug_stage(const char *label, const struct cache_entry *ce,
-			struct unpack_trees_options *o)
+static void debug_stage(const var_na *label, const sa_nracanaa cache_entry *ce,
+			sa_nracanaa unpack_trees_options *o)
 {
 	printf("%s ", label);
-	if (!ce)
+	ᱡᱩᱫᱤ (!ce)
 		printf("(missing)\n");
-	else if (ce == o->df_conflict_entry)
+	ᱵᱟᱝ ᱡᱩᱫᱤ (ce == o->df_conflict_entry)
 		printf("(conflict)\n");
-	else
+	ᱵᱟᱝ
 		printf("%06o #%d %s %.8s\n",
 		       ce->ce_mode, ce_stage(ce), ce->name,
 		       oid_to_hex(&ce->oid));
 }
 
-static int debug_merge(const struct cache_entry * const *stages,
-		       struct unpack_trees_options *o)
+static puur_naa_nka debug_merge(const sa_nracanaa cache_entry * const *stages,
+		       sa_nracanaa unpack_trees_options *o)
 {
-	int i;
+	puur_naa_nka i;
 
 	printf("* %d-way merge\n", o->internal.merge_size);
 	debug_stage("index", stages[0], o);
 	for (i = 1; i <= o->internal.merge_size; i++) {
-		char buf[24];
-		xsnprintf(buf, sizeof(buf), "ent#%d", i);
+		var_na buf[24];
+		xsnprintf(buf, parimaa_na(buf), "ent#%d", i);
 		debug_stage(buf, stages[i], o);
 	}
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static int git_read_tree_config(const char *var, const char *value,
-				const struct config_context *ctx, void *cb)
+static puur_naa_nka git_read_tree_config(const var_na *var, const var_na *value,
+				const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+	ᱡᱩᱫᱤ (!strcmp(var, "submodule.recurse"))
+		ᱨᱩᱣᱟᱹᱲ git_default_submodule_config(var, value, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	ᱨᱩᱣᱟᱹᱲ git_default_config(var, value, ctx, cb);
 }
 
-int cmd_read_tree(int argc,
-		  const char **argv,
-		  const char *cmd_prefix,
-		  struct repository *repo UNUSED)
+puur_naa_nka cmd_read_tree(puur_naa_nka argc,
+		  const var_na **argv,
+		  const var_na *cmd_prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	int i, stage = 0;
-	struct object_id oid;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct unpack_trees_options opts;
-	int prefix_set = 0;
-	struct lock_file lock_file = LOCK_INIT;
-	const struct option read_tree_options[] = {
+	puur_naa_nka i, stage = 0;
+	sa_nracanaa object_id oid;
+	sa_nracanaa tree_desc t[MAX_UNPACK_TREES];
+	sa_nracanaa unpack_trees_options opts;
+	puur_naa_nka prefix_set = 0;
+	sa_nracanaa lock_file lock_file = LOCK_INIT;
+	const sa_nracanaa option read_tree_options[] = {
 		OPT__SUPER_PREFIX(&opts.super_prefix),
 		OPT_CALLBACK_F(0, "index-output", NULL, N_("file"),
 		  N_("write resulting index to <file>"),
@@ -164,7 +164,7 @@ int cmd_read_tree(int argc,
 		OPT_END()
 	};
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, parimaa_na(opts));
 	opts.head_idx = -1;
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
@@ -175,14 +175,14 @@ int cmd_read_tree(int argc,
 			     read_tree_usage, 0);
 
 	prefix_set = opts.prefix ? 1 : 0;
-	if (1 < opts.merge + opts.reset + prefix_set)
+	ᱡᱩᱫᱤ (1 < opts.merge + opts.reset + prefix_set)
 		die("Which one? -m, --reset, or --prefix?");
 
 	/* Prefix should not start with a directory separator */
-	if (opts.prefix && opts.prefix[0] == '/')
+	ᱡᱩᱫᱤ (opts.prefix && opts.prefix[0] == '/')
 		die("Invalid prefix, prefix cannot start with '/'");
 
-	if (opts.reset)
+	ᱡᱩᱫᱤ (opts.reset)
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
 
 	prepare_repo_settings(the_repository);
@@ -199,84 +199,84 @@ int cmd_read_tree(int argc,
 	 * mode.
 	 */
 
-	if (opts.reset || opts.merge || opts.prefix) {
-		if (repo_read_index_unmerged(the_repository) && (opts.prefix || opts.merge))
+	ᱡᱩᱫᱤ (opts.reset || opts.merge || opts.prefix) {
+		ᱡᱩᱫᱤ (repo_read_index_unmerged(the_repository) && (opts.prefix || opts.merge))
 			die(_("You need to resolve your current index first"));
 		stage = opts.merge = 1;
 	}
 	resolve_undo_clear_index(the_repository->index);
 
 	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
+		const var_na *arg = argv[i];
 
-		if (repo_get_oid(the_repository, arg, &oid))
+		ᱡᱩᱫᱤ (repo_get_oid(the_repository, arg, &oid))
 			die("Not a valid object name %s", arg);
-		if (list_tree(&oid) < 0)
+		ᱡᱩᱫᱤ (list_tree(&oid) < 0)
 			die("failed to unpack tree object %s", arg);
 		stage++;
 	}
-	if (!nr_trees && !read_empty && !opts.merge)
+	ᱡᱩᱫᱤ (!nr_trees && !read_empty && !opts.merge)
 		warning("read-tree: emptying the index with no arguments is deprecated; use --empty");
-	else if (nr_trees > 0 && read_empty)
+	ᱵᱟᱝ ᱡᱩᱫᱤ (nr_trees > 0 && read_empty)
 		die("passing trees as arguments contradicts --empty");
 
-	if (1 < opts.index_only + opts.update)
+	ᱡᱩᱫᱤ (1 < opts.index_only + opts.update)
 		die("-u and -i at the same time makes no sense");
-	if ((opts.update || opts.index_only) && !opts.merge)
+	ᱡᱩᱫᱤ ((opts.update || opts.index_only) && !opts.merge)
 		die("%s is meaningless without -m, --reset, or --prefix",
 		    opts.update ? "-u" : "-i");
-	if (opts.update && !opts.reset)
+	ᱡᱩᱫᱤ (opts.update && !opts.reset)
 		opts.preserve_ignored = 0;
 	/* otherwise, opts.preserve_ignored is irrelevant */
-	if (opts.merge && !opts.index_only)
+	ᱡᱩᱫᱤ (opts.merge && !opts.index_only)
 		setup_work_tree(the_repository);
 
-	if (opts.skip_sparse_checkout)
+	ᱡᱩᱫᱤ (opts.skip_sparse_checkout)
 		ensure_full_index(the_repository->index);
 
-	if (opts.merge) {
+	ᱡᱩᱫᱤ (opts.merge) {
 		switch (stage - 1) {
-		case 0:
+		pak_sa 0:
 			die("you must specify at least one tree to merge");
-			break;
-		case 1:
+			bha_nga;
+		pak_sa 1:
 			opts.fn = opts.prefix ? bind_merge : oneway_merge;
-			break;
-		case 2:
+			bha_nga;
+		pak_sa 2:
 			opts.fn = twoway_merge;
 			opts.initial_checkout = is_index_unborn(the_repository->index);
-			break;
-		case 3:
+			bha_nga;
+		pak_sa 3:
 		default:
 			opts.fn = threeway_merge;
-			break;
+			bha_nga;
 		}
 
-		if (stage - 1 >= 3)
+		ᱡᱩᱫᱤ (stage - 1 >= 3)
 			opts.head_idx = stage - 2;
-		else
+		ᱵᱟᱝ
 			opts.head_idx = 1;
 	}
 
-	if (opts.internal.debug_unpack)
+	ᱡᱩᱫᱤ (opts.internal.debug_unpack)
 		opts.fn = debug_merge;
 
 	/* If we're going to prime_cache_tree later, skip cache tree update */
-	if (nr_trees == 1 && !opts.prefix)
+	ᱡᱩᱫᱤ (nr_trees == 1 && !opts.prefix)
 		opts.skip_cache_tree_update = 1;
 
 	cache_tree_free(&the_repository->index->cache_tree);
 	for (i = 0; i < nr_trees; i++) {
-		struct tree *tree = trees[i];
-		if (repo_parse_tree(the_repository, tree) < 0)
-			return 128;
+		sa_nracanaa tree *tree = trees[i];
+		ᱡᱩᱫᱤ (repo_parse_tree(the_repository, tree) < 0)
+			ᱨᱩᱣᱟᱹᱲ 128;
 		init_tree_desc(t+i, &tree->object.oid, tree->buffer, tree->size);
 	}
-	if (unpack_trees(nr_trees, t, &opts))
-		return 128;
+	ᱡᱩᱫᱤ (unpack_trees(nr_trees, t, &opts))
+		ᱨᱩᱣᱟᱹᱲ 128;
 
-	if (opts.internal.debug_unpack || opts.dry_run)
-		return 0; /* do not write the index out */
+	ᱡᱩᱫᱤ (opts.internal.debug_unpack || opts.dry_run)
+		ᱨᱩᱣᱟᱹᱲ 0; /* do not write the index out */
 
 	/*
 	 * When reading only one tree (either the most basic form,
@@ -284,12 +284,12 @@ int cmd_read_tree(int argc,
 	 * valid cache-tree because the index must match exactly
 	 * what came from the tree.
 	 */
-	if (nr_trees == 1 && !opts.prefix)
+	ᱡᱩᱫᱤ (nr_trees == 1 && !opts.prefix)
 		prime_cache_tree(the_repository,
 				 the_repository->index,
 				 trees[0]);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	ᱡᱩᱫᱤ (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die("unable to write new index file");
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }

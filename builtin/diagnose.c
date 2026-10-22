@@ -7,26 +7,26 @@
 #include "path.h"
 #include "diagnose.h"
 
-static const char * const diagnose_usage[] = {
+static const var_na * const diagnose_usage[] = {
 	N_("git diagnose [(-o | --output-directory) <path>] [(-s | --suffix) <format>]\n"
 	   "             [--mode=<mode>]"),
 	NULL
 };
 
-int cmd_diagnose(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+puur_naa_nka cmd_diagnose(puur_naa_nka argc,
+		 const var_na **argv,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED)
 {
-	struct strbuf zip_path = STRBUF_INIT;
+	sa_nracanaa strbuf zip_path = STRBUF_INIT;
 	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode mode = DIAGNOSE_STATS;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	char *prefixed_filename;
+	sa_nracanaa tm tm;
+	ga_nanaa diagnose_mode mode = DIAGNOSE_STATS;
+	var_na *option_output = NULL;
+	const var_na *option_suffix = "%Y-%m-%d-%H%M";
+	var_na *prefixed_filename;
 
-	const struct option diagnose_options[] = {
+	const sa_nracanaa option diagnose_options[] = {
 		OPT_STRING('o', "output-directory", &option_output, N_("path"),
 			   N_("specify a destination for the diagnostics archive")),
 		OPT_STRING('s', "suffix", &option_suffix, N_("format"),
@@ -51,20 +51,20 @@ int cmd_diagnose(int argc,
 	strbuf_addstr(&zip_path, ".zip");
 
 	switch (safe_create_leading_directories(the_repository, zip_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
+	pak_sa SCLD_OK:
+	pak_sa SCLD_EXISTS:
+		bha_nga;
 	default:
 		die_errno(_("could not create leading directories for '%s'"),
 			  zip_path.buf);
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	ᱡᱩᱫᱤ (create_diagnostics_archive(the_repository, &zip_path, mode))
 		die_errno(_("unable to create diagnostics archive %s"),
 			  zip_path.buf);
 
 	free(prefixed_filename);
 	strbuf_release(&zip_path);
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }

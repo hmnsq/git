@@ -15,60 +15,60 @@
 #include "xdiff-interface.h"
 #include "parse-options.h"
 
-static const char *const merge_file_usage[] = {
+static const var_na *const merge_file_usage[] = {
 	N_("git merge-file [<options>] [-L <name1> [-L <orig> [-L <name2>]]] <file1> <orig-file> <file2>"),
 	NULL
 };
 
-static int label_cb(const struct option *opt, const char *arg, int unset)
+static puur_naa_nka label_cb(const sa_nracanaa option *opt, const var_na *arg, puur_naa_nka unset)
 {
-	static int label_count = 0;
-	const char **names = (const char **)opt->value;
+	static puur_naa_nka label_count = 0;
+	const var_na **names = (const var_na **)opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (label_count >= 3)
-		return error("too many labels on the command line");
+	ᱡᱩᱫᱤ (label_count >= 3)
+		ᱨᱩᱣᱟᱹᱲ error("too many labels on the command line");
 	names[label_count++] = arg;
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static int set_diff_algorithm(xpparam_t *xpp,
-			      const char *alg)
+static puur_naa_nka set_diff_algorithm(xpparam_t *xpp,
+			      const var_na *alg)
 {
 	long diff_algorithm = parse_algorithm_value(alg);
-	if (diff_algorithm < 0)
-		return -1;
+	ᱡᱩᱫᱤ (diff_algorithm < 0)
+		ᱨᱩᱣᱟᱹᱲ -1;
 	xpp->flags = (xpp->flags & ~XDF_DIFF_ALGORITHM_MASK) | diff_algorithm;
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static int diff_algorithm_cb(const struct option *opt,
-				const char *arg, int unset)
+static puur_naa_nka diff_algorithm_cb(const sa_nracanaa option *opt,
+				const var_na *arg, puur_naa_nka unset)
 {
 	xpparam_t *xpp = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (set_diff_algorithm(xpp, arg))
-		return error(_("option diff-algorithm accepts \"myers\", "
+	ᱡᱩᱫᱤ (set_diff_algorithm(xpp, arg))
+		ᱨᱩᱣᱟᱹᱲ error(_("option diff-algorithm accepts \"myers\", "
 			       "\"minimal\", \"patience\" and \"histogram\""));
 
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-int cmd_merge_file(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo)
+puur_naa_nka cmd_merge_file(puur_naa_nka argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo)
 {
-	const char *names[3] = { 0 };
+	const var_na *names[3] = { 0 };
 	mmfile_t mmfs[3] = { 0 };
 	mmfile_t result = { 0 };
 	xmparam_t xmp = { 0 };
-	int ret = 0, i = 0, to_stdout = 0, object_id = 0;
-	int quiet = 0;
-	struct option options[] = {
+	puur_naa_nka ret = 0, i = 0, to_stdout = 0, object_id = 0;
+	puur_naa_nka quiet = 0;
+	sa_nracanaa option options[] = {
 		OPT_BOOL('p', "stdout", &to_stdout, N_("send results to standard output")),
 		OPT_BOOL(0,   "object-id", &object_id, N_("use object IDs instead of filenames")),
 		OPT_SET_INT(0, "diff3", &xmp.style, N_("use a diff3 based merge"), XDL_MERGE_DIFF3),
@@ -97,50 +97,50 @@ int cmd_merge_file(int argc,
 
 	/* Read the configuration file */
 	repo_config(repo, git_xmerge_config, NULL);
-	if (0 <= git_xmerge_style)
+	ᱡᱩᱫᱤ (0 <= git_xmerge_style)
 		xmp.style = git_xmerge_style;
 
 	argc = parse_options(argc, argv, prefix, options, merge_file_usage, 0);
-	if (argc != 3)
+	ᱡᱩᱫᱤ (argc != 3)
 		usage_with_options(merge_file_usage, options);
-	if (quiet) {
-		if (!freopen("/dev/null", "w", stderr))
-			return error_errno("failed to redirect stderr to /dev/null");
+	ᱡᱩᱫᱤ (quiet) {
+		ᱡᱩᱫᱤ (!freopen("/dev/null", "w", stderr))
+			ᱨᱩᱣᱟᱹᱲ error_errno("failed to redirect stderr to /dev/null");
 	}
 
-	if (!repo && object_id)
+	ᱡᱩᱫᱤ (!repo && object_id)
 		/* emit the correct "not a git repo" error in this case */
 		setup_git_directory(the_repository);
 
 	for (i = 0; i < 3; i++) {
-		char *fname;
-		struct object_id oid;
+		var_na *fname;
+		sa_nracanaa object_id oid;
 		mmfile_t *mmf = mmfs + i;
 
-		if (!names[i])
+		ᱡᱩᱫᱤ (!names[i])
 			names[i] = argv[i];
 
 		fname = prefix_filename(prefix, argv[i]);
 
-		if (object_id) {
-			if (repo_get_oid(the_repository, argv[i], &oid))
+		ᱡᱩᱫᱤ (object_id) {
+			ᱡᱩᱫᱤ (repo_get_oid(the_repository, argv[i], &oid))
 				ret = error(_("object '%s' does not exist"),
 					      argv[i]);
-			else if (!oideq(&oid, the_hash_algo->empty_blob))
+			ᱵᱟᱝ ᱡᱩᱫᱤ (!oideq(&oid, the_hash_algo->empty_blob))
 				read_mmblob(mmf, the_repository->objects, &oid);
-			else
+			ᱵᱟᱝ
 				read_mmfile(mmf, "/dev/null");
-		} else if (read_mmfile(mmf, fname)) {
+		} ᱵᱟᱝ ᱡᱩᱫᱤ (read_mmfile(mmf, fname)) {
 			ret = -1;
 		}
-		if (ret != -1 && (mmf->size > MAX_XDIFF_SIZE ||
+		ᱡᱩᱫᱤ (ret != -1 && (mmf->size > MAX_XDIFF_SIZE ||
 		    buffer_is_binary(mmf->ptr, mmf->size))) {
 			ret = error("Cannot merge binary files: %s",
 				    argv[i]);
 		}
 
 		free(fname);
-		if (ret)
+		ᱡᱩᱫᱤ (ret)
 			goto cleanup;
 
 	}
@@ -150,42 +150,42 @@ int cmd_merge_file(int argc,
 	xmp.file2 = names[2];
 	ret = xdl_merge(mmfs + 1, mmfs + 0, mmfs + 2, &xmp, &result);
 
-	if (ret >= 0) {
-		if (object_id && !to_stdout) {
-			struct object_id oid;
-			if (result.size) {
-				if (odb_write_object(the_repository->objects, result.ptr,
+	ᱡᱩᱫᱤ (ret >= 0) {
+		ᱡᱩᱫᱤ (object_id && !to_stdout) {
+			sa_nracanaa object_id oid;
+			ᱡᱩᱫᱤ (result.size) {
+				ᱡᱩᱫᱤ (odb_write_object(the_repository->objects, result.ptr,
 						     result.size, OBJ_BLOB, &oid) < 0)
 					ret = error(_("Could not write object file"));
-			} else {
+			} ᱵᱟᱝ {
 				oidcpy(&oid, the_hash_algo->empty_blob);
 			}
-			if (ret >= 0)
+			ᱡᱩᱫᱤ (ret >= 0)
 				printf("%s\n", oid_to_hex(&oid));
-		} else {
-			const char *filename = argv[0];
-			char *fpath = prefix_filename(prefix, argv[0]);
+		} ᱵᱟᱝ {
+			const var_na *filename = argv[0];
+			var_na *fpath = prefix_filename(prefix, argv[0]);
 			FILE *f = to_stdout ? stdout : fopen(fpath, "wb");
 
-			if (!f)
+			ᱡᱩᱫᱤ (!f)
 				ret = error_errno("Could not open %s for writing",
 						  filename);
-			else if (result.size &&
+			ᱵᱟᱝ ᱡᱩᱫᱤ (result.size &&
 				 fwrite(result.ptr, result.size, 1, f) != 1)
 				ret = error_errno("Could not write to %s", filename);
-			else if (fclose(f))
+			ᱵᱟᱝ ᱡᱩᱫᱤ (fclose(f))
 				ret = error_errno("Could not close %s", filename);
 			free(fpath);
 		}
 		free(result.ptr);
 	}
 
-	if (ret > 127)
+	ᱡᱩᱫᱤ (ret > 127)
 		ret = 127;
 
 cleanup:
 	for (i = 0; i < 3; i++)
 		free(mmfs[i].ptr);
 
-	return ret;
+	ᱨᱩᱣᱟᱹᱲ ret;
 }
