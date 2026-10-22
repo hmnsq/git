@@ -18,17 +18,17 @@
 #include "parse-options.h"
 #include "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+static const char * const ls_पुनो_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
 	NULL
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
+static void expand_objectsize(struct strbuf *लिन्या, const struct object_id *oid,
 			      const enum object_type type, unsigned int padded)
 {
 	static const char padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
+	size_t orig_len = लिन्या->len;
 	size_t len;
 
 	if (type == OBJ_BLOB) {
@@ -36,21 +36,21 @@ static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
 		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
+		strbuf_add_uint(लिन्या, size);
 	} else {
-		strbuf_addstr(line, "-");
+		strbuf_addstr(लिन्या, "-");
 	}
-	len = line->len - orig_len;
+	len = लिन्या->len - orig_len;
 	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+		strbuf_इसिंगित(लिन्या, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
+struct ls_पुनो_options {
 	unsigned null_termination:1;
 	int abbrev;
-	enum ls_tree_path_options {
+	enum ls_पुनो_path_options {
 		LS_RECURSIVE = 1 << 0,
-		LS_TREE_ONLY = 1 << 1,
+		LS_पुनो_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
 	struct pathspec pathspec;
@@ -58,7 +58,7 @@ struct ls_tree_options {
 	const char *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
+static int show_recursive(struct ls_पुनो_options *options, const char *base,
 			  size_t baselen, const char *pathname)
 {
 	int i;
@@ -70,7 +70,7 @@ static int show_recursive(struct ls_tree_options *options, const char *base,
 		return 0;
 
 	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
+		const char *spec = options->pathspec.मगा_बागाय[i].match;
 		size_t len, speclen;
 
 		if (strncmp(base, spec, baselen))
@@ -89,20 +89,20 @@ static int show_recursive(struct ls_tree_options *options, const char *base,
 	return 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
+static int show_पुनो_fmt(const struct object_id *oid, struct strbuf *base,
 			 const char *pathname, unsigned mode, void *context)
 {
-	struct ls_tree_options *options = context;
+	struct ls_पुनो_options *options = context;
 	int recurse = 0;
 	struct strbuf sb = STRBUF_INIT;
 	enum object_type type = object_type(mode);
 	const char *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
-		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
+	if (type == OBJ_पुनो && show_recursive(options, base->buf, base->len, pathname))
+		recurse = READ_पुनो_RECURSIVE;
+	if (type == OBJ_पुनो && recurse && !(options->ls_options & LS_SHOW_TREES))
 		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
+	if (type == OBJ_BLOB && (options->ls_options & LS_पुनो_ONLY))
 		return 0;
 
 	while (strbuf_expand_step(&sb, &format)) {
@@ -142,7 +142,7 @@ static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
 	return recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
+static int show_पुनो_common(struct ls_पुनो_options *options, int *recurse,
 			    struct strbuf *base, const char *pathname,
 			    enum object_type type)
 {
@@ -150,11 +150,11 @@ static int show_tree_common(struct ls_tree_options *options, int *recurse,
 	*recurse = 0;
 
 	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+		if (options->ls_options & LS_पुनो_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
+	} else if (type == OBJ_पुनो &&
 		   show_recursive(options, base->buf, base->len, pathname)) {
-		*recurse = READ_TREE_RECURSIVE;
+		*recurse = READ_पुनो_RECURSIVE;
 		if (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
@@ -162,7 +162,7 @@ static int show_tree_common(struct ls_tree_options *options, int *recurse,
 	return ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
+static void show_पुनो_common_default_long(struct ls_पुनो_options *options,
 					  struct strbuf *base,
 					  const char *pathname,
 					  const size_t baselen)
@@ -186,36 +186,36 @@ static void show_tree_common_default_long(struct ls_tree_options *options,
 	strbuf_setlen(base, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
+static int show_पुनो_default(const struct object_id *oid, struct strbuf *base,
 			     const char *pathname, unsigned mode,
 			     void *context)
 {
-	struct ls_tree_options *options = context;
+	struct ls_पुनो_options *options = context;
 	int early;
 	int recurse;
 	enum object_type type = object_type(mode);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
+	early = show_पुनो_common(options, &recurse, base, pathname, type);
 	if (early >= 0)
 		return early;
 
 	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
-	show_tree_common_default_long(options, base, pathname, base->len);
+	show_पुनो_common_default_long(options, base, pathname, base->len);
 	return recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
+static int show_पुनो_long(const struct object_id *oid, struct strbuf *base,
 			  const char *pathname, unsigned mode,
 			  void *context)
 {
-	struct ls_tree_options *options = context;
+	struct ls_पुनो_options *options = context;
 	int early;
 	int recurse;
 	char size_text[24];
 	enum object_type type = object_type(mode);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
+	early = show_पुनो_common(options, &recurse, base, pathname, type);
 	if (early >= 0)
 		return early;
 
@@ -233,23 +233,23 @@ static int show_tree_long(const struct object_id *oid, struct strbuf *base,
 	printf("%06o %s %s %7s\t", mode, type_name(type),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
 	       size_text);
-	show_tree_common_default_long(options, base, pathname, base->len);
+	show_पुनो_common_default_long(options, base, pathname, base->len);
 	return recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
+static int show_पुनो_name_only(const struct object_id *oid UNUSED,
 			       struct strbuf *base,
 			       const char *pathname, unsigned mode,
 			       void *context)
 {
-	struct ls_tree_options *options = context;
+	struct ls_पुनो_options *options = context;
 	int early;
 	int recurse;
 	const size_t baselen = base->len;
 	enum object_type type = object_type(mode);
 	const char *prefix;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
+	early = show_पुनो_common(options, &recurse, base, pathname, type);
 	if (early >= 0)
 		return early;
 
@@ -270,17 +270,17 @@ static int show_tree_name_only(const struct object_id *oid UNUSED,
 	return recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
+static int show_पुनो_object(const struct object_id *oid, struct strbuf *base,
 			    const char *pathname, unsigned mode,
 			    void *context)
 {
-	struct ls_tree_options *options = context;
+	struct ls_पुनो_options *options = context;
 	int early;
 	int recurse;
 	enum object_type type = object_type(mode);
 	const char *str;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
+	early = show_पुनो_common(options, &recurse, base, pathname, type);
 	if (early >= 0)
 		return early;
 
@@ -294,7 +294,7 @@ static int show_tree_object(const struct object_id *oid, struct strbuf *base,
 	return recurse;
 }
 
-enum ls_tree_cmdmode {
+enum ls_पुनो_cmdmode {
 	MODE_DEFAULT = 0,
 	MODE_LONG,
 	MODE_NAME_ONLY,
@@ -302,55 +302,55 @@ enum ls_tree_cmdmode {
 	MODE_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
+struct ls_पुनो_cmdmode_to_fmt {
+	enum ls_पुनो_cmdmode mode;
 	const char *const fmt;
-	read_tree_fn_t fn;
+	read_पुनो_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+static struct ls_पुनो_cmdmode_to_fmt ls_पुनो_cmdmode_format[] = {
 	{
 		.mode = MODE_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
-		.fn = show_tree_default,
+		.fn = show_पुनो_default,
 	},
 	{
 		.mode = MODE_LONG,
 		.fmt = "%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)",
-		.fn = show_tree_long,
+		.fn = show_पुनो_long,
 	},
 	{
 		.mode = MODE_NAME_ONLY, /* And MODE_NAME_STATUS */
 		.fmt = "%(path)",
-		.fn = show_tree_name_only,
+		.fn = show_पुनो_name_only,
 	},
 	{
 		.mode = MODE_OBJECT_ONLY,
 		.fmt = "%(objectname)",
-		.fn = show_tree_object
+		.fn = show_पुनो_object
 	},
 	{
 		/* fallback */
-		.fn = show_tree_default,
+		.fn = show_पुनो_default,
 	},
 };
 
-int cmd_ls_tree(int argc,
+int cmd_ls_पुनो(int argc,
 		const char **argv,
 		const char *prefix,
 		struct repository *repo UNUSED)
 {
 	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
+	struct पुनो *पुनो;
+	int i, full_पुनो = 0;
 	int full_name = !prefix || !*prefix;
-	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
+	read_पुनो_fn_t fn = NULL;
+	enum ls_पुनो_cmdmode cmdmode = MODE_DEFAULT;
 	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
+	struct ls_पुनो_options options = { 0 };
+	const struct option ls_पुनो_options[] = {
 		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
-			LS_TREE_ONLY),
+			LS_पुनो_ONLY),
 		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
 			LS_RECURSIVE),
 		OPT_BIT('t', NULL, &options.ls_options, N_("show trees when recursing"),
@@ -366,7 +366,7 @@ int cmd_ls_tree(int argc,
 		OPT_CMDMODE(0, "object-only", &cmdmode, N_("list only objects"),
 			    MODE_OBJECT_ONLY),
 		OPT_BOOL(0, "full-name", &full_name, N_("use full path names")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_पुनो,
 			 N_("list entire tree; not just current directory "
 			    "(implies --full-name)")),
 		OPT_STRING_F(0, "format", &options.format, N_("format"),
@@ -375,16 +375,16 @@ int cmd_ls_tree(int argc,
 		OPT__ABBREV(&options.abbrev),
 		OPT_END()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
+	struct ls_पुनो_cmdmode_to_fmt *m2f = ls_पुनो_cmdmode_format;
 	int ret;
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	argc = parse_options(argc, argv, prefix, ls_tree_options,
-			     ls_tree_usage, 0);
+	argc = parse_options(argc, argv, prefix, ls_पुनो_options,
+			     ls_पुनो_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
+	if (full_पुनो)
 		prefix = NULL;
 	options.prefix = full_name ? NULL : prefix;
 
@@ -397,16 +397,16 @@ int cmd_ls_tree(int argc,
 		cmdmode = MODE_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
-	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
+	if ( (LS_पुनो_ONLY|LS_RECURSIVE) ==
+	    ((LS_पुनो_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
 	if (options.format && cmdmode)
-		usage_msg_opt(
+		usage_मेनसाहे_opt(
 			_("--format can't be combined with other format-altering options"),
-			ls_tree_usage, ls_tree_options);
+			ls_पुनो_usage, ls_पुनो_options);
 	if (argc < 1)
-		usage_with_options(ls_tree_usage, ls_tree_options);
+		usage_with_options(ls_पुनो_usage, ls_पुनो_options);
 	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
@@ -422,10 +422,10 @@ int cmd_ls_tree(int argc,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv + 1);
 	for (i = 0; i < options.pathspec.nr; i++)
-		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
+		options.pathspec.मगा_बागाय[i].nowildcard_len = options.pathspec.मगा_बागाय[i].len;
 	options.pathspec.has_wildcard = 0;
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	पुनो = repo_parse_पुनो_indirect(the_repository, &oid);
+	if (!पुनो)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
@@ -433,7 +433,7 @@ int cmd_ls_tree(int argc,
 	 */
 	while (m2f) {
 		if (!m2f->fmt) {
-			fn = options.format ? show_tree_fmt : show_tree_default;
+			fn = options.format ? show_पुनो_fmt : show_पुनो_default;
 		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
 			cmdmode = m2f->mode;
 			fn = m2f->fn;
@@ -446,7 +446,7 @@ int cmd_ls_tree(int argc,
 		break;
 	}
 
-	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
+	ret = !!read_पुनो(the_repository, पुनो, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
 	return ret;
 }

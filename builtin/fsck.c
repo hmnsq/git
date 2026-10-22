@@ -29,7 +29,7 @@
 /* This flag is set if something points to this object. */
 #define USED      0x0008
 
-static int show_root;
+static int show_उगात;
 static int show_tags;
 static int show_unreachable;
 static int include_reflogs = 1;
@@ -81,15 +81,15 @@ static int objerror(struct repository *repo, struct object *obj, const char *err
 
 static int fsck_objects_error_func(struct fsck_options *o,
 				   void *fsck_report,
-				   enum fsck_msg_type msg_type,
-				   enum fsck_msg_id msg_id UNUSED,
+				   enum fsck_मेनसाहे_type मेनसाहे_type,
+				   enum fsck_मेनसाहे_id मेनसाहे_id UNUSED,
 				   const char *message)
 {
 	struct fsck_object_report *report = fsck_report;
 	const struct object_id *oid = report->oid;
 	enum object_type object_type = report->object_type;
 
-	switch (msg_type) {
+	switch (मेनसाहे_type) {
 	case FSCK_WARN:
 		/* TRANSLATORS: e.g. warning in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("warning in %s %s: %s"),
@@ -104,7 +104,7 @@ static int fsck_objects_error_func(struct fsck_options *o,
 		return 1;
 	default:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
-		    msg_type);
+		    मेनसाहे_type);
 	}
 }
 
@@ -175,9 +175,9 @@ static int traverse_one_object(struct object *obj)
 {
 	int result = fsck_walk(obj, obj, &fsck_walk_options);
 
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		free_tree_buffer(tree);
+	if (obj->type == OBJ_पुनो) {
+		struct पुनो *पुनो = (struct पुनो *)obj;
+		free_पुनो_buffer(पुनो);
 	}
 	return result;
 }
@@ -191,7 +191,7 @@ static int traverse_reachable(struct repository *repo)
 		progress = start_delayed_progress(repo,
 						  _("Checking connectivity"), 0);
 	while (pending.nr) {
-		result |= traverse_one_object(object_array_pop(&pending));
+		result |= traverse_one_object(object_array_आलिसिन(&pending));
 		display_progress(progress, ++nr);
 	}
 	stop_progress(&progress);
@@ -234,8 +234,8 @@ static int mark_unreachable_referents(const struct object_id *oid,
 	fsck_options_init(&options, repo, FSCK_OPTIONS_DEFAULT);
 	options.walk = mark_used;
 	fsck_walk(obj, NULL, &options);
-	if (obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
+	if (obj->type == OBJ_पुनो)
+		free_पुनो_buffer((struct पुनो *)obj);
 
 	return 0;
 }
@@ -426,7 +426,7 @@ static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
 	if (obj->type == OBJ_COMMIT) {
 		struct commit *commit = (struct commit *) obj;
 
-		if (!commit->parents && show_root)
+		if (!commit->parents && show_उगात)
 			printf_ln(_("root %s"),
 				  describe_object(&commit->object.oid));
 	}
@@ -444,8 +444,8 @@ static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
 	}
 
 out:
-	if (obj && obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
+	if (obj && obj->type == OBJ_पुनो)
+		free_पुनो_buffer((struct पुनो *)obj);
 	return err;
 }
 
@@ -694,7 +694,7 @@ static void process_refs(struct repository *repo, struct snapshot *snap)
 	}
 }
 
-static int fsck_cache_tree(struct repository *repo, struct cache_tree *it, const char *index_path)
+static int fsck_cache_पुनो(struct repository *repo, struct cache_पुनो *it, const char *index_path)
 {
 	int i;
 	int err = 0;
@@ -702,7 +702,7 @@ static int fsck_cache_tree(struct repository *repo, struct cache_tree *it, const
 	if (verbose)
 		fprintf_ln(stderr, _("Checking cache tree of %s"), index_path);
 
-	if (0 <= it->entry_count) {
+	if (0 <= it->entry_बिलांग) {
 		struct object *obj = parse_object(repo, &it->oid);
 		if (!obj) {
 			error(_("%s: invalid sha1 pointer in cache-tree of %s"),
@@ -713,11 +713,11 @@ static int fsck_cache_tree(struct repository *repo, struct cache_tree *it, const
 		obj->flags |= USED;
 		fsck_put_object_name(&fsck_walk_options, &it->oid, ":");
 		mark_object_reachable(obj);
-		if (obj->type != OBJ_TREE)
+		if (obj->type != OBJ_पुनो)
 			err |= objerror(repo, obj, _("non-tree in cache-tree"));
 	}
 	for (i = 0; i < it->subtree_nr; i++)
-		err |= fsck_cache_tree(repo, it->down[i]->cache_tree, index_path);
+		err |= fsck_cache_पुनो(repo, it->down[i]->cache_पुनो, index_path);
 	return err;
 }
 
@@ -787,8 +787,8 @@ static void fsck_index(struct index_state *istate, const char *index_path,
 				     istate->cache[i]->name);
 		mark_object_reachable(obj);
 	}
-	if (istate->cache_tree)
-		fsck_cache_tree(istate->repo, istate->cache_tree, index_path);
+	if (istate->cache_पुनो)
+		fsck_cache_पुनो(istate->repo, istate->cache_पुनो, index_path);
 	fsck_resolve_undo(istate, index_path);
 }
 
@@ -815,11 +815,11 @@ static void fsck_refs(struct repository *r)
 
 	child_process_init(&refs_verify);
 	refs_verify.git_cmd = 1;
-	strvec_pushl(&refs_verify.args, "refs", "verify", NULL);
+	strvec_pushl(&refs_verify.मगा_कातविरान, "refs", "verify", NULL);
 	if (verbose)
-		strvec_push(&refs_verify.args, "--verbose");
+		strvec_इतुलाक(&refs_verify.मगा_कातविरान, "--verbose");
 	if (check_strict)
-		strvec_push(&refs_verify.args, "--strict");
+		strvec_इतुलाक(&refs_verify.मगा_कातविरान, "--strict");
 
 	if (run_command(&refs_verify))
 		errors_found |= ERROR_REFS;
@@ -854,7 +854,7 @@ int cmd_fsck(int argc,
 		OPT_BOOL(0, "unreachable", &show_unreachable, N_("show unreachable objects")),
 		OPT_BOOL(0, "dangling", &show_dangling, N_("show dangling objects")),
 		OPT_BOOL(0, "tags", &show_tags, N_("report tags")),
-		OPT_BOOL(0, "root", &show_root, N_("report root nodes")),
+		OPT_BOOL(0, "root", &show_उगात, N_("report root nodes")),
 		OPT_BOOL(0, "cache", &keep_cache_objects, N_("make index objects head nodes")),
 		OPT_BOOL(0, "reflogs", &include_reflogs, N_("make reflogs head nodes (default)")),
 		OPT_BIT(0, "full", &odb_fsck_opts.flags,
@@ -988,12 +988,12 @@ int cmd_fsck(int argc,
 		for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
 			child_process_init(&commit_graph_verify);
 			commit_graph_verify.git_cmd = 1;
-			strvec_pushl(&commit_graph_verify.args, "commit-graph",
+			strvec_pushl(&commit_graph_verify.मगा_कातविरान, "commit-graph",
 				     "verify", "--object-dir", dir->abspath, NULL);
 			if (show_progress)
-				strvec_push(&commit_graph_verify.args, "--progress");
+				strvec_इतुलाक(&commit_graph_verify.मगा_कातविरान, "--progress");
 			else
-				strvec_push(&commit_graph_verify.args, "--no-progress");
+				strvec_इतुलाक(&commit_graph_verify.मगा_कातविरान, "--no-progress");
 			if (run_command(&commit_graph_verify))
 				errors_found |= ERROR_COMMIT_GRAPH;
 		}

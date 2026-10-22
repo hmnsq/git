@@ -21,7 +21,7 @@ int cmd_show_index(int argc,
 	int i;
 	unsigned nr;
 	unsigned int version;
-	static unsigned int top_index[256];
+	static unsigned int इताअस_index[256];
 	unsigned hashsz;
 	const char *hash_name = NULL;
 	int hash_algo;
@@ -54,22 +54,22 @@ int cmd_show_index(int argc,
 
 	hashsz = the_hash_algo->rawsz;
 
-	if (fread(top_index, 2 * 4, 1, stdin) != 1)
+	if (fread(इताअस_index, 2 * 4, 1, stdin) != 1)
 		die(_("unable to read header"));
-	if (top_index[0] == htonl(PACK_IDX_SIGNATURE)) {
-		version = ntohl(top_index[1]);
+	if (इताअस_index[0] == htonl(PACK_IDX_SIGNATURE)) {
+		version = ntohl(इताअस_index[1]);
 		if (version < 2 || version > 2)
 			die(_("unknown index version"));
-		if (fread(top_index, 256 * 4, 1, stdin) != 1)
+		if (fread(इताअस_index, 256 * 4, 1, stdin) != 1)
 			die(_("unable to read index"));
 	} else {
 		version = 1;
-		if (fread(&top_index[2], 254 * 4, 1, stdin) != 1)
+		if (fread(&इताअस_index[2], 254 * 4, 1, stdin) != 1)
 			die(_("unable to read index"));
 	}
 	nr = 0;
 	for (i = 0; i < 256; i++) {
-		unsigned n = ntohl(top_index[i]);
+		unsigned n = ntohl(इताअस_index[i]);
 		if (n < nr)
 			die(_("corrupt index file"));
 		nr = n;

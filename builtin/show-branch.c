@@ -32,7 +32,7 @@ static const char*const show_branch_usage[] = {
 
 static enum git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
 
-static struct strvec default_args = STRVEC_INIT;
+static struct strvec default_मगा_कातविरान = STRVEC_INIT;
 
 /*
  * TODO: convert this use of commit->object.flags to commit-slab
@@ -141,7 +141,7 @@ static int name_first_parent_chain(struct commit *c)
 static void name_commits(struct commit_list *list,
 			 struct commit **rev,
 			 char **ref_name,
-			 int num_rev)
+			 int नुमेरो_rev)
 {
 	struct commit_list *cl;
 	struct commit *c;
@@ -152,7 +152,7 @@ static void name_commits(struct commit_list *list,
 		c = cl->item;
 		if (commit_to_name(c))
 			continue;
-		for (i = 0; i < num_rev; i++) {
+		for (i = 0; i < नुमेरो_rev; i++) {
 			if (rev[i] == c) {
 				name_commit(c, ref_name[i], 0);
 				break;
@@ -215,7 +215,7 @@ static void name_commits(struct commit_list *list,
 static int mark_seen(struct commit *commit, struct commit_list **seen_p)
 {
 	if (!commit->object.flags) {
-		commit_list_insert(commit, seen_p);
+		commit_list_इसिंगित(commit, seen_p);
 		return 1;
 	}
 	return 0;
@@ -223,9 +223,9 @@ static int mark_seen(struct commit *commit, struct commit_list **seen_p)
 
 static void join_revs(struct prio_queue *queue,
 		      struct commit_list **seen_p,
-		      int num_rev, int extra)
+		      int नुमेरो_rev, int extra)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	int all_mask = ((1u << (REV_SHIFT + नुमेरो_rev)) - 1);
 	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
 	struct commit *commit;
 
@@ -382,9 +382,9 @@ static int compare_ref_name(const void *a_, const void *b_)
 	return version_cmp(*a, *b);
 }
 
-static void sort_ref_range(int bottom, int top)
+static void sort_ref_range(int bottom, int इताअस)
 {
-	QSORT(ref_name + bottom, top - bottom, compare_ref_name);
+	QSORT(ref_name + bottom, इताअस - bottom, compare_ref_name);
 }
 
 static int append_ref(const char *refname, const struct object_id *oid,
@@ -460,7 +460,7 @@ static int append_matching_ref(const struct reference *ref, void *cb_data)
 	 * refs/tags/v0.99.9a and friends.
 	 */
 	const char *tail;
-	int slash = count_slashes(ref->name);
+	int slash = बिलांग_slashes(ref->name);
 	for (tail = ref->name; *tail && match_ref_slash < slash; )
 		if (*tail++ == '/')
 			slash--;
@@ -503,9 +503,9 @@ static int rev_is_head(const char *head, const char *name)
 	return !strcmp(head, name);
 }
 
-static int show_merge_base(const struct commit_list *seen, int num_rev)
+static int show_merge_base(const struct commit_list *seen, int नुमेरो_rev)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	int all_mask = ((1u << (REV_SHIFT + नुमेरो_rev)) - 1);
 	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
 	int exit_status = 1;
 
@@ -523,12 +523,12 @@ static int show_merge_base(const struct commit_list *seen, int num_rev)
 }
 
 static int show_independent(struct commit **rev,
-			    int num_rev,
+			    int नुमेरो_rev,
 			    unsigned int *rev_mask)
 {
 	int i;
 
-	for (i = 0; i < num_rev; i++) {
+	for (i = 0; i < नुमेरो_rev; i++) {
 		struct commit *commit = rev[i];
 		unsigned int flag = rev_mask[i];
 
@@ -551,7 +551,7 @@ static void append_one_rev(const char *av)
 		int saved_matches = ref_name_cnt;
 
 		match_ref_pattern = av;
-		match_ref_slash = count_slashes(av);
+		match_ref_slash = बिलांग_slashes(av);
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  append_matching_ref, NULL);
 		if (saved_matches == ref_name_cnt &&
@@ -563,31 +563,31 @@ static void append_one_rev(const char *av)
 	die("bad sha1 reference %s", av);
 }
 
-static int git_show_branch_config(const char *var, const char *value,
+static int git_show_branch_config(const char *var, const char *हालागा,
 				  const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "showbranch.default")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
 		/*
 		 * default_arg is now passed to parse_options(), so we need to
 		 * mimic the real argv a bit better.
 		 */
-		if (!default_args.nr)
-			strvec_push(&default_args, "show-branch");
-		strvec_push(&default_args, value);
+		if (!default_मगा_कातविरान.nr)
+			strvec_इतुलाक(&default_मगा_कातविरान, "show-branch");
+		strvec_इतुलाक(&default_मगा_कातविरान, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "color.showbranch")) {
-		showbranch_use_color = git_config_colorbool(var, value);
+		showbranch_use_color = git_config_colorbool(var, हालागा);
 		return 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
+	if (git_color_config(var, हालागा, cb) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static int omit_in_dense(struct commit *commit, struct commit **rev, int n)
@@ -597,16 +597,16 @@ static int omit_in_dense(struct commit *commit, struct commit **rev, int n)
 	 * Otherwise, if it is a merge that is reachable from only one
 	 * tip, it is not that interesting.
 	 */
-	int i, flag, count;
+	int i, flag, बिलांग;
 	for (i = 0; i < n; i++)
 		if (rev[i] == commit)
 			return 0;
 	flag = commit->object.flags;
-	for (i = count = 0; i < n; i++) {
+	for (i = बिलांग = 0; i < n; i++) {
 		if (flag & (1u << (i + REV_SHIFT)))
-			count++;
+			बिलांग++;
 	}
-	if (count == 1)
+	if (बिलांग == 1)
 		return 1;
 	return 0;
 }
@@ -617,7 +617,7 @@ static int parse_reflog_param(const struct option *opt, const char *arg,
 			      int unset)
 {
 	char *ep;
-	const char **base = (const char **)opt->value;
+	const char **base = (const char **)opt->हालागा;
 	BUG_ON_OPT_NEG(unset);
 	if (!arg)
 		arg = "";
@@ -639,11 +639,11 @@ int cmd_show_branch(int ac,
 		struct repository *repo UNUSED)
 {
 	struct commit *rev[MAX_REVS], *commit;
-	char *reflog_msg[MAX_REVS] = {0};
+	char *reflog_मेनसाहे[MAX_REVS] = {0};
 	struct commit_list *seen = NULL;
 	struct prio_queue queue = { compare_commits_by_commit_date };
 	unsigned int rev_mask[MAX_REVS];
-	int num_rev, i, extra = 0;
+	int नुमेरो_rev, i, extra = 0;
 	int all_heads = 0, all_remotes = 0;
 	int all_mask, all_revs;
 	enum rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
@@ -669,7 +669,7 @@ int cmd_show_branch(int ac,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "more",
-			.value = &extra,
+			.हालागा = &extra,
 			.precision = sizeof(extra),
 			.argh = N_("n"),
 			.help = N_("show <n> more commits after the common ancestor"),
@@ -704,7 +704,7 @@ int cmd_show_branch(int ac,
 			    parse_reflog_param),
 		OPT_END()
 	};
-	const char **args_copy = NULL;
+	const char **मगा_कातविरान_copy = NULL;
 	int ret;
 
 	init_commit_name_slab(&name_slab);
@@ -712,10 +712,10 @@ int cmd_show_branch(int ac,
 	repo_config(the_repository, git_show_branch_config, NULL);
 
 	/* If nothing is specified, try the default first */
-	if (ac == 1 && default_args.nr) {
-		DUP_ARRAY(args_copy, default_args.v, default_args.nr);
-		ac = default_args.nr;
-		av = args_copy;
+	if (ac == 1 && default_मगा_कातविरान.nr) {
+		DUP_ARRAY(मगा_कातविरान_copy, default_मगा_कातविरान.v, default_मगा_कातविरान.nr);
+		ac = default_मगा_कातविरान.nr;
+		av = मगा_कातविरान_copy;
 	}
 
 	ac = parse_options(ac, av, prefix, builtin_show_branch_options,
@@ -797,7 +797,7 @@ int cmd_show_branch(int ac,
 		for (i = 0; i < reflog; i++) {
 			char *logmsg = NULL;
 			char *nth_desc;
-			const char *msg;
+			const char *मेनसाहे;
 			char *end;
 			timestamp_t timestamp;
 			int tz;
@@ -814,11 +814,11 @@ int cmd_show_branch(int ac,
 			if (end)
 				*end = '\0';
 
-			msg = (*logmsg == '\0') ? "(none)" : logmsg;
-			reflog_msg[i] = xstrfmt("(%s) %s",
+			मेनसाहे = (*logmsg == '\0') ? "(none)" : logmsg;
+			reflog_मेनसाहे[i] = xstrfmt("(%s) %s",
 						show_date(timestamp, tz,
 							  DATE_MODE(RELATIVE)),
-						msg);
+						मेनसाहे);
 			free(logmsg);
 
 			nth_desc = xstrfmt("%s@{%d}", *av, base+i);
@@ -862,20 +862,20 @@ int cmd_show_branch(int ac,
 		goto out;
 	}
 
-	for (num_rev = 0; ref_name[num_rev]; num_rev++) {
+	for (नुमेरो_rev = 0; ref_name[नुमेरो_rev]; नुमेरो_rev++) {
 		struct object_id revkey;
-		unsigned int flag = 1u << (num_rev + REV_SHIFT);
+		unsigned int flag = 1u << (नुमेरो_rev + REV_SHIFT);
 
-		if (MAX_REVS <= num_rev)
+		if (MAX_REVS <= नुमेरो_rev)
 			die(Q_("cannot handle more than %d rev.",
 			       "cannot handle more than %d revs.",
 			       MAX_REVS), MAX_REVS);
-		if (repo_get_oid(the_repository, ref_name[num_rev], &revkey))
-			die(_("'%s' is not a valid ref."), ref_name[num_rev]);
+		if (repo_get_oid(the_repository, ref_name[नुमेरो_rev], &revkey))
+			die(_("'%s' is not a valid ref."), ref_name[नुमेरो_rev]);
 		commit = lookup_commit_reference(the_repository, &revkey);
 		if (!commit)
 			die(_("cannot find commit %s (%s)"),
-			    ref_name[num_rev], oid_to_hex(&revkey));
+			    ref_name[नुमेरो_rev], oid_to_hex(&revkey));
 		repo_parse_commit(the_repository, commit);
 		mark_seen(commit, &seen);
 
@@ -886,29 +886,29 @@ int cmd_show_branch(int ac,
 		commit->object.flags |= flag;
 		if (commit->object.flags == flag)
 			prio_queue_put(&queue, commit);
-		rev[num_rev] = commit;
+		rev[नुमेरो_rev] = commit;
 	}
-	for (i = 0; i < num_rev; i++)
+	for (i = 0; i < नुमेरो_rev; i++)
 		rev_mask[i] = rev[i]->object.flags;
 
 	if (0 <= extra)
-		join_revs(&queue, &seen, num_rev, extra);
+		join_revs(&queue, &seen, नुमेरो_rev, extra);
 
 	commit_list_sort_by_date(&seen);
 
 	if (merge_base) {
-		ret = show_merge_base(seen, num_rev);
+		ret = show_merge_base(seen, नुमेरो_rev);
 		goto out;
 	}
 
 	if (independent) {
-		ret = show_independent(rev, num_rev, rev_mask);
+		ret = show_independent(rev, नुमेरो_rev, rev_mask);
 		goto out;
 	}
 
 	/* Show list; --more=-1 means list-only */
-	if (1 < num_rev || extra < 0) {
-		for (i = 0; i < num_rev; i++) {
+	if (1 < नुमेरो_rev || extra < 0) {
+		for (i = 0; i < नुमेरो_rev; i++) {
 			int j;
 			int is_head = rev_is_head(head, ref_name[i]) &&
 				      oideq(&head_oid, &rev[i]->object.oid);
@@ -929,13 +929,13 @@ int cmd_show_branch(int ac,
 				show_one_commit(rev[i], 1);
 			}
 			else
-				puts(reflog_msg[i]);
+				puts(reflog_मेनसाहे[i]);
 
 			if (is_head)
 				head_at = i;
 		}
 		if (0 <= extra) {
-			for (i = 0; i < num_rev; i++)
+			for (i = 0; i < नुमेरो_rev; i++)
 				putchar('-');
 			putchar('\n');
 		}
@@ -950,9 +950,9 @@ int cmd_show_branch(int ac,
 
 	/* Give names to commits */
 	if (!sha1_name && !no_name)
-		name_commits(seen, rev, ref_name, num_rev);
+		name_commits(seen, rev, ref_name, नुमेरो_rev);
 
-	all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	all_mask = ((1u << (REV_SHIFT + नुमेरो_rev)) - 1);
 	all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
 
 	for (struct commit_list *l = seen; l; l = l->next) {
@@ -962,7 +962,7 @@ int cmd_show_branch(int ac,
 
 		shown_merge_point |= is_merge_point;
 
-		if (1 < num_rev) {
+		if (1 < नुमेरो_rev) {
 			int is_merge = !!(commit->parents &&
 					  commit->parents->next);
 			if (topics &&
@@ -970,9 +970,9 @@ int cmd_show_branch(int ac,
 			    (this_flag & (1u << REV_SHIFT)))
 				continue;
 			if (!sparse && is_merge &&
-			    omit_in_dense(commit, rev, num_rev))
+			    omit_in_dense(commit, rev, नुमेरो_rev))
 				continue;
-			for (i = 0; i < num_rev; i++) {
+			for (i = 0; i < नुमेरो_rev; i++) {
 				int mark;
 				if (!(this_flag & (1u << (i + REV_SHIFT))))
 					mark = ' ';
@@ -1000,11 +1000,11 @@ int cmd_show_branch(int ac,
 	ret = 0;
 
 out:
-	for (size_t i = 0; i < ARRAY_SIZE(reflog_msg); i++)
-		free(reflog_msg[i]);
+	for (size_t i = 0; i < ARRAY_SIZE(reflog_मेनसाहे); i++)
+		free(reflog_मेनसाहे[i]);
 	commit_list_free(seen);
 	clear_prio_queue(&queue);
-	free(args_copy);
+	free(मगा_कातविरान_copy);
 	free(head);
 	return ret;
 }

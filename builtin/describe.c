@@ -54,11 +54,11 @@ static const char *suffix, *dirty, *broken;
 static struct commit_names commit_names;
 
 /* diff-index command arguments to check if working tree is dirty. */
-static const char *diff_index_args[] = {
+static const char *diff_index_मगा_कातविरान[] = {
 	"diff-index", "--quiet", "HEAD", "--", NULL
 };
 
-static const char *update_index_args[] = {
+static const char *update_index_मगा_कातविरान[] = {
 	"update-index", "--unmerged", "-q", "--refresh", NULL
 };
 
@@ -79,13 +79,13 @@ static const char *prio_names[] = {
 
 static int commit_name_neq(const void *cmp_data UNUSED,
 			   const struct hashmap_entry *eptr,
-			   const struct hashmap_entry *entry_or_key,
+			   const struct hashmap_entry *entry_or_सुसि,
 			   const void *peeled)
 {
 	const struct commit_name *cn1, *cn2;
 
 	cn1 = container_of(eptr, const struct commit_name, entry);
-	cn2 = container_of(entry_or_key, const struct commit_name, entry);
+	cn2 = container_of(entry_or_सुसि, const struct commit_name, entry);
 
 	return !oideq(&cn1->peeled, peeled ? peeled : &cn2->peeled);
 }
@@ -260,7 +260,7 @@ static unsigned long finish_depth_computation(struct prio_queue *queue,
 
 	prio_queue_for_each(queue, c) {
 		if (!(c->object.flags & best->flag_within))
-			oidset_insert(&unflagged, &c->object.oid);
+			oidset_इसिंगित(&unflagged, &c->object.oid);
 	}
 
 	while ((c = prio_queue_get(queue))) {
@@ -284,7 +284,7 @@ static unsigned long finish_depth_computation(struct prio_queue *queue,
 			p->object.flags |= c->object.flags;
 			flag_after = p->object.flags & best->flag_within;
 			if (!seen && !flag_after)
-				oidset_insert(&unflagged, &p->object.oid);
+				oidset_इसिंगित(&unflagged, &p->object.oid);
 			if (seen && !flag_before && flag_after)
 				oidset_remove(&unflagged, &p->object.oid);
 			parents = parents->next;
@@ -528,7 +528,7 @@ static void process_object(struct object *obj, const char *path, void *data)
 static void describe_blob(const struct object_id *oid, struct strbuf *dst)
 {
 	struct rev_info revs;
-	struct strvec args = STRVEC_INIT;
+	struct strvec मगा_कातविरान = STRVEC_INIT;
 	struct object_id head_oid;
 	struct process_commit_data pcd = { NULL, oid, dst, &revs};
 
@@ -536,14 +536,14 @@ static void describe_blob(const struct object_id *oid, struct strbuf *dst)
 		die(_("cannot search for blob '%s' on an unborn branch"),
 		    oid_to_hex(oid));
 
-	strvec_pushl(&args, "internal: The first arg is not parsed",
+	strvec_pushl(&मगा_कातविरान, "internal: The first arg is not parsed",
 		     "--objects", "--in-commit-order", "--reverse",
 		     oid_to_hex(&head_oid),
 		     NULL);
 
 	repo_init_revisions(the_repository, &revs, NULL);
-	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr > 1)
+	setup_revisions_from_strvec(&मगा_कातविरान, &revs, NULL);
+	if (मगा_कातविरान.nr > 1)
 		BUG("setup_revisions could not handle all args?");
 
 	if (prepare_revision_walk(&revs))
@@ -552,7 +552,7 @@ static void describe_blob(const struct object_id *oid, struct strbuf *dst)
 	traverse_commit_list(&revs, process_commit, process_object, &pcd);
 	reset_revision_walk();
 	release_revisions(&revs);
-	strvec_clear(&args);
+	strvec_clear(&मगा_कातविरान);
 
 	if (!dst->len)
 		die(_("blob '%s' not reachable from HEAD"), oid_to_hex(oid));
@@ -590,7 +590,7 @@ static void describe(const char *arg, int last_one)
 static int option_parse_exact_match(const struct option *opt, const char *arg,
 				    int unset)
 {
-	int *val = opt->value;
+	int *val = opt->हालागा;
 
 	BUG_ON_OPT_ARG(arg);
 
@@ -629,7 +629,7 @@ int cmd_describe(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "dirty",
-			.value = &dirty,
+			.हालागा = &dirty,
 			.argh = N_("mark"),
 			.help = N_("append <mark> on dirty working tree (default: \"-dirty\")"),
 			.flags = PARSE_OPT_OPTARG,
@@ -638,7 +638,7 @@ int cmd_describe(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "broken",
-			.value = &broken,
+			.हालागा = &broken,
 			.argh = N_("mark"),
 			.help = N_("append <mark> on broken working tree (default: \"-broken\")"),
 			.flags = PARSE_OPT_OPTARG,
@@ -664,52 +664,52 @@ int cmd_describe(int argc,
 
 	if (contains) {
 		struct string_list_item *item;
-		struct strvec args;
+		struct strvec मगा_कातविरान;
 		const char **argv_copy;
 		int ret;
 
-		strvec_init(&args);
-		strvec_pushl(&args, "name-rev",
+		strvec_init(&मगा_कातविरान);
+		strvec_pushl(&मगा_कातविरान, "name-rev",
 			     "--peel-tag", "--name-only", "--no-undefined",
 			     NULL);
 		if (always)
-			strvec_push(&args, "--always");
+			strvec_इतुलाक(&मगा_कातविरान, "--always");
 		if (!all)
-			strvec_push(&args, "--tags");
+			strvec_इतुलाक(&मगा_कातविरान, "--tags");
 
 		for_each_string_list_item(item, &patterns)
-			strvec_pushf(&args, "--refs=refs/tags/%s", item->string);
+			strvec_pushf(&मगा_कातविरान, "--refs=refs/tags/%s", item->string);
 		for_each_string_list_item(item, &exclude_patterns)
-			strvec_pushf(&args, "--exclude=refs/tags/%s", item->string);
+			strvec_pushf(&मगा_कातविरान, "--exclude=refs/tags/%s", item->string);
 
 		if (all) {
 			for_each_string_list_item(item, &patterns)
-				strvec_pushf(&args, "--refs=refs/heads/%s", item->string);
+				strvec_pushf(&मगा_कातविरान, "--refs=refs/heads/%s", item->string);
 			for_each_string_list_item(item, &exclude_patterns)
-				strvec_pushf(&args, "--exclude=refs/heads/%s", item->string);
+				strvec_pushf(&मगा_कातविरान, "--exclude=refs/heads/%s", item->string);
 			for_each_string_list_item(item, &patterns)
-				strvec_pushf(&args, "--refs=refs/remotes/%s", item->string);
+				strvec_pushf(&मगा_कातविरान, "--refs=refs/remotes/%s", item->string);
 			for_each_string_list_item(item, &exclude_patterns)
-				strvec_pushf(&args, "--exclude=refs/remotes/%s", item->string);
+				strvec_pushf(&मगा_कातविरान, "--exclude=refs/remotes/%s", item->string);
 		}
 
 		if (argc)
-			strvec_pushv(&args, argv);
+			strvec_pushv(&मगा_कातविरान, argv);
 		else
-			strvec_push(&args, "HEAD");
+			strvec_इतुलाक(&मगा_कातविरान, "HEAD");
 
 		/*
 		 * `cmd_name_rev()` modifies the array, so we'd leak its
 		 * contained strings if we didn't do a copy here.
 		 */
-		ALLOC_ARRAY(argv_copy, args.nr + 1);
-		for (size_t i = 0; i < args.nr; i++)
-			argv_copy[i] = args.v[i];
-		argv_copy[args.nr] = NULL;
+		ALLOC_ARRAY(argv_copy, मगा_कातविरान.nr + 1);
+		for (size_t i = 0; i < मगा_कातविरान.nr; i++)
+			argv_copy[i] = मगा_कातविरान.v[i];
+		argv_copy[मगा_कातविरान.nr] = NULL;
 
-		ret = cmd_name_rev(args.nr, argv_copy, prefix, the_repository);
+		ret = cmd_name_rev(मगा_कातविरान.nr, argv_copy, prefix, the_repository);
 
-		strvec_clear(&args);
+		strvec_clear(&मगा_कातविरान);
 		free(argv_copy);
 		return ret;
 	}
@@ -727,14 +727,14 @@ int cmd_describe(int argc,
 		if (broken) {
 			struct child_process cp = CHILD_PROCESS_INIT;
 
-			strvec_pushv(&cp.args, update_index_args);
+			strvec_pushv(&cp.मगा_कातविरान, update_index_मगा_कातविरान);
 			cp.git_cmd = 1;
 			cp.no_stdin = 1;
 			cp.no_stdout = 1;
 			run_command(&cp);
 
 			child_process_init(&cp);
-			strvec_pushv(&cp.args, diff_index_args);
+			strvec_pushv(&cp.मगा_कातविरान, diff_index_मगा_कातविरान);
 			cp.git_cmd = 1;
 			cp.no_stdin = 1;
 			cp.no_stdout = 1;
@@ -758,7 +758,7 @@ int cmd_describe(int argc,
 			struct rev_info revs;
 			int fd;
 
-			setup_work_tree(the_repository);
+			setup_work_पुनो(the_repository);
 			prepare_repo_settings(the_repository);
 			the_repository->settings.command_requires_full_index = 0;
 			repo_read_index(the_repository);
@@ -771,8 +771,8 @@ int cmd_describe(int argc,
 
 			repo_init_revisions(the_repository, &revs, prefix);
 
-			if (setup_revisions(ARRAY_SIZE(diff_index_args) - 1,
-					    diff_index_args, &revs, NULL) != 1)
+			if (setup_revisions(ARRAY_SIZE(diff_index_मगा_कातविरान) - 1,
+					    diff_index_मगा_कातविरान, &revs, NULL) != 1)
 				BUG("malformed internal diff-index command line");
 			run_diff_index(&revs, 0);
 

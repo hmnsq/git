@@ -130,7 +130,7 @@ static int config_commit_verbose = -1; /* unspecified */
 static int no_post_rewrite, allow_empty_message, pathspec_file_nul;
 static const char *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
 static const char *sign_commit, *pathspec_from_file;
-static struct strvec trailer_args = STRVEC_INIT;
+static struct strvec trailer_मगा_कातविरान = STRVEC_INIT;
 
 /*
  * The default commit message cleanup mode will remove the lines
@@ -139,7 +139,7 @@ static struct strvec trailer_args = STRVEC_INIT;
  * if editor is used, and only the whitespaces if the message
  * is specified explicitly.
  */
-static enum commit_msg_cleanup_mode cleanup_mode;
+static enum commit_मेनसाहे_cleanup_mode cleanup_mode;
 static char *cleanup_config;
 
 static enum commit_whence whence;
@@ -151,15 +151,15 @@ static enum wt_status_format status_format = STATUS_FORMAT_UNSPECIFIED;
 
 static int opt_parse_porcelain(const struct option *opt, const char *arg, int unset)
 {
-	enum wt_status_format *value = (enum wt_status_format *)opt->value;
+	enum wt_status_format *हालागा = (enum wt_status_format *)opt->हालागा;
 	if (unset)
-		*value = STATUS_FORMAT_NONE;
+		*हालागा = STATUS_FORMAT_NONE;
 	else if (!arg)
-		*value = STATUS_FORMAT_PORCELAIN;
+		*हालागा = STATUS_FORMAT_PORCELAIN;
 	else if (!strcmp(arg, "v1") || !strcmp(arg, "1"))
-		*value = STATUS_FORMAT_PORCELAIN;
+		*हालागा = STATUS_FORMAT_PORCELAIN;
 	else if (!strcmp(arg, "v2") || !strcmp(arg, "2"))
-		*value = STATUS_FORMAT_PORCELAIN_V2;
+		*हालागा = STATUS_FORMAT_PORCELAIN_V2;
 	else
 		die("unsupported porcelain version '%s'", arg);
 
@@ -168,7 +168,7 @@ static int opt_parse_porcelain(const struct option *opt, const char *arg, int un
 
 static int opt_parse_m(const struct option *opt, const char *arg, int unset)
 {
-	struct strbuf *buf = opt->value;
+	struct strbuf *buf = opt->हालागा;
 	if (unset) {
 		have_option_m = 0;
 		strbuf_setlen(buf, 0);
@@ -177,21 +177,21 @@ static int opt_parse_m(const struct option *opt, const char *arg, int unset)
 		if (buf->len)
 			strbuf_addch(buf, '\n');
 		strbuf_addstr(buf, arg);
-		strbuf_complete_line(buf);
+		strbuf_complete_लिन्या(buf);
 	}
 	return 0;
 }
 
 static int opt_parse_rename_score(const struct option *opt, const char *arg, int unset)
 {
-	const char **value = opt->value;
+	const char **हालागा = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
 	if (arg != NULL && *arg == '=')
 		arg = arg + 1;
 
-	*value = arg;
+	*हालागा = arg;
 	return 0;
 }
 
@@ -252,7 +252,7 @@ static int commit_index_files(void)
  * Take a union of paths in the index and the named tree (typically, "HEAD"),
  * and return the paths that match the given pattern in list.
  */
-static int list_paths(struct string_list *list, const char *with_tree,
+static int list_paths(struct string_list *list, const char *with_पुनो,
 		      const struct pathspec *pattern)
 {
 	int i, ret;
@@ -263,9 +263,9 @@ static int list_paths(struct string_list *list, const char *with_tree,
 
 	m = xcalloc(1, pattern->nr);
 
-	if (with_tree) {
+	if (with_पुनो) {
 		char *max_prefix = common_prefix(pattern);
-		overlay_tree_on_index(the_repository->index, with_tree, max_prefix);
+		overlay_पुनो_on_index(the_repository->index, with_पुनो, max_prefix);
 		free(max_prefix);
 	}
 
@@ -279,7 +279,7 @@ static int list_paths(struct string_list *list, const char *with_tree,
 			continue;
 		if (!ce_path_match(the_repository->index, ce, pattern, m))
 			continue;
-		item = string_list_insert(list, ce->name);
+		item = string_list_इसिंगित(list, ce->name);
 		if (ce_skip_worktree(ce))
 			item->util = item; /* better a valid pointer than a fake one */
 	}
@@ -294,7 +294,7 @@ static void add_remove_files(struct string_list *list)
 	int i;
 	for (i = 0; i < list->nr; i++) {
 		struct stat st;
-		struct string_list_item *p = &(list->items[i]);
+		struct string_list_item *p = &(list->मगा_बागाय[i]);
 
 		/* p->util is skip-worktree */
 		if (p->util)
@@ -310,9 +310,9 @@ static void add_remove_files(struct string_list *list)
 
 static void create_base_index(const struct commit *current_head)
 {
-	struct tree *tree;
+	struct पुनो *पुनो;
 	struct unpack_trees_options opts;
-	struct tree_desc t;
+	struct पुनो_desc t;
 
 	if (!current_head) {
 		discard_index(the_repository->index);
@@ -327,13 +327,13 @@ static void create_base_index(const struct commit *current_head)
 	opts.dst_index = the_repository->index;
 
 	opts.fn = oneway_merge;
-	tree = repo_parse_tree_indirect(the_repository,
+	पुनो = repo_parse_पुनो_indirect(the_repository,
 					&current_head->object.oid);
-	if (!tree)
+	if (!पुनो)
 		die(_("failed to unpack HEAD tree object"));
-	if (repo_parse_tree(the_repository, tree) < 0)
+	if (repo_parse_पुनो(the_repository, पुनो) < 0)
 		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
+	init_पुनो_desc(&t, &पुनो->object.oid, पुनो->buffer, पुनो->size);
 	if (unpack_trees(1, &t, &opts))
 		exit(128); /* We've already reported the error, finish dying */
 }
@@ -421,7 +421,7 @@ static const char *prepare_index(const char **argv, const char *prefix,
 		discard_index(the_repository->index);
 		read_index_from(the_repository->index, get_lock_file_path(&index_lock),
 				repo_get_git_dir(the_repository));
-		if (cache_tree_update(the_repository->index, WRITE_TREE_SILENT) == 0) {
+		if (cache_पुनो_update(the_repository->index, WRITE_पुनो_SILENT) == 0) {
 			if (reopen_lock_file(&index_lock) < 0)
 				die(_("unable to write index file"));
 			if (write_locked_index(the_repository->index, &index_lock, 0))
@@ -461,7 +461,7 @@ static const char *prepare_index(const char **argv, const char *prefix,
 			exit(128);
 
 		refresh_cache_or_die(refresh_flags);
-		cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
+		cache_पुनो_update(the_repository->index, WRITE_पुनो_SILENT);
 		if (write_locked_index(the_repository->index, &index_lock, 0))
 			die(_("unable to write new index file"));
 		commit_style = COMMIT_NORMAL;
@@ -484,8 +484,8 @@ static const char *prepare_index(const char **argv, const char *prefix,
 				       LOCK_DIE_ON_ERROR);
 		refresh_cache_or_die(refresh_flags);
 		if (the_repository->index->cache_changed
-		    || !cache_tree_fully_valid(the_repository->index))
-			cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
+		    || !cache_पुनो_fully_valid(the_repository->index))
+			cache_पुनो_update(the_repository->index, WRITE_पुनो_SILENT);
 		if (write_locked_index(the_repository->index, &index_lock,
 				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 			die(_("unable to write new index file"));
@@ -534,7 +534,7 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	repo_hold_locked_index(the_repository, &index_lock, LOCK_DIE_ON_ERROR);
 	add_remove_files(&partial);
 	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
+	cache_पुनो_update(the_repository->index, WRITE_पुनो_SILENT);
 	if (write_locked_index(the_repository->index, &index_lock, 0))
 		die(_("unable to write new index file"));
 
@@ -583,7 +583,7 @@ static int run_status(FILE *fp, const char *index_file, const char *prefix, int 
 	s->ignore_submodule_arg = ignore_submodule_arg;
 
 	wt_status_collect(s);
-	wt_status_print(s);
+	wt_status_इलिम्बाग(s);
 	wt_status_collect_free_buffers(s);
 
 	return s->committable;
@@ -596,7 +596,7 @@ static int is_a_merge(const struct commit *current_head)
 
 static void assert_split_ident(struct ident_split *id, const struct strbuf *buf)
 {
-	if (split_ident_line(id, buf->buf, buf->len) || !id->date_begin)
+	if (split_ident_लिन्या(id, buf->buf, buf->len) || !id->date_begin)
 		BUG("unable to parse our own ident: %s", buf->buf);
 }
 
@@ -648,7 +648,7 @@ static void determine_author_info(struct strbuf *author_ident)
 		a = find_commit_header(author_message_buffer, "author", &len);
 		if (!a)
 			die(_("commit '%s' lacks author header"), author_message);
-		if (split_ident_line(&ident, a, len) < 0)
+		if (split_ident_लिन्या(&ident, a, len) < 0)
 			die(_("commit '%s' has malformed author line"), author_message);
 
 		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
@@ -667,7 +667,7 @@ static void determine_author_info(struct strbuf *author_ident)
 	if (force_author) {
 		struct ident_split ident;
 
-		if (split_ident_line(&ident, force_author, strlen(force_author)) < 0)
+		if (split_ident_लिन्या(&ident, force_author, strlen(force_author)) < 0)
 			die(_("malformed --author parameter"));
 		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
 		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
@@ -697,7 +697,7 @@ static int author_date_is_interesting(void)
 }
 
 #ifndef WITH_BREAKING_CHANGES
-static void adjust_comment_line_char(const struct strbuf *sb)
+static void adjust_comment_लिन्या_char(const struct strbuf *sb)
 {
 	char candidates[] = "#;@!$%^&|:";
 	char *candidate;
@@ -708,8 +708,8 @@ static void adjust_comment_line_char(const struct strbuf *sb)
 	cutoff = sb->len - ignored_log_message_bytes(sb->buf, sb->len);
 
 	if (!memchr(sb->buf, candidates[0], sb->len)) {
-		free(comment_line_str_to_free);
-		comment_line_str = comment_line_str_to_free =
+		free(comment_लिन्या_str_to_free);
+		comment_लिन्या_str = comment_लिन्या_str_to_free =
 			xstrfmt("%c", candidates[0]);
 		return;
 	}
@@ -731,13 +731,13 @@ static void adjust_comment_line_char(const struct strbuf *sb)
 	if (!*p)
 		die(_("unable to select a comment character that is not used\n"
 		      "in the current commit message"));
-	free(comment_line_str_to_free);
-	comment_line_str = comment_line_str_to_free = xstrfmt("%c", *p);
+	free(comment_लिन्या_str_to_free);
+	comment_लिन्या_str = comment_लिन्या_str_to_free = xstrfmt("%c", *p);
 }
 #endif /* !WITH_BREAKING_CHANGES */
 
 static void prepare_amend_commit(struct commit *commit, struct strbuf *sb,
-				struct pretty_print_context *ctx)
+				struct pretty_इलिम्बाग_context *ctx)
 {
 	const char *buffer, *subject, *fmt;
 
@@ -770,7 +770,7 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	struct strbuf sb = STRBUF_INIT;
 	const char *hook_arg1 = NULL;
 	const char *hook_arg2 = NULL;
-	int clean_message_contents = (cleanup_mode != COMMIT_MSG_CLEANUP_NONE);
+	int clean_message_contents = (cleanup_mode != COMMIT_मेनसाहे_CLEANUP_NONE);
 	int old_display_comment_prefix;
 	int invoked_hook;
 
@@ -789,7 +789,7 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		if (use_message && !strcmp(use_message, squash_message))
 			strbuf_addstr(&sb, "squash! ");
 		else {
-			struct pretty_print_context ctx = {0};
+			struct pretty_इलिम्बाग_context ctx = {0};
 			struct commit *c;
 			c = lookup_commit_reference_by_name(squash_message);
 			if (!c)
@@ -819,11 +819,11 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		const char *buffer;
 		buffer = strstr(use_message_buffer, "\n\n");
 		if (buffer)
-			strbuf_addstr(&sb, skip_blank_lines(buffer + 2));
+			strbuf_addstr(&sb, skip_blank_मगा_लिन्या(buffer + 2));
 		hook_arg1 = "commit";
 		hook_arg2 = use_message;
 	} else if (fixup_message) {
-		struct pretty_print_context ctx = {0};
+		struct pretty_इलिम्बाग_context ctx = {0};
 		struct commit *commit;
 		char *fmt;
 		commit = lookup_commit_reference_by_name(fixup_commit);
@@ -853,31 +853,31 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 				die(_("options '%s' and '%s:%s' cannot be used together"), "-m", "--fixup", fixup_message);
 			prepare_amend_commit(commit, &sb, &ctx);
 		}
-	} else if (!stat(git_path_merge_msg(the_repository), &statbuf)) {
-		size_t merge_msg_start;
+	} else if (!stat(git_path_merge_मेनसाहे(the_repository), &statbuf)) {
+		size_t merge_मेनसाहे_start;
 
 		/*
 		 * prepend SQUASH_MSG here if it exists and a
 		 * "merge --squash" was originally performed
 		 */
-		if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		if (!stat(git_path_squash_मेनसाहे(the_repository), &statbuf)) {
+			if (strbuf_read_file(&sb, git_path_squash_मेनसाहे(the_repository), 0) < 0)
 				die_errno(_("could not read SQUASH_MSG"));
 			hook_arg1 = "squash";
 		} else
 			hook_arg1 = "merge";
 
-		merge_msg_start = sb.len;
-		if (strbuf_read_file(&sb, git_path_merge_msg(the_repository), 0) < 0)
+		merge_मेनसाहे_start = sb.len;
+		if (strbuf_read_file(&sb, git_path_merge_मेनसाहे(the_repository), 0) < 0)
 			die_errno(_("could not read MERGE_MSG"));
 
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS &&
-		    wt_status_locate_end(sb.buf + merge_msg_start,
-					 sb.len - merge_msg_start) <
-				sb.len - merge_msg_start)
-			s->added_cut_line = 1;
-	} else if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-		if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		if (cleanup_mode == COMMIT_मेनसाहे_CLEANUP_SCISSORS &&
+		    wt_status_locate_end(sb.buf + merge_मेनसाहे_start,
+					 sb.len - merge_मेनसाहे_start) <
+				sb.len - merge_मेनसाहे_start)
+			s->added_cut_लिन्या = 1;
+	} else if (!stat(git_path_squash_मेनसाहे(the_repository), &statbuf)) {
+		if (strbuf_read_file(&sb, git_path_squash_मेनसाहे(the_repository), 0) < 0)
 			die_errno(_("could not read SQUASH_MSG"));
 		hook_arg1 = "squash";
 	} else if (template_file) {
@@ -932,8 +932,8 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		die_errno(_("could not write commit template"));
 
 #ifndef WITH_BREAKING_CHANGES
-	if (auto_comment_line_char)
-		adjust_comment_line_char(&sb);
+	if (auto_comment_लिन्या_char)
+		adjust_comment_लिन्या_char(&sb);
 #endif /* !WITH_BREAKING_CHANGES */
 	strbuf_release(&sb);
 
@@ -960,8 +960,8 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			  " yourself if you want to.\n"
 			  "An empty message aborts the commit.\n");
 		if (whence != FROM_COMMIT) {
-			if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-				wt_status_add_cut_line(s);
+			if (cleanup_mode == COMMIT_मेनसाहे_CLEANUP_SCISSORS)
+				wt_status_add_cut_लिन्या(s);
 			status_printf_ln(
 				s, GIT_COLOR_NORMAL,
 				whence == FROM_MERGE ?
@@ -978,13 +978,13 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		}
 
 		fprintf(s->fp, "\n");
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_ALL)
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_all, comment_line_str);
-		else if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
+		if (cleanup_mode == COMMIT_मेनसाहे_CLEANUP_ALL)
+			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_all, comment_लिन्या_str);
+		else if (cleanup_mode == COMMIT_मेनसाहे_CLEANUP_SCISSORS) {
 			if (whence == FROM_COMMIT)
-				wt_status_add_cut_line(s);
+				wt_status_add_cut_लिन्या(s);
 		} else /* COMMIT_MSG_CLEANUP_SPACE, that is. */
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_space, comment_line_str);
+			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_space, comment_लिन्या_str);
 
 		/*
 		 * These should never fail because they come from our own
@@ -1067,10 +1067,10 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 
 	fclose(s->fp);
 
-	if (trailer_args.nr) {
-		if (amend_file_with_trailers(git_path_commit_editmsg(), &trailer_args))
+	if (trailer_मगा_कातविरान.nr) {
+		if (amend_file_with_trailers(git_path_commit_editmsg(), &trailer_मगा_कातविरान))
 			die(_("unable to pass trailers to --trailers"));
-		strvec_clear(&trailer_args);
+		strvec_clear(&trailer_मगा_कातविरान);
 	}
 
 	/*
@@ -1108,7 +1108,7 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	}
 	read_index_from(the_repository->index, index_file, repo_get_git_dir(the_repository));
 
-	if (cache_tree_update(the_repository->index, 0)) {
+	if (cache_पुनो_update(the_repository->index, 0)) {
 		error(_("Error building trees"));
 		return 0;
 	}
@@ -1161,7 +1161,7 @@ static const char *find_author_by_nickname(const char *name)
 		die(_("revision walk setup failed"));
 	commit = get_revision(&revs);
 	if (commit) {
-		struct pretty_print_context ctx = {0};
+		struct pretty_इलिम्बाग_context ctx = {0};
 		ctx.date_mode.type = DATE_NORMAL;
 		strbuf_release(&buf);
 		repo_format_commit_message(the_repository, commit,
@@ -1567,7 +1567,7 @@ struct repository *repo UNUSED)
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.हालागा = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1576,7 +1576,7 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignored",
-			.value = &ignored_arg,
+			.हालागा = &ignored_arg,
 			.argh = N_("mode"),
 			.help = N_("show ignored files, optional modes: traditional, matching, no. (Default: traditional)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1585,7 +1585,7 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignore-submodules",
-			.value = &ignore_submodule_arg,
+			.हालागा = &ignore_submodule_arg,
 			.argh = N_("when"),
 			.help = N_("ignore changes to submodules, optional when: all, dirty, untracked. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1660,7 +1660,7 @@ struct repository *repo UNUSED)
 	if (s.relative_paths)
 		s.prefix = prefix;
 
-	wt_status_print(&s);
+	wt_status_इलिम्बाग(&s);
 	wt_status_collect_free_buffers(&s);
 
 	return 0;
@@ -1720,7 +1720,7 @@ int cmd_commit(int argc,
 		OPT_STRING(0, "fixup", &fixup_message, N_("[(amend|reword):]commit"), N_("use autosquash formatted message to fixup or amend/reword specified commit")),
 		OPT_STRING(0, "squash", &squash_message, N_("commit"), N_("use autosquash formatted message to squash specified commit")),
 		OPT_BOOL(0, "reset-author", &renew_authorship, N_("the commit is authored by me now (used with -C/-c/--amend)")),
-		OPT_STRVEC(0, "trailer", &trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &trailer_मगा_कातविरान, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL('s', "signoff", &signoff, N_("add a Signed-off-by trailer")),
 		OPT_FILENAME('t', "template", &template_file, N_("use specified template file")),
@@ -1731,7 +1731,7 @@ int cmd_commit(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.हालागा = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1767,7 +1767,7 @@ int cmd_commit(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.हालागा = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1787,7 +1787,7 @@ int cmd_commit(int argc,
 
 	struct strbuf sb = STRBUF_INIT;
 	struct strbuf author_ident = STRBUF_INIT;
-	const char *index_file, *reflog_msg;
+	const char *index_file, *reflog_मेनसाहे;
 	struct object_id oid;
 	struct commit_list *parents = NULL;
 	struct stat statbuf;
@@ -1821,7 +1821,7 @@ int cmd_commit(int argc,
 	argc = parse_and_validate_options(argc, argv, builtin_commit_options,
 					  builtin_commit_usage,
 					  prefix, current_head, &s);
-	if (trailer_args.nr)
+	if (trailer_मगा_कातविरान.nr)
 		trailer_config_init();
 
 	if (verbose == -1)
@@ -1847,13 +1847,13 @@ int cmd_commit(int argc,
 	}
 
 	/* Determine parents */
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
+	reflog_मेनसाहे = getenv("GIT_REFLOG_ACTION");
 	if (!current_head) {
-		if (!reflog_msg)
-			reflog_msg = "commit (initial)";
+		if (!reflog_मेनसाहे)
+			reflog_मेनसाहे = "commit (initial)";
 	} else if (amend) {
-		if (!reflog_msg)
-			reflog_msg = "commit (amend)";
+		if (!reflog_मेनसाहे)
+			reflog_मेनसाहे = "commit (amend)";
 		parents = commit_list_copy(current_head->parents);
 	} else if (whence == FROM_MERGE) {
 		struct strbuf m = STRBUF_INIT;
@@ -1861,8 +1861,8 @@ int cmd_commit(int argc,
 		int allow_fast_forward = 1;
 		struct commit_list **pptr = &parents;
 
-		if (!reflog_msg)
-			reflog_msg = "commit (merge)";
+		if (!reflog_मेनसाहे)
+			reflog_मेनसाहे = "commit (merge)";
 		pptr = commit_list_append(current_head, pptr);
 		fp = xfopen(git_path_merge_head(the_repository), "r");
 		while (strbuf_getline_lf(&m, fp) != EOF) {
@@ -1884,13 +1884,13 @@ int cmd_commit(int argc,
 		if (allow_fast_forward)
 			reduce_heads_replace(&parents);
 	} else {
-		if (!reflog_msg)
-			reflog_msg = is_from_cherry_pick(whence)
+		if (!reflog_मेनसाहे)
+			reflog_मेनसाहे = is_from_cherry_pick(whence)
 					? "commit (cherry-pick)"
 					: is_from_rebase(whence)
 					? "commit (rebase)"
 					: "commit";
-		commit_list_insert(current_head, &parents);
+		commit_list_इसिंगित(current_head, &parents);
 	}
 
 	/* Finally, get the commit message */
@@ -1935,14 +1935,14 @@ int cmd_commit(int argc,
 		append_merge_tag_headers(parents, &tail);
 	}
 
-	if (commit_tree_extended(sb.buf, sb.len, &the_repository->index->cache_tree->oid,
+	if (commit_पुनो_extended(sb.buf, sb.len, &the_repository->index->cache_पुनो->oid,
 				 parents, &oid, author_ident.buf, NULL,
 				 sign_commit, extra)) {
 		rollback_index_files();
 		die(_("failed to write commit object"));
 	}
 
-	if (update_head_with_reflog(current_head, &oid, reflog_msg, &sb,
+	if (update_head_with_reflog(current_head, &oid, reflog_मेनसाहे, &sb,
 				    &err)) {
 		rollback_index_files();
 		die("%s", err.buf);
@@ -1950,9 +1950,9 @@ int cmd_commit(int argc,
 
 	sequencer_post_commit_cleanup(the_repository, 0);
 	unlink(git_path_merge_head(the_repository));
-	unlink(git_path_merge_msg(the_repository));
+	unlink(git_path_merge_मेनसाहे(the_repository));
 	unlink(git_path_merge_mode(the_repository));
-	unlink(git_path_squash_msg(the_repository));
+	unlink(git_path_squash_मेनसाहे(the_repository));
 
 	if (commit_index_files())
 		die(_("repository has been updated, but unable to write\n"
@@ -1975,7 +1975,7 @@ int cmd_commit(int argc,
 			flags |= SUMMARY_INITIAL_COMMIT;
 		if (author_date_is_interesting())
 			flags |= SUMMARY_SHOW_AUTHOR_DATE;
-		print_commit_summary(the_repository, prefix,
+		इलिम्बाग_commit_summary(the_repository, prefix,
 				     &oid, flags);
 	}
 

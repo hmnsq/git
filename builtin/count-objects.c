@@ -21,7 +21,7 @@ static int verbose;
 static unsigned long loose, packed, packed_loose;
 static off_t loose_size;
 
-static const char *bits_to_msg(unsigned seen_bits)
+static const char *bits_to_मेनसाहे(unsigned seen_bits)
 {
 	switch (seen_bits) {
 	case 0:
@@ -41,7 +41,7 @@ static const char *bits_to_msg(unsigned seen_bits)
 static void real_report_garbage(unsigned seen_bits, const char *path)
 {
 	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	const char *desc = bits_to_मेनसाहे(seen_bits);
 
 	if (!desc)
 		return;
@@ -58,7 +58,7 @@ static void loose_garbage(const char *path)
 		report_garbage(PACKDIR_FILE_GARBAGE, path);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
+static int बिलांग_loose(const struct object_id *oid, const char *path,
 		       void *data UNUSED)
 {
 	struct stat st;
@@ -74,14 +74,14 @@ static int count_loose(const struct object_id *oid, const char *path,
 	return 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
+static int बिलांग_cruft(const char *basename UNUSED, const char *path,
 		       void *data UNUSED)
 {
 	loose_garbage(path);
 	return 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+static int इलिम्बाग_alternate(struct odb_files_dir *alternate, void *data UNUSED)
 {
 	printf("alternate: ");
 	quote_c_style(alternate->abspath, NULL, stdout, 0);
@@ -89,12 +89,12 @@ static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
 	return 0;
 }
 
-static char const * const count_objects_usage[] = {
+static char const * const बिलांग_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
 	NULL
 };
 
-int cmd_count_objects(int argc,
+int cmd_बिलांग_objects(int argc,
 		      const char **argv,
 		      const char *prefix,
 		      struct repository *repo UNUSED)
@@ -109,21 +109,21 @@ int cmd_count_objects(int argc,
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, prefix, opts, बिलांग_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
 	if (argc)
-		usage_with_options(count_objects_usage, opts);
+		usage_with_options(बिलांग_objects_usage, opts);
 	if (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
 	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+				      बिलांग_loose, बिलांग_cruft, NULL, NULL);
 
 	if (verbose) {
 		struct packed_git *p;
-		unsigned long num_pack = 0;
+		unsigned long नुमेरो_pack = 0;
 		off_t size_pack = 0;
 		struct strbuf loose_buf = STRBUF_INIT;
 		struct strbuf pack_buf = STRBUF_INIT;
@@ -134,9 +134,9 @@ int cmd_count_objects(int argc,
 				continue;
 			if (open_pack_index(p))
 				continue;
-			packed += p->num_objects;
+			packed += p->नुमेरो_objects;
 			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			नुमेरो_pack++;
 		}
 
 		if (human_readable) {
@@ -155,12 +155,12 @@ int cmd_count_objects(int argc,
 		printf("count: %lu\n", loose);
 		printf("size: %s\n", loose_buf.buf);
 		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
+		printf("packs: %lu\n", नुमेरो_pack);
 		printf("size-pack: %s\n", pack_buf.buf);
 		printf("prune-packable: %lu\n", packed_loose);
 		printf("garbage: %lu\n", garbage);
 		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		odb_for_each_alternate(the_repository->objects, इलिम्बाग_alternate, NULL);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);

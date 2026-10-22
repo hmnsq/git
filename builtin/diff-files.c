@@ -50,11 +50,11 @@ int cmd_diff_files(int argc,
 	argc = setup_revisions(argc, argv, &rev, NULL);
 	while (1 < argc && argv[1][0] == '-') {
 		if (!strcmp(argv[1], "--base"))
-			rev.max_count = 1;
+			rev.max_बिलांग = 1;
 		else if (!strcmp(argv[1], "--ours"))
-			rev.max_count = 2;
+			rev.max_बिलांग = 2;
 		else if (!strcmp(argv[1], "--theirs"))
-			rev.max_count = 3;
+			rev.max_बिलांग = 3;
 		else if (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
 		else
@@ -72,7 +72,7 @@ int cmd_diff_files(int argc,
 	 */
 	if (rev.pending.nr ||
 	    rev.min_age != -1 || rev.max_age != -1 ||
-	    3 < rev.max_count)
+	    3 < rev.max_बिलांग)
 		usage(diff_files_usage);
 
 	/*
@@ -80,7 +80,7 @@ int cmd_diff_files(int argc,
 	 * was not asked to.  "diff-files -c -p" should not densify
 	 * (the user should ask with "diff-files --cc" explicitly).
 	 */
-	if (rev.max_count == -1 &&
+	if (rev.max_बिलांग == -1 &&
 	    (rev.diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(&rev);
 

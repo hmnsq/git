@@ -66,10 +66,10 @@ int cmd_diff_index(int argc,
 	 * and there is no revision filtering parameters.
 	 */
 	if (rev.pending.nr != 1 ||
-	    rev.max_count != -1 || rev.min_age != -1 || rev.max_age != -1)
+	    rev.max_बिलांग != -1 || rev.min_age != -1 || rev.max_age != -1)
 		usage(diff_cache_usage);
 	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
+		setup_work_पुनो(the_repository);
 		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
 			return -1;

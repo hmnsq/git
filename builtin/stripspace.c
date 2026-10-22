@@ -8,14 +8,14 @@
 #include "strbuf.h"
 #include "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+static void comment_मगा_लिन्या(struct strbuf *buf)
 {
-	char *msg;
+	char *मेनसाहे;
 	size_t len;
 
-	msg = strbuf_detach(buf, &len);
-	strbuf_add_commented_lines(buf, msg, len, comment_line_str);
-	free(msg);
+	मेनसाहे = strbuf_detach(buf, &len);
+	strbuf_add_commented_मगा_लिन्या(buf, मेनसाहे, len, comment_लिन्या_str);
+	free(मेनसाहे);
 }
 
 static const char * const stripspace_usage[] = {
@@ -27,7 +27,7 @@ static const char * const stripspace_usage[] = {
 enum stripspace_mode {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
-	COMMENT_LINES
+	COMMENT_मगा_लिन्या
 };
 
 int cmd_stripspace(int argc,
@@ -45,7 +45,7 @@ int cmd_stripspace(int argc,
 			    STRIP_COMMENTS),
 		OPT_CMDMODE('c', "comment-lines", &mode,
 			    N_("prepend comment character and space to each line"),
-			    COMMENT_LINES),
+			    COMMENT_मगा_लिन्या),
 		OPT_END()
 	};
 
@@ -53,7 +53,7 @@ int cmd_stripspace(int argc,
 	if (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	if (mode == STRIP_COMMENTS || mode == COMMENT_मगा_लिन्या) {
 		setup_git_directory_gently(the_repository, &nongit);
 		repo_config(the_repository, git_default_config, NULL);
 	}
@@ -63,9 +63,9 @@ int cmd_stripspace(int argc,
 
 	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
-			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
+			  mode == STRIP_COMMENTS ? comment_लिन्या_str : NULL);
 	else
-		comment_lines(&buf);
+		comment_मगा_लिन्या(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);

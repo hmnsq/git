@@ -3,7 +3,7 @@
 #include "run-command.h"
 #include "pkt-line.h"
 
-static const char usage_msg[] =
+static const char usage_मेनसाहे[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -122,7 +122,7 @@ static void parse_argv(struct strvec *out, const char *arg, const char *service)
 	while (*arg) {
 		char *expanded = strip_escapes(arg, service, &arg);
 		if (expanded)
-			strvec_push(out, expanded);
+			strvec_इतुलाक(out, expanded);
 		free(expanded);
 	}
 }
@@ -145,7 +145,7 @@ static int run_child(const char *arg, const char *service)
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
-	parse_argv(&child.args, arg, service);
+	parse_argv(&child.मगा_कातविरान, arg, service);
 
 	if (start_command(&child) < 0)
 		die("Can't run specified command");
@@ -202,10 +202,10 @@ int cmd_remote_ext(int argc,
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_मेनसाहे);
 
 	if (argc != 3)
-		usage(usage_msg);
+		usage(usage_मेनसाहे);
 
 	return command_loop(argv[2]);
 }

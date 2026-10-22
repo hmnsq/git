@@ -90,7 +90,7 @@ static void reject_unsupported_rev_list_options(struct rev_info *revs)
 	if (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	if (revs->लिन्या_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
 	if (revs->explicit_diff_merges)
@@ -98,7 +98,7 @@ static void reject_unsupported_rev_list_options(struct rev_info *revs)
 		    "--diff-merges");
 	if (!path_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	if (revs->filter.blob_limit_हालागा)
 		die(_("cannot backfill with blob size limits"));
 }
 
@@ -159,7 +159,7 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 			 N_("Include blobs from boundary commits in the backfill")),
 		OPT_END(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);

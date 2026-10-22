@@ -45,7 +45,7 @@ static enum reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode
 static int fake_missing_tagger;
 static int use_done_feature;
 static int no_data;
-static int full_tree;
+static int full_पुनो;
 static int reference_excluded_commits;
 static int show_original_ids;
 static int mark_tags;
@@ -59,7 +59,7 @@ static struct revision_sources revision_sources;
 static int parse_opt_sign_mode(const struct option *opt,
 			       const char *arg, int unset)
 {
-	enum sign_mode *val = opt->value;
+	enum sign_mode *val = opt->हालागा;
 
 	if (unset)
 		return 0;
@@ -74,7 +74,7 @@ static int parse_opt_sign_mode(const struct option *opt,
 static int parse_opt_tag_of_filtered_mode(const struct option *opt,
 					  const char *arg, int unset)
 {
-	enum tag_of_filtered_mode *val = opt->value;
+	enum tag_of_filtered_mode *val = opt->हालागा;
 
 	if (unset || !strcmp(arg, "abort"))
 		*val = TAG_FILTERING_ABORT;
@@ -90,7 +90,7 @@ static int parse_opt_tag_of_filtered_mode(const struct option *opt,
 static int parse_opt_reencode_mode(const struct option *opt,
 				   const char *arg, int unset)
 {
-	enum reencode_mode *val = opt->value;
+	enum reencode_mode *val = opt->हालागा;
 
 	if (unset) {
 		*val = REENCODE_ABORT;
@@ -122,7 +122,7 @@ struct anonymized_entry {
 	const char orig[FLEX_ARRAY];
 };
 
-struct anonymized_entry_key {
+struct anonymized_entry_सुसि {
 	struct hashmap_entry hash;
 	const char *orig;
 	size_t orig_len;
@@ -130,19 +130,19 @@ struct anonymized_entry_key {
 
 static int anonymized_entry_cmp(const void *cmp_data UNUSED,
 				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
+				const struct hashmap_entry *entry_or_सुसि,
 				const void *keydata)
 {
 	const struct anonymized_entry *a, *b;
 
 	a = container_of(eptr, const struct anonymized_entry, hash);
 	if (keydata) {
-		const struct anonymized_entry_key *key = keydata;
-		int equal = !xstrncmpz(a->orig, key->orig, key->orig_len);
+		const struct anonymized_entry_सुसि *सुसि = keydata;
+		int equal = !xstrncmpz(a->orig, सुसि->orig, सुसि->orig_len);
 		return !equal;
 	}
 
-	b = container_of(entry_or_key, const struct anonymized_entry, hash);
+	b = container_of(entry_or_सुसि, const struct anonymized_entry, hash);
 	return strcmp(a->orig, b->orig);
 }
 
@@ -178,23 +178,23 @@ static const char *anonymize_str(struct hashmap *map,
 				 char *(*generate)(void),
 				 const char *orig, size_t len)
 {
-	struct anonymized_entry_key key;
+	struct anonymized_entry_सुसि सुसि;
 	struct anonymized_entry *ret;
 
-	hashmap_entry_init(&key.hash, memhash(orig, len));
-	key.orig = orig;
-	key.orig_len = len;
+	hashmap_entry_init(&सुसि.hash, memhash(orig, len));
+	सुसि.orig = orig;
+	सुसि.orig_len = len;
 
 	/* First check if it's a token the user configured manually... */
-	ret = hashmap_get_entry(&anonymized_seeds, &key, hash, &key);
+	ret = hashmap_get_entry(&anonymized_seeds, &सुसि, hash, &सुसि);
 
 	/* ...otherwise check if we've already seen it in this context... */
 	if (!ret)
-		ret = hashmap_get_entry(map, &key, hash, &key);
+		ret = hashmap_get_entry(map, &सुसि, hash, &सुसि);
 
 	/* ...and finally generate a new mapping if necessary */
 	if (!ret)
-		ret = add_anonymized_entry(map, key.hash.hash,
+		ret = add_anonymized_entry(map, सुसि.hash.hash,
 					   orig, len, generate());
 
 	return ret->anon;
@@ -380,7 +380,7 @@ static int depth_first(const void *a_, const void *b_)
 	return (a->status == 'R') - (b->status == 'R');
 }
 
-static void print_path_1(const char *path)
+static void इलिम्बाग_path_1(const char *path)
 {
 	int need_quote = quote_c_style(path, NULL, NULL, 0);
 	if (need_quote)
@@ -399,16 +399,16 @@ static char *anonymize_path_component(void)
 	return strbuf_detach(&out, NULL);
 }
 
-static void print_path(const char *path)
+static void इलिम्बाग_path(const char *path)
 {
 	if (!anonymize)
-		print_path_1(path);
+		इलिम्बाग_path_1(path);
 	else {
 		static struct hashmap paths;
 		static struct strbuf anon = STRBUF_INIT;
 
 		anonymize_path(&anon, path, &paths, anonymize_path_component);
-		print_path_1(anon.buf);
+		इलिम्बाग_path_1(anon.buf);
 		strbuf_reset(&anon);
 	}
 }
@@ -451,8 +451,8 @@ static void show_filemodify(struct diff_queue_struct *q,
 		switch (q->queue[i]->status) {
 		case DIFF_STATUS_DELETED:
 			printf("D ");
-			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			इलिम्बाग_path(spec->path);
+			string_list_इसिंगित(changed, spec->path);
 			putchar('\n');
 			break;
 
@@ -467,10 +467,10 @@ static void show_filemodify(struct diff_queue_struct *q,
 			 */
 			if (!string_list_has_string(changed, ospec->path)) {
 				printf("%c ", q->queue[i]->status);
-				print_path(ospec->path);
+				इलिम्बाग_path(ospec->path);
 				putchar(' ');
-				print_path(spec->path);
-				string_list_insert(changed, spec->path);
+				इलिम्बाग_path(spec->path);
+				string_list_इसिंगित(changed, spec->path);
 				putchar('\n');
 
 				if (oideq(&ospec->oid, &spec->oid) &&
@@ -497,8 +497,8 @@ static void show_filemodify(struct diff_queue_struct *q,
 				printf("M %06o :%d ", spec->mode,
 				       get_object_mark(object));
 			}
-			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			इलिम्बाग_path(spec->path);
+			string_list_इसिंगित(changed, spec->path);
 			putchar('\n');
 			break;
 
@@ -571,7 +571,7 @@ static char *anonymize_ident(void)
  * but keep timestamps intact, as they influence things like traversal
  * order (and by themselves should not be too revealing).
  */
-static void anonymize_ident_line(const char **beg, const char **end)
+static void anonymize_ident_लिन्या(const char **beg, const char **end)
 {
 	static struct hashmap idents;
 	static struct strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
@@ -593,7 +593,7 @@ static void anonymize_ident_line(const char **beg, const char **end)
 	end_of_header++;
 	strbuf_add(out, *beg, end_of_header - *beg);
 
-	if (!split_ident_line(&split, end_of_header, *end - end_of_header) &&
+	if (!split_ident_लिन्या(&split, end_of_header, *end - end_of_header) &&
 	    split.date_begin) {
 		const char *ident;
 		size_t len;
@@ -624,15 +624,15 @@ static void anonymize_ident_line(const char **beg, const char **end)
  * If the header is found, then *end is set to point at the '\n' in
  * msg that immediately follows the header value.
  */
-static const char *find_commit_multiline_header(const char *msg,
-						const char *key,
+static const char *find_commit_multiline_header(const char *मेनसाहे,
+						const char *सुसि,
 						const char **end)
 {
 	struct strbuf val = STRBUF_INIT;
 	const char *bol, *eol;
 	size_t len;
 
-	bol = find_commit_header(msg, key, &len);
+	bol = find_commit_header(मेनसाहे, सुसि, &len);
 	if (!bol)
 		return NULL;
 	eol = bol + len;
@@ -649,7 +649,7 @@ static const char *find_commit_multiline_header(const char *msg,
 	return strbuf_detach(&val, NULL);
 }
 
-static void print_signature(const char *signature, const char *object_hash)
+static void इलिम्बाग_signature(const char *signature, const char *object_hash)
 {
 	if (!signature)
 		return;
@@ -743,13 +743,13 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	if (commit->parents &&
 	    (get_object_mark(&commit->parents->item->object) != 0 ||
 	     reference_excluded_commits) &&
-	    !full_tree) {
+	    !full_पुनो) {
 		parse_commit_or_die(commit->parents->item);
-		diff_tree_oid(get_commit_tree_oid(commit->parents->item),
-			      get_commit_tree_oid(commit), "", &rev->diffopt);
+		diff_पुनो_oid(get_commit_पुनो_oid(commit->parents->item),
+			      get_commit_पुनो_oid(commit), "", &rev->diffopt);
 	}
 	else
-		diff_root_tree_oid(get_commit_tree_oid(commit),
+		diff_उगात_पुनो_oid(get_commit_पुनो_oid(commit),
 				   "", &rev->diffopt);
 
 	/* Export the referenced blobs, and remember the marks. */
@@ -767,8 +767,8 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	string_list_remove(&extra_refs, refname, 0);
 	if (anonymize) {
 		refname = anonymize_refname(refname);
-		anonymize_ident_line(&committer, &committer_end);
-		anonymize_ident_line(&author, &author_end);
+		anonymize_ident_लिन्या(&committer, &committer_end);
+		anonymize_ident_लिन्या(&author, &author_end);
 	}
 
 	mark_next_object(&commit->object);
@@ -808,8 +808,8 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 			/* fallthru */
 		case SIGN_VERBATIM:
 			for (size_t i = 0; i < signatures.nr; i++) {
-				struct string_list_item *item = &signatures.items[i];
-				print_signature(item->string, item->util);
+				struct string_list_item *item = &signatures.मगा_बागाय[i];
+				इलिम्बाग_signature(item->string, item->util);
 			}
 			break;
 
@@ -861,9 +861,9 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 		i++;
 	}
 
-	if (full_tree)
+	if (full_पुनो)
 		printf("deleteall\n");
-	log_tree_diff_flush(rev);
+	log_पुनो_diff_flush(rev);
 	string_list_clear(paths_of_changed_objects, 0);
 	rev->diffopt.output_format = saved_output_format;
 
@@ -900,7 +900,7 @@ static void handle_tag(const char *name, struct tag *tag)
 	while (tagged->type == OBJ_TAG) {
 		tagged = ((struct tag *)tagged)->tagged;
 	}
-	if (tagged->type == OBJ_TREE) {
+	if (tagged->type == OBJ_पुनो) {
 		warning(_("omitting tag %s,\nsince tags of trees (or tags "
 			  "of tags of trees, etc.) are not supported."),
 			oid_to_hex(&tag->object.oid));
@@ -928,7 +928,7 @@ static void handle_tag(const char *name, struct tag *tag)
 		tagger++;
 		tagger_end = strchrnul(tagger, '\n');
 		if (anonymize)
-			anonymize_ident_line(&tagger, &tagger_end);
+			anonymize_ident_लिन्या(&tagger, &tagger_end);
 	}
 
 	if (anonymize) {
@@ -1125,8 +1125,8 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 	int i;
 
 	for (i = extras->nr - 1; i >= 0; i--) {
-		const char *name = extras->items[i].string;
-		struct object *object = extras->items[i].util;
+		const char *name = extras->मगा_बागाय[i].string;
+		struct object *object = extras->मगा_बागाय[i].util;
 		int mark;
 
 		switch (object->type) {
@@ -1212,33 +1212,33 @@ static void export_marks(char *file)
 		error(_("unable to write marks file %s."), file);
 }
 
-static void import_marks(char *input_file, int check_exists)
+static void import_marks(char *पासोक_file, int check_exists)
 {
-	char line[512];
+	char लिन्या[512];
 	FILE *f;
 	struct stat sb;
 
-	if (check_exists && stat(input_file, &sb))
+	if (check_exists && stat(पासोक_file, &sb))
 		return;
 
-	f = xfopen(input_file, "r");
-	while (fgets(line, sizeof(line), f)) {
+	f = xfopen(पासोक_file, "r");
+	while (fgets(लिन्या, sizeof(लिन्या), f)) {
 		uint32_t mark;
-		char *line_end, *mark_end;
+		char *लिन्या_end, *mark_end;
 		struct object_id oid;
 		struct object *object;
 		struct commit *commit;
 		enum object_type type;
 
-		line_end = strchr(line, '\n');
-		if (line[0] != ':' || !line_end)
-			die(_("corrupt mark line: %s"), line);
-		*line_end = '\0';
+		लिन्या_end = strchr(लिन्या, '\n');
+		if (लिन्या[0] != ':' || !लिन्या_end)
+			die(_("corrupt mark line: %s"), लिन्या);
+		*लिन्या_end = '\0';
 
-		mark = strtoumax(line + 1, &mark_end, 10);
-		if (!mark || mark_end == line + 1
+		mark = strtoumax(लिन्या + 1, &mark_end, 10);
+		if (!mark || mark_end == लिन्या + 1
 			|| *mark_end != ' ' || get_oid_hex(mark_end + 1, &oid))
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), लिन्या);
 
 		if (last_idnum < mark)
 			last_idnum = mark;
@@ -1271,7 +1271,7 @@ static void handle_deletes(void)
 {
 	int i;
 	for (i = 0; i < refspecs.nr; i++) {
-		struct refspec_item *refspec = &refspecs.items[i];
+		struct refspec_item *refspec = &refspecs.मगा_बागाय[i];
 		if (*refspec->src)
 			continue;
 
@@ -1283,8 +1283,8 @@ static void handle_deletes(void)
 static int parse_opt_anonymize_map(const struct option *opt,
 				   const char *arg, int unset)
 {
-	struct hashmap *map = opt->value;
-	const char *delim, *value;
+	struct hashmap *map = opt->हालागा;
+	const char *delim, *हालागा;
 	size_t keylen;
 
 	BUG_ON_OPT_NEG(unset);
@@ -1292,17 +1292,17 @@ static int parse_opt_anonymize_map(const struct option *opt,
 	delim = strchr(arg, ':');
 	if (delim) {
 		keylen = delim - arg;
-		value = delim + 1;
+		हालागा = delim + 1;
 	} else {
 		keylen = strlen(arg);
-		value = arg;
+		हालागा = arg;
 	}
 
-	if (!keylen || !*value)
+	if (!keylen || !*हालागा)
 		return error(_("--anonymize-map token cannot be empty"));
 
 	add_anonymized_entry(map, memhash(arg, keylen), arg, keylen,
-			     xstrdup(value));
+			     xstrdup(हालागा));
 
 	return 0;
 }
@@ -1345,7 +1345,7 @@ int cmd_fast_export(int argc,
 			     N_("import marks from this file if it exists")),
 		OPT_BOOL(0, "fake-missing-tagger", &fake_missing_tagger,
 			 N_("fake a tagger when tags lack one")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_पुनो,
 			 N_("output full tree for each commit")),
 		OPT_BOOL(0, "use-done-feature", &use_done_feature,
 			     N_("use the done feature to terminate the stream")),
@@ -1392,7 +1392,7 @@ int cmd_fast_export(int argc,
 		int i;
 
 		for (i = 0; i < refspecs_list.nr; i++)
-			refspec_append(&refspecs, refspecs_list.items[i].string);
+			refspec_append(&refspecs, refspecs_list.मगा_बागाय[i].string);
 
 		string_list_clear(&refspecs_list, 1);
 	}
@@ -1409,7 +1409,7 @@ int cmd_fast_export(int argc,
 	lastimportid = last_idnum;
 
 	if (import_filename && revs.prune_data.nr)
-		full_tree = 1;
+		full_पुनो = 1;
 
 	get_tags_and_duplicates(&revs.cmdline);
 

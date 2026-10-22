@@ -60,7 +60,7 @@ static void clean_pack_garbage(void)
 {
 	int i;
 	for (i = 0; i < pack_garbage.nr; i++)
-		unlink_or_warn(pack_garbage.items[i].string);
+		unlink_or_warn(pack_garbage.मगा_बागाय[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
@@ -107,12 +107,12 @@ static void process_log_file_at_exit(void)
 
 static int gc_config_is_timestamp_never(const char *var)
 {
-	const char *value;
+	const char *हालागा;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
-			die(_("failed to parse '%s' value '%s'"), var, value);
+	if (!repo_config_get_हालागा(the_repository, var, &हालागा) && हालागा) {
+		if (parse_expiry_date(हालागा, &expire))
+			die(_("failed to parse '%s' value '%s'"), var, हालागा);
 		return expire == 0;
 	}
 	return 0;
@@ -153,14 +153,14 @@ static void gc_config_release(struct gc_config *cfg)
 
 static void gc_config(struct gc_config *cfg)
 {
-	const char *value;
+	const char *हालागा;
 	char *owned = NULL;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	if (!repo_config_get_हालागा(the_repository, "gc.packrefs", &हालागा)) {
+		if (हालागा && !strcmp(हालागा, "notbare"))
 			cfg->pack_refs = -1;
 		else
-			cfg->pack_refs = git_config_bool("gc.packrefs", value);
+			cfg->pack_refs = git_config_bool("gc.packrefs", हालागा);
 	}
 
 	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
@@ -198,15 +198,15 @@ enum schedule_priority {
 	SCHEDULE_HOURLY = 3,
 };
 
-static enum schedule_priority parse_schedule(const char *value)
+static enum schedule_priority parse_schedule(const char *हालागा)
 {
-	if (!value)
+	if (!हालागा)
 		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
+	if (!strcasecmp(हालागा, "hourly"))
 		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
+	if (!strcasecmp(हालागा, "daily"))
 		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
+	if (!strcasecmp(हालागा, "weekly"))
 		return SCHEDULE_WEEKLY;
 	return SCHEDULE_NONE;
 }
@@ -224,7 +224,7 @@ enum maintenance_task_label {
 	TASK_RERERE_GC,
 
 	/* Leave as final value */
-	TASK__COUNT
+	TASK_बिलांग
 };
 
 struct maintenance_run_opts {
@@ -274,34 +274,34 @@ static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
+	strvec_pushl(&cmd.मगा_कातविरान, "pack-refs", "--all", "--prune", NULL);
 	if (opts->auto_flag)
-		strvec_push(&cmd.args, "--auto");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--auto");
 
 	return run_command(&cmd);
 }
 
-struct count_reflog_entries_data {
+struct बिलांग_reflog_entries_data {
 	struct expire_reflog_policy_cb policy;
-	size_t count;
+	size_t बिलांग;
 	size_t limit;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
+static int बिलांग_reflog_entries(const char *refname UNUSED,
 				struct object_id *old_oid, struct object_id *new_oid,
 				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+				int tz, const char *मेनसाहे, void *cb_data)
 {
-	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
-		data->count++;
-	return data->count >= data->limit;
+	struct बिलांग_reflog_entries_data *data = cb_data;
+	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, मेनसाहे, &data->policy))
+		data->बिलांग++;
+	return data->बिलांग >= data->limit;
 }
 
 static int reflog_expire_condition(struct gc_config *cfg UNUSED)
 {
 	timestamp_t now = time(NULL);
-	struct count_reflog_entries_data data = {
+	struct बिलांग_reflog_entries_data data = {
 		.policy = {
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
@@ -319,11 +319,11 @@ static int reflog_expire_condition(struct gc_config *cfg UNUSED)
 
 	reflog_expire_options_set_refname(&data.policy.opts, "HEAD");
 	refs_for_each_reflog_ent(get_main_ref_store(the_repository), "HEAD",
-				 count_reflog_entries, &data);
+				 बिलांग_reflog_entries, &data);
 
 	reflog_expiry_cleanup(&data.policy);
 	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	return data.बिलांग >= data.limit;
 }
 
 static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
@@ -331,7 +331,7 @@ static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUS
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
+	strvec_pushl(&cmd.मगा_कातविरान, "reflog", "expire", "--all", NULL);
 	return run_command(&cmd);
 }
 
@@ -341,8 +341,8 @@ static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNU
 	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
 
 	prune_worktrees_cmd.git_cmd = 1;
-	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
-	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
+	strvec_pushl(&prune_worktrees_cmd.मगा_कातविरान, "worktree", "prune", "--expire", NULL);
+	strvec_इतुलाक(&prune_worktrees_cmd.मगा_कातविरान, cfg->prune_worktrees_expire);
 
 	return run_command(&prune_worktrees_cmd);
 }
@@ -390,7 +390,7 @@ static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
 {
 	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
-	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
+	strvec_pushl(&rerere_cmd.मगा_कातविरान, "rerere", "gc", NULL);
 	return run_command(&rerere_cmd);
 }
 
@@ -586,7 +586,7 @@ int cmd_gc(int argc,
 		{
 			.type = OPTION_STRING,
 			.long_name = "prune",
-			.value = &prune_expire_arg,
+			.हालागा = &prune_expire_arg,
 			.argh = N_("date"),
 			.help = N_("prune unreferenced objects"),
 			.flags = PARSE_OPT_OPTARG,
@@ -758,7 +758,7 @@ static const char *const builtin_maintenance_run_usage[] = {
 static int maintenance_opt_schedule(const struct option *opt, const char *arg,
 				    int unset)
 {
-	enum schedule_priority *priority = opt->value;
+	enum schedule_priority *priority = opt->हालागा;
 
 	if (unset)
 		die(_("--no-schedule is not allowed"));
@@ -772,7 +772,7 @@ static int maintenance_opt_schedule(const struct option *opt, const char *arg,
 }
 
 struct cg_auto_data {
-	int num_not_in_graph;
+	int नुमेरो_not_in_graph;
 	int limit;
 };
 
@@ -782,7 +782,7 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 	int result = 0;
 	const struct object_id *maybe_peeled = ref->oid;
 	struct object_id peeled;
-	struct commit_list *stack = NULL;
+	struct commit_list *सालानसान = NULL;
 	struct commit *commit;
 
 	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
@@ -799,17 +799,17 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
 		return 0;
 
-	data->num_not_in_graph++;
+	data->नुमेरो_not_in_graph++;
 
-	if (data->num_not_in_graph >= data->limit)
+	if (data->नुमेरो_not_in_graph >= data->limit)
 		return 1;
 
-	commit_list_insert(commit, &stack);
+	commit_list_इसिंगित(commit, &सालानसान);
 
-	while (!result && stack) {
+	while (!result && सालानसान) {
 		struct commit_list *parent;
 
-		commit = pop_commit(&stack);
+		commit = आलिसिन_commit(&सालानसान);
 
 		for (parent = commit->parents; parent; parent = parent->next) {
 			if (repo_parse_commit(the_repository, parent->item) ||
@@ -818,18 +818,18 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 				continue;
 
 			parent->item->object.flags |= SEEN;
-			data->num_not_in_graph++;
+			data->नुमेरो_not_in_graph++;
 
-			if (data->num_not_in_graph >= data->limit) {
+			if (data->नुमेरो_not_in_graph >= data->limit) {
 				result = 1;
 				break;
 			}
 
-			commit_list_insert(parent->item, &stack);
+			commit_list_इसिंगित(parent->item, &सालानसान);
 		}
 	}
 
-	commit_list_free(stack);
+	commit_list_free(सालानसान);
 	return result;
 }
 
@@ -838,7 +838,7 @@ static int should_write_commit_graph(struct gc_config *cfg UNUSED)
 	int result;
 	struct cg_auto_data data;
 
-	data.num_not_in_graph = 0;
+	data.नुमेरो_not_in_graph = 0;
 	data.limit = 100;
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
 			    &data.limit);
@@ -862,13 +862,13 @@ static int run_write_commit_graph(struct maintenance_run_opts *opts)
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "commit-graph", "write",
+	strvec_pushl(&child.मगा_कातविरान, "commit-graph", "write",
 		     "--split", "--reachable", NULL);
 
 	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--no-progress");
 	else
-		strvec_push(&child.args, "--progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--progress");
 
 	return !!run_command(&child);
 }
@@ -897,13 +897,13 @@ static int fetch_remote(struct remote *remote, void *cbdata)
 		return 0;
 
 	child.git_cmd = 1;
-	strvec_pushl(&child.args, "fetch", remote->name,
+	strvec_pushl(&child.मगा_कातविरान, "fetch", remote->name,
 		     "--prefetch", "--prune", "--no-tags",
 		     "--no-write-fetch-head", "--recurse-submodules=no",
 		     NULL);
 
 	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--quiet");
 
 	return !!run_command(&child);
 }
@@ -932,16 +932,16 @@ static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_push(&child.args, "gc");
+	strvec_इतुलाक(&child.मगा_कातविरान, "gc");
 
 	if (opts->auto_flag)
-		strvec_push(&child.args, "--auto");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--auto");
 	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--quiet");
 	else
-		strvec_push(&child.args, "--no-quiet");
-	strvec_push(&child.args, "--no-detach");
-	strvec_push(&child.args, "--skip-foreground-tasks");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--no-quiet");
+	strvec_इतुलाक(&child.मगा_कातविरान, "--no-detach");
+	strvec_इतुलाक(&child.मगा_कातविरान, "--skip-foreground-tasks");
 
 	return run_command(&child);
 }
@@ -960,35 +960,35 @@ static int prune_packed(struct maintenance_run_opts *opts)
 	struct child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
-	strvec_push(&child.args, "prune-packed");
+	strvec_इतुलाक(&child.मगा_कातविरान, "prune-packed");
 
 	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--quiet");
 
 	return !!run_command(&child);
 }
 
 struct write_loose_object_data {
 	FILE *in;
-	int count;
+	int बिलांग;
 	int batch_size;
 };
 
 static int loose_object_auto_limit = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
+static int loose_object_बिलांग(const struct object_id *oid UNUSED,
 			      const char *path UNUSED,
 			      void *data)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
+	int *बिलांग = (int*)data;
+	if (++(*बिलांग) >= loose_object_auto_limit)
 		return 1;
 	return 0;
 }
 
 static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
 {
-	int count = 0;
+	int बिलांग = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
 			    &loose_object_auto_limit);
@@ -999,8 +999,8 @@ static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
 		return 1;
 
 	return for_each_loose_file_in_source(the_repository->objects->source,
-					     loose_object_count,
-					     NULL, NULL, &count);
+					     loose_object_बिलांग,
+					     NULL, NULL, &बिलांग);
 }
 
 static int bail_on_loose(const struct object_id *oid UNUSED,
@@ -1019,7 +1019,7 @@ static int write_loose_object_to_stdin(const struct object_id *oid,
 	fprintf(d->in, "%s\n", oid_to_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	return ++(d->बिलांग) > d->batch_size;
 }
 
 static int pack_loose(struct maintenance_run_opts *opts)
@@ -1040,12 +1040,12 @@ static int pack_loose(struct maintenance_run_opts *opts)
 
 	pack_proc.git_cmd = 1;
 
-	strvec_push(&pack_proc.args, "pack-objects");
+	strvec_इतुलाक(&pack_proc.मगा_कातविरान, "pack-objects");
 	if (opts->quiet)
-		strvec_push(&pack_proc.args, "--quiet");
+		strvec_इतुलाक(&pack_proc.मगा_कातविरान, "--quiet");
 	else
-		strvec_push(&pack_proc.args, "--no-quiet");
-	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
+		strvec_इतुलाक(&pack_proc.मगा_कातविरान, "--no-quiet");
+	strvec_pushf(&pack_proc.मगा_कातविरान, "%s/pack/loose", r->objects->source->path);
 
 	pack_proc.in = -1;
 
@@ -1061,7 +1061,7 @@ static int pack_loose(struct maintenance_run_opts *opts)
 	}
 
 	data.in = xfdopen(pack_proc.in, "w");
-	data.count = 0;
+	data.बिलांग = 0;
 	data.batch_size = 50000;
 
 	repo_config_get_int(r, "maintenance.loose-objects.batchSize",
@@ -1097,7 +1097,7 @@ static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
 {
 	struct packed_git *p;
 	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	int बिलांग = 0;
 
 	prepare_repo_settings(the_repository);
 	if (!the_repository->settings.core_multi_pack_index)
@@ -1112,13 +1112,13 @@ static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
 		return 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
+		if (बिलांग >= incremental_repack_auto_limit)
 			break;
 		if (!p->multi_pack_index)
-			count++;
+			बिलांग++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	return बिलांग >= incremental_repack_auto_limit;
 }
 
 static int multi_pack_index_write(struct maintenance_run_opts *opts)
@@ -1126,12 +1126,12 @@ static int multi_pack_index_write(struct maintenance_run_opts *opts)
 	struct child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
-	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
+	strvec_pushl(&child.मगा_कातविरान, "multi-pack-index", "write", NULL);
 
 	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--no-progress");
 	else
-		strvec_push(&child.args, "--progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--progress");
 
 	if (run_command(&child))
 		return error(_("failed to write multi-pack-index"));
@@ -1145,12 +1145,12 @@ static int multi_pack_index_expire(struct maintenance_run_opts *opts)
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
+	strvec_pushl(&child.मगा_कातविरान, "multi-pack-index", "expire", NULL);
 
 	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--no-progress");
 	else
-		strvec_push(&child.args, "--progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--progress");
 
 	if (run_command(&child))
 		return error(_("'git multi-pack-index expire' failed"));
@@ -1204,14 +1204,14 @@ static int multi_pack_index_repack(struct maintenance_run_opts *opts)
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
+	strvec_pushl(&child.मगा_कातविरान, "multi-pack-index", "repack", NULL);
 
 	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--no-progress");
 	else
-		strvec_push(&child.args, "--progress");
+		strvec_इतुलाक(&child.मगा_कातविरान, "--progress");
 
-	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
+	strvec_pushf(&child.मगा_कातविरान, "--batch-size=%"PRIuMAX,
 				  (uintmax_t)get_auto_pack_size());
 
 	if (run_command(&child))
@@ -1447,7 +1447,7 @@ struct maintenance_strategy {
 	struct {
 		unsigned type;
 		enum schedule_priority schedule;
-	} tasks[TASK__COUNT];
+	} tasks[TASK_बिलांग];
 };
 
 static const struct maintenance_strategy none_strategy = { 0 };
@@ -1555,7 +1555,7 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 */
 	if (selected_tasks->nr) {
 		for (size_t i = 0; i < selected_tasks->nr; i++) {
-			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
+			enum maintenance_task_label label = (intptr_t)selected_tasks->मगा_बागाय[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
@@ -1587,14 +1587,14 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	for (size_t i = 0; i < TASK_बिलांग; i++) {
+		int config_हालागा;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
-			strategy.tasks[i].type = config_value ? type : 0;
+		if (!repo_config_get_bool(the_repository, config_name.buf, &config_हालागा))
+			strategy.tasks[i].type = config_हालागा ? type : 0;
 		if (!(strategy.tasks[i].type & type))
 			continue;
 
@@ -1618,15 +1618,15 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 static int task_option_parse(const struct option *opt,
 			     const char *arg, int unset)
 {
-	struct string_list *selected_tasks = opt->value;
+	struct string_list *selected_tasks = opt->हालागा;
 	size_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
+	for (i = 0; i < TASK_बिलांग; i++)
 		if (!strcasecmp(tasks[i].name, arg))
 			break;
-	if (i >= TASK__COUNT) {
+	if (i >= TASK_बिलांग) {
 		error(_("'%s' is not a valid task"), arg);
 		return 1;
 	}
@@ -1715,7 +1715,7 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 		OPT_END(),
 	};
 	int found = 0;
-	const char *key = "maintenance.repo";
+	const char *सुसि = "maintenance.repo";
 	char *maintpath = get_maintpath();
 	struct string_list_item *item;
 	const struct string_list *list;
@@ -1733,7 +1733,7 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 	if (repo_config_get(the_repository, "maintenance.strategy"))
 		repo_config_set(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
+	if (!repo_config_get_string_multi(the_repository, सुसि, &list)) {
 		for_each_string_list_item(item, list) {
 			if (!strcmp(maintpath, item->string)) {
 				found = 1;
@@ -1759,7 +1759,7 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 
 		if (rc)
 			die(_("unable to add '%s' value of '%s'"),
-			    key, maintpath);
+			    सुसि, maintpath);
 	}
 
 	free(maintpath);
@@ -1783,7 +1783,7 @@ static int maintenance_unregister(int argc, const char **argv, const char *prefi
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_END(),
 	};
-	const char *key = "maintenance.repo";
+	const char *सुसि = "maintenance.repo";
 	char *maintpath = get_maintpath();
 	int found = 0;
 	struct string_list_item *item;
@@ -1801,8 +1801,8 @@ static int maintenance_unregister(int argc, const char **argv, const char *prefi
 		git_configset_add_file(&cs, config_file);
 	}
 	if (!(config_file
-	      ? git_configset_get_string_multi(&cs, key, &list)
-	      : repo_config_get_string_multi(the_repository, key, &list))) {
+	      ? git_configset_get_string_multi(&cs, सुसि, &list)
+	      : repo_config_get_string_multi(the_repository, सुसि, &list))) {
 		for_each_string_list_item(item, list) {
 			if (!strcmp(maintpath, item->string)) {
 				found = 1;
@@ -1822,14 +1822,14 @@ static int maintenance_unregister(int argc, const char **argv, const char *prefi
 		if (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
-			config_file, key, NULL, maintpath, NULL,
-			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
+			config_file, सुसि, NULL, maintpath, NULL,
+			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_हालागा);
 		free(global_config_file);
 
 		if (rc &&
 		    (!force || rc == CONFIG_NOTHING_SET))
 			die(_("unable to unset '%s' value of '%s'"),
-			    key, maintpath);
+			    सुसि, maintpath);
 	} else if (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
@@ -1951,9 +1951,9 @@ static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
 		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
 			continue;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
+		if (!strcmp(cmd, pair.मगा_बागाय[0].string)) {
 			if (out)
-				*out = xstrdup(pair.items[1].string);
+				*out = xstrdup(pair.मगा_बागाय[1].string);
 			if (is_available)
 				*is_available = 1;
 			string_list_clear(&pair, 0);
@@ -2028,8 +2028,8 @@ static int launchctl_boot_plist(int enable, const char *filename)
 	char *uid = launchctl_get_uid();
 
 	get_schedule_cmd("launchctl", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, enable ? "bootstrap" : "bootout", uid,
+	strvec_split(&child.मगा_कातविरान, cmd);
+	strvec_pushl(&child.मगा_कातविरान, enable ? "bootstrap" : "bootout", uid,
 		     filename, NULL);
 
 	child.no_stderr = 1;
@@ -2068,8 +2068,8 @@ static int launchctl_list_contains_plist(const char *name, const char *cmd)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "list", name, NULL);
+	strvec_split(&child.मगा_कातविरान, cmd);
+	strvec_pushl(&child.मगा_कातविरान, "list", name, NULL);
 
 	child.no_stderr = 1;
 	child.no_stdout = 1;
@@ -2238,8 +2238,8 @@ static int schtasks_remove_task(enum schedule_priority schedule)
 	char *name = schtasks_task_name(frequency);
 
 	get_schedule_cmd("schtasks", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", NULL);
+	strvec_split(&child.मगा_कातविरान, cmd);
+	strvec_pushl(&child.मगा_कातविरान, "/delete", "/tn", name, "/f", NULL);
 	free(name);
 	free(cmd);
 
@@ -2358,8 +2358,8 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "</Task>\n";
 	fprintf(tfile->fp, xml, exec_path, exec_path,
 		get_extra_config_parameters(), frequency);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/create", "/tn", name, "/f", "/xml",
+	strvec_split(&child.मगा_कातविरान, cmd);
+	strvec_pushl(&child.मगा_कातविरान, "/create", "/tn", name, "/f", "/xml",
 				  get_tempfile_path(tfile), NULL);
 	close_tempfile_gently(tfile);
 
@@ -2398,8 +2398,8 @@ static int check_crontab_process(const char *cmd)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
-	strvec_split(&child.args, cmd);
-	strvec_push(&child.args, "-l");
+	strvec_split(&child.मगा_कातविरान, cmd);
+	strvec_इतुलाक(&child.मगा_कातविरान, "-l");
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.no_stderr = 1;
@@ -2438,8 +2438,8 @@ out:
 	return ret;
 }
 
-#define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
-#define END_LINE "# END GIT MAINTENANCE SCHEDULE"
+#define BEGIN_लिन्या "# BEGIN GIT MAINTENANCE SCHEDULE"
+#define END_लिन्या "# END GIT MAINTENANCE SCHEDULE"
 
 static int crontab_update_schedule(int run_maintenance, int fd)
 {
@@ -2449,13 +2449,13 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	struct child_process crontab_list = CHILD_PROCESS_INIT;
 	struct child_process crontab_edit = CHILD_PROCESS_INIT;
 	FILE *cron_list, *cron_in;
-	struct strbuf line = STRBUF_INIT;
+	struct strbuf लिन्या = STRBUF_INIT;
 	struct tempfile *tmpedit = NULL;
 	int minute = get_random_minute();
 
 	get_schedule_cmd("crontab", NULL, &cmd);
-	strvec_split(&crontab_list.args, cmd);
-	strvec_push(&crontab_list.args, "-l");
+	strvec_split(&crontab_list.मगा_कातविरान, cmd);
+	strvec_इतुलाक(&crontab_list.मगा_कातविरान, "-l");
 	crontab_list.in = -1;
 	crontab_list.out = dup(fd);
 	crontab_list.git_cmd = 0;
@@ -2486,42 +2486,42 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
+	while (!strbuf_getline_lf(&लिन्या, cron_list)) {
+		if (!in_old_region && !strcmp(लिन्या.buf, BEGIN_लिन्या))
 			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
+		else if (in_old_region && !strcmp(लिन्या.buf, END_लिन्या))
 			in_old_region = 0;
 		else if (!in_old_region)
-			fprintf(cron_in, "%s\n", line.buf);
+			fprintf(cron_in, "%s\n", लिन्या.buf);
 	}
-	strbuf_release(&line);
+	strbuf_release(&लिन्या);
 
 	if (run_maintenance) {
-		struct strbuf line_format = STRBUF_INIT;
+		struct strbuf लिन्या_format = STRBUF_INIT;
 		const char *exec_path = git_exec_path();
 
-		fprintf(cron_in, "%s\n", BEGIN_LINE);
+		fprintf(cron_in, "%s\n", BEGIN_लिन्या);
 		fprintf(cron_in,
 			"# The following schedule was created by Git\n");
 		fprintf(cron_in, "# Any edits made in this region might be\n");
 		fprintf(cron_in,
 			"# replaced in the future by a Git command.\n\n");
 
-		strbuf_addf(&line_format,
+		strbuf_addf(&लिन्या_format,
 			    "%%d %%s * * %%s \"%s/git\" --exec-path=\"%s\" %s for-each-repo --keep-going --config=maintenance.repo maintenance run --schedule=%%s\n",
 			    exec_path, exec_path, get_extra_config_parameters());
-		fprintf(cron_in, line_format.buf, minute, "1-23", "*", "hourly");
-		fprintf(cron_in, line_format.buf, minute, "0", "1-6", "daily");
-		fprintf(cron_in, line_format.buf, minute, "0", "0", "weekly");
-		strbuf_release(&line_format);
+		fprintf(cron_in, लिन्या_format.buf, minute, "1-23", "*", "hourly");
+		fprintf(cron_in, लिन्या_format.buf, minute, "0", "1-6", "daily");
+		fprintf(cron_in, लिन्या_format.buf, minute, "0", "0", "weekly");
+		strbuf_release(&लिन्या_format);
 
-		fprintf(cron_in, "\n%s\n", END_LINE);
+		fprintf(cron_in, "\n%s\n", END_लिन्या);
 	}
 
 	fflush(cron_in);
 
-	strvec_split(&crontab_edit.args, cmd);
-	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
+	strvec_split(&crontab_edit.मगा_कातविरान, cmd);
+	strvec_इतुलाक(&crontab_edit.मगा_कातविरान, get_tempfile_path(tmpedit));
 	crontab_edit.git_cmd = 0;
 
 	if (start_command(&crontab_edit)) {
@@ -2544,7 +2544,7 @@ static int real_is_systemd_timer_available(void)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", NULL);
+	strvec_pushl(&child.मगा_कातविरान, "systemctl", "--user", "list-timers", NULL);
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.no_stderr = 1;
@@ -2764,10 +2764,10 @@ static int systemd_timer_enable_unit(int enable,
 	}
 
 	get_schedule_cmd("systemctl", NULL, &cmd);
-	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "--user", enable ? "enable" : "disable",
+	strvec_split(&child.मगा_कातविरान, cmd);
+	strvec_pushl(&child.मगा_कातविरान, "--user", enable ? "enable" : "disable",
 		     "--now", NULL);
-	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	strvec_pushf(&child.मगा_कातविरान, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
 	if (start_command(&child)) {
 		ret = error(_("failed to start systemctl"));
@@ -2894,20 +2894,20 @@ static const struct {
 	},
 };
 
-static enum scheduler parse_scheduler(const char *value)
+static enum scheduler parse_scheduler(const char *हालागा)
 {
-	if (!value)
+	if (!हालागा)
 		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
+	else if (!strcasecmp(हालागा, "auto"))
 		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
+	else if (!strcasecmp(हालागा, "cron") || !strcasecmp(हालागा, "crontab"))
 		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
-		 !strcasecmp(value, "systemd-timer"))
+	else if (!strcasecmp(हालागा, "systemd") ||
+		 !strcasecmp(हालागा, "systemd-timer"))
 		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
+	else if (!strcasecmp(हालागा, "launchctl"))
 		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
+	else if (!strcasecmp(हालागा, "schtasks"))
 		return SCHEDULER_SCHTASKS;
 	else
 		return SCHEDULER_INVALID;
@@ -2916,7 +2916,7 @@ static enum scheduler parse_scheduler(const char *value)
 static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
 				     int unset)
 {
-	enum scheduler *scheduler = opt->value;
+	enum scheduler *scheduler = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -3022,7 +3022,7 @@ static int maintenance_start(int argc, const char **argv, const char *prefix,
 			PARSE_OPT_NONEG, maintenance_opt_scheduler),
 		OPT_END()
 	};
-	const char *register_args[] = { "register", NULL };
+	const char *register_मगा_कातविरान[] = { "register", NULL };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_start_usage, 0);
@@ -3035,7 +3035,7 @@ static int maintenance_start(int argc, const char **argv, const char *prefix,
 	if (update_background_schedule(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	if (maintenance_register(ARRAY_SIZE(register_मगा_कातविरान)-1, register_मगा_कातविरान, NULL, repo))
 		warning(_("failed to add repo to global config"));
 	return 0;
 }

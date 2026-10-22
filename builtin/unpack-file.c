@@ -28,7 +28,7 @@ static char *create_temp_file(struct object_id *oid)
 	return path;
 }
 
-static const char usage_msg[] =
+static const char usage_मेनसाहे[] =
 "git unpack-file <blob>";
 
 int cmd_unpack_file(int argc,
@@ -38,9 +38,9 @@ int cmd_unpack_file(int argc,
 {
 	struct object_id oid;
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_मेनसाहे);
 	if (argc != 2)
-		usage(usage_msg);
+		usage(usage_मेनसाहे);
 	if (repo_get_oid(the_repository, argv[1], &oid))
 		die("Not a valid object name %s", argv[1]);
 

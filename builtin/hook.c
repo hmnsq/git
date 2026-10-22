@@ -34,13 +34,13 @@ static int list(int argc, const char **argv, const char *prefix,
 	struct string_list *head;
 	struct string_list_item *item;
 	const char *hookname = NULL;
-	int line_terminator = '\n';
+	int लिन्या_terminator = '\n';
 	int show_scope = 0;
 	int allow_unknown = 0;
 	int ret = 0;
 
 	struct option list_options[] = {
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_SET_INT('z', NULL, &लिन्या_terminator,
 			    N_("use NUL as line terminator"), '\0'),
 		OPT_BOOL(0, "show-scope", &show_scope,
 			 N_("show the config scope that defined each hook")),
@@ -57,7 +57,7 @@ static int list(int argc, const char **argv, const char *prefix,
 	 * arguments later they probably should be caught by parse_options.
 	 */
 	if (argc != 1)
-		usage_msg_opt(_("you must specify a hook event name to list"),
+		usage_मेनसाहे_opt(_("you must specify a hook event name to list"),
 			      builtin_hook_list_usage, list_options);
 
 	hookname = argv[0];
@@ -82,7 +82,7 @@ static int list(int argc, const char **argv, const char *prefix,
 
 		switch (h->kind) {
 		case HOOK_TRADITIONAL:
-			printf("%s%c", _("hook from hookdir"), line_terminator);
+			printf("%s%c", _("hook from hookdir"), लिन्या_terminator);
 			break;
 		case HOOK_CONFIGURED: {
 			const char *name = h->u.configured.friendly_name;
@@ -100,10 +100,10 @@ static int list(int argc, const char **argv, const char *prefix,
 								 "";
 			if (scope)
 				printf("%s\t%s%s%c", scope, disability, name,
-				       line_terminator);
+				       लिन्या_terminator);
 			else
 				printf("%s%s%c", disability, name,
-				       line_terminator);
+				       लिन्या_terminator);
 			break;
 		}
 		default:
@@ -165,7 +165,7 @@ static int run(int argc, const char **argv, const char *prefix,
 
 	/* Add our arguments, start after -- */
 	for (i = 2 ; i < argc; i++)
-		strvec_push(&opt.args, argv[i]);
+		strvec_इतुलाक(&opt.मगा_कातविरान, argv[i]);
 
 	/* Need to take into account core.hooksPath */
 	repo_config(the_repository, git_default_config, NULL);

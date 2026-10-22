@@ -99,7 +99,7 @@ struct rebase_options {
 	const char *onto_name;
 	const char *revisions;
 	const char *switch_to;
-	int root, root_with_onto;
+	int उगात, उगात_with_onto;
 	struct object_id *squash_onto;
 	struct commit *restrict_revision;
 	int dont_finish_rebase;
@@ -114,7 +114,7 @@ struct rebase_options {
 	enum action action;
 	char *reflog_action;
 	int signoff;
-	struct strvec trailer_args;
+	struct strvec trailer_मगा_कातविरान;
 	int allow_rerere_autoupdate;
 	int keep_empty;
 	int autosquash;
@@ -145,7 +145,7 @@ struct rebase_options {
 		.flags = REBASE_NO_QUIET, 		\
 		.git_am_opts = STRVEC_INIT,		\
 		.exec = STRING_LIST_INIT_NODUP,		\
-		.trailer_args = STRVEC_INIT,		\
+		.trailer_मगा_कातविरान = STRVEC_INIT,		\
 		.git_format_patch_opt = STRBUF_INIT,	\
 		.fork_point = -1,			\
 		.reapply_cherry_picks = -1,             \
@@ -169,7 +169,7 @@ static void rebase_options_release(struct rebase_options *opts)
 	free(opts->strategy);
 	string_list_clear(&opts->strategy_opts, 0);
 	strbuf_release(&opts->git_format_patch_opt);
-	strvec_clear(&opts->trailer_args);
+	strvec_clear(&opts->trailer_मगा_कातविरान);
 }
 
 static struct replay_opts get_replay_opts(const struct rebase_options *opts)
@@ -182,7 +182,7 @@ static struct replay_opts get_replay_opts(const struct rebase_options *opts)
 
 	replay.signoff = opts->signoff;
 
-	strvec_pushv(&replay.trailer_args, opts->trailer_args.v);
+	strvec_pushv(&replay.trailer_मगा_कातविरान, opts->trailer_मगा_कातविरान.v);
 
 	replay.allow_ff = !(opts->flags & REBASE_FORCE);
 	if (opts->allow_rerere_autoupdate)
@@ -208,7 +208,7 @@ static struct replay_opts get_replay_opts(const struct rebase_options *opts)
 	}
 
 	for (size_t i = 0; i < opts->strategy_opts.nr; i++)
-		strvec_push(&replay.xopts, opts->strategy_opts.items[i].string);
+		strvec_इतुलाक(&replay.xopts, opts->strategy_opts.मगा_बागाय[i].string);
 
 	if (opts->squash_onto) {
 		oidcpy(&replay.squash_onto, opts->squash_onto);
@@ -228,7 +228,7 @@ static int edit_todo_file(unsigned flags, struct replay_opts *opts)
 	if (strbuf_read_file(&todo_list.buf, todo_file, 0) < 0)
 		return error_errno(_("could not read '%s'."), todo_file);
 
-	strbuf_stripspace(&todo_list.buf, comment_line_str);
+	strbuf_stripspace(&todo_list.buf, comment_लिन्या_str);
 	res = edit_todo_list(the_repository, opts, &todo_list, &new_todo,
 			     NULL, NULL, flags);
 	if (!res && todo_list_write_to_file(the_repository, &new_todo, todo_file,
@@ -292,7 +292,7 @@ static int do_interactive_rebase(struct rebase_options *opts, unsigned flags)
 {
 	int ret = -1;
 	char *revisions = NULL, *shortrevisions = NULL;
-	struct strvec make_script_args = STRVEC_INIT;
+	struct strvec make_script_मगा_कातविरान = STRVEC_INIT;
 	struct todo_list todo_list = TODO_LIST_INIT;
 	struct replay_opts replay = get_replay_opts(opts);
 
@@ -300,13 +300,13 @@ static int do_interactive_rebase(struct rebase_options *opts, unsigned flags)
 				&revisions, &shortrevisions))
 		goto cleanup;
 
-	strvec_pushl(&make_script_args, "", revisions, NULL);
+	strvec_pushl(&make_script_मगा_कातविरान, "", revisions, NULL);
 	if (opts->restrict_revision)
-		strvec_pushf(&make_script_args, "^%s",
+		strvec_pushf(&make_script_मगा_कातविरान, "^%s",
 			     oid_to_hex(&opts->restrict_revision->object.oid));
 
 	ret = sequencer_make_script(the_repository, &todo_list.buf,
-				    &make_script_args, flags);
+				    &make_script_मगा_कातविरान, flags);
 	if (ret) {
 		error(_("could not generate todo list"));
 		goto cleanup;
@@ -336,7 +336,7 @@ cleanup:
 	free(revisions);
 	free(shortrevisions);
 	todo_list_release(&todo_list);
-	strvec_clear(&make_script_args);
+	strvec_clear(&make_script_मगा_कातविरान);
 
 	return ret;
 }
@@ -352,7 +352,7 @@ static int run_sequencer_rebase(struct rebase_options *opts)
 	flags |= abbreviate_commands ? TODO_LIST_ABBREVIATE_CMDS : 0;
 	flags |= opts->rebase_merges ? TODO_LIST_REBASE_MERGES : 0;
 	flags |= opts->rebase_cousins > 0 ? TODO_LIST_REBASE_COUSINS : 0;
-	flags |= opts->root_with_onto ? TODO_LIST_ROOT_WITH_ONTO : 0;
+	flags |= opts->उगात_with_onto ? TODO_LIST_उगात_WITH_ONTO : 0;
 	flags |= opts->reapply_cherry_picks ? TODO_LIST_REAPPLY_CHERRY_PICKS : 0;
 	flags |= opts->flags & REBASE_NO_QUIET ? TODO_LIST_WARN_SKIPPED_CHERRY_PICKS : 0;
 
@@ -388,7 +388,7 @@ static int run_sequencer_rebase(struct rebase_options *opts)
 		struct child_process cmd = CHILD_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
-		strvec_pushl(&cmd.args, "show", "REBASE_HEAD", "--", NULL);
+		strvec_pushl(&cmd.मगा_कातविरान, "show", "REBASE_HEAD", "--", NULL);
 		ret = run_command(&cmd);
 
 		break;
@@ -592,7 +592,7 @@ static int finish_rebase(struct rebase_options *opts)
 static int move_to_original_branch(struct rebase_options *opts)
 {
 	struct strbuf branch_reflog = STRBUF_INIT, head_reflog = STRBUF_INIT;
-	struct reset_working_tree_options ropts = { 0 };
+	struct reset_working_पुनो_options ropts = { 0 };
 	int ret;
 
 	if (!opts->head_name)
@@ -607,11 +607,11 @@ static int move_to_original_branch(struct rebase_options *opts)
 	strbuf_addf(&head_reflog, "%s (finish): returning to %s",
 		    opts->reflog_action, opts->head_name);
 	ropts.branch = opts->head_name;
-	ropts.flags = RESET_WORKING_TREE_REFS_ONLY |
-		      RESET_WORKING_TREE_UPDATE_HEAD;
-	ropts.branch_msg = branch_reflog.buf;
-	ropts.head_msg = head_reflog.buf;
-	ret = reset_working_tree(the_repository, &ropts);
+	ropts.flags = RESET_WORKING_पुनो_REFS_ONLY |
+		      RESET_WORKING_पुनो_UPDATE_HEAD;
+	ropts.branch_मेनसाहे = branch_reflog.buf;
+	ropts.head_मेनसाहे = head_reflog.buf;
+	ret = reset_working_पुनो(the_repository, &ropts);
 
 	strbuf_release(&branch_reflog);
 	strbuf_release(&head_reflog);
@@ -626,14 +626,14 @@ static int run_am(struct rebase_options *opts)
 	char *rebased_patches;
 
 	am.git_cmd = 1;
-	strvec_push(&am.args, "am");
+	strvec_इतुलाक(&am.मगा_कातविरान, "am");
 	strvec_pushf(&am.env, GIT_REFLOG_ACTION_ENVIRONMENT "=%s (pick)",
 		     opts->reflog_action);
 	if (opts->action == ACTION_CONTINUE) {
-		strvec_push(&am.args, "--resolved");
-		strvec_pushf(&am.args, "--resolvemsg=%s", rebase_resolvemsg);
+		strvec_इतुलाक(&am.मगा_कातविरान, "--resolved");
+		strvec_pushf(&am.मगा_कातविरान, "--resolvemsg=%s", rebase_resolvemsg);
 		if (opts->gpg_sign_opt)
-			strvec_push(&am.args, opts->gpg_sign_opt);
+			strvec_इतुलाक(&am.मगा_कातविरान, opts->gpg_sign_opt);
 		status = run_command(&am);
 		if (status)
 			return status;
@@ -641,8 +641,8 @@ static int run_am(struct rebase_options *opts)
 		return move_to_original_branch(opts);
 	}
 	if (opts->action == ACTION_SKIP) {
-		strvec_push(&am.args, "--skip");
-		strvec_pushf(&am.args, "--resolvemsg=%s", rebase_resolvemsg);
+		strvec_इतुलाक(&am.मगा_कातविरान, "--skip");
+		strvec_pushf(&am.मगा_कातविरान, "--resolvemsg=%s", rebase_resolvemsg);
 		status = run_command(&am);
 		if (status)
 			return status;
@@ -650,7 +650,7 @@ static int run_am(struct rebase_options *opts)
 		return move_to_original_branch(opts);
 	}
 	if (opts->action == ACTION_SHOW_CURRENT_PATCH) {
-		strvec_push(&am.args, "--show-current-patch");
+		strvec_इतुलाक(&am.मगा_कातविरान, "--show-current-patch");
 		return run_command(&am);
 	}
 
@@ -666,27 +666,27 @@ static int run_am(struct rebase_options *opts)
 	}
 
 	format_patch.git_cmd = 1;
-	strvec_pushl(&format_patch.args, "format-patch", "-k", "--stdout",
+	strvec_pushl(&format_patch.मगा_कातविरान, "format-patch", "-k", "--stdout",
 		     "--full-index", "--cherry-pick", "--right-only",
 		     "--default-prefix", "--no-renames",
 		     "--no-cover-letter", "--pretty=mboxrd", "--topo-order",
 		     "--no-base", NULL);
 	if (opts->git_format_patch_opt.len)
-		strvec_split(&format_patch.args,
+		strvec_split(&format_patch.मगा_कातविरान,
 			     opts->git_format_patch_opt.buf);
-	strvec_pushf(&format_patch.args, "%s...%s",
-		     oid_to_hex(opts->root ?
+	strvec_pushf(&format_patch.मगा_कातविरान, "%s...%s",
+		     oid_to_hex(opts->उगात ?
 				/* this is now equivalent to !opts->upstream */
 				&opts->onto->object.oid :
 				&opts->upstream->object.oid),
 		     oid_to_hex(&opts->orig_head->object.oid));
 	if (opts->restrict_revision)
-		strvec_pushf(&format_patch.args, "^%s",
+		strvec_pushf(&format_patch.मगा_कातविरान, "^%s",
 			     oid_to_hex(&opts->restrict_revision->object.oid));
 
 	status = run_command(&format_patch);
 	if (status) {
-		struct reset_working_tree_options ropts = { 0 };
+		struct reset_working_पुनो_options ropts = { 0 };
 		unlink(rebased_patches);
 		free(rebased_patches);
 		child_process_clear(&am);
@@ -694,8 +694,8 @@ static int run_am(struct rebase_options *opts)
 		ropts.oid = &opts->orig_head->object.oid;
 		ropts.branch = opts->head_name;
 		ropts.default_reflog_action = opts->reflog_action;
-		ropts.flags = RESET_WORKING_TREE_UPDATE_HEAD;
-		reset_working_tree(the_repository, &ropts);
+		ropts.flags = RESET_WORKING_पुनो_UPDATE_HEAD;
+		reset_working_पुनो(the_repository, &ropts);
 		error(_("\ngit encountered an error while preparing the "
 			"patches to replay\n"
 			"these revisions:\n"
@@ -715,16 +715,16 @@ static int run_am(struct rebase_options *opts)
 		return status;
 	}
 
-	strvec_pushv(&am.args, opts->git_am_opts.v);
-	strvec_push(&am.args, "--rebasing");
-	strvec_pushf(&am.args, "--resolvemsg=%s", rebase_resolvemsg);
-	strvec_push(&am.args, "--patch-format=mboxrd");
+	strvec_pushv(&am.मगा_कातविरान, opts->git_am_opts.v);
+	strvec_इतुलाक(&am.मगा_कातविरान, "--rebasing");
+	strvec_pushf(&am.मगा_कातविरान, "--resolvemsg=%s", rebase_resolvemsg);
+	strvec_इतुलाक(&am.मगा_कातविरान, "--patch-format=mboxrd");
 	if (opts->allow_rerere_autoupdate == RERERE_AUTOUPDATE)
-		strvec_push(&am.args, "--rerere-autoupdate");
+		strvec_इतुलाक(&am.मगा_कातविरान, "--rerere-autoupdate");
 	else if (opts->allow_rerere_autoupdate == RERERE_NOAUTOUPDATE)
-		strvec_push(&am.args, "--no-rerere-autoupdate");
+		strvec_इतुलाक(&am.मगा_कातविरान, "--no-rerere-autoupdate");
 	if (opts->gpg_sign_opt)
-		strvec_push(&am.args, opts->gpg_sign_opt);
+		strvec_इतुलाक(&am.मगा_कातविरान, opts->gpg_sign_opt);
 	status = run_command(&am);
 	unlink(rebased_patches);
 	free(rebased_patches);
@@ -787,23 +787,23 @@ static int run_specific_rebase(struct rebase_options *opts)
 	return status ? -1 : 0;
 }
 
-static void parse_rebase_merges_value(struct rebase_options *options, const char *value)
+static void parse_rebase_merges_हालागा(struct rebase_options *options, const char *हालागा)
 {
-	if (!strcmp("no-rebase-cousins", value))
+	if (!strcmp("no-rebase-cousins", हालागा))
 		options->rebase_cousins = 0;
-	else if (!strcmp("rebase-cousins", value))
+	else if (!strcmp("rebase-cousins", हालागा))
 		options->rebase_cousins = 1;
 	else
-		die(_("Unknown rebase-merges mode: %s"), value);
+		die(_("Unknown rebase-merges mode: %s"), हालागा);
 }
 
-static int rebase_config(const char *var, const char *value,
+static int rebase_config(const char *var, const char *हालागा,
 			 const struct config_context *ctx, void *data)
 {
 	struct rebase_options *opts = data;
 
 	if (!strcmp(var, "rebase.stat")) {
-		if (git_config_bool(var, value))
+		if (git_config_bool(var, हालागा))
 			opts->flags |= REBASE_DIFFSTAT;
 		else
 			opts->flags &= ~REBASE_DIFFSTAT;
@@ -811,27 +811,27 @@ static int rebase_config(const char *var, const char *value,
 	}
 
 	if (!strcmp(var, "rebase.autosquash")) {
-		opts->config_autosquash = git_config_bool(var, value);
+		opts->config_autosquash = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "commit.gpgsign")) {
 		free(opts->gpg_sign_opt);
-		opts->gpg_sign_opt = git_config_bool(var, value) ?
+		opts->gpg_sign_opt = git_config_bool(var, हालागा) ?
 			xstrdup("-S") : NULL;
 		return 0;
 	}
 
 	if (!strcmp(var, "rebase.autostash")) {
-		opts->autostash = git_config_bool(var, value);
+		opts->autostash = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "rebase.rebasemerges")) {
-		opts->config_rebase_merges = git_parse_maybe_bool(value);
+		opts->config_rebase_merges = git_parse_maybe_bool(हालागा);
 		if (opts->config_rebase_merges < 0) {
 			opts->config_rebase_merges = 1;
-			parse_rebase_merges_value(opts, value);
+			parse_rebase_merges_हालागा(opts, हालागा);
 		} else {
 			opts->rebase_cousins = 0;
 		}
@@ -839,44 +839,44 @@ static int rebase_config(const char *var, const char *value,
 	}
 
 	if (!strcmp(var, "rebase.updaterefs")) {
-		opts->config_update_refs = git_config_bool(var, value);
+		opts->config_update_refs = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "rebase.reschedulefailedexec")) {
-		opts->reschedule_failed_exec = git_config_bool(var, value);
+		opts->reschedule_failed_exec = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "rebase.forkpoint")) {
-		opts->fork_point = git_config_bool(var, value) ? -1 : 0;
+		opts->fork_point = git_config_bool(var, हालागा) ? -1 : 0;
 		return 0;
 	}
 
 	if (!strcmp(var, "rebase.backend")) {
 		FREE_AND_NULL(opts->default_backend);
-		return git_config_string(&opts->default_backend, var, value);
+		return git_config_string(&opts->default_backend, var, हालागा);
 	}
 
-	return git_default_config(var, value, ctx, data);
+	return git_default_config(var, हालागा, ctx, data);
 }
 
 static int checkout_up_to_date(struct rebase_options *options)
 {
 	struct strbuf buf = STRBUF_INIT;
-	struct reset_working_tree_options ropts = { 0 };
+	struct reset_working_पुनो_options ropts = { 0 };
 	int ret = 0;
 
 	strbuf_addf(&buf, "%s: checkout %s",
 		    options->reflog_action, options->switch_to);
 	ropts.oid = &options->orig_head->object.oid;
 	ropts.branch = options->head_name;
-	ropts.flags = RESET_WORKING_TREE_RUN_POST_CHECKOUT_HOOK |
-		      RESET_WORKING_TREE_UPDATE_HEAD;
+	ropts.flags = RESET_WORKING_पुनो_RUN_POST_CHECKOUT_HOOK |
+		      RESET_WORKING_पुनो_UPDATE_HEAD;
 	if (!ropts.branch)
-		ropts.flags |=  RESET_WORKING_TREE_DETACH;
-	ropts.head_msg = buf.buf;
-	if (reset_working_tree(the_repository, &ropts) < 0)
+		ropts.flags |=  RESET_WORKING_पुनो_DETACH;
+	ropts.head_मेनसाहे = buf.buf;
+	if (reset_working_पुनो(the_repository, &ropts) < 0)
 		ret = error(_("could not switch to %s"), options->switch_to);
 	strbuf_release(&buf);
 
@@ -953,7 +953,7 @@ static void fill_branch_base(struct rebase_options *options,
 
 static int parse_opt_am(const struct option *opt, const char *arg, int unset)
 {
-	struct rebase_options *opts = opt->value;
+	struct rebase_options *opts = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -969,7 +969,7 @@ static int parse_opt_am(const struct option *opt, const char *arg, int unset)
 /* -i followed by -m is still -i */
 static int parse_opt_merge(const struct option *opt, const char *arg, int unset)
 {
-	struct rebase_options *opts = opt->value;
+	struct rebase_options *opts = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -986,7 +986,7 @@ static int parse_opt_merge(const struct option *opt, const char *arg, int unset)
 static int parse_opt_interactive(const struct option *opt, const char *arg,
 				 int unset)
 {
-	struct rebase_options *opts = opt->value;
+	struct rebase_options *opts = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -1000,26 +1000,26 @@ static int parse_opt_interactive(const struct option *opt, const char *arg,
 	return 0;
 }
 
-static enum empty_type parse_empty_value(const char *value)
+static enum empty_type parse_empty_हालागा(const char *हालागा)
 {
-	if (!strcasecmp(value, "drop"))
+	if (!strcasecmp(हालागा, "drop"))
 		return EMPTY_DROP;
-	else if (!strcasecmp(value, "keep"))
+	else if (!strcasecmp(हालागा, "keep"))
 		return EMPTY_KEEP;
-	else if (!strcasecmp(value, "stop"))
+	else if (!strcasecmp(हालागा, "stop"))
 		return EMPTY_STOP;
-	else if (!strcasecmp(value, "ask")) {
+	else if (!strcasecmp(हालागा, "ask")) {
 		warning(_("--empty=ask is deprecated; use '--empty=stop' instead."));
 		return EMPTY_STOP;
 	}
 
-	die(_("unrecognized empty type '%s'; valid values are \"drop\", \"keep\", and \"stop\"."), value);
+	die(_("unrecognized empty type '%s'; valid values are \"drop\", \"keep\", and \"stop\"."), हालागा);
 }
 
 static int parse_opt_keep_empty(const struct option *opt, const char *arg,
 				int unset)
 {
-	struct rebase_options *opts = opt->value;
+	struct rebase_options *opts = opt->हालागा;
 
 	BUG_ON_OPT_ARG(arg);
 
@@ -1030,18 +1030,18 @@ static int parse_opt_keep_empty(const struct option *opt, const char *arg,
 
 static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
 {
-	struct rebase_options *options = opt->value;
-	enum empty_type value = parse_empty_value(arg);
+	struct rebase_options *options = opt->हालागा;
+	enum empty_type हालागा = parse_empty_हालागा(arg);
 
 	BUG_ON_OPT_NEG(unset);
 
-	options->empty = value;
+	options->empty = हालागा;
 	return 0;
 }
 
 static int parse_opt_rebase_merges(const struct option *opt, const char *arg, int unset)
 {
-	struct rebase_options *options = opt->value;
+	struct rebase_options *options = opt->हालागा;
 
 	options->rebase_merges = !unset;
 	options->rebase_cousins = 0;
@@ -1055,7 +1055,7 @@ static int parse_opt_rebase_merges(const struct option *opt, const char *arg, in
 				  "instead, which does the same thing."));
 			return 0;
 		}
-		parse_rebase_merges_value(options, arg);
+		parse_rebase_merges_हालागा(options, arg);
 	}
 
 	return 0;
@@ -1114,7 +1114,7 @@ int cmd_rebase(int argc,
 	int ret, flags, total_argc, in_progress = 0;
 	int keep_base = 0;
 	int ok_to_skip_pre_rebase = 0;
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 	struct strbuf revisions = STRBUF_INIT;
 	struct strbuf buf = STRBUF_INIT;
 	struct object_id branch_base;
@@ -1126,7 +1126,7 @@ int cmd_rebase(int argc,
 	int reschedule_failed_exec = -1;
 	int allow_preemptive_ff = 1;
 	int preserve_merges_selected = 0;
-	struct reset_working_tree_options ropts = { 0 };
+	struct reset_working_पुनो_options ropts = { 0 };
 	struct option builtin_rebase_options[] = {
 		OPT_STRING(0, "onto", &options.onto_name,
 			   N_("revision"),
@@ -1145,13 +1145,13 @@ int cmd_rebase(int argc,
 			.type = OPTION_NEGBIT,
 			.short_name = 'n',
 			.long_name = "no-stat",
-			.value = &options.flags,
+			.हालागा = &options.flags,
 			.precision = sizeof(options.flags),
 			.help = N_("do not show diffstat of what changed upstream"),
 			.flags = PARSE_OPT_NOARG,
 			.defval = REBASE_DIFFSTAT,
 		},
-		OPT_STRVEC(0, "trailer", &options.trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &options.trailer_मगा_कातविरान, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL(0, "signoff", &options.signoff,
 			 N_("add a Signed-off-by trailer to each commit")),
@@ -1222,7 +1222,7 @@ int cmd_rebase(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &gpg_sign,
+			.हालागा = &gpg_sign,
 			.argh = N_("key-id"),
 			.help = N_("GPG-sign commits"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1247,7 +1247,7 @@ int cmd_rebase(int argc,
 				N_("option"),
 				N_("pass the argument through to the merge "
 				   "strategy")),
-		OPT_BOOL(0, "root", &options.root,
+		OPT_BOOL(0, "root", &options.उगात,
 			 N_("rebase all reachable commits up to the root(s)")),
 		OPT_BOOL(0, "reschedule-failed-exec",
 			 &reschedule_failed_exec,
@@ -1306,8 +1306,8 @@ int cmd_rebase(int argc,
 			     builtin_rebase_options,
 			     builtin_rebase_usage, 0);
 
-	if (options.trailer_args.nr) {
-		if (validate_trailer_args(&options.trailer_args))
+	if (options.trailer_मगा_कातविरान.nr) {
+		if (validate_trailer_मगा_कातविरान(&options.trailer_मगा_कातविरान))
 			die(NULL);
 		options.flags |= REBASE_FORCE;
 	}
@@ -1329,7 +1329,7 @@ int cmd_rebase(int argc,
 	if (keep_base) {
 		if (options.onto_name)
 			die(_("options '%s' and '%s' cannot be used together"), "--keep-base", "--onto");
-		if (options.root)
+		if (options.उगात)
 			die(_("options '%s' and '%s' cannot be used together"), "--keep-base", "--root");
 		/*
 		 * --keep-base defaults to --no-fork-point to keep the
@@ -1338,7 +1338,7 @@ int cmd_rebase(int argc,
 		if (options.fork_point < 0)
 			options.fork_point = 0;
 	}
-	if (options.root && options.fork_point > 0)
+	if (options.उगात && options.fork_point > 0)
 		die(_("options '%s' and '%s' cannot be used together"), "--root", "--fork-point");
 
 	if (options.action != ACTION_NONE && !in_progress)
@@ -1394,9 +1394,9 @@ int cmd_rebase(int argc,
 
 		rerere_clear(the_repository, &merge_rr);
 		string_list_clear(&merge_rr, 1);
-		ropts.flags = RESET_WORKING_TREE_HARD |
-			      RESET_WORKING_TREE_UPDATE_HEAD;
-		if (reset_working_tree(the_repository, &ropts) < 0)
+		ropts.flags = RESET_WORKING_पुनो_HARD |
+			      RESET_WORKING_पुनो_UPDATE_HEAD;
+		if (reset_working_पुनो(the_repository, &ropts) < 0)
 			die(_("could not discard worktree changes"));
 		remove_branch_state(the_repository, 0);
 		if (read_basic_state(&options))
@@ -1405,7 +1405,7 @@ int cmd_rebase(int argc,
 	}
 	case ACTION_ABORT: {
 		struct string_list merge_rr = STRING_LIST_INIT_DUP;
-		struct strbuf head_msg = STRBUF_INIT;
+		struct strbuf head_मेनसाहे = STRBUF_INIT;
 
 		rerere_clear(the_repository, &merge_rr);
 		string_list_clear(&merge_rr, 1);
@@ -1413,19 +1413,19 @@ int cmd_rebase(int argc,
 		if (read_basic_state(&options))
 			exit(1);
 
-		strbuf_addf(&head_msg, "%s (abort): returning to %s",
+		strbuf_addf(&head_मेनसाहे, "%s (abort): returning to %s",
 			    options.reflog_action,
 			    options.head_name ? options.head_name
 					      : oid_to_hex(&options.orig_head->object.oid));
 		ropts.oid = &options.orig_head->object.oid;
-		ropts.head_msg = head_msg.buf;
+		ropts.head_मेनसाहे = head_मेनसाहे.buf;
 		ropts.branch = options.head_name;
-		ropts.flags = RESET_WORKING_TREE_HARD |
-			      RESET_WORKING_TREE_UPDATE_HEAD;
-		if (reset_working_tree(the_repository, &ropts) < 0)
+		ropts.flags = RESET_WORKING_पुनो_HARD |
+			      RESET_WORKING_पुनो_UPDATE_HEAD;
+		if (reset_working_पुनो(the_repository, &ropts) < 0)
 			die(_("could not move back to %s"),
 			    oid_to_hex(&options.orig_head->object.oid));
-		strbuf_release(&head_msg);
+		strbuf_release(&head_मेनसाहे);
 		remove_branch_state(the_repository, 0);
 		ret = finish_rebase(&options);
 		goto cleanup;
@@ -1507,11 +1507,11 @@ int cmd_rebase(int argc,
 	}
 
 	for (i = 0; i < options.exec.nr; i++)
-		if (check_exec_cmd(options.exec.items[i].string))
+		if (check_exec_cmd(options.exec.मगा_बागाय[i].string))
 			exit(1);
 
 	if (!(options.flags & REBASE_NO_QUIET))
-		strvec_push(&options.git_am_opts, "-q");
+		strvec_इतुलाक(&options.git_am_opts, "-q");
 
 	if (options.empty != EMPTY_UNSPECIFIED)
 		imply_merge(&options, "--empty");
@@ -1546,13 +1546,13 @@ int cmd_rebase(int argc,
 
 	if (options.type == REBASE_APPLY) {
 		if (ignore_whitespace)
-			strvec_push(&options.git_am_opts,
+			strvec_इतुलाक(&options.git_am_opts,
 				    "--ignore-whitespace");
 		if (options.committer_date_is_author_date)
-			strvec_push(&options.git_am_opts,
+			strvec_इतुलाक(&options.git_am_opts,
 				    "--committer-date-is-author-date");
 		if (options.ignore_date)
-			strvec_push(&options.git_am_opts, "--ignore-date");
+			strvec_इतुलाक(&options.git_am_opts, "--ignore-date");
 	} else {
 		/* REBASE_MERGE */
 		if (ignore_whitespace) {
@@ -1568,10 +1568,10 @@ int cmd_rebase(int argc,
 	if (options.strategy)
 		imply_merge(&options, "--strategy");
 
-	if (options.root && !options.onto_name)
+	if (options.उगात && !options.onto_name)
 		imply_merge(&options, "--root without --onto");
 
-	if (options.trailer_args.nr)
+	if (options.trailer_मगा_कातविरान.nr)
 		imply_merge(&options, "--trailer");
 
 	if (isatty(2) && options.flags & REBASE_NO_QUIET)
@@ -1650,11 +1650,11 @@ int cmd_rebase(int argc,
 		options.reschedule_failed_exec = reschedule_failed_exec;
 
 	if (options.signoff) {
-		strvec_push(&options.git_am_opts, "--signoff");
+		strvec_इतुलाक(&options.git_am_opts, "--signoff");
 		options.flags |= REBASE_FORCE;
 	}
 
-	if (!options.root) {
+	if (!options.उगात) {
 		if (argc < 1) {
 			struct branch *branch;
 
@@ -1679,14 +1679,14 @@ int cmd_rebase(int argc,
 		options.upstream_arg = options.upstream_name;
 	} else {
 		if (!options.onto_name) {
-			if (commit_tree("", 0, the_hash_algo->empty_tree, NULL,
+			if (commit_पुनो("", 0, the_hash_algo->empty_पुनो, NULL,
 					&squash_onto, NULL, NULL) < 0)
 				die(_("Could not create new root commit"));
 			options.squash_onto = &squash_onto;
 			options.onto_name = squash_onto_name =
 				xstrdup(oid_to_hex(&squash_onto));
 		} else
-			options.root_with_onto = 1;
+			options.उगात_with_onto = 1;
 
 		options.upstream_name = NULL;
 		options.upstream = NULL;
@@ -1792,7 +1792,7 @@ int cmd_rebase(int argc,
 				 state_dir_path("autostash", &options));
 
 
-	if (require_clean_work_tree(the_repository, "rebase",
+	if (require_clean_work_पुनो(the_repository, "rebase",
 				    _("Please commit or stash them."), 1, 1)) {
 		ret = -1;
 		goto cleanup_autostash;
@@ -1869,8 +1869,8 @@ int cmd_rebase(int argc,
 			DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
 		opts.detect_rename = DIFF_DETECT_RENAME;
 		diff_setup_done(&opts);
-		diff_tree_oid(is_null_oid(&branch_base) ?
-			      the_hash_algo->empty_tree : &branch_base,
+		diff_पुनो_oid(is_null_oid(&branch_base) ?
+			      the_hash_algo->empty_पुनो : &branch_base,
 			      &options.onto->object.oid, "", &opts);
 		diffcore_std(&opts);
 		diff_flush(&opts);
@@ -1884,17 +1884,17 @@ int cmd_rebase(int argc,
 		printf(_("First, rewinding head to replay your work on top of "
 			 "it...\n"));
 
-	strbuf_addf(&msg, "%s (start): checkout %s",
+	strbuf_addf(&मेनसाहे, "%s (start): checkout %s",
 		    options.reflog_action, options.onto_name);
 	ropts.oid = &options.onto->object.oid;
 	ropts.orig_head = &options.orig_head->object.oid;
-	ropts.flags = RESET_WORKING_TREE_DETACH |
-		      RESET_WORKING_TREE_UPDATE_HEAD |
-		      RESET_WORKING_TREE_UPDATE_ORIG_HEAD |
-		      RESET_WORKING_TREE_RUN_POST_CHECKOUT_HOOK;
-	ropts.head_msg = msg.buf;
+	ropts.flags = RESET_WORKING_पुनो_DETACH |
+		      RESET_WORKING_पुनो_UPDATE_HEAD |
+		      RESET_WORKING_पुनो_UPDATE_ORIG_HEAD |
+		      RESET_WORKING_पुनो_RUN_POST_CHECKOUT_HOOK;
+	ropts.head_मेनसाहे = मेनसाहे.buf;
 	ropts.default_reflog_action = options.reflog_action;
-	if (reset_working_tree(the_repository, &ropts)) {
+	if (reset_working_पुनो(the_repository, &ropts)) {
 		ret = error(_("Could not detach HEAD"));
 		goto cleanup_autostash;
 	}
@@ -1912,7 +1912,7 @@ int cmd_rebase(int argc,
 	}
 
 	strbuf_addf(&revisions, "%s..%s",
-		    options.root ? oid_to_hex(&options.onto->object.oid) :
+		    options.उगात ? oid_to_hex(&options.onto->object.oid) :
 		    (options.restrict_revision ?
 		     oid_to_hex(&options.restrict_revision->object.oid) :
 		     oid_to_hex(&options.upstream->object.oid)),
@@ -1925,7 +1925,7 @@ run_rebase:
 
 cleanup:
 	strbuf_release(&buf);
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 	strbuf_release(&revisions);
 	rebase_options_release(&options);
 	free(squash_onto_name);

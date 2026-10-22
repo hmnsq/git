@@ -107,7 +107,7 @@ static struct llist * llist_copy(struct llist *list)
 	return ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
+static inline struct llist_item *llist_इसिंगित(struct llist *list,
 					      struct llist_item *after,
 					      const unsigned char *oid)
 {
@@ -131,13 +131,13 @@ static inline struct llist_item *llist_insert(struct llist *list,
 	return new_item;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
+static inline struct llist_item *llist_इसिंगित_back(struct llist *list,
 						   const unsigned char *oid)
 {
-	return llist_insert(list, list->back, oid);
+	return llist_इसिंगित(list, list->back, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
+static inline struct llist_item *llist_इसिंगित_sorted_unique(struct llist *list,
 			const struct object_id *oid, struct llist_item *hint)
 {
 	struct llist_item *prev = NULL, *l;
@@ -146,7 +146,7 @@ static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
 	while (l) {
 		int cmp = oidcmp(&l->oid, oid);
 		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+			return llist_इसिंगित(list, prev, oid->hash);
 		}
 		if (!cmp) { /* already exists */
 			return l;
@@ -155,7 +155,7 @@ static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
 		l = l->next;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	return llist_इसिंगित_back(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
@@ -207,7 +207,7 @@ static void llist_sorted_difference_inplace(struct llist *A,
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
+static inline struct pack_list * pack_list_इसिंगित(struct pack_list **pl,
 					   struct pack_list *entry)
 {
 	struct pack_list *p = xmalloc(sizeof(struct pack_list));
@@ -275,8 +275,8 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
-	       p2_off < p2->pack->num_objects * p2_step)
+	while (p1_off < p1->pack->नुमेरो_objects * p1_step &&
+	       p2_off < p2->pack->नुमेरो_objects * p2_step)
 	{
 		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 					the_repository->hash_algo);
@@ -314,8 +314,8 @@ static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
 	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
-	       p2_off < p2->num_objects * p2_step)
+	while (p1_off < p1->नुमेरो_objects * p1_step &&
+	       p2_off < p2->नुमेरो_objects * p2_step)
 	{
 		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 				  the_repository->hash_algo);
@@ -420,9 +420,9 @@ static void minimize(struct pack_list **min)
 	pl = local_packs;
 	while (pl) {
 		if (pl->unique_objects->size)
-			pack_list_insert(&unique, pl);
+			pack_list_इसिंगित(&unique, pl);
 		else
-			pack_list_insert(&non_unique, pl);
+			pack_list_इसिंगित(&non_unique, pl);
 		pl = pl->next;
 	}
 	/* find out which objects are missing from the set of unique packs */
@@ -460,7 +460,7 @@ static void minimize(struct pack_list **min)
 		if (non_unique->remaining_objects->size == 0)
 			break;
 
-		pack_list_insert(min, non_unique);
+		pack_list_इसिंगित(min, non_unique);
 
 		for (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
 			llist_sorted_difference_inplace(pl->remaining_objects, non_unique->remaining_objects);
@@ -486,7 +486,7 @@ static void load_all_objects(void)
 		hint = NULL;
 		l = pl->remaining_objects->front;
 		while (l) {
-			hint = llist_insert_sorted_unique(all_objects,
+			hint = llist_इसिंगित_sorted_unique(all_objects,
 							  &l->oid, hint);
 			l = l->next;
 		}
@@ -554,16 +554,16 @@ static struct pack_list * add_pack(struct packed_git *p)
 	base = p->index_data;
 	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
 	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
-		llist_insert_back(l.remaining_objects, base + off);
+	while (off < p->नुमेरो_objects * step) {
+		llist_इसिंगित_back(l.remaining_objects, base + off);
 		off += step;
 	}
 	l.all_objects_size = l.remaining_objects->size;
 	l.unique_objects = NULL;
 	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
+		return pack_list_इसिंगित(&local_packs, &l);
 	else
-		return pack_list_insert(&altodb_packs, &l);
+		return pack_list_इसिंगित(&altodb_packs, &l);
 }
 
 static struct pack_list * add_pack_file(const char *filename)
@@ -647,7 +647,7 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 		while (fgets(buf, sizeof(buf), stdin)) {
 			if (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
-			llist_insert_sorted_unique(ignore, &oid, NULL);
+			llist_इसिंगित_sorted_unique(ignore, &oid, NULL);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);

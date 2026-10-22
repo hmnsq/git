@@ -109,7 +109,7 @@ enum notes_stripspace {
 	STRIPSPACE = 1,
 };
 
-struct note_msg {
+struct note_मेनसाहे {
 	enum notes_stripspace stripspace;
 	struct strbuf buf;
 };
@@ -119,9 +119,9 @@ struct note_data {
 	int stripspace;
 	char *edit_path;
 	struct strbuf buf;
-	struct note_msg **messages;
-	size_t msg_nr;
-	size_t msg_alloc;
+	struct note_मेनसाहे **messages;
+	size_t मेनसाहे_nr;
+	size_t मेनसाहे_alloc;
 };
 
 static void free_note_data(struct note_data *d)
@@ -132,9 +132,9 @@ static void free_note_data(struct note_data *d)
 	}
 	strbuf_release(&d->buf);
 
-	while (d->msg_nr--) {
-		strbuf_release(&d->messages[d->msg_nr]->buf);
-		free(d->messages[d->msg_nr]);
+	while (d->मेनसाहे_nr--) {
+		strbuf_release(&d->messages[d->मेनसाहे_nr]->buf);
+		free(d->messages[d->मेनसाहे_nr]);
 	}
 	free(d->messages);
 }
@@ -167,7 +167,7 @@ static void write_commented_object(int fd, const struct object_id *object)
 	struct strbuf cbuf = STRBUF_INIT;
 
 	/* Invoke "git show --stat --no-notes $object" */
-	strvec_pushl(&show.args, "show", "--stat", "--no-notes",
+	strvec_pushl(&show.मगा_कातविरान, "show", "--stat", "--no-notes",
 		     oid_to_hex(object), NULL);
 	show.no_stdin = 1;
 	show.out = -1;
@@ -179,7 +179,7 @@ static void write_commented_object(int fd, const struct object_id *object)
 
 	if (strbuf_read(&buf, show.out, 0) < 0)
 		die_errno(_("could not read 'show' output"));
-	strbuf_add_commented_lines(&cbuf, buf.buf, buf.len, comment_line_str);
+	strbuf_add_commented_मगा_लिन्या(&cbuf, buf.buf, buf.len, comment_लिन्या_str);
 	write_or_die(fd, cbuf.buf, cbuf.len);
 
 	strbuf_release(&cbuf);
@@ -193,7 +193,7 @@ static void write_commented_object(int fd, const struct object_id *object)
 static void prepare_note_data(const struct object_id *object, struct note_data *d,
 		const struct object_id *old_note)
 {
-	if (d->use_editor || !d->msg_nr) {
+	if (d->use_editor || !d->मेनसाहे_nr) {
 		int fd;
 		struct strbuf buf = STRBUF_INIT;
 
@@ -201,16 +201,16 @@ static void prepare_note_data(const struct object_id *object, struct note_data *
 		d->edit_path = repo_git_path(the_repository, "NOTES_EDITMSG");
 		fd = xopen(d->edit_path, O_CREAT | O_TRUNC | O_WRONLY, 0600);
 
-		if (d->msg_nr)
+		if (d->मेनसाहे_nr)
 			write_or_die(fd, d->buf.buf, d->buf.len);
 		else if (old_note)
 			copy_obj_to_fd(fd, old_note);
 
 		strbuf_addch(&buf, '\n');
-		strbuf_add_commented_lines(&buf, "\n", strlen("\n"), comment_line_str);
-		strbuf_add_commented_lines(&buf, _(note_template), strlen(_(note_template)),
-					   comment_line_str);
-		strbuf_add_commented_lines(&buf, "\n", strlen("\n"), comment_line_str);
+		strbuf_add_commented_मगा_लिन्या(&buf, "\n", strlen("\n"), comment_लिन्या_str);
+		strbuf_add_commented_मगा_लिन्या(&buf, _(note_template), strlen(_(note_template)),
+					   comment_लिन्या_str);
+		strbuf_add_commented_मगा_लिन्या(&buf, "\n", strlen("\n"), comment_लिन्या_str);
 		write_or_die(fd, buf.buf, buf.len);
 
 		write_commented_object(fd, object);
@@ -223,7 +223,7 @@ static void prepare_note_data(const struct object_id *object, struct note_data *
 			die(_("please supply the note contents using either -m or -F option"));
 		}
 		if (d->stripspace)
-			strbuf_stripspace(&d->buf, comment_line_str);
+			strbuf_stripspace(&d->buf, comment_लिन्या_str);
 	}
 }
 
@@ -254,94 +254,94 @@ static void append_separator(struct strbuf *message)
 
 static void concat_messages(struct note_data *d)
 {
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 	size_t i;
 
-	for (i = 0; i < d->msg_nr ; i++) {
+	for (i = 0; i < d->मेनसाहे_nr ; i++) {
 		if (d->buf.len)
 			append_separator(&d->buf);
-		strbuf_add(&msg, d->messages[i]->buf.buf, d->messages[i]->buf.len);
-		strbuf_addbuf(&d->buf, &msg);
+		strbuf_add(&मेनसाहे, d->messages[i]->buf.buf, d->messages[i]->buf.len);
+		strbuf_addbuf(&d->buf, &मेनसाहे);
 		if ((d->stripspace == UNSPECIFIED &&
 		     d->messages[i]->stripspace == STRIPSPACE) ||
 		    d->stripspace == STRIPSPACE)
 			strbuf_stripspace(&d->buf, NULL);
-		strbuf_reset(&msg);
+		strbuf_reset(&मेनसाहे);
 	}
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 }
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+static int parse_मेनसाहे_arg(const struct option *opt, const char *arg, int unset)
 {
-	struct note_data *d = opt->value;
-	struct note_msg *msg = xmalloc(sizeof(*msg));
+	struct note_data *d = opt->हालागा;
+	struct note_मेनसाहे *मेनसाहे = xmalloc(sizeof(*मेनसाहे));
 
 	BUG_ON_OPT_NEG(unset);
 
-	strbuf_init(&msg->buf, strlen(arg));
-	strbuf_addstr(&msg->buf, arg);
-	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
-	d->messages[d->msg_nr - 1] = msg;
-	msg->stripspace = STRIPSPACE;
+	strbuf_init(&मेनसाहे->buf, strlen(arg));
+	strbuf_addstr(&मेनसाहे->buf, arg);
+	ALLOC_GROW_BY(d->messages, d->मेनसाहे_nr, 1, d->मेनसाहे_alloc);
+	d->messages[d->मेनसाहे_nr - 1] = मेनसाहे;
+	मेनसाहे->stripspace = STRIPSPACE;
 	return 0;
 }
 
 static int parse_file_arg(const struct option *opt, const char *arg, int unset)
 {
-	struct note_data *d = opt->value;
-	struct note_msg *msg = xmalloc(sizeof(*msg));
+	struct note_data *d = opt->हालागा;
+	struct note_मेनसाहे *मेनसाहे = xmalloc(sizeof(*मेनसाहे));
 
 	BUG_ON_OPT_NEG(unset);
 
-	strbuf_init(&msg->buf , 0);
+	strbuf_init(&मेनसाहे->buf , 0);
 	if (!strcmp(arg, "-")) {
-		if (strbuf_read(&msg->buf, 0, 1024) < 0)
+		if (strbuf_read(&मेनसाहे->buf, 0, 1024) < 0)
 			die_errno(_("cannot read '%s'"), arg);
-	} else if (strbuf_read_file(&msg->buf, arg, 1024) < 0)
+	} else if (strbuf_read_file(&मेनसाहे->buf, arg, 1024) < 0)
 		die_errno(_("could not open or read '%s'"), arg);
 
-	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
-	d->messages[d->msg_nr - 1] = msg;
-	msg->stripspace = STRIPSPACE;
+	ALLOC_GROW_BY(d->messages, d->मेनसाहे_nr, 1, d->मेनसाहे_alloc);
+	d->messages[d->मेनसाहे_nr - 1] = मेनसाहे;
+	मेनसाहे->stripspace = STRIPSPACE;
 	return 0;
 }
 
 static int parse_reuse_arg(const struct option *opt, const char *arg, int unset)
 {
-	struct note_data *d = opt->value;
-	struct note_msg *msg = xmalloc(sizeof(*msg));
-	char *value;
+	struct note_data *d = opt->हालागा;
+	struct note_मेनसाहे *मेनसाहे = xmalloc(sizeof(*मेनसाहे));
+	char *हालागा;
 	struct object_id object;
 	enum object_type type;
 	size_t len;
 
 	BUG_ON_OPT_NEG(unset);
 
-	strbuf_init(&msg->buf, 0);
+	strbuf_init(&मेनसाहे->buf, 0);
 	if (repo_get_oid(the_repository, arg, &object))
 		die(_("failed to resolve '%s' as a valid ref."), arg);
-	if (!(value = odb_read_object(the_repository->objects, &object, &type, &len)))
+	if (!(हालागा = odb_read_object(the_repository->objects, &object, &type, &len)))
 		die(_("failed to read object '%s'."), arg);
 	if (type != OBJ_BLOB) {
-		strbuf_release(&msg->buf);
-		free(value);
-		free(msg);
+		strbuf_release(&मेनसाहे->buf);
+		free(हालागा);
+		free(मेनसाहे);
 		die(_("cannot read note data from non-blob object '%s'."), arg);
 	}
 
-	strbuf_add(&msg->buf, value, len);
-	free(value);
+	strbuf_add(&मेनसाहे->buf, हालागा, len);
+	free(हालागा);
 
-	msg->buf.len = len;
-	ALLOC_GROW_BY(d->messages, d->msg_nr, 1, d->msg_alloc);
-	d->messages[d->msg_nr - 1] = msg;
-	msg->stripspace = NO_STRIPSPACE;
+	मेनसाहे->buf.len = len;
+	ALLOC_GROW_BY(d->messages, d->मेनसाहे_nr, 1, d->मेनसाहे_alloc);
+	d->messages[d->मेनसाहे_nr - 1] = मेनसाहे;
+	मेनसाहे->stripspace = NO_STRIPSPACE;
 	return 0;
 }
 
 static int parse_reedit_arg(const struct option *opt, const char *arg, int unset)
 {
-	struct note_data *d = opt->value;
+	struct note_data *d = opt->हालागा;
 	BUG_ON_OPT_NEG(unset);
 	d->use_editor = 1;
 	return parse_reuse_arg(opt, arg, unset);
@@ -351,9 +351,9 @@ static int parse_separator_arg(const struct option *opt, const char *arg,
 			       int unset)
 {
 	if (unset)
-		*(const char **)opt->value = NULL;
+		*(const char **)opt->हालागा = NULL;
 	else
-		*(const char **)opt->value = arg ? arg : "\n";
+		*(const char **)opt->हालागा = arg ? arg : "\n";
 	return 0;
 }
 
@@ -361,9 +361,9 @@ static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
 {
 	struct strbuf buf = STRBUF_INIT;
 	struct notes_rewrite_cfg *c = NULL;
-	struct notes_tree *t = NULL;
+	struct notes_पुनो *t = NULL;
 	int ret = 0;
-	const char *msg = "Notes added by 'git notes copy'";
+	const char *मेनसाहे = "Notes added by 'git notes copy'";
 
 	if (rewrite_cmd) {
 		c = init_copy_notes_for_rewrite(rewrite_cmd);
@@ -371,7 +371,7 @@ static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
 			return 0;
 	} else {
 		init_notes(NULL, NULL, NULL, NOTES_INIT_WRITABLE);
-		t = &default_notes_tree;
+		t = &default_notes_पुनो;
 	}
 
 	while (strbuf_getline_lf(&buf, stdin) != EOF) {
@@ -383,12 +383,12 @@ static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
 					     STRING_LIST_SPLIT_TRIM);
 		if (split.nr < 2)
 			die(_("malformed input line: '%s'."), buf.buf);
-		if (repo_get_oid(the_repository, split.items[0].string, &from_obj))
+		if (repo_get_oid(the_repository, split.मगा_बागाय[0].string, &from_obj))
 			die(_("failed to resolve '%s' as a valid ref."),
-			    split.items[0].string);
-		if (repo_get_oid(the_repository, split.items[1].string, &to_obj))
+			    split.मगा_बागाय[0].string);
+		if (repo_get_oid(the_repository, split.मगा_बागाय[1].string, &to_obj))
 			die(_("failed to resolve '%s' as a valid ref."),
-			    split.items[1].string);
+			    split.मगा_बागाय[1].string);
 
 		if (rewrite_cmd)
 			err = copy_note_for_rewrite(c, &from_obj, &to_obj);
@@ -398,7 +398,7 @@ static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
 
 		if (err) {
 			error(_("failed to copy notes from '%s' to '%s'"),
-			      split.items[0].string, split.items[1].string);
+			      split.मगा_बागाय[0].string, split.मगा_बागाय[1].string);
 			ret = 1;
 		}
 
@@ -406,22 +406,22 @@ static int notes_copy_from_stdin(int force, const char *rewrite_cmd)
 	}
 
 	if (!rewrite_cmd) {
-		commit_notes(the_repository, t, msg);
+		commit_notes(the_repository, t, मेनसाहे);
 		free_notes(t);
 	} else {
-		finish_copy_notes_for_rewrite(the_repository, c, msg);
+		finish_copy_notes_for_rewrite(the_repository, c, मेनसाहे);
 	}
 	strbuf_release(&buf);
 	return ret;
 }
 
-static struct notes_tree *init_notes_check(const char *subcommand,
+static struct notes_पुनो *init_notes_check(const char *subcommand,
 					   int flags)
 {
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	const char *ref;
 	init_notes(NULL, NULL, NULL, flags);
-	t = &default_notes_tree;
+	t = &default_notes_पुनो;
 
 	ref = (flags & NOTES_INIT_WRITABLE) ? t->update_ref : t->ref;
 	if (!starts_with(ref, "refs/notes/"))
@@ -437,7 +437,7 @@ static struct notes_tree *init_notes_check(const char *subcommand,
 static int list(int argc, const char **argv, const char *prefix,
 		struct repository *repo UNUSED)
 {
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	struct object_id object;
 	const struct object_id *note;
 	int retval = -1;
@@ -480,7 +480,7 @@ static int add(int argc, const char **argv, const char *prefix,
 {
 	int force = 0, allow_empty = 0;
 	const char *object_ref;
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	struct object_id object, new_note;
 	const struct object_id *note;
 	struct note_data d = { .buf = STRBUF_INIT, .stripspace = UNSPECIFIED };
@@ -488,7 +488,7 @@ static int add(int argc, const char **argv, const char *prefix,
 	struct option options[] = {
 		OPT_CALLBACK_F('m', "message", &d, N_("message"),
 			N_("note contents as a string"), PARSE_OPT_NONEG,
-			parse_msg_arg),
+			parse_मेनसाहे_arg),
 		OPT_CALLBACK_F('F', "file", &d, N_("file"),
 			N_("note contents in a file"), PARSE_OPT_NONEG,
 			parse_file_arg),
@@ -520,7 +520,7 @@ static int add(int argc, const char **argv, const char *prefix,
 		usage_with_options(git_notes_add_usage, options);
 	}
 
-	if (d.msg_nr)
+	if (d.मेनसाहे_nr)
 		concat_messages(&d);
 
 	object_ref = argc > 1 ? argv[1] : "HEAD";
@@ -534,7 +534,7 @@ static int add(int argc, const char **argv, const char *prefix,
 	if (note) {
 		if (!force) {
 			free_notes(t);
-			if (d.msg_nr) {
+			if (d.मेनसाहे_nr) {
 				free_note_data(&d);
 				return error(_("Cannot add notes. "
 					"Found existing notes for object %s. "
@@ -582,7 +582,7 @@ static int copy(int argc, const char **argv, const char *prefix,
 	const struct object_id *from_note, *note;
 	const char *object_ref;
 	struct object_id object, from_obj;
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	const char *rewrite_cmd = NULL;
 	struct option options[] = {
 		OPT__FORCE(&force, N_("replace existing notes"), PARSE_OPT_NOCOMPLETE),
@@ -658,7 +658,7 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 {
 	int allow_empty = 0;
 	const char *object_ref;
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	struct object_id object, new_note;
 	const struct object_id *note;
 	char *logmsg;
@@ -667,7 +667,7 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 	struct option options[] = {
 		OPT_CALLBACK_F('m', "message", &d, N_("message"),
 			N_("note contents as a string"), PARSE_OPT_NONEG,
-			parse_msg_arg),
+			parse_मेनसाहे_arg),
 		OPT_CALLBACK_F('F', "file", &d, N_("file"),
 			N_("note contents in a file"), PARSE_OPT_NONEG,
 			parse_file_arg),
@@ -700,7 +700,7 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 		usage_with_options(usage, options);
 	}
 
-	if (d.msg_nr) {
+	if (d.मेनसाहे_nr) {
 		concat_messages(&d);
 		if (edit)
 			fprintf(stderr, _("The -m/-F/-c/-C options have been "
@@ -732,7 +732,7 @@ static int append_edit(int argc, const char **argv, const char *prefix,
 			strbuf_add(&buf, prev_buf, size);
 		if (d.buf.len && size)
 			append_separator(&buf);
-		strbuf_insert(&d.buf, 0, buf.buf, buf.len);
+		strbuf_इसिंगित(&d.buf, 0, buf.buf, buf.len);
 
 		free(prev_buf);
 		strbuf_release(&buf);
@@ -761,7 +761,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		struct repository *repo UNUSED)
 {
 	const char *object_ref;
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	struct object_id object;
 	const struct object_id *note;
 	int retval;
@@ -789,8 +789,8 @@ static int show(int argc, const char **argv, const char *prefix,
 		retval = error(_("no note found for object %s."),
 			       oid_to_hex(&object));
 	else {
-		const char *show_args[3] = {"show", oid_to_hex(note), NULL};
-		retval = execv_git_cmd(show_args);
+		const char *show_मगा_कातविरान[3] = {"show", oid_to_hex(note), NULL};
+		retval = execv_git_cmd(show_मगा_कातविरान);
 	}
 	free_notes(t);
 	return retval;
@@ -816,11 +816,11 @@ static int merge_abort(struct notes_merge_options *o)
 
 static int merge_commit(struct notes_merge_options *o)
 {
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 	struct object_id oid, parent_oid;
-	struct notes_tree t = {0};
+	struct notes_पुनो t = {0};
 	struct commit *partial;
-	struct pretty_print_context pretty_ctx;
+	struct pretty_इलिम्बाग_context pretty_ctx;
 	void *local_ref_to_free;
 	int ret;
 
@@ -854,42 +854,42 @@ static int merge_commit(struct notes_merge_options *o)
 
 	/* Reuse existing commit message in reflog message */
 	memset(&pretty_ctx, 0, sizeof(pretty_ctx));
-	repo_format_commit_message(the_repository, partial, "%s", &msg,
+	repo_format_commit_message(the_repository, partial, "%s", &मेनसाहे,
 				   &pretty_ctx);
-	strbuf_trim(&msg);
-	strbuf_insertstr(&msg, 0, "notes: ");
-	refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+	strbuf_trim(&मेनसाहे);
+	strbuf_insertstr(&मेनसाहे, 0, "notes: ");
+	refs_update_ref(get_main_ref_store(the_repository), मेनसाहे.buf,
 			o->local_ref, &oid,
 			is_null_oid(&parent_oid) ? NULL : &parent_oid,
 			0, UPDATE_REFS_DIE_ON_ERR);
 
 	free_notes(&t);
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 	ret = merge_abort(o);
 	free(local_ref_to_free);
 	return ret;
 }
 
-static int git_config_get_notes_strategy(const char *key,
+static int git_config_get_notes_strategy(const char *सुसि,
 					 enum notes_merge_strategy *strategy)
 {
-	char *value;
+	char *हालागा;
 
-	if (repo_config_get_string(the_repository, key, &value))
+	if (repo_config_get_string(the_repository, सुसि, &हालागा))
 		return 1;
-	if (parse_notes_merge_strategy(value, strategy))
-		git_die_config(the_repository, key, _("unknown notes merge strategy %s"), value);
+	if (parse_notes_merge_strategy(हालागा, strategy))
+		git_die_config(the_repository, सुसि, _("unknown notes merge strategy %s"), हालागा);
 
-	free(value);
+	free(हालागा);
 	return 0;
 }
 
 static int merge(int argc, const char **argv, const char *prefix,
 		 struct repository *repo UNUSED)
 {
-	struct strbuf remote_ref = STRBUF_INIT, msg = STRBUF_INIT;
+	struct strbuf remote_ref = STRBUF_INIT, मेनसाहे = STRBUF_INIT;
 	struct object_id result_oid;
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	struct notes_merge_options o;
 	int do_merge = 0, do_commit = 0, do_abort = 0;
 	int verbosity = 0, result;
@@ -953,30 +953,30 @@ static int merge(int argc, const char **argv, const char *prefix,
 			usage_with_options(git_notes_merge_usage, options);
 		}
 	} else {
-		struct strbuf merge_key = STRBUF_INIT;
+		struct strbuf merge_सुसि = STRBUF_INIT;
 		const char *short_ref = NULL;
 
 		if (!skip_prefix(o.local_ref, "refs/notes/", &short_ref))
 			BUG("local ref %s is outside of refs/notes/",
 			    o.local_ref);
 
-		strbuf_addf(&merge_key, "notes.%s.mergeStrategy", short_ref);
+		strbuf_addf(&merge_सुसि, "notes.%s.mergeStrategy", short_ref);
 
-		if (git_config_get_notes_strategy(merge_key.buf, &o.strategy))
+		if (git_config_get_notes_strategy(merge_सुसि.buf, &o.strategy))
 			git_config_get_notes_strategy("notes.mergeStrategy", &o.strategy);
 
-		strbuf_release(&merge_key);
+		strbuf_release(&merge_सुसि);
 	}
 
-	strbuf_addf(&msg, "notes: Merged notes from %s into %s",
+	strbuf_addf(&मेनसाहे, "notes: Merged notes from %s into %s",
 		    remote_ref.buf, notes_ref);
-	strbuf_add(&(o.commit_msg), msg.buf + 7, msg.len - 7); /* skip "notes: " */
+	strbuf_add(&(o.commit_मेनसाहे), मेनसाहे.buf + 7, मेनसाहे.len - 7); /* skip "notes: " */
 
 	result = notes_merge(&o, t, &result_oid);
 
 	if (result >= 0) /* Merge resulted (trivially) in result_oid */
 		/* Update default notes ref with new commit */
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		refs_update_ref(get_main_ref_store(the_repository), मेनसाहे.buf,
 				notes_ref, &result_oid, NULL, 0,
 				UPDATE_REFS_DIE_ON_ERR);
 	else { /* Merge has unresolved conflicts */
@@ -985,7 +985,7 @@ static int merge(int argc, const char **argv, const char *prefix,
 		char *path;
 
 		/* Update .git/NOTES_MERGE_PARTIAL with partial merge result */
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		refs_update_ref(get_main_ref_store(the_repository), मेनसाहे.buf,
 				"NOTES_MERGE_PARTIAL", &result_oid, NULL,
 				0, UPDATE_REFS_DIE_ON_ERR);
 		/* Store ref-to-be-updated into .git/NOTES_MERGE_REF */
@@ -1011,13 +1011,13 @@ static int merge(int argc, const char **argv, const char *prefix,
 	free_notes(t);
 	free(notes_ref);
 	strbuf_release(&remote_ref);
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 	return result < 0; /* return non-zero on conflicts */
 }
 
 #define IGNORE_MISSING 1
 
-static int remove_one_note(struct notes_tree *t, const char *name, unsigned flag)
+static int remove_one_note(struct notes_पुनो *t, const char *name, unsigned flag)
 {
 	int status;
 	struct object_id oid;
@@ -1044,7 +1044,7 @@ static int remove_cmd(int argc, const char **argv, const char *prefix,
 			    N_("read object names from the standard input")),
 		OPT_END()
 	};
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	int retval = 0;
 
 	argc = parse_options(argc, argv, prefix, options,
@@ -1078,7 +1078,7 @@ static int remove_cmd(int argc, const char **argv, const char *prefix,
 static int prune(int argc, const char **argv, const char *prefix,
 		 struct repository *repo UNUSED)
 {
-	struct notes_tree *t;
+	struct notes_पुनो *t;
 	int show_only = 0, verbose = 0;
 	struct option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),

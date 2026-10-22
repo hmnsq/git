@@ -74,7 +74,7 @@ static void spawn_daemon(const char *socket)
 	char buf[128];
 	int r;
 
-	strvec_pushl(&daemon.args,
+	strvec_pushl(&daemon.मगा_कातविरान,
 		     "credential-cache--daemon", socket,
 		     NULL);
 	daemon.git_cmd = 1;

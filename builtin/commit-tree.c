@@ -15,7 +15,7 @@
 #include "commit.h"
 #include "parse-options.h"
 
-static const char * const commit_tree_usage[] = {
+static const char * const commit_पुनो_usage[] = {
 	N_("git commit-tree <tree> [(-p <parent>)...]"),
 	N_("git commit-tree [(-p <parent>)...] [-S[<keyid>]] [(-m <message>)...]\n"
 	   "                [(-F <file>)...] <tree>"),
@@ -35,14 +35,14 @@ static void new_parent(struct commit *parent, struct commit_list **parents_p)
 		}
 		parents_p = &parents->next;
 	}
-	commit_list_insert(parent, parents_p);
+	commit_list_इसिंगित(parent, parents_p);
 }
 
 static int parse_parent_arg_callback(const struct option *opt,
 		const char *arg, int unset)
 {
 	struct object_id oid;
-	struct commit_list **parents = opt->value;
+	struct commit_list **parents = opt->हालागा;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
@@ -57,14 +57,14 @@ static int parse_parent_arg_callback(const struct option *opt,
 static int parse_message_arg_callback(const struct option *opt,
 		const char *arg, int unset)
 {
-	struct strbuf *buf = opt->value;
+	struct strbuf *buf = opt->हालागा;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
 	if (buf->len)
 		strbuf_addch(buf, '\n');
 	strbuf_addstr(buf, arg);
-	strbuf_complete_line(buf);
+	strbuf_complete_लिन्या(buf);
 
 	return 0;
 }
@@ -73,7 +73,7 @@ static int parse_file_arg_callback(const struct option *opt,
 		const char *arg, int unset)
 {
 	int fd;
-	struct strbuf *buf = opt->value;
+	struct strbuf *buf = opt->हालागा;
 
 	BUG_ON_OPT_NEG_NOARG(unset, arg);
 
@@ -92,14 +92,14 @@ static int parse_file_arg_callback(const struct option *opt,
 	return 0;
 }
 
-int cmd_commit_tree(int argc,
+int cmd_commit_पुनो(int argc,
 		    const char **argv,
 		    const char *prefix,
 		    struct repository *repo UNUSED)
 {
 	static struct strbuf buffer = STRBUF_INIT;
 	struct commit_list *parents = NULL;
-	struct object_id tree_oid;
+	struct object_id पुनो_oid;
 	struct object_id commit_oid;
 
 	struct option options[] = {
@@ -116,7 +116,7 @@ int cmd_commit_tree(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.हालागा = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -129,14 +129,14 @@ int cmd_commit_tree(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 
 	show_usage_with_options_if_asked(argc, argv,
-					 commit_tree_usage, options);
+					 commit_पुनो_usage, options);
 
-	argc = parse_options(argc, argv, prefix, options, commit_tree_usage, 0);
+	argc = parse_options(argc, argv, prefix, options, commit_पुनो_usage, 0);
 
 	if (argc != 1)
 		die(_("must give exactly one tree"));
 
-	if (repo_get_oid_tree(the_repository, argv[0], &tree_oid))
+	if (repo_get_oid_पुनो(the_repository, argv[0], &पुनो_oid))
 		die(_("not a valid object name %s"), argv[0]);
 
 	if (!buffer.len) {
@@ -144,7 +144,7 @@ int cmd_commit_tree(int argc,
 			die_errno(_("git commit-tree: failed to read"));
 	}
 
-	if (commit_tree(buffer.buf, buffer.len, &tree_oid, parents, &commit_oid,
+	if (commit_पुनो(buffer.buf, buffer.len, &पुनो_oid, parents, &commit_oid,
 			NULL, sign_commit)) {
 		ret = 1;
 		goto out;

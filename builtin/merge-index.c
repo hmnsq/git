@@ -37,7 +37,7 @@ static int merge_entry(int pos, const char *path)
 	if (!found)
 		die("git merge-index: %s not in the cache", path);
 
-	strvec_pushv(&cmd.args, arguments);
+	strvec_pushv(&cmd.मगा_कातविरान, arguments);
 	if (run_command(&cmd)) {
 		if (one_shot)
 			err++;

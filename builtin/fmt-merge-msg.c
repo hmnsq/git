@@ -4,12 +4,12 @@
 #include "gettext.h"
 #include "parse-options.h"
 
-static const char * const fmt_merge_msg_usage[] = {
+static const char * const fmt_merge_मेनसाहे_usage[] = {
 	N_("git fmt-merge-msg [-m <message>] [--log[=<n>] | --no-log] [--file <file>]"),
 	NULL
 };
 
-int cmd_fmt_merge_msg(int argc,
+int cmd_fmt_merge_मेनसाहे(int argc,
 		      const char **argv,
 		      const char *prefix,
 		      struct repository *repo)
@@ -23,7 +23,7 @@ int cmd_fmt_merge_msg(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "log",
-			.value = &shortlog_len,
+			.हालागा = &shortlog_len,
 			.precision = sizeof(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("populate log with at most <n> entries from shortlog"),
@@ -33,7 +33,7 @@ int cmd_fmt_merge_msg(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "summary",
-			.value = &shortlog_len,
+			.हालागा = &shortlog_len,
 			.precision = sizeof(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("alias for --log (deprecated)"),
@@ -49,15 +49,15 @@ int cmd_fmt_merge_msg(int argc,
 	};
 
 	FILE *in = stdin;
-	struct strbuf input = STRBUF_INIT, output = STRBUF_INIT;
+	struct strbuf पासोक = STRBUF_INIT, output = STRBUF_INIT;
 	int ret;
-	struct fmt_merge_msg_opts opts;
+	struct fmt_merge_मेनसाहे_opts opts;
 
-	repo_config(repo, fmt_merge_msg_config, &merge_log_config);
-	argc = parse_options(argc, argv, prefix, options, fmt_merge_msg_usage,
+	repo_config(repo, fmt_merge_मेनसाहे_config, &merge_log_config);
+	argc = parse_options(argc, argv, prefix, options, fmt_merge_मेनसाहे_usage,
 			     0);
 	if (argc > 0)
-		usage_with_options(fmt_merge_msg_usage, options);
+		usage_with_options(fmt_merge_मेनसाहे_usage, options);
 	if (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
@@ -67,7 +67,7 @@ int cmd_fmt_merge_msg(int argc,
 			die_errno("cannot open '%s'", inpath);
 	}
 
-	if (strbuf_read(&input, fileno(in), 0) < 0)
+	if (strbuf_read(&पासोक, fileno(in), 0) < 0)
 		die_errno("could not read input file");
 
 	if (message)
@@ -79,12 +79,12 @@ int cmd_fmt_merge_msg(int argc,
 	opts.shortlog_len = shortlog_len;
 	opts.into_name = into_name;
 
-	ret = fmt_merge_msg(&input, &output, &opts);
+	ret = fmt_merge_मेनसाहे(&पासोक, &output, &opts);
 	if (ret)
 		return ret;
 	write_in_full(STDOUT_FILENO, output.buf, output.len);
 
-	strbuf_release(&input);
+	strbuf_release(&पासोक);
 	strbuf_release(&output);
 	free(inpath);
 	return 0;

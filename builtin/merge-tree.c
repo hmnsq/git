@@ -21,7 +21,7 @@
 #include "strvec.h"
 #include "write-or-die.h"
 
-static int line_termination = '\n';
+static int लिन्या_termination = '\n';
 
 struct merge_list {
 	struct merge_list *next;
@@ -41,7 +41,7 @@ static void add_merge_entry(struct merge_list *entry)
 	merge_result_end = &entry->next;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+static void trivial_merge_trees(struct पुनो_desc t[3], const char *base);
 
 static const char *explanation(struct merge_list *entry)
 {
@@ -123,7 +123,7 @@ static void show_diff(struct merge_list *entry)
 	mmfile_t src, dst;
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = show_outf };
+	xdemitcb_t ecb = { .out_लिन्या = show_outf };
 
 	memset(&xpp, 0, sizeof(xpp));
 	xpp.flags = 0;
@@ -223,7 +223,7 @@ static void unresolved_directory(const struct traverse_info *info,
 	struct repository *r = the_repository;
 	char *newbase;
 	struct name_entry *p;
-	struct tree_desc t[3];
+	struct पुनो_desc t[3];
 	void *buf0, *buf1, *buf2;
 
 	for (p = n; p < n + 3; p++) {
@@ -236,9 +236,9 @@ static void unresolved_directory(const struct traverse_info *info,
 	newbase = traverse_path(info, p);
 
 #define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : NULL)
-	buf0 = fill_tree_descriptor(r, t + 0, ENTRY_OID(n + 0));
-	buf1 = fill_tree_descriptor(r, t + 1, ENTRY_OID(n + 1));
-	buf2 = fill_tree_descriptor(r, t + 2, ENTRY_OID(n + 2));
+	buf0 = fill_पुनो_descriptor(r, t + 0, ENTRY_OID(n + 0));
+	buf1 = fill_पुनो_descriptor(r, t + 1, ENTRY_OID(n + 1));
+	buf2 = fill_पुनो_descriptor(r, t + 2, ENTRY_OID(n + 2));
 #undef ENTRY_OID
 
 	trivial_merge_trees(t, newbase);
@@ -360,7 +360,7 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 	return mask;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+static void trivial_merge_trees(struct पुनो_desc t[3], const char *base)
 {
 	struct traverse_info info;
 
@@ -369,8 +369,8 @@ static void trivial_merge_trees(struct tree_desc t[3], const char *base)
 	traverse_trees(the_repository->index, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
+static void *get_पुनो_descriptor(struct repository *r,
+				 struct पुनो_desc *desc,
 				 const char *rev)
 {
 	struct object_id oid;
@@ -378,7 +378,7 @@ static void *get_tree_descriptor(struct repository *r,
 
 	if (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
-	buf = fill_tree_descriptor(r, desc, &oid);
+	buf = fill_पुनो_descriptor(r, desc, &oid);
 	if (!buf)
 		die("%s is not a tree", rev);
 	return buf;
@@ -389,12 +389,12 @@ static int trivial_merge(const char *base,
 			 const char *branch2)
 {
 	struct repository *r = the_repository;
-	struct tree_desc t[3];
+	struct पुनो_desc t[3];
 	void *buf1, *buf2, *buf3;
 
-	buf1 = get_tree_descriptor(r, t+0, base);
-	buf2 = get_tree_descriptor(r, t+1, branch1);
-	buf3 = get_tree_descriptor(r, t+2, branch2);
+	buf1 = get_पुनो_descriptor(r, t+0, base);
+	buf2 = get_पुनो_descriptor(r, t+1, branch1);
+	buf3 = get_पुनो_descriptor(r, t+2, branch2);
 	trivial_merge_trees(t, "");
 	free(buf1);
 	free(buf2);
@@ -410,7 +410,7 @@ enum mode {
 	MODE_REAL,
 };
 
-struct merge_tree_options {
+struct merge_पुनो_options {
 	int mode;
 	int allow_unrelated_histories;
 	int show_messages;
@@ -419,7 +419,7 @@ struct merge_tree_options {
 	struct merge_options merge_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
+static int real_merge(struct merge_पुनो_options *o,
 		      const char *merge_base,
 		      const char *branch1, const char *branch2,
 		      const char *prefix)
@@ -437,7 +437,7 @@ static int real_merge(struct merge_tree_options *o,
 	opt.branch2 = branch2;
 
 	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+		struct पुनो *base_पुनो, *parent1_पुनो, *parent2_पुनो;
 
 		/*
 		 * We actually only need the trees because we already
@@ -447,25 +447,25 @@ static int real_merge(struct merge_tree_options *o,
 
 		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
 			die(_("could not parse as tree '%s'"), merge_base);
-		base_tree = repo_parse_tree_indirect(the_repository,
+		base_पुनो = repo_parse_पुनो_indirect(the_repository,
 						     &base_oid);
-		if (!base_tree)
+		if (!base_पुनो)
 			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
 		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
 			die(_("could not parse as tree '%s'"), branch1);
-		parent1_tree = repo_parse_tree_indirect(the_repository,
+		parent1_पुनो = repo_parse_पुनो_indirect(the_repository,
 							&head_oid);
-		if (!parent1_tree)
+		if (!parent1_पुनो)
 			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
 		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
 			die(_("could not parse as tree '%s'"), branch2);
-		parent2_tree = repo_parse_tree_indirect(the_repository,
+		parent2_पुनो = repo_parse_पुनो_indirect(the_repository,
 							&merge_oid);
-		if (!parent2_tree)
+		if (!parent2_पुनो)
 			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
 
 		opt.ancestor = merge_base;
-		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
+		merge_incore_nonrecursive(&opt, base_पुनो, parent1_पुनो, parent2_पुनो, &result);
 	} else {
 		parent1 = get_merge_parent(branch1);
 		if (!parent1)
@@ -501,34 +501,34 @@ static int real_merge(struct merge_tree_options *o,
 		show_messages = !result.clean;
 
 	if (o->use_stdin)
-		printf("%d%c", result.clean, line_termination);
-	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
+		printf("%d%c", result.clean, लिन्या_termination);
+	printf("%s%c", oid_to_hex(&result.पुनो->object.oid), लिन्या_termination);
 	if (!result.clean) {
 		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
 		const char *last = NULL;
 
 		merge_get_conflicted_files(&result, &conflicted_files);
 		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
+			const char *name = conflicted_files.मगा_बागाय[i].string;
+			struct stage_info *c = conflicted_files.मगा_बागाय[i].util;
 			if (!o->name_only)
 				printf("%06o %s %d\t",
 				       c->mode, oid_to_hex(&c->oid), c->stage);
 			else if (last && !strcmp(last, name))
 				continue;
 			write_name_quoted_relative(
-				name, prefix, stdout, line_termination);
+				name, prefix, stdout, लिन्या_termination);
 			last = name;
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
 	if (show_messages) {
-		putchar(line_termination);
-		merge_display_update_messages(&opt, line_termination == '\0',
+		putchar(लिन्या_termination);
+		merge_display_update_messages(&opt, लिन्या_termination == '\0',
 					      &result);
 	}
 	if (o->use_stdin)
-		putchar(line_termination);
+		putchar(लिन्या_termination);
 
 cleanup:
 	merge_finalize(&opt, &result);
@@ -536,12 +536,12 @@ cleanup:
 	return !result.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
+int cmd_merge_पुनो(int argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
+	struct merge_पुनो_options o = { .show_messages = -1 };
 	struct strvec xopts = STRVEC_INIT;
 	int expected_remaining_argc;
 	int original_argc;
@@ -549,7 +549,7 @@ int cmd_merge_tree(int argc,
 	int ret;
 	int quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	const char * const merge_पुनो_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
 		NULL
@@ -566,7 +566,7 @@ int cmd_merge_tree(int argc,
 			   &quiet,
 			   N_("suppress all output; only exit status wanted"),
 			   PARSE_OPT_NONEG),
-		OPT_SET_INT('z', NULL, &line_termination,
+		OPT_SET_INT('z', NULL, &लिन्या_termination,
 			    N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL_F(0, "name-only",
 			   &o.name_only,
@@ -595,7 +595,7 @@ int cmd_merge_tree(int argc,
 	/* Parse arguments */
 	original_argc = argc - 1; /* ignoring argv[0] */
 	argc = parse_options(argc, argv, prefix, mt_options,
-			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
+			     merge_पुनो_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
 	if (quiet && o.show_messages == -1)
 		o.show_messages = 0;
@@ -603,7 +603,7 @@ int cmd_merge_tree(int argc,
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
 	die_for_incompatible_opt2(quiet, "--quiet", o.name_only, "--name-only");
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
-	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
+	die_for_incompatible_opt2(quiet, "--quiet", !लिन्या_termination, "-z");
 
 	if (xopts.nr && o.mode == MODE_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
@@ -620,10 +620,10 @@ int cmd_merge_tree(int argc,
 		if (merge_base)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
-		line_termination = '\0';
+		लिन्या_termination = '\0';
 		while (strbuf_getline_lf(&buf, stdin) != EOF) {
 			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+			const char *पासोक_merge_base = NULL;
 
 			string_list_split_in_place_f(&split, buf.buf, " ", -1,
 						     STRING_LIST_SPLIT_TRIM);
@@ -632,17 +632,17 @@ int cmd_merge_tree(int argc,
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
-				input_merge_base = split.items[0].string;
+			if (!strcmp(split.मगा_बागाय[1].string, "--")) {
+				पासोक_merge_base = split.मगा_बागाय[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
-				real_merge(&o, input_merge_base,
-					   split.items[2].string, split.items[3].string,
+			if (पासोक_merge_base && split.nr == 4) {
+				real_merge(&o, पासोक_merge_base,
+					   split.मगा_बागाय[2].string, split.मगा_बागाय[3].string,
 					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
+			} else if (!पासोक_merge_base && split.nr == 2) {
 				real_merge(&o, NULL,
-					   split.items[0].string, split.items[1].string,
+					   split.मगा_बागाय[0].string, split.मगा_बागाय[1].string,
 					   prefix);
 			} else {
 				die(_("malformed input line: '%s'."), buf.buf);
@@ -664,7 +664,7 @@ int cmd_merge_tree(int argc,
 	case MODE_UNKNOWN:
 		switch (argc) {
 		default:
-			usage_with_options(merge_tree_usage, mt_options);
+			usage_with_options(merge_पुनो_usage, mt_options);
 		case 2:
 			o.mode = MODE_REAL;
 			break;
@@ -687,7 +687,7 @@ int cmd_merge_tree(int argc,
 		die(_("--trivial-merge is incompatible with all other options"));
 
 	if (argc != expected_remaining_argc)
-		usage_with_options(merge_tree_usage, mt_options);
+		usage_with_options(merge_पुनो_usage, mt_options);
 
 	repo_config(the_repository, git_default_config, NULL);
 

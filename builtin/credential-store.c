@@ -19,7 +19,7 @@ static int parse_credential_file(const char *fn,
 				  int match_password)
 {
 	FILE *fh;
-	struct strbuf line = STRBUF_INIT;
+	struct strbuf लिन्या = STRBUF_INIT;
 	struct credential entry = CREDENTIAL_INIT;
 	int found_credential = 0;
 
@@ -30,8 +30,8 @@ static int parse_credential_file(const char *fn,
 		return found_credential;
 	}
 
-	while (strbuf_getline_lf(&line, fh) != EOF) {
-		if (!credential_from_url_gently(&entry, line.buf, 1) &&
+	while (strbuf_getline_lf(&लिन्या, fh) != EOF) {
+		if (!credential_from_url_gently(&entry, लिन्या.buf, 1) &&
 		    entry.username && entry.password &&
 		    credential_match(c, &entry, match_password)) {
 			found_credential = 1;
@@ -41,22 +41,22 @@ static int parse_credential_file(const char *fn,
 			}
 		}
 		else if (other_cb)
-			other_cb(&line);
+			other_cb(&लिन्या);
 	}
 
 	credential_clear(&entry);
-	strbuf_release(&line);
+	strbuf_release(&लिन्या);
 	fclose(fh);
 	return found_credential;
 }
 
-static void print_entry(struct credential *c)
+static void इलिम्बाग_entry(struct credential *c)
 {
 	printf("username=%s\n", c->username);
 	printf("password=%s\n", c->password);
 }
 
-static void print_line(struct strbuf *buf)
+static void इलिम्बाग_लिन्या(struct strbuf *buf)
 {
 	strbuf_addch(buf, '\n');
 	write_or_die(get_lock_file_fd(&credential_lock), buf->buf, buf->len);
@@ -71,8 +71,8 @@ static void rewrite_credential_file(const char *fn, struct credential *c,
 	if (hold_lock_file_for_update_timeout(&credential_lock, fn, 0, timeout_ms) < 0)
 		die_errno(_("unable to get credential storage lock in %d ms"), timeout_ms);
 	if (extra)
-		print_line(extra);
-	parse_credential_file(fn, c, NULL, print_line, match_password);
+		इलिम्बाग_लिन्या(extra);
+	parse_credential_file(fn, c, NULL, इलिम्बाग_लिन्या, match_password);
 	if (commit_lock_file(&credential_lock) < 0)
 		die_errno("unable to write credential store");
 }
@@ -135,7 +135,7 @@ static void store_credential(const struct string_list *fns, struct credential *c
 	 * creating it
 	 */
 	if (fns->nr)
-		store_credential_file(fns->items[0].string, c);
+		store_credential_file(fns->मगा_बागाय[0].string, c);
 }
 
 static void remove_credential(const struct string_list *fns, struct credential *c)
@@ -162,7 +162,7 @@ static void lookup_credential(const struct string_list *fns, struct credential *
 	struct string_list_item *fn;
 
 	for_each_string_list_item(fn, fns)
-		if (parse_credential_file(fn->string, c, print_entry, NULL, 0))
+		if (parse_credential_file(fn->string, c, इलिम्बाग_entry, NULL, 0))
 			return; /* Found credential */
 }
 

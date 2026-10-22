@@ -30,7 +30,7 @@ struct metainfo_charset
 static int parse_opt_explicit_encoding(const struct option *opt,
 				       const char *arg, int unset)
 {
-	struct metainfo_charset *meta_charset = opt->value;
+	struct metainfo_charset *meta_charset = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -44,7 +44,7 @@ static int parse_opt_quoted_cr(const struct option *opt, const char *arg, int un
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
+	if (mailinfo_parse_quoted_cr_action(arg, opt->हालागा) != 0)
 		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
 	return 0;
 }
@@ -104,7 +104,7 @@ int cmd_mailinfo(int argc,
 		BUG("invalid meta_charset.policy");
 	}
 
-	mi.input = stdin;
+	mi.पासोक = stdin;
 	mi.output = stdout;
 
 	msgfile = prefix_filename(prefix, argv[0]);

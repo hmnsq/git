@@ -62,8 +62,8 @@ static inline int is_merge(void)
 static int reset_index(const char *ref, const struct object_id *oid, int reset_type, int quiet)
 {
 	int i, nr = 0;
-	struct tree_desc desc[2];
-	struct tree *tree;
+	struct पुनो_desc desc[2];
+	struct पुनो *पुनो;
 	struct unpack_trees_options opts;
 	int ret = -1;
 
@@ -85,11 +85,11 @@ static int reset_index(const char *ref, const struct object_id *oid, int reset_t
 	case HARD:
 		opts.update = 1;
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
+		opts.skip_cache_पुनो_update = 1;
 		break;
 	case MIXED:
 		opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
+		opts.skip_cache_पुनो_update = 1;
 		/* but opts.update=0, so working tree not updated */
 		break;
 	default:
@@ -102,13 +102,13 @@ static int reset_index(const char *ref, const struct object_id *oid, int reset_t
 		struct object_id head_oid;
 		if (repo_get_oid(the_repository, "HEAD", &head_oid))
 			return error(_("You do not have a valid HEAD."));
-		if (!fill_tree_descriptor(the_repository, desc + nr, &head_oid))
+		if (!fill_पुनो_descriptor(the_repository, desc + nr, &head_oid))
 			return error(_("Failed to find tree of HEAD."));
 		nr++;
 		opts.fn = twoway_merge;
 	}
 
-	if (!fill_tree_descriptor(the_repository, desc + nr, oid)) {
+	if (!fill_पुनो_descriptor(the_repository, desc + nr, oid)) {
 		error(_("Failed to find tree of %s."), oid_to_hex(oid));
 		goto out;
 	}
@@ -118,12 +118,12 @@ static int reset_index(const char *ref, const struct object_id *oid, int reset_t
 		goto out;
 
 	if (reset_type == MIXED || reset_type == HARD) {
-		tree = repo_parse_tree_indirect(the_repository, oid);
-		if (!tree) {
+		पुनो = repo_parse_पुनो_indirect(the_repository, oid);
+		if (!पुनो) {
 			error(_("unable to read tree (%s)"), oid_to_hex(oid));
 			goto out;
 		}
-		prime_cache_tree(the_repository, the_repository->index, tree);
+		पांगुनाहिन_cache_पुनो(the_repository, the_repository->index, पुनो);
 	}
 
 	ret = 0;
@@ -134,7 +134,7 @@ out:
 	return ret;
 }
 
-static void print_new_head_line(struct commit *commit)
+static void इलिम्बाग_new_head_लिन्या(struct commit *commit)
 {
 	struct strbuf buf = STRBUF_INIT;
 
@@ -158,10 +158,10 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 	for (i = 0; i < q->nr; i++) {
 		int pos;
 		struct diff_filespec *one = q->queue[i]->one;
-		int is_in_reset_tree = one->mode && !is_null_oid(&one->oid);
+		int is_in_reset_पुनो = one->mode && !is_null_oid(&one->oid);
 		struct cache_entry *ce;
 
-		if (!is_in_reset_tree && !intent_to_add) {
+		if (!is_in_reset_पुनो && !intent_to_add) {
 			remove_file_from_index(the_repository->index, one->path);
 			continue;
 		}
@@ -185,7 +185,7 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 		if (!ce)
 			die(_("make_cache_entry failed for path '%s'"),
 			    one->path);
-		if (!is_in_reset_tree) {
+		if (!is_in_reset_पुनो) {
 			ce->ce_flags |= CE_INTENT_TO_ADD;
 			set_object_name_for_intent_to_add_entry(ce);
 		}
@@ -194,8 +194,8 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 	}
 }
 
-static int read_from_tree(const struct pathspec *pathspec,
-			  struct object_id *tree_oid,
+static int read_from_पुनो(const struct pathspec *pathspec,
+			  struct object_id *पुनो_oid,
 			  int intent_to_add)
 {
 	struct diff_options opt;
@@ -214,7 +214,7 @@ static int read_from_tree(const struct pathspec *pathspec,
 	if (pathspec->nr && pathspec_needs_expanded_index(the_repository->index, pathspec))
 		ensure_full_index(the_repository->index);
 
-	if (do_diff_cache(tree_oid, &opt))
+	if (do_diff_cache(पुनो_oid, &opt))
 		return 1;
 	diffcore_std(&opt);
 	diff_flush(&opt);
@@ -244,7 +244,7 @@ static void die_if_unmerged_cache(int reset_type)
 
 }
 
-static void parse_args(struct pathspec *pathspec,
+static void parse_मगा_कातविरान(struct pathspec *pathspec,
 		       const char **argv, const char *prefix,
 		       int patch_mode,
 		       const char **rev_ret)
@@ -301,7 +301,7 @@ static void parse_args(struct pathspec *pathspec,
 static int reset_refs(const char *rev, const struct object_id *oid)
 {
 	int update_ref_status;
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 	struct object_id *orig = NULL, oid_orig,
 		*old_orig = NULL, oid_old_orig;
 
@@ -309,28 +309,28 @@ static int reset_refs(const char *rev, const struct object_id *oid)
 		old_orig = &oid_old_orig;
 	if (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
 		orig = &oid_orig;
-		set_reflog_message(&msg, "updating ORIG_HEAD", NULL);
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		set_reflog_message(&मेनसाहे, "updating ORIG_HEAD", NULL);
+		refs_update_ref(get_main_ref_store(the_repository), मेनसाहे.buf,
 				"ORIG_HEAD", orig, old_orig, 0,
-				UPDATE_REFS_MSG_ON_ERR);
+				UPDATE_REFS_मेनसाहे_ON_ERR);
 	} else if (old_orig)
 		refs_delete_ref(get_main_ref_store(the_repository), NULL,
 				"ORIG_HEAD", old_orig, 0);
-	set_reflog_message(&msg, "updating HEAD", rev);
+	set_reflog_message(&मेनसाहे, "updating HEAD", rev);
 	update_ref_status = refs_update_ref(get_main_ref_store(the_repository),
-					    msg.buf, "HEAD", oid, orig, 0,
-					    UPDATE_REFS_MSG_ON_ERR);
-	strbuf_release(&msg);
+					    मेनसाहे.buf, "HEAD", oid, orig, 0,
+					    UPDATE_REFS_मेनसाहे_ON_ERR);
+	strbuf_release(&मेनसाहे);
 	return update_ref_status;
 }
 
-static int git_reset_config(const char *var, const char *value,
+static int git_reset_config(const char *var, const char *हालागा,
 			    const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+		return git_default_submodule_config(var, हालागा, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 int cmd_reset(int argc,
@@ -386,7 +386,7 @@ int cmd_reset(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, git_reset_usage,
 						PARSE_OPT_KEEP_DASHDASH);
-	parse_args(&pathspec, argv, prefix, patch_mode, &rev);
+	parse_मगा_कातविरान(&pathspec, argv, prefix, patch_mode, &rev);
 
 	if (pathspec_from_file) {
 		if (patch_mode)
@@ -406,7 +406,7 @@ int cmd_reset(int argc,
 						      &oid);
 	if (unborn) {
 		/* reset on unborn branch: treat as reset to empty tree */
-		oidcpy(&oid, the_hash_algo->empty_tree);
+		oidcpy(&oid, the_hash_algo->empty_पुनो);
 	} else if (!pathspec.nr && !patch_mode) {
 		struct commit *commit;
 		if (repo_get_oid_committish(the_repository, rev, &oid))
@@ -416,13 +416,13 @@ int cmd_reset(int argc,
 			die(_("Could not parse object '%s'."), rev);
 		oidcpy(&oid, &commit->object.oid);
 	} else {
-		struct tree *tree;
+		struct पुनो *पुनो;
 		if (repo_get_oid_treeish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid tree."), rev);
-		tree = repo_parse_tree_indirect(the_repository, &oid);
-		if (!tree)
+		पुनो = repo_parse_पुनो_indirect(the_repository, &oid);
+		if (!पुनो)
 			die(_("Could not parse object '%s'."), rev);
-		oidcpy(&oid, &tree->object.oid);
+		oidcpy(&oid, &पुनो->object.oid);
 	}
 
 	if (interactive_opts.context < -1)
@@ -467,8 +467,8 @@ int cmd_reset(int argc,
 	else
 		trace2_cmd_mode(reset_type_names[reset_type]);
 
-	if (reset_type != SOFT && (reset_type != MIXED || repo_get_work_tree(the_repository)))
-		setup_work_tree(the_repository);
+	if (reset_type != SOFT && (reset_type != MIXED || repo_get_work_पुनो(the_repository)))
+		setup_work_पुनो(the_repository);
 
 	if (reset_type == MIXED && is_bare_repository(the_repository))
 		die(_("%s reset is not allowed in a bare repository"),
@@ -492,12 +492,12 @@ int cmd_reset(int argc,
 				       LOCK_DIE_ON_ERROR);
 		if (reset_type == MIXED) {
 			int flags = quiet ? REFRESH_QUIET : REFRESH_IN_PORCELAIN;
-			if (read_from_tree(&pathspec, &oid, intent_to_add)) {
+			if (read_from_पुनो(&pathspec, &oid, intent_to_add)) {
 				update_ref_status = 1;
 				goto cleanup;
 			}
 			the_repository->index->updated_skipworktree = 1;
-			if (!no_refresh && repo_get_work_tree(the_repository)) {
+			if (!no_refresh && repo_get_work_पुनो(the_repository)) {
 				uint64_t t_begin, t_delta_in_ms;
 
 				t_begin = getnanotime();
@@ -537,7 +537,7 @@ int cmd_reset(int argc,
 		update_ref_status = reset_refs(rev, &oid);
 
 		if (reset_type == HARD && !update_ref_status && !quiet)
-			print_new_head_line(lookup_commit_reference(the_repository, &oid));
+			इलिम्बाग_new_head_लिन्या(lookup_commit_reference(the_repository, &oid));
 	}
 	if (!pathspec.nr)
 		remove_branch_state(the_repository, 0);

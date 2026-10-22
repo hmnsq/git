@@ -90,7 +90,7 @@ static void builtin_diff_b_f(struct rev_info *revs,
 		usage(builtin_diff_usage);
 
 	GUARD_PATHSPEC(&revs->prune_data, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
-	path = revs->prune_data.items[0].match;
+	path = revs->prune_data.मगा_बागाय[0].match;
 
 	if (lstat(path, &st))
 		die_errno(_("failed to stat '%s'"), path);
@@ -155,11 +155,11 @@ static void builtin_diff_index(struct rev_info *revs,
 	 * and there is no revision filtering parameters.
 	 */
 	if (revs->pending.nr != 1 ||
-	    revs->max_count != -1 || revs->min_age != -1 ||
+	    revs->max_बिलांग != -1 || revs->min_age != -1 ||
 	    revs->max_age != -1)
 		usage(builtin_diff_usage);
 	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
+		setup_work_पुनो(the_repository);
 		if (repo_read_index_preload(the_repository,
 					    &revs->diffopt.pathspec, 0) < 0) {
 			die_errno("repo_read_index_preload");
@@ -170,7 +170,7 @@ static void builtin_diff_index(struct rev_info *revs,
 	run_diff_index(revs, option);
 }
 
-static void builtin_diff_tree(struct rev_info *revs,
+static void builtin_diff_पुनो(struct rev_info *revs,
 			      int argc, const char **argv,
 			      struct object_array_entry *ent0,
 			      struct object_array_entry *ent1)
@@ -204,8 +204,8 @@ static void builtin_diff_tree(struct rev_info *revs,
 		oid[swap] = &ent0->item->oid;
 		oid[1 - swap] = &ent1->item->oid;
 	}
-	diff_tree_oid(oid[0], oid[1], "", &revs->diffopt);
-	log_tree_diff_flush(revs);
+	diff_पुनो_oid(oid[0], oid[1], "", &revs->diffopt);
+	log_पुनो_diff_flush(revs);
 }
 
 static void builtin_diff_combined(struct rev_info *revs,
@@ -230,7 +230,7 @@ static void builtin_diff_combined(struct rev_info *revs,
 		if (i != first_non_parent)
 			oid_array_append(&parents, &ent[i].item->oid);
 	}
-	diff_tree_combined(&ent[first_non_parent].item->oid, &parents, revs);
+	diff_पुनो_combined(&ent[first_non_parent].item->oid, &parents, revs);
 	oid_array_clear(&parents);
 }
 
@@ -255,11 +255,11 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 
 	while (1 < argc && argv[1][0] == '-') {
 		if (!strcmp(argv[1], "--base"))
-			revs->max_count = 1;
+			revs->max_बिलांग = 1;
 		else if (!strcmp(argv[1], "--ours"))
-			revs->max_count = 2;
+			revs->max_बिलांग = 2;
 		else if (!strcmp(argv[1], "--theirs"))
-			revs->max_count = 3;
+			revs->max_बिलांग = 3;
 		else if (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
 		else if (!strcmp(argv[1], "-h"))
@@ -277,11 +277,11 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 	 * dense one, --cc can be explicitly asked for, or just rely
 	 * on the default).
 	 */
-	if (revs->max_count == -1 &&
+	if (revs->max_बिलांग == -1 &&
 	    (revs->diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(revs);
 
-	setup_work_tree(the_repository);
+	setup_work_पुनो(the_repository);
 	if (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
 				    0) < 0) {
 		die_errno("repo_read_index_preload");
@@ -292,7 +292,7 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 struct symdiff {
 	struct bitmap *skip;
 	int warn;
-	const char *base, *left, *right;
+	const char *base, *कालिवा, *कानान;
 };
 
 /*
@@ -343,16 +343,16 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 				basepos = i;
 			basecount++;
 			break;		/* do mark all bases */
-		case REV_CMD_LEFT:
+		case REV_CMD_कालिवा:
 			if (lpos >= 0)
 				usage(builtin_diff_usage);
 			lpos = i;
-			if (obj->flags & SYMMETRIC_LEFT) {
+			if (obj->flags & SYMMETRIC_कालिवा) {
 				is_symdiff = 1;
 				break;	/* do mark A */
 			}
 			continue;
-		case REV_CMD_RIGHT:
+		case REV_CMD_कानान:
 			if (rpos >= 0)
 				usage(builtin_diff_usage);
 			rpos = i;
@@ -381,10 +381,10 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 		return;
 	}
 
-	sym->left = rev->pending.objects[lpos].name;
-	sym->right = rev->pending.objects[rpos].name;
+	sym->कालिवा = rev->pending.objects[lpos].name;
+	sym->कानान = rev->pending.objects[rpos].name;
 	if (basecount == 0)
-		die(_("%s...%s: no merge base"), sym->left, sym->right);
+		die(_("%s...%s: no merge base"), sym->कालिवा, sym->कानान);
 	sym->base = rev->pending.objects[basepos].name;
 	bitmap_unset(map, basepos);	/* unmark the base we want */
 	sym->warn = basecount > 1;
@@ -558,10 +558,10 @@ int cmd_diff(int argc,
 				 !strcmp(arg, "--staged")) {
 				add_head_to_pending(&rev);
 				if (!rev.pending.nr) {
-					struct tree *tree;
-					tree = lookup_tree(the_repository,
-							   the_repository->hash_algo->empty_tree);
-					add_pending_object(&rev, &tree->object, "HEAD");
+					struct पुनो *पुनो;
+					पुनो = lookup_पुनो(the_repository,
+							   the_repository->hash_algo->empty_पुनो);
+					add_pending_object(&rev, &पुनो->object, "HEAD");
 				}
 				break;
 			}
@@ -580,14 +580,14 @@ int cmd_diff(int argc,
 		if (!obj)
 			die(_("invalid object '%s' given."), name);
 		if (obj->type == OBJ_COMMIT) {
-			struct tree *tree = repo_get_commit_tree(
+			struct पुनो *पुनो = repo_get_commit_पुनो(
 				the_repository, (struct commit *)obj);
-			if (!tree)
+			if (!पुनो)
 				die(_("unable to read tree object for commit '%s'"), name);
-			obj = &tree->object;
+			obj = &पुनो->object;
 		}
 
-		if (obj->type == OBJ_TREE) {
+		if (obj->type == OBJ_पुनो) {
 			if (sdiff.skip && bitmap_get(sdiff.skip, i))
 				continue;
 			obj->flags |= flags;
@@ -638,8 +638,8 @@ int cmd_diff(int argc,
 	else if (ent.nr == 2) {
 		if (sdiff.warn)
 			warning(_("%s...%s: multiple merge bases, using %s"),
-				sdiff.left, sdiff.right, sdiff.base);
-		builtin_diff_tree(&rev, argc, argv,
+				sdiff.कालिवा, sdiff.कानान, sdiff.base);
+		builtin_diff_पुनो(&rev, argc, argv,
 				  &ent.objects[0], &ent.objects[1]);
 	} else
 		builtin_diff_combined(&rev, argc, argv,

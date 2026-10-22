@@ -30,7 +30,7 @@ static void check_mailmap(struct string_list *mailmap, const char *contact)
 	size_t namelen, maillen;
 	struct ident_split ident;
 
-	if (!split_ident_line(&ident, contact, strlen(contact))) {
+	if (!split_ident_लिन्या(&ident, contact, strlen(contact))) {
 		name = ident.name_begin;
 		namelen = ident.name_end - ident.name_begin;
 		mail = ident.mail_begin;

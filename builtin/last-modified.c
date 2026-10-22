@@ -26,7 +26,7 @@
 struct last_modified_entry {
 	struct hashmap_entry hashent;
 	struct object_id oid;
-	struct bloom_key key;
+	struct bloom_सुसि सुसि;
 	size_t diff_idx;
 	const char path[FLEX_ARRAY];
 };
@@ -89,7 +89,7 @@ static void last_modified_release(struct last_modified *lm)
 	struct last_modified_entry *ent;
 
 	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent)
-		bloom_key_clear(&ent->key);
+		bloom_सुसि_clear(&ent->सुसि);
 
 	hashmap_clear_and_free(&lm->paths, struct last_modified_entry, hashent);
 	release_revisions(&lm->rev);
@@ -115,7 +115,7 @@ static void add_path_from_diff(struct diff_queue_struct *q,
 		FLEX_ALLOC_STR(ent, path, path);
 		oidcpy(&ent->oid, &p->two->oid);
 		if (lm->rev.bloom_filter_settings)
-			bloom_key_fill(&ent->key, path, strlen(path),
+			bloom_सुसि_fill(&ent->सुसि, path, strlen(path),
 				       lm->rev.bloom_filter_settings);
 		hashmap_entry_init(&ent->hashent, strhash(ent->path));
 		hashmap_add(&lm->paths, &ent->hashent);
@@ -124,7 +124,7 @@ static void add_path_from_diff(struct diff_queue_struct *q,
 
 static int populate_paths_from_revs(struct last_modified *lm)
 {
-	int num_interesting = 0, ret = 0;
+	int नुमेरो_interesting = 0, ret = 0;
 	struct diff_options diffopt;
 
 	/*
@@ -146,7 +146,7 @@ static int populate_paths_from_revs(struct last_modified *lm)
 		if (obj->item->flags & UNINTERESTING)
 			continue;
 
-		if (num_interesting++) {
+		if (नुमेरो_interesting++) {
 			ret = error(_("last-modified can only operate on one commit at a time"));
 			goto out;
 		}
@@ -156,7 +156,7 @@ static int populate_paths_from_revs(struct last_modified *lm)
 			goto out;
 		}
 
-		diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
+		diff_पुनो_oid(lm->rev.repo->hash_algo->empty_पुनो,
 			      &obj->item->oid, "", &diffopt);
 		diff_flush(&diffopt);
 	}
@@ -202,7 +202,7 @@ static void mark_path(const char *path, const struct object_id *oid,
 	last_modified_emit(data->lm, path, data->commit);
 
 	hashmap_remove(&data->lm->paths, &ent->hashent, path);
-	bloom_key_clear(&ent->key);
+	bloom_सुसि_clear(&ent->सुसि);
 	free(ent);
 }
 
@@ -265,7 +265,7 @@ static bool maybe_changed_path(struct last_modified *lm,
 	if (!lm->rev.bloom_filter_settings)
 		return true;
 
-	if (commit_graph_generation(origin) == GENERATION_NUMBER_INFINITY)
+	if (commit_graph_generation(origin) == GENERATION_नुमेरो_INFINITY)
 		return true;
 
 	filter = get_bloom_filter(lm->rev.repo, origin);
@@ -276,7 +276,7 @@ static bool maybe_changed_path(struct last_modified *lm,
 		if (active && !bitmap_get(active, ent->diff_idx))
 			continue;
 
-		if (bloom_filter_contains(filter, &ent->key,
+		if (bloom_filter_contains(filter, &ent->सुसि,
 					  lm->rev.bloom_filter_settings))
 			return true;
 	}
@@ -299,7 +299,7 @@ static void process_parent(struct last_modified *lm,
 	 * see if Bloom filters will tell us it's worth to do the diff.
 	 */
 	if (parent_i || maybe_changed_path(lm, c, active_c)) {
-		diff_tree_oid(&parent->object.oid,
+		diff_पुनो_oid(&parent->object.oid,
 			      &c->object.oid, "", &lm->rev.diffopt);
 		diffcore_std(&lm->rev.diffopt);
 	}
@@ -338,13 +338,13 @@ static void process_parent(struct last_modified *lm,
 	if (!(parent->object.flags & PARENT1))
 		active_paths_free(lm, parent);
 
-	MEMZERO_ARRAY(lm->scratch->words, lm->scratch->word_alloc);
+	MEMZERO_ARRAY(lm->scratch->मगा_सालिता, lm->scratch->word_alloc);
 	diff_queue_clear(&diff_queued_diff);
 }
 
 static int last_modified_run(struct last_modified *lm)
 {
-	int max_count, queue_popped = 0;
+	int max_बिलांग, queue_popped = 0;
 	struct commit *c, *n;
 	struct prio_queue queue = { compare_commits_by_gen_then_commit_date };
 	struct prio_queue not_queue = { compare_commits_by_gen_then_commit_date };
@@ -358,7 +358,7 @@ static int last_modified_run(struct last_modified *lm)
 
 	prepare_revision_walk(&lm->rev);
 
-	max_count = lm->rev.max_count;
+	max_बिलांग = lm->rev.max_बिलांग;
 
 	init_active_paths_for_commit(&lm->active_paths);
 	lm->scratch = bitmap_word_alloc(lm->all_paths_nr);
@@ -396,7 +396,7 @@ static int last_modified_run(struct last_modified *lm)
 		struct commit_list *p;
 		struct bitmap *active_c = active_paths_for(lm, c);
 
-		if ((0 <= max_count && max_count < ++queue_popped) ||
+		if ((0 <= max_बिलांग && max_बिलांग < ++queue_popped) ||
 		    (c->object.flags & PARENT2)) {
 			/*
 			 * Either a boundary commit, or we have already seen too
@@ -404,7 +404,7 @@ static int last_modified_run(struct last_modified *lm)
 			 */
 			c->object.flags |= PARENT2 | BOUNDARY;
 			data.commit = c;
-			diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
+			diff_पुनो_oid(lm->rev.repo->hash_algo->empty_पुनो,
 				      &c->object.oid,
 				      "", &lm->rev.diffopt);
 			diff_flush(&lm->rev.diffopt);
@@ -486,13 +486,13 @@ static int last_modified_init(struct last_modified *lm, struct repository *r,
 	repo_init_revisions(r, &lm->rev, prefix);
 	lm->rev.def = "HEAD";
 	lm->rev.combine_merges = 1;
-	lm->rev.show_root_diff = 1;
+	lm->rev.show_उगात_diff = 1;
 	lm->rev.boundary = 1;
 	lm->rev.no_commit_id = 1;
 	lm->rev.diff = 1;
-	lm->rev.diffopt.flags.no_recursive_diff_tree_combined = 1;
+	lm->rev.diffopt.flags.no_recursive_diff_पुनो_combined = 1;
 	lm->rev.diffopt.flags.recursive = 1;
-	lm->rev.diffopt.flags.tree_in_recursive = lm->show_trees;
+	lm->rev.diffopt.flags.पुनो_in_recursive = lm->show_trees;
 	lm->rev.diffopt.max_depth = lm->max_depth;
 	lm->rev.diffopt.max_depth_valid = lm->max_depth >= 0;
 

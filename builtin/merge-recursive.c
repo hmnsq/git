@@ -27,7 +27,7 @@ int cmd_merge_recursive(int argc,
 			struct repository *repo UNUSED)
 {
 	struct object_id bases[21];
-	unsigned bases_count = 0;
+	unsigned bases_बिलांग = 0;
 	int i, failed;
 	struct object_id h1, h2;
 	struct merge_options o;
@@ -40,9 +40,9 @@ int cmd_merge_recursive(int argc,
 
 	if (argc == 2 && (!strcmp(argv[1], "-h") ||
 			  !strcmp(argv[1], "--help-all"))) {
-		struct strbuf msg = STRBUF_INIT;
-		strbuf_addf(&msg, builtin_merge_recursive_usage, argv[0]);
-		show_usage_if_asked(argc, argv, msg.buf);
+		struct strbuf मेनसाहे = STRBUF_INIT;
+		strbuf_addf(&मेनसाहे, builtin_merge_recursive_usage, argv[0]);
+		show_usage_if_asked(argc, argv, मेनसाहे.buf);
 	}
 
 	if (argc < 4)
@@ -58,8 +58,8 @@ int cmd_merge_recursive(int argc,
 				die(_("unknown option %s"), arg);
 			continue;
 		}
-		if (bases_count < ARRAY_SIZE(bases)-1) {
-			if (repo_get_oid(the_repository, argv[i], &bases[bases_count++]))
+		if (bases_बिलांग < ARRAY_SIZE(bases)-1) {
+			if (repo_get_oid(the_repository, argv[i], &bases[bases_बिलांग++]))
 				die(_("could not parse object '%s'"), argv[i]);
 		}
 		else
@@ -90,7 +90,7 @@ int cmd_merge_recursive(int argc,
 	if (o.verbosity >= 3)
 		printf(_("Merging %s with %s\n"), o.branch1, o.branch2);
 
-	failed = merge_ort_generic(&o, &h1, &h2, bases_count, bases, &result);
+	failed = merge_ort_generic(&o, &h1, &h2, bases_बिलांग, bases, &result);
 
 	free(better1);
 	free(better2);

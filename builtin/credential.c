@@ -6,7 +6,7 @@
 #include "environment.h"
 #include "config.h"
 
-static const char usage_msg[] =
+static const char usage_मेनसाहे[] =
 	"git credential (fill|approve|reject)";
 
 int cmd_credential(int argc,
@@ -19,9 +19,9 @@ int cmd_credential(int argc,
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_मेनसाहे);
 	if (argc != 2)
-		usage(usage_msg);
+		usage(usage_मेनसाहे);
 	op = argv[1];
 
 	if (!strcmp(op, "capability")) {
@@ -44,7 +44,7 @@ int cmd_credential(int argc,
 		credential_set_all_capabilities(&c, CREDENTIAL_OP_HELPER);
 		credential_reject(the_repository, &c);
 	} else {
-		usage(usage_msg);
+		usage(usage_मेनसाहे);
 	}
 
 	credential_clear(&c);

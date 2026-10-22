@@ -42,11 +42,11 @@ static int fsmonitor__start_timeout_sec = 60;
 #define FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
 static int fsmonitor__announce_startup = 0;
 
-static int fsmonitor_config(const char *var, const char *value,
+static int fsmonitor_config(const char *var, const char *हालागा,
 			    const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, FSMONITOR__IPC_THREADS)) {
-		int i = git_config_int(var, value, ctx->kvi);
+		int i = git_config_int(var, हालागा, ctx->kvi);
 		if (i < 1)
 			return error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__IPC_THREADS, i);
@@ -55,7 +55,7 @@ static int fsmonitor_config(const char *var, const char *value,
 	}
 
 	if (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
-		int i = git_config_int(var, value, ctx->kvi);
+		int i = git_config_int(var, हालागा, ctx->kvi);
 		if (i < 0)
 			return error(_("value of '%s' out of range: %d"),
 				     FSMONITOR__START_TIMEOUT, i);
@@ -65,7 +65,7 @@ static int fsmonitor_config(const char *var, const char *value,
 
 	if (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
 		int is_bool;
-		int i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
+		int i = git_config_bool_or_int(var, हालागा, ctx->kvi, &is_bool);
 		if (i < 0)
 			return error(_("value of '%s' not bool or int: %d"),
 				     var, i);
@@ -73,7 +73,7 @@ static int fsmonitor_config(const char *var, const char *value,
 		return 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 /*
@@ -182,7 +182,7 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 
 	hashmap_add(&state->cookies, &cookie->entry);
 
-	trace_printf_key(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
+	trace_printf_सुसि(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
 			 cookie->name, cookie_pathname.buf);
 
 	/*
@@ -227,7 +227,7 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 						     &state->main_lock,
 						     &ts);
 		if (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_सुसि(&trace_fsmonitor,
 					 "cookie_wait timed out");
 			cookie->result = FCIR_ERROR;
 		}
@@ -257,15 +257,15 @@ static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
 	int nr_seen = 0;
 
 	for (k = 0; k < cookie_names->nr; k++) {
-		struct fsmonitor_cookie_item key;
+		struct fsmonitor_cookie_item सुसि;
 		struct fsmonitor_cookie_item *cookie;
 
-		key.name = cookie_names->items[k].string;
-		hashmap_entry_init(&key.entry, strhash(key.name));
+		सुसि.name = cookie_names->मगा_बागाय[k].string;
+		hashmap_entry_init(&सुसि.entry, strhash(सुसि.name));
 
-		cookie = hashmap_get_entry(&state->cookies, &key, entry, NULL);
+		cookie = hashmap_get_entry(&state->cookies, &सुसि, entry, NULL);
 		if (cookie) {
-			trace_printf_key(&trace_fsmonitor, "cookie-seen: '%s'",
+			trace_printf_सुसि(&trace_fsmonitor, "cookie-seen: '%s'",
 					 cookie->name);
 			cookie->result = FCIR_SEEN;
 			nr_seen++;
@@ -288,7 +288,7 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
 	int nr_aborted = 0;
 
 	hashmap_for_each_entry(&state->cookies, &iter, cookie, entry) {
-		trace_printf_key(&trace_fsmonitor, "cookie-abort: '%s'",
+		trace_printf_सुसि(&trace_fsmonitor, "cookie-abort: '%s'",
 				 cookie->name);
 		cookie->result = FCIR_ABORT;
 		nr_aborted++;
@@ -370,7 +370,7 @@ struct fsmonitor_token_data {
 	struct strbuf token_id;
 	struct fsmonitor_batch *batch_head;
 	struct fsmonitor_batch *batch_tail;
-	uint64_t client_ref_count;
+	uint64_t client_ref_बिलांग;
 };
 
 struct fsmonitor_batch {
@@ -383,8 +383,8 @@ struct fsmonitor_batch {
 
 static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 {
-	static int test_env_value = -1;
-	static uint64_t flush_count = 0;
+	static int test_env_हालागा = -1;
+	static uint64_t flush_बिलांग = 0;
 	struct fsmonitor_token_data *token;
 	struct fsmonitor_batch *batch;
 
@@ -394,12 +394,12 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	strbuf_init(&token->token_id, 0);
 	token->batch_head = batch;
 	token->batch_tail = batch;
-	token->client_ref_count = 0;
+	token->client_ref_बिलांग = 0;
 
-	if (test_env_value < 0)
-		test_env_value = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
+	if (test_env_हालागा < 0)
+		test_env_हालागा = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
 
-	if (!test_env_value) {
+	if (!test_env_हालागा) {
 		struct timeval tv;
 		struct tm tm;
 		time_t secs;
@@ -410,13 +410,13 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 
 		strbuf_addf(&token->token_id,
 			    "%"PRIu64".%d.%4d%02d%02dT%02d%02d%02d.%06ldZ",
-			    flush_count++,
+			    flush_बिलांग++,
 			    getpid(),
 			    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			    tm.tm_hour, tm.tm_min, tm.tm_sec,
 			    (long)tv.tv_usec);
 	} else {
-		strbuf_addf(&token->token_id, "test_%08x", test_env_value++);
+		strbuf_addf(&token->token_id, "test_%08x", test_env_हालागा++);
 	}
 
 	/*
@@ -446,7 +446,7 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	 * reference point set.  Pin batch 0 to force early file system
 	 * events to accumulate.
 	 */
-	if (test_env_value)
+	if (test_env_हालागा)
 		batch->pinned_time = time(NULL);
 
 	return token;
@@ -483,7 +483,7 @@ void fsmonitor_batch__add_path(struct fsmonitor_batch *batch,
 {
 	const char *interned_path = strintern(path);
 
-	trace_printf_key(&trace_fsmonitor, "event: %s", interned_path);
+	trace_printf_सुसि(&trace_fsmonitor, "event: %s", interned_path);
 
 	ALLOC_GROW(batch->interned_paths, batch->nr + 1, batch->alloc);
 	batch->interned_paths[batch->nr++] = interned_path;
@@ -544,7 +544,7 @@ static struct fsmonitor_batch *with_lock__truncate_old_batches(
 	if (!batch_marker)
 		return NULL;
 
-	trace_printf_key(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
+	trace_printf_सुसि(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
 			 batch_marker->batch_seq_nr,
 			 (uint64_t)batch_marker->pinned_time);
 
@@ -577,7 +577,7 @@ static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
 	if (!token)
 		return;
 
-	assert(token->client_ref_count == 0);
+	assert(token->client_ref_बिलांग == 0);
 
 	strbuf_release(&token->token_id);
 
@@ -614,7 +614,7 @@ static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
 
 	new_one = fsmonitor_new_token_data();
 
-	if (state->current_token_data->client_ref_count == 0)
+	if (state->current_token_data->client_ref_बिलांग == 0)
 		free_me = state->current_token_data;
 	state->current_token_data = new_one;
 
@@ -689,7 +689,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	const struct fsmonitor_batch *batch_head;
 	const struct fsmonitor_batch *batch;
 	struct fsmonitor_batch *remainder = NULL;
-	intmax_t count = 0, duplicates = 0;
+	intmax_t बिलांग = 0, duplicates = 0;
 	struct strset shown = STRSET_INIT;
 	int do_trivial = 0;
 	int do_flush = 0;
@@ -734,7 +734,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		char *p_end;
 
 		strtoumax(command, &p_end, 10);
-		trace_printf_key(&trace_fsmonitor,
+		trace_printf_सुसि(&trace_fsmonitor,
 				 ((*p_end) ?
 				  "fsmonitor: invalid command line '%s'" :
 				  "fsmonitor: unsupported V1 protocol '%s'"),
@@ -746,7 +746,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		/* We have "builtin:*" */
 		if (fsmonitor_parse_client_token(command, &requested_token_id,
 						 &requested_oldest_seq_nr)) {
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_सुसि(&trace_fsmonitor,
 					 "fsmonitor: invalid V2 protocol token '%s'",
 					 command);
 			do_trivial = 1;
@@ -818,7 +818,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	trace2_data_string("fsmonitor", the_repository, "response/token",
 			   response_token.buf);
-	trace_printf_key(&trace_fsmonitor, "response token: %s",
+	trace_printf_सुसि(&trace_fsmonitor, "response token: %s",
 			 response_token.buf);
 
 	if (!do_trivial) {
@@ -841,7 +841,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * client a complete snapshot relative to their
 			 * request.
 			 */
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_सुसि(&trace_fsmonitor,
 					 "client requested truncated data");
 			do_trivial = 1;
 		}
@@ -870,7 +870,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * AND it allows the listener thread to do a token-reset
 	 * (and install a new `current_token_data`).
 	 */
-	token_data->client_ref_count++;
+	token_data->client_ref_बिलांग++;
 
 	pthread_mutex_unlock(&state->main_lock);
 
@@ -899,9 +899,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			if (!strset_add(&shown, s))
 				duplicates++;
 			else {
-				trace_printf_key(&trace_fsmonitor,
+				trace_printf_सुसि(&trace_fsmonitor,
 						 "send[%"PRIuMAX"]: %s",
-						 count, s);
+						 बिलांग, s);
 
 				/* Each path gets written with a trailing NUL */
 				s_len = strlen(s) + 1;
@@ -915,7 +915,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 				}
 
 				strbuf_add(&payload, s, s_len);
-				count++;
+				बिलांग++;
 			}
 		}
 	}
@@ -927,10 +927,10 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 
 	pthread_mutex_lock(&state->main_lock);
 
-	if (token_data->client_ref_count > 0)
-		token_data->client_ref_count--;
+	if (token_data->client_ref_बिलांग > 0)
+		token_data->client_ref_बिलांग--;
 
-	if (token_data->client_ref_count == 0) {
+	if (token_data->client_ref_बिलांग == 0) {
 		if (token_data != state->current_token_data) {
 			/*
 			 * The listener thread did a token-reset while we were
@@ -964,7 +964,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		fsmonitor_batch__free_list(remainder);
 
 	trace2_data_intmax("fsmonitor", the_repository, "response/length", total_response_len);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/files", count);
+	trace2_data_intmax("fsmonitor", the_repository, "response/count/files", बिलांग);
 	trace2_data_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
 
 cleanup:
@@ -994,7 +994,7 @@ static int handle_client(void *data,
 	if (command_len != strlen(command))
 		BUG("FSMonitor assumes text messages");
 
-	trace_printf_key(&trace_fsmonitor, "requested token: %s", command);
+	trace_printf_सुसि(&trace_fsmonitor, "requested token: %s", command);
 
 	trace2_region_enter("fsmonitor", "handle_client", the_repository);
 	trace2_data_string("fsmonitor", the_repository, "request", command);
@@ -1185,17 +1185,17 @@ static void *fsm_listen__thread_proc(void *_state)
 
 	trace2_thread_start("fsm-listen");
 
-	trace_printf_key(&trace_fsmonitor, "Watching: worktree '%s'",
+	trace_printf_सुसि(&trace_fsmonitor, "Watching: worktree '%s'",
 			 state->path_worktree_watch.buf);
 	if (state->nr_paths_watching > 1)
-		trace_printf_key(&trace_fsmonitor, "Watching: gitdir '%s'",
+		trace_printf_सुसि(&trace_fsmonitor, "Watching: gitdir '%s'",
 				 state->path_gitdir_watch.buf);
 
 	fsm_listen__loop(state);
 
 	pthread_mutex_lock(&state->main_lock);
 	if (state->current_token_data &&
-	    state->current_token_data->client_ref_count == 0)
+	    state->current_token_data->client_ref_बिलांग == 0)
 		fsmonitor_free_token_data(state->current_token_data);
 	state->current_token_data = NULL;
 	pthread_mutex_unlock(&state->main_lock);
@@ -1310,7 +1310,7 @@ static int fsmonitor_run_daemon(void)
 	/* Prepare to (recursively) watch the <worktree-root> directory. */
 	strbuf_init(&state.path_worktree_watch, 0);
 	strbuf_addstr(&state.path_worktree_watch,
-		      absolute_path(repo_get_work_tree(the_repository)));
+		      absolute_path(repo_get_work_पुनो(the_repository)));
 	state.nr_paths_watching = 1;
 
 	strbuf_init(&state.alias.alias, 0);
@@ -1535,10 +1535,10 @@ static int try_to_start_background_daemon(void)
 
 	cp.git_cmd = 1;
 
-	strvec_push(&cp.args, "fsmonitor--daemon");
-	strvec_push(&cp.args, "run");
-	strvec_push(&cp.args, "--detach");
-	strvec_pushf(&cp.args, "--ipc-threads=%d", fsmonitor__ipc_threads);
+	strvec_इतुलाक(&cp.मगा_कातविरान, "fsmonitor--daemon");
+	strvec_इतुलाक(&cp.मगा_कातविरान, "run");
+	strvec_इतुलाक(&cp.मगा_कातविरान, "--detach");
+	strvec_pushf(&cp.मगा_कातविरान, "--ipc-threads=%d", fsmonitor__ipc_threads);
 
 	cp.no_stdin = 1;
 	cp.no_stdout = 1;
@@ -1612,7 +1612,7 @@ int cmd_fsmonitor__daemon(int argc,
 	reason = fsm_settings__get_reason(the_repository);
 	if (reason > FSMONITOR_REASON_OK)
 		die("%s",
-		    fsm_settings__get_incompatible_msg(the_repository,
+		    fsm_settings_get_incompatible_मेनसाहे(the_repository,
 						       reason));
 
 	if (!strcmp(subcmd, "start"))

@@ -35,7 +35,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	struct strbuf meta = STRBUF_INIT;
 	struct option *parseopts;
 	struct rev_info revs;
-	int line_term = '\0';
+	int लिन्या_term = '\0';
 	int ret;
 
 	const char * const builtin_diff_pairs_usage[] = {
@@ -73,13 +73,13 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 	 * NUL-delimited (this mode does not affect patch output). At present
 	 * only NUL-delimited raw diff formatted input is supported.
 	 */
-	if (revs.diffopt.line_termination)
+	if (revs.diffopt.लिन्या_termination)
 		usage(_("working without -z is not supported"));
 
 	if (revs.prune_data.nr)
 		usage(_("pathspec arguments not supported"));
 
-	if (revs.pending.nr || revs.max_count != -1 ||
+	if (revs.pending.nr || revs.max_बिलांग != -1 ||
 	    revs.min_age != (timestamp_t)-1 ||
 	    revs.max_age != (timestamp_t)-1)
 		usage(_("revision arguments not allowed"));
@@ -103,7 +103,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 		const char *p;
 		char status;
 
-		if (strbuf_getwholeline(&meta, stdin, line_term) == EOF)
+		if (strbuf_getwholeline(&meta, stdin, लिन्या_term) == EOF)
 			break;
 
 		p = meta.buf;
@@ -134,7 +134,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 
 		status = *p++;
 
-		if (strbuf_getwholeline(&path, stdin, line_term) == EOF)
+		if (strbuf_getwholeline(&path, stdin, लिन्या_term) == EOF)
 			die(_("got EOF while reading path"));
 
 		switch (status) {
@@ -168,7 +168,7 @@ int cmd_diff_pairs(int argc, const char **argv, const char *prefix,
 				struct diff_filespec *a, *b;
 				unsigned int score;
 
-				if (strbuf_getwholeline(&path_dst, stdin, line_term) == EOF)
+				if (strbuf_getwholeline(&path_dst, stdin, लिन्या_term) == EOF)
 					die(_("got EOF while reading destination path"));
 
 				a = alloc_filespec(path.buf);

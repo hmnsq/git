@@ -45,9 +45,9 @@
 /**
  * Returns the length of the first line of msg.
  */
-static int linelen(const char *msg)
+static int linelen(const char *मेनसाहे)
 {
-	return strchrnul(msg, '\n') - msg;
+	return strchrnul(मेनसाहे, '\n') - मेनसाहे;
 }
 
 /**
@@ -119,8 +119,8 @@ struct am_state {
 	char *author_name;
 	char *author_email;
 	char *author_date;
-	char *msg;
-	size_t msg_len;
+	char *मेनसाहे;
+	size_t मेनसाहे_len;
 
 	/* when --rebasing, records the original commit the patch came from */
 	struct object_id orig_commit;
@@ -186,7 +186,7 @@ static void am_state_release(struct am_state *state)
 	free(state->author_name);
 	free(state->author_email);
 	free(state->author_date);
-	free(state->msg);
+	free(state->मेनसाहे);
 	strvec_clear(&state->git_apply_opts);
 }
 
@@ -195,7 +195,7 @@ static int am_option_parse_quoted_cr(const struct option *opt,
 {
 	BUG_ON_OPT_NEG(unset);
 
-	if (mailinfo_parse_quoted_cr_action(arg, opt->value) != 0)
+	if (mailinfo_parse_quoted_cr_action(arg, opt->हालागा) != 0)
 		return error(_("bad action '%s' for '%s'"), arg, "--quoted-cr");
 	return 0;
 }
@@ -203,16 +203,16 @@ static int am_option_parse_quoted_cr(const struct option *opt,
 static int am_option_parse_empty(const struct option *opt,
 				     const char *arg, int unset)
 {
-	int *opt_value = opt->value;
+	int *opt_हालागा = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
 	if (!strcmp(arg, "stop"))
-		*opt_value = STOP_ON_EMPTY_COMMIT;
+		*opt_हालागा = STOP_ON_EMPTY_COMMIT;
 	else if (!strcmp(arg, "drop"))
-		*opt_value = DROP_EMPTY_COMMIT;
+		*opt_हालागा = DROP_EMPTY_COMMIT;
 	else if (!strcmp(arg, "keep"))
-		*opt_value = KEEP_EMPTY_COMMIT;
+		*opt_हालागा = KEEP_EMPTY_COMMIT;
 	else
 		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
@@ -236,16 +236,16 @@ static void write_state_text(const struct am_state *state,
 	write_file(am_path(state, name), "%s", string);
 }
 
-static void write_state_count(const struct am_state *state,
-			      const char *name, int value)
+static void write_state_बिलांग(const struct am_state *state,
+			      const char *name, int हालागा)
 {
-	write_file(am_path(state, name), "%d", value);
+	write_file(am_path(state, name), "%d", हालागा);
 }
 
 static void write_state_bool(const struct am_state *state,
-			     const char *name, int value)
+			     const char *name, int हालागा)
 {
-	write_state_text(state, name, value ? "t" : "f");
+	write_state_text(state, name, हालागा ? "t" : "f");
 }
 
 /**
@@ -364,28 +364,28 @@ static void write_author_script(const struct am_state *state)
  *
  * Returns 0 on success, -1 if the file does not exist.
  */
-static int read_commit_msg(struct am_state *state)
+static int read_commit_मेनसाहे(struct am_state *state)
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	assert(!state->msg);
+	assert(!state->मेनसाहे);
 
 	if (read_state_file(&sb, state, "final-commit", 0) < 0) {
 		strbuf_release(&sb);
 		return -1;
 	}
 
-	state->msg = strbuf_detach(&sb, &state->msg_len);
+	state->मेनसाहे = strbuf_detach(&sb, &state->मेनसाहे_len);
 	return 0;
 }
 
 /**
  * Saves state->msg in the state directory's "final-commit" file.
  */
-static void write_commit_msg(const struct am_state *state)
+static void write_commit_मेनसाहे(const struct am_state *state)
 {
 	const char *filename = am_path(state, "final-commit");
-	write_file_buf(filename, state->msg, state->msg_len);
+	write_file_buf(filename, state->मेनसाहे, state->मेनसाहे_len);
 }
 
 /**
@@ -406,7 +406,7 @@ static void am_load(struct am_state *state)
 	if (read_am_author_script(state) < 0)
 		die(_("could not parse author script"));
 
-	read_commit_msg(state);
+	read_commit_मेनसाहे(state);
 
 	if (read_state_file(&sb, state, "original-commit", 1) < 0)
 		oidclr(&state->orig_commit, the_repository->hash_algo);
@@ -484,21 +484,21 @@ static void am_destroy(const struct am_state *state)
 /**
  * Runs applypatch-msg hook. Returns its exit code.
  */
-static int run_applypatch_msg_hook(struct am_state *state)
+static int run_applypatch_मेनसाहे_hook(struct am_state *state)
 {
 	int ret = 0;
 
-	assert(state->msg);
+	assert(state->मेनसाहे);
 
 	if (!state->no_verify) {
 		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
-		strvec_push(&opt.args, am_path(state, "final-commit"));
+		strvec_इतुलाक(&opt.मगा_कातविरान, am_path(state, "final-commit"));
 		ret = run_hooks_opt(the_repository, "applypatch-msg", &opt);
 	}
 
 	if (!ret) {
-		FREE_AND_NULL(state->msg);
-		if (read_commit_msg(state) < 0)
+		FREE_AND_NULL(state->मेनसाहे);
+		if (read_commit_मेनसाहे(state) < 0)
 			die(_("'%s' was deleted by the applypatch-msg hook"),
 				am_path(state, "final-commit"));
 	}
@@ -513,7 +513,7 @@ static int run_post_rewrite_hook(const struct am_state *state)
 {
 	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
 
-	strvec_push(&opt.args, "rebase");
+	strvec_इतुलाक(&opt.मगा_कातविरान, "rebase");
 	opt.path_to_stdin = am_path(state, "rewritten");
 
 	return run_hooks_opt(the_repository, "post-rewrite", &opt);
@@ -529,8 +529,8 @@ static int copy_notes_for_rebase(const struct am_state *state)
 {
 	struct notes_rewrite_cfg *c;
 	struct strbuf sb = STRBUF_INIT;
-	const char *invalid_line = _("Malformed input line: '%s'.");
-	const char *msg = "Notes added by 'git rebase'";
+	const char *invalid_लिन्या = _("Malformed input line: '%s'.");
+	const char *मेनसाहे = "Notes added by 'git rebase'";
 	FILE *fp;
 	int ret = 0;
 
@@ -547,22 +547,22 @@ static int copy_notes_for_rebase(const struct am_state *state)
 		const char *p;
 
 		if (sb.len != the_hash_algo->hexsz * 2 + 1) {
-			ret = error(invalid_line, sb.buf);
+			ret = error(invalid_लिन्या, sb.buf);
 			goto finish;
 		}
 
 		if (parse_oid_hex(sb.buf, &from_obj, &p)) {
-			ret = error(invalid_line, sb.buf);
+			ret = error(invalid_लिन्या, sb.buf);
 			goto finish;
 		}
 
 		if (*p != ' ') {
-			ret = error(invalid_line, sb.buf);
+			ret = error(invalid_लिन्या, sb.buf);
 			goto finish;
 		}
 
 		if (get_oid_hex(p + 1, &to_obj)) {
-			ret = error(invalid_line, sb.buf);
+			ret = error(invalid_लिन्या, sb.buf);
 			goto finish;
 		}
 
@@ -572,7 +572,7 @@ static int copy_notes_for_rebase(const struct am_state *state)
 	}
 
 finish:
-	finish_copy_notes_for_rewrite(the_repository, c, msg);
+	finish_copy_notes_for_rewrite(the_repository, c, मेनसाहे);
 	fclose(fp);
 	strbuf_release(&sb);
 	return ret;
@@ -705,16 +705,16 @@ static int split_mail_mbox(struct am_state *state, const char **paths,
 	int ret;
 
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "mailsplit");
-	strvec_pushf(&cp.args, "-d%d", state->prec);
-	strvec_pushf(&cp.args, "-o%s", state->dir);
-	strvec_push(&cp.args, "-b");
+	strvec_इतुलाक(&cp.मगा_कातविरान, "mailsplit");
+	strvec_pushf(&cp.मगा_कातविरान, "-d%d", state->prec);
+	strvec_pushf(&cp.मगा_कातविरान, "-o%s", state->dir);
+	strvec_इतुलाक(&cp.मगा_कातविरान, "-b");
 	if (keep_cr)
-		strvec_push(&cp.args, "--keep-cr");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--keep-cr");
 	if (mboxrd)
-		strvec_push(&cp.args, "--mboxrd");
-	strvec_push(&cp.args, "--");
-	strvec_pushv(&cp.args, paths);
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--mboxrd");
+	strvec_इतुलाक(&cp.मगा_कातविरान, "--");
+	strvec_pushv(&cp.मगा_कातविरान, paths);
 
 	ret = capture_command(&cp, &last, 8);
 	if (ret)
@@ -861,7 +861,7 @@ static int split_mail_stgit_series(struct am_state *state, const char **paths,
 		if (*sb.buf == '#')
 			continue; /* skip comment lines */
 
-		strvec_push(&patches, mkpath("%s/%s", series_dir, sb.buf));
+		strvec_इतुलाक(&patches, mkpath("%s/%s", series_dir, sb.buf));
 	}
 
 	fclose(fp);
@@ -1104,8 +1104,8 @@ static void am_setup(struct am_state *state, enum patch_format patch_format,
 	 * session is in progress, they should be written last.
 	 */
 
-	write_state_count(state, "next", state->cur);
-	write_state_count(state, "last", state->last);
+	write_state_बिलांग(state, "next", state->cur);
+	write_state_बिलांग(state, "last", state->last);
 
 	strbuf_release(&sb);
 }
@@ -1121,8 +1121,8 @@ static void am_next(struct am_state *state)
 	FREE_AND_NULL(state->author_name);
 	FREE_AND_NULL(state->author_email);
 	FREE_AND_NULL(state->author_date);
-	FREE_AND_NULL(state->msg);
-	state->msg_len = 0;
+	FREE_AND_NULL(state->मेनसाहे);
+	state->मेनसाहे_len = 0;
 
 	unlink(am_path(state, "author-script"));
 	unlink(am_path(state, "final-commit"));
@@ -1138,7 +1138,7 @@ static void am_next(struct am_state *state)
 		write_state_text(state, "abort-safety", "");
 
 	state->cur++;
-	write_state_count(state, "next", state->cur);
+	write_state_बिलांग(state, "next", state->cur);
 }
 
 /**
@@ -1190,9 +1190,9 @@ static void am_append_signoff(struct am_state *state)
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	strbuf_attach(&sb, state->msg, state->msg_len, state->msg_len + 1);
+	strbuf_attach(&sb, state->मेनसाहे, state->मेनसाहे_len, state->मेनसाहे_len + 1);
 	append_signoff(&sb, 0, 0);
-	state->msg = strbuf_detach(&sb, &state->msg_len);
+	state->मेनसाहे = strbuf_detach(&sb, &state->मेनसाहे_len);
 }
 
 /**
@@ -1208,7 +1208,7 @@ static int parse_mail(struct am_state *state, const char *mail)
 {
 	FILE *fp;
 	struct strbuf sb = STRBUF_INIT;
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 	struct strbuf author_name = STRBUF_INIT;
 	struct strbuf author_date = STRBUF_INIT;
 	struct strbuf author_email = STRBUF_INIT;
@@ -1263,12 +1263,12 @@ static int parse_mail(struct am_state *state, const char *mail)
 		BUG("invalid value for state->quoted_cr");
 	}
 
-	mi.input = xfopen(mail, "r");
+	mi.पासोक = xfopen(mail, "r");
 	mi.output = xfopen(am_path(state, "info"), "w");
 	if (mailinfo(&mi, am_path(state, "msg"), am_path(state, "patch")))
 		die("could not parse patch");
 
-	fclose(mi.input);
+	fclose(mi.पासोक);
 	fclose(mi.output);
 
 	if (mi.format_flowed)
@@ -1281,9 +1281,9 @@ static int parse_mail(struct am_state *state, const char *mail)
 		const char *x;
 
 		if (skip_prefix(sb.buf, "Subject: ", &x)) {
-			if (msg.len)
-				strbuf_addch(&msg, '\n');
-			strbuf_addstr(&msg, x);
+			if (मेनसाहे.len)
+				strbuf_addch(&मेनसाहे, '\n');
+			strbuf_addstr(&मेनसाहे, x);
 		} else if (skip_prefix(sb.buf, "Author: ", &x))
 			strbuf_addstr(&author_name, x);
 		else if (skip_prefix(sb.buf, "Email: ", &x))
@@ -1299,9 +1299,9 @@ static int parse_mail(struct am_state *state, const char *mail)
 		goto finish;
 	}
 
-	strbuf_addstr(&msg, "\n\n");
-	strbuf_addbuf(&msg, &mi.log_message);
-	strbuf_stripspace(&msg, NULL);
+	strbuf_addstr(&मेनसाहे, "\n\n");
+	strbuf_addbuf(&मेनसाहे, &mi.log_message);
+	strbuf_stripspace(&मेनसाहे, NULL);
 
 	assert(!state->author_name);
 	state->author_name = strbuf_detach(&author_name, NULL);
@@ -1312,11 +1312,11 @@ static int parse_mail(struct am_state *state, const char *mail)
 	assert(!state->author_date);
 	state->author_date = strbuf_detach(&author_date, NULL);
 
-	assert(!state->msg);
-	state->msg = strbuf_detach(&msg, &state->msg_len);
+	assert(!state->मेनसाहे);
+	state->मेनसाहे = strbuf_detach(&मेनसाहे, &state->मेनसाहे_len);
 
 finish:
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 	strbuf_release(&author_date);
 	strbuf_release(&author_email);
 	strbuf_release(&author_name);
@@ -1352,19 +1352,19 @@ static int get_mail_commit_oid(struct object_id *commit_id, const char *mail)
  */
 static void get_commit_info(struct am_state *state, struct commit *commit)
 {
-	const char *buffer, *ident_line, *msg;
+	const char *buffer, *ident_लिन्या, *मेनसाहे;
 	size_t ident_len;
 	struct ident_split id;
 
 	buffer = repo_logmsg_reencode(the_repository, commit, NULL,
 				      get_commit_output_encoding());
 
-	ident_line = find_commit_header(buffer, "author", &ident_len);
-	if (!ident_line)
+	ident_लिन्या = find_commit_header(buffer, "author", &ident_len);
+	if (!ident_लिन्या)
 		die(_("missing author line in commit %s"),
 		      oid_to_hex(&commit->object.oid));
-	if (split_ident_line(&id, ident_line, ident_len) < 0)
-		die(_("invalid ident line: %.*s"), (int)ident_len, ident_line);
+	if (split_ident_लिन्या(&id, ident_लिन्या, ident_len) < 0)
+		die(_("invalid ident line: %.*s"), (int)ident_len, ident_लिन्या);
 
 	assert(!state->author_name);
 	if (id.name_begin)
@@ -1383,12 +1383,12 @@ static void get_commit_info(struct am_state *state, struct commit *commit)
 	assert(!state->author_date);
 	state->author_date = xstrdup(show_ident_date(&id, DATE_MODE(NORMAL)));
 
-	assert(!state->msg);
-	msg = strstr(buffer, "\n\n");
-	if (!msg)
+	assert(!state->मेनसाहे);
+	मेनसाहे = strstr(buffer, "\n\n");
+	if (!मेनसाहे)
 		die(_("unable to parse commit %s"), oid_to_hex(&commit->object.oid));
-	state->msg = xstrdup(msg + 2);
-	state->msg_len = strlen(state->msg);
+	state->मेनसाहे = xstrdup(मेनसाहे + 2);
+	state->मेनसाहे_len = strlen(state->मेनसाहे);
 	repo_unuse_commit_buffer(the_repository, commit, buffer);
 }
 
@@ -1405,17 +1405,17 @@ static void write_commit_patch(const struct am_state *state, struct commit *comm
 	rev_info.diff = 1;
 	rev_info.abbrev = 0;
 	rev_info.disable_stdin = 1;
-	rev_info.show_root_diff = 1;
+	rev_info.show_उगात_diff = 1;
 	rev_info.diffopt.output_format = DIFF_FORMAT_PATCH;
 	rev_info.no_commit_id = 1;
-	rev_info.diffopt.flags.binary = 1;
+	rev_info.diffopt.flags.दालावाहान = 1;
 	rev_info.diffopt.flags.full_index = 1;
 	rev_info.diffopt.use_color = GIT_COLOR_NEVER;
 	rev_info.diffopt.file = fp;
 	rev_info.diffopt.close_file = 1;
 	add_pending_object(&rev_info, &commit->object, "");
 	diff_setup_done(&rev_info.diffopt);
-	log_tree_commit(&rev_info, commit);
+	log_पुनो_commit(&rev_info, commit);
 	release_revisions(&rev_info);
 }
 
@@ -1425,17 +1425,17 @@ static void write_commit_patch(const struct am_state *state, struct commit *comm
  */
 static void write_index_patch(const struct am_state *state)
 {
-	struct tree *tree;
+	struct पुनो *पुनो;
 	struct object_id head;
 	struct rev_info rev_info;
 	FILE *fp;
 
 	if (!repo_get_oid(the_repository, "HEAD", &head)) {
 		struct commit *commit = lookup_commit_or_die(&head, "HEAD");
-		tree = repo_get_commit_tree(the_repository, commit);
+		पुनो = repo_get_commit_पुनो(the_repository, commit);
 	} else
-		tree = lookup_tree(the_repository,
-				   the_repository->hash_algo->empty_tree);
+		पुनो = lookup_पुनो(the_repository,
+				   the_repository->hash_algo->empty_पुनो);
 
 	fp = xfopen(am_path(state, "patch"), "w");
 	repo_init_revisions(the_repository, &rev_info, NULL);
@@ -1446,7 +1446,7 @@ static void write_index_patch(const struct am_state *state)
 	rev_info.diffopt.use_color = GIT_COLOR_NEVER;
 	rev_info.diffopt.file = fp;
 	rev_info.diffopt.close_file = 1;
-	add_pending_object(&rev_info, &tree->object, "");
+	add_pending_object(&rev_info, &पुनो->object, "");
 	diff_setup_done(&rev_info.diffopt);
 	run_diff_index(&rev_info, DIFF_INDEX_CACHED);
 	release_revisions(&rev_info);
@@ -1493,7 +1493,7 @@ static int run_apply(const struct am_state *state, const char *index_file)
 	struct strvec apply_paths = STRVEC_INIT;
 	struct strvec apply_opts = STRVEC_INIT;
 	struct apply_state apply_state;
-	int res, opts_left;
+	int res, opts_कालिवा;
 	int force_apply = 0;
 	int options = 0;
 	const char **apply_argv;
@@ -1501,7 +1501,7 @@ static int run_apply(const struct am_state *state, const char *index_file)
 	if (init_apply_state(&apply_state, the_repository, NULL))
 		BUG("init_apply_state() failed");
 
-	strvec_push(&apply_opts, "apply");
+	strvec_इतुलाक(&apply_opts, "apply");
 	strvec_pushv(&apply_opts, state->git_apply_opts.v);
 
 	/*
@@ -1511,11 +1511,11 @@ static int run_apply(const struct am_state *state, const char *index_file)
 	 */
 	DUP_ARRAY(apply_argv, apply_opts.v, apply_opts.nr);
 
-	opts_left = apply_parse_options(apply_opts.nr, apply_argv,
+	opts_कालिवा = apply_parse_options(apply_opts.nr, apply_argv,
 					&apply_state, &force_apply, &options,
 					NULL);
 
-	if (opts_left != 0)
+	if (opts_कालिवा != 0)
 		die("unknown option passed through to git apply");
 
 	if (index_file) {
@@ -1534,7 +1534,7 @@ static int run_apply(const struct am_state *state, const char *index_file)
 	if (check_apply_state(&apply_state, force_apply))
 		BUG("check_apply_state() failed");
 
-	strvec_push(&apply_paths, am_path(state, "patch"));
+	strvec_इतुलाक(&apply_paths, am_path(state, "patch"));
 
 	res = apply_all_patches(&apply_state, apply_paths.nr, apply_paths.v, options);
 
@@ -1564,10 +1564,10 @@ static int build_fake_ancestor(const struct am_state *state, const char *index_f
 	struct child_process cp = CHILD_PROCESS_INIT;
 
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "apply");
-	strvec_pushv(&cp.args, state->git_apply_opts.v);
-	strvec_pushf(&cp.args, "--build-fake-ancestor=%s", index_file);
-	strvec_push(&cp.args, am_path(state, "patch"));
+	strvec_इतुलाक(&cp.मगा_कातविरान, "apply");
+	strvec_pushv(&cp.मगा_कातविरान, state->git_apply_opts.v);
+	strvec_pushf(&cp.मगा_कातविरान, "--build-fake-ancestor=%s", index_file);
+	strvec_इतुलाक(&cp.मगा_कातविरान, am_path(state, "patch"));
 
 	if (run_command(&cp))
 		return -1;
@@ -1580,14 +1580,14 @@ static int build_fake_ancestor(const struct am_state *state, const char *index_f
  */
 static int fall_back_threeway(const struct am_state *state, const char *index_path)
 {
-	struct object_id their_tree, our_tree;
+	struct object_id their_पुनो, our_पुनो;
 	struct object_id bases[1] = { 0 };
 	struct merge_options o;
 	struct commit *result;
-	char *their_tree_name;
+	char *their_पुनो_name;
 
-	if (repo_get_oid(the_repository, "HEAD", &our_tree) < 0)
-		oidcpy(&our_tree, the_hash_algo->empty_tree);
+	if (repo_get_oid(the_repository, "HEAD", &our_पुनो) < 0)
+		oidcpy(&our_पुनो, the_hash_algo->empty_पुनो);
 
 	if (build_fake_ancestor(state, index_path))
 		return error("could not build fake ancestor");
@@ -1595,7 +1595,7 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 	discard_index(the_repository->index);
 	read_index_from(the_repository->index, index_path, repo_get_git_dir(the_repository));
 
-	if (write_index_as_tree(&bases[0], the_repository->index, index_path, 0, NULL))
+	if (write_index_as_पुनो(&bases[0], the_repository->index, index_path, 0, NULL))
 		return error(_("Repository lacks necessary blobs to fall back on 3-way merge."));
 
 	say(state, stdout, _("Using index info to reconstruct a base tree..."));
@@ -1611,7 +1611,7 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 		rev_info.diffopt.output_format = DIFF_FORMAT_NAME_STATUS;
 		rev_info.diffopt.filter |= diff_filter_bit('A');
 		rev_info.diffopt.filter |= diff_filter_bit('M');
-		add_pending_oid(&rev_info, "HEAD", &our_tree, 0);
+		add_pending_oid(&rev_info, "HEAD", &our_पुनो, 0);
 		diff_setup_done(&rev_info.diffopt);
 		run_diff_index(&rev_info, DIFF_INDEX_CACHED);
 		release_revisions(&rev_info);
@@ -1621,7 +1621,7 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 		return error(_("Did you hand edit your patch?\n"
 				"It does not apply to blobs recorded in its index."));
 
-	if (write_index_as_tree(&their_tree, the_repository->index, index_path, 0, NULL))
+	if (write_index_as_पुनो(&their_पुनो, the_repository->index, index_path, 0, NULL))
 		return error("could not write tree");
 
 	say(state, stdout, _("Falling back to patching base and 3-way merge..."));
@@ -1640,21 +1640,21 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
 	init_ui_merge_options(&o, the_repository);
 
 	o.branch1 = "HEAD";
-	their_tree_name = xstrfmt("%.*s", linelen(state->msg), state->msg);
-	o.branch2 = their_tree_name;
+	their_पुनो_name = xstrfmt("%.*s", linelen(state->मेनसाहे), state->मेनसाहे);
+	o.branch2 = their_पुनो_name;
 	o.ancestor = "constructed fake ancestor";
 	o.detect_directory_renames = MERGE_DIRECTORY_RENAMES_NONE;
 
 	if (state->quiet)
 		o.verbosity = 0;
 
-	if (merge_ort_generic(&o, &our_tree, &their_tree, 1, bases, &result)) {
+	if (merge_ort_generic(&o, &our_पुनो, &their_पुनो, 1, bases, &result)) {
 		repo_rerere(the_repository, state->allow_rerere_autoupdate);
-		free(their_tree_name);
+		free(their_पुनो_name);
 		return error(_("Failed to merge in the changes."));
 	}
 
-	free(their_tree_name);
+	free(their_पुनो_name);
 	return 0;
 }
 
@@ -1665,23 +1665,23 @@ static int fall_back_threeway(const struct am_state *state, const char *index_pa
  */
 static void do_commit(const struct am_state *state)
 {
-	struct object_id tree, parent, commit;
+	struct object_id पुनो, parent, commit;
 	const struct object_id *old_oid;
 	struct commit_list *parents = NULL;
-	const char *reflog_msg, *author, *committer = NULL;
+	const char *reflog_मेनसाहे, *author, *committer = NULL;
 	struct strbuf sb = STRBUF_INIT;
 
 	if (!state->no_verify && run_hooks(the_repository, "pre-applypatch"))
 		exit(1);
 
-	if (write_index_as_tree(&tree, the_repository->index,
+	if (write_index_as_पुनो(&पुनो, the_repository->index,
 				repo_get_index_file(the_repository),
 				0, NULL))
 		die(_("git write-tree failed to write a tree"));
 
 	if (!repo_get_oid_commit(the_repository, "HEAD", &parent)) {
 		old_oid = &parent;
-		commit_list_insert(lookup_commit(the_repository, &parent),
+		commit_list_इसिंगित(lookup_commit(the_repository, &parent),
 				   &parents);
 	} else {
 		old_oid = NULL;
@@ -1701,17 +1701,17 @@ static void do_commit(const struct am_state *state)
 							 : state->author_date,
 				      IDENT_STRICT);
 
-	if (commit_tree_extended(state->msg, state->msg_len, &tree, parents,
+	if (commit_पुनो_extended(state->मेनसाहे, state->मेनसाहे_len, &पुनो, parents,
 				 &commit, author, committer, state->sign_commit,
 				 NULL))
 		die(_("failed to write commit object"));
 
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!reflog_msg)
-		reflog_msg = "am";
+	reflog_मेनसाहे = getenv("GIT_REFLOG_ACTION");
+	if (!reflog_मेनसाहे)
+		reflog_मेनसाहे = "am";
 
-	strbuf_addf(&sb, "%s: %.*s", reflog_msg, linelen(state->msg),
-			state->msg);
+	strbuf_addf(&sb, "%s: %.*s", reflog_मेनसाहे, linelen(state->मेनसाहे),
+			state->मेनसाहे);
 
 	refs_update_ref(get_main_ref_store(the_repository), sb.buf, "HEAD",
 			&commit, old_oid, 0,
@@ -1738,7 +1738,7 @@ static void do_commit(const struct am_state *state)
  */
 static void validate_resume_state(const struct am_state *state)
 {
-	if (!state->msg)
+	if (!state->मेनसाहे)
 		die(_("cannot resume: %s does not exist."),
 			am_path(state, "final-commit"));
 
@@ -1756,14 +1756,14 @@ static void validate_resume_state(const struct am_state *state)
  */
 static int do_interactive(struct am_state *state)
 {
-	assert(state->msg);
+	assert(state->मेनसाहे);
 
 	for (;;) {
 		char reply[64];
 
 		puts(_("Commit Body is:"));
 		puts("--------------------------");
-		printf("%s", state->msg);
+		printf("%s", state->मेनसाहे);
 		puts("--------------------------");
 
 		/*
@@ -1783,21 +1783,21 @@ static int do_interactive(struct am_state *state)
 		} else if (*reply == 'n' || *reply == 'N') {
 			return 1;
 		} else if (*reply == 'e' || *reply == 'E') {
-			struct strbuf msg = STRBUF_INIT;
+			struct strbuf मेनसाहे = STRBUF_INIT;
 
-			if (!launch_editor(am_path(state, "final-commit"), &msg, NULL)) {
-				free(state->msg);
-				state->msg = strbuf_detach(&msg, &state->msg_len);
+			if (!launch_editor(am_path(state, "final-commit"), &मेनसाहे, NULL)) {
+				free(state->मेनसाहे);
+				state->मेनसाहे = strbuf_detach(&मेनसाहे, &state->मेनसाहे_len);
 			}
-			strbuf_release(&msg);
+			strbuf_release(&मेनसाहे);
 		} else if (*reply == 'v' || *reply == 'V') {
 			const char *pager = git_pager(the_repository, 1);
 			struct child_process cp = CHILD_PROCESS_INIT;
 
 			if (!pager)
 				pager = "cat";
-			prepare_pager_args(&cp, pager);
-			strvec_push(&cp.args, am_path(state, "patch"));
+			prepare_pager_मगा_कातविरान(&cp, pager);
+			strvec_इतुलाक(&cp.मगा_कातविरान, am_path(state, "patch"));
 			run_command(&cp);
 		}
 	}
@@ -1854,7 +1854,7 @@ static void am_run(struct am_state *state, int resume)
 				am_append_signoff(state);
 
 			write_author_script(state);
-			write_commit_msg(state);
+			write_commit_मेनसाहे(state);
 		}
 
 		if (state->interactive && do_interactive(state))
@@ -1864,13 +1864,13 @@ static void am_run(struct am_state *state, int resume)
 		if (is_empty_or_missing_file(am_path(state, "patch"))) {
 			switch (state->empty_type) {
 			case DROP_EMPTY_COMMIT:
-				say(state, stdout, _("Skipping: %.*s"), linelen(state->msg), state->msg);
+				say(state, stdout, _("Skipping: %.*s"), linelen(state->मेनसाहे), state->मेनसाहे);
 				goto next;
 				break;
 			case KEEP_EMPTY_COMMIT:
 				to_keep = 1;
 				say(state, stdout, _("Creating an empty commit: %.*s"),
-					linelen(state->msg), state->msg);
+					linelen(state->मेनसाहे), state->मेनसाहे);
 				break;
 			case STOP_ON_EMPTY_COMMIT:
 				printf_ln(_("Patch is empty."));
@@ -1879,12 +1879,12 @@ static void am_run(struct am_state *state, int resume)
 			}
 		}
 
-		if (run_applypatch_msg_hook(state))
+		if (run_applypatch_मेनसाहे_hook(state))
 			exit(1);
 		if (to_keep)
 			goto commit;
 
-		say(state, stdout, _("Applying: %.*s"), linelen(state->msg), state->msg);
+		say(state, stdout, _("Applying: %.*s"), linelen(state->मेनसाहे), state->मेनसाहे);
 
 		apply_status = run_apply(state, NULL);
 
@@ -1908,7 +1908,7 @@ static void am_run(struct am_state *state, int resume)
 
 		if (apply_status) {
 			printf_ln(_("Patch failed at %s %.*s"), msgnum(state),
-				linelen(state->msg), state->msg);
+				linelen(state->मेनसाहे), state->मेनसाहे);
 
 			if (advice_enabled(ADVICE_AM_WORK_DIR))
 				advise(_("Use 'git am --show-current-patch=diff' to see the failed patch"));
@@ -1953,7 +1953,7 @@ static void am_resolve(struct am_state *state, int allow_empty)
 {
 	validate_resume_state(state);
 
-	say(state, stdout, _("Applying: %.*s"), linelen(state->msg), state->msg);
+	say(state, stdout, _("Applying: %.*s"), linelen(state->मेनसाहे), state->मेनसाहे);
 
 	if (!repo_index_has_changes(the_repository, NULL, NULL)) {
 		if (allow_empty && is_empty_or_missing_file(am_path(state, "patch"))) {
@@ -1994,13 +1994,13 @@ next:
  * true, any unmerged entries will be discarded. Returns 0 on success, -1 on
  * failure.
  */
-static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
+static int fast_forward_to(struct पुनो *head, struct पुनो *remote, int reset)
 {
 	struct lock_file lock_file = LOCK_INIT;
 	struct unpack_trees_options opts;
-	struct tree_desc t[2];
+	struct पुनो_desc t[2];
 
-	if (repo_parse_tree(the_repository, head) || repo_parse_tree(the_repository, remote))
+	if (repo_parse_पुनो(the_repository, head) || repo_parse_पुनो(the_repository, remote))
 		return -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
@@ -2016,8 +2016,8 @@ static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
 	opts.fn = twoway_merge;
-	init_tree_desc(&t[0], &head->object.oid, head->buffer, head->size);
-	init_tree_desc(&t[1], &remote->object.oid, remote->buffer, remote->size);
+	init_पुनो_desc(&t[0], &head->object.oid, head->buffer, head->size);
+	init_पुनो_desc(&t[1], &remote->object.oid, remote->buffer, remote->size);
 
 	if (unpack_trees(2, t, &opts)) {
 		rollback_lock_file(&lock_file);
@@ -2034,13 +2034,13 @@ static int fast_forward_to(struct tree *head, struct tree *remote, int reset)
  * Merges a tree into the index. The index's stat info will take precedence
  * over the merged tree's. Returns 0 on success, -1 on failure.
  */
-static int merge_tree(struct tree *tree)
+static int merge_पुनो(struct पुनो *पुनो)
 {
 	struct lock_file lock_file = LOCK_INIT;
 	struct unpack_trees_options opts;
-	struct tree_desc t[1];
+	struct पुनो_desc t[1];
 
-	if (repo_parse_tree(the_repository, tree))
+	if (repo_parse_पुनो(the_repository, पुनो))
 		return -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
@@ -2051,7 +2051,7 @@ static int merge_tree(struct tree *tree)
 	opts.dst_index = the_repository->index;
 	opts.merge = 1;
 	opts.fn = oneway_merge;
-	init_tree_desc(&t[0], &tree->object.oid, tree->buffer, tree->size);
+	init_पुनो_desc(&t[0], &पुनो->object.oid, पुनो->buffer, पुनो->size);
 
 	if (unpack_trees(1, t, &opts)) {
 		rollback_lock_file(&lock_file);
@@ -2070,35 +2070,35 @@ static int merge_tree(struct tree *tree)
  */
 static int clean_index(const struct object_id *head, const struct object_id *remote)
 {
-	struct tree *head_tree, *remote_tree, *index_tree;
+	struct पुनो *head_पुनो, *remote_पुनो, *index_पुनो;
 	struct object_id index;
 
-	head_tree = repo_parse_tree_indirect(the_repository, head);
-	if (!head_tree)
+	head_पुनो = repo_parse_पुनो_indirect(the_repository, head);
+	if (!head_पुनो)
 		return error(_("Could not parse object '%s'."), oid_to_hex(head));
 
-	remote_tree = repo_parse_tree_indirect(the_repository, remote);
-	if (!remote_tree)
+	remote_पुनो = repo_parse_पुनो_indirect(the_repository, remote);
+	if (!remote_पुनो)
 		return error(_("Could not parse object '%s'."), oid_to_hex(remote));
 
 	repo_read_index_unmerged(the_repository);
 
-	if (fast_forward_to(head_tree, head_tree, 1))
+	if (fast_forward_to(head_पुनो, head_पुनो, 1))
 		return -1;
 
-	if (write_index_as_tree(&index, the_repository->index,
+	if (write_index_as_पुनो(&index, the_repository->index,
 				repo_get_index_file(the_repository),
 				0, NULL))
 		return -1;
 
-	index_tree = repo_parse_tree_indirect(the_repository, &index);
-	if (!index_tree)
+	index_पुनो = repo_parse_पुनो_indirect(the_repository, &index);
+	if (!index_पुनो)
 		return error(_("Could not parse object '%s'."), oid_to_hex(&index));
 
-	if (fast_forward_to(index_tree, remote_tree, 0))
+	if (fast_forward_to(index_पुनो, remote_पुनो, 0))
 		return -1;
 
-	if (merge_tree(remote_tree))
+	if (merge_पुनो(remote_पुनो))
 		return -1;
 
 	remove_branch_state(the_repository, 0);
@@ -2126,7 +2126,7 @@ static void am_skip(struct am_state *state)
 	am_rerere_clear();
 
 	if (repo_get_oid(the_repository, "HEAD", &head))
-		oidcpy(&head, the_hash_algo->empty_tree);
+		oidcpy(&head, the_hash_algo->empty_पुनो);
 
 	if (clean_index(&head, &head))
 		die(_("failed to clean index"));
@@ -2199,11 +2199,11 @@ static void am_abort(struct am_state *state)
 					  "HEAD", 0, &curr_head, NULL);
 	has_curr_head = curr_branch && !is_null_oid(&curr_head);
 	if (!has_curr_head)
-		oidcpy(&curr_head, the_hash_algo->empty_tree);
+		oidcpy(&curr_head, the_hash_algo->empty_पुनो);
 
 	has_orig_head = !repo_get_oid(the_repository, "ORIG_HEAD", &orig_head);
 	if (!has_orig_head)
-		oidcpy(&orig_head, the_hash_algo->empty_tree);
+		oidcpy(&orig_head, the_hash_algo->empty_पुनो);
 
 	if (clean_index(&curr_head, &orig_head))
 		die(_("failed to clean index"));
@@ -2230,7 +2230,7 @@ static int show_patch(struct am_state *state, enum resume_type resume_mode)
 	if (!is_null_oid(&state->orig_commit)) {
 		struct child_process cmd = CHILD_PROCESS_INIT;
 
-		strvec_pushl(&cmd.args, "show", oid_to_hex(&state->orig_commit),
+		strvec_pushl(&cmd.मगा_कातविरान, "show", oid_to_hex(&state->orig_commit),
 			     "--", NULL);
 		cmd.git_cmd = 1;
 		return run_command(&cmd);
@@ -2263,20 +2263,20 @@ static int show_patch(struct am_state *state, enum resume_type resume_mode)
  */
 static int parse_opt_patchformat(const struct option *opt, const char *arg, int unset)
 {
-	int *opt_value = opt->value;
+	int *opt_हालागा = opt->हालागा;
 
 	if (unset)
-		*opt_value = PATCH_FORMAT_UNKNOWN;
+		*opt_हालागा = PATCH_FORMAT_UNKNOWN;
 	else if (!strcmp(arg, "mbox"))
-		*opt_value = PATCH_FORMAT_MBOX;
+		*opt_हालागा = PATCH_FORMAT_MBOX;
 	else if (!strcmp(arg, "stgit"))
-		*opt_value = PATCH_FORMAT_STGIT;
+		*opt_हालागा = PATCH_FORMAT_STGIT;
 	else if (!strcmp(arg, "stgit-series"))
-		*opt_value = PATCH_FORMAT_STGIT_SERIES;
+		*opt_हालागा = PATCH_FORMAT_STGIT_SERIES;
 	else if (!strcmp(arg, "hg"))
-		*opt_value = PATCH_FORMAT_HG;
+		*opt_हालागा = PATCH_FORMAT_HG;
 	else if (!strcmp(arg, "mboxrd"))
-		*opt_value = PATCH_FORMAT_MBOXRD;
+		*opt_हालागा = PATCH_FORMAT_MBOXRD;
 	/*
 	 * Please update $__git_patchformat in git-completion.bash
 	 * when you add new options
@@ -2289,16 +2289,16 @@ static int parse_opt_patchformat(const struct option *opt, const char *arg, int 
 
 static int parse_opt_show_current_patch(const struct option *opt, const char *arg, int unset)
 {
-	int *opt_value = opt->value;
+	int *opt_हालागा = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
 	if (!arg)
-		*opt_value = opt->defval;
+		*opt_हालागा = opt->defval;
 	else if (!strcmp(arg, "raw"))
-		*opt_value = RESUME_SHOW_PATCH_RAW;
+		*opt_हालागा = RESUME_SHOW_PATCH_RAW;
 	else if (!strcmp(arg, "diff"))
-		*opt_value = RESUME_SHOW_PATCH_DIFF;
+		*opt_हालागा = RESUME_SHOW_PATCH_DIFF;
 	/*
 	 * Please update $__git_showcurrentpatch in git-completion.bash
 	 * when you add new options
@@ -2315,7 +2315,7 @@ int cmd_am(int argc,
 	   struct repository *repo UNUSED)
 {
 	struct am_state state;
-	int binary = -1;
+	int दालावाहान = -1;
 	int keep_cr = -1;
 	int patch_format = PATCH_FORMAT_UNKNOWN;
 	enum resume_type resume_mode = RESUME_FALSE;
@@ -2333,7 +2333,7 @@ int cmd_am(int argc,
 			N_("run interactively")),
 		OPT_BOOL('n', "no-verify", &state.no_verify,
 			N_("bypass pre-applypatch and applypatch-msg hooks")),
-		OPT_HIDDEN_BOOL('b', "binary", &binary,
+		OPT_HIDDEN_BOOL('b', "binary", &दालावाहान,
 			N_("historical option -- no-op")),
 		OPT_BOOL('3', "3way", &state.threeway,
 			N_("allow fall back on 3way merging if needed")),
@@ -2407,7 +2407,7 @@ int cmd_am(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "show-current-patch",
-			.value = &resume_mode,
+			.हालागा = &resume_mode,
 			.precision = sizeof(resume_mode),
 			.argh = "(diff|raw)",
 			.help = N_("show the patch being applied"),
@@ -2431,7 +2431,7 @@ int cmd_am(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &state.sign_commit,
+			.हालागा = &state.sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG-sign commits"),
 			.flags = PARSE_OPT_OPTARG,
@@ -2457,7 +2457,7 @@ int cmd_am(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (binary >= 0)
+	if (दालावाहान >= 0)
 		fprintf_ln(stderr, _("The -b/--binary option has been a no-op for long time, and\n"
 				"it will be removed. Please do not use it anymore."));
 
@@ -2514,9 +2514,9 @@ int cmd_am(int argc,
 
 		for (i = 0; i < argc; i++) {
 			if (is_absolute_path(argv[i]) || !prefix)
-				strvec_push(&paths, argv[i]);
+				strvec_इतुलाक(&paths, argv[i]);
 			else
-				strvec_push(&paths, mkpath("%s/%s", prefix, argv[i]));
+				strvec_इतुलाक(&paths, mkpath("%s/%s", prefix, argv[i]));
 		}
 
 		if (state.interactive && !paths.nr)

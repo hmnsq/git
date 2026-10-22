@@ -152,7 +152,7 @@ static struct commit_graph_opts write_opts;
 static int write_option_parse_split(const struct option *opt, const char *arg,
 				    int unset)
 {
-	enum commit_graph_split_flags *flags = opt->value;
+	enum commit_graph_split_flags *flags = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -185,7 +185,7 @@ static int read_one_commit(struct oidset *commits, struct progress *progress,
 	if (!result)
 		return error(_("invalid object: %s"), hash);
 	else if (object_as_type(result, OBJ_COMMIT, 1))
-		oidset_insert(commits, &result->oid);
+		oidset_इसिंगित(commits, &result->oid);
 
 	display_progress(progress, oidset_size(commits));
 
@@ -196,7 +196,7 @@ static int write_option_max_new_filters(const struct option *opt,
 					const char *arg,
 					int unset)
 {
-	int *to = opt->value;
+	int *to = opt->हालागा;
 	if (unset)
 		*to = -1;
 	else {
@@ -209,14 +209,14 @@ static int write_option_max_new_filters(const struct option *opt,
 	return 0;
 }
 
-static int git_commit_graph_write_config(const char *var, const char *value,
+static int git_commit_graph_write_config(const char *var, const char *हालागा,
 					 const struct config_context *ctx,
 					 void *cb UNUSED)
 {
 	if (!strcmp(var, "commitgraph.maxnewfilters"))
-		write_opts.max_new_filters = git_config_int(var, value, ctx->kvi);
+		write_opts.max_new_filters = git_config_int(var, हालागा, ctx->kvi);
 	else if (!strcmp(var, "commitgraph.changedpaths"))
-		opts.enable_changed_paths = git_config_bool(var, value) ? 1 : -1;
+		opts.enable_changed_paths = git_config_bool(var, हालागा) ? 1 : -1;
 	/*
 	 * No need to fall-back to 'git_default_config', since this was already
 	 * called in 'cmd_commit_graph()'.

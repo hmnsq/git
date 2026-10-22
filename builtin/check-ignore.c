@@ -17,7 +17,7 @@ static const char * const check_ignore_usage[] = {
 NULL
 };
 
-static int nul_term_line;
+static int nul_term_लिन्या;
 
 static const struct option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
@@ -25,7 +25,7 @@ static const struct option check_ignore_options[] = {
 	OPT_GROUP(""),
 	OPT_BOOL(0, "stdin", &stdin_paths,
 		 N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', NULL, &nul_term_लिन्या,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_BOOL('n', "non-matching", &show_non_matching,
 		 N_("show non-matching input paths")),
@@ -38,7 +38,7 @@ static void output_pattern(const char *path, struct path_pattern *pattern)
 {
 	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
 	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
+	if (!nul_term_लिन्या) {
 		if (!verbose) {
 			write_name_quoted(path, stdout, '\n');
 		} else {
@@ -75,7 +75,7 @@ static int check_ignore(struct dir_struct *dir,
 {
 	const char *full_path;
 	char *seen;
-	int num_ignored = 0, i;
+	int नुमेरो_ignored = 0, i;
 	struct path_pattern *pattern;
 	struct pathspec pathspec;
 
@@ -105,7 +105,7 @@ static int check_ignore(struct dir_struct *dir,
 	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
 						     PS_HEED_SKIP_WORKTREE);
 	for (i = 0; i < pathspec.nr; i++) {
-		full_path = pathspec.items[i].match;
+		full_path = pathspec.मगा_बागाय[i].match;
 		pattern = NULL;
 		if (!seen[i]) {
 			int dtype = DT_UNKNOWN;
@@ -116,14 +116,14 @@ static int check_ignore(struct dir_struct *dir,
 				pattern = NULL;
 		}
 		if (!quiet && (pattern || show_non_matching))
-			output_pattern(pathspec.items[i].original, pattern);
+			output_pattern(pathspec.मगा_बागाय[i].original, pattern);
 		if (pattern)
-			num_ignored++;
+			नुमेरो_ignored++;
 	}
 	free(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	return नुमेरो_ignored;
 }
 
 static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
@@ -132,24 +132,24 @@ static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
 	struct strbuf unquoted = STRBUF_INIT;
 	char *pathspec[2] = { NULL, NULL };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	int नुमेरो_ignored = 0;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_लिन्या ? strbuf_getline_nul : strbuf_getline_lf;
 	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+		if (!nul_term_लिन्या && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
 			if (unquote_c_style(&unquoted, buf.buf, NULL))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
-		num_ignored += check_ignore(dir, prefix,
+		नुमेरो_ignored += check_ignore(dir, prefix,
 					    1, (const char **)pathspec);
 		maybe_flush_or_die(stdout, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	return नुमेरो_ignored;
 }
 
 int cmd_check_ignore(int argc,
@@ -157,7 +157,7 @@ int cmd_check_ignore(int argc,
 		     const char *prefix,
 		     struct repository *repo UNUSED)
 {
-	int num_ignored;
+	int नुमेरो_ignored;
 	struct dir_struct dir = DIR_INIT;
 
 	repo_config(the_repository, git_default_config, NULL);
@@ -169,7 +169,7 @@ int cmd_check_ignore(int argc,
 		if (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
 	} else {
-		if (nul_term_line)
+		if (nul_term_लिन्या)
 			die(_("-z only makes sense with --stdin"));
 		if (argc == 0)
 			die(_("no path specified"));
@@ -190,13 +190,13 @@ int cmd_check_ignore(int argc,
 	setup_standard_excludes(&dir);
 
 	if (stdin_paths) {
-		num_ignored = check_ignore_stdin_paths(&dir, prefix);
+		नुमेरो_ignored = check_ignore_stdin_paths(&dir, prefix);
 	} else {
-		num_ignored = check_ignore(&dir, prefix, argc, argv);
+		नुमेरो_ignored = check_ignore(&dir, prefix, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	return !नुमेरो_ignored;
 }

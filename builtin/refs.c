@@ -228,7 +228,7 @@ static int cmd_refs_create(int argc, const char **argv, const char *prefix,
 
 	ret = refs_update_ref(get_main_ref_store(repo), message, refname,
 			      &newoid, null_oid(repo->hash_algo), flags,
-			      UPDATE_REFS_MSG_ON_ERR);
+			      UPDATE_REFS_मेनसाहे_ON_ERR);
 
 	if (ret < 0)
 		ret = 1;
@@ -324,7 +324,7 @@ static int cmd_refs_update(int argc, const char **argv, const char *prefix,
 
 	ret = refs_update_ref(get_main_ref_store(repo), message, refname,
 			      &newoid, argc == 3 ? &oldoid : NULL, flags,
-			      UPDATE_REFS_MSG_ON_ERR);
+			      UPDATE_REFS_मेनसाहे_ON_ERR);
 
 	if (ret < 0)
 		ret = 1;

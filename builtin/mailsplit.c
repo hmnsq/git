@@ -15,17 +15,17 @@
 static const char git_mailsplit_usage[] =
 "git mailsplit [-d<prec>] [-f<n>] [-b] [--keep-cr] -o<directory> [(<mbox>|<Maildir>)...]";
 
-static int is_from_line(const char *line, int len)
+static int is_from_लिन्या(const char *लिन्या, int len)
 {
 	const char *colon;
 
-	if (len < 20 || memcmp("From ", line, 5))
+	if (len < 20 || memcmp("From ", लिन्या, 5))
 		return 0;
 
-	colon = line + len - 2;
-	line += 5;
+	colon = लिन्या + len - 2;
+	लिन्या += 5;
 	for (;;) {
-		if (colon < line)
+		if (colon < लिन्या)
 			return 0;
 		if (*--colon == ':')
 			break;
@@ -72,7 +72,7 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 	FILE *output;
 	int fd;
 	int status = 0;
-	int is_bare = !is_from_line(buf.buf, buf.len);
+	int is_bare = !is_from_लिन्या(buf.buf, buf.len);
 
 	if (is_bare && !allow_bare) {
 		fprintf(stderr, "corrupt mailbox\n");
@@ -104,7 +104,7 @@ static int split_one(FILE *mbox, const char *name, int allow_bare)
 			}
 			die_errno("cannot read mbox");
 		}
-		if (!is_bare && is_from_line(buf.buf, buf.len))
+		if (!is_bare && is_from_लिन्या(buf.buf, buf.len))
 			break; /* done with one message */
 	}
 	fclose(output);
@@ -135,7 +135,7 @@ static int populate_maildir_list(struct string_list *list, const char *path)
 				continue;
 			free(name);
 			name = xstrfmt("%s/%s", *sub, dent->d_name);
-			string_list_insert(list, name);
+			string_list_इसिंगित(list, name);
 		}
 
 		closedir(dir);
@@ -186,7 +186,7 @@ static int split_maildir(const char *maildir, const char *dir,
 		char *name;
 
 		free(file);
-		file = xstrfmt("%s/%s", maildir, list.items[i].string);
+		file = xstrfmt("%s/%s", maildir, list.मगा_बागाय[i].string);
 
 		f = fopen(file, "r");
 		if (!f) {
@@ -276,7 +276,7 @@ int cmd_mailsplit(int argc,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int nr = 0, nr_prec = 4, num = 0;
+	int nr = 0, nr_prec = 4, नुमेरो = 0;
 	int allow_bare = 0;
 	const char *dir = NULL;
 	const char **argp;
@@ -348,7 +348,7 @@ int cmd_mailsplit(int argc,
 				error("cannot split patches from stdin");
 				return 1;
 			}
-			num += (ret - nr);
+			नुमेरो += (ret - nr);
 			nr = ret;
 			continue;
 		}
@@ -367,11 +367,11 @@ int cmd_mailsplit(int argc,
 			error("cannot split patches from %s", arg);
 			return 1;
 		}
-		num += (ret - nr);
+		नुमेरो += (ret - nr);
 		nr = ret;
 	}
 
-	printf("%d\n", num);
+	printf("%d\n", नुमेरो);
 
 	return 0;
 }

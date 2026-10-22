@@ -55,16 +55,16 @@ enum empty_action {
 
 static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
 {
-	int *opt_value = opt->value;
+	int *opt_हालागा = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
 	if (!strcmp(arg, "stop"))
-		*opt_value = STOP_ON_EMPTY_COMMIT;
+		*opt_हालागा = STOP_ON_EMPTY_COMMIT;
 	else if (!strcmp(arg, "drop"))
-		*opt_value = DROP_EMPTY_COMMIT;
+		*opt_हालागा = DROP_EMPTY_COMMIT;
 	else if (!strcmp(arg, "keep"))
-		*opt_value = KEEP_EMPTY_COMMIT;
+		*opt_हालागा = KEEP_EMPTY_COMMIT;
 	else
 		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
@@ -74,7 +74,7 @@ static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
 static int option_parse_m(const struct option *opt,
 			  const char *arg, int unset)
 {
-	struct replay_opts *replay = opt->value;
+	struct replay_opts *replay = opt->हालागा;
 	char *end;
 
 	if (unset) {
@@ -113,9 +113,9 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
 	const char *me = action_name(opts);
 	const char *cleanup_arg = NULL;
-	const char sentinel_value = 0; /* value not important */
-	const char *strategy = &sentinel_value;
-	const char *gpg_sign = &sentinel_value;
+	const char sentinel_हालागा = 0; /* value not important */
+	const char *strategy = &sentinel_हालागा;
+	const char *gpg_sign = &sentinel_हालागा;
 	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
 	int cmd = 0, ret;
 	struct option base_options[] = {
@@ -138,7 +138,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &gpg_sign,
+			.हालागा = &gpg_sign,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -187,7 +187,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		opts->allow_empty = 1;
 
 	if (cleanup_arg) {
-		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
+		opts->default_मेनसाहे_cleanup = get_cleanup_mode(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
@@ -240,7 +240,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		opts->revs = xmalloc(sizeof(*opts->revs));
 		repo_init_revisions(the_repository, opts->revs, NULL);
 		opts->revs->no_walk = 1;
-		opts->revs->unsorted_input = 1;
+		opts->revs->unsorted_पासोक = 1;
 		if (argc < 2)
 			usage_with_options(usage_str, options);
 		if (!strcmp(argv[1], "-"))
@@ -254,11 +254,11 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
+	if (gpg_sign != &sentinel_हालागा) {
 		free(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
+	if (strategy != &sentinel_हालागा) {
 		free(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}

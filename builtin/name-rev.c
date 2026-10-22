@@ -38,7 +38,7 @@ struct rev_name {
 
 define_commit_slab(commit_rev_name, struct rev_name);
 
-static timestamp_t generation_cutoff = GENERATION_NUMBER_INFINITY;
+static timestamp_t generation_cutoff = GENERATION_नुमेरो_INFINITY;
 static timestamp_t cutoff = TIME_MAX;
 static struct commit_rev_name rev_names;
 
@@ -83,7 +83,7 @@ static void adjust_cutoff_timestamp_for_slop(void)
  */
 static int commit_is_before_cutoff(struct commit *commit)
 {
-	if (generation_cutoff < GENERATION_NUMBER_INFINITY)
+	if (generation_cutoff < GENERATION_नुमेरो_INFINITY)
 		return generation_cutoff &&
 			commit_graph_generation(commit) < generation_cutoff;
 
@@ -161,7 +161,7 @@ static struct rev_name *create_or_update_name(struct commit *commit,
 	return name;
 }
 
-static char *get_parent_name(const struct rev_name *name, int parent_number,
+static char *get_parent_name(const struct rev_name *name, int parent_नुमेरो,
 			     struct mem_pool *string_pool)
 {
 	size_t len;
@@ -170,10 +170,10 @@ static char *get_parent_name(const struct rev_name *name, int parent_number,
 	if (name->generation > 0) {
 		return mem_pool_strfmt(string_pool, "%.*s~%d^%d",
 				       (int)len, name->tip_name,
-				       name->generation, parent_number);
+				       name->generation, parent_नुमेरो);
 	} else {
 		return mem_pool_strfmt(string_pool, "%.*s^%d",
-				       (int)len, name->tip_name, parent_number);
+				       (int)len, name->tip_name, parent_नुमेरो);
 	}
 }
 
@@ -181,9 +181,9 @@ static void name_rev(struct commit *start_commit,
 		const char *tip_name, timestamp_t taggerdate,
 		int from_tag, int deref, struct mem_pool *string_pool)
 {
-	struct commit_stack stack = COMMIT_STACK_INIT;
+	struct commit_सालानसान सालानसान = COMMIT_सालानसान_INIT;
 	struct commit *commit;
-	struct commit_stack parents_to_queue = COMMIT_STACK_INIT;
+	struct commit_सालानसान parents_to_queue = COMMIT_सालानसान_INIT;
 	struct rev_name *start_name;
 
 	repo_parse_commit(the_repository, start_commit);
@@ -200,18 +200,18 @@ static void name_rev(struct commit *start_commit,
 	else
 		start_name->tip_name = mem_pool_strdup(string_pool, tip_name);
 
-	commit_stack_push(&stack, start_commit);
+	commit_सालानसान_इतुलाक(&सालानसान, start_commit);
 
-	while ((commit = commit_stack_pop(&stack))) {
+	while ((commit = commit_सालानसान_आलिसिन(&सालानसान))) {
 		struct rev_name *name = get_commit_rev_name(commit);
 		struct commit_list *parents;
-		int parent_number = 1;
+		int parent_नुमेरो = 1;
 
 		parents_to_queue.nr = 0;
 
 		for (parents = commit->parents;
 				parents;
-				parents = parents->next, parent_number++) {
+				parents = parents->next, parent_नुमेरो++) {
 			struct commit *parent = parents->item;
 			struct rev_name *parent_name;
 			int generation, distance;
@@ -220,7 +220,7 @@ static void name_rev(struct commit *start_commit,
 			if (commit_is_before_cutoff(parent))
 				continue;
 
-			if (parent_number > 1) {
+			if (parent_नुमेरो > 1) {
 				generation = 0;
 				distance = name->distance + MERGE_TRAVERSAL_WEIGHT;
 			} else {
@@ -232,25 +232,25 @@ static void name_rev(struct commit *start_commit,
 							    generation,
 							    distance, from_tag);
 			if (parent_name) {
-				if (parent_number > 1)
+				if (parent_नुमेरो > 1)
 					parent_name->tip_name =
 						get_parent_name(name,
-								parent_number,
+								parent_नुमेरो,
 								string_pool);
 				else
 					parent_name->tip_name = name->tip_name;
-				commit_stack_push(&parents_to_queue, parent);
+				commit_सालानसान_इतुलाक(&parents_to_queue, parent);
 			}
 		}
 
 		/* The first parent must come out first from the stack */
 		while (parents_to_queue.nr)
-			commit_stack_push(&stack,
-					  commit_stack_pop(&parents_to_queue));
+			commit_सालानसान_इतुलाक(&सालानसान,
+					  commit_सालानसान_आलिसिन(&parents_to_queue));
 	}
 
-	commit_stack_clear(&stack);
-	commit_stack_clear(&parents_to_queue);
+	commit_सालानसान_clear(&सालानसान);
+	commit_सालानसान_clear(&parents_to_queue);
 }
 
 static int subpath_matches(const char *path, const char *filter)
@@ -275,7 +275,7 @@ struct name_ref_data {
 };
 
 struct pretty_format {
-	struct pretty_print_context ctx;
+	struct pretty_इलिम्बाग_context ctx;
 	struct userformat_want want;
 };
 
@@ -531,7 +531,7 @@ static const char *get_format_rev(const struct commit *c,
 		format_ctx->ctx.notes_message = strbuf_detach(&notebuf, NULL);
 	}
 
-	pretty_print_commit(&format_ctx->ctx, c, buf);
+	pretty_इलिम्बाग_commit(&format_ctx->ctx, c, buf);
 	FREE_AND_NULL(format_ctx->ctx.notes_message);
 
 	return buf->buf;
@@ -567,7 +567,7 @@ static char const * const name_rev_usage[] = {
 	NULL
 };
 
-static void name_rev_line(char *p, struct command *cmd)
+static void name_rev_लिन्या(char *p, struct command *cmd)
 {
 	struct strbuf buf = STRBUF_INIT;
 	int counter = 0;
@@ -744,7 +744,7 @@ int cmd_name_rev(int argc,
 
 		while (strbuf_getline(&sb, stdin) != EOF) {
 			strbuf_addch(&sb, '\n');
-			name_rev_line(sb.buf, &cmd);
+			name_rev_लिन्या(sb.buf, &cmd);
 		}
 		strbuf_release(&sb);
 	} else if (all) {
@@ -773,7 +773,7 @@ int cmd_name_rev(int argc,
 }
 
 struct format_nul_data {
-	bool nul_input;
+	bool nul_पासोक;
 	bool nul_output;
 };
 
@@ -781,8 +781,8 @@ static int format_nul_cb(const struct option *option,
 			 const char *arg,
 			 int unset)
 {
-	struct format_nul_data *data = option->value;
-	data->nul_input = 1;
+	struct format_nul_data *data = option->हालागा;
+	data->nul_पासोक = 1;
 	data->nul_output = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -835,7 +835,7 @@ int cmd_format_rev(int argc,
 		OPT_CALLBACK_F('z', "null", &nul_data, N_("z"),
 			       N_("Use NUL for input and output termination"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG, format_nul_cb),
-		OPT_BOOL(0, "null-input", &nul_data.nul_input,
+		OPT_BOOL(0, "null-input", &nul_data.nul_पासोक,
 			 N_("Use NUL for input termination")),
 		OPT_BOOL(0, "null-output", &nul_data.nul_output,
 			 N_("Use NUL for output termination")),
@@ -854,7 +854,7 @@ int cmd_format_rev(int argc,
 	if (!stdin_mode_arg)
 		die(_("'%s' is required"), "--stdin-mode");
 
-	getline_fn = nul_data.nul_input ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_data.nul_पासोक ? strbuf_getline_nul : strbuf_getline_lf;
 	output_terminator = nul_data.nul_output ? '\0' : '\n';
 
 	init_display_notes(&format_notes_opt);
@@ -886,7 +886,7 @@ int cmd_format_rev(int argc,
 	switch (stdin_mode) {
 	case TEXT:
 		while (getline_fn(&scratch_buf, stdin) != EOF) {
-			name_rev_line(scratch_buf.buf, &cmd);
+			name_rev_लिन्या(scratch_buf.buf, &cmd);
 			/*
 			 * We do not pass on the terminator to name_rev_line,
 			 * unlike name-rev.

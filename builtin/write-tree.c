@@ -13,59 +13,59 @@
 #include "cache-tree.h"
 #include "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+static const char * const write_पुनो_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
 	NULL
 };
 
-int cmd_write_tree(int argc,
+int cmd_write_पुनो(int argc,
 		   const char **argv,
 		   const char *cmd_prefix,
 		   struct repository *repo UNUSED)
 {
 	int flags = 0, ret;
-	const char *tree_prefix = NULL;
+	const char *पुनो_prefix = NULL;
 	struct object_id oid;
 	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
+	struct option write_पुनो_options[] = {
 		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
-			WRITE_TREE_MISSING_OK),
-		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
+			WRITE_पुनो_MISSING_OK),
+		OPT_STRING(0, "prefix", &पुनो_prefix, N_("<prefix>/"),
 			   N_("write tree object for a subdirectory <prefix>")),
 		{
 			.type = OPTION_BIT,
 			.long_name = "ignore-cache-tree",
-			.value = &flags,
+			.हालागा = &flags,
 			.precision = sizeof(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
-			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
+			.defval = WRITE_पुनो_IGNORE_CACHE_पुनो,
 		},
 		OPT_END()
 	};
 
 	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
-			     write_tree_usage, 0);
+	argc = parse_options(argc, argv, cmd_prefix, write_पुनो_options,
+			     write_पुनो_usage, 0);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	ret = write_index_as_tree(&oid, the_repository->index,
+	ret = write_index_as_पुनो(&oid, the_repository->index,
 				  repo_get_index_file(the_repository),
-				  flags, tree_prefix);
+				  flags, पुनो_prefix);
 	switch (ret) {
 	case 0:
 		printf("%s\n", oid_to_hex(&oid));
 		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+	case WRITE_पुनो_UNREADABLE_INDEX:
 		die("%s: error reading the index", me);
 		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+	case WRITE_पुनो_UNMERGED_INDEX:
 		die("%s: error building trees", me);
 		break;
-	case WRITE_TREE_PREFIX_ERROR:
-		die("%s: prefix %s not found", me, tree_prefix);
+	case WRITE_पुनो_PREFIX_ERROR:
+		die("%s: prefix %s not found", me, पुनो_prefix);
 		break;
 	}
 	return ret;

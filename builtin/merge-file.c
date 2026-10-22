@@ -22,21 +22,21 @@ static const char *const merge_file_usage[] = {
 
 static int label_cb(const struct option *opt, const char *arg, int unset)
 {
-	static int label_count = 0;
-	const char **names = (const char **)opt->value;
+	static int label_बिलांग = 0;
+	const char **names = (const char **)opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (label_count >= 3)
+	if (label_बिलांग >= 3)
 		return error("too many labels on the command line");
-	names[label_count++] = arg;
+	names[label_बिलांग++] = arg;
 	return 0;
 }
 
 static int set_diff_algorithm(xpparam_t *xpp,
 			      const char *alg)
 {
-	long diff_algorithm = parse_algorithm_value(alg);
+	long diff_algorithm = parse_algorithm_हालागा(alg);
 	if (diff_algorithm < 0)
 		return -1;
 	xpp->flags = (xpp->flags & ~XDF_DIFF_ALGORITHM_MASK) | diff_algorithm;
@@ -46,7 +46,7 @@ static int set_diff_algorithm(xpparam_t *xpp,
 static int diff_algorithm_cb(const struct option *opt,
 				const char *arg, int unset)
 {
-	xpparam_t *xpp = opt->value;
+	xpparam_t *xpp = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -134,7 +134,7 @@ int cmd_merge_file(int argc,
 			ret = -1;
 		}
 		if (ret != -1 && (mmf->size > MAX_XDIFF_SIZE ||
-		    buffer_is_binary(mmf->ptr, mmf->size))) {
+		    buffer_is_दालावाहान(mmf->ptr, mmf->size))) {
 			ret = error("Cannot merge binary files: %s",
 				    argv[i]);
 		}

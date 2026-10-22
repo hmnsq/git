@@ -56,14 +56,14 @@ static int list_tags(struct ref_filter *filter, struct ref_sorting *sorting,
 {
 	char *to_free = NULL;
 
-	if (filter->lines == -1)
-		filter->lines = 0;
+	if (filter->मगा_लिन्या == -1)
+		filter->मगा_लिन्या = 0;
 
 	if (!format->format) {
-		if (filter->lines) {
+		if (filter->मगा_लिन्या) {
 			to_free = xstrfmt("%s %%(contents:lines=%d)",
 					  "%(align:15)%(refname:lstrip=2)%(end)",
-					  filter->lines);
+					  filter->मगा_लिन्या);
 			format->format = to_free;
 		} else
 			format->format = "%(refname:lstrip=2)";
@@ -111,7 +111,7 @@ static int collect_tags(const char *name UNUSED, const char *ref,
 	struct string_list *ref_list = cb_data;
 
 	string_list_append(ref_list, ref);
-	ref_list->items[ref_list->nr - 1].util = oiddup(oid);
+	ref_list->मगा_बागाय[ref_list->nr - 1].util = oiddup(oid);
 	return 0;
 }
 
@@ -153,7 +153,7 @@ static int verify_tag(const char *name, const char *ref UNUSED,
 		return -1;
 
 	if (format->format)
-		pretty_print_ref(name, oid, NULL, format);
+		pretty_इलिम्बाग_ref(name, oid, NULL, format);
 
 	return 0;
 }
@@ -164,7 +164,7 @@ static int do_sign(struct strbuf *buffer, struct object_id **compat_oid,
 	const struct git_hash_algo *compat = the_repository->compat_hash_algo;
 	struct strbuf sig = STRBUF_INIT, compat_sig = STRBUF_INIT;
 	struct strbuf compat_buf = STRBUF_INIT;
-	char *keyid = get_signing_key();
+	char *keyid = get_signing_सुसि();
 	int ret = -1;
 
 	if (sign_buffer(buffer, &sig, keyid, 0))
@@ -207,33 +207,33 @@ static const char tag_template_nocleanup[] =
 	"Lines starting with '%s' will be kept; you may remove them"
 	" yourself if you want to.\n");
 
-static int git_tag_config(const char *var, const char *value,
+static int git_tag_config(const char *var, const char *हालागा,
 			  const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "tag.gpgsign")) {
-		config_sign_tag = git_config_bool(var, value);
+		config_sign_tag = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "tag.sort")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		string_list_append(cb, value);
+		string_list_append(cb, हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "tag.forcesignannotated")) {
-		force_sign_annotate = git_config_bool(var, value);
+		force_sign_annotate = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (starts_with(var, "column."))
-		return git_column_config(var, value, "tag", &colopts);
+		return git_column_config(var, हालागा, "tag", &colopts);
 
-	if (git_color_config(var, value, cb) < 0)
+	if (git_color_config(var, हालागा, cb) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static void write_tag_body(int fd, const struct object_id *oid)
@@ -298,7 +298,7 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 		       const char *tag,
 		       struct strbuf *buf, struct create_tag_options *opt,
 		       struct object_id *prev, struct object_id *result,
-		       struct strvec *trailer_args, char *path)
+		       struct strvec *trailer_मगा_कातविरान, char *path)
 {
 	enum object_type type;
 	struct strbuf header = STRBUF_INIT;
@@ -323,7 +323,7 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 		    git_committer_info(IDENT_STRICT));
 
 	should_edit = opt->use_editor || !opt->message_given;
-	if (should_edit || trailer_args->nr) {
+	if (should_edit || trailer_मगा_कातविरान->nr) {
 		int fd;
 
 		/* write the template message before editing: */
@@ -339,17 +339,17 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 			struct strbuf buf = STRBUF_INIT;
 			strbuf_addch(&buf, '\n');
 			if (opt->cleanup_mode == CLEANUP_ALL)
-				strbuf_commented_addf(&buf, comment_line_str,
-				      _(tag_template), tag, comment_line_str);
+				strbuf_commented_addf(&buf, comment_लिन्या_str,
+				      _(tag_template), tag, comment_लिन्या_str);
 			else
-				strbuf_commented_addf(&buf, comment_line_str,
-				      _(tag_template_nocleanup), tag, comment_line_str);
+				strbuf_commented_addf(&buf, comment_लिन्या_str,
+				      _(tag_template_nocleanup), tag, comment_लिन्या_str);
 			write_or_die(fd, buf.buf, buf.len);
 			strbuf_release(&buf);
 		}
 		close(fd);
 
-		if (trailer_args->nr && amend_file_with_trailers(path, trailer_args))
+		if (trailer_मगा_कातविरान->nr && amend_file_with_trailers(path, trailer_मगा_कातविरान))
 			die(_("unable to pass trailers to --trailers"));
 
 		if (should_edit) {
@@ -358,7 +358,7 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 					_("Please supply the message using either -m or -F option.\n"));
 				exit(1);
 			}
-		} else if (trailer_args->nr) {
+		} else if (trailer_मगा_कातविरान->nr) {
 			strbuf_reset(buf);
 			if (strbuf_read_file(buf, path, 0) < 0)
 				die_errno(_("failed to read '%s'"), path);
@@ -367,12 +367,12 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 
 	if (opt->cleanup_mode != CLEANUP_NONE)
 		strbuf_stripspace(buf,
-		  opt->cleanup_mode == CLEANUP_ALL ? comment_line_str : NULL);
+		  opt->cleanup_mode == CLEANUP_ALL ? comment_लिन्या_str : NULL);
 
 	if (!opt->message_given && !buf->len)
 		die(_("no tag message?"));
 
-	strbuf_insert(buf, 0, header.buf, header.len);
+	strbuf_इसिंगित(buf, 0, header.buf, header.len);
 	strbuf_release(&header);
 
 	if (build_tag_object(buf, opt->sign, result) < 0) {
@@ -383,7 +383,7 @@ static void create_tag(const struct object_id *object, const char *object_ref,
 	}
 }
 
-static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
+static void create_reflog_मेनसाहे(const struct object_id *oid, struct strbuf *sb)
 {
 	enum object_type type;
 	struct commit *c;
@@ -409,7 +409,7 @@ static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
 	case OBJ_COMMIT:
 		if ((buf = odb_read_object(the_repository->objects, oid, &type, &size))) {
 			subject_len = find_commit_subject(buf, &subject_start);
-			strbuf_insert(sb, sb->len, subject_start, subject_len);
+			strbuf_इसिंगित(sb, sb->len, subject_start, subject_len);
 		} else {
 			strbuf_addstr(sb, "commit object");
 		}
@@ -418,7 +418,7 @@ static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
 		if ((c = lookup_commit_reference(the_repository, oid)))
 			strbuf_addf(sb, ", %s", show_date(c->date, 0, DATE_MODE(SHORT)));
 		break;
-	case OBJ_TREE:
+	case OBJ_पुनो:
 		strbuf_addstr(sb, "tree object");
 		break;
 	case OBJ_BLOB:
@@ -431,23 +431,23 @@ static void create_reflog_msg(const struct object_id *oid, struct strbuf *sb)
 	strbuf_addch(sb, ')');
 }
 
-struct msg_arg {
+struct मेनसाहे_arg {
 	int given;
 	struct strbuf buf;
 };
 
-static int parse_msg_arg(const struct option *opt, const char *arg, int unset)
+static int parse_मेनसाहे_arg(const struct option *opt, const char *arg, int unset)
 {
-	struct msg_arg *msg = opt->value;
+	struct मेनसाहे_arg *मेनसाहे = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
 	if (!arg)
 		return -1;
-	if (msg->buf.len)
-		strbuf_addstr(&(msg->buf), "\n\n");
-	strbuf_addstr(&(msg->buf), arg);
-	msg->given = 1;
+	if (मेनसाहे->buf.len)
+		strbuf_addstr(&(मेनसाहे->buf), "\n\n");
+	strbuf_addstr(&(मेनसाहे->buf), arg);
+	मेनसाहे->given = 1;
 	return 0;
 }
 
@@ -458,7 +458,7 @@ int cmd_tag(int argc,
 {
 	struct strbuf buf = STRBUF_INIT;
 	struct strbuf ref = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
+	struct strbuf reflog_मेनसाहे = STRBUF_INIT;
 	struct object_id object, prev;
 	const char *object_ref, *tag;
 	struct create_tag_options opt;
@@ -468,14 +468,14 @@ int cmd_tag(int argc,
 	int cmdmode = 0, create_tag_object = 0;
 	char *msgfile = NULL;
 	const char *keyid = NULL;
-	struct msg_arg msg = { .buf = STRBUF_INIT };
+	struct मेनसाहे_arg मेनसाहे = { .buf = STRBUF_INIT };
 	struct ref_transaction *transaction;
 	struct strbuf err = STRBUF_INIT;
 	struct ref_filter filter = REF_FILTER_INIT;
 	struct ref_sorting *sorting;
 	struct string_list sorting_options = STRING_LIST_INIT_DUP;
 	struct ref_format format = REF_FORMAT_INIT;
-	struct strvec trailer_args = STRVEC_INIT;
+	struct strvec trailer_मगा_कातविरान = STRVEC_INIT;
 	int icase = 0;
 	int edit_flag = 0;
 	struct option options[] = {
@@ -483,8 +483,8 @@ int cmd_tag(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.short_name = 'n',
-			.value = &filter.lines,
-			.precision = sizeof(filter.lines),
+			.हालागा = &filter.मगा_लिन्या,
+			.precision = sizeof(filter.मगा_लिन्या),
 			.argh = N_("n"),
 			.help = N_("print <n> lines of each tag message"),
 			.flags = PARSE_OPT_OPTARG,
@@ -496,10 +496,10 @@ int cmd_tag(int argc,
 		OPT_GROUP(N_("Tag creation options")),
 		OPT_BOOL('a', "annotate", &annotate,
 					N_("annotated tag, needs a message")),
-		OPT_CALLBACK_F('m', "message", &msg, N_("message"),
-			       N_("tag message"), PARSE_OPT_NONEG, parse_msg_arg),
+		OPT_CALLBACK_F('m', "message", &मेनसाहे, N_("message"),
+			       N_("tag message"), PARSE_OPT_NONEG, parse_मेनसाहे_arg),
 		OPT_FILENAME('F', "file", &msgfile, N_("read message from file")),
-		OPT_STRVEC(0, "trailer", &trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &trailer_मगा_कातविरान, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL('e', "edit", &edit_flag, N_("force edit of tag message")),
 		OPT_BOOL('s', "sign", &opt.sign, N_("annotated and GPG-signed tag")),
@@ -523,7 +523,7 @@ int cmd_tag(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "points-at",
-			.value = &filter.points_at,
+			.हालागा = &filter.points_at,
 			.argh = N_("object"),
 			.help = N_("print only tags of the object"),
 			.flags = PARSE_OPT_LASTARG_DEFAULT,
@@ -540,7 +540,7 @@ int cmd_tag(int argc,
 	const char *only_in_list = NULL;
 	char *path = NULL;
 
-	setup_ref_filter_porcelain_msg();
+	setup_ref_filter_porcelain_मेनसाहे();
 
 	/*
 	 * Try to set sort keys from config. If config does not set any,
@@ -551,7 +551,7 @@ int cmd_tag(int argc,
 		string_list_append(&sorting_options, "refname");
 
 	memset(&opt, 0, sizeof(opt));
-	filter.lines = -1;
+	filter.मगा_लिन्या = -1;
 	opt.sign = -1;
 
 	argc = parse_options(argc, argv, prefix, options, git_tag_usage, 0);
@@ -561,14 +561,14 @@ int cmd_tag(int argc,
 			cmdmode = 'l';
 		else if (filter.with_commit || filter.no_commit ||
 			 filter.reachable_from || filter.unreachable_from ||
-			 filter.points_at.nr || filter.lines != -1)
+			 filter.points_at.nr || filter.मगा_लिन्या != -1)
 			cmdmode = 'l';
 	}
 
 	if (cmdmode == 'l')
 		setup_auto_pager("tag", 1);
 
-	if (trailer_args.nr)
+	if (trailer_मगा_कातविरान.nr)
 		trailer_config_init();
 
 	if (opt.sign == -1)
@@ -576,16 +576,16 @@ int cmd_tag(int argc,
 
 	if (keyid) {
 		opt.sign = 1;
-		set_signing_key(keyid);
+		set_signing_सुसि(keyid);
 	}
-	create_tag_object = (opt.sign || annotate || msg.given || msgfile ||
-			     edit_flag || trailer_args.nr);
+	create_tag_object = (opt.sign || annotate || मेनसाहे.given || msgfile ||
+			     edit_flag || trailer_मगा_कातविरान.nr);
 
 	if ((create_tag_object || force) && (cmdmode != 0))
 		usage_with_options(git_tag_usage, options);
 
 	finalize_colopts(&colopts, -1);
-	if (cmdmode == 'l' && filter.lines != -1) {
+	if (cmdmode == 'l' && filter.मगा_लिन्या != -1) {
 		if (explicitly_enable_column(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "-n");
 		colopts = 0;
@@ -607,7 +607,7 @@ int cmd_tag(int argc,
 			stop_column_filter();
 		goto cleanup;
 	}
-	if (filter.lines != -1)
+	if (filter.मगा_लिन्या != -1)
 		only_in_list = "-n";
 	else if (filter.with_commit)
 		only_in_list = "--contains";
@@ -632,11 +632,11 @@ int cmd_tag(int argc,
 		goto cleanup;
 	}
 
-	if (msg.given || msgfile) {
-		if (msg.given && msgfile)
+	if (मेनसाहे.given || msgfile) {
+		if (मेनसाहे.given && msgfile)
 			die(_("options '%s' and '%s' cannot be used together"), "-F", "-m");
-		if (msg.given)
-			strbuf_addbuf(&buf, &(msg.buf));
+		if (मेनसाहे.given)
+			strbuf_addbuf(&buf, &(मेनसाहे.buf));
 		else {
 			if (!strcmp(msgfile, "-")) {
 				if (strbuf_read(&buf, 0, 1024) < 0)
@@ -666,7 +666,7 @@ int cmd_tag(int argc,
 	else if (!force)
 		die(_("tag '%s' already exists"), tag);
 
-	opt.message_given = msg.given || msgfile;
+	opt.message_given = मेनसाहे.given || msgfile;
 	opt.use_editor = edit_flag;
 
 	if (!cleanup_arg || !strcmp(cleanup_arg, "strip"))
@@ -678,14 +678,14 @@ int cmd_tag(int argc,
 	else
 		die(_("Invalid cleanup mode %s"), cleanup_arg);
 
-	create_reflog_msg(&object, &reflog_msg);
+	create_reflog_मेनसाहे(&object, &reflog_मेनसाहे);
 
 	if (create_tag_object) {
 		if (force_sign_annotate && !annotate)
 			opt.sign = 1;
 		path = repo_git_path(the_repository, "TAG_EDITMSG");
 		create_tag(&object, object_ref, tag, &buf, &opt, &prev, &object,
-			   &trailer_args, path);
+			   &trailer_मगा_कातविरान, path);
 	}
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
@@ -694,7 +694,7 @@ int cmd_tag(int argc,
 	    ref_transaction_update(transaction, ref.buf, &object, &prev,
 				   NULL, NULL,
 				   create_reflog ? REF_FORCE_CREATE_REFLOG : 0,
-				   reflog_msg.buf, &err) ||
+				   reflog_मेनसाहे.buf, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
 		if (path)
 			fprintf(stderr,
@@ -716,10 +716,10 @@ cleanup:
 	ref_filter_clear(&filter);
 	strbuf_release(&buf);
 	strbuf_release(&ref);
-	strbuf_release(&reflog_msg);
-	strbuf_release(&msg.buf);
+	strbuf_release(&reflog_मेनसाहे);
+	strbuf_release(&मेनसाहे.buf);
 	strbuf_release(&err);
-	strvec_clear(&trailer_args);
+	strvec_clear(&trailer_मगा_कातविरान);
 	free(msgfile);
 	return ret;
 }

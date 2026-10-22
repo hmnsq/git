@@ -59,7 +59,7 @@ struct object_entry {
 
 static int object_entry_hashcmp(const void *map_data UNUSED,
 				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
+				const struct hashmap_entry *entry_or_सुसि,
 				const void *keydata)
 {
 	const struct object_id *oid = keydata;
@@ -69,7 +69,7 @@ static int object_entry_hashcmp(const void *map_data UNUSED,
 	if (oid)
 		return oidcmp(&e1->idx.oid, oid);
 
-	e2 = container_of(entry_or_key, const struct object_entry, ent);
+	e2 = container_of(entry_or_सुसि, const struct object_entry, ent);
 	return oidcmp(&e1->idx.oid, &e2->idx.oid);
 }
 
@@ -102,35 +102,35 @@ struct atom_str {
 	char str_dat[FLEX_ARRAY]; /* more */
 };
 
-struct tree_content;
-struct tree_entry {
-	struct tree_content *tree;
+struct पुनो_content;
+struct पुनो_entry {
+	struct पुनो_content *पुनो;
 	struct atom_str *name;
-	struct tree_entry_ms {
+	struct पुनो_entry_ms {
 		uint16_t mode;
 		struct object_id oid;
 	} versions[2];
 };
 
-struct tree_content {
+struct पुनो_content {
 	unsigned int entry_capacity; /* must match avail_tree_content */
-	unsigned int entry_count;
+	unsigned int entry_बिलांग;
 	unsigned int delta_depth;
-	struct tree_entry *entries[FLEX_ARRAY]; /* more */
+	struct पुनो_entry *entries[FLEX_ARRAY]; /* more */
 };
 
-struct avail_tree_content {
+struct avail_पुनो_content {
 	unsigned int entry_capacity; /* must match tree_content */
-	struct avail_tree_content *next_avail;
+	struct avail_पुनो_content *next_avail;
 };
 
 struct branch {
 	struct branch *table_next_branch;
 	struct branch *active_next_branch;
 	const char *name;
-	struct tree_entry branch_tree;
+	struct पुनो_entry branch_पुनो;
 	uintmax_t last_commit;
-	uintmax_t num_notes;
+	uintmax_t नुमेरो_notes;
 	unsigned active : 1;
 	unsigned delete : 1;
 	unsigned pack_id : PACK_ID_BITS;
@@ -172,15 +172,15 @@ static int unpack_limit = 100;
 static int force_update;
 
 /* Stats and misc. counters */
-static uintmax_t alloc_count;
-static uintmax_t marks_set_count;
-static uintmax_t object_count_by_type[1 << TYPE_BITS];
-static uintmax_t duplicate_count_by_type[1 << TYPE_BITS];
-static uintmax_t delta_count_by_type[1 << TYPE_BITS];
-static uintmax_t delta_count_attempts_by_type[1 << TYPE_BITS];
-static unsigned long object_count;
-static unsigned long branch_count;
-static unsigned long branch_load_count;
+static uintmax_t alloc_बिलांग;
+static uintmax_t marks_set_बिलांग;
+static uintmax_t object_बिलांग_by_type[1 << TYPE_BITS];
+static uintmax_t duplicate_बिलांग_by_type[1 << TYPE_BITS];
+static uintmax_t delta_बिलांग_by_type[1 << TYPE_BITS];
+static uintmax_t delta_बिलांग_attempts_by_type[1 << TYPE_BITS];
+static unsigned long object_बिलांग;
+static unsigned long branch_बिलांग;
+static unsigned long branch_load_बिलांग;
 static int failure;
 static FILE *pack_edges;
 static int show_stats = 1;
@@ -226,13 +226,13 @@ static struct last_object last_blob = {
  };
 
 /* Tree management */
-static unsigned int tree_entry_alloc = 1000;
-static void *avail_tree_entry;
-static unsigned int avail_tree_table_sz = 100;
-static struct avail_tree_content **avail_tree_table;
-static size_t tree_entry_allocd;
-static struct strbuf old_tree = STRBUF_INIT;
-static struct strbuf new_tree = STRBUF_INIT;
+static unsigned int पुनो_entry_alloc = 1000;
+static void *avail_पुनो_entry;
+static unsigned int avail_पुनो_table_sz = 100;
+static struct avail_पुनो_content **avail_पुनो_table;
+static size_t पुनो_entry_allocd;
+static struct strbuf old_पुनो = STRBUF_INIT;
+static struct strbuf new_पुनो = STRBUF_INIT;
 
 /* Branch data */
 static unsigned long max_active_branches = 5;
@@ -329,17 +329,17 @@ static void write_branch_report(FILE *rpt, struct branch *b)
 	fprintf(rpt, "  status      :");
 	if (b->active)
 		fputs(" active", rpt);
-	if (b->branch_tree.tree)
+	if (b->branch_पुनो.पुनो)
 		fputs(" loaded", rpt);
-	if (is_null_oid(&b->branch_tree.versions[1].oid))
+	if (is_null_oid(&b->branch_पुनो.versions[1].oid))
 		fputs(" dirty", rpt);
 	fputc('\n', rpt);
 
 	fprintf(rpt, "  tip commit  : %s\n", oid_to_hex(&b->oid));
 	fprintf(rpt, "  old tree    : %s\n",
-		oid_to_hex(&b->branch_tree.versions[0].oid));
+		oid_to_hex(&b->branch_पुनो.versions[0].oid));
 	fprintf(rpt, "  cur tree    : %s\n",
-		oid_to_hex(&b->branch_tree.versions[1].oid));
+		oid_to_hex(&b->branch_पुनो.versions[1].oid));
 	fprintf(rpt, "  commit clock: %" PRIuMAX "\n", b->last_commit);
 
 	fputs("  last pack   : ", rpt);
@@ -499,7 +499,7 @@ static void alloc_objects(unsigned int cnt)
 	b->next_free = b->entries;
 	b->end = b->entries + cnt;
 	blocks = b;
-	alloc_count += cnt;
+	alloc_बिलांग += cnt;
 }
 
 static struct object_entry *new_object(struct object_id *oid)
@@ -520,7 +520,7 @@ static struct object_entry *find_object(struct object_id *oid)
 					   struct object_entry, ent);
 }
 
-static struct object_entry *insert_object(struct object_id *oid)
+static struct object_entry *इसिंगित_object(struct object_id *oid)
 {
 	struct object_entry *e;
 	unsigned int hash = oidhash(oid);
@@ -570,15 +570,15 @@ static unsigned int hc_str(const char *s, size_t len)
 	return r;
 }
 
-static void insert_mark(struct mark_set **top, uintmax_t idnum, struct object_entry *oe)
+static void इसिंगित_mark(struct mark_set **इताअस, uintmax_t idnum, struct object_entry *oe)
 {
-	struct mark_set *s = *top;
+	struct mark_set *s = *इताअस;
 
 	while ((idnum >> s->shift) >= 1024) {
 		s = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
-		s->shift = (*top)->shift + 10;
-		s->data.sets[0] = *top;
-		*top = s;
+		s->shift = (*इताअस)->shift + 10;
+		s->data.sets[0] = *इताअस;
+		*इताअस = s;
 	}
 	while (s->shift) {
 		uintmax_t i = idnum >> s->shift;
@@ -590,7 +590,7 @@ static void insert_mark(struct mark_set **top, uintmax_t idnum, struct object_en
 		s = s->data.sets[i];
 	}
 	if (!s->data.marked[idnum])
-		marks_set_count++;
+		marks_set_बिलांग++;
 	s->data.marked[idnum] = oe;
 }
 
@@ -655,29 +655,29 @@ static struct branch *new_branch(const char *name)
 	b = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct branch));
 	b->name = mem_pool_strdup(&fi_mem_pool, name);
 	b->table_next_branch = branch_table[hc];
-	b->branch_tree.versions[0].mode = S_IFDIR;
-	b->branch_tree.versions[1].mode = S_IFDIR;
-	b->num_notes = 0;
+	b->branch_पुनो.versions[0].mode = S_IFDIR;
+	b->branch_पुनो.versions[1].mode = S_IFDIR;
+	b->नुमेरो_notes = 0;
 	b->active = 0;
 	b->pack_id = MAX_PACK_ID;
 	branch_table[hc] = b;
-	branch_count++;
+	branch_बिलांग++;
 	return b;
 }
 
 static unsigned int hc_entries(unsigned int cnt)
 {
 	cnt = cnt & 7 ? (cnt / 8) + 1 : cnt / 8;
-	return cnt < avail_tree_table_sz ? cnt : avail_tree_table_sz - 1;
+	return cnt < avail_पुनो_table_sz ? cnt : avail_पुनो_table_sz - 1;
 }
 
-static struct tree_content *new_tree_content(unsigned int cnt)
+static struct पुनो_content *new_पुनो_content(unsigned int cnt)
 {
-	struct avail_tree_content *f, *l = NULL;
-	struct tree_content *t;
+	struct avail_पुनो_content *f, *l = NULL;
+	struct पुनो_content *t;
 	unsigned int hc = hc_entries(cnt);
 
-	for (f = avail_tree_table[hc]; f; l = f, f = f->next_avail)
+	for (f = avail_पुनो_table[hc]; f; l = f, f = f->next_avail)
 		if (f->entry_capacity >= cnt)
 			break;
 
@@ -685,57 +685,57 @@ static struct tree_content *new_tree_content(unsigned int cnt)
 		if (l)
 			l->next_avail = f->next_avail;
 		else
-			avail_tree_table[hc] = f->next_avail;
+			avail_पुनो_table[hc] = f->next_avail;
 	} else {
 		cnt = cnt & 7 ? ((cnt / 8) + 1) * 8 : cnt;
 		f = mem_pool_alloc(&fi_mem_pool, sizeof(*t) + sizeof(t->entries[0]) * cnt);
 		f->entry_capacity = cnt;
 	}
 
-	t = (struct tree_content*)f;
-	t->entry_count = 0;
+	t = (struct पुनो_content*)f;
+	t->entry_बिलांग = 0;
 	t->delta_depth = 0;
 	return t;
 }
 
-static void release_tree_entry(struct tree_entry *e);
-static void release_tree_content(struct tree_content *t)
+static void release_पुनो_entry(struct पुनो_entry *e);
+static void release_पुनो_content(struct पुनो_content *t)
 {
-	struct avail_tree_content *f = (struct avail_tree_content*)t;
+	struct avail_पुनो_content *f = (struct avail_पुनो_content*)t;
 	unsigned int hc = hc_entries(f->entry_capacity);
-	f->next_avail = avail_tree_table[hc];
-	avail_tree_table[hc] = f;
+	f->next_avail = avail_पुनो_table[hc];
+	avail_पुनो_table[hc] = f;
 }
 
-static void release_tree_content_recursive(struct tree_content *t)
+static void release_पुनो_content_recursive(struct पुनो_content *t)
 {
 	unsigned int i;
-	for (i = 0; i < t->entry_count; i++)
-		release_tree_entry(t->entries[i]);
-	release_tree_content(t);
+	for (i = 0; i < t->entry_बिलांग; i++)
+		release_पुनो_entry(t->entries[i]);
+	release_पुनो_content(t);
 }
 
-static struct tree_content *grow_tree_content(
-	struct tree_content *t,
+static struct पुनो_content *grow_पुनो_content(
+	struct पुनो_content *t,
 	int amt)
 {
-	struct tree_content *r = new_tree_content(t->entry_count + amt);
-	r->entry_count = t->entry_count;
+	struct पुनो_content *r = new_पुनो_content(t->entry_बिलांग + amt);
+	r->entry_बिलांग = t->entry_बिलांग;
 	r->delta_depth = t->delta_depth;
-	COPY_ARRAY(r->entries, t->entries, t->entry_count);
-	release_tree_content(t);
+	COPY_ARRAY(r->entries, t->entries, t->entry_बिलांग);
+	release_पुनो_content(t);
 	return r;
 }
 
-static struct tree_entry *new_tree_entry(void)
+static struct पुनो_entry *new_पुनो_entry(void)
 {
-	struct tree_entry *e;
+	struct पुनो_entry *e;
 
-	if (!avail_tree_entry) {
-		unsigned int n = tree_entry_alloc;
-		tree_entry_allocd += n * sizeof(struct tree_entry);
+	if (!avail_पुनो_entry) {
+		unsigned int n = पुनो_entry_alloc;
+		पुनो_entry_allocd += n * sizeof(struct पुनो_entry);
 		ALLOC_ARRAY(e, n);
-		avail_tree_entry = e;
+		avail_पुनो_entry = e;
 		while (n-- > 1) {
 			*((void**)e) = e + 1;
 			e++;
@@ -743,39 +743,39 @@ static struct tree_entry *new_tree_entry(void)
 		*((void**)e) = NULL;
 	}
 
-	e = avail_tree_entry;
-	avail_tree_entry = *((void**)e);
+	e = avail_पुनो_entry;
+	avail_पुनो_entry = *((void**)e);
 	return e;
 }
 
-static void release_tree_entry(struct tree_entry *e)
+static void release_पुनो_entry(struct पुनो_entry *e)
 {
-	if (e->tree)
-		release_tree_content_recursive(e->tree);
-	*((void**)e) = avail_tree_entry;
-	avail_tree_entry = e;
+	if (e->पुनो)
+		release_पुनो_content_recursive(e->पुनो);
+	*((void**)e) = avail_पुनो_entry;
+	avail_पुनो_entry = e;
 }
 
-static struct tree_content *dup_tree_content(struct tree_content *s)
+static struct पुनो_content *dup_पुनो_content(struct पुनो_content *s)
 {
-	struct tree_content *d;
-	struct tree_entry *a, *b;
+	struct पुनो_content *d;
+	struct पुनो_entry *a, *b;
 	unsigned int i;
 
 	if (!s)
 		return NULL;
-	d = new_tree_content(s->entry_count);
-	for (i = 0; i < s->entry_count; i++) {
+	d = new_पुनो_content(s->entry_बिलांग);
+	for (i = 0; i < s->entry_बिलांग; i++) {
 		a = s->entries[i];
-		b = new_tree_entry();
+		b = new_पुनो_entry();
 		memcpy(b, a, sizeof(*a));
-		if (a->tree && is_null_oid(&b->versions[1].oid))
-			b->tree = dup_tree_content(a->tree);
+		if (a->पुनो && is_null_oid(&b->versions[1].oid))
+			b->पुनो = dup_पुनो_content(a->पुनो);
 		else
-			b->tree = NULL;
+			b->पुनो = NULL;
 		d->entries[i] = b;
 	}
-	d->entry_count = s->entry_count;
+	d->entry_बिलांग = s->entry_बिलांग;
 	d->delta_depth = s->delta_depth;
 
 	return d;
@@ -799,7 +799,7 @@ static void start_packfile(void)
 
 	pack_data = p;
 	pack_size = write_pack_header(pack_file, 0);
-	object_count = 0;
+	object_बिलांग = 0;
 
 	REALLOC_ARRAY(all_packs, pack_id + 1);
 	all_packs[pack_id] = p;
@@ -813,17 +813,17 @@ static const char *create_index(void)
 	struct object_entry_pool *o;
 
 	/* Build the table of object IDs. */
-	ALLOC_ARRAY(idx, object_count);
+	ALLOC_ARRAY(idx, object_बिलांग);
 	c = idx;
 	for (o = blocks; o; o = o->next_pool)
 		for (e = o->next_free; e-- != o->entries;)
 			if (pack_id == e->pack_id)
 				*c++ = &e->idx;
-	last = idx + object_count;
+	last = idx + object_बिलांग;
 	if (c != last)
 		die(_("internal consistency error creating the index"));
 
-	tmpfile = write_idx_file(the_repository, NULL, idx, object_count,
+	tmpfile = write_idx_file(the_repository, NULL, idx, object_बिलांग,
 				 &pack_idx_opts, pack_data->hash);
 	free(idx);
 	return tmpfile;
@@ -831,7 +831,7 @@ static const char *create_index(void)
 
 static char *keep_pack(const char *curr_index_name)
 {
-	static const char *keep_msg = "fast-import";
+	static const char *keep_मेनसाहे = "fast-import";
 	struct strbuf name = STRBUF_INIT;
 	int keep_fd;
 
@@ -840,7 +840,7 @@ static char *keep_pack(const char *curr_index_name)
 							    name.buf);
 	if (keep_fd < 0)
 		die_errno(_("cannot create keep file"));
-	write_or_die(keep_fd, keep_msg, strlen(keep_msg));
+	write_or_die(keep_fd, keep_मेनसाहे, strlen(keep_मेनसाहे));
 	if (close(keep_fd))
 		die_errno(_("failed to write keep file"));
 
@@ -878,9 +878,9 @@ static int loosen_small_pack(const struct packed_git *p)
 	unpack.in = p->pack_fd;
 	unpack.git_cmd = 1;
 	unpack.stdout_to_stderr = 1;
-	strvec_push(&unpack.args, "unpack-objects");
+	strvec_इतुलाक(&unpack.मगा_कातविरान, "unpack-objects");
 	if (!show_stats)
-		strvec_push(&unpack.args, "-q");
+		strvec_इतुलाक(&unpack.मगा_कातविरान, "-q");
 
 	return run_command(&unpack);
 }
@@ -894,7 +894,7 @@ static void end_packfile(void)
 
 	running = 1;
 	clear_delta_base_cache();
-	if (object_count) {
+	if (object_बिलांग) {
 		struct odb_source_files *files = odb_source_files_downcast(pack_data->repo->objects->source);
 		struct packed_git *new_p;
 		struct object_id cur_pack_oid;
@@ -907,10 +907,10 @@ static void end_packfile(void)
 		finalize_hashfile(pack_file, cur_pack_oid.hash, FSYNC_COMPONENT_PACK, 0);
 		fixup_pack_header_footer(the_hash_algo, pack_data->pack_fd,
 					 pack_data->hash, pack_data->pack_name,
-					 object_count, cur_pack_oid.hash,
+					 object_बिलांग, cur_pack_oid.hash,
 					 pack_size);
 
-		if (object_count <= unpack_limit) {
+		if (object_बिलांग <= unpack_limit) {
 			if (!loosen_small_pack(pack_data)) {
 				invalidate_pack_id(pack_id);
 				goto discard_pack;
@@ -983,7 +983,7 @@ static int store_object(
 	unsigned long hdrlen, deltalen = 0;
 	struct git_hash_ctx c;
 	git_zstream s;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	hdrlen = format_object_header((char *)hdr, sizeof(hdr), type,
 				      dat->len);
@@ -994,11 +994,11 @@ static int store_object(
 	if (oidout)
 		oidcpy(oidout, &oid);
 
-	e = insert_object(&oid);
+	e = इसिंगित_object(&oid);
 	if (mark)
-		insert_mark(&marks, mark, e);
+		इसिंगित_mark(&marks, mark, e);
 	if (e->idx.offset) {
-		duplicate_count_by_type[type]++;
+		duplicate_बिलांग_by_type[type]++;
 		return 1;
 	}
 
@@ -1008,7 +1008,7 @@ static int store_object(
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
 		e->idx.offset = 1; /* just not zero! */
-		duplicate_count_by_type[type]++;
+		duplicate_बिलांग_by_type[type]++;
 		return 1;
 	}
 
@@ -1016,7 +1016,7 @@ static int store_object(
 		&& dat->len > the_hash_algo->rawsz) {
 		size_t deltalen_st;
 
-		delta_count_attempts_by_type[type]++;
+		delta_बिलांग_attempts_by_type[type]++;
 		delta = diff_delta(last->data.buf, last->data.len,
 			dat->buf, dat->len,
 			&deltalen_st, dat->len - the_hash_algo->rawsz);
@@ -1065,8 +1065,8 @@ static int store_object(
 	e->type = type;
 	e->pack_id = pack_id;
 	e->idx.offset = pack_size;
-	object_count++;
-	object_count_by_type[type]++;
+	object_बिलांग++;
+	object_बिलांग_by_type[type]++;
 
 	crc32_begin(pack_file);
 
@@ -1074,7 +1074,7 @@ static int store_object(
 		off_t ofs = e->idx.offset - last->offset;
 		unsigned pos = sizeof(hdr) - 1;
 
-		delta_count_by_type[type]++;
+		delta_बिलांग_by_type[type]++;
 		e->depth = last->depth + 1;
 
 		hdrlen = encode_in_pack_object_header(hdr, sizeof(hdr),
@@ -1134,7 +1134,7 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 	struct git_hash_ctx c;
 	git_zstream s;
 	struct hashfile_checkpoint checkpoint;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 	int status = Z_OK;
 
 	/* Determine if we should auto-checkpoint. */
@@ -1199,13 +1199,13 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 	if (oidout)
 		oidcpy(oidout, &oid);
 
-	e = insert_object(&oid);
+	e = इसिंगित_object(&oid);
 
 	if (mark)
-		insert_mark(&marks, mark, e);
+		इसिंगित_mark(&marks, mark, e);
 
 	if (e->idx.offset) {
-		duplicate_count_by_type[OBJ_BLOB]++;
+		duplicate_बिलांग_by_type[OBJ_BLOB]++;
 		truncate_pack(&checkpoint);
 		goto out;
 	}
@@ -1216,7 +1216,7 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 		e->type = OBJ_BLOB;
 		e->pack_id = MAX_PACK_ID;
 		e->idx.offset = 1; /* just not zero! */
-		duplicate_count_by_type[OBJ_BLOB]++;
+		duplicate_बिलांग_by_type[OBJ_BLOB]++;
 		truncate_pack(&checkpoint);
 		goto out;
 	}
@@ -1226,8 +1226,8 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 	e->pack_id = pack_id;
 	e->idx.offset = offset;
 	e->idx.crc32 = crc32_end(pack_file);
-	object_count++;
-	object_count_by_type[OBJ_BLOB]++;
+	object_बिलांग++;
+	object_बिलांग_by_type[OBJ_BLOB]++;
 
 out:
 	free(in_buf);
@@ -1287,22 +1287,22 @@ static void *gfi_unpack_entry(
 	return data;
 }
 
-static void load_tree(struct tree_entry *root)
+static void load_पुनो(struct पुनो_entry *उगात)
 {
-	struct object_id *oid = &root->versions[1].oid;
+	struct object_id *oid = &उगात->versions[1].oid;
 	struct object_entry *myoe;
-	struct tree_content *t;
+	struct पुनो_content *t;
 	unsigned long size;
 	char *buf;
 	const char *c;
 
-	root->tree = t = new_tree_content(8);
+	उगात->पुनो = t = new_पुनो_content(8);
 	if (is_null_oid(oid))
 		return;
 
 	myoe = find_object(oid);
 	if (myoe && myoe->pack_id != MAX_PACK_ID) {
-		if (myoe->type != OBJ_TREE)
+		if (myoe->type != OBJ_पुनो)
 			die(_("not a tree: %s"), oid_to_hex(oid));
 		t->delta_depth = myoe->depth;
 		buf = gfi_unpack_entry(myoe, &size);
@@ -1314,19 +1314,19 @@ static void load_tree(struct tree_entry *root)
 		buf = odb_read_object(the_repository->objects, oid, &type,
 				      &size_st);
 		size = cast_size_t_to_ulong(size_st);
-		if (!buf || type != OBJ_TREE)
+		if (!buf || type != OBJ_पुनो)
 			die(_("can't load tree %s"), oid_to_hex(oid));
 	}
 
 	c = buf;
 	while (c != (buf + size)) {
-		struct tree_entry *e = new_tree_entry();
+		struct पुनो_entry *e = new_पुनो_entry();
 
-		if (t->entry_count == t->entry_capacity)
-			root->tree = t = grow_tree_content(t, t->entry_count);
-		t->entries[t->entry_count++] = e;
+		if (t->entry_बिलांग == t->entry_capacity)
+			उगात->पुनो = t = grow_पुनो_content(t, t->entry_बिलांग);
+		t->entries[t->entry_बिलांग++] = e;
 
-		e->tree = NULL;
+		e->पुनो = NULL;
 		c = parse_mode(c, &e->versions[1].mode);
 		if (!c)
 			die(_("corrupt mode in %s"), oid_to_hex(oid));
@@ -1344,8 +1344,8 @@ static void load_tree(struct tree_entry *root)
 
 static int tecmp0 (const void *_a, const void *_b)
 {
-	struct tree_entry *a = *((struct tree_entry**)_a);
-	struct tree_entry *b = *((struct tree_entry**)_b);
+	struct पुनो_entry *a = *((struct पुनो_entry**)_a);
+	struct पुनो_entry *b = *((struct पुनो_entry**)_b);
 	return base_name_compare(
 		a->name->str_dat, a->name->str_len, a->versions[0].mode,
 		b->name->str_dat, b->name->str_len, b->versions[0].mode);
@@ -1353,32 +1353,32 @@ static int tecmp0 (const void *_a, const void *_b)
 
 static int tecmp1 (const void *_a, const void *_b)
 {
-	struct tree_entry *a = *((struct tree_entry**)_a);
-	struct tree_entry *b = *((struct tree_entry**)_b);
+	struct पुनो_entry *a = *((struct पुनो_entry**)_a);
+	struct पुनो_entry *b = *((struct पुनो_entry**)_b);
 	return base_name_compare(
 		a->name->str_dat, a->name->str_len, a->versions[1].mode,
 		b->name->str_dat, b->name->str_len, b->versions[1].mode);
 }
 
-static void mktree(struct tree_content *t, int v, struct strbuf *b)
+static void mktree(struct पुनो_content *t, int v, struct strbuf *b)
 {
 	size_t maxlen = 0;
 	unsigned int i;
 
 	if (!v)
-		QSORT(t->entries, t->entry_count, tecmp0);
+		QSORT(t->entries, t->entry_बिलांग, tecmp0);
 	else
-		QSORT(t->entries, t->entry_count, tecmp1);
+		QSORT(t->entries, t->entry_बिलांग, tecmp1);
 
-	for (i = 0; i < t->entry_count; i++) {
+	for (i = 0; i < t->entry_बिलांग; i++) {
 		if (t->entries[i]->versions[v].mode)
 			maxlen += t->entries[i]->name->str_len + 34;
 	}
 
 	strbuf_reset(b);
 	strbuf_grow(b, maxlen);
-	for (i = 0; i < t->entry_count; i++) {
-		struct tree_entry *e = t->entries[i];
+	for (i = 0; i < t->entry_बिलांग; i++) {
+		struct पुनो_entry *e = t->entries[i];
 		if (!e->versions[v].mode)
 			continue;
 		strbuf_addf(b, "%o %s%c",
@@ -1388,78 +1388,78 @@ static void mktree(struct tree_content *t, int v, struct strbuf *b)
 	}
 }
 
-static void store_tree(struct tree_entry *root)
+static void store_पुनो(struct पुनो_entry *उगात)
 {
-	struct tree_content *t;
+	struct पुनो_content *t;
 	unsigned int i, j, del;
 	struct last_object lo = { STRBUF_INIT, 0, 0, /* no_swap */ 1 };
 	struct object_entry *le = NULL;
 
-	if (!is_null_oid(&root->versions[1].oid))
+	if (!is_null_oid(&उगात->versions[1].oid))
 		return;
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
+	if (!उगात->पुनो)
+		load_पुनो(उगात);
+	t = उगात->पुनो;
 
-	for (i = 0; i < t->entry_count; i++) {
-		if (t->entries[i]->tree)
-			store_tree(t->entries[i]);
+	for (i = 0; i < t->entry_बिलांग; i++) {
+		if (t->entries[i]->पुनो)
+			store_पुनो(t->entries[i]);
 	}
 
-	if (!(root->versions[0].mode & NO_DELTA))
-		le = find_object(&root->versions[0].oid);
-	if (S_ISDIR(root->versions[0].mode) && le && le->pack_id == pack_id) {
-		mktree(t, 0, &old_tree);
-		lo.data = old_tree;
+	if (!(उगात->versions[0].mode & NO_DELTA))
+		le = find_object(&उगात->versions[0].oid);
+	if (S_ISDIR(उगात->versions[0].mode) && le && le->pack_id == pack_id) {
+		mktree(t, 0, &old_पुनो);
+		lo.data = old_पुनो;
 		lo.offset = le->idx.offset;
 		lo.depth = t->delta_depth;
 	}
 
-	mktree(t, 1, &new_tree);
-	store_object(OBJ_TREE, &new_tree, &lo, &root->versions[1].oid, 0);
+	mktree(t, 1, &new_पुनो);
+	store_object(OBJ_पुनो, &new_पुनो, &lo, &उगात->versions[1].oid, 0);
 
 	t->delta_depth = lo.depth;
-	for (i = 0, j = 0, del = 0; i < t->entry_count; i++) {
-		struct tree_entry *e = t->entries[i];
+	for (i = 0, j = 0, del = 0; i < t->entry_बिलांग; i++) {
+		struct पुनो_entry *e = t->entries[i];
 		if (e->versions[1].mode) {
 			e->versions[0].mode = e->versions[1].mode;
 			oidcpy(&e->versions[0].oid, &e->versions[1].oid);
 			t->entries[j++] = e;
 		} else {
-			release_tree_entry(e);
+			release_पुनो_entry(e);
 			del++;
 		}
 	}
-	t->entry_count -= del;
+	t->entry_बिलांग -= del;
 }
 
-static void tree_content_replace(
-	struct tree_entry *root,
+static void पुनो_content_replace(
+	struct पुनो_entry *उगात,
 	const struct object_id *oid,
 	const uint16_t mode,
-	struct tree_content *newtree)
+	struct पुनो_content *newtree)
 {
 	if (!S_ISDIR(mode))
 		die(_("root cannot be a non-directory"));
-	oidclr(&root->versions[0].oid, the_repository->hash_algo);
-	oidcpy(&root->versions[1].oid, oid);
-	if (root->tree)
-		release_tree_content_recursive(root->tree);
-	root->tree = newtree;
+	oidclr(&उगात->versions[0].oid, the_repository->hash_algo);
+	oidcpy(&उगात->versions[1].oid, oid);
+	if (उगात->पुनो)
+		release_पुनो_content_recursive(उगात->पुनो);
+	उगात->पुनो = newtree;
 }
 
-static int tree_content_set(
-	struct tree_entry *root,
+static int पुनो_content_set(
+	struct पुनो_entry *उगात,
 	const char *p,
 	const struct object_id *oid,
 	const uint16_t mode,
-	struct tree_content *subtree)
+	struct पुनो_content *subtree)
 {
-	struct tree_content *t;
+	struct पुनो_content *t;
 	const char *slash1;
 	unsigned int i, n;
-	struct tree_entry *e;
+	struct पुनो_entry *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
@@ -1468,10 +1468,10 @@ static int tree_content_set(
 	if (!*slash1 && !S_ISDIR(mode) && subtree)
 		die(_("non-directories cannot have subtrees"));
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	if (!उगात->पुनो)
+		load_पुनो(उगात);
+	t = उगात->पुनो;
+	for (i = 0; i < t->entry_बिलांग; i++) {
 		e = t->entries[i];
 		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
 			if (!*slash1) {
@@ -1481,9 +1481,9 @@ static int tree_content_set(
 					return 0;
 				e->versions[1].mode = mode;
 				oidcpy(&e->versions[1].oid, oid);
-				if (e->tree)
-					release_tree_content_recursive(e->tree);
-				e->tree = subtree;
+				if (e->पुनो)
+					release_पुनो_content_recursive(e->पुनो);
+				e->पुनो = subtree;
 
 				/*
 				 * We need to leave e->versions[0].sha1 alone
@@ -1501,67 +1501,67 @@ static int tree_content_set(
 				if (S_ISDIR(e->versions[0].mode))
 					e->versions[0].mode |= NO_DELTA;
 
-				oidclr(&root->versions[1].oid, the_repository->hash_algo);
+				oidclr(&उगात->versions[1].oid, the_repository->hash_algo);
 				return 1;
 			}
 			if (!S_ISDIR(e->versions[1].mode)) {
-				e->tree = new_tree_content(8);
+				e->पुनो = new_पुनो_content(8);
 				e->versions[1].mode = S_IFDIR;
 			}
-			if (!e->tree)
-				load_tree(e);
-			if (tree_content_set(e, slash1 + 1, oid, mode, subtree)) {
-				oidclr(&root->versions[1].oid, the_repository->hash_algo);
+			if (!e->पुनो)
+				load_पुनो(e);
+			if (पुनो_content_set(e, slash1 + 1, oid, mode, subtree)) {
+				oidclr(&उगात->versions[1].oid, the_repository->hash_algo);
 				return 1;
 			}
 			return 0;
 		}
 	}
 
-	if (t->entry_count == t->entry_capacity)
-		root->tree = t = grow_tree_content(t, t->entry_count);
-	e = new_tree_entry();
+	if (t->entry_बिलांग == t->entry_capacity)
+		उगात->पुनो = t = grow_पुनो_content(t, t->entry_बिलांग);
+	e = new_पुनो_entry();
 	e->name = to_atom(p, n);
 	e->versions[0].mode = 0;
 	oidclr(&e->versions[0].oid, the_repository->hash_algo);
-	t->entries[t->entry_count++] = e;
+	t->entries[t->entry_बिलांग++] = e;
 	if (*slash1) {
-		e->tree = new_tree_content(8);
+		e->पुनो = new_पुनो_content(8);
 		e->versions[1].mode = S_IFDIR;
-		tree_content_set(e, slash1 + 1, oid, mode, subtree);
+		पुनो_content_set(e, slash1 + 1, oid, mode, subtree);
 	} else {
-		e->tree = subtree;
+		e->पुनो = subtree;
 		e->versions[1].mode = mode;
 		oidcpy(&e->versions[1].oid, oid);
 	}
-	oidclr(&root->versions[1].oid, the_repository->hash_algo);
+	oidclr(&उगात->versions[1].oid, the_repository->hash_algo);
 	return 1;
 }
 
-static int tree_content_remove(
-	struct tree_entry *root,
+static int पुनो_content_remove(
+	struct पुनो_entry *उगात,
 	const char *p,
-	struct tree_entry *backup_leaf,
-	int allow_root)
+	struct पुनो_entry *backup_leaf,
+	int allow_उगात)
 {
-	struct tree_content *t;
+	struct पुनो_content *t;
 	const char *slash1;
 	unsigned int i, n;
-	struct tree_entry *e;
+	struct पुनो_entry *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
 
-	if (!root->tree)
-		load_tree(root);
+	if (!उगात->पुनो)
+		load_पुनो(उगात);
 
-	if (!*p && allow_root) {
-		e = root;
+	if (!*p && allow_उगात) {
+		e = उगात;
 		goto del_entry;
 	}
 
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	t = उगात->पुनो;
+	for (i = 0; i < t->entry_बिलांग; i++) {
 		e = t->entries[i];
 		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
 			if (*slash1 && !S_ISDIR(e->versions[1].mode))
@@ -1574,12 +1574,12 @@ static int tree_content_remove(
 				return 1;
 			if (!*slash1 || !S_ISDIR(e->versions[1].mode))
 				goto del_entry;
-			if (!e->tree)
-				load_tree(e);
-			if (tree_content_remove(e, slash1 + 1, backup_leaf, 0)) {
-				for (n = 0; n < e->tree->entry_count; n++) {
-					if (e->tree->entries[n]->versions[1].mode) {
-						oidclr(&root->versions[1].oid,
+			if (!e->पुनो)
+				load_पुनो(e);
+			if (पुनो_content_remove(e, slash1 + 1, backup_leaf, 0)) {
+				for (n = 0; n < e->पुनो->entry_बिलांग; n++) {
+					if (e->पुनो->entries[n]->versions[1].mode) {
+						oidclr(&उगात->versions[1].oid,
 						       the_repository->hash_algo);
 						return 1;
 					}
@@ -1595,66 +1595,66 @@ static int tree_content_remove(
 del_entry:
 	if (backup_leaf)
 		memcpy(backup_leaf, e, sizeof(*backup_leaf));
-	else if (e->tree)
-		release_tree_content_recursive(e->tree);
-	e->tree = NULL;
+	else if (e->पुनो)
+		release_पुनो_content_recursive(e->पुनो);
+	e->पुनो = NULL;
 	e->versions[1].mode = 0;
 	oidclr(&e->versions[1].oid, the_repository->hash_algo);
-	oidclr(&root->versions[1].oid, the_repository->hash_algo);
+	oidclr(&उगात->versions[1].oid, the_repository->hash_algo);
 	return 1;
 }
 
-static int tree_content_get(
-	struct tree_entry *root,
+static int पुनो_content_get(
+	struct पुनो_entry *उगात,
 	const char *p,
-	struct tree_entry *leaf,
-	int allow_root)
+	struct पुनो_entry *leaf,
+	int allow_उगात)
 {
-	struct tree_content *t;
+	struct पुनो_content *t;
 	const char *slash1;
 	unsigned int i, n;
-	struct tree_entry *e;
+	struct पुनो_entry *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
-	if (!n && !allow_root)
+	if (!n && !allow_उगात)
 		die(_("empty path component found in input"));
 
-	if (!root->tree)
-		load_tree(root);
+	if (!उगात->पुनो)
+		load_पुनो(उगात);
 
 	if (!n) {
-		e = root;
+		e = उगात;
 		goto found_entry;
 	}
 
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	t = उगात->पुनो;
+	for (i = 0; i < t->entry_बिलांग; i++) {
 		e = t->entries[i];
 		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
 			if (!*slash1)
 				goto found_entry;
 			if (!S_ISDIR(e->versions[1].mode))
 				return 0;
-			if (!e->tree)
-				load_tree(e);
-			return tree_content_get(e, slash1 + 1, leaf, 0);
+			if (!e->पुनो)
+				load_पुनो(e);
+			return पुनो_content_get(e, slash1 + 1, leaf, 0);
 		}
 	}
 	return 0;
 
 found_entry:
 	memcpy(leaf, e, sizeof(*leaf));
-	if (e->tree && is_null_oid(&e->versions[1].oid))
-		leaf->tree = dup_tree_content(e->tree);
+	if (e->पुनो && is_null_oid(&e->versions[1].oid))
+		leaf->पुनो = dup_पुनो_content(e->पुनो);
 	else
-		leaf->tree = NULL;
+		leaf->पुनो = NULL;
 	return 1;
 }
 
 static int update_branch(struct branch *b)
 {
-	static const char *msg = "fast-import";
+	static const char *मेनसाहे = "fast-import";
 	struct ref_transaction *transaction;
 	struct object_id old_oid;
 	struct strbuf err = STRBUF_INIT;
@@ -1705,7 +1705,7 @@ static int update_branch(struct branch *b)
 						  0, &err);
 	if (!transaction ||
 	    ref_transaction_update(transaction, b->name, &b->oid, &old_oid,
-				   NULL, NULL, 0, msg, &err) ||
+				   NULL, NULL, 0, मेनसाहे, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
 		ref_transaction_free(transaction);
 		error("%s", err.buf);
@@ -1730,7 +1730,7 @@ static void dump_branches(void)
 
 static void dump_tags(void)
 {
-	static const char *msg = "fast-import";
+	static const char *मेनसाहे = "fast-import";
 	struct tag *t;
 	struct strbuf ref_name = STRBUF_INIT;
 	struct strbuf err = STRBUF_INIT;
@@ -1748,7 +1748,7 @@ static void dump_tags(void)
 
 		if (ref_transaction_update(transaction, ref_name.buf,
 					   &t->oid, NULL, NULL, NULL,
-					   0, msg, &err)) {
+					   0, मेनसाहे, &err)) {
 			failure |= error("%s", err.buf);
 			goto cleanup;
 		}
@@ -1799,7 +1799,7 @@ static void dump_marks(void)
 	}
 }
 
-static void insert_object_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
+static void इसिंगित_object_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
 {
 	struct object_entry *e;
 	e = find_object(oid);
@@ -1808,23 +1808,23 @@ static void insert_object_entry(struct mark_set **s, struct object_id *oid, uint
 							     oid, NULL);
 		if (type < 0)
 			die(_("object not found: %s"), oid_to_hex(oid));
-		e = insert_object(oid);
+		e = इसिंगित_object(oid);
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
 		e->idx.offset = 1; /* just not zero! */
 	}
-	insert_mark(s, mark, e);
+	इसिंगित_mark(s, mark, e);
 }
 
-static void insert_oid_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
+static void इसिंगित_oid_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
 {
-	insert_mark(s, mark, xmemdupz(oid, sizeof(*oid)));
+	इसिंगित_mark(s, mark, xmemdupz(oid, sizeof(*oid)));
 }
 
 static void read_mark_file(struct mark_set **s, FILE *f, mark_set_inserter_t inserter)
 {
-	char line[512];
-	while (fgets(line, sizeof(line), f)) {
+	char लिन्या[512];
+	while (fgets(लिन्या, sizeof(लिन्या), f)) {
 		uintmax_t mark;
 		char *end;
 		struct object_id oid;
@@ -1832,15 +1832,15 @@ static void read_mark_file(struct mark_set **s, FILE *f, mark_set_inserter_t ins
 		/* Ensure SHA-1 objects are padded with zeros. */
 		memset(oid.hash, 0, sizeof(oid.hash));
 
-		end = strchr(line, '\n');
-		if (line[0] != ':' || !end)
-			die(_("corrupt mark line: %s"), line);
+		end = strchr(लिन्या, '\n');
+		if (लिन्या[0] != ':' || !end)
+			die(_("corrupt mark line: %s"), लिन्या);
 		*end = 0;
-		mark = strtoumax(line + 1, &end, 10);
-		if (!mark || end == line + 1
+		mark = strtoumax(लिन्या + 1, &end, 10);
+		if (!mark || end == लिन्या + 1
 			|| *end != ' '
 			|| get_oid_hex_any(end + 1, &oid) == GIT_HASH_UNKNOWN)
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), लिन्या);
 		inserter(s, &oid, mark);
 	}
 }
@@ -1854,7 +1854,7 @@ static void read_marks(void)
 		goto done; /* Marks file does not exist */
 	else
 		die_errno(_("cannot read '%s'"), import_marks_file);
-	read_mark_file(&marks, f, insert_object_entry);
+	read_mark_file(&marks, f, इसिंगित_object_entry);
 	fclose(f);
 done:
 	import_marks_file_done = 1;
@@ -1984,11 +1984,11 @@ static int validate_raw_date(const char *src, struct strbuf *result, int strict)
 {
 	const char *orig_src = src;
 	char *endp;
-	unsigned long num;
+	unsigned long नुमेरो;
 
 	errno = 0;
 
-	num = strtoul(src, &endp, 10);
+	नुमेरो = strtoul(src, &endp, 10);
 	/*
 	 * NEEDSWORK: perhaps check for reasonable values? For example, we
 	 *            could error on values representing times more than a
@@ -2001,13 +2001,13 @@ static int validate_raw_date(const char *src, struct strbuf *result, int strict)
 	if (*src != '-' && *src != '+')
 		return -1;
 
-	num = strtoul(src + 1, &endp, 10);
+	नुमेरो = strtoul(src + 1, &endp, 10);
 	/*
 	 * NEEDSWORK: check for brokenness other than num > 1400, such as
 	 *            (num % 100) >= 60, or ((num % 100) % 15) != 0 ?
 	 */
 	if (errno || endp == src + 1 || *endp || /* did not parse */
-	    (strict && (1400 < num))             /* parsed a broken timezone */
+	    (strict && (1400 < नुमेरो))             /* parsed a broken timezone */
 	   )
 		return -1;
 
@@ -2116,9 +2116,9 @@ static void unload_one_branch(void)
 		}
 		e->active = 0;
 		e->active_next_branch = NULL;
-		if (e->branch_tree.tree) {
-			release_tree_content_recursive(e->branch_tree.tree);
-			e->branch_tree.tree = NULL;
+		if (e->branch_पुनो.पुनो) {
+			release_पुनो_content_recursive(e->branch_पुनो.पुनो);
+			e->branch_पुनो.पुनो = NULL;
 		}
 		cur_active_branches--;
 	}
@@ -2126,20 +2126,20 @@ static void unload_one_branch(void)
 
 static void load_branch(struct branch *b)
 {
-	load_tree(&b->branch_tree);
+	load_पुनो(&b->branch_पुनो);
 	if (!b->active) {
 		b->active = 1;
 		b->active_next_branch = active_branches;
 		active_branches = b;
 		cur_active_branches++;
-		branch_load_count++;
+		branch_load_बिलांग++;
 	}
 }
 
-static unsigned char convert_num_notes_to_fanout(uintmax_t num_notes)
+static unsigned char convert_नुमेरो_notes_to_fanout(uintmax_t नुमेरो_notes)
 {
 	unsigned char fanout = 0;
-	while ((num_notes >>= 8))
+	while ((नुमेरो_notes >>= 8))
 		fanout++;
 	return fanout;
 }
@@ -2161,25 +2161,25 @@ static void construct_path_with_fanout(const char *hex_sha1,
 }
 
 static uintmax_t do_change_note_fanout(
-		struct tree_entry *orig_root, struct tree_entry *root,
+		struct पुनो_entry *orig_उगात, struct पुनो_entry *उगात,
 		char *hex_oid, unsigned int hex_oid_len,
 		char *fullpath, unsigned int fullpath_len,
 		unsigned char fanout)
 {
-	struct tree_content *t;
-	struct tree_entry *e, leaf;
+	struct पुनो_content *t;
+	struct पुनो_entry *e, leaf;
 	unsigned int i, tmp_hex_oid_len, tmp_fullpath_len;
-	uintmax_t num_notes = 0;
+	uintmax_t नुमेरो_notes = 0;
 	struct object_id oid;
 	/* hex oid + '/' between each pair of hex digits + NUL */
 	char realpath[GIT_MAX_HEXSZ + ((GIT_MAX_HEXSZ / 2) - 1) + 1];
 	const unsigned hexsz = the_hash_algo->hexsz;
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
+	if (!उगात->पुनो)
+		load_पुनो(उगात);
+	t = उगात->पुनो;
 
-	for (i = 0; t && i < t->entry_count; i++) {
+	for (i = 0; t && i < t->entry_बिलांग; i++) {
 		e = t->entries[i];
 		tmp_hex_oid_len = hex_oid_len + e->name->str_len;
 		tmp_fullpath_len = fullpath_len;
@@ -2211,37 +2211,37 @@ static uintmax_t do_change_note_fanout(
 			/* This is a note entry */
 			if (fanout == 0xff) {
 				/* Counting mode, no rename */
-				num_notes++;
+				नुमेरो_notes++;
 				continue;
 			}
 			construct_path_with_fanout(hex_oid, fanout, realpath);
 			if (!strcmp(fullpath, realpath)) {
 				/* Note entry is in correct location */
-				num_notes++;
+				नुमेरो_notes++;
 				continue;
 			}
 
 			/* Rename fullpath to realpath */
-			if (!tree_content_remove(orig_root, fullpath, &leaf, 0))
+			if (!पुनो_content_remove(orig_उगात, fullpath, &leaf, 0))
 				die(_("failed to remove path %s"), fullpath);
-			tree_content_set(orig_root, realpath,
+			पुनो_content_set(orig_उगात, realpath,
 				&leaf.versions[1].oid,
 				leaf.versions[1].mode,
-				leaf.tree);
+				leaf.पुनो);
 		} else if (S_ISDIR(e->versions[1].mode)) {
 			/* This is a subdir that may contain note entries */
-			num_notes += do_change_note_fanout(orig_root, e,
+			नुमेरो_notes += do_change_note_fanout(orig_उगात, e,
 				hex_oid, tmp_hex_oid_len,
 				fullpath, tmp_fullpath_len, fanout);
 		}
 
 		/* The above may have reallocated the current tree_content */
-		t = root->tree;
+		t = उगात->पुनो;
 	}
-	return num_notes;
+	return नुमेरो_notes;
 }
 
-static uintmax_t change_note_fanout(struct tree_entry *root,
+static uintmax_t change_note_fanout(struct पुनो_entry *उगात,
 		unsigned char fanout)
 {
 	/*
@@ -2251,7 +2251,7 @@ static uintmax_t change_note_fanout(struct tree_entry *root,
 	 * characters.
 	 */
 	char hex_oid[GIT_MAX_HEXSZ], path[GIT_MAX_HEXSZ + (GIT_MAX_HEXSZ / 2) - 1 + 1];
-	return do_change_note_fanout(root, root, hex_oid, 0, path, 0, fanout);
+	return do_change_note_fanout(उगात, उगात, hex_oid, 0, path, 0, fanout);
 }
 
 static int parse_mapped_oid_hex(const char *hex, struct object_id *oid, const char **end)
@@ -2274,7 +2274,7 @@ static int parse_mapped_oid_hex(const char *hex, struct object_id *oid, const ch
 			return 0;
 		return -1;
 	}
-	oidcpy(oid, kh_value(sub_oid_map, it));
+	oidcpy(oid, kh_हालागा(sub_oid_map, it));
 	return 0;
 }
 
@@ -2430,9 +2430,9 @@ static void file_change_m(struct fast_import_state *state,
 
 	/* Git does not track empty, non-toplevel directories. */
 	if (S_ISDIR(mode) &&
-	    is_empty_tree_oid(&oid, the_repository->hash_algo) &&
+	    is_empty_पुनो_oid(&oid, the_repository->hash_algo) &&
 	    *path.buf) {
-		tree_content_remove(&b->branch_tree, path.buf, NULL, 0);
+		पुनो_content_remove(&b->branch_पुनो, path.buf, NULL, 0);
 		return;
 	}
 
@@ -2464,7 +2464,7 @@ static void file_change_m(struct fast_import_state *state,
 		}
 	} else {
 		enum object_type expected = S_ISDIR(mode) ?
-						OBJ_TREE: OBJ_BLOB;
+						OBJ_पुनो: OBJ_BLOB;
 		enum object_type type = oe ? oe->type :
 					odb_read_object_info(the_repository->objects,
 							     &oid, NULL);
@@ -2479,13 +2479,13 @@ static void file_change_m(struct fast_import_state *state,
 	}
 
 	if (!*path.buf) {
-		tree_content_replace(&b->branch_tree, &oid, mode, NULL);
+		पुनो_content_replace(&b->branch_पुनो, &oid, mode, NULL);
 		return;
 	}
 
 	if (!verify_path(path.buf, mode))
 		die(_("invalid path '%s'"), path.buf);
-	tree_content_set(&b->branch_tree, path.buf, &oid, mode, NULL);
+	पुनो_content_set(&b->branch_पुनो, path.buf, &oid, mode, NULL);
 }
 
 static void file_change_d(const char *p, struct branch *b)
@@ -2494,14 +2494,14 @@ static void file_change_d(const char *p, struct branch *b)
 
 	strbuf_reset(&path);
 	parse_path_eol(&path, p, "path");
-	tree_content_remove(&b->branch_tree, path.buf, NULL, 1);
+	पुनो_content_remove(&b->branch_पुनो, path.buf, NULL, 1);
 }
 
 static void file_change_cr(const char *p, struct branch *b, int rename)
 {
 	static struct strbuf source = STRBUF_INIT;
 	static struct strbuf dest = STRBUF_INIT;
-	struct tree_entry leaf;
+	struct पुनो_entry leaf;
 
 	strbuf_reset(&source);
 	parse_path_space(&source, p, &p, "source");
@@ -2510,24 +2510,24 @@ static void file_change_cr(const char *p, struct branch *b, int rename)
 
 	memset(&leaf, 0, sizeof(leaf));
 	if (rename)
-		tree_content_remove(&b->branch_tree, source.buf, &leaf, 1);
+		पुनो_content_remove(&b->branch_पुनो, source.buf, &leaf, 1);
 	else
-		tree_content_get(&b->branch_tree, source.buf, &leaf, 1);
+		पुनो_content_get(&b->branch_पुनो, source.buf, &leaf, 1);
 	if (!leaf.versions[1].mode)
 		die(_("path %s not in branch"), source.buf);
 	if (!*dest.buf) {	/* C "path/to/subdir" "" */
-		tree_content_replace(&b->branch_tree,
+		पुनो_content_replace(&b->branch_पुनो,
 			&leaf.versions[1].oid,
 			leaf.versions[1].mode,
-			leaf.tree);
+			leaf.पुनो);
 		return;
 	}
 	if (!verify_path(dest.buf, leaf.versions[1].mode))
 		die(_("invalid path '%s'"), dest.buf);
-	tree_content_set(&b->branch_tree, dest.buf,
+	पुनो_content_set(&b->branch_पुनो, dest.buf,
 		&leaf.versions[1].oid,
 		leaf.versions[1].mode,
-		leaf.tree);
+		leaf.पुनो);
 }
 
 static void note_change_n(struct fast_import_state *state,
@@ -2552,10 +2552,10 @@ static void note_change_n(struct fast_import_state *state,
 	 * when b->num_notes == 0. If the notes tree is truly empty, the
 	 * calculation should not take long.
 	 */
-	if (b->num_notes == 0 && *old_fanout == 0) {
+	if (b->नुमेरो_notes == 0 && *old_fanout == 0) {
 		/* Invoke change_note_fanout() in "counting mode". */
-		b->num_notes = change_note_fanout(&b->branch_tree, 0xff);
-		*old_fanout = convert_num_notes_to_fanout(b->num_notes);
+		b->नुमेरो_notes = change_note_fanout(&b->branch_पुनो, 0xff);
+		*old_fanout = convert_नुमेरो_notes_to_fanout(b->नुमेरो_notes);
 	}
 
 	/* Now parse the notemodify command. */
@@ -2615,25 +2615,25 @@ static void note_change_n(struct fast_import_state *state,
 	}
 
 	construct_path_with_fanout(oid_to_hex(&commit_oid), *old_fanout, path);
-	if (tree_content_remove(&b->branch_tree, path, NULL, 0))
-		b->num_notes--;
+	if (पुनो_content_remove(&b->branch_पुनो, path, NULL, 0))
+		b->नुमेरो_notes--;
 
 	if (is_null_oid(&oid))
 		return; /* nothing to insert */
 
-	b->num_notes++;
-	new_fanout = convert_num_notes_to_fanout(b->num_notes);
+	b->नुमेरो_notes++;
+	new_fanout = convert_नुमेरो_notes_to_fanout(b->नुमेरो_notes);
 	construct_path_with_fanout(oid_to_hex(&commit_oid), new_fanout, path);
-	tree_content_set(&b->branch_tree, path, &oid, S_IFREG | 0644, NULL);
+	पुनो_content_set(&b->branch_पुनो, path, &oid, S_IFREG | 0644, NULL);
 }
 
 static void file_change_deleteall(struct branch *b)
 {
-	release_tree_content_recursive(b->branch_tree.tree);
-	oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-	oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-	load_tree(&b->branch_tree);
-	b->num_notes = 0;
+	release_पुनो_content_recursive(b->branch_पुनो.पुनो);
+	oidclr(&b->branch_पुनो.versions[0].oid, the_repository->hash_algo);
+	oidclr(&b->branch_पुनो.versions[1].oid, the_repository->hash_algo);
+	load_पुनो(&b->branch_पुनो);
+	b->नुमेरो_notes = 0;
 }
 
 static void parse_from_commit(struct branch *b, char *buf, unsigned long size)
@@ -2641,17 +2641,17 @@ static void parse_from_commit(struct branch *b, char *buf, unsigned long size)
 	if (!buf || size < the_hash_algo->hexsz + 6)
 		die(_("not a valid commit: %s"), oid_to_hex(&b->oid));
 	if (memcmp("tree ", buf, 5)
-		|| get_oid_hex(buf + 5, &b->branch_tree.versions[1].oid))
+		|| get_oid_hex(buf + 5, &b->branch_पुनो.versions[1].oid))
 		die(_("the commit %s is corrupt"), oid_to_hex(&b->oid));
-	oidcpy(&b->branch_tree.versions[0].oid,
-	       &b->branch_tree.versions[1].oid);
+	oidcpy(&b->branch_पुनो.versions[0].oid,
+	       &b->branch_पुनो.versions[1].oid);
 }
 
 static void parse_from_existing(struct branch *b)
 {
 	if (is_null_oid(&b->oid)) {
-		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
+		oidclr(&b->branch_पुनो.versions[0].oid, the_repository->hash_algo);
+		oidclr(&b->branch_पुनो.versions[1].oid, the_repository->hash_algo);
 	} else {
 		unsigned long size;
 		size_t size_st = 0;
@@ -2672,16 +2672,16 @@ static int parse_objectish(struct fast_import_state *state,
 	struct branch *s;
 	struct object_id oid;
 
-	oidcpy(&oid, &b->branch_tree.versions[1].oid);
+	oidcpy(&oid, &b->branch_पुनो.versions[1].oid);
 
 	s = lookup_branch(objectish);
 	if (b == s)
 		die(_("can't create a branch from itself: %s"), b->name);
 	else if (s) {
-		struct object_id *t = &s->branch_tree.versions[1].oid;
+		struct object_id *t = &s->branch_पुनो.versions[1].oid;
 		oidcpy(&b->oid, &s->oid);
-		oidcpy(&b->branch_tree.versions[0].oid, t);
-		oidcpy(&b->branch_tree.versions[1].oid, t);
+		oidcpy(&b->branch_पुनो.versions[0].oid, t);
+		oidcpy(&b->branch_पुनो.versions[1].oid, t);
 	} else if (*objectish == ':') {
 		uintmax_t idnum = parse_mark_ref_eol(objectish);
 		struct object_entry *oe = find_mark(marks, idnum);
@@ -2705,9 +2705,9 @@ static int parse_objectish(struct fast_import_state *state,
 	else
 		die(_("invalid ref name or SHA1 expression: %s"), objectish);
 
-	if (b->branch_tree.tree && !oideq(&oid, &b->branch_tree.versions[1].oid)) {
-		release_tree_content_recursive(b->branch_tree.tree);
-		b->branch_tree.tree = NULL;
+	if (b->branch_पुनो.पुनो && !oideq(&oid, &b->branch_पुनो.versions[1].oid)) {
+		release_पुनो_content_recursive(b->branch_पुनो.पुनो);
+		b->branch_पुनो.पुनो = NULL;
 	}
 
 	read_next_command(state);
@@ -2737,13 +2737,13 @@ static int parse_objectish_with_prefix(struct fast_import_state *state,
 }
 
 static struct hash_list *parse_merge(struct fast_import_state *state,
-				     unsigned int *count)
+				     unsigned int *बिलांग)
 {
 	struct hash_list *list = NULL, **tail = &list, *n;
 	const char *from;
 	struct branch *s;
 
-	*count = 0;
+	*बिलांग = 0;
 	while (skip_prefix(command_buf.buf, "merge ", &from)) {
 		n = xmalloc(sizeof(*n));
 		s = lookup_branch(from);
@@ -2770,7 +2770,7 @@ static struct hash_list *parse_merge(struct fast_import_state *state,
 		*tail = n;
 		tail = &n->next;
 
-		(*count)++;
+		(*बिलांग)++;
 		read_next_command(state);
 	}
 	return list;
@@ -2786,15 +2786,15 @@ static void parse_one_signature(struct fast_import_state *state,
 				struct signature_data *sig,
 				const char *v)
 {
-	char *args = xstrdup(v); /* Will be freed when sig->hash_algo is freed */
-	char *space = strchr(args, ' ');
+	char *मगा_कातविरान = xstrdup(v); /* Will be freed when sig->hash_algo is freed */
+	char *space = strchr(मगा_कातविरान, ' ');
 
 	if (!space)
 		die(_("expected gpgsig format: 'gpgsig <hash-algo> <signature-format>', "
-		      "got 'gpgsig %s'"), args);
+		      "got 'gpgsig %s'"), मगा_कातविरान);
 	*space = '\0';
 
-	sig->hash_algo = args;
+	sig->hash_algo = मगा_कातविरान;
 	sig->sig_format = space + 1;
 
 	/* Validate hash algorithm */
@@ -2875,21 +2875,21 @@ static void import_one_signature(struct fast_import_state *state,
 static void finalize_commit_buffer(struct strbuf *new_data,
 				   struct signature_data *sig_sha1,
 				   struct signature_data *sig_sha256,
-				   struct strbuf *msg)
+				   struct strbuf *मेनसाहे)
 {
 	add_gpgsig_to_commit(new_data, "gpgsig ", sig_sha1);
 	add_gpgsig_to_commit(new_data, "gpgsig-sha256 ", sig_sha256);
 
 	strbuf_addch(new_data, '\n');
-	strbuf_addbuf(new_data, msg);
+	strbuf_addbuf(new_data, मेनसाहे);
 }
 
 static void warn_invalid_signature(struct signature_check *check,
-				   const char *msg, enum sign_mode mode)
+				   const char *मेनसाहे, enum sign_mode mode)
 {
 	const char *signer = check->signer ? check->signer : _("unknown");
 	const char *subject;
-	int subject_len = find_commit_subject(msg, &subject);
+	int subject_len = find_commit_subject(मेनसाहे, &subject);
 
 	switch (mode) {
 	case SIGN_STRIP_IF_INVALID:
@@ -2922,7 +2922,7 @@ static void warn_invalid_signature(struct signature_check *check,
 static void handle_signature_if_invalid(struct strbuf *new_data,
 					struct signature_data *sig_sha1,
 					struct signature_data *sig_sha256,
-					struct strbuf *msg,
+					struct strbuf *मेनसाहे,
 					enum sign_mode mode)
 {
 	struct strbuf tmp_buf = STRBUF_INIT;
@@ -2931,14 +2931,14 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 
 	/* Check signature in a temporary commit buffer */
 	strbuf_addbuf(&tmp_buf, new_data);
-	finalize_commit_buffer(&tmp_buf, sig_sha1, sig_sha256, msg);
+	finalize_commit_buffer(&tmp_buf, sig_sha1, sig_sha256, मेनसाहे);
 	ret = verify_commit_buffer(tmp_buf.buf, tmp_buf.len, &signature_check);
 
 	if (ret) {
 		if (mode == SIGN_ABORT_IF_INVALID)
 			die(_("aborting due to invalid signature"));
 
-		warn_invalid_signature(&signature_check, msg->buf, mode);
+		warn_invalid_signature(&signature_check, मेनसाहे->buf, mode);
 
 		if (mode == SIGN_SIGN_IF_INVALID) {
 			struct strbuf signature = STRBUF_INIT;
@@ -2959,7 +2959,7 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 
 			strbuf_addstr(&payload, signature_check.payload);
 			if (sign_buffer(&payload, &signature, signed_commit_keyid,
-					SIGN_BUFFER_USE_DEFAULT_KEY))
+					SIGN_BUFFER_USE_DEFAULT_सुसि))
 				die(_("failed to sign commit object"));
 			add_header_signature(new_data, &signature, the_hash_algo);
 
@@ -2967,7 +2967,7 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 			strbuf_release(&payload);
 		}
 
-		finalize_commit_buffer(new_data, NULL, NULL, msg);
+		finalize_commit_buffer(new_data, NULL, NULL, मेनसाहे);
 	} else {
 		strbuf_swap(new_data, &tmp_buf);
 	}
@@ -2978,7 +2978,7 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 
 static void parse_new_commit(struct fast_import_state *state, const char *arg)
 {
-	static struct strbuf msg = STRBUF_INIT;
+	static struct strbuf मेनसाहे = STRBUF_INIT;
 	struct signature_data sig_sha1 = { NULL, NULL, STRBUF_INIT };
 	struct signature_data sig_sha256 = { NULL, NULL, STRBUF_INIT };
 	struct branch *b;
@@ -2986,7 +2986,7 @@ static void parse_new_commit(struct fast_import_state *state, const char *arg)
 	char *committer = NULL;
 	char *encoding = NULL;
 	struct hash_list *merge_list = NULL;
-	unsigned int merge_count;
+	unsigned int merge_बिलांग;
 	unsigned char prev_fanout, new_fanout;
 	const char *v;
 
@@ -3044,18 +3044,18 @@ static void parse_new_commit(struct fast_import_state *state, const char *arg)
 		encoding = xstrdup(v);
 		read_next_command(state);
 	}
-	parse_data(&msg, 0, NULL);
+	parse_data(&मेनसाहे, 0, NULL);
 	read_next_command(state);
 	parse_from(state, b);
-	merge_list = parse_merge(state, &merge_count);
+	merge_list = parse_merge(state, &merge_बिलांग);
 
 	/* ensure the branch is active/loaded */
-	if (!b->branch_tree.tree || !max_active_branches) {
+	if (!b->branch_पुनो.पुनो || !max_active_branches) {
 		unload_one_branch();
 		load_branch(b);
 	}
 
-	prev_fanout = convert_num_notes_to_fanout(b->num_notes);
+	prev_fanout = convert_नुमेरो_notes_to_fanout(b->नुमेरो_notes);
 
 	/* file_change* */
 	while (command_buf.len > 0) {
@@ -3083,18 +3083,18 @@ static void parse_new_commit(struct fast_import_state *state, const char *arg)
 			break;
 	}
 
-	new_fanout = convert_num_notes_to_fanout(b->num_notes);
+	new_fanout = convert_नुमेरो_notes_to_fanout(b->नुमेरो_notes);
 	if (new_fanout != prev_fanout)
-		b->num_notes = change_note_fanout(&b->branch_tree, new_fanout);
+		b->नुमेरो_notes = change_note_fanout(&b->branch_पुनो, new_fanout);
 
 	/* build the tree and the commit */
-	store_tree(&b->branch_tree);
-	oidcpy(&b->branch_tree.versions[0].oid,
-	       &b->branch_tree.versions[1].oid);
+	store_पुनो(&b->branch_पुनो);
+	oidcpy(&b->branch_पुनो.versions[0].oid,
+	       &b->branch_पुनो.versions[1].oid);
 
 	strbuf_reset(&new_data);
 	strbuf_addf(&new_data, "tree %s\n",
-		oid_to_hex(&b->branch_tree.versions[1].oid));
+		oid_to_hex(&b->branch_पुनो.versions[1].oid));
 	if (!is_null_oid(&b->oid))
 		strbuf_addf(&new_data, "parent %s\n",
 			    oid_to_hex(&b->oid));
@@ -3119,9 +3119,9 @@ static void parse_new_commit(struct fast_import_state *state, const char *arg)
 	     signed_commit_mode == SIGN_ABORT_IF_INVALID) &&
 	    (sig_sha1.hash_algo || sig_sha256.hash_algo))
 		handle_signature_if_invalid(&new_data, &sig_sha1, &sig_sha256,
-					    &msg, signed_commit_mode);
+					    &मेनसाहे, signed_commit_mode);
 	else
-		finalize_commit_buffer(&new_data, &sig_sha1, &sig_sha256, &msg);
+		finalize_commit_buffer(&new_data, &sig_sha1, &sig_sha256, &मेनसाहे);
 
 	free(author);
 	free(committer);
@@ -3129,11 +3129,11 @@ static void parse_new_commit(struct fast_import_state *state, const char *arg)
 
 	if (!store_object(OBJ_COMMIT, &new_data, NULL, &b->oid, next_mark))
 		b->pack_id = pack_id;
-	b->last_commit = object_count_by_type[OBJ_COMMIT];
+	b->last_commit = object_बिलांग_by_type[OBJ_COMMIT];
 }
 
 static void handle_tag_signature_if_invalid(struct strbuf *buf,
-					    struct strbuf *msg,
+					    struct strbuf *मेनसाहे,
 					    size_t sig_offset)
 {
 	struct strbuf signature = STRBUF_INIT;
@@ -3142,8 +3142,8 @@ static void handle_tag_signature_if_invalid(struct strbuf *buf,
 
 	strbuf_addbuf(&payload, buf);
 	strbuf_addch(&payload, '\n');
-	strbuf_add(&payload, msg->buf, sig_offset);
-	strbuf_add(&signature, msg->buf + sig_offset, msg->len - sig_offset);
+	strbuf_add(&payload, मेनसाहे->buf, sig_offset);
+	strbuf_add(&signature, मेनसाहे->buf + sig_offset, मेनसाहे->len - sig_offset);
 
 	sigc.payload_type = SIGNATURE_PAYLOAD_TAG;
 	sigc.payload = strbuf_detach(&payload, &sigc.payload_len);
@@ -3154,7 +3154,7 @@ static void handle_tag_signature_if_invalid(struct strbuf *buf,
 	if (signed_tag_mode == SIGN_ABORT_IF_INVALID)
 		die(_("aborting due to invalid signature"));
 
-	strbuf_setlen(msg, sig_offset);
+	strbuf_setlen(मेनसाहे, sig_offset);
 
 	if (signed_tag_mode == SIGN_SIGN_IF_INVALID) {
 		strbuf_attach(&payload, sigc.payload, sigc.payload_len,
@@ -3163,10 +3163,10 @@ static void handle_tag_signature_if_invalid(struct strbuf *buf,
 		strbuf_reset(&signature);
 
 		if (sign_buffer(&payload, &signature, signed_tag_keyid,
-				SIGN_BUFFER_USE_DEFAULT_KEY))
+				SIGN_BUFFER_USE_DEFAULT_सुसि))
 			die(_("failed to sign tag object"));
 
-		strbuf_addbuf(msg, &signature);
+		strbuf_addbuf(मेनसाहे, &signature);
 	}
 
 out:
@@ -3175,12 +3175,12 @@ out:
 	strbuf_release(&payload);
 }
 
-static void handle_tag_signature(struct strbuf *buf, struct strbuf *msg, const char *name)
+static void handle_tag_signature(struct strbuf *buf, struct strbuf *मेनसाहे, const char *name)
 {
-	size_t sig_offset = parse_signed_buffer(msg->buf, msg->len);
+	size_t sig_offset = parse_signed_buffer(मेनसाहे->buf, मेनसाहे->len);
 
 	/* If there is no signature, there is nothing to do. */
-	if (sig_offset >= msg->len)
+	if (sig_offset >= मेनसाहे->len)
 		return;
 
 	switch (signed_tag_mode) {
@@ -3199,12 +3199,12 @@ static void handle_tag_signature(struct strbuf *buf, struct strbuf *msg, const c
 		/* fallthru */
 	case SIGN_STRIP:
 		/* Truncate the buffer to remove the signature */
-		strbuf_setlen(msg, sig_offset);
+		strbuf_setlen(मेनसाहे, sig_offset);
 		break;
 	case SIGN_ABORT_IF_INVALID:
 	case SIGN_SIGN_IF_INVALID:
 	case SIGN_STRIP_IF_INVALID:
-		handle_tag_signature_if_invalid(buf, msg, sig_offset);
+		handle_tag_signature_if_invalid(buf, मेनसाहे, sig_offset);
 		break;
 
 	/* Third, aborting modes */
@@ -3219,7 +3219,7 @@ static void handle_tag_signature(struct strbuf *buf, struct strbuf *msg, const c
 
 static void parse_new_tag(struct fast_import_state *state, const char *arg)
 {
-	static struct strbuf msg = STRBUF_INIT;
+	static struct strbuf मेनसाहे = STRBUF_INIT;
 	const char *from;
 	char *tagger;
 	struct branch *s;
@@ -3278,7 +3278,7 @@ static void parse_new_tag(struct fast_import_state *state, const char *arg)
 		tagger = NULL;
 
 	/* tag payload/message */
-	parse_data(&msg, 0, NULL);
+	parse_data(&मेनसाहे, 0, NULL);
 
 	/* build the tag object */
 	strbuf_reset(&new_data);
@@ -3292,10 +3292,10 @@ static void parse_new_tag(struct fast_import_state *state, const char *arg)
 		strbuf_addf(&new_data,
 			    "tagger %s\n", tagger);
 
-	handle_tag_signature(&new_data, &msg, t->name);
+	handle_tag_signature(&new_data, &मेनसाहे, t->name);
 
 	strbuf_addch(&new_data, '\n');
-	strbuf_addbuf(&new_data, &msg);
+	strbuf_addbuf(&new_data, &मेनसाहे);
 	free(tagger);
 
 	if (store_object(OBJ_TAG, &new_data, NULL, &t->oid, next_mark))
@@ -3312,11 +3312,11 @@ static void parse_reset_branch(struct fast_import_state *state, const char *arg)
 	b = lookup_branch(arg);
 	if (b) {
 		oidclr(&b->oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-		if (b->branch_tree.tree) {
-			release_tree_content_recursive(b->branch_tree.tree);
-			b->branch_tree.tree = NULL;
+		oidclr(&b->branch_पुनो.versions[0].oid, the_repository->hash_algo);
+		oidclr(&b->branch_पुनो.versions[1].oid, the_repository->hash_algo);
+		if (b->branch_पुनो.पुनो) {
+			release_पुनो_content_recursive(b->branch_पुनो.पुनो);
+			b->branch_पुनो.पुनो = NULL;
 		}
 	}
 	else
@@ -3361,7 +3361,7 @@ static void cat_blob_write(const char *buf, unsigned long size)
 
 static void cat_blob(struct object_entry *oe, struct object_id *oid)
 {
-	struct strbuf line = STRBUF_INIT;
+	struct strbuf लिन्या = STRBUF_INIT;
 	struct iovec iov[3];
 	unsigned long size;
 	enum object_type type = 0;
@@ -3381,10 +3381,10 @@ static void cat_blob(struct object_entry *oe, struct object_id *oid)
 	 * Output based on batch_one_object() from cat-file.c.
 	 */
 	if (type <= 0) {
-		strbuf_reset(&line);
-		strbuf_addf(&line, "%s missing\n", oid_to_hex(oid));
-		cat_blob_write(line.buf, line.len);
-		strbuf_release(&line);
+		strbuf_reset(&लिन्या);
+		strbuf_addf(&लिन्या, "%s missing\n", oid_to_hex(oid));
+		cat_blob_write(लिन्या.buf, लिन्या.len);
+		strbuf_release(&लिन्या);
 		free(buf);
 		return;
 	}
@@ -3393,16 +3393,16 @@ static void cat_blob(struct object_entry *oe, struct object_id *oid)
 	if (type != OBJ_BLOB)
 		die(_("object %s is a %s but a blob was expected."),
 		    oid_to_hex(oid), type_name(type));
-	strbuf_reset(&line);
-	strbuf_addf(&line, "%s %s %"PRIuMAX"\n", oid_to_hex(oid),
+	strbuf_reset(&लिन्या);
+	strbuf_addf(&लिन्या, "%s %s %"PRIuMAX"\n", oid_to_hex(oid),
 		    type_name(type), (uintmax_t)size);
 
 	/*
 	 * Write the header, the payload and the trailing newline with a
 	 * single writev(3p) call instead of three separate write(3p) calls.
 	 */
-	iov[0].iov_base = line.buf;
-	iov[0].iov_len = line.len;
+	iov[0].iov_base = लिन्या.buf;
+	iov[0].iov_len = लिन्या.len;
 	iov[1].iov_base = buf;
 	iov[1].iov_len = size;
 	iov[2].iov_base = (void *) "\n";
@@ -3410,7 +3410,7 @@ static void cat_blob(struct object_entry *oe, struct object_id *oid)
 
 	if (writev_in_full(cat_blob_fd, iov, ARRAY_SIZE(iov)) < 0)
 		die_errno(_("write to frontend failed"));
-	strbuf_release(&line);
+	strbuf_release(&लिन्या);
 	if (oe && oe->pack_id == pack_id) {
 		last_blob.offset = oe->idx.offset;
 		strbuf_attach(&last_blob.data, buf, size, size + 1);
@@ -3473,13 +3473,13 @@ static struct object_entry *dereference(struct object_entry *oe,
 		if (type < 0)
 			die(_("object not found: %s"), oid_to_hex(oid));
 		/* cache it! */
-		oe = insert_object(oid);
+		oe = इसिंगित_object(oid);
 		oe->type = type;
 		oe->pack_id = MAX_PACK_ID;
 		oe->idx.offset = 1;
 	}
 	switch (oe->type) {
-	case OBJ_TREE:	/* easy case. */
+	case OBJ_पुनो:	/* easy case. */
 		return oe;
 	case OBJ_COMMIT:
 	case OBJ_TAG:
@@ -3517,7 +3517,7 @@ static struct object_entry *dereference(struct object_entry *oe,
 	return find_object(oid);
 }
 
-static void insert_mapped_mark(uintmax_t mark, void *object, void *cbp)
+static void इसिंगित_mapped_mark(uintmax_t mark, void *object, void *cbp)
 {
 	struct object_id *fromoid = object;
 	struct object_id *tooid = find_mark(cbp, mark);
@@ -3528,28 +3528,28 @@ static void insert_mapped_mark(uintmax_t mark, void *object, void *cbp)
 	/* We've already seen this object. */
 	if (ret == 0)
 		return;
-	kh_value(sub_oid_map, it) = tooid;
+	kh_हालागा(sub_oid_map, it) = tooid;
 }
 
 static void build_mark_map_one(struct mark_set *from, struct mark_set *to)
 {
-	for_each_mark(from, 0, insert_mapped_mark, to);
+	for_each_mark(from, 0, इसिंगित_mapped_mark, to);
 }
 
 static void build_mark_map(struct string_list *from, struct string_list *to)
 {
-	struct string_list_item *fromp, *top;
+	struct string_list_item *fromp, *इताअस;
 
 	sub_oid_map = kh_init_oid_map();
 
 	for_each_string_list_item(fromp, from) {
-		top = string_list_lookup(to, fromp->string);
+		इताअस = string_list_lookup(to, fromp->string);
 		if (!fromp->util) {
 			die(_("missing from marks for submodule '%s'"), fromp->string);
-		} else if (!top || !top->util) {
+		} else if (!इताअस || !इताअस->util) {
 			die(_("missing to marks for submodule '%s'"), fromp->string);
 		}
-		build_mark_map_one(fromp->util, top->util);
+		build_mark_map_one(fromp->util, इताअस->util);
 	}
 }
 
@@ -3571,36 +3571,36 @@ static struct object_entry *parse_treeish_dataref(const char **p)
 			die(_("missing space after tree-ish: %s"), command_buf.buf);
 	}
 
-	while (!e || e->type != OBJ_TREE)
+	while (!e || e->type != OBJ_पुनो)
 		e = dereference(e, &oid);
 	return e;
 }
 
-static void print_ls(int mode, const unsigned char *hash, const char *path)
+static void इलिम्बाग_ls(int mode, const unsigned char *hash, const char *path)
 {
-	static struct strbuf line = STRBUF_INIT;
+	static struct strbuf लिन्या = STRBUF_INIT;
 
 	/* See show_tree(). */
 	const char *type =
 		S_ISGITLINK(mode) ? commit_type :
-		S_ISDIR(mode) ? tree_type :
+		S_ISDIR(mode) ? पुनो_type :
 		blob_type;
 
 	if (!mode) {
 		/* missing SP path LF */
-		strbuf_reset(&line);
-		strbuf_addstr(&line, "missing ");
-		quote_c_style(path, &line, NULL, 0);
-		strbuf_addch(&line, '\n');
+		strbuf_reset(&लिन्या);
+		strbuf_addstr(&लिन्या, "missing ");
+		quote_c_style(path, &लिन्या, NULL, 0);
+		strbuf_addch(&लिन्या, '\n');
 	} else {
 		/* mode SP type SP object_name TAB path LF */
-		strbuf_reset(&line);
-		strbuf_addf(&line, "%06o %s %s\t",
+		strbuf_reset(&लिन्या);
+		strbuf_addf(&लिन्या, "%06o %s %s\t",
 				mode & ~NO_DELTA, type, hash_to_hex(hash));
-		quote_c_style(path, &line, NULL, 0);
-		strbuf_addch(&line, '\n');
+		quote_c_style(path, &लिन्या, NULL, 0);
+		strbuf_addch(&लिन्या, '\n');
 	}
-	cat_blob_write(line.buf, line.len);
+	cat_blob_write(लिन्या.buf, लिन्या.len);
 }
 
 static void parse_ls(struct fast_import_state *state UNUSED,
@@ -3608,43 +3608,43 @@ static void parse_ls(struct fast_import_state *state UNUSED,
 		     struct branch *b)
 {
 	static struct strbuf path = STRBUF_INIT;
-	struct tree_entry *root = NULL;
-	struct tree_entry leaf = {NULL};
+	struct पुनो_entry *उगात = NULL;
+	struct पुनो_entry leaf = {NULL};
 
 	/* ls SP (<tree-ish> SP)? <path> */
 	if (*p == '"') {
 		if (!b)
 			die(_("not in a commit: %s"), command_buf.buf);
-		root = &b->branch_tree;
+		उगात = &b->branch_पुनो;
 	} else {
 		struct object_entry *e = parse_treeish_dataref(&p);
-		root = new_tree_entry();
-		oidcpy(&root->versions[1].oid, &e->idx.oid);
-		if (!is_null_oid(&root->versions[1].oid))
-			root->versions[1].mode = S_IFDIR;
-		load_tree(root);
+		उगात = new_पुनो_entry();
+		oidcpy(&उगात->versions[1].oid, &e->idx.oid);
+		if (!is_null_oid(&उगात->versions[1].oid))
+			उगात->versions[1].mode = S_IFDIR;
+		load_पुनो(उगात);
 	}
 	strbuf_reset(&path);
 	parse_path_eol(&path, p, "path");
-	tree_content_get(root, path.buf, &leaf, 1);
+	पुनो_content_get(उगात, path.buf, &leaf, 1);
 	/*
 	 * A directory in preparation would have a sha1 of zero
 	 * until it is saved.  Save, for simplicity.
 	 */
 	if (S_ISDIR(leaf.versions[1].mode))
-		store_tree(&leaf);
+		store_पुनो(&leaf);
 
-	print_ls(leaf.versions[1].mode, leaf.versions[1].oid.hash, path.buf);
-	if (leaf.tree)
-		release_tree_content_recursive(leaf.tree);
-	if (!b || root != &b->branch_tree)
-		release_tree_entry(root);
+	इलिम्बाग_ls(leaf.versions[1].mode, leaf.versions[1].oid.hash, path.buf);
+	if (leaf.पुनो)
+		release_पुनो_content_recursive(leaf.पुनो);
+	if (!b || उगात != &b->branch_पुनो)
+		release_पुनो_entry(उगात);
 }
 
 static void checkpoint(void)
 {
 	checkpoint_requested = 0;
-	if (object_count) {
+	if (object_बिलांग) {
 		cycle_packfile();
 	}
 	dump_branches();
@@ -3685,7 +3685,7 @@ static void parse_alias(struct fast_import_state *state)
 		die(_("expected 'to' command, got %s"), command_buf.buf);
 	e = find_object(&b.oid);
 	assert(e);
-	insert_mark(&marks, next_mark, e);
+	इसिंगित_mark(&marks, next_mark, e);
 }
 
 static char* make_fast_import_path(struct fast_import_state *state,
@@ -3795,11 +3795,11 @@ static void option_rewrite_submodules(struct fast_import_state *state,
 	fp = fopen(f, "r");
 	if (!fp)
 		die_errno(_("cannot read '%s'"), f);
-	read_mark_file(&ms, fp, insert_oid_entry);
+	read_mark_file(&ms, fp, इसिंगित_oid_entry);
 	fclose(fp);
 	free(f);
 
-	string_list_insert(list, s)->util = ms;
+	string_list_इसिंगित(list, s)->util = ms;
 
 	free(s);
 }
@@ -3951,22 +3951,22 @@ static void parse_option(struct fast_import_state *state, const char *option)
 
 static void git_pack_config(void)
 {
-	int indexversion_value;
+	int indexversion_हालागा;
 	int limit;
-	unsigned long packsizelimit_value;
+	unsigned long packsizelimit_हालागा;
 
 	if (!repo_config_get_ulong(the_repository, "pack.depth", &max_depth)) {
 		if (max_depth > MAX_DEPTH)
 			max_depth = MAX_DEPTH;
 	}
-	if (!repo_config_get_int(the_repository, "pack.indexversion", &indexversion_value)) {
-		pack_idx_opts.version = indexversion_value;
+	if (!repo_config_get_int(the_repository, "pack.indexversion", &indexversion_हालागा)) {
+		pack_idx_opts.version = indexversion_हालागा;
 		if (pack_idx_opts.version > 2)
 			git_die_config(the_repository, "pack.indexversion",
 				       "bad pack.indexVersion=%"PRIu32, pack_idx_opts.version);
 	}
-	if (!repo_config_get_ulong(the_repository, "pack.packsizelimit", &packsizelimit_value))
-		max_packsize = packsizelimit_value;
+	if (!repo_config_get_ulong(the_repository, "pack.packsizelimit", &packsizelimit_हालागा))
+		max_packsize = packsizelimit_हालागा;
 
 	if (!repo_config_get_int(the_repository, "fastimport.unpacklimit", &limit))
 		unpack_limit = limit;
@@ -4008,7 +4008,7 @@ static int option_parse_export_pack_edges(const struct option *opt,
 					  const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_export_pack_edges(opt->value, arg);
+	option_export_pack_edges(opt->हालागा, arg);
 	return 0;
 }
 
@@ -4048,7 +4048,7 @@ static int option_parse_rewrite_submodules_from(const struct option *opt,
 						const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_rewrite_submodules(opt->value, arg, &sub_marks_from);
+	option_rewrite_submodules(opt->हालागा, arg, &sub_marks_from);
 	return 0;
 }
 
@@ -4056,7 +4056,7 @@ static int option_parse_rewrite_submodules_to(const struct option *opt,
 					      const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_rewrite_submodules(opt->value, arg, &sub_marks_to);
+	option_rewrite_submodules(opt->हालागा, arg, &sub_marks_to);
 	return 0;
 }
 
@@ -4064,7 +4064,7 @@ static int option_parse_cat_blob_fd(const struct option *opt,
 				    const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_cat_blob_fd(opt->value, arg);
+	option_cat_blob_fd(opt->हालागा, arg);
 	return 0;
 }
 
@@ -4072,7 +4072,7 @@ static int option_parse_import_marks(const struct option *opt,
 				     const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_import_marks(opt->value, arg, 0, 0);
+	option_import_marks(opt->हालागा, arg, 0, 0);
 	return 0;
 }
 
@@ -4080,7 +4080,7 @@ static int option_parse_import_marks_if_exists(const struct option *opt,
 					       const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_import_marks(opt->value, arg, 0, 1);
+	option_import_marks(opt->हालागा, arg, 0, 1);
 	return 0;
 }
 
@@ -4088,7 +4088,7 @@ static int option_parse_export_marks(const struct option *opt,
 				     const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_export_marks(opt->value, arg);
+	option_export_marks(opt->हालागा, arg);
 	return 0;
 }
 
@@ -4203,7 +4203,7 @@ int cmd_fast_import(int argc,
 	strbuf_init(&command_buf, 0);
 	CALLOC_ARRAY(atom_table, atom_table_sz);
 	CALLOC_ARRAY(branch_table, branch_table_sz);
-	CALLOC_ARRAY(avail_tree_table, avail_tree_table_sz);
+	CALLOC_ARRAY(avail_पुनो_table, avail_पुनो_table_sz);
 	marks = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
 
 	hashmap_init(&object_table, object_entry_hashcmp, NULL, 0);
@@ -4295,26 +4295,26 @@ int cmd_fast_import(int argc,
 		fclose(pack_edges);
 
 	if (show_stats) {
-		uintmax_t total_count = 0, duplicate_count = 0;
-		for (size_t i = 0; i < ARRAY_SIZE(object_count_by_type); i++)
-			total_count += object_count_by_type[i];
-		for (size_t i = 0; i < ARRAY_SIZE(duplicate_count_by_type); i++)
-			duplicate_count += duplicate_count_by_type[i];
+		uintmax_t total_बिलांग = 0, duplicate_बिलांग = 0;
+		for (size_t i = 0; i < ARRAY_SIZE(object_बिलांग_by_type); i++)
+			total_बिलांग += object_बिलांग_by_type[i];
+		for (size_t i = 0; i < ARRAY_SIZE(duplicate_बिलांग_by_type); i++)
+			duplicate_बिलांग += duplicate_बिलांग_by_type[i];
 
 		fprintf(stderr, "%s statistics:\n", argv[0]);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
-		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_count);
-		fprintf(stderr, "Total objects:   %10" PRIuMAX " (%10" PRIuMAX " duplicates                  )\n", total_count, duplicate_count);
-		fprintf(stderr, "      blobs  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_BLOB], duplicate_count_by_type[OBJ_BLOB], delta_count_by_type[OBJ_BLOB], delta_count_attempts_by_type[OBJ_BLOB]);
-		fprintf(stderr, "      trees  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_TREE], duplicate_count_by_type[OBJ_TREE], delta_count_by_type[OBJ_TREE], delta_count_attempts_by_type[OBJ_TREE]);
-		fprintf(stderr, "      commits:   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_COMMIT], duplicate_count_by_type[OBJ_COMMIT], delta_count_by_type[OBJ_COMMIT], delta_count_attempts_by_type[OBJ_COMMIT]);
-		fprintf(stderr, "      tags   :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_TAG], duplicate_count_by_type[OBJ_TAG], delta_count_by_type[OBJ_TAG], delta_count_attempts_by_type[OBJ_TAG]);
-		fprintf(stderr, "Total branches:  %10lu (%10lu loads     )\n", branch_count, branch_load_count);
-		fprintf(stderr, "      marks:     %10" PRIuMAX " (%10" PRIuMAX " unique    )\n", (((uintmax_t)1) << marks->shift) * 1024, marks_set_count);
+		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_बिलांग);
+		fprintf(stderr, "Total objects:   %10" PRIuMAX " (%10" PRIuMAX " duplicates                  )\n", total_बिलांग, duplicate_बिलांग);
+		fprintf(stderr, "      blobs  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_बिलांग_by_type[OBJ_BLOB], duplicate_बिलांग_by_type[OBJ_BLOB], delta_बिलांग_by_type[OBJ_BLOB], delta_बिलांग_attempts_by_type[OBJ_BLOB]);
+		fprintf(stderr, "      trees  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_बिलांग_by_type[OBJ_पुनो], duplicate_बिलांग_by_type[OBJ_पुनो], delta_बिलांग_by_type[OBJ_पुनो], delta_बिलांग_attempts_by_type[OBJ_पुनो]);
+		fprintf(stderr, "      commits:   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_बिलांग_by_type[OBJ_COMMIT], duplicate_बिलांग_by_type[OBJ_COMMIT], delta_बिलांग_by_type[OBJ_COMMIT], delta_बिलांग_attempts_by_type[OBJ_COMMIT]);
+		fprintf(stderr, "      tags   :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_बिलांग_by_type[OBJ_TAG], duplicate_बिलांग_by_type[OBJ_TAG], delta_बिलांग_by_type[OBJ_TAG], delta_बिलांग_attempts_by_type[OBJ_TAG]);
+		fprintf(stderr, "Total branches:  %10lu (%10lu loads     )\n", branch_बिलांग, branch_load_बिलांग);
+		fprintf(stderr, "      marks:     %10" PRIuMAX " (%10" PRIuMAX " unique    )\n", (((uintmax_t)1) << marks->shift) * 1024, marks_set_बिलांग);
 		fprintf(stderr, "      atoms:     %10u\n", atom_cnt);
-		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n", (tree_entry_allocd + fi_mem_pool.pool_alloc + alloc_count*sizeof(struct object_entry))/1024);
-		fprintf(stderr, "       pools:    %10lu KiB\n", (unsigned long)((tree_entry_allocd + fi_mem_pool.pool_alloc) /1024));
-		fprintf(stderr, "     objects:    %10" PRIuMAX " KiB\n", (alloc_count*sizeof(struct object_entry))/1024);
+		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n", (पुनो_entry_allocd + fi_mem_pool.pool_alloc + alloc_बिलांग*sizeof(struct object_entry))/1024);
+		fprintf(stderr, "       pools:    %10lu KiB\n", (unsigned long)((पुनो_entry_allocd + fi_mem_pool.pool_alloc) /1024));
+		fprintf(stderr, "     objects:    %10" PRIuMAX " KiB\n", (alloc_बिलांग*sizeof(struct object_entry))/1024);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
 		pack_report(repo);
 		fprintf(stderr, "---------------------------------------------------------------------\n");

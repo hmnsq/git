@@ -62,7 +62,7 @@ static int parse_options_cmd_bundle(int argc,
 	argc = parse_options(argc, argv, NULL, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	if (!argc)
-		usage_msg_opt(_("need a <file> argument"), usagestr, options);
+		usage_मेनसाहे_opt(_("need a <file> argument"), usagestr, options);
 	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
 	return argc;
 }
@@ -197,7 +197,7 @@ static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
 		OPT_END()
 	};
 	char *bundle_file;
-	struct strvec extra_index_pack_args = STRVEC_INIT;
+	struct strvec extra_index_pack_मगा_कातविरान = STRVEC_INIT;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
@@ -211,15 +211,15 @@ static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
 		goto cleanup;
 	}
 	if (progress)
-		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
+		strvec_pushl(&extra_index_pack_मगा_कातविरान, "-v", "--progress-title",
 			     _("Unbundling objects"), NULL);
 	ret = !!unbundle(the_repository, &header, bundle_fd,
-			 &extra_index_pack_args, NULL) ||
+			 &extra_index_pack_मगा_कातविरान, NULL) ||
 		list_bundle_refs(&header, argc, argv);
 	bundle_header_release(&header);
 
 cleanup:
-	strvec_clear(&extra_index_pack_args);
+	strvec_clear(&extra_index_pack_मगा_कातविरान);
 	free(bundle_file);
 	return ret;
 }

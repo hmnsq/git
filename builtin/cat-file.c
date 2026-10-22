@@ -43,7 +43,7 @@
 #define MAX_ALLOWED_OBJ_LIMIT 10000
 
 /* Maximum input size permitted for the remote-object-info command. */
-#define MAX_REMOTE_OBJ_INFO_LINE \
+#define MAX_REMOTE_OBJ_INFO_लिन्या \
 	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_LIMIT * (GIT_MAX_HEXSZ + 1))
 
 enum batch_mode {
@@ -61,7 +61,7 @@ struct batch_options {
 	int all_objects;
 	int unordered;
 	int transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
-	char input_delim;
+	char पासोक_delim;
 	char output_delim;
 	const char *format;
 };
@@ -113,7 +113,7 @@ static int filter_object(const char *path, unsigned mode,
 		struct checkout_metadata meta;
 
 		init_checkout_metadata(&meta, NULL, NULL, oid);
-		if (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
+		if (convert_to_working_पुनो(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
 			free(*buf);
 			*size = strbuf.len;
 			*buf = strbuf_detach(&strbuf, NULL);
@@ -218,11 +218,11 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 			die("Not a valid object name %s", obj_name);
 
 		/* custom pretty-print here */
-		if (type == OBJ_TREE) {
-			const char *ls_args[3] = { NULL };
-			ls_args[0] =  "ls-tree";
-			ls_args[1] =  obj_name;
-			ret = cmd_ls_tree(2, ls_args, NULL, the_repository);
+		if (type == OBJ_पुनो) {
+			const char *ls_मगा_कातविरान[3] = { NULL };
+			ls_मगा_कातविरान[0] =  "ls-tree";
+			ls_मगा_कातविरान[1] =  obj_name;
+			ret = cmd_ls_पुनो(2, ls_मगा_कातविरान, NULL, the_repository);
 			goto cleanup;
 		}
 
@@ -364,7 +364,7 @@ static int expand_atom(struct strbuf *sb, const char *atom, int len,
 	if (data->is_remote) {
 		size_t i;
 		for (i = 0; i < data->remote_allowed_atoms.nr; i++)
-			if (is_atom(data->remote_allowed_atoms.items[i].string,
+			if (is_atom(data->remote_allowed_atoms.मगा_बागाय[i].string,
 				    atom, len))
 				break;
 		if (i == data->remote_allowed_atoms.nr)
@@ -434,7 +434,7 @@ static void batch_write(struct batch_options *opt, const void *data, int len)
 		write_or_die(1, data, len);
 }
 
-static void print_object_or_die(struct batch_options *opt, struct expand_data *data)
+static void इलिम्बाग_object_or_die(struct batch_options *opt, struct expand_data *data)
 {
 	const struct object_id *oid = &data->oid;
 
@@ -499,7 +499,7 @@ static void print_object_or_die(struct batch_options *opt, struct expand_data *d
 	}
 }
 
-static void print_default_format(struct strbuf *scratch, struct expand_data *data,
+static void इलिम्बाग_default_format(struct strbuf *scratch, struct expand_data *data,
 				 struct batch_options *opt)
 {
 	strbuf_add_oid_hex(scratch, &data->oid);
@@ -570,7 +570,7 @@ static void batch_object_write(const char *obj_name,
 			break;
 		case LOFC_BLOB_LIMIT:
 			if (data->type == OBJ_BLOB &&
-			    data->size >= opt->objects_filter.blob_limit_value) {
+			    data->size >= opt->objects_filter.blob_limit_हालागा) {
 				if (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
@@ -605,7 +605,7 @@ static void batch_object_write(const char *obj_name,
 	strbuf_reset(scratch);
 
 	if (!opt->format) {
-		print_default_format(scratch, data, opt);
+		इलिम्बाग_default_format(scratch, data, opt);
 	} else {
 		expand_format(scratch, opt->format, data);
 		strbuf_addch(scratch, opt->output_delim);
@@ -614,7 +614,7 @@ static void batch_object_write(const char *obj_name,
 	batch_write(opt, scratch->buf, scratch->len);
 
 	if (opt->batch_mode == BATCH_MODE_CONTENTS) {
-		print_object_or_die(opt, data);
+		इलिम्बाग_object_or_die(opt, data);
 		batch_write(opt, &opt->output_delim, 1);
 	}
 }
@@ -763,7 +763,7 @@ static int batch_unordered_object(const struct object_id *oid,
 {
 	struct object_cb_data *data = vdata;
 
-	if (oidset_insert(data->seen, oid))
+	if (oidset_इसिंगित(data->seen, oid))
 		return 0;
 
 	oidcpy(&data->expand->oid, oid);
@@ -777,63 +777,63 @@ typedef void (*parse_cmd_fn_t)(struct batch_options *, const char *,
 
 struct queued_cmd {
 	parse_cmd_fn_t fn;
-	char *line;
+	char *लिन्या;
 };
 
 static void parse_cmd_contents(struct batch_options *opt,
-			     const char *line,
+			     const char *लिन्या,
 			     struct strbuf *output,
 			     struct expand_data *data)
 {
 	enum object_type *saved_typep = data->info.typep;
 	data->info.typep = &data->type;
 	opt->batch_mode = BATCH_MODE_CONTENTS;
-	batch_one_object(line, output, opt, data);
+	batch_one_object(लिन्या, output, opt, data);
 	data->info.typep = saved_typep;
 }
 
 static void parse_cmd_info(struct batch_options *opt,
-			   const char *line,
+			   const char *लिन्या,
 			   struct strbuf *output,
 			   struct expand_data *data)
 {
 	opt->batch_mode = BATCH_MODE_INFO;
-	batch_one_object(line, output, opt, data);
+	batch_one_object(लिन्या, output, opt, data);
 }
 
 static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
-			      const char *line,
+			      const char *लिन्या,
 			      struct strbuf *output UNUSED,
 			      struct expand_data *data UNUSED)
 {
-	use_mailmap = git_parse_maybe_bool(line);
+	use_mailmap = git_parse_maybe_bool(लिन्या);
 
 	if (use_mailmap < 0)
-		die(_("mailmap: invalid boolean '%s'"), line);
+		die(_("mailmap: invalid boolean '%s'"), लिन्या);
 
 	if (use_mailmap)
 		load_mailmap();
 }
 
 static void parse_cmd_remote_object_info(struct batch_options *opt,
-					 const char *line, struct strbuf *output,
+					 const char *लिन्या, struct strbuf *output,
 					 struct expand_data *data)
 {
-	int count;
+	int बिलांग;
 	const char **argv;
-	char *line_to_split;
+	char *लिन्या_to_split;
 	struct fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
 	struct oid_array object_info_oids = OID_ARRAY_INIT;
 
-	if (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
+	if (strlen(लिन्या) >= MAX_REMOTE_OBJ_INFO_लिन्या)
 		die(_("remote-object-info command too long"));
 
-	line_to_split = xstrdup(line);
-	count = split_cmdline(line_to_split, &argv);
-	if (count < 0)
+	लिन्या_to_split = xstrdup(लिन्या);
+	बिलांग = split_cmdline(लिन्या_to_split, &argv);
+	if (बिलांग < 0)
 		die(_("remote-object-info: failed to parse command line: %s"),
-		    split_cmdline_strerror(count));
-	if (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
+		    split_cmdline_strerror(बिलांग));
+	if (बिलांग - 1 > MAX_ALLOWED_OBJ_LIMIT)
 		die(_("remote-object-info supports at most %d objects"),
 		    MAX_ALLOWED_OBJ_LIMIT);
 
@@ -842,7 +842,7 @@ static void parse_cmd_remote_object_info(struct batch_options *opt,
 	if (data->info.typep)
 		results.wants_type = 1;
 
-	if (get_remote_info(count, argv, &results, &object_info_oids))
+	if (get_remote_info(बिलांग, argv, &results, &object_info_oids))
 		die(_("failed to get object info from the remote: %s"), argv[0]);
 
 	string_list_clear(&data->remote_allowed_atoms, 0);
@@ -880,7 +880,7 @@ static void parse_cmd_remote_object_info(struct batch_options *opt,
 	data->skip_object_info = 0;
 
 	free_fetch_object_info_results(&results);
-	free(line_to_split);
+	free(लिन्या_to_split);
 	free(argv);
 	oid_array_clear(&object_info_oids);
 }
@@ -895,7 +895,7 @@ static void dispatch_calls(struct batch_options *opt,
 		die(_("flush is only for --buffer mode"));
 
 	for (size_t i = 0; i < nr; i++)
-		cmd[i].fn(opt, cmd[i].line, output, data);
+		cmd[i].fn(opt, cmd[i].लिन्या, output, data);
 
 	fflush(stdout);
 }
@@ -903,7 +903,7 @@ static void dispatch_calls(struct batch_options *opt,
 static void free_cmds(struct queued_cmd *cmd, size_t *nr)
 {
 	for (size_t i = 0; i < *nr; i++)
-		FREE_AND_NULL(cmd[i].line);
+		FREE_AND_NULL(cmd[i].लिन्या);
 
 	*nr = 0;
 }
@@ -912,7 +912,7 @@ static void free_cmds(struct queued_cmd *cmd, size_t *nr)
 static const struct parse_cmd {
 	const char *name;
 	parse_cmd_fn_t fn;
-	unsigned takes_args;
+	unsigned takes_मगा_कातविरान;
 } commands[] = {
 	{ "contents", parse_cmd_contents, 1 },
 	{ "flush", NULL, 0 },
@@ -925,26 +925,26 @@ static void batch_objects_command(struct batch_options *opt,
 				    struct strbuf *output,
 				    struct expand_data *data)
 {
-	struct strbuf input = STRBUF_INIT;
+	struct strbuf पासोक = STRBUF_INIT;
 	struct queued_cmd *queued_cmd = NULL;
 	size_t alloc = 0, nr = 0;
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
+	while (strbuf_getdelim_strip_crlf(&पासोक, stdin, opt->पासोक_delim) != EOF) {
 		const struct parse_cmd *cmd = NULL;
 		const char *p = NULL, *cmd_end;
 		struct queued_cmd call = {0};
 
-		if (!input.len)
+		if (!पासोक.len)
 			die(_("empty command in input"));
-		if (isspace(*input.buf))
-			die(_("whitespace before command: '%s'"), input.buf);
+		if (isspace(*पासोक.buf))
+			die(_("whitespace before command: '%s'"), पासोक.buf);
 
 		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (!skip_prefix(input.buf, commands[i].name, &cmd_end))
+			if (!skip_prefix(पासोक.buf, commands[i].name, &cmd_end))
 				continue;
 
 			cmd = &commands[i];
-			if (cmd->takes_args) {
+			if (cmd->takes_मगा_कातविरान) {
 				if (*cmd_end != ' ')
 					die(_("%s requires arguments"),
 					    commands[i].name);
@@ -959,7 +959,7 @@ static void batch_objects_command(struct batch_options *opt,
 		}
 
 		if (!cmd)
-			die(_("unknown command: '%s'"), input.buf);
+			die(_("unknown command: '%s'"), पासोक.buf);
 
 		if (!strcmp(cmd->name, "flush")) {
 			dispatch_calls(opt, output, data, queued_cmd, nr);
@@ -969,7 +969,7 @@ static void batch_objects_command(struct batch_options *opt,
 		} else {
 			ALLOC_GROW(queued_cmd, nr + 1, alloc);
 			call.fn = cmd->fn;
-			call.line = xstrdup_or_null(p);
+			call.लिन्या = xstrdup_or_null(p);
 			queued_cmd[nr++] = call;
 		}
 	}
@@ -983,7 +983,7 @@ static void batch_objects_command(struct batch_options *opt,
 
 	free_cmds(queued_cmd, &nr);
 	free(queued_cmd);
-	strbuf_release(&input);
+	strbuf_release(&पासोक);
 }
 
 #define DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
@@ -1032,10 +1032,10 @@ static void batch_each_object(struct batch_options *opt,
 
 static int batch_objects(struct batch_options *opt)
 {
-	struct strbuf input = STRBUF_INIT;
+	struct strbuf पासोक = STRBUF_INIT;
 	struct strbuf output = STRBUF_INIT;
 	struct expand_data data = EXPAND_DATA_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 	int save_warning;
 	int retval = 0;
 
@@ -1116,14 +1116,14 @@ static int batch_objects(struct batch_options *opt)
 		goto cleanup;
 	}
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
+	while (strbuf_getdelim_strip_crlf(&पासोक, stdin, opt->पासोक_delim) != EOF) {
 		if (data.split_on_whitespace) {
 			/*
 			 * Split at first whitespace, tying off the beginning
 			 * of the string and saving the remainder (or NULL) in
 			 * data.rest.
 			 */
-			char *p = strpbrk(input.buf, " \t");
+			char *p = strpbrk(पासोक.buf, " \t");
 			if (p) {
 				while (*p && strchr(" \t", *p))
 					*p++ = '\0';
@@ -1131,31 +1131,31 @@ static int batch_objects(struct batch_options *opt)
 			data.rest = p;
 		}
 
-		batch_one_object(input.buf, &output, opt, &data);
+		batch_one_object(पासोक.buf, &output, opt, &data);
 	}
 
  cleanup:
-	strbuf_release(&input);
+	strbuf_release(&पासोक);
 	strbuf_release(&output);
 	string_list_clear(&data.remote_allowed_atoms, 0);
 	cfg->warn_on_object_refname_ambiguity = save_warning;
 	return retval;
 }
 
-static int git_cat_file_config(const char *var, const char *value,
+static int git_cat_file_config(const char *var, const char *हालागा,
 			       const struct config_context *ctx, void *cb)
 {
-	if (userdiff_config(var, value) < 0)
+	if (userdiff_config(var, हालागा) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static int batch_option_callback(const struct option *opt,
 				 const char *arg,
 				 int unset)
 {
-	struct batch_options *bo = opt->value;
+	struct batch_options *bo = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -1192,7 +1192,7 @@ int cmd_cat_file(int argc,
 		.objects_filter = LIST_OBJECTS_FILTER_INIT,
 	};
 	int unknown_type = 0;
-	int input_nul_terminated = 0;
+	int पासोक_nul_terminated = 0;
 	int nul_terminated = 0;
 	int ret;
 
@@ -1230,7 +1230,7 @@ int cmd_cat_file(int argc,
 			N_("like --batch, but don't emit <contents>"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
 			batch_option_callback),
-		OPT_BOOL_F('z', NULL, &input_nul_terminated, N_("stdin is NUL-terminated"),
+		OPT_BOOL_F('z', NULL, &पासोक_nul_terminated, N_("stdin is NUL-terminated"),
 			PARSE_OPT_HIDDEN),
 		OPT_BOOL('Z', NULL, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
 		OPT_CALLBACK_F(0, "batch-command", &batch, N_("format"),
@@ -1289,7 +1289,7 @@ int cmd_cat_file(int argc,
 
 	/* Option compatibility */
 	if (force_path && !opt_cw)
-		usage_msg_optf(_("'%s=<%s>' needs '%s' or '%s'"),
+		usage_मेनसाहे_optf(_("'%s=<%s>' needs '%s' or '%s'"),
 			       builtin_catfile_usage, options,
 			       "--path", _("path|tree-ish"), "--filters",
 			       "--textconv");
@@ -1298,26 +1298,26 @@ int cmd_cat_file(int argc,
 	if (batch.enabled)
 		;
 	else if (batch.follow_symlinks)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+		usage_मेनसाहे_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--follow-symlinks");
 	else if (batch.buffer_output >= 0)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+		usage_मेनसाहे_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--buffer");
 	else if (batch.all_objects)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+		usage_मेनसाहे_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--batch-all-objects");
-	else if (input_nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	else if (पासोक_nul_terminated)
+		usage_मेनसाहे_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-z");
 	else if (nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+		usage_मेनसाहे_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-Z");
 
-	batch.input_delim = batch.output_delim = '\n';
-	if (input_nul_terminated)
-		batch.input_delim = '\0';
+	batch.पासोक_delim = batch.output_delim = '\n';
+	if (पासोक_nul_terminated)
+		batch.पासोक_delim = '\0';
 	if (nul_terminated)
-		batch.input_delim = batch.output_delim = '\0';
+		batch.पासोक_delim = batch.output_delim = '\0';
 
 	/* Batch defaults */
 	if (batch.buffer_output < 0)
@@ -1331,10 +1331,10 @@ int cmd_cat_file(int argc,
 		if (opt_cw)
 			batch.transform_mode = opt;
 		else if (opt && opt != 'b')
-			usage_msg_optf(_("'-%c' is incompatible with batch mode"),
+			usage_मेनसाहे_optf(_("'-%c' is incompatible with batch mode"),
 				       builtin_catfile_usage, options, opt);
 		else if (argc)
-			usage_msg_opt(_("batch modes take no arguments"),
+			usage_मेनसाहे_opt(_("batch modes take no arguments"),
 				      builtin_catfile_usage, options);
 
 		ret = batch_objects(&batch);
@@ -1343,25 +1343,25 @@ int cmd_cat_file(int argc,
 
 	if (opt) {
 		if (!argc && opt == 'c')
-			usage_msg_optf(_("<rev> required with '%s'"),
+			usage_मेनसाहे_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--textconv");
 		else if (!argc && opt == 'w')
-			usage_msg_optf(_("<rev> required with '%s'"),
+			usage_मेनसाहे_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--filters");
 		else if (!argc && opt_epts)
-			usage_msg_optf(_("<object> required with '-%c'"),
+			usage_मेनसाहे_optf(_("<object> required with '-%c'"),
 				       builtin_catfile_usage, options, opt);
 		else if (argc == 1)
 			obj_name = argv[0];
 		else
-			usage_msg_opt(_("too many arguments"), builtin_catfile_usage,
+			usage_मेनसाहे_opt(_("too many arguments"), builtin_catfile_usage,
 				      options);
 	} else if (!argc) {
 		usage_with_options(builtin_catfile_usage, options);
 	} else if (argc != 2) {
-		usage_msg_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
+		usage_मेनसाहे_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
 			      builtin_catfile_usage, options, argc);
 	} else if (argc) {
 		exp_type = argv[0];

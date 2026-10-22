@@ -39,7 +39,7 @@ static char *ident_part(const char *ident, enum ident_part part)
 
 	if (!ident)
 		return NULL;
-	if (split_ident_line(&split, ident, strlen(ident)))
+	if (split_ident_लिन्या(&split, ident, strlen(ident)))
 		return NULL;
 
 	switch (part) {
@@ -279,7 +279,7 @@ static void list_vars(int nul_term)
 			ptr->multiread(&list);
 			for (size_t i = 0; i < list.nr; i++)
 				printf("%s%c%s%c", ptr->name, delim,
-				       list.items[i].string, term);
+				       list.मगा_बागाय[i].string, term);
 			string_list_clear(&list, 0);
 		}
 	}
@@ -296,18 +296,18 @@ static const struct git_var *get_git_var(const char *var)
 	return NULL;
 }
 
-static int show_config(const char *var, const char *value,
+static int show_config(const char *var, const char *हालागा,
 		       const struct config_context *ctx, void *cb)
 {
 	int *nul_term = cb;
 	char delim = *nul_term ? '\n' : '=';
 	char term = *nul_term ? '\0' : '\n';
 
-	if (value)
-		printf("%s%c%s%c", var, delim, value, term);
+	if (हालागा)
+		printf("%s%c%s%c", var, delim, हालागा, term);
 	else
 		printf("%s%c", var, term);
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 int cmd_var(int argc,
@@ -376,11 +376,11 @@ int cmd_var(int argc,
 			}
 			for (size_t j = 0; j < list.nr; j++) {
 				if (argc == 1)
-					printf("%s%c", list.items[j].string,
+					printf("%s%c", list.मगा_बागाय[j].string,
 					       term);
 				else
 					printf("%s%c%s%c", git_var->name, delim,
-					       list.items[j].string, term);
+					       list.मगा_बागाय[j].string, term);
 			}
 			string_list_clear(&list, 0);
 		}

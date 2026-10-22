@@ -85,7 +85,7 @@ static struct progress *progress;
 static unsigned progress_counter;
 
 static struct oidset omitted_objects;
-static int arg_print_omitted; /* print objects omitted by filter */
+static int arg_इलिम्बाग_omitted; /* print objects omitted by filter */
 
 struct missing_objects_map_entry {
 	struct oidmap_entry entry;
@@ -106,8 +106,8 @@ static struct oidmap missing_objects;
 enum missing_action {
 	MA_ERROR = 0,    /* fail if any missing objects are encountered */
 	MA_ALLOW_ANY,    /* silently allow ALL missing objects */
-	MA_PRINT,        /* print ALL missing objects in special section */
-	MA_PRINT_INFO,   /* same as MA_PRINT but also prints missing object info */
+	MA_इलिम्बाग,        /* print ALL missing objects in special section */
+	MA_इलिम्बाग_INFO,   /* same as MA_PRINT but also prints missing object info */
 	MA_ALLOW_PROMISOR, /* silently allow all missing PROMISOR objects */
 };
 static enum missing_action arg_missing_action;
@@ -115,8 +115,8 @@ static int arg_missing_only;
 
 static inline int should_collect_missing(void)
 {
-	return arg_missing_action == MA_PRINT ||
-	       arg_missing_action == MA_PRINT_INFO;
+	return arg_missing_action == MA_इलिम्बाग ||
+	       arg_missing_action == MA_इलिम्बाग_INFO;
 }
 
 /* display only the oid of each object encountered */
@@ -124,7 +124,7 @@ static int arg_show_object_names = 1;
 
 #define DEFAULT_OIDSET_SIZE     (16*1024)
 
-static char line_term = '\n';
+static char लिन्या_term = '\n';
 static char info_term = ' ';
 
 static int show_disk_usage;
@@ -158,8 +158,8 @@ static void add_missing_object_entry(struct object_id *oid, const char *path,
 	oidmap_put(&missing_objects, entry);
 }
 
-static void print_missing_object(struct missing_objects_map_entry *entry,
-				 int print_missing_info)
+static void इलिम्बाग_missing_object(struct missing_objects_map_entry *entry,
+				 int इलिम्बाग_missing_info)
 {
 	struct strbuf sb = STRBUF_INIT;
 
@@ -168,23 +168,23 @@ static void print_missing_object(struct missing_objects_map_entry *entry,
 	 * It still uses the selected --missing= format for missing ones,
 	 * except the human "?" prefix is omitted (script-friendly OIDs).
 	 */
-	if (arg_missing_only && line_term)
+	if (arg_missing_only && लिन्या_term)
 		printf("%s", oid_to_hex(&entry->entry.oid));
-	else if (line_term)
+	else if (लिन्या_term)
 		printf("?%s", oid_to_hex(&entry->entry.oid));
 	else
 		printf("%s%cmissing=yes", oid_to_hex(&entry->entry.oid),
 		       info_term);
 
-	if (!print_missing_info) {
-		putchar(line_term);
+	if (!इलिम्बाग_missing_info) {
+		putchar(लिन्या_term);
 		return;
 	}
 
 	if (entry->path && *entry->path) {
 		strbuf_addf(&sb, "%cpath=", info_term);
 
-		if (line_term) {
+		if (लिन्या_term) {
 			struct strbuf path = STRBUF_INIT;
 
 			quote_path(entry->path, NULL, &path, QUOTE_PATH_QUOTE_SP);
@@ -199,7 +199,7 @@ static void print_missing_object(struct missing_objects_map_entry *entry,
 		strbuf_addf(&sb, "%ctype=%s", info_term, type_name(entry->type));
 
 	fwrite(sb.buf, sizeof(char), sb.len, stdout);
-	putchar(line_term);
+	putchar(लिन्या_term);
 
 	strbuf_release(&sb);
 }
@@ -221,8 +221,8 @@ static inline void finish_object__ma(struct object *obj, const char *name)
 	case MA_ALLOW_ANY:
 		return;
 
-	case MA_PRINT:
-	case MA_PRINT_INFO:
+	case MA_इलिम्बाग:
+	case MA_इलिम्बाग_INFO:
 		add_missing_object_entry(&obj->oid, name, obj->type);
 		return;
 
@@ -275,13 +275,13 @@ static void show_commit(struct commit *commit, void *data)
 
 	graph_show_commit(revs->graph);
 
-	if (revs->count) {
+	if (revs->बिलांग) {
 		if (commit->object.flags & PATCHSAME)
-			revs->count_same++;
-		else if (commit->object.flags & SYMMETRIC_LEFT)
-			revs->count_left++;
+			revs->बिलांग_same++;
+		else if (commit->object.flags & SYMMETRIC_कालिवा)
+			revs->बिलांग_कालिवा++;
 		else
-			revs->count_right++;
+			revs->बिलांग_कानान++;
 		finish_commit(commit);
 		return;
 	}
@@ -292,7 +292,7 @@ static void show_commit(struct commit *commit, void *data)
 		fputs(info->header_prefix, stdout);
 
 	if (revs->include_header) {
-		if (!revs->graph && line_term)
+		if (!revs->graph && लिन्या_term)
 			fputs(get_revision_mark(revs, commit), stdout);
 		if (revs->abbrev_commit && revs->abbrev)
 			fputs(repo_find_unique_abbrev(the_repository, &commit->object.oid, revs->abbrev),
@@ -300,12 +300,12 @@ static void show_commit(struct commit *commit, void *data)
 		else
 			fputs(oid_to_hex(&commit->object.oid), stdout);
 
-		if (!line_term) {
+		if (!लिन्या_term) {
 			if (commit->object.flags & BOUNDARY)
 				printf("%cboundary=yes", info_term);
 		}
 	}
-	if (revs->print_parents) {
+	if (revs->इलिम्बाग_parents) {
 		struct commit_list *parents = commit->parents;
 		while (parents) {
 			printf(" %s", oid_to_hex(&parents->item->object.oid));
@@ -325,11 +325,11 @@ static void show_commit(struct commit *commit, void *data)
 	if (revs->commit_format == CMIT_FMT_ONELINE)
 		putchar(' ');
 	else if (revs->include_header)
-		putchar(line_term);
+		putchar(लिन्या_term);
 
 	if (revs->verbose_header) {
 		struct strbuf buf = STRBUF_INIT;
-		struct pretty_print_context ctx = {0};
+		struct pretty_इलिम्बाग_context ctx = {0};
 		ctx.abbrev = revs->abbrev;
 		ctx.date_mode = revs->date_mode;
 		ctx.date_mode_explicit = revs->date_mode_explicit;
@@ -337,12 +337,12 @@ static void show_commit(struct commit *commit, void *data)
 		ctx.output_encoding = get_log_output_encoding();
 		ctx.color = revs->diffopt.use_color;
 		ctx.rev = revs;
-		pretty_print_commit(&ctx, commit, &buf);
+		pretty_इलिम्बाग_commit(&ctx, commit, &buf);
 		if (buf.len) {
 			if (revs->commit_format != CMIT_FMT_ONELINE)
 				graph_show_oneline(revs->graph);
 
-			graph_show_commit_msg(revs->graph, stdout, &buf);
+			graph_show_commit_मेनसाहे(revs->graph, stdout, &buf);
 
 			/*
 			 * Add a newline after the commit message.
@@ -410,7 +410,7 @@ static void show_object(struct object *obj, const char *name, void *cb_data)
 	if (info->flags & REV_LIST_QUIET)
 		return;
 
-	if (revs->count) {
+	if (revs->बिलांग) {
 		/*
 		 * The object count is always accumulated in the .count_right
 		 * field for traversal that is not a left-right traversal,
@@ -418,14 +418,14 @@ static void show_object(struct object *obj, const char *name, void *cb_data)
 		 * wants to count non-commit objects, which is handled by
 		 * the show_object() callback, does not ask for .left_right.
 		 */
-		revs->count_right++;
+		revs->बिलांग_कानान++;
 		return;
 	}
 
 	printf("%s", oid_to_hex(&obj->oid));
 
 	if (arg_show_object_names) {
-		if (line_term) {
+		if (लिन्या_term) {
 			putchar(info_term);
 			for (const char *p = name; *p && *p != '\n'; p++)
 				putchar(*p);
@@ -434,7 +434,7 @@ static void show_object(struct object *obj, const char *name, void *cb_data)
 		}
 	}
 
-	putchar(line_term);
+	putchar(लिन्या_term);
 }
 
 static void show_edge(struct commit *commit)
@@ -442,12 +442,12 @@ static void show_edge(struct commit *commit)
 	printf("-%s\n", oid_to_hex(&commit->object.oid));
 }
 
-static void print_var_str(const char *var, const char *val)
+static void इलिम्बाग_var_str(const char *var, const char *val)
 {
 	printf("%s='%s'\n", var, val);
 }
 
-static void print_var_int(const char *var, int val)
+static void इलिम्बाग_var_int(const char *var, int val)
 {
 	printf("%s=%d\n", var, val);
 }
@@ -487,12 +487,12 @@ static int show_bisect_vars(struct rev_list_info *info, int reaches, int all)
 		printf("------\n");
 	}
 
-	print_var_str("bisect_rev", hex);
-	print_var_int("bisect_nr", cnt - 1);
-	print_var_int("bisect_good", all - reaches - 1);
-	print_var_int("bisect_bad", reaches - 1);
-	print_var_int("bisect_all", all);
-	print_var_int("bisect_steps", estimate_bisect_steps(all));
+	इलिम्बाग_var_str("bisect_rev", hex);
+	इलिम्बाग_var_int("bisect_nr", cnt - 1);
+	इलिम्बाग_var_int("bisect_good", all - reaches - 1);
+	इलिम्बाग_var_int("bisect_bad", reaches - 1);
+	इलिम्बाग_var_int("bisect_all", all);
+	इलिम्बाग_var_int("bisect_steps", estimate_bisect_steps(all));
 
 	return 0;
 }
@@ -510,7 +510,7 @@ static int show_object_fast(
 	return 0;
 }
 
-static void print_disk_usage(off_t size)
+static void इलिम्बाग_disk_usage(off_t size)
 {
 	struct strbuf sb = STRBUF_INIT;
 	if (human_readable)
@@ -521,33 +521,33 @@ static void print_disk_usage(off_t size)
 	strbuf_release(&sb);
 }
 
-static inline int parse_missing_action_value(struct repository *repo,
-					     const char *value)
+static inline int parse_missing_action_हालागा(struct repository *repo,
+					     const char *हालागा)
 {
-	if (!strcmp(value, "error")) {
+	if (!strcmp(हालागा, "error")) {
 		arg_missing_action = MA_ERROR;
 		return 1;
 	}
 
-	if (!strcmp(value, "allow-any")) {
+	if (!strcmp(हालागा, "allow-any")) {
 		arg_missing_action = MA_ALLOW_ANY;
 		repo->fetch_if_missing = 0;
 		return 1;
 	}
 
-	if (!strcmp(value, "print")) {
-		arg_missing_action = MA_PRINT;
+	if (!strcmp(हालागा, "print")) {
+		arg_missing_action = MA_इलिम्बाग;
 		repo->fetch_if_missing = 0;
 		return 1;
 	}
 
-	if (!strcmp(value, "print-info")) {
-		arg_missing_action = MA_PRINT_INFO;
+	if (!strcmp(हालागा, "print-info")) {
+		arg_missing_action = MA_इलिम्बाग_INFO;
 		repo->fetch_if_missing = 0;
 		return 1;
 	}
 
-	if (!strcmp(value, "allow-promisor")) {
+	if (!strcmp(हालागा, "allow-promisor")) {
 		arg_missing_action = MA_ALLOW_PROMISOR;
 		repo->fetch_if_missing = 0;
 		return 1;
@@ -556,25 +556,25 @@ static inline int parse_missing_action_value(struct repository *repo,
 	return 0;
 }
 
-static int try_bitmap_count(struct rev_info *revs,
+static int try_bitmap_बिलांग(struct rev_info *revs,
 			    int filter_provided_objects)
 {
-	uint32_t commit_count = 0,
-		 tag_count = 0,
-		 tree_count = 0,
-		 blob_count = 0;
-	int max_count;
+	uint32_t commit_बिलांग = 0,
+		 tag_बिलांग = 0,
+		 पुनो_बिलांग = 0,
+		 blob_बिलांग = 0;
+	int max_बिलांग;
 	struct bitmap_index *bitmap_git;
 
 	/* This function only handles counting, not general traversal. */
-	if (!revs->count)
+	if (!revs->बिलांग)
 		return -1;
 
 	/*
 	 * A bitmap result can't know left/right, etc, because we don't
 	 * actually traverse.
 	 */
-	if (revs->left_right || revs->cherry_mark)
+	if (revs->कालिवा_कानान || revs->cherry_mark)
 		return -1;
 
 	/*
@@ -582,28 +582,28 @@ static int try_bitmap_count(struct rev_info *revs,
 	 * commits to traverse, since we don't know which objects go with which
 	 * commit.
 	 */
-	if (revs->max_count >= 0 &&
-	    (revs->tag_objects || revs->tree_objects || revs->blob_objects))
+	if (revs->max_बिलांग >= 0 &&
+	    (revs->tag_objects || revs->पुनो_objects || revs->blob_objects))
 		return -1;
 
 	/*
 	 * This must be saved before doing any walking, since the revision
 	 * machinery will count it down to zero while traversing.
 	 */
-	max_count = revs->max_count;
+	max_बिलांग = revs->max_बिलांग;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
 	if (!bitmap_git)
 		return -1;
 
-	count_bitmap_commit_list(bitmap_git, &commit_count,
-				 revs->tree_objects ? &tree_count : NULL,
-				 revs->blob_objects ? &blob_count : NULL,
-				 revs->tag_objects ? &tag_count : NULL);
-	if (max_count >= 0 && max_count < commit_count)
-		commit_count = max_count;
+	बिलांग_bitmap_commit_list(bitmap_git, &commit_बिलांग,
+				 revs->पुनो_objects ? &पुनो_बिलांग : NULL,
+				 revs->blob_objects ? &blob_बिलांग : NULL,
+				 revs->tag_objects ? &tag_बिलांग : NULL);
+	if (max_बिलांग >= 0 && max_बिलांग < commit_बिलांग)
+		commit_बिलांग = max_बिलांग;
 
-	printf("%d\n", commit_count + tree_count + blob_count + tag_count);
+	printf("%d\n", commit_बिलांग + पुनो_बिलांग + blob_बिलांग + tag_बिलांग);
 	free_bitmap_index(bitmap_git);
 	return 0;
 }
@@ -617,14 +617,14 @@ static int try_bitmap_traversal(struct rev_info *revs,
 	 * We can't use a bitmap result with a traversal limit, since the set
 	 * of commits we'd get would be essentially random.
 	 */
-	if (revs->max_count >= 0)
+	if (revs->max_बिलांग >= 0)
 		return -1;
 
 	/*
 	 * We can't know which commits were left/right in a single traversal,
 	 * and we don't yet know how to traverse them separately.
 	 */
-	if (revs->left_right)
+	if (revs->कालिवा_कानान)
 		return -1;
 
 	bitmap_git = prepare_bitmap_walk(revs, filter_provided_objects);
@@ -650,7 +650,7 @@ static int try_bitmap_disk_usage(struct rev_info *revs,
 		return -1;
 
 	size_from_bitmap = get_disk_usage_from_bitmap(bitmap_git, revs);
-	print_disk_usage(size_from_bitmap);
+	इलिम्बाग_disk_usage(size_from_bitmap);
 
 	free_bitmap_index(bitmap_git);
 	return 0;
@@ -679,18 +679,18 @@ static void prepare_maximal_independent(struct rev_info *revs)
 	    revs->topo_order ||
 	    revs->first_parent_only ||
 	    revs->reverse ||
-	    revs->max_count >= 0 ||
-	    revs->skip_count >= 0 ||
+	    revs->max_बिलांग >= 0 ||
+	    revs->skip_बिलांग >= 0 ||
 	    revs->min_age != (timestamp_t)-1 ||
 	    revs->max_age != (timestamp_t)-1 ||
 	    revs->min_parents > 0 ||
 	    revs->max_parents >= 0 ||
 	    revs->prune_data.nr ||
-	    revs->count ||
-	    revs->left_right ||
+	    revs->बिलांग ||
+	    revs->कालिवा_कानान ||
 	    revs->boundary ||
 	    revs->tag_objects ||
-	    revs->tree_objects ||
+	    revs->पुनो_objects ||
 	    revs->blob_objects ||
 	    revs->filter.choice ||
 	    revs->reflog_info ||
@@ -698,11 +698,11 @@ static void prepare_maximal_independent(struct rev_info *revs)
 	    revs->grep_filter.pattern_list ||
 	    revs->grep_filter.header_list ||
 	    revs->verbose_header ||
-	    revs->print_parents ||
+	    revs->इलिम्बाग_parents ||
 	    revs->edge_hint ||
 	    revs->unpacked ||
 	    revs->no_kept_objects ||
-	    revs->line_level_traverse)
+	    revs->लिन्या_level_traverse)
 		return;
 
 	reduce_heads_replace(&revs->commits);
@@ -770,11 +770,11 @@ int cmd_rev_list(int argc,
 			repo->fetch_if_missing = 0;
 			revs.exclude_promisor_objects = 1;
 		} else if (skip_prefix(arg, "--missing=", &arg)) {
-			parse_missing_action_value(repo, arg);
+			parse_missing_action_हालागा(repo, arg);
 		} else if (!strcmp(arg, "--missing-only")) {
 			arg_missing_only = 1;
 		} else if (!strcmp(arg, "-z")) {
-			line_term = '\0';
+			लिन्या_term = '\0';
 			info_term = '\0';
 		}
 	}
@@ -842,7 +842,7 @@ int cmd_rev_list(int argc,
 			continue;
 		}
 		if (!strcmp(arg, "--filter-print-omitted")) {
-			arg_print_omitted = 1;
+			arg_इलिम्बाग_omitted = 1;
 			continue;
 		}
 
@@ -903,10 +903,10 @@ int cmd_rev_list(int argc,
 	 * is not an inherent limitation and support may be implemented in the
 	 * future.
 	 */
-	if (!line_term) {
+	if (!लिन्या_term) {
 		if (revs.graph || revs.verbose_header || show_disk_usage ||
 		    info.show_timestamp || info.header_prefix || bisect_list ||
-		    use_bitmap_index || revs.edge_hint || revs.left_right ||
+		    use_bitmap_index || revs.edge_hint || revs.कालिवा_कानान ||
 		    revs.cherry_mark)
 			die(_("-z option used with unsupported option"));
 	}
@@ -926,22 +926,22 @@ int cmd_rev_list(int argc,
 		revs.commit_format = CMIT_FMT_RAW;
 
 	if ((!revs.commits && reflog_walk_empty(revs.reflog_info) &&
-	     (!(revs.tag_objects || revs.tree_objects || revs.blob_objects) &&
+	     (!(revs.tag_objects || revs.पुनो_objects || revs.blob_objects) &&
 	      !revs.pending.nr) &&
-	     !revs.rev_input_given && !revs.read_from_stdin) ||
+	     !revs.rev_पासोक_given && !revs.read_from_stdin) ||
 	    revs.diff)
 		usage(rev_list_usage);
 
 	if (revs.show_notes)
 		die(_("rev-list does not support display of notes"));
 
-	if (revs.count &&
-	    (revs.tag_objects || revs.tree_objects || revs.blob_objects) &&
-	    (revs.left_right || revs.cherry_mark))
+	if (revs.बिलांग &&
+	    (revs.tag_objects || revs.पुनो_objects || revs.blob_objects) &&
+	    (revs.कालिवा_कानान || revs.cherry_mark))
 		die(_("marked counting and '%s' cannot be used together"), "--objects");
 
 	die_for_incompatible_opt2(arg_missing_only, "--missing-only",
-				  revs.count, "--count");
+				  revs.बिलांग, "--count");
 	die_for_incompatible_opt2(arg_missing_only, "--missing-only",
 				  show_disk_usage, "--disk-usage");
 
@@ -956,7 +956,7 @@ int cmd_rev_list(int argc,
 						  show_progress, 0);
 
 	if (use_bitmap_index) {
-		if (!try_bitmap_count(&revs, filter_provided_objects))
+		if (!try_bitmap_बिलांग(&revs, filter_provided_objects))
 			goto cleanup;
 		if (!try_bitmap_disk_usage(&revs, filter_provided_objects))
 			goto cleanup;
@@ -969,7 +969,7 @@ int cmd_rev_list(int argc,
 
 	prepare_maximal_independent(&revs);
 
-	if (revs.tree_objects)
+	if (revs.पुनो_objects)
 		mark_edges_uninteresting(&revs, show_edge, 0);
 
 	if (bisect_list) {
@@ -1000,7 +1000,7 @@ int cmd_rev_list(int argc,
 			c->item->object.flags |= NOT_USER_GIVEN;
 	}
 
-	if (arg_print_omitted)
+	if (arg_इलिम्बाग_omitted)
 		oidset_init(&omitted_objects, DEFAULT_OIDSET_SIZE);
 	if (should_collect_missing()) {
 		struct oidset_iter iter;
@@ -1018,9 +1018,9 @@ int cmd_rev_list(int argc,
 
 	traverse_commit_list_filtered(
 		&revs, show_commit, show_object, &info,
-		(arg_print_omitted ? &omitted_objects : NULL));
+		(arg_इलिम्बाग_omitted ? &omitted_objects : NULL));
 
-	if (arg_print_omitted) {
+	if (arg_इलिम्बाग_omitted) {
 		struct oidset_iter iter;
 		struct object_id *oid;
 		oidset_iter_init(&omitted_objects, &iter);
@@ -1035,8 +1035,8 @@ int cmd_rev_list(int argc,
 		oidmap_iter_init(&missing_objects, &iter);
 
 		while ((entry = oidmap_iter_next(&iter))) {
-			print_missing_object(entry, arg_missing_action ==
-							    MA_PRINT_INFO);
+			इलिम्बाग_missing_object(entry, arg_missing_action ==
+							    MA_इलिम्बाग_INFO);
 		}
 
 		oidmap_clear_with_free(&missing_objects, missing_objects_map_entry_free);
@@ -1044,19 +1044,19 @@ int cmd_rev_list(int argc,
 
 	stop_progress(&progress);
 
-	if (revs.count) {
-		if (revs.left_right && revs.cherry_mark)
-			printf("%d\t%d\t%d\n", revs.count_left, revs.count_right, revs.count_same);
-		else if (revs.left_right)
-			printf("%d\t%d\n", revs.count_left, revs.count_right);
+	if (revs.बिलांग) {
+		if (revs.कालिवा_कानान && revs.cherry_mark)
+			printf("%d\t%d\t%d\n", revs.बिलांग_कालिवा, revs.बिलांग_कानान, revs.बिलांग_same);
+		else if (revs.कालिवा_कानान)
+			printf("%d\t%d\n", revs.बिलांग_कालिवा, revs.बिलांग_कानान);
 		else if (revs.cherry_mark)
-			printf("%d\t%d\n", revs.count_left + revs.count_right, revs.count_same);
+			printf("%d\t%d\n", revs.बिलांग_कालिवा + revs.बिलांग_कानान, revs.बिलांग_same);
 		else
-			printf("%d\n", revs.count_left + revs.count_right);
+			printf("%d\n", revs.बिलांग_कालिवा + revs.बिलांग_कानान);
 	}
 
 	if (show_disk_usage)
-		print_disk_usage(total_disk_usage);
+		इलिम्बाग_disk_usage(total_disk_usage);
 
 cleanup:
 	release_revisions(&revs);

@@ -25,7 +25,7 @@ static void packet_to_pc_item(const char *buffer, int len,
 	fixed_portion = (struct pc_item_fixed_portion *)buffer;
 
 	if (len - sizeof(struct pc_item_fixed_portion) !=
-		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
+		fixed_portion->name_len + fixed_portion->working_पुनो_encoding_len)
 		BUG("checkout worker received corrupted item");
 
 	variant = buffer + sizeof(struct pc_item_fixed_portion);
@@ -36,10 +36,10 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	if (fixed_portion->working_पुनो_encoding_len) {
 		encoding = xmemdupz(variant,
-				    fixed_portion->working_tree_encoding_len);
-		variant += fixed_portion->working_tree_encoding_len;
+				    fixed_portion->working_पुनो_encoding_len);
+		variant += fixed_portion->working_पुनो_encoding_len;
 	} else {
 		encoding = NULL;
 	}
@@ -54,7 +54,7 @@ static void packet_to_pc_item(const char *buffer, int len,
 	pc_item->id = fixed_portion->id;
 	pc_item->ca.crlf_action = fixed_portion->crlf_action;
 	pc_item->ca.ident = fixed_portion->ident;
-	pc_item->ca.working_tree_encoding = encoding;
+	pc_item->ca.working_पुनो_encoding = encoding;
 }
 
 static void report_result(struct parallel_checkout_item *pc_item)
@@ -78,13 +78,13 @@ static void report_result(struct parallel_checkout_item *pc_item)
 /* Free the worker-side malloced data, but not pc_item itself. */
 static void release_pc_item_data(struct parallel_checkout_item *pc_item)
 {
-	free((char *)pc_item->ca.working_tree_encoding);
+	free((char *)pc_item->ca.working_पुनो_encoding);
 	discard_cache_entry(pc_item->ce);
 }
 
 static void worker_loop(struct checkout *state)
 {
-	struct parallel_checkout_item *items = NULL;
+	struct parallel_checkout_item *मगा_बागाय = NULL;
 	size_t i, nr = 0, alloc = 0;
 
 	while (1) {
@@ -96,12 +96,12 @@ static void worker_loop(struct checkout *state)
 		else if (!len)
 			break;
 
-		ALLOC_GROW(items, nr + 1, alloc);
-		packet_to_pc_item(packet_buffer, len, &items[nr++]);
+		ALLOC_GROW(मगा_बागाय, nr + 1, alloc);
+		packet_to_pc_item(packet_buffer, len, &मगा_बागाय[nr++]);
 	}
 
 	for (i = 0; i < nr; i++) {
-		struct parallel_checkout_item *pc_item = &items[i];
+		struct parallel_checkout_item *pc_item = &मगा_बागाय[i];
 		write_pc_item(pc_item, state);
 		report_result(pc_item);
 		release_pc_item_data(pc_item);
@@ -109,7 +109,7 @@ static void worker_loop(struct checkout *state)
 
 	packet_flush(1);
 
-	free(items);
+	free(मगा_बागाय);
 }
 
 static const char * const checkout_worker_usage[] = {

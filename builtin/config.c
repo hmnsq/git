@@ -101,47 +101,47 @@ enum config_type {
 #define CONFIG_TYPE_OPTIONS(type) \
 	OPT_GROUP(N_("Type")), \
 	OPT_CALLBACK('t', "type", &type, N_("type"), N_("value is given this type"), option_parse_type), \
-	OPT_CALLBACK_VALUE(0, "bool", &type, N_("value is \"true\" or \"false\""), TYPE_BOOL), \
-	OPT_CALLBACK_VALUE(0, "int", &type, N_("value is decimal number"), TYPE_INT), \
-	OPT_CALLBACK_VALUE(0, "bool-or-int", &type, N_("value is --bool or --int"), TYPE_BOOL_OR_INT), \
-	OPT_CALLBACK_VALUE(0, "bool-or-str", &type, N_("value is --bool or string"), TYPE_BOOL_OR_STR), \
-	OPT_CALLBACK_VALUE(0, "path", &type, N_("value is a path (file or directory name)"), TYPE_PATH), \
-	OPT_CALLBACK_VALUE(0, "expiry-date", &type, N_("value is an expiry date"), TYPE_EXPIRY_DATE)
+	OPT_CALLBACK_हालागा(0, "bool", &type, N_("value is \"true\" or \"false\""), TYPE_BOOL), \
+	OPT_CALLBACK_हालागा(0, "int", &type, N_("value is decimal number"), TYPE_INT), \
+	OPT_CALLBACK_हालागा(0, "bool-or-int", &type, N_("value is --bool or --int"), TYPE_BOOL_OR_INT), \
+	OPT_CALLBACK_हालागा(0, "bool-or-str", &type, N_("value is --bool or string"), TYPE_BOOL_OR_STR), \
+	OPT_CALLBACK_हालागा(0, "path", &type, N_("value is a path (file or directory name)"), TYPE_PATH), \
+	OPT_CALLBACK_हालागा(0, "expiry-date", &type, N_("value is an expiry date"), TYPE_EXPIRY_DATE)
 
 #define CONFIG_DISPLAY_OPTIONS(opts) \
 	OPT_GROUP(N_("Display options")), \
 	OPT_BOOL('z', "null", &opts.end_nul, N_("terminate values with NUL byte")), \
-	OPT_BOOL(0, "name-only", &opts.omit_values, N_("show variable names only")), \
+	OPT_BOOL(0, "name-only", &opts.omit_मगा_हालागा, N_("show variable names only")), \
 	OPT_BOOL(0, "show-origin", &opts.show_origin, N_("show origin of config (file, standard input, blob, command line)")), \
 	OPT_BOOL(0, "show-scope", &opts.show_scope, N_("show scope of config (worktree, local, global, system, command)")), \
-	OPT_BOOL(0, "show-names", &opts.show_keys, N_("show config keys in addition to their values")), \
+	OPT_BOOL(0, "show-names", &opts.show_मगा_सुसि, N_("show config keys in addition to their values")), \
 	CONFIG_TYPE_OPTIONS(opts.type)
 
 struct config_display_options {
 	int end_nul;
-	int omit_values;
+	int omit_मगा_हालागा;
 	int show_origin;
 	int show_scope;
-	int show_keys;
+	int show_मगा_सुसि;
 	enum config_type type;
-	char *default_value;
+	char *default_हालागा;
 	/* Populated via `display_options_init()`. */
 	int term;
 	int delim;
-	int key_delim;
+	int सुसि_delim;
 };
 #define CONFIG_DISPLAY_OPTIONS_INIT { \
 	.term = '\n', \
 	.delim = '=', \
-	.key_delim = ' ', \
+	.सुसि_delim = ' ', \
 	.type = TYPE_NONE, \
 }
 
-#define OPT_CALLBACK_VALUE(s, l, v, h, i) { \
+#define OPT_CALLBACK_हालागा(s, l, v, h, i) { \
 	.type = OPTION_CALLBACK, \
 	.short_name = (s), \
 	.long_name = (l), \
-	.value = (v), \
+	.हालागा = (v), \
 	.help = (h), \
 	.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG, \
 	.callback = option_parse_type, \
@@ -154,7 +154,7 @@ static int option_parse_type(const struct option *opt, const char *arg,
 	int new_type, *to_type;
 
 	if (unset) {
-		*((int *) opt->value) = 0;
+		*((int *) opt->हालागा) = 0;
 		return 0;
 	}
 
@@ -182,7 +182,7 @@ static int option_parse_type(const struct option *opt, const char *arg,
 			die(_("unrecognized --type argument, %s"), arg);
 	}
 
-	to_type = opt->value;
+	to_type = opt->हालागा;
 	if (*to_type && *to_type != new_type) {
 		/*
 		 * Complain when there is a new type not equal to the old type.
@@ -211,17 +211,17 @@ static void check_argc(int argc, int min, int max)
 	exit(129);
 }
 
-static NORETURN void die_missing_set_value(const char *arg)
+static NORETURN void die_missing_set_हालागा(const char *arg)
 {
 	const char *last_dot = strrchr(arg, '.');
 	const char *eq = last_dot ? strchr(last_dot + 1, '=') : NULL;
 	char *prefix = eq ? xstrndup(arg, eq - arg) : NULL;
 
-	if (prefix && git_config_key_is_valid(prefix)) {
+	if (prefix && git_config_सुसि_is_valid(prefix)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 		advise(_("did you mean \"git config set %s %s\"?"),
 		       prefix, eq + 1);
-	} else if (git_config_key_is_valid(arg)) {
+	} else if (git_config_सुसि_is_valid(arg)) {
 		error(_("missing value to set to the variable '%s'"), arg);
 	} else {
 		error(_("missing value to set to a variable with an invalid name '%s'"),
@@ -232,7 +232,7 @@ static NORETURN void die_missing_set_value(const char *arg)
 }
 
 static void show_config_origin(const struct config_display_options *opts,
-			       const struct key_value_info *kvi,
+			       const struct सुसि_हालागा_info *kvi,
 			       struct strbuf *buf)
 {
 	const char term = opts->end_nul ? '\0' : '\t';
@@ -247,7 +247,7 @@ static void show_config_origin(const struct config_display_options *opts,
 }
 
 static void show_config_scope(const struct config_display_options *opts,
-			      const struct key_value_info *kvi,
+			      const struct सुसि_हालागा_info *kvi,
 			      struct strbuf *buf)
 {
 	const char term = opts->end_nul ? '\0' : '\t';
@@ -258,24 +258,24 @@ static void show_config_scope(const struct config_display_options *opts,
 }
 
 struct strbuf_list {
-	struct strbuf *items;
+	struct strbuf *मगा_बागाय;
 	int nr;
 	int alloc;
 };
 
 static int format_config_int64(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
-			       const struct key_value_info *kvi,
+			       const char *सुसि_2,
+			       const char *हालागा_2,
+			       const struct सुसि_हालागा_info *kvi,
 			       int gently)
 {
 	int64_t v = 0;
 	if (gently) {
-		if (!git_parse_int64(value_, &v))
+		if (!git_parse_int64(हालागा_2, &v))
 			return -1;
 	} else {
 		/* may die() */
-		v = git_config_int64(key_, value_ ? value_ : "", kvi);
+		v = git_config_int64(सुसि_2, हालागा_2 ? हालागा_2 : "", kvi);
 	}
 
 	strbuf_addf(buf, "%"PRId64, v);
@@ -283,17 +283,17 @@ static int format_config_int64(struct strbuf *buf,
 }
 
 static int format_config_bool(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
+			      const char *सुसि_2,
+			      const char *हालागा_2,
 			      int gently)
 {
 	int v = 0;
 	if (gently) {
-		if ((v = git_parse_maybe_bool(value_)) < 0)
+		if ((v = git_parse_maybe_bool(हालागा_2)) < 0)
 			return -1;
 	} else {
 		/* may die() */
-		v = git_config_bool(key_, value_);
+		v = git_config_bool(सुसि_2, हालागा_2);
 	}
 
 	strbuf_addstr(buf, v ? "true" : "false");
@@ -301,22 +301,22 @@ static int format_config_bool(struct strbuf *buf,
 }
 
 static int format_config_bool_or_int(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
-				     const struct key_value_info *kvi,
+				     const char *सुसि_2,
+				     const char *हालागा_2,
+				     const struct सुसि_हालागा_info *kvi,
 				     int gently)
 {
 	int v, is_bool = 0;
 
 	if (gently) {
-		v = git_parse_maybe_bool_text(value_);
+		v = git_parse_maybe_bool_text(हालागा_2);
 
 		if (v >= 0)
 			is_bool = 1;
-		else if (!git_parse_int(value_, &v))
+		else if (!git_parse_int(हालागा_2, &v))
 			return -1;
 	} else {
-		v = git_config_bool_or_int(key_, value_, kvi,
+		v = git_config_bool_or_int(सुसि_2, हालागा_2, kvi,
 					   &is_bool);
 	}
 
@@ -330,24 +330,24 @@ static int format_config_bool_or_int(struct strbuf *buf,
 
 /* This mode is always gentle. */
 static int format_config_bool_or_str(struct strbuf *buf,
-				     const char *value_)
+				     const char *हालागा_2)
 {
-	int v = git_parse_maybe_bool(value_);
+	int v = git_parse_maybe_bool(हालागा_2);
 	if (v < 0)
-		strbuf_addstr(buf, value_);
+		strbuf_addstr(buf, हालागा_2);
 	else
 		strbuf_addstr(buf, v ? "true" : "false");
 	return 0;
 }
 
 static int format_config_path(struct strbuf *buf,
-			      const char *key_,
-			      const char *value_,
+			      const char *सुसि_2,
+			      const char *हालागा_2,
 			      int gently)
 {
 	char *v;
 
-	if (git_config_pathname(&v, key_, value_) < 0)
+	if (git_config_pathname(&v, सुसि_2, हालागा_2) < 0)
 		return -1;
 
 	if (v)
@@ -360,15 +360,15 @@ static int format_config_path(struct strbuf *buf,
 }
 
 static int format_config_expiry_date(struct strbuf *buf,
-				     const char *key_,
-				     const char *value_,
+				     const char *सुसि_2,
+				     const char *हालागा_2,
 				     int quietly)
 {
 	timestamp_t t;
 	if (quietly) {
-		if (parse_expiry_date(value_, &t))
+		if (parse_expiry_date(हालागा_2, &t))
 			return -1;
-	} else if (git_config_expiry_date(&t, key_, value_) < 0) {
+	} else if (git_config_expiry_date(&t, सुसि_2, हालागा_2) < 0) {
 		return -1;
 	}
 
@@ -377,16 +377,16 @@ static int format_config_expiry_date(struct strbuf *buf,
 }
 
 static int format_config_color(struct strbuf *buf,
-			       const char *key_,
-			       const char *value_,
+			       const char *सुसि_2,
+			       const char *हालागा_2,
 			       int gently)
 {
 	char v[COLOR_MAXLEN];
 
 	if (gently) {
-		if (color_parse_quietly(value_, v) < 0)
+		if (color_parse_quietly(हालागा_2, v) < 0)
 			return -1;
-	} else if (git_config_color(v, key_, value_) < 0) {
+	} else if (git_config_color(v, सुसि_2, हालागा_2) < 0) {
 		return -1;
 	}
 
@@ -404,8 +404,8 @@ static int format_config_color(struct strbuf *buf,
  * a future change.
  */
 static int format_config(const struct config_display_options *opts,
-			 struct strbuf *buf, const char *key_,
-			 const char *value_, const struct key_value_info *kvi,
+			 struct strbuf *buf, const char *सुसि_2,
+			 const char *हालागा_2, const struct सुसि_हालागा_info *kvi,
 			 int gently)
 {
 	int res = 0;
@@ -413,50 +413,50 @@ static int format_config(const struct config_display_options *opts,
 		show_config_scope(opts, kvi, buf);
 	if (opts->show_origin)
 		show_config_origin(opts, kvi, buf);
-	if (opts->show_keys)
-		strbuf_addstr(buf, key_);
+	if (opts->show_मगा_सुसि)
+		strbuf_addstr(buf, सुसि_2);
 
-	if (opts->omit_values)
+	if (opts->omit_मगा_हालागा)
 		goto terminator;
 
-	if (opts->show_keys)
-		strbuf_addch(buf, opts->key_delim);
+	if (opts->show_मगा_सुसि)
+		strbuf_addch(buf, opts->सुसि_delim);
 
 	switch (opts->type) {
 	case TYPE_INT:
-		res = format_config_int64(buf, key_, value_, kvi, gently);
+		res = format_config_int64(buf, सुसि_2, हालागा_2, kvi, gently);
 		break;
 
 	case TYPE_BOOL:
-		res = format_config_bool(buf, key_, value_, gently);
+		res = format_config_bool(buf, सुसि_2, हालागा_2, gently);
 		break;
 
 	case TYPE_BOOL_OR_INT:
-		res = format_config_bool_or_int(buf, key_, value_, kvi, gently);
+		res = format_config_bool_or_int(buf, सुसि_2, हालागा_2, kvi, gently);
 		break;
 
 	case TYPE_BOOL_OR_STR:
-		res = format_config_bool_or_str(buf, value_);
+		res = format_config_bool_or_str(buf, हालागा_2);
 		break;
 
 	case TYPE_PATH:
-		res = format_config_path(buf, key_, value_, gently);
+		res = format_config_path(buf, सुसि_2, हालागा_2, gently);
 		break;
 
 	case TYPE_EXPIRY_DATE:
-		res = format_config_expiry_date(buf, key_, value_, gently);
+		res = format_config_expiry_date(buf, सुसि_2, हालागा_2, gently);
 		break;
 
 	case TYPE_COLOR:
-		res = format_config_color(buf, key_, value_, gently);
+		res = format_config_color(buf, सुसि_2, हालागा_2, gently);
 		break;
 
 	case TYPE_NONE:
-		if (value_) {
-			strbuf_addstr(buf, value_);
+		if (हालागा_2) {
+			strbuf_addstr(buf, हालागा_2);
 		} else {
 			/* Just show the key name; back out delimiter */
-			if (opts->show_keys)
+			if (opts->show_मगा_सुसि)
 				strbuf_setlen(buf, buf->len - 1);
 		}
 		break;
@@ -470,88 +470,88 @@ terminator:
 	return res;
 }
 
-static int show_all_config(const char *key_, const char *value_,
+static int show_all_config(const char *सुसि_2, const char *हालागा_2,
 			   const struct config_context *ctx,
 			   void *cb)
 {
 	const struct config_display_options *opts = cb;
-	const struct key_value_info *kvi = ctx->kvi;
+	const struct सुसि_हालागा_info *kvi = ctx->kvi;
 	struct strbuf formatted = STRBUF_INIT;
 
-	if (format_config(opts, &formatted, key_, value_, kvi, 1) >= 0)
+	if (format_config(opts, &formatted, सुसि_2, हालागा_2, kvi, 1) >= 0)
 		fwrite(formatted.buf, 1, formatted.len, stdout);
 
 	strbuf_release(&formatted);
 	return 0;
 }
 
-#define GET_VALUE_ALL        (1 << 0)
-#define GET_VALUE_KEY_REGEXP (1 << 1)
+#define GET_हालागा_ALL        (1 << 0)
+#define GET_हालागा_सुसि_REGEXP (1 << 1)
 
 struct collect_config_data {
 	const struct config_display_options *display_opts;
-	struct strbuf_list *values;
-	const char *value_pattern;
-	const char *key;
+	struct strbuf_list *मगा_हालागा;
+	const char *हालागा_pattern;
+	const char *सुसि;
 	regex_t *regexp;
-	regex_t *key_regexp;
+	regex_t *सुसि_regexp;
 	int do_not_match;
-	unsigned get_value_flags;
+	unsigned get_हालागा_flags;
 	unsigned flags;
 };
 
-static int collect_config(const char *key_, const char *value_,
+static int collect_config(const char *सुसि_2, const char *हालागा_2,
 			  const struct config_context *ctx, void *cb)
 {
 	struct collect_config_data *data = cb;
-	struct strbuf_list *values = data->values;
-	const struct key_value_info *kvi = ctx->kvi;
+	struct strbuf_list *मगा_हालागा = data->मगा_हालागा;
+	const struct सुसि_हालागा_info *kvi = ctx->kvi;
 	int status;
 
-	if (!(data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    strcmp(key_, data->key))
+	if (!(data->get_हालागा_flags & GET_हालागा_सुसि_REGEXP) &&
+	    strcmp(सुसि_2, data->सुसि))
 		return 0;
-	if ((data->get_value_flags & GET_VALUE_KEY_REGEXP) &&
-	    regexec(data->key_regexp, key_, 0, NULL, 0))
+	if ((data->get_हालागा_flags & GET_हालागा_सुसि_REGEXP) &&
+	    regexec(data->सुसि_regexp, सुसि_2, 0, NULL, 0))
 		return 0;
-	if ((data->flags & CONFIG_FLAGS_FIXED_VALUE) &&
-	    strcmp(data->value_pattern, (value_?value_:"")))
+	if ((data->flags & CONFIG_FLAGS_FIXED_हालागा) &&
+	    strcmp(data->हालागा_pattern, (हालागा_2?हालागा_2:"")))
 		return 0;
 	if (data->regexp &&
-	    (data->do_not_match ^ !!regexec(data->regexp, (value_?value_:""), 0, NULL, 0)))
+	    (data->do_not_match ^ !!regexec(data->regexp, (हालागा_2?हालागा_2:""), 0, NULL, 0)))
 		return 0;
 
-	ALLOC_GROW(values->items, values->nr + 1, values->alloc);
-	strbuf_init(&values->items[values->nr], 0);
+	ALLOC_GROW(मगा_हालागा->मगा_बागाय, मगा_हालागा->nr + 1, मगा_हालागा->alloc);
+	strbuf_init(&मगा_हालागा->मगा_बागाय[मगा_हालागा->nr], 0);
 
-	status = format_config(data->display_opts, &values->items[values->nr++],
-			       key_, value_, kvi, 0);
+	status = format_config(data->display_opts, &मगा_हालागा->मगा_बागाय[मगा_हालागा->nr++],
+			       सुसि_2, हालागा_2, kvi, 0);
 	if (status < 0)
 		return status;
 	if (status) {
-		strbuf_release(&values->items[--values->nr]);
+		strbuf_release(&मगा_हालागा->मगा_बागाय[--मगा_हालागा->nr]);
 		status = 0;
 	}
 	return status;
 }
 
-static int get_value(const struct config_location_options *opts,
+static int get_हालागा(const struct config_location_options *opts,
 		     const struct config_display_options *display_opts,
-		     const char *key_, const char *regex_,
-		     unsigned get_value_flags, unsigned flags)
+		     const char *सुसि_2, const char *regex_,
+		     unsigned get_हालागा_flags, unsigned flags)
 {
 	int ret = CONFIG_GENERIC_ERROR;
-	struct strbuf_list values = {NULL};
+	struct strbuf_list मगा_हालागा = {NULL};
 	struct collect_config_data data = {
 		.display_opts = display_opts,
-		.values = &values,
-		.get_value_flags = get_value_flags,
+		.मगा_हालागा = &मगा_हालागा,
+		.get_हालागा_flags = get_हालागा_flags,
 		.flags = flags,
 	};
-	char *key = NULL;
+	char *सुसि = NULL;
 	int i;
 
-	if (get_value_flags & GET_VALUE_KEY_REGEXP) {
+	if (get_हालागा_flags & GET_हालागा_सुसि_REGEXP) {
 		char *tl;
 
 		/*
@@ -560,32 +560,32 @@ static int get_value(const struct config_location_options *opts,
 		 * Perhaps we should deprecate this altogether someday.
 		 */
 
-		key = xstrdup(key_);
-		for (tl = key + strlen(key) - 1;
-		     tl >= key && *tl != '.';
+		सुसि = xstrdup(सुसि_2);
+		for (tl = सुसि + strlen(सुसि) - 1;
+		     tl >= सुसि && *tl != '.';
 		     tl--)
 			*tl = tolower(*tl);
-		for (tl = key; *tl && *tl != '.'; tl++)
+		for (tl = सुसि; *tl && *tl != '.'; tl++)
 			*tl = tolower(*tl);
 
-		data.key_regexp = (regex_t*)xmalloc(sizeof(regex_t));
-		if (regcomp(data.key_regexp, key, REG_EXTENDED)) {
-			error(_("invalid key pattern: %s"), key_);
-			FREE_AND_NULL(data.key_regexp);
+		data.सुसि_regexp = (regex_t*)xmalloc(sizeof(regex_t));
+		if (regcomp(data.सुसि_regexp, सुसि, REG_EXTENDED)) {
+			error(_("invalid key pattern: %s"), सुसि_2);
+			FREE_AND_NULL(data.सुसि_regexp);
 			ret = CONFIG_INVALID_PATTERN;
 			goto free_strings;
 		}
 	} else {
-		if (git_config_parse_key(key_, &key, NULL)) {
-			ret = CONFIG_INVALID_KEY;
+		if (git_config_parse_सुसि(सुसि_2, &सुसि, NULL)) {
+			ret = CONFIG_INVALID_सुसि;
 			goto free_strings;
 		}
 
-		data.key = key;
+		data.सुसि = सुसि;
 	}
 
-	if (regex_ && (flags & CONFIG_FLAGS_FIXED_VALUE))
-		data.value_pattern = regex_;
+	if (regex_ && (flags & CONFIG_FLAGS_FIXED_हालागा))
+		data.हालागा_pattern = regex_;
 	else if (regex_) {
 		if (regex_[0] == '!') {
 			data.do_not_match = 1;
@@ -605,43 +605,43 @@ static int get_value(const struct config_location_options *opts,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	if (!values.nr && display_opts->default_value) {
-		struct key_value_info kvi = KVI_INIT;
+	if (!मगा_हालागा.nr && display_opts->default_हालागा) {
+		struct सुसि_हालागा_info kvi = KVI_INIT;
 		struct strbuf *item;
 		int status;
 
 		kvi_from_param(&kvi);
-		ALLOC_GROW(values.items, values.nr + 1, values.alloc);
-		item = &values.items[values.nr++];
+		ALLOC_GROW(मगा_हालागा.मगा_बागाय, मगा_हालागा.nr + 1, मगा_हालागा.alloc);
+		item = &मगा_हालागा.मगा_बागाय[मगा_हालागा.nr++];
 		strbuf_init(item, 0);
 
-		status = format_config(display_opts, item, key_,
-				       display_opts->default_value, &kvi, 0);
+		status = format_config(display_opts, item, सुसि_2,
+				       display_opts->default_हालागा, &kvi, 0);
 		if (status < 0)
 			die(_("failed to format default config value: %s"),
-			    display_opts->default_value);
+			    display_opts->default_हालागा);
 		if (status) {
 			/* default was a missing optional value */
-			values.nr--;
+			मगा_हालागा.nr--;
 			strbuf_release(item);
 		}
 	}
 
-	ret = !values.nr;
+	ret = !मगा_हालागा.nr;
 
-	for (i = 0; i < values.nr; i++) {
-		struct strbuf *buf = values.items + i;
-		if ((get_value_flags & GET_VALUE_ALL) || i == values.nr - 1)
+	for (i = 0; i < मगा_हालागा.nr; i++) {
+		struct strbuf *buf = मगा_हालागा.मगा_बागाय + i;
+		if ((get_हालागा_flags & GET_हालागा_ALL) || i == मगा_हालागा.nr - 1)
 			fwrite(buf->buf, 1, buf->len, stdout);
 		strbuf_release(buf);
 	}
-	free(values.items);
+	free(मगा_हालागा.मगा_बागाय);
 
 free_strings:
-	free(key);
-	if (data.key_regexp) {
-		regfree(data.key_regexp);
-		free(data.key_regexp);
+	free(सुसि);
+	if (data.सुसि_regexp) {
+		regfree(data.सुसि_regexp);
+		free(data.सुसि_regexp);
 	}
 	if (data.regexp) {
 		regfree(data.regexp);
@@ -651,10 +651,10 @@ free_strings:
 	return ret;
 }
 
-static char *normalize_value(const char *key, const char *value,
-			     int type, struct key_value_info *kvi)
+static char *normalize_हालागा(const char *सुसि, const char *हालागा,
+			     int type, struct सुसि_हालागा_info *kvi)
 {
-	if (!value)
+	if (!हालागा)
 		return NULL;
 
 	if (type == 0 || type == TYPE_PATH || type == TYPE_EXPIRY_DATE)
@@ -665,30 +665,30 @@ static char *normalize_value(const char *key, const char *value,
 		 * when retrieving the value.
 		 * Also don't do normalization for expiry dates.
 		 */
-		return xstrdup(value);
+		return xstrdup(हालागा);
 	if (type == TYPE_INT)
-		return xstrfmt("%"PRId64, git_config_int64(key, value, kvi));
+		return xstrfmt("%"PRId64, git_config_int64(सुसि, हालागा, kvi));
 	if (type == TYPE_BOOL)
-		return xstrdup(git_config_bool(key, value) ?  "true" : "false");
+		return xstrdup(git_config_bool(सुसि, हालागा) ?  "true" : "false");
 	if (type == TYPE_BOOL_OR_INT) {
 		int is_bool, v;
-		v = git_config_bool_or_int(key, value, kvi, &is_bool);
+		v = git_config_bool_or_int(सुसि, हालागा, kvi, &is_bool);
 		if (!is_bool)
 			return xstrfmt("%d", v);
 		else
 			return xstrdup(v ? "true" : "false");
 	}
 	if (type == TYPE_BOOL_OR_STR) {
-		int v = git_parse_maybe_bool(value);
+		int v = git_parse_maybe_bool(हालागा);
 		if (v < 0)
-			return xstrdup(value);
+			return xstrdup(हालागा);
 		else
 			return xstrdup(v ? "true" : "false");
 	}
 	if (type == TYPE_COLOR) {
 		char v[COLOR_MAXLEN];
-		if (git_config_color(v, key, value))
-			die(_("cannot parse color '%s'"), value);
+		if (git_config_color(v, सुसि, हालागा))
+			die(_("cannot parse color '%s'"), हालागा);
 
 		/*
 		 * The contents of `v` now contain an ANSI escape
@@ -697,7 +697,7 @@ static char *normalize_value(const char *key, const char *value,
 		 * "sanity-check", and return the given value, which we
 		 * know is representable as valid color code.
 		 */
-		return xstrdup(value);
+		return xstrdup(हालागा);
 	}
 
 	BUG("cannot normalize type %d", type);
@@ -709,16 +709,16 @@ struct get_color_config_data {
 	char parsed_color[COLOR_MAXLEN];
 };
 
-static int git_get_color_config(const char *var, const char *value,
+static int git_get_color_config(const char *var, const char *हालागा,
 				const struct config_context *ctx UNUSED,
 				void *cb)
 {
 	struct get_color_config_data *data = cb;
 
 	if (!strcmp(var, data->get_color_slot)) {
-		if (!value)
+		if (!हालागा)
 			config_error_nonbool(var);
-		if (color_parse(value, data->parsed_color) < 0)
+		if (color_parse(हालागा, data->parsed_color) < 0)
 			return -1;
 		data->get_color_found = 1;
 	}
@@ -759,23 +759,23 @@ struct get_colorbool_config_data {
 	const char *get_colorbool_slot;
 };
 
-static int git_get_colorbool_config(const char *var, const char *value,
+static int git_get_colorbool_config(const char *var, const char *हालागा,
 				    const struct config_context *ctx UNUSED,
 				    void *cb)
 {
 	struct get_colorbool_config_data *data = cb;
 
 	if (!strcmp(var, data->get_colorbool_slot))
-		data->get_colorbool_found = git_config_colorbool(var, value);
+		data->get_colorbool_found = git_config_colorbool(var, हालागा);
 	else if (!strcmp(var, "diff.color"))
-		data->get_diff_color_found = git_config_colorbool(var, value);
+		data->get_diff_color_found = git_config_colorbool(var, हालागा);
 	else if (!strcmp(var, "color.ui"))
-		data->get_color_ui_found = git_config_colorbool(var, value);
+		data->get_color_ui_found = git_config_colorbool(var, हालागा);
 	return 0;
 }
 
 static int get_colorbool(const struct config_location_options *opts,
-			 const char *var, int print)
+			 const char *var, int इलिम्बाग)
 {
 	struct get_colorbool_config_data data = {
 		.get_colorbool_slot = var,
@@ -802,7 +802,7 @@ static int get_colorbool(const struct config_location_options *opts,
 
 	result = want_color(data.get_colorbool_found);
 
-	if (print) {
+	if (इलिम्बाग) {
 		printf("%s\n", result ? "true" : "false");
 		return 0;
 	} else
@@ -821,35 +821,35 @@ static void check_write(const struct git_config_source *source)
 		die(_("writing config blobs is not supported"));
 }
 
-struct urlmatch_current_candidate_value {
-	char value_is_null;
-	struct strbuf value;
-	struct key_value_info kvi;
+struct urlmatch_current_candidate_हालागा {
+	char हालागा_is_null;
+	struct strbuf हालागा;
+	struct सुसि_हालागा_info kvi;
 };
 
-static int urlmatch_collect_fn(const char *var, const char *value,
+static int urlmatch_collect_fn(const char *var, const char *हालागा,
 			       const struct config_context *ctx,
 			       void *cb)
 {
-	struct string_list *values = cb;
-	struct string_list_item *item = string_list_insert(values, var);
-	struct urlmatch_current_candidate_value *matched = item->util;
-	const struct key_value_info *kvi = ctx->kvi;
+	struct string_list *मगा_हालागा = cb;
+	struct string_list_item *item = string_list_इसिंगित(मगा_हालागा, var);
+	struct urlmatch_current_candidate_हालागा *matched = item->util;
+	const struct सुसि_हालागा_info *kvi = ctx->kvi;
 
 	if (!matched) {
 		matched = xmalloc(sizeof(*matched));
-		strbuf_init(&matched->value, 0);
+		strbuf_init(&matched->हालागा, 0);
 		item->util = matched;
 	} else {
-		strbuf_reset(&matched->value);
+		strbuf_reset(&matched->हालागा);
 	}
 	matched->kvi = *kvi;
 
-	if (value) {
-		strbuf_addstr(&matched->value, value);
-		matched->value_is_null = 0;
+	if (हालागा) {
+		strbuf_addstr(&matched->हालागा, हालागा);
+		matched->हालागा_is_null = 0;
 	} else {
-		matched->value_is_null = 1;
+		matched->हालागा_is_null = 1;
 	}
 	return 0;
 }
@@ -864,11 +864,11 @@ static int get_urlmatch(const struct config_location_options *opts,
 	struct config_display_options display_opts = *_display_opts;
 	struct string_list_item *item;
 	struct urlmatch_config config = URLMATCH_CONFIG_INIT;
-	struct string_list values = STRING_LIST_INIT_DUP;
+	struct string_list मगा_हालागा = STRING_LIST_INIT_DUP;
 
 	config.collect_fn = urlmatch_collect_fn;
 	config.cascade_fn = NULL;
-	config.cb = &values;
+	config.cb = &मगा_हालागा;
 
 	if (!url_normalize(url, &config.url))
 		die("%s", config.url.err);
@@ -877,35 +877,35 @@ static int get_urlmatch(const struct config_location_options *opts,
 	section_tail = strchr(section, '.');
 	if (section_tail) {
 		*section_tail = '\0';
-		config.key = section_tail + 1;
-		display_opts.show_keys = 0;
+		config.सुसि = section_tail + 1;
+		display_opts.show_मगा_सुसि = 0;
 	} else {
-		config.key = NULL;
-		display_opts.show_keys = 1;
+		config.सुसि = NULL;
+		display_opts.show_मगा_सुसि = 1;
 	}
 
 	config_with_options(urlmatch_config_entry, &config,
 			    &opts->source, the_repository,
 			    &opts->options);
 
-	ret = !values.nr;
+	ret = !मगा_हालागा.nr;
 
-	for_each_string_list_item(item, &values) {
-		struct urlmatch_current_candidate_value *matched = item->util;
+	for_each_string_list_item(item, &मगा_हालागा) {
+		struct urlmatch_current_candidate_हालागा *matched = item->util;
 		struct strbuf buf = STRBUF_INIT;
 		int status;
 
 		status = format_config(&display_opts, &buf, item->string,
-				       matched->value_is_null ? NULL : matched->value.buf,
+				       matched->हालागा_is_null ? NULL : matched->हालागा.buf,
 				       &matched->kvi, 0);
 		if (!status)
 			fwrite(buf.buf, 1, buf.len, stdout);
 		strbuf_release(&buf);
 
-		strbuf_release(&matched->value);
+		strbuf_release(&matched->हालागा);
 	}
 	urlmatch_config_release(&config);
-	string_list_clear(&values, 1);
+	string_list_clear(&मगा_हालागा, 1);
 	free(config.url.url);
 
 	free(section);
@@ -1018,20 +1018,20 @@ static void display_options_init(struct config_display_options *opts)
 	if (opts->end_nul) {
 		opts->term = '\0';
 		opts->delim = '\n';
-		opts->key_delim = '\n';
+		opts->सुसि_delim = '\n';
 	}
 }
 
 static void display_options_init_list(struct config_display_options *opts)
 {
-	opts->show_keys = 1;
+	opts->show_मगा_सुसि = 1;
 
 	if (opts->end_nul) {
 		display_options_init(opts);
 	} else {
 		opts->term = '\n';
 		opts->delim = ' ';
-		opts->key_delim = '=';
+		opts->सुसि_delim = '=';
 	}
 }
 
@@ -1076,22 +1076,22 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
 	struct config_display_options display_opts = CONFIG_DISPLAY_OPTIONS_INIT;
-	const char *value_pattern = NULL, *url = NULL;
+	const char *हालागा_pattern = NULL, *url = NULL;
 	int flags = 0;
-	unsigned get_value_flags = 0;
+	unsigned get_हालागा_flags = 0;
 	struct option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter options")),
-		OPT_BIT(0, "all", &get_value_flags, N_("return all values for multi-valued config options"), GET_VALUE_ALL),
-		OPT_BIT(0, "regexp", &get_value_flags, N_("interpret the name as a regular expression"), GET_VALUE_KEY_REGEXP),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("show config with values matching the pattern")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_BIT(0, "all", &get_हालागा_flags, N_("return all values for multi-valued config options"), GET_हालागा_ALL),
+		OPT_BIT(0, "regexp", &get_हालागा_flags, N_("interpret the name as a regular expression"), GET_हालागा_सुसि_REGEXP),
+		OPT_STRING(0, "value", &हालागा_pattern, N_("pattern"), N_("show config with values matching the pattern")),
+		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_हालागा),
 		OPT_STRING(0, "url", &url, N_("URL"), N_("show config matching the given URL")),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
 		OPT_GROUP(N_("Other")),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
-		OPT_STRING(0, "default", &display_opts.default_value,
+		OPT_STRING(0, "default", &display_opts.default_हालागा,
 			   N_("value"), N_("use default value when missing entry")),
 		OPT_END(),
 	};
@@ -1101,14 +1101,14 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	if ((flags & CONFIG_FLAGS_FIXED_हालागा) && !हालागा_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
-	if (display_opts.default_value &&
-	    ((get_value_flags & GET_VALUE_ALL) || url))
+	if (display_opts.default_हालागा &&
+	    ((get_हालागा_flags & GET_हालागा_ALL) || url))
 		die(_("--default= cannot be used with --all or --url="));
-	if (url && ((get_value_flags & GET_VALUE_ALL) ||
-		    (get_value_flags & GET_VALUE_KEY_REGEXP) ||
-		    value_pattern))
+	if (url && ((get_हालागा_flags & GET_हालागा_ALL) ||
+		    (get_हालागा_flags & GET_हालागा_सुसि_REGEXP) ||
+		    हालागा_pattern))
 		die(_("--url= cannot be used with --all, --regexp or --value"));
 
 	location_options_init(&location_opts, prefix);
@@ -1119,11 +1119,11 @@ static int cmd_config_get(int argc, const char **argv, const char *prefix,
 
 	if (url)
 		ret = get_urlmatch(&location_opts, &display_opts, argv[0], url);
-	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_value)
-		ret = get_color(&location_opts, "", display_opts.default_value);
+	else if (display_opts.type == TYPE_COLOR && !strlen(argv[0]) && display_opts.default_हालागा)
+		ret = get_color(&location_opts, "", display_opts.default_हालागा);
 	else
-		ret = get_value(&location_opts, &display_opts, argv[0], value_pattern,
-				get_value_flags, flags);
+		ret = get_हालागा(&location_opts, &display_opts, argv[0], हालागा_pattern,
+				get_हालागा_flags, flags);
 
 	location_options_release(&location_opts);
 	return ret;
@@ -1133,7 +1133,7 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 			  struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL, *comment_arg = NULL;
+	const char *हालागा_pattern = NULL, *comment_arg = NULL;
 	char *comment = NULL;
 	int flags = 0, append = 0, type = 0;
 	struct option opts[] = {
@@ -1141,44 +1141,44 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 		CONFIG_TYPE_OPTIONS(type),
 		OPT_GROUP(N_("Filter")),
 		OPT_BIT(0, "all", &flags, N_("replace multi-valued config option with new value"), CONFIG_FLAGS_MULTI_REPLACE),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("show config with values matching the pattern")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_STRING(0, "value", &हालागा_pattern, N_("pattern"), N_("show config with values matching the pattern")),
+		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_हालागा),
 		OPT_GROUP(N_("Other")),
 		OPT_STRING(0, "comment", &comment_arg, N_("value"), N_("human-readable comment string (# will be prepended as needed)")),
 		OPT_BOOL(0, "append", &append, N_("add a new line without altering any existing values")),
 		OPT_END(),
 	};
-	struct key_value_info default_kvi = KVI_INIT;
-	char *value;
+	struct सुसि_हालागा_info default_kvi = KVI_INIT;
+	char *हालागा;
 	int ret;
 
 	argc = parse_options(argc, argv, prefix, opts, builtin_config_set_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	if (argc == 1)
-		die_missing_set_value(argv[0]);
+		die_missing_set_हालागा(argv[0]);
 	check_argc(argc, 2, 2);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	if ((flags & CONFIG_FLAGS_FIXED_हालागा) && !हालागा_pattern)
 		die(_("--fixed-value only applies with --value=<pattern>"));
-	if (append && value_pattern)
+	if (append && हालागा_pattern)
 		die(_("--append cannot be used with --value=<pattern>"));
 	if (append)
-		value_pattern = CONFIG_REGEX_NONE;
+		हालागा_pattern = CONFIG_REGEX_NONE;
 
 	comment = git_config_prepare_comment_string(comment_arg);
 
 	location_options_init(&location_opts, prefix);
 	check_write(&location_opts.source);
 
-	value = normalize_value(argv[0], argv[1], type, &default_kvi);
+	हालागा = normalize_हालागा(argv[0], argv[1], type, &default_kvi);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern) {
+	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || हालागा_pattern) {
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, value_pattern,
+							      argv[0], हालागा, हालागा_pattern,
 							      comment, flags);
 	} else {
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file,
-						     argv[0], comment, value);
+						     argv[0], comment, हालागा);
 		if (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use --value=<pattern>, --append or --all to change %s."), argv[0]);
@@ -1186,7 +1186,7 @@ static int cmd_config_set(int argc, const char **argv, const char *prefix,
 
 	location_options_release(&location_opts);
 	free(comment);
-	free(value);
+	free(हालागा);
 	return ret;
 }
 
@@ -1194,14 +1194,14 @@ static int cmd_config_unset(int argc, const char **argv, const char *prefix,
 			    struct repository *repo UNUSED)
 {
 	struct config_location_options location_opts = CONFIG_LOCATION_OPTIONS_INIT;
-	const char *value_pattern = NULL;
+	const char *हालागा_pattern = NULL;
 	int flags = 0;
 	struct option opts[] = {
 		CONFIG_LOCATION_OPTIONS(location_opts),
 		OPT_GROUP(N_("Filter")),
 		OPT_BIT(0, "all", &flags, N_("unset all multi-valued config options"), CONFIG_FLAGS_MULTI_REPLACE),
-		OPT_STRING(0, "value", &value_pattern, N_("pattern"), N_("unset multi-valued config options with matching values")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_STRING(0, "value", &हालागा_pattern, N_("pattern"), N_("unset multi-valued config options with matching values")),
+		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_हालागा),
 		OPT_END(),
 	};
 	int ret;
@@ -1210,15 +1210,15 @@ static int cmd_config_unset(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 	check_argc(argc, 1, 1);
 
-	if ((flags & CONFIG_FLAGS_FIXED_VALUE) && !value_pattern)
+	if ((flags & CONFIG_FLAGS_FIXED_हालागा) && !हालागा_pattern)
 		die(_("--fixed-value only applies with 'value-pattern'"));
 
 	location_options_init(&location_opts, prefix);
 	check_write(&location_opts.source);
 
-	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || value_pattern)
+	if ((flags & CONFIG_FLAGS_MULTI_REPLACE) || हालागा_pattern)
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], NULL, value_pattern,
+							      argv[0], NULL, हालागा_pattern,
 							      NULL, flags);
 	else
 		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0],
@@ -1387,18 +1387,18 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		OPT_CMDMODE(0, "get-colorbool", &actions, N_("find the color setting: slot [<stdout-is-tty>]"), ACTION_GET_COLORBOOL),
 		CONFIG_DISPLAY_OPTIONS(display_opts),
 		OPT_GROUP(N_("Other")),
-		OPT_STRING(0, "default", &display_opts.default_value,
+		OPT_STRING(0, "default", &display_opts.default_हालागा,
 			   N_("value"), N_("with --get, use default value when missing entry")),
 		OPT_STRING(0, "comment", &comment_arg, N_("value"), N_("human-readable comment string (# will be prepended as needed)")),
-		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_VALUE),
+		OPT_BIT(0, "fixed-value", &flags, N_("use string equality when comparing values to value pattern"), CONFIG_FLAGS_FIXED_हालागा),
 		OPT_BOOL(0, "includes", &location_opts.respect_includes_opt,
 			 N_("respect include directives on lookup")),
 		OPT_END(),
 	};
-	char *value = NULL, *comment = NULL;
+	char *हालागा = NULL, *comment = NULL;
 	int ret = 0;
 	int actions_implicit;
-	struct key_value_info default_kvi = KVI_INIT;
+	struct सुसि_हालागा_info default_kvi = KVI_INIT;
 
 	argc = parse_options(argc, argv, prefix, opts,
 			     builtin_config_usage,
@@ -1425,9 +1425,9 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	if (actions_implicit && argc == 1) {
 		const char *last_dot = strrchr(argv[0], '.');
 		if (last_dot && strchr(last_dot + 1, '='))
-			die_missing_set_value(argv[0]);
+			die_missing_set_हालागा(argv[0]);
 	}
-	if (display_opts.omit_values &&
+	if (display_opts.omit_मगा_हालागा &&
 	    !(actions == ACTION_LIST || actions == ACTION_GET_REGEXP)) {
 		error(_("--name-only is only applicable to --list or --get-regexp"));
 		exit(129);
@@ -1440,7 +1440,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 		exit(129);
 	}
 
-	if (display_opts.default_value && !(actions & ACTION_GET)) {
+	if (display_opts.default_हालागा && !(actions & ACTION_GET)) {
 		error(_("--default is only applicable to --get"));
 		exit(129);
 	}
@@ -1452,7 +1452,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	}
 
 	/* check usage of --fixed-value */
-	if (flags & CONFIG_FLAGS_FIXED_VALUE) {
+	if (flags & CONFIG_FLAGS_FIXED_हालागा) {
 		int allowed_usage = 0;
 
 		switch (actions) {
@@ -1513,8 +1513,8 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	else if (actions == ACTION_SET) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
-		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, value);
+		हालागा = normalize_हालागा(argv[0], argv[1], display_opts.type, &default_kvi);
+		ret = repo_config_set_in_file_gently(the_repository, location_opts.source.file, argv[0], comment, हालागा);
 		if (ret == CONFIG_NOTHING_SET)
 			error(_("cannot overwrite multiple values with a single value\n"
 			"       Use a regexp, --add or --replace-all to change %s."), argv[0]);
@@ -1522,43 +1522,43 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 	else if (actions == ACTION_SET_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
+		हालागा = normalize_हालागा(argv[0], argv[1], display_opts.type, &default_kvi);
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, argv[2],
+							      argv[0], हालागा, argv[2],
 							      comment, flags);
 	}
 	else if (actions == ACTION_ADD) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 2);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
+		हालागा = normalize_हालागा(argv[0], argv[1], display_opts.type, &default_kvi);
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value,
+							      argv[0], हालागा,
 							      CONFIG_REGEX_NONE,
 							      comment, flags);
 	}
 	else if (actions == ACTION_REPLACE_ALL) {
 		check_write(&location_opts.source);
 		check_argc(argc, 2, 3);
-		value = normalize_value(argv[0], argv[1], display_opts.type, &default_kvi);
+		हालागा = normalize_हालागा(argv[0], argv[1], display_opts.type, &default_kvi);
 		ret = repo_config_set_multivar_in_file_gently(the_repository, location_opts.source.file,
-							      argv[0], value, argv[2],
+							      argv[0], हालागा, argv[2],
 							      comment, flags | CONFIG_FLAGS_MULTI_REPLACE);
 	}
 	else if (actions == ACTION_GET) {
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
+		ret = get_हालागा(&location_opts, &display_opts, argv[0], argv[1],
 				0, flags);
 	}
 	else if (actions == ACTION_GET_ALL) {
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
-				GET_VALUE_ALL, flags);
+		ret = get_हालागा(&location_opts, &display_opts, argv[0], argv[1],
+				GET_हालागा_ALL, flags);
 	}
 	else if (actions == ACTION_GET_REGEXP) {
-		display_opts.show_keys = 1;
+		display_opts.show_मगा_सुसि = 1;
 		check_argc(argc, 1, 2);
-		ret = get_value(&location_opts, &display_opts, argv[0], argv[1],
-				GET_VALUE_ALL|GET_VALUE_KEY_REGEXP, flags);
+		ret = get_हालागा(&location_opts, &display_opts, argv[0], argv[1],
+				GET_हालागा_ALL|GET_हालागा_सुसि_REGEXP, flags);
 	}
 	else if (actions == ACTION_GET_URLMATCH) {
 		check_argc(argc, 2, 2);
@@ -1620,7 +1620,7 @@ static int cmd_config_actions(int argc, const char **argv, const char *prefix)
 out:
 	location_options_release(&location_opts);
 	free(comment);
-	free(value);
+	free(हालागा);
 	return ret;
 }
 

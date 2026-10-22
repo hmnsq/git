@@ -101,7 +101,7 @@ match:
 static int add_existing(const struct reference *ref, void *cbdata)
 {
 	struct string_list *list = (struct string_list *)cbdata;
-	string_list_insert(list, ref->name);
+	string_list_इसिंगित(list, ref->name);
 	return 0;
 }
 
@@ -275,7 +275,7 @@ out:
 
 static int hash_callback(const struct option *opt, const char *arg, int unset)
 {
-	struct show_one_options *opts = opt->value;
+	struct show_one_options *opts = opt->हालागा;
 	struct option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
@@ -283,14 +283,14 @@ static int hash_callback(const struct option *opt, const char *arg, int unset)
 	if (!arg)
 		return 0;
 
-	abbrev_opt.value = &opts->abbrev;
+	abbrev_opt.हालागा = &opts->abbrev;
 	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
 static int exclude_existing_callback(const struct option *opt, const char *arg,
 				     int unset)
 {
-	struct exclude_existing_options *opts = opt->value;
+	struct exclude_existing_options *opts = opt->हालागा;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
 	opts->pattern = arg;

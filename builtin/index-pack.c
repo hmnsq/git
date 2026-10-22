@@ -145,14 +145,14 @@ static int check_self_contained_and_connected;
 
 static struct progress *progress;
 
-static unsigned char input_buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int input_offset, input_len;
+static unsigned char पासोक_buffer[DEFAULT_IO_BUFFER_SIZE];
+static unsigned int पासोक_offset, पासोक_len;
 static off_t consumed_bytes;
-static off_t max_input_size;
+static off_t max_पासोक_size;
 static unsigned deepest_delta;
-static struct git_hash_ctx input_ctx;
-static uint32_t input_crc32;
-static int input_fd, output_fd;
+static struct git_hash_ctx पासोक_ctx;
+static uint32_t पासोक_crc32;
+static int पासोक_fd, output_fd;
 static const char *curr_pack;
 
 /*
@@ -182,7 +182,7 @@ static pthread_mutex_t deepest_delta_mutex;
 #define deepest_delta_lock()	lock_mutex(&deepest_delta_mutex)
 #define deepest_delta_unlock()	unlock_mutex(&deepest_delta_mutex)
 
-static pthread_key_t key;
+static pthread_सुसि_t सुसि;
 
 static inline void lock_mutex(pthread_mutex_t *mutex)
 {
@@ -207,7 +207,7 @@ static void init_thread(void)
 	pthread_mutex_init(&work_mutex, NULL);
 	if (show_stat)
 		pthread_mutex_init(&deepest_delta_mutex, NULL);
-	pthread_key_create(&key, NULL);
+	pthread_सुसि_create(&सुसि, NULL);
 	CALLOC_ARRAY(thread_data, nr_threads);
 	for (i = 0; i < nr_threads; i++) {
 		thread_data[i].pack_fd = xopen(curr_pack, O_RDONLY);
@@ -229,7 +229,7 @@ static void cleanup_thread(void)
 		pthread_mutex_destroy(&deepest_delta_mutex);
 	for (i = 0; i < nr_threads; i++)
 		close(thread_data[i].pack_fd);
-	pthread_key_delete(key);
+	pthread_सुसि_delete(सुसि);
 	free(thread_data);
 }
 
@@ -298,12 +298,12 @@ static unsigned check_objects(void)
 /* Discard current buffer used content. */
 static void flush(void)
 {
-	if (input_offset) {
+	if (पासोक_offset) {
 		if (output_fd >= 0)
-			write_or_die(output_fd, input_buffer, input_offset);
-		git_hash_update(&input_ctx, input_buffer, input_offset);
-		memmove(input_buffer, input_buffer + input_offset, input_len);
-		input_offset = 0;
+			write_or_die(output_fd, पासोक_buffer, पासोक_offset);
+		git_hash_update(&पासोक_ctx, पासोक_buffer, पासोक_offset);
+		memmove(पासोक_buffer, पासोक_buffer + पासोक_offset, पासोक_len);
+		पासोक_offset = 0;
 	}
 }
 
@@ -313,44 +313,44 @@ static void flush(void)
  */
 static void *fill(int min)
 {
-	if (min <= input_len)
-		return input_buffer + input_offset;
-	if (min > sizeof(input_buffer))
+	if (min <= पासोक_len)
+		return पासोक_buffer + पासोक_offset;
+	if (min > sizeof(पासोक_buffer))
 		die(Q_("cannot fill %d byte",
 		       "cannot fill %d bytes",
 		       min),
 		    min);
 	flush();
 	do {
-		ssize_t ret = xread(input_fd, input_buffer + input_len,
-				sizeof(input_buffer) - input_len);
+		ssize_t ret = xread(पासोक_fd, पासोक_buffer + पासोक_len,
+				sizeof(पासोक_buffer) - पासोक_len);
 		if (ret <= 0) {
 			if (!ret)
 				die(_("early EOF"));
 			die_errno(_("read error on input"));
 		}
-		input_len += ret;
+		पासोक_len += ret;
 		if (from_stdin)
-			display_throughput(progress, consumed_bytes + input_len);
-	} while (input_len < min);
-	return input_buffer;
+			display_throughput(progress, consumed_bytes + पासोक_len);
+	} while (पासोक_len < min);
+	return पासोक_buffer;
 }
 
 static void use(int bytes)
 {
-	if (bytes > input_len)
+	if (bytes > पासोक_len)
 		die(_("used more bytes than were available"));
-	input_crc32 = crc32(input_crc32, input_buffer + input_offset, bytes);
-	input_len -= bytes;
-	input_offset += bytes;
+	पासोक_crc32 = crc32(पासोक_crc32, पासोक_buffer + पासोक_offset, bytes);
+	पासोक_len -= bytes;
+	पासोक_offset += bytes;
 
 	/* make sure off_t is sufficiently large not to wrap */
 	if (signed_add_overflows(consumed_bytes, bytes))
 		die(_("pack too large for current definition of off_t"));
 	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size) {
+	if (max_पासोक_size && consumed_bytes > max_पासोक_size) {
 		struct strbuf size_limit = STRBUF_INIT;
-		strbuf_humanise_bytes(&size_limit, max_input_size);
+		strbuf_humanise_bytes(&size_limit, max_पासोक_size);
 		die(_("pack exceeds maximum allowed size (%s)"),
 		    size_limit.buf);
 	}
@@ -359,7 +359,7 @@ static void use(int bytes)
 static const char *open_pack_file(const char *pack_name)
 {
 	if (from_stdin) {
-		input_fd = 0;
+		पासोक_fd = 0;
 		if (!pack_name) {
 			struct strbuf tmp_file = STRBUF_INIT;
 			output_fd = odb_mkstemp(the_repository->objects, &tmp_file,
@@ -370,11 +370,11 @@ static const char *open_pack_file(const char *pack_name)
 		}
 		nothread_data.pack_fd = output_fd;
 	} else {
-		input_fd = xopen(pack_name, O_RDONLY);
+		पासोक_fd = xopen(pack_name, O_RDONLY);
 		output_fd = -1;
-		nothread_data.pack_fd = input_fd;
+		nothread_data.pack_fd = पासोक_fd;
 	}
-	git_hash_init(&input_ctx, the_hash_algo);
+	git_hash_init(&पासोक_ctx, the_hash_algo);
 	return pack_name;
 }
 
@@ -412,7 +412,7 @@ static inline struct thread_local_data *get_thread_data(void)
 {
 	if (HAVE_THREADS) {
 		if (threads_active)
-			return pthread_getspecific(key);
+			return pthread_getspecific(सुसि);
 		assert(!threads_active &&
 		       "This should only be reached when all threads are gone");
 	}
@@ -422,7 +422,7 @@ static inline struct thread_local_data *get_thread_data(void)
 static void set_thread_data(struct thread_local_data *data)
 {
 	if (threads_active)
-		pthread_setspecific(key, data);
+		pthread_setspecific(सुसि, data);
 }
 
 static void free_base_data(struct base_data *c)
@@ -499,9 +499,9 @@ static void *unpack_entry_data(off_t offset, size_t size,
 	do {
 		unsigned char *last_out = stream.next_out;
 		stream.next_in = fill(1);
-		stream.avail_in = input_len;
+		stream.avail_in = पासोक_len;
 		status = git_inflate(&stream, 0);
-		use(input_len - stream.avail_in);
+		use(पासोक_len - stream.avail_in);
 		if (oid)
 			git_hash_update(&c, last_out, stream.next_out - last_out);
 		if (buf == fixed_buf) {
@@ -529,7 +529,7 @@ static void *unpack_raw_entry(struct object_entry *obj,
 	void *data;
 
 	obj->idx.offset = consumed_bytes;
-	input_crc32 = crc32(0, NULL, 0);
+	पासोक_crc32 = crc32(0, NULL, 0);
 
 	p = fill(1);
 	c = *p;
@@ -573,7 +573,7 @@ static void *unpack_raw_entry(struct object_entry *obj,
 			bad_object(obj->idx.offset, _("delta base offset is out of bound"));
 		break;
 	case OBJ_COMMIT:
-	case OBJ_TREE:
+	case OBJ_पुनो:
 	case OBJ_BLOB:
 	case OBJ_TAG:
 		break;
@@ -583,7 +583,7 @@ static void *unpack_raw_entry(struct object_entry *obj,
 	obj->hdr_size = consumed_bytes - obj->idx.offset;
 
 	data = unpack_entry_data(obj->idx.offset, obj->size, obj->type, oid);
-	obj->idx.crc32 = input_crc32;
+	obj->idx.crc32 = पासोक_crc32;
 	return data;
 }
 
@@ -820,7 +820,7 @@ static int check_collison(struct object_entry *entry)
 
 static void record_outgoing_link(const struct object_id *oid)
 {
-	oidset_insert(&outgoing_links, oid);
+	oidset_इसिंगित(&outgoing_links, oid);
 }
 
 static void maybe_record_name_entry(const struct name_entry *entry)
@@ -854,24 +854,24 @@ static void maybe_record_name_entry(const struct name_entry *entry)
 
 static void do_record_outgoing_links(struct object *obj)
 {
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		struct tree_desc desc;
+	if (obj->type == OBJ_पुनो) {
+		struct पुनो *पुनो = (struct पुनो *)obj;
+		struct पुनो_desc desc;
 		struct name_entry entry;
-		if (init_tree_desc_gently(&desc, &tree->object.oid,
-					  tree->buffer, tree->size, 0))
+		if (init_पुनो_desc_gently(&desc, &पुनो->object.oid,
+					  पुनो->buffer, पुनो->size, 0))
 			/*
 			 * Error messages are given when packs are
 			 * verified, so do not print any here.
 			 */
 			return;
-		while (tree_entry_gently(&desc, &entry))
+		while (पुनो_entry_gently(&desc, &entry))
 			maybe_record_name_entry(&entry);
 	} else if (obj->type == OBJ_COMMIT) {
 		struct commit *commit = (struct commit *) obj;
 		struct commit_list *parents = commit->parents;
 
-		record_outgoing_link(get_commit_tree_oid(commit));
+		record_outgoing_link(get_commit_पुनो_oid(commit));
 		for (; parents; parents = parents->next)
 			record_outgoing_link(&parents->item->object.oid);
 	} else if (obj->type == OBJ_TAG) {
@@ -960,8 +960,8 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
 			if (record_outgoing_links)
 				do_record_outgoing_links(obj);
 
-			if (obj->type == OBJ_TREE) {
-				struct tree *item = (struct tree *) obj;
+			if (obj->type == OBJ_पुनो) {
+				struct पुनो *item = (struct पुनो *) obj;
 				item->buffer = NULL;
 				obj->parsed = 0;
 			}
@@ -1292,17 +1292,17 @@ static void parse_pack_objects(unsigned char *hash)
 	/* Check pack integrity */
 	flush();
 	git_hash_init(&tmp_ctx, the_hash_algo);
-	git_hash_clone(&tmp_ctx, &input_ctx);
+	git_hash_clone(&tmp_ctx, &पासोक_ctx);
 	git_hash_final(hash, &tmp_ctx);
 	if (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
 		die(_("pack is corrupted (SHA1 mismatch)"));
 	use(the_hash_algo->rawsz);
 
 	/* If input_fd is a file, we should have reached its end now. */
-	if (fstat(input_fd, &st))
+	if (fstat(पासोक_fd, &st))
 		die_errno(_("cannot fstat packfile"));
 	if (S_ISREG(st.st_mode) &&
-			lseek(input_fd, 0, SEEK_CUR) - input_len != st.st_size)
+			lseek(पासोक_fd, 0, SEEK_CUR) - पासोक_len != st.st_size)
 		die(_("pack has junk at the end"));
 
 	for (i = 0; i < nr_objects; i++) {
@@ -1379,7 +1379,7 @@ static void conclude_pack(int fix_thin_pack, const char *curr_pack, unsigned cha
 	if (fix_thin_pack) {
 		struct hashfile *f;
 		unsigned char read_hash[GIT_MAX_RAWSZ], tail_hash[GIT_MAX_RAWSZ];
-		struct strbuf msg = STRBUF_INIT;
+		struct strbuf मेनसाहे = STRBUF_INIT;
 		int nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
 		int nr_objects_initial = nr_objects;
 		if (nr_unresolved <= 0)
@@ -1389,12 +1389,12 @@ static void conclude_pack(int fix_thin_pack, const char *curr_pack, unsigned cha
 		       nr_unresolved * sizeof(*objects));
 		f = hashfd(the_repository->hash_algo, output_fd, curr_pack);
 		fix_unresolved_deltas(f);
-		strbuf_addf(&msg, Q_("completed with %d local object",
+		strbuf_addf(&मेनसाहे, Q_("completed with %d local object",
 				     "completed with %d local objects",
 				     nr_objects - nr_objects_initial),
 			    nr_objects - nr_objects_initial);
-		stop_progress_msg(&progress, msg.buf);
-		strbuf_release(&msg);
+		stop_progress_मेनसाहे(&progress, मेनसाहे.buf);
+		strbuf_release(&मेनसाहे);
 		finalize_hashfile(f, tail_hash, FSYNC_COMPONENT_PACK, 0);
 		hashcpy(read_hash, pack_hash, the_repository->hash_algo);
 		fixup_pack_header_footer(the_hash_algo, output_fd, pack_hash,
@@ -1416,7 +1416,7 @@ static int write_compressed(struct hashfile *f, void *in, unsigned int size)
 	git_zstream stream;
 	int status;
 	unsigned char outbuf[4096];
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	git_deflate_init(&stream, cfg->zlib_compression_level);
 	stream.next_in = in;
@@ -1555,14 +1555,14 @@ static const char *derive_filename(const char *pack_name, const char *strip,
 	return buf->buf;
 }
 
-static void write_special_file(const char *suffix, const char *msg,
+static void write_special_file(const char *suffix, const char *मेनसाहे,
 			       const char *pack_name, const unsigned char *hash,
 			       const char **report)
 {
 	struct strbuf name_buf = STRBUF_INIT;
 	const char *filename;
 	int fd;
-	int msg_len = strlen(msg);
+	int मेनसाहे_len = strlen(मेनसाहे);
 
 	if (pack_name)
 		filename = derive_filename(pack_name, "pack", suffix, &name_buf);
@@ -1575,8 +1575,8 @@ static void write_special_file(const char *suffix, const char *msg,
 			die_errno(_("cannot write %s file '%s'"),
 				  suffix, filename);
 	} else {
-		if (msg_len > 0) {
-			write_or_die(fd, msg, msg_len);
+		if (मेनसाहे_len > 0) {
+			write_or_die(fd, मेनसाहे, मेनसाहे_len);
 			write_or_die(fd, "\n", 1);
 		}
 		if (close(fd) != 0)
@@ -1607,7 +1607,7 @@ static void rename_tmp_packfile(const char **final_name,
 static void final(const char *final_pack_name, const char *curr_pack_name,
 		  const char *final_index_name, const char *curr_index_name,
 		  const char *final_rev_index_name, const char *curr_rev_index_name,
-		  const char *keep_msg, const char *promisor_msg,
+		  const char *keep_मेनसाहे, const char *promisor_मेनसाहे,
 		  unsigned char *hash)
 {
 	const char *report = "pack";
@@ -1616,18 +1616,18 @@ static void final(const char *final_pack_name, const char *curr_pack_name,
 	struct strbuf rev_index_name = STRBUF_INIT;
 
 	if (!from_stdin) {
-		close(input_fd);
+		close(पासोक_fd);
 	} else {
 		fsync_component_or_die(FSYNC_COMPONENT_PACK, output_fd, curr_pack_name);
 		if (close(output_fd))
 			die_errno(_("error while closing pack file"));
 	}
 
-	if (keep_msg)
-		write_special_file("keep", keep_msg, final_pack_name, hash,
+	if (keep_मेनसाहे)
+		write_special_file("keep", keep_मेनसाहे, final_pack_name, hash,
 				   &report);
-	if (promisor_msg)
-		write_special_file("promisor", promisor_msg, final_pack_name,
+	if (promisor_मेनसाहे)
+		write_special_file("promisor", promisor_मेनसाहे, final_pack_name,
 				   hash, NULL);
 
 	rename_tmp_packfile(&final_pack_name, curr_pack_name, &pack_name,
@@ -1654,7 +1654,7 @@ static void final(const char *final_pack_name, const char *curr_pack_name,
 		strbuf_release(&buf);
 
 		/* Write the last part of the buffer to stdout */
-		write_in_full(1, input_buffer + input_offset, input_len);
+		write_in_full(1, पासोक_buffer + पासोक_offset, पासोक_len);
 	}
 
 	strbuf_release(&rev_index_name);
@@ -1713,13 +1713,13 @@ static void read_v2_anomalous_offsets(struct packed_git *p,
 
 	/* The address of the 4-byte offset table */
 	idx1 = (((const uint32_t *)((const uint8_t *)p->index_data + p->crc_offset))
-		+ (size_t)p->num_objects /* CRC32 table */
+		+ (size_t)p->नुमेरो_objects /* CRC32 table */
 		);
 
 	/* The address of the 8-byte offset table */
-	idx2 = idx1 + p->num_objects;
+	idx2 = idx1 + p->नुमेरो_objects;
 
-	for (i = 0; i < p->num_objects; i++) {
+	for (i = 0; i < p->नुमेरो_objects; i++) {
 		uint32_t off = ntohl(idx1[i]);
 		if (!(off & 0x80000000))
 			continue;
@@ -1815,7 +1815,7 @@ static void repack_local_links(void)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 	FILE *out;
-	struct strbuf line = STRBUF_INIT;
+	struct strbuf लिन्या = STRBUF_INIT;
 	struct oidset_iter iter;
 	struct object_id *oid;
 	char *base_name = NULL;
@@ -1837,14 +1837,14 @@ static void repack_local_links(void)
 		    source_info.u.packed.pack->pack_promisor)
 			continue;
 
-		if (!cmd.args.nr) {
+		if (!cmd.मगा_कातविरान.nr) {
 			base_name = mkpathdup(
 				"%s/pack/pack",
 				repo_get_object_directory(the_repository));
-			strvec_push(&cmd.args, "pack-objects");
-			strvec_push(&cmd.args,
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "pack-objects");
+			strvec_इतुलाक(&cmd.मगा_कातविरान,
 				    "--exclude-promisor-objects-best-effort");
-			strvec_push(&cmd.args, base_name);
+			strvec_इतुलाक(&cmd.मगा_कातविरान, base_name);
 			cmd.git_cmd = 1;
 			cmd.in = -1;
 			cmd.out = -1;
@@ -1857,29 +1857,29 @@ static void repack_local_links(void)
 			die(_("failed to feed local object to pack-objects"));
 	}
 
-	if (!cmd.args.nr)
+	if (!cmd.मगा_कातविरान.nr)
 		return;
 
 	close(cmd.in);
 
 	out = xfdopen(cmd.out, "r");
-	while (strbuf_getline_lf(&line, out) != EOF) {
-		unsigned char binary[GIT_MAX_RAWSZ];
-		if (line.len != the_hash_algo->hexsz ||
-		    !hex_to_bytes(binary, line.buf, line.len))
+	while (strbuf_getline_lf(&लिन्या, out) != EOF) {
+		unsigned char दालावाहान[GIT_MAX_RAWSZ];
+		if (लिन्या.len != the_hash_algo->hexsz ||
+		    !hex_to_bytes(दालावाहान, लिन्या.buf, लिन्या.len))
 			die(_("index-pack: Expecting full hex object ID lines only from pack-objects."));
 
 		/*
 		 * pack-objects creates the .pack and .idx files, but not the
 		 * .promisor file. Create the .promisor file, which is empty.
 		 */
-		write_special_file("promisor", "", NULL, binary, NULL);
+		write_special_file("promisor", "", NULL, दालावाहान, NULL);
 	}
 
 	fclose(out);
 	if (finish_command(&cmd))
 		die(_("could not finish pack-objects to repack local links"));
-	strbuf_release(&line);
+	strbuf_release(&लिन्या);
 	free(base_name);
 }
 
@@ -1892,15 +1892,15 @@ int cmd_index_pack(int argc,
 	const char *curr_index;
 	char *curr_rev_index = NULL;
 	const char *index_name = NULL, *pack_name = NULL, *rev_index_name = NULL;
-	const char *keep_msg = NULL;
-	const char *promisor_msg = NULL;
+	const char *keep_मेनसाहे = NULL;
+	const char *promisor_मेनसाहे = NULL;
 	struct strbuf index_name_buf = STRBUF_INIT;
 	struct strbuf rev_index_name_buf = STRBUF_INIT;
 	struct pack_idx_entry **idx_objects;
 	struct pack_idx_option opts;
 	unsigned char pack_hash[GIT_MAX_RAWSZ];
 	unsigned foreign_nr = 1;	/* zero is a "good" value, assume bad */
-	int report_end_of_input = 0;
+	int report_end_of_पासोक = 0;
 	int hash_algo = 0;
 
 	show_usage_if_asked(argc, argv, index_pack_usage);
@@ -1940,13 +1940,13 @@ int cmd_index_pack(int argc,
 			} else if (skip_to_optional_arg(arg, "--strict", &arg)) {
 				strict = 1;
 				do_fsck_object = 1;
-				fsck_set_msg_types(&fsck_options, arg);
+				fsck_set_मेनसाहे_types(&fsck_options, arg);
 			} else if (!strcmp(arg, "--check-self-contained-and-connected")) {
 				strict = 1;
 				check_self_contained_and_connected = 1;
 			} else if (skip_to_optional_arg(arg, "--fsck-objects", &arg)) {
 				do_fsck_object = 1;
-				fsck_set_msg_types(&fsck_options, arg);
+				fsck_set_मेनसाहे_types(&fsck_options, arg);
 			} else if (!strcmp(arg, "--verify")) {
 				verify = 1;
 			} else if (!strcmp(arg, "--verify-stat")) {
@@ -1956,9 +1956,9 @@ int cmd_index_pack(int argc,
 				verify = 1;
 				show_stat = 1;
 				stat_only = 1;
-			} else if (skip_to_optional_arg(arg, "--keep", &keep_msg)) {
+			} else if (skip_to_optional_arg(arg, "--keep", &keep_मेनसाहे)) {
 				; /* nothing to do */
-			} else if (skip_to_optional_arg(arg, "--promisor", &promisor_msg)) {
+			} else if (skip_to_optional_arg(arg, "--promisor", &promisor_मेनसाहे)) {
 				record_outgoing_links = 1;
 			} else if (starts_with(arg, "--threads=")) {
 				char *end;
@@ -1971,8 +1971,8 @@ int cmd_index_pack(int argc,
 				}
 			} else if (skip_prefix(arg, "--pack_header=", &arg)) {
 				if (parse_pack_header_option(arg,
-							     input_buffer,
-							     &input_len) < 0)
+							     पासोक_buffer,
+							     &पासोक_len) < 0)
 					die(_("bad --pack_header: %s"), arg);
 			} else if (!strcmp(arg, "-v")) {
 				verbose = 1;
@@ -1983,7 +1983,7 @@ int cmd_index_pack(int argc,
 			} else if (!strcmp(arg, "--show-resolving-progress")) {
 				show_resolving_progress = 1;
 			} else if (!strcmp(arg, "--report-end-of-input")) {
-				report_end_of_input = 1;
+				report_end_of_पासोक = 1;
 			} else if (!strcmp(arg, "-o")) {
 				if (index_name || (i+1) >= argc)
 					usage(index_pack_usage);
@@ -1998,7 +1998,7 @@ int cmd_index_pack(int argc,
 				if (*c || opts.off32_limit & 0x80000000)
 					die(_("bad %s"), arg);
 			} else if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
+				max_पासोक_size = strtoumax(arg, NULL, 10);
 			} else if (skip_prefix(arg, "--object-format=", &arg)) {
 				hash_algo = hash_algo_by_name(arg);
 				if (hash_algo == GIT_HASH_UNKNOWN)
@@ -2022,7 +2022,7 @@ int cmd_index_pack(int argc,
 		usage(index_pack_usage);
 	if (fix_thin_pack && !from_stdin)
 		die(_("the option '%s' requires '%s'"), "--fix-thin", "--stdin");
-	if (promisor_msg && pack_name)
+	if (promisor_मेनसाहे && pack_name)
 		die(_("--promisor cannot be used with a pack name"));
 	if (from_stdin && !startup_info->have_repository)
 		die(_("--stdin requires a git repository"));
@@ -2085,7 +2085,7 @@ int cmd_index_pack(int argc,
 		CALLOC_ARRAY(obj_stat, st_add(nr_objects, 1));
 	CALLOC_ARRAY(ofs_deltas, nr_objects);
 	parse_pack_objects(pack_hash);
-	if (report_end_of_input)
+	if (report_end_of_पासोक)
 		write_in_full(2, "\0", 1);
 	resolve_deltas(&opts);
 	conclude_pack(fix_thin_pack, curr_pack, pack_hash);
@@ -2112,10 +2112,10 @@ int cmd_index_pack(int argc,
 		final(pack_name, curr_pack,
 		      index_name, curr_index,
 		      rev_index_name, curr_rev_index,
-		      keep_msg, promisor_msg,
+		      keep_मेनसाहे, promisor_मेनसाहे,
 		      pack_hash);
 	else
-		close(input_fd);
+		close(पासोक_fd);
 
 	if (do_fsck_object) {
 		/*

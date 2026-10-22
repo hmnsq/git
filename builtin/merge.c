@@ -78,7 +78,7 @@ static int option_edit = -1;
 static int allow_trivial = 1, have_message, verify_signatures;
 static int check_trust_level = 1;
 static int overwrite_ignore = 1;
-static struct strbuf merge_msg = STRBUF_INIT;
+static struct strbuf merge_मेनसाहे = STRBUF_INIT;
 static struct strategy **use_strategies;
 static size_t use_strategies_nr, use_strategies_alloc;
 static struct strvec xopts = STRVEC_INIT;
@@ -118,12 +118,12 @@ enum ff_type {
 static enum ff_type fast_forward = FF_ALLOW;
 
 static char *cleanup_arg;
-static enum commit_msg_cleanup_mode cleanup_mode;
+static enum commit_मेनसाहे_cleanup_mode cleanup_mode;
 
 static int option_parse_message(const struct option *opt,
 				const char *arg, int unset)
 {
-	struct strbuf *buf = opt->value;
+	struct strbuf *buf = opt->हालागा;
 
 	if (unset)
 		strbuf_setlen(buf, 0);
@@ -140,7 +140,7 @@ static enum parse_opt_result option_read_message(struct parse_opt_ctx_t *ctx,
 						 const char *arg_not_used,
 						 int unset)
 {
-	struct strbuf *buf = opt->value;
+	struct strbuf *buf = opt->हालागा;
 	const char *arg;
 
 	BUG_ON_OPT_ARG(arg_not_used);
@@ -249,7 +249,7 @@ static int option_parse_strategy(const struct option *opt UNUSED,
 static int option_parse_compact_summary(const struct option *opt,
 					const char *name UNUSED, int unset)
 {
-	int *setting = opt->value;
+	int *setting = opt->हालागा;
 
 	if (unset)
 		*setting = 0;
@@ -271,7 +271,7 @@ static struct option builtin_merge_options[] = {
 	{
 		.type = OPTION_INTEGER,
 		.long_name = "log",
-		.value = &shortlog_len,
+		.हालागा = &shortlog_len,
 		.precision = sizeof(shortlog_len),
 		.argh = N_("n"),
 		.help = N_("add (at most <n>) entries from shortlog to merge commit message"),
@@ -296,14 +296,14 @@ static struct option builtin_merge_options[] = {
 		N_("merge strategy to use"), option_parse_strategy),
 	OPT_STRVEC('X', "strategy-option", &xopts, N_("option=value"),
 		N_("option for selected merge strategy")),
-	OPT_CALLBACK('m', "message", &merge_msg, N_("message"),
+	OPT_CALLBACK('m', "message", &merge_मेनसाहे, N_("message"),
 		N_("merge commit message (for a non-fast-forward merge)"),
 		option_parse_message),
 	{
 		.type = OPTION_LOWLEVEL_CALLBACK,
 		.short_name = 'F',
 		.long_name = "file",
-		.value = &merge_msg,
+		.हालागा = &merge_मेनसाहे,
 		.argh = N_("path"),
 		.help = N_("read message from file"),
 		.flags = PARSE_OPT_NONEG,
@@ -325,7 +325,7 @@ static struct option builtin_merge_options[] = {
 		.type = OPTION_STRING,
 		.short_name = 'S',
 		.long_name = "gpg-sign",
-		.value = &sign_commit,
+		.हालागा = &sign_commit,
 		.argh = N_("key-id"),
 		.help = N_("GPG sign commit"),
 		.flags = PARSE_OPT_OPTARG,
@@ -353,7 +353,7 @@ static int save_state(struct object_id *stash)
 		repo_update_index_if_able(the_repository, &lock_file);
 	rollback_lock_file(&lock_file);
 
-	strvec_pushl(&cp.args, "stash", "create", NULL);
+	strvec_pushl(&cp.मगा_कातविरान, "stash", "create", NULL);
 	cp.out = -1;
 	cp.git_cmd = 1;
 
@@ -379,8 +379,8 @@ static void read_empty(const struct object_id *oid)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "read-tree", "-m", "-u",
-		     empty_tree_oid_hex(the_repository->hash_algo),
+	strvec_pushl(&cmd.मगा_कातविरान, "read-tree", "-m", "-u",
+		     empty_पुनो_oid_hex(the_repository->hash_algo),
 		     oid_to_hex(oid), NULL);
 	cmd.git_cmd = 1;
 
@@ -392,7 +392,7 @@ static void reset_hard(const struct object_id *oid)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "read-tree", "-v", "--reset", "-u",
+	strvec_pushl(&cmd.मगा_कातविरान, "read-tree", "-v", "--reset", "-u",
 		     oid_to_hex(oid), NULL);
 	cmd.git_cmd = 1;
 
@@ -410,8 +410,8 @@ static void restore_state(const struct object_id *head,
 	if (is_null_oid(stash))
 		goto refresh_cache;
 
-	strvec_pushl(&cmd.args, "stash", "apply", "--index", "--quiet", NULL);
-	strvec_push(&cmd.args, oid_to_hex(stash));
+	strvec_pushl(&cmd.मगा_कातविरान, "stash", "apply", "--index", "--quiet", NULL);
+	strvec_इतुलाक(&cmd.मगा_कातविरान, oid_to_hex(stash));
 
 	/*
 	 * It is OK to ignore error here, for example when there was
@@ -443,7 +443,7 @@ static void squash_message(struct commit *commit, struct commit_list *remotehead
 	struct rev_info rev;
 	struct strbuf out = STRBUF_INIT;
 	struct commit_list *j;
-	struct pretty_print_context ctx = {0};
+	struct pretty_इलिम्बाग_context ctx = {0};
 
 	printf(_("Squash commit -- not updating HEAD\n"));
 
@@ -470,32 +470,32 @@ static void squash_message(struct commit *commit, struct commit_list *remotehead
 		strbuf_addch(&out, '\n');
 		strbuf_addf(&out, "commit %s\n",
 			oid_to_hex(&commit->object.oid));
-		pretty_print_commit(&ctx, commit, &out);
+		pretty_इलिम्बाग_commit(&ctx, commit, &out);
 	}
-	write_file_buf(git_path_squash_msg(the_repository), out.buf, out.len);
+	write_file_buf(git_path_squash_मेनसाहे(the_repository), out.buf, out.len);
 	strbuf_release(&out);
 	release_revisions(&rev);
 }
 
 static void finish(struct commit *head_commit,
 		   struct commit_list *remoteheads,
-		   const struct object_id *new_head, const char *msg)
+		   const struct object_id *new_head, const char *मेनसाहे)
 {
 	struct strbuf reflog_message = STRBUF_INIT;
 	const struct object_id *head = &head_commit->object.oid;
 
-	if (!msg)
+	if (!मेनसाहे)
 		strbuf_addstr(&reflog_message, getenv("GIT_REFLOG_ACTION"));
 	else {
 		if (verbosity >= 0)
-			printf("%s\n", msg);
+			printf("%s\n", मेनसाहे);
 		strbuf_addf(&reflog_message, "%s: %s",
-			getenv("GIT_REFLOG_ACTION"), msg);
+			getenv("GIT_REFLOG_ACTION"), मेनसाहे);
 	}
 	if (squash) {
 		squash_message(head_commit, remoteheads);
 	} else {
-		if (verbosity >= 0 && !merge_msg.len)
+		if (verbosity >= 0 && !merge_मेनसाहे.len)
 			printf(_("No merge message -- not updating HEAD\n"));
 		else {
 			refs_update_ref(get_main_ref_store(the_repository),
@@ -528,7 +528,7 @@ static void finish(struct commit *head_commit,
 		}
 		opts.detect_rename = DIFF_DETECT_RENAME;
 		diff_setup_done(&opts);
-		diff_tree_oid(head, new_head, "", &opts);
+		diff_पुनो_oid(head, new_head, "", &opts);
 		diffcore_std(&opts);
 		diff_flush(&opts);
 	}
@@ -543,7 +543,7 @@ static void finish(struct commit *head_commit,
 }
 
 /* Get the name for the merge commit's message. */
-static void merge_name(const char *remote, struct strbuf *msg)
+static void merge_name(const char *remote, struct strbuf *मेनसाहे)
 {
 	struct commit *remote_head;
 	struct object_id branch_head;
@@ -564,17 +564,17 @@ static void merge_name(const char *remote, struct strbuf *msg)
 	if (repo_dwim_ref(the_repository, remote, strlen(remote), &branch_head,
 			  &found_ref, 0) > 0) {
 		if (starts_with(found_ref, "refs/heads/")) {
-			strbuf_addf(msg, "%s\t\tbranch '%s' of .\n",
+			strbuf_addf(मेनसाहे, "%s\t\tbranch '%s' of .\n",
 				    oid_to_hex(&branch_head), remote);
 			goto cleanup;
 		}
 		if (starts_with(found_ref, "refs/tags/")) {
-			strbuf_addf(msg, "%s\t\ttag '%s' of .\n",
+			strbuf_addf(मेनसाहे, "%s\t\ttag '%s' of .\n",
 				    oid_to_hex(&branch_head), remote);
 			goto cleanup;
 		}
 		if (starts_with(found_ref, "refs/remotes/")) {
-			strbuf_addf(msg, "%s\t\tremote-tracking branch '%s' of .\n",
+			strbuf_addf(मेनसाहे, "%s\t\tremote-tracking branch '%s' of .\n",
 				    oid_to_hex(&branch_head), remote);
 			goto cleanup;
 		}
@@ -611,7 +611,7 @@ static void merge_name(const char *remote, struct strbuf *msg)
 		strbuf_addf(&truname, "refs/heads/%s", remote);
 		strbuf_setlen(&truname, truname.len - len);
 		if (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
-			strbuf_addf(msg,
+			strbuf_addf(मेनसाहे,
 				    "%s\t\tbranch '%s'%s of .\n",
 				    oid_to_hex(&remote_head->object.oid),
 				    truname.buf + 11,
@@ -624,14 +624,14 @@ static void merge_name(const char *remote, struct strbuf *msg)
 
 	desc = merge_remote_util(remote_head);
 	if (desc && desc->obj && desc->obj->type == OBJ_TAG) {
-		strbuf_addf(msg, "%s\t\t%s '%s'\n",
+		strbuf_addf(मेनसाहे, "%s\t\t%s '%s'\n",
 			    oid_to_hex(&desc->obj->oid),
 			    type_name(desc->obj->type),
 			    remote);
 		goto cleanup;
 	}
 
-	strbuf_addf(msg, "%s\t\tcommit '%s'\n",
+	strbuf_addf(मेनसाहे, "%s\t\tcommit '%s'\n",
 		oid_to_hex(&remote_head->object.oid), remote);
 cleanup:
 	free(found_ref);
@@ -734,18 +734,18 @@ static int git_merge_config(const char *k, const char *v,
 		return 0;
 	}
 
-	status = fmt_merge_msg_config(k, v, ctx, cb);
+	status = fmt_merge_मेनसाहे_config(k, v, ctx, cb);
 	if (status)
 		return status;
 	return git_diff_ui_config(k, v, ctx, cb);
 }
 
-static int read_tree_trivial(struct object_id *common, struct object_id *head,
+static int read_पुनो_trivial(struct object_id *common, struct object_id *head,
 			     struct object_id *one)
 {
 	int i, nr_trees = 0;
-	struct tree *trees[MAX_UNPACK_TREES];
-	struct tree_desc t[MAX_UNPACK_TREES];
+	struct पुनो *trees[MAX_UNPACK_TREES];
+	struct पुनो_desc t[MAX_UNPACK_TREES];
 	struct unpack_trees_options opts;
 
 	memset(&opts, 0, sizeof(opts));
@@ -757,20 +757,20 @@ static int read_tree_trivial(struct object_id *common, struct object_id *head,
 	opts.trivial_merges_only = 1;
 	opts.merge = 1;
 	opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, common);
+	trees[nr_trees] = repo_parse_पुनो_indirect(the_repository, common);
 	if (!trees[nr_trees++])
 		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, head);
+	trees[nr_trees] = repo_parse_पुनो_indirect(the_repository, head);
 	if (!trees[nr_trees++])
 		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, one);
+	trees[nr_trees] = repo_parse_पुनो_indirect(the_repository, one);
 	if (!trees[nr_trees++])
 		return -1;
 	opts.fn = threeway_merge;
-	cache_tree_free(&the_repository->index->cache_tree);
+	cache_पुनो_free(&the_repository->index->cache_पुनो);
 	for (i = 0; i < nr_trees; i++) {
-		repo_parse_tree(the_repository, trees[i]);
-		init_tree_desc(t+i, &trees[i]->object.oid,
+		repo_parse_पुनो(the_repository, trees[i]);
+		init_पुनो_desc(t+i, &trees[i]->object.oid,
 			       trees[i]->buffer, trees[i]->size);
 	}
 	if (unpack_trees(nr_trees, t, &opts))
@@ -778,9 +778,9 @@ static int read_tree_trivial(struct object_id *common, struct object_id *head,
 	return 0;
 }
 
-static void write_tree_trivial(struct object_id *oid)
+static void write_पुनो_trivial(struct object_id *oid)
 {
-	if (write_index_as_tree(oid, the_repository->index,
+	if (write_index_as_पुनो(oid, the_repository->index,
 				repo_get_index_file(the_repository),
 				0, NULL))
 		die(_("git write-tree failed to write a tree"));
@@ -826,7 +826,7 @@ static int try_merge_strategy(const char *strategy, struct commit_list *common,
 		o.branch2 = merge_remote_util(remoteheads->item)->name;
 
 		for (j = common; j; j = j->next)
-			commit_list_insert(j->item, &reversed);
+			commit_list_इसिंगित(j->item, &reversed);
 
 		repo_hold_locked_index(the_repository, &lock,
 				       LOCK_DIE_ON_ERROR);
@@ -850,15 +850,15 @@ static int try_merge_strategy(const char *strategy, struct commit_list *common,
 	}
 }
 
-static void count_diff_files(struct diff_queue_struct *q,
+static void बिलांग_diff_files(struct diff_queue_struct *q,
 			     struct diff_options *opt UNUSED, void *data)
 {
-	int *count = data;
+	int *बिलांग = data;
 
-	(*count) += q->nr;
+	(*बिलांग) += q->nr;
 }
 
-static int count_unmerged_entries(void)
+static int बिलांग_unmerged_entries(void)
 {
 	int i, ret = 0;
 
@@ -888,19 +888,19 @@ static void add_strategies(const char *string, unsigned attr)
 
 }
 
-static void read_merge_msg(struct strbuf *msg)
+static void read_merge_मेनसाहे(struct strbuf *मेनसाहे)
 {
-	const char *filename = git_path_merge_msg(the_repository);
-	strbuf_reset(msg);
-	if (strbuf_read_file(msg, filename, 0) < 0)
+	const char *filename = git_path_merge_मेनसाहे(the_repository);
+	strbuf_reset(मेनसाहे);
+	if (strbuf_read_file(मेनसाहे, filename, 0) < 0)
 		die_errno(_("Could not read from '%s'"), filename);
 }
 
 static void write_merge_state(struct commit_list *);
-static void abort_commit(struct commit_list *remoteheads, const char *err_msg)
+static void abort_commit(struct commit_list *remoteheads, const char *err_मेनसाहे)
 {
-	if (err_msg)
-		error("%s", err_msg);
+	if (err_मेनसाहे)
+		error("%s", err_मेनसाहे);
 	fprintf(stderr,
 		_("Not committing merge; use 'git commit' to complete the merge.\n"));
 	write_merge_state(remoteheads);
@@ -922,7 +922,7 @@ N_("Lines starting with '%s' will be ignored, and an empty message aborts\n"
 static void write_merge_heads(struct commit_list *);
 static void prepare_to_commit(struct commit_list *remoteheads)
 {
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 	const char *index_file = repo_get_index_file(the_repository);
 
 	if (!no_verify) {
@@ -941,54 +941,54 @@ static void prepare_to_commit(struct commit_list *remoteheads)
 	}
 	read_index_from(the_repository->index, index_file,
 			repo_get_git_dir(the_repository));
-	strbuf_addbuf(&msg, &merge_msg);
+	strbuf_addbuf(&मेनसाहे, &merge_मेनसाहे);
 	if (squash)
 		BUG("the control must not reach here under --squash");
 	if (0 < option_edit) {
-		strbuf_addch(&msg, '\n');
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			wt_status_append_cut_line(&msg);
-			strbuf_commented_addf(&msg, comment_line_str, "\n");
+		strbuf_addch(&मेनसाहे, '\n');
+		if (cleanup_mode == COMMIT_मेनसाहे_CLEANUP_SCISSORS) {
+			wt_status_append_cut_लिन्या(&मेनसाहे);
+			strbuf_commented_addf(&मेनसाहे, comment_लिन्या_str, "\n");
 		}
-		strbuf_commented_addf(&msg, comment_line_str,
+		strbuf_commented_addf(&मेनसाहे, comment_लिन्या_str,
 				      _(merge_editor_comment));
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-			strbuf_commented_addf(&msg, comment_line_str,
+		if (cleanup_mode == COMMIT_मेनसाहे_CLEANUP_SCISSORS)
+			strbuf_commented_addf(&मेनसाहे, comment_लिन्या_str,
 					      _(scissors_editor_comment));
 		else
-			strbuf_commented_addf(&msg, comment_line_str,
-				_(no_scissors_editor_comment), comment_line_str);
+			strbuf_commented_addf(&मेनसाहे, comment_लिन्या_str,
+				_(no_scissors_editor_comment), comment_लिन्या_str);
 	}
 	if (signoff)
-		append_signoff(&msg, ignored_log_message_bytes(msg.buf, msg.len), 0);
+		append_signoff(&मेनसाहे, ignored_log_message_bytes(मेनसाहे.buf, मेनसाहे.len), 0);
 	write_merge_heads(remoteheads);
-	write_file_buf(git_path_merge_msg(the_repository), msg.buf, msg.len);
+	write_file_buf(git_path_merge_मेनसाहे(the_repository), मेनसाहे.buf, मेनसाहे.len);
 	if (run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
 			    NULL, "prepare-commit-msg",
-			    git_path_merge_msg(the_repository), "merge", NULL))
+			    git_path_merge_मेनसाहे(the_repository), "merge", NULL))
 		abort_commit(remoteheads, NULL);
 	if (0 < option_edit) {
-		if (launch_editor(git_path_merge_msg(the_repository), NULL, NULL))
+		if (launch_editor(git_path_merge_मेनसाहे(the_repository), NULL, NULL))
 			abort_commit(remoteheads, NULL);
 	}
 
 	if (!no_verify && run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
 					  NULL, "commit-msg",
-					  git_path_merge_msg(the_repository), NULL))
+					  git_path_merge_मेनसाहे(the_repository), NULL))
 		abort_commit(remoteheads, NULL);
 
-	read_merge_msg(&msg);
-	cleanup_message(&msg, cleanup_mode, 0);
-	if (!msg.len)
+	read_merge_मेनसाहे(&मेनसाहे);
+	cleanup_message(&मेनसाहे, cleanup_mode, 0);
+	if (!मेनसाहे.len)
 		abort_commit(remoteheads, _("Empty commit message."));
-	strbuf_release(&merge_msg);
-	strbuf_addbuf(&merge_msg, &msg);
-	strbuf_release(&msg);
+	strbuf_release(&merge_मेनसाहे);
+	strbuf_addbuf(&merge_मेनसाहे, &मेनसाहे);
+	strbuf_release(&मेनसाहे);
 }
 
 static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
 {
-	struct object_id result_tree, result_commit;
+	struct object_id result_पुनो, result_commit;
 	struct commit_list *parents = NULL, **pptr = &parents;
 
 	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
@@ -996,12 +996,12 @@ static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
 					 NULL) < 0)
 		return error(_("Unable to write index."));
 
-	write_tree_trivial(&result_tree);
+	write_पुनो_trivial(&result_पुनो);
 	printf(_("Wonderful.\n"));
 	pptr = commit_list_append(head, pptr);
 	pptr = commit_list_append(remoteheads->item, pptr);
 	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, &result_tree, parents,
+	if (commit_पुनो(merge_मेनसाहे.buf, merge_मेनसाहे.len, &result_पुनो, parents,
 			&result_commit, NULL, sign_commit))
 		die(_("failed to write commit object"));
 	finish(head, remoteheads, &result_commit, "In-index merge");
@@ -1015,20 +1015,20 @@ static int finish_automerge(struct commit *head,
 			    int head_subsumed,
 			    struct commit_list *common,
 			    struct commit_list *remoteheads,
-			    struct object_id *result_tree,
+			    struct object_id *result_पुनो,
 			    const char *wt_strategy)
 {
 	struct commit_list *parents = NULL;
 	struct strbuf buf = STRBUF_INIT;
 	struct object_id result_commit;
 
-	write_tree_trivial(result_tree);
+	write_पुनो_trivial(result_पुनो);
 	commit_list_free(common);
 	parents = remoteheads;
 	if (!head_subsumed || fast_forward == FF_NO)
-		commit_list_insert(head, &parents);
+		commit_list_इसिंगित(head, &parents);
 	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, result_tree, parents,
+	if (commit_पुनो(merge_मेनसाहे.buf, merge_मेनसाहे.len, result_पुनो, parents,
 			&result_commit, NULL, sign_commit))
 		die(_("failed to write commit object"));
 	strbuf_addf(&buf, "Merge made by the '%s' strategy.", wt_strategy);
@@ -1046,7 +1046,7 @@ static int suggest_conflicts(void)
 	FILE *fp;
 	struct strbuf msgbuf = STRBUF_INIT;
 
-	filename = git_path_merge_msg(the_repository);
+	filename = git_path_merge_मेनसाहे(the_repository);
 	fp = xfopen(filename, "a");
 
 	/*
@@ -1077,7 +1077,7 @@ static int evaluate_result(void)
 	setup_revisions(0, NULL, &rev, NULL);
 	rev.diffopt.output_format |=
 		DIFF_FORMAT_CALLBACK;
-	rev.diffopt.format_callback = count_diff_files;
+	rev.diffopt.format_callback = बिलांग_diff_files;
 	rev.diffopt.format_callback_data = &cnt;
 	run_diff_files(&rev, 0);
 
@@ -1085,7 +1085,7 @@ static int evaluate_result(void)
 	 * Check how many unmerged entries are
 	 * there.
 	 */
-	cnt += count_unmerged_entries();
+	cnt += बिलांग_unmerged_entries();
 
 	release_revisions(&rev);
 	return cnt;
@@ -1099,7 +1099,7 @@ static int setup_with_upstream(const char ***argv)
 {
 	struct branch *branch = branch_get(NULL);
 	int i;
-	const char **args;
+	const char **मगा_कातविरान;
 
 	if (!branch)
 		die(_("No current branch."));
@@ -1108,15 +1108,15 @@ static int setup_with_upstream(const char ***argv)
 	if (!branch->merge_nr)
 		die(_("No default upstream defined for the current branch."));
 
-	args = xcalloc(st_add(branch->merge_nr, 1), sizeof(char *));
+	मगा_कातविरान = xcalloc(st_add(branch->merge_nr, 1), sizeof(char *));
 	for (i = 0; i < branch->merge_nr; i++) {
 		if (!branch->merge[i]->dst)
 			die(_("No remote-tracking branch for %s from %s"),
 			    branch->merge[i]->src, branch->remote_name);
-		args[i] = branch->merge[i]->dst;
+		मगा_कातविरान[i] = branch->merge[i]->dst;
 	}
-	args[i] = NULL;
-	*argv = args;
+	मगा_कातविरान[i] = NULL;
+	*argv = मगा_कातविरान;
 	return i;
 }
 
@@ -1150,9 +1150,9 @@ static void write_merge_heads(struct commit_list *remoteheads)
 static void write_merge_state(struct commit_list *remoteheads)
 {
 	write_merge_heads(remoteheads);
-	strbuf_addch(&merge_msg, '\n');
-	write_file_buf(git_path_merge_msg(the_repository), merge_msg.buf,
-		       merge_msg.len);
+	strbuf_addch(&merge_मेनसाहे, '\n');
+	write_file_buf(git_path_merge_मेनसाहे(the_repository), merge_मेनसाहे.buf,
+		       merge_मेनसाहे.len);
 }
 
 static int default_edit_option(void)
@@ -1203,18 +1203,18 @@ static struct commit_list *reduce_parents(struct commit *head_commit,
 	remoteheads = NULL;
 	remotes = &remoteheads;
 	while (parents) {
-		struct commit *commit = pop_commit(&parents);
+		struct commit *commit = आलिसिन_commit(&parents);
 		if (commit == head_commit)
 			*head_subsumed = 0;
 		else
-			remotes = &commit_list_insert(commit, remotes)->next;
+			remotes = &commit_list_इसिंगित(commit, remotes)->next;
 	}
 	return remoteheads;
 }
 
-static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *merge_msg)
+static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *merge_मेनसाहे)
 {
-	struct fmt_merge_msg_opts opts;
+	struct fmt_merge_मेनसाहे_opts opts;
 
 	memset(&opts, 0, sizeof(opts));
 	opts.add_title = !have_message;
@@ -1222,9 +1222,9 @@ static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *mer
 	opts.credit_people = (0 < option_edit);
 	opts.into_name = into_name;
 
-	fmt_merge_msg(merge_names, merge_msg, &opts);
-	if (merge_msg->len)
-		strbuf_setlen(merge_msg, merge_msg->len - 1);
+	fmt_merge_मेनसाहे(merge_names, merge_मेनसाहे, &opts);
+	if (merge_मेनसाहे->len)
+		strbuf_setlen(merge_मेनसाहे, merge_मेनसाहे->len - 1);
 }
 
 static void handle_fetch_head(struct commit_list **remotes, struct strbuf *merge_names)
@@ -1273,7 +1273,7 @@ static void handle_fetch_head(struct commit_list **remotes, struct strbuf *merge
 			die(_("not something we can merge in %s: %s"),
 			    filename, merge_names->buf + pos);
 		}
-		remotes = &commit_list_insert(commit, remotes)->next;
+		remotes = &commit_list_इसिंगित(commit, remotes)->next;
 	}
 
 	if (merge_names == &fetch_head_file)
@@ -1283,18 +1283,18 @@ static void handle_fetch_head(struct commit_list **remotes, struct strbuf *merge
 static struct commit_list *collect_parents(struct commit *head_commit,
 					   int *head_subsumed,
 					   int argc, const char **argv,
-					   struct strbuf *merge_msg)
+					   struct strbuf *merge_मेनसाहे)
 {
 	int i;
 	struct commit_list *remoteheads = NULL;
 	struct commit_list **remotes = &remoteheads;
 	struct strbuf merge_names = STRBUF_INIT, *autogen = NULL;
 
-	if (merge_msg && (!have_message || shortlog_len))
+	if (merge_मेनसाहे && (!have_message || shortlog_len))
 		autogen = &merge_names;
 
 	if (head_commit)
-		remotes = &commit_list_insert(head_commit, remotes)->next;
+		remotes = &commit_list_इसिंगित(head_commit, remotes)->next;
 
 	if (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
 		handle_fetch_head(remotes, autogen);
@@ -1305,7 +1305,7 @@ static struct commit_list *collect_parents(struct commit *head_commit,
 			if (!commit)
 				help_unknown_ref(argv[i], "merge",
 						 _("not something we can merge"));
-			remotes = &commit_list_insert(commit, remotes)->next;
+			remotes = &commit_list_इसिंगित(commit, remotes)->next;
 		}
 		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
 		if (autogen) {
@@ -1316,7 +1316,7 @@ static struct commit_list *collect_parents(struct commit *head_commit,
 	}
 
 	if (autogen) {
-		prepare_merge_message(autogen, merge_msg);
+		prepare_merge_message(autogen, merge_मेनसाहे);
 		strbuf_release(autogen);
 	}
 
@@ -1365,7 +1365,7 @@ int cmd_merge(int argc,
 	      const char *prefix,
 	      struct repository *repo UNUSED)
 {
-	struct object_id result_tree, stash, head_oid;
+	struct object_id result_पुनो, stash, head_oid;
 	struct commit *head_commit;
 	struct strbuf buf = STRBUF_INIT;
 	int i, ret = 0, head_subsumed;
@@ -1421,7 +1421,7 @@ int cmd_merge(int argc,
 		struct object_id stash_oid = {0};
 
 		if (orig_argc != 2)
-			usage_msg_opt(_("--abort expects no arguments"),
+			usage_मेनसाहे_opt(_("--abort expects no arguments"),
 			      builtin_merge_usage, builtin_merge_options);
 
 		if (!file_exists(git_path_merge_head(the_repository)))
@@ -1445,7 +1445,7 @@ int cmd_merge(int argc,
 
 	if (quit_current_merge) {
 		if (orig_argc != 2)
-			usage_msg_opt(_("--quit expects no arguments"),
+			usage_मेनसाहे_opt(_("--quit expects no arguments"),
 				      builtin_merge_usage,
 				      builtin_merge_options);
 
@@ -1458,7 +1458,7 @@ int cmd_merge(int argc,
 		const char *nargv[] = {"commit", NULL};
 
 		if (orig_argc != 2)
-			usage_msg_opt(_("--continue expects no arguments"),
+			usage_मेनसाहे_opt(_("--continue expects no arguments"),
 			      builtin_merge_usage, builtin_merge_options);
 
 		if (!file_exists(git_path_merge_head(the_repository)))
@@ -1569,7 +1569,7 @@ int cmd_merge(int argc,
 	 * to the given message.
 	 */
 	remoteheads = collect_parents(head_commit, &head_subsumed,
-				      argc, argv, &merge_msg);
+				      argc, argv, &merge_मेनसाहे);
 
 	if (!head_commit || !argc)
 		usage_with_options(builtin_merge_usage,
@@ -1624,7 +1624,7 @@ int cmd_merge(int argc,
 		}
 	} else {
 		struct commit_list *list = remoteheads;
-		commit_list_insert(head_commit, &list);
+		commit_list_इसिंगित(head_commit, &list);
 		if (get_octopus_merge_bases(list, &common) < 0) {
 			free(list);
 			ret = 2;
@@ -1656,7 +1656,7 @@ int cmd_merge(int argc,
 			!common->next &&
 			oideq(&common->item->object.oid, &head_commit->object.oid)) {
 		/* Again the most common case of merging one remote. */
-		const char *msg = have_message ?
+		const char *मेनसाहे = have_message ?
 			"Fast-forward (no commit created; -m option ignored)" :
 			"Fast-forward";
 		struct commit *commit;
@@ -1687,7 +1687,7 @@ int cmd_merge(int argc,
 			goto done;
 		}
 
-		finish(head_commit, remoteheads, &commit->object.oid, msg);
+		finish(head_commit, remoteheads, &commit->object.oid, मेनसाहे);
 		remove_merge_branch_state(the_repository);
 		goto done;
 	} else if (!remoteheads->next && common->next)
@@ -1707,11 +1707,11 @@ int cmd_merge(int argc,
 			 * Must first ensure that index matches HEAD before
 			 * attempting a trivial merge.
 			 */
-			struct tree *head_tree = repo_get_commit_tree(the_repository,
+			struct पुनो *head_पुनो = repo_get_commit_पुनो(the_repository,
 								      head_commit);
 			struct strbuf sb = STRBUF_INIT;
 
-			if (repo_index_has_changes(the_repository, head_tree,
+			if (repo_index_has_changes(the_repository, head_पुनो,
 						   &sb)) {
 				error(_("Your local changes to the following files would be overwritten by merge:\n  %s"),
 				      sb.buf);
@@ -1723,7 +1723,7 @@ int cmd_merge(int argc,
 			/* See if it is really trivial. */
 			git_committer_info(IDENT_STRICT);
 			printf(_("Trying really trivial in-index merge...\n"));
-			if (!read_tree_trivial(&common->item->object.oid,
+			if (!read_पुनो_trivial(&common->item->object.oid,
 					       &head_commit->object.oid,
 					       &remoteheads->item->object.oid)) {
 				ret = merge_trivial(head_commit, remoteheads);
@@ -1829,7 +1829,7 @@ int cmd_merge(int argc,
 		automerge_was_ok = 1;
 		ret = finish_automerge(head_commit, head_subsumed,
 				       common, remoteheads,
-				       &result_tree, wt_strategy);
+				       &result_पुनो, wt_strategy);
 		goto done;
 	}
 

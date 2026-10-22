@@ -19,7 +19,7 @@ NULL
 
 static int parse_max_memory(const struct option *opt, const char *arg, int unset)
 {
-	size_t *max_memory = opt->value;
+	size_t *max_memory = opt->हालागा;
 	uintmax_t val;
 
 	if (unset)
@@ -46,7 +46,7 @@ int cmd_range_diff(int argc,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
+	int simple_color = -1, कालिवा_only = 0, कानान_only = 0;
 	struct option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
 			    &range_diff_opts.creation_factor,
@@ -64,9 +64,9 @@ int cmd_range_diff(int argc,
 			     parse_max_memory),
 		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, NULL,
 				  N_("passed to 'git log'"), PARSE_OPT_NOARG),
-		OPT_BOOL(0, "left-only", &left_only,
+		OPT_BOOL(0, "left-only", &कालिवा_only,
 			 N_("only emit output related to the first range")),
-		OPT_BOOL(0, "right-only", &right_only,
+		OPT_BOOL(0, "right-only", &कानान_only,
 			 N_("only emit output related to the second range")),
 		OPT_END()
 	};
@@ -110,15 +110,15 @@ int cmd_range_diff(int argc,
 		if (dash_dash < 0)
 			; /* already validated arguments */
 		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+			usage_मेनसाहे_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
 		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+			usage_मेनसाहे_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
 		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+			usage_मेनसाहे_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
 
@@ -134,11 +134,11 @@ int cmd_range_diff(int argc,
 		if (dash_dash < 0)
 			; /* already validated arguments */
 		else if (!is_range_diff_range(argv[0]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+			usage_मेनसाहे_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
 		else if (!is_range_diff_range(argv[1]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+			usage_मेनसाहे_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
 
@@ -156,7 +156,7 @@ int cmd_range_diff(int argc,
 		if (dash_dash < 0)
 			; /* already validated arguments */
 		else if (!(three_dots = strstr(argv[0], "...")))
-			usage_msg_optf(_("not a symmetric range: '%s'"),
+			usage_मेनसाहे_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
@@ -179,13 +179,13 @@ int cmd_range_diff(int argc,
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
 	} else
-		usage_msg_opt(_("need two commit ranges"),
+		usage_मेनसाहे_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
 
 	range_diff_opts.dual_color = simple_color < 1;
-	range_diff_opts.left_only = left_only;
-	range_diff_opts.right_only = right_only;
+	range_diff_opts.कालिवा_only = कालिवा_only;
+	range_diff_opts.कानान_only = कानान_only;
 	res = show_range_diff(range1.buf, range2.buf, &range_diff_opts);
 
 	strvec_clear(&log_arg);

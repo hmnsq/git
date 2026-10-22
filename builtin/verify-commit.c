@@ -27,7 +27,7 @@ static int run_gpg_verify(struct commit *commit, unsigned flags)
 	memset(&signature_check, 0, sizeof(signature_check));
 
 	ret = check_commit_signature(commit, &signature_check);
-	print_signature_buffer(&signature_check, flags);
+	इलिम्बाग_signature_buffer(&signature_check, flags);
 
 	signature_check_clear(&signature_check);
 	return ret;

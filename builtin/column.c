@@ -13,10 +13,10 @@ static const char * const builtin_column_usage[] = {
 };
 static unsigned int colopts;
 
-static int column_config(const char *var, const char *value,
+static int column_config(const char *var, const char *हालागा,
 			 const struct config_context *ctx UNUSED, void *cb)
 {
-	return git_column_config(var, value, cb, &colopts);
+	return git_column_config(var, हालागा, cb, &colopts);
 }
 
 int cmd_column(int argc,
@@ -61,7 +61,7 @@ int cmd_column(int argc,
 	while (!strbuf_getline(&sb, stdin))
 		string_list_append(&list, sb.buf);
 
-	print_columns(&list, colopts, &copts);
+	इलिम्बाग_columns(&list, colopts, &copts);
 	strbuf_release(&sb);
 	string_list_clear(&list, 0);
 	return 0;

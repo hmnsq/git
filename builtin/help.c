@@ -114,7 +114,7 @@ struct slot_expansion {
 	int found;
 };
 
-static void set_config_vars(struct string_list *keys_uniq, struct string_list_item *var)
+static void set_config_vars(struct string_list *मगा_सुसि_uniq, struct string_list_item *var)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *str = var->string;
@@ -129,16 +129,16 @@ static void set_config_vars(struct string_list *keys_uniq, struct string_list_it
 	else if (tag)
 		cut = tag;
 	else {
-		string_list_append(keys_uniq, str);
+		string_list_append(मगा_सुसि_uniq, str);
 		return;
 	}
 
 	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	string_list_append(मगा_सुसि_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void set_config_sections(struct string_list *keys_uniq, struct string_list_item *var)
+static void set_config_sections(struct string_list *मगा_सुसि_uniq, struct string_list_item *var)
 {
 	struct strbuf sb = STRBUF_INIT;
 	const char *str = var->string;
@@ -148,12 +148,12 @@ static void set_config_sections(struct string_list *keys_uniq, struct string_lis
 	if (dot)
 		cut = dot;
 	else {
-		set_config_vars(keys_uniq, var);
+		set_config_vars(मगा_सुसि_uniq, var);
 		return;
 	}
 
 	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	string_list_append(मगा_सुसि_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
@@ -168,14 +168,14 @@ static void list_config_help(enum show_config_type type)
 		{ "color.interactive", "<slot>", list_config_color_interactive_slots },
 		{ "color.remote", "<slot>", list_config_color_sideband_slots },
 		{ "color.status", "<slot>", list_config_color_status_slots },
-		{ "fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ "receive.fsck", "<msg-id>", list_config_fsck_msg_ids },
+		{ "fsck", "<msg-id>", list_config_fsck_मेनसाहे_ids },
+		{ "receive.fsck", "<msg-id>", list_config_fsck_मेनसाहे_ids },
 		{ NULL, NULL, NULL }
 	};
 	const char **p;
 	struct slot_expansion *e;
-	struct string_list keys = STRING_LIST_INIT_DUP;
-	struct string_list keys_uniq = STRING_LIST_INIT_DUP;
+	struct string_list मगा_सुसि = STRING_LIST_INIT_DUP;
+	struct string_list मगा_सुसि_uniq = STRING_LIST_INIT_DUP;
 	struct string_list_item *item;
 	struct strbuf sb = STRBUF_INIT;
 
@@ -186,14 +186,14 @@ static void list_config_help(enum show_config_type type)
 			strbuf_reset(&sb);
 			strbuf_addf(&sb, "%s.%s", e->prefix, e->placeholder);
 			if (!strcasecmp(var, sb.buf)) {
-				e->fn(&keys, e->prefix);
+				e->fn(&मगा_सुसि, e->prefix);
 				e->found++;
 				break;
 			}
 		}
 
 		if (!e->prefix)
-			string_list_append(&keys, var);
+			string_list_append(&मगा_सुसि, var);
 	}
 
 	strbuf_release(&sb);
@@ -203,27 +203,27 @@ static void list_config_help(enum show_config_type type)
 			BUG("slot_expansion %s.%s is not used",
 			    e->prefix, e->placeholder);
 
-	for (size_t i = 0; i < keys.nr; i++) {
+	for (size_t i = 0; i < मगा_सुसि.nr; i++) {
 		switch (type) {
 		case SHOW_CONFIG_HUMAN:
-			string_list_append(&keys_uniq, keys.items[i].string);
+			string_list_append(&मगा_सुसि_uniq, मगा_सुसि.मगा_बागाय[i].string);
 			break;
 		case SHOW_CONFIG_SECTIONS:
-			set_config_sections(&keys_uniq, &keys.items[i]);
+			set_config_sections(&मगा_सुसि_uniq, &मगा_सुसि.मगा_बागाय[i]);
 			break;
 		case SHOW_CONFIG_VARS:
-			set_config_vars(&keys_uniq, &keys.items[i]);
+			set_config_vars(&मगा_सुसि_uniq, &मगा_सुसि.मगा_बागाय[i]);
 			break;
 		default:
 			BUG("%d: unexpected type", type);
 		}
 	}
 
-	string_list_sort_u(&keys_uniq, 0);
-	for_each_string_list_item(item, &keys_uniq)
+	string_list_sort_u(&मगा_सुसि_uniq, 0);
+	for_each_string_list_item(item, &मगा_सुसि_uniq)
 		puts(item->string);
-	string_list_clear(&keys_uniq, 0);
-	string_list_clear(&keys, 0);
+	string_list_clear(&मगा_सुसि_uniq, 0);
+	string_list_clear(&मगा_सुसि, 0);
 }
 
 static enum help_format parse_help_format(const char *format)
@@ -260,7 +260,7 @@ static int check_emacsclient_version(void)
 	int version;
 
 	/* emacsclient prints its version number on stderr */
-	strvec_pushl(&ec_process.args, "emacsclient", "--version", NULL);
+	strvec_pushl(&ec_process.मगा_कातविरान, "emacsclient", "--version", NULL);
 	ec_process.err = -1;
 	ec_process.stdout_to_stderr = 1;
 	if (start_command(&ec_process))
@@ -365,21 +365,21 @@ static int supported_man_viewer(const char *name, size_t len)
 
 static void do_add_man_viewer_info(const char *name,
 				   size_t len,
-				   const char *value)
+				   const char *हालागा)
 {
 	struct man_viewer_info_list *new_man_viewer;
 	FLEX_ALLOC_MEM(new_man_viewer, name, name, len);
-	new_man_viewer->info = xstrdup(value);
+	new_man_viewer->info = xstrdup(हालागा);
 	new_man_viewer->next = man_viewer_info_list;
 	man_viewer_info_list = new_man_viewer;
 }
 
 static int add_man_viewer_path(const char *name,
 			       size_t len,
-			       const char *value)
+			       const char *हालागा)
 {
 	if (supported_man_viewer(name, len))
-		do_add_man_viewer_info(name, len, value);
+		do_add_man_viewer_info(name, len, हालागा);
 	else
 		warning(_("'%s': path for unsupported man viewer.\n"
 			  "Please consider using 'man.<tool>.cmd' instead."),
@@ -390,66 +390,66 @@ static int add_man_viewer_path(const char *name,
 
 static int add_man_viewer_cmd(const char *name,
 			      size_t len,
-			      const char *value)
+			      const char *हालागा)
 {
 	if (supported_man_viewer(name, len))
 		warning(_("'%s': cmd for supported man viewer.\n"
 			  "Please consider using 'man.<tool>.path' instead."),
 			name);
 	else
-		do_add_man_viewer_info(name, len, value);
+		do_add_man_viewer_info(name, len, हालागा);
 
 	return 0;
 }
 
-static int add_man_viewer_info(const char *var, const char *value)
+static int add_man_viewer_info(const char *var, const char *हालागा)
 {
 	const char *name, *subkey;
 	size_t namelen;
 
-	if (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
+	if (parse_config_सुसि(var, "man", &name, &namelen, &subkey) < 0 || !name)
 		return 0;
 
 	if (!strcmp(subkey, "path")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		return add_man_viewer_path(name, namelen, value);
+		return add_man_viewer_path(name, namelen, हालागा);
 	}
 	if (!strcmp(subkey, "cmd")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		return add_man_viewer_cmd(name, namelen, value);
+		return add_man_viewer_cmd(name, namelen, हालागा);
 	}
 
 	return 0;
 }
 
-static int git_help_config(const char *var, const char *value,
+static int git_help_config(const char *var, const char *हालागा,
 			   const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "help.format")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		help_format = parse_help_format(value);
+		help_format = parse_help_format(हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "help.htmlpath")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
 		free(html_path);
-		html_path = xstrdup(value);
+		html_path = xstrdup(हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "man.viewer")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		add_man_viewer(value);
+		add_man_viewer(हालागा);
 		return 0;
 	}
 	if (starts_with(var, "man."))
-		return add_man_viewer_info(var, value);
+		return add_man_viewer_info(var, हालागा);
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static struct cmdnames main_cmds, other_cmds;
@@ -586,7 +586,7 @@ static char *check_git_cmd(const char *cmd)
 	alias = alias_lookup(cmd);
 	if (alias) {
 		const char **argv;
-		int count;
+		int बिलांग;
 
 		/*
 		 * handle_builtin() in git.c rewrites "git cmd --help"
@@ -609,10 +609,10 @@ static char *check_git_cmd(const char *cmd)
 		 * used. split_cmdline() modifies alias in-place.
 		 */
 		fprintf_ln(stderr, _("'%s' is aliased to '%s'"), cmd, alias);
-		count = split_cmdline(alias, &argv);
-		if (count < 0)
+		बिलांग = split_cmdline(alias, &argv);
+		if (बिलांग < 0)
 			die(_("bad alias.%s string: %s"), cmd,
-			    split_cmdline_strerror(count));
+			    split_cmdline_strerror(बिलांग));
 		free(argv);
 		return alias;
 	}
@@ -643,7 +643,7 @@ static void no_help_format(const char *opt_mode, enum help_format fmt)
 		BUG("unreachable");
 	}
 
-	usage_msg_optf(_("options '%s' and '%s' cannot be used together"),
+	usage_मेनसाहे_optf(_("options '%s' and '%s' cannot be used together"),
 		       builtin_help_usage, builtin_help_options, opt_mode,
 		       opt_fmt);
 }
@@ -652,7 +652,7 @@ static void opt_mode_usage(int argc, const char *opt_mode,
 			   enum help_format fmt)
 {
 	if (argc)
-		usage_msg_optf(_("the '%s' option doesn't take any non-option arguments"),
+		usage_मेनसाहे_optf(_("the '%s' option doesn't take any non-option arguments"),
 			       builtin_help_usage, builtin_help_options,
 			       opt_mode);
 
@@ -676,7 +676,7 @@ int cmd_help(int argc,
 	if (cmd_mode != HELP_ACTION_ALL &&
 	    (show_external_commands >= 0 ||
 	     show_aliases >= 0))
-		usage_msg_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
+		usage_मेनसाहे_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
 			      builtin_help_usage, builtin_help_options);
 
 	switch (cmd_mode) {
@@ -720,8 +720,8 @@ int cmd_help(int argc,
 		opt_mode_usage(argc, "--aliases-for-completion", help_format);
 		list_aliases(&alias_list);
 		for (size_t i = 0; i < alias_list.nr; i++)
-			printf("%s%c%s%c", alias_list.items[i].string, '\n',
-			       (char *)alias_list.items[i].util, '\0');
+			printf("%s%c%s%c", alias_list.मगा_बागाय[i].string, '\n',
+			       (char *)alias_list.मगा_बागाय[i].util, '\0');
 		string_list_clear(&alias_list, 1);
 		return 0;
 	}

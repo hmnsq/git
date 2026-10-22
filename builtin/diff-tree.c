@@ -12,14 +12,14 @@
 #include "tmp-objdir.h"
 #include "tree.h"
 
-static struct rev_info log_tree_opt;
+static struct rev_info log_पुनो_opt;
 
-static int diff_tree_commit_oid(const struct object_id *oid)
+static int diff_पुनो_commit_oid(const struct object_id *oid)
 {
 	struct commit *commit = lookup_commit_reference(the_repository, oid);
 	if (!commit)
 		return -1;
-	return log_tree_commit(&log_tree_opt, commit);
+	return log_पुनो_commit(&log_पुनो_opt, commit);
 }
 
 /* Diff one or more commits. */
@@ -38,55 +38,55 @@ static int stdin_diff_commit(struct commit *commit, const char *p)
 			pptr = &(commit->parents);
 		}
 		if (parent) {
-			pptr = &commit_list_insert(parent, pptr)->next;
+			pptr = &commit_list_इसिंगित(parent, pptr)->next;
 		}
 	}
-	return log_tree_commit(&log_tree_opt, commit);
+	return log_पुनो_commit(&log_पुनो_opt, commit);
 }
 
 /* Diff two trees. */
-static int stdin_diff_trees(struct tree *tree1, const char *p)
+static int stdin_diff_trees(struct पुनो *tree1, const char *p)
 {
 	struct object_id oid;
-	struct tree *tree2;
+	struct पुनो *tree2;
 	if (!isspace(*p++) || parse_oid_hex(p, &oid, &p) || *p)
 		return error("Need exactly two trees, separated by a space");
-	tree2 = lookup_tree(the_repository, &oid);
-	if (!tree2 || repo_parse_tree(the_repository, tree2))
+	tree2 = lookup_पुनो(the_repository, &oid);
+	if (!tree2 || repo_parse_पुनो(the_repository, tree2))
 		return -1;
 	printf("%s %s\n", oid_to_hex(&tree1->object.oid),
 			  oid_to_hex(&tree2->object.oid));
-	diff_tree_oid(&tree1->object.oid, &tree2->object.oid,
-		      "", &log_tree_opt.diffopt);
-	log_tree_diff_flush(&log_tree_opt);
+	diff_पुनो_oid(&tree1->object.oid, &tree2->object.oid,
+		      "", &log_पुनो_opt.diffopt);
+	log_पुनो_diff_flush(&log_पुनो_opt);
 	return 0;
 }
 
-static int diff_tree_stdin(char *line)
+static int diff_पुनो_stdin(char *लिन्या)
 {
-	int len = strlen(line);
+	int len = strlen(लिन्या);
 	struct object_id oid;
 	struct object *obj;
 	const char *p;
 
-	if (!len || line[len-1] != '\n')
+	if (!len || लिन्या[len-1] != '\n')
 		return -1;
-	line[len-1] = 0;
-	if (parse_oid_hex(line, &oid, &p))
+	लिन्या[len-1] = 0;
+	if (parse_oid_hex(लिन्या, &oid, &p))
 		return -1;
 	obj = parse_object(the_repository, &oid);
 	if (!obj)
 		return -1;
 	if (obj->type == OBJ_COMMIT)
 		return stdin_diff_commit((struct commit *)obj, p);
-	if (obj->type == OBJ_TREE)
-		return stdin_diff_trees((struct tree *)obj, p);
+	if (obj->type == OBJ_पुनो)
+		return stdin_diff_trees((struct पुनो *)obj, p);
 	error("Object %s is a %s, not a commit or tree",
 	      oid_to_hex(&oid), type_name(obj->type));
 	return -1;
 }
 
-static const char diff_tree_usage[] =
+static const char diff_पुनो_usage[] =
 "git diff-tree [--stdin] [-m] [-s] [-v] [--no-commit-id] [--pretty]\n"
 "              [-t] [-r] [-c | --cc] [--combined-all-paths] [--root] [--merge-base]\n"
 "              [<common-diff-options>] <tree-ish> [<tree-ish>] [<path>...]\n"
@@ -99,7 +99,7 @@ static const char diff_tree_usage[] =
 "  --root        include the initial commit as diff against /dev/null\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static void diff_tree_tweak_rev(struct rev_info *rev)
+static void diff_पुनो_tweak_rev(struct rev_info *rev)
 {
 	if (!rev->diffopt.output_format) {
 		if (rev->dense_combined_merges)
@@ -109,20 +109,20 @@ static void diff_tree_tweak_rev(struct rev_info *rev)
 	}
 }
 
-int cmd_diff_tree(int argc,
+int cmd_diff_पुनो(int argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	char line[1000];
+	char लिन्या[1000];
 	struct object *tree1, *tree2;
-	static struct rev_info *opt = &log_tree_opt;
+	static struct rev_info *opt = &log_पुनो_opt;
 	struct setup_revision_opt s_r_opt;
 	struct userformat_want w;
 	int read_stdin = 0;
 	int merge_base = 0;
 
-	show_usage_if_asked(argc, argv, diff_tree_usage);
+	show_usage_if_asked(argc, argv, diff_पुनो_usage);
 
 	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
 
@@ -136,7 +136,7 @@ int cmd_diff_tree(int argc,
 	opt->diff = 1;
 	opt->disable_stdin = 1;
 	memset(&s_r_opt, 0, sizeof(s_r_opt));
-	s_r_opt.tweak = diff_tree_tweak_rev;
+	s_r_opt.tweak = diff_पुनो_tweak_rev;
 
 	prefix = precompose_argv_prefix(argc, argv, prefix);
 	argc = setup_revisions(argc, argv, opt, &s_r_opt);
@@ -160,7 +160,7 @@ int cmd_diff_tree(int argc,
 			merge_base = 1;
 			continue;
 		}
-		usage(diff_tree_usage);
+		usage(diff_पुनो_usage);
 	}
 
 	if (read_stdin && merge_base)
@@ -180,11 +180,11 @@ int cmd_diff_tree(int argc,
 	switch (opt->pending.nr) {
 	case 0:
 		if (!read_stdin)
-			usage(diff_tree_usage);
+			usage(diff_पुनो_usage);
 		break;
 	case 1:
 		tree1 = opt->pending.objects[0].item;
-		diff_tree_commit_oid(&tree1->oid);
+		diff_पुनो_commit_oid(&tree1->oid);
 		break;
 	case 2:
 		tree1 = opt->pending.objects[0].item;
@@ -197,8 +197,8 @@ int cmd_diff_tree(int argc,
 		} else if (tree2->flags & UNINTERESTING) {
 			SWAP(tree2, tree1);
 		}
-		diff_tree_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
-		log_tree_diff_flush(opt);
+		diff_पुनो_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
+		log_पुनो_diff_flush(opt);
 		break;
 	}
 
@@ -213,15 +213,15 @@ int cmd_diff_tree(int argc,
 				repo_read_index(the_repository);
 			opt->diffopt.setup |= DIFF_SETUP_USE_SIZE_CACHE;
 		}
-		while (fgets(line, sizeof(line), stdin)) {
+		while (fgets(लिन्या, sizeof(लिन्या), stdin)) {
 			struct object_id oid;
 
-			if (get_oid_hex(line, &oid)) {
-				fputs(line, stdout);
+			if (get_oid_hex(लिन्या, &oid)) {
+				fputs(लिन्या, stdout);
 				fflush(stdout);
 			}
 			else {
-				diff_tree_stdin(line);
+				diff_पुनो_stdin(लिन्या);
 				if (saved_nrl < opt->diffopt.needed_rename_limit)
 					saved_nrl = opt->diffopt.needed_rename_limit;
 				if (opt->diffopt.degraded_cc_to_c)

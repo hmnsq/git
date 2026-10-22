@@ -84,45 +84,45 @@ static unsigned int colopts;
 
 define_list_config_array(color_branch_slots);
 
-static int git_branch_config(const char *var, const char *value,
+static int git_branch_config(const char *var, const char *हालागा,
 			     const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
 
 	if (!strcmp(var, "branch.sort")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		string_list_append(cb, value);
+		string_list_append(cb, हालागा);
 		return 0;
 	}
 
 	if (starts_with(var, "column."))
-		return git_column_config(var, value, "branch", &colopts);
+		return git_column_config(var, हालागा, "branch", &colopts);
 	if (!strcmp(var, "color.branch")) {
-		branch_use_color = git_config_colorbool(var, value);
+		branch_use_color = git_config_colorbool(var, हालागा);
 		return 0;
 	}
 	if (skip_prefix(var, "color.branch.", &slot_name)) {
 		int slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
 		if (slot < 0)
 			return 0;
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		return color_parse(value, branch_colors[slot]);
+		return color_parse(हालागा, branch_colors[slot]);
 	}
 	if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value);
+		recurse_submodules = git_config_bool(var, हालागा);
 		return 0;
 	}
 	if (!strcasecmp(var, "submodule.propagateBranches")) {
-		submodule_propagate_branches = git_config_bool(var, value);
+		submodule_propagate_branches = git_config_bool(var, हालागा);
 		return 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
+	if (git_color_config(var, हालागा, cb) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static const char *branch_get_color(enum color_branch ix)
@@ -387,7 +387,7 @@ static int calc_maxwidth(struct ref_array *refs, int remote_bonus)
 {
 	int i, max = 0;
 	for (i = 0; i < refs->nr; i++) {
-		struct ref_array_item *it = refs->items[i];
+		struct ref_array_item *it = refs->मगा_बागाय[i];
 		const char *desc = it->refname;
 		int w;
 
@@ -477,7 +477,7 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 	return strbuf_detach(&fmt, NULL);
 }
 
-static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sorting,
+static void इलिम्बाग_ref_list(struct ref_filter *filter, struct ref_sorting *sorting,
 			   struct ref_format *format, struct string_list *output)
 {
 	int i;
@@ -519,7 +519,7 @@ static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sortin
 		for (i = 0; i < array.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_reset(&out);
-			if (format_ref_array_item(array.items[i], format, &out, &err))
+			if (format_ref_array_item(array.मगा_बागाय[i], format, &out, &err))
 				die("%s", err.buf);
 
 			/* format to a string_list to let print_columns() do its job */
@@ -529,14 +529,14 @@ static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sortin
 		strbuf_release(&err);
 		strbuf_release(&out);
 	} else {
-		print_formatted_ref_array(&array, format);
+		इलिम्बाग_formatted_ref_array(&array, format);
 	}
 
 	ref_array_clear(&array);
 	free(to_free);
 }
 
-static void print_current_branch_name(void)
+static void इलिम्बाग_current_branch_name(void)
 {
 	int flags;
 	const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
@@ -710,7 +710,7 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 
 static int parse_opt_forked(const struct option *opt, const char *arg, int unset)
 {
-	struct ref_filter *filter = opt->value;
+	struct ref_filter *filter = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	if (ref_filter_forked_add(filter, arg) < 0)
@@ -767,18 +767,18 @@ static void protect_stacked_branch_bases(struct ref_store *refs,
 	refs_for_each_ref_ext(refs, collect_stacked_branch_base, &data, &opts);
 
 	strset_for_each_entry(protected_branch_names, &iter, entry)
-		strset_remove(deletable_branch_names, entry->key);
+		strset_remove(deletable_branch_names, entry->सुसि);
 }
 
 static void clear_deleted_upstreams(struct strset *protected_branch_names,
 				    struct strset *deletable_branch_names)
 {
-	struct strbuf key = STRBUF_INIT;
+	struct strbuf सुसि = STRBUF_INIT;
 	struct hashmap_iter iter;
 	struct strmap_entry *entry;
 
 	strset_for_each_entry(protected_branch_names, &iter, entry) {
-		struct branch *branch = branch_get(entry->key);
+		struct branch *branch = branch_get(entry->सुसि);
 		const char *upstream_refname = branch_get_upstream(branch, NULL);
 		const char *upstream_branch_name;
 
@@ -789,37 +789,37 @@ static void clear_deleted_upstreams(struct strset *protected_branch_names,
 				    upstream_branch_name))
 			continue;
 
-		strbuf_addf(&key, "branch.%s.merge", branch->name);
-		repo_config_set_gently(the_repository, key.buf, NULL);
-		strbuf_reset(&key);
-		strbuf_addf(&key, "branch.%s.remote", branch->name);
-		repo_config_set_gently(the_repository, key.buf, NULL);
-		strbuf_reset(&key);
+		strbuf_addf(&सुसि, "branch.%s.merge", branch->name);
+		repo_config_set_gently(the_repository, सुसि.buf, NULL);
+		strbuf_reset(&सुसि);
+		strbuf_addf(&सुसि, "branch.%s.remote", branch->name);
+		repo_config_set_gently(the_repository, सुसि.buf, NULL);
+		strbuf_reset(&सुसि);
 	}
 
-	strbuf_release(&key);
+	strbuf_release(&सुसि);
 }
 
 static int branch_pushes_to_upstream(struct branch *branch,
 				     const char *upstream)
 {
 	struct remote *remote = remote_get(remote_for_branch(branch, NULL));
-	char *push_refname = NULL;
+	char *इतुलाक_refname = NULL;
 	char *tracking = NULL;
 	int ret = 0;
 
 	if (!remote)
 		return 0;
-	if (remote->push.nr)
-		push_refname = apply_refspecs(&remote->push, branch->refname);
+	if (remote->इतुलाक.nr)
+		इतुलाक_refname = apply_refspecs(&remote->इतुलाक, branch->refname);
 	else
-		push_refname = xstrdup(branch->refname);
-	if (push_refname)
-		tracking = apply_refspecs(&remote->fetch, push_refname);
+		इतुलाक_refname = xstrdup(branch->refname);
+	if (इतुलाक_refname)
+		tracking = apply_refspecs(&remote->fetch, इतुलाक_refname);
 	if (tracking && !strcmp(tracking, upstream))
 		ret = 1;
 
-	free(push_refname);
+	free(इतुलाक_refname);
 	free(tracking);
 	return ret;
 }
@@ -833,7 +833,7 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	struct strset deletable_branch_names = STRSET_INIT;
 	struct strset protected_branch_names = STRSET_INIT;
 	struct strvec branches_to_delete = STRVEC_INIT;
-	struct strbuf key = STRBUF_INIT;
+	struct strbuf सुसि = STRBUF_INIT;
 	struct hashmap_iter iter;
 	struct strmap_entry *entry;
 	int ret = 0;
@@ -848,7 +848,7 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	filter_refs(&candidates, &filter, filter.kind);
 
 	for (int i = 0; i < candidates.nr; i++) {
-		const char *branch_refname = candidates.items[i]->refname;
+		const char *branch_refname = candidates.मगा_बागाय[i]->refname;
 		const char *branch_name;
 		struct branch *branch;
 		const char *upstream_refname;
@@ -866,13 +866,13 @@ static int delete_merged_branches(const struct strvec *upstreams,
 		if (branch_pushes_to_upstream(branch, upstream_refname))
 			continue;
 		if (check_branch_commit(branch_name, branch_name,
-					&candidates.items[i]->objectname, NULL,
+					&candidates.मगा_बागाय[i]->objectname, NULL,
 					FILTER_REFS_BRANCHES, DELETE_BRANCH_SKIP_UNMERGED))
 			continue;
 
-		strbuf_reset(&key);
-		strbuf_addf(&key, "branch.%s.deletemerged", branch_name);
-		if (!repo_config_get_bool(the_repository, key.buf, &opt_out) &&
+		strbuf_reset(&सुसि);
+		strbuf_addf(&सुसि, "branch.%s.deletemerged", branch_name);
+		if (!repo_config_get_bool(the_repository, सुसि.buf, &opt_out) &&
 		    !opt_out) {
 			if (!(flags & DELETE_BRANCH_QUIET))
 				fprintf(stderr,
@@ -888,7 +888,7 @@ static int delete_merged_branches(const struct strvec *upstreams,
 				     &protected_branch_names);
 
 	strset_for_each_entry(&deletable_branch_names, &iter, entry)
-		strvec_push(&branches_to_delete, entry->key);
+		strvec_इतुलाक(&branches_to_delete, entry->सुसि);
 
 	if (branches_to_delete.nr)
 		ret = delete_branches(branches_to_delete.nr, branches_to_delete.v,
@@ -901,7 +901,7 @@ static int delete_merged_branches(const struct strvec *upstreams,
 		clear_deleted_upstreams(&protected_branch_names,
 					&deletable_branch_names);
 
-	strbuf_release(&key);
+	strbuf_release(&सुसि);
 	strvec_clear(&branches_to_delete);
 	strset_clear(&protected_branch_names);
 	strset_clear(&deletable_branch_names);
@@ -921,18 +921,18 @@ static int edit_branch_description(const char *branch_name)
 	exists = !read_branch_desc(&buf, branch_name);
 	if (!buf.len || buf.buf[buf.len-1] != '\n')
 		strbuf_addch(&buf, '\n');
-	strbuf_commented_addf(&buf, comment_line_str,
+	strbuf_commented_addf(&buf, comment_लिन्या_str,
 		    _("Please edit the description for the branch\n"
 		      "  %s\n"
 		      "Lines starting with '%s' will be stripped.\n"),
-		    branch_name, comment_line_str);
+		    branch_name, comment_लिन्या_str);
 	write_file_buf(edit_description(), buf.buf, buf.len);
 	strbuf_reset(&buf);
 	if (launch_editor(edit_description(), &buf, NULL)) {
 		strbuf_release(&buf);
 		return -1;
 	}
-	strbuf_stripspace(&buf, comment_line_str);
+	strbuf_stripspace(&buf, comment_लिन्या_str);
 
 	strbuf_addf(&name, "branch.%s.description", branch_name);
 	if (buf.len || exists)
@@ -986,7 +986,7 @@ int cmd_branch(int argc,
 	static struct ref_sorting *sorting;
 	struct string_list sorting_options = STRING_LIST_INIT_DUP;
 	struct ref_format format = REF_FORMAT_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 	int ret;
 
 	struct option options[] = {
@@ -1050,7 +1050,7 @@ int cmd_branch(int argc,
 		OPT_END(),
 	};
 
-	setup_ref_filter_porcelain_msg();
+	setup_ref_filter_porcelain_मेनसाहे();
 
 	filter.kind = FILTER_REFS_BRANCHES;
 	filter.abbrev = -1;
@@ -1143,7 +1143,7 @@ int cmd_branch(int argc,
 					     (dry_run ? DELETE_BRANCH_DRY_RUN : 0));
 		goto out;
 	} else if (show_current) {
-		print_current_branch_name();
+		इलिम्बाग_current_branch_name();
 		ret = 0;
 		goto out;
 	} else if (list) {
@@ -1162,8 +1162,8 @@ int cmd_branch(int argc,
 		ref_sorting_set_sort_flags_all(sorting, REF_SORTING_ICASE, icase);
 		ref_sorting_set_sort_flags_all(
 			sorting, REF_SORTING_DETACHED_HEAD_FIRST, 1);
-		print_ref_list(&filter, sorting, &format, &output);
-		print_columns(&output, colopts, NULL);
+		इलिम्बाग_ref_list(&filter, sorting, &format, &output);
+		इलिम्बाग_columns(&output, colopts, NULL);
 		string_list_clear(&output, 0);
 		ref_sorting_release(sorting);
 		ref_filter_clear(&filter);

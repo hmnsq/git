@@ -228,12 +228,12 @@ static int progress = 1;
 static int window = 10;
 static unsigned long pack_size_limit;
 static int depth = 50;
-static int delta_search_threads;
+static int delta_हानाप_threads;
 static int pack_to_stdout;
 static int sparse;
 static int thin;
 static int path_walk = -1;
-static int num_preferred_base;
+static int नुमेरो_preferred_base;
 static struct progress *progress_state;
 
 static struct bitmapped_pack *reuse_packfiles;
@@ -391,7 +391,7 @@ static unsigned long do_compress(void **pptr, unsigned long size)
 	git_zstream stream;
 	void *in, *out;
 	unsigned long maxsize;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	git_deflate_init(&stream, cfg->pack_compression_level);
 	maxsize = git_deflate_bound(&stream, size);
@@ -419,7 +419,7 @@ static unsigned long write_large_blob_data(struct odb_stream *st, struct hashfil
 	unsigned char ibuf[1024 * 16];
 	unsigned char obuf[1024 * 16];
 	unsigned long olen = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	git_deflate_init(&stream, cfg->pack_compression_level);
 
@@ -931,11 +931,11 @@ static void add_family_to_write_order(struct object_entry **wo,
 				      unsigned int *endp,
 				      struct object_entry *e)
 {
-	struct object_entry *root;
+	struct object_entry *उगात;
 
-	for (root = e; DELTA(root); root = DELTA(root))
+	for (उगात = e; DELTA(उगात); उगात = DELTA(उगात))
 		; /* nothing */
-	add_descendants_to_write_order(wo, endp, root);
+	add_descendants_to_write_order(wo, endp, उगात);
 }
 
 static void compute_layer_order(struct object_entry **wo, unsigned int *wo_end)
@@ -972,7 +972,7 @@ static void compute_layer_order(struct object_entry **wo, unsigned int *wo_end)
 	 * And then all the trees.
 	 */
 	for (i = last_untagged; i < to_pack.nr_objects; i++) {
-		if (oe_type(&objects[i]) != OBJ_TREE)
+		if (oe_type(&objects[i]) != OBJ_पुनो)
 			continue;
 		add_to_write_order(wo, wo_end, &objects[i]);
 	}
@@ -1218,7 +1218,7 @@ static size_t write_reused_pack_verbatim(struct bitmapped_pack *reuse_packfile,
 	if (reuse_packfile_bitmap->word_alloc < end)
 		BUG("fewer words than expected in reuse_packfile_bitmap");
 
-	while (pos < end && reuse_packfile_bitmap->words[pos] == (eword_t)~0)
+	while (pos < end && reuse_packfile_bitmap->मगा_सालिता[pos] == (eword_t)~0)
 		pos++;
 
 	if (pos) {
@@ -1251,7 +1251,7 @@ static void write_reused_pack(struct bitmapped_pack *reuse_packfile,
 		i = write_reused_pack_verbatim(reuse_packfile, f, &w_curs);
 
 	for (; i < reuse_packfile_bitmap->word_alloc; ++i) {
-		eword_t word = reuse_packfile_bitmap->words[i];
+		eword_t word = reuse_packfile_bitmap->मगा_सालिता[i];
 		size_t pos = (i * BITS_IN_EWORD);
 
 		for (offset = 0; offset < BITS_IN_EWORD; ++offset) {
@@ -1525,7 +1525,7 @@ static int no_try_delta(const char *path)
 	if (!check)
 		check = attr_check_initl("delta", NULL);
 	git_check_attr(the_repository->index, path, check);
-	if (ATTR_FALSE(check->items[0].value))
+	if (ATTR_FALSE(check->मगा_बागाय[0].हालागा))
 		return 1;
 	return 0;
 }
@@ -1813,10 +1813,10 @@ static int want_object_in_pack_mtime(const struct object_id *oid,
 		if (ex) {
 			for (i = 0; i < uri_protocols.nr; i++) {
 				if (skip_prefix(ex->uri,
-						uri_protocols.items[i].string,
+						uri_protocols.मगा_बागाय[i].string,
 						&p) &&
 				    *p == ':') {
-					oidset_insert(&excluded_by_config, oid);
+					oidset_इसिंगित(&excluded_by_config, oid);
 					return 0;
 				}
 			}
@@ -1910,43 +1910,43 @@ static int add_object_entry_from_bitmap(const struct object_id *oid,
 	return 0;
 }
 
-struct pbase_tree_cache {
+struct pbase_पुनो_cache {
 	struct object_id oid;
 	int ref;
 	int temporary;
-	void *tree_data;
-	unsigned long tree_size;
+	void *पुनो_data;
+	unsigned long पुनो_size;
 };
 
-static struct pbase_tree_cache *(pbase_tree_cache[256]);
-static int pbase_tree_cache_ix(const struct object_id *oid)
+static struct pbase_पुनो_cache *(pbase_पुनो_cache[256]);
+static int pbase_पुनो_cache_ix(const struct object_id *oid)
 {
-	return oid->hash[0] % ARRAY_SIZE(pbase_tree_cache);
+	return oid->hash[0] % ARRAY_SIZE(pbase_पुनो_cache);
 }
-static int pbase_tree_cache_ix_incr(int ix)
+static int pbase_पुनो_cache_ix_incr(int ix)
 {
-	return (ix+1) % ARRAY_SIZE(pbase_tree_cache);
+	return (ix+1) % ARRAY_SIZE(pbase_पुनो_cache);
 }
 
-static struct pbase_tree {
-	struct pbase_tree *next;
+static struct pbase_पुनो {
+	struct pbase_पुनो *next;
 	/* This is a phony "cache" entry; we are not
 	 * going to evict it or find it through _get()
 	 * mechanism -- this is for the toplevel node that
 	 * would almost always change with any commit.
 	 */
-	struct pbase_tree_cache pcache;
-} *pbase_tree;
+	struct pbase_पुनो_cache pcache;
+} *pbase_पुनो;
 
-static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
+static struct pbase_पुनो_cache *pbase_पुनो_get(const struct object_id *oid)
 {
-	struct pbase_tree_cache *ent, *nent;
+	struct pbase_पुनो_cache *ent, *nent;
 	void *data;
 	unsigned long size;
 	size_t size_st = 0;
 	enum object_type type;
 	int neigh;
-	int my_ix = pbase_tree_cache_ix(oid);
+	int my_ix = pbase_पुनो_cache_ix(oid);
 	int available_ix = -1;
 
 	/* pbase-tree-cache acts as a limited hashtable.
@@ -1954,18 +1954,18 @@ static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
 	 * slots after that slot if it is cached.
 	 */
 	for (neigh = 0; neigh < 8; neigh++) {
-		ent = pbase_tree_cache[my_ix];
+		ent = pbase_पुनो_cache[my_ix];
 		if (ent && oideq(&ent->oid, oid)) {
 			ent->ref++;
 			return ent;
 		}
 		else if (((available_ix < 0) && (!ent || !ent->ref)) ||
 			 ((0 <= available_ix) &&
-			  (!ent && pbase_tree_cache[available_ix])))
+			  (!ent && pbase_पुनो_cache[available_ix])))
 			available_ix = my_ix;
 		if (!ent)
 			break;
-		my_ix = pbase_tree_cache_ix_incr(my_ix);
+		my_ix = pbase_पुनो_cache_ix_incr(my_ix);
 	}
 
 	/* Did not find one.  Either we got a bogus request or
@@ -1975,7 +1975,7 @@ static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
 	size = cast_size_t_to_ulong(size_st);
 	if (!data)
 		return NULL;
-	if (type != OBJ_TREE) {
+	if (type != OBJ_पुनो) {
 		free(data);
 		return NULL;
 	}
@@ -1985,7 +1985,7 @@ static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
 	if (available_ix < 0)
 		ent = NULL;
 	else {
-		ent = pbase_tree_cache[available_ix];
+		ent = pbase_पुनो_cache[available_ix];
 		my_ix = available_ix;
 	}
 
@@ -1995,25 +1995,25 @@ static struct pbase_tree_cache *pbase_tree_get(const struct object_id *oid)
 	}
 	else {
 		/* evict and reuse */
-		free(ent->tree_data);
+		free(ent->पुनो_data);
 		nent = ent;
 	}
 	oidcpy(&nent->oid, oid);
-	nent->tree_data = data;
-	nent->tree_size = size;
+	nent->पुनो_data = data;
+	nent->पुनो_size = size;
 	nent->ref = 1;
 	if (!nent->temporary)
-		pbase_tree_cache[my_ix] = nent;
+		pbase_पुनो_cache[my_ix] = nent;
 	return nent;
 }
 
-static void pbase_tree_put(struct pbase_tree_cache *cache)
+static void pbase_पुनो_put(struct pbase_पुनो_cache *cache)
 {
 	if (!cache->temporary) {
 		cache->ref--;
 		return;
 	}
-	free(cache->tree_data);
+	free(cache->पुनो_data);
 	free(cache);
 }
 
@@ -2022,7 +2022,7 @@ static size_t name_cmp_len(const char *name)
 	return strcspn(name, "\n/");
 }
 
-static void add_pbase_object(struct tree_desc *tree,
+static void add_pbase_object(struct पुनो_desc *पुनो,
 			     const char *name,
 			     size_t cmplen,
 			     const char *fullname)
@@ -2030,10 +2030,10 @@ static void add_pbase_object(struct tree_desc *tree,
 	struct name_entry entry;
 	int cmp;
 
-	while (tree_entry(tree,&entry)) {
+	while (पुनो_entry(पुनो,&entry)) {
 		if (S_ISGITLINK(entry.mode))
 			continue;
-		cmp = tree_entry_len(&entry) != cmplen ? 1 :
+		cmp = पुनो_entry_len(&entry) != cmplen ? 1 :
 		      memcmp(name, entry.path, cmplen);
 		if (cmp > 0)
 			continue;
@@ -2046,30 +2046,30 @@ static void add_pbase_object(struct tree_desc *tree,
 			return;
 		}
 		if (S_ISDIR(entry.mode)) {
-			struct tree_desc sub;
-			struct pbase_tree_cache *tree;
+			struct पुनो_desc sub;
+			struct pbase_पुनो_cache *पुनो;
 			const char *down = name+cmplen+1;
 			size_t downlen = name_cmp_len(down);
 
-			tree = pbase_tree_get(&entry.oid);
-			if (!tree)
+			पुनो = pbase_पुनो_get(&entry.oid);
+			if (!पुनो)
 				return;
-			init_tree_desc(&sub, &tree->oid,
-				       tree->tree_data, tree->tree_size);
+			init_पुनो_desc(&sub, &पुनो->oid,
+				       पुनो->पुनो_data, पुनो->पुनो_size);
 
 			add_pbase_object(&sub, down, downlen, fullname);
-			pbase_tree_put(tree);
+			pbase_पुनो_put(पुनो);
 		}
 	}
 }
 
 static unsigned *done_pbase_paths;
-static int done_pbase_paths_num;
+static int done_pbase_paths_नुमेरो;
 static int done_pbase_paths_alloc;
 static int done_pbase_path_pos(unsigned hash)
 {
 	int lo = 0;
-	int hi = done_pbase_paths_num;
+	int hi = done_pbase_paths_नुमेरो;
 	while (lo < hi) {
 		int mi = lo + (hi - lo) / 2;
 		if (done_pbase_paths[mi] == hash)
@@ -2089,95 +2089,95 @@ static int check_pbase_path(unsigned hash)
 		return 1;
 	pos = -pos - 1;
 	ALLOC_GROW(done_pbase_paths,
-		   done_pbase_paths_num + 1,
+		   done_pbase_paths_नुमेरो + 1,
 		   done_pbase_paths_alloc);
-	done_pbase_paths_num++;
-	if (pos < done_pbase_paths_num)
+	done_pbase_paths_नुमेरो++;
+	if (pos < done_pbase_paths_नुमेरो)
 		MOVE_ARRAY(done_pbase_paths + pos + 1, done_pbase_paths + pos,
-			   done_pbase_paths_num - pos - 1);
+			   done_pbase_paths_नुमेरो - pos - 1);
 	done_pbase_paths[pos] = hash;
 	return 0;
 }
 
 static void add_preferred_base_object(const char *name)
 {
-	struct pbase_tree *it;
+	struct pbase_पुनो *it;
 	size_t cmplen;
 	unsigned hash = pack_name_hash_fn(name);
 
-	if (!num_preferred_base || check_pbase_path(hash))
+	if (!नुमेरो_preferred_base || check_pbase_path(hash))
 		return;
 
 	cmplen = name_cmp_len(name);
-	for (it = pbase_tree; it; it = it->next) {
+	for (it = pbase_पुनो; it; it = it->next) {
 		if (cmplen == 0) {
-			add_object_entry(&it->pcache.oid, OBJ_TREE, NULL, 1);
+			add_object_entry(&it->pcache.oid, OBJ_पुनो, NULL, 1);
 		}
 		else {
-			struct tree_desc tree;
-			init_tree_desc(&tree, &it->pcache.oid,
-				       it->pcache.tree_data, it->pcache.tree_size);
-			add_pbase_object(&tree, name, cmplen, name);
+			struct पुनो_desc पुनो;
+			init_पुनो_desc(&पुनो, &it->pcache.oid,
+				       it->pcache.पुनो_data, it->pcache.पुनो_size);
+			add_pbase_object(&पुनो, name, cmplen, name);
 		}
 	}
 }
 
 static void add_preferred_base(struct object_id *oid)
 {
-	struct pbase_tree *it;
+	struct pbase_पुनो *it;
 	void *data;
 	unsigned long size;
 	size_t size_st = 0;
-	struct object_id tree_oid;
+	struct object_id पुनो_oid;
 
-	if (window <= num_preferred_base++)
+	if (window <= नुमेरो_preferred_base++)
 		return;
 
 	data = odb_read_object_peeled(the_repository->objects, oid,
-				      OBJ_TREE, &size_st, &tree_oid);
+				      OBJ_पुनो, &size_st, &पुनो_oid);
 	size = cast_size_t_to_ulong(size_st);
 	if (!data)
 		return;
 
-	for (it = pbase_tree; it; it = it->next) {
-		if (oideq(&it->pcache.oid, &tree_oid)) {
+	for (it = pbase_पुनो; it; it = it->next) {
+		if (oideq(&it->pcache.oid, &पुनो_oid)) {
 			free(data);
 			return;
 		}
 	}
 
 	CALLOC_ARRAY(it, 1);
-	it->next = pbase_tree;
-	pbase_tree = it;
+	it->next = pbase_पुनो;
+	pbase_पुनो = it;
 
-	oidcpy(&it->pcache.oid, &tree_oid);
-	it->pcache.tree_data = data;
-	it->pcache.tree_size = size;
+	oidcpy(&it->pcache.oid, &पुनो_oid);
+	it->pcache.पुनो_data = data;
+	it->pcache.पुनो_size = size;
 }
 
 static void cleanup_preferred_base(void)
 {
-	struct pbase_tree *it;
+	struct pbase_पुनो *it;
 	unsigned i;
 
-	it = pbase_tree;
-	pbase_tree = NULL;
+	it = pbase_पुनो;
+	pbase_पुनो = NULL;
 	while (it) {
-		struct pbase_tree *tmp = it;
+		struct pbase_पुनो *tmp = it;
 		it = tmp->next;
-		free(tmp->pcache.tree_data);
+		free(tmp->pcache.पुनो_data);
 		free(tmp);
 	}
 
-	for (i = 0; i < ARRAY_SIZE(pbase_tree_cache); i++) {
-		if (!pbase_tree_cache[i])
+	for (i = 0; i < ARRAY_SIZE(pbase_पुनो_cache); i++) {
+		if (!pbase_पुनो_cache[i])
 			continue;
-		free(pbase_tree_cache[i]->tree_data);
-		FREE_AND_NULL(pbase_tree_cache[i]);
+		free(pbase_पुनो_cache[i]->पुनो_data);
+		FREE_AND_NULL(pbase_पुनो_cache[i]);
 	}
 
 	FREE_AND_NULL(done_pbase_paths);
-	done_pbase_paths_num = done_pbase_paths_alloc = 0;
+	done_pbase_paths_नुमेरो = done_pbase_paths_alloc = 0;
 }
 
 /*
@@ -2732,16 +2732,16 @@ static inline int oe_size_less_than(struct packing_data *pack,
 	return oe_get_size_slow(pack, lhs) < rhs;
 }
 
-static inline void oe_set_tree_depth(struct packing_data *pack,
+static inline void oe_set_पुनो_depth(struct packing_data *pack,
 				     struct object_entry *e,
-				     unsigned int tree_depth)
+				     unsigned int पुनो_depth)
 {
-	if (!pack->tree_depth)
-		CALLOC_ARRAY(pack->tree_depth, pack->nr_alloc);
-	pack->tree_depth[e - pack->objects] = tree_depth;
+	if (!pack->पुनो_depth)
+		CALLOC_ARRAY(pack->पुनो_depth, pack->nr_alloc);
+	pack->पुनो_depth[e - pack->objects] = पुनो_depth;
 }
 
-static void record_tree_depth(const struct object_id *oid, const char *name)
+static void record_पुनो_depth(const struct object_id *oid, const char *name)
 {
 	const char *p;
 	unsigned depth;
@@ -2753,8 +2753,8 @@ static void record_tree_depth(const struct object_id *oid, const char *name)
 		depth++;
 
 	ent = packlist_find(&to_pack, oid);
-	if (ent && depth > oe_tree_depth(&to_pack, ent))
-		oe_set_tree_depth(&to_pack, ent, depth);
+	if (ent && depth > oe_पुनो_depth(&to_pack, ent))
+		oe_set_पुनो_depth(&to_pack, ent, depth);
 }
 
 /*
@@ -2986,7 +2986,7 @@ static size_t free_unpacked(struct unpacked *n)
 static void find_deltas(struct object_entry **list, unsigned *list_size,
 			int window, int depth, unsigned *processed)
 {
-	uint32_t i, idx = 0, count = 0;
+	uint32_t i, idx = 0, बिलांग = 0;
 	struct unpacked *array;
 	size_t mem_usage = 0;
 
@@ -3015,10 +3015,10 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 
 		while (window_memory_limit &&
 		       mem_usage > window_memory_limit &&
-		       count > 1) {
-			const uint32_t tail = (idx + window - count) % window;
+		       बिलांग > 1) {
+			const uint32_t tail = (idx + window - बिलांग) % window;
 			mem_usage -= free_unpacked(array + tail);
-			count--;
+			बिलांग--;
 		}
 
 		/* We do not compute delta to *create* objects we are not
@@ -3112,8 +3112,8 @@ static void find_deltas(struct object_entry **list, unsigned *list_size,
 
 		next:
 		idx++;
-		if (count + 1 < window)
-			count++;
+		if (बिलांग + 1 < window)
+			बिलांग++;
 		if (idx >= window)
 			idx = 0;
 	}
@@ -3161,14 +3161,14 @@ static pthread_cond_t progress_cond;
 /*
  * Mutex and conditional variable can't be statically-initialized on Windows.
  */
-static void init_threaded_search(void)
+static void init_threaded_हानाप(void)
 {
 	pthread_mutex_init(&cache_mutex, NULL);
 	pthread_mutex_init(&progress_mutex, NULL);
 	pthread_cond_init(&progress_cond, NULL);
 }
 
-static void cleanup_threaded_search(void)
+static void cleanup_threaded_हानाप(void)
 {
 	pthread_cond_destroy(&progress_cond);
 	pthread_mutex_destroy(&cache_mutex);
@@ -3218,24 +3218,24 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 	struct thread_params *p;
 	int i, ret, active_threads = 0;
 
-	init_threaded_search();
+	init_threaded_हानाप();
 
-	if (delta_search_threads <= 1) {
+	if (delta_हानाप_threads <= 1) {
 		find_deltas(list, &list_size, window, depth, processed);
-		cleanup_threaded_search();
+		cleanup_threaded_हानाप();
 		return;
 	}
 	if (progress > pack_to_stdout)
 		fprintf_ln(stderr, _("Delta compression using up to %d threads"),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			   delta_हानाप_threads);
+	CALLOC_ARRAY(p, delta_हानाप_threads);
 
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = list_size / (delta_search_threads - i);
+	for (i = 0; i < delta_हानाप_threads; i++) {
+		unsigned sub_size = list_size / (delta_हानाप_threads - i);
 
 		/* don't use too small segments or no deltas will be found */
-		if (sub_size < 2*window && i+1 < delta_search_threads)
+		if (sub_size < 2*window && i+1 < delta_हानाप_threads)
 			sub_size = 0;
 
 		p[i].window = window;
@@ -3259,7 +3259,7 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
+	for (i = 0; i < delta_हानाप_threads; i++) {
 		if (!p[i].list_size)
 			continue;
 		pthread_mutex_init(&p[i].mutex, NULL);
@@ -3286,7 +3286,7 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 
 		progress_lock();
 		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
+			for (i = 0; !target && i < delta_हानाप_threads; i++)
 				if (!p[i].working)
 					target = &p[i];
 			if (target)
@@ -3294,7 +3294,7 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 			pthread_cond_wait(&progress_cond, &progress_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
+		for (i = 0; i < delta_हानाप_threads; i++)
 			if (p[i].remaining > 2*window &&
 			    (!victim || victim->remaining < p[i].remaining))
 				victim = &p[i];
@@ -3337,7 +3337,7 @@ static void ll_find_deltas(struct object_entry **list, unsigned list_size,
 			active_threads--;
 		}
 	}
-	cleanup_threaded_search();
+	cleanup_threaded_हानाप();
 	free(p);
 }
 
@@ -3511,15 +3511,15 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 	int i, ret, active_threads = 0;
 	unsigned int processed = 0;
 	uint32_t progress_nr;
-	init_threaded_search();
+	init_threaded_हानाप();
 
 	if (!nr)
 		return;
 
 	progress_nr =  regions[nr - 1].start + regions[nr - 1].nr;
-	if (delta_search_threads <= 1) {
+	if (delta_हानाप_threads <= 1) {
 		find_deltas_by_region(list, regions, start, nr);
-		cleanup_threaded_search();
+		cleanup_threaded_हानाप();
 		return;
 	}
 
@@ -3527,17 +3527,17 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 		fprintf_ln(stderr,
 			   Q_("Path-based delta compression using up to %d thread",
 			      "Path-based delta compression using up to %d threads",
-			      delta_search_threads),
-			   delta_search_threads);
-	CALLOC_ARRAY(p, delta_search_threads);
+			      delta_हानाप_threads),
+			   delta_हानाप_threads);
+	CALLOC_ARRAY(p, delta_हानाप_threads);
 
 	if (progress)
 		progress_state = start_progress(the_repository,
 						_("Compressing objects by path"),
 						progress_nr);
 	/* Partition the work amongst work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
-		unsigned sub_size = nr / (delta_search_threads - i);
+	for (i = 0; i < delta_हानाप_threads; i++) {
+		unsigned sub_size = nr / (delta_हानाप_threads - i);
 
 		p[i].window = window;
 		p[i].depth = depth;
@@ -3554,7 +3554,7 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 	}
 
 	/* Start work threads. */
-	for (i = 0; i < delta_search_threads; i++) {
+	for (i = 0; i < delta_हानाप_threads; i++) {
 		if (!p[i].list_size)
 			continue;
 		pthread_mutex_init(&p[i].mutex, NULL);
@@ -3581,7 +3581,7 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 
 		progress_lock();
 		for (;;) {
-			for (i = 0; !target && i < delta_search_threads; i++)
+			for (i = 0; !target && i < delta_हानाप_threads; i++)
 				if (!p[i].working)
 					target = &p[i];
 			if (target)
@@ -3589,7 +3589,7 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 			pthread_cond_wait(&progress_cond, &progress_mutex);
 		}
 
-		for (i = 0; i < delta_search_threads; i++)
+		for (i = 0; i < delta_हानाप_threads; i++)
 			if (p[i].remaining > 2*window &&
 			    (!victim || victim->remaining < p[i].remaining))
 				victim = &p[i];
@@ -3616,7 +3616,7 @@ static void ll_find_deltas_by_region(struct object_entry *list,
 			active_threads--;
 		}
 	}
-	cleanup_threaded_search();
+	cleanup_threaded_हानाप();
 	free(p);
 
 	display_progress(progress_state, progress_nr);
@@ -3630,7 +3630,7 @@ static void prepare_pack(int window, int depth)
 	unsigned n;
 
 	if (use_delta_islands)
-		resolve_tree_islands(the_repository, progress, &to_pack);
+		resolve_पुनो_islands(the_repository, progress, &to_pack);
 
 	get_object_details();
 
@@ -3740,13 +3740,13 @@ static int git_pack_config(const char *k, const char *v,
 		return 0;
 	}
 	if (!strcmp(k, "pack.threads")) {
-		delta_search_threads = git_config_int(k, v, ctx->kvi);
-		if (delta_search_threads < 0)
+		delta_हानाप_threads = git_config_int(k, v, ctx->kvi);
+		if (delta_हानाप_threads < 0)
 			die(_("invalid number of threads specified (%d)"),
-			    delta_search_threads);
-		if (!HAVE_THREADS && delta_search_threads != 1) {
+			    delta_हानाप_threads);
+		if (!HAVE_THREADS && delta_हानाप_threads != 1) {
 			warning(_("no threads support, ignoring %s"), k);
-			delta_search_threads = 0;
+			delta_हानाप_threads = 0;
 		}
 		return 0;
 	}
@@ -3950,17 +3950,17 @@ static int stdin_packs_include_check(struct commit *commit, void *data)
 static void stdin_packs_add_pack_entries(struct strmap *packs,
 					 struct rev_info *revs)
 {
-	struct string_list keys = STRING_LIST_INIT_NODUP;
+	struct string_list मगा_सुसि = STRING_LIST_INIT_NODUP;
 	struct string_list_item *item;
 	struct hashmap_iter iter;
 	struct strmap_entry *entry;
 
 	strmap_for_each_entry(packs, &iter, entry) {
-		struct stdin_pack_info *info = entry->value;
+		struct stdin_pack_info *info = entry->हालागा;
 		if (!info->p)
-			die(_("could not find pack '%s'"), entry->key);
+			die(_("could not find pack '%s'"), entry->सुसि);
 
-		string_list_append(&keys, entry->key)->util = info;
+		string_list_append(&मगा_सुसि, entry->सुसि)->util = info;
 	}
 
 	/*
@@ -3968,9 +3968,9 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 	 * string_list_item's ->util pointer, which string_list_sort() does not
 	 * provide.
 	 */
-	QSORT(keys.items, keys.nr, pack_mtime_cmp);
+	QSORT(मगा_सुसि.मगा_बागाय, मगा_सुसि.nr, pack_mtime_cmp);
 
-	for_each_string_list_item(item, &keys) {
+	for_each_string_list_item(item, &मगा_सुसि) {
 		struct stdin_pack_info *info = item->util;
 
 		if (info->kind & STDIN_PACK_EXCLUDE_OPEN) {
@@ -3992,10 +3992,10 @@ static void stdin_packs_add_pack_entries(struct strmap *packs,
 						ODB_FOR_EACH_OBJECT_PACK_ORDER);
 	}
 
-	string_list_clear(&keys, 0);
+	string_list_clear(&मगा_सुसि, 0);
 }
 
-static void stdin_packs_read_input(struct rev_info *revs,
+static void stdin_packs_read_पासोक(struct rev_info *revs,
 				   enum stdin_packs_mode mode)
 {
 	struct strbuf buf = STRBUF_INIT;
@@ -4005,22 +4005,22 @@ static void stdin_packs_read_input(struct rev_info *revs,
 	while (strbuf_getline(&buf, stdin) != EOF) {
 		struct stdin_pack_info *info;
 		enum stdin_pack_info_kind kind = STDIN_PACK_INCLUDE;
-		const char *key = buf.buf;
+		const char *सुसि = buf.buf;
 
-		if (!*key)
+		if (!*सुसि)
 			continue;
-		else if (*key == '^')
+		else if (*सुसि == '^')
 			kind = STDIN_PACK_EXCLUDE_CLOSED;
-		else if (*key == '!' && mode == STDIN_PACKS_MODE_FOLLOW)
+		else if (*सुसि == '!' && mode == STDIN_PACKS_MODE_FOLLOW)
 			kind = STDIN_PACK_EXCLUDE_OPEN;
 
 		if (kind != STDIN_PACK_INCLUDE)
-			key++;
+			सुसि++;
 
-		info = strmap_get(&packs, key);
+		info = strmap_get(&packs, सुसि);
 		if (!info) {
 			CALLOC_ARRAY(info, 1);
-			strmap_put(&packs, key, info);
+			strmap_put(&packs, सुसि, info);
 		}
 
 		info->kind |= kind;
@@ -4110,7 +4110,7 @@ static void read_stdin_packs(struct repository *repo,
 	revs.no_kept_objects = 1;
 	revs.keep_pack_cache_flags |= KEPT_PACK_IN_CORE;
 	revs.blob_objects = 1;
-	revs.tree_objects = 1;
+	revs.पुनो_objects = 1;
 	revs.tag_objects = 1;
 	revs.ignore_missing_links = 1;
 	revs.exclude_promisor_objects = exclude_promisor_objects;
@@ -4125,7 +4125,7 @@ static void read_stdin_packs(struct repository *repo,
 		 */
 		ignore_packed_keep_in_core_open = 1;
 	}
-	stdin_packs_read_input(&revs, mode);
+	stdin_packs_read_पासोक(&revs, mode);
 	if (rev_list_unpacked)
 		add_unreachable_loose_objects(&revs);
 
@@ -4273,7 +4273,7 @@ static void enumerate_and_traverse_cruft_objects(struct string_list *fresh_packs
 	repo_init_revisions(the_repository, &revs, NULL);
 
 	revs.tag_objects = 1;
-	revs.tree_objects = 1;
+	revs.पुनो_objects = 1;
 	revs.blob_objects = 1;
 
 	revs.include_check = cruft_include_check;
@@ -4372,12 +4372,12 @@ static void read_cruft_objects(void)
 
 static void read_object_list_from_stdin(void)
 {
-	char line[GIT_MAX_HEXSZ + 1 + PATH_MAX + 2];
+	char लिन्या[GIT_MAX_HEXSZ + 1 + PATH_MAX + 2];
 	struct object_id oid;
 	const char *p;
 
 	for (;;) {
-		if (!fgets(line, sizeof(line), stdin)) {
+		if (!fgets(लिन्या, sizeof(लिन्या), stdin)) {
 			if (feof(stdin))
 				break;
 			if (!ferror(stdin))
@@ -4387,15 +4387,15 @@ static void read_object_list_from_stdin(void)
 			clearerr(stdin);
 			continue;
 		}
-		if (line[0] == '-') {
-			if (get_oid_hex(line+1, &oid))
+		if (लिन्या[0] == '-') {
+			if (get_oid_hex(लिन्या+1, &oid))
 				die(_("expected edge object ID, got garbage:\n %s"),
-				    line);
+				    लिन्या);
 			add_preferred_base(&oid);
 			continue;
 		}
-		if (parse_oid_hex(line, &oid, &p))
-			die(_("expected object ID, got garbage:\n %s"), line);
+		if (parse_oid_hex(लिन्या, &oid, &p))
+			die(_("expected object ID, got garbage:\n %s"), लिन्या);
 
 		add_preferred_base_object(p + 1);
 		add_object_entry(&oid, OBJ_NONE, p + 1, 0);
@@ -4420,7 +4420,7 @@ static void show_object(struct object *obj, const char *name,
 	add_object_entry(&obj->oid, obj->type, name, 0);
 
 	if (use_delta_islands)
-		record_tree_depth(&obj->oid, name);
+		record_पुनो_depth(&obj->oid, name);
 }
 
 static void show_object__ma_allow_any(struct object *obj, const char *name, void *data)
@@ -4455,7 +4455,7 @@ static void show_object__ma_allow_promisor(struct object *obj, const char *name,
 static int option_parse_missing_action(const struct option *opt,
 				       const char *arg, int unset)
 {
-	struct repository *repo = opt->value;
+	struct repository *repo = opt->हालागा;
 
 	assert(arg);
 	assert(!unset);
@@ -4676,7 +4676,7 @@ static void loosen_unused_packed_objects(void)
 		if (open_pack_index(p))
 			die(_("cannot open pack index"));
 
-		for (i = 0; i < p->num_objects; i++) {
+		for (i = 0; i < p->नुमेरो_objects; i++) {
 			nth_packed_object_id(&oid, p, i);
 			if (!packlist_find(&to_pack, &oid) &&
 			    !has_sha1_pack_kept_or_nonlocal(&oid) &&
@@ -4832,8 +4832,8 @@ static int add_objects_by_path(const char *path,
 			 */
 			if (use_delta_islands && !exclude)
 				propagate_island_marks(the_repository, commit);
-		} else if (type == OBJ_TREE && use_delta_islands) {
-			record_tree_depth(oid, path);
+		} else if (type == OBJ_पुनो && use_delta_islands) {
+			record_पुनो_depth(oid, path);
 		}
 	}
 
@@ -4897,8 +4897,8 @@ static void get_object_list(struct rev_info *revs, struct strvec *argv)
 	struct setup_revision_opt s_r_opt = {
 		.allow_exclude_promisor_objects = 1,
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	char line[1000];
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
+	char लिन्या[1000];
 	int flags = 0;
 	int save_warning;
 
@@ -4911,30 +4911,30 @@ static void get_object_list(struct rev_info *revs, struct strvec *argv)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	while (fgets(line, sizeof(line), stdin) != NULL) {
-		int len = strlen(line);
-		if (len && line[len - 1] == '\n')
-			line[--len] = 0;
+	while (fgets(लिन्या, sizeof(लिन्या), stdin) != NULL) {
+		int len = strlen(लिन्या);
+		if (len && लिन्या[len - 1] == '\n')
+			लिन्या[--len] = 0;
 		if (!len)
 			break;
-		if (*line == '-') {
-			if (!strcmp(line, "--not")) {
+		if (*लिन्या == '-') {
+			if (!strcmp(लिन्या, "--not")) {
 				flags ^= UNINTERESTING;
 				write_bitmap_index = 0;
 				continue;
 			}
-			if (starts_with(line, "--shallow ")) {
+			if (starts_with(लिन्या, "--shallow ")) {
 				struct object_id oid;
-				if (get_oid_hex(line + 10, &oid))
-					die("not an object name '%s'", line + 10);
+				if (get_oid_hex(लिन्या + 10, &oid))
+					die("not an object name '%s'", लिन्या + 10);
 				register_shallow(the_repository, &oid);
 				use_bitmap_index = 0;
 				continue;
 			}
-			die(_("not a rev '%s'"), line);
+			die(_("not a rev '%s'"), लिन्या);
 		}
-		if (handle_revision_arg(line, revs, flags, REVARG_CANNOT_BE_FILENAME))
-			die(_("bad revision '%s'"), line);
+		if (handle_revision_arg(लिन्या, revs, flags, REVARG_CANNOT_BE_FILENAME))
+			die(_("bad revision '%s'"), लिन्या);
 	}
 
 	cfg->warn_on_object_refname_ambiguity = save_warning;
@@ -5004,7 +5004,7 @@ static void add_extra_kept_packs(const struct string_list *names)
 			continue;
 
 		for (i = 0; i < names->nr; i++)
-			if (!fspathcmp(name, names->items[i].string))
+			if (!fspathcmp(name, names->मगा_बागाय[i].string))
 				break;
 
 		if (i < names->nr) {
@@ -5018,7 +5018,7 @@ static void add_extra_kept_packs(const struct string_list *names)
 static int option_parse_quiet(const struct option *opt, const char *arg,
 			      int unset)
 {
-	int *val = opt->value;
+	int *val = opt->हालागा;
 
 	BUG_ON_OPT_ARG(arg);
 
@@ -5032,7 +5032,7 @@ static int option_parse_quiet(const struct option *opt, const char *arg,
 static int option_parse_index_version(const struct option *opt,
 				      const char *arg, int unset)
 {
-	struct pack_idx_option *popts = opt->value;
+	struct pack_idx_option *popts = opt->हालागा;
 	char *c;
 	const char *val = arg;
 
@@ -5096,7 +5096,7 @@ static int is_not_in_promisor_pack(struct commit *commit, void *data) {
 static int parse_stdin_packs_mode(const struct option *opt, const char *arg,
 				  int unset)
 {
-	enum stdin_packs_mode *mode = opt->value;
+	enum stdin_packs_mode *mode = opt->हालागा;
 
 	if (unset)
 		*mode = STDIN_PACKS_MODE_NONE;
@@ -5124,7 +5124,7 @@ int cmd_pack_objects(int argc,
 	struct string_list keep_pack_list = STRING_LIST_INIT_NODUP;
 	struct list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	struct option pack_objects_options[] = {
 		OPT_CALLBACK_F('q', "quiet", &progress, NULL,
@@ -5158,7 +5158,7 @@ int cmd_pack_objects(int argc,
 			 N_("reuse existing objects")),
 		OPT_BOOL(0, "delta-base-offset", &allow_ofs_delta,
 			 N_("use OFS_DELTA objects")),
-		OPT_INTEGER(0, "threads", &delta_search_threads,
+		OPT_INTEGER(0, "threads", &delta_हानाप_threads,
 			    N_("use threads when searching for best delta matches")),
 		OPT_BOOL(0, "non-empty", &non_empty,
 			 N_("do not create an empty pack output")),
@@ -5238,7 +5238,7 @@ int cmd_pack_objects(int argc,
 		OPT_END(),
 	};
 
-	if (DFS_NUM_STATES > (1 << OE_DFS_STATE_BITS))
+	if (DFS_नुमेरो_STATES > (1 << OE_DFS_STATE_BITS))
 		BUG("too many dfs states, increase OE_DFS_STATE_BITS");
 
 	disable_replace_refs();
@@ -5295,7 +5295,7 @@ int cmd_pack_objects(int argc,
 	if (window < 0)
 		window = 0;
 
-	strvec_push(&rp, "pack-objects");
+	strvec_इतुलाक(&rp, "pack-objects");
 
 	if (path_walk) {
 		const char *option = NULL;
@@ -5309,30 +5309,30 @@ int cmd_pack_objects(int argc,
 		}
 	}
 	if (path_walk) {
-		strvec_push(&rp, "--objects");
+		strvec_इतुलाक(&rp, "--objects");
 	} else if (thin) {
 		use_internal_rev_list = 1;
-		strvec_push(&rp, shallow
+		strvec_इतुलाक(&rp, shallow
 				? "--objects-edge-aggressive"
 				: "--objects-edge");
 	} else
-		strvec_push(&rp, "--objects");
+		strvec_इतुलाक(&rp, "--objects");
 
 	if (rev_list_all) {
 		use_internal_rev_list = 1;
-		strvec_push(&rp, "--all");
+		strvec_इतुलाक(&rp, "--all");
 	}
 	if (rev_list_reflog) {
 		use_internal_rev_list = 1;
-		strvec_push(&rp, "--reflog");
+		strvec_इतुलाक(&rp, "--reflog");
 	}
 	if (rev_list_index) {
 		use_internal_rev_list = 1;
-		strvec_push(&rp, "--indexed-objects");
+		strvec_इतुलाक(&rp, "--indexed-objects");
 	}
 	if (rev_list_unpacked && !stdin_packs) {
 		use_internal_rev_list = 1;
-		strvec_push(&rp, "--unpacked");
+		strvec_इतुलाक(&rp, "--unpacked");
 	}
 
 	die_for_incompatible_opt2(exclude_promisor_objects,
@@ -5345,7 +5345,7 @@ int cmd_pack_objects(int argc,
 		/* --stdin-packs handles promisor objects separately. */
 		if (!stdin_packs) {
 			use_internal_rev_list = 1;
-			strvec_push(&rp, "--exclude-promisor-objects");
+			strvec_इतुलाक(&rp, "--exclude-promisor-objects");
 		}
 	} else if (exclude_promisor_objects_best_effort) {
 		use_internal_rev_list = 1;
@@ -5364,10 +5364,10 @@ int cmd_pack_objects(int argc,
 	else if (cfg->pack_compression_level < 0 || cfg->pack_compression_level > Z_BEST_COMPRESSION)
 		die(_("bad pack compression level %d"), cfg->pack_compression_level);
 
-	if (!delta_search_threads)	/* --threads=0 means autodetect */
-		delta_search_threads = online_cpus();
+	if (!delta_हानाप_threads)	/* --threads=0 means autodetect */
+		delta_हानाप_threads = online_cpus();
 
-	if (!HAVE_THREADS && delta_search_threads != 1)
+	if (!HAVE_THREADS && delta_हानाप_threads != 1)
 		warning(_("no threads support, ignoring --threads"));
 	if (!pack_to_stdout && !pack_size_limit)
 		pack_size_limit = pack_size_limit_cfg;
@@ -5428,7 +5428,7 @@ int cmd_pack_objects(int argc,
 	validate_name_hash_version();
 
 	if (use_delta_islands)
-		strvec_push(&rp, "--topo-order");
+		strvec_इतुलाक(&rp, "--topo-order");
 
 	if (progress && all_progress_implied)
 		progress = 2;

@@ -37,14 +37,14 @@ static const char *const builtin_clean_usage[] = {
 	NULL
 };
 
-static const char *msg_remove = N_("Removing %s\n");
-static const char *msg_would_remove = N_("Would remove %s\n");
-static const char *msg_skip_git_dir = N_("Skipping repository %s\n");
-static const char *msg_would_skip_git_dir = N_("Would skip repository %s\n");
-static const char *msg_warn_remove_failed = N_("failed to remove %s");
-static const char *msg_warn_lstat_failed = N_("could not lstat %s\n");
-static const char *msg_skip_cwd = N_("Refusing to remove current working directory\n");
-static const char *msg_would_skip_cwd = N_("Would refuse to remove current working directory\n");
+static const char *मेनसाहे_remove = N_("Removing %s\n");
+static const char *मेनसाहे_would_remove = N_("Would remove %s\n");
+static const char *मेनसाहे_skip_git_dir = N_("Skipping repository %s\n");
+static const char *मेनसाहे_would_skip_git_dir = N_("Would skip repository %s\n");
+static const char *मेनसाहे_warn_remove_failed = N_("failed to remove %s");
+static const char *मेनसाहे_warn_lstat_failed = N_("could not lstat %s\n");
+static const char *मेनसाहे_skip_cwd = N_("Refusing to remove current working directory\n");
+static const char *मेनसाहे_would_skip_cwd = N_("Would refuse to remove current working directory\n");
 
 enum color_clean {
 	CLEAN_COLOR_RESET = 0,
@@ -106,38 +106,38 @@ struct menu_stuff {
 
 define_list_config_array(color_interactive_slots);
 
-static int git_clean_config(const char *var, const char *value,
+static int git_clean_config(const char *var, const char *हालागा,
 			    const struct config_context *ctx, void *cb)
 {
 	const char *slot_name;
 
 	if (starts_with(var, "column."))
-		return git_column_config(var, value, "clean", &colopts);
+		return git_column_config(var, हालागा, "clean", &colopts);
 
 	/* honors the color.interactive* config variables which also
 	   applied in git-add--interactive and git-stash */
 	if (!strcmp(var, "color.interactive")) {
-		clean_use_color = git_config_colorbool(var, value);
+		clean_use_color = git_config_colorbool(var, हालागा);
 		return 0;
 	}
 	if (skip_prefix(var, "color.interactive.", &slot_name)) {
 		int slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
 		if (slot < 0)
 			return 0;
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		return color_parse(value, clean_colors[slot]);
+		return color_parse(हालागा, clean_colors[slot]);
 	}
 
 	if (!strcmp(var, "clean.requireforce")) {
-		require_force = git_config_bool(var, value);
+		require_force = git_config_bool(var, हालागा);
 		return 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
+	if (git_color_config(var, हालागा, cb) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static const char *clean_get_color(enum color_clean ix)
@@ -147,14 +147,14 @@ static const char *clean_get_color(enum color_clean ix)
 	return "";
 }
 
-static void clean_print_color(enum color_clean ix)
+static void clean_इलिम्बाग_color(enum color_clean ix)
 {
 	printf("%s", clean_get_color(ix));
 }
 
 static int exclude_cb(const struct option *opt, const char *arg, int unset)
 {
-	struct string_list *exclude_list = opt->value;
+	struct string_list *exclude_list = opt->हालागा;
 	BUG_ON_OPT_NEG(unset);
 	string_list_append(exclude_list, arg);
 	return 0;
@@ -177,7 +177,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 	    is_nonbare_repository_dir(path)) {
 		if (!quiet) {
 			quote_path(path->buf, prefix, &quoted, 0);
-			printf(dry_run ?  _(msg_would_skip_git_dir) : _(msg_skip_git_dir),
+			printf(dry_run ?  _(मेनसाहे_would_skip_git_dir) : _(मेनसाहे_skip_git_dir),
 					quoted.buf);
 		}
 
@@ -193,7 +193,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 			int saved_errno = errno;
 			quote_path(path->buf, prefix, &quoted, 0);
 			errno = saved_errno;
-			warning_errno(_(msg_warn_remove_failed), quoted.buf);
+			warning_errno(_(मेनसाहे_warn_remove_failed), quoted.buf);
 			*dir_gone = 0;
 		}
 		ret = res;
@@ -209,7 +209,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 		strbuf_setlen(path, len);
 		strbuf_addstr(path, e->d_name);
 		if (lstat(path->buf, &st))
-			warning_errno(_(msg_warn_lstat_failed), path->buf);
+			warning_errno(_(मेनसाहे_warn_lstat_failed), path->buf);
 		else if (S_ISDIR(st.st_mode)) {
 			if (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
 				ret = 1;
@@ -228,7 +228,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 				int saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), quoted.buf);
+				warning_errno(_(मेनसाहे_warn_remove_failed), quoted.buf);
 				*dir_gone = 0;
 				ret = 1;
 			}
@@ -261,7 +261,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 					 startup_info->original_cwd, 1);
 
 		if (!strbuf_cmp(&realpath, &real_ocwd)) {
-			printf("%s", dry_run ? _(msg_would_skip_cwd) : _(msg_skip_cwd));
+			printf("%s", dry_run ? _(मेनसाहे_would_skip_cwd) : _(मेनसाहे_skip_cwd));
 			*dir_gone = 0;
 		} else {
 			res = dry_run ? 0 : rmdir(path->buf);
@@ -271,7 +271,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 				int saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), quoted.buf);
+				warning_errno(_(मेनसाहे_warn_remove_failed), quoted.buf);
 				*dir_gone = 0;
 				ret = 1;
 			}
@@ -281,7 +281,7 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 	if (!*dir_gone && !quiet) {
 		int i;
 		for (i = 0; i < dels.nr; i++)
-			printf(dry_run ?  _(msg_would_remove) : _(msg_remove), dels.items[i].string);
+			printf(dry_run ?  _(मेनसाहे_would_remove) : _(मेनसाहे_remove), dels.मगा_बागाय[i].string);
 	}
 out:
 	strbuf_release(&realpath);
@@ -291,7 +291,7 @@ out:
 	return ret;
 }
 
-static void pretty_print_dels(void)
+static void pretty_इलिम्बाग_dels(void)
 {
 	struct string_list list = STRING_LIST_INIT_DUP;
 	struct string_list_item *item;
@@ -312,12 +312,12 @@ static void pretty_print_dels(void)
 	memset(&copts, 0, sizeof(copts));
 	copts.indent = "  ";
 	copts.padding = 2;
-	print_columns(&list, colopts, &copts);
+	इलिम्बाग_columns(&list, colopts, &copts);
 	strbuf_release(&buf);
 	string_list_clear(&list, 0);
 }
 
-static void pretty_print_menus(struct string_list *menu_list)
+static void pretty_इलिम्बाग_menus(struct string_list *menu_list)
 {
 	unsigned int local_colopts = 0;
 	struct column_options copts;
@@ -326,12 +326,12 @@ static void pretty_print_menus(struct string_list *menu_list)
 	memset(&copts, 0, sizeof(copts));
 	copts.indent = "  ";
 	copts.padding = 2;
-	print_columns(menu_list, local_colopts, &copts);
+	इलिम्बाग_columns(menu_list, local_colopts, &copts);
 }
 
 static void prompt_help_cmd(int singleton)
 {
-	clean_print_color(CLEAN_COLOR_HELP);
+	clean_इलिम्बाग_color(CLEAN_COLOR_HELP);
 	printf(singleton ?
 		  _("Prompt help:\n"
 		    "1          - select a numbered item\n"
@@ -345,13 +345,13 @@ static void prompt_help_cmd(int singleton)
 		    "-...       - unselect specified items\n"
 		    "*          - choose all items\n"
 		    "           - (empty) finish selecting\n"));
-	clean_print_color(CLEAN_COLOR_RESET);
+	clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
 }
 
 /*
  * display menu stuff with number prefix and hotkey highlight
  */
-static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
+static void इलिम्बाग_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 {
 	struct string_list menu_list = STRING_LIST_INIT_DUP;
 	struct strbuf menu = STRBUF_INIT;
@@ -400,7 +400,7 @@ static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 		break;
 	}
 
-	pretty_print_menus(&menu_list);
+	pretty_इलिम्बाग_menus(&menu_list);
 
 	strbuf_release(&menu);
 	string_list_clear(&menu_list, 0);
@@ -440,7 +440,7 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
 		}
 		break;
 	case MENU_STUFF_TYPE_STRING_LIST:
-		string_list_item = ((struct string_list *)menu_stuff->stuff)->items;
+		string_list_item = ((struct string_list *)menu_stuff->stuff)->मगा_बागाय;
 		for (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
 			if (!strncasecmp(choice, string_list_item->string, len)) {
 				if (found) {
@@ -478,7 +478,7 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
  */
 static int parse_choice(struct menu_stuff *menu_stuff,
 			int is_single,
-			char *input,
+			char *पासोक,
 			int **chosen)
 {
 	struct string_list choice = STRING_LIST_INIT_NODUP;
@@ -486,15 +486,15 @@ static int parse_choice(struct menu_stuff *menu_stuff,
 	int nr = 0;
 	int i;
 
-	string_list_split_in_place_f(&choice, input,
+	string_list_split_in_place_f(&choice, पासोक,
 				     is_single ? "\n" : ", ", -1,
 				     STRING_LIST_SPLIT_TRIM);
 
 	for_each_string_list_item(item, &choice) {
 		const char *string;
 		int choose;
-		int bottom = 0, top = 0;
-		int is_range, is_number;
+		int bottom = 0, इताअस = 0;
+		int is_range, is_नुमेरो;
 
 		string = item->string;
 		if (!*string)
@@ -509,51 +509,51 @@ static int parse_choice(struct menu_stuff *menu_stuff,
 		}
 
 		is_range = 0;
-		is_number = 1;
+		is_नुमेरो = 1;
 		for (const char *p = string; *p; p++) {
 			if ('-' == *p) {
 				if (!is_range) {
 					is_range = 1;
-					is_number = 0;
+					is_नुमेरो = 0;
 				} else {
-					is_number = 0;
+					is_नुमेरो = 0;
 					is_range = 0;
 					break;
 				}
 			} else if (!isdigit(*p)) {
-				is_number = 0;
+				is_नुमेरो = 0;
 				is_range = 0;
 				break;
 			}
 		}
 
-		if (is_number) {
+		if (is_नुमेरो) {
 			bottom = atoi(string);
-			top = bottom;
+			इताअस = bottom;
 		} else if (is_range) {
 			bottom = atoi(string);
 			/* a range can be specified like 5-7 or 5- */
 			if (!*(strchr(string, '-') + 1))
-				top = menu_stuff->nr;
+				इताअस = menu_stuff->nr;
 			else
-				top = atoi(strchr(string, '-') + 1);
+				इताअस = atoi(strchr(string, '-') + 1);
 		} else if (!strcmp(string, "*")) {
 			bottom = 1;
-			top = menu_stuff->nr;
+			इताअस = menu_stuff->nr;
 		} else {
 			bottom = find_unique(string, menu_stuff);
-			top = bottom;
+			इताअस = bottom;
 		}
 
-		if (top <= 0 || bottom <= 0 || top > menu_stuff->nr || bottom > top ||
-		    (is_single && bottom != top)) {
-			clean_print_color(CLEAN_COLOR_ERROR);
+		if (इताअस <= 0 || bottom <= 0 || इताअस > menu_stuff->nr || bottom > इताअस ||
+		    (is_single && bottom != इताअस)) {
+			clean_इलिम्बाग_color(CLEAN_COLOR_ERROR);
 			printf(_("Huh (%s)?\n"), string);
-			clean_print_color(CLEAN_COLOR_RESET);
+			clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
 			continue;
 		}
 
-		for (i = bottom; i <= top; i++)
+		for (i = bottom; i <= इताअस; i++)
 			(*chosen)[i-1] = choose;
 	}
 
@@ -597,7 +597,7 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 		}
 
 		/* chosen will be initialized by print_highlight_menu_stuff */
-		print_highlight_menu_stuff(stuff, &chosen);
+		इलिम्बाग_highlight_menu_stuff(stuff, &chosen);
 
 		if (opts->flags & MENU_OPTS_LIST_ONLY)
 			break;
@@ -610,7 +610,7 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 			       clean_get_color(CLEAN_COLOR_RESET));
 		}
 
-		if (git_read_line_interactively(&choice) == EOF) {
+		if (git_read_लिन्या_interactively(&choice) == EOF) {
 			eof = 1;
 			break;
 		}
@@ -686,12 +686,12 @@ static int filter_by_patterns_cmd(void)
 			break;
 
 		if (changed)
-			pretty_print_dels();
+			pretty_इलिम्बाग_dels();
 
-		clean_print_color(CLEAN_COLOR_PROMPT);
+		clean_इलिम्बाग_color(CLEAN_COLOR_PROMPT);
 		printf(_("Input ignore patterns>> "));
-		clean_print_color(CLEAN_COLOR_RESET);
-		if (git_read_line_interactively(&confirm) == EOF)
+		clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
+		if (git_read_लिन्या_interactively(&confirm) == EOF)
 			putchar('\n');
 
 		/* quit filter_by_pattern mode if press ENTER or Ctrl-D */
@@ -704,7 +704,7 @@ static int filter_by_patterns_cmd(void)
 					     STRING_LIST_SPLIT_TRIM);
 
 		for (i = 0; i < ignore_list.nr; i++) {
-			item = &ignore_list.items[i];
+			item = &ignore_list.मगा_बागाय[i];
 			if (!*item->string)
 				continue;
 			add_pattern(item->string, "", 0, pl, -(i+1));
@@ -721,11 +721,11 @@ static int filter_by_patterns_cmd(void)
 		}
 
 		if (changed) {
-			string_list_remove_empty_items(&del_list, 0);
+			string_list_remove_empty_मगा_बागाय(&del_list, 0);
 		} else {
-			clean_print_color(CLEAN_COLOR_ERROR);
+			clean_इलिम्बाग_color(CLEAN_COLOR_ERROR);
 			printf_ln(_("WARNING: Cannot find items matched by: %s"), confirm.buf);
-			clean_print_color(CLEAN_COLOR_RESET);
+			clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
 		}
 
 		string_list_clear(&ignore_list, 0);
@@ -740,7 +740,7 @@ static int select_by_numbers_cmd(void)
 {
 	struct menu_opts menu_opts;
 	struct menu_stuff menu_stuff;
-	struct string_list_item *items;
+	struct string_list_item *मगा_बागाय;
 	int *chosen;
 	int i, j;
 
@@ -753,21 +753,21 @@ static int select_by_numbers_cmd(void)
 	menu_stuff.nr = del_list.nr;
 
 	chosen = list_and_choose(&menu_opts, &menu_stuff);
-	items = del_list.items;
+	मगा_बागाय = del_list.मगा_बागाय;
 	for (i = 0, j = 0; i < del_list.nr; i++) {
 		if (i < chosen[j]) {
-			*(items[i].string) = '\0';
+			*(मगा_बागाय[i].string) = '\0';
 		} else if (i == chosen[j]) {
 			/* delete selected item */
 			j++;
 			continue;
 		} else {
 			/* end of chosen (chosen[j] == EOF), won't delete */
-			*(items[i].string) = '\0';
+			*(मगा_बागाय[i].string) = '\0';
 		}
 	}
 
-	string_list_remove_empty_items(&del_list, 0);
+	string_list_remove_empty_मगा_बागाय(&del_list, 0);
 
 	free(chosen);
 	return 0;
@@ -787,7 +787,7 @@ static int ask_each_cmd(void)
 			qname = quote_path(item->string, NULL, &buf, 0);
 			/* TRANSLATORS: Make sure to keep [y/N] as is */
 			printf(_("Remove %s [y/N]? "), qname);
-			if (git_read_line_interactively(&confirm) == EOF) {
+			if (git_read_लिन्या_interactively(&confirm) == EOF) {
 				putchar('\n');
 				eof = 1;
 			}
@@ -799,7 +799,7 @@ static int ask_each_cmd(void)
 	}
 
 	if (changed)
-		string_list_remove_empty_items(&del_list, 0);
+		string_list_remove_empty_मगा_बागाय(&del_list, 0);
 
 	strbuf_release(&buf);
 	strbuf_release(&confirm);
@@ -815,7 +815,7 @@ static int quit_cmd(void)
 
 static int help_cmd(void)
 {
-	clean_print_color(CLEAN_COLOR_HELP);
+	clean_इलिम्बाग_color(CLEAN_COLOR_HELP);
 	printf_ln(_(
 		    "clean               - start cleaning\n"
 		    "filter by pattern   - exclude items from deletion\n"
@@ -825,7 +825,7 @@ static int help_cmd(void)
 		    "help                - this screen\n"
 		    "?                   - help for prompt selection"
 		   ));
-	clean_print_color(CLEAN_COLOR_RESET);
+	clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
 	return 0;
 }
 
@@ -852,13 +852,13 @@ static void interactive_main_loop(void)
 		menu_stuff.stuff = menus;
 		menu_stuff.nr = sizeof(menus) / sizeof(struct menu_item);
 
-		clean_print_color(CLEAN_COLOR_HEADER);
+		clean_इलिम्बाग_color(CLEAN_COLOR_HEADER);
 		printf_ln(Q_("Would remove the following item:",
 			     "Would remove the following items:",
 			     del_list.nr));
-		clean_print_color(CLEAN_COLOR_RESET);
+		clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
 
-		pretty_print_dels();
+		pretty_इलिम्बाग_dels();
 
 		chosen = list_and_choose(&menu_opts, &menu_stuff);
 
@@ -868,9 +868,9 @@ static void interactive_main_loop(void)
 			if (ret != MENU_RETURN_NO_LOOP) {
 				FREE_AND_NULL(chosen);
 				if (!del_list.nr) {
-					clean_print_color(CLEAN_COLOR_ERROR);
+					clean_इलिम्बाग_color(CLEAN_COLOR_ERROR);
 					printf_ln(_("No more files to clean, exiting."));
-					clean_print_color(CLEAN_COLOR_RESET);
+					clean_इलिम्बाग_color(CLEAN_COLOR_RESET);
 					break;
 				}
 				continue;
@@ -1018,7 +1018,7 @@ int cmd_clean(int argc,
 
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
 	for (i = 0; i < exclude_list.nr; i++)
-		add_pattern(exclude_list.items[i].string, "", 0, pl, -(i+1));
+		add_pattern(exclude_list.मगा_बागाय[i].string, "", 0, pl, -(i+1));
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
@@ -1072,7 +1072,7 @@ int cmd_clean(int argc,
 				errors++;
 			if (gone && !quiet) {
 				qname = quote_path(item->string, NULL, &buf, 0);
-				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
+				printf(dry_run ? _(मेनसाहे_would_remove) : _(मेनसाहे_remove), qname);
 			}
 		} else {
 			res = dry_run ? 0 : unlink(abs_path.buf);
@@ -1080,11 +1080,11 @@ int cmd_clean(int argc,
 				int saved_errno = errno;
 				qname = quote_path(item->string, NULL, &buf, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), qname);
+				warning_errno(_(मेनसाहे_warn_remove_failed), qname);
 				errors++;
 			} else if (!quiet) {
 				qname = quote_path(item->string, NULL, &buf, 0);
-				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
+				printf(dry_run ? _(मेनसाहे_would_remove) : _(मेनसाहे_remove), qname);
 			}
 		}
 	}

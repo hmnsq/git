@@ -41,7 +41,7 @@ static int show_modified;
 static int show_killed;
 static int show_valid_bit;
 static int show_fsmonitor_bit;
-static int line_terminator = '\n';
+static int लिन्या_terminator = '\n';
 static int debug_mode;
 static int show_eol;
 static int recurse_submodules;
@@ -54,9 +54,9 @@ static int prefix_len;
 static struct pathspec pathspec;
 static int error_unmatch;
 static char *ps_matched;
-static const char *with_tree;
+static const char *with_पुनो;
 static int exc_given;
-static int exclude_args;
+static int exclude_मगा_कातविरान;
 static const char *format;
 
 static const char *tag_cached = "";
@@ -92,7 +92,7 @@ static void write_name(const char *name)
 	 * an empty string in that case (a NULL is good for "").
 	 */
 	write_name_quoted_relative(name, prefix_len ? prefix : NULL,
-				   stdout, line_terminator);
+				   stdout, लिन्या_terminator);
 }
 
 static void write_name_to_buf(struct strbuf *sb, const char *name)
@@ -100,7 +100,7 @@ static void write_name_to_buf(struct strbuf *sb, const char *name)
 	struct strbuf buf = STRBUF_INIT;
 	const char *rel = relative_path(name, prefix_len ? prefix : NULL, &buf);
 
-	if (line_terminator)
+	if (लिन्या_terminator)
 		quote_c_style(rel, sb, NULL, 0);
 	else
 		strbuf_addstr(sb, rel);
@@ -133,7 +133,7 @@ static const char *get_tag(const struct cache_entry *ce, const char *tag)
 	return tag;
 }
 
-static void print_debug(const struct cache_entry *ce)
+static void इलिम्बाग_debug(const struct cache_entry *ce)
 {
 	if (debug_mode) {
 		const struct stat_data *sd = &ce->ce_stat_data;
@@ -246,13 +246,13 @@ static void show_submodule(struct repository *superproject,
 	repo_clear(&subrepo);
 }
 
-static void expand_objectsize(struct repository *repo, struct strbuf *line,
+static void expand_objectsize(struct repository *repo, struct strbuf *लिन्या,
 			      const struct object_id *oid,
 			      const enum object_type type, unsigned int padded)
 {
 	static const char padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
+	size_t orig_len = लिन्या->len;
 	size_t len;
 
 	if (type == OBJ_BLOB) {
@@ -260,13 +260,13 @@ static void expand_objectsize(struct repository *repo, struct strbuf *line,
 		if (odb_read_object_info(repo->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
+		strbuf_add_uint(लिन्या, size);
 	} else {
-		strbuf_addstr(line, "-");
+		strbuf_addstr(लिन्या, "-");
 	}
-	len = line->len - orig_len;
+	len = लिन्या->len - orig_len;
 	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+		strbuf_इसिंगित(लिन्या, orig_len, padding, min_len - len);
 }
 
 static void show_ce_fmt(struct repository *repo, const struct cache_entry *ce,
@@ -311,7 +311,7 @@ static void show_ce_fmt(struct repository *repo, const struct cache_entry *ce,
 		else
 			strbuf_expand_bad_format(format, "ls-files");
 	}
-	strbuf_addch(&sb, line_terminator);
+	strbuf_addch(&sb, लिन्या_terminator);
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
 }
@@ -332,7 +332,7 @@ static void show_ce(struct repository *repo, struct dir_struct *dir,
 				  S_ISGITLINK(ce->ce_mode))) {
 		if (format) {
 			show_ce_fmt(repo, ce, format, fullname);
-			print_debug(ce);
+			इलिम्बाग_debug(ce);
 			return;
 		}
 
@@ -349,7 +349,7 @@ static void show_ce(struct repository *repo, struct dir_struct *dir,
 		}
 		write_eolinfo(repo->index, ce, fullname);
 		write_name(fullname);
-		print_debug(ce);
+		इलिम्बाग_debug(ce);
 	}
 }
 
@@ -550,7 +550,7 @@ static const char * const ls_files_usage[] = {
 static int option_parse_exclude(const struct option *opt,
 				const char *arg, int unset)
 {
-	struct string_list *exclude_list = opt->value;
+	struct string_list *exclude_list = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -563,7 +563,7 @@ static int option_parse_exclude(const struct option *opt,
 static int option_parse_exclude_from(const struct option *opt,
 				     const char *arg, int unset)
 {
-	struct dir_struct *dir = opt->value;
+	struct dir_struct *dir = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -576,7 +576,7 @@ static int option_parse_exclude_from(const struct option *opt,
 static int option_parse_exclude_standard(const struct option *opt,
 					 const char *arg, int unset)
 {
-	struct dir_struct *dir = opt->value;
+	struct dir_struct *dir = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -592,14 +592,14 @@ int cmd_ls_files(int argc,
 		 const char *cmd_prefix,
 		 struct repository *repo)
 {
-	int require_work_tree = 0, show_tag = 0, i;
+	int require_work_पुनो = 0, show_tag = 0, i;
 	char *max_prefix;
 	struct dir_struct dir = DIR_INIT;
 	struct pattern_list *pl;
 	struct string_list exclude_list = STRING_LIST_INIT_NODUP;
 	struct option builtin_ls_files_options[] = {
 		/* Think twice before adding "--nul" synonym to this */
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_SET_INT('z', NULL, &लिन्या_terminator,
 			N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL('t', NULL, &show_tag,
 			N_("identify the file status with tags")),
@@ -652,7 +652,7 @@ int cmd_ls_files(int argc,
 			N_("recurse through submodules")),
 		OPT_BOOL(0, "error-unmatch", &error_unmatch,
 			N_("if any <file> is not in the index, treat this as an error")),
-		OPT_STRING(0, "with-tree", &with_tree, N_("tree-ish"),
+		OPT_STRING(0, "with-tree", &with_पुनो, N_("tree-ish"),
 			N_("pretend that paths removed since <tree-ish> are still present")),
 		OPT__ABBREV(&abbrev),
 		OPT_BOOL(0, "debug", &debug_mode, N_("show debugging data")),
@@ -685,12 +685,12 @@ int cmd_ls_files(int argc,
 			ls_files_usage, 0);
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
 	for (i = 0; i < exclude_list.nr; i++) {
-		add_pattern(exclude_list.items[i].string, "", 0, pl, --exclude_args);
+		add_pattern(exclude_list.मगा_बागाय[i].string, "", 0, pl, --exclude_मगा_कातविरान);
 	}
 
 	if (format && (show_stage || show_others || show_killed ||
 		show_resolve_undo || skipping_duplicates || show_eol || show_tag))
-			usage_msg_opt(_("--format cannot be used with -s, -o, -k, -t, "
+			usage_मेनसाहे_opt(_("--format cannot be used with -s, -o, -k, -t, "
 				      "--resolve-undo, --deduplicate, --eol"),
 				      ls_files_usage, builtin_ls_files_options);
 
@@ -705,7 +705,7 @@ int cmd_ls_files(int argc,
 		tag_resolve_undo = "U ";
 	}
 	if (show_modified || show_others || show_deleted || (dir.flags & DIR_SHOW_IGNORED) || show_killed)
-		require_work_tree = 1;
+		require_work_पुनो = 1;
 	if (show_unmerged)
 		/*
 		 * There's no point in showing unmerged unless
@@ -717,12 +717,12 @@ int cmd_ls_files(int argc,
 	if (dir.exclude_per_dir)
 		exc_given = 1;
 
-	if (require_work_tree && !is_inside_work_tree(repo))
-		setup_work_tree(repo);
+	if (require_work_पुनो && !is_inside_work_पुनो(repo))
+		setup_work_पुनो(repo);
 
 	if (recurse_submodules &&
 	    (show_deleted || show_others || show_unmerged ||
-	     show_killed || show_modified || show_resolve_undo || with_tree))
+	     show_killed || show_modified || show_resolve_undo || with_पुनो))
 		die("ls-files --recurse-submodules unsupported mode");
 
 	if (recurse_submodules && error_unmatch)
@@ -764,14 +764,14 @@ int cmd_ls_files(int argc,
 	      show_killed || show_modified || show_resolve_undo))
 		show_cached = 1;
 
-	if (with_tree) {
+	if (with_पुनो) {
 		/*
 		 * Basic sanity check; show-stages and show-unmerged
 		 * would not make any sense with this option.
 		 */
 		if (show_stage || show_unmerged)
 			die(_("options '%s' and '%s' cannot be used together"), "ls-files --with-tree", "-s/-u");
-		overlay_tree_on_index(repo->index, with_tree, max_prefix);
+		overlay_पुनो_on_index(repo->index, with_पुनो, max_prefix);
 	}
 
 	show_files(repo, &dir);

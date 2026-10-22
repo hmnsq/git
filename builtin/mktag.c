@@ -20,11 +20,11 @@ static struct fsck_options fsck_options;
 
 static int mktag_fsck_error_func(struct fsck_options *o UNUSED,
 				 void *fsck_report UNUSED,
-				 enum fsck_msg_type msg_type,
-				 enum fsck_msg_id msg_id UNUSED,
+				 enum fsck_मेनसाहे_type मेनसाहे_type,
+				 enum fsck_मेनसाहे_id मेनसाहे_id UNUSED,
 				 const char *message)
 {
-	switch (msg_type) {
+	switch (मेनसाहे_type) {
 	case FSCK_WARN:
 		if (!option_strict) {
 			fprintf_ln(stderr, _("warning: tag input does not pass fsck: %s"), message);
@@ -42,7 +42,7 @@ static int mktag_fsck_error_func(struct fsck_options *o UNUSED,
 		return 1;
 	default:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
-		    msg_type);
+		    मेनसाहे_type);
 	}
 }
 
@@ -96,7 +96,7 @@ int cmd_mktag(int argc,
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
 	fsck_options.error_func = mktag_fsck_error_func;
-	fsck_set_msg_type_from_ids(&fsck_options, FSCK_MSG_EXTRA_HEADER_ENTRY,
+	fsck_set_मेनसाहे_type_from_ids(&fsck_options, FSCK_मेनसाहे_EXTRA_HEADER_ENTRY,
 				   FSCK_WARN);
 	/* config might set fsck.extraHeaderEntry=* again */
 	repo_config(the_repository, git_fsck_config, &fsck_options);

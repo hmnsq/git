@@ -29,21 +29,21 @@ static int option_parse_where(const struct option *opt,
 			      const char *arg, int unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	return trailer_set_where(opt->हालागा, arg);
 }
 
 static int option_parse_if_exists(const struct option *opt,
 				  const char *arg, int unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	return trailer_set_if_exists(opt->हालागा, arg);
 }
 
 static int option_parse_if_missing(const struct option *opt,
 				   const char *arg, int unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	return trailer_set_if_missing(opt->हालागा, arg);
 }
 
 static void new_trailers_clear(struct list_head *trailers)
@@ -61,7 +61,7 @@ static void new_trailers_clear(struct list_head *trailers)
 static int option_parse_trailer(const struct option *opt,
 				   const char *arg, int unset)
 {
-	struct list_head *trailers = opt->value;
+	struct list_head *trailers = opt->हालागा;
 	struct new_trailer_item *item;
 
 	if (unset) {
@@ -84,16 +84,16 @@ static int option_parse_trailer(const struct option *opt,
 static int parse_opt_parse(const struct option *opt, const char *arg,
 			   int unset)
 {
-	struct process_trailer_options *v = opt->value;
+	struct process_trailer_options *v = opt->हालागा;
 	v->only_trailers = 1;
-	v->only_input = 1;
+	v->only_पासोक = 1;
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	return 0;
 }
 
-static void read_input_file(struct strbuf *sb, const char *file)
+static void read_पासोक_file(struct strbuf *sb, const char *file)
 {
 	if (file) {
 		if (strbuf_read_file(sb, file, 0) < 0)
@@ -102,21 +102,21 @@ static void read_input_file(struct strbuf *sb, const char *file)
 		if (strbuf_read(sb, fileno(stdin), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
-	strbuf_complete_line(sb);
+	strbuf_complete_लिन्या(sb);
 }
 
 static void interpret_trailers(const struct process_trailer_options *opts,
 			       struct list_head *new_trailer_head,
 			       const char *file)
 {
-	struct strbuf input = STRBUF_INIT;
+	struct strbuf पासोक = STRBUF_INIT;
 	struct strbuf out = STRBUF_INIT;
 	struct tempfile *tempfile = NULL;
 	int fd = 1;
 
 	trailer_config_init();
 
-	read_input_file(&input, file);
+	read_पासोक_file(&पासोक, file);
 
 	if (opts->in_place) {
 		tempfile = trailer_create_in_place_tempfile(file);
@@ -124,7 +124,7 @@ static void interpret_trailers(const struct process_trailer_options *opts,
 			die(NULL);
 		fd = tempfile->fd;
 	}
-	process_trailers(opts, new_trailer_head, &input, &out);
+	process_trailers(opts, new_trailer_head, &पासोक, &out);
 
 	if (write_in_full(fd, out.buf, out.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
@@ -132,7 +132,7 @@ static void interpret_trailers(const struct process_trailer_options *opts,
 		if (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
-	strbuf_release(&input);
+	strbuf_release(&पासोक);
 	strbuf_release(&out);
 }
 
@@ -156,7 +156,7 @@ int cmd_interpret_trailers(int argc,
 			     N_("action if trailer is missing"), option_parse_if_missing),
 
 		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
-		OPT_BOOL(0, "only-input", &opts.only_input, N_("do not apply trailer.<key-alias> configuration variables")),
+		OPT_BOOL(0, "only-input", &opts.only_पासोक, N_("do not apply trailer.<key-alias> configuration variables")),
 		OPT_BOOL(0, "unfold", &opts.unfold, N_("reformat multiline trailer values as single-line values")),
 		OPT_CALLBACK_F(0, "parse", &opts, NULL, N_("alias for --only-trailers --only-input --unfold"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_parse),
@@ -171,8 +171,8 @@ int cmd_interpret_trailers(int argc,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
-		usage_msg_opt(
+	if (opts.only_पासोक && !list_empty(&trailers))
+		usage_मेनसाहे_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);

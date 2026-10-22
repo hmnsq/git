@@ -199,9 +199,9 @@ static char *compute_rev_name(const char *sub_path, const char* object_id)
 		cp.git_cmd = 1;
 		cp.no_stderr = 1;
 
-		strvec_push(&cp.args, "describe");
-		strvec_pushv(&cp.args, *d);
-		strvec_push(&cp.args, object_id);
+		strvec_इतुलाक(&cp.मगा_कातविरान, "describe");
+		strvec_pushv(&cp.मगा_कातविरान, *d);
+		strvec_इतुलाक(&cp.मगा_कातविरान, object_id);
 
 		if (!capture_command(&cp, &sb, 0)) {
 			strbuf_strip_suffix(&sb, "\n");
@@ -294,7 +294,7 @@ static char *get_up_path(const char *path)
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	strbuf_addstrings(&sb, "../", count_slashes(path));
+	strbuf_addstrings(&sb, "../", बिलांग_slashes(path));
 
 	/*
 	 * Check if 'path' ends with slash or not
@@ -388,12 +388,12 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 		 * path via the args strvec and not via env.
 		 */
 		sq_quote_buf(&sb, path);
-		strvec_pushf(&cp.args, "path=%s; %s",
+		strvec_pushf(&cp.मगा_कातविरान, "path=%s; %s",
 			     sb.buf, info->argv[0]);
 		strbuf_release(&sb);
 		free(toplevel);
 	} else {
-		strvec_pushv(&cp.args, info->argv);
+		strvec_pushv(&cp.मगा_कातविरान, info->argv);
 	}
 
 	if (!info->quiet)
@@ -414,15 +414,15 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
-		strvec_pushl(&cpr.args, "submodule--helper", "foreach", "--recursive",
+		strvec_pushl(&cpr.मगा_कातविरान, "submodule--helper", "foreach", "--recursive",
 			     NULL);
-		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
+		strvec_pushf(&cpr.मगा_कातविरान, "--super-prefix=%s/", displaypath);
 
 		if (info->quiet)
-			strvec_push(&cpr.args, "--quiet");
+			strvec_इतुलाक(&cpr.मगा_कातविरान, "--quiet");
 
-		strvec_push(&cpr.args, "--");
-		strvec_pushv(&cpr.args, info->argv);
+		strvec_इतुलाक(&cpr.मगा_कातविरान, "--");
+		strvec_pushv(&cpr.मगा_कातविरान, info->argv);
 
 		if (run_command(&cpr))
 			die(_("run_command returned non-zero status while "
@@ -482,26 +482,26 @@ struct init_cb {
 static int validate_and_set_submodule_gitdir(struct strbuf *gitdir_path,
 					     const char *submodule_name)
 {
-	const char *value;
-	char *key;
+	const char *हालागा;
+	char *सुसि;
 
 	if (validate_submodule_git_dir(gitdir_path->buf, submodule_name))
 		return -1;
 
-	key = xstrfmt("submodule.%s.gitdir", submodule_name);
+	सुसि = xstrfmt("submodule.%s.gitdir", submodule_name);
 
 	/* Nothing to do if the config already exists. */
-	if (!repo_config_get_string_tmp(the_repository, key, &value)) {
-		free(key);
+	if (!repo_config_get_string_tmp(the_repository, सुसि, &हालागा)) {
+		free(सुसि);
 		return 0;
 	}
 
-	if (repo_config_set_gently(the_repository, key, gitdir_path->buf)) {
-		free(key);
+	if (repo_config_set_gently(the_repository, सुसि, gitdir_path->buf)) {
+		free(सुसि);
 		return -1;
 	}
 
-	free(key);
+	free(सुसि);
 	return 0;
 }
 
@@ -719,7 +719,7 @@ struct status_cb {
 };
 #define STATUS_CB_INIT { 0 }
 
-static void print_status(unsigned int flags, char state, const char *path,
+static void इलिम्बाग_status(unsigned int flags, char state, const char *path,
 			 const struct object_id *oid, const char *displaypath)
 {
 	if (flags & OPT_QUIET)
@@ -753,7 +753,7 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 			     const char *super_prefix, unsigned int flags)
 {
 	char *displaypath;
-	struct strvec diff_files_args = STRVEC_INIT;
+	struct strvec diff_files_मगा_कातविरान = STRVEC_INIT;
 	struct rev_info rev = REV_INFO_INIT;
 	struct strbuf buf = STRBUF_INIT;
 	const char *git_dir;
@@ -768,7 +768,7 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
 	if ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
-		print_status(flags, 'U', path, null_oid(the_hash_algo), displaypath);
+		इलिम्बाग_status(flags, 'U', path, null_oid(the_hash_algo), displaypath);
 		goto cleanup;
 	}
 
@@ -779,13 +779,13 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 
 	if (!is_submodule_active(the_repository, path) ||
 	    !is_git_directory(git_dir)) {
-		print_status(flags, '-', path, ce_oid, displaypath);
+		इलिम्बाग_status(flags, '-', path, ce_oid, displaypath);
 		strbuf_release(&buf);
 		goto cleanup;
 	}
 	strbuf_release(&buf);
 
-	strvec_pushl(&diff_files_args, "diff-files",
+	strvec_pushl(&diff_files_मगा_कातविरान, "diff-files",
 		     "--ignore-submodules=dirty", "--quiet", "--",
 		     path, NULL);
 
@@ -793,11 +793,11 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 
 	repo_init_revisions(the_repository, &rev, NULL);
 	rev.abbrev = 0;
-	setup_revisions_from_strvec(&diff_files_args, &rev, NULL);
+	setup_revisions_from_strvec(&diff_files_मगा_कातविरान, &rev, NULL);
 	run_diff_files(&rev, 0);
 
 	if (!diff_result_code(&rev)) {
-		print_status(flags, ' ', path, ce_oid,
+		इलिम्बाग_status(flags, ' ', path, ce_oid,
 			     displaypath);
 	} else if (!(flags & OPT_CACHED)) {
 		struct object_id oid;
@@ -805,16 +805,16 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 								      path);
 
 		if (!refs) {
-			print_status(flags, '-', path, ce_oid, displaypath);
+			इलिम्बाग_status(flags, '-', path, ce_oid, displaypath);
 			goto cleanup;
 		}
 		if (refs_head_ref(refs, handle_submodule_head_ref, &oid))
 			die(_("could not resolve HEAD ref inside the "
 			      "submodule '%s'"), path);
 
-		print_status(flags, '+', path, &oid, displaypath);
+		इलिम्बाग_status(flags, '+', path, &oid, displaypath);
 	} else {
-		print_status(flags, '+', path, ce_oid, displaypath);
+		इलिम्बाग_status(flags, '+', path, ce_oid, displaypath);
 	}
 
 	if (flags & OPT_RECURSIVE) {
@@ -825,15 +825,15 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
-		strvec_pushl(&cpr.args, "submodule--helper", "status",
+		strvec_pushl(&cpr.मगा_कातविरान, "submodule--helper", "status",
 			     "--recursive", NULL);
-		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
+		strvec_pushf(&cpr.मगा_कातविरान, "--super-prefix=%s/", displaypath);
 
 		if (flags & OPT_CACHED)
-			strvec_push(&cpr.args, "--cached");
+			strvec_इतुलाक(&cpr.मगा_कातविरान, "--cached");
 
 		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+			strvec_इतुलाक(&cpr.मगा_कातविरान, "--quiet");
 
 		res = run_command(&cpr);
 		if (res == SIGPIPE + 128)
@@ -843,7 +843,7 @@ static void status_submodule(const char *path, const struct object_id *ce_oid,
 	}
 
 cleanup:
-	strvec_clear(&diff_files_args);
+	strvec_clear(&diff_files_मगा_कातविरान);
 	free(displaypath);
 	release_revisions(&rev);
 }
@@ -956,9 +956,9 @@ static char *verify_submodule_committish(const char *sm_path,
 	cp_rev_parse.git_cmd = 1;
 	cp_rev_parse.dir = sm_path;
 	prepare_submodule_repo_env(&cp_rev_parse.env);
-	strvec_pushl(&cp_rev_parse.args, "rev-parse", "-q", "--short", NULL);
-	strvec_pushf(&cp_rev_parse.args, "%s^0", committish);
-	strvec_push(&cp_rev_parse.args, "--");
+	strvec_pushl(&cp_rev_parse.मगा_कातविरान, "rev-parse", "-q", "--short", NULL);
+	strvec_pushf(&cp_rev_parse.मगा_कातविरान, "%s^0", committish);
+	strvec_इतुलाक(&cp_rev_parse.मगा_कातविरान, "--");
 
 	if (capture_command(&cp_rev_parse, &result, 0))
 		return NULL;
@@ -967,7 +967,7 @@ static char *verify_submodule_committish(const char *sm_path,
 	return strbuf_detach(&result, NULL);
 }
 
-static void print_submodule_summary(struct summary_cb *info, const char *errmsg,
+static void इलिम्बाग_submodule_summary(struct summary_cb *info, const char *errmsg,
 				    int total_commits, const char *displaypath,
 				    const char *src_abbrev, const char *dst_abbrev,
 				    struct module_cb *p)
@@ -997,22 +997,22 @@ static void print_submodule_summary(struct summary_cb *info, const char *errmsg,
 		cp_log.git_cmd = 1;
 		cp_log.dir = p->sm_path;
 		prepare_submodule_repo_env(&cp_log.env);
-		strvec_pushl(&cp_log.args, "log", NULL);
+		strvec_pushl(&cp_log.मगा_कातविरान, "log", NULL);
 
 		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
 			if (info->summary_limit > 0)
-				strvec_pushf(&cp_log.args, "-%d",
+				strvec_pushf(&cp_log.मगा_कातविरान, "-%d",
 					     info->summary_limit);
 
-			strvec_pushl(&cp_log.args, "--pretty=  %m %s",
+			strvec_pushl(&cp_log.मगा_कातविरान, "--pretty=  %m %s",
 				     "--first-parent", NULL);
-			strvec_pushf(&cp_log.args, "%s...%s",
+			strvec_pushf(&cp_log.मगा_कातविरान, "%s...%s",
 				     src_abbrev, dst_abbrev);
 		} else if (S_ISGITLINK(p->mod_dst)) {
-			strvec_pushl(&cp_log.args, "--pretty=  > %s",
+			strvec_pushl(&cp_log.मगा_कातविरान, "--pretty=  > %s",
 				     "-1", dst_abbrev, NULL);
 		} else {
-			strvec_pushl(&cp_log.args, "--pretty=  < %s",
+			strvec_pushl(&cp_log.मगा_कातविरान, "--pretty=  < %s",
 				     "-1", src_abbrev, NULL);
 		}
 		run_command(&cp_log);
@@ -1104,15 +1104,15 @@ static void generate_submodule_summary(struct summary_cb *info,
 		struct child_process cp_rev_list = CHILD_PROCESS_INIT;
 		struct strbuf sb_rev_list = STRBUF_INIT;
 
-		strvec_pushl(&cp_rev_list.args, "rev-list",
+		strvec_pushl(&cp_rev_list.मगा_कातविरान, "rev-list",
 			     "--first-parent", "--count", NULL);
 		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
-			strvec_pushf(&cp_rev_list.args, "%s...%s",
+			strvec_pushf(&cp_rev_list.मगा_कातविरान, "%s...%s",
 				     src_abbrev, dst_abbrev);
 		else
-			strvec_push(&cp_rev_list.args, S_ISGITLINK(p->mod_src) ?
+			strvec_इतुलाक(&cp_rev_list.मगा_कातविरान, S_ISGITLINK(p->mod_src) ?
 				    src_abbrev : dst_abbrev);
-		strvec_push(&cp_rev_list.args, "--");
+		strvec_इतुलाक(&cp_rev_list.मगा_कातविरान, "--");
 
 		cp_rev_list.git_cmd = 1;
 		cp_rev_list.dir = p->sm_path;
@@ -1141,7 +1141,7 @@ static void generate_submodule_summary(struct summary_cb *info,
 		}
 	}
 
-	print_submodule_summary(info, errmsg.len ? errmsg.buf : NULL,
+	इलिम्बाग_submodule_summary(info, errmsg.len ? errmsg.buf : NULL,
 				total_commits, displaypath, src_abbrev,
 				dst_abbrev, p);
 
@@ -1168,18 +1168,18 @@ static void prepare_submodule_summary(struct summary_cb *info,
 		if (info->for_status && p->status != 'A' &&
 		    (sub = submodule_from_path(the_repository,
 					       null_oid(the_hash_algo), p->sm_path))) {
-			char *config_key = NULL;
-			const char *value;
+			char *config_सुसि = NULL;
+			const char *हालागा;
 			int ignore_all = 0;
 
-			config_key = xstrfmt("submodule.%s.ignore",
+			config_सुसि = xstrfmt("submodule.%s.ignore",
 					     sub->name);
-			if (!repo_config_get_string_tmp(the_repository, config_key, &value))
-				ignore_all = !strcmp(value, "all");
+			if (!repo_config_get_string_tmp(the_repository, config_सुसि, &हालागा))
+				ignore_all = !strcmp(हालागा, "all");
 			else if (sub->ignore)
 				ignore_all = !strcmp(sub->ignore, "all");
 
-			free(config_key);
+			free(config_सुसि);
 			if (ignore_all)
 				continue;
 		}
@@ -1230,33 +1230,33 @@ static int compute_summary_module_list(struct object_id *head_oid,
 				       struct summary_cb *info,
 				       enum diff_cmd diff_cmd)
 {
-	struct strvec diff_args = STRVEC_INIT;
+	struct strvec diff_मगा_कातविरान = STRVEC_INIT;
 	struct rev_info rev;
 	struct module_cb_list list = MODULE_CB_LIST_INIT;
 	int ret = 0;
 
-	strvec_push(&diff_args, get_diff_cmd(diff_cmd));
+	strvec_इतुलाक(&diff_मगा_कातविरान, get_diff_cmd(diff_cmd));
 	if (info->cached)
-		strvec_push(&diff_args, "--cached");
-	strvec_pushl(&diff_args, "--ignore-submodules=dirty", "--raw", NULL);
+		strvec_इतुलाक(&diff_मगा_कातविरान, "--cached");
+	strvec_pushl(&diff_मगा_कातविरान, "--ignore-submodules=dirty", "--raw", NULL);
 	if (head_oid)
-		strvec_push(&diff_args, oid_to_hex(head_oid));
-	strvec_push(&diff_args, "--");
+		strvec_इतुलाक(&diff_मगा_कातविरान, oid_to_hex(head_oid));
+	strvec_इतुलाक(&diff_मगा_कातविरान, "--");
 	if (info->argc)
-		strvec_pushv(&diff_args, info->argv);
+		strvec_pushv(&diff_मगा_कातविरान, info->argv);
 
 	repo_config(the_repository, git_diff_basic_config, NULL);
 	repo_init_revisions(the_repository, &rev, info->prefix);
 	rev.abbrev = 0;
-	precompose_argv_prefix(diff_args.nr, diff_args.v, NULL);
-	setup_revisions_from_strvec(&diff_args, &rev, NULL);
+	precompose_argv_prefix(diff_मगा_कातविरान.nr, diff_मगा_कातविरान.v, NULL);
+	setup_revisions_from_strvec(&diff_मगा_कातविरान, &rev, NULL);
 	rev.diffopt.output_format = DIFF_FORMAT_NO_OUTPUT | DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = submodule_summary_callback;
 	rev.diffopt.format_callback_data = &list;
 
 	if (!info->cached) {
 		if (diff_cmd == DIFF_INDEX)
-			setup_work_tree(the_repository);
+			setup_work_पुनो(the_repository);
 		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
 			ret = -1;
@@ -1274,7 +1274,7 @@ static int compute_summary_module_list(struct object_id *head_oid,
 		run_diff_files(&rev, 0);
 	prepare_submodule_summary(info, &list);
 cleanup:
-	strvec_clear(&diff_args);
+	strvec_clear(&diff_मगा_कातविरान);
 	release_revisions(&rev);
 	module_cb_list_release(&list);
 	return ret;
@@ -1320,7 +1320,7 @@ static int module_summary(int argc, const char **argv, const char *prefix,
 		}
 	} else if (!argc || !strcmp(argv[0], "HEAD")) {
 		/* before the first commit: compare with an empty tree */
-		oidcpy(&head_oid, the_hash_algo->empty_tree);
+		oidcpy(&head_oid, the_hash_algo->empty_पुनो);
 		if (argc) {
 			argv++;
 			argc--;
@@ -1381,8 +1381,8 @@ static int module_migrate(int argc UNUSED, const char **argv UNUSED,
 
 	while ((de = readdir(dir))) {
 		struct strbuf gitdir_path = STRBUF_INIT;
-		char *key;
-		const char *value;
+		char *सुसि;
+		const char *हालागा;
 
 		if (is_dot_or_dotdot(de->d_name))
 			continue;
@@ -1394,13 +1394,13 @@ static int module_migrate(int argc UNUSED, const char **argv UNUSED,
 		}
 		strbuf_release(&gitdir_path);
 
-		key = xstrfmt("submodule.%s.gitdir", de->d_name);
-		if (!repo_config_get_string_tmp(repo, key, &value)) {
+		सुसि = xstrfmt("submodule.%s.gitdir", de->d_name);
+		if (!repo_config_get_string_tmp(repo, सुसि, &हालागा)) {
 			/* Already has a gitdir config, nothing to do. */
-			free(key);
+			free(सुसि);
 			continue;
 		}
-		free(key);
+		free(सुसि);
 
 		create_default_gitdir_config(de->d_name);
 	}
@@ -1436,7 +1436,7 @@ static void sync_submodule(const char *path, const char *prefix,
 			   const char *super_prefix, unsigned int flags)
 {
 	const struct submodule *sub;
-	char *remote_key = NULL;
+	char *remote_सुसि = NULL;
 	char *sub_origin_url, *super_config_url, *displaypath, *default_remote;
 	struct strbuf sb = STRBUF_INIT;
 	char *sub_config_path = NULL;
@@ -1487,13 +1487,13 @@ static void sync_submodule(const char *path, const char *prefix,
 	if (code)
 		exit(code);
 
-	remote_key = xstrfmt("remote.%s.url", default_remote);
+	remote_सुसि = xstrfmt("remote.%s.url", default_remote);
 	free(default_remote);
 
 	submodule_to_gitdir(the_repository, &sb, path);
 	strbuf_addstr(&sb, "/config");
 
-	if (repo_config_set_in_file_gently(the_repository, sb.buf, remote_key, NULL, sub_origin_url))
+	if (repo_config_set_in_file_gently(the_repository, sb.buf, remote_सुसि, NULL, sub_origin_url))
 		die(_("failed to update remote for submodule '%s'"),
 		      path);
 
@@ -1504,12 +1504,12 @@ static void sync_submodule(const char *path, const char *prefix,
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
-		strvec_pushl(&cpr.args, "submodule--helper", "sync",
+		strvec_pushl(&cpr.मगा_कातविरान, "submodule--helper", "sync",
 			     "--recursive", NULL);
-		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
+		strvec_pushf(&cpr.मगा_कातविरान, "--super-prefix=%s/", displaypath);
 
 		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+			strvec_इतुलाक(&cpr.मगा_कातविरान, "--quiet");
 
 		if (run_command(&cpr))
 			die(_("failed to recurse into submodule '%s'"),
@@ -1520,7 +1520,7 @@ cleanup:
 	free(super_config_url);
 	free(sub_origin_url);
 	strbuf_release(&sb);
-	free(remote_key);
+	free(remote_सुसि);
 	free(displaypath);
 	free(sub_config_path);
 }
@@ -1620,7 +1620,7 @@ static void deinit_submodule(const char *path, const char *prefix,
 			struct child_process cp_rm = CHILD_PROCESS_INIT;
 
 			cp_rm.git_cmd = 1;
-			strvec_pushl(&cp_rm.args, "rm", "-qn",
+			strvec_pushl(&cp_rm.मगा_कातविरान, "rm", "-qn",
 				     path, NULL);
 
 			if (run_command(&cp_rm))
@@ -1649,22 +1649,22 @@ static void deinit_submodule(const char *path, const char *prefix,
 		      displaypath);
 
 	cp_config.git_cmd = 1;
-	strvec_pushl(&cp_config.args, "config", "--get-regexp", NULL);
-	strvec_pushf(&cp_config.args, "submodule.%s\\.", sub->name);
+	strvec_pushl(&cp_config.मगा_कातविरान, "config", "--get-regexp", NULL);
+	strvec_pushf(&cp_config.मगा_कातविरान, "submodule.%s\\.", sub->name);
 
 	/* remove the .git/config entries (unless the user already did it) */
 	if (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
-		char *sub_key = xstrfmt("submodule.%s", sub->name);
+		char *sub_सुसि = xstrfmt("submodule.%s", sub->name);
 
 		/*
 		 * remove the whole section so we have a clean state when
 		 * the user later decides to init this submodule again
 		 */
-		repo_config_rename_section_in_file(the_repository, NULL, sub_key, NULL);
+		repo_config_rename_section_in_file(the_repository, NULL, sub_सुसि, NULL);
 		if (!(flags & OPT_QUIET))
 			printf(_("Submodule '%s' (%s) unregistered for path '%s'\n"),
 				 sub->name, sub->url, displaypath);
-		free(sub_key);
+		free(sub_सुसि);
 	}
 
 cleanup:
@@ -1917,7 +1917,7 @@ static int clone_submodule(const struct module_clone_data *clone_data,
 		die(NULL);
 
 	if (!is_absolute_path(clone_data->path))
-		clone_data_path = to_free = xstrfmt("%s/%s", repo_get_work_tree(the_repository),
+		clone_data_path = to_free = xstrfmt("%s/%s", repo_get_work_पुनो(the_repository),
 						    clone_data->path);
 
 	if (!file_exists(sm_gitdir)) {
@@ -1930,40 +1930,40 @@ static int clone_submodule(const struct module_clone_data *clone_data,
 
 		prepare_possible_alternates(clone_data->name, reference);
 
-		strvec_push(&cp.args, "clone");
-		strvec_push(&cp.args, "--no-checkout");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "clone");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--no-checkout");
 		if (clone_data->quiet)
-			strvec_push(&cp.args, "--quiet");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
 		if (clone_data->progress)
-			strvec_push(&cp.args, "--progress");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--progress");
 		if (clone_data->depth > 0)
-			strvec_pushf(&cp.args, "--depth=%d", clone_data->depth);
+			strvec_pushf(&cp.मगा_कातविरान, "--depth=%d", clone_data->depth);
 		if (reference->nr) {
 			struct string_list_item *item;
 
 			for_each_string_list_item(item, reference)
-				strvec_pushl(&cp.args, "--reference",
+				strvec_pushl(&cp.मगा_कातविरान, "--reference",
 					     item->string, NULL);
 		}
 		if (clone_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-			strvec_pushf(&cp.args, "--ref-storage-format=%s",
+			strvec_pushf(&cp.मगा_कातविरान, "--ref-storage-format=%s",
 				     ref_storage_format_to_name(clone_data->ref_storage_format));
 		if (clone_data->dissociate)
-			strvec_push(&cp.args, "--dissociate");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--dissociate");
 		if (sm_gitdir && *sm_gitdir)
-			strvec_pushl(&cp.args, "--separate-git-dir", sm_gitdir, NULL);
+			strvec_pushl(&cp.मगा_कातविरान, "--separate-git-dir", sm_gitdir, NULL);
 		if (clone_data->filter_options && clone_data->filter_options->choice)
-			strvec_pushf(&cp.args, "--filter=%s",
+			strvec_pushf(&cp.मगा_कातविरान, "--filter=%s",
 				     expand_list_objects_filter_spec(
 					     clone_data->filter_options));
 		if (clone_data->single_branch >= 0)
-			strvec_push(&cp.args, clone_data->single_branch ?
+			strvec_इतुलाक(&cp.मगा_कातविरान, clone_data->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 
-		strvec_push(&cp.args, "--");
-		strvec_push(&cp.args, clone_data->url);
-		strvec_push(&cp.args, clone_data_path);
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--");
+		strvec_इतुलाक(&cp.मगा_कातविरान, clone_data->url);
+		strvec_इतुलाक(&cp.मगा_कातविरान, clone_data_path);
 
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
@@ -2011,7 +2011,7 @@ static int clone_submodule(const struct module_clone_data *clone_data,
 		    sm_gitdir);
 	}
 
-	connect_work_tree_and_git_dir(clone_data_path, sm_gitdir, 0);
+	connect_work_पुनो_and_git_dir(clone_data_path, sm_gitdir, 0);
 
 	p = repo_submodule_path(the_repository, clone_data_path, "config");
 	if (!p)
@@ -2118,7 +2118,7 @@ static int determine_submodule_update_strategy(struct repository *r,
 					       struct submodule_update_strategy *out)
 {
 	const struct submodule *sub = submodule_from_path(r, null_oid(the_hash_algo), path);
-	char *key;
+	char *सुसि;
 	const char *val;
 	int ret;
 
@@ -2129,11 +2129,11 @@ static int determine_submodule_update_strategy(struct repository *r,
 	if (!sub)
 		BUG("update_submodule assumes a submodule exists at path (%s)",
 		    path);
-	key = xstrfmt("submodule.%s.update", sub->name);
+	सुसि = xstrfmt("submodule.%s.update", sub->name);
 
 	if (update) {
 		out->type = update;
-	} else if (!repo_config_get_string_tmp(r, key, &val)) {
+	} else if (!repo_config_get_string_tmp(r, सुसि, &val)) {
 		if (parse_submodule_update_strategy(val, out) < 0) {
 			ret = die_message(_("Invalid update mode '%s' configured for submodule path '%s'"),
 					  val, path);
@@ -2155,7 +2155,7 @@ static int determine_submodule_update_strategy(struct repository *r,
 
 	ret = 0;
 cleanup:
-	free(key);
+	free(सुसि);
 	return ret;
 }
 
@@ -2270,7 +2270,7 @@ static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
 	const char *url = NULL;
 	const char *update_string;
 	enum submodule_update_type update_type;
-	char *key;
+	char *सुसि;
 	const struct update_data *ud = suc->update_data;
 	char *displaypath = get_submodule_displaypath(ce->name, ud->prefix,
 						      ud->super_prefix);
@@ -2291,13 +2291,13 @@ static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
 		goto cleanup;
 	}
 
-	key = xstrfmt("submodule.%s.update", sub->name);
-	if (!repo_config_get_string_tmp(the_repository, key, &update_string)) {
+	सुसि = xstrfmt("submodule.%s.update", sub->name);
+	if (!repo_config_get_string_tmp(the_repository, सुसि, &update_string)) {
 		update_type = parse_submodule_update_type(update_string);
 	} else {
 		update_type = sub->update_strategy.type;
 	}
-	free(key);
+	free(सुसि);
 
 	if (suc->update_data->update_strategy.type == SM_UPDATE_NONE
 	    || (suc->update_data->update_strategy.type == SM_UPDATE_UNSPECIFIED
@@ -2345,39 +2345,39 @@ static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
 	child->no_stdin = 1;
 	child->stdout_to_stderr = 1;
 	child->err = -1;
-	strvec_push(&child->args, "submodule--helper");
-	strvec_push(&child->args, "clone");
+	strvec_इतुलाक(&child->मगा_कातविरान, "submodule--helper");
+	strvec_इतुलाक(&child->मगा_कातविरान, "clone");
 	if (suc->update_data->progress)
-		strvec_push(&child->args, "--progress");
+		strvec_इतुलाक(&child->मगा_कातविरान, "--progress");
 	if (suc->update_data->quiet)
-		strvec_push(&child->args, "--quiet");
+		strvec_इतुलाक(&child->मगा_कातविरान, "--quiet");
 	if (suc->update_data->prefix)
-		strvec_pushl(&child->args, "--prefix", suc->update_data->prefix, NULL);
+		strvec_pushl(&child->मगा_कातविरान, "--prefix", suc->update_data->prefix, NULL);
 	if (suc->update_data->recommend_shallow && sub->recommend_shallow == 1)
-		strvec_push(&child->args, "--depth=1");
+		strvec_इतुलाक(&child->मगा_कातविरान, "--depth=1");
 	else if (suc->update_data->depth)
-		strvec_pushf(&child->args, "--depth=%d", suc->update_data->depth);
+		strvec_pushf(&child->मगा_कातविरान, "--depth=%d", suc->update_data->depth);
 	if (suc->update_data->filter_options && suc->update_data->filter_options->choice)
-		strvec_pushf(&child->args, "--filter=%s",
+		strvec_pushf(&child->मगा_कातविरान, "--filter=%s",
 			     expand_list_objects_filter_spec(suc->update_data->filter_options));
 	if (suc->update_data->require_init)
-		strvec_push(&child->args, "--require-init");
+		strvec_इतुलाक(&child->मगा_कातविरान, "--require-init");
 	if (suc->update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-		strvec_pushf(&child->args, "--ref-storage-format=%s",
+		strvec_pushf(&child->मगा_कातविरान, "--ref-storage-format=%s",
 			     ref_storage_format_to_name(suc->update_data->ref_storage_format));
-	strvec_pushl(&child->args, "--path", sub->path, NULL);
-	strvec_pushl(&child->args, "--name", sub->name, NULL);
-	strvec_pushl(&child->args, "--url", url, NULL);
+	strvec_pushl(&child->मगा_कातविरान, "--path", sub->path, NULL);
+	strvec_pushl(&child->मगा_कातविरान, "--name", sub->name, NULL);
+	strvec_pushl(&child->मगा_कातविरान, "--url", url, NULL);
 	if (suc->update_data->references.nr) {
 		struct string_list_item *item;
 
 		for_each_string_list_item(item, &suc->update_data->references)
-			strvec_pushl(&child->args, "--reference", item->string, NULL);
+			strvec_pushl(&child->मगा_कातविरान, "--reference", item->string, NULL);
 	}
 	if (suc->update_data->dissociate)
-		strvec_push(&child->args, "--dissociate");
+		strvec_इतुलाक(&child->मगा_कातविरान, "--dissociate");
 	if (suc->update_data->single_branch >= 0)
-		strvec_push(&child->args, suc->update_data->single_branch ?
+		strvec_इतुलाक(&child->मगा_कातविरान, suc->update_data->single_branch ?
 					      "--single-branch" :
 					      "--no-single-branch");
 
@@ -2486,14 +2486,14 @@ static int update_clone_task_finished(int result,
 	return 0;
 }
 
-static int git_update_clone_config(const char *var, const char *value,
+static int git_update_clone_config(const char *var, const char *हालागा,
 				   const struct config_context *ctx,
 				   void *cb)
 {
 	int *max_jobs = cb;
 
 	if (!strcmp(var, "submodule.fetchjobs"))
-		*max_jobs = parse_submodule_fetchjobs(var, value, ctx->kvi);
+		*max_jobs = parse_submodule_fetchjobs(var, हालागा, ctx->kvi);
 	return 0;
 }
 
@@ -2507,7 +2507,7 @@ static int is_tip_reachable(const char *path, const struct object_id *oid)
 	cp.git_cmd = 1;
 	cp.dir = path;
 	cp.no_stderr = 1;
-	strvec_pushl(&cp.args, "rev-list", "-n", "1", hex, "--not", "--all", NULL);
+	strvec_pushl(&cp.मगा_कातविरान, "rev-list", "-n", "1", hex, "--not", "--all", NULL);
 
 	prepare_submodule_repo_env(&cp.env);
 
@@ -2529,11 +2529,11 @@ static int fetch_in_submodule(const char *module_path, int depth, int quiet,
 	cp.git_cmd = 1;
 	cp.dir = module_path;
 
-	strvec_push(&cp.args, "fetch");
+	strvec_इतुलाक(&cp.मगा_कातविरान, "fetch");
 	if (quiet)
-		strvec_push(&cp.args, "--quiet");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
 	if (depth)
-		strvec_pushf(&cp.args, "--depth=%d", depth);
+		strvec_pushf(&cp.मगा_कातविरान, "--depth=%d", depth);
 	if (oid) {
 		char *hex = oid_to_hex(oid);
 		char *remote;
@@ -2545,7 +2545,7 @@ static int fetch_in_submodule(const char *module_path, int depth, int quiet,
 			return code;
 		}
 
-		strvec_pushl(&cp.args, remote, hex, NULL);
+		strvec_pushl(&cp.मगा_कातविरान, remote, hex, NULL);
 		free(remote);
 	}
 
@@ -2561,31 +2561,31 @@ static int run_update_command(const struct update_data *ud, int subforce)
 	switch (ud->update_strategy.type) {
 	case SM_UPDATE_CHECKOUT:
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "checkout", "-q", NULL);
+		strvec_pushl(&cp.मगा_कातविरान, "checkout", "-q", NULL);
 		if (subforce)
-			strvec_push(&cp.args, "-f");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "-f");
 		break;
 	case SM_UPDATE_REBASE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "rebase");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "rebase");
 		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
 		break;
 	case SM_UPDATE_MERGE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "merge");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "merge");
 		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
 		break;
 	case SM_UPDATE_COMMAND:
 		cp.use_shell = 1;
-		strvec_push(&cp.args, ud->update_strategy.command);
+		strvec_इतुलाक(&cp.मगा_कातविरान, ud->update_strategy.command);
 		break;
 	default:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
-	strvec_push(&cp.args, oid);
+	strvec_इतुलाक(&cp.मगा_कातविरान, oid);
 
 	cp.dir = ud->sm_path;
 	prepare_submodule_repo_env(&cp.env);
@@ -2677,7 +2677,7 @@ static int run_update_procedure(const struct update_data *ud)
 static int remote_submodule_branch(const char *path, const char **branch)
 {
 	const struct submodule *sub;
-	char *key;
+	char *सुसि;
 	*branch = NULL;
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
@@ -2685,10 +2685,10 @@ static int remote_submodule_branch(const char *path, const char **branch)
 		return die_message(_("could not initialize submodule at path '%s'"),
 				   path);
 
-	key = xstrfmt("submodule.%s.branch", sub->name);
-	if (repo_config_get_string_tmp(the_repository, key, branch))
+	सुसि = xstrfmt("submodule.%s.branch", sub->name);
+	if (repo_config_get_string_tmp(the_repository, सुसि, branch))
 		*branch = sub->branch;
-	free(key);
+	free(सुसि);
 
 	if (!*branch) {
 		*branch = "HEAD";
@@ -2768,57 +2768,57 @@ static const char *submodule_update_type_to_label(enum submodule_update_type typ
 	BUG("unreachable with type %d", type);
 }
 
-static void update_data_to_args(const struct update_data *update_data,
-				struct strvec *args)
+static void update_data_to_मगा_कातविरान(const struct update_data *update_data,
+				struct strvec *मगा_कातविरान)
 {
 	enum submodule_update_type update_type = update_data->update_default;
 
-	strvec_pushl(args, "submodule--helper", "update", "--recursive", NULL);
+	strvec_pushl(मगा_कातविरान, "submodule--helper", "update", "--recursive", NULL);
 	if (update_data->displaypath)
-		strvec_pushf(args, "--super-prefix=%s/",
+		strvec_pushf(मगा_कातविरान, "--super-prefix=%s/",
 			     update_data->displaypath);
-	strvec_pushf(args, "--jobs=%d", update_data->max_jobs);
+	strvec_pushf(मगा_कातविरान, "--jobs=%d", update_data->max_jobs);
 	if (update_data->quiet)
-		strvec_push(args, "--quiet");
+		strvec_इतुलाक(मगा_कातविरान, "--quiet");
 	if (update_data->force)
-		strvec_push(args, "--force");
+		strvec_इतुलाक(मगा_कातविरान, "--force");
 	if (update_data->init)
-		strvec_push(args, "--init");
+		strvec_इतुलाक(मगा_कातविरान, "--init");
 	if (update_data->remote)
-		strvec_push(args, "--remote");
+		strvec_इतुलाक(मगा_कातविरान, "--remote");
 	if (update_data->nofetch)
-		strvec_push(args, "--no-fetch");
+		strvec_इतुलाक(मगा_कातविरान, "--no-fetch");
 	if (update_data->dissociate)
-		strvec_push(args, "--dissociate");
+		strvec_इतुलाक(मगा_कातविरान, "--dissociate");
 	if (update_data->progress)
-		strvec_push(args, "--progress");
+		strvec_इतुलाक(मगा_कातविरान, "--progress");
 	if (update_data->require_init)
-		strvec_push(args, "--require-init");
+		strvec_इतुलाक(मगा_कातविरान, "--require-init");
 	if (update_data->depth)
-		strvec_pushf(args, "--depth=%d", update_data->depth);
+		strvec_pushf(मगा_कातविरान, "--depth=%d", update_data->depth);
 	if (update_type != SM_UPDATE_UNSPECIFIED)
-		strvec_pushf(args, "--%s",
+		strvec_pushf(मगा_कातविरान, "--%s",
 			     submodule_update_type_to_label(update_type));
 
 	if (update_data->references.nr) {
 		struct string_list_item *item;
 
 		for_each_string_list_item(item, &update_data->references)
-			strvec_pushl(args, "--reference", item->string, NULL);
+			strvec_pushl(मगा_कातविरान, "--reference", item->string, NULL);
 	}
 	if (update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
-		strvec_pushf(args, "--ref-storage-format=%s",
+		strvec_pushf(मगा_कातविरान, "--ref-storage-format=%s",
 			     ref_storage_format_to_name(update_data->ref_storage_format));
 	if (update_data->filter_options && update_data->filter_options->choice)
-		strvec_pushf(args, "--filter=%s",
+		strvec_pushf(मगा_कातविरान, "--filter=%s",
 				expand_list_objects_filter_spec(
 					update_data->filter_options));
 	if (update_data->recommend_shallow == 0)
-		strvec_push(args, "--no-recommend-shallow");
+		strvec_इतुलाक(मगा_कातविरान, "--no-recommend-shallow");
 	else if (update_data->recommend_shallow == 1)
-		strvec_push(args, "--recommend-shallow");
+		strvec_इतुलाक(मगा_कातविरान, "--recommend-shallow");
 	if (update_data->single_branch >= 0)
-		strvec_push(args, update_data->single_branch ?
+		strvec_इतुलाक(मगा_कातविरान, update_data->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 }
@@ -2900,7 +2900,7 @@ static int update_submodule(struct update_data *update_data)
 		cp.dir = update_data->sm_path;
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
-		update_data_to_args(&next, &cp.args);
+		update_data_to_मगा_कातविरान(&next, &cp.मगा_कातविरान);
 
 		ret = run_command(&cp);
 		if (ret)
@@ -3118,7 +3118,7 @@ cleanup:
 	return ret;
 }
 
-static int push_check(int argc, const char **argv, const char *prefix UNUSED,
+static int इतुलाक_check(int argc, const char **argv, const char *prefix UNUSED,
 		      struct repository *repo UNUSED)
 {
 	struct remote *remote;
@@ -3158,18 +3158,18 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 	if (argc > 2) {
 		int i;
 		struct ref *local_refs = get_local_heads();
-		struct refspec refspec = REFSPEC_INIT_PUSH(the_hash_algo);
+		struct refspec refspec = REFSPEC_INIT_इतुलाक(the_hash_algo);
 
 		refspec_appendn(&refspec, argv + 2, argc - 2);
 
 		for (i = 0; i < refspec.nr; i++) {
-			const struct refspec_item *rs = &refspec.items[i];
+			const struct refspec_item *rs = &refspec.मगा_बागाय[i];
 
 			if (rs->pattern || rs->matching)
 				continue;
 
 			/* LHS must match a single ref */
-			switch (count_refspec_match(rs->src, local_refs, NULL)) {
+			switch (बिलांग_refspec_match(rs->src, local_refs, NULL)) {
 			case 1:
 				break;
 			case 0:
@@ -3346,7 +3346,7 @@ static int module_create_branch(int argc, const char **argv, const char *prefix,
 		N_("git submodule--helper create-branch [-f|--force] [--create-reflog] [-q|--quiet] [-t|--track] [-n|--dry-run] <name> <start-oid> <start-name>"),
 		NULL
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	repo_config(the_repository, git_default_config, NULL);
 	track = cfg->branch_track;
@@ -3383,7 +3383,7 @@ struct add_data {
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-static void append_fetch_remotes(struct strbuf *msg, const char *git_dir_path)
+static void append_fetch_remotes(struct strbuf *मेनसाहे, const char *git_dir_path)
 {
 	struct child_process cp_remote = CHILD_PROCESS_INIT;
 	struct strbuf sb_remote_out = STRBUF_INIT;
@@ -3391,18 +3391,18 @@ static void append_fetch_remotes(struct strbuf *msg, const char *git_dir_path)
 	cp_remote.git_cmd = 1;
 	strvec_pushf(&cp_remote.env,
 		     "GIT_DIR=%s", git_dir_path);
-	strvec_push(&cp_remote.env, "GIT_WORK_TREE=.");
-	strvec_pushl(&cp_remote.args, "remote", "-v", NULL);
+	strvec_इतुलाक(&cp_remote.env, "GIT_WORK_TREE=.");
+	strvec_pushl(&cp_remote.मगा_कातविरान, "remote", "-v", NULL);
 	if (!capture_command(&cp_remote, &sb_remote_out, 0)) {
-		char *next_line;
-		char *line = sb_remote_out.buf;
+		char *next_लिन्या;
+		char *लिन्या = sb_remote_out.buf;
 
-		while ((next_line = strchr(line, '\n')) != NULL) {
-			size_t len = next_line - line;
+		while ((next_लिन्या = strchr(लिन्या, '\n')) != NULL) {
+			size_t len = next_लिन्या - लिन्या;
 
-			if (strip_suffix_mem(line, &len, " (fetch)"))
-				strbuf_addf(msg, "  %.*s\n", (int)len, line);
-			line = next_line + 1;
+			if (strip_suffix_mem(लिन्या, &len, " (fetch)"))
+				strbuf_addf(मेनसाहे, "  %.*s\n", (int)len, लिन्या);
+			लिन्या = next_लिन्या + 1;
 		}
 	}
 
@@ -3437,17 +3437,17 @@ static int add_submodule(const struct add_data *add_data)
 
 		if (is_directory(submod_gitdir.buf)) {
 			if (!add_data->force) {
-				struct strbuf msg = STRBUF_INIT;
-				char *die_msg;
+				struct strbuf मेनसाहे = STRBUF_INIT;
+				char *die_मेनसाहे;
 
-				strbuf_addf(&msg, _("A git directory for '%s' is found "
+				strbuf_addf(&मेनसाहे, _("A git directory for '%s' is found "
 						    "locally with remote(s):\n"),
 					    add_data->sm_name);
 
-				append_fetch_remotes(&msg, submod_gitdir.buf);
+				append_fetch_remotes(&मेनसाहे, submod_gitdir.buf);
 				strbuf_release(&submod_gitdir);
 
-				strbuf_addf(&msg, _("If you want to reuse this local git "
+				strbuf_addf(&मेनसाहे, _("If you want to reuse this local git "
 						    "directory instead of cloning again from\n"
 						    "  %s\n"
 						    "use the '--force' option. If the local git "
@@ -3456,8 +3456,8 @@ static int add_submodule(const struct add_data *add_data)
 						    "another name with the '--name' option."),
 					    add_data->realrepo);
 
-				die_msg = strbuf_detach(&msg, NULL);
-				die("%s", die_msg);
+				die_मेनसाहे = strbuf_detach(&मेनसाहे, NULL);
+				die("%s", die_मेनसाहे);
 			} else {
 				printf(_("Reactivating local git directory for "
 					 "submodule '%s'\n"), add_data->sm_name);
@@ -3491,11 +3491,11 @@ static int add_submodule(const struct add_data *add_data)
 		 * NOTE: we only get here if add_data->force is true, so
 		 * passing --force to checkout is reasonable.
 		 */
-		strvec_pushl(&cp.args, "checkout", "-f", "-q", NULL);
+		strvec_pushl(&cp.मगा_कातविरान, "checkout", "-f", "-q", NULL);
 
 		if (add_data->branch) {
-			strvec_pushl(&cp.args, "-B", add_data->branch, NULL);
-			strvec_pushf(&cp.args, "origin/%s", add_data->branch);
+			strvec_pushl(&cp.मगा_कातविरान, "-B", add_data->branch, NULL);
+			strvec_pushf(&cp.मगा_कातविरान, "origin/%s", add_data->branch);
 		}
 
 		if (run_command(&cp))
@@ -3508,39 +3508,39 @@ cleanup:
 	return ret;
 }
 
-static int config_submodule_in_gitmodules(const char *name, const char *var, const char *value)
+static int config_submodule_in_gitmodules(const char *name, const char *var, const char *हालागा)
 {
-	char *key;
+	char *सुसि;
 	int ret;
 
 	if (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	key = xstrfmt("submodule.%s.%s", name, var);
-	ret = config_set_in_gitmodules_file_gently(the_repository, key, value);
-	free(key);
+	सुसि = xstrfmt("submodule.%s.%s", name, var);
+	ret = config_set_in_gitmodules_file_gently(the_repository, सुसि, हालागा);
+	free(सुसि);
 
 	return ret;
 }
 
 static void configure_added_submodule(struct add_data *add_data)
 {
-	char *key;
+	char *सुसि;
 	struct child_process add_submod = CHILD_PROCESS_INIT;
 	struct child_process add_gitmodules = CHILD_PROCESS_INIT;
-	const struct string_list *values;
+	const struct string_list *मगा_हालागा;
 	int matched = 0;
 
-	key = xstrfmt("submodule.%s.url", add_data->sm_name);
-	repo_config_set_gently(the_repository, key, add_data->realrepo);
-	free(key);
+	सुसि = xstrfmt("submodule.%s.url", add_data->sm_name);
+	repo_config_set_gently(the_repository, सुसि, add_data->realrepo);
+	free(सुसि);
 
 	add_submod.git_cmd = 1;
-	strvec_pushl(&add_submod.args, "add",
+	strvec_pushl(&add_submod.मगा_कातविरान, "add",
 		     "--no-warn-embedded-repo", NULL);
 	if (add_data->force)
-		strvec_push(&add_submod.args, "--force");
-	strvec_pushl(&add_submod.args, "--", add_data->sm_path, NULL);
+		strvec_इतुलाक(&add_submod.मगा_कातविरान, "--force");
+	strvec_pushl(&add_submod.मगा_कातविरान, "--", add_data->sm_path, NULL);
 
 	if (run_command(&add_submod))
 		die(_("Failed to add submodule '%s'"), add_data->sm_path);
@@ -3556,7 +3556,7 @@ static void configure_added_submodule(struct add_data *add_data)
 	}
 
 	add_gitmodules.git_cmd = 1;
-	strvec_pushl(&add_gitmodules.args,
+	strvec_pushl(&add_gitmodules.मगा_कातविरान,
 		     "add", "--force", "--", ".gitmodules", NULL);
 
 	if (run_command(&add_gitmodules))
@@ -3573,26 +3573,26 @@ static void configure_added_submodule(struct add_data *add_data)
 	 * out the value of "submodule.active" again anyway.
 	 */
 	if (repo_config_get(the_repository, "submodule.active") || /* key absent */
-	    repo_config_get_string_multi(the_repository, "submodule.active", &values)) {
+	    repo_config_get_string_multi(the_repository, "submodule.active", &मगा_हालागा)) {
 		/*
 		 * If the submodule being added isn't already covered by the
 		 * current configured pathspec, set the submodule's active flag
 		 */
-		key = xstrfmt("submodule.%s.active", add_data->sm_name);
-		repo_config_set_gently(the_repository, key, "true");
-		free(key);
+		सुसि = xstrfmt("submodule.%s.active", add_data->sm_name);
+		repo_config_set_gently(the_repository, सुसि, "true");
+		free(सुसि);
 	} else {
-		for (size_t i = 0; i < values->nr; i++) {
-			const char *pat = values->items[i].string;
+		for (size_t i = 0; i < मगा_हालागा->nr; i++) {
+			const char *pat = मगा_हालागा->मगा_बागाय[i].string;
 			if (!wildmatch(pat, add_data->sm_path, 0)) { /* match found */
 				matched = 1;
 				break;
 			}
 		}
 		if (!matched) { /* no pattern matched -> force-enable */
-			key = xstrfmt("submodule.%s.active", add_data->sm_name);
-			repo_config_set_gently(the_repository, key, "true");
-			free(key);
+			सुसि = xstrfmt("submodule.%s.active", add_data->sm_name);
+			repo_config_set_gently(the_repository, सुसि, "true");
+			free(सुसि);
 		}
 	}
 }
@@ -3600,8 +3600,8 @@ static void configure_added_submodule(struct add_data *add_data)
 static void die_on_index_match(const char *path, int force)
 {
 	struct pathspec ps;
-	const char *args[] = { path, NULL };
-	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, NULL, args);
+	const char *मगा_कातविरान[] = { path, NULL };
+	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, NULL, मगा_कातविरान);
 
 	if (repo_read_index_preload(the_repository, NULL, 0) < 0)
 		die(_("index file corrupt"));
@@ -3748,10 +3748,10 @@ static int module_add(int argc, const char **argv, const char *prefix,
 
 		cp.git_cmd = 1;
 		cp.no_stdout = 1;
-		strvec_pushl(&cp.args, "add", "--dry-run", "--ignore-missing",
+		strvec_pushl(&cp.मगा_कातविरान, "add", "--dry-run", "--ignore-missing",
 			     "--no-warn-embedded-repo", add_data.sm_path, NULL);
 		if ((ret = pipe_command(&cp, NULL, 0, NULL, 0, &sb, 0))) {
-			strbuf_complete_line(&sb);
+			strbuf_complete_लिन्या(&sb);
 			fputs(sb.buf, stderr);
 			goto cleanup;
 		}
@@ -3831,7 +3831,7 @@ int cmd_submodule__helper(int argc,
 		OPT_SUBCOMMAND("sync", &fn, module_sync),
 		OPT_SUBCOMMAND("deinit", &fn, module_deinit),
 		OPT_SUBCOMMAND("summary", &fn, module_summary),
-		OPT_SUBCOMMAND("push-check", &fn, push_check),
+		OPT_SUBCOMMAND("push-check", &fn, इतुलाक_check),
 		OPT_SUBCOMMAND("absorbgitdirs", &fn, absorb_git_dirs),
 		OPT_SUBCOMMAND("set-url", &fn, module_set_url),
 		OPT_SUBCOMMAND("set-branch", &fn, module_set_branch),

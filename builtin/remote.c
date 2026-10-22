@@ -93,7 +93,7 @@ static const char * const builtin_remote_seturl_usage[] = {
 
 #define GET_REF_STATES (1<<0)
 #define GET_HEAD_NAMES (1<<1)
-#define GET_PUSH_REF_STATES (1<<2)
+#define GET_इतुलाक_REF_STATES (1<<2)
 
 static int verbose;
 
@@ -101,10 +101,10 @@ static int fetch_remote(const char *name)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "fetch");
 	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, name);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "-v");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, name);
 	cmd.git_cmd = 1;
 	printf_ln(_("Updating %s"), name);
 	if (run_command(&cmd))
@@ -120,10 +120,10 @@ enum {
 
 #define MIRROR_NONE 0
 #define MIRROR_FETCH 1
-#define MIRROR_PUSH 2
-#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_PUSH)
+#define MIRROR_इतुलाक 2
+#define MIRROR_BOTH (MIRROR_FETCH|MIRROR_इतुलाक)
 
-static void add_branch(const char *key, const char *branchname,
+static void add_branch(const char *सुसि, const char *branchname,
 		       const char *remotename, int mirror, struct strbuf *tmp)
 {
 	strbuf_reset(tmp);
@@ -134,7 +134,7 @@ static void add_branch(const char *key, const char *branchname,
 	else
 		strbuf_addf(tmp, "refs/heads/%s:refs/remotes/%s/%s",
 				branchname, remotename, branchname);
-	repo_config_set_multivar(the_repository, key, tmp->buf, "^$", 0);
+	repo_config_set_multivar(the_repository, सुसि, tmp->buf, "^$", 0);
 }
 
 static const char mirror_advice[] =
@@ -143,7 +143,7 @@ N_("--mirror is dangerous and deprecated; please\n"
 
 static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
 {
-	unsigned *mirror = opt->value;
+	unsigned *mirror = opt->हालागा;
 	if (not)
 		*mirror = MIRROR_NONE;
 	else if (!arg) {
@@ -153,7 +153,7 @@ static int parse_mirror_opt(const struct option *opt, const char *arg, int not)
 	else if (!strcmp(arg, "fetch"))
 		*mirror = MIRROR_FETCH;
 	else if (!strcmp(arg, "push"))
-		*mirror = MIRROR_PUSH;
+		*mirror = MIRROR_इतुलाक;
 	else
 		return error(_("unknown --mirror argument: %s"), arg);
 	return 0;
@@ -235,12 +235,12 @@ static int add(int argc, const char **argv, const char *prefix,
 		if (track.nr == 0)
 			string_list_append(&track, "*");
 		for (size_t i = 0; i < track.nr; i++) {
-			add_branch(buf.buf, track.items[i].string,
+			add_branch(buf.buf, track.मगा_बागाय[i].string,
 				   name, mirror, &buf2);
 		}
 	}
 
-	if (mirror & MIRROR_PUSH) {
+	if (mirror & MIRROR_इतुलाक) {
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "remote.%s.mirror", name);
 		repo_config_set(the_repository, buf.buf, "true");
@@ -281,7 +281,7 @@ struct branch_info {
 	char *remote_name;
 	struct string_list merge;
 	enum rebase_type rebase;
-	char *push_remote_name;
+	char *इतुलाक_remote_name;
 };
 
 static struct string_list branch_list = STRING_LIST_INIT_DUP;
@@ -293,34 +293,34 @@ static const char *abbrev_ref(const char *name, const char *prefix)
 }
 #define abbrev_branch(name) abbrev_ref((name), "refs/heads/")
 
-static int config_read_branches(const char *key, const char *value,
+static int config_read_branches(const char *सुसि, const char *हालागा,
 				const struct config_context *ctx UNUSED,
 				void *data UNUSED)
 {
-	const char *orig_key = key;
+	const char *orig_सुसि = सुसि;
 	char *name;
 	struct string_list_item *item;
 	struct branch_info *info;
-	enum { REMOTE, MERGE, REBASE, PUSH_REMOTE } type;
-	size_t key_len;
+	enum { REMOTE, MERGE, REBASE, इतुलाक_REMOTE } type;
+	size_t सुसि_len;
 
-	if (!starts_with(key, "branch."))
+	if (!starts_with(सुसि, "branch."))
 		return 0;
 
-	key += strlen("branch.");
-	if (strip_suffix(key, ".remote", &key_len))
+	सुसि += strlen("branch.");
+	if (strip_suffix(सुसि, ".remote", &सुसि_len))
 		type = REMOTE;
-	else if (strip_suffix(key, ".merge", &key_len))
+	else if (strip_suffix(सुसि, ".merge", &सुसि_len))
 		type = MERGE;
-	else if (strip_suffix(key, ".rebase", &key_len))
+	else if (strip_suffix(सुसि, ".rebase", &सुसि_len))
 		type = REBASE;
-	else if (strip_suffix(key, ".pushremote", &key_len))
-		type = PUSH_REMOTE;
+	else if (strip_suffix(सुसि, ".pushremote", &सुसि_len))
+		type = इतुलाक_REMOTE;
 	else
 		return 0;
 
-	name = xmemdupz(key, key_len);
-	item = string_list_insert(&branch_list, name);
+	name = xmemdupz(सुसि, सुसि_len);
+	item = string_list_इसिंगित(&branch_list, name);
 
 	if (!item->util)
 		item->util = xcalloc(1, sizeof(struct branch_info));
@@ -328,20 +328,20 @@ static int config_read_branches(const char *key, const char *value,
 	switch (type) {
 	case REMOTE:
 		if (info->remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->remote_name = xstrdup(value);
+			warning(_("more than one %s"), orig_सुसि);
+		info->remote_name = xstrdup(हालागा);
 		break;
 	case MERGE: {
-		const char *space = strchr(value, ' ');
-		value = abbrev_branch(value);
+		const char *space = strchr(हालागा, ' ');
+		हालागा = abbrev_branch(हालागा);
 		while (space) {
 			char *merge;
-			merge = xstrndup(value, space - value);
+			merge = xstrndup(हालागा, space - हालागा);
 			string_list_append(&info->merge, merge);
-			value = abbrev_branch(space + 1);
-			space = strchr(value, ' ');
+			हालागा = abbrev_branch(space + 1);
+			space = strchr(हालागा, ' ');
 		}
-		string_list_append(&info->merge, xstrdup(value));
+		string_list_append(&info->merge, xstrdup(हालागा));
 		break;
 	}
 	case REBASE:
@@ -349,15 +349,15 @@ static int config_read_branches(const char *key, const char *value,
 		 * Consider invalid values as false and check the
 		 * truth value with >= REBASE_TRUE.
 		 */
-		info->rebase = rebase_parse_value(value);
+		info->rebase = rebase_parse_हालागा(हालागा);
 		if (info->rebase == REBASE_INVALID)
 			warning(_("unhandled branch.%s.rebase=%s; assuming "
-				  "'true'"), name, value);
+				  "'true'"), name, हालागा);
 		break;
-	case PUSH_REMOTE:
-		if (info->push_remote_name)
-			warning(_("more than one %s"), orig_key);
-		info->push_remote_name = xstrdup(value);
+	case इतुलाक_REMOTE:
+		if (info->इतुलाक_remote_name)
+			warning(_("more than one %s"), orig_सुसि);
+		info->इतुलाक_remote_name = xstrdup(हालागा);
 		break;
 	default:
 		BUG("unexpected type=%d", type);
@@ -376,7 +376,7 @@ static void read_branches(void)
 
 struct ref_states {
 	struct remote *remote;
-	struct string_list new_refs, skipped, stale, tracked, heads, push;
+	struct string_list new_refs, skipped, stale, tracked, heads, इतुलाक;
 	int queried;
 };
 
@@ -386,7 +386,7 @@ struct ref_states {
 	.stale = STRING_LIST_INIT_DUP, \
 	.tracked = STRING_LIST_INIT_DUP, \
 	.heads = STRING_LIST_INIT_DUP, \
-	.push = STRING_LIST_INIT_DUP, \
+	.इतुलाक = STRING_LIST_INIT_DUP, \
 }
 
 static int get_ref_states(const struct ref *remote_refs, struct ref_states *states)
@@ -396,9 +396,9 @@ static int get_ref_states(const struct ref *remote_refs, struct ref_states *stat
 	int i;
 
 	for (i = 0; i < states->remote->fetch.nr; i++)
-		if (get_fetch_map(remote_refs, &states->remote->fetch.items[i], &tail, 1))
+		if (get_fetch_map(remote_refs, &states->remote->fetch.मगा_बागाय[i], &tail, 1))
 			die(_("Could not get fetch map for refspec %s"),
-				states->remote->fetch.items[i].raw);
+				states->remote->fetch.मगा_बागाय[i].raw);
 
 	for (ref = fetch_map; ref; ref = ref->next) {
 		if (refname_matches_negative_refspec_item(ref->name, &states->remote->fetch))
@@ -425,93 +425,93 @@ static int get_ref_states(const struct ref *remote_refs, struct ref_states *stat
 	return 0;
 }
 
-struct push_info {
+struct इतुलाक_info {
 	char *dest;
 	int forced;
 	enum {
-		PUSH_STATUS_CREATE = 0,
-		PUSH_STATUS_DELETE,
-		PUSH_STATUS_UPTODATE,
-		PUSH_STATUS_FASTFORWARD,
-		PUSH_STATUS_OUTOFDATE,
-		PUSH_STATUS_NOTQUERIED
+		इतुलाक_STATUS_CREATE = 0,
+		इतुलाक_STATUS_DELETE,
+		इतुलाक_STATUS_UPTODATE,
+		इतुलाक_STATUS_FASTFORWARD,
+		इतुलाक_STATUS_OUTOFDATE,
+		इतुलाक_STATUS_NOTQUERIED
 	} status;
 };
 
-static int get_push_ref_states(const struct ref *remote_refs,
+static int get_इतुलाक_ref_states(const struct ref *remote_refs,
 	struct ref_states *states)
 {
 	struct remote *remote = states->remote;
-	struct ref *ref, *local_refs, *push_map;
+	struct ref *ref, *local_refs, *इतुलाक_map;
 	if (remote->mirror)
 		return 0;
 
 	local_refs = get_local_heads();
-	push_map = copy_ref_list(remote_refs);
+	इतुलाक_map = copy_ref_list(remote_refs);
 
-	match_push_refs(local_refs, &push_map, &remote->push, MATCH_REFS_NONE);
+	match_इतुलाक_refs(local_refs, &इतुलाक_map, &remote->इतुलाक, MATCH_REFS_NONE);
 
-	for (ref = push_map; ref; ref = ref->next) {
+	for (ref = इतुलाक_map; ref; ref = ref->next) {
 		struct string_list_item *item;
-		struct push_info *info;
+		struct इतुलाक_info *info;
 
 		if (!ref->peer_ref)
 			continue;
 		oidcpy(&ref->new_oid, &ref->peer_ref->new_oid);
 
-		item = string_list_append(&states->push,
+		item = string_list_append(&states->इतुलाक,
 					  abbrev_branch(ref->peer_ref->name));
-		item->util = xcalloc(1, sizeof(struct push_info));
+		item->util = xcalloc(1, sizeof(struct इतुलाक_info));
 		info = item->util;
 		info->forced = ref->force;
 		info->dest = xstrdup(abbrev_branch(ref->name));
 
 		if (is_null_oid(&ref->new_oid)) {
-			info->status = PUSH_STATUS_DELETE;
+			info->status = इतुलाक_STATUS_DELETE;
 		} else if (oideq(&ref->old_oid, &ref->new_oid))
-			info->status = PUSH_STATUS_UPTODATE;
+			info->status = इतुलाक_STATUS_UPTODATE;
 		else if (is_null_oid(&ref->old_oid))
-			info->status = PUSH_STATUS_CREATE;
+			info->status = इतुलाक_STATUS_CREATE;
 		else if (odb_has_object(the_repository->objects, &ref->old_oid,
 					ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR) &&
 			 ref_newer(&ref->new_oid, &ref->old_oid))
-			info->status = PUSH_STATUS_FASTFORWARD;
+			info->status = इतुलाक_STATUS_FASTFORWARD;
 		else
-			info->status = PUSH_STATUS_OUTOFDATE;
+			info->status = इतुलाक_STATUS_OUTOFDATE;
 	}
 	free_refs(local_refs);
-	free_refs(push_map);
+	free_refs(इतुलाक_map);
 	return 0;
 }
 
-static int get_push_ref_states_noquery(struct ref_states *states)
+static int get_इतुलाक_ref_states_noquery(struct ref_states *states)
 {
 	int i;
 	struct remote *remote = states->remote;
 	struct string_list_item *item;
-	struct push_info *info;
+	struct इतुलाक_info *info;
 
 	if (remote->mirror)
 		return 0;
 
-	if (!remote->push.nr) {
-		item = string_list_append(&states->push, _("(matching)"));
-		info = item->util = xcalloc(1, sizeof(struct push_info));
-		info->status = PUSH_STATUS_NOTQUERIED;
+	if (!remote->इतुलाक.nr) {
+		item = string_list_append(&states->इतुलाक, _("(matching)"));
+		info = item->util = xcalloc(1, sizeof(struct इतुलाक_info));
+		info->status = इतुलाक_STATUS_NOTQUERIED;
 		info->dest = xstrdup(item->string);
 	}
-	for (i = 0; i < remote->push.nr; i++) {
-		const struct refspec_item *spec = &remote->push.items[i];
+	for (i = 0; i < remote->इतुलाक.nr; i++) {
+		const struct refspec_item *spec = &remote->इतुलाक.मगा_बागाय[i];
 		if (spec->matching)
-			item = string_list_append(&states->push, _("(matching)"));
+			item = string_list_append(&states->इतुलाक, _("(matching)"));
 		else if (strlen(spec->src))
-			item = string_list_append(&states->push, spec->src);
+			item = string_list_append(&states->इतुलाक, spec->src);
 		else
-			item = string_list_append(&states->push, _("(delete)"));
+			item = string_list_append(&states->इतुलाक, _("(delete)"));
 
-		info = item->util = xcalloc(1, sizeof(struct push_info));
+		info = item->util = xcalloc(1, sizeof(struct इतुलाक_info));
 		info->forced = spec->force;
-		info->status = PUSH_STATUS_NOTQUERIED;
+		info->status = इतुलाक_STATUS_NOTQUERIED;
 		info->dest = xstrdup(spec->dst ? spec->dst : item->string);
 	}
 	return 0;
@@ -632,7 +632,7 @@ static int rename_one_reflog_entry(const char *old_refname,
 				   struct object_id *new_oid,
 				   const char *committer,
 				   timestamp_t timestamp, int tz,
-				   const char *msg, void *cb_data)
+				   const char *मेनसाहे, void *cb_data)
 {
 	struct rename_info *rename = cb_data;
 	struct strbuf new_refname = STRBUF_INIT;
@@ -645,7 +645,7 @@ static int rename_one_reflog_entry(const char *old_refname,
 
 	compute_renamed_ref(rename, old_refname, &new_refname);
 
-	if (split_ident_line(&ident, committer, strlen(committer)) < 0) {
+	if (split_ident_लिन्या(&ident, committer, strlen(committer)) < 0) {
 		error = -1;
 		goto out;
 	}
@@ -658,7 +658,7 @@ static int rename_one_reflog_entry(const char *old_refname,
 					  WANT_BLANK_IDENT, date, 0));
 
 	error = ref_transaction_update_reflog(rename->transaction, new_refname.buf,
-					      new_oid, old_oid, identity.buf, msg,
+					      new_oid, old_oid, identity.buf, मेनसाहे,
 					      rename->index++, rename->err);
 
 out:
@@ -768,12 +768,12 @@ static int migrate_file(struct remote *remote)
 		repo_config_set_multivar(the_repository, buf.buf, remote->url.v[i], "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.push", remote->name);
-	for (int i = 0; i < remote->push.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->push.items[i].raw, "^$", 0);
+	for (int i = 0; i < remote->इतुलाक.nr; i++)
+		repo_config_set_multivar(the_repository, buf.buf, remote->इतुलाक.मगा_बागाय[i].raw, "^$", 0);
 	strbuf_reset(&buf);
 	strbuf_addf(&buf, "remote.%s.fetch", remote->name);
 	for (int i = 0; i < remote->fetch.nr; i++)
-		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.items[i].raw, "^$", 0);
+		repo_config_set_multivar(the_repository, buf.buf, remote->fetch.मगा_बागाय[i].raw, "^$", 0);
 #ifndef WITH_BREAKING_CHANGES
 	if (remote->origin == REMOTE_REMOTES)
 		unlink_or_warn(repo_git_path_replace(the_repository, &buf,
@@ -787,7 +787,7 @@ static int migrate_file(struct remote *remote)
 	return 0;
 }
 
-struct push_default_info
+struct इतुलाक_default_info
 {
 	const char *old_name;
 	enum config_scope scope;
@@ -795,14 +795,14 @@ struct push_default_info
 	int linenr;
 };
 
-static int config_read_push_default(const char *key, const char *value,
+static int config_read_इतुलाक_default(const char *सुसि, const char *हालागा,
 	const struct config_context *ctx, void *cb)
 {
-	const struct key_value_info *kvi = ctx->kvi;
+	const struct सुसि_हालागा_info *kvi = ctx->kvi;
 
-	struct push_default_info* info = cb;
-	if (strcmp(key, "remote.pushdefault") ||
-	    !value || strcmp(value, info->old_name))
+	struct इतुलाक_default_info* info = cb;
+	if (strcmp(सुसि, "remote.pushdefault") ||
+	    !हालागा || strcmp(हालागा, info->old_name))
 		return 0;
 
 	info->scope = kvi->scope;
@@ -813,35 +813,35 @@ static int config_read_push_default(const char *key, const char *value,
 	return 0;
 }
 
-static void handle_push_default(const char* old_name, const char* new_name)
+static void handle_इतुलाक_default(const char* old_name, const char* new_name)
 {
-	struct push_default_info push_default = {
+	struct इतुलाक_default_info इतुलाक_default = {
 		.old_name = old_name,
 		.scope = CONFIG_SCOPE_UNKNOWN,
 		.origin = STRBUF_INIT,
 		.linenr = -1,
 	};
-	repo_config(the_repository, config_read_push_default, &push_default);
-	if (push_default.scope >= CONFIG_SCOPE_COMMAND)
+	repo_config(the_repository, config_read_इतुलाक_default, &इतुलाक_default);
+	if (इतुलाक_default.scope >= CONFIG_SCOPE_COMMAND)
 		; /* pass */
-	else if (push_default.scope >= CONFIG_SCOPE_LOCAL) {
+	else if (इतुलाक_default.scope >= CONFIG_SCOPE_LOCAL) {
 		int result = repo_config_set_gently(the_repository, "remote.pushDefault",
 						    new_name);
 		if (new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not set '%s'"), "remote.pushDefault");
 		else if (!new_name && result && result != CONFIG_NOTHING_SET)
 			die(_("could not unset '%s'"), "remote.pushDefault");
-	} else if (push_default.scope >= CONFIG_SCOPE_SYSTEM) {
+	} else if (इतुलाक_default.scope >= CONFIG_SCOPE_SYSTEM) {
 		/* warn */
 		warning(_("The %s configuration remote.pushDefault in:\n"
 			  "\t%s:%d\n"
 			  "now names the non-existent remote '%s'"),
-			config_scope_name(push_default.scope),
-			push_default.origin.buf, push_default.linenr,
+			config_scope_name(इतुलाक_default.scope),
+			इतुलाक_default.origin.buf, इतुलाक_default.linenr,
 			old_name);
 	}
 
-	strbuf_release(&push_default.origin);
+	strbuf_release(&इतुलाक_default.origin);
 }
 
 static const char conflicting_remote_refs_advice[] = N_(
@@ -908,7 +908,7 @@ static int mv(int argc, const char **argv, const char *prefix,
 	strbuf_addf(&old_remote_context, ":refs/remotes/%s/", rename.old_name);
 
 	for (int i = 0; i < oldremote->fetch.nr && !refspecs_need_update; i++)
-		refspecs_need_update = !!strstr(oldremote->fetch.items[i].raw,
+		refspecs_need_update = !!strstr(oldremote->fetch.मगा_बागाय[i].raw,
 						old_remote_context.buf);
 
 	if (refspecs_need_update) {
@@ -950,7 +950,7 @@ static int mv(int argc, const char **argv, const char *prefix,
 			char *ptr;
 
 			strbuf_reset(&buf2);
-			strbuf_addstr(&buf2, oldremote->fetch.items[i].raw);
+			strbuf_addstr(&buf2, oldremote->fetch.मगा_बागाय[i].raw);
 			ptr = strstr(buf2.buf, old_remote_context.buf);
 			if (ptr) {
 				strbuf_splice(&buf2,
@@ -969,14 +969,14 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 	read_branches();
 	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
+		struct string_list_item *item = branch_list.मगा_बागाय + i;
 		struct branch_info *info = item->util;
 		if (info->remote_name && !strcmp(info->remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.remote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, rename.old_name)) {
+		if (info->इतुलाक_remote_name && !strcmp(info->इतुलाक_remote_name, rename.old_name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushRemote", item->string);
 			repo_config_set(the_repository, buf.buf, rename.new_name);
@@ -990,7 +990,7 @@ static int mv(int argc, const char **argv, const char *prefix,
 
 		stop_progress(&rename.progress);
 
-		handle_push_default(rename.old_name, rename.new_name);
+		handle_इतुलाक_default(rename.old_name, rename.new_name);
 	}
 
 out:
@@ -1038,11 +1038,11 @@ static int rm(int argc, const char **argv, const char *prefix,
 
 	read_branches();
 	for (size_t i = 0; i < branch_list.nr; i++) {
-		struct string_list_item *item = branch_list.items + i;
+		struct string_list_item *item = branch_list.मगा_बागाय + i;
 		struct branch_info *info = item->util;
 		if (info->remote_name && !strcmp(info->remote_name, remote->name)) {
-			const char *keys[] = { "remote", "merge", NULL }, **k;
-			for (k = keys; *k; k++) {
+			const char *मगा_सुसि[] = { "remote", "merge", NULL }, **k;
+			for (k = मगा_सुसि; *k; k++) {
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "branch.%s.%s",
 						item->string, *k);
@@ -1051,7 +1051,7 @@ static int rm(int argc, const char **argv, const char *prefix,
 					die(_("could not unset '%s'"), buf.buf);
 			}
 		}
-		if (info->push_remote_name && !strcmp(info->push_remote_name, remote->name)) {
+		if (info->इतुलाक_remote_name && !strcmp(info->इतुलाक_remote_name, remote->name)) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "branch.%s.pushremote", item->string);
 			result = repo_config_set_gently(the_repository, buf.buf, NULL);
@@ -1085,7 +1085,7 @@ static int rm(int argc, const char **argv, const char *prefix,
 			      skipped.nr));
 		for (size_t i = 0; i < skipped.nr; i++)
 			fprintf(stderr, "  git branch -d %s\n",
-				skipped.items[i].string);
+				skipped.मगा_बागाय[i].string);
 	}
 	string_list_clear(&skipped, 0);
 
@@ -1096,7 +1096,7 @@ static int rm(int argc, const char **argv, const char *prefix,
 			goto out;
 		}
 
-		handle_push_default(remote->name, NULL);
+		handle_इतुलाक_default(remote->name, NULL);
 	}
 
 out:
@@ -1109,9 +1109,9 @@ out:
 	return result;
 }
 
-static void clear_push_info(void *util, const char *string UNUSED)
+static void clear_इतुलाक_info(void *util, const char *string UNUSED)
 {
-	struct push_info *info = util;
+	struct इतुलाक_info *info = util;
 	free(info->dest);
 	free(info);
 }
@@ -1123,7 +1123,7 @@ static void free_remote_ref_states(struct ref_states *states)
 	string_list_clear(&states->stale, 1);
 	string_list_clear(&states->tracked, 0);
 	string_list_clear(&states->heads, 0);
-	string_list_clear_func(&states->push, clear_push_info);
+	string_list_clear_func(&states->इतुलाक, clear_इतुलाक_info);
 }
 
 static int append_ref_to_tracked_list(const struct reference *ref, void *cb_data)
@@ -1166,14 +1166,14 @@ static int get_remote_ref_states(const char *name,
 			get_ref_states(remote_refs, states);
 		if (query & GET_HEAD_NAMES)
 			get_head_names(remote_refs, states);
-		if (query & GET_PUSH_REF_STATES)
-			get_push_ref_states(remote_refs, states);
+		if (query & GET_इतुलाक_REF_STATES)
+			get_इतुलाक_ref_states(remote_refs, states);
 		transport_disconnect(transport);
 	} else {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  append_ref_to_tracked_list, states);
 		string_list_sort(&states->tracked);
-		get_push_ref_states_noquery(states);
+		get_इतुलाक_ref_states_noquery(states);
 	}
 
 	return 0;
@@ -1197,7 +1197,7 @@ static int add_remote_to_show_info(struct string_list_item *item, void *cb_data)
 	int n = strlen(item->string);
 	if (n > info->width)
 		info->width = n;
-	string_list_insert(&info->list, item->string);
+	string_list_इसिंगित(&info->list, item->string);
 	return 0;
 }
 
@@ -1246,7 +1246,7 @@ static int add_local_to_show_info(struct string_list_item *branch_item, void *cb
 	if (branch_info->rebase >= REBASE_TRUE)
 		show_info->any_rebase = 1;
 
-	item = string_list_insert(&show_info->list, branch_item->string);
+	item = string_list_इसिंगित(&show_info->list, branch_item->string);
 	item->util = branch_info;
 
 	return 0;
@@ -1267,41 +1267,41 @@ static int show_local_info_item(struct string_list_item *item, void *cb_data)
 
 	printf("    %-*s ", show_info->width, item->string);
 	if (branch_info->rebase >= REBASE_TRUE) {
-		const char *msg;
+		const char *मेनसाहे;
 		if (branch_info->rebase == REBASE_INTERACTIVE)
-			msg = _("rebases interactively onto remote %s");
+			मेनसाहे = _("rebases interactively onto remote %s");
 		else if (branch_info->rebase == REBASE_MERGES)
-			msg = _("rebases interactively (with merges) onto "
+			मेनसाहे = _("rebases interactively (with merges) onto "
 				"remote %s");
 		else
-			msg = _("rebases onto remote %s");
-		printf_ln(msg, merge->items[0].string);
+			मेनसाहे = _("rebases onto remote %s");
+		printf_ln(मेनसाहे, merge->मगा_बागाय[0].string);
 		return 0;
 	} else if (show_info->any_rebase) {
-		printf_ln(_(" merges with remote %s"), merge->items[0].string);
+		printf_ln(_(" merges with remote %s"), merge->मगा_बागाय[0].string);
 		width++;
 	} else {
-		printf_ln(_("merges with remote %s"), merge->items[0].string);
+		printf_ln(_("merges with remote %s"), merge->मगा_बागाय[0].string);
 	}
 	for (size_t i = 1; i < merge->nr; i++)
 		printf(_("%-*s    and with remote %s\n"), width, "",
-		       merge->items[i].string);
+		       merge->मगा_बागाय[i].string);
 
 	return 0;
 }
 
-static int add_push_to_show_info(struct string_list_item *push_item, void *cb_data)
+static int add_इतुलाक_to_show_info(struct string_list_item *इतुलाक_item, void *cb_data)
 {
 	struct show_info *show_info = cb_data;
-	struct push_info *push_info = push_item->util;
+	struct इतुलाक_info *इतुलाक_info = इतुलाक_item->util;
 	struct string_list_item *item;
 	int n;
-	if ((n = strlen(push_item->string)) > show_info->width)
+	if ((n = strlen(इतुलाक_item->string)) > show_info->width)
 		show_info->width = n;
-	if ((n = strlen(push_info->dest)) > show_info->width2)
+	if ((n = strlen(इतुलाक_info->dest)) > show_info->width2)
 		show_info->width2 = n;
-	item = string_list_append(&show_info->list, push_item->string);
-	item->util = push_item->util;
+	item = string_list_append(&show_info->list, इतुलाक_item->string);
+	item->util = इतुलाक_item->util;
 	return 0;
 }
 
@@ -1309,56 +1309,56 @@ static int add_push_to_show_info(struct string_list_item *push_item, void *cb_da
  * Sorting comparison for a string list that has push_info
  * structs in its util field
  */
-static int cmp_string_with_push(const void *va, const void *vb)
+static int cmp_string_with_इतुलाक(const void *va, const void *vb)
 {
 	const struct string_list_item *a = va;
 	const struct string_list_item *b = vb;
-	const struct push_info *a_push = a->util;
-	const struct push_info *b_push = b->util;
+	const struct इतुलाक_info *a_इतुलाक = a->util;
+	const struct इतुलाक_info *b_इतुलाक = b->util;
 	int cmp = strcmp(a->string, b->string);
-	return cmp ? cmp : strcmp(a_push->dest, b_push->dest);
+	return cmp ? cmp : strcmp(a_इतुलाक->dest, b_इतुलाक->dest);
 }
 
-static int show_push_info_item(struct string_list_item *item, void *cb_data)
+static int show_इतुलाक_info_item(struct string_list_item *item, void *cb_data)
 {
 	struct show_info *show_info = cb_data;
-	struct push_info *push_info = item->util;
+	struct इतुलाक_info *इतुलाक_info = item->util;
 	const char *src = item->string, *status = NULL;
 
-	switch (push_info->status) {
-	case PUSH_STATUS_CREATE:
+	switch (इतुलाक_info->status) {
+	case इतुलाक_STATUS_CREATE:
 		status = _("create");
 		break;
-	case PUSH_STATUS_DELETE:
+	case इतुलाक_STATUS_DELETE:
 		status = _("delete");
 		src = _("(none)");
 		break;
-	case PUSH_STATUS_UPTODATE:
+	case इतुलाक_STATUS_UPTODATE:
 		status = _("up to date");
 		break;
-	case PUSH_STATUS_FASTFORWARD:
+	case इतुलाक_STATUS_FASTFORWARD:
 		status = _("fast-forwardable");
 		break;
-	case PUSH_STATUS_OUTOFDATE:
+	case इतुलाक_STATUS_OUTOFDATE:
 		status = _("local out of date");
 		break;
-	case PUSH_STATUS_NOTQUERIED:
+	case इतुलाक_STATUS_NOTQUERIED:
 		break;
 	}
 	if (status) {
-		if (push_info->forced)
+		if (इतुलाक_info->forced)
 			printf_ln(_("    %-*s forces to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
+			       show_info->width2, इतुलाक_info->dest, status);
 		else
 			printf_ln(_("    %-*s pushes to %-*s (%s)"), show_info->width, src,
-			       show_info->width2, push_info->dest, status);
+			       show_info->width2, इतुलाक_info->dest, status);
 	} else {
-		if (push_info->forced)
+		if (इतुलाक_info->forced)
 			printf_ln(_("    %-*s forces to %s"), show_info->width, src,
-			       push_info->dest);
+			       इतुलाक_info->dest);
 		else
 			printf_ln(_("    %-*s pushes to %s"), show_info->width, src,
-			       push_info->dest);
+			       इतुलाक_info->dest);
 	}
 	return 0;
 }
@@ -1383,7 +1383,7 @@ static int get_one_entry(struct remote *remote, void *priv)
 				strbuf_detach(&remote_info_buf, NULL);
 	} else
 		string_list_append(list, remote->name)->util = NULL;
-	url = push_url_of_remote(remote);
+	url = इतुलाक_url_of_remote(remote);
 	for (size_t i = 0; i < url->nr; i++) {
 		strbuf_addf(&remote_info_buf, "%s (push)", url->v[i]);
 		string_list_append(list, remote->name)->util =
@@ -1403,7 +1403,7 @@ static int show_all(void)
 	if (!result) {
 		string_list_sort(&list);
 		for (size_t i = 0; i < list.nr; i++) {
-			struct string_list_item *item = list.items + i;
+			struct string_list_item *item = list.मगा_बागाय + i;
 			if (verbose)
 				printf("%s\t%s\n", item->string,
 					item->util ? (const char *)item->util : "");
@@ -1436,7 +1436,7 @@ static int show(int argc, const char **argv, const char *prefix,
 		return show_all();
 
 	if (!no_query)
-		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_PUSH_REF_STATES);
+		query_flag = (GET_REF_STATES | GET_HEAD_NAMES | GET_इतुलाक_REF_STATES);
 
 	for (; argc; argc--, argv++) {
 		size_t i;
@@ -1446,7 +1446,7 @@ static int show(int argc, const char **argv, const char *prefix,
 
 		printf_ln(_("* remote %s"), *argv);
 		printf_ln(_("  Fetch URL: %s"), info.states.remote->url.v[0]);
-		url = push_url_of_remote(info.states.remote);
+		url = इतुलाक_url_of_remote(info.states.remote);
 		for (i = 0; i < url->nr; i++)
 			/*
 			 * TRANSLATORS: the colon ':' should align
@@ -1461,12 +1461,12 @@ static int show(int argc, const char **argv, const char *prefix,
 		else if (!info.states.heads.nr)
 			printf_ln(_("  HEAD branch: %s"), _("(unknown)"));
 		else if (info.states.heads.nr == 1)
-			printf_ln(_("  HEAD branch: %s"), info.states.heads.items[0].string);
+			printf_ln(_("  HEAD branch: %s"), info.states.heads.मगा_बागाय[0].string);
 		else {
 			printf(_("  HEAD branch (remote HEAD is ambiguous,"
 				 " may be one of the following):\n"));
 			for (i = 0; i < info.states.heads.nr; i++)
-				printf("    %s\n", info.states.heads.items[i].string);
+				printf("    %s\n", info.states.heads.मगा_बागाय[i].string);
 		}
 
 		/* remote branch info */
@@ -1499,14 +1499,14 @@ static int show(int argc, const char **argv, const char *prefix,
 			printf_ln(_("  Local refs will be mirrored by 'git push'"));
 
 		info.width = info.width2 = 0;
-		for_each_string_list(&info.states.push, add_push_to_show_info, &info);
-		QSORT(info.list.items, info.list.nr, cmp_string_with_push);
+		for_each_string_list(&info.states.इतुलाक, add_इतुलाक_to_show_info, &info);
+		QSORT(info.list.मगा_बागाय, info.list.nr, cmp_string_with_इतुलाक);
 		if (info.list.nr)
 			printf_ln(Q_("  Local ref configured for 'git push'%s:",
 				     "  Local refs configured for 'git push'%s:",
 				     info.list.nr),
 				  no_query ? _(" (status not queried)") : "");
-		for_each_string_list(&info.list, show_push_info_item, &info);
+		for_each_string_list(&info.list, show_इतुलाक_info_item, &info);
 		string_list_clear(&info.list, 0);
 
 		free_remote_ref_states(&info.states);
@@ -1581,9 +1581,9 @@ static int set_head(int argc, const char **argv, const char *prefix,
 					  "Please choose one explicitly with:"));
 			for (size_t i = 0; i < states.heads.nr; i++)
 				fprintf(stderr, "  git remote set-head %s %s\n",
-					argv[0], states.heads.items[i].string);
+					argv[0], states.heads.मगा_बागाय[i].string);
 		} else
-			head_name = xstrdup(states.heads.items[0].string);
+			head_name = xstrdup(states.heads.मगा_बागाय[0].string);
 		free_remote_ref_states(&states);
 	} else if (opt_d && !opt_a && argc == 1) {
 		if (refs_delete_ref(refs, NULL, b_head.buf, NULL, REF_NO_DEREF))
@@ -1687,11 +1687,11 @@ static int prune(int argc, const char **argv, const char *prefix,
 	return result;
 }
 
-static int get_remote_default(const char *key, const char *value UNUSED,
+static int get_remote_default(const char *सुसि, const char *हालागा UNUSED,
 			      const struct config_context *ctx UNUSED,
 			      void *priv)
 {
-	if (strcmp(key, "remotes.default") == 0) {
+	if (strcmp(सुसि, "remotes.default") == 0) {
 		int *found = priv;
 		*found = 1;
 	}
@@ -1714,23 +1714,23 @@ static int update(int argc, const char **argv, const char *prefix,
 			     builtin_remote_update_usage,
 			     PARSE_OPT_KEEP_ARGV0);
 
-	strvec_push(&cmd.args, "fetch");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "fetch");
 
 	if (prune != -1)
-		strvec_push(&cmd.args, prune ? "--prune" : "--no-prune");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, prune ? "--prune" : "--no-prune");
 	if (verbose)
-		strvec_push(&cmd.args, "-v");
-	strvec_push(&cmd.args, "--multiple");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "-v");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "--multiple");
 	if (argc < 2)
-		strvec_push(&cmd.args, "default");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "default");
 	for (i = 1; i < argc; i++)
-		strvec_push(&cmd.args, argv[i]);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, argv[i]);
 
-	if (strcmp(cmd.args.v[cmd.args.nr-1], "default") == 0) {
+	if (strcmp(cmd.मगा_कातविरान.v[cmd.मगा_कातविरान.nr-1], "default") == 0) {
 		repo_config(the_repository, get_remote_default, &default_defined);
 		if (!default_defined) {
-			strvec_pop(&cmd.args);
-			strvec_push(&cmd.args, "--all");
+			strvec_आलिसिन(&cmd.मगा_कातविरान);
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "--all");
 		}
 	}
 
@@ -1738,21 +1738,21 @@ static int update(int argc, const char **argv, const char *prefix,
 	return run_command(&cmd);
 }
 
-static int remove_all_fetch_refspecs(const char *key)
+static int remove_all_fetch_refspecs(const char *सुसि)
 {
-	return repo_config_set_multivar_gently(the_repository, key, NULL, NULL,
+	return repo_config_set_multivar_gently(the_repository, सुसि, NULL, NULL,
 					       CONFIG_FLAGS_MULTI_REPLACE);
 }
 
 static void add_branches(struct remote *remote, const char **branches,
-			 const char *key)
+			 const char *सुसि)
 {
 	const char *remotename = remote->name;
 	int mirror = remote->mirror;
 	struct strbuf refspec = STRBUF_INIT;
 
 	for (; *branches; branches++)
-		add_branch(key, *branches, remotename, mirror, &refspec);
+		add_branch(सुसि, *branches, remotename, mirror, &refspec);
 
 	strbuf_release(&refspec);
 }
@@ -1760,10 +1760,10 @@ static void add_branches(struct remote *remote, const char **branches,
 static int set_remote_branches(const char *remotename, const char **branches,
 				int add_mode)
 {
-	struct strbuf key = STRBUF_INIT;
+	struct strbuf सुसि = STRBUF_INIT;
 	struct remote *remote;
 
-	strbuf_addf(&key, "remote.%s.fetch", remotename);
+	strbuf_addf(&सुसि, "remote.%s.fetch", remotename);
 
 	remote = remote_get(remotename);
 	if (!remote_is_configured(remote, 1)) {
@@ -1771,13 +1771,13 @@ static int set_remote_branches(const char *remotename, const char **branches,
 		exit(2);
 	}
 
-	if (!add_mode && remove_all_fetch_refspecs(key.buf)) {
-		strbuf_release(&key);
+	if (!add_mode && remove_all_fetch_refspecs(सुसि.buf)) {
+		strbuf_release(&सुसि);
 		return 1;
 	}
-	add_branches(remote, branches, key.buf);
+	add_branches(remote, branches, सुसि.buf);
 
-	strbuf_release(&key);
+	strbuf_release(&सुसि);
 	return 0;
 }
 
@@ -1804,12 +1804,12 @@ static int set_branches(int argc, const char **argv, const char *prefix,
 static int get_url(int argc, const char **argv, const char *prefix,
 		   struct repository *repo UNUSED)
 {
-	int push_mode = 0, all_mode = 0;
+	int इतुलाक_mode = 0, all_mode = 0;
 	const char *remotename = NULL;
 	struct remote *remote;
 	struct strvec *url;
 	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+		OPT_BOOL('\0', "push", &इतुलाक_mode,
 			 N_("query push URLs rather than fetch URLs")),
 		OPT_BOOL('\0', "all", &all_mode,
 			 N_("return all URLs")),
@@ -1829,7 +1829,7 @@ static int get_url(int argc, const char **argv, const char *prefix,
 		exit(2);
 	}
 
-	url = push_mode ? push_url_of_remote(remote) : &remote->url;
+	url = इतुलाक_mode ? इतुलाक_url_of_remote(remote) : &remote->url;
 
 	if (all_mode) {
 		for (size_t i = 0; i < url->nr; i++)
@@ -1844,7 +1844,7 @@ static int get_url(int argc, const char **argv, const char *prefix,
 static int set_url(int argc, const char **argv, const char *prefix,
 		   struct repository *repo UNUSED)
 {
-	int push_mode = 0, add_mode = 0, delete_mode = 0;
+	int इतुलाक_mode = 0, add_mode = 0, delete_mode = 0;
 	int matches = 0, negative_matches = 0;
 	const char *remotename = NULL;
 	const char *newurl = NULL;
@@ -1854,7 +1854,7 @@ static int set_url(int argc, const char **argv, const char *prefix,
 	struct strvec *urlset;
 	struct strbuf name_buf = STRBUF_INIT;
 	struct option options[] = {
-		OPT_BOOL('\0', "push", &push_mode,
+		OPT_BOOL('\0', "push", &इतुलाक_mode,
 			 N_("manipulate push URLs")),
 		OPT_BOOL('\0', "add", &add_mode,
 			 N_("add URL")),
@@ -1886,7 +1886,7 @@ static int set_url(int argc, const char **argv, const char *prefix,
 		exit(2);
 	}
 
-	if (push_mode) {
+	if (इतुलाक_mode) {
 		strbuf_addf(&name_buf, "remote.%s.pushurl", remotename);
 		urlset = &remote->pushurl;
 	} else {
@@ -1915,7 +1915,7 @@ static int set_url(int argc, const char **argv, const char *prefix,
 			negative_matches++;
 	if (!delete_mode && !matches)
 		die(_("No such URL found: %s"), oldurl);
-	if (delete_mode && !negative_matches && !push_mode)
+	if (delete_mode && !negative_matches && !इतुलाक_mode)
 		die(_("Will not delete all non-push URLs"));
 
 	regfree(&old_regex);

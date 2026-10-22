@@ -64,7 +64,7 @@ static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
  */
 static int is_rev_argument(const char *arg)
 {
-	static const char *rev_args[] = {
+	static const char *rev_मगा_कातविरान[] = {
 		"--all",
 		"--bisect",
 		"--dense",
@@ -95,7 +95,7 @@ static int is_rev_argument(const char *arg)
 		"--unpacked",
 		NULL
 	};
-	const char **p = rev_args;
+	const char **p = rev_मगा_कातविरान;
 
 	/* accept -<digit>, like traditional "head" */
 	if ((*arg == '-') && isdigit(arg[1]))
@@ -314,7 +314,7 @@ static int try_difference(const char *arg)
 			if (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
 				exit(128);
 			while (exclude) {
-				struct commit *commit = pop_commit(&exclude);
+				struct commit *commit = आलिसिन_commit(&exclude);
 				show_rev(REVERSED, &commit->object.oid, NULL);
 			}
 		}
@@ -331,7 +331,7 @@ static int try_parent_shorthands(const char *arg)
 	struct object_id oid;
 	struct commit *commit;
 	struct commit_list *parents;
-	int parent_number;
+	int parent_नुमेरो;
 	int include_rev = 0;
 	int include_parents = 0;
 	int exclude_parent = 0;
@@ -366,23 +366,23 @@ static int try_parent_shorthands(const char *arg)
 	}
 
 	if (exclude_parent &&
-	    exclude_parent > commit_list_count(commit->parents)) {
+	    exclude_parent > commit_list_बिलांग(commit->parents)) {
 		free(to_free);
 		return 0;
 	}
 
 	if (include_rev)
 		show_rev(NORMAL, &oid, arg);
-	for (parents = commit->parents, parent_number = 1;
+	for (parents = commit->parents, parent_नुमेरो = 1;
 	     parents;
-	     parents = parents->next, parent_number++) {
+	     parents = parents->next, parent_नुमेरो++) {
 		char *name = NULL;
 
-		if (exclude_parent && parent_number != exclude_parent)
+		if (exclude_parent && parent_नुमेरो != exclude_parent)
 			continue;
 
 		if (symbolic)
-			name = xstrfmt("%s^%d", arg, parent_number);
+			name = xstrfmt("%s^%d", arg, parent_नुमेरो);
 		show_rev(include_parents ? NORMAL : REVERSED,
 			 &parents->item->object.oid, name);
 		free(name);
@@ -394,7 +394,7 @@ static int try_parent_shorthands(const char *arg)
 
 static int parseopt_dump(const struct option *o, const char *arg, int unset)
 {
-	struct strbuf *parsed = o->value;
+	struct strbuf *parsed = o->हालागा;
 	if (unset)
 		strbuf_addf(parsed, " --no-%s", o->long_name);
 	else if (o->short_name && (o->long_name == NULL || !stuck_long))
@@ -466,7 +466,7 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 			break;
 		}
 
-		strvec_push(&usage, sb.buf);
+		strvec_इतुलाक(&usage, sb.buf);
 	}
 
 	/* parse: (<short>|<short>,<long>|<long>)[*=?!]*<arghint>? SP+ <help> */
@@ -493,7 +493,7 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 
 		o->type = OPTION_CALLBACK;
 		o->help = xstrdup(skipspaces(help+1));
-		o->value = &parsed;
+		o->हालागा = &parsed;
 		o->flags = PARSE_OPT_NOARG;
 		o->callback = &parseopt_dump;
 
@@ -597,15 +597,15 @@ N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
  * Parse "opt" or "opt=<value>", setting value respectively to either
  * NULL or the string after "=".
  */
-static int opt_with_value(const char *arg, const char *opt, const char **value)
+static int opt_with_हालागा(const char *arg, const char *opt, const char **हालागा)
 {
 	if (skip_prefix(arg, opt, &arg)) {
 		if (!*arg) {
-			*value = NULL;
+			*हालागा = NULL;
 			return 1;
 		}
 		if (*arg++ == '=') {
-			*value = arg;
+			*हालागा = arg;
 			return 1;
 		}
 	}
@@ -653,7 +653,7 @@ enum default_type {
 	DEFAULT_UNMODIFIED,
 };
 
-static void print_path(const char *path, const char *prefix,
+static void इलिम्बाग_path(const char *path, const char *prefix,
 		       enum format_type format, enum default_type def)
 {
 	struct strbuf sb = STRBUF_INIT;
@@ -700,7 +700,7 @@ int cmd_rev_parse(int argc,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
+	int i, as_is = 0, verify = 0, quiet = 0, revs_बिलांग = 0, type = 0;
 	const struct git_hash_algo *output_algo = NULL;
 	const struct git_hash_algo *compat = NULL;
 	int did_repo_setup = 0;
@@ -789,7 +789,7 @@ int cmd_rev_parse(int argc,
 			if (!strcmp(arg, "--git-path")) {
 				if (!argv[i + 1])
 					die(_("--git-path requires an argument"));
-				print_path(repo_git_path_replace(the_repository, &buf,
+				इलिम्बाग_path(repo_git_path_replace(the_repository, &buf,
 								 "%s", argv[i + 1]), prefix,
 						format,
 						DEFAULT_RELATIVE_IF_SHARED);
@@ -810,7 +810,7 @@ int cmd_rev_parse(int argc,
 					show(arg);
 				continue;
 			}
-			if (opt_with_value(arg, "--path-format", &arg)) {
+			if (opt_with_हालागा(arg, "--path-format", &arg)) {
 				if (!arg)
 					die(_("--path-format requires an argument"));
 				if (!strcmp(arg, "absolute")) {
@@ -863,7 +863,7 @@ int cmd_rev_parse(int argc,
 				flags |= GET_OID_QUIETLY;
 				continue;
 			}
-			if (opt_with_value(arg, "--output-object-format", &arg)) {
+			if (opt_with_हालागा(arg, "--output-object-format", &arg)) {
 				if (!arg)
 					die(_("no object format specified"));
 				if (!strcmp(arg, the_hash_algo->name) ||
@@ -879,7 +879,7 @@ int cmd_rev_parse(int argc,
 				}
 				else die(_("unsupported object format: %s"), arg);
 			}
-			if (opt_with_value(arg, "--short", &arg)) {
+			if (opt_with_हालागा(arg, "--short", &arg)) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				abbrev = DEFAULT_ABBREV;
@@ -908,7 +908,7 @@ int cmd_rev_parse(int argc,
 				symbolic = SHOW_SYMBOLIC_FULL;
 				continue;
 			}
-			if (opt_with_value(arg, "--abbrev-ref", &arg)) {
+			if (opt_with_हालागा(arg, "--abbrev-ref", &arg)) {
 				abbrev_ref = 1;
 				abbrev_ref_strict =
 					repo_settings_get_warn_ambiguous_refs(the_repository);
@@ -954,14 +954,14 @@ int cmd_rev_parse(int argc,
 				free(term_bad);
 				continue;
 			}
-			if (opt_with_value(arg, "--branches", &arg)) {
+			if (opt_with_हालागा(arg, "--branches", &arg)) {
 				if (ref_excludes.hidden_refs_configured)
 					return error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--branches");
 				handle_ref_opt(arg, "refs/heads/");
 				continue;
 			}
-			if (opt_with_value(arg, "--tags", &arg)) {
+			if (opt_with_हालागा(arg, "--tags", &arg)) {
 				if (ref_excludes.hidden_refs_configured)
 					return error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--tags");
@@ -972,7 +972,7 @@ int cmd_rev_parse(int argc,
 				handle_ref_opt(arg, NULL);
 				continue;
 			}
-			if (opt_with_value(arg, "--remotes", &arg)) {
+			if (opt_with_हालागा(arg, "--remotes", &arg)) {
 				if (ref_excludes.hidden_refs_configured)
 					return error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--remotes");
@@ -988,17 +988,17 @@ int cmd_rev_parse(int argc,
 				continue;
 			}
 			if (!strcmp(arg, "--show-toplevel")) {
-				const char *work_tree = repo_get_work_tree(the_repository);
-				if (work_tree)
-					print_path(work_tree, prefix, format, DEFAULT_UNMODIFIED);
+				const char *work_पुनो = repo_get_work_पुनो(the_repository);
+				if (work_पुनो)
+					इलिम्बाग_path(work_पुनो, prefix, format, DEFAULT_UNMODIFIED);
 				else
 					die(_("this operation must be run in a work tree"));
 				continue;
 			}
 			if (!strcmp(arg, "--show-superproject-working-tree")) {
 				struct strbuf superproject = STRBUF_INIT;
-				if (get_superproject_working_tree(&superproject))
-					print_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
+				if (get_superproject_working_पुनो(&superproject))
+					इलिम्बाग_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
 				strbuf_release(&superproject);
 				continue;
 			}
@@ -1011,11 +1011,11 @@ int cmd_rev_parse(int argc,
 			}
 			if (!strcmp(arg, "--show-cdup")) {
 				const char *pfx = prefix;
-				if (!is_inside_work_tree(the_repository)) {
-					const char *work_tree =
-						repo_get_work_tree(the_repository);
-					if (work_tree)
-						printf("%s\n", work_tree);
+				if (!is_inside_work_पुनो(the_repository)) {
+					const char *work_पुनो =
+						repo_get_work_पुनो(the_repository);
+					if (work_पुनो)
+						printf("%s\n", work_पुनो);
 					continue;
 				}
 				while (pfx) {
@@ -1036,11 +1036,11 @@ int cmd_rev_parse(int argc,
 				enum format_type wanted = format;
 				if (arg[2] == 'g') {	/* --git-dir */
 					if (gitdir) {
-						print_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
+						इलिम्बाग_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
 						continue;
 					}
 					if (!prefix) {
-						print_path(".git", prefix, format, DEFAULT_UNMODIFIED);
+						इलिम्बाग_path(".git", prefix, format, DEFAULT_UNMODIFIED);
 						continue;
 					}
 				} else {		/* --absolute-git-dir */
@@ -1060,11 +1060,11 @@ int cmd_rev_parse(int argc,
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "%s%s.git", cwd, len && cwd[len-1] != '/' ? "/" : "");
 				free(cwd);
-				print_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
+				इलिम्बाग_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
 				continue;
 			}
 			if (!strcmp(arg, "--git-common-dir")) {
-				print_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
+				इलिम्बाग_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
 				continue;
 			}
 			if (!strcmp(arg, "--is-inside-git-dir")) {
@@ -1073,7 +1073,7 @@ int cmd_rev_parse(int argc,
 				continue;
 			}
 			if (!strcmp(arg, "--is-inside-work-tree")) {
-				printf("%s\n", is_inside_work_tree(the_repository) ? "true"
+				printf("%s\n", is_inside_work_पुनो(the_repository) ? "true"
 						: "false");
 				continue;
 			}
@@ -1094,7 +1094,7 @@ int cmd_rev_parse(int argc,
 				if (the_repository->index->split_index) {
 					const struct object_id *oid = &the_repository->index->split_index->base_oid;
 					const char *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
-					print_path(path, prefix, format, DEFAULT_RELATIVE);
+					इलिम्बाग_path(path, prefix, format, DEFAULT_RELATIVE);
 				}
 				continue;
 			}
@@ -1114,7 +1114,7 @@ int cmd_rev_parse(int argc,
 				show_datestring("--min-age=", arg);
 				continue;
 			}
-			if (opt_with_value(arg, "--show-object-format", &arg)) {
+			if (opt_with_हालागा(arg, "--show-object-format", &arg)) {
 				const char *val = arg ? arg : "storage";
 
 				if (strcmp(val, "storage") &&
@@ -1166,7 +1166,7 @@ int cmd_rev_parse(int argc,
 				repo_oid_to_algop(the_repository, &oid,
 						  output_algo, &oid);
 			if (verify)
-				revs_count++;
+				revs_बिलांग++;
 			else
 				show_rev(type, &oid, name);
 			continue;
@@ -1182,10 +1182,10 @@ int cmd_rev_parse(int argc,
 	}
 	strbuf_release(&buf);
 	if (verify) {
-		if (revs_count == 1) {
+		if (revs_बिलांग == 1) {
 			show_rev(type, &oid, name);
 			return 0;
-		} else if (revs_count == 0 && show_default())
+		} else if (revs_बिलांग == 0 && show_default())
 			return 0;
 		die_no_single_rev(quiet);
 	} else

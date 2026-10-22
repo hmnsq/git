@@ -250,7 +250,7 @@ static int mark_ce_flags(const char *path, int flag, int mark)
 		else
 			the_repository->index->cache[pos]->ce_flags &= ~flag;
 		the_repository->index->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
-		cache_tree_invalidate_path(the_repository->index, path);
+		cache_पुनो_invalidate_path(the_repository->index, path);
 		the_repository->index->cache_changed |= CE_ENTRY_CHANGED;
 		return 0;
 	}
@@ -504,14 +504,14 @@ static void update_one(const char *path)
 	report("add '%s'", path);
 }
 
-static void read_index_info(int nul_term_line)
+static void read_index_info(int nul_term_लिन्या)
 {
 	const int hexsz = the_hash_algo->hexsz;
 	struct strbuf buf = STRBUF_INIT;
 	struct strbuf uq = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_लिन्या ? strbuf_getline_nul : strbuf_getline_lf;
 	while (getline_fn(&buf, stdin) != EOF) {
 		char *ptr, *tab;
 		char *path_name;
@@ -540,12 +540,12 @@ static void read_index_info(int nul_term_line)
 		ul = strtoul(buf.buf, &ptr, 8);
 		if (ptr == buf.buf || *ptr != ' '
 		    || errno || (unsigned int) ul != ul)
-			goto bad_line;
+			goto bad_लिन्या;
 		mode = ul;
 
 		tab = strchr(ptr, '\t');
 		if (!tab || tab - ptr < hexsz + 1)
-			goto bad_line;
+			goto bad_लिन्या;
 
 		if (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
 			stage = tab[-1] - '0';
@@ -559,10 +559,10 @@ static void read_index_info(int nul_term_line)
 
 		if (get_oid_hex(tab - hexsz, &oid) ||
 			tab[-(hexsz + 1)] != ' ')
-			goto bad_line;
+			goto bad_लिन्या;
 
 		path_name = ptr;
-		if (!nul_term_line && path_name[0] == '"') {
+		if (!nul_term_लिन्या && path_name[0] == '"') {
 			strbuf_reset(&uq);
 			if (unquote_c_style(&uq, path_name, NULL)) {
 				die("git update-index: bad quoting of path name");
@@ -593,7 +593,7 @@ static void read_index_info(int nul_term_line)
 		}
 		continue;
 
-	bad_line:
+	bad_लिन्या:
 		die("malformed index info %s", buf.buf);
 	}
 	strbuf_release(&buf);
@@ -613,7 +613,7 @@ static struct cache_entry *read_one_ent(const char *which,
 	struct object_id oid;
 	struct cache_entry *ce;
 
-	if (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
+	if (get_पुनो_entry(the_repository, ent, path, &oid, &mode)) {
 		if (which)
 			error("%s: not in %s branch.", path, which);
 		return NULL;
@@ -733,7 +733,7 @@ struct refresh_params {
 
 static int refresh(struct refresh_params *o, unsigned int flag)
 {
-	setup_work_tree(the_repository);
+	setup_work_पुनो(the_repository);
 	repo_read_index(the_repository);
 	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, NULL,
 					NULL, NULL);
@@ -756,7 +756,7 @@ static int refresh_callback(const struct option *opt,
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, 0);
+	return refresh(opt->हालागा, 0);
 }
 
 static int really_refresh_callback(const struct option *opt,
@@ -764,13 +764,13 @@ static int really_refresh_callback(const struct option *opt,
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, REFRESH_REALLY);
+	return refresh(opt->हालागा, REFRESH_REALLY);
 }
 
 static int chmod_callback(const struct option *opt,
 				const char *arg, int unset)
 {
-	char *flip = opt->value;
+	char *flip = opt->हालागा;
 	BUG_ON_OPT_NEG(unset);
 	if ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
 		return error("option 'chmod' expects \"+x\" or \"-x\"");
@@ -843,7 +843,7 @@ static enum parse_opt_result stdin_cacheinfo_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
 	const char *arg, int unset)
 {
-	int *nul_term_line = opt->value;
+	int *nul_term_लिन्या = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -851,7 +851,7 @@ static enum parse_opt_result stdin_cacheinfo_callback(
 	if (ctx->argc != 1)
 		return error("option '%s' must be the last argument", opt->long_name);
 	allow_add = allow_replace = allow_remove = 1;
-	read_index_info(*nul_term_line);
+	read_index_info(*nul_term_लिन्या);
 	return 0;
 }
 
@@ -859,7 +859,7 @@ static enum parse_opt_result stdin_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
 	const char *arg, int unset)
 {
-	int *read_from_stdin = opt->value;
+	int *read_from_stdin = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -874,7 +874,7 @@ static enum parse_opt_result unresolve_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
 	const char *arg, int unset)
 {
-	int *has_errors = opt->value;
+	int *has_errors = opt->हालागा;
 	const char *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
@@ -895,14 +895,14 @@ static enum parse_opt_result reupdate_callback(
 	struct parse_opt_ctx_t *ctx, const struct option *opt,
 	const char *arg, int unset)
 {
-	int *has_errors = opt->value;
+	int *has_errors = opt->हालागा;
 	const char *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
 	/* consume remaining arguments. */
-	setup_work_tree(the_repository);
+	setup_work_पुनो(the_repository);
 	*has_errors = do_reupdate(ctx->argv + 1, prefix);
 	if (*has_errors)
 		the_repository->index->cache_changed = 0;
@@ -917,13 +917,13 @@ int cmd_update_index(int argc,
 		     const char *prefix,
 		     struct repository *repo UNUSED)
 {
-	int newfd, entries, has_errors = 0, nul_term_line = 0;
+	int newfd, entries, has_errors = 0, nul_term_लिन्या = 0;
 	enum uc_mode untracked_cache = UC_UNSPECIFIED;
 	int read_from_stdin = 0;
 	int prefix_length = prefix ? strlen(prefix) : 0;
 	int preferred_index_format = 0;
 	char set_executable_bit = 0;
-	struct refresh_params refresh_args = {0, &has_errors};
+	struct refresh_params refresh_मगा_कातविरान = {0, &has_errors};
 	int lock_error = 0;
 	int split_index = -1;
 	int force_write = 0;
@@ -935,10 +935,10 @@ int cmd_update_index(int argc,
 	struct repository *r = the_repository;
 	struct odb_transaction *transaction;
 	struct option options[] = {
-		OPT_BIT('q', NULL, &refresh_args.flags,
+		OPT_BIT('q', NULL, &refresh_मगा_कातविरान.flags,
 			N_("continue refresh even when index needs update"),
 			REFRESH_QUIET),
-		OPT_BIT(0, "ignore-submodules", &refresh_args.flags,
+		OPT_BIT(0, "ignore-submodules", &refresh_मगा_कातविरान.flags,
 			N_("refresh: ignore submodules"),
 			REFRESH_IGNORE_SUBMODULES),
 		OPT_SET_INT(0, "add", &allow_add,
@@ -947,14 +947,14 @@ int cmd_update_index(int argc,
 			N_("let files replace directories and vice-versa"), 1),
 		OPT_SET_INT(0, "remove", &allow_remove,
 			N_("notice files missing from worktree"), 1),
-		OPT_BIT(0, "unmerged", &refresh_args.flags,
+		OPT_BIT(0, "unmerged", &refresh_मगा_कातविरान.flags,
 			N_("refresh even if index contains unmerged entries"),
 			REFRESH_UNMERGED),
-		OPT_CALLBACK_F(0, "refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "refresh", &refresh_मगा_कातविरान, NULL,
 			N_("refresh stat information"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			refresh_callback),
-		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "really-refresh", &refresh_मगा_कातविरान, NULL,
 			N_("like --refresh, but ignore assume-unchanged setting"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			really_refresh_callback),
@@ -974,7 +974,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "assume-unchanged",
-			.value = &mark_valid_only,
+			.हालागा = &mark_valid_only,
 			.precision = sizeof(mark_valid_only),
 			.help = N_("mark files as \"not changing\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
@@ -983,7 +983,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-assume-unchanged",
-			.value = &mark_valid_only,
+			.हालागा = &mark_valid_only,
 			.precision = sizeof(mark_valid_only),
 			.help = N_("clear assumed-unchanged bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
@@ -992,7 +992,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "skip-worktree",
-			.value = &mark_skip_worktree_only,
+			.हालागा = &mark_skip_worktree_only,
 			.precision = sizeof(mark_skip_worktree_only),
 			.help = N_("mark files as \"index-only\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
@@ -1001,7 +1001,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-skip-worktree",
-			.value = &mark_skip_worktree_only,
+			.हालागा = &mark_skip_worktree_only,
 			.precision = sizeof(mark_skip_worktree_only),
 			.help = N_("clear skip-worktree bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
@@ -1013,12 +1013,12 @@ int cmd_update_index(int argc,
 			N_("add to index only; do not add content to object database"), 1),
 		OPT_SET_INT(0, "force-remove", &force_remove,
 			N_("remove named paths even if present in worktree"), 1),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', NULL, &nul_term_लिन्या,
 			 N_("with --stdin: input lines are terminated by null bytes")),
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "stdin",
-			.value = &read_from_stdin,
+			.हालागा = &read_from_stdin,
 			.help = N_("read list of paths to be updated from standard input"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_callback,
@@ -1026,7 +1026,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "index-info",
-			.value = &nul_term_line,
+			.हालागा = &nul_term_लिन्या,
 			.help = N_("add entries from standard input to the index"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_cacheinfo_callback,
@@ -1034,7 +1034,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "unresolve",
-			.value = &has_errors,
+			.हालागा = &has_errors,
 			.help = N_("repopulate stages #2 and #3 for the listed paths"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = unresolve_callback,
@@ -1043,12 +1043,12 @@ int cmd_update_index(int argc,
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.short_name = 'g',
 			.long_name = "again",
-			.value = &has_errors,
+			.हालागा = &has_errors,
 			.help = N_("only update entries that differ from HEAD"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = reupdate_callback,
 		},
-		OPT_BIT(0, "ignore-missing", &refresh_args.flags,
+		OPT_BIT(0, "ignore-missing", &refresh_मगा_कातविरान.flags,
 			N_("ignore files missing from worktree"),
 			REFRESH_IGNORE_MISSING),
 		OPT_SET_INT(0, "verbose", &verbose,
@@ -1076,7 +1076,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
+			.हालागा = &mark_fsmonitor_only,
 			.precision = sizeof(mark_fsmonitor_only),
 			.help = N_("mark files as fsmonitor valid"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
@@ -1085,7 +1085,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
+			.हालागा = &mark_fsmonitor_only,
 			.precision = sizeof(mark_fsmonitor_only),
 			.help = N_("clear fsmonitor valid bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
@@ -1160,7 +1160,7 @@ int cmd_update_index(int argc,
 				transaction = NULL;
 			}
 
-			setup_work_tree(the_repository);
+			setup_work_पुनो(the_repository);
 			p = prefix_path(the_repository, prefix, prefix_length, path);
 			update_one(p);
 			if (set_executable_bit)
@@ -1180,7 +1180,7 @@ int cmd_update_index(int argc,
 	}
 	argc = parse_options_end(&ctx);
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_लिन्या ? strbuf_getline_nul : strbuf_getline_lf;
 	if (preferred_index_format) {
 		if (preferred_index_format < 0) {
 			printf(_("%d\n"), the_repository->index->version);
@@ -1202,10 +1202,10 @@ int cmd_update_index(int argc,
 		struct strbuf buf = STRBUF_INIT;
 		struct strbuf unquoted = STRBUF_INIT;
 
-		setup_work_tree(the_repository);
+		setup_work_पुनो(the_repository);
 		while (getline_fn(&buf, stdin) != EOF) {
 			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+			if (!nul_term_लिन्या && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
 				if (unquote_c_style(&unquoted, buf.buf, NULL))
 					die("line is badly quoted");
@@ -1256,7 +1256,7 @@ int cmd_update_index(int argc,
 		report(_("Untracked cache disabled"));
 		break;
 	case UC_TEST:
-		setup_work_tree(the_repository);
+		setup_work_पुनो(the_repository);
 		return !test_if_untracked_cache_is_supported();
 	case UC_ENABLE:
 	case UC_FORCE:
@@ -1265,7 +1265,7 @@ int cmd_update_index(int argc,
 				  "remove or change it, if you really want to "
 				  "enable the untracked cache"));
 		add_untracked_cache(the_repository->index);
-		report(_("Untracked cache enabled for '%s'"), repo_get_work_tree(the_repository));
+		report(_("Untracked cache enabled for '%s'"), repo_get_work_पुनो(the_repository));
 		break;
 	default:
 		BUG("bad untracked_cache value: %d", untracked_cache);
@@ -1287,7 +1287,7 @@ int cmd_update_index(int argc,
 		 */
 		if (reason > FSMONITOR_REASON_OK)
 			die("%s",
-			    fsm_settings__get_incompatible_msg(r, reason));
+			    fsm_settings_get_incompatible_मेनसाहे(r, reason));
 
 		if (fsm_mode == FSMONITOR_MODE_DISABLED) {
 			warning(_("core.fsmonitor is unset; "
@@ -1308,7 +1308,7 @@ int cmd_update_index(int argc,
 
 	if (the_repository->index->cache_changed || force_write) {
 		if (newfd < 0) {
-			if (refresh_args.flags & REFRESH_QUIET)
+			if (refresh_मगा_कातविरान.flags & REFRESH_QUIET)
 				exit(128);
 			unable_to_lock_die(repo_get_index_file(the_repository), lock_error);
 		}

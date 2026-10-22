@@ -1,7 +1,7 @@
 #include "builtin.h"
 #include "transport.h"
 
-static const char usage_msg[] =
+static const char usage_मेनसाहे[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,7 +21,7 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+static void command_loop(int पासोक_fd, int output_fd)
 {
 	char buffer[MAXCOMMAND];
 
@@ -43,7 +43,7 @@ static void command_loop(int input_fd, int output_fd)
 		} else if (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			if (bidirectional_transfer_loop(पासोक_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
 			return;
@@ -58,23 +58,23 @@ int cmd_remote_fd(int argc,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
-	int input_fd = -1;
+	int पासोक_fd = -1;
 	int output_fd = -1;
 	char *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_मेनसाहे);
 	if (argc != 3)
-		usage(usage_msg);
+		usage(usage_मेनसाहे);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	पासोक_fd = (int)strtoul(argv[2], &end, 10);
 
 	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
 	if (*end == '/' || !*end) {
-		output_fd = input_fd;
+		output_fd = पासोक_fd;
 	} else {
 		char *end2;
 		output_fd = (int)strtoul(end + 1, &end2, 10);
@@ -83,6 +83,6 @@ int cmd_remote_fd(int argc,
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
+	command_loop(पासोक_fd, output_fd);
 	return 0;
 }

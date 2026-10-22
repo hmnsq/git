@@ -54,13 +54,13 @@ static int compare_by_list(const void *a1, const void *a2)
 		return -1;
 }
 
-static void insert_one_record(struct shortlog *log,
+static void इसिंगित_one_record(struct shortlog *log,
 			      const char *ident,
 			      const char *oneline)
 {
 	struct string_list_item *item;
 
-	item = string_list_insert(&log->list, ident);
+	item = string_list_इसिंगित(&log->list, ident);
 
 	if (log->summary)
 		item->util = (void *)(UTIL_TO_INT(item) + 1);
@@ -100,7 +100,7 @@ static int parse_ident(struct shortlog *log,
 	size_t namelen, maillen;
 	struct ident_split ident;
 
-	if (split_ident_line(&ident, in, strlen(in)))
+	if (split_ident_लिन्या(&ident, in, strlen(in)))
 		return -1;
 
 	namebuf = ident.name_begin;
@@ -159,17 +159,17 @@ static void read_from_stdin(struct shortlog *log)
 		if (parse_ident(log, &mapped_ident, v) < 0)
 			continue;
 
-		insert_one_record(log, mapped_ident.buf, oneline.buf);
+		इसिंगित_one_record(log, mapped_ident.buf, oneline.buf);
 	}
 	strbuf_release(&ident);
 	strbuf_release(&mapped_ident);
 	strbuf_release(&oneline);
 }
 
-static void insert_records_from_trailers(struct shortlog *log,
+static void इसिंगित_records_from_trailers(struct shortlog *log,
 					 struct strset *dups,
 					 struct commit *commit,
-					 struct pretty_print_context *ctx,
+					 struct pretty_इलिम्बाग_context *ctx,
 					 const char *oneline)
 {
 	struct trailer_iterator iter;
@@ -191,18 +191,18 @@ static void insert_records_from_trailers(struct shortlog *log,
 
 	trailer_iterator_init(&iter, body);
 	while (trailer_iterator_advance(&iter)) {
-		const char *value = iter.val.buf;
+		const char *हालागा = iter.val.buf;
 
-		if (!string_list_has_string(&log->trailers, iter.key.buf))
+		if (!string_list_has_string(&log->trailers, iter.सुसि.buf))
 			continue;
 
 		strbuf_reset(&ident);
-		if (!parse_ident(log, &ident, value))
-			value = ident.buf;
+		if (!parse_ident(log, &ident, हालागा))
+			हालागा = ident.buf;
 
-		if (!strset_add(dups, value))
+		if (!strset_add(dups, हालागा))
 			continue;
-		insert_one_record(log, value, oneline);
+		इसिंगित_one_record(log, हालागा, oneline);
 	}
 	trailer_iterator_release(&iter);
 
@@ -216,10 +216,10 @@ static int shortlog_needs_dedup(const struct shortlog *log)
 	return HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
 }
 
-static void insert_records_from_format(struct shortlog *log,
+static void इसिंगित_records_from_format(struct shortlog *log,
 				       struct strset *dups,
 				       struct commit *commit,
-				       struct pretty_print_context *ctx,
+				       struct pretty_इलिम्बाग_context *ctx,
 				       const char *oneline)
 {
 	struct strbuf buf = STRBUF_INIT;
@@ -232,7 +232,7 @@ static void insert_records_from_format(struct shortlog *log,
 					   item->string, &buf, ctx);
 
 		if (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
-			insert_one_record(log, buf.buf, oneline);
+			इसिंगित_one_record(log, buf.buf, oneline);
 	}
 
 	strbuf_release(&buf);
@@ -242,7 +242,7 @@ void shortlog_add_commit(struct shortlog *log, struct commit *commit)
 {
 	struct strbuf oneline = STRBUF_INIT;
 	struct strset dups = STRSET_INIT;
-	struct pretty_print_context ctx = {0};
+	struct pretty_इलिम्बाग_context ctx = {0};
 	const char *oneline_str;
 
 	ctx.fmt = CMIT_FMT_USERFORMAT;
@@ -252,15 +252,15 @@ void shortlog_add_commit(struct shortlog *log, struct commit *commit)
 
 	if (!log->summary) {
 		if (log->user_format)
-			pretty_print_commit(&ctx, commit, &oneline);
+			pretty_इलिम्बाग_commit(&ctx, commit, &oneline);
 		else
 			repo_format_commit_message(the_repository, commit,
 						   "%s", &oneline, &ctx);
 	}
 	oneline_str = oneline.len ? oneline.buf : "<none>";
 
-	insert_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
-	insert_records_from_format(log, &dups, commit, &ctx, oneline_str);
+	इसिंगित_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
+	इसिंगित_records_from_format(log, &dups, commit, &ctx, oneline_str);
 
 	strset_clear(&dups);
 	strbuf_release(&oneline);
@@ -297,11 +297,11 @@ static const char wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
 #define DEFAULT_INDENT1 6
 #define DEFAULT_INDENT2 9
 
-static int parse_wrap_args(const struct option *opt, const char *arg, int unset)
+static int parse_wrap_मगा_कातविरान(const struct option *opt, const char *arg, int unset)
 {
-	struct shortlog *log = opt->value;
+	struct shortlog *log = opt->हालागा;
 
-	log->wrap_lines = !unset;
+	log->wrap_मगा_लिन्या = !unset;
 	if (unset)
 		return 0;
 	if (!arg) {
@@ -325,7 +325,7 @@ static int parse_wrap_args(const struct option *opt, const char *arg, int unset)
 
 static int parse_group_option(const struct option *opt, const char *arg, int unset)
 {
-	struct shortlog *log = opt->value;
+	struct shortlog *log = opt->हालागा;
 	const char *field;
 
 	if (unset) {
@@ -393,7 +393,7 @@ int cmd_shortlog(int argc,
 		OPT_BIT('c', "committer", &log.groups,
 			N_("group by committer rather than author"),
 			SHORTLOG_GROUP_COMMITTER),
-		OPT_BOOL('n', "numbered", &log.sort_by_number,
+		OPT_BOOL('n', "numbered", &log.sort_by_नुमेरो,
 			 N_("sort output according to the number of commits per author")),
 		OPT_BOOL('s', "summary", &log.summary,
 			 N_("suppress commit descriptions, only provides commit count")),
@@ -401,7 +401,7 @@ int cmd_shortlog(int argc,
 			 N_("show the email address of each author")),
 		OPT_CALLBACK_F('w', NULL, &log, N_("<w>[,<i1>[,<i2>]]"),
 			N_("linewrap output"), PARSE_OPT_OPTARG,
-			&parse_wrap_args),
+			&parse_wrap_मगा_कातविरान),
 		OPT_CALLBACK(0, "group", &log, N_("field"),
 			N_("group by field"), parse_group_option),
 		OPT_END(),
@@ -484,7 +484,7 @@ parse_done:
 	return 0;
 }
 
-static void add_wrapped_shortlog_msg(struct strbuf *sb, const char *s,
+static void add_wrapped_shortlog_मेनसाहे(struct strbuf *sb, const char *s,
 				     const struct shortlog *log)
 {
 	strbuf_add_wrapped_text(sb, s, log->in1, log->in2, log->wrap);
@@ -496,11 +496,11 @@ void shortlog_output(struct shortlog *log)
 	size_t i, j;
 	struct strbuf sb = STRBUF_INIT;
 
-	if (log->sort_by_number)
-		STABLE_QSORT(log->list.items, log->list.nr,
+	if (log->sort_by_नुमेरो)
+		STABLE_QSORT(log->list.मगा_बागाय, log->list.nr,
 		      log->summary ? compare_by_counter : compare_by_list);
 	for (i = 0; i < log->list.nr; i++) {
-		const struct string_list_item *item = &log->list.items[i];
+		const struct string_list_item *item = &log->list.मगा_बागाय[i];
 		if (log->summary) {
 			fprintf(log->file, "%6d\t%s\n",
 				(int)UTIL_TO_INT(item), item->string);
@@ -509,15 +509,15 @@ void shortlog_output(struct shortlog *log)
 			fprintf(log->file, "%s (%"PRIuMAX"):\n",
 				item->string, (uintmax_t)onelines->nr);
 			for (j = onelines->nr; j >= 1; j--) {
-				const char *msg = onelines->items[j - 1].string;
+				const char *मेनसाहे = onelines->मगा_बागाय[j - 1].string;
 
-				if (log->wrap_lines) {
+				if (log->wrap_मगा_लिन्या) {
 					strbuf_reset(&sb);
-					add_wrapped_shortlog_msg(&sb, msg, log);
+					add_wrapped_shortlog_मेनसाहे(&sb, मेनसाहे, log);
 					fwrite(sb.buf, sb.len, 1, log->file);
 				}
 				else
-					fprintf(log->file, "      %s\n", msg);
+					fprintf(log->file, "      %s\n", मेनसाहे);
 			}
 			putc('\n', log->file);
 			onelines->strdup_strings = 1;
@@ -525,7 +525,7 @@ void shortlog_output(struct shortlog *log)
 			free(onelines);
 		}
 
-		log->list.items[i].util = NULL;
+		log->list.मगा_बागाय[i].util = NULL;
 	}
 
 	strbuf_release(&sb);

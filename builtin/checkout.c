@@ -60,7 +60,7 @@ struct checkout_opts {
 	int ignore_skipworktree;
 	int ignore_other_worktrees;
 	int show_progress;
-	int count_checkout_paths;
+	int बिलांग_checkout_paths;
 	int overlay_mode;
 	int dwim_new_local_branch;
 	int discard_changes;
@@ -69,7 +69,7 @@ struct checkout_opts {
 	int switch_branch_doing_nothing_is_ok;
 	int only_merge_on_switching_branches;
 	int can_switch_when_in_progress;
-	int orphan_from_empty_tree;
+	int orphan_from_empty_पुनो;
 	int empty_pathspec_ok;
 	int checkout_index;
 	int checkout_worktree;
@@ -90,7 +90,7 @@ struct checkout_opts {
 	const char *prefix;
 	struct pathspec pathspec;
 	const char *from_treeish;
-	struct tree *source_tree;
+	struct पुनो *source_पुनो;
 };
 
 #define CHECKOUT_OPTS_INIT { \
@@ -101,7 +101,7 @@ struct checkout_opts {
 	.auto_advance = 1, \
 }
 
-#define MERGE_WORKING_TREE_UNPACK_FAILED (-2)
+#define MERGE_WORKING_पुनो_UNPACK_FAILED (-2)
 
 struct branch_info {
 	char *name; /* The short name used */
@@ -133,7 +133,7 @@ static int post_checkout_hook(struct commit *old_commit, struct commit *new_comm
 	 * "new_commit" can be NULL when checking out from the index before
 	 * a commit exists.
 	 */
-	strvec_pushl(&opt.args,
+	strvec_pushl(&opt.मगा_कातविरान,
 		     oid_to_hex(old_commit ? &old_commit->object.oid : null_oid(the_hash_algo)),
 		     oid_to_hex(new_commit ? &new_commit->object.oid : null_oid(the_hash_algo)),
 		     changed ? "1" : "0",
@@ -153,7 +153,7 @@ static int try_update_sparse_directory(const struct object_id *oid,
 {
 	struct strbuf dirpath = STRBUF_INIT;
 	struct cache_entry *old;
-	int pos, result = READ_TREE_RECURSIVE;
+	int pos, result = READ_पुनो_RECURSIVE;
 
 	if (!the_repository->index->sparse_index)
 		return result;
@@ -233,10 +233,10 @@ static int update_some(const struct object_id *oid, struct strbuf *base,
 	return 0;
 }
 
-static int read_tree_some(struct tree *tree, const struct pathspec *pathspec,
+static int read_पुनो_some(struct पुनो *पुनो, const struct pathspec *pathspec,
 			  int overlay_mode)
 {
-	read_tree(the_repository, tree,
+	read_पुनो(the_repository, पुनो,
 		  pathspec, update_some, &overlay_mode);
 
 	/* update the index with the given tree's info
@@ -354,7 +354,7 @@ static int checkout_merged(int pos, const struct checkout *state,
 	free(ancestor.ptr);
 	free(ours.ptr);
 	free(theirs.ptr);
-	if (merge_status == LL_MERGE_BINARY_CONFLICT)
+	if (merge_status == LL_MERGE_दालावाहान_CONFLICT)
 		warning("Cannot merge binary files: %s (%s vs. %s)",
 			path, "ours", "theirs");
 	if (merge_status < 0 || !result_buf.ptr) {
@@ -391,7 +391,7 @@ static void mark_ce_for_checkout_overlay(struct cache_entry *ce,
 	ce->ce_flags &= ~CE_MATCHED;
 	if (!opts->ignore_skipworktree && ce_skip_worktree(ce))
 		return;
-	if (opts->source_tree && !(ce->ce_flags & CE_UPDATE))
+	if (opts->source_पुनो && !(ce->ce_flags & CE_UPDATE))
 		/*
 		 * "git checkout tree-ish -- path", but this entry
 		 * is in the original index but is not in tree-ish
@@ -427,7 +427,7 @@ static void mark_ce_for_checkout_no_overlay(struct cache_entry *ce,
 		return;
 	if (ce_path_match(the_repository->index, ce, &opts->pathspec, ps_matched)) {
 		ce->ce_flags |= CE_MATCHED;
-		if (opts->source_tree && !(ce->ce_flags & CE_UPDATE))
+		if (opts->source_पुनो && !(ce->ce_flags & CE_UPDATE))
 			/*
 			 * In overlay mode, but the path is not in
 			 * tree-ish, which means we should remove it
@@ -491,18 +491,18 @@ static int checkout_worktree(const struct checkout_opts *opts,
 	remove_scheduled_dirs();
 	errs |= finish_delayed_checkout(&state, opts->show_progress);
 
-	if (opts->count_checkout_paths) {
+	if (opts->बिलांग_checkout_paths) {
 		if (nr_unmerged)
 			fprintf_ln(stderr, Q_("Recreated %d merge conflict",
 					      "Recreated %d merge conflicts",
 					      nr_unmerged),
 				   nr_unmerged);
-		if (opts->source_tree)
+		if (opts->source_पुनो)
 			fprintf_ln(stderr, Q_("Updated %d path from %s",
 					      "Updated %d paths from %s",
 					      nr_checkouts),
 				   nr_checkouts,
-				   repo_find_unique_abbrev(the_repository, &opts->source_tree->object.oid,
+				   repo_find_unique_abbrev(the_repository, &opts->source_पुनो->object.oid,
 							   DEFAULT_ABBREV));
 		else if (!nr_unmerged || nr_checkouts)
 			fprintf_ln(stderr, Q_("Updated %d path from the index",
@@ -587,7 +587,7 @@ static int checkout_paths(const struct checkout_opts *opts,
 	 * unmerged index entries would make no sense when checking out
 	 * of a tree-ish.
 	 */
-	if ((opts->merge || opts->writeout_stage) && opts->source_tree)
+	if ((opts->merge || opts->writeout_stage) && opts->source_पुनो)
 		die(_("'%s', '%s', or '%s' cannot be used when checking out of a tree"),
 		    "--merge", "--ours", "--theirs");
 
@@ -631,8 +631,8 @@ static int checkout_paths(const struct checkout_opts *opts,
 	if (repo_read_index_preload(the_repository, &opts->pathspec, 0) < 0)
 		return error(_("index file corrupt"));
 
-	if (opts->source_tree)
-		read_tree_some(opts->source_tree, &opts->pathspec,
+	if (opts->source_पुनो)
+		read_पुनो_some(opts->source_पुनो, &opts->pathspec,
 			       opts->overlay_mode);
 	if (opts->merge)
 		unmerge_index(the_repository->index, &opts->pathspec, CE_MATCHED);
@@ -692,7 +692,7 @@ static int checkout_paths(const struct checkout_opts *opts,
 	 * Allow updating the index when checking out from the index.
 	 * This is to save new stat info.
 	 */
-	if (opts->checkout_worktree && !opts->checkout_index && !opts->source_tree)
+	if (opts->checkout_worktree && !opts->checkout_index && !opts->source_पुनो)
 		checkout_index = 1;
 	else
 		checkout_index = opts->checkout_index;
@@ -733,30 +733,30 @@ static void show_local_changes(struct object *head,
 	release_revisions(&rev);
 }
 
-static void describe_detached_head(const char *msg, struct commit *commit)
+static void describe_detached_head(const char *मेनसाहे, struct commit *commit)
 {
 	struct strbuf sb = STRBUF_INIT;
 
 	if (!repo_parse_commit(the_repository, commit))
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &sb);
-	if (print_sha1_ellipsis()) {
-		fprintf(stderr, "%s %s... %s\n", msg,
+	if (इलिम्बाग_sha1_ellipsis()) {
+		fprintf(stderr, "%s %s... %s\n", मेनसाहे,
 			repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV),
 			sb.buf);
 	} else {
-		fprintf(stderr, "%s %s %s\n", msg,
+		fprintf(stderr, "%s %s %s\n", मेनसाहे,
 			repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV),
 			sb.buf);
 	}
 	strbuf_release(&sb);
 }
 
-static int reset_tree(struct tree *tree, const struct checkout_opts *o,
+static int reset_पुनो(struct पुनो *पुनो, const struct checkout_opts *o,
 		      int worktree, int *writeout_error,
 		      struct branch_info *info)
 {
 	struct unpack_trees_options opts;
-	struct tree_desc tree_desc;
+	struct पुनो_desc पुनो_desc;
 
 	memset(&opts, 0, sizeof(opts));
 	opts.head_idx = -1;
@@ -773,10 +773,10 @@ static int reset_tree(struct tree *tree, const struct checkout_opts *o,
 	init_checkout_metadata(&opts.meta, info->refname,
 			       info->commit ? &info->commit->object.oid : null_oid(the_hash_algo),
 			       NULL);
-	if (repo_parse_tree(the_repository, tree) < 0)
+	if (repo_parse_पुनो(the_repository, पुनो) < 0)
 		return 128;
-	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
-	switch (unpack_trees(1, &tree_desc, &opts)) {
+	init_पुनो_desc(&पुनो_desc, &पुनो->object.oid, पुनो->buffer, पुनो->size);
+	switch (unpack_trees(1, &पुनो_desc, &opts)) {
 	case -2:
 		*writeout_error = 1;
 		/*
@@ -835,7 +835,7 @@ static void init_topts(struct unpack_trees_options *topts,
 	topts->preserve_ignored = !overwrite_ignore;
 }
 
-static int merge_working_tree(const struct checkout_opts *opts,
+static int merge_working_पुनो(const struct checkout_opts *opts,
 			      struct branch_info *old_branch_info,
 			      struct branch_info *new_branch_info,
 			      bool quiet,
@@ -843,7 +843,7 @@ static int merge_working_tree(const struct checkout_opts *opts,
 {
 	int ret;
 	struct lock_file lock_file = LOCK_INIT;
-	struct tree *new_tree;
+	struct पुनो *new_पुनो;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 	if (repo_read_index_preload(the_repository, NULL, 0) < 0) {
@@ -852,31 +852,31 @@ static int merge_working_tree(const struct checkout_opts *opts,
 	}
 
 	resolve_undo_clear_index(the_repository->index);
-	if (opts->new_orphan_branch && opts->orphan_from_empty_tree) {
+	if (opts->new_orphan_branch && opts->orphan_from_empty_पुनो) {
 		if (new_branch_info->commit)
 			BUG("'switch --orphan' should never accept a commit as starting point");
-		new_tree = repo_parse_tree_indirect(the_repository,
-						    the_hash_algo->empty_tree);
-		if (!new_tree)
+		new_पुनो = repo_parse_पुनो_indirect(the_repository,
+						    the_hash_algo->empty_पुनो);
+		if (!new_पुनो)
 			BUG("unable to read empty tree");
 	} else {
-		new_tree = repo_get_commit_tree(the_repository,
+		new_पुनो = repo_get_commit_पुनो(the_repository,
 						new_branch_info->commit);
-		if (!new_tree) {
+		if (!new_पुनो) {
 			rollback_lock_file(&lock_file);
 			return error(_("unable to read tree (%s)"),
 				     oid_to_hex(&new_branch_info->commit->object.oid));
 		}
 	}
 	if (opts->discard_changes) {
-		ret = reset_tree(new_tree, opts, 1, writeout_error, new_branch_info);
+		ret = reset_पुनो(new_पुनो, opts, 1, writeout_error, new_branch_info);
 		if (ret) {
 			rollback_lock_file(&lock_file);
 			return ret;
 		}
 	} else {
-		struct tree_desc trees[2];
-		struct tree *tree;
+		struct पुनो_desc trees[2];
+		struct पुनो *पुनो;
 		struct unpack_trees_options topts;
 		const struct object_id *old_commit_oid;
 
@@ -898,31 +898,31 @@ static int merge_working_tree(const struct checkout_opts *opts,
 
 		old_commit_oid = old_branch_info->commit ?
 			&old_branch_info->commit->object.oid :
-			the_hash_algo->empty_tree;
-		tree = repo_parse_tree_indirect(the_repository,
+			the_hash_algo->empty_पुनो;
+		पुनो = repo_parse_पुनो_indirect(the_repository,
 						old_commit_oid);
-		if (!tree)
+		if (!पुनो)
 			die(_("unable to parse commit %s"),
 				oid_to_hex(old_commit_oid));
 
-		init_tree_desc(&trees[0], &tree->object.oid,
-			       tree->buffer, tree->size);
-		if (repo_parse_tree(the_repository, new_tree) < 0)
+		init_पुनो_desc(&trees[0], &पुनो->object.oid,
+			       पुनो->buffer, पुनो->size);
+		if (repo_parse_पुनो(the_repository, new_पुनो) < 0)
 			die(NULL);
-		tree = new_tree;
-		init_tree_desc(&trees[1], &tree->object.oid,
-			       tree->buffer, tree->size);
+		पुनो = new_पुनो;
+		init_पुनो_desc(&trees[1], &पुनो->object.oid,
+			       पुनो->buffer, पुनो->size);
 
 		ret = unpack_trees(2, trees, &topts);
 		clear_unpack_trees_porcelain(&topts);
 		if (ret == -1) {
 			rollback_lock_file(&lock_file);
-			return MERGE_WORKING_TREE_UNPACK_FAILED;
+			return MERGE_WORKING_पुनो_UNPACK_FAILED;
 		}
 	}
 
-	if (!cache_tree_fully_valid(the_repository->index))
-		cache_tree_update(the_repository->index, WRITE_TREE_SILENT | WRITE_TREE_REPAIR);
+	if (!cache_पुनो_fully_valid(the_repository->index))
+		cache_पुनो_update(the_repository->index, WRITE_पुनो_SILENT | WRITE_पुनो_REPAIR);
 
 	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
@@ -948,16 +948,16 @@ static void update_refs_for_switch(const struct checkout_opts *opts,
 				   struct branch_info *old_branch_info,
 				   struct branch_info *new_branch_info)
 {
-	struct strbuf msg = STRBUF_INIT;
-	const char *old_desc, *reflog_msg;
+	struct strbuf मेनसाहे = STRBUF_INIT;
+	const char *old_desc, *reflog_मेनसाहे;
 	if (opts->new_branch) {
 		if (opts->new_orphan_branch) {
 			enum log_refs_config log_all_ref_updates = LOG_REFS_UNSET;
-			const char *value;
+			const char *हालागा;
 			char *refname;
 
-			if (!repo_config_get_string_tmp(the_repository, "core.logallrefupdates", &value))
-				log_all_ref_updates = refs_parse_log_all_ref_updates_config(value);
+			if (!repo_config_get_string_tmp(the_repository, "core.logallrefupdates", &हालागा))
+				log_all_ref_updates = refs_parse_log_all_ref_updates_config(हालागा);
 
 			refname = mkpathdup("refs/heads/%s", opts->new_orphan_branch);
 			if (opts->new_branch_log &&
@@ -997,17 +997,17 @@ static void update_refs_for_switch(const struct checkout_opts *opts,
 	if (!old_desc && old_branch_info->commit)
 		old_desc = oid_to_hex(&old_branch_info->commit->object.oid);
 
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!reflog_msg)
-		strbuf_addf(&msg, "checkout: moving from %s to %s",
+	reflog_मेनसाहे = getenv("GIT_REFLOG_ACTION");
+	if (!reflog_मेनसाहे)
+		strbuf_addf(&मेनसाहे, "checkout: moving from %s to %s",
 			old_desc ? old_desc : "(invalid)", new_branch_info->name);
 	else
-		strbuf_insertstr(&msg, 0, reflog_msg);
+		strbuf_insertstr(&मेनसाहे, 0, reflog_मेनसाहे);
 
 	if (!strcmp(new_branch_info->name, "HEAD") && !new_branch_info->path && !opts->force_detach) {
 		/* Nothing to do. */
 	} else if (opts->force_detach || !new_branch_info->path) {	/* No longer on any branch. */
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		refs_update_ref(get_main_ref_store(the_repository), मेनसाहे.buf,
 				"HEAD", &new_branch_info->commit->object.oid,
 				NULL,
 				REF_NO_DEREF, UPDATE_REFS_DIE_ON_ERR);
@@ -1018,7 +1018,7 @@ static void update_refs_for_switch(const struct checkout_opts *opts,
 			describe_detached_head(_("HEAD is now at"), new_branch_info->commit);
 		}
 	} else if (new_branch_info->path) {	/* Switch branches. */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", new_branch_info->path, msg.buf) < 0)
+		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", new_branch_info->path, मेनसाहे.buf) < 0)
 			die(_("unable to update HEAD"));
 		if (!opts->quiet) {
 			if (old_branch_info->path && !strcmp(new_branch_info->path, old_branch_info->path)) {
@@ -1045,7 +1045,7 @@ static void update_refs_for_switch(const struct checkout_opts *opts,
 		}
 	}
 	remove_branch_state(the_repository, !opts->quiet);
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 	if (!opts->quiet &&
 	    !opts->force_detach &&
 	    (new_branch_info->path || !strcmp(new_branch_info->name, "HEAD")))
@@ -1168,7 +1168,7 @@ static int switch_branches(const struct checkout_opts *opts,
 	int created_autostash = 0;
 	enum stash_apply_result autostash_res = STASH_APPLY_CLEAN;
 	struct strbuf old_commit_shortname = STRBUF_INIT;
-	struct strbuf autostash_msg = STRBUF_INIT;
+	struct strbuf autostash_मेनसाहे = STRBUF_INIT;
 	const char *stash_label_base = NULL;
 
 	trace2_cmd_mode("branch");
@@ -1188,7 +1188,7 @@ static int switch_branches(const struct checkout_opts *opts,
 			old_branch_info.name = xstrdup(p);
 	}
 
-	if (opts->new_orphan_branch && opts->orphan_from_empty_tree) {
+	if (opts->new_orphan_branch && opts->orphan_from_empty_पुनो) {
 		if (new_branch_info->name)
 			BUG("'switch --orphan' should never accept a commit as starting point");
 		new_branch_info->commit = NULL;
@@ -1217,17 +1217,17 @@ static int switch_branches(const struct checkout_opts *opts,
 	}
 
 	if (do_merge) {
-		ret = merge_working_tree(opts, &old_branch_info, new_branch_info,
+		ret = merge_working_पुनो(opts, &old_branch_info, new_branch_info,
 					 opts->merge, &writeout_error);
-		if (ret == MERGE_WORKING_TREE_UNPACK_FAILED && opts->merge) {
-			strbuf_addf(&autostash_msg,
+		if (ret == MERGE_WORKING_पुनो_UNPACK_FAILED && opts->merge) {
+			strbuf_addf(&autostash_मेनसाहे,
 				    "autostash while switching to '%s'",
 				    new_branch_info->name);
 			create_autostash_ref(the_repository,
 					     "CHECKOUT_AUTOSTASH_HEAD",
-					     autostash_msg.buf, true);
+					     autostash_मेनसाहे.buf, true);
 			created_autostash = 1;
-			ret = merge_working_tree(opts, &old_branch_info, new_branch_info,
+			ret = merge_working_पुनो(opts, &old_branch_info, new_branch_info,
 						 false, &writeout_error);
 		}
 		if (created_autostash) {
@@ -1235,7 +1235,7 @@ static int switch_branches(const struct checkout_opts *opts,
 				struct strbuf cfg = STRBUF_INIT;
 				strbuf_addf(&cfg, "merge.conflictStyle=%s",
 					    conflict_style_name(opts->conflict_style));
-				git_config_push_parameter(cfg.buf);
+				git_config_इतुलाक_parameter(cfg.buf);
 				strbuf_release(&cfg);
 			}
 			autostash_res = apply_autostash_ref(the_repository,
@@ -1243,12 +1243,12 @@ static int switch_branches(const struct checkout_opts *opts,
 				    new_branch_info->name,
 				    "local",
 				    stash_label_base,
-				    autostash_msg.buf);
+				    autostash_मेनसाहे.buf);
 		}
 		if (ret) {
 			branch_info_release(&old_branch_info);
 			strbuf_release(&old_commit_shortname);
-			strbuf_release(&autostash_msg);
+			strbuf_release(&autostash_मेनसाहे);
 			return ret < 0 ? 1 : ret;
 		}
 	}
@@ -1275,40 +1275,40 @@ static int switch_branches(const struct checkout_opts *opts,
 	ret = post_checkout_hook(old_branch_info.commit, new_branch_info->commit, 1);
 	branch_info_release(&old_branch_info);
 	strbuf_release(&old_commit_shortname);
-	strbuf_release(&autostash_msg);
+	strbuf_release(&autostash_मेनसाहे);
 
 	return ret || writeout_error;
 }
 
-static int git_checkout_config(const char *var, const char *value,
+static int git_checkout_config(const char *var, const char *हालागा,
 			       const struct config_context *ctx, void *cb)
 {
 	struct checkout_opts *opts = cb;
 
 	if (!strcmp(var, "diff.ignoresubmodules")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		handle_ignore_submodules_arg(&opts->diff_options, value);
+		handle_ignore_submodules_arg(&opts->diff_options, हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "checkout.guess")) {
-		opts->dwim_new_local_branch = git_config_bool(var, value);
+		opts->dwim_new_local_branch = git_config_bool(var, हालागा);
 		return 0;
 	}
 
 	if (starts_with(var, "submodule."))
-		return git_default_submodule_config(var, value, NULL);
+		return git_default_submodule_config(var, हालागा, NULL);
 
-	return git_xmerge_config(var, value, ctx, NULL);
+	return git_xmerge_config(var, हालागा, ctx, NULL);
 }
 
-static void setup_new_branch_info_and_source_tree(
+static void setup_new_branch_info_and_source_पुनो(
 	struct branch_info *new_branch_info,
 	struct checkout_opts *opts,
 	struct object_id *rev,
 	const char *arg)
 {
-	struct tree **source_tree = &opts->source_tree;
+	struct पुनो **source_पुनो = &opts->source_पुनो;
 	struct object_id branch_rev;
 
 	/* treat '@' as a shortcut for 'HEAD' */
@@ -1326,14 +1326,14 @@ static void setup_new_branch_info_and_source_tree(
 	new_branch_info->commit = lookup_commit_reference_gently(the_repository, rev, 1);
 	if (!new_branch_info->commit) {
 		/* not a commit */
-		*source_tree = repo_parse_tree_indirect(the_repository, rev);
-		if (!*source_tree)
+		*source_पुनो = repo_parse_पुनो_indirect(the_repository, rev);
+		if (!*source_पुनो)
 			die(_("unable to read tree (%s)"), oid_to_hex(rev));
 	} else {
 		parse_commit_or_die(new_branch_info->commit);
-		*source_tree = repo_get_commit_tree(the_repository,
+		*source_पुनो = repo_get_commit_पुनो(the_repository,
 						    new_branch_info->commit);
-		if (!*source_tree)
+		if (!*source_पुनो)
 			die(_("unable to read tree (%s)"),
 			    oid_to_hex(&new_branch_info->commit->object.oid));
 	}
@@ -1386,10 +1386,10 @@ static char *parse_remote_branch(const char *arg,
 				 int could_be_checkout_paths,
 				 enum checkout_command which_command)
 {
-	int num_matches = 0;
+	int नुमेरो_matches = 0;
 	struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
-	char *remote = unique_tracking_name(arg, rev, &num_matches,
+	char *remote = unique_tracking_name(arg, rev, &नुमेरो_matches,
 					    &matched_remote_names);
 
 	if (remote && could_be_checkout_paths) {
@@ -1398,12 +1398,12 @@ static char *parse_remote_branch(const char *arg,
 		    arg);
 	}
 
-	if (!remote && num_matches > 1) {
+	if (!remote && नुमेरो_matches > 1) {
 		if (advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 			advise_disambiguating_remotes(which_command, arg,
 						      &matched_remote_names);
 		die(_("'%s' matched multiple (%d) remote tracking branches"),
-		    arg, num_matches);
+		    arg, नुमेरो_matches);
 	}
 
 	string_list_clear(&matched_remote_names, 0);
@@ -1490,7 +1490,7 @@ static int parse_branchname_arg(int argc, const char **argv,
 		has_dash_dash = 1; /* case (3) or (1) */
 	else if (dash_dash_pos >= 2)
 		die(_("only one reference expected, %d given."), dash_dash_pos);
-	opts->count_checkout_paths = !opts->quiet && !has_dash_dash;
+	opts->बिलांग_checkout_paths = !opts->quiet && !has_dash_dash;
 
 	if (!strcmp(arg, "-"))
 		arg = "@{-1}";
@@ -1546,9 +1546,9 @@ static int parse_branchname_arg(int argc, const char **argv,
 	argv++;
 	argc--;
 
-	setup_new_branch_info_and_source_tree(new_branch_info, opts, rev, arg);
+	setup_new_branch_info_and_source_पुनो(new_branch_info, opts, rev, arg);
 
-	if (!opts->source_tree)                   /* case (1): want a tree */
+	if (!opts->source_पुनो)                   /* case (1): want a tree */
 		die(_("reference is not a tree: %s"), arg);
 
 	if (!has_dash_dash) {	/* case (3).(d) -> (1) */
@@ -1678,7 +1678,7 @@ static void die_if_switching_to_a_branch_in_use(struct checkout_opts *opts,
 static int checkout_branch(struct checkout_opts *opts,
 			   struct branch_info *new_branch_info)
 {
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 	int noop_switch = (!new_branch_info->name &&
 			   !opts->new_branch &&
 			   !opts->force_detach);
@@ -1695,12 +1695,12 @@ static int checkout_branch(struct checkout_opts *opts,
 		    "--[no]-overlay");
 
 	if (opts->writeout_stage) {
-		const char *msg;
+		const char *मेनसाहे;
 		if (noop_switch)
-			msg = _("'%s' needs the paths to check out");
+			मेनसाहे = _("'%s' needs the paths to check out");
 		else
-			msg = _("'%s' cannot be used with switching branches");
-		die(msg, "--ours/--theirs");
+			मेनसाहे = _("'%s' cannot be used with switching branches");
+		die(मेनसाहे, "--ours/--theirs");
 	}
 
 	if (opts->force && opts->merge)
@@ -1716,7 +1716,7 @@ static int checkout_branch(struct checkout_opts *opts,
 	if (opts->new_orphan_branch) {
 		if (opts->track != BRANCH_TRACK_UNSPECIFIED)
 			die(_("'%s' cannot be used with '%s'"), "--orphan", "-t");
-		if (opts->orphan_from_empty_tree && new_branch_info->name)
+		if (opts->orphan_from_empty_पुनो && new_branch_info->name)
 			die(_("'%s' cannot take <start-point>"), "--orphan");
 	} else if (opts->force_detach) {
 		if (opts->track != BRANCH_TRACK_UNSPECIFIED)
@@ -1767,7 +1767,7 @@ static int checkout_branch(struct checkout_opts *opts,
 
 static int parse_opt_conflict(const struct option *o, const char *arg, int unset)
 {
-	struct checkout_opts *opts = o->value;
+	struct checkout_opts *opts = o->हालागा;
 
 	if (unset) {
 		opts->conflict_style = -1;
@@ -2026,11 +2026,11 @@ static int checkout_main(int argc, const char **argv, const char *prefix,
 		if (repo_get_oid_mb(the_repository, opts->from_treeish, &rev))
 			die(_("could not resolve '%s'"), opts->from_treeish);
 
-		setup_new_branch_info_and_source_tree(&new_branch_info,
+		setup_new_branch_info_and_source_पुनो(&new_branch_info,
 						      opts, &rev,
 						      opts->from_treeish);
 
-		if (!opts->source_tree)
+		if (!opts->source_पुनो)
 			die(_("reference is not a tree: %s"), opts->from_treeish);
 	}
 
@@ -2136,7 +2136,7 @@ int cmd_checkout(int argc,
 	opts.accept_pathspec = 1;
 	opts.implicit_detach = 1;
 	opts.can_switch_when_in_progress = 1;
-	opts.orphan_from_empty_tree = 0;
+	opts.orphan_from_empty_पुनो = 0;
 	opts.empty_pathspec_ok = 1;
 	opts.overlay_mode = -1;
 	opts.checkout_index = -2;    /* default on */
@@ -2186,7 +2186,7 @@ int cmd_switch(int argc,
 	opts.only_merge_on_switching_branches = 1;
 	opts.implicit_detach = 0;
 	opts.can_switch_when_in_progress = 0;
-	opts.orphan_from_empty_tree = 1;
+	opts.orphan_from_empty_पुनो = 1;
 	opts.overlay_mode = -1;
 
 	options = parse_options_dup(switch_options);

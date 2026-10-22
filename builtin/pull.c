@@ -38,17 +38,17 @@
  * "merges", returns REBASE_MERGES. If value is a invalid value, dies with
  * a fatal error if fatal is true, otherwise returns REBASE_INVALID.
  */
-static enum rebase_type parse_config_rebase(const char *key, const char *value,
+static enum rebase_type parse_config_rebase(const char *सुसि, const char *हालागा,
 		int fatal)
 {
-	enum rebase_type v = rebase_parse_value(value);
+	enum rebase_type v = rebase_parse_हालागा(हालागा);
 	if (v != REBASE_INVALID)
 		return v;
 
 	if (fatal)
-		die(_("invalid value for '%s': '%s'"), key, value);
+		die(_("invalid value for '%s': '%s'"), सुसि, हालागा);
 	else
-		error(_("invalid value for '%s': '%s'"), key, value);
+		error(_("invalid value for '%s': '%s'"), सुसि, हालागा);
 
 	return REBASE_INVALID;
 }
@@ -58,13 +58,13 @@ static enum rebase_type parse_config_rebase(const char *key, const char *value,
  */
 static int parse_opt_rebase(const struct option *opt, const char *arg, int unset)
 {
-	enum rebase_type *value = opt->value;
+	enum rebase_type *हालागा = opt->हालागा;
 
 	if (arg)
-		*value = parse_config_rebase("--rebase", arg, 0);
+		*हालागा = parse_config_rebase("--rebase", arg, 0);
 	else
-		*value = unset ? REBASE_FALSE : REBASE_TRUE;
-	return *value == REBASE_INVALID ? -1 : 0;
+		*हालागा = unset ? REBASE_FALSE : REBASE_TRUE;
+	return *हालागा == REBASE_INVALID ? -1 : 0;
 }
 
 static const char * const pull_usage[] = {
@@ -122,25 +122,25 @@ static struct strvec opt_fetch = STRVEC_INIT;
 /**
  * Pushes "-q" or "-v" switches into arr to match the opt_verbosity level.
  */
-static void argv_push_verbosity(struct strvec *arr)
+static void argv_इतुलाक_verbosity(struct strvec *arr)
 {
 	int verbosity;
 
 	for (verbosity = opt_verbosity; verbosity > 0; verbosity--)
-		strvec_push(arr, "-v");
+		strvec_इतुलाक(arr, "-v");
 
 	for (verbosity = opt_verbosity; verbosity < 0; verbosity++)
-		strvec_push(arr, "-q");
+		strvec_इतुलाक(arr, "-q");
 }
 
 /**
  * Pushes "-f" switches into arr to match the opt_force level.
  */
-static void argv_push_force(struct strvec *arr)
+static void argv_इतुलाक_force(struct strvec *arr)
 {
 	int force = opt_force;
 	while (force-- > 0)
-		strvec_push(arr, "-f");
+		strvec_इतुलाक(arr, "-f");
 }
 
 /**
@@ -149,17 +149,17 @@ static void argv_push_force(struct strvec *arr)
 static void set_reflog_message(int argc, const char **argv)
 {
 	int i;
-	struct strbuf msg = STRBUF_INIT;
+	struct strbuf मेनसाहे = STRBUF_INIT;
 
 	for (i = 0; i < argc; i++) {
 		if (i)
-			strbuf_addch(&msg, ' ');
-		strbuf_addstr(&msg, argv[i]);
+			strbuf_addch(&मेनसाहे, ' ');
+		strbuf_addstr(&मेनसाहे, argv[i]);
 	}
 
-	setenv("GIT_REFLOG_ACTION", msg.buf, 0);
+	setenv("GIT_REFLOG_ACTION", मेनसाहे.buf, 0);
 
-	strbuf_release(&msg);
+	strbuf_release(&मेनसाहे);
 }
 
 /**
@@ -170,22 +170,22 @@ static void set_reflog_message(int argc, const char **argv)
  */
 static const char *config_get_ff(void)
 {
-	const char *value;
+	const char *हालागा;
 
-	if (repo_config_get_value(the_repository, "pull.ff", &value))
+	if (repo_config_get_हालागा(the_repository, "pull.ff", &हालागा))
 		return NULL;
 
-	switch (git_parse_maybe_bool(value)) {
+	switch (git_parse_maybe_bool(हालागा)) {
 	case 0:
 		return "--no-ff";
 	case 1:
 		return "--ff";
 	}
 
-	if (!strcmp(value, "only"))
+	if (!strcmp(हालागा, "only"))
 		return "--ff-only";
 
-	die(_("invalid value for '%s': '%s'"), "pull.ff", value);
+	die(_("invalid value for '%s': '%s'"), "pull.ff", हालागा);
 }
 
 /**
@@ -198,22 +198,22 @@ static const char *config_get_ff(void)
 static enum rebase_type config_get_rebase(int *rebase_unspecified)
 {
 	struct branch *curr_branch = branch_get("HEAD");
-	const char *value;
+	const char *हालागा;
 
 	if (curr_branch) {
-		char *key = xstrfmt("branch.%s.rebase", curr_branch->name);
+		char *सुसि = xstrfmt("branch.%s.rebase", curr_branch->name);
 
-		if (!repo_config_get_value(the_repository, key, &value)) {
-			enum rebase_type ret = parse_config_rebase(key, value, 1);
-			free(key);
+		if (!repo_config_get_हालागा(the_repository, सुसि, &हालागा)) {
+			enum rebase_type ret = parse_config_rebase(सुसि, हालागा, 1);
+			free(सुसि);
 			return ret;
 		}
 
-		free(key);
+		free(सुसि);
 	}
 
-	if (!repo_config_get_value(the_repository, "pull.rebase", &value))
-		return parse_config_rebase("pull.rebase", value, 1);
+	if (!repo_config_get_हालागा(the_repository, "pull.rebase", &हालागा))
+		return parse_config_rebase("pull.rebase", हालागा, 1);
 
 	*rebase_unspecified = 1;
 
@@ -223,7 +223,7 @@ static enum rebase_type config_get_rebase(int *rebase_unspecified)
 /**
  * Read config variables.
  */
-static int git_pull_config(const char *var, const char *value,
+static int git_pull_config(const char *var, const char *हालागा,
 			   const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "rebase.autostash")) {
@@ -235,20 +235,20 @@ static int git_pull_config(const char *var, const char *value,
 		 *
 		 * run_merge() handles merge.autostash, so we don't handle it here.
 		 */
-		config_rebase_autostash = git_config_bool(var, value);
+		config_rebase_autostash = git_config_bool(var, हालागा);
 		return 0;
 	} else if (!strcmp(var, "pull.autostash")) {
-		config_pull_autostash = git_config_bool(var, value);
+		config_pull_autostash = git_config_bool(var, हालागा);
 		return 0;
 	} else if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value) ?
+		recurse_submodules = git_config_bool(var, हालागा) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
 		return 0;
 	} else if (!strcmp(var, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 /**
@@ -389,68 +389,68 @@ static int run_fetch(const char *repo, const char **refspecs)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "fetch", "--update-head-ok", NULL);
+	strvec_pushl(&cmd.मगा_कातविरान, "fetch", "--update-head-ok", NULL);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_इतुलाक_verbosity(&cmd.मगा_कातविरान);
 	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_progress);
 
 	/* Options passed to git-fetch */
 	if (opt_all)
-		strvec_push(&cmd.args, opt_all);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_all);
 	if (opt_append)
-		strvec_push(&cmd.args, opt_append);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_append);
 	if (opt_upload_pack)
-		strvec_push(&cmd.args, opt_upload_pack);
-	argv_push_force(&cmd.args);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_upload_pack);
+	argv_इतुलाक_force(&cmd.मगा_कातविरान);
 	if (opt_tags)
-		strvec_push(&cmd.args, opt_tags);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_tags);
 	if (opt_prune)
-		strvec_push(&cmd.args, opt_prune);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_prune);
 	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		switch (recurse_submodules_cli) {
 		case RECURSE_SUBMODULES_ON:
-			strvec_push(&cmd.args, "--recurse-submodules=on");
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "--recurse-submodules=on");
 			break;
 		case RECURSE_SUBMODULES_OFF:
-			strvec_push(&cmd.args, "--recurse-submodules=no");
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "--recurse-submodules=no");
 			break;
 		case RECURSE_SUBMODULES_ON_DEMAND:
-			strvec_push(&cmd.args, "--recurse-submodules=on-demand");
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "--recurse-submodules=on-demand");
 			break;
 		default:
 			BUG("submodule recursion option not understood");
 		}
 	if (max_children)
-		strvec_push(&cmd.args, max_children);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, max_children);
 	if (opt_dry_run)
-		strvec_push(&cmd.args, "--dry-run");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--dry-run");
 	if (opt_keep)
-		strvec_push(&cmd.args, opt_keep);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_keep);
 	if (opt_depth)
-		strvec_push(&cmd.args, opt_depth);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_depth);
 	if (opt_unshallow)
-		strvec_push(&cmd.args, opt_unshallow);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_unshallow);
 	if (opt_update_shallow)
-		strvec_push(&cmd.args, opt_update_shallow);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_update_shallow);
 	if (opt_refmap)
-		strvec_push(&cmd.args, opt_refmap);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_refmap);
 	if (opt_ipv4)
-		strvec_push(&cmd.args, opt_ipv4);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_ipv4);
 	if (opt_ipv6)
-		strvec_push(&cmd.args, opt_ipv6);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_ipv6);
 	if (opt_show_forced_updates > 0)
-		strvec_push(&cmd.args, "--show-forced-updates");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--show-forced-updates");
 	else if (opt_show_forced_updates == 0)
-		strvec_push(&cmd.args, "--no-show-forced-updates");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--no-show-forced-updates");
 	if (set_upstream)
-		strvec_push(&cmd.args, set_upstream);
-	strvec_pushv(&cmd.args, opt_fetch.v);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, set_upstream);
+	strvec_pushv(&cmd.मगा_कातविरान, opt_fetch.v);
 
 	if (repo) {
-		strvec_push(&cmd.args, repo);
-		strvec_pushv(&cmd.args, refspecs);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, repo);
+		strvec_pushv(&cmd.मगा_कातविरान, refspecs);
 	} else if (*refspecs)
 		BUG("refspecs without repo?");
 	cmd.git_cmd = 1;
@@ -483,7 +483,7 @@ static int pull_into_void(const struct object_id *merge_head,
 	 * branch.
 	 */
 	if (checkout_fast_forward(the_repository,
-				  the_hash_algo->empty_tree,
+				  the_hash_algo->empty_पुनो,
 				  merge_head, 0))
 		return 1;
 
@@ -499,9 +499,9 @@ static int rebase_submodules(void)
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
-	strvec_pushl(&cp.args, "submodule", "update",
+	strvec_pushl(&cp.मगा_कातविरान, "submodule", "update",
 		     "--recursive", "--rebase", NULL);
-	argv_push_verbosity(&cp.args);
+	argv_इतुलाक_verbosity(&cp.मगा_कातविरान);
 
 	return run_command(&cp);
 }
@@ -512,9 +512,9 @@ static int update_submodules(void)
 
 	cp.git_cmd = 1;
 	cp.no_stdin = 1;
-	strvec_pushl(&cp.args, "submodule", "update",
+	strvec_pushl(&cp.मगा_कातविरान, "submodule", "update",
 		     "--recursive", "--checkout", NULL);
-	argv_push_verbosity(&cp.args);
+	argv_इतुलाक_verbosity(&cp.मगा_कातविरान);
 
 	return run_command(&cp);
 }
@@ -526,46 +526,46 @@ static int run_merge(void)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&cmd.args, "merge", NULL);
+	strvec_pushl(&cmd.मगा_कातविरान, "merge", NULL);
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_इतुलाक_verbosity(&cmd.मगा_कातविरान);
 	if (opt_progress)
-		strvec_push(&cmd.args, opt_progress);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_progress);
 
 	/* Options passed to git-merge */
 	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_diffstat);
 	if (opt_log)
-		strvec_push(&cmd.args, opt_log);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_log);
 	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_signoff);
 	if (opt_squash)
-		strvec_push(&cmd.args, opt_squash);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_squash);
 	if (opt_commit)
-		strvec_push(&cmd.args, opt_commit);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_commit);
 	if (opt_edit)
-		strvec_push(&cmd.args, opt_edit);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_edit);
 	if (cleanup_arg)
-		strvec_pushf(&cmd.args, "--cleanup=%s", cleanup_arg);
+		strvec_pushf(&cmd.मगा_कातविरान, "--cleanup=%s", cleanup_arg);
 	if (opt_ff)
-		strvec_push(&cmd.args, opt_ff);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_ff);
 	if (opt_verify)
-		strvec_push(&cmd.args, opt_verify);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_verify);
 	if (opt_verify_signatures)
-		strvec_push(&cmd.args, opt_verify_signatures);
-	strvec_pushv(&cmd.args, opt_strategies.v);
-	strvec_pushv(&cmd.args, opt_strategy_opts.v);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_verify_signatures);
+	strvec_pushv(&cmd.मगा_कातविरान, opt_strategies.v);
+	strvec_pushv(&cmd.मगा_कातविरान, opt_strategy_opts.v);
 	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_gpg_sign);
 	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--no-autostash");
 	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--autostash");
 	if (opt_allow_unrelated_histories > 0)
-		strvec_push(&cmd.args, "--allow-unrelated-histories");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--allow-unrelated-histories");
 
-	strvec_push(&cmd.args, "FETCH_HEAD");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "FETCH_HEAD");
 	cmd.git_cmd = 1;
 	return run_command(&cmd);
 }
@@ -664,7 +664,7 @@ static int get_rebase_fork_point(struct object_id *fork_point, const char *repo,
 	if (!remote_branch)
 		return -1;
 
-	strvec_pushl(&cp.args, "merge-base", "--fork-point",
+	strvec_pushl(&cp.मगा_कातविरान, "merge-base", "--fork-point",
 		     remote_branch, curr_branch->name, NULL);
 	cp.no_stdin = 1;
 	cp.no_stderr = 1;
@@ -694,12 +694,12 @@ static int get_octopus_merge_base(struct object_id *merge_base,
 {
 	struct commit_list *revs = NULL, *result = NULL;
 
-	commit_list_insert(lookup_commit_reference(the_repository, curr_head),
+	commit_list_इसिंगित(lookup_commit_reference(the_repository, curr_head),
 			   &revs);
-	commit_list_insert(lookup_commit_reference(the_repository, merge_head),
+	commit_list_इसिंगित(lookup_commit_reference(the_repository, merge_head),
 			   &revs);
 	if (!is_null_oid(fork_point))
-		commit_list_insert(lookup_commit_reference(the_repository, fork_point),
+		commit_list_इसिंगित(lookup_commit_reference(the_repository, fork_point),
 				   &revs);
 
 	if (get_octopus_merge_bases(revs, &result) < 0)
@@ -752,36 +752,36 @@ static int run_rebase(const struct object_id *newbase,
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
-	strvec_push(&cmd.args, "rebase");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "rebase");
 
 	/* Shared options */
-	argv_push_verbosity(&cmd.args);
+	argv_इतुलाक_verbosity(&cmd.मगा_कातविरान);
 
 	/* Options passed to git-rebase */
 	if (opt_rebase == REBASE_MERGES)
-		strvec_push(&cmd.args, "--rebase-merges");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--rebase-merges");
 	else if (opt_rebase == REBASE_INTERACTIVE)
-		strvec_push(&cmd.args, "--interactive");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--interactive");
 	if (opt_diffstat)
-		strvec_push(&cmd.args, opt_diffstat);
-	strvec_pushv(&cmd.args, opt_strategies.v);
-	strvec_pushv(&cmd.args, opt_strategy_opts.v);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_diffstat);
+	strvec_pushv(&cmd.मगा_कातविरान, opt_strategies.v);
+	strvec_pushv(&cmd.मगा_कातविरान, opt_strategy_opts.v);
 	if (opt_gpg_sign)
-		strvec_push(&cmd.args, opt_gpg_sign);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_gpg_sign);
 	if (opt_signoff)
-		strvec_push(&cmd.args, opt_signoff);
+		strvec_इतुलाक(&cmd.मगा_कातविरान, opt_signoff);
 	if (opt_autostash == 0)
-		strvec_push(&cmd.args, "--no-autostash");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--no-autostash");
 	else if (opt_autostash == 1)
-		strvec_push(&cmd.args, "--autostash");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "--autostash");
 	if (opt_verify_signatures &&
 	    !strcmp(opt_verify_signatures, "--verify-signatures"))
 		warning(_("ignoring --verify-signatures for rebase"));
 
-	strvec_push(&cmd.args, "--onto");
-	strvec_push(&cmd.args, oid_to_hex(newbase));
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "--onto");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, oid_to_hex(newbase));
 
-	strvec_push(&cmd.args, oid_to_hex(upstream));
+	strvec_इतुलाक(&cmd.मगा_कातविरान, oid_to_hex(upstream));
 
 	cmd.git_cmd = 1;
 	return run_command(&cmd);
@@ -805,7 +805,7 @@ static int get_can_ff(struct object_id *orig_head,
 	merge_head = lookup_commit_reference(the_repository, orig_merge_head);
 	if (!merge_head)
 		return 0;
-	commit_list_insert(head, &list);
+	commit_list_इसिंगित(head, &list);
 	ret = repo_is_descendant_of(the_repository, merge_head, list);
 	commit_list_free(list);
 	if (ret < 0)
@@ -834,7 +834,7 @@ static int already_up_to_date(struct object_id *orig_head,
 		theirs = lookup_commit_reference(the_repository, &merge_heads->oid[i]);
 		if (!theirs)
 			return 0;
-		commit_list_insert(theirs, &list);
+		commit_list_इसिंगित(theirs, &list);
 		ok = repo_is_descendant_of(the_repository, ours, list);
 		commit_list_free(list);
 		if (ok < 0)
@@ -1084,7 +1084,7 @@ int cmd_pull(int argc,
 			die(_("Updating an unborn branch with changes added to the index."));
 
 		if (!opt_autostash)
-			require_clean_work_tree(the_repository,
+			require_clean_work_पुनो(the_repository,
 				N_("pull with rebase"),
 				_("Please commit or stash them."), 1, 0);
 

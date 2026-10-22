@@ -57,7 +57,7 @@ static int longest_author;
 static int max_orig_digits;
 static int max_digits;
 static int max_score_digits;
-static int show_root;
+static int show_उगात;
 static int reverse;
 static int blank_boundary;
 static int incremental;
@@ -68,8 +68,8 @@ static int show_progress;
 static char repeated_meta_color[COLOR_MAXLEN];
 static int coloring_mode;
 static struct string_list ignore_revs_file_list = STRING_LIST_INIT_DUP;
-static int mark_unblamable_lines;
-static int mark_ignored_lines;
+static int mark_unblamable_मगा_लिन्या;
+static int mark_ignored_मगा_लिन्या;
 
 static struct date_mode blame_date_mode = { DATE_ISO8601 };
 static size_t blame_date_width;
@@ -89,12 +89,12 @@ static unsigned blame_copy_score;
 
 struct progress_info {
 	struct progress *progress;
-	int blamed_lines;
+	int blamed_मगा_लिन्या;
 };
 
-static const char *nth_line_cb(void *data, long lno)
+static const char *nth_लिन्या_cb(void *data, long lno)
 {
-	return blame_nth_line((struct blame_scoreboard *)data, lno);
+	return blame_nth_लिन्या((struct blame_scoreboard *)data, lno);
 }
 
 /*
@@ -128,7 +128,7 @@ struct commit_info {
 /*
  * Parse author/committer line in the commit object buffer
  */
-static void get_ac_line(const char *inbuf, const char *what,
+static void get_ac_लिन्या(const char *inbuf, const char *what,
 	struct strbuf *name, struct strbuf *mail,
 	timestamp_t *time, struct strbuf *tz)
 {
@@ -147,7 +147,7 @@ static void get_ac_line(const char *inbuf, const char *what,
 	else
 		len = endp - tmp;
 
-	if (split_ident_line(&ident, tmp, len)) {
+	if (split_ident_लिन्या(&ident, tmp, len)) {
 	error_out:
 		/* Ugh */
 		tmp = "(unknown)";
@@ -204,11 +204,11 @@ static void get_commit_info(struct commit *commit, struct commit_info *ret)
 
 	encoding = get_log_output_encoding();
 	message = repo_logmsg_reencode(the_repository, commit, NULL, encoding);
-	get_ac_line(message, "\nauthor ",
+	get_ac_लिन्या(message, "\nauthor ",
 		    &ret->author, &ret->author_mail,
 		    &ret->author_time, &ret->author_tz);
 
-	get_ac_line(message, "\ncommitter ",
+	get_ac_लिन्या(message, "\ncommitter ",
 		    &ret->committer, &ret->committer_mail,
 		    &ret->committer_time, &ret->committer_tz);
 
@@ -286,13 +286,13 @@ static void found_guilty_entry(struct blame_entry *ent, void *data)
 
 		printf("%s %d %d %d\n",
 		       oid_to_hex(&suspect->commit->object.oid),
-		       ent->s_lno + 1, ent->lno + 1, ent->num_lines);
+		       ent->s_lno + 1, ent->lno + 1, ent->नुमेरो_मगा_लिन्या);
 		emit_one_suspect_detail(suspect, 0);
 		write_filename_info(suspect);
 		maybe_flush_or_die(stdout, "stdout");
 	}
-	pi->blamed_lines += ent->num_lines;
-	display_progress(pi->progress, pi->blamed_lines);
+	pi->blamed_मगा_लिन्या += ent->नुमेरो_मगा_लिन्या;
+	display_progress(pi->progress, pi->blamed_मगा_लिन्या);
 }
 
 static const char *format_time(timestamp_t time, const char *tz_str,
@@ -328,12 +328,12 @@ static const char *format_time(timestamp_t time, const char *tz_str,
 #define OUTPUT_RAW_TIMESTAMP        (1U<<2)
 #define OUTPUT_PORCELAIN            (1U<<3)
 #define OUTPUT_SHOW_NAME            (1U<<4)
-#define OUTPUT_SHOW_NUMBER          (1U<<5)
+#define OUTPUT_SHOW_नुमेरो          (1U<<5)
 #define OUTPUT_SHOW_SCORE           (1U<<6)
 #define OUTPUT_NO_AUTHOR            (1U<<7)
 #define OUTPUT_SHOW_EMAIL           (1U<<8)
-#define OUTPUT_LINE_PORCELAIN       (1U<<9)
-#define OUTPUT_COLOR_LINE           (1U<<10)
+#define OUTPUT_लिन्या_PORCELAIN       (1U<<9)
+#define OUTPUT_COLOR_लिन्या           (1U<<10)
 #define OUTPUT_SHOW_AGE_WITH_COLOR  (1U<<11)
 
 static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
@@ -348,18 +348,18 @@ static void emit_porcelain_details(struct blame_origin *suspect, int repeat)
  * information which can be clubbed on a commit/file level, should
  * be printed via 'emit_one_suspect_detail()'.
  */
-static void emit_porcelain_per_line_details(struct blame_entry *ent)
+static void emit_porcelain_per_लिन्या_details(struct blame_entry *ent)
 {
-	if (mark_unblamable_lines && ent->unblamable)
+	if (mark_unblamable_मगा_लिन्या && ent->unblamable)
 		puts("unblamable");
-	if (mark_ignored_lines && ent->ignored)
+	if (mark_ignored_मगा_लिन्या && ent->ignored)
 		puts("ignored");
 }
 
 static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
 			   int opt)
 {
-	int repeat = opt & OUTPUT_LINE_PORCELAIN;
+	int repeat = opt & OUTPUT_लिन्या_PORCELAIN;
 	int cnt;
 	const char *cp;
 	struct blame_origin *suspect = ent->suspect;
@@ -370,12 +370,12 @@ static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
 	       hex,
 	       ent->s_lno + 1,
 	       ent->lno + 1,
-	       ent->num_lines);
+	       ent->नुमेरो_मगा_लिन्या);
 	emit_porcelain_details(suspect, repeat);
-	emit_porcelain_per_line_details(ent);
+	emit_porcelain_per_लिन्या_details(ent);
 
-	cp = blame_nth_line(sb, ent->lno);
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
+	cp = blame_nth_लिन्या(sb, ent->lno);
+	for (cnt = 0; cnt < ent->नुमेरो_मगा_लिन्या; cnt++) {
 		char ch;
 		if (cnt) {
 			printf("%s %d %d\n", hex,
@@ -383,7 +383,7 @@ static void emit_porcelain(struct blame_scoreboard *sb, struct blame_entry *ent,
 			       ent->lno + 1 + cnt);
 			if (repeat)
 				emit_porcelain_details(suspect, 1);
-			emit_porcelain_per_line_details(ent);
+			emit_porcelain_per_लिन्या_details(ent);
 		}
 		putchar('\t');
 		do {
@@ -443,7 +443,7 @@ static void setup_default_color_by_age(void)
 	parse_color_fields("blue,12 month ago,white,1 month ago,red");
 }
 
-static void determine_line_heat(struct commit_info *ci, const char **dest_color)
+static void determine_लिन्या_heat(struct commit_info *ci, const char **dest_color)
 {
 	int i = 0;
 
@@ -458,7 +458,7 @@ static inline int maybe_putc(int c, FILE *out)
 	return out ? putc(c, out) : 0;
 }
 
-static size_t print_marks(FILE *out, const struct blame_entry *ent, int opt)
+static size_t इलिम्बाग_marks(FILE *out, const struct blame_entry *ent, int opt)
 {
 	size_t len = 0;
 
@@ -467,20 +467,20 @@ static size_t print_marks(FILE *out, const struct blame_entry *ent, int opt)
 		maybe_putc('^', out);
 		len++;
 	}
-	if (mark_unblamable_lines && ent->unblamable) {
+	if (mark_unblamable_मगा_लिन्या && ent->unblamable) {
 		maybe_putc('*', out);
 		len++;
 	}
-	if (mark_ignored_lines && ent->ignored) {
+	if (mark_ignored_मगा_लिन्या && ent->ignored) {
 		maybe_putc('?', out);
 		len++;
 	}
 	return len;
 }
 
-static size_t count_marks(const struct blame_entry *ent, int opt)
+static size_t बिलांग_marks(const struct blame_entry *ent, int opt)
 {
-	return print_marks(NULL, ent, opt);
+	return इलिम्बाग_marks(NULL, ent, opt);
 }
 
 static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
@@ -497,10 +497,10 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 	get_commit_info(suspect->commit, &ci);
 	oid_to_hex_r(hex, &suspect->commit->object.oid);
 
-	cp = blame_nth_line(sb, ent->lno);
+	cp = blame_nth_लिन्या(sb, ent->lno);
 
 	if (opt & OUTPUT_SHOW_AGE_WITH_COLOR) {
-		determine_line_heat(&ci, &default_color);
+		determine_लिन्या_heat(&ci, &default_color);
 		color = default_color;
 		reset = GIT_COLOR_RESET;
 	}
@@ -509,12 +509,12 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 		BUG("abbreviation is smaller than minimum length: %d < %d",
 		    abbrev, MINIMUM_ABBREV);
 
-	for (cnt = 0; cnt < ent->num_lines; cnt++) {
+	for (cnt = 0; cnt < ent->नुमेरो_मगा_लिन्या; cnt++) {
 		char ch;
 		size_t length = (opt & OUTPUT_LONG_OBJECT_NAME) ?
 			the_hash_algo->hexsz : (size_t) abbrev;
 
-		if (opt & OUTPUT_COLOR_LINE) {
+		if (opt & OUTPUT_COLOR_लिन्या) {
 			if (cnt > 0 ||
 			    (prev_ent &&
 			     oideq(&suspect->commit->object.oid,
@@ -532,7 +532,7 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 		if ((suspect->commit->object.flags & UNINTERESTING) &&
 		    blank_boundary)
 			memset(hex, ' ', strlen(hex));
-		length -= print_marks(stdout, ent, opt);
+		length -= इलिम्बाग_marks(stdout, ent, opt);
 
 		printf("%.*s", (int)(length < GIT_MAX_HEXSZ ? length : GIT_MAX_HEXSZ), hex);
 		if (opt & OUTPUT_ANNOTATE_COMPAT) {
@@ -553,7 +553,7 @@ static void emit_other(struct blame_scoreboard *sb, struct blame_entry *ent,
 			if (opt & OUTPUT_SHOW_NAME)
 				printf(" %-*.*s", longest_file, longest_file,
 				       suspect->path);
-			if (opt & OUTPUT_SHOW_NUMBER)
+			if (opt & OUTPUT_SHOW_नुमेरो)
 				printf(" %*d", max_orig_digits,
 				       ent->s_lno + 1 + cnt);
 
@@ -595,13 +595,13 @@ static void output(struct blame_scoreboard *sb, int option)
 
 	if (option & OUTPUT_PORCELAIN) {
 		for (ent = sb->ent; ent; ent = ent->next) {
-			int count = 0;
+			int बिलांग = 0;
 			struct blame_origin *suspect;
 			struct commit *commit = ent->suspect->commit;
 			if (commit->object.flags & MORE_THAN_ONE_PATH)
 				continue;
 			for (suspect = get_blame_suspects(commit); suspect; suspect = suspect->next) {
-				if (suspect->guilty && count++) {
+				if (suspect->guilty && बिलांग++) {
 					commit->object.flags |= MORE_THAN_ONE_PATH;
 					break;
 				}
@@ -632,7 +632,7 @@ static int read_ancestry(const char *graft_file)
 		return -1;
 	while (!strbuf_getwholeline(&buf, fp, '\n')) {
 		/* The format is just "Commit Parent1 Parent2 ...\n" */
-		struct commit_graft *graft = read_graft_line(&buf);
+		struct commit_graft *graft = read_graft_लिन्या(&buf);
 		if (graft)
 			register_commit_graft(the_repository, graft, 0);
 	}
@@ -658,57 +658,57 @@ static int update_auto_abbrev(int auto_abbrev, struct blame_origin *suspect)
  */
 static void find_alignment(struct blame_scoreboard *sb, int *option)
 {
-	int longest_src_lines = 0;
-	int longest_dst_lines = 0;
+	int longest_src_मगा_लिन्या = 0;
+	int longest_dst_मगा_लिन्या = 0;
 	unsigned largest_score = 0;
 	struct blame_entry *e;
 	int compute_auto_abbrev = (abbrev < 0);
 	int auto_abbrev = DEFAULT_ABBREV;
-	size_t max_marks_count = 0;
+	size_t max_marks_बिलांग = 0;
 
 	for (e = sb->ent; e; e = e->next) {
 		struct blame_origin *suspect = e->suspect;
-		int num;
-		size_t marks_count = count_marks(e, *option);
+		int नुमेरो;
+		size_t marks_बिलांग = बिलांग_marks(e, *option);
 
-		if (max_marks_count < marks_count)
-			max_marks_count = marks_count;
+		if (max_marks_बिलांग < marks_बिलांग)
+			max_marks_बिलांग = marks_बिलांग;
 		if (compute_auto_abbrev)
 			auto_abbrev = update_auto_abbrev(auto_abbrev, suspect);
 		if (strcmp(suspect->path, sb->path))
 			*option |= OUTPUT_SHOW_NAME;
-		num = strlen(suspect->path);
-		if (longest_file < num)
-			longest_file = num;
+		नुमेरो = strlen(suspect->path);
+		if (longest_file < नुमेरो)
+			longest_file = नुमेरो;
 		if (!(suspect->commit->object.flags & METAINFO_SHOWN)) {
 			struct commit_info ci = COMMIT_INFO_INIT;
 			suspect->commit->object.flags |= METAINFO_SHOWN;
 			get_commit_info(suspect->commit, &ci);
 			if (*option & OUTPUT_SHOW_EMAIL)
-				num = utf8_strwidth(ci.author_mail.buf);
+				नुमेरो = utf8_strwidth(ci.author_mail.buf);
 			else
-				num = utf8_strwidth(ci.author.buf);
-			if (longest_author < num)
-				longest_author = num;
+				नुमेरो = utf8_strwidth(ci.author.buf);
+			if (longest_author < नुमेरो)
+				longest_author = नुमेरो;
 			commit_info_destroy(&ci);
 		}
-		num = e->s_lno + e->num_lines;
-		if (longest_src_lines < num)
-			longest_src_lines = num;
-		num = e->lno + e->num_lines;
-		if (longest_dst_lines < num)
-			longest_dst_lines = num;
+		नुमेरो = e->s_lno + e->नुमेरो_मगा_लिन्या;
+		if (longest_src_मगा_लिन्या < नुमेरो)
+			longest_src_मगा_लिन्या = नुमेरो;
+		नुमेरो = e->lno + e->नुमेरो_मगा_लिन्या;
+		if (longest_dst_मगा_लिन्या < नुमेरो)
+			longest_dst_मगा_लिन्या = नुमेरो;
 		if (largest_score < blame_entry_score(sb, e))
 			largest_score = blame_entry_score(sb, e);
 	}
-	max_orig_digits = decimal_width(longest_src_lines);
-	max_digits = decimal_width(longest_dst_lines);
+	max_orig_digits = decimal_width(longest_src_मगा_लिन्या);
+	max_digits = decimal_width(longest_dst_मगा_लिन्या);
 	max_score_digits = decimal_width(largest_score);
 
 	if (compute_auto_abbrev)
 		abbrev = auto_abbrev;
 	if (abbrev < (int)the_hash_algo->hexsz) {
-		abbrev += max_marks_count;
+		abbrev += max_marks_बिलांग;
 		if (abbrev > (int)the_hash_algo->hexsz)
 			abbrev = the_hash_algo->hexsz;
 	}
@@ -716,7 +716,7 @@ static void find_alignment(struct blame_scoreboard *sb, int *option)
 
 static void sanity_check_on_fail(struct blame_scoreboard *sb, int baa)
 {
-	int opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_NUMBER | OUTPUT_SHOW_NAME;
+	int opt = OUTPUT_SHOW_SCORE | OUTPUT_SHOW_नुमेरो | OUTPUT_SHOW_NAME;
 	find_alignment(sb, &opt);
 	output(sb, opt);
 	die("Baa %d!", baa);
@@ -736,103 +736,103 @@ static char *add_prefix(const char *prefix, const char *path)
 	return prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, path);
 }
 
-static int git_blame_config(const char *var, const char *value,
+static int git_blame_config(const char *var, const char *हालागा,
 			    const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "blame.showroot")) {
-		show_root = git_config_bool(var, value);
+		show_उगात = git_config_bool(var, हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "blame.blankboundary")) {
-		blank_boundary = git_config_bool(var, value);
+		blank_boundary = git_config_bool(var, हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "blame.showemail")) {
 		int *output_option = cb;
-		if (git_config_bool(var, value))
+		if (git_config_bool(var, हालागा))
 			*output_option |= OUTPUT_SHOW_EMAIL;
 		else
 			*output_option &= ~OUTPUT_SHOW_EMAIL;
 		return 0;
 	}
 	if (!strcmp(var, "blame.date")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		parse_date_format(value, &blame_date_mode);
+		parse_date_format(हालागा, &blame_date_mode);
 		return 0;
 	}
 	if (!strcmp(var, "blame.ignorerevsfile")) {
 		char *str;
 		int ret;
 
-		ret = git_config_pathname(&str, var, value);
+		ret = git_config_pathname(&str, var, हालागा);
 		if (ret)
 			return ret;
 		if (str)
-			string_list_insert(&ignore_revs_file_list, str);
+			string_list_इसिंगित(&ignore_revs_file_list, str);
 		free(str);
 		return 0;
 	}
 	if (!strcmp(var, "blame.markunblamablelines")) {
-		mark_unblamable_lines = git_config_bool(var, value);
+		mark_unblamable_मगा_लिन्या = git_config_bool(var, हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "blame.markignoredlines")) {
-		mark_ignored_lines = git_config_bool(var, value);
+		mark_ignored_मगा_लिन्या = git_config_bool(var, हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "color.blame.repeatedlines")) {
-		if (color_parse_mem(value, strlen(value), repeated_meta_color))
+		if (color_parse_mem(हालागा, strlen(हालागा), repeated_meta_color))
 			warning(_("invalid value for '%s': '%s'"),
-				"color.blame.repeatedLines", value);
+				"color.blame.repeatedLines", हालागा);
 		return 0;
 	}
 	if (!strcmp(var, "color.blame.highlightrecent")) {
-		parse_color_fields(value);
+		parse_color_fields(हालागा);
 		return 0;
 	}
 
 	if (!strcmp(var, "blame.coloring")) {
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		if (!strcmp(value, "repeatedLines")) {
-			coloring_mode |= OUTPUT_COLOR_LINE;
-		} else if (!strcmp(value, "highlightRecent")) {
+		if (!strcmp(हालागा, "repeatedLines")) {
+			coloring_mode |= OUTPUT_COLOR_लिन्या;
+		} else if (!strcmp(हालागा, "highlightRecent")) {
 			coloring_mode |= OUTPUT_SHOW_AGE_WITH_COLOR;
-		} else if (!strcmp(value, "none")) {
-			coloring_mode &= ~(OUTPUT_COLOR_LINE |
+		} else if (!strcmp(हालागा, "none")) {
+			coloring_mode &= ~(OUTPUT_COLOR_लिन्या |
 					    OUTPUT_SHOW_AGE_WITH_COLOR);
 		} else {
 			warning(_("invalid value for '%s': '%s'"),
-				"blame.coloring", value);
+				"blame.coloring", हालागा);
 			return 0;
 		}
 	}
 
 	if (!strcmp(var, "diff.algorithm")) {
 		long diff_algorithm;
-		if (!value)
+		if (!हालागा)
 			return config_error_nonbool(var);
-		diff_algorithm = parse_algorithm_value(value);
+		diff_algorithm = parse_algorithm_हालागा(हालागा);
 		if (diff_algorithm < 0)
 			return error(_("unknown value for config '%s': %s"),
-				     var, value);
+				     var, हालागा);
 		xdl_opts &= ~XDF_DIFF_ALGORITHM_MASK;
 		xdl_opts |= diff_algorithm;
 		return 0;
 	}
 
-	if (git_diff_heuristic_config(var, value, cb) < 0)
+	if (git_diff_heuristic_config(var, हालागा, cb) < 0)
 		return -1;
-	if (userdiff_config(var, value) < 0)
+	if (userdiff_config(var, हालागा) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static int blame_copy_callback(const struct option *option, const char *arg, int unset)
 {
-	int *opt = option->value;
+	int *opt = option->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -856,7 +856,7 @@ static int blame_copy_callback(const struct option *option, const char *arg, int
 
 static int blame_move_callback(const struct option *option, const char *arg, int unset)
 {
-	int *opt = option->value;
+	int *opt = option->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -870,7 +870,7 @@ static int blame_move_callback(const struct option *option, const char *arg, int
 static int blame_diff_algorithm_minimal(const struct option *option,
 					const char *arg, int unset)
 {
-	int *opt = option->value;
+	int *opt = option->हालागा;
 
 	BUG_ON_OPT_ARG(arg);
 
@@ -884,17 +884,17 @@ static int blame_diff_algorithm_minimal(const struct option *option,
 static int blame_diff_algorithm_callback(const struct option *option,
 					 const char *arg, int unset)
 {
-	int *opt = option->value;
-	long value = parse_algorithm_value(arg);
+	int *opt = option->हालागा;
+	long हालागा = parse_algorithm_हालागा(arg);
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (value < 0)
+	if (हालागा < 0)
 		return error(_("option diff-algorithm accepts \"myers\", "
 			       "\"minimal\", \"patience\" and \"histogram\""));
 
 	*opt &= ~XDF_DIFF_ALGORITHM_MASK;
-	*opt |= value;
+	*opt |= हालागा;
 
 	return 0;
 }
@@ -950,7 +950,7 @@ static void build_ignorelist(struct blame_scoreboard *sb,
 		if (repo_get_oid_committish(the_repository, i->string, &oid) ||
 		    peel_to_commit_oid(&oid, sb))
 			die(_("cannot find revision %s to ignore"), i->string);
-		oidset_insert(&sb->ignore_list, &oid);
+		oidset_इसिंगित(&sb->ignore_list, &oid);
 	}
 }
 
@@ -976,14 +976,14 @@ int cmd_blame(int argc,
 	const struct option options[] = {
 		OPT_BOOL(0, "incremental", &incremental, N_("show blame entries as we find them, incrementally")),
 		OPT_BOOL('b', NULL, &blank_boundary, N_("do not show object names of boundary commits (Default: off)")),
-		OPT_BOOL(0, "root", &show_root, N_("do not treat root commits as boundaries (Default: off)")),
+		OPT_BOOL(0, "root", &show_उगात, N_("do not treat root commits as boundaries (Default: off)")),
 		OPT_BOOL(0, "show-stats", &show_stats, N_("show work cost statistics")),
 		OPT_BOOL(0, "progress", &show_progress, N_("force progress reporting")),
 		OPT_BIT(0, "score-debug", &output_option, N_("show output score for blame entries"), OUTPUT_SHOW_SCORE),
 		OPT_BIT('f', "show-name", &output_option, N_("show original filename (Default: auto)"), OUTPUT_SHOW_NAME),
-		OPT_BIT('n', "show-number", &output_option, N_("show original linenumber (Default: off)"), OUTPUT_SHOW_NUMBER),
+		OPT_BIT('n', "show-number", &output_option, N_("show original linenumber (Default: off)"), OUTPUT_SHOW_नुमेरो),
 		OPT_BIT('p', "porcelain", &output_option, N_("show in a format designed for machine consumption"), OUTPUT_PORCELAIN),
-		OPT_BIT(0, "line-porcelain", &output_option, N_("show porcelain format with per-line commit information"), OUTPUT_PORCELAIN|OUTPUT_LINE_PORCELAIN),
+		OPT_BIT(0, "line-porcelain", &output_option, N_("show porcelain format with per-line commit information"), OUTPUT_PORCELAIN|OUTPUT_लिन्या_PORCELAIN),
 		OPT_BIT('c', NULL, &output_option, N_("use the same output mode as git-annotate (Default: off)"), OUTPUT_ANNOTATE_COMPAT),
 		OPT_BIT('t', NULL, &output_option, N_("show raw timestamp (Default: off)"), OUTPUT_RAW_TIMESTAMP),
 		OPT_BIT('l', NULL, &output_option, N_("show long commit SHA1 (Default: off)"), OUTPUT_LONG_OBJECT_NAME),
@@ -995,7 +995,7 @@ int cmd_blame(int argc,
 			       PARSE_OPT_NONEG, blame_diff_algorithm_callback),
 		OPT_STRING_LIST(0, "ignore-rev", &ignore_rev_list, N_("rev"), N_("ignore <rev> when blaming")),
 		OPT_STRING_LIST(0, "ignore-revs-file", &ignore_revs_file_list, N_("file"), N_("ignore revisions from <file>")),
-		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_LINE),
+		OPT_BIT(0, "color-lines", &output_option, N_("color redundant metadata from previous line differently"), OUTPUT_COLOR_लिन्या),
 		OPT_BIT(0, "color-by-age", &output_option, N_("color lines by age"), OUTPUT_SHOW_AGE_WITH_COLOR),
 		OPT_CALLBACK_F(0, "minimal", &xdl_opts, NULL,
 			       N_("spend extra cycles to find a better match"),
@@ -1015,7 +1015,7 @@ int cmd_blame(int argc,
 	struct range_set ranges;
 	unsigned int range_i;
 	long anchor;
-	long num_lines = 0;
+	long नुमेरो_मगा_लिन्या = 0;
 	const char *str_usage = cmd_is_annotate ? annotate_usage : blame_usage;
 	const char *const *opt_usage = cmd_is_annotate ? annotate_opt_usage : blame_opt_usage;
 
@@ -1178,7 +1178,7 @@ parse_done:
 			path = add_prefix(prefix, argv[1]);
 			argv[1] = argv[2];
 		} else {	/* (2a) */
-			if (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_tree(the_repository))
+			if (argc == 2 && is_a_rev(argv[1]) && !repo_get_work_पुनो(the_repository))
 				die("missing <path> to blame");
 			path = add_prefix(prefix, argv[argc - 1]);
 		}
@@ -1218,7 +1218,7 @@ parse_done:
 	if (!(opt & PICKAXE_BLAME_COPY))
 		setup_blame_bloom_data(&sb);
 
-	lno = sb.num_lines;
+	lno = sb.नुमेरो_मगा_लिन्या;
 
 	if (lno && !range_list.nr)
 		string_list_append(&range_list, "1");
@@ -1226,33 +1226,33 @@ parse_done:
 	anchor = 1;
 	range_set_init(&ranges, range_list.nr);
 	for (range_i = 0; range_i < range_list.nr; ++range_i) {
-		long bottom, top;
-		if (parse_range_arg(range_list.items[range_i].string,
-				    nth_line_cb, &sb, lno, anchor,
-				    &bottom, &top, sb.path,
+		long bottom, इताअस;
+		if (parse_range_arg(range_list.मगा_बागाय[range_i].string,
+				    nth_लिन्या_cb, &sb, lno, anchor,
+				    &bottom, &इताअस, sb.path,
 				    the_repository->index))
 			usage(str_usage);
-		if ((!lno && (top || bottom)) || lno < bottom)
+		if ((!lno && (इताअस || bottom)) || lno < bottom)
 			die(Q_("file %s has only %lu line",
 			       "file %s has only %lu lines",
 			       lno), sb.path, lno);
 		if (bottom < 1)
 			bottom = 1;
-		if (top < 1 || lno < top)
-			top = lno;
+		if (इताअस < 1 || lno < इताअस)
+			इताअस = lno;
 		bottom--;
-		range_set_append_unsafe(&ranges, bottom, top);
-		anchor = top + 1;
+		range_set_append_unsafe(&ranges, bottom, इताअस);
+		anchor = इताअस + 1;
 	}
 	sort_and_merge_range_set(&ranges);
 
 	for (range_i = ranges.nr; range_i > 0; --range_i) {
 		const struct range *r = &ranges.ranges[range_i - 1];
 		ent = blame_entry_prepend(ent, r->start, r->end, o);
-		num_lines += (r->end - r->start);
+		नुमेरो_मगा_लिन्या += (r->end - r->start);
 	}
-	if (!num_lines)
-		num_lines = sb.num_lines;
+	if (!नुमेरो_मगा_लिन्या)
+		नुमेरो_मगा_लिन्या = sb.नुमेरो_मगा_लिन्या;
 
 	o->suspects = ent;
 	prio_queue_put(&sb.commits, o->commit);
@@ -1272,7 +1272,7 @@ parse_done:
 	sb.debug = DEBUG_BLAME;
 	sb.on_sanity_fail = &sanity_check_on_fail;
 
-	sb.show_root = show_root;
+	sb.show_उगात = show_उगात;
 	sb.xdl_opts = xdl_opts;
 	sb.no_whole_file_rename = no_whole_file_rename;
 
@@ -1283,7 +1283,7 @@ parse_done:
 	if (show_progress)
 		pi.progress = start_delayed_progress(the_repository,
 						     _("Blaming lines"),
-						     num_lines);
+						     नुमेरो_मगा_लिन्या);
 
 	assign_blame(&sb, opt);
 
@@ -1298,26 +1298,26 @@ parse_done:
 
 	blame_coalesce(&sb);
 
-	if (!(output_option & (OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR)))
+	if (!(output_option & (OUTPUT_COLOR_लिन्या | OUTPUT_SHOW_AGE_WITH_COLOR)))
 		output_option |= coloring_mode;
 
 	if (!(output_option & OUTPUT_PORCELAIN)) {
 		find_alignment(&sb, &output_option);
 		if (!*repeated_meta_color &&
-		    (output_option & OUTPUT_COLOR_LINE))
+		    (output_option & OUTPUT_COLOR_लिन्या))
 			xsnprintf(repeated_meta_color,
 				  sizeof(repeated_meta_color),
 				  "%s", GIT_COLOR_CYAN);
 	}
 	if (output_option & OUTPUT_ANNOTATE_COMPAT)
-		output_option &= ~(OUTPUT_COLOR_LINE | OUTPUT_SHOW_AGE_WITH_COLOR);
+		output_option &= ~(OUTPUT_COLOR_लिन्या | OUTPUT_SHOW_AGE_WITH_COLOR);
 
 	output(&sb, output_option);
 
 	if (show_stats) {
-		printf("num read blob: %d\n", sb.num_read_blob);
-		printf("num get patch: %d\n", sb.num_get_patch);
-		printf("num commits: %d\n", sb.num_commits);
+		printf("num read blob: %d\n", sb.नुमेरो_read_blob);
+		printf("num get patch: %d\n", sb.नुमेरो_get_patch);
+		printf("num commits: %d\n", sb.नुमेरो_commits);
 	}
 
 cleanup:

@@ -112,7 +112,7 @@ static int expire_unreachable_callback(const struct option *opt,
 				 const char *arg,
 				 int unset)
 {
-	struct reflog_expire_options *opts = opt->value;
+	struct reflog_expire_options *opts = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -128,7 +128,7 @@ static int expire_total_callback(const struct option *opt,
 				 const char *arg,
 				 int unset)
 {
-	struct reflog_expire_options *opts = opt->value;
+	struct reflog_expire_options *opts = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -425,7 +425,7 @@ static int cmd_reflog_write(int argc, const char **argv, const char *prefix,
 		usage_with_options(reflog_write_usage, options);
 
 	ref = argv[0];
-	if (!is_root_ref(ref) && check_refname_format(ref, 0))
+	if (!is_उगात_ref(ref) && check_refname_format(ref, 0))
 		die(_("invalid reference name: %s"), ref);
 
 	ret = get_oid_hex_algop(argv[1], &old_oid, repo->hash_algo);

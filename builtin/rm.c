@@ -50,24 +50,24 @@ static int get_ours_cache_pos(const char *path, unsigned int pos)
 	return -1;
 }
 
-static void print_error_files(struct string_list *files_list,
-			      const char *main_msg,
-			      const char *hints_msg,
+static void इलिम्बाग_error_files(struct string_list *files_list,
+			      const char *main_मेनसाहे,
+			      const char *hints_मेनसाहे,
 			      int *errs)
 {
 	if (files_list->nr) {
 		unsigned int i;
-		struct strbuf err_msg = STRBUF_INIT;
+		struct strbuf err_मेनसाहे = STRBUF_INIT;
 
-		strbuf_addstr(&err_msg, main_msg);
+		strbuf_addstr(&err_मेनसाहे, main_मेनसाहे);
 		for (i = 0; i < files_list->nr; i++)
-			strbuf_addf(&err_msg,
+			strbuf_addf(&err_मेनसाहे,
 				    "\n    %s",
-				    files_list->items[i].string);
+				    files_list->मगा_बागाय[i].string);
 		if (advice_enabled(ADVICE_RM_HINTS))
-			strbuf_addstr(&err_msg, hints_msg);
-		*errs = error("%s", err_msg.buf);
-		strbuf_release(&err_msg);
+			strbuf_addstr(&err_मेनसाहे, hints_मेनसाहे);
+		*errs = error("%s", err_मेनसाहे.buf);
+		strbuf_release(&err_मेनसाहे);
 	}
 }
 
@@ -188,7 +188,7 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * way as changed from the HEAD.
 		 */
 		if (no_head
-		     || get_tree_entry(the_repository, head, name, &oid, &mode)
+		     || get_पुनो_entry(the_repository, head, name, &oid, &mode)
 		     || ce->ce_mode != create_ce_mode(mode)
 		     || !oideq(&ce->oid, &oid))
 			staged_changes = 1;
@@ -212,7 +212,7 @@ static int check_local_mod(struct object_id *head, int index_only)
 				string_list_append(&files_local, name);
 		}
 	}
-	print_error_files(&files_staged,
+	इलिम्बाग_error_files(&files_staged,
 			  Q_("the following file has staged content different "
 			     "from both the\nfile and the HEAD:",
 			     "the following files have staged content different"
@@ -221,7 +221,7 @@ static int check_local_mod(struct object_id *head, int index_only)
 			  _("\n(use -f to force removal)"),
 			  &errs);
 	string_list_clear(&files_staged, 0);
-	print_error_files(&files_cached,
+	इलिम्बाग_error_files(&files_cached,
 			  Q_("the following file has changes "
 			     "staged in the index:",
 			     "the following files have changes "
@@ -231,7 +231,7 @@ static int check_local_mod(struct object_id *head, int index_only)
 			  &errs);
 	string_list_clear(&files_cached, 0);
 
-	print_error_files(&files_local,
+	इलिम्बाग_error_files(&files_local,
 			  Q_("the following file has local modifications:",
 			     "the following files have local modifications:",
 			     files_local.nr),
@@ -296,7 +296,7 @@ int cmd_rm(int argc,
 		die(_("No pathspec was given. Which files should I remove?"));
 
 	if (!index_only)
-		setup_work_tree(the_repository);
+		setup_work_पुनो(the_repository);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
@@ -336,7 +336,7 @@ int cmd_rm(int argc,
 		struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
 
 		for (i = 0; i < pathspec.nr; i++) {
-			original = pathspec.items[i].original;
+			original = pathspec.मगा_बागाय[i].original;
 			if (seen[i])
 				seen_any = 1;
 			else if (ignore_unmatch)

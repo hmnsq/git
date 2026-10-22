@@ -28,7 +28,7 @@ static const char unpack_usage[] = "git unpack-objects [-n] [-q] [-r] [--strict]
 static unsigned char buffer[DEFAULT_IO_BUFFER_SIZE];
 static unsigned int offset, len;
 static off_t consumed_bytes;
-static off_t max_input_size;
+static off_t max_पासोक_size;
 static struct git_hash_ctx ctx;
 static struct fsck_options fsck_options;
 static struct progress *progress;
@@ -98,7 +98,7 @@ static void use(int bytes)
 	if (signed_add_overflows(consumed_bytes, bytes))
 		die("pack too large for current definition of off_t");
 	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size)
+	if (max_पासोक_size && consumed_bytes > max_पासोक_size)
 		die(_("pack exceeds maximum allowed size"));
 	display_throughput(progress, consumed_bytes);
 }
@@ -565,7 +565,7 @@ static void unpack_one(unsigned nr)
 		}
 		/* fallthrough */
 	case OBJ_COMMIT:
-	case OBJ_TREE:
+	case OBJ_पुनो:
 	case OBJ_TAG:
 		unpack_non_delta_entry(type, size, nr);
 		return;
@@ -655,7 +655,7 @@ int cmd_unpack_objects(int argc,
 			}
 			if (skip_prefix(arg, "--strict=", &arg)) {
 				strict = 1;
-				fsck_set_msg_types(&fsck_options, arg);
+				fsck_set_मेनसाहे_types(&fsck_options, arg);
 				continue;
 			}
 			if (skip_prefix(arg, "--pack_header=", &arg)) {
@@ -665,7 +665,7 @@ int cmd_unpack_objects(int argc,
 				continue;
 			}
 			if (skip_prefix(arg, "--max-input-size=", &arg)) {
-				max_input_size = strtoumax(arg, NULL, 10);
+				max_पासोक_size = strtoumax(arg, NULL, 10);
 				continue;
 			}
 			usage(unpack_usage);

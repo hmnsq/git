@@ -77,12 +77,12 @@ static struct opts_multi_pack_index {
 static int parse_object_dir(const struct option *opt, const char *arg,
 			    int unset)
 {
-	char **value = opt->value;
-	free(*value);
+	char **हालागा = opt->हालागा;
+	free(*हालागा);
 	if (unset)
-		*value = xstrdup(the_repository->objects->source->path);
+		*हालागा = xstrdup(the_repository->objects->source->path);
 	else
-		*value = real_pathdup(arg, 1);
+		*हालागा = real_pathdup(arg, 1);
 	return 0;
 }
 
@@ -110,19 +110,19 @@ static struct option *add_common_options(struct option *prev)
 	return parse_options_concat(common_opts, prev);
 }
 
-static int git_multi_pack_index_write_config(const char *var, const char *value,
+static int git_multi_pack_index_write_config(const char *var, const char *हालागा,
 					     const struct config_context *ctx UNUSED,
 					     void *cb UNUSED)
 {
 	if (!strcmp(var, "pack.writebitmaphashcache")) {
-		if (git_config_bool(var, value))
+		if (git_config_bool(var, हालागा))
 			opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
 		else
 			opts.flags &= ~MIDX_WRITE_BITMAP_HASH_CACHE;
 	}
 
 	if (!strcmp(var, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(var, value))
+		if (git_config_bool(var, हालागा))
 			opts.flags |= MIDX_WRITE_BITMAP_LOOKUP_TABLE;
 		else
 			opts.flags &= ~MIDX_WRITE_BITMAP_LOOKUP_TABLE;

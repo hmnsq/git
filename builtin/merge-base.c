@@ -57,13 +57,13 @@ static struct commit *get_commit_reference(const char *arg)
 	return r;
 }
 
-static int handle_independent(int count, const char **args)
+static int handle_independent(int बिलांग, const char **मगा_कातविरान)
 {
 	struct commit_list *revs = NULL, *rev;
 	int i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	for (i = बिलांग - 1; i >= 0; i--)
+		commit_list_इसिंगित(get_commit_reference(मगा_कातविरान[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
@@ -77,14 +77,14 @@ static int handle_independent(int count, const char **args)
 	return 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+static int handle_octopus(int बिलांग, const char **मगा_कातविरान, int show_all)
 {
 	struct commit_list *revs = NULL;
 	struct commit_list *result = NULL, *rev;
 	int i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	for (i = बिलांग - 1; i >= 0; i--)
+		commit_list_इसिंगित(get_commit_reference(मगा_कातविरान[i]), &revs);
 
 	if (get_octopus_merge_bases(revs, &result) < 0) {
 		commit_list_free(revs);

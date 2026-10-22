@@ -135,15 +135,15 @@ static int refresh(struct repository *repo, int verbose, const struct pathspec *
 		      _("Unstaged changes after refreshing the index:"));
 	for (i = 0; i < pathspec->nr; i++) {
 		if (!seen[i]) {
-			const char *path = pathspec->items[i].original;
+			const char *path = pathspec->मगा_बागाय[i].original;
 
 			if (matches_skip_worktree(pathspec, i, &skip_worktree_seen) ||
 			    !path_in_sparse_checkout(path, repo->index)) {
 				string_list_append(&only_match_skip_worktree,
-						   pathspec->items[i].original);
+						   pathspec->मगा_बागाय[i].original);
 			} else {
 				die(_("pathspec '%s' did not match any files"),
-				    pathspec->items[i].original);
+				    pathspec->मगा_बागाय[i].original);
 			}
 		}
 	}
@@ -254,7 +254,7 @@ static int ignore_removal_cb(const struct option *opt, const char *arg, int unse
 	BUG_ON_OPT_ARG(arg);
 
 	/* if we are told to ignore, we are not adding removals */
-	*(int *)opt->value = !unset ? 0 : 1;
+	*(int *)opt->हालागा = !unset ? 0 : 1;
 	return 0;
 }
 
@@ -292,19 +292,19 @@ static struct option builtin_add_options[] = {
 	OPT_END(),
 };
 
-static int add_config(const char *var, const char *value,
+static int add_config(const char *var, const char *हालागा,
 		      const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "add.ignoreerrors") ||
 	    !strcmp(var, "add.ignore-errors")) {
-		ignore_add_errors = git_config_bool(var, value);
+		ignore_add_errors = git_config_bool(var, हालागा);
 		return 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
+	if (git_color_config(var, हालागा, cb) < 0)
 		return -1;
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static const char embedded_advice[] = N_(
@@ -411,7 +411,7 @@ static int add_resolved_files(struct repository *repo,
 		if (pathspec->nr && !ce_path_match(istate, ce, pathspec, NULL))
 			continue;
 		if (!unmerged_paths.nr ||
-		    strcmp(unmerged_paths.items[unmerged_paths.nr - 1].string, ce->name))
+		    strcmp(unmerged_paths.मगा_बागाय[unmerged_paths.nr - 1].string, ce->name))
 			string_list_append(&unmerged_paths, ce->name);
 	}
 
@@ -421,7 +421,7 @@ static int add_resolved_files(struct repository *repo,
 	}
 
 	for (i = 0; i < unmerged_paths.nr; i++) {
-		const char *path = unmerged_paths.items[i].string;
+		const char *path = unmerged_paths.मगा_बागाय[i].string;
 		struct stat st;
 
 		if (!lstat(path, &st) && S_ISREG(st.st_mode)) {
@@ -433,12 +433,12 @@ static int add_resolved_files(struct repository *repo,
 	if (unresolved_paths.nr) {
 		struct strbuf sb = STRBUF_INIT;
 		for (i = 0; i < unresolved_paths.nr; i++)
-			strbuf_addf(&sb, "\t%s\n", unresolved_paths.items[i].string);
+			strbuf_addf(&sb, "\t%s\n", unresolved_paths.मगा_बागाय[i].string);
 		die(_("the following paths still have conflict markers:\n%s"), sb.buf);
 	}
 
 	for (i = 0; i < unmerged_paths.nr; i++) {
-		const char *path = unmerged_paths.items[i].string;
+		const char *path = unmerged_paths.मगा_बागाय[i].string;
 		struct stat st;
 
 		if (lstat(path, &st)) {
@@ -622,9 +622,9 @@ int cmd_add(int argc,
 			       PATHSPEC_ATTR);
 
 		for (i = 0; i < pathspec.nr; i++) {
-			const char *path = pathspec.items[i].match;
+			const char *path = pathspec.मगा_बागाय[i].match;
 
-			if (pathspec.items[i].magic & PATHSPEC_EXCLUDE)
+			if (pathspec.मगा_बागाय[i].magic & PATHSPEC_EXCLUDE)
 				continue;
 			if (seen[i])
 				continue;
@@ -632,7 +632,7 @@ int cmd_add(int argc,
 			if (!include_sparse &&
 			    matches_skip_worktree(&pathspec, i, &skip_worktree_seen)) {
 				string_list_append(&only_match_skip_worktree,
-						   pathspec.items[i].original);
+						   pathspec.मगा_बागाय[i].original);
 				continue;
 			}
 
@@ -640,16 +640,16 @@ int cmd_add(int argc,
 			if (!path[0])
 				continue;
 
-			if ((pathspec.items[i].magic & (PATHSPEC_GLOB | PATHSPEC_ICASE)) ||
+			if ((pathspec.मगा_बागाय[i].magic & (PATHSPEC_GLOB | PATHSPEC_ICASE)) ||
 			    !file_exists(path)) {
 				if (ignore_missing) {
 					int dtype = DT_UNKNOWN;
 					if (is_excluded(&dir, repo->index, path, &dtype))
 						dir_add_ignored(&dir, repo->index,
-								path, pathspec.items[i].len);
+								path, pathspec.मगा_बागाय[i].len);
 				} else
 					die(_("pathspec '%s' did not match any files"),
-					    pathspec.items[i].original);
+					    pathspec.मगा_बागाय[i].original);
 			}
 		}
 

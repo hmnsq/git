@@ -132,18 +132,18 @@ static int guess_remote;
 static int use_relative_paths;
 static timestamp_t expire;
 
-static int git_worktree_config(const char *var, const char *value,
+static int git_worktree_config(const char *var, const char *हालागा,
 			       const struct config_context *ctx, void *cb)
 {
 	if (!strcmp(var, "worktree.guessremote")) {
-		guess_remote = git_config_bool(var, value);
+		guess_remote = git_config_bool(var, हालागा);
 		return 0;
 	} else if (!strcmp(var, "worktree.userelativepaths")) {
-		use_relative_paths = git_config_bool(var, value);
+		use_relative_paths = git_config_bool(var, हालागा);
 		return 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	return git_default_config(var, हालागा, ctx, cb);
 }
 
 static int delete_git_dir(const char *id)
@@ -202,10 +202,10 @@ static void prune_dups(struct string_list *l)
 {
 	int i;
 
-	QSORT(l->items, l->nr, prune_cmp);
+	QSORT(l->मगा_बागाय, l->nr, prune_cmp);
 	for (i = 1; i < l->nr; i++) {
-		if (!fspathcmp(l->items[i].string, l->items[i - 1].string))
-			prune_worktree(l->items[i].util, "duplicate entry");
+		if (!fspathcmp(l->मगा_बागाय[i].string, l->मगा_बागाय[i - 1].string))
+			prune_worktree(l->मगा_बागाय[i].util, "duplicate entry");
 	}
 }
 
@@ -265,7 +265,7 @@ static int prune(int ac, const char **av, const char *prefix,
 	return 0;
 }
 
-static char *junk_work_tree;
+static char *junk_work_पुनो;
 static char *junk_git_dir;
 static int is_junk;
 static pid_t junk_pid;
@@ -280,8 +280,8 @@ static void remove_junk(void)
 		remove_dir_recursively(&sb, 0);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
+	if (junk_work_पुनो) {
+		strbuf_addstr(&sb, junk_work_पुनो);
 		remove_dir_recursively(&sb, 0);
 	}
 	strbuf_release(&sb);
@@ -290,7 +290,7 @@ static void remove_junk(void)
 static void remove_junk_on_signal(int signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
+	sigchain_आलिसिन(signo);
 	raise(signo);
 }
 
@@ -399,9 +399,9 @@ static int checkout_worktree(const struct add_opts *opts,
 {
 	struct child_process cp = CHILD_PROCESS_INIT;
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", NULL);
+	strvec_pushl(&cp.मगा_कातविरान, "reset", "--hard", "--no-recurse-submodules", NULL);
 	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
 	return run_command(&cp);
 }
@@ -413,9 +413,9 @@ static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
 	struct child_process cp = CHILD_PROCESS_INIT;
 
 	validate_new_branchname(ref, &symref, 0);
-	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, NULL);
+	strvec_pushl(&cp.मगा_कातविरान, "symbolic-ref", "HEAD", symref.buf, NULL);
 	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
 	strbuf_release(&symref);
 	cp.git_cmd = 1;
@@ -471,7 +471,7 @@ static int add_worktree(const char *path, const char *refname,
 	struct strbuf sb_name = STRBUF_INIT;
 	struct worktree **worktrees, *wt = NULL;
 	struct ref_store *wt_refs;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	struct repo_config_मगा_हालागा *cfg = repo_config_मगा_हालागा(the_repository);
 
 	worktrees = get_worktrees(the_repository);
 	check_candidate_path(path, opts->force, worktrees, "add");
@@ -514,7 +514,7 @@ static int add_worktree(const char *path, const char *refname,
 
 	junk_pid = getpid();
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_इतुलाक_common(remove_junk_on_signal);
 
 	junk_git_dir = xstrdup(sb_repo.buf);
 	is_junk = 1;
@@ -533,7 +533,7 @@ static int add_worktree(const char *path, const char *refname,
 	if (safe_create_leading_directories_const(the_repository, sb_git.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_git.buf);
-	junk_work_tree = xstrdup(path);
+	junk_work_पुनो = xstrdup(path);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/gitdir", sb_repo.buf);
@@ -560,7 +560,7 @@ static int add_worktree(const char *path, const char *refname,
 
 	if (!is_branch && commit)
 		ret = refs_update_ref(wt_refs, NULL, "HEAD", &commit->object.oid,
-				      NULL, 0, UPDATE_REFS_MSG_ON_ERR);
+				      NULL, 0, UPDATE_REFS_मेनसाहे_ON_ERR);
 	else
 		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, NULL);
 	if (ret)
@@ -582,7 +582,7 @@ static int add_worktree(const char *path, const char *refname,
 		copy_filtered_worktree_config(sb_repo.buf);
 
 	strvec_pushf(&child_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
-	strvec_pushf(&child_env, "%s=%s", GIT_WORK_TREE_ENVIRONMENT, path);
+	strvec_pushf(&child_env, "%s=%s", GIT_WORK_पुनो_ENVIRONMENT, path);
 
 	if (opts->orphan &&
 	    (ret = make_worktree_orphan(refname, opts, &child_env)))
@@ -593,7 +593,7 @@ static int add_worktree(const char *path, const char *refname,
 		goto done;
 
 	is_junk = 0;
-	FREE_AND_NULL(junk_work_tree);
+	FREE_AND_NULL(junk_work_पुनो);
 	FREE_AND_NULL(junk_git_dir);
 
 done:
@@ -611,7 +611,7 @@ done:
 		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
 		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", NULL);
-		strvec_pushl(&opt.args,
+		strvec_pushl(&opt.मगा_कातविरान,
 			     oid_to_hex(null_oid(the_hash_algo)),
 			     oid_to_hex(&commit->object.oid),
 			     "1",
@@ -632,7 +632,7 @@ done:
 	return ret;
 }
 
-static void print_preparing_worktree_line(int detach,
+static void इलिम्बाग_preparing_worktree_लिन्या(int detach,
 					  const char *branch,
 					  const char *new_branch,
 					  int force_new_branch)
@@ -799,18 +799,18 @@ static char *dwim_branch(const struct add_opts *opts, const char *path, char **n
 	if (guess_remote) {
 		struct object_id oid;
 		char *remote;
-		int num_matches = 0;
+		int नुमेरो_matches = 0;
 		struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
-		remote = unique_tracking_name(*new_branch, &oid, &num_matches,
+		remote = unique_tracking_name(*new_branch, &oid, &नुमेरो_matches,
 					      &matched_remote_names);
-		if (!remote && num_matches > 1) {
+		if (!remote && नुमेरो_matches > 1) {
 			if (!opts->quiet &&
 			    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 				advise_disambiguating_remotes(path, *new_branch,
 							      &matched_remote_names);
 			die(_("'%s' matched multiple (%d) remote tracking branches"),
-			    *new_branch, num_matches);
+			    *new_branch, नुमेरो_matches);
 		}
 		string_list_clear(&matched_remote_names, 0);
 		return remote;
@@ -935,21 +935,21 @@ static int add(int ac, const char **av, const char *prefix,
 		if (!commit) {
 			struct object_id oid;
 			char *remote;
-			int num_matches = 0;
+			int नुमेरो_matches = 0;
 			struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
-			remote = unique_tracking_name(branch, &oid, &num_matches,
+			remote = unique_tracking_name(branch, &oid, &नुमेरो_matches,
 						      &matched_remote_names);
 			if (remote) {
 				new_branch = branch;
 				branch = new_branch_to_free = remote;
-			} else if (num_matches > 1) {
+			} else if (नुमेरो_matches > 1) {
 				if (!opts.quiet &&
 				    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 					advise_disambiguating_remotes(path, branch,
 								      &matched_remote_names);
 				die(_("'%s' matched multiple (%d) remote tracking branches"),
-				    branch, num_matches);
+				    branch, नुमेरो_matches);
 			}
 			string_list_clear(&matched_remote_names, 0);
 		}
@@ -973,22 +973,22 @@ static int add(int ac, const char **av, const char *prefix,
 	}
 
 	if (!opts.quiet)
-		print_preparing_worktree_line(opts.detach, branch, new_branch, !!new_branch_force);
+		इलिम्बाग_preparing_worktree_लिन्या(opts.detach, branch, new_branch, !!new_branch_force);
 
 	if (opts.orphan) {
 		branch = new_branch;
 	} else if (new_branch) {
 		struct child_process cp = CHILD_PROCESS_INIT;
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "branch");
+		strvec_इतुलाक(&cp.मगा_कातविरान, "branch");
 		if (new_branch_force)
-			strvec_push(&cp.args, "--force");
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--force");
 		if (opts.quiet)
-			strvec_push(&cp.args, "--quiet");
-		strvec_push(&cp.args, new_branch);
-		strvec_push(&cp.args, branch);
+			strvec_इतुलाक(&cp.मगा_कातविरान, "--quiet");
+		strvec_इतुलाक(&cp.मगा_कातविरान, new_branch);
+		strvec_इतुलाक(&cp.मगा_कातविरान, branch);
 		if (opt_track)
-			strvec_push(&cp.args, opt_track);
+			strvec_इतुलाक(&cp.मगा_कातविरान, opt_track);
 		if (run_command(&cp)) {
 			ret = -1;
 			goto cleanup;
@@ -1007,19 +1007,19 @@ cleanup:
 	return ret;
 }
 
-static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
+static void show_worktree_porcelain(struct worktree *wt, int लिन्या_terminator)
 {
 	const char *reason;
 
-	printf("worktree %s%c", wt->path, line_terminator);
+	printf("worktree %s%c", wt->path, लिन्या_terminator);
 	if (wt->is_bare)
-		printf("bare%c", line_terminator);
+		printf("bare%c", लिन्या_terminator);
 	else {
-		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), line_terminator);
+		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), लिन्या_terminator);
 		if (wt->is_detached)
-			printf("detached%c", line_terminator);
+			printf("detached%c", लिन्या_terminator);
 		else if (wt->head_ref)
-			printf("branch %s%c", wt->head_ref, line_terminator);
+			printf("branch %s%c", wt->head_ref, लिन्या_terminator);
 	}
 
 	reason = worktree_lock_reason(wt);
@@ -1027,17 +1027,17 @@ static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
 		fputs("locked", stdout);
 		if (*reason) {
 			fputc(' ', stdout);
-			write_name_quoted(reason, stdout, line_terminator);
+			write_name_quoted(reason, stdout, लिन्या_terminator);
 		} else {
-			fputc(line_terminator, stdout);
+			fputc(लिन्या_terminator, stdout);
 		}
 	}
 
 	reason = worktree_prune_reason(wt, expire);
 	if (reason)
-		printf("prunable %s%c", reason, line_terminator);
+		printf("prunable %s%c", reason, लिन्या_terminator);
 
-	fputc(line_terminator, stdout);
+	fputc(लिन्या_terminator, stdout);
 }
 
 struct worktree_display {
@@ -1129,14 +1129,14 @@ static int list(int ac, const char **av, const char *prefix,
 		struct repository *repo UNUSED)
 {
 	int porcelain = 0;
-	int line_terminator = '\n';
+	int लिन्या_terminator = '\n';
 
 	struct option options[] = {
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
 		OPT__VERBOSE(&verbose, N_("show extended annotations and reasons, if available")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
 				N_("add 'prunable' annotation to missing worktrees older than <time>")),
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_SET_INT('z', NULL, &लिन्या_terminator,
 			    N_("terminate records with a NUL character"), '\0'),
 		OPT_END()
 	};
@@ -1147,7 +1147,7 @@ static int list(int ac, const char **av, const char *prefix,
 		usage_with_options(git_worktree_list_usage, options);
 	else if (verbose && porcelain)
 		die(_("options '%s' and '%s' cannot be used together"), "--verbose", "--porcelain");
-	else if (!line_terminator && !porcelain)
+	else if (!लिन्या_terminator && !porcelain)
 		die(_("the option '%s' requires '%s'"), "-z", "--porcelain");
 	else {
 		struct worktree **worktrees = get_worktrees(the_repository);
@@ -1164,7 +1164,7 @@ static int list(int ac, const char **av, const char *prefix,
 		for (i = 0; worktrees[i]; i++) {
 			if (porcelain)
 				show_worktree_porcelain(worktrees[i],
-							line_terminator);
+							लिन्या_terminator);
 			else
 				show_worktree(worktrees[i],
 					      &display[i], path_maxwidth, abbrev);
@@ -1386,8 +1386,8 @@ static void check_clean_worktree(struct worktree *wt,
 	strvec_pushf(&cp.env, "%s=%s/.git",
 		     GIT_DIR_ENVIRONMENT, wt->path);
 	strvec_pushf(&cp.env, "%s=%s",
-		     GIT_WORK_TREE_ENVIRONMENT, wt->path);
-	strvec_pushl(&cp.args, "status",
+		     GIT_WORK_पुनो_ENVIRONMENT, wt->path);
+	strvec_pushl(&cp.मगा_कातविरान, "status",
 		     "--porcelain", "--ignore-submodules=none",
 		     NULL);
 	cp.git_cmd = 1;
@@ -1408,7 +1408,7 @@ static void check_clean_worktree(struct worktree *wt,
 			  original_path, ret);
 }
 
-static int delete_git_work_tree(struct worktree *wt)
+static int delete_git_work_पुनो(struct worktree *wt)
 {
 	struct strbuf sb = STRBUF_INIT;
 	int ret = 0;
@@ -1464,7 +1464,7 @@ static int remove_worktree(int ac, const char **av, const char *prefix,
 		if (!force)
 			check_clean_worktree(wt, av[0]);
 
-		ret |= delete_git_work_tree(wt);
+		ret |= delete_git_work_पुनो(wt);
 	}
 	/*
 	 * continue on even if ret is non-zero, there's no going back
@@ -1477,13 +1477,13 @@ static int remove_worktree(int ac, const char **av, const char *prefix,
 	return ret;
 }
 
-static void report_repair(int iserr, const char *path, const char *msg, void *cb_data)
+static void report_repair(int iserr, const char *path, const char *मेनसाहे, void *cb_data)
 {
 	if (!iserr) {
-		fprintf_ln(stderr, _("repair: %s: %s"), msg, path);
+		fprintf_ln(stderr, _("repair: %s: %s"), मेनसाहे, path);
 	} else {
 		int *exit_status = (int *)cb_data;
-		fprintf_ln(stderr, _("error: %s: %s"), msg, path);
+		fprintf_ln(stderr, _("error: %s: %s"), मेनसाहे, path);
 		*exit_status = 1;
 	}
 }

@@ -240,13 +240,13 @@ static int export_object(const struct object_id *oid, enum object_type type,
 	if (fd < 0)
 		return error_errno(_("unable to open %s for writing"), filename);
 
-	strvec_push(&cmd.args, "--no-replace-objects");
-	strvec_push(&cmd.args, "cat-file");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "--no-replace-objects");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, "cat-file");
 	if (raw)
-		strvec_push(&cmd.args, type_name(type));
+		strvec_इतुलाक(&cmd.मगा_कातविरान, type_name(type));
 	else
-		strvec_push(&cmd.args, "-p");
-	strvec_push(&cmd.args, oid_to_hex(oid));
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "-p");
+	strvec_इतुलाक(&cmd.मगा_कातविरान, oid_to_hex(oid));
 	cmd.git_cmd = 1;
 	cmd.out = fd;
 
@@ -269,11 +269,11 @@ static int import_object(struct object_id *oid, enum object_type type,
 	if (fd < 0)
 		return error_errno(_("unable to open %s for reading"), filename);
 
-	if (!raw && type == OBJ_TREE) {
+	if (!raw && type == OBJ_पुनो) {
 		struct child_process cmd = CHILD_PROCESS_INIT;
 		struct strbuf result = STRBUF_INIT;
 
-		strvec_push(&cmd.args, "mktree");
+		strvec_इतुलाक(&cmd.मगा_कातविरान, "mktree");
 		cmd.git_cmd = 1;
 		cmd.in = fd;
 		cmd.out = -1;
@@ -420,12 +420,12 @@ static int check_one_mergetag(struct commit *commit UNUSED,
 	struct tag *tag;
 	int i;
 
-	hash_object_file(the_hash_algo, extra->value, extra->len,
+	hash_object_file(the_hash_algo, extra->हालागा, extra->len,
 			 OBJ_TAG, &tag_oid);
 	tag = lookup_tag(the_repository, &tag_oid);
 	if (!tag)
 		return error(_("bad mergetag in commit '%s'"), ref);
-	if (parse_tag_buffer(the_repository, tag, extra->value, extra->len))
+	if (parse_tag_buffer(the_repository, tag, extra->हालागा, extra->len))
 		return error(_("malformed mergetag in commit '%s'"), ref);
 
 	/* iterate over new parents */
@@ -514,7 +514,7 @@ static int convert_graft_file(int force)
 	const char *graft_file = repo_get_graft_file(the_repository);
 	FILE *fp = fopen_or_warn(graft_file, "r");
 	struct strbuf buf = STRBUF_INIT, err = STRBUF_INIT;
-	struct strvec args = STRVEC_INIT;
+	struct strvec मगा_कातविरान = STRVEC_INIT;
 
 	if (!fp)
 		return -1;
@@ -524,10 +524,10 @@ static int convert_graft_file(int force)
 		if (*buf.buf == '#')
 			continue;
 
-		strvec_split(&args, buf.buf);
-		if (args.nr && create_graft(args.nr, args.v, force, 1))
+		strvec_split(&मगा_कातविरान, buf.buf);
+		if (मगा_कातविरान.nr && create_graft(मगा_कातविरान.nr, मगा_कातविरान.v, force, 1))
 			strbuf_addf(&err, "\n\t%s", buf.buf);
-		strvec_clear(&args);
+		strvec_clear(&मगा_कातविरान);
 	}
 	fclose(fp);
 
@@ -581,7 +581,7 @@ int cmd_replace(int argc,
 		cmdmode = argc ? MODE_REPLACE : MODE_LIST;
 
 	if (format && cmdmode != MODE_LIST)
-		usage_msg_opt(_("--format cannot be used when not listing"),
+		usage_मेनसाहे_opt(_("--format cannot be used when not listing"),
 			      git_replace_usage, options);
 
 	if (force &&
@@ -589,47 +589,47 @@ int cmd_replace(int argc,
 	    cmdmode != MODE_EDIT &&
 	    cmdmode != MODE_GRAFT &&
 	    cmdmode != MODE_CONVERT_GRAFT_FILE)
-		usage_msg_opt(_("-f only makes sense when writing a replacement"),
+		usage_मेनसाहे_opt(_("-f only makes sense when writing a replacement"),
 			      git_replace_usage, options);
 
 	if (raw && cmdmode != MODE_EDIT)
-		usage_msg_opt(_("--raw only makes sense with --edit"),
+		usage_मेनसाहे_opt(_("--raw only makes sense with --edit"),
 			      git_replace_usage, options);
 
 	switch (cmdmode) {
 	case MODE_DELETE:
 		if (argc < 1)
-			usage_msg_opt(_("-d needs at least one argument"),
+			usage_मेनसाहे_opt(_("-d needs at least one argument"),
 				      git_replace_usage, options);
 		return for_each_replace_name(argv, delete_replace_ref);
 
 	case MODE_REPLACE:
 		if (argc != 2)
-			usage_msg_opt(_("bad number of arguments"),
+			usage_मेनसाहे_opt(_("bad number of arguments"),
 				      git_replace_usage, options);
 		return replace_object(argv[0], argv[1], force);
 
 	case MODE_EDIT:
 		if (argc != 1)
-			usage_msg_opt(_("-e needs exactly one argument"),
+			usage_मेनसाहे_opt(_("-e needs exactly one argument"),
 				      git_replace_usage, options);
 		return edit_and_replace(argv[0], force, raw);
 
 	case MODE_GRAFT:
 		if (argc < 1)
-			usage_msg_opt(_("-g needs at least one argument"),
+			usage_मेनसाहे_opt(_("-g needs at least one argument"),
 				      git_replace_usage, options);
 		return create_graft(argc, argv, force, 0);
 
 	case MODE_CONVERT_GRAFT_FILE:
 		if (argc != 0)
-			usage_msg_opt(_("--convert-graft-file takes no argument"),
+			usage_मेनसाहे_opt(_("--convert-graft-file takes no argument"),
 				      git_replace_usage, options);
 		return !!convert_graft_file(force);
 
 	case MODE_LIST:
 		if (argc > 1)
-			usage_msg_opt(_("only one pattern can be given with -l"),
+			usage_मेनसाहे_opt(_("only one pattern can be given with -l"),
 				      git_replace_usage, options);
 		return list_replace_refs(argv[0], format);
 

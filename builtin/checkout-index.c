@@ -22,7 +22,7 @@
 #include "sparse-index.h"
 
 #define CHECKOUT_ALL 4
-static int nul_term_line;
+static int nul_term_लिन्या;
 static int checkout_stage; /* default to checkout stage0 */
 static int ignore_skip_worktree; /* default to 0 */
 static int to_tempfile = -1;
@@ -60,7 +60,7 @@ static void write_tempfile_record(const char *name, const char *prefix)
 	if (have_tempname) {
 		putchar('\t');
 		write_name_quoted_relative(name, prefix, stdout,
-					   nul_term_line ? '\0' : '\n');
+					   nul_term_लिन्या ? '\0' : '\n');
 	}
 
 	for (i = 0; i < 4; i++) {
@@ -194,7 +194,7 @@ static const char * const builtin_checkout_index_usage[] = {
 static int option_parse_stage(const struct option *opt,
 			      const char *arg, int unset)
 {
-	int *stage = opt->value;
+	int *stage = opt->हालागा;
 
 	BUG_ON_OPT_NEG(unset);
 
@@ -236,7 +236,7 @@ int cmd_checkout_index(int argc,
 			N_("don't checkout new files")),
 		OPT_BOOL('u', "index", &index_opt,
 			 N_("update stat information in the index file")),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', NULL, &nul_term_लिन्या,
 			N_("paths are separated with NUL character")),
 		OPT_BOOL(0, "stdin", &read_from_stdin,
 			N_("read list of paths from the standard input")),
@@ -316,10 +316,10 @@ int cmd_checkout_index(int argc,
 		if (all)
 			die("git checkout-index: don't mix '--all' and '--stdin'");
 
-		getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+		getline_fn = nul_term_लिन्या ? strbuf_getline_nul : strbuf_getline_lf;
 		while (getline_fn(&buf, stdin) != EOF) {
 			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+			if (!nul_term_लिन्या && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
 				if (unquote_c_style(&unquoted, buf.buf, NULL))
 					die("line is badly quoted");

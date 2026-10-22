@@ -137,7 +137,7 @@ static int is_bisect_success(enum bisect_error res)
 		res == BISECT_INTERNAL_SUCCESS_MERGE_BASE;
 }
 
-static int write_in_file(const char *path, const char *mode, const char *format, va_list args)
+static int write_in_file(const char *path, const char *mode, const char *format, va_list मगा_कातविरान)
 {
 	FILE *fp = NULL;
 	int res = 0;
@@ -147,7 +147,7 @@ static int write_in_file(const char *path, const char *mode, const char *format,
 	fp = fopen(path, mode);
 	if (!fp)
 		return error_errno(_("cannot open file '%s' in mode '%s'"), path, mode);
-	res = vfprintf(fp, format, args);
+	res = vfprintf(fp, format, मगा_कातविरान);
 
 	if (res < 0) {
 		int saved_errno = errno;
@@ -163,11 +163,11 @@ __attribute__((format (printf, 2, 3)))
 static int write_to_file(const char *path, const char *format, ...)
 {
 	int res;
-	va_list args;
+	va_list मगा_कातविरान;
 
-	va_start(args, format);
-	res = write_in_file(path, "w", format, args);
-	va_end(args);
+	va_start(मगा_कातविरान, format);
+	res = write_in_file(path, "w", format, मगा_कातविरान);
+	va_end(मगा_कातविरान);
 
 	return res;
 }
@@ -176,16 +176,16 @@ __attribute__((format (printf, 2, 3)))
 static int append_to_file(const char *path, const char *format, ...)
 {
 	int res;
-	va_list args;
+	va_list मगा_कातविरान;
 
-	va_start(args, format);
-	res = write_in_file(path, "a", format, args);
-	va_end(args);
+	va_start(मगा_कातविरान, format);
+	res = write_in_file(path, "a", format, मगा_कातविरान);
+	va_end(मगा_कातविरान);
 
 	return res;
 }
 
-static int print_file_to_stdout(const char *path)
+static int इलिम्बाग_file_to_stdout(const char *path)
 {
 	int fd = open(path, O_RDONLY);
 	int ret = 0;
@@ -262,10 +262,10 @@ static int bisect_reset(const char *commit, bool quiet)
 		struct child_process cmd = CHILD_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
-		strvec_pushl(&cmd.args, "checkout", "--ignore-other-worktrees", NULL);
+		strvec_pushl(&cmd.मगा_कातविरान, "checkout", "--ignore-other-worktrees", NULL);
 		if (quiet)
-			strvec_push(&cmd.args, "--quiet");
-		strvec_pushl(&cmd.args, branch.buf, "--", NULL);
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "--quiet");
+		strvec_pushl(&cmd.मगा_कातविरान, branch.buf, "--", NULL);
 		if (run_command(&cmd)) {
 			error(_("could not check out original"
 				" HEAD '%s'. Try 'git bisect"
@@ -279,16 +279,16 @@ static int bisect_reset(const char *commit, bool quiet)
 	return 0;
 }
 
-static int parse_reset_when_found(const char *value,
+static int parse_reset_when_found(const char *हालागा,
 				  enum reset_when_found_mode *mode)
 {
-	if (!strcmp(value, "original"))
+	if (!strcmp(हालागा, "original"))
 		*mode = RESET_WHEN_FOUND_TO_ORIGINAL;
-	else if (!strcmp(value, "found"))
+	else if (!strcmp(हालागा, "found"))
 		*mode = RESET_WHEN_FOUND_TO_FOUND;
 	else
 		return error(_("invalid value for '--reset-when-found': '%s'"),
-			     value);
+			     हालागा);
 
 	return 0;
 }
@@ -308,24 +308,24 @@ static const char *reset_when_found_mode_name(enum reset_when_found_mode mode)
 
 static int read_reset_when_found(enum reset_when_found_mode *mode)
 {
-	struct strbuf value = STRBUF_INIT;
+	struct strbuf हालागा = STRBUF_INIT;
 	int res = 0;
 
 	*mode = RESET_WHEN_FOUND_NONE;
 	if (is_empty_or_missing_file(git_path_bisect_reset_when_found()))
 		return 0;
 
-	if (strbuf_read_file(&value, git_path_bisect_reset_when_found(), 0) < 0) {
+	if (strbuf_read_file(&हालागा, git_path_bisect_reset_when_found(), 0) < 0) {
 		res = error_errno(_("could not read '%s'"),
 				  git_path_bisect_reset_when_found());
 		goto out;
 	}
-	strbuf_trim(&value);
-	if (parse_reset_when_found(value.buf, mode))
+	strbuf_trim(&हालागा);
+	if (parse_reset_when_found(हालागा.buf, mode))
 		res = -1;
 
 out:
-	strbuf_release(&value);
+	strbuf_release(&हालागा);
 	return res;
 }
 
@@ -355,17 +355,17 @@ static void log_commit(FILE *fp,
 		       const char *fmt, const char *state,
 		       struct commit *commit)
 {
-	struct pretty_print_context pp = {0};
-	struct strbuf commit_msg = STRBUF_INIT;
+	struct pretty_इलिम्बाग_context pp = {0};
+	struct strbuf commit_मेनसाहे = STRBUF_INIT;
 	char *label = xstrfmt(fmt, state);
 
-	repo_format_commit_message(the_repository, commit, "%s", &commit_msg,
+	repo_format_commit_message(the_repository, commit, "%s", &commit_मेनसाहे,
 				   &pp);
 
 	fprintf(fp, "# %s: [%s] %s\n", label, oid_to_hex(&commit->object.oid),
-		commit_msg.buf);
+		commit_मेनसाहे.buf);
 
-	strbuf_release(&commit_msg);
+	strbuf_release(&commit_मेनसाहे);
 	free(label);
 }
 
@@ -393,7 +393,7 @@ static int bisect_write(const char *state, const char *rev,
 	}
 
 	if (refs_update_ref(get_main_ref_store(the_repository), NULL, tag.buf, &oid, NULL, 0,
-			    UPDATE_REFS_MSG_ON_ERR)) {
+			    UPDATE_REFS_मेनसाहे_ON_ERR)) {
 		res = -1;
 		goto finish;
 	}
@@ -535,7 +535,7 @@ static void bisect_log_printf(const char *fmt, ...)
 	strbuf_release(&buf);
 }
 
-static void bisect_print_status(const struct bisect_terms *terms)
+static void bisect_इलिम्बाग_status(const struct bisect_terms *terms)
 {
 	struct bisect_state state = { 0 };
 
@@ -626,7 +626,7 @@ static int bisect_append_log_quoted(const char **argv)
 {
 	int res = 0;
 	FILE *fp = fopen(git_path_bisect_log(), "a");
-	struct strbuf orig_args = STRBUF_INIT;
+	struct strbuf orig_मगा_कातविरान = STRBUF_INIT;
 
 	if (!fp)
 		return -1;
@@ -636,13 +636,13 @@ static int bisect_append_log_quoted(const char **argv)
 		goto finish;
 	}
 
-	sq_quote_argv(&orig_args, argv);
-	if (fprintf(fp, "%s\n", orig_args.buf) < 1)
+	sq_quote_argv(&orig_मगा_कातविरान, argv);
+	if (fprintf(fp, "%s\n", orig_मगा_कातविरान.buf) < 1)
 		res = -1;
 
 finish:
 	fclose(fp);
-	strbuf_release(&orig_args);
+	strbuf_release(&orig_मगा_कातविरान);
 	return res;
 }
 
@@ -704,7 +704,7 @@ static int bisect_skipped_commits(struct bisect_terms *terms)
 	FILE *fp = NULL;
 	struct rev_info revs;
 	struct commit *commit;
-	struct pretty_print_context pp = {0};
+	struct pretty_इलिम्बाग_context pp = {0};
 	struct strbuf commit_name = STRBUF_INIT;
 
 	res = prepare_revs(terms, &revs);
@@ -744,7 +744,7 @@ static int bisect_successful(struct bisect_terms *terms)
 {
 	struct object_id oid;
 	struct commit *commit;
-	struct pretty_print_context pp = {0};
+	struct pretty_इलिम्बाग_context pp = {0};
 	struct strbuf commit_name = STRBUF_INIT;
 	char *bad_ref = xstrfmt("refs/bisect/%s",terms->term_bad);
 	int res;
@@ -785,9 +785,9 @@ static enum bisect_error bisect_next(struct bisect_terms *terms,
 	if (res == BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND) {
 		res = bisect_successful(terms);
 		return res ? res : BISECT_INTERNAL_SUCCESS_1ST_BAD_FOUND;
-	} else if (res == BISECT_ONLY_SKIPPED_LEFT) {
+	} else if (res == BISECT_ONLY_SKIPPED_कालिवा) {
 		res = bisect_skipped_commits(terms);
-		return res ? res : BISECT_ONLY_SKIPPED_LEFT;
+		return res ? res : BISECT_ONLY_SKIPPED_कालिवा;
 	}
 	return res;
 }
@@ -796,7 +796,7 @@ static enum bisect_error bisect_auto_next(struct bisect_terms *terms,
 					  const char *prefix)
 {
 	if (bisect_next_check(terms, NULL)) {
-		bisect_print_status(terms);
+		bisect_इलिम्बाग_status(terms);
 		return BISECT_OK;
 	}
 
@@ -931,7 +931,7 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 			struct child_process cmd = CHILD_PROCESS_INIT;
 
 			cmd.git_cmd = 1;
-			strvec_pushl(&cmd.args, "checkout", start_head.buf,
+			strvec_pushl(&cmd.मगा_कातविरान, "checkout", start_head.buf,
 				     "--", NULL);
 			if (run_command(&cmd)) {
 				res = error(_("checking out '%s' failed."
@@ -979,7 +979,7 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 			goto finish;
 		}
 		if (refs_update_ref(get_main_ref_store(the_repository), NULL, "BISECT_HEAD", &oid, NULL, 0,
-				    UPDATE_REFS_MSG_ON_ERR)) {
+				    UPDATE_REFS_मेनसाहे_ON_ERR)) {
 			res = BISECT_FAILED;
 			goto finish;
 		}
@@ -990,8 +990,8 @@ static enum bisect_error bisect_start(struct bisect_terms *terms, int argc,
 	write_file(git_path_bisect_names(), "%s\n", bisect_names.buf);
 
 	for (i = 0; i < states.nr; i++)
-		if (bisect_write(states.items[i].string,
-				 revs.items[i].string, terms, 1)) {
+		if (bisect_write(states.मगा_बागाय[i].string,
+				 revs.मगा_बागाय[i].string, terms, 1)) {
 			res = BISECT_FAILED;
 			goto finish;
 		}
@@ -1150,9 +1150,9 @@ static enum bisect_error bisect_log(void)
 	return status ? BISECT_FAILED : BISECT_OK;
 }
 
-static int process_replay_line(struct bisect_terms *terms, struct strbuf *line)
+static int process_replay_लिन्या(struct bisect_terms *terms, struct strbuf *लिन्या)
 {
-	const char *p = line->buf + strspn(line->buf, " \t");
+	const char *p = लिन्या->buf + strspn(लिन्या->buf, " \t");
 	char *word_end, *rev;
 
 	if ((!skip_prefix(p, "git bisect", &p) &&
@@ -1199,7 +1199,7 @@ static enum bisect_error bisect_replay(struct bisect_terms *terms, const char *f
 {
 	FILE *fp = NULL;
 	enum bisect_error res = BISECT_OK;
-	struct strbuf line = STRBUF_INIT;
+	struct strbuf लिन्या = STRBUF_INIT;
 
 	if (is_empty_or_missing_file(filename))
 		return error(_("cannot read file '%s' for replaying"), filename);
@@ -1211,10 +1211,10 @@ static enum bisect_error bisect_replay(struct bisect_terms *terms, const char *f
 	if (!fp)
 		return BISECT_FAILED;
 
-	while ((strbuf_getline(&line, fp) != EOF) && !res)
-		res = process_replay_line(terms, &line);
+	while ((strbuf_getline(&लिन्या, fp) != EOF) && !res)
+		res = process_replay_लिन्या(terms, &लिन्या);
 
-	strbuf_release(&line);
+	strbuf_release(&लिन्या);
 	fclose(fp);
 
 	if (res)
@@ -1230,7 +1230,7 @@ static enum bisect_error bisect_skip(struct bisect_terms *terms, int argc,
 	enum bisect_error res;
 	struct strvec argv_state = STRVEC_INIT;
 
-	strvec_push(&argv_state, "skip");
+	strvec_इतुलाक(&argv_state, "skip");
 
 	for (i = 0; i < argc; i++) {
 		const char *dotdot = strstr(argv[i], "..");
@@ -1245,13 +1245,13 @@ static enum bisect_error bisect_skip(struct bisect_terms *terms, int argc,
 			if (prepare_revision_walk(&revs))
 				die(_("revision walk setup failed"));
 			while ((commit = get_revision(&revs)) != NULL)
-				strvec_push(&argv_state,
+				strvec_इतुलाक(&argv_state,
 						oid_to_hex(&commit->object.oid));
 
 			reset_revision_walk();
 			release_revisions(&revs);
 		} else {
-			strvec_push(&argv_state, argv[i]);
+			strvec_इतुलाक(&argv_state, argv[i]);
 		}
 	}
 	res = bisect_state(terms, argv_state.nr, argv_state.v);
@@ -1273,25 +1273,25 @@ static int bisect_visualize(struct bisect_terms *terms, int argc,
 	if (!argc) {
 		if ((getenv("DISPLAY") || getenv("SESSIONNAME") || getenv("MSYSTEM") ||
 		     getenv("SECURITYSESSIONID")) && exists_in_PATH("gitk")) {
-			strvec_push(&cmd.args, "gitk");
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "gitk");
 		} else {
-			strvec_push(&cmd.args, "log");
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "log");
 			cmd.git_cmd = 1;
 		}
 	} else {
 		if (argv[0][0] == '-') {
-			strvec_push(&cmd.args, "log");
+			strvec_इतुलाक(&cmd.मगा_कातविरान, "log");
 			cmd.git_cmd = 1;
 		} else if (strcmp(argv[0], "tig") && !starts_with(argv[0], "git"))
 			cmd.git_cmd = 1;
 
-		strvec_pushv(&cmd.args, argv);
+		strvec_pushv(&cmd.मगा_कातविरान, argv);
 	}
 
-	strvec_pushl(&cmd.args, "--bisect", "--", NULL);
+	strvec_pushl(&cmd.मगा_कातविरान, "--bisect", "--", NULL);
 
 	strbuf_read_file(&sb, git_path_bisect_names(), 0);
-	sq_dequote_to_strvec(sb.buf, &cmd.args);
+	sq_dequote_to_strvec(sb.buf, &cmd.मगा_कातविरान);
 	strbuf_release(&sb);
 
 	return run_command(&cmd);
@@ -1309,7 +1309,7 @@ static int do_bisect_run(const char *command)
 
 	printf(_("running %s\n"), command);
 	cmd.use_shell = 1;
-	strvec_push(&cmd.args, command);
+	strvec_इतुलाक(&cmd.मगा_कातविरान, command);
 	return run_command(&cmd);
 }
 
@@ -1454,9 +1454,9 @@ static int bisect_run(struct bisect_terms *terms, int argc, const char **argv)
 		close(saved_stdout);
 		close(temporary_stdout_fd);
 
-		print_file_to_stdout(git_path_bisect_run());
+		इलिम्बाग_file_to_stdout(git_path_bisect_run());
 
-		if (res == BISECT_ONLY_SKIPPED_LEFT)
+		if (res == BISECT_ONLY_SKIPPED_कालिवा)
 			error(_("bisect run cannot continue any more"));
 		else if (res == BISECT_INTERNAL_SUCCESS_MERGE_BASE) {
 			puts(_("bisect run success"));
@@ -1622,7 +1622,7 @@ int cmd_bisect(int argc,
 		struct bisect_terms terms = { 0 };
 
 		if (!argc)
-			usage_msg_opt(_("need a command"), git_bisect_usage, options);
+			usage_मेनसाहे_opt(_("need a command"), git_bisect_usage, options);
 
 		if (!strcmp(argv[0], "help"))
 			usage_with_options(git_bisect_usage, options);
@@ -1632,7 +1632,7 @@ int cmd_bisect(int argc,
 			return error(_("no terms defined"));
 		if (check_and_set_terms(&terms, argv[0]) ||
 		    !one_of(argv[0], terms.term_good, terms.term_bad, NULL))
-			usage_msg_optf(_("unknown command: '%s'"), git_bisect_usage,
+			usage_मेनसाहे_optf(_("unknown command: '%s'"), git_bisect_usage,
 				       options, argv[0]);
 		else
 			res = bisect_state(&terms, argc, argv);

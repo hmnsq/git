@@ -15,7 +15,7 @@
 
 enum ref_action_mode {
 	REF_ACTION_UPDATE,
-	REF_ACTION_PRINT,
+	REF_ACTION_इलिम्बाग,
 };
 
 static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const char *source)
@@ -23,21 +23,21 @@ static enum ref_action_mode parse_ref_action_mode(const char *ref_action, const 
 	if (!ref_action || !strcmp(ref_action, "update"))
 		return REF_ACTION_UPDATE;
 	if (!strcmp(ref_action, "print"))
-		return REF_ACTION_PRINT;
+		return REF_ACTION_इलिम्बाग;
 	die(_("invalid %s value: '%s'"), source, ref_action);
 }
 
 static enum ref_action_mode get_ref_action_mode(struct repository *repo, const char *ref_action)
 {
-	const char *config_value = NULL;
+	const char *config_हालागा = NULL;
 
 	/* Command line option takes precedence */
 	if (ref_action)
 		return parse_ref_action_mode(ref_action, "--ref-action");
 
 	/* Check config value */
-	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_value))
-		return parse_ref_action_mode(config_value, "replay.refAction");
+	if (!repo_config_get_string_tmp(repo, "replay.refAction", &config_हालागा))
+		return parse_ref_action_mode(config_हालागा, "replay.refAction");
 
 	/* Default to update mode */
 	return REF_ACTION_UPDATE;
@@ -48,11 +48,11 @@ static int handle_ref_update(enum ref_action_mode mode,
 			     const char *refname,
 			     const struct object_id *new_oid,
 			     const struct object_id *old_oid,
-			     const char *reflog_msg,
+			     const char *reflog_मेनसाहे,
 			     struct strbuf *err)
 {
 	switch (mode) {
-	case REF_ACTION_PRINT:
+	case REF_ACTION_इलिम्बाग:
 		printf("update %s %s %s\n",
 		       refname,
 		       oid_to_hex(new_oid),
@@ -60,7 +60,7 @@ static int handle_ref_update(enum ref_action_mode mode,
 		return 0;
 	case REF_ACTION_UPDATE:
 		return ref_transaction_update(transaction, refname, new_oid, old_oid,
-					      NULL, NULL, 0, reflog_msg, err);
+					      NULL, NULL, 0, reflog_मेनसाहे, err);
 	default:
 		BUG("unknown ref_action_mode %d", mode);
 	}
@@ -78,7 +78,7 @@ int cmd_replay(int argc,
 	struct rev_info revs;
 	struct ref_transaction *transaction = NULL;
 	struct strbuf transaction_err = STRBUF_INIT;
-	struct strbuf reflog_msg = STRBUF_INIT;
+	struct strbuf reflog_मेनसाहे = STRBUF_INIT;
 	int desired_reverse;
 	int ret = 0;
 
@@ -205,14 +205,14 @@ int cmd_replay(int argc,
 
 	/* Build reflog message */
 	if (opts.revert) {
-		strbuf_addf(&reflog_msg, "replay --revert %s", opts.revert);
+		strbuf_addf(&reflog_मेनसाहे, "replay --revert %s", opts.revert);
 	} else if (opts.advance) {
-		strbuf_addf(&reflog_msg, "replay --advance %s", opts.advance);
+		strbuf_addf(&reflog_मेनसाहे, "replay --advance %s", opts.advance);
 	} else {
 		struct object_id oid;
 		if (repo_get_oid_committish(repo, opts.onto, &oid))
 			BUG("--onto commit should have been resolved beforehand already");
-		strbuf_addf(&reflog_msg, "replay --onto %s", oid_to_hex(&oid));
+		strbuf_addf(&reflog_मेनसाहे, "replay --onto %s", oid_to_hex(&oid));
 	}
 
 	/* Initialize ref transaction if using update mode */
@@ -229,7 +229,7 @@ int cmd_replay(int argc,
 	for (size_t i = 0; i < result.updates_nr; i++) {
 		ret = handle_ref_update(ref_mode, transaction, result.updates[i].refname,
 					&result.updates[i].new_oid, &result.updates[i].old_oid,
-					reflog_msg.buf, &transaction_err);
+					reflog_मेनसाहे.buf, &transaction_err);
 		if (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
 				    result.updates[i].refname, transaction_err.buf);
@@ -253,7 +253,7 @@ cleanup:
 		ref_transaction_free(transaction);
 	replay_result_release(&result);
 	strbuf_release(&transaction_err);
-	strbuf_release(&reflog_msg);
+	strbuf_release(&reflog_मेनसाहे);
 	release_revisions(&revs);
 
 	/* Return */

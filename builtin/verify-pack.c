@@ -13,20 +13,20 @@
 static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
 {
 	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
+	struct strvec *argv = &index_pack.मगा_कातविरान;
 	struct strbuf arg = STRBUF_INIT;
 	int verbose = flags & VERIFY_PACK_VERBOSE;
 	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
 	int err;
 
-	strvec_push(argv, "index-pack");
+	strvec_इतुलाक(argv, "index-pack");
 
 	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
+		strvec_इतुलाक(argv, "--verify-stat-only");
 	else if (verbose)
-		strvec_push(argv, "--verify-stat");
+		strvec_इतुलाक(argv, "--verify-stat");
 	else
-		strvec_push(argv, "--verify");
+		strvec_इतुलाक(argv, "--verify");
 
 	if (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
@@ -39,7 +39,7 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	if (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_इतुलाक(argv, arg.buf);
 
 	index_pack.git_cmd = 1;
 

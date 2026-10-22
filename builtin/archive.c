@@ -54,9 +54,9 @@ static int run_remote_archiver(int argc, const char **argv,
 
 	if (packet_reader_read(&reader) != PACKET_READ_NORMAL)
 		die(_("git archive: expected ACK/NAK, got a flush packet"));
-	if (strcmp(reader.line, "ACK")) {
-		if (starts_with(reader.line, "NACK "))
-			die(_("git archive: NACK %s"), reader.line + 5);
+	if (strcmp(reader.लिन्या, "ACK")) {
+		if (starts_with(reader.लिन्या, "NACK "))
+			die(_("git archive: NACK %s"), reader.लिन्या + 5);
 		die(_("git archive: protocol error"));
 	}
 

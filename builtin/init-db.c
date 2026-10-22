@@ -50,7 +50,7 @@ static int guess_repository_type(const char *git_dir)
 static int shared_callback(const struct option *opt, const char *arg, int unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	*((int *) opt->value) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
+	*((int *) opt->हालागा) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
 	return 0;
 }
 
@@ -77,7 +77,7 @@ int cmd_init_db(int argc,
 	char *git_dir;
 	const char *real_git_dir = NULL;
 	char *real_git_dir_to_free = NULL;
-	char *work_tree = NULL;
+	char *work_पुनो = NULL;
 	const char *template_dir = NULL;
 	char *template_dir_to_free = NULL;
 	int quiet = 0;
@@ -95,7 +95,7 @@ int cmd_init_db(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "shared",
-			.value = &init_shared_repository,
+			.हालागा = &init_shared_repository,
 			.argh = N_("permissions"),
 			.help = N_("specify that the git repository is to be shared amongst several users"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -181,11 +181,11 @@ int cmd_init_db(int argc,
 	 * without --bare.  Catch the error early.
 	 */
 	git_dir = xstrdup_or_null(getenv(GIT_DIR_ENVIRONMENT));
-	work_tree = xstrdup_or_null(getenv(GIT_WORK_TREE_ENVIRONMENT));
-	if ((!git_dir || bare == 1) && work_tree)
+	work_पुनो = xstrdup_or_null(getenv(GIT_WORK_पुनो_ENVIRONMENT));
+	if ((!git_dir || bare == 1) && work_पुनो)
 		die(_("%s (or --work-tree=<directory>) not allowed without "
 			  "specifying %s (or --git-dir=<directory>)"),
-		    GIT_WORK_TREE_ENVIRONMENT,
+		    GIT_WORK_पुनो_ENVIRONMENT,
 		    GIT_DIR_ENVIRONMENT);
 
 	/*
@@ -225,23 +225,23 @@ int cmd_init_db(int argc,
 	if (!bare) {
 		const char *git_dir_parent = strrchr(git_dir, '/');
 
-		if (!work_tree) {
+		if (!work_पुनो) {
 			if (git_dir_parent) {
 				char *rel = xstrndup(git_dir, git_dir_parent - git_dir);
-				work_tree = real_pathdup(rel, 1);
+				work_पुनो = real_pathdup(rel, 1);
 				free(rel);
 			} else {
-				work_tree = xgetcwd();
+				work_पुनो = xgetcwd();
 			}
 		}
 
-		if (access(work_tree, X_OK))
-			die_errno (_("Cannot access work tree '%s'"), work_tree);
+		if (access(work_पुनो, X_OK))
+			die_errno (_("Cannot access work tree '%s'"), work_पुनो);
 	} else if (real_git_dir) {
 		die(_("--separate-git-dir incompatible with bare repository"));
 	}
 
-	create_repository(the_repository, git_dir, real_git_dir, work_tree,
+	create_repository(the_repository, git_dir, real_git_dir, work_पुनो,
 			  template_dir, hash_algo, ref_storage_format_uri,
 			  init_shared_repository, &reinit);
 	create_reference_database(the_repository, initial_branch, quiet);
@@ -264,7 +264,7 @@ int cmd_init_db(int argc,
 
 	free(template_dir_to_free);
 	free(real_git_dir_to_free);
-	free(work_tree);
+	free(work_पुनो);
 	free(git_dir);
 	return 0;
 }

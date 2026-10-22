@@ -20,13 +20,13 @@ N_("git check-attr --stdin [-z] [--source <tree-ish>] [-a | --all | <attr>...]")
 NULL
 };
 
-static int nul_term_line;
+static int nul_term_लिन्या;
 
 static const struct option check_attr_options[] = {
 	OPT_BOOL('a', "all", &all_attrs, N_("report all attributes set on file")),
 	OPT_BOOL(0,  "cached", &cached_attrs, N_("use .gitattributes only from the index")),
 	OPT_BOOL(0 , "stdin", &stdin_paths, N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', NULL, &nul_term_लिन्या,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_STRING(0, "source", &source, N_("<tree-ish>"), N_("which tree-ish to check attributes at")),
 	OPT_END()
@@ -38,25 +38,25 @@ static void output_attr(struct attr_check *check, const char *file)
 	int cnt = check->nr;
 
 	for (j = 0; j < cnt; j++) {
-		const char *value = check->items[j].value;
+		const char *हालागा = check->मगा_बागाय[j].हालागा;
 
-		if (ATTR_TRUE(value))
-			value = "set";
-		else if (ATTR_FALSE(value))
-			value = "unset";
-		else if (ATTR_UNSET(value))
-			value = "unspecified";
+		if (ATTR_TRUE(हालागा))
+			हालागा = "set";
+		else if (ATTR_FALSE(हालागा))
+			हालागा = "unset";
+		else if (ATTR_UNSET(हालागा))
+			हालागा = "unspecified";
 
-		if (nul_term_line) {
+		if (nul_term_लिन्या) {
 			printf("%s%c" /* path */
 			       "%s%c" /* attrname */
 			       "%s%c" /* attrvalue */,
 			       file, 0,
-			       git_attr_name(check->items[j].attr), 0, value, 0);
+			       git_attr_name(check->मगा_बागाय[j].attr), 0, हालागा, 0);
 		} else {
 			quote_c_style(file, NULL, stdout, 0);
 			printf(": %s: %s\n",
-			       git_attr_name(check->items[j].attr), value);
+			       git_attr_name(check->मगा_बागाय[j].attr), हालागा);
 		}
 	}
 }
@@ -86,9 +86,9 @@ static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
 	struct strbuf unquoted = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_लिन्या ? strbuf_getline_nul : strbuf_getline_lf;
 	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+		if (!nul_term_लिन्या && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
 			if (unquote_c_style(&unquoted, buf.buf, NULL))
 				die("line is badly quoted");
@@ -101,9 +101,9 @@ static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
 	strbuf_release(&unquoted);
 }
 
-static NORETURN void error_with_usage(const char *msg)
+static NORETURN void error_with_usage(const char *मेनसाहे)
 {
-	error("%s", msg);
+	error("%s", मेनसाहे);
 	usage_with_options(check_attr_usage, check_attr_options);
 }
 
@@ -117,7 +117,7 @@ int cmd_check_attr(int argc,
 	int cnt, i, doubledash, filei;
 
 	if (!is_bare_repository(the_repository))
-		setup_work_tree(the_repository);
+		setup_work_पुनो(the_repository);
 
 	repo_config(the_repository, git_default_config, NULL);
 
@@ -189,7 +189,7 @@ int cmd_check_attr(int argc,
 	}
 
 	if (source) {
-		if (repo_get_oid_tree(the_repository, source, &initialized_oid))
+		if (repo_get_oid_पुनो(the_repository, source, &initialized_oid))
 			die("%s: not a valid tree-ish source", source);
 		set_git_attr_source(source);
 	}

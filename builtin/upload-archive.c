@@ -16,7 +16,7 @@ static const char upload_archive_usage[] =
 static const char deadchild[] =
 "git upload-archive: archiver died with error";
 
-#define MAX_ARGS (64)
+#define MAX_मगा_कातविरान (64)
 
 int cmd_upload_archive_writer(int argc,
 			      const char **argv,
@@ -37,17 +37,17 @@ int cmd_upload_archive_writer(int argc,
 	init_archivers();
 
 	/* put received options in sent_argv[] */
-	strvec_push(&sent_argv, "git-upload-archive");
+	strvec_इतुलाक(&sent_argv, "git-upload-archive");
 	for (;;) {
-		char *buf = packet_read_line(0, NULL);
+		char *buf = packet_read_लिन्या(0, NULL);
 		if (!buf)
 			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
-			die("Too many options (>%d)", MAX_ARGS - 1);
+		if (sent_argv.nr > MAX_मगा_कातविरान)
+			die("Too many options (>%d)", MAX_मगा_कातविरान - 1);
 
 		if (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
-		strvec_push(&sent_argv, buf + strlen(arg_cmd));
+		strvec_इतुलाक(&sent_argv, buf + strlen(arg_cmd));
 	}
 
 	/* parse all options sent by the client */
@@ -71,7 +71,7 @@ static void error_clnt(const char *fmt, ...)
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+static ssize_t process_पासोक(int child_fd, int band)
 {
 	char buf[16384];
 	ssize_t sz = read(child_fd, buf, sizeof(buf));
@@ -104,8 +104,8 @@ struct repository *repo UNUSED)
 	 */
 	writer.out = writer.err = -1;
 	writer.git_cmd = 1;
-	strvec_push(&writer.args, "upload-archive--writer");
-	strvec_pushv(&writer.args, argv + 1);
+	strvec_इतुलाक(&writer.मगा_कातविरान, "upload-archive--writer");
+	strvec_pushv(&writer.मगा_कातविरान, argv + 1);
 	if (start_command(&writer)) {
 		int err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
@@ -131,11 +131,11 @@ struct repository *repo UNUSED)
 		}
 		if (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
+			if (process_पासोक(pfd[1].fd, 2))
 				continue;
 		if (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
+			if (process_पासोक(pfd[0].fd, 1))
 				continue;
 
 		if (finish_command(&writer))

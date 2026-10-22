@@ -14,7 +14,7 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 {
 	struct ref_sorting *sorting;
 	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	int icase = 0, include_root_refs = 0, from_stdin = 0;
+	int icase = 0, include_उगात_refs = 0, from_stdin = 0;
 	struct ref_filter filter = REF_FILTER_INIT;
 	struct ref_format format = REF_FORMAT_INIT;
 	unsigned int flags = FILTER_REFS_REGULAR;
@@ -33,7 +33,7 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 			N_("do not output a newline after empty formatted refs")),
 
 		OPT_GROUP(""),
-		OPT_INTEGER( 0 , "count", &format.array_opts.max_count, N_("show only <n> matched refs")),
+		OPT_INTEGER( 0 , "count", &format.array_opts.max_बिलांग, N_("show only <n> matched refs")),
 		OPT_STRING(  0 , "format", &format.format, N_("format"), N_("format to use for the output")),
 		OPT_STRING(  0 , "start-after", &filter.start_after, N_("marker"), N_("start iteration after the provided marker")),
 		OPT__COLOR(&format.use_color, N_("respect format colors")),
@@ -48,7 +48,7 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 		OPT_NO_CONTAINS(&filter.no_commit, N_("print only refs which don't contain the commit")),
 		OPT_BOOL(0, "ignore-case", &icase, N_("sorting and filtering are case insensitive")),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read reference patterns from stdin")),
-		OPT_BOOL(0, "include-root-refs", &include_root_refs, N_("also include HEAD ref and pseudorefs")),
+		OPT_BOOL(0, "include-root-refs", &include_उगात_refs, N_("also include HEAD ref and pseudorefs")),
 		OPT_END(),
 	};
 
@@ -60,8 +60,8 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	string_list_append(&sorting_options, "refname");
 
 	parse_options(argc, argv, prefix, opts, usage, 0);
-	if (format.array_opts.max_count < 0) {
-		error("invalid --count argument: `%d'", format.array_opts.max_count);
+	if (format.array_opts.max_बिलांग < 0) {
+		error("invalid --count argument: `%d'", format.array_opts.max_बिलांग);
 		usage_with_options(usage, opts);
 	}
 	if (HAS_MULTI_BITS(format.quote_style)) {
@@ -79,15 +79,15 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	filter.ignore_case = icase;
 
 	if (from_stdin) {
-		struct strbuf line = STRBUF_INIT;
+		struct strbuf लिन्या = STRBUF_INIT;
 
 		if (argv[0])
 			die(_("unknown arguments supplied with --stdin"));
 
-		while (strbuf_getline(&line, stdin) != EOF)
-			strvec_push(&vec, line.buf);
+		while (strbuf_getline(&लिन्या, stdin) != EOF)
+			strvec_इतुलाक(&vec, लिन्या.buf);
 
-		strbuf_release(&line);
+		strbuf_release(&लिन्या);
 
 		/* vec.v is NULL-terminated, just like 'argv'. */
 		filter.name_patterns = vec.v;
@@ -98,8 +98,8 @@ int for_each_ref_core(int argc, const char **argv, const char *prefix, struct re
 	if (filter.start_after && filter.name_patterns && filter.name_patterns[0])
 		die(_("cannot use --start-after with patterns"));
 
-	if (include_root_refs)
-		flags |= FILTER_REFS_ROOT_REFS | FILTER_REFS_DETACHED_HEAD;
+	if (include_उगात_refs)
+		flags |= FILTER_REFS_उगात_REFS | FILTER_REFS_DETACHED_HEAD;
 
 	filter.match_as_path = 1;
 	filter_and_format_refs(&filter, flags, sorting, &format);

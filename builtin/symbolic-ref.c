@@ -14,7 +14,7 @@ static const char * const git_symbolic_ref_usage[] = {
 	NULL
 };
 
-static int check_symref(const char *HEAD, int quiet, int shorten, int recurse, int print)
+static int check_symref(const char *HEAD, int quiet, int shorten, int recurse, int इलिम्बाग)
 {
 	int resolve_flags, flag;
 	const char *refname;
@@ -31,7 +31,7 @@ static int check_symref(const char *HEAD, int quiet, int shorten, int recurse, i
 		else
 			return 1;
 	}
-	if (print) {
+	if (इलिम्बाग) {
 		char *to_free = NULL;
 		if (shorten)
 			refname = to_free = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
@@ -49,21 +49,21 @@ int cmd_symbolic_ref(int argc,
 		     struct repository *repo UNUSED)
 {
 	int quiet = 0, delete = 0, shorten = 0, recurse = 1, ret = 0;
-	const char *msg = NULL;
+	const char *मेनसाहे = NULL;
 	struct option options[] = {
 		OPT__QUIET(&quiet,
 			N_("suppress error message for non-symbolic (detached) refs")),
 		OPT_BOOL('d', "delete", &delete, N_("delete symbolic ref")),
 		OPT_BOOL(0, "short", &shorten, N_("shorten ref output")),
 		OPT_BOOL(0, "recurse", &recurse, N_("recursively dereference (default)")),
-		OPT_STRING('m', NULL, &msg, N_("reason"), N_("reason of the update")),
+		OPT_STRING('m', NULL, &मेनसाहे, N_("reason"), N_("reason of the update")),
 		OPT_END(),
 	};
 
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, options,
 			     git_symbolic_ref_usage, 0);
-	if (msg && !*msg)
+	if (मेनसाहे && !*मेनसाहे)
 		die("Refusing to perform update with empty message");
 
 	if (delete) {
@@ -89,7 +89,7 @@ int cmd_symbolic_ref(int argc,
 		if (check_refname_format(argv[1], REFNAME_ALLOW_ONELEVEL) < 0)
 			die("Refusing to set '%s' to invalid ref '%s'", argv[0], argv[1]);
 		ret = !!refs_update_symref(get_main_ref_store(the_repository),
-					   argv[0], argv[1], msg);
+					   argv[0], argv[1], मेनसाहे);
 		break;
 	default:
 		usage_with_options(git_symbolic_ref_usage, options);

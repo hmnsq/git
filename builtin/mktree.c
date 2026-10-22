@@ -21,7 +21,7 @@ static struct treeent {
 } **entries;
 static int alloc, used;
 
-static void append_to_tree(unsigned mode, struct object_id *oid, char *path)
+static void append_to_पुनो(unsigned mode, struct object_id *oid, char *path)
 {
 	struct treeent *ent;
 	size_t len = strlen(path);
@@ -45,7 +45,7 @@ static int ent_compare(const void *a_, const void *b_)
 				 b->name, b->len, b->mode);
 }
 
-static void write_tree(struct repository *repo, struct object_id *oid)
+static void write_पुनो(struct repository *repo, struct object_id *oid)
 {
 	struct strbuf buf;
 	size_t size;
@@ -62,7 +62,7 @@ static void write_tree(struct repository *repo, struct object_id *oid)
 		strbuf_add(&buf, ent->oid.hash, repo->hash_algo->rawsz);
 	}
 
-	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_TREE, oid);
+	odb_write_object(repo->objects, buf.buf, buf.len, OBJ_पुनो, oid);
 	strbuf_release(&buf);
 }
 
@@ -71,7 +71,7 @@ static const char *const mktree_usage[] = {
 	NULL
 };
 
-static void mktree_line(struct repository *repo, char *buf, int nul_term_line, int allow_missing)
+static void mktree_लिन्या(struct repository *repo, char *buf, int nul_term_लिन्या, int allow_missing)
 {
 	char *ptr, *ntr;
 	const char *p;
@@ -104,7 +104,7 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 	*ntr++ = 0; /* now at the beginning of SHA1 */
 
 	path = (char *)p + 1;  /* at the beginning of name */
-	if (!nul_term_line && path[0] == '"') {
+	if (!nul_term_लिन्या && path[0] == '"') {
 		struct strbuf p_uq = STRBUF_INIT;
 		if (unquote_c_style(&p_uq, path, NULL))
 			die("invalid quoting");
@@ -146,7 +146,7 @@ static void mktree_line(struct repository *repo, char *buf, int nul_term_line, i
 		}
 	}
 
-	append_to_tree(mode, &oid, path);
+	append_to_पुनो(mode, &oid, path);
 	free(to_free);
 }
 
@@ -157,21 +157,21 @@ int cmd_mktree(int ac,
 {
 	struct strbuf sb = STRBUF_INIT;
 	struct object_id oid;
-	int nul_term_line = 0;
+	int nul_term_लिन्या = 0;
 	int allow_missing = 0;
 	int is_batch_mode = 0;
 	int got_eof = 0;
 	strbuf_getline_fn getline_fn;
 
 	const struct option option[] = {
-		OPT_BOOL('z', NULL, &nul_term_line, N_("input is NUL terminated")),
+		OPT_BOOL('z', NULL, &nul_term_लिन्या, N_("input is NUL terminated")),
 		OPT_SET_INT( 0 , "missing", &allow_missing, N_("allow missing objects"), 1),
 		OPT_SET_INT( 0 , "batch", &is_batch_mode, N_("allow creation of more than one tree"), 1),
 		OPT_END()
 	};
 
 	ac = parse_options(ac, av, prefix, option, mktree_usage, 0);
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
+	getline_fn = nul_term_लिन्या ? strbuf_getline_nul : strbuf_getline_lf;
 
 	while (!got_eof) {
 		while (1) {
@@ -185,7 +185,7 @@ int cmd_mktree(int ac,
 					break;
 				die("input format error: (blank line only valid in batch mode)");
 			}
-			mktree_line(repo, sb.buf, nul_term_line, allow_missing);
+			mktree_लिन्या(repo, sb.buf, nul_term_लिन्या, allow_missing);
 		}
 		if (is_batch_mode && got_eof && used < 1) {
 			/*
@@ -195,7 +195,7 @@ int cmd_mktree(int ac,
 			 */
 			; /* skip creating an empty tree */
 		} else {
-			write_tree(repo, &oid);
+			write_पुनो(repo, &oid);
 			puts(oid_to_hex(&oid));
 			fflush(stdout);
 		}
