@@ -1,386 +1,386 @@
-#include "builtin.h"
-#include "config.h"
-#include "fsck.h"
-#include "pack-refs.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "strbuf.h"
-#include "worktree.h"
-#include "for-each-ref.h"
-#include "refs/refs-internal.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "fsck.h"
+#شامل "pack-refs.h"
+#شامل "parse-options.h"
+#شامل "refs.h"
+#شامل "strbuf.h"
+#شامل "worktree.h"
+#شامل "for-each-ref.h"
+#شامل "refs/refs-internal.h"
 
-#define REFS_MIGRATE_USAGE \
+#تعریف_کرو REFS_MIGRATE_USAGE \
 	N_("git refs migrate --ref-storage-format=<format> [--no-reflog] [--dry-run]")
 
-#define REFS_VERIFY_USAGE \
+#تعریف_کرو REFS_VERIFY_USAGE \
 	N_("git refs verify [--strict] [--verbose]")
 
-#define REFS_EXISTS_USAGE \
+#تعریف_کرو REFS_EXISTS_USAGE \
 	N_("git refs exists <ref>")
 
-#define REFS_OPTIMIZE_USAGE \
+#تعریف_کرو REFS_OPTIMIZE_USAGE \
 	N_("git refs optimize " PACK_REFS_OPTS)
 
-#define REFS_CREATE_USAGE \
+#تعریف_کرو REFS_CREATE_USAGE \
 	N_("git refs create [--message=<reason>] [--no-deref] [--create-reflog] <ref> <new-value>")
 
-#define REFS_DELETE_USAGE \
+#تعریف_کرو REFS_DELETE_USAGE \
 	N_("git refs delete [--message=<reason>] [--no-deref] <ref> [<old-value>]")
 
-#define REFS_UPDATE_USAGE \
+#تعریف_کرو REFS_UPDATE_USAGE \
 	N_("git refs update [--message=<reason>] [--no-deref] [--create-reflog] <ref> <new-value> [<old-value>]")
 
-#define REFS_RENAME_USAGE \
+#تعریف_کرو REFS_RENAME_USAGE \
 	N_("git refs rename [--message=<reason>] <old-ref> <new-ref>")
 
-static int cmd_refs_migrate(int argc, const char **argv, const char *prefix,
-			    struct repository *repo)
+ساکن صحیح cmd_refs_migrate(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			    ساخت repository *repo)
 {
-	const char * const migrate_usage[] = {
+	ثابت حرف * ثابت migrate_usage[] = {
 		REFS_MIGRATE_USAGE,
-		NULL,
+		تہی,
 	};
-	const char *format_str = NULL;
-	enum ref_storage_format format;
-	unsigned int flags = 0;
-	struct option options[] = {
+	ثابت حرف *format_str = تہی;
+	شمار ref_storage_format format;
+	غیرعلامتی صحیح flags = 0;
+	ساخت option options[] = {
 		OPT_STRING_F(0, "ref-storage-format", &format_str, N_("format"),
 			N_("specify the reference storage format to convert to"),
 			PARSE_OPT_NONEG),
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
-		OPT_BIT(0, "dry-run", &flags,
+		OPT_ثنائی_ہندسہ(0, "dry-run", &flags,
 			N_("perform a non-destructive dry-run"),
 			REPO_MIGRATE_REF_STORAGE_FORMAT_DRYRUN),
-		OPT_BIT(0, "no-reflog", &flags,
+		OPT_ثنائی_ہندسہ(0, "no-reflog", &flags,
 			N_("drop reflogs entirely during the migration"),
 			REPO_MIGRATE_REF_STORAGE_FORMAT_SKIP_REFLOG),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct strbuf errbuf = STRBUF_INIT;
-	int err;
+	ساخت strbuf errbuf = STRBUF_INIT;
+	صحیح err;
 
-	argc = parse_options(argc, argv, prefix, options, migrate_usage, 0);
-	if (argc)
+	argc = parse_options(argc, argv, سابقہ, options, migrate_usage, 0);
+	اگر (argc)
 		usage(_("too many arguments"));
-	if (!format_str)
+	اگر (!format_str)
 		usage(_("missing --ref-storage-format=<format>"));
 
 	format = ref_storage_format_by_name(format_str);
-	if (format == REF_STORAGE_FORMAT_UNKNOWN) {
+	اگر (format == REF_STORAGE_FORMAT_UNKNOWN) {
 		err = error(_("unknown ref storage format '%s'"), format_str);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (repo->ref_storage_format == format) {
+	اگر (repo->ref_storage_format == format) {
 		err = error(_("repository already uses '%s' format"),
-			    ref_storage_format_to_name(format));
-		goto out;
+			    ref_storage_format_مقصد_name(format));
+		جاؤ برآمد;
 	}
 
-	if (repo_migrate_ref_storage_format(repo, format, flags, &errbuf) < 0) {
+	اگر (repo_migrate_ref_storage_format(repo, format, flags, &errbuf) < 0) {
 		err = error("%s", errbuf.buf);
-		goto out;
+		جاؤ برآمد;
 	}
 
 	err = 0;
 
-out:
+برآمد:
 	strbuf_release(&errbuf);
-	return err;
+	واپس err;
 }
 
-static int cmd_refs_verify(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_verify(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	struct fsck_options fsck_refs_options;
-	struct worktree **worktrees;
-	const char * const verify_usage[] = {
+	ساخت fsck_options fsck_refs_options;
+	ساخت worktree **worktrees;
+	ثابت حرف * ثابت verify_usage[] = {
 		REFS_VERIFY_USAGE,
-		NULL,
+		تہی,
 	};
-	struct option options[] = {
+	ساخت option options[] = {
 		OPT_BOOL(0, "verbose", &fsck_refs_options.verbose, N_("be verbose")),
 		OPT_BOOL(0, "strict", &fsck_refs_options.strict, N_("enable strict checking")),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	int ret = 0;
+	صحیح ret = 0;
 
 	fsck_options_init(&fsck_refs_options, repo, FSCK_OPTIONS_REFS);
 
-	argc = parse_options(argc, argv, prefix, options, verify_usage, 0);
-	if (argc)
+	argc = parse_options(argc, argv, سابقہ, options, verify_usage, 0);
+	اگر (argc)
 		usage(_("'git refs verify' takes no arguments"));
 
 	repo_config(repo, git_fsck_config, &fsck_refs_options);
 	prepare_repo_settings(repo);
 
-	worktrees = get_worktrees_without_reading_head(repo);
-	for (size_t i = 0; worktrees[i]; i++)
+	worktrees = get_worktrees_without_reading_سر(repo);
+	برائے (سائز_t i = 0; worktrees[i]; i++)
 		ret |= refs_fsck(get_worktree_ref_store(worktrees[i]),
 				 &fsck_refs_options, worktrees[i]);
 
 	fsck_options_clear(&fsck_refs_options);
 	free_worktrees(worktrees);
-	return ret;
+	واپس ret;
 }
 
-static int cmd_refs_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_list(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	static char const * const refs_list_usage[] = {
+	ساکن حرف ثابت * ثابت refs_list_usage[] = {
 		N_("git refs list " COMMON_USAGE_FOR_EACH_REF),
-		NULL
+		تہی
 	};
 
-	return for_each_ref_core(argc, argv, prefix, repo, refs_list_usage);
+	واپس for_each_ref_core(argc, argv, سابقہ, repo, refs_list_usage);
 }
 
-static int cmd_refs_exists(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_exists(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	struct strbuf unused_referent = STRBUF_INIT;
-	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
-	const char *ref;
-	int ret = 0;
-	const char * const exists_usage[] = {
+	ساخت strbuf غیر_مستعمل_referent = STRBUF_INIT;
+	ساخت object_id غیر_مستعمل_oid;
+	غیرعلامتی صحیح غیر_مستعمل_type;
+	صحیح failure_errno = 0;
+	ثابت حرف *ref;
+	صحیح ret = 0;
+	ثابت حرف * ثابت exists_usage[] = {
 		REFS_EXISTS_USAGE,
-		NULL,
+		تہی,
 	};
-	struct option options[] = {
-		OPT_END(),
+	ساخت option options[] = {
+		OPT_انتہا(),
 	};
 
-	argc = parse_options(argc, argv, prefix, options, exists_usage, 0);
-	if (argc != 1)
+	argc = parse_options(argc, argv, سابقہ, options, exists_usage, 0);
+	اگر (argc != 1)
 		die(_("'git refs exists' requires a reference"));
 
 	ref = *argv++;
-	if (refs_read_raw_ref(get_main_ref_store(repo), ref,
-			      &unused_oid, &unused_referent, &unused_type,
+	اگر (refs_read_raw_ref(get_main_ref_store(repo), ref,
+			      &غیر_مستعمل_oid, &غیر_مستعمل_referent, &غیر_مستعمل_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		اگر (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} ورنہ {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
 		}
 
-		goto out;
+		جاؤ برآمد;
 	}
 
-out:
-	strbuf_release(&unused_referent);
-	return ret;
+برآمد:
+	strbuf_release(&غیر_مستعمل_referent);
+	واپس ret;
 }
 
-static int cmd_refs_optimize(int argc, const char **argv, const char *prefix,
-			     struct repository *repo)
+ساکن صحیح cmd_refs_optimize(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			     ساخت repository *repo)
 {
-	static char const * const refs_optimize_usage[] = {
+	ساکن حرف ثابت * ثابت refs_optimize_usage[] = {
 		REFS_OPTIMIZE_USAGE,
-		NULL
+		تہی
 	};
 
-	return pack_refs_core(argc, argv, prefix, repo, refs_optimize_usage);
+	واپس pack_refs_core(argc, argv, سابقہ, repo, refs_optimize_usage);
 }
 
-static int cmd_refs_create(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_create(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	static char const * const refs_create_usage[] = {
+	ساکن حرف ثابت * ثابت refs_create_usage[] = {
 		REFS_CREATE_USAGE,
-		NULL
+		تہی
 	};
-	const char *message = NULL;
-	unsigned flags = 0;
-	struct option opts[] = {
-		OPT_STRING(0, "message", &message, N_("reason"),
+	ثابت حرف *پیغام_2 = تہی;
+	غیرعلامتی flags = 0;
+	ساخت option opts[] = {
+		OPT_STRING(0, "message", &پیغام_2, N_("reason"),
 			   N_("reason of the update")),
-		OPT_BIT(0 ,"no-deref", &flags,
+		OPT_ثنائی_ہندسہ(0 ,"no-deref", &flags,
 			N_("update <refname> not the one it points to"),
 			REF_NO_DEREF),
-		OPT_BIT(0, "create-reflog", &flags, N_("create a reflog"),
+		OPT_ثنائی_ہندسہ(0, "create-reflog", &flags, N_("create a reflog"),
 			REF_FORCE_CREATE_REFLOG),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct object_id newoid;
-	const char *refname;
-	int ret;
+	ساخت object_id newoid;
+	ثابت حرف *refname;
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, opts, refs_create_usage, 0);
-	if (argc != 2)
+	argc = parse_options(argc, argv, سابقہ, opts, refs_create_usage, 0);
+	اگر (argc != 2)
 		usage(_("create requires reference name and an object ID"));
 
-	if (message && !*message)
+	اگر (پیغام_2 && !*پیغام_2)
 		die(_("refusing to perform update with empty message"));
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
 	refname = argv[0];
-	if (repo_get_oid_with_flags(repo, argv[1], &newoid, GET_OID_SKIP_AMBIGUITY_CHECK))
+	اگر (repo_get_oid_with_flags(repo, argv[1], &newoid, GET_OID_SKIP_AMBIGUITY_CHECK))
 		die(_("invalid object ID: '%s'"), argv[1]);
-	if (is_null_oid(&newoid))
+	اگر (is_null_oid(&newoid))
 		die(_("cannot create reference with null new object ID"));
 
-	ret = refs_update_ref(get_main_ref_store(repo), message, refname,
+	ret = refs_update_ref(get_main_ref_store(repo), پیغام_2, refname,
 			      &newoid, null_oid(repo->hash_algo), flags,
-			      UPDATE_REFS_MSG_ON_ERR);
+			      UPDATE_REFS_پیغام_ON_ERR);
 
-	if (ret < 0)
+	اگر (ret < 0)
 		ret = 1;
-	return ret;
+	واپس ret;
 }
 
-static int cmd_refs_delete(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_delete(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	static char const * const refs_delete_usage[] = {
+	ساکن حرف ثابت * ثابت refs_delete_usage[] = {
 		REFS_DELETE_USAGE,
-		NULL
+		تہی
 	};
-	const char *message = NULL;
-	unsigned flags = 0;
-	struct option opts[] = {
-		OPT_STRING(0, "message", &message, N_("reason"),
+	ثابت حرف *پیغام_2 = تہی;
+	غیرعلامتی flags = 0;
+	ساخت option opts[] = {
+		OPT_STRING(0, "message", &پیغام_2, N_("reason"),
 			   N_("reason of the update")),
-		OPT_BIT(0 ,"no-deref", &flags,
+		OPT_ثنائی_ہندسہ(0 ,"no-deref", &flags,
 			N_("update <refname> not the one it points to"),
 			REF_NO_DEREF),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct object_id oldoid;
-	const char *refname;
-	int ret;
+	ساخت object_id oldoid;
+	ثابت حرف *refname;
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, opts, refs_delete_usage, 0);
-	if (argc < 1 || argc > 2)
+	argc = parse_options(argc, argv, سابقہ, opts, refs_delete_usage, 0);
+	اگر (argc < 1 || argc > 2)
 		usage(_("delete requires reference name and an optional old object ID"));
 
-	if (message && !*message)
+	اگر (پیغام_2 && !*پیغام_2)
 		die(_("refusing to perform update with empty message"));
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
 	refname = argv[0];
-	if (argc == 2) {
-		if (repo_get_oid_with_flags(repo, argv[1], &oldoid, GET_OID_SKIP_AMBIGUITY_CHECK))
+	اگر (argc == 2) {
+		اگر (repo_get_oid_with_flags(repo, argv[1], &oldoid, GET_OID_SKIP_AMBIGUITY_CHECK))
 			die(_("invalid old object ID: '%s'"), argv[1]);
-		if (is_null_oid(&oldoid))
+		اگر (is_null_oid(&oldoid))
 			die(_("cannot delete reference with null old object ID"));
 	}
 
-	ret = refs_delete_ref(get_main_ref_store(repo), message, refname,
-			      argc == 2 ? &oldoid : NULL, flags);
+	ret = refs_delete_ref(get_main_ref_store(repo), پیغام_2, refname,
+			      argc == 2 ? &oldoid : تہی, flags);
 
-	if (ret < 0)
+	اگر (ret < 0)
 		ret = 1;
-	return ret;
+	واپس ret;
 }
 
-static int cmd_refs_update(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_update(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	static char const * const refs_update_usage[] = {
+	ساکن حرف ثابت * ثابت refs_update_usage[] = {
 		REFS_UPDATE_USAGE,
-		NULL
+		تہی
 	};
-	const char *message = NULL;
-	unsigned flags = 0;
-	struct option opts[] = {
-		OPT_STRING(0, "message", &message, N_("reason"),
+	ثابت حرف *پیغام_2 = تہی;
+	غیرعلامتی flags = 0;
+	ساخت option opts[] = {
+		OPT_STRING(0, "message", &پیغام_2, N_("reason"),
 			   N_("reason of the update")),
-		OPT_BIT(0 ,"no-deref", &flags,
+		OPT_ثنائی_ہندسہ(0 ,"no-deref", &flags,
 			N_("update <refname> not the one it points to"),
 			REF_NO_DEREF),
-		OPT_BIT(0, "create-reflog", &flags, N_("create a reflog"),
+		OPT_ثنائی_ہندسہ(0, "create-reflog", &flags, N_("create a reflog"),
 			REF_FORCE_CREATE_REFLOG),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct object_id newoid, oldoid;
-	const char *refname;
-	int ret;
+	ساخت object_id newoid, oldoid;
+	ثابت حرف *refname;
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, opts, refs_update_usage, 0);
-	if (argc < 2 || argc > 3)
+	argc = parse_options(argc, argv, سابقہ, opts, refs_update_usage, 0);
+	اگر (argc < 2 || argc > 3)
 		usage(_("update requires reference name, new value and an optional old value"));
 
-	if (message && !*message)
+	اگر (پیغام_2 && !*پیغام_2)
 		die(_("refusing to perform update with empty message"));
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
 	refname = argv[0];
-	if (repo_get_oid_with_flags(repo, argv[1], &newoid,
+	اگر (repo_get_oid_with_flags(repo, argv[1], &newoid,
 				    GET_OID_SKIP_AMBIGUITY_CHECK))
 		die(_("invalid new object ID: '%s'"), argv[1]);
-	if (argc == 3 &&
+	اگر (argc == 3 &&
 	    repo_get_oid_with_flags(repo, argv[2], &oldoid,
 				    GET_OID_SKIP_AMBIGUITY_CHECK))
 		die(_("invalid old object ID: '%s'"), argv[2]);
 
-	ret = refs_update_ref(get_main_ref_store(repo), message, refname,
-			      &newoid, argc == 3 ? &oldoid : NULL, flags,
-			      UPDATE_REFS_MSG_ON_ERR);
+	ret = refs_update_ref(get_main_ref_store(repo), پیغام_2, refname,
+			      &newoid, argc == 3 ? &oldoid : تہی, flags,
+			      UPDATE_REFS_پیغام_ON_ERR);
 
-	if (ret < 0)
+	اگر (ret < 0)
 		ret = 1;
-	return ret;
+	واپس ret;
 }
 
-static int cmd_refs_rename(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+ساکن صحیح cmd_refs_rename(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			   ساخت repository *repo)
 {
-	static char const * const refs_rename_usage[] = {
+	ساکن حرف ثابت * ثابت refs_rename_usage[] = {
 		REFS_RENAME_USAGE,
-		NULL
+		تہی
 	};
-	const char *message = NULL;
-	struct option opts[] = {
-		OPT_STRING(0, "message", &message, N_("reason"),
+	ثابت حرف *پیغام_2 = تہی;
+	ساخت option opts[] = {
+		OPT_STRING(0, "message", &پیغام_2, N_("reason"),
 			   N_("reason of the update")),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	const char *oldref, *newref;
-	int ret;
+	ثابت حرف *oldref, *newref;
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, opts, refs_rename_usage, 0);
-	if (argc != 2)
+	argc = parse_options(argc, argv, سابقہ, opts, refs_rename_usage, 0);
+	اگر (argc != 2)
 		usage(_("rename requires old and new reference name"));
-	if (message && !*message)
+	اگر (پیغام_2 && !*پیغام_2)
 		die(_("refusing to perform update with empty message"));
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
 	oldref = argv[0];
 	newref = argv[1];
 
-	if (check_refname_format(oldref, 0))
+	اگر (check_refname_format(oldref, 0))
 		die(_("invalid ref format: '%s'"), oldref);
-	if (check_refname_format(newref, 0))
+	اگر (check_refname_format(newref, 0))
 		die(_("invalid ref format: '%s'"), newref);
 
-	if (!refs_ref_exists(get_main_ref_store(repo), oldref))
+	اگر (!refs_ref_exists(get_main_ref_store(repo), oldref))
 		die(_("reference does not exist: '%s'"), oldref);
-	if (refs_ref_exists(get_main_ref_store(repo), newref))
+	اگر (refs_ref_exists(get_main_ref_store(repo), newref))
 		die(_("reference already exists: '%s'"), newref);
 
-	ret = refs_rename_ref(get_main_ref_store(repo), oldref, newref, message);
+	ret = refs_rename_ref(get_main_ref_store(repo), oldref, newref, پیغام_2);
 
-	if (ret < 0)
+	اگر (ret < 0)
 		ret = 1;
-	return ret;
+	واپس ret;
 }
 
-int cmd_refs(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+صحیح cmd_refs(صحیح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *سابقہ,
+	     ساخت repository *repo)
 {
-	const char * const refs_usage[] = {
+	ثابت حرف * ثابت refs_usage[] = {
 		REFS_MIGRATE_USAGE,
 		REFS_VERIFY_USAGE,
 		REFS_OPTIMIZE_USAGE,
@@ -390,23 +390,23 @@ int cmd_refs(int argc,
 		REFS_DELETE_USAGE,
 		REFS_UPDATE_USAGE,
 		REFS_RENAME_USAGE,
-		NULL,
+		تہی,
 	};
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option opts[] = {
-		OPT_GROUP(N_("Reference database")),
+	parse_opt_subcommand_fn *fn = تہی;
+	ساخت option opts[] = {
+		OPT_گروہ(N_("Reference database")),
 		OPT_SUBCOMMAND_F("migrate", &fn, cmd_refs_migrate,
 				 N_("migrate the reference database to a different format"), 0),
 		OPT_SUBCOMMAND_F("verify", &fn, cmd_refs_verify,
 				 N_("verify the consistency of the reference database"), 0),
 		OPT_SUBCOMMAND_F("optimize", &fn, cmd_refs_optimize,
 				 N_("optimize the reference database"), 0),
-		OPT_GROUP(N_("Reading references")),
+		OPT_گروہ(N_("Reading references")),
 		OPT_SUBCOMMAND_F("list", &fn, cmd_refs_list,
 				 N_("list references"), 0),
 		OPT_SUBCOMMAND_F("exists", &fn, cmd_refs_exists,
 				 N_("check whether a reference exists"), 0),
-		OPT_GROUP(N_("Writing references")),
+		OPT_گروہ(N_("Writing references")),
 		OPT_SUBCOMMAND_F("create", &fn, cmd_refs_create,
 				 N_("create a new reference"), 0),
 		OPT_SUBCOMMAND_F("delete", &fn, cmd_refs_delete,
@@ -415,9 +415,9 @@ int cmd_refs(int argc,
 				 N_("update an existing reference"), 0),
 		OPT_SUBCOMMAND_F("rename", &fn, cmd_refs_rename,
 				 N_("rename a reference"), 0),
-		OPT_END(),
+		OPT_انتہا(),
 	};
 
-	argc = parse_options(argc, argv, prefix, opts, refs_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	argc = parse_options(argc, argv, سابقہ, opts, refs_usage, 0);
+	واپس fn(argc, argv, سابقہ, repo);
 }

@@ -3,411 +3,411 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#شامل "builtin.h"
 
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
-#include "tree.h"
-#include "path.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "pathspec.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "object-name.h"
+#شامل "odb.h"
+#شامل "tree.h"
+#شامل "path.h"
+#شامل "quote.h"
+#شامل "parse-options.h"
+#شامل "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+ساکن ثابت حرف * ثابت ls_درخت_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
-	NULL
+	تہی
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+ساکن خالی expand_objectsize(ساخت strbuf *سطر, ثابت ساخت object_id *oid,
+			      ثابت شمار object_type type, غیرعلامتی صحیح padded)
 {
-	static const char padding[] = "       ";
-	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
-	size_t len;
+	ساکن ثابت حرف padding[] = "       ";
+	سائز_t min_len = padded ? لڑی_لمبائی(padding) : 0;
+	سائز_t orig_len = سطر->len;
+	سائز_t len;
 
-	if (type == OBJ_BLOB) {
-		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+	اگر (type == OBJ_BLOB) {
+		سائز_t سائز;
+		اگر (odb_read_object_info(the_repository->objects, oid, &سائز) < 0)
 			die(_("could not get object info about '%s'"),
-			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
-	} else {
-		strbuf_addstr(line, "-");
+			    oid_مقصد_hex(oid));
+		strbuf_جوڑو_uint(سطر, سائز);
+	} ورنہ {
+		strbuf_addstr(سطر, "-");
 	}
-	len = line->len - orig_len;
-	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+	len = سطر->len - orig_len;
+	اگر (len < min_len)
+		strbuf_داخل_کرو(سطر, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
-	unsigned null_termination:1;
-	int abbrev;
-	enum ls_tree_path_options {
+ساخت ls_درخت_options {
+	غیرعلامتی null_termination:1;
+	صحیح abbrev;
+	شمار ls_درخت_راستہ_options {
 		LS_RECURSIVE = 1 << 0,
-		LS_TREE_ONLY = 1 << 1,
+		LS_درخت_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
-	struct pathspec pathspec;
-	const char *prefix;
-	const char *format;
+	ساخت pathspec pathspec;
+	ثابت حرف *سابقہ;
+	ثابت حرف *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
-			  size_t baselen, const char *pathname)
+ساکن صحیح show_recursive(ساخت ls_درخت_options *options, ثابت حرف *بنیاد,
+			  سائز_t baselen, ثابت حرف *pathname)
 {
-	int i;
+	صحیح i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	اگر (options->ls_options & LS_RECURSIVE)
+		واپس 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	اگر (!options->pathspec.nr)
+		واپس 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
-		size_t len, speclen;
+	برائے (i = 0; i < options->pathspec.nr; i++) {
+		ثابت حرف *spec = options->pathspec.اشیاء[i].مطابقت;
+		سائز_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
-			continue;
-		len = strlen(pathname);
+		اگر (لڑی_موازنہ(بنیاد, spec, baselen))
+			جاری;
+		len = لڑی_لمبائی(pathname);
 		spec += baselen;
-		speclen = strlen(spec);
-		if (speclen <= len)
-			continue;
-		if (spec[len] && spec[len] != '/')
-			continue;
-		if (memcmp(pathname, spec, len))
-			continue;
-		return 1;
+		speclen = لڑی_لمبائی(spec);
+		اگر (speclen <= len)
+			جاری;
+		اگر (spec[len] && spec[len] != '/')
+			جاری;
+		اگر (memcmp(pathname, spec, len))
+			جاری;
+		واپس 1;
 	}
-	return 0;
+	واپس 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
-			 const char *pathname, unsigned mode, void *context)
+ساکن صحیح show_درخت_fmt(ثابت ساخت object_id *oid, ساخت strbuf *بنیاد,
+			 ثابت حرف *pathname, غیرعلامتی منوال, خالی *context)
 {
-	struct ls_tree_options *options = context;
-	int recurse = 0;
-	struct strbuf sb = STRBUF_INIT;
-	enum object_type type = object_type(mode);
-	const char *format = options->format;
+	ساخت ls_درخت_options *options = context;
+	صحیح recurse = 0;
+	ساخت strbuf sb = STRBUF_INIT;
+	شمار object_type type = object_type(منوال);
+	ثابت حرف *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
-		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	اگر (type == OBJ_درخت && show_recursive(options, بنیاد->buf, بنیاد->len, pathname))
+		recurse = READ_درخت_RECURSIVE;
+	اگر (type == OBJ_درخت && recurse && !(options->ls_options & LS_SHOW_TREES))
+		واپس recurse;
+	اگر (type == OBJ_BLOB && (options->ls_options & LS_درخت_ONLY))
+		واپس 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
-		size_t len;
+	جب (strbuf_expand_قدم(&sb, &format)) {
+		سائز_t len;
 
-		if (skip_prefix(format, "%", &format))
+		اگر (skip_سابقہ(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		ورنہ اگر ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
-			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		ورنہ اگر (skip_سابقہ(format, "(objectmode)", &format))
+			strbuf_addf(&sb, "%06o", منوال);
+		ورنہ اگر (skip_سابقہ(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		ورنہ اگر (skip_سابقہ(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		ورنہ اگر (skip_سابقہ(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
-			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
-			const char *name;
-			const char *prefix = options->prefix;
-			struct strbuf sbuf = STRBUF_INIT;
-			size_t baselen = base->len;
+		ورنہ اگر (skip_سابقہ(format, "(objectname)", &format))
+			strbuf_جوڑو_unique_abbrev(&sb, oid, options->abbrev);
+		ورنہ اگر (skip_سابقہ(format, "(path)", &format)) {
+			ثابت حرف *name;
+			ثابت حرف *سابقہ = options->سابقہ;
+			ساخت strbuf sbuf = STRBUF_INIT;
+			سائز_t baselen = بنیاد->len;
 
-			strbuf_addstr(base, pathname);
-			name = relative_path(base->buf, prefix, &sbuf);
-			quote_c_style(name, &sb, NULL, 0);
-			strbuf_setlen(base, baselen);
+			strbuf_addstr(بنیاد, pathname);
+			name = relative_راستہ(بنیاد->buf, سابقہ, &sbuf);
+			quote_c_style(name, &sb, تہی, 0);
+			strbuf_setlen(بنیاد, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} ورنہ
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	واپس recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
-			    struct strbuf *base, const char *pathname,
-			    enum object_type type)
+ساکن صحیح show_درخت_common(ساخت ls_درخت_options *options, صحیح *recurse,
+			    ساخت strbuf *بنیاد, ثابت حرف *pathname,
+			    شمار object_type type)
 {
-	int ret = -1;
+	صحیح ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	اگر (type == OBJ_BLOB) {
+		اگر (options->ls_options & LS_درخت_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
-		   show_recursive(options, base->buf, base->len, pathname)) {
-		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+	} ورنہ اگر (type == OBJ_درخت &&
+		   show_recursive(options, بنیاد->buf, بنیاد->len, pathname)) {
+		*recurse = READ_درخت_RECURSIVE;
+		اگر (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	واپس ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
-					  struct strbuf *base,
-					  const char *pathname,
-					  const size_t baselen)
+ساکن خالی show_درخت_common_default_long(ساخت ls_درخت_options *options,
+					  ساخت strbuf *بنیاد,
+					  ثابت حرف *pathname,
+					  ثابت سائز_t baselen)
 {
-	const char *prefix = options->prefix;
+	ثابت حرف *سابقہ = options->سابقہ;
 
-	strbuf_addstr(base, pathname);
+	strbuf_addstr(بنیاد, pathname);
 
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	اگر (options->null_termination) {
+		ساخت strbuf sb = STRBUF_INIT;
+		ثابت حرف *name = relative_راستہ(بنیاد->buf, سابقہ, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
-		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
+	} ورنہ {
+		write_name_quoted_relative(بنیاد->buf, سابقہ, stdout, '\n');
 	}
 
-	strbuf_setlen(base, baselen);
+	strbuf_setlen(بنیاد, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
-			     const char *pathname, unsigned mode,
-			     void *context)
+ساکن صحیح show_درخت_default(ثابت ساخت object_id *oid, ساخت strbuf *بنیاد,
+			     ثابت حرف *pathname, غیرعلامتی منوال,
+			     خالی *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
+	ساخت ls_درخت_options *options = context;
+	صحیح early;
+	صحیح recurse;
+	شمار object_type type = object_type(منوال);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_درخت_common(options, &recurse, بنیاد, pathname, type);
+	اگر (early >= 0)
+		واپس early;
 
-	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
-	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	لکھو("%06o %s %s\t", منوال, type_name(object_type(منوال)),
+	       repo_ڈھونڈو_unique_abbrev(the_repository, oid, options->abbrev));
+	show_درخت_common_default_long(options, بنیاد, pathname, بنیاد->len);
+	واپس recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
-			  const char *pathname, unsigned mode,
-			  void *context)
+ساکن صحیح show_درخت_long(ثابت ساخت object_id *oid, ساخت strbuf *بنیاد,
+			  ثابت حرف *pathname, غیرعلامتی منوال,
+			  خالی *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	char size_text[24];
-	enum object_type type = object_type(mode);
+	ساخت ls_درخت_options *options = context;
+	صحیح early;
+	صحیح recurse;
+	حرف سائز_متن[24];
+	شمار object_type type = object_type(منوال);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_درخت_common(options, &recurse, بنیاد, pathname, type);
+	اگر (early >= 0)
+		واپس early;
 
-	if (type == OBJ_BLOB) {
-		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
-			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
-			xsnprintf(size_text, sizeof(size_text),
-				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
-		xsnprintf(size_text, sizeof(size_text), "-");
+	اگر (type == OBJ_BLOB) {
+		سائز_t سائز;
+		اگر (odb_read_object_info(the_repository->objects, oid, &سائز) == OBJ_BAD)
+			xsnprintf(سائز_متن, حجم(سائز_متن), "BAD");
+		ورنہ
+			xsnprintf(سائز_متن, حجم(سائز_متن),
+				  "%" PRIuMAX, (uintmax_t)سائز);
+	} ورنہ {
+		xsnprintf(سائز_متن, حجم(سائز_متن), "-");
 	}
 
-	printf("%06o %s %s %7s\t", mode, type_name(type),
-	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
-	       size_text);
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	لکھو("%06o %s %s %7s\t", منوال, type_name(type),
+	       repo_ڈھونڈو_unique_abbrev(the_repository, oid, options->abbrev),
+	       سائز_متن);
+	show_درخت_common_default_long(options, بنیاد, pathname, بنیاد->len);
+	واپس recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
-			       struct strbuf *base,
-			       const char *pathname, unsigned mode,
-			       void *context)
+ساکن صحیح show_درخت_name_only(ثابت ساخت object_id *oid غیر_مستعمل,
+			       ساخت strbuf *بنیاد,
+			       ثابت حرف *pathname, غیرعلامتی منوال,
+			       خالی *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	const size_t baselen = base->len;
-	enum object_type type = object_type(mode);
-	const char *prefix;
+	ساخت ls_درخت_options *options = context;
+	صحیح early;
+	صحیح recurse;
+	ثابت سائز_t baselen = بنیاد->len;
+	شمار object_type type = object_type(منوال);
+	ثابت حرف *سابقہ;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_درخت_common(options, &recurse, بنیاد, pathname, type);
+	اگر (early >= 0)
+		واپس early;
 
-	prefix = options->prefix;
-	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	سابقہ = options->سابقہ;
+	strbuf_addstr(بنیاد, pathname);
+	اگر (options->null_termination) {
+		ساخت strbuf sb = STRBUF_INIT;
+		ثابت حرف *name = relative_راستہ(بنیاد->buf, سابقہ, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
-		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
+	} ورنہ {
+		write_name_quoted_relative(بنیاد->buf, سابقہ, stdout, '\n');
 	}
-	strbuf_setlen(base, baselen);
-	return recurse;
+	strbuf_setlen(بنیاد, baselen);
+	واپس recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
-			    const char *pathname, unsigned mode,
-			    void *context)
+ساکن صحیح show_درخت_object(ثابت ساخت object_id *oid, ساخت strbuf *بنیاد,
+			    ثابت حرف *pathname, غیرعلامتی منوال,
+			    خالی *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
-	const char *str;
+	ساخت ls_درخت_options *options = context;
+	صحیح early;
+	صحیح recurse;
+	شمار object_type type = object_type(منوال);
+	ثابت حرف *str;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_درخت_common(options, &recurse, بنیاد, pathname, type);
+	اگر (early >= 0)
+		واپس early;
 
-	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	str = repo_ڈھونڈو_unique_abbrev(the_repository, oid, options->abbrev);
+	اگر (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} ورنہ  {
 		puts(str);
 	}
-	return recurse;
+	واپس recurse;
 }
 
-enum ls_tree_cmdmode {
-	MODE_DEFAULT = 0,
-	MODE_LONG,
-	MODE_NAME_ONLY,
-	MODE_NAME_STATUS,
-	MODE_OBJECT_ONLY,
+شمار ls_درخت_cmdmode {
+	منوال_DEFAULT = 0,
+	منوال_LONG,
+	منوال_NAME_ONLY,
+	منوال_NAME_حالت,
+	منوال_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
-	const char *const fmt;
-	read_tree_fn_t fn;
+ساخت ls_درخت_cmdmode_مقصد_fmt {
+	شمار ls_درخت_cmdmode منوال;
+	ثابت حرف *ثابت fmt;
+	read_درخت_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+ساکن ساخت ls_درخت_cmdmode_مقصد_fmt ls_درخت_cmdmode_format[] = {
 	{
-		.mode = MODE_DEFAULT,
+		.منوال = منوال_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
-		.fn = show_tree_default,
+		.fn = show_درخت_default,
 	},
 	{
-		.mode = MODE_LONG,
+		.منوال = منوال_LONG,
 		.fmt = "%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)",
-		.fn = show_tree_long,
+		.fn = show_درخت_long,
 	},
 	{
-		.mode = MODE_NAME_ONLY, /* And MODE_NAME_STATUS */
+		.منوال = منوال_NAME_ONLY, /* And MODE_NAME_STATUS */
 		.fmt = "%(path)",
-		.fn = show_tree_name_only,
+		.fn = show_درخت_name_only,
 	},
 	{
-		.mode = MODE_OBJECT_ONLY,
+		.منوال = منوال_OBJECT_ONLY,
 		.fmt = "%(objectname)",
-		.fn = show_tree_object
+		.fn = show_درخت_object
 	},
 	{
 		/* fallback */
-		.fn = show_tree_default,
+		.fn = show_درخت_default,
 	},
 };
 
-int cmd_ls_tree(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+صحیح cmd_ls_درخت(صحیح argc,
+		ثابت حرف **argv,
+		ثابت حرف *سابقہ,
+		ساخت repository *repo غیر_مستعمل)
 {
-	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
-	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
-		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
-			LS_TREE_ONLY),
-		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
+	ساخت object_id oid;
+	ساخت درخت *درخت;
+	صحیح i, بھرا_درخت = 0;
+	صحیح بھرا_name = !سابقہ || !*سابقہ;
+	read_درخت_fn_t fn = تہی;
+	شمار ls_درخت_cmdmode cmdmode = منوال_DEFAULT;
+	صحیح null_termination = 0;
+	ساخت ls_درخت_options options = { 0 };
+	ثابت ساخت option ls_درخت_options[] = {
+		OPT_ثنائی_ہندسہ('d', تہی, &options.ls_options, N_("only show trees"),
+			LS_درخت_ONLY),
+		OPT_ثنائی_ہندسہ('r', تہی, &options.ls_options, N_("recurse into subtrees"),
 			LS_RECURSIVE),
-		OPT_BIT('t', NULL, &options.ls_options, N_("show trees when recursing"),
+		OPT_ثنائی_ہندسہ('t', تہی, &options.ls_options, N_("show trees when recursing"),
 			LS_SHOW_TREES),
-		OPT_BOOL('z', NULL, &null_termination,
+		OPT_BOOL('z', تہی, &null_termination,
 			 N_("terminate entries with NUL byte")),
 		OPT_CMDMODE('l', "long", &cmdmode, N_("include object size"),
-			    MODE_LONG),
+			    منوال_LONG),
 		OPT_CMDMODE(0, "name-only", &cmdmode, N_("list only filenames"),
-			    MODE_NAME_ONLY),
+			    منوال_NAME_ONLY),
 		OPT_CMDMODE(0, "name-status", &cmdmode, N_("list only filenames"),
-			    MODE_NAME_STATUS),
+			    منوال_NAME_حالت),
 		OPT_CMDMODE(0, "object-only", &cmdmode, N_("list only objects"),
-			    MODE_OBJECT_ONLY),
-		OPT_BOOL(0, "full-name", &full_name, N_("use full path names")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+			    منوال_OBJECT_ONLY),
+		OPT_BOOL(0, "full-name", &بھرا_name, N_("use full path names")),
+		OPT_BOOL(0, "full-tree", &بھرا_درخت,
 			 N_("list entire tree; not just current directory "
 			    "(implies --full-name)")),
 		OPT_STRING_F(0, "format", &options.format, N_("format"),
 					 N_("format to use for the output"),
 					 PARSE_OPT_NONEG),
 		OPT__ABBREV(&options.abbrev),
-		OPT_END()
+		OPT_انتہا()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	ساخت ls_درخت_cmdmode_مقصد_fmt *m2f = ls_درخت_cmdmode_format;
+	صحیح ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, تہی);
 
-	argc = parse_options(argc, argv, prefix, ls_tree_options,
-			     ls_tree_usage, 0);
+	argc = parse_options(argc, argv, سابقہ, ls_درخت_options,
+			     ls_درخت_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
-		prefix = NULL;
-	options.prefix = full_name ? NULL : prefix;
+	اگر (بھرا_درخت)
+		سابقہ = تہی;
+	options.سابقہ = بھرا_name ? تہی : سابقہ;
 
 	/*
 	 * We wanted to detect conflicts between --name-only and
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
-		cmdmode = MODE_NAME_ONLY;
+	اگر (cmdmode == منوال_NAME_حالت)
+		cmdmode = منوال_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
-	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
+	اگر ( (LS_درخت_ONLY|LS_RECURSIVE) ==
+	    ((LS_درخت_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
-		usage_msg_opt(
+	اگر (options.format && cmdmode)
+		usage_پیغام_opt(
 			_("--format can't be combined with other format-altering options"),
-			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
-		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+			ls_درخت_usage, ls_درخت_options);
+	اگر (argc < 1)
+		usage_with_options(ls_درخت_usage, ls_درخت_options);
+	اگر (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -420,33 +420,33 @@ int cmd_ls_tree(int argc,
 	parse_pathspec(&options.pathspec, PATHSPEC_ALL_MAGIC &
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
-		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
-		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
+		       سابقہ, argv + 1);
+	برائے (i = 0; i < options.pathspec.nr; i++)
+		options.pathspec.اشیاء[i].nowildcard_len = options.pathspec.اشیاء[i].len;
 	options.pathspec.has_wildcard = 0;
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	درخت = repo_parse_درخت_بالواسطہ(the_repository, &oid);
+	اگر (!درخت)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
-			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
-			cmdmode = m2f->mode;
+	جب (m2f) {
+		اگر (!m2f->fmt) {
+			fn = options.format ? show_درخت_fmt : show_درخت_default;
+		} ورنہ اگر (options.format && !strcmp(options.format, m2f->fmt)) {
+			cmdmode = m2f->منوال;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} ورنہ اگر (!options.format && cmdmode == m2f->منوال) {
 			fn = m2f->fn;
-		} else {
+		} ورنہ {
 			m2f++;
-			continue;
+			جاری;
 		}
-		break;
+		توڑو;
 	}
 
-	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
+	ret = !!read_درخت(the_repository, درخت, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	واپس ret;
 }

@@ -5,80 +5,80 @@
  *
  * Based on git-verify-tag
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "commit.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "object-name.h"
+#شامل "commit.h"
+#شامل "parse-options.h"
+#شامل "gpg-interface.h"
 
-static const char * const verify_commit_usage[] = {
+ساکن ثابت حرف * ثابت verify_commit_usage[] = {
 		N_("git verify-commit [-v | --verbose] [--raw] <commit>..."),
-		NULL
+		تہی
 };
 
-static int run_gpg_verify(struct commit *commit, unsigned flags)
+ساکن صحیح تسلسل_gpg_verify(ساخت commit *commit, غیرعلامتی flags)
 {
-	struct signature_check signature_check;
-	int ret;
+	ساخت signature_check signature_check;
+	صحیح ret;
 
-	memset(&signature_check, 0, sizeof(signature_check));
+	memset(&signature_check, 0, حجم(signature_check));
 
 	ret = check_commit_signature(commit, &signature_check);
-	print_signature_buffer(&signature_check, flags);
+	print_signature_بفر(&signature_check, flags);
 
 	signature_check_clear(&signature_check);
-	return ret;
+	واپس ret;
 }
 
-static int verify_commit(struct repository *repo, const char *name, unsigned flags)
+ساکن صحیح verify_commit(ساخت repository *repo, ثابت حرف *name, غیرعلامتی flags)
 {
-	struct object_id oid;
-	struct object *obj;
+	ساخت object_id oid;
+	ساخت object *obj;
 
-	if (repo_get_oid(repo, name, &oid))
-		return error("commit '%s' not found.", name);
+	اگر (repo_get_oid(repo, name, &oid))
+		واپس error("commit '%s' not found.", name);
 
 	obj = parse_object(repo, &oid);
-	if (!obj)
-		return error("%s: unable to read file.", name);
-	if (obj->type != OBJ_COMMIT)
-		return error("%s: cannot verify a non-commit object of type %s.",
+	اگر (!obj)
+		واپس error("%s: unable to read file.", name);
+	اگر (obj->type != OBJ_COMMIT)
+		واپس error("%s: cannot verify a non-commit object of type %s.",
 				name, type_name(obj->type));
 
-	return run_gpg_verify((struct commit *)obj, flags);
+	واپس تسلسل_gpg_verify((ساخت commit *)obj, flags);
 }
 
-int cmd_verify_commit(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+صحیح cmd_verify_commit(صحیح argc,
+		      ثابت حرف **argv,
+		      ثابت حرف *سابقہ,
+		      ساخت repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
-	unsigned flags = 0;
-	const struct option verify_commit_options[] = {
+	صحیح i = 1, verbose = 0, had_error = 0;
+	غیرعلامتی flags = 0;
+	ثابت ساخت option verify_commit_options[] = {
 		OPT__VERBOSE(&verbose, N_("print commit contents")),
-		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
-		OPT_END()
+		OPT_ثنائی_ہندسہ(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
+		OPT_انتہا()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
-	argc = parse_options(argc, argv, prefix, verify_commit_options,
+	argc = parse_options(argc, argv, سابقہ, verify_commit_options,
 			     verify_commit_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	اگر (argc <= i)
 		usage_with_options(verify_commit_usage, verify_commit_options);
 
-	if (verbose)
+	اگر (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
 	/* sometimes the program was terminated because this signal
 	 * was received in the process of writing the gpg input: */
-	signal(SIGPIPE, SIG_IGN);
-	while (i < argc)
-		if (verify_commit(repo, argv[i++], flags))
+	اشارہ(SIGPIPE, SIG_IGN);
+	جب (i < argc)
+		اگر (verify_commit(repo, argv[i++], flags))
 			had_error = 1;
-	return had_error;
+	واپس had_error;
 }

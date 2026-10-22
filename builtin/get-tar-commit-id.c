@@ -1,58 +1,58 @@
 /*
  * Copyright (c) 2005, 2006 Rene Scharfe
  */
-#include "builtin.h"
-#include "commit.h"
-#include "tar.h"
+#شامل "builtin.h"
+#شامل "commit.h"
+#شامل "tar.h"
 
-static const char builtin_get_tar_commit_id_usage[] =
+ساکن ثابت حرف builtin_get_tar_commit_id_usage[] =
 "git get-tar-commit-id";
 
 /* ustar header + extended global header content */
-#define RECORDSIZE	(512)
-#define HEADERSIZE (2 * RECORDSIZE)
+#تعریف_کرو RECORDSIZE	(512)
+#تعریف_کرو HEADERSIZE (2 * RECORDSIZE)
 
-int cmd_get_tar_commit_id(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo UNUSED)
+صحیح cmd_get_tar_commit_id(صحیح argc,
+			  ثابت حرف **argv,
+			  ثابت حرف *سابقہ,
+			  ساخت repository *repo غیر_مستعمل)
 {
-	char buffer[HEADERSIZE];
-	struct ustar_header *header = (struct ustar_header *)buffer;
-	char *content = buffer + RECORDSIZE;
-	const char *comment;
+	حرف بفر[HEADERSIZE];
+	ساخت ustar_سرخی *سرخی = (ساخت ustar_سرخی *)بفر;
+	حرف *content = بفر + RECORDSIZE;
+	ثابت حرف *comment;
 	ssize_t n;
-	long len;
-	char *end;
+	طویل len;
+	حرف *انتہا;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_خالی_خانے_سابقہ(سابقہ);
 
 	show_usage_if_asked(argc, argv, builtin_get_tar_commit_id_usage);
 
-	if (argc != 1)
+	اگر (argc != 1)
 		usage(builtin_get_tar_commit_id_usage);
 
-	n = read_in_full(0, buffer, HEADERSIZE);
-	if (n < 0)
+	n = read_اندر_بھرا(0, بفر, HEADERSIZE);
+	اگر (n < 0)
 		die_errno("git get-tar-commit-id: read error");
-	if (n != HEADERSIZE)
+	اگر (n != HEADERSIZE)
 		die_errno("git get-tar-commit-id: EOF before reading tar header");
-	if (header->typeflag[0] != TYPEFLAG_GLOBAL_HEADER)
-		return 1;
+	اگر (سرخی->typeflag[0] != TYPEFLAG_GLOBAL_سرخی)
+		واپس 1;
 
 	errno = 0;
-	len = strtol(content, &end, 10);
-	if (errno == ERANGE || end == content || len < 0)
-		return 1;
-	if (!skip_prefix(end, " comment=", &comment))
-		return 1;
+	len = strtol(content, &انتہا, 10);
+	اگر (errno == ERANGE || انتہا == content || len < 0)
+		واپس 1;
+	اگر (!skip_سابقہ(انتہا, " comment=", &comment))
+		واپس 1;
 	len -= comment - content;
-	if (len < 1 || !(len % 2) ||
-	    hash_algo_by_length((len - 1) / 2) == GIT_HASH_UNKNOWN)
-		return 1;
+	اگر (len < 1 || !(len % 2) ||
+	    hash_algo_by_لمبائی((len - 1) / 2) == GIT_HASH_UNKNOWN)
+		واپس 1;
 
-	if (write_in_full(1, comment, len) < 0)
+	اگر (write_اندر_بھرا(1, comment, len) < 0)
 		die_errno("git get-tar-commit-id: write error");
 
-	return 0;
+	واپس 0;
 }

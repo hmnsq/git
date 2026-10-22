@@ -2,51 +2,51 @@
  * Builtin help command
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "config-list.h"
-#include "help.h"
-#include "alias.h"
-#include "setup.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "exec-cmd.h"
+#شامل "gettext.h"
+#شامل "pager.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "run-command.h"
+#شامل "config-list.h"
+#شامل "help.h"
+#شامل "alias.h"
+#شامل "setup.h"
 
-#ifndef DEFAULT_HELP_FORMAT
-#define DEFAULT_HELP_FORMAT "man"
-#endif
+#اگر_غیر_تعریف_شدہ DEFAULT_HELP_FORMAT
+#تعریف_کرو DEFAULT_HELP_FORMAT "man"
+#اگر_ختم
 
-static struct man_viewer_list {
-	struct man_viewer_list *next;
-	char name[FLEX_ARRAY];
+ساکن ساخت man_viewer_list {
+	ساخت man_viewer_list *اگلا;
+	حرف name[FLEX_ARRAY];
 } *man_viewer_list;
 
-static struct man_viewer_info_list {
-	struct man_viewer_info_list *next;
-	const char *info;
-	char name[FLEX_ARRAY];
+ساکن ساخت man_viewer_info_list {
+	ساخت man_viewer_info_list *اگلا;
+	ثابت حرف *info;
+	حرف name[FLEX_ARRAY];
 } *man_viewer_info_list;
 
-enum help_format {
+شمار help_format {
 	HELP_FORMAT_NONE,
 	HELP_FORMAT_MAN,
 	HELP_FORMAT_INFO,
 	HELP_FORMAT_WEB
 };
 
-enum show_config_type {
+شمار show_config_type {
 	SHOW_CONFIG_HUMAN,
 	SHOW_CONFIG_VARS,
 	SHOW_CONFIG_SECTIONS,
 };
 
-static enum help_action {
+ساکن شمار help_action {
 	HELP_ACTION_ALL = 1,
 	HELP_ACTION_GUIDES,
 	HELP_ACTION_CONFIG,
@@ -55,111 +55,111 @@ static enum help_action {
 	HELP_ACTION_CONFIG_FOR_COMPLETION,
 	HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION,
 	HELP_ACTION_ALIASES_FOR_COMPLETION,
-} cmd_mode;
+} cmd_منوال;
 
-static char *html_path;
-static int verbose = 1;
-static enum help_format help_format = HELP_FORMAT_NONE;
-static int exclude_guides;
-static int show_external_commands = -1;
-static int show_aliases = -1;
-static struct option builtin_help_options[] = {
-	OPT_CMDMODE('a', "all", &cmd_mode, N_("print all available commands"),
+ساکن حرف *html_راستہ;
+ساکن صحیح verbose = 1;
+ساکن شمار help_format help_format = HELP_FORMAT_NONE;
+ساکن صحیح exclude_guides;
+ساکن صحیح show_external_commands = -1;
+ساکن صحیح show_aliases = -1;
+ساکن ساخت option builtin_help_options[] = {
+	OPT_CMDMODE('a', "all", &cmd_منوال, N_("print all available commands"),
 		    HELP_ACTION_ALL),
 	OPT_BOOL(0, "external-commands", &show_external_commands,
 		 N_("show external commands in --all")),
 	OPT_BOOL(0, "aliases", &show_aliases, N_("show aliases in --all")),
 	OPT_HIDDEN_BOOL(0, "exclude-guides", &exclude_guides, N_("exclude guides")),
-	OPT_SET_INT('m', "man", &help_format, N_("show man page"), HELP_FORMAT_MAN),
-	OPT_SET_INT('w', "web", &help_format, N_("show manual in web browser"),
+	OPT_سیٹ_INT('m', "man", &help_format, N_("show man page"), HELP_FORMAT_MAN),
+	OPT_سیٹ_INT('w', "web", &help_format, N_("show manual in web browser"),
 			HELP_FORMAT_WEB),
-	OPT_SET_INT('i', "info", &help_format, N_("show info page"),
+	OPT_سیٹ_INT('i', "info", &help_format, N_("show info page"),
 			HELP_FORMAT_INFO),
 	OPT__VERBOSE(&verbose, N_("print command description")),
 
-	OPT_CMDMODE('g', "guides", &cmd_mode, N_("print list of useful guides"),
+	OPT_CMDMODE('g', "guides", &cmd_منوال, N_("print list of useful guides"),
 		    HELP_ACTION_GUIDES),
-	OPT_CMDMODE(0, "user-interfaces", &cmd_mode,
+	OPT_CMDMODE(0, "user-interfaces", &cmd_منوال,
 		    N_("print list of user-facing repository, command and file interfaces"),
 		    HELP_ACTION_USER_INTERFACES),
-	OPT_CMDMODE(0, "developer-interfaces", &cmd_mode,
+	OPT_CMDMODE(0, "developer-interfaces", &cmd_منوال,
 		    N_("print list of file formats, protocols and other developer interfaces"),
 		    HELP_ACTION_DEVELOPER_INTERFACES),
-	OPT_CMDMODE('c', "config", &cmd_mode, N_("print all configuration variable names"),
+	OPT_CMDMODE('c', "config", &cmd_منوال, N_("print all configuration variable names"),
 		    HELP_ACTION_CONFIG),
-	OPT_CMDMODE_F(0, "config-for-completion", &cmd_mode, "",
+	OPT_CMDMODE_F(0, "config-for-completion", &cmd_منوال, "",
 		    HELP_ACTION_CONFIG_FOR_COMPLETION, PARSE_OPT_HIDDEN),
-	OPT_CMDMODE_F(0, "config-sections-for-completion", &cmd_mode, "",
+	OPT_CMDMODE_F(0, "config-sections-for-completion", &cmd_منوال, "",
 		    HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION, PARSE_OPT_HIDDEN),
-	OPT_CMDMODE_F(0, "aliases-for-completion", &cmd_mode, "",
+	OPT_CMDMODE_F(0, "aliases-for-completion", &cmd_منوال, "",
 		    HELP_ACTION_ALIASES_FOR_COMPLETION, PARSE_OPT_HIDDEN),
 
-	OPT_END(),
+	OPT_انتہا(),
 };
 
-static const char * const builtin_help_usage[] = {
+ساکن ثابت حرف * ثابت builtin_help_usage[] = {
 	"git help [-a|--all] [--[no-]verbose] [--[no-]external-commands] [--[no-]aliases]",
 	N_("git help [[-i|--info] [-m|--man] [-w|--web]] [<command>|<doc>]"),
 	"git help [-g|--guides]",
 	"git help [-c|--config]",
 	"git help [--user-interfaces]",
 	"git help [--developer-interfaces]",
-	NULL
+	تہی
 };
 
-struct slot_expansion {
-	const char *prefix;
-	const char *placeholder;
-	void (*fn)(struct string_list *list, const char *prefix);
-	int found;
+ساخت خانہ_expansion {
+	ثابت حرف *سابقہ;
+	ثابت حرف *placeholder;
+	خالی (*fn)(ساخت string_list *list, ثابت حرف *سابقہ);
+	صحیح ملا_2;
 };
 
-static void set_config_vars(struct string_list *keys_uniq, struct string_list_item *var)
+ساکن خالی سیٹ_config_vars(ساخت string_list *کلیدیں_uniq, ساخت string_list_شے *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *wildcard = strchr(str, '*');
-	const char *tag = strchr(str, '<');
-	const char *cut;
+	ساخت strbuf sb = STRBUF_INIT;
+	ثابت حرف *str = var->string;
+	ثابت حرف *wildcard = strchr(str, '*');
+	ثابت حرف *لیبل = strchr(str, '<');
+	ثابت حرف *cut;
 
-	if (wildcard && tag)
-		cut = wildcard < tag ? wildcard : tag;
-	else if (wildcard)
+	اگر (wildcard && لیبل)
+		cut = wildcard < لیبل ? wildcard : لیبل;
+	ورنہ اگر (wildcard)
 		cut = wildcard;
-	else if (tag)
-		cut = tag;
-	else {
-		string_list_append(keys_uniq, str);
-		return;
+	ورنہ اگر (لیبل)
+		cut = لیبل;
+	ورنہ {
+		string_list_append(کلیدیں_uniq, str);
+		واپس;
 	}
 
-	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	strbuf_جوڑو(&sb, str, cut - str);
+	string_list_append(کلیدیں_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void set_config_sections(struct string_list *keys_uniq, struct string_list_item *var)
+ساکن خالی سیٹ_config_sections(ساخت string_list *کلیدیں_uniq, ساخت string_list_شے *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *dot = strchr(str, '.');
-	const char *cut;
+	ساخت strbuf sb = STRBUF_INIT;
+	ثابت حرف *str = var->string;
+	ثابت حرف *dot = strchr(str, '.');
+	ثابت حرف *cut;
 
-	if (dot)
+	اگر (dot)
 		cut = dot;
-	else {
-		set_config_vars(keys_uniq, var);
-		return;
+	ورنہ {
+		سیٹ_config_vars(کلیدیں_uniq, var);
+		واپس;
 	}
 
-	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	strbuf_جوڑو(&sb, str, cut - str);
+	string_list_append(کلیدیں_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void list_config_help(enum show_config_type type)
+ساکن خالی list_config_help(شمار show_config_type type)
 {
-	struct slot_expansion slot_expansions[] = {
+	ساخت خانہ_expansion خانہ_expansions[] = {
 		{ "advice", "*", list_config_advices },
 		{ "color.branch", "<slot>", list_config_color_branch_slots },
 		{ "color.decorate", "<slot>", list_config_color_decorate_slots },
@@ -167,73 +167,73 @@ static void list_config_help(enum show_config_type type)
 		{ "color.grep", "<slot>", list_config_color_grep_slots },
 		{ "color.interactive", "<slot>", list_config_color_interactive_slots },
 		{ "color.remote", "<slot>", list_config_color_sideband_slots },
-		{ "color.status", "<slot>", list_config_color_status_slots },
-		{ "fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ "receive.fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ NULL, NULL, NULL }
+		{ "color.status", "<slot>", list_config_color_حالت_slots },
+		{ "fsck", "<msg-id>", list_config_fsck_پیغام_ids },
+		{ "receive.fsck", "<msg-id>", list_config_fsck_پیغام_ids },
+		{ تہی, تہی, تہی }
 	};
-	const char **p;
-	struct slot_expansion *e;
-	struct string_list keys = STRING_LIST_INIT_DUP;
-	struct string_list keys_uniq = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	struct strbuf sb = STRBUF_INIT;
+	ثابت حرف **p;
+	ساخت خانہ_expansion *e;
+	ساخت string_list کلیدیں = STRING_LIST_INIT_DUP;
+	ساخت string_list کلیدیں_uniq = STRING_LIST_INIT_DUP;
+	ساخت string_list_شے *شے;
+	ساخت strbuf sb = STRBUF_INIT;
 
-	for (p = config_name_list; *p; p++) {
-		const char *var = *p;
+	برائے (p = config_name_list; *p; p++) {
+		ثابت حرف *var = *p;
 
-		for (e = slot_expansions; e->prefix; e++) {
+		برائے (e = خانہ_expansions; e->سابقہ; e++) {
 			strbuf_reset(&sb);
-			strbuf_addf(&sb, "%s.%s", e->prefix, e->placeholder);
-			if (!strcasecmp(var, sb.buf)) {
-				e->fn(&keys, e->prefix);
-				e->found++;
-				break;
+			strbuf_addf(&sb, "%s.%s", e->سابقہ, e->placeholder);
+			اگر (!strcasecmp(var, sb.buf)) {
+				e->fn(&کلیدیں, e->سابقہ);
+				e->ملا_2++;
+				توڑو;
 			}
 		}
 
-		if (!e->prefix)
-			string_list_append(&keys, var);
+		اگر (!e->سابقہ)
+			string_list_append(&کلیدیں, var);
 	}
 
 	strbuf_release(&sb);
 
-	for (e = slot_expansions; e->prefix; e++)
-		if (!e->found)
+	برائے (e = خانہ_expansions; e->سابقہ; e++)
+		اگر (!e->ملا_2)
 			BUG("slot_expansion %s.%s is not used",
-			    e->prefix, e->placeholder);
+			    e->سابقہ, e->placeholder);
 
-	for (size_t i = 0; i < keys.nr; i++) {
-		switch (type) {
-		case SHOW_CONFIG_HUMAN:
-			string_list_append(&keys_uniq, keys.items[i].string);
-			break;
-		case SHOW_CONFIG_SECTIONS:
-			set_config_sections(&keys_uniq, &keys.items[i]);
-			break;
-		case SHOW_CONFIG_VARS:
-			set_config_vars(&keys_uniq, &keys.items[i]);
-			break;
-		default:
+	برائے (سائز_t i = 0; i < کلیدیں.nr; i++) {
+		انتخاب (type) {
+		حالت SHOW_CONFIG_HUMAN:
+			string_list_append(&کلیدیں_uniq, کلیدیں.اشیاء[i].string);
+			توڑو;
+		حالت SHOW_CONFIG_SECTIONS:
+			سیٹ_config_sections(&کلیدیں_uniq, &کلیدیں.اشیاء[i]);
+			توڑو;
+		حالت SHOW_CONFIG_VARS:
+			سیٹ_config_vars(&کلیدیں_uniq, &کلیدیں.اشیاء[i]);
+			توڑو;
+		طےشدہ:
 			BUG("%d: unexpected type", type);
 		}
 	}
 
-	string_list_sort_u(&keys_uniq, 0);
-	for_each_string_list_item(item, &keys_uniq)
-		puts(item->string);
-	string_list_clear(&keys_uniq, 0);
-	string_list_clear(&keys, 0);
+	string_list_ترتیب_دو_u(&کلیدیں_uniq, 0);
+	for_each_string_list_شے(شے, &کلیدیں_uniq)
+		puts(شے->string);
+	string_list_clear(&کلیدیں_uniq, 0);
+	string_list_clear(&کلیدیں, 0);
 }
 
-static enum help_format parse_help_format(const char *format)
+ساکن شمار help_format parse_help_format(ثابت حرف *format)
 {
-	if (!strcmp(format, "man"))
-		return HELP_FORMAT_MAN;
-	if (!strcmp(format, "info"))
-		return HELP_FORMAT_INFO;
-	if (!strcmp(format, "web") || !strcmp(format, "html"))
-		return HELP_FORMAT_WEB;
+	اگر (!strcmp(format, "man"))
+		واپس HELP_FORMAT_MAN;
+	اگر (!strcmp(format, "info"))
+		واپس HELP_FORMAT_INFO;
+	اگر (!strcmp(format, "web") || !strcmp(format, "html"))
+		واپس HELP_FORMAT_WEB;
 	/*
 	 * Please update _repo_config() in git-completion.bash when you
 	 * add new help formats.
@@ -241,352 +241,352 @@ static enum help_format parse_help_format(const char *format)
 	die(_("unrecognized help format '%s'"), format);
 }
 
-static const char *get_man_viewer_info(const char *name)
+ساکن ثابت حرف *get_man_viewer_info(ثابت حرف *name)
 {
-	struct man_viewer_info_list *viewer;
+	ساخت man_viewer_info_list *viewer;
 
-	for (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
+	برائے (viewer = man_viewer_info_list; viewer; viewer = viewer->اگلا)
 	{
-		if (!strcasecmp(name, viewer->name))
-			return viewer->info;
+		اگر (!strcasecmp(name, viewer->name))
+			واپس viewer->info;
 	}
-	return NULL;
+	واپس تہی;
 }
 
-static int check_emacsclient_version(void)
+ساکن صحیح check_emacsclient_نسخہ(خالی)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct child_process ec_process = CHILD_PROCESS_INIT;
-	int version;
+	ساخت strbuf بفر = STRBUF_INIT;
+	ساخت بچہ_process ec_process = بچہ_PROCESS_INIT;
+	صحیح نسخہ;
 
 	/* emacsclient prints its version number on stderr */
-	strvec_pushl(&ec_process.args, "emacsclient", "--version", NULL);
+	strvec_pushl(&ec_process.دلائل, "emacsclient", "--version", تہی);
 	ec_process.err = -1;
-	ec_process.stdout_to_stderr = 1;
-	if (start_command(&ec_process))
-		return error(_("Failed to start emacsclient."));
+	ec_process.stdout_مقصد_stderr = 1;
+	اگر (آغاز_command(&ec_process))
+		واپس error(_("Failed to start emacsclient."));
 
-	strbuf_read(&buffer, ec_process.err, 20);
+	strbuf_read(&بفر, ec_process.err, 20);
 	close(ec_process.err);
 
 	/*
 	 * Don't bother checking return value, because "emacsclient --version"
 	 * seems to always exits with code 1.
 	 */
-	finish_command(&ec_process);
+	اختتام_command(&ec_process);
 
-	if (!starts_with(buffer.buf, "emacsclient")) {
-		strbuf_release(&buffer);
-		return error(_("Failed to parse emacsclient version."));
+	اگر (!starts_with(بفر.buf, "emacsclient")) {
+		strbuf_release(&بفر);
+		واپس error(_("Failed to parse emacsclient version."));
 	}
 
-	strbuf_remove(&buffer, 0, strlen("emacsclient"));
-	version = atoi(buffer.buf);
+	strbuf_remove(&بفر, 0, لڑی_لمبائی("emacsclient"));
+	نسخہ = atoi(بفر.buf);
 
-	if (version < 22) {
-		strbuf_release(&buffer);
-		return error(_("emacsclient version '%d' too old (< 22)."),
-			version);
+	اگر (نسخہ < 22) {
+		strbuf_release(&بفر);
+		واپس error(_("emacsclient version '%d' too old (< 22)."),
+			نسخہ);
 	}
 
-	strbuf_release(&buffer);
-	return 0;
+	strbuf_release(&بفر);
+	واپس 0;
 }
 
-static void exec_woman_emacs(const char *path, const char *page)
+ساکن خالی exec_woman_emacs(ثابت حرف *راستہ, ثابت حرف *صفحہ)
 {
-	if (!check_emacsclient_version()) {
+	اگر (!check_emacsclient_نسخہ()) {
 		/* This works only with emacsclient version >= 22. */
-		struct strbuf man_page = STRBUF_INIT;
+		ساخت strbuf man_صفحہ = STRBUF_INIT;
 
-		if (!path)
-			path = "emacsclient";
-		strbuf_addf(&man_page, "(woman \"%s\")", page);
-		execlp(path, "emacsclient", "-e", man_page.buf, (char *)NULL);
-		warning_errno(_("failed to exec '%s'"), path);
-		strbuf_release(&man_page);
+		اگر (!راستہ)
+			راستہ = "emacsclient";
+		strbuf_addf(&man_صفحہ, "(woman \"%s\")", صفحہ);
+		execlp(راستہ, "emacsclient", "-e", man_صفحہ.buf, (حرف *)تہی);
+		warning_errno(_("failed to exec '%s'"), راستہ);
+		strbuf_release(&man_صفحہ);
 	}
 }
 
-static void exec_man_konqueror(const char *path, const char *page)
+ساکن خالی exec_man_konqueror(ثابت حرف *راستہ, ثابت حرف *صفحہ)
 {
-	const char *display = getenv("DISPLAY");
-	if (display && *display) {
-		struct strbuf man_page = STRBUF_INIT;
-		const char *filename = "kfmclient";
+	ثابت حرف *display = getenv("DISPLAY");
+	اگر (display && *display) {
+		ساخت strbuf man_صفحہ = STRBUF_INIT;
+		ثابت حرف *filename = "kfmclient";
 
 		/* It's simpler to launch konqueror using kfmclient. */
-		if (path) {
-			size_t len;
-			if (strip_suffix(path, "/konqueror", &len))
-				path = xstrfmt("%.*s/kfmclient", (int)len, path);
-			filename = basename((char *)path);
-		} else
-			path = "kfmclient";
-		strbuf_addf(&man_page, "man:%s(1)", page);
-		execlp(path, filename, "newTab", man_page.buf, (char *)NULL);
-		warning_errno(_("failed to exec '%s'"), path);
-		strbuf_release(&man_page);
+		اگر (راستہ) {
+			سائز_t len;
+			اگر (strip_suffix(راستہ, "/konqueror", &len))
+				راستہ = xstrfmt("%.*s/kfmclient", (صحیح)len, راستہ);
+			filename = basename((حرف *)راستہ);
+		} ورنہ
+			راستہ = "kfmclient";
+		strbuf_addf(&man_صفحہ, "man:%s(1)", صفحہ);
+		execlp(راستہ, filename, "newTab", man_صفحہ.buf, (حرف *)تہی);
+		warning_errno(_("failed to exec '%s'"), راستہ);
+		strbuf_release(&man_صفحہ);
 	}
 }
 
-static void exec_man_man(const char *path, const char *page)
+ساکن خالی exec_man_man(ثابت حرف *راستہ, ثابت حرف *صفحہ)
 {
-	if (!path)
-		path = "man";
-	execlp(path, "man", page, (char *)NULL);
-	warning_errno(_("failed to exec '%s'"), path);
+	اگر (!راستہ)
+		راستہ = "man";
+	execlp(راستہ, "man", صفحہ, (حرف *)تہی);
+	warning_errno(_("failed to exec '%s'"), راستہ);
 }
 
-static void exec_man_cmd(const char *cmd, const char *page)
+ساکن خالی exec_man_cmd(ثابت حرف *cmd, ثابت حرف *صفحہ)
 {
-	struct strbuf shell_cmd = STRBUF_INIT;
-	strbuf_addf(&shell_cmd, "%s %s", cmd, page);
-	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (char *)NULL);
+	ساخت strbuf shell_cmd = STRBUF_INIT;
+	strbuf_addf(&shell_cmd, "%s %s", cmd, صفحہ);
+	execl(SHELL_راستہ, SHELL_راستہ, "-c", shell_cmd.buf, (حرف *)تہی);
 	warning(_("failed to exec '%s'"), cmd);
 	strbuf_release(&shell_cmd);
 }
 
-static void add_man_viewer(const char *name)
+ساکن خالی جوڑو_man_viewer(ثابت حرف *name)
 {
-	struct man_viewer_list **p = &man_viewer_list;
+	ساخت man_viewer_list **p = &man_viewer_list;
 
-	while (*p)
-		p = &((*p)->next);
+	جب (*p)
+		p = &((*p)->اگلا);
 	FLEX_ALLOC_STR(*p, name, name);
 }
 
-static int supported_man_viewer(const char *name, size_t len)
+ساکن صحیح supported_man_viewer(ثابت حرف *name, سائز_t len)
 {
-	return (!strncasecmp("man", name, len) ||
+	واپس (!strncasecmp("man", name, len) ||
 		!strncasecmp("woman", name, len) ||
 		!strncasecmp("konqueror", name, len));
 }
 
-static void do_add_man_viewer_info(const char *name,
-				   size_t len,
-				   const char *value)
+ساکن خالی do_جوڑو_man_viewer_info(ثابت حرف *name,
+				   سائز_t len,
+				   ثابت حرف *قدر)
 {
-	struct man_viewer_info_list *new_man_viewer;
+	ساخت man_viewer_info_list *new_man_viewer;
 	FLEX_ALLOC_MEM(new_man_viewer, name, name, len);
-	new_man_viewer->info = xstrdup(value);
-	new_man_viewer->next = man_viewer_info_list;
+	new_man_viewer->info = xstrdup(قدر);
+	new_man_viewer->اگلا = man_viewer_info_list;
 	man_viewer_info_list = new_man_viewer;
 }
 
-static int add_man_viewer_path(const char *name,
-			       size_t len,
-			       const char *value)
+ساکن صحیح جوڑو_man_viewer_راستہ(ثابت حرف *name,
+			       سائز_t len,
+			       ثابت حرف *قدر)
 {
-	if (supported_man_viewer(name, len))
-		do_add_man_viewer_info(name, len, value);
-	else
+	اگر (supported_man_viewer(name, len))
+		do_جوڑو_man_viewer_info(name, len, قدر);
+	ورنہ
 		warning(_("'%s': path for unsupported man viewer.\n"
 			  "Please consider using 'man.<tool>.cmd' instead."),
 			name);
 
-	return 0;
+	واپس 0;
 }
 
-static int add_man_viewer_cmd(const char *name,
-			      size_t len,
-			      const char *value)
+ساکن صحیح جوڑو_man_viewer_cmd(ثابت حرف *name,
+			      سائز_t len,
+			      ثابت حرف *قدر)
 {
-	if (supported_man_viewer(name, len))
+	اگر (supported_man_viewer(name, len))
 		warning(_("'%s': cmd for supported man viewer.\n"
 			  "Please consider using 'man.<tool>.path' instead."),
 			name);
-	else
-		do_add_man_viewer_info(name, len, value);
+	ورنہ
+		do_جوڑو_man_viewer_info(name, len, قدر);
 
-	return 0;
+	واپس 0;
 }
 
-static int add_man_viewer_info(const char *var, const char *value)
+ساکن صحیح جوڑو_man_viewer_info(ثابت حرف *var, ثابت حرف *قدر)
 {
-	const char *name, *subkey;
-	size_t namelen;
+	ثابت حرف *name, *subkey;
+	سائز_t namelen;
 
-	if (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
-		return 0;
+	اگر (parse_config_کلید(var, "man", &name, &namelen, &subkey) < 0 || !name)
+		واپس 0;
 
-	if (!strcmp(subkey, "path")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_path(name, namelen, value);
+	اگر (!strcmp(subkey, "path")) {
+		اگر (!قدر)
+			واپس config_error_nonbool(var);
+		واپس جوڑو_man_viewer_راستہ(name, namelen, قدر);
 	}
-	if (!strcmp(subkey, "cmd")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_cmd(name, namelen, value);
+	اگر (!strcmp(subkey, "cmd")) {
+		اگر (!قدر)
+			واپس config_error_nonbool(var);
+		واپس جوڑو_man_viewer_cmd(name, namelen, قدر);
 	}
 
-	return 0;
+	واپس 0;
 }
 
-static int git_help_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+ساکن صحیح git_help_config(ثابت حرف *var, ثابت حرف *قدر,
+			   ثابت ساخت config_context *ctx, خالی *cb)
 {
-	if (!strcmp(var, "help.format")) {
-		if (!value)
-			return config_error_nonbool(var);
-		help_format = parse_help_format(value);
-		return 0;
+	اگر (!strcmp(var, "help.format")) {
+		اگر (!قدر)
+			واپس config_error_nonbool(var);
+		help_format = parse_help_format(قدر);
+		واپس 0;
 	}
-	if (!strcmp(var, "help.htmlpath")) {
-		if (!value)
-			return config_error_nonbool(var);
-		free(html_path);
-		html_path = xstrdup(value);
-		return 0;
+	اگر (!strcmp(var, "help.htmlpath")) {
+		اگر (!قدر)
+			واپس config_error_nonbool(var);
+		آزاد(html_راستہ);
+		html_راستہ = xstrdup(قدر);
+		واپس 0;
 	}
-	if (!strcmp(var, "man.viewer")) {
-		if (!value)
-			return config_error_nonbool(var);
-		add_man_viewer(value);
-		return 0;
+	اگر (!strcmp(var, "man.viewer")) {
+		اگر (!قدر)
+			واپس config_error_nonbool(var);
+		جوڑو_man_viewer(قدر);
+		واپس 0;
 	}
-	if (starts_with(var, "man."))
-		return add_man_viewer_info(var, value);
+	اگر (starts_with(var, "man."))
+		واپس جوڑو_man_viewer_info(var, قدر);
 
-	return git_default_config(var, value, ctx, cb);
+	واپس git_default_config(var, قدر, ctx, cb);
 }
 
-static struct cmdnames main_cmds, other_cmds;
+ساکن ساخت cmdnames main_cmds, other_cmds;
 
-static int is_git_command(const char *s)
+ساکن صحیح is_git_command(ثابت حرف *s)
 {
-	if (is_builtin(s))
-		return 1;
+	اگر (is_builtin(s))
+		واپس 1;
 
-	load_command_list("git-", &main_cmds, &other_cmds);
-	return is_in_cmdlist(&main_cmds, s) ||
-		is_in_cmdlist(&other_cmds, s);
+	بھرو_command_list("git-", &main_cmds, &other_cmds);
+	واپس is_اندر_cmdlist(&main_cmds, s) ||
+		is_اندر_cmdlist(&other_cmds, s);
 }
 
-static const char *cmd_to_page(const char *git_cmd)
+ساکن ثابت حرف *cmd_مقصد_صفحہ(ثابت حرف *git_cmd)
 {
-	if (!git_cmd)
-		return "git";
-	else if (starts_with(git_cmd, "git"))
-		return git_cmd;
-	else if (is_git_command(git_cmd))
-		return xstrfmt("git-%s", git_cmd);
-	else if (!strcmp("scalar", git_cmd))
-		return xstrdup(git_cmd);
-	else
-		return xstrfmt("git%s", git_cmd);
+	اگر (!git_cmd)
+		واپس "git";
+	ورنہ اگر (starts_with(git_cmd, "git"))
+		واپس git_cmd;
+	ورنہ اگر (is_git_command(git_cmd))
+		واپس xstrfmt("git-%s", git_cmd);
+	ورنہ اگر (!strcmp("scalar", git_cmd))
+		واپس xstrdup(git_cmd);
+	ورنہ
+		واپس xstrfmt("git%s", git_cmd);
 }
 
-static void setup_man_path(void)
+ساکن خالی تیاری_man_راستہ(خالی)
 {
-	struct strbuf new_path = STRBUF_INIT;
-	const char *old_path = getenv("MANPATH");
-	char *git_man_path = system_path(GIT_MAN_PATH);
+	ساخت strbuf new_راستہ = STRBUF_INIT;
+	ثابت حرف *old_راستہ = getenv("MANPATH");
+	حرف *git_man_راستہ = system_راستہ(GIT_MAN_راستہ);
 
 	/* We should always put ':' after our path. If there is no
 	 * old_path, the ':' at the end will let 'man' to try
 	 * system-wide paths after ours to find the manual page. If
 	 * there is old_path, we need ':' as delimiter. */
-	strbuf_addstr(&new_path, git_man_path);
-	strbuf_addch(&new_path, ':');
-	if (old_path)
-		strbuf_addstr(&new_path, old_path);
+	strbuf_addstr(&new_راستہ, git_man_راستہ);
+	strbuf_addch(&new_راستہ, ':');
+	اگر (old_راستہ)
+		strbuf_addstr(&new_راستہ, old_راستہ);
 
-	free(git_man_path);
-	setenv("MANPATH", new_path.buf, 1);
+	آزاد(git_man_راستہ);
+	setenv("MANPATH", new_راستہ.buf, 1);
 
-	strbuf_release(&new_path);
+	strbuf_release(&new_راستہ);
 }
 
-static void exec_viewer(const char *name, const char *page)
+ساکن خالی exec_viewer(ثابت حرف *name, ثابت حرف *صفحہ)
 {
-	const char *info = get_man_viewer_info(name);
+	ثابت حرف *info = get_man_viewer_info(name);
 
-	if (!strcasecmp(name, "man"))
-		exec_man_man(info, page);
-	else if (!strcasecmp(name, "woman"))
-		exec_woman_emacs(info, page);
-	else if (!strcasecmp(name, "konqueror"))
-		exec_man_konqueror(info, page);
-	else if (info)
-		exec_man_cmd(info, page);
-	else
+	اگر (!strcasecmp(name, "man"))
+		exec_man_man(info, صفحہ);
+	ورنہ اگر (!strcasecmp(name, "woman"))
+		exec_woman_emacs(info, صفحہ);
+	ورنہ اگر (!strcasecmp(name, "konqueror"))
+		exec_man_konqueror(info, صفحہ);
+	ورنہ اگر (info)
+		exec_man_cmd(info, صفحہ);
+	ورنہ
 		warning(_("'%s': unknown man viewer."), name);
 }
 
-static void show_man_page(const char *page)
+ساکن خالی show_man_صفحہ(ثابت حرف *صفحہ)
 {
-	struct man_viewer_list *viewer;
-	const char *fallback = getenv("GIT_MAN_VIEWER");
+	ساخت man_viewer_list *viewer;
+	ثابت حرف *fallback = getenv("GIT_MAN_VIEWER");
 
-	setup_man_path();
-	for (viewer = man_viewer_list; viewer; viewer = viewer->next)
+	تیاری_man_راستہ();
+	برائے (viewer = man_viewer_list; viewer; viewer = viewer->اگلا)
 	{
-		exec_viewer(viewer->name, page); /* will return when unable */
+		exec_viewer(viewer->name, صفحہ); /* will return when unable */
 	}
-	if (fallback)
-		exec_viewer(fallback, page);
-	exec_viewer("man", page);
+	اگر (fallback)
+		exec_viewer(fallback, صفحہ);
+	exec_viewer("man", صفحہ);
 	die(_("no man viewer handled the request"));
 }
 
-static void show_info_page(const char *page)
+ساکن خالی show_info_صفحہ(ثابت حرف *صفحہ)
 {
-	setenv("INFOPATH", system_path(GIT_INFO_PATH), 1);
-	execlp("info", "info", "gitman", page, (char *)NULL);
+	setenv("INFOPATH", system_راستہ(GIT_INFO_راستہ), 1);
+	execlp("info", "info", "gitman", صفحہ, (حرف *)تہی);
 	die(_("no info viewer handled the request"));
 }
 
-static void get_html_page_path(struct strbuf *page_path, const char *page)
+ساکن خالی get_html_صفحہ_راستہ(ساخت strbuf *صفحہ_راستہ, ثابت حرف *صفحہ)
 {
-	struct stat st;
-	const char *path = html_path;
-	char *to_free = NULL;
+	ساخت stat st;
+	ثابت حرف *راستہ = html_راستہ;
+	حرف *مقصد_free = تہی;
 
-	if (!path)
-		path = to_free = system_path(GIT_HTML_PATH);
+	اگر (!راستہ)
+		راستہ = مقصد_free = system_راستہ(GIT_HTML_راستہ);
 
 	/*
 	 * Check that the page we're looking for exists.
 	 */
-	if (!strstr(path, "://")) {
-		if (stat(mkpath("%s/%s.html", path, page), &st)
-		    || !S_ISREG(st.st_mode))
+	اگر (!لڑی_تلاش(راستہ, "://")) {
+		اگر (stat(mkpath("%s/%s.html", راستہ, صفحہ), &st)
+		    || !S_ISREG(st.st_منوال))
 			die("'%s/%s.html': documentation file not found.",
-				path, page);
+				راستہ, صفحہ);
 	}
 
-	strbuf_init(page_path, 0);
-	strbuf_addf(page_path, "%s/%s.html", path, page);
-	free(to_free);
+	strbuf_init(صفحہ_راستہ, 0);
+	strbuf_addf(صفحہ_راستہ, "%s/%s.html", راستہ, صفحہ);
+	آزاد(مقصد_free);
 }
 
-static void open_html(const char *path)
+ساکن خالی open_html(ثابت حرف *راستہ)
 {
-	execl_git_cmd("web--browse", "-c", "help.browser", path, (char *)NULL);
+	execl_git_cmd("web--browse", "-c", "help.browser", راستہ, (حرف *)تہی);
 }
 
-static void show_html_page(const char *page)
+ساکن خالی show_html_صفحہ(ثابت حرف *صفحہ)
 {
-	struct strbuf page_path; /* it leaks but we exec below */
+	ساخت strbuf صفحہ_راستہ; /* it leaks but we exec below */
 
-	get_html_page_path(&page_path, page);
+	get_html_صفحہ_راستہ(&صفحہ_راستہ, صفحہ);
 
-	open_html(page_path.buf);
+	open_html(صفحہ_راستہ.buf);
 }
 
-static char *check_git_cmd(const char *cmd)
+ساکن حرف *check_git_cmd(ثابت حرف *cmd)
 {
-	char *alias;
+	حرف *alias;
 
-	if (is_git_command(cmd))
-		return xstrdup(cmd);
+	اگر (is_git_command(cmd))
+		واپس xstrdup(cmd);
 
 	alias = alias_lookup(cmd);
-	if (alias) {
-		const char **argv;
-		int count;
+	اگر (alias) {
+		ثابت حرف **argv;
+		صحیح گنتی;
 
 		/*
 		 * handle_builtin() in git.c rewrites "git cmd --help"
@@ -596,10 +596,10 @@ static char *check_git_cmd(const char *cmd)
 		 * alias for a shell command, just print the alias
 		 * definition.
 		 */
-		if (!exclude_guides || alias[0] == '!') {
+		اگر (!exclude_guides || alias[0] == '!') {
 			printf_ln(_("'%s' is aliased to '%s'"), cmd, alias);
-			free(alias);
-			exit(0);
+			آزاد(alias);
+			باہر_نکلو(0);
 		}
 		/*
 		 * Otherwise, we pretend that the command was "git
@@ -609,161 +609,161 @@ static char *check_git_cmd(const char *cmd)
 		 * used. split_cmdline() modifies alias in-place.
 		 */
 		fprintf_ln(stderr, _("'%s' is aliased to '%s'"), cmd, alias);
-		count = split_cmdline(alias, &argv);
-		if (count < 0)
+		گنتی = بانٹو_cmdline(alias, &argv);
+		اگر (گنتی < 0)
 			die(_("bad alias.%s string: %s"), cmd,
-			    split_cmdline_strerror(count));
-		free(argv);
-		return alias;
+			    بانٹو_cmdline_strerror(گنتی));
+		آزاد(argv);
+		واپس alias;
 	}
 
-	if (exclude_guides)
-		return help_unknown_cmd(cmd);
+	اگر (exclude_guides)
+		واپس help_unknown_cmd(cmd);
 
-	return xstrdup(cmd);
+	واپس xstrdup(cmd);
 }
 
-static void no_help_format(const char *opt_mode, enum help_format fmt)
+ساکن خالی no_help_format(ثابت حرف *opt_منوال, شمار help_format fmt)
 {
-	const char *opt_fmt;
+	ثابت حرف *opt_fmt;
 
-	switch (fmt) {
-	case HELP_FORMAT_NONE:
-		return;
-	case HELP_FORMAT_MAN:
+	انتخاب (fmt) {
+	حالت HELP_FORMAT_NONE:
+		واپس;
+	حالت HELP_FORMAT_MAN:
 		opt_fmt = "--man";
-		break;
-	case HELP_FORMAT_INFO:
+		توڑو;
+	حالت HELP_FORMAT_INFO:
 		opt_fmt = "--info";
-		break;
-	case HELP_FORMAT_WEB:
+		توڑو;
+	حالت HELP_FORMAT_WEB:
 		opt_fmt = "--web";
-		break;
-	default:
+		توڑو;
+	طےشدہ:
 		BUG("unreachable");
 	}
 
-	usage_msg_optf(_("options '%s' and '%s' cannot be used together"),
-		       builtin_help_usage, builtin_help_options, opt_mode,
+	usage_پیغام_optf(_("options '%s' and '%s' cannot be used together"),
+		       builtin_help_usage, builtin_help_options, opt_منوال,
 		       opt_fmt);
 }
 
-static void opt_mode_usage(int argc, const char *opt_mode,
-			   enum help_format fmt)
+ساکن خالی opt_منوال_usage(صحیح argc, ثابت حرف *opt_منوال,
+			   شمار help_format fmt)
 {
-	if (argc)
-		usage_msg_optf(_("the '%s' option doesn't take any non-option arguments"),
+	اگر (argc)
+		usage_پیغام_optf(_("the '%s' option doesn't take any non-option arguments"),
 			       builtin_help_usage, builtin_help_options,
-			       opt_mode);
+			       opt_منوال);
 
-	no_help_format(opt_mode, fmt);
+	no_help_format(opt_منوال, fmt);
 }
 
-int cmd_help(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+صحیح cmd_help(صحیح argc,
+	     ثابت حرف **argv,
+	     ثابت حرف *سابقہ,
+	     ساخت repository *repo غیر_مستعمل)
 {
-	int nongit;
-	enum help_format parsed_help_format;
-	char *command = NULL;
-	const char *page;
+	صحیح nongit;
+	شمار help_format parsed_help_format;
+	حرف *command = تہی;
+	ثابت حرف *صفحہ;
 
-	argc = parse_options(argc, argv, prefix, builtin_help_options,
+	argc = parse_options(argc, argv, سابقہ, builtin_help_options,
 			builtin_help_usage, 0);
 	parsed_help_format = help_format;
 
-	if (cmd_mode != HELP_ACTION_ALL &&
+	اگر (cmd_منوال != HELP_ACTION_ALL &&
 	    (show_external_commands >= 0 ||
 	     show_aliases >= 0))
-		usage_msg_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
+		usage_پیغام_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
 			      builtin_help_usage, builtin_help_options);
 
-	switch (cmd_mode) {
-	case HELP_ACTION_ALL:
-		opt_mode_usage(argc, "--all", help_format);
-		if (verbose) {
-			setup_pager(the_repository);
+	انتخاب (cmd_منوال) {
+	حالت HELP_ACTION_ALL:
+		opt_منوال_usage(argc, "--all", help_format);
+		اگر (verbose) {
+			تیاری_pager(the_repository);
 			list_all_cmds_help(show_external_commands,
 					   show_aliases);
-			return 0;
+			واپس 0;
 		}
-		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
-		load_command_list("git-", &main_cmds, &other_cmds);
+		لکھو(_("usage: %s%s"), _(git_usage_string), "\n\n");
+		بھرو_command_list("git-", &main_cmds, &other_cmds);
 		list_commands(&main_cmds, &other_cmds);
-		printf("%s\n", _(git_more_info_string));
-		break;
-	case HELP_ACTION_GUIDES:
-		opt_mode_usage(argc, "--guides", help_format);
+		لکھو("%s\n", _(git_مزید_info_string));
+		توڑو;
+	حالت HELP_ACTION_GUIDES:
+		opt_منوال_usage(argc, "--guides", help_format);
 		list_guides_help();
-		printf("%s\n", _(git_more_info_string));
-		return 0;
-	case HELP_ACTION_CONFIG_FOR_COMPLETION:
-		opt_mode_usage(argc, "--config-for-completion", help_format);
+		لکھو("%s\n", _(git_مزید_info_string));
+		واپس 0;
+	حالت HELP_ACTION_CONFIG_FOR_COMPLETION:
+		opt_منوال_usage(argc, "--config-for-completion", help_format);
 		list_config_help(SHOW_CONFIG_VARS);
-		return 0;
-	case HELP_ACTION_USER_INTERFACES:
-		opt_mode_usage(argc, "--user-interfaces", help_format);
+		واپس 0;
+	حالت HELP_ACTION_USER_INTERFACES:
+		opt_منوال_usage(argc, "--user-interfaces", help_format);
 		list_user_interfaces_help();
-		return 0;
-	case HELP_ACTION_DEVELOPER_INTERFACES:
-		opt_mode_usage(argc, "--developer-interfaces", help_format);
+		واپس 0;
+	حالت HELP_ACTION_DEVELOPER_INTERFACES:
+		opt_منوال_usage(argc, "--developer-interfaces", help_format);
 		list_developer_interfaces_help();
-		return 0;
-	case HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
-		opt_mode_usage(argc, "--config-sections-for-completion",
+		واپس 0;
+	حالت HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
+		opt_منوال_usage(argc, "--config-sections-for-completion",
 			       help_format);
 		list_config_help(SHOW_CONFIG_SECTIONS);
-		return 0;
-	case HELP_ACTION_ALIASES_FOR_COMPLETION: {
-		struct string_list alias_list = STRING_LIST_INIT_DUP;
-		opt_mode_usage(argc, "--aliases-for-completion", help_format);
+		واپس 0;
+	حالت HELP_ACTION_ALIASES_FOR_COMPLETION: {
+		ساخت string_list alias_list = STRING_LIST_INIT_DUP;
+		opt_منوال_usage(argc, "--aliases-for-completion", help_format);
 		list_aliases(&alias_list);
-		for (size_t i = 0; i < alias_list.nr; i++)
-			printf("%s%c%s%c", alias_list.items[i].string, '\n',
-			       (char *)alias_list.items[i].util, '\0');
+		برائے (سائز_t i = 0; i < alias_list.nr; i++)
+			لکھو("%s%c%s%c", alias_list.اشیاء[i].string, '\n',
+			       (حرف *)alias_list.اشیاء[i].util, '\0');
 		string_list_clear(&alias_list, 1);
-		return 0;
+		واپس 0;
 	}
-	case HELP_ACTION_CONFIG:
-		opt_mode_usage(argc, "--config", help_format);
-		setup_pager(the_repository);
+	حالت HELP_ACTION_CONFIG:
+		opt_منوال_usage(argc, "--config", help_format);
+		تیاری_pager(the_repository);
 		list_config_help(SHOW_CONFIG_HUMAN);
-		printf("\n%s\n", _("'git help config' for more information"));
-		return 0;
+		لکھو("\n%s\n", _("'git help config' for more information"));
+		واپس 0;
 	}
 
-	if (!argv[0]) {
-		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
+	اگر (!argv[0]) {
+		لکھو(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		list_common_cmds_help();
-		printf("\n%s\n", _(git_more_info_string));
-		return 0;
+		لکھو("\n%s\n", _(git_مزید_info_string));
+		واپس 0;
 	}
 
-	setup_git_directory_gently(the_repository, &nongit);
-	repo_config(the_repository, git_help_config, NULL);
+	تیاری_git_directory_gently(the_repository, &nongit);
+	repo_config(the_repository, git_help_config, تہی);
 
-	if (parsed_help_format != HELP_FORMAT_NONE)
+	اگر (parsed_help_format != HELP_FORMAT_NONE)
 		help_format = parsed_help_format;
-	if (help_format == HELP_FORMAT_NONE)
+	اگر (help_format == HELP_FORMAT_NONE)
 		help_format = parse_help_format(DEFAULT_HELP_FORMAT);
 
 	command = check_git_cmd(argv[0]);
 
-	page = cmd_to_page(command);
-	switch (help_format) {
-	case HELP_FORMAT_NONE:
-	case HELP_FORMAT_MAN:
-		show_man_page(page);
-		break;
-	case HELP_FORMAT_INFO:
-		show_info_page(page);
-		break;
-	case HELP_FORMAT_WEB:
-		show_html_page(page);
-		break;
+	صفحہ = cmd_مقصد_صفحہ(command);
+	انتخاب (help_format) {
+	حالت HELP_FORMAT_NONE:
+	حالت HELP_FORMAT_MAN:
+		show_man_صفحہ(صفحہ);
+		توڑو;
+	حالت HELP_FORMAT_INFO:
+		show_info_صفحہ(صفحہ);
+		توڑو;
+	حالت HELP_FORMAT_WEB:
+		show_html_صفحہ(صفحہ);
+		توڑو;
 	}
 
-	free(command);
-	return 0;
+	آزاد(command);
+	واپس 0;
 }

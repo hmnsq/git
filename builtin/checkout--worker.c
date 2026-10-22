@@ -1,34 +1,34 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "entry.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parallel-checkout.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "read-cache-ll.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "entry.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "parallel-checkout.h"
+#شامل "parse-options.h"
+#شامل "pkt-line.h"
+#شامل "read-cache-ll.h"
 
-static void packet_to_pc_item(const char *buffer, int len,
-			      struct parallel_checkout_item *pc_item)
+ساکن خالی packet_مقصد_pc_شے(ثابت حرف *بفر, صحیح len,
+			      ساخت parallel_checkout_شے *pc_شے)
 {
-	const struct pc_item_fixed_portion *fixed_portion;
-	const char *variant;
-	char *encoding;
+	ثابت ساخت pc_شے_fixed_portion *fixed_portion;
+	ثابت حرف *variant;
+	حرف *encoding;
 
-	if (len < sizeof(struct pc_item_fixed_portion))
+	اگر (len < حجم(ساخت pc_شے_fixed_portion))
 		BUG("checkout worker received too short item (got %dB, exp %dB)",
-		    len, (int)sizeof(struct pc_item_fixed_portion));
+		    len, (صحیح)حجم(ساخت pc_شے_fixed_portion));
 
-	fixed_portion = (struct pc_item_fixed_portion *)buffer;
+	fixed_portion = (ساخت pc_شے_fixed_portion *)بفر;
 
-	if (len - sizeof(struct pc_item_fixed_portion) !=
-		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
+	اگر (len - حجم(ساخت pc_شے_fixed_portion) !=
+		fixed_portion->name_len + fixed_portion->working_درخت_encoding_len)
 		BUG("checkout worker received corrupted item");
 
-	variant = buffer + sizeof(struct pc_item_fixed_portion);
+	variant = بفر + حجم(ساخت pc_شے_fixed_portion);
 
 	/*
 	 * Note: the main process uses zero length to communicate that the
@@ -36,111 +36,111 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	اگر (fixed_portion->working_درخت_encoding_len) {
 		encoding = xmemdupz(variant,
-				    fixed_portion->working_tree_encoding_len);
-		variant += fixed_portion->working_tree_encoding_len;
-	} else {
-		encoding = NULL;
+				    fixed_portion->working_درخت_encoding_len);
+		variant += fixed_portion->working_درخت_encoding_len;
+	} ورنہ {
+		encoding = تہی;
 	}
 
-	memset(pc_item, 0, sizeof(*pc_item));
-	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, NULL);
-	pc_item->ce->ce_namelen = fixed_portion->name_len;
-	pc_item->ce->ce_mode = fixed_portion->ce_mode;
-	memcpy(pc_item->ce->name, variant, pc_item->ce->ce_namelen);
-	oidcpy(&pc_item->ce->oid, &fixed_portion->oid);
+	memset(pc_شے, 0, حجم(*pc_شے));
+	pc_شے->ce = make_خالی_خانے_transient_cache_اندراج(fixed_portion->name_len, تہی);
+	pc_شے->ce->ce_namelen = fixed_portion->name_len;
+	pc_شے->ce->ce_منوال = fixed_portion->ce_منوال;
+	حافظہ_نقل(pc_شے->ce->name, variant, pc_شے->ce->ce_namelen);
+	oidcpy(&pc_شے->ce->oid, &fixed_portion->oid);
 
-	pc_item->id = fixed_portion->id;
-	pc_item->ca.crlf_action = fixed_portion->crlf_action;
-	pc_item->ca.ident = fixed_portion->ident;
-	pc_item->ca.working_tree_encoding = encoding;
+	pc_شے->id = fixed_portion->id;
+	pc_شے->ca.crlf_action = fixed_portion->crlf_action;
+	pc_شے->ca.ident = fixed_portion->ident;
+	pc_شے->ca.working_درخت_encoding = encoding;
 }
 
-static void report_result(struct parallel_checkout_item *pc_item)
+ساکن خالی report_نتیجہ(ساخت parallel_checkout_شے *pc_شے)
 {
-	struct pc_item_result res = { 0 };
-	size_t size;
+	ساخت pc_شے_نتیجہ res = { 0 };
+	سائز_t سائز;
 
-	res.id = pc_item->id;
-	res.status = pc_item->status;
+	res.id = pc_شے->id;
+	res.حالت_2 = pc_شے->حالت_2;
 
-	if (pc_item->status == PC_ITEM_WRITTEN) {
-		res.st = pc_item->st;
-		size = sizeof(res);
-	} else {
-		size = PC_ITEM_RESULT_BASE_SIZE;
+	اگر (pc_شے->حالت_2 == PC_شے_WRITTEN) {
+		res.st = pc_شے->st;
+		سائز = حجم(res);
+	} ورنہ {
+		سائز = PC_شے_نتیجہ_بنیاد_سائز;
 	}
 
-	packet_write(1, (const char *)&res, size);
+	packet_write(1, (ثابت حرف *)&res, سائز);
 }
 
 /* Free the worker-side malloced data, but not pc_item itself. */
-static void release_pc_item_data(struct parallel_checkout_item *pc_item)
+ساکن خالی release_pc_شے_ڈیٹا(ساخت parallel_checkout_شے *pc_شے)
 {
-	free((char *)pc_item->ca.working_tree_encoding);
-	discard_cache_entry(pc_item->ce);
+	آزاد((حرف *)pc_شے->ca.working_درخت_encoding);
+	discard_cache_اندراج(pc_شے->ce);
 }
 
-static void worker_loop(struct checkout *state)
+ساکن خالی کارکن_loop(ساخت checkout *state)
 {
-	struct parallel_checkout_item *items = NULL;
-	size_t i, nr = 0, alloc = 0;
+	ساخت parallel_checkout_شے *اشیاء = تہی;
+	سائز_t i, nr = 0, alloc = 0;
 
-	while (1) {
-		int len = packet_read(0, packet_buffer, sizeof(packet_buffer),
+	جب (1) {
+		صحیح len = packet_read(0, packet_بفر, حجم(packet_بفر),
 				      0);
 
-		if (len < 0)
+		اگر (len < 0)
 			BUG("packet_read() returned negative value");
-		else if (!len)
-			break;
+		ورنہ اگر (!len)
+			توڑو;
 
-		ALLOC_GROW(items, nr + 1, alloc);
-		packet_to_pc_item(packet_buffer, len, &items[nr++]);
+		ALLOC_GROW(اشیاء, nr + 1, alloc);
+		packet_مقصد_pc_شے(packet_بفر, len, &اشیاء[nr++]);
 	}
 
-	for (i = 0; i < nr; i++) {
-		struct parallel_checkout_item *pc_item = &items[i];
-		write_pc_item(pc_item, state);
-		report_result(pc_item);
-		release_pc_item_data(pc_item);
+	برائے (i = 0; i < nr; i++) {
+		ساخت parallel_checkout_شے *pc_شے = &اشیاء[i];
+		write_pc_شے(pc_شے, state);
+		report_نتیجہ(pc_شے);
+		release_pc_شے_ڈیٹا(pc_شے);
 	}
 
 	packet_flush(1);
 
-	free(items);
+	آزاد(اشیاء);
 }
 
-static const char * const checkout_worker_usage[] = {
+ساکن ثابت حرف * ثابت checkout_کارکن_usage[] = {
 	N_("git checkout--worker [<options>]"),
-	NULL
+	تہی
 };
 
-int cmd_checkout__worker(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+صحیح cmd_checkout_کارکن(صحیح argc,
+			 ثابت حرف **argv,
+			 ثابت حرف *سابقہ,
+			 ساخت repository *repo غیر_مستعمل)
 {
-	struct checkout state = CHECKOUT_INIT;
-	struct option checkout_worker_options[] = {
-		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
+	ساخت checkout state = CHECKOUT_INIT;
+	ساخت option checkout_کارکن_options[] = {
+		OPT_STRING(0, "prefix", &state.بنیاد_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
-		OPT_END()
+		OPT_انتہا()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 checkout_worker_usage,
-					 checkout_worker_options);
+					 checkout_کارکن_usage,
+					 checkout_کارکن_options);
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, prefix, checkout_worker_options,
-			     checkout_worker_usage, 0);
-	if (argc > 0)
-		usage_with_options(checkout_worker_usage, checkout_worker_options);
+	repo_config(the_repository, git_default_config, تہی);
+	argc = parse_options(argc, argv, سابقہ, checkout_کارکن_options,
+			     checkout_کارکن_usage, 0);
+	اگر (argc > 0)
+		usage_with_options(checkout_کارکن_usage, checkout_کارکن_options);
 
-	if (state.base_dir)
-		state.base_dir_len = strlen(state.base_dir);
+	اگر (state.بنیاد_dir)
+		state.بنیاد_dir_len = لڑی_لمبائی(state.بنیاد_dir);
 
 	/*
 	 * Setting this on a worker won't actually update the index. We just
@@ -149,6 +149,6 @@ int cmd_checkout__worker(int argc,
 	 */
 	state.refresh_cache = 1;
 
-	worker_loop(&state);
-	return 0;
+	کارکن_loop(&state);
+	واپس 0;
 }

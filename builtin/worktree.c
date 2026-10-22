@@ -1,425 +1,425 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "checkout.h"
-#include "config.h"
-#include "copy.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "strvec.h"
-#include "branch.h"
-#include "read-cache-ll.h"
-#include "refs.h"
-#include "remote.h"
-#include "run-command.h"
-#include "hook.h"
-#include "sigchain.h"
-#include "submodule.h"
-#include "utf8.h"
-#include "worktree.h"
-#include "quote.h"
+#شامل "builtin.h"
+#شامل "abspath.h"
+#شامل "advice.h"
+#شامل "checkout.h"
+#شامل "config.h"
+#شامل "copy.h"
+#شامل "dir.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "object-file.h"
+#شامل "object-name.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "strvec.h"
+#شامل "branch.h"
+#شامل "read-cache-ll.h"
+#شامل "refs.h"
+#شامل "remote.h"
+#شامل "run-command.h"
+#شامل "hook.h"
+#شامل "sigchain.h"
+#شامل "submodule.h"
+#شامل "utf8.h"
+#شامل "worktree.h"
+#شامل "quote.h"
 
-#define BUILTIN_WORKTREE_ADD_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_جوڑو_USAGE \
 	N_("git worktree add [-f] [--detach] [--checkout] [--lock [--reason <string>]]\n" \
 	   "                 [--orphan] [(-b | -B) <new-branch>] <path> [<commit-ish>]")
 
-#define BUILTIN_WORKTREE_LIST_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_LIST_USAGE \
 	N_("git worktree list [-v | --porcelain [-z]]")
-#define BUILTIN_WORKTREE_LOCK_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_تالا_USAGE \
 	N_("git worktree lock [--reason <string>] <worktree>")
-#define BUILTIN_WORKTREE_MOVE_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_MOVE_USAGE \
 	N_("git worktree move <worktree> <new-path>")
-#define BUILTIN_WORKTREE_PRUNE_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_PRUNE_USAGE \
 	N_("git worktree prune [-n] [-v] [--expire <expire>]")
-#define BUILTIN_WORKTREE_REMOVE_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_REMOVE_USAGE \
 	N_("git worktree remove [-f] <worktree>")
-#define BUILTIN_WORKTREE_REPAIR_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_REPAIR_USAGE \
 	N_("git worktree repair [<path>...]")
-#define BUILTIN_WORKTREE_UNLOCK_USAGE \
+#تعریف_کرو BUILTIN_WORKTREE_UNLOCK_USAGE \
 	N_("git worktree unlock <worktree>")
 
-#define WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT \
+#تعریف_کرو WORKTREE_جوڑو_DWIM_ORPHAN_INFER_متن \
 	_("No possible source branch, inferring '--orphan'")
 
-#define WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT \
+#تعریف_کرو WORKTREE_جوڑو_ORPHAN_WITH_DASH_B_HINT_متن \
 	_("If you meant to create a worktree containing a new unborn branch\n" \
 	"(branch with no commits) for this repository, you can do so\n" \
 	"using the --orphan flag:\n" \
 	"\n" \
 	"    git worktree add --orphan -b %s %s\n")
 
-#define WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT \
+#تعریف_کرو WORKTREE_جوڑو_ORPHAN_NO_DASH_B_HINT_متن \
 	_("If you meant to create a worktree containing a new unborn branch\n" \
 	"(branch with no commits) for this repository, you can do so\n" \
 	"using the --orphan flag:\n" \
 	"\n" \
 	"    git worktree add --orphan %s\n")
 
-static const char * const git_worktree_usage[] = {
-	BUILTIN_WORKTREE_ADD_USAGE,
+ساکن ثابت حرف * ثابت git_worktree_usage[] = {
+	BUILTIN_WORKTREE_جوڑو_USAGE,
 	BUILTIN_WORKTREE_LIST_USAGE,
-	BUILTIN_WORKTREE_LOCK_USAGE,
+	BUILTIN_WORKTREE_تالا_USAGE,
 	BUILTIN_WORKTREE_MOVE_USAGE,
 	BUILTIN_WORKTREE_PRUNE_USAGE,
 	BUILTIN_WORKTREE_REMOVE_USAGE,
 	BUILTIN_WORKTREE_REPAIR_USAGE,
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
-	NULL
+	تہی
 };
 
-static const char * const git_worktree_add_usage[] = {
-	BUILTIN_WORKTREE_ADD_USAGE,
-	NULL,
+ساکن ثابت حرف * ثابت git_worktree_جوڑو_usage[] = {
+	BUILTIN_WORKTREE_جوڑو_USAGE,
+	تہی,
 };
 
-static const char * const git_worktree_list_usage[] = {
+ساکن ثابت حرف * ثابت git_worktree_list_usage[] = {
 	BUILTIN_WORKTREE_LIST_USAGE,
-	NULL
+	تہی
 };
 
-static const char * const git_worktree_lock_usage[] = {
-	BUILTIN_WORKTREE_LOCK_USAGE,
-	NULL
+ساکن ثابت حرف * ثابت git_worktree_تالا_usage[] = {
+	BUILTIN_WORKTREE_تالا_USAGE,
+	تہی
 };
 
-static const char * const git_worktree_move_usage[] = {
+ساکن ثابت حرف * ثابت git_worktree_move_usage[] = {
 	BUILTIN_WORKTREE_MOVE_USAGE,
-	NULL
+	تہی
 };
 
-static const char * const git_worktree_prune_usage[] = {
+ساکن ثابت حرف * ثابت git_worktree_prune_usage[] = {
 	BUILTIN_WORKTREE_PRUNE_USAGE,
-	NULL
+	تہی
 };
 
-static const char * const git_worktree_remove_usage[] = {
+ساکن ثابت حرف * ثابت git_worktree_remove_usage[] = {
 	BUILTIN_WORKTREE_REMOVE_USAGE,
-	NULL
+	تہی
 };
 
-static const char * const git_worktree_repair_usage[] = {
+ساکن ثابت حرف * ثابت git_worktree_repair_usage[] = {
 	BUILTIN_WORKTREE_REPAIR_USAGE,
-	NULL
+	تہی
 };
 
-static const char * const git_worktree_unlock_usage[] = {
+ساکن ثابت حرف * ثابت git_worktree_unlock_usage[] = {
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
-	NULL
+	تہی
 };
 
-struct add_opts {
-	int force;
-	int detach;
-	int quiet;
-	int checkout;
-	int orphan;
-	int relative_paths;
-	const char *keep_locked;
+ساخت جوڑو_opts {
+	صحیح force;
+	صحیح detach;
+	صحیح quiet;
+	صحیح checkout;
+	صحیح orphan;
+	صحیح relative_paths;
+	ثابت حرف *keep_locked;
 };
 
-static int show_only;
-static int verbose;
-static int guess_remote;
-static int use_relative_paths;
-static timestamp_t expire;
+ساکن صحیح show_only;
+ساکن صحیح verbose;
+ساکن صحیح guess_remote;
+ساکن صحیح use_relative_paths;
+ساکن timestamp_t expire;
 
-static int git_worktree_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+ساکن صحیح git_worktree_config(ثابت حرف *var, ثابت حرف *قدر,
+			       ثابت ساخت config_context *ctx, خالی *cb)
 {
-	if (!strcmp(var, "worktree.guessremote")) {
-		guess_remote = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "worktree.userelativepaths")) {
-		use_relative_paths = git_config_bool(var, value);
-		return 0;
+	اگر (!strcmp(var, "worktree.guessremote")) {
+		guess_remote = git_config_bool(var, قدر);
+		واپس 0;
+	} ورنہ اگر (!strcmp(var, "worktree.userelativepaths")) {
+		use_relative_paths = git_config_bool(var, قدر);
+		واپس 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	واپس git_default_config(var, قدر, ctx, cb);
 }
 
-static int delete_git_dir(const char *id)
+ساکن صحیح delete_git_dir(ثابت حرف *id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	ساخت strbuf sb = STRBUF_INIT;
+	صحیح ret;
 
-	repo_common_path_append(the_repository, &sb, "worktrees/%s", id);
+	repo_common_راستہ_append(the_repository, &sb, "worktrees/%s", id);
 	ret = remove_dir_recursively(&sb, 0);
-	if (ret < 0 && errno == ENOTDIR)
+	اگر (ret < 0 && errno == ENOTDIR)
 		ret = unlink(sb.buf);
-	if (ret)
+	اگر (ret)
 		error_errno(_("failed to delete '%s'"), sb.buf);
 	strbuf_release(&sb);
-	return ret;
+	واپس ret;
 }
 
-static void delete_worktrees_dir_if_empty(void)
+ساکن خالی delete_worktrees_dir_if_خالی_خانے(خالی)
 {
-	char *path = repo_git_path(the_repository, "worktrees");
-	rmdir(path); /* ignore failed removal */
-	free(path);
+	حرف *راستہ = repo_git_راستہ(the_repository, "worktrees");
+	rmdir(راستہ); /* ignore failed removal */
+	آزاد(راستہ);
 }
 
-static void prune_worktree(const char *id, const char *reason)
+ساکن خالی prune_worktree(ثابت حرف *id, ثابت حرف *reason)
 {
-	if (show_only || verbose)
+	اگر (show_only || verbose)
 		fprintf_ln(stderr, _("Removing %s/%s: %s"), "worktrees", id, reason);
-	if (!show_only)
+	اگر (!show_only)
 		delete_git_dir(id);
 }
 
-static int prune_cmp(const void *a, const void *b)
+ساکن صحیح prune_cmp(ثابت خالی *a, ثابت خالی *b)
 {
-	const struct string_list_item *x = a;
-	const struct string_list_item *y = b;
-	int c;
+	ثابت ساخت string_list_شے *x = a;
+	ثابت ساخت string_list_شے *y = b;
+	صحیح c;
 
-	if ((c = fspathcmp(x->string, y->string)))
-	    return c;
+	اگر ((c = fspathcmp(x->string, y->string)))
+	    واپس c;
 	/*
 	 * paths same; prune_dupes() removes all but the first worktree entry
 	 * having the same path, so sort main worktree ('util' is NULL) above
 	 * linked worktrees ('util' not NULL) since main worktree can't be
 	 * removed
 	 */
-	if (!x->util)
-		return -1;
-	if (!y->util)
-		return 1;
+	اگر (!x->util)
+		واپس -1;
+	اگر (!y->util)
+		واپس 1;
 	/* paths same; sort by .git/worktrees/<id> */
-	return strcmp(x->util, y->util);
+	واپس strcmp(x->util, y->util);
 }
 
-static void prune_dups(struct string_list *l)
+ساکن خالی prune_dups(ساخت string_list *l)
 {
-	int i;
+	صحیح i;
 
-	QSORT(l->items, l->nr, prune_cmp);
-	for (i = 1; i < l->nr; i++) {
-		if (!fspathcmp(l->items[i].string, l->items[i - 1].string))
-			prune_worktree(l->items[i].util, "duplicate entry");
+	QSORT(l->اشیاء, l->nr, prune_cmp);
+	برائے (i = 1; i < l->nr; i++) {
+		اگر (!fspathcmp(l->اشیاء[i].string, l->اشیاء[i - 1].string))
+			prune_worktree(l->اشیاء[i].util, "duplicate entry");
 	}
 }
 
-static void prune_worktrees(void)
+ساکن خالی prune_worktrees(خالی)
 {
-	struct strbuf reason = STRBUF_INIT;
-	struct strbuf main_path = STRBUF_INIT;
-	struct string_list kept = STRING_LIST_INIT_DUP;
-	char *path;
+	ساخت strbuf reason = STRBUF_INIT;
+	ساخت strbuf main_راستہ = STRBUF_INIT;
+	ساخت string_list kept = STRING_LIST_INIT_DUP;
+	حرف *راستہ;
 	DIR *dir;
-	struct dirent *d;
+	ساخت dirent *d;
 
-	path = repo_git_path(the_repository, "worktrees");
-	dir = opendir(path);
-	free(path);
-	if (!dir)
-		return;
-	while ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
-		char *path;
+	راستہ = repo_git_راستہ(the_repository, "worktrees");
+	dir = opendir(راستہ);
+	آزاد(راستہ);
+	اگر (!dir)
+		واپس;
+	جب ((d = readdir_skip_dot_and_dotdot(dir)) != تہی) {
+		حرف *راستہ;
 		strbuf_reset(&reason);
-		if (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
+		اگر (should_prune_worktree(the_repository, d->d_name, &reason, &راستہ, expire))
 			prune_worktree(d->d_name, reason.buf);
-		else if (path)
-			string_list_append_nodup(&kept, path)->util = xstrdup(d->d_name);
+		ورنہ اگر (راستہ)
+			string_list_append_nodup(&kept, راستہ)->util = xstrdup(d->d_name);
 	}
 	closedir(dir);
 
-	strbuf_add_absolute_path(&main_path, repo_get_common_dir(the_repository));
+	strbuf_جوڑو_absolute_راستہ(&main_راستہ, repo_get_common_dir(the_repository));
 	/* massage main worktree absolute path to match 'gitdir' content */
-	strbuf_strip_suffix(&main_path, "/.");
-	string_list_append_nodup(&kept, strbuf_detach(&main_path, NULL));
+	strbuf_strip_suffix(&main_راستہ, "/.");
+	string_list_append_nodup(&kept, strbuf_detach(&main_راستہ, تہی));
 	prune_dups(&kept);
 	string_list_clear(&kept, 1);
 
-	if (!show_only)
-		delete_worktrees_dir_if_empty();
+	اگر (!show_only)
+		delete_worktrees_dir_if_خالی_خانے();
 	strbuf_release(&reason);
 }
 
-static int prune(int ac, const char **av, const char *prefix,
-		 struct repository *repo UNUSED)
+ساکن صحیح prune(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+		 ساخت repository *repo غیر_مستعمل)
 {
-	struct option options[] = {
-		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
+	ساخت option options[] = {
+		OPT_DRY_تسلسل(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned working trees")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
 				N_("prune missing working trees older than <time>")),
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	expire = TIME_MAX;
-	ac = parse_options(ac, av, prefix, options, git_worktree_prune_usage,
+	expire = وقت_MAX;
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_prune_usage,
 			   0);
-	if (ac)
+	اگر (ac)
 		usage_with_options(git_worktree_prune_usage, options);
 	prune_worktrees();
-	return 0;
+	واپس 0;
 }
 
-static char *junk_work_tree;
-static char *junk_git_dir;
-static int is_junk;
-static pid_t junk_pid;
+ساکن حرف *junk_work_درخت;
+ساکن حرف *junk_git_dir;
+ساکن صحیح is_junk;
+ساکن pid_t junk_pid;
 
-static void remove_junk(void)
+ساکن خالی remove_junk(خالی)
 {
-	struct strbuf sb = STRBUF_INIT;
-	if (!is_junk || getpid() != junk_pid)
-		return;
-	if (junk_git_dir) {
+	ساخت strbuf sb = STRBUF_INIT;
+	اگر (!is_junk || getpid() != junk_pid)
+		واپس;
+	اگر (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, 0);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
+	اگر (junk_work_درخت) {
+		strbuf_addstr(&sb, junk_work_درخت);
 		remove_dir_recursively(&sb, 0);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+ساکن خالی remove_junk_on_signal(صحیح signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
-	raise(signo);
+	sigchain_نکالو(signo);
+	اٹھاؤ(signo);
 }
 
-static char *worktree_basename_dup(const char *path)
+ساکن حرف *worktree_basename_dup(ثابت حرف *راستہ)
 {
-	const char *name;
-	int len;
+	ثابت حرف *name;
+	صحیح len;
 
-	len = strlen(path);
-	while (len && is_dir_sep(path[len - 1]))
+	len = لڑی_لمبائی(راستہ);
+	جب (len && is_dir_sep(راستہ[len - 1]))
 		len--;
 
-	name = path + len;
-	while (name > path && !is_dir_sep(name[-1]))
+	name = راستہ + len;
+	جب (name > راستہ && !is_dir_sep(name[-1]))
 		name--;
 
-	return xmemdupz(name, path + len - name);
+	واپس xmemdupz(name, راستہ + len - name);
 }
 
 /* check that path is viable location for worktree */
-static void check_candidate_path(const char *path,
-				 int force,
-				 struct worktree **worktrees,
-				 const char *cmd)
+ساکن خالی check_candidate_راستہ(ثابت حرف *راستہ,
+				 صحیح force,
+				 ساخت worktree **worktrees,
+				 ثابت حرف *cmd)
 {
-	struct worktree *wt;
-	int locked;
+	ساخت worktree *wt;
+	صحیح locked;
 
-	if (file_exists(path) && !is_empty_dir(path))
-		die(_("'%s' already exists"), path);
+	اگر (file_exists(راستہ) && !is_خالی_خانے_dir(راستہ))
+		die(_("'%s' already exists"), راستہ);
 
-	wt = find_worktree_by_path(worktrees, path);
-	if (!wt)
-		return;
+	wt = ڈھونڈو_worktree_by_راستہ(worktrees, راستہ);
+	اگر (!wt)
+		واپس;
 
-	locked = !!worktree_lock_reason(wt);
-	if ((!locked && force) || (locked && force > 1)) {
-		if (delete_git_dir(wt->id))
-		    die(_("unusable worktree destination '%s'"), path);
-		return;
+	locked = !!worktree_تالا_reason(wt);
+	اگر ((!locked && force) || (locked && force > 1)) {
+		اگر (delete_git_dir(wt->id))
+		    die(_("unusable worktree destination '%s'"), راستہ);
+		واپس;
 	}
 
-	if (locked)
-		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), path, cmd);
-	else
-		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), path, cmd);
+	اگر (locked)
+		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), راستہ, cmd);
+	ورنہ
+		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), راستہ, cmd);
 }
 
-static void copy_sparse_checkout(const char *worktree_git_dir)
+ساکن خالی copy_sparse_checkout(ثابت حرف *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "info/sparse-checkout");
-	char *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
+	حرف *from_file = repo_git_راستہ(the_repository, "info/sparse-checkout");
+	حرف *مقصد_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		if (safe_create_leading_directories(the_repository, to_file) ||
-			copy_file(the_repository, to_file, from_file, 0666))
+	اگر (file_exists(from_file)) {
+		اگر (محفوظ_create_leading_directories(the_repository, مقصد_file) ||
+			copy_file(the_repository, مقصد_file, from_file, 0666))
 			error(_("failed to copy '%s' to '%s'; sparse-checkout may not work correctly"),
-				from_file, to_file);
+				from_file, مقصد_file);
 	}
 
-	free(from_file);
-	free(to_file);
+	آزاد(from_file);
+	آزاد(مقصد_file);
 }
 
-static void copy_filtered_worktree_config(const char *worktree_git_dir)
+ساکن خالی copy_filtered_worktree_config(ثابت حرف *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "config.worktree");
-	char *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
+	حرف *from_file = repo_git_راستہ(the_repository, "config.worktree");
+	حرف *مقصد_file = xstrfmt("%s/config.worktree", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		struct config_set cs = { { 0 } };
-		int bare;
+	اگر (file_exists(from_file)) {
+		ساخت config_سیٹ cs = { { 0 } };
+		صحیح bare;
 
-		if (safe_create_leading_directories(the_repository, to_file) ||
-			copy_file(the_repository, to_file, from_file, 0666)) {
+		اگر (محفوظ_create_leading_directories(the_repository, مقصد_file) ||
+			copy_file(the_repository, مقصد_file, from_file, 0666)) {
 			error(_("failed to copy worktree config from '%s' to '%s'"),
-				from_file, to_file);
-			goto worktree_copy_cleanup;
+				from_file, مقصد_file);
+			جاؤ worktree_copy_cleanup;
 		}
 
 		git_configset_init(&cs);
-		git_configset_add_file(&cs, from_file);
+		git_configset_جوڑو_file(&cs, from_file);
 
-		if (!git_configset_get_bool(&cs, "core.bare", &bare) &&
+		اگر (!git_configset_get_bool(&cs, "core.bare", &bare) &&
 			bare &&
-			repo_config_set_multivar_in_file_gently(the_repository,
-				to_file, "core.bare", NULL, "true", NULL, 0))
+			repo_config_سیٹ_multivar_اندر_file_gently(the_repository,
+				مقصد_file, "core.bare", تہی, "true", تہی, 0))
 			error(_("failed to unset '%s' in '%s'"),
-				"core.bare", to_file);
-		if (!git_configset_get(&cs, "core.worktree") &&
-			repo_config_set_in_file_gently(the_repository, to_file,
-						       "core.worktree", NULL, NULL))
+				"core.bare", مقصد_file);
+		اگر (!git_configset_get(&cs, "core.worktree") &&
+			repo_config_سیٹ_اندر_file_gently(the_repository, مقصد_file,
+						       "core.worktree", تہی, تہی))
 			error(_("failed to unset '%s' in '%s'"),
-				"core.worktree", to_file);
+				"core.worktree", مقصد_file);
 
 		git_configset_clear(&cs);
 	}
 
 worktree_copy_cleanup:
-	free(from_file);
-	free(to_file);
+	آزاد(from_file);
+	آزاد(مقصد_file);
 }
 
-static int checkout_worktree(const struct add_opts *opts,
-			     struct strvec *child_env)
+ساکن صحیح checkout_worktree(ثابت ساخت جوڑو_opts *opts,
+			     ساخت strvec *بچہ_env)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ساخت بچہ_process cp = بچہ_PROCESS_INIT;
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", NULL);
-	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
-	strvec_pushv(&cp.env, child_env->v);
-	return run_command(&cp);
+	strvec_pushl(&cp.دلائل, "reset", "--hard", "--no-recurse-submodules", تہی);
+	اگر (opts->quiet)
+		strvec_ڈالو(&cp.دلائل, "--quiet");
+	strvec_pushv(&cp.env, بچہ_env->v);
+	واپس تسلسل_command(&cp);
 }
 
-static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
-				struct strvec *child_env)
+ساکن صحیح make_worktree_orphan(ثابت حرف * ref, ثابت ساخت جوڑو_opts *opts,
+				ساخت strvec *بچہ_env)
 {
-	struct strbuf symref = STRBUF_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ساخت strbuf symref = STRBUF_INIT;
+	ساخت بچہ_process cp = بچہ_PROCESS_INIT;
 
 	validate_new_branchname(ref, &symref, 0);
-	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, NULL);
-	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
-	strvec_pushv(&cp.env, child_env->v);
+	strvec_pushl(&cp.دلائل, "symbolic-ref", "HEAD", symref.buf, تہی);
+	اگر (opts->quiet)
+		strvec_ڈالو(&cp.دلائل, "--quiet");
+	strvec_pushv(&cp.env, بچہ_env->v);
 	strbuf_release(&symref);
 	cp.git_cmd = 1;
-	return run_command(&cp);
+	واپس تسلسل_command(&cp);
 }
 
 /*
@@ -430,91 +430,91 @@ static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
  * Create the necessary folder structure to facilitate the same. But to ensure
  * that the former path is still considered a Git directory, add stubs.
  */
-static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path)
+ساکن خالی تیاری_alternate_ref_dir(ساخت worktree *wt, ثابت حرف *wt_git_راستہ)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *path;
+	ساخت strbuf sb = STRBUF_INIT;
+	حرف *راستہ;
 
-	path = wt->repo->ref_storage_payload;
-	if (!path)
-		return;
+	راستہ = wt->repo->ref_storage_payload;
+	اگر (!راستہ)
+		واپس;
 
-	if (!is_absolute_path(path))
+	اگر (!is_absolute_راستہ(راستہ))
 		strbuf_addf(&sb, "%s/", wt->repo->commondir);
 
-	strbuf_addf(&sb, "%s/worktrees", path);
-	safe_create_dir(wt->repo, sb.buf, 1);
+	strbuf_addf(&sb, "%s/worktrees", راستہ);
+	محفوظ_create_dir(wt->repo, sb.buf, 1);
 	strbuf_addf(&sb, "/%s", wt->id);
-	safe_create_dir(wt->repo, sb.buf, 1);
+	محفوظ_create_dir(wt->repo, sb.buf, 1);
 	strbuf_reset(&sb);
 
 	strbuf_addf(&sb, "this worktree stores references in %s/worktrees/%s",
-		    path, wt->id);
-	refs_create_refdir_stubs(wt->repo, wt_git_path, sb.buf);
+		    راستہ, wt->id);
+	refs_create_refdir_stubs(wt->repo, wt_git_راستہ, sb.buf);
 
 	strbuf_release(&sb);
 }
 
-static int add_worktree(const char *path, const char *refname,
-			const struct add_opts *opts)
+ساکن صحیح جوڑو_worktree(ثابت حرف *راستہ, ثابت حرف *refname,
+			ثابت ساخت جوڑو_opts *opts)
 {
-	struct strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	char *name_to_free = NULL;
-	struct strvec child_env = STRVEC_INIT;
-	unsigned int counter = 0;
-	int len, ret;
-	struct strbuf symref = STRBUF_INIT;
-	struct commit *commit = NULL;
-	int is_branch = 0;
-	struct strbuf sb_name = STRBUF_INIT;
-	struct worktree **worktrees, *wt = NULL;
-	struct ref_store *wt_refs;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ساخت strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
+	ساخت strbuf sb = STRBUF_INIT;
+	ثابت حرف *name;
+	حرف *name_مقصد_free = تہی;
+	ساخت strvec بچہ_env = STRVEC_INIT;
+	غیرعلامتی صحیح شمار_2 = 0;
+	صحیح len, ret;
+	ساخت strbuf symref = STRBUF_INIT;
+	ساخت commit *commit = تہی;
+	صحیح is_branch = 0;
+	ساخت strbuf sb_name = STRBUF_INIT;
+	ساخت worktree **worktrees, *wt = تہی;
+	ساخت ref_store *wt_refs;
+	ساخت repo_config_اقدار *cfg = repo_config_اقدار(the_repository);
 
 	worktrees = get_worktrees(the_repository);
-	check_candidate_path(path, opts->force, worktrees, "add");
+	check_candidate_راستہ(راستہ, opts->force, worktrees, "add");
 	free_worktrees(worktrees);
-	worktrees = NULL;
+	worktrees = تہی;
 
 	/* is 'refname' a branch or commit? */
-	if (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
+	اگر (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
 	    refs_ref_exists(get_main_ref_store(the_repository), symref.buf)) {
 		is_branch = 1;
-		if (!opts->force)
-			die_if_checked_out(symref.buf, 0);
+		اگر (!opts->force)
+			die_if_checked_برآمد(symref.buf, 0);
 	}
 	commit = lookup_commit_reference_by_name(refname);
-	if (!commit && !opts->orphan)
+	اگر (!commit && !opts->orphan)
 		die(_("invalid reference: %s"), refname);
 
-	name = name_to_free = worktree_basename_dup(path);
-	if (!*name)
-		die(_("invalid path '%s'"), path);
+	name = name_مقصد_free = worktree_basename_dup(راستہ);
+	اگر (!*name)
+		die(_("invalid path '%s'"), راستہ);
 	sanitize_refname_component(name, &sb_name);
-	if (!sb_name.len)
+	اگر (!sb_name.len)
 		BUG("How come '%s' becomes empty after sanitization?", name);
 	name = sb_name.buf;
-	repo_git_path_replace(the_repository, &sb_repo, "worktrees/%s", name);
+	repo_git_راستہ_replace(the_repository, &sb_repo, "worktrees/%s", name);
 	len = sb_repo.len;
-	if (safe_create_leading_directories_const(the_repository, sb_repo.buf))
+	اگر (محفوظ_create_leading_directories_const(the_repository, sb_repo.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_repo.buf);
 
-	while (mkdir(sb_repo.buf, 0777)) {
-		counter++;
-		if ((errno != EEXIST) || !counter /* overflow */)
+	جب (mkdir(sb_repo.buf, 0777)) {
+		شمار_2++;
+		اگر ((errno != EEXIST) || !شمار_2 /*حد_سے_تجاوز*/)
 			die_errno(_("could not create directory of '%s'"),
 				  sb_repo.buf);
 		strbuf_setlen(&sb_repo, len);
-		strbuf_addf(&sb_repo, "%d", counter);
+		strbuf_addf(&sb_repo, "%d", شمار_2);
 	}
 	name = strrchr(sb_repo.buf, '/') + 1;
 
 	junk_pid = getpid();
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_ڈالو_common(remove_junk_on_signal);
 
 	junk_git_dir = xstrdup(sb_repo.buf);
 	is_junk = 1;
@@ -524,16 +524,16 @@ static int add_worktree(const char *path, const char *refname,
 	 * after the preparation is over.
 	 */
 	strbuf_addf(&sb, "%s/locked", sb_repo.buf);
-	if (opts->keep_locked)
+	اگر (opts->keep_locked)
 		write_file(sb.buf, "%s", opts->keep_locked);
-	else
+	ورنہ
 		write_file(sb.buf, _("initializing"));
 
-	strbuf_addf(&sb_git, "%s/.git", path);
-	if (safe_create_leading_directories_const(the_repository, sb_git.buf))
+	strbuf_addf(&sb_git, "%s/.git", راستہ);
+	اگر (محفوظ_create_leading_directories_const(the_repository, sb_git.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_git.buf);
-	junk_work_tree = xstrdup(path);
+	junk_work_درخت = xstrdup(راستہ);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/gitdir", sb_repo.buf);
@@ -547,30 +547,30 @@ static int add_worktree(const char *path, const char *refname,
 	 * Set up the ref store of the worktree and create the HEAD reference.
 	 */
 	wt = get_linked_worktree(the_repository, name, 1);
-	if (!wt) {
+	اگر (!wt) {
 		ret = error(_("could not find created worktree '%s'"), name);
-		goto done;
+		جاؤ مکمل;
 	}
-	setup_alternate_ref_dir(wt, sb_repo.buf);
+	تیاری_alternate_ref_dir(wt, sb_repo.buf);
 	wt_refs = get_worktree_ref_store(wt);
 
 	ret = ref_store_create_on_disk(wt_refs, REF_STORE_CREATE_ON_DISK_IS_WORKTREE, &sb);
-	if (ret)
-		goto done;
+	اگر (ret)
+		جاؤ مکمل;
 
-	if (!is_branch && commit)
-		ret = refs_update_ref(wt_refs, NULL, "HEAD", &commit->object.oid,
-				      NULL, 0, UPDATE_REFS_MSG_ON_ERR);
-	else
-		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, NULL);
-	if (ret)
-		goto done;
+	اگر (!is_branch && commit)
+		ret = refs_update_ref(wt_refs, تہی, "HEAD", &commit->object.oid,
+				      تہی, 0, UPDATE_REFS_پیغام_ON_ERR);
+	ورنہ
+		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, تہی);
+	اگر (ret)
+		جاؤ مکمل;
 
 	/*
 	 * If the current worktree has sparse-checkout enabled, then copy
 	 * the sparse-checkout patterns from the current worktree.
 	 */
-	if (cfg->apply_sparse_checkout)
+	اگر (cfg->apply_sparse_checkout)
 		copy_sparse_checkout(sb_repo.buf);
 
 	/*
@@ -578,26 +578,26 @@ static int add_worktree(const char *path, const char *refname,
 	 * values from the current worktree into the new one, that way the
 	 * new worktree behaves the same as this one.
 	 */
-	if (the_repository->repository_format_worktree_config)
+	اگر (the_repository->repository_format_worktree_config)
 		copy_filtered_worktree_config(sb_repo.buf);
 
-	strvec_pushf(&child_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
-	strvec_pushf(&child_env, "%s=%s", GIT_WORK_TREE_ENVIRONMENT, path);
+	strvec_pushf(&بچہ_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
+	strvec_pushf(&بچہ_env, "%s=%s", GIT_WORK_درخت_ENVIRONMENT, راستہ);
 
-	if (opts->orphan &&
-	    (ret = make_worktree_orphan(refname, opts, &child_env)))
-		goto done;
+	اگر (opts->orphan &&
+	    (ret = make_worktree_orphan(refname, opts, &بچہ_env)))
+		جاؤ مکمل;
 
-	if (opts->checkout &&
-	    (ret = checkout_worktree(opts, &child_env)))
-		goto done;
+	اگر (opts->checkout &&
+	    (ret = checkout_worktree(opts, &بچہ_env)))
+		جاؤ مکمل;
 
 	is_junk = 0;
-	FREE_AND_NULL(junk_work_tree);
+	FREE_AND_NULL(junk_work_درخت);
 	FREE_AND_NULL(junk_git_dir);
 
-done:
-	if (ret || !opts->keep_locked) {
+مکمل:
+	اگر (ret || !opts->keep_locked) {
 		strbuf_reset(&sb);
 		strbuf_addf(&sb, "%s/locked", sb_repo.buf);
 		unlink_or_warn(sb.buf);
@@ -607,58 +607,58 @@ done:
 	 * Hook failure does not warrant worktree deletion, so run hook after
 	 * is_junk is cleared, but do return appropriate code when hook fails.
 	 */
-	if (!ret && opts->checkout && !opts->orphan) {
-		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	اگر (!ret && opts->checkout && !opts->orphan) {
+		ساخت تسلسل_hooks_opt opt = تسلسل_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", NULL);
-		strvec_pushl(&opt.args,
-			     oid_to_hex(null_oid(the_hash_algo)),
-			     oid_to_hex(&commit->object.oid),
+		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", تہی);
+		strvec_pushl(&opt.دلائل,
+			     oid_مقصد_hex(null_oid(the_hash_algo)),
+			     oid_مقصد_hex(&commit->object.oid),
 			     "1",
-			     NULL);
-		opt.dir = path;
+			     تہی);
+		opt.dir = راستہ;
 
-		ret = run_hooks_opt(the_repository, "post-checkout", &opt);
+		ret = تسلسل_hooks_opt(the_repository, "post-checkout", &opt);
 	}
 
-	strvec_clear(&child_env);
+	strvec_clear(&بچہ_env);
 	strbuf_release(&sb);
 	strbuf_release(&symref);
 	strbuf_release(&sb_repo);
 	strbuf_release(&sb_git);
 	strbuf_release(&sb_name);
 	free_worktree(wt);
-	free(name_to_free);
-	return ret;
+	آزاد(name_مقصد_free);
+	واپس ret;
 }
 
-static void print_preparing_worktree_line(int detach,
-					  const char *branch,
-					  const char *new_branch,
-					  int force_new_branch)
+ساکن خالی print_preparing_worktree_سطر(صحیح detach,
+					  ثابت حرف *branch,
+					  ثابت حرف *new_branch,
+					  صحیح force_new_branch)
 {
-	if (force_new_branch) {
-		struct commit *commit = lookup_commit_reference_by_name(new_branch);
-		if (!commit)
+	اگر (force_new_branch) {
+		ساخت commit *commit = lookup_commit_reference_by_name(new_branch);
+		اگر (!commit)
 			fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-		else
+		ورنہ
 			fprintf_ln(stderr, _("Preparing worktree (resetting branch '%s'; was at %s)"),
 				  new_branch,
-				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
-	} else if (new_branch) {
+				  repo_ڈھونڈو_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
+	} ورنہ اگر (new_branch) {
 		fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-	} else {
-		struct strbuf s = STRBUF_INIT;
-		if (!detach && !check_branch_ref(the_repository, &s, branch) &&
+	} ورنہ {
+		ساخت strbuf s = STRBUF_INIT;
+		اگر (!detach && !check_branch_ref(the_repository, &s, branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), s.buf))
 			fprintf_ln(stderr, _("Preparing worktree (checking out '%s')"),
 				  branch);
-		else {
-			struct commit *commit = lookup_commit_reference_by_name(branch);
-			if (!commit)
+		ورنہ {
+			ساخت commit *commit = lookup_commit_reference_by_name(branch);
+			اگر (!commit)
 				BUG("unreachable: invalid reference: %s", branch);
 			fprintf_ln(stderr, _("Preparing worktree (detached HEAD %s)"),
-				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
+				  repo_ڈھونڈو_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
 		}
 		strbuf_release(&s);
 	}
@@ -670,9 +670,9 @@ static void print_preparing_worktree_line(int detach,
  *
  * Returns 0 on failure and non-zero on success.
  */
-static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNUSED)
+ساکن صحیح پہلا_valid_ref(ثابت ساخت reference *ref غیر_مستعمل, خالی *cb_ڈیٹا غیر_مستعمل)
 {
-	return 1;
+	واپس 1;
 }
 
 /**
@@ -687,16 +687,16 @@ static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNU
  *
  * Returns 1 if any of the previous checks are true, otherwise returns 0.
  */
-static int can_use_local_refs(const struct add_opts *opts)
+ساکن صحیح can_use_local_refs(ثابت ساخت جوڑو_opts *opts)
 {
-	if (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		if (!opts->quiet)
+	اگر (refs_سر_ref(get_main_ref_store(the_repository), پہلا_valid_ref, تہی)) {
+		واپس 1;
+	} ورنہ اگر (refs_for_each_branch_ref(get_main_ref_store(the_repository), پہلا_valid_ref, تہی)) {
+		اگر (!opts->quiet)
 			warning(_("HEAD points to an invalid (or orphaned) reference.\n"));
-		return 1;
+		واپس 1;
 	}
-	return 0;
+	واپس 0;
 }
 
 /**
@@ -712,17 +712,17 @@ static int can_use_local_refs(const struct add_opts *opts)
  *
  * Returns 1 if checks 1. and 2. are true, otherwise 0.
  */
-static int can_use_remote_refs(const struct add_opts *opts)
+ساکن صحیح can_use_remote_refs(ثابت ساخت جوڑو_opts *opts)
 {
-	if (!guess_remote) {
-		return 0;
-	} else if (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (!opts->force && remote_get(NULL)) {
+	اگر (!guess_remote) {
+		واپس 0;
+	} ورنہ اگر (refs_for_each_remote_ref(get_main_ref_store(the_repository), پہلا_valid_ref, تہی)) {
+		واپس 1;
+	} ورنہ اگر (!opts->force && remote_get(تہی)) {
 		die(_("No local or remote refs exist despite at least one remote\n"
 		      "present, stopping; use 'add -f' to override or fetch a remote first"));
 	}
-	return 0;
+	واپس 0;
 }
 
 /**
@@ -743,34 +743,34 @@ static int can_use_remote_refs(const struct add_opts *opts)
  * checked and the repo is in a state that looks like the user added a remote
  * but forgot to fetch (and did not override the warning with -f).
  */
-static int dwim_orphan(const struct add_opts *opts, int opt_track, int remote)
+ساکن صحیح dwim_orphan(ثابت ساخت جوڑو_opts *opts, صحیح opt_track, صحیح remote)
 {
-	if (can_use_local_refs(opts)) {
-		return 0;
-	} else if (remote && can_use_remote_refs(opts)) {
-		return 0;
-	} else if (!opts->quiet) {
-		fprintf_ln(stderr, WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT);
+	اگر (can_use_local_refs(opts)) {
+		واپس 0;
+	} ورنہ اگر (remote && can_use_remote_refs(opts)) {
+		واپس 0;
+	} ورنہ اگر (!opts->quiet) {
+		fprintf_ln(stderr, WORKTREE_جوڑو_DWIM_ORPHAN_INFER_متن);
 	}
 
-	if (opt_track) {
+	اگر (opt_track) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	} else if (!opts->checkout) {
+	} ورنہ اگر (!opts->checkout) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
 	}
-	return 1;
+	واپس 1;
 }
 
-static void advise_disambiguating_remotes(const char *path, const char *branch,
-					  const struct string_list *matched_remote_names)
+ساکن خالی advise_disambiguating_remotes(ثابت حرف *راستہ, ثابت حرف *branch,
+					  ثابت ساخت string_list *matched_remote_نام)
 {
-	struct string_list_item *item;
+	ساخت string_list_شے *شے;
 
 	advise(_("Branch name '%s' appears in multiple remotes:"), branch);
-	for_each_string_list_item(item, matched_remote_names) {
-		advise(_("  %s"), item->string);
+	for_each_string_list_شے(شے, matched_remote_نام) {
+		advise(_("  %s"), شے->string);
 	}
 	advise(_("If you meant to create a worktree from a remote tracking branch on\n"
 		 "<remote>, you can do so by:\n"
@@ -779,583 +779,583 @@ static void advise_disambiguating_remotes(const char *path, const char *branch,
 		 "\n"
 		 "If you'd like to always prefer some remote, e.g. 'origin',\n"
 		 "consider setting checkout.defaultRemote=origin in your config."),
-	       branch, path, branch);
+	       branch, راستہ, branch);
 }
 
-static char *dwim_branch(const struct add_opts *opts, const char *path, char **new_branch)
+ساکن حرف *dwim_branch(ثابت ساخت جوڑو_opts *opts, ثابت حرف *راستہ, حرف **new_branch)
 {
-	int branch_exists;
-	char *branchname = worktree_basename_dup(path);
-	struct strbuf ref = STRBUF_INIT;
+	صحیح branch_exists;
+	حرف *branchname = worktree_basename_dup(راستہ);
+	ساخت strbuf ref = STRBUF_INIT;
 
 	branch_exists = !check_branch_ref(the_repository, &ref, branchname) &&
 			refs_ref_exists(get_main_ref_store(the_repository),
 					ref.buf);
 	strbuf_release(&ref);
-	if (branch_exists)
-		return branchname;
+	اگر (branch_exists)
+		واپس branchname;
 
 	*new_branch = branchname;
-	if (guess_remote) {
-		struct object_id oid;
-		char *remote;
-		int num_matches = 0;
-		struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+	اگر (guess_remote) {
+		ساخت object_id oid;
+		حرف *remote;
+		صحیح عدد_matches = 0;
+		ساخت string_list matched_remote_نام = STRING_LIST_INIT_DUP;
 
-		remote = unique_tracking_name(*new_branch, &oid, &num_matches,
-					      &matched_remote_names);
-		if (!remote && num_matches > 1) {
-			if (!opts->quiet &&
+		remote = unique_tracking_name(*new_branch, &oid, &عدد_matches,
+					      &matched_remote_نام);
+		اگر (!remote && عدد_matches > 1) {
+			اگر (!opts->quiet &&
 			    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
-				advise_disambiguating_remotes(path, *new_branch,
-							      &matched_remote_names);
+				advise_disambiguating_remotes(راستہ, *new_branch,
+							      &matched_remote_نام);
 			die(_("'%s' matched multiple (%d) remote tracking branches"),
-			    *new_branch, num_matches);
+			    *new_branch, عدد_matches);
 		}
-		string_list_clear(&matched_remote_names, 0);
-		return remote;
+		string_list_clear(&matched_remote_نام, 0);
+		واپس remote;
 	}
-	return NULL;
+	واپس تہی;
 }
 
-static int add(int ac, const char **av, const char *prefix,
-	       struct repository *repo UNUSED)
+ساکن صحیح جوڑو(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+	       ساخت repository *repo غیر_مستعمل)
 {
-	struct add_opts opts;
-	const char *new_branch_force = NULL;
-	char *path;
-	const char *branch;
-	char *branch_to_free = NULL;
-	char *new_branch_to_free = NULL;
-	const char *new_branch = NULL;
-	char *opt_track = NULL;
-	const char *lock_reason = NULL;
-	int keep_locked = 0;
-	int used_new_branch_options;
-	struct option options[] = {
+	ساخت جوڑو_opts opts;
+	ثابت حرف *new_branch_force = تہی;
+	حرف *راستہ;
+	ثابت حرف *branch;
+	حرف *branch_مقصد_free = تہی;
+	حرف *new_branch_مقصد_free = تہی;
+	ثابت حرف *new_branch = تہی;
+	حرف *opt_track = تہی;
+	ثابت حرف *تالا_reason = تہی;
+	صحیح keep_locked = 0;
+	صحیح مستعمل_new_branch_options;
+	ساخت option options[] = {
 		OPT__FORCE(&opts.force,
 			   N_("checkout <branch> even if already checked out in other worktree"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_STRING('b', NULL, &new_branch, N_("branch"),
+		OPT_STRING('b', تہی, &new_branch, N_("branch"),
 			   N_("create a new branch")),
-		OPT_STRING('B', NULL, &new_branch_force, N_("branch"),
+		OPT_STRING('B', تہی, &new_branch_force, N_("branch"),
 			   N_("create or reset a branch")),
 		OPT_BOOL(0, "orphan", &opts.orphan, N_("create unborn branch")),
 		OPT_BOOL('d', "detach", &opts.detach, N_("detach HEAD at named commit")),
 		OPT_BOOL(0, "checkout", &opts.checkout, N_("populate the new working tree")),
 		OPT_BOOL(0, "lock", &keep_locked, N_("keep the new working tree locked")),
-		OPT_STRING(0, "reason", &lock_reason, N_("string"),
+		OPT_STRING(0, "reason", &تالا_reason, N_("string"),
 			   N_("reason for locking")),
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
-		OPT_PASSTHRU(0, "track", &opt_track, NULL,
+		OPT_PASSTHRU(0, "track", &opt_track, تہی,
 			     N_("set up tracking mode (see git-branch(1))"),
 			     PARSE_OPT_NOARG | PARSE_OPT_OPTARG),
 		OPT_BOOL(0, "guess-remote", &guess_remote,
 			 N_("try to match the new branch name with a remote-tracking branch")),
 		OPT_BOOL(0, "relative-paths", &opts.relative_paths,
 			 N_("use relative paths for worktrees")),
-		OPT_END()
+		OPT_انتہا()
 	};
-	int ret;
+	صحیح ret;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, حجم(opts));
 	opts.checkout = 1;
 	opts.relative_paths = use_relative_paths;
-	ac = parse_options(ac, av, prefix, options, git_worktree_add_usage, 0);
-	if (!!opts.detach + !!new_branch + !!new_branch_force > 1)
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_جوڑو_usage, 0);
+	اگر (!!opts.detach + !!new_branch + !!new_branch_force > 1)
 		die(_("options '%s', '%s', and '%s' cannot be used together"), "-b", "-B", "--detach");
-	if (opts.detach && opts.orphan)
+	اگر (opts.detach && opts.orphan)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--detach");
-	if (opts.orphan && opt_track)
+	اگر (opts.orphan && opt_track)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	if (opts.orphan && !opts.checkout)
+	اگر (opts.orphan && !opts.checkout)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
-	if (opts.orphan && ac == 2)
+	اگر (opts.orphan && ac == 2)
 		die(_("option '%s' and commit-ish cannot be used together"),
 		    "--orphan");
-	if (lock_reason && !keep_locked)
+	اگر (تالا_reason && !keep_locked)
 		die(_("the option '%s' requires '%s'"), "--reason", "--lock");
-	if (lock_reason)
-		opts.keep_locked = lock_reason;
-	else if (keep_locked)
+	اگر (تالا_reason)
+		opts.keep_locked = تالا_reason;
+	ورنہ اگر (keep_locked)
 		opts.keep_locked = _("added with --lock");
 
-	if (ac < 1 || ac > 2)
-		usage_with_options(git_worktree_add_usage, options);
+	اگر (ac < 1 || ac > 2)
+		usage_with_options(git_worktree_جوڑو_usage, options);
 
-	path = prefix_filename(prefix, av[0]);
+	راستہ = سابقہ_filename(سابقہ, av[0]);
 	branch = ac < 2 ? "HEAD" : av[1];
-	used_new_branch_options = new_branch || new_branch_force;
+	مستعمل_new_branch_options = new_branch || new_branch_force;
 
-	if (!strcmp(branch, "-"))
+	اگر (!strcmp(branch, "-"))
 		branch = "@{-1}";
 
-	if (new_branch_force) {
-		struct strbuf symref = STRBUF_INIT;
+	اگر (new_branch_force) {
+		ساخت strbuf symref = STRBUF_INIT;
 
 		new_branch = new_branch_force;
 
-		if (!opts.force &&
+		اگر (!opts.force &&
 		    !check_branch_ref(the_repository, &symref, new_branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), symref.buf))
-			die_if_checked_out(symref.buf, 0);
+			die_if_checked_برآمد(symref.buf, 0);
 		strbuf_release(&symref);
 	}
 
-	if (opts.orphan && !new_branch) {
-		new_branch = new_branch_to_free = worktree_basename_dup(path);
-	} else if (opts.orphan) {
+	اگر (opts.orphan && !new_branch) {
+		new_branch = new_branch_مقصد_free = worktree_basename_dup(راستہ);
+	} ورنہ اگر (opts.orphan) {
 		; /* no-op */
-	} else if (opts.detach) {
+	} ورنہ اگر (opts.detach) {
 		/* Check HEAD */
-		if (!strcmp(branch, "HEAD"))
+		اگر (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac < 2 && new_branch) {
+	} ورنہ اگر (ac < 2 && new_branch) {
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = dwim_orphan(&opts, !!opt_track, 0);
-	} else if (ac < 2) {
+	} ورنہ اگر (ac < 2) {
 		/* DWIM: Guess branch name from path. */
-		char *s = dwim_branch(&opts, path, &new_branch_to_free);
-		if (s)
-			branch = branch_to_free = s;
-		new_branch = new_branch_to_free;
+		حرف *s = dwim_branch(&opts, راستہ, &new_branch_مقصد_free);
+		اگر (s)
+			branch = branch_مقصد_free = s;
+		new_branch = new_branch_مقصد_free;
 
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = (!s) && dwim_orphan(&opts, !!opt_track, 1);
-	} else if (ac == 2 && new_branch) {
-		if (!strcmp(branch, "HEAD"))
+	} ورنہ اگر (ac == 2 && new_branch) {
+		اگر (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac == 2) {
-		struct commit *commit;
+	} ورنہ اگر (ac == 2) {
+		ساخت commit *commit;
 
 		commit = lookup_commit_reference_by_name(branch);
-		if (!commit) {
-			struct object_id oid;
-			char *remote;
-			int num_matches = 0;
-			struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+		اگر (!commit) {
+			ساخت object_id oid;
+			حرف *remote;
+			صحیح عدد_matches = 0;
+			ساخت string_list matched_remote_نام = STRING_LIST_INIT_DUP;
 
-			remote = unique_tracking_name(branch, &oid, &num_matches,
-						      &matched_remote_names);
-			if (remote) {
+			remote = unique_tracking_name(branch, &oid, &عدد_matches,
+						      &matched_remote_نام);
+			اگر (remote) {
 				new_branch = branch;
-				branch = new_branch_to_free = remote;
-			} else if (num_matches > 1) {
-				if (!opts.quiet &&
+				branch = new_branch_مقصد_free = remote;
+			} ورنہ اگر (عدد_matches > 1) {
+				اگر (!opts.quiet &&
 				    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
-					advise_disambiguating_remotes(path, branch,
-								      &matched_remote_names);
+					advise_disambiguating_remotes(راستہ, branch,
+								      &matched_remote_نام);
 				die(_("'%s' matched multiple (%d) remote tracking branches"),
-				    branch, num_matches);
+				    branch, عدد_matches);
 			}
-			string_list_clear(&matched_remote_names, 0);
+			string_list_clear(&matched_remote_نام, 0);
 		}
 
-		if (!strcmp(branch, "HEAD"))
+		اگر (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
 
 	}
 
-	if (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
-		int attempt_hint = !opts.quiet && (ac < 2);
-		if (attempt_hint && used_new_branch_options) {
-			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
-				WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT,
-				new_branch, path);
-		} else if (attempt_hint) {
-			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
-				WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT, path);
+	اگر (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
+		صحیح attempt_hint = !opts.quiet && (ac < 2);
+		اگر (attempt_hint && مستعمل_new_branch_options) {
+			advise_if_enabled(ADVICE_WORKTREE_جوڑو_ORPHAN,
+				WORKTREE_جوڑو_ORPHAN_WITH_DASH_B_HINT_متن,
+				new_branch, راستہ);
+		} ورنہ اگر (attempt_hint) {
+			advise_if_enabled(ADVICE_WORKTREE_جوڑو_ORPHAN,
+				WORKTREE_جوڑو_ORPHAN_NO_DASH_B_HINT_متن, راستہ);
 		}
 		die(_("invalid reference: %s"), branch);
 	}
 
-	if (!opts.quiet)
-		print_preparing_worktree_line(opts.detach, branch, new_branch, !!new_branch_force);
+	اگر (!opts.quiet)
+		print_preparing_worktree_سطر(opts.detach, branch, new_branch, !!new_branch_force);
 
-	if (opts.orphan) {
+	اگر (opts.orphan) {
 		branch = new_branch;
-	} else if (new_branch) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	} ورنہ اگر (new_branch) {
+		ساخت بچہ_process cp = بچہ_PROCESS_INIT;
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "branch");
-		if (new_branch_force)
-			strvec_push(&cp.args, "--force");
-		if (opts.quiet)
-			strvec_push(&cp.args, "--quiet");
-		strvec_push(&cp.args, new_branch);
-		strvec_push(&cp.args, branch);
-		if (opt_track)
-			strvec_push(&cp.args, opt_track);
-		if (run_command(&cp)) {
+		strvec_ڈالو(&cp.دلائل, "branch");
+		اگر (new_branch_force)
+			strvec_ڈالو(&cp.دلائل, "--force");
+		اگر (opts.quiet)
+			strvec_ڈالو(&cp.دلائل, "--quiet");
+		strvec_ڈالو(&cp.دلائل, new_branch);
+		strvec_ڈالو(&cp.دلائل, branch);
+		اگر (opt_track)
+			strvec_ڈالو(&cp.دلائل, opt_track);
+		اگر (تسلسل_command(&cp)) {
 			ret = -1;
-			goto cleanup;
+			جاؤ cleanup;
 		}
 		branch = new_branch;
-	} else if (opt_track) {
+	} ورنہ اگر (opt_track) {
 		die(_("--[no-]track can only be used if a new branch is created"));
 	}
 
-	ret = add_worktree(path, branch, &opts);
+	ret = جوڑو_worktree(راستہ, branch, &opts);
 cleanup:
-	free(path);
-	free(opt_track);
-	free(branch_to_free);
-	free(new_branch_to_free);
-	return ret;
+	آزاد(راستہ);
+	آزاد(opt_track);
+	آزاد(branch_مقصد_free);
+	آزاد(new_branch_مقصد_free);
+	واپس ret;
 }
 
-static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
+ساکن خالی show_worktree_porcelain(ساخت worktree *wt, صحیح سطر_terminator)
 {
-	const char *reason;
+	ثابت حرف *reason;
 
-	printf("worktree %s%c", wt->path, line_terminator);
-	if (wt->is_bare)
-		printf("bare%c", line_terminator);
-	else {
-		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), line_terminator);
-		if (wt->is_detached)
-			printf("detached%c", line_terminator);
-		else if (wt->head_ref)
-			printf("branch %s%c", wt->head_ref, line_terminator);
+	لکھو("worktree %s%c", wt->راستہ, سطر_terminator);
+	اگر (wt->is_bare)
+		لکھو("bare%c", سطر_terminator);
+	ورنہ {
+		لکھو("HEAD %s%c", oid_مقصد_hex(&wt->سر_oid), سطر_terminator);
+		اگر (wt->is_detached)
+			لکھو("detached%c", سطر_terminator);
+		ورنہ اگر (wt->سر_ref)
+			لکھو("branch %s%c", wt->سر_ref, سطر_terminator);
 	}
 
-	reason = worktree_lock_reason(wt);
-	if (reason) {
+	reason = worktree_تالا_reason(wt);
+	اگر (reason) {
 		fputs("locked", stdout);
-		if (*reason) {
+		اگر (*reason) {
 			fputc(' ', stdout);
-			write_name_quoted(reason, stdout, line_terminator);
-		} else {
-			fputc(line_terminator, stdout);
+			write_name_quoted(reason, stdout, سطر_terminator);
+		} ورنہ {
+			fputc(سطر_terminator, stdout);
 		}
 	}
 
 	reason = worktree_prune_reason(wt, expire);
-	if (reason)
-		printf("prunable %s%c", reason, line_terminator);
+	اگر (reason)
+		لکھو("prunable %s%c", reason, سطر_terminator);
 
-	fputc(line_terminator, stdout);
+	fputc(سطر_terminator, stdout);
 }
 
-struct worktree_display {
-	char *path;
-	int width;
+ساخت worktree_display {
+	حرف *راستہ;
+	صحیح چوڑائی;
 };
 
-static void show_worktree(struct worktree *wt, struct worktree_display *display,
-			  int path_maxwidth, int abbrev_len)
+ساکن خالی show_worktree(ساخت worktree *wt, ساخت worktree_display *display,
+			  صحیح راستہ_maxwidth, صحیح abbrev_len)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *reason;
+	ساخت strbuf sb = STRBUF_INIT;
+	ثابت حرف *reason;
 
-	strbuf_addf(&sb, "%s%*s", display->path, 1 + path_maxwidth - display->width, "");
-	if (wt->is_bare)
+	strbuf_addf(&sb, "%s%*s", display->راستہ, 1 + راستہ_maxwidth - display->چوڑائی, "");
+	اگر (wt->is_bare)
 		strbuf_addstr(&sb, "(bare)");
-	else {
+	ورنہ {
 		strbuf_addf(&sb, "%-*s ", abbrev_len,
-				repo_find_unique_abbrev(the_repository, &wt->head_oid, DEFAULT_ABBREV));
-		if (wt->is_detached)
+				repo_ڈھونڈو_unique_abbrev(the_repository, &wt->سر_oid, DEFAULT_ABBREV));
+		اگر (wt->is_detached)
 			strbuf_addstr(&sb, "(detached HEAD)");
-		else if (wt->head_ref) {
-			char *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
-								 wt->head_ref,
+		ورنہ اگر (wt->سر_ref) {
+			حرف *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
+								 wt->سر_ref,
 								 0);
 			strbuf_addf(&sb, "[%s]", ref);
-			free(ref);
-		} else
+			آزاد(ref);
+		} ورنہ
 			strbuf_addstr(&sb, "(error)");
 	}
 
-	reason = worktree_lock_reason(wt);
-	if (verbose && reason && *reason)
+	reason = worktree_تالا_reason(wt);
+	اگر (verbose && reason && *reason)
 		strbuf_addf(&sb, "\n\tlocked: %s", reason);
-	else if (reason)
+	ورنہ اگر (reason)
 		strbuf_addstr(&sb, " locked");
 
 	reason = worktree_prune_reason(wt, expire);
-	if (verbose && reason)
+	اگر (verbose && reason)
 		strbuf_addf(&sb, "\n\tprunable: %s", reason);
-	else if (reason)
+	ورنہ اگر (reason)
 		strbuf_addstr(&sb, " prunable");
 
-	printf("%s\n", sb.buf);
+	لکھو("%s\n", sb.buf);
 	strbuf_release(&sb);
 }
 
-static void measure_widths(struct worktree **wt, int *abbrev,
-			   struct worktree_display **d, int *maxwidth)
+ساکن خالی measure_widths(ساخت worktree **wt, صحیح *abbrev,
+			   ساخت worktree_display **d, صحیح *maxwidth)
 {
-	int i, display_alloc = 0;
-	struct worktree_display *display = NULL;
-	struct strbuf buf = STRBUF_INIT;
+	صحیح i, display_alloc = 0;
+	ساخت worktree_display *display = تہی;
+	ساخت strbuf buf = STRBUF_INIT;
 
-	for (i = 0; wt[i]; i++) {
-		int sha1_len;
+	برائے (i = 0; wt[i]; i++) {
+		صحیح sha1_len;
 		ALLOC_GROW(display, i + 1, display_alloc);
-		quote_path(wt[i]->path, NULL, &buf, 0);
-		display[i].width = utf8_strwidth(buf.buf);
-		display[i].path = strbuf_detach(&buf, NULL);
+		quote_راستہ(wt[i]->راستہ, تہی, &buf, 0);
+		display[i].چوڑائی = utf8_strwidth(buf.buf);
+		display[i].راستہ = strbuf_detach(&buf, تہی);
 
-		if (display[i].width > *maxwidth)
-			*maxwidth = display[i].width;
-		sha1_len = strlen(repo_find_unique_abbrev(the_repository, &wt[i]->head_oid, *abbrev));
-		if (sha1_len > *abbrev)
+		اگر (display[i].چوڑائی > *maxwidth)
+			*maxwidth = display[i].چوڑائی;
+		sha1_len = لڑی_لمبائی(repo_ڈھونڈو_unique_abbrev(the_repository, &wt[i]->سر_oid, *abbrev));
+		اگر (sha1_len > *abbrev)
 			*abbrev = sha1_len;
 	}
 	*d = display;
 }
 
-static int pathcmp(const void *a_, const void *b_)
+ساکن صحیح pathcmp(ثابت خالی *a_, ثابت خالی *b_)
 {
-	const struct worktree *const *a = a_;
-	const struct worktree *const *b = b_;
-	return fspathcmp((*a)->path, (*b)->path);
+	ثابت ساخت worktree *ثابت *a = a_;
+	ثابت ساخت worktree *ثابت *b = b_;
+	واپس fspathcmp((*a)->راستہ, (*b)->راستہ);
 }
 
-static void pathsort(struct worktree **wt)
+ساکن خالی pathsort(ساخت worktree **wt)
 {
-	int n = 0;
-	struct worktree **p = wt;
+	صحیح n = 0;
+	ساخت worktree **p = wt;
 
-	while (*p++)
+	جب (*p++)
 		n++;
 	QSORT(wt, n, pathcmp);
 }
 
-static int list(int ac, const char **av, const char *prefix,
-		struct repository *repo UNUSED)
+ساکن صحیح list(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+		ساخت repository *repo غیر_مستعمل)
 {
-	int porcelain = 0;
-	int line_terminator = '\n';
+	صحیح porcelain = 0;
+	صحیح سطر_terminator = '\n';
 
-	struct option options[] = {
+	ساخت option options[] = {
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
 		OPT__VERBOSE(&verbose, N_("show extended annotations and reasons, if available")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
 				N_("add 'prunable' annotation to missing worktrees older than <time>")),
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_سیٹ_INT('z', تہی, &سطر_terminator,
 			    N_("terminate records with a NUL character"), '\0'),
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	expire = TIME_MAX;
-	ac = parse_options(ac, av, prefix, options, git_worktree_list_usage, 0);
-	if (ac)
+	expire = وقت_MAX;
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_list_usage, 0);
+	اگر (ac)
 		usage_with_options(git_worktree_list_usage, options);
-	else if (verbose && porcelain)
+	ورنہ اگر (verbose && porcelain)
 		die(_("options '%s' and '%s' cannot be used together"), "--verbose", "--porcelain");
-	else if (!line_terminator && !porcelain)
+	ورنہ اگر (!سطر_terminator && !porcelain)
 		die(_("the option '%s' requires '%s'"), "-z", "--porcelain");
-	else {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		int path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
-		struct worktree_display *display = NULL;
+	ورنہ {
+		ساخت worktree **worktrees = get_worktrees(the_repository);
+		صحیح راستہ_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
+		ساخت worktree_display *display = تہی;
 
 		/* sort worktrees by path but keep main worktree at top */
 		pathsort(worktrees + 1);
 
-		if (!porcelain)
+		اگر (!porcelain)
 			measure_widths(worktrees, &abbrev,
-				       &display, &path_maxwidth);
+				       &display, &راستہ_maxwidth);
 
-		for (i = 0; worktrees[i]; i++) {
-			if (porcelain)
+		برائے (i = 0; worktrees[i]; i++) {
+			اگر (porcelain)
 				show_worktree_porcelain(worktrees[i],
-							line_terminator);
-			else
+							سطر_terminator);
+			ورنہ
 				show_worktree(worktrees[i],
-					      &display[i], path_maxwidth, abbrev);
+					      &display[i], راستہ_maxwidth, abbrev);
 		}
-		for (i = 0; display && worktrees[i]; i++)
-			free(display[i].path);
-		free(display);
+		برائے (i = 0; display && worktrees[i]; i++)
+			آزاد(display[i].راستہ);
+		آزاد(display);
 		free_worktrees(worktrees);
 	}
-	return 0;
+	واپس 0;
 }
 
-static int lock_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+ساکن صحیح تالا_worktree(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+			 ساخت repository *repo غیر_مستعمل)
 {
-	const char *reason = "", *old_reason;
-	struct option options[] = {
+	ثابت حرف *reason = "", *old_reason;
+	ساخت option options[] = {
 		OPT_STRING(0, "reason", &reason, N_("string"),
 			   N_("reason for locking")),
-		OPT_END()
+		OPT_انتہا()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
+	ساخت worktree **worktrees, *wt;
+	حرف *راستہ;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_lock_usage, 0);
-	if (ac != 1)
-		usage_with_options(git_worktree_lock_usage, options);
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_تالا_usage, 0);
+	اگر (ac != 1)
+		usage_with_options(git_worktree_تالا_usage, options);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = ڈھونڈو_worktree(worktrees, سابقہ, av[0]);
+	اگر (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	اگر (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
 
-	old_reason = worktree_lock_reason(wt);
-	if (old_reason) {
-		if (*old_reason)
+	old_reason = worktree_تالا_reason(wt);
+	اگر (old_reason) {
+		اگر (*old_reason)
 			die(_("'%s' is already locked, reason: %s"),
 			    av[0], old_reason);
 		die(_("'%s' is already locked"), av[0]);
 	}
 
-	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
-	write_file(path, "%s", reason);
+	راستہ = repo_common_راستہ(the_repository, "worktrees/%s/locked", wt->id);
+	write_file(راستہ, "%s", reason);
 
 	free_worktrees(worktrees);
-	free(path);
-	return 0;
+	آزاد(راستہ);
+	واپس 0;
 }
 
-static int unlock_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+ساکن صحیح unlock_worktree(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+			   ساخت repository *repo غیر_مستعمل)
 {
-	struct option options[] = {
-		OPT_END()
+	ساخت option options[] = {
+		OPT_انتہا()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
-	int ret;
+	ساخت worktree **worktrees, *wt;
+	حرف *راستہ;
+	صحیح ret;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_unlock_usage, 0);
-	if (ac != 1)
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_unlock_usage, 0);
+	اگر (ac != 1)
 		usage_with_options(git_worktree_unlock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = ڈھونڈو_worktree(worktrees, سابقہ, av[0]);
+	اگر (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	اگر (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
-	if (!worktree_lock_reason(wt))
+	اگر (!worktree_تالا_reason(wt))
 		die(_("'%s' is not locked"), av[0]);
 
-	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
-	ret = unlink_or_warn(path);
+	راستہ = repo_common_راستہ(the_repository, "worktrees/%s/locked", wt->id);
+	ret = unlink_or_warn(راستہ);
 
 	free_worktrees(worktrees);
-	free(path);
-	return ret;
+	آزاد(راستہ);
+	واپس ret;
 }
 
-static void validate_no_submodules(const struct worktree *wt)
+ساکن خالی validate_no_submodules(ثابت ساخت worktree *wt)
 {
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	struct strbuf path = STRBUF_INIT;
-	int i, found_submodules = 0;
-	char *wt_gitdir;
+	ساخت اشاریہ_state istate = اشاریہ_STATE_INIT(the_repository);
+	ساخت strbuf راستہ = STRBUF_INIT;
+	صحیح i, ملا_submodules = 0;
+	حرف *wt_gitdir;
 
 	wt_gitdir = get_worktree_git_dir(wt);
 
-	if (is_directory(worktree_git_path(wt, "modules"))) {
+	اگر (is_directory(worktree_git_راستہ(wt, "modules"))) {
 		/*
 		 * There could be false positives, e.g. the "modules"
 		 * directory exists but is empty. But it's a rare case and
 		 * this simpler check is probably good enough for now.
 		 */
-		found_submodules = 1;
-	} else if (read_index_from(&istate, worktree_git_path(wt, "index"),
+		ملا_submodules = 1;
+	} ورنہ اگر (read_اشاریہ_from(&istate, worktree_git_راستہ(wt, "index"),
 				   wt_gitdir) > 0) {
-		for (i = 0; i < istate.cache_nr; i++) {
-			struct cache_entry *ce = istate.cache[i];
-			int err;
+		برائے (i = 0; i < istate.cache_nr; i++) {
+			ساخت cache_اندراج *ce = istate.cache[i];
+			صحیح err;
 
-			if (!S_ISGITLINK(ce->ce_mode))
-				continue;
+			اگر (!S_ISGITLINK(ce->ce_منوال))
+				جاری;
 
-			strbuf_reset(&path);
-			strbuf_addf(&path, "%s/%s", wt->path, ce->name);
-			if (!is_submodule_populated_gently(path.buf, &err))
-				continue;
+			strbuf_reset(&راستہ);
+			strbuf_addf(&راستہ, "%s/%s", wt->راستہ, ce->name);
+			اگر (!is_submodule_populated_gently(راستہ.buf, &err))
+				جاری;
 
-			found_submodules = 1;
-			break;
+			ملا_submodules = 1;
+			توڑو;
 		}
 	}
-	discard_index(&istate);
-	strbuf_release(&path);
-	free(wt_gitdir);
+	discard_اشاریہ(&istate);
+	strbuf_release(&راستہ);
+	آزاد(wt_gitdir);
 
-	if (found_submodules)
+	اگر (ملا_submodules)
 		die(_("working trees containing submodules cannot be moved or removed"));
 }
 
-static int move_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+ساکن صحیح move_worktree(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+			 ساخت repository *repo غیر_مستعمل)
 {
-	int force = 0;
-	struct option options[] = {
+	صحیح force = 0;
+	ساخت option options[] = {
 		OPT__FORCE(&force,
 			 N_("force move even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL(0, "relative-paths", &use_relative_paths,
 			 N_("use relative paths for worktrees")),
-		OPT_END()
+		OPT_انتہا()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf dst = STRBUF_INIT;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	char *path;
+	ساخت worktree **worktrees, *wt;
+	ساخت strbuf dst = STRBUF_INIT;
+	ساخت strbuf errmsg = STRBUF_INIT;
+	ثابت حرف *reason = تہی;
+	حرف *راستہ;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_move_usage,
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_move_usage,
 			   0);
-	if (ac != 2)
+	اگر (ac != 2)
 		usage_with_options(git_worktree_move_usage, options);
 
-	path = prefix_filename(prefix, av[1]);
-	strbuf_addstr(&dst, path);
-	free(path);
+	راستہ = سابقہ_filename(سابقہ, av[1]);
+	strbuf_addstr(&dst, راستہ);
+	آزاد(راستہ);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = ڈھونڈو_worktree(worktrees, سابقہ, av[0]);
+	اگر (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	اگر (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (is_directory(dst.buf)) {
-		const char *sep = find_last_dir_sep(wt->path);
+	اگر (is_directory(dst.buf)) {
+		ثابت حرف *sep = ڈھونڈو_آخری_dir_sep(wt->راستہ);
 
-		if (!sep)
+		اگر (!sep)
 			die(_("could not figure out destination name from '%s'"),
-			    wt->path);
+			    wt->راستہ);
 		strbuf_trim_trailing_dir_sep(&dst);
 		strbuf_addstr(&dst, sep);
 	}
-	check_candidate_path(dst.buf, force, worktrees, "move");
+	check_candidate_راستہ(dst.buf, force, worktrees, "move");
 
 	validate_no_submodules(wt);
 
-	if (force < 2)
-		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	اگر (force < 2)
+		reason = worktree_تالا_reason(wt);
+	اگر (reason) {
+		اگر (*reason)
 			die(_("cannot move a locked working tree, lock reason: %s\nuse 'move -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot move a locked working tree;\nuse 'move -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, 0))
+	اگر (validate_worktree(wt, &errmsg, 0))
 		die(_("validation failed, cannot move working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (rename(wt->path, dst.buf) == -1)
-		die_errno(_("failed to move '%s' to '%s'"), wt->path, dst.buf);
+	اگر (rename(wt->راستہ, dst.buf) == -1)
+		die_errno(_("failed to move '%s' to '%s'"), wt->راستہ, dst.buf);
 
 	update_worktree_location(wt, dst.buf, use_relative_paths);
 
 	strbuf_release(&dst);
 	free_worktrees(worktrees);
-	return 0;
+	واپس 0;
 }
 
 /*
@@ -1369,12 +1369,12 @@ static int move_worktree(int ac, const char **av, const char *prefix,
  * it's absolutely safe to do so from _our_ point of view because we
  * know better.
  */
-static void check_clean_worktree(struct worktree *wt,
-				 const char *original_path)
+ساکن خالی check_clean_worktree(ساخت worktree *wt,
+				 ثابت حرف *original_راستہ)
 {
-	struct child_process cp;
-	char buf[1];
-	int ret;
+	ساخت بچہ_process cp;
+	حرف buf[1];
+	صحیح ret;
 
 	/*
 	 * Until we sort this out, all submodules are "dirty" and
@@ -1382,160 +1382,160 @@ static void check_clean_worktree(struct worktree *wt,
 	 */
 	validate_no_submodules(wt);
 
-	child_process_init(&cp);
+	بچہ_process_init(&cp);
 	strvec_pushf(&cp.env, "%s=%s/.git",
-		     GIT_DIR_ENVIRONMENT, wt->path);
+		     GIT_DIR_ENVIRONMENT, wt->راستہ);
 	strvec_pushf(&cp.env, "%s=%s",
-		     GIT_WORK_TREE_ENVIRONMENT, wt->path);
-	strvec_pushl(&cp.args, "status",
+		     GIT_WORK_درخت_ENVIRONMENT, wt->راستہ);
+	strvec_pushl(&cp.دلائل, "status",
 		     "--porcelain", "--ignore-submodules=none",
-		     NULL);
+		     تہی);
 	cp.git_cmd = 1;
-	cp.dir = wt->path;
-	cp.out = -1;
-	ret = start_command(&cp);
-	if (ret)
+	cp.dir = wt->راستہ;
+	cp.برآمد = -1;
+	ret = آغاز_command(&cp);
+	اگر (ret)
 		die_errno(_("failed to run 'git status' on '%s'"),
-			  original_path);
-	ret = xread(cp.out, buf, sizeof(buf));
-	if (ret)
+			  original_راستہ);
+	ret = xread(cp.برآمد, buf, حجم(buf));
+	اگر (ret)
 		die(_("'%s' contains modified or untracked files, use --force to delete it"),
-		    original_path);
-	close(cp.out);
-	ret = finish_command(&cp);
-	if (ret)
+		    original_راستہ);
+	close(cp.برآمد);
+	ret = اختتام_command(&cp);
+	اگر (ret)
 		die_errno(_("failed to run 'git status' on '%s', code %d"),
-			  original_path, ret);
+			  original_راستہ, ret);
 }
 
-static int delete_git_work_tree(struct worktree *wt)
+ساکن صحیح delete_git_work_درخت(ساخت worktree *wt)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	ساخت strbuf sb = STRBUF_INIT;
+	صحیح ret = 0;
 
-	strbuf_addstr(&sb, wt->path);
-	if (remove_dir_recursively(&sb, 0)) {
+	strbuf_addstr(&sb, wt->راستہ);
+	اگر (remove_dir_recursively(&sb, 0)) {
 		error_errno(_("failed to delete '%s'"), sb.buf);
 		ret = -1;
 	}
 	strbuf_release(&sb);
-	return ret;
+	واپس ret;
 }
 
-static int remove_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+ساکن صحیح remove_worktree(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+			   ساخت repository *repo غیر_مستعمل)
 {
-	int force = 0;
-	struct option options[] = {
+	صحیح force = 0;
+	ساخت option options[] = {
 		OPT__FORCE(&force,
 			 N_("force removal even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
-		OPT_END()
+		OPT_انتہا()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	int ret = 0;
+	ساخت worktree **worktrees, *wt;
+	ساخت strbuf errmsg = STRBUF_INIT;
+	ثابت حرف *reason = تہی;
+	صحیح ret = 0;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_remove_usage, 0);
-	if (ac != 1)
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_remove_usage, 0);
+	اگر (ac != 1)
 		usage_with_options(git_worktree_remove_usage, options);
 
 	worktrees = get_worktrees(the_repository);
-	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	wt = ڈھونڈو_worktree(worktrees, سابقہ, av[0]);
+	اگر (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	اگر (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (force < 2)
-		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	اگر (force < 2)
+		reason = worktree_تالا_reason(wt);
+	اگر (reason) {
+		اگر (*reason)
 			die(_("cannot remove a locked working tree, lock reason: %s\nuse 'remove -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot remove a locked working tree;\nuse 'remove -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
+	اگر (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
 		die(_("validation failed, cannot remove working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (file_exists(wt->path)) {
-		if (!force)
+	اگر (file_exists(wt->راستہ)) {
+		اگر (!force)
 			check_clean_worktree(wt, av[0]);
 
-		ret |= delete_git_work_tree(wt);
+		ret |= delete_git_work_درخت(wt);
 	}
 	/*
 	 * continue on even if ret is non-zero, there's no going back
 	 * from here.
 	 */
 	ret |= delete_git_dir(wt->id);
-	delete_worktrees_dir_if_empty();
+	delete_worktrees_dir_if_خالی_خانے();
 
 	free_worktrees(worktrees);
-	return ret;
+	واپس ret;
 }
 
-static void report_repair(int iserr, const char *path, const char *msg, void *cb_data)
+ساکن خالی report_repair(صحیح iserr, ثابت حرف *راستہ, ثابت حرف *پیغام, خالی *cb_ڈیٹا)
 {
-	if (!iserr) {
-		fprintf_ln(stderr, _("repair: %s: %s"), msg, path);
-	} else {
-		int *exit_status = (int *)cb_data;
-		fprintf_ln(stderr, _("error: %s: %s"), msg, path);
-		*exit_status = 1;
+	اگر (!iserr) {
+		fprintf_ln(stderr, _("repair: %s: %s"), پیغام, راستہ);
+	} ورنہ {
+		صحیح *exit_حالت = (صحیح *)cb_ڈیٹا;
+		fprintf_ln(stderr, _("error: %s: %s"), پیغام, راستہ);
+		*exit_حالت = 1;
 	}
 }
 
-static int repair(int ac, const char **av, const char *prefix,
-		  struct repository *repo UNUSED)
+ساکن صحیح repair(صحیح ac, ثابت حرف **av, ثابت حرف *سابقہ,
+		  ساخت repository *repo غیر_مستعمل)
 {
-	const char **p;
-	const char *self[] = { ".", NULL };
-	struct option options[] = {
+	ثابت حرف **p;
+	ثابت حرف *self[] = { ".", تہی };
+	ساخت option options[] = {
 		OPT_BOOL(0, "relative-paths", &use_relative_paths,
 			 N_("use relative paths for worktrees")),
-		OPT_END()
+		OPT_انتہا()
 	};
-	int rc = 0;
+	صحیح rc = 0;
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_repair_usage, 0);
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_repair_usage, 0);
 	p = ac > 0 ? av : self;
-	for (; *p; p++)
-		repair_worktree_at_path(the_repository, *p, report_repair,
+	برائے (; *p; p++)
+		repair_worktree_at_راستہ(the_repository, *p, report_repair,
 					&rc, use_relative_paths);
 	repair_worktrees(the_repository, report_repair, &rc, use_relative_paths);
-	return rc;
+	واپس rc;
 }
 
-int cmd_worktree(int ac,
-		 const char **av,
-		 const char *prefix,
-		 struct repository *repo)
+صحیح cmd_worktree(صحیح ac,
+		 ثابت حرف **av,
+		 ثابت حرف *سابقہ,
+		 ساخت repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
-		OPT_SUBCOMMAND("add", &fn, add),
+	parse_opt_subcommand_fn *fn = تہی;
+	ساخت option options[] = {
+		OPT_SUBCOMMAND("add", &fn, جوڑو),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("list", &fn, list),
-		OPT_SUBCOMMAND("lock", &fn, lock_worktree),
+		OPT_SUBCOMMAND("lock", &fn, تالا_worktree),
 		OPT_SUBCOMMAND("unlock", &fn, unlock_worktree),
 		OPT_SUBCOMMAND("move", &fn, move_worktree),
 		OPT_SUBCOMMAND("remove", &fn, remove_worktree),
 		OPT_SUBCOMMAND("repair", &fn, repair),
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	repo_config(the_repository, git_worktree_config, NULL);
+	repo_config(the_repository, git_worktree_config, تہی);
 
-	if (!prefix)
-		prefix = "";
+	اگر (!سابقہ)
+		سابقہ = "";
 
-	ac = parse_options(ac, av, prefix, options, git_worktree_usage, 0);
+	ac = parse_options(ac, av, سابقہ, options, git_worktree_usage, 0);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
-	return fn(ac, av, prefix, repo);
+	واپس fn(ac, av, سابقہ, repo);
 }

@@ -1,51 +1,51 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "hex.h"
+#شامل "object-file.h"
+#شامل "object-name.h"
+#شامل "odb.h"
 
-static char *create_temp_file(struct object_id *oid)
+ساکن حرف *create_عارضی_file(ساخت object_id *oid)
 {
-	static char path[50];
-	void *buf;
-	enum object_type type;
-	size_t size;
-	int fd;
+	ساکن حرف راستہ[50];
+	خالی *buf;
+	شمار object_type type;
+	سائز_t سائز;
+	صحیح fd;
 
-	buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf || type != OBJ_BLOB)
-		die("unable to read blob object %s", oid_to_hex(oid));
+	buf = odb_read_object(the_repository->objects, oid, &type, &سائز);
+	اگر (!buf || type != OBJ_BLOB)
+		die("unable to read blob object %s", oid_مقصد_hex(oid));
 
-	xsnprintf(path, sizeof(path), ".merge_file_XXXXXX");
-	fd = xmkstemp(path);
-	if (write_in_full(fd, buf, size) < 0)
+	xsnprintf(راستہ, حجم(راستہ), ".merge_file_XXXXXX");
+	fd = xmkstemp(راستہ);
+	اگر (write_اندر_بھرا(fd, buf, سائز) < 0)
 		die_errno("unable to write temp-file");
 	close(fd);
-	free(buf);
-	return path;
+	آزاد(buf);
+	واپس راستہ;
 }
 
-static const char usage_msg[] =
+ساکن ثابت حرف usage_پیغام[] =
 "git unpack-file <blob>";
 
-int cmd_unpack_file(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+صحیح cmd_unpack_file(صحیح argc,
+		    ثابت حرف **argv,
+		    ثابت حرف *سابقہ غیر_مستعمل,
+		    ساخت repository *repo غیر_مستعمل)
 {
-	struct object_id oid;
+	ساخت object_id oid;
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
-	if (repo_get_oid(the_repository, argv[1], &oid))
+	show_usage_if_asked(argc, argv, usage_پیغام);
+	اگر (argc != 2)
+		usage(usage_پیغام);
+	اگر (repo_get_oid(the_repository, argv[1], &oid))
 		die("Not a valid object name %s", argv[1]);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, تہی);
 
-	puts(create_temp_file(&oid));
-	return 0;
+	puts(create_عارضی_file(&oid));
+	واپس 0;
 }

@@ -1,70 +1,70 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diagnose.h"
+#شامل "builtin.h"
+#شامل "abspath.h"
+#شامل "gettext.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "diagnose.h"
 
-static const char * const diagnose_usage[] = {
+ساکن ثابت حرف * ثابت diagnose_usage[] = {
 	N_("git diagnose [(-o | --output-directory) <path>] [(-s | --suffix) <format>]\n"
 	   "             [--mode=<mode>]"),
-	NULL
+	تہی
 };
 
-int cmd_diagnose(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+صحیح cmd_diagnose(صحیح argc,
+		 ثابت حرف **argv,
+		 ثابت حرف *سابقہ,
+		 ساخت repository *repo غیر_مستعمل)
 {
-	struct strbuf zip_path = STRBUF_INIT;
-	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode mode = DIAGNOSE_STATS;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	char *prefixed_filename;
+	ساخت strbuf zip_راستہ = STRBUF_INIT;
+	وقت_t now = وقت(تہی);
+	ساخت tm tm;
+	شمار diagnose_منوال منوال = DIAGNOSE_STATS;
+	حرف *option_output = تہی;
+	ثابت حرف *option_suffix = "%Y-%m-%d-%H%M";
+	حرف *prefixed_filename;
 
-	const struct option diagnose_options[] = {
+	ثابت ساخت option diagnose_options[] = {
 		OPT_STRING('o', "output-directory", &option_output, N_("path"),
 			   N_("specify a destination for the diagnostics archive")),
 		OPT_STRING('s', "suffix", &option_suffix, N_("format"),
 			   N_("specify a strftime format suffix for the filename")),
-		OPT_CALLBACK_F(0, "mode", &mode, "(stats|all)",
+		OPT_CALLBACK_F(0, "mode", &منوال, "(stats|all)",
 			       N_("specify the content of the diagnostic archive"),
 			       PARSE_OPT_NONEG, option_parse_diagnose),
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	argc = parse_options(argc, argv, prefix, diagnose_options,
+	argc = parse_options(argc, argv, سابقہ, diagnose_options,
 			     diagnose_usage, 0);
 
 	/* Prepare the path to put the result */
-	prefixed_filename = prefix_filename(prefix,
+	prefixed_filename = سابقہ_filename(سابقہ,
 					    option_output ? option_output : "");
-	strbuf_addstr(&zip_path, prefixed_filename);
-	strbuf_complete(&zip_path, '/');
+	strbuf_addstr(&zip_راستہ, prefixed_filename);
+	strbuf_complete(&zip_راستہ, '/');
 
-	strbuf_addstr(&zip_path, "git-diagnostics-");
-	strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
-	strbuf_addstr(&zip_path, ".zip");
+	strbuf_addstr(&zip_راستہ, "git-diagnostics-");
+	strbuf_addftime(&zip_راستہ, option_suffix, localtime_r(&now, &tm), 0, 0);
+	strbuf_addstr(&zip_راستہ, ".zip");
 
-	switch (safe_create_leading_directories(the_repository, zip_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
-	default:
+	انتخاب (محفوظ_create_leading_directories(the_repository, zip_راستہ.buf)) {
+	حالت SCLD_OK:
+	حالت SCLD_EXISTS:
+		توڑو;
+	طےشدہ:
 		die_errno(_("could not create leading directories for '%s'"),
-			  zip_path.buf);
+			  zip_راستہ.buf);
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	اگر (create_diagnostics_archive(the_repository, &zip_راستہ, منوال))
 		die_errno(_("unable to create diagnostics archive %s"),
-			  zip_path.buf);
+			  zip_راستہ.buf);
 
-	free(prefixed_filename);
-	strbuf_release(&zip_path);
-	return 0;
+	آزاد(prefixed_filename);
+	strbuf_release(&zip_راستہ);
+	واپس 0;
 }

@@ -1,16 +1,16 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
 
-#include "git-compat-util.h"
-#include "builtin.h"
-#include "parse-options.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "revision.h"
-#include "rerere.h"
-#include "run-command.h"
-#include "sequencer.h"
-#include "branch.h"
+#شامل "git-compat-util.h"
+#شامل "builtin.h"
+#شامل "parse-options.h"
+#شامل "diff.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "revision.h"
+#شامل "rerere.h"
+#شامل "run-command.h"
+#شامل "sequencer.h"
+#شامل "branch.h"
 
 /*
  * This implements the builtins revert and cherry-pick.
@@ -23,102 +23,102 @@
  * Copyright (c) 2005 Junio C Hamano
  */
 
-static const char * const revert_usage[] = {
+ساکن ثابت حرف * ثابت revert_usage[] = {
 	N_("git revert [--[no-]edit] [-n] [-m <parent-number>] [-s] [-S[<keyid>]] <commit>..."),
 	N_("git revert (--continue | --skip | --abort | --quit)"),
-	NULL
+	تہی
 };
 
-static const char * const cherry_pick_usage[] = {
+ساکن ثابت حرف * ثابت cherry_pick_usage[] = {
 	N_("git cherry-pick [--edit] [-n] [-m <parent-number>] [-s] [-x] [--ff]\n"
 	   "                [-S[<keyid>]] <commit>..."),
 	N_("git cherry-pick (--continue | --skip | --abort | --quit)"),
-	NULL
+	تہی
 };
 
-static const char *action_name(const struct replay_opts *opts)
+ساکن ثابت حرف *action_name(ثابت ساخت replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
+	واپس opts->action == REPLAY_REVERT ? "revert" : "cherry-pick";
 }
 
-static const char * const *revert_or_cherry_pick_usage(struct replay_opts *opts)
+ساکن ثابت حرف * ثابت *revert_or_cherry_pick_usage(ساخت replay_opts *opts)
 {
-	return opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
+	واپس opts->action == REPLAY_REVERT ? revert_usage : cherry_pick_usage;
 }
 
-enum empty_action {
-	EMPTY_COMMIT_UNSPECIFIED = -1,
-	STOP_ON_EMPTY_COMMIT,      /* output errors and stop in the middle of a cherry-pick */
-	DROP_EMPTY_COMMIT,         /* skip with a notice message */
-	KEEP_EMPTY_COMMIT,         /* keep recording as empty commits */
+شمار خالی_خانے_action {
+	خالی_خانے_COMMIT_UNSPECIFIED = -1,
+	STOP_ON_خالی_خانے_COMMIT,      /* output errors and stop in the middle of a cherry-pick */
+	DROP_خالی_خانے_COMMIT,         /* skip with a notice message */
+	KEEP_خالی_خانے_COMMIT,         /* keep recording as empty commits */
 };
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+ساکن صحیح parse_opt_خالی_خانے(ثابت ساخت option *opt, ثابت حرف *arg, صحیح unset)
 {
-	int *opt_value = opt->value;
+	صحیح *opt_قدر = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "stop"))
-		*opt_value = STOP_ON_EMPTY_COMMIT;
-	else if (!strcmp(arg, "drop"))
-		*opt_value = DROP_EMPTY_COMMIT;
-	else if (!strcmp(arg, "keep"))
-		*opt_value = KEEP_EMPTY_COMMIT;
-	else
-		return error(_("invalid value for '%s': '%s'"), "--empty", arg);
+	اگر (!strcmp(arg, "stop"))
+		*opt_قدر = STOP_ON_خالی_خانے_COMMIT;
+	ورنہ اگر (!strcmp(arg, "drop"))
+		*opt_قدر = DROP_خالی_خانے_COMMIT;
+	ورنہ اگر (!strcmp(arg, "keep"))
+		*opt_قدر = KEEP_خالی_خانے_COMMIT;
+	ورنہ
+		واپس error(_("invalid value for '%s': '%s'"), "--empty", arg);
 
-	return 0;
+	واپس 0;
 }
 
-static int option_parse_m(const struct option *opt,
-			  const char *arg, int unset)
+ساکن صحیح option_parse_m(ثابت ساخت option *opt,
+			  ثابت حرف *arg, صحیح unset)
 {
-	struct replay_opts *replay = opt->value;
-	char *end;
+	ساخت replay_opts *replay = opt->قدر;
+	حرف *انتہا;
 
-	if (unset) {
+	اگر (unset) {
 		replay->mainline = 0;
-		return 0;
+		واپس 0;
 	}
 
-	replay->mainline = strtol(arg, &end, 10);
-	if (*end || replay->mainline <= 0)
-		return error(_("option `%s' expects a number greater than zero"),
+	replay->mainline = strtol(arg, &انتہا, 10);
+	اگر (*انتہا || replay->mainline <= 0)
+		واپس error(_("option `%s' expects a number greater than zero"),
 			     opt->long_name);
 
-	return 0;
+	واپس 0;
 }
 
-LAST_ARG_MUST_BE_NULL
-static void verify_opt_compatible(const char *me, const char *base_opt, ...)
+آخری_ARG_MUST_BE_NULL
+ساکن خالی verify_opt_compatible(ثابت حرف *me, ثابت حرف *بنیاد_opt, ...)
 {
-	const char *this_opt;
+	ثابت حرف *this_opt;
 	va_list ap;
 
-	va_start(ap, base_opt);
-	while ((this_opt = va_arg(ap, const char *))) {
-		if (va_arg(ap, int))
-			break;
+	va_آغاز(ap, بنیاد_opt);
+	جب ((this_opt = va_arg(ap, ثابت حرف *))) {
+		اگر (va_arg(ap, صحیح))
+			توڑو;
 	}
-	va_end(ap);
+	va_انتہا(ap);
 
-	if (this_opt)
-		die(_("%s: %s cannot be used with %s"), me, this_opt, base_opt);
+	اگر (this_opt)
+		die(_("%s: %s cannot be used with %s"), me, this_opt, بنیاد_opt);
 }
 
-static int run_sequencer(int argc, const char **argv, const char *prefix,
-			 struct replay_opts *opts)
+ساکن صحیح تسلسل_sequencer(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ,
+			 ساخت replay_opts *opts)
 {
-	const char * const * usage_str = revert_or_cherry_pick_usage(opts);
-	const char *me = action_name(opts);
-	const char *cleanup_arg = NULL;
-	const char sentinel_value = 0; /* value not important */
-	const char *strategy = &sentinel_value;
-	const char *gpg_sign = &sentinel_value;
-	enum empty_action empty_opt = EMPTY_COMMIT_UNSPECIFIED;
-	int cmd = 0, ret;
-	struct option base_options[] = {
+	ثابت حرف * ثابت * usage_str = revert_or_cherry_pick_usage(opts);
+	ثابت حرف *me = action_name(opts);
+	ثابت حرف *cleanup_arg = تہی;
+	ثابت حرف sentinel_قدر = 0; /* value not important */
+	ثابت حرف *strategy = &sentinel_قدر;
+	ثابت حرف *gpg_sign = &sentinel_قدر;
+	شمار خالی_خانے_action خالی_خانے_opt = خالی_خانے_COMMIT_UNSPECIFIED;
+	صحیح cmd = 0, ret;
+	ساخت option بنیاد_options[] = {
 		OPT_CMDMODE(0, "quit", &cmd, N_("end revert or cherry-pick sequence"), 'q'),
 		OPT_CMDMODE(0, "continue", &cmd, N_("resume revert or cherry-pick sequence"), 'c'),
 		OPT_CMDMODE(0, "abort", &cmd, N_("cancel revert or cherry-pick sequence"), 'a'),
@@ -126,7 +126,7 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 		OPT_CLEANUP(&cleanup_arg),
 		OPT_BOOL('n', "no-commit", &opts->no_commit, N_("don't automatically commit")),
 		OPT_BOOL('e', "edit", &opts->edit, N_("edit the commit message")),
-		OPT_NOOP_NOARG('r', NULL),
+		OPT_NOOP_NOARG('r', تہی),
 		OPT_BOOL('s', "signoff", &opts->signoff, N_("add a Signed-off-by trailer")),
 		OPT_CALLBACK('m', "mainline", opts, N_("parent-number"),
 			     N_("select mainline parent"), option_parse_m),
@@ -138,70 +138,70 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &gpg_sign,
+			.قدر = &gpg_sign,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t) "",
 		},
-		OPT_END()
+		OPT_انتہا()
 	};
-	struct option *options = base_options;
+	ساخت option *options = بنیاد_options;
 
-	if (opts->action == REPLAY_PICK) {
-		struct option cp_extra[] = {
-			OPT_BOOL('x', NULL, &opts->record_origin, N_("append commit name")),
+	اگر (opts->action == REPLAY_PICK) {
+		ساخت option cp_extra[] = {
+			OPT_BOOL('x', تہی, &opts->ریکارڈ_origin, N_("append commit name")),
 			OPT_BOOL(0, "ff", &opts->allow_ff, N_("allow fast-forward")),
-			OPT_BOOL(0, "allow-empty", &opts->allow_empty, N_("preserve initially empty commits")),
-			OPT_BOOL(0, "allow-empty-message", &opts->allow_empty_message, N_("allow commits with empty messages")),
+			OPT_BOOL(0, "allow-empty", &opts->allow_خالی_خانے, N_("preserve initially empty commits")),
+			OPT_BOOL(0, "allow-empty-message", &opts->allow_خالی_خانے_پیغام, N_("allow commits with empty messages")),
 			OPT_BOOL(0, "keep-redundant-commits", &opts->keep_redundant_commits, N_("deprecated: use --empty=keep instead")),
-			OPT_CALLBACK_F(0, "empty", &empty_opt, "(stop|drop|keep)",
+			OPT_CALLBACK_F(0, "empty", &خالی_خانے_opt, "(stop|drop|keep)",
 				       N_("how to handle commits that become empty"),
-				       PARSE_OPT_NONEG, parse_opt_empty),
-			OPT_END(),
+				       PARSE_OPT_NONEG, parse_opt_خالی_خانے),
+			OPT_انتہا(),
 		};
 		options = parse_options_concat(options, cp_extra);
-	} else if (opts->action == REPLAY_REVERT) {
-		struct option cp_extra[] = {
+	} ورنہ اگر (opts->action == REPLAY_REVERT) {
+		ساخت option cp_extra[] = {
 			OPT_BOOL(0, "reference", &opts->commit_use_reference,
 				 N_("use the 'reference' format to refer to commits")),
-			OPT_END(),
+			OPT_انتہا(),
 		};
 		options = parse_options_concat(options, cp_extra);
 	}
 
-	argc = parse_options(argc, argv, prefix, options, usage_str,
+	argc = parse_options(argc, argv, سابقہ, options, usage_str,
 			PARSE_OPT_KEEP_ARGV0 |
 			PARSE_OPT_KEEP_UNKNOWN_OPT);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
-	if (opts->action == REPLAY_PICK) {
-		opts->drop_redundant_commits = (empty_opt == DROP_EMPTY_COMMIT);
-		opts->keep_redundant_commits = opts->keep_redundant_commits || (empty_opt == KEEP_EMPTY_COMMIT);
+	اگر (opts->action == REPLAY_PICK) {
+		opts->drop_redundant_commits = (خالی_خانے_opt == DROP_خالی_خانے_COMMIT);
+		opts->keep_redundant_commits = opts->keep_redundant_commits || (خالی_خانے_opt == KEEP_خالی_خانے_COMMIT);
 	}
 
 	/* implies allow_empty */
-	if (opts->keep_redundant_commits)
-		opts->allow_empty = 1;
+	اگر (opts->keep_redundant_commits)
+		opts->allow_خالی_خانے = 1;
 
-	if (cleanup_arg) {
-		opts->default_msg_cleanup = get_cleanup_mode(cleanup_arg, 1);
+	اگر (cleanup_arg) {
+		opts->default_پیغام_cleanup = get_cleanup_منوال(cleanup_arg, 1);
 		opts->explicit_cleanup = 1;
 	}
 
 	/* Check for incompatible command line arguments */
-	if (cmd) {
-		const char *this_operation;
-		if (cmd == 'q')
+	اگر (cmd) {
+		ثابت حرف *this_operation;
+		اگر (cmd == 'q')
 			this_operation = "--quit";
-		else if (cmd == 'c')
+		ورنہ اگر (cmd == 'c')
 			this_operation = "--continue";
-		else if (cmd == 's')
+		ورنہ اگر (cmd == 's')
 			this_operation = "--skip";
-		else {
-			assert(cmd == 'a');
+		ورنہ {
+			أكد(cmd == 'a');
 			this_operation = "--abort";
 		}
 
@@ -211,114 +211,114 @@ static int run_sequencer(int argc, const char **argv, const char *prefix,
 				"--mainline", opts->mainline,
 				"--strategy", opts->strategy ? 1 : 0,
 				"--strategy-option", opts->xopts.nr ? 1 : 0,
-				"-x", opts->record_origin,
+				"-x", opts->ریکارڈ_origin,
 				"--ff", opts->allow_ff,
 				"--rerere-autoupdate", opts->allow_rerere_auto == RERERE_AUTOUPDATE,
 				"--no-rerere-autoupdate", opts->allow_rerere_auto == RERERE_NOAUTOUPDATE,
 				"--keep-redundant-commits", opts->keep_redundant_commits,
-				"--empty", empty_opt != EMPTY_COMMIT_UNSPECIFIED,
-				NULL);
+				"--empty", خالی_خانے_opt != خالی_خانے_COMMIT_UNSPECIFIED,
+				تہی);
 	}
 
-	if (!opts->strategy && opts->default_strategy) {
+	اگر (!opts->strategy && opts->default_strategy) {
 		opts->strategy = opts->default_strategy;
-		opts->default_strategy = NULL;
+		opts->default_strategy = تہی;
 	}
 
-	if (opts->allow_ff)
+	اگر (opts->allow_ff)
 		verify_opt_compatible(me, "--ff",
 				"--signoff", opts->signoff,
 				"--no-commit", opts->no_commit,
-				"-x", opts->record_origin,
+				"-x", opts->ریکارڈ_origin,
 				"--edit", opts->edit > 0,
-				NULL);
+				تہی);
 
-	if (cmd) {
-		opts->revs = NULL;
-	} else {
-		struct setup_revision_opt s_r_opt;
-		opts->revs = xmalloc(sizeof(*opts->revs));
-		repo_init_revisions(the_repository, opts->revs, NULL);
+	اگر (cmd) {
+		opts->revs = تہی;
+	} ورنہ {
+		ساخت تیاری_revision_opt s_r_opt;
+		opts->revs = xmalloc(حجم(*opts->revs));
+		repo_init_revisions(the_repository, opts->revs, تہی);
 		opts->revs->no_walk = 1;
-		opts->revs->unsorted_input = 1;
-		if (argc < 2)
+		opts->revs->unsorted_داخلہ = 1;
+		اگر (argc < 2)
 			usage_with_options(usage_str, options);
-		if (!strcmp(argv[1], "-"))
+		اگر (!strcmp(argv[1], "-"))
 			argv[1] = "@{-1}";
-		memset(&s_r_opt, 0, sizeof(s_r_opt));
+		memset(&s_r_opt, 0, حجم(s_r_opt));
 		s_r_opt.assume_dashdash = 1;
-		argc = setup_revisions(argc, argv, opts->revs, &s_r_opt);
+		argc = تیاری_revisions(argc, argv, opts->revs, &s_r_opt);
 	}
 
-	if (argc > 1)
+	اگر (argc > 1)
 		usage_with_options(usage_str, options);
 
 	/* These option values will be free()d */
-	if (gpg_sign != &sentinel_value) {
-		free(opts->gpg_sign);
+	اگر (gpg_sign != &sentinel_قدر) {
+		آزاد(opts->gpg_sign);
 		opts->gpg_sign = xstrdup_or_null(gpg_sign);
 	}
-	if (strategy != &sentinel_value) {
-		free(opts->strategy);
+	اگر (strategy != &sentinel_قدر) {
+		آزاد(opts->strategy);
 		opts->strategy = xstrdup_or_null(strategy);
 	}
-	free(options);
+	آزاد(options);
 
-	if (cmd == 'q') {
+	اگر (cmd == 'q') {
 		ret = sequencer_remove_state(opts);
-		if (!ret)
+		اگر (!ret)
 			remove_branch_state(the_repository, 0);
-		return ret;
+		واپس ret;
 	}
-	if (cmd == 'a')
-		return sequencer_rollback(the_repository, opts);
-	if (cmd == 'c')
+	اگر (cmd == 'a')
+		واپس sequencer_rollback(the_repository, opts);
+	اگر (cmd == 'c')
 		ret = sequencer_continue(the_repository, opts);
-	else if (cmd == 's')
+	ورنہ اگر (cmd == 's')
 		ret = sequencer_skip(the_repository, opts);
-	else
+	ورنہ
 		ret = sequencer_pick_revisions(the_repository, opts);
-	if (!ret)
-		run_auto_maintenance(the_repository, opts->quiet);
-	return ret;
+	اگر (!ret)
+		تسلسل_auto_maintenance(the_repository, opts->quiet);
+	واپس ret;
 }
 
-int cmd_revert(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+صحیح cmd_revert(صحیح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *سابقہ,
+	       ساخت repository *repo غیر_مستعمل)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	ساخت replay_opts opts = REPLAY_OPTS_INIT;
+	صحیح res;
 
-#ifndef WITH_BREAKING_CHANGES
+#اگر_غیر_تعریف_شدہ WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
-#endif /* !WITH_BREAKING_CHANGES */
+#اگر_ختم /* !WITH_BREAKING_CHANGES */
 	opts.action = REPLAY_REVERT;
 	sequencer_init_config(&opts);
-	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	res = تسلسل_sequencer(argc, argv, سابقہ, &opts);
+	اگر (res < 0)
 		die(_("revert failed"));
 	replay_opts_release(&opts);
-	return res;
+	واپس res;
 }
 
-int cmd_cherry_pick(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+صحیح cmd_cherry_pick(صحیح argc,
+ثابت حرف **argv,
+ثابت حرف *سابقہ,
+ساخت repository *repo غیر_مستعمل)
 {
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int res;
+	ساخت replay_opts opts = REPLAY_OPTS_INIT;
+	صحیح res;
 
-#ifndef WITH_BREAKING_CHANGES
+#اگر_غیر_تعریف_شدہ WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
-#endif /* !WITH_BREAKING_CHANGES */
+#اگر_ختم /* !WITH_BREAKING_CHANGES */
 	opts.action = REPLAY_PICK;
 	sequencer_init_config(&opts);
-	res = run_sequencer(argc, argv, prefix, &opts);
-	if (res < 0)
+	res = تسلسل_sequencer(argc, argv, سابقہ, &opts);
+	اگر (res < 0)
 		die(_("cherry-pick failed"));
 	replay_opts_release(&opts);
-	return res;
+	واپس res;
 }

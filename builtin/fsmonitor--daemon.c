@@ -1,79 +1,79 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "fsmonitor-ll.h"
-#include "fsmonitor-ipc.h"
-#include "fsmonitor-settings.h"
-#include "compat/fsmonitor/fsm-health.h"
-#include "compat/fsmonitor/fsm-listen.h"
-#include "fsmonitor--daemon.h"
+#شامل "builtin.h"
+#شامل "abspath.h"
+#شامل "config.h"
+#شامل "dir.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "parse-options.h"
+#شامل "fsmonitor-ll.h"
+#شامل "fsmonitor-ipc.h"
+#شامل "fsmonitor-settings.h"
+#شامل "compat/fsmonitor/fsm-health.h"
+#شامل "compat/fsmonitor/fsm-listen.h"
+#شامل "fsmonitor--daemon.h"
 
-#include "simple-ipc.h"
-#include "strmap.h"
-#include "run-command.h"
-#include "trace.h"
-#include "trace2.h"
+#شامل "simple-ipc.h"
+#شامل "strmap.h"
+#شامل "run-command.h"
+#شامل "trace.h"
+#شامل "trace2.h"
 
-static const char * const builtin_fsmonitor__daemon_usage[] = {
+ساکن ثابت حرف * ثابت builtin_fsmonitor__daemon_usage[] = {
 	N_("git fsmonitor--daemon start [<options>]"),
 	N_("git fsmonitor--daemon run [<options>]"),
 	"git fsmonitor--daemon stop",
 	"git fsmonitor--daemon status",
-	NULL
+	تہی
 };
 
-#ifdef HAVE_FSMONITOR_DAEMON_BACKEND
+#اگر_تعریف_شدہ HAVE_FSMONITOR_DAEMON_BACKEND
 /*
  * Global state loaded from config.
  */
-#define FSMONITOR__IPC_THREADS "fsmonitor.ipcthreads"
-static int fsmonitor__ipc_threads = 8;
+#تعریف_کرو FSMONITOR_IPC_دھاگے "fsmonitor.ipcthreads"
+ساکن صحیح fsmonitor_ipc_دھاگے = 8;
 
-#define FSMONITOR__START_TIMEOUT "fsmonitor.starttimeout"
-static int fsmonitor__start_timeout_sec = 60;
+#تعریف_کرو FSMONITOR_آغاز_TIMEOUT "fsmonitor.starttimeout"
+ساکن صحیح fsmonitor_آغاز_timeout_sec = 60;
 
-#define FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
-static int fsmonitor__announce_startup = 0;
+#تعریف_کرو FSMONITOR__ANNOUNCE_STARTUP "fsmonitor.announcestartup"
+ساکن صحیح fsmonitor__announce_startup = 0;
 
-static int fsmonitor_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+ساکن صحیح fsmonitor_config(ثابت حرف *var, ثابت حرف *قدر,
+			    ثابت ساخت config_context *ctx, خالی *cb)
 {
-	if (!strcmp(var, FSMONITOR__IPC_THREADS)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 1)
-			return error(_("value of '%s' out of range: %d"),
-				     FSMONITOR__IPC_THREADS, i);
-		fsmonitor__ipc_threads = i;
-		return 0;
+	اگر (!strcmp(var, FSMONITOR_IPC_دھاگے)) {
+		صحیح i = git_config_int(var, قدر, ctx->kvi);
+		اگر (i < 1)
+			واپس error(_("value of '%s' out of range: %d"),
+				     FSMONITOR_IPC_دھاگے, i);
+		fsmonitor_ipc_دھاگے = i;
+		واپس 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__START_TIMEOUT)) {
-		int i = git_config_int(var, value, ctx->kvi);
-		if (i < 0)
-			return error(_("value of '%s' out of range: %d"),
-				     FSMONITOR__START_TIMEOUT, i);
-		fsmonitor__start_timeout_sec = i;
-		return 0;
+	اگر (!strcmp(var, FSMONITOR_آغاز_TIMEOUT)) {
+		صحیح i = git_config_int(var, قدر, ctx->kvi);
+		اگر (i < 0)
+			واپس error(_("value of '%s' out of range: %d"),
+				     FSMONITOR_آغاز_TIMEOUT, i);
+		fsmonitor_آغاز_timeout_sec = i;
+		واپس 0;
 	}
 
-	if (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
-		int is_bool;
-		int i = git_config_bool_or_int(var, value, ctx->kvi, &is_bool);
-		if (i < 0)
-			return error(_("value of '%s' not bool or int: %d"),
+	اگر (!strcmp(var, FSMONITOR__ANNOUNCE_STARTUP)) {
+		صحیح is_bool;
+		صحیح i = git_config_bool_or_int(var, قدر, ctx->kvi, &is_bool);
+		اگر (i < 0)
+			واپس error(_("value of '%s' not bool or int: %d"),
 				     var, i);
 		fsmonitor__announce_startup = i;
-		return 0;
+		واپس 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	واپس git_default_config(var, قدر, ctx, cb);
 }
 
 /*
@@ -82,90 +82,90 @@ static int fsmonitor_config(const char *var, const char *value,
  * Send a "quit" command to the `git-fsmonitor--daemon` (if running)
  * and wait for it to shutdown.
  */
-static int do_as_client__send_stop(void)
+ساکن صحیح do_as_client__send_stop(خالی)
 {
-	struct strbuf answer = STRBUF_INIT;
-	int ret;
-	int max_wait_ms = 30000;
-	int elapsed_ms = 0;
+	ساخت strbuf answer = STRBUF_INIT;
+	صحیح ret;
+	صحیح max_wait_ms = 30000;
+	صحیح elapsed_ms = 0;
 
 	ret = fsmonitor_ipc__send_command("quit", &answer);
 
 	/* The quit command does not return any response data. */
 	strbuf_release(&answer);
 
-	if (ret)
-		return ret;
+	اگر (ret)
+		واپس ret;
 
-	trace2_region_enter("fsm_client", "polling-for-daemon-exit", NULL);
-	while (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
-		if (elapsed_ms >= max_wait_ms) {
+	trace2_region_enter("fsm_client", "polling-for-daemon-exit", تہی);
+	جب (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING) {
+		اگر (elapsed_ms >= max_wait_ms) {
 			trace2_region_leave("fsm_client",
-					    "polling-for-daemon-exit", NULL);
-			return error(_("daemon did not stop within %d seconds"),
+					    "polling-for-daemon-exit", تہی);
+			واپس error(_("daemon did not stop within %d seconds"),
 				     max_wait_ms / 1000);
 		}
 		sleep_millisec(50);
 		elapsed_ms += 50;
 	}
-	trace2_region_leave("fsm_client", "polling-for-daemon-exit", NULL);
+	trace2_region_leave("fsm_client", "polling-for-daemon-exit", تہی);
 
-	return 0;
+	واپس 0;
 }
 
-static int do_as_client__status(void)
+ساکن صحیح do_as_client_حالت(خالی)
 {
-	enum ipc_active_state state = fsmonitor_ipc__get_state();
+	شمار ipc_فعال_state state = fsmonitor_ipc__get_state();
 
-	switch (state) {
-	case IPC_STATE__LISTENING:
-		printf(_("fsmonitor-daemon is watching '%s'\n"),
+	انتخاب (state) {
+	حالت IPC_STATE__LISTENING:
+		لکھو(_("fsmonitor-daemon is watching '%s'\n"),
 		       the_repository->worktree);
-		return 0;
+		واپس 0;
 
-	default:
-		printf(_("fsmonitor-daemon is not watching '%s'\n"),
+	طےشدہ:
+		لکھو(_("fsmonitor-daemon is not watching '%s'\n"),
 		       the_repository->worktree);
-		return 1;
+		واپس 1;
 	}
 }
 
-enum fsmonitor_cookie_item_result {
+شمار fsmonitor_cookie_شے_نتیجہ {
 	FCIR_ERROR = -1, /* could not create cookie file ? */
 	FCIR_INIT,
-	FCIR_SEEN,
+	FCIR_نظر_آیا,
 	FCIR_ABORT,
 };
 
-struct fsmonitor_cookie_item {
-	struct hashmap_entry entry;
-	char *name;
-	enum fsmonitor_cookie_item_result result;
+ساخت fsmonitor_cookie_شے {
+	ساخت hashmap_اندراج اندراج_2;
+	حرف *name;
+	شمار fsmonitor_cookie_شے_نتیجہ نتیجہ;
 };
 
-static int cookies_cmp(const void *data UNUSED,
-		       const struct hashmap_entry *he1,
-		       const struct hashmap_entry *he2, const void *keydata)
+ساکن صحیح cookies_cmp(ثابت خالی *ڈیٹا غیر_مستعمل,
+		       ثابت ساخت hashmap_اندراج *he1,
+		       ثابت ساخت hashmap_اندراج *he2, ثابت خالی *keydata)
 {
-	const struct fsmonitor_cookie_item *a =
-		container_of(he1, const struct fsmonitor_cookie_item, entry);
-	const struct fsmonitor_cookie_item *b =
-		container_of(he2, const struct fsmonitor_cookie_item, entry);
+	ثابت ساخت fsmonitor_cookie_شے *a =
+		container_کا(he1, ثابت ساخت fsmonitor_cookie_شے, اندراج_2);
+	ثابت ساخت fsmonitor_cookie_شے *b =
+		container_کا(he2, ثابت ساخت fsmonitor_cookie_شے, اندراج_2);
 
-	return strcmp(a->name, keydata ? keydata : b->name);
+	واپس strcmp(a->name, keydata ? keydata : b->name);
 }
 
-static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
-	struct fsmonitor_daemon_state *state)
+ساکن شمار fsmonitor_cookie_شے_نتیجہ with_تالا_wait_for_cookie(
+	ساخت fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	int fd;
-	struct fsmonitor_cookie_item *cookie;
-	struct strbuf cookie_pathname = STRBUF_INIT;
-	struct strbuf cookie_filename = STRBUF_INIT;
-	enum fsmonitor_cookie_item_result result;
-	int my_cookie_seq;
+	صحیح fd;
+	ساخت fsmonitor_cookie_شے *cookie;
+	ساخت strbuf cookie_pathname = STRBUF_INIT;
+	ساخت strbuf cookie_filename = STRBUF_INIT;
+	شمار fsmonitor_cookie_شے_نتیجہ نتیجہ;
+	صحیح my_cookie_seq;
 
 	CALLOC_ARRAY(cookie, 1);
 
@@ -173,16 +173,16 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 
 	strbuf_addf(&cookie_filename, "%i-%i", getpid(), my_cookie_seq);
 
-	strbuf_addbuf(&cookie_pathname, &state->path_cookie_prefix);
+	strbuf_addbuf(&cookie_pathname, &state->راستہ_cookie_سابقہ);
 	strbuf_addbuf(&cookie_pathname, &cookie_filename);
 
-	cookie->name = strbuf_detach(&cookie_filename, NULL);
-	cookie->result = FCIR_INIT;
-	hashmap_entry_init(&cookie->entry, strhash(cookie->name));
+	cookie->name = strbuf_detach(&cookie_filename, تہی);
+	cookie->نتیجہ = FCIR_INIT;
+	hashmap_اندراج_init(&cookie->اندراج_2, strhash(cookie->name));
 
-	hashmap_add(&state->cookies, &cookie->entry);
+	hashmap_جوڑو(&state->cookies, &cookie->اندراج_2);
 
-	trace_printf_key(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
+	trace_printf_کلید(&trace_fsmonitor, "cookie-wait: '%s' '%s'",
 			 cookie->name, cookie_pathname.buf);
 
 	/*
@@ -190,12 +190,12 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * that the listener thread has seen it.
 	 */
 	fd = open(cookie_pathname.buf, O_WRONLY | O_CREAT | O_EXCL, 0600);
-	if (fd < 0) {
+	اگر (fd < 0) {
 		error_errno(_("could not create fsmonitor cookie '%s'"),
 			    cookie->name);
 
-		cookie->result = FCIR_ERROR;
-		goto done;
+		cookie->نتیجہ = FCIR_ERROR;
+		جاؤ مکمل;
 	}
 
 	/*
@@ -214,88 +214,88 @@ static enum fsmonitor_cookie_item_result with_lock__wait_for_cookie(
 	 * where inotify watches succeed but events never arrive).
 	 */
 	{
-		struct timeval now;
-		struct timespec ts;
-		int err = 0;
+		ساخت timeval now;
+		ساخت timespec ts;
+		صحیح err = 0;
 
-		gettimeofday(&now, NULL);
+		gettimeofday(&now, تہی);
 		ts.tv_sec = now.tv_sec + 1;
 		ts.tv_nsec = now.tv_usec * 1000;
 
-		while (cookie->result == FCIR_INIT && !err)
+		جب (cookie->نتیجہ == FCIR_INIT && !err)
 			err = pthread_cond_timedwait(&state->cookies_cond,
-						     &state->main_lock,
+						     &state->main_تالا,
 						     &ts);
-		if (err == ETIMEDOUT && cookie->result == FCIR_INIT) {
-			trace_printf_key(&trace_fsmonitor,
+		اگر (err == ETIMEDOUT && cookie->نتیجہ == FCIR_INIT) {
+			trace_printf_کلید(&trace_fsmonitor,
 					 "cookie_wait timed out");
-			cookie->result = FCIR_ERROR;
+			cookie->نتیجہ = FCIR_ERROR;
 		}
 	}
 
-done:
-	hashmap_remove(&state->cookies, &cookie->entry, NULL);
+مکمل:
+	hashmap_remove(&state->cookies, &cookie->اندراج_2, تہی);
 
-	result = cookie->result;
+	نتیجہ = cookie->نتیجہ;
 
-	free(cookie->name);
-	free(cookie);
+	آزاد(cookie->name);
+	آزاد(cookie);
 	strbuf_release(&cookie_pathname);
 
-	return result;
+	واپس نتیجہ;
 }
 
 /*
  * Mark these cookies as _SEEN and wake up the corresponding client threads.
  */
-static void with_lock__mark_cookies_seen(struct fsmonitor_daemon_state *state,
-					 const struct string_list *cookie_names)
+ساکن خالی with_تالا_mark_cookies_نظر_آیا(ساخت fsmonitor_daemon_state *state,
+					 ثابت ساخت string_list *cookie_نام)
 {
 	/* assert current thread holding state->main_lock */
 
-	int k;
-	int nr_seen = 0;
+	صحیح k;
+	صحیح nr_نظر_آیا = 0;
 
-	for (k = 0; k < cookie_names->nr; k++) {
-		struct fsmonitor_cookie_item key;
-		struct fsmonitor_cookie_item *cookie;
+	برائے (k = 0; k < cookie_نام->nr; k++) {
+		ساخت fsmonitor_cookie_شے کلید;
+		ساخت fsmonitor_cookie_شے *cookie;
 
-		key.name = cookie_names->items[k].string;
-		hashmap_entry_init(&key.entry, strhash(key.name));
+		کلید.name = cookie_نام->اشیاء[k].string;
+		hashmap_اندراج_init(&کلید.اندراج_2, strhash(کلید.name));
 
-		cookie = hashmap_get_entry(&state->cookies, &key, entry, NULL);
-		if (cookie) {
-			trace_printf_key(&trace_fsmonitor, "cookie-seen: '%s'",
+		cookie = hashmap_get_اندراج(&state->cookies, &کلید, اندراج_2, تہی);
+		اگر (cookie) {
+			trace_printf_کلید(&trace_fsmonitor, "cookie-seen: '%s'",
 					 cookie->name);
-			cookie->result = FCIR_SEEN;
-			nr_seen++;
+			cookie->نتیجہ = FCIR_نظر_آیا;
+			nr_نظر_آیا++;
 		}
 	}
 
-	if (nr_seen)
-		pthread_cond_broadcast(&state->cookies_cond);
+	اگر (nr_نظر_آیا)
+		pthread_cond_نشر(&state->cookies_cond);
 }
 
 /*
  * Set _ABORT on all pending cookies and wake up all client threads.
  */
-static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
+ساکن خالی with_تالا_abort_all_cookies(ساخت fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct hashmap_iter iter;
-	struct fsmonitor_cookie_item *cookie;
-	int nr_aborted = 0;
+	ساخت hashmap_iter iter;
+	ساخت fsmonitor_cookie_شے *cookie;
+	صحیح nr_aborted = 0;
 
-	hashmap_for_each_entry(&state->cookies, &iter, cookie, entry) {
-		trace_printf_key(&trace_fsmonitor, "cookie-abort: '%s'",
+	hashmap_for_each_اندراج(&state->cookies, &iter, cookie, اندراج_2) {
+		trace_printf_کلید(&trace_fsmonitor, "cookie-abort: '%s'",
 				 cookie->name);
-		cookie->result = FCIR_ABORT;
+		cookie->نتیجہ = FCIR_ABORT;
 		nr_aborted++;
 	}
 
-	if (nr_aborted)
-		pthread_cond_broadcast(&state->cookies_cond);
+	اگر (nr_aborted)
+		pthread_cond_نشر(&state->cookies_cond);
 }
 
 /*
@@ -366,57 +366,57 @@ static void with_lock__abort_all_cookies(struct fsmonitor_daemon_state *state)
  * Therefore, clients that present a token with a stale (non-current)
  * token_id will always be given a trivial response.
  */
-struct fsmonitor_token_data {
-	struct strbuf token_id;
-	struct fsmonitor_batch *batch_head;
-	struct fsmonitor_batch *batch_tail;
-	uint64_t client_ref_count;
+ساخت fsmonitor_token_ڈیٹا {
+	ساخت strbuf token_id;
+	ساخت fsmonitor_batch *batch_سر;
+	ساخت fsmonitor_batch *batch_دم;
+	uint64_t client_ref_گنتی;
 };
 
-struct fsmonitor_batch {
-	struct fsmonitor_batch *next;
+ساخت fsmonitor_batch {
+	ساخت fsmonitor_batch *اگلا;
 	uint64_t batch_seq_nr;
-	const char **interned_paths;
-	size_t nr, alloc;
-	time_t pinned_time;
+	ثابت حرف **interned_paths;
+	سائز_t nr, alloc;
+	وقت_t pinned_وقت;
 };
 
-static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
+ساکن ساخت fsmonitor_token_ڈیٹا *fsmonitor_new_token_ڈیٹا(خالی)
 {
-	static int test_env_value = -1;
-	static uint64_t flush_count = 0;
-	struct fsmonitor_token_data *token;
-	struct fsmonitor_batch *batch;
+	ساکن صحیح test_env_قدر = -1;
+	ساکن uint64_t flush_گنتی = 0;
+	ساخت fsmonitor_token_ڈیٹا *token;
+	ساخت fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(token, 1);
 	batch = fsmonitor_batch__new();
 
 	strbuf_init(&token->token_id, 0);
-	token->batch_head = batch;
-	token->batch_tail = batch;
-	token->client_ref_count = 0;
+	token->batch_سر = batch;
+	token->batch_دم = batch;
+	token->client_ref_گنتی = 0;
 
-	if (test_env_value < 0)
-		test_env_value = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
+	اگر (test_env_قدر < 0)
+		test_env_قدر = git_env_bool("GIT_TEST_FSMONITOR_TOKEN", 0);
 
-	if (!test_env_value) {
-		struct timeval tv;
-		struct tm tm;
-		time_t secs;
+	اگر (!test_env_قدر) {
+		ساخت timeval tv;
+		ساخت tm tm;
+		وقت_t secs;
 
-		gettimeofday(&tv, NULL);
+		gettimeofday(&tv, تہی);
 		secs = tv.tv_sec;
 		gmtime_r(&secs, &tm);
 
 		strbuf_addf(&token->token_id,
 			    "%"PRIu64".%d.%4d%02d%02dT%02d%02d%02d.%06ldZ",
-			    flush_count++,
+			    flush_گنتی++,
 			    getpid(),
 			    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 			    tm.tm_hour, tm.tm_min, tm.tm_sec,
-			    (long)tv.tv_usec);
-	} else {
-		strbuf_addf(&token->token_id, "test_%08x", test_env_value++);
+			    (طویل)tv.tv_usec);
+	} ورنہ {
+		strbuf_addf(&token->token_id, "test_%08x", test_env_قدر++);
 	}
 
 	/*
@@ -446,59 +446,59 @@ static struct fsmonitor_token_data *fsmonitor_new_token_data(void)
 	 * reference point set.  Pin batch 0 to force early file system
 	 * events to accumulate.
 	 */
-	if (test_env_value)
-		batch->pinned_time = time(NULL);
+	اگر (test_env_قدر)
+		batch->pinned_وقت = وقت(تہی);
 
-	return token;
+	واپس token;
 }
 
-struct fsmonitor_batch *fsmonitor_batch__new(void)
+ساخت fsmonitor_batch *fsmonitor_batch__new(خالی)
 {
-	struct fsmonitor_batch *batch;
+	ساخت fsmonitor_batch *batch;
 
 	CALLOC_ARRAY(batch, 1);
 
-	return batch;
+	واپس batch;
 }
 
-void fsmonitor_batch__free_list(struct fsmonitor_batch *batch)
+خالی fsmonitor_batch__free_list(ساخت fsmonitor_batch *batch)
 {
-	while (batch) {
-		struct fsmonitor_batch *next = batch->next;
+	جب (batch) {
+		ساخت fsmonitor_batch *اگلا = batch->اگلا;
 
 		/*
 		 * The actual strings within the array of this batch
 		 * are interned, so we don't own them.  We only own
 		 * the array.
 		 */
-		free(batch->interned_paths);
-		free(batch);
+		آزاد(batch->interned_paths);
+		آزاد(batch);
 
-		batch = next;
+		batch = اگلا;
 	}
 }
 
-void fsmonitor_batch__add_path(struct fsmonitor_batch *batch,
-			       const char *path)
+خالی fsmonitor_batch_جوڑو_راستہ(ساخت fsmonitor_batch *batch,
+			       ثابت حرف *راستہ)
 {
-	const char *interned_path = strintern(path);
+	ثابت حرف *interned_راستہ = strintern(راستہ);
 
-	trace_printf_key(&trace_fsmonitor, "event: %s", interned_path);
+	trace_printf_کلید(&trace_fsmonitor, "event: %s", interned_راستہ);
 
 	ALLOC_GROW(batch->interned_paths, batch->nr + 1, batch->alloc);
-	batch->interned_paths[batch->nr++] = interned_path;
+	batch->interned_paths[batch->nr++] = interned_راستہ;
 }
 
-static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
-				     const struct fsmonitor_batch *batch_src)
+ساکن خالی fsmonitor_batch__combine(ساخت fsmonitor_batch *batch_dest,
+				     ثابت ساخت fsmonitor_batch *batch_src)
 {
-	size_t k;
+	سائز_t k;
 
 	ALLOC_GROW(batch_dest->interned_paths,
 		   batch_dest->nr + batch_src->nr + 1,
 		   batch_dest->alloc);
 
-	for (k = 0; k < batch_src->nr; k++)
+	برائے (k = 0; k < batch_src->nr; k++)
 		batch_dest->interned_paths[batch_dest->nr++] =
 			batch_src->interned_paths[k];
 }
@@ -530,60 +530,60 @@ static void fsmonitor_batch__combine(struct fsmonitor_batch *batch_dest,
  * Return the obsolete portion of the list after we have removed it from
  * the official list so that the caller can free it after leaving the lock.
  */
-#define MY_TIME_DELAY_SECONDS (5 * 60) /* seconds */
+#تعریف_کرو MY_وقت_DELAY_SECONDS (5 * 60) /* seconds */
 
-static struct fsmonitor_batch *with_lock__truncate_old_batches(
-	struct fsmonitor_daemon_state *state,
-	const struct fsmonitor_batch *batch_marker)
+ساکن ساخت fsmonitor_batch *with_تالا_truncate_old_batches(
+	ساخت fsmonitor_daemon_state *state,
+	ثابت ساخت fsmonitor_batch *batch_marker)
 {
 	/* assert current thread holding state->main_lock */
 
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder;
+	ثابت ساخت fsmonitor_batch *batch;
+	ساخت fsmonitor_batch *remainder;
 
-	if (!batch_marker)
-		return NULL;
+	اگر (!batch_marker)
+		واپس تہی;
 
-	trace_printf_key(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
+	trace_printf_کلید(&trace_fsmonitor, "Truncate: mark (%"PRIu64",%"PRIu64")",
 			 batch_marker->batch_seq_nr,
-			 (uint64_t)batch_marker->pinned_time);
+			 (uint64_t)batch_marker->pinned_وقت);
 
-	for (batch = batch_marker; batch; batch = batch->next) {
-		time_t t;
+	برائے (batch = batch_marker; batch; batch = batch->اگلا) {
+		وقت_t t;
 
-		if (!batch->pinned_time) /* an overflow batch */
-			continue;
+		اگر (!batch->pinned_وقت) /* an overflow batch */
+			جاری;
 
-		t = batch->pinned_time + MY_TIME_DELAY_SECONDS;
-		if (t > batch_marker->pinned_time) /* too close to marker */
-			continue;
+		t = batch->pinned_وقت + MY_وقت_DELAY_SECONDS;
+		اگر (t > batch_marker->pinned_وقت) /* too close to marker */
+			جاری;
 
-		goto truncate_past_here;
+		جاؤ truncate_past_یہاں;
 	}
 
-	return NULL;
+	واپس تہی;
 
-truncate_past_here:
-	state->current_token_data->batch_tail = (struct fsmonitor_batch *)batch;
+truncate_past_یہاں:
+	state->current_token_ڈیٹا->batch_دم = (ساخت fsmonitor_batch *)batch;
 
-	remainder = ((struct fsmonitor_batch *)batch)->next;
-	((struct fsmonitor_batch *)batch)->next = NULL;
+	remainder = ((ساخت fsmonitor_batch *)batch)->اگلا;
+	((ساخت fsmonitor_batch *)batch)->اگلا = تہی;
 
-	return remainder;
+	واپس remainder;
 }
 
-static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
+ساکن خالی fsmonitor_free_token_ڈیٹا(ساخت fsmonitor_token_ڈیٹا *token)
 {
-	if (!token)
-		return;
+	اگر (!token)
+		واپس;
 
-	assert(token->client_ref_count == 0);
+	أكد(token->client_ref_گنتی == 0);
 
 	strbuf_release(&token->token_id);
 
-	fsmonitor_batch__free_list(token->batch_head);
+	fsmonitor_batch__free_list(token->batch_سر);
 
-	free(token);
+	آزاد(token);
 }
 
 /*
@@ -605,38 +605,38 @@ static void fsmonitor_free_token_data(struct fsmonitor_token_data *token)
  * Either way, the old token data series is no longer associated with
  * our state data.
  */
-static void with_lock__do_force_resync(struct fsmonitor_daemon_state *state)
+ساکن خالی with_تالا_do_force_resync(ساخت fsmonitor_daemon_state *state)
 {
 	/* assert current thread holding state->main_lock */
 
-	struct fsmonitor_token_data *free_me = NULL;
-	struct fsmonitor_token_data *new_one = NULL;
+	ساخت fsmonitor_token_ڈیٹا *free_me = تہی;
+	ساخت fsmonitor_token_ڈیٹا *new_one = تہی;
 
-	new_one = fsmonitor_new_token_data();
+	new_one = fsmonitor_new_token_ڈیٹا();
 
-	if (state->current_token_data->client_ref_count == 0)
-		free_me = state->current_token_data;
-	state->current_token_data = new_one;
+	اگر (state->current_token_ڈیٹا->client_ref_گنتی == 0)
+		free_me = state->current_token_ڈیٹا;
+	state->current_token_ڈیٹا = new_one;
 
-	fsmonitor_free_token_data(free_me);
+	fsmonitor_free_token_ڈیٹا(free_me);
 
-	with_lock__abort_all_cookies(state);
+	with_تالا_abort_all_cookies(state);
 }
 
-void fsmonitor_force_resync(struct fsmonitor_daemon_state *state)
+خالی fsmonitor_force_resync(ساخت fsmonitor_daemon_state *state)
 {
-	pthread_mutex_lock(&state->main_lock);
-	with_lock__do_force_resync(state);
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_تالا(&state->main_تالا);
+	with_تالا_do_force_resync(state);
+	pthread_mutex_unlock(&state->main_تالا);
 }
 
 /*
  * Format an opaque token string to send to the client.
  */
-static void with_lock__format_response_token(
-	struct strbuf *response_token,
-	const struct strbuf *response_token_id,
-	const struct fsmonitor_batch *batch)
+ساکن خالی with_تالا_format_response_token(
+	ساخت strbuf *response_token,
+	ثابت ساخت strbuf *response_token_id,
+	ثابت ساخت fsmonitor_batch *batch)
 {
 	/* assert current thread holding state->main_lock */
 
@@ -649,52 +649,52 @@ static void with_lock__format_response_token(
  * Parse an opaque token from the client.
  * Returns -1 on error.
  */
-static int fsmonitor_parse_client_token(const char *buf_token,
-					struct strbuf *requested_token_id,
+ساکن صحیح fsmonitor_parse_client_token(ثابت حرف *buf_token,
+					ساخت strbuf *requested_token_id,
 					uint64_t *seq_nr)
 {
-	const char *p;
-	char *p_end;
+	ثابت حرف *p;
+	حرف *p_انتہا;
 
 	strbuf_reset(requested_token_id);
 	*seq_nr = 0;
 
-	if (!skip_prefix(buf_token, "builtin:", &p))
-		return -1;
+	اگر (!skip_سابقہ(buf_token, "builtin:", &p))
+		واپس -1;
 
-	while (*p && *p != ':')
+	جب (*p && *p != ':')
 		strbuf_addch(requested_token_id, *p++);
-	if (!*p++)
-		return -1;
+	اگر (!*p++)
+		واپس -1;
 
-	*seq_nr = (uint64_t)strtoumax(p, &p_end, 10);
-	if (*p_end)
-		return -1;
+	*seq_nr = (uint64_t)strtoumax(p, &p_انتہا, 10);
+	اگر (*p_انتہا)
+		واپس -1;
 
-	return 0;
+	واپس 0;
 }
 
-static int do_handle_client(struct fsmonitor_daemon_state *state,
-			    const char *command,
-			    ipc_server_reply_cb *reply,
-			    struct ipc_server_reply_data *reply_data)
+ساکن صحیح do_handle_client(ساخت fsmonitor_daemon_state *state,
+			    ثابت حرف *command,
+			    ipc_server_جواب_cb *جواب,
+			    ساخت ipc_server_جواب_ڈیٹا *جواب_ڈیٹا)
 {
-	struct fsmonitor_token_data *token_data = NULL;
-	struct strbuf response_token = STRBUF_INIT;
-	struct strbuf requested_token_id = STRBUF_INIT;
-	struct strbuf payload = STRBUF_INIT;
+	ساخت fsmonitor_token_ڈیٹا *token_ڈیٹا = تہی;
+	ساخت strbuf response_token = STRBUF_INIT;
+	ساخت strbuf requested_token_id = STRBUF_INIT;
+	ساخت strbuf payload = STRBUF_INIT;
 	uint64_t requested_oldest_seq_nr = 0;
-	uint64_t total_response_len = 0;
-	const char *p;
-	const struct fsmonitor_batch *batch_head;
-	const struct fsmonitor_batch *batch;
-	struct fsmonitor_batch *remainder = NULL;
-	intmax_t count = 0, duplicates = 0;
-	struct strset shown = STRSET_INIT;
-	int do_trivial = 0;
-	int do_flush = 0;
-	int do_cookie = 0;
-	enum fsmonitor_cookie_item_result cookie_result;
+	uint64_t کل_response_len = 0;
+	ثابت حرف *p;
+	ثابت ساخت fsmonitor_batch *batch_سر;
+	ثابت ساخت fsmonitor_batch *batch;
+	ساخت fsmonitor_batch *remainder = تہی;
+	intmax_t گنتی = 0, duplicates = 0;
+	ساخت strset shown = STRSET_INIT;
+	صحیح do_trivial = 0;
+	صحیح do_flush = 0;
+	صحیح do_cookie = 0;
+	شمار fsmonitor_cookie_شے_نتیجہ cookie_نتیجہ;
 
 	/*
 	 * We expect `command` to be of the form:
@@ -705,7 +705,7 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 *            | <V2-opaque-fsmonitor-token> NUL
 	 */
 
-	if (!strcmp(command, "quit")) {
+	اگر (!strcmp(command, "quit")) {
 		/*
 		 * A client has requested over the socket/pipe that the
 		 * daemon shutdown.
@@ -716,9 +716,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		 *
 		 * There is no reply to the client.
 		 */
-		return SIMPLE_IPC_QUIT;
+		واپس SIMPLE_IPC_QUIT;
 
-	} else if (!strcmp(command, "flush")) {
+	} ورنہ اگر (!strcmp(command, "flush")) {
 		/*
 		 * Flush all of our cached data and generate a new token
 		 * just like if we lost sync with the filesystem.
@@ -728,31 +728,31 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		do_flush = 1;
 		do_trivial = 1;
 
-	} else if (!skip_prefix(command, "builtin:", &p)) {
+	} ورنہ اگر (!skip_سابقہ(command, "builtin:", &p)) {
 		/* assume V1 timestamp or garbage */
 
-		char *p_end;
+		حرف *p_انتہا;
 
-		strtoumax(command, &p_end, 10);
-		trace_printf_key(&trace_fsmonitor,
-				 ((*p_end) ?
+		strtoumax(command, &p_انتہا, 10);
+		trace_printf_کلید(&trace_fsmonitor,
+				 ((*p_انتہا) ?
 				  "fsmonitor: invalid command line '%s'" :
 				  "fsmonitor: unsupported V1 protocol '%s'"),
 				 command);
 		do_trivial = 1;
 		do_cookie = 1;
 
-	} else {
+	} ورنہ {
 		/* We have "builtin:*" */
-		if (fsmonitor_parse_client_token(command, &requested_token_id,
+		اگر (fsmonitor_parse_client_token(command, &requested_token_id,
 						 &requested_oldest_seq_nr)) {
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_کلید(&trace_fsmonitor,
 					 "fsmonitor: invalid V2 protocol token '%s'",
 					 command);
 			do_trivial = 1;
 			do_cookie = 1;
 
-		} else {
+		} ورنہ {
 			/*
 			 * We have a V2 valid token:
 			 *     "builtin:<token_id>:<seq_nr>"
@@ -761,9 +761,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 		}
 	}
 
-	pthread_mutex_lock(&state->main_lock);
+	pthread_mutex_تالا(&state->main_تالا);
 
-	if (!state->current_token_data)
+	اگر (!state->current_token_ڈیٹا)
 		BUG("fsmonitor state does not have a current token");
 
 	/*
@@ -781,17 +781,17 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * assume that there might be some very, very recent activity
 	 * on the FS still in flight.
 	 */
-	if (do_cookie) {
-		cookie_result = with_lock__wait_for_cookie(state);
-		if (cookie_result != FCIR_SEEN) {
+	اگر (do_cookie) {
+		cookie_نتیجہ = with_تالا_wait_for_cookie(state);
+		اگر (cookie_نتیجہ != FCIR_نظر_آیا) {
 			error(_("fsmonitor: cookie_result '%d' != SEEN"),
-			      cookie_result);
+			      cookie_نتیجہ);
 			do_trivial = 1;
 		}
 	}
 
-	if (do_flush)
-		with_lock__do_force_resync(state);
+	اگر (do_flush)
+		with_تالا_do_force_resync(state);
 
 	/*
 	 * We mark the current head of the batch list as "pinned" so
@@ -799,9 +799,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * (and prevent any more paths from being added to it) from
 	 * now on.
 	 */
-	token_data = state->current_token_data;
-	batch_head = token_data->batch_head;
-	((struct fsmonitor_batch *)batch_head)->pinned_time = time(NULL);
+	token_ڈیٹا = state->current_token_ڈیٹا;
+	batch_سر = token_ڈیٹا->batch_سر;
+	((ساخت fsmonitor_batch *)batch_سر)->pinned_وقت = وقت(تہی);
 
 	/*
 	 * FSMonitor Protocol V2 requires that we send a response header
@@ -810,30 +810,30 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * head batch so that future requests from a client will be relative
 	 * to it.
 	 */
-	with_lock__format_response_token(&response_token,
-					 &token_data->token_id, batch_head);
+	with_تالا_format_response_token(&response_token,
+					 &token_ڈیٹا->token_id, batch_سر);
 
-	reply(reply_data, response_token.buf, response_token.len + 1);
-	total_response_len += response_token.len + 1;
+	جواب(جواب_ڈیٹا, response_token.buf, response_token.len + 1);
+	کل_response_len += response_token.len + 1;
 
-	trace2_data_string("fsmonitor", the_repository, "response/token",
+	trace2_ڈیٹا_string("fsmonitor", the_repository, "response/token",
 			   response_token.buf);
-	trace_printf_key(&trace_fsmonitor, "response token: %s",
+	trace_printf_کلید(&trace_fsmonitor, "response token: %s",
 			 response_token.buf);
 
-	if (!do_trivial) {
-		if (strcmp(requested_token_id.buf, token_data->token_id.buf)) {
+	اگر (!do_trivial) {
+		اگر (strcmp(requested_token_id.buf, token_ڈیٹا->token_id.buf)) {
 			/*
 			 * The client last spoke to a different daemon
 			 * instance -OR- the daemon had to resync with
 			 * the filesystem (and lost events), so reject.
 			 */
-			trace2_data_string("fsmonitor", the_repository,
+			trace2_ڈیٹا_string("fsmonitor", the_repository,
 					   "response/token", "different");
 			do_trivial = 1;
 
-		} else if (requested_oldest_seq_nr <
-			   token_data->batch_tail->batch_seq_nr) {
+		} ورنہ اگر (requested_oldest_seq_nr <
+			   token_ڈیٹا->batch_دم->batch_seq_nr) {
 			/*
 			 * The client wants older events than we have for
 			 * this token_id.  This means that the end of our
@@ -841,21 +841,21 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * client a complete snapshot relative to their
 			 * request.
 			 */
-			trace_printf_key(&trace_fsmonitor,
+			trace_printf_کلید(&trace_fsmonitor,
 					 "client requested truncated data");
 			do_trivial = 1;
 		}
 	}
 
-	if (do_trivial) {
-		pthread_mutex_unlock(&state->main_lock);
+	اگر (do_trivial) {
+		pthread_mutex_unlock(&state->main_تالا);
 
-		reply(reply_data, "/", 2);
+		جواب(جواب_ڈیٹا, "/", 2);
 
-		trace2_data_intmax("fsmonitor", the_repository,
+		trace2_ڈیٹا_intmax("fsmonitor", the_repository,
 				   "response/trivial", 1);
 
-		goto cleanup;
+		جاؤ cleanup;
 	}
 
 	/*
@@ -870,9 +870,9 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * AND it allows the listener thread to do a token-reset
 	 * (and install a new `current_token_data`).
 	 */
-	token_data->client_ref_count++;
+	token_ڈیٹا->client_ref_گنتی++;
 
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_unlock(&state->main_تالا);
 
 	/*
 	 * The client request is relative to the token that they sent,
@@ -886,52 +886,52 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 	 * hash table.  Currently, we're still comparing the string
 	 * values.
 	 */
-	strset_init_with_options(&shown, NULL, 0);
-	for (batch = batch_head;
+	strset_init_with_options(&shown, تہی, 0);
+	برائے (batch = batch_سر;
 	     batch && batch->batch_seq_nr > requested_oldest_seq_nr;
-	     batch = batch->next) {
-		size_t k;
+	     batch = batch->اگلا) {
+		سائز_t k;
 
-		for (k = 0; k < batch->nr; k++) {
-			const char *s = batch->interned_paths[k];
-			size_t s_len;
+		برائے (k = 0; k < batch->nr; k++) {
+			ثابت حرف *s = batch->interned_paths[k];
+			سائز_t s_len;
 
-			if (!strset_add(&shown, s))
+			اگر (!strset_جوڑو(&shown, s))
 				duplicates++;
-			else {
-				trace_printf_key(&trace_fsmonitor,
+			ورنہ {
+				trace_printf_کلید(&trace_fsmonitor,
 						 "send[%"PRIuMAX"]: %s",
-						 count, s);
+						 گنتی, s);
 
 				/* Each path gets written with a trailing NUL */
-				s_len = strlen(s) + 1;
+				s_len = لڑی_لمبائی(s) + 1;
 
-				if (payload.len + s_len >=
-				    LARGE_PACKET_DATA_MAX) {
-					reply(reply_data, payload.buf,
+				اگر (payload.len + s_len >=
+				    LARGE_PACKET_ڈیٹا_MAX) {
+					جواب(جواب_ڈیٹا, payload.buf,
 					      payload.len);
-					total_response_len += payload.len;
+					کل_response_len += payload.len;
 					strbuf_reset(&payload);
 				}
 
-				strbuf_add(&payload, s, s_len);
-				count++;
+				strbuf_جوڑو(&payload, s, s_len);
+				گنتی++;
 			}
 		}
 	}
 
-	if (payload.len) {
-		reply(reply_data, payload.buf, payload.len);
-		total_response_len += payload.len;
+	اگر (payload.len) {
+		جواب(جواب_ڈیٹا, payload.buf, payload.len);
+		کل_response_len += payload.len;
 	}
 
-	pthread_mutex_lock(&state->main_lock);
+	pthread_mutex_تالا(&state->main_تالا);
 
-	if (token_data->client_ref_count > 0)
-		token_data->client_ref_count--;
+	اگر (token_ڈیٹا->client_ref_گنتی > 0)
+		token_ڈیٹا->client_ref_گنتی--;
 
-	if (token_data->client_ref_count == 0) {
-		if (token_data != state->current_token_data) {
+	اگر (token_ڈیٹا->client_ref_گنتی == 0) {
+		اگر (token_ڈیٹا != state->current_token_ڈیٹا) {
 			/*
 			 * The listener thread did a token-reset while we were
 			 * walking the batch list.  Therefore, this token is
@@ -939,8 +939,8 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * the last reader thread using this token, we own
 			 * that work.
 			 */
-			fsmonitor_free_token_data(token_data);
-		} else if (batch) {
+			fsmonitor_free_token_ڈیٹا(token_ڈیٹا);
+		} ورنہ اگر (batch) {
 			/*
 			 * We are holding the lock and are the only
 			 * reader of the ref-counted portion of the
@@ -953,19 +953,19 @@ static int do_handle_client(struct fsmonitor_daemon_state *state,
 			 * end-point sequence number.  See if the tail
 			 * end of the list is obsolete.
 			 */
-			remainder = with_lock__truncate_old_batches(state,
+			remainder = with_تالا_truncate_old_batches(state,
 								    batch);
 		}
 	}
 
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_unlock(&state->main_تالا);
 
-	if (remainder)
+	اگر (remainder)
 		fsmonitor_batch__free_list(remainder);
 
-	trace2_data_intmax("fsmonitor", the_repository, "response/length", total_response_len);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/files", count);
-	trace2_data_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
+	trace2_ڈیٹا_intmax("fsmonitor", the_repository, "response/length", کل_response_len);
+	trace2_ڈیٹا_intmax("fsmonitor", the_repository, "response/count/files", گنتی);
+	trace2_ڈیٹا_intmax("fsmonitor", the_repository, "response/count/duplicates", duplicates);
 
 cleanup:
 	strset_clear(&shown);
@@ -973,120 +973,120 @@ cleanup:
 	strbuf_release(&requested_token_id);
 	strbuf_release(&payload);
 
-	return 0;
+	واپس 0;
 }
 
-static ipc_server_application_cb handle_client;
+ساکن ipc_server_application_cb handle_client;
 
-static int handle_client(void *data,
-			 const char *command, size_t command_len,
-			 ipc_server_reply_cb *reply,
-			 struct ipc_server_reply_data *reply_data)
+ساکن صحیح handle_client(خالی *ڈیٹا,
+			 ثابت حرف *command, سائز_t command_len,
+			 ipc_server_جواب_cb *جواب,
+			 ساخت ipc_server_جواب_ڈیٹا *جواب_ڈیٹا)
 {
-	struct fsmonitor_daemon_state *state = data;
-	int result;
+	ساخت fsmonitor_daemon_state *state = ڈیٹا;
+	صحیح نتیجہ;
 
 	/*
 	 * The Simple IPC API now supports {char*, len} arguments, but
 	 * FSMonitor always uses proper null-terminated strings, so
 	 * we can ignore the command_len argument.  (Trust, but verify.)
 	 */
-	if (command_len != strlen(command))
+	اگر (command_len != لڑی_لمبائی(command))
 		BUG("FSMonitor assumes text messages");
 
-	trace_printf_key(&trace_fsmonitor, "requested token: %s", command);
+	trace_printf_کلید(&trace_fsmonitor, "requested token: %s", command);
 
 	trace2_region_enter("fsmonitor", "handle_client", the_repository);
-	trace2_data_string("fsmonitor", the_repository, "request", command);
+	trace2_ڈیٹا_string("fsmonitor", the_repository, "request", command);
 
-	result = do_handle_client(state, command, reply, reply_data);
+	نتیجہ = do_handle_client(state, command, جواب, جواب_ڈیٹا);
 
 	trace2_region_leave("fsmonitor", "handle_client", the_repository);
 
-	return result;
+	واپس نتیجہ;
 }
 
-#define FSMONITOR_DIR           "fsmonitor--daemon"
-#define FSMONITOR_COOKIE_DIR    "cookies"
-#define FSMONITOR_COOKIE_PREFIX (FSMONITOR_DIR "/" FSMONITOR_COOKIE_DIR "/")
+#تعریف_کرو FSMONITOR_DIR           "fsmonitor--daemon"
+#تعریف_کرو FSMONITOR_COOKIE_DIR    "cookies"
+#تعریف_کرو FSMONITOR_COOKIE_سابقہ (FSMONITOR_DIR "/" FSMONITOR_COOKIE_DIR "/")
 
-enum fsmonitor_path_type fsmonitor_classify_path_workdir_relative(
-	const char *rel)
+شمار fsmonitor_راستہ_type fsmonitor_classify_راستہ_workdir_relative(
+	ثابت حرف *rel)
 {
-	if (fspathncmp(rel, ".git", 4))
-		return IS_WORKDIR_PATH;
+	اگر (fspathncmp(rel, ".git", 4))
+		واپس IS_WORKDIR_راستہ;
 	rel += 4;
 
-	if (!*rel)
-		return IS_DOT_GIT;
-	if (*rel != '/')
-		return IS_WORKDIR_PATH; /* e.g. .gitignore */
+	اگر (!*rel)
+		واپس IS_DOT_GIT;
+	اگر (*rel != '/')
+		واپس IS_WORKDIR_راستہ; /* e.g. .gitignore */
 	rel++;
 
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
-			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_DOT_GIT_WITH_COOKIE_PREFIX;
+	اگر (!fspathncmp(rel, FSMONITOR_COOKIE_سابقہ,
+			لڑی_لمبائی(FSMONITOR_COOKIE_سابقہ)))
+		واپس IS_INSIDE_DOT_GIT_WITH_COOKIE_سابقہ;
 
-	return IS_INSIDE_DOT_GIT;
+	واپس IS_INSIDE_DOT_GIT;
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_gitdir_relative(
-	const char *rel)
+شمار fsmonitor_راستہ_type fsmonitor_classify_راستہ_gitdir_relative(
+	ثابت حرف *rel)
 {
-	if (!fspathncmp(rel, FSMONITOR_COOKIE_PREFIX,
-			strlen(FSMONITOR_COOKIE_PREFIX)))
-		return IS_INSIDE_GITDIR_WITH_COOKIE_PREFIX;
+	اگر (!fspathncmp(rel, FSMONITOR_COOKIE_سابقہ,
+			لڑی_لمبائی(FSMONITOR_COOKIE_سابقہ)))
+		واپس IS_INSIDE_GITDIR_WITH_COOKIE_سابقہ;
 
-	return IS_INSIDE_GITDIR;
+	واپس IS_INSIDE_GITDIR;
 }
 
-static enum fsmonitor_path_type try_classify_workdir_abs_path(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+ساکن شمار fsmonitor_راستہ_type try_classify_workdir_abs_راستہ(
+	ساخت fsmonitor_daemon_state *state,
+	ثابت حرف *راستہ)
 {
-	const char *rel;
+	ثابت حرف *rel;
 
-	if (fspathncmp(path, state->path_worktree_watch.buf,
-		       state->path_worktree_watch.len))
-		return IS_OUTSIDE_CONE;
+	اگر (fspathncmp(راستہ, state->راستہ_worktree_watch.buf,
+		       state->راستہ_worktree_watch.len))
+		واپس IS_OUTSIDE_CONE;
 
-	rel = path + state->path_worktree_watch.len;
+	rel = راستہ + state->راستہ_worktree_watch.len;
 
-	if (!*rel)
-		return IS_WORKDIR_PATH; /* it is the root dir exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	اگر (!*rel)
+		واپس IS_WORKDIR_راستہ; /* it is the root dir exactly */
+	اگر (*rel != '/')
+		واپس IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_workdir_relative(rel);
+	واپس fsmonitor_classify_راستہ_workdir_relative(rel);
 }
 
-enum fsmonitor_path_type fsmonitor_classify_path_absolute(
-	struct fsmonitor_daemon_state *state,
-	const char *path)
+شمار fsmonitor_راستہ_type fsmonitor_classify_راستہ_absolute(
+	ساخت fsmonitor_daemon_state *state,
+	ثابت حرف *راستہ)
 {
-	const char *rel;
-	enum fsmonitor_path_type t;
+	ثابت حرف *rel;
+	شمار fsmonitor_راستہ_type t;
 
-	t = try_classify_workdir_abs_path(state, path);
-	if (state->nr_paths_watching == 1)
-		return t;
-	if (t != IS_OUTSIDE_CONE)
-		return t;
+	t = try_classify_workdir_abs_راستہ(state, راستہ);
+	اگر (state->nr_paths_watching == 1)
+		واپس t;
+	اگر (t != IS_OUTSIDE_CONE)
+		واپس t;
 
-	if (fspathncmp(path, state->path_gitdir_watch.buf,
-		       state->path_gitdir_watch.len))
-		return IS_OUTSIDE_CONE;
+	اگر (fspathncmp(راستہ, state->راستہ_gitdir_watch.buf,
+		       state->راستہ_gitdir_watch.len))
+		واپس IS_OUTSIDE_CONE;
 
-	rel = path + state->path_gitdir_watch.len;
+	rel = راستہ + state->راستہ_gitdir_watch.len;
 
-	if (!*rel)
-		return IS_GITDIR; /* it is the <gitdir> exactly */
-	if (*rel != '/')
-		return IS_OUTSIDE_CONE;
+	اگر (!*rel)
+		واپس IS_GITDIR; /* it is the <gitdir> exactly */
+	اگر (*rel != '/')
+		واپس IS_OUTSIDE_CONE;
 	rel++;
 
-	return fsmonitor_classify_path_gitdir_relative(rel);
+	واپس fsmonitor_classify_راستہ_gitdir_relative(rel);
 }
 
 /*
@@ -1096,24 +1096,24 @@ enum fsmonitor_path_type fsmonitor_classify_path_absolute(
  * to just keep growing and growing with realloc, so we insert an arbitrary
  * limit.
  */
-#define MY_COMBINE_LIMIT (1024)
+#تعریف_کرو MY_COMBINE_حد_بندی (1024)
 
-void fsmonitor_publish(struct fsmonitor_daemon_state *state,
-		       struct fsmonitor_batch *batch,
-		       const struct string_list *cookie_names)
+خالی fsmonitor_publish(ساخت fsmonitor_daemon_state *state,
+		       ساخت fsmonitor_batch *batch,
+		       ثابت ساخت string_list *cookie_نام)
 {
-	if (!batch && !cookie_names->nr)
-		return;
+	اگر (!batch && !cookie_نام->nr)
+		واپس;
 
-	pthread_mutex_lock(&state->main_lock);
+	pthread_mutex_تالا(&state->main_تالا);
 
-	if (batch) {
-		struct fsmonitor_batch *head;
+	اگر (batch) {
+		ساخت fsmonitor_batch *سر;
 
-		head = state->current_token_data->batch_head;
-		if (!head) {
+		سر = state->current_token_ڈیٹا->batch_سر;
+		اگر (!سر) {
 			BUG("token does not have batch");
-		} else if (head->pinned_time) {
+		} ورنہ اگر (سر->pinned_وقت) {
 			/*
 			 * We cannot alter the current batch list
 			 * because:
@@ -1130,17 +1130,17 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			 * So, we can only prepend a new batch onto
 			 * the front of the list.
 			 */
-			batch->batch_seq_nr = head->batch_seq_nr + 1;
-			batch->next = head;
-			state->current_token_data->batch_head = batch;
-		} else if (!head->batch_seq_nr) {
+			batch->batch_seq_nr = سر->batch_seq_nr + 1;
+			batch->اگلا = سر;
+			state->current_token_ڈیٹا->batch_سر = batch;
+		} ورنہ اگر (!سر->batch_seq_nr) {
 			/*
 			 * Batch 0 is unpinned.  See the note in
 			 * `fsmonitor_new_token_data()` about why we
 			 * don't need to accumulate these paths.
 			 */
 			fsmonitor_batch__free_list(batch);
-		} else if (head->nr + batch->nr > MY_COMBINE_LIMIT) {
+		} ورنہ اگر (سر->nr + batch->nr > MY_COMBINE_حد_بندی) {
 			/*
 			 * The head batch in the list has never been
 			 * transmitted to a client, but folding the
@@ -1148,66 +1148,66 @@ void fsmonitor_publish(struct fsmonitor_daemon_state *state,
 			 * exceed our arbitrary limit, so just prepend
 			 * the new batch onto the list.
 			 */
-			batch->batch_seq_nr = head->batch_seq_nr + 1;
-			batch->next = head;
-			state->current_token_data->batch_head = batch;
-		} else {
+			batch->batch_seq_nr = سر->batch_seq_nr + 1;
+			batch->اگلا = سر;
+			state->current_token_ڈیٹا->batch_سر = batch;
+		} ورنہ {
 			/*
 			 * We are free to add the paths in the given
 			 * batch onto the end of the current head batch.
 			 */
-			fsmonitor_batch__combine(head, batch);
+			fsmonitor_batch__combine(سر, batch);
 			fsmonitor_batch__free_list(batch);
 		}
 	}
 
-	if (cookie_names->nr)
-		with_lock__mark_cookies_seen(state, cookie_names);
+	اگر (cookie_نام->nr)
+		with_تالا_mark_cookies_نظر_آیا(state, cookie_نام);
 
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_unlock(&state->main_تالا);
 }
 
-static void *fsm_health__thread_proc(void *_state)
+ساکن خالی *fsm_health__thread_proc(خالی *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	ساخت fsmonitor_daemon_state *state = _state;
 
-	trace2_thread_start("fsm-health");
+	trace2_thread_آغاز("fsm-health");
 
 	fsm_health__loop(state);
 
 	trace2_thread_exit();
-	return NULL;
+	واپس تہی;
 }
 
-static void *fsm_listen__thread_proc(void *_state)
+ساکن خالی *fsm_listen__thread_proc(خالی *_state)
 {
-	struct fsmonitor_daemon_state *state = _state;
+	ساخت fsmonitor_daemon_state *state = _state;
 
-	trace2_thread_start("fsm-listen");
+	trace2_thread_آغاز("fsm-listen");
 
-	trace_printf_key(&trace_fsmonitor, "Watching: worktree '%s'",
-			 state->path_worktree_watch.buf);
-	if (state->nr_paths_watching > 1)
-		trace_printf_key(&trace_fsmonitor, "Watching: gitdir '%s'",
-				 state->path_gitdir_watch.buf);
+	trace_printf_کلید(&trace_fsmonitor, "Watching: worktree '%s'",
+			 state->راستہ_worktree_watch.buf);
+	اگر (state->nr_paths_watching > 1)
+		trace_printf_کلید(&trace_fsmonitor, "Watching: gitdir '%s'",
+				 state->راستہ_gitdir_watch.buf);
 
 	fsm_listen__loop(state);
 
-	pthread_mutex_lock(&state->main_lock);
-	if (state->current_token_data &&
-	    state->current_token_data->client_ref_count == 0)
-		fsmonitor_free_token_data(state->current_token_data);
-	state->current_token_data = NULL;
-	pthread_mutex_unlock(&state->main_lock);
+	pthread_mutex_تالا(&state->main_تالا);
+	اگر (state->current_token_ڈیٹا &&
+	    state->current_token_ڈیٹا->client_ref_گنتی == 0)
+		fsmonitor_free_token_ڈیٹا(state->current_token_ڈیٹا);
+	state->current_token_ڈیٹا = تہی;
+	pthread_mutex_unlock(&state->main_تالا);
 
 	trace2_thread_exit();
-	return NULL;
+	واپس تہی;
 }
 
-static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
+ساکن صحیح fsmonitor_تسلسل_daemon_1(ساخت fsmonitor_daemon_state *state)
 {
-	struct ipc_server_opts ipc_opts = {
-		.nr_threads = fsmonitor__ipc_threads,
+	ساخت ipc_server_opts ipc_opts = {
+		.nr_دھاگے = fsmonitor_ipc_دھاگے,
 
 		/*
 		 * We know that there are no other active threads yet,
@@ -1217,42 +1217,42 @@ static int fsmonitor_run_daemon_1(struct fsmonitor_daemon_state *state)
 		 */
 		.uds_disallow_chdir = 0
 	};
-	int health_started = 0;
-	int listener_started = 0;
-	int err = 0;
+	صحیح health_started = 0;
+	صحیح listener_started = 0;
+	صحیح err = 0;
 
 	/*
 	 * Start the IPC thread pool before the we've started the file
 	 * system event listener thread so that we have the IPC handle
 	 * before we need it.
 	 */
-	if (ipc_server_init_async(&state->ipc_server_data,
-				  state->path_ipc.buf, &ipc_opts,
+	اگر (ipc_server_init_async(&state->ipc_server_ڈیٹا,
+				  state->راستہ_ipc.buf, &ipc_opts,
 				  handle_client, state))
-		return error_errno(
+		واپس error_errno(
 			_("could not start IPC thread pool on '%s'"),
-			state->path_ipc.buf);
+			state->راستہ_ipc.buf);
 
 	/*
 	 * Start the fsmonitor listener thread to collect filesystem
 	 * events.
 	 */
-	if (pthread_create(&state->listener_thread, NULL,
+	اگر (pthread_create(&state->listener_thread, تہی,
 			   fsm_listen__thread_proc, state)) {
-		ipc_server_stop_async(state->ipc_server_data);
+		ipc_server_stop_async(state->ipc_server_ڈیٹا);
 		err = error(_("could not start fsmonitor listener thread"));
-		goto cleanup;
+		جاؤ cleanup;
 	}
 	listener_started = 1;
 
 	/*
 	 * Start the health thread to watch over our process.
 	 */
-	if (pthread_create(&state->health_thread, NULL,
+	اگر (pthread_create(&state->health_thread, تہی,
 			   fsm_health__thread_proc, state)) {
-		ipc_server_stop_async(state->ipc_server_data);
+		ipc_server_stop_async(state->ipc_server_ڈیٹا);
 		err = error(_("could not start fsmonitor health thread"));
-		goto cleanup;
+		جاؤ cleanup;
 	}
 	health_started = 1;
 
@@ -1266,57 +1266,57 @@ cleanup:
 	 * Wait for the IPC thread pool to shutdown (whether by client
 	 * request, from filesystem activity, or an error).
 	 */
-	ipc_server_await(state->ipc_server_data);
+	ipc_server_await(state->ipc_server_ڈیٹا);
 
 	/*
 	 * The fsmonitor listener thread may have received a shutdown
 	 * event from the IPC thread pool, but it doesn't hurt to tell
 	 * it again.  And wait for it to shutdown.
 	 */
-	if (listener_started) {
+	اگر (listener_started) {
 		fsm_listen__stop_async(state);
-		pthread_join(state->listener_thread, NULL);
+		pthread_join(state->listener_thread, تہی);
 	}
 
-	if (health_started) {
+	اگر (health_started) {
 		fsm_health__stop_async(state);
-		pthread_join(state->health_thread, NULL);
+		pthread_join(state->health_thread, تہی);
 	}
 
-	if (err)
-		return err;
-	if (state->listen_error_code)
-		return state->listen_error_code;
-	if (state->health_error_code)
-		return state->health_error_code;
-	return 0;
+	اگر (err)
+		واپس err;
+	اگر (state->listen_error_رمز)
+		واپس state->listen_error_رمز;
+	اگر (state->health_error_رمز)
+		واپس state->health_error_رمز;
+	واپس 0;
 }
 
-static int fsmonitor_run_daemon(void)
+ساکن صحیح fsmonitor_تسلسل_daemon(خالی)
 {
-	struct fsmonitor_daemon_state state;
-	const char *home;
-	int err;
+	ساخت fsmonitor_daemon_state state;
+	ثابت حرف *home;
+	صحیح err;
 
-	memset(&state, 0, sizeof(state));
+	memset(&state, 0, حجم(state));
 
-	hashmap_init(&state.cookies, cookies_cmp, NULL, 0);
-	pthread_mutex_init(&state.main_lock, NULL);
-	pthread_cond_init(&state.cookies_cond, NULL);
-	state.listen_error_code = 0;
-	state.health_error_code = 0;
-	state.current_token_data = fsmonitor_new_token_data();
+	hashmap_init(&state.cookies, cookies_cmp, تہی, 0);
+	pthread_mutex_init(&state.main_تالا, تہی);
+	pthread_cond_init(&state.cookies_cond, تہی);
+	state.listen_error_رمز = 0;
+	state.health_error_رمز = 0;
+	state.current_token_ڈیٹا = fsmonitor_new_token_ڈیٹا();
 
 	/* Prepare to (recursively) watch the <worktree-root> directory. */
-	strbuf_init(&state.path_worktree_watch, 0);
-	strbuf_addstr(&state.path_worktree_watch,
-		      absolute_path(repo_get_work_tree(the_repository)));
+	strbuf_init(&state.راستہ_worktree_watch, 0);
+	strbuf_addstr(&state.راستہ_worktree_watch,
+		      absolute_راستہ(repo_get_work_درخت(the_repository)));
 	state.nr_paths_watching = 1;
 
 	strbuf_init(&state.alias.alias, 0);
-	strbuf_init(&state.alias.points_to, 0);
-	if ((err = fsmonitor__get_alias(state.path_worktree_watch.buf, &state.alias)))
-		goto done;
+	strbuf_init(&state.alias.points_مقصد, 0);
+	اگر ((err = fsmonitor__get_alias(state.راستہ_worktree_watch.buf, &state.alias)))
+		جاؤ مکمل;
 
 	/*
 	 * We create and delete cookie files somewhere inside the .git
@@ -1325,14 +1325,14 @@ static int fsmonitor_run_daemon(void)
 	 * cone of <worktree-root>, so set up a second watch to watch
 	 * the <gitdir> so that we get events for the cookie files.
 	 */
-	strbuf_init(&state.path_gitdir_watch, 0);
-	strbuf_addbuf(&state.path_gitdir_watch, &state.path_worktree_watch);
-	strbuf_addstr(&state.path_gitdir_watch, "/.git");
-	if (!is_directory(state.path_gitdir_watch.buf)) {
-		strbuf_reset(&state.path_gitdir_watch);
-		strbuf_addstr(&state.path_gitdir_watch,
-			      absolute_path(repo_get_git_dir(the_repository)));
-		strbuf_strip_suffix(&state.path_gitdir_watch, "/.");
+	strbuf_init(&state.راستہ_gitdir_watch, 0);
+	strbuf_addbuf(&state.راستہ_gitdir_watch, &state.راستہ_worktree_watch);
+	strbuf_addstr(&state.راستہ_gitdir_watch, "/.git");
+	اگر (!is_directory(state.راستہ_gitdir_watch.buf)) {
+		strbuf_reset(&state.راستہ_gitdir_watch);
+		strbuf_addstr(&state.راستہ_gitdir_watch,
+			      absolute_راستہ(repo_get_git_dir(the_repository)));
+		strbuf_strip_suffix(&state.راستہ_gitdir_watch, "/.");
 		state.nr_paths_watching = 2;
 	}
 
@@ -1361,18 +1361,18 @@ static int fsmonitor_run_daemon(void)
 	 * mtime of ".git/" and ".git/foo" from changing when a
 	 * cookie file is created.
 	 */
-	strbuf_init(&state.path_cookie_prefix, 0);
-	strbuf_addbuf(&state.path_cookie_prefix, &state.path_gitdir_watch);
+	strbuf_init(&state.راستہ_cookie_سابقہ, 0);
+	strbuf_addbuf(&state.راستہ_cookie_سابقہ, &state.راستہ_gitdir_watch);
 
-	strbuf_addch(&state.path_cookie_prefix, '/');
-	strbuf_addstr(&state.path_cookie_prefix, FSMONITOR_DIR);
-	mkdir(state.path_cookie_prefix.buf, 0777);
+	strbuf_addch(&state.راستہ_cookie_سابقہ, '/');
+	strbuf_addstr(&state.راستہ_cookie_سابقہ, FSMONITOR_DIR);
+	mkdir(state.راستہ_cookie_سابقہ.buf, 0777);
 
-	strbuf_addch(&state.path_cookie_prefix, '/');
-	strbuf_addstr(&state.path_cookie_prefix, FSMONITOR_COOKIE_DIR);
-	mkdir(state.path_cookie_prefix.buf, 0777);
+	strbuf_addch(&state.راستہ_cookie_سابقہ, '/');
+	strbuf_addstr(&state.راستہ_cookie_سابقہ, FSMONITOR_COOKIE_DIR);
+	mkdir(state.راستہ_cookie_سابقہ.buf, 0777);
 
-	strbuf_addch(&state.path_cookie_prefix, '/');
+	strbuf_addch(&state.راستہ_cookie_سابقہ, '/');
 
 	/*
 	 * We create a named-pipe or unix domain socket inside of the
@@ -1380,22 +1380,22 @@ static int fsmonitor_run_daemon(void)
 	 * pipe in the NPFS on the absolute path of the git
 	 * directory.)
 	 */
-	strbuf_init(&state.path_ipc, 0);
-	strbuf_addstr(&state.path_ipc,
-		absolute_path(fsmonitor_ipc__get_path(the_repository)));
+	strbuf_init(&state.راستہ_ipc, 0);
+	strbuf_addstr(&state.راستہ_ipc,
+		absolute_راستہ(fsmonitor_ipc_get_راستہ(the_repository)));
 
 	/*
 	 * Confirm that we can create platform-specific resources for the
 	 * filesystem listener before we bother starting all the threads.
 	 */
-	if (fsm_listen__ctor(&state)) {
+	اگر (fsm_listen__ctor(&state)) {
 		err = error(_("could not initialize listener thread"));
-		goto done;
+		جاؤ مکمل;
 	}
 
-	if (fsm_health__ctor(&state)) {
+	اگر (fsm_health__ctor(&state)) {
 		err = error(_("could not initialize health thread"));
-		goto done;
+		جاؤ مکمل;
 	}
 
 	/*
@@ -1412,41 +1412,41 @@ static int fsmonitor_run_daemon(void)
 	 * everything using absolute paths.
 	 */
 	home = getenv("HOME");
-	if (home && *home && chdir(home))
+	اگر (home && *home && chdir(home))
 		die_errno(_("could not cd home '%s'"), home);
 
-	err = fsmonitor_run_daemon_1(&state);
+	err = fsmonitor_تسلسل_daemon_1(&state);
 
-done:
-	fsmonitor_free_token_data(state.current_token_data);
-	state.current_token_data = NULL;
+مکمل:
+	fsmonitor_free_token_ڈیٹا(state.current_token_ڈیٹا);
+	state.current_token_ڈیٹا = تہی;
 	pthread_cond_destroy(&state.cookies_cond);
-	pthread_mutex_destroy(&state.main_lock);
+	pthread_mutex_destroy(&state.main_تالا);
 	{
-		struct hashmap_iter iter;
-		struct fsmonitor_cookie_item *cookie;
+		ساخت hashmap_iter iter;
+		ساخت fsmonitor_cookie_شے *cookie;
 
-		hashmap_for_each_entry(&state.cookies, &iter, cookie, entry)
-			free(cookie->name);
+		hashmap_for_each_اندراج(&state.cookies, &iter, cookie, اندراج_2)
+			آزاد(cookie->name);
 		hashmap_clear_and_free(&state.cookies,
-				       struct fsmonitor_cookie_item, entry);
+				       ساخت fsmonitor_cookie_شے, اندراج_2);
 	}
 	fsm_listen__dtor(&state);
 	fsm_health__dtor(&state);
 
-	ipc_server_free(state.ipc_server_data);
+	ipc_server_free(state.ipc_server_ڈیٹا);
 
-	strbuf_release(&state.path_worktree_watch);
-	strbuf_release(&state.path_gitdir_watch);
-	strbuf_release(&state.path_cookie_prefix);
-	strbuf_release(&state.path_ipc);
+	strbuf_release(&state.راستہ_worktree_watch);
+	strbuf_release(&state.راستہ_gitdir_watch);
+	strbuf_release(&state.راستہ_cookie_سابقہ);
+	strbuf_release(&state.راستہ_ipc);
 	strbuf_release(&state.alias.alias);
-	strbuf_release(&state.alias.points_to);
+	strbuf_release(&state.alias.points_مقصد);
 
-	return err;
+	واپس err;
 }
 
-static int try_to_run_foreground_daemon(int detach_console)
+ساکن صحیح try_مقصد_تسلسل_foreground_daemon(صحیح detach_console)
 {
 	/*
 	 * Technically, we don't need to probe for an existing daemon
@@ -1456,20 +1456,20 @@ static int try_to_run_foreground_daemon(int detach_console)
 	 * However, this method gives us a nicer error message for a
 	 * common error case.
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	اگر (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	اگر (fsmonitor__announce_startup) {
 		fprintf(stderr, _("running fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
 	}
 
-	if (detach_console) {
-#ifdef GIT_WINDOWS_NATIVE
+	اگر (detach_console) {
+#اگر_تعریف_شدہ GIT_WINDOWS_NATIVE
 		FreeConsole();
-#else
+#ورنہ
 		/*
 		 * Create a new session so that the daemon is detached
 		 * from the parent's process group.  This prevents
@@ -1477,43 +1477,43 @@ static int try_to_run_foreground_daemon(int detach_console)
 		 * from waiting on the daemon when they wait for a
 		 * foreground command that implicitly spawned it.
 		 */
-		if (setsid() == -1)
+		اگر (setsid() == -1)
 			warning_errno(_("setsid failed"));
-#endif
+#اگر_ختم
 	}
 
-	return !!fsmonitor_run_daemon();
+	واپس !!fsmonitor_تسلسل_daemon();
 }
 
-static start_bg_wait_cb bg_wait_cb;
+ساکن آغاز_bg_wait_cb bg_wait_cb;
 
-static int bg_wait_cb(const struct child_process *cp UNUSED,
-		      void *cb_data UNUSED)
+ساکن صحیح bg_wait_cb(ثابت ساخت بچہ_process *cp غیر_مستعمل,
+		      خالی *cb_ڈیٹا غیر_مستعمل)
 {
-	enum ipc_active_state s = fsmonitor_ipc__get_state();
+	شمار ipc_فعال_state s = fsmonitor_ipc__get_state();
 
-	switch (s) {
-	case IPC_STATE__LISTENING:
+	انتخاب (s) {
+	حالت IPC_STATE__LISTENING:
 		/* child is "ready" */
-		return 0;
+		واپس 0;
 
-	case IPC_STATE__NOT_LISTENING:
-	case IPC_STATE__PATH_NOT_FOUND:
+	حالت IPC_STATE__NOT_LISTENING:
+	حالت IPC_STATE_راستہ_NOT_ملا:
 		/* give child more time */
-		return 1;
+		واپس 1;
 
-	default:
-	case IPC_STATE__INVALID_PATH:
-	case IPC_STATE__OTHER_ERROR:
+	طےشدہ:
+	حالت IPC_STATE_INVALID_راستہ:
+	حالت IPC_STATE__OTHER_ERROR:
 		/* all the time in world won't help */
-		return -1;
+		واپس -1;
 	}
 }
 
-static int try_to_start_background_daemon(void)
+ساکن صحیح try_مقصد_آغاز_background_daemon(خالی)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	enum start_bg_result sbgr;
+	ساخت بچہ_process cp = بچہ_PROCESS_INIT;
+	شمار آغاز_bg_نتیجہ sbgr;
 
 	/*
 	 * Before we try to create a background daemon process, see
@@ -1523,11 +1523,11 @@ static int try_to_start_background_daemon(void)
 	 * of creating the background process (and not whether it
 	 * immediately exited).
 	 */
-	if (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
+	اگر (fsmonitor_ipc__get_state() == IPC_STATE__LISTENING)
 		die(_("fsmonitor--daemon is already running '%s'"),
 		    the_repository->worktree);
 
-	if (fsmonitor__announce_startup) {
+	اگر (fsmonitor__announce_startup) {
 		fprintf(stderr, _("starting fsmonitor-daemon in '%s'\n"),
 			the_repository->worktree);
 		fflush(stderr);
@@ -1535,68 +1535,68 @@ static int try_to_start_background_daemon(void)
 
 	cp.git_cmd = 1;
 
-	strvec_push(&cp.args, "fsmonitor--daemon");
-	strvec_push(&cp.args, "run");
-	strvec_push(&cp.args, "--detach");
-	strvec_pushf(&cp.args, "--ipc-threads=%d", fsmonitor__ipc_threads);
+	strvec_ڈالو(&cp.دلائل, "fsmonitor--daemon");
+	strvec_ڈالو(&cp.دلائل, "run");
+	strvec_ڈالو(&cp.دلائل, "--detach");
+	strvec_pushf(&cp.دلائل, "--ipc-threads=%d", fsmonitor_ipc_دھاگے);
 
 	cp.no_stdin = 1;
 	cp.no_stdout = 1;
 	cp.no_stderr = 1;
 	cp.close_fd_above_stderr = 1;
 
-	sbgr = start_bg_command(&cp, bg_wait_cb, NULL,
-				fsmonitor__start_timeout_sec);
+	sbgr = آغاز_bg_command(&cp, bg_wait_cb, تہی,
+				fsmonitor_آغاز_timeout_sec);
 
-	switch (sbgr) {
-	case SBGR_READY:
-		return 0;
+	انتخاب (sbgr) {
+	حالت SBGR_READY:
+		واپس 0;
 
-	default:
-	case SBGR_ERROR:
-	case SBGR_CB_ERROR:
-		return error(_("daemon failed to start"));
+	طےشدہ:
+	حالت SBGR_ERROR:
+	حالت SBGR_CB_ERROR:
+		واپس error(_("daemon failed to start"));
 
-	case SBGR_TIMEOUT:
-		return error(_("daemon not online yet"));
+	حالت SBGR_TIMEOUT:
+		واپس error(_("daemon not online yet"));
 
-	case SBGR_DIED:
-		return error(_("daemon terminated"));
+	حالت SBGR_DIED:
+		واپس error(_("daemon terminated"));
 	}
 }
 
-int cmd_fsmonitor__daemon(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo UNUSED)
+صحیح cmd_fsmonitor__daemon(صحیح argc,
+			  ثابت حرف **argv,
+			  ثابت حرف *سابقہ,
+			  ساخت repository *repo غیر_مستعمل)
 {
-	const char *subcmd;
-	enum fsmonitor_reason reason;
-	int detach_console = 0;
+	ثابت حرف *subcmd;
+	شمار fsmonitor_reason reason;
+	صحیح detach_console = 0;
 
-	struct option options[] = {
+	ساخت option options[] = {
 		OPT_BOOL(0, "detach", &detach_console, N_("detach from console")),
 		OPT_INTEGER(0, "ipc-threads",
-			    &fsmonitor__ipc_threads,
+			    &fsmonitor_ipc_دھاگے,
 			    N_("use <n> ipc worker threads")),
 		OPT_INTEGER(0, "start-timeout",
-			    &fsmonitor__start_timeout_sec,
+			    &fsmonitor_آغاز_timeout_sec,
 			    N_("max seconds to wait for background daemon startup")),
 
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	repo_config(the_repository, fsmonitor_config, NULL);
+	repo_config(the_repository, fsmonitor_config, تہی);
 
-	argc = parse_options(argc, argv, prefix, options,
+	argc = parse_options(argc, argv, سابقہ, options,
 			     builtin_fsmonitor__daemon_usage, 0);
-	if (argc != 1)
+	اگر (argc != 1)
 		usage_with_options(builtin_fsmonitor__daemon_usage, options);
 	subcmd = argv[0];
 
-	if (fsmonitor__ipc_threads < 1)
+	اگر (fsmonitor_ipc_دھاگے < 1)
 		die(_("invalid 'ipc-threads' value (%d)"),
-		    fsmonitor__ipc_threads);
+		    fsmonitor_ipc_دھاگے);
 
 	prepare_repo_settings(the_repository);
 	/*
@@ -1607,34 +1607,34 @@ int cmd_fsmonitor__daemon(int argc,
 	 * incompatible rather than IPC, so we can use one of the __get
 	 * routines to detect the discrepancy.
 	 */
-	fsm_settings__set_ipc(the_repository);
+	fsm_settings_سیٹ_ipc(the_repository);
 
 	reason = fsm_settings__get_reason(the_repository);
-	if (reason > FSMONITOR_REASON_OK)
+	اگر (reason > FSMONITOR_REASON_OK)
 		die("%s",
-		    fsm_settings__get_incompatible_msg(the_repository,
+		    fsm_settings_get_incompatible_پیغام(the_repository,
 						       reason));
 
-	if (!strcmp(subcmd, "start"))
-		return !!try_to_start_background_daemon();
+	اگر (!strcmp(subcmd, "start"))
+		واپس !!try_مقصد_آغاز_background_daemon();
 
-	if (!strcmp(subcmd, "run"))
-		return !!try_to_run_foreground_daemon(detach_console);
+	اگر (!strcmp(subcmd, "run"))
+		واپس !!try_مقصد_تسلسل_foreground_daemon(detach_console);
 
-	if (!strcmp(subcmd, "stop"))
-		return !!do_as_client__send_stop();
+	اگر (!strcmp(subcmd, "stop"))
+		واپس !!do_as_client__send_stop();
 
-	if (!strcmp(subcmd, "status"))
-		return !!do_as_client__status();
+	اگر (!strcmp(subcmd, "status"))
+		واپس !!do_as_client_حالت();
 
 	die(_("Unhandled subcommand '%s'"), subcmd);
 }
 
-#else
-int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED)
+#ورنہ
+صحیح cmd_fsmonitor__daemon(صحیح argc, ثابت حرف **argv, ثابت حرف *سابقہ غیر_مستعمل, ساخت repository *repo غیر_مستعمل)
 {
-	struct option options[] = {
-		OPT_END()
+	ساخت option options[] = {
+		OPT_انتہا()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
@@ -1642,4 +1642,4 @@ int cmd_fsmonitor__daemon(int argc, const char **argv, const char *prefix UNUSED
 
 	die(_("fsmonitor--daemon not supported on this platform"));
 }
-#endif
+#اگر_ختم

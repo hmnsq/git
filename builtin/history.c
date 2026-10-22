@@ -1,296 +1,296 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "cache-tree.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "merge-ort.h"
-#include "oidmap.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache.h"
-#include "refs.h"
-#include "ref-filter.h"
-#include "replay.h"
-#include "reset.h"
-#include "revision.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "strvec.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "wt-status.h"
+#شامل "builtin.h"
+#شامل "advice.h"
+#شامل "cache-tree.h"
+#شامل "commit.h"
+#شامل "commit-reach.h"
+#شامل "config.h"
+#شامل "editor.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "lockfile.h"
+#شامل "merge-ort.h"
+#شامل "oidmap.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "read-cache.h"
+#شامل "refs.h"
+#شامل "ref-filter.h"
+#شامل "replay.h"
+#شامل "reset.h"
+#شامل "revision.h"
+#شامل "sequencer.h"
+#شامل "string-list.h"
+#شامل "strvec.h"
+#شامل "tree.h"
+#شامل "tree-walk.h"
+#شامل "unpack-trees.h"
+#شامل "wt-status.h"
 
-#define GIT_HISTORY_DROP_USAGE \
+#تعریف_کرو GIT_HISTORY_DROP_USAGE \
 	N_("git history drop <commit> [--dry-run] [--update-refs=(branches|head)] [--empty=(drop|keep|abort)]")
-#define GIT_HISTORY_FIXUP_USAGE \
+#تعریف_کرو GIT_HISTORY_FIXUP_USAGE \
 	N_("git history fixup <commit> [--dry-run] [--update-refs=(branches|head)] [--reedit-message] [--empty=(drop|keep|abort)]")
-#define GIT_HISTORY_REWORD_USAGE \
+#تعریف_کرو GIT_HISTORY_REWORD_USAGE \
 	N_("git history reword <commit> [--dry-run] [--update-refs=(branches|head)]")
-#define GIT_HISTORY_SPLIT_USAGE \
+#تعریف_کرو GIT_HISTORY_بانٹو_USAGE \
 	N_("git history split <commit> [--dry-run] [--update-refs=(branches|head)] [--] [<pathspec>...]")
-#define GIT_HISTORY_SQUASH_USAGE \
+#تعریف_کرو GIT_HISTORY_SQUASH_USAGE \
 	N_("git history squash [--dry-run] [--update-refs=(branches|head)] [--[no-]edit] <revision-range>")
 
-static void change_data_free(void *util, const char *str UNUSED)
+ساکن خالی change_ڈیٹا_free(خالی *util, ثابت حرف *str غیر_مستعمل)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	ساخت wt_حالت_change_ڈیٹا *d = util;
+	آزاد(d->rename_ماخذ);
+	آزاد(d);
 }
 
-static int fill_commit_message(struct repository *repo,
-			       const struct object_id *old_tree,
-			       const struct object_id *new_tree,
-			       const char *default_message,
-			       const char *action,
-			       struct strbuf *out)
+ساکن صحیح fill_commit_پیغام(ساخت repository *repo,
+			       ثابت ساخت object_id *old_درخت,
+			       ثابت ساخت object_id *new_درخت,
+			       ثابت حرف *default_پیغام,
+			       ثابت حرف *action,
+			       ساخت strbuf *برآمد)
 {
-	const char *path = git_path_commit_editmsg();
-	const char *hint =
+	ثابت حرف *راستہ = git_راستہ_commit_editmsg();
+	ثابت حرف *hint =
 		_("Please enter the commit message for the %s changes."
 		  " Lines starting\nwith '%s' will be ignored, and an"
 		  " empty message aborts the commit.\n");
-	struct wt_status s;
+	ساخت wt_حالت s;
 
-	wt_status_prepare(repo, &s);
+	wt_حالت_prepare(repo, &s);
 	FREE_AND_NULL(s.branch);
-	s.ahead_behind_flags = AHEAD_BEHIND_QUICK;
+	s.ahead_behind_flags = AHEAD_BEHIND_تیز;
 	s.commit_template = 1;
 	s.colopts = 0;
-	s.display_comment_prefix = 1;
+	s.display_comment_سابقہ = 1;
 	s.hints = 0;
 	s.use_color = 0;
 	s.whence = FROM_COMMIT;
 	s.committable = 1;
 
-	s.fp = fopen(path, "w");
-	if (!s.fp)
-		return error_errno(_("could not open '%s'"), path);
+	s.fp = fopen(راستہ, "w");
+	اگر (!s.fp)
+		واپس error_errno(_("could not open '%s'"), راستہ);
 
-	strbuf_addstr(out, default_message);
-	strbuf_addch(out, '\n');
-	strbuf_commented_addf(out, comment_line_str, hint, action, comment_line_str);
-	if (fwrite(out->buf, 1, out->len, s.fp) != out->len)
-		die_errno(_("could not write to '%s'"), path);
+	strbuf_addstr(برآمد, default_پیغام);
+	strbuf_addch(برآمد, '\n');
+	strbuf_commented_addf(برآمد, comment_سطر_str, hint, action, comment_سطر_str);
+	اگر (fwrite(برآمد->buf, 1, برآمد->len, s.fp) != برآمد->len)
+		die_errno(_("could not write to '%s'"), راستہ);
 
-	wt_status_collect_changes_trees(&s, old_tree, new_tree);
-	wt_status_print(&s);
-	wt_status_collect_free_buffers(&s);
-	string_list_clear_func(&s.change, change_data_free);
-	if (fclose(s.fp))
-		die_errno(_("could not write to '%s'"), path);
+	wt_حالت_collect_changes_trees(&s, old_درخت, new_درخت);
+	wt_حالت_print(&s);
+	wt_حالت_collect_free_buffers(&s);
+	string_list_clear_func(&s.change, change_ڈیٹا_free);
+	اگر (fclose(s.fp))
+		die_errno(_("could not write to '%s'"), راستہ);
 
-	strbuf_reset(out);
-	if (launch_editor(path, out, NULL)) {
+	strbuf_reset(برآمد);
+	اگر (launch_editor(راستہ, برآمد, تہی)) {
 		fprintf(stderr, _("Aborting commit as launching the editor failed.\n"));
-		return -1;
+		واپس -1;
 	}
-	strbuf_stripspace(out, comment_line_str);
+	strbuf_stripspace(برآمد, comment_سطر_str);
 
-	cleanup_message(out, COMMIT_MSG_CLEANUP_ALL, 0);
+	cleanup_پیغام(برآمد, COMMIT_پیغام_CLEANUP_ALL, 0);
 
-	if (!out->len) {
+	اگر (!برآمد->len) {
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		return -1;
+		واپس -1;
 	}
 
-	return 0;
+	واپس 0;
 }
 
-enum commit_tree_flags {
-	COMMIT_TREE_EDIT_MESSAGE = (1 << 0),
+شمار commit_درخت_flags {
+	COMMIT_درخت_EDIT_پیغام = (1 << 0),
 };
 
-static int commit_tree_ext(struct repository *repo,
-			   const char *action,
-			   struct commit *commit_with_message,
-			   const char *message_template,
-			   const struct commit_list *parents,
-			   const struct object_id *old_tree,
-			   const struct object_id *new_tree,
-			   struct commit **out,
-			   enum commit_tree_flags flags)
+ساکن صحیح commit_درخت_ext(ساخت repository *repo,
+			   ثابت حرف *action,
+			   ساخت commit *commit_with_پیغام,
+			   ثابت حرف *پیغام_template,
+			   ثابت ساخت commit_list *parents,
+			   ثابت ساخت object_id *old_درخت,
+			   ثابت ساخت object_id *new_درخت,
+			   ساخت commit **برآمد,
+			   شمار commit_درخت_flags flags)
 {
-	const char *exclude_gpgsig[] = {
+	ثابت حرف *exclude_gpgsig[] = {
 		/* We reencode the message, so the encoding needs to be stripped. */
 		"encoding",
 		/* We need to strip signatures as those will become invalid. */
 		"gpgsig",
 		"gpgsig-sha256",
-		NULL,
+		تہی,
 	};
-	const char *original_message, *original_body, *ptr;
-	struct commit_extra_header *original_extra_headers = NULL;
-	struct strbuf commit_message = STRBUF_INIT;
-	struct object_id rewritten_commit_oid;
-	char *original_author = NULL;
-	size_t len;
-	int ret;
+	ثابت حرف *original_پیغام, *original_body, *ptr;
+	ساخت commit_extra_سرخی *original_extra_سرخیاں = تہی;
+	ساخت strbuf commit_پیغام_2 = STRBUF_INIT;
+	ساخت object_id rewritten_commit_oid;
+	حرف *original_author = تہی;
+	سائز_t len;
+	صحیح ret;
 
 	/* We retain authorship of the original commit. */
-	original_message = repo_logmsg_reencode(repo, commit_with_message, NULL, NULL);
-	ptr = find_commit_header(original_message, "author", &len);
-	if (ptr)
+	original_پیغام = repo_logmsg_reencode(repo, commit_with_پیغام, تہی, تہی);
+	ptr = ڈھونڈو_commit_سرخی(original_پیغام, "author", &len);
+	اگر (ptr)
 		original_author = xmemdupz(ptr, len);
-	find_commit_subject(original_message, &original_body);
+	ڈھونڈو_commit_subject(original_پیغام, &original_body);
 
-	if (!message_template)
-		message_template = original_body;
+	اگر (!پیغام_template)
+		پیغام_template = original_body;
 
-	if (flags & COMMIT_TREE_EDIT_MESSAGE) {
-		ret = fill_commit_message(repo, old_tree, new_tree,
-					  message_template, action, &commit_message);
-		if (ret < 0)
-			goto out;
-	} else {
-		strbuf_addstr(&commit_message, message_template);
+	اگر (flags & COMMIT_درخت_EDIT_پیغام) {
+		ret = fill_commit_پیغام(repo, old_درخت, new_درخت,
+					  پیغام_template, action, &commit_پیغام_2);
+		اگر (ret < 0)
+			جاؤ برآمد;
+	} ورنہ {
+		strbuf_addstr(&commit_پیغام_2, پیغام_template);
 	}
 
-	original_extra_headers = read_commit_extra_headers(commit_with_message,
+	original_extra_سرخیاں = read_commit_extra_سرخیاں(commit_with_پیغام,
 							   exclude_gpgsig);
 
-	ret = commit_tree_extended(commit_message.buf, commit_message.len, new_tree,
+	ret = commit_درخت_extended(commit_پیغام_2.buf, commit_پیغام_2.len, new_درخت,
 				   parents, &rewritten_commit_oid, original_author,
-				   NULL, NULL, original_extra_headers);
-	if (ret < 0)
-		goto out;
+				   تہی, تہی, original_extra_سرخیاں);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	*out = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
+	*برآمد = lookup_commit_or_die(&rewritten_commit_oid, "rewritten commit");
 
-out:
-	free_commit_extra_headers(original_extra_headers);
-	strbuf_release(&commit_message);
-	free(original_author);
-	repo_unuse_commit_buffer(repo, commit_with_message, original_message);
-	return ret;
+برآمد:
+	free_commit_extra_سرخیاں(original_extra_سرخیاں);
+	strbuf_release(&commit_پیغام_2);
+	آزاد(original_author);
+	repo_unuse_commit_بفر(repo, commit_with_پیغام, original_پیغام);
+	واپس ret;
 }
 
-static int first_parent_tree_oid(struct repository *repo,
-				 struct commit *commit,
-				 struct object_id *out)
+ساکن صحیح پہلا_والد_درخت_oid(ساخت repository *repo,
+				 ساخت commit *commit,
+				 ساخت object_id *برآمد)
 {
-	struct commit *parent = commit->parents ? commit->parents->item : NULL;
+	ساخت commit *والد = commit->parents ? commit->parents->شے : تہی;
 
-	if (!parent) {
-		oidcpy(out, repo->hash_algo->empty_tree);
-		return 0;
+	اگر (!والد) {
+		oidcpy(برآمد, repo->hash_algo->خالی_خانے_درخت);
+		واپس 0;
 	}
 
-	if (repo_parse_commit(repo, parent))
-		return error(_("unable to parse parent commit %s"),
-			     oid_to_hex(&parent->object.oid));
+	اگر (repo_parse_commit(repo, والد))
+		واپس error(_("unable to parse parent commit %s"),
+			     oid_مقصد_hex(&والد->object.oid));
 
-	oidcpy(out, &repo_get_commit_tree(repo, parent)->object.oid);
-	return 0;
+	oidcpy(برآمد, &repo_get_commit_درخت(repo, والد)->object.oid);
+	واپس 0;
 }
 
-static int commit_tree_with_edited_message(struct repository *repo,
-					   const char *action,
-					   struct commit *original,
-					   struct commit **out)
+ساکن صحیح commit_درخت_with_edited_پیغام(ساخت repository *repo,
+					   ثابت حرف *action,
+					   ساخت commit *original,
+					   ساخت commit **برآمد)
 {
-	struct object_id parent_tree_oid;
-	const struct object_id *tree_oid;
+	ساخت object_id والد_درخت_oid;
+	ثابت ساخت object_id *درخت_oid;
 
-	tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
+	درخت_oid = &repo_get_commit_درخت(repo, original)->object.oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	اگر (پہلا_والد_درخت_oid(repo, original, &والد_درخت_oid) < 0)
+		واپس -1;
 
-	return commit_tree_ext(repo, action, original, NULL, original->parents,
-			       &parent_tree_oid, tree_oid, out, COMMIT_TREE_EDIT_MESSAGE);
+	واپس commit_درخت_ext(repo, action, original, تہی, original->parents,
+			       &والد_درخت_oid, درخت_oid, برآمد, COMMIT_درخت_EDIT_پیغام);
 }
 
-enum ref_action {
+شمار ref_action {
 	REF_ACTION_DEFAULT,
 	REF_ACTION_BRANCHES,
-	REF_ACTION_HEAD,
+	REF_ACTION_سر,
 };
 
-static int parse_ref_action(const struct option *opt, const char *value, int unset)
+ساکن صحیح parse_ref_action(ثابت ساخت option *opt, ثابت حرف *قدر, صحیح unset)
 {
-	enum ref_action *action = opt->value;
+	شمار ref_action *action = opt->قدر;
 
-	BUG_ON_OPT_NEG_NOARG(unset, value);
-	if (!strcmp(value, "branches")) {
+	BUG_ON_OPT_NEG_NOARG(unset, قدر);
+	اگر (!strcmp(قدر, "branches")) {
 		*action = REF_ACTION_BRANCHES;
-	} else if (!strcmp(value, "head")) {
-		*action = REF_ACTION_HEAD;
-	} else {
-		return error(_("%s expects one of 'branches' or 'head'"),
+	} ورنہ اگر (!strcmp(قدر, "head")) {
+		*action = REF_ACTION_سر;
+	} ورنہ {
+		واپس error(_("%s expects one of 'branches' or 'head'"),
 			     opt->long_name);
 	}
 
-	return 0;
+	واپس 0;
 }
 
-static int revwalk_contains_merges(struct repository *repo,
-				   const struct strvec *revwalk_args)
+ساکن صحیح revwalk_شامل_ہے_merges(ساخت repository *repo,
+				   ثابت ساخت strvec *revwalk_دلائل)
 {
-	struct strvec args = STRVEC_INIT;
-	struct rev_info revs;
-	int ret;
+	ساخت strvec دلائل = STRVEC_INIT;
+	ساخت rev_info revs;
+	صحیح ret;
 
-	strvec_pushv(&args, revwalk_args->v);
-	strvec_push(&args, "--min-parents=2");
+	strvec_pushv(&دلائل, revwalk_دلائل->v);
+	strvec_ڈالو(&دلائل, "--min-parents=2");
 
-	repo_init_revisions(repo, &revs, NULL);
+	repo_init_revisions(repo, &revs, تہی);
 
-	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr != 1)
+	تیاری_revisions_from_strvec(&دلائل, &revs, تہی);
+	اگر (دلائل.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
-	if (prepare_revision_walk(&revs) < 0) {
+	اگر (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (get_revision(&revs)) {
+	اگر (get_revision(&revs)) {
 		ret = error(_("replaying merge commits is not supported yet!"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	reset_revision_walk();
 	ret = 0;
 
-out:
+برآمد:
 	release_revisions(&revs);
-	strvec_clear(&args);
-	return ret;
+	strvec_clear(&دلائل);
+	واپس ret;
 }
 
-static int setup_revwalk(struct repository *repo,
-			 enum ref_action action,
-			 struct commit *original,
-			 struct rev_info *revs)
+ساکن صحیح تیاری_revwalk(ساخت repository *repo,
+			 شمار ref_action action,
+			 ساخت commit *original,
+			 ساخت rev_info *revs)
 {
-	struct strvec args = STRVEC_INIT;
-	int ret;
+	ساخت strvec دلائل = STRVEC_INIT;
+	صحیح ret;
 
-	repo_init_revisions(repo, revs, NULL);
-	strvec_push(&args, "ignored");
-	strvec_push(&args, "--reverse");
-	strvec_push(&args, "--topo-order");
-	strvec_push(&args, "--full-history");
+	repo_init_revisions(repo, revs, تہی);
+	strvec_ڈالو(&دلائل, "ignored");
+	strvec_ڈالو(&دلائل, "--reverse");
+	strvec_ڈالو(&دلائل, "--topo-order");
+	strvec_ڈالو(&دلائل, "--full-history");
 
 	/* We only want to see commits that are descendants of the old commit. */
-	strvec_pushf(&args, "--ancestry-path=%s",
-		     oid_to_hex(&original->object.oid));
+	strvec_pushf(&دلائل, "--ancestry-path=%s",
+		     oid_مقصد_hex(&original->object.oid));
 
 	/*
 	 * Ancestry path may also show ancestors of the old commit, but we
 	 * don't want to see those, either.
 	 */
-	strvec_pushf(&args, "^%s", oid_to_hex(&original->object.oid));
+	strvec_pushf(&دلائل, "^%s", oid_مقصد_hex(&original->object.oid));
 
 	/*
 	 * When we're asked to update HEAD we need to verify that the commit
@@ -298,94 +298,94 @@ static int setup_revwalk(struct repository *repo,
 	 * update it. Otherwise we'll update (or print) all descendant
 	 * branches.
 	 */
-	if (action == REF_ACTION_HEAD) {
-		struct commit_list *from_list = NULL;
-		struct commit *head;
+	اگر (action == REF_ACTION_سر) {
+		ساخت commit_list *from_list = تہی;
+		ساخت commit *سر;
 
-		head = lookup_commit_reference_by_name("HEAD");
-		if (!head) {
+		سر = lookup_commit_reference_by_name("HEAD");
+		اگر (!سر) {
 			ret = error(_("cannot look up HEAD"));
-			goto out;
+			جاؤ برآمد;
 		}
 
-		commit_list_insert(original, &from_list);
-		ret = repo_is_descendant_of(repo, head, from_list);
+		commit_list_داخل_کرو(original, &from_list);
+		ret = repo_is_descendant_کا(repo, سر, from_list);
 		commit_list_free(from_list);
 
-		if (ret < 0) {
+		اگر (ret < 0) {
 			ret = error(_("cannot determine descendance"));
-			goto out;
-		} else if (!ret) {
+			جاؤ برآمد;
+		} ورنہ اگر (!ret) {
 			ret = error(_("rewritten commit must be an ancestor "
 				      "of HEAD when using --update-refs=head"));
-			goto out;
+			جاؤ برآمد;
 		}
 
-		strvec_push(&args, "HEAD");
-	} else {
-		strvec_push(&args, "--branches");
-		strvec_push(&args, "HEAD");
+		strvec_ڈالو(&دلائل, "HEAD");
+	} ورنہ {
+		strvec_ڈالو(&دلائل, "--branches");
+		strvec_ڈالو(&دلائل, "HEAD");
 	}
 
-	ret = revwalk_contains_merges(repo, &args);
-	if (ret < 0)
-		goto out;
+	ret = revwalk_شامل_ہے_merges(repo, &دلائل);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	setup_revisions_from_strvec(&args, revs, NULL);
-	if (args.nr != 1)
+	تیاری_revisions_from_strvec(&دلائل, revs, تہی);
+	اگر (دلائل.nr != 1)
 		BUG("revisions were set up with invalid argument");
 
 	ret = 0;
 
-out:
-	strvec_clear(&args);
-	return ret;
+برآمد:
+	strvec_clear(&دلائل);
+	واپس ret;
 }
 
-static int handle_ref_update(struct ref_transaction *transaction,
-			     const char *refname,
-			     const struct object_id *new_oid,
-			     const struct object_id *old_oid,
-			     const char *reflog_msg,
-			     struct strbuf *err)
+ساکن صحیح handle_ref_update(ساخت ref_transaction *transaction,
+			     ثابت حرف *refname,
+			     ثابت ساخت object_id *new_oid,
+			     ثابت ساخت object_id *old_oid,
+			     ثابت حرف *reflog_پیغام,
+			     ساخت strbuf *err)
 {
-	if (!transaction) {
-		printf("update %s %s %s\n",
-		       refname, oid_to_hex(new_oid), oid_to_hex(old_oid));
-		return 0;
+	اگر (!transaction) {
+		لکھو("update %s %s %s\n",
+		       refname, oid_مقصد_hex(new_oid), oid_مقصد_hex(old_oid));
+		واپس 0;
 	}
 
-	return ref_transaction_update(transaction, refname, new_oid, old_oid,
-				      NULL, NULL, 0, reflog_msg, err);
+	واپس ref_transaction_update(transaction, refname, new_oid, old_oid,
+				      تہی, تہی, 0, reflog_پیغام, err);
 }
 
-static int compute_pending_ref_updates(struct rev_info *revs,
-				       enum ref_action action,
-				       struct commit *original,
-				       struct commit *rewritten,
-				       enum replay_empty_commit_action empty,
-				       struct replay_result *result)
+ساکن صحیح compute_pending_ref_updates(ساخت rev_info *revs,
+				       شمار ref_action action,
+				       ساخت commit *original,
+				       ساخت commit *rewritten,
+				       شمار replay_خالی_خانے_commit_action خالی_خانے,
+				       ساخت replay_نتیجہ *نتیجہ)
 {
-	const struct name_decoration *decoration;
-	struct replay_revisions_options opts = {
-		.empty = empty,
+	ثابت ساخت name_decoration *decoration;
+	ساخت replay_revisions_options opts = {
+		.خالی_خانے = خالی_خانے,
 	};
-	char hex[GIT_MAX_HEXSZ + 1];
-	bool detached_head;
-	int head_flags = 0;
-	int ret;
+	حرف hex[GIT_MAX_HEXSZ + 1];
+	bool detached_سر;
+	صحیح سر_flags = 0;
+	صحیح ret;
 
-	refs_read_ref_full(get_main_ref_store(revs->repo), "HEAD",
-			   RESOLVE_REF_NO_RECURSE, NULL, &head_flags);
-	detached_head = !(head_flags & REF_ISSYMREF);
+	refs_read_ref_بھرا(get_main_ref_store(revs->repo), "HEAD",
+			   RESOLVE_REF_NO_RECURSE, تہی, &سر_flags);
+	detached_سر = !(سر_flags & REF_ISSYMREF);
 
-	opts.onto = oid_to_hex_r(hex, &rewritten->object.oid);
+	opts.onto = oid_مقصد_hex_r(hex, &rewritten->object.oid);
 
-	ret = replay_revisions(revs, &opts, result);
-	if (ret)
-		return ret;
+	ret = replay_revisions(revs, &opts, نتیجہ);
+	اگر (ret)
+		واپس ret;
 
-	if (action != REF_ACTION_BRANCHES && action != REF_ACTION_HEAD)
+	اگر (action != REF_ACTION_BRANCHES && action != REF_ACTION_سر)
 		BUG("unsupported ref action %d", action);
 
 	/*
@@ -393,232 +393,232 @@ static int compute_pending_ref_updates(struct rev_info *revs,
 	 * ancestors of `rewritten`, so we need to manually
 	 * handle updating references that point to `original`.
 	 */
-	for (decoration = get_name_decoration(&original->object);
+	برائے (decoration = get_name_decoration(&original->object);
 	     decoration;
-	     decoration = decoration->next)
+	     decoration = decoration->اگلا)
 	{
-		if (decoration->type != DECORATION_REF_LOCAL &&
-		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+		اگر (decoration->type != DECORATION_REF_LOCAL &&
+		    decoration->type != DECORATION_REF_سر)
+			جاری;
 
-		if (action == REF_ACTION_HEAD &&
-		    decoration->type != DECORATION_REF_HEAD)
-			continue;
+		اگر (action == REF_ACTION_سر &&
+		    decoration->type != DECORATION_REF_سر)
+			جاری;
 
 		/*
 		 * We only need to update HEAD separately in case it's
 		 * detached. If it's not we'd already update the branch
 		 * it is pointing to.
 		 */
-		if (action == REF_ACTION_BRANCHES &&
-		    decoration->type == DECORATION_REF_HEAD &&
-		    !detached_head)
-			continue;
+		اگر (action == REF_ACTION_BRANCHES &&
+		    decoration->type == DECORATION_REF_سر &&
+		    !detached_سر)
+			جاری;
 
-		replay_result_queue_update(result, decoration->name,
+		replay_نتیجہ_قطار_update(نتیجہ, decoration->name,
 					   &original->object.oid,
 					   &rewritten->object.oid);
 	}
 
-	return 0;
+	واپس 0;
 }
 
-static int apply_pending_ref_updates(struct repository *repo,
-				     const struct replay_result *result,
-				     const char *reflog_msg,
-				     int dry_run)
+ساکن صحیح apply_pending_ref_updates(ساخت repository *repo,
+				     ثابت ساخت replay_نتیجہ *نتیجہ,
+				     ثابت حرف *reflog_پیغام,
+				     صحیح dry_تسلسل)
 {
-	struct ref_transaction *transaction = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret;
+	ساخت ref_transaction *transaction = تہی;
+	ساخت strbuf err = STRBUF_INIT;
+	صحیح ret;
 
-	if (!dry_run) {
+	اگر (!dry_تسلسل) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(repo),
 							  0, &err);
-		if (!transaction) {
+		اگر (!transaction) {
 			ret = error(_("failed to begin ref transaction: %s"), err.buf);
-			goto out;
+			جاؤ برآمد;
 		}
 	}
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
+	برائے (سائز_t i = 0; i < نتیجہ->updates_nr; i++) {
 		ret = handle_ref_update(transaction,
-					result->updates[i].refname,
-					&result->updates[i].new_oid,
-					&result->updates[i].old_oid,
-					reflog_msg, &err);
-		if (ret) {
+					نتیجہ->updates[i].refname,
+					&نتیجہ->updates[i].new_oid,
+					&نتیجہ->updates[i].old_oid,
+					reflog_پیغام, &err);
+		اگر (ret) {
 			ret = error(_("failed to update ref '%s': %s"),
-				    result->updates[i].refname, err.buf);
-			goto out;
+				    نتیجہ->updates[i].refname, err.buf);
+			جاؤ برآمد;
 		}
 	}
 
-	if (transaction && ref_transaction_commit(transaction, &err)) {
+	اگر (transaction && ref_transaction_commit(transaction, &err)) {
 		ret = error(_("failed to commit ref transaction: %s"), err.buf);
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
+برآمد:
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return ret;
+	واپس ret;
 }
 
-static int handle_reference_updates(struct rev_info *revs,
-				    enum ref_action action,
-				    struct commit *original,
-				    struct commit *rewritten,
-				    const char *reflog_msg,
-				    int dry_run,
-				    enum replay_empty_commit_action empty)
+ساکن صحیح handle_reference_updates(ساخت rev_info *revs,
+				    شمار ref_action action,
+				    ساخت commit *original,
+				    ساخت commit *rewritten,
+				    ثابت حرف *reflog_پیغام,
+				    صحیح dry_تسلسل,
+				    شمار replay_خالی_خانے_commit_action خالی_خانے)
 {
-	struct replay_result result = { 0 };
-	int ret;
+	ساخت replay_نتیجہ نتیجہ = { 0 };
+	صحیح ret;
 
 	ret = compute_pending_ref_updates(revs, action, original, rewritten,
-					  empty, &result);
-	if (ret)
-		goto out;
+					  خالی_خانے, &نتیجہ);
+	اگر (ret)
+		جاؤ برآمد;
 
-	ret = apply_pending_ref_updates(revs->repo, &result, reflog_msg, dry_run);
+	ret = apply_pending_ref_updates(revs->repo, &نتیجہ, reflog_پیغام, dry_تسلسل);
 
-out:
-	replay_result_release(&result);
-	return ret;
+برآمد:
+	replay_نتیجہ_release(&نتیجہ);
+	واپس ret;
 }
 
-static int commit_became_empty(struct repository *repo,
-			       struct commit *original,
-			       struct tree *result)
+ساکن صحیح commit_became_خالی_خانے(ساخت repository *repo,
+			       ساخت commit *original,
+			       ساخت درخت *نتیجہ)
 {
-	struct object_id parent_tree_oid;
+	ساخت object_id والد_درخت_oid;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0)
-		return -1;
+	اگر (پہلا_والد_درخت_oid(repo, original, &والد_درخت_oid) < 0)
+		واپس -1;
 
-	return oideq(&result->object.oid, &parent_tree_oid);
+	واپس oideq(&نتیجہ->object.oid, &والد_درخت_oid);
 }
 
-static int parse_opt_empty(const struct option *opt, const char *arg, int unset)
+ساکن صحیح parse_opt_خالی_خانے(ثابت ساخت option *opt, ثابت حرف *arg, صحیح unset)
 {
-	enum replay_empty_commit_action *value = opt->value;
+	شمار replay_خالی_خانے_commit_action *قدر = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "drop"))
-		*value = REPLAY_EMPTY_COMMIT_DROP;
-	else if (!strcmp(arg, "keep"))
-		*value = REPLAY_EMPTY_COMMIT_KEEP;
-	else if (!strcmp(arg, "abort"))
-		*value = REPLAY_EMPTY_COMMIT_ABORT;
-	else
+	اگر (!strcmp(arg, "drop"))
+		*قدر = REPLAY_خالی_خانے_COMMIT_DROP;
+	ورنہ اگر (!strcmp(arg, "keep"))
+		*قدر = REPLAY_خالی_خانے_COMMIT_KEEP;
+	ورنہ اگر (!strcmp(arg, "abort"))
+		*قدر = REPLAY_خالی_خانے_COMMIT_ABORT;
+	ورنہ
 		die(_("unrecognized '--empty=' action '%s'; "
 		      "valid values are \"drop\", \"keep\", and \"abort\"."), arg);
 
-	return 0;
+	واپس 0;
 }
 
-static int cmd_history_fixup(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+ساکن صحیح cmd_history_fixup(صحیح argc,
+			     ثابت حرف **argv,
+			     ثابت حرف *سابقہ,
+			     ساخت repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_FIXUP_USAGE,
-		NULL,
+		تہی,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	enum commit_tree_flags flags = 0;
-	int dry_run = 0;
-	struct option options[] = {
+	شمار replay_خالی_خانے_commit_action خالی_خانے = REPLAY_خالی_خانے_COMMIT_DROP;
+	شمار ref_action action = REF_ACTION_DEFAULT;
+	شمار commit_درخت_flags flags = 0;
+	صحیح dry_تسلسل = 0;
+	ساخت option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
-		OPT_BOOL('n', "dry-run", &dry_run,
+		OPT_BOOL('n', "dry-run", &dry_تسلسل,
 			 N_("perform a dry-run without updating any refs")),
-		OPT_BIT(0, "reedit-message", &flags,
+		OPT_ثنائی_ہندسہ(0, "reedit-message", &flags,
 			N_("open an editor to modify the commit message"),
-			COMMIT_TREE_EDIT_MESSAGE),
-		OPT_CALLBACK_F(0, "empty", &empty, "(drop|keep|abort)",
+			COMMIT_درخت_EDIT_پیغام),
+		OPT_CALLBACK_F(0, "empty", &خالی_خانے, "(drop|keep|abort)",
 			       N_("how to handle commits that become empty"),
-			       PARSE_OPT_NONEG, parse_opt_empty),
-		OPT_END(),
+			       PARSE_OPT_NONEG, parse_opt_خالی_خانے),
+		OPT_انتہا(),
 	};
-	struct merge_result merge_result = { 0 };
-	struct merge_options merge_opts = { 0 };
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *head_commit, *original, *rewritten;
-	struct tree *head_tree, *original_tree, *index_tree;
-	struct rev_info revs = { 0 };
+	ساخت ملاؤ_نتیجہ ملاؤ_نتیجہ = { 0 };
+	ساخت ملاؤ_options ملاؤ_opts = { 0 };
+	ساخت strbuf reflog_پیغام = STRBUF_INIT;
+	ساخت commit *سر_commit, *original, *rewritten;
+	ساخت درخت *سر_درخت, *original_درخت, *اشاریہ_درخت;
+	ساخت rev_info revs = { 0 };
 	bool skip_commit = false;
-	int ret;
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	argc = parse_options(argc, argv, سابقہ, options, usage, 0);
+	اگر (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		جاؤ برآمد;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
-	if (action == REF_ACTION_DEFAULT)
+	اگر (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	if (is_bare_repository(repo)) {
+	اگر (is_bare_repository(repo)) {
 		ret = error(_("cannot run fixup in a bare repository"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/* Resolve the original commit, which is the one we want to fix up. */
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	اگر (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/*
 	 * Resolve HEAD so we can use its tree as the merge base: the staged
 	 * changes are expressed as a diff from HEAD's tree to the index tree.
 	 */
-	head_commit = lookup_commit_reference_by_name("HEAD");
-	if (!head_commit) {
+	سر_commit = lookup_commit_reference_by_name("HEAD");
+	اگر (!سر_commit) {
 		ret = error(_("cannot look up HEAD"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	head_tree = repo_get_commit_tree(repo, head_commit);
-	if (!head_tree) {
+	سر_درخت = repo_get_commit_درخت(repo, سر_commit);
+	اگر (!سر_درخت) {
 		ret = error(_("cannot get tree for HEAD"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (repo_read_index(repo) < 0) {
+	اگر (repo_read_اشاریہ(repo) < 0) {
 		ret = error(_("unable to read index"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (!repo_index_has_changes(repo, head_tree, NULL)) {
+	اگر (!repo_اشاریہ_has_changes(repo, سر_درخت, تہی)) {
 		ret = error(_("nothing to fixup: no staged changes"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/*
 	 * Write the index as a tree object. This is the "theirs" side of the
 	 * three-way merge: it is HEAD's tree with the staged changes applied.
 	 */
-	index_tree = write_in_core_index_as_tree(repo, repo->index);
-	if (!index_tree) {
+	اشاریہ_درخت = write_اندر_core_اشاریہ_as_درخت(repo, repo->اشاریہ);
+	اگر (!اشاریہ_درخت) {
 		ret = error(_("unable to write index as a tree"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	original_tree = repo_get_commit_tree(repo, original);
-	if (!original_tree) {
+	original_درخت = repo_get_commit_درخت(repo, original);
+	اگر (!original_درخت) {
 		ret = error(_("cannot get tree for commit %s"), argv[0]);
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/*
@@ -627,34 +627,34 @@ static int cmd_history_fixup(int argc,
 	 * cherry-pick, where the base commit is our HEAD, ours is the original
 	 * tree and theirs is the index tree.
 	 */
-	init_basic_merge_options(&merge_opts, repo);
-	merge_opts.ancestor = "HEAD";
-	merge_opts.branch1 = argv[0];
-	merge_opts.branch2 = "staged";
-	merge_incore_nonrecursive(&merge_opts, head_tree,
-				  original_tree, index_tree, &merge_result);
+	init_basic_ملاؤ_options(&ملاؤ_opts, repo);
+	ملاؤ_opts.ancestor = "HEAD";
+	ملاؤ_opts.branch1 = argv[0];
+	ملاؤ_opts.branch2 = "staged";
+	ملاؤ_incore_nonrecursive(&ملاؤ_opts, سر_درخت,
+				  original_درخت, اشاریہ_درخت, &ملاؤ_نتیجہ);
 
-	if (merge_result.clean < 0) {
+	اگر (ملاؤ_نتیجہ.clean < 0) {
 		ret = error(_("merge failed while applying fixup"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (!merge_result.clean) {
+	اگر (!ملاؤ_نتیجہ.clean) {
 		ret = error(_("fixup would produce conflicts; aborting"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	ret = commit_became_empty(repo, original, merge_result.tree);
-	if (ret < 0)
-		goto out;
-	if (ret > 0) {
-		switch (empty) {
-		case REPLAY_EMPTY_COMMIT_DROP:
+	ret = commit_became_خالی_خانے(repo, original, ملاؤ_نتیجہ.درخت);
+	اگر (ret < 0)
+		جاؤ برآمد;
+	اگر (ret > 0) {
+		انتخاب (خالی_خانے) {
+		حالت REPLAY_خالی_خانے_COMMIT_DROP:
 			/*
 			 * Drop the target commit by replaying its descendants
 			 * directly onto its parent.
 			 */
-			rewritten = original->parents ? original->parents->item : NULL;
+			rewritten = original->parents ? original->parents->شے : تہی;
 
 			/*
 			 * TODO: we don't yet have the ability to drop root
@@ -662,249 +662,249 @@ static int cmd_history_fixup(int argc,
 			 * this restriction to exist other than a technical
 			 * limitation.
 			 */
-			if (!rewritten) {
+			اگر (!rewritten) {
 				ret = error(_("cannot drop root commit %s: "
 					      "it has no parent to replay onto"),
 					    argv[0]);
-				goto out;
+				جاؤ برآمد;
 			}
 
 			skip_commit = true;
-			break;
-		case REPLAY_EMPTY_COMMIT_KEEP:
+			توڑو;
+		حالت REPLAY_خالی_خانے_COMMIT_KEEP:
 			/* Proceed and record the empty commit. */
-			break;
-		case REPLAY_EMPTY_COMMIT_ABORT:
+			توڑو;
+		حالت REPLAY_خالی_خانے_COMMIT_ABORT:
 			ret = error(_("fixup makes commit %s empty"), argv[0]);
-			goto out;
+			جاؤ برآمد;
 		}
 	}
 
-	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	ret = تیاری_revwalk(repo, action, original, &revs);
+	اگر (ret)
+		جاؤ برآمد;
 
-	if (!skip_commit) {
-		ret = commit_tree_ext(repo, "fixup", original, NULL, original->parents,
-				      &original_tree->object.oid, &merge_result.tree->object.oid,
+	اگر (!skip_commit) {
+		ret = commit_درخت_ext(repo, "fixup", original, تہی, original->parents,
+				      &original_درخت->object.oid, &ملاؤ_نتیجہ.درخت->object.oid,
 				      &rewritten, flags);
-		if (ret < 0) {
+		اگر (ret < 0) {
 			ret = error(_("failed writing fixed-up commit"));
-			goto out;
+			جاؤ برآمد;
 		}
 	}
 
-	strbuf_addf(&reflog_msg, "fixup: updating %s", argv[0]);
+	strbuf_addf(&reflog_پیغام, "fixup: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, empty);
-	if (ret < 0) {
+				       reflog_پیغام.buf, dry_تسلسل, خالی_خانے);
+	اگر (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
-	merge_finalize(&merge_opts, &merge_result);
-	strbuf_release(&reflog_msg);
+برآمد:
+	ملاؤ_finalize(&ملاؤ_opts, &ملاؤ_نتیجہ);
+	strbuf_release(&reflog_پیغام);
 	release_revisions(&revs);
-	return ret;
+	واپس ret;
 }
 
-static int cmd_history_reword(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+ساکن صحیح cmd_history_reword(صحیح argc,
+			      ثابت حرف **argv,
+			      ثابت حرف *سابقہ,
+			      ساخت repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_REWORD_USAGE,
-		NULL,
+		تہی,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	شمار ref_action action = REF_ACTION_DEFAULT;
+	صحیح dry_تسلسل = 0;
+	ساخت option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
-		OPT_BOOL('n', "dry-run", &dry_run,
+		OPT_BOOL('n', "dry-run", &dry_تسلسل,
 			 N_("perform a dry-run without updating any refs")),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	int ret;
+	ساخت strbuf reflog_پیغام = STRBUF_INIT;
+	ساخت commit *original, *rewritten;
+	ساخت rev_info revs = { 0 };
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	argc = parse_options(argc, argv, سابقہ, options, usage, 0);
+	اگر (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		جاؤ برآمد;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
-	if (action == REF_ACTION_DEFAULT)
+	اگر (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	اگر (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	ret = تیاری_revwalk(repo, action, original, &revs);
+	اگر (ret)
+		جاؤ برآمد;
 
-	ret = commit_tree_with_edited_message(repo, "reworded", original, &rewritten);
-	if (ret < 0) {
+	ret = commit_درخت_with_edited_پیغام(repo, "reworded", original, &rewritten);
+	اگر (ret < 0) {
 		ret = error(_("failed writing reworded commit"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	strbuf_addf(&reflog_msg, "reword: updating %s", argv[0]);
+	strbuf_addf(&reflog_پیغام, "reword: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_پیغام.buf, dry_تسلسل, REPLAY_خالی_خانے_COMMIT_ABORT);
+	اگر (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
-	strbuf_release(&reflog_msg);
+برآمد:
+	strbuf_release(&reflog_پیغام);
 	release_revisions(&revs);
-	return ret;
+	واپس ret;
 }
 
-static int write_ondisk_index(struct repository *repo,
-			      struct object_id *oid,
-			      const char *path)
+ساکن صحیح write_ondisk_اشاریہ(ساخت repository *repo,
+			      ساخت object_id *oid,
+			      ثابت حرف *راستہ)
 {
-	struct unpack_trees_options opts = { 0 };
-	struct lock_file lock = LOCK_INIT;
-	struct tree_desc tree_desc;
-	struct index_state index;
-	struct tree *tree;
-	int ret;
+	ساخت unpack_trees_options opts = { 0 };
+	ساخت تالا_file تالا = تالا_INIT;
+	ساخت درخت_desc درخت_desc;
+	ساخت اشاریہ_state اشاریہ;
+	ساخت درخت *درخت;
+	صحیح ret;
 
-	index_state_init(&index, repo);
+	اشاریہ_state_init(&اشاریہ, repo);
 
-	opts.head_idx = -1;
-	opts.src_index = &index;
-	opts.dst_index = &index;
+	opts.سر_idx = -1;
+	opts.src_اشاریہ = &اشاریہ;
+	opts.dst_اشاریہ = &اشاریہ;
 
-	tree = repo_parse_tree_indirect(repo, oid);
-	if (!tree) {
-		ret = error(_("unable to parse tree %s"), oid_to_hex(oid));
-		goto out;
+	درخت = repo_parse_درخت_بالواسطہ(repo, oid);
+	اگر (!درخت) {
+		ret = error(_("unable to parse tree %s"), oid_مقصد_hex(oid));
+		جاؤ برآمد;
 	}
-	init_tree_desc(&tree_desc, &tree->object.oid, tree->buffer, tree->size);
+	init_درخت_desc(&درخت_desc, &درخت->object.oid, درخت->بفر, درخت->سائز);
 
-	if (unpack_trees(1, &tree_desc, &opts)) {
+	اگر (unpack_trees(1, &درخت_desc, &opts)) {
 		ret = error(_("unable to populate index with tree"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	prime_cache_tree(repo, &index, tree);
+	مفرد_cache_درخت(repo, &اشاریہ, درخت);
 
-	if (repo_hold_lock_file_for_update(repo, &lock, path, 0) < 0) {
+	اگر (repo_hold_تالا_file_for_update(repo, &تالا, راستہ, 0) < 0) {
 		ret = error_errno(_("unable to acquire index lock"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (write_locked_index(&index, &lock, COMMIT_LOCK)) {
+	اگر (write_locked_اشاریہ(&اشاریہ, &تالا, COMMIT_تالا)) {
 		ret = error(_("unable to write new index file"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
-	rollback_lock_file(&lock);
-	release_index(&index);
-	return ret;
+برآمد:
+	rollback_تالا_file(&تالا);
+	release_اشاریہ(&اشاریہ);
+	واپس ret;
 }
 
-static int split_commit(struct repository *repo,
-			struct commit *original,
-			struct pathspec *pathspec,
-			struct commit **out)
+ساکن صحیح بانٹو_commit(ساخت repository *repo,
+			ساخت commit *original,
+			ساخت pathspec *pathspec,
+			ساخت commit **برآمد)
 {
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct strbuf index_file = STRBUF_INIT;
-	struct index_state index = INDEX_STATE_INIT(repo);
-	const struct object_id *original_commit_tree_oid;
-	const struct object_id *old_tree_oid, *new_tree_oid;
-	struct object_id parent_tree_oid;
-	char original_commit_oid[GIT_MAX_HEXSZ + 1];
-	struct commit *first_commit, *second_commit;
-	struct commit_list *parents = NULL;
-	struct tree *split_tree;
-	int ret;
+	ساخت interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	ساخت strbuf اشاریہ_file = STRBUF_INIT;
+	ساخت اشاریہ_state اشاریہ = اشاریہ_STATE_INIT(repo);
+	ثابت ساخت object_id *original_commit_درخت_oid;
+	ثابت ساخت object_id *old_درخت_oid, *new_درخت_oid;
+	ساخت object_id والد_درخت_oid;
+	حرف original_commit_oid[GIT_MAX_HEXSZ + 1];
+	ساخت commit *پہلا_commit, *دوسرا_commit;
+	ساخت commit_list *parents = تہی;
+	ساخت درخت *بانٹو_درخت;
+	صحیح ret;
 
-	if (first_parent_tree_oid(repo, original, &parent_tree_oid) < 0) {
+	اگر (پہلا_والد_درخت_oid(repo, original, &والد_درخت_oid) < 0) {
 		ret = -1;
-		goto out;
+		جاؤ برآمد;
 	}
-	original_commit_tree_oid = get_commit_tree_oid(original);
+	original_commit_درخت_oid = get_commit_درخت_oid(original);
 
 	/*
 	 * Construct the first commit. This is done by taking the original
 	 * commit parent's tree and selectively patching changes from the diff
 	 * between that parent and its child.
 	 */
-	repo_git_path_replace(repo, &index_file, "%s", "history-split.index");
+	repo_git_راستہ_replace(repo, &اشاریہ_file, "%s", "history-split.index");
 
-	ret = write_ondisk_index(repo, &parent_tree_oid, index_file.buf);
-	if (ret < 0)
-		goto out;
+	ret = write_ondisk_اشاریہ(repo, &والد_درخت_oid, اشاریہ_file.buf);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	ret = read_index_from(&index, index_file.buf, repo->gitdir);
-	if (ret < 0) {
+	ret = read_اشاریہ_from(&اشاریہ, اشاریہ_file.buf, repo->gitdir);
+	اگر (ret < 0) {
 		ret = error(_("failed reading temporary index"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	oid_to_hex_r(original_commit_oid, &original->object.oid);
-	ret = run_add_p_index(repo, &index, index_file.buf, &interactive_opts,
-			      original_commit_oid, pathspec, ADD_P_DISALLOW_EDIT);
-	if (ret < 0)
-		goto out;
+	oid_مقصد_hex_r(original_commit_oid, &original->object.oid);
+	ret = تسلسل_جوڑو_p_اشاریہ(repo, &اشاریہ, اشاریہ_file.buf, &interactive_opts,
+			      original_commit_oid, pathspec, جوڑو_P_DISALLOW_EDIT);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	split_tree = write_in_core_index_as_tree(repo, &index);
-	if (!split_tree) {
+	بانٹو_درخت = write_اندر_core_اشاریہ_as_درخت(repo, &اشاریہ);
+	اگر (!بانٹو_درخت) {
 		ret = error(_("failed split tree"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	unlink(index_file.buf);
-	strbuf_release(&index_file);
+	unlink(اشاریہ_file.buf);
+	strbuf_release(&اشاریہ_file);
 
 	/*
 	 * We disallow the cases where either the split-out commit or the
 	 * original commit would become empty. Consequently, if we see that the
 	 * new tree ID matches either of those trees we abort.
 	 */
-	if (oideq(&split_tree->object.oid, &parent_tree_oid)) {
+	اگر (oideq(&بانٹو_درخت->object.oid, &والد_درخت_oid)) {
 		ret = error(_("split commit is empty"));
-		goto out;
-	} else if (oideq(&split_tree->object.oid, original_commit_tree_oid)) {
+		جاؤ برآمد;
+	} ورنہ اگر (oideq(&بانٹو_درخت->object.oid, original_commit_درخت_oid)) {
 		ret = error(_("split commit tree matches original commit"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/*
 	 * The first commit is constructed from the split-out tree. The base
 	 * that shall be diffed against is the parent of the original commit.
 	 */
-	ret = commit_tree_ext(repo, "split-out", original, NULL, original->parents, &parent_tree_oid,
-			      &split_tree->object.oid, &first_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ret = commit_درخت_ext(repo, "split-out", original, تہی, original->parents, &والد_درخت_oid,
+			      &بانٹو_درخت->object.oid, &پہلا_commit, COMMIT_درخت_EDIT_پیغام);
+	اگر (ret < 0) {
 		ret = error(_("failed writing first commit"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/*
@@ -912,269 +912,269 @@ static int split_commit(struct repository *repo,
 	 * diff against and the parent in this case is the first split-out
 	 * commit.
 	 */
-	commit_list_append(first_commit, &parents);
+	commit_list_append(پہلا_commit, &parents);
 
-	old_tree_oid = &repo_get_commit_tree(repo, first_commit)->object.oid;
-	new_tree_oid = &repo_get_commit_tree(repo, original)->object.oid;
+	old_درخت_oid = &repo_get_commit_درخت(repo, پہلا_commit)->object.oid;
+	new_درخت_oid = &repo_get_commit_درخت(repo, original)->object.oid;
 
-	ret = commit_tree_ext(repo, "split-out", original, NULL, parents, old_tree_oid,
-			      new_tree_oid, &second_commit, COMMIT_TREE_EDIT_MESSAGE);
-	if (ret < 0) {
+	ret = commit_درخت_ext(repo, "split-out", original, تہی, parents, old_درخت_oid,
+			      new_درخت_oid, &دوسرا_commit, COMMIT_درخت_EDIT_پیغام);
+	اگر (ret < 0) {
 		ret = error(_("failed writing second commit"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	*out = second_commit;
+	*برآمد = دوسرا_commit;
 	ret = 0;
 
-out:
-	if (index_file.len)
-		unlink(index_file.buf);
-	strbuf_release(&index_file);
+برآمد:
+	اگر (اشاریہ_file.len)
+		unlink(اشاریہ_file.buf);
+	strbuf_release(&اشاریہ_file);
 	commit_list_free(parents);
-	release_index(&index);
-	return ret;
+	release_اشاریہ(&اشاریہ);
+	واپس ret;
 }
 
-static int cmd_history_split(int argc,
-			     const char **argv,
-			     const char *prefix,
-			     struct repository *repo)
+ساکن صحیح cmd_history_بانٹو(صحیح argc,
+			     ثابت حرف **argv,
+			     ثابت حرف *سابقہ,
+			     ساخت repository *repo)
 {
-	const char * const usage[] = {
-		GIT_HISTORY_SPLIT_USAGE,
-		NULL,
+	ثابت حرف * ثابت usage[] = {
+		GIT_HISTORY_بانٹو_USAGE,
+		تہی,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	شمار ref_action action = REF_ACTION_DEFAULT;
+	صحیح dry_تسلسل = 0;
+	ساخت option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control ref update behavior"),
 			       PARSE_OPT_NONEG, parse_ref_action),
-		OPT_BOOL('n', "dry-run", &dry_run,
+		OPT_BOOL('n', "dry-run", &dry_تسلسل,
 			 N_("perform a dry-run without updating any refs")),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct commit *original, *rewritten = NULL;
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct pathspec pathspec = { 0 };
-	struct rev_info revs = { 0 };
-	int ret;
+	ساخت commit *original, *rewritten = تہی;
+	ساخت strbuf reflog_پیغام = STRBUF_INIT;
+	ساخت pathspec pathspec = { 0 };
+	ساخت rev_info revs = { 0 };
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc < 1) {
+	argc = parse_options(argc, argv, سابقہ, options, usage, 0);
+	اگر (argc < 1) {
 		ret = error(_("command expects a committish"));
-		goto out;
+		جاؤ برآمد;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
-	if (action == REF_ACTION_DEFAULT)
+	اگر (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	parse_pathspec(&pathspec, 0,
-		       PATHSPEC_PREFER_FULL |
-		       PATHSPEC_SYMLINK_LEADING_PATH |
-		       PATHSPEC_PREFIX_ORIGIN,
-		       prefix, argv + 1);
+		       PATHSPEC_PREFER_بھرا |
+		       PATHSPEC_SYMLINK_LEADING_راستہ |
+		       PATHSPEC_سابقہ_ORIGIN,
+		       سابقہ, argv + 1);
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	اگر (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret < 0)
-		goto out;
+	ret = تیاری_revwalk(repo, action, original, &revs);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	if (original->parents && original->parents->next) {
+	اگر (original->parents && original->parents->اگلا) {
 		ret = error(_("cannot split up merge commit"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	ret = split_commit(repo, original, &pathspec, &rewritten);
-	if (ret < 0)
-		goto out;
+	ret = بانٹو_commit(repo, original, &pathspec, &rewritten);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	strbuf_addf(&reflog_msg, "split: updating %s", argv[0]);
+	strbuf_addf(&reflog_پیغام, "split: updating %s", argv[0]);
 
 	ret = handle_reference_updates(&revs, action, original, rewritten,
-				       reflog_msg.buf, dry_run, REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_پیغام.buf, dry_تسلسل, REPLAY_خالی_خانے_COMMIT_ABORT);
+	اگر (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
-	strbuf_release(&reflog_msg);
+برآمد:
+	strbuf_release(&reflog_پیغام);
 	clear_pathspec(&pathspec);
 	release_revisions(&revs);
-	return ret;
+	واپس ret;
 }
 
-#define SQUASH_SEEN (1u << 11)
-#define SQUASH_TIP (1u << 12)
-#define SQUASH_AMEND_TARGET (1u << 13)
+#تعریف_کرو SQUASH_نظر_آیا (1u << 11)
+#تعریف_کرو SQUASH_TIP (1u << 12)
+#تعریف_کرو SQUASH_AMEND_ہدف (1u << 13)
 
-static bool is_autosquash_subject(const char *s)
+ساکن bool is_autosquash_subject(ثابت حرف *s)
 {
-	return starts_with(s, "amend!") || starts_with(s, "fixup!") ||
+	واپس starts_with(s, "amend!") || starts_with(s, "fixup!") ||
 		starts_with(s, "squash!");
 }
 
-static bool skip_one_autosquash_prefix(const char *s, const char **out)
+ساکن bool skip_one_autosquash_سابقہ(ثابت حرف *s, ثابت حرف **برآمد)
 {
-	if (skip_prefix(s, "amend!", out) || skip_prefix(s, "fixup!", out) ||
-	    skip_prefix(s, "squash!", out)) {
-		while (**out == ' ')
-			(*out)++;
-		return true;
+	اگر (skip_سابقہ(s, "amend!", برآمد) || skip_سابقہ(s, "fixup!", برآمد) ||
+	    skip_سابقہ(s, "squash!", برآمد)) {
+		جب (**برآمد == ' ')
+			(*برآمد)++;
+		واپس true;
 	}
-	return false;
+	واپس false;
 }
 
-static void truncate_message_to_subject(struct strbuf *msg)
+ساکن خالی truncate_پیغام_مقصد_subject(ساخت strbuf *پیغام)
 {
-	const char *eos = strstr(msg->buf, "\n\n");
+	ثابت حرف *eos = لڑی_تلاش(پیغام->buf, "\n\n");
 
-	if (eos)
-		strbuf_setlen(msg, eos - msg->buf + 1);
+	اگر (eos)
+		strbuf_setlen(پیغام, eos - پیغام->buf + 1);
 }
 
-struct subject_data {
-	struct strintmap subjects;
-	struct strbuf subject;
-	struct strbuf squash_message;
-	const char *message;
-	bool edit_message;
+ساخت subject_ڈیٹا {
+	ساخت strintmap subjects;
+	ساخت strbuf subject;
+	ساخت strbuf squash_پیغام;
+	ثابت حرف *پیغام_2;
+	bool edit_پیغام;
 };
 
-#define SUBJECT_DATA_INIT {		\
+#تعریف_کرو SUBJECT_ڈیٹا_INIT {		\
 	.subjects = STRINTMAP_INIT,	\
 	.subject = STRBUF_INIT,		\
-	.squash_message = STRBUF_INIT,	\
+	.squash_پیغام = STRBUF_INIT,	\
 }
 
-static void subject_data_clear(struct subject_data *data)
+ساکن خالی subject_ڈیٹا_clear(ساخت subject_ڈیٹا *ڈیٹا)
 {
-	strintmap_clear(&data->subjects);
-	strbuf_release(&data->subject);
-	strbuf_release(&data->squash_message);
+	strintmap_clear(&ڈیٹا->subjects);
+	strbuf_release(&ڈیٹا->subject);
+	strbuf_release(&ڈیٹا->squash_پیغام);
 }
 
-static int squash_amend_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
-				unsigned flags)
+ساکن صحیح squash_amend_پیغام(ساخت repository *repo,
+				ساخت commit *commit,
+				ساخت subject_ڈیٹا *ڈیٹا,
+				غیرعلامتی flags)
 {
-	const char *body = data->message + data->subject.len;
+	ثابت حرف *body = ڈیٹا->پیغام_2 + ڈیٹا->subject.len;
 
-	while (isspace(*body))
+	جب (خلا_ہے(*body))
 		body++;
 
-	if (!*body) {
+	اگر (!*body) {
 		warning(_("ignoring %s (%s): message body is empty"),
-			repo_find_unique_abbrev(repo, &commit->object.oid,
+			repo_ڈھونڈو_unique_abbrev(repo, &commit->object.oid,
 						DEFAULT_ABBREV),
-			data->subject.buf);
-		return 0;
+			ڈیٹا->subject.buf);
+		واپس 0;
 	}
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "squash!"))
-			return error(_("squashing %s (%s) would overwrite "
+	اگر (ڈیٹا->edit_پیغام) {
+		واپس 0;
+	} ورنہ اگر (flags & SQUASH_AMEND_ہدف) {
+		اگر (starts_with(ڈیٹا->squash_پیغام.buf, "squash!"))
+			واپس error(_("squashing %s (%s) would overwrite "
 				       "'squash!' message, please combine them "
 				       "using '--edit'"),
-				     repo_find_unique_abbrev(repo,
+				     repo_ڈھونڈو_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
-				     data->subject.buf);
-		if (starts_with(data->squash_message.buf, "fixup!"))
-			strbuf_splice(&data->squash_message, 0, 5, "amend!", 5);
-		if (starts_with(data->squash_message.buf, "amend!")) {
-			truncate_message_to_subject(&data->squash_message);
-			strbuf_addch(&data->squash_message, '\n');
-		} else {
-			strbuf_reset(&data->squash_message);
+				     ڈیٹا->subject.buf);
+		اگر (starts_with(ڈیٹا->squash_پیغام.buf, "fixup!"))
+			strbuf_splice(&ڈیٹا->squash_پیغام, 0, 5, "amend!", 5);
+		اگر (starts_with(ڈیٹا->squash_پیغام.buf, "amend!")) {
+			truncate_پیغام_مقصد_subject(&ڈیٹا->squash_پیغام);
+			strbuf_addch(&ڈیٹا->squash_پیغام, '\n');
+		} ورنہ {
+			strbuf_reset(&ڈیٹا->squash_پیغام);
 		}
-		strbuf_addstr(&data->squash_message, body);
-		strbuf_complete_line(&data->squash_message);
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+		strbuf_addstr(&ڈیٹا->squash_پیغام, body);
+		strbuf_complete_سطر(&ڈیٹا->squash_پیغام);
+	} ورنہ {
+		واپس error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
-			     repo_find_unique_abbrev(repo, &commit->object.oid,
+			     repo_ڈھونڈو_unique_abbrev(repo, &commit->object.oid,
 						     DEFAULT_ABBREV),
-			     data->subject.buf);
+			     ڈیٹا->subject.buf);
 	}
-	return 0;
+	واپس 0;
 }
 
-static int squash_squash_message(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data,
-				unsigned flags)
+ساکن صحیح squash_squash_پیغام(ساخت repository *repo,
+				ساخت commit *commit,
+				ساخت subject_ڈیٹا *ڈیٹا,
+				غیرعلامتی flags)
 {
-	const char *body = data->message + data->subject.len;
+	ثابت حرف *body = ڈیٹا->پیغام_2 + ڈیٹا->subject.len;
 
-	while (isspace(*body))
+	جب (خلا_ہے(*body))
 		body++;
 
-	if (data->edit_message) {
-		return 0;
-	} else if (flags & SQUASH_AMEND_TARGET) {
-		if (starts_with(data->squash_message.buf, "fixup!")) {
-			truncate_message_to_subject(&data->squash_message);
-			strbuf_splice(&data->squash_message, 0, 5, "squash", 6);
+	اگر (ڈیٹا->edit_پیغام) {
+		واپس 0;
+	} ورنہ اگر (flags & SQUASH_AMEND_ہدف) {
+		اگر (starts_with(ڈیٹا->squash_پیغام.buf, "fixup!")) {
+			truncate_پیغام_مقصد_subject(&ڈیٹا->squash_پیغام);
+			strbuf_splice(&ڈیٹا->squash_پیغام, 0, 5, "squash", 6);
 		}
-		if (starts_with(data->squash_message.buf, "squash!")) {
-			strbuf_addch(&data->squash_message, '\n');
-			strbuf_addstr(&data->squash_message, body);
-			strbuf_complete_line(&data->squash_message);
-		} else {
-			return error(_("squashing %s (%s) would discard its "
+		اگر (starts_with(ڈیٹا->squash_پیغام.buf, "squash!")) {
+			strbuf_addch(&ڈیٹا->squash_پیغام, '\n');
+			strbuf_addstr(&ڈیٹا->squash_پیغام, body);
+			strbuf_complete_سطر(&ڈیٹا->squash_پیغام);
+		} ورنہ {
+			واپس error(_("squashing %s (%s) would discard its "
 				       "message, please combine them using "
 				       "'--edit'"),
-				     repo_find_unique_abbrev(repo,
+				     repo_ڈھونڈو_unique_abbrev(repo,
 							     &commit->object.oid,
 							     DEFAULT_ABBREV),
-				     data->subject.buf);
+				     ڈیٹا->subject.buf);
 		}
-	} else {
-		return error(_("cannot squash %s (%s) that does not target "
+	} ورنہ {
+		واپس error(_("cannot squash %s (%s) that does not target "
 			       "base commit without '--edit'"),
-			      repo_find_unique_abbrev(repo, &commit->object.oid,
+			      repo_ڈھونڈو_unique_abbrev(repo, &commit->object.oid,
 						      DEFAULT_ABBREV),
-			      data->subject.buf);
+			      ڈیٹا->subject.buf);
 	}
-	return 0;
+	واپس 0;
 }
 
-static int squash_check_can_autosquash(struct repository *repo,
-				       struct commit *commit,
-				       struct subject_data *data,
-				       unsigned flags)
+ساکن صحیح squash_check_can_autosquash(ساخت repository *repo,
+				       ساخت commit *commit,
+				       ساخت subject_ڈیٹا *ڈیٹا,
+				       غیرعلامتی flags)
 {
-	commit->object.flags |= flags & SQUASH_AMEND_TARGET;
-	if (starts_with(data->subject.buf, "amend!"))
-		return squash_amend_message(repo, commit, data, flags);
-	else if (starts_with(data->subject.buf, "squash!"))
-		return squash_squash_message(repo, commit, data, flags);
+	commit->object.flags |= flags & SQUASH_AMEND_ہدف;
+	اگر (starts_with(ڈیٹا->subject.buf, "amend!"))
+		واپس squash_amend_پیغام(repo, commit, ڈیٹا, flags);
+	ورنہ اگر (starts_with(ڈیٹا->subject.buf, "squash!"))
+		واپس squash_squash_پیغام(repo, commit, ڈیٹا, flags);
 
-	return 0;
+	واپس 0;
 }
 
-static int squash_check_autosquash_subject(struct repository *repo,
-					   struct commit *commit,
-					   struct subject_data *data)
+ساکن صحیح squash_check_autosquash_subject(ساخت repository *repo,
+					   ساخت commit *commit,
+					   ساخت subject_ڈیٹا *ڈیٹا)
 {
-	const char* s = data->subject.buf;
-	struct commit *target;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	ثابت حرف* s = ڈیٹا->subject.buf;
+	ساخت commit *ہدف;
+	ساخت hashmap_iter iter;
+	ساخت strmap_اندراج *اندراج_2;
 	/* Try skipping autosquash prefixes one at a time to allow
 	 * squashing
 	 *     a commit
@@ -1187,10 +1187,10 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 *
 	 * and squashed the first fixup separately from the second
 	 */
-	while (skip_one_autosquash_prefix(s, &s)) {
-		unsigned flags = strintmap_get(&data->subjects, s);
-		if (flags)
-			return squash_check_can_autosquash(repo, commit, data, flags);
+	جب (skip_one_autosquash_سابقہ(s, &s)) {
+		غیرعلامتی flags = strintmap_get(&ڈیٹا->subjects, s);
+		اگر (flags)
+			واپس squash_check_can_autosquash(repo, commit, ڈیٹا, flags);
 	}
 	/*
 	 * Allow "fixup! <hex object id>", but not "fixup! HEAD^" or
@@ -1198,115 +1198,115 @@ static int squash_check_autosquash_subject(struct repository *repo,
 	 * to allow "fixup! abc123" and "fixup! <subject of abc123>" to be
 	 * squashed together.
 	 */
-	target = lookup_commit_reference_by_name(s);
-	if (target && starts_with(oid_to_hex(&target->object.oid), s)) {
-		unsigned flags =
-			target->object.flags & (SQUASH_SEEN | SQUASH_AMEND_TARGET);
-		if (!flags) {
-			const char *subject_start;
-			const char *buffer = repo_logmsg_reencode(repo, target,
-								  NULL, NULL);
-			size_t subject_len = find_commit_subject(buffer,
-								 &subject_start);
-			char *subject = xmemdupz(subject_start, subject_len);
+	ہدف = lookup_commit_reference_by_name(s);
+	اگر (ہدف && starts_with(oid_مقصد_hex(&ہدف->object.oid), s)) {
+		غیرعلامتی flags =
+			ہدف->object.flags & (SQUASH_نظر_آیا | SQUASH_AMEND_ہدف);
+		اگر (!flags) {
+			ثابت حرف *subject_آغاز;
+			ثابت حرف *بفر = repo_logmsg_reencode(repo, ہدف,
+								  تہی, تہی);
+			سائز_t subject_len = ڈھونڈو_commit_subject(بفر,
+								 &subject_آغاز);
+			حرف *subject = xmemdupz(subject_آغاز, subject_len);
 
-			flags = strintmap_get(&data->subjects, subject);
-			free(subject);
-			repo_unuse_commit_buffer(repo, target, buffer);
+			flags = strintmap_get(&ڈیٹا->subjects, subject);
+			آزاد(subject);
+			repo_unuse_commit_بفر(repo, ہدف, بفر);
 		}
-		if (flags)
-			return squash_check_can_autosquash(repo, commit,
-							   data, flags);
+		اگر (flags)
+			واپس squash_check_can_autosquash(repo, commit,
+							   ڈیٹا, flags);
 	}
 	/* Try subject prefix matches */
-	strintmap_for_each_entry(&data->subjects, &iter, entry) {
-		s = data->subject.buf;
-		while(skip_one_autosquash_prefix(s, &s)) {
-			if (starts_with(entry->key, s)) {
-				unsigned value = (intptr_t)entry->value;
+	strintmap_for_each_اندراج(&ڈیٹا->subjects, &iter, اندراج_2) {
+		s = ڈیٹا->subject.buf;
+		جب(skip_one_autosquash_سابقہ(s, &s)) {
+			اگر (starts_with(اندراج_2->کلید, s)) {
+				غیرعلامتی قدر = (intptr_t)اندراج_2->قدر;
 
-				return squash_check_can_autosquash(repo, commit,
-								   data, value);
+				واپس squash_check_can_autosquash(repo, commit,
+								   ڈیٹا, قدر);
 			}
 		}
 	}
-	return error(_("cannot squash %s (%s): its target is not being "
+	واپس error(_("cannot squash %s (%s): its target is not being "
 		       "squashed"),
-		       repo_find_unique_abbrev(repo, &commit->object.oid,
+		       repo_ڈھونڈو_unique_abbrev(repo, &commit->object.oid,
 					       DEFAULT_ABBREV),
-		       data->subject.buf);
+		       ڈیٹا->subject.buf);
 }
 
-static int squash_check_subject(struct repository *repo,
-				struct commit *commit,
-				struct subject_data *data)
+ساکن صحیح squash_check_subject(ساخت repository *repo,
+				ساخت commit *commit,
+				ساخت subject_ڈیٹا *ڈیٹا)
 {
-	int ret = 0;
-	const char *buf = repo_logmsg_reencode(repo, commit, NULL, NULL);
-	size_t subject_len = find_commit_subject(buf, &data->message);
+	صحیح ret = 0;
+	ثابت حرف *buf = repo_logmsg_reencode(repo, commit, تہی, تہی);
+	سائز_t subject_len = ڈھونڈو_commit_subject(buf, &ڈیٹا->پیغام_2);
 
-	strbuf_reset(&data->subject);
-	strbuf_add(&data->subject, data->message, subject_len);
+	strbuf_reset(&ڈیٹا->subject);
+	strbuf_جوڑو(&ڈیٹا->subject, ڈیٹا->پیغام_2, subject_len);
 
-	if (!strintmap_get_size(&data->subjects)) {
-		const char *s;
+	اگر (!strintmap_get_سائز(&ڈیٹا->subjects)) {
+		ثابت حرف *s;
 
-		strbuf_addstr(&data->squash_message, data->message);
-		strbuf_complete_line(&data->squash_message);
+		strbuf_addstr(&ڈیٹا->squash_پیغام, ڈیٹا->پیغام_2);
+		strbuf_complete_سطر(&ڈیٹا->squash_پیغام);
 		/*
 		 * Strip a single autosquash prefix to allow squashing
 		 *     fixup! base
 		 *     amend! base
 		 */
-		s = data->subject.buf;
-		skip_one_autosquash_prefix(s, &s);
-		strintmap_set(&data->subjects, s, SQUASH_AMEND_TARGET | SQUASH_SEEN);
-		commit->object.flags |= SQUASH_AMEND_TARGET;
-	} else if (is_autosquash_subject(data->subject.buf)) {
-		ret = squash_check_autosquash_subject(repo, commit, data);
-	} else {
-		strintmap_set(&data->subjects, data->subject.buf, SQUASH_SEEN);
+		s = ڈیٹا->subject.buf;
+		skip_one_autosquash_سابقہ(s, &s);
+		strintmap_سیٹ(&ڈیٹا->subjects, s, SQUASH_AMEND_ہدف | SQUASH_نظر_آیا);
+		commit->object.flags |= SQUASH_AMEND_ہدف;
+	} ورنہ اگر (is_autosquash_subject(ڈیٹا->subject.buf)) {
+		ret = squash_check_autosquash_subject(repo, commit, ڈیٹا);
+	} ورنہ {
+		strintmap_سیٹ(&ڈیٹا->subjects, ڈیٹا->subject.buf, SQUASH_نظر_آیا);
 	}
-	repo_unuse_commit_buffer(repo, commit, buf);
-	return ret;
+	repo_unuse_commit_بفر(repo, commit, buf);
+	واپس ret;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out);
+ساکن صحیح build_squash_پیغام(ساخت repository *repo,
+				ثابت ساخت strbuf *todo_buf,
+				ساخت strbuf *برآمد);
 
-static int setup_squash_revisions(struct repository *repo,
-				  int argc, const char **argv,
-				  struct rev_info *revs)
+ساکن صحیح تیاری_squash_revisions(ساخت repository *repo,
+				  صحیح argc, ثابت حرف **argv,
+				  ساخت rev_info *revs)
 {
-	repo_init_revisions(repo, revs, NULL);
-	revs->reverse = 1;
-	revs->topo_order = 1;
-	revs->sort_order = REV_SORT_IN_GRAPH_ORDER;
+	repo_init_revisions(repo, revs, تہی);
+	revs->الٹ = 1;
+	revs->topo_ترتیب = 1;
+	revs->ترتیب_دو_ترتیب = REV_ترتیب_دو_اندر_گراف_ترتیب;
 	revs->simplify_history = 0;
-	revs->ancestry_path = 1;
+	revs->ancestry_راستہ = 1;
 	revs->limited = 1;
-	revs->ancestry_path_implicit_bottoms = 1;
+	revs->ancestry_راستہ_implicit_bottoms = 1;
 
-	argc = setup_revisions(argc, argv, revs, NULL);
-	if (argc > 1)
-		return error(_("unrecognized argument: %s"), argv[1]);
+	argc = تیاری_revisions(argc, argv, revs, تہی);
+	اگر (argc > 1)
+		واپس error(_("unrecognized argument: %s"), argv[1]);
 
-	if (revs->reverse != 1 || revs->topo_order != 1 ||
-	    revs->sort_order != REV_SORT_IN_GRAPH_ORDER ||
+	اگر (revs->الٹ != 1 || revs->topo_ترتیب != 1 ||
+	    revs->ترتیب_دو_ترتیب != REV_ترتیب_دو_اندر_گراف_ترتیب ||
 	    revs->simplify_history != 0 || revs->boundary == 1 ||
-	    revs->ancestry_path != 1 || revs->limited != 1 ||
-	    revs->ancestry_path_implicit_bottoms != 1) {
+	    revs->ancestry_راستہ != 1 || revs->limited != 1 ||
+	    revs->ancestry_راستہ_implicit_bottoms != 1) {
 		warning(_("ignoring rev-list options that would change how the "
 			  "range is walked"));
-		revs->reverse = 1;
-		revs->topo_order = 1;
-		revs->sort_order = REV_SORT_IN_GRAPH_ORDER;
+		revs->الٹ = 1;
+		revs->topo_ترتیب = 1;
+		revs->ترتیب_دو_ترتیب = REV_ترتیب_دو_اندر_گراف_ترتیب;
 		revs->simplify_history = 0;
 		revs->boundary = 0;
-		revs->ancestry_path = 1;
+		revs->ancestry_راستہ = 1;
 		revs->limited = 1;
-		revs->ancestry_path_implicit_bottoms = 1;
+		revs->ancestry_راستہ_implicit_bottoms = 1;
 	}
 
 	/*
@@ -1314,11 +1314,11 @@ static int setup_squash_revisions(struct repository *repo,
 	 * something, as in "<base>..<tip>". A revision range with no such
 	 * bottom commit cannot be squashed.
 	 */
-	for (size_t i = 0; i < revs->cmdline.nr; i++)
-		if (revs->cmdline.rev[i].flags & BOTTOM)
-			return 0;
+	برائے (سائز_t i = 0; i < revs->cmdline.nr; i++)
+		اگر (revs->cmdline.rev[i].flags & BOTTOM)
+			واپس 0;
 
-	return error(_("not a '<base>..<tip>' revision range"));
+	واپس error(_("not a '<base>..<tip>' revision range"));
 }
 
 /*
@@ -1326,135 +1326,135 @@ static int setup_squash_revisions(struct repository *repo,
  * parent after the oldest commit must either be selected or also be a parent
  * of the oldest commit.
  */
-static int resolve_squash_range(struct repository *repo,
+ساکن صحیح resolve_squash_range(ساخت repository *repo,
 				bool update_branches,
-				bool edit_message,
-				int argc, const char **argv,
-				struct commit **oldest_out,
-				struct commit **tip_out,
-				char **message_out)
+				bool edit_پیغام,
+				صحیح argc, ثابت حرف **argv,
+				ساخت commit **oldest_برآمد,
+				ساخت commit **tip_برآمد,
+				حرف **پیغام_برآمد)
 {
-	struct rev_info revs;
-	struct subject_data subject_data = SUBJECT_DATA_INIT;
-	struct commit *commit, *oldest = NULL, *tip = NULL;
-	struct strbuf todo_buf = STRBUF_INIT;
-	int ret, tip_count = 0;
+	ساخت rev_info revs;
+	ساخت subject_ڈیٹا subject_ڈیٹا = SUBJECT_ڈیٹا_INIT;
+	ساخت commit *commit, *oldest = تہی, *tip = تہی;
+	ساخت strbuf todo_buf = STRBUF_INIT;
+	صحیح ret, tip_گنتی = 0;
 	bool walk_started = false;
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array refs = { 0 };
+	ساخت ref_filter filter = REF_FILTER_INIT;
+	ساخت ref_array refs = { 0 };
 
-	subject_data.edit_message = edit_message;
-	ret = setup_squash_revisions(repo, argc, argv, &revs);
-	if (ret < 0)
-		goto out;
+	subject_ڈیٹا.edit_پیغام = edit_پیغام;
+	ret = تیاری_squash_revisions(repo, argc, argv, &revs);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	if (prepare_revision_walk(&revs) < 0) {
+	اگر (prepare_revision_walk(&revs) < 0) {
 		ret = error(_("error preparing revisions"));
-		goto out;
+		جاؤ برآمد;
 	}
 	walk_started = true;
-	while ((commit = get_revision(&revs))) {
-		struct commit_list *p;
+	جب ((commit = get_revision(&revs))) {
+		ساخت commit_list *p;
 
-		if (edit_message)
+		اگر (edit_پیغام)
 			strbuf_addf(&todo_buf, "pick %s\n",
-				    oid_to_hex(&commit->object.oid));
+				    oid_مقصد_hex(&commit->object.oid));
 
-		if (!commit->parents) {
+		اگر (!commit->parents) {
 			ret = error(_("cannot squash down to root commit"));
-			goto out;
+			جاؤ برآمد;
 		}
-		for (p = commit->parents; oldest && p; p = p->next) {
-			struct commit_list *q;
-			struct object *o;
-			bool seen;
+		برائے (p = commit->parents; oldest && p; p = p->اگلا) {
+			ساخت commit_list *q;
+			ساخت object *o;
+			bool نظر_آیا;
 
-			if (repo_parse_commit(repo, p->item)) {
+			اگر (repo_parse_commit(repo, p->شے)) {
 				ret = error(_("cannot parse commit"));
-				goto out;
+				جاؤ برآمد;
 			}
-			o = &p->item->object;
-			seen = o->flags & SQUASH_SEEN;
+			o = &p->شے->object;
+			نظر_آیا = o->flags & SQUASH_نظر_آیا;
 			/*
 			 * Allow parents that match the parents of the
 			 * squashed commit.
 			 */
-			for (q = oldest->parents; !seen && q; q = q->next) {
-				if (p->item == q->item) {
-					seen = true;
-					commit_list_insert(commit, &filter.with_commit);
+			برائے (q = oldest->parents; !نظر_آیا && q; q = q->اگلا) {
+				اگر (p->شے == q->شے) {
+					نظر_آیا = true;
+					commit_list_داخل_کرو(commit, &filter.with_commit);
 				}
 			}
-			if (!seen) {
+			اگر (!نظر_آیا) {
 				ret = error(_("parent %s of commit %s is "
 					      "outside the revision range"),
-					    repo_find_unique_abbrev(repo, &o->oid,
+					    repo_ڈھونڈو_unique_abbrev(repo, &o->oid,
 								    DEFAULT_ABBREV),
-					    repo_find_unique_abbrev(repo,
+					    repo_ڈھونڈو_unique_abbrev(repo,
 								    &commit->object.oid,
 								    DEFAULT_ABBREV));
-				goto out;
+				جاؤ برآمد;
 			}
-			if (o->flags & SQUASH_TIP) {
-				tip_count--;
+			اگر (o->flags & SQUASH_TIP) {
+				tip_گنتی--;
 				o->flags &= ~SQUASH_TIP;
 			}
 		}
-		if (!oldest) {
-			commit_list_insert(commit, &filter.with_commit);
+		اگر (!oldest) {
+			commit_list_داخل_کرو(commit, &filter.with_commit);
 			oldest = commit;
 		}
-		if (squash_check_subject(repo, commit, &subject_data)) {
+		اگر (squash_check_subject(repo, commit, &subject_ڈیٹا)) {
 			ret = -1;
-			goto out;
+			جاؤ برآمد;
 		}
 		tip = commit;
-		tip->object.flags |= SQUASH_SEEN | SQUASH_TIP;
-		tip_count++;
+		tip->object.flags |= SQUASH_نظر_آیا | SQUASH_TIP;
+		tip_گنتی++;
 	}
-	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP);
+	clear_object_flags(repo, SQUASH_نظر_آیا | SQUASH_TIP);
 	reset_revision_walk();
 	walk_started = false;
 
-	if (!tip_count) {
+	اگر (!tip_گنتی) {
 		ret = error(_("the revision range is empty"));
-		goto out;
-	} else if (tip_count != 1) {
+		جاؤ برآمد;
+	} ورنہ اگر (tip_گنتی != 1) {
 		ret = error(_("the revision range contains more than one tip "
 			      "commit"));
-		goto out;
-	} else if (oldest == tip) {
+		جاؤ برآمد;
+	} ورنہ اگر (oldest == tip) {
 		ret = error(_("the revision range holds a single commit; "
 			      "nothing to squash"));
-		goto out;
-	} else if (!oldest->parents) {
+		جاؤ برآمد;
+	} ورنہ اگر (!oldest->parents) {
 		BUG("an in-range commit must have a parent");
 	}
 
-	commit_list_insert(tip, &filter.no_commit);
-	filter.kind = FILTER_REFS_BRANCHES;
-	if (update_branches &&
-	    filter_refs(&refs, &filter, filter.kind)) {
+	commit_list_داخل_کرو(tip, &filter.no_commit);
+	filter.قسم = FILTER_REFS_BRANCHES;
+	اگر (update_branches &&
+	    filter_refs(&refs, &filter, filter.قسم)) {
 		ret = error(_("could not filter refs"));
-		goto out;
+		جاؤ برآمد;
 	}
-	if (refs.nr) {
-		struct ref_format format = REF_FORMAT_INIT;
-		struct ref_sorting *sorting;
-		struct string_list sorting_options = STRING_LIST_INIT_DUP;
-		struct strbuf branches = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	اگر (refs.nr) {
+		ساخت ref_format format = REF_FORMAT_INIT;
+		ساخت ref_ترتیب_کاری *ترتیب_کاری;
+		ساخت string_list ترتیب_کاری_options = STRING_LIST_INIT_DUP;
+		ساخت strbuf branches = STRBUF_INIT;
+		ساخت strbuf err = STRBUF_INIT;
 
 		format.format = "%(refname:short)";
-		if (verify_ref_format(&format))
+		اگر (verify_ref_format(&format))
 			BUG("invalid branch format");
-		string_list_append(&sorting_options, "refname");
-		sorting = ref_sorting_options(&sorting_options);
-		ref_array_sort(sorting, &refs);
-		for (int i = 0; i < refs.nr; i++) {
+		string_list_append(&ترتیب_کاری_options, "refname");
+		ترتیب_کاری = ref_ترتیب_کاری_options(&ترتیب_کاری_options);
+		ref_array_ترتیب_دو(ترتیب_کاری, &refs);
+		برائے (صحیح i = 0; i < refs.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_addstr(&branches, "\n  ");
-			if (format_ref_array_item(refs.items[i], &format,
+			اگر (format_ref_array_شے(refs.اشیاء[i], &format,
 						  &branches, &err))
 				BUG("could not format branch name: %s", err.buf);
 		}
@@ -1469,322 +1469,322 @@ static int resolve_squash_range(struct repository *repo,
 				    "untouched."));
 		strbuf_release(&err);
 		strbuf_release(&branches);
-		ref_sorting_release(sorting);
-		string_list_clear(&sorting_options, 0);
-		goto out;
+		ref_ترتیب_کاری_release(ترتیب_کاری);
+		string_list_clear(&ترتیب_کاری_options, 0);
+		جاؤ برآمد;
 	}
-	if (edit_message) {
-		strbuf_reset(&subject_data.squash_message);
-		ret = build_squash_message(repo, &todo_buf,
-					   &subject_data.squash_message);
-		if (ret < 0)
-			goto out;
+	اگر (edit_پیغام) {
+		strbuf_reset(&subject_ڈیٹا.squash_پیغام);
+		ret = build_squash_پیغام(repo, &todo_buf,
+					   &subject_ڈیٹا.squash_پیغام);
+		اگر (ret < 0)
+			جاؤ برآمد;
 	}
 
-	*oldest_out = oldest;
-	*tip_out = tip;
-	*message_out = strbuf_detach(&subject_data.squash_message, NULL);
+	*oldest_برآمد = oldest;
+	*tip_برآمد = tip;
+	*پیغام_برآمد = strbuf_detach(&subject_ڈیٹا.squash_پیغام, تہی);
 	ret = 0;
 
-out:
+برآمد:
 	strbuf_release(&todo_buf);
-	clear_object_flags(repo, SQUASH_SEEN | SQUASH_TIP |
-			   SQUASH_AMEND_TARGET);
-	if (walk_started)
+	clear_object_flags(repo, SQUASH_نظر_آیا | SQUASH_TIP |
+			   SQUASH_AMEND_ہدف);
+	اگر (walk_started)
 		reset_revision_walk();
-	subject_data_clear(&subject_data);
+	subject_ڈیٹا_clear(&subject_ڈیٹا);
 	release_revisions(&revs);
 	ref_filter_clear(&filter);
 	ref_array_clear(&refs);
-	return ret;
+	واپس ret;
 }
 
-static bool amend_replaces_target(struct todo_list *todo, int target)
+ساکن bool amend_replaces_ہدف(ساخت todo_list *todo, صحیح ہدف)
 {
-	for (int i = target + 1; i < todo->nr &&
-				 todo->items[i].command != TODO_PICK; i++) {
-		if (todo->items[i].command == TODO_SQUASH)
-			return false;
-		if (todo->items[i].flags & TODO_REPLACE_FIXUP_MSG)
-			return true;
+	برائے (صحیح i = ہدف + 1; i < todo->nr &&
+				 todo->اشیاء[i].command != TODO_PICK; i++) {
+		اگر (todo->اشیاء[i].command == TODO_SQUASH)
+			واپس false;
+		اگر (todo->اشیاء[i].flags & TODO_REPLACE_FIXUP_پیغام)
+			واپس true;
 	}
-	return false;
+	واپس false;
 }
 
-static int build_squash_message(struct repository *repo,
-				const struct strbuf *todo_buf,
-				struct strbuf *out)
+ساکن صحیح build_squash_پیغام(ساخت repository *repo,
+				ثابت ساخت strbuf *todo_buf,
+				ساخت strbuf *برآمد)
 {
-	struct todo_list todo = TODO_LIST_INIT;
-	struct replay_opts opts = REPLAY_OPTS_INIT;
-	int nr_commits, ret;
+	ساخت todo_list todo = TODO_LIST_INIT;
+	ساخت replay_opts opts = REPLAY_OPTS_INIT;
+	صحیح nr_commits, ret;
 
-	if (todo_list_parse_insn_buffer(repo, &opts, todo_buf->buf, &todo) < 0 ||
+	اگر (todo_list_parse_insn_بفر(repo, &opts, todo_buf->buf, &todo) < 0 ||
 	    todo_list_rearrange_squash(&todo) < 0) {
 		ret = error(_("could not prepare the squash message"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	nr_commits = todo.nr;
-	for (int i = 0; i < nr_commits; i++) {
-		struct todo_item *item = &todo.items[i];
-		const char *message, *body;
-		size_t commented_len;
+	برائے (صحیح i = 0; i < nr_commits; i++) {
+		ساخت todo_شے *شے = &todo.اشیاء[i];
+		ثابت حرف *پیغام_2, *body;
+		سائز_t commented_len;
 		bool skip, squashing;
 
-		squashing = item->command == TODO_SQUASH ||
-			    (item->flags & TODO_REPLACE_FIXUP_MSG);
-		if (item->command == TODO_PICK)
-			skip = amend_replaces_target(&todo, i);
-		else
+		squashing = شے->command == TODO_SQUASH ||
+			    (شے->flags & TODO_REPLACE_FIXUP_پیغام);
+		اگر (شے->command == TODO_PICK)
+			skip = amend_replaces_ہدف(&todo, i);
+		ورنہ
 			skip = !squashing;
 
-		message = repo_logmsg_reencode(repo, item->commit, NULL, NULL);
-		find_commit_subject(message, &body);
+		پیغام_2 = repo_logmsg_reencode(repo, شے->commit, تہی, تہی);
+		ڈھونڈو_commit_subject(پیغام_2, &body);
 
-		if (skip)
-			commented_len = strlen(body);
-		else if (squashing)
+		اگر (skip)
+			commented_len = لڑی_لمبائی(body);
+		ورنہ اگر (squashing)
 			commented_len = squash_subject_comment_len(body, 1);
-		else
+		ورنہ
 			commented_len = 0;
 
-		if (!i)
-			add_squash_combination_header(out, nr_commits);
-		strbuf_addch(out, '\n');
-		add_squash_message_header(out, i + 1, skip);
-		strbuf_addstr(out, "\n\n");
-		strbuf_add_commented_lines(out, body, commented_len, comment_line_str);
-		strbuf_addstr(out, body + commented_len);
-		strbuf_complete_line(out);
+		اگر (!i)
+			جوڑو_squash_combination_سرخی(برآمد, nr_commits);
+		strbuf_addch(برآمد, '\n');
+		جوڑو_squash_پیغام_سرخی(برآمد, i + 1, skip);
+		strbuf_addstr(برآمد, "\n\n");
+		strbuf_جوڑو_commented_سطریں(برآمد, body, commented_len, comment_سطر_str);
+		strbuf_addstr(برآمد, body + commented_len);
+		strbuf_complete_سطر(برآمد);
 
-		repo_unuse_commit_buffer(repo, item->commit, message);
+		repo_unuse_commit_بفر(repo, شے->commit, پیغام_2);
 	}
 
 	ret = 0;
 
-out:
+برآمد:
 	todo_list_release(&todo);
 	replay_opts_release(&opts);
-	return ret;
+	واپس ret;
 }
 
-static int cmd_history_squash(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo)
+ساکن صحیح cmd_history_squash(صحیح argc,
+			      ثابت حرف **argv,
+			      ثابت حرف *سابقہ,
+			      ساخت repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		تہی,
 	};
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	int edit = 1;
-	struct option options[] = {
+	شمار ref_action action = REF_ACTION_DEFAULT;
+	صحیح dry_تسلسل = 0;
+	صحیح edit = 1;
+	ساخت option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
-		OPT_BOOL('n', "dry-run", &dry_run,
+		OPT_BOOL('n', "dry-run", &dry_تسلسل,
 			 N_("perform a dry-run without updating any refs")),
 		OPT_BOOL('e', "edit", &edit,
 			 N_("edit the commit message")),
-		OPT_END(),
+		OPT_انتہا(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *oldest, *tip, *rewritten;
-	const struct object_id *base_tree_oid, *tip_tree_oid;
-	char *message_template = NULL;
-	struct rev_info revs = { 0 };
-	int ret;
+	ساخت strbuf reflog_پیغام = STRBUF_INIT;
+	ساخت commit *oldest, *tip, *rewritten;
+	ثابت ساخت object_id *بنیاد_درخت_oid, *tip_درخت_oid;
+	حرف *پیغام_template = تہی;
+	ساخت rev_info revs = { 0 };
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, options, usage,
+	argc = parse_options(argc, argv, سابقہ, options, usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT | PARSE_OPT_KEEP_ARGV0);
-	if (argc < 2) {
+	اگر (argc < 2) {
 		ret = error(_("command expects a revision range"));
-		goto out;
+		جاؤ برآمد;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
-	if (action == REF_ACTION_DEFAULT)
+	اگر (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
-	strbuf_addstr(&reflog_msg, "squash: updating ");
-	strbuf_join_argv(&reflog_msg, argc - 1, argv + 1, ' ');
+	strbuf_addstr(&reflog_پیغام, "squash: updating ");
+	strbuf_join_argv(&reflog_پیغام, argc - 1, argv + 1, ' ');
 
 	ret = resolve_squash_range(repo, action == REF_ACTION_BRANCHES,
 				   edit,
 				   argc, argv, &oldest, &tip,
-				   &message_template);
-	if (ret < 0)
-		goto out;
+				   &پیغام_template);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	ret = setup_revwalk(repo, action, tip, &revs);
-	if (ret < 0)
-		goto out;
+	ret = تیاری_revwalk(repo, action, tip, &revs);
+	اگر (ret < 0)
+		جاؤ برآمد;
 
-	base_tree_oid = &repo_get_commit_tree(repo,
-					oldest->parents->item)->object.oid;
-	tip_tree_oid = &repo_get_commit_tree(repo, tip)->object.oid;
+	بنیاد_درخت_oid = &repo_get_commit_درخت(repo,
+					oldest->parents->شے)->object.oid;
+	tip_درخت_oid = &repo_get_commit_درخت(repo, tip)->object.oid;
 
-	ret = commit_tree_ext(repo, "squash", oldest, message_template,
-			      oldest->parents, base_tree_oid, tip_tree_oid,
+	ret = commit_درخت_ext(repo, "squash", oldest, پیغام_template,
+			      oldest->parents, بنیاد_درخت_oid, tip_درخت_oid,
 			      &rewritten,
-			      edit ? COMMIT_TREE_EDIT_MESSAGE : 0);
-	if (ret < 0) {
+			      edit ? COMMIT_درخت_EDIT_پیغام : 0);
+	اگر (ret < 0) {
 		ret = error(_("failed writing squashed commit"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = handle_reference_updates(&revs, action, tip, rewritten,
-				       reflog_msg.buf, dry_run,
-				       REPLAY_EMPTY_COMMIT_ABORT);
-	if (ret < 0) {
+				       reflog_پیغام.buf, dry_تسلسل,
+				       REPLAY_خالی_خانے_COMMIT_ABORT);
+	اگر (ret < 0) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
-	strbuf_release(&reflog_msg);
+برآمد:
+	strbuf_release(&reflog_پیغام);
 	release_revisions(&revs);
-	free(message_template);
-	return ret;
+	آزاد(پیغام_template);
+	واپس ret;
 }
 
-static int update_worktree(struct repository *repo,
-			   const struct commit *old_head,
-			   const struct commit *new_head,
-			   bool dry_run)
+ساکن صحیح update_worktree(ساخت repository *repo,
+			   ثابت ساخت commit *old_سر,
+			   ثابت ساخت commit *new_سر,
+			   bool dry_تسلسل)
 {
-	struct reset_working_tree_options opts = {
-		.oid_from = &old_head->object.oid,
-		.oid = &new_head->object.oid,
+	ساخت reset_working_درخت_options opts = {
+		.oid_from = &old_سر->object.oid,
+		.oid = &new_سر->object.oid,
 	};
-	if (dry_run)
-		opts.flags |= RESET_WORKING_TREE_DRY_RUN;
-	return reset_working_tree(repo, &opts);
+	اگر (dry_تسلسل)
+		opts.flags |= RESET_WORKING_درخت_DRY_تسلسل;
+	واپس reset_working_درخت(repo, &opts);
 }
 
-static int find_head_tree_change(struct repository *repo,
-				 const struct replay_result *result,
-				 struct commit **old_head,
-				 struct commit **new_head,
-				 bool *changed)
+ساکن صحیح ڈھونڈو_سر_درخت_change(ساخت repository *repo,
+				 ثابت ساخت replay_نتیجہ *نتیجہ,
+				 ساخت commit **old_سر,
+				 ساخت commit **new_سر,
+				 bool *بدلا)
 {
-	const struct replay_ref_update *head_update = NULL;
-	struct commit *old_head_commit, *new_head_commit;
-	struct tree *old_head_tree, *new_head_tree;
-	const char *head_target;
-	int head_flags;
+	ثابت ساخت replay_ref_update *سر_update = تہی;
+	ساخت commit *old_سر_commit, *new_سر_commit;
+	ساخت درخت *old_سر_درخت, *new_سر_درخت;
+	ثابت حرف *سر_ہدف;
+	صحیح سر_flags;
 
-	*changed = false;
+	*بدلا = false;
 
-	head_target = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
+	سر_ہدف = refs_resolve_ref_unsafe(get_main_ref_store(repo), "HEAD",
 					      RESOLVE_REF_NO_RECURSE | RESOLVE_REF_READING,
-					      NULL, &head_flags);
-	if (!head_target)
-		return error(_("cannot look up HEAD"));
+					      تہی, &سر_flags);
+	اگر (!سر_ہدف)
+		واپس error(_("cannot look up HEAD"));
 
-	for (size_t i = 0; i < result->updates_nr; i++) {
-		if (!strcmp(result->updates[i].refname, head_target)) {
-			head_update = &result->updates[i];
-			break;
+	برائے (سائز_t i = 0; i < نتیجہ->updates_nr; i++) {
+		اگر (!strcmp(نتیجہ->updates[i].refname, سر_ہدف)) {
+			سر_update = &نتیجہ->updates[i];
+			توڑو;
 		}
 	}
 
-	if (!head_update)
-		return 0;
+	اگر (!سر_update)
+		واپس 0;
 
-	old_head_commit = lookup_commit_reference(repo, &head_update->old_oid);
-	new_head_commit = lookup_commit_reference(repo, &head_update->new_oid);
-	if (!old_head_commit || !new_head_commit)
-		return error(_("cannot resolve HEAD commit"));
+	old_سر_commit = lookup_commit_reference(repo, &سر_update->old_oid);
+	new_سر_commit = lookup_commit_reference(repo, &سر_update->new_oid);
+	اگر (!old_سر_commit || !new_سر_commit)
+		واپس error(_("cannot resolve HEAD commit"));
 
-	old_head_tree = repo_get_commit_tree(repo, old_head_commit);
-	new_head_tree = repo_get_commit_tree(repo, new_head_commit);
-	if (!old_head_tree || !new_head_tree)
-		return error(_("cannot resolve tree for HEAD"));
+	old_سر_درخت = repo_get_commit_درخت(repo, old_سر_commit);
+	new_سر_درخت = repo_get_commit_درخت(repo, new_سر_commit);
+	اگر (!old_سر_درخت || !new_سر_درخت)
+		واپس error(_("cannot resolve tree for HEAD"));
 
-	if (oideq(&old_head_tree->object.oid, &new_head_tree->object.oid))
-		return 0;
+	اگر (oideq(&old_سر_درخت->object.oid, &new_سر_درخت->object.oid))
+		واپس 0;
 
-	*old_head = old_head_commit;
-	*new_head = new_head_commit;
-	*changed = true;
+	*old_سر = old_سر_commit;
+	*new_سر = new_سر_commit;
+	*بدلا = true;
 
-	return 0;
+	واپس 0;
 }
 
-static int cmd_history_drop(int argc,
-			    const char **argv,
-			    const char *prefix,
-			    struct repository *repo)
+ساکن صحیح cmd_history_drop(صحیح argc,
+			    ثابت حرف **argv,
+			    ثابت حرف *سابقہ,
+			    ساخت repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_DROP_USAGE,
-		NULL,
+		تہی,
 	};
-	enum replay_empty_commit_action empty = REPLAY_EMPTY_COMMIT_DROP;
-	enum ref_action action = REF_ACTION_DEFAULT;
-	int dry_run = 0;
-	struct option options[] = {
+	شمار replay_خالی_خانے_commit_action خالی_خانے = REPLAY_خالی_خانے_COMMIT_DROP;
+	شمار ref_action action = REF_ACTION_DEFAULT;
+	صحیح dry_تسلسل = 0;
+	ساخت option options[] = {
 		OPT_CALLBACK_F(0, "update-refs", &action, "(branches|head)",
 			       N_("control which refs should be updated"),
 			       PARSE_OPT_NONEG, parse_ref_action),
-		OPT_BOOL('n', "dry-run", &dry_run,
+		OPT_BOOL('n', "dry-run", &dry_تسلسل,
 			 N_("perform a dry-run without updating any refs")),
-		OPT_CALLBACK_F(0, "empty", &empty, "(drop|keep|abort)",
+		OPT_CALLBACK_F(0, "empty", &خالی_خانے, "(drop|keep|abort)",
 			       N_("how to handle descendants that become empty"),
-			       PARSE_OPT_NONEG, parse_opt_empty),
-		OPT_END(),
+			       PARSE_OPT_NONEG, parse_opt_خالی_خانے),
+		OPT_انتہا(),
 	};
-	struct strbuf reflog_msg = STRBUF_INIT;
-	struct commit *original, *rewritten;
-	struct rev_info revs = { 0 };
-	struct replay_result result = { 0 };
-	struct commit *old_head, *new_head;
-	bool head_moves = false;
-	int ret;
+	ساخت strbuf reflog_پیغام = STRBUF_INIT;
+	ساخت commit *original, *rewritten;
+	ساخت rev_info revs = { 0 };
+	ساخت replay_نتیجہ نتیجہ = { 0 };
+	ساخت commit *old_سر, *new_سر;
+	bool سر_چالیں = false;
+	صحیح ret;
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1) {
+	argc = parse_options(argc, argv, سابقہ, options, usage, 0);
+	اگر (argc != 1) {
 		ret = error(_("command expects a single revision"));
-		goto out;
+		جاؤ برآمد;
 	}
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, تہی);
 
-	if (action == REF_ACTION_DEFAULT)
+	اگر (action == REF_ACTION_DEFAULT)
 		action = REF_ACTION_BRANCHES;
 
 	original = lookup_commit_reference_by_name(argv[0]);
-	if (!original) {
+	اگر (!original) {
 		ret = error(_("commit cannot be found: %s"), argv[0]);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (!original->parents) {
+	اگر (!original->parents) {
 		ret = error(_("cannot drop root commit %s: "
 			      "it has no parent to replay onto"),
 			    argv[0]);
-		goto out;
-	} else if (original->parents->next) {
+		جاؤ برآمد;
+	} ورنہ اگر (original->parents->اگلا) {
 		ret = error(_("cannot drop merge commit: %s"), argv[0]);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	ret = setup_revwalk(repo, action, original, &revs);
-	if (ret)
-		goto out;
+	ret = تیاری_revwalk(repo, action, original, &revs);
+	اگر (ret)
+		جاؤ برآمد;
 
-	rewritten = original->parents->item;
+	rewritten = original->parents->شے;
 
 	ret = compute_pending_ref_updates(&revs, action, original, rewritten,
-					  empty, &result);
-	if (ret) {
+					  خالی_خانے, &نتیجہ);
+	اگر (ret) {
 		ret = error(_("failed replaying descendants"));
-		goto out;
+		جاؤ برآمد;
 	}
 
 	/*
@@ -1796,64 +1796,64 @@ static int cmd_history_drop(int argc,
 	 * inconsistent repository state. So we first perform a dry-run merge
 	 * here before updating refs.
 	 */
-	if (!is_bare_repository(repo)) {
-		ret = find_head_tree_change(repo, &result, &old_head,
-					    &new_head, &head_moves);
-		if (ret < 0)
-			goto out;
+	اگر (!is_bare_repository(repo)) {
+		ret = ڈھونڈو_سر_درخت_change(repo, &نتیجہ, &old_سر,
+					    &new_سر, &سر_چالیں);
+		اگر (ret < 0)
+			جاؤ برآمد;
 
-		if (head_moves && update_worktree(repo, old_head, new_head, true) < 0) {
+		اگر (سر_چالیں && update_worktree(repo, old_سر, new_سر, true) < 0) {
 			ret = error(_("dropping this commit would "
 				      "overwrite local changes; aborting"));
-			goto out;
+			جاؤ برآمد;
 		}
 	}
 
-	strbuf_addf(&reflog_msg, "drop: dropping %s", argv[0]);
-	ret = apply_pending_ref_updates(repo, &result, reflog_msg.buf, dry_run);
-	if (ret < 0) {
+	strbuf_addf(&reflog_پیغام, "drop: dropping %s", argv[0]);
+	ret = apply_pending_ref_updates(repo, &نتیجہ, reflog_پیغام.buf, dry_تسلسل);
+	اگر (ret < 0) {
 		ret = error(_("failed to update references"));
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (!dry_run && head_moves && update_worktree(repo, old_head, new_head, false) < 0) {
+	اگر (!dry_تسلسل && سر_چالیں && update_worktree(repo, old_سر, new_سر, false) < 0) {
 		ret = error(_("could not update working tree to new commit %s"),
-			    oid_to_hex(&new_head->object.oid));
-		goto out;
+			    oid_مقصد_hex(&new_سر->object.oid));
+		جاؤ برآمد;
 	}
 
 	ret = 0;
 
-out:
-	replay_result_release(&result);
-	strbuf_release(&reflog_msg);
+برآمد:
+	replay_نتیجہ_release(&نتیجہ);
+	strbuf_release(&reflog_پیغام);
 	release_revisions(&revs);
-	return ret;
+	واپس ret;
 }
 
-int cmd_history(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo)
+صحیح cmd_history(صحیح argc,
+		ثابت حرف **argv,
+		ثابت حرف *سابقہ,
+		ساخت repository *repo)
 {
-	const char * const usage[] = {
+	ثابت حرف * ثابت usage[] = {
 		GIT_HISTORY_DROP_USAGE,
 		GIT_HISTORY_FIXUP_USAGE,
 		GIT_HISTORY_REWORD_USAGE,
-		GIT_HISTORY_SPLIT_USAGE,
+		GIT_HISTORY_بانٹو_USAGE,
 		GIT_HISTORY_SQUASH_USAGE,
-		NULL,
+		تہی,
 	};
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = تہی;
+	ساخت option options[] = {
 		OPT_SUBCOMMAND("drop", &fn, cmd_history_drop),
 		OPT_SUBCOMMAND("fixup", &fn, cmd_history_fixup),
 		OPT_SUBCOMMAND("reword", &fn, cmd_history_reword),
-		OPT_SUBCOMMAND("split", &fn, cmd_history_split),
+		OPT_SUBCOMMAND("split", &fn, cmd_history_بانٹو),
 		OPT_SUBCOMMAND("squash", &fn, cmd_history_squash),
-		OPT_END(),
+		OPT_انتہا(),
 	};
 
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	return fn(argc, argv, prefix, repo);
+	argc = parse_options(argc, argv, سابقہ, options, usage, 0);
+	واپس fn(argc, argv, سابقہ, repo);
 }

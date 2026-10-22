@@ -3,70 +3,70 @@
  *
  * Copyright (C) Linus Torvalds, 2005
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "tree.h"
-#include "cache-tree.h"
-#include "parse-options.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "tree.h"
+#شامل "cache-tree.h"
+#شامل "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+ساکن ثابت حرف * ثابت write_درخت_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
-	NULL
+	تہی
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+صحیح cmd_write_درخت(صحیح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *cmd_سابقہ,
+		   ساخت repository *repo غیر_مستعمل)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
-		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
-			WRITE_TREE_MISSING_OK),
-		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
+	صحیح flags = 0, ret;
+	ثابت حرف *درخت_سابقہ = تہی;
+	ساخت object_id oid;
+	ثابت حرف *me = "git-write-tree";
+	ساخت option write_درخت_options[] = {
+		OPT_ثنائی_ہندسہ(0, "missing-ok", &flags, N_("allow missing objects"),
+			WRITE_درخت_MISSING_OK),
+		OPT_STRING(0, "prefix", &درخت_سابقہ, N_("<prefix>/"),
 			   N_("write tree object for a subdirectory <prefix>")),
 		{
-			.type = OPTION_BIT,
+			.type = OPTION_ثنائی_ہندسہ,
 			.long_name = "ignore-cache-tree",
-			.value = &flags,
-			.precision = sizeof(flags),
+			.قدر = &flags,
+			.precision = حجم(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
-			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
+			.defval = WRITE_درخت_IGNORE_CACHE_درخت,
 		},
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
-			     write_tree_usage, 0);
+	repo_config(the_repository, git_default_config, تہی);
+	argc = parse_options(argc, argv, cmd_سابقہ, write_درخت_options,
+			     write_درخت_usage, 0);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
-	ret = write_index_as_tree(&oid, the_repository->index,
-				  repo_get_index_file(the_repository),
-				  flags, tree_prefix);
-	switch (ret) {
-	case 0:
-		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+	ret = write_اشاریہ_as_درخت(&oid, the_repository->اشاریہ,
+				  repo_get_اشاریہ_file(the_repository),
+				  flags, درخت_سابقہ);
+	انتخاب (ret) {
+	حالت 0:
+		لکھو("%s\n", oid_مقصد_hex(&oid));
+		توڑو;
+	حالت WRITE_درخت_UNREADABLE_اشاریہ:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		توڑو;
+	حالت WRITE_درخت_UNMERGED_اشاریہ:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
-		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		توڑو;
+	حالت WRITE_درخت_سابقہ_ERROR:
+		die("%s: prefix %s not found", me, درخت_سابقہ);
+		توڑو;
 	}
-	return ret;
+	واپس ret;
 }

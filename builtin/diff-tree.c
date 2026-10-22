@@ -1,92 +1,92 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "commit.h"
-#include "gettext.h"
-#include "hex.h"
-#include "log-tree.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "tmp-objdir.h"
-#include "tree.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "diff.h"
+#شامل "commit.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "log-tree.h"
+#شامل "read-cache-ll.h"
+#شامل "revision.h"
+#شامل "tmp-objdir.h"
+#شامل "tree.h"
 
-static struct rev_info log_tree_opt;
+ساکن ساخت rev_info log_درخت_opt;
 
-static int diff_tree_commit_oid(const struct object_id *oid)
+ساکن صحیح diff_درخت_commit_oid(ثابت ساخت object_id *oid)
 {
-	struct commit *commit = lookup_commit_reference(the_repository, oid);
-	if (!commit)
-		return -1;
-	return log_tree_commit(&log_tree_opt, commit);
+	ساخت commit *commit = lookup_commit_reference(the_repository, oid);
+	اگر (!commit)
+		واپس -1;
+	واپس log_درخت_commit(&log_درخت_opt, commit);
 }
 
 /* Diff one or more commits. */
-static int stdin_diff_commit(struct commit *commit, const char *p)
+ساکن صحیح stdin_diff_commit(ساخت commit *commit, ثابت حرف *p)
 {
-	struct object_id oid;
-	struct commit_list **pptr = NULL;
+	ساخت object_id oid;
+	ساخت commit_list **pptr = تہی;
 
 	/* Graft the fake parents locally to the commit */
-	while (isspace(*p++) && !parse_oid_hex(p, &oid, &p)) {
-		struct commit *parent = lookup_commit(the_repository, &oid);
-		if (!pptr) {
+	جب (خلا_ہے(*p++) && !parse_oid_hex(p, &oid, &p)) {
+		ساخت commit *والد = lookup_commit(the_repository, &oid);
+		اگر (!pptr) {
 			/* Free the real parent list */
 			commit_list_free(commit->parents);
-			commit->parents = NULL;
+			commit->parents = تہی;
 			pptr = &(commit->parents);
 		}
-		if (parent) {
-			pptr = &commit_list_insert(parent, pptr)->next;
+		اگر (والد) {
+			pptr = &commit_list_داخل_کرو(والد, pptr)->اگلا;
 		}
 	}
-	return log_tree_commit(&log_tree_opt, commit);
+	واپس log_درخت_commit(&log_درخت_opt, commit);
 }
 
 /* Diff two trees. */
-static int stdin_diff_trees(struct tree *tree1, const char *p)
+ساکن صحیح stdin_diff_trees(ساخت درخت *tree1, ثابت حرف *p)
 {
-	struct object_id oid;
-	struct tree *tree2;
-	if (!isspace(*p++) || parse_oid_hex(p, &oid, &p) || *p)
-		return error("Need exactly two trees, separated by a space");
-	tree2 = lookup_tree(the_repository, &oid);
-	if (!tree2 || repo_parse_tree(the_repository, tree2))
-		return -1;
-	printf("%s %s\n", oid_to_hex(&tree1->object.oid),
-			  oid_to_hex(&tree2->object.oid));
-	diff_tree_oid(&tree1->object.oid, &tree2->object.oid,
-		      "", &log_tree_opt.diffopt);
-	log_tree_diff_flush(&log_tree_opt);
-	return 0;
+	ساخت object_id oid;
+	ساخت درخت *tree2;
+	اگر (!خلا_ہے(*p++) || parse_oid_hex(p, &oid, &p) || *p)
+		واپس error("Need exactly two trees, separated by a space");
+	tree2 = lookup_درخت(the_repository, &oid);
+	اگر (!tree2 || repo_parse_درخت(the_repository, tree2))
+		واپس -1;
+	لکھو("%s %s\n", oid_مقصد_hex(&tree1->object.oid),
+			  oid_مقصد_hex(&tree2->object.oid));
+	diff_درخت_oid(&tree1->object.oid, &tree2->object.oid,
+		      "", &log_درخت_opt.diffopt);
+	log_درخت_diff_flush(&log_درخت_opt);
+	واپس 0;
 }
 
-static int diff_tree_stdin(char *line)
+ساکن صحیح diff_درخت_stdin(حرف *سطر)
 {
-	int len = strlen(line);
-	struct object_id oid;
-	struct object *obj;
-	const char *p;
+	صحیح len = لڑی_لمبائی(سطر);
+	ساخت object_id oid;
+	ساخت object *obj;
+	ثابت حرف *p;
 
-	if (!len || line[len-1] != '\n')
-		return -1;
-	line[len-1] = 0;
-	if (parse_oid_hex(line, &oid, &p))
-		return -1;
+	اگر (!len || سطر[len-1] != '\n')
+		واپس -1;
+	سطر[len-1] = 0;
+	اگر (parse_oid_hex(سطر, &oid, &p))
+		واپس -1;
 	obj = parse_object(the_repository, &oid);
-	if (!obj)
-		return -1;
-	if (obj->type == OBJ_COMMIT)
-		return stdin_diff_commit((struct commit *)obj, p);
-	if (obj->type == OBJ_TREE)
-		return stdin_diff_trees((struct tree *)obj, p);
+	اگر (!obj)
+		واپس -1;
+	اگر (obj->type == OBJ_COMMIT)
+		واپس stdin_diff_commit((ساخت commit *)obj, p);
+	اگر (obj->type == OBJ_درخت)
+		واپس stdin_diff_trees((ساخت درخت *)obj, p);
 	error("Object %s is a %s, not a commit or tree",
-	      oid_to_hex(&oid), type_name(obj->type));
-	return -1;
+	      oid_مقصد_hex(&oid), type_name(obj->type));
+	واپس -1;
 }
 
-static const char diff_tree_usage[] =
+ساکن ثابت حرف diff_درخت_usage[] =
 "git diff-tree [--stdin] [-m] [-s] [-v] [--no-commit-id] [--pretty]\n"
 "              [-t] [-r] [-c | --cc] [--combined-all-paths] [--root] [--merge-base]\n"
 "              [<common-diff-options>] <tree-ish> [<tree-ish>] [<path>...]\n"
@@ -99,76 +99,76 @@ static const char diff_tree_usage[] =
 "  --root        include the initial commit as diff against /dev/null\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static void diff_tree_tweak_rev(struct rev_info *rev)
+ساکن خالی diff_درخت_tweak_rev(ساخت rev_info *rev)
 {
-	if (!rev->diffopt.output_format) {
-		if (rev->dense_combined_merges)
+	اگر (!rev->diffopt.output_format) {
+		اگر (rev->dense_combined_merges)
 			rev->diffopt.output_format = DIFF_FORMAT_PATCH;
-		else
+		ورنہ
 			rev->diffopt.output_format = DIFF_FORMAT_RAW;
 	}
 }
 
-int cmd_diff_tree(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+صحیح cmd_diff_درخت(صحیح argc,
+		  ثابت حرف **argv,
+		  ثابت حرف *سابقہ,
+		  ساخت repository *repo غیر_مستعمل)
 {
-	char line[1000];
-	struct object *tree1, *tree2;
-	static struct rev_info *opt = &log_tree_opt;
-	struct setup_revision_opt s_r_opt;
-	struct userformat_want w;
-	int read_stdin = 0;
-	int merge_base = 0;
+	حرف سطر[1000];
+	ساخت object *tree1, *tree2;
+	ساکن ساخت rev_info *opt = &log_درخت_opt;
+	ساخت تیاری_revision_opt s_r_opt;
+	ساخت userformat_want w;
+	صحیح read_stdin = 0;
+	صحیح ملاؤ_بنیاد = 0;
 
-	show_usage_if_asked(argc, argv, diff_tree_usage);
+	show_usage_if_asked(argc, argv, diff_درخت_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, تہی); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
-	repo_init_revisions(the_repository, opt, prefix);
-	if (repo_read_index(the_repository) < 0)
+	repo_init_revisions(the_repository, opt, سابقہ);
+	اگر (repo_read_اشاریہ(the_repository) < 0)
 		die(_("index file corrupt"));
 	opt->abbrev = 0;
 	opt->diff = 1;
 	opt->disable_stdin = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
-	s_r_opt.tweak = diff_tree_tweak_rev;
+	memset(&s_r_opt, 0, حجم(s_r_opt));
+	s_r_opt.tweak = diff_درخت_tweak_rev;
 
-	prefix = precompose_argv_prefix(argc, argv, prefix);
-	argc = setup_revisions(argc, argv, opt, &s_r_opt);
+	سابقہ = precompose_argv_سابقہ(argc, argv, سابقہ);
+	argc = تیاری_revisions(argc, argv, opt, &s_r_opt);
 
-	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	memset(&w, 0, حجم(w));
+	userformat_ڈھونڈو_requirements(تہی, &w);
 
-	if (!opt->show_notes_given && w.notes)
+	اگر (!opt->show_notes_given && w.notes)
 		opt->show_notes = 1;
-	if (opt->show_notes)
-		load_display_notes(&opt->notes_opt);
+	اگر (opt->show_notes)
+		بھرو_display_notes(&opt->notes_opt);
 
-	while (--argc > 0) {
-		const char *arg = *++argv;
+	جب (--argc > 0) {
+		ثابت حرف *arg = *++argv;
 
-		if (!strcmp(arg, "--stdin")) {
+		اگر (!strcmp(arg, "--stdin")) {
 			read_stdin = 1;
-			continue;
+			جاری;
 		}
-		if (!strcmp(arg, "--merge-base")) {
-			merge_base = 1;
-			continue;
+		اگر (!strcmp(arg, "--merge-base")) {
+			ملاؤ_بنیاد = 1;
+			جاری;
 		}
-		usage(diff_tree_usage);
+		usage(diff_درخت_usage);
 	}
 
-	if (read_stdin && merge_base)
+	اگر (read_stdin && ملاؤ_بنیاد)
 		die(_("options '%s' and '%s' cannot be used together"), "--stdin", "--merge-base");
-	if (merge_base && opt->pending.nr != 2)
+	اگر (ملاؤ_بنیاد && opt->pending.nr != 2)
 		die(_("--merge-base only works with two commits"));
 
-	opt->diffopt.rotate_to_strict = 1;
+	opt->diffopt.rotate_مقصد_strict = 1;
 
 	/*
 	 * NOTE!  We expect "a..b" to expand to "^a b" but it is
@@ -177,62 +177,62 @@ int cmd_diff_tree(int argc,
 	 * second one is marked UNINTERESTING, we recover the original
 	 * order the user gave, i.e. "a..b", by swapping the trees.
 	 */
-	switch (opt->pending.nr) {
-	case 0:
-		if (!read_stdin)
-			usage(diff_tree_usage);
-		break;
-	case 1:
-		tree1 = opt->pending.objects[0].item;
-		diff_tree_commit_oid(&tree1->oid);
-		break;
-	case 2:
-		tree1 = opt->pending.objects[0].item;
-		tree2 = opt->pending.objects[1].item;
-		if (merge_base) {
-			struct object_id oid;
+	انتخاب (opt->pending.nr) {
+	حالت 0:
+		اگر (!read_stdin)
+			usage(diff_درخت_usage);
+		توڑو;
+	حالت 1:
+		tree1 = opt->pending.objects[0].شے;
+		diff_درخت_commit_oid(&tree1->oid);
+		توڑو;
+	حالت 2:
+		tree1 = opt->pending.objects[0].شے;
+		tree2 = opt->pending.objects[1].شے;
+		اگر (ملاؤ_بنیاد) {
+			ساخت object_id oid;
 
-			diff_get_merge_base(opt, &oid);
+			diff_get_ملاؤ_بنیاد(opt, &oid);
 			tree1 = lookup_object(the_repository, &oid);
-		} else if (tree2->flags & UNINTERESTING) {
-			SWAP(tree2, tree1);
+		} ورنہ اگر (tree2->flags & UNINTERESTING) {
+			تبادلہ(tree2, tree1);
 		}
-		diff_tree_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
-		log_tree_diff_flush(opt);
-		break;
+		diff_درخت_oid(&tree1->oid, &tree2->oid, "", &opt->diffopt);
+		log_درخت_diff_flush(opt);
+		توڑو;
 	}
 
-	if (read_stdin) {
-		int saved_nrl = 0;
-		int saved_dcctc = 0;
+	اگر (read_stdin) {
+		صحیح saved_nrl = 0;
+		صحیح saved_dcctc = 0;
 
-		opt->diffopt.rotate_to_strict = 0;
+		opt->diffopt.rotate_مقصد_strict = 0;
 		opt->diffopt.no_free = 1;
-		if (opt->diffopt.detect_rename) {
-			if (the_repository->index->cache)
-				repo_read_index(the_repository);
-			opt->diffopt.setup |= DIFF_SETUP_USE_SIZE_CACHE;
+		اگر (opt->diffopt.detect_rename) {
+			اگر (the_repository->اشاریہ->cache)
+				repo_read_اشاریہ(the_repository);
+			opt->diffopt.تیاری |= DIFF_تیاری_USE_سائز_CACHE;
 		}
-		while (fgets(line, sizeof(line), stdin)) {
-			struct object_id oid;
+		جب (fgets(سطر, حجم(سطر), stdin)) {
+			ساخت object_id oid;
 
-			if (get_oid_hex(line, &oid)) {
-				fputs(line, stdout);
+			اگر (get_oid_hex(سطر, &oid)) {
+				fputs(سطر, stdout);
 				fflush(stdout);
 			}
-			else {
-				diff_tree_stdin(line);
-				if (saved_nrl < opt->diffopt.needed_rename_limit)
-					saved_nrl = opt->diffopt.needed_rename_limit;
-				if (opt->diffopt.degraded_cc_to_c)
+			ورنہ {
+				diff_درخت_stdin(سطر);
+				اگر (saved_nrl < opt->diffopt.needed_rename_حد_بندی)
+					saved_nrl = opt->diffopt.needed_rename_حد_بندی;
+				اگر (opt->diffopt.degraded_cc_مقصد_c)
 					saved_dcctc = 1;
 			}
 		}
-		opt->diffopt.degraded_cc_to_c = saved_dcctc;
-		opt->diffopt.needed_rename_limit = saved_nrl;
+		opt->diffopt.degraded_cc_مقصد_c = saved_dcctc;
+		opt->diffopt.needed_rename_حد_بندی = saved_nrl;
 		opt->diffopt.no_free = 0;
 		diff_free(&opt->diffopt);
 	}
 
-	return diff_result_code(opt);
+	واپس diff_نتیجہ_رمز(opt);
 }

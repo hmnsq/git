@@ -1,40 +1,40 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "pkt-line.h"
-#include "fetch-pack.h"
-#include "remote.h"
-#include "connect.h"
-#include "oid-array.h"
-#include "protocol.h"
+#شامل "builtin.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "object-file.h"
+#شامل "pkt-line.h"
+#شامل "fetch-pack.h"
+#شامل "remote.h"
+#شامل "connect.h"
+#شامل "oid-array.h"
+#شامل "protocol.h"
 
-static const char fetch_pack_usage[] =
+ساکن ثابت حرف fetch_pack_usage[] =
 "git fetch-pack [--all] [--stdin] [--quiet | -q] [--keep | -k] [--thin] "
 "[--include-tag] [--upload-pack=<git-upload-pack>] [--depth=<n>] "
 "[--no-progress] [--diag-url] [-v] [<host>:]<directory> [<refs>...]";
 
-static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
-			     const char *name)
+ساکن خالی جوڑو_sought_اندراج(ساخت ref ***sought, صحیح *nr, صحیح *alloc,
+			     ثابت حرف *name)
 {
-	struct ref *ref;
-	struct object_id oid;
-	const char *p;
+	ساخت ref *ref;
+	ساخت object_id oid;
+	ثابت حرف *p;
 
-	if (!parse_oid_hex(name, &oid, &p)) {
-		if (*p == ' ') {
+	اگر (!parse_oid_hex(name, &oid, &p)) {
+		اگر (*p == ' ') {
 			/* <oid> <ref>, find refname */
 			name = p + 1;
-		} else if (*p == '\0') {
+		} ورنہ اگر (*p == '\0') {
 			; /* <oid>, leave oid as name */
-		} else {
+		} ورنہ {
 			/* <ref>, clear cruft from oid */
 			oidclr(&oid, the_repository->hash_algo);
 		}
-	} else {
+	} ورنہ {
 		/* <ref>, clear cruft from get_oid_hex */
 		oidclr(&oid, the_repository->hash_algo);
 	}
@@ -46,205 +46,205 @@ static void add_sought_entry(struct ref ***sought, int *nr, int *alloc,
 	(*sought)[*nr - 1] = ref;
 }
 
-int cmd_fetch_pack(int argc,
-		   const char **argv,
-		   const char *prefix UNUSED,
-		   struct repository *repo)
+صحیح cmd_fetch_pack(صحیح argc,
+		   ثابت حرف **argv,
+		   ثابت حرف *سابقہ غیر_مستعمل,
+		   ساخت repository *repo)
 {
-	int i, ret;
-	struct ref *fetched_refs = NULL, *remote_refs = NULL;
-	const char *dest = NULL;
-	struct ref **sought = NULL;
-	struct ref **sought_to_free = NULL;
-	int nr_sought = 0, alloc_sought = 0;
-	int fd[2];
-	struct string_list pack_lockfiles = STRING_LIST_INIT_DUP;
-	struct string_list *pack_lockfiles_ptr = NULL;
-	struct child_process *conn;
-	struct fetch_pack_args args;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct string_list deepen_not = STRING_LIST_INIT_DUP;
-	struct packet_reader reader;
-	enum protocol_version version;
+	صحیح i, ret;
+	ساخت ref *fetched_refs = تہی, *remote_refs = تہی;
+	ثابت حرف *dest = تہی;
+	ساخت ref **sought = تہی;
+	ساخت ref **sought_مقصد_free = تہی;
+	صحیح nr_sought = 0, alloc_sought = 0;
+	صحیح fd[2];
+	ساخت string_list pack_lockfiles = STRING_LIST_INIT_DUP;
+	ساخت string_list *pack_lockfiles_ptr = تہی;
+	ساخت بچہ_process *conn;
+	ساخت fetch_pack_دلائل دلائل;
+	ساخت oid_array shallow = OID_ARRAY_INIT;
+	ساخت string_list deepen_not = STRING_LIST_INIT_DUP;
+	ساخت packet_reader reader;
+	شمار protocol_نسخہ نسخہ;
 
-	packet_trace_identity("fetch-pack");
+	packet_trace_شناختی_عنصر("fetch-pack");
 
-	memset(&args, 0, sizeof(args));
-	list_objects_filter_init(&args.filter_options);
-	args.uploadpack = "git-upload-pack";
+	memset(&دلائل, 0, حجم(دلائل));
+	list_objects_filter_init(&دلائل.filter_options);
+	دلائل.uploadpack = "git-upload-pack";
 
 	show_usage_if_asked(argc, argv, fetch_pack_usage);
 
 	repo->fetch_if_missing = 0;
 
-	for (i = 1; i < argc && *argv[i] == '-'; i++) {
-		const char *arg = argv[i];
+	برائے (i = 1; i < argc && *argv[i] == '-'; i++) {
+		ثابت حرف *arg = argv[i];
 
-		if (skip_prefix(arg, "--upload-pack=", &arg)) {
-			args.uploadpack = arg;
-			continue;
+		اگر (skip_سابقہ(arg, "--upload-pack=", &arg)) {
+			دلائل.uploadpack = arg;
+			جاری;
 		}
-		if (skip_prefix(arg, "--exec=", &arg)) {
-			args.uploadpack = arg;
-			continue;
+		اگر (skip_سابقہ(arg, "--exec=", &arg)) {
+			دلائل.uploadpack = arg;
+			جاری;
 		}
-		if (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
-			args.quiet = 1;
-			continue;
+		اگر (!strcmp("--quiet", arg) || !strcmp("-q", arg)) {
+			دلائل.quiet = 1;
+			جاری;
 		}
-		if (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
-			args.lock_pack = args.keep_pack;
-			args.keep_pack = 1;
-			continue;
+		اگر (!strcmp("--keep", arg) || !strcmp("-k", arg)) {
+			دلائل.تالا_pack = دلائل.keep_pack;
+			دلائل.keep_pack = 1;
+			جاری;
 		}
-		if (!strcmp("--thin", arg)) {
-			args.use_thin_pack = 1;
-			continue;
+		اگر (!strcmp("--thin", arg)) {
+			دلائل.use_thin_pack = 1;
+			جاری;
 		}
-		if (!strcmp("--include-tag", arg)) {
-			args.include_tag = 1;
-			continue;
+		اگر (!strcmp("--include-tag", arg)) {
+			دلائل.include_لیبل = 1;
+			جاری;
 		}
-		if (!strcmp("--all", arg)) {
-			args.fetch_all = 1;
-			continue;
+		اگر (!strcmp("--all", arg)) {
+			دلائل.fetch_all = 1;
+			جاری;
 		}
-		if (!strcmp("--stdin", arg)) {
-			args.stdin_refs = 1;
-			continue;
+		اگر (!strcmp("--stdin", arg)) {
+			دلائل.stdin_refs = 1;
+			جاری;
 		}
-		if (!strcmp("--diag-url", arg)) {
-			args.diag_url = 1;
-			continue;
+		اگر (!strcmp("--diag-url", arg)) {
+			دلائل.diag_url = 1;
+			جاری;
 		}
-		if (!strcmp("-v", arg)) {
-			args.verbose = 1;
-			continue;
+		اگر (!strcmp("-v", arg)) {
+			دلائل.verbose = 1;
+			جاری;
 		}
-		if (skip_prefix(arg, "--depth=", &arg)) {
-			args.depth = strtol(arg, NULL, 0);
-			continue;
+		اگر (skip_سابقہ(arg, "--depth=", &arg)) {
+			دلائل.گہرائی = strtol(arg, تہی, 0);
+			جاری;
 		}
-		if (skip_prefix(arg, "--shallow-since=", &arg)) {
-			args.deepen_since = xstrdup(arg);
-			continue;
+		اگر (skip_سابقہ(arg, "--shallow-since=", &arg)) {
+			دلائل.deepen_since = xstrdup(arg);
+			جاری;
 		}
-		if (skip_prefix(arg, "--shallow-exclude=", &arg)) {
+		اگر (skip_سابقہ(arg, "--shallow-exclude=", &arg)) {
 			string_list_append(&deepen_not, arg);
-			continue;
+			جاری;
 		}
-		if (!strcmp(arg, "--deepen-relative")) {
-			args.deepen_relative = 1;
-			continue;
+		اگر (!strcmp(arg, "--deepen-relative")) {
+			دلائل.deepen_relative = 1;
+			جاری;
 		}
-		if (!strcmp("--no-progress", arg)) {
-			args.no_progress = 1;
-			continue;
+		اگر (!strcmp("--no-progress", arg)) {
+			دلائل.no_پیش_رفت = 1;
+			جاری;
 		}
-		if (!strcmp("--stateless-rpc", arg)) {
-			args.stateless_rpc = 1;
-			continue;
+		اگر (!strcmp("--stateless-rpc", arg)) {
+			دلائل.stateless_rpc = 1;
+			جاری;
 		}
-		if (!strcmp("--lock-pack", arg)) {
-			args.lock_pack = 1;
+		اگر (!strcmp("--lock-pack", arg)) {
+			دلائل.تالا_pack = 1;
 			pack_lockfiles_ptr = &pack_lockfiles;
-			continue;
+			جاری;
 		}
-		if (!strcmp("--check-self-contained-and-connected", arg)) {
-			args.check_self_contained_and_connected = 1;
-			continue;
+		اگر (!strcmp("--check-self-contained-and-connected", arg)) {
+			دلائل.check_self_contained_and_connected = 1;
+			جاری;
 		}
-		if (!strcmp("--cloning", arg)) {
-			args.cloning = 1;
-			continue;
+		اگر (!strcmp("--cloning", arg)) {
+			دلائل.cloning = 1;
+			جاری;
 		}
-		if (!strcmp("--update-shallow", arg)) {
-			args.update_shallow = 1;
-			continue;
+		اگر (!strcmp("--update-shallow", arg)) {
+			دلائل.update_shallow = 1;
+			جاری;
 		}
-		if (!strcmp("--from-promisor", arg)) {
-			args.from_promisor = 1;
-			continue;
+		اگر (!strcmp("--from-promisor", arg)) {
+			دلائل.from_promisor = 1;
+			جاری;
 		}
-		if (!strcmp("--refetch", arg)) {
-			args.refetch = 1;
-			continue;
+		اگر (!strcmp("--refetch", arg)) {
+			دلائل.refetch = 1;
+			جاری;
 		}
-		if (skip_prefix(arg, ("--filter="), &arg)) {
-			parse_list_objects_filter(&args.filter_options, arg);
-			continue;
+		اگر (skip_سابقہ(arg, ("--filter="), &arg)) {
+			parse_list_objects_filter(&دلائل.filter_options, arg);
+			جاری;
 		}
-		if (!strcmp(arg, ("--no-filter"))) {
-			list_objects_filter_set_no_filter(&args.filter_options);
-			continue;
+		اگر (!strcmp(arg, ("--no-filter"))) {
+			list_objects_filter_سیٹ_no_filter(&دلائل.filter_options);
+			جاری;
 		}
 		usage(fetch_pack_usage);
 	}
-	if (deepen_not.nr)
-		args.deepen_not = &deepen_not;
+	اگر (deepen_not.nr)
+		دلائل.deepen_not = &deepen_not;
 
-	if (i < argc)
+	اگر (i < argc)
 		dest = argv[i++];
-	else
+	ورنہ
 		usage(fetch_pack_usage);
 
 	/*
 	 * Copy refs from cmdline to growable list, then append any
 	 * refs from the standard input:
 	 */
-	for (; i < argc; i++)
-		add_sought_entry(&sought, &nr_sought, &alloc_sought, argv[i]);
-	if (args.stdin_refs) {
-		if (args.stateless_rpc) {
+	برائے (; i < argc; i++)
+		جوڑو_sought_اندراج(&sought, &nr_sought, &alloc_sought, argv[i]);
+	اگر (دلائل.stdin_refs) {
+		اگر (دلائل.stateless_rpc) {
 			/* in stateless RPC mode we use pkt-line to read
 			 * from stdin, until we get a flush packet
 			 */
-			for (;;) {
-				char *line = packet_read_line(0, NULL);
-				if (!line)
-					break;
-				add_sought_entry(&sought, &nr_sought,  &alloc_sought, line);
+			برائے (;;) {
+				حرف *سطر = packet_read_سطر(0, تہی);
+				اگر (!سطر)
+					توڑو;
+				جوڑو_sought_اندراج(&sought, &nr_sought,  &alloc_sought, سطر);
 			}
 		}
-		else {
+		ورنہ {
 			/* read from stdin one ref per line, until EOF */
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline_lf(&line, stdin) != EOF)
-				add_sought_entry(&sought, &nr_sought, &alloc_sought, line.buf);
-			strbuf_release(&line);
+			ساخت strbuf سطر = STRBUF_INIT;
+			جب (strbuf_getline_lf(&سطر, stdin) != EOF)
+				جوڑو_sought_اندراج(&sought, &nr_sought, &alloc_sought, سطر.buf);
+			strbuf_release(&سطر);
 		}
 	}
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	اگر (دلائل.stateless_rpc) {
+		conn = تہی;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
-		int flags = args.verbose ? CONNECT_VERBOSE : 0;
-		if (args.diag_url)
+	} ورنہ {
+		صحیح flags = دلائل.verbose ? CONNECT_VERBOSE : 0;
+		اگر (دلائل.diag_url)
 			flags |= CONNECT_DIAG_URL;
 		conn = git_connect(fd, dest, GIT_CONNECT_UPLOAD_PACK,
-				   args.uploadpack, flags);
-		if (!conn)
-			return args.diag_url ? 0 : 1;
+				   دلائل.uploadpack, flags);
+		اگر (!conn)
+			واپس دلائل.diag_url ? 0 : 1;
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], تہی, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	version = discover_version(&reader);
-	switch (version) {
-	case protocol_v2:
-		get_remote_refs(fd[1], &reader, &remote_refs, 0, NULL, NULL,
-				args.stateless_rpc);
-		break;
-	case protocol_v1:
-	case protocol_v0:
-		get_remote_heads(&reader, &remote_refs, 0, NULL, &shallow);
-		break;
-	case protocol_unknown_version:
+	نسخہ = discover_نسخہ(&reader);
+	انتخاب (نسخہ) {
+	حالت protocol_v2:
+		get_remote_refs(fd[1], &reader, &remote_refs, 0, تہی, تہی,
+				دلائل.stateless_rpc);
+		توڑو;
+	حالت protocol_v1:
+	حالت protocol_v0:
+		get_remote_heads(&reader, &remote_refs, 0, تہی, &shallow);
+		توڑو;
+	حالت protocol_unknown_نسخہ:
 		BUG("unknown protocol version");
 	}
 
@@ -253,30 +253,30 @@ int cmd_fetch_pack(int argc,
 	 * This is because `fetch_pack()` will modify the array to evict some
 	 * entries, but won't free those.
 	 */
-	DUP_ARRAY(sought_to_free, sought, nr_sought);
+	DUP_ARRAY(sought_مقصد_free, sought, nr_sought);
 
-	fetched_refs = fetch_pack(&args, fd, remote_refs, sought, nr_sought,
-			 &shallow, pack_lockfiles_ptr, version);
+	fetched_refs = fetch_pack(&دلائل, fd, remote_refs, sought, nr_sought,
+			 &shallow, pack_lockfiles_ptr, نسخہ);
 
-	if (pack_lockfiles.nr) {
-		int i;
+	اگر (pack_lockfiles.nr) {
+		صحیح i;
 
-		printf("lock %s\n", pack_lockfiles.items[0].string);
+		لکھو("lock %s\n", pack_lockfiles.اشیاء[0].string);
 		fflush(stdout);
-		for (i = 1; i < pack_lockfiles.nr; i++)
+		برائے (i = 1; i < pack_lockfiles.nr; i++)
 			warning(_("Lockfile created but not reported: %s"),
-				pack_lockfiles.items[i].string);
+				pack_lockfiles.اشیاء[i].string);
 	}
-	if (args.check_self_contained_and_connected &&
-	    args.self_contained_and_connected) {
-		printf("connectivity-ok\n");
+	اگر (دلائل.check_self_contained_and_connected &&
+	    دلائل.self_contained_and_connected) {
+		لکھو("connectivity-ok\n");
 		fflush(stdout);
 	}
 	close(fd[0]);
 	close(fd[1]);
-	if (finish_connect(conn)) {
+	اگر (اختتام_connect(conn)) {
 		ret = 1;
-		goto cleanup;
+		جاؤ cleanup;
 	}
 
 	ret = !fetched_refs;
@@ -289,19 +289,19 @@ int cmd_fetch_pack(int argc,
 	 */
 	ret |= report_unmatched_refs(sought, nr_sought);
 
-	for (struct ref *ref = fetched_refs; ref; ref = ref->next)
-		printf("%s %s\n",
-		       oid_to_hex(&ref->old_oid), ref->name);
+	برائے (ساخت ref *ref = fetched_refs; ref; ref = ref->اگلا)
+		لکھو("%s %s\n",
+		       oid_مقصد_hex(&ref->old_oid), ref->name);
 
 cleanup:
-	for (size_t i = 0; i < nr_sought; i++)
-		free_one_ref(sought_to_free[i]);
-	free(sought_to_free);
-	free(sought);
+	برائے (سائز_t i = 0; i < nr_sought; i++)
+		free_one_ref(sought_مقصد_free[i]);
+	آزاد(sought_مقصد_free);
+	آزاد(sought);
 	free_refs(fetched_refs);
 	free_refs(remote_refs);
-	list_objects_filter_release(&args.filter_options);
+	list_objects_filter_release(&دلائل.filter_options);
 	oid_array_clear(&shallow);
 	string_list_clear(&pack_lockfiles, 0);
-	return ret;
+	واپس ret;
 }

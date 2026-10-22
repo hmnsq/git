@@ -4,74 +4,74 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "convert.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "ident.h"
-#include "list-objects-filter-options.h"
-#include "parse-options.h"
-#include "userdiff.h"
-#include "oid-array.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "replace-object.h"
-#include "promisor-remote.h"
-#include "mailmap.h"
-#include "write-or-die.h"
-#include "alias.h"
-#include "remote.h"
-#include "transport.h"
-#include "fetch-object-info.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "convert.h"
+#شامل "diff.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "hex.h"
+#شامل "ident.h"
+#شامل "list-objects-filter-options.h"
+#شامل "parse-options.h"
+#شامل "userdiff.h"
+#شامل "oid-array.h"
+#شامل "packfile.h"
+#شامل "object-file.h"
+#شامل "object-name.h"
+#شامل "odb.h"
+#شامل "odb/streaming.h"
+#شامل "replace-object.h"
+#شامل "promisor-remote.h"
+#شامل "mailmap.h"
+#شامل "write-or-die.h"
+#شامل "alias.h"
+#شامل "remote.h"
+#شامل "transport.h"
+#شامل "fetch-object-info.h"
 
 /*
  * Maximum length for a remote URL. While no universal standard exists,
  * 8K is assumed to be a reasonable limit.
  */
-#define MAX_REMOTE_URL_LEN (8 * 1024)
+#تعریف_کرو MAX_REMOTE_URL_LEN (8 * 1024)
 
 /* Maximum number of objects allowed in a single remote-object-info request. */
-#define MAX_ALLOWED_OBJ_LIMIT 10000
+#تعریف_کرو MAX_ALLOWED_OBJ_حد_بندی 10000
 
 /* Maximum input size permitted for the remote-object-info command. */
-#define MAX_REMOTE_OBJ_INFO_LINE \
-	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_LIMIT * (GIT_MAX_HEXSZ + 1))
+#تعریف_کرو MAX_REMOTE_OBJ_INFO_سطر \
+	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_حد_بندی * (GIT_MAX_HEXSZ + 1))
 
-enum batch_mode {
-	BATCH_MODE_CONTENTS,
-	BATCH_MODE_INFO,
-	BATCH_MODE_QUEUE_AND_DISPATCH,
+شمار batch_منوال {
+	BATCH_منوال_CONTENTS,
+	BATCH_منوال_INFO,
+	BATCH_منوال_قطار_AND_DISPATCH,
 };
 
-struct batch_options {
-	struct list_objects_filter_options objects_filter;
-	int enabled;
-	int follow_symlinks;
-	enum batch_mode batch_mode;
-	int buffer_output;
-	int all_objects;
-	int unordered;
-	int transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
-	char input_delim;
-	char output_delim;
-	const char *format;
+ساخت batch_options {
+	ساخت list_objects_filter_options objects_filter;
+	صحیح enabled;
+	صحیح follow_symlinks;
+	شمار batch_منوال batch_منوال;
+	صحیح بفر_output;
+	صحیح all_objects;
+	صحیح unordered;
+	صحیح transform_منوال; /* may be 'w' or 'c' for --filters or --textconv */
+	حرف داخلہ_delim;
+	حرف output_delim;
+	ثابت حرف *format;
 };
 
-static const char *force_path;
+ساکن ثابت حرف *force_راستہ;
 
-static struct string_list mailmap = STRING_LIST_INIT_NODUP;
-static int use_mailmap;
+ساکن ساخت string_list mailmap = STRING_LIST_INIT_NODUP;
+ساکن صحیح use_mailmap;
 
-static char *replace_idents_using_mailmap(char *, size_t *);
+ساکن حرف *replace_idents_using_mailmap(حرف *, سائز_t *);
 
 /*
  * The mailmap is initialized with .strdup_strings set to 0,
@@ -79,195 +79,195 @@ static char *replace_idents_using_mailmap(char *, size_t *);
  * not a single mailmap entry is read), so it can be used for
  * lazy loading.
  */
-static void load_mailmap(void)
+ساکن خالی بھرو_mailmap(خالی)
 {
-	if (mailmap.strdup_strings)
-		return;
+	اگر (mailmap.strdup_لڑیاں)
+		واپس;
 
 	read_mailmap(the_repository, &mailmap);
 }
 
-static char *replace_idents_using_mailmap(char *object_buf, size_t *size)
+ساکن حرف *replace_idents_using_mailmap(حرف *object_buf, سائز_t *سائز)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *headers[] = { "author ", "committer ", "tagger ", NULL };
+	ساخت strbuf sb = STRBUF_INIT;
+	ثابت حرف *سرخیاں[] = { "author ", "committer ", "tagger ", تہی };
 
-	strbuf_attach(&sb, object_buf, *size, *size + 1);
-	apply_mailmap_to_header(&sb, headers, &mailmap);
-	*size = sb.len;
-	return strbuf_detach(&sb, NULL);
+	strbuf_attach(&sb, object_buf, *سائز, *سائز + 1);
+	apply_mailmap_مقصد_سرخی(&sb, سرخیاں, &mailmap);
+	*سائز = sb.len;
+	واپس strbuf_detach(&sb, تہی);
 }
 
-static int filter_object(const char *path, unsigned mode,
-			 const struct object_id *oid,
-			 char **buf, size_t *size)
+ساکن صحیح filter_object(ثابت حرف *راستہ, غیرعلامتی منوال,
+			 ثابت ساخت object_id *oid,
+			 حرف **buf, سائز_t *سائز)
 {
-	enum object_type type;
+	شمار object_type type;
 
-	*buf = odb_read_object(the_repository->objects, oid, &type, size);
-	if (!*buf)
-		return error(_("cannot read object %s '%s'"),
-			     oid_to_hex(oid), path);
-	if ((type == OBJ_BLOB) && S_ISREG(mode)) {
-		struct strbuf strbuf = STRBUF_INIT;
-		struct checkout_metadata meta;
+	*buf = odb_read_object(the_repository->objects, oid, &type, سائز);
+	اگر (!*buf)
+		واپس error(_("cannot read object %s '%s'"),
+			     oid_مقصد_hex(oid), راستہ);
+	اگر ((type == OBJ_BLOB) && S_ISREG(منوال)) {
+		ساخت strbuf strbuf = STRBUF_INIT;
+		ساخت checkout_metadata meta;
 
-		init_checkout_metadata(&meta, NULL, NULL, oid);
-		if (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
-			free(*buf);
-			*size = strbuf.len;
-			*buf = strbuf_detach(&strbuf, NULL);
+		init_checkout_metadata(&meta, تہی, تہی, oid);
+		اگر (convert_مقصد_working_درخت(the_repository->اشاریہ, راستہ, *buf, *سائز, &strbuf, &meta)) {
+			آزاد(*buf);
+			*سائز = strbuf.len;
+			*buf = strbuf_detach(&strbuf, تہی);
 		}
 	}
 
-	return 0;
+	واپس 0;
 }
 
-static int stream_blob(const struct object_id *oid)
+ساکن صحیح دھارا_blob(ثابت ساخت object_id *oid)
 {
-	if (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
-		die("unable to stream %s to stdout", oid_to_hex(oid));
-	return 0;
+	اگر (odb_دھارا_blob_مقصد_fd(the_repository->objects, 1, oid, تہی, 0))
+		die("unable to stream %s to stdout", oid_مقصد_hex(oid));
+	واپس 0;
 }
 
-static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
+ساکن صحیح cat_one_file(صحیح opt, ثابت حرف *exp_type, ثابت حرف *obj_name)
 {
-	int ret;
-	struct object_id oid;
-	enum object_type type;
-	char *buf;
-	size_t size;
-	struct object_context obj_context = {0};
-	struct object_info oi = OBJECT_INFO_INIT;
-	unsigned flags = OBJECT_INFO_LOOKUP_REPLACE;
-	unsigned get_oid_flags =
-		GET_OID_RECORD_PATH |
-		GET_OID_ONLY_TO_DIE |
+	صحیح ret;
+	ساخت object_id oid;
+	شمار object_type type;
+	حرف *buf;
+	سائز_t سائز;
+	ساخت object_context obj_context = {0};
+	ساخت object_info oi = OBJECT_INFO_INIT;
+	غیرعلامتی flags = OBJECT_INFO_LOOKUP_REPLACE;
+	غیرعلامتی get_oid_flags =
+		GET_OID_ریکارڈ_راستہ |
+		GET_OID_ONLY_مقصد_DIE |
 		GET_OID_HASH_ANY;
-	const char *path = force_path;
-	const int opt_cw = (opt == 'c' || opt == 'w');
-	if (!path && opt_cw)
-		get_oid_flags |= GET_OID_REQUIRE_PATH;
+	ثابت حرف *راستہ = force_راستہ;
+	ثابت صحیح opt_cw = (opt == 'c' || opt == 'w');
+	اگر (!راستہ && opt_cw)
+		get_oid_flags |= GET_OID_REQUIRE_راستہ;
 
-	if (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
+	اگر (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
 				 &obj_context))
 		die("Not a valid object name %s", obj_name);
 
-	if (!path)
-		path = obj_context.path;
-	if (obj_context.mode == S_IFINVALID)
-		obj_context.mode = 0100644;
+	اگر (!راستہ)
+		راستہ = obj_context.راستہ;
+	اگر (obj_context.منوال == S_IFINVALID)
+		obj_context.منوال = 0100644;
 
-	buf = NULL;
-	switch (opt) {
-	case 't':
+	buf = تہی;
+	انتخاب (opt) {
+	حالت 't':
 		oi.typep = &type;
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		اگر (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
-		printf("%s\n", type_name(type));
+		لکھو("%s\n", type_name(type));
 		ret = 0;
-		goto cleanup;
+		جاؤ cleanup;
 
-	case 's':
-		oi.sizep = &size;
+	حالت 's':
+		oi.sizep = &سائز;
 
-		if (use_mailmap) {
+		اگر (use_mailmap) {
 			oi.typep = &type;
-			oi.contentp = (void**)&buf;
+			oi.contentp = (خالی**)&buf;
 		}
 
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		اگر (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 
-		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
-			buf = replace_idents_using_mailmap(buf, &size);
+		اگر (use_mailmap && (type == OBJ_COMMIT || type == OBJ_لیبل))
+			buf = replace_idents_using_mailmap(buf, &سائز);
 
-		printf("%"PRIuMAX"\n", (uintmax_t)size);
+		لکھو("%"PRIuMAX"\n", (uintmax_t)سائز);
 		ret = 0;
-		goto cleanup;
+		جاؤ cleanup;
 
-	case 'e':
+	حالت 'e':
 		ret = !odb_has_object(the_repository->objects, &oid,
 				      ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR);
-		goto cleanup;
+		جاؤ cleanup;
 
-	case 'w':
+	حالت 'w':
 
-		if (filter_object(path, obj_context.mode,
-				  &oid, &buf, &size)) {
+		اگر (filter_object(راستہ, obj_context.منوال,
+				  &oid, &buf, &سائز)) {
 			ret = -1;
-			goto cleanup;
+			جاؤ cleanup;
 		}
-		break;
+		توڑو;
 
-	case 'c':
+	حالت 'c':
 	{
-		unsigned long size_ul = 0;
-		int textconv_ret = textconv_object(the_repository, path,
-						   obj_context.mode, &oid, 1,
-						   &buf, &size_ul);
-		size = size_ul;
-		if (textconv_ret)
-			break;
+		غیرعلامتی طویل سائز_ul = 0;
+		صحیح textconv_ret = textconv_object(the_repository, راستہ,
+						   obj_context.منوال, &oid, 1,
+						   &buf, &سائز_ul);
+		سائز = سائز_ul;
+		اگر (textconv_ret)
+			توڑو;
 	}
 		/* else fallthrough */
 
-	case 'p':
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+	حالت 'p':
+		type = odb_read_object_info(the_repository->objects, &oid, تہی);
+		اگر (type < 0)
 			die("Not a valid object name %s", obj_name);
 
 		/* custom pretty-print here */
-		if (type == OBJ_TREE) {
-			const char *ls_args[3] = { NULL };
-			ls_args[0] =  "ls-tree";
-			ls_args[1] =  obj_name;
-			ret = cmd_ls_tree(2, ls_args, NULL, the_repository);
-			goto cleanup;
+		اگر (type == OBJ_درخت) {
+			ثابت حرف *ls_دلائل[3] = { تہی };
+			ls_دلائل[0] =  "ls-tree";
+			ls_دلائل[1] =  obj_name;
+			ret = cmd_ls_درخت(2, ls_دلائل, تہی, the_repository);
+			جاؤ cleanup;
 		}
 
-		if (type == OBJ_BLOB) {
-			ret = stream_blob(&oid);
-			goto cleanup;
+		اگر (type == OBJ_BLOB) {
+			ret = دھارا_blob(&oid);
+			جاؤ cleanup;
 		}
 		buf = odb_read_object(the_repository->objects, &oid,
-				      &type, &size);
-		if (!buf)
+				      &type, &سائز);
+		اگر (!buf)
 			die("Cannot read object %s", obj_name);
 
-		if (use_mailmap)
-			buf = replace_idents_using_mailmap(buf, &size);
+		اگر (use_mailmap)
+			buf = replace_idents_using_mailmap(buf, &سائز);
 
 		/* otherwise just spit out the data */
-		break;
+		توڑو;
 
-	case 0:
+	حالت 0:
 	{
-		enum object_type exp_type_id = type_from_string(exp_type);
+		شمار object_type exp_type_id = type_from_string(exp_type);
 
-		if (exp_type_id == OBJ_BLOB) {
-			struct object_id blob_oid;
-			if (odb_read_object_info(the_repository->objects,
-						 &oid, NULL) == OBJ_TAG) {
-				char *buffer = odb_read_object(the_repository->objects,
-							       &oid, &type, &size);
-				const char *target;
+		اگر (exp_type_id == OBJ_BLOB) {
+			ساخت object_id blob_oid;
+			اگر (odb_read_object_info(the_repository->objects,
+						 &oid, تہی) == OBJ_لیبل) {
+				حرف *بفر = odb_read_object(the_repository->objects,
+							       &oid, &type, &سائز);
+				ثابت حرف *ہدف;
 
-				if (!buffer)
-					die(_("unable to read %s"), oid_to_hex(&oid));
+				اگر (!بفر)
+					die(_("unable to read %s"), oid_مقصد_hex(&oid));
 
-				if (!skip_prefix(buffer, "object ", &target) ||
-				    get_oid_hex_algop(target, &blob_oid,
+				اگر (!skip_سابقہ(بفر, "object ", &ہدف) ||
+				    get_oid_hex_algop(ہدف, &blob_oid,
 						      &hash_algos[oid.algo]))
-					die("%s not a valid tag", oid_to_hex(&oid));
-				free(buffer);
-			} else
+					die("%s not a valid tag", oid_مقصد_hex(&oid));
+				آزاد(بفر);
+			} ورنہ
 				oidcpy(&blob_oid, &oid);
 
-			if (odb_read_object_info(the_repository->objects,
-						 &blob_oid, NULL) == OBJ_BLOB) {
-				ret = stream_blob(&blob_oid);
-				goto cleanup;
+			اگر (odb_read_object_info(the_repository->objects,
+						 &blob_oid, تہی) == OBJ_BLOB) {
+				ret = دھارا_blob(&blob_oid);
+				جاؤ cleanup;
 			}
 			/*
 			 * we attempted to dereference a tag to a blob
@@ -277,246 +277,246 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 			 */
 		}
 		buf = odb_read_object_peeled(the_repository->objects, &oid,
-					     exp_type_id, &size, NULL);
+					     exp_type_id, &سائز, تہی);
 
-		if (use_mailmap)
-			buf = replace_idents_using_mailmap(buf, &size);
-		break;
+		اگر (use_mailmap)
+			buf = replace_idents_using_mailmap(buf, &سائز);
+		توڑو;
 	}
-	default:
+	طےشدہ:
 		die("git cat-file: unknown option: %s", exp_type);
 	}
 
-	if (!buf)
+	اگر (!buf)
 		die("git cat-file %s: bad file", obj_name);
 
-	write_or_die(1, buf, size);
+	write_or_die(1, buf, سائز);
 	ret = 0;
 cleanup:
-	free(buf);
+	آزاد(buf);
 	object_context_release(&obj_context);
-	return ret;
+	واپس ret;
 }
 
-struct expand_data {
-	struct object_id oid;
-	enum object_type type;
-	size_t size;
-	unsigned short mode;
-	off_t disk_size;
-	const char *rest;
-	struct object_id delta_base_oid;
+ساخت expand_ڈیٹا {
+	ساخت object_id oid;
+	شمار object_type type;
+	سائز_t سائز;
+	غیرعلامتی مختصر منوال;
+	off_t disk_سائز;
+	ثابت حرف *rest;
+	ساخت object_id delta_بنیاد_oid;
 
 	/*
 	 * If mark_query is true, we do not expand anything, but rather
 	 * just mark the object_info with items we wish to query.
 	 */
-	int mark_query;
+	صحیح mark_query;
 
 	/*
 	 * Whether to split the input on whitespace before feeding it to
 	 * get_sha1; this is decided during the mark_query phase based on
 	 * whether we have a %(rest) token in our format.
 	 */
-	int split_on_whitespace;
+	صحیح بانٹو_on_whitespace;
 
 	/*
 	 * After a mark_query run, this object_info is set up to be
 	 * passed to odb_read_object_info_extended. It will point to the data
 	 * elements above, so you can retrieve the response from there.
 	 */
-	struct object_info info;
+	ساخت object_info info;
 
 	/*
 	 * This flag will be true if the requested batch format and options
 	 * don't require us to call oid_object_info, which can then be
 	 * optimized out.
 	 */
-	unsigned skip_object_info : 1;
+	غیرعلامتی skip_object_info : 1;
 
 	/*
 	 * Flags about when an object info is being fetched from remote.
 	 */
-	unsigned is_remote:1;
+	غیرعلامتی is_remote:1;
 
 	/*
 	 * List of atoms (i.e. "objectsize") that the server supports. Built
 	 * from the server's object-info advertised capabilities.
 	 */
-	struct string_list remote_allowed_atoms;
+	ساخت string_list remote_allowed_atoms;
 };
 
-#define EXPAND_DATA_INIT  {  \
-	.mode = S_IFINVALID, \
+#تعریف_کرو EXPAND_ڈیٹا_INIT  {  \
+	.منوال = S_IFINVALID, \
 	.type = OBJ_BAD,     \
 	.remote_allowed_atoms = STRING_LIST_INIT_NODUP, \
 }
 
-static int is_atom(const char *atom, const char *s, int slen)
+ساکن صحیح is_atom(ثابت حرف *atom, ثابت حرف *s, صحیح slen)
 {
-	int alen = strlen(atom);
-	return alen == slen && !memcmp(atom, s, alen);
+	صحیح alen = لڑی_لمبائی(atom);
+	واپس alen == slen && !memcmp(atom, s, alen);
 }
 
-static int expand_atom(struct strbuf *sb, const char *atom, int len,
-		       struct expand_data *data)
+ساکن صحیح expand_atom(ساخت strbuf *sb, ثابت حرف *atom, صحیح len,
+		       ساخت expand_ڈیٹا *ڈیٹا)
 {
-	if (data->is_remote) {
-		size_t i;
-		for (i = 0; i < data->remote_allowed_atoms.nr; i++)
-			if (is_atom(data->remote_allowed_atoms.items[i].string,
+	اگر (ڈیٹا->is_remote) {
+		سائز_t i;
+		برائے (i = 0; i < ڈیٹا->remote_allowed_atoms.nr; i++)
+			اگر (is_atom(ڈیٹا->remote_allowed_atoms.اشیاء[i].string,
 				    atom, len))
-				break;
-		if (i == data->remote_allowed_atoms.nr)
-			return 1;
+				توڑو;
+		اگر (i == ڈیٹا->remote_allowed_atoms.nr)
+			واپس 1;
 	}
 
-	if (is_atom("objectname", atom, len)) {
-		if (!data->mark_query)
-			strbuf_add_oid_hex(sb, &data->oid);
-	} else if (is_atom("objecttype", atom, len)) {
-		if (data->mark_query) {
-			data->info.typep = &data->type;
-		} else {
-			const char *t = type_name(data->type);
+	اگر (is_atom("objectname", atom, len)) {
+		اگر (!ڈیٹا->mark_query)
+			strbuf_جوڑو_oid_hex(sb, &ڈیٹا->oid);
+	} ورنہ اگر (is_atom("objecttype", atom, len)) {
+		اگر (ڈیٹا->mark_query) {
+			ڈیٹا->info.typep = &ڈیٹا->type;
+		} ورنہ {
+			ثابت حرف *t = type_name(ڈیٹا->type);
 			strbuf_addstr(sb, t ? t : "");
 		}
-	} else if (is_atom("objectsize", atom, len)) {
-		if (data->mark_query)
-			data->info.sizep = &data->size;
-		else
-			strbuf_add_uint(sb, data->size);
-	} else if (is_atom("objectsize:disk", atom, len)) {
-		if (data->mark_query)
-			data->info.disk_sizep = &data->disk_size;
-		else
-			strbuf_add_uint(sb, data->disk_size);
-	} else if (is_atom("rest", atom, len)) {
-		if (data->mark_query)
-			data->split_on_whitespace = 1;
-		else if (data->rest)
-			strbuf_addstr(sb, data->rest);
-	} else if (is_atom("deltabase", atom, len)) {
-		if (data->mark_query)
-			data->info.delta_base_oid = &data->delta_base_oid;
-		else
-			strbuf_add_oid_hex(sb, &data->delta_base_oid);
-	} else if (is_atom("objectmode", atom, len)) {
-		if (!data->mark_query && !(S_IFINVALID == data->mode))
-			strbuf_addf(sb, "%06o", data->mode);
-	} else
-		return 0;
-	return 1;
+	} ورنہ اگر (is_atom("objectsize", atom, len)) {
+		اگر (ڈیٹا->mark_query)
+			ڈیٹا->info.sizep = &ڈیٹا->سائز;
+		ورنہ
+			strbuf_جوڑو_uint(sb, ڈیٹا->سائز);
+	} ورنہ اگر (is_atom("objectsize:disk", atom, len)) {
+		اگر (ڈیٹا->mark_query)
+			ڈیٹا->info.disk_sizep = &ڈیٹا->disk_سائز;
+		ورنہ
+			strbuf_جوڑو_uint(sb, ڈیٹا->disk_سائز);
+	} ورنہ اگر (is_atom("rest", atom, len)) {
+		اگر (ڈیٹا->mark_query)
+			ڈیٹا->بانٹو_on_whitespace = 1;
+		ورنہ اگر (ڈیٹا->rest)
+			strbuf_addstr(sb, ڈیٹا->rest);
+	} ورنہ اگر (is_atom("deltabase", atom, len)) {
+		اگر (ڈیٹا->mark_query)
+			ڈیٹا->info.delta_بنیاد_oid = &ڈیٹا->delta_بنیاد_oid;
+		ورنہ
+			strbuf_جوڑو_oid_hex(sb, &ڈیٹا->delta_بنیاد_oid);
+	} ورنہ اگر (is_atom("objectmode", atom, len)) {
+		اگر (!ڈیٹا->mark_query && !(S_IFINVALID == ڈیٹا->منوال))
+			strbuf_addf(sb, "%06o", ڈیٹا->منوال);
+	} ورنہ
+		واپس 0;
+	واپس 1;
 }
 
-static void expand_format(struct strbuf *sb, const char *start,
-			  struct expand_data *data)
+ساکن خالی expand_format(ساخت strbuf *sb, ثابت حرف *آغاز,
+			  ساخت expand_ڈیٹا *ڈیٹا)
 {
-	while (strbuf_expand_step(sb, &start)) {
-		const char *end;
+	جب (strbuf_expand_قدم(sb, &آغاز)) {
+		ثابت حرف *انتہا;
 
-		if (skip_prefix(start, "%", &start) || *start != '(')
+		اگر (skip_سابقہ(آغاز, "%", &آغاز) || *آغاز != '(')
 			strbuf_addch(sb, '%');
-		else if ((end = strchr(start + 1, ')')) &&
-			 expand_atom(sb, start + 1, end - start - 1, data))
-			start = end + 1;
-		else
-			strbuf_expand_bad_format(start, "cat-file");
+		ورنہ اگر ((انتہا = strchr(آغاز + 1, ')')) &&
+			 expand_atom(sb, آغاز + 1, انتہا - آغاز - 1, ڈیٹا))
+			آغاز = انتہا + 1;
+		ورنہ
+			strbuf_expand_bad_format(آغاز, "cat-file");
 	}
 }
 
-static void batch_write(struct batch_options *opt, const void *data, int len)
+ساکن خالی batch_write(ساخت batch_options *opt, ثابت خالی *ڈیٹا, صحیح len)
 {
-	if (opt->buffer_output) {
-		if (fwrite(data, 1, len, stdout) != len)
+	اگر (opt->بفر_output) {
+		اگر (fwrite(ڈیٹا, 1, len, stdout) != len)
 			die_errno("unable to write to stdout");
-	} else
-		write_or_die(1, data, len);
+	} ورنہ
+		write_or_die(1, ڈیٹا, len);
 }
 
-static void print_object_or_die(struct batch_options *opt, struct expand_data *data)
+ساکن خالی print_object_or_die(ساخت batch_options *opt, ساخت expand_ڈیٹا *ڈیٹا)
 {
-	const struct object_id *oid = &data->oid;
+	ثابت ساخت object_id *oid = &ڈیٹا->oid;
 
-	assert(data->info.typep);
+	أكد(ڈیٹا->info.typep);
 
-	if (data->type == OBJ_BLOB) {
-		if (opt->buffer_output)
+	اگر (ڈیٹا->type == OBJ_BLOB) {
+		اگر (opt->بفر_output)
 			fflush(stdout);
-		if (opt->transform_mode) {
-			char *contents;
-			size_t size;
+		اگر (opt->transform_منوال) {
+			حرف *contents;
+			سائز_t سائز;
 
-			if (!data->rest)
-				die("missing path for '%s'", oid_to_hex(oid));
+			اگر (!ڈیٹا->rest)
+				die("missing path for '%s'", oid_مقصد_hex(oid));
 
-			if (opt->transform_mode == 'w') {
-				if (filter_object(data->rest, 0100644, oid,
-						  &contents, &size))
+			اگر (opt->transform_منوال == 'w') {
+				اگر (filter_object(ڈیٹا->rest, 0100644, oid,
+						  &contents, &سائز))
 					die("could not convert '%s' %s",
-					    oid_to_hex(oid), data->rest);
-			} else if (opt->transform_mode == 'c') {
-				enum object_type type;
-				unsigned long size_ul = 0;
-				if (textconv_object(the_repository,
-						    data->rest, 0100644, oid,
-						    1, &contents, &size_ul))
-					size = size_ul;
-				else
+					    oid_مقصد_hex(oid), ڈیٹا->rest);
+			} ورنہ اگر (opt->transform_منوال == 'c') {
+				شمار object_type type;
+				غیرعلامتی طویل سائز_ul = 0;
+				اگر (textconv_object(the_repository,
+						    ڈیٹا->rest, 0100644, oid,
+						    1, &contents, &سائز_ul))
+					سائز = سائز_ul;
+				ورنہ
 					contents = odb_read_object(the_repository->objects,
-								   oid, &type, &size);
-				if (!contents)
+								   oid, &type, &سائز);
+				اگر (!contents)
 					die("could not convert '%s' %s",
-					    oid_to_hex(oid), data->rest);
-			} else
-				BUG("invalid transform_mode: %c", opt->transform_mode);
-			batch_write(opt, contents, size);
-			free(contents);
-		} else {
-			stream_blob(oid);
+					    oid_مقصد_hex(oid), ڈیٹا->rest);
+			} ورنہ
+				BUG("invalid transform_mode: %c", opt->transform_منوال);
+			batch_write(opt, contents, سائز);
+			آزاد(contents);
+		} ورنہ {
+			دھارا_blob(oid);
 		}
 	}
-	else {
-		enum object_type type;
-		size_t size;
-		void *contents;
+	ورنہ {
+		شمار object_type type;
+		سائز_t سائز;
+		خالی *contents;
 
 		contents = odb_read_object(the_repository->objects, oid,
-					   &type, &size);
-		if (!contents)
-			die("object %s disappeared", oid_to_hex(oid));
+					   &type, &سائز);
+		اگر (!contents)
+			die("object %s disappeared", oid_مقصد_hex(oid));
 
-		if (use_mailmap)
-			contents = replace_idents_using_mailmap(contents, &size);
+		اگر (use_mailmap)
+			contents = replace_idents_using_mailmap(contents, &سائز);
 
-		if (type != data->type)
-			die("object %s changed type!?", oid_to_hex(oid));
-		if (data->info.sizep && size != data->size && !use_mailmap)
-			die("object %s changed size!?", oid_to_hex(oid));
+		اگر (type != ڈیٹا->type)
+			die("object %s changed type!?", oid_مقصد_hex(oid));
+		اگر (ڈیٹا->info.sizep && سائز != ڈیٹا->سائز && !use_mailmap)
+			die("object %s changed size!?", oid_مقصد_hex(oid));
 
-		batch_write(opt, contents, size);
-		free(contents);
+		batch_write(opt, contents, سائز);
+		آزاد(contents);
 	}
 }
 
-static void print_default_format(struct strbuf *scratch, struct expand_data *data,
-				 struct batch_options *opt)
+ساکن خالی print_default_format(ساخت strbuf *scratch, ساخت expand_ڈیٹا *ڈیٹا,
+				 ساخت batch_options *opt)
 {
-	strbuf_add_oid_hex(scratch, &data->oid);
+	strbuf_جوڑو_oid_hex(scratch, &ڈیٹا->oid);
 	strbuf_addch(scratch, ' ');
-	strbuf_addstr(scratch, type_name(data->type));
+	strbuf_addstr(scratch, type_name(ڈیٹا->type));
 	strbuf_addch(scratch, ' ');
-	strbuf_add_uint(scratch, data->size);
+	strbuf_جوڑو_uint(scratch, ڈیٹا->سائز);
 	strbuf_addch(scratch, opt->output_delim);
 }
 
-static void report_object_status(struct batch_options *opt,
-				 const char *obj_name,
-				 const struct object_id *oid,
-				 const char *status)
+ساکن خالی report_object_حالت(ساخت batch_options *opt,
+				 ثابت حرف *obj_name,
+				 ثابت ساخت object_id *oid,
+				 ثابت حرف *حالت_2)
 {
-	printf("%s %s%c", obj_name ? obj_name : oid_to_hex(oid),
-	       status, opt->output_delim);
+	لکھو("%s %s%c", obj_name ? obj_name : oid_مقصد_hex(oid),
+	       حالت_2, opt->output_delim);
 	fflush(stdout);
 }
 
@@ -525,503 +525,503 @@ static void report_object_status(struct batch_options *opt,
  * which the object may be accessed (though note that we may also rely on
  * data->oid, too). If "pack" is NULL, then offset is ignored.
  */
-static void batch_object_write(const char *obj_name,
-			       struct strbuf *scratch,
-			       struct batch_options *opt,
-			       struct expand_data *data,
-			       struct packed_git *pack,
-			       off_t offset)
+ساکن خالی batch_object_write(ثابت حرف *obj_name,
+			       ساخت strbuf *scratch,
+			       ساخت batch_options *opt,
+			       ساخت expand_ڈیٹا *ڈیٹا,
+			       ساخت packed_git *pack,
+			       off_t انحراف)
 {
-	if (!data->skip_object_info) {
-		int ret;
+	اگر (!ڈیٹا->skip_object_info) {
+		صحیح ret;
 
-		if (use_mailmap ||
+		اگر (use_mailmap ||
 		    opt->objects_filter.choice == LOFC_BLOB_NONE ||
-		    opt->objects_filter.choice == LOFC_BLOB_LIMIT ||
+		    opt->objects_filter.choice == LOFC_BLOB_حد_بندی ||
 		    opt->objects_filter.choice == LOFC_OBJECT_TYPE)
-			data->info.typep = &data->type;
-		if (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
-			data->info.sizep = &data->size;
+			ڈیٹا->info.typep = &ڈیٹا->type;
+		اگر (opt->objects_filter.choice == LOFC_BLOB_حد_بندی)
+			ڈیٹا->info.sizep = &ڈیٹا->سائز;
 
-		if (pack)
-			ret = packed_object_info(NULL, pack, offset, &data->info);
-		else
+		اگر (pack)
+			ret = packed_object_info(تہی, pack, انحراف, &ڈیٹا->info);
+		ورنہ
 			ret = odb_read_object_info_extended(the_repository->objects,
-							    &data->oid, &data->info,
+							    &ڈیٹا->oid, &ڈیٹا->info,
 							    OBJECT_INFO_LOOKUP_REPLACE);
-		if (ret < 0) {
-			if (data->mode == S_IFGITLINK)
-				report_object_status(opt, NULL, &data->oid, "submodule");
-			else
-				report_object_status(opt, obj_name, &data->oid, "missing");
-			return;
+		اگر (ret < 0) {
+			اگر (ڈیٹا->منوال == S_IFGITLINK)
+				report_object_حالت(opt, تہی, &ڈیٹا->oid, "submodule");
+			ورنہ
+				report_object_حالت(opt, obj_name, &ڈیٹا->oid, "missing");
+			واپس;
 		}
 
-		switch (opt->objects_filter.choice) {
-		case LOFC_DISABLED:
-			break;
-		case LOFC_BLOB_NONE:
-			if (data->type == OBJ_BLOB) {
-				if (!opt->all_objects)
-					report_object_status(opt, obj_name,
-							     &data->oid, "excluded");
-				return;
+		انتخاب (opt->objects_filter.choice) {
+		حالت LOFC_DISABLED:
+			توڑو;
+		حالت LOFC_BLOB_NONE:
+			اگر (ڈیٹا->type == OBJ_BLOB) {
+				اگر (!opt->all_objects)
+					report_object_حالت(opt, obj_name,
+							     &ڈیٹا->oid, "excluded");
+				واپس;
 			}
-			break;
-		case LOFC_BLOB_LIMIT:
-			if (data->type == OBJ_BLOB &&
-			    data->size >= opt->objects_filter.blob_limit_value) {
-				if (!opt->all_objects)
-					report_object_status(opt, obj_name,
-							     &data->oid, "excluded");
-				return;
+			توڑو;
+		حالت LOFC_BLOB_حد_بندی:
+			اگر (ڈیٹا->type == OBJ_BLOB &&
+			    ڈیٹا->سائز >= opt->objects_filter.blob_حد_بندی_قدر) {
+				اگر (!opt->all_objects)
+					report_object_حالت(opt, obj_name,
+							     &ڈیٹا->oid, "excluded");
+				واپس;
 			}
-			break;
-		case LOFC_OBJECT_TYPE:
-			if (data->type != opt->objects_filter.object_type) {
-				if (!opt->all_objects)
-					report_object_status(opt, obj_name,
-							     &data->oid, "excluded");
-				return;
+			توڑو;
+		حالت LOFC_OBJECT_TYPE:
+			اگر (ڈیٹا->type != opt->objects_filter.object_type) {
+				اگر (!opt->all_objects)
+					report_object_حالت(opt, obj_name,
+							     &ڈیٹا->oid, "excluded");
+				واپس;
 			}
-			break;
-		default:
+			توڑو;
+		طےشدہ:
 			BUG("unsupported objects filter");
 		}
 
-		if (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
-			char *buf = NULL;
+		اگر (use_mailmap && (ڈیٹا->type == OBJ_COMMIT || ڈیٹا->type == OBJ_لیبل)) {
+			حرف *buf = تہی;
 
-			buf = odb_read_object(the_repository->objects, &data->oid,
-					      &data->type, &data->size);
-			if (!buf)
-				die(_("unable to read %s"), oid_to_hex(&data->oid));
-			buf = replace_idents_using_mailmap(buf, &data->size);
+			buf = odb_read_object(the_repository->objects, &ڈیٹا->oid,
+					      &ڈیٹا->type, &ڈیٹا->سائز);
+			اگر (!buf)
+				die(_("unable to read %s"), oid_مقصد_hex(&ڈیٹا->oid));
+			buf = replace_idents_using_mailmap(buf, &ڈیٹا->سائز);
 
-			free(buf);
+			آزاد(buf);
 		}
 	}
 
 	strbuf_reset(scratch);
 
-	if (!opt->format) {
-		print_default_format(scratch, data, opt);
-	} else {
-		expand_format(scratch, opt->format, data);
+	اگر (!opt->format) {
+		print_default_format(scratch, ڈیٹا, opt);
+	} ورنہ {
+		expand_format(scratch, opt->format, ڈیٹا);
 		strbuf_addch(scratch, opt->output_delim);
 	}
 
 	batch_write(opt, scratch->buf, scratch->len);
 
-	if (opt->batch_mode == BATCH_MODE_CONTENTS) {
-		print_object_or_die(opt, data);
+	اگر (opt->batch_منوال == BATCH_منوال_CONTENTS) {
+		print_object_or_die(opt, ڈیٹا);
 		batch_write(opt, &opt->output_delim, 1);
 	}
 }
 
-static void batch_one_object(const char *obj_name,
-			     struct strbuf *scratch,
-			     struct batch_options *opt,
-			     struct expand_data *data)
+ساکن خالی batch_one_object(ثابت حرف *obj_name,
+			     ساخت strbuf *scratch,
+			     ساخت batch_options *opt,
+			     ساخت expand_ڈیٹا *ڈیٹا)
 {
-	struct object_context ctx = {0};
-	int flags =
+	ساخت object_context ctx = {0};
+	صحیح flags =
 		GET_OID_HASH_ANY |
 		(opt->follow_symlinks ? GET_OID_FOLLOW_SYMLINKS : 0);
-	enum get_oid_result result;
+	شمار get_oid_نتیجہ نتیجہ;
 
-	result = get_oid_with_context(the_repository, obj_name,
-				      flags, &data->oid, &ctx);
-	if (result != FOUND) {
-		switch (result) {
-		case MISSING_OBJECT:
-			report_object_status(opt, obj_name, &data->oid, "missing");
-			break;
-		case SHORT_NAME_AMBIGUOUS:
-			report_object_status(opt, obj_name, &data->oid, "ambiguous");
-			break;
-		case DANGLING_SYMLINK:
-			printf("dangling %"PRIuMAX"%c%s%c",
-			       (uintmax_t)strlen(obj_name),
+	نتیجہ = get_oid_with_context(the_repository, obj_name,
+				      flags, &ڈیٹا->oid, &ctx);
+	اگر (نتیجہ != ملا) {
+		انتخاب (نتیجہ) {
+		حالت MISSING_OBJECT:
+			report_object_حالت(opt, obj_name, &ڈیٹا->oid, "missing");
+			توڑو;
+		حالت SHORT_NAME_AMBIGUOUS:
+			report_object_حالت(opt, obj_name, &ڈیٹا->oid, "ambiguous");
+			توڑو;
+		حالت DANGLING_SYMLINK:
+			لکھو("dangling %"PRIuMAX"%c%s%c",
+			       (uintmax_t)لڑی_لمبائی(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case SYMLINK_LOOP:
-			printf("loop %"PRIuMAX"%c%s%c",
-			       (uintmax_t)strlen(obj_name),
+			توڑو;
+		حالت SYMLINK_LOOP:
+			لکھو("loop %"PRIuMAX"%c%s%c",
+			       (uintmax_t)لڑی_لمبائی(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case NOT_DIR:
-			printf("notdir %"PRIuMAX"%c%s%c",
-			       (uintmax_t)strlen(obj_name),
+			توڑو;
+		حالت NOT_DIR:
+			لکھو("notdir %"PRIuMAX"%c%s%c",
+			       (uintmax_t)لڑی_لمبائی(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		default:
+			توڑو;
+		طےشدہ:
 			BUG("unknown get_sha1_with_context result %d\n",
-			       result);
-			break;
+			       نتیجہ);
+			توڑو;
 		}
 		fflush(stdout);
 
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (ctx.mode == 0) {
-		printf("symlink %"PRIuMAX"%c%s%c",
-		       (uintmax_t)ctx.symlink_path.len,
-		       opt->output_delim, ctx.symlink_path.buf, opt->output_delim);
+	اگر (ctx.منوال == 0) {
+		لکھو("symlink %"PRIuMAX"%c%s%c",
+		       (uintmax_t)ctx.symlink_راستہ.len,
+		       opt->output_delim, ctx.symlink_راستہ.buf, opt->output_delim);
 		fflush(stdout);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	data->mode = ctx.mode;
-	batch_object_write(obj_name, scratch, opt, data, NULL, 0);
+	ڈیٹا->منوال = ctx.منوال;
+	batch_object_write(obj_name, scratch, opt, ڈیٹا, تہی, 0);
 
-out:
+برآمد:
 	object_context_release(&ctx);
 }
 
-static int get_remote_info(int argc,
-			   const char **argv,
-			   struct fetch_object_info_results *results,
-			   struct oid_array *object_info_oids)
+ساکن صحیح get_remote_info(صحیح argc,
+			   ثابت حرف **argv,
+			   ساخت fetch_object_info_results *results,
+			   ساخت oid_array *object_info_oids)
 {
-	int retval = 0;
-	struct remote *remote = NULL;
-	struct object_id oid;
-	struct transport *gtransport;
+	صحیح retval = 0;
+	ساخت remote *remote = تہی;
+	ساخت object_id oid;
+	ساخت transport *gtransport;
 
 	remote = remote_get(argv[0]);
-	if (!remote)
+	اگر (!remote)
 		die(_("must supply valid remote when using remote-object-info"));
 
 	oid_array_clear(object_info_oids);
-	for (size_t i = 1; i < argc; i++) {
-		if (get_oid_hex(argv[i], &oid)) {
-			size_t len = strlen(argv[i]);
+	برائے (سائز_t i = 1; i < argc; i++) {
+		اگر (get_oid_hex(argv[i], &oid)) {
+			سائز_t len = لڑی_لمبائی(argv[i]);
 
-			if (len < the_hash_algo->hexsz && len >= 4) {
-				size_t j;
-				for (j = 0; j < len; j++)
-					if (!isxdigit(argv[i][j]))
-						break;
-				if (j == len)
+			اگر (len < the_hash_algo->hexsz && len >= 4) {
+				سائز_t j;
+				برائے (j = 0; j < len; j++)
+					اگر (!isxdigit(argv[i][j]))
+						توڑو;
+				اگر (j == len)
 					die(_("remote-object-info does not support "
 					      "short oids, %d characters required"),
-					    (int)the_hash_algo->hexsz);
+					    (صحیح)the_hash_algo->hexsz);
 			}
 			die(_("not a valid object name '%s'"), argv[i]);
 		}
 		oid_array_append(object_info_oids, &oid);
 	}
 
-	if (!object_info_oids->nr)
+	اگر (!object_info_oids->nr)
 		die(_("remote-object-info requires objects"));
 
-	gtransport = transport_get(remote, NULL);
+	gtransport = transport_get(remote, تہی);
 
-	if (!gtransport->smart_options) {
+	اگر (!gtransport->smart_options) {
 		retval = -1;
-		goto cleanup;
+		جاؤ cleanup;
 	}
 
 	retval = transport_fetch_object_info(gtransport, object_info_oids,
 					     results);
 cleanup:
 	transport_disconnect(gtransport);
-	return retval;
+	واپس retval;
 }
 
-struct object_cb_data {
-	struct batch_options *opt;
-	struct expand_data *expand;
-	struct oidset *seen;
-	struct strbuf *scratch;
+ساخت object_cb_ڈیٹا {
+	ساخت batch_options *opt;
+	ساخت expand_ڈیٹا *expand;
+	ساخت oidset *نظر_آیا;
+	ساخت strbuf *scratch;
 };
 
-static int batch_object_cb(const struct object_id *oid, void *vdata)
+ساکن صحیح batch_object_cb(ثابت ساخت object_id *oid, خالی *vdata)
 {
-	struct object_cb_data *data = vdata;
-	oidcpy(&data->expand->oid, oid);
-	batch_object_write(NULL, data->scratch, data->opt, data->expand,
-			   NULL, 0);
-	return 0;
+	ساخت object_cb_ڈیٹا *ڈیٹا = vdata;
+	oidcpy(&ڈیٹا->expand->oid, oid);
+	batch_object_write(تہی, ڈیٹا->scratch, ڈیٹا->opt, ڈیٹا->expand,
+			   تہی, 0);
+	واپس 0;
 }
 
-static int collect_object(const struct object_id *oid,
-			  struct packed_git *pack UNUSED,
-			  off_t offset UNUSED,
-			  void *data)
+ساکن صحیح collect_object(ثابت ساخت object_id *oid,
+			  ساخت packed_git *pack غیر_مستعمل,
+			  off_t انحراف غیر_مستعمل,
+			  خالی *ڈیٹا)
 {
-	oid_array_append(data, oid);
-	return 0;
+	oid_array_append(ڈیٹا, oid);
+	واپس 0;
 }
 
-static int batch_unordered_object(const struct object_id *oid,
-				  struct packed_git *pack,
-				  off_t offset,
-				  void *vdata)
+ساکن صحیح batch_unordered_object(ثابت ساخت object_id *oid,
+				  ساخت packed_git *pack,
+				  off_t انحراف,
+				  خالی *vdata)
 {
-	struct object_cb_data *data = vdata;
+	ساخت object_cb_ڈیٹا *ڈیٹا = vdata;
 
-	if (oidset_insert(data->seen, oid))
-		return 0;
+	اگر (oidset_داخل_کرو(ڈیٹا->نظر_آیا, oid))
+		واپس 0;
 
-	oidcpy(&data->expand->oid, oid);
-	batch_object_write(NULL, data->scratch, data->opt, data->expand,
-			   pack, offset);
-	return 0;
+	oidcpy(&ڈیٹا->expand->oid, oid);
+	batch_object_write(تہی, ڈیٹا->scratch, ڈیٹا->opt, ڈیٹا->expand,
+			   pack, انحراف);
+	واپس 0;
 }
 
-typedef void (*parse_cmd_fn_t)(struct batch_options *, const char *,
-			       struct strbuf *, struct expand_data *);
+قسمتعریف خالی (*parse_cmd_fn_t)(ساخت batch_options *, ثابت حرف *,
+			       ساخت strbuf *, ساخت expand_ڈیٹا *);
 
-struct queued_cmd {
+ساخت queued_cmd {
 	parse_cmd_fn_t fn;
-	char *line;
+	حرف *سطر;
 };
 
-static void parse_cmd_contents(struct batch_options *opt,
-			     const char *line,
-			     struct strbuf *output,
-			     struct expand_data *data)
+ساکن خالی parse_cmd_contents(ساخت batch_options *opt,
+			     ثابت حرف *سطر,
+			     ساخت strbuf *output,
+			     ساخت expand_ڈیٹا *ڈیٹا)
 {
-	enum object_type *saved_typep = data->info.typep;
-	data->info.typep = &data->type;
-	opt->batch_mode = BATCH_MODE_CONTENTS;
-	batch_one_object(line, output, opt, data);
-	data->info.typep = saved_typep;
+	شمار object_type *saved_typep = ڈیٹا->info.typep;
+	ڈیٹا->info.typep = &ڈیٹا->type;
+	opt->batch_منوال = BATCH_منوال_CONTENTS;
+	batch_one_object(سطر, output, opt, ڈیٹا);
+	ڈیٹا->info.typep = saved_typep;
 }
 
-static void parse_cmd_info(struct batch_options *opt,
-			   const char *line,
-			   struct strbuf *output,
-			   struct expand_data *data)
+ساکن خالی parse_cmd_info(ساخت batch_options *opt,
+			   ثابت حرف *سطر,
+			   ساخت strbuf *output,
+			   ساخت expand_ڈیٹا *ڈیٹا)
 {
-	opt->batch_mode = BATCH_MODE_INFO;
-	batch_one_object(line, output, opt, data);
+	opt->batch_منوال = BATCH_منوال_INFO;
+	batch_one_object(سطر, output, opt, ڈیٹا);
 }
 
-static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
-			      const char *line,
-			      struct strbuf *output UNUSED,
-			      struct expand_data *data UNUSED)
+ساکن خالی parse_cmd_mailmap(ساخت batch_options *opt غیر_مستعمل,
+			      ثابت حرف *سطر,
+			      ساخت strbuf *output غیر_مستعمل,
+			      ساخت expand_ڈیٹا *ڈیٹا غیر_مستعمل)
 {
-	use_mailmap = git_parse_maybe_bool(line);
+	use_mailmap = git_parse_maybe_bool(سطر);
 
-	if (use_mailmap < 0)
-		die(_("mailmap: invalid boolean '%s'"), line);
+	اگر (use_mailmap < 0)
+		die(_("mailmap: invalid boolean '%s'"), سطر);
 
-	if (use_mailmap)
-		load_mailmap();
+	اگر (use_mailmap)
+		بھرو_mailmap();
 }
 
-static void parse_cmd_remote_object_info(struct batch_options *opt,
-					 const char *line, struct strbuf *output,
-					 struct expand_data *data)
+ساکن خالی parse_cmd_remote_object_info(ساخت batch_options *opt,
+					 ثابت حرف *سطر, ساخت strbuf *output,
+					 ساخت expand_ڈیٹا *ڈیٹا)
 {
-	int count;
-	const char **argv;
-	char *line_to_split;
-	struct fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
-	struct oid_array object_info_oids = OID_ARRAY_INIT;
+	صحیح گنتی;
+	ثابت حرف **argv;
+	حرف *سطر_مقصد_بانٹو;
+	ساخت fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
+	ساخت oid_array object_info_oids = OID_ARRAY_INIT;
 
-	if (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
+	اگر (لڑی_لمبائی(سطر) >= MAX_REMOTE_OBJ_INFO_سطر)
 		die(_("remote-object-info command too long"));
 
-	line_to_split = xstrdup(line);
-	count = split_cmdline(line_to_split, &argv);
-	if (count < 0)
+	سطر_مقصد_بانٹو = xstrdup(سطر);
+	گنتی = بانٹو_cmdline(سطر_مقصد_بانٹو, &argv);
+	اگر (گنتی < 0)
 		die(_("remote-object-info: failed to parse command line: %s"),
-		    split_cmdline_strerror(count));
-	if (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
+		    بانٹو_cmdline_strerror(گنتی));
+	اگر (گنتی - 1 > MAX_ALLOWED_OBJ_حد_بندی)
 		die(_("remote-object-info supports at most %d objects"),
-		    MAX_ALLOWED_OBJ_LIMIT);
+		    MAX_ALLOWED_OBJ_حد_بندی);
 
-	if (data->info.sizep)
-		results.wants_size = 1;
-	if (data->info.typep)
-		results.wants_type = 1;
+	اگر (ڈیٹا->info.sizep)
+		results.چاہتا_سائز = 1;
+	اگر (ڈیٹا->info.typep)
+		results.چاہتا_type = 1;
 
-	if (get_remote_info(count, argv, &results, &object_info_oids))
+	اگر (get_remote_info(گنتی, argv, &results, &object_info_oids))
 		die(_("failed to get object info from the remote: %s"), argv[0]);
 
-	string_list_clear(&data->remote_allowed_atoms, 0);
-	string_list_append(&data->remote_allowed_atoms, "objectname");
-	if (results.sizes)
-		string_list_append(&data->remote_allowed_atoms, "objectsize");
-	if (results.types)
-		string_list_append(&data->remote_allowed_atoms, "objecttype");
+	string_list_clear(&ڈیٹا->remote_allowed_atoms, 0);
+	string_list_append(&ڈیٹا->remote_allowed_atoms, "objectname");
+	اگر (results.sizes)
+		string_list_append(&ڈیٹا->remote_allowed_atoms, "objectsize");
+	اگر (results.types)
+		string_list_append(&ڈیٹا->remote_allowed_atoms, "objecttype");
 
-	data->skip_object_info = 1;
-	for (size_t i = 0; i < results.nr; i++) {
-		data->oid = object_info_oids.oid[i];
+	ڈیٹا->skip_object_info = 1;
+	برائے (سائز_t i = 0; i < results.nr; i++) {
+		ڈیٹا->oid = object_info_oids.oid[i];
 
-		if (results.unrecognized[i]) {
-			report_object_status(opt, oid_to_hex(&data->oid),
-					     &data->oid, "missing");
-			continue;
+		اگر (results.unrecognized[i]) {
+			report_object_حالت(opt, oid_مقصد_hex(&ڈیٹا->oid),
+					     &ڈیٹا->oid, "missing");
+			جاری;
 		}
 
 		/*
 		 * When reaching here, it means remote-object-info can retrieve
 		 * information from server without downloading them.
 		 */
-		if (results.sizes)
-			data->size = results.sizes[i];
+		اگر (results.sizes)
+			ڈیٹا->سائز = results.sizes[i];
 
-		if (results.types)
-			data->type = results.types[i];
+		اگر (results.types)
+			ڈیٹا->type = results.types[i];
 
-		opt->batch_mode = BATCH_MODE_INFO;
-		data->is_remote = 1;
-		batch_object_write(argv[i + 1], output, opt, data, NULL, 0);
-		data->is_remote = 0;
+		opt->batch_منوال = BATCH_منوال_INFO;
+		ڈیٹا->is_remote = 1;
+		batch_object_write(argv[i + 1], output, opt, ڈیٹا, تہی, 0);
+		ڈیٹا->is_remote = 0;
 	}
-	data->skip_object_info = 0;
+	ڈیٹا->skip_object_info = 0;
 
 	free_fetch_object_info_results(&results);
-	free(line_to_split);
-	free(argv);
+	آزاد(سطر_مقصد_بانٹو);
+	آزاد(argv);
 	oid_array_clear(&object_info_oids);
 }
 
-static void dispatch_calls(struct batch_options *opt,
-		struct strbuf *output,
-		struct expand_data *data,
-		struct queued_cmd *cmd,
-		size_t nr)
+ساکن خالی dispatch_calls(ساخت batch_options *opt,
+		ساخت strbuf *output,
+		ساخت expand_ڈیٹا *ڈیٹا,
+		ساخت queued_cmd *cmd,
+		سائز_t nr)
 {
-	if (!opt->buffer_output)
+	اگر (!opt->بفر_output)
 		die(_("flush is only for --buffer mode"));
 
-	for (size_t i = 0; i < nr; i++)
-		cmd[i].fn(opt, cmd[i].line, output, data);
+	برائے (سائز_t i = 0; i < nr; i++)
+		cmd[i].fn(opt, cmd[i].سطر, output, ڈیٹا);
 
 	fflush(stdout);
 }
 
-static void free_cmds(struct queued_cmd *cmd, size_t *nr)
+ساکن خالی free_cmds(ساخت queued_cmd *cmd, سائز_t *nr)
 {
-	for (size_t i = 0; i < *nr; i++)
-		FREE_AND_NULL(cmd[i].line);
+	برائے (سائز_t i = 0; i < *nr; i++)
+		FREE_AND_NULL(cmd[i].سطر);
 
 	*nr = 0;
 }
 
 
-static const struct parse_cmd {
-	const char *name;
+ساکن ثابت ساخت parse_cmd {
+	ثابت حرف *name;
 	parse_cmd_fn_t fn;
-	unsigned takes_args;
+	غیرعلامتی takes_دلائل;
 } commands[] = {
 	{ "contents", parse_cmd_contents, 1 },
-	{ "flush", NULL, 0 },
+	{ "flush", تہی, 0 },
 	{ "info", parse_cmd_info, 1 },
 	{ "mailmap", parse_cmd_mailmap, 1 },
 	{ "remote-object-info", parse_cmd_remote_object_info, 1 },
 };
 
-static void batch_objects_command(struct batch_options *opt,
-				    struct strbuf *output,
-				    struct expand_data *data)
+ساکن خالی batch_objects_command(ساخت batch_options *opt,
+				    ساخت strbuf *output,
+				    ساخت expand_ڈیٹا *ڈیٹا)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct queued_cmd *queued_cmd = NULL;
-	size_t alloc = 0, nr = 0;
+	ساخت strbuf داخلہ = STRBUF_INIT;
+	ساخت queued_cmd *queued_cmd = تہی;
+	سائز_t alloc = 0, nr = 0;
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		const struct parse_cmd *cmd = NULL;
-		const char *p = NULL, *cmd_end;
-		struct queued_cmd call = {0};
+	جب (strbuf_getdelim_strip_crlf(&داخلہ, stdin, opt->داخلہ_delim) != EOF) {
+		ثابت ساخت parse_cmd *cmd = تہی;
+		ثابت حرف *p = تہی, *cmd_انتہا;
+		ساخت queued_cmd call = {0};
 
-		if (!input.len)
+		اگر (!داخلہ.len)
 			die(_("empty command in input"));
-		if (isspace(*input.buf))
-			die(_("whitespace before command: '%s'"), input.buf);
+		اگر (خلا_ہے(*داخلہ.buf))
+			die(_("whitespace before command: '%s'"), داخلہ.buf);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (!skip_prefix(input.buf, commands[i].name, &cmd_end))
-				continue;
+		برائے (سائز_t i = 0; i < ARRAY_سائز(commands); i++) {
+			اگر (!skip_سابقہ(داخلہ.buf, commands[i].name, &cmd_انتہا))
+				جاری;
 
 			cmd = &commands[i];
-			if (cmd->takes_args) {
-				if (*cmd_end != ' ')
+			اگر (cmd->takes_دلائل) {
+				اگر (*cmd_انتہا != ' ')
 					die(_("%s requires arguments"),
 					    commands[i].name);
 
-				p = cmd_end + 1;
-			} else if (*cmd_end) {
+				p = cmd_انتہا + 1;
+			} ورنہ اگر (*cmd_انتہا) {
 				die(_("%s takes no arguments"),
 				    commands[i].name);
 			}
 
-			break;
+			توڑو;
 		}
 
-		if (!cmd)
-			die(_("unknown command: '%s'"), input.buf);
+		اگر (!cmd)
+			die(_("unknown command: '%s'"), داخلہ.buf);
 
-		if (!strcmp(cmd->name, "flush")) {
-			dispatch_calls(opt, output, data, queued_cmd, nr);
+		اگر (!strcmp(cmd->name, "flush")) {
+			dispatch_calls(opt, output, ڈیٹا, queued_cmd, nr);
 			free_cmds(queued_cmd, &nr);
-		} else if (!opt->buffer_output) {
-			cmd->fn(opt, p, output, data);
-		} else {
+		} ورنہ اگر (!opt->بفر_output) {
+			cmd->fn(opt, p, output, ڈیٹا);
+		} ورنہ {
 			ALLOC_GROW(queued_cmd, nr + 1, alloc);
 			call.fn = cmd->fn;
-			call.line = xstrdup_or_null(p);
+			call.سطر = xstrdup_or_null(p);
 			queued_cmd[nr++] = call;
 		}
 	}
 
-	if (opt->buffer_output &&
+	اگر (opt->بفر_output &&
 	    nr &&
 	    !git_env_bool("GIT_TEST_CAT_FILE_NO_FLUSH_ON_EXIT", 0)) {
-		dispatch_calls(opt, output, data, queued_cmd, nr);
+		dispatch_calls(opt, output, ڈیٹا, queued_cmd, nr);
 		free_cmds(queued_cmd, &nr);
 	}
 
 	free_cmds(queued_cmd, &nr);
-	free(queued_cmd);
-	strbuf_release(&input);
+	آزاد(queued_cmd);
+	strbuf_release(&داخلہ);
 }
 
-#define DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
+#تعریف_کرو DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
 
-typedef int (*for_each_object_fn)(const struct object_id *oid, struct packed_git *pack,
-				  off_t offset, void *data);
+قسمتعریف صحیح (*for_each_object_fn)(ثابت ساخت object_id *oid, ساخت packed_git *pack,
+				  off_t انحراف, خالی *ڈیٹا);
 
-struct for_each_object_payload {
+ساخت for_each_object_payload {
 	for_each_object_fn callback;
-	void *payload;
+	خالی *payload;
 };
 
-static int batch_one_object_oi(const struct object_id *oid,
-			       struct object_info *oi,
-			       void *_payload)
+ساکن صحیح batch_one_object_oi(ثابت ساخت object_id *oid,
+			       ساخت object_info *oi,
+			       خالی *_payload)
 {
-	struct for_each_object_payload *payload = _payload;
-	if (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
-		return payload->callback(oid, oi->source_infop->u.packed.pack,
-					 oi->source_infop->u.packed.offset,
+	ساخت for_each_object_payload *payload = _payload;
+	اگر (oi && oi->ماخذ_infop->ماخذ->type == ODB_ماخذ_PACKED)
+		واپس payload->callback(oid, oi->ماخذ_infop->u.packed.pack,
+					 oi->ماخذ_infop->u.packed.انحراف,
 					 payload->payload);
-	return payload->callback(oid, NULL, 0, payload->payload);
+	واپس payload->callback(oid, تہی, 0, payload->payload);
 }
 
-static void batch_each_object(struct batch_options *opt,
+ساکن خالی batch_each_object(ساخت batch_options *opt,
 			      for_each_object_fn callback,
-			      unsigned flags,
-			      void *_payload)
+			      غیرعلامتی flags,
+			      خالی *_payload)
 {
-	struct for_each_object_payload payload = {
+	ساخت for_each_object_payload payload = {
 		.callback = callback,
 		.payload = _payload,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
-		.source_infop = &source_info,
+	ساخت odb_ماخذ_info ماخذ_info;
+	ساخت object_info oi = {
+		.ماخذ_infop = &ماخذ_info,
 	};
-	struct odb_for_each_object_options opts = {
+	ساخت odb_for_each_object_options opts = {
 		.flags = flags,
 		.filter = &opt->objects_filter,
 	};
@@ -1030,66 +1030,66 @@ static void batch_each_object(struct batch_options *opt,
 				batch_one_object_oi, &payload, &opts);
 }
 
-static int batch_objects(struct batch_options *opt)
+ساکن صحیح batch_objects(ساخت batch_options *opt)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf output = STRBUF_INIT;
-	struct expand_data data = EXPAND_DATA_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int save_warning;
-	int retval = 0;
+	ساخت strbuf داخلہ = STRBUF_INIT;
+	ساخت strbuf output = STRBUF_INIT;
+	ساخت expand_ڈیٹا ڈیٹا = EXPAND_ڈیٹا_INIT;
+	ساخت repo_config_اقدار *cfg = repo_config_اقدار(the_repository);
+	صحیح save_warning;
+	صحیح retval = 0;
 
 	/*
 	 * Expand once with our special mark_query flag, which will prime the
 	 * object_info to be handed to odb_read_object_info_extended for each
 	 * object.
 	 */
-	data.mark_query = 1;
+	ڈیٹا.mark_query = 1;
 	expand_format(&output,
 		      opt->format ? opt->format : DEFAULT_FORMAT,
-		      &data);
-	data.mark_query = 0;
+		      &ڈیٹا);
+	ڈیٹا.mark_query = 0;
 	strbuf_release(&output);
-	if (opt->transform_mode)
-		data.split_on_whitespace = 1;
+	اگر (opt->transform_منوال)
+		ڈیٹا.بانٹو_on_whitespace = 1;
 
-	if (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
-		opt->format = NULL;
+	اگر (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
+		opt->format = تہی;
 	/*
 	 * If we are printing out the object, then always fill in the type,
 	 * since we will want to decide whether or not to stream.
 	 */
-	if (opt->batch_mode == BATCH_MODE_CONTENTS)
-		data.info.typep = &data.type;
+	اگر (opt->batch_منوال == BATCH_منوال_CONTENTS)
+		ڈیٹا.info.typep = &ڈیٹا.type;
 
-	if (opt->all_objects) {
-		struct object_cb_data cb;
-		struct object_info empty = OBJECT_INFO_INIT;
+	اگر (opt->all_objects) {
+		ساخت object_cb_ڈیٹا cb;
+		ساخت object_info خالی_خانے = OBJECT_INFO_INIT;
 
-		if (!memcmp(&data.info, &empty, sizeof(empty)) &&
+		اگر (!memcmp(&ڈیٹا.info, &خالی_خانے, حجم(خالی_خانے)) &&
 		    opt->objects_filter.choice == LOFC_DISABLED)
-			data.skip_object_info = 1;
+			ڈیٹا.skip_object_info = 1;
 
-		if (repo_has_promisor_remote(the_repository))
+		اگر (repo_has_promisor_remote(the_repository))
 			warning("This repository uses promisor remotes. Some objects may not be loaded.");
 
 		disable_replace_refs();
 
 		cb.opt = opt;
-		cb.expand = &data;
+		cb.expand = &ڈیٹا;
 		cb.scratch = &output;
 
-		if (opt->unordered) {
-			struct oidset seen = OIDSET_INIT;
+		اگر (opt->unordered) {
+			ساخت oidset نظر_آیا = OIDSET_INIT;
 
-			cb.seen = &seen;
+			cb.نظر_آیا = &نظر_آیا;
 
 			batch_each_object(opt, batch_unordered_object,
-					  ODB_FOR_EACH_OBJECT_PACK_ORDER, &cb);
+					  ODB_FOR_EACH_OBJECT_PACK_ترتیب, &cb);
 
-			oidset_clear(&seen);
-		} else {
-			struct oid_array sa = OID_ARRAY_INIT;
+			oidset_clear(&نظر_آیا);
+		} ورنہ {
+			ساخت oid_array sa = OID_ARRAY_INIT;
 
 			batch_each_object(opt, collect_object, 0, &sa);
 			oid_array_for_each_unique(&sa, batch_object_cb, &cb);
@@ -1098,7 +1098,7 @@ static int batch_objects(struct batch_options *opt)
 		}
 
 		strbuf_release(&output);
-		return 0;
+		واپس 0;
 	}
 
 	/*
@@ -1111,92 +1111,92 @@ static int batch_objects(struct batch_options *opt)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	if (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
-		batch_objects_command(opt, &output, &data);
-		goto cleanup;
+	اگر (opt->batch_منوال == BATCH_منوال_قطار_AND_DISPATCH) {
+		batch_objects_command(opt, &output, &ڈیٹا);
+		جاؤ cleanup;
 	}
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		if (data.split_on_whitespace) {
+	جب (strbuf_getdelim_strip_crlf(&داخلہ, stdin, opt->داخلہ_delim) != EOF) {
+		اگر (ڈیٹا.بانٹو_on_whitespace) {
 			/*
 			 * Split at first whitespace, tying off the beginning
 			 * of the string and saving the remainder (or NULL) in
 			 * data.rest.
 			 */
-			char *p = strpbrk(input.buf, " \t");
-			if (p) {
-				while (*p && strchr(" \t", *p))
+			حرف *p = strpbrk(داخلہ.buf, " \t");
+			اگر (p) {
+				جب (*p && strchr(" \t", *p))
 					*p++ = '\0';
 			}
-			data.rest = p;
+			ڈیٹا.rest = p;
 		}
 
-		batch_one_object(input.buf, &output, opt, &data);
+		batch_one_object(داخلہ.buf, &output, opt, &ڈیٹا);
 	}
 
  cleanup:
-	strbuf_release(&input);
+	strbuf_release(&داخلہ);
 	strbuf_release(&output);
-	string_list_clear(&data.remote_allowed_atoms, 0);
+	string_list_clear(&ڈیٹا.remote_allowed_atoms, 0);
 	cfg->warn_on_object_refname_ambiguity = save_warning;
-	return retval;
+	واپس retval;
 }
 
-static int git_cat_file_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+ساکن صحیح git_cat_file_config(ثابت حرف *var, ثابت حرف *قدر,
+			       ثابت ساخت config_context *ctx, خالی *cb)
 {
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	اگر (userdiff_config(var, قدر) < 0)
+		واپس -1;
 
-	return git_default_config(var, value, ctx, cb);
+	واپس git_default_config(var, قدر, ctx, cb);
 }
 
-static int batch_option_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+ساکن صحیح batch_option_callback(ثابت ساخت option *opt,
+				 ثابت حرف *arg,
+				 صحیح unset)
 {
-	struct batch_options *bo = opt->value;
+	ساخت batch_options *bo = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (bo->enabled) {
-		return error(_("only one batch option may be specified"));
+	اگر (bo->enabled) {
+		واپس error(_("only one batch option may be specified"));
 	}
 
 	bo->enabled = 1;
 
-	if (!strcmp(opt->long_name, "batch"))
-		bo->batch_mode = BATCH_MODE_CONTENTS;
-	else if (!strcmp(opt->long_name, "batch-check"))
-		bo->batch_mode = BATCH_MODE_INFO;
-	else if (!strcmp(opt->long_name, "batch-command"))
-		bo->batch_mode = BATCH_MODE_QUEUE_AND_DISPATCH;
-	else
+	اگر (!strcmp(opt->long_name, "batch"))
+		bo->batch_منوال = BATCH_منوال_CONTENTS;
+	ورنہ اگر (!strcmp(opt->long_name, "batch-check"))
+		bo->batch_منوال = BATCH_منوال_INFO;
+	ورنہ اگر (!strcmp(opt->long_name, "batch-command"))
+		bo->batch_منوال = BATCH_منوال_قطار_AND_DISPATCH;
+	ورنہ
 		BUG("%s given to batch-option-callback", opt->long_name);
 
 	bo->format = arg;
 
-	return 0;
+	واپس 0;
 }
 
-int cmd_cat_file(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+صحیح cmd_cat_file(صحیح argc,
+		 ثابت حرف **argv,
+		 ثابت حرف *سابقہ,
+		 ساخت repository *repo غیر_مستعمل)
 {
-	int opt = 0;
-	int opt_cw = 0;
-	int opt_epts = 0;
-	const char *exp_type = NULL, *obj_name = NULL;
-	struct batch_options batch = {
+	صحیح opt = 0;
+	صحیح opt_cw = 0;
+	صحیح opt_epts = 0;
+	ثابت حرف *exp_type = تہی, *obj_name = تہی;
+	ساخت batch_options batch = {
 		.objects_filter = LIST_OBJECTS_FILTER_INIT,
 	};
-	int unknown_type = 0;
-	int input_nul_terminated = 0;
-	int nul_terminated = 0;
-	int ret;
+	صحیح unknown_type = 0;
+	صحیح داخلہ_nul_terminated = 0;
+	صحیح nul_terminated = 0;
+	صحیح ret;
 
-	const char * const builtin_catfile_usage[] = {
+	ثابت حرف * ثابت builtin_catfile_usage[] = {
 		N_("git cat-file <type> <object>"),
 		N_("git cat-file (-e | -p | -t | -s) <object>"),
 		N_("git cat-file (--textconv | --filters)\n"
@@ -1204,24 +1204,24 @@ int cmd_cat_file(int argc,
 		N_("git cat-file (--batch | --batch-check | --batch-command) [--batch-all-objects]\n"
 		   "             [--buffer] [--follow-symlinks] [--unordered]\n"
 		   "             [--textconv | --filters] [-Z]"),
-		NULL
+		تہی
 	};
-	const struct option options[] = {
+	ثابت ساخت option options[] = {
 		/* Simple queries */
-		OPT_GROUP(N_("Check object existence or emit object contents")),
-		OPT_CMDMODE('e', NULL, &opt,
+		OPT_گروہ(N_("Check object existence or emit object contents")),
+		OPT_CMDMODE('e', تہی, &opt,
 			    N_("check if <object> exists"), 'e'),
-		OPT_CMDMODE('p', NULL, &opt, N_("pretty-print <object> content"), 'p'),
+		OPT_CMDMODE('p', تہی, &opt, N_("pretty-print <object> content"), 'p'),
 
-		OPT_GROUP(N_("Emit [broken] object attributes")),
-		OPT_CMDMODE('t', NULL, &opt, N_("show object type (one of 'blob', 'tree', 'commit', 'tag', ...)"), 't'),
-		OPT_CMDMODE('s', NULL, &opt, N_("show object size"), 's'),
+		OPT_گروہ(N_("Emit [broken] object attributes")),
+		OPT_CMDMODE('t', تہی, &opt, N_("show object type (one of 'blob', 'tree', 'commit', 'tag', ...)"), 't'),
+		OPT_CMDMODE('s', تہی, &opt, N_("show object size"), 's'),
 		OPT_HIDDEN_BOOL(0, "allow-unknown-type", &unknown_type,
 			  N_("historical option -- no-op")),
 		OPT_BOOL(0, "use-mailmap", &use_mailmap, N_("use mail map file")),
 		OPT_ALIAS(0, "mailmap", "use-mailmap"),
 		/* Batch mode */
-		OPT_GROUP(N_("Batch objects requested on stdin (or --batch-all-objects)")),
+		OPT_گروہ(N_("Batch objects requested on stdin (or --batch-all-objects)")),
 		OPT_CALLBACK_F(0, "batch", &batch, N_("format"),
 			N_("show full <object> or <rev> contents"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -1230,9 +1230,9 @@ int cmd_cat_file(int argc,
 			N_("like --batch, but don't emit <contents>"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
 			batch_option_callback),
-		OPT_BOOL_F('z', NULL, &input_nul_terminated, N_("stdin is NUL-terminated"),
+		OPT_BOOL_F('z', تہی, &داخلہ_nul_terminated, N_("stdin is NUL-terminated"),
 			PARSE_OPT_HIDDEN),
-		OPT_BOOL('Z', NULL, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
+		OPT_BOOL('Z', تہی, &nul_terminated, N_("stdin and stdout is NUL-terminated")),
 		OPT_CALLBACK_F(0, "batch-command", &batch, N_("format"),
 			N_("read commands from stdin"),
 			PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -1240,137 +1240,137 @@ int cmd_cat_file(int argc,
 		OPT_CMDMODE(0, "batch-all-objects", &opt,
 			    N_("with --batch[-check]: ignores stdin, batches all known objects"), 'b'),
 		/* Batch-specific options */
-		OPT_GROUP(N_("Change or optimize batch output")),
-		OPT_BOOL(0, "buffer", &batch.buffer_output, N_("buffer --batch output")),
+		OPT_گروہ(N_("Change or optimize batch output")),
+		OPT_BOOL(0, "buffer", &batch.بفر_output, N_("buffer --batch output")),
 		OPT_BOOL(0, "follow-symlinks", &batch.follow_symlinks,
 			 N_("follow in-tree symlinks")),
 		OPT_BOOL(0, "unordered", &batch.unordered,
 			 N_("do not order objects before emitting them")),
 		/* Textconv options, stand-ole*/
-		OPT_GROUP(N_("Emit object (blob or tree) with conversion or filter (stand-alone, or with batch)")),
+		OPT_گروہ(N_("Emit object (blob or tree) with conversion or filter (stand-alone, or with batch)")),
 		OPT_CMDMODE(0, "textconv", &opt,
 			    N_("run textconv on object's content"), 'c'),
 		OPT_CMDMODE(0, "filters", &opt,
 			    N_("run filters on object's content"), 'w'),
-		OPT_STRING(0, "path", &force_path, N_("blob|tree"),
+		OPT_STRING(0, "path", &force_راستہ, N_("blob|tree"),
 			   N_("use a <path> for (--textconv | --filters); Not with 'batch'")),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&batch.objects_filter),
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	repo_config(the_repository, git_cat_file_config, NULL);
+	repo_config(the_repository, git_cat_file_config, تہی);
 
-	batch.buffer_output = -1;
+	batch.بفر_output = -1;
 
-	argc = parse_options(argc, argv, prefix, options, builtin_catfile_usage, 0);
+	argc = parse_options(argc, argv, سابقہ, options, builtin_catfile_usage, 0);
 	opt_cw = (opt == 'c' || opt == 'w');
 	opt_epts = (opt == 'e' || opt == 'p' || opt == 't' || opt == 's');
 
-	if (use_mailmap)
-		load_mailmap();
+	اگر (use_mailmap)
+		بھرو_mailmap();
 
-	switch (batch.objects_filter.choice) {
-	case LOFC_DISABLED:
-		break;
-	case LOFC_BLOB_NONE:
-	case LOFC_BLOB_LIMIT:
-	case LOFC_OBJECT_TYPE:
-		if (!batch.enabled)
+	انتخاب (batch.objects_filter.choice) {
+	حالت LOFC_DISABLED:
+		توڑو;
+	حالت LOFC_BLOB_NONE:
+	حالت LOFC_BLOB_حد_بندی:
+	حالت LOFC_OBJECT_TYPE:
+		اگر (!batch.enabled)
 			usage(_("objects filter only supported in batch mode"));
-		break;
-	default:
+		توڑو;
+	طےشدہ:
 		usagef(_("objects filter not supported: '%s'"),
 		       list_object_filter_config_name(batch.objects_filter.choice));
 	}
 
 	/* --batch-all-objects? */
-	if (opt == 'b')
+	اگر (opt == 'b')
 		batch.all_objects = 1;
 
 	/* Option compatibility */
-	if (force_path && !opt_cw)
-		usage_msg_optf(_("'%s=<%s>' needs '%s' or '%s'"),
+	اگر (force_راستہ && !opt_cw)
+		usage_پیغام_optf(_("'%s=<%s>' needs '%s' or '%s'"),
 			       builtin_catfile_usage, options,
 			       "--path", _("path|tree-ish"), "--filters",
 			       "--textconv");
 
 	/* Option compatibility with batch mode */
-	if (batch.enabled)
+	اگر (batch.enabled)
 		;
-	else if (batch.follow_symlinks)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ورنہ اگر (batch.follow_symlinks)
+		usage_پیغام_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--follow-symlinks");
-	else if (batch.buffer_output >= 0)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ورنہ اگر (batch.بفر_output >= 0)
+		usage_پیغام_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--buffer");
-	else if (batch.all_objects)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ورنہ اگر (batch.all_objects)
+		usage_پیغام_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--batch-all-objects");
-	else if (input_nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ورنہ اگر (داخلہ_nul_terminated)
+		usage_پیغام_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-z");
-	else if (nul_terminated)
-		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
+	ورنہ اگر (nul_terminated)
+		usage_پیغام_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-Z");
 
-	batch.input_delim = batch.output_delim = '\n';
-	if (input_nul_terminated)
-		batch.input_delim = '\0';
-	if (nul_terminated)
-		batch.input_delim = batch.output_delim = '\0';
+	batch.داخلہ_delim = batch.output_delim = '\n';
+	اگر (داخلہ_nul_terminated)
+		batch.داخلہ_delim = '\0';
+	اگر (nul_terminated)
+		batch.داخلہ_delim = batch.output_delim = '\0';
 
 	/* Batch defaults */
-	if (batch.buffer_output < 0)
-		batch.buffer_output = batch.all_objects;
+	اگر (batch.بفر_output < 0)
+		batch.بفر_output = batch.all_objects;
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
 	/* Return early if we're in batch mode? */
-	if (batch.enabled) {
-		if (opt_cw)
-			batch.transform_mode = opt;
-		else if (opt && opt != 'b')
-			usage_msg_optf(_("'-%c' is incompatible with batch mode"),
+	اگر (batch.enabled) {
+		اگر (opt_cw)
+			batch.transform_منوال = opt;
+		ورنہ اگر (opt && opt != 'b')
+			usage_پیغام_optf(_("'-%c' is incompatible with batch mode"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc)
-			usage_msg_opt(_("batch modes take no arguments"),
+		ورنہ اگر (argc)
+			usage_پیغام_opt(_("batch modes take no arguments"),
 				      builtin_catfile_usage, options);
 
 		ret = batch_objects(&batch);
-		goto out;
+		جاؤ برآمد;
 	}
 
-	if (opt) {
-		if (!argc && opt == 'c')
-			usage_msg_optf(_("<rev> required with '%s'"),
+	اگر (opt) {
+		اگر (!argc && opt == 'c')
+			usage_پیغام_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--textconv");
-		else if (!argc && opt == 'w')
-			usage_msg_optf(_("<rev> required with '%s'"),
+		ورنہ اگر (!argc && opt == 'w')
+			usage_پیغام_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--filters");
-		else if (!argc && opt_epts)
-			usage_msg_optf(_("<object> required with '-%c'"),
+		ورنہ اگر (!argc && opt_epts)
+			usage_پیغام_optf(_("<object> required with '-%c'"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc == 1)
+		ورنہ اگر (argc == 1)
 			obj_name = argv[0];
-		else
-			usage_msg_opt(_("too many arguments"), builtin_catfile_usage,
+		ورنہ
+			usage_پیغام_opt(_("too many arguments"), builtin_catfile_usage,
 				      options);
-	} else if (!argc) {
+	} ورنہ اگر (!argc) {
 		usage_with_options(builtin_catfile_usage, options);
-	} else if (argc != 2) {
-		usage_msg_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
+	} ورنہ اگر (argc != 2) {
+		usage_پیغام_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
 			      builtin_catfile_usage, options, argc);
-	} else if (argc) {
+	} ورنہ اگر (argc) {
 		exp_type = argv[0];
 		obj_name = argv[1];
 	}
 
 	ret = cat_one_file(opt, exp_type, obj_name);
 
-out:
+برآمد:
 	list_objects_filter_release(&batch.objects_filter);
-	return ret;
+	واپس ret;
 }

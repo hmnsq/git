@@ -1,124 +1,124 @@
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "pkt-line.h"
-#include "run-command.h"
-#include "remote.h"
-#include "connect.h"
-#include "send-pack.h"
-#include "quote.h"
-#include "transport.h"
-#include "oid-array.h"
-#include "gettext.h"
-#include "protocol.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "hex.h"
+#شامل "pkt-line.h"
+#شامل "run-command.h"
+#شامل "remote.h"
+#شامل "connect.h"
+#شامل "send-pack.h"
+#شامل "quote.h"
+#شامل "transport.h"
+#شامل "oid-array.h"
+#شامل "gettext.h"
+#شامل "protocol.h"
+#شامل "parse-options.h"
+#شامل "write-or-die.h"
 
-static const char * const send_pack_usage[] = {
+ساکن ثابت حرف * ثابت send_pack_usage[] = {
 	N_("git send-pack [--mirror] [--dry-run] [--force]\n"
 	   "              [--receive-pack=<git-receive-pack>]\n"
 	   "              [--verbose] [--thin] [--atomic]\n"
 	   "              [--[no-]signed | --signed=(true|false|if-asked)]\n"
 	   "              [<host>:]<directory> (--all | <ref>...)"),
-	NULL,
+	تہی,
 };
 
-static struct send_pack_args args;
+ساکن ساخت send_pack_دلائل دلائل;
 
-static void print_helper_status(struct ref *ref)
+ساکن خالی print_helper_حالت(ساخت ref *ref)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct ref_push_report *report;
+	ساخت strbuf buf = STRBUF_INIT;
+	ساخت ref_ڈالو_report *report;
 
-	for (; ref; ref = ref->next) {
-		const char *msg = NULL;
-		const char *res;
-		int count = 0;
+	برائے (; ref; ref = ref->اگلا) {
+		ثابت حرف *پیغام = تہی;
+		ثابت حرف *res;
+		صحیح گنتی = 0;
 
-		switch(ref->status) {
-		case REF_STATUS_NONE:
+		انتخاب(ref->حالت_2) {
+		حالت REF_حالت_NONE:
 			res = "error";
-			msg = "no match";
-			break;
+			پیغام = "no match";
+			توڑو;
 
-		case REF_STATUS_OK:
+		حالت REF_حالت_OK:
 			res = "ok";
-			break;
+			توڑو;
 
-		case REF_STATUS_UPTODATE:
+		حالت REF_حالت_UPTODATE:
 			res = "ok";
-			msg = "up to date";
-			break;
+			پیغام = "up to date";
+			توڑو;
 
-		case REF_STATUS_REJECT_NONFASTFORWARD:
+		حالت REF_حالت_REJECT_NONFASTFORWARD:
 			res = "error";
-			msg = "non-fast forward";
-			break;
+			پیغام = "non-fast forward";
+			توڑو;
 
-		case REF_STATUS_REJECT_FETCH_FIRST:
+		حالت REF_حالت_REJECT_FETCH_پہلا:
 			res = "error";
-			msg = "fetch first";
-			break;
+			پیغام = "fetch first";
+			توڑو;
 
-		case REF_STATUS_REJECT_NEEDS_FORCE:
+		حالت REF_حالت_REJECT_NEEDS_FORCE:
 			res = "error";
-			msg = "needs force";
-			break;
+			پیغام = "needs force";
+			توڑو;
 
-		case REF_STATUS_REJECT_STALE:
+		حالت REF_حالت_REJECT_STALE:
 			res = "error";
-			msg = "stale info";
-			break;
+			پیغام = "stale info";
+			توڑو;
 
-		case REF_STATUS_REJECT_REMOTE_UPDATED:
+		حالت REF_حالت_REJECT_REMOTE_UPDATED:
 			res = "error";
-			msg = "remote ref updated since checkout";
-			break;
+			پیغام = "remote ref updated since checkout";
+			توڑو;
 
-		case REF_STATUS_REJECT_ALREADY_EXISTS:
+		حالت REF_حالت_REJECT_ALREADY_EXISTS:
 			res = "error";
-			msg = "already exists";
-			break;
+			پیغام = "already exists";
+			توڑو;
 
-		case REF_STATUS_REJECT_NODELETE:
-		case REF_STATUS_REMOTE_REJECT:
+		حالت REF_حالت_REJECT_NODELETE:
+		حالت REF_حالت_REMOTE_REJECT:
 			res = "error";
-			break;
+			توڑو;
 
-		case REF_STATUS_EXPECTING_REPORT:
+		حالت REF_حالت_EXPECTING_REPORT:
 			res = "error";
-			msg = "expecting report";
-			break;
+			پیغام = "expecting report";
+			توڑو;
 
-		default:
-			continue;
+		طےشدہ:
+			جاری;
 		}
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "%s %s", res, ref->name);
-		if (ref->remote_status)
-			msg = ref->remote_status;
-		if (msg) {
+		اگر (ref->remote_حالت)
+			پیغام = ref->remote_حالت;
+		اگر (پیغام) {
 			strbuf_addch(&buf, ' ');
-			quote_two_c_style(&buf, "", msg, 0);
+			quote_two_c_style(&buf, "", پیغام, 0);
 		}
 		strbuf_addch(&buf, '\n');
 
-		if (ref->status == REF_STATUS_OK) {
-			for (report = ref->report; report; report = report->next) {
-				if (count++ > 0)
+		اگر (ref->حالت_2 == REF_حالت_OK) {
+			برائے (report = ref->report; report; report = report->اگلا) {
+				اگر (گنتی++ > 0)
 					strbuf_addf(&buf, "ok %s\n", ref->name);
-				if (report->ref_name)
+				اگر (report->ref_name)
 					strbuf_addf(&buf, "option refname %s\n",
 						report->ref_name);
-				if (report->old_oid)
+				اگر (report->old_oid)
 					strbuf_addf(&buf, "option old-oid %s\n",
-						oid_to_hex(report->old_oid));
-				if (report->new_oid)
+						oid_مقصد_hex(report->old_oid));
+				اگر (report->new_oid)
 					strbuf_addf(&buf, "option new-oid %s\n",
-						oid_to_hex(report->new_oid));
-				if (report->forced_update)
+						oid_مقصد_hex(report->new_oid));
+				اگر (report->forced_update)
 					strbuf_addstr(&buf, "option forced-update\n");
 			}
 		}
@@ -127,127 +127,127 @@ static void print_helper_status(struct ref *ref)
 	strbuf_release(&buf);
 }
 
-static int send_pack_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+ساکن صحیح send_pack_config(ثابت حرف *k, ثابت حرف *v,
+			    ثابت ساخت config_context *ctx, خالی *cb)
 {
-	if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			args.push_cert = SEND_PACK_PUSH_CERT_NEVER;
-			break;
-		case 1:
-			args.push_cert = SEND_PACK_PUSH_CERT_ALWAYS;
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				args.push_cert = SEND_PACK_PUSH_CERT_IF_ASKED;
-			else
-				return error(_("invalid value for '%s'"), k);
+	اگر (!strcmp(k, "push.gpgsign")) {
+		انتخاب (git_parse_maybe_bool(v)) {
+		حالت 0:
+			دلائل.ڈالو_cert = SEND_PACK_ڈالو_CERT_NEVER;
+			توڑو;
+		حالت 1:
+			دلائل.ڈالو_cert = SEND_PACK_ڈالو_CERT_ALWAYS;
+			توڑو;
+		طےشدہ:
+			اگر (!strcasecmp(v, "if-asked"))
+				دلائل.ڈالو_cert = SEND_PACK_ڈالو_CERT_IF_ASKED;
+			ورنہ
+				واپس error(_("invalid value for '%s'"), k);
 		}
 	}
-	return git_default_config(k, v, ctx, cb);
+	واپس git_default_config(k, v, ctx, cb);
 }
 
-int cmd_send_pack(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo)
+صحیح cmd_send_pack(صحیح argc,
+		  ثابت حرف **argv,
+		  ثابت حرف *سابقہ,
+		  ساخت repository *repo)
 {
-	struct refspec rs;
-	const char *remote_name = NULL;
-	struct remote *remote = NULL;
-	const char *dest = NULL;
-	int fd[2];
-	struct child_process *conn;
-	struct oid_array extra_have = OID_ARRAY_INIT;
-	struct oid_array shallow = OID_ARRAY_INIT;
-	struct ref *remote_refs, *local_refs;
-	int ret;
-	int helper_status = 0;
-	int send_all = 0;
-	int verbose = 0;
-	const char *receivepack = "git-receive-pack";
-	unsigned dry_run = 0;
-	unsigned send_mirror = 0;
-	unsigned force_update = 0;
-	unsigned quiet = 0;
-	int push_cert = 0;
-	struct string_list push_options = STRING_LIST_INIT_NODUP;
-	unsigned use_thin_pack = 0;
-	unsigned atomic = 0;
-	unsigned stateless_rpc = 0;
-	int flags;
-	unsigned int reject_reasons;
-	int progress = -1;
-	int from_stdin = 0;
-	struct push_cas_option cas = {0};
-	int force_if_includes = 0;
-	struct packet_reader reader;
+	ساخت refspec rs;
+	ثابت حرف *remote_name = تہی;
+	ساخت remote *remote = تہی;
+	ثابت حرف *dest = تہی;
+	صحیح fd[2];
+	ساخت بچہ_process *conn;
+	ساخت oid_array extra_have = OID_ARRAY_INIT;
+	ساخت oid_array shallow = OID_ARRAY_INIT;
+	ساخت ref *remote_refs, *local_refs;
+	صحیح ret;
+	صحیح helper_حالت = 0;
+	صحیح send_all = 0;
+	صحیح verbose = 0;
+	ثابت حرف *receivepack = "git-receive-pack";
+	غیرعلامتی dry_تسلسل = 0;
+	غیرعلامتی send_mirror = 0;
+	غیرعلامتی force_update = 0;
+	غیرعلامتی quiet = 0;
+	صحیح ڈالو_cert = 0;
+	ساخت string_list ڈالو_options = STRING_LIST_INIT_NODUP;
+	غیرعلامتی use_thin_pack = 0;
+	غیرعلامتی atomic = 0;
+	غیرعلامتی stateless_rpc = 0;
+	صحیح flags;
+	غیرعلامتی صحیح reject_reasons;
+	صحیح پیش_رفت = -1;
+	صحیح from_stdin = 0;
+	ساخت ڈالو_cas_option cas = {0};
+	صحیح force_if_includes = 0;
+	ساخت packet_reader reader;
 
-	struct option options[] = {
+	ساخت option options[] = {
 		OPT__VERBOSITY(&verbose),
 		OPT_STRING(0, "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING(0, "exec", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING(0, "remote", &remote_name, "remote", N_("remote name")),
 		OPT_BOOL(0, "all", &send_all, N_("push all refs")),
-		OPT_BOOL('n' , "dry-run", &dry_run, N_("dry run")),
+		OPT_BOOL('n' , "dry-run", &dry_تسلسل, N_("dry run")),
 		OPT_BOOL(0, "mirror", &send_mirror, N_("mirror all refs")),
 		OPT_BOOL('f', "force", &force_update, N_("force updates")),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-		  PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_STRING_LIST(0, "push-option", &push_options,
+		OPT_CALLBACK_F(0, "signed", &ڈالو_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+		  PARSE_OPT_OPTARG, option_parse_ڈالو_signed),
+		OPT_STRING_LIST(0, "push-option", &ڈالو_options,
 				N_("server-specific"),
 				N_("option to transmit")),
-		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
+		OPT_BOOL(0, "progress", &پیش_رفت, N_("force progress reporting")),
 		OPT_BOOL(0, "thin", &use_thin_pack, N_("use thin pack")),
 		OPT_BOOL(0, "atomic", &atomic, N_("request atomic transaction on remote side")),
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc, N_("use stateless RPC protocol")),
 		OPT_BOOL(0, "stdin", &from_stdin, N_("read refs from stdin")),
-		OPT_BOOL(0, "helper-status", &helper_status, N_("print status from remote helper")),
+		OPT_BOOL(0, "helper-status", &helper_حالت, N_("print status from remote helper")),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 		  N_("require old value of ref to be at this value"),
-		  PARSE_OPT_OPTARG, parseopt_push_cas_option),
+		  PARSE_OPT_OPTARG, parseopt_ڈالو_cas_option),
 		OPT_BOOL(0, TRANS_OPT_FORCE_IF_INCLUDES, &force_if_includes,
 			 N_("require remote updates to be integrated locally")),
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	repo_config(repo, send_pack_config, NULL);
-	argc = parse_options(argc, argv, prefix, options, send_pack_usage, 0);
+	repo_config(repo, send_pack_config, تہی);
+	argc = parse_options(argc, argv, سابقہ, options, send_pack_usage, 0);
 
-	refspec_init_push(&rs, repo->hash_algo);
+	refspec_init_ڈالو(&rs, repo->hash_algo);
 
-	if (argc > 0) {
+	اگر (argc > 0) {
 		dest = argv[0];
 		refspec_appendn(&rs, argv + 1, argc - 1);
 	}
 
-	if (!dest)
+	اگر (!dest)
 		usage_with_options(send_pack_usage, options);
 
-	args.verbose = verbose;
-	args.dry_run = dry_run;
-	args.send_mirror = send_mirror;
-	args.force_update = force_update;
-	args.quiet = quiet;
-	args.push_cert = push_cert;
-	args.progress = progress;
-	args.use_thin_pack = use_thin_pack;
-	args.atomic = atomic;
-	args.stateless_rpc = stateless_rpc;
-	args.push_options = push_options.nr ? &push_options : NULL;
-	args.url = dest;
+	دلائل.verbose = verbose;
+	دلائل.dry_تسلسل = dry_تسلسل;
+	دلائل.send_mirror = send_mirror;
+	دلائل.force_update = force_update;
+	دلائل.quiet = quiet;
+	دلائل.ڈالو_cert = ڈالو_cert;
+	دلائل.پیش_رفت = پیش_رفت;
+	دلائل.use_thin_pack = use_thin_pack;
+	دلائل.atomic = atomic;
+	دلائل.stateless_rpc = stateless_rpc;
+	دلائل.ڈالو_options = ڈالو_options.nr ? &ڈالو_options : تہی;
+	دلائل.url = dest;
 
-	if (from_stdin) {
-		if (args.stateless_rpc) {
-			const char *buf;
-			while ((buf = packet_read_line(0, NULL)))
+	اگر (from_stdin) {
+		اگر (دلائل.stateless_rpc) {
+			ثابت حرف *buf;
+			جب ((buf = packet_read_سطر(0, تہی)))
 				refspec_append(&rs, buf);
-		} else {
-			struct strbuf line = STRBUF_INIT;
-			while (strbuf_getline(&line, stdin) != EOF)
-				refspec_append(&rs, line.buf);
-			strbuf_release(&line);
+		} ورنہ {
+			ساخت strbuf سطر = STRBUF_INIT;
+			جب (strbuf_getline(&سطر, stdin) != EOF)
+				refspec_append(&rs, سطر.buf);
+			strbuf_release(&سطر);
 		}
 	}
 
@@ -255,103 +255,103 @@ int cmd_send_pack(int argc,
 	 * --all and --mirror are incompatible; neither makes sense
 	 * with any refspecs.
 	 */
-	if ((rs.nr > 0 && (send_all || args.send_mirror)) ||
-	    (send_all && args.send_mirror))
+	اگر ((rs.nr > 0 && (send_all || دلائل.send_mirror)) ||
+	    (send_all && دلائل.send_mirror))
 		usage_with_options(send_pack_usage, options);
 
-	if (remote_name) {
+	اگر (remote_name) {
 		remote = remote_get(remote_name);
-		if (!remote_has_url(remote, dest)) {
+		اگر (!remote_has_url(remote, dest)) {
 			die("Destination %s is not a uri for %s",
 			    dest, remote_name);
 		}
 	}
 
-	if (progress == -1)
-		progress = !args.quiet && isatty(2);
-	args.progress = progress;
+	اگر (پیش_رفت == -1)
+		پیش_رفت = !دلائل.quiet && isatty(2);
+	دلائل.پیش_رفت = پیش_رفت;
 
-	if (args.stateless_rpc) {
-		conn = NULL;
+	اگر (دلائل.stateless_rpc) {
+		conn = تہی;
 		fd[0] = 0;
 		fd[1] = 1;
-	} else {
+	} ورنہ {
 		conn = git_connect(fd, dest, GIT_CONNECT_RECEIVE_PACK,
 				   receivepack,
-				   args.verbose ? CONNECT_VERBOSE : 0);
+				   دلائل.verbose ? CONNECT_VERBOSE : 0);
 	}
 
-	packet_reader_init(&reader, fd[0], NULL, 0,
+	packet_reader_init(&reader, fd[0], تہی, 0,
 			   PACKET_READ_CHOMP_NEWLINE |
 			   PACKET_READ_GENTLE_ON_EOF |
 			   PACKET_READ_DIE_ON_ERR_PACKET);
 
-	switch (discover_version(&reader)) {
-	case protocol_v2:
+	انتخاب (discover_نسخہ(&reader)) {
+	حالت protocol_v2:
 		die("support for protocol v2 not implemented yet");
-		break;
-	case protocol_v1:
-	case protocol_v0:
-		get_remote_heads(&reader, &remote_refs, REF_NORMAL,
+		توڑو;
+	حالت protocol_v1:
+	حالت protocol_v0:
+		get_remote_heads(&reader, &remote_refs, REF_معمول,
 				 &extra_have, &shallow);
-		break;
-	case protocol_unknown_version:
+		توڑو;
+	حالت protocol_unknown_نسخہ:
 		BUG("unknown protocol version");
 	}
 
 	local_refs = get_local_heads();
 
-	flags = MATCH_REFS_NONE;
+	flags = مطابقت_REFS_NONE;
 
-	if (send_all)
-		flags |= MATCH_REFS_ALL;
-	if (args.send_mirror)
-		flags |= MATCH_REFS_MIRROR;
+	اگر (send_all)
+		flags |= مطابقت_REFS_ALL;
+	اگر (دلائل.send_mirror)
+		flags |= مطابقت_REFS_MIRROR;
 
 	/* match them up */
-	if (match_push_refs(local_refs, &remote_refs, &rs, flags)) {
+	اگر (مطابقت_ڈالو_refs(local_refs, &remote_refs, &rs, flags)) {
 		ret = -1;
-		goto cleanup;
+		جاؤ cleanup;
 	}
-	if (!is_empty_cas(&cas))
-		apply_push_cas(&cas, remote, remote_refs);
+	اگر (!is_خالی_خانے_cas(&cas))
+		apply_ڈالو_cas(&cas, remote, remote_refs);
 
-	if (!is_empty_cas(&cas) && force_if_includes)
+	اگر (!is_خالی_خانے_cas(&cas) && force_if_includes)
 		cas.use_force_if_includes = 1;
 
-	set_ref_status_for_push(remote_refs, args.send_mirror,
-		args.force_update);
+	سیٹ_ref_حالت_for_ڈالو(remote_refs, دلائل.send_mirror,
+		دلائل.force_update);
 
-	ret = send_pack(repo, &args, fd, conn, remote_refs, &extra_have);
+	ret = send_pack(repo, &دلائل, fd, conn, remote_refs, &extra_have);
 
-	if (helper_status)
-		print_helper_status(remote_refs);
+	اگر (helper_حالت)
+		print_helper_حالت(remote_refs);
 
 	close(fd[1]);
 	close(fd[0]);
 
-	ret |= finish_connect(conn);
+	ret |= اختتام_connect(conn);
 
-	if (!helper_status)
-		transport_print_push_status(dest, remote_refs, args.verbose, 0, &reject_reasons);
+	اگر (!helper_حالت)
+		transport_print_ڈالو_حالت(dest, remote_refs, دلائل.verbose, 0, &reject_reasons);
 
-	if (!args.dry_run && remote) {
-		struct ref *ref;
-		for (ref = remote_refs; ref; ref = ref->next)
-			transport_update_tracking_ref(remote, ref, args.verbose);
+	اگر (!دلائل.dry_تسلسل && remote) {
+		ساخت ref *ref;
+		برائے (ref = remote_refs; ref; ref = ref->اگلا)
+			transport_update_tracking_ref(remote, ref, دلائل.verbose);
 	}
 
-	if (!ret && !transport_refs_pushed(remote_refs))
+	اگر (!ret && !transport_refs_pushed(remote_refs))
 		/* stable plumbing output; do not modify or localize */
 		fprintf(stderr, "Everything up-to-date\n");
 
 cleanup:
-	string_list_clear(&push_options, 0);
+	string_list_clear(&ڈالو_options, 0);
 	free_refs(remote_refs);
 	free_refs(local_refs);
 	refspec_clear(&rs);
 	oid_array_clear(&extra_have);
 	oid_array_clear(&shallow);
 	clear_cas_option(&cas);
-	return ret;
+	واپس ret;
 }

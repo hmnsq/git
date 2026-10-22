@@ -4,100 +4,100 @@
  * Copyright (C) Linus Torvalds 2006
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "lockfile.h"
-#include "dir.h"
-#include "gettext.h"
-#include "hash.h"
-#include "tree-walk.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "read-cache.h"
+#شامل "builtin.h"
+#شامل "advice.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "lockfile.h"
+#شامل "dir.h"
+#شامل "gettext.h"
+#شامل "hash.h"
+#شامل "tree-walk.h"
+#شامل "object-name.h"
+#شامل "parse-options.h"
+#شامل "read-cache.h"
 
-#include "string-list.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "pathspec.h"
+#شامل "string-list.h"
+#شامل "setup.h"
+#شامل "sparse-index.h"
+#شامل "submodule.h"
+#شامل "pathspec.h"
 
-static const char * const builtin_rm_usage[] = {
+ساکن ثابت حرف * ثابت builtin_rm_usage[] = {
 	N_("git rm [-f | --force] [-n] [-r] [--cached] [--ignore-unmatch]\n"
 	   "       [--quiet] [--pathspec-from-file=<file> [--pathspec-file-nul]]\n"
 	   "       [--] [<pathspec>...]"),
-	NULL
+	تہی
 };
 
-static struct {
-	int nr, alloc;
-	struct {
-		const char *name;
-		char is_submodule;
-	} *entry;
+ساکن ساخت {
+	صحیح nr, alloc;
+	ساخت {
+		ثابت حرف *name;
+		حرف is_submodule;
+	} *اندراج_2;
 } list;
 
-static int get_ours_cache_pos(const char *path, unsigned int pos)
+ساکن صحیح get_ours_cache_pos(ثابت حرف *راستہ, غیرعلامتی صحیح pos)
 {
-	while ((pos < the_repository->index->cache_nr) && !strcmp(the_repository->index->cache[pos]->name, path)) {
-		if (ce_stage(the_repository->index->cache[pos]) == 2)
-			return pos;
+	جب ((pos < the_repository->اشاریہ->cache_nr) && !strcmp(the_repository->اشاریہ->cache[pos]->name, راستہ)) {
+		اگر (ce_stage(the_repository->اشاریہ->cache[pos]) == 2)
+			واپس pos;
 		pos++;
 	}
-	return -1;
+	واپس -1;
 }
 
-static void print_error_files(struct string_list *files_list,
-			      const char *main_msg,
-			      const char *hints_msg,
-			      int *errs)
+ساکن خالی print_error_files(ساخت string_list *files_list,
+			      ثابت حرف *main_پیغام,
+			      ثابت حرف *hints_پیغام,
+			      صحیح *errs)
 {
-	if (files_list->nr) {
-		unsigned int i;
-		struct strbuf err_msg = STRBUF_INIT;
+	اگر (files_list->nr) {
+		غیرعلامتی صحیح i;
+		ساخت strbuf err_پیغام = STRBUF_INIT;
 
-		strbuf_addstr(&err_msg, main_msg);
-		for (i = 0; i < files_list->nr; i++)
-			strbuf_addf(&err_msg,
+		strbuf_addstr(&err_پیغام, main_پیغام);
+		برائے (i = 0; i < files_list->nr; i++)
+			strbuf_addf(&err_پیغام,
 				    "\n    %s",
-				    files_list->items[i].string);
-		if (advice_enabled(ADVICE_RM_HINTS))
-			strbuf_addstr(&err_msg, hints_msg);
-		*errs = error("%s", err_msg.buf);
-		strbuf_release(&err_msg);
+				    files_list->اشیاء[i].string);
+		اگر (advice_enabled(ADVICE_RM_HINTS))
+			strbuf_addstr(&err_پیغام, hints_پیغام);
+		*errs = error("%s", err_پیغام.buf);
+		strbuf_release(&err_پیغام);
 	}
 }
 
-static void submodules_absorb_gitdir_if_needed(void)
+ساکن خالی submodules_absorb_gitdir_if_needed(خالی)
 {
-	int i;
-	for (i = 0; i < list.nr; i++) {
-		const char *name = list.entry[i].name;
-		int pos;
-		const struct cache_entry *ce;
+	صحیح i;
+	برائے (i = 0; i < list.nr; i++) {
+		ثابت حرف *name = list.اندراج_2[i].name;
+		صحیح pos;
+		ثابت ساخت cache_اندراج *ce;
 
-		pos = index_name_pos(the_repository->index, name, strlen(name));
-		if (pos < 0) {
+		pos = اشاریہ_name_pos(the_repository->اشاریہ, name, لڑی_لمبائی(name));
+		اگر (pos < 0) {
 			pos = get_ours_cache_pos(name, -pos - 1);
-			if (pos < 0)
-				continue;
+			اگر (pos < 0)
+				جاری;
 		}
-		ce = the_repository->index->cache[pos];
+		ce = the_repository->اشاریہ->cache[pos];
 
-		if (!S_ISGITLINK(ce->ce_mode) ||
+		اگر (!S_ISGITLINK(ce->ce_منوال) ||
 		    !file_exists(ce->name) ||
-		    is_empty_dir(name))
-			continue;
+		    is_خالی_خانے_dir(name))
+			جاری;
 
-		if (!submodule_uses_gitfile(name))
-			absorb_git_dir_into_superproject(name, NULL);
+		اگر (!submodule_استعمال_کرتا_gitfile(name))
+			absorb_git_dir_into_superproject(name, تہی);
 	}
 }
 
-static int check_local_mod(struct object_id *head, int index_only)
+ساکن صحیح check_local_mod(ساخت object_id *سر, صحیح اشاریہ_only)
 {
 	/*
 	 * Items in list are already sorted in the cache order,
@@ -106,53 +106,53 @@ static int check_local_mod(struct object_id *head, int index_only)
 	 * lazy, and who cares if removal of files is a tad
 	 * slower than the theoretical maximum speed?
 	 */
-	int i, no_head;
-	int errs = 0;
-	struct string_list files_staged = STRING_LIST_INIT_NODUP;
-	struct string_list files_cached = STRING_LIST_INIT_NODUP;
-	struct string_list files_local = STRING_LIST_INIT_NODUP;
+	صحیح i, no_سر;
+	صحیح errs = 0;
+	ساخت string_list files_staged = STRING_LIST_INIT_NODUP;
+	ساخت string_list files_cached = STRING_LIST_INIT_NODUP;
+	ساخت string_list files_local = STRING_LIST_INIT_NODUP;
 
-	no_head = is_null_oid(head);
-	for (i = 0; i < list.nr; i++) {
-		struct stat st;
-		int pos;
-		const struct cache_entry *ce;
-		const char *name = list.entry[i].name;
-		struct object_id oid;
-		unsigned short mode;
-		int local_changes = 0;
-		int staged_changes = 0;
+	no_سر = is_null_oid(سر);
+	برائے (i = 0; i < list.nr; i++) {
+		ساخت stat st;
+		صحیح pos;
+		ثابت ساخت cache_اندراج *ce;
+		ثابت حرف *name = list.اندراج_2[i].name;
+		ساخت object_id oid;
+		غیرعلامتی مختصر منوال;
+		صحیح local_changes = 0;
+		صحیح staged_changes = 0;
 
-		pos = index_name_pos(the_repository->index, name, strlen(name));
-		if (pos < 0) {
+		pos = اشاریہ_name_pos(the_repository->اشاریہ, name, لڑی_لمبائی(name));
+		اگر (pos < 0) {
 			/*
 			 * Skip unmerged entries except for populated submodules
 			 * that could lose history when removed.
 			 */
 			pos = get_ours_cache_pos(name, -pos - 1);
-			if (pos < 0)
-				continue;
+			اگر (pos < 0)
+				جاری;
 
-			if (!S_ISGITLINK(the_repository->index->cache[pos]->ce_mode) ||
-			    is_empty_dir(name))
-				continue;
+			اگر (!S_ISGITLINK(the_repository->اشاریہ->cache[pos]->ce_منوال) ||
+			    is_خالی_خانے_dir(name))
+				جاری;
 		}
-		ce = the_repository->index->cache[pos];
+		ce = the_repository->اشاریہ->cache[pos];
 
-		if (lstat(ce->name, &st) < 0) {
-			if (!is_missing_file_error(errno))
+		اگر (lstat(ce->name, &st) < 0) {
+			اگر (!is_missing_file_error(errno))
 				warning_errno(_("failed to stat '%s'"), ce->name);
 			/* It already vanished from the working tree */
-			continue;
+			جاری;
 		}
-		else if (S_ISDIR(st.st_mode)) {
+		ورنہ اگر (S_ISDIR(st.st_منوال)) {
 			/* if a file was removed and it is now a
 			 * directory, that is the same as ENOENT as
 			 * far as git is concerned; we do not track
 			 * directories unless they are submodules.
 			 */
-			if (!S_ISGITLINK(ce->ce_mode))
-				continue;
+			اگر (!S_ISGITLINK(ce->ce_منوال))
+				جاری;
 		}
 
 		/*
@@ -174,9 +174,9 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * Is the index different from the file in the work tree?
 		 * If it's a submodule, is its work tree modified?
 		 */
-		if (ie_match_stat(the_repository->index, ce, &st, 0) ||
-		    (S_ISGITLINK(ce->ce_mode) &&
-		     bad_to_remove_submodule(ce->name,
+		اگر (ie_مطابقت_stat(the_repository->اشاریہ, ce, &st, 0) ||
+		    (S_ISGITLINK(ce->ce_منوال) &&
+		     bad_مقصد_remove_submodule(ce->name,
 				SUBMODULE_REMOVAL_DIE_ON_ERROR |
 				SUBMODULE_REMOVAL_IGNORE_IGNORED_UNTRACKED)))
 			local_changes = 1;
@@ -187,9 +187,9 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * anything staged in the index is treated by the same
 		 * way as changed from the HEAD.
 		 */
-		if (no_head
-		     || get_tree_entry(the_repository, head, name, &oid, &mode)
-		     || ce->ce_mode != create_ce_mode(mode)
+		اگر (no_سر
+		     || get_درخت_اندراج(the_repository, سر, name, &oid, &منوال)
+		     || ce->ce_منوال != create_ce_منوال(منوال)
 		     || !oideq(&ce->oid, &oid))
 			staged_changes = 1;
 
@@ -201,14 +201,14 @@ static int check_local_mod(struct object_id *head, int index_only)
 		 * lose information unless it is about removing an
 		 * "intent to add" entry.
 		 */
-		if (local_changes && staged_changes) {
-			if (!index_only || !ce_intent_to_add(ce))
+		اگر (local_changes && staged_changes) {
+			اگر (!اشاریہ_only || !ce_intent_مقصد_جوڑو(ce))
 				string_list_append(&files_staged, name);
 		}
-		else if (!index_only) {
-			if (staged_changes)
+		ورنہ اگر (!اشاریہ_only) {
+			اگر (staged_changes)
 				string_list_append(&files_cached, name);
-			if (local_changes)
+			اگر (local_changes)
 				string_list_append(&files_local, name);
 		}
 	}
@@ -240,132 +240,132 @@ static int check_local_mod(struct object_id *head, int index_only)
 			  &errs);
 	string_list_clear(&files_local, 0);
 
-	return errs;
+	واپس errs;
 }
 
-static int show_only = 0, force = 0, index_only = 0, recursive = 0, quiet = 0;
-static int ignore_unmatch = 0, pathspec_file_nul;
-static int include_sparse;
-static char *pathspec_from_file;
+ساکن صحیح show_only = 0, force = 0, اشاریہ_only = 0, recursive = 0, quiet = 0;
+ساکن صحیح ignore_unmatch = 0, pathspec_file_nul;
+ساکن صحیح include_sparse;
+ساکن حرف *pathspec_from_file;
 
-static struct option builtin_rm_options[] = {
-	OPT__DRY_RUN(&show_only, N_("dry run")),
+ساکن ساخت option builtin_rm_options[] = {
+	OPT_DRY_تسلسل(&show_only, N_("dry run")),
 	OPT__QUIET(&quiet, N_("do not list removed files")),
-	OPT_BOOL( 0 , "cached",         &index_only, N_("only remove from the index")),
+	OPT_BOOL( 0 , "cached",         &اشاریہ_only, N_("only remove from the index")),
 	OPT__FORCE(&force, N_("override the up-to-date check"), PARSE_OPT_NOCOMPLETE),
-	OPT_BOOL('r', NULL,             &recursive,  N_("allow recursive removal")),
+	OPT_BOOL('r', تہی,             &recursive,  N_("allow recursive removal")),
 	OPT_BOOL( 0 , "ignore-unmatch", &ignore_unmatch,
 				N_("exit with a zero status even if nothing matched")),
 	OPT_BOOL(0, "sparse", &include_sparse, N_("allow updating entries outside of the sparse-checkout cone")),
 	OPT_PATHSPEC_FROM_FILE(&pathspec_from_file),
 	OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
-	OPT_END(),
+	OPT_انتہا(),
 };
 
-int cmd_rm(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+صحیح cmd_rm(صحیح argc,
+	   ثابت حرف **argv,
+	   ثابت حرف *سابقہ,
+	   ساخت repository *repo غیر_مستعمل)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int i, ret = 0;
-	struct pathspec pathspec;
-	char *seen;
+	ساخت تالا_file تالا_file = تالا_INIT;
+	صحیح i, ret = 0;
+	ساخت pathspec pathspec;
+	حرف *نظر_آیا;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, تہی);
 
-	argc = parse_options(argc, argv, prefix, builtin_rm_options,
+	argc = parse_options(argc, argv, سابقہ, builtin_rm_options,
 			     builtin_rm_usage, 0);
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
-		       prefix, argv);
+		       سابقہ, argv);
 
-	if (pathspec_from_file) {
-		if (pathspec.nr)
+	اگر (pathspec_from_file) {
+		اگر (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_CWD,
-				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+				    سابقہ, pathspec_from_file, pathspec_file_nul);
+	} ورنہ اگر (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!pathspec.nr)
+	اگر (!pathspec.nr)
 		die(_("No pathspec was given. Which files should I remove?"));
 
-	if (!index_only)
-		setup_work_tree(the_repository);
+	اگر (!اشاریہ_only)
+		تیاری_work_درخت(the_repository);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
-	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
+	repo_hold_locked_اشاریہ(the_repository, &تالا_file, تالا_DIE_ON_ERROR);
 
-	if (repo_read_index(the_repository) < 0)
+	اگر (repo_read_اشاریہ(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, &pathspec, NULL, NULL);
+	refresh_اشاریہ(the_repository->اشاریہ, REFRESH_QUIET|REFRESH_UNMERGED, &pathspec, تہی, تہی);
 
-	seen = xcalloc(pathspec.nr, 1);
+	نظر_آیا = xcalloc(pathspec.nr, 1);
 
-	if (pathspec_needs_expanded_index(the_repository->index, &pathspec))
-		ensure_full_index(the_repository->index);
+	اگر (pathspec_needs_expanded_اشاریہ(the_repository->اشاریہ, &pathspec))
+		ensure_بھرا_اشاریہ(the_repository->اشاریہ);
 
-	for (unsigned int i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
+	برائے (غیرعلامتی صحیح i = 0; i < the_repository->اشاریہ->cache_nr; i++) {
+		ثابت ساخت cache_اندراج *ce = the_repository->اشاریہ->cache[i];
 
-		if (!include_sparse &&
+		اگر (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
-		     !path_in_sparse_checkout(ce->name, the_repository->index)))
-			continue;
-		if (!ce_path_match(the_repository->index, ce, &pathspec, seen))
-			continue;
-		ALLOC_GROW(list.entry, list.nr + 1, list.alloc);
-		list.entry[list.nr].name = xstrdup(ce->name);
-		list.entry[list.nr].is_submodule = S_ISGITLINK(ce->ce_mode);
-		if (list.entry[list.nr++].is_submodule &&
-		    !is_staging_gitmodules_ok(the_repository->index))
+		     !راستہ_اندر_sparse_checkout(ce->name, the_repository->اشاریہ)))
+			جاری;
+		اگر (!ce_راستہ_مطابقت(the_repository->اشاریہ, ce, &pathspec, نظر_آیا))
+			جاری;
+		ALLOC_GROW(list.اندراج_2, list.nr + 1, list.alloc);
+		list.اندراج_2[list.nr].name = xstrdup(ce->name);
+		list.اندراج_2[list.nr].is_submodule = S_ISGITLINK(ce->ce_منوال);
+		اگر (list.اندراج_2[list.nr++].is_submodule &&
+		    !is_staging_gitmodules_ok(the_repository->اشاریہ))
 			die(_("please stage your changes to .gitmodules or stash them to proceed"));
 	}
 
-	if (pathspec.nr) {
-		const char *original;
-		int seen_any = 0;
-		char *skip_worktree_seen = NULL;
-		struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	اگر (pathspec.nr) {
+		ثابت حرف *original;
+		صحیح نظر_آیا_any = 0;
+		حرف *skip_worktree_نظر_آیا = تہی;
+		ساخت string_list only_مطابقت_skip_worktree = STRING_LIST_INIT_NODUP;
 
-		for (i = 0; i < pathspec.nr; i++) {
-			original = pathspec.items[i].original;
-			if (seen[i])
-				seen_any = 1;
-			else if (ignore_unmatch)
-				continue;
-			else if (!include_sparse &&
-				 matches_skip_worktree(&pathspec, i, &skip_worktree_seen))
-				string_list_append(&only_match_skip_worktree, original);
-			else
+		برائے (i = 0; i < pathspec.nr; i++) {
+			original = pathspec.اشیاء[i].original;
+			اگر (نظر_آیا[i])
+				نظر_آیا_any = 1;
+			ورنہ اگر (ignore_unmatch)
+				جاری;
+			ورنہ اگر (!include_sparse &&
+				 matches_skip_worktree(&pathspec, i, &skip_worktree_نظر_آیا))
+				string_list_append(&only_مطابقت_skip_worktree, original);
+			ورنہ
 				die(_("pathspec '%s' did not match any files"), original);
 
-			if (!recursive && seen[i] == MATCHED_RECURSIVELY)
+			اگر (!recursive && نظر_آیا[i] == MATCHED_RECURSIVELY)
 				die(_("not removing '%s' recursively without -r"),
 				    *original ? original : ".");
 		}
 
-		if (only_match_skip_worktree.nr) {
-			advise_on_updating_sparse_paths(&only_match_skip_worktree);
+		اگر (only_مطابقت_skip_worktree.nr) {
+			advise_on_updating_sparse_paths(&only_مطابقت_skip_worktree);
 			ret = 1;
 		}
-		free(skip_worktree_seen);
-		string_list_clear(&only_match_skip_worktree, 0);
+		آزاد(skip_worktree_نظر_آیا);
+		string_list_clear(&only_مطابقت_skip_worktree, 0);
 
-		if (!seen_any)
-			exit(ret);
+		اگر (!نظر_آیا_any)
+			باہر_نکلو(ret);
 	}
 	clear_pathspec(&pathspec);
-	free(seen);
+	آزاد(نظر_آیا);
 
-	if (!index_only)
+	اگر (!اشاریہ_only)
 		submodules_absorb_gitdir_if_needed();
 
 	/*
@@ -378,29 +378,29 @@ int cmd_rm(int argc,
 	 * Further, if HEAD commit exists, "diff-index --cached" must
 	 * report no changes unless forced.
 	 */
-	if (!force) {
-		struct object_id oid;
-		if (repo_get_oid(the_repository, "HEAD", &oid))
+	اگر (!force) {
+		ساخت object_id oid;
+		اگر (repo_get_oid(the_repository, "HEAD", &oid))
 			oidclr(&oid, the_repository->hash_algo);
-		if (check_local_mod(&oid, index_only))
-			exit(1);
+		اگر (check_local_mod(&oid, اشاریہ_only))
+			باہر_نکلو(1);
 	}
 
 	/*
 	 * First remove the names from the index: we won't commit
 	 * the index unless all of them succeed.
 	 */
-	for (i = 0; i < list.nr; i++) {
-		const char *path = list.entry[i].name;
-		if (!quiet)
-			printf("rm '%s'\n", path);
+	برائے (i = 0; i < list.nr; i++) {
+		ثابت حرف *راستہ = list.اندراج_2[i].name;
+		اگر (!quiet)
+			لکھو("rm '%s'\n", راستہ);
 
-		if (remove_file_from_index(the_repository->index, path))
-			die(_("git rm: unable to remove %s"), path);
+		اگر (remove_file_from_اشاریہ(the_repository->اشاریہ, راستہ))
+			die(_("git rm: unable to remove %s"), راستہ);
 	}
 
-	if (show_only)
-		return 0;
+	اگر (show_only)
+		واپس 0;
 
 	/*
 	 * Then, unless we used "--cached", remove the filenames from
@@ -410,38 +410,38 @@ int cmd_rm(int argc,
 	 * by then we've already committed ourselves and can't fail
 	 * in the middle)
 	 */
-	if (!index_only) {
-		int removed = 0, gitmodules_modified = 0;
-		struct strbuf buf = STRBUF_INIT;
-		int flag = force ? REMOVE_DIR_PURGE_ORIGINAL_CWD : 0;
-		for (i = 0; i < list.nr; i++) {
-			const char *path = list.entry[i].name;
-			if (list.entry[i].is_submodule) {
+	اگر (!اشاریہ_only) {
+		صحیح removed = 0, gitmodules_modified = 0;
+		ساخت strbuf buf = STRBUF_INIT;
+		صحیح flag = force ? REMOVE_DIR_PURGE_ORIGINAL_CWD : 0;
+		برائے (i = 0; i < list.nr; i++) {
+			ثابت حرف *راستہ = list.اندراج_2[i].name;
+			اگر (list.اندراج_2[i].is_submodule) {
 				strbuf_reset(&buf);
-				strbuf_addstr(&buf, path);
-				if (remove_dir_recursively(&buf, flag))
-					die(_("could not remove '%s'"), path);
+				strbuf_addstr(&buf, راستہ);
+				اگر (remove_dir_recursively(&buf, flag))
+					die(_("could not remove '%s'"), راستہ);
 
 				removed = 1;
-				if (!remove_path_from_gitmodules(path))
+				اگر (!remove_راستہ_from_gitmodules(راستہ))
 					gitmodules_modified = 1;
-				continue;
+				جاری;
 			}
-			if (!remove_path(path)) {
+			اگر (!remove_راستہ(راستہ)) {
 				removed = 1;
-				continue;
+				جاری;
 			}
-			if (!removed)
-				die_errno("git rm: '%s'", path);
+			اگر (!removed)
+				die_errno("git rm: '%s'", راستہ);
 		}
 		strbuf_release(&buf);
-		if (gitmodules_modified)
-			stage_updated_gitmodules(the_repository->index);
+		اگر (gitmodules_modified)
+			stage_updated_gitmodules(the_repository->اشاریہ);
 	}
 
-	if (write_locked_index(the_repository->index, &lock_file,
-			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
+	اگر (write_locked_اشاریہ(the_repository->اشاریہ, &تالا_file,
+			       COMMIT_تالا | SKIP_IF_UNCHANGED))
 		die(_("Unable to write new index file"));
 
-	return ret;
+	واپس ret;
 }

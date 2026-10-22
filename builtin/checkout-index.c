@@ -5,109 +5,109 @@
  *
  */
 
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "parse-options.h"
-#include "entry.h"
-#include "parallel-checkout.h"
-#include "read-cache-ll.h"
-#include "setup.h"
-#include "sparse-index.h"
+#شامل "builtin.h"
+#شامل "config.h"
+#شامل "environment.h"
+#شامل "gettext.h"
+#شامل "lockfile.h"
+#شامل "quote.h"
+#شامل "cache-tree.h"
+#شامل "parse-options.h"
+#شامل "entry.h"
+#شامل "parallel-checkout.h"
+#شامل "read-cache-ll.h"
+#شامل "setup.h"
+#شامل "sparse-index.h"
 
-#define CHECKOUT_ALL 4
-static int nul_term_line;
-static int checkout_stage; /* default to checkout stage0 */
-static int ignore_skip_worktree; /* default to 0 */
-static int to_tempfile = -1;
-static char topath[4][TEMPORARY_FILENAME_LENGTH + 1];
+#تعریف_کرو CHECKOUT_ALL 4
+ساکن صحیح nul_رکن_سطر;
+ساکن صحیح checkout_stage; /* default to checkout stage0 */
+ساکن صحیح ignore_skip_worktree; /* default to 0 */
+ساکن صحیح مقصد_tempfile = -1;
+ساکن حرف topath[4][TEMPORARY_FILENAME_لمبائی + 1];
 
-static struct checkout state = CHECKOUT_INIT;
+ساکن ساخت checkout state = CHECKOUT_INIT;
 
-static void write_tempfile_record(const char *name, const char *prefix)
+ساکن خالی write_tempfile_ریکارڈ(ثابت حرف *name, ثابت حرف *سابقہ)
 {
-	int i;
-	int have_tempname = 0;
+	صحیح i;
+	صحیح have_tempname = 0;
 
-	if (CHECKOUT_ALL == checkout_stage) {
-		for (i = 1; i < 4; i++)
-			if (topath[i][0]) {
+	اگر (CHECKOUT_ALL == checkout_stage) {
+		برائے (i = 1; i < 4; i++)
+			اگر (topath[i][0]) {
 				have_tempname = 1;
-				break;
+				توڑو;
 			}
 
-		if (have_tempname) {
-			for (i = 1; i < 4; i++) {
-				if (i > 1)
-					putchar(' ');
-				if (topath[i][0])
+		اگر (have_tempname) {
+			برائے (i = 1; i < 4; i++) {
+				اگر (i > 1)
+					حرف_لکھو(' ');
+				اگر (topath[i][0])
 					fputs(topath[i], stdout);
-				else
-					putchar('.');
+				ورنہ
+					حرف_لکھو('.');
 			}
 		}
-	} else if (topath[checkout_stage][0]) {
+	} ورنہ اگر (topath[checkout_stage][0]) {
 		have_tempname = 1;
 		fputs(topath[checkout_stage], stdout);
 	}
 
-	if (have_tempname) {
-		putchar('\t');
-		write_name_quoted_relative(name, prefix, stdout,
-					   nul_term_line ? '\0' : '\n');
+	اگر (have_tempname) {
+		حرف_لکھو('\t');
+		write_name_quoted_relative(name, سابقہ, stdout,
+					   nul_رکن_سطر ? '\0' : '\n');
 	}
 
-	for (i = 0; i < 4; i++) {
+	برائے (i = 0; i < 4; i++) {
 		topath[i][0] = 0;
 	}
 }
 
-static int checkout_file(struct index_state *index, const char *name, const char *prefix)
+ساکن صحیح checkout_file(ساخت اشاریہ_state *اشاریہ, ثابت حرف *name, ثابت حرف *سابقہ)
 {
-	int namelen = strlen(name);
-	int pos = index_name_pos(index, name, namelen);
-	int has_same_name = 0;
-	int is_file = 0;
-	int is_skipped = 1;
-	int did_checkout = 0;
-	int errs = 0;
+	صحیح namelen = لڑی_لمبائی(name);
+	صحیح pos = اشاریہ_name_pos(اشاریہ, name, namelen);
+	صحیح has_same_name = 0;
+	صحیح is_file = 0;
+	صحیح is_skipped = 1;
+	صحیح did_checkout = 0;
+	صحیح errs = 0;
 
-	if (pos < 0)
+	اگر (pos < 0)
 		pos = -pos - 1;
 
-	while (pos < index->cache_nr) {
-		struct cache_entry *ce = index->cache[pos];
-		if (ce_namelen(ce) != namelen ||
+	جب (pos < اشاریہ->cache_nr) {
+		ساخت cache_اندراج *ce = اشاریہ->cache[pos];
+		اگر (ce_namelen(ce) != namelen ||
 		    memcmp(ce->name, name, namelen))
-			break;
+			توڑو;
 		has_same_name = 1;
 		pos++;
-		if (S_ISSPARSEDIR(ce->ce_mode))
-			break;
+		اگر (S_ISSPARSEDIR(ce->ce_منوال))
+			توڑو;
 		is_file = 1;
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			break;
+		اگر (!ignore_skip_worktree && ce_skip_worktree(ce))
+			توڑو;
 		is_skipped = 0;
-		if (ce_stage(ce) != checkout_stage
+		اگر (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
+			جاری;
 		did_checkout = 1;
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		اگر (checkout_اندراج(ce, &state,
+				   مقصد_tempfile ? topath[ce_stage(ce)] : تہی,
+				   تہی) < 0)
 			errs++;
 	}
 
-	if (did_checkout) {
-		if (to_tempfile)
-			write_tempfile_record(name, prefix);
-		return errs > 0 ? -1 : 0;
+	اگر (did_checkout) {
+		اگر (مقصد_tempfile)
+			write_tempfile_ریکارڈ(name, سابقہ);
+		واپس errs > 0 ? -1 : 0;
 	}
 
 	/*
@@ -115,38 +115,38 @@ static int checkout_file(struct index_state *index, const char *name, const char
 	 * because we did find an entry but it was stage 0, that's not an
 	 * error.
 	 */
-	if (has_same_name && checkout_stage == CHECKOUT_ALL)
-		return 0;
+	اگر (has_same_name && checkout_stage == CHECKOUT_ALL)
+		واپس 0;
 
-	if (!state.quiet) {
+	اگر (!state.quiet) {
 		fprintf(stderr, "git checkout-index: %s ", name);
-		if (!has_same_name)
+		اگر (!has_same_name)
 			fprintf(stderr, "is not in the cache");
-		else if (!is_file)
+		ورنہ اگر (!is_file)
 			fprintf(stderr, "is a sparse directory");
-		else if (is_skipped)
+		ورنہ اگر (is_skipped)
 			fprintf(stderr, "has skip-worktree enabled; "
 					"use '--ignore-skip-worktree-bits' to checkout");
-		else if (checkout_stage)
+		ورنہ اگر (checkout_stage)
 			fprintf(stderr, "does not exist at stage %d",
 				checkout_stage);
-		else
+		ورنہ
 			fprintf(stderr, "is unmerged");
 		fputc('\n', stderr);
 	}
-	return -1;
+	واپس -1;
 }
 
-static int checkout_all(struct index_state *index, const char *prefix, int prefix_length)
+ساکن صحیح checkout_all(ساخت اشاریہ_state *اشاریہ, ثابت حرف *سابقہ, صحیح سابقہ_لمبائی)
 {
-	int i, errs = 0;
-	struct cache_entry *last_ce = NULL;
+	صحیح i, errs = 0;
+	ساخت cache_اندراج *آخری_ce = تہی;
 
-	for (i = 0; i < index->cache_nr ; i++) {
-		struct cache_entry *ce = index->cache[i];
+	برائے (i = 0; i < اشاریہ->cache_nr ; i++) {
+		ساخت cache_اندراج *ce = اشاریہ->cache[i];
 
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
-			if (!ce_skip_worktree(ce))
+		اگر (S_ISSPARSEDIR(ce->ce_منوال)) {
+			اگر (!ce_skip_worktree(ce))
 				BUG("sparse directory '%s' does not have skip-worktree set", ce->name);
 
 			/*
@@ -155,76 +155,76 @@ static int checkout_all(struct index_state *index, const char *prefix, int prefi
 			 * the loop on the current index position (now pointing to the
 			 * first entry inside the expanded sparse directory).
 			 */
-			if (ignore_skip_worktree) {
-				ensure_full_index(index);
-				ce = index->cache[i];
+			اگر (ignore_skip_worktree) {
+				ensure_بھرا_اشاریہ(اشاریہ);
+				ce = اشاریہ->cache[i];
 			}
 		}
 
-		if (!ignore_skip_worktree && ce_skip_worktree(ce))
-			continue;
-		if (ce_stage(ce) != checkout_stage
+		اگر (!ignore_skip_worktree && ce_skip_worktree(ce))
+			جاری;
+		اگر (ce_stage(ce) != checkout_stage
 		    && (CHECKOUT_ALL != checkout_stage || !ce_stage(ce)))
-			continue;
-		if (prefix && *prefix &&
-		    (ce_namelen(ce) <= prefix_length ||
-		     memcmp(prefix, ce->name, prefix_length)))
-			continue;
-		if (last_ce && to_tempfile) {
-			if (ce_namelen(last_ce) != ce_namelen(ce)
-			    || memcmp(last_ce->name, ce->name, ce_namelen(ce)))
-				write_tempfile_record(last_ce->name, prefix);
+			جاری;
+		اگر (سابقہ && *سابقہ &&
+		    (ce_namelen(ce) <= سابقہ_لمبائی ||
+		     memcmp(سابقہ, ce->name, سابقہ_لمبائی)))
+			جاری;
+		اگر (آخری_ce && مقصد_tempfile) {
+			اگر (ce_namelen(آخری_ce) != ce_namelen(ce)
+			    || memcmp(آخری_ce->name, ce->name, ce_namelen(ce)))
+				write_tempfile_ریکارڈ(آخری_ce->name, سابقہ);
 		}
-		if (checkout_entry(ce, &state,
-				   to_tempfile ? topath[ce_stage(ce)] : NULL,
-				   NULL) < 0)
+		اگر (checkout_اندراج(ce, &state,
+				   مقصد_tempfile ? topath[ce_stage(ce)] : تہی,
+				   تہی) < 0)
 			errs++;
-		last_ce = ce;
+		آخری_ce = ce;
 	}
-	if (last_ce && to_tempfile)
-		write_tempfile_record(last_ce->name, prefix);
-	return !!errs;
+	اگر (آخری_ce && مقصد_tempfile)
+		write_tempfile_ریکارڈ(آخری_ce->name, سابقہ);
+	واپس !!errs;
 }
 
-static const char * const builtin_checkout_index_usage[] = {
+ساکن ثابت حرف * ثابت builtin_checkout_اشاریہ_usage[] = {
 	N_("git checkout-index [<options>] [--] [<file>...]"),
-	NULL
+	تہی
 };
 
-static int option_parse_stage(const struct option *opt,
-			      const char *arg, int unset)
+ساکن صحیح option_parse_stage(ثابت ساخت option *opt,
+			      ثابت حرف *arg, صحیح unset)
 {
-	int *stage = opt->value;
+	صحیح *stage = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!strcmp(arg, "all")) {
+	اگر (!strcmp(arg, "all")) {
 		*stage = CHECKOUT_ALL;
-	} else {
-		int ch = arg[0];
-		if ('1' <= ch && ch <= '3')
+	} ورنہ {
+		صحیح ch = arg[0];
+		اگر ('1' <= ch && ch <= '3')
 			*stage = arg[0] - '0';
-		else
+		ورنہ
 			die(_("stage should be between 1 and 3 or all"));
 	}
-	return 0;
+	واپس 0;
 }
 
-int cmd_checkout_index(int argc,
-		       const char **argv,
-		       const char *prefix,
-		       struct repository *repo)
+صحیح cmd_checkout_اشاریہ(صحیح argc,
+		       ثابت حرف **argv,
+		       ثابت حرف *سابقہ,
+		       ساخت repository *repo)
 {
-	int i;
-	struct lock_file lock_file = LOCK_INIT;
-	int all = 0;
-	int read_from_stdin = 0;
-	int prefix_length;
-	int force = 0, quiet = 0, not_new = 0;
-	int index_opt = 0;
-	int err = 0;
-	int pc_workers, pc_threshold;
-	struct option builtin_checkout_index_options[] = {
+	صحیح i;
+	ساخت تالا_file تالا_file = تالا_INIT;
+	صحیح all = 0;
+	صحیح read_from_stdin = 0;
+	صحیح سابقہ_لمبائی;
+	صحیح force = 0, quiet = 0, not_new = 0;
+	صحیح اشاریہ_opt = 0;
+	صحیح err = 0;
+	صحیح pc_workers, pc_حد;
+	ساخت option builtin_checkout_اشاریہ_options[] = {
 		OPT_BOOL('a', "all", &all,
 			N_("check out all files in the index")),
 		OPT_BOOL(0, "ignore-skip-worktree-bits", &ignore_skip_worktree,
@@ -234,117 +234,117 @@ int cmd_checkout_index(int argc,
 			N_("no warning for existing files and files not in index")),
 		OPT_BOOL('n', "no-create", &not_new,
 			N_("don't checkout new files")),
-		OPT_BOOL('u', "index", &index_opt,
+		OPT_BOOL('u', "index", &اشاریہ_opt,
 			 N_("update stat information in the index file")),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', تہی, &nul_رکن_سطر,
 			N_("paths are separated with NUL character")),
 		OPT_BOOL(0, "stdin", &read_from_stdin,
 			N_("read list of paths from the standard input")),
-		OPT_BOOL(0, "temp", &to_tempfile,
+		OPT_BOOL(0, "temp", &مقصد_tempfile,
 			N_("write the content to temporary files")),
-		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
+		OPT_STRING(0, "prefix", &state.بنیاد_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
 		OPT_CALLBACK_F(0, "stage", &checkout_stage, "(1|2|3|all)",
 			N_("copy out the files from named stage"),
 			PARSE_OPT_NONEG, option_parse_stage),
-		OPT_END()
+		OPT_انتہا()
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_checkout_index_usage,
-					 builtin_checkout_index_options);
-	repo_config(repo, git_default_config, NULL);
-	prefix_length = prefix ? strlen(prefix) : 0;
+					 builtin_checkout_اشاریہ_usage,
+					 builtin_checkout_اشاریہ_options);
+	repo_config(repo, git_default_config, تہی);
+	سابقہ_لمبائی = سابقہ ? لڑی_لمبائی(سابقہ) : 0;
 
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_بھرا_اشاریہ = 0;
 
-	if (repo_read_index(repo) < 0) {
+	اگر (repo_read_اشاریہ(repo) < 0) {
 		die("invalid cache");
 	}
 
-	argc = parse_options(argc, argv, prefix, builtin_checkout_index_options,
-			builtin_checkout_index_usage, 0);
-	state.istate = repo->index;
+	argc = parse_options(argc, argv, سابقہ, builtin_checkout_اشاریہ_options,
+			builtin_checkout_اشاریہ_usage, 0);
+	state.istate = repo->اشاریہ;
 	state.force = force;
 	state.quiet = quiet;
 	state.not_new = not_new;
 
-	if (!state.base_dir)
-		state.base_dir = "";
-	state.base_dir_len = strlen(state.base_dir);
+	اگر (!state.بنیاد_dir)
+		state.بنیاد_dir = "";
+	state.بنیاد_dir_len = لڑی_لمبائی(state.بنیاد_dir);
 
-	if (to_tempfile < 0)
-		to_tempfile = (checkout_stage == CHECKOUT_ALL);
-	if (!to_tempfile && checkout_stage == CHECKOUT_ALL)
+	اگر (مقصد_tempfile < 0)
+		مقصد_tempfile = (checkout_stage == CHECKOUT_ALL);
+	اگر (!مقصد_tempfile && checkout_stage == CHECKOUT_ALL)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--stage=all", "--no-temp");
 
 	/*
 	 * when --prefix is specified we do not want to update cache.
 	 */
-	if (index_opt && !state.base_dir_len && !to_tempfile) {
+	اگر (اشاریہ_opt && !state.بنیاد_dir_len && !مقصد_tempfile) {
 		state.refresh_cache = 1;
-		state.istate = repo->index;
-		repo_hold_locked_index(repo, &lock_file,
-				       LOCK_DIE_ON_ERROR);
+		state.istate = repo->اشاریہ;
+		repo_hold_locked_اشاریہ(repo, &تالا_file,
+				       تالا_DIE_ON_ERROR);
 	}
 
-	get_parallel_checkout_configs(&pc_workers, &pc_threshold);
-	if (pc_workers > 1)
+	get_parallel_checkout_configs(&pc_workers, &pc_حد);
+	اگر (pc_workers > 1)
 		init_parallel_checkout();
 
 	/* Check out named files first */
-	for (i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		char *p;
+	برائے (i = 0; i < argc; i++) {
+		ثابت حرف *arg = argv[i];
+		حرف *p;
 
-		if (all)
+		اگر (all)
 			die("git checkout-index: don't mix '--all' and explicit filenames");
-		if (read_from_stdin)
+		اگر (read_from_stdin)
 			die("git checkout-index: don't mix '--stdin' and explicit filenames");
-		p = prefix_path(repo, prefix, prefix_length, arg);
-		err |= checkout_file(repo->index, p, prefix);
-		free(p);
+		p = سابقہ_راستہ(repo, سابقہ, سابقہ_لمبائی, arg);
+		err |= checkout_file(repo->اشاریہ, p, سابقہ);
+		آزاد(p);
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	اگر (read_from_stdin) {
+		ساخت strbuf buf = STRBUF_INIT;
+		ساخت strbuf unquoted = STRBUF_INIT;
 		strbuf_getline_fn getline_fn;
 
-		if (all)
+		اگر (all)
 			die("git checkout-index: don't mix '--all' and '--stdin'");
 
-		getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		getline_fn = nul_رکن_سطر ? strbuf_getline_nul : strbuf_getline_lf;
+		جب (getline_fn(&buf, stdin) != EOF) {
+			حرف *p;
+			اگر (!nul_رکن_سطر && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				اگر (unquote_c_style(&unquoted, buf.buf, تہی))
 					die("line is badly quoted");
-				strbuf_swap(&buf, &unquoted);
+				strbuf_تبادلہ(&buf, &unquoted);
 			}
-			p = prefix_path(repo, prefix, prefix_length, buf.buf);
-			err |= checkout_file(repo->index, p, prefix);
-			free(p);
+			p = سابقہ_راستہ(repo, سابقہ, سابقہ_لمبائی, buf.buf);
+			err |= checkout_file(repo->اشاریہ, p, سابقہ);
+			آزاد(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
 	}
 
-	if (all)
-		err |= checkout_all(repo->index, prefix, prefix_length);
+	اگر (all)
+		err |= checkout_all(repo->اشاریہ, سابقہ, سابقہ_لمبائی);
 
-	if (pc_workers > 1)
-		err |= run_parallel_checkout(&state, pc_workers, pc_threshold,
-					     NULL, NULL);
+	اگر (pc_workers > 1)
+		err |= تسلسل_parallel_checkout(&state, pc_workers, pc_حد,
+					     تہی, تہی);
 
-	if (err)
-		return 1;
+	اگر (err)
+		واپس 1;
 
-	if (is_lock_file_locked(&lock_file) &&
-	    write_locked_index(repo->index, &lock_file, COMMIT_LOCK))
+	اگر (is_تالا_file_locked(&تالا_file) &&
+	    write_locked_اشاریہ(repo->اشاریہ, &تالا_file, COMMIT_تالا))
 		die("Unable to write new index file");
-	return 0;
+	واپس 0;
 }

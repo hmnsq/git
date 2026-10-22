@@ -1,97 +1,97 @@
 /*
  * Copyright (c) 2006 Franck Bui-Huu
  */
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "archive.h"
-#include "pkt-line.h"
-#include "setup.h"
-#include "sideband.h"
-#include "run-command.h"
-#include "strvec.h"
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#شامل "builtin.h"
+#شامل "archive.h"
+#شامل "pkt-line.h"
+#شامل "setup.h"
+#شامل "sideband.h"
+#شامل "run-command.h"
+#شامل "strvec.h"
 
-static const char upload_archive_usage[] =
+ساکن ثابت حرف upload_archive_usage[] =
 	"git upload-archive <repository>";
 
-static const char deadchild[] =
+ساکن ثابت حرف deadchild[] =
 "git upload-archive: archiver died with error";
 
-#define MAX_ARGS (64)
+#تعریف_کرو MAX_دلائل (64)
 
-int cmd_upload_archive_writer(int argc,
-			      const char **argv,
-			      const char *prefix,
-			      struct repository *repo UNUSED)
+صحیح cmd_upload_archive_writer(صحیح argc,
+			      ثابت حرف **argv,
+			      ثابت حرف *سابقہ,
+			      ساخت repository *repo غیر_مستعمل)
 {
-	struct strvec sent_argv = STRVEC_INIT;
-	const char *arg_cmd = "argument ";
-	int ret;
+	ساخت strvec بھیجا_argv = STRVEC_INIT;
+	ثابت حرف *arg_cmd = "argument ";
+	صحیح ret;
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
-	if (argc != 2)
+	اگر (argc != 2)
 		usage(upload_archive_usage);
 
-	if (!enter_repo(the_repository, argv[1], 0))
+	اگر (!enter_repo(the_repository, argv[1], 0))
 		die("'%s' does not appear to be a git repository", argv[1]);
 
 	init_archivers();
 
 	/* put received options in sent_argv[] */
-	strvec_push(&sent_argv, "git-upload-archive");
-	for (;;) {
-		char *buf = packet_read_line(0, NULL);
-		if (!buf)
-			break;	/* got a flush */
-		if (sent_argv.nr > MAX_ARGS)
-			die("Too many options (>%d)", MAX_ARGS - 1);
+	strvec_ڈالو(&بھیجا_argv, "git-upload-archive");
+	برائے (;;) {
+		حرف *buf = packet_read_سطر(0, تہی);
+		اگر (!buf)
+			توڑو;	/* got a flush */
+		اگر (بھیجا_argv.nr > MAX_دلائل)
+			die("Too many options (>%d)", MAX_دلائل - 1);
 
-		if (!starts_with(buf, arg_cmd))
+		اگر (!starts_with(buf, arg_cmd))
 			die("'argument' token or flush expected");
-		strvec_push(&sent_argv, buf + strlen(arg_cmd));
+		strvec_ڈالو(&بھیجا_argv, buf + لڑی_لمبائی(arg_cmd));
 	}
 
 	/* parse all options sent by the client */
-	ret = write_archive(sent_argv.nr, sent_argv.v, prefix,
-			    the_repository, NULL, 1);
+	ret = write_archive(بھیجا_argv.nr, بھیجا_argv.v, سابقہ,
+			    the_repository, تہی, 1);
 
-	strvec_clear(&sent_argv);
-	return ret;
+	strvec_clear(&بھیجا_argv);
+	واپس ret;
 }
 
-__attribute__((format (printf, 1, 2)))
-static void error_clnt(const char *fmt, ...)
+__attribute__((format (لکھو, 1, 2)))
+ساکن خالی error_clnt(ثابت حرف *fmt, ...)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ساخت strbuf buf = STRBUF_INIT;
 	va_list params;
 
-	va_start(params, fmt);
+	va_آغاز(params, fmt);
 	strbuf_vaddf(&buf, fmt, params);
-	va_end(params);
+	va_انتہا(params);
 	send_sideband(1, 3, buf.buf, buf.len, LARGE_PACKET_MAX);
 	die("sent error to the client: %s", buf.buf);
 }
 
-static ssize_t process_input(int child_fd, int band)
+ساکن ssize_t process_داخلہ(صحیح بچہ_fd, صحیح band)
 {
-	char buf[16384];
-	ssize_t sz = read(child_fd, buf, sizeof(buf));
-	if (sz < 0) {
-		if (errno != EAGAIN && errno != EINTR)
+	حرف buf[16384];
+	ssize_t sz = اقرأ(بچہ_fd, buf, حجم(buf));
+	اگر (sz < 0) {
+		اگر (errno != EAGAIN && errno != EINTR)
 			error_clnt("read error: %s\n", strerror(errno));
-		return sz;
+		واپس sz;
 	}
 	send_sideband(1, band, buf, sz, LARGE_PACKET_MAX);
-	return sz;
+	واپس sz;
 }
 
-int cmd_upload_archive(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+صحیح cmd_upload_archive(صحیح argc,
+ثابت حرف **argv,
+ثابت حرف *سابقہ,
+ساخت repository *repo غیر_مستعمل)
 {
-	struct child_process writer = CHILD_PROCESS_INIT;
+	ساخت بچہ_process writer = بچہ_PROCESS_INIT;
 
-	BUG_ON_NON_EMPTY_PREFIX(prefix);
+	BUG_ON_NON_خالی_خانے_سابقہ(سابقہ);
 
 	show_usage_if_asked(argc, argv, upload_archive_usage);
 
@@ -102,12 +102,12 @@ struct repository *repo UNUSED)
 	 * multiplexed out to our fd#1.  If the child dies, we tell the other
 	 * end over channel #3.
 	 */
-	writer.out = writer.err = -1;
+	writer.برآمد = writer.err = -1;
 	writer.git_cmd = 1;
-	strvec_push(&writer.args, "upload-archive--writer");
-	strvec_pushv(&writer.args, argv + 1);
-	if (start_command(&writer)) {
-		int err = errno;
+	strvec_ڈالو(&writer.دلائل, "upload-archive--writer");
+	strvec_pushv(&writer.دلائل, argv + 1);
+	اگر (آغاز_command(&writer)) {
+		صحیح err = errno;
 		packet_write_fmt(1, "NACK unable to spawn subprocess\n");
 		die("upload-archive: %s", strerror(err));
 	}
@@ -115,33 +115,33 @@ struct repository *repo UNUSED)
 	packet_write_fmt(1, "ACK\n");
 	packet_flush(1);
 
-	while (1) {
-		struct pollfd pfd[2];
+	جب (1) {
+		ساخت pollfd pfd[2];
 
-		pfd[0].fd = writer.out;
+		pfd[0].fd = writer.برآمد;
 		pfd[0].events = POLLIN;
 		pfd[1].fd = writer.err;
 		pfd[1].events = POLLIN;
-		if (poll(pfd, 2, -1) < 0) {
-			if (errno != EINTR) {
+		اگر (poll(pfd, 2, -1) < 0) {
+			اگر (errno != EINTR) {
 				error_errno("poll failed resuming");
 				sleep(1);
 			}
-			continue;
+			جاری;
 		}
-		if (pfd[1].revents & POLLIN)
+		اگر (pfd[1].revents & POLLIN)
 			/* Status stream ready */
-			if (process_input(pfd[1].fd, 2))
-				continue;
-		if (pfd[0].revents & POLLIN)
+			اگر (process_داخلہ(pfd[1].fd, 2))
+				جاری;
+		اگر (pfd[0].revents & POLLIN)
 			/* Data stream ready */
-			if (process_input(pfd[0].fd, 1))
-				continue;
+			اگر (process_داخلہ(pfd[0].fd, 1))
+				جاری;
 
-		if (finish_command(&writer))
+		اگر (اختتام_command(&writer))
 			error_clnt("%s", deadchild);
 		packet_flush(1);
-		break;
+		توڑو;
 	}
-	return 0;
+	واپس 0;
 }

@@ -5,46 +5,46 @@
  * Based on git-commit.sh by Junio C Hamano and Linus Torvalds
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#تعریف_کرو USE_THE_REPOSITORY_VARIABLE
+#تعریف_کرو DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "color.h"
-#include "dir.h"
-#include "editor.h"
-#include "environment.h"
-#include "diff.h"
-#include "commit.h"
-#include "add-interactive.h"
-#include "gettext.h"
-#include "revision.h"
-#include "wt-status.h"
-#include "run-command.h"
-#include "strbuf.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "string-list.h"
-#include "rerere.h"
-#include "unpack-trees.h"
-#include "column.h"
-#include "sequencer.h"
-#include "sparse-index.h"
-#include "mailmap.h"
-#include "help.h"
-#include "commit-reach.h"
-#include "commit-graph.h"
-#include "pretty.h"
-#include "trailer.h"
+#شامل "builtin.h"
+#شامل "advice.h"
+#شامل "config.h"
+#شامل "lockfile.h"
+#شامل "cache-tree.h"
+#شامل "color.h"
+#شامل "dir.h"
+#شامل "editor.h"
+#شامل "environment.h"
+#شامل "diff.h"
+#شامل "commit.h"
+#شامل "add-interactive.h"
+#شامل "gettext.h"
+#شامل "revision.h"
+#شامل "wt-status.h"
+#شامل "run-command.h"
+#شامل "strbuf.h"
+#شامل "object-name.h"
+#شامل "parse-options.h"
+#شامل "path.h"
+#شامل "preload-index.h"
+#شامل "read-cache.h"
+#شامل "repository.h"
+#شامل "string-list.h"
+#شامل "rerere.h"
+#شامل "unpack-trees.h"
+#شامل "column.h"
+#شامل "sequencer.h"
+#شامل "sparse-index.h"
+#شامل "mailmap.h"
+#شامل "help.h"
+#شامل "commit-reach.h"
+#شامل "commit-graph.h"
+#شامل "pretty.h"
+#شامل "trailer.h"
 
-static const char * const builtin_commit_usage[] = {
+ساکن ثابت حرف * ثابت builtin_commit_usage[] = {
 	N_("git commit [-a | --interactive | --patch] [-s] [-v] [-u[<mode>]] [--amend]\n"
 	   "           [--dry-run] [(-c | -C | --squash) <commit> | --fixup [(amend|reword):]<commit>]\n"
 	   "           [-F <file> | -m <msg>] [--reset-author] [--allow-empty]\n"
@@ -53,33 +53,33 @@ static const char * const builtin_commit_usage[] = {
 	   "           [-i | -o] [--pathspec-from-file=<file> [--pathspec-file-nul]]\n"
 	   "           [(--trailer <token>[(=|:)<value>])...] [-S[<keyid>]]\n"
 	   "           [--] [<pathspec>...]"),
-	NULL
+	تہی
 };
 
-static const char * const builtin_status_usage[] = {
+ساکن ثابت حرف * ثابت builtin_حالت_usage[] = {
 	N_("git status [<options>] [--] [<pathspec>...]"),
-	NULL
+	تہی
 };
 
-static const char empty_amend_advice[] =
+ساکن ثابت حرف خالی_خانے_amend_advice[] =
 N_("You asked to amend the most recent commit, but doing so would make\n"
 "it empty. You can repeat your command with --allow-empty, or you can\n"
 "remove the commit entirely with \"git reset HEAD^\".\n");
 
-static const char empty_cherry_pick_advice[] =
+ساکن ثابت حرف خالی_خانے_cherry_pick_advice[] =
 N_("The previous cherry-pick is now empty, possibly due to conflict resolution.\n"
 "If you wish to commit it anyway, use:\n"
 "\n"
 "    git commit --allow-empty\n"
 "\n");
 
-static const char empty_rebase_pick_advice[] =
+ساکن ثابت حرف خالی_خانے_rebase_pick_advice[] =
 N_("Otherwise, please use 'git rebase --skip'\n");
 
-static const char empty_cherry_pick_advice_single[] =
+ساکن ثابت حرف خالی_خانے_cherry_pick_advice_single[] =
 N_("Otherwise, please use 'git cherry-pick --skip'\n");
 
-static const char empty_cherry_pick_advice_multi[] =
+ساکن ثابت حرف خالی_خانے_cherry_pick_advice_multi[] =
 N_("and then use:\n"
 "\n"
 "    git cherry-pick --continue\n"
@@ -90,47 +90,47 @@ N_("and then use:\n"
 "    git cherry-pick --skip\n"
 "\n");
 
-static const char *color_status_slots[] = {
-	[WT_STATUS_HEADER]	  = "header",
-	[WT_STATUS_UPDATED]	  = "updated",
-	[WT_STATUS_CHANGED]	  = "changed",
-	[WT_STATUS_UNTRACKED]	  = "untracked",
-	[WT_STATUS_NOBRANCH]	  = "noBranch",
-	[WT_STATUS_UNMERGED]	  = "unmerged",
-	[WT_STATUS_LOCAL_BRANCH]  = "localBranch",
-	[WT_STATUS_REMOTE_BRANCH] = "remoteBranch",
-	[WT_STATUS_ONBRANCH]	  = "branch",
+ساکن ثابت حرف *color_حالت_slots[] = {
+	[WT_حالت_سرخی]	  = "header",
+	[WT_حالت_UPDATED]	  = "updated",
+	[WT_حالت_بدلا]	  = "changed",
+	[WT_حالت_UNTRACKED]	  = "untracked",
+	[WT_حالت_NOBRANCH]	  = "noBranch",
+	[WT_حالت_UNMERGED]	  = "unmerged",
+	[WT_حالت_LOCAL_BRANCH]  = "localBranch",
+	[WT_حالت_REMOTE_BRANCH] = "remoteBranch",
+	[WT_حالت_ONBRANCH]	  = "branch",
 };
 
-static const char *use_message_buffer;
-static struct lock_file index_lock; /* real index */
-static struct lock_file false_lock; /* used only for partial commits */
-static enum {
+ساکن ثابت حرف *use_پیغام_بفر;
+ساکن ساخت تالا_file اشاریہ_تالا; /* real index */
+ساکن ساخت تالا_file false_تالا; /* used only for partial commits */
+ساکن شمار {
 	COMMIT_AS_IS = 1,
-	COMMIT_NORMAL,
+	COMMIT_معمول,
 	COMMIT_PARTIAL
 } commit_style;
 
-static const char *force_author;
-static char *logfile;
-static char *template_file;
+ساکن ثابت حرف *force_author;
+ساکن حرف *logfile;
+ساکن حرف *template_file;
 /*
  * The _message variables are commit names from which to take
  * the commit message and/or authorship.
  */
-static const char *author_message, *author_message_buffer;
-static const char *edit_message, *use_message;
-static char *fixup_message, *fixup_commit, *squash_message;
-static const char *fixup_prefix;
-static int all, also, interactive, patch_interactive, only, amend, signoff;
-static struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-static int edit_flag = -1; /* unspecified */
-static int quiet, verbose, no_verify, allow_empty, dry_run, renew_authorship;
-static int config_commit_verbose = -1; /* unspecified */
-static int no_post_rewrite, allow_empty_message, pathspec_file_nul;
-static const char *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
-static const char *sign_commit, *pathspec_from_file;
-static struct strvec trailer_args = STRVEC_INIT;
+ساکن ثابت حرف *author_پیغام, *author_پیغام_بفر;
+ساکن ثابت حرف *edit_پیغام, *use_پیغام;
+ساکن حرف *fixup_پیغام, *fixup_commit, *squash_پیغام;
+ساکن ثابت حرف *fixup_سابقہ;
+ساکن صحیح all, also, interactive, patch_interactive, only, amend, signoff;
+ساکن ساخت interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+ساکن صحیح edit_flag = -1; /* unspecified */
+ساکن صحیح quiet, verbose, no_verify, allow_خالی_خانے, dry_تسلسل, renew_authorship;
+ساکن صحیح config_commit_verbose = -1; /* unspecified */
+ساکن صحیح no_post_rewrite, allow_خالی_خانے_پیغام, pathspec_file_nul;
+ساکن ثابت حرف *untracked_files_arg, *force_date, *ignore_submodule_arg, *ignored_arg;
+ساکن ثابت حرف *sign_commit, *pathspec_from_file;
+ساکن ساخت strvec trailer_دلائل = STRVEC_INIT;
 
 /*
  * The default commit message cleanup mode will remove the lines
@@ -139,303 +139,303 @@ static struct strvec trailer_args = STRVEC_INIT;
  * if editor is used, and only the whitespaces if the message
  * is specified explicitly.
  */
-static enum commit_msg_cleanup_mode cleanup_mode;
-static char *cleanup_config;
+ساکن شمار commit_پیغام_cleanup_منوال cleanup_منوال;
+ساکن حرف *cleanup_config;
 
-static enum commit_whence whence;
-static int use_editor = 1, include_status = 1;
-static int have_option_m;
-static struct strbuf message = STRBUF_INIT;
+ساکن شمار commit_whence whence;
+ساکن صحیح use_editor = 1, include_حالت = 1;
+ساکن صحیح have_option_m;
+ساکن ساخت strbuf پیغام_2 = STRBUF_INIT;
 
-static enum wt_status_format status_format = STATUS_FORMAT_UNSPECIFIED;
+ساکن شمار wt_حالت_format حالت_format = حالت_FORMAT_UNSPECIFIED;
 
-static int opt_parse_porcelain(const struct option *opt, const char *arg, int unset)
+ساکن صحیح opt_parse_porcelain(ثابت ساخت option *opt, ثابت حرف *arg, صحیح unset)
 {
-	enum wt_status_format *value = (enum wt_status_format *)opt->value;
-	if (unset)
-		*value = STATUS_FORMAT_NONE;
-	else if (!arg)
-		*value = STATUS_FORMAT_PORCELAIN;
-	else if (!strcmp(arg, "v1") || !strcmp(arg, "1"))
-		*value = STATUS_FORMAT_PORCELAIN;
-	else if (!strcmp(arg, "v2") || !strcmp(arg, "2"))
-		*value = STATUS_FORMAT_PORCELAIN_V2;
-	else
+	شمار wt_حالت_format *قدر = (شمار wt_حالت_format *)opt->قدر;
+	اگر (unset)
+		*قدر = حالت_FORMAT_NONE;
+	ورنہ اگر (!arg)
+		*قدر = حالت_FORMAT_PORCELAIN;
+	ورنہ اگر (!strcmp(arg, "v1") || !strcmp(arg, "1"))
+		*قدر = حالت_FORMAT_PORCELAIN;
+	ورنہ اگر (!strcmp(arg, "v2") || !strcmp(arg, "2"))
+		*قدر = حالت_FORMAT_PORCELAIN_V2;
+	ورنہ
 		die("unsupported porcelain version '%s'", arg);
 
-	return 0;
+	واپس 0;
 }
 
-static int opt_parse_m(const struct option *opt, const char *arg, int unset)
+ساکن صحیح opt_parse_m(ثابت ساخت option *opt, ثابت حرف *arg, صحیح unset)
 {
-	struct strbuf *buf = opt->value;
-	if (unset) {
+	ساخت strbuf *buf = opt->قدر;
+	اگر (unset) {
 		have_option_m = 0;
 		strbuf_setlen(buf, 0);
-	} else {
+	} ورنہ {
 		have_option_m = 1;
-		if (buf->len)
+		اگر (buf->len)
 			strbuf_addch(buf, '\n');
 		strbuf_addstr(buf, arg);
-		strbuf_complete_line(buf);
+		strbuf_complete_سطر(buf);
 	}
-	return 0;
+	واپس 0;
 }
 
-static int opt_parse_rename_score(const struct option *opt, const char *arg, int unset)
+ساکن صحیح opt_parse_rename_score(ثابت ساخت option *opt, ثابت حرف *arg, صحیح unset)
 {
-	const char **value = opt->value;
+	ثابت حرف **قدر = opt->قدر;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (arg != NULL && *arg == '=')
+	اگر (arg != تہی && *arg == '=')
 		arg = arg + 1;
 
-	*value = arg;
-	return 0;
+	*قدر = arg;
+	واپس 0;
 }
 
-static void determine_whence(struct wt_status *s)
+ساکن خالی determine_whence(ساخت wt_حالت *s)
 {
-	if (file_exists(git_path_merge_head(the_repository)))
-		whence = FROM_MERGE;
-	else if (!sequencer_determine_whence(the_repository, &whence))
+	اگر (file_exists(git_راستہ_ملاؤ_سر(the_repository)))
+		whence = FROM_ملاؤ;
+	ورنہ اگر (!sequencer_determine_whence(the_repository, &whence))
 		whence = FROM_COMMIT;
-	if (s)
+	اگر (s)
 		s->whence = whence;
 }
 
-static void status_init_config(struct wt_status *s, config_fn_t fn)
+ساکن خالی حالت_init_config(ساخت wt_حالت *s, config_fn_t fn)
 {
-	wt_status_prepare(the_repository, s);
+	wt_حالت_prepare(the_repository, s);
 	init_diff_ui_defaults();
 	repo_config(the_repository, fn, s);
 	determine_whence(s);
-	s->hints = advice_enabled(ADVICE_STATUS_HINTS); /* must come after repo_config() */
+	s->hints = advice_enabled(ADVICE_حالت_HINTS); /* must come after repo_config() */
 }
 
-static void rollback_index_files(void)
+ساکن خالی rollback_اشاریہ_files(خالی)
 {
-	switch (commit_style) {
-	case COMMIT_AS_IS:
-		break; /* nothing to do */
-	case COMMIT_NORMAL:
-		rollback_lock_file(&index_lock);
-		break;
-	case COMMIT_PARTIAL:
-		rollback_lock_file(&index_lock);
-		rollback_lock_file(&false_lock);
-		break;
+	انتخاب (commit_style) {
+	حالت COMMIT_AS_IS:
+		توڑو; /* nothing to do */
+	حالت COMMIT_معمول:
+		rollback_تالا_file(&اشاریہ_تالا);
+		توڑو;
+	حالت COMMIT_PARTIAL:
+		rollback_تالا_file(&اشاریہ_تالا);
+		rollback_تالا_file(&false_تالا);
+		توڑو;
 	}
 }
 
-static int commit_index_files(void)
+ساکن صحیح commit_اشاریہ_files(خالی)
 {
-	int err = 0;
+	صحیح err = 0;
 
-	switch (commit_style) {
-	case COMMIT_AS_IS:
-		break; /* nothing to do */
-	case COMMIT_NORMAL:
-		err = commit_lock_file(&index_lock);
-		break;
-	case COMMIT_PARTIAL:
-		err = commit_lock_file(&index_lock);
-		rollback_lock_file(&false_lock);
-		break;
+	انتخاب (commit_style) {
+	حالت COMMIT_AS_IS:
+		توڑو; /* nothing to do */
+	حالت COMMIT_معمول:
+		err = commit_تالا_file(&اشاریہ_تالا);
+		توڑو;
+	حالت COMMIT_PARTIAL:
+		err = commit_تالا_file(&اشاریہ_تالا);
+		rollback_تالا_file(&false_تالا);
+		توڑو;
 	}
 
-	return err;
+	واپس err;
 }
 
 /*
  * Take a union of paths in the index and the named tree (typically, "HEAD"),
  * and return the paths that match the given pattern in list.
  */
-static int list_paths(struct string_list *list, const char *with_tree,
-		      const struct pathspec *pattern)
+ساکن صحیح list_paths(ساخت string_list *list, ثابت حرف *with_درخت,
+		      ثابت ساخت pathspec *نمونہ)
 {
-	int i, ret;
-	char *m;
+	صحیح i, ret;
+	حرف *m;
 
-	if (!pattern->nr)
-		return 0;
+	اگر (!نمونہ->nr)
+		واپس 0;
 
-	m = xcalloc(1, pattern->nr);
+	m = xcalloc(1, نمونہ->nr);
 
-	if (with_tree) {
-		char *max_prefix = common_prefix(pattern);
-		overlay_tree_on_index(the_repository->index, with_tree, max_prefix);
-		free(max_prefix);
+	اگر (with_درخت) {
+		حرف *max_سابقہ = common_سابقہ(نمونہ);
+		overlay_درخت_on_اشاریہ(the_repository->اشاریہ, with_درخت, max_سابقہ);
+		آزاد(max_سابقہ);
 	}
 
 	/* TODO: audit for interaction with sparse-index. */
-	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		struct string_list_item *item;
+	ensure_بھرا_اشاریہ(the_repository->اشاریہ);
+	برائے (i = 0; i < the_repository->اشاریہ->cache_nr; i++) {
+		ثابت ساخت cache_اندراج *ce = the_repository->اشاریہ->cache[i];
+		ساخت string_list_شے *شے;
 
-		if (ce->ce_flags & CE_UPDATE)
-			continue;
-		if (!ce_path_match(the_repository->index, ce, pattern, m))
-			continue;
-		item = string_list_insert(list, ce->name);
-		if (ce_skip_worktree(ce))
-			item->util = item; /* better a valid pointer than a fake one */
+		اگر (ce->ce_flags & CE_UPDATE)
+			جاری;
+		اگر (!ce_راستہ_مطابقت(the_repository->اشاریہ, ce, نمونہ, m))
+			جاری;
+		شے = string_list_داخل_کرو(list, ce->name);
+		اگر (ce_skip_worktree(ce))
+			شے->util = شے; /* better a valid pointer than a fake one */
 	}
 
-	ret = report_path_error(m, pattern);
-	free(m);
-	return ret;
+	ret = report_راستہ_error(m, نمونہ);
+	آزاد(m);
+	واپس ret;
 }
 
-static void add_remove_files(struct string_list *list)
+ساکن خالی جوڑو_remove_files(ساخت string_list *list)
 {
-	int i;
-	for (i = 0; i < list->nr; i++) {
-		struct stat st;
-		struct string_list_item *p = &(list->items[i]);
+	صحیح i;
+	برائے (i = 0; i < list->nr; i++) {
+		ساخت stat st;
+		ساخت string_list_شے *p = &(list->اشیاء[i]);
 
 		/* p->util is skip-worktree */
-		if (p->util)
-			continue;
+		اگر (p->util)
+			جاری;
 
-		if (!lstat(p->string, &st)) {
-			if (add_to_index(the_repository->index, p->string, &st, 0))
+		اگر (!lstat(p->string, &st)) {
+			اگر (جوڑو_مقصد_اشاریہ(the_repository->اشاریہ, p->string, &st, 0))
 				die(_("updating files failed"));
-		} else
-			remove_file_from_index(the_repository->index, p->string);
+		} ورنہ
+			remove_file_from_اشاریہ(the_repository->اشاریہ, p->string);
 	}
 }
 
-static void create_base_index(const struct commit *current_head)
+ساکن خالی create_بنیاد_اشاریہ(ثابت ساخت commit *current_سر)
 {
-	struct tree *tree;
-	struct unpack_trees_options opts;
-	struct tree_desc t;
+	ساخت درخت *درخت;
+	ساخت unpack_trees_options opts;
+	ساخت درخت_desc t;
 
-	if (!current_head) {
-		discard_index(the_repository->index);
-		return;
+	اگر (!current_سر) {
+		discard_اشاریہ(the_repository->اشاریہ);
+		واپس;
 	}
 
-	memset(&opts, 0, sizeof(opts));
-	opts.head_idx = 1;
-	opts.index_only = 1;
-	opts.merge = 1;
-	opts.src_index = the_repository->index;
-	opts.dst_index = the_repository->index;
+	memset(&opts, 0, حجم(opts));
+	opts.سر_idx = 1;
+	opts.اشاریہ_only = 1;
+	opts.ملاؤ = 1;
+	opts.src_اشاریہ = the_repository->اشاریہ;
+	opts.dst_اشاریہ = the_repository->اشاریہ;
 
-	opts.fn = oneway_merge;
-	tree = repo_parse_tree_indirect(the_repository,
-					&current_head->object.oid);
-	if (!tree)
+	opts.fn = oneway_ملاؤ;
+	درخت = repo_parse_درخت_بالواسطہ(the_repository,
+					&current_سر->object.oid);
+	اگر (!درخت)
 		die(_("failed to unpack HEAD tree object"));
-	if (repo_parse_tree(the_repository, tree) < 0)
-		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts))
-		exit(128); /* We've already reported the error, finish dying */
+	اگر (repo_parse_درخت(the_repository, درخت) < 0)
+		باہر_نکلو(128);
+	init_درخت_desc(&t, &درخت->object.oid, درخت->بفر, درخت->سائز);
+	اگر (unpack_trees(1, &t, &opts))
+		باہر_نکلو(128); /* We've already reported the error, finish dying */
 }
 
-static void refresh_cache_or_die(int refresh_flags)
+ساکن خالی refresh_cache_or_die(صحیح refresh_flags)
 {
 	/*
 	 * refresh_flags contains REFRESH_QUIET, so the only errors
 	 * are for unmerged entries.
 	 */
-	if (refresh_index(the_repository->index, refresh_flags | REFRESH_IN_PORCELAIN, NULL, NULL, NULL))
+	اگر (refresh_اشاریہ(the_repository->اشاریہ, refresh_flags | REFRESH_اندر_PORCELAIN, تہی, تہی, تہی))
 		die_resolve_conflict("commit");
 }
 
-static const char *prepare_index(const char **argv, const char *prefix,
-				 const struct commit *current_head, int is_status)
+ساکن ثابت حرف *prepare_اشاریہ(ثابت حرف **argv, ثابت حرف *سابقہ,
+				 ثابت ساخت commit *current_سر, صحیح is_حالت)
 {
-	struct string_list partial = STRING_LIST_INIT_DUP;
-	struct pathspec pathspec;
-	int refresh_flags = REFRESH_QUIET;
-	const char *ret;
-	char *path = NULL;
+	ساخت string_list partial = STRING_LIST_INIT_DUP;
+	ساخت pathspec pathspec;
+	صحیح refresh_flags = REFRESH_QUIET;
+	ثابت حرف *ret;
+	حرف *راستہ = تہی;
 
-	if (interactive_opts.context < -1)
+	اگر (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	اگر (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (is_status)
+	اگر (is_حالت)
 		refresh_flags |= REFRESH_UNMERGED;
 	parse_pathspec(&pathspec, 0,
-		       PATHSPEC_PREFER_FULL,
-		       prefix, argv);
+		       PATHSPEC_PREFER_بھرا,
+		       سابقہ, argv);
 
-	if (pathspec_from_file) {
-		if (interactive)
+	اگر (pathspec_from_file) {
+		اگر (interactive)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--interactive/--patch");
 
-		if (all)
+		اگر (all)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "-a");
 
-		if (pathspec.nr)
+		اگر (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
-				    PATHSPEC_PREFER_FULL,
-				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+				    PATHSPEC_PREFER_بھرا,
+				    سابقہ, pathspec_from_file, pathspec_file_nul);
+	} ورنہ اگر (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!pathspec.nr && (also || (only && !allow_empty &&
-	    (!amend || (fixup_message && strcmp(fixup_prefix, "amend"))))))
+	اگر (!pathspec.nr && (also || (only && !allow_خالی_خانے &&
+	    (!amend || (fixup_پیغام && strcmp(fixup_سابقہ, "amend"))))))
 		die(_("No paths with --include/--only does not make sense."));
 
-	if (repo_read_index_preload(the_repository, &pathspec, 0) < 0)
+	اگر (repo_read_اشاریہ_preload(the_repository, &pathspec, 0) < 0)
 		die(_("index file corrupt"));
 
-	if (interactive) {
-		char *old_index_env = NULL, *old_repo_index_file;
-		repo_hold_locked_index(the_repository, &index_lock,
-				       LOCK_DIE_ON_ERROR);
+	اگر (interactive) {
+		حرف *old_اشاریہ_env = تہی, *old_repo_اشاریہ_file;
+		repo_hold_locked_اشاریہ(the_repository, &اشاریہ_تالا,
+				       تالا_DIE_ON_ERROR);
 
 		refresh_cache_or_die(refresh_flags);
 
-		if (write_locked_index(the_repository->index, &index_lock, 0))
+		اگر (write_locked_اشاریہ(the_repository->اشاریہ, &اشاریہ_تالا, 0))
 			die(_("unable to create temporary index"));
 
-		old_repo_index_file = the_repository->index_file;
-		the_repository->index_file =
-			(char *)get_lock_file_path(&index_lock);
-		old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
-		setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
+		old_repo_اشاریہ_file = the_repository->اشاریہ_file;
+		the_repository->اشاریہ_file =
+			(حرف *)get_تالا_file_راستہ(&اشاریہ_تالا);
+		old_اشاریہ_env = xstrdup_or_null(getenv(اشاریہ_ENVIRONMENT));
+		setenv(اشاریہ_ENVIRONMENT, the_repository->اشاریہ_file, 1);
 
-		if (interactive_add(the_repository, argv, prefix, patch_interactive, &interactive_opts) != 0)
+		اگر (interactive_جوڑو(the_repository, argv, سابقہ, patch_interactive, &interactive_opts) != 0)
 			die(_("interactive add failed"));
 
-		the_repository->index_file = old_repo_index_file;
-		if (old_index_env && *old_index_env)
-			setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-		else
-			unsetenv(INDEX_ENVIRONMENT);
-		FREE_AND_NULL(old_index_env);
+		the_repository->اشاریہ_file = old_repo_اشاریہ_file;
+		اگر (old_اشاریہ_env && *old_اشاریہ_env)
+			setenv(اشاریہ_ENVIRONMENT, old_اشاریہ_env, 1);
+		ورنہ
+			unsetenv(اشاریہ_ENVIRONMENT);
+		FREE_AND_NULL(old_اشاریہ_env);
 
-		discard_index(the_repository->index);
-		read_index_from(the_repository->index, get_lock_file_path(&index_lock),
+		discard_اشاریہ(the_repository->اشاریہ);
+		read_اشاریہ_from(the_repository->اشاریہ, get_تالا_file_راستہ(&اشاریہ_تالا),
 				repo_get_git_dir(the_repository));
-		if (cache_tree_update(the_repository->index, WRITE_TREE_SILENT) == 0) {
-			if (reopen_lock_file(&index_lock) < 0)
+		اگر (cache_درخت_update(the_repository->اشاریہ, WRITE_درخت_SILENT) == 0) {
+			اگر (reopen_تالا_file(&اشاریہ_تالا) < 0)
 				die(_("unable to write index file"));
-			if (write_locked_index(the_repository->index, &index_lock, 0))
+			اگر (write_locked_اشاریہ(the_repository->اشاریہ, &اشاریہ_تالا, 0))
 				die(_("unable to update temporary index"));
-		} else
+		} ورنہ
 			warning(_("Failed to update main cache tree"));
 
-		commit_style = COMMIT_NORMAL;
-		ret = get_lock_file_path(&index_lock);
-		goto out;
-	} else {
-		if (interactive_opts.context != -1)
+		commit_style = COMMIT_معمول;
+		ret = get_تالا_file_راستہ(&اشاریہ_تالا);
+		جاؤ برآمد;
+	} ورنہ {
+		اگر (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--interactive/--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		اگر (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--interactive/--patch");
 	}
 
@@ -451,23 +451,23 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 * (A) if all goes well, commit the real index;
 	 * (B) on failure, rollback the real index.
 	 */
-	if (all || (also && pathspec.nr)) {
-		char *ps_matched = xcalloc(pathspec.nr, 1);
-		repo_hold_locked_index(the_repository, &index_lock,
-				       LOCK_DIE_ON_ERROR);
-		add_files_to_cache(the_repository, also ? prefix : NULL,
+	اگر (all || (also && pathspec.nr)) {
+		حرف *ps_matched = xcalloc(pathspec.nr, 1);
+		repo_hold_locked_اشاریہ(the_repository, &اشاریہ_تالا,
+				       تالا_DIE_ON_ERROR);
+		جوڑو_files_مقصد_cache(the_repository, also ? سابقہ : تہی,
 				   &pathspec, ps_matched, 0, 0, 0 );
-		if (!all && report_path_error(ps_matched, &pathspec))
-			exit(128);
+		اگر (!all && report_راستہ_error(ps_matched, &pathspec))
+			باہر_نکلو(128);
 
 		refresh_cache_or_die(refresh_flags);
-		cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-		if (write_locked_index(the_repository->index, &index_lock, 0))
+		cache_درخت_update(the_repository->اشاریہ, WRITE_درخت_SILENT);
+		اگر (write_locked_اشاریہ(the_repository->اشاریہ, &اشاریہ_تالا, 0))
 			die(_("unable to write new index file"));
-		commit_style = COMMIT_NORMAL;
-		ret = get_lock_file_path(&index_lock);
-		free(ps_matched);
-		goto out;
+		commit_style = COMMIT_معمول;
+		ret = get_تالا_file_راستہ(&اشاریہ_تالا);
+		آزاد(ps_matched);
+		جاؤ برآمد;
 	}
 
 	/*
@@ -479,19 +479,19 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 * and create commit from the_index.
 	 * We still need to refresh the index here.
 	 */
-	if (!only && !pathspec.nr) {
-		repo_hold_locked_index(the_repository, &index_lock,
-				       LOCK_DIE_ON_ERROR);
+	اگر (!only && !pathspec.nr) {
+		repo_hold_locked_اشاریہ(the_repository, &اشاریہ_تالا,
+				       تالا_DIE_ON_ERROR);
 		refresh_cache_or_die(refresh_flags);
-		if (the_repository->index->cache_changed
-		    || !cache_tree_fully_valid(the_repository->index))
-			cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-		if (write_locked_index(the_repository->index, &index_lock,
-				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
+		اگر (the_repository->اشاریہ->cache_بدلا
+		    || !cache_درخت_fully_valid(the_repository->اشاریہ))
+			cache_درخت_update(the_repository->اشاریہ, WRITE_درخت_SILENT);
+		اگر (write_locked_اشاریہ(the_repository->اشاریہ, &اشاریہ_تالا,
+				       COMMIT_تالا | SKIP_IF_UNCHANGED))
 			die(_("unable to write new index file"));
 		commit_style = COMMIT_AS_IS;
-		ret = repo_get_index_file(the_repository);
-		goto out;
+		ret = repo_get_اشاریہ_file(the_repository);
+		جاؤ برآمد;
 	}
 
 	/*
@@ -515,325 +515,325 @@ static const char *prepare_index(const char **argv, const char *prefix,
 	 */
 	commit_style = COMMIT_PARTIAL;
 
-	if (whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+	اگر (whence != FROM_COMMIT) {
+		اگر (whence == FROM_ملاؤ)
 			die(_("cannot do a partial commit during a merge."));
-		else if (is_from_cherry_pick(whence))
+		ورنہ اگر (is_from_cherry_pick(whence))
 			die(_("cannot do a partial commit during a cherry-pick."));
-		else if (is_from_rebase(whence))
+		ورنہ اگر (is_from_rebase(whence))
 			die(_("cannot do a partial commit during a rebase."));
 	}
 
-	if (list_paths(&partial, !current_head ? NULL : "HEAD", &pathspec))
-		exit(1);
+	اگر (list_paths(&partial, !current_سر ? تہی : "HEAD", &pathspec))
+		باہر_نکلو(1);
 
-	discard_index(the_repository->index);
-	if (repo_read_index(the_repository) < 0)
+	discard_اشاریہ(the_repository->اشاریہ);
+	اگر (repo_read_اشاریہ(the_repository) < 0)
 		die(_("cannot read the index"));
 
-	repo_hold_locked_index(the_repository, &index_lock, LOCK_DIE_ON_ERROR);
-	add_remove_files(&partial);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	cache_tree_update(the_repository->index, WRITE_TREE_SILENT);
-	if (write_locked_index(the_repository->index, &index_lock, 0))
+	repo_hold_locked_اشاریہ(the_repository, &اشاریہ_تالا, تالا_DIE_ON_ERROR);
+	جوڑو_remove_files(&partial);
+	refresh_اشاریہ(the_repository->اشاریہ, REFRESH_QUIET, تہی, تہی, تہی);
+	cache_درخت_update(the_repository->اشاریہ, WRITE_درخت_SILENT);
+	اگر (write_locked_اشاریہ(the_repository->اشاریہ, &اشاریہ_تالا, 0))
 		die(_("unable to write new index file"));
 
-	path = repo_git_path(the_repository, "next-index-%"PRIuMAX,
+	راستہ = repo_git_راستہ(the_repository, "next-index-%"PRIuMAX,
 			     (uintmax_t) getpid());
-	hold_lock_file_for_update(&false_lock, path,
-				  LOCK_DIE_ON_ERROR);
+	hold_تالا_file_for_update(&false_تالا, راستہ,
+				  تالا_DIE_ON_ERROR);
 
-	create_base_index(current_head);
-	add_remove_files(&partial);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	create_بنیاد_اشاریہ(current_سر);
+	جوڑو_remove_files(&partial);
+	refresh_اشاریہ(the_repository->اشاریہ, REFRESH_QUIET, تہی, تہی, تہی);
 
-	if (write_locked_index(the_repository->index, &false_lock, 0))
+	اگر (write_locked_اشاریہ(the_repository->اشاریہ, &false_تالا, 0))
 		die(_("unable to write temporary index file"));
 
-	discard_index(the_repository->index);
-	ret = get_lock_file_path(&false_lock);
-	read_index_from(the_repository->index, ret, repo_get_git_dir(the_repository));
-out:
+	discard_اشاریہ(the_repository->اشاریہ);
+	ret = get_تالا_file_راستہ(&false_تالا);
+	read_اشاریہ_from(the_repository->اشاریہ, ret, repo_get_git_dir(the_repository));
+برآمد:
 	string_list_clear(&partial, 0);
 	clear_pathspec(&pathspec);
-	free(path);
-	return ret;
+	آزاد(راستہ);
+	واپس ret;
 }
 
-static int run_status(FILE *fp, const char *index_file, const char *prefix, int nowarn,
-		      struct wt_status *s)
+ساکن صحیح تسلسل_حالت(FILE *fp, ثابت حرف *اشاریہ_file, ثابت حرف *سابقہ, صحیح nowarn,
+		      ساخت wt_حالت *s)
 {
-	struct object_id oid;
+	ساخت object_id oid;
 
-	if (s->relative_paths)
-		s->prefix = prefix;
+	اگر (s->relative_paths)
+		s->سابقہ = سابقہ;
 
-	if (amend) {
+	اگر (amend) {
 		s->amend = 1;
 		s->reference = "HEAD^1";
 	}
 	s->verbose = verbose;
-	s->index_file = index_file;
+	s->اشاریہ_file = اشاریہ_file;
 	s->fp = fp;
 	s->nowarn = nowarn;
 	s->is_initial = repo_get_oid(the_repository, s->reference, &oid) ? 1 : 0;
-	if (!s->is_initial)
+	اگر (!s->is_initial)
 		oidcpy(&s->oid_commit, &oid);
-	s->status_format = status_format;
+	s->حالت_format = حالت_format;
 	s->ignore_submodule_arg = ignore_submodule_arg;
 
-	wt_status_collect(s);
-	wt_status_print(s);
-	wt_status_collect_free_buffers(s);
+	wt_حالت_collect(s);
+	wt_حالت_print(s);
+	wt_حالت_collect_free_buffers(s);
 
-	return s->committable;
+	واپس s->committable;
 }
 
-static int is_a_merge(const struct commit *current_head)
+ساکن صحیح is_a_ملاؤ(ثابت ساخت commit *current_سر)
 {
-	return !!(current_head->parents && current_head->parents->next);
+	واپس !!(current_سر->parents && current_سر->parents->اگلا);
 }
 
-static void assert_split_ident(struct ident_split *id, const struct strbuf *buf)
+ساکن خالی assert_بانٹو_ident(ساخت ident_بانٹو *id, ثابت ساخت strbuf *buf)
 {
-	if (split_ident_line(id, buf->buf, buf->len) || !id->date_begin)
+	اگر (بانٹو_ident_سطر(id, buf->buf, buf->len) || !id->date_begin)
 		BUG("unable to parse our own ident: %s", buf->buf);
 }
 
-static void export_one(const char *var, const char *s, const char *e, int hack)
+ساکن خالی export_one(ثابت حرف *var, ثابت حرف *s, ثابت حرف *e, صحیح hack)
 {
-	struct strbuf buf = STRBUF_INIT;
-	if (hack)
+	ساخت strbuf buf = STRBUF_INIT;
+	اگر (hack)
 		strbuf_addch(&buf, hack);
-	strbuf_add(&buf, s, e - s);
+	strbuf_جوڑو(&buf, s, e - s);
 	setenv(var, buf.buf, 1);
 	strbuf_release(&buf);
 }
 
-static int parse_force_date(const char *in, struct strbuf *out)
+ساکن صحیح parse_force_date(ثابت حرف *اندر, ساخت strbuf *برآمد)
 {
-	strbuf_addch(out, '@');
+	strbuf_addch(برآمد, '@');
 
-	if (parse_date(in, out) < 0) {
-		int errors = 0;
-		unsigned long t = approxidate_careful(in, &errors);
-		if (errors)
-			return -1;
-		strbuf_addf(out, "%lu", t);
+	اگر (parse_date(اندر, برآمد) < 0) {
+		صحیح errors = 0;
+		غیرعلامتی طویل t = approxidate_careful(اندر, &errors);
+		اگر (errors)
+			واپس -1;
+		strbuf_addf(برآمد, "%lu", t);
 	}
 
-	return 0;
+	واپس 0;
 }
 
-static void set_ident_var(char **buf, char *val)
+ساکن خالی سیٹ_ident_var(حرف **buf, حرف *val)
 {
-	free(*buf);
+	آزاد(*buf);
 	*buf = val;
 }
 
-static void determine_author_info(struct strbuf *author_ident)
+ساکن خالی determine_author_info(ساخت strbuf *author_ident)
 {
-	char *name, *email, *date;
-	struct ident_split author;
+	حرف *name, *email, *date;
+	ساخت ident_بانٹو author;
 
 	name = xstrdup_or_null(getenv("GIT_AUTHOR_NAME"));
 	email = xstrdup_or_null(getenv("GIT_AUTHOR_EMAIL"));
 	date = xstrdup_or_null(getenv("GIT_AUTHOR_DATE"));
 
-	if (author_message) {
-		struct ident_split ident;
-		size_t len;
-		const char *a;
+	اگر (author_پیغام) {
+		ساخت ident_بانٹو ident;
+		سائز_t len;
+		ثابت حرف *a;
 
-		a = find_commit_header(author_message_buffer, "author", &len);
-		if (!a)
-			die(_("commit '%s' lacks author header"), author_message);
-		if (split_ident_line(&ident, a, len) < 0)
-			die(_("commit '%s' has malformed author line"), author_message);
+		a = ڈھونڈو_commit_سرخی(author_پیغام_بفر, "author", &len);
+		اگر (!a)
+			die(_("commit '%s' lacks author header"), author_پیغام);
+		اگر (بانٹو_ident_سطر(&ident, a, len) < 0)
+			die(_("commit '%s' has malformed author line"), author_پیغام);
 
-		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
-		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
+		سیٹ_ident_var(&name, xmemdupz(ident.name_begin, ident.name_انتہا - ident.name_begin));
+		سیٹ_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_انتہا - ident.mail_begin));
 
-		if (ident.date_begin) {
-			struct strbuf date_buf = STRBUF_INIT;
+		اگر (ident.date_begin) {
+			ساخت strbuf date_buf = STRBUF_INIT;
 			strbuf_addch(&date_buf, '@');
-			strbuf_add(&date_buf, ident.date_begin, ident.date_end - ident.date_begin);
+			strbuf_جوڑو(&date_buf, ident.date_begin, ident.date_انتہا - ident.date_begin);
 			strbuf_addch(&date_buf, ' ');
-			strbuf_add(&date_buf, ident.tz_begin, ident.tz_end - ident.tz_begin);
-			set_ident_var(&date, strbuf_detach(&date_buf, NULL));
+			strbuf_جوڑو(&date_buf, ident.tz_begin, ident.tz_انتہا - ident.tz_begin);
+			سیٹ_ident_var(&date, strbuf_detach(&date_buf, تہی));
 		}
 	}
 
-	if (force_author) {
-		struct ident_split ident;
+	اگر (force_author) {
+		ساخت ident_بانٹو ident;
 
-		if (split_ident_line(&ident, force_author, strlen(force_author)) < 0)
+		اگر (بانٹو_ident_سطر(&ident, force_author, لڑی_لمبائی(force_author)) < 0)
 			die(_("malformed --author parameter"));
-		set_ident_var(&name, xmemdupz(ident.name_begin, ident.name_end - ident.name_begin));
-		set_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_end - ident.mail_begin));
+		سیٹ_ident_var(&name, xmemdupz(ident.name_begin, ident.name_انتہا - ident.name_begin));
+		سیٹ_ident_var(&email, xmemdupz(ident.mail_begin, ident.mail_انتہا - ident.mail_begin));
 	}
 
-	if (force_date) {
-		struct strbuf date_buf = STRBUF_INIT;
-		if (parse_force_date(force_date, &date_buf))
+	اگر (force_date) {
+		ساخت strbuf date_buf = STRBUF_INIT;
+		اگر (parse_force_date(force_date, &date_buf))
 			die(_("invalid date format: %s"), force_date);
-		set_ident_var(&date, strbuf_detach(&date_buf, NULL));
+		سیٹ_ident_var(&date, strbuf_detach(&date_buf, تہی));
 	}
 
 	strbuf_addstr(author_ident, fmt_ident(name, email, WANT_AUTHOR_IDENT, date,
 				IDENT_STRICT));
-	assert_split_ident(&author, author_ident);
-	export_one("GIT_AUTHOR_NAME", author.name_begin, author.name_end, 0);
-	export_one("GIT_AUTHOR_EMAIL", author.mail_begin, author.mail_end, 0);
-	export_one("GIT_AUTHOR_DATE", author.date_begin, author.tz_end, '@');
-	free(name);
-	free(email);
-	free(date);
+	assert_بانٹو_ident(&author, author_ident);
+	export_one("GIT_AUTHOR_NAME", author.name_begin, author.name_انتہا, 0);
+	export_one("GIT_AUTHOR_EMAIL", author.mail_begin, author.mail_انتہا, 0);
+	export_one("GIT_AUTHOR_DATE", author.date_begin, author.tz_انتہا, '@');
+	آزاد(name);
+	آزاد(email);
+	آزاد(date);
 }
 
-static int author_date_is_interesting(void)
+ساکن صحیح author_date_is_interesting(خالی)
 {
-	return author_message || force_date;
+	واپس author_پیغام || force_date;
 }
 
-#ifndef WITH_BREAKING_CHANGES
-static void adjust_comment_line_char(const struct strbuf *sb)
+#اگر_غیر_تعریف_شدہ WITH_BREAKING_CHANGES
+ساکن خالی adjust_comment_سطر_char(ثابت ساخت strbuf *sb)
 {
-	char candidates[] = "#;@!$%^&|:";
-	char *candidate;
-	const char *p;
-	size_t cutoff;
+	حرف candidates[] = "#;@!$%^&|:";
+	حرف *candidate;
+	ثابت حرف *p;
+	سائز_t cutoff;
 
 	/* Ignore comment chars in trailing comments (e.g., Conflicts:) */
-	cutoff = sb->len - ignored_log_message_bytes(sb->buf, sb->len);
+	cutoff = sb->len - ignored_log_پیغام_بائٹیں(sb->buf, sb->len);
 
-	if (!memchr(sb->buf, candidates[0], sb->len)) {
-		free(comment_line_str_to_free);
-		comment_line_str = comment_line_str_to_free =
+	اگر (!memchr(sb->buf, candidates[0], sb->len)) {
+		آزاد(comment_سطر_str_مقصد_free);
+		comment_سطر_str = comment_سطر_str_مقصد_free =
 			xstrfmt("%c", candidates[0]);
-		return;
+		واپس;
 	}
 
 	p = sb->buf;
 	candidate = strchr(candidates, *p);
-	if (candidate)
+	اگر (candidate)
 		*candidate = ' ';
-	for (p = sb->buf; p + 1 < sb->buf + cutoff; p++) {
-		if ((p[0] == '\n' || p[0] == '\r') && p[1]) {
+	برائے (p = sb->buf; p + 1 < sb->buf + cutoff; p++) {
+		اگر ((p[0] == '\n' || p[0] == '\r') && p[1]) {
 			candidate = strchr(candidates, p[1]);
-			if (candidate)
+			اگر (candidate)
 				*candidate = ' ';
 		}
 	}
 
-	for (p = candidates; *p == ' '; p++)
+	برائے (p = candidates; *p == ' '; p++)
 		;
-	if (!*p)
+	اگر (!*p)
 		die(_("unable to select a comment character that is not used\n"
 		      "in the current commit message"));
-	free(comment_line_str_to_free);
-	comment_line_str = comment_line_str_to_free = xstrfmt("%c", *p);
+	آزاد(comment_سطر_str_مقصد_free);
+	comment_سطر_str = comment_سطر_str_مقصد_free = xstrfmt("%c", *p);
 }
-#endif /* !WITH_BREAKING_CHANGES */
+#اگر_ختم /* !WITH_BREAKING_CHANGES */
 
-static void prepare_amend_commit(struct commit *commit, struct strbuf *sb,
-				struct pretty_print_context *ctx)
+ساکن خالی prepare_amend_commit(ساخت commit *commit, ساخت strbuf *sb,
+				ساخت pretty_print_context *ctx)
 {
-	const char *buffer, *subject, *fmt;
+	ثابت حرف *بفر, *subject, *fmt;
 
-	buffer = repo_get_commit_buffer(the_repository, commit, NULL);
-	find_commit_subject(buffer, &subject);
+	بفر = repo_get_commit_بفر(the_repository, commit, تہی);
+	ڈھونڈو_commit_subject(بفر, &subject);
 	/*
 	 * If we amend the 'amend!' commit then we don't want to
 	 * duplicate the subject line.
 	 */
 	fmt = starts_with(subject, "amend!") ? "%b" : "%B";
-	repo_format_commit_message(the_repository, commit, fmt, sb, ctx);
-	repo_unuse_commit_buffer(the_repository, commit, buffer);
+	repo_format_commit_پیغام(the_repository, commit, fmt, sb, ctx);
+	repo_unuse_commit_بفر(the_repository, commit, بفر);
 }
 
-static void change_data_free(void *util, const char *str UNUSED)
+ساکن خالی change_ڈیٹا_free(خالی *util, ثابت حرف *str غیر_مستعمل)
 {
-	struct wt_status_change_data *d = util;
-	free(d->rename_source);
-	free(d);
+	ساخت wt_حالت_change_ڈیٹا *d = util;
+	آزاد(d->rename_ماخذ);
+	آزاد(d);
 }
 
-static int prepare_to_commit(const char *index_file, const char *prefix,
-			     struct commit *current_head,
-			     struct wt_status *s,
-			     struct strbuf *author_ident)
+ساکن صحیح prepare_مقصد_commit(ثابت حرف *اشاریہ_file, ثابت حرف *سابقہ,
+			     ساخت commit *current_سر,
+			     ساخت wt_حالت *s,
+			     ساخت strbuf *author_ident)
 {
-	struct stat statbuf;
-	struct strbuf committer_ident = STRBUF_INIT;
-	int committable;
-	struct strbuf sb = STRBUF_INIT;
-	const char *hook_arg1 = NULL;
-	const char *hook_arg2 = NULL;
-	int clean_message_contents = (cleanup_mode != COMMIT_MSG_CLEANUP_NONE);
-	int old_display_comment_prefix;
-	int invoked_hook;
+	ساخت stat statbuf;
+	ساخت strbuf committer_ident = STRBUF_INIT;
+	صحیح committable;
+	ساخت strbuf sb = STRBUF_INIT;
+	ثابت حرف *hook_arg1 = تہی;
+	ثابت حرف *hook_arg2 = تہی;
+	صحیح clean_پیغام_contents = (cleanup_منوال != COMMIT_پیغام_CLEANUP_NONE);
+	صحیح old_display_comment_سابقہ;
+	صحیح invoked_hook;
 
 	/* This checks and barfs if author is badly specified */
 	determine_author_info(author_ident);
 
-	if (!no_verify && run_commit_hook(use_editor, index_file, &invoked_hook,
-					  "pre-commit", NULL))
-		return 0;
+	اگر (!no_verify && تسلسل_commit_hook(use_editor, اشاریہ_file, &invoked_hook,
+					  "pre-commit", تہی))
+		واپس 0;
 
-	if (squash_message) {
+	اگر (squash_پیغام) {
 		/*
 		 * Insert the proper subject line before other commit
 		 * message options add their content.
 		 */
-		if (use_message && !strcmp(use_message, squash_message))
+		اگر (use_پیغام && !strcmp(use_پیغام, squash_پیغام))
 			strbuf_addstr(&sb, "squash! ");
-		else {
-			struct pretty_print_context ctx = {0};
-			struct commit *c;
-			c = lookup_commit_reference_by_name(squash_message);
-			if (!c)
-				die(_("could not lookup commit '%s'"), squash_message);
+		ورنہ {
+			ساخت pretty_print_context ctx = {0};
+			ساخت commit *c;
+			c = lookup_commit_reference_by_name(squash_پیغام);
+			اگر (!c)
+				die(_("could not lookup commit '%s'"), squash_پیغام);
 			ctx.output_encoding = get_commit_output_encoding();
-			repo_format_commit_message(the_repository, c,
+			repo_format_commit_پیغام(the_repository, c,
 						   "squash! %s\n\n", &sb,
 						   &ctx);
 		}
 	}
 
-	if (have_option_m && !fixup_message) {
-		strbuf_addbuf(&sb, &message);
+	اگر (have_option_m && !fixup_پیغام) {
+		strbuf_addbuf(&sb, &پیغام_2);
 		hook_arg1 = "message";
-	} else if (logfile && !strcmp(logfile, "-")) {
-		if (isatty(0))
+	} ورنہ اگر (logfile && !strcmp(logfile, "-")) {
+		اگر (isatty(0))
 			fprintf(stderr, _("(reading log message from standard input)\n"));
-		if (strbuf_read(&sb, 0, 0) < 0)
+		اگر (strbuf_read(&sb, 0, 0) < 0)
 			die_errno(_("could not read log from standard input"));
 		hook_arg1 = "message";
-	} else if (logfile) {
-		if (strbuf_read_file(&sb, logfile, 0) < 0)
+	} ورنہ اگر (logfile) {
+		اگر (strbuf_read_file(&sb, logfile, 0) < 0)
 			die_errno(_("could not read log file '%s'"),
 				  logfile);
 		hook_arg1 = "message";
-	} else if (use_message) {
-		const char *buffer;
-		buffer = strstr(use_message_buffer, "\n\n");
-		if (buffer)
-			strbuf_addstr(&sb, skip_blank_lines(buffer + 2));
+	} ورنہ اگر (use_پیغام) {
+		ثابت حرف *بفر;
+		بفر = لڑی_تلاش(use_پیغام_بفر, "\n\n");
+		اگر (بفر)
+			strbuf_addstr(&sb, skip_blank_سطریں(بفر + 2));
 		hook_arg1 = "commit";
-		hook_arg2 = use_message;
-	} else if (fixup_message) {
-		struct pretty_print_context ctx = {0};
-		struct commit *commit;
-		char *fmt;
+		hook_arg2 = use_پیغام;
+	} ورنہ اگر (fixup_پیغام) {
+		ساخت pretty_print_context ctx = {0};
+		ساخت commit *commit;
+		حرف *fmt;
 		commit = lookup_commit_reference_by_name(fixup_commit);
-		if (!commit)
+		اگر (!commit)
 			die(_("could not lookup commit '%s'"), fixup_commit);
 		ctx.output_encoding = get_commit_output_encoding();
-		fmt = xstrfmt("%s! %%s\n\n", fixup_prefix);
-		repo_format_commit_message(the_repository, commit, fmt, &sb,
+		fmt = xstrfmt("%s! %%s\n\n", fixup_سابقہ);
+		repo_format_commit_پیغام(the_repository, commit, fmt, &sb,
 					   &ctx);
-		free(fmt);
+		آزاد(fmt);
 		hook_arg1 = "message";
 
 		/*
@@ -845,60 +845,60 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		 * have already errored out while parsing the `git commit`
 		 * options.
 		 */
-		if (have_option_m && !strcmp(fixup_prefix, "fixup"))
-			strbuf_addbuf(&sb, &message);
+		اگر (have_option_m && !strcmp(fixup_سابقہ, "fixup"))
+			strbuf_addbuf(&sb, &پیغام_2);
 
-		if (!strcmp(fixup_prefix, "amend")) {
-			if (have_option_m)
-				die(_("options '%s' and '%s:%s' cannot be used together"), "-m", "--fixup", fixup_message);
+		اگر (!strcmp(fixup_سابقہ, "amend")) {
+			اگر (have_option_m)
+				die(_("options '%s' and '%s:%s' cannot be used together"), "-m", "--fixup", fixup_پیغام);
 			prepare_amend_commit(commit, &sb, &ctx);
 		}
-	} else if (!stat(git_path_merge_msg(the_repository), &statbuf)) {
-		size_t merge_msg_start;
+	} ورنہ اگر (!stat(git_راستہ_ملاؤ_پیغام(the_repository), &statbuf)) {
+		سائز_t ملاؤ_پیغام_آغاز;
 
 		/*
 		 * prepend SQUASH_MSG here if it exists and a
 		 * "merge --squash" was originally performed
 		 */
-		if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		اگر (!stat(git_راستہ_squash_پیغام(the_repository), &statbuf)) {
+			اگر (strbuf_read_file(&sb, git_راستہ_squash_پیغام(the_repository), 0) < 0)
 				die_errno(_("could not read SQUASH_MSG"));
 			hook_arg1 = "squash";
-		} else
+		} ورنہ
 			hook_arg1 = "merge";
 
-		merge_msg_start = sb.len;
-		if (strbuf_read_file(&sb, git_path_merge_msg(the_repository), 0) < 0)
+		ملاؤ_پیغام_آغاز = sb.len;
+		اگر (strbuf_read_file(&sb, git_راستہ_ملاؤ_پیغام(the_repository), 0) < 0)
 			die_errno(_("could not read MERGE_MSG"));
 
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS &&
-		    wt_status_locate_end(sb.buf + merge_msg_start,
-					 sb.len - merge_msg_start) <
-				sb.len - merge_msg_start)
-			s->added_cut_line = 1;
-	} else if (!stat(git_path_squash_msg(the_repository), &statbuf)) {
-		if (strbuf_read_file(&sb, git_path_squash_msg(the_repository), 0) < 0)
+		اگر (cleanup_منوال == COMMIT_پیغام_CLEANUP_SCISSORS &&
+		    wt_حالت_locate_انتہا(sb.buf + ملاؤ_پیغام_آغاز,
+					 sb.len - ملاؤ_پیغام_آغاز) <
+				sb.len - ملاؤ_پیغام_آغاز)
+			s->added_cut_سطر = 1;
+	} ورنہ اگر (!stat(git_راستہ_squash_پیغام(the_repository), &statbuf)) {
+		اگر (strbuf_read_file(&sb, git_راستہ_squash_پیغام(the_repository), 0) < 0)
 			die_errno(_("could not read SQUASH_MSG"));
 		hook_arg1 = "squash";
-	} else if (template_file) {
-		if (strbuf_read_file(&sb, template_file, 0) < 0)
+	} ورنہ اگر (template_file) {
+		اگر (strbuf_read_file(&sb, template_file, 0) < 0)
 			die_errno(_("could not read '%s'"), template_file);
 		hook_arg1 = "template";
-		clean_message_contents = 0;
+		clean_پیغام_contents = 0;
 	}
 
 	/*
 	 * The remaining cases don't modify the template message, but
 	 * just set the argument(s) to the prepare-commit-msg hook.
 	 */
-	else if (whence == FROM_MERGE)
+	ورنہ اگر (whence == FROM_ملاؤ)
 		hook_arg1 = "merge";
-	else if (is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) {
+	ورنہ اگر (is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) {
 		hook_arg1 = "commit";
 		hook_arg2 = "CHERRY_PICK_HEAD";
 	}
 
-	if (squash_message) {
+	اگر (squash_پیغام) {
 		/*
 		 * If squash_commit was used for the commit subject,
 		 * then we're possibly hijacking other commit log options.
@@ -908,13 +908,13 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		hook_arg2 = "";
 	}
 
-	s->fp = fopen_for_writing(git_path_commit_editmsg());
-	if (!s->fp)
-		die_errno(_("could not open '%s'"), git_path_commit_editmsg());
+	s->fp = fopen_for_writing(git_راستہ_commit_editmsg());
+	اگر (!s->fp)
+		die_errno(_("could not open '%s'"), git_راستہ_commit_editmsg());
 
 	/* Ignore status.displayCommentPrefix: we do need comments in COMMIT_EDITMSG. */
-	old_display_comment_prefix = s->display_comment_prefix;
-	s->display_comment_prefix = 1;
+	old_display_comment_سابقہ = s->display_comment_سابقہ;
+	s->display_comment_سابقہ = 1;
 
 	/*
 	 * Most hints are counter-productive when the commit has
@@ -922,34 +922,34 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 */
 	s->hints = 0;
 
-	if (clean_message_contents)
-		strbuf_stripspace(&sb, NULL);
+	اگر (clean_پیغام_contents)
+		strbuf_stripspace(&sb, تہی);
 
-	if (signoff)
-		append_signoff(&sb, ignored_log_message_bytes(sb.buf, sb.len), 0);
+	اگر (signoff)
+		append_signoff(&sb, ignored_log_پیغام_بائٹیں(sb.buf, sb.len), 0);
 
-	if (fwrite(sb.buf, 1, sb.len, s->fp) < sb.len)
+	اگر (fwrite(sb.buf, 1, sb.len, s->fp) < sb.len)
 		die_errno(_("could not write commit template"));
 
-#ifndef WITH_BREAKING_CHANGES
-	if (auto_comment_line_char)
-		adjust_comment_line_char(&sb);
-#endif /* !WITH_BREAKING_CHANGES */
+#اگر_غیر_تعریف_شدہ WITH_BREAKING_CHANGES
+	اگر (auto_comment_سطر_char)
+		adjust_comment_سطر_char(&sb);
+#اگر_ختم /* !WITH_BREAKING_CHANGES */
 	strbuf_release(&sb);
 
 	/* This checks if committer ident is explicitly given */
 	strbuf_addstr(&committer_ident, git_committer_info(IDENT_STRICT));
-	if (use_editor && include_status) {
-		int ident_shown = 0;
-		enum git_colorbool saved_color_setting;
-		struct ident_split ci, ai;
-		const char *hint_cleanup_all = allow_empty_message ?
+	اگر (use_editor && include_حالت) {
+		صحیح ident_shown = 0;
+		شمار git_colorbool saved_color_setting;
+		ساخت ident_بانٹو ci, ai;
+		ثابت حرف *hint_cleanup_all = allow_خالی_خانے_پیغام ?
 			_("Please enter the commit message for your changes."
 			  " Lines starting\nwith '%s' will be ignored.\n") :
 			_("Please enter the commit message for your changes."
 			  " Lines starting\nwith '%s' will be ignored, and an empty"
 			  " message aborts the commit.\n");
-		const char *hint_cleanup_space = allow_empty_message ?
+		ثابت حرف *hint_cleanup_space = allow_خالی_خانے_پیغام ?
 			_("Please enter the commit message for your changes."
 			  " Lines starting\n"
 			  "with '%s' will be kept; you may remove them"
@@ -959,12 +959,12 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			  "with '%s' will be kept; you may remove them"
 			  " yourself if you want to.\n"
 			  "An empty message aborts the commit.\n");
-		if (whence != FROM_COMMIT) {
-			if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-				wt_status_add_cut_line(s);
-			status_printf_ln(
-				s, GIT_COLOR_NORMAL,
-				whence == FROM_MERGE ?
+		اگر (whence != FROM_COMMIT) {
+			اگر (cleanup_منوال == COMMIT_پیغام_CLEANUP_SCISSORS)
+				wt_حالت_جوڑو_cut_سطر(s);
+			حالت_printf_ln(
+				s, GIT_COLOR_معمول,
+				whence == FROM_ملاؤ ?
 					      _("\n"
 					  "It looks like you may be committing a merge.\n"
 					  "If this is not correct, please run\n"
@@ -978,13 +978,13 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		}
 
 		fprintf(s->fp, "\n");
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_ALL)
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_all, comment_line_str);
-		else if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			if (whence == FROM_COMMIT)
-				wt_status_add_cut_line(s);
-		} else /* COMMIT_MSG_CLEANUP_SPACE, that is. */
-			status_printf(s, GIT_COLOR_NORMAL, hint_cleanup_space, comment_line_str);
+		اگر (cleanup_منوال == COMMIT_پیغام_CLEANUP_ALL)
+			حالت_printf(s, GIT_COLOR_معمول, hint_cleanup_all, comment_سطر_str);
+		ورنہ اگر (cleanup_منوال == COMMIT_پیغام_CLEANUP_SCISSORS) {
+			اگر (whence == FROM_COMMIT)
+				wt_حالت_جوڑو_cut_سطر(s);
+		} ورنہ /* COMMIT_MSG_CLEANUP_SPACE, that is. */
+			حالت_printf(s, GIT_COLOR_معمول, hint_cleanup_space, comment_سطر_str);
 
 		/*
 		 * These should never fail because they come from our own
@@ -992,59 +992,59 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 		 * that the name and mail pointers will at least be valid,
 		 * which is enough for our tests and printing here.
 		 */
-		assert_split_ident(&ai, author_ident);
-		assert_split_ident(&ci, &committer_ident);
+		assert_بانٹو_ident(&ai, author_ident);
+		assert_بانٹو_ident(&ci, &committer_ident);
 
-		if (ident_cmp(&ai, &ci))
-			status_printf_ln(s, GIT_COLOR_NORMAL,
+		اگر (ident_cmp(&ai, &ci))
+			حالت_printf_ln(s, GIT_COLOR_معمول,
 				_("%s"
 				"Author:    %.*s <%.*s>"),
 				ident_shown++ ? "" : "\n",
-				(int)(ai.name_end - ai.name_begin), ai.name_begin,
-				(int)(ai.mail_end - ai.mail_begin), ai.mail_begin);
+				(صحیح)(ai.name_انتہا - ai.name_begin), ai.name_begin,
+				(صحیح)(ai.mail_انتہا - ai.mail_begin), ai.mail_begin);
 
-		if (author_date_is_interesting())
-			status_printf_ln(s, GIT_COLOR_NORMAL,
+		اگر (author_date_is_interesting())
+			حالت_printf_ln(s, GIT_COLOR_معمول,
 				_("%s"
 				"Date:      %s"),
 				ident_shown++ ? "" : "\n",
-				show_ident_date(&ai, DATE_MODE(NORMAL)));
+				show_ident_date(&ai, DATE_منوال(معمول)));
 
-		if (!committer_ident_sufficiently_given())
-			status_printf_ln(s, GIT_COLOR_NORMAL,
+		اگر (!committer_ident_sufficiently_given())
+			حالت_printf_ln(s, GIT_COLOR_معمول,
 				_("%s"
 				"Committer: %.*s <%.*s>"),
 				ident_shown++ ? "" : "\n",
-				(int)(ci.name_end - ci.name_begin), ci.name_begin,
-				(int)(ci.mail_end - ci.mail_begin), ci.mail_begin);
+				(صحیح)(ci.name_انتہا - ci.name_begin), ci.name_begin,
+				(صحیح)(ci.mail_انتہا - ci.mail_begin), ci.mail_begin);
 
-		status_printf_ln(s, GIT_COLOR_NORMAL, "%s", ""); /* Add new line for clarity */
+		حالت_printf_ln(s, GIT_COLOR_معمول, "%s", ""); /* Add new line for clarity */
 
 		saved_color_setting = s->use_color;
 		s->use_color = GIT_COLOR_NEVER;
-		committable = run_status(s->fp, index_file, prefix, 1, s);
+		committable = تسلسل_حالت(s->fp, اشاریہ_file, سابقہ, 1, s);
 		s->use_color = saved_color_setting;
-		string_list_clear_func(&s->change, change_data_free);
-	} else {
-		struct object_id oid;
-		const char *parent = "HEAD";
+		string_list_clear_func(&s->change, change_ڈیٹا_free);
+	} ورنہ {
+		ساخت object_id oid;
+		ثابت حرف *والد = "HEAD";
 
-		if (!the_repository->index->initialized && repo_read_index(the_repository) < 0)
+		اگر (!the_repository->اشاریہ->initialized && repo_read_اشاریہ(the_repository) < 0)
 			die(_("Cannot read index"));
 
-		if (amend)
-			parent = "HEAD^1";
+		اگر (amend)
+			والد = "HEAD^1";
 
-		if (repo_get_oid(the_repository, parent, &oid)) {
-			int i, ita_nr = 0;
+		اگر (repo_get_oid(the_repository, والد, &oid)) {
+			صحیح i, ita_nr = 0;
 
 			/* TODO: audit for interaction with sparse-index. */
-			ensure_full_index(the_repository->index);
-			for (i = 0; i < the_repository->index->cache_nr; i++)
-				if (ce_intent_to_add(the_repository->index->cache[i]))
+			ensure_بھرا_اشاریہ(the_repository->اشاریہ);
+			برائے (i = 0; i < the_repository->اشاریہ->cache_nr; i++)
+				اگر (ce_intent_مقصد_جوڑو(the_repository->اشاریہ->cache[i]))
 					ita_nr++;
-			committable = the_repository->index->cache_nr > ita_nr;
-		} else {
+			committable = the_repository->اشاریہ->cache_nr > ita_nr;
+		} ورنہ {
 			/*
 			 * Unless the user did explicitly request a submodule
 			 * ignore mode by passing a command line option we do
@@ -1054,23 +1054,23 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 			 * submodules which were manually staged, which would
 			 * be really confusing.
 			 */
-			struct diff_flags flags = DIFF_FLAGS_INIT;
+			ساخت diff_flags flags = DIFF_FLAGS_INIT;
 			flags.override_submodule_config = 1;
-			if (ignore_submodule_arg &&
+			اگر (ignore_submodule_arg &&
 			    !strcmp(ignore_submodule_arg, "all"))
 				flags.ignore_submodules = 1;
-			committable = index_differs_from(the_repository,
-							 parent, &flags, 1);
+			committable = اشاریہ_differs_from(the_repository,
+							 والد, &flags, 1);
 		}
 	}
 	strbuf_release(&committer_ident);
 
 	fclose(s->fp);
 
-	if (trailer_args.nr) {
-		if (amend_file_with_trailers(git_path_commit_editmsg(), &trailer_args))
+	اگر (trailer_دلائل.nr) {
+		اگر (amend_file_with_trailers(git_راستہ_commit_editmsg(), &trailer_دلائل))
 			die(_("unable to pass trailers to --trailers"));
-		strvec_clear(&trailer_args);
+		strvec_clear(&trailer_دلائل);
 	}
 
 	/*
@@ -1078,203 +1078,203 @@ static int prepare_to_commit(const char *index_file, const char *prefix,
 	 * explicit --allow-empty. In the cherry-pick case, it may be
 	 * empty due to conflict resolution, which the user should okay.
 	 */
-	if (!committable && whence != FROM_MERGE && !allow_empty &&
-	    !(amend && is_a_merge(current_head))) {
-		s->hints = advice_enabled(ADVICE_STATUS_HINTS);
-		s->display_comment_prefix = old_display_comment_prefix;
-		run_status(stdout, index_file, prefix, 0, s);
-		if (amend)
-			fputs(_(empty_amend_advice), stderr);
-		else if (is_from_cherry_pick(whence) ||
+	اگر (!committable && whence != FROM_ملاؤ && !allow_خالی_خانے &&
+	    !(amend && is_a_ملاؤ(current_سر))) {
+		s->hints = advice_enabled(ADVICE_حالت_HINTS);
+		s->display_comment_سابقہ = old_display_comment_سابقہ;
+		تسلسل_حالت(stdout, اشاریہ_file, سابقہ, 0, s);
+		اگر (amend)
+			fputs(_(خالی_خانے_amend_advice), stderr);
+		ورنہ اگر (is_from_cherry_pick(whence) ||
 			 whence == FROM_REBASE_PICK) {
-			fputs(_(empty_cherry_pick_advice), stderr);
-			if (whence == FROM_CHERRY_PICK_SINGLE)
-				fputs(_(empty_cherry_pick_advice_single), stderr);
-			else if (whence == FROM_CHERRY_PICK_MULTI)
-				fputs(_(empty_cherry_pick_advice_multi), stderr);
-			else
-				fputs(_(empty_rebase_pick_advice), stderr);
+			fputs(_(خالی_خانے_cherry_pick_advice), stderr);
+			اگر (whence == FROM_CHERRY_PICK_SINGLE)
+				fputs(_(خالی_خانے_cherry_pick_advice_single), stderr);
+			ورنہ اگر (whence == FROM_CHERRY_PICK_MULTI)
+				fputs(_(خالی_خانے_cherry_pick_advice_multi), stderr);
+			ورنہ
+				fputs(_(خالی_خانے_rebase_pick_advice), stderr);
 		}
-		return 0;
+		واپس 0;
 	}
 
-	if (!no_verify && invoked_hook) {
+	اگر (!no_verify && invoked_hook) {
 		/*
 		 * Re-read the index as the pre-commit-commit hook was invoked
 		 * and could have updated it. We must do this before we invoke
 		 * the editor and after we invoke run_status above.
 		 */
-		discard_index(the_repository->index);
+		discard_اشاریہ(the_repository->اشاریہ);
 	}
-	read_index_from(the_repository->index, index_file, repo_get_git_dir(the_repository));
+	read_اشاریہ_from(the_repository->اشاریہ, اشاریہ_file, repo_get_git_dir(the_repository));
 
-	if (cache_tree_update(the_repository->index, 0)) {
+	اگر (cache_درخت_update(the_repository->اشاریہ, 0)) {
 		error(_("Error building trees"));
-		return 0;
+		واپس 0;
 	}
 
-	if (run_commit_hook(use_editor, index_file, NULL, "prepare-commit-msg",
-			    git_path_commit_editmsg(), hook_arg1, hook_arg2, NULL))
-		return 0;
+	اگر (تسلسل_commit_hook(use_editor, اشاریہ_file, تہی, "prepare-commit-msg",
+			    git_راستہ_commit_editmsg(), hook_arg1, hook_arg2, تہی))
+		واپس 0;
 
-	if (use_editor) {
-		struct strvec env = STRVEC_INIT;
+	اگر (use_editor) {
+		ساخت strvec env = STRVEC_INIT;
 
-		strvec_pushf(&env, "GIT_INDEX_FILE=%s", index_file);
-		if (launch_editor(git_path_commit_editmsg(), NULL, env.v)) {
+		strvec_pushf(&env, "GIT_INDEX_FILE=%s", اشاریہ_file);
+		اگر (launch_editor(git_راستہ_commit_editmsg(), تہی, env.v)) {
 			fprintf(stderr,
 			_("Please supply the message using either -m or -F option.\n"));
-			exit(1);
+			باہر_نکلو(1);
 		}
 		strvec_clear(&env);
 	}
 
-	if (!no_verify &&
-	    run_commit_hook(use_editor, index_file, NULL, "commit-msg",
-			    git_path_commit_editmsg(), NULL)) {
-		return 0;
+	اگر (!no_verify &&
+	    تسلسل_commit_hook(use_editor, اشاریہ_file, تہی, "commit-msg",
+			    git_راستہ_commit_editmsg(), تہی)) {
+		واپس 0;
 	}
 
-	return 1;
+	واپس 1;
 }
 
-static const char *find_author_by_nickname(const char *name)
+ساکن ثابت حرف *ڈھونڈو_author_by_nickname(ثابت حرف *name)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	struct strbuf buf = STRBUF_INIT;
-	const char *av[20];
-	int ac = 0;
+	ساخت rev_info revs;
+	ساخت commit *commit;
+	ساخت strbuf buf = STRBUF_INIT;
+	ثابت حرف *av[20];
+	صحیح ac = 0;
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, تہی);
 	strbuf_addf(&buf, "--author=%s", name);
 	av[++ac] = "--all";
 	av[++ac] = "-i";
 	av[++ac] = buf.buf;
-	av[++ac] = NULL;
-	setup_revisions(ac, av, &revs, NULL);
-	revs.mailmap = xmalloc(sizeof(struct string_list));
+	av[++ac] = تہی;
+	تیاری_revisions(ac, av, &revs, تہی);
+	revs.mailmap = xmalloc(حجم(ساخت string_list));
 	string_list_init_nodup(revs.mailmap);
 	read_mailmap(the_repository, revs.mailmap);
 
-	if (prepare_revision_walk(&revs))
+	اگر (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	commit = get_revision(&revs);
-	if (commit) {
-		struct pretty_print_context ctx = {0};
-		ctx.date_mode.type = DATE_NORMAL;
+	اگر (commit) {
+		ساخت pretty_print_context ctx = {0};
+		ctx.date_منوال.type = DATE_معمول;
 		strbuf_release(&buf);
-		repo_format_commit_message(the_repository, commit,
+		repo_format_commit_پیغام(the_repository, commit,
 					   "%aN <%aE>", &buf, &ctx);
 		release_revisions(&revs);
-		return strbuf_detach(&buf, NULL);
+		واپس strbuf_detach(&buf, تہی);
 	}
 	die(_("--author '%s' is not 'Name <email>' and matches no existing author"), name);
 }
 
-static void handle_ignored_arg(struct wt_status *s)
+ساکن خالی handle_ignored_arg(ساخت wt_حالت *s)
 {
-	if (!ignored_arg)
+	اگر (!ignored_arg)
 		; /* default already initialized */
-	else if (!strcmp(ignored_arg, "traditional"))
-		s->show_ignored_mode = SHOW_TRADITIONAL_IGNORED;
-	else if (!strcmp(ignored_arg, "no"))
-		s->show_ignored_mode = SHOW_NO_IGNORED;
-	else if (!strcmp(ignored_arg, "matching"))
-		s->show_ignored_mode = SHOW_MATCHING_IGNORED;
-	else
+	ورنہ اگر (!strcmp(ignored_arg, "traditional"))
+		s->show_ignored_منوال = SHOW_TRADITIONAL_IGNORED;
+	ورنہ اگر (!strcmp(ignored_arg, "no"))
+		s->show_ignored_منوال = SHOW_NO_IGNORED;
+	ورنہ اگر (!strcmp(ignored_arg, "matching"))
+		s->show_ignored_منوال = SHOW_MATCHING_IGNORED;
+	ورنہ
 		die(_("Invalid ignored mode '%s'"), ignored_arg);
 }
 
-static enum untracked_status_type parse_untracked_setting_name(const char *u)
+ساکن شمار untracked_حالت_type parse_untracked_setting_name(ثابت حرف *u)
 {
 	/*
 	 * Please update $__git_untracked_file_modes in
 	 * git-completion.bash when you add new options
 	 */
-	switch (git_parse_maybe_bool(u)) {
-	case 0:
+	انتخاب (git_parse_maybe_bool(u)) {
+	حالت 0:
 		u = "no";
-		break;
-	case 1:
+		توڑو;
+	حالت 1:
 		u = "normal";
-		break;
-	default:
-		break;
+		توڑو;
+	طےشدہ:
+		توڑو;
 	}
 
-	if (!strcmp(u, "no"))
-		return SHOW_NO_UNTRACKED_FILES;
-	else if (!strcmp(u, "normal"))
-		return SHOW_NORMAL_UNTRACKED_FILES;
-	else if (!strcmp(u, "all"))
-		return SHOW_ALL_UNTRACKED_FILES;
-	else
-		return SHOW_UNTRACKED_FILES_ERROR;
+	اگر (!strcmp(u, "no"))
+		واپس SHOW_NO_UNTRACKED_FILES;
+	ورنہ اگر (!strcmp(u, "normal"))
+		واپس SHOW_معمول_UNTRACKED_FILES;
+	ورنہ اگر (!strcmp(u, "all"))
+		واپس SHOW_ALL_UNTRACKED_FILES;
+	ورنہ
+		واپس SHOW_UNTRACKED_FILES_ERROR;
 }
 
-static void handle_untracked_files_arg(struct wt_status *s)
+ساکن خالی handle_untracked_files_arg(ساخت wt_حالت *s)
 {
-	enum untracked_status_type u;
+	شمار untracked_حالت_type u;
 
-	if (!untracked_files_arg)
-		return; /* default already initialized */
+	اگر (!untracked_files_arg)
+		واپس; /* default already initialized */
 
 	u = parse_untracked_setting_name(untracked_files_arg);
-	if (u == SHOW_UNTRACKED_FILES_ERROR)
+	اگر (u == SHOW_UNTRACKED_FILES_ERROR)
 		die(_("Invalid untracked files mode '%s'"),
 		    untracked_files_arg);
 	s->show_untracked_files = u;
 }
 
-static const char *read_commit_message(const char *name)
+ساکن ثابت حرف *read_commit_پیغام_2(ثابت حرف *name)
 {
-	const char *out_enc;
-	struct commit *commit;
+	ثابت حرف *برآمد_enc;
+	ساخت commit *commit;
 
 	commit = lookup_commit_reference_by_name(name);
-	if (!commit)
+	اگر (!commit)
 		die(_("could not lookup commit '%s'"), name);
-	out_enc = get_commit_output_encoding();
-	return repo_logmsg_reencode(the_repository, commit, NULL, out_enc);
+	برآمد_enc = get_commit_output_encoding();
+	واپس repo_logmsg_reencode(the_repository, commit, تہی, برآمد_enc);
 }
 
 /*
  * Enumerate what needs to be propagated when --porcelain
  * is not in effect here.
  */
-static struct status_deferred_config {
-	enum wt_status_format status_format;
-	int show_branch;
-	enum ahead_behind_flags ahead_behind;
-} status_deferred_config = {
-	STATUS_FORMAT_UNSPECIFIED,
+ساکن ساخت حالت_deferred_config {
+	شمار wt_حالت_format حالت_format;
+	صحیح show_branch;
+	شمار ahead_behind_flags ahead_behind;
+} حالت_deferred_config = {
+	حالت_FORMAT_UNSPECIFIED,
 	-1, /* unspecified */
 	AHEAD_BEHIND_UNSPECIFIED,
 };
 
-static void finalize_deferred_config(struct wt_status *s)
+ساکن خالی finalize_deferred_config(ساخت wt_حالت *s)
 {
-	int use_deferred_config = (status_format != STATUS_FORMAT_PORCELAIN &&
-				   status_format != STATUS_FORMAT_PORCELAIN_V2 &&
+	صحیح use_deferred_config = (حالت_format != حالت_FORMAT_PORCELAIN &&
+				   حالت_format != حالت_FORMAT_PORCELAIN_V2 &&
 				   !s->null_termination);
 
-	if (s->null_termination) {
-		if (status_format == STATUS_FORMAT_NONE ||
-		    status_format == STATUS_FORMAT_UNSPECIFIED)
-			status_format = STATUS_FORMAT_PORCELAIN;
-		else if (status_format == STATUS_FORMAT_LONG)
+	اگر (s->null_termination) {
+		اگر (حالت_format == حالت_FORMAT_NONE ||
+		    حالت_format == حالت_FORMAT_UNSPECIFIED)
+			حالت_format = حالت_FORMAT_PORCELAIN;
+		ورنہ اگر (حالت_format == حالت_FORMAT_LONG)
 			die(_("options '%s' and '%s' cannot be used together"), "--long", "-z");
 	}
 
-	if (use_deferred_config && status_format == STATUS_FORMAT_UNSPECIFIED)
-		status_format = status_deferred_config.status_format;
-	if (status_format == STATUS_FORMAT_UNSPECIFIED)
-		status_format = STATUS_FORMAT_NONE;
+	اگر (use_deferred_config && حالت_format == حالت_FORMAT_UNSPECIFIED)
+		حالت_format = حالت_deferred_config.حالت_format;
+	اگر (حالت_format == حالت_FORMAT_UNSPECIFIED)
+		حالت_format = حالت_FORMAT_NONE;
 
-	if (use_deferred_config && s->show_branch < 0)
-		s->show_branch = status_deferred_config.show_branch;
-	if (s->show_branch < 0)
+	اگر (use_deferred_config && s->show_branch < 0)
+		s->show_branch = حالت_deferred_config.show_branch;
+	اگر (s->show_branch < 0)
 		s->show_branch = 0;
 
 	/*
@@ -1284,98 +1284,98 @@ static void finalize_deferred_config(struct wt_status *s)
 	 * config setting.  In all other cases (and porcelain V[12] formats
 	 * in particular), we inherit _FULL for backwards compatibility.
 	 */
-	if (use_deferred_config &&
+	اگر (use_deferred_config &&
 	    s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
-		s->ahead_behind_flags = status_deferred_config.ahead_behind;
+		s->ahead_behind_flags = حالت_deferred_config.ahead_behind;
 
-	if (s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
-		s->ahead_behind_flags = AHEAD_BEHIND_FULL;
+	اگر (s->ahead_behind_flags == AHEAD_BEHIND_UNSPECIFIED)
+		s->ahead_behind_flags = AHEAD_BEHIND_بھرا;
 }
 
-static void check_fixup_reword_options(int argc, const char *argv[]) {
-	if (whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+ساکن خالی check_fixup_reword_options(صحیح argc, ثابت حرف *argv[]) {
+	اگر (whence != FROM_COMMIT) {
+		اگر (whence == FROM_ملاؤ)
 			die(_("You are in the middle of a merge -- cannot reword."));
-		else if (is_from_cherry_pick(whence))
+		ورنہ اگر (is_from_cherry_pick(whence))
 			die(_("You are in the middle of a cherry-pick -- cannot reword."));
 	}
-	if (argc)
+	اگر (argc)
 		die(_("reword option of '%s' and path '%s' cannot be used together"), "--fixup", *argv);
-	if (patch_interactive || interactive || all || also || only)
+	اگر (patch_interactive || interactive || all || also || only)
 		die(_("reword option of '%s' and '%s' cannot be used together"),
 			"--fixup", "--patch/--interactive/--all/--include/--only");
 }
 
-static int parse_and_validate_options(int argc, const char *argv[],
-				      const struct option *options,
-				      const char * const usage[],
-				      const char *prefix,
-				      struct commit *current_head,
-				      struct wt_status *s)
+ساکن صحیح parse_and_validate_options(صحیح argc, ثابت حرف *argv[],
+				      ثابت ساخت option *options,
+				      ثابت حرف * ثابت usage[],
+				      ثابت حرف *سابقہ,
+				      ساخت commit *current_سر,
+				      ساخت wt_حالت *s)
 {
-	argc = parse_options(argc, argv, prefix, options, usage, 0);
+	argc = parse_options(argc, argv, سابقہ, options, usage, 0);
 	finalize_deferred_config(s);
 
-	if (force_author && !strchr(force_author, '>'))
-		force_author = find_author_by_nickname(force_author);
+	اگر (force_author && !strchr(force_author, '>'))
+		force_author = ڈھونڈو_author_by_nickname(force_author);
 
-	if (force_author && renew_authorship)
+	اگر (force_author && renew_authorship)
 		die(_("options '%s' and '%s' cannot be used together"), "--reset-author", "--author");
 
-	if (logfile || have_option_m || use_message)
+	اگر (logfile || have_option_m || use_پیغام)
 		use_editor = 0;
 
 	/* Sanity check options */
-	if (amend && !current_head)
+	اگر (amend && !current_سر)
 		die(_("You have nothing to amend."));
-	if (amend && whence != FROM_COMMIT) {
-		if (whence == FROM_MERGE)
+	اگر (amend && whence != FROM_COMMIT) {
+		اگر (whence == FROM_ملاؤ)
 			die(_("You are in the middle of a merge -- cannot amend."));
-		else if (is_from_cherry_pick(whence))
+		ورنہ اگر (is_from_cherry_pick(whence))
 			die(_("You are in the middle of a cherry-pick -- cannot amend."));
-		else if (whence == FROM_REBASE_PICK)
+		ورنہ اگر (whence == FROM_REBASE_PICK)
 			die(_("You are in the middle of a rebase -- cannot amend."));
 	}
-	if (fixup_message && squash_message)
+	اگر (fixup_پیغام && squash_پیغام)
 		die(_("options '%s' and '%s' cannot be used together"), "--squash", "--fixup");
-	die_for_incompatible_opt4(!!use_message, "-C",
-				  !!edit_message, "-c",
+	die_for_incompatible_opt4(!!use_پیغام, "-C",
+				  !!edit_پیغام, "-c",
 				  !!logfile, "-F",
-				  !!fixup_message, "--fixup");
+				  !!fixup_پیغام, "--fixup");
 	die_for_incompatible_opt4(have_option_m, "-m",
-				  !!edit_message, "-c",
-				  !!use_message, "-C",
+				  !!edit_پیغام, "-c",
+				  !!use_پیغام, "-C",
 				  !!logfile, "-F");
-	if (use_message || edit_message || logfile ||fixup_message || have_option_m)
+	اگر (use_پیغام || edit_پیغام || logfile ||fixup_پیغام || have_option_m)
 		FREE_AND_NULL(template_file);
-	if (edit_message)
-		use_message = edit_message;
-	if (amend && !use_message && !fixup_message)
-		use_message = "HEAD";
-	if (!use_message && !is_from_cherry_pick(whence) &&
+	اگر (edit_پیغام)
+		use_پیغام = edit_پیغام;
+	اگر (amend && !use_پیغام && !fixup_پیغام)
+		use_پیغام = "HEAD";
+	اگر (!use_پیغام && !is_from_cherry_pick(whence) &&
 	    !is_from_rebase(whence) && renew_authorship)
 		die(_("--reset-author can be used only with -C, -c or --amend."));
-	if (use_message) {
-		use_message_buffer = read_commit_message(use_message);
-		if (!renew_authorship) {
-			author_message = use_message;
-			author_message_buffer = use_message_buffer;
+	اگر (use_پیغام) {
+		use_پیغام_بفر = read_commit_پیغام_2(use_پیغام);
+		اگر (!renew_authorship) {
+			author_پیغام = use_پیغام;
+			author_پیغام_بفر = use_پیغام_بفر;
 		}
 	}
-	if ((is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) &&
+	اگر ((is_from_cherry_pick(whence) || whence == FROM_REBASE_PICK) &&
 	    !renew_authorship) {
-		author_message = "CHERRY_PICK_HEAD";
-		author_message_buffer = read_commit_message(author_message);
+		author_پیغام = "CHERRY_PICK_HEAD";
+		author_پیغام_بفر = read_commit_پیغام_2(author_پیغام);
 	}
 
-	if (patch_interactive)
+	اگر (patch_interactive)
 		interactive = 1;
 
 	die_for_incompatible_opt4(also, "-i/--include",
 				  only, "-o/--only",
 				  all, "-a/--all",
 				  interactive, "--interactive/-p/--patch");
-	if (fixup_message) {
+	اگر (fixup_پیغام) {
 		/*
 		 * We limit --fixup's suboptions to only alpha characters.
 		 * If the first character after a run of alpha is colon,
@@ -1386,188 +1386,188 @@ static int parse_and_validate_options(int argc, const char *argv[],
 		 *
 		 * Otherwise, we are dealing with --fixup=<commit>.
 		 */
-		char *p = fixup_message;
-		while (isalpha(*p))
+		حرف *p = fixup_پیغام;
+		جب (حرف_ہے(*p))
 			p++;
-		if (p > fixup_message && *p == ':') {
+		اگر (p > fixup_پیغام && *p == ':') {
 			*p = '\0';
 			fixup_commit = p + 1;
-			if (!strcmp("amend", fixup_message) ||
-			    !strcmp("reword", fixup_message)) {
-				fixup_prefix = "amend";
-				allow_empty = 1;
-				if (*fixup_message == 'r') {
+			اگر (!strcmp("amend", fixup_پیغام) ||
+			    !strcmp("reword", fixup_پیغام)) {
+				fixup_سابقہ = "amend";
+				allow_خالی_خانے = 1;
+				اگر (*fixup_پیغام == 'r') {
 					check_fixup_reword_options(argc, argv);
 					only = 1;
 				}
-			} else {
-				die(_("unknown option: --fixup=%s:%s"), fixup_message, fixup_commit);
+			} ورنہ {
+				die(_("unknown option: --fixup=%s:%s"), fixup_پیغام, fixup_commit);
 			}
-		} else {
-			fixup_commit = fixup_message;
-			fixup_prefix = "fixup";
+		} ورنہ {
+			fixup_commit = fixup_پیغام;
+			fixup_سابقہ = "fixup";
 			use_editor = 0;
 		}
 	}
 
-	if (0 <= edit_flag)
+	اگر (0 <= edit_flag)
 		use_editor = edit_flag;
 
 	handle_untracked_files_arg(s);
 
-	if (all && argc > 0)
+	اگر (all && argc > 0)
 		die(_("paths '%s ...' with -a does not make sense"),
 		    argv[0]);
 
-	if (status_format != STATUS_FORMAT_NONE)
-		dry_run = 1;
+	اگر (حالت_format != حالت_FORMAT_NONE)
+		dry_تسلسل = 1;
 
-	return argc;
+	واپس argc;
 }
 
-static int dry_run_commit(const char **argv, const char *prefix,
-			  const struct commit *current_head, struct wt_status *s)
+ساکن صحیح dry_تسلسل_commit(ثابت حرف **argv, ثابت حرف *سابقہ,
+			  ثابت ساخت commit *current_سر, ساخت wt_حالت *s)
 {
-	int committable;
-	const char *index_file;
+	صحیح committable;
+	ثابت حرف *اشاریہ_file;
 
-	index_file = prepare_index(argv, prefix, current_head, 1);
-	committable = run_status(stdout, index_file, prefix, 0, s);
-	rollback_index_files();
+	اشاریہ_file = prepare_اشاریہ(argv, سابقہ, current_سر, 1);
+	committable = تسلسل_حالت(stdout, اشاریہ_file, سابقہ, 0, s);
+	rollback_اشاریہ_files();
 
-	return committable ? 0 : 1;
+	واپس committable ? 0 : 1;
 }
 
-define_list_config_array_extra(color_status_slots, {"added"});
+define_list_config_array_extra(color_حالت_slots, {"added"});
 
-static int parse_status_slot(const char *slot)
+ساکن صحیح parse_حالت_خانہ(ثابت حرف *خانہ)
 {
-	if (!strcasecmp(slot, "added"))
-		return WT_STATUS_UPDATED;
+	اگر (!strcasecmp(خانہ, "added"))
+		واپس WT_حالت_UPDATED;
 
-	return LOOKUP_CONFIG(color_status_slots, slot);
+	واپس LOOKUP_CONFIG(color_حالت_slots, خانہ);
 }
 
-static int git_status_config(const char *k, const char *v,
-			     const struct config_context *ctx, void *cb)
+ساکن صحیح git_حالت_config(ثابت حرف *k, ثابت حرف *v,
+			     ثابت ساخت config_context *ctx, خالی *cb)
 {
-	struct wt_status *s = cb;
-	const char *slot_name;
+	ساخت wt_حالت *s = cb;
+	ثابت حرف *خانہ_name;
 
-	if (starts_with(k, "column."))
-		return git_column_config(k, v, "status", &s->colopts);
-	if (!strcmp(k, "status.submodulesummary")) {
-		int is_bool;
+	اگر (starts_with(k, "column."))
+		واپس git_عمود_config(k, v, "status", &s->colopts);
+	اگر (!strcmp(k, "status.submodulesummary")) {
+		صحیح is_bool;
 		s->submodule_summary = git_config_bool_or_int(k, v, ctx->kvi,
 							      &is_bool);
-		if (is_bool && s->submodule_summary)
+		اگر (is_bool && s->submodule_summary)
 			s->submodule_summary = -1;
-		return 0;
+		واپس 0;
 	}
-	if (!strcmp(k, "status.short")) {
-		if (git_config_bool(k, v))
-			status_deferred_config.status_format = STATUS_FORMAT_SHORT;
-		else
-			status_deferred_config.status_format = STATUS_FORMAT_NONE;
-		return 0;
+	اگر (!strcmp(k, "status.short")) {
+		اگر (git_config_bool(k, v))
+			حالت_deferred_config.حالت_format = حالت_FORMAT_SHORT;
+		ورنہ
+			حالت_deferred_config.حالت_format = حالت_FORMAT_NONE;
+		واپس 0;
 	}
-	if (!strcmp(k, "status.branch")) {
-		status_deferred_config.show_branch = git_config_bool(k, v);
-		return 0;
+	اگر (!strcmp(k, "status.branch")) {
+		حالت_deferred_config.show_branch = git_config_bool(k, v);
+		واپس 0;
 	}
-	if (!strcmp(k, "status.aheadbehind")) {
-		status_deferred_config.ahead_behind = git_config_bool(k, v);
-		return 0;
+	اگر (!strcmp(k, "status.aheadbehind")) {
+		حالت_deferred_config.ahead_behind = git_config_bool(k, v);
+		واپس 0;
 	}
-	if (!strcmp(k, "status.showstash")) {
+	اگر (!strcmp(k, "status.showstash")) {
 		s->show_stash = git_config_bool(k, v);
-		return 0;
+		واپس 0;
 	}
-	if (!strcmp(k, "status.color") || !strcmp(k, "color.status")) {
+	اگر (!strcmp(k, "status.color") || !strcmp(k, "color.status")) {
 		s->use_color = git_config_colorbool(k, v);
-		return 0;
+		واپس 0;
 	}
-	if (!strcmp(k, "status.displaycommentprefix")) {
-		s->display_comment_prefix = git_config_bool(k, v);
-		return 0;
+	اگر (!strcmp(k, "status.displaycommentprefix")) {
+		s->display_comment_سابقہ = git_config_bool(k, v);
+		واپس 0;
 	}
-	if (skip_prefix(k, "status.color.", &slot_name) ||
-	    skip_prefix(k, "color.status.", &slot_name)) {
-		int slot = parse_status_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, s->color_palette[slot]);
+	اگر (skip_سابقہ(k, "status.color.", &خانہ_name) ||
+	    skip_سابقہ(k, "color.status.", &خانہ_name)) {
+		صحیح خانہ = parse_حالت_خانہ(خانہ_name);
+		اگر (خانہ < 0)
+			واپس 0;
+		اگر (!v)
+			واپس config_error_nonbool(k);
+		واپس color_parse(v, s->color_palette[خانہ]);
 	}
-	if (!strcmp(k, "status.relativepaths")) {
+	اگر (!strcmp(k, "status.relativepaths")) {
 		s->relative_paths = git_config_bool(k, v);
-		return 0;
+		واپس 0;
 	}
-	if (!strcmp(k, "status.showuntrackedfiles")) {
-		enum untracked_status_type u;
+	اگر (!strcmp(k, "status.showuntrackedfiles")) {
+		شمار untracked_حالت_type u;
 
 		u = parse_untracked_setting_name(v);
-		if (u == SHOW_UNTRACKED_FILES_ERROR)
-			return error(_("Invalid untracked files mode '%s'"), v);
+		اگر (u == SHOW_UNTRACKED_FILES_ERROR)
+			واپس error(_("Invalid untracked files mode '%s'"), v);
 		s->show_untracked_files = u;
-		return 0;
+		واپس 0;
 	}
-	if (!strcmp(k, "diff.renamelimit")) {
-		if (s->rename_limit == -1)
-			s->rename_limit = git_config_int(k, v, ctx->kvi);
-		return 0;
+	اگر (!strcmp(k, "diff.renamelimit")) {
+		اگر (s->rename_حد_بندی == -1)
+			s->rename_حد_بندی = git_config_int(k, v, ctx->kvi);
+		واپس 0;
 	}
-	if (!strcmp(k, "status.renamelimit")) {
-		s->rename_limit = git_config_int(k, v, ctx->kvi);
-		return 0;
+	اگر (!strcmp(k, "status.renamelimit")) {
+		s->rename_حد_بندی = git_config_int(k, v, ctx->kvi);
+		واپس 0;
 	}
-	if (!strcmp(k, "diff.renames")) {
-		if (s->detect_rename == -1)
+	اگر (!strcmp(k, "diff.renames")) {
+		اگر (s->detect_rename == -1)
 			s->detect_rename = git_config_rename(k, v);
-		return 0;
+		واپس 0;
 	}
-	if (!strcmp(k, "status.renames")) {
+	اگر (!strcmp(k, "status.renames")) {
 		s->detect_rename = git_config_rename(k, v);
-		return 0;
+		واپس 0;
 	}
-	return git_diff_ui_config(k, v, ctx, NULL);
+	واپس git_diff_ui_config(k, v, ctx, تہی);
 }
 
-int cmd_status(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+صحیح cmd_حالت(صحیح argc,
+ثابت حرف **argv,
+ثابت حرف *سابقہ,
+ساخت repository *repo غیر_مستعمل)
 {
-	static int no_renames = -1;
-	static const char *rename_score_arg = (const char *)-1;
-	static struct wt_status s;
-	unsigned int progress_flag = 0;
-	int fd;
-	struct object_id oid;
-	static struct option builtin_status_options[] = {
+	ساکن صحیح no_renames = -1;
+	ساکن ثابت حرف *rename_score_arg = (ثابت حرف *)-1;
+	ساکن ساخت wt_حالت s;
+	غیرعلامتی صحیح پیش_رفت_flag = 0;
+	صحیح fd;
+	ساخت object_id oid;
+	ساکن ساخت option builtin_حالت_options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
-		OPT_SET_INT('s', "short", &status_format,
-			    N_("show status concisely"), STATUS_FORMAT_SHORT),
+		OPT_سیٹ_INT('s', "short", &حالت_format,
+			    N_("show status concisely"), حالت_FORMAT_SHORT),
 		OPT_BOOL('b', "branch", &s.show_branch,
 			 N_("show branch information")),
 		OPT_BOOL(0, "show-stash", &s.show_stash,
 			 N_("show stash information")),
 		OPT_BOOL(0, "ahead-behind", &s.ahead_behind_flags,
 			 N_("compute full ahead/behind values")),
-		OPT_CALLBACK_F(0, "porcelain", &status_format,
+		OPT_CALLBACK_F(0, "porcelain", &حالت_format,
 		  N_("version"), N_("machine-readable output"),
 		  PARSE_OPT_OPTARG, opt_parse_porcelain),
-		OPT_SET_INT(0, "long", &status_format,
+		OPT_سیٹ_INT(0, "long", &حالت_format,
 			    N_("show status in long format (default)"),
-			    STATUS_FORMAT_LONG),
+			    حالت_FORMAT_LONG),
 		OPT_BOOL('z', "null", &s.null_termination,
 			 N_("terminate entries with NUL")),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.قدر = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1576,7 +1576,7 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignored",
-			.value = &ignored_arg,
+			.قدر = &ignored_arg,
 			.argh = N_("mode"),
 			.help = N_("show ignored files, optional modes: traditional, matching, no. (Default: traditional)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1585,153 +1585,153 @@ struct repository *repo UNUSED)
 		{
 			.type = OPTION_STRING,
 			.long_name = "ignore-submodules",
-			.value = &ignore_submodule_arg,
+			.قدر = &ignore_submodule_arg,
 			.argh = N_("when"),
 			.help = N_("ignore changes to submodules, optional when: all, dirty, untracked. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
 			.defval = (intptr_t)"all",
 		},
-		OPT_COLUMN(0, "column", &s.colopts, N_("list untracked files in columns")),
+		OPT_عمود(0, "column", &s.colopts, N_("list untracked files in columns")),
 		OPT_BOOL(0, "no-renames", &no_renames, N_("do not detect renames")),
 		OPT_CALLBACK_F('M', "find-renames", &rename_score_arg,
 		  N_("n"), N_("detect renames, optionally set similarity index"),
 		  PARSE_OPT_OPTARG | PARSE_OPT_NONEG, opt_parse_rename_score),
-		OPT_END(),
+		OPT_انتہا(),
 	};
 
 	show_usage_with_options_if_asked(argc, argv,
-					 builtin_status_usage, builtin_status_options);
+					 builtin_حالت_usage, builtin_حالت_options);
 
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
-	status_init_config(&s, git_status_config);
-	argc = parse_options(argc, argv, prefix,
-			     builtin_status_options,
-			     builtin_status_usage, 0);
+	حالت_init_config(&s, git_حالت_config);
+	argc = parse_options(argc, argv, سابقہ,
+			     builtin_حالت_options,
+			     builtin_حالت_usage, 0);
 	finalize_colopts(&s.colopts, -1);
 	finalize_deferred_config(&s);
 
 	handle_untracked_files_arg(&s);
 	handle_ignored_arg(&s);
 
-	if (s.show_ignored_mode == SHOW_MATCHING_IGNORED &&
+	اگر (s.show_ignored_منوال == SHOW_MATCHING_IGNORED &&
 	    s.show_untracked_files == SHOW_NO_UNTRACKED_FILES)
 		die(_("Unsupported combination of ignored and untracked-files arguments"));
 
 	parse_pathspec(&s.pathspec, 0,
-		       PATHSPEC_PREFER_FULL,
-		       prefix, argv);
+		       PATHSPEC_PREFER_بھرا,
+		       سابقہ, argv);
 
-	if (status_format != STATUS_FORMAT_PORCELAIN &&
-	    status_format != STATUS_FORMAT_PORCELAIN_V2)
-		progress_flag = REFRESH_PROGRESS;
-	repo_read_index(the_repository);
-	refresh_index(the_repository->index,
-		      REFRESH_QUIET|REFRESH_UNMERGED|progress_flag,
-		      &s.pathspec, NULL, NULL);
+	اگر (حالت_format != حالت_FORMAT_PORCELAIN &&
+	    حالت_format != حالت_FORMAT_PORCELAIN_V2)
+		پیش_رفت_flag = REFRESH_پیش_رفت;
+	repo_read_اشاریہ(the_repository);
+	refresh_اشاریہ(the_repository->اشاریہ,
+		      REFRESH_QUIET|REFRESH_UNMERGED|پیش_رفت_flag,
+		      &s.pathspec, تہی, تہی);
 
-	if (use_optional_locks())
-		fd = repo_hold_locked_index(the_repository, &index_lock, 0);
-	else
+	اگر (use_optional_locks())
+		fd = repo_hold_locked_اشاریہ(the_repository, &اشاریہ_تالا, 0);
+	ورنہ
 		fd = -1;
 
 	s.is_initial = repo_get_oid(the_repository, s.reference, &oid) ? 1 : 0;
-	if (!s.is_initial)
+	اگر (!s.is_initial)
 		oidcpy(&s.oid_commit, &oid);
 
 	s.ignore_submodule_arg = ignore_submodule_arg;
-	s.status_format = status_format;
+	s.حالت_format = حالت_format;
 	s.verbose = verbose;
-	if (no_renames != -1)
+	اگر (no_renames != -1)
 		s.detect_rename = !no_renames;
-	if ((intptr_t)rename_score_arg != -1) {
-		if (s.detect_rename < DIFF_DETECT_RENAME)
+	اگر ((intptr_t)rename_score_arg != -1) {
+		اگر (s.detect_rename < DIFF_DETECT_RENAME)
 			s.detect_rename = DIFF_DETECT_RENAME;
-		if (rename_score_arg)
+		اگر (rename_score_arg)
 			s.rename_score = parse_rename_score(&rename_score_arg);
 	}
 
-	wt_status_collect(&s);
+	wt_حالت_collect(&s);
 
-	if (0 <= fd)
-		repo_update_index_if_able(the_repository, &index_lock);
+	اگر (0 <= fd)
+		repo_update_اشاریہ_if_able(the_repository, &اشاریہ_تالا);
 
-	if (s.relative_paths)
-		s.prefix = prefix;
+	اگر (s.relative_paths)
+		s.سابقہ = سابقہ;
 
-	wt_status_print(&s);
-	wt_status_collect_free_buffers(&s);
+	wt_حالت_print(&s);
+	wt_حالت_collect_free_buffers(&s);
 
-	return 0;
+	واپس 0;
 }
 
-static int git_commit_config(const char *k, const char *v,
-			     const struct config_context *ctx, void *cb)
+ساکن صحیح git_commit_config(ثابت حرف *k, ثابت حرف *v,
+			     ثابت ساخت config_context *ctx, خالی *cb)
 {
-	struct wt_status *s = cb;
+	ساخت wt_حالت *s = cb;
 
-	if (!strcmp(k, "commit.template"))
-		return git_config_pathname(&template_file, k, v);
-	if (!strcmp(k, "commit.status")) {
-		include_status = git_config_bool(k, v);
-		return 0;
+	اگر (!strcmp(k, "commit.template"))
+		واپس git_config_pathname(&template_file, k, v);
+	اگر (!strcmp(k, "commit.status")) {
+		include_حالت = git_config_bool(k, v);
+		واپس 0;
 	}
-	if (!strcmp(k, "commit.cleanup")) {
+	اگر (!strcmp(k, "commit.cleanup")) {
 		FREE_AND_NULL(cleanup_config);
-		return git_config_string(&cleanup_config, k, v);
+		واپس git_config_string(&cleanup_config, k, v);
 	}
-	if (!strcmp(k, "commit.gpgsign")) {
-		sign_commit = git_config_bool(k, v) ? "" : NULL;
-		return 0;
+	اگر (!strcmp(k, "commit.gpgsign")) {
+		sign_commit = git_config_bool(k, v) ? "" : تہی;
+		واپس 0;
 	}
-	if (!strcmp(k, "commit.verbose")) {
-		int is_bool;
+	اگر (!strcmp(k, "commit.verbose")) {
+		صحیح is_bool;
 		config_commit_verbose = git_config_bool_or_int(k, v, ctx->kvi,
 							       &is_bool);
-		return 0;
+		واپس 0;
 	}
 
-	return git_status_config(k, v, ctx, s);
+	واپس git_حالت_config(k, v, ctx, s);
 }
 
-int cmd_commit(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+صحیح cmd_commit(صحیح argc,
+	       ثابت حرف **argv,
+	       ثابت حرف *سابقہ,
+	       ساخت repository *repo غیر_مستعمل)
 {
-	static struct wt_status s;
-	static const char *cleanup_arg = NULL;
-	static struct option builtin_commit_options[] = {
+	ساکن ساخت wt_حالت s;
+	ساکن ثابت حرف *cleanup_arg = تہی;
+	ساکن ساخت option builtin_commit_options[] = {
 		OPT__QUIET(&quiet, N_("suppress summary after successful commit")),
 		OPT__VERBOSE(&verbose, N_("show diff in commit message template")),
 
-		OPT_GROUP(N_("Commit message options")),
+		OPT_گروہ(N_("Commit message options")),
 		OPT_FILENAME('F', "file", &logfile, N_("read message from file")),
 		OPT_STRING(0, "author", &force_author, N_("author"), N_("override author for commit")),
 		OPT_STRING(0, "date", &force_date, N_("date"), N_("override date for commit")),
-		OPT_CALLBACK('m', "message", &message, N_("message"), N_("commit message"), opt_parse_m),
-		OPT_STRING('c', "reedit-message", &edit_message, N_("commit"), N_("reuse and edit message from specified commit")),
-		OPT_STRING('C', "reuse-message", &use_message, N_("commit"), N_("reuse message from specified commit")),
+		OPT_CALLBACK('m', "message", &پیغام_2, N_("message"), N_("commit message"), opt_parse_m),
+		OPT_STRING('c', "reedit-message", &edit_پیغام, N_("commit"), N_("reuse and edit message from specified commit")),
+		OPT_STRING('C', "reuse-message", &use_پیغام, N_("commit"), N_("reuse message from specified commit")),
 		/*
 		 * TRANSLATORS: Leave "[(amend|reword):]" as-is,
 		 * and only translate <commit>.
 		 */
-		OPT_STRING(0, "fixup", &fixup_message, N_("[(amend|reword):]commit"), N_("use autosquash formatted message to fixup or amend/reword specified commit")),
-		OPT_STRING(0, "squash", &squash_message, N_("commit"), N_("use autosquash formatted message to squash specified commit")),
+		OPT_STRING(0, "fixup", &fixup_پیغام, N_("[(amend|reword):]commit"), N_("use autosquash formatted message to fixup or amend/reword specified commit")),
+		OPT_STRING(0, "squash", &squash_پیغام, N_("commit"), N_("use autosquash formatted message to squash specified commit")),
 		OPT_BOOL(0, "reset-author", &renew_authorship, N_("the commit is authored by me now (used with -C/-c/--amend)")),
-		OPT_STRVEC(0, "trailer", &trailer_args, N_("trailer"),
+		OPT_STRVEC(0, "trailer", &trailer_دلائل, N_("trailer"),
 			   N_("add custom trailer(s)")),
 		OPT_BOOL('s', "signoff", &signoff, N_("add a Signed-off-by trailer")),
 		OPT_FILENAME('t', "template", &template_file, N_("use specified template file")),
 		OPT_BOOL('e', "edit", &edit_flag, N_("force edit of commit")),
 		OPT_CLEANUP(&cleanup_arg),
-		OPT_BOOL(0, "status", &include_status, N_("include status in commit message template")),
+		OPT_BOOL(0, "status", &include_حالت, N_("include status in commit message template")),
 		{
 			.type = OPTION_STRING,
 			.short_name = 'S',
 			.long_name = "gpg-sign",
-			.value = &sign_commit,
+			.قدر = &sign_commit,
 			.argh = N_("key-id"),
 			.help = N_("GPG sign commit"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1739,7 +1739,7 @@ int cmd_commit(int argc,
 		},
 		/* end commit message options */
 
-		OPT_GROUP(N_("Commit contents options")),
+		OPT_گروہ(N_("Commit contents options")),
 		OPT_BOOL('a', "all", &all, N_("commit all changed files")),
 		OPT_BOOL('i', "include", &also, N_("add specified files to index for commit")),
 		OPT_BOOL(0, "interactive", &interactive, N_("interactively add files")),
@@ -1748,17 +1748,17 @@ int cmd_commit(int argc,
 		OPT_DIFF_INTERHUNK_CONTEXT(&interactive_opts.interhunkcontext),
 		OPT_BOOL('o', "only", &only, N_("commit only specified files")),
 		OPT_BOOL('n', "no-verify", &no_verify, N_("bypass pre-commit and commit-msg hooks")),
-		OPT_BOOL(0, "dry-run", &dry_run, N_("show what would be committed")),
-		OPT_SET_INT(0, "short", &status_format, N_("show status concisely"),
-			    STATUS_FORMAT_SHORT),
+		OPT_BOOL(0, "dry-run", &dry_تسلسل, N_("show what would be committed")),
+		OPT_سیٹ_INT(0, "short", &حالت_format, N_("show status concisely"),
+			    حالت_FORMAT_SHORT),
 		OPT_BOOL(0, "branch", &s.show_branch, N_("show branch information")),
 		OPT_BOOL(0, "ahead-behind", &s.ahead_behind_flags,
 			 N_("compute full ahead/behind values")),
-		OPT_SET_INT(0, "porcelain", &status_format,
-			    N_("machine-readable output"), STATUS_FORMAT_PORCELAIN),
-		OPT_SET_INT(0, "long", &status_format,
+		OPT_سیٹ_INT(0, "porcelain", &حالت_format,
+			    N_("machine-readable output"), حالت_FORMAT_PORCELAIN),
+		OPT_سیٹ_INT(0, "long", &حالت_format,
 			    N_("show status in long format (default)"),
-			    STATUS_FORMAT_LONG),
+			    حالت_FORMAT_LONG),
 		OPT_BOOL('z', "null", &s.null_termination,
 			 N_("terminate entries with NUL")),
 		OPT_BOOL(0, "amend", &amend, N_("amend previous commit")),
@@ -1767,7 +1767,7 @@ int cmd_commit(int argc,
 			.type = OPTION_STRING,
 			.short_name = 'u',
 			.long_name = "untracked-files",
-			.value = &untracked_files_arg,
+			.قدر = &untracked_files_arg,
 			.argh = N_("mode"),
 			.help = N_("show untracked files, optional modes: all, normal, no. (Default: all)"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1777,218 +1777,218 @@ int cmd_commit(int argc,
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
 		/* end commit contents options */
 
-		OPT_HIDDEN_BOOL(0, "allow-empty", &allow_empty,
+		OPT_HIDDEN_BOOL(0, "allow-empty", &allow_خالی_خانے,
 				N_("ok to record an empty change")),
-		OPT_HIDDEN_BOOL(0, "allow-empty-message", &allow_empty_message,
+		OPT_HIDDEN_BOOL(0, "allow-empty-message", &allow_خالی_خانے_پیغام,
 				N_("ok to record a change with an empty message")),
 
-		OPT_END()
+		OPT_انتہا()
 	};
 
-	struct strbuf sb = STRBUF_INIT;
-	struct strbuf author_ident = STRBUF_INIT;
-	const char *index_file, *reflog_msg;
-	struct object_id oid;
-	struct commit_list *parents = NULL;
-	struct stat statbuf;
-	struct commit *current_head = NULL;
-	struct commit_extra_header *extra = NULL;
-	struct strbuf err = STRBUF_INIT;
-	int ret = 0;
+	ساخت strbuf sb = STRBUF_INIT;
+	ساخت strbuf author_ident = STRBUF_INIT;
+	ثابت حرف *اشاریہ_file, *reflog_پیغام;
+	ساخت object_id oid;
+	ساخت commit_list *parents = تہی;
+	ساخت stat statbuf;
+	ساخت commit *current_سر = تہی;
+	ساخت commit_extra_سرخی *extra = تہی;
+	ساخت strbuf err = STRBUF_INIT;
+	صحیح ret = 0;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_commit_usage, builtin_commit_options);
 
-#ifndef WITH_BREAKING_CHANGES
+#اگر_غیر_تعریف_شدہ WITH_BREAKING_CHANGES
 	warn_on_auto_comment_char = true;
-#endif /* !WITH_BREAKING_CHANGES */
+#اگر_ختم /* !WITH_BREAKING_CHANGES */
 	prepare_repo_settings(the_repository);
-	the_repository->settings.command_requires_full_index = 0;
+	the_repository->settings.command_requires_بھرا_اشاریہ = 0;
 
-	status_init_config(&s, git_commit_config);
+	حالت_init_config(&s, git_commit_config);
 	s.commit_template = 1;
-	status_format = STATUS_FORMAT_NONE; /* Ignore status.short */
+	حالت_format = حالت_FORMAT_NONE; /* Ignore status.short */
 	s.colopts = 0;
 
-	if (repo_get_oid(the_repository, "HEAD", &oid))
-		current_head = NULL;
-	else {
-		current_head = lookup_commit_or_die(&oid, "HEAD");
-		if (repo_parse_commit(the_repository, current_head))
+	اگر (repo_get_oid(the_repository, "HEAD", &oid))
+		current_سر = تہی;
+	ورنہ {
+		current_سر = lookup_commit_or_die(&oid, "HEAD");
+		اگر (repo_parse_commit(the_repository, current_سر))
 			die(_("could not parse HEAD commit"));
 	}
 	verbose = -1; /* unspecified */
 	argc = parse_and_validate_options(argc, argv, builtin_commit_options,
 					  builtin_commit_usage,
-					  prefix, current_head, &s);
-	if (trailer_args.nr)
+					  سابقہ, current_سر, &s);
+	اگر (trailer_دلائل.nr)
 		trailer_config_init();
 
-	if (verbose == -1)
+	اگر (verbose == -1)
 		verbose = (config_commit_verbose < 0) ? 0 : config_commit_verbose;
 
-	if (cleanup_arg) {
-		free(cleanup_config);
+	اگر (cleanup_arg) {
+		آزاد(cleanup_config);
 		cleanup_config = xstrdup(cleanup_arg);
 	}
-	cleanup_mode = get_cleanup_mode(cleanup_config, use_editor);
+	cleanup_منوال = get_cleanup_منوال(cleanup_config, use_editor);
 
-	if (dry_run)
-		return dry_run_commit(argv, prefix, current_head, &s);
-	index_file = prepare_index(argv, prefix, current_head, 0);
+	اگر (dry_تسلسل)
+		واپس dry_تسلسل_commit(argv, سابقہ, current_سر, &s);
+	اشاریہ_file = prepare_اشاریہ(argv, سابقہ, current_سر, 0);
 
 	/* Set up everything for writing the commit object.  This includes
 	   running hooks, writing the trees, and interacting with the user.  */
-	if (!prepare_to_commit(index_file, prefix,
-			       current_head, &s, &author_ident)) {
+	اگر (!prepare_مقصد_commit(اشاریہ_file, سابقہ,
+			       current_سر, &s, &author_ident)) {
 		ret = 1;
-		rollback_index_files();
-		goto cleanup;
+		rollback_اشاریہ_files();
+		جاؤ cleanup;
 	}
 
 	/* Determine parents */
-	reflog_msg = getenv("GIT_REFLOG_ACTION");
-	if (!current_head) {
-		if (!reflog_msg)
-			reflog_msg = "commit (initial)";
-	} else if (amend) {
-		if (!reflog_msg)
-			reflog_msg = "commit (amend)";
-		parents = commit_list_copy(current_head->parents);
-	} else if (whence == FROM_MERGE) {
-		struct strbuf m = STRBUF_INIT;
+	reflog_پیغام = getenv("GIT_REFLOG_ACTION");
+	اگر (!current_سر) {
+		اگر (!reflog_پیغام)
+			reflog_پیغام = "commit (initial)";
+	} ورنہ اگر (amend) {
+		اگر (!reflog_پیغام)
+			reflog_پیغام = "commit (amend)";
+		parents = commit_list_copy(current_سر->parents);
+	} ورنہ اگر (whence == FROM_ملاؤ) {
+		ساخت strbuf m = STRBUF_INIT;
 		FILE *fp;
-		int allow_fast_forward = 1;
-		struct commit_list **pptr = &parents;
+		صحیح allow_fast_forward = 1;
+		ساخت commit_list **pptr = &parents;
 
-		if (!reflog_msg)
-			reflog_msg = "commit (merge)";
-		pptr = commit_list_append(current_head, pptr);
-		fp = xfopen(git_path_merge_head(the_repository), "r");
-		while (strbuf_getline_lf(&m, fp) != EOF) {
-			struct commit *parent;
+		اگر (!reflog_پیغام)
+			reflog_پیغام = "commit (merge)";
+		pptr = commit_list_append(current_سر, pptr);
+		fp = xfopen(git_راستہ_ملاؤ_سر(the_repository), "r");
+		جب (strbuf_getline_lf(&m, fp) != EOF) {
+			ساخت commit *والد;
 
-			parent = get_merge_parent(m.buf);
-			if (!parent)
+			والد = get_ملاؤ_والد(m.buf);
+			اگر (!والد)
 				die(_("Corrupt MERGE_HEAD file (%s)"), m.buf);
-			pptr = commit_list_append(parent, pptr);
+			pptr = commit_list_append(والد, pptr);
 		}
 		fclose(fp);
 		strbuf_release(&m);
-		if (!stat(git_path_merge_mode(the_repository), &statbuf)) {
-			if (strbuf_read_file(&sb, git_path_merge_mode(the_repository), 0) < 0)
+		اگر (!stat(git_راستہ_ملاؤ_منوال(the_repository), &statbuf)) {
+			اگر (strbuf_read_file(&sb, git_راستہ_ملاؤ_منوال(the_repository), 0) < 0)
 				die_errno(_("could not read MERGE_MODE"));
-			if (!strcmp(sb.buf, "no-ff"))
+			اگر (!strcmp(sb.buf, "no-ff"))
 				allow_fast_forward = 0;
 		}
-		if (allow_fast_forward)
+		اگر (allow_fast_forward)
 			reduce_heads_replace(&parents);
-	} else {
-		if (!reflog_msg)
-			reflog_msg = is_from_cherry_pick(whence)
+	} ورنہ {
+		اگر (!reflog_پیغام)
+			reflog_پیغام = is_from_cherry_pick(whence)
 					? "commit (cherry-pick)"
 					: is_from_rebase(whence)
 					? "commit (rebase)"
 					: "commit";
-		commit_list_insert(current_head, &parents);
+		commit_list_داخل_کرو(current_سر, &parents);
 	}
 
 	/* Finally, get the commit message */
 	strbuf_reset(&sb);
-	if (strbuf_read_file(&sb, git_path_commit_editmsg(), 0) < 0) {
-		int saved_errno = errno;
-		rollback_index_files();
+	اگر (strbuf_read_file(&sb, git_راستہ_commit_editmsg(), 0) < 0) {
+		صحیح saved_errno = errno;
+		rollback_اشاریہ_files();
 		die(_("could not read commit message: %s"), strerror(saved_errno));
 	}
 
-	cleanup_message(&sb, cleanup_mode, verbose);
+	cleanup_پیغام(&sb, cleanup_منوال, verbose);
 
-	if (message_is_empty(&sb, cleanup_mode) && !allow_empty_message) {
-		rollback_index_files();
+	اگر (پیغام_is_خالی_خانے(&sb, cleanup_منوال) && !allow_خالی_خانے_پیغام) {
+		rollback_اشاریہ_files();
 		fprintf(stderr, _("Aborting commit due to empty commit message.\n"));
-		exit(1);
+		باہر_نکلو(1);
 	}
-	if (template_untouched(&sb, template_file, cleanup_mode) && !allow_empty_message) {
-		rollback_index_files();
+	اگر (template_untouched(&sb, template_file, cleanup_منوال) && !allow_خالی_خانے_پیغام) {
+		rollback_اشاریہ_files();
 		fprintf(stderr, _("Aborting commit; you did not edit the message.\n"));
-		exit(1);
+		باہر_نکلو(1);
 	}
 
-	if (fixup_message && starts_with(sb.buf, "amend! ") &&
-	    !allow_empty_message) {
-		struct strbuf body = STRBUF_INIT;
-		size_t len = commit_subject_length(sb.buf);
+	اگر (fixup_پیغام && starts_with(sb.buf, "amend! ") &&
+	    !allow_خالی_خانے_پیغام) {
+		ساخت strbuf body = STRBUF_INIT;
+		سائز_t len = commit_subject_لمبائی(sb.buf);
 		strbuf_addstr(&body, sb.buf + len);
-		if (message_is_empty(&body, cleanup_mode)) {
-			rollback_index_files();
+		اگر (پیغام_is_خالی_خانے(&body, cleanup_منوال)) {
+			rollback_اشاریہ_files();
 			fprintf(stderr, _("Aborting commit due to empty commit message body.\n"));
-			exit(1);
+			باہر_نکلو(1);
 		}
 		strbuf_release(&body);
 	}
 
-	if (amend) {
-		const char *exclude_gpgsig[3] = { "gpgsig", "gpgsig-sha256", NULL };
-		extra = read_commit_extra_headers(current_head, exclude_gpgsig);
-	} else {
-		struct commit_extra_header **tail = &extra;
-		append_merge_tag_headers(parents, &tail);
+	اگر (amend) {
+		ثابت حرف *exclude_gpgsig[3] = { "gpgsig", "gpgsig-sha256", تہی };
+		extra = read_commit_extra_سرخیاں(current_سر, exclude_gpgsig);
+	} ورنہ {
+		ساخت commit_extra_سرخی **دم = &extra;
+		append_ملاؤ_لیبل_سرخیاں(parents, &دم);
 	}
 
-	if (commit_tree_extended(sb.buf, sb.len, &the_repository->index->cache_tree->oid,
-				 parents, &oid, author_ident.buf, NULL,
+	اگر (commit_درخت_extended(sb.buf, sb.len, &the_repository->اشاریہ->cache_درخت->oid,
+				 parents, &oid, author_ident.buf, تہی,
 				 sign_commit, extra)) {
-		rollback_index_files();
+		rollback_اشاریہ_files();
 		die(_("failed to write commit object"));
 	}
 
-	if (update_head_with_reflog(current_head, &oid, reflog_msg, &sb,
+	اگر (update_سر_with_reflog(current_سر, &oid, reflog_پیغام, &sb,
 				    &err)) {
-		rollback_index_files();
+		rollback_اشاریہ_files();
 		die("%s", err.buf);
 	}
 
 	sequencer_post_commit_cleanup(the_repository, 0);
-	unlink(git_path_merge_head(the_repository));
-	unlink(git_path_merge_msg(the_repository));
-	unlink(git_path_merge_mode(the_repository));
-	unlink(git_path_squash_msg(the_repository));
+	unlink(git_راستہ_ملاؤ_سر(the_repository));
+	unlink(git_راستہ_ملاؤ_پیغام(the_repository));
+	unlink(git_راستہ_ملاؤ_منوال(the_repository));
+	unlink(git_راستہ_squash_پیغام(the_repository));
 
-	if (commit_index_files())
+	اگر (commit_اشاریہ_files())
 		die(_("repository has been updated, but unable to write\n"
 		      "new index file. Check that disk is not full and quota is\n"
 		      "not exceeded, and then \"git restore --staged :/\" to recover."));
 
-	git_test_write_commit_graph_or_die(the_repository);
+	git_test_write_commit_گراف_or_die(the_repository);
 
 	repo_rerere(the_repository, 0);
-	run_auto_maintenance(the_repository, quiet);
-	run_commit_hook(use_editor, repo_get_index_file(the_repository),
-			NULL, "post-commit", NULL);
-	if (amend && !no_post_rewrite) {
-		commit_post_rewrite(the_repository, current_head, &oid);
+	تسلسل_auto_maintenance(the_repository, quiet);
+	تسلسل_commit_hook(use_editor, repo_get_اشاریہ_file(the_repository),
+			تہی, "post-commit", تہی);
+	اگر (amend && !no_post_rewrite) {
+		commit_post_rewrite(the_repository, current_سر, &oid);
 	}
-	if (!quiet) {
-		unsigned int flags = 0;
+	اگر (!quiet) {
+		غیرعلامتی صحیح flags = 0;
 
-		if (!current_head)
+		اگر (!current_سر)
 			flags |= SUMMARY_INITIAL_COMMIT;
-		if (author_date_is_interesting())
+		اگر (author_date_is_interesting())
 			flags |= SUMMARY_SHOW_AUTHOR_DATE;
-		print_commit_summary(the_repository, prefix,
+		print_commit_summary(the_repository, سابقہ,
 				     &oid, flags);
 	}
 
 	apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-			    NULL, NULL, NULL, NULL);
+			    تہی, تہی, تہی, تہی);
 
 cleanup:
-	free_commit_extra_headers(extra);
+	free_commit_extra_سرخیاں(extra);
 	commit_list_free(parents);
 	strbuf_release(&author_ident);
 	strbuf_release(&err);
 	strbuf_release(&sb);
-	free(logfile);
-	free(template_file);
-	return ret;
+	آزاد(logfile);
+	آزاد(template_file);
+	واپس ret;
 }
