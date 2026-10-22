@@ -9,96 +9,96 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#ضمن "builtin.h"
 
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "editor.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "lockfile.h"
-#include "repository.h"
-#include "run-command.h"
-#include "hook.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "refs.h"
-#include "refspec.h"
-#include "commit.h"
-#include "diffcore.h"
-#include "path.h"
-#include "revision.h"
-#include "unpack-trees.h"
-#include "cache-tree.h"
-#include "dir.h"
-#include "color.h"
-#include "rerere.h"
-#include "help.h"
-#include "merge.h"
-#include "merge-ort-wrappers.h"
-#include "resolve-undo.h"
-#include "remote.h"
-#include "fmt-merge-msg.h"
-#include "sequencer.h"
-#include "string-list.h"
-#include "tag.h"
-#include "alias.h"
-#include "branch.h"
-#include "commit-reach.h"
-#include "wt-status.h"
-#include "commit-graph.h"
+#ضمن "abspath.h"
+#ضمن "advice.h"
+#ضمن "config.h"
+#ضمن "editor.h"
+#ضمن "environment.h"
+#ضمن "gettext.h"
+#ضمن "hex.h"
+#ضمن "object-name.h"
+#ضمن "parse-options.h"
+#ضمن "lockfile.h"
+#ضمن "repository.h"
+#ضمن "run-command.h"
+#ضمن "hook.h"
+#ضمن "diff.h"
+#ضمن "diff-merges.h"
+#ضمن "refs.h"
+#ضمن "refspec.h"
+#ضمن "commit.h"
+#ضمن "diffcore.h"
+#ضمن "path.h"
+#ضمن "revision.h"
+#ضمن "unpack-trees.h"
+#ضمن "cache-tree.h"
+#ضمن "dir.h"
+#ضمن "color.h"
+#ضمن "rerere.h"
+#ضمن "help.h"
+#ضمن "merge.h"
+#ضمن "merge-ort-wrappers.h"
+#ضمن "resolve-undo.h"
+#ضمن "remote.h"
+#ضمن "fmt-merge-msg.h"
+#ضمن "sequencer.h"
+#ضمن "string-list.h"
+#ضمن "tag.h"
+#ضمن "alias.h"
+#ضمن "branch.h"
+#ضمن "commit-reach.h"
+#ضمن "wt-status.h"
+#ضمن "commit-graph.h"
 
 #define DEFAULT_TWOHEAD (1<<0)
 #define DEFAULT_OCTOPUS (1<<1)
 #define NO_FAST_FORWARD (1<<2)
 #define NO_TRIVIAL      (1<<3)
 
-struct strategy {
-	const char *name;
+بنية strategy {
+	ثابت حرف *name;
 	unsigned attr;
 };
 
-static const char * const builtin_merge_usage[] = {
+ساكن ثابت حرف * ثابت builtin_merge_usage[] = {
 	N_("git merge [<options>] [<commit>...]"),
 	"git merge --abort",
 	"git merge --continue",
-	NULL
+	عدم
 };
 
 #define MERGE_SHOW_DIFFSTAT 1
 #define MERGE_SHOW_COMPACTSUMMARY 2
 
-static int show_diffstat = MERGE_SHOW_DIFFSTAT, shortlog_len = -1, squash;
-static int option_commit = -1;
-static int option_edit = -1;
-static int allow_trivial = 1, have_message, verify_signatures;
-static int check_trust_level = 1;
-static int overwrite_ignore = 1;
-static struct strbuf merge_msg = STRBUF_INIT;
-static struct strategy **use_strategies;
-static size_t use_strategies_nr, use_strategies_alloc;
-static struct strvec xopts = STRVEC_INIT;
-static const char *branch;
-static char *branch_mergeoptions;
-static int verbosity;
-static int allow_rerere_auto;
-static int abort_current_merge;
-static int quit_current_merge;
-static int continue_current_merge;
-static int allow_unrelated_histories;
-static int show_progress = -1;
-static int default_to_upstream = 1;
-static int signoff;
-static const char *sign_commit;
-static int autostash;
-static int no_verify;
-static char *into_name;
+ساكن صحيح show_diffstat = MERGE_SHOW_DIFFSTAT, shortlog_len = -1, squash;
+ساكن صحيح option_commit = -1;
+ساكن صحيح option_edit = -1;
+ساكن صحيح allow_trivial = 1, have_message, verify_signatures;
+ساكن صحيح check_trust_level = 1;
+ساكن صحيح overwrite_ignore = 1;
+ساكن بنية strbuf merge_پەیام = STRBUF_INIT;
+ساكن بنية strategy **use_strategies;
+ساكن size_t use_strategies_nr, use_strategies_alloc;
+ساكن بنية strvec xopts = STRVEC_INIT;
+ساكن ثابت حرف *branch;
+ساكن حرف *branch_mergeoptions;
+ساكن صحيح verbosity;
+ساكن صحيح allow_rerere_auto;
+ساكن صحيح abort_current_merge;
+ساكن صحيح quit_current_merge;
+ساكن صحيح continue_current_merge;
+ساكن صحيح allow_unrelated_histories;
+ساكن صحيح show_progress = -1;
+ساكن صحيح default_to_upstream = 1;
+ساكن صحيح signoff;
+ساكن ثابت حرف *sign_commit;
+ساكن صحيح autostash;
+ساكن صحيح no_verify;
+ساكن حرف *into_name;
 
-static struct strategy all_strategy[] = {
+ساكن بنية strategy all_strategy[] = {
 	{ "recursive",  NO_TRIVIAL },
 	{ "octopus",    DEFAULT_OCTOPUS },
 	{ "ort",        DEFAULT_TWOHEAD | NO_TRIVIAL },
@@ -107,114 +107,114 @@ static struct strategy all_strategy[] = {
 	{ "subtree",    NO_FAST_FORWARD | NO_TRIVIAL },
 };
 
-static char *pull_twohead, *pull_octopus;
+ساكن حرف *pull_twohead, *pull_octopus;
 
-enum ff_type {
+تعداد ff_type {
 	FF_NO,
 	FF_ALLOW,
 	FF_ONLY
 };
 
-static enum ff_type fast_forward = FF_ALLOW;
+ساكن تعداد ff_type fast_forward = FF_ALLOW;
 
-static char *cleanup_arg;
-static enum commit_msg_cleanup_mode cleanup_mode;
+ساكن حرف *cleanup_arg;
+ساكن تعداد commit_پەیام_cleanup_mode cleanup_mode;
 
-static int option_parse_message(const struct option *opt,
-				const char *arg, int unset)
+ساكن صحيح option_parse_message(ثابت بنية option *opt,
+				ثابت حرف *arg, صحيح unset)
 {
-	struct strbuf *buf = opt->value;
+	بنية strbuf *buf = opt->بەها;
 
-	if (unset)
+	إذا (unset)
 		strbuf_setlen(buf, 0);
-	else if (arg) {
+	وإلا إذا (arg) {
 		strbuf_addf(buf, "%s%s", buf->len ? "\n\n" : "", arg);
 		have_message = 1;
-	} else
-		return error(_("switch `m' requires a value"));
-	return 0;
+	} وإلا
+		أرجع error(_("switch `m' requires a value"));
+	أرجع 0;
 }
 
-static enum parse_opt_result option_read_message(struct parse_opt_ctx_t *ctx,
-						 const struct option *opt,
-						 const char *arg_not_used,
-						 int unset)
+ساكن تعداد parse_opt_result option_read_message(بنية parse_opt_ctx_t *ctx,
+						 ثابت بنية option *opt,
+						 ثابت حرف *arg_not_used,
+						 صحيح unset)
 {
-	struct strbuf *buf = opt->value;
-	const char *arg;
+	بنية strbuf *buf = opt->بەها;
+	ثابت حرف *arg;
 
 	BUG_ON_OPT_ARG(arg_not_used);
-	if (unset)
+	إذا (unset)
 		BUG("-F cannot be negated");
 
-	if (ctx->opt) {
+	إذا (ctx->opt) {
 		arg = ctx->opt;
-		ctx->opt = NULL;
-	} else if (ctx->argc > 1) {
+		ctx->opt = عدم;
+	} وإلا إذا (ctx->argc > 1) {
 		ctx->argc--;
 		arg = *++ctx->argv;
-	} else
-		return error(_("option `%s' requires a value"), opt->long_name);
+	} وإلا
+		أرجع error(_("option `%s' requires a value"), opt->long_name);
 
-	if (buf->len)
+	إذا (buf->len)
 		strbuf_addch(buf, '\n');
-	if (ctx->prefix && !is_absolute_path(arg))
+	إذا (ctx->prefix && !is_absolute_path(arg))
 		arg = prefix_filename(ctx->prefix, arg);
-	if (strbuf_read_file(buf, arg, 0) < 0)
-		return error(_("could not read file '%s'"), arg);
+	إذا (strbuf_read_file(buf, arg, 0) < 0)
+		أرجع error(_("could not read file '%s'"), arg);
 	have_message = 1;
 
-	return 0;
+	أرجع 0;
 }
 
-static struct strategy *get_strategy(const char *name)
+ساكن بنية strategy *get_strategy(ثابت حرف *name)
 {
-	int i;
-	struct strategy *ret;
-	static struct cmdnames main_cmds = {0}, other_cmds = {0};
-	static int loaded;
-	char *default_strategy = NULL;
+	صحيح i;
+	بنية strategy *ret;
+	ساكن بنية cmdnames main_cmds = {0}, other_cmds = {0};
+	ساكن صحيح loaded;
+	حرف *default_strategy = عدم;
 
-	if (!name)
-		return NULL;
+	إذا (!name)
+		أرجع عدم;
 
-	if (default_strategy &&
+	إذا (default_strategy &&
 	    !strcmp(default_strategy, "ort") &&
 	    !strcmp(name, "recursive")) {
 		name = "ort";
 	}
 
-	for (i = 0; i < ARRAY_SIZE(all_strategy); i++)
-		if (!strcmp(name, all_strategy[i].name))
-			return &all_strategy[i];
+	لكل (i = 0; i < ARRAY_SIZE(all_strategy); i++)
+		إذا (!strcmp(name, all_strategy[i].name))
+			أرجع &all_strategy[i];
 
-	if (!loaded) {
-		struct cmdnames not_strategies = {0};
+	إذا (!loaded) {
+		بنية cmdnames not_strategies = {0};
 		loaded = 1;
 
 		load_command_list("git-merge-", &main_cmds, &other_cmds);
-		for (i = 0; i < main_cmds.cnt; i++) {
-			int j, found = 0;
-			struct cmdname *ent = main_cmds.names[i];
-			for (j = 0; !found && j < ARRAY_SIZE(all_strategy); j++)
-				if (!xstrncmpz(all_strategy[j].name, ent->name, ent->len))
+		لكل (i = 0; i < main_cmds.cnt; i++) {
+			صحيح j, found = 0;
+			بنية cmdname *ent = main_cmds.names[i];
+			لكل (j = 0; !found && j < ARRAY_SIZE(all_strategy); j++)
+				إذا (!xstrncmpz(all_strategy[j].name, ent->name, ent->len))
 					found = 1;
-			if (!found)
+			إذا (!found)
 				add_cmdname(&not_strategies, ent->name, ent->len);
 		}
 		exclude_cmds(&main_cmds, &not_strategies);
 
 		cmdnames_release(&not_strategies);
 	}
-	if (!is_in_cmdlist(&main_cmds, name) && !is_in_cmdlist(&other_cmds, name)) {
+	إذا (!is_in_cmdlist(&main_cmds, name) && !is_in_cmdlist(&other_cmds, name)) {
 		fprintf(stderr, _("Could not find merge strategy '%s'.\n"), name);
 		fprintf(stderr, _("Available strategies are:"));
-		for (i = 0; i < main_cmds.cnt; i++)
+		لكل (i = 0; i < main_cmds.cnt; i++)
 			fprintf(stderr, " %s", main_cmds.names[i]->name);
 		fprintf(stderr, ".\n");
-		if (other_cmds.cnt) {
+		إذا (other_cmds.cnt) {
 			fprintf(stderr, _("Available custom strategies are:"));
-			for (i = 0; i < other_cmds.cnt; i++)
+			لكل (i = 0; i < other_cmds.cnt; i++)
 				fprintf(stderr, " %s", other_cmds.names[i]->name);
 			fprintf(stderr, ".\n");
 		}
@@ -227,52 +227,52 @@ static struct strategy *get_strategy(const char *name)
 
 	cmdnames_release(&main_cmds);
 	cmdnames_release(&other_cmds);
-	return ret;
+	أرجع ret;
 }
 
-static void append_strategy(struct strategy *s)
+ساكن فراغ append_strategy(بنية strategy *s)
 {
 	ALLOC_GROW(use_strategies, use_strategies_nr + 1, use_strategies_alloc);
 	use_strategies[use_strategies_nr++] = s;
 }
 
-static int option_parse_strategy(const struct option *opt UNUSED,
-				 const char *name, int unset)
+ساكن صحيح option_parse_strategy(ثابت بنية option *opt UNUSED,
+				 ثابت حرف *name, صحيح unset)
 {
-	if (unset)
-		return 0;
+	إذا (unset)
+		أرجع 0;
 
 	append_strategy(get_strategy(name));
-	return 0;
+	أرجع 0;
 }
 
-static int option_parse_compact_summary(const struct option *opt,
-					const char *name UNUSED, int unset)
+ساكن صحيح option_parse_compact_summary(ثابت بنية option *opt,
+					ثابت حرف *name UNUSED, صحيح unset)
 {
-	int *setting = opt->value;
+	صحيح *setting = opt->بەها;
 
-	if (unset)
+	إذا (unset)
 		*setting = 0;
-	else
+	وإلا
 		*setting = MERGE_SHOW_COMPACTSUMMARY;
-	return 0;
+	أرجع 0;
 }
 
-static struct option builtin_merge_options[] = {
-	OPT_SET_INT('n', NULL, &show_diffstat,
+ساكن بنية option builtin_merge_options[] = {
+	OPT_SET_INT('n', عدم, &show_diffstat,
 		N_("do not show a diffstat at the end of the merge"), 0),
 	OPT_BOOL(0, "stat", &show_diffstat,
 		N_("show a diffstat at the end of the merge")),
 	OPT_BOOL(0, "summary", &show_diffstat, N_("(synonym to --stat)")),
-	OPT_CALLBACK_F(0, "compact-summary", &show_diffstat, NULL,
+	OPT_CALLBACK_F(0, "compact-summary", &show_diffstat, عدم,
 		       N_("show a compact-summary at the end of the merge"),
 		       PARSE_OPT_NOARG,
 		       option_parse_compact_summary),
 	{
 		.type = OPTION_INTEGER,
 		.long_name = "log",
-		.value = &shortlog_len,
-		.precision = sizeof(shortlog_len),
+		.بەها = &shortlog_len,
+		.precision = حجم(shortlog_len),
 		.argh = N_("n"),
 		.help = N_("add (at most <n>) entries from shortlog to merge commit message"),
 		.flags = PARSE_OPT_OPTARG,
@@ -292,18 +292,18 @@ static struct option builtin_merge_options[] = {
 	OPT_RERERE_AUTOUPDATE(&allow_rerere_auto),
 	OPT_BOOL(0, "verify-signatures", &verify_signatures,
 		N_("verify that the named commit has a valid GPG signature")),
-	OPT_CALLBACK('s', "strategy", NULL, N_("strategy"),
+	OPT_CALLBACK('s', "strategy", عدم, N_("strategy"),
 		N_("merge strategy to use"), option_parse_strategy),
 	OPT_STRVEC('X', "strategy-option", &xopts, N_("option=value"),
 		N_("option for selected merge strategy")),
-	OPT_CALLBACK('m', "message", &merge_msg, N_("message"),
+	OPT_CALLBACK('m', "message", &merge_پەیام, N_("message"),
 		N_("merge commit message (for a non-fast-forward merge)"),
 		option_parse_message),
 	{
 		.type = OPTION_LOWLEVEL_CALLBACK,
 		.short_name = 'F',
 		.long_name = "file",
-		.value = &merge_msg,
+		.بەها = &merge_پەیام,
 		.argh = N_("path"),
 		.help = N_("read message from file"),
 		.flags = PARSE_OPT_NONEG,
@@ -325,7 +325,7 @@ static struct option builtin_merge_options[] = {
 		.type = OPTION_STRING,
 		.short_name = 'S',
 		.long_name = "gpg-sign",
-		.value = &sign_commit,
+		.بەها = &sign_commit,
 		.argh = N_("key-id"),
 		.help = N_("GPG sign commit"),
 		.flags = PARSE_OPT_OPTARG,
@@ -338,80 +338,80 @@ static struct option builtin_merge_options[] = {
 	OPT_END()
 };
 
-static int save_state(struct object_id *stash)
+ساكن صحيح save_state(بنية object_id *stash)
 {
-	int len;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf buffer = STRBUF_INIT;
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
-	int rc = -1;
+	صحيح len;
+	بنية child_process cp = CHILD_PROCESS_INIT;
+	بنية strbuf buffer = STRBUF_INIT;
+	بنية lock_file lock_file = LOCK_INIT;
+	صحيح fd;
+	صحيح rc = -1;
 
 	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-	if (0 <= fd)
+	refresh_index(the_repository->index, REFRESH_QUIET, عدم, عدم, عدم);
+	إذا (0 <= fd)
 		repo_update_index_if_able(the_repository, &lock_file);
 	rollback_lock_file(&lock_file);
 
-	strvec_pushl(&cp.args, "stash", "create", NULL);
+	strvec_pushl(&cp.args, "stash", "create", عدم);
 	cp.out = -1;
 	cp.git_cmd = 1;
 
-	if (start_command(&cp))
+	إذا (start_command(&cp))
 		die(_("could not run stash."));
 	len = strbuf_read(&buffer, cp.out, 1024);
 	close(cp.out);
 
-	if (finish_command(&cp) || len < 0)
+	إذا (finish_command(&cp) || len < 0)
 		die(_("stash failed"));
-	else if (!len)		/* no changes */
-		goto out;
+	وإلا إذا (!len)		/* no changes */
+		اذهب out;
 	strbuf_setlen(&buffer, buffer.len-1);
-	if (repo_get_oid(the_repository, buffer.buf, stash))
+	إذا (repo_get_oid(the_repository, buffer.buf, stash))
 		die(_("not a valid object: %s"), buffer.buf);
 	rc = 0;
 out:
 	strbuf_release(&buffer);
-	return rc;
+	أرجع rc;
 }
 
-static void read_empty(const struct object_id *oid)
+ساكن فراغ read_empty(ثابت بنية object_id *oid)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_pushl(&cmd.args, "read-tree", "-m", "-u",
-		     empty_tree_oid_hex(the_repository->hash_algo),
-		     oid_to_hex(oid), NULL);
+		     empty_درەخت_oid_hex(the_repository->hash_algo),
+		     oid_to_hex(oid), عدم);
 	cmd.git_cmd = 1;
 
-	if (run_command(&cmd))
+	إذا (run_command(&cmd))
 		die(_("read-tree failed"));
 }
 
-static void reset_hard(const struct object_id *oid)
+ساكن فراغ reset_hard(ثابت بنية object_id *oid)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية child_process cmd = CHILD_PROCESS_INIT;
 
 	strvec_pushl(&cmd.args, "read-tree", "-v", "--reset", "-u",
-		     oid_to_hex(oid), NULL);
+		     oid_to_hex(oid), عدم);
 	cmd.git_cmd = 1;
 
-	if (run_command(&cmd))
+	إذا (run_command(&cmd))
 		die(_("read-tree failed"));
 }
 
-static void restore_state(const struct object_id *head,
-			  const struct object_id *stash)
+ساكن فراغ restore_state(ثابت بنية object_id *head,
+			  ثابت بنية object_id *stash)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	بنية child_process cmd = CHILD_PROCESS_INIT;
 
 	reset_hard(head);
 
-	if (is_null_oid(stash))
-		goto refresh_cache;
+	إذا (is_null_oid(stash))
+		اذهب refresh_cache;
 
-	strvec_pushl(&cmd.args, "stash", "apply", "--index", "--quiet", NULL);
-	strvec_push(&cmd.args, oid_to_hex(stash));
+	strvec_pushl(&cmd.args, "stash", "apply", "--index", "--quiet", عدم);
+	strvec_پاڵنان(&cmd.args, oid_to_hex(stash));
 
 	/*
 	 * It is OK to ignore error here, for example when there was
@@ -422,43 +422,43 @@ static void restore_state(const struct object_id *head,
 
 refresh_cache:
 	discard_index(the_repository->index);
-	if (repo_read_index(the_repository) < 0)
+	إذا (repo_read_index(the_repository) < 0)
 		die(_("could not read index"));
 }
 
 /* This is called when no merge was necessary. */
-static void finish_up_to_date(void)
+ساكن فراغ finish_up_to_date(فراغ)
 {
-	if (verbosity >= 0) {
-		if (squash)
+	إذا (verbosity >= 0) {
+		إذا (squash)
 			puts(_("Already up to date. (nothing to squash)"));
-		else
+		وإلا
 			puts(_("Already up to date."));
 	}
 	remove_merge_branch_state(the_repository);
 }
 
-static void squash_message(struct commit *commit, struct commit_list *remoteheads)
+ساكن فراغ squash_message(بنية commit *commit, بنية commit_list *remoteheads)
 {
-	struct rev_info rev;
-	struct strbuf out = STRBUF_INIT;
-	struct commit_list *j;
-	struct pretty_print_context ctx = {0};
+	بنية rev_info rev;
+	بنية strbuf out = STRBUF_INIT;
+	بنية commit_list *j;
+	بنية pretty_print_context ctx = {0};
 
 	printf(_("Squash commit -- not updating HEAD\n"));
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, عدم);
 	diff_merges_suppress(&rev);
 	rev.commit_format = CMIT_FMT_MEDIUM;
 
 	commit->object.flags |= UNINTERESTING;
-	add_pending_object(&rev, &commit->object, NULL);
+	add_pending_object(&rev, &commit->object, عدم);
 
-	for (j = remoteheads; j; j = j->next)
-		add_pending_object(&rev, &j->item->object, NULL);
+	لكل (j = remoteheads; j; j = j->next)
+		add_pending_object(&rev, &j->item->object, عدم);
 
-	setup_revisions(0, NULL, &rev, NULL);
-	if (prepare_revision_walk(&rev))
+	setup_revisions(0, عدم, &rev, عدم);
+	إذا (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 
 	ctx.abbrev = rev.abbrev;
@@ -466,38 +466,38 @@ static void squash_message(struct commit *commit, struct commit_list *remotehead
 	ctx.fmt = rev.commit_format;
 
 	strbuf_addstr(&out, "Squashed commit of the following:\n");
-	while ((commit = get_revision(&rev)) != NULL) {
+	طالما ((commit = get_revision(&rev)) != عدم) {
 		strbuf_addch(&out, '\n');
 		strbuf_addf(&out, "commit %s\n",
 			oid_to_hex(&commit->object.oid));
 		pretty_print_commit(&ctx, commit, &out);
 	}
-	write_file_buf(git_path_squash_msg(the_repository), out.buf, out.len);
+	write_file_buf(git_path_squash_پەیام(the_repository), out.buf, out.len);
 	strbuf_release(&out);
 	release_revisions(&rev);
 }
 
-static void finish(struct commit *head_commit,
-		   struct commit_list *remoteheads,
-		   const struct object_id *new_head, const char *msg)
+ساكن فراغ finish(بنية commit *head_commit,
+		   بنية commit_list *remoteheads,
+		   ثابت بنية object_id *new_head, ثابت حرف *پەیام)
 {
-	struct strbuf reflog_message = STRBUF_INIT;
-	const struct object_id *head = &head_commit->object.oid;
+	بنية strbuf reflog_message = STRBUF_INIT;
+	ثابت بنية object_id *head = &head_commit->object.oid;
 
-	if (!msg)
+	إذا (!پەیام)
 		strbuf_addstr(&reflog_message, getenv("GIT_REFLOG_ACTION"));
-	else {
-		if (verbosity >= 0)
-			printf("%s\n", msg);
+	وإلا {
+		إذا (verbosity >= 0)
+			printf("%s\n", پەیام);
 		strbuf_addf(&reflog_message, "%s: %s",
-			getenv("GIT_REFLOG_ACTION"), msg);
+			getenv("GIT_REFLOG_ACTION"), پەیام);
 	}
-	if (squash) {
+	إذا (squash) {
 		squash_message(head_commit, remoteheads);
-	} else {
-		if (verbosity >= 0 && !merge_msg.len)
+	} وإلا {
+		إذا (verbosity >= 0 && !merge_پەیام.len)
 			printf(_("No merge message -- not updating HEAD\n"));
-		else {
+		وإلا {
 			refs_update_ref(get_main_ref_store(the_repository),
 					reflog_message.buf, "HEAD", new_head,
 					head,
@@ -509,181 +509,181 @@ static void finish(struct commit *head_commit,
 			run_auto_maintenance(the_repository, verbosity < 0);
 		}
 	}
-	if (new_head && show_diffstat) {
-		struct diff_options opts;
+	إذا (new_head && show_diffstat) {
+		بنية diff_options opts;
 		repo_diff_setup(the_repository, &opts);
 		init_diffstat_widths(&opts);
 
-		switch (show_diffstat) {
-		case MERGE_SHOW_DIFFSTAT: /* 1 */
+		بدل (show_diffstat) {
+		حالة MERGE_SHOW_DIFFSTAT: /* 1 */
 			opts.output_format |=
 				DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
-			break;
-		case MERGE_SHOW_COMPACTSUMMARY: /* 2 */
+			اكسر;
+		حالة MERGE_SHOW_COMPACTSUMMARY: /* 2 */
 			opts.output_format |= DIFF_FORMAT_DIFFSTAT;
 			opts.flags.stat_with_summary = 1;
-			break;
-		default:
-			break;
+			اكسر;
+		افتراضي:
+			اكسر;
 		}
 		opts.detect_rename = DIFF_DETECT_RENAME;
 		diff_setup_done(&opts);
-		diff_tree_oid(head, new_head, "", &opts);
+		diff_درەخت_oid(head, new_head, "", &opts);
 		diffcore_std(&opts);
 		diff_flush(&opts);
 	}
 
 	/* Run a post-merge hook */
-	run_hooks_l(the_repository, "post-merge", squash ? "1" : "0", NULL);
+	run_hooks_l(the_repository, "post-merge", squash ? "1" : "0", عدم);
 
-	if (new_head)
+	إذا (new_head)
 		apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				    NULL, NULL, NULL, NULL);
+				    عدم, عدم, عدم, عدم);
 	strbuf_release(&reflog_message);
 }
 
 /* Get the name for the merge commit's message. */
-static void merge_name(const char *remote, struct strbuf *msg)
+ساكن فراغ merge_name(ثابت حرف *remote, بنية strbuf *پەیام)
 {
-	struct commit *remote_head;
-	struct object_id branch_head;
-	struct strbuf bname = STRBUF_INIT;
-	struct merge_remote_desc *desc;
-	const char *ptr;
-	char *found_ref = NULL;
-	int len, early;
+	بنية commit *remote_head;
+	بنية object_id branch_head;
+	بنية strbuf bname = STRBUF_INIT;
+	بنية merge_remote_desc *desc;
+	ثابت حرف *ptr;
+	حرف *found_ref = عدم;
+	صحيح len, early;
 
 	copy_branchname(the_repository, &bname, remote, 0);
 	remote = bname.buf;
 
 	oidclr(&branch_head, the_repository->hash_algo);
 	remote_head = get_merge_parent(remote);
-	if (!remote_head)
+	إذا (!remote_head)
 		die(_("'%s' does not point to a commit"), remote);
 
-	if (repo_dwim_ref(the_repository, remote, strlen(remote), &branch_head,
+	إذا (repo_dwim_ref(the_repository, remote, strlen(remote), &branch_head,
 			  &found_ref, 0) > 0) {
-		if (starts_with(found_ref, "refs/heads/")) {
-			strbuf_addf(msg, "%s\t\tbranch '%s' of .\n",
+		إذا (starts_with(found_ref, "refs/heads/")) {
+			strbuf_addf(پەیام, "%s\t\tbranch '%s' of .\n",
 				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+			اذهب cleanup;
 		}
-		if (starts_with(found_ref, "refs/tags/")) {
-			strbuf_addf(msg, "%s\t\ttag '%s' of .\n",
+		إذا (starts_with(found_ref, "refs/tags/")) {
+			strbuf_addf(پەیام, "%s\t\ttag '%s' of .\n",
 				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+			اذهب cleanup;
 		}
-		if (starts_with(found_ref, "refs/remotes/")) {
-			strbuf_addf(msg, "%s\t\tremote-tracking branch '%s' of .\n",
+		إذا (starts_with(found_ref, "refs/remotes/")) {
+			strbuf_addf(پەیام, "%s\t\tremote-tracking branch '%s' of .\n",
 				    oid_to_hex(&branch_head), remote);
-			goto cleanup;
+			اذهب cleanup;
 		}
 	}
 
 	/* See if remote matches <name>^^^.. or <name>~<number> */
-	for (len = 0, ptr = remote + strlen(remote);
+	لكل (len = 0, ptr = remote + strlen(remote);
 	     remote < ptr && ptr[-1] == '^';
 	     ptr--)
 		len++;
-	if (len)
+	إذا (len)
 		early = 1;
-	else {
+	وإلا {
 		early = 0;
 		ptr = strrchr(remote, '~');
-		if (ptr) {
-			int seen_nonzero = 0;
+		إذا (ptr) {
+			صحيح seen_nonzero = 0;
 
 			len++; /* count ~ */
-			while (*++ptr && isdigit(*ptr)) {
+			طالما (*++ptr && isdigit(*ptr)) {
 				seen_nonzero |= (*ptr != '0');
 				len++;
 			}
-			if (*ptr)
+			إذا (*ptr)
 				len = 0; /* not ...~<number> */
-			else if (seen_nonzero)
+			وإلا إذا (seen_nonzero)
 				early = 1;
-			else if (len == 1)
+			وإلا إذا (len == 1)
 				early = 1; /* "name~" is "name~1"! */
 		}
 	}
-	if (len) {
-		struct strbuf truname = STRBUF_INIT;
+	إذا (len) {
+		بنية strbuf truname = STRBUF_INIT;
 		strbuf_addf(&truname, "refs/heads/%s", remote);
 		strbuf_setlen(&truname, truname.len - len);
-		if (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
-			strbuf_addf(msg,
+		إذا (refs_ref_exists(get_main_ref_store(the_repository), truname.buf)) {
+			strbuf_addf(پەیام,
 				    "%s\t\tbranch '%s'%s of .\n",
 				    oid_to_hex(&remote_head->object.oid),
 				    truname.buf + 11,
 				    (early ? " (early part)" : ""));
 			strbuf_release(&truname);
-			goto cleanup;
+			اذهب cleanup;
 		}
 		strbuf_release(&truname);
 	}
 
 	desc = merge_remote_util(remote_head);
-	if (desc && desc->obj && desc->obj->type == OBJ_TAG) {
-		strbuf_addf(msg, "%s\t\t%s '%s'\n",
+	إذا (desc && desc->obj && desc->obj->type == OBJ_TAG) {
+		strbuf_addf(پەیام, "%s\t\t%s '%s'\n",
 			    oid_to_hex(&desc->obj->oid),
 			    type_name(desc->obj->type),
 			    remote);
-		goto cleanup;
+		اذهب cleanup;
 	}
 
-	strbuf_addf(msg, "%s\t\tcommit '%s'\n",
+	strbuf_addf(پەیام, "%s\t\tcommit '%s'\n",
 		oid_to_hex(&remote_head->object.oid), remote);
 cleanup:
-	free(found_ref);
+	حرر(found_ref);
 	strbuf_release(&bname);
 }
 
-static void parse_branch_merge_options(char *bmo)
+ساكن فراغ parse_branch_merge_options(حرف *bmo)
 {
-	const char **argv;
-	int argc;
+	ثابت حرف **argv;
+	صحيح argc;
 
-	if (!bmo)
-		return;
+	إذا (!bmo)
+		أرجع;
 	argc = split_cmdline(bmo, &argv);
-	if (argc < 0)
+	إذا (argc < 0)
 		die(_("Bad branch.%s.mergeoptions string: %s"), branch,
 		    _(split_cmdline_strerror(argc)));
 	REALLOC_ARRAY(argv, argc + 2);
 	MOVE_ARRAY(argv + 1, argv, argc + 1);
 	argc++;
 	argv[0] = "branch.*.mergeoptions";
-	parse_options(argc, argv, NULL, builtin_merge_options,
+	parse_options(argc, argv, عدم, builtin_merge_options,
 		      builtin_merge_usage, 0);
-	free(argv);
+	حرر(argv);
 }
 
-static int git_merge_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+ساكن صحيح git_merge_config(ثابت حرف *k, ثابت حرف *v,
+			    ثابت بنية config_context *ctx, فراغ *cb)
 {
-	int status;
-	const char *str;
+	صحيح status;
+	ثابت حرف *str;
 
-	if (branch &&
+	إذا (branch &&
 	    skip_prefix(k, "branch.", &str) &&
 	    skip_prefix(str, branch, &str) &&
 	    !strcmp(str, ".mergeoptions")) {
-		free(branch_mergeoptions);
+		حرر(branch_mergeoptions);
 		branch_mergeoptions = xstrdup(v);
-		return 0;
+		أرجع 0;
 	}
 
-	if (!strcmp(k, "merge.diffstat") || !strcmp(k, "merge.stat")) {
-		int val = git_parse_maybe_bool_text(v);
-		switch (val) {
-		case 0:
+	إذا (!strcmp(k, "merge.diffstat") || !strcmp(k, "merge.stat")) {
+		صحيح val = git_parse_maybe_bool_text(v);
+		بدل (val) {
+		حالة 0:
 			show_diffstat = 0;
-			break;
-		case 1:
+			اكسر;
+		حالة 1:
 			show_diffstat = MERGE_SHOW_DIFFSTAT;
-			break;
-		default:
-			if (!strcmp(v, "compact"))
+			اكسر;
+		افتراضي:
+			إذا (!strcmp(v, "compact"))
 				show_diffstat = MERGE_SHOW_COMPACTSUMMARY;
 			/*
 			 * We do not need to have an explicit
@@ -694,61 +694,61 @@ static int git_merge_config(const char *k, const char *v,
 			 * here, because the catch-all uses the
 			 * diffstat style anyway.
 			 */
-			else
+			وإلا
 				/*
 				 * A setting from a future?  It is not an
 				 * error grave enough to fail the command.
 				 * proceed using the default one.
 				 */
 				show_diffstat = MERGE_SHOW_DIFFSTAT;
-			break;
+			اكسر;
 		}
-	} else if (!strcmp(k, "merge.verifysignatures")) {
+	} وإلا إذا (!strcmp(k, "merge.verifysignatures")) {
 		verify_signatures = git_config_bool(k, v);
-	} else if (!strcmp(k, "pull.twohead")) {
+	} وإلا إذا (!strcmp(k, "pull.twohead")) {
 		FREE_AND_NULL(pull_twohead);
-		return git_config_string(&pull_twohead, k, v);
-	} else if (!strcmp(k, "pull.octopus")) {
+		أرجع git_config_string(&pull_twohead, k, v);
+	} وإلا إذا (!strcmp(k, "pull.octopus")) {
 		FREE_AND_NULL(pull_octopus);
-		return git_config_string(&pull_octopus, k, v);
-	} else if (!strcmp(k, "commit.cleanup")) {
-		return git_config_string(&cleanup_arg, k, v);
-	} else if (!strcmp(k, "merge.ff")) {
-		int boolval = git_parse_maybe_bool(v);
-		if (0 <= boolval) {
+		أرجع git_config_string(&pull_octopus, k, v);
+	} وإلا إذا (!strcmp(k, "commit.cleanup")) {
+		أرجع git_config_string(&cleanup_arg, k, v);
+	} وإلا إذا (!strcmp(k, "merge.ff")) {
+		صحيح boolval = git_parse_maybe_bool(v);
+		إذا (0 <= boolval) {
 			fast_forward = boolval ? FF_ALLOW : FF_NO;
-		} else if (v && !strcmp(v, "only")) {
+		} وإلا إذا (v && !strcmp(v, "only")) {
 			fast_forward = FF_ONLY;
 		} /* do not barf on values from future versions of git */
-		return 0;
-	} else if (!strcmp(k, "merge.defaulttoupstream")) {
+		أرجع 0;
+	} وإلا إذا (!strcmp(k, "merge.defaulttoupstream")) {
 		default_to_upstream = git_config_bool(k, v);
-		return 0;
-	} else if (!strcmp(k, "commit.gpgsign")) {
-		sign_commit = git_config_bool(k, v) ? "" : NULL;
-		return 0;
-	} else if (!strcmp(k, "gpg.mintrustlevel")) {
+		أرجع 0;
+	} وإلا إذا (!strcmp(k, "commit.gpgsign")) {
+		sign_commit = git_config_bool(k, v) ? "" : عدم;
+		أرجع 0;
+	} وإلا إذا (!strcmp(k, "gpg.mintrustlevel")) {
 		check_trust_level = 0;
-	} else if (!strcmp(k, "merge.autostash")) {
+	} وإلا إذا (!strcmp(k, "merge.autostash")) {
 		autostash = git_config_bool(k, v);
-		return 0;
+		أرجع 0;
 	}
 
-	status = fmt_merge_msg_config(k, v, ctx, cb);
-	if (status)
-		return status;
-	return git_diff_ui_config(k, v, ctx, cb);
+	status = fmt_merge_پەیام_config(k, v, ctx, cb);
+	إذا (status)
+		أرجع status;
+	أرجع git_diff_ui_config(k, v, ctx, cb);
 }
 
-static int read_tree_trivial(struct object_id *common, struct object_id *head,
-			     struct object_id *one)
+ساكن صحيح read_درەخت_trivial(بنية object_id *common, بنية object_id *head,
+			     بنية object_id *one)
 {
-	int i, nr_trees = 0;
-	struct tree *trees[MAX_UNPACK_TREES];
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct unpack_trees_options opts;
+	صحيح i, nr_trees = 0;
+	بنية درەخت *trees[MAX_UNPACK_TREES];
+	بنية درەخت_desc t[MAX_UNPACK_TREES];
+	بنية unpack_trees_options opts;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, حجم(opts));
 	opts.head_idx = 2;
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
@@ -757,76 +757,76 @@ static int read_tree_trivial(struct object_id *common, struct object_id *head,
 	opts.trivial_merges_only = 1;
 	opts.merge = 1;
 	opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, common);
-	if (!trees[nr_trees++])
-		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, head);
-	if (!trees[nr_trees++])
-		return -1;
-	trees[nr_trees] = repo_parse_tree_indirect(the_repository, one);
-	if (!trees[nr_trees++])
-		return -1;
+	trees[nr_trees] = repo_parse_درەخت_indirect(the_repository, common);
+	إذا (!trees[nr_trees++])
+		أرجع -1;
+	trees[nr_trees] = repo_parse_درەخت_indirect(the_repository, head);
+	إذا (!trees[nr_trees++])
+		أرجع -1;
+	trees[nr_trees] = repo_parse_درەخت_indirect(the_repository, one);
+	إذا (!trees[nr_trees++])
+		أرجع -1;
 	opts.fn = threeway_merge;
-	cache_tree_free(&the_repository->index->cache_tree);
-	for (i = 0; i < nr_trees; i++) {
-		repo_parse_tree(the_repository, trees[i]);
-		init_tree_desc(t+i, &trees[i]->object.oid,
+	cache_درەخت_free(&the_repository->index->cache_درەخت);
+	لكل (i = 0; i < nr_trees; i++) {
+		repo_parse_درەخت(the_repository, trees[i]);
+		init_درەخت_desc(t+i, &trees[i]->object.oid,
 			       trees[i]->buffer, trees[i]->size);
 	}
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
-	return 0;
+	إذا (unpack_trees(nr_trees, t, &opts))
+		أرجع -1;
+	أرجع 0;
 }
 
-static void write_tree_trivial(struct object_id *oid)
+ساكن فراغ write_درەخت_trivial(بنية object_id *oid)
 {
-	if (write_index_as_tree(oid, the_repository->index,
+	إذا (write_index_as_درەخت(oid, the_repository->index,
 				repo_get_index_file(the_repository),
-				0, NULL))
+				0, عدم))
 		die(_("git write-tree failed to write a tree"));
 }
 
-static int try_merge_strategy(const char *strategy, struct commit_list *common,
-			      struct commit_list *remoteheads,
-			      struct commit *head)
+ساكن صحيح try_merge_strategy(ثابت حرف *strategy, بنية commit_list *common,
+			      بنية commit_list *remoteheads,
+			      بنية commit *head)
 {
-	const char *head_arg = "HEAD";
+	ثابت حرف *head_arg = "HEAD";
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
-					 SKIP_IF_UNCHANGED, 0, NULL, NULL,
-					 NULL) < 0)
+	إذا (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
+					 SKIP_IF_UNCHANGED, 0, عدم, عدم,
+					 عدم) < 0)
 		die(_("Unable to write index."));
 
-	if (!strcmp(strategy, "recursive") || !strcmp(strategy, "subtree") ||
+	إذا (!strcmp(strategy, "recursive") || !strcmp(strategy, "subtree") ||
 	    !strcmp(strategy, "ort")) {
-		struct lock_file lock = LOCK_INIT;
-		int clean, x;
-		struct commit *result;
-		struct commit_list *reversed = NULL;
-		struct merge_options o;
-		struct commit_list *j;
+		بنية lock_file lock = LOCK_INIT;
+		صحيح clean, x;
+		بنية commit *result;
+		بنية commit_list *reversed = عدم;
+		بنية merge_options o;
+		بنية commit_list *j;
 
-		if (remoteheads->next) {
+		إذا (remoteheads->next) {
 			error(_("Not handling anything other than two heads merge."));
-			return 2;
+			أرجع 2;
 		}
 
 		init_ui_merge_options(&o, the_repository);
-		if (!strcmp(strategy, "subtree"))
+		إذا (!strcmp(strategy, "subtree"))
 			o.subtree_shift = "";
 
 		o.show_rename_progress =
 			show_progress == -1 ? isatty(2) : show_progress;
 
-		for (x = 0; x < xopts.nr; x++)
-			if (parse_merge_opt(&o, xopts.v[x]))
+		لكل (x = 0; x < xopts.nr; x++)
+			إذا (parse_merge_opt(&o, xopts.v[x]))
 				die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 		o.branch1 = head_arg;
 		o.branch2 = merge_remote_util(remoteheads->item)->name;
 
-		for (j = common; j; j = j->next)
-			commit_list_insert(j->item, &reversed);
+		لكل (j = common; j; j = j->next)
+			commit_list_زیادکردن(j->item, &reversed);
 
 		repo_hold_locked_index(the_repository, &lock,
 				       LOCK_DIE_ON_ERROR);
@@ -835,201 +835,201 @@ static int try_merge_strategy(const char *strategy, struct commit_list *common,
 		commit_list_free(reversed);
 		strbuf_release(&o.obuf);
 
-		if (clean < 0) {
+		إذا (clean < 0) {
 			rollback_lock_file(&lock);
-			return 2;
+			أرجع 2;
 		}
-		if (write_locked_index(the_repository->index, &lock,
+		إذا (write_locked_index(the_repository->index, &lock,
 				       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 			die(_("unable to write %s"), repo_get_index_file(the_repository));
-		return clean ? 0 : 1;
-	} else {
-		return try_merge_command(the_repository,
+		أرجع clean ? 0 : 1;
+	} وإلا {
+		أرجع try_merge_command(the_repository,
 					 strategy, xopts.nr, xopts.v,
 					 common, head_arg, remoteheads);
 	}
 }
 
-static void count_diff_files(struct diff_queue_struct *q,
-			     struct diff_options *opt UNUSED, void *data)
+ساكن فراغ ژماردن_diff_files(بنية diff_queue_struct *q,
+			     بنية diff_options *opt UNUSED, فراغ *data)
 {
-	int *count = data;
+	صحيح *ژماردن = data;
 
-	(*count) += q->nr;
+	(*ژماردن) += q->nr;
 }
 
-static int count_unmerged_entries(void)
+ساكن صحيح ژماردن_unmerged_entries(فراغ)
 {
-	int i, ret = 0;
+	صحيح i, ret = 0;
 
-	for (i = 0; i < the_repository->index->cache_nr; i++)
-		if (ce_stage(the_repository->index->cache[i]))
+	لكل (i = 0; i < the_repository->index->cache_nr; i++)
+		إذا (ce_stage(the_repository->index->cache[i]))
 			ret++;
 
-	return ret;
+	أرجع ret;
 }
 
-static void add_strategies(const char *string, unsigned attr)
+ساكن فراغ add_strategies(ثابت حرف *string, unsigned attr)
 {
-	int i;
+	صحيح i;
 
-	if (string) {
-		struct string_list list = STRING_LIST_INIT_DUP;
-		struct string_list_item *item;
+	إذا (string) {
+		بنية string_list list = STRING_LIST_INIT_DUP;
+		بنية string_list_item *item;
 		string_list_split(&list, string, " ", -1);
 		for_each_string_list_item(item, &list)
 			append_strategy(get_strategy(item->string));
 		string_list_clear(&list, 0);
-		return;
+		أرجع;
 	}
-	for (i = 0; i < ARRAY_SIZE(all_strategy); i++)
-		if (all_strategy[i].attr & attr)
+	لكل (i = 0; i < ARRAY_SIZE(all_strategy); i++)
+		إذا (all_strategy[i].attr & attr)
 			append_strategy(&all_strategy[i]);
 
 }
 
-static void read_merge_msg(struct strbuf *msg)
+ساكن فراغ read_merge_پەیام(بنية strbuf *پەیام)
 {
-	const char *filename = git_path_merge_msg(the_repository);
-	strbuf_reset(msg);
-	if (strbuf_read_file(msg, filename, 0) < 0)
+	ثابت حرف *filename = git_path_merge_پەیام(the_repository);
+	strbuf_reset(پەیام);
+	إذا (strbuf_read_file(پەیام, filename, 0) < 0)
 		die_errno(_("Could not read from '%s'"), filename);
 }
 
-static void write_merge_state(struct commit_list *);
-static void abort_commit(struct commit_list *remoteheads, const char *err_msg)
+ساكن فراغ write_merge_state(بنية commit_list *);
+ساكن فراغ abort_commit(بنية commit_list *remoteheads, ثابت حرف *err_پەیام)
 {
-	if (err_msg)
-		error("%s", err_msg);
+	إذا (err_پەیام)
+		error("%s", err_پەیام);
 	fprintf(stderr,
 		_("Not committing merge; use 'git commit' to complete the merge.\n"));
 	write_merge_state(remoteheads);
 	exit(1);
 }
 
-static const char merge_editor_comment[] =
+ساكن ثابت حرف merge_editor_comment[] =
 N_("Please enter a commit message to explain why this merge is necessary,\n"
    "especially if it merges an updated upstream into a topic branch.\n"
    "\n");
 
-static const char scissors_editor_comment[] =
+ساكن ثابت حرف scissors_editor_comment[] =
 N_("An empty message aborts the commit.\n");
 
-static const char no_scissors_editor_comment[] =
+ساكن ثابت حرف no_scissors_editor_comment[] =
 N_("Lines starting with '%s' will be ignored, and an empty message aborts\n"
    "the commit.\n");
 
-static void write_merge_heads(struct commit_list *);
-static void prepare_to_commit(struct commit_list *remoteheads)
+ساكن فراغ write_merge_heads(بنية commit_list *);
+ساكن فراغ prepare_to_commit(بنية commit_list *remoteheads)
 {
-	struct strbuf msg = STRBUF_INIT;
-	const char *index_file = repo_get_index_file(the_repository);
+	بنية strbuf پەیام = STRBUF_INIT;
+	ثابت حرف *index_file = repo_get_index_file(the_repository);
 
-	if (!no_verify) {
-		int invoked_hook;
+	إذا (!no_verify) {
+		صحيح invoked_hook;
 
-		if (run_commit_hook(0 < option_edit, index_file, &invoked_hook,
-				    "pre-merge-commit", NULL))
-			abort_commit(remoteheads, NULL);
+		إذا (run_commit_hook(0 < option_edit, index_file, &invoked_hook,
+				    "pre-merge-commit", عدم))
+			abort_commit(remoteheads, عدم);
 		/*
 		 * Re-read the index as pre-merge-commit hook could have updated it,
 		 * and write it out as a tree.  We must do this before we invoke
 		 * the editor and after we invoke run_status above.
 		 */
-		if (invoked_hook)
+		إذا (invoked_hook)
 			discard_index(the_repository->index);
 	}
 	read_index_from(the_repository->index, index_file,
 			repo_get_git_dir(the_repository));
-	strbuf_addbuf(&msg, &merge_msg);
-	if (squash)
+	strbuf_addbuf(&پەیام, &merge_پەیام);
+	إذا (squash)
 		BUG("the control must not reach here under --squash");
-	if (0 < option_edit) {
-		strbuf_addch(&msg, '\n');
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS) {
-			wt_status_append_cut_line(&msg);
-			strbuf_commented_addf(&msg, comment_line_str, "\n");
+	إذا (0 < option_edit) {
+		strbuf_addch(&پەیام, '\n');
+		إذا (cleanup_mode == COMMIT_پەیام_CLEANUP_SCISSORS) {
+			wt_status_append_cut_هێڵ(&پەیام);
+			strbuf_commented_addf(&پەیام, comment_هێڵ_str, "\n");
 		}
-		strbuf_commented_addf(&msg, comment_line_str,
+		strbuf_commented_addf(&پەیام, comment_هێڵ_str,
 				      _(merge_editor_comment));
-		if (cleanup_mode == COMMIT_MSG_CLEANUP_SCISSORS)
-			strbuf_commented_addf(&msg, comment_line_str,
+		إذا (cleanup_mode == COMMIT_پەیام_CLEANUP_SCISSORS)
+			strbuf_commented_addf(&پەیام, comment_هێڵ_str,
 					      _(scissors_editor_comment));
-		else
-			strbuf_commented_addf(&msg, comment_line_str,
-				_(no_scissors_editor_comment), comment_line_str);
+		وإلا
+			strbuf_commented_addf(&پەیام, comment_هێڵ_str,
+				_(no_scissors_editor_comment), comment_هێڵ_str);
 	}
-	if (signoff)
-		append_signoff(&msg, ignored_log_message_bytes(msg.buf, msg.len), 0);
+	إذا (signoff)
+		append_signoff(&پەیام, ignored_log_message_bytes(پەیام.buf, پەیام.len), 0);
 	write_merge_heads(remoteheads);
-	write_file_buf(git_path_merge_msg(the_repository), msg.buf, msg.len);
-	if (run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
-			    NULL, "prepare-commit-msg",
-			    git_path_merge_msg(the_repository), "merge", NULL))
-		abort_commit(remoteheads, NULL);
-	if (0 < option_edit) {
-		if (launch_editor(git_path_merge_msg(the_repository), NULL, NULL))
-			abort_commit(remoteheads, NULL);
+	write_file_buf(git_path_merge_پەیام(the_repository), پەیام.buf, پەیام.len);
+	إذا (run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
+			    عدم, "prepare-commit-msg",
+			    git_path_merge_پەیام(the_repository), "merge", عدم))
+		abort_commit(remoteheads, عدم);
+	إذا (0 < option_edit) {
+		إذا (launch_editor(git_path_merge_پەیام(the_repository), عدم, عدم))
+			abort_commit(remoteheads, عدم);
 	}
 
-	if (!no_verify && run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
-					  NULL, "commit-msg",
-					  git_path_merge_msg(the_repository), NULL))
-		abort_commit(remoteheads, NULL);
+	إذا (!no_verify && run_commit_hook(0 < option_edit, repo_get_index_file(the_repository),
+					  عدم, "commit-msg",
+					  git_path_merge_پەیام(the_repository), عدم))
+		abort_commit(remoteheads, عدم);
 
-	read_merge_msg(&msg);
-	cleanup_message(&msg, cleanup_mode, 0);
-	if (!msg.len)
+	read_merge_پەیام(&پەیام);
+	cleanup_message(&پەیام, cleanup_mode, 0);
+	إذا (!پەیام.len)
 		abort_commit(remoteheads, _("Empty commit message."));
-	strbuf_release(&merge_msg);
-	strbuf_addbuf(&merge_msg, &msg);
-	strbuf_release(&msg);
+	strbuf_release(&merge_پەیام);
+	strbuf_addbuf(&merge_پەیام, &پەیام);
+	strbuf_release(&پەیام);
 }
 
-static int merge_trivial(struct commit *head, struct commit_list *remoteheads)
+ساكن صحيح merge_trivial(بنية commit *head, بنية commit_list *remoteheads)
 {
-	struct object_id result_tree, result_commit;
-	struct commit_list *parents = NULL, **pptr = &parents;
+	بنية object_id result_درەخت, result_commit;
+	بنية commit_list *parents = عدم, **pptr = &parents;
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
-					 SKIP_IF_UNCHANGED, 0, NULL, NULL,
-					 NULL) < 0)
-		return error(_("Unable to write index."));
+	إذا (repo_refresh_and_write_index(the_repository, REFRESH_QUIET,
+					 SKIP_IF_UNCHANGED, 0, عدم, عدم,
+					 عدم) < 0)
+		أرجع error(_("Unable to write index."));
 
-	write_tree_trivial(&result_tree);
+	write_درەخت_trivial(&result_درەخت);
 	printf(_("Wonderful.\n"));
 	pptr = commit_list_append(head, pptr);
 	pptr = commit_list_append(remoteheads->item, pptr);
 	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, &result_tree, parents,
-			&result_commit, NULL, sign_commit))
+	إذا (commit_درەخت(merge_پەیام.buf, merge_پەیام.len, &result_درەخت, parents,
+			&result_commit, عدم, sign_commit))
 		die(_("failed to write commit object"));
 	finish(head, remoteheads, &result_commit, "In-index merge");
 
 	remove_merge_branch_state(the_repository);
 	commit_list_free(parents);
-	return 0;
+	أرجع 0;
 }
 
-static int finish_automerge(struct commit *head,
-			    int head_subsumed,
-			    struct commit_list *common,
-			    struct commit_list *remoteheads,
-			    struct object_id *result_tree,
-			    const char *wt_strategy)
+ساكن صحيح finish_automerge(بنية commit *head,
+			    صحيح head_subsumed,
+			    بنية commit_list *common,
+			    بنية commit_list *remoteheads,
+			    بنية object_id *result_درەخت,
+			    ثابت حرف *wt_strategy)
 {
-	struct commit_list *parents = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	struct object_id result_commit;
+	بنية commit_list *parents = عدم;
+	بنية strbuf buf = STRBUF_INIT;
+	بنية object_id result_commit;
 
-	write_tree_trivial(result_tree);
+	write_درەخت_trivial(result_درەخت);
 	commit_list_free(common);
 	parents = remoteheads;
-	if (!head_subsumed || fast_forward == FF_NO)
-		commit_list_insert(head, &parents);
+	إذا (!head_subsumed || fast_forward == FF_NO)
+		commit_list_زیادکردن(head, &parents);
 	prepare_to_commit(remoteheads);
-	if (commit_tree(merge_msg.buf, merge_msg.len, result_tree, parents,
-			&result_commit, NULL, sign_commit))
+	إذا (commit_درەخت(merge_پەیام.buf, merge_پەیام.len, result_درەخت, parents,
+			&result_commit, عدم, sign_commit))
 		die(_("failed to write commit object"));
 	strbuf_addf(&buf, "Merge made by the '%s' strategy.", wt_strategy);
 	finish(head, remoteheads, &result_commit, buf.buf);
@@ -1037,16 +1037,16 @@ static int finish_automerge(struct commit *head,
 	strbuf_release(&buf);
 	remove_merge_branch_state(the_repository);
 	commit_list_free(parents);
-	return 0;
+	أرجع 0;
 }
 
-static int suggest_conflicts(void)
+ساكن صحيح suggest_conflicts(فراغ)
 {
-	const char *filename;
+	ثابت حرف *filename;
 	FILE *fp;
-	struct strbuf msgbuf = STRBUF_INIT;
+	بنية strbuf msgbuf = STRBUF_INIT;
 
-	filename = git_path_merge_msg(the_repository);
+	filename = git_path_merge_پەیام(the_repository);
 	fp = xfopen(filename, "a");
 
 	/*
@@ -1064,20 +1064,20 @@ static int suggest_conflicts(void)
 	repo_rerere(the_repository, allow_rerere_auto);
 	printf(_("Automatic merge failed; "
 			"fix conflicts and then commit the result.\n"));
-	return 1;
+	أرجع 1;
 }
 
-static int evaluate_result(void)
+ساكن صحيح evaluate_result(فراغ)
 {
-	int cnt = 0;
-	struct rev_info rev;
+	صحيح cnt = 0;
+	بنية rev_info rev;
 
 	/* Check how many files differ. */
 	repo_init_revisions(the_repository, &rev, "");
-	setup_revisions(0, NULL, &rev, NULL);
+	setup_revisions(0, عدم, &rev, عدم);
 	rev.diffopt.output_format |=
 		DIFF_FORMAT_CALLBACK;
-	rev.diffopt.format_callback = count_diff_files;
+	rev.diffopt.format_callback = ژماردن_diff_files;
 	rev.diffopt.format_callback_data = &cnt;
 	run_diff_files(&rev, 0);
 
@@ -1085,55 +1085,55 @@ static int evaluate_result(void)
 	 * Check how many unmerged entries are
 	 * there.
 	 */
-	cnt += count_unmerged_entries();
+	cnt += ژماردن_unmerged_entries();
 
 	release_revisions(&rev);
-	return cnt;
+	أرجع cnt;
 }
 
 /*
  * Pretend as if the user told us to merge with the remote-tracking
  * branch we have for the upstream of the current branch
  */
-static int setup_with_upstream(const char ***argv)
+ساكن صحيح setup_with_upstream(ثابت حرف ***argv)
 {
-	struct branch *branch = branch_get(NULL);
-	int i;
-	const char **args;
+	بنية branch *branch = branch_get(عدم);
+	صحيح i;
+	ثابت حرف **args;
 
-	if (!branch)
+	إذا (!branch)
 		die(_("No current branch."));
-	if (!branch->remote_name)
+	إذا (!branch->remote_name)
 		die(_("No remote for the current branch."));
-	if (!branch->merge_nr)
+	إذا (!branch->merge_nr)
 		die(_("No default upstream defined for the current branch."));
 
-	args = xcalloc(st_add(branch->merge_nr, 1), sizeof(char *));
-	for (i = 0; i < branch->merge_nr; i++) {
-		if (!branch->merge[i]->dst)
+	args = xcalloc(st_add(branch->merge_nr, 1), حجم(حرف *));
+	لكل (i = 0; i < branch->merge_nr; i++) {
+		إذا (!branch->merge[i]->dst)
 			die(_("No remote-tracking branch for %s from %s"),
 			    branch->merge[i]->src, branch->remote_name);
 		args[i] = branch->merge[i]->dst;
 	}
-	args[i] = NULL;
+	args[i] = عدم;
 	*argv = args;
-	return i;
+	أرجع i;
 }
 
-static void write_merge_heads(struct commit_list *remoteheads)
+ساكن فراغ write_merge_heads(بنية commit_list *remoteheads)
 {
-	struct commit_list *j;
-	struct strbuf buf = STRBUF_INIT;
+	بنية commit_list *j;
+	بنية strbuf buf = STRBUF_INIT;
 
-	for (j = remoteheads; j; j = j->next) {
-		struct object_id *oid;
-		struct commit *c = j->item;
-		struct merge_remote_desc *desc;
+	لكل (j = remoteheads; j; j = j->next) {
+		بنية object_id *oid;
+		بنية commit *c = j->item;
+		بنية merge_remote_desc *desc;
 
 		desc = merge_remote_util(c);
-		if (desc && desc->obj) {
+		إذا (desc && desc->obj) {
 			oid = &desc->obj->oid;
-		} else {
+		} وإلا {
 			oid = &c->object.oid;
 		}
 		strbuf_addf(&buf, "%s\n", oid_to_hex(oid));
@@ -1141,39 +1141,39 @@ static void write_merge_heads(struct commit_list *remoteheads)
 	write_file_buf(git_path_merge_head(the_repository), buf.buf, buf.len);
 
 	strbuf_reset(&buf);
-	if (fast_forward == FF_NO)
+	إذا (fast_forward == FF_NO)
 		strbuf_addstr(&buf, "no-ff");
 	write_file_buf(git_path_merge_mode(the_repository), buf.buf, buf.len);
 	strbuf_release(&buf);
 }
 
-static void write_merge_state(struct commit_list *remoteheads)
+ساكن فراغ write_merge_state(بنية commit_list *remoteheads)
 {
 	write_merge_heads(remoteheads);
-	strbuf_addch(&merge_msg, '\n');
-	write_file_buf(git_path_merge_msg(the_repository), merge_msg.buf,
-		       merge_msg.len);
+	strbuf_addch(&merge_پەیام, '\n');
+	write_file_buf(git_path_merge_پەیام(the_repository), merge_پەیام.buf,
+		       merge_پەیام.len);
 }
 
-static int default_edit_option(void)
+ساكن صحيح default_edit_option(فراغ)
 {
-	static const char name[] = "GIT_MERGE_AUTOEDIT";
-	const char *e = getenv(name);
-	struct stat st_stdin, st_stdout;
+	ساكن ثابت حرف name[] = "GIT_MERGE_AUTOEDIT";
+	ثابت حرف *e = getenv(name);
+	بنية stat st_stdin, st_stdout;
 
-	if (have_message)
+	إذا (have_message)
 		/* an explicit -m msg without --[no-]edit */
-		return 0;
+		أرجع 0;
 
-	if (e) {
-		int v = git_parse_maybe_bool(e);
-		if (v < 0)
+	إذا (e) {
+		صحيح v = git_parse_maybe_bool(e);
+		إذا (v < 0)
 			die(_("Bad value '%s' in environment '%s'"), e, name);
-		return v;
+		أرجع v;
 	}
 
 	/* Use editor if stdin and stdout are the same and is a tty */
-	return (!fstat(0, &st_stdin) &&
+	أرجع (!fstat(0, &st_stdin) &&
 		!fstat(1, &st_stdout) &&
 		isatty(0) && isatty(1) &&
 		st_stdin.st_dev == st_stdout.st_dev &&
@@ -1181,11 +1181,11 @@ static int default_edit_option(void)
 		st_stdin.st_mode == st_stdout.st_mode);
 }
 
-static struct commit_list *reduce_parents(struct commit *head_commit,
-					  int *head_subsumed,
-					  struct commit_list *remoteheads)
+ساكن بنية commit_list *reduce_parents(بنية commit *head_commit,
+					  صحيح *head_subsumed,
+					  بنية commit_list *remoteheads)
 {
-	struct commit_list *parents, **remotes;
+	بنية commit_list *parents, **remotes;
 
 	/*
 	 * Is the current HEAD reachable from another commit being
@@ -1200,140 +1200,140 @@ static struct commit_list *reduce_parents(struct commit *head_commit,
 	parents = reduce_heads(remoteheads);
 	commit_list_free(remoteheads);
 
-	remoteheads = NULL;
+	remoteheads = عدم;
 	remotes = &remoteheads;
-	while (parents) {
-		struct commit *commit = pop_commit(&parents);
-		if (commit == head_commit)
+	طالما (parents) {
+		بنية commit *commit = دەرهێنان_commit(&parents);
+		إذا (commit == head_commit)
 			*head_subsumed = 0;
-		else
-			remotes = &commit_list_insert(commit, remotes)->next;
+		وإلا
+			remotes = &commit_list_زیادکردن(commit, remotes)->next;
 	}
-	return remoteheads;
+	أرجع remoteheads;
 }
 
-static void prepare_merge_message(struct strbuf *merge_names, struct strbuf *merge_msg)
+ساكن فراغ prepare_merge_message(بنية strbuf *merge_names, بنية strbuf *merge_پەیام)
 {
-	struct fmt_merge_msg_opts opts;
+	بنية fmt_merge_پەیام_opts opts;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, حجم(opts));
 	opts.add_title = !have_message;
 	opts.shortlog_len = shortlog_len;
 	opts.credit_people = (0 < option_edit);
 	opts.into_name = into_name;
 
-	fmt_merge_msg(merge_names, merge_msg, &opts);
-	if (merge_msg->len)
-		strbuf_setlen(merge_msg, merge_msg->len - 1);
+	fmt_merge_پەیام(merge_names, merge_پەیام, &opts);
+	إذا (merge_پەیام->len)
+		strbuf_setlen(merge_پەیام, merge_پەیام->len - 1);
 }
 
-static void handle_fetch_head(struct commit_list **remotes, struct strbuf *merge_names)
+ساكن فراغ handle_fetch_head(بنية commit_list **remotes, بنية strbuf *merge_names)
 {
-	const char *filename;
-	int fd, pos, npos;
-	struct strbuf fetch_head_file = STRBUF_INIT;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	ثابت حرف *filename;
+	صحيح fd, pos, npos;
+	بنية strbuf fetch_head_file = STRBUF_INIT;
+	ثابت unsigned hexsz = the_hash_algo->hexsz;
 
-	if (!merge_names)
+	إذا (!merge_names)
 		merge_names = &fetch_head_file;
 
 	filename = git_path_fetch_head(the_repository);
 	fd = xopen(filename, O_RDONLY);
 
-	if (strbuf_read(merge_names, fd, 0) < 0)
+	إذا (strbuf_read(merge_names, fd, 0) < 0)
 		die_errno(_("could not read '%s'"), filename);
-	if (close(fd) < 0)
+	إذا (close(fd) < 0)
 		die_errno(_("could not close '%s'"), filename);
 
-	for (pos = 0; pos < merge_names->len; pos = npos) {
-		struct object_id oid;
-		char *ptr;
-		struct commit *commit;
+	لكل (pos = 0; pos < merge_names->len; pos = npos) {
+		بنية object_id oid;
+		حرف *ptr;
+		بنية commit *commit;
 
 		ptr = strchr(merge_names->buf + pos, '\n');
-		if (ptr)
+		إذا (ptr)
 			npos = ptr - merge_names->buf + 1;
-		else
+		وإلا
 			npos = merge_names->len;
 
-		if (npos - pos < hexsz + 2 ||
+		إذا (npos - pos < hexsz + 2 ||
 		    get_oid_hex(merge_names->buf + pos, &oid))
-			commit = NULL; /* bad */
-		else if (memcmp(merge_names->buf + pos + hexsz, "\t\t", 2))
-			continue; /* not-for-merge */
-		else {
-			char saved = merge_names->buf[pos + hexsz];
+			commit = عدم; /* bad */
+		وإلا إذا (memcmp(merge_names->buf + pos + hexsz, "\t\t", 2))
+			استمر; /* not-for-merge */
+		وإلا {
+			حرف saved = merge_names->buf[pos + hexsz];
 			merge_names->buf[pos + hexsz] = '\0';
 			commit = get_merge_parent(merge_names->buf + pos);
 			merge_names->buf[pos + hexsz] = saved;
 		}
-		if (!commit) {
-			if (ptr)
+		إذا (!commit) {
+			إذا (ptr)
 				*ptr = '\0';
 			die(_("not something we can merge in %s: %s"),
 			    filename, merge_names->buf + pos);
 		}
-		remotes = &commit_list_insert(commit, remotes)->next;
+		remotes = &commit_list_زیادکردن(commit, remotes)->next;
 	}
 
-	if (merge_names == &fetch_head_file)
+	إذا (merge_names == &fetch_head_file)
 		strbuf_release(&fetch_head_file);
 }
 
-static struct commit_list *collect_parents(struct commit *head_commit,
-					   int *head_subsumed,
-					   int argc, const char **argv,
-					   struct strbuf *merge_msg)
+ساكن بنية commit_list *collect_parents(بنية commit *head_commit,
+					   صحيح *head_subsumed,
+					   صحيح argc, ثابت حرف **argv,
+					   بنية strbuf *merge_پەیام)
 {
-	int i;
-	struct commit_list *remoteheads = NULL;
-	struct commit_list **remotes = &remoteheads;
-	struct strbuf merge_names = STRBUF_INIT, *autogen = NULL;
+	صحيح i;
+	بنية commit_list *remoteheads = عدم;
+	بنية commit_list **remotes = &remoteheads;
+	بنية strbuf merge_names = STRBUF_INIT, *autogen = عدم;
 
-	if (merge_msg && (!have_message || shortlog_len))
+	إذا (merge_پەیام && (!have_message || shortlog_len))
 		autogen = &merge_names;
 
-	if (head_commit)
-		remotes = &commit_list_insert(head_commit, remotes)->next;
+	إذا (head_commit)
+		remotes = &commit_list_زیادکردن(head_commit, remotes)->next;
 
-	if (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
+	إذا (argc == 1 && !strcmp(argv[0], "FETCH_HEAD")) {
 		handle_fetch_head(remotes, autogen);
 		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
-	} else {
-		for (i = 0; i < argc; i++) {
-			struct commit *commit = get_merge_parent(argv[i]);
-			if (!commit)
+	} وإلا {
+		لكل (i = 0; i < argc; i++) {
+			بنية commit *commit = get_merge_parent(argv[i]);
+			إذا (!commit)
 				help_unknown_ref(argv[i], "merge",
 						 _("not something we can merge"));
-			remotes = &commit_list_insert(commit, remotes)->next;
+			remotes = &commit_list_زیادکردن(commit, remotes)->next;
 		}
 		remoteheads = reduce_parents(head_commit, head_subsumed, remoteheads);
-		if (autogen) {
-			struct commit_list *p;
-			for (p = remoteheads; p; p = p->next)
+		إذا (autogen) {
+			بنية commit_list *p;
+			لكل (p = remoteheads; p; p = p->next)
 				merge_name(merge_remote_util(p->item)->name, autogen);
 		}
 	}
 
-	if (autogen) {
-		prepare_merge_message(autogen, merge_msg);
+	إذا (autogen) {
+		prepare_merge_message(autogen, merge_پەیام);
 		strbuf_release(autogen);
 	}
 
-	return remoteheads;
+	أرجع remoteheads;
 }
 
-static int merging_a_throwaway_tag(struct commit *commit)
+ساكن صحيح merging_a_throwaway_tag(بنية commit *commit)
 {
-	char *tag_ref;
-	struct object_id oid;
-	int is_throwaway_tag = 0;
+	حرف *tag_ref;
+	بنية object_id oid;
+	صحيح is_throwaway_tag = 0;
 
 	/* Are we merging a tag? */
-	if (!merge_remote_util(commit) ||
+	إذا (!merge_remote_util(commit) ||
 	    !merge_remote_util(commit)->obj ||
 	    merge_remote_util(commit)->obj->type != OBJ_TAG)
-		return is_throwaway_tag;
+		أرجع is_throwaway_tag;
 
 	/*
 	 * Now we know we are merging a tag object.  Are we downstream
@@ -1350,32 +1350,32 @@ static int merging_a_throwaway_tag(struct commit *commit)
 	 * anywhere.
 	 */
 	tag_ref = xstrfmt("refs/tags/%s",
-			  ((struct tag *)merge_remote_util(commit)->obj)->tag);
-	if (!refs_read_ref(get_main_ref_store(the_repository), tag_ref, &oid) &&
+			  ((بنية tag *)merge_remote_util(commit)->obj)->tag);
+	إذا (!refs_read_ref(get_main_ref_store(the_repository), tag_ref, &oid) &&
 	    oideq(&oid, &merge_remote_util(commit)->obj->oid))
 		is_throwaway_tag = 0;
-	else
+	وإلا
 		is_throwaway_tag = 1;
-	free(tag_ref);
-	return is_throwaway_tag;
+	حرر(tag_ref);
+	أرجع is_throwaway_tag;
 }
 
-int cmd_merge(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+صحيح cmd_merge(صحيح argc,
+	      ثابت حرف **argv,
+	      ثابت حرف *prefix,
+	      بنية repository *repo UNUSED)
 {
-	struct object_id result_tree, stash, head_oid;
-	struct commit *head_commit;
-	struct strbuf buf = STRBUF_INIT;
-	int i, ret = 0, head_subsumed;
-	int best_cnt = -1, merge_was_ok = 0, automerge_was_ok = 0;
-	struct commit_list *common = NULL;
-	const char *best_strategy = NULL, *wt_strategy = NULL;
-	struct commit_list *remoteheads = NULL, *p;
-	void *branch_to_free, *argv_to_free = NULL;
-	int orig_argc = argc;
-	int merge_log_config = -1;
+	بنية object_id result_درەخت, stash, head_oid;
+	بنية commit *head_commit;
+	بنية strbuf buf = STRBUF_INIT;
+	صحيح i, ret = 0, head_subsumed;
+	صحيح best_cnt = -1, merge_was_ok = 0, automerge_was_ok = 0;
+	بنية commit_list *common = عدم;
+	ثابت حرف *best_strategy = عدم, *wt_strategy = عدم;
+	بنية commit_list *remoteheads = عدم, *p;
+	فراغ *branch_to_free, *argv_to_free = عدم;
+	صحيح orig_argc = argc;
+	صحيح merge_log_config = -1;
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_merge_usage, builtin_merge_options);
@@ -1392,42 +1392,42 @@ int cmd_merge(int argc,
 	 */
 	branch = branch_to_free = refs_resolve_refdup(get_main_ref_store(the_repository),
 						      "HEAD", 0, &head_oid,
-						      NULL);
-	if (branch)
+						      عدم);
+	إذا (branch)
 		skip_prefix(branch, "refs/heads/", &branch);
 
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_merge_config, &merge_log_config);
 
-	if (!branch || is_null_oid(&head_oid))
-		head_commit = NULL;
-	else
+	إذا (!branch || is_null_oid(&head_oid))
+		head_commit = عدم;
+	وإلا
 		head_commit = lookup_commit_or_die(&head_oid, "HEAD");
 
-	if (branch_mergeoptions)
+	إذا (branch_mergeoptions)
 		parse_branch_merge_options(branch_mergeoptions);
 	argc = parse_options(argc, argv, prefix, builtin_merge_options,
 			builtin_merge_usage, 0);
-	if (shortlog_len < 0)
+	إذا (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
-	if (verbosity < 0 && show_progress == -1)
+	إذا (verbosity < 0 && show_progress == -1)
 		show_progress = 0;
 
-	if (abort_current_merge) {
-		int nargc = 2;
-		const char *nargv[] = {"reset", "--merge", NULL};
-		char stash_oid_hex[GIT_MAX_HEXSZ + 1];
-		struct object_id stash_oid = {0};
+	إذا (abort_current_merge) {
+		صحيح nargc = 2;
+		ثابت حرف *nargv[] = {"reset", "--merge", عدم};
+		حرف stash_oid_hex[GIT_MAX_HEXSZ + 1];
+		بنية object_id stash_oid = {0};
 
-		if (orig_argc != 2)
-			usage_msg_opt(_("--abort expects no arguments"),
+		إذا (orig_argc != 2)
+			usage_پەیام_opt(_("--abort expects no arguments"),
 			      builtin_merge_usage, builtin_merge_options);
 
-		if (!file_exists(git_path_merge_head(the_repository)))
+		إذا (!file_exists(git_path_merge_head(the_repository)))
 			die(_("There is no merge to abort (MERGE_HEAD missing)."));
 
-		if (!refs_read_ref(get_main_ref_store(the_repository), "MERGE_AUTOSTASH", &stash_oid))
+		إذا (!refs_read_ref(get_main_ref_store(the_repository), "MERGE_AUTOSTASH", &stash_oid))
 			refs_delete_ref(get_main_ref_store(the_repository),
 					"", "MERGE_AUTOSTASH", &stash_oid,
 					REF_NO_DEREF);
@@ -1435,75 +1435,75 @@ int cmd_merge(int argc,
 		/* Invoke 'git reset --merge' */
 		ret = cmd_reset(nargc, nargv, prefix, the_repository);
 
-		if (!is_null_oid(&stash_oid)) {
+		إذا (!is_null_oid(&stash_oid)) {
 			oid_to_hex_r(stash_oid_hex, &stash_oid);
 			apply_autostash_oid(stash_oid_hex);
 		}
 
-		goto done;
+		اذهب done;
 	}
 
-	if (quit_current_merge) {
-		if (orig_argc != 2)
-			usage_msg_opt(_("--quit expects no arguments"),
+	إذا (quit_current_merge) {
+		إذا (orig_argc != 2)
+			usage_پەیام_opt(_("--quit expects no arguments"),
 				      builtin_merge_usage,
 				      builtin_merge_options);
 
 		remove_merge_branch_state(the_repository);
-		goto done;
+		اذهب done;
 	}
 
-	if (continue_current_merge) {
-		int nargc = 1;
-		const char *nargv[] = {"commit", NULL};
+	إذا (continue_current_merge) {
+		صحيح nargc = 1;
+		ثابت حرف *nargv[] = {"commit", عدم};
 
-		if (orig_argc != 2)
-			usage_msg_opt(_("--continue expects no arguments"),
+		إذا (orig_argc != 2)
+			usage_پەیام_opt(_("--continue expects no arguments"),
 			      builtin_merge_usage, builtin_merge_options);
 
-		if (!file_exists(git_path_merge_head(the_repository)))
+		إذا (!file_exists(git_path_merge_head(the_repository)))
 			die(_("There is no merge in progress (MERGE_HEAD missing)."));
 
 		/* Invoke 'git commit' */
 		ret = cmd_commit(nargc, nargv, prefix, the_repository);
-		goto done;
+		اذهب done;
 	}
 
-	if (repo_read_index_unmerged(the_repository))
+	إذا (repo_read_index_unmerged(the_repository))
 		die_resolve_conflict("merge");
 
-	if (file_exists(git_path_merge_head(the_repository))) {
+	إذا (file_exists(git_path_merge_head(the_repository))) {
 		/*
 		 * There is no unmerged entry, don't advise 'git
 		 * add/rm <file>', just 'git commit'.
 		 */
-		if (advice_enabled(ADVICE_RESOLVE_CONFLICT))
+		إذا (advice_enabled(ADVICE_RESOLVE_CONFLICT))
 			die(_("You have not concluded your merge (MERGE_HEAD exists).\n"
 				  "Please, commit your changes before you merge."));
-		else
+		وإلا
 			die(_("You have not concluded your merge (MERGE_HEAD exists)."));
 	}
-	if (refs_ref_exists(get_main_ref_store(the_repository), "CHERRY_PICK_HEAD")) {
-		if (advice_enabled(ADVICE_RESOLVE_CONFLICT))
+	إذا (refs_ref_exists(get_main_ref_store(the_repository), "CHERRY_PICK_HEAD")) {
+		إذا (advice_enabled(ADVICE_RESOLVE_CONFLICT))
 			die(_("You have not concluded your cherry-pick (CHERRY_PICK_HEAD exists).\n"
 			    "Please, commit your changes before you merge."));
-		else
+		وإلا
 			die(_("You have not concluded your cherry-pick (CHERRY_PICK_HEAD exists)."));
 	}
 	resolve_undo_clear_index(the_repository->index);
 
-	if (option_edit < 0)
+	إذا (option_edit < 0)
 		option_edit = default_edit_option();
 
 	cleanup_mode = get_cleanup_mode(cleanup_arg, 0 < option_edit);
 
-	if (verbosity < 0)
+	إذا (verbosity < 0)
 		show_diffstat = 0;
 
-	if (squash) {
-		if (fast_forward == FF_NO)
+	إذا (squash) {
+		إذا (fast_forward == FF_NO)
 			die(_("options '%s' and '%s' cannot be used together"), "--squash", "--no-ff.");
-		if (option_commit > 0)
+		إذا (option_commit > 0)
 			die(_("options '%s' and '%s' cannot be used together"), "--squash", "--commit.");
 		/*
 		 * squash can now silently disable option_commit - this is not
@@ -1513,54 +1513,54 @@ int cmd_merge(int argc,
 		option_commit = 0;
 	}
 
-	if (option_commit < 0)
+	إذا (option_commit < 0)
 		option_commit = 1;
 
-	if (!argc) {
-		if (default_to_upstream) {
+	إذا (!argc) {
+		إذا (default_to_upstream) {
 			argc = setup_with_upstream(&argv);
 			argv_to_free = argv;
 		}
-		else
+		وإلا
 			die(_("No commit specified and merge.defaultToUpstream not set."));
-	} else if (argc == 1 && !strcmp(argv[0], "-")) {
+	} وإلا إذا (argc == 1 && !strcmp(argv[0], "-")) {
 		argv[0] = "@{-1}";
 	}
 
-	if (!argc)
+	إذا (!argc)
 		usage_with_options(builtin_merge_usage,
 			builtin_merge_options);
 
-	if (!head_commit) {
+	إذا (!head_commit) {
 		/*
 		 * If the merged head is a valid one there is no reason
 		 * to forbid "git merge" into a branch yet to be born.
 		 * We do the same for "git pull".
 		 */
-		struct object_id *remote_head_oid;
-		if (squash)
+		بنية object_id *remote_head_oid;
+		إذا (squash)
 			die(_("Squash commit into empty head not supported yet"));
-		if (fast_forward == FF_NO)
+		إذا (fast_forward == FF_NO)
 			die(_("Non-fast-forward commit does not make sense into "
 			    "an empty head"));
 		remoteheads = collect_parents(head_commit, &head_subsumed,
-					      argc, argv, NULL);
-		if (!remoteheads)
+					      argc, argv, عدم);
+		إذا (!remoteheads)
 			die(_("%s - not something we can merge"), argv[0]);
-		if (remoteheads->next)
+		إذا (remoteheads->next)
 			die(_("Can merge only exactly one commit into empty head"));
 
-		if (verify_signatures)
+		إذا (verify_signatures)
 			verify_merge_signature(remoteheads->item, verbosity,
 					       check_trust_level);
 
 		remote_head_oid = &remoteheads->item->object.oid;
 		read_empty(remote_head_oid);
 		refs_update_ref(get_main_ref_store(the_repository),
-				"initial pull", "HEAD", remote_head_oid, NULL,
+				"initial pull", "HEAD", remote_head_oid, عدم,
 				0,
 				UPDATE_REFS_DIE_ON_ERR);
-		goto done;
+		اذهب done;
 	}
 
 	/*
@@ -1569,81 +1569,81 @@ int cmd_merge(int argc,
 	 * to the given message.
 	 */
 	remoteheads = collect_parents(head_commit, &head_subsumed,
-				      argc, argv, &merge_msg);
+				      argc, argv, &merge_پەیام);
 
-	if (!head_commit || !argc)
+	إذا (!head_commit || !argc)
 		usage_with_options(builtin_merge_usage,
 			builtin_merge_options);
 
-	if (verify_signatures) {
-		for (p = remoteheads; p; p = p->next) {
+	إذا (verify_signatures) {
+		لكل (p = remoteheads; p; p = p->next) {
 			verify_merge_signature(p->item, verbosity,
 					       check_trust_level);
 		}
 	}
 
 	strbuf_addstr(&buf, "merge");
-	for (p = remoteheads; p; p = p->next)
+	لكل (p = remoteheads; p; p = p->next)
 		strbuf_addf(&buf, " %s", merge_remote_util(p->item)->name);
 	setenv("GIT_REFLOG_ACTION", buf.buf, 0);
 	strbuf_reset(&buf);
 
-	for (p = remoteheads; p; p = p->next) {
-		struct commit *commit = p->item;
+	لكل (p = remoteheads; p; p = p->next) {
+		بنية commit *commit = p->item;
 		strbuf_addf(&buf, "GITHEAD_%s",
 			    oid_to_hex(&commit->object.oid));
 		setenv(buf.buf, merge_remote_util(commit)->name, 1);
 		strbuf_reset(&buf);
-		if (fast_forward != FF_ONLY && merging_a_throwaway_tag(commit))
+		إذا (fast_forward != FF_ONLY && merging_a_throwaway_tag(commit))
 			fast_forward = FF_NO;
 	}
 
-	if (!use_strategies) {
-		if (!remoteheads)
+	إذا (!use_strategies) {
+		إذا (!remoteheads)
 			; /* already up-to-date */
-		else if (!remoteheads->next)
+		وإلا إذا (!remoteheads->next)
 			add_strategies(pull_twohead, DEFAULT_TWOHEAD);
-		else
+		وإلا
 			add_strategies(pull_octopus, DEFAULT_OCTOPUS);
 	}
 
-	for (i = 0; i < use_strategies_nr; i++) {
-		if (use_strategies[i]->attr & NO_FAST_FORWARD)
+	لكل (i = 0; i < use_strategies_nr; i++) {
+		إذا (use_strategies[i]->attr & NO_FAST_FORWARD)
 			fast_forward = FF_NO;
-		if (use_strategies[i]->attr & NO_TRIVIAL)
+		إذا (use_strategies[i]->attr & NO_TRIVIAL)
 			allow_trivial = 0;
 	}
 
-	if (!remoteheads)
+	إذا (!remoteheads)
 		; /* already up-to-date */
-	else if (!remoteheads->next) {
-		if (repo_get_merge_bases(the_repository, head_commit,
+	وإلا إذا (!remoteheads->next) {
+		إذا (repo_get_merge_bases(the_repository, head_commit,
 					 remoteheads->item, &common) < 0) {
 			ret = 2;
-			goto done;
+			اذهب done;
 		}
-	} else {
-		struct commit_list *list = remoteheads;
-		commit_list_insert(head_commit, &list);
-		if (get_octopus_merge_bases(list, &common) < 0) {
-			free(list);
+	} وإلا {
+		بنية commit_list *list = remoteheads;
+		commit_list_زیادکردن(head_commit, &list);
+		إذا (get_octopus_merge_bases(list, &common) < 0) {
+			حرر(list);
 			ret = 2;
-			goto done;
+			اذهب done;
 		}
-		free(list);
+		حرر(list);
 	}
 
 	refs_update_ref(get_main_ref_store(the_repository),
 			"updating ORIG_HEAD", "ORIG_HEAD",
-			&head_commit->object.oid, NULL, 0,
+			&head_commit->object.oid, عدم, 0,
 			UPDATE_REFS_DIE_ON_ERR);
 
-	if (remoteheads && !common) {
+	إذا (remoteheads && !common) {
 		/* No common ancestors found. */
-		if (!allow_unrelated_histories)
+		إذا (!allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		/* otherwise, we need a real merge. */
-	} else if (!remoteheads ||
+	} وإلا إذا (!remoteheads ||
 		 (!remoteheads->next && !common->next &&
 		  common->item == remoteheads->item)) {
 		/*
@@ -1651,17 +1651,17 @@ int cmd_merge(int argc,
 		 * but first the most common case of merging one remote.
 		 */
 		finish_up_to_date();
-		goto done;
-	} else if (fast_forward != FF_NO && !remoteheads->next &&
+		اذهب done;
+	} وإلا إذا (fast_forward != FF_NO && !remoteheads->next &&
 			!common->next &&
 			oideq(&common->item->object.oid, &head_commit->object.oid)) {
 		/* Again the most common case of merging one remote. */
-		const char *msg = have_message ?
+		ثابت حرف *پەیام = have_message ?
 			"Fast-forward (no commit created; -m option ignored)" :
 			"Fast-forward";
-		struct commit *commit;
+		بنية commit *commit;
 
-		if (verbosity >= 0) {
+		إذا (verbosity >= 0) {
 			printf(_("Updating %s..%s\n"),
 			       repo_find_unique_abbrev(the_repository, &head_commit->object.oid,
 						       DEFAULT_ABBREV),
@@ -1669,98 +1669,98 @@ int cmd_merge(int argc,
 						       DEFAULT_ABBREV));
 		}
 		commit = remoteheads->item;
-		if (!commit) {
+		إذا (!commit) {
 			ret = 1;
-			goto done;
+			اذهب done;
 		}
 
-		if (autostash)
+		إذا (autostash)
 			create_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-					     NULL, false);
-		if (checkout_fast_forward(the_repository,
+					     عدم, false);
+		إذا (checkout_fast_forward(the_repository,
 					  &head_commit->object.oid,
 					  &commit->object.oid,
 					  overwrite_ignore)) {
 			apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-					    NULL, NULL, NULL, NULL);
+					    عدم, عدم, عدم, عدم);
 			ret = 1;
-			goto done;
+			اذهب done;
 		}
 
-		finish(head_commit, remoteheads, &commit->object.oid, msg);
+		finish(head_commit, remoteheads, &commit->object.oid, پەیام);
 		remove_merge_branch_state(the_repository);
-		goto done;
-	} else if (!remoteheads->next && common->next)
+		اذهب done;
+	} وإلا إذا (!remoteheads->next && common->next)
 		;
 		/*
 		 * We are not doing octopus and not fast-forward.  Need
 		 * a real merge.
 		 */
-	else if (!remoteheads->next && !common->next && option_commit) {
+	وإلا إذا (!remoteheads->next && !common->next && option_commit) {
 		/*
 		 * We are not doing octopus, not fast-forward, and have
 		 * only one common.
 		 */
-		refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
-		if (allow_trivial && fast_forward != FF_ONLY) {
+		refresh_index(the_repository->index, REFRESH_QUIET, عدم, عدم, عدم);
+		إذا (allow_trivial && fast_forward != FF_ONLY) {
 			/*
 			 * Must first ensure that index matches HEAD before
 			 * attempting a trivial merge.
 			 */
-			struct tree *head_tree = repo_get_commit_tree(the_repository,
+			بنية درەخت *head_درەخت = repo_get_commit_درەخت(the_repository,
 								      head_commit);
-			struct strbuf sb = STRBUF_INIT;
+			بنية strbuf sb = STRBUF_INIT;
 
-			if (repo_index_has_changes(the_repository, head_tree,
+			إذا (repo_index_has_changes(the_repository, head_درەخت,
 						   &sb)) {
 				error(_("Your local changes to the following files would be overwritten by merge:\n  %s"),
 				      sb.buf);
 				strbuf_release(&sb);
 				ret = 2;
-				goto done;
+				اذهب done;
 			}
 
 			/* See if it is really trivial. */
 			git_committer_info(IDENT_STRICT);
 			printf(_("Trying really trivial in-index merge...\n"));
-			if (!read_tree_trivial(&common->item->object.oid,
+			إذا (!read_درەخت_trivial(&common->item->object.oid,
 					       &head_commit->object.oid,
 					       &remoteheads->item->object.oid)) {
 				ret = merge_trivial(head_commit, remoteheads);
-				goto done;
+				اذهب done;
 			}
 			printf(_("Nope.\n"));
 		}
-	} else {
+	} وإلا {
 		/*
 		 * An octopus.  If we can reach all the remote we are up
 		 * to date.
 		 */
-		int up_to_date = 1;
-		struct commit_list *j;
+		صحيح up_to_date = 1;
+		بنية commit_list *j;
 
-		for (j = remoteheads; j; j = j->next) {
-			int ret = repo_in_merge_bases(the_repository,
+		لكل (j = remoteheads; j; j = j->next) {
+			صحيح ret = repo_in_merge_bases(the_repository,
 						      j->item, head_commit);
-			if (ret < 0)
+			إذا (ret < 0)
 				exit(128);
-			if (!ret) {
+			إذا (!ret) {
 				up_to_date = 0;
-				break;
+				اكسر;
 			}
 		}
-		if (up_to_date) {
+		إذا (up_to_date) {
 			finish_up_to_date();
-			goto done;
+			اذهب done;
 		}
 	}
 
-	if (fast_forward == FF_ONLY)
+	إذا (fast_forward == FF_ONLY)
 		die_ff_impossible();
 
-	if (autostash)
+	إذا (autostash)
 		create_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				     NULL, false);
+				     عدم, false);
 
 	/* We are going to make a new commit. */
 	git_committer_info(IDENT_STRICT);
@@ -1777,16 +1777,16 @@ int cmd_merge(int argc,
 	 * and/or recover from merge strategies bailing while leaving the
 	 * index and working tree polluted.
 	 */
-	if (save_state(&stash))
+	إذا (save_state(&stash))
 		oidclr(&stash, the_repository->hash_algo);
 
-	for (i = 0; i < use_strategies_nr; i++) {
-		int ret, cnt;
-		if (i) {
+	لكل (i = 0; i < use_strategies_nr; i++) {
+		صحيح ret, cnt;
+		إذا (i) {
 			printf(_("Rewinding the tree to pristine...\n"));
 			restore_state(&head_commit->object.oid, &stash);
 		}
-		if (use_strategies_nr != 1)
+		إذا (use_strategies_nr != 1)
 			printf(_("Trying merge strategy %s...\n"),
 				use_strategies[i]->name);
 		/*
@@ -1803,18 +1803,18 @@ int cmd_merge(int argc,
 		 * left to be resolved, with 2 when it does not
 		 * handle the given merge at all.
 		 */
-		if (ret < 2) {
-			if (!ret) {
+		إذا (ret < 2) {
+			إذا (!ret) {
 				/*
 				 * This strategy worked; no point in trying
 				 * another.
 				 */
 				merge_was_ok = 1;
 				best_strategy = wt_strategy;
-				break;
+				اكسر;
 			}
 			cnt = (use_strategies_nr > 1) ? evaluate_result() : 0;
-			if (best_cnt <= 0 || cnt <= best_cnt) {
+			إذا (best_cnt <= 0 || cnt <= best_cnt) {
 				best_strategy = wt_strategy;
 				best_cnt = cnt;
 			}
@@ -1825,33 +1825,33 @@ int cmd_merge(int argc,
 	 * If we have a resulting tree, that means the strategy module
 	 * auto resolved the merge cleanly.
 	 */
-	if (merge_was_ok && option_commit) {
+	إذا (merge_was_ok && option_commit) {
 		automerge_was_ok = 1;
 		ret = finish_automerge(head_commit, head_subsumed,
 				       common, remoteheads,
-				       &result_tree, wt_strategy);
-		goto done;
+				       &result_درەخت, wt_strategy);
+		اذهب done;
 	}
 
 	/*
 	 * Pick the result from the best strategy and have the user fix
 	 * it up.
 	 */
-	if (!best_strategy) {
+	إذا (!best_strategy) {
 		restore_state(&head_commit->object.oid, &stash);
-		if (use_strategies_nr > 1)
+		إذا (use_strategies_nr > 1)
 			fprintf(stderr,
 				_("No merge strategy handled the merge.\n"));
-		else
+		وإلا
 			fprintf(stderr, _("Merge with strategy %s failed.\n"),
 				use_strategies[0]->name);
 		apply_autostash_ref(the_repository, "MERGE_AUTOSTASH",
-				    NULL, NULL, NULL, NULL);
+				    عدم, عدم, عدم, عدم);
 		ret = 2;
-		goto done;
-	} else if (best_strategy == wt_strategy)
+		اذهب done;
+	} وإلا إذا (best_strategy == wt_strategy)
 		; /* We already have its result in the working tree. */
-	else {
+	وإلا {
 		printf(_("Rewinding the tree to pristine...\n"));
 		restore_state(&head_commit->object.oid, &stash);
 		printf(_("Using the %s strategy to prepare resolving by hand.\n"),
@@ -1860,31 +1860,31 @@ int cmd_merge(int argc,
 				   head_commit);
 	}
 
-	if (squash) {
-		finish(head_commit, remoteheads, NULL, NULL);
+	إذا (squash) {
+		finish(head_commit, remoteheads, عدم, عدم);
 
 		git_test_write_commit_graph_or_die(the_repository);
-	} else
+	} وإلا
 		write_merge_state(remoteheads);
 
-	if (merge_was_ok)
+	إذا (merge_was_ok)
 		fprintf(stderr, _("Automatic merge went well; "
 			"stopped before committing as requested\n"));
-	else
+	وإلا
 		ret = suggest_conflicts();
-	if (autostash)
+	إذا (autostash)
 		printf(_("When finished, apply stashed changes with `git stash pop`\n"));
 
 done:
-	if (!automerge_was_ok) {
+	إذا (!automerge_was_ok) {
 		commit_list_free(common);
 		commit_list_free(remoteheads);
 	}
 	strbuf_release(&buf);
-	free(branch_to_free);
-	free(argv_to_free);
-	free(pull_twohead);
-	free(pull_octopus);
+	حرر(branch_to_free);
+	حرر(argv_to_free);
+	حرر(pull_twohead);
+	حرر(pull_octopus);
 	discard_index(the_repository->index);
-	return ret;
+	أرجع ret;
 }
