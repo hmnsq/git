@@ -17,7 +17,7 @@
 static const char builtin_merge_ours_usage[] =
 	"git merge-ours <base>... -- HEAD <remote>...";
 
-int cmd_merge_ours(int argc,
+ціле cmd_merge_ours(ціле argc,
 		   const char **argv,
 		   const char *prefix UNUSED,
 		   struct repository *repo)
@@ -33,9 +33,9 @@ int cmd_merge_ours(int argc,
 	 * commit.  The index must match HEAD, or this merge cannot go
 	 * through.
 	 */
-	if (repo_read_index(repo) < 0)
+	якщо (repo_read_index(repo) < 0)
 		die_errno("read_cache failed");
-	if (index_differs_from(repo, "HEAD", NULL, 0))
-		return 2;
-	return 0;
+	якщо (index_differs_from(repo, "HEAD", NULL, 0))
+		повернути 2;
+	повернути 0;
 }

@@ -68,27 +68,27 @@ enum display_format {
 struct display_state {
 	struct strbuf buf;
 
-	int refcol_width;
+	ціле refcol_width;
 	enum display_format format;
 
 	char *url;
-	int url_len, shown_url;
+	ціле url_len, shown_url;
 };
 
 static uint64_t forced_updates_ms = 0;
-static int prefetch = 0;
-static int prune = -1; /* unspecified */
+static ціле prefetch = 0;
+static ціле prune = -1; /* unspecified */
 #define PRUNE_BY_DEFAULT 0 /* do we prune by default? */
 
-static int prune_tags = -1; /* unspecified */
+static ціле prune_tags = -1; /* unspecified */
 #define PRUNE_TAGS_BY_DEFAULT 0 /* do we prune tags by default? */
 
-static int append, dry_run, force, keep, update_head_ok;
-static int write_fetch_head = 1;
-static int verbosity, deepen_relative, set_upstream, refetch;
-static int progress = -1;
-static int tags = TAGS_DEFAULT, update_shallow, deepen;
-static int atomic_fetch;
+static ціле append, dry_run, force, keep, update_head_ok;
+static ціле write_fetch_head = 1;
+static ціле verbosity, deepen_relative, set_upstream, refetch;
+static ціле progress = -1;
+static ціле tags = TAGS_DEFAULT, update_shallow, deepen;
+static ціле atomic_fetch;
 static enum transport_family family;
 static const char *depth;
 static const char *deepen_since;
@@ -105,105 +105,105 @@ static struct string_list negotiation_include = STRING_LIST_INIT_NODUP;
 struct fetch_config {
 	enum display_format display_format;
 	char *follow_remote_head_raw;
-	int follow_remote_head_seen;
-	int all;
-	int prune;
-	int prune_tags;
-	int show_forced_updates;
-	int recurse_submodules;
-	int parallel;
-	int submodule_fetch_jobs;
+	ціле follow_remote_head_seen;
+	ціле all;
+	ціле prune;
+	ціле prune_tags;
+	ціле show_forced_updates;
+	ціле recurse_submodules;
+	ціле parallel;
+	ціле submodule_fetch_jobs;
 };
 
-static int git_fetch_config(const char *k, const char *v,
+static ціле git_fetch_config(const char *k, const char *v,
 			    const struct config_context *ctx, void *cb)
 {
 	struct fetch_config *fetch_config = cb;
 
-	if (!strcmp(k, "fetch.all")) {
+	якщо (!strcmp(k, "fetch.all")) {
 		fetch_config->all = git_config_bool(k, v);
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "fetch.prune")) {
+	якщо (!strcmp(k, "fetch.prune")) {
 		fetch_config->prune = git_config_bool(k, v);
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "fetch.prunetags")) {
+	якщо (!strcmp(k, "fetch.prunetags")) {
 		fetch_config->prune_tags = git_config_bool(k, v);
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "fetch.showforcedupdates")) {
+	якщо (!strcmp(k, "fetch.showforcedupdates")) {
 		fetch_config->show_forced_updates = git_config_bool(k, v);
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "submodule.recurse")) {
-		int r = git_config_bool(k, v) ?
+	якщо (!strcmp(k, "submodule.recurse")) {
+		ціле r = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON : RECURSE_SUBMODULES_OFF;
 		fetch_config->recurse_submodules = r;
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "submodule.fetchjobs")) {
+	якщо (!strcmp(k, "submodule.fetchjobs")) {
 		fetch_config->submodule_fetch_jobs = parse_submodule_fetchjobs(k, v, ctx->kvi);
-		return 0;
-	} else if (!strcmp(k, "fetch.recursesubmodules")) {
+		повернути 0;
+	} інакше якщо (!strcmp(k, "fetch.recursesubmodules")) {
 		fetch_config->recurse_submodules = parse_fetch_recurse_submodules_arg(k, v);
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "fetch.parallel")) {
+	якщо (!strcmp(k, "fetch.parallel")) {
 		fetch_config->parallel = git_config_int(k, v, ctx->kvi);
-		if (fetch_config->parallel < 0)
+		якщо (fetch_config->parallel < 0)
 			die(_("fetch.parallel cannot be negative"));
-		if (!fetch_config->parallel)
+		якщо (!fetch_config->parallel)
 			fetch_config->parallel = online_cpus();
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "fetch.output")) {
-		if (!v)
-			return config_error_nonbool(k);
-		else if (!strcasecmp(v, "full"))
+	якщо (!strcmp(k, "fetch.output")) {
+		якщо (!v)
+			повернути config_error_nonbool(k);
+		інакше якщо (!strcasecmp(v, "full"))
 			fetch_config->display_format = DISPLAY_FORMAT_FULL;
-		else if (!strcasecmp(v, "compact"))
+		інакше якщо (!strcasecmp(v, "compact"))
 			fetch_config->display_format = DISPLAY_FORMAT_COMPACT;
-		else
+		інакше
 			die(_("invalid value for '%s': '%s'"),
 			    "fetch.output", v);
-		return 0;
+		повернути 0;
 	}
 
-	if (!strcmp(k, "fetch.followremotehead")) {
+	якщо (!strcmp(k, "fetch.followremotehead")) {
 		free(fetch_config->follow_remote_head_raw);
 		fetch_config->follow_remote_head_raw = xstrdup_or_null(v);
 		fetch_config->follow_remote_head_seen = 1;
-		return 0;
+		повернути 0;
 	}
 
-	return git_default_config(k, v, ctx, cb);
+	повернути git_default_config(k, v, ctx, cb);
 }
 
 static enum follow_remote_head_settings get_follow_remote_head(const char *setting)
 {
-	if (!setting)
+	якщо (!setting)
 		die(_("missing value for 'fetch.followRemoteHEAD'"));
-	else if (!strcmp(setting, "never"))
-		return FOLLOW_REMOTE_NEVER;
-	else if (!strcmp(setting, "create"))
-		return FOLLOW_REMOTE_CREATE;
-	else if (!strcmp(setting, "warn"))
-		return FOLLOW_REMOTE_WARN;
-	else if (!strcmp(setting, "always"))
-		return FOLLOW_REMOTE_ALWAYS;
+	інакше якщо (!strcmp(setting, "never"))
+		повернути FOLLOW_REMOTE_NEVER;
+	інакше якщо (!strcmp(setting, "create"))
+		повернути FOLLOW_REMOTE_CREATE;
+	інакше якщо (!strcmp(setting, "warn"))
+		повернути FOLLOW_REMOTE_WARN;
+	інакше якщо (!strcmp(setting, "always"))
+		повернути FOLLOW_REMOTE_ALWAYS;
 	warning(_("unrecognized fetch.followRemoteHEAD value '%s' ignored"), setting);
-	return BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
+	повернути BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
 }
 
-static int parse_refmap_arg(const struct option *opt, const char *arg, int unset)
+static ціле parse_refmap_arg(const struct option *opt, const char *arg, ціле unset)
 {
 	BUG_ON_OPT_NEG(unset);
 
@@ -213,14 +213,14 @@ static int parse_refmap_arg(const struct option *opt, const char *arg, int unset
 	 */
 	refspec_append(opt->value, arg);
 
-	return 0;
+	повернути 0;
 }
 
-static void unlock_pack(unsigned int flags)
+static void unlock_pack(unsigned ціле flags)
 {
-	if (gtransport)
+	якщо (gtransport)
 		transport_unlock_pack(gtransport, flags);
-	if (gsecondary)
+	якщо (gsecondary)
 		transport_unlock_pack(gsecondary, flags);
 }
 
@@ -229,7 +229,7 @@ static void unlock_pack_atexit(void)
 	unlock_pack(0);
 }
 
-static void unlock_pack_on_signal(int signo)
+static void unlock_pack_on_signal(ціле signo)
 {
 	unlock_pack(TRANSPORT_UNLOCK_PACK_IN_SIGNAL_HANDLER);
 	sigchain_pop(signo);
@@ -241,19 +241,19 @@ static void add_merge_config(struct ref **head,
 		           struct branch *branch,
 		           struct ref ***tail)
 {
-	int i;
+	ціле i;
 
-	for (i = 0; i < branch->merge_nr; i++) {
+	для (i = 0; i < branch->merge_nr; i++) {
 		struct ref *rm, **old_tail = *tail;
 		struct refspec_item refspec;
 
-		for (rm = *head; rm; rm = rm->next) {
-			if (branch_merge_matches(branch, i, rm->name)) {
+		для (rm = *head; rm; rm = rm->next) {
+			якщо (branch_merge_matches(branch, i, rm->name)) {
 				rm->fetch_head_status = FETCH_HEAD_MERGE;
 				break;
 			}
 		}
-		if (rm)
+		якщо (rm)
 			continue;
 
 		/*
@@ -269,7 +269,7 @@ static void add_merge_config(struct ref **head,
 		memset(&refspec, 0, sizeof(refspec));
 		refspec.src = branch->merge[i]->src;
 		get_fetch_map(remote_refs, &refspec, tail, 1);
-		for (rm = *old_tail; rm; rm = rm->next)
+		для (rm = *old_tail; rm; rm = rm->next)
 			rm->fetch_head_status = FETCH_HEAD_MERGE;
 	}
 }
@@ -277,7 +277,7 @@ static void add_merge_config(struct ref **head,
 static void create_fetch_oidset(struct ref **head, struct oidset *out)
 {
 	struct ref *rm = *head;
-	while (rm) {
+	поки (rm) {
 		oidset_insert(out, &rm->old_oid);
 		rm = rm->next;
 	}
@@ -286,11 +286,11 @@ static void create_fetch_oidset(struct ref **head, struct oidset *out)
 struct refname_hash_entry {
 	struct hashmap_entry ent;
 	struct object_id oid;
-	int ignore;
+	ціле ignore;
 	char refname[FLEX_ARRAY];
 };
 
-static int refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
+static ціле refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
 				  const struct hashmap_entry *eptr,
 				  const struct hashmap_entry *entry_or_key,
 				  const void *keydata)
@@ -299,7 +299,7 @@ static int refname_hash_entry_cmp(const void *hashmap_cmp_fn_data UNUSED,
 
 	e1 = container_of(eptr, const struct refname_hash_entry, ent);
 	e2 = container_of(entry_or_key, const struct refname_hash_entry, ent);
-	return strcmp(e1->refname, keydata ? keydata : e2->refname);
+	повернути strcmp(e1->refname, keydata ? keydata : e2->refname);
 }
 
 static struct refname_hash_entry *refname_hash_add(struct hashmap *map,
@@ -313,15 +313,15 @@ static struct refname_hash_entry *refname_hash_add(struct hashmap *map,
 	hashmap_entry_init(&ent->ent, strhash(refname));
 	oidcpy(&ent->oid, oid);
 	hashmap_add(map, &ent->ent);
-	return ent;
+	повернути ent;
 }
 
-static int add_one_refname(const struct reference *ref, void *cbdata)
+static ціле add_one_refname(const struct reference *ref, void *cbdata)
 {
 	struct hashmap *refname_map = cbdata;
 
 	(void) refname_hash_add(refname_map, ref->name, ref->oid);
-	return 0;
+	повернути 0;
 }
 
 static void refname_hash_init(struct hashmap *map)
@@ -329,9 +329,9 @@ static void refname_hash_init(struct hashmap *map)
 	hashmap_init(map, refname_hash_entry_cmp, NULL, 0);
 }
 
-static int refname_hash_exists(struct hashmap *map, const char *refname)
+static ціле refname_hash_exists(struct hashmap *map, const char *refname)
 {
-	return !!hashmap_get_from_hash(map, strhash(refname), refname);
+	повернути !!hashmap_get_from_hash(map, strhash(refname), refname);
 }
 
 static void clear_item(struct refname_hash_entry *item)
@@ -346,7 +346,7 @@ static void add_already_queued_tags(const char *refname,
 				    void *cb_data)
 {
 	struct hashmap *queued_tags = cb_data;
-	if (starts_with(refname, "refs/tags/") && new_oid)
+	якщо (starts_with(refname, "refs/tags/") && new_oid)
 		(void) refname_hash_add(queued_tags, refname, new_oid);
 }
 
@@ -374,13 +374,13 @@ static void find_non_local_tags(const struct ref *refs,
 	 * If we already have a transaction, then we need to filter out all
 	 * tags which have already been queued up.
 	 */
-	if (transaction)
+	якщо (transaction)
 		ref_transaction_for_each_queued_update(transaction,
 						       add_already_queued_tags,
 						       &existing_refs);
 
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
+	для (ref = refs; ref; ref = ref->next) {
+		якщо (!starts_with(ref->name, "refs/tags/"))
 			continue;
 
 		/*
@@ -389,8 +389,8 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to fetch then we can mark the ref entry in the list
 		 * as one to ignore by setting util to NULL.
 		 */
-		if (ends_with(ref->name, "^{}")) {
-			if (item &&
+		якщо (ends_with(ref->name, "^{}")) {
+			якщо (item &&
 			    !odb_has_object(the_repository->objects, &ref->old_oid, 0) &&
 			    !oidset_contains(&fetch_oids, &ref->old_oid) &&
 			    !odb_has_object(the_repository->objects, &item->oid, 0) &&
@@ -406,7 +406,7 @@ static void find_non_local_tags(const struct ref *refs,
 		 * to check if it is a lightweight tag that we want to
 		 * fetch.
 		 */
-		if (item &&
+		якщо (item &&
 		    !odb_has_object(the_repository->objects, &item->oid, 0) &&
 		    !oidset_contains(&fetch_oids, &item->oid))
 			clear_item(item);
@@ -414,7 +414,7 @@ static void find_non_local_tags(const struct ref *refs,
 		item = NULL;
 
 		/* skip duplicates and refs that we already have */
-		if (refname_hash_exists(&remote_refs, ref->name) ||
+		якщо (refname_hash_exists(&remote_refs, ref->name) ||
 		    refname_hash_exists(&existing_refs, ref->name))
 			continue;
 
@@ -427,7 +427,7 @@ static void find_non_local_tags(const struct ref *refs,
 	 * We may have a final lightweight tag that needs to be
 	 * checked to see if it needs fetching.
 	 */
-	if (item &&
+	якщо (item &&
 	    !odb_has_object(the_repository->objects, &item->oid, 0) &&
 	    !oidset_contains(&fetch_oids, &item->oid))
 		clear_item(item);
@@ -439,15 +439,15 @@ static void find_non_local_tags(const struct ref *refs,
 	for_each_string_list_item(remote_ref_item, &remote_refs_list) {
 		const char *refname = remote_ref_item->string;
 		struct ref *rm;
-		unsigned int hash = strhash(refname);
+		unsigned ціле hash = strhash(refname);
 
 		item = hashmap_get_entry_from_hash(&remote_refs, hash, refname,
 					struct refname_hash_entry, ent);
-		if (!item)
+		якщо (!item)
 			BUG("unseen remote ref?");
 
 		/* Unless we have already decided to ignore this item... */
-		if (item->ignore)
+		якщо (item->ignore)
 			continue;
 
 		rm = alloc_ref(item->refname);
@@ -463,27 +463,27 @@ static void find_non_local_tags(const struct ref *refs,
 
 static void filter_prefetch_refspec(struct refspec *rs)
 {
-	int i;
+	ціле i;
 
-	if (!prefetch)
-		return;
+	якщо (!prefetch)
+		повернути;
 
-	for (i = 0; i < rs->nr; i++) {
+	для (i = 0; i < rs->nr; i++) {
 		struct strbuf new_dst = STRBUF_INIT;
 		char *old_dst;
 		const char *sub = NULL;
 
-		if (rs->items[i].negative)
+		якщо (rs->items[i].negative)
 			continue;
-		if (!rs->items[i].dst ||
+		якщо (!rs->items[i].dst ||
 		    (rs->items[i].src &&
 		     starts_with(rs->items[i].src,
 				 ref_namespace[NAMESPACE_TAGS].ref))) {
-			int j;
+			ціле j;
 
 			refspec_item_clear(&rs->items[i]);
 
-			for (j = i + 1; j < rs->nr; j++)
+			для (j = i + 1; j < rs->nr; j++)
 				rs->items[j - 1] = rs->items[j];
 			rs->nr--;
 			i--;
@@ -498,7 +498,7 @@ static void filter_prefetch_refspec(struct refspec *rs)
 		 * sub after that prefix. Otherwise, start at
 		 * the beginning of the string.
 		 */
-		if (!skip_prefix(old_dst, "refs/", &sub))
+		якщо (!skip_prefix(old_dst, "refs/", &sub))
 			sub = old_dst;
 		strbuf_addstr(&new_dst, sub);
 
@@ -512,9 +512,9 @@ static void filter_prefetch_refspec(struct refspec *rs)
 static struct ref *get_ref_map(struct remote *remote,
 			       const struct ref *remote_refs,
 			       struct refspec *rs,
-			       int tags, int *autotags)
+			       ціле tags, ціле *autotags)
 {
-	int i;
+	ціле i;
 	struct ref *rm;
 	struct ref *ref_map = NULL;
 	struct ref **tail = &ref_map;
@@ -523,22 +523,22 @@ static struct ref *get_ref_map(struct remote *remote,
 	struct ref *orefs = NULL, **oref_tail = &orefs;
 
 	struct hashmap existing_refs;
-	int existing_refs_populated = 0;
+	ціле existing_refs_populated = 0;
 
 	filter_prefetch_refspec(rs);
-	if (remote)
+	якщо (remote)
 		filter_prefetch_refspec(&remote->fetch);
 
-	if (rs->nr) {
+	якщо (rs->nr) {
 		struct refspec *fetch_refspec;
 
-		for (i = 0; i < rs->nr; i++) {
+		для (i = 0; i < rs->nr; i++) {
 			get_fetch_map(remote_refs, &rs->items[i], &tail, 0);
-			if (rs->items[i].dst && rs->items[i].dst[0])
+			якщо (rs->items[i].dst && rs->items[i].dst[0])
 				*autotags = 1;
 		}
 		/* Merge everything on the command line (but not --tags) */
-		for (rm = ref_map; rm; rm = rm->next)
+		для (rm = ref_map; rm; rm = rm->next)
 			rm->fetch_head_status = FETCH_HEAD_MERGE;
 
 		/*
@@ -561,29 +561,29 @@ static struct ref *get_ref_map(struct remote *remote,
 		 * by ref_remove_duplicates() in favor of one of these
 		 * opportunistic entries with FETCH_HEAD_IGNORE.
 		 */
-		if (refmap.nr)
+		якщо (refmap.nr)
 			fetch_refspec = &refmap;
-		else
+		інакше
 			fetch_refspec = &remote->fetch;
 
-		for (i = 0; i < fetch_refspec->nr; i++)
+		для (i = 0; i < fetch_refspec->nr; i++)
 			get_fetch_map(ref_map, &fetch_refspec->items[i], &oref_tail, 1);
-	} else if (refmap.nr) {
+	} інакше якщо (refmap.nr) {
 		die("--refmap option is only meaningful with command-line refspec(s)");
-	} else {
+	} інакше {
 		/* Use the defaults */
 		struct branch *branch = branch_get(NULL);
-		int has_merge = branch_has_merge_config(branch);
-		if (remote &&
+		ціле has_merge = branch_has_merge_config(branch);
+		якщо (remote &&
 		    (remote->fetch.nr ||
 		     /* Note: has_merge implies non-NULL branch->remote_name */
 		     (has_merge && !strcmp(branch->remote_name, remote->name)))) {
-			for (i = 0; i < remote->fetch.nr; i++) {
+			для (i = 0; i < remote->fetch.nr; i++) {
 				get_fetch_map(remote_refs, &remote->fetch.items[i], &tail, 0);
-				if (remote->fetch.items[i].dst &&
+				якщо (remote->fetch.items[i].dst &&
 				    remote->fetch.items[i].dst[0])
 					*autotags = 1;
-				if (!i && !has_merge && ref_map &&
+				якщо (!i && !has_merge && ref_map &&
 				    !remote->fetch.items[0].pattern)
 					ref_map->fetch_head_status = FETCH_HEAD_MERGE;
 			}
@@ -594,19 +594,19 @@ static struct ref *get_ref_map(struct remote *remote,
 			 *
 			 * Note: has_merge implies non-NULL branch->remote_name
 			 */
-			if (has_merge &&
+			якщо (has_merge &&
 			    !strcmp(branch->remote_name, remote->name))
 				add_merge_config(&ref_map, remote_refs, branch, &tail);
-		} else if (!prefetch) {
+		} інакше якщо (!prefetch) {
 			ref_map = get_remote_ref(remote_refs, "HEAD");
-			if (!ref_map)
+			якщо (!ref_map)
 				die(_("couldn't find remote ref HEAD"));
 			ref_map->fetch_head_status = FETCH_HEAD_MERGE;
 			tail = &ref_map->next;
 		}
 	}
 
-	if (tags == TAGS_SET) {
+	якщо (tags == TAGS_SET) {
 		struct refspec_item tag_refspec;
 
 		/* also fetch all tags */
@@ -614,13 +614,13 @@ static struct ref *get_ref_map(struct remote *remote,
 				       the_hash_algo);
 		get_fetch_map(remote_refs, &tag_refspec, &tail, 0);
 		refspec_item_clear(&tag_refspec);
-	} else if (tags == TAGS_DEFAULT && *autotags) {
+	} інакше якщо (tags == TAGS_DEFAULT && *autotags) {
 		find_non_local_tags(remote_refs, NULL, &ref_map, &tail);
 	}
 
 	/* Now append any refs to be updated opportunistically: */
 	*tail = orefs;
-	for (rm = orefs; rm; rm = rm->next) {
+	для (rm = orefs; rm; rm = rm->next) {
 		rm->fetch_head_status = FETCH_HEAD_IGNORE;
 		tail = &rm->next;
 	}
@@ -630,20 +630,20 @@ static struct ref *get_ref_map(struct remote *remote,
 	 * necessary as negative refspecs might remove an otherwise conflicting
 	 * duplicate.
 	 */
-	if (rs->nr)
+	якщо (rs->nr)
 		ref_map = apply_negative_refspecs(ref_map, rs);
-	else
+	інакше
 		ref_map = apply_negative_refspecs(ref_map, &remote->fetch);
 
 	ref_map = ref_remove_duplicates(ref_map);
 
-	for (rm = ref_map; rm; rm = rm->next) {
-		if (rm->peer_ref) {
+	для (rm = ref_map; rm; rm = rm->next) {
+		якщо (rm->peer_ref) {
 			const char *refname = rm->peer_ref->name;
 			struct refname_hash_entry *peer_item;
-			unsigned int hash = strhash(refname);
+			unsigned ціле hash = strhash(refname);
 
-			if (!existing_refs_populated) {
+			якщо (!existing_refs_populated) {
 				refname_hash_init(&existing_refs);
 				refs_for_each_ref(get_main_ref_store(the_repository),
 						  add_one_refname,
@@ -654,31 +654,31 @@ static struct ref *get_ref_map(struct remote *remote,
 			peer_item = hashmap_get_entry_from_hash(&existing_refs,
 						hash, refname,
 						struct refname_hash_entry, ent);
-			if (peer_item) {
+			якщо (peer_item) {
 				struct object_id *old_oid = &peer_item->oid;
 				oidcpy(&rm->peer_ref->old_oid, old_oid);
 			}
 		}
 	}
-	if (existing_refs_populated)
+	якщо (existing_refs_populated)
 		hashmap_clear_and_free(&existing_refs, struct refname_hash_entry, ent);
 
-	return ref_map;
+	повернути ref_map;
 }
 
-static int s_update_ref(const char *action,
+static ціле s_update_ref(const char *action,
 			struct ref *ref,
 			struct ref_transaction *transaction,
-			int check_old)
+			ціле check_old)
 {
 	char *msg;
 	char *rla = getenv("GIT_REFLOG_ACTION");
 	struct strbuf err = STRBUF_INIT;
-	int ret;
+	ціле ret;
 
-	if (dry_run)
-		return 0;
-	if (!rla)
+	якщо (dry_run)
+		повернути 0;
+	якщо (!rla)
 		rla = default_rla.buf;
 	msg = xstrfmt("%s: %s", rla, action);
 
@@ -686,36 +686,36 @@ static int s_update_ref(const char *action,
 				     check_old ? &ref->old_oid : NULL,
 				     NULL, NULL, 0, msg, &err);
 
-	if (ret)
+	якщо (ret)
 		error("%s", err.buf);
 	strbuf_release(&err);
 	free(msg);
-	return ret;
+	повернути ret;
 }
 
-static int refcol_width(const struct ref *ref_map, int compact_format)
+static ціле refcol_width(const struct ref *ref_map, ціле compact_format)
 {
 	const struct ref *ref;
-	int max, width = 10;
+	ціле max, width = 10;
 
 	max = term_columns();
-	if (compact_format)
+	якщо (compact_format)
 		max = max * 2 / 3;
 
-	for (ref = ref_map; ref; ref = ref->next) {
-		int rlen, llen = 0, len;
+	для (ref = ref_map; ref; ref = ref->next) {
+		ціле rlen, llen = 0, len;
 
-		if (ref->status == REF_STATUS_REJECT_SHALLOW ||
+		якщо (ref->status == REF_STATUS_REJECT_SHALLOW ||
 		    !ref->peer_ref ||
 		    !strcmp(ref->name, "HEAD"))
 			continue;
 
 		/* uptodate lines are only shown on high verbosity level */
-		if (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
+		якщо (verbosity <= 0 && oideq(&ref->peer_ref->old_oid, &ref->old_oid))
 			continue;
 
 		rlen = utf8_strwidth(prettify_refname(ref->name));
-		if (!compact_format)
+		якщо (!compact_format)
 			llen = utf8_strwidth(prettify_refname(ref->peer_ref->name));
 
 		/*
@@ -725,39 +725,39 @@ static int refcol_width(const struct ref *ref_map, int compact_format)
 		 * will be printed in update_local_ref)
 		 */
 		len = 21 /* flag and summary */ + rlen + 4 /* -> */ + llen;
-		if (len >= max)
+		якщо (len >= max)
 			continue;
 
-		if (width < rlen)
+		якщо (width < rlen)
 			width = rlen;
 	}
 
-	return width;
+	повернути width;
 }
 
 static void display_state_init(struct display_state *display_state, struct ref *ref_map,
 			       const char *raw_url, enum display_format format)
 {
-	int i;
+	ціле i;
 
 	memset(display_state, 0, sizeof(*display_state));
 	strbuf_init(&display_state->buf, 0);
 	display_state->format = format;
 
-	if (raw_url)
+	якщо (raw_url)
 		display_state->url = transport_anonymize_url(raw_url);
-	else
+	інакше
 		display_state->url = xstrdup("foreign");
 
 	display_state->url_len = strlen(display_state->url);
-	for (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
+	для (i = display_state->url_len - 1; 0 <= i && display_state->url[i] == '/'; i--)
 		;
 	display_state->url_len = i + 1;
-	if (4 < i && !strncmp(".git", display_state->url + i - 3, 4))
+	якщо (4 < i && !strncmp(".git", display_state->url + i - 3, 4))
 		display_state->url_len = i - 3;
 
-	if (verbosity < 0)
-		return;
+	якщо (verbosity < 0)
+		повернути;
 
 	switch (display_state->format) {
 	case DISPLAY_FORMAT_FULL:
@@ -786,31 +786,31 @@ static void print_remote_to_local(struct display_state *display_state,
 		    display_state->refcol_width, remote, local);
 }
 
-static int find_and_replace(struct strbuf *haystack,
+static ціле find_and_replace(struct strbuf *haystack,
 			    const char *needle,
 			    const char *placeholder)
 {
 	const char *p = NULL;
-	int plen, nlen;
+	ціле plen, nlen;
 
 	nlen = strlen(needle);
-	if (ends_with(haystack->buf, needle))
+	якщо (ends_with(haystack->buf, needle))
 		p = haystack->buf + haystack->len - nlen;
-	else
+	інакше
 		p = strstr(haystack->buf, needle);
-	if (!p)
-		return 0;
+	якщо (!p)
+		повернути 0;
 
-	if (p > haystack->buf && p[-1] != '/')
-		return 0;
+	якщо (p > haystack->buf && p[-1] != '/')
+		повернути 0;
 
 	plen = strlen(p);
-	if (plen > nlen && p[nlen] != '/')
-		return 0;
+	якщо (plen > nlen && p[nlen] != '/')
+		повернути 0;
 
 	strbuf_splice(haystack, p - haystack->buf, nlen,
 		      placeholder, strlen(placeholder));
-	return 1;
+	повернути 1;
 }
 
 static void print_compact(struct display_state *display_state,
@@ -819,15 +819,15 @@ static void print_compact(struct display_state *display_state,
 	struct strbuf r = STRBUF_INIT;
 	struct strbuf l = STRBUF_INIT;
 
-	if (!strcmp(remote, local)) {
+	якщо (!strcmp(remote, local)) {
 		strbuf_addf(&display_state->buf, "%-*s -> *", display_state->refcol_width, remote);
-		return;
+		повернути;
 	}
 
 	strbuf_addstr(&r, remote);
 	strbuf_addstr(&l, local);
 
-	if (!find_and_replace(&r, local, "*"))
+	якщо (!find_and_replace(&r, local, "*"))
 		find_and_replace(&l, remote, "*");
 	print_remote_to_local(display_state, r.buf, l.buf);
 
@@ -840,21 +840,21 @@ static void display_ref_update(struct display_state *display_state, char code,
 			       const char *remote, const char *local,
 			       const struct object_id *old_oid,
 			       const struct object_id *new_oid,
-			       int summary_width)
+			       ціле summary_width)
 {
 	FILE *f = stderr;
 
-	if (verbosity < 0)
-		return;
+	якщо (verbosity < 0)
+		повернути;
 
 	strbuf_reset(&display_state->buf);
 
 	switch (display_state->format) {
 	case DISPLAY_FORMAT_FULL:
 	case DISPLAY_FORMAT_COMPACT: {
-		int width;
+		ціле width;
 
-		if (!display_state->shown_url) {
+		якщо (!display_state->shown_url) {
 			strbuf_addf(&display_state->buf, _("From %.*s\n"),
 				    display_state->url_len, display_state->url);
 			display_state->shown_url = 1;
@@ -866,12 +866,12 @@ static void display_ref_update(struct display_state *display_state, char code,
 
 		strbuf_addf(&display_state->buf, " %c %-*s ", code, width, summary);
 
-		if (display_state->format != DISPLAY_FORMAT_COMPACT)
+		якщо (display_state->format != DISPLAY_FORMAT_COMPACT)
 			print_remote_to_local(display_state, remote, local);
-		else
+		інакше
 			print_compact(display_state, remote, local);
 
-		if (error)
+		якщо (error)
 			strbuf_addf(&display_state->buf, "  (%s)", error);
 
 		break;
@@ -936,7 +936,7 @@ static struct ref_update_display_info *ref_update_display_info_append(
 	oidcpy(&info->old_oid, old_oid);
 	oidcpy(&info->new_oid, new_oid);
 
-	return info;
+	повернути info;
 }
 
 static void ref_update_display_info_set_failed(struct ref_update_display_info *info)
@@ -955,7 +955,7 @@ static void ref_update_display_info_free(struct ref_update_display_info *info)
 
 static void ref_update_display_info_display(struct ref_update_display_info *info,
 					    struct display_state *display_state,
-					    int summary_width)
+					    ціле summary_width)
 {
 	display_ref_update(display_state,
 			   info->failed ? info->fail_code : info->success_code,
@@ -965,30 +965,30 @@ static void ref_update_display_info_display(struct ref_update_display_info *info
 			   &info->new_oid, summary_width);
 }
 
-static int update_local_ref(struct ref *ref,
+static ціле update_local_ref(struct ref *ref,
 			    struct ref_transaction *transaction,
 			    const struct ref *remote_ref,
 			    const struct fetch_config *config,
 			    struct ref_update_display_info_array *display_array)
 {
 	struct commit *current = NULL, *updated;
-	int fast_forward = 0;
+	ціле fast_forward = 0;
 
-	if (!odb_has_object(the_repository->objects, &ref->new_oid,
+	якщо (!odb_has_object(the_repository->objects, &ref->new_oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die(_("object %s not found"), oid_to_hex(&ref->new_oid));
 
-	if (oideq(&ref->old_oid, &ref->new_oid)) {
-		if (verbosity > 0)
+	якщо (oideq(&ref->old_oid, &ref->new_oid)) {
+		якщо (verbosity > 0)
 			ref_update_display_info_append(display_array, '=', '=',
 						       _("[up to date]"), NULL,
 						       NULL, ref->name,
 						       remote_ref->name, &ref->old_oid,
 						       &ref->new_oid);
-		return 0;
+		повернути 0;
 	}
 
-	if (!update_head_ok &&
+	якщо (!update_head_ok &&
 	    !is_null_oid(&ref->old_oid) &&
 	    branch_checked_out(ref->name)) {
 		struct ref_update_display_info *info;
@@ -1002,15 +1002,15 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 		ref_update_display_info_set_failed(info);
-		return 1;
+		повернути 1;
 	}
 
-	if (!is_null_oid(&ref->old_oid) &&
+	якщо (!is_null_oid(&ref->old_oid) &&
 	    starts_with(ref->name, "refs/tags/")) {
 		struct ref_update_display_info *info;
 
-		if (force || ref->force) {
-			int r;
+		якщо (force || ref->force) {
+			ціле r;
 
 			r = s_update_ref("updating tag", ref, transaction, 0);
 
@@ -1019,18 +1019,18 @@ static int update_local_ref(struct ref *ref,
 							      _("unable to update local ref"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
-			if (r)
+			якщо (r)
 				ref_update_display_info_set_failed(info);
 
-			return r;
-		} else {
+			повернути r;
+		} інакше {
 			info = ref_update_display_info_append(display_array, '!', '!',
 							      _("[rejected]"), NULL,
 							      _("would clobber existing tag"),
 							      ref->name, remote_ref->name,
 							      &ref->old_oid, &ref->new_oid);
 			ref_update_display_info_set_failed(info);
-			return 1;
+			повернути 1;
 		}
 	}
 
@@ -1038,23 +1038,23 @@ static int update_local_ref(struct ref *ref,
 						 &ref->old_oid, 1);
 	updated = lookup_commit_reference_gently(the_repository,
 						 &ref->new_oid, 1);
-	if (!current || !updated) {
+	якщо (!current || !updated) {
 		struct ref_update_display_info *info;
 		const char *msg;
 		const char *what;
-		int r;
+		ціле r;
 		/*
 		 * Nicely describe the new ref we're fetching.
 		 * Base this on the remote's ref name, as it's
 		 * more likely to follow a standard layout.
 		 */
-		if (starts_with(remote_ref->name, "refs/tags/")) {
+		якщо (starts_with(remote_ref->name, "refs/tags/")) {
 			msg = "storing tag";
 			what = _("[new tag]");
-		} else if (starts_with(remote_ref->name, "refs/heads/")) {
+		} інакше якщо (starts_with(remote_ref->name, "refs/heads/")) {
 			msg = "storing head";
 			what = _("[new branch]");
-		} else {
+		} інакше {
 			msg = "storing ref";
 			what = _("[new ref]");
 		}
@@ -1066,27 +1066,27 @@ static int update_local_ref(struct ref *ref,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
+		якщо (r)
 			ref_update_display_info_set_failed(info);
 
-		return r;
+		повернути r;
 	}
 
-	if (config->show_forced_updates) {
+	якщо (config->show_forced_updates) {
 		uint64_t t_before = getnanotime();
 		fast_forward = repo_in_merge_bases(the_repository, current,
 						   updated);
-		if (fast_forward < 0)
+		якщо (fast_forward < 0)
 			die(NULL);
 		forced_updates_ms += (getnanotime() - t_before) / 1000000;
-	} else {
+	} інакше {
 		fast_forward = 1;
 	}
 
-	if (fast_forward) {
+	якщо (fast_forward) {
 		struct ref_update_display_info *info;
 		struct strbuf quickref = STRBUF_INIT;
-		int r;
+		ціле r;
 
 		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "..");
@@ -1098,15 +1098,15 @@ static int update_local_ref(struct ref *ref,
 						      _("unable to update local ref"),
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
-		if (r)
+		якщо (r)
 			ref_update_display_info_set_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else if (force || ref->force) {
+		повернути r;
+	} інакше якщо (force || ref->force) {
 		struct ref_update_display_info *info;
 		struct strbuf quickref = STRBUF_INIT;
-		int r;
+		ціле r;
 
 		strbuf_add_unique_abbrev(&quickref, &current->object.oid, DEFAULT_ABBREV);
 		strbuf_addstr(&quickref, "...");
@@ -1119,12 +1119,12 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 
-		if (r)
+		якщо (r)
 			ref_update_display_info_set_failed(info);
 
 		strbuf_release(&quickref);
-		return r;
-	} else {
+		повернути r;
+	} інакше {
 		struct ref_update_display_info *info;
 		info = ref_update_display_info_append(display_array, '!', '!',
 						      _("[rejected]"), NULL,
@@ -1132,7 +1132,7 @@ static int update_local_ref(struct ref *ref,
 						      ref->name, remote_ref->name,
 						      &ref->old_oid, &ref->new_oid);
 		ref_update_display_info_set_failed(info);
-		return 1;
+		повернути 1;
 	}
 }
 
@@ -1141,12 +1141,12 @@ static const struct object_id *iterate_ref_map(void *cb_data)
 	struct ref **rm = cb_data;
 	struct ref *ref = *rm;
 
-	while (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
+	поки (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
 		ref = ref->next;
-	if (!ref)
-		return NULL;
+	якщо (!ref)
+		повернути NULL;
 	*rm = ref->next;
-	return &ref->old_oid;
+	повернути &ref->old_oid;
 }
 
 struct fetch_head {
@@ -1154,20 +1154,20 @@ struct fetch_head {
 	struct strbuf buf;
 };
 
-static int open_fetch_head(struct fetch_head *fetch_head)
+static ціле open_fetch_head(struct fetch_head *fetch_head)
 {
 	const char *filename = git_path_fetch_head(the_repository);
 
-	if (write_fetch_head) {
+	якщо (write_fetch_head) {
 		fetch_head->fp = fopen(filename, "a");
-		if (!fetch_head->fp)
-			return error_errno(_("cannot open '%s'"), filename);
+		якщо (!fetch_head->fp)
+			повернути error_errno(_("cannot open '%s'"), filename);
 		strbuf_init(&fetch_head->buf, 0);
-	} else {
+	} інакше {
 		fetch_head->fp = NULL;
 	}
 
-	return 0;
+	повернути 0;
 }
 
 static void append_fetch_head(struct fetch_head *fetch_head,
@@ -1180,8 +1180,8 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 	const char *merge_status_marker;
 	size_t i;
 
-	if (!fetch_head->fp)
-		return;
+	якщо (!fetch_head->fp)
+		повернути;
 
 	switch (fetch_head_status) {
 	case FETCH_HEAD_NOT_FOR_MERGE:
@@ -1192,15 +1192,15 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 		break;
 	default:
 		/* do not write anything to FETCH_HEAD */
-		return;
+		повернути;
 	}
 
 	strbuf_addf(&fetch_head->buf, "%s\t%s\t%s",
 		    oid_to_hex_r(old_oid_hex, old_oid), merge_status_marker, note);
-	for (i = 0; i < url_len; ++i)
-		if ('\n' == url[i])
+	для (i = 0; i < url_len; ++i)
+		якщо ('\n' == url[i])
 			strbuf_addstr(&fetch_head->buf, "\\n");
-		else
+		інакше
 			strbuf_addch(&fetch_head->buf, url[i]);
 	strbuf_addch(&fetch_head->buf, '\n');
 
@@ -1210,7 +1210,7 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 	 * updates to a buffer first and only commit it as soon as all
 	 * references have been successfully updated.
 	 */
-	if (!atomic_fetch) {
+	якщо (!atomic_fetch) {
 		strbuf_write(&fetch_head->buf, fetch_head->fp);
 		strbuf_reset(&fetch_head->buf);
 	}
@@ -1218,15 +1218,15 @@ static void append_fetch_head(struct fetch_head *fetch_head,
 
 static void commit_fetch_head(struct fetch_head *fetch_head)
 {
-	if (!fetch_head->fp || !atomic_fetch)
-		return;
+	якщо (!fetch_head->fp || !atomic_fetch)
+		повернути;
 	strbuf_write(&fetch_head->buf, fetch_head->fp);
 }
 
 static void close_fetch_head(struct fetch_head *fetch_head)
 {
-	if (!fetch_head->fp)
-		return;
+	якщо (!fetch_head->fp)
+		повернути;
 
 	fclose(fetch_head->fp);
 	strbuf_release(&fetch_head->buf);
@@ -1241,25 +1241,25 @@ N_("it took %.2f seconds to check forced updates; you can use\n"
    "'--no-show-forced-updates' or run 'git config fetch.showForcedUpdates false'\n"
    "to avoid this check\n");
 
-static int store_updated_refs(struct display_state *display_state,
-			      int connectivity_checked,
+static ціле store_updated_refs(struct display_state *display_state,
+			      ціле connectivity_checked,
 			      struct ref_transaction *transaction, struct ref *ref_map,
 			      struct fetch_head *fetch_head,
 			      const struct fetch_config *config,
 			      struct ref_update_display_info_array *display_array)
 {
-	int rc = 0;
+	ціле rc = 0;
 	struct strbuf note = STRBUF_INIT;
 	const char *what, *kind;
 	struct ref *rm;
-	int want_status;
+	ціле want_status;
 
-	if (!connectivity_checked) {
+	якщо (!connectivity_checked) {
 		struct check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.exclude_hidden_refs_section = "fetch";
 		rm = ref_map;
-		if (check_connected(iterate_ref_map, &rm, &opt)) {
+		якщо (check_connected(iterate_ref_map, &rm, &opt)) {
 			rc = error(_("%s did not send all necessary objects"),
 				   display_state->url);
 			goto abort;
@@ -1271,14 +1271,14 @@ static int store_updated_refs(struct display_state *display_state,
 	 * merged entries are written before not-for-merge. That lets readers
 	 * use FETCH_HEAD as a refname to refer to the ref to be merged.
 	 */
-	for (want_status = FETCH_HEAD_MERGE;
+	для (want_status = FETCH_HEAD_MERGE;
 	     want_status <= FETCH_HEAD_IGNORE;
 	     want_status++) {
-		for (rm = ref_map; rm; rm = rm->next) {
+		для (rm = ref_map; rm; rm = rm->next) {
 			struct ref *ref = NULL;
 
-			if (rm->status == REF_STATUS_REJECT_SHALLOW) {
-				if (want_status == FETCH_HEAD_MERGE)
+			якщо (rm->status == REF_STATUS_REJECT_SHALLOW) {
+				якщо (want_status == FETCH_HEAD_MERGE)
 					warning(_("rejected %s because shallow roots are not allowed to be updated"),
 						rm->peer_ref ? rm->peer_ref->name : rm->name);
 				continue;
@@ -1293,7 +1293,7 @@ static int store_updated_refs(struct display_state *display_state,
 			 * in case FETCH_HEAD is not to be updated, so we can
 			 * skip the classification in that case.
 			 */
-			if (fetch_head->fp) {
+			якщо (fetch_head->fp) {
 				struct commit *commit = NULL;
 
 				/*
@@ -1304,49 +1304,49 @@ static int store_updated_refs(struct display_state *display_state,
 				 * regress performance in repositories with many
 				 * annotated tags.
 				 */
-				if (!starts_with(rm->name, "refs/tags/"))
+				якщо (!starts_with(rm->name, "refs/tags/"))
 					commit = lookup_commit_in_graph(the_repository, &rm->old_oid);
-				if (!commit) {
+				якщо (!commit) {
 					commit = lookup_commit_reference_gently(the_repository,
 										&rm->old_oid,
 										1);
-					if (!commit)
+					якщо (!commit)
 						rm->fetch_head_status = FETCH_HEAD_NOT_FOR_MERGE;
 				}
 			}
 
-			if (rm->fetch_head_status != want_status)
+			якщо (rm->fetch_head_status != want_status)
 				continue;
 
-			if (rm->peer_ref) {
+			якщо (rm->peer_ref) {
 				ref = alloc_ref(rm->peer_ref->name);
 				oidcpy(&ref->old_oid, &rm->peer_ref->old_oid);
 				oidcpy(&ref->new_oid, &rm->old_oid);
 				ref->force = rm->peer_ref->force;
 			}
 
-			if (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
+			якщо (config->recurse_submodules != RECURSE_SUBMODULES_OFF &&
 			    (!rm->peer_ref || !oideq(&ref->old_oid, &ref->new_oid))) {
 				check_for_new_submodule_commits(&rm->old_oid);
 			}
 
-			if (!strcmp(rm->name, "HEAD")) {
+			якщо (!strcmp(rm->name, "HEAD")) {
 				kind = "";
 				what = "";
-			} else if (skip_prefix(rm->name, "refs/heads/", &what)) {
+			} інакше якщо (skip_prefix(rm->name, "refs/heads/", &what)) {
 				kind = "branch";
-			} else if (skip_prefix(rm->name, "refs/tags/", &what)) {
+			} інакше якщо (skip_prefix(rm->name, "refs/tags/", &what)) {
 				kind = "tag";
-			} else if (skip_prefix(rm->name, "refs/remotes/", &what)) {
+			} інакше якщо (skip_prefix(rm->name, "refs/remotes/", &what)) {
 				kind = "remote-tracking branch";
-			} else {
+			} інакше {
 				kind = "";
 				what = rm->name;
 			}
 
 			strbuf_reset(&note);
-			if (*what) {
-				if (*kind)
+			якщо (*what) {
+				якщо (*kind)
 					strbuf_addf(&note, "%s ", kind);
 				strbuf_addf(&note, "'%s' of ", what);
 			}
@@ -1356,11 +1356,11 @@ static int store_updated_refs(struct display_state *display_state,
 					  note.buf, display_state->url,
 					  display_state->url_len);
 
-			if (ref) {
+			якщо (ref) {
 				rc |= update_local_ref(ref, transaction, rm,
 						       config, display_array);
 				free(ref);
-			} else if (write_fetch_head || dry_run) {
+			} інакше якщо (write_fetch_head || dry_run) {
 				/*
 				 * Display fetches written to FETCH_HEAD (or
 				 * would be written to FETCH_HEAD, if --dry-run
@@ -1376,10 +1376,10 @@ static int store_updated_refs(struct display_state *display_state,
 		}
 	}
 
-	if (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
-		if (!config->show_forced_updates) {
+	якщо (advice_enabled(ADVICE_FETCH_SHOW_FORCED_UPDATES)) {
+		якщо (!config->show_forced_updates) {
 			warning(_(warn_show_forced_updates));
-		} else if (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_IN_MS) {
+		} інакше якщо (forced_updates_ms > FORCED_UPDATES_DELAY_WARNING_IN_MS) {
 			warning(_(warn_time_show_forced_updates),
 				forced_updates_ms / 1000.0);
 		}
@@ -1387,7 +1387,7 @@ static int store_updated_refs(struct display_state *display_state,
 
  abort:
 	strbuf_release(&note);
-	return rc;
+	повернути rc;
 }
 
 /*
@@ -1395,7 +1395,7 @@ static int store_updated_refs(struct display_state *display_state,
  * everything we are going to fetch already exists and is connected
  * locally.
  */
-static int check_exist_and_connected(struct ref *ref_map)
+static ціле check_exist_and_connected(struct ref *ref_map)
 {
 	struct ref *rm = ref_map;
 	struct check_connected_options opt = CHECK_CONNECTED_INIT;
@@ -1408,33 +1408,33 @@ static int check_exist_and_connected(struct ref *ref_map)
 	 * really need to perform.  Claiming failure now will ensure
 	 * we perform the network exchange to deepen our history.
 	 */
-	if (deepen)
-		return -1;
+	якщо (deepen)
+		повернути -1;
 
 	/*
 	 * Similarly, if we need to refetch, we always want to perform a full
 	 * fetch ignoring existing objects.
 	 */
-	if (refetch)
-		return -1;
+	якщо (refetch)
+		повернути -1;
 
 
 	/*
 	 * check_connected() allows objects to merely be promised, but
 	 * we need all direct targets to exist.
 	 */
-	for (r = rm; r; r = r->next) {
-		if (!odb_has_object(the_repository->objects, &r->old_oid,
+	для (r = rm; r; r = r->next) {
+		якщо (!odb_has_object(the_repository->objects, &r->old_oid,
 				    ODB_HAS_OBJECT_RECHECK_PACKED))
-			return -1;
+			повернути -1;
 	}
 
 	opt.quiet = 1;
 	opt.exclude_hidden_refs_section = "fetch";
-	return check_connected(iterate_ref_map, &rm, &opt);
+	повернути check_connected(iterate_ref_map, &rm, &opt);
 }
 
-static int fetch_and_consume_refs(struct display_state *display_state,
+static ціле fetch_and_consume_refs(struct display_state *display_state,
 				  struct transport *transport,
 				  struct ref_transaction *transaction,
 				  struct ref *ref_map,
@@ -1442,19 +1442,19 @@ static int fetch_and_consume_refs(struct display_state *display_state,
 				  const struct fetch_config *config,
 				  struct ref_update_display_info_array *display_array)
 {
-	int connectivity_checked = 1;
-	int ret;
+	ціле connectivity_checked = 1;
+	ціле ret;
 
 	/*
 	 * We don't need to perform a fetch in case we can already satisfy all
 	 * refs.
 	 */
 	ret = check_exist_and_connected(ref_map);
-	if (ret) {
+	якщо (ret) {
 		trace2_region_enter("fetch", "fetch_refs", the_repository);
 		ret = transport_fetch_refs(transport, ref_map);
 		trace2_region_leave("fetch", "fetch_refs", the_repository);
-		if (ret)
+		якщо (ret)
 			goto out;
 		connectivity_checked = transport->smart_options ?
 			transport->smart_options->connectivity_checked : 0;
@@ -1468,41 +1468,41 @@ static int fetch_and_consume_refs(struct display_state *display_state,
 
 out:
 	transport_unlock_pack(transport, 0);
-	return ret;
+	повернути ret;
 }
 
-static int prune_refs(struct display_state *display_state,
+static ціле prune_refs(struct display_state *display_state,
 		      struct refspec *rs,
 		      struct ref_transaction *transaction,
 		      struct ref *ref_map)
 {
-	int result = 0;
+	ціле result = 0;
 	struct ref *ref, *stale_refs = get_stale_heads(rs, ref_map);
 	struct strbuf err = STRBUF_INIT;
 	struct string_list refnames = STRING_LIST_INIT_NODUP;
 
-	for (ref = stale_refs; ref; ref = ref->next)
+	для (ref = stale_refs; ref; ref = ref->next)
 		string_list_append(&refnames, ref->name);
 
-	if (!dry_run) {
-		if (transaction) {
-			for (ref = stale_refs; ref; ref = ref->next) {
+	якщо (!dry_run) {
+		якщо (transaction) {
+			для (ref = stale_refs; ref; ref = ref->next) {
 				result = ref_transaction_delete(transaction, ref->name, NULL,
 								NULL, 0, "fetch: prune", &err);
-				if (result)
+				якщо (result)
 					goto cleanup;
 			}
-		} else {
+		} інакше {
 			result = refs_delete_refs(get_main_ref_store(the_repository),
 						  "fetch: prune", &refnames,
 						  0);
 		}
 	}
 
-	if (verbosity >= 0) {
-		int summary_width = transport_summary_width(stale_refs);
+	якщо (verbosity >= 0) {
+		ціле summary_width = transport_summary_width(stale_refs);
 
-		for (ref = stale_refs; ref; ref = ref->next) {
+		для (ref = stale_refs; ref; ref = ref->next) {
 			display_ref_update(display_state, '-', _("[deleted]"), NULL,
 					   _("(none)"), ref->name,
 					   &ref->new_oid, &ref->old_oid,
@@ -1517,14 +1517,14 @@ cleanup:
 	string_list_clear(&refnames, 0);
 	strbuf_release(&err);
 	free_refs(stale_refs);
-	return result;
+	повернути result;
 }
 
 static void check_not_current_branch(struct ref *ref_map)
 {
 	const char *path;
-	for (; ref_map; ref_map = ref_map->next)
-		if (ref_map->peer_ref &&
+	для (; ref_map; ref_map = ref_map->next)
+		якщо (ref_map->peer_ref &&
 		    starts_with(ref_map->peer_ref->name, "refs/heads/") &&
 		    (path = branch_checked_out(ref_map->peer_ref->name)))
 			die(_("refusing to fetch into branch '%s' "
@@ -1532,35 +1532,35 @@ static void check_not_current_branch(struct ref *ref_map)
 			    ref_map->peer_ref->name, path);
 }
 
-static int truncate_fetch_head(void)
+static ціле truncate_fetch_head(void)
 {
 	const char *filename = git_path_fetch_head(the_repository);
 	FILE *fp = fopen_for_writing(filename);
 
-	if (!fp)
-		return error_errno(_("cannot open '%s'"), filename);
+	якщо (!fp)
+		повернути error_errno(_("cannot open '%s'"), filename);
 	fclose(fp);
-	return 0;
+	повернути 0;
 }
 
 static void set_option(struct transport *transport, const char *name, const char *value)
 {
-	int r = transport_set_option(transport, name, value);
-	if (r < 0)
+	ціле r = transport_set_option(transport, name, value);
+	якщо (r < 0)
 		die(_("option \"%s\" value \"%s\" is not valid for %s"),
 		    name, value, transport->url);
-	if (r > 0)
+	якщо (r > 0)
 		warning(_("option \"%s\" is ignored for %s"),
 			name, transport->url);
 }
 
 
-static int add_oid(const struct reference *ref, void *cb_data)
+static ціле add_oid(const struct reference *ref, void *cb_data)
 {
 	struct oid_array *oids = cb_data;
 
 	oid_array_append(oids, ref->oid);
-	return 0;
+	повернути 0;
 }
 
 static void add_negotiation_tips(struct string_list *input_list,
@@ -1568,22 +1568,22 @@ static void add_negotiation_tips(struct string_list *input_list,
 				 const char *argname)
 {
 	struct oid_array *oids = xcalloc(1, sizeof(*oids));
-	int i;
+	ціле i;
 
-	for (i = 0; i < input_list->nr; i++) {
+	для (i = 0; i < input_list->nr; i++) {
 		const char *s = input_list->items[i].string;
 		struct refs_for_each_ref_options opts = {
 			.pattern = s,
 		};
-		int old_nr;
-		if (!has_glob_specials(s)) {
+		ціле old_nr;
+		якщо (!has_glob_specials(s)) {
 			struct object_id oid;
 
 			/* Ignore missing reference. */
-			if (repo_get_oid(the_repository, s, &oid))
+			якщо (repo_get_oid(the_repository, s, &oid))
 				continue;
 			/* Fail on missing object pointed by ref. */
-			if (!odb_has_object(the_repository->objects, &oid, 0))
+			якщо (!odb_has_object(the_repository->objects, &oid, 0))
 				die(_("the object %s does not exist"), s);
 
 			oid_array_append(oids, &oid);
@@ -1592,14 +1592,14 @@ static void add_negotiation_tips(struct string_list *input_list,
 		old_nr = oids->nr;
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
 				      add_oid, oids, &opts);
-		if (old_nr == oids->nr)
+		якщо (old_nr == oids->nr)
 			warning(_("ignoring %s=%s because it does not match any refs"),
 				argname, s);
 	}
 	*output_list = oids;
 }
 
-static struct transport *prepare_transport(struct remote *remote, int deepen,
+static struct transport *prepare_transport(struct remote *remote, ціле deepen,
 					   struct list_objects_filter_options *filter_options)
 {
 	struct transport *transport;
@@ -1607,46 +1607,46 @@ static struct transport *prepare_transport(struct remote *remote, int deepen,
 	transport = transport_get(remote, NULL);
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
-	if (upload_pack)
+	якщо (upload_pack)
 		set_option(transport, TRANS_OPT_UPLOADPACK, upload_pack);
-	if (keep)
+	якщо (keep)
 		set_option(transport, TRANS_OPT_KEEP, "yes");
-	if (depth)
+	якщо (depth)
 		set_option(transport, TRANS_OPT_DEPTH, depth);
-	if (deepen && deepen_since)
+	якщо (deepen && deepen_since)
 		set_option(transport, TRANS_OPT_DEEPEN_SINCE, deepen_since);
-	if (deepen && deepen_not.nr)
+	якщо (deepen && deepen_not.nr)
 		set_option(transport, TRANS_OPT_DEEPEN_NOT,
 			   (const char *)&deepen_not);
-	if (deepen_relative)
+	якщо (deepen_relative)
 		set_option(transport, TRANS_OPT_DEEPEN_RELATIVE, "yes");
-	if (update_shallow)
+	якщо (update_shallow)
 		set_option(transport, TRANS_OPT_UPDATE_SHALLOW, "yes");
-	if (refetch)
+	якщо (refetch)
 		set_option(transport, TRANS_OPT_REFETCH, "yes");
-	if (filter_options->choice) {
+	якщо (filter_options->choice) {
 		const char *spec =
 			expand_list_objects_filter_spec(filter_options);
 		set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER, spec);
 		set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
-	if (negotiation_restrict.nr) {
-		if (transport->smart_options)
+	якщо (negotiation_restrict.nr) {
+		якщо (transport->smart_options)
 			add_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else
+		інакше
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-restrict");
-	} else if (remote->negotiation_restrict.nr) {
+	} інакше якщо (remote->negotiation_restrict.nr) {
 		struct string_list_item *item;
 		for_each_string_list_item(item, &remote->negotiation_restrict)
 			string_list_append(&negotiation_restrict, item->string);
-		if (transport->smart_options)
+		якщо (transport->smart_options)
 			add_negotiation_tips(&negotiation_restrict,
 					     &transport->smart_options->negotiation_restrict_tips,
 					     "--negotiation-restrict");
-		else {
+		інакше {
 			struct strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationRestrict", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
@@ -1654,20 +1654,20 @@ static struct transport *prepare_transport(struct remote *remote, int deepen,
 			strbuf_release(&config_name);
 		}
 	}
-	if (negotiation_include.nr) {
-		if (transport->smart_options)
+	якщо (negotiation_include.nr) {
+		якщо (transport->smart_options)
 			add_negotiation_tips(&negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		else
+		інакше
 			warning(_("ignoring %s because the protocol does not support it"),
 				"--negotiation-include");
-	} else if (remote->negotiation_include.nr) {
-		if (transport->smart_options) {
+	} інакше якщо (remote->negotiation_include.nr) {
+		якщо (transport->smart_options) {
 			add_negotiation_tips(&remote->negotiation_include,
 					     &transport->smart_options->negotiation_include_tips,
 					     "--negotiation-include");
-		} else {
+		} інакше {
 			struct strbuf config_name = STRBUF_INIT;
 			strbuf_addf(&config_name, "remote.%s.negotiationInclude", remote->name);
 			warning(_("ignoring %s because the protocol does not support it"),
@@ -1675,10 +1675,10 @@ static struct transport *prepare_transport(struct remote *remote, int deepen,
 			strbuf_release(&config_name);
 		}
 	}
-	return transport;
+	повернути transport;
 }
 
-static int backfill_tags(struct display_state *display_state,
+static ціле backfill_tags(struct display_state *display_state,
 			 struct transport *transport,
 			 struct ref_transaction *transaction,
 			 struct ref *ref_map,
@@ -1687,7 +1687,7 @@ static int backfill_tags(struct display_state *display_state,
 			 struct ref_update_display_info_array *display_array,
 			 struct list_objects_filter_options *filter_options)
 {
-	int retcode, cannot_reuse;
+	ціле retcode, cannot_reuse;
 
 	/*
 	 * Once we have set TRANS_OPT_DEEPEN_SINCE, we can't unset it
@@ -1698,7 +1698,7 @@ static int backfill_tags(struct display_state *display_state,
 	 */
 	cannot_reuse = transport->cannot_reuse ||
 		deepen_since || deepen_not.nr;
-	if (cannot_reuse) {
+	якщо (cannot_reuse) {
 		gsecondary = prepare_transport(transport->remote, 0, filter_options);
 		transport = gsecondary;
 	}
@@ -1709,17 +1709,17 @@ static int backfill_tags(struct display_state *display_state,
 	retcode = fetch_and_consume_refs(display_state, transport, transaction, ref_map,
 					 fetch_head, config, display_array);
 
-	if (gsecondary) {
+	якщо (gsecondary) {
 		transport_disconnect(gsecondary);
 		gsecondary = NULL;
 	}
 
-	return retcode;
+	повернути retcode;
 }
 
 static const char *strip_refshead(const char *name){
 	skip_prefix(name, "refs/heads/", &name);
-	return name;
+	повернути name;
 }
 
 static void set_head_advice_msg(const char *remote, const char *head_name)
@@ -1738,19 +1738,19 @@ static void set_head_advice_msg(const char *remote, const char *head_name)
 }
 
 static void warn_set_head(const char *remote, const char *head_name,
-			struct strbuf *buf_prev, int updateres) {
+			struct strbuf *buf_prev, ціле updateres) {
 	struct strbuf buf_prefix = STRBUF_INIT;
 	const char *prev_head = NULL;
 
 	strbuf_addf(&buf_prefix, "refs/remotes/%s/", remote);
 	skip_prefix(buf_prev->buf, buf_prefix.buf, &prev_head);
 
-	if (prev_head && strcmp(prev_head, head_name)) {
+	якщо (prev_head && strcmp(prev_head, head_name)) {
 		printf("'HEAD' at '%s' is '%s', but we have '%s' locally.\n",
 			remote, head_name, prev_head);
 		set_head_advice_msg(remote, head_name);
 	}
-	else if (updateres && buf_prev->len) {
+	інакше якщо (updateres && buf_prev->len) {
 		printf("'HEAD' at '%s' is '%s', "
 			"but we have a detached HEAD pointing to '%s' locally.\n",
 			remote, head_name, buf_prev->buf);
@@ -1759,10 +1759,10 @@ static void warn_set_head(const char *remote, const char *head_name,
 	strbuf_release(&buf_prefix);
 }
 
-static int set_head(const struct ref *remote_refs, struct remote *remote,
-			int follow_remote_head)
+static ціле set_head(const struct ref *remote_refs, struct remote *remote,
+			ціле follow_remote_head)
 {
-	int result = 0, create_only, baremirror, was_detached;
+	ціле result = 0, create_only, baremirror, was_detached;
 	struct strbuf b_head = STRBUF_INIT, b_remote_head = STRBUF_INIT,
 		      b_local_head = STRBUF_INIT;
 	const char *no_warn_branch = remote->no_warn_branch;
@@ -1781,40 +1781,40 @@ static int set_head(const struct ref *remote_refs, struct remote *remote,
 	get_fetch_map(remote_refs, &refspec, &fetch_map_tail, 0);
 	matches = guess_remote_head(find_ref_by_name(remote_refs, "HEAD"),
 				    fetch_map, REMOTE_GUESS_HEAD_ALL);
-	for (ref = matches; ref; ref = ref->next) {
+	для (ref = matches; ref; ref = ref->next) {
 		string_list_append(&heads, strip_refshead(ref->name));
 	}
 
-	if (!heads.nr)
+	якщо (!heads.nr)
 		result = 1;
-	else if (heads.nr > 1)
+	інакше якщо (heads.nr > 1)
 		result = 1;
-	else
+	інакше
 		head_name = xstrdup(heads.items[0].string);
 
-	if (!head_name)
+	якщо (!head_name)
 		goto cleanup;
 	baremirror = is_bare_repository(the_repository) && remote->mirror;
 	create_only = follow_remote_head == FOLLOW_REMOTE_ALWAYS ? 0 : !baremirror;
-	if (baremirror) {
+	якщо (baremirror) {
 		strbuf_addstr(&b_head, "HEAD");
 		strbuf_addf(&b_remote_head, "refs/heads/%s", head_name);
-	} else {
+	} інакше {
 		strbuf_addf(&b_head, "refs/remotes/%s/HEAD", remote->name);
 		strbuf_addf(&b_remote_head, "refs/remotes/%s/%s", remote->name, head_name);
 	}
 	/* make sure it's valid */
-	if (!baremirror && !refs_ref_exists(refs, b_remote_head.buf)) {
+	якщо (!baremirror && !refs_ref_exists(refs, b_remote_head.buf)) {
 		result = 1;
 		goto cleanup;
 	}
 	was_detached = refs_update_symref_extended(refs, b_head.buf, b_remote_head.buf,
 					"fetch", &b_local_head, create_only);
-	if (was_detached == -1) {
+	якщо (was_detached == -1) {
 		result = 1;
 		goto cleanup;
 	}
-	if (verbosity >= 0 &&
+	якщо (verbosity >= 0 &&
 		follow_remote_head == FOLLOW_REMOTE_WARN &&
 		(!no_warn_branch || strcmp(no_warn_branch, head_name)))
 		warn_set_head(remote->name, head_name, &b_local_head, was_detached);
@@ -1827,11 +1827,11 @@ cleanup:
 	strbuf_release(&b_head);
 	strbuf_release(&b_local_head);
 	strbuf_release(&b_remote_head);
-	return result;
+	повернути result;
 }
 
 struct ref_rejection_data {
-	int *retcode;
+	ціле *retcode;
 	bool conflict_msg_shown;
 	bool case_sensitive_msg_shown;
 	const char *remote_name;
@@ -1849,7 +1849,7 @@ static void ref_transaction_rejection_handler(const char *refname,
 {
 	struct ref_rejection_data *data = cb_data;
 
-	if (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
+	якщо (err == REF_TRANSACTION_ERROR_CASE_CONFLICT && repo_ignore_case(the_repository) &&
 	    !data->case_sensitive_msg_shown) {
 		error(_("You're on a case-insensitive filesystem, and the remote you are\n"
 			"trying to fetch from has references that only differ in casing. It\n"
@@ -1862,16 +1862,16 @@ static void ref_transaction_rejection_handler(const char *refname,
 			"new format yet. So if you use tools other than Git to access this\n"
 			"repository it may not be an option to migrate to reftables.\n"));
 		data->case_sensitive_msg_shown = true;
-	} else if (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
+	} інакше якщо (err == REF_TRANSACTION_ERROR_NAME_CONFLICT &&
 		   !data->conflict_msg_shown) {
 		error(_("some local refs could not be updated; try running\n"
 			" 'git remote prune %s' to remove any old, conflicting "
 			"branches"), data->remote_name);
 		data->conflict_msg_shown = true;
-	} else {
-		if (details)
+	} інакше {
+		якщо (details)
 			error("%s", details);
-		else
+		інакше
 			error(_("fetching ref %s failed: %s"),
 			      refname, ref_transaction_error_msg(err));
 	}
@@ -1884,16 +1884,16 @@ static void ref_transaction_rejection_handler(const char *refname,
  * Commit the reference transaction. If it isn't an atomic transaction, handle
  * rejected updates as part of using batched updates.
  */
-static int commit_ref_transaction(struct ref_transaction **transaction,
+static ціле commit_ref_transaction(struct ref_transaction **transaction,
 				  bool is_atomic, const char *remote_name,
 				  struct strmap *rejected_refs,
 				  struct strbuf *err)
 {
-	int retcode = ref_transaction_commit(*transaction, err);
-	if (retcode)
+	ціле retcode = ref_transaction_commit(*transaction, err);
+	якщо (retcode)
 		goto out;
 
-	if (!is_atomic) {
+	якщо (!is_atomic) {
 		struct ref_rejection_data data = {
 			.conflict_msg_shown = 0,
 			.remote_name = remote_name,
@@ -1909,33 +1909,33 @@ static int commit_ref_transaction(struct ref_transaction **transaction,
 out:
 	ref_transaction_free(*transaction);
 	*transaction = NULL;
-	return retcode;
+	повернути retcode;
 }
 
 static void collect_updated_tips(struct oidset *tips, struct ref *ref_map)
 {
 	struct ref *rm;
-	for (rm = ref_map; rm; rm = rm->next) {
+	для (rm = ref_map; rm; rm = rm->next) {
 		struct commit *commit;
 		/*
 		 * Shallow-rejected refs are not stored and their history
 		 * is incomplete, so skip them.
 		 */
-		if (rm->status == REF_STATUS_REJECT_SHALLOW)
+		якщо (rm->status == REF_STATUS_REJECT_SHALLOW)
 			continue;
-		if (is_null_oid(&rm->old_oid))
+		якщо (is_null_oid(&rm->old_oid))
 			continue;
-		if (rm->peer_ref &&
+		якщо (rm->peer_ref &&
 		    oideq(&rm->old_oid, &rm->peer_ref->old_oid))
 			continue;
 		commit = lookup_commit_reference_gently(the_repository,
 							&rm->old_oid, 1);
-		if (commit)
+		якщо (commit)
 			oidset_insert(tips, &commit->object.oid);
 	}
 }
 
-static int do_fetch(struct transport *transport,
+static ціле do_fetch(struct transport *transport,
 		    struct refspec *rs,
 		    const struct fetch_config *config,
 		    struct list_objects_filter_options *filter_options,
@@ -1944,8 +1944,8 @@ static int do_fetch(struct transport *transport,
 	struct ref_transaction *transaction = NULL;
 	struct ref *ref_map = NULL;
 	struct display_state display_state = { 0 };
-	int autotags = (transport->remote->fetch_tags == 1);
-	int retcode = 0;
+	ціле autotags = (transport->remote->fetch_tags == 1);
+	ціле retcode = 0;
 	const struct ref *remote_refs;
 	struct transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
@@ -1953,46 +1953,46 @@ static int do_fetch(struct transport *transport,
 	struct strbuf err = STRBUF_INIT;
 	struct ref_update_display_info_array display_array = { 0 };
 	struct strmap rejected_refs = STRMAP_INIT;
-	int summary_width = 0;
-	int follow_remote_head = FOLLOW_REMOTE_NEVER;
+	ціле summary_width = 0;
+	ціле follow_remote_head = FOLLOW_REMOTE_NEVER;
 
-	if (tags == TAGS_DEFAULT) {
-		if (transport->remote->fetch_tags == 2)
+	якщо (tags == TAGS_DEFAULT) {
+		якщо (transport->remote->fetch_tags == 2)
 			tags = TAGS_SET;
-		if (transport->remote->fetch_tags == -1)
+		якщо (transport->remote->fetch_tags == -1)
 			tags = TAGS_UNSET;
 	}
 
 	/* if not appending, truncate FETCH_HEAD */
-	if (!append && write_fetch_head) {
+	якщо (!append && write_fetch_head) {
 		retcode = truncate_fetch_head();
-		if (retcode)
+		якщо (retcode)
 			goto cleanup;
 	}
 
-	if (rs->nr) {
+	якщо (rs->nr) {
 		refspec_ref_prefixes(rs, &transport_ls_refs_options.ref_prefixes);
-	} else {
+	} інакше {
 		struct branch *branch = branch_get(NULL);
 
-		if (transport->remote->fetch.nr) {
+		якщо (transport->remote->fetch.nr) {
 			refspec_ref_prefixes(&transport->remote->fetch,
 					     &transport_ls_refs_options.ref_prefixes);
 			/*
 			 * See remote.c's handling of remote.<name>.followRemoteHEAD
 			 * for the analogous, still-unresolved case.
 			 */
-			if (transport->remote->follow_remote_head)
+			якщо (transport->remote->follow_remote_head)
 				follow_remote_head = transport->remote->follow_remote_head;
-			else if (config->follow_remote_head_seen)
+			інакше якщо (config->follow_remote_head_seen)
 				follow_remote_head = get_follow_remote_head(config->follow_remote_head_raw);
-			else
+			інакше
 				follow_remote_head = BUILTIN_FOLLOW_REMOTE_HEAD_DFLT;
 		}
-		if (branch && branch_has_merge_config(branch) &&
+		якщо (branch && branch_has_merge_config(branch) &&
 		    !strcmp(branch->remote_name, transport->remote->name)) {
-			int i;
-			for (i = 0; i < branch->merge_nr; i++) {
+			ціле i;
+			для (i = 0; i < branch->merge_nr; i++) {
 				strvec_push(&transport_ls_refs_options.ref_prefixes,
 					    branch->merge[i]->src);
 			}
@@ -2002,16 +2002,16 @@ static int do_fetch(struct transport *transport,
 		 * If there are no refs specified to fetch, then we just
 		 * fetch HEAD; mention that to narrow the advertisement.
 		 */
-		if (!transport_ls_refs_options.ref_prefixes.nr)
+		якщо (!transport_ls_refs_options.ref_prefixes.nr)
 			strvec_push(&transport_ls_refs_options.ref_prefixes,
 				    "HEAD");
 	}
 
-	if (tags == TAGS_SET || tags == TAGS_DEFAULT)
+	якщо (tags == TAGS_SET || tags == TAGS_DEFAULT)
 		strvec_push(&transport_ls_refs_options.ref_prefixes,
 			    "refs/tags/");
 
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER)
+	якщо (follow_remote_head != FOLLOW_REMOTE_NEVER)
 		strvec_push(&transport_ls_refs_options.ref_prefixes,
 			    "HEAD");
 
@@ -2019,52 +2019,52 @@ static int do_fetch(struct transport *transport,
 	 * Only initiate ref listing if we have at least one ref we want to
 	 * know about.
 	 */
-	if (transport_ls_refs_options.ref_prefixes.nr) {
+	якщо (transport_ls_refs_options.ref_prefixes.nr) {
 		trace2_region_enter("fetch", "remote_refs", the_repository);
 		remote_refs = transport_get_remote_refs(transport,
 							&transport_ls_refs_options);
 		trace2_region_leave("fetch", "remote_refs", the_repository);
-	} else
+	} інакше
 		remote_refs = NULL;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
 
 	ref_map = get_ref_map(transport->remote, remote_refs, rs,
 			      tags, &autotags);
-	if (!update_head_ok)
+	якщо (!update_head_ok)
 		check_not_current_branch(ref_map);
 
 	retcode = open_fetch_head(&fetch_head);
-	if (retcode)
+	якщо (retcode)
 		goto cleanup;
 
 	display_state_init(&display_state, ref_map, transport->url,
 			   config->display_format);
 
-	if (atomic_fetch) {
+	якщо (atomic_fetch) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  0, &err);
-		if (!transaction) {
+		якщо (!transaction) {
 			retcode = -1;
 			goto cleanup;
 		}
 	}
 
-	if (tags == TAGS_DEFAULT && autotags)
+	якщо (tags == TAGS_DEFAULT && autotags)
 		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
-	if (prune) {
+	якщо (prune) {
 		/*
 		 * We only prune based on refspecs specified
 		 * explicitly (via command line or configuration); we
 		 * don't care whether --tags was specified.
 		 */
-		if (rs->nr) {
+		якщо (rs->nr) {
 			retcode = prune_refs(&display_state, rs, transaction, ref_map);
-		} else {
+		} інакше {
 			retcode = prune_refs(&display_state, &transport->remote->fetch,
 					     transaction, ref_map);
 		}
-		if (retcode != 0)
+		якщо (retcode != 0)
 			retcode = 1;
 	}
 
@@ -2077,16 +2077,16 @@ static int do_fetch(struct transport *transport,
 	 * can delete and create refs (with F/D conflicts) in the same transaction
 	 * and this can be moved above the 'prune_refs()' block.
 	 */
-	if (!transaction) {
+	якщо (!transaction) {
 		transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 							  REF_TRANSACTION_ALLOW_FAILURE, &err);
-		if (!transaction) {
+		якщо (!transaction) {
 			retcode = -1;
 			goto cleanup;
 		}
 	}
 
-	if (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
+	якщо (fetch_and_consume_refs(&display_state, transport, transaction, ref_map,
 				   &fetch_head, config, &display_array)) {
 		retcode = 1;
 		goto cleanup;
@@ -2096,11 +2096,11 @@ static int do_fetch(struct transport *transport,
 	 * If neither --no-tags nor --tags was specified, do automated tag
 	 * following.
 	 */
-	if (tags == TAGS_DEFAULT && autotags) {
+	якщо (tags == TAGS_DEFAULT && autotags) {
 		struct ref *tags_ref_map = NULL, **tail = &tags_ref_map;
 
 		find_non_local_tags(remote_refs, transaction, &tags_ref_map, &tail);
-		if (tags_ref_map) {
+		якщо (tags_ref_map) {
 			/*
 			 * If backfilling of tags fails then we want to tell
 			 * the user so, but we have to continue regardless to
@@ -2109,7 +2109,7 @@ static int do_fetch(struct transport *transport,
 			 * when `--atomic` is passed: in that case we'll abort
 			 * the transaction and don't commit anything.
 			 */
-			if (backfill_tags(&display_state, transport, transaction, tags_ref_map,
+			якщо (backfill_tags(&display_state, transport, transaction, tags_ref_map,
 					  &fetch_head, config, &display_array, filter_options))
 				retcode = 1;
 		}
@@ -2117,10 +2117,10 @@ static int do_fetch(struct transport *transport,
 		free_refs(tags_ref_map);
 	}
 
-	if (retcode)
+	якщо (retcode)
 		goto cleanup;
 
-	if (verbosity >= 0)
+	якщо (verbosity >= 0)
 		summary_width = transport_summary_width(ref_map);
 
 	retcode = commit_ref_transaction(&transaction, atomic_fetch,
@@ -2130,14 +2130,14 @@ static int do_fetch(struct transport *transport,
 	 * With '--atomic', bail out if the transaction fails. Without '--atomic',
 	 * continue to fetch head and perform other post-fetch operations.
 	 */
-	if (retcode && atomic_fetch)
+	якщо (retcode && atomic_fetch)
 		goto cleanup;
 
 	commit_fetch_head(&fetch_head);
 
 	collect_updated_tips(updated_tips, ref_map);
 
-	if (set_upstream) {
+	якщо (set_upstream) {
 		struct branch *branch = branch_get("HEAD");
 		struct ref *rm;
 		struct ref *source_ref = NULL;
@@ -2152,18 +2152,18 @@ static int do_fetch(struct transport *transport,
 		 * request ambiguous and err on the safe side by doing
 		 * nothing and just emit a warning.
 		 */
-		for (rm = ref_map; rm; rm = rm->next) {
-			if (!rm->peer_ref) {
-				if (source_ref) {
+		для (rm = ref_map; rm; rm = rm->next) {
+			якщо (!rm->peer_ref) {
+				якщо (source_ref) {
 					warning(_("multiple branches detected, incompatible with --set-upstream"));
 					goto cleanup;
-				} else {
+				} інакше {
 					source_ref = rm;
 				}
 			}
 		}
-		if (source_ref) {
-			if (!branch) {
+		якщо (source_ref) {
+			якщо (!branch) {
 				const char *shortname = source_ref->name;
 				skip_prefix(shortname, "refs/heads/", &shortname);
 
@@ -2173,24 +2173,24 @@ static int do_fetch(struct transport *transport,
 				goto cleanup;
 			}
 
-			if (!strcmp(source_ref->name, "HEAD") ||
+			якщо (!strcmp(source_ref->name, "HEAD") ||
 			    starts_with(source_ref->name, "refs/heads/"))
 				install_branch_config(0,
 						      branch->name,
 						      transport->remote->name,
 						      source_ref->name);
-			else if (starts_with(source_ref->name, "refs/remotes/"))
+			інакше якщо (starts_with(source_ref->name, "refs/remotes/"))
 				warning(_("not setting upstream for a remote remote-tracking branch"));
-			else if (starts_with(source_ref->name, "refs/tags/"))
+			інакше якщо (starts_with(source_ref->name, "refs/tags/"))
 				warning(_("not setting upstream for a remote tag"));
-			else
+			інакше
 				warning(_("unknown branch type"));
-		} else {
+		} інакше {
 			warning(_("no source branch found;\n"
 				  "you need to specify exactly one branch with the --set-upstream option"));
 		}
 	}
-	if (follow_remote_head != FOLLOW_REMOTE_NEVER) {
+	якщо (follow_remote_head != FOLLOW_REMOTE_NEVER) {
 		/*
 		 * Way too many cases where this can go wrong so let's just
 		 * ignore errors and fail silently for now.
@@ -2203,32 +2203,32 @@ cleanup:
 	 * When using batched updates, we want to commit the non-rejected
 	 * updates and also handle the rejections.
 	 */
-	if (retcode && !atomic_fetch && transaction)
+	якщо (retcode && !atomic_fetch && transaction)
 		commit_ref_transaction(&transaction, false,
 				       transport->remote->name,
 				       &rejected_refs, &err);
 
-	for (size_t i = 0; i < display_array.nr; i++) {
+	для (size_t i = 0; i < display_array.nr; i++) {
 		struct ref_update_display_info *info = &display_array.info[i];
 
-		if (!info->failed && strmap_contains(&rejected_refs, info->ref))
+		якщо (!info->failed && strmap_contains(&rejected_refs, info->ref))
 			ref_update_display_info_set_failed(info);
 		ref_update_display_info_display(info, &display_state, summary_width);
 		ref_update_display_info_free(info);
 	}
 
-	if (retcode) {
-		if (err.len) {
+	якщо (retcode) {
+		якщо (err.len) {
 			error("%s", err.buf);
 			strbuf_reset(&err);
 		}
-		if (transaction && ref_transaction_abort(transaction, &err) &&
+		якщо (transaction && ref_transaction_abort(transaction, &err) &&
 		    err.len)
 			error("%s", err.buf);
 		transaction = NULL;
 	}
 
-	if (transaction)
+	якщо (transaction)
 		ref_transaction_free(transaction);
 
 	free(display_array.info);
@@ -2237,55 +2237,55 @@ cleanup:
 	close_fetch_head(&fetch_head);
 	strbuf_release(&err);
 	free_refs(ref_map);
-	return retcode;
+	повернути retcode;
 }
 
-static int get_one_remote_for_fetch(struct remote *remote, void *priv)
+static ціле get_one_remote_for_fetch(struct remote *remote, void *priv)
 {
 	struct string_list *list = priv;
-	if (!remote->skip_default_update)
+	якщо (!remote->skip_default_update)
 		string_list_append(list, remote->name);
-	return 0;
+	повернути 0;
 }
 
 static void add_options_to_argv(struct strvec *argv,
 				const struct fetch_config *config)
 {
-	if (dry_run)
+	якщо (dry_run)
 		strvec_push(argv, "--dry-run");
-	if (prune != -1)
+	якщо (prune != -1)
 		strvec_push(argv, prune ? "--prune" : "--no-prune");
-	if (prune_tags != -1)
+	якщо (prune_tags != -1)
 		strvec_push(argv, prune_tags ? "--prune-tags" : "--no-prune-tags");
-	if (update_head_ok)
+	якщо (update_head_ok)
 		strvec_push(argv, "--update-head-ok");
-	if (force)
+	якщо (force)
 		strvec_push(argv, "--force");
-	if (keep)
+	якщо (keep)
 		strvec_push(argv, "--keep");
-	if (config->recurse_submodules == RECURSE_SUBMODULES_ON)
+	якщо (config->recurse_submodules == RECURSE_SUBMODULES_ON)
 		strvec_push(argv, "--recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
+	інакше якщо (config->recurse_submodules == RECURSE_SUBMODULES_OFF)
 		strvec_push(argv, "--no-recurse-submodules");
-	else if (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	інакше якщо (config->recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		strvec_push(argv, "--recurse-submodules=on-demand");
-	if (tags == TAGS_SET)
+	якщо (tags == TAGS_SET)
 		strvec_push(argv, "--tags");
-	else if (tags == TAGS_UNSET)
+	інакше якщо (tags == TAGS_UNSET)
 		strvec_push(argv, "--no-tags");
-	if (verbosity >= 2)
+	якщо (verbosity >= 2)
 		strvec_push(argv, "-v");
-	if (verbosity >= 1)
+	якщо (verbosity >= 1)
 		strvec_push(argv, "-v");
-	else if (verbosity < 0)
+	інакше якщо (verbosity < 0)
 		strvec_push(argv, "-q");
-	if (family == TRANSPORT_FAMILY_IPV4)
+	якщо (family == TRANSPORT_FAMILY_IPV4)
 		strvec_push(argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
+	інакше якщо (family == TRANSPORT_FAMILY_IPV6)
 		strvec_push(argv, "--ipv6");
-	if (!write_fetch_head)
+	якщо (!write_fetch_head)
 		strvec_push(argv, "--no-write-fetch-head");
-	if (config->display_format == DISPLAY_FORMAT_PORCELAIN)
+	якщо (config->display_format == DISPLAY_FORMAT_PORCELAIN)
 		strvec_pushf(argv, "--porcelain");
 }
 
@@ -2294,19 +2294,19 @@ static void add_options_to_argv(struct strvec *argv,
 struct parallel_fetch_state {
 	const char **argv;
 	struct string_list *remotes;
-	int next, result;
+	ціле next, result;
 	const struct fetch_config *config;
 };
 
-static int fetch_next_remote(struct child_process *cp,
+static ціле fetch_next_remote(struct child_process *cp,
 			     struct strbuf *out UNUSED,
 			     void *cb, void **task_cb)
 {
 	struct parallel_fetch_state *state = cb;
 	char *remote;
 
-	if (state->next < 0 || state->next >= state->remotes->nr)
-		return 0;
+	якщо (state->next < 0 || state->next >= state->remotes->nr)
+		повернути 0;
 
 	remote = state->remotes->items[state->next++].string;
 	*task_cb = remote;
@@ -2315,13 +2315,13 @@ static int fetch_next_remote(struct child_process *cp,
 	strvec_push(&cp->args, remote);
 	cp->git_cmd = 1;
 
-	if (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
+	якщо (verbosity >= 0 && state->config->display_format != DISPLAY_FORMAT_PORCELAIN)
 		printf(_("Fetching %s\n"), remote);
 
-	return 1;
+	повернути 1;
 }
 
-static int fetch_failed_to_start(struct strbuf *out UNUSED,
+static ціле fetch_failed_to_start(struct strbuf *out UNUSED,
 				 void *cb, void *task_cb)
 {
 	struct parallel_fetch_state *state = cb;
@@ -2329,34 +2329,34 @@ static int fetch_failed_to_start(struct strbuf *out UNUSED,
 
 	state->result = error(_("could not fetch %s"), remote);
 
-	return 0;
+	повернути 0;
 }
 
-static int fetch_finished(int result, struct strbuf *out,
+static ціле fetch_finished(ціле result, struct strbuf *out,
 			  void *cb, void *task_cb)
 {
 	struct parallel_fetch_state *state = cb;
 	const char *remote = task_cb;
 
-	if (result) {
+	якщо (result) {
 		strbuf_addf(out, _("could not fetch '%s' (exit code: %d)\n"),
 			    remote, result);
 		state->result = -1;
 	}
 
-	return 0;
+	повернути 0;
 }
 
-static int fetch_multiple(struct string_list *list, int max_children,
+static ціле fetch_multiple(struct string_list *list, ціле max_children,
 			  const struct fetch_config *config)
 {
-	int i, result = 0;
+	ціле i, result = 0;
 	struct strvec argv = STRVEC_INIT;
 
-	if (!append && write_fetch_head) {
-		int errcode = truncate_fetch_head();
-		if (errcode)
-			return errcode;
+	якщо (!append && write_fetch_head) {
+		ціле errcode = truncate_fetch_head();
+		якщо (errcode)
+			повернути errcode;
 	}
 
 	/*
@@ -2366,11 +2366,11 @@ static int fetch_multiple(struct string_list *list, int max_children,
 	strvec_pushl(&argv, "-c", "fetch.bundleURI=",
 		     "fetch", "--append", "--no-auto-gc",
 		     "--no-write-commit-graph", NULL);
-	for (i = 0; i < server_options.nr; i++)
+	для (i = 0; i < server_options.nr; i++)
 		strvec_pushf(&argv, "--server-option=%s", server_options.items[i].string);
 	add_options_to_argv(&argv, config);
 
-	if (max_children != 1 && list->nr != 1) {
+	якщо (max_children != 1 && list->nr != 1) {
 		struct parallel_fetch_state state = { argv.v, list, 0, 0, config };
 		const struct run_process_parallel_opts opts = {
 			.tr2_category = "fetch",
@@ -2388,24 +2388,24 @@ static int fetch_multiple(struct string_list *list, int max_children,
 
 		run_processes_parallel(&opts);
 		result = state.result;
-	} else
-		for (i = 0; i < list->nr; i++) {
+	} інакше
+		для (i = 0; i < list->nr; i++) {
 			const char *name = list->items[i].string;
 			struct child_process cmd = CHILD_PROCESS_INIT;
 
 			strvec_pushv(&cmd.args, argv.v);
 			strvec_push(&cmd.args, name);
-			if (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
+			якщо (verbosity >= 0 && config->display_format != DISPLAY_FORMAT_PORCELAIN)
 				printf(_("Fetching %s\n"), name);
 			cmd.git_cmd = 1;
-			if (run_command(&cmd)) {
+			якщо (run_command(&cmd)) {
 				error(_("could not fetch %s"), name);
 				result = 1;
 			}
 		}
 
 	strvec_clear(&argv);
-	return !!result;
+	повернути !!result;
 }
 
 /*
@@ -2419,15 +2419,15 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * Explicit --no-filter argument overrides everything, regardless
 	 * of any prior partial clones and fetches.
 	 */
-	if (filter_options->no_filter)
-		return;
+	якщо (filter_options->no_filter)
+		повернути;
 
 	/*
 	 * If no prior partial clone/fetch and the current fetch DID NOT
 	 * request a partial-fetch, do a normal fetch.
 	 */
-	if (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
-		return;
+	якщо (!repo_has_promisor_remote(the_repository) && !filter_options->choice)
+		повернути;
 
 	/*
 	 * If this is a partial-fetch request, we enable partial on
@@ -2435,9 +2435,9 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * filter-spec as the default for subsequent fetches to this
 	 * remote if there is currently no default filter-spec.
 	 */
-	if (filter_options->choice) {
+	якщо (filter_options->choice) {
 		partial_clone_register(remote->name, filter_options);
-		return;
+		повернути;
 	}
 
 	/*
@@ -2445,77 +2445,77 @@ static inline void fetch_one_setup_partial(struct remote *remote,
 	 * explicitly given filter-spec or inherit the filter-spec from
 	 * the config.
 	 */
-	if (!filter_options->choice)
+	якщо (!filter_options->choice)
 		partial_clone_get_default_filter_spec(filter_options, remote->name);
-	return;
+	повернути;
 }
 
-static int fetch_one(struct remote *remote, int argc, const char **argv,
-		     int prune_tags_ok, int use_stdin_refspecs,
+static ціле fetch_one(struct remote *remote, ціле argc, const char **argv,
+		     ціле prune_tags_ok, ціле use_stdin_refspecs,
 		     const struct fetch_config *config,
 		     struct list_objects_filter_options *filter_options,
 		     struct oidset *updated_tips)
 {
 	struct refspec rs = REFSPEC_INIT_FETCH(the_hash_algo);
-	int i;
-	int exit_code;
-	int maybe_prune_tags;
-	int remote_via_config = remote_is_configured(remote, 0);
+	ціле i;
+	ціле exit_code;
+	ціле maybe_prune_tags;
+	ціле remote_via_config = remote_is_configured(remote, 0);
 
-	if (!remote)
+	якщо (!remote)
 		die(_("no remote repository specified; please specify either a URL or a\n"
 		      "remote name from which new revisions should be fetched"));
 
 	gtransport = prepare_transport(remote, 1, filter_options);
 
-	if (prune < 0) {
+	якщо (prune < 0) {
 		/* no command line request */
-		if (0 <= remote->prune)
+		якщо (0 <= remote->prune)
 			prune = remote->prune;
-		else if (0 <= config->prune)
+		інакше якщо (0 <= config->prune)
 			prune = config->prune;
-		else
+		інакше
 			prune = PRUNE_BY_DEFAULT;
 	}
 
-	if (prune_tags < 0) {
+	якщо (prune_tags < 0) {
 		/* no command line request */
-		if (0 <= remote->prune_tags)
+		якщо (0 <= remote->prune_tags)
 			prune_tags = remote->prune_tags;
-		else if (0 <= config->prune_tags)
+		інакше якщо (0 <= config->prune_tags)
 			prune_tags = config->prune_tags;
-		else
+		інакше
 			prune_tags = PRUNE_TAGS_BY_DEFAULT;
 	}
 
 	maybe_prune_tags = prune_tags_ok && prune_tags;
-	if (maybe_prune_tags && remote_via_config)
+	якщо (maybe_prune_tags && remote_via_config)
 		refspec_append(&remote->fetch, TAG_REFSPEC);
 
-	if (maybe_prune_tags && (argc || !remote_via_config))
+	якщо (maybe_prune_tags && (argc || !remote_via_config))
 		refspec_append(&rs, TAG_REFSPEC);
 
-	for (i = 0; i < argc; i++) {
-		if (!strcmp(argv[i], "tag")) {
+	для (i = 0; i < argc; i++) {
+		якщо (!strcmp(argv[i], "tag")) {
 			i++;
-			if (i >= argc)
+			якщо (i >= argc)
 				die(_("you need to specify a tag name"));
 
 			refspec_appendf(&rs, "refs/tags/%s:refs/tags/%s",
 					argv[i], argv[i]);
-		} else {
+		} інакше {
 			refspec_append(&rs, argv[i]);
 		}
 	}
 
-	if (use_stdin_refspecs) {
+	якщо (use_stdin_refspecs) {
 		struct strbuf line = STRBUF_INIT;
-		while (strbuf_getline_lf(&line, stdin) != EOF)
+		поки (strbuf_getline_lf(&line, stdin) != EOF)
 			refspec_append(&rs, line.buf);
 		strbuf_release(&line);
 	}
 
-	if (server_options.nr)
+	якщо (server_options.nr)
 		gtransport->server_options = &server_options;
 
 	sigchain_push_common(unlock_pack_on_signal);
@@ -2527,10 +2527,10 @@ static int fetch_one(struct remote *remote, int argc, const char **argv,
 	refspec_clear(&rs);
 	transport_disconnect(gtransport);
 	gtransport = NULL;
-	return exit_code;
+	повернути exit_code;
 }
 
-int cmd_fetch(int argc,
+ціле cmd_fetch(ціле argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo UNUSED)
@@ -2551,19 +2551,19 @@ int cmd_fetch(int argc,
 	struct string_list list = STRING_LIST_INIT_DUP;
 	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
 	struct remote *remote = NULL;
-	int all = -1, multiple = 0;
-	int result = 0;
-	int prune_tags_ok = 1;
-	int enable_auto_gc = 1;
-	int unshallow = 0;
-	int max_jobs = -1;
-	int recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
-	int recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
-	int fetch_write_commit_graph = -1;
-	int stdin_refspecs = 0;
-	int negotiate_only = 0;
-	int porcelain = 0;
-	int i;
+	ціле all = -1, multiple = 0;
+	ціле result = 0;
+	ціле prune_tags_ok = 1;
+	ціле enable_auto_gc = 1;
+	ціле unshallow = 0;
+	ціле max_jobs = -1;
+	ціле recurse_submodules_cli = RECURSE_SUBMODULES_DEFAULT;
+	ціле recurse_submodules_default = RECURSE_SUBMODULES_ON_DEMAND;
+	ціле fetch_write_commit_graph = -1;
+	ціле stdin_refspecs = 0;
+	ціле negotiate_only = 0;
+	ціле porcelain = 0;
+	ціле i;
 	enum {
 		GRAPH_WRITE_REACHABLE,
 		GRAPH_WRITE_TIPS,
@@ -2672,7 +2672,7 @@ int cmd_fetch(int argc,
 
 	/* Record the command line for the reflog */
 	strbuf_addstr(&default_rla, "fetch");
-	for (i = 1; i < argc; i++) {
+	для (i = 1; i < argc; i++) {
 		/* This handles non-URLs gracefully */
 		char *anon = transport_anonymize_url(argv[i]);
 
@@ -2681,7 +2681,7 @@ int cmd_fetch(int argc,
 	}
 
 	repo_config(the_repository, git_fetch_config, &config);
-	if (the_repository->gitdir) {
+	якщо (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
@@ -2689,10 +2689,10 @@ int cmd_fetch(int argc,
 	argc = parse_options(argc, argv, prefix,
 			     builtin_fetch_options, builtin_fetch_usage, 0);
 
-	if (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
+	якщо (recurse_submodules_cli != RECURSE_SUBMODULES_DEFAULT)
 		config.recurse_submodules = recurse_submodules_cli;
 
-	if (negotiate_only) {
+	якщо (negotiate_only) {
 		switch (recurse_submodules_cli) {
 		case RECURSE_SUBMODULES_OFF:
 		case RECURSE_SUBMODULES_DEFAULT:
@@ -2710,17 +2710,17 @@ int cmd_fetch(int argc,
 		}
 	}
 
-	if (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
-		int *sfjc = config.submodule_fetch_jobs == -1
+	якщо (config.recurse_submodules != RECURSE_SUBMODULES_OFF) {
+		ціле *sfjc = config.submodule_fetch_jobs == -1
 			    ? &config.submodule_fetch_jobs : NULL;
-		int *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
+		ціле *rs = config.recurse_submodules == RECURSE_SUBMODULES_DEFAULT
 			  ? &config.recurse_submodules : NULL;
 
 		fetch_config_from_gitmodules(the_repository, sfjc, rs);
 	}
 
 
-	if (porcelain) {
+	якщо (porcelain) {
 		switch (recurse_submodules_cli) {
 		case RECURSE_SUBMODULES_OFF:
 		case RECURSE_SUBMODULES_DEFAULT:
@@ -2739,40 +2739,40 @@ int cmd_fetch(int argc,
 		config.display_format = DISPLAY_FORMAT_PORCELAIN;
 	}
 
-	if (deepen_relative) {
-		if (deepen_relative < 0)
+	якщо (deepen_relative) {
+		якщо (deepen_relative < 0)
 			die(_("negative depth in --deepen is not supported"));
-		if (depth)
+		якщо (depth)
 			die(_("options '%s' and '%s' cannot be used together"), "--deepen", "--depth");
 		depth = xstrfmt("%d", deepen_relative);
 	}
-	if (unshallow) {
-		if (depth)
+	якщо (unshallow) {
+		якщо (depth)
 			die(_("options '%s' and '%s' cannot be used together"), "--depth", "--unshallow");
-		else if (!is_repository_shallow(the_repository))
+		інакше якщо (!is_repository_shallow(the_repository))
 			die(_("--unshallow on a complete repository does not make sense"));
-		else
+		інакше
 			depth = xstrfmt("%d", INFINITE_DEPTH);
 	}
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (depth && atoi(depth) < 1)
+	якщо (depth && atoi(depth) < 1)
 		die(_("depth %s is not a positive number"), depth);
-	if (depth || deepen_since || deepen_not.nr)
+	якщо (depth || deepen_since || deepen_not.nr)
 		deepen = 1;
 
 	/* FETCH_HEAD never gets updated in --dry-run mode */
-	if (dry_run)
+	якщо (dry_run)
 		write_fetch_head = 0;
 
-	if (!max_jobs)
+	якщо (!max_jobs)
 		max_jobs = online_cpus();
 
-	if (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
+	якщо (!repo_config_get_string_tmp(the_repository, "fetch.bundleuri", &bundle_uri) &&
 	    fetch_bundle_uri(the_repository, bundle_uri, NULL))
 		warning(_("failed to fetch bundles from '%s'"), bundle_uri);
 
-	if (all < 0) {
+	якщо (all < 0) {
 		/*
 		 * no --[no-]all given;
 		 * only use config option if no remote was explicitly specified
@@ -2780,34 +2780,34 @@ int cmd_fetch(int argc,
 		all = (!argc) ? config.all : 0;
 	}
 
-	if (all) {
-		if (argc == 1)
+	якщо (all) {
+		якщо (argc == 1)
 			die(_("fetch --all does not take a repository argument"));
-		else if (argc > 1)
+		інакше якщо (argc > 1)
 			die(_("fetch --all does not make sense with refspecs"));
 
 		(void) for_each_remote(get_one_remote_for_fetch, &list);
 
 		/* do not do fetch_multiple() of one */
-		if (list.nr == 1)
+		якщо (list.nr == 1)
 			remote = remote_get(list.items[0].string);
-	} else if (argc == 0) {
+	} інакше якщо (argc == 0) {
 		/* No arguments -- use default remote */
 		remote = remote_get(NULL);
-	} else if (multiple) {
+	} інакше якщо (multiple) {
 		/* All arguments are assumed to be remotes or groups */
-		for (i = 0; i < argc; i++)
-			if (!add_remote_or_group(argv[i], &list))
+		для (i = 0; i < argc; i++)
+			якщо (!add_remote_or_group(argv[i], &list))
 				die(_("no such remote or remote group: %s"),
 				    argv[i]);
-	} else {
+	} інакше {
 		/* Single remote or group */
 		(void) add_remote_or_group(argv[0], &list);
-		if (list.nr > 1) {
+		якщо (list.nr > 1) {
 			/* More than one remote */
-			if (argc > 1)
+			якщо (argc > 1)
 				die(_("fetching a group and specifying refspecs does not make sense"));
-		} else {
+		} інакше {
 			/* Zero or one remotes */
 			remote = remote_get(argv[0]);
 			prune_tags_ok = (argc == 1);
@@ -2817,40 +2817,40 @@ int cmd_fetch(int argc,
 	}
 	string_list_remove_duplicates(&list, 0);
 
-	if (negotiate_only) {
+	якщо (negotiate_only) {
 		struct oidset acked_commits = OIDSET_INIT;
 		struct oidset_iter iter;
 		const struct object_id *oid;
 
 		trace2_region_enter("fetch", "negotiate-only", the_repository);
-		if (!remote)
+		якщо (!remote)
 			die(_("must supply remote when using --negotiate-only"));
 		gtransport = prepare_transport(remote, 1, &filter_options);
 
-		if (!gtransport->smart_options) {
+		якщо (!gtransport->smart_options) {
 			warning(_("protocol does not support --negotiate-only, exiting"));
 			result = 1;
 			trace2_region_leave("fetch", "negotiate-only", the_repository);
 			goto cleanup;
 		}
-		if (!gtransport->smart_options->negotiation_restrict_tips)
+		якщо (!gtransport->smart_options->negotiation_restrict_tips)
 			die(_("%s needs one or more %s"), "--negotiate-only",
 			    "--negotiation-restrict=*");
 
 		gtransport->smart_options->acked_commits = &acked_commits;
 
-		if (server_options.nr)
+		якщо (server_options.nr)
 			gtransport->server_options = &server_options;
 		result = transport_fetch_refs(gtransport, NULL);
 		gtransport->smart_options->acked_commits = NULL;
 
 		oidset_iter_init(&acked_commits, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		поки ((oid = oidset_iter_next(&iter)))
 			printf("%s\n", oid_to_hex(oid));
 		oidset_clear(&acked_commits);
 		trace2_region_leave("fetch", "negotiate-only", the_repository);
-	} else if (remote) {
-		if (filter_options.choice || repo_has_promisor_remote(the_repository)) {
+	} інакше якщо (remote) {
+		якщо (filter_options.choice || repo_has_promisor_remote(the_repository)) {
 			trace2_region_enter("fetch", "setup-partial", the_repository);
 			fetch_one_setup_partial(remote, &filter_options);
 			trace2_region_leave("fetch", "setup-partial", the_repository);
@@ -2858,29 +2858,29 @@ int cmd_fetch(int argc,
 		trace2_region_enter("fetch", "fetch-one", the_repository);
 		result = fetch_one(remote, argc, argv, prune_tags_ok, stdin_refspecs,
 				   &config, &filter_options, &updated_tips);
-		if (prepare_commit_graph(the_repository)) {
-			if (oidset_size(&updated_tips))
+		якщо (prepare_commit_graph(the_repository)) {
+			якщо (oidset_size(&updated_tips))
 				graph_write_mode = GRAPH_WRITE_TIPS;
-			else
+			інакше
 				graph_write_mode = GRAPH_WRITE_SKIP;
 		}
 		trace2_region_leave("fetch", "fetch-one", the_repository);
-	} else {
-		int max_children = max_jobs;
+	} інакше {
+		ціле max_children = max_jobs;
 
-		if (filter_options.choice)
+		якщо (filter_options.choice)
 			die(_("--filter can only be used with the remote "
 			      "configured in extensions.partialclone"));
 
-		if (atomic_fetch)
+		якщо (atomic_fetch)
 			die(_("--atomic can only be used when fetching "
 			      "from one remote"));
 
-		if (stdin_refspecs)
+		якщо (stdin_refspecs)
 			die(_("--stdin can only be used when fetching "
 			      "from one remote"));
 
-		if (max_children < 0)
+		якщо (max_children < 0)
 			max_children = config.parallel;
 
 		/* TODO should this also die if we have a previous partial-clone? */
@@ -2898,13 +2898,13 @@ int cmd_fetch(int argc,
 	 * the fetched history from each remote, so there is no need
 	 * to fetch submodules from here.
 	 */
-	if (!result && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
+	якщо (!result && remote && (config.recurse_submodules != RECURSE_SUBMODULES_OFF)) {
 		struct strvec options = STRVEC_INIT;
-		int max_children = max_jobs;
+		ціле max_children = max_jobs;
 
-		if (max_children < 0)
+		якщо (max_children < 0)
 			max_children = config.submodule_fetch_jobs;
-		if (max_children < 0)
+		якщо (max_children < 0)
 			max_children = config.parallel;
 
 		add_options_to_argv(&options, &config);
@@ -2928,28 +2928,28 @@ int cmd_fetch(int argc,
 	 * whenever objects were not fetched e.g. if we already have all
 	 * of them.
 	 */
-	if (negotiate_only)
+	якщо (negotiate_only)
 		goto cleanup;
 
 	prepare_repo_settings(the_repository);
-	if (fetch_write_commit_graph > 0 ||
+	якщо (fetch_write_commit_graph > 0 ||
 	    (fetch_write_commit_graph < 0 &&
 	     the_repository->settings.fetch_write_commit_graph)) {
-		int commit_graph_flags = COMMIT_GRAPH_WRITE_SPLIT;
+		ціле commit_graph_flags = COMMIT_GRAPH_WRITE_SPLIT;
 
-		if (progress)
+		якщо (progress)
 			commit_graph_flags |= COMMIT_GRAPH_WRITE_PROGRESS;
 
-		if (graph_write_mode != GRAPH_WRITE_SKIP) {
+		якщо (graph_write_mode != GRAPH_WRITE_SKIP) {
 			trace2_region_enter("fetch", "write-commit-graph",
 					    the_repository);
-			if (graph_write_mode == GRAPH_WRITE_TIPS)
+			якщо (graph_write_mode == GRAPH_WRITE_TIPS)
 				write_commit_graph(
 					the_repository,
 					the_repository->objects->source->path,
 					NULL, &updated_tips,
 					commit_graph_flags, NULL);
-			else
+			інакше
 				write_commit_graph_reachable(
 					the_repository,
 					the_repository->objects->source->path,
@@ -2959,21 +2959,21 @@ int cmd_fetch(int argc,
 		}
 	}
 
-	if (enable_auto_gc) {
-		if (refetch) {
+	якщо (enable_auto_gc) {
+		якщо (refetch) {
 			/*
 			 * Hint auto-maintenance strongly to encourage repacking,
 			 * but respect config settings disabling it.
 			 */
-			int opt_val;
-			if (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
+			ціле opt_val;
+			якщо (repo_config_get_int(the_repository, "gc.autopacklimit", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
+			якщо (opt_val != 0)
 				git_config_push_parameter("gc.autoPackLimit=1");
 
-			if (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
+			якщо (repo_config_get_int(the_repository, "maintenance.incremental-repack.auto", &opt_val))
 				opt_val = -1;
-			if (opt_val != 0)
+			якщо (opt_val != 0)
 				git_config_push_parameter("maintenance.incremental-repack.auto=-1");
 		}
 		run_auto_maintenance(the_repository, verbosity < 0);
@@ -2984,5 +2984,5 @@ int cmd_fetch(int argc,
 	string_list_clear(&list, 0);
 	list_objects_filter_release(&filter_options);
 	free(config.follow_remote_head_raw);
-	return result;
+	повернути result;
 }

@@ -37,20 +37,20 @@ static void get_system_info(struct strbuf *sys_info)
 		    shell ? shell : "<unset>");
 }
 
-static void get_populated_hooks(struct strbuf *hook_info, int nongit)
+static void get_populated_hooks(struct strbuf *hook_info, ціле nongit)
 {
 	const char **p;
 
-	if (nongit) {
+	якщо (nongit) {
 		strbuf_addstr(hook_info,
 			_("not run from a git repository - no hooks to show\n"));
-		return;
+		повернути;
 	}
 
-	for (p = hook_name_list; *p; p++) {
+	для (p = hook_name_list; *p; p++) {
 		const char *hook = *p;
 
-		if (hook_exists(the_repository, hook))
+		якщо (hook_exists(the_repository, hook))
 			strbuf_addf(hook_info, "%s\n", hook);
 	}
 }
@@ -62,7 +62,7 @@ static const char * const bugreport_usage[] = {
 	NULL
 };
 
-static int get_bug_template(struct strbuf *template)
+static ціле get_bug_template(struct strbuf *template)
 {
 	const char template_text[] = N_(
 "Thank you for filling out a Git bug report!\n"
@@ -82,7 +82,7 @@ static int get_bug_template(struct strbuf *template)
 "You can delete any lines you don't wish to share.\n");
 
 	strbuf_addstr(template, _(template_text));
-	return 0;
+	повернути 0;
 }
 
 static void get_header(struct strbuf *buf, const char *title)
@@ -90,14 +90,14 @@ static void get_header(struct strbuf *buf, const char *title)
 	strbuf_addf(buf, "\n\n[%s]\n", title);
 }
 
-int cmd_bugreport(int argc,
+ціле cmd_bugreport(ціле argc,
 		  const char **argv,
 		  const char *prefix,
 		  struct repository *repo UNUSED)
 {
 	struct strbuf buffer = STRBUF_INIT;
 	struct strbuf report_path = STRBUF_INIT;
-	int report = -1;
+	ціле report = -1;
 	time_t now = time(NULL);
 	struct tm tm;
 	enum diagnose_mode diagnose = DIAGNOSE_NONE;
@@ -106,7 +106,7 @@ int cmd_bugreport(int argc,
 	const char *user_relative_path = NULL;
 	char *prefixed_filename;
 	size_t output_path_len;
-	int ret;
+	ціле ret;
 
 	const struct option bugreport_options[] = {
 		OPT_CALLBACK_F(0, "diagnose", &diagnose, N_("mode"),
@@ -122,7 +122,7 @@ int cmd_bugreport(int argc,
 	argc = parse_options(argc, argv, prefix, bugreport_options,
 			     bugreport_usage, 0);
 
-	if (argc) {
+	якщо (argc) {
 		error(_("unknown argument `%s'"), argv[0]);
 		usage(bugreport_usage[0]);
 	}
@@ -135,7 +135,7 @@ int cmd_bugreport(int argc,
 	output_path_len = report_path.len;
 
 	strbuf_addstr(&report_path, "git-bugreport");
-	if (option_suffix) {
+	якщо (option_suffix) {
 		strbuf_addch(&report_path, '-');
 		strbuf_addftime(&report_path, option_suffix, localtime_r(&now, &tm), 0, 0);
 	}
@@ -151,14 +151,14 @@ int cmd_bugreport(int argc,
 	}
 
 	/* Prepare diagnostics, if requested */
-	if (diagnose != DIAGNOSE_NONE) {
+	якщо (diagnose != DIAGNOSE_NONE) {
 		struct strbuf zip_path = STRBUF_INIT;
 		strbuf_add(&zip_path, report_path.buf, output_path_len);
 		strbuf_addstr(&zip_path, "git-diagnostics-");
 		strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
 		strbuf_addstr(&zip_path, ".zip");
 
-		if (create_diagnostics_archive(the_repository, &zip_path, diagnose))
+		якщо (create_diagnostics_archive(the_repository, &zip_path, diagnose))
 			die_errno(_("unable to create diagnostics archive %s"), zip_path.buf);
 
 		strbuf_release(&zip_path);
@@ -176,7 +176,7 @@ int cmd_bugreport(int argc,
 	/* fopen doesn't offer us an O_EXCL alternative, except with glibc. */
 	report = xopen(report_path.buf, O_CREAT | O_EXCL | O_WRONLY, 0666);
 
-	if (write_in_full(report, buffer.buf, buffer.len) < 0)
+	якщо (write_in_full(report, buffer.buf, buffer.len) < 0)
 		die_errno(_("unable to write to %s"), report_path.buf);
 
 	close(report);
@@ -185,7 +185,7 @@ int cmd_bugreport(int argc,
 	 * We want to print the path relative to the user, but we still need the
 	 * path relative to us to give to the editor.
 	 */
-	if (!(prefix && skip_prefix(report_path.buf, prefix, &user_relative_path)))
+	якщо (!(prefix && skip_prefix(report_path.buf, prefix, &user_relative_path)))
 		user_relative_path = report_path.buf;
 	fprintf(stderr, _("Created new report at '%s'.\n"),
 		user_relative_path);
@@ -195,5 +195,5 @@ int cmd_bugreport(int argc,
 
 	ret = !!launch_editor(report_path.buf, NULL, NULL);
 	strbuf_release(&report_path);
-	return ret;
+	повернути ret;
 }

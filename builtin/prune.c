@@ -23,46 +23,46 @@ static const char * const prune_usage[] = {
 	N_("git prune [-n] [-v] [--progress] [--expire <time>] [--] [<head>...]"),
 	NULL
 };
-static int show_only;
-static int verbose;
+static ціле show_only;
+static ціле verbose;
 static timestamp_t expire;
-static int show_progress = -1;
+static ціле show_progress = -1;
 
-static int prune_tmp_file(const char *fullpath)
+static ціле prune_tmp_file(const char *fullpath)
 {
 	struct stat st;
-	if (lstat(fullpath, &st))
-		return error("Could not stat '%s'", fullpath);
-	if (st.st_mtime > expire)
-		return 0;
-	if (S_ISDIR(st.st_mode)) {
-		if (show_only || verbose)
+	якщо (lstat(fullpath, &st))
+		повернути error("Could not stat '%s'", fullpath);
+	якщо (st.st_mtime > expire)
+		повернути 0;
+	якщо (S_ISDIR(st.st_mode)) {
+		якщо (show_only || verbose)
 			printf("Removing stale temporary directory %s\n", fullpath);
-		if (!show_only) {
+		якщо (!show_only) {
 			struct strbuf remove_dir_buf = STRBUF_INIT;
 
 			strbuf_addstr(&remove_dir_buf, fullpath);
 			remove_dir_recursively(&remove_dir_buf, 0);
 			strbuf_release(&remove_dir_buf);
 		}
-	} else {
-		if (show_only || verbose)
+	} інакше {
+		якщо (show_only || verbose)
 			printf("Removing stale temporary file %s\n", fullpath);
-		if (!show_only)
+		якщо (!show_only)
 			unlink_or_warn(fullpath);
 	}
-	return 0;
+	повернути 0;
 }
 
 static void perform_reachability_traversal(struct rev_info *revs)
 {
-	static int initialized;
+	static ціле initialized;
 	struct progress *progress = NULL;
 
-	if (initialized)
-		return;
+	якщо (initialized)
+		повернути;
 
-	if (show_progress)
+	якщо (show_progress)
 		progress = start_delayed_progress(revs->repo,
 						  _("Checking connectivity"), 0);
 	mark_reachable_objects(revs, 1, expire, progress);
@@ -70,7 +70,7 @@ static void perform_reachability_traversal(struct rev_info *revs)
 	initialized = 1;
 }
 
-static int is_object_reachable(const struct object_id *oid,
+static ціле is_object_reachable(const struct object_id *oid,
 			       struct rev_info *revs)
 {
 	struct object *obj;
@@ -78,52 +78,52 @@ static int is_object_reachable(const struct object_id *oid,
 	perform_reachability_traversal(revs);
 
 	obj = lookup_object(revs->repo, oid);
-	return obj && (obj->flags & SEEN);
+	повернути obj && (obj->flags & SEEN);
 }
 
-static int prune_object(const struct object_id *oid, const char *fullpath,
+static ціле prune_object(const struct object_id *oid, const char *fullpath,
 			void *data)
 {
 	struct rev_info *revs = data;
 	struct stat st;
 
-	if (is_object_reachable(oid, revs))
-		return 0;
+	якщо (is_object_reachable(oid, revs))
+		повернути 0;
 
-	if (lstat(fullpath, &st)) {
+	якщо (lstat(fullpath, &st)) {
 		/* report errors, but do not stop pruning */
 		error("Could not stat '%s'", fullpath);
-		return 0;
+		повернути 0;
 	}
-	if (st.st_mtime > expire)
-		return 0;
-	if (show_only || verbose) {
+	якщо (st.st_mtime > expire)
+		повернути 0;
+	якщо (show_only || verbose) {
 		enum object_type type =
 			odb_read_object_info(revs->repo->objects, oid, NULL);
 		printf("%s %s\n", oid_to_hex(oid),
 		       (type > 0) ? type_name(type) : "unknown");
 	}
-	if (!show_only)
+	якщо (!show_only)
 		unlink_or_warn(fullpath);
-	return 0;
+	повернути 0;
 }
 
-static int prune_cruft(const char *basename, const char *path,
+static ціле prune_cruft(const char *basename, const char *path,
 		       void *data UNUSED)
 {
-	if (starts_with(basename, "tmp_obj_"))
+	якщо (starts_with(basename, "tmp_obj_"))
 		prune_tmp_file(path);
-	else
+	інакше
 		fprintf(stderr, "bad sha1 file: %s\n", path);
-	return 0;
+	повернути 0;
 }
 
-static int prune_subdir(unsigned int nr UNUSED, const char *path,
+static ціле prune_subdir(unsigned ціле nr UNUSED, const char *path,
 			void *data UNUSED)
 {
-	if (!show_only)
+	якщо (!show_only)
 		rmdir(path);
-	return 0;
+	повернути 0;
 }
 
 /*
@@ -138,25 +138,25 @@ static void remove_temporary_files(const char *path)
 	struct dirent *de;
 
 	dir = opendir(path);
-	if (!dir) {
-		if (errno != ENOENT)
+	якщо (!dir) {
+		якщо (errno != ENOENT)
 			fprintf(stderr, "Unable to open directory %s: %s\n",
 				path, strerror(errno));
-		return;
+		повернути;
 	}
-	while ((de = readdir(dir)) != NULL)
-		if (starts_with(de->d_name, "tmp_"))
+	поки ((de = readdir(dir)) != NULL)
+		якщо (starts_with(de->d_name, "tmp_"))
 			prune_tmp_file(mkpath("%s/%s", path, de->d_name));
 	closedir(dir);
 }
 
-int cmd_prune(int argc,
+ціле cmd_prune(ціле argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo)
 {
 	struct rev_info revs;
-	int exclude_promisor_objects = 0;
+	ціле exclude_promisor_objects = 0;
 	const struct option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned objects")),
@@ -176,24 +176,24 @@ int cmd_prune(int argc,
 	argc = parse_options(argc, argv, prefix, options, prune_usage, 0);
 
 	repo_init_revisions(repo, &revs, prefix);
-	if (repo->repository_format_precious_objects)
+	якщо (repo->repository_format_precious_objects)
 		die(_("cannot prune in a precious-objects repo"));
 
-	while (argc--) {
+	поки (argc--) {
 		struct object_id oid;
 		const char *name = *argv++;
 
-		if (!repo_get_oid(repo, name, &oid)) {
+		якщо (!repo_get_oid(repo, name, &oid)) {
 			struct object *object = parse_object_or_die(repo, &oid, name);
 			add_pending_object(&revs, object, "");
 		}
-		else
+		інакше
 			die("unrecognized argument: %s", name);
 	}
 
-	if (show_progress == -1)
+	якщо (show_progress == -1)
 		show_progress = isatty(2);
-	if (exclude_promisor_objects) {
+	якщо (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 		revs.exclude_promisor_objects = 1;
 	}
@@ -207,11 +207,11 @@ int cmd_prune(int argc,
 	remove_temporary_files(s);
 	free(s);
 
-	if (is_repository_shallow(repo)) {
+	якщо (is_repository_shallow(repo)) {
 		perform_reachability_traversal(&revs);
 		prune_shallow(show_only ? PRUNE_SHOW_ONLY : 0);
 	}
 
 	release_revisions(&revs);
-	return 0;
+	повернути 0;
 }

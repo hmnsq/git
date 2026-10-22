@@ -20,8 +20,8 @@ static const char * const git_update_ref_usage[] = {
 };
 
 static char line_termination = '\n';
-static unsigned int update_flags;
-static unsigned int default_flags;
+static unsigned ціле update_flags;
+static unsigned ціле default_flags;
 static unsigned create_reflog_flag;
 static const char *msg;
 
@@ -42,19 +42,19 @@ struct command_options {
  */
 static const char *parse_arg(const char *next, struct strbuf *arg)
 {
-	if (*next == '"') {
+	якщо (*next == '"') {
 		const char *orig = next;
 
-		if (unquote_c_style(arg, next, &next))
+		якщо (unquote_c_style(arg, next, &next))
 			die("badly quoted argument: %s", orig);
-		if (*next && !isspace(*next))
+		якщо (*next && !isspace(*next))
 			die("unexpected character after quoted argument: %s", orig);
-	} else {
-		while (*next && !isspace(*next))
+	} інакше {
+		поки (*next && !isspace(*next))
 			strbuf_addch(arg, *next++);
 	}
 
-	return next;
+	повернути next;
 }
 
 /*
@@ -69,24 +69,24 @@ static char *parse_refname(const char **next)
 {
 	struct strbuf ref = STRBUF_INIT;
 
-	if (line_termination) {
+	якщо (line_termination) {
 		/* Without -z, use the next argument */
 		*next = parse_arg(*next, &ref);
-	} else {
+	} інакше {
 		/* With -z, use everything up to the next NUL */
 		strbuf_addstr(&ref, *next);
 		*next += ref.len;
 	}
 
-	if (!ref.len) {
+	якщо (!ref.len) {
 		strbuf_release(&ref);
-		return NULL;
+		повернути NULL;
 	}
 
-	if (check_refname_format(ref.buf, REFNAME_ALLOW_ONELEVEL))
+	якщо (check_refname_format(ref.buf, REFNAME_ALLOW_ONELEVEL))
 		die("invalid ref format: %s", ref.buf);
 
-	return strbuf_detach(&ref, NULL);
+	повернути strbuf_detach(&ref, NULL);
 }
 
 /*
@@ -94,21 +94,21 @@ static char *parse_refname(const char **next)
  */
 static char *parse_next_refname(const char **next)
 {
-	if (line_termination) {
+	якщо (line_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return NULL;
-		if (**next != ' ')
+		якщо (!**next || **next == line_termination)
+			повернути NULL;
+		якщо (**next != ' ')
 			die("expected SP but got: %s", *next);
-	} else {
+	} інакше {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
-			return NULL;
+		якщо (**next)
+			повернути NULL;
 	}
 	/* Skip the delimiter */
 	(*next)++;
 
-	return parse_refname(next);
+	повернути parse_refname(next);
 }
 
 /*
@@ -118,34 +118,34 @@ static char *parse_next_arg(const char **next)
 {
 	struct strbuf arg = STRBUF_INIT;
 
-	if (line_termination) {
+	якщо (line_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return NULL;
-		if (**next != ' ')
+		якщо (!**next || **next == line_termination)
+			повернути NULL;
+		якщо (**next != ' ')
 			die("expected SP but got: %s", *next);
-	} else {
+	} інакше {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
-			return NULL;
+		якщо (**next)
+			повернути NULL;
 	}
 	/* Skip the delimiter */
 	(*next)++;
 
-	if (line_termination) {
+	якщо (line_termination) {
 		/* Without -z, use the next argument */
 		*next = parse_arg(*next, &arg);
-	} else {
+	} інакше {
 		/* With -z, use everything up to the next NUL */
 		strbuf_addstr(&arg, *next);
 		*next += arg.len;
 	}
 
-	if (arg.len)
-		return strbuf_detach(&arg, NULL);
+	якщо (arg.len)
+		повернути strbuf_detach(&arg, NULL);
 
 	strbuf_release(&arg);
-	return NULL;
+	повернути NULL;
 }
 
 /*
@@ -169,55 +169,55 @@ static char *parse_next_arg(const char **next)
  * provided but cannot be converted to a SHA-1, die.  flags can
  * include PARSE_SHA1_OLD and/or PARSE_SHA1_ALLOW_EMPTY.
  */
-static int parse_next_oid(const char **next, const char *end,
+static ціле parse_next_oid(const char **next, const char *end,
 			  struct object_id *oid,
 			  const char *command, const char *refname,
-			  int flags)
+			  ціле flags)
 {
 	struct strbuf arg = STRBUF_INIT;
-	int ret = 0;
+	ціле ret = 0;
 
-	if (*next == end)
+	якщо (*next == end)
 		goto eof;
 
-	if (line_termination) {
+	якщо (line_termination) {
 		/* Without -z, consume SP and use next argument */
-		if (!**next || **next == line_termination)
-			return 1;
-		if (**next != ' ')
+		якщо (!**next || **next == line_termination)
+			повернути 1;
+		якщо (**next != ' ')
 			die("%s %s: expected SP but got: %s",
 			    command, refname, *next);
 		(*next)++;
 		*next = parse_arg(*next, &arg);
-		if (arg.len) {
-			if (repo_get_oid_with_flags(the_repository, arg.buf, oid,
+		якщо (arg.len) {
+			якщо (repo_get_oid_with_flags(the_repository, arg.buf, oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
 				goto invalid;
-		} else {
+		} інакше {
 			/* Without -z, an empty value means all zeros: */
 			oidclr(oid, the_repository->hash_algo);
 		}
-	} else {
+	} інакше {
 		/* With -z, read the next NUL-terminated line */
-		if (**next)
+		якщо (**next)
 			die("%s %s: expected NUL but got: %s",
 			    command, refname, *next);
 		(*next)++;
-		if (*next == end)
+		якщо (*next == end)
 			goto eof;
 		strbuf_addstr(&arg, *next);
 		*next += arg.len;
 
-		if (arg.len) {
-			if (repo_get_oid_with_flags(the_repository, arg.buf, oid,
+		якщо (arg.len) {
+			якщо (repo_get_oid_with_flags(the_repository, arg.buf, oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
 				goto invalid;
-		} else if (flags & PARSE_SHA1_ALLOW_EMPTY) {
+		} інакше якщо (flags & PARSE_SHA1_ALLOW_EMPTY) {
 			/* With -z, treat an empty value as all zeros: */
 			warning("%s %s: missing <new-oid>, treating as zero",
 				command, refname);
 			oidclr(oid, the_repository->hash_algo);
-		} else {
+		} інакше {
 			/*
 			 * With -z, an empty non-required value means
 			 * unspecified:
@@ -228,7 +228,7 @@ static int parse_next_oid(const char **next, const char *end,
 
 	strbuf_release(&arg);
 
-	return ret;
+	повернути ret;
 
  invalid:
 	die(flags & PARSE_SHA1_OLD ?
@@ -254,7 +254,7 @@ static void print_rejected_refs(const char *refname,
 {
 	struct strbuf sb = STRBUF_INIT;
 
-	if (details && *details)
+	якщо (details && *details)
 		error("%s", details);
 
 	strbuf_addf(&sb, "rejected %s %s %s %s\n", refname,
@@ -279,13 +279,13 @@ static void handle_ref_transaction_error(const char *refname,
 					 struct strbuf *err,
 					 struct command_options *opts)
 {
-	if (!tx_err)
-		return;
+	якщо (!tx_err)
+		повернути;
 
-	if (tx_err != REF_TRANSACTION_ERROR_GENERIC && opts->allow_update_failures) {
+	якщо (tx_err != REF_TRANSACTION_ERROR_GENERIC && opts->allow_update_failures) {
 		print_rejected_refs(refname, old_oid, new_oid, old_target,
 				    new_target, tx_err, err->buf, NULL);
-		return;
+		повернути;
 	}
 
 	die("%s", err->buf);
@@ -309,20 +309,20 @@ static void parse_cmd_update(struct ref_transaction *transaction,
 	char *refname;
 	struct object_id new_oid, old_oid;
 	enum ref_transaction_error tx_err;
-	int have_old;
+	ціле have_old;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("update: missing <ref>");
 
-	if (parse_next_oid(&next, end, &new_oid, "update", refname,
+	якщо (parse_next_oid(&next, end, &new_oid, "update", refname,
 			   PARSE_SHA1_ALLOW_EMPTY))
 		die("update %s: missing <new-oid>", refname);
 
 	have_old = !parse_next_oid(&next, end, &old_oid, "update", refname,
 				   PARSE_SHA1_OLD);
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("update %s: extra input: %s", refname, next);
 
 	tx_err = ref_transaction_update(transaction, refname,
@@ -348,37 +348,37 @@ static void parse_cmd_symref_update(struct ref_transaction *transaction,
 	char *old_target = NULL;
 	struct strbuf err = STRBUF_INIT;
 	struct object_id old_oid;
-	int have_old_oid = 0;
+	ціле have_old_oid = 0;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("symref-update: missing <ref>");
 
 	new_target = parse_next_refname(&next);
-	if (!new_target)
+	якщо (!new_target)
 		die("symref-update %s: missing <new-target>", refname);
 
 	old_arg = parse_next_arg(&next);
-	if (old_arg) {
+	якщо (old_arg) {
 		old_target = parse_next_arg(&next);
-		if (!old_target)
+		якщо (!old_target)
 			die("symref-update %s: expected old value", refname);
 
-		if (!strcmp(old_arg, "oid")) {
-			if (repo_get_oid_with_flags(the_repository, old_target, &old_oid,
+		якщо (!strcmp(old_arg, "oid")) {
+			якщо (repo_get_oid_with_flags(the_repository, old_target, &old_oid,
 						    GET_OID_SKIP_AMBIGUITY_CHECK))
 				die("symref-update %s: invalid oid: %s", refname, old_target);
 
 			have_old_oid = 1;
-		} else if (!strcmp(old_arg, "ref")) {
-			if (check_refname_format(old_target, REFNAME_ALLOW_ONELEVEL))
+		} інакше якщо (!strcmp(old_arg, "ref")) {
+			якщо (check_refname_format(old_target, REFNAME_ALLOW_ONELEVEL))
 				die("symref-update %s: invalid ref: %s", refname, old_target);
-		} else {
+		} інакше {
 			die("symref-update %s: invalid arg '%s' for old value", refname, old_arg);
 		}
 	}
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("symref-update %s: extra input: %s", refname, next);
 
 	tx_err = ref_transaction_update(transaction, refname, NULL,
@@ -409,16 +409,16 @@ static void parse_cmd_create(struct ref_transaction *transaction,
 	enum ref_transaction_error tx_err;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("create: missing <ref>");
 
-	if (parse_next_oid(&next, end, &new_oid, "create", refname, 0))
+	якщо (parse_next_oid(&next, end, &new_oid, "create", refname, 0))
 		die("create %s: missing <new-oid>", refname);
 
-	if (is_null_oid(&new_oid))
+	якщо (is_null_oid(&new_oid))
 		die("create %s: zero <new-oid>", refname);
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("create %s: extra input: %s", refname, next);
 
 	tx_err = ref_transaction_create(transaction, refname, &new_oid, NULL,
@@ -441,14 +441,14 @@ static void parse_cmd_symref_create(struct ref_transaction *transaction,
 	enum ref_transaction_error tx_err;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("symref-create: missing <ref>");
 
 	new_target = parse_next_refname(&next);
-	if (!new_target)
+	якщо (!new_target)
 		die("symref-create %s: missing <new-target>", refname);
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("symref-create %s: extra input: %s", refname, next);
 
 	tx_err = ref_transaction_create(transaction, refname, NULL, new_target,
@@ -470,25 +470,25 @@ static void parse_cmd_delete(struct ref_transaction *transaction,
 	struct strbuf err = STRBUF_INIT;
 	char *refname;
 	struct object_id old_oid;
-	int have_old;
+	ціле have_old;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("delete: missing <ref>");
 
-	if (parse_next_oid(&next, end, &old_oid, "delete", refname,
+	якщо (parse_next_oid(&next, end, &old_oid, "delete", refname,
 			   PARSE_SHA1_OLD)) {
 		have_old = 0;
-	} else {
-		if (is_null_oid(&old_oid))
+	} інакше {
+		якщо (is_null_oid(&old_oid))
 			die("delete %s: zero <old-oid>", refname);
 		have_old = 1;
 	}
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("delete %s: extra input: %s", refname, next);
 
-	if (ref_transaction_delete(transaction, refname,
+	якщо (ref_transaction_delete(transaction, refname,
 				   have_old ? &old_oid : NULL,
 				   NULL, update_flags, msg, &err))
 		die("%s", err.buf);
@@ -505,19 +505,19 @@ static void parse_cmd_symref_delete(struct ref_transaction *transaction,
 	struct strbuf err = STRBUF_INIT;
 	char *refname, *old_target;
 
-	if (!(update_flags & REF_NO_DEREF))
+	якщо (!(update_flags & REF_NO_DEREF))
 		die("symref-delete: cannot operate with deref mode");
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("symref-delete: missing <ref>");
 
 	old_target = parse_next_refname(&next);
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("symref-delete %s: extra input: %s", refname, next);
 
-	if (ref_transaction_delete(transaction, refname, NULL,
+	якщо (ref_transaction_delete(transaction, refname, NULL,
 				   old_target, update_flags, msg, &err))
 		die("%s", err.buf);
 
@@ -536,17 +536,17 @@ static void parse_cmd_verify(struct ref_transaction *transaction,
 	struct object_id old_oid;
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("verify: missing <ref>");
 
-	if (parse_next_oid(&next, end, &old_oid, "verify", refname,
+	якщо (parse_next_oid(&next, end, &old_oid, "verify", refname,
 			   PARSE_SHA1_OLD))
 		oidclr(&old_oid, the_repository->hash_algo);
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("verify %s: extra input: %s", refname, next);
 
-	if (ref_transaction_verify(transaction, refname, &old_oid,
+	якщо (ref_transaction_verify(transaction, refname, &old_oid,
 				   NULL, update_flags, &err))
 		die("%s", err.buf);
 
@@ -563,11 +563,11 @@ static void parse_cmd_symref_verify(struct ref_transaction *transaction,
 	struct object_id old_oid;
 	char *refname, *old_target;
 
-	if (!(update_flags & REF_NO_DEREF))
+	якщо (!(update_flags & REF_NO_DEREF))
 		die("symref-verify: cannot operate with deref mode");
 
 	refname = parse_refname(&next);
-	if (!refname)
+	якщо (!refname)
 		die("symref-verify: missing <ref>");
 
 	/*
@@ -575,13 +575,13 @@ static void parse_cmd_symref_verify(struct ref_transaction *transaction,
 	 * ref doesn't exist.
 	 */
 	old_target = parse_next_refname(&next);
-	if (!old_target)
+	якщо (!old_target)
 		oidcpy(&old_oid, null_oid(the_hash_algo));
 
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("symref-verify %s: extra input: %s", refname, next);
 
-	if (ref_transaction_verify(transaction, refname,
+	якщо (ref_transaction_verify(transaction, refname,
 				   old_target ? NULL : &old_oid,
 				   old_target, update_flags, &err))
 		die("%s", err.buf);
@@ -603,9 +603,9 @@ static void parse_cmd_option(struct ref_transaction *transaction UNUSED,
 			     struct command_options *opts UNUSED)
 {
 	const char *rest;
-	if (skip_prefix(next, "no-deref", &rest) && *rest == line_termination)
+	якщо (skip_prefix(next, "no-deref", &rest) && *rest == line_termination)
 		update_flags |= REF_NO_DEREF;
-	else
+	інакше
 		die("option unknown: %s", next);
 }
 
@@ -613,7 +613,7 @@ static void parse_cmd_start(struct ref_transaction *transaction UNUSED,
 			    const char *next, const char *end UNUSED,
 			    struct command_options *opts UNUSED)
 {
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("start: extra input: %s", next);
 	report_ok("start");
 }
@@ -623,9 +623,9 @@ static void parse_cmd_prepare(struct ref_transaction *transaction,
 			      struct command_options *opts UNUSED)
 {
 	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("prepare: extra input: %s", next);
-	if (ref_transaction_prepare(transaction, &error))
+	якщо (ref_transaction_prepare(transaction, &error))
 		die("prepare: %s", error.buf);
 	report_ok("prepare");
 }
@@ -635,9 +635,9 @@ static void parse_cmd_abort(struct ref_transaction *transaction,
 			    struct command_options *opts UNUSED)
 {
 	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("abort: extra input: %s", next);
-	if (ref_transaction_abort(transaction, &error))
+	якщо (ref_transaction_abort(transaction, &error))
 		die("abort: %s", error.buf);
 	report_ok("abort");
 }
@@ -647,9 +647,9 @@ static void parse_cmd_commit(struct ref_transaction *transaction,
 			     struct command_options *opts UNUSED)
 {
 	struct strbuf error = STRBUF_INIT;
-	if (*next != line_termination)
+	якщо (*next != line_termination)
 		die("commit: extra input: %s", next);
-	if (ref_transaction_commit(transaction, &error))
+	якщо (ref_transaction_commit(transaction, &error))
 		die("commit: %s", error.buf);
 
 	ref_transaction_for_each_rejected_update(transaction,
@@ -692,12 +692,12 @@ static const struct parse_cmd {
 	{ "commit",        parse_cmd_commit,        0, UPDATE_REFS_CLOSED },
 };
 
-static void update_refs_stdin(unsigned int flags)
+static void update_refs_stdin(unsigned ціле flags)
 {
 	struct strbuf input = STRBUF_INIT, err = STRBUF_INIT;
 	enum update_refs_state state = UPDATE_REFS_OPEN;
 	struct ref_transaction *transaction;
-	int i, j;
+	ціле i, j;
 
 	struct command_options opts = {
 		.allow_update_failures = flags & REF_TRANSACTION_ALLOW_FAILURE,
@@ -705,23 +705,23 @@ static void update_refs_stdin(unsigned int flags)
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  flags, &err);
-	if (!transaction)
+	якщо (!transaction)
 		die("%s", err.buf);
 
 	/* Read each line dispatch its command */
-	while (!strbuf_getwholeline(&input, stdin, line_termination)) {
+	поки (!strbuf_getwholeline(&input, stdin, line_termination)) {
 		const struct parse_cmd *cmd = NULL;
 
-		if (*input.buf == line_termination)
+		якщо (*input.buf == line_termination)
 			die("empty command in input");
-		else if (isspace(*input.buf))
+		інакше якщо (isspace(*input.buf))
 			die("whitespace before command: %s", input.buf);
 
-		for (i = 0; i < ARRAY_SIZE(command); i++) {
+		для (i = 0; i < ARRAY_SIZE(command); i++) {
 			const char *prefix = command[i].prefix;
 			char c;
 
-			if (!starts_with(input.buf, prefix))
+			якщо (!starts_with(input.buf, prefix))
 				continue;
 
 			/*
@@ -730,13 +730,13 @@ static void update_refs_stdin(unsigned int flags)
 			 * by a line terminator.
 			 */
 			c = command[i].args ? ' ' : line_termination;
-			if (input.buf[strlen(prefix)] != c)
+			якщо (input.buf[strlen(prefix)] != c)
 				continue;
 
 			cmd = &command[i];
 			break;
 		}
-		if (!cmd)
+		якщо (!cmd)
 			die("unknown command: %s", input.buf);
 
 		/*
@@ -744,26 +744,26 @@ static void update_refs_stdin(unsigned int flags)
 		 * error in case there is an early EOF to let the command
 		 * handle missing arguments with a proper error message.
 		 */
-		for (j = 1; line_termination == '\0' && j < cmd->args; j++)
-			if (strbuf_appendwholeline(&input, stdin, line_termination))
+		для (j = 1; line_termination == '\0' && j < cmd->args; j++)
+			якщо (strbuf_appendwholeline(&input, stdin, line_termination))
 				break;
 
 		switch (state) {
 		case UPDATE_REFS_OPEN:
 		case UPDATE_REFS_STARTED:
-			if (state == UPDATE_REFS_STARTED && cmd->state == UPDATE_REFS_STARTED)
+			якщо (state == UPDATE_REFS_STARTED && cmd->state == UPDATE_REFS_STARTED)
 				die("cannot restart ongoing transaction");
 			/* Do not downgrade a transaction to a non-transaction. */
-			if (cmd->state >= state)
+			якщо (cmd->state >= state)
 				state = cmd->state;
 			break;
 		case UPDATE_REFS_PREPARED:
-			if (cmd->state != UPDATE_REFS_CLOSED)
+			якщо (cmd->state != UPDATE_REFS_CLOSED)
 				die("prepared transactions can only be closed");
 			state = cmd->state;
 			break;
 		case UPDATE_REFS_CLOSED:
-			if (cmd->state != UPDATE_REFS_STARTED)
+			якщо (cmd->state != UPDATE_REFS_STARTED)
 				die("transaction is closed");
 
 			/*
@@ -773,7 +773,7 @@ static void update_refs_stdin(unsigned int flags)
 			state = cmd->state;
 			transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 								  flags, &err);
-			if (!transaction)
+			якщо (!transaction)
 				die("%s", err.buf);
 
 			break;
@@ -786,7 +786,7 @@ static void update_refs_stdin(unsigned int flags)
 	switch (state) {
 	case UPDATE_REFS_OPEN:
 		/* Commit by default if no transaction was requested. */
-		if (ref_transaction_commit(transaction, &err))
+		якщо (ref_transaction_commit(transaction, &err))
 			die("%s", err.buf);
 		ref_transaction_for_each_rejected_update(transaction,
 						 print_rejected_refs, NULL);
@@ -795,7 +795,7 @@ static void update_refs_stdin(unsigned int flags)
 	case UPDATE_REFS_STARTED:
 	case UPDATE_REFS_PREPARED:
 		/* If using a transaction, we want to abort it. */
-		if (ref_transaction_abort(transaction, &err))
+		якщо (ref_transaction_abort(transaction, &err))
 			die("%s", err.buf);
 		break;
 	case UPDATE_REFS_CLOSED:
@@ -807,16 +807,16 @@ static void update_refs_stdin(unsigned int flags)
 	strbuf_release(&input);
 }
 
-int cmd_update_ref(int argc,
+ціле cmd_update_ref(ціле argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo UNUSED)
 {
 	const char *refname, *oldval;
 	struct object_id oid, oldoid;
-	int delete = 0, no_deref = 0, read_stdin = 0, end_null = 0;
-	int create_reflog = 0;
-	unsigned int flags = 0;
+	ціле delete = 0, no_deref = 0, read_stdin = 0, end_null = 0;
+	ціле create_reflog = 0;
+	unsigned ціле flags = 0;
 
 	struct option options[] = {
 		OPT_STRING( 'm', NULL, &msg, N_("reason"), N_("reason of the update")),
@@ -834,70 +834,70 @@ int cmd_update_ref(int argc,
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, options, git_update_ref_usage,
 			     0);
-	if (msg && !*msg)
+	якщо (msg && !*msg)
 		die("Refusing to perform update with empty message.");
 
 	create_reflog_flag = create_reflog ? REF_FORCE_CREATE_REFLOG : 0;
 
-	if (no_deref) {
+	якщо (no_deref) {
 		default_flags = REF_NO_DEREF;
 		update_flags = default_flags;
 	}
 
-	if (read_stdin) {
-		if (delete || argc > 0)
+	якщо (read_stdin) {
+		якщо (delete || argc > 0)
 			usage_with_options(git_update_ref_usage, options);
-		if (end_null)
+		якщо (end_null)
 			line_termination = '\0';
 		update_refs_stdin(flags);
-		return 0;
-	} else if (flags & REF_TRANSACTION_ALLOW_FAILURE) {
+		повернути 0;
+	} інакше якщо (flags & REF_TRANSACTION_ALLOW_FAILURE) {
 		die("--batch-updates can only be used with --stdin");
 	}
 
-	if (end_null)
+	якщо (end_null)
 		usage_with_options(git_update_ref_usage, options);
 
-	if (delete) {
-		if (argc < 1 || argc > 2)
+	якщо (delete) {
+		якщо (argc < 1 || argc > 2)
 			usage_with_options(git_update_ref_usage, options);
 		refname = argv[0];
 		oldval = argv[1];
-	} else {
+	} інакше {
 		const char *value;
-		if (argc < 2 || argc > 3)
+		якщо (argc < 2 || argc > 3)
 			usage_with_options(git_update_ref_usage, options);
 		refname = argv[0];
 		value = argv[1];
 		oldval = argv[2];
-		if (repo_get_oid_with_flags(the_repository, value, &oid,
+		якщо (repo_get_oid_with_flags(the_repository, value, &oid,
 					    GET_OID_SKIP_AMBIGUITY_CHECK))
 			die("%s: not a valid SHA1", value);
 	}
 
-	if (oldval) {
-		if (!*oldval)
+	якщо (oldval) {
+		якщо (!*oldval)
 			/*
 			 * The empty string implies that the reference
 			 * must not already exist:
 			 */
 			oidclr(&oldoid, the_repository->hash_algo);
-		else if (repo_get_oid_with_flags(the_repository, oldval, &oldoid,
+		інакше якщо (repo_get_oid_with_flags(the_repository, oldval, &oldoid,
 						 GET_OID_SKIP_AMBIGUITY_CHECK))
 			die("%s: not a valid old SHA1", oldval);
 	}
 
-	if (delete)
+	якщо (delete)
 		/*
 		 * For purposes of backwards compatibility, we treat
 		 * NULL_SHA1 as "don't care" here:
 		 */
-		return refs_delete_ref(get_main_ref_store(the_repository),
+		повернути refs_delete_ref(get_main_ref_store(the_repository),
 				       msg, refname,
 				       (oldval && !is_null_oid(&oldoid)) ? &oldoid : NULL,
 				       default_flags);
-	else
-		return refs_update_ref(get_main_ref_store(the_repository),
+	інакше
+		повернути refs_update_ref(get_main_ref_store(the_repository),
 				       msg, refname, &oid,
 				       oldval ? &oldoid : NULL,
 				       default_flags | create_reflog_flag,

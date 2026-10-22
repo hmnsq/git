@@ -14,11 +14,11 @@ static char const * const builtin_mktag_usage[] = {
 	"git mktag",
 	NULL
 };
-static int option_strict = 1;
+static ціле option_strict = 1;
 
 static struct fsck_options fsck_options;
 
-static int mktag_fsck_error_func(struct fsck_options *o UNUSED,
+static ціле mktag_fsck_error_func(struct fsck_options *o UNUSED,
 				 void *fsck_report UNUSED,
 				 enum fsck_msg_type msg_type,
 				 enum fsck_msg_id msg_id UNUSED,
@@ -26,9 +26,9 @@ static int mktag_fsck_error_func(struct fsck_options *o UNUSED,
 {
 	switch (msg_type) {
 	case FSCK_WARN:
-		if (!option_strict) {
+		якщо (!option_strict) {
 			fprintf_ln(stderr, _("warning: tag input does not pass fsck: %s"), message);
-			return 0;
+			повернути 0;
 
 		}
 		/* fallthrough */
@@ -39,16 +39,16 @@ static int mktag_fsck_error_func(struct fsck_options *o UNUSED,
 		 * under fsck, we've always considered them an error.
 		 */
 		fprintf_ln(stderr, _("error: tag input does not pass fsck: %s"), message);
-		return 1;
+		повернути 1;
 	default:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
 		    msg_type);
 	}
 }
 
-static int verify_object_in_tag(struct object_id *tagged_oid, int *tagged_type)
+static ціле verify_object_in_tag(struct object_id *tagged_oid, ціле *tagged_type)
 {
-	int ret;
+	ціле ret;
 	enum object_type type;
 	size_t size;
 	void *buffer;
@@ -56,10 +56,10 @@ static int verify_object_in_tag(struct object_id *tagged_oid, int *tagged_type)
 
 	buffer = odb_read_object(the_repository->objects, tagged_oid,
 				 &type, &size);
-	if (!buffer)
+	якщо (!buffer)
 		die(_("could not read tagged object '%s'"),
 		    oid_to_hex(tagged_oid));
-	if (type != *tagged_type)
+	якщо (type != *tagged_type)
 		die(_("object '%s' tagged as '%s', but is a '%s' type"),
 		    oid_to_hex(tagged_oid),
 		    type_name(*tagged_type), type_name(type));
@@ -69,10 +69,10 @@ static int verify_object_in_tag(struct object_id *tagged_oid, int *tagged_type)
 				     *tagged_type);
 	free(buffer);
 
-	return ret;
+	повернути ret;
 }
 
-int cmd_mktag(int argc,
+ціле cmd_mktag(ціле argc,
 	      const char **argv,
 	      const char *prefix,
 	      struct repository *repo)
@@ -84,14 +84,14 @@ int cmd_mktag(int argc,
 	};
 	struct strbuf buf = STRBUF_INIT;
 	struct object_id tagged_oid;
-	int tagged_type;
+	ціле tagged_type;
 	struct object_id result;
 
 	argc = parse_options(argc, argv, prefix,
 			     builtin_mktag_options,
 			     builtin_mktag_usage, 0);
 
-	if (strbuf_read(&buf, 0, 0) < 0)
+	якщо (strbuf_read(&buf, 0, 0) < 0)
 		die_errno(_("could not read from stdin"));
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
@@ -100,17 +100,17 @@ int cmd_mktag(int argc,
 				   FSCK_WARN);
 	/* config might set fsck.extraHeaderEntry=* again */
 	repo_config(the_repository, git_fsck_config, &fsck_options);
-	if (fsck_tag_standalone(NULL, buf.buf, buf.len, &fsck_options,
+	якщо (fsck_tag_standalone(NULL, buf.buf, buf.len, &fsck_options,
 				&tagged_oid, &tagged_type))
 		die(_("tag on stdin did not pass our strict fsck check"));
 
-	if (verify_object_in_tag(&tagged_oid, &tagged_type) < 0)
+	якщо (verify_object_in_tag(&tagged_oid, &tagged_type) < 0)
 		die(_("tag on stdin did not refer to a valid object"));
 
-	if (odb_write_object(the_repository->objects, buf.buf, buf.len, OBJ_TAG, &result) < 0)
+	якщо (odb_write_object(the_repository->objects, buf.buf, buf.len, OBJ_TAG, &result) < 0)
 		die(_("unable to write tag file"));
 
 	strbuf_release(&buf);
 	puts(oid_to_hex(&result));
-	return 0;
+	повернути 0;
 }

@@ -24,7 +24,7 @@ static const char * const builtin_hook_run_usage[] = {
 	NULL
 };
 
-static int list(int argc, const char **argv, const char *prefix,
+static ціле list(ціле argc, const char **argv, const char *prefix,
 		 struct repository *repo)
 {
 	static const char *const builtin_hook_list_usage[] = {
@@ -34,10 +34,10 @@ static int list(int argc, const char **argv, const char *prefix,
 	struct string_list *head;
 	struct string_list_item *item;
 	const char *hookname = NULL;
-	int line_terminator = '\n';
-	int show_scope = 0;
-	int allow_unknown = 0;
-	int ret = 0;
+	ціле line_terminator = '\n';
+	ціле show_scope = 0;
+	ціле allow_unknown = 0;
+	ціле ret = 0;
 
 	struct option list_options[] = {
 		OPT_SET_INT('z', NULL, &line_terminator,
@@ -56,22 +56,22 @@ static int list(int argc, const char **argv, const char *prefix,
 	 * The only unnamed argument provided should be the hook-name; if we add
 	 * arguments later they probably should be caught by parse_options.
 	 */
-	if (argc != 1)
+	якщо (argc != 1)
 		usage_msg_opt(_("you must specify a hook event name to list"),
 			      builtin_hook_list_usage, list_options);
 
 	hookname = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hookname)) {
+	якщо (!allow_unknown && !is_known_hook(hookname)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hookname);
-		return 1;
+		повернути 1;
 	}
 
 	head = list_hooks(repo, hookname, NULL);
 
-	if (!head->nr) {
+	якщо (!head->nr) {
 		warning(_("no hooks found for event '%s'"), hookname);
 		ret = 1; /* no hooks found */
 		goto cleanup;
@@ -98,10 +98,10 @@ static int list(int argc, const char **argv, const char *prefix,
 				h->u.configured.event_disabled ? "event-disabled\t" :
 				h->u.configured.disabled       ? "disabled\t"       :
 								 "";
-			if (scope)
+			якщо (scope)
 				printf("%s\t%s%s%c", scope, disability, name,
 				       line_terminator);
-			else
+			інакше
 				printf("%s%s%c", disability, name,
 				       line_terminator);
 			break;
@@ -114,17 +114,17 @@ static int list(int argc, const char **argv, const char *prefix,
 cleanup:
 	string_list_clear_func(head, hook_free);
 	free(head);
-	return ret;
+	повернути ret;
 }
 
-static int run(int argc, const char **argv, const char *prefix,
+static ціле run(ціле argc, const char **argv, const char *prefix,
 	       struct repository *repo UNUSED)
 {
-	int i;
+	ціле i;
 	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	int ignore_missing = 0;
-	int allow_unknown = 0;
-	int jobs = 0;
+	ціле ignore_missing = 0;
+	ціле allow_unknown = 0;
+	ціле jobs = 0;
 	const char *hook_name;
 	struct option run_options[] = {
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
@@ -137,34 +137,34 @@ static int run(int argc, const char **argv, const char *prefix,
 			    N_("run up to <n> hooks simultaneously (-1 for CPU count)")),
 		OPT_END(),
 	};
-	int ret;
+	ціле ret;
 
 	argc = parse_options(argc, argv, prefix, run_options,
 			     builtin_hook_run_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (jobs == -1)
+	якщо (jobs == -1)
 		opt.jobs = online_cpus();
-	else if (jobs < 0)
+	інакше якщо (jobs < 0)
 		die(_("invalid value for -j: %d"
 		     " (use -1 for CPU count or a"
 		     " positive integer)"), jobs);
-	else
+	інакше
 		opt.jobs = jobs;
 
-	if (!argc)
+	якщо (!argc)
 		goto usage;
 
 	/*
 	 * Having a -- for "run" when providing <hook-args> is
 	 * mandatory.
 	 */
-	if (argc > 1 && strcmp(argv[1], "--") &&
+	якщо (argc > 1 && strcmp(argv[1], "--") &&
 	    strcmp(argv[1], "--end-of-options"))
 		goto usage;
 
 	/* Add our arguments, start after -- */
-	for (i = 2 ; i < argc; i++)
+	для (i = 2 ; i < argc; i++)
 		strvec_push(&opt.args, argv[i]);
 
 	/* Need to take into account core.hooksPath */
@@ -172,24 +172,24 @@ static int run(int argc, const char **argv, const char *prefix,
 
 	hook_name = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hook_name)) {
+	якщо (!allow_unknown && !is_known_hook(hook_name)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hook_name);
-		return 1;
+		повернути 1;
 	}
 
-	if (!ignore_missing)
+	якщо (!ignore_missing)
 		opt.error_if_missing = 1;
 	ret = run_hooks_opt(the_repository, hook_name, &opt);
-	if (ret < 0) /* error() return */
+	якщо (ret < 0) /* error() return */
 		ret = 1;
-	return ret;
+	повернути ret;
 usage:
 	usage_with_options(builtin_hook_run_usage, run_options);
 }
 
-int cmd_hook(int argc,
+ціле cmd_hook(ціле argc,
 	     const char **argv,
 	     const char *prefix,
 	     struct repository *repo)
@@ -204,5 +204,5 @@ int cmd_hook(int argc,
 	argc = parse_options(argc, argv, NULL, builtin_hook_options,
 			     builtin_hook_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	повернути fn(argc, argv, prefix, repo);
 }

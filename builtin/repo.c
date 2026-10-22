@@ -45,7 +45,7 @@ static const char *const repo_structure_usage[] = {
 	NULL,
 };
 
-typedef int get_value_fn(struct repository *repo, struct strbuf *buf);
+typedef ціле get_value_fn(struct repository *repo, struct strbuf *buf);
 
 enum output_format {
 	FORMAT_TABLE,
@@ -58,74 +58,74 @@ struct repo_info_field {
 	get_value_fn *get_value;
 };
 
-static int get_layout_bare(struct repository *repo UNUSED, struct strbuf *buf)
+static ціле get_layout_bare(struct repository *repo UNUSED, struct strbuf *buf)
 {
 	strbuf_addstr(buf, is_bare_repository(the_repository) ? "true" : "false");
-	return 0;
+	повернути 0;
 }
 
-static int get_layout_shallow(struct repository *repo, struct strbuf *buf)
+static ціле get_layout_shallow(struct repository *repo, struct strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      is_repository_shallow(repo) ? "true" : "false");
-	return 0;
+	повернути 0;
 }
 
-static int get_object_format(struct repository *repo, struct strbuf *buf)
+static ціле get_object_format(struct repository *repo, struct strbuf *buf)
 {
 	strbuf_addstr(buf, repo->hash_algo->name);
-	return 0;
+	повернути 0;
 }
 
-static int get_path_commondir_absolute(struct repository *repo, struct strbuf *buf)
+static ціле get_path_commondir_absolute(struct repository *repo, struct strbuf *buf)
 {
 	const char *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	якщо (!common_dir)
+		повернути error(_("unable to get common directory"));
 
 	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	повернути 0;
 }
 
-static int get_path_commondir_relative(struct repository *repo, struct strbuf *buf)
+static ціле get_path_commondir_relative(struct repository *repo, struct strbuf *buf)
 {
 	const char *common_dir = repo_get_common_dir(repo);
 
-	if (!common_dir)
-		return error(_("unable to get common directory"));
+	якщо (!common_dir)
+		повернути error(_("unable to get common directory"));
 
 	format_path(buf, common_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	повернути 0;
 }
 
-static int get_path_gitdir_absolute(struct repository *repo, struct strbuf *buf)
+static ціле get_path_gitdir_absolute(struct repository *repo, struct strbuf *buf)
 {
 	const char *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	якщо (!git_dir)
+		повернути error(_("unable to get git directory"));
 
 	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_CANONICAL);
-	return 0;
+	повернути 0;
 }
 
-static int get_path_gitdir_relative(struct repository *repo, struct strbuf *buf)
+static ціле get_path_gitdir_relative(struct repository *repo, struct strbuf *buf)
 {
 	const char *git_dir = repo_get_git_dir(repo);
 
-	if (!git_dir)
-		return error(_("unable to get git directory"));
+	якщо (!git_dir)
+		повернути error(_("unable to get git directory"));
 
 	format_path(buf, git_dir, repo->prefix, PATH_FORMAT_RELATIVE);
-	return 0;
+	повернути 0;
 }
 
-static int get_references_format(struct repository *repo, struct strbuf *buf)
+static ціле get_references_format(struct repository *repo, struct strbuf *buf)
 {
 	strbuf_addstr(buf,
 		      ref_storage_format_to_name(repo->ref_storage_format));
-	return 0;
+	повернути 0;
 }
 
 /* repo_info_field keys must be in lexicographical order */
@@ -140,12 +140,12 @@ static const struct repo_info_field repo_info_field[] = {
 	{ "references.format", get_references_format },
 };
 
-static int repo_info_field_cmp(const void *va, const void *vb)
+static ціле repo_info_field_cmp(const void *va, const void *vb)
 {
 	const struct repo_info_field *a = va;
 	const struct repo_info_field *b = vb;
 
-	return strcmp(a->key, b->key);
+	повернути strcmp(a->key, b->key);
 }
 
 static const struct repo_info_field *get_repo_info_field(const char *key)
@@ -157,7 +157,7 @@ static const struct repo_info_field *get_repo_info_field(const char *key)
 						      sizeof(*found),
 						      repo_info_field_cmp);
 
-	return found;
+	повернути found;
 }
 
 static void print_field(enum output_format format, const char *key,
@@ -177,18 +177,18 @@ static void print_field(enum output_format format, const char *key,
 	}
 }
 
-static int print_fields(int argc, const char **argv,
+static ціле print_fields(ціле argc, const char **argv,
 			struct repository *repo,
 			enum output_format format)
 {
-	int ret = 0;
+	ціле ret = 0;
 	struct strbuf valbuf = STRBUF_INIT;
 
-	for (int i = 0; i < argc; i++) {
+	для (ціле i = 0; i < argc; i++) {
 		const char *key = argv[i];
 		const struct repo_info_field *field = get_repo_info_field(key);
 
-		if (!field) {
+		якщо (!field) {
 			ret = error(_("key '%s' not found"), key);
 			continue;
 		}
@@ -199,15 +199,15 @@ static int print_fields(int argc, const char **argv,
 	}
 
 	strbuf_release(&valbuf);
-	return ret;
+	повернути ret;
 }
 
-static int print_all_fields(struct repository *repo,
+static ціле print_all_fields(struct repository *repo,
 			    enum output_format format)
 {
 	struct strbuf valbuf = STRBUF_INIT;
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
+	для (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
 		const struct repo_info_field *field = &repo_info_field[i];
 
 		strbuf_reset(&valbuf);
@@ -216,10 +216,10 @@ static int print_all_fields(struct repository *repo,
 	}
 
 	strbuf_release(&valbuf);
-	return 0;
+	повернути 0;
 }
 
-static int print_keys(enum output_format format)
+static ціле print_keys(enum output_format format)
 {
 	char sep;
 
@@ -234,39 +234,39 @@ static int print_keys(enum output_format format)
 		die(_("--keys can only be used with --format=lines or --format=nul"));
 	}
 
-	for (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
+	для (size_t i = 0; i < ARRAY_SIZE(repo_info_field); i++) {
 		const struct repo_info_field *field = &repo_info_field[i];
 		printf("%s%c", field->key, sep);
 	}
 
-	return 0;
+	повернути 0;
 }
 
-static int parse_format_cb(const struct option *opt,
-			   const char *arg, int unset UNUSED)
+static ціле parse_format_cb(const struct option *opt,
+			   const char *arg, ціле unset UNUSED)
 {
 	enum output_format *format = opt->value;
 
-	if (opt->short_name == 'z')
+	якщо (opt->short_name == 'z')
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "nul"))
+	інакше якщо (!strcmp(arg, "nul"))
 		*format = FORMAT_NUL_TERMINATED;
-	else if (!strcmp(arg, "lines"))
+	інакше якщо (!strcmp(arg, "lines"))
 		*format = FORMAT_NEWLINE_TERMINATED;
-	else if (!strcmp(arg, "table"))
+	інакше якщо (!strcmp(arg, "table"))
 		*format = FORMAT_TABLE;
-	else
+	інакше
 		die(_("invalid format '%s'"), arg);
 
-	return 0;
+	повернути 0;
 }
 
-static int cmd_repo_info(int argc, const char **argv, const char *prefix,
+static ціле cmd_repo_info(ціле argc, const char **argv, const char *prefix,
 			 struct repository *repo)
 {
 	enum output_format format = FORMAT_NEWLINE_TERMINATED;
-	int all_keys = 0;
-	int show_keys = 0;
+	ціле all_keys = 0;
+	ціле show_keys = 0;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
@@ -282,22 +282,22 @@ static int cmd_repo_info(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, repo_info_usage, 0);
 
-	if (show_keys && (all_keys || argc))
+	якщо (show_keys && (all_keys || argc))
 		die(_("--keys cannot be used with a <key> or --all"));
 
-	if (show_keys)
-		return print_keys(format);
+	якщо (show_keys)
+		повернути print_keys(format);
 
-	if (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
+	якщо (format != FORMAT_NEWLINE_TERMINATED && format != FORMAT_NUL_TERMINATED)
 		die(_("unsupported output format"));
 
-	if (all_keys && argc)
+	якщо (all_keys && argc)
 		die(_("--all and <key> cannot be used together"));
 
-	if (all_keys)
-		return print_all_fields(repo, format);
-	else
-		return print_fields(argc, argv, repo, format);
+	якщо (all_keys)
+		повернути print_all_fields(repo, format);
+	інакше
+		повернути print_fields(argc, argv, repo, format);
 }
 
 struct object_data {
@@ -345,9 +345,9 @@ struct stats_table {
 	struct string_list rows;
 	struct string_list annotations;
 
-	int name_col_width;
-	int value_col_width;
-	int unit_col_width;
+	ціле name_col_width;
+	ціле value_col_width;
+	ціле unit_col_width;
 };
 
 /*
@@ -367,7 +367,7 @@ static void stats_table_vaddf(struct stats_table *table,
 	struct strbuf buf = STRBUF_INIT;
 	struct string_list_item *item;
 	char *formatted_name;
-	int name_width;
+	ціле name_width;
 
 	strbuf_vaddf(&buf, format, ap);
 	formatted_name = strbuf_detach(&buf, NULL);
@@ -376,24 +376,24 @@ static void stats_table_vaddf(struct stats_table *table,
 	item = string_list_append_nodup(&table->rows, formatted_name);
 	item->util = entry;
 
-	if (name_width > table->name_col_width)
+	якщо (name_width > table->name_col_width)
 		table->name_col_width = name_width;
-	if (!entry)
-		return;
-	if (entry->oid) {
+	якщо (!entry)
+		повернути;
+	якщо (entry->oid) {
 		entry->index = table->annotations.nr + 1;
 		strbuf_addf(&buf, "[%" PRIuMAX "] %s", (uintmax_t)entry->index,
 			    oid_to_hex(entry->oid));
 		string_list_append_nodup(&table->annotations, strbuf_detach(&buf, NULL));
 	}
-	if (entry->value) {
-		int value_width = utf8_strwidth(entry->value);
-		if (value_width > table->value_col_width)
+	якщо (entry->value) {
+		ціле value_width = utf8_strwidth(entry->value);
+		якщо (value_width > table->value_col_width)
 			table->value_col_width = value_width;
 	}
-	if (entry->unit) {
-		int unit_width = utf8_strwidth(entry->unit);
-		if (unit_width > table->unit_col_width)
+	якщо (entry->unit) {
+		ціле unit_width = utf8_strwidth(entry->unit);
+		якщо (unit_width > table->unit_col_width)
 			table->unit_col_width = unit_width;
 	}
 
@@ -436,7 +436,7 @@ static void stats_table_object_count_addf(struct stats_table *table,
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
+	якщо (!is_null_oid(oid))
 		entry->oid = oid;
 
 	va_start(ap, format);
@@ -471,7 +471,7 @@ static void stats_table_object_size_addf(struct stats_table *table,
 	/*
 	 * A NULL OID should not have a table annotation.
 	 */
-	if (!is_null_oid(oid))
+	якщо (!is_null_oid(oid))
 		entry->oid = oid;
 
 	va_start(ap, format);
@@ -481,12 +481,12 @@ static void stats_table_object_size_addf(struct stats_table *table,
 
 static inline size_t get_total_reference_count(struct ref_stats *stats)
 {
-	return stats->branches + stats->remotes + stats->tags + stats->others;
+	повернути stats->branches + stats->remotes + stats->tags + stats->others;
 }
 
 static inline size_t get_total_object_values(struct object_values *values)
 {
-	return values->tags + values->commits + values->trees + values->blobs;
+	повернути values->tags + values->commits + values->trees + values->blobs;
 }
 
 static void stats_table_setup_structure(struct stats_table *table,
@@ -582,17 +582,17 @@ static void stats_table_print_structure(const struct stats_table *table)
 {
 	const char *name_col_title = _("Repository structure");
 	const char *value_col_title = _("Value");
-	int title_name_width = utf8_strwidth(name_col_title);
-	int title_value_width = utf8_strwidth(value_col_title);
-	int name_col_width = table->name_col_width;
-	int value_col_width = table->value_col_width;
-	int unit_col_width = table->unit_col_width;
+	ціле title_name_width = utf8_strwidth(name_col_title);
+	ціле title_value_width = utf8_strwidth(value_col_title);
+	ціле name_col_width = table->name_col_width;
+	ціле value_col_width = table->value_col_width;
+	ціле unit_col_width = table->unit_col_width;
 	struct string_list_item *item;
 	struct strbuf buf = STRBUF_INIT;
 
-	if (title_name_width > name_col_width)
+	якщо (title_name_width > name_col_width)
 		name_col_width = title_name_width;
-	if (title_value_width > value_col_width + unit_col_width + 1)
+	якщо (title_value_width > value_col_width + unit_col_width + 1)
 		value_col_width = title_value_width - unit_col_width;
 
 	strbuf_addstr(&buf, "| ");
@@ -605,10 +605,10 @@ static void stats_table_print_structure(const struct stats_table *table)
 	printf("%s\n", buf.buf);
 
 	printf("| ");
-	for (int i = 0; i < name_col_width + INDEX_WIDTH; i++)
+	для (ціле i = 0; i < name_col_width + INDEX_WIDTH; i++)
 		putchar('-');
 	printf(" | ");
-	for (int i = 0; i < value_col_width + unit_col_width + 1; i++)
+	для (ціле i = 0; i < value_col_width + unit_col_width + 1; i++)
 		putchar('-');
 	printf(" |\n");
 
@@ -617,9 +617,9 @@ static void stats_table_print_structure(const struct stats_table *table)
 		const char *value = "";
 		const char *unit = "";
 
-		if (entry) {
+		якщо (entry) {
 			value = entry->value;
-			if (entry->unit)
+			якщо (entry->unit)
 				unit = entry->unit;
 		}
 
@@ -627,10 +627,10 @@ static void stats_table_print_structure(const struct stats_table *table)
 		strbuf_addstr(&buf, "| ");
 		strbuf_utf8_align(&buf, ALIGN_LEFT, name_col_width, item->string);
 
-		if (entry && entry->oid)
+		якщо (entry && entry->oid)
 			strbuf_addf(&buf, " [%" PRIuMAX "]",
 				    (uintmax_t)entry->index);
-		else
+		інакше
 			strbuf_addchars(&buf, ' ', INDEX_WIDTH);
 
 		strbuf_addstr(&buf, " | ");
@@ -641,7 +641,7 @@ static void stats_table_print_structure(const struct stats_table *table)
 		printf("%s\n", buf.buf);
 	}
 
-	if (table->annotations.nr) {
+	якщо (table->annotations.nr) {
 		printf("\n");
 		for_each_string_list_item(item, &table->annotations)
 			printf("%s\n", item->string);
@@ -657,7 +657,7 @@ static void stats_table_clear(struct stats_table *table)
 
 	for_each_string_list_item(item, &table->rows) {
 		entry = item->util;
-		if (entry)
+		якщо (entry)
 			free(entry->value);
 	}
 
@@ -742,7 +742,7 @@ struct count_references_data {
 	struct progress *progress;
 };
 
-static int count_references(const struct reference *ref, void *cb_data)
+static ціле count_references(const struct reference *ref, void *cb_data)
 {
 	struct count_references_data *data = cb_data;
 	struct ref_stats *stats = data->stats;
@@ -774,20 +774,20 @@ static int count_references(const struct reference *ref, void *cb_data)
 	ref_count = get_total_reference_count(stats);
 	display_progress(data->progress, ref_count);
 
-	return 0;
+	повернути 0;
 }
 
 static void structure_count_references(struct ref_stats *stats,
 				       struct rev_info *revs,
 				       struct repository *repo,
-				       int show_progress)
+				       ціле show_progress)
 {
 	struct count_references_data data = {
 		.stats = stats,
 		.revs = revs,
 	};
 
-	if (show_progress)
+	якщо (show_progress)
 		data.progress = start_delayed_progress(repo,
 						       _("Counting references"), 0);
 
@@ -804,7 +804,7 @@ struct count_objects_data {
 static void check_largest(struct object_data *data, struct object_id *oid,
 			  size_t value)
 {
-	if (value > data->value || is_null_oid(&data->oid)) {
+	якщо (value > data->value || is_null_oid(&data->oid)) {
 		oidcpy(&data->oid, oid);
 		data->value = value;
 	}
@@ -818,20 +818,20 @@ static size_t count_tree_entries(struct object *obj)
 	size_t count = 0;
 
 	init_tree_desc(&desc, &t->object.oid, t->buffer, t->size);
-	while (tree_entry(&desc, &entry))
+	поки (tree_entry(&desc, &entry))
 		count++;
 
-	return count;
+	повернути count;
 }
 
-static int count_objects(const char *path UNUSED, struct oid_array *oids,
+static ціле count_objects(const char *path UNUSED, struct oid_array *oids,
 			 enum object_type type, void *cb_data)
 {
 	struct count_objects_data *data = cb_data;
 	struct object_stats *stats = data->stats;
 	size_t object_count;
 
-	for (size_t i = 0; i < oids->nr; i++) {
+	для (size_t i = 0; i < oids->nr; i++) {
 		struct object_info oi = OBJECT_INFO_INIT;
 		unsigned long inflated;
 		size_t inflated_st = 0;
@@ -839,13 +839,13 @@ static int count_objects(const char *path UNUSED, struct oid_array *oids,
 		struct object *obj;
 		void *content;
 		off_t disk;
-		int eaten;
+		ціле eaten;
 
 		oi.sizep = &inflated_st;
 		oi.disk_sizep = &disk;
 		oi.contentp = &content;
 
-		if (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
+		якщо (odb_read_object_info_extended(data->odb, &oids->oid[i], &oi,
 						  OBJECT_INFO_SKIP_FETCH_OBJECT |
 						  OBJECT_INFO_QUICK) < 0)
 			continue;
@@ -892,19 +892,19 @@ static int count_objects(const char *path UNUSED, struct oid_array *oids,
 			BUG("invalid object type");
 		}
 
-		if (!eaten)
+		якщо (!eaten)
 			free(content);
 	}
 
 	object_count = get_total_object_values(&stats->type_counts);
 	display_progress(data->progress, object_count);
 
-	return 0;
+	повернути 0;
 }
 
 static void structure_count_objects(struct object_stats *stats,
 				    struct rev_info *revs,
-				    struct repository *repo, int show_progress)
+				    struct repository *repo, ціле show_progress)
 {
 	struct path_walk_info info = PATH_WALK_INFO_INIT;
 	struct count_objects_data data = {
@@ -916,7 +916,7 @@ static void structure_count_objects(struct object_stats *stats,
 	info.path_fn = count_objects;
 	info.path_fn_data = &data;
 
-	if (show_progress)
+	якщо (show_progress)
 		data.progress = start_delayed_progress(repo, _("Counting objects"), 0);
 
 	walk_objects_by_path(&info);
@@ -924,7 +924,7 @@ static void structure_count_objects(struct object_stats *stats,
 	stop_progress(&data.progress);
 }
 
-static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
+static ціле cmd_repo_structure(ціле argc, const char **argv, const char *prefix,
 			      struct repository *repo)
 {
 	struct stats_table table = {
@@ -934,7 +934,7 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 	enum output_format format = FORMAT_TABLE;
 	struct repo_structure stats = { 0 };
 	struct rev_info revs;
-	int show_progress = -1;
+	ціле show_progress = -1;
 	struct option options[] = {
 		OPT_CALLBACK_F(0, "format", &format, N_("format"),
 			       N_("output format"),
@@ -948,12 +948,12 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, repo_structure_usage, 0);
-	if (argc)
+	якщо (argc)
 		usage(_("too many arguments"));
 
 	repo_init_revisions(repo, &revs, prefix);
 
-	if (show_progress < 0)
+	якщо (show_progress < 0)
 		show_progress = isatty(2);
 
 	structure_count_references(&stats.refs, &revs, repo, show_progress);
@@ -977,10 +977,10 @@ static int cmd_repo_structure(int argc, const char **argv, const char *prefix,
 	stats_table_clear(&table);
 	release_revisions(&revs);
 
-	return 0;
+	повернути 0;
 }
 
-int cmd_repo(int argc, const char **argv, const char *prefix,
+ціле cmd_repo(ціле argc, const char **argv, const char *prefix,
 	     struct repository *repo)
 {
 	parse_opt_subcommand_fn *fn = NULL;
@@ -992,5 +992,5 @@ int cmd_repo(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, repo_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	повернути fn(argc, argv, prefix, repo);
 }

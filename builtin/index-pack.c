@@ -45,28 +45,28 @@ struct object_entry {
 
 struct object_stat {
 	unsigned delta_depth;
-	int base_object_no;
+	ціле base_object_no;
 };
 
 struct base_data {
 	/* Initialized by make_base(). */
 	struct base_data *base;
 	struct object_entry *obj;
-	int ref_first, ref_last;
-	int ofs_first, ofs_last;
+	ціле ref_first, ref_last;
+	ціле ofs_first, ofs_last;
 	/*
 	 * Threads should increment retain_data if they are about to call
 	 * patch_delta() using this struct's data as a base, and decrement this
 	 * when they are done. While retain_data is nonzero, this struct's data
 	 * will not be freed even if the delta base cache limit is exceeded.
 	 */
-	int retain_data;
+	ціле retain_data;
 	/*
 	 * The number of direct children that have not been fully processed
 	 * (entered work_head, entered done_head, left done_head). When this
 	 * number reaches zero, this struct base_data can be freed.
 	 */
-	int children_remaining;
+	ціле children_remaining;
 
 	/* Not initialized by make_base(). */
 	struct list_head list;
@@ -104,7 +104,7 @@ static size_t base_cache_limit;
 
 struct thread_local_data {
 	pthread_t thread;
-	int pack_fd;
+	ціле pack_fd;
 };
 
 /* Remember to update object flag allocation in object.h */
@@ -113,12 +113,12 @@ struct thread_local_data {
 
 struct ofs_delta_entry {
 	off_t offset;
-	int obj_no;
+	ціле obj_no;
 };
 
 struct ref_delta_entry {
 	struct object_id oid;
-	int obj_no;
+	ціле obj_no;
 };
 
 static struct object_entry *objects;
@@ -126,33 +126,33 @@ static struct object_stat *obj_stat;
 static struct ofs_delta_entry *ofs_deltas;
 static struct ref_delta_entry *ref_deltas;
 static struct thread_local_data nothread_data;
-static int nr_objects;
-static int nr_ofs_deltas;
-static int nr_ref_deltas;
-static int ref_deltas_alloc;
-static int nr_resolved_deltas;
-static int nr_threads;
+static ціле nr_objects;
+static ціле nr_ofs_deltas;
+static ціле nr_ref_deltas;
+static ціле ref_deltas_alloc;
+static ціле nr_resolved_deltas;
+static ціле nr_threads;
 
-static int from_stdin;
-static int strict;
-static int do_fsck_object;
+static ціле from_stdin;
+static ціле strict;
+static ціле do_fsck_object;
 static struct fsck_options fsck_options;
-static int verbose;
+static ціле verbose;
 static const char *progress_title;
-static int show_resolving_progress;
-static int show_stat;
-static int check_self_contained_and_connected;
+static ціле show_resolving_progress;
+static ціле show_stat;
+static ціле check_self_contained_and_connected;
 
 static struct progress *progress;
 
 static unsigned char input_buffer[DEFAULT_IO_BUFFER_SIZE];
-static unsigned int input_offset, input_len;
+static unsigned ціле input_offset, input_len;
 static off_t consumed_bytes;
 static off_t max_input_size;
 static unsigned deepest_delta;
 static struct git_hash_ctx input_ctx;
 static uint32_t input_crc32;
-static int input_fd, output_fd;
+static ціле input_fd, output_fd;
 static const char *curr_pack;
 
 /*
@@ -160,11 +160,11 @@ static const char *curr_pack;
  * read-only in a thread.
  */
 static struct oidset outgoing_links = OIDSET_INIT;
-static int record_outgoing_links;
+static ціле record_outgoing_links;
 
 static struct thread_local_data *thread_data;
-static int nr_dispatched;
-static int threads_active;
+static ціле nr_dispatched;
+static ціле threads_active;
 
 static pthread_mutex_t read_mutex;
 #define read_lock()		lock_mutex(&read_mutex)
@@ -186,13 +186,13 @@ static pthread_key_t key;
 
 static inline void lock_mutex(pthread_mutex_t *mutex)
 {
-	if (threads_active)
+	якщо (threads_active)
 		pthread_mutex_lock(mutex);
 }
 
 static inline void unlock_mutex(pthread_mutex_t *mutex)
 {
-	if (threads_active)
+	якщо (threads_active)
 		pthread_mutex_unlock(mutex);
 }
 
@@ -201,15 +201,15 @@ static inline void unlock_mutex(pthread_mutex_t *mutex)
  */
 static void init_thread(void)
 {
-	int i;
+	ціле i;
 	init_recursive_mutex(&read_mutex);
 	pthread_mutex_init(&counter_mutex, NULL);
 	pthread_mutex_init(&work_mutex, NULL);
-	if (show_stat)
+	якщо (show_stat)
 		pthread_mutex_init(&deepest_delta_mutex, NULL);
 	pthread_key_create(&key, NULL);
 	CALLOC_ARRAY(thread_data, nr_threads);
-	for (i = 0; i < nr_threads; i++) {
+	для (i = 0; i < nr_threads; i++) {
 		thread_data[i].pack_fd = xopen(curr_pack, O_RDONLY);
 	}
 
@@ -218,61 +218,61 @@ static void init_thread(void)
 
 static void cleanup_thread(void)
 {
-	int i;
-	if (!threads_active)
-		return;
+	ціле i;
+	якщо (!threads_active)
+		повернути;
 	threads_active = 0;
 	pthread_mutex_destroy(&read_mutex);
 	pthread_mutex_destroy(&counter_mutex);
 	pthread_mutex_destroy(&work_mutex);
-	if (show_stat)
+	якщо (show_stat)
 		pthread_mutex_destroy(&deepest_delta_mutex);
-	for (i = 0; i < nr_threads; i++)
+	для (i = 0; i < nr_threads; i++)
 		close(thread_data[i].pack_fd);
 	pthread_key_delete(key);
 	free(thread_data);
 }
 
-static int mark_link(struct object *obj, enum object_type type,
+static ціле mark_link(struct object *obj, enum object_type type,
 		     void *data UNUSED,
 		     struct fsck_options *options UNUSED)
 {
-	if (!obj)
-		return -1;
+	якщо (!obj)
+		повернути -1;
 
-	if (type != OBJ_ANY && obj->type != type)
+	якщо (type != OBJ_ANY && obj->type != type)
 		die(_("object type mismatch at %s"), oid_to_hex(&obj->oid));
 
 	obj->flags |= FLAG_LINK;
-	return 0;
+	повернути 0;
 }
 
 /* The content of each linked object must have been checked
    or it must be already present in the object database */
 static unsigned check_object(struct object *obj)
 {
-	if (!obj)
-		return 0;
+	якщо (!obj)
+		повернути 0;
 
-	if (!(obj->flags & FLAG_LINK))
-		return 0;
+	якщо (!(obj->flags & FLAG_LINK))
+		повернути 0;
 
-	if (!(obj->flags & FLAG_CHECKED)) {
+	якщо (!(obj->flags & FLAG_CHECKED)) {
 		size_t size;
-		int type = odb_read_object_info(the_repository->objects,
+		ціле type = odb_read_object_info(the_repository->objects,
 						&obj->oid, &size);
-		if (type <= 0)
+		якщо (type <= 0)
 			die(_("did not receive expected object %s"),
 			      oid_to_hex(&obj->oid));
-		if (type != obj->type)
+		якщо (type != obj->type)
 			die(_("object %s: expected type %s, found %s"),
 			    oid_to_hex(&obj->oid),
 			    type_name(obj->type), type_name(type));
 		obj->flags |= FLAG_CHECKED;
-		return 1;
+		повернути 1;
 	}
 
-	return 0;
+	повернути 0;
 }
 
 static unsigned check_objects(void)
@@ -281,25 +281,25 @@ static unsigned check_objects(void)
 
 	max = get_max_object_index(the_repository);
 
-	if (verbose)
+	якщо (verbose)
 		progress = start_delayed_progress(the_repository,
 						  _("Checking objects"), max);
 
-	for (i = 0; i < max; i++) {
+	для (i = 0; i < max; i++) {
 		foreign_nr += check_object(get_indexed_object(the_repository, i));
 		display_progress(progress, i + 1);
 	}
 
 	stop_progress(&progress);
-	return foreign_nr;
+	повернути foreign_nr;
 }
 
 
 /* Discard current buffer used content. */
 static void flush(void)
 {
-	if (input_offset) {
-		if (output_fd >= 0)
+	якщо (input_offset) {
+		якщо (output_fd >= 0)
 			write_or_die(output_fd, input_buffer, input_offset);
 		git_hash_update(&input_ctx, input_buffer, input_offset);
 		memmove(input_buffer, input_buffer + input_offset, input_len);
@@ -311,11 +311,11 @@ static void flush(void)
  * Make sure at least "min" bytes are available in the buffer, and
  * return the pointer to the buffer.
  */
-static void *fill(int min)
+static void *fill(ціле min)
 {
-	if (min <= input_len)
-		return input_buffer + input_offset;
-	if (min > sizeof(input_buffer))
+	якщо (min <= input_len)
+		повернути input_buffer + input_offset;
+	якщо (min > sizeof(input_buffer))
 		die(Q_("cannot fill %d byte",
 		       "cannot fill %d bytes",
 		       min),
@@ -324,31 +324,31 @@ static void *fill(int min)
 	do {
 		ssize_t ret = xread(input_fd, input_buffer + input_len,
 				sizeof(input_buffer) - input_len);
-		if (ret <= 0) {
-			if (!ret)
+		якщо (ret <= 0) {
+			якщо (!ret)
 				die(_("early EOF"));
 			die_errno(_("read error on input"));
 		}
 		input_len += ret;
-		if (from_stdin)
+		якщо (from_stdin)
 			display_throughput(progress, consumed_bytes + input_len);
-	} while (input_len < min);
-	return input_buffer;
+	} поки (input_len < min);
+	повернути input_buffer;
 }
 
-static void use(int bytes)
+static void use(ціле bytes)
 {
-	if (bytes > input_len)
+	якщо (bytes > input_len)
 		die(_("used more bytes than were available"));
 	input_crc32 = crc32(input_crc32, input_buffer + input_offset, bytes);
 	input_len -= bytes;
 	input_offset += bytes;
 
 	/* make sure off_t is sufficiently large not to wrap */
-	if (signed_add_overflows(consumed_bytes, bytes))
+	якщо (signed_add_overflows(consumed_bytes, bytes))
 		die(_("pack too large for current definition of off_t"));
 	consumed_bytes += bytes;
-	if (max_input_size && consumed_bytes > max_input_size) {
+	якщо (max_input_size && consumed_bytes > max_input_size) {
 		struct strbuf size_limit = STRBUF_INIT;
 		strbuf_humanise_bytes(&size_limit, max_input_size);
 		die(_("pack exceeds maximum allowed size (%s)"),
@@ -358,24 +358,24 @@ static void use(int bytes)
 
 static const char *open_pack_file(const char *pack_name)
 {
-	if (from_stdin) {
+	якщо (from_stdin) {
 		input_fd = 0;
-		if (!pack_name) {
+		якщо (!pack_name) {
 			struct strbuf tmp_file = STRBUF_INIT;
 			output_fd = odb_mkstemp(the_repository->objects, &tmp_file,
 						"pack/tmp_pack_XXXXXX");
 			pack_name = strbuf_detach(&tmp_file, NULL);
-		} else {
+		} інакше {
 			output_fd = xopen(pack_name, O_CREAT|O_EXCL|O_RDWR, 0600);
 		}
 		nothread_data.pack_fd = output_fd;
-	} else {
+	} інакше {
 		input_fd = xopen(pack_name, O_RDONLY);
 		output_fd = -1;
 		nothread_data.pack_fd = input_fd;
 	}
 	git_hash_init(&input_ctx, the_hash_algo);
-	return pack_name;
+	повернути pack_name;
 }
 
 static void parse_pack_header(void)
@@ -383,10 +383,10 @@ static void parse_pack_header(void)
 	unsigned char *hdr = fill(sizeof(struct pack_header));
 
 	/* Header consistency check */
-	if (get_be32(hdr) != PACK_SIGNATURE)
+	якщо (get_be32(hdr) != PACK_SIGNATURE)
 		die(_("pack signature mismatch"));
 	hdr += 4;
-	if (!pack_version_ok_native(get_be32(hdr)))
+	якщо (!pack_version_ok_native(get_be32(hdr)))
 		die(_("pack version %"PRIu32" unsupported"),
 		    get_be32(hdr));
 	hdr += 4;
@@ -410,24 +410,24 @@ static NORETURN void bad_object(off_t offset, const char *format, ...)
 
 static inline struct thread_local_data *get_thread_data(void)
 {
-	if (HAVE_THREADS) {
-		if (threads_active)
-			return pthread_getspecific(key);
+	якщо (HAVE_THREADS) {
+		якщо (threads_active)
+			повернути pthread_getspecific(key);
 		assert(!threads_active &&
 		       "This should only be reached when all threads are gone");
 	}
-	return &nothread_data;
+	повернути &nothread_data;
 }
 
 static void set_thread_data(struct thread_local_data *data)
 {
-	if (threads_active)
+	якщо (threads_active)
 		pthread_setspecific(key, data);
 }
 
 static void free_base_data(struct base_data *c)
 {
-	if (c->data) {
+	якщо (c->data) {
 		FREE_AND_NULL(c->data);
 		base_cache_used -= c->size;
 	}
@@ -437,58 +437,58 @@ static void prune_base_data(struct base_data *retain)
 {
 	struct list_head *pos;
 
-	if (base_cache_used <= base_cache_limit)
-		return;
+	якщо (base_cache_used <= base_cache_limit)
+		повернути;
 
 	list_for_each_prev(pos, &done_head) {
 		struct base_data *b = list_entry(pos, struct base_data, list);
-		if (b->retain_data || b == retain)
+		якщо (b->retain_data || b == retain)
 			continue;
-		if (b->data) {
+		якщо (b->data) {
 			free_base_data(b);
-			if (base_cache_used <= base_cache_limit)
-				return;
+			якщо (base_cache_used <= base_cache_limit)
+				повернути;
 		}
 	}
 
 	list_for_each_prev(pos, &work_head) {
 		struct base_data *b = list_entry(pos, struct base_data, list);
-		if (b->retain_data || b == retain)
+		якщо (b->retain_data || b == retain)
 			continue;
-		if (b->data) {
+		якщо (b->data) {
 			free_base_data(b);
-			if (base_cache_used <= base_cache_limit)
-				return;
+			якщо (base_cache_used <= base_cache_limit)
+				повернути;
 		}
 	}
 }
 
-static int is_delta_type(enum object_type type)
+static ціле is_delta_type(enum object_type type)
 {
-	return (type == OBJ_REF_DELTA || type == OBJ_OFS_DELTA);
+	повернути (type == OBJ_REF_DELTA || type == OBJ_OFS_DELTA);
 }
 
 static void *unpack_entry_data(off_t offset, size_t size,
 			       enum object_type type, struct object_id *oid)
 {
 	static char fixed_buf[8192];
-	int status;
+	ціле status;
 	git_zstream stream;
 	void *buf;
 	struct git_hash_ctx c;
 	char hdr[32];
-	int hdrlen;
+	ціле hdrlen;
 
-	if (!is_delta_type(type)) {
+	якщо (!is_delta_type(type)) {
 		hdrlen = format_object_header(hdr, sizeof(hdr), type, size);
 		git_hash_init(&c, the_hash_algo);
 		git_hash_update(&c, hdr, hdrlen);
-	} else
+	} інакше
 		oid = NULL;
-	if (type == OBJ_BLOB &&
+	якщо (type == OBJ_BLOB &&
 	    size > repo_settings_get_big_file_threshold(the_repository))
 		buf = fixed_buf;
-	else
+	інакше
 		buf = xmallocz(size);
 
 	memset(&stream, 0, sizeof(stream));
@@ -502,19 +502,19 @@ static void *unpack_entry_data(off_t offset, size_t size,
 		stream.avail_in = input_len;
 		status = git_inflate(&stream, 0);
 		use(input_len - stream.avail_in);
-		if (oid)
+		якщо (oid)
 			git_hash_update(&c, last_out, stream.next_out - last_out);
-		if (buf == fixed_buf) {
+		якщо (buf == fixed_buf) {
 			stream.next_out = buf;
 			stream.avail_out = sizeof(fixed_buf);
 		}
-	} while (status == Z_OK);
-	if (stream.total_out != size || status != Z_STREAM_END)
+	} поки (status == Z_OK);
+	якщо (stream.total_out != size || status != Z_STREAM_END)
 		bad_object(offset, _("inflate returned %d"), status);
 	git_inflate_end(&stream);
-	if (oid)
+	якщо (oid)
 		git_hash_final_oid(oid, &c);
-	return buf == fixed_buf ? NULL : buf;
+	повернути buf == fixed_buf ? NULL : buf;
 }
 
 static void *unpack_raw_entry(struct object_entry *obj,
@@ -537,8 +537,8 @@ static void *unpack_raw_entry(struct object_entry *obj,
 	obj->type = (c >> 4) & 7;
 	size = (c & 15);
 	shift = 4;
-	while (c & 0x80) {
-		if ((bitsizeof(size_t) - 7) < shift)
+	поки (c & 0x80) {
+		якщо ((bitsizeof(size_t) - 7) < shift)
 			die(_("object size too large for this platform"));
 		p = fill(1);
 		c = *p;
@@ -559,9 +559,9 @@ static void *unpack_raw_entry(struct object_entry *obj,
 		c = *p;
 		use(1);
 		base_offset = c & 127;
-		while (c & 128) {
+		поки (c & 128) {
 			base_offset += 1;
-			if (!base_offset || MSB(base_offset, 7))
+			якщо (!base_offset || MSB(base_offset, 7))
 				bad_object(obj->idx.offset, _("offset value overflow for delta base object"));
 			p = fill(1);
 			c = *p;
@@ -569,7 +569,7 @@ static void *unpack_raw_entry(struct object_entry *obj,
 			base_offset = (base_offset << 7) + (c & 127);
 		}
 		*ofs_offset = obj->idx.offset - base_offset;
-		if (*ofs_offset <= 0 || *ofs_offset >= obj->idx.offset)
+		якщо (*ofs_offset <= 0 || *ofs_offset >= obj->idx.offset)
 			bad_object(obj->idx.offset, _("delta base offset is out of bound"));
 		break;
 	case OBJ_COMMIT:
@@ -584,21 +584,21 @@ static void *unpack_raw_entry(struct object_entry *obj,
 
 	data = unpack_entry_data(obj->idx.offset, obj->size, obj->type, oid);
 	obj->idx.crc32 = input_crc32;
-	return data;
+	повернути data;
 }
 
 static void *unpack_data(struct object_entry *obj,
-			 int (*consume)(const unsigned char *, unsigned long, void *),
+			 ціле (*consume)(const unsigned char *, unsigned long, void *),
 			 void *cb_data)
 {
 	off_t from = obj[0].idx.offset + obj[0].hdr_size;
 	off_t len = obj[1].idx.offset - from;
 	unsigned char *data, *inbuf;
 	git_zstream stream;
-	int status;
+	ціле status;
 
 	data = xmallocz(consume ? 64*1024 : obj->size);
-	inbuf = xmalloc((len < 64*1024) ? (int)len : 64*1024);
+	inbuf = xmalloc((len < 64*1024) ? (ціле)len : 64*1024);
 
 	memset(&stream, 0, sizeof(stream));
 	git_inflate_init(&stream);
@@ -608,9 +608,9 @@ static void *unpack_data(struct object_entry *obj,
 	do {
 		ssize_t n = (len < 64*1024) ? (ssize_t)len : 64*1024;
 		n = xpread(get_thread_data()->pack_fd, inbuf, n, from);
-		if (n < 0)
+		якщо (n < 0)
 			die_errno(_("cannot pread pack file"));
-		if (!n)
+		якщо (!n)
 			die(Q_("premature end of pack file, %"PRIuMAX" byte missing",
 			       "premature end of pack file, %"PRIuMAX" bytes missing",
 			       len),
@@ -619,143 +619,143 @@ static void *unpack_data(struct object_entry *obj,
 		len -= n;
 		stream.next_in = inbuf;
 		stream.avail_in = n;
-		if (!consume)
+		якщо (!consume)
 			status = git_inflate(&stream, 0);
-		else {
+		інакше {
 			do {
 				status = git_inflate(&stream, 0);
-				if (consume(data, stream.next_out - data, cb_data)) {
+				якщо (consume(data, stream.next_out - data, cb_data)) {
 					free(inbuf);
 					free(data);
-					return NULL;
+					повернути NULL;
 				}
 				stream.next_out = data;
 				stream.avail_out = 64*1024;
-			} while (status == Z_OK && stream.avail_in);
+			} поки (status == Z_OK && stream.avail_in);
 		}
-	} while (len && status == Z_OK && !stream.avail_in);
+	} поки (len && status == Z_OK && !stream.avail_in);
 
 	/* This has been inflated OK when first encountered, so... */
-	if (status != Z_STREAM_END || stream.total_out != obj->size)
+	якщо (status != Z_STREAM_END || stream.total_out != obj->size)
 		die(_("serious inflate inconsistency"));
 
 	git_inflate_end(&stream);
 	free(inbuf);
-	if (consume) {
+	якщо (consume) {
 		FREE_AND_NULL(data);
 	}
-	return data;
+	повернути data;
 }
 
 static void *get_data_from_pack(struct object_entry *obj)
 {
-	return unpack_data(obj, NULL, NULL);
+	повернути unpack_data(obj, NULL, NULL);
 }
 
-static int compare_ofs_delta_bases(off_t offset1, off_t offset2,
+static ціле compare_ofs_delta_bases(off_t offset1, off_t offset2,
 				   enum object_type type1,
 				   enum object_type type2)
 {
-	int cmp = type1 - type2;
-	if (cmp)
-		return cmp;
-	return offset1 < offset2 ? -1 :
+	ціле cmp = type1 - type2;
+	якщо (cmp)
+		повернути cmp;
+	повернути offset1 < offset2 ? -1 :
 	       offset1 > offset2 ?  1 :
 	       0;
 }
 
-static int find_ofs_delta(const off_t offset)
+static ціле find_ofs_delta(const off_t offset)
 {
-	int first = 0, last = nr_ofs_deltas;
+	ціле first = 0, last = nr_ofs_deltas;
 
-	while (first < last) {
-		int next = first + (last - first) / 2;
+	поки (first < last) {
+		ціле next = first + (last - first) / 2;
 		struct ofs_delta_entry *delta = &ofs_deltas[next];
-		int cmp;
+		ціле cmp;
 
 		cmp = compare_ofs_delta_bases(offset, delta->offset,
 					      OBJ_OFS_DELTA,
 					      objects[delta->obj_no].type);
-		if (!cmp)
-			return next;
-		if (cmp < 0) {
+		якщо (!cmp)
+			повернути next;
+		якщо (cmp < 0) {
 			last = next;
 			continue;
 		}
 		first = next+1;
 	}
-	return -first-1;
+	повернути -first-1;
 }
 
 static void find_ofs_delta_children(off_t offset,
-				    int *first_index, int *last_index)
+				    ціле *first_index, ціле *last_index)
 {
-	int first = find_ofs_delta(offset);
-	int last = first;
-	int end = nr_ofs_deltas - 1;
+	ціле first = find_ofs_delta(offset);
+	ціле last = first;
+	ціле end = nr_ofs_deltas - 1;
 
-	if (first < 0) {
+	якщо (first < 0) {
 		*first_index = 0;
 		*last_index = -1;
-		return;
+		повернути;
 	}
-	while (first > 0 && ofs_deltas[first - 1].offset == offset)
+	поки (first > 0 && ofs_deltas[first - 1].offset == offset)
 		--first;
-	while (last < end && ofs_deltas[last + 1].offset == offset)
+	поки (last < end && ofs_deltas[last + 1].offset == offset)
 		++last;
 	*first_index = first;
 	*last_index = last;
 }
 
-static int compare_ref_delta_bases(const struct object_id *oid1,
+static ціле compare_ref_delta_bases(const struct object_id *oid1,
 				   const struct object_id *oid2,
 				   enum object_type type1,
 				   enum object_type type2)
 {
-	int cmp = type1 - type2;
-	if (cmp)
-		return cmp;
-	return oidcmp(oid1, oid2);
+	ціле cmp = type1 - type2;
+	якщо (cmp)
+		повернути cmp;
+	повернути oidcmp(oid1, oid2);
 }
 
-static int find_ref_delta(const struct object_id *oid)
+static ціле find_ref_delta(const struct object_id *oid)
 {
-	int first = 0, last = nr_ref_deltas;
+	ціле first = 0, last = nr_ref_deltas;
 
-	while (first < last) {
-		int next = first + (last - first) / 2;
+	поки (first < last) {
+		ціле next = first + (last - first) / 2;
 		struct ref_delta_entry *delta = &ref_deltas[next];
-		int cmp;
+		ціле cmp;
 
 		cmp = compare_ref_delta_bases(oid, &delta->oid,
 					      OBJ_REF_DELTA,
 					      objects[delta->obj_no].type);
-		if (!cmp)
-			return next;
-		if (cmp < 0) {
+		якщо (!cmp)
+			повернути next;
+		якщо (cmp < 0) {
 			last = next;
 			continue;
 		}
 		first = next+1;
 	}
-	return -first-1;
+	повернути -first-1;
 }
 
 static void find_ref_delta_children(const struct object_id *oid,
-				    int *first_index, int *last_index)
+				    ціле *first_index, ціле *last_index)
 {
-	int first = find_ref_delta(oid);
-	int last = first;
-	int end = nr_ref_deltas - 1;
+	ціле first = find_ref_delta(oid);
+	ціле last = first;
+	ціле end = nr_ref_deltas - 1;
 
-	if (first < 0) {
+	якщо (first < 0) {
 		*first_index = 0;
 		*last_index = -1;
-		return;
+		повернути;
 	}
-	while (first > 0 && oideq(&ref_deltas[first - 1].oid, oid))
+	поки (first > 0 && oideq(&ref_deltas[first - 1].oid, oid))
 		--first;
-	while (last < end && oideq(&ref_deltas[last + 1].oid, oid))
+	поки (last < end && oideq(&ref_deltas[last + 1].oid, oid))
 		++last;
 	*first_index = first;
 	*last_index = last;
@@ -768,54 +768,54 @@ struct compare_data {
 	unsigned long buf_size;
 };
 
-static int compare_objects(const unsigned char *buf, unsigned long size,
+static ціле compare_objects(const unsigned char *buf, unsigned long size,
 			   void *cb_data)
 {
 	struct compare_data *data = cb_data;
 
-	if (data->buf_size < size) {
+	якщо (data->buf_size < size) {
 		free(data->buf);
 		data->buf = xmalloc(size);
 		data->buf_size = size;
 	}
 
-	while (size) {
+	поки (size) {
 		ssize_t len = odb_stream_read(data->st, data->buf, size);
-		if (len == 0)
+		якщо (len == 0)
 			die(_("SHA1 COLLISION FOUND WITH %s !"),
 			    oid_to_hex(&data->entry->idx.oid));
-		if (len < 0)
+		якщо (len < 0)
 			die(_("unable to read %s"),
 			    oid_to_hex(&data->entry->idx.oid));
-		if (memcmp(buf, data->buf, len))
+		якщо (memcmp(buf, data->buf, len))
 			die(_("SHA1 COLLISION FOUND WITH %s !"),
 			    oid_to_hex(&data->entry->idx.oid));
 		size -= len;
 		buf += len;
 	}
-	return 0;
+	повернути 0;
 }
 
-static int check_collison(struct object_entry *entry)
+static ціле check_collison(struct object_entry *entry)
 {
 	struct compare_data data;
 
-	if (entry->size <= repo_settings_get_big_file_threshold(the_repository) ||
+	якщо (entry->size <= repo_settings_get_big_file_threshold(the_repository) ||
 	    entry->type != OBJ_BLOB)
-		return -1;
+		повернути -1;
 
 	memset(&data, 0, sizeof(data));
 	data.entry = entry;
 	data.st = odb_stream_from_object(the_repository->objects, &entry->idx.oid, NULL);
-	if (!data.st)
-		return -1;
-	if (data.st->size != entry->size || data.st->type != entry->type)
+	якщо (!data.st)
+		повернути -1;
+	якщо (data.st->size != entry->size || data.st->type != entry->type)
 		die(_("SHA1 COLLISION FOUND WITH %s !"),
 		    oid_to_hex(&entry->idx.oid));
 	unpack_data(entry, compare_objects, &data);
 	odb_stream_close(data.st);
 	free(data.buf);
-	return 0;
+	повернути 0;
 }
 
 static void record_outgoing_link(const struct object_id *oid)
@@ -848,33 +848,33 @@ static void maybe_record_name_entry(const struct name_entry *entry)
 	 * happens only once - when refetched, the blob goes into a promisor
 	 * pack, so it won't be GC-ed, the tradeoff seems worth it.
 	*/
-	if (S_ISDIR(entry->mode))
+	якщо (S_ISDIR(entry->mode))
 		record_outgoing_link(&entry->oid);
 }
 
 static void do_record_outgoing_links(struct object *obj)
 {
-	if (obj->type == OBJ_TREE) {
+	якщо (obj->type == OBJ_TREE) {
 		struct tree *tree = (struct tree *)obj;
 		struct tree_desc desc;
 		struct name_entry entry;
-		if (init_tree_desc_gently(&desc, &tree->object.oid,
+		якщо (init_tree_desc_gently(&desc, &tree->object.oid,
 					  tree->buffer, tree->size, 0))
 			/*
 			 * Error messages are given when packs are
 			 * verified, so do not print any here.
 			 */
-			return;
-		while (tree_entry_gently(&desc, &entry))
+			повернути;
+		поки (tree_entry_gently(&desc, &entry))
 			maybe_record_name_entry(&entry);
-	} else if (obj->type == OBJ_COMMIT) {
+	} інакше якщо (obj->type == OBJ_COMMIT) {
 		struct commit *commit = (struct commit *) obj;
 		struct commit_list *parents = commit->parents;
 
 		record_outgoing_link(get_commit_tree_oid(commit));
-		for (; parents; parents = parents->next)
+		для (; parents; parents = parents->next)
 			record_outgoing_link(&parents->item->object.oid);
-	} else if (obj->type == OBJ_TAG) {
+	} інакше якщо (obj->type == OBJ_TAG) {
 		struct tag *tag = (struct tag *) obj;
 		record_outgoing_link(get_tagged_oid(tag));
 	}
@@ -885,60 +885,60 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
 			const struct object_id *oid)
 {
 	void *new_data = NULL;
-	int collision_test_needed = 0;
+	ціле collision_test_needed = 0;
 
 	assert(data || obj_entry);
 
-	if (startup_info->have_repository) {
+	якщо (startup_info->have_repository) {
 		read_lock();
 		collision_test_needed = odb_has_object(the_repository->objects, oid,
 						       ODB_HAS_OBJECT_FETCH_PROMISOR);
 		read_unlock();
 	}
 
-	if (collision_test_needed && !data) {
+	якщо (collision_test_needed && !data) {
 		read_lock();
-		if (!check_collison(obj_entry))
+		якщо (!check_collison(obj_entry))
 			collision_test_needed = 0;
 		read_unlock();
 	}
-	if (collision_test_needed) {
+	якщо (collision_test_needed) {
 		void *has_data;
 		enum object_type has_type;
 		size_t has_size;
 		read_lock();
 		has_type = odb_read_object_info(the_repository->objects, oid, &has_size);
-		if (has_type < 0)
+		якщо (has_type < 0)
 			die(_("cannot read existing object info %s"), oid_to_hex(oid));
-		if (has_type != type || has_size != size)
+		якщо (has_type != type || has_size != size)
 			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_to_hex(oid));
 		has_data = odb_read_object(the_repository->objects, oid,
 					   &has_type, &has_size);
 		read_unlock();
-		if (!data)
+		якщо (!data)
 			data = new_data = get_data_from_pack(obj_entry);
-		if (!has_data)
+		якщо (!has_data)
 			die(_("cannot read existing object %s"), oid_to_hex(oid));
-		if (size != has_size || type != has_type ||
+		якщо (size != has_size || type != has_type ||
 		    memcmp(data, has_data, size) != 0)
 			die(_("SHA1 COLLISION FOUND WITH %s !"), oid_to_hex(oid));
 		free(has_data);
 	}
 
-	if (strict || do_fsck_object || record_outgoing_links) {
+	якщо (strict || do_fsck_object || record_outgoing_links) {
 		read_lock();
-		if (type == OBJ_BLOB) {
+		якщо (type == OBJ_BLOB) {
 			struct blob *blob = lookup_blob(the_repository, oid);
-			if (blob)
+			якщо (blob)
 				blob->object.flags |= FLAG_CHECKED;
-			else
+			інакше
 				die(_("invalid blob object %s"), oid_to_hex(oid));
-			if (do_fsck_object &&
+			якщо (do_fsck_object &&
 			    fsck_object(&blob->object, (void *)data, size, &fsck_options))
 				die(_("fsck error in packed object"));
-		} else {
+		} інакше {
 			struct object *obj;
-			int eaten;
+			ціле eaten;
 			void *buf = (void *) data;
 
 			assert(data && "data can only be NULL for large _blobs_");
@@ -950,24 +950,24 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
 			obj = parse_object_buffer(the_repository, oid, type,
 						  size, buf,
 						  &eaten);
-			if (!obj)
+			якщо (!obj)
 				die(_("invalid %s"), type_name(type));
-			if (do_fsck_object &&
+			якщо (do_fsck_object &&
 			    fsck_object(obj, buf, size, &fsck_options))
 				die(_("fsck error in packed object"));
-			if (strict && fsck_walk(obj, NULL, &fsck_options))
+			якщо (strict && fsck_walk(obj, NULL, &fsck_options))
 				die(_("Not all child objects of %s are reachable"), oid_to_hex(&obj->oid));
-			if (record_outgoing_links)
+			якщо (record_outgoing_links)
 				do_record_outgoing_links(obj);
 
-			if (obj->type == OBJ_TREE) {
+			якщо (obj->type == OBJ_TREE) {
 				struct tree *item = (struct tree *) obj;
 				item->buffer = NULL;
 				obj->parsed = 0;
 			}
-			if (obj->type == OBJ_COMMIT) {
+			якщо (obj->type == OBJ_COMMIT) {
 				struct commit *commit = (struct commit *) obj;
-				if (detach_commit_buffer(commit, NULL) != data)
+				якщо (detach_commit_buffer(commit, NULL) != data)
 					BUG("parse_object_buffer transmogrified our buffer");
 			}
 			obj->flags |= FLAG_CHECKED;
@@ -991,23 +991,23 @@ static void sha1_object(const void *data, struct object_entry *obj_entry,
  */
 static void *get_base_data(struct base_data *c)
 {
-	if (!c->data) {
+	якщо (!c->data) {
 		struct object_entry *obj = c->obj;
 		struct base_data **delta = NULL;
-		int delta_nr = 0, delta_alloc = 0;
+		ціле delta_nr = 0, delta_alloc = 0;
 
-		while (is_delta_type(c->obj->type) && !c->data) {
+		поки (is_delta_type(c->obj->type) && !c->data) {
 			ALLOC_GROW(delta, delta_nr + 1, delta_alloc);
 			delta[delta_nr++] = c;
 			c = c->base;
 		}
-		if (!delta_nr) {
+		якщо (!delta_nr) {
 			c->data = get_data_from_pack(obj);
 			c->size = obj->size;
 			base_cache_used += c->size;
 			prune_base_data(c);
 		}
-		for (; delta_nr > 0; delta_nr--) {
+		для (; delta_nr > 0; delta_nr--) {
 			void *base, *raw;
 			c = delta[delta_nr - 1];
 			obj = c->obj;
@@ -1018,14 +1018,14 @@ static void *get_base_data(struct base_data *c)
 				raw, obj->size,
 				&c->size);
 			free(raw);
-			if (!c->data)
+			якщо (!c->data)
 				bad_object(obj->idx.offset, _("failed to apply delta"));
 			base_cache_used += c->size;
 			prune_base_data(c);
 		}
 		free(delta);
 	}
-	return c->data;
+	повернути c->data;
 }
 
 static struct base_data *make_base(struct object_entry *obj,
@@ -1040,7 +1040,7 @@ static struct base_data *make_base(struct object_entry *obj,
 				&base->ofs_first, &base->ofs_last);
 	base->children_remaining = base->ref_last - base->ref_first +
 		base->ofs_last - base->ofs_first + 2;
-	return base;
+	повернути base;
 }
 
 static struct base_data *resolve_delta(struct object_entry *delta_obj,
@@ -1050,12 +1050,12 @@ static struct base_data *resolve_delta(struct object_entry *delta_obj,
 	struct base_data *result;
 	size_t result_size;
 
-	if (show_stat) {
-		int i = delta_obj - objects;
-		int j = base->obj - objects;
+	якщо (show_stat) {
+		ціле i = delta_obj - objects;
+		ціле j = base->obj - objects;
 		obj_stat[i].delta_depth = obj_stat[j].delta_depth + 1;
 		deepest_delta_lock();
-		if (deepest_delta < obj_stat[i].delta_depth)
+		якщо (deepest_delta < obj_stat[i].delta_depth)
 			deepest_delta = obj_stat[i].delta_depth;
 		deepest_delta_unlock();
 		obj_stat[i].base_object_no = j;
@@ -1065,7 +1065,7 @@ static struct base_data *resolve_delta(struct object_entry *delta_obj,
 	result_data = patch_delta(base->data, base->size,
 				  delta_data, delta_obj->size, &result_size);
 	free(delta_data);
-	if (!result_data)
+	якщо (!result_data)
 		bad_object(delta_obj->idx.offset, _("failed to apply delta"));
 	hash_object_file(the_hash_algo, result_data, result_size,
 			 delta_obj->real_type, &delta_obj->idx.oid);
@@ -1080,32 +1080,32 @@ static struct base_data *resolve_delta(struct object_entry *delta_obj,
 	nr_resolved_deltas++;
 	counter_unlock();
 
-	return result;
+	повернути result;
 }
 
-static int compare_ofs_delta_entry(const void *a, const void *b)
+static ціле compare_ofs_delta_entry(const void *a, const void *b)
 {
 	const struct ofs_delta_entry *delta_a = a;
 	const struct ofs_delta_entry *delta_b = b;
 
-	return delta_a->offset < delta_b->offset ? -1 :
+	повернути delta_a->offset < delta_b->offset ? -1 :
 	       delta_a->offset > delta_b->offset ?  1 :
 	       0;
 }
 
-static int compare_ref_delta_entry(const void *a, const void *b)
+static ціле compare_ref_delta_entry(const void *a, const void *b)
 {
 	const struct ref_delta_entry *delta_a = a;
 	const struct ref_delta_entry *delta_b = b;
 
-	return oidcmp(&delta_a->oid, &delta_b->oid);
+	повернути oidcmp(&delta_a->oid, &delta_b->oid);
 }
 
 static void *threaded_second_pass(void *data)
 {
-	if (data)
+	якщо (data)
 		set_thread_data(data);
-	for (;;) {
+	для (;;) {
 		struct base_data *parent = NULL;
 		struct object_entry *child_obj = NULL;
 		struct base_data *child = NULL;
@@ -1115,19 +1115,19 @@ static void *threaded_second_pass(void *data)
 		counter_unlock();
 
 		work_lock();
-		if (list_empty(&work_head)) {
+		якщо (list_empty(&work_head)) {
 			/*
 			 * Take an object from the object array.
 			 */
-			while (nr_dispatched < nr_objects &&
+			поки (nr_dispatched < nr_objects &&
 			       is_delta_type(objects[nr_dispatched].type))
 				nr_dispatched++;
-			if (nr_dispatched >= nr_objects) {
+			якщо (nr_dispatched >= nr_objects) {
 				work_unlock();
 				break;
 			}
 			child_obj = &objects[nr_dispatched++];
-		} else {
+		} інакше {
 			/*
 			 * Peek at the top of the stack, and take a child from
 			 * it.
@@ -1135,10 +1135,10 @@ static void *threaded_second_pass(void *data)
 			parent = list_first_entry(&work_head, struct base_data,
 						  list);
 
-			while (parent->ref_first <= parent->ref_last) {
-				int offset = ref_deltas[parent->ref_first++].obj_no;
+			поки (parent->ref_first <= parent->ref_last) {
+				ціле offset = ref_deltas[parent->ref_first++].obj_no;
 				child_obj = objects + offset;
-				if (child_obj->real_type != OBJ_REF_DELTA) {
+				якщо (child_obj->real_type != OBJ_REF_DELTA) {
 					child_obj = NULL;
 					continue;
 				}
@@ -1146,14 +1146,14 @@ static void *threaded_second_pass(void *data)
 				break;
 			}
 
-			if (!child_obj && parent->ofs_first <= parent->ofs_last) {
+			якщо (!child_obj && parent->ofs_first <= parent->ofs_last) {
 				child_obj = objects +
 					ofs_deltas[parent->ofs_first++].obj_no;
 				assert(child_obj->real_type == OBJ_OFS_DELTA);
 				child_obj->real_type = parent->obj->real_type;
 			}
 
-			if (parent->ref_first > parent->ref_last &&
+			якщо (parent->ref_first > parent->ref_last &&
 			    parent->ofs_first > parent->ofs_last) {
 				/*
 				 * This parent has run out of children, so move
@@ -1179,14 +1179,14 @@ static void *threaded_second_pass(void *data)
 		}
 		work_unlock();
 
-		if (child_obj) {
-			if (parent) {
+		якщо (child_obj) {
+			якщо (parent) {
 				child = resolve_delta(child_obj, parent);
-				if (!child->children_remaining)
+				якщо (!child->children_remaining)
 					FREE_AND_NULL(child->data);
-			} else{
+			} інакше{
 				child = make_base(child_obj, NULL);
-				if (child->children_remaining) {
+				якщо (child->children_remaining) {
 					/*
 					 * Since this child has its own delta children,
 					 * we will need this data in the future.
@@ -1201,10 +1201,10 @@ static void *threaded_second_pass(void *data)
 		}
 
 		work_lock();
-		if (parent)
+		якщо (parent)
 			parent->retain_data--;
 
-		if (child && child->data) {
+		якщо (child && child->data) {
 			/*
 			 * This child has its own children, so add it to
 			 * work_head.
@@ -1212,7 +1212,7 @@ static void *threaded_second_pass(void *data)
 			list_add(&child->list, &work_head);
 			base_cache_used += child->size;
 			prune_base_data(NULL);
-		} else if (child) {
+		} інакше якщо (child) {
 			/*
 			 * This child does not have its own children. It may be
 			 * the last descendant of its ancestors; free those
@@ -1220,11 +1220,11 @@ static void *threaded_second_pass(void *data)
 			 */
 			struct base_data *p = parent;
 
-			while (p) {
+			поки (p) {
 				struct base_data *next_p;
 
 				p->children_remaining--;
-				if (p->children_remaining)
+				якщо (p->children_remaining)
 					break;
 
 				next_p = p->base;
@@ -1238,7 +1238,7 @@ static void *threaded_second_pass(void *data)
 		}
 		work_unlock();
 	}
-	return NULL;
+	повернути NULL;
 }
 
 /*
@@ -1249,38 +1249,38 @@ static void *threaded_second_pass(void *data)
  */
 static void parse_pack_objects(unsigned char *hash)
 {
-	int i, nr_delays = 0;
+	ціле i, nr_delays = 0;
 	struct ofs_delta_entry *ofs_delta = ofs_deltas;
 	struct object_id ref_delta_oid;
 	struct stat st;
 	struct git_hash_ctx tmp_ctx;
 
-	if (verbose)
+	якщо (verbose)
 		progress = start_progress(
 				the_repository,
 				progress_title ? progress_title :
 				from_stdin ? _("Receiving objects") : _("Indexing objects"),
 				nr_objects);
-	for (i = 0; i < nr_objects; i++) {
+	для (i = 0; i < nr_objects; i++) {
 		struct object_entry *obj = &objects[i];
 		void *data = unpack_raw_entry(obj, &ofs_delta->offset,
 					      &ref_delta_oid,
 					      &obj->idx.oid);
 		obj->real_type = obj->type;
-		if (obj->type == OBJ_OFS_DELTA) {
+		якщо (obj->type == OBJ_OFS_DELTA) {
 			nr_ofs_deltas++;
 			ofs_delta->obj_no = i;
 			ofs_delta++;
-		} else if (obj->type == OBJ_REF_DELTA) {
+		} інакше якщо (obj->type == OBJ_REF_DELTA) {
 			ALLOC_GROW(ref_deltas, nr_ref_deltas + 1, ref_deltas_alloc);
 			oidcpy(&ref_deltas[nr_ref_deltas].oid, &ref_delta_oid);
 			ref_deltas[nr_ref_deltas].obj_no = i;
 			nr_ref_deltas++;
-		} else if (!data) {
+		} інакше якщо (!data) {
 			/* large blobs, check later */
 			obj->real_type = OBJ_BAD;
 			nr_delays++;
-		} else
+		} інакше
 			sha1_object(data, NULL, obj->size, obj->type,
 				    &obj->idx.oid);
 		free(data);
@@ -1294,27 +1294,27 @@ static void parse_pack_objects(unsigned char *hash)
 	git_hash_init(&tmp_ctx, the_hash_algo);
 	git_hash_clone(&tmp_ctx, &input_ctx);
 	git_hash_final(hash, &tmp_ctx);
-	if (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
+	якщо (!hasheq(fill(the_hash_algo->rawsz), hash, the_repository->hash_algo))
 		die(_("pack is corrupted (SHA1 mismatch)"));
 	use(the_hash_algo->rawsz);
 
 	/* If input_fd is a file, we should have reached its end now. */
-	if (fstat(input_fd, &st))
+	якщо (fstat(input_fd, &st))
 		die_errno(_("cannot fstat packfile"));
-	if (S_ISREG(st.st_mode) &&
+	якщо (S_ISREG(st.st_mode) &&
 			lseek(input_fd, 0, SEEK_CUR) - input_len != st.st_size)
 		die(_("pack has junk at the end"));
 
-	for (i = 0; i < nr_objects; i++) {
+	для (i = 0; i < nr_objects; i++) {
 		struct object_entry *obj = &objects[i];
-		if (obj->real_type != OBJ_BAD)
+		якщо (obj->real_type != OBJ_BAD)
 			continue;
 		obj->real_type = obj->type;
 		sha1_object(NULL, obj, obj->size, obj->type,
 			    &obj->idx.oid);
 		nr_delays--;
 	}
-	if (nr_delays)
+	якщо (nr_delays)
 		die(_("confusion beyond insanity in parse_pack_objects()"));
 }
 
@@ -1328,35 +1328,35 @@ static void parse_pack_objects(unsigned char *hash)
  */
 static void resolve_deltas(struct pack_idx_option *opts)
 {
-	int i;
+	ціле i;
 
-	if (!nr_ofs_deltas && !nr_ref_deltas)
-		return;
+	якщо (!nr_ofs_deltas && !nr_ref_deltas)
+		повернути;
 
 	/* Sort deltas by base SHA1/offset for fast searching */
 	QSORT(ofs_deltas, nr_ofs_deltas, compare_ofs_delta_entry);
 	QSORT(ref_deltas, nr_ref_deltas, compare_ref_delta_entry);
 
-	if (verbose || show_resolving_progress)
+	якщо (verbose || show_resolving_progress)
 		progress = start_progress(the_repository,
 					  _("Resolving deltas"),
 					  nr_ref_deltas + nr_ofs_deltas);
 
 	nr_dispatched = 0;
 	base_cache_limit = opts->delta_base_cache_limit * nr_threads;
-	if (nr_threads > 1 || getenv("GIT_FORCE_THREADS")) {
+	якщо (nr_threads > 1 || getenv("GIT_FORCE_THREADS")) {
 		init_thread();
-		for (i = 0; i < nr_threads; i++) {
-			int ret = pthread_create(&thread_data[i].thread, NULL,
+		для (i = 0; i < nr_threads; i++) {
+			ціле ret = pthread_create(&thread_data[i].thread, NULL,
 						 threaded_second_pass, thread_data + i);
-			if (ret)
+			якщо (ret)
 				die(_("unable to create thread: %s"),
 				    strerror(ret));
 		}
-		for (i = 0; i < nr_threads; i++)
+		для (i = 0; i < nr_threads; i++)
 			pthread_join(thread_data[i].thread, NULL);
 		cleanup_thread();
-		return;
+		повернути;
 	}
 	threaded_second_pass(&nothread_data);
 }
@@ -1367,22 +1367,22 @@ static void resolve_deltas(struct pack_idx_option *opts)
  * - write the final pack hash
  */
 static void fix_unresolved_deltas(struct hashfile *f);
-static void conclude_pack(int fix_thin_pack, const char *curr_pack, unsigned char *pack_hash)
+static void conclude_pack(ціле fix_thin_pack, const char *curr_pack, unsigned char *pack_hash)
 {
-	if (nr_ref_deltas + nr_ofs_deltas == nr_resolved_deltas) {
+	якщо (nr_ref_deltas + nr_ofs_deltas == nr_resolved_deltas) {
 		stop_progress(&progress);
 		/* Flush remaining pack final hash. */
 		flush();
-		return;
+		повернути;
 	}
 
-	if (fix_thin_pack) {
+	якщо (fix_thin_pack) {
 		struct hashfile *f;
 		unsigned char read_hash[GIT_MAX_RAWSZ], tail_hash[GIT_MAX_RAWSZ];
 		struct strbuf msg = STRBUF_INIT;
-		int nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
-		int nr_objects_initial = nr_objects;
-		if (nr_unresolved <= 0)
+		ціле nr_unresolved = nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas;
+		ціле nr_objects_initial = nr_objects;
+		якщо (nr_unresolved <= 0)
 			die(_("confusion beyond insanity"));
 		REALLOC_ARRAY(objects, nr_objects + nr_unresolved + 1);
 		memset(objects + nr_objects + 1, 0,
@@ -1400,21 +1400,21 @@ static void conclude_pack(int fix_thin_pack, const char *curr_pack, unsigned cha
 		fixup_pack_header_footer(the_hash_algo, output_fd, pack_hash,
 					 curr_pack, nr_objects,
 					 read_hash, consumed_bytes-the_hash_algo->rawsz);
-		if (!hasheq(read_hash, tail_hash, the_repository->hash_algo))
+		якщо (!hasheq(read_hash, tail_hash, the_repository->hash_algo))
 			die(_("Unexpected tail checksum for %s "
 			      "(disk corruption?)"), curr_pack);
 	}
-	if (nr_ofs_deltas + nr_ref_deltas != nr_resolved_deltas)
+	якщо (nr_ofs_deltas + nr_ref_deltas != nr_resolved_deltas)
 		die(Q_("pack has %d unresolved delta",
 		       "pack has %d unresolved deltas",
 		       nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas),
 		    nr_ofs_deltas + nr_ref_deltas - nr_resolved_deltas);
 }
 
-static int write_compressed(struct hashfile *f, void *in, unsigned int size)
+static ціле write_compressed(struct hashfile *f, void *in, unsigned ціле size)
 {
 	git_zstream stream;
-	int status;
+	ціле status;
 	unsigned char outbuf[4096];
 	struct repo_config_values *cfg = repo_config_values(the_repository);
 
@@ -1427,13 +1427,13 @@ static int write_compressed(struct hashfile *f, void *in, unsigned int size)
 		stream.avail_out = sizeof(outbuf);
 		status = git_deflate(&stream, Z_FINISH);
 		hashwrite(f, outbuf, sizeof(outbuf) - stream.avail_out);
-	} while (status == Z_OK);
+	} поки (status == Z_OK);
 
-	if (status != Z_STREAM_END)
+	якщо (status != Z_STREAM_END)
 		die(_("unable to deflate appended object (%d)"), status);
 	size = stream.total_out;
 	git_deflate_end(&stream);
-	return size;
+	повернути size;
 }
 
 static struct object_entry *append_obj_to_pack(struct hashfile *f,
@@ -1443,10 +1443,10 @@ static struct object_entry *append_obj_to_pack(struct hashfile *f,
 	struct object_entry *obj = &objects[nr_objects++];
 	unsigned char header[10];
 	unsigned long s = size;
-	int n = 0;
+	ціле n = 0;
 	unsigned char c = (type << 4) | (s & 15);
 	s >>= 4;
-	while (s) {
+	поки (s) {
 		header[n++] = c | 0x80;
 		c = s & 0x7f;
 		s >>= 7;
@@ -1463,20 +1463,20 @@ static struct object_entry *append_obj_to_pack(struct hashfile *f,
 	obj[0].idx.crc32 = crc32_end(f);
 	hashflush(f);
 	oidread(&obj->idx.oid, sha1, the_repository->hash_algo);
-	return obj;
+	повернути obj;
 }
 
-static int delta_pos_compare(const void *_a, const void *_b)
+static ціле delta_pos_compare(const void *_a, const void *_b)
 {
 	struct ref_delta_entry *a = *(struct ref_delta_entry **)_a;
 	struct ref_delta_entry *b = *(struct ref_delta_entry **)_b;
-	return a->obj_no - b->obj_no;
+	повернути a->obj_no - b->obj_no;
 }
 
 static void fix_unresolved_deltas(struct hashfile *f)
 {
 	struct ref_delta_entry **sorted_by_pos;
-	int i;
+	ціле i;
 
 	/*
 	 * Since many unresolved deltas may well be themselves base objects
@@ -1489,18 +1489,18 @@ static void fix_unresolved_deltas(struct hashfile *f)
 	 * resolving deltas in the same order as their position in the pack.
 	 */
 	ALLOC_ARRAY(sorted_by_pos, nr_ref_deltas);
-	for (i = 0; i < nr_ref_deltas; i++)
+	для (i = 0; i < nr_ref_deltas; i++)
 		sorted_by_pos[i] = &ref_deltas[i];
 	QSORT(sorted_by_pos, nr_ref_deltas, delta_pos_compare);
 
-	if (repo_has_promisor_remote(the_repository)) {
+	якщо (repo_has_promisor_remote(the_repository)) {
 		/*
 		 * Prefetch the delta bases.
 		 */
 		struct oid_array to_fetch = OID_ARRAY_INIT;
-		for (i = 0; i < nr_ref_deltas; i++) {
+		для (i = 0; i < nr_ref_deltas; i++) {
 			struct ref_delta_entry *d = sorted_by_pos[i];
-			if (!odb_read_object_info_extended(the_repository->objects,
+			якщо (!odb_read_object_info_extended(the_repository->objects,
 							   &d->oid, NULL,
 							   OBJECT_INFO_FOR_PREFETCH))
 				continue;
@@ -1511,20 +1511,20 @@ static void fix_unresolved_deltas(struct hashfile *f)
 		oid_array_clear(&to_fetch);
 	}
 
-	for (i = 0; i < nr_ref_deltas; i++) {
+	для (i = 0; i < nr_ref_deltas; i++) {
 		struct ref_delta_entry *d = sorted_by_pos[i];
 		enum object_type type;
 		void *data;
 		size_t size;
 
-		if (objects[d->obj_no].real_type != OBJ_REF_DELTA)
+		якщо (objects[d->obj_no].real_type != OBJ_REF_DELTA)
 			continue;
 		data = odb_read_object(the_repository->objects, &d->oid,
 				       &type, &size);
-		if (!data)
+		якщо (!data)
 			continue;
 
-		if (check_object_signature(the_repository, &d->oid, data, size,
+		якщо (check_object_signature(the_repository, &d->oid, data, size,
 					   type) < 0)
 			die(_("local object %s is corrupt"), oid_to_hex(&d->oid));
 
@@ -1546,13 +1546,13 @@ static const char *derive_filename(const char *pack_name, const char *strip,
 				   const char *suffix, struct strbuf *buf)
 {
 	size_t len;
-	if (!strip_suffix(pack_name, strip, &len) || !len ||
+	якщо (!strip_suffix(pack_name, strip, &len) || !len ||
 	    pack_name[len - 1] != '.')
 		die(_("packfile name '%s' does not end with '.%s'"),
 		    pack_name, strip);
 	strbuf_add(buf, pack_name, len);
 	strbuf_addstr(buf, suffix);
-	return buf->buf;
+	повернути buf->buf;
 }
 
 static void write_special_file(const char *suffix, const char *msg,
@@ -1561,28 +1561,28 @@ static void write_special_file(const char *suffix, const char *msg,
 {
 	struct strbuf name_buf = STRBUF_INIT;
 	const char *filename;
-	int fd;
-	int msg_len = strlen(msg);
+	ціле fd;
+	ціле msg_len = strlen(msg);
 
-	if (pack_name)
+	якщо (pack_name)
 		filename = derive_filename(pack_name, "pack", suffix, &name_buf);
-	else
+	інакше
 		filename = odb_pack_name(the_repository, &name_buf, hash, suffix);
 
 	fd = safe_create_file_with_leading_directories(the_repository, filename);
-	if (fd < 0) {
-		if (errno != EEXIST)
+	якщо (fd < 0) {
+		якщо (errno != EEXIST)
 			die_errno(_("cannot write %s file '%s'"),
 				  suffix, filename);
-	} else {
-		if (msg_len > 0) {
+	} інакше {
+		якщо (msg_len > 0) {
 			write_or_die(fd, msg, msg_len);
 			write_or_die(fd, "\n", 1);
 		}
-		if (close(fd) != 0)
+		якщо (close(fd) != 0)
 			die_errno(_("cannot close written %s file '%s'"),
 				  suffix, filename);
-		if (report)
+		якщо (report)
 			*report = suffix;
 	}
 	strbuf_release(&name_buf);
@@ -1591,15 +1591,15 @@ static void write_special_file(const char *suffix, const char *msg,
 static void rename_tmp_packfile(const char **final_name,
 				const char *curr_name,
 				struct strbuf *name, unsigned char *hash,
-				const char *ext, int make_read_only_if_same)
+				const char *ext, ціле make_read_only_if_same)
 {
-	if (!*final_name || strcmp(*final_name, curr_name)) {
-		if (!*final_name)
+	якщо (!*final_name || strcmp(*final_name, curr_name)) {
+		якщо (!*final_name)
 			*final_name = odb_pack_name(the_repository, name, hash, ext);
-		if (finalize_object_file(the_repository, curr_name, *final_name))
+		якщо (finalize_object_file(the_repository, curr_name, *final_name))
 			die(_("unable to rename temporary '*.%s' file to '%s'"),
 			    ext, *final_name);
-	} else if (make_read_only_if_same) {
+	} інакше якщо (make_read_only_if_same) {
 		chmod(*final_name, 0444);
 	}
 }
@@ -1615,38 +1615,38 @@ static void final(const char *final_pack_name, const char *curr_pack_name,
 	struct strbuf index_name = STRBUF_INIT;
 	struct strbuf rev_index_name = STRBUF_INIT;
 
-	if (!from_stdin) {
+	якщо (!from_stdin) {
 		close(input_fd);
-	} else {
+	} інакше {
 		fsync_component_or_die(FSYNC_COMPONENT_PACK, output_fd, curr_pack_name);
-		if (close(output_fd))
+		якщо (close(output_fd))
 			die_errno(_("error while closing pack file"));
 	}
 
-	if (keep_msg)
+	якщо (keep_msg)
 		write_special_file("keep", keep_msg, final_pack_name, hash,
 				   &report);
-	if (promisor_msg)
+	якщо (promisor_msg)
 		write_special_file("promisor", promisor_msg, final_pack_name,
 				   hash, NULL);
 
 	rename_tmp_packfile(&final_pack_name, curr_pack_name, &pack_name,
 			    hash, "pack", from_stdin);
-	if (curr_rev_index_name)
+	якщо (curr_rev_index_name)
 		rename_tmp_packfile(&final_rev_index_name, curr_rev_index_name,
 				    &rev_index_name, hash, "rev", 1);
 	rename_tmp_packfile(&final_index_name, curr_index_name, &index_name,
 			    hash, "idx", 1);
 
-	if (do_fsck_object && startup_info->have_repository) {
+	якщо (do_fsck_object && startup_info->have_repository) {
 		struct odb_source_files *files =
 			odb_source_files_downcast(the_repository->objects->source);
 		packfile_store_load_pack(files->dirs->packed, final_index_name, 0);
 	}
 
-	if (!from_stdin) {
+	якщо (!from_stdin) {
 		printf("%s\n", hash_to_hex(hash));
-	} else {
+	} інакше {
 		struct strbuf buf = STRBUF_INIT;
 
 		strbuf_addf(&buf, "%s\t%s\n", report, hash_to_hex(hash));
@@ -1662,47 +1662,47 @@ static void final(const char *final_pack_name, const char *curr_pack_name,
 	strbuf_release(&pack_name);
 }
 
-static int git_index_pack_config(const char *k, const char *v,
+static ціле git_index_pack_config(const char *k, const char *v,
 				 const struct config_context *ctx, void *cb)
 {
 	struct pack_idx_option *opts = cb;
 
-	if (!strcmp(k, "pack.indexversion")) {
+	якщо (!strcmp(k, "pack.indexversion")) {
 		opts->version = git_config_int(k, v, ctx->kvi);
-		if (opts->version > 2)
+		якщо (opts->version > 2)
 			die(_("bad pack.indexVersion=%"PRIu32), opts->version);
-		return 0;
+		повернути 0;
 	}
-	if (!strcmp(k, "pack.threads")) {
+	якщо (!strcmp(k, "pack.threads")) {
 		nr_threads = git_config_int(k, v, ctx->kvi);
-		if (nr_threads < 0)
+		якщо (nr_threads < 0)
 			die(_("invalid number of threads specified (%d)"),
 			    nr_threads);
-		if (!HAVE_THREADS && nr_threads != 1) {
+		якщо (!HAVE_THREADS && nr_threads != 1) {
 			warning(_("no threads support, ignoring %s"), k);
 			nr_threads = 1;
 		}
-		return 0;
+		повернути 0;
 	}
-	if (!strcmp(k, "pack.writereverseindex")) {
-		if (git_config_bool(k, v))
+	якщо (!strcmp(k, "pack.writereverseindex")) {
+		якщо (git_config_bool(k, v))
 			opts->flags |= WRITE_REV;
-		else
+		інакше
 			opts->flags &= ~WRITE_REV;
 	}
-	if (!strcmp(k, "core.deltabasecachelimit")) {
+	якщо (!strcmp(k, "core.deltabasecachelimit")) {
 		opts->delta_base_cache_limit = git_config_ulong(k, v, ctx->kvi);
-		return 0;
+		повернути 0;
 	}
-	return git_default_config(k, v, ctx, cb);
+	повернути git_default_config(k, v, ctx, cb);
 }
 
-static int cmp_uint32(const void *a_, const void *b_)
+static ціле cmp_uint32(const void *a_, const void *b_)
 {
 	uint32_t a = *((uint32_t *)a_);
 	uint32_t b = *((uint32_t *)b_);
 
-	return (a < b) ? -1 : (a != b);
+	повернути (a < b) ? -1 : (a != b);
 }
 
 static void read_v2_anomalous_offsets(struct packed_git *p,
@@ -1719,13 +1719,13 @@ static void read_v2_anomalous_offsets(struct packed_git *p,
 	/* The address of the 8-byte offset table */
 	idx2 = idx1 + p->num_objects;
 
-	for (i = 0; i < p->num_objects; i++) {
+	для (i = 0; i < p->num_objects; i++) {
 		uint32_t off = ntohl(idx1[i]);
-		if (!(off & 0x80000000))
+		якщо (!(off & 0x80000000))
 			continue;
 		off = off & 0x7fffffff;
 		check_pack_index_ptr(p, &idx2[off * 2]);
-		if (idx2[off * 2])
+		якщо (idx2[off * 2])
 			continue;
 		/*
 		 * The real offset is ntohl(idx2[off * 2]) in high 4
@@ -1744,15 +1744,15 @@ static void read_idx_option(struct pack_idx_option *opts, const char *pack_name)
 	struct packed_git *p = add_packed_git(the_repository, pack_name,
 					      strlen(pack_name), 1);
 
-	if (!p)
+	якщо (!p)
 		die(_("Cannot open existing pack file '%s'"), pack_name);
-	if (open_pack_index(p))
+	якщо (open_pack_index(p))
 		die(_("Cannot open existing pack idx file for '%s'"), pack_name);
 
 	/* Read the attributes from the existing idx file */
 	opts->version = p->index_version;
 
-	if (opts->version == 2)
+	якщо (opts->version == 2)
 		read_v2_anomalous_offsets(p, opts);
 
 	/*
@@ -1766,27 +1766,27 @@ static void read_idx_option(struct pack_idx_option *opts, const char *pack_name)
 	free(p);
 }
 
-static void show_pack_info(int stat_only)
+static void show_pack_info(ціле stat_only)
 {
-	int i, baseobjects = nr_objects - nr_ref_deltas - nr_ofs_deltas;
+	ціле i, baseobjects = nr_objects - nr_ref_deltas - nr_ofs_deltas;
 	unsigned long *chain_histogram = NULL;
 
-	if (deepest_delta)
+	якщо (deepest_delta)
 		CALLOC_ARRAY(chain_histogram, deepest_delta);
 
-	for (i = 0; i < nr_objects; i++) {
+	для (i = 0; i < nr_objects; i++) {
 		struct object_entry *obj = &objects[i];
 
-		if (is_delta_type(obj->type))
+		якщо (is_delta_type(obj->type))
 			chain_histogram[obj_stat[i].delta_depth - 1]++;
-		if (stat_only)
+		якщо (stat_only)
 			continue;
 		printf("%s %-6s %"PRIuMAX" %"PRIuMAX" %"PRIuMAX,
 		       oid_to_hex(&obj->idx.oid),
 		       type_name(obj->real_type), (uintmax_t)obj->size,
 		       (uintmax_t)(obj[1].idx.offset - obj->idx.offset),
 		       (uintmax_t)obj->idx.offset);
-		if (is_delta_type(obj->type)) {
+		якщо (is_delta_type(obj->type)) {
 			struct object_entry *bobj = &objects[obj_stat[i].base_object_no];
 			printf(" %u %s", obj_stat[i].delta_depth,
 			       oid_to_hex(&bobj->idx.oid));
@@ -1794,13 +1794,13 @@ static void show_pack_info(int stat_only)
 		putchar('\n');
 	}
 
-	if (baseobjects)
+	якщо (baseobjects)
 		printf_ln(Q_("non delta: %d object",
 			     "non delta: %d objects",
 			     baseobjects),
 			  baseobjects);
-	for (i = 0; i < deepest_delta; i++) {
-		if (!chain_histogram[i])
+	для (i = 0; i < deepest_delta; i++) {
+		якщо (!chain_histogram[i])
 			continue;
 		printf_ln(Q_("chain length = %d: %lu object",
 			     "chain length = %d: %lu objects",
@@ -1820,24 +1820,24 @@ static void repack_local_links(void)
 	struct object_id *oid;
 	char *base_name = NULL;
 
-	if (!oidset_size(&outgoing_links))
-		return;
+	якщо (!oidset_size(&outgoing_links))
+		повернути;
 
 	oidset_iter_init(&outgoing_links, &iter);
-	while ((oid = oidset_iter_next(&iter))) {
+	поки ((oid = oidset_iter_next(&iter))) {
 		struct odb_source_info source_info;
 		struct object_info info = {
 			.source_infop = &source_info,
 		};
 
-		if (odb_read_object_info_extended(the_repository->objects, oid, &info, 0))
+		якщо (odb_read_object_info_extended(the_repository->objects, oid, &info, 0))
 			/* Missing; assume it is a promisor object */
 			continue;
-		if (source_info.source->type == ODB_SOURCE_PACKED &&
+		якщо (source_info.source->type == ODB_SOURCE_PACKED &&
 		    source_info.u.packed.pack->pack_promisor)
 			continue;
 
-		if (!cmd.args.nr) {
+		якщо (!cmd.args.nr) {
 			base_name = mkpathdup(
 				"%s/pack/pack",
 				repo_get_object_directory(the_repository));
@@ -1848,24 +1848,24 @@ static void repack_local_links(void)
 			cmd.git_cmd = 1;
 			cmd.in = -1;
 			cmd.out = -1;
-			if (start_command(&cmd))
+			якщо (start_command(&cmd))
 				die(_("could not start pack-objects to repack local links"));
 		}
 
-		if (write_in_full(cmd.in, oid_to_hex(oid), the_hash_algo->hexsz) < 0 ||
+		якщо (write_in_full(cmd.in, oid_to_hex(oid), the_hash_algo->hexsz) < 0 ||
 		    write_in_full(cmd.in, "\n", 1) < 0)
 			die(_("failed to feed local object to pack-objects"));
 	}
 
-	if (!cmd.args.nr)
-		return;
+	якщо (!cmd.args.nr)
+		повернути;
 
 	close(cmd.in);
 
 	out = xfdopen(cmd.out, "r");
-	while (strbuf_getline_lf(&line, out) != EOF) {
+	поки (strbuf_getline_lf(&line, out) != EOF) {
 		unsigned char binary[GIT_MAX_RAWSZ];
-		if (line.len != the_hash_algo->hexsz ||
+		якщо (line.len != the_hash_algo->hexsz ||
 		    !hex_to_bytes(binary, line.buf, line.len))
 			die(_("index-pack: Expecting full hex object ID lines only from pack-objects."));
 
@@ -1877,18 +1877,18 @@ static void repack_local_links(void)
 	}
 
 	fclose(out);
-	if (finish_command(&cmd))
+	якщо (finish_command(&cmd))
 		die(_("could not finish pack-objects to repack local links"));
 	strbuf_release(&line);
 	free(base_name);
 }
 
-int cmd_index_pack(int argc,
+ціле cmd_index_pack(ціле argc,
 		   const char **argv,
 		   const char *prefix,
 		   struct repository *repo)
 {
-	int i, fix_thin_pack = 0, verify = 0, stat_only = 0, rev_index;
+	ціле i, fix_thin_pack = 0, verify = 0, stat_only = 0, rev_index;
 	const char *curr_index;
 	char *curr_rev_index = NULL;
 	const char *index_name = NULL, *pack_name = NULL, *rev_index_name = NULL;
@@ -1900,8 +1900,8 @@ int cmd_index_pack(int argc,
 	struct pack_idx_option opts;
 	unsigned char pack_hash[GIT_MAX_RAWSZ];
 	unsigned foreign_nr = 1;	/* zero is a "good" value, assume bad */
-	int report_end_of_input = 0;
-	int hash_algo = 0;
+	ціле report_end_of_input = 0;
+	ціле hash_algo = 0;
 
 	show_usage_if_asked(argc, argv, index_pack_usage);
 
@@ -1921,114 +1921,114 @@ int cmd_index_pack(int argc,
 	reset_pack_idx_option(&opts);
 	opts.flags |= WRITE_REV;
 	repo_config(the_repository, git_index_pack_config, &opts);
-	if (prefix && chdir(prefix))
+	якщо (prefix && chdir(prefix))
 		die(_("Cannot come back to cwd"));
 
-	if (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
+	якщо (git_env_bool(GIT_TEST_NO_WRITE_REV_INDEX, 0))
 		rev_index = 0;
-	else
+	інакше
 		rev_index = !!(opts.flags & (WRITE_REV_VERIFY | WRITE_REV));
 
-	for (i = 1; i < argc; i++) {
+	для (i = 1; i < argc; i++) {
 		const char *arg = argv[i];
 
-		if (*arg == '-') {
-			if (!strcmp(arg, "--stdin")) {
+		якщо (*arg == '-') {
+			якщо (!strcmp(arg, "--stdin")) {
 				from_stdin = 1;
-			} else if (!strcmp(arg, "--fix-thin")) {
+			} інакше якщо (!strcmp(arg, "--fix-thin")) {
 				fix_thin_pack = 1;
-			} else if (skip_to_optional_arg(arg, "--strict", &arg)) {
+			} інакше якщо (skip_to_optional_arg(arg, "--strict", &arg)) {
 				strict = 1;
 				do_fsck_object = 1;
 				fsck_set_msg_types(&fsck_options, arg);
-			} else if (!strcmp(arg, "--check-self-contained-and-connected")) {
+			} інакше якщо (!strcmp(arg, "--check-self-contained-and-connected")) {
 				strict = 1;
 				check_self_contained_and_connected = 1;
-			} else if (skip_to_optional_arg(arg, "--fsck-objects", &arg)) {
+			} інакше якщо (skip_to_optional_arg(arg, "--fsck-objects", &arg)) {
 				do_fsck_object = 1;
 				fsck_set_msg_types(&fsck_options, arg);
-			} else if (!strcmp(arg, "--verify")) {
+			} інакше якщо (!strcmp(arg, "--verify")) {
 				verify = 1;
-			} else if (!strcmp(arg, "--verify-stat")) {
+			} інакше якщо (!strcmp(arg, "--verify-stat")) {
 				verify = 1;
 				show_stat = 1;
-			} else if (!strcmp(arg, "--verify-stat-only")) {
+			} інакше якщо (!strcmp(arg, "--verify-stat-only")) {
 				verify = 1;
 				show_stat = 1;
 				stat_only = 1;
-			} else if (skip_to_optional_arg(arg, "--keep", &keep_msg)) {
+			} інакше якщо (skip_to_optional_arg(arg, "--keep", &keep_msg)) {
 				; /* nothing to do */
-			} else if (skip_to_optional_arg(arg, "--promisor", &promisor_msg)) {
+			} інакше якщо (skip_to_optional_arg(arg, "--promisor", &promisor_msg)) {
 				record_outgoing_links = 1;
-			} else if (starts_with(arg, "--threads=")) {
+			} інакше якщо (starts_with(arg, "--threads=")) {
 				char *end;
 				nr_threads = strtoul(arg+10, &end, 0);
-				if (!arg[10] || *end || nr_threads < 0)
+				якщо (!arg[10] || *end || nr_threads < 0)
 					usage(index_pack_usage);
-				if (!HAVE_THREADS && nr_threads != 1) {
+				якщо (!HAVE_THREADS && nr_threads != 1) {
 					warning(_("no threads support, ignoring %s"), arg);
 					nr_threads = 1;
 				}
-			} else if (skip_prefix(arg, "--pack_header=", &arg)) {
-				if (parse_pack_header_option(arg,
+			} інакше якщо (skip_prefix(arg, "--pack_header=", &arg)) {
+				якщо (parse_pack_header_option(arg,
 							     input_buffer,
 							     &input_len) < 0)
 					die(_("bad --pack_header: %s"), arg);
-			} else if (!strcmp(arg, "-v")) {
+			} інакше якщо (!strcmp(arg, "-v")) {
 				verbose = 1;
-			} else if (!strcmp(arg, "--progress-title")) {
-				if (progress_title || (i+1) >= argc)
+			} інакше якщо (!strcmp(arg, "--progress-title")) {
+				якщо (progress_title || (i+1) >= argc)
 					usage(index_pack_usage);
 				progress_title = argv[++i];
-			} else if (!strcmp(arg, "--show-resolving-progress")) {
+			} інакше якщо (!strcmp(arg, "--show-resolving-progress")) {
 				show_resolving_progress = 1;
-			} else if (!strcmp(arg, "--report-end-of-input")) {
+			} інакше якщо (!strcmp(arg, "--report-end-of-input")) {
 				report_end_of_input = 1;
-			} else if (!strcmp(arg, "-o")) {
-				if (index_name || (i+1) >= argc)
+			} інакше якщо (!strcmp(arg, "-o")) {
+				якщо (index_name || (i+1) >= argc)
 					usage(index_pack_usage);
 				index_name = argv[++i];
-			} else if (starts_with(arg, "--index-version=")) {
+			} інакше якщо (starts_with(arg, "--index-version=")) {
 				char *c;
 				opts.version = strtoul(arg + 16, &c, 10);
-				if (opts.version > 2)
+				якщо (opts.version > 2)
 					die(_("bad %s"), arg);
-				if (*c == ',')
+				якщо (*c == ',')
 					opts.off32_limit = strtoul(c+1, &c, 0);
-				if (*c || opts.off32_limit & 0x80000000)
+				якщо (*c || opts.off32_limit & 0x80000000)
 					die(_("bad %s"), arg);
-			} else if (skip_prefix(arg, "--max-input-size=", &arg)) {
+			} інакше якщо (skip_prefix(arg, "--max-input-size=", &arg)) {
 				max_input_size = strtoumax(arg, NULL, 10);
-			} else if (skip_prefix(arg, "--object-format=", &arg)) {
+			} інакше якщо (skip_prefix(arg, "--object-format=", &arg)) {
 				hash_algo = hash_algo_by_name(arg);
-				if (hash_algo == GIT_HASH_UNKNOWN)
+				якщо (hash_algo == GIT_HASH_UNKNOWN)
 					die(_("unknown hash algorithm '%s'"), arg);
 				repo_set_hash_algo(the_repository, hash_algo);
-			} else if (!strcmp(arg, "--rev-index")) {
+			} інакше якщо (!strcmp(arg, "--rev-index")) {
 				rev_index = 1;
-			} else if (!strcmp(arg, "--no-rev-index")) {
+			} інакше якщо (!strcmp(arg, "--no-rev-index")) {
 				rev_index = 0;
-			} else
+			} інакше
 				usage(index_pack_usage);
 			continue;
 		}
 
-		if (pack_name)
+		якщо (pack_name)
 			usage(index_pack_usage);
 		pack_name = arg;
 	}
 
-	if (!pack_name && !from_stdin)
+	якщо (!pack_name && !from_stdin)
 		usage(index_pack_usage);
-	if (fix_thin_pack && !from_stdin)
+	якщо (fix_thin_pack && !from_stdin)
 		die(_("the option '%s' requires '%s'"), "--fix-thin", "--stdin");
-	if (promisor_msg && pack_name)
+	якщо (promisor_msg && pack_name)
 		die(_("--promisor cannot be used with a pack name"));
-	if (from_stdin && !startup_info->have_repository)
+	якщо (from_stdin && !startup_info->have_repository)
 		die(_("--stdin requires a git repository"));
-	if (from_stdin && hash_algo)
+	якщо (from_stdin && hash_algo)
 		die(_("options '%s' and '%s' cannot be used together"), "--object-format", "--stdin");
-	if (!index_name && pack_name)
+	якщо (!index_name && pack_name)
 		index_name = derive_filename(pack_name, "pack", "idx", &index_name_buf);
 
 	/*
@@ -2037,28 +2037,28 @@ int cmd_index_pack(int argc,
 	 * nor has the user told us which object hash to use we have no other
 	 * choice but to guess the object hash.
 	 */
-	if (!the_repository->hash_algo)
+	якщо (!the_repository->hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	opts.flags &= ~(WRITE_REV | WRITE_REV_VERIFY);
-	if (rev_index) {
+	якщо (rev_index) {
 		opts.flags |= verify ? WRITE_REV_VERIFY : WRITE_REV;
-		if (index_name)
+		якщо (index_name)
 			rev_index_name = derive_filename(index_name,
 							 "idx", "rev",
 							 &rev_index_name_buf);
 	}
 
-	if (verify) {
-		if (!index_name)
+	якщо (verify) {
+		якщо (!index_name)
 			die(_("--verify with no packfile name given"));
 		read_idx_option(&opts, index_name);
 		opts.flags |= WRITE_IDX_VERIFY | WRITE_IDX_STRICT;
 	}
-	if (strict)
+	якщо (strict)
 		opts.flags |= WRITE_IDX_STRICT;
 
-	if (HAVE_THREADS && !nr_threads) {
+	якщо (HAVE_THREADS && !nr_threads) {
 		nr_threads = online_cpus();
 		/*
 		 * Experiments show that going above 20 threads doesn't help,
@@ -2068,56 +2068,56 @@ int cmd_index_pack(int argc,
 		 * never reduce the level below "3", though, to match a
 		 * historical value that nobody complained about.
 		 */
-		if (nr_threads < 4)
+		якщо (nr_threads < 4)
 			; /* too few cores to consider capping */
-		else if (nr_threads < 6)
+		інакше якщо (nr_threads < 6)
 			nr_threads = 3; /* historic cap */
-		else if (nr_threads < 40)
+		інакше якщо (nr_threads < 40)
 			nr_threads /= 2;
-		else
+		інакше
 			nr_threads = 20; /* hard cap */
 	}
 
 	curr_pack = open_pack_file(pack_name);
 	parse_pack_header();
 	CALLOC_ARRAY(objects, st_add(nr_objects, 1));
-	if (show_stat)
+	якщо (show_stat)
 		CALLOC_ARRAY(obj_stat, st_add(nr_objects, 1));
 	CALLOC_ARRAY(ofs_deltas, nr_objects);
 	parse_pack_objects(pack_hash);
-	if (report_end_of_input)
+	якщо (report_end_of_input)
 		write_in_full(2, "\0", 1);
 	resolve_deltas(&opts);
 	conclude_pack(fix_thin_pack, curr_pack, pack_hash);
 	free(ofs_deltas);
 	free(ref_deltas);
-	if (strict)
+	якщо (strict)
 		foreign_nr = check_objects();
 
-	if (show_stat)
+	якщо (show_stat)
 		show_pack_info(stat_only);
 
 	ALLOC_ARRAY(idx_objects, nr_objects);
-	for (i = 0; i < nr_objects; i++)
+	для (i = 0; i < nr_objects; i++)
 		idx_objects[i] = &objects[i].idx;
 	curr_index = write_idx_file(the_repository, index_name, idx_objects,
 				    nr_objects, &opts, pack_hash);
-	if (rev_index)
+	якщо (rev_index)
 		curr_rev_index = write_rev_file(the_repository, rev_index_name,
 						idx_objects, nr_objects,
 						pack_hash, opts.flags);
 	free(idx_objects);
 
-	if (!verify)
+	якщо (!verify)
 		final(pack_name, curr_pack,
 		      index_name, curr_index,
 		      rev_index_name, curr_rev_index,
 		      keep_msg, promisor_msg,
 		      pack_hash);
-	else
+	інакше
 		close(input_fd);
 
-	if (do_fsck_object) {
+	якщо (do_fsck_object) {
 		/*
 		 * We cannot perform queued consistency checks when running
 		 * outside of a repository because those require us to read
@@ -2126,12 +2126,12 @@ int cmd_index_pack(int argc,
 		 * TODO: we may eventually set up an in-memory object database,
 		 * which would allow us to perform these queued checks.
 		 */
-		if (!startup_info->have_repository &&
+		якщо (!startup_info->have_repository &&
 		    fsck_has_queued_checks(&fsck_options))
 			die(_("cannot perform queued object checks outside "
 			      "of a repository"));
 
-		if (fsck_finish(&fsck_options))
+		якщо (fsck_finish(&fsck_options))
 			die(_("fsck error in pack objects"));
 	}
 
@@ -2139,9 +2139,9 @@ int cmd_index_pack(int argc,
 	free(objects);
 	strbuf_release(&index_name_buf);
 	strbuf_release(&rev_index_name_buf);
-	if (!pack_name)
+	якщо (!pack_name)
 		free((void *) curr_pack);
-	if (!index_name)
+	якщо (!index_name)
 		free((void *) curr_index);
 	free(curr_rev_index);
 
@@ -2150,8 +2150,8 @@ int cmd_index_pack(int argc,
 	/*
 	 * Let the caller know this pack is not self contained
 	 */
-	if (check_self_contained_and_connected && foreign_nr)
-		return 1;
+	якщо (check_self_contained_and_connected && foreign_nr)
+		повернути 1;
 
-	return 0;
+	повернути 0;
 }

@@ -58,39 +58,39 @@ static struct string_list pack_garbage = STRING_LIST_INIT_DUP;
 
 static void clean_pack_garbage(void)
 {
-	int i;
-	for (i = 0; i < pack_garbage.nr; i++)
+	ціле i;
+	для (i = 0; i < pack_garbage.nr; i++)
 		unlink_or_warn(pack_garbage.items[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
 static void report_pack_garbage(unsigned seen_bits, const char *path)
 {
-	if (seen_bits == PACKDIR_FILE_IDX)
+	якщо (seen_bits == PACKDIR_FILE_IDX)
 		string_list_append(&pack_garbage, path);
 }
 
 static void process_log_file(void)
 {
 	struct stat st;
-	if (fstat(get_lock_file_fd(&log_lock), &st)) {
+	якщо (fstat(get_lock_file_fd(&log_lock), &st)) {
 		/*
 		 * Perhaps there was an i/o error or another
 		 * unlikely situation.  Try to make a note of
 		 * this in gc.log along with any existing
 		 * messages.
 		 */
-		int saved_errno = errno;
+		ціле saved_errno = errno;
 		fprintf(stderr, _("Failed to fstat %s: %s"),
 			get_lock_file_path(&log_lock),
 			strerror(saved_errno));
 		fflush(stderr);
 		commit_lock_file(&log_lock);
 		errno = saved_errno;
-	} else if (st.st_size) {
+	} інакше якщо (st.st_size) {
 		/* There was some error recorded in the lock file */
 		commit_lock_file(&log_lock);
-	} else {
+	} інакше {
 		char *path = repo_git_path(the_repository, "gc.log");
 		/* No error, clean up any old gc.log */
 		unlink(path);
@@ -105,27 +105,27 @@ static void process_log_file_at_exit(void)
 	process_log_file();
 }
 
-static int gc_config_is_timestamp_never(const char *var)
+static ціле gc_config_is_timestamp_never(const char *var)
 {
 	const char *value;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
+	якщо (!repo_config_get_value(the_repository, var, &value) && value) {
+		якщо (parse_expiry_date(value, &expire))
 			die(_("failed to parse '%s' value '%s'"), var, value);
-		return expire == 0;
+		повернути expire == 0;
 	}
-	return 0;
+	повернути 0;
 }
 
 struct gc_config {
-	int pack_refs;
-	int prune_reflogs;
-	int cruft_packs;
+	ціле pack_refs;
+	ціле prune_reflogs;
+	ціле cruft_packs;
 	unsigned long max_cruft_size;
-	int aggressive_depth;
-	int aggressive_window;
-	int detach_auto;
+	ціле aggressive_depth;
+	ціле aggressive_window;
+	ціле detach_auto;
 	char *gc_log_expire;
 	char *prune_expire;
 	char *prune_worktrees_expire;
@@ -156,14 +156,14 @@ static void gc_config(struct gc_config *cfg)
 	const char *value;
 	char *owned = NULL;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	якщо (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
+		якщо (value && !strcmp(value, "notbare"))
 			cfg->pack_refs = -1;
-		else
+		інакше
 			cfg->pack_refs = git_config_bool("gc.packrefs", value);
 	}
 
-	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
+	якщо (gc_config_is_timestamp_never("gc.reflogexpire") &&
 	    gc_config_is_timestamp_never("gc.reflogexpireunreachable"))
 		cfg->prune_reflogs = 0;
 
@@ -173,17 +173,17 @@ static void gc_config(struct gc_config *cfg)
 	repo_config_get_bool(the_repository, "gc.cruftpacks", &cfg->cruft_packs);
 	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_size);
 
-	if (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
+	якщо (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
 		free(cfg->prune_expire);
 		cfg->prune_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
+	якщо (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
 		free(cfg->prune_worktrees_expire);
 		cfg->prune_worktrees_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
+	якщо (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
 		free(cfg->gc_log_expire);
 		cfg->gc_log_expire = owned;
 	}
@@ -200,15 +200,15 @@ enum schedule_priority {
 
 static enum schedule_priority parse_schedule(const char *value)
 {
-	if (!value)
-		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
-		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
-		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
-		return SCHEDULE_WEEKLY;
-	return SCHEDULE_NONE;
+	якщо (!value)
+		повернути SCHEDULE_NONE;
+	якщо (!strcasecmp(value, "hourly"))
+		повернути SCHEDULE_HOURLY;
+	якщо (!strcasecmp(value, "daily"))
+		повернути SCHEDULE_DAILY;
+	якщо (!strcasecmp(value, "weekly"))
+		повернути SCHEDULE_WEEKLY;
+	повернути SCHEDULE_NONE;
 }
 
 enum maintenance_task_label {
@@ -230,9 +230,9 @@ enum maintenance_task_label {
 struct maintenance_run_opts {
 	enum maintenance_task_label *tasks;
 	size_t tasks_nr, tasks_alloc;
-	int auto_flag;
-	int detach;
-	int quiet;
+	ціле auto_flag;
+	ціле detach;
+	ціле quiet;
 	enum schedule_priority schedule;
 };
 #define MAINTENANCE_RUN_OPTS_INIT { \
@@ -244,7 +244,7 @@ static void maintenance_run_opts_release(struct maintenance_run_opts *opts)
 	free(opts->tasks);
 }
 
-static int pack_refs_condition(UNUSED struct gc_config *cfg)
+static ціле pack_refs_condition(UNUSED struct gc_config *cfg)
 {
 	struct string_list included_refs = STRING_LIST_INIT_NODUP;
 	struct ref_exclusions excludes = REF_EXCLUSIONS_INIT;
@@ -258,27 +258,27 @@ static int pack_refs_condition(UNUSED struct gc_config *cfg)
 	/* Check for all refs, similar to 'git refs optimize --all'. */
 	string_list_append(optimize_opts.includes, "*");
 
-	if (refs_optimize_required(get_main_ref_store(the_repository),
+	якщо (refs_optimize_required(get_main_ref_store(the_repository),
 				   &optimize_opts, &required))
-		return 0;
+		повернути 0;
 
 	clear_ref_exclusions(&excludes);
 	string_list_clear(&included_refs, 0);
 
-	return required;
+	повернути required;
 }
 
-static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
+static ціле maintenance_task_pack_refs(struct maintenance_run_opts *opts,
 				      UNUSED struct gc_config *cfg)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
 	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
-	if (opts->auto_flag)
+	якщо (opts->auto_flag)
 		strvec_push(&cmd.args, "--auto");
 
-	return run_command(&cmd);
+	повернути run_command(&cmd);
 }
 
 struct count_reflog_entries_data {
@@ -287,18 +287,18 @@ struct count_reflog_entries_data {
 	size_t limit;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
+static ціле count_reflog_entries(const char *refname UNUSED,
 				struct object_id *old_oid, struct object_id *new_oid,
 				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+				ціле tz, const char *msg, void *cb_data)
 {
 	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
+	якщо (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
 		data->count++;
-	return data->count >= data->limit;
+	повернути data->count >= data->limit;
 }
 
-static int reflog_expire_condition(struct gc_config *cfg UNUSED)
+static ціле reflog_expire_condition(struct gc_config *cfg UNUSED)
 {
 	timestamp_t now = time(NULL);
 	struct count_reflog_entries_data data = {
@@ -306,13 +306,13 @@ static int reflog_expire_condition(struct gc_config *cfg UNUSED)
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
 	};
-	int limit = 100;
+	ціле limit = 100;
 
 	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &limit);
-	if (!limit)
-		return 0;
-	if (limit < 0)
-		return 1;
+	якщо (!limit)
+		повернути 0;
+	якщо (limit < 0)
+		повернути 1;
 	data.limit = limit;
 
 	repo_config(the_repository, reflog_expire_config, &data.policy.opts);
@@ -323,19 +323,19 @@ static int reflog_expire_condition(struct gc_config *cfg UNUSED)
 
 	reflog_expiry_cleanup(&data.policy);
 	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	повернути data.count >= data.limit;
 }
 
-static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
+static ціле maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
 					  struct gc_config *cfg UNUSED)
 {
 	struct child_process cmd = CHILD_PROCESS_INIT;
 	cmd.git_cmd = 1;
 	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
-	return run_command(&cmd);
+	повернути run_command(&cmd);
 }
 
-static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
+static ціле maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
 					   struct gc_config *cfg)
 {
 	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
@@ -344,34 +344,34 @@ static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNU
 	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
 	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
 
-	return run_command(&prune_worktrees_cmd);
+	повернути run_command(&prune_worktrees_cmd);
 }
 
-static int worktree_prune_condition(struct gc_config *cfg)
+static ціле worktree_prune_condition(struct gc_config *cfg)
 {
 	struct strbuf buf = STRBUF_INIT;
-	int should_prune = 0, limit = 1;
+	ціле should_prune = 0, limit = 1;
 	timestamp_t expiry_date;
 	struct dirent *d;
 	DIR *dir = NULL;
 
 	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &limit);
-	if (limit <= 0) {
+	якщо (limit <= 0) {
 		should_prune = limit < 0;
 		goto out;
 	}
 
-	if (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
+	якщо (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
 		goto out;
 
 	dir = opendir(repo_git_path_replace(the_repository, &buf, "worktrees"));
-	if (!dir)
+	якщо (!dir)
 		goto out;
 
-	while (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
+	поки (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
 		char *wtpath;
 		strbuf_reset(&buf);
-		if (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
+		якщо (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
 			limit--;
 		free(wtpath);
 	}
@@ -379,32 +379,32 @@ static int worktree_prune_condition(struct gc_config *cfg)
 	should_prune = !limit;
 
 out:
-	if (dir)
+	якщо (dir)
 		closedir(dir);
 	strbuf_release(&buf);
-	return should_prune;
+	повернути should_prune;
 }
 
-static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
+static ціле maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
 				      struct gc_config *cfg UNUSED)
 {
 	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
 	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
-	return run_command(&rerere_cmd);
+	повернути run_command(&rerere_cmd);
 }
 
-static int rerere_gc_condition(struct gc_config *cfg UNUSED)
+static ціле rerere_gc_condition(struct gc_config *cfg UNUSED)
 {
-	int limit = 512;
+	ціле limit = 512;
 
 	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &limit);
-	if (!limit)
-		return 0; /* never prune */
-	if (limit < 0)
-		return 1; /* always prune */
+	якщо (!limit)
+		повернути 0; /* never prune */
+	якщо (limit < 0)
+		повернути 1; /* always prune */
 
-	return rerere_gc_needed(the_repository, (size_t)limit);
+	повернути rerere_gc_needed(the_repository, (size_t)limit);
 }
 
 #define OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
@@ -416,7 +416,7 @@ static int rerere_gc_condition(struct gc_config *cfg UNUSED)
 	.depth = (aggressive) ? (cfg)->aggressive_depth : 0
 
 /* return NULL on success, else hostname running the gc */
-static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
+static const char *lock_repo_for_gc(ціле force, pid_t* ret_pid)
 {
 	struct lock_file lock = LOCK_INIT;
 	char my_host[HOST_NAME_MAX + 1];
@@ -424,25 +424,25 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 	struct stat st;
 	uintmax_t pid;
 	FILE *fp;
-	int fd;
+	ціле fd;
 	char *pidfile_path;
 
-	if (is_tempfile_active(pidfile))
+	якщо (is_tempfile_active(pidfile))
 		/* already locked */
-		return NULL;
+		повернути NULL;
 
-	if (xgethostname(my_host, sizeof(my_host)))
+	якщо (xgethostname(my_host, sizeof(my_host)))
 		xsnprintf(my_host, sizeof(my_host), "unknown");
 
 	pidfile_path = repo_git_path(the_repository, "gc.pid");
 	fd = hold_lock_file_for_update(&lock, pidfile_path,
 				       LOCK_DIE_ON_ERROR);
-	if (!force) {
+	якщо (!force) {
 		static char locking_host[HOST_NAME_MAX + 1];
 		static char *scan_fmt;
-		int should_exit;
+		ціле should_exit;
 
-		if (!scan_fmt)
+		якщо (!scan_fmt)
 			scan_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
 		fp = fopen(pidfile_path, "r");
 		memset(locking_host, 0, sizeof(locking_host));
@@ -462,14 +462,14 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 			fscanf(fp, scan_fmt, &pid, locking_host) == 2 &&
 			/* be gentle to concurrent "gc" on remote hosts */
 			(strcmp(locking_host, my_host) || !kill(pid, 0) || errno == EPERM);
-		if (fp)
+		якщо (fp)
 			fclose(fp);
-		if (should_exit) {
-			if (fd >= 0)
+		якщо (should_exit) {
+			якщо (fd >= 0)
 				rollback_lock_file(&lock);
 			*ret_pid = pid;
 			free(pidfile_path);
-			return locking_host;
+			повернути locking_host;
 		}
 	}
 
@@ -480,7 +480,7 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 	commit_lock_file(&lock);
 	pidfile = register_tempfile(pidfile_path);
 	free(pidfile_path);
-	return NULL;
+	повернути NULL;
 }
 
 /*
@@ -489,29 +489,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
  * message and returns with a non-[01] status code if an error occurred
  * while reading gc.log
  */
-static int report_last_gc_error(void)
+static ціле report_last_gc_error(void)
 {
 	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	ціле ret = 0;
 	ssize_t len;
 	struct stat st;
 	char *gc_log_path = repo_git_path(the_repository, "gc.log");
 
-	if (stat(gc_log_path, &st)) {
-		if (errno == ENOENT)
+	якщо (stat(gc_log_path, &st)) {
+		якщо (errno == ENOENT)
 			goto done;
 
 		ret = die_message_errno(_("cannot stat '%s'"), gc_log_path);
 		goto done;
 	}
 
-	if (st.st_mtime < gc_log_expire_time)
+	якщо (st.st_mtime < gc_log_expire_time)
 		goto done;
 
 	len = strbuf_read_file(&sb, gc_log_path, 0);
-	if (len < 0)
+	якщо (len < 0)
 		ret = die_message_errno(_("cannot read '%s'"), gc_log_path);
-	else if (len > 0) {
+	інакше якщо (len > 0) {
 		/*
 		 * A previous gc failed.  Report the error, and don't
 		 * bother with an automatic gc run since it is likely
@@ -529,23 +529,23 @@ static int report_last_gc_error(void)
 	strbuf_release(&sb);
 done:
 	free(gc_log_path);
-	return ret;
+	повернути ret;
 }
 
-static int gc_foreground_tasks(struct maintenance_run_opts *opts,
+static ціле gc_foreground_tasks(struct maintenance_run_opts *opts,
 			       struct gc_config *cfg)
 {
-	if (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
-		return error(FAILED_RUN, "pack-refs");
-	if (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
-		return error(FAILED_RUN, "reflog");
-	return 0;
+	якщо (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
+		повернути error(FAILED_RUN, "pack-refs");
+	якщо (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
+		повернути error(FAILED_RUN, "reflog");
+	повернути 0;
 }
 
-static int maintenance_task_odb(struct maintenance_run_opts *opts,
+static ціле maintenance_task_odb(struct maintenance_run_opts *opts,
 				struct gc_config *cfg,
-				int keep_largest_pack,
-				int aggressive)
+				ціле keep_largest_pack,
+				ціле aggressive)
 {
 	struct odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
@@ -553,34 +553,34 @@ static int maintenance_task_odb(struct maintenance_run_opts *opts,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive),
 	};
 
-	if (opts->auto_flag)
+	якщо (opts->auto_flag)
 		odb_opts.flags |= ODB_OPTIMIZE_AUTO;
-	if (!opts->quiet)
+	якщо (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
-	if (aggressive)
+	якщо (aggressive)
 		odb_opts.flags |= ODB_OPTIMIZE_NO_REUSE_DELTAS;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	повернути odb_optimize(the_repository->objects, &odb_opts);
 }
 
-int cmd_gc(int argc,
+ціле cmd_gc(ціле argc,
 	   const char **argv,
 	   const char *prefix,
 	   struct repository *repo UNUSED)
 {
-	int aggressive = 0;
-	int force = 0;
+	ціле aggressive = 0;
+	ціле force = 0;
 	const char *name;
 	pid_t pid;
-	int daemonized = 0;
-	int keep_largest_pack = -1;
-	int skip_foreground_tasks = 0;
+	ціле daemonized = 0;
+	ціле keep_largest_pack = -1;
+	ціле skip_foreground_tasks = 0;
 	timestamp_t dummy;
 	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
 	struct gc_config cfg = GC_CONFIG_INIT;
 	const char *prune_expire_sentinel = "sentinel";
 	const char *prune_expire_arg = prune_expire_sentinel;
-	int ret;
+	ціле ret;
 	struct option builtin_gc_options[] = {
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
 		{
@@ -617,70 +617,70 @@ int cmd_gc(int argc,
 
 	gc_config(&cfg);
 
-	if (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
+	якщо (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
 		die(_("failed to parse gc.logExpiry value %s"), cfg.gc_log_expire);
 
-	if (cfg.pack_refs < 0)
+	якщо (cfg.pack_refs < 0)
 		cfg.pack_refs = !is_bare_repository(the_repository);
 
 	argc = parse_options(argc, argv, prefix, builtin_gc_options,
 			     builtin_gc_usage, 0);
-	if (argc > 0)
+	якщо (argc > 0)
 		usage_with_options(builtin_gc_usage, builtin_gc_options);
 
-	if (prune_expire_arg != prune_expire_sentinel) {
+	якщо (prune_expire_arg != prune_expire_sentinel) {
 		free(cfg.prune_expire);
 		cfg.prune_expire = xstrdup_or_null(prune_expire_arg);
 	}
-	if (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
+	якщо (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
 		die(_("failed to parse prune expiry value %s"), cfg.prune_expire);
 
-	if (opts.auto_flag) {
+	якщо (opts.auto_flag) {
 		struct odb_optimize_options optimize_opts = {
 			.strategy = ODB_OPTIMIZE_INCREMENTAL,
 			OPTIMIZE_FIELDS_FROM_GC_CONFIG(&cfg, 0),
 		};
 
-		if (cfg.detach_auto && opts.detach < 0)
+		якщо (cfg.detach_auto && opts.detach < 0)
 			opts.detach = 1;
 
 		/*
 		 * Auto-gc should be least intrusive as possible.
 		 */
-		if (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
+		якщо (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
 		    run_hooks(the_repository, "pre-auto-gc")) {
 			ret = 0;
 			goto out;
 		}
 
-		if (!opts.quiet) {
-			if (opts.detach > 0)
+		якщо (!opts.quiet) {
+			якщо (opts.detach > 0)
 				fprintf(stderr, _("Auto packing the repository in background for optimum performance.\n"));
-			else
+			інакше
 				fprintf(stderr, _("Auto packing the repository for optimum performance.\n"));
 			fprintf(stderr, _("See \"git help gc\" for manual housekeeping.\n"));
 		}
 	}
 
-	if (opts.detach > 0) {
+	якщо (opts.detach > 0) {
 		ret = report_last_gc_error();
-		if (ret == 1) {
+		якщо (ret == 1) {
 			/* Last gc --auto failed. Skip this one. */
 			ret = 0;
 			goto out;
 
-		} else if (ret) {
+		} інакше якщо (ret) {
 			/* an I/O error occurred, already reported */
 			goto out;
 		}
 
-		if (!skip_foreground_tasks) {
-			if (lock_repo_for_gc(force, &pid)) {
+		якщо (!skip_foreground_tasks) {
+			якщо (lock_repo_for_gc(force, &pid)) {
 				ret = 0;
 				goto out;
 			}
 
-			if (gc_foreground_tasks(&opts, &cfg) < 0)
+			якщо (gc_foreground_tasks(&opts, &cfg) < 0)
 				die(NULL);
 			delete_tempfile(&pidfile);
 		}
@@ -693,8 +693,8 @@ int cmd_gc(int argc,
 	}
 
 	name = lock_repo_for_gc(force, &pid);
-	if (name) {
-		if (opts.auto_flag) {
+	якщо (name) {
+		якщо (opts.auto_flag) {
 			ret = 0;
 			goto out; /* be quiet on --auto */
 		}
@@ -703,7 +703,7 @@ int cmd_gc(int argc,
 		    name, (uintmax_t)pid);
 	}
 
-	if (daemonized) {
+	якщо (daemonized) {
 		char *path = repo_git_path(the_repository, "gc.log");
 		hold_lock_file_for_update(&log_lock, path,
 					  LOCK_DIE_ON_ERROR);
@@ -712,33 +712,33 @@ int cmd_gc(int argc,
 		free(path);
 	}
 
-	if (opts.detach <= 0 && !skip_foreground_tasks)
+	якщо (opts.detach <= 0 && !skip_foreground_tasks)
 		gc_foreground_tasks(&opts, &cfg);
 
-	if (cfg.prune_worktrees_expire &&
+	якщо (cfg.prune_worktrees_expire &&
 	    maintenance_task_worktree_prune(&opts, &cfg))
 		die(FAILED_RUN, "worktree");
 
-	if (maintenance_task_rerere_gc(&opts, &cfg))
+	якщо (maintenance_task_rerere_gc(&opts, &cfg))
 		die(FAILED_RUN, "rerere");
 
-	if (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
+	якщо (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
 		die(NULL);
 
 	report_garbage = report_pack_garbage;
 	odb_reprepare(the_repository->objects);
-	if (pack_garbage.nr > 0) {
+	якщо (pack_garbage.nr > 0) {
 		odb_close(the_repository->objects);
 		clean_pack_garbage();
 	}
 
-	if (the_repository->settings.gc_write_commit_graph == 1)
+	якщо (the_repository->settings.gc_write_commit_graph == 1)
 		write_commit_graph_reachable(the_repository,
 					     the_repository->objects->source->path,
 					     !opts.quiet && !daemonized ? COMMIT_GRAPH_WRITE_PROGRESS : 0,
 					     NULL);
 
-	if (!daemonized) {
+	якщо (!daemonized) {
 		char *path = repo_git_path(the_repository, "gc.log");
 		unlink(path);
 		free(path);
@@ -747,7 +747,7 @@ int cmd_gc(int argc,
 out:
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return 0;
+	повернути 0;
 }
 
 static const char *const builtin_maintenance_run_usage[] = {
@@ -755,64 +755,64 @@ static const char *const builtin_maintenance_run_usage[] = {
 	NULL
 };
 
-static int maintenance_opt_schedule(const struct option *opt, const char *arg,
-				    int unset)
+static ціле maintenance_opt_schedule(const struct option *opt, const char *arg,
+				    ціле unset)
 {
 	enum schedule_priority *priority = opt->value;
 
-	if (unset)
+	якщо (unset)
 		die(_("--no-schedule is not allowed"));
 
 	*priority = parse_schedule(arg);
 
-	if (!*priority)
+	якщо (!*priority)
 		die(_("unrecognized --schedule argument '%s'"), arg);
 
-	return 0;
+	повернути 0;
 }
 
 struct cg_auto_data {
-	int num_not_in_graph;
-	int limit;
+	ціле num_not_in_graph;
+	ціле limit;
 };
 
-static int dfs_on_ref(const struct reference *ref, void *cb_data)
+static ціле dfs_on_ref(const struct reference *ref, void *cb_data)
 {
 	struct cg_auto_data *data = (struct cg_auto_data *)cb_data;
-	int result = 0;
+	ціле result = 0;
 	const struct object_id *maybe_peeled = ref->oid;
 	struct object_id peeled;
 	struct commit_list *stack = NULL;
 	struct commit *commit;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	якщо (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
-	if (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
-		return 0;
+	якщо (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
+		повернути 0;
 
 	commit = lookup_commit(the_repository, maybe_peeled);
-	if (!commit || commit->object.flags & SEEN)
-		return 0;
+	якщо (!commit || commit->object.flags & SEEN)
+		повернути 0;
 	commit->object.flags |= SEEN;
 
-	if (repo_parse_commit(the_repository, commit) ||
+	якщо (repo_parse_commit(the_repository, commit) ||
 	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
-		return 0;
+		повернути 0;
 
 	data->num_not_in_graph++;
 
-	if (data->num_not_in_graph >= data->limit)
-		return 1;
+	якщо (data->num_not_in_graph >= data->limit)
+		повернути 1;
 
 	commit_list_insert(commit, &stack);
 
-	while (!result && stack) {
+	поки (!result && stack) {
 		struct commit_list *parent;
 
 		commit = pop_commit(&stack);
 
-		for (parent = commit->parents; parent; parent = parent->next) {
-			if (repo_parse_commit(the_repository, parent->item) ||
+		для (parent = commit->parents; parent; parent = parent->next) {
+			якщо (repo_parse_commit(the_repository, parent->item) ||
 			    commit_graph_position(parent->item) != COMMIT_NOT_FROM_GRAPH ||
 			    parent->item->object.flags & SEEN)
 				continue;
@@ -820,7 +820,7 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 			parent->item->object.flags |= SEEN;
 			data->num_not_in_graph++;
 
-			if (data->num_not_in_graph >= data->limit) {
+			якщо (data->num_not_in_graph >= data->limit) {
 				result = 1;
 				break;
 			}
@@ -830,12 +830,12 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 	}
 
 	commit_list_free(stack);
-	return result;
+	повернути result;
 }
 
-static int should_write_commit_graph(struct gc_config *cfg UNUSED)
+static ціле should_write_commit_graph(struct gc_config *cfg UNUSED)
 {
-	int result;
+	ціле result;
 	struct cg_auto_data data;
 
 	data.num_not_in_graph = 0;
@@ -843,20 +843,20 @@ static int should_write_commit_graph(struct gc_config *cfg UNUSED)
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
 			    &data.limit);
 
-	if (!data.limit)
-		return 0;
-	if (data.limit < 0)
-		return 1;
+	якщо (!data.limit)
+		повернути 0;
+	якщо (data.limit < 0)
+		повернути 1;
 
 	result = refs_for_each_ref(get_main_ref_store(the_repository),
 				   dfs_on_ref, &data);
 
 	repo_clear_commit_marks(the_repository, SEEN);
 
-	return result;
+	повернути result;
 }
 
-static int run_write_commit_graph(struct maintenance_run_opts *opts)
+static ціле run_write_commit_graph(struct maintenance_run_opts *opts)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
@@ -865,36 +865,36 @@ static int run_write_commit_graph(struct maintenance_run_opts *opts)
 	strvec_pushl(&child.args, "commit-graph", "write",
 		     "--split", "--reachable", NULL);
 
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	інакше
 		strvec_push(&child.args, "--progress");
 
-	return !!run_command(&child);
+	повернути !!run_command(&child);
 }
 
-static int maintenance_task_commit_graph(struct maintenance_run_opts *opts,
+static ціле maintenance_task_commit_graph(struct maintenance_run_opts *opts,
 					 struct gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_commit_graph)
-		return 0;
+	якщо (!the_repository->settings.core_commit_graph)
+		повернути 0;
 
-	if (run_write_commit_graph(opts)) {
+	якщо (run_write_commit_graph(opts)) {
 		error(_("failed to write commit-graph"));
-		return 1;
+		повернути 1;
 	}
 
-	return 0;
+	повернути 0;
 }
 
-static int fetch_remote(struct remote *remote, void *cbdata)
+static ціле fetch_remote(struct remote *remote, void *cbdata)
 {
 	struct maintenance_run_opts *opts = cbdata;
 	struct child_process child = CHILD_PROCESS_INIT;
 
-	if (remote->skip_default_update)
-		return 0;
+	якщо (remote->skip_default_update)
+		повернути 0;
 
 	child.git_cmd = 1;
 	strvec_pushl(&child.args, "fetch", remote->name,
@@ -902,30 +902,30 @@ static int fetch_remote(struct remote *remote, void *cbdata)
 		     "--no-write-fetch-head", "--recurse-submodules=no",
 		     NULL);
 
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	повернути !!run_command(&child);
 }
 
-static int maintenance_task_prefetch(struct maintenance_run_opts *opts,
+static ціле maintenance_task_prefetch(struct maintenance_run_opts *opts,
 				     struct gc_config *cfg UNUSED)
 {
-	if (for_each_remote(fetch_remote, opts)) {
+	якщо (for_each_remote(fetch_remote, opts)) {
 		error(_("failed to prefetch remotes"));
-		return 1;
+		повернути 1;
 	}
 
-	return 0;
+	повернути 0;
 }
 
-static int maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
+static ціле maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
 					  struct gc_config *cfg)
 {
-	return gc_foreground_tasks(opts, cfg);
+	повернути gc_foreground_tasks(opts, cfg);
 }
 
-static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
+static ціле maintenance_task_gc_background(struct maintenance_run_opts *opts,
 					  struct gc_config *cfg UNUSED)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
@@ -934,83 +934,83 @@ static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
 	child.odb_to_close = the_repository->objects;
 	strvec_push(&child.args, "gc");
 
-	if (opts->auto_flag)
+	якщо (opts->auto_flag)
 		strvec_push(&child.args, "--auto");
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--quiet");
-	else
+	інакше
 		strvec_push(&child.args, "--no-quiet");
 	strvec_push(&child.args, "--no-detach");
 	strvec_push(&child.args, "--skip-foreground-tasks");
 
-	return run_command(&child);
+	повернути run_command(&child);
 }
 
-static int gc_condition(struct gc_config *cfg)
+static ціле gc_condition(struct gc_config *cfg)
 {
 	struct odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	повернути odb_optimize_required(the_repository->objects, &opts);
 }
 
-static int prune_packed(struct maintenance_run_opts *opts)
+static ціле prune_packed(struct maintenance_run_opts *opts)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	strvec_push(&child.args, "prune-packed");
 
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	повернути !!run_command(&child);
 }
 
 struct write_loose_object_data {
 	FILE *in;
-	int count;
-	int batch_size;
+	ціле count;
+	ціле batch_size;
 };
 
-static int loose_object_auto_limit = 100;
+static ціле loose_object_auto_limit = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
+static ціле loose_object_count(const struct object_id *oid UNUSED,
 			      const char *path UNUSED,
 			      void *data)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
-		return 1;
-	return 0;
+	ціле *count = (ціле*)data;
+	якщо (++(*count) >= loose_object_auto_limit)
+		повернути 1;
+	повернути 0;
 }
 
-static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
+static ціле loose_object_auto_condition(struct gc_config *cfg UNUSED)
 {
-	int count = 0;
+	ціле count = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
 			    &loose_object_auto_limit);
 
-	if (!loose_object_auto_limit)
-		return 0;
-	if (loose_object_auto_limit < 0)
-		return 1;
+	якщо (!loose_object_auto_limit)
+		повернути 0;
+	якщо (loose_object_auto_limit < 0)
+		повернути 1;
 
-	return for_each_loose_file_in_source(the_repository->objects->source,
+	повернути for_each_loose_file_in_source(the_repository->objects->source,
 					     loose_object_count,
 					     NULL, NULL, &count);
 }
 
-static int bail_on_loose(const struct object_id *oid UNUSED,
+static ціле bail_on_loose(const struct object_id *oid UNUSED,
 			 const char *path UNUSED,
 			 void *data UNUSED)
 {
-	return 1;
+	повернути 1;
 }
 
-static int write_loose_object_to_stdin(const struct object_id *oid,
+static ціле write_loose_object_to_stdin(const struct object_id *oid,
 				       const char *path UNUSED,
 				       void *data)
 {
@@ -1019,13 +1019,13 @@ static int write_loose_object_to_stdin(const struct object_id *oid,
 	fprintf(d->in, "%s\n", oid_to_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	повернути ++(d->count) > d->batch_size;
 }
 
-static int pack_loose(struct maintenance_run_opts *opts)
+static ціле pack_loose(struct maintenance_run_opts *opts)
 {
 	struct repository *r = the_repository;
-	int result = 0;
+	ціле result = 0;
 	struct write_loose_object_data data;
 	struct child_process pack_proc = CHILD_PROCESS_INIT;
 
@@ -1033,17 +1033,17 @@ static int pack_loose(struct maintenance_run_opts *opts)
 	 * Do not start pack-objects process
 	 * if there are no loose objects.
 	 */
-	if (!for_each_loose_file_in_source(r->objects->source,
+	якщо (!for_each_loose_file_in_source(r->objects->source,
 					   bail_on_loose,
 					   NULL, NULL, NULL))
-		return 0;
+		повернути 0;
 
 	pack_proc.git_cmd = 1;
 
 	strvec_push(&pack_proc.args, "pack-objects");
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&pack_proc.args, "--quiet");
-	else
+	інакше
 		strvec_push(&pack_proc.args, "--no-quiet");
 	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
 
@@ -1055,9 +1055,9 @@ static int pack_loose(struct maintenance_run_opts *opts)
 	 */
 	pack_proc.out = -1;
 
-	if (start_command(&pack_proc)) {
+	якщо (start_command(&pack_proc)) {
 		error(_("failed to start 'git pack-objects' process"));
-		return 1;
+		повернути 1;
 	}
 
 	data.in = xfdopen(pack_proc.in, "w");
@@ -1068,9 +1068,9 @@ static int pack_loose(struct maintenance_run_opts *opts)
 			    &data.batch_size);
 
 	/* If configured as 0, then remove limit. */
-	if (!data.batch_size)
+	якщо (!data.batch_size)
 		data.batch_size = INT_MAX;
-	else if (data.batch_size > 0)
+	інакше якщо (data.batch_size > 0)
 		data.batch_size--; /* Decrease for equality on limit. */
 
 	for_each_loose_file_in_source(r->objects->source,
@@ -1079,67 +1079,67 @@ static int pack_loose(struct maintenance_run_opts *opts)
 
 	fclose(data.in);
 
-	if (finish_command(&pack_proc)) {
+	якщо (finish_command(&pack_proc)) {
 		error(_("failed to finish 'git pack-objects' process"));
 		result = 1;
 	}
 
-	return result;
+	повернути result;
 }
 
-static int maintenance_task_loose_objects(struct maintenance_run_opts *opts,
+static ціле maintenance_task_loose_objects(struct maintenance_run_opts *opts,
 					  struct gc_config *cfg UNUSED)
 {
-	return prune_packed(opts) || pack_loose(opts);
+	повернути prune_packed(opts) || pack_loose(opts);
 }
 
-static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
+static ціле incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
 {
 	struct packed_git *p;
-	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	ціле incremental_repack_auto_limit = 10;
+	ціле count = 0;
 
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index)
-		return 0;
+	якщо (!the_repository->settings.core_multi_pack_index)
+		повернути 0;
 
 	repo_config_get_int(the_repository, "maintenance.incremental-repack.auto",
 			    &incremental_repack_auto_limit);
 
-	if (!incremental_repack_auto_limit)
-		return 0;
-	if (incremental_repack_auto_limit < 0)
-		return 1;
+	якщо (!incremental_repack_auto_limit)
+		повернути 0;
+	якщо (incremental_repack_auto_limit < 0)
+		повернути 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
+		якщо (count >= incremental_repack_auto_limit)
 			break;
-		if (!p->multi_pack_index)
+		якщо (!p->multi_pack_index)
 			count++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	повернути count >= incremental_repack_auto_limit;
 }
 
-static int multi_pack_index_write(struct maintenance_run_opts *opts)
+static ціле multi_pack_index_write(struct maintenance_run_opts *opts)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
 
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	інакше
 		strvec_push(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("failed to write multi-pack-index"));
+	якщо (run_command(&child))
+		повернути error(_("failed to write multi-pack-index"));
 
-	return 0;
+	повернути 0;
 }
 
-static int multi_pack_index_expire(struct maintenance_run_opts *opts)
+static ціле multi_pack_index_expire(struct maintenance_run_opts *opts)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
@@ -1147,15 +1147,15 @@ static int multi_pack_index_expire(struct maintenance_run_opts *opts)
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
 
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	інакше
 		strvec_push(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index expire' failed"));
+	якщо (run_command(&child))
+		повернути error(_("'git multi-pack-index expire' failed"));
 
-	return 0;
+	повернути 0;
 }
 
 #define TWO_GIGABYTES (INT32_MAX)
@@ -1182,23 +1182,23 @@ static off_t get_auto_pack_size(void)
 
 	odb_reprepare(r->objects);
 	repo_for_each_pack(r, p) {
-		if (p->pack_size > max_size) {
+		якщо (p->pack_size > max_size) {
 			second_largest_size = max_size;
 			max_size = p->pack_size;
-		} else if (p->pack_size > second_largest_size)
+		} інакше якщо (p->pack_size > second_largest_size)
 			second_largest_size = p->pack_size;
 	}
 
 	result_size = second_largest_size + 1;
 
 	/* But limit ourselves to a batch size of 2g */
-	if (result_size > TWO_GIGABYTES)
+	якщо (result_size > TWO_GIGABYTES)
 		result_size = TWO_GIGABYTES;
 
-	return result_size;
+	повернути result_size;
 }
 
-static int multi_pack_index_repack(struct maintenance_run_opts *opts)
+static ціле multi_pack_index_repack(struct maintenance_run_opts *opts)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
@@ -1206,39 +1206,39 @@ static int multi_pack_index_repack(struct maintenance_run_opts *opts)
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
 
-	if (opts->quiet)
+	якщо (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	інакше
 		strvec_push(&child.args, "--progress");
 
 	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
 				  (uintmax_t)get_auto_pack_size());
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index repack' failed"));
+	якщо (run_command(&child))
+		повернути error(_("'git multi-pack-index repack' failed"));
 
-	return 0;
+	повернути 0;
 }
 
-static int maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
+static ціле maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
 					       struct gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index) {
+	якщо (!the_repository->settings.core_multi_pack_index) {
 		warning(_("skipping incremental-repack task because core.multiPackIndex is disabled"));
-		return 0;
+		повернути 0;
 	}
 
-	if (multi_pack_index_write(opts))
-		return 1;
-	if (multi_pack_index_expire(opts))
-		return 1;
-	if (multi_pack_index_repack(opts))
-		return 1;
-	return 0;
+	якщо (multi_pack_index_write(opts))
+		повернути 1;
+	якщо (multi_pack_index_expire(opts))
+		повернути 1;
+	якщо (multi_pack_index_repack(opts))
+		повернути 1;
+	повернути 0;
 }
 
-static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
+static ціле maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
 					     struct gc_config *cfg)
 {
 	struct odb_optimize_options odb_opts = {
@@ -1246,24 +1246,24 @@ static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
 
-	if (!opts->quiet)
+	якщо (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	повернути odb_optimize(the_repository->objects, &odb_opts);
 }
 
-static int geometric_repack_auto_condition(struct gc_config *cfg)
+static ціле geometric_repack_auto_condition(struct gc_config *cfg)
 {
 	struct odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	повернути odb_optimize_required(the_repository->objects, &opts);
 }
 
-typedef int (*maintenance_task_fn)(struct maintenance_run_opts *opts,
+typedef ціле (*maintenance_task_fn)(struct maintenance_run_opts *opts,
 				   struct gc_config *cfg);
-typedef int (*maintenance_auto_fn)(struct gc_config *cfg);
+typedef ціле (*maintenance_auto_fn)(struct gc_config *cfg);
 
 struct maintenance_task {
 	const char *name;
@@ -1352,54 +1352,54 @@ enum auto_gc_hook_result {
 	AUTO_GC_HOOK_SKIP = 2,
 };
 
-static int maybe_run_task(const struct maintenance_task *task,
+static ціле maybe_run_task(const struct maintenance_task *task,
 			  struct repository *repo,
 			  struct maintenance_run_opts *opts,
 			  struct gc_config *cfg,
 			  enum task_phase phase,
 			  enum auto_gc_hook_result *auto_gc_hook_result)
 {
-	int foreground = (phase == TASK_PHASE_FOREGROUND);
+	ціле foreground = (phase == TASK_PHASE_FOREGROUND);
 	maintenance_task_fn fn = foreground ? task->foreground : task->background;
 	const char *region = foreground ? "maintenance foreground" : "maintenance";
-	int ret = 0;
+	ціле ret = 0;
 
-	if (!fn)
-		return 0;
-	if (opts->auto_flag) {
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+	якщо (!fn)
+		повернути 0;
+	якщо (opts->auto_flag) {
+		якщо (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
+			повернути 0;
 
-		if (!task->auto_condition || !task->auto_condition(cfg))
-			return 0;
+		якщо (!task->auto_condition || !task->auto_condition(cfg))
+			повернути 0;
 
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
+		якщо (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
 			*auto_gc_hook_result = run_hooks(repo, "pre-auto-gc") ?
 				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_RUN;
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+		якщо (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
+			повернути 0;
 	}
 
 	trace2_region_enter(region, task->name, repo);
-	if (fn(opts, cfg)) {
+	якщо (fn(opts, cfg)) {
 		error(_("task '%s' failed"), task->name);
 		ret = 1;
 	}
 	trace2_region_leave(region, task->name, repo);
 
-	return ret;
+	повернути ret;
 }
 
-static int maintenance_run_tasks(struct maintenance_run_opts *opts,
+static ціле maintenance_run_tasks(struct maintenance_run_opts *opts,
 				 struct gc_config *cfg)
 {
-	int result = 0;
+	ціле result = 0;
 	struct lock_file lk;
 	struct repository *r = the_repository;
 	char *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
 	enum auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
 
-	if (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
+	якщо (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
 		/*
 		 * Another maintenance command is running.
 		 *
@@ -1407,33 +1407,33 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 		 * recursive process stack. Do not report an error in
 		 * that case.
 		 */
-		if (!opts->auto_flag && !opts->quiet)
+		якщо (!opts->auto_flag && !opts->quiet)
 			warning(_("lock file '%s' exists, skipping maintenance"),
 				lock_path);
 		free(lock_path);
-		return 0;
+		повернути 0;
 	}
 	free(lock_path);
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+	для (size_t i = 0; i < opts->tasks_nr; i++)
+		якщо (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
 				   TASK_PHASE_FOREGROUND, &auto_gc_hook_result))
 			result = 1;
 
 	/* Failure to daemonize is ok, we'll continue in foreground. */
-	if (opts->detach > 0) {
+	якщо (opts->detach > 0) {
 		trace2_region_enter("maintenance", "detach", the_repository);
 		daemonize();
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+	для (size_t i = 0; i < opts->tasks_nr; i++)
+		якщо (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
 				   TASK_PHASE_BACKGROUND, &auto_gc_hook_result))
 			result = 1;
 
 	rollback_lock_file(&lk);
-	return result;
+	повернути result;
 }
 
 enum maintenance_type {
@@ -1531,12 +1531,12 @@ static const struct maintenance_strategy geometric_strategy = {
 
 static struct maintenance_strategy parse_maintenance_strategy(const char *name)
 {
-	if (!strcasecmp(name, "incremental"))
-		return incremental_strategy;
-	if (!strcasecmp(name, "gc"))
-		return gc_strategy;
-	if (!strcasecmp(name, "geometric"))
-		return geometric_strategy;
+	якщо (!strcasecmp(name, "incremental"))
+		повернути incremental_strategy;
+	якщо (!strcasecmp(name, "gc"))
+		повернути gc_strategy;
+	якщо (!strcasecmp(name, "geometric"))
+		повернути geometric_strategy;
 	die(_("unknown maintenance strategy: '%s'"), name);
 }
 
@@ -1553,14 +1553,14 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * those specified tasks. Specifically, we do _not_ want to consult the
 	 * config or maintenance strategy.
 	 */
-	if (selected_tasks->nr) {
-		for (size_t i = 0; i < selected_tasks->nr; i++) {
+	якщо (selected_tasks->nr) {
+		для (size_t i = 0; i < selected_tasks->nr; i++) {
 			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
 
-		return;
+		повернути;
 	}
 
 	/*
@@ -1576,35 +1576,35 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * override specific aspects of our strategy. Furthermore, both
 	 * strategies can be overridden by setting "maintenance.strategy".
 	 */
-	if (opts->schedule) {
+	якщо (opts->schedule) {
 		strategy = none_strategy;
 		type = MAINTENANCE_TYPE_SCHEDULED;
-	} else {
+	} інакше {
 		strategy = geometric_strategy;
 		type = MAINTENANCE_TYPE_MANUAL;
 	}
 
-	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
+	якщо (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	для (size_t i = 0; i < TASK__COUNT; i++) {
+		ціле config_value;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
+		якщо (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
 			strategy.tasks[i].type = config_value ? type : 0;
-		if (!(strategy.tasks[i].type & type))
+		якщо (!(strategy.tasks[i].type & type))
 			continue;
 
-		if (opts->schedule) {
+		якщо (opts->schedule) {
 			strbuf_reset(&config_name);
 			strbuf_addf(&config_name, "maintenance.%s.schedule",
 				    tasks[i].name);
-			if (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
+			якщо (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
 				strategy.tasks[i].schedule = parse_schedule(config_str);
-			if (strategy.tasks[i].schedule < opts->schedule)
+			якщо (strategy.tasks[i].schedule < opts->schedule)
 				continue;
 		}
 
@@ -1615,33 +1615,33 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	strbuf_release(&config_name);
 }
 
-static int task_option_parse(const struct option *opt,
-			     const char *arg, int unset)
+static ціле task_option_parse(const struct option *opt,
+			     const char *arg, ціле unset)
 {
 	struct string_list *selected_tasks = opt->value;
 	size_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
-		if (!strcasecmp(tasks[i].name, arg))
+	для (i = 0; i < TASK__COUNT; i++)
+		якщо (!strcasecmp(tasks[i].name, arg))
 			break;
-	if (i >= TASK__COUNT) {
+	якщо (i >= TASK__COUNT) {
 		error(_("'%s' is not a valid task"), arg);
-		return 1;
+		повернути 1;
 	}
 
-	if (unsorted_string_list_has_string(selected_tasks, arg)) {
+	якщо (unsorted_string_list_has_string(selected_tasks, arg)) {
 		error(_("task '%s' cannot be selected multiple times"), arg);
-		return 1;
+		повернути 1;
 	}
 
 	string_list_append(selected_tasks, arg)->util = (void *)(intptr_t)i;
 
-	return 0;
+	повернути 0;
 }
 
-static int maintenance_run(int argc, const char **argv, const char *prefix,
+static ціле maintenance_run(ціле argc, const char **argv, const char *prefix,
 			   struct repository *repo UNUSED)
 {
 	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
@@ -1662,7 +1662,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 			PARSE_OPT_NONEG, task_option_parse),
 		OPT_END()
 	};
-	int ret;
+	ціле ret;
 
 	opts.quiet = !isatty(2);
 
@@ -1679,7 +1679,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (argc != 0)
+	якщо (argc != 0)
 		usage_with_options(builtin_maintenance_run_usage,
 				   builtin_maintenance_run_options);
 
@@ -1688,7 +1688,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	string_list_clear(&selected_tasks, 0);
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return ret;
+	повернути ret;
 }
 
 static char *get_maintpath(void)
@@ -1698,7 +1698,7 @@ static char *get_maintpath(void)
 		the_repository->worktree : the_repository->gitdir;
 
 	strbuf_realpath(&sb, p, 1);
-	return strbuf_detach(&sb, NULL);
+	повернути strbuf_detach(&sb, NULL);
 }
 
 static char const * const builtin_maintenance_register_usage[] = {
@@ -1706,7 +1706,7 @@ static char const * const builtin_maintenance_register_usage[] = {
 	NULL
 };
 
-static int maintenance_register(int argc, const char **argv, const char *prefix,
+static ціле maintenance_register(ціле argc, const char **argv, const char *prefix,
 				struct repository *repo UNUSED)
 {
 	char *config_file = NULL;
@@ -1714,7 +1714,7 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT_END(),
 	};
-	int found = 0;
+	ціле found = 0;
 	const char *key = "maintenance.repo";
 	char *maintpath = get_maintpath();
 	struct string_list_item *item;
@@ -1722,7 +1722,7 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_register_usage, 0);
-	if (argc)
+	якщо (argc)
 		usage_with_options(builtin_maintenance_register_usage,
 				   options);
 
@@ -1730,40 +1730,40 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 	repo_config_set(the_repository, "maintenance.auto", "false");
 
 	/* Set maintenance strategy, if unset */
-	if (repo_config_get(the_repository, "maintenance.strategy"))
+	якщо (repo_config_get(the_repository, "maintenance.strategy"))
 		repo_config_set(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
+	якщо (!repo_config_get_string_multi(the_repository, key, &list)) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			якщо (!strcmp(maintpath, item->string)) {
 				found = 1;
 				break;
 			}
 		}
 	}
 
-	if (!found) {
-		int rc;
+	якщо (!found) {
+		ціле rc;
 		char *global_config_file = NULL;
 
-		if (!config_file) {
+		якщо (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		якщо (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
 			config_file, "maintenance.repo", maintpath,
 			CONFIG_REGEX_NONE, NULL, 0);
 		free(global_config_file);
 
-		if (rc)
+		якщо (rc)
 			die(_("unable to add '%s' value of '%s'"),
 			    key, maintpath);
 	}
 
 	free(maintpath);
-	return 0;
+	повернути 0;
 }
 
 static char const * const builtin_maintenance_unregister_usage[] = {
@@ -1771,10 +1771,10 @@ static char const * const builtin_maintenance_unregister_usage[] = {
 	NULL
 };
 
-static int maintenance_unregister(int argc, const char **argv, const char *prefix,
+static ціле maintenance_unregister(ціле argc, const char **argv, const char *prefix,
 				  struct repository *repo UNUSED)
 {
-	int force = 0;
+	ціле force = 0;
 	char *config_file = NULL;
 	struct option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
@@ -1785,69 +1785,69 @@ static int maintenance_unregister(int argc, const char **argv, const char *prefi
 	};
 	const char *key = "maintenance.repo";
 	char *maintpath = get_maintpath();
-	int found = 0;
+	ціле found = 0;
 	struct string_list_item *item;
 	const struct string_list *list;
 	struct config_set cs = { { 0 } };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_unregister_usage, 0);
-	if (argc)
+	якщо (argc)
 		usage_with_options(builtin_maintenance_unregister_usage,
 				   options);
 
-	if (config_file) {
+	якщо (config_file) {
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, config_file);
 	}
-	if (!(config_file
+	якщо (!(config_file
 	      ? git_configset_get_string_multi(&cs, key, &list)
 	      : repo_config_get_string_multi(the_repository, key, &list))) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			якщо (!strcmp(maintpath, item->string)) {
 				found = 1;
 				break;
 			}
 		}
 	}
 
-	if (found) {
-		int rc;
+	якщо (found) {
+		ціле rc;
 		char *global_config_file = NULL;
 
-		if (!config_file) {
+		якщо (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		якщо (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
 			config_file, key, NULL, maintpath, NULL,
 			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
 		free(global_config_file);
 
-		if (rc &&
+		якщо (rc &&
 		    (!force || rc == CONFIG_NOTHING_SET))
 			die(_("unable to unset '%s' value of '%s'"),
 			    key, maintpath);
-	} else if (!force) {
+	} інакше якщо (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
 
 	git_configset_clear(&cs);
 	free(maintpath);
-	return 0;
+	повернути 0;
 }
 
 static const char *get_frequency(enum schedule_priority schedule)
 {
 	switch (schedule) {
 	case SCHEDULE_HOURLY:
-		return "hourly";
+		повернути "hourly";
 	case SCHEDULE_DAILY:
-		return "daily";
+		повернути "daily";
 	case SCHEDULE_WEEKLY:
-		return "weekly";
+		повернути "weekly";
 	default:
 		BUG("invalid schedule %d", schedule);
 	}
@@ -1863,30 +1863,30 @@ static const char *get_extra_config_parameters(void) {
 	static const char *result = NULL;
 	struct strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	якщо (result)
+		повернути result;
 
-	for (const char **s = extraconfig; s && *s; s++)
+	для (const char **s = extraconfig; s && *s; s++)
 		strbuf_addf(&builder, "-c %s ", *s);
 
 	result = strbuf_detach(&builder, NULL);
-	return result;
+	повернути result;
 }
 
 static const char *get_extra_launchctl_strings(void) {
 	static const char *result = NULL;
 	struct strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	якщо (result)
+		повернути result;
 
-	for (const char **s = extraconfig; s && *s; s++) {
+	для (const char **s = extraconfig; s && *s; s++) {
 		strbuf_addstr(&builder, "<string>-c</string>\n");
 		strbuf_addf(&builder, "<string>%s</string>\n", *s);
 	}
 
 	result = strbuf_detach(&builder, NULL);
-	return result;
+	повернути result;
 }
 
 /*
@@ -1929,32 +1929,32 @@ static const char *get_extra_launchctl_strings(void) {
  *     | "qux" |    true     | "qux" (allocated) |     false     |
  *     +-------+-------------+-------------------+---------------+
  */
-static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
+static ціле get_schedule_cmd(const char *cmd, ціле *is_available, char **out)
 {
 	char *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
 	struct string_list_item *item;
 	struct string_list list = STRING_LIST_INIT_NODUP;
 
-	if (!testing) {
-		if (out)
+	якщо (!testing) {
+		якщо (out)
 			*out = xstrdup(cmd);
-		return 0;
+		повернути 0;
 	}
 
-	if (is_available)
+	якщо (is_available)
 		*is_available = 0;
 
 	string_list_split_in_place(&list, testing, ",", -1);
 	for_each_string_list_item(item, &list) {
 		struct string_list pair = STRING_LIST_INIT_NODUP;
 
-		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
+		якщо (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
 			continue;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
-			if (out)
+		якщо (!strcmp(cmd, pair.items[0].string)) {
+			якщо (out)
 				*out = xstrdup(pair.items[1].string);
-			if (is_available)
+			якщо (is_available)
 				*is_available = 1;
 			string_list_clear(&pair, 0);
 			goto out;
@@ -1963,34 +1963,34 @@ static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
 		string_list_clear(&pair, 0);
 	}
 
-	if (out)
+	якщо (out)
 		*out = xstrdup(cmd);
 
 out:
 	string_list_clear(&list, 0);
 	free(testing);
-	return 1;
+	повернути 1;
 }
 
-static int get_random_minute(void)
+static ціле get_random_minute(void)
 {
 	/* Use a static value when under tests. */
-	if (getenv("GIT_TEST_MAINT_SCHEDULER"))
-		return 13;
+	якщо (getenv("GIT_TEST_MAINT_SCHEDULER"))
+		повернути 13;
 
-	return git_rand(0) % 60;
+	повернути git_rand(0) % 60;
 }
 
-static int is_launchctl_available(void)
+static ціле is_launchctl_available(void)
 {
-	int is_available;
-	if (get_schedule_cmd("launchctl", &is_available, NULL))
-		return is_available;
+	ціле is_available;
+	якщо (get_schedule_cmd("launchctl", &is_available, NULL))
+		повернути is_available;
 
 #ifdef __APPLE__
-	return 1;
-#else
-	return 0;
+	повернути 1;
+#інакше
+	повернути 0;
 #endif
 }
 
@@ -1998,7 +1998,7 @@ static char *launchctl_service_name(const char *frequency)
 {
 	struct strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "org.git-scm.git.%s", frequency);
-	return strbuf_detach(&label, NULL);
+	повернути strbuf_detach(&label, NULL);
 }
 
 static char *launchctl_service_filename(const char *name)
@@ -2008,22 +2008,22 @@ static char *launchctl_service_filename(const char *name)
 	strbuf_addf(&filename, "~/Library/LaunchAgents/%s.plist", name);
 
 	expanded = interpolate_path(filename.buf, 1);
-	if (!expanded)
+	якщо (!expanded)
 		die(_("failed to expand path '%s'"), filename.buf);
 
 	strbuf_release(&filename);
-	return expanded;
+	повернути expanded;
 }
 
 static char *launchctl_get_uid(void)
 {
-	return xstrfmt("gui/%d", getuid());
+	повернути xstrfmt("gui/%d", getuid());
 }
 
-static int launchctl_boot_plist(int enable, const char *filename)
+static ціле launchctl_boot_plist(ціле enable, const char *filename)
 {
 	char *cmd;
-	int result;
+	ціле result;
 	struct child_process child = CHILD_PROCESS_INIT;
 	char *uid = launchctl_get_uid();
 
@@ -2035,36 +2035,36 @@ static int launchctl_boot_plist(int enable, const char *filename)
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	якщо (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	result = finish_command(&child);
 
 	free(cmd);
 	free(uid);
-	return result;
+	повернути result;
 }
 
-static int launchctl_remove_plist(enum schedule_priority schedule)
+static ціле launchctl_remove_plist(enum schedule_priority schedule)
 {
 	const char *frequency = get_frequency(schedule);
 	char *name = launchctl_service_name(frequency);
 	char *filename = launchctl_service_filename(name);
-	int result = launchctl_boot_plist(0, filename);
+	ціле result = launchctl_boot_plist(0, filename);
 	unlink(filename);
 	free(filename);
 	free(name);
-	return result;
+	повернути result;
 }
 
-static int launchctl_remove_plists(void)
+static ціле launchctl_remove_plists(void)
 {
-	return launchctl_remove_plist(SCHEDULE_HOURLY) ||
+	повернути launchctl_remove_plist(SCHEDULE_HOURLY) ||
 	       launchctl_remove_plist(SCHEDULE_DAILY) ||
 	       launchctl_remove_plist(SCHEDULE_WEEKLY);
 }
 
-static int launchctl_list_contains_plist(const char *name, const char *cmd)
+static ціле launchctl_list_contains_plist(const char *name, const char *cmd)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
@@ -2074,16 +2074,16 @@ static int launchctl_list_contains_plist(const char *name, const char *cmd)
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	якщо (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	/* Returns failure if 'name' doesn't exist. */
-	return !finish_command(&child);
+	повернути !finish_command(&child);
 }
 
-static int launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
+static ціле launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
 {
-	int i, fd;
+	ціле i, fd;
 	const char *preamble, *repeat;
 	const char *frequency = get_frequency(schedule);
 	char *name = launchctl_service_name(frequency);
@@ -2093,7 +2093,7 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	struct strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
 	struct stat st;
 	char *cmd;
-	int minute = get_random_minute();
+	ціле minute = get_random_minute();
 
 	get_schedule_cmd("launchctl", NULL, &cmd);
 	preamble = "<?xml version=\"1.0\"?>\n"
@@ -2124,7 +2124,7 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			 "<key>Hour</key><integer>%d</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 23; i++)
+		для (i = 1; i <= 23; i++)
 			strbuf_addf(&plist, repeat, i, minute);
 		break;
 
@@ -2134,7 +2134,7 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			 "<key>Hour</key><integer>0</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 6; i++)
+		для (i = 1; i <= 6; i++)
 			strbuf_addf(&plist, repeat, i, minute);
 		break;
 
@@ -2154,10 +2154,10 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	}
 	strbuf_addstr(&plist, "</array>\n</dict>\n</plist>\n");
 
-	if (safe_create_leading_directories(the_repository, filename))
+	якщо (safe_create_leading_directories(the_repository, filename))
 		die(_("failed to create directories for '%s'"), filename);
 
-	if ((long)lock_file_timeout_ms < 0 &&
+	якщо ((long)lock_file_timeout_ms < 0 &&
 	    repo_config_get_ulong(the_repository, "gc.launchctlplistlocktimeoutms",
 				 &lock_file_timeout_ms))
 		lock_file_timeout_ms = 150;
@@ -2169,19 +2169,19 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	 * Does this file already exist? With the intended contents? Is it
 	 * registered already? Then it does not need to be re-registered.
 	 */
-	if (!stat(filename, &st) && st.st_size == plist.len &&
+	якщо (!stat(filename, &st) && st.st_size == plist.len &&
 	    strbuf_read_file(&plist2, filename, plist.len) == plist.len &&
 	    !strbuf_cmp(&plist, &plist2) &&
 	    launchctl_list_contains_plist(name, cmd))
 		rollback_lock_file(&lk);
-	else {
-		if (write_in_full(fd, plist.buf, plist.len) < 0 ||
+	інакше {
+		якщо (write_in_full(fd, plist.buf, plist.len) < 0 ||
 		    commit_lock_file(&lk))
 			die_errno(_("could not write '%s'"), filename);
 
 		/* bootout might fail if not already running, so ignore */
 		launchctl_boot_plist(0, filename);
-		if (launchctl_boot_plist(1, filename))
+		якщо (launchctl_boot_plist(1, filename))
 			die(_("failed to bootstrap service %s"), filename);
 	}
 
@@ -2190,36 +2190,36 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	free(cmd);
 	strbuf_release(&plist);
 	strbuf_release(&plist2);
-	return 0;
+	повернути 0;
 }
 
-static int launchctl_add_plists(void)
+static ціле launchctl_add_plists(void)
 {
 	const char *exec_path = git_exec_path();
 
-	return launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
+	повернути launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_DAILY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int launchctl_update_schedule(int run_maintenance, int fd UNUSED)
+static ціле launchctl_update_schedule(ціле run_maintenance, ціле fd UNUSED)
 {
-	if (run_maintenance)
-		return launchctl_add_plists();
-	else
-		return launchctl_remove_plists();
+	якщо (run_maintenance)
+		повернути launchctl_add_plists();
+	інакше
+		повернути launchctl_remove_plists();
 }
 
-static int is_schtasks_available(void)
+static ціле is_schtasks_available(void)
 {
-	int is_available;
-	if (get_schedule_cmd("schtasks", &is_available, NULL))
-		return is_available;
+	ціле is_available;
+	якщо (get_schedule_cmd("schtasks", &is_available, NULL))
+		повернути is_available;
 
 #ifdef GIT_WINDOWS_NATIVE
-	return 1;
-#else
-	return 0;
+	повернути 1;
+#інакше
+	повернути 0;
 #endif
 }
 
@@ -2227,10 +2227,10 @@ static char *schtasks_task_name(const char *frequency)
 {
 	struct strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "Git Maintenance (%s)", frequency);
-	return strbuf_detach(&label, NULL);
+	повернути strbuf_detach(&label, NULL);
 }
 
-static int schtasks_remove_task(enum schedule_priority schedule)
+static ціле schtasks_remove_task(enum schedule_priority schedule)
 {
 	char *cmd;
 	struct child_process child = CHILD_PROCESS_INIT;
@@ -2243,27 +2243,27 @@ static int schtasks_remove_task(enum schedule_priority schedule)
 	free(name);
 	free(cmd);
 
-	return run_command(&child);
+	повернути run_command(&child);
 }
 
-static int schtasks_remove_tasks(void)
+static ціле schtasks_remove_tasks(void)
 {
-	return schtasks_remove_task(SCHEDULE_HOURLY) ||
+	повернути schtasks_remove_task(SCHEDULE_HOURLY) ||
 	       schtasks_remove_task(SCHEDULE_DAILY) ||
 	       schtasks_remove_task(SCHEDULE_WEEKLY);
 }
 
-static int schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
+static ціле schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
 {
 	char *cmd;
-	int result;
+	ціле result;
 	struct child_process child = CHILD_PROCESS_INIT;
 	const char *xml;
 	struct tempfile *tfile;
 	const char *frequency = get_frequency(schedule);
 	char *name = schtasks_task_name(frequency);
 	struct strbuf tfilename = STRBUF_INIT;
-	int minute = get_random_minute();
+	ціле minute = get_random_minute();
 
 	get_schedule_cmd("schtasks", NULL, &cmd);
 
@@ -2272,7 +2272,7 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	tfile = xmks_tempfile(tfilename.buf);
 	strbuf_release(&tfilename);
 
-	if (!fdopen_tempfile(tfile, "w"))
+	якщо (!fdopen_tempfile(tfile, "w"))
 		die(_("failed to create temp xml file"));
 
 	xml = "<?xml version=\"1.0\" ?>\n"
@@ -2366,35 +2366,35 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 
-	if (start_command(&child))
+	якщо (start_command(&child))
 		die(_("failed to start schtasks"));
 	result = finish_command(&child);
 
 	delete_tempfile(&tfile);
 	free(name);
 	free(cmd);
-	return result;
+	повернути result;
 }
 
-static int schtasks_schedule_tasks(void)
+static ціле schtasks_schedule_tasks(void)
 {
 	const char *exec_path = git_exec_path();
 
-	return schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
+	повернути schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_DAILY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int schtasks_update_schedule(int run_maintenance, int fd UNUSED)
+static ціле schtasks_update_schedule(ціле run_maintenance, ціле fd UNUSED)
 {
-	if (run_maintenance)
-		return schtasks_schedule_tasks();
-	else
-		return schtasks_remove_tasks();
+	якщо (run_maintenance)
+		повернути schtasks_schedule_tasks();
+	інакше
+		повернути schtasks_remove_tasks();
 }
 
 MAYBE_UNUSED
-static int check_crontab_process(const char *cmd)
+static ціле check_crontab_process(const char *cmd)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
@@ -2405,20 +2405,20 @@ static int check_crontab_process(const char *cmd)
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
+	якщо (start_command(&child))
+		повернути 0;
 	/* Ignore exit code, as an empty crontab will return error. */
 	finish_command(&child);
-	return 1;
+	повернути 1;
 }
 
-static int is_crontab_available(void)
+static ціле is_crontab_available(void)
 {
 	char *cmd;
-	int is_available;
-	int ret;
+	ціле is_available;
+	ціле ret;
 
-	if (get_schedule_cmd("crontab", &is_available, &cmd)) {
+	якщо (get_schedule_cmd("crontab", &is_available, &cmd)) {
 		ret = is_available;
 		goto out;
 	}
@@ -2429,29 +2429,29 @@ static int is_crontab_available(void)
 	 * create a UI alert when attempting to run this command.
 	 */
 	ret = 0;
-#else
+#інакше
 	ret = check_crontab_process(cmd);
 #endif
 
 out:
 	free(cmd);
-	return ret;
+	повернути ret;
 }
 
 #define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
 #define END_LINE "# END GIT MAINTENANCE SCHEDULE"
 
-static int crontab_update_schedule(int run_maintenance, int fd)
+static ціле crontab_update_schedule(ціле run_maintenance, ціле fd)
 {
 	char *cmd;
-	int result = 0;
-	int in_old_region = 0;
+	ціле result = 0;
+	ціле in_old_region = 0;
 	struct child_process crontab_list = CHILD_PROCESS_INIT;
 	struct child_process crontab_edit = CHILD_PROCESS_INIT;
 	FILE *cron_list, *cron_in;
 	struct strbuf line = STRBUF_INIT;
 	struct tempfile *tmpedit = NULL;
-	int minute = get_random_minute();
+	ціле minute = get_random_minute();
 
 	get_schedule_cmd("crontab", NULL, &cmd);
 	strvec_split(&crontab_list.args, cmd);
@@ -2460,7 +2460,7 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	crontab_list.out = dup(fd);
 	crontab_list.git_cmd = 0;
 
-	if (start_command(&crontab_list)) {
+	якщо (start_command(&crontab_list)) {
 		result = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
 		goto out;
 	}
@@ -2469,12 +2469,12 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	finish_command(&crontab_list);
 
 	tmpedit = mks_tempfile_t(".git_cron_edit_tmpXXXXXX");
-	if (!tmpedit) {
+	якщо (!tmpedit) {
 		result = error(_("failed to create crontab temporary file"));
 		goto out;
 	}
 	cron_in = fdopen_tempfile(tmpedit, "w");
-	if (!cron_in) {
+	якщо (!cron_in) {
 		result = error(_("failed to open temporary file"));
 		goto out;
 	}
@@ -2486,17 +2486,17 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
+	поки (!strbuf_getline_lf(&line, cron_list)) {
+		якщо (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
 			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
+		інакше якщо (in_old_region && !strcmp(line.buf, END_LINE))
 			in_old_region = 0;
-		else if (!in_old_region)
+		інакше якщо (!in_old_region)
 			fprintf(cron_in, "%s\n", line.buf);
 	}
 	strbuf_release(&line);
 
-	if (run_maintenance) {
+	якщо (run_maintenance) {
 		struct strbuf line_format = STRBUF_INIT;
 		const char *exec_path = git_exec_path();
 
@@ -2524,23 +2524,23 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
 	crontab_edit.git_cmd = 0;
 
-	if (start_command(&crontab_edit)) {
+	якщо (start_command(&crontab_edit)) {
 		result = error(_("failed to run 'crontab'; your system might not support 'cron'"));
 		goto out;
 	}
 
-	if (finish_command(&crontab_edit))
+	якщо (finish_command(&crontab_edit))
 		result = error(_("'crontab' died"));
-	else
+	інакше
 		fclose(cron_list);
 
 out:
 	delete_tempfile(&tmpedit);
 	free(cmd);
-	return result;
+	повернути result;
 }
 
-static int real_is_systemd_timer_available(void)
+static ціле real_is_systemd_timer_available(void)
 {
 	struct child_process child = CHILD_PROCESS_INIT;
 
@@ -2550,56 +2550,56 @@ static int real_is_systemd_timer_available(void)
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
-	if (finish_command(&child))
-		return 0;
-	return 1;
+	якщо (start_command(&child))
+		повернути 0;
+	якщо (finish_command(&child))
+		повернути 0;
+	повернути 1;
 }
 
-static int is_systemd_timer_available(void)
+static ціле is_systemd_timer_available(void)
 {
-	int is_available;
+	ціле is_available;
 
-	if (get_schedule_cmd("systemctl", &is_available, NULL))
-		return is_available;
+	якщо (get_schedule_cmd("systemctl", &is_available, NULL))
+		повернути is_available;
 
-	return real_is_systemd_timer_available();
+	повернути real_is_systemd_timer_available();
 }
 
 static char *xdg_config_home_systemd(const char *filename)
 {
-	return xdg_config_home_for("systemd/user", filename);
+	повернути xdg_config_home_for("systemd/user", filename);
 }
 
 #define SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
 
-static int systemd_timer_delete_timer_file(enum schedule_priority priority)
+static ціле systemd_timer_delete_timer_file(enum schedule_priority priority)
 {
-	int ret = 0;
+	ціле ret = 0;
 	const char *frequency = get_frequency(priority);
 	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
 	char *filename = xdg_config_home_systemd(local_timer_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	якщо (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
 	free(filename);
 	free(local_timer_name);
-	return ret;
+	повернути ret;
 }
 
-static int systemd_timer_delete_service_template(void)
+static ціле systemd_timer_delete_service_template(void)
 {
-	int ret = 0;
+	ціле ret = 0;
 	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 	char *filename = xdg_config_home_systemd(local_service_name);
-	if (unlink(filename) && !is_missing_file_error(errno))
+	якщо (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
 	free(filename);
 	free(local_service_name);
-	return ret;
+	повернути ret;
 }
 
 /*
@@ -2607,10 +2607,10 @@ static int systemd_timer_delete_service_template(void)
  * file using a custom minute. This timer file cannot use the templating
  * system, so we generate a specific file for each.
  */
-static int systemd_timer_write_timer_file(enum schedule_priority schedule,
-					  int minute)
+static ціле systemd_timer_write_timer_file(enum schedule_priority schedule,
+					  ціле minute)
 {
-	int res = -1;
+	ціле res = -1;
 	char *filename;
 	FILE *file;
 	const char *unit;
@@ -2620,12 +2620,12 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 
 	filename = xdg_config_home_systemd(local_timer_name);
 
-	if (safe_create_leading_directories(the_repository, filename)) {
+	якщо (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
 		goto error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
+	якщо (!file)
 		goto error;
 
 	switch (schedule) {
@@ -2658,12 +2658,12 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 	       "\n"
 	       "[Install]\n"
 	       "WantedBy=timers.target\n";
-	if (fprintf(file, unit, schedule_pattern) < 0) {
+	якщо (fprintf(file, unit, schedule_pattern) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
 		goto error;
 	}
-	if (fclose(file) == EOF) {
+	якщо (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
 		goto error;
 	}
@@ -2674,7 +2674,7 @@ error:
 	free(schedule_pattern);
 	free(local_timer_name);
 	free(filename);
-	return res;
+	повернути res;
 }
 
 /*
@@ -2684,21 +2684,21 @@ error:
  * and will use this file and insert the <schedule> into the template at
  * the position of "%i".
  */
-static int systemd_timer_write_service_template(const char *exec_path)
+static ціле systemd_timer_write_service_template(const char *exec_path)
 {
-	int res = -1;
+	ціле res = -1;
 	char *filename;
 	FILE *file;
 	const char *unit;
 	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 
 	filename = xdg_config_home_systemd(local_service_name);
-	if (safe_create_leading_directories(the_repository, filename)) {
+	якщо (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
 		goto error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
+	якщо (!file)
 		goto error;
 
 	unit = "# This file was created and is maintained by Git.\n"
@@ -2720,12 +2720,12 @@ static int systemd_timer_write_service_template(const char *exec_path)
 	       "RestrictSUIDSGID=yes\n"
 	       "SystemCallArchitectures=native\n"
 	       "SystemCallFilter=@system-service\n";
-	if (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
+	якщо (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
 		goto error;
 	}
-	if (fclose(file) == EOF) {
+	якщо (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
 		goto error;
 	}
@@ -2735,17 +2735,17 @@ static int systemd_timer_write_service_template(const char *exec_path)
 error:
 	free(local_service_name);
 	free(filename);
-	return res;
+	повернути res;
 }
 
-static int systemd_timer_enable_unit(int enable,
+static ціле systemd_timer_enable_unit(ціле enable,
 				     enum schedule_priority schedule,
-				     int minute)
+				     ціле minute)
 {
 	char *cmd = NULL;
 	struct child_process child = CHILD_PROCESS_INIT;
 	const char *frequency = get_frequency(schedule);
-	int ret;
+	ціле ret;
 
 	/*
 	 * Disabling the systemd unit while it is already disabled makes
@@ -2756,9 +2756,9 @@ static int systemd_timer_enable_unit(int enable,
 	 * On the other hand, enabling a systemd unit which is already enabled
 	 * produces no error.
 	 */
-	if (!enable) {
+	якщо (!enable) {
 		child.no_stderr = 1;
-	} else if (systemd_timer_write_timer_file(schedule, minute)) {
+	} інакше якщо (systemd_timer_write_timer_file(schedule, minute)) {
 		ret = -1;
 		goto out;
 	}
@@ -2769,12 +2769,12 @@ static int systemd_timer_enable_unit(int enable,
 		     "--now", NULL);
 	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
-	if (start_command(&child)) {
+	якщо (start_command(&child)) {
 		ret = error(_("failed to start systemctl"));
 		goto out;
 	}
 
-	if (finish_command(&child)) {
+	якщо (finish_command(&child)) {
 		/*
 		 * Disabling an already disabled systemd unit makes
 		 * systemctl fail.
@@ -2782,7 +2782,7 @@ static int systemd_timer_enable_unit(int enable,
 		 *
 		 * Enabling an enabled systemd unit doesn't fail.
 		 */
-		if (enable) {
+		якщо (enable) {
 			ret = error(_("failed to run systemctl"));
 			goto out;
 		}
@@ -2792,7 +2792,7 @@ static int systemd_timer_enable_unit(int enable,
 
 out:
 	free(cmd);
-	return ret;
+	повернути ret;
 }
 
 /*
@@ -2804,58 +2804,58 @@ static void systemd_timer_delete_stale_timer_templates(void)
 	char *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
 	char *filename = xdg_config_home_systemd(timer_template_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	якщо (unlink(filename) && !is_missing_file_error(errno))
 		warning(_("failed to delete '%s'"), filename);
 
 	free(filename);
 	free(timer_template_name);
 }
 
-static int systemd_timer_delete_unit_files(void)
+static ціле systemd_timer_delete_unit_files(void)
 {
 	systemd_timer_delete_stale_timer_templates();
 
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
+	повернути systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_DAILY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_WEEKLY) |
 	       systemd_timer_delete_service_template();
 }
 
-static int systemd_timer_delete_units(void)
+static ціле systemd_timer_delete_units(void)
 {
-	int minute = get_random_minute();
+	ціле minute = get_random_minute();
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
+	повернути systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_DAILY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_WEEKLY, minute) |
 	       systemd_timer_delete_unit_files();
 }
 
-static int systemd_timer_setup_units(void)
+static ціле systemd_timer_setup_units(void)
 {
-	int minute = get_random_minute();
+	ціле minute = get_random_minute();
 	const char *exec_path = git_exec_path();
 
-	int ret = systemd_timer_write_service_template(exec_path) ||
+	ціле ret = systemd_timer_write_service_template(exec_path) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_HOURLY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_DAILY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_WEEKLY, minute);
 
-	if (ret)
+	якщо (ret)
 		systemd_timer_delete_units();
-	else
+	інакше
 		systemd_timer_delete_stale_timer_templates();
 
-	return ret;
+	повернути ret;
 }
 
-static int systemd_timer_update_schedule(int run_maintenance, int fd UNUSED)
+static ціле systemd_timer_update_schedule(ціле run_maintenance, ціле fd UNUSED)
 {
-	if (run_maintenance)
-		return systemd_timer_setup_units();
-	else
-		return systemd_timer_delete_units();
+	якщо (run_maintenance)
+		повернути systemd_timer_setup_units();
+	інакше
+		повернути systemd_timer_delete_units();
 }
 
 enum scheduler {
@@ -2869,8 +2869,8 @@ enum scheduler {
 
 static const struct {
 	const char *name;
-	int (*is_available)(void);
-	int (*update_schedule)(int run_maintenance, int fd);
+	ціле (*is_available)(void);
+	ціле (*update_schedule)(ціле run_maintenance, ціле fd);
 } scheduler_fn[] = {
 	[SCHEDULER_CRON] = {
 		.name = "crontab",
@@ -2896,34 +2896,34 @@ static const struct {
 
 static enum scheduler parse_scheduler(const char *value)
 {
-	if (!value)
-		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
-		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
-		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
+	якщо (!value)
+		повернути SCHEDULER_INVALID;
+	інакше якщо (!strcasecmp(value, "auto"))
+		повернути SCHEDULER_AUTO;
+	інакше якщо (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
+		повернути SCHEDULER_CRON;
+	інакше якщо (!strcasecmp(value, "systemd") ||
 		 !strcasecmp(value, "systemd-timer"))
-		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
-		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
-		return SCHEDULER_SCHTASKS;
-	else
-		return SCHEDULER_INVALID;
+		повернути SCHEDULER_SYSTEMD;
+	інакше якщо (!strcasecmp(value, "launchctl"))
+		повернути SCHEDULER_LAUNCHCTL;
+	інакше якщо (!strcasecmp(value, "schtasks"))
+		повернути SCHEDULER_SCHTASKS;
+	інакше
+		повернути SCHEDULER_INVALID;
 }
 
-static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
-				     int unset)
+static ціле maintenance_opt_scheduler(const struct option *opt, const char *arg,
+				     ціле unset)
 {
 	enum scheduler *scheduler = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*scheduler = parse_scheduler(arg);
-	if (*scheduler == SCHEDULER_INVALID)
-		return error(_("unrecognized --scheduler argument '%s'"), arg);
-	return 0;
+	якщо (*scheduler == SCHEDULER_INVALID)
+		повернути error(_("unrecognized --scheduler argument '%s'"), arg);
+	повернути 0;
 }
 
 struct maintenance_start_opts {
@@ -2932,78 +2932,78 @@ struct maintenance_start_opts {
 
 static enum scheduler resolve_scheduler(enum scheduler scheduler)
 {
-	if (scheduler != SCHEDULER_AUTO)
-		return scheduler;
+	якщо (scheduler != SCHEDULER_AUTO)
+		повернути scheduler;
 
-#if defined(__APPLE__)
-	return SCHEDULER_LAUNCHCTL;
+#якщо defined(__APPLE__)
+	повернути SCHEDULER_LAUNCHCTL;
 
 #elif defined(GIT_WINDOWS_NATIVE)
-	return SCHEDULER_SCHTASKS;
+	повернути SCHEDULER_SCHTASKS;
 
 #elif defined(__linux__)
-	if (is_systemd_timer_available())
-		return SCHEDULER_SYSTEMD;
-	else if (is_crontab_available())
-		return SCHEDULER_CRON;
-	else
+	якщо (is_systemd_timer_available())
+		повернути SCHEDULER_SYSTEMD;
+	інакше якщо (is_crontab_available())
+		повернути SCHEDULER_CRON;
+	інакше
 		die(_("neither systemd timers nor crontab are available"));
 
-#else
-	return SCHEDULER_CRON;
+#інакше
+	повернути SCHEDULER_CRON;
 #endif
 }
 
 static void validate_scheduler(enum scheduler scheduler)
 {
-	if (scheduler == SCHEDULER_INVALID)
+	якщо (scheduler == SCHEDULER_INVALID)
 		BUG("invalid scheduler");
-	if (scheduler == SCHEDULER_AUTO)
+	якщо (scheduler == SCHEDULER_AUTO)
 		BUG("resolve_scheduler should have been called before");
 
-	if (!scheduler_fn[scheduler].is_available())
+	якщо (!scheduler_fn[scheduler].is_available())
 		die(_("%s scheduler is not available"),
 		    scheduler_fn[scheduler].name);
 }
 
-static int update_background_schedule(const struct maintenance_start_opts *opts,
-				      int enable)
+static ціле update_background_schedule(const struct maintenance_start_opts *opts,
+				      ціле enable)
 {
-	unsigned int i;
-	int result = 0;
+	unsigned ціле i;
+	ціле result = 0;
 	struct lock_file lk;
 	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
 
-	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
-		if (errno == EEXIST)
+	якщо (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
+		якщо (errno == EEXIST)
 			error(_("unable to create '%s.lock': %s.\n\n"
 			    "Another scheduled git-maintenance(1) process seems to be running in this\n"
 			    "repository. Please make sure no other maintenance processes are running and\n"
 			    "then try again. If it still fails, a git-maintenance(1) process may have\n"
 			    "crashed in this repository earlier: remove the file manually to continue."),
 			    absolute_path(lock_path), strerror(errno));
-		else
+		інакше
 			error_errno(_("cannot acquire lock for scheduled background maintenance"));
 		free(lock_path);
-		return -1;
+		повернути -1;
 	}
 
-	for (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
-		if (enable && opts->scheduler == i)
+	для (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
+		якщо (enable && opts->scheduler == i)
 			continue;
-		if (!scheduler_fn[i].is_available())
+		якщо (!scheduler_fn[i].is_available())
 			continue;
 		scheduler_fn[i].update_schedule(0, get_lock_file_fd(&lk));
 	}
 
-	if (enable)
+	якщо (enable)
 		result = scheduler_fn[opts->scheduler].update_schedule(
 			1, get_lock_file_fd(&lk));
 
 	rollback_lock_file(&lk);
 
 	free(lock_path);
-	return result;
+	повернути result;
 }
 
 static const char *const builtin_maintenance_start_usage[] = {
@@ -3011,7 +3011,7 @@ static const char *const builtin_maintenance_start_usage[] = {
 	NULL
 };
 
-static int maintenance_start(int argc, const char **argv, const char *prefix,
+static ціле maintenance_start(ціле argc, const char **argv, const char *prefix,
 			     struct repository *repo)
 {
 	struct maintenance_start_opts opts = { 0 };
@@ -3026,18 +3026,18 @@ static int maintenance_start(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_start_usage, 0);
-	if (argc)
+	якщо (argc)
 		usage_with_options(builtin_maintenance_start_usage, options);
 
 	opts.scheduler = resolve_scheduler(opts.scheduler);
 	validate_scheduler(opts.scheduler);
 
-	if (update_background_schedule(&opts, 1))
+	якщо (update_background_schedule(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	якщо (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
 		warning(_("failed to add repo to global config"));
-	return 0;
+	повернути 0;
 }
 
 static const char *const builtin_maintenance_stop_usage[] = {
@@ -3045,7 +3045,7 @@ static const char *const builtin_maintenance_stop_usage[] = {
 	NULL
 };
 
-static int maintenance_stop(int argc, const char **argv, const char *prefix,
+static ціле maintenance_stop(ціле argc, const char **argv, const char *prefix,
 			    struct repository *repo UNUSED)
 {
 	struct option options[] = {
@@ -3053,9 +3053,9 @@ static int maintenance_stop(int argc, const char **argv, const char *prefix,
 	};
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_stop_usage, 0);
-	if (argc)
+	якщо (argc)
 		usage_with_options(builtin_maintenance_stop_usage, options);
-	return update_background_schedule(NULL, 0);
+	повернути update_background_schedule(NULL, 0);
 }
 
 static const char *const builtin_maintenance_is_needed_usage[] = {
@@ -3063,7 +3063,7 @@ static const char *const builtin_maintenance_is_needed_usage[] = {
 	NULL
 };
 
-static int maintenance_is_needed(int argc, const char **argv, const char *prefix,
+static ціле maintenance_is_needed(ціле argc, const char **argv, const char *prefix,
 				 struct repository *repo UNUSED)
 {
 	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
@@ -3082,21 +3082,21 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_is_needed_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc)
+	якщо (argc)
 		usage_with_options(builtin_maintenance_is_needed_usage, options);
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (opts.auto_flag) {
-		for (size_t i = 0; i < opts.tasks_nr; i++) {
-			if (tasks[opts.tasks[i]].auto_condition &&
+	якщо (opts.auto_flag) {
+		для (size_t i = 0; i < opts.tasks_nr; i++) {
+			якщо (tasks[opts.tasks[i]].auto_condition &&
 			    tasks[opts.tasks[i]].auto_condition(&cfg)) {
 				is_needed = true;
 				break;
 			}
 		}
-	} else {
+	} інакше {
 		/*
 		 * When not using --auto we always require maintenance right now.
 		 *
@@ -3113,9 +3113,9 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
 
-	if (is_needed)
-		return 0;
-	return 1;
+	якщо (is_needed)
+		повернути 0;
+	повернути 1;
 }
 
 static const char *const builtin_maintenance_usage[] = {
@@ -3123,7 +3123,7 @@ static const char *const builtin_maintenance_usage[] = {
 	NULL,
 };
 
-int cmd_maintenance(int argc,
+ціле cmd_maintenance(ціле argc,
 		    const char **argv,
 		    const char *prefix,
 		    struct repository *repo)
@@ -3141,5 +3141,5 @@ int cmd_maintenance(int argc,
 
 	argc = parse_options(argc, argv, prefix, builtin_maintenance_options,
 			     builtin_maintenance_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	повернути fn(argc, argv, prefix, repo);
 }
