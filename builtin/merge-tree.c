@@ -1,166 +1,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "environment.h"
-#include "tree-walk.h"
-#include "xdiff-interface.h"
-#include "help.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "merge-ort.h"
-#include "object-name.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "blob.h"
-#include "merge-blobs.h"
-#include "quote.h"
-#include "tree.h"
-#include "config.h"
-#include "strvec.h"
-#include "write-or-die.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "tree-walk.h"
+#अन्तर्भाव "xdiff-interface.h"
+#अन्तर्भाव "help.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "commit.h"
+#अन्तर्भाव "commit-reach.h"
+#अन्तर्भाव "merge-ort.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "blob.h"
+#अन्तर्भाव "merge-blobs.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "tree.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "strvec.h"
+#अन्तर्भाव "write-or-die.h"
 
-static int line_termination = '\n';
+स्थिर पूर्णाङ्क ओळ_termination = '\n';
 
-struct merge_list {
-	struct merge_list *next;
-	struct merge_list *link;	/* other stages for this object */
+संरचना merge_list {
+	संरचना merge_list *next;
+	संरचना merge_list *link;	/* other stages for this object */
 
-	unsigned int stage : 2;
-	unsigned int mode;
-	const char *path;
-	struct blob *blob;
+	unsigned पूर्णाङ्क stage : 2;
+	unsigned पूर्णाङ्क mode;
+	ध्रुव वर्ण *path;
+	संरचना blob *blob;
 };
 
-static struct merge_list *merge_result, **merge_result_end = &merge_result;
+स्थिर संरचना merge_list *merge_result, **merge_result_end = &merge_result;
 
-static void add_merge_entry(struct merge_list *entry)
+स्थिर शून्य add_merge_entry(संरचना merge_list *entry)
 {
 	*merge_result_end = entry;
 	merge_result_end = &entry->next;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+स्थिर शून्य trivial_merge_trees(संरचना वृक्ष_desc t[3], ध्रुव वर्ण *base);
 
-static const char *explanation(struct merge_list *entry)
+स्थिर ध्रुव वर्ण *explanation(संरचना merge_list *entry)
 {
-	switch (entry->stage) {
-	case 0:
-		return "merged";
-	case 3:
-		return "added in remote";
-	case 2:
-		if (entry->link)
-			return "added in both";
-		return "added in local";
+	विकल्प (entry->stage) {
+	पक्ष 0:
+		प्रत्यागम "merged";
+	पक्ष 3:
+		प्रत्यागम "added in remote";
+	पक्ष 2:
+		यदि (entry->link)
+			प्रत्यागम "added in both";
+		प्रत्यागम "added in local";
 	}
 
 	/* Existed in base */
 	entry = entry->link;
-	if (!entry)
-		return "removed in both";
+	यदि (!entry)
+		प्रत्यागम "removed in both";
 
-	if (entry->link)
-		return "changed in both";
+	यदि (entry->link)
+		प्रत्यागम "changed in both";
 
-	if (entry->stage == 3)
-		return "removed in local";
-	return "removed in remote";
+	यदि (entry->stage == 3)
+		प्रत्यागम "removed in local";
+	प्रत्यागम "removed in remote";
 }
 
-static void *result(struct merge_list *entry, size_t *size)
+स्थिर शून्य *result(संरचना merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	struct blob *base, *our, *their;
-	const char *path = entry->path;
+	गणना object_type type;
+	संरचना blob *base, *our, *their;
+	ध्रुव वर्ण *path = entry->path;
 
-	if (!entry->stage)
-		return odb_read_object(the_repository->objects,
+	यदि (!entry->stage)
+		प्रत्यागम odb_read_object(the_repository->objects,
 				       &entry->blob->object.oid, &type,
 				       size);
-	base = NULL;
-	if (entry->stage == 1) {
+	base = रिक्त;
+	यदि (entry->stage == 1) {
 		base = entry->blob;
 		entry = entry->link;
 	}
-	our = NULL;
-	if (entry && entry->stage == 2) {
+	our = रिक्त;
+	यदि (entry && entry->stage == 2) {
 		our = entry->blob;
 		entry = entry->link;
 	}
-	their = NULL;
-	if (entry)
+	their = रिक्त;
+	यदि (entry)
 		their = entry->blob;
-	return merge_blobs(the_repository->index, path,
+	प्रत्यागम merge_blobs(the_repository->index, path,
 			   base, our, their, size);
 }
 
-static void *origin(struct merge_list *entry, size_t *size)
+स्थिर शून्य *origin(संरचना merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	while (entry) {
-		if (entry->stage == 2)
-			return odb_read_object(the_repository->objects,
+	गणना object_type type;
+	यावत् (entry) {
+		यदि (entry->stage == 2)
+			प्रत्यागम odb_read_object(the_repository->objects,
 					       &entry->blob->object.oid,
 					       &type, size);
 		entry = entry->link;
 	}
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
-static int show_outf(void *priv UNUSED, mmfile_t *mb, int nbuf)
+स्थिर पूर्णाङ्क show_outf(शून्य *priv UNUSED, mmfile_t *mb, पूर्णाङ्क nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		printf("%.*s", (int) mb[i].size, mb[i].ptr);
-	return 0;
+	पूर्णाङ्क i;
+	प्रति (i = 0; i < nbuf; i++)
+		printf("%.*s", (पूर्णाङ्क) mb[i].size, mb[i].ptr);
+	प्रत्यागम 0;
 }
 
-static void show_diff(struct merge_list *entry)
+स्थिर शून्य show_diff(संरचना merge_list *entry)
 {
 	size_t size;
 	mmfile_t src, dst;
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = show_outf };
+	xdemitcb_t ecb = { .out_ओळ = show_outf };
 
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, परिमाण(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, परिमाण(xecfg));
 	xecfg.ctxlen = 3;
 
 	src.ptr = origin(entry, &size);
-	if (!src.ptr)
+	यदि (!src.ptr)
 		size = 0;
 	src.size = size;
 	dst.ptr = result(entry, &size);
-	if (!dst.ptr)
+	यदि (!dst.ptr)
 		size = 0;
 	dst.size = size;
-	if (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
+	यदि (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
 		die("unable to generate diff");
-	free(src.ptr);
-	free(dst.ptr);
+	मुक्त(src.ptr);
+	मुक्त(dst.ptr);
 }
 
-static void show_result_list(struct merge_list *entry)
+स्थिर शून्य show_result_list(संरचना merge_list *entry)
 {
 	printf("%s\n", explanation(entry));
-	do {
-		struct merge_list *link = entry->link;
-		static const char *desc[4] = { "result", "base", "our", "their" };
+	कुरु {
+		संरचना merge_list *link = entry->link;
+		स्थिर ध्रुव वर्ण *desc[4] = { "result", "base", "our", "their" };
 		printf("  %-6s %o %s %s\n", desc[entry->stage], entry->mode, oid_to_hex(&entry->blob->object.oid), entry->path);
 		entry = link;
-	} while (entry);
+	} यावत् (entry);
 }
 
-static void show_result(void)
+स्थिर शून्य show_result(शून्य)
 {
-	struct merge_list *walk;
+	संरचना merge_list *walk;
 
 	walk = merge_result;
-	while (walk) {
+	यावत् (walk) {
 		show_result_list(walk);
 		show_diff(walk);
 		walk = walk->next;
@@ -168,45 +168,45 @@ static void show_result(void)
 }
 
 /* An empty entry never compares same, not even to another empty entry */
-static int same_entry(struct name_entry *a, struct name_entry *b)
+स्थिर पूर्णाङ्क same_entry(संरचना name_entry *a, संरचना name_entry *b)
 {
-	return	!is_null_oid(&a->oid) &&
+	प्रत्यागम	!is_null_oid(&a->oid) &&
 		!is_null_oid(&b->oid) &&
 		oideq(&a->oid, &b->oid) &&
 		a->mode == b->mode;
 }
 
-static int both_empty(struct name_entry *a, struct name_entry *b)
+स्थिर पूर्णाङ्क both_empty(संरचना name_entry *a, संरचना name_entry *b)
 {
-	return is_null_oid(&a->oid) && is_null_oid(&b->oid);
+	प्रत्यागम is_null_oid(&a->oid) && is_null_oid(&b->oid);
 }
 
-static struct merge_list *create_entry(unsigned stage, unsigned mode, const struct object_id *oid, const char *path)
+स्थिर संरचना merge_list *create_entry(unsigned stage, unsigned mode, ध्रुव संरचना object_id *oid, ध्रुव वर्ण *path)
 {
-	struct merge_list *res = xcalloc(1, sizeof(*res));
+	संरचना merge_list *res = xcalloc(1, परिमाण(*res));
 
 	res->stage = stage;
 	res->path = path;
 	res->mode = mode;
 	res->blob = lookup_blob(the_repository, oid);
-	return res;
+	प्रत्यागम res;
 }
 
-static char *traverse_path(const struct traverse_info *info, const struct name_entry *n)
+स्थिर वर्ण *traverse_path(ध्रुव संरचना traverse_info *info, ध्रुव संरचना name_entry *n)
 {
-	struct strbuf buf = STRBUF_INIT;
+	संरचना strbuf buf = STRBUF_INIT;
 	strbuf_make_traverse_path(&buf, info, n->path, n->pathlen);
-	return strbuf_detach(&buf, NULL);
+	प्रत्यागम strbuf_detach(&buf, रिक्त);
 }
 
-static void resolve(const struct traverse_info *info, struct name_entry *ours, struct name_entry *result)
+स्थिर शून्य resolve(ध्रुव संरचना traverse_info *info, संरचना name_entry *ours, संरचना name_entry *result)
 {
-	struct merge_list *orig, *final;
-	const char *path;
+	संरचना merge_list *orig, *final;
+	ध्रुव वर्ण *path;
 
 	/* If it's already ours, don't bother showing it */
-	if (!ours)
-		return;
+	यदि (!ours)
+		प्रत्यागम;
 
 	path = traverse_path(info, result);
 	orig = create_entry(2, ours->mode, &ours->oid, path);
@@ -217,81 +217,81 @@ static void resolve(const struct traverse_info *info, struct name_entry *ours, s
 	add_merge_entry(final);
 }
 
-static void unresolved_directory(const struct traverse_info *info,
-				 struct name_entry n[3])
+स्थिर शून्य unresolved_directory(ध्रुव संरचना traverse_info *info,
+				 संरचना name_entry n[3])
 {
-	struct repository *r = the_repository;
-	char *newbase;
-	struct name_entry *p;
-	struct tree_desc t[3];
-	void *buf0, *buf1, *buf2;
+	संरचना repository *r = the_repository;
+	वर्ण *newbase;
+	संरचना name_entry *p;
+	संरचना वृक्ष_desc t[3];
+	शून्य *buf0, *buf1, *buf2;
 
-	for (p = n; p < n + 3; p++) {
-		if (p->mode && S_ISDIR(p->mode))
-			break;
+	प्रति (p = n; p < n + 3; p++) {
+		यदि (p->mode && S_ISDIR(p->mode))
+			भङ्ग;
 	}
-	if (n + 3 <= p)
-		return; /* there is no tree here */
+	यदि (n + 3 <= p)
+		प्रत्यागम; /* there is no tree here */
 
 	newbase = traverse_path(info, p);
 
-#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : NULL)
-	buf0 = fill_tree_descriptor(r, t + 0, ENTRY_OID(n + 0));
-	buf1 = fill_tree_descriptor(r, t + 1, ENTRY_OID(n + 1));
-	buf2 = fill_tree_descriptor(r, t + 2, ENTRY_OID(n + 2));
+#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : रिक्त)
+	buf0 = fill_वृक्ष_descriptor(r, t + 0, ENTRY_OID(n + 0));
+	buf1 = fill_वृक्ष_descriptor(r, t + 1, ENTRY_OID(n + 1));
+	buf2 = fill_वृक्ष_descriptor(r, t + 2, ENTRY_OID(n + 2));
 #undef ENTRY_OID
 
 	trivial_merge_trees(t, newbase);
 
-	free(buf0);
-	free(buf1);
-	free(buf2);
-	free(newbase);
+	मुक्त(buf0);
+	मुक्त(buf1);
+	मुक्त(buf2);
+	मुक्त(newbase);
 }
 
 
-static struct merge_list *link_entry(unsigned stage, const struct traverse_info *info, struct name_entry *n, struct merge_list *entry)
+स्थिर संरचना merge_list *link_entry(unsigned stage, ध्रुव संरचना traverse_info *info, संरचना name_entry *n, संरचना merge_list *entry)
 {
-	const char *path;
-	struct merge_list *link;
+	ध्रुव वर्ण *path;
+	संरचना merge_list *link;
 
-	if (!n->mode)
-		return entry;
-	if (entry)
+	यदि (!n->mode)
+		प्रत्यागम entry;
+	यदि (entry)
 		path = entry->path;
-	else
+	अन्यथा
 		path = traverse_path(info, n);
 	link = create_entry(stage, n->mode, &n->oid, path);
 	link->link = entry;
-	return link;
+	प्रत्यागम link;
 }
 
-static void unresolved(const struct traverse_info *info, struct name_entry n[3])
+स्थिर शून्य unresolved(ध्रुव संरचना traverse_info *info, संरचना name_entry n[3])
 {
-	struct merge_list *entry = NULL;
-	int i;
+	संरचना merge_list *entry = रिक्त;
+	पूर्णाङ्क i;
 	unsigned dirmask = 0, mask = 0;
 
-	for (i = 0; i < 3; i++) {
+	प्रति (i = 0; i < 3; i++) {
 		mask |= (1 << i);
 		/*
 		 * Treat missing entries as directories so that we return
 		 * after unresolved_directory has handled this.
 		 */
-		if (!n[i].mode || S_ISDIR(n[i].mode))
+		यदि (!n[i].mode || S_ISDIR(n[i].mode))
 			dirmask |= (1 << i);
 	}
 
 	unresolved_directory(info, n);
 
-	if (dirmask == mask)
-		return;
+	यदि (dirmask == mask)
+		प्रत्यागम;
 
-	if (n[2].mode && !S_ISDIR(n[2].mode))
+	यदि (n[2].mode && !S_ISDIR(n[2].mode))
 		entry = link_entry(3, info, n + 2, entry);
-	if (n[1].mode && !S_ISDIR(n[1].mode))
+	यदि (n[1].mode && !S_ISDIR(n[1].mode))
 		entry = link_entry(2, info, n + 1, entry);
-	if (n[0].mode && !S_ISDIR(n[0].mode))
+	यदि (n[0].mode && !S_ISDIR(n[0].mode))
 		entry = link_entry(1, info, n + 0, entry);
 
 	add_merge_entry(entry);
@@ -326,22 +326,22 @@ static void unresolved(const struct traverse_info *info, struct name_entry n[3])
  * The successful merge rules are the same as for the three-way merge
  * in git-read-tree.
  */
-static int threeway_callback(int n UNUSED, unsigned long mask,
+स्थिर पूर्णाङ्क threeway_callback(पूर्णाङ्क n UNUSED, unsigned long mask,
 			     unsigned long dirmask UNUSED,
-			     struct name_entry *entry, struct traverse_info *info)
+			     संरचना name_entry *entry, संरचना traverse_info *info)
 {
 	/* Same in both? */
-	if (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
+	यदि (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
 		/* Modified, added or removed identically */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, रिक्त, entry+1);
+		प्रत्यागम mask;
 	}
 
-	if (same_entry(entry+0, entry+1)) {
-		if (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
+	यदि (same_entry(entry+0, entry+1)) {
+		यदि (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
 			/* We did not touch, they modified -- take theirs */
 			resolve(info, entry+1, entry+2);
-			return mask;
+			प्रत्यागम mask;
 		}
 		/*
 		 * If we did not touch a directory but they made it
@@ -350,85 +350,85 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 		 */
 	}
 
-	if (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
+	यदि (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
 		/* We added, modified or removed, they did not touch -- take ours */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, रिक्त, entry+1);
+		प्रत्यागम mask;
 	}
 
 	unresolved(info, entry);
-	return mask;
+	प्रत्यागम mask;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+स्थिर शून्य trivial_merge_trees(संरचना वृक्ष_desc t[3], ध्रुव वर्ण *base)
 {
-	struct traverse_info info;
+	संरचना traverse_info info;
 
 	setup_traverse_info(&info, base);
 	info.fn = threeway_callback;
 	traverse_trees(the_repository->index, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
-				 const char *rev)
+स्थिर शून्य *get_वृक्ष_descriptor(संरचना repository *r,
+				 संरचना वृक्ष_desc *desc,
+				 ध्रुव वर्ण *rev)
 {
-	struct object_id oid;
-	void *buf;
+	संरचना object_id oid;
+	शून्य *buf;
 
-	if (repo_get_oid(r, rev, &oid))
+	यदि (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
-	buf = fill_tree_descriptor(r, desc, &oid);
-	if (!buf)
+	buf = fill_वृक्ष_descriptor(r, desc, &oid);
+	यदि (!buf)
 		die("%s is not a tree", rev);
-	return buf;
+	प्रत्यागम buf;
 }
 
-static int trivial_merge(const char *base,
-			 const char *branch1,
-			 const char *branch2)
+स्थिर पूर्णाङ्क trivial_merge(ध्रुव वर्ण *base,
+			 ध्रुव वर्ण *branch1,
+			 ध्रुव वर्ण *branch2)
 {
-	struct repository *r = the_repository;
-	struct tree_desc t[3];
-	void *buf1, *buf2, *buf3;
+	संरचना repository *r = the_repository;
+	संरचना वृक्ष_desc t[3];
+	शून्य *buf1, *buf2, *buf3;
 
-	buf1 = get_tree_descriptor(r, t+0, base);
-	buf2 = get_tree_descriptor(r, t+1, branch1);
-	buf3 = get_tree_descriptor(r, t+2, branch2);
+	buf1 = get_वृक्ष_descriptor(r, t+0, base);
+	buf2 = get_वृक्ष_descriptor(r, t+1, branch1);
+	buf3 = get_वृक्ष_descriptor(r, t+2, branch2);
 	trivial_merge_trees(t, "");
-	free(buf1);
-	free(buf2);
-	free(buf3);
+	मुक्त(buf1);
+	मुक्त(buf2);
+	मुक्त(buf3);
 
 	show_result();
-	return 0;
+	प्रत्यागम 0;
 }
 
-enum mode {
+गणना mode {
 	MODE_UNKNOWN,
 	MODE_TRIVIAL,
 	MODE_REAL,
 };
 
-struct merge_tree_options {
-	int mode;
-	int allow_unrelated_histories;
-	int show_messages;
-	int name_only;
-	int use_stdin;
-	struct merge_options merge_options;
+संरचना merge_वृक्ष_options {
+	पूर्णाङ्क mode;
+	पूर्णाङ्क allow_unrelated_histories;
+	पूर्णाङ्क show_messages;
+	पूर्णाङ्क name_only;
+	पूर्णाङ्क use_stdin;
+	संरचना merge_options merge_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
-		      const char *merge_base,
-		      const char *branch1, const char *branch2,
-		      const char *prefix)
+स्थिर पूर्णाङ्क real_merge(संरचना merge_वृक्ष_options *o,
+		      ध्रुव वर्ण *merge_base,
+		      ध्रुव वर्ण *branch1, ध्रुव वर्ण *branch2,
+		      ध्रुव वर्ण *prefix)
 {
-	struct commit *parent1, *parent2;
-	struct commit_list *merge_bases = NULL;
-	struct merge_result result = { 0 };
-	int show_messages = o->show_messages;
-	struct merge_options opt;
+	संरचना commit *parent1, *parent2;
+	संरचना commit_list *merge_bases = रिक्त;
+	संरचना merge_result result = { 0 };
+	पूर्णाङ्क show_messages = o->show_messages;
+	संरचना merge_options opt;
 
 	copy_merge_options(&opt, &o->merge_options);
 	opt.show_rename_progress = 0;
@@ -436,44 +436,44 @@ static int real_merge(struct merge_tree_options *o,
 	opt.branch1 = branch1;
 	opt.branch2 = branch2;
 
-	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+	यदि (merge_base) {
+		संरचना वृक्ष *base_वृक्ष, *parent1_वृक्ष, *parent2_वृक्ष;
 
 		/*
 		 * We actually only need the trees because we already
 		 * have a merge base.
 		 */
-		struct object_id base_oid, head_oid, merge_oid;
+		संरचना object_id base_oid, head_oid, merge_oid;
 
-		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
+		यदि (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
 			die(_("could not parse as tree '%s'"), merge_base);
-		base_tree = repo_parse_tree_indirect(the_repository,
+		base_वृक्ष = repo_parse_वृक्ष_indirect(the_repository,
 						     &base_oid);
-		if (!base_tree)
+		यदि (!base_वृक्ष)
 			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
-		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
+		यदि (repo_get_oid_treeish(the_repository, branch1, &head_oid))
 			die(_("could not parse as tree '%s'"), branch1);
-		parent1_tree = repo_parse_tree_indirect(the_repository,
+		parent1_वृक्ष = repo_parse_वृक्ष_indirect(the_repository,
 							&head_oid);
-		if (!parent1_tree)
+		यदि (!parent1_वृक्ष)
 			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
-		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
+		यदि (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
 			die(_("could not parse as tree '%s'"), branch2);
-		parent2_tree = repo_parse_tree_indirect(the_repository,
+		parent2_वृक्ष = repo_parse_वृक्ष_indirect(the_repository,
 							&merge_oid);
-		if (!parent2_tree)
+		यदि (!parent2_वृक्ष)
 			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
 
 		opt.ancestor = merge_base;
-		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
-	} else {
+		merge_incore_nonrecursive(&opt, base_वृक्ष, parent1_वृक्ष, parent2_वृक्ष, &result);
+	} अन्यथा {
 		parent1 = get_merge_parent(branch1);
-		if (!parent1)
+		यदि (!parent1)
 			help_unknown_ref(branch1, "merge-tree",
 					 _("not something we can merge"));
 
 		parent2 = get_merge_parent(branch2);
-		if (!parent2)
+		यदि (!parent2)
 			help_unknown_ref(branch2, "merge-tree",
 					 _("not something we can merge"));
 
@@ -481,80 +481,80 @@ static int real_merge(struct merge_tree_options *o,
 		 * Get the merge bases, in reverse order; see comment above
 		 * merge_incore_recursive in merge-ort.h
 		 */
-		if (repo_get_merge_bases(the_repository, parent1,
+		यदि (repo_get_merge_bases(the_repository, parent1,
 					 parent2, &merge_bases) < 0)
 			exit(128);
-		if (!merge_bases && !o->allow_unrelated_histories)
+		यदि (!merge_bases && !o->allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		merge_bases = commit_list_reverse(merge_bases);
 		merge_incore_recursive(&opt, merge_bases, parent1, parent2, &result);
 		commit_list_free(merge_bases);
 	}
 
-	if (result.clean < 0)
+	यदि (result.clean < 0)
 		die(_("failure to merge"));
 
-	if (o->merge_options.mergeability_only)
-		goto cleanup;
+	यदि (o->merge_options.mergeability_only)
+		गच्छ cleanup;
 
-	if (show_messages == -1)
+	यदि (show_messages == -1)
 		show_messages = !result.clean;
 
-	if (o->use_stdin)
-		printf("%d%c", result.clean, line_termination);
-	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
-	if (!result.clean) {
-		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
-		const char *last = NULL;
+	यदि (o->use_stdin)
+		printf("%d%c", result.clean, ओळ_termination);
+	printf("%s%c", oid_to_hex(&result.वृक्ष->object.oid), ओळ_termination);
+	यदि (!result.clean) {
+		संरचना string_list conflicted_files = STRING_LIST_INIT_NODUP;
+		ध्रुव वर्ण *last = रिक्त;
 
 		merge_get_conflicted_files(&result, &conflicted_files);
-		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
-			if (!o->name_only)
+		प्रति (size_t i = 0; i < conflicted_files.nr; i++) {
+			ध्रुव वर्ण *name = conflicted_files.वस्तुसंच[i].string;
+			संरचना stage_info *c = conflicted_files.वस्तुसंच[i].util;
+			यदि (!o->name_only)
 				printf("%06o %s %d\t",
 				       c->mode, oid_to_hex(&c->oid), c->stage);
-			else if (last && !strcmp(last, name))
-				continue;
+			अन्यथा यदि (last && !strcmp(last, name))
+				अनुवर्त;
 			write_name_quoted_relative(
-				name, prefix, stdout, line_termination);
+				name, prefix, stdout, ओळ_termination);
 			last = name;
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
-	if (show_messages) {
-		putchar(line_termination);
-		merge_display_update_messages(&opt, line_termination == '\0',
+	यदि (show_messages) {
+		putchar(ओळ_termination);
+		merge_display_update_messages(&opt, ओळ_termination == '\0',
 					      &result);
 	}
-	if (o->use_stdin)
-		putchar(line_termination);
+	यदि (o->use_stdin)
+		putchar(ओळ_termination);
 
 cleanup:
 	merge_finalize(&opt, &result);
 	clear_merge_options(&opt);
-	return !result.clean; /* result.clean < 0 handled above */
+	प्रत्यागम !result.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_merge_वृक्ष(पूर्णाङ्क argc,
+		   ध्रुव वर्ण **argv,
+		   ध्रुव वर्ण *prefix,
+		   संरचना repository *repo UNUSED)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
-	struct strvec xopts = STRVEC_INIT;
-	int expected_remaining_argc;
-	int original_argc;
-	const char *merge_base = NULL;
-	int ret;
-	int quiet = 0;
+	संरचना merge_वृक्ष_options o = { .show_messages = -1 };
+	संरचना strvec xopts = STRVEC_INIT;
+	पूर्णाङ्क expected_remaining_argc;
+	पूर्णाङ्क original_argc;
+	ध्रुव वर्ण *merge_base = रिक्त;
+	पूर्णाङ्क ret;
+	पूर्णाङ्क quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	ध्रुव वर्ण * ध्रुव merge_वृक्ष_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
-		NULL
+		रिक्त
 	};
-	struct option mt_options[] = {
+	संरचना option mt_options[] = {
 		OPT_CMDMODE(0, "write-tree", &o.mode,
 			    N_("do a real merge instead of a trivial merge"),
 			    MODE_REAL),
@@ -566,7 +566,7 @@ int cmd_merge_tree(int argc,
 			   &quiet,
 			   N_("suppress all output; only exit status wanted"),
 			   PARSE_OPT_NONEG),
-		OPT_SET_INT('z', NULL, &line_termination,
+		OPT_SET_INT('z', रिक्त, &ओळ_termination,
 			    N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL_F(0, "name-only",
 			   &o.name_only,
@@ -595,56 +595,56 @@ int cmd_merge_tree(int argc,
 	/* Parse arguments */
 	original_argc = argc - 1; /* ignoring argv[0] */
 	argc = parse_options(argc, argv, prefix, mt_options,
-			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
+			     merge_वृक्ष_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (quiet && o.show_messages == -1)
+	यदि (quiet && o.show_messages == -1)
 		o.show_messages = 0;
 	o.merge_options.mergeability_only = quiet;
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
 	die_for_incompatible_opt2(quiet, "--quiet", o.name_only, "--name-only");
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
-	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
+	die_for_incompatible_opt2(quiet, "--quiet", !ओळ_termination, "-z");
 
-	if (xopts.nr && o.mode == MODE_TRIVIAL)
+	यदि (xopts.nr && o.mode == MODE_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
-	for (size_t x = 0; x < xopts.nr; x++)
-		if (parse_merge_opt(&o.merge_options, xopts.v[x]))
+	प्रति (size_t x = 0; x < xopts.nr; x++)
+		यदि (parse_merge_opt(&o.merge_options, xopts.v[x]))
 			die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 	/* Handle --stdin */
-	if (o.use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
+	यदि (o.use_stdin) {
+		संरचना strbuf buf = STRBUF_INIT;
 
-		if (o.mode == MODE_TRIVIAL)
+		यदि (o.mode == MODE_TRIVIAL)
 			die(_("--trivial-merge is incompatible with all other options"));
-		if (merge_base)
+		यदि (merge_base)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
-		line_termination = '\0';
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
-			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+		ओळ_termination = '\0';
+		यावत् (strbuf_getline_lf(&buf, stdin) != EOF) {
+			संरचना string_list split = STRING_LIST_INIT_NODUP;
+			ध्रुव वर्ण *आदान_merge_base = रिक्त;
 
 			string_list_split_in_place_f(&split, buf.buf, " ", -1,
 						     STRING_LIST_SPLIT_TRIM);
 
-			if (split.nr < 2)
+			यदि (split.nr < 2)
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
-				input_merge_base = split.items[0].string;
+			यदि (!strcmp(split.वस्तुसंच[1].string, "--")) {
+				आदान_merge_base = split.वस्तुसंच[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
-				real_merge(&o, input_merge_base,
-					   split.items[2].string, split.items[3].string,
+			यदि (आदान_merge_base && split.nr == 4) {
+				real_merge(&o, आदान_merge_base,
+					   split.वस्तुसंच[2].string, split.वस्तुसंच[3].string,
 					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
-				real_merge(&o, NULL,
-					   split.items[0].string, split.items[1].string,
+			} अन्यथा यदि (!आदान_merge_base && split.nr == 2) {
+				real_merge(&o, रिक्त,
+					   split.वस्तुसंच[0].string, split.वस्तुसंच[1].string,
 					   prefix);
-			} else {
+			} अन्यथा {
 				die(_("malformed input line: '%s'."), buf.buf);
 			}
 			maybe_flush_or_die(stdout, "stdout");
@@ -654,50 +654,50 @@ int cmd_merge_tree(int argc,
 		strbuf_release(&buf);
 
 		ret = 0;
-		goto out;
+		गच्छ out;
 	}
 
 	/* Figure out which mode to use */
-	switch (o.mode) {
-	default:
+	विकल्प (o.mode) {
+	स्वभाव:
 		BUG("unexpected command mode %d", o.mode);
-	case MODE_UNKNOWN:
-		switch (argc) {
-		default:
-			usage_with_options(merge_tree_usage, mt_options);
-		case 2:
+	पक्ष MODE_UNKNOWN:
+		विकल्प (argc) {
+		स्वभाव:
+			usage_with_options(merge_वृक्ष_usage, mt_options);
+		पक्ष 2:
 			o.mode = MODE_REAL;
-			break;
-		case 3:
+			भङ्ग;
+		पक्ष 3:
 			o.mode = MODE_TRIVIAL;
-			break;
+			भङ्ग;
 		}
 		expected_remaining_argc = argc;
-		break;
-	case MODE_REAL:
+		भङ्ग;
+	पक्ष MODE_REAL:
 		expected_remaining_argc = 2;
-		break;
-	case MODE_TRIVIAL:
+		भङ्ग;
+	पक्ष MODE_TRIVIAL:
 		expected_remaining_argc = 3;
 		/* Removal of `--trivial-merge` is expected */
 		original_argc--;
-		break;
+		भङ्ग;
 	}
-	if (o.mode == MODE_TRIVIAL && argc < original_argc)
+	यदि (o.mode == MODE_TRIVIAL && argc < original_argc)
 		die(_("--trivial-merge is incompatible with all other options"));
 
-	if (argc != expected_remaining_argc)
-		usage_with_options(merge_tree_usage, mt_options);
+	यदि (argc != expected_remaining_argc)
+		usage_with_options(merge_वृक्ष_usage, mt_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
 	/* Do the relevant type of merge */
-	if (o.mode == MODE_REAL)
+	यदि (o.mode == MODE_REAL)
 		ret = real_merge(&o, merge_base, argv[0], argv[1], prefix);
-	else
+	अन्यथा
 		ret = trivial_merge(argv[0], argv[1], argv[2]);
 
 out:
 	strvec_clear(&xopts);
-	return ret;
+	प्रत्यागम ret;
 }

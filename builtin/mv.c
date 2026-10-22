@@ -7,35 +7,35 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "name-hash.h"
-#include "object-file.h"
-#include "path.h"
-#include "pathspec.h"
-#include "lockfile.h"
-#include "dir.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "read-cache-ll.h"
-#include "symlinks.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "abspath.h"
+#अन्तर्भाव "advice.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "name-hash.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "pathspec.h"
+#अन्तर्भाव "lockfile.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "read-cache-ll.h"
+#अन्तर्भाव "symlinks.h"
 
-#include "setup.h"
-#include "strvec.h"
-#include "submodule.h"
-#include "entry.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "strvec.h"
+#अन्तर्भाव "submodule.h"
+#अन्तर्भाव "entry.h"
 
-static const char * const builtin_mv_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव builtin_mv_usage[] = {
 	N_("git mv [-v] [-f] [-n] [-k] <source> <destination>"),
 	N_("git mv [-v] [-f] [-n] [-k] <source>... <destination-directory>"),
-	NULL
+	रिक्त
 };
 
-enum update_mode {
+गणना update_mode {
 	WORKING_DIRECTORY = (1 << 1),
 	INDEX = (1 << 2),
 	SPARSE = (1 << 3),
@@ -49,98 +49,98 @@ enum update_mode {
 	MOVE_VIA_PARENT_DIR = (1 << 5),
 };
 
-static int needs_worktree_rename(enum update_mode mode, enum update_mode dst_mode)
+स्थिर पूर्णाङ्क needs_worktree_rename(गणना update_mode mode, गणना update_mode dst_mode)
 {
-	return !(mode & (INDEX | SPARSE | SKIP_WORKTREE_DIR)) &&
+	प्रत्यागम !(mode & (INDEX | SPARSE | SKIP_WORKTREE_DIR)) &&
 	       !(dst_mode & (SKIP_WORKTREE_DIR | SPARSE));
 }
 
 #define DUP_BASENAME 1
 #define KEEP_TRAILING_SLASH 2
 
-static void internal_prefix_pathspec(struct strvec *out,
-				     const char *prefix,
-				     const char **pathspec,
-				     int count, unsigned flags)
+स्थिर शून्य internal_prefix_pathspec(संरचना strvec *out,
+				     ध्रुव वर्ण *prefix,
+				     ध्रुव वर्ण **pathspec,
+				     पूर्णाङ्क मोजणी, unsigned flags)
 {
-	int prefixlen = prefix ? strlen(prefix) : 0;
+	पूर्णाङ्क prefixlen = prefix ? strlen(prefix) : 0;
 
 	/* Create an intermediate copy of the pathspec based on the flags */
-	for (int i = 0; i < count; i++) {
+	प्रति (पूर्णाङ्क i = 0; i < मोजणी; i++) {
 		size_t length = strlen(pathspec[i]);
 		size_t to_copy = length;
-		const char *maybe_basename;
-		char *trimmed, *prefixed_path;
+		ध्रुव वर्ण *maybe_basename;
+		वर्ण *trimmed, *prefixed_path;
 
-		while (!(flags & KEEP_TRAILING_SLASH) &&
+		यावत् (!(flags & KEEP_TRAILING_SLASH) &&
 		       to_copy > 0 && is_dir_sep(pathspec[i][to_copy - 1]))
 			to_copy--;
 
 		trimmed = xmemdupz(pathspec[i], to_copy);
 		maybe_basename = (flags & DUP_BASENAME) ? basename(trimmed) : trimmed;
 		prefixed_path = prefix_path(the_repository, prefix, prefixlen, maybe_basename);
-		strvec_push(out, prefixed_path);
+		strvec_ढकला(out, prefixed_path);
 
-		free(prefixed_path);
-		free(trimmed);
+		मुक्त(prefixed_path);
+		मुक्त(trimmed);
 	}
 }
 
-static char *add_slash(const char *path)
+स्थिर वर्ण *add_slash(ध्रुव वर्ण *path)
 {
 	size_t len = strlen(path);
-	if (len && path[len - 1] != '/') {
-		char *with_slash = xmalloc(st_add(len, 2));
+	यदि (len && path[len - 1] != '/') {
+		वर्ण *with_slash = xmalloc(st_add(len, 2));
 		memcpy(with_slash, path, len);
 		with_slash[len++] = '/';
 		with_slash[len] = 0;
-		return with_slash;
+		प्रत्यागम with_slash;
 	}
-	return xstrdup(path);
+	प्रत्यागम xstrdup(path);
 }
 
-#define SUBMODULE_WITH_GITDIR ((const char *)1)
+#define SUBMODULE_WITH_GITDIR ((ध्रुव वर्ण *)1)
 
-static const char *submodule_gitfile_path(const char *src, int first)
+स्थिर ध्रुव वर्ण *submodule_gitfile_path(ध्रुव वर्ण *src, पूर्णाङ्क first)
 {
-	struct strbuf submodule_dotgit = STRBUF_INIT;
-	const char *path;
+	संरचना strbuf submodule_dotgit = STRBUF_INIT;
+	ध्रुव वर्ण *path;
 
-	if (!S_ISGITLINK(the_repository->index->cache[first]->ce_mode))
+	यदि (!S_ISGITLINK(the_repository->index->cache[first]->ce_mode))
 		die(_("Directory %s is in index and no submodule?"), src);
-	if (!is_staging_gitmodules_ok(the_repository->index))
+	यदि (!is_staging_gitmodules_ok(the_repository->index))
 		die(_("Please stage your changes to .gitmodules or stash them to proceed"));
 
 	strbuf_addf(&submodule_dotgit, "%s/.git", src);
 
 	path = read_gitfile(submodule_dotgit.buf);
 	strbuf_release(&submodule_dotgit);
-	if (path)
-		return path;
-	return SUBMODULE_WITH_GITDIR;
+	यदि (path)
+		प्रत्यागम path;
+	प्रत्यागम SUBMODULE_WITH_GITDIR;
 }
 
-static int index_range_of_same_dir(const char *src, int length,
-				   int *first_p, int *last_p)
+स्थिर पूर्णाङ्क index_range_of_same_dir(ध्रुव वर्ण *src, पूर्णाङ्क length,
+				   पूर्णाङ्क *first_p, पूर्णाङ्क *last_p)
 {
-	char *src_w_slash = add_slash(src);
-	int first, last, len_w_slash = length + 1;
+	वर्ण *src_w_slash = add_slash(src);
+	पूर्णाङ्क first, last, len_w_slash = length + 1;
 
 	first = index_name_pos(the_repository->index, src_w_slash, len_w_slash);
-	if (first >= 0)
+	यदि (first >= 0)
 		die(_("%.*s is in index"), len_w_slash, src_w_slash);
 
 	first = -1 - first;
-	for (last = first; last < the_repository->index->cache_nr; last++) {
-		const char *path = the_repository->index->cache[last]->name;
-		if (strncmp(path, src_w_slash, len_w_slash))
-			break;
+	प्रति (last = first; last < the_repository->index->cache_nr; last++) {
+		ध्रुव वर्ण *path = the_repository->index->cache[last]->name;
+		यदि (strncmp(path, src_w_slash, len_w_slash))
+			भङ्ग;
 	}
 
-	free(src_w_slash);
+	मुक्त(src_w_slash);
 	*first_p = first;
 	*last_p = last;
-	return last - first;
+	प्रत्यागम last - first;
 }
 
 /*
@@ -150,44 +150,44 @@ static int index_range_of_same_dir(const char *src, int length,
  * Return 1 if such index entries exist.
  * Return 0 otherwise.
  */
-static int empty_dir_has_sparse_contents(const char *name)
+स्थिर पूर्णाङ्क empty_dir_has_sparse_contents(ध्रुव वर्ण *name)
 {
-	int ret = 0;
-	char *with_slash = add_slash(name);
-	int length = strlen(with_slash);
+	पूर्णाङ्क ret = 0;
+	वर्ण *with_slash = add_slash(name);
+	पूर्णाङ्क length = strlen(with_slash);
 
-	int pos = index_name_pos(the_repository->index, with_slash, length);
-	const struct cache_entry *ce;
+	पूर्णाङ्क pos = index_name_pos(the_repository->index, with_slash, length);
+	ध्रुव संरचना cache_entry *ce;
 
-	if (pos < 0) {
+	यदि (pos < 0) {
 		pos = -pos - 1;
-		if (pos >= the_repository->index->cache_nr)
-			goto free_return;
+		यदि (pos >= the_repository->index->cache_nr)
+			गच्छ free_return;
 		ce = the_repository->index->cache[pos];
-		if (strncmp(with_slash, ce->name, length))
-			goto free_return;
-		if (ce_skip_worktree(ce))
+		यदि (strncmp(with_slash, ce->name, length))
+			गच्छ free_return;
+		यदि (ce_skip_worktree(ce))
 			ret = 1;
 	}
 
 free_return:
-	free(with_slash);
-	return ret;
+	मुक्त(with_slash);
+	प्रत्यागम ret;
 }
 
-static void remove_empty_src_dirs(const char **src_dir, size_t src_dir_nr)
+स्थिर शून्य remove_empty_src_dirs(ध्रुव वर्ण **src_dir, size_t src_dir_nr)
 {
 	size_t i;
-	struct strbuf a_src_dir = STRBUF_INIT;
+	संरचना strbuf a_src_dir = STRBUF_INIT;
 
-	for (i = 0; i < src_dir_nr; i++) {
-		int dummy;
+	प्रति (i = 0; i < src_dir_nr; i++) {
+		पूर्णाङ्क dummy;
 		strbuf_addstr(&a_src_dir, src_dir[i]);
 		/*
 		 * if entries under a_src_dir are all moved away,
 		 * recursively remove a_src_dir to cleanup
 		 */
-		if (index_range_of_same_dir(a_src_dir.buf, a_src_dir.len,
+		यदि (index_range_of_same_dir(a_src_dir.buf, a_src_dir.len,
 					    &dummy, &dummy) < 1) {
 			remove_dir_recursively(&a_src_dir, 0);
 		}
@@ -197,65 +197,65 @@ static void remove_empty_src_dirs(const char **src_dir, size_t src_dir_nr)
 	strbuf_release(&a_src_dir);
 }
 
-struct pathmap_entry {
-	struct hashmap_entry ent;
-	const char *path;
+संरचना pathmap_entry {
+	संरचना hashmap_entry ent;
+	ध्रुव वर्ण *path;
 };
 
-static int pathmap_cmp(const void *cmp_data UNUSED,
-		       const struct hashmap_entry *a,
-		       const struct hashmap_entry *b,
-		       const void *key UNUSED)
+स्थिर पूर्णाङ्क pathmap_cmp(ध्रुव शून्य *cmp_data UNUSED,
+		       ध्रुव संरचना hashmap_entry *a,
+		       ध्रुव संरचना hashmap_entry *b,
+		       ध्रुव शून्य *किल्ली UNUSED)
 {
-	const struct pathmap_entry *e1 = container_of(a, struct pathmap_entry, ent);
-	const struct pathmap_entry *e2 = container_of(b, struct pathmap_entry, ent);
-	return fspathcmp(e1->path, e2->path);
+	ध्रुव संरचना pathmap_entry *e1 = container_of(a, संरचना pathmap_entry, ent);
+	ध्रुव संरचना pathmap_entry *e2 = container_of(b, संरचना pathmap_entry, ent);
+	प्रत्यागम fspathcmp(e1->path, e2->path);
 }
 
-int cmd_mv(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_mv(पूर्णाङ्क argc,
+	   ध्रुव वर्ण **argv,
+	   ध्रुव वर्ण *prefix,
+	   संरचना repository *repo UNUSED)
 {
-	int i, flags, gitmodules_modified = 0;
-	int verbose = 0, show_only = 0, force = 0, ignore_errors = 0, ignore_sparse = 0;
-	struct option builtin_mv_options[] = {
+	पूर्णाङ्क i, flags, gitmodules_modified = 0;
+	पूर्णाङ्क verbose = 0, show_only = 0, force = 0, ignore_errors = 0, ignore_sparse = 0;
+	संरचना option builtin_mv_options[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT__DRY_RUN(&show_only, N_("dry run")),
 		OPT__FORCE(&force, N_("force move/rename even if target exists"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_BOOL('k', NULL, &ignore_errors, N_("skip move/rename errors")),
+		OPT_BOOL('k', रिक्त, &ignore_errors, N_("skip move/rename errors")),
 		OPT_BOOL(0, "sparse", &ignore_sparse, N_("allow updating entries outside of the sparse-checkout cone")),
 		OPT_END(),
 	};
-	struct strvec sources = STRVEC_INIT;
-	struct strvec dest_paths = STRVEC_INIT;
-	struct strvec destinations = STRVEC_INIT;
-	struct strvec submodule_gitfiles_to_free = STRVEC_INIT;
-	const char **submodule_gitfiles;
-	char *dst_w_slash = NULL;
-	struct strvec src_dir = STRVEC_INIT;
-	enum update_mode *modes, dst_mode = 0;
-	struct stat st, dest_st;
-	struct string_list src_for_dst = STRING_LIST_INIT_DUP;
-	struct lock_file lock_file = LOCK_INIT;
-	struct cache_entry *ce;
-	struct string_list only_match_skip_worktree = STRING_LIST_INIT_DUP;
-	struct string_list dirty_paths = STRING_LIST_INIT_DUP;
-	struct hashmap moved_dirs = HASHMAP_INIT(pathmap_cmp, NULL);
-	struct strbuf pathbuf = STRBUF_INIT;
-	int ret;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	संरचना strvec sources = STRVEC_INIT;
+	संरचना strvec dest_paths = STRVEC_INIT;
+	संरचना strvec destinations = STRVEC_INIT;
+	संरचना strvec submodule_gitfiles_to_free = STRVEC_INIT;
+	ध्रुव वर्ण **submodule_gitfiles;
+	वर्ण *dst_w_slash = रिक्त;
+	संरचना strvec src_dir = STRVEC_INIT;
+	गणना update_mode *modes, dst_mode = 0;
+	संरचना stat st, dest_st;
+	संरचना string_list src_for_dst = STRING_LIST_INIT_DUP;
+	संरचना lock_file lock_file = LOCK_INIT;
+	संरचना cache_entry *ce;
+	संरचना string_list only_match_skip_worktree = STRING_LIST_INIT_DUP;
+	संरचना string_list dirty_paths = STRING_LIST_INIT_DUP;
+	संरचना hashmap moved_dirs = HASHMAP_INIT(pathmap_cmp, रिक्त);
+	संरचना strbuf pathbuf = STRBUF_INIT;
+	पूर्णाङ्क ret;
+	संरचना repo_config_मूल्ये *cfg = repo_config_मूल्ये(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, builtin_mv_options,
 			     builtin_mv_usage, 0);
-	if (--argc < 1)
+	यदि (--argc < 1)
 		usage_with_options(builtin_mv_usage, builtin_mv_options);
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
-	if (repo_read_index(the_repository) < 0)
+	यदि (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	internal_prefix_pathspec(&sources, prefix, argv, argc, 0);
@@ -267,24 +267,24 @@ int cmd_mv(int argc,
 	 * "git mv directory no-such-dir/".
 	 */
 	flags = KEEP_TRAILING_SLASH;
-	if (argc == 1 && is_directory(argv[0]) && !is_directory(argv[1]))
+	यदि (argc == 1 && is_directory(argv[0]) && !is_directory(argv[1]))
 		flags = 0;
 	internal_prefix_pathspec(&dest_paths, prefix, argv + argc, 1, flags);
 	dst_w_slash = add_slash(dest_paths.v[0]);
-	submodule_gitfiles = xcalloc(argc, sizeof(char *));
+	submodule_gitfiles = xcalloc(argc, परिमाण(वर्ण *));
 
-	if (dest_paths.v[0][0] == '\0')
+	यदि (dest_paths.v[0][0] == '\0')
 		/* special case: "." was normalized to "" */
 		internal_prefix_pathspec(&destinations, dest_paths.v[0], argv, argc, DUP_BASENAME);
-	else if (!lstat(dest_paths.v[0], &st) && S_ISDIR(st.st_mode)) {
+	अन्यथा यदि (!lstat(dest_paths.v[0], &st) && S_ISDIR(st.st_mode)) {
 		internal_prefix_pathspec(&destinations, dst_w_slash, argv, argc, DUP_BASENAME);
-	} else if (!path_in_sparse_checkout(dst_w_slash, the_repository->index) &&
+	} अन्यथा यदि (!path_in_sparse_checkout(dst_w_slash, the_repository->index) &&
 		   empty_dir_has_sparse_contents(dst_w_slash)) {
 		internal_prefix_pathspec(&destinations, dst_w_slash, argv, argc, DUP_BASENAME);
 		dst_mode = SKIP_WORKTREE_DIR;
-	} else if (argc != 1) {
+	} अन्यथा यदि (argc != 1) {
 		die(_("destination '%s' is not a directory"), dest_paths.v[0]);
-	} else {
+	} अन्यथा {
 		strvec_pushv(&destinations, dest_paths.v);
 
 		/*
@@ -295,93 +295,93 @@ int cmd_mv(int argc,
 		 * is deprecated at this point) sparse-checkout. As
 		 * SPARSE here is only considering cone-mode situation.
 		 */
-		if (!path_in_cone_mode_sparse_checkout(destinations.v[0], the_repository->index))
+		यदि (!path_in_cone_mode_sparse_checkout(destinations.v[0], the_repository->index))
 			dst_mode = SPARSE;
 	}
 
 	/* Checking */
-	for (i = 0; i < argc; i++) {
-		const char *src = sources.v[i], *dst = destinations.v[i];
-		int length;
-		const char *bad = NULL;
-		int skip_sparse = 0;
+	प्रति (i = 0; i < argc; i++) {
+		ध्रुव वर्ण *src = sources.v[i], *dst = destinations.v[i];
+		पूर्णाङ्क length;
+		ध्रुव वर्ण *bad = रिक्त;
+		पूर्णाङ्क skip_sparse = 0;
 
-		if (show_only)
+		यदि (show_only)
 			printf(_("Checking rename of '%s' to '%s'\n"), src, dst);
 
 		length = strlen(src);
-		if (lstat(src, &st) < 0) {
-			int pos;
-			const struct cache_entry *ce;
+		यदि (lstat(src, &st) < 0) {
+			पूर्णाङ्क pos;
+			ध्रुव संरचना cache_entry *ce;
 
 			pos = index_name_pos(the_repository->index, src, length);
-			if (pos < 0) {
-				char *src_w_slash = add_slash(src);
-				if (!path_in_sparse_checkout(src_w_slash, the_repository->index) &&
+			यदि (pos < 0) {
+				वर्ण *src_w_slash = add_slash(src);
+				यदि (!path_in_sparse_checkout(src_w_slash, the_repository->index) &&
 				    empty_dir_has_sparse_contents(src)) {
-					free(src_w_slash);
+					मुक्त(src_w_slash);
 					modes[i] |= SKIP_WORKTREE_DIR;
-					goto dir_check;
+					गच्छ dir_check;
 				}
-				free(src_w_slash);
+				मुक्त(src_w_slash);
 				/* only error if existence is expected. */
-				if (!(modes[i] & SPARSE))
+				यदि (!(modes[i] & SPARSE))
 					bad = _("bad source");
-				goto act_on_entry;
+				गच्छ act_on_entry;
 			}
 			ce = the_repository->index->cache[pos];
-			if (!ce_skip_worktree(ce)) {
+			यदि (!ce_skip_worktree(ce)) {
 				bad = _("bad source");
-				goto act_on_entry;
+				गच्छ act_on_entry;
 			}
-			if (!ignore_sparse) {
+			यदि (!ignore_sparse) {
 				string_list_append(&only_match_skip_worktree, src);
-				goto act_on_entry;
+				गच्छ act_on_entry;
 			}
 			/* Check if dst exists in index */
-			if (index_name_pos(the_repository->index, dst, strlen(dst)) < 0) {
+			यदि (index_name_pos(the_repository->index, dst, strlen(dst)) < 0) {
 				modes[i] |= SPARSE;
-				goto act_on_entry;
+				गच्छ act_on_entry;
 			}
-			if (!force) {
+			यदि (!force) {
 				bad = _("destination exists");
-				goto act_on_entry;
+				गच्छ act_on_entry;
 			}
 			modes[i] |= SPARSE;
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (!strncmp(src, dst, length) &&
+		यदि (!strncmp(src, dst, length) &&
 		    (dst[length] == 0 || dst[length] == '/')) {
 			bad = _("can not move directory into itself");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (S_ISDIR(st.st_mode)
+		यदि (S_ISDIR(st.st_mode)
 		    && lstat(dst, &dest_st) == 0) {
 			bad = _("destination already exists");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
 
 dir_check:
-		if (S_ISDIR(st.st_mode)) {
-			struct pathmap_entry *entry;
-			char *dst_with_slash;
+		यदि (S_ISDIR(st.st_mode)) {
+			संरचना pathmap_entry *entry;
+			वर्ण *dst_with_slash;
 			size_t dst_with_slash_len;
-			int j, n;
-			int first = index_name_pos(the_repository->index, src, length), last;
+			पूर्णाङ्क j, n;
+			पूर्णाङ्क first = index_name_pos(the_repository->index, src, length), last;
 
-			if (first >= 0) {
-				const char *path = submodule_gitfile_path(src, first);
-				if (path != SUBMODULE_WITH_GITDIR)
-					path = strvec_push(&submodule_gitfiles_to_free, path);
+			यदि (first >= 0) {
+				ध्रुव वर्ण *path = submodule_gitfile_path(src, first);
+				यदि (path != SUBMODULE_WITH_GITDIR)
+					path = strvec_ढकला(&submodule_gitfiles_to_free, path);
 				submodule_gitfiles[i] = path;
-				goto act_on_entry;
-			} else if (index_range_of_same_dir(src, length,
+				गच्छ act_on_entry;
+			} अन्यथा यदि (index_range_of_same_dir(src, length,
 							   &first, &last) < 1) {
 				bad = _("source directory is empty");
-				goto act_on_entry;
+				गच्छ act_on_entry;
 			}
 
-			entry = xmalloc(sizeof(*entry));
+			entry = xmalloc(परिमाण(*entry));
 			entry->path = src;
 			hashmap_entry_init(&entry->ent, fspathhash(src));
 			hashmap_add(&moved_dirs, &entry->ent);
@@ -389,7 +389,7 @@ dir_check:
 			/* last - first >= 1 */
 			modes[i] |= WORKING_DIRECTORY;
 
-			strvec_push(&src_dir, src);
+			strvec_ढकला(&src_dir, src);
 
 			n = argc + last - first;
 			REALLOC_ARRAY(modes, n);
@@ -398,104 +398,104 @@ dir_check:
 			dst_with_slash = add_slash(dst);
 			dst_with_slash_len = strlen(dst_with_slash);
 
-			for (j = 0; j < last - first; j++) {
-				const struct cache_entry *ce = the_repository->index->cache[first + j];
-				const char *path = ce->name;
-				char *prefixed_path = prefix_path(the_repository, dst_with_slash,
+			प्रति (j = 0; j < last - first; j++) {
+				ध्रुव संरचना cache_entry *ce = the_repository->index->cache[first + j];
+				ध्रुव वर्ण *path = ce->name;
+				वर्ण *prefixed_path = prefix_path(the_repository, dst_with_slash,
 								  dst_with_slash_len, path + length + 1);
 
-				strvec_push(&sources, path);
-				strvec_push(&destinations, prefixed_path);
+				strvec_ढकला(&sources, path);
+				strvec_ढकला(&destinations, prefixed_path);
 
 				modes[argc + j] = MOVE_VIA_PARENT_DIR | (ce_skip_worktree(ce) ? SPARSE : INDEX);
-				submodule_gitfiles[argc + j] = NULL;
+				submodule_gitfiles[argc + j] = रिक्त;
 
-				free(prefixed_path);
+				मुक्त(prefixed_path);
 			}
 
-			free(dst_with_slash);
+			मुक्त(dst_with_slash);
 			argc += last - first;
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (!(ce = index_file_exists(the_repository->index, src, length, 0))) {
+		यदि (!(ce = index_file_exists(the_repository->index, src, length, 0))) {
 			bad = _("not under version control");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (ce_stage(ce)) {
+		यदि (ce_stage(ce)) {
 			bad = _("conflicted");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (lstat(dst, &st) == 0 &&
+		यदि (lstat(dst, &st) == 0 &&
 		    (!repo_ignore_case(the_repository) || strcasecmp(src, dst))) {
 			bad = _("destination exists");
-			if (force) {
+			यदि (force) {
 				/*
 				 * only files can overwrite each other:
 				 * check both source and destination
 				 */
-				if (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) {
-					if (verbose)
+				यदि (S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)) {
+					यदि (verbose)
 						warning(_("overwriting '%s'"), dst);
-					bad = NULL;
-				} else
+					bad = रिक्त;
+				} अन्यथा
 					bad = _("Cannot overwrite");
 			}
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (string_list_has_string(&src_for_dst, dst)) {
+		यदि (string_list_has_string(&src_for_dst, dst)) {
 			bad = _("multiple sources for the same target");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (is_dir_sep(dst[strlen(dst) - 1])) {
+		यदि (is_dir_sep(dst[strlen(dst) - 1])) {
 			bad = _("destination directory does not exist");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
-		if (has_symlink_leading_path(dst, strlen(dst))) {
+		यदि (has_symlink_leading_path(dst, strlen(dst))) {
 			bad = _("destination is beyond a symbolic link");
-			goto act_on_entry;
+			गच्छ act_on_entry;
 		}
 
 		/*
 		 * If we are going to move SRC to DST on disk, DST's leading
 		 * directories must already exist.
 		 */
-		if (needs_worktree_rename(modes[i], dst_mode)) {
-			const char *slash_ = strrchr(dst, '/');
+		यदि (needs_worktree_rename(modes[i], dst_mode)) {
+			ध्रुव वर्ण *slash_ = strrchr(dst, '/');
 
-			if (slash_) {
-				struct stat dir_st;
-				char *dst_dir = xstrdup(dst);
-				char *slash = &dst_dir[slash_ - dst];
+			यदि (slash_) {
+				संरचना stat dir_st;
+				वर्ण *dst_dir = xstrdup(dst);
+				वर्ण *slash = &dst_dir[slash_ - dst];
 
 				*slash = '\0';
-				if (lstat(dst_dir, &dir_st) < 0) {
+				यदि (lstat(dst_dir, &dir_st) < 0) {
 					/*
 					 * other errors fall through to rename(),
 					 * which reports them
 					 */
-					if (errno == ENOENT || errno == ENOTDIR)
+					यदि (errno == ENOENT || errno == ENOTDIR)
 						bad = _("destination directory does not exist");
-				} else if (!S_ISDIR(dir_st.st_mode)) {
+				} अन्यथा यदि (!S_ISDIR(dir_st.st_mode)) {
 					bad = _("destination is not a directory");
 				}
 
-				free(dst_dir);
+				मुक्त(dst_dir);
 			}
 
-			if (bad)
-				goto act_on_entry;
+			यदि (bad)
+				गच्छ act_on_entry;
 		}
 
-		if (ignore_sparse &&
+		यदि (ignore_sparse &&
 		    (dst_mode & (SKIP_WORKTREE_DIR | SPARSE)) &&
 		    index_entry_exists(the_repository->index, dst, strlen(dst))) {
 			bad = _("destination exists in the index");
-			if (force) {
-				if (verbose)
+			यदि (force) {
+				यदि (verbose)
 					warning(_("overwriting '%s'"), dst);
-				bad = NULL;
-			} else {
-				goto act_on_entry;
+				bad = रिक्त;
+			} अन्यथा {
+				गच्छ act_on_entry;
 			}
 		}
 		/*
@@ -504,31 +504,31 @@ dir_check:
 		 * allows us to point the user to the --sparse
 		 * option as a way to have a successful run.
 		 */
-		if (!ignore_sparse &&
+		यदि (!ignore_sparse &&
 		    !path_in_sparse_checkout(src, the_repository->index)) {
 			string_list_append(&only_match_skip_worktree, src);
 			skip_sparse = 1;
 		}
-		if (!ignore_sparse &&
+		यदि (!ignore_sparse &&
 		    !path_in_sparse_checkout(dst, the_repository->index)) {
 			string_list_append(&only_match_skip_worktree, dst);
 			skip_sparse = 1;
 		}
 
-		if (skip_sparse)
-			goto remove_entry;
+		यदि (skip_sparse)
+			गच्छ remove_entry;
 
-		string_list_insert(&src_for_dst, dst);
+		string_list_घाला(&src_for_dst, dst);
 
 act_on_entry:
-		if (!bad)
-			continue;
-		if (!ignore_errors)
+		यदि (!bad)
+			अनुवर्त;
+		यदि (!ignore_errors)
 			die(_("%s, source=%s, destination=%s"),
 			     bad, src, dst);
 remove_entry:
-		if (--argc > 0) {
-			int n = argc - i;
+		यदि (--argc > 0) {
+			पूर्णाङ्क n = argc - i;
 			strvec_remove(&sources, i);
 			strvec_remove(&destinations, i);
 			MOVE_ARRAY(modes + i, modes + i + 1, n);
@@ -538,25 +538,25 @@ remove_entry:
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
-		const char *slash_pos;
+	प्रति (i = 0; i < argc; i++) {
+		ध्रुव वर्ण *slash_pos;
 
-		if (modes[i] & MOVE_VIA_PARENT_DIR)
-			continue;
+		यदि (modes[i] & MOVE_VIA_PARENT_DIR)
+			अनुवर्त;
 
 		strbuf_reset(&pathbuf);
 		strbuf_addstr(&pathbuf, sources.v[i]);
 
 		slash_pos = strrchr(pathbuf.buf, '/');
-		while (slash_pos > pathbuf.buf) {
-			struct pathmap_entry needle;
+		यावत् (slash_pos > pathbuf.buf) {
+			संरचना pathmap_entry needle;
 
 			strbuf_setlen(&pathbuf, slash_pos - pathbuf.buf);
 
 			needle.path = pathbuf.buf;
 			hashmap_entry_init(&needle.ent, fspathhash(pathbuf.buf));
 
-			if (hashmap_get_entry(&moved_dirs, &needle, ent, NULL))
+			यदि (hashmap_get_entry(&moved_dirs, &needle, ent, रिक्त))
 				die(_("cannot move both '%s' and its parent directory '%s'"),
 				    sources.v[i], pathbuf.buf);
 
@@ -564,57 +564,57 @@ remove_entry:
 		}
 	}
 
-	if (only_match_skip_worktree.nr) {
+	यदि (only_match_skip_worktree.nr) {
 		advise_on_updating_sparse_paths(&only_match_skip_worktree);
-		if (!ignore_errors) {
+		यदि (!ignore_errors) {
 			ret = 1;
-			goto out;
+			गच्छ out;
 		}
 	}
 
-	for (i = 0; i < argc; i++) {
-		const char *src = sources.v[i], *dst = destinations.v[i];
-		enum update_mode mode = modes[i];
-		int pos;
-		int sparse_and_dirty = 0;
-		struct checkout state = CHECKOUT_INIT;
+	प्रति (i = 0; i < argc; i++) {
+		ध्रुव वर्ण *src = sources.v[i], *dst = destinations.v[i];
+		गणना update_mode mode = modes[i];
+		पूर्णाङ्क pos;
+		पूर्णाङ्क sparse_and_dirty = 0;
+		संरचना checkout state = CHECKOUT_INIT;
 		state.istate = the_repository->index;
 
-		if (force)
+		यदि (force)
 			state.force = 1;
-		if (show_only || verbose)
+		यदि (show_only || verbose)
 			printf(_("Renaming %s to %s\n"), src, dst);
-		if (show_only)
-			continue;
-		if (needs_worktree_rename(mode, dst_mode) &&
+		यदि (show_only)
+			अनुवर्त;
+		यदि (needs_worktree_rename(mode, dst_mode) &&
 		    rename(src, dst) < 0) {
-			if (ignore_errors)
-				continue;
+			यदि (ignore_errors)
+				अनुवर्त;
 			die_errno(_("renaming '%s' to '%s' failed"), src, dst);
 		}
-		if (submodule_gitfiles[i]) {
-			if (!update_path_in_gitmodules(src, dst))
+		यदि (submodule_gitfiles[i]) {
+			यदि (!update_path_in_gitmodules(src, dst))
 				gitmodules_modified = 1;
-			if (submodule_gitfiles[i] != SUBMODULE_WITH_GITDIR)
-				connect_work_tree_and_git_dir(dst,
+			यदि (submodule_gitfiles[i] != SUBMODULE_WITH_GITDIR)
+				connect_work_वृक्ष_and_git_dir(dst,
 							      submodule_gitfiles[i],
 							      1);
 		}
 
-		if (mode & (WORKING_DIRECTORY | SKIP_WORKTREE_DIR))
-			continue;
+		यदि (mode & (WORKING_DIRECTORY | SKIP_WORKTREE_DIR))
+			अनुवर्त;
 
 		pos = index_name_pos(the_repository->index, src, strlen(src));
-		if (pos < 0)
+		यदि (pos < 0)
 			BUG("could not find source in index: '%s'", src);
-		if (!(mode & SPARSE) && !lstat(src, &st))
+		यदि (!(mode & SPARSE) && !lstat(src, &st))
 			sparse_and_dirty = ie_modified(the_repository->index,
 						       the_repository->index->cache[pos],
 						       &st,
 						       0);
 		rename_index_entry_at(the_repository->index, pos, dst);
 
-		if (ignore_sparse &&
+		यदि (ignore_sparse &&
 		    cfg->apply_sparse_checkout &&
 		    cfg->core_sparse_checkout_cone) {
 			/*
@@ -623,38 +623,38 @@ remove_entry:
 			 * <destination> is out-of-cone) at this point. It
 			 * should be added in a future patch.
 			 */
-			if ((mode & SPARSE) &&
+			यदि ((mode & SPARSE) &&
 			    path_in_sparse_checkout(dst, the_repository->index)) {
 				/* from out-of-cone to in-cone */
-				int dst_pos = index_name_pos(the_repository->index, dst,
+				पूर्णाङ्क dst_pos = index_name_pos(the_repository->index, dst,
 							     strlen(dst));
-				struct cache_entry *dst_ce = the_repository->index->cache[dst_pos];
+				संरचना cache_entry *dst_ce = the_repository->index->cache[dst_pos];
 
 				dst_ce->ce_flags &= ~CE_SKIP_WORKTREE;
 
-				if (checkout_entry(dst_ce, &state, NULL, NULL))
+				यदि (checkout_entry(dst_ce, &state, रिक्त, रिक्त))
 					die(_("cannot checkout %s"), dst_ce->name);
-			} else if ((dst_mode & (SKIP_WORKTREE_DIR | SPARSE)) &&
+			} अन्यथा यदि ((dst_mode & (SKIP_WORKTREE_DIR | SPARSE)) &&
 				   !(mode & SPARSE) &&
 				   !path_in_sparse_checkout(dst, the_repository->index)) {
 				/* from in-cone to out-of-cone */
-				int dst_pos = index_name_pos(the_repository->index, dst,
+				पूर्णाङ्क dst_pos = index_name_pos(the_repository->index, dst,
 							     strlen(dst));
-				struct cache_entry *dst_ce = the_repository->index->cache[dst_pos];
+				संरचना cache_entry *dst_ce = the_repository->index->cache[dst_pos];
 
 				/*
 				 * if src is clean, it will suffice to remove it
 				 */
-				if (!sparse_and_dirty) {
+				यदि (!sparse_and_dirty) {
 					dst_ce->ce_flags |= CE_SKIP_WORKTREE;
 					unlink_or_warn(src);
-				} else {
+				} अन्यथा {
 					/*
 					 * if src is dirty, move it to the
 					 * destination and create leading
 					 * dirs if necessary
 					 */
-					char *dst_dup = xstrdup(dst);
+					वर्ण *dst_dup = xstrdup(dst);
 					string_list_append(&dirty_paths, dst);
 					safe_create_leading_directories(the_repository, dst_dup);
 					FREE_AND_NULL(dst_dup);
@@ -666,13 +666,13 @@ remove_entry:
 
 	remove_empty_src_dirs(src_dir.v, src_dir.nr);
 
-	if (dirty_paths.nr)
+	यदि (dirty_paths.nr)
 		advise_on_moving_dirty_path(&dirty_paths);
 
-	if (gitmodules_modified)
+	यदि (gitmodules_modified)
 		stage_updated_gitmodules(the_repository->index);
 
-	if (write_locked_index(the_repository->index, &lock_file,
+	यदि (write_locked_index(the_repository->index, &lock_file,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("Unable to write new index file"));
 
@@ -680,7 +680,7 @@ remove_entry:
 
 out:
 	strvec_clear(&src_dir);
-	free(dst_w_slash);
+	मुक्त(dst_w_slash);
 	string_list_clear(&src_for_dst, 0);
 	string_list_clear(&dirty_paths, 0);
 	string_list_clear(&only_match_skip_worktree, 0);
@@ -688,9 +688,9 @@ out:
 	strvec_clear(&dest_paths);
 	strvec_clear(&destinations);
 	strvec_clear(&submodule_gitfiles_to_free);
-	hashmap_clear_and_free(&moved_dirs, struct pathmap_entry, ent);
+	hashmap_clear_and_free(&moved_dirs, संरचना pathmap_entry, ent);
 	strbuf_release(&pathbuf);
-	free(submodule_gitfiles);
-	free(modes);
-	return ret;
+	मुक्त(submodule_gitfiles);
+	मुक्त(modes);
+	प्रत्यागम ret;
 }

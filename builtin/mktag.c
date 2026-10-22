@@ -1,65 +1,65 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "parse-options.h"
-#include "strbuf.h"
-#include "replace-object.h"
-#include "object-file.h"
-#include "odb.h"
-#include "fsck.h"
-#include "config.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "hex.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "strbuf.h"
+#अन्तर्भाव "replace-object.h"
+#अन्तर्भाव "object-file.h"
+#अन्तर्भाव "odb.h"
+#अन्तर्भाव "fsck.h"
+#अन्तर्भाव "config.h"
 
-static char const * const builtin_mktag_usage[] = {
+स्थिर वर्ण ध्रुव * ध्रुव builtin_mktag_usage[] = {
 	"git mktag",
-	NULL
+	रिक्त
 };
-static int option_strict = 1;
+स्थिर पूर्णाङ्क option_strict = 1;
 
-static struct fsck_options fsck_options;
+स्थिर संरचना fsck_options fsck_options;
 
-static int mktag_fsck_error_func(struct fsck_options *o UNUSED,
-				 void *fsck_report UNUSED,
-				 enum fsck_msg_type msg_type,
-				 enum fsck_msg_id msg_id UNUSED,
-				 const char *message)
+स्थिर पूर्णाङ्क mktag_fsck_error_func(संरचना fsck_options *o UNUSED,
+				 शून्य *fsck_report UNUSED,
+				 गणना fsck_संदेश_type संदेश_type,
+				 गणना fsck_संदेश_id संदेश_id UNUSED,
+				 ध्रुव वर्ण *message)
 {
-	switch (msg_type) {
-	case FSCK_WARN:
-		if (!option_strict) {
+	विकल्प (संदेश_type) {
+	पक्ष FSCK_WARN:
+		यदि (!option_strict) {
 			fprintf_ln(stderr, _("warning: tag input does not pass fsck: %s"), message);
-			return 0;
+			प्रत्यागम 0;
 
 		}
 		/* fallthrough */
-	case FSCK_ERROR:
+	पक्ष FSCK_ERROR:
 		/*
 		 * We treat both warnings and errors as errors, things
 		 * like missing "tagger" lines are "only" warnings
 		 * under fsck, we've always considered them an error.
 		 */
 		fprintf_ln(stderr, _("error: tag input does not pass fsck: %s"), message);
-		return 1;
-	default:
+		प्रत्यागम 1;
+	स्वभाव:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
-		    msg_type);
+		    संदेश_type);
 	}
 }
 
-static int verify_object_in_tag(struct object_id *tagged_oid, int *tagged_type)
+स्थिर पूर्णाङ्क verify_object_in_tag(संरचना object_id *tagged_oid, पूर्णाङ्क *tagged_type)
 {
-	int ret;
-	enum object_type type;
+	पूर्णाङ्क ret;
+	गणना object_type type;
 	size_t size;
-	void *buffer;
-	const struct object_id *repl;
+	शून्य *buffer;
+	ध्रुव संरचना object_id *repl;
 
 	buffer = odb_read_object(the_repository->objects, tagged_oid,
 				 &type, &size);
-	if (!buffer)
+	यदि (!buffer)
 		die(_("could not read tagged object '%s'"),
 		    oid_to_hex(tagged_oid));
-	if (type != *tagged_type)
+	यदि (type != *tagged_type)
 		die(_("object '%s' tagged as '%s', but is a '%s' type"),
 		    oid_to_hex(tagged_oid),
 		    type_name(*tagged_type), type_name(type));
@@ -67,50 +67,50 @@ static int verify_object_in_tag(struct object_id *tagged_oid, int *tagged_type)
 	repl = lookup_replace_object(the_repository, tagged_oid);
 	ret = check_object_signature(the_repository, repl, buffer, size,
 				     *tagged_type);
-	free(buffer);
+	मुक्त(buffer);
 
-	return ret;
+	प्रत्यागम ret;
 }
 
-int cmd_mktag(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+पूर्णाङ्क cmd_mktag(पूर्णाङ्क argc,
+	      ध्रुव वर्ण **argv,
+	      ध्रुव वर्ण *prefix,
+	      संरचना repository *repo)
 {
-	static struct option builtin_mktag_options[] = {
+	स्थिर संरचना option builtin_mktag_options[] = {
 		OPT_BOOL(0, "strict", &option_strict,
 			 N_("enable more strict checking")),
 		OPT_END(),
 	};
-	struct strbuf buf = STRBUF_INIT;
-	struct object_id tagged_oid;
-	int tagged_type;
-	struct object_id result;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना object_id tagged_oid;
+	पूर्णाङ्क tagged_type;
+	संरचना object_id result;
 
 	argc = parse_options(argc, argv, prefix,
 			     builtin_mktag_options,
 			     builtin_mktag_usage, 0);
 
-	if (strbuf_read(&buf, 0, 0) < 0)
+	यदि (strbuf_read(&buf, 0, 0) < 0)
 		die_errno(_("could not read from stdin"));
 
 	fsck_options_init(&fsck_options, repo, FSCK_OPTIONS_STRICT);
 	fsck_options.error_func = mktag_fsck_error_func;
-	fsck_set_msg_type_from_ids(&fsck_options, FSCK_MSG_EXTRA_HEADER_ENTRY,
+	fsck_set_संदेश_type_from_ids(&fsck_options, FSCK_संदेश_EXTRA_HEADER_ENTRY,
 				   FSCK_WARN);
 	/* config might set fsck.extraHeaderEntry=* again */
 	repo_config(the_repository, git_fsck_config, &fsck_options);
-	if (fsck_tag_standalone(NULL, buf.buf, buf.len, &fsck_options,
+	यदि (fsck_tag_standalone(रिक्त, buf.buf, buf.len, &fsck_options,
 				&tagged_oid, &tagged_type))
 		die(_("tag on stdin did not pass our strict fsck check"));
 
-	if (verify_object_in_tag(&tagged_oid, &tagged_type) < 0)
+	यदि (verify_object_in_tag(&tagged_oid, &tagged_type) < 0)
 		die(_("tag on stdin did not refer to a valid object"));
 
-	if (odb_write_object(the_repository->objects, buf.buf, buf.len, OBJ_TAG, &result) < 0)
+	यदि (odb_write_object(the_repository->objects, buf.buf, buf.len, OBJ_TAG, &result) < 0)
 		die(_("unable to write tag file"));
 
 	strbuf_release(&buf);
 	puts(oid_to_hex(&result));
-	return 0;
+	प्रत्यागम 0;
 }
