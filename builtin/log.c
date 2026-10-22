@@ -7,117 +7,117 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "pager.h"
-#include "color.h"
-#include "commit.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "diff-merges.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "tag.h"
-#include "reflog-walk.h"
-#include "patch-ids.h"
-#include "path.h"
-#include "shortlog.h"
-#include "remote.h"
-#include "string-list.h"
-#include "parse-options.h"
-#include "line-log.h"
-#include "branch.h"
-#include "version.h"
-#include "mailmap.h"
-#include "progress.h"
-#include "commit-slab.h"
-#include "advice.h"
-#include "utf8.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "abspath.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "refs.h"
+#અન્તર્ભાવ "object-name.h"
+#અન્તર્ભાવ "odb.h"
+#અન્તર્ભાવ "odb/streaming.h"
+#અન્તર્ભાવ "pager.h"
+#અન્તર્ભાવ "color.h"
+#અન્તર્ભાવ "commit.h"
+#અન્તર્ભાવ "diff.h"
+#અન્તર્ભાવ "diffcore.h"
+#અન્તર્ભાવ "diff-merges.h"
+#અન્તર્ભાવ "revision.h"
+#અન્તર્ભાવ "log-tree.h"
+#અન્તર્ભાવ "oid-array.h"
+#અન્તર્ભાવ "oidset.h"
+#અન્તર્ભાવ "tag.h"
+#અન્તર્ભાવ "reflog-walk.h"
+#અન્તર્ભાવ "patch-ids.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "shortlog.h"
+#અન્તર્ભાવ "remote.h"
+#અન્તર્ભાવ "string-list.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "line-log.h"
+#અન્તર્ભાવ "branch.h"
+#અન્તર્ભાવ "version.h"
+#અન્તર્ભાવ "mailmap.h"
+#અન્તર્ભાવ "progress.h"
+#અન્તર્ભાવ "commit-slab.h"
+#અન્તર્ભાવ "advice.h"
+#અન્તર્ભાવ "utf8.h"
 
-#include "commit-reach.h"
-#include "promisor-remote.h"
-#include "range-diff.h"
-#include "tmp-objdir.h"
-#include "tree.h"
-#include "userdiff.h"
-#include "write-or-die.h"
+#અન્તર્ભાવ "commit-reach.h"
+#અન્તર્ભાવ "promisor-remote.h"
+#અન્તર્ભાવ "range-diff.h"
+#અન્તર્ભાવ "tmp-objdir.h"
+#અન્તર્ભાવ "tree.h"
+#અન્તર્ભાવ "userdiff.h"
+#અન્તર્ભાવ "write-or-die.h"
 
 #define MAIL_DEFAULT_WRAP 72
 #define COVER_FROM_AUTO_MAX_SUBJECT_LEN 100
 #define FORMAT_PATCH_NAME_MAX_DEFAULT 64
 
-static unsigned int force_in_body_from;
-static int stdout_mboxrd;
-static int format_no_prefix;
+સ્થિર unsigned પૂર્ણાંક force_in_body_from;
+સ્થિર પૂર્ણાંક stdout_mboxrd;
+સ્થિર પૂર્ણાંક format_no_prefix;
 
-static const char * const builtin_log_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_log_usage[] = {
 	N_("git log [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git show [<options>] <object>..."),
-	NULL
+	ખાલી
 };
 
-struct line_opt_callback_data {
-	struct rev_info *rev;
-	const char *prefix;
-	struct string_list args;
+સંરચના લીટી_opt_callback_data {
+	સંરચના rev_info *rev;
+	અચલ અક્ષર *prefix;
+	સંરચના string_list args;
 };
 
-static int session_is_interactive(void)
+સ્થિર પૂર્ણાંક session_is_interactive(શૂન્ય)
 {
-	return isatty(1) || pager_in_use();
+	પાછા isatty(1) || pager_in_use();
 }
 
-static int auto_decoration_style(void)
+સ્થિર પૂર્ણાંક auto_decoration_style(શૂન્ય)
 {
-	return session_is_interactive() ? DECORATE_SHORT_REFS : 0;
+	પાછા session_is_interactive() ? DECORATE_SHORT_REFS : 0;
 }
 
-static int parse_decoration_style(const char *value)
+સ્થિર પૂર્ણાંક parse_decoration_style(અચલ અક્ષર *કિંમત)
 {
-	switch (git_parse_maybe_bool(value)) {
-	case 1:
-		return DECORATE_SHORT_REFS;
-	case 0:
-		return 0;
-	default:
-		break;
+	પસંદગી (git_parse_maybe_bool(કિંમત)) {
+	સ્થિતિ 1:
+		પાછા DECORATE_SHORT_REFS;
+	સ્થિતિ 0:
+		પાછા 0;
+	મૂળભૂત:
+		તોડો;
 	}
-	if (!strcmp(value, "full"))
-		return DECORATE_FULL_REFS;
-	else if (!strcmp(value, "short"))
-		return DECORATE_SHORT_REFS;
-	else if (!strcmp(value, "auto"))
-		return auto_decoration_style();
+	જો (!strcmp(કિંમત, "full"))
+		પાછા DECORATE_FULL_REFS;
+	નહીંતર જો (!strcmp(કિંમત, "short"))
+		પાછા DECORATE_SHORT_REFS;
+	નહીંતર જો (!strcmp(કિંમત, "auto"))
+		પાછા auto_decoration_style();
 	/*
 	 * Please update _git_log() in git-completion.bash when you
 	 * add new decoration styles.
 	 */
-	return -1;
+	પાછા -1;
 }
 
-struct log_config {
-	int default_abbrev_commit;
-	int default_show_root;
-	int default_follow;
-	int default_show_signature;
-	int default_encode_email_headers;
-	int decoration_style;
-	int decoration_given;
-	int use_mailmap_config;
-	char *fmt_patch_subject_prefix;
-	int fmt_patch_name_max;
-	char *fmt_pretty;
-	char *default_date_mode;
+સંરચના log_config {
+	પૂર્ણાંક default_abbrev_commit;
+	પૂર્ણાંક default_show_મૂળ;
+	પૂર્ણાંક default_follow;
+	પૂર્ણાંક default_show_signature;
+	પૂર્ણાંક default_encode_email_headers;
+	પૂર્ણાંક decoration_style;
+	પૂર્ણાંક decoration_given;
+	પૂર્ણાંક use_mailmap_config;
+	અક્ષર *fmt_patch_subject_prefix;
+	પૂર્ણાંક fmt_patch_name_max;
+	અક્ષર *fmt_pretty;
+	અક્ષર *default_date_mode;
 
 #ifndef WITH_BREAKING_CHANGES
 	/*
@@ -125,14 +125,14 @@ struct log_config {
 	 * is very deliberate.  This member is only to be used to
 	 * resurrect whatchanged that is deprecated.
 	 */
-	int i_still_use_this;
+	પૂર્ણાંક i_still_use_this;
 #endif
 };
 
-static void log_config_init(struct log_config *cfg)
+સ્થિર શૂન્ય log_config_init(સંરચના log_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
-	cfg->default_show_root = 1;
+	memset(cfg, 0, કદ(*cfg));
+	cfg->default_show_મૂળ = 1;
 	cfg->default_encode_email_headers = 1;
 	cfg->use_mailmap_config = 1;
 	cfg->fmt_patch_subject_prefix = xstrdup("PATCH");
@@ -140,95 +140,95 @@ static void log_config_init(struct log_config *cfg)
 	cfg->decoration_style = auto_decoration_style();
 }
 
-static void log_config_release(struct log_config *cfg)
+સ્થિર શૂન્ય log_config_release(સંરચના log_config *cfg)
 {
-	free(cfg->default_date_mode);
-	free(cfg->fmt_pretty);
-	free(cfg->fmt_patch_subject_prefix);
+	મુક્ત(cfg->default_date_mode);
+	મુક્ત(cfg->fmt_pretty);
+	મુક્ત(cfg->fmt_patch_subject_prefix);
 }
 
-static int use_default_decoration_filter = 1;
-static struct string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
-static struct string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
+સ્થિર પૂર્ણાંક use_default_decoration_filter = 1;
+સ્થિર સંરચના string_list decorate_refs_exclude = STRING_LIST_INIT_NODUP;
+સ્થિર સંરચના string_list decorate_refs_exclude_config = STRING_LIST_INIT_NODUP;
+સ્થિર સંરચના string_list decorate_refs_include = STRING_LIST_INIT_NODUP;
 
-static int clear_decorations_callback(const struct option *opt UNUSED,
-				      const char *arg, int unset)
+સ્થિર પૂર્ણાંક clear_decorations_callback(અચલ સંરચના option *opt UNUSED,
+				      અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	string_list_clear(&decorate_refs_include, 0);
 	string_list_clear(&decorate_refs_exclude, 0);
 	use_default_decoration_filter = 0;
-	return 0;
+	પાછા 0;
 }
 
-static int decorate_callback(const struct option *opt, const char *arg,
-			     int unset)
+સ્થિર પૂર્ણાંક decorate_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			     પૂર્ણાંક unset)
 {
-	struct log_config *cfg = opt->value;
+	સંરચના log_config *cfg = opt->કિંમત;
 
-	if (unset)
+	જો (unset)
 		cfg->decoration_style = 0;
-	else if (arg)
+	નહીંતર જો (arg)
 		cfg->decoration_style = parse_decoration_style(arg);
-	else
+	નહીંતર
 		cfg->decoration_style = DECORATE_SHORT_REFS;
 
-	if (cfg->decoration_style < 0)
+	જો (cfg->decoration_style < 0)
 		die(_("invalid --decorate option: %s"), arg);
 
 	cfg->decoration_given = 1;
 
-	return 0;
+	પાછા 0;
 }
 
-static int log_line_range_callback(const struct option *option, const char *arg, int unset)
+સ્થિર પૂર્ણાંક log_લીટી_range_callback(અચલ સંરચના option *option, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct line_opt_callback_data *data = option->value;
+	સંરચના લીટી_opt_callback_data *data = option->કિંમત;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (!arg)
-		return -1;
+	જો (!arg)
+		પાછા -1;
 
-	data->rev->line_level_traverse = 1;
+	data->rev->લીટી_level_traverse = 1;
 	string_list_append(&data->args, arg);
 
-	return 0;
+	પાછા 0;
 }
 
-static void cmd_log_init_defaults(struct rev_info *rev,
-				  struct log_config *cfg)
+સ્થિર શૂન્ય cmd_log_init_defaults(સંરચના rev_info *rev,
+				  સંરચના log_config *cfg)
 {
-	if (cfg->fmt_pretty)
+	જો (cfg->fmt_pretty)
 		get_commit_format(cfg->fmt_pretty, rev);
-	if (cfg->default_follow)
+	જો (cfg->default_follow)
 		rev->diffopt.flags.default_follow_renames = 1;
 	rev->verbose_header = 1;
 	init_diffstat_widths(&rev->diffopt);
 	rev->diffopt.flags.recursive = 1;
 	rev->diffopt.flags.allow_textconv = 1;
 	rev->abbrev_commit = cfg->default_abbrev_commit;
-	rev->show_root_diff = cfg->default_show_root;
+	rev->show_મૂળ_diff = cfg->default_show_મૂળ;
 	rev->subject_prefix = cfg->fmt_patch_subject_prefix;
 	rev->patch_name_max = cfg->fmt_patch_name_max;
 	rev->show_signature = cfg->default_show_signature;
 	rev->encode_email_headers = cfg->default_encode_email_headers;
 
-	if (cfg->default_date_mode)
+	જો (cfg->default_date_mode)
 		parse_date_format(cfg->default_date_mode, &rev->date_mode);
 }
 
-static void set_default_decoration_filter(struct decoration_filter *decoration_filter)
+સ્થિર શૂન્ય set_default_decoration_filter(સંરચના decoration_filter *decoration_filter)
 {
-	char *value = NULL;
-	struct string_list *include = decoration_filter->include_ref_pattern;
-	const struct string_list *config_exclude;
+	અક્ષર *કિંમત = ખાલી;
+	સંરચના string_list *include = decoration_filter->include_ref_pattern;
+	અચલ સંરચના string_list *config_exclude;
 
-	if (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
+	જો (!repo_config_get_string_multi(the_repository, "log.excludeDecoration",
 					 &config_exclude)) {
-		struct string_list_item *item;
+		સંરચના string_list_item *item;
 		for_each_string_list_item(item, config_exclude)
 			string_list_append(decoration_filter->exclude_ref_config_pattern,
 					   item->string);
@@ -239,45 +239,45 @@ static void set_default_decoration_filter(struct decoration_filter *decoration_f
 	 * log.initialDecorationSet=all. Don't ever disable it by config,
 	 * since the command-line takes precedent.
 	 */
-	if (use_default_decoration_filter &&
-	    !repo_config_get_string(the_repository, "log.initialdecorationset", &value) &&
-	    !strcmp("all", value))
+	જો (use_default_decoration_filter &&
+	    !repo_config_get_string(the_repository, "log.initialdecorationset", &કિંમત) &&
+	    !strcmp("all", કિંમત))
 		use_default_decoration_filter = 0;
-	free(value);
+	મુક્ત(કિંમત);
 
-	if (!use_default_decoration_filter ||
+	જો (!use_default_decoration_filter ||
 	    decoration_filter->exclude_ref_pattern->nr ||
 	    decoration_filter->include_ref_pattern->nr ||
 	    decoration_filter->exclude_ref_config_pattern->nr)
-		return;
+		પાછા;
 
 	/*
 	 * No command-line or config options were given, so
 	 * populate with sensible defaults.
 	 */
-	for (size_t i = 0; i < ARRAY_SIZE(ref_namespace); i++) {
-		if (!ref_namespace[i].decoration)
-			continue;
+	માટે (size_t i = 0; i < ARRAY_SIZE(ref_namespace); i++) {
+		જો (!ref_namespace[i].decoration)
+			ચાલુ;
 
 		string_list_append(include, ref_namespace[i].ref);
 	}
 }
 
-static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+સ્થિર શૂન્ય cmd_log_init_finish(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			 સંરચના rev_info *rev, સંરચના setup_revision_opt *opt,
+			 સંરચના log_config *cfg)
 {
-	struct userformat_want w;
-	int quiet = 0, source = 0, mailmap;
-	static struct line_opt_callback_data line_cb = {NULL, NULL, STRING_LIST_INIT_DUP};
-	struct decoration_filter decoration_filter = {
+	સંરચના userformat_want w;
+	પૂર્ણાંક quiet = 0, source = 0, mailmap;
+	સ્થિર સંરચના લીટી_opt_callback_data લીટી_cb = {ખાલી, ખાલી, STRING_LIST_INIT_DUP};
+	સંરચના decoration_filter decoration_filter = {
 		.exclude_ref_pattern = &decorate_refs_exclude,
 		.include_ref_pattern = &decorate_refs_include,
 		.exclude_ref_config_pattern = &decorate_refs_exclude_config,
 	};
-	static struct revision_sources revision_sources;
+	સ્થિર સંરચના revision_sources revision_sources;
 
-	const struct option builtin_log_options[] = {
+	અચલ સંરચના option builtin_log_options[] = {
 		OPT__QUIET(&quiet, N_("suppress diff output")),
 		OPT_BOOL(0, "source", &source, N_("show source")),
 		OPT_BOOL(0, "use-mailmap", &mailmap, N_("use mail map file")),
@@ -286,7 +286,7 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 				"<use this deprecated command>"),
 #endif
 		OPT_ALIAS(0, "mailmap", "use-mailmap"),
-		OPT_CALLBACK_F(0, "clear-decorations", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-decorations", ખાલી, ખાલી,
 			       N_("clear all previously-defined decoration filters"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			       clear_decorations_callback),
@@ -294,16 +294,16 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 				N_("pattern"), N_("only decorate refs that match <pattern>")),
 		OPT_STRING_LIST(0, "decorate-refs-exclude", &decorate_refs_exclude,
 				N_("pattern"), N_("do not decorate refs that match <pattern>")),
-		OPT_CALLBACK_F(0, "decorate", cfg, NULL, N_("decorate options"),
+		OPT_CALLBACK_F(0, "decorate", cfg, ખાલી, N_("decorate options"),
 			       PARSE_OPT_OPTARG, decorate_callback),
-		OPT_CALLBACK('L', NULL, &line_cb, "range:file",
+		OPT_CALLBACK('L', ખાલી, &લીટી_cb, "range:file",
 			     N_("trace the evolution of line range <start>,<end> or function :<funcname> in <file>"),
-			     log_line_range_callback),
+			     log_લીટી_range_callback),
 		OPT_END()
 	};
 
-	line_cb.rev = rev;
-	line_cb.prefix = prefix;
+	લીટી_cb.rev = rev;
+	લીટી_cb.prefix = prefix;
 
 	mailmap = cfg->use_mailmap_config;
 	argc = parse_options(argc, argv, prefix,
@@ -311,59 +311,59 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (quiet)
+	જો (quiet)
 		rev->diffopt.output_format |= DIFF_FORMAT_NO_OUTPUT;
 	argc = setup_revisions(argc, argv, rev, opt);
 
 	/* Any arguments at this point are not recognized */
-	if (argc > 1)
+	જો (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev->line_level_traverse && rev->prune_data.nr)
+	જો (rev->લીટી_level_traverse && rev->prune_data.nr)
 		die(_("-L<range>:<file> cannot be used with pathspec"));
 
-	memset(&w, 0, sizeof(w));
-	userformat_find_requirements(NULL, &w);
+	memset(&w, 0, કદ(w));
+	userformat_find_requirements(ખાલી, &w);
 
-	if (!rev->show_notes_given && (!rev->pretty_given || w.notes))
+	જો (!rev->show_notes_given && (!rev->pretty_given || w.notes))
 		rev->show_notes = 1;
-	if (rev->show_notes)
+	જો (rev->show_notes)
 		load_display_notes(&rev->notes_opt);
 
-	if ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
+	જો ((rev->diffopt.pickaxe_opts & DIFF_PICKAXE_KINDS_MASK) ||
 	    rev->diffopt.filter || rev->diffopt.flags.follow_renames)
 		rev->always_show_header = 0;
 
-	if (source || w.source) {
+	જો (source || w.source) {
 		init_revision_sources(&revision_sources);
 		rev->sources = &revision_sources;
 	}
 
-	if (mailmap) {
-		rev->mailmap = xmalloc(sizeof(struct string_list));
+	જો (mailmap) {
+		rev->mailmap = xmalloc(કદ(સંરચના string_list));
 		string_list_init_nodup(rev->mailmap);
 		read_mailmap(the_repository, rev->mailmap);
 	}
 
-	if (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
+	જો (rev->pretty_given && rev->commit_format == CMIT_FMT_RAW) {
 		/*
 		 * "log --pretty=raw" is special; ignore UI oriented
 		 * configuration variables such as decoration.
 		 */
-		if (!cfg->decoration_given)
+		જો (!cfg->decoration_given)
 			cfg->decoration_style = 0;
-		if (!rev->abbrev_commit_given)
+		જો (!rev->abbrev_commit_given)
 			rev->abbrev_commit = 0;
 	}
 
-	if (rev->commit_format == CMIT_FMT_USERFORMAT) {
-		if (!w.decorate) {
+	જો (rev->commit_format == CMIT_FMT_USERFORMAT) {
+		જો (!w.decorate) {
 			/*
 			 * Disable decoration loading if the format will not
 			 * show them anyway.
 			 */
 			cfg->decoration_style = 0;
-		} else if (!cfg->decoration_style) {
+		} નહીંતર જો (!cfg->decoration_style) {
 			/*
 			 * If we are going to show them, make sure we do load
 			 * them here, but taking care not to override a
@@ -373,37 +373,37 @@ static void cmd_log_init_finish(int argc, const char **argv, const char *prefix,
 		}
 	}
 
-	if (cfg->decoration_style || rev->simplify_by_decoration) {
+	જો (cfg->decoration_style || rev->simplify_by_decoration) {
 		set_default_decoration_filter(&decoration_filter);
 
-		if (cfg->decoration_style)
+		જો (cfg->decoration_style)
 			rev->show_decorations = 1;
 
 		load_ref_decorations(&decoration_filter, cfg->decoration_style);
 	}
 
-	if (rev->line_level_traverse)
-		line_log_init(rev, line_cb.prefix, &line_cb.args);
+	જો (rev->લીટી_level_traverse)
+		લીટી_log_init(rev, લીટી_cb.prefix, &લીટી_cb.args);
 
 	setup_pager(the_repository);
 }
 
-static void cmd_log_init(int argc, const char **argv, const char *prefix,
-			 struct rev_info *rev, struct setup_revision_opt *opt,
-			 struct log_config *cfg)
+સ્થિર શૂન્ય cmd_log_init(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			 સંરચના rev_info *rev, સંરચના setup_revision_opt *opt,
+			 સંરચના log_config *cfg)
 {
 	cmd_log_init_defaults(rev, cfg);
 	cmd_log_init_finish(argc, argv, prefix, rev, opt, cfg);
 }
 
-static int cmd_log_walk_no_free(struct rev_info *rev)
+સ્થિર પૂર્ણાંક cmd_log_walk_no_free(સંરચના rev_info *rev)
 {
-	struct commit *commit;
-	int saved_nrl = 0;
-	int saved_dcctc = 0;
-	int result;
+	સંરચના commit *commit;
+	પૂર્ણાંક saved_nrl = 0;
+	પૂર્ણાંક saved_dcctc = 0;
+	પૂર્ણાંક result;
 
-	if (prepare_revision_walk(rev))
+	જો (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
 
 	/*
@@ -411,14 +411,14 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 	 * and HAS_CHANGES being accumulated in rev->diffopt, so be careful to
 	 * retain that state information if replacing rev->diffopt in this loop
 	 */
-	while ((commit = get_revision(rev)) != NULL) {
-		if (!log_tree_commit(rev, commit) && rev->max_count >= 0)
+	જ્યારે ((commit = get_revision(rev)) != ખાલી) {
+		જો (!log_વૃક્ષ_commit(rev, commit) && rev->max_ગણતરી >= 0)
 			/*
 			 * We decremented max_count in get_revision,
 			 * but we didn't actually show the commit.
 			 */
-			rev->max_count++;
-		if (!rev->reflog_info && !rev->remerge_diff) {
+			rev->max_ગણતરી++;
+		જો (!rev->reflog_info && !rev->remerge_diff) {
 			/*
 			 * We may show a given commit multiple times when
 			 * walking the reflogs. Therefore we still need it.
@@ -430,108 +430,108 @@ static int cmd_log_walk_no_free(struct rev_info *rev)
 			free_commit_buffer(the_repository->parsed_objects,
 					   commit);
 			commit_list_free(commit->parents);
-			commit->parents = NULL;
+			commit->parents = ખાલી;
 		}
-		if (saved_nrl < rev->diffopt.needed_rename_limit)
+		જો (saved_nrl < rev->diffopt.needed_rename_limit)
 			saved_nrl = rev->diffopt.needed_rename_limit;
-		if (rev->diffopt.degraded_cc_to_c)
+		જો (rev->diffopt.degraded_cc_to_c)
 			saved_dcctc = 1;
 	}
 	rev->diffopt.degraded_cc_to_c = saved_dcctc;
 	rev->diffopt.needed_rename_limit = saved_nrl;
 
 	result = diff_result_code(rev);
-	if (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
+	જો (rev->diffopt.output_format & DIFF_FORMAT_CHECKDIFF &&
 	    rev->diffopt.flags.check_failed) {
 		result = 02;
 	}
-	return result;
+	પાછા result;
 }
 
-static int cmd_log_walk(struct rev_info *rev)
+સ્થિર પૂર્ણાંક cmd_log_walk(સંરચના rev_info *rev)
 {
-	int retval;
+	પૂર્ણાંક retval;
 
 	rev->diffopt.no_free = 1;
 	retval = cmd_log_walk_no_free(rev);
 	rev->diffopt.no_free = 0;
 	diff_free(&rev->diffopt);
-	return retval;
+	પાછા retval;
 }
 
-static int git_log_config(const char *var, const char *value,
-			  const struct config_context *ctx, void *cb)
+સ્થિર પૂર્ણાંક git_log_config(અચલ અક્ષર *var, અચલ અક્ષર *કિંમત,
+			  અચલ સંરચના config_context *ctx, શૂન્ય *cb)
 {
-	struct log_config *cfg = cb;
-	const char *slot_name;
+	સંરચના log_config *cfg = cb;
+	અચલ અક્ષર *slot_name;
 
-	if (!strcmp(var, "format.pretty")) {
+	જો (!strcmp(var, "format.pretty")) {
 		FREE_AND_NULL(cfg->fmt_pretty);
-		return git_config_string(&cfg->fmt_pretty, var, value);
+		પાછા git_config_string(&cfg->fmt_pretty, var, કિંમત);
 	}
-	if (!strcmp(var, "format.subjectprefix")) {
+	જો (!strcmp(var, "format.subjectprefix")) {
 		FREE_AND_NULL(cfg->fmt_patch_subject_prefix);
-		return git_config_string(&cfg->fmt_patch_subject_prefix, var, value);
+		પાછા git_config_string(&cfg->fmt_patch_subject_prefix, var, કિંમત);
 	}
-	if (!strcmp(var, "format.filenamemaxlength")) {
-		cfg->fmt_patch_name_max = git_config_int(var, value, ctx->kvi);
-		return 0;
+	જો (!strcmp(var, "format.filenamemaxlength")) {
+		cfg->fmt_patch_name_max = git_config_int(var, કિંમત, ctx->kvi);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.encodeemailheaders")) {
-		cfg->default_encode_email_headers = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "format.encodeemailheaders")) {
+		cfg->default_encode_email_headers = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "log.abbrevcommit")) {
-		cfg->default_abbrev_commit = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "log.abbrevcommit")) {
+		cfg->default_abbrev_commit = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "log.date")) {
+	જો (!strcmp(var, "log.date")) {
 		FREE_AND_NULL(cfg->default_date_mode);
-		return git_config_string(&cfg->default_date_mode, var, value);
+		પાછા git_config_string(&cfg->default_date_mode, var, કિંમત);
 	}
-	if (!strcmp(var, "log.decorate")) {
-		cfg->decoration_style = parse_decoration_style(value);
-		if (cfg->decoration_style < 0)
+	જો (!strcmp(var, "log.decorate")) {
+		cfg->decoration_style = parse_decoration_style(કિંમત);
+		જો (cfg->decoration_style < 0)
 			cfg->decoration_style = 0; /* maybe warn? */
-		return 0;
+		પાછા 0;
 	}
-	if (!strcmp(var, "log.diffmerges")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return diff_merges_config(value);
+	જો (!strcmp(var, "log.diffmerges")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		પાછા diff_merges_config(કિંમત);
 	}
-	if (!strcmp(var, "log.showroot")) {
-		cfg->default_show_root = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "log.showroot")) {
+		cfg->default_show_મૂળ = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "log.follow")) {
-		cfg->default_follow = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "log.follow")) {
+		cfg->default_follow = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (skip_prefix(var, "color.decorate.", &slot_name))
-		return parse_decorate_color_config(var, slot_name, value);
-	if (!strcmp(var, "log.mailmap")) {
-		cfg->use_mailmap_config = git_config_bool(var, value);
-		return 0;
+	જો (skip_prefix(var, "color.decorate.", &slot_name))
+		પાછા parse_decorate_color_config(var, slot_name, કિંમત);
+	જો (!strcmp(var, "log.mailmap")) {
+		cfg->use_mailmap_config = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "log.showsignature")) {
-		cfg->default_show_signature = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "log.showsignature")) {
+		cfg->default_show_signature = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
 
-	return git_diff_ui_config(var, value, ctx, cb);
+	પાછા git_diff_ui_config(var, કિંમત, ctx, cb);
 }
 
 #ifndef WITH_BREAKING_CHANGES
-int cmd_whatchanged(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+પૂર્ણાંક cmd_whatchanged(પૂર્ણાંક argc,
+		    અચલ અક્ષર **argv,
+		    અચલ અક્ષર *prefix,
+		    સંરચના repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	સંરચના log_config cfg;
+	સંરચના rev_info rev;
+	સંરચના setup_revision_opt opt;
+	પૂર્ણાંક ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -542,12 +542,12 @@ int cmd_whatchanged(int argc,
 
 	rev.diff = 1;
 	rev.simplify_history = 0;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, કદ(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
 	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
 
-	if (!cfg.i_still_use_this)
+	જો (!cfg.i_still_use_this)
 		you_still_use_that("git whatchanged",
 				   _("\n"
 				     "hint: You can replace 'git whatchanged <opts>' with:\n"
@@ -556,21 +556,21 @@ int cmd_whatchanged(int argc,
 				     "hint:\tgit config set --global alias.whatchanged 'log --raw --no-merges'\n"
 				     "\n"));
 
-	if (!rev.diffopt.output_format)
+	જો (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	ret = cmd_log_walk(&rev);
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	પાછા ret;
 }
 #endif
 
-static void show_tagger(const char *buf, struct rev_info *rev)
+સ્થિર શૂન્ય show_tagger(અચલ અક્ષર *buf, સંરચના rev_info *rev)
 {
-	struct strbuf out = STRBUF_INIT;
-	struct pretty_print_context pp = {0};
+	સંરચના strbuf out = STRBUF_INIT;
+	સંરચના pretty_print_context pp = {0};
 
 	pp.fmt = rev->commit_format;
 	pp.date_mode = rev->date_mode;
@@ -579,107 +579,107 @@ static void show_tagger(const char *buf, struct rev_info *rev)
 	strbuf_release(&out);
 }
 
-static int show_blob_object(const struct object_id *oid, struct rev_info *rev, const char *obj_name)
+સ્થિર પૂર્ણાંક show_blob_object(અચલ સંરચના object_id *oid, સંરચના rev_info *rev, અચલ અક્ષર *obj_name)
 {
-	struct object_id oidc;
-	struct object_context obj_context = {0};
-	char *buf;
+	સંરચના object_id oidc;
+	સંરચના object_context obj_context = {0};
+	અક્ષર *buf;
 	unsigned long size;
 
 	fflush(rev->diffopt.file);
-	if (!rev->diffopt.flags.textconv_set_via_cmdline ||
+	જો (!rev->diffopt.flags.textconv_set_via_cmdline ||
 	    !rev->diffopt.flags.allow_textconv)
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		પાછા odb_stream_blob_to_fd(the_repository->objects, 1, oid, ખાલી, 0);
 
-	if (get_oid_with_context(the_repository, obj_name,
+	જો (get_oid_with_context(the_repository, obj_name,
 				 GET_OID_RECORD_PATH,
 				 &oidc, &obj_context))
 		die(_("not a valid object name %s"), obj_name);
-	if (!obj_context.path ||
+	જો (!obj_context.path ||
 	    !textconv_object(the_repository, obj_context.path,
 			     obj_context.mode, &oidc, 1, &buf, &size)) {
 		object_context_release(&obj_context);
-		return odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0);
+		પાછા odb_stream_blob_to_fd(the_repository->objects, 1, oid, ખાલી, 0);
 	}
 
-	if (!buf)
+	જો (!buf)
 		die(_("git show %s: bad file"), obj_name);
 
 	write_or_die(1, buf, size);
 	object_context_release(&obj_context);
-	free(buf);
-	return 0;
+	મુક્ત(buf);
+	પાછા 0;
 }
 
-static int show_tag_object(const struct object_id *oid, struct rev_info *rev)
+સ્થિર પૂર્ણાંક show_tag_object(અચલ સંરચના object_id *oid, સંરચના rev_info *rev)
 {
 	size_t size;
-	enum object_type type;
-	char *buf = odb_read_object(the_repository->objects, oid, &type, &size);
+	ગણના object_type type;
+	અક્ષર *buf = odb_read_object(the_repository->objects, oid, &type, &size);
 	unsigned long offset = 0;
 
-	if (!buf)
-		return error(_("could not read object %s"), oid_to_hex(oid));
+	જો (!buf)
+		પાછા error(_("could not read object %s"), oid_to_hex(oid));
 
-	assert(type == OBJ_TAG);
-	while (offset < size && buf[offset] != '\n') {
+	પ્રતિજ્ઞા(type == OBJ_TAG);
+	જ્યારે (offset < size && buf[offset] != '\n') {
 		unsigned long new_offset = offset + 1;
-		const char *ident;
-		while (new_offset < size && buf[new_offset++] != '\n')
+		અચલ અક્ષર *ident;
+		જ્યારે (new_offset < size && buf[new_offset++] != '\n')
 			; /* do nothing */
-		if (skip_prefix(buf + offset, "tagger ", &ident))
+		જો (skip_prefix(buf + offset, "tagger ", &ident))
 			show_tagger(ident, rev);
 		offset = new_offset;
 	}
 
-	if (offset < size)
+	જો (offset < size)
 		fwrite(buf + offset, size - offset, 1, rev->diffopt.file);
-	free(buf);
-	return 0;
+	મુક્ત(buf);
+	પાછા 0;
 }
 
-static int show_tree_object(const struct object_id *oid UNUSED,
-			    struct strbuf *base UNUSED,
-			    const char *pathname, unsigned mode,
-			    void *context)
+સ્થિર પૂર્ણાંક show_વૃક્ષ_object(અચલ સંરચના object_id *oid UNUSED,
+			    સંરચના strbuf *base UNUSED,
+			    અચલ અક્ષર *pathname, unsigned mode,
+			    શૂન્ય *context)
 {
 	FILE *file = context;
 	fprintf(file, "%s%s\n", pathname, S_ISDIR(mode) ? "/" : "");
-	return 0;
+	પાછા 0;
 }
 
-static void show_setup_revisions_tweak(struct rev_info *rev)
+સ્થિર શૂન્ય show_setup_revisions_tweak(સંરચના rev_info *rev)
 {
-	if (rev->first_parent_only)
+	જો (rev->first_parent_only)
 		diff_merges_default_to_first_parent(rev);
-	else
+	નહીંતર
 		diff_merges_default_to_dense_combined(rev);
-	if (!rev->diffopt.output_format)
+	જો (!rev->diffopt.output_format)
 		rev->diffopt.output_format = DIFF_FORMAT_PATCH;
 }
 
-int cmd_show(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+પૂર્ણાંક cmd_show(પૂર્ણાંક argc,
+	     અચલ અક્ષર **argv,
+	     અચલ અક્ષર *prefix,
+	     સંરચના repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	unsigned int i;
-	struct setup_revision_opt opt;
-	struct pathspec match_all;
-	int ret = 0;
+	સંરચના log_config cfg;
+	સંરચના rev_info rev;
+	unsigned પૂર્ણાંક i;
+	સંરચના setup_revision_opt opt;
+	સંરચના pathspec match_all;
+	પૂર્ણાંક ret = 0;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
 	repo_config(the_repository, git_log_config, &cfg);
 
-	if (the_repository->gitdir) {
+	જો (the_repository->gitdir) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	memset(&match_all, 0, sizeof(match_all));
+	memset(&match_all, 0, કદ(match_all));
 	repo_init_revisions(the_repository, &rev, prefix);
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
@@ -688,31 +688,31 @@ int cmd_show(int argc,
 	rev.no_walk = 1;
 	rev.diffopt.stat_width = -1; 	/* Scale to real terminal size */
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, કદ(opt));
 	opt.def = "HEAD";
 	opt.tweak = show_setup_revisions_tweak;
 	cmd_log_init(argc, argv, prefix, &rev, &opt, &cfg);
 
-	if (!rev.no_walk) {
+	જો (!rev.no_walk) {
 		ret = cmd_log_walk(&rev);
 		release_revisions(&rev);
 		log_config_release(&cfg);
-		return ret;
+		પાછા ret;
 	}
 
 	rev.diffopt.no_free = 1;
-	for (i = 0; i < rev.pending.nr && !ret; i++) {
-		struct object *o = rev.pending.objects[i].item;
-		const char *name = rev.pending.objects[i].name;
-		switch (o->type) {
-		case OBJ_BLOB:
+	માટે (i = 0; i < rev.pending.nr && !ret; i++) {
+		સંરચના object *o = rev.pending.objects[i].item;
+		અચલ અક્ષર *name = rev.pending.objects[i].name;
+		પસંદગી (o->type) {
+		સ્થિતિ OBJ_BLOB:
 			ret = show_blob_object(&o->oid, &rev, name);
-			break;
-		case OBJ_TAG: {
-			struct tag *t = (struct tag *)o;
-			struct object_id *oid = get_tagged_oid(t);
+			તોડો;
+		સ્થિતિ OBJ_TAG: {
+			સંરચના tag *t = (સંરચના tag *)o;
+			સંરચના object_id *oid = get_tagged_oid(t);
 
-			if (rev.shown_one)
+			જો (rev.shown_one)
 				putchar('\n');
 			fprintf(rev.diffopt.file, "%stag %s%s\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
@@ -720,35 +720,35 @@ int cmd_show(int argc,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
 			ret = show_tag_object(&o->oid, &rev);
 			rev.shown_one = 1;
-			if (ret)
-				break;
+			જો (ret)
+				તોડો;
 			o = parse_object(the_repository, oid);
-			if (!o)
+			જો (!o)
 				ret = error(_("could not read object %s"),
 					    oid_to_hex(oid));
 			rev.pending.objects[i].item = o;
 			i--;
-			break;
+			તોડો;
 		}
-		case OBJ_TREE:
-			if (rev.shown_one)
+		સ્થિતિ OBJ_વૃક્ષ:
+			જો (rev.shown_one)
 				putchar('\n');
 			fprintf(rev.diffopt.file, "%stree %s%s\n\n",
 					diff_get_color_opt(&rev.diffopt, DIFF_COMMIT),
 					name,
 					diff_get_color_opt(&rev.diffopt, DIFF_RESET));
-			read_tree(the_repository, (struct tree *)o,
-				  &match_all, show_tree_object,
+			read_વૃક્ષ(the_repository, (સંરચના વૃક્ષ *)o,
+				  &match_all, show_વૃક્ષ_object,
 				  rev.diffopt.file);
 			rev.shown_one = 1;
-			break;
-		case OBJ_COMMIT:
+			તોડો;
+		સ્થિતિ OBJ_COMMIT:
 		{
-			struct object_array old;
-			struct object_array blank = OBJECT_ARRAY_INIT;
+			સંરચના object_array old;
+			સંરચના object_array blank = OBJECT_ARRAY_INIT;
 
-			memcpy(&old, &rev.pending, sizeof(old));
-			memcpy(&rev.pending, &blank, sizeof(rev.pending));
+			memcpy(&old, &rev.pending, કદ(old));
+			memcpy(&rev.pending, &blank, કદ(rev.pending));
 
 			add_object_array(o, name, &rev.pending);
 			ret = cmd_log_walk_no_free(&rev);
@@ -758,10 +758,10 @@ int cmd_show(int argc,
 			 * object_array_clear(&pending). It was
 			 * cleared already in prepare_revision_walk()
 			 */
-			memcpy(&rev.pending, &old, sizeof(rev.pending));
-			break;
+			memcpy(&rev.pending, &old, કદ(rev.pending));
+			તોડો;
 		}
-		default:
+		મૂળભૂત:
 			ret = error(_("unknown type: %d"), o->type);
 		}
 	}
@@ -771,21 +771,21 @@ int cmd_show(int argc,
 	release_revisions(&rev);
 	log_config_release(&cfg);
 
-	return ret;
+	પાછા ret;
 }
 
 /*
  * This is equivalent to "git log -g --abbrev-commit --pretty=oneline"
  */
-int cmd_log_reflog(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+પૂર્ણાંક cmd_log_reflog(પૂર્ણાંક argc,
+		   અચલ અક્ષર **argv,
+		   અચલ અક્ષર *prefix,
+		   સંરચના repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	સંરચના log_config cfg;
+	સંરચના rev_info rev;
+	સંરચના setup_revision_opt opt;
+	પૂર્ણાંક ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -796,7 +796,7 @@ int cmd_log_reflog(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.verbose_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, કદ(opt));
 	opt.def = "HEAD";
 	cmd_log_init_defaults(&rev, &cfg);
 	rev.abbrev_commit = 1;
@@ -809,28 +809,28 @@ int cmd_log_reflog(int argc,
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	પાછા ret;
 }
 
-static void log_setup_revisions_tweak(struct rev_info *rev)
+સ્થિર શૂન્ય log_setup_revisions_tweak(સંરચના rev_info *rev)
 {
-	if (rev->diffopt.flags.default_follow_renames &&
+	જો (rev->diffopt.flags.default_follow_renames &&
 	    diff_check_follow_pathspec(&rev->prune_data, 0))
 		rev->diffopt.flags.follow_renames = 1;
 
-	if (rev->first_parent_only)
+	જો (rev->first_parent_only)
 		diff_merges_default_to_first_parent(rev);
 }
 
-int cmd_log(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo UNUSED)
+પૂર્ણાંક cmd_log(પૂર્ણાંક argc,
+	    અચલ અક્ષર **argv,
+	    અચલ અક્ષર *prefix,
+	    સંરચના repository *repo UNUSED)
 {
-	struct log_config cfg;
-	struct rev_info rev;
-	struct setup_revision_opt opt;
-	int ret;
+	સંરચના log_config cfg;
+	સંરચના rev_info rev;
+	સંરચના setup_revision_opt opt;
+	પૂર્ણાંક ret;
 
 	log_config_init(&cfg);
 	init_diff_ui_defaults();
@@ -840,7 +840,7 @@ int cmd_log(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.always_show_header = 1;
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, કદ(opt));
 	opt.def = "HEAD";
 	opt.revarg_opt = REVARG_COMMITTISH;
 	opt.tweak = log_setup_revisions_tweak;
@@ -850,71 +850,71 @@ int cmd_log(int argc,
 
 	release_revisions(&rev);
 	log_config_release(&cfg);
-	return ret;
+	પાછા ret;
 }
 
 /* format-patch */
 
-enum cover_setting {
+ગણના cover_setting {
 	COVER_UNSET,
 	COVER_OFF,
 	COVER_ON,
 	COVER_AUTO
 };
 
-enum thread_level {
+ગણના thread_level {
 	THREAD_UNSET,
 	THREAD_SHALLOW,
 	THREAD_DEEP
 };
 
-enum cover_from_description {
+ગણના cover_from_description {
 	COVER_FROM_NONE,
 	COVER_FROM_MESSAGE,
 	COVER_FROM_SUBJECT,
 	COVER_FROM_AUTO
 };
 
-enum auto_base_setting {
+ગણના auto_base_setting {
 	AUTO_BASE_NEVER,
 	AUTO_BASE_ALWAYS,
 	AUTO_BASE_WHEN_ABLE
 };
 
-struct format_config {
-	struct log_config log;
-	enum thread_level thread;
-	int do_signoff;
-	enum auto_base_setting auto_base;
-	char *base_commit;
-	char *from;
-	char *signature;
-	char *signature_file;
-	enum cover_setting config_cover_letter;
-	char *fmt_cover_letter_commit_list;
-	char *config_output_directory;
-	enum cover_from_description cover_from_description_mode;
-	int show_notes;
-	struct display_notes_opt notes_opt;
-	int numbered_cmdline_opt;
-	int numbered;
-	int auto_number;
-	char *default_attach;
-	struct string_list extra_hdr;
-	struct string_list extra_to;
-	struct string_list extra_cc;
-	int keep_subject;
-	int subject_prefix;
-	struct strbuf sprefix;
-	char *fmt_patch_suffix;
+સંરચના format_config {
+	સંરચના log_config log;
+	ગણના thread_level thread;
+	પૂર્ણાંક do_signoff;
+	ગણના auto_base_setting auto_base;
+	અક્ષર *base_commit;
+	અક્ષર *from;
+	અક્ષર *signature;
+	અક્ષર *signature_file;
+	ગણના cover_setting config_cover_letter;
+	અક્ષર *fmt_cover_letter_commit_list;
+	અક્ષર *config_output_directory;
+	ગણના cover_from_description cover_from_description_mode;
+	પૂર્ણાંક show_notes;
+	સંરચના display_notes_opt notes_opt;
+	પૂર્ણાંક numbered_cmdline_opt;
+	પૂર્ણાંક numbered;
+	પૂર્ણાંક auto_સંખ્યા;
+	અક્ષર *default_attach;
+	સંરચના string_list extra_hdr;
+	સંરચના string_list extra_to;
+	સંરચના string_list extra_cc;
+	પૂર્ણાંક keep_subject;
+	પૂર્ણાંક subject_prefix;
+	સંરચના strbuf sprefix;
+	અક્ષર *fmt_patch_suffix;
 };
 
-static void format_config_init(struct format_config *cfg)
+સ્થિર શૂન્ય format_config_init(સંરચના format_config *cfg)
 {
-	memset(cfg, 0, sizeof(*cfg));
+	memset(cfg, 0, કદ(*cfg));
 	log_config_init(&cfg->log);
 	cfg->cover_from_description_mode = COVER_FROM_MESSAGE;
-	cfg->auto_number = 1;
+	cfg->auto_સંખ્યા = 1;
 	string_list_init_dup(&cfg->extra_hdr);
 	string_list_init_dup(&cfg->extra_to);
 	string_list_init_dup(&cfg->extra_cc);
@@ -922,196 +922,196 @@ static void format_config_init(struct format_config *cfg)
 	cfg->fmt_patch_suffix = xstrdup(".patch");
 }
 
-static void format_config_release(struct format_config *cfg)
+સ્થિર શૂન્ય format_config_release(સંરચના format_config *cfg)
 {
 	log_config_release(&cfg->log);
-	free(cfg->base_commit);
-	free(cfg->from);
-	free(cfg->signature);
-	free(cfg->signature_file);
-	free(cfg->config_output_directory);
-	free(cfg->default_attach);
+	મુક્ત(cfg->base_commit);
+	મુક્ત(cfg->from);
+	મુક્ત(cfg->signature);
+	મુક્ત(cfg->signature_file);
+	મુક્ત(cfg->config_output_directory);
+	મુક્ત(cfg->default_attach);
 	string_list_clear(&cfg->extra_hdr, 0);
 	string_list_clear(&cfg->extra_to, 0);
 	string_list_clear(&cfg->extra_cc, 0);
 	strbuf_release(&cfg->sprefix);
-	free(cfg->fmt_patch_suffix);
-	free(cfg->fmt_cover_letter_commit_list);
+	મુક્ત(cfg->fmt_patch_suffix);
+	મુક્ત(cfg->fmt_cover_letter_commit_list);
 }
 
-static enum cover_from_description parse_cover_from_description(const char *arg)
+સ્થિર ગણના cover_from_description parse_cover_from_description(અચલ અક્ષર *arg)
 {
-	if (!arg || !strcmp(arg, "default"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "none"))
-		return COVER_FROM_NONE;
-	else if (!strcmp(arg, "message"))
-		return COVER_FROM_MESSAGE;
-	else if (!strcmp(arg, "subject"))
-		return COVER_FROM_SUBJECT;
-	else if (!strcmp(arg, "auto"))
-		return COVER_FROM_AUTO;
-	else
+	જો (!arg || !strcmp(arg, "default"))
+		પાછા COVER_FROM_MESSAGE;
+	નહીંતર જો (!strcmp(arg, "none"))
+		પાછા COVER_FROM_NONE;
+	નહીંતર જો (!strcmp(arg, "message"))
+		પાછા COVER_FROM_MESSAGE;
+	નહીંતર જો (!strcmp(arg, "subject"))
+		પાછા COVER_FROM_SUBJECT;
+	નહીંતર જો (!strcmp(arg, "auto"))
+		પાછા COVER_FROM_AUTO;
+	નહીંતર
 		die(_("%s: invalid cover from description mode"), arg);
 }
 
-static void add_header(struct format_config *cfg, const char *value)
+સ્થિર શૂન્ય add_header(સંરચના format_config *cfg, અચલ અક્ષર *કિંમત)
 {
-	struct string_list_item *item;
-	int len = strlen(value);
-	while (len && value[len - 1] == '\n')
+	સંરચના string_list_item *item;
+	પૂર્ણાંક len = strlen(કિંમત);
+	જ્યારે (len && કિંમત[len - 1] == '\n')
 		len--;
 
-	if (!strncasecmp(value, "to: ", 4)) {
-		item = string_list_append(&cfg->extra_to, value + 4);
+	જો (!strncasecmp(કિંમત, "to: ", 4)) {
+		item = string_list_append(&cfg->extra_to, કિંમત + 4);
 		len -= 4;
-	} else if (!strncasecmp(value, "cc: ", 4)) {
-		item = string_list_append(&cfg->extra_cc, value + 4);
+	} નહીંતર જો (!strncasecmp(કિંમત, "cc: ", 4)) {
+		item = string_list_append(&cfg->extra_cc, કિંમત + 4);
 		len -= 4;
-	} else {
-		item = string_list_append(&cfg->extra_hdr, value);
+	} નહીંતર {
+		item = string_list_append(&cfg->extra_hdr, કિંમત);
 	}
 
 	item->string[len] = '\0';
 }
 
-static int git_format_config(const char *var, const char *value,
-			     const struct config_context *ctx, void *cb)
+સ્થિર પૂર્ણાંક git_format_config(અચલ અક્ષર *var, અચલ અક્ષર *કિંમત,
+			     અચલ સંરચના config_context *ctx, શૂન્ય *cb)
 {
-	struct format_config *cfg = cb;
+	સંરચના format_config *cfg = cb;
 
-	if (!strcmp(var, "format.headers")) {
-		if (!value)
+	જો (!strcmp(var, "format.headers")) {
+		જો (!કિંમત)
 			die(_("format.headers without value"));
-		add_header(cfg, value);
-		return 0;
+		add_header(cfg, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.suffix")) {
+	જો (!strcmp(var, "format.suffix")) {
 		FREE_AND_NULL(cfg->fmt_patch_suffix);
-		return git_config_string(&cfg->fmt_patch_suffix, var, value);
+		પાછા git_config_string(&cfg->fmt_patch_suffix, var, કિંમત);
 	}
-	if (!strcmp(var, "format.to")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(&cfg->extra_to, value);
-		return 0;
+	જો (!strcmp(var, "format.to")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		string_list_append(&cfg->extra_to, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.cc")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(&cfg->extra_cc, value);
-		return 0;
+	જો (!strcmp(var, "format.cc")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		string_list_append(&cfg->extra_cc, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
+	જો (!strcmp(var, "diff.color") || !strcmp(var, "color.diff") ||
 	    !strcmp(var, "color.ui") || !strcmp(var, "diff.submodule")) {
-		return 0;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.numbered")) {
-		if (value && !strcasecmp(value, "auto")) {
-			cfg->auto_number = 1;
-			return 0;
+	જો (!strcmp(var, "format.numbered")) {
+		જો (કિંમત && !strcasecmp(કિંમત, "auto")) {
+			cfg->auto_સંખ્યા = 1;
+			પાછા 0;
 		}
-		cfg->numbered = git_config_bool(var, value);
-		cfg->auto_number = cfg->auto_number && cfg->numbered;
-		return 0;
+		cfg->numbered = git_config_bool(var, કિંમત);
+		cfg->auto_સંખ્યા = cfg->auto_સંખ્યા && cfg->numbered;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.attach")) {
-		if (value && *value) {
+	જો (!strcmp(var, "format.attach")) {
+		જો (કિંમત && *કિંમત) {
 			FREE_AND_NULL(cfg->default_attach);
-			cfg->default_attach = xstrdup(value);
-		} else if (value && !*value) {
+			cfg->default_attach = xstrdup(કિંમત);
+		} નહીંતર જો (કિંમત && !*કિંમત) {
 			FREE_AND_NULL(cfg->default_attach);
-		} else {
+		} નહીંતર {
 			FREE_AND_NULL(cfg->default_attach);
 			cfg->default_attach = xstrdup(git_version_string);
 		}
-		return 0;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.thread")) {
-		if (value && !strcasecmp(value, "deep")) {
+	જો (!strcmp(var, "format.thread")) {
+		જો (કિંમત && !strcasecmp(કિંમત, "deep")) {
 			cfg->thread = THREAD_DEEP;
-			return 0;
+			પાછા 0;
 		}
-		if (value && !strcasecmp(value, "shallow")) {
+		જો (કિંમત && !strcasecmp(કિંમત, "shallow")) {
 			cfg->thread = THREAD_SHALLOW;
-			return 0;
+			પાછા 0;
 		}
-		cfg->thread = git_config_bool(var, value) ? THREAD_SHALLOW : THREAD_UNSET;
-		return 0;
+		cfg->thread = git_config_bool(var, કિંમત) ? THREAD_SHALLOW : THREAD_UNSET;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.signoff")) {
-		cfg->do_signoff = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "format.signoff")) {
+		cfg->do_signoff = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.signature")) {
+	જો (!strcmp(var, "format.signature")) {
 		FREE_AND_NULL(cfg->signature);
-		return git_config_string(&cfg->signature, var, value);
+		પાછા git_config_string(&cfg->signature, var, કિંમત);
 	}
-	if (!strcmp(var, "format.signaturefile")) {
+	જો (!strcmp(var, "format.signaturefile")) {
 		FREE_AND_NULL(cfg->signature_file);
-		return git_config_pathname(&cfg->signature_file, var, value);
+		પાછા git_config_pathname(&cfg->signature_file, var, કિંમત);
 	}
-	if (!strcmp(var, "format.coverletter")) {
-		if (value && !strcasecmp(value, "auto")) {
+	જો (!strcmp(var, "format.coverletter")) {
+		જો (કિંમત && !strcasecmp(કિંમત, "auto")) {
 			cfg->config_cover_letter = COVER_AUTO;
-			return 0;
+			પાછા 0;
 		}
-		cfg->config_cover_letter = git_config_bool(var, value) ? COVER_ON : COVER_OFF;
-		return 0;
+		cfg->config_cover_letter = git_config_bool(var, કિંમત) ? COVER_ON : COVER_OFF;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.commitlistformat")) {
+	જો (!strcmp(var, "format.commitlistformat")) {
 		FREE_AND_NULL(cfg->fmt_cover_letter_commit_list);
-		return git_config_string(&cfg->fmt_cover_letter_commit_list, var, value);
+		પાછા git_config_string(&cfg->fmt_cover_letter_commit_list, var, કિંમત);
 	}
-	if (!strcmp(var, "format.outputdirectory")) {
+	જો (!strcmp(var, "format.outputdirectory")) {
 		FREE_AND_NULL(cfg->config_output_directory);
-		return git_config_string(&cfg->config_output_directory, var, value);
+		પાછા git_config_string(&cfg->config_output_directory, var, કિંમત);
 	}
-	if (!strcmp(var, "format.useautobase")) {
-		if (value && !strcasecmp(value, "whenAble")) {
+	જો (!strcmp(var, "format.useautobase")) {
+		જો (કિંમત && !strcasecmp(કિંમત, "whenAble")) {
 			cfg->auto_base = AUTO_BASE_WHEN_ABLE;
-			return 0;
+			પાછા 0;
 		}
-		cfg->auto_base = git_config_bool(var, value) ? AUTO_BASE_ALWAYS : AUTO_BASE_NEVER;
-		return 0;
+		cfg->auto_base = git_config_bool(var, કિંમત) ? AUTO_BASE_ALWAYS : AUTO_BASE_NEVER;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.from")) {
-		int b = git_parse_maybe_bool(value);
+	જો (!strcmp(var, "format.from")) {
+		પૂર્ણાંક b = git_parse_maybe_bool(કિંમત);
 		FREE_AND_NULL(cfg->from);
-		if (b < 0)
-			cfg->from = xstrdup(value);
-		else if (b)
+		જો (b < 0)
+			cfg->from = xstrdup(કિંમત);
+		નહીંતર જો (b)
 			cfg->from = xstrdup(git_committer_info(IDENT_NO_DATE));
-		return 0;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.forceinbodyfrom")) {
-		force_in_body_from = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "format.forceinbodyfrom")) {
+		force_in_body_from = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.notes")) {
-		int b = git_parse_maybe_bool(value);
-		if (b < 0)
-			enable_ref_display_notes(&cfg->notes_opt, &cfg->show_notes, value);
-		else if (b)
+	જો (!strcmp(var, "format.notes")) {
+		પૂર્ણાંક b = git_parse_maybe_bool(કિંમત);
+		જો (b < 0)
+			enable_ref_display_notes(&cfg->notes_opt, &cfg->show_notes, કિંમત);
+		નહીંતર જો (b)
 			enable_default_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		else
+		નહીંતર
 			disable_display_notes(&cfg->notes_opt, &cfg->show_notes);
-		return 0;
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.coverfromdescription")) {
-		cfg->cover_from_description_mode = parse_cover_from_description(value);
-		return 0;
+	જો (!strcmp(var, "format.coverfromdescription")) {
+		cfg->cover_from_description_mode = parse_cover_from_description(કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.mboxrd")) {
-		stdout_mboxrd = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "format.mboxrd")) {
+		stdout_mboxrd = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "format.noprefix")) {
-		format_no_prefix = git_parse_maybe_bool(value);
-		if (format_no_prefix < 0) {
-			int status = die_message(
+	જો (!strcmp(var, "format.noprefix")) {
+		format_no_prefix = git_parse_maybe_bool(કિંમત);
+		જો (format_no_prefix < 0) {
+			પૂર્ણાંક status = die_message(
 				_("bad boolean config value '%s' for '%s'"),
-				value, var);
+				કિંમત, var);
 			advise(_("'%s' used to accept any value and "
 				 "treat that as 'true'.\n"
 				 "Now it only accepts boolean values, "
@@ -1119,7 +1119,7 @@ static int git_format_config(const char *var, const char *value,
 			       var, "diff.noprefix");
 			exit(status);
 		}
-		return 0;
+		પાછા 0;
 	}
 
 	/*
@@ -1128,53 +1128,53 @@ static int git_format_config(const char *var, const char *value,
 	 * diff_ui_config completely, because we do care about some ui options
 	 * like color.
 	 */
-	if (!strcmp(var, "diff.noprefix"))
-		return 0;
+	જો (!strcmp(var, "diff.noprefix"))
+		પાછા 0;
 
-	return git_log_config(var, value, ctx, &cfg->log);
+	પાછા git_log_config(var, કિંમત, ctx, &cfg->log);
 }
 
-static const char *output_directory = NULL;
-static int outdir_offset;
+સ્થિર અચલ અક્ષર *output_directory = ખાલી;
+સ્થિર પૂર્ણાંક outdir_offset;
 
-static int open_next_file(struct commit *commit, const char *subject,
-			 struct rev_info *rev, int quiet)
+સ્થિર પૂર્ણાંક open_next_file(સંરચના commit *commit, અચલ અક્ષર *subject,
+			 સંરચના rev_info *rev, પૂર્ણાંક quiet)
 {
-	struct strbuf filename = STRBUF_INIT;
+	સંરચના strbuf filename = STRBUF_INIT;
 
-	if (output_directory) {
+	જો (output_directory) {
 		strbuf_addstr(&filename, output_directory);
 		strbuf_complete(&filename, '/');
 	}
 
-	if (rev->numbered_files)
+	જો (rev->numbered_files)
 		strbuf_addf(&filename, "%d", rev->nr);
-	else if (commit)
+	નહીંતર જો (commit)
 		fmt_output_commit(&filename, commit, rev);
-	else
+	નહીંતર
 		fmt_output_subject(&filename, subject, rev);
 
-	if (!quiet)
+	જો (!quiet)
 		printf("%s\n", filename.buf + outdir_offset);
 
-	if (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
+	જો (!(rev->diffopt.file = fopen(filename.buf, "w"))) {
 		error_errno(_("cannot open patch file %s"), filename.buf);
 		strbuf_release(&filename);
-		return -1;
+		પાછા -1;
 	}
 
 	strbuf_release(&filename);
-	return 0;
+	પાછા 0;
 }
 
-static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
+સ્થિર શૂન્ય get_patch_ids(સંરચના rev_info *rev, સંરચના patch_ids *ids)
 {
-	struct rev_info check_rev;
-	struct commit *commit, *c1, *c2;
-	struct object *o1, *o2;
+	સંરચના rev_info check_rev;
+	સંરચના commit *commit, *c1, *c2;
+	સંરચના object *o1, *o2;
 	unsigned flags1, flags2;
 
-	if (rev->pending.nr != 2)
+	જો (rev->pending.nr != 2)
 		die(_("need exactly one range"));
 
 	o1 = rev->pending.objects[0].item;
@@ -1184,7 +1184,7 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	c1 = lookup_commit_reference(the_repository, &o1->oid);
 	c2 = lookup_commit_reference(the_repository, &o2->oid);
 
-	if ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
+	જો ((flags1 & UNINTERESTING) == (flags2 & UNINTERESTING))
 		die(_("not a range"));
 
 	init_patch_ids(the_repository, ids);
@@ -1196,10 +1196,10 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	o2->flags ^= UNINTERESTING;
 	add_pending_object(&check_rev, o1, "o1");
 	add_pending_object(&check_rev, o2, "o2");
-	if (prepare_revision_walk(&check_rev))
+	જો (prepare_revision_walk(&check_rev))
 		die(_("revision walk setup failed"));
 
-	while ((commit = get_revision(&check_rev)) != NULL) {
+	જ્યારે ((commit = get_revision(&check_rev)) != ખાલી) {
 		add_commit_patch_id(commit, ids);
 	}
 
@@ -1210,67 +1210,67 @@ static void get_patch_ids(struct rev_info *rev, struct patch_ids *ids)
 	o2->flags = flags2;
 }
 
-static void gen_message_id(struct rev_info *info, const char *base)
+સ્થિર શૂન્ય gen_message_id(સંરચના rev_info *info, અચલ અક્ષર *base)
 {
-	struct strbuf buf = STRBUF_INIT;
+	સંરચના strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf, "%s.%"PRItime".git.%s", base,
-		    (timestamp_t) time(NULL),
+		    (timestamp_t) time(ખાલી),
 		    git_committer_info(IDENT_NO_NAME|IDENT_NO_DATE|IDENT_STRICT));
-	info->message_id = strbuf_detach(&buf, NULL);
+	info->message_id = strbuf_detach(&buf, ખાલી);
 }
 
-static void print_signature(const char *signature, FILE *file)
+સ્થિર શૂન્ય print_signature(અચલ અક્ષર *signature, FILE *file)
 {
-	if (!signature || !*signature)
-		return;
+	જો (!signature || !*signature)
+		પાછા;
 
 	fprintf(file, "-- \n%s", signature);
-	if (signature[strlen(signature)-1] != '\n')
+	જો (signature[strlen(signature)-1] != '\n')
 		putc('\n', file);
 	putc('\n', file);
 }
 
-static char *find_branch_name(struct rev_info *rev)
+સ્થિર અક્ષર *find_branch_name(સંરચના rev_info *rev)
 {
-	struct object_id branch_oid;
-	const struct object_id *tip_oid;
-	const char *ref, *v;
-	char *full_ref, *branch = NULL;
-	int interesting_found = 0;
+	સંરચના object_id branch_oid;
+	અચલ સંરચના object_id *tip_oid;
+	અચલ અક્ષર *ref, *v;
+	અક્ષર *full_ref, *branch = ખાલી;
+	પૂર્ણાંક interesting_found = 0;
 	size_t idx;
 
-	for (size_t i = 0; i < rev->cmdline.nr; i++) {
-		if (rev->cmdline.rev[i].flags & UNINTERESTING)
-			continue;
-		if (interesting_found)
-			return NULL;
+	માટે (size_t i = 0; i < rev->cmdline.nr; i++) {
+		જો (rev->cmdline.rev[i].flags & UNINTERESTING)
+			ચાલુ;
+		જો (interesting_found)
+			પાછા ખાલી;
 		interesting_found = 1;
 		idx = i;
 	}
-	if (!interesting_found)
-		return NULL;
+	જો (!interesting_found)
+		પાછા ખાલી;
 	ref = rev->cmdline.rev[idx].name;
 	tip_oid = &rev->cmdline.rev[idx].item->oid;
-	if (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
+	જો (repo_dwim_ref(the_repository, ref, strlen(ref), &branch_oid,
 			  &full_ref, 0) &&
 	    skip_prefix(full_ref, "refs/heads/", &v) &&
 	    oideq(tip_oid, &branch_oid))
 		branch = xstrdup(v);
-	free(full_ref);
-	return branch;
+	મુક્ત(full_ref);
+	પાછા branch;
 }
 
-static void show_diffstat(struct rev_info *rev,
-			  struct commit *origin, struct commit *head)
+સ્થિર શૂન્ય show_diffstat(સંરચના rev_info *rev,
+			  સંરચના commit *origin, સંરચના commit *head)
 {
-	struct diff_options opts;
+	સંરચના diff_options opts;
 
-	memcpy(&opts, &rev->diffopt, sizeof(opts));
+	memcpy(&opts, &rev->diffopt, કદ(opts));
 	opts.output_format = DIFF_FORMAT_SUMMARY | DIFF_FORMAT_DIFFSTAT;
 	diff_setup_done(&opts);
 
-	diff_tree_oid(get_commit_tree_oid(origin),
-		      get_commit_tree_oid(head),
+	diff_વૃક્ષ_oid(get_commit_વૃક્ષ_oid(origin),
+		      get_commit_વૃક્ષ_oid(head),
 		      "", &opts);
 	diffcore_std(&opts);
 	diff_flush(&opts);
@@ -1278,45 +1278,45 @@ static void show_diffstat(struct rev_info *rev,
 	fprintf(rev->diffopt.file, "\n");
 }
 
-static void read_desc_file(struct strbuf *buf, const char *desc_file)
+સ્થિર શૂન્ય read_desc_file(સંરચના strbuf *buf, અચલ અક્ષર *desc_file)
 {
-	if (strbuf_read_file(buf, desc_file, 0) < 0)
+	જો (strbuf_read_file(buf, desc_file, 0) < 0)
 		die_errno(_("unable to read branch description file '%s'"),
 			  desc_file);
 }
 
-static void prepare_cover_text(struct pretty_print_context *pp,
-			       const char *description_file,
-			       const char *branch_name,
-			       struct strbuf *sb,
-			       const char *encoding,
-			       int need_8bit_cte,
-			       const struct format_config *cfg)
+સ્થિર શૂન્ય prepare_cover_text(સંરચના pretty_print_context *pp,
+			       અચલ અક્ષર *description_file,
+			       અચલ અક્ષર *branch_name,
+			       સંરચના strbuf *sb,
+			       અચલ અક્ષર *encoding,
+			       પૂર્ણાંક need_8bit_cte,
+			       અચલ સંરચના format_config *cfg)
 {
-	const char *subject = "*** SUBJECT HERE ***";
-	const char *body = "*** BLURB HERE ***";
-	struct strbuf description_sb = STRBUF_INIT;
-	struct strbuf subject_sb = STRBUF_INIT;
+	અચલ અક્ષર *subject = "*** SUBJECT HERE ***";
+	અચલ અક્ષર *body = "*** BLURB HERE ***";
+	સંરચના strbuf description_sb = STRBUF_INIT;
+	સંરચના strbuf subject_sb = STRBUF_INIT;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_NONE)
-		goto do_pp;
+	જો (cfg->cover_from_description_mode == COVER_FROM_NONE)
+		જાઓ do_pp;
 
-	if (description_file && *description_file)
+	જો (description_file && *description_file)
 		read_desc_file(&description_sb, description_file);
-	else if (branch_name && *branch_name)
+	નહીંતર જો (branch_name && *branch_name)
 		read_branch_desc(&description_sb, branch_name);
-	if (!description_sb.len)
-		goto do_pp;
+	જો (!description_sb.len)
+		જાઓ do_pp;
 
-	if (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
+	જો (cfg->cover_from_description_mode == COVER_FROM_SUBJECT ||
 	    cfg->cover_from_description_mode == COVER_FROM_AUTO)
 		body = format_subject(&subject_sb, description_sb.buf, " ");
 
-	if (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
+	જો (cfg->cover_from_description_mode == COVER_FROM_MESSAGE ||
 	    (cfg->cover_from_description_mode == COVER_FROM_AUTO &&
 	     subject_sb.len > COVER_FROM_AUTO_MAX_SUBJECT_LEN))
 		body = description_sb.buf;
-	else
+	નહીંતર
 		subject = subject_sb.buf;
 
 do_pp:
@@ -1327,179 +1327,179 @@ do_pp:
 	strbuf_release(&subject_sb);
 }
 
-struct rdiff_notes {
+સંરચના rdiff_notes {
 	/*
 	 * True if we want to override the notes behavior
 	 * of 'format-patch'
 	 */
 	bool override;
-	struct string_list notes;
+	સંરચના string_list notes;
 };
 
-static int rdiff_notes_cb(const struct option *option,
-			  const char *arg,
-			  int unset)
+સ્થિર પૂર્ણાંક rdiff_notes_cb(અચલ સંરચના option *option,
+			  અચલ અક્ષર *arg,
+			  પૂર્ણાંક unset)
 {
-	struct option opt = *option;
-	struct rdiff_notes *rdiff_notes = option->value;
+	સંરચના option opt = *option;
+	સંરચના rdiff_notes *rdiff_notes = option->કિંમત;
 
 	rdiff_notes->override = 1;
-	opt.value = &rdiff_notes->notes;
-	return parse_opt_string_list(&opt, arg, unset);
+	opt.કિંમત = &rdiff_notes->notes;
+	પાછા parse_opt_string_list(&opt, arg, unset);
 }
 
-static int get_notes_refs(struct string_list_item *item, void *arg)
+સ્થિર પૂર્ણાંક get_notes_refs(સંરચના string_list_item *item, શૂન્ય *arg)
 {
 	strvec_pushf(arg, "--notes=%s", item->string);
-	return 0;
+	પાછા 0;
 }
 
-static void get_notes_args(struct rdiff_notes *rdiff_notes,
-			   struct rev_info *rev)
+સ્થિર શૂન્ય get_notes_args(સંરચના rdiff_notes *rdiff_notes,
+			   સંરચના rev_info *rev)
 {
-	if (rdiff_notes->override) {
-		if (rdiff_notes->notes.nr)
+	જો (rdiff_notes->override) {
+		જો (rdiff_notes->notes.nr)
 			for_each_string_list(&rdiff_notes->notes,
 					     get_notes_refs,
 					     &rev->rdiff_log_arg);
-		else
-			strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (!rev->show_notes) {
-		strvec_push(&rev->rdiff_log_arg, "--no-notes");
-	} else if (rev->notes_opt.use_default_notes > 0 ||
+		નહીંતર
+			strvec_ધકેલો(&rev->rdiff_log_arg, "--no-notes");
+	} નહીંતર જો (!rev->show_notes) {
+		strvec_ધકેલો(&rev->rdiff_log_arg, "--no-notes");
+	} નહીંતર જો (rev->notes_opt.use_default_notes > 0 ||
 		   (rev->notes_opt.use_default_notes == -1 &&
 		    !rev->notes_opt.extra_notes_refs.nr)) {
-		strvec_push(&rev->rdiff_log_arg, "--notes");
-	} else {
+		strvec_ધકેલો(&rev->rdiff_log_arg, "--notes");
+	} નહીંતર {
 		for_each_string_list(&rev->notes_opt.extra_notes_refs,
 				     get_notes_refs,
 				     &rev->rdiff_log_arg);
 	}
 }
 
-static void generate_shortlog_cover_letter(struct shortlog *log,
-					   struct rev_info *rev,
-					   struct commit **list,
-					   int nr)
+સ્થિર શૂન્ય generate_shortlog_cover_letter(સંરચના shortlog *log,
+					   સંરચના rev_info *rev,
+					   સંરચના commit **list,
+					   પૂર્ણાંક nr)
 {
 	shortlog_init(log);
-	log->wrap_lines = 1;
+	log->wrap_લીટીઓ = 1;
 	log->wrap = MAIL_DEFAULT_WRAP;
 	log->in1 = 2;
 	log->in2 = 4;
 	log->file = rev->diffopt.file;
 	log->groups = SHORTLOG_GROUP_AUTHOR;
 	shortlog_finish_setup(log);
-	for (int i = 0; i < nr; i++)
+	માટે (પૂર્ણાંક i = 0; i < nr; i++)
 		shortlog_add_commit(log, list[i]);
 
 	shortlog_output(log);
 }
 
-static void generate_commit_list_cover(FILE *cover_file, const char *format,
-				       struct commit **list, int n)
+સ્થિર શૂન્ય generate_commit_list_cover(FILE *cover_file, અચલ અક્ષર *format,
+				       સંરચના commit **list, પૂર્ણાંક n)
 {
-	struct strbuf commit_line = STRBUF_INIT;
-	struct pretty_print_context ctx = {0};
-	struct rev_info rev = REV_INFO_INIT;
+	સંરચના strbuf commit_લીટી = STRBUF_INIT;
+	સંરચના pretty_print_context ctx = {0};
+	સંરચના rev_info rev = REV_INFO_INIT;
 
 	rev.total = n;
 	ctx.rev = &rev;
-	for (int i = 1; i <= n; i++) {
+	માટે (પૂર્ણાંક i = 1; i <= n; i++) {
 		rev.nr = i;
 		repo_format_commit_message(the_repository, list[n - i], format,
-				&commit_line, &ctx);
-		fprintf(cover_file, "%s\n", commit_line.buf);
-		strbuf_reset(&commit_line);
+				&commit_લીટી, &ctx);
+		fprintf(cover_file, "%s\n", commit_લીટી.buf);
+		strbuf_reset(&commit_લીટી);
 	}
 	fprintf(cover_file, "\n");
 
-	strbuf_release(&commit_line);
+	strbuf_release(&commit_લીટી);
 }
 
-static void make_cover_letter(struct rev_info *rev, int use_separate_file,
-			      struct commit *origin,
-			      int nr, struct commit **list,
-			      const char *description_file,
-			      const char *branch_name,
-			      int quiet,
-			      const struct format_config *cfg,
-			      const char *format)
+સ્થિર શૂન્ય make_cover_letter(સંરચના rev_info *rev, પૂર્ણાંક use_separate_file,
+			      સંરચના commit *origin,
+			      પૂર્ણાંક nr, સંરચના commit **list,
+			      અચલ અક્ષર *description_file,
+			      અચલ અક્ષર *branch_name,
+			      પૂર્ણાંક quiet,
+			      અચલ સંરચના format_config *cfg,
+			      અચલ અક્ષર *format)
 {
-	const char *from;
-	struct shortlog log;
-	struct strbuf sb = STRBUF_INIT;
-	int i;
-	const char *encoding = "UTF-8";
-	int need_8bit_cte = 0;
-	struct pretty_print_context pp = {0};
-	struct commit *head = list[0];
-	char *to_free = NULL;
+	અચલ અક્ષર *from;
+	સંરચના shortlog log;
+	સંરચના strbuf sb = STRBUF_INIT;
+	પૂર્ણાંક i;
+	અચલ અક્ષર *encoding = "UTF-8";
+	પૂર્ણાંક need_8bit_cte = 0;
+	સંરચના pretty_print_context pp = {0};
+	સંરચના commit *head = list[0];
+	અક્ષર *to_free = ખાલી;
 
-	if (!cmit_fmt_is_mail(rev->commit_format))
+	જો (!cmit_fmt_is_mail(rev->commit_format))
 		die(_("cover letter needs email format"));
 
 	from = cfg->from ? cfg->from : git_committer_info(0);
 
-	if (use_separate_file &&
-	    open_next_file(NULL, rev->numbered_files ? NULL : "cover-letter", rev, quiet))
+	જો (use_separate_file &&
+	    open_next_file(ખાલી, rev->numbered_files ? ખાલી : "cover-letter", rev, quiet))
 		die(_("failed to create cover-letter file"));
 
 	log_write_email_headers(rev, head, &pp.after_subject, &need_8bit_cte, 0);
 
-	for (i = 0; !need_8bit_cte && i < nr; i++) {
-		const char *buf = repo_get_commit_buffer(the_repository,
-							 list[i], NULL);
-		if (has_non_ascii(buf))
+	માટે (i = 0; !need_8bit_cte && i < nr; i++) {
+		અચલ અક્ષર *buf = repo_get_commit_buffer(the_repository,
+							 list[i], ખાલી);
+		જો (has_non_ascii(buf))
 			need_8bit_cte = 1;
 		repo_unuse_commit_buffer(the_repository, list[i], buf);
 	}
 
-	if (!branch_name)
+	જો (!branch_name)
 		branch_name = to_free = find_branch_name(rev);
 
 	pp.fmt = CMIT_FMT_EMAIL;
 	pp.date_mode.type = DATE_RFC2822;
 	pp.rev = rev;
 	pp.encode_email_headers = rev->encode_email_headers;
-	pp_user_info(&pp, NULL, &sb, from, encoding);
+	pp_user_info(&pp, ખાલી, &sb, from, encoding);
 	prepare_cover_text(&pp, description_file, branch_name, &sb,
 			   encoding, need_8bit_cte, cfg);
 	fprintf(rev->diffopt.file, "%s\n", sb.buf);
 
-	free(to_free);
-	free(pp.after_subject);
+	મુક્ત(to_free);
+	મુક્ત(pp.after_subject);
 	strbuf_release(&sb);
 
-	if (skip_prefix(format, "log:", &format))
+	જો (skip_prefix(format, "log:", &format))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else if (!strcmp(format, "shortlog"))
+	નહીંતર જો (!strcmp(format, "shortlog"))
 		generate_shortlog_cover_letter(&log, rev, list, nr);
-	else if (!strcmp(format, "modern"))
+	નહીંતર જો (!strcmp(format, "modern"))
 		generate_commit_list_cover(rev->diffopt.file, "%w(72)[%(count)/%(total)] %s",
 					   list, nr);
-	else if (strchr(format, '%'))
+	નહીંતર જો (strchr(format, '%'))
 		generate_commit_list_cover(rev->diffopt.file, format, list, nr);
-	else
+	નહીંતર
 		die(_("'%s' is not a valid format string"), format);
 
 	/* We can only do diffstat with a unique reference point */
-	if (origin)
+	જો (origin)
 		show_diffstat(rev, origin, head);
 
-	if (rev->idiff_oid1) {
+	જો (rev->idiff_oid1) {
 		fprintf_ln(rev->diffopt.file, "%s", rev->idiff_title);
 		show_interdiff(rev->idiff_oid1, rev->idiff_oid2, 0,
 			       &rev->diffopt);
 	}
 
-	if (rev->rdiff1) {
+	જો (rev->rdiff1) {
 		/*
 		 * Pass minimum required diff-options to range-diff; others
 		 * can be added later if deemed desirable.
 		 */
-		struct diff_options opts;
-		struct range_diff_options range_diff_opts = {
+		સંરચના diff_options opts;
+		સંરચના range_diff_options range_diff_opts = {
 			.creation_factor = rev->creation_factor,
 			.dual_color = 1,
 			.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
@@ -1516,298 +1516,298 @@ static void make_cover_letter(struct rev_info *rev, int use_separate_file,
 	}
 }
 
-static char *clean_message_id(const char *msg_id)
+સ્થિર અક્ષર *clean_message_id(અચલ અક્ષર *સંદેશ_id)
 {
-	char ch;
-	const char *a, *z, *m;
+	અક્ષર ch;
+	અચલ અક્ષર *a, *z, *m;
 
-	m = msg_id;
-	while ((ch = *m) && (isspace(ch) || (ch == '<')))
+	m = સંદેશ_id;
+	જ્યારે ((ch = *m) && (isspace(ch) || (ch == '<')))
 		m++;
 	a = m;
-	z = NULL;
-	while ((ch = *m)) {
-		if (!isspace(ch) && (ch != '>'))
+	z = ખાલી;
+	જ્યારે ((ch = *m)) {
+		જો (!isspace(ch) && (ch != '>'))
 			z = m;
 		m++;
 	}
-	if (!z)
-		die(_("insane in-reply-to: %s"), msg_id);
-	if (++z == m)
-		return xstrdup(a);
-	return xmemdupz(a, z - a);
+	જો (!z)
+		die(_("insane in-reply-to: %s"), સંદેશ_id);
+	જો (++z == m)
+		પાછા xstrdup(a);
+	પાછા xmemdupz(a, z - a);
 }
 
-static const char *set_outdir(const char *prefix, const char *output_directory)
+સ્થિર અચલ અક્ષર *set_outdir(અચલ અક્ષર *prefix, અચલ અક્ષર *output_directory)
 {
-	if (output_directory && is_absolute_path(output_directory))
-		return output_directory;
+	જો (output_directory && is_absolute_path(output_directory))
+		પાછા output_directory;
 
-	if (!prefix || !*prefix) {
-		if (output_directory)
-			return output_directory;
+	જો (!prefix || !*prefix) {
+		જો (output_directory)
+			પાછા output_directory;
 		/* The user did not explicitly ask for "./" */
 		outdir_offset = 2;
-		return "./";
+		પાછા "./";
 	}
 
 	outdir_offset = strlen(prefix);
-	if (!output_directory)
-		return prefix;
+	જો (!output_directory)
+		પાછા prefix;
 
-	return prefix_filename(prefix, output_directory);
+	પાછા prefix_filename(prefix, output_directory);
 }
 
-static const char * const builtin_format_patch_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_format_patch_usage[] = {
 	N_("git format-patch [<options>] [<since> | <revision-range>]"),
-	NULL
+	ખાલી
 };
 
-struct keep_callback_data {
-	struct format_config *cfg;
-	struct rev_info *revs;
+સંરચના keep_callback_data {
+	સંરચના format_config *cfg;
+	સંરચના rev_info *revs;
 };
 
-static int keep_callback(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક keep_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct keep_callback_data *data = opt->value;
+	સંરચના keep_callback_data *data = opt->કિંમત;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	data->revs->total = -1;
 	data->cfg->keep_subject = 1;
-	return 0;
+	પાછા 0;
 }
 
-static int subject_prefix_callback(const struct option *opt, const char *arg,
-			    int unset)
+સ્થિર પૂર્ણાંક subject_prefix_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			    પૂર્ણાંક unset)
 {
-	struct format_config *cfg = opt->value;
+	સંરચના format_config *cfg = opt->કિંમત;
 
 	BUG_ON_OPT_NEG(unset);
 	cfg->subject_prefix = 1;
 	strbuf_reset(&cfg->sprefix);
 	strbuf_addstr(&cfg->sprefix, arg);
-	return 0;
+	પાછા 0;
 }
 
-static int rfc_callback(const struct option *opt, const char *arg,
-			int unset)
+સ્થિર પૂર્ણાંક rfc_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			પૂર્ણાંક unset)
 {
-	const char **rfc = opt->value;
+	અચલ અક્ષર **rfc = opt->કિંમત;
 
-	*rfc = opt->value;
-	if (unset)
-		*rfc = NULL;
-	else
+	*rfc = opt->કિંમત;
+	જો (unset)
+		*rfc = ખાલી;
+	નહીંતર
 		*rfc = arg ? arg : "RFC";
-	return 0;
+	પાછા 0;
 }
 
-static int numbered_callback(const struct option *opt, const char *arg,
-			     int unset)
+સ્થિર પૂર્ણાંક numbered_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			     પૂર્ણાંક unset)
 {
-	struct format_config *cfg = opt->value;
+	સંરચના format_config *cfg = opt->કિંમત;
 	BUG_ON_OPT_ARG(arg);
 	cfg->numbered = cfg->numbered_cmdline_opt = unset ? 0 : 1;
-	if (unset)
-		cfg->auto_number =  0;
-	return 0;
+	જો (unset)
+		cfg->auto_સંખ્યા =  0;
+	પાછા 0;
 }
 
-static int no_numbered_callback(const struct option *opt, const char *arg,
-				int unset)
+સ્થિર પૂર્ણાંક no_numbered_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+				પૂર્ણાંક unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	return numbered_callback(opt, arg, 1);
+	પાછા numbered_callback(opt, arg, 1);
 }
 
-static int output_directory_callback(const struct option *opt, const char *arg,
-			      int unset)
+સ્થિર પૂર્ણાંક output_directory_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			      પૂર્ણાંક unset)
 {
-	const char **dir = (const char **)opt->value;
+	અચલ અક્ષર **dir = (અચલ અક્ષર **)opt->કિંમત;
 	BUG_ON_OPT_NEG(unset);
-	if (*dir)
+	જો (*dir)
 		die(_("two output directories?"));
 	*dir = arg;
-	return 0;
+	પાછા 0;
 }
 
-static int thread_callback(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક thread_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct format_config *cfg = opt->value;
+	સંરચના format_config *cfg = opt->કિંમત;
 
-	if (unset)
+	જો (unset)
 		cfg->thread = THREAD_UNSET;
-	else if (!arg || !strcmp(arg, "shallow"))
+	નહીંતર જો (!arg || !strcmp(arg, "shallow"))
 		cfg->thread = THREAD_SHALLOW;
-	else if (!strcmp(arg, "deep"))
+	નહીંતર જો (!strcmp(arg, "deep"))
 		cfg->thread = THREAD_DEEP;
 	/*
 	 * Please update _git_formatpatch() in git-completion.bash
 	 * when you add new options.
 	 */
-	else
-		return 1;
-	return 0;
+	નહીંતર
+		પાછા 1;
+	પાછા 0;
 }
 
-static int attach_callback(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક attach_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
-		rev->mime_boundary = NULL;
-	else if (arg)
+	સંરચના rev_info *rev = (સંરચના rev_info *)opt->કિંમત;
+	જો (unset)
+		rev->mime_boundary = ખાલી;
+	નહીંતર જો (arg)
 		rev->mime_boundary = arg;
-	else
+	નહીંતર
 		rev->mime_boundary = git_version_string;
 	rev->no_inline = unset ? 0 : 1;
-	return 0;
+	પાછા 0;
 }
 
-static int inline_callback(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક inline_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct rev_info *rev = (struct rev_info *)opt->value;
-	if (unset)
-		rev->mime_boundary = NULL;
-	else if (arg)
+	સંરચના rev_info *rev = (સંરચના rev_info *)opt->કિંમત;
+	જો (unset)
+		rev->mime_boundary = ખાલી;
+	નહીંતર જો (arg)
 		rev->mime_boundary = arg;
-	else
+	નહીંતર
 		rev->mime_boundary = git_version_string;
 	rev->no_inline = 0;
-	return 0;
+	પાછા 0;
 }
 
-static int header_callback(const struct option *opt, const char *arg,
-			   int unset)
+સ્થિર પૂર્ણાંક header_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			   પૂર્ણાંક unset)
 {
-	struct format_config *cfg = opt->value;
+	સંરચના format_config *cfg = opt->કિંમત;
 
-	if (unset) {
+	જો (unset) {
 		string_list_clear(&cfg->extra_hdr, 0);
 		string_list_clear(&cfg->extra_to, 0);
 		string_list_clear(&cfg->extra_cc, 0);
-	} else {
+	} નહીંતર {
 		add_header(cfg, arg);
 	}
-	return 0;
+	પાછા 0;
 }
 
-static int from_callback(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક from_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	char **from = opt->value;
+	અક્ષર **from = opt->કિંમત;
 
-	free(*from);
+	મુક્ત(*from);
 
-	if (unset)
-		*from = NULL;
-	else if (arg)
+	જો (unset)
+		*from = ખાલી;
+	નહીંતર જો (arg)
 		*from = xstrdup(arg);
-	else
+	નહીંતર
 		*from = xstrdup(git_committer_info(IDENT_NO_DATE));
-	return 0;
+	પાછા 0;
 }
 
-static int base_callback(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક base_callback(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct format_config *cfg = opt->value;
+	સંરચના format_config *cfg = opt->કિંમત;
 
-	if (unset) {
+	જો (unset) {
 		cfg->auto_base = AUTO_BASE_NEVER;
 		FREE_AND_NULL(cfg->base_commit);
-	} else if (!strcmp(arg, "auto")) {
+	} નહીંતર જો (!strcmp(arg, "auto")) {
 		cfg->auto_base = AUTO_BASE_ALWAYS;
 		FREE_AND_NULL(cfg->base_commit);
-	} else {
+	} નહીંતર {
 		cfg->auto_base = AUTO_BASE_NEVER;
 		cfg->base_commit = xstrdup(arg);
 	}
-	return 0;
+	પાછા 0;
 }
 
-struct base_tree_info {
-	struct object_id base_commit;
-	int nr_patch_id, alloc_patch_id;
-	struct object_id *patch_id;
+સંરચના base_વૃક્ષ_info {
+	સંરચના object_id base_commit;
+	પૂર્ણાંક nr_patch_id, alloc_patch_id;
+	સંરચના object_id *patch_id;
 };
 
-static struct commit *get_base_commit(const struct format_config *cfg,
-				      struct commit **list,
+સ્થિર સંરચના commit *get_base_commit(અચલ સંરચના format_config *cfg,
+				      સંરચના commit **list,
 				      size_t total)
 {
-	struct commit *base = NULL;
-	struct commit **rev;
-	int auto_select, die_on_failure, ret;
+	સંરચના commit *base = ખાલી;
+	સંરચના commit **rev;
+	પૂર્ણાંક auto_select, die_on_failure, ret;
 	size_t i = 0, rev_nr = 0;
 
-	switch (cfg->auto_base) {
-	case AUTO_BASE_NEVER:
-		if (cfg->base_commit) {
+	પસંદગી (cfg->auto_base) {
+	સ્થિતિ AUTO_BASE_NEVER:
+		જો (cfg->base_commit) {
 			auto_select = 0;
 			die_on_failure = 1;
-		} else {
+		} નહીંતર {
 			/* no base information is requested */
-			return NULL;
+			પાછા ખાલી;
 		}
-		break;
-	case AUTO_BASE_ALWAYS:
-	case AUTO_BASE_WHEN_ABLE:
-		if (cfg->base_commit) {
+		તોડો;
+	સ્થિતિ AUTO_BASE_ALWAYS:
+	સ્થિતિ AUTO_BASE_WHEN_ABLE:
+		જો (cfg->base_commit) {
 			BUG("requested automatic base selection but a commit was provided");
-		} else {
+		} નહીંતર {
 			auto_select = 1;
 			die_on_failure = cfg->auto_base == AUTO_BASE_ALWAYS;
 		}
-		break;
-	default:
+		તોડો;
+	મૂળભૂત:
 		BUG("unexpected automatic base selection method");
 	}
 
-	if (!auto_select) {
+	જો (!auto_select) {
 		base = lookup_commit_reference_by_name(cfg->base_commit);
-		if (!base)
+		જો (!base)
 			die(_("unknown commit %s"), cfg->base_commit);
-	} else {
-		struct branch *curr_branch = branch_get(NULL);
-		const char *upstream = branch_get_upstream(curr_branch, NULL);
-		if (upstream) {
-			struct commit_list *base_list = NULL;
-			struct commit *commit;
-			struct object_id oid;
+	} નહીંતર {
+		સંરચના branch *curr_branch = branch_get(ખાલી);
+		અચલ અક્ષર *upstream = branch_get_upstream(curr_branch, ખાલી);
+		જો (upstream) {
+			સંરચના commit_list *base_list = ખાલી;
+			સંરચના commit *commit;
+			સંરચના object_id oid;
 
-			if (repo_get_oid(the_repository, upstream, &oid)) {
-				if (die_on_failure)
+			જો (repo_get_oid(the_repository, upstream, &oid)) {
+				જો (die_on_failure)
 					die(_("failed to resolve '%s' as a valid ref"), upstream);
-				else
-					return NULL;
+				નહીંતર
+					પાછા ખાલી;
 			}
 			commit = lookup_commit_or_die(&oid, "upstream base");
-			if (repo_get_merge_bases_many(the_repository,
+			જો (repo_get_merge_bases_many(the_repository,
 						      commit, total,
 						      list,
 						      &base_list) < 0 ||
 			    /* There should be one and only one merge base. */
 			    !base_list || base_list->next) {
-				if (die_on_failure) {
+				જો (die_on_failure) {
 					die(_("could not find exact merge base"));
-				} else {
+				} નહીંતર {
 					commit_list_free(base_list);
-					return NULL;
+					પાછા ખાલી;
 				}
 			}
 			base = base_list->item;
 			commit_list_free(base_list);
-		} else {
-			if (die_on_failure)
+		} નહીંતર {
+			જો (die_on_failure)
 				die(_("failed to get upstream, if you want to record base commit automatically,\n"
 				      "please use git branch --set-upstream-to to track a remote branch.\n"
 				      "Or you could specify base commit by --base=<base-commit-id> manually"));
-			else
-				return NULL;
+			નહીંતર
+				પાછા ખાલી;
 		}
 	}
 
 	ALLOC_ARRAY(rev, total);
-	for (i = 0; i < total; i++)
+	માટે (i = 0; i < total; i++)
 		rev[i] = list[i];
 
 	rev_nr = total;
@@ -1815,19 +1815,19 @@ static struct commit *get_base_commit(const struct format_config *cfg,
 	 * Get merge base through pair-wise computations
 	 * and store it in rev[0].
 	 */
-	while (rev_nr > 1) {
-		for (i = 0; i < rev_nr / 2; i++) {
-			struct commit_list *merge_base = NULL;
-			if (repo_get_merge_bases(the_repository,
+	જ્યારે (rev_nr > 1) {
+		માટે (i = 0; i < rev_nr / 2; i++) {
+			સંરચના commit_list *merge_base = ખાલી;
+			જો (repo_get_merge_bases(the_repository,
 						 rev[2 * i],
 						 rev[2 * i + 1], &merge_base) < 0 ||
 			    !merge_base || merge_base->next) {
-				if (die_on_failure) {
+				જો (die_on_failure) {
 					die(_("failed to find exact merge base"));
-				} else {
+				} નહીંતર {
 					commit_list_free(merge_base);
-					free(rev);
-					return NULL;
+					મુક્ત(rev);
+					પાછા ખાલી;
 				}
 			}
 
@@ -1835,52 +1835,52 @@ static struct commit *get_base_commit(const struct format_config *cfg,
 			commit_list_free(merge_base);
 		}
 
-		if (rev_nr % 2)
+		જો (rev_nr % 2)
 			rev[i] = rev[2 * i];
 		rev_nr = DIV_ROUND_UP(rev_nr, 2);
 	}
 
 	ret = repo_in_merge_bases(the_repository, base, rev[0]);
-	if (ret < 0)
+	જો (ret < 0)
 		exit(128);
-	if (!ret) {
-		if (die_on_failure) {
+	જો (!ret) {
+		જો (die_on_failure) {
 			die(_("base commit should be the ancestor of revision list"));
-		} else {
-			free(rev);
-			return NULL;
+		} નહીંતર {
+			મુક્ત(rev);
+			પાછા ખાલી;
 		}
 	}
 
-	for (i = 0; i < total; i++) {
-		if (base == list[i]) {
-			if (die_on_failure) {
+	માટે (i = 0; i < total; i++) {
+		જો (base == list[i]) {
+			જો (die_on_failure) {
 				die(_("base commit shouldn't be in revision list"));
-			} else {
-				free(rev);
-				return NULL;
+			} નહીંતર {
+				મુક્ત(rev);
+				પાછા ખાલી;
 			}
 		}
 	}
 
-	free(rev);
-	return base;
+	મુક્ત(rev);
+	પાછા base;
 }
 
-define_commit_slab(commit_base, int);
+define_commit_slab(commit_base, પૂર્ણાંક);
 
-static void prepare_bases(struct base_tree_info *bases,
-			  struct commit *base,
-			  struct commit **list,
+સ્થિર શૂન્ય prepare_bases(સંરચના base_વૃક્ષ_info *bases,
+			  સંરચના commit *base,
+			  સંરચના commit **list,
 			  size_t total)
 {
-	struct commit *commit;
-	struct rev_info revs;
-	struct diff_options diffopt;
-	struct commit_base commit_base;
+	સંરચના commit *commit;
+	સંરચના rev_info revs;
+	સંરચના diff_options diffopt;
+	સંરચના commit_base commit_base;
 
-	if (!base)
-		return;
+	જો (!base)
+		પાછા;
 
 	init_commit_base(&commit_base);
 	repo_diff_setup(the_repository, &diffopt);
@@ -1889,10 +1889,10 @@ static void prepare_bases(struct base_tree_info *bases,
 
 	oidcpy(&bases->base_commit, &base->object.oid);
 
-	repo_init_revisions(the_repository, &revs, NULL);
+	repo_init_revisions(the_repository, &revs, ખાલી);
 	revs.max_parents = 1;
 	revs.topo_order = 1;
-	for (size_t i = 0; i < total; i++) {
+	માટે (size_t i = 0; i < total; i++) {
 		list[i]->object.flags &= ~UNINTERESTING;
 		add_pending_object(&revs, &list[i]->object, "rev_list");
 		*commit_base_at(&commit_base, list[i]) = 1;
@@ -1900,18 +1900,18 @@ static void prepare_bases(struct base_tree_info *bases,
 	base->object.flags |= UNINTERESTING;
 	add_pending_object(&revs, &base->object, "base");
 
-	if (prepare_revision_walk(&revs))
+	જો (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 	/*
 	 * Traverse the commits list, get prerequisite patch ids
 	 * and stuff them in bases structure.
 	 */
-	while ((commit = get_revision(&revs)) != NULL) {
-		struct object_id oid;
-		struct object_id *patch_id;
-		if (*commit_base_at(&commit_base, commit))
-			continue;
-		if (commit_patch_id(commit, &diffopt, &oid, 0))
+	જ્યારે ((commit = get_revision(&revs)) != ખાલી) {
+		સંરચના object_id oid;
+		સંરચના object_id *patch_id;
+		જો (*commit_base_at(&commit_base, commit))
+			ચાલુ;
+		જો (commit_patch_id(commit, &diffopt, &oid, 0))
 			die(_("cannot get patch id"));
 		ALLOC_GROW(bases->patch_id, bases->nr_patch_id + 1, bases->alloc_patch_id);
 		patch_id = bases->patch_id + bases->nr_patch_id;
@@ -1922,127 +1922,127 @@ static void prepare_bases(struct base_tree_info *bases,
 	release_revisions(&revs);
 }
 
-static void print_bases(struct base_tree_info *bases, FILE *file)
+સ્થિર શૂન્ય print_bases(સંરચના base_વૃક્ષ_info *bases, FILE *file)
 {
-	int i;
+	પૂર્ણાંક i;
 
 	/* Only do this once, either for the cover or for the first one */
-	if (is_null_oid(&bases->base_commit))
-		return;
+	જો (is_null_oid(&bases->base_commit))
+		પાછા;
 
 	/* Show the base commit */
 	fprintf(file, "\nbase-commit: %s\n", oid_to_hex(&bases->base_commit));
 
 	/* Show the prerequisite patches */
-	for (i = bases->nr_patch_id - 1; i >= 0; i--)
+	માટે (i = bases->nr_patch_id - 1; i >= 0; i--)
 		fprintf(file, "prerequisite-patch-id: %s\n", oid_to_hex(&bases->patch_id[i]));
 
-	free(bases->patch_id);
+	મુક્ત(bases->patch_id);
 	bases->nr_patch_id = 0;
 	bases->alloc_patch_id = 0;
 	oidclr(&bases->base_commit, the_repository->hash_algo);
 }
 
-static const char *diff_title(struct strbuf *sb,
-			      const char *reroll_count,
-			      const char *generic,
-			      const char *rerolled)
+સ્થિર અચલ અક્ષર *diff_title(સંરચના strbuf *sb,
+			      અચલ અક્ષર *reroll_ગણતરી,
+			      અચલ અક્ષર *generic,
+			      અચલ અક્ષર *rerolled)
 {
-	int v;
+	પૂર્ણાંક v;
 
 	/* RFC may be v0, so allow -v1 to diff against v0 */
-	if (reroll_count && !strtol_i(reroll_count, 10, &v) &&
+	જો (reroll_ગણતરી && !strtol_i(reroll_ગણતરી, 10, &v) &&
 	    v >= 1)
 		strbuf_addf(sb, rerolled, v - 1);
-	else
+	નહીંતર
 		strbuf_addstr(sb, generic);
-	return sb->buf;
+	પાછા sb->buf;
 }
 
-static void infer_range_diff_ranges(struct strbuf *r1,
-				    struct strbuf *r2,
-				    const char *prev,
-				    struct commit *origin,
-				    struct commit *head)
+સ્થિર શૂન્ય infer_range_diff_ranges(સંરચના strbuf *r1,
+				    સંરચના strbuf *r2,
+				    અચલ અક્ષર *prev,
+				    સંરચના commit *origin,
+				    સંરચના commit *head)
 {
-	const char *head_oid = oid_to_hex(&head->object.oid);
-	int prev_is_range = is_range_diff_range(prev);
+	અચલ અક્ષર *head_oid = oid_to_hex(&head->object.oid);
+	પૂર્ણાંક prev_is_range = is_range_diff_range(prev);
 
-	if (prev_is_range)
+	જો (prev_is_range)
 		strbuf_addstr(r1, prev);
-	else
+	નહીંતર
 		strbuf_addf(r1, "%s..%s", head_oid, prev);
 
-	if (origin)
+	જો (origin)
 		strbuf_addf(r2, "%s..%s", oid_to_hex(&origin->object.oid), head_oid);
-	else if (prev_is_range)
+	નહીંતર જો (prev_is_range)
 		die(_("failed to infer range-diff origin of current series"));
-	else {
+	નહીંતર {
 		warning(_("using '%s' as range-diff origin of current series"), prev);
 		strbuf_addf(r2, "%s..%s", prev, head_oid);
 	}
 }
 
-int cmd_format_patch(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+પૂર્ણાંક cmd_format_patch(પૂર્ણાંક argc,
+		     અચલ અક્ષર **argv,
+		     અચલ અક્ષર *prefix,
+		     સંરચના repository *repo UNUSED)
 {
-	struct format_config cfg;
-	struct commit *commit;
-	struct commit_stack list = COMMIT_STACK_INIT;
-	struct rev_info rev;
-	char *to_free = NULL;
-	struct setup_revision_opt s_r_opt;
+	સંરચના format_config cfg;
+	સંરચના commit *commit;
+	સંરચના commit_ઢગલો list = COMMIT_ઢગલો_INIT;
+	સંરચના rev_info rev;
+	અક્ષર *to_free = ખાલી;
+	સંરચના setup_revision_opt s_r_opt;
 	size_t total, i;
-	int use_stdout = 0;
-	int start_number = -1;
-	int just_numbers = 0;
-	int ignore_if_in_upstream = 0;
-	int cover_letter = -1;
-	const char *cover_letter_fmt = NULL;
-	int boundary_count = 0;
-	int no_binary_diff = 0;
-	int zero_commit = 0;
-	struct commit *origin = NULL;
-	const char *in_reply_to = NULL;
-	struct patch_ids ids;
-	struct strbuf buf = STRBUF_INIT;
-	int use_patch_format = 0;
-	int quiet = 0;
-	const char *reroll_count = NULL;
-	char *cover_from_description_arg = NULL;
-	char *description_file = NULL;
-	char *branch_name = NULL;
-	struct base_tree_info bases;
-	struct commit *base;
-	int show_progress = 0;
-	struct progress *progress = NULL;
-	struct oid_array idiff_prev = OID_ARRAY_INIT;
-	struct strbuf idiff_title = STRBUF_INIT;
-	const char *rdiff_prev = NULL;
-	struct strbuf rdiff1 = STRBUF_INIT;
-	struct strbuf rdiff2 = STRBUF_INIT;
-	struct strbuf rdiff_title = STRBUF_INIT;
-	struct rdiff_notes rdiff_notes = {
+	પૂર્ણાંક use_stdout = 0;
+	પૂર્ણાંક start_સંખ્યા = -1;
+	પૂર્ણાંક just_numbers = 0;
+	પૂર્ણાંક ignore_if_in_upstream = 0;
+	પૂર્ણાંક cover_letter = -1;
+	અચલ અક્ષર *cover_letter_fmt = ખાલી;
+	પૂર્ણાંક boundary_ગણતરી = 0;
+	પૂર્ણાંક no_દ્વિઅંકી_diff = 0;
+	પૂર્ણાંક zero_commit = 0;
+	સંરચના commit *origin = ખાલી;
+	અચલ અક્ષર *in_reply_to = ખાલી;
+	સંરચના patch_ids ids;
+	સંરચના strbuf buf = STRBUF_INIT;
+	પૂર્ણાંક use_patch_format = 0;
+	પૂર્ણાંક quiet = 0;
+	અચલ અક્ષર *reroll_ગણતરી = ખાલી;
+	અક્ષર *cover_from_description_arg = ખાલી;
+	અક્ષર *description_file = ખાલી;
+	અક્ષર *branch_name = ખાલી;
+	સંરચના base_વૃક્ષ_info bases;
+	સંરચના commit *base;
+	પૂર્ણાંક show_progress = 0;
+	સંરચના progress *progress = ખાલી;
+	સંરચના oid_array idiff_prev = OID_ARRAY_INIT;
+	સંરચના strbuf idiff_title = STRBUF_INIT;
+	અચલ અક્ષર *rdiff_prev = ખાલી;
+	સંરચના strbuf rdiff1 = STRBUF_INIT;
+	સંરચના strbuf rdiff2 = STRBUF_INIT;
+	સંરચના strbuf rdiff_title = STRBUF_INIT;
+	સંરચના rdiff_notes rdiff_notes = {
 		.notes = STRING_LIST_INIT_NODUP,
 	};
-	const char *rfc = NULL;
-	int creation_factor = -1;
-	const char *signature = git_version_string;
-	char *signature_to_free = NULL;
-	char *signature_file_arg = NULL;
-	struct keep_callback_data keep_callback_data = {
+	અચલ અક્ષર *rfc = ખાલી;
+	પૂર્ણાંક creation_factor = -1;
+	અચલ અક્ષર *signature = git_version_string;
+	અક્ષર *signature_to_free = ખાલી;
+	અક્ષર *signature_file_arg = ખાલી;
+	સંરચના keep_callback_data keep_callback_data = {
 		.cfg = &cfg,
 		.revs = &rev,
 	};
-	const char *fmt_patch_suffix = NULL;
+	અચલ અક્ષર *fmt_patch_suffix = ખાલી;
 
-	const struct option builtin_format_patch_options[] = {
-		OPT_CALLBACK_F('n', "numbered", &cfg, NULL,
+	અચલ સંરચના option builtin_format_patch_options[] = {
+		OPT_CALLBACK_F('n', "numbered", &cfg, ખાલી,
 			    N_("use [PATCH n/m] even with a single patch"),
 			    PARSE_OPT_NOARG, numbered_callback),
-		OPT_CALLBACK_F('N', "no-numbered", &cfg, NULL,
+		OPT_CALLBACK_F('N', "no-numbered", &cfg, ખાલી,
 			    N_("use [PATCH] even with multiple patches"),
 			    PARSE_OPT_NOARG | PARSE_OPT_NONEG, no_numbered_callback),
 		OPT_BOOL('s', "signoff", &cfg.do_signoff, N_("add a Signed-off-by trailer")),
@@ -2056,9 +2056,9 @@ int cmd_format_patch(int argc,
 			    N_("use simple number sequence for output file names")),
 		OPT_STRING(0, "suffix", &fmt_patch_suffix, N_("sfx"),
 			    N_("use <sfx> instead of '.patch'")),
-		OPT_INTEGER(0, "start-number", &start_number,
+		OPT_INTEGER(0, "start-number", &start_સંખ્યા,
 			    N_("start numbering patches at <n> instead of 1")),
-		OPT_STRING('v', "reroll-count", &reroll_count, N_("reroll-count"),
+		OPT_STRING('v', "reroll-count", &reroll_ગણતરી, N_("reroll-count"),
 			    N_("mark the series as Nth re-roll")),
 		OPT_INTEGER(0, "filename-max-length", &cfg.log.fmt_patch_name_max,
 			    N_("max length of output filename")),
@@ -2076,10 +2076,10 @@ int cmd_format_patch(int argc,
 		OPT_CALLBACK_F('o', "output-directory", &output_directory,
 			    N_("dir"), N_("store resulting files in <dir>"),
 			    PARSE_OPT_NONEG, output_directory_callback),
-		OPT_CALLBACK_F('k', "keep-subject", &keep_callback_data, NULL,
+		OPT_CALLBACK_F('k', "keep-subject", &keep_callback_data, ખાલી,
 			    N_("don't strip/add [PATCH]"),
 			    PARSE_OPT_NOARG | PARSE_OPT_NONEG, keep_callback),
-		OPT_BOOL(0, "no-binary", &no_binary_diff,
+		OPT_BOOL(0, "no-binary", &no_દ્વિઅંકી_diff,
 			 N_("don't output binary diffs")),
 		OPT_BOOL(0, "zero-commit", &zero_commit,
 			 N_("output all-zero hash in From header")),
@@ -2141,7 +2141,7 @@ int cmd_format_patch(int argc,
 	repo_config(the_repository, grep_config, &rev.grep_filter);
 
 	rev.show_notes = cfg.show_notes;
-	memcpy(&rev.notes_opt, &cfg.notes_opt, sizeof(cfg.notes_opt));
+	memcpy(&rev.notes_opt, &cfg.notes_opt, કદ(cfg.notes_opt));
 	rev.commit_format = CMIT_FMT_EMAIL;
 	rev.encode_email_headers = cfg.log.default_encode_email_headers;
 	rev.expand_tabs_in_log_default = 0;
@@ -2150,15 +2150,15 @@ int cmd_format_patch(int argc,
 	rev.max_parents = 1;
 	rev.diffopt.flags.recursive = 1;
 	rev.diffopt.no_free = 1;
-	memset(&s_r_opt, 0, sizeof(s_r_opt));
+	memset(&s_r_opt, 0, કદ(s_r_opt));
 	s_r_opt.def = "HEAD";
 	s_r_opt.revarg_opt = REVARG_COMMITTISH;
 
 	strbuf_addstr(&cfg.sprefix, cfg.log.fmt_patch_subject_prefix);
-	if (format_no_prefix)
+	જો (format_no_prefix)
 		diff_set_noprefix(&rev.diffopt);
 
-	if (cfg.default_attach) {
+	જો (cfg.default_attach) {
 		rev.mime_boundary = cfg.default_attach;
 		rev.no_inline = 1;
 	}
@@ -2175,100 +2175,100 @@ int cmd_format_patch(int argc,
 
 	rev.force_in_body_from = force_in_body_from;
 
-	if (!fmt_patch_suffix)
+	જો (!fmt_patch_suffix)
 		fmt_patch_suffix = cfg.fmt_patch_suffix;
 
 	/* Make sure "0000-$sub.patch" gives non-negative length for $sub */
-	if (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
+	જો (cfg.log.fmt_patch_name_max <= cast_size_t_to_int(strlen("0000-") + strlen(fmt_patch_suffix)))
 		cfg.log.fmt_patch_name_max = strlen("0000-") + strlen(fmt_patch_suffix);
 
-	if (cover_from_description_arg)
+	જો (cover_from_description_arg)
 		cfg.cover_from_description_mode = parse_cover_from_description(cover_from_description_arg);
 
-	if (rfc && rfc[0]) {
+	જો (rfc && rfc[0]) {
 		cfg.subject_prefix = 1;
-		if (rfc[0] == '-')
+		જો (rfc[0] == '-')
 			strbuf_addf(&cfg.sprefix, " %s", rfc + 1);
-		else
+		નહીંતર
 			strbuf_insertf(&cfg.sprefix, 0, "%s ", rfc);
 	}
 
-	if (reroll_count) {
-		strbuf_addf(&cfg.sprefix, " v%s", reroll_count);
-		rev.reroll_count = reroll_count;
+	જો (reroll_ગણતરી) {
+		strbuf_addf(&cfg.sprefix, " v%s", reroll_ગણતરી);
+		rev.reroll_ગણતરી = reroll_ગણતરી;
 	}
 
 	rev.subject_prefix = cfg.sprefix.buf;
 
-	for (i = 0; i < cfg.extra_hdr.nr; i++) {
-		strbuf_addstr(&buf, cfg.extra_hdr.items[i].string);
+	માટે (i = 0; i < cfg.extra_hdr.nr; i++) {
+		strbuf_addstr(&buf, cfg.extra_hdr.વસ્તુઓ[i].string);
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_to.nr)
+	જો (cfg.extra_to.nr)
 		strbuf_addstr(&buf, "To: ");
-	for (i = 0; i < cfg.extra_to.nr; i++) {
-		if (i)
+	માટે (i = 0; i < cfg.extra_to.nr; i++) {
+		જો (i)
 			strbuf_addstr(&buf, "    ");
-		strbuf_addstr(&buf, cfg.extra_to.items[i].string);
-		if (i + 1 < cfg.extra_to.nr)
+		strbuf_addstr(&buf, cfg.extra_to.વસ્તુઓ[i].string);
+		જો (i + 1 < cfg.extra_to.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	if (cfg.extra_cc.nr)
+	જો (cfg.extra_cc.nr)
 		strbuf_addstr(&buf, "Cc: ");
-	for (i = 0; i < cfg.extra_cc.nr; i++) {
-		if (i)
+	માટે (i = 0; i < cfg.extra_cc.nr; i++) {
+		જો (i)
 			strbuf_addstr(&buf, "    ");
-		strbuf_addstr(&buf, cfg.extra_cc.items[i].string);
-		if (i + 1 < cfg.extra_cc.nr)
+		strbuf_addstr(&buf, cfg.extra_cc.વસ્તુઓ[i].string);
+		જો (i + 1 < cfg.extra_cc.nr)
 			strbuf_addch(&buf, ',');
 		strbuf_addch(&buf, '\n');
 	}
 
-	rev.extra_headers = to_free = strbuf_detach(&buf, NULL);
+	rev.extra_headers = to_free = strbuf_detach(&buf, ખાલી);
 
-	if (cfg.from) {
-		if (split_ident_line(&rev.from_ident, cfg.from, strlen(cfg.from)))
+	જો (cfg.from) {
+		જો (split_ident_લીટી(&rev.from_ident, cfg.from, strlen(cfg.from)))
 			die(_("invalid ident line: %s"), cfg.from);
 	}
 
-	if (start_number < 0)
-		start_number = 1;
+	જો (start_સંખ્યા < 0)
+		start_સંખ્યા = 1;
 
 	/*
 	 * If numbered is set solely due to format.numbered in config,
 	 * and it would conflict with --keep-subject (-k) from the
 	 * command line, reset "numbered".
 	 */
-	if (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
+	જો (cfg.numbered && cfg.keep_subject && !cfg.numbered_cmdline_opt)
 		cfg.numbered = 0;
 
-	if (cfg.numbered && cfg.keep_subject)
+	જો (cfg.numbered && cfg.keep_subject)
 		die(_("options '%s' and '%s' cannot be used together"), "-n", "-k");
-	if (cfg.keep_subject && cfg.subject_prefix)
+	જો (cfg.keep_subject && cfg.subject_prefix)
 		die(_("options '%s' and '%s' cannot be used together"), "--subject-prefix/--rfc", "-k");
 	rev.preserve_subject = cfg.keep_subject;
 
 	argc = setup_revisions(argc, argv, &rev, &s_r_opt);
-	if (argc > 1)
+	જો (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME)
+	જો (rev.diffopt.output_format & DIFF_FORMAT_NAME)
 		die(_("--name-only does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
+	જો (rev.diffopt.output_format & DIFF_FORMAT_NAME_STATUS)
 		die(_("--name-status does not make sense"));
-	if (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
+	જો (rev.diffopt.output_format & DIFF_FORMAT_CHECKDIFF)
 		die(_("--check does not make sense"));
-	if (rev.remerge_diff)
+	જો (rev.remerge_diff)
 		die(_("--remerge-diff does not make sense"));
 
-	if (!use_patch_format &&
+	જો (!use_patch_format &&
 		(!rev.diffopt.output_format ||
 		 rev.diffopt.output_format == DIFF_FORMAT_PATCH))
 		rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT | DIFF_FORMAT_SUMMARY;
-	if (!rev.diffopt.stat_width)
+	જો (!rev.diffopt.stat_width)
 		rev.diffopt.stat_width = MAIL_DEFAULT_WRAP;
 
 	/* Always generate a patch */
@@ -2278,29 +2278,29 @@ int cmd_format_patch(int argc,
 	rev.zero_commit = zero_commit;
 	rev.patch_name_max = cfg.log.fmt_patch_name_max;
 
-	if (!rev.diffopt.flags.text && !no_binary_diff)
-		rev.diffopt.flags.binary = 1;
+	જો (!rev.diffopt.flags.text && !no_દ્વિઅંકી_diff)
+		rev.diffopt.flags.દ્વિઅંકી = 1;
 
-	if (rev.show_notes)
+	જો (rev.show_notes)
 		load_display_notes(&rev.notes_opt);
 
 	die_for_incompatible_opt3(use_stdout, "--stdout",
 				  rev.diffopt.close_file, "--output",
 				  !!output_directory, "--output-directory");
 
-	if (use_stdout && stdout_mboxrd)
+	જો (use_stdout && stdout_mboxrd)
 		rev.commit_format = CMIT_FMT_MBOXRD;
 
-	if (use_stdout) {
+	જો (use_stdout) {
 		setup_pager(the_repository);
-	} else if (!rev.diffopt.close_file) {
-		int saved;
+	} નહીંતર જો (!rev.diffopt.close_file) {
+		પૂર્ણાંક saved;
 
-		if (!output_directory)
+		જો (!output_directory)
 			output_directory = cfg.config_output_directory;
 		output_directory = set_outdir(prefix, output_directory);
 
-		if (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
+		જો (rev.diffopt.use_color != GIT_COLOR_ALWAYS)
 			rev.diffopt.use_color = GIT_COLOR_NEVER;
 		/*
 		 * We consider <outdir> as 'outside of gitdir', therefore avoid
@@ -2308,24 +2308,24 @@ int cmd_format_patch(int argc,
 		 */
 		saved = repo_settings_get_shared_repository(the_repository);
 		repo_settings_set_shared_repository(the_repository, 0);
-		switch (safe_create_leading_directories_const(the_repository, output_directory)) {
-		case SCLD_OK:
-		case SCLD_EXISTS:
-			break;
-		default:
+		પસંદગી (safe_create_leading_directories_const(the_repository, output_directory)) {
+		સ્થિતિ SCLD_OK:
+		સ્થિતિ SCLD_EXISTS:
+			તોડો;
+		મૂળભૂત:
 			die(_("could not create leading directories "
 			      "of '%s'"), output_directory);
 		}
 		repo_settings_set_shared_repository(the_repository, saved);
-		if (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
+		જો (mkdir(output_directory, 0777) < 0 && errno != EEXIST)
 			die_errno(_("could not create directory '%s'"),
 				  output_directory);
 	}
 
-	if (rev.pending.nr == 1) {
-		int check_head = 0;
+	જો (rev.pending.nr == 1) {
+		પૂર્ણાંક check_head = 0;
 
-		if (rev.max_count < 0 && !rev.show_root_diff) {
+		જો (rev.max_ગણતરી < 0 && !rev.show_મૂળ_diff) {
 			/*
 			 * This is traditional behaviour of "git format-patch
 			 * origin" that prepares what the origin side still
@@ -2341,18 +2341,18 @@ int cmd_format_patch(int argc,
 		 * get_revision() to do the usual traversal.
 		 */
 
-		if (!strcmp(rev.pending.objects[0].name, "HEAD"))
+		જો (!strcmp(rev.pending.objects[0].name, "HEAD"))
 			check_head = 1;
 
-		if (check_head) {
-			const char *ref, *v;
+		જો (check_head) {
+			અચલ અક્ષર *ref, *v;
 			ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
 						      "HEAD",
 						      RESOLVE_REF_READING,
-						      NULL, NULL);
-			if (ref && skip_prefix(ref, "refs/heads/", &v))
+						      ખાલી, ખાલી);
+			જો (ref && skip_prefix(ref, "refs/heads/", &v))
 				branch_name = xstrdup(v);
-			else
+			નહીંતર
 				branch_name = xstrdup(""); /* no branch */
 		}
 	}
@@ -2361,84 +2361,84 @@ int cmd_format_patch(int argc,
 	 * We cannot move this anywhere earlier because we do want to
 	 * know if --root was given explicitly from the command line.
 	 */
-	rev.show_root_diff = 1;
+	rev.show_મૂળ_diff = 1;
 
-	if (ignore_if_in_upstream) {
+	જો (ignore_if_in_upstream) {
 		/* Don't say anything if head and upstream are the same. */
-		if (rev.pending.nr == 2) {
-			struct object_array_entry *o = rev.pending.objects;
-			if (oideq(&o[0].item->oid, &o[1].item->oid))
-				goto done;
+		જો (rev.pending.nr == 2) {
+			સંરચના object_array_entry *o = rev.pending.objects;
+			જો (oideq(&o[0].item->oid, &o[1].item->oid))
+				જાઓ done;
 		}
 		get_patch_ids(&rev, &ids);
 	}
 
-	if (prepare_revision_walk(&rev))
+	જો (prepare_revision_walk(&rev))
 		die(_("revision walk setup failed"));
 	rev.boundary = 1;
-	while ((commit = get_revision(&rev)) != NULL) {
-		if (commit->object.flags & BOUNDARY) {
-			boundary_count++;
-			origin = (boundary_count == 1) ? commit : NULL;
-			continue;
+	જ્યારે ((commit = get_revision(&rev)) != ખાલી) {
+		જો (commit->object.flags & BOUNDARY) {
+			boundary_ગણતરી++;
+			origin = (boundary_ગણતરી == 1) ? commit : ખાલી;
+			ચાલુ;
 		}
 
-		if (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
-			continue;
+		જો (ignore_if_in_upstream && has_commit_patch_id(commit, &ids))
+			ચાલુ;
 
-		commit_stack_push(&list, commit);
+		commit_ઢગલો_ધકેલો(&list, commit);
 	}
-	if (!list.nr)
+	જો (!list.nr)
 		/* nothing to do */
-		goto done;
+		જાઓ done;
 	total = list.nr;
 
-	if (!cover_letter_fmt) {
+	જો (!cover_letter_fmt) {
 		cover_letter_fmt = cfg.fmt_cover_letter_commit_list;
-		if (!cover_letter_fmt)
+		જો (!cover_letter_fmt)
 			cover_letter_fmt = "shortlog";
-	} else if (cover_letter == -1) {
+	} નહીંતર જો (cover_letter == -1) {
 		cover_letter = 1;
 	}
 
-	if (cover_letter == -1) {
-		if (cfg.config_cover_letter == COVER_AUTO)
+	જો (cover_letter == -1) {
+		જો (cfg.config_cover_letter == COVER_AUTO)
 			cover_letter = (total > 1);
-		else if ((idiff_prev.nr || rdiff_prev) && (total > 1))
+		નહીંતર જો ((idiff_prev.nr || rdiff_prev) && (total > 1))
 			cover_letter = (cfg.config_cover_letter != COVER_OFF);
-		else
+		નહીંતર
 			cover_letter = (cfg.config_cover_letter == COVER_ON);
 	}
-	if (!cfg.keep_subject && cfg.auto_number && (total > 1 || cover_letter))
+	જો (!cfg.keep_subject && cfg.auto_સંખ્યા && (total > 1 || cover_letter))
 		cfg.numbered = 1;
-	if (cfg.numbered)
-		rev.total = total + start_number - 1;
+	જો (cfg.numbered)
+		rev.total = total + start_સંખ્યા - 1;
 
-	if (idiff_prev.nr) {
-		if (!cover_letter && total != 1)
+	જો (idiff_prev.nr) {
+		જો (!cover_letter && total != 1)
 			die(_("--interdiff requires --cover-letter or single patch"));
 		rev.idiff_oid1 = &idiff_prev.oid[idiff_prev.nr - 1];
-		rev.idiff_oid2 = get_commit_tree_oid(list.items[0]);
-		rev.idiff_title = diff_title(&idiff_title, reroll_count,
+		rev.idiff_oid2 = get_commit_વૃક્ષ_oid(list.વસ્તુઓ[0]);
+		rev.idiff_title = diff_title(&idiff_title, reroll_ગણતરી,
 					     _("Interdiff:"),
 					     _("Interdiff against v%d:"));
 	}
 
-	if (creation_factor < 0)
+	જો (creation_factor < 0)
 		creation_factor = CREATION_FACTOR_FOR_THE_SAME_SERIES;
-	else if (!rdiff_prev)
+	નહીંતર જો (!rdiff_prev)
 		die(_("the option '%s' requires '%s'"), "--creation-factor", "--range-diff");
 
-	if (rdiff_prev) {
-		if (!cover_letter && total != 1)
+	જો (rdiff_prev) {
+		જો (!cover_letter && total != 1)
 			die(_("--range-diff requires --cover-letter or single patch"));
 
 		infer_range_diff_ranges(&rdiff1, &rdiff2, rdiff_prev,
-					origin, list.items[0]);
+					origin, list.વસ્તુઓ[0]);
 		rev.rdiff1 = rdiff1.buf;
 		rev.rdiff2 = rdiff2.buf;
 		rev.creation_factor = creation_factor;
-		rev.rdiff_title = diff_title(&rdiff_title, reroll_count,
+		rev.rdiff_title = diff_title(&rdiff_title, reroll_ગણતરી,
 					     _("Range-diff:"),
 					     _("Range-diff against v%d:"));
 		get_notes_args(&rdiff_notes, &rev);
@@ -2453,73 +2453,73 @@ int cmd_format_patch(int argc,
 	 *   4. The `format.signatureFile` config.
 	 *   5. Default `git_version_string`.
 	 */
-	if (!signature) {
+	જો (!signature) {
 		; /* --no-signature inhibits all signatures */
-	} else if (signature && signature != git_version_string) {
+	} નહીંતર જો (signature && signature != git_version_string) {
 		; /* non-default signature already set */
-	} else if (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
-		struct strbuf buf = STRBUF_INIT;
-		const char *signature_file = signature_file_arg ?
+	} નહીંતર જો (signature_file_arg || (cfg.signature_file && !cfg.signature)) {
+		સંરચના strbuf buf = STRBUF_INIT;
+		અચલ અક્ષર *signature_file = signature_file_arg ?
 			signature_file_arg : cfg.signature_file;
 
-		if (strbuf_read_file(&buf, signature_file, 128) < 0)
+		જો (strbuf_read_file(&buf, signature_file, 128) < 0)
 			die_errno(_("unable to read signature file '%s'"), signature_file);
-		signature = signature_to_free = strbuf_detach(&buf, NULL);
-	} else if (cfg.signature) {
+		signature = signature_to_free = strbuf_detach(&buf, ખાલી);
+	} નહીંતર જો (cfg.signature) {
 		signature = cfg.signature;
 	}
 
-	memset(&bases, 0, sizeof(bases));
-	base = get_base_commit(&cfg, list.items, list.nr);
-	if (base) {
+	memset(&bases, 0, કદ(bases));
+	base = get_base_commit(&cfg, list.વસ્તુઓ, list.nr);
+	જો (base) {
 		reset_revision_walk();
 		clear_object_flags(the_repository, UNINTERESTING);
-		prepare_bases(&bases, base, list.items, list.nr);
+		prepare_bases(&bases, base, list.વસ્તુઓ, list.nr);
 	}
 
-	if (in_reply_to || cfg.thread || cover_letter) {
-		rev.ref_message_ids = xmalloc(sizeof(*rev.ref_message_ids));
+	જો (in_reply_to || cfg.thread || cover_letter) {
+		rev.ref_message_ids = xmalloc(કદ(*rev.ref_message_ids));
 		string_list_init_dup(rev.ref_message_ids);
 	}
-	if (in_reply_to) {
-		char *msgid = clean_message_id(in_reply_to);
+	જો (in_reply_to) {
+		અક્ષર *msgid = clean_message_id(in_reply_to);
 		string_list_append_nodup(rev.ref_message_ids, msgid);
 	}
 	rev.numbered_files = just_numbers;
 	rev.patch_suffix = fmt_patch_suffix;
 
-	if (cover_letter) {
-		if (cfg.thread)
+	જો (cover_letter) {
+		જો (cfg.thread)
 			gen_message_id(&rev, "cover");
 		make_cover_letter(&rev, !!output_directory,
-				  origin, list.nr, list.items,
+				  origin, list.nr, list.વસ્તુઓ,
 				  description_file, branch_name, quiet, &cfg,
 				  cover_letter_fmt);
 		print_bases(&bases, rev.diffopt.file);
 		print_signature(signature, rev.diffopt.file);
 		total++;
-		start_number--;
+		start_સંખ્યા--;
 		/* interdiff/range-diff in cover-letter; omit from patches */
-		rev.idiff_oid1 = NULL;
-		rev.rdiff1 = NULL;
+		rev.idiff_oid1 = ખાલી;
+		rev.rdiff1 = ખાલી;
 	}
 	rev.add_signoff = cfg.do_signoff;
 
-	if (show_progress)
+	જો (show_progress)
 		progress = start_delayed_progress(the_repository,
 						  _("Generating patches"), total);
-	while (list.nr) {
+	જ્યારે (list.nr) {
 		size_t idx = list.nr - 1;
-		int shown;
+		પૂર્ણાંક shown;
 
 		display_progress(progress, total - idx);
-		commit = commit_stack_pop(&list);
-		rev.nr = total - idx + (start_number - 1);
+		commit = commit_ઢગલો_કાઢો(&list);
+		rev.nr = total - idx + (start_સંખ્યા - 1);
 
 		/* Make the second and subsequent mails replies to the first */
-		if (cfg.thread) {
+		જો (cfg.thread) {
 			/* Have we already had a message ID? */
-			if (rev.message_id) {
+			જો (rev.message_id) {
 				/*
 				 * For deep threading: make every mail
 				 * a reply to the previous one, no
@@ -2541,21 +2541,21 @@ int cmd_format_patch(int argc,
 				 * letter is a reply to the
 				 * --in-reply-to, if specified.
 				 */
-				if (cfg.thread == THREAD_SHALLOW
+				જો (cfg.thread == THREAD_SHALLOW
 				    && rev.ref_message_ids->nr > 0
 				    && (!cover_letter || rev.nr > 1))
-					free(rev.message_id);
-				else
+					મુક્ત(rev.message_id);
+				નહીંતર
 					string_list_append_nodup(rev.ref_message_ids,
 								 rev.message_id);
 			}
 			gen_message_id(&rev, oid_to_hex(&commit->object.oid));
 		}
 
-		if (output_directory &&
-		    open_next_file(rev.numbered_files ? NULL : commit, NULL, &rev, quiet))
+		જો (output_directory &&
+		    open_next_file(rev.numbered_files ? ખાલી : commit, ખાલી, &rev, quiet))
 			die(_("failed to create output files"));
-		shown = log_tree_commit(&rev, commit);
+		shown = log_વૃક્ષ_commit(&rev, commit);
 		free_commit_buffer(the_repository->parsed_objects,
 				   commit);
 
@@ -2565,25 +2565,25 @@ int cmd_format_patch(int argc,
 		 * the log; when using one file per patch, we do
 		 * not want the extra blank line.
 		 */
-		if (output_directory)
+		જો (output_directory)
 			rev.shown_one = 0;
-		if (shown) {
+		જો (shown) {
 			print_bases(&bases, rev.diffopt.file);
-			if (rev.mime_boundary)
+			જો (rev.mime_boundary)
 				fprintf(rev.diffopt.file, "\n--%s%s--\n\n\n",
 				       mime_boundary_leader,
 				       rev.mime_boundary);
-			else
+			નહીંતર
 				print_signature(signature, rev.diffopt.file);
 		}
-		if (output_directory) {
+		જો (output_directory) {
 			fclose(rev.diffopt.file);
-			rev.diffopt.file = NULL;
+			rev.diffopt.file = ખાલી;
 		}
 	}
 	stop_progress(&progress);
-	commit_stack_clear(&list);
-	if (ignore_if_in_upstream)
+	commit_ઢગલો_clear(&list);
+	જો (ignore_if_in_upstream)
 		free_patch_ids(&ids);
 
 done:
@@ -2592,51 +2592,51 @@ done:
 	strbuf_release(&rdiff1);
 	strbuf_release(&rdiff2);
 	strbuf_release(&rdiff_title);
-	free(description_file);
-	free(signature_file_arg);
-	free(signature_to_free);
-	free(branch_name);
-	free(to_free);
-	free(rev.message_id);
-	if (rev.ref_message_ids)
+	મુક્ત(description_file);
+	મુક્ત(signature_file_arg);
+	મુક્ત(signature_to_free);
+	મુક્ત(branch_name);
+	મુક્ત(to_free);
+	મુક્ત(rev.message_id);
+	જો (rev.ref_message_ids)
 		string_list_clear(rev.ref_message_ids, 0);
-	free(rev.ref_message_ids);
+	મુક્ત(rev.ref_message_ids);
 	rev.diffopt.no_free = 0;
 	release_revisions(&rev);
 	format_config_release(&cfg);
 	strvec_clear(&rev.rdiff_log_arg);
 	string_list_clear(&rdiff_notes.notes, 0);
-	return 0;
+	પાછા 0;
 }
 
-static int add_pending_commit(const char *arg, struct rev_info *revs, int flags)
+સ્થિર પૂર્ણાંક add_pending_commit(અચલ અક્ષર *arg, સંરચના rev_info *revs, પૂર્ણાંક flags)
 {
-	struct object_id oid;
-	if (repo_get_oid(the_repository, arg, &oid) == 0) {
-		struct commit *commit = lookup_commit_reference(the_repository,
+	સંરચના object_id oid;
+	જો (repo_get_oid(the_repository, arg, &oid) == 0) {
+		સંરચના commit *commit = lookup_commit_reference(the_repository,
 								&oid);
-		if (commit) {
+		જો (commit) {
 			commit->object.flags |= flags;
 			add_pending_object(revs, &commit->object, arg);
-			return 0;
+			પાછા 0;
 		}
 	}
-	return -1;
+	પાછા -1;
 }
 
-static const char * const cherry_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ cherry_usage[] = {
 	N_("git cherry [-v] [<upstream> [<head> [<limit>]]]"),
-	NULL
+	ખાલી
 };
 
-static void print_commit(char sign, struct commit *commit, int verbose,
-			 int abbrev, FILE *file)
+સ્થિર શૂન્ય print_commit(અક્ષર sign, સંરચના commit *commit, પૂર્ણાંક verbose,
+			 પૂર્ણાંક abbrev, FILE *file)
 {
-	if (!verbose) {
+	જો (!verbose) {
 		fprintf(file, "%c %s\n", sign,
 		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev));
-	} else {
-		struct strbuf buf = STRBUF_INIT;
+	} નહીંતર {
+		સંરચના strbuf buf = STRBUF_INIT;
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
 		fprintf(file, "%c %s %s\n", sign,
 		       repo_find_unique_abbrev(the_repository, &commit->object.oid, abbrev),
@@ -2654,55 +2654,55 @@ static void print_commit(char sign, struct commit *commit, int verbose,
  *
  * Clean up with diff_queue_clear() (from diffcore.h).
  */
-static void collect_diff_blob_oids(struct commit *commit,
-				   struct diff_options *opts,
-				   struct oidset *blobs)
+સ્થિર શૂન્ય collect_diff_blob_oids(સંરચના commit *commit,
+				   સંરચના diff_options *opts,
+				   સંરચના oidset *blobs)
 {
-	struct diff_queue_struct *q;
+	સંરચના diff_queue_struct *q;
 
 	/*
 	 * Merge commits are filtered out by patch_id_defined() in patch-ids.c,
 	 * so we'll never be called with one.
 	 */
-	assert(!commit->parents || !commit->parents->next);
+	પ્રતિજ્ઞા(!commit->parents || !commit->parents->next);
 
-	if (commit->parents)
-		diff_tree_oid(&commit->parents->item->object.oid,
+	જો (commit->parents)
+		diff_વૃક્ષ_oid(&commit->parents->item->object.oid,
 			      &commit->object.oid, "", opts);
-	else
-		diff_root_tree_oid(&commit->object.oid, "", opts);
+	નહીંતર
+		diff_મૂળ_વૃક્ષ_oid(&commit->object.oid, "", opts);
 	diffcore_std(opts);
 
 	q = &diff_queued_diff;
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct userdiff_driver *drv;
+	માટે (પૂર્ણાંક i = 0; i < q->nr; i++) {
+		સંરચના diff_filepair *p = q->queue[i];
+		સંરચના userdiff_driver *drv;
 
 		/* Skip binary files */
 		drv = userdiff_find_by_path(opts->repo->index, p->one->path);
-		if (drv && drv->binary > 0)
-			continue;
+		જો (drv && drv->દ્વિઅંકી > 0)
+			ચાલુ;
 
-		if (DIFF_FILE_VALID(p->one) &&
+		જો (DIFF_FILE_VALID(p->one) &&
 		    odb_read_object_info_extended(opts->repo->objects,
-						  &p->one->oid, NULL,
+						  &p->one->oid, ખાલી,
 						  OBJECT_INFO_FOR_PREFETCH))
-			oidset_insert(blobs, &p->one->oid);
-		if (DIFF_FILE_VALID(p->two) &&
+			oidset_ઉમેરો(blobs, &p->one->oid);
+		જો (DIFF_FILE_VALID(p->two) &&
 		    odb_read_object_info_extended(opts->repo->objects,
-						  &p->two->oid, NULL,
+						  &p->two->oid, ખાલી,
 						  OBJECT_INFO_FOR_PREFETCH))
-			oidset_insert(blobs, &p->two->oid);
+			oidset_ઉમેરો(blobs, &p->two->oid);
 	}
 	diff_queue_clear(q);
 }
 
-static int always_match(const void *cmp_data UNUSED,
-			const struct hashmap_entry *entry1 UNUSED,
-			const struct hashmap_entry *entry2 UNUSED,
-			const void *keydata UNUSED)
+સ્થિર પૂર્ણાંક always_match(અચલ શૂન્ય *cmp_data UNUSED,
+			અચલ સંરચના hashmap_entry *entry1 UNUSED,
+			અચલ સંરચના hashmap_entry *entry2 UNUSED,
+			અચલ શૂન્ય *keydata UNUSED)
 {
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -2719,33 +2719,33 @@ static int always_match(const void *cmp_data UNUSED,
  * blobs to be read on demand, and we want to prefetch them all at
  * once instead.
  */
-static void prefetch_cherry_blobs(struct repository *repo,
-				  struct commit_list *list,
-				  struct patch_ids *ids)
+સ્થિર શૂન્ય prefetch_cherry_blobs(સંરચના repository *repo,
+				  સંરચના commit_list *list,
+				  સંરચના patch_ids *ids)
 {
-	struct oidset blobs = OIDSET_INIT;
+	સંરચના oidset blobs = OIDSET_INIT;
 	hashmap_cmp_fn original_cmpfn;
 
 	/* Exit if we're not in a partial clone */
-	if (!repo_has_promisor_remote(repo))
-		return;
+	જો (!repo_has_promisor_remote(repo))
+		પાછા;
 
 	/* Save original cmpfn, replace with always_match */
 	original_cmpfn = ids->patches.cmpfn;
 	ids->patches.cmpfn = always_match;
 
 	/* Find header-only collisions, gather blobs from those commits */
-	for (struct commit_list *l = list; l; l = l->next) {
-		struct commit *c = l->item;
+	માટે (સંરચના commit_list *l = list; l; l = l->next) {
+		સંરચના commit *c = l->item;
 		bool match_found = false;
-		for (struct patch_id *cur = patch_id_iter_first(c, ids);
+		માટે (સંરચના patch_id *cur = patch_id_iter_first(c, ids);
 		     cur;
 		     cur = patch_id_iter_next(cur, ids)) {
 			match_found = true;
 			collect_diff_blob_oids(cur->commit, &ids->diffopts,
 					       &blobs);
 		}
-		if (match_found)
+		જો (match_found)
 			collect_diff_blob_oids(c, &ids->diffopts, &blobs);
 	}
 
@@ -2753,13 +2753,13 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	ids->patches.cmpfn = original_cmpfn;
 
 	/* If we have any blobs to fetch, fetch them */
-	if (oidset_size(&blobs)) {
-		struct oid_array to_fetch = OID_ARRAY_INIT;
-		struct oidset_iter iter;
-		const struct object_id *oid;
+	જો (oidset_size(&blobs)) {
+		સંરચના oid_array to_fetch = OID_ARRAY_INIT;
+		સંરચના oidset_iter iter;
+		અચલ સંરચના object_id *oid;
 
 		oidset_iter_init(&blobs, &iter);
-		while ((oid = oidset_iter_next(&iter)))
+		જ્યારે ((oid = oidset_iter_next(&iter)))
 			oid_array_append(&to_fetch, oid);
 
 		promisor_remote_get_direct(repo, to_fetch.oid, to_fetch.nr);
@@ -2770,22 +2770,22 @@ static void prefetch_cherry_blobs(struct repository *repo,
 	oidset_clear(&blobs);
 }
 
-int cmd_cherry(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+પૂર્ણાંક cmd_cherry(પૂર્ણાંક argc,
+	       અચલ અક્ષર **argv,
+	       અચલ અક્ષર *prefix,
+	       સંરચના repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct patch_ids ids;
-	struct commit *commit;
-	struct commit_list *list = NULL;
-	struct branch *current_branch;
-	const char *upstream;
-	const char *head = "HEAD";
-	const char *limit = NULL;
-	int verbose = 0, abbrev = 0;
+	સંરચના rev_info revs;
+	સંરચના patch_ids ids;
+	સંરચના commit *commit;
+	સંરચના commit_list *list = ખાલી;
+	સંરચના branch *current_branch;
+	અચલ અક્ષર *upstream;
+	અચલ અક્ષર *head = "HEAD";
+	અચલ અક્ષર *limit = ખાલી;
+	પૂર્ણાંક verbose = 0, abbrev = 0;
 
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT__ABBREV(&abbrev),
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_END()
@@ -2793,20 +2793,20 @@ int cmd_cherry(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, cherry_usage, 0);
 
-	switch (argc) {
-	case 3:
+	પસંદગી (argc) {
+	સ્થિતિ 3:
 		limit = argv[2];
 		/* FALLTHROUGH */
-	case 2:
+	સ્થિતિ 2:
 		head = argv[1];
 		/* FALLTHROUGH */
-	case 1:
+	સ્થિતિ 1:
 		upstream = argv[0];
-		break;
-	default:
-		current_branch = branch_get(NULL);
-		upstream = branch_get_upstream(current_branch, NULL);
-		if (!upstream) {
+		તોડો;
+	મૂળભૂત:
+		current_branch = branch_get(ખાલી);
+		upstream = branch_get_upstream(current_branch, ખાલી);
+		જો (!upstream) {
 			fprintf(stderr, _("Could not find a tracked"
 					" remote branch, please"
 					" specify <upstream> manually.\n"));
@@ -2817,42 +2817,42 @@ int cmd_cherry(int argc,
 	repo_init_revisions(the_repository, &revs, prefix);
 	revs.max_parents = 1;
 
-	if (add_pending_commit(head, &revs, 0))
+	જો (add_pending_commit(head, &revs, 0))
 		die(_("unknown commit %s"), head);
-	if (add_pending_commit(upstream, &revs, UNINTERESTING))
+	જો (add_pending_commit(upstream, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), upstream);
 
 	/* Don't say anything if head and upstream are the same. */
-	if (revs.pending.nr == 2) {
-		struct object_array_entry *o = revs.pending.objects;
-		if (oideq(&o[0].item->oid, &o[1].item->oid))
-			return 0;
+	જો (revs.pending.nr == 2) {
+		સંરચના object_array_entry *o = revs.pending.objects;
+		જો (oideq(&o[0].item->oid, &o[1].item->oid))
+			પાછા 0;
 	}
 
 	get_patch_ids(&revs, &ids);
 
-	if (limit && add_pending_commit(limit, &revs, UNINTERESTING))
+	જો (limit && add_pending_commit(limit, &revs, UNINTERESTING))
 		die(_("unknown commit %s"), limit);
 
 	/* reverse the list of commits */
-	if (prepare_revision_walk(&revs))
+	જો (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(&revs)) != NULL) {
-		commit_list_insert(commit, &list);
+	જ્યારે ((commit = get_revision(&revs)) != ખાલી) {
+		commit_list_ઉમેરો(commit, &list);
 	}
 
 	prefetch_cherry_blobs(the_repository, list, &ids);
 
-	for (struct commit_list *l = list; l; l = l->next) {
-		char sign = '+';
+	માટે (સંરચના commit_list *l = list; l; l = l->next) {
+		અક્ષર sign = '+';
 
 		commit = l->item;
-		if (has_commit_patch_id(commit, &ids))
+		જો (has_commit_patch_id(commit, &ids))
 			sign = '-';
 		print_commit(sign, commit, verbose, abbrev, revs.diffopt.file);
 	}
 
 	commit_list_free(list);
 	free_patch_ids(&ids);
-	return 0;
+	પાછા 0;
 }

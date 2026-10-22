@@ -1,53 +1,53 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "range-diff.h"
-#include "config.h"
-#include "parse.h"
-#include "color.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "object-name.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "range-diff.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "parse.h"
+#અન્તર્ભાવ "color.h"
 
 
-static const char * const builtin_range_diff_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_range_diff_usage[] = {
 N_("git range-diff [<options>] <old-base>..<old-tip> <new-base>..<new-tip>"),
 N_("git range-diff [<options>] <old-tip>...<new-tip>"),
 N_("git range-diff [<options>] <base> <old-tip> <new-tip>"),
-NULL
+ખાલી
 };
 
-static int parse_max_memory(const struct option *opt, const char *arg, int unset)
+સ્થિર પૂર્ણાંક parse_max_memory(અચલ સંરચના option *opt, અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	size_t *max_memory = opt->value;
+	size_t *max_memory = opt->કિંમત;
 	uintmax_t val;
 
-	if (unset)
-		return 0;
+	જો (unset)
+		પાછા 0;
 
-	if (!git_parse_unsigned(arg, &val, SIZE_MAX))
-		return error(_("invalid max-memory value: %s"), arg);
+	જો (!git_parse_unsigned(arg, &val, SIZE_MAX))
+		પાછા error(_("invalid max-memory value: %s"), arg);
 
 	*max_memory = (size_t)val;
-	return 0;
+	પાછા 0;
 }
 
-int cmd_range_diff(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+પૂર્ણાંક cmd_range_diff(પૂર્ણાંક argc,
+		   અચલ અક્ષર **argv,
+		   અચલ અક્ષર *prefix,
+		   સંરચના repository *repo UNUSED)
 {
-	struct diff_options diffopt = { NULL };
-	struct strvec log_arg = STRVEC_INIT;
-	struct strvec diff_merges_arg = STRVEC_INIT;
-	struct range_diff_options range_diff_opts = {
+	સંરચના diff_options diffopt = { ખાલી };
+	સંરચના strvec log_arg = STRVEC_INIT;
+	સંરચના strvec diff_merges_arg = STRVEC_INIT;
+	સંરચના range_diff_options range_diff_opts = {
 		.creation_factor = RANGE_DIFF_CREATION_FACTOR_DEFAULT,
 		.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
-	struct option range_diff_options[] = {
+	પૂર્ણાંક simple_color = -1, ડાબું_only = 0, જમણું_only = 0;
+	સંરચના option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
 			    &range_diff_opts.creation_factor,
 			    N_("percentage by which creation is weighted")),
@@ -62,21 +62,21 @@ int cmd_range_diff(int argc,
 			     N_("size"),
 			     N_("maximum memory for cost matrix (default 4G)"),
 			     parse_max_memory),
-		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, NULL,
+		OPT_PASSTHRU_ARGV(0, "remerge-diff", &diff_merges_arg, ખાલી,
 				  N_("passed to 'git log'"), PARSE_OPT_NOARG),
-		OPT_BOOL(0, "left-only", &left_only,
+		OPT_BOOL(0, "left-only", &ડાબું_only,
 			 N_("only emit output related to the first range")),
-		OPT_BOOL(0, "right-only", &right_only,
+		OPT_BOOL(0, "right-only", &જમણું_only,
 			 N_("only emit output related to the second range")),
 		OPT_END()
 	};
-	struct option *options;
-	int i, dash_dash = -1, res = 0;
-	struct strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
-	struct object_id oid;
-	const char *three_dots = NULL;
+	સંરચના option *options;
+	પૂર્ણાંક i, dash_dash = -1, res = 0;
+	સંરચના strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
+	સંરચના object_id oid;
+	અચલ અક્ષર *three_dots = ખાલી;
 
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, ખાલી);
 
 	repo_diff_setup(the_repository, &diffopt);
 
@@ -87,38 +87,38 @@ int cmd_range_diff(int argc,
 	diff_setup_done(&diffopt);
 
 	/* force color when --dual-color was used */
-	if (!simple_color)
+	જો (!simple_color)
 		diffopt.use_color = GIT_COLOR_ALWAYS;
 
 	/* If `--diff-merges` was specified, imply `--merges` */
-	if (diff_merges_arg.nr) {
+	જો (diff_merges_arg.nr) {
 		range_diff_opts.include_merges = 1;
 		strvec_pushv(&log_arg, diff_merges_arg.v);
 	}
 
-	for (i = 0; i < argc; i++)
-		if (!strcmp(argv[i], "--")) {
+	માટે (i = 0; i < argc; i++)
+		જો (!strcmp(argv[i], "--")) {
 			dash_dash = i;
-			break;
+			તોડો;
 		}
 
-	if (dash_dash == 3 ||
+	જો (dash_dash == 3 ||
 	    (dash_dash < 0 && argc > 2 &&
 	     !repo_get_oid_committish(the_repository, argv[0], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[1], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[2], &oid))) {
-		if (dash_dash < 0)
+		જો (dash_dash < 0)
 			; /* already validated arguments */
-		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		નહીંતર જો (repo_get_oid_committish(the_repository, argv[0], &oid))
+			usage_સંદેશ_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		નહીંતર જો (repo_get_oid_committish(the_repository, argv[1], &oid))
+			usage_સંદેશ_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
-		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
-			usage_msg_optf(_("not a revision: '%s'"),
+		નહીંતર જો (repo_get_oid_committish(the_repository, argv[2], &oid))
+			usage_સંદેશ_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
 
@@ -127,18 +127,18 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 3 : dash_dash));
-	} else if (dash_dash == 2 ||
+	} નહીંતર જો (dash_dash == 2 ||
 		   (dash_dash < 0 && argc > 1 &&
 		    is_range_diff_range(argv[0]) &&
 		    is_range_diff_range(argv[1]))) {
-		if (dash_dash < 0)
+		જો (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!is_range_diff_range(argv[0]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+		નહીંતર જો (!is_range_diff_range(argv[0]))
+			usage_સંદેશ_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (!is_range_diff_range(argv[1]))
-			usage_msg_optf(_("not a commit range: '%s'"),
+		નહીંતર જો (!is_range_diff_range(argv[1]))
+			usage_સંદેશ_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
 
@@ -147,30 +147,30 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 2 : dash_dash));
-	} else if (dash_dash == 1 ||
+	} નહીંતર જો (dash_dash == 1 ||
 		   (dash_dash < 0 && argc > 0 &&
 		    (three_dots = strstr(argv[0], "...")))) {
-		const char *a, *b;
-		int a_len;
+		અચલ અક્ષર *a, *b;
+		પૂર્ણાંક a_len;
 
-		if (dash_dash < 0)
+		જો (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!(three_dots = strstr(argv[0], "...")))
-			usage_msg_optf(_("not a symmetric range: '%s'"),
+		નહીંતર જો (!(three_dots = strstr(argv[0], "...")))
+			usage_સંદેશ_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
-		if (three_dots == argv[0]) {
+		જો (three_dots == argv[0]) {
 			a = "HEAD";
 			a_len = strlen(a);
-		} else {
+		} નહીંતર {
 			a = argv[0];
-			a_len = (int)(three_dots - a);
+			a_len = (પૂર્ણાંક)(three_dots - a);
 		}
 
-		if (three_dots[3])
+		જો (three_dots[3])
 			b = three_dots + 3;
-		else
+		નહીંતર
 			b = "HEAD";
 
 		strbuf_addf(&range1, "%s..%.*s", b, a_len, a);
@@ -178,14 +178,14 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
-	} else
-		usage_msg_opt(_("need two commit ranges"),
+	} નહીંતર
+		usage_સંદેશ_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
 
 	range_diff_opts.dual_color = simple_color < 1;
-	range_diff_opts.left_only = left_only;
-	range_diff_opts.right_only = right_only;
+	range_diff_opts.ડાબું_only = ડાબું_only;
+	range_diff_opts.જમણું_only = જમણું_only;
 	res = show_range_diff(range1.buf, range2.buf, &range_diff_opts);
 
 	strvec_clear(&log_arg);
@@ -193,5 +193,5 @@ int cmd_range_diff(int argc,
 	strbuf_release(&range1);
 	strbuf_release(&range2);
 
-	return res;
+	પાછા res;
 }

@@ -1,46 +1,46 @@
-#include "git-compat-util.h"
-#include "bloom.h"
-#include "builtin.h"
-#include "commit-graph.h"
-#include "commit-slab.h"
-#include "commit.h"
-#include "config.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "environment.h"
-#include "ewah/ewok.h"
-#include "hashmap.h"
-#include "hex.h"
-#include "object-name.h"
-#include "object.h"
-#include "parse-options.h"
-#include "prio-queue.h"
-#include "quote.h"
-#include "repository.h"
-#include "revision.h"
+#અન્તર્ભાવ "git-compat-util.h"
+#અન્તર્ભાવ "bloom.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "commit-graph.h"
+#અન્તર્ભાવ "commit-slab.h"
+#અન્તર્ભાવ "commit.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "diff.h"
+#અન્તર્ભાવ "diffcore.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "ewah/ewok.h"
+#અન્તર્ભાવ "hashmap.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "object-name.h"
+#અન્તર્ભાવ "object.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "prio-queue.h"
+#અન્તર્ભાવ "quote.h"
+#અન્તર્ભાવ "repository.h"
+#અન્તર્ભાવ "revision.h"
 
 /* Remember to update object flag allocation in object.h */
 #define PARENT1 (1u<<16) /* used instead of SEEN */
 #define PARENT2 (1u<<17) /* used instead of BOTTOM, BOUNDARY */
 
-struct last_modified_entry {
-	struct hashmap_entry hashent;
-	struct object_id oid;
-	struct bloom_key key;
+સંરચના last_modified_entry {
+	સંરચના hashmap_entry hashent;
+	સંરચના object_id oid;
+	સંરચના bloom_ચાવી ચાવી;
 	size_t diff_idx;
-	const char path[FLEX_ARRAY];
+	અચલ અક્ષર path[FLEX_ARRAY];
 };
 
-static int last_modified_entry_hashcmp(const void *unused UNUSED,
-				       const struct hashmap_entry *hent1,
-				       const struct hashmap_entry *hent2,
-				       const void *path)
+સ્થિર પૂર્ણાંક last_modified_entry_hashcmp(અચલ શૂન્ય *unused UNUSED,
+				       અચલ સંરચના hashmap_entry *hent1,
+				       અચલ સંરચના hashmap_entry *hent2,
+				       અચલ શૂન્ય *path)
 {
-	const struct last_modified_entry *ent1 =
-		container_of(hent1, const struct last_modified_entry, hashent);
-	const struct last_modified_entry *ent2 =
-		container_of(hent2, const struct last_modified_entry, hashent);
-	return strcmp(ent1->path, path ? path : ent2->path);
+	અચલ સંરચના last_modified_entry *ent1 =
+		container_of(hent1, અચલ સંરચના last_modified_entry, hashent);
+	અચલ સંરચના last_modified_entry *ent2 =
+		container_of(hent2, અચલ સંરચના last_modified_entry, hashent);
+	પાછા strcmp(ent1->path, path ? path : ent2->path);
 }
 
 /*
@@ -48,84 +48,84 @@ static int last_modified_entry_hashcmp(const void *unused UNUSED,
  * represents a path in `lm->all_paths`. An active bit indicates the path still
  * needs to be associated to a commit.
  */
-define_commit_slab(active_paths_for_commit, struct bitmap *);
+define_commit_slab(active_paths_for_commit, સંરચના bitmap *);
 
-struct last_modified {
-	struct hashmap paths;
-	struct rev_info rev;
+સંરચના last_modified {
+	સંરચના hashmap paths;
+	સંરચના rev_info rev;
 	bool show_trees;
 	bool nul_termination;
-	int max_depth;
+	પૂર્ણાંક max_depth;
 
-	const char **all_paths;
+	અચલ અક્ષર **all_paths;
 	size_t all_paths_nr;
-	struct active_paths_for_commit active_paths;
+	સંરચના active_paths_for_commit active_paths;
 
 	/* 'scratch' to avoid allocating a bitmap every process_parent() */
-	struct bitmap *scratch;
+	સંરચના bitmap *scratch;
 };
 
-static struct bitmap *active_paths_for(struct last_modified *lm, struct commit *c)
+સ્થિર સંરચના bitmap *active_paths_for(સંરચના last_modified *lm, સંરચના commit *c)
 {
-	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (!*bitmap)
+	સંરચના bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
+	જો (!*bitmap)
 		*bitmap = bitmap_word_alloc(lm->all_paths_nr / BITS_IN_EWORD + 1);
 
-	return *bitmap;
+	પાછા *bitmap;
 }
 
-static void active_paths_free(struct last_modified *lm, struct commit *c)
+સ્થિર શૂન્ય active_paths_free(સંરચના last_modified *lm, સંરચના commit *c)
 {
-	struct bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
-	if (*bitmap) {
+	સંરચના bitmap **bitmap = active_paths_for_commit_at(&lm->active_paths, c);
+	જો (*bitmap) {
 		bitmap_free(*bitmap);
-		*bitmap = NULL;
+		*bitmap = ખાલી;
 	}
 }
 
-static void last_modified_release(struct last_modified *lm)
+સ્થિર શૂન્ય last_modified_release(સંરચના last_modified *lm)
 {
-	struct hashmap_iter iter;
-	struct last_modified_entry *ent;
+	સંરચના hashmap_iter iter;
+	સંરચના last_modified_entry *ent;
 
 	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent)
-		bloom_key_clear(&ent->key);
+		bloom_ચાવી_clear(&ent->ચાવી);
 
-	hashmap_clear_and_free(&lm->paths, struct last_modified_entry, hashent);
+	hashmap_clear_and_free(&lm->paths, સંરચના last_modified_entry, hashent);
 	release_revisions(&lm->rev);
 
-	free(lm->all_paths);
+	મુક્ત(lm->all_paths);
 }
 
-struct last_modified_callback_data {
-	struct last_modified *lm;
-	struct commit *commit;
+સંરચના last_modified_callback_data {
+	સંરચના last_modified *lm;
+	સંરચના commit *commit;
 };
 
-static void add_path_from_diff(struct diff_queue_struct *q,
-			       struct diff_options *opt UNUSED, void *data)
+સ્થિર શૂન્ય add_path_from_diff(સંરચના diff_queue_struct *q,
+			       સંરચના diff_options *opt UNUSED, શૂન્ય *data)
 {
-	struct last_modified *lm = data;
+	સંરચના last_modified *lm = data;
 
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct last_modified_entry *ent;
-		const char *path = p->two->path;
+	માટે (પૂર્ણાંક i = 0; i < q->nr; i++) {
+		સંરચના diff_filepair *p = q->queue[i];
+		સંરચના last_modified_entry *ent;
+		અચલ અક્ષર *path = p->two->path;
 
 		FLEX_ALLOC_STR(ent, path, path);
 		oidcpy(&ent->oid, &p->two->oid);
-		if (lm->rev.bloom_filter_settings)
-			bloom_key_fill(&ent->key, path, strlen(path),
+		જો (lm->rev.bloom_filter_settings)
+			bloom_ચાવી_fill(&ent->ચાવી, path, strlen(path),
 				       lm->rev.bloom_filter_settings);
 		hashmap_entry_init(&ent->hashent, strhash(ent->path));
 		hashmap_add(&lm->paths, &ent->hashent);
 	}
 }
 
-static int populate_paths_from_revs(struct last_modified *lm)
+સ્થિર પૂર્ણાંક populate_paths_from_revs(સંરચના last_modified *lm)
 {
-	int num_interesting = 0, ret = 0;
-	struct diff_options diffopt;
+	પૂર્ણાંક અંક_interesting = 0, ret = 0;
+	સંરચના diff_options diffopt;
 
 	/*
 	 * Create a copy of `struct diff_options`. In this copy a callback is
@@ -134,29 +134,29 @@ static int populate_paths_from_revs(struct last_modified *lm)
 	 * empty tree. This results in all paths in the target revision being
 	 * listed. After `paths` is populated, we don't need this copy no more.
 	 */
-	memcpy(&diffopt, &lm->rev.diffopt, sizeof(diffopt));
+	memcpy(&diffopt, &lm->rev.diffopt, કદ(diffopt));
 	copy_pathspec(&diffopt.pathspec, &lm->rev.diffopt.pathspec);
 	diffopt.output_format = DIFF_FORMAT_CALLBACK;
 	diffopt.format_callback = add_path_from_diff;
 	diffopt.format_callback_data = lm;
 
-	for (size_t i = 0; i < lm->rev.pending.nr; i++) {
-		struct object_array_entry *obj = lm->rev.pending.objects + i;
+	માટે (size_t i = 0; i < lm->rev.pending.nr; i++) {
+		સંરચના object_array_entry *obj = lm->rev.pending.objects + i;
 
-		if (obj->item->flags & UNINTERESTING)
-			continue;
+		જો (obj->item->flags & UNINTERESTING)
+			ચાલુ;
 
-		if (num_interesting++) {
+		જો (અંક_interesting++) {
 			ret = error(_("last-modified can only operate on one commit at a time"));
-			goto out;
+			જાઓ out;
 		}
 
-		if (!repo_peel_to_type(lm->rev.repo, obj->path, 0, obj->item, OBJ_COMMIT)) {
+		જો (!repo_peel_to_type(lm->rev.repo, obj->path, 0, obj->item, OBJ_COMMIT)) {
 			ret = error(_("revision argument '%s' is a %s, not a commit-ish"), obj->name, type_name(obj->item->type));
-			goto out;
+			જાઓ out;
 		}
 
-		diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
+		diff_વૃક્ષ_oid(lm->rev.repo->hash_algo->empty_વૃક્ષ,
 			      &obj->item->oid, "", &diffopt);
 		diff_flush(&diffopt);
 	}
@@ -164,65 +164,65 @@ static int populate_paths_from_revs(struct last_modified *lm)
 out:
 	clear_pathspec(&diffopt.pathspec);
 
-	return ret;
+	પાછા ret;
 }
 
-static void last_modified_emit(struct last_modified *lm,
-			       const char *path, const struct commit *commit)
+સ્થિર શૂન્ય last_modified_emit(સંરચના last_modified *lm,
+			       અચલ અક્ષર *path, અચલ સંરચના commit *commit)
 
 {
-	if (commit->object.flags & BOUNDARY)
+	જો (commit->object.flags & BOUNDARY)
 		putchar('^');
 	printf("%s\t", oid_to_hex(&commit->object.oid));
 
-	if (lm->nul_termination)
+	જો (lm->nul_termination)
 		printf("%s%c", path, '\0');
-	else
+	નહીંતર
 		write_name_quoted(path, stdout, '\n');
 }
 
-static void mark_path(const char *path, const struct object_id *oid,
-		      struct last_modified_callback_data *data)
+સ્થિર શૂન્ય mark_path(અચલ અક્ષર *path, અચલ સંરચના object_id *oid,
+		      સંરચના last_modified_callback_data *data)
 {
-	struct last_modified_entry *ent;
+	સંરચના last_modified_entry *ent;
 
 	/* Is it even a path that we are interested in? */
 	ent = hashmap_get_entry_from_hash(&data->lm->paths, strhash(path), path,
-					  struct last_modified_entry, hashent);
-	if (!ent)
-		return;
+					  સંરચના last_modified_entry, hashent);
+	જો (!ent)
+		પાછા;
 
 	/*
 	 * Is it arriving at a version of interest, or is it from a side branch
 	 * which did not contribute to the final state?
 	 */
-	if (oid && !oideq(oid, &ent->oid))
-		return;
+	જો (oid && !oideq(oid, &ent->oid))
+		પાછા;
 
 	last_modified_emit(data->lm, path, data->commit);
 
 	hashmap_remove(&data->lm->paths, &ent->hashent, path);
-	bloom_key_clear(&ent->key);
-	free(ent);
+	bloom_ચાવી_clear(&ent->ચાવી);
+	મુક્ત(ent);
 }
 
-static void last_modified_diff(struct diff_queue_struct *q,
-			       struct diff_options *opt UNUSED, void *cbdata)
+સ્થિર શૂન્ય last_modified_diff(સંરચના diff_queue_struct *q,
+			       સંરચના diff_options *opt UNUSED, શૂન્ય *cbdata)
 {
-	struct last_modified_callback_data *data = cbdata;
+	સંરચના last_modified_callback_data *data = cbdata;
 
-	for (int i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		switch (p->status) {
-		case DIFF_STATUS_DELETED:
+	માટે (પૂર્ણાંક i = 0; i < q->nr; i++) {
+		સંરચના diff_filepair *p = q->queue[i];
+		પસંદગી (p->status) {
+		સ્થિતિ DIFF_STATUS_DELETED:
 			/*
 			 * There's no point in feeding a deletion, as it could
 			 * not have resulted in our current state, which
 			 * actually has the file.
 			 */
-			break;
+			તોડો;
 
-		default:
+		મૂળભૂત:
 			/*
 			 * Otherwise, we care only that we somehow arrived at
 			 * a final oid state. Note that this covers some
@@ -241,65 +241,65 @@ static void last_modified_diff(struct diff_queue_struct *q,
 			 * renames) can come later.
 			 */
 			mark_path(p->two->path, &p->two->oid, data);
-			break;
+			તોડો;
 		}
 	}
 }
 
-static void pass_to_parent(struct bitmap *c,
-			   struct bitmap *p,
+સ્થિર શૂન્ય pass_to_parent(સંરચના bitmap *c,
+			   સંરચના bitmap *p,
 			   size_t pos)
 {
 	bitmap_unset(c, pos);
 	bitmap_set(p, pos);
 }
 
-static bool maybe_changed_path(struct last_modified *lm,
-			       struct commit *origin,
-			       struct bitmap *active)
+સ્થિર bool maybe_changed_path(સંરચના last_modified *lm,
+			       સંરચના commit *origin,
+			       સંરચના bitmap *active)
 {
-	struct bloom_filter *filter;
-	struct last_modified_entry *ent;
-	struct hashmap_iter iter;
+	સંરચના bloom_filter *filter;
+	સંરચના last_modified_entry *ent;
+	સંરચના hashmap_iter iter;
 
-	if (!lm->rev.bloom_filter_settings)
-		return true;
+	જો (!lm->rev.bloom_filter_settings)
+		પાછા true;
 
-	if (commit_graph_generation(origin) == GENERATION_NUMBER_INFINITY)
-		return true;
+	જો (commit_graph_generation(origin) == GENERATION_સંખ્યા_INFINITY)
+		પાછા true;
 
 	filter = get_bloom_filter(lm->rev.repo, origin);
-	if (!filter)
-		return true;
+	જો (!filter)
+		પાછા true;
 
 	hashmap_for_each_entry(&lm->paths, &iter, ent, hashent) {
-		if (active && !bitmap_get(active, ent->diff_idx))
-			continue;
+		જો (active && !bitmap_get(active, ent->diff_idx))
+			ચાલુ;
 
-		if (bloom_filter_contains(filter, &ent->key,
+		જો (bloom_filter_contains(filter, &ent->ચાવી,
 					  lm->rev.bloom_filter_settings))
-			return true;
+			પાછા true;
 	}
-	return false;
+	પાછા false;
 }
 
-static void process_parent(struct last_modified *lm,
-			   struct prio_queue *queue,
-			   struct commit *c, struct bitmap *active_c,
-			   struct commit *parent, int parent_i)
+સ્થિર શૂન્ય process_parent(સંરચના last_modified *lm,
+			   સંરચના prio_queue *queue,
+			   સંરચના commit *c, સંરચના bitmap *active_c,
+			   સંરચના commit *parent, પૂર્ણાંક parent_i)
 {
-	struct bitmap *active_p;
+	સંરચના bitmap *active_p;
 
-	if (repo_parse_commit(lm->rev.repo, parent))
-		return;
+	જો (repo_parse_commit(lm->rev.repo, parent))
+		પાછા;
 	active_p = active_paths_for(lm, parent);
 
 	/*
 	 * The first time entering this function for this commit (i.e. first parent)
 	 * see if Bloom filters will tell us it's worth to do the diff.
 	 */
-	if (parent_i || maybe_changed_path(lm, c, active_c)) {
-		diff_tree_oid(&parent->object.oid,
+	જો (parent_i || maybe_changed_path(lm, c, active_c)) {
+		diff_વૃક્ષ_oid(&parent->object.oid,
 			      &c->object.oid, "", &lm->rev.diffopt);
 		diffcore_std(&lm->rev.diffopt);
 	}
@@ -311,45 +311,45 @@ static void process_parent(struct last_modified *lm,
 	 * First, collect all paths that are *not* TREESAME in 'scratch'.
 	 * Then, pass paths that *are* TREESAME and active to the parent.
 	 */
-	for (int i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *fp = diff_queued_diff.queue[i];
-		const char *path = fp->two->path;
-		struct last_modified_entry *ent =
+	માટે (પૂર્ણાંક i = 0; i < diff_queued_diff.nr; i++) {
+		સંરચના diff_filepair *fp = diff_queued_diff.queue[i];
+		અચલ અક્ષર *path = fp->two->path;
+		સંરચના last_modified_entry *ent =
 			hashmap_get_entry_from_hash(&lm->paths, strhash(path), path,
-						    struct last_modified_entry, hashent);
-		if (ent) {
+						    સંરચના last_modified_entry, hashent);
+		જો (ent) {
 			size_t k = ent->diff_idx;
-			if (bitmap_get(active_c, k))
+			જો (bitmap_get(active_c, k))
 				bitmap_set(lm->scratch, k);
 		}
 	}
-	for (size_t i = 0; i < lm->all_paths_nr; i++) {
-		if (bitmap_get(active_c, i) && !bitmap_get(lm->scratch, i))
+	માટે (size_t i = 0; i < lm->all_paths_nr; i++) {
+		જો (bitmap_get(active_c, i) && !bitmap_get(lm->scratch, i))
 			pass_to_parent(active_c, active_p, i);
 	}
 
 	/*
 	 * If parent has any active paths, put it on the queue (if not already).
 	 */
-	if (!bitmap_is_empty(active_p) && !(parent->object.flags & PARENT1)) {
+	જો (!bitmap_is_empty(active_p) && !(parent->object.flags & PARENT1)) {
 		parent->object.flags |= PARENT1;
 		prio_queue_put(queue, parent);
 	}
-	if (!(parent->object.flags & PARENT1))
+	જો (!(parent->object.flags & PARENT1))
 		active_paths_free(lm, parent);
 
-	MEMZERO_ARRAY(lm->scratch->words, lm->scratch->word_alloc);
+	MEMZERO_ARRAY(lm->scratch->શબ્દો, lm->scratch->word_alloc);
 	diff_queue_clear(&diff_queued_diff);
 }
 
-static int last_modified_run(struct last_modified *lm)
+સ્થિર પૂર્ણાંક last_modified_run(સંરચના last_modified *lm)
 {
-	int max_count, queue_popped = 0;
-	struct commit *c, *n;
-	struct prio_queue queue = { compare_commits_by_gen_then_commit_date };
-	struct prio_queue not_queue = { compare_commits_by_gen_then_commit_date };
-	struct commit_list *list;
-	struct last_modified_callback_data data = { .lm = lm };
+	પૂર્ણાંક max_ગણતરી, queue_popped = 0;
+	સંરચના commit *c, *n;
+	સંરચના prio_queue queue = { compare_commits_by_gen_then_commit_date };
+	સંરચના prio_queue not_queue = { compare_commits_by_gen_then_commit_date };
+	સંરચના commit_list *list;
+	સંરચના last_modified_callback_data data = { .lm = lm };
 
 	lm->rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
 	lm->rev.diffopt.format_callback = last_modified_diff;
@@ -358,7 +358,7 @@ static int last_modified_run(struct last_modified *lm)
 
 	prepare_revision_walk(&lm->rev);
 
-	max_count = lm->rev.max_count;
+	max_ગણતરી = lm->rev.max_ગણતરી;
 
 	init_active_paths_for_commit(&lm->active_paths);
 	lm->scratch = bitmap_word_alloc(lm->all_paths_nr);
@@ -368,35 +368,35 @@ static int last_modified_run(struct last_modified *lm)
 	 *
 	 * Loop through each such commit, and place it in the appropriate queue.
 	 */
-	for (list = lm->rev.commits; list; list = list->next) {
-		struct commit *c = list->item;
+	માટે (list = lm->rev.commits; list; list = list->next) {
+		સંરચના commit *c = list->item;
 
-		if (c->object.flags & BOTTOM) {
+		જો (c->object.flags & BOTTOM) {
 			prio_queue_put(&not_queue, c);
 			c->object.flags |= PARENT2;
-		} else if (!(c->object.flags & PARENT1)) {
+		} નહીંતર જો (!(c->object.flags & PARENT1)) {
 			/*
 			 * If the commit is a starting point (and hasn't been
 			 * seen yet), then initialize the set of interesting
 			 * paths, too.
 			 */
-			struct bitmap *active;
+			સંરચના bitmap *active;
 
 			prio_queue_put(&queue, c);
 			c->object.flags |= PARENT1;
 
 			active = active_paths_for(lm, c);
-			for (size_t i = 0; i < lm->all_paths_nr; i++)
+			માટે (size_t i = 0; i < lm->all_paths_nr; i++)
 				bitmap_set(active, i);
 		}
 	}
 
-	while ((c = prio_queue_get(&queue))) {
-		int parent_i;
-		struct commit_list *p;
-		struct bitmap *active_c = active_paths_for(lm, c);
+	જ્યારે ((c = prio_queue_get(&queue))) {
+		પૂર્ણાંક parent_i;
+		સંરચના commit_list *p;
+		સંરચના bitmap *active_c = active_paths_for(lm, c);
 
-		if ((0 <= max_count && max_count < ++queue_popped) ||
+		જો ((0 <= max_ગણતરી && max_ગણતરી < ++queue_popped) ||
 		    (c->object.flags & PARENT2)) {
 			/*
 			 * Either a boundary commit, or we have already seen too
@@ -404,59 +404,59 @@ static int last_modified_run(struct last_modified *lm)
 			 */
 			c->object.flags |= PARENT2 | BOUNDARY;
 			data.commit = c;
-			diff_tree_oid(lm->rev.repo->hash_algo->empty_tree,
+			diff_વૃક્ષ_oid(lm->rev.repo->hash_algo->empty_વૃક્ષ,
 				      &c->object.oid,
 				      "", &lm->rev.diffopt);
 			diff_flush(&lm->rev.diffopt);
-			goto cleanup;
+			જાઓ cleanup;
 		}
 
 		/*
 		 * Otherwise, make sure that 'c' isn't reachable from anything
 		 * in the '--not' queue.
 		 */
-		if (repo_parse_commit(lm->rev.repo, c))
-			goto cleanup;
+		જો (repo_parse_commit(lm->rev.repo, c))
+			જાઓ cleanup;
 
-		while ((n = prio_queue_get(&not_queue))) {
-			struct commit_list *np;
+		જ્યારે ((n = prio_queue_get(&not_queue))) {
+			સંરચના commit_list *np;
 
-			if (repo_parse_commit(lm->rev.repo, n))
-				continue;
+			જો (repo_parse_commit(lm->rev.repo, n))
+				ચાલુ;
 
-			for (np = n->parents; np; np = np->next) {
-				if (!(np->item->object.flags & PARENT2)) {
+			માટે (np = n->parents; np; np = np->next) {
+				જો (!(np->item->object.flags & PARENT2)) {
 					prio_queue_put(&not_queue, np->item);
 					np->item->object.flags |= PARENT2;
 				}
 			}
 
-			if (commit_graph_generation(n) < commit_graph_generation(c))
-				break;
+			જો (commit_graph_generation(n) < commit_graph_generation(c))
+				તોડો;
 		}
 
 		/*
 		 * Look at each parent and pass on each path that's TREESAME
 		 * with that parent. Stop early when no active paths remain.
 		 */
-		for (p = c->parents, parent_i = 0; p; p = p->next, parent_i++) {
+		માટે (p = c->parents, parent_i = 0; p; p = p->next, parent_i++) {
 			process_parent(lm, &queue,
 				       c, active_c,
 				       p->item, parent_i);
 
-			if (bitmap_is_empty(active_c))
-				break;
+			જો (bitmap_is_empty(active_c))
+				તોડો;
 		}
 
 		/*
 		 * Paths that remain active, or not TREESAME with any parent,
 		 * were changed by 'c'.
 		 */
-		if (!bitmap_is_empty(active_c))  {
+		જો (!bitmap_is_empty(active_c))  {
 			data.commit = c;
-			for (size_t i = 0; i < lm->all_paths_nr; i++) {
-				if (bitmap_get(active_c, i))
-					mark_path(lm->all_paths[i], NULL, &data);
+			માટે (size_t i = 0; i < lm->all_paths_nr; i++) {
+				જો (bitmap_get(active_c, i))
+					mark_path(lm->all_paths[i], ખાલી, &data);
 			}
 		}
 
@@ -464,7 +464,7 @@ cleanup:
 		active_paths_free(lm, c);
 	}
 
-	if (hashmap_get_size(&lm->paths))
+	જો (hashmap_get_size(&lm->paths))
 		BUG("paths remaining beyond boundary in last-modified");
 
 	clear_prio_queue(&not_queue);
@@ -472,40 +472,40 @@ cleanup:
 	clear_active_paths_for_commit(&lm->active_paths);
 	bitmap_free(lm->scratch);
 
-	return 0;
+	પાછા 0;
 }
 
-static int last_modified_init(struct last_modified *lm, struct repository *r,
-			      const char *prefix, int argc, const char **argv)
+સ્થિર પૂર્ણાંક last_modified_init(સંરચના last_modified *lm, સંરચના repository *r,
+			      અચલ અક્ષર *prefix, પૂર્ણાંક argc, અચલ અક્ષર **argv)
 {
-	struct hashmap_iter iter;
-	struct last_modified_entry *ent;
+	સંરચના hashmap_iter iter;
+	સંરચના last_modified_entry *ent;
 
-	hashmap_init(&lm->paths, last_modified_entry_hashcmp, NULL, 0);
+	hashmap_init(&lm->paths, last_modified_entry_hashcmp, ખાલી, 0);
 
 	repo_init_revisions(r, &lm->rev, prefix);
 	lm->rev.def = "HEAD";
 	lm->rev.combine_merges = 1;
-	lm->rev.show_root_diff = 1;
+	lm->rev.show_મૂળ_diff = 1;
 	lm->rev.boundary = 1;
 	lm->rev.no_commit_id = 1;
 	lm->rev.diff = 1;
-	lm->rev.diffopt.flags.no_recursive_diff_tree_combined = 1;
+	lm->rev.diffopt.flags.no_recursive_diff_વૃક્ષ_combined = 1;
 	lm->rev.diffopt.flags.recursive = 1;
-	lm->rev.diffopt.flags.tree_in_recursive = lm->show_trees;
+	lm->rev.diffopt.flags.વૃક્ષ_in_recursive = lm->show_trees;
 	lm->rev.diffopt.max_depth = lm->max_depth;
 	lm->rev.diffopt.max_depth_valid = lm->max_depth >= 0;
 
-	argc = setup_revisions(argc, argv, &lm->rev, NULL);
-	if (argc > 1) {
+	argc = setup_revisions(argc, argv, &lm->rev, ખાલી);
+	જો (argc > 1) {
 		error(_("unknown last-modified argument: %s"), argv[1]);
-		return argc;
+		પાછા argc;
 	}
 
 	lm->rev.bloom_filter_settings = get_bloom_filter_settings(lm->rev.repo);
 
-	if (populate_paths_from_revs(lm) < 0)
-		return -1;
+	જો (populate_paths_from_revs(lm) < 0)
+		પાછા -1;
 
 	CALLOC_ARRAY(lm->all_paths, hashmap_get_size(&lm->paths));
 	lm->all_paths_nr = 0;
@@ -514,29 +514,29 @@ static int last_modified_init(struct last_modified *lm, struct repository *r,
 		lm->all_paths[ent->diff_idx] = ent->path;
 	}
 
-	return 0;
+	પાછા 0;
 }
 
-int cmd_last_modified(int argc, const char **argv, const char *prefix,
-		      struct repository *repo)
+પૂર્ણાંક cmd_last_modified(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+		      સંરચના repository *repo)
 {
-	int ret;
-	struct last_modified lm = { 0 };
+	પૂર્ણાંક ret;
+	સંરચના last_modified lm = { 0 };
 
-	const char * const last_modified_usage[] = {
+	અચલ અક્ષર * અચલ last_modified_usage[] = {
 		N_("git last-modified [--recursive] [--show-trees] [--max-depth=<depth>] [-z]\n"
 		   "                  [<revision-range>] [[--] <pathspec>...]"),
-		NULL
+		ખાલી
 	};
 
-	struct option last_modified_options[] = {
+	સંરચના option last_modified_options[] = {
 		OPT_SET_INT('r', "recursive", &lm.max_depth,
 			    N_("recurse into subtrees"), -1),
 		OPT_BOOL('t', "show-trees", &lm.show_trees,
 			 N_("show tree entries when recursing into subtrees")),
 		OPT_INTEGER_F(0, "max-depth", &lm.max_depth,
 			      N_("maximum tree depth to recurse"), PARSE_OPT_NONEG),
-		OPT_BOOL('z', NULL, &lm.nul_termination,
+		OPT_BOOL('z', ખાલી, &lm.nul_termination,
 			 N_("lines are separated with NUL character")),
 		OPT_END()
 	};
@@ -546,21 +546,21 @@ int cmd_last_modified(int argc, const char **argv, const char *prefix,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ખાલી);
 
 	ret = last_modified_init(&lm, repo, prefix, argc, argv);
-	if (ret > 0)
+	જો (ret > 0)
 		usage_with_options(last_modified_usage,
 				   last_modified_options);
-	if (ret)
-		goto out;
+	જો (ret)
+		જાઓ out;
 
 	ret = last_modified_run(&lm);
-	if (ret)
-		goto out;
+	જો (ret)
+		જાઓ out;
 
 out:
 	last_modified_release(&lm);
 
-	return ret;
+	પાછા ret;
 }

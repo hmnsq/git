@@ -1,51 +1,51 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "object-file.h"
+#અન્તર્ભાવ "object-name.h"
+#અન્તર્ભાવ "odb.h"
 
-static char *create_temp_file(struct object_id *oid)
+સ્થિર અક્ષર *create_temp_file(સંરચના object_id *oid)
 {
-	static char path[50];
-	void *buf;
-	enum object_type type;
+	સ્થિર અક્ષર path[50];
+	શૂન્ય *buf;
+	ગણના object_type type;
 	size_t size;
-	int fd;
+	પૂર્ણાંક fd;
 
 	buf = odb_read_object(the_repository->objects, oid, &type, &size);
-	if (!buf || type != OBJ_BLOB)
+	જો (!buf || type != OBJ_BLOB)
 		die("unable to read blob object %s", oid_to_hex(oid));
 
-	xsnprintf(path, sizeof(path), ".merge_file_XXXXXX");
+	xsnprintf(path, કદ(path), ".merge_file_XXXXXX");
 	fd = xmkstemp(path);
-	if (write_in_full(fd, buf, size) < 0)
+	જો (write_in_full(fd, buf, size) < 0)
 		die_errno("unable to write temp-file");
 	close(fd);
-	free(buf);
-	return path;
+	મુક્ત(buf);
+	પાછા path;
 }
 
-static const char usage_msg[] =
+સ્થિર અચલ અક્ષર usage_સંદેશ[] =
 "git unpack-file <blob>";
 
-int cmd_unpack_file(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+પૂર્ણાંક cmd_unpack_file(પૂર્ણાંક argc,
+		    અચલ અક્ષર **argv,
+		    અચલ અક્ષર *prefix UNUSED,
+		    સંરચના repository *repo UNUSED)
 {
-	struct object_id oid;
+	સંરચના object_id oid;
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 2)
-		usage(usage_msg);
-	if (repo_get_oid(the_repository, argv[1], &oid))
+	show_usage_if_asked(argc, argv, usage_સંદેશ);
+	જો (argc != 2)
+		usage(usage_સંદેશ);
+	જો (repo_get_oid(the_repository, argv[1], &oid))
 		die("Not a valid object name %s", argv[1]);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ખાલી);
 
 	puts(create_temp_file(&oid));
-	return 0;
+	પાછા 0;
 }

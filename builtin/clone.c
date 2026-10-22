@@ -11,42 +11,42 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#અન્તર્ભાવ "builtin.h"
 
-#include "abspath.h"
-#include "advice.h"
-#include "config.h"
-#include "copy.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "unpack-trees.h"
-#include "transport.h"
-#include "strbuf.h"
-#include "dir.h"
-#include "dir-iterator.h"
-#include "iterator.h"
-#include "sigchain.h"
-#include "branch.h"
-#include "remote.h"
-#include "run-command.h"
-#include "setup.h"
-#include "connected.h"
-#include "packfile.h"
-#include "path.h"
-#include "pkt-line.h"
-#include "list-objects-filter-options.h"
-#include "hook.h"
-#include "bundle.h"
-#include "bundle-uri.h"
+#અન્તર્ભાવ "abspath.h"
+#અન્તર્ભાવ "advice.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "copy.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "lockfile.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "refs.h"
+#અન્તર્ભાવ "refspec.h"
+#અન્તર્ભાવ "object-file.h"
+#અન્તર્ભાવ "odb.h"
+#અન્તર્ભાવ "tree.h"
+#અન્તર્ભાવ "tree-walk.h"
+#અન્તર્ભાવ "unpack-trees.h"
+#અન્તર્ભાવ "transport.h"
+#અન્તર્ભાવ "strbuf.h"
+#અન્તર્ભાવ "dir.h"
+#અન્તર્ભાવ "dir-iterator.h"
+#અન્તર્ભાવ "iterator.h"
+#અન્તર્ભાવ "sigchain.h"
+#અન્તર્ભાવ "branch.h"
+#અન્તર્ભાવ "remote.h"
+#અન્તર્ભાવ "run-command.h"
+#અન્તર્ભાવ "setup.h"
+#અન્તર્ભાવ "connected.h"
+#અન્તર્ભાવ "packfile.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "pkt-line.h"
+#અન્તર્ભાવ "list-objects-filter-options.h"
+#અન્તર્ભાવ "hook.h"
+#અન્તર્ભાવ "bundle.h"
+#અન્તર્ભાવ "bundle-uri.h"
 
 /*
  * Overall FIXMEs:
@@ -57,131 +57,131 @@
  *
  */
 
-struct clone_opts {
-	int wants_head;
-	int detach;
+સંરચના clone_opts {
+	પૂર્ણાંક wants_head;
+	પૂર્ણાંક detach;
 };
 #define CLONE_OPTS_INIT { \
 	.wants_head = 1 /* default enabled */ \
 }
 
-static int option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
-static int option_local = -1, option_no_hardlinks, option_shared;
-static int option_tags = 1; /* default enabled */
-static int option_shallow_submodules;
-static int config_reject_shallow = -1;    /* unspecified */
-static char *remote_name = NULL;
-static char *option_branch = NULL;
-static int option_verbosity;
-static struct string_list option_required_reference = STRING_LIST_INIT_NODUP;
-static struct string_list option_optional_reference = STRING_LIST_INIT_NODUP;
-static int max_jobs = -1;
-static struct string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
-static int config_filter_submodules = -1;    /* unspecified */
-static int option_remote_submodules;
+સ્થિર પૂર્ણાંક option_no_checkout, option_bare, option_mirror, option_single_branch = -1;
+સ્થિર પૂર્ણાંક option_local = -1, option_no_hardlinks, option_shared;
+સ્થિર પૂર્ણાંક option_tags = 1; /* default enabled */
+સ્થિર પૂર્ણાંક option_shallow_submodules;
+સ્થિર પૂર્ણાંક config_reject_shallow = -1;    /* unspecified */
+સ્થિર અક્ષર *remote_name = ખાલી;
+સ્થિર અક્ષર *option_branch = ખાલી;
+સ્થિર પૂર્ણાંક option_verbosity;
+સ્થિર સંરચના string_list option_required_reference = STRING_LIST_INIT_NODUP;
+સ્થિર સંરચના string_list option_optional_reference = STRING_LIST_INIT_NODUP;
+સ્થિર પૂર્ણાંક max_jobs = -1;
+સ્થિર સંરચના string_list option_recurse_submodules = STRING_LIST_INIT_NODUP;
+સ્થિર પૂર્ણાંક config_filter_submodules = -1;    /* unspecified */
+સ્થિર પૂર્ણાંક option_remote_submodules;
 
-static int recurse_submodules_cb(const struct option *opt,
-				 const char *arg, int unset)
+સ્થિર પૂર્ણાંક recurse_submodules_cb(અચલ સંરચના option *opt,
+				 અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	if (unset)
-		string_list_clear((struct string_list *)opt->value, 0);
-	else if (arg)
-		string_list_append((struct string_list *)opt->value, arg);
-	else
-		string_list_append((struct string_list *)opt->value,
-				   (const char *)opt->defval);
+	જો (unset)
+		string_list_clear((સંરચના string_list *)opt->કિંમત, 0);
+	નહીંતર જો (arg)
+		string_list_append((સંરચના string_list *)opt->કિંમત, arg);
+	નહીંતર
+		string_list_append((સંરચના string_list *)opt->કિંમત,
+				   (અચલ અક્ષર *)opt->defval);
 
-	return 0;
+	પાછા 0;
 }
 
-static const char *get_repo_path_1(struct strbuf *path, int *is_bundle)
+સ્થિર અચલ અક્ષર *get_repo_path_1(સંરચના strbuf *path, પૂર્ણાંક *is_bundle)
 {
-	static const char *suffix[] = { "/.git", "", ".git/.git", ".git" };
-	static const char *bundle_suffix[] = { ".bundle", "" };
+	સ્થિર અચલ અક્ષર *suffix[] = { "/.git", "", ".git/.git", ".git" };
+	સ્થિર અચલ અક્ષર *bundle_suffix[] = { ".bundle", "" };
 	size_t baselen = path->len;
-	struct stat st;
-	int i;
+	સંરચના stat st;
+	પૂર્ણાંક i;
 
-	for (i = 0; i < ARRAY_SIZE(suffix); i++) {
+	માટે (i = 0; i < ARRAY_SIZE(suffix); i++) {
 		strbuf_setlen(path, baselen);
 		strbuf_addstr(path, suffix[i]);
-		if (stat(path->buf, &st))
-			continue;
-		if (S_ISDIR(st.st_mode) && is_git_directory(path->buf)) {
+		જો (stat(path->buf, &st))
+			ચાલુ;
+		જો (S_ISDIR(st.st_mode) && is_git_directory(path->buf)) {
 			*is_bundle = 0;
-			return path->buf;
-		} else if (S_ISREG(st.st_mode) && st.st_size > 8) {
+			પાછા path->buf;
+		} નહીંતર જો (S_ISREG(st.st_mode) && st.st_size > 8) {
 			/* Is it a "gitfile"? */
-			char signature[8];
-			const char *dst;
-			int len, fd = open(path->buf, O_RDONLY);
-			if (fd < 0)
-				continue;
+			અક્ષર signature[8];
+			અચલ અક્ષર *dst;
+			પૂર્ણાંક len, fd = open(path->buf, O_RDONLY);
+			જો (fd < 0)
+				ચાલુ;
 			len = read_in_full(fd, signature, 8);
 			close(fd);
-			if (len != 8 || strncmp(signature, "gitdir: ", 8))
-				continue;
+			જો (len != 8 || strncmp(signature, "gitdir: ", 8))
+				ચાલુ;
 			dst = read_gitfile(path->buf);
-			if (dst) {
+			જો (dst) {
 				*is_bundle = 0;
-				return dst;
+				પાછા dst;
 			}
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bundle_suffix); i++) {
+	માટે (i = 0; i < ARRAY_SIZE(bundle_suffix); i++) {
 		strbuf_setlen(path, baselen);
 		strbuf_addstr(path, bundle_suffix[i]);
-		if (!stat(path->buf, &st) && S_ISREG(st.st_mode)) {
+		જો (!stat(path->buf, &st) && S_ISREG(st.st_mode)) {
 			*is_bundle = 1;
-			return path->buf;
+			પાછા path->buf;
 		}
 	}
 
-	return NULL;
+	પાછા ખાલી;
 }
 
-static char *get_repo_path(const char *repo, int *is_bundle)
+સ્થિર અક્ષર *get_repo_path(અચલ અક્ષર *repo, પૂર્ણાંક *is_bundle)
 {
-	struct strbuf path = STRBUF_INIT;
-	const char *raw;
-	char *canon;
+	સંરચના strbuf path = STRBUF_INIT;
+	અચલ અક્ષર *raw;
+	અક્ષર *canon;
 
 	strbuf_addstr(&path, repo);
 	raw = get_repo_path_1(&path, is_bundle);
-	canon = raw ? absolute_pathdup(raw) : NULL;
+	canon = raw ? absolute_pathdup(raw) : ખાલી;
 	strbuf_release(&path);
-	return canon;
+	પાછા canon;
 }
 
-struct collect_alternates_data {
-	struct strvec *alternates;
+સંરચના collect_alternates_data {
+	સંરચના strvec *alternates;
 	bool required;
 };
 
-static int collect_one_alternate(struct string_list_item *item, void *cb_data)
+સ્થિર પૂર્ણાંક collect_one_alternate(સંરચના string_list_item *item, શૂન્ય *cb_data)
 {
-	struct collect_alternates_data *data = cb_data;
-	struct strbuf err = STRBUF_INIT;
-	char *ref_git = compute_alternate_path(item->string, &err);
+	સંરચના collect_alternates_data *data = cb_data;
+	સંરચના strbuf err = STRBUF_INIT;
+	અક્ષર *ref_git = compute_alternate_path(item->string, &err);
 
-	if (!ref_git) {
-		if (data->required)
+	જો (!ref_git) {
+		જો (data->required)
 			die("%s", err.buf);
-		else
+		નહીંતર
 			fprintf(stderr,
 				_("info: Could not add alternate for '%s': %s\n"),
 				item->string, err.buf);
-	} else {
+	} નહીંતર {
 		strvec_pushf(data->alternates, "%s/objects", ref_git);
 	}
 
 	strbuf_release(&err);
-	free(ref_git);
-	return 0;
+	મુક્ત(ref_git);
+	પાછા 0;
 }
 
-static void read_alternates(struct strvec *alternates, const char *src_repo)
+સ્થિર શૂન્ય read_alternates(સંરચના strvec *alternates, અચલ અક્ષર *src_repo)
 {
 	/*
 	 * Read from the source objects/info/alternates file
@@ -196,47 +196,47 @@ static void read_alternates(struct strvec *alternates, const char *src_repo)
 	 * absolute, so that they can be used in the new repository.
 	 */
 	FILE *in;
-	struct strbuf path = STRBUF_INIT;
-	struct strbuf line = STRBUF_INIT;
+	સંરચના strbuf path = STRBUF_INIT;
+	સંરચના strbuf લીટી = STRBUF_INIT;
 
 	strbuf_addf(&path, "%s/objects/info/alternates", src_repo);
 
 	in = fopen(path.buf, "r");
-	if (!in) {
-		if (errno == ENOENT)
-			goto out;
+	જો (!in) {
+		જો (errno == ENOENT)
+			જાઓ out;
 		die_errno("could not read alternates file '%s'", path.buf);
 	}
 
-	while (strbuf_getline(&line, in) != EOF) {
-		char *abs_path;
-		if (!line.len || line.buf[0] == '#')
-			continue;
-		if (is_absolute_path(line.buf)) {
-			strvec_push(alternates, line.buf);
-			continue;
+	જ્યારે (strbuf_getline(&લીટી, in) != EOF) {
+		અક્ષર *abs_path;
+		જો (!લીટી.len || લીટી.buf[0] == '#')
+			ચાલુ;
+		જો (is_absolute_path(લીટી.buf)) {
+			strvec_ધકેલો(alternates, લીટી.buf);
+			ચાલુ;
 		}
-		abs_path = mkpathdup("%s/objects/%s", src_repo, line.buf);
-		if (!normalize_path_copy(abs_path, abs_path))
-			strvec_push(alternates, abs_path);
-		else
+		abs_path = mkpathdup("%s/objects/%s", src_repo, લીટી.buf);
+		જો (!normalize_path_copy(abs_path, abs_path))
+			strvec_ધકેલો(alternates, abs_path);
+		નહીંતર
 			warning("skipping invalid relative alternate: %s/%s",
-				src_repo, line.buf);
-		free(abs_path);
+				src_repo, લીટી.buf);
+		મુક્ત(abs_path);
 	}
 
 out:
 	strbuf_release(&path);
-	strbuf_release(&line);
-	if (in)
+	strbuf_release(&લીટી);
+	જો (in)
 		fclose(in);
 }
 
-static void collect_alternates(struct strvec *alternates,
-			       const char *local_source_repo)
+સ્થિર શૂન્ય collect_alternates(સંરચના strvec *alternates,
+			       અચલ અક્ષર *local_source_repo)
 {
-	if (option_required_reference.nr || option_optional_reference.nr) {
-		struct collect_alternates_data data = {
+	જો (option_required_reference.nr || option_optional_reference.nr) {
+		સંરચના collect_alternates_data data = {
 			.alternates = alternates,
 			.required = true,
 		};
@@ -248,40 +248,40 @@ static void collect_alternates(struct strvec *alternates,
 				     collect_one_alternate, &data);
 	}
 
-	if (local_source_repo) {
-		struct strbuf commondir = STRBUF_INIT;
+	જો (local_source_repo) {
+		સંરચના strbuf commondir = STRBUF_INIT;
 
 		get_common_dir(&commondir, local_source_repo);
-		if (option_shared)
+		જો (option_shared)
 			strvec_pushf(alternates, "%s/objects", commondir.buf);
-		else
+		નહીંતર
 			read_alternates(alternates, commondir.buf);
 
 		strbuf_release(&commondir);
 	}
 }
 
-static void mkdir_if_missing(const char *pathname, mode_t mode)
+સ્થિર શૂન્ય mkdir_if_missing(અચલ અક્ષર *pathname, mode_t mode)
 {
-	struct stat st;
+	સંરચના stat st;
 
-	if (!mkdir(pathname, mode))
-		return;
+	જો (!mkdir(pathname, mode))
+		પાછા;
 
-	if (errno != EEXIST)
+	જો (errno != EEXIST)
 		die_errno(_("failed to create directory '%s'"), pathname);
-	else if (stat(pathname, &st))
+	નહીંતર જો (stat(pathname, &st))
 		die_errno(_("failed to stat '%s'"), pathname);
-	else if (!S_ISDIR(st.st_mode))
+	નહીંતર જો (!S_ISDIR(st.st_mode))
 		die(_("%s exists and is not a directory"), pathname);
 }
 
-static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
-				   const char *src_repo)
+સ્થિર શૂન્ય copy_or_link_directory(સંરચના strbuf *src, સંરચના strbuf *dest,
+				   અચલ અક્ષર *src_repo)
 {
-	int src_len, dest_len;
-	struct dir_iterator *iter;
-	int iter_status;
+	પૂર્ણાંક src_len, dest_len;
+	સંરચના dir_iterator *iter;
+	પૂર્ણાંક iter_status;
 
 	/*
 	 * Refuse copying directories by default which aren't owned by us. The
@@ -295,18 +295,18 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	 * operation as the hardlinked files can be rewritten at will by the
 	 * potentially-untrusted user. We thus refuse to do so by default.
 	 */
-	die_upon_dubious_ownership(NULL, NULL, src_repo);
+	die_upon_dubious_ownership(ખાલી, ખાલી, src_repo);
 
 	mkdir_if_missing(dest->buf, 0777);
 
 	iter = dir_iterator_begin(src->buf, DIR_ITERATOR_PEDANTIC);
 
-	if (!iter) {
-		if (errno == ENOTDIR) {
-			int saved_errno = errno;
-			struct stat st;
+	જો (!iter) {
+		જો (errno == ENOTDIR) {
+			પૂર્ણાંક saved_errno = errno;
+			સંરચના stat st;
 
-			if (!lstat(src->buf, &st) && S_ISLNK(st.st_mode))
+			જો (!lstat(src->buf, &st) && S_ISLNK(st.st_mode))
 				die(_("'%s' is a symlink, refusing to clone with --local"),
 				    src->buf);
 			errno = saved_errno;
@@ -319,30 +319,30 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	strbuf_addch(dest, '/');
 	dest_len = dest->len;
 
-	while ((iter_status = dir_iterator_advance(iter)) == ITER_OK) {
+	જ્યારે ((iter_status = dir_iterator_advance(iter)) == ITER_OK) {
 		strbuf_setlen(src, src_len);
 		strbuf_addstr(src, iter->relative_path);
 		strbuf_setlen(dest, dest_len);
 		strbuf_addstr(dest, iter->relative_path);
 
-		if (S_ISLNK(iter->st.st_mode))
+		જો (S_ISLNK(iter->st.st_mode))
 			die(_("symlink '%s' exists, refusing to clone with --local"),
 			    iter->relative_path);
 
-		if (S_ISDIR(iter->st.st_mode)) {
+		જો (S_ISDIR(iter->st.st_mode)) {
 			mkdir_if_missing(dest->buf, 0777);
-			continue;
+			ચાલુ;
 		}
 
 		/* Alternates were already handled earlier. */
-		if (!fspathcmp(iter->relative_path, "info/alternates"))
-			continue;
+		જો (!fspathcmp(iter->relative_path, "info/alternates"))
+			ચાલુ;
 
-		if (unlink(dest->buf) && errno != ENOENT)
+		જો (unlink(dest->buf) && errno != ENOENT)
 			die_errno(_("failed to unlink '%s'"), dest->buf);
-		if (!option_no_hardlinks) {
-			if (!link(src->buf, dest->buf)) {
-				struct stat st;
+		જો (!option_no_hardlinks) {
+			જો (!link(src->buf, dest->buf)) {
+				સંરચના stat st;
 
 				/*
 				 * Sanity-check whether the created hardlink
@@ -350,9 +350,9 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 				 * catches time-of-check-time-of-use bugs in
 				 * case the source file was meanwhile swapped.
 				 */
-				if (lstat(dest->buf, &st))
+				જો (lstat(dest->buf, &st))
 					die(_("hardlink cannot be checked at '%s'"), dest->buf);
-				if (st.st_mode != iter->st.st_mode ||
+				જો (st.st_mode != iter->st.st_mode ||
 				    st.st_ino != iter->st.st_ino ||
 				    st.st_dev != iter->st.st_dev ||
 				    st.st_size != iter->st.st_size ||
@@ -360,17 +360,17 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 				    st.st_gid != iter->st.st_gid)
 					die(_("hardlink different from source at '%s'"), dest->buf);
 
-				continue;
+				ચાલુ;
 			}
-			if (option_local > 0)
+			જો (option_local > 0)
 				die_errno(_("failed to create link '%s'"), dest->buf);
 			option_no_hardlinks = 1;
 		}
-		if (copy_file_with_time(the_repository, dest->buf, src->buf, 0666))
+		જો (copy_file_with_time(the_repository, dest->buf, src->buf, 0666))
 			die_errno(_("failed to copy file to '%s'"), dest->buf);
 	}
 
-	if (iter_status != ITER_DONE) {
+	જો (iter_status != ITER_DONE) {
 		strbuf_setlen(src, src_len);
 		die(_("failed to iterate over '%s'"), src->buf);
 	}
@@ -378,11 +378,11 @@ static void copy_or_link_directory(struct strbuf *src, struct strbuf *dest,
 	dir_iterator_free(iter);
 }
 
-static void clone_local(const char *src_repo, const char *dest_repo)
+સ્થિર શૂન્ય clone_local(અચલ અક્ષર *src_repo, અચલ અક્ષર *dest_repo)
 {
-	if (!option_shared) {
-		struct strbuf src = STRBUF_INIT;
-		struct strbuf dest = STRBUF_INIT;
+	જો (!option_shared) {
+		સંરચના strbuf src = STRBUF_INIT;
+		સંરચના strbuf dest = STRBUF_INIT;
 		get_common_dir(&src, src_repo);
 		get_common_dir(&dest, dest_repo);
 		strbuf_addstr(&src, "/objects");
@@ -392,258 +392,258 @@ static void clone_local(const char *src_repo, const char *dest_repo)
 		strbuf_release(&dest);
 	}
 
-	if (0 <= option_verbosity)
+	જો (0 <= option_verbosity)
 		fprintf(stderr, _("done.\n"));
 }
 
-static const char *junk_work_tree;
-static int junk_work_tree_flags;
-static const char *junk_git_dir;
-static int junk_git_dir_flags;
-static enum {
+સ્થિર અચલ અક્ષર *junk_work_વૃક્ષ;
+સ્થિર પૂર્ણાંક junk_work_વૃક્ષ_flags;
+સ્થિર અચલ અક્ષર *junk_git_dir;
+સ્થિર પૂર્ણાંક junk_git_dir_flags;
+સ્થિર ગણના {
 	JUNK_LEAVE_NONE,
 	JUNK_LEAVE_REPO,
 	JUNK_LEAVE_ALL
 } junk_mode = JUNK_LEAVE_NONE;
 
-static const char junk_leave_repo_msg[] =
+સ્થિર અચલ અક્ષર junk_leave_repo_સંદેશ[] =
 N_("Clone succeeded, but checkout failed.\n"
    "You can inspect what was checked out with 'git status'\n"
    "and retry with 'git restore --source=HEAD :/'\n");
 
-static void remove_junk(void)
+સ્થિર શૂન્ય remove_junk(શૂન્ય)
 {
-	struct strbuf sb = STRBUF_INIT;
+	સંરચના strbuf sb = STRBUF_INIT;
 
-	switch (junk_mode) {
-	case JUNK_LEAVE_REPO:
-		warning("%s", _(junk_leave_repo_msg));
+	પસંદગી (junk_mode) {
+	સ્થિતિ JUNK_LEAVE_REPO:
+		warning("%s", _(junk_leave_repo_સંદેશ));
 		/* fall-through */
-	case JUNK_LEAVE_ALL:
-		return;
-	default:
+	સ્થિતિ JUNK_LEAVE_ALL:
+		પાછા;
+	મૂળભૂત:
 		/* proceed to removal */
-		break;
+		તોડો;
 	}
 
-	if (junk_git_dir) {
+	જો (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, junk_git_dir_flags);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
-		remove_dir_recursively(&sb, junk_work_tree_flags);
+	જો (junk_work_વૃક્ષ) {
+		strbuf_addstr(&sb, junk_work_વૃક્ષ);
+		remove_dir_recursively(&sb, junk_work_વૃક્ષ_flags);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+સ્થિર શૂન્ય remove_junk_on_signal(પૂર્ણાંક signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
-	raise(signo);
+	sigchain_કાઢો(signo);
+	ઉઠાવો(signo);
 }
 
-static struct ref *find_remote_branch(const struct ref *refs, const char *branch)
+સ્થિર સંરચના ref *find_remote_branch(અચલ સંરચના ref *refs, અચલ અક્ષર *branch)
 {
-	struct ref *ref;
-	struct strbuf head = STRBUF_INIT;
+	સંરચના ref *ref;
+	સંરચના strbuf head = STRBUF_INIT;
 	strbuf_addstr(&head, "refs/heads/");
 	strbuf_addstr(&head, branch);
 	ref = find_ref_by_name(refs, head.buf);
 	strbuf_release(&head);
 
-	if (ref)
-		return ref;
+	જો (ref)
+		પાછા ref;
 
 	strbuf_addstr(&head, "refs/tags/");
 	strbuf_addstr(&head, branch);
 	ref = find_ref_by_name(refs, head.buf);
 	strbuf_release(&head);
 
-	return ref;
+	પાછા ref;
 }
 
-static struct ref *wanted_peer_refs(struct clone_opts *opts,
-				    const struct ref *refs,
-				    struct refspec *refspec)
+સ્થિર સંરચના ref *wanted_peer_refs(સંરચના clone_opts *opts,
+				    અચલ સંરચના ref *refs,
+				    સંરચના refspec *refspec)
 {
-	struct ref *local_refs = NULL;
-	struct ref **tail = &local_refs;
-	struct ref *to_free = NULL;
+	સંરચના ref *local_refs = ખાલી;
+	સંરચના ref **tail = &local_refs;
+	સંરચના ref *to_free = ખાલી;
 
-	if (opts->wants_head) {
-		struct ref *head = copy_ref(find_ref_by_name(refs, "HEAD"));
-		if (head)
+	જો (opts->wants_head) {
+		સંરચના ref *head = copy_ref(find_ref_by_name(refs, "HEAD"));
+		જો (head)
 			tail_link_ref(head, &tail);
-		if (option_single_branch)
+		જો (option_single_branch)
 			refs = to_free =
 				guess_remote_head(head, refs,
 						  REMOTE_GUESS_HEAD_QUIET);
-	} else if (option_single_branch) {
-		local_refs = NULL;
+	} નહીંતર જો (option_single_branch) {
+		local_refs = ખાલી;
 		tail = &local_refs;
 		refs = to_free = copy_ref(find_remote_branch(refs, option_branch));
 	}
 
-	for (size_t i = 0; i < refspec->nr; i++)
-		get_fetch_map(refs, &refspec->items[i], &tail, 0);
+	માટે (size_t i = 0; i < refspec->nr; i++)
+		get_fetch_map(refs, &refspec->વસ્તુઓ[i], &tail, 0);
 
 	free_one_ref(to_free);
 
-	return local_refs;
+	પાછા local_refs;
 }
 
-static void write_remote_refs(const struct ref *local_refs)
+સ્થિર શૂન્ય write_remote_refs(અચલ સંરચના ref *local_refs)
 {
-	const struct ref *r;
+	અચલ સંરચના ref *r;
 
-	struct ref_transaction *t;
-	struct strbuf err = STRBUF_INIT;
+	સંરચના ref_transaction *t;
+	સંરચના strbuf err = STRBUF_INIT;
 
 	t = ref_store_transaction_begin(get_main_ref_store(the_repository),
 					REF_TRANSACTION_FLAG_INITIAL, &err);
-	if (!t)
+	જો (!t)
 		die("%s", err.buf);
 
-	for (r = local_refs; r; r = r->next) {
-		if (!r->peer_ref)
-			continue;
-		if (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
-					   NULL, 0, NULL, &err))
+	માટે (r = local_refs; r; r = r->next) {
+		જો (!r->peer_ref)
+			ચાલુ;
+		જો (ref_transaction_create(t, r->peer_ref->name, &r->old_oid,
+					   ખાલી, 0, ખાલી, &err))
 			die("%s", err.buf);
 	}
 
-	if (ref_transaction_commit(t, &err))
+	જો (ref_transaction_commit(t, &err))
 		die("%s", err.buf);
 
 	strbuf_release(&err);
 	ref_transaction_free(t);
 }
 
-static void write_followtags(const struct ref *refs, const char *msg)
+સ્થિર શૂન્ય write_followtags(અચલ સંરચના ref *refs, અચલ અક્ષર *સંદેશ)
 {
-	const struct ref *ref;
-	for (ref = refs; ref; ref = ref->next) {
-		if (!starts_with(ref->name, "refs/tags/"))
-			continue;
-		if (ends_with(ref->name, "^{}"))
-			continue;
-		if (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
-			continue;
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				ref->name, &ref->old_oid, NULL, 0,
+	અચલ સંરચના ref *ref;
+	માટે (ref = refs; ref; ref = ref->next) {
+		જો (!starts_with(ref->name, "refs/tags/"))
+			ચાલુ;
+		જો (ends_with(ref->name, "^{}"))
+			ચાલુ;
+		જો (!odb_has_object(the_repository->objects, &ref->old_oid, 0))
+			ચાલુ;
+		refs_update_ref(get_main_ref_store(the_repository), સંદેશ,
+				ref->name, &ref->old_oid, ખાલી, 0,
 				UPDATE_REFS_DIE_ON_ERR);
 	}
 }
 
-static const struct object_id *iterate_ref_map(void *cb_data)
+સ્થિર અચલ સંરચના object_id *iterate_ref_map(શૂન્ય *cb_data)
 {
-	struct ref **rm = cb_data;
-	struct ref *ref = *rm;
+	સંરચના ref **rm = cb_data;
+	સંરચના ref *ref = *rm;
 
 	/*
 	 * Skip anything missing a peer_ref, which we are not
 	 * actually going to write a ref for.
 	 */
-	while (ref && !ref->peer_ref)
+	જ્યારે (ref && !ref->peer_ref)
 		ref = ref->next;
-	if (!ref)
-		return NULL;
+	જો (!ref)
+		પાછા ખાલી;
 
 	*rm = ref->next;
-	return &ref->old_oid;
+	પાછા &ref->old_oid;
 }
 
-static void update_remote_refs(const struct ref *refs,
-			       const struct ref *mapped_refs,
-			       const struct ref *remote_head_points_at,
-			       const char *branch_top,
-			       const char *msg,
-			       struct transport *transport,
-			       int check_connectivity)
+સ્થિર શૂન્ય update_remote_refs(અચલ સંરચના ref *refs,
+			       અચલ સંરચના ref *mapped_refs,
+			       અચલ સંરચના ref *remote_head_points_at,
+			       અચલ અક્ષર *branch_ટોચ,
+			       અચલ અક્ષર *સંદેશ,
+			       સંરચના transport *transport,
+			       પૂર્ણાંક check_connectivity)
 {
-	const struct ref *rm = mapped_refs;
+	અચલ સંરચના ref *rm = mapped_refs;
 
-	if (check_connectivity) {
-		struct check_connected_options opt = CHECK_CONNECTED_INIT;
+	જો (check_connectivity) {
+		સંરચના check_connected_options opt = CHECK_CONNECTED_INIT;
 
 		opt.transport = transport;
 		opt.progress = transport->progress;
 
-		if (check_connected(iterate_ref_map, &rm, &opt))
+		જો (check_connected(iterate_ref_map, &rm, &opt))
 			die(_("remote did not send all necessary objects"));
 	}
 
-	if (refs) {
+	જો (refs) {
 		write_remote_refs(mapped_refs);
-		if (option_single_branch && option_tags)
-			write_followtags(refs, msg);
+		જો (option_single_branch && option_tags)
+			write_followtags(refs, સંદેશ);
 	}
 
-	if (remote_head_points_at && remote_head_points_at->peer_ref && !option_bare) {
-		struct strbuf head_ref = STRBUF_INIT;
-		strbuf_addstr(&head_ref, branch_top);
+	જો (remote_head_points_at && remote_head_points_at->peer_ref && !option_bare) {
+		સંરચના strbuf head_ref = STRBUF_INIT;
+		strbuf_addstr(&head_ref, branch_ટોચ);
 		strbuf_addstr(&head_ref, "HEAD");
-		if (refs_update_symref(get_main_ref_store(the_repository), head_ref.buf,
+		જો (refs_update_symref(get_main_ref_store(the_repository), head_ref.buf,
 				       remote_head_points_at->peer_ref->name,
-				       msg) < 0)
+				       સંદેશ) < 0)
 			die(_("unable to update %s"), head_ref.buf);
 		strbuf_release(&head_ref);
 	}
 }
 
-static void update_head(struct clone_opts *opts, const struct ref *our, const struct ref *remote,
-			const char *unborn, const char *msg)
+સ્થિર શૂન્ય update_head(સંરચના clone_opts *opts, અચલ સંરચના ref *our, અચલ સંરચના ref *remote,
+			અચલ અક્ષર *unborn, અચલ અક્ષર *સંદેશ)
 {
-	const char *head;
-	if (our && !opts->detach && skip_prefix(our->name, "refs/heads/", &head)) {
+	અચલ અક્ષર *head;
+	જો (our && !opts->detach && skip_prefix(our->name, "refs/heads/", &head)) {
 		/* Local default branch link */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, NULL) < 0)
+		જો (refs_update_symref(get_main_ref_store(the_repository), "HEAD", our->name, ખાલી) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare) {
+		જો (!option_bare) {
 			refs_update_ref(get_main_ref_store(the_repository),
-					msg, "HEAD", &our->old_oid, NULL, 0,
+					સંદેશ, "HEAD", &our->old_oid, ખાલી, 0,
 					UPDATE_REFS_DIE_ON_ERR);
 			install_branch_config(0, head, remote_name, our->name);
 		}
-	} else if (our) {
-		struct commit *c = lookup_commit_or_die(&our->old_oid,
+	} નહીંતર જો (our) {
+		સંરચના commit *c = lookup_commit_or_die(&our->old_oid,
 							our->name);
 
 		/* --branch specifies a non-branch (i.e. tags), detach HEAD */
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				"HEAD", &c->object.oid, NULL, REF_NO_DEREF,
+		refs_update_ref(get_main_ref_store(the_repository), સંદેશ,
+				"HEAD", &c->object.oid, ખાલી, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (remote) {
+	} નહીંતર જો (remote) {
 		/*
 		 * We know remote HEAD points to a non-branch, or
 		 * HEAD points to a branch but we don't know which one.
 		 * Detach HEAD in all these cases.
 		 */
-		refs_update_ref(get_main_ref_store(the_repository), msg,
-				"HEAD", &remote->old_oid, NULL, REF_NO_DEREF,
+		refs_update_ref(get_main_ref_store(the_repository), સંદેશ,
+				"HEAD", &remote->old_oid, ખાલી, REF_NO_DEREF,
 				UPDATE_REFS_DIE_ON_ERR);
-	} else if (unborn && skip_prefix(unborn, "refs/heads/", &head)) {
+	} નહીંતર જો (unborn && skip_prefix(unborn, "refs/heads/", &head)) {
 		/*
 		 * Unborn head from remote; same as "our" case above except
 		 * that we have no ref to update.
 		 */
-		if (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, NULL) < 0)
+		જો (refs_update_symref(get_main_ref_store(the_repository), "HEAD", unborn, ખાલી) < 0)
 			die(_("unable to update HEAD"));
-		if (!option_bare)
+		જો (!option_bare)
 			install_branch_config(0, head, remote_name, unborn);
 	}
 }
 
-static int git_sparse_checkout_init(const char *repo)
+સ્થિર પૂર્ણાંક git_sparse_checkout_init(અચલ અક્ષર *repo)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
-	int result = 0;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	સંરચના child_process cmd = CHILD_PROCESS_INIT;
+	પૂર્ણાંક result = 0;
+	સંરચના repo_config_કિંમતો *cfg = repo_config_કિંમતો(the_repository);
 
-	strvec_pushl(&cmd.args, "-C", repo, "sparse-checkout", "set", NULL);
+	strvec_pushl(&cmd.args, "-C", repo, "sparse-checkout", "set", ખાલી);
 
 	/*
 	 * We must apply the setting in the current process
@@ -652,53 +652,53 @@ static int git_sparse_checkout_init(const char *repo)
 	cfg->apply_sparse_checkout = 1;
 
 	cmd.git_cmd = 1;
-	if (run_command(&cmd)) {
+	જો (run_command(&cmd)) {
 		error(_("failed to initialize sparse-checkout"));
 		result = 1;
 	}
 
-	return result;
+	પાછા result;
 }
 
-static int checkout(int submodule_progress,
-		    struct list_objects_filter_options *filter_options,
-		    int filter_submodules,
-		    enum ref_storage_format ref_storage_format)
+સ્થિર પૂર્ણાંક checkout(પૂર્ણાંક submodule_progress,
+		    સંરચના list_objects_filter_options *filter_options,
+		    પૂર્ણાંક filter_submodules,
+		    ગણના ref_storage_format ref_storage_format)
 {
-	struct object_id oid;
-	char *head;
-	struct lock_file lock_file = LOCK_INIT;
-	struct unpack_trees_options opts;
-	struct tree *tree;
-	struct tree_desc t;
-	int err = 0;
-	struct run_hooks_opt hook_opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	સંરચના object_id oid;
+	અક્ષર *head;
+	સંરચના lock_file lock_file = LOCK_INIT;
+	સંરચના unpack_trees_options opts;
+	સંરચના વૃક્ષ *વૃક્ષ;
+	સંરચના વૃક્ષ_desc t;
+	પૂર્ણાંક err = 0;
+	સંરચના run_hooks_opt hook_opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-	if (option_no_checkout)
-		return 0;
+	જો (option_no_checkout)
+		પાછા 0;
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   RESOLVE_REF_READING, &oid, NULL);
-	if (!head) {
+				   RESOLVE_REF_READING, &oid, ખાલી);
+	જો (!head) {
 		warning(_("remote HEAD refers to nonexistent ref, "
 			  "unable to checkout"));
-		return 0;
+		પાછા 0;
 	}
-	if (!strcmp(head, "HEAD")) {
-		if (advice_enabled(ADVICE_DETACHED_HEAD))
+	જો (!strcmp(head, "HEAD")) {
+		જો (advice_enabled(ADVICE_DETACHED_HEAD))
 			detach_advice(oid_to_hex(&oid));
 		FREE_AND_NULL(head);
-	} else {
-		if (!starts_with(head, "refs/heads/"))
+	} નહીંતર {
+		જો (!starts_with(head, "refs/heads/"))
 			die(_("HEAD not found below refs/heads!"));
 	}
 
 	/* We need to be in the new work tree for the checkout */
-	setup_work_tree(the_repository);
+	setup_work_વૃક્ષ(the_repository);
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof opts);
+	memset(&opts, 0, કદ opts);
 	opts.update = 1;
 	opts.merge = 1;
 	opts.clone = 1;
@@ -707,58 +707,58 @@ static int checkout(int submodule_progress,
 	opts.verbose_update = (option_verbosity >= 0);
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
-	init_checkout_metadata(&opts.meta, head, &oid, NULL);
+	init_checkout_metadata(&opts.meta, head, &oid, ખાલી);
 
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	વૃક્ષ = repo_parse_વૃક્ષ_indirect(the_repository, &oid);
+	જો (!વૃક્ષ)
 		die(_("unable to parse commit %s"), oid_to_hex(&oid));
-	if (repo_parse_tree(the_repository, tree) < 0)
+	જો (repo_parse_વૃક્ષ(the_repository, વૃક્ષ) < 0)
 		exit(128);
-	init_tree_desc(&t, &tree->object.oid, tree->buffer, tree->size);
-	if (unpack_trees(1, &t, &opts) < 0)
+	init_વૃક્ષ_desc(&t, &વૃક્ષ->object.oid, વૃક્ષ->buffer, વૃક્ષ->size);
+	જો (unpack_trees(1, &t, &opts) < 0)
 		die(_("unable to checkout working tree"));
 
-	free(head);
+	મુક્ત(head);
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+	જો (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 		die(_("unable to write new index file"));
 
 	strvec_pushl(&hook_opt.args, oid_to_hex(null_oid(the_hash_algo)),
-		     oid_to_hex(&oid), "1", NULL);
+		     oid_to_hex(&oid), "1", ખાલી);
 	err |= run_hooks_opt(the_repository, "post-checkout", &hook_opt);
 
-	if (!err && (option_recurse_submodules.nr > 0)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	જો (!err && (option_recurse_submodules.nr > 0)) {
+		સંરચના child_process cmd = CHILD_PROCESS_INIT;
 		strvec_pushl(&cmd.args, "submodule", "update", "--require-init",
-			     "--recursive", NULL);
+			     "--recursive", ખાલી);
 
-		if (option_shallow_submodules == 1)
-			strvec_push(&cmd.args, "--depth=1");
+		જો (option_shallow_submodules == 1)
+			strvec_ધકેલો(&cmd.args, "--depth=1");
 
-		if (max_jobs != -1)
+		જો (max_jobs != -1)
 			strvec_pushf(&cmd.args, "--jobs=%d", max_jobs);
 
-		if (submodule_progress)
-			strvec_push(&cmd.args, "--progress");
+		જો (submodule_progress)
+			strvec_ધકેલો(&cmd.args, "--progress");
 
-		if (option_verbosity < 0)
-			strvec_push(&cmd.args, "--quiet");
+		જો (option_verbosity < 0)
+			strvec_ધકેલો(&cmd.args, "--quiet");
 
-		if (option_remote_submodules) {
-			strvec_push(&cmd.args, "--remote");
-			strvec_push(&cmd.args, "--no-fetch");
+		જો (option_remote_submodules) {
+			strvec_ધકેલો(&cmd.args, "--remote");
+			strvec_ધકેલો(&cmd.args, "--no-fetch");
 		}
 
-		if (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+		જો (ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 			strvec_pushf(&cmd.args, "--ref-storage-format=%s",
 				     ref_storage_format_to_name(ref_storage_format));
 
-		if (filter_submodules && filter_options->choice)
+		જો (filter_submodules && filter_options->choice)
 			strvec_pushf(&cmd.args, "--filter=%s",
 				     expand_list_objects_filter_spec(filter_options));
 
-		if (option_single_branch >= 0)
-			strvec_push(&cmd.args, option_single_branch ?
+		જો (option_single_branch >= 0)
+			strvec_ધકેલો(&cmd.args, option_single_branch ?
 					       "--single-branch" :
 					       "--no-single-branch");
 
@@ -766,79 +766,79 @@ static int checkout(int submodule_progress,
 		err = run_command(&cmd);
 	}
 
-	return err;
+	પાછા err;
 }
 
-static int git_clone_config(const char *k, const char *v,
-			    const struct config_context *ctx, void *cb)
+સ્થિર પૂર્ણાંક git_clone_config(અચલ અક્ષર *k, અચલ અક્ષર *v,
+			    અચલ સંરચના config_context *ctx, શૂન્ય *cb)
 {
-	if (!strcmp(k, "clone.defaultremotename")) {
-		if (!v)
-			return config_error_nonbool(k);
-		free(remote_name);
+	જો (!strcmp(k, "clone.defaultremotename")) {
+		જો (!v)
+			પાછા config_error_nonbool(k);
+		મુક્ત(remote_name);
 		remote_name = xstrdup(v);
 	}
-	if (!strcmp(k, "clone.rejectshallow"))
+	જો (!strcmp(k, "clone.rejectshallow"))
 		config_reject_shallow = git_config_bool(k, v);
-	if (!strcmp(k, "clone.filtersubmodules"))
+	જો (!strcmp(k, "clone.filtersubmodules"))
 		config_filter_submodules = git_config_bool(k, v);
 
-	return git_default_config(k, v, ctx, cb);
+	પાછા git_default_config(k, v, ctx, cb);
 }
 
-static int write_one_config(const char *key, const char *value,
-			    const struct config_context *ctx,
-			    void *data)
+સ્થિર પૂર્ણાંક write_one_config(અચલ અક્ષર *ચાવી, અચલ અક્ષર *કિંમત,
+			    અચલ સંરચના config_context *ctx,
+			    શૂન્ય *data)
 {
 	/*
 	 * give git_clone_config a chance to write config values back to the
 	 * environment, since repo_config_set_multivar_gently only deals with
 	 * config-file writes
 	 */
-	int apply_failed = git_clone_config(key, value, ctx, data);
-	if (apply_failed)
-		return apply_failed;
+	પૂર્ણાંક apply_failed = git_clone_config(ચાવી, કિંમત, ctx, data);
+	જો (apply_failed)
+		પાછા apply_failed;
 
-	return repo_config_set_multivar_gently(the_repository, key,
-					       value ? value : "true",
+	પાછા repo_config_set_multivar_gently(the_repository, ચાવી,
+					       કિંમત ? કિંમત : "true",
 					       CONFIG_REGEX_NONE, 0);
 }
 
-static void write_config(struct string_list *config)
+સ્થિર શૂન્ય write_config(સંરચના string_list *config)
 {
-	int i;
+	પૂર્ણાંક i;
 
-	for (i = 0; i < config->nr; i++) {
-		if (git_config_parse_parameter(config->items[i].string,
-					       write_one_config, NULL) < 0)
+	માટે (i = 0; i < config->nr; i++) {
+		જો (git_config_parse_parameter(config->વસ્તુઓ[i].string,
+					       write_one_config, ખાલી) < 0)
 			die(_("unable to write parameters to config file"));
 	}
 }
 
-static void write_refspec_config(const char *src_ref_prefix,
-		const struct ref *our_head_points_at,
-		const struct ref *remote_head_points_at,
-		struct strbuf *branch_top)
+સ્થિર શૂન્ય write_refspec_config(અચલ અક્ષર *src_ref_prefix,
+		અચલ સંરચના ref *our_head_points_at,
+		અચલ સંરચના ref *remote_head_points_at,
+		સંરચના strbuf *branch_ટોચ)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct strbuf value = STRBUF_INIT;
+	સંરચના strbuf ચાવી = STRBUF_INIT;
+	સંરચના strbuf કિંમત = STRBUF_INIT;
 
-	if (option_mirror || !option_bare) {
-		if (option_single_branch && !option_mirror) {
-			if (option_branch) {
-				if (starts_with(our_head_points_at->name, "refs/tags/"))
-					strbuf_addf(&value, "+%s:%s", our_head_points_at->name,
+	જો (option_mirror || !option_bare) {
+		જો (option_single_branch && !option_mirror) {
+			જો (option_branch) {
+				જો (starts_with(our_head_points_at->name, "refs/tags/"))
+					strbuf_addf(&કિંમત, "+%s:%s", our_head_points_at->name,
 						our_head_points_at->name);
-				else
-					strbuf_addf(&value, "+%s:%s%s", our_head_points_at->name,
-						branch_top->buf, option_branch);
-			} else if (remote_head_points_at) {
-				const char *head = remote_head_points_at->name;
-				if (!skip_prefix(head, "refs/heads/", &head))
+				નહીંતર
+					strbuf_addf(&કિંમત, "+%s:%s%s", our_head_points_at->name,
+						branch_ટોચ->buf, option_branch);
+			} નહીંતર જો (remote_head_points_at) {
+				અચલ અક્ષર *head = remote_head_points_at->name;
+				જો (!skip_prefix(head, "refs/heads/", &head))
 					BUG("remote HEAD points at non-head?");
 
-				strbuf_addf(&value, "+%s:%s%s", remote_head_points_at->name,
-						branch_top->buf, head);
+				strbuf_addf(&કિંમત, "+%s:%s%s", remote_head_points_at->name,
+						branch_ટોચ->buf, head);
 			}
 			/*
 			 * otherwise, the next "git fetch" will
@@ -846,105 +846,105 @@ static void write_refspec_config(const char *src_ref_prefix,
 			 * any remote-tracking branch, which is what
 			 * we want.
 			 */
-		} else {
-			strbuf_addf(&value, "+%s*:%s*", src_ref_prefix, branch_top->buf);
+		} નહીંતર {
+			strbuf_addf(&કિંમત, "+%s*:%s*", src_ref_prefix, branch_ટોચ->buf);
 		}
 		/* Configure the remote */
-		if (value.len) {
-			strbuf_addf(&key, "remote.%s.fetch", remote_name);
-			repo_config_set_multivar(the_repository, key.buf, value.buf, "^$", 0);
-			strbuf_reset(&key);
+		જો (કિંમત.len) {
+			strbuf_addf(&ચાવી, "remote.%s.fetch", remote_name);
+			repo_config_set_multivar(the_repository, ચાવી.buf, કિંમત.buf, "^$", 0);
+			strbuf_reset(&ચાવી);
 
-			if (option_mirror) {
-				strbuf_addf(&key, "remote.%s.mirror", remote_name);
-				repo_config_set(the_repository, key.buf, "true");
-				strbuf_reset(&key);
+			જો (option_mirror) {
+				strbuf_addf(&ચાવી, "remote.%s.mirror", remote_name);
+				repo_config_set(the_repository, ચાવી.buf, "true");
+				strbuf_reset(&ચાવી);
 			}
 		}
 	}
 
-	strbuf_release(&key);
-	strbuf_release(&value);
+	strbuf_release(&ચાવી);
+	strbuf_release(&કિંમત);
 }
 
-static void dissociate_from_references(void)
+સ્થિર શૂન્ય dissociate_from_references(શૂન્ય)
 {
-	char *alternates = repo_git_path(the_repository, "objects/info/alternates");
+	અક્ષર *alternates = repo_git_path(the_repository, "objects/info/alternates");
 
-	if (!access(alternates, F_OK)) {
-		struct child_process cmd = CHILD_PROCESS_INIT;
+	જો (!access(alternates, F_OK)) {
+		સંરચના child_process cmd = CHILD_PROCESS_INIT;
 
 		cmd.git_cmd = 1;
 		cmd.no_stdin = 1;
-		strvec_pushl(&cmd.args, "repack", "-a", "-d", NULL);
-		if (run_command(&cmd))
+		strvec_pushl(&cmd.args, "repack", "-a", "-d", ખાલી);
+		જો (run_command(&cmd))
 			die(_("cannot repack to clean up"));
-		if (unlink(alternates) && errno != ENOENT)
+		જો (unlink(alternates) && errno != ENOENT)
 			die_errno(_("cannot unlink temporary alternates file"));
 	}
-	free(alternates);
+	મુક્ત(alternates);
 }
 
-static int path_exists(const char *path)
+સ્થિર પૂર્ણાંક path_exists(અચલ અક્ષર *path)
 {
-	struct stat sb;
-	return !stat(path, &sb);
+	સંરચના stat sb;
+	પાછા !stat(path, &sb);
 }
 
-int cmd_clone(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repository UNUSED)
+પૂર્ણાંક cmd_clone(પૂર્ણાંક argc,
+	      અચલ અક્ષર **argv,
+	      અચલ અક્ષર *prefix,
+	      સંરચના repository *repository UNUSED)
 {
-	int is_bundle = 0, is_local;
-	int reject_shallow = 0;
-	const char *repo_name, *repo, *work_tree, *git_dir;
-	char *repo_to_free = NULL;
-	char *path = NULL, *dir, *display_repo = NULL;
-	int dest_exists, real_dest_exists = 0;
-	const struct ref *refs, *remote_head;
-	struct ref *remote_head_points_at = NULL;
-	const struct ref *our_head_points_at;
-	char *unborn_head = NULL;
-	struct ref *mapped_refs = NULL;
-	const struct ref *ref;
-	struct strbuf key = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf branch_top = STRBUF_INIT, reflog_msg = STRBUF_INIT;
-	struct transport *transport = NULL;
-	const char *src_ref_prefix = "refs/heads/";
-	struct remote *remote;
-	int err = 0, complete_refs_before_fetch = 1;
-	int submodule_progress;
-	int filter_submodules = 0;
-	int hash_algo;
-	enum ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
-	const int do_not_override_repo_unix_permissions = -1;
-	int option_reject_shallow = -1; /* unspecified */
-	int deepen = 0;
-	char *option_template = NULL, *option_depth = NULL, *option_since = NULL;
-	char *option_origin = NULL;
-	struct string_list option_not = STRING_LIST_INIT_NODUP;
-	const char *real_git_dir = NULL;
-	const char *ref_storage_format_uri = NULL;
-	const char *option_upload_pack = "git-upload-pack";
-	int option_progress = -1;
-	int option_sparse_checkout = 0;
-	enum transport_family family = TRANSPORT_FAMILY_ALL;
-	struct string_list option_config = STRING_LIST_INIT_DUP;
-	int option_dissociate = 0;
-	struct list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
-	int option_filter_submodules = -1; /* unspecified */
-	struct string_list server_options = STRING_LIST_INIT_NODUP;
-	const char *bundle_uri = NULL;
-	char *option_rev = NULL;
+	પૂર્ણાંક is_bundle = 0, is_local;
+	પૂર્ણાંક reject_shallow = 0;
+	અચલ અક્ષર *repo_name, *repo, *work_વૃક્ષ, *git_dir;
+	અક્ષર *repo_to_free = ખાલી;
+	અક્ષર *path = ખાલી, *dir, *display_repo = ખાલી;
+	પૂર્ણાંક dest_exists, real_dest_exists = 0;
+	અચલ સંરચના ref *refs, *remote_head;
+	સંરચના ref *remote_head_points_at = ખાલી;
+	અચલ સંરચના ref *our_head_points_at;
+	અક્ષર *unborn_head = ખાલી;
+	સંરચના ref *mapped_refs = ખાલી;
+	અચલ સંરચના ref *ref;
+	સંરચના strbuf ચાવી = STRBUF_INIT;
+	સંરચના strbuf buf = STRBUF_INIT;
+	સંરચના strbuf branch_ટોચ = STRBUF_INIT, reflog_સંદેશ = STRBUF_INIT;
+	સંરચના transport *transport = ખાલી;
+	અચલ અક્ષર *src_ref_prefix = "refs/heads/";
+	સંરચના remote *remote;
+	પૂર્ણાંક err = 0, complete_refs_before_fetch = 1;
+	પૂર્ણાંક submodule_progress;
+	પૂર્ણાંક filter_submodules = 0;
+	પૂર્ણાંક hash_algo;
+	ગણના ref_storage_format ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN;
+	અચલ પૂર્ણાંક do_not_override_repo_unix_permissions = -1;
+	પૂર્ણાંક option_reject_shallow = -1; /* unspecified */
+	પૂર્ણાંક deepen = 0;
+	અક્ષર *option_template = ખાલી, *option_depth = ખાલી, *option_since = ખાલી;
+	અક્ષર *option_origin = ખાલી;
+	સંરચના string_list option_not = STRING_LIST_INIT_NODUP;
+	અચલ અક્ષર *real_git_dir = ખાલી;
+	અચલ અક્ષર *ref_storage_format_uri = ખાલી;
+	અચલ અક્ષર *option_upload_pack = "git-upload-pack";
+	પૂર્ણાંક option_progress = -1;
+	પૂર્ણાંક option_sparse_checkout = 0;
+	ગણના transport_family family = TRANSPORT_FAMILY_ALL;
+	સંરચના string_list option_config = STRING_LIST_INIT_DUP;
+	પૂર્ણાંક option_dissociate = 0;
+	સંરચના list_objects_filter_options filter_options = LIST_OBJECTS_FILTER_INIT;
+	પૂર્ણાંક option_filter_submodules = -1; /* unspecified */
+	સંરચના string_list server_options = STRING_LIST_INIT_NODUP;
+	અચલ અક્ષર *bundle_uri = ખાલી;
+	અક્ષર *option_rev = ખાલી;
 
-	struct clone_opts opts = CLONE_OPTS_INIT;
+	સંરચના clone_opts opts = CLONE_OPTS_INIT;
 
-	struct transport_ls_refs_options transport_ls_refs_options =
+	સંરચના transport_ls_refs_options transport_ls_refs_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
 
-	struct option builtin_clone_options[] = {
+	સંરચના option builtin_clone_options[] = {
 		OPT__VERBOSITY(&option_verbosity),
 		OPT_BOOL(0, "progress", &option_progress,
 			 N_("force progress reporting")),
@@ -966,7 +966,7 @@ int cmd_clone(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "recurse-submodules",
-			.value = &option_recurse_submodules,
+			.કિંમત = &option_recurse_submodules,
 			.argh = N_("pathspec"),
 			.help = N_("initialize submodules in the clone"),
 			.flags = PARSE_OPT_OPTARG,
@@ -1025,53 +1025,53 @@ int cmd_clone(int argc,
 			   N_("uri"), N_("a URI for downloading bundles before fetching from origin remote")),
 		OPT_END()
 	};
-	struct strvec alternates = STRVEC_INIT;
+	સંરચના strvec alternates = STRVEC_INIT;
 
-	const char * const builtin_clone_usage[] = {
+	અચલ અક્ષર * અચલ builtin_clone_usage[] = {
 		N_("git clone [<options>] [--] <repo> [<dir>]"),
-		NULL
+		ખાલી
 	};
 
 	filter_options.allow_auto_filter = 1;
 
 	packet_trace_identity("clone");
 
-	repo_config(the_repository, git_clone_config, NULL);
+	repo_config(the_repository, git_clone_config, ખાલી);
 
 	argc = parse_options(argc, argv, prefix, builtin_clone_options,
 			     builtin_clone_usage, 0);
 
-	if (argc > 2)
-		usage_msg_opt(_("Too many arguments."),
+	જો (argc > 2)
+		usage_સંદેશ_opt(_("Too many arguments."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (argc == 0)
-		usage_msg_opt(_("You must specify a repository to clone."),
+	જો (argc == 0)
+		usage_સંદેશ_opt(_("You must specify a repository to clone."),
 			builtin_clone_usage, builtin_clone_options);
 
-	if (option_depth || option_since || option_not.nr)
+	જો (option_depth || option_since || option_not.nr)
 		deepen = 1;
-	if (option_single_branch == -1)
+	જો (option_single_branch == -1)
 		option_single_branch = deepen ? 1 : 0;
 
-	if (ref_storage_format_uri) {
-		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, NULL);
-		if (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	જો (ref_storage_format_uri) {
+		ref_storage_format = ref_storage_format_by_uri(ref_storage_format_uri, ખાલી);
+		જો (ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format_uri);
 	}
 
-	if (option_mirror) {
+	જો (option_mirror) {
 		option_bare = 1;
 		option_tags = 0;
 	}
 
-	if (option_bare) {
-		if (real_git_dir)
+	જો (option_bare) {
+		જો (real_git_dir)
 			die(_("options '%s' and '%s' cannot be used together"), "--bare", "--separate-git-dir");
 		option_no_checkout = 1;
 	}
 
-	if (bundle_uri && deepen)
+	જો (bundle_uri && deepen)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--bundle-uri",
 		    "--depth/--shallow-since/--shallow-exclude");
@@ -1079,95 +1079,95 @@ int cmd_clone(int argc,
 	repo_name = argv[0];
 
 	path = get_repo_path(repo_name, &is_bundle);
-	if (path) {
+	જો (path) {
 		FREE_AND_NULL(path);
 		repo = repo_to_free = absolute_pathdup(repo_name);
-	} else if (strchr(repo_name, ':')) {
+	} નહીંતર જો (strchr(repo_name, ':')) {
 		repo = repo_name;
 		display_repo = transport_anonymize_url(repo);
-	} else
+	} નહીંતર
 		die(_("repository '%s' does not exist"), repo_name);
 
 	/* no need to be strict, transport_set_option() will validate it again */
-	if (option_depth && atoi(option_depth) < 1)
+	જો (option_depth && atoi(option_depth) < 1)
 		die(_("depth %s is not a positive number"), option_depth);
 
-	if (argc == 2)
+	જો (argc == 2)
 		dir = xstrdup(argv[1]);
-	else
+	નહીંતર
 		dir = git_url_basename(repo_name, is_bundle, option_bare);
 	strip_dir_trailing_slashes(dir);
 
 	dest_exists = path_exists(dir);
-	if (dest_exists && !is_empty_dir(dir))
+	જો (dest_exists && !is_empty_dir(dir))
 		die(_("destination path '%s' already exists and is not "
 			"an empty directory."), dir);
 
-	if (real_git_dir) {
+	જો (real_git_dir) {
 		real_dest_exists = path_exists(real_git_dir);
-		if (real_dest_exists && !is_empty_dir(real_git_dir))
+		જો (real_dest_exists && !is_empty_dir(real_git_dir))
 			die(_("repository path '%s' already exists and is not "
 				"an empty directory."), real_git_dir);
 	}
 
 
-	strbuf_addf(&reflog_msg, "clone: from %s",
+	strbuf_addf(&reflog_સંદેશ, "clone: from %s",
 		    display_repo ? display_repo : repo);
-	free(display_repo);
+	મુક્ત(display_repo);
 
-	if (option_bare)
-		work_tree = NULL;
-	else {
-		work_tree = getenv("GIT_WORK_TREE");
-		if (work_tree && path_exists(work_tree))
-			die(_("working tree '%s' already exists."), work_tree);
+	જો (option_bare)
+		work_વૃક્ષ = ખાલી;
+	નહીંતર {
+		work_વૃક્ષ = getenv("GIT_WORK_TREE");
+		જો (work_વૃક્ષ && path_exists(work_વૃક્ષ))
+			die(_("working tree '%s' already exists."), work_વૃક્ષ);
 	}
 
-	if (option_bare || work_tree)
+	જો (option_bare || work_વૃક્ષ)
 		git_dir = xstrdup(dir);
-	else {
-		work_tree = dir;
+	નહીંતર {
+		work_વૃક્ષ = dir;
 		git_dir = mkpathdup("%s/.git", dir);
 	}
 
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_ધકેલો_common(remove_junk_on_signal);
 
-	if (!option_bare) {
-		if (safe_create_leading_directories_const(the_repository, work_tree) < 0)
+	જો (!option_bare) {
+		જો (safe_create_leading_directories_const(the_repository, work_વૃક્ષ) < 0)
 			die_errno(_("could not create leading directories of '%s'"),
-				  work_tree);
-		if (dest_exists)
-			junk_work_tree_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
-		else if (mkdir(work_tree, 0777))
+				  work_વૃક્ષ);
+		જો (dest_exists)
+			junk_work_વૃક્ષ_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
+		નહીંતર જો (mkdir(work_વૃક્ષ, 0777))
 			die_errno(_("could not create work tree dir '%s'"),
-				  work_tree);
-		junk_work_tree = work_tree;
+				  work_વૃક્ષ);
+		junk_work_વૃક્ષ = work_વૃક્ષ;
 	}
 
-	if (real_git_dir) {
-		if (real_dest_exists)
+	જો (real_git_dir) {
+		જો (real_dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = real_git_dir;
-	} else {
-		if (dest_exists)
+	} નહીંતર {
+		જો (dest_exists)
 			junk_git_dir_flags |= REMOVE_DIR_KEEP_TOPLEVEL;
 		junk_git_dir = git_dir;
 	}
-	if (safe_create_leading_directories_const(the_repository, git_dir) < 0)
+	જો (safe_create_leading_directories_const(the_repository, git_dir) < 0)
 		die(_("could not create leading directories of '%s'"), git_dir);
 
-	if (0 <= option_verbosity) {
-		if (option_bare)
+	જો (0 <= option_verbosity) {
+		જો (option_bare)
 			fprintf(stderr, _("Cloning into bare repository '%s'...\n"), dir);
-		else
+		નહીંતર
 			fprintf(stderr, _("Cloning into '%s'...\n"), dir);
 	}
 
-	if (option_recurse_submodules.nr > 0) {
-		struct string_list_item *item;
-		struct strbuf sb = STRBUF_INIT;
-		int val;
+	જો (option_recurse_submodules.nr > 0) {
+		સંરચના string_list_item *item;
+		સંરચના strbuf sb = STRBUF_INIT;
+		પૂર્ણાંક val;
 
 		/* remove duplicates */
 		string_list_sort_u(&option_recurse_submodules, 0);
@@ -1183,20 +1183,20 @@ int cmd_clone(int argc,
 			strbuf_reset(&sb);
 		}
 
-		if (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
+		જો (!repo_config_get_bool(the_repository, "submodule.stickyRecursiveClone", &val) &&
 		    val)
 			string_list_append(&option_config, "submodule.recurse=true");
 
-		if (option_required_reference.nr &&
+		જો (option_required_reference.nr &&
 		    option_optional_reference.nr)
 			die(_("clone --recursive is not compatible with "
 			      "both --reference and --reference-if-able"));
-		else if (option_required_reference.nr) {
+		નહીંતર જો (option_required_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
 				"submodule.alternateErrorStrategy=die");
-		} else if (option_optional_reference.nr) {
+		} નહીંતર જો (option_optional_reference.nr) {
 			string_list_append(&option_config,
 				"submodule.alternateLocation=superproject");
 			string_list_append(&option_config,
@@ -1212,12 +1212,12 @@ int cmd_clone(int argc,
 	 * repository, and reference backends may persist that information into
 	 * their on-disk data structures.
 	 */
-	create_repository(the_repository, git_dir, real_git_dir, work_tree,
+	create_repository(the_repository, git_dir, real_git_dir, work_વૃક્ષ,
 			  option_template, GIT_HASH_UNKNOWN, ref_storage_format_uri,
-			  do_not_override_repo_unix_permissions, NULL);
+			  do_not_override_repo_unix_permissions, ખાલી);
 
-	if (real_git_dir) {
-		free((char *)git_dir);
+	જો (real_git_dir) {
+		મુક્ત((અક્ષર *)git_dir);
 		git_dir = real_git_dir;
 	}
 
@@ -1258,7 +1258,7 @@ int cmd_clone(int argc,
 	initialize_repository_version(the_repository, GIT_HASH_UNKNOWN,
 				      the_repository->ref_storage_format, 1);
 
-	refs_create_refdir_stubs(the_repository, git_dir, NULL);
+	refs_create_refdir_stubs(the_repository, git_dir, ખાલી);
 
 	/*
 	 * additional config can be injected with -c, make sure it's included
@@ -1270,24 +1270,24 @@ int cmd_clone(int argc,
 	 * re-read config after init_db and write_config to pick up any config
 	 * injected by --template and --config, respectively.
 	 */
-	repo_config(the_repository, git_clone_config, NULL);
+	repo_config(the_repository, git_clone_config, ખાલી);
 
 	/*
 	 * If option_reject_shallow is specified from CLI option,
 	 * ignore config_reject_shallow from git_clone_config.
 	 */
-	if (config_reject_shallow != -1)
+	જો (config_reject_shallow != -1)
 		reject_shallow = config_reject_shallow;
-	if (option_reject_shallow != -1)
+	જો (option_reject_shallow != -1)
 		reject_shallow = option_reject_shallow;
 
 	/*
 	 * If option_filter_submodules is specified from CLI option,
 	 * ignore config_filter_submodules from git_clone_config.
 	 */
-	if (config_filter_submodules != -1)
+	જો (config_filter_submodules != -1)
 		filter_submodules = config_filter_submodules;
-	if (option_filter_submodules != -1)
+	જો (option_filter_submodules != -1)
 		filter_submodules = option_filter_submodules;
 
 	/*
@@ -1295,10 +1295,10 @@ int cmd_clone(int argc,
 	 * filter flags (but not with filter configs, as those should be
 	 * set-and-forget).
 	 */
-	if (option_filter_submodules > 0 && !filter_options.choice)
+	જો (option_filter_submodules > 0 && !filter_options.choice)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--filter");
-	if (option_filter_submodules > 0 && !option_recurse_submodules.nr)
+	જો (option_filter_submodules > 0 && !option_recurse_submodules.nr)
 		die(_("the option '%s' requires '%s'"),
 		    "--also-filter-submodules", "--recurse-submodules");
 
@@ -1306,66 +1306,66 @@ int cmd_clone(int argc,
 	 * apply the remote name provided by --origin only after this second
 	 * call to git_config, to ensure it overrides all config-based values.
 	 */
-	if (option_origin) {
-		free(remote_name);
+	જો (option_origin) {
+		મુક્ત(remote_name);
 		remote_name = xstrdup(option_origin);
 	}
 
-	if (!remote_name)
+	જો (!remote_name)
 		remote_name = xstrdup("origin");
 
-	if (!valid_remote_name(remote_name))
+	જો (!valid_remote_name(remote_name))
 		die(_("'%s' is not a valid remote name"), remote_name);
 
-	if (option_bare) {
-		if (option_mirror)
+	જો (option_bare) {
+		જો (option_mirror)
 			src_ref_prefix = "refs/";
-		strbuf_addstr(&branch_top, src_ref_prefix);
+		strbuf_addstr(&branch_ટોચ, src_ref_prefix);
 
 		repo_config_set(the_repository, "core.bare", "true");
-	} else if (!option_rev) {
-		strbuf_addf(&branch_top, "refs/remotes/%s/", remote_name);
+	} નહીંતર જો (!option_rev) {
+		strbuf_addf(&branch_ટોચ, "refs/remotes/%s/", remote_name);
 	}
 
-	strbuf_addf(&key, "remote.%s.url", remote_name);
-	repo_config_set(the_repository, key.buf, repo);
-	strbuf_reset(&key);
+	strbuf_addf(&ચાવી, "remote.%s.url", remote_name);
+	repo_config_set(the_repository, ચાવી.buf, repo);
+	strbuf_reset(&ચાવી);
 
-	if (!option_tags) {
-		strbuf_addf(&key, "remote.%s.tagOpt", remote_name);
-		repo_config_set(the_repository, key.buf, "--no-tags");
-		strbuf_reset(&key);
+	જો (!option_tags) {
+		strbuf_addf(&ચાવી, "remote.%s.tagOpt", remote_name);
+		repo_config_set(the_repository, ચાવી.buf, "--no-tags");
+		strbuf_reset(&ચાવી);
 	}
 
 	remote = remote_get_early(remote_name);
 
-	if (!option_rev)
+	જો (!option_rev)
 		refspec_appendf(&remote->fetch, "+%s*:%s*", src_ref_prefix,
-				branch_top.buf);
+				branch_ટોચ.buf);
 
 	path = get_repo_path(remote->url.v[0], &is_bundle);
 	is_local = option_local != 0 && path && !is_bundle;
-	if (is_local) {
-		if (option_depth)
+	જો (is_local) {
+		જો (option_depth)
 			warning(_("--depth is ignored in local clones; use file:// instead."));
-		if (option_since)
+		જો (option_since)
 			warning(_("--shallow-since is ignored in local clones; use file:// instead."));
-		if (option_not.nr)
+		જો (option_not.nr)
 			warning(_("--shallow-exclude is ignored in local clones; use file:// instead."));
-		if (filter_options.choice)
+		જો (filter_options.choice)
 			warning(_("--filter is ignored in local clones; use file:// instead."));
-		if (!access(mkpath("%s/shallow", path), F_OK)) {
-			if (reject_shallow)
+		જો (!access(mkpath("%s/shallow", path), F_OK)) {
+			જો (reject_shallow)
 				die(_("source repository is shallow, reject to clone."));
-			if (option_local > 0)
+			જો (option_local > 0)
 				warning(_("source repository is shallow, ignoring --local"));
 			is_local = 0;
 		}
 	}
-	if (option_local > 0 && !is_local)
+	જો (option_local > 0 && !is_local)
 		warning(_("--local is ignored"));
 
-	collect_alternates(&alternates, is_local ? path : NULL);
+	collect_alternates(&alternates, is_local ? path : ખાલી);
 	create_object_database(the_repository, &alternates);
 
 	transport = transport_get(remote, path ? path : remote->url.v[0]);
@@ -1373,15 +1373,15 @@ int cmd_clone(int argc,
 	transport->family = family;
 	transport->cloning = 1;
 
-	if (is_bundle) {
-		struct bundle_header header = BUNDLE_HEADER_INIT;
-		int fd = read_bundle_header(path, &header);
-		int has_filter = header.filter.choice != LOFC_DISABLED;
+	જો (is_bundle) {
+		સંરચના bundle_header header = BUNDLE_HEADER_INIT;
+		પૂર્ણાંક fd = read_bundle_header(path, &header);
+		પૂર્ણાંક has_filter = header.filter.choice != LOFC_DISABLED;
 
-		if (fd > 0)
+		જો (fd > 0)
 			close(fd);
 		bundle_header_release(&header);
-		if (has_filter)
+		જો (has_filter)
 			die(_("cannot clone from filtered bundle"));
 	}
 
@@ -1392,43 +1392,43 @@ int cmd_clone(int argc,
 	die_for_incompatible_opt2(!!option_rev, "--revision",
 				  option_mirror, "--mirror");
 
-	if (reject_shallow)
+	જો (reject_shallow)
 		transport_set_option(transport, TRANS_OPT_REJECT_SHALLOW, "1");
-	if (option_depth)
+	જો (option_depth)
 		transport_set_option(transport, TRANS_OPT_DEPTH,
 				     option_depth);
-	if (option_since)
+	જો (option_since)
 		transport_set_option(transport, TRANS_OPT_DEEPEN_SINCE,
 				     option_since);
-	if (option_not.nr)
+	જો (option_not.nr)
 		transport_set_option(transport, TRANS_OPT_DEEPEN_NOT,
-				     (const char *)&option_not);
-	if (option_single_branch) {
+				     (અચલ અક્ષર *)&option_not);
+	જો (option_single_branch) {
 		transport_set_option(transport, TRANS_OPT_FOLLOWTAGS, "1");
 
-		if (option_branch)
+		જો (option_branch)
 			opts.wants_head = 0;
 	}
 
-	if (option_upload_pack)
+	જો (option_upload_pack)
 		transport_set_option(transport, TRANS_OPT_UPLOADPACK,
 				     option_upload_pack);
 
-	if (server_options.nr)
+	જો (server_options.nr)
 		transport->server_options = &server_options;
 
-	if (filter_options.choice) {
-		const char *spec =
+	જો (filter_options.choice) {
+		અચલ અક્ષર *spec =
 			expand_list_objects_filter_spec(&filter_options);
 		transport_set_option(transport, TRANS_OPT_LIST_OBJECTS_FILTER,
 				     spec);
 		transport_set_option(transport, TRANS_OPT_FROM_PROMISOR, "1");
 	}
 
-	if (transport->smart_options && !deepen && !filter_options.choice)
+	જો (transport->smart_options && !deepen && !filter_options.choice)
 		transport->smart_options->check_self_contained_and_connected = 1;
 
-	if (option_rev) {
+	જો (option_rev) {
 		option_tags = 0;
 		option_single_branch = 0;
 		opts.wants_head = 0;
@@ -1437,7 +1437,7 @@ int cmd_clone(int argc,
 		refspec_append(&remote->fetch, option_rev);
 	}
 
-	if (option_tags || option_branch)
+	જો (option_tags || option_branch)
 		/*
 		 * Add tags refspec when user asked for tags (implicitly) or
 		 * specified --branch, whose argument might be a tag.
@@ -1446,7 +1446,7 @@ int cmd_clone(int argc,
 
 	refspec_ref_prefixes(&remote->fetch,
 			     &transport_ls_refs_options.ref_prefixes);
-	if (option_branch)
+	જો (option_branch)
 		expand_ref_prefix(&transport_ls_refs_options.ref_prefixes,
 				  option_branch);
 
@@ -1458,8 +1458,8 @@ int cmd_clone(int argc,
 	 * ref_prefixes will be empty so we fall back to asking about HEAD to
 	 * reduce traffic from the server.
 	 */
-	if (opts.wants_head || transport_ls_refs_options.ref_prefixes.nr == 0)
-		strvec_push(&transport_ls_refs_options.ref_prefixes, "HEAD");
+	જો (opts.wants_head || transport_ls_refs_options.ref_prefixes.nr == 0)
+		strvec_ધકેલો(&transport_ls_refs_options.ref_prefixes, "HEAD");
 
 	refs = transport_get_remote_refs(transport, &transport_ls_refs_options);
 
@@ -1470,76 +1470,76 @@ int cmd_clone(int argc,
 	hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
 	initialize_repository_version(the_repository, hash_algo, the_repository->ref_storage_format, 1);
 	repo_set_hash_algo(the_repository, hash_algo);
-	create_reference_database(the_repository, NULL, 1);
+	create_reference_database(the_repository, ખાલી, 1);
 	startup_info->have_repository = 1;
 
 	/*
 	 * Before fetching from the remote, download and install bundle
 	 * data from the --bundle-uri option.
 	 */
-	if (bundle_uri) {
-		struct remote_state *state;
-		int has_heuristic = 0;
+	જો (bundle_uri) {
+		સંરચના remote_state *state;
+		પૂર્ણાંક has_heuristic = 0;
 
 		/*
 		 * We need to save the remote state as our remote's lifetime is
 		 * tied to it.
 		 */
 		state = the_repository->remote_state;
-		the_repository->remote_state = NULL;
+		the_repository->remote_state = ખાલી;
 		repo_clear(the_repository);
 
 		/* At this point, we need the_repository to match the cloned repo. */
-		if (repo_init(the_repository, git_dir, work_tree))
+		જો (repo_init(the_repository, git_dir, work_વૃક્ષ))
 			warning(_("failed to initialize the repo, skipping bundle URI"));
-		else if (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
+		નહીંતર જો (fetch_bundle_uri(the_repository, bundle_uri, &has_heuristic))
 			warning(_("failed to fetch objects from bundle URI '%s'"),
 				bundle_uri);
-		else if (has_heuristic)
+		નહીંતર જો (has_heuristic)
 			repo_config_set_gently(the_repository, "fetch.bundleuri", bundle_uri);
 
 		remote_state_clear(the_repository->remote_state);
-		free(the_repository->remote_state);
+		મુક્ત(the_repository->remote_state);
 		the_repository->remote_state = state;
-	} else {
+	} નહીંતર {
 		/*
 		* Populate transport->got_remote_bundle_uri and
 		* transport->bundle_uri. We might get nothing.
 		*/
 		transport_get_remote_bundle_uri(transport);
 
-		if (transport->bundles &&
+		જો (transport->bundles &&
 		    hashmap_get_size(&transport->bundles->bundles)) {
-			struct remote_state *state;
+			સંરચના remote_state *state;
 
 			/*
 			 * We need to save the remote state as our remote's
 			 * lifetime is tied to it.
 			 */
 			state = the_repository->remote_state;
-			the_repository->remote_state = NULL;
+			the_repository->remote_state = ખાલી;
 			repo_clear(the_repository);
 
 			/* At this point, we need the_repository to match the cloned repo. */
-			if (repo_init(the_repository, git_dir, work_tree))
+			જો (repo_init(the_repository, git_dir, work_વૃક્ષ))
 				warning(_("failed to initialize the repo, skipping bundle URI"));
-			else if (fetch_bundle_list(the_repository,
+			નહીંતર જો (fetch_bundle_list(the_repository,
 						   transport->bundles))
 				warning(_("failed to fetch advertised bundles"));
 
 			remote_state_clear(the_repository->remote_state);
-			free(the_repository->remote_state);
+			મુક્ત(the_repository->remote_state);
 			the_repository->remote_state = state;
-		} else {
+		} નહીંતર {
 			clear_bundle_list(transport->bundles);
 			FREE_AND_NULL(transport->bundles);
 		}
 	}
 
-	if (refs)
+	જો (refs)
 		mapped_refs = wanted_peer_refs(&opts, refs, &remote->fetch);
 
-	if (mapped_refs) {
+	જો (mapped_refs) {
 		/*
 		 * transport_get_remote_refs() may return refs with null sha-1
 		 * in mapped_refs (see struct transport->get_refs_list
@@ -1550,14 +1550,14 @@ int cmd_clone(int argc,
 		 * return reliable ref set, we can delay cloning until after
 		 * remote HEAD check.
 		 */
-		for (ref = refs; ref; ref = ref->next)
-			if (is_null_oid(&ref->old_oid)) {
+		માટે (ref = refs; ref; ref = ref->next)
+			જો (is_null_oid(&ref->old_oid)) {
 				complete_refs_before_fetch = 0;
-				break;
+				તોડો;
 			}
 
-		if (!is_local && !complete_refs_before_fetch) {
-			if (transport_fetch_refs(transport, mapped_refs))
+		જો (!is_local && !complete_refs_before_fetch) {
+			જો (transport_fetch_refs(transport, mapped_refs))
 				die(_("remote transport reported error"));
 		}
 	}
@@ -1566,34 +1566,34 @@ int cmd_clone(int argc,
 	remote_head_points_at = guess_remote_head(remote_head, mapped_refs,
 						  REMOTE_GUESS_HEAD_QUIET);
 
-	if (option_branch) {
+	જો (option_branch) {
 		our_head_points_at = find_remote_branch(mapped_refs, option_branch);
-		if (!our_head_points_at)
+		જો (!our_head_points_at)
 			die(_("Remote branch %s not found in upstream %s"),
 			    option_branch, remote_name);
-	} else if (option_rev) {
+	} નહીંતર જો (option_rev) {
 		our_head_points_at = mapped_refs;
-		if (!our_head_points_at)
+		જો (!our_head_points_at)
 			die(_("Remote revision %s not found in upstream %s"),
 			    option_rev, remote_name);
-	} else if (remote_head_points_at) {
+	} નહીંતર જો (remote_head_points_at) {
 		our_head_points_at = remote_head_points_at;
-	} else if (remote_head) {
-		our_head_points_at = NULL;
-	} else {
-		char *to_free = NULL;
-		const char *branch;
+	} નહીંતર જો (remote_head) {
+		our_head_points_at = ખાલી;
+	} નહીંતર {
+		અક્ષર *to_free = ખાલી;
+		અચલ અક્ષર *branch;
 
-		if (!mapped_refs) {
+		જો (!mapped_refs) {
 			warning(_("You appear to have cloned an empty repository."));
 			option_no_checkout = 1;
 		}
 
-		if (transport_ls_refs_options.unborn_head_target &&
+		જો (transport_ls_refs_options.unborn_head_target &&
 		    skip_prefix(transport_ls_refs_options.unborn_head_target,
 				"refs/heads/", &branch)) {
 			unborn_head  = xstrdup(transport_ls_refs_options.unborn_head_target);
-		} else {
+		} નહીંતર {
 			branch = to_free = repo_default_branch_name(the_repository, 0);
 			unborn_head = xstrfmt("refs/heads/%s", branch);
 		}
@@ -1611,28 +1611,28 @@ int cmd_clone(int argc,
 		 */
 		our_head_points_at = find_remote_branch(mapped_refs, branch);
 
-		free(to_free);
+		મુક્ત(to_free);
 	}
 
-	if (!option_rev)
+	જો (!option_rev)
 		write_refspec_config(src_ref_prefix, our_head_points_at,
-				     remote_head_points_at, &branch_top);
+				     remote_head_points_at, &branch_ટોચ);
 
-	if (filter_options.choice)
+	જો (filter_options.choice)
 		partial_clone_register(remote_name, &filter_options);
 
-	if (is_local)
+	જો (is_local)
 		clone_local(path, git_dir);
-	else if (mapped_refs && complete_refs_before_fetch) {
-		if (transport_fetch_refs(transport, mapped_refs))
+	નહીંતર જો (mapped_refs && complete_refs_before_fetch) {
+		જો (transport_fetch_refs(transport, mapped_refs))
 			die(_("remote transport reported error"));
 	}
 
 	update_remote_refs(refs, mapped_refs, remote_head_points_at,
-			   branch_top.buf, reflog_msg.buf, transport,
+			   branch_ટોચ.buf, reflog_સંદેશ.buf, transport,
 			   !is_local);
 
-	update_head(&opts, our_head_points_at, remote_head, unborn_head, reflog_msg.buf);
+	update_head(&opts, our_head_points_at, remote_head, unborn_head, reflog_સંદેશ.buf);
 
 	/*
 	 * We want to show progress for recursive submodule clones iff
@@ -1645,13 +1645,13 @@ int cmd_clone(int argc,
 	transport_unlock_pack(transport, 0);
 	transport_disconnect(transport);
 
-	if (option_dissociate) {
+	જો (option_dissociate) {
 		odb_close(the_repository->objects);
 		dissociate_from_references();
 	}
 
-	if (option_sparse_checkout && git_sparse_checkout_init(dir))
-		return 1;
+	જો (option_sparse_checkout && git_sparse_checkout_init(dir))
+		પાછા 1;
 
 	junk_mode = JUNK_LEAVE_REPO;
 	err = checkout(submodule_progress,
@@ -1666,19 +1666,19 @@ int cmd_clone(int argc,
 	string_list_clear(&server_options, 0);
 	strvec_clear(&alternates);
 
-	free(remote_name);
-	strbuf_release(&reflog_msg);
-	strbuf_release(&branch_top);
+	મુક્ત(remote_name);
+	strbuf_release(&reflog_સંદેશ);
+	strbuf_release(&branch_ટોચ);
 	strbuf_release(&buf);
-	strbuf_release(&key);
+	strbuf_release(&ચાવી);
 	free_refs(mapped_refs);
 	free_refs(remote_head_points_at);
-	free(unborn_head);
-	free(dir);
-	free(path);
-	free(repo_to_free);
+	મુક્ત(unborn_head);
+	મુક્ત(dir);
+	મુક્ત(path);
+	મુક્ત(repo_to_free);
 	junk_mode = JUNK_LEAVE_ALL;
 
 	transport_ls_refs_options_release(&transport_ls_refs_options);
-	return err;
+	પાછા err;
 }

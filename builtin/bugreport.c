@@ -1,22 +1,22 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "editor.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "strbuf.h"
-#include "help.h"
-#include "compat/compiler.h"
-#include "hook.h"
-#include "hook-list.h"
-#include "diagnose.h"
-#include "setup.h"
-#include "version.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "abspath.h"
+#અન્તર્ભાવ "editor.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "strbuf.h"
+#અન્તર્ભાવ "help.h"
+#અન્તર્ભાવ "compat/compiler.h"
+#અન્તર્ભાવ "hook.h"
+#અન્તર્ભાવ "hook-list.h"
+#અન્તર્ભાવ "diagnose.h"
+#અન્તર્ભાવ "setup.h"
+#અન્તર્ભાવ "version.h"
 
-static void get_system_info(struct strbuf *sys_info)
+સ્થિર શૂન્ય get_system_info(સંરચના strbuf *sys_info)
 {
-	char *shell = NULL;
+	અક્ષર *shell = ખાલી;
 
 	/* get git version from native cmd */
 	strbuf_addstr(sys_info, _("git version:\n"));
@@ -37,34 +37,34 @@ static void get_system_info(struct strbuf *sys_info)
 		    shell ? shell : "<unset>");
 }
 
-static void get_populated_hooks(struct strbuf *hook_info, int nongit)
+સ્થિર શૂન્ય get_populated_hooks(સંરચના strbuf *hook_info, પૂર્ણાંક nongit)
 {
-	const char **p;
+	અચલ અક્ષર **p;
 
-	if (nongit) {
+	જો (nongit) {
 		strbuf_addstr(hook_info,
 			_("not run from a git repository - no hooks to show\n"));
-		return;
+		પાછા;
 	}
 
-	for (p = hook_name_list; *p; p++) {
-		const char *hook = *p;
+	માટે (p = hook_name_list; *p; p++) {
+		અચલ અક્ષર *hook = *p;
 
-		if (hook_exists(the_repository, hook))
+		જો (hook_exists(the_repository, hook))
 			strbuf_addf(hook_info, "%s\n", hook);
 	}
 }
 
-static const char * const bugreport_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ bugreport_usage[] = {
 	N_("git bugreport [(-o | --output-directory) <path>]\n"
 	   "              [(-s | --suffix) <format> | --no-suffix]\n"
 	   "              [--diagnose[=<mode>]]"),
-	NULL
+	ખાલી
 };
 
-static int get_bug_template(struct strbuf *template)
+સ્થિર પૂર્ણાંક get_bug_template(સંરચના strbuf *template)
 {
-	const char template_text[] = N_(
+	અચલ અક્ષર template_text[] = N_(
 "Thank you for filling out a Git bug report!\n"
 "Please answer the following questions to help us understand your issue.\n"
 "\n"
@@ -82,33 +82,33 @@ static int get_bug_template(struct strbuf *template)
 "You can delete any lines you don't wish to share.\n");
 
 	strbuf_addstr(template, _(template_text));
-	return 0;
+	પાછા 0;
 }
 
-static void get_header(struct strbuf *buf, const char *title)
+સ્થિર શૂન્ય get_header(સંરચના strbuf *buf, અચલ અક્ષર *title)
 {
 	strbuf_addf(buf, "\n\n[%s]\n", title);
 }
 
-int cmd_bugreport(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+પૂર્ણાંક cmd_bugreport(પૂર્ણાંક argc,
+		  અચલ અક્ષર **argv,
+		  અચલ અક્ષર *prefix,
+		  સંરચના repository *repo UNUSED)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct strbuf report_path = STRBUF_INIT;
-	int report = -1;
-	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode diagnose = DIAGNOSE_NONE;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	const char *user_relative_path = NULL;
-	char *prefixed_filename;
+	સંરચના strbuf buffer = STRBUF_INIT;
+	સંરચના strbuf report_path = STRBUF_INIT;
+	પૂર્ણાંક report = -1;
+	time_t now = time(ખાલી);
+	સંરચના tm tm;
+	ગણના diagnose_mode diagnose = DIAGNOSE_NONE;
+	અક્ષર *option_output = ખાલી;
+	અચલ અક્ષર *option_suffix = "%Y-%m-%d-%H%M";
+	અચલ અક્ષર *user_relative_path = ખાલી;
+	અક્ષર *prefixed_filename;
 	size_t output_path_len;
-	int ret;
+	પૂર્ણાંક ret;
 
-	const struct option bugreport_options[] = {
+	અચલ સંરચના option bugreport_options[] = {
 		OPT_CALLBACK_F(0, "diagnose", &diagnose, N_("mode"),
 			       N_("create an additional zip archive of detailed diagnostics (default 'stats')"),
 			       PARSE_OPT_OPTARG, option_parse_diagnose),
@@ -122,7 +122,7 @@ int cmd_bugreport(int argc,
 	argc = parse_options(argc, argv, prefix, bugreport_options,
 			     bugreport_usage, 0);
 
-	if (argc) {
+	જો (argc) {
 		error(_("unknown argument `%s'"), argv[0]);
 		usage(bugreport_usage[0]);
 	}
@@ -135,30 +135,30 @@ int cmd_bugreport(int argc,
 	output_path_len = report_path.len;
 
 	strbuf_addstr(&report_path, "git-bugreport");
-	if (option_suffix) {
+	જો (option_suffix) {
 		strbuf_addch(&report_path, '-');
 		strbuf_addftime(&report_path, option_suffix, localtime_r(&now, &tm), 0, 0);
 	}
 	strbuf_addstr(&report_path, ".txt");
 
-	switch (safe_create_leading_directories(the_repository, report_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
-	default:
+	પસંદગી (safe_create_leading_directories(the_repository, report_path.buf)) {
+	સ્થિતિ SCLD_OK:
+	સ્થિતિ SCLD_EXISTS:
+		તોડો;
+	મૂળભૂત:
 		die(_("could not create leading directories for '%s'"),
 		    report_path.buf);
 	}
 
 	/* Prepare diagnostics, if requested */
-	if (diagnose != DIAGNOSE_NONE) {
-		struct strbuf zip_path = STRBUF_INIT;
+	જો (diagnose != DIAGNOSE_NONE) {
+		સંરચના strbuf zip_path = STRBUF_INIT;
 		strbuf_add(&zip_path, report_path.buf, output_path_len);
 		strbuf_addstr(&zip_path, "git-diagnostics-");
 		strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
 		strbuf_addstr(&zip_path, ".zip");
 
-		if (create_diagnostics_archive(the_repository, &zip_path, diagnose))
+		જો (create_diagnostics_archive(the_repository, &zip_path, diagnose))
 			die_errno(_("unable to create diagnostics archive %s"), zip_path.buf);
 
 		strbuf_release(&zip_path);
@@ -176,7 +176,7 @@ int cmd_bugreport(int argc,
 	/* fopen doesn't offer us an O_EXCL alternative, except with glibc. */
 	report = xopen(report_path.buf, O_CREAT | O_EXCL | O_WRONLY, 0666);
 
-	if (write_in_full(report, buffer.buf, buffer.len) < 0)
+	જો (write_in_full(report, buffer.buf, buffer.len) < 0)
 		die_errno(_("unable to write to %s"), report_path.buf);
 
 	close(report);
@@ -185,15 +185,15 @@ int cmd_bugreport(int argc,
 	 * We want to print the path relative to the user, but we still need the
 	 * path relative to us to give to the editor.
 	 */
-	if (!(prefix && skip_prefix(report_path.buf, prefix, &user_relative_path)))
+	જો (!(prefix && skip_prefix(report_path.buf, prefix, &user_relative_path)))
 		user_relative_path = report_path.buf;
 	fprintf(stderr, _("Created new report at '%s'.\n"),
 		user_relative_path);
 
-	free(prefixed_filename);
+	મુક્ત(prefixed_filename);
 	strbuf_release(&buffer);
 
-	ret = !!launch_editor(report_path.buf, NULL, NULL);
+	ret = !!launch_editor(report_path.buf, ખાલી, ખાલી);
 	strbuf_release(&report_path);
-	return ret;
+	પાછા ret;
 }

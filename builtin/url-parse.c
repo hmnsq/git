@@ -1,23 +1,23 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "url.h"
-#include "urlmatch.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "url.h"
+#અન્તર્ભાવ "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
-	NULL
+	ખાલી
 };
 
-static char *component_arg;
+સ્થિર અક્ષર *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+સ્થિર સંરચના option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
 	OPT_END(),
 };
 
-enum url_component {
+ગણના url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
@@ -27,109 +27,109 @@ enum url_component {
 	URL_PATH,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+સ્થિર શૂન્ય parse_or_die(અચલ અક્ષર *url, સંરચના url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	જો (url_is_local_not_ssh(url)) {
+		જો (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		જો (has_dos_drive_prefix(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	જો (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+સ્થિર ગણના url_component get_component_or_die(અચલ અક્ષર *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	જો (!strcmp("path", arg))
+		પાછા URL_PATH;
+	જો (!strcmp("host", arg))
+		પાછા URL_HOST;
+	જો (!strcmp("scheme", arg))
+		પાછા URL_SCHEME;
+	જો (!strcmp("user", arg))
+		પાછા URL_USER;
+	જો (!strcmp("password", arg))
+		પાછા URL_PASSWORD;
+	જો (!strcmp("port", arg))
+		પાછા URL_PORT;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+સ્થિર અક્ષર *extract_component(ગણના url_component component,
+			       સંરચના url_info *info)
 {
 	size_t offset, length;
 
-	switch (component) {
-	case URL_SCHEME:
+	પસંદગી (component) {
+	સ્થિતિ URL_SCHEME:
 		offset = 0;
 		length = info->scheme_len;
-		break;
-	case URL_USER:
+		તોડો;
+	સ્થિતિ URL_USER:
 		offset = info->user_off;
 		length = info->user_len;
-		break;
-	case URL_PASSWORD:
+		તોડો;
+	સ્થિતિ URL_PASSWORD:
 		offset = info->passwd_off;
 		length = info->passwd_len;
-		break;
-	case URL_HOST:
+		તોડો;
+	સ્થિતિ URL_HOST:
 		offset = info->host_off;
 		length = info->host_len;
-		break;
-	case URL_PORT:
+		તોડો;
+	સ્થિતિ URL_PORT:
 		offset = info->port_off;
 		length = info->port_len;
-		break;
-	case URL_PATH:
+		તોડો;
+	સ્થિતિ URL_PATH:
 		offset = info->path_off;
 		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+		તોડો;
+	સ્થિતિ URL_NONE:
+		પાછા ખાલી;
 	}
 
-	return xstrndup(info->url + offset, length);
+	પાછા xstrndup(info->url + offset, length);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+પૂર્ણાંક cmd_url_parse(પૂર્ણાંક argc,
+		  અચલ અક્ષર **argv,
+		  અચલ અક્ષર *prefix,
+		  સંરચના repository *repo UNUSED)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	સંરચના url_info info;
+	ગણના url_component selected = URL_NONE;
+	અક્ષર *extracted;
+	પૂર્ણાંક i;
 
 	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	જો (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	જો (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	માટે (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
+		જો (selected != URL_NONE) {
 			extracted = extract_component(selected, &info);
-			if (extracted) {
+			જો (extracted) {
 				puts(extracted);
-				free(extracted);
+				મુક્ત(extracted);
 			}
 		}
 
-		free(info.url);
+		મુક્ત(info.url);
 	}
 
-	return 0;
+	પાછા 0;
 }

@@ -1,32 +1,32 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "advice.h"
-#include "checkout.h"
-#include "config.h"
-#include "copy.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "strvec.h"
-#include "branch.h"
-#include "read-cache-ll.h"
-#include "refs.h"
-#include "remote.h"
-#include "run-command.h"
-#include "hook.h"
-#include "sigchain.h"
-#include "submodule.h"
-#include "utf8.h"
-#include "worktree.h"
-#include "quote.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "abspath.h"
+#અન્તર્ભાવ "advice.h"
+#અન્તર્ભાવ "checkout.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "copy.h"
+#અન્તર્ભાવ "dir.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "object-file.h"
+#અન્તર્ભાવ "object-name.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "strvec.h"
+#અન્તર્ભાવ "branch.h"
+#અન્તર્ભાવ "read-cache-ll.h"
+#અન્તર્ભાવ "refs.h"
+#અન્તર્ભાવ "remote.h"
+#અન્તર્ભાવ "run-command.h"
+#અન્તર્ભાવ "hook.h"
+#અન્તર્ભાવ "sigchain.h"
+#અન્તર્ભાવ "submodule.h"
+#અન્તર્ભાવ "utf8.h"
+#અન્તર્ભાવ "worktree.h"
+#અન્તર્ભાવ "quote.h"
 
 #define BUILTIN_WORKTREE_ADD_USAGE \
 	N_("git worktree add [-f] [--detach] [--checkout] [--lock [--reason <string>]]\n" \
@@ -64,7 +64,7 @@
 	"\n" \
 	"    git worktree add --orphan %s\n")
 
-static const char * const git_worktree_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_usage[] = {
 	BUILTIN_WORKTREE_ADD_USAGE,
 	BUILTIN_WORKTREE_LIST_USAGE,
 	BUILTIN_WORKTREE_LOCK_USAGE,
@@ -73,162 +73,162 @@ static const char * const git_worktree_usage[] = {
 	BUILTIN_WORKTREE_REMOVE_USAGE,
 	BUILTIN_WORKTREE_REPAIR_USAGE,
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_add_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_add_usage[] = {
 	BUILTIN_WORKTREE_ADD_USAGE,
-	NULL,
+	ખાલી,
 };
 
-static const char * const git_worktree_list_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_list_usage[] = {
 	BUILTIN_WORKTREE_LIST_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_lock_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_lock_usage[] = {
 	BUILTIN_WORKTREE_LOCK_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_move_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_move_usage[] = {
 	BUILTIN_WORKTREE_MOVE_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_prune_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_prune_usage[] = {
 	BUILTIN_WORKTREE_PRUNE_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_remove_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_remove_usage[] = {
 	BUILTIN_WORKTREE_REMOVE_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_repair_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_repair_usage[] = {
 	BUILTIN_WORKTREE_REPAIR_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const git_worktree_unlock_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_worktree_unlock_usage[] = {
 	BUILTIN_WORKTREE_UNLOCK_USAGE,
-	NULL
+	ખાલી
 };
 
-struct add_opts {
-	int force;
-	int detach;
-	int quiet;
-	int checkout;
-	int orphan;
-	int relative_paths;
-	const char *keep_locked;
+સંરચના add_opts {
+	પૂર્ણાંક force;
+	પૂર્ણાંક detach;
+	પૂર્ણાંક quiet;
+	પૂર્ણાંક checkout;
+	પૂર્ણાંક orphan;
+	પૂર્ણાંક relative_paths;
+	અચલ અક્ષર *keep_locked;
 };
 
-static int show_only;
-static int verbose;
-static int guess_remote;
-static int use_relative_paths;
-static timestamp_t expire;
+સ્થિર પૂર્ણાંક show_only;
+સ્થિર પૂર્ણાંક verbose;
+સ્થિર પૂર્ણાંક guess_remote;
+સ્થિર પૂર્ણાંક use_relative_paths;
+સ્થિર timestamp_t expire;
 
-static int git_worktree_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+સ્થિર પૂર્ણાંક git_worktree_config(અચલ અક્ષર *var, અચલ અક્ષર *કિંમત,
+			       અચલ સંરચના config_context *ctx, શૂન્ય *cb)
 {
-	if (!strcmp(var, "worktree.guessremote")) {
-		guess_remote = git_config_bool(var, value);
-		return 0;
-	} else if (!strcmp(var, "worktree.userelativepaths")) {
-		use_relative_paths = git_config_bool(var, value);
-		return 0;
+	જો (!strcmp(var, "worktree.guessremote")) {
+		guess_remote = git_config_bool(var, કિંમત);
+		પાછા 0;
+	} નહીંતર જો (!strcmp(var, "worktree.userelativepaths")) {
+		use_relative_paths = git_config_bool(var, કિંમત);
+		પાછા 0;
 	}
 
-	return git_default_config(var, value, ctx, cb);
+	પાછા git_default_config(var, કિંમત, ctx, cb);
 }
 
-static int delete_git_dir(const char *id)
+સ્થિર પૂર્ણાંક delete_git_dir(અચલ અક્ષર *id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret;
+	સંરચના strbuf sb = STRBUF_INIT;
+	પૂર્ણાંક ret;
 
 	repo_common_path_append(the_repository, &sb, "worktrees/%s", id);
 	ret = remove_dir_recursively(&sb, 0);
-	if (ret < 0 && errno == ENOTDIR)
+	જો (ret < 0 && errno == ENOTDIR)
 		ret = unlink(sb.buf);
-	if (ret)
+	જો (ret)
 		error_errno(_("failed to delete '%s'"), sb.buf);
 	strbuf_release(&sb);
-	return ret;
+	પાછા ret;
 }
 
-static void delete_worktrees_dir_if_empty(void)
+સ્થિર શૂન્ય delete_worktrees_dir_if_empty(શૂન્ય)
 {
-	char *path = repo_git_path(the_repository, "worktrees");
+	અક્ષર *path = repo_git_path(the_repository, "worktrees");
 	rmdir(path); /* ignore failed removal */
-	free(path);
+	મુક્ત(path);
 }
 
-static void prune_worktree(const char *id, const char *reason)
+સ્થિર શૂન્ય prune_worktree(અચલ અક્ષર *id, અચલ અક્ષર *reason)
 {
-	if (show_only || verbose)
+	જો (show_only || verbose)
 		fprintf_ln(stderr, _("Removing %s/%s: %s"), "worktrees", id, reason);
-	if (!show_only)
+	જો (!show_only)
 		delete_git_dir(id);
 }
 
-static int prune_cmp(const void *a, const void *b)
+સ્થિર પૂર્ણાંક prune_cmp(અચલ શૂન્ય *a, અચલ શૂન્ય *b)
 {
-	const struct string_list_item *x = a;
-	const struct string_list_item *y = b;
-	int c;
+	અચલ સંરચના string_list_item *x = a;
+	અચલ સંરચના string_list_item *y = b;
+	પૂર્ણાંક c;
 
-	if ((c = fspathcmp(x->string, y->string)))
-	    return c;
+	જો ((c = fspathcmp(x->string, y->string)))
+	    પાછા c;
 	/*
 	 * paths same; prune_dupes() removes all but the first worktree entry
 	 * having the same path, so sort main worktree ('util' is NULL) above
 	 * linked worktrees ('util' not NULL) since main worktree can't be
 	 * removed
 	 */
-	if (!x->util)
-		return -1;
-	if (!y->util)
-		return 1;
+	જો (!x->util)
+		પાછા -1;
+	જો (!y->util)
+		પાછા 1;
 	/* paths same; sort by .git/worktrees/<id> */
-	return strcmp(x->util, y->util);
+	પાછા strcmp(x->util, y->util);
 }
 
-static void prune_dups(struct string_list *l)
+સ્થિર શૂન્ય prune_dups(સંરચના string_list *l)
 {
-	int i;
+	પૂર્ણાંક i;
 
-	QSORT(l->items, l->nr, prune_cmp);
-	for (i = 1; i < l->nr; i++) {
-		if (!fspathcmp(l->items[i].string, l->items[i - 1].string))
-			prune_worktree(l->items[i].util, "duplicate entry");
+	QSORT(l->વસ્તુઓ, l->nr, prune_cmp);
+	માટે (i = 1; i < l->nr; i++) {
+		જો (!fspathcmp(l->વસ્તુઓ[i].string, l->વસ્તુઓ[i - 1].string))
+			prune_worktree(l->વસ્તુઓ[i].util, "duplicate entry");
 	}
 }
 
-static void prune_worktrees(void)
+સ્થિર શૂન્ય prune_worktrees(શૂન્ય)
 {
-	struct strbuf reason = STRBUF_INIT;
-	struct strbuf main_path = STRBUF_INIT;
-	struct string_list kept = STRING_LIST_INIT_DUP;
-	char *path;
+	સંરચના strbuf reason = STRBUF_INIT;
+	સંરચના strbuf main_path = STRBUF_INIT;
+	સંરચના string_list kept = STRING_LIST_INIT_DUP;
+	અક્ષર *path;
 	DIR *dir;
-	struct dirent *d;
+	સંરચના dirent *d;
 
 	path = repo_git_path(the_repository, "worktrees");
 	dir = opendir(path);
-	free(path);
-	if (!dir)
-		return;
-	while ((d = readdir_skip_dot_and_dotdot(dir)) != NULL) {
-		char *path;
+	મુક્ત(path);
+	જો (!dir)
+		પાછા;
+	જ્યારે ((d = readdir_skip_dot_and_dotdot(dir)) != ખાલી) {
+		અક્ષર *path;
 		strbuf_reset(&reason);
-		if (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
+		જો (should_prune_worktree(the_repository, d->d_name, &reason, &path, expire))
 			prune_worktree(d->d_name, reason.buf);
-		else if (path)
+		નહીંતર જો (path)
 			string_list_append_nodup(&kept, path)->util = xstrdup(d->d_name);
 	}
 	closedir(dir);
@@ -236,19 +236,19 @@ static void prune_worktrees(void)
 	strbuf_add_absolute_path(&main_path, repo_get_common_dir(the_repository));
 	/* massage main worktree absolute path to match 'gitdir' content */
 	strbuf_strip_suffix(&main_path, "/.");
-	string_list_append_nodup(&kept, strbuf_detach(&main_path, NULL));
+	string_list_append_nodup(&kept, strbuf_detach(&main_path, ખાલી));
 	prune_dups(&kept);
 	string_list_clear(&kept, 1);
 
-	if (!show_only)
+	જો (!show_only)
 		delete_worktrees_dir_if_empty();
 	strbuf_release(&reason);
 }
 
-static int prune(int ac, const char **av, const char *prefix,
-		 struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક prune(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+		 સંરચના repository *repo UNUSED)
 {
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned working trees")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
@@ -259,130 +259,130 @@ static int prune(int ac, const char **av, const char *prefix,
 	expire = TIME_MAX;
 	ac = parse_options(ac, av, prefix, options, git_worktree_prune_usage,
 			   0);
-	if (ac)
+	જો (ac)
 		usage_with_options(git_worktree_prune_usage, options);
 	prune_worktrees();
-	return 0;
+	પાછા 0;
 }
 
-static char *junk_work_tree;
-static char *junk_git_dir;
-static int is_junk;
-static pid_t junk_pid;
+સ્થિર અક્ષર *junk_work_વૃક્ષ;
+સ્થિર અક્ષર *junk_git_dir;
+સ્થિર પૂર્ણાંક is_junk;
+સ્થિર pid_t junk_pid;
 
-static void remove_junk(void)
+સ્થિર શૂન્ય remove_junk(શૂન્ય)
 {
-	struct strbuf sb = STRBUF_INIT;
-	if (!is_junk || getpid() != junk_pid)
-		return;
-	if (junk_git_dir) {
+	સંરચના strbuf sb = STRBUF_INIT;
+	જો (!is_junk || getpid() != junk_pid)
+		પાછા;
+	જો (junk_git_dir) {
 		strbuf_addstr(&sb, junk_git_dir);
 		remove_dir_recursively(&sb, 0);
 		strbuf_reset(&sb);
 	}
-	if (junk_work_tree) {
-		strbuf_addstr(&sb, junk_work_tree);
+	જો (junk_work_વૃક્ષ) {
+		strbuf_addstr(&sb, junk_work_વૃક્ષ);
 		remove_dir_recursively(&sb, 0);
 	}
 	strbuf_release(&sb);
 }
 
-static void remove_junk_on_signal(int signo)
+સ્થિર શૂન્ય remove_junk_on_signal(પૂર્ણાંક signo)
 {
 	remove_junk();
-	sigchain_pop(signo);
-	raise(signo);
+	sigchain_કાઢો(signo);
+	ઉઠાવો(signo);
 }
 
-static char *worktree_basename_dup(const char *path)
+સ્થિર અક્ષર *worktree_basename_dup(અચલ અક્ષર *path)
 {
-	const char *name;
-	int len;
+	અચલ અક્ષર *name;
+	પૂર્ણાંક len;
 
 	len = strlen(path);
-	while (len && is_dir_sep(path[len - 1]))
+	જ્યારે (len && is_dir_sep(path[len - 1]))
 		len--;
 
 	name = path + len;
-	while (name > path && !is_dir_sep(name[-1]))
+	જ્યારે (name > path && !is_dir_sep(name[-1]))
 		name--;
 
-	return xmemdupz(name, path + len - name);
+	પાછા xmemdupz(name, path + len - name);
 }
 
 /* check that path is viable location for worktree */
-static void check_candidate_path(const char *path,
-				 int force,
-				 struct worktree **worktrees,
-				 const char *cmd)
+સ્થિર શૂન્ય check_candidate_path(અચલ અક્ષર *path,
+				 પૂર્ણાંક force,
+				 સંરચના worktree **worktrees,
+				 અચલ અક્ષર *cmd)
 {
-	struct worktree *wt;
-	int locked;
+	સંરચના worktree *wt;
+	પૂર્ણાંક locked;
 
-	if (file_exists(path) && !is_empty_dir(path))
+	જો (file_exists(path) && !is_empty_dir(path))
 		die(_("'%s' already exists"), path);
 
 	wt = find_worktree_by_path(worktrees, path);
-	if (!wt)
-		return;
+	જો (!wt)
+		પાછા;
 
 	locked = !!worktree_lock_reason(wt);
-	if ((!locked && force) || (locked && force > 1)) {
-		if (delete_git_dir(wt->id))
+	જો ((!locked && force) || (locked && force > 1)) {
+		જો (delete_git_dir(wt->id))
 		    die(_("unusable worktree destination '%s'"), path);
-		return;
+		પાછા;
 	}
 
-	if (locked)
+	જો (locked)
 		die(_("'%s' is a missing but locked worktree;\nuse '%s -f -f' to override, or 'unlock' and 'prune' or 'remove' to clear"), path, cmd);
-	else
+	નહીંતર
 		die(_("'%s' is a missing but already registered worktree;\nuse '%s -f' to override, or 'prune' or 'remove' to clear"), path, cmd);
 }
 
-static void copy_sparse_checkout(const char *worktree_git_dir)
+સ્થિર શૂન્ય copy_sparse_checkout(અચલ અક્ષર *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "info/sparse-checkout");
-	char *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
+	અક્ષર *from_file = repo_git_path(the_repository, "info/sparse-checkout");
+	અક્ષર *to_file = xstrfmt("%s/info/sparse-checkout", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		if (safe_create_leading_directories(the_repository, to_file) ||
+	જો (file_exists(from_file)) {
+		જો (safe_create_leading_directories(the_repository, to_file) ||
 			copy_file(the_repository, to_file, from_file, 0666))
 			error(_("failed to copy '%s' to '%s'; sparse-checkout may not work correctly"),
 				from_file, to_file);
 	}
 
-	free(from_file);
-	free(to_file);
+	મુક્ત(from_file);
+	મુક્ત(to_file);
 }
 
-static void copy_filtered_worktree_config(const char *worktree_git_dir)
+સ્થિર શૂન્ય copy_filtered_worktree_config(અચલ અક્ષર *worktree_git_dir)
 {
-	char *from_file = repo_git_path(the_repository, "config.worktree");
-	char *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
+	અક્ષર *from_file = repo_git_path(the_repository, "config.worktree");
+	અક્ષર *to_file = xstrfmt("%s/config.worktree", worktree_git_dir);
 
-	if (file_exists(from_file)) {
-		struct config_set cs = { { 0 } };
-		int bare;
+	જો (file_exists(from_file)) {
+		સંરચના config_set cs = { { 0 } };
+		પૂર્ણાંક bare;
 
-		if (safe_create_leading_directories(the_repository, to_file) ||
+		જો (safe_create_leading_directories(the_repository, to_file) ||
 			copy_file(the_repository, to_file, from_file, 0666)) {
 			error(_("failed to copy worktree config from '%s' to '%s'"),
 				from_file, to_file);
-			goto worktree_copy_cleanup;
+			જાઓ worktree_copy_cleanup;
 		}
 
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, from_file);
 
-		if (!git_configset_get_bool(&cs, "core.bare", &bare) &&
+		જો (!git_configset_get_bool(&cs, "core.bare", &bare) &&
 			bare &&
 			repo_config_set_multivar_in_file_gently(the_repository,
-				to_file, "core.bare", NULL, "true", NULL, 0))
+				to_file, "core.bare", ખાલી, "true", ખાલી, 0))
 			error(_("failed to unset '%s' in '%s'"),
 				"core.bare", to_file);
-		if (!git_configset_get(&cs, "core.worktree") &&
+		જો (!git_configset_get(&cs, "core.worktree") &&
 			repo_config_set_in_file_gently(the_repository, to_file,
-						       "core.worktree", NULL, NULL))
+						       "core.worktree", ખાલી, ખાલી))
 			error(_("failed to unset '%s' in '%s'"),
 				"core.worktree", to_file);
 
@@ -390,36 +390,36 @@ static void copy_filtered_worktree_config(const char *worktree_git_dir)
 	}
 
 worktree_copy_cleanup:
-	free(from_file);
-	free(to_file);
+	મુક્ત(from_file);
+	મુક્ત(to_file);
 }
 
-static int checkout_worktree(const struct add_opts *opts,
-			     struct strvec *child_env)
+સ્થિર પૂર્ણાંક checkout_worktree(અચલ સંરચના add_opts *opts,
+			     સંરચના strvec *child_env)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	સંરચના child_process cp = CHILD_PROCESS_INIT;
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", NULL);
-	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
+	strvec_pushl(&cp.args, "reset", "--hard", "--no-recurse-submodules", ખાલી);
+	જો (opts->quiet)
+		strvec_ધકેલો(&cp.args, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
-	return run_command(&cp);
+	પાછા run_command(&cp);
 }
 
-static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
-				struct strvec *child_env)
+સ્થિર પૂર્ણાંક make_worktree_orphan(અચલ અક્ષર * ref, અચલ સંરચના add_opts *opts,
+				સંરચના strvec *child_env)
 {
-	struct strbuf symref = STRBUF_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	સંરચના strbuf symref = STRBUF_INIT;
+	સંરચના child_process cp = CHILD_PROCESS_INIT;
 
 	validate_new_branchname(ref, &symref, 0);
-	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, NULL);
-	if (opts->quiet)
-		strvec_push(&cp.args, "--quiet");
+	strvec_pushl(&cp.args, "symbolic-ref", "HEAD", symref.buf, ખાલી);
+	જો (opts->quiet)
+		strvec_ધકેલો(&cp.args, "--quiet");
 	strvec_pushv(&cp.env, child_env->v);
 	strbuf_release(&symref);
 	cp.git_cmd = 1;
-	return run_command(&cp);
+	પાછા run_command(&cp);
 }
 
 /*
@@ -430,16 +430,16 @@ static int make_worktree_orphan(const char * ref, const struct add_opts *opts,
  * Create the necessary folder structure to facilitate the same. But to ensure
  * that the former path is still considered a Git directory, add stubs.
  */
-static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path)
+સ્થિર શૂન્ય setup_alternate_ref_dir(સંરચના worktree *wt, અચલ અક્ષર *wt_git_path)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *path;
+	સંરચના strbuf sb = STRBUF_INIT;
+	અક્ષર *path;
 
 	path = wt->repo->ref_storage_payload;
-	if (!path)
-		return;
+	જો (!path)
+		પાછા;
 
-	if (!is_absolute_path(path))
+	જો (!is_absolute_path(path))
 		strbuf_addf(&sb, "%s/", wt->repo->commondir);
 
 	strbuf_addf(&sb, "%s/worktrees", path);
@@ -455,56 +455,56 @@ static void setup_alternate_ref_dir(struct worktree *wt, const char *wt_git_path
 	strbuf_release(&sb);
 }
 
-static int add_worktree(const char *path, const char *refname,
-			const struct add_opts *opts)
+સ્થિર પૂર્ણાંક add_worktree(અચલ અક્ષર *path, અચલ અક્ષર *refname,
+			અચલ સંરચના add_opts *opts)
 {
-	struct strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
-	struct strbuf sb = STRBUF_INIT;
-	const char *name;
-	char *name_to_free = NULL;
-	struct strvec child_env = STRVEC_INIT;
-	unsigned int counter = 0;
-	int len, ret;
-	struct strbuf symref = STRBUF_INIT;
-	struct commit *commit = NULL;
-	int is_branch = 0;
-	struct strbuf sb_name = STRBUF_INIT;
-	struct worktree **worktrees, *wt = NULL;
-	struct ref_store *wt_refs;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	સંરચના strbuf sb_git = STRBUF_INIT, sb_repo = STRBUF_INIT;
+	સંરચના strbuf sb = STRBUF_INIT;
+	અચલ અક્ષર *name;
+	અક્ષર *name_to_free = ખાલી;
+	સંરચના strvec child_env = STRVEC_INIT;
+	unsigned પૂર્ણાંક counter = 0;
+	પૂર્ણાંક len, ret;
+	સંરચના strbuf symref = STRBUF_INIT;
+	સંરચના commit *commit = ખાલી;
+	પૂર્ણાંક is_branch = 0;
+	સંરચના strbuf sb_name = STRBUF_INIT;
+	સંરચના worktree **worktrees, *wt = ખાલી;
+	સંરચના ref_store *wt_refs;
+	સંરચના repo_config_કિંમતો *cfg = repo_config_કિંમતો(the_repository);
 
 	worktrees = get_worktrees(the_repository);
 	check_candidate_path(path, opts->force, worktrees, "add");
 	free_worktrees(worktrees);
-	worktrees = NULL;
+	worktrees = ખાલી;
 
 	/* is 'refname' a branch or commit? */
-	if (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
+	જો (!opts->detach && !check_branch_ref(the_repository, &symref, refname) &&
 	    refs_ref_exists(get_main_ref_store(the_repository), symref.buf)) {
 		is_branch = 1;
-		if (!opts->force)
+		જો (!opts->force)
 			die_if_checked_out(symref.buf, 0);
 	}
 	commit = lookup_commit_reference_by_name(refname);
-	if (!commit && !opts->orphan)
+	જો (!commit && !opts->orphan)
 		die(_("invalid reference: %s"), refname);
 
 	name = name_to_free = worktree_basename_dup(path);
-	if (!*name)
+	જો (!*name)
 		die(_("invalid path '%s'"), path);
 	sanitize_refname_component(name, &sb_name);
-	if (!sb_name.len)
+	જો (!sb_name.len)
 		BUG("How come '%s' becomes empty after sanitization?", name);
 	name = sb_name.buf;
 	repo_git_path_replace(the_repository, &sb_repo, "worktrees/%s", name);
 	len = sb_repo.len;
-	if (safe_create_leading_directories_const(the_repository, sb_repo.buf))
+	જો (safe_create_leading_directories_const(the_repository, sb_repo.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_repo.buf);
 
-	while (mkdir(sb_repo.buf, 0777)) {
+	જ્યારે (mkdir(sb_repo.buf, 0777)) {
 		counter++;
-		if ((errno != EEXIST) || !counter /* overflow */)
+		જો ((errno != EEXIST) || !counter /* overflow */)
 			die_errno(_("could not create directory of '%s'"),
 				  sb_repo.buf);
 		strbuf_setlen(&sb_repo, len);
@@ -514,7 +514,7 @@ static int add_worktree(const char *path, const char *refname,
 
 	junk_pid = getpid();
 	atexit(remove_junk);
-	sigchain_push_common(remove_junk_on_signal);
+	sigchain_ધકેલો_common(remove_junk_on_signal);
 
 	junk_git_dir = xstrdup(sb_repo.buf);
 	is_junk = 1;
@@ -524,16 +524,16 @@ static int add_worktree(const char *path, const char *refname,
 	 * after the preparation is over.
 	 */
 	strbuf_addf(&sb, "%s/locked", sb_repo.buf);
-	if (opts->keep_locked)
+	જો (opts->keep_locked)
 		write_file(sb.buf, "%s", opts->keep_locked);
-	else
+	નહીંતર
 		write_file(sb.buf, _("initializing"));
 
 	strbuf_addf(&sb_git, "%s/.git", path);
-	if (safe_create_leading_directories_const(the_repository, sb_git.buf))
+	જો (safe_create_leading_directories_const(the_repository, sb_git.buf))
 		die_errno(_("could not create leading directories of '%s'"),
 			  sb_git.buf);
-	junk_work_tree = xstrdup(path);
+	junk_work_વૃક્ષ = xstrdup(path);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/gitdir", sb_repo.buf);
@@ -547,30 +547,30 @@ static int add_worktree(const char *path, const char *refname,
 	 * Set up the ref store of the worktree and create the HEAD reference.
 	 */
 	wt = get_linked_worktree(the_repository, name, 1);
-	if (!wt) {
+	જો (!wt) {
 		ret = error(_("could not find created worktree '%s'"), name);
-		goto done;
+		જાઓ done;
 	}
 	setup_alternate_ref_dir(wt, sb_repo.buf);
 	wt_refs = get_worktree_ref_store(wt);
 
 	ret = ref_store_create_on_disk(wt_refs, REF_STORE_CREATE_ON_DISK_IS_WORKTREE, &sb);
-	if (ret)
-		goto done;
+	જો (ret)
+		જાઓ done;
 
-	if (!is_branch && commit)
-		ret = refs_update_ref(wt_refs, NULL, "HEAD", &commit->object.oid,
-				      NULL, 0, UPDATE_REFS_MSG_ON_ERR);
-	else
-		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, NULL);
-	if (ret)
-		goto done;
+	જો (!is_branch && commit)
+		ret = refs_update_ref(wt_refs, ખાલી, "HEAD", &commit->object.oid,
+				      ખાલી, 0, UPDATE_REFS_સંદેશ_ON_ERR);
+	નહીંતર
+		ret = refs_update_symref(wt_refs, "HEAD", symref.buf, ખાલી);
+	જો (ret)
+		જાઓ done;
 
 	/*
 	 * If the current worktree has sparse-checkout enabled, then copy
 	 * the sparse-checkout patterns from the current worktree.
 	 */
-	if (cfg->apply_sparse_checkout)
+	જો (cfg->apply_sparse_checkout)
 		copy_sparse_checkout(sb_repo.buf);
 
 	/*
@@ -578,26 +578,26 @@ static int add_worktree(const char *path, const char *refname,
 	 * values from the current worktree into the new one, that way the
 	 * new worktree behaves the same as this one.
 	 */
-	if (the_repository->repository_format_worktree_config)
+	જો (the_repository->repository_format_worktree_config)
 		copy_filtered_worktree_config(sb_repo.buf);
 
 	strvec_pushf(&child_env, "%s=%s", GIT_DIR_ENVIRONMENT, sb_git.buf);
-	strvec_pushf(&child_env, "%s=%s", GIT_WORK_TREE_ENVIRONMENT, path);
+	strvec_pushf(&child_env, "%s=%s", GIT_WORK_વૃક્ષ_ENVIRONMENT, path);
 
-	if (opts->orphan &&
+	જો (opts->orphan &&
 	    (ret = make_worktree_orphan(refname, opts, &child_env)))
-		goto done;
+		જાઓ done;
 
-	if (opts->checkout &&
+	જો (opts->checkout &&
 	    (ret = checkout_worktree(opts, &child_env)))
-		goto done;
+		જાઓ done;
 
 	is_junk = 0;
-	FREE_AND_NULL(junk_work_tree);
+	FREE_AND_NULL(junk_work_વૃક્ષ);
 	FREE_AND_NULL(junk_git_dir);
 
 done:
-	if (ret || !opts->keep_locked) {
+	જો (ret || !opts->keep_locked) {
 		strbuf_reset(&sb);
 		strbuf_addf(&sb, "%s/locked", sb_repo.buf);
 		unlink_or_warn(sb.buf);
@@ -607,15 +607,15 @@ done:
 	 * Hook failure does not warrant worktree deletion, so run hook after
 	 * is_junk is cleared, but do return appropriate code when hook fails.
 	 */
-	if (!ret && opts->checkout && !opts->orphan) {
-		struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
+	જો (!ret && opts->checkout && !opts->orphan) {
+		સંરચના run_hooks_opt opt = RUN_HOOKS_OPT_INIT_FORCE_SERIAL;
 
-		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", NULL);
+		strvec_pushl(&opt.env, "GIT_DIR", "GIT_WORK_TREE", ખાલી);
 		strvec_pushl(&opt.args,
 			     oid_to_hex(null_oid(the_hash_algo)),
 			     oid_to_hex(&commit->object.oid),
 			     "1",
-			     NULL);
+			     ખાલી);
 		opt.dir = path;
 
 		ret = run_hooks_opt(the_repository, "post-checkout", &opt);
@@ -628,34 +628,34 @@ done:
 	strbuf_release(&sb_git);
 	strbuf_release(&sb_name);
 	free_worktree(wt);
-	free(name_to_free);
-	return ret;
+	મુક્ત(name_to_free);
+	પાછા ret;
 }
 
-static void print_preparing_worktree_line(int detach,
-					  const char *branch,
-					  const char *new_branch,
-					  int force_new_branch)
+સ્થિર શૂન્ય print_preparing_worktree_લીટી(પૂર્ણાંક detach,
+					  અચલ અક્ષર *branch,
+					  અચલ અક્ષર *new_branch,
+					  પૂર્ણાંક force_new_branch)
 {
-	if (force_new_branch) {
-		struct commit *commit = lookup_commit_reference_by_name(new_branch);
-		if (!commit)
+	જો (force_new_branch) {
+		સંરચના commit *commit = lookup_commit_reference_by_name(new_branch);
+		જો (!commit)
 			fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-		else
+		નહીંતર
 			fprintf_ln(stderr, _("Preparing worktree (resetting branch '%s'; was at %s)"),
 				  new_branch,
 				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
-	} else if (new_branch) {
+	} નહીંતર જો (new_branch) {
 		fprintf_ln(stderr, _("Preparing worktree (new branch '%s')"), new_branch);
-	} else {
-		struct strbuf s = STRBUF_INIT;
-		if (!detach && !check_branch_ref(the_repository, &s, branch) &&
+	} નહીંતર {
+		સંરચના strbuf s = STRBUF_INIT;
+		જો (!detach && !check_branch_ref(the_repository, &s, branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), s.buf))
 			fprintf_ln(stderr, _("Preparing worktree (checking out '%s')"),
 				  branch);
-		else {
-			struct commit *commit = lookup_commit_reference_by_name(branch);
-			if (!commit)
+		નહીંતર {
+			સંરચના commit *commit = lookup_commit_reference_by_name(branch);
+			જો (!commit)
 				BUG("unreachable: invalid reference: %s", branch);
 			fprintf_ln(stderr, _("Preparing worktree (detached HEAD %s)"),
 				  repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
@@ -670,9 +670,9 @@ static void print_preparing_worktree_line(int detach,
  *
  * Returns 0 on failure and non-zero on success.
  */
-static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNUSED)
+સ્થિર પૂર્ણાંક first_valid_ref(અચલ સંરચના reference *ref UNUSED, શૂન્ય *cb_data UNUSED)
 {
-	return 1;
+	પાછા 1;
 }
 
 /**
@@ -687,16 +687,16 @@ static int first_valid_ref(const struct reference *ref UNUSED, void *cb_data UNU
  *
  * Returns 1 if any of the previous checks are true, otherwise returns 0.
  */
-static int can_use_local_refs(const struct add_opts *opts)
+સ્થિર પૂર્ણાંક can_use_local_refs(અચલ સંરચના add_opts *opts)
 {
-	if (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		if (!opts->quiet)
+	જો (refs_head_ref(get_main_ref_store(the_repository), first_valid_ref, ખાલી)) {
+		પાછા 1;
+	} નહીંતર જો (refs_for_each_branch_ref(get_main_ref_store(the_repository), first_valid_ref, ખાલી)) {
+		જો (!opts->quiet)
 			warning(_("HEAD points to an invalid (or orphaned) reference.\n"));
-		return 1;
+		પાછા 1;
 	}
-	return 0;
+	પાછા 0;
 }
 
 /**
@@ -712,17 +712,17 @@ static int can_use_local_refs(const struct add_opts *opts)
  *
  * Returns 1 if checks 1. and 2. are true, otherwise 0.
  */
-static int can_use_remote_refs(const struct add_opts *opts)
+સ્થિર પૂર્ણાંક can_use_remote_refs(અચલ સંરચના add_opts *opts)
 {
-	if (!guess_remote) {
-		return 0;
-	} else if (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, NULL)) {
-		return 1;
-	} else if (!opts->force && remote_get(NULL)) {
+	જો (!guess_remote) {
+		પાછા 0;
+	} નહીંતર જો (refs_for_each_remote_ref(get_main_ref_store(the_repository), first_valid_ref, ખાલી)) {
+		પાછા 1;
+	} નહીંતર જો (!opts->force && remote_get(ખાલી)) {
 		die(_("No local or remote refs exist despite at least one remote\n"
 		      "present, stopping; use 'add -f' to override or fetch a remote first"));
 	}
-	return 0;
+	પાછા 0;
 }
 
 /**
@@ -743,30 +743,30 @@ static int can_use_remote_refs(const struct add_opts *opts)
  * checked and the repo is in a state that looks like the user added a remote
  * but forgot to fetch (and did not override the warning with -f).
  */
-static int dwim_orphan(const struct add_opts *opts, int opt_track, int remote)
+સ્થિર પૂર્ણાંક dwim_orphan(અચલ સંરચના add_opts *opts, પૂર્ણાંક opt_track, પૂર્ણાંક remote)
 {
-	if (can_use_local_refs(opts)) {
-		return 0;
-	} else if (remote && can_use_remote_refs(opts)) {
-		return 0;
-	} else if (!opts->quiet) {
+	જો (can_use_local_refs(opts)) {
+		પાછા 0;
+	} નહીંતર જો (remote && can_use_remote_refs(opts)) {
+		પાછા 0;
+	} નહીંતર જો (!opts->quiet) {
 		fprintf_ln(stderr, WORKTREE_ADD_DWIM_ORPHAN_INFER_TEXT);
 	}
 
-	if (opt_track) {
+	જો (opt_track) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	} else if (!opts->checkout) {
+	} નહીંતર જો (!opts->checkout) {
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
 	}
-	return 1;
+	પાછા 1;
 }
 
-static void advise_disambiguating_remotes(const char *path, const char *branch,
-					  const struct string_list *matched_remote_names)
+સ્થિર શૂન્ય advise_disambiguating_remotes(અચલ અક્ષર *path, અચલ અક્ષર *branch,
+					  અચલ સંરચના string_list *matched_remote_names)
 {
-	struct string_list_item *item;
+	સંરચના string_list_item *item;
 
 	advise(_("Branch name '%s' appears in multiple remotes:"), branch);
 	for_each_string_list_item(item, matched_remote_names) {
@@ -782,63 +782,63 @@ static void advise_disambiguating_remotes(const char *path, const char *branch,
 	       branch, path, branch);
 }
 
-static char *dwim_branch(const struct add_opts *opts, const char *path, char **new_branch)
+સ્થિર અક્ષર *dwim_branch(અચલ સંરચના add_opts *opts, અચલ અક્ષર *path, અક્ષર **new_branch)
 {
-	int branch_exists;
-	char *branchname = worktree_basename_dup(path);
-	struct strbuf ref = STRBUF_INIT;
+	પૂર્ણાંક branch_exists;
+	અક્ષર *branchname = worktree_basename_dup(path);
+	સંરચના strbuf ref = STRBUF_INIT;
 
 	branch_exists = !check_branch_ref(the_repository, &ref, branchname) &&
 			refs_ref_exists(get_main_ref_store(the_repository),
 					ref.buf);
 	strbuf_release(&ref);
-	if (branch_exists)
-		return branchname;
+	જો (branch_exists)
+		પાછા branchname;
 
 	*new_branch = branchname;
-	if (guess_remote) {
-		struct object_id oid;
-		char *remote;
-		int num_matches = 0;
-		struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+	જો (guess_remote) {
+		સંરચના object_id oid;
+		અક્ષર *remote;
+		પૂર્ણાંક અંક_matches = 0;
+		સંરચના string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
-		remote = unique_tracking_name(*new_branch, &oid, &num_matches,
+		remote = unique_tracking_name(*new_branch, &oid, &અંક_matches,
 					      &matched_remote_names);
-		if (!remote && num_matches > 1) {
-			if (!opts->quiet &&
+		જો (!remote && અંક_matches > 1) {
+			જો (!opts->quiet &&
 			    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 				advise_disambiguating_remotes(path, *new_branch,
 							      &matched_remote_names);
 			die(_("'%s' matched multiple (%d) remote tracking branches"),
-			    *new_branch, num_matches);
+			    *new_branch, અંક_matches);
 		}
 		string_list_clear(&matched_remote_names, 0);
-		return remote;
+		પાછા remote;
 	}
-	return NULL;
+	પાછા ખાલી;
 }
 
-static int add(int ac, const char **av, const char *prefix,
-	       struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક add(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+	       સંરચના repository *repo UNUSED)
 {
-	struct add_opts opts;
-	const char *new_branch_force = NULL;
-	char *path;
-	const char *branch;
-	char *branch_to_free = NULL;
-	char *new_branch_to_free = NULL;
-	const char *new_branch = NULL;
-	char *opt_track = NULL;
-	const char *lock_reason = NULL;
-	int keep_locked = 0;
-	int used_new_branch_options;
-	struct option options[] = {
+	સંરચના add_opts opts;
+	અચલ અક્ષર *new_branch_force = ખાલી;
+	અક્ષર *path;
+	અચલ અક્ષર *branch;
+	અક્ષર *branch_to_free = ખાલી;
+	અક્ષર *new_branch_to_free = ખાલી;
+	અચલ અક્ષર *new_branch = ખાલી;
+	અક્ષર *opt_track = ખાલી;
+	અચલ અક્ષર *lock_reason = ખાલી;
+	પૂર્ણાંક keep_locked = 0;
+	પૂર્ણાંક used_new_branch_options;
+	સંરચના option options[] = {
 		OPT__FORCE(&opts.force,
 			   N_("checkout <branch> even if already checked out in other worktree"),
 			   PARSE_OPT_NOCOMPLETE),
-		OPT_STRING('b', NULL, &new_branch, N_("branch"),
+		OPT_STRING('b', ખાલી, &new_branch, N_("branch"),
 			   N_("create a new branch")),
-		OPT_STRING('B', NULL, &new_branch_force, N_("branch"),
+		OPT_STRING('B', ખાલી, &new_branch_force, N_("branch"),
 			   N_("create or reset a branch")),
 		OPT_BOOL(0, "orphan", &opts.orphan, N_("create unborn branch")),
 		OPT_BOOL('d', "detach", &opts.detach, N_("detach HEAD at named commit")),
@@ -847,7 +847,7 @@ static int add(int ac, const char **av, const char *prefix,
 		OPT_STRING(0, "reason", &lock_reason, N_("string"),
 			   N_("reason for locking")),
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
-		OPT_PASSTHRU(0, "track", &opt_track, NULL,
+		OPT_PASSTHRU(0, "track", &opt_track, ખાલી,
 			     N_("set up tracking mode (see git-branch(1))"),
 			     PARSE_OPT_NOARG | PARSE_OPT_OPTARG),
 		OPT_BOOL(0, "guess-remote", &guess_remote,
@@ -856,353 +856,353 @@ static int add(int ac, const char **av, const char *prefix,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	int ret;
+	પૂર્ણાંક ret;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, કદ(opts));
 	opts.checkout = 1;
 	opts.relative_paths = use_relative_paths;
 	ac = parse_options(ac, av, prefix, options, git_worktree_add_usage, 0);
-	if (!!opts.detach + !!new_branch + !!new_branch_force > 1)
+	જો (!!opts.detach + !!new_branch + !!new_branch_force > 1)
 		die(_("options '%s', '%s', and '%s' cannot be used together"), "-b", "-B", "--detach");
-	if (opts.detach && opts.orphan)
+	જો (opts.detach && opts.orphan)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--detach");
-	if (opts.orphan && opt_track)
+	જો (opts.orphan && opt_track)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--track");
-	if (opts.orphan && !opts.checkout)
+	જો (opts.orphan && !opts.checkout)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--orphan", "--no-checkout");
-	if (opts.orphan && ac == 2)
+	જો (opts.orphan && ac == 2)
 		die(_("option '%s' and commit-ish cannot be used together"),
 		    "--orphan");
-	if (lock_reason && !keep_locked)
+	જો (lock_reason && !keep_locked)
 		die(_("the option '%s' requires '%s'"), "--reason", "--lock");
-	if (lock_reason)
+	જો (lock_reason)
 		opts.keep_locked = lock_reason;
-	else if (keep_locked)
+	નહીંતર જો (keep_locked)
 		opts.keep_locked = _("added with --lock");
 
-	if (ac < 1 || ac > 2)
+	જો (ac < 1 || ac > 2)
 		usage_with_options(git_worktree_add_usage, options);
 
 	path = prefix_filename(prefix, av[0]);
 	branch = ac < 2 ? "HEAD" : av[1];
 	used_new_branch_options = new_branch || new_branch_force;
 
-	if (!strcmp(branch, "-"))
+	જો (!strcmp(branch, "-"))
 		branch = "@{-1}";
 
-	if (new_branch_force) {
-		struct strbuf symref = STRBUF_INIT;
+	જો (new_branch_force) {
+		સંરચના strbuf symref = STRBUF_INIT;
 
 		new_branch = new_branch_force;
 
-		if (!opts.force &&
+		જો (!opts.force &&
 		    !check_branch_ref(the_repository, &symref, new_branch) &&
 		    refs_ref_exists(get_main_ref_store(the_repository), symref.buf))
 			die_if_checked_out(symref.buf, 0);
 		strbuf_release(&symref);
 	}
 
-	if (opts.orphan && !new_branch) {
+	જો (opts.orphan && !new_branch) {
 		new_branch = new_branch_to_free = worktree_basename_dup(path);
-	} else if (opts.orphan) {
+	} નહીંતર જો (opts.orphan) {
 		; /* no-op */
-	} else if (opts.detach) {
+	} નહીંતર જો (opts.detach) {
 		/* Check HEAD */
-		if (!strcmp(branch, "HEAD"))
+		જો (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac < 2 && new_branch) {
+	} નહીંતર જો (ac < 2 && new_branch) {
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = dwim_orphan(&opts, !!opt_track, 0);
-	} else if (ac < 2) {
+	} નહીંતર જો (ac < 2) {
 		/* DWIM: Guess branch name from path. */
-		char *s = dwim_branch(&opts, path, &new_branch_to_free);
-		if (s)
+		અક્ષર *s = dwim_branch(&opts, path, &new_branch_to_free);
+		જો (s)
 			branch = branch_to_free = s;
 		new_branch = new_branch_to_free;
 
 		/* DWIM: Infer --orphan when repo has no refs. */
 		opts.orphan = (!s) && dwim_orphan(&opts, !!opt_track, 1);
-	} else if (ac == 2 && new_branch) {
-		if (!strcmp(branch, "HEAD"))
+	} નહીંતર જો (ac == 2 && new_branch) {
+		જો (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
-	} else if (ac == 2) {
-		struct commit *commit;
+	} નહીંતર જો (ac == 2) {
+		સંરચના commit *commit;
 
 		commit = lookup_commit_reference_by_name(branch);
-		if (!commit) {
-			struct object_id oid;
-			char *remote;
-			int num_matches = 0;
-			struct string_list matched_remote_names = STRING_LIST_INIT_DUP;
+		જો (!commit) {
+			સંરચના object_id oid;
+			અક્ષર *remote;
+			પૂર્ણાંક અંક_matches = 0;
+			સંરચના string_list matched_remote_names = STRING_LIST_INIT_DUP;
 
-			remote = unique_tracking_name(branch, &oid, &num_matches,
+			remote = unique_tracking_name(branch, &oid, &અંક_matches,
 						      &matched_remote_names);
-			if (remote) {
+			જો (remote) {
 				new_branch = branch;
 				branch = new_branch_to_free = remote;
-			} else if (num_matches > 1) {
-				if (!opts.quiet &&
+			} નહીંતર જો (અંક_matches > 1) {
+				જો (!opts.quiet &&
 				    advice_enabled(ADVICE_CHECKOUT_AMBIGUOUS_REMOTE_BRANCH_NAME))
 					advise_disambiguating_remotes(path, branch,
 								      &matched_remote_names);
 				die(_("'%s' matched multiple (%d) remote tracking branches"),
-				    branch, num_matches);
+				    branch, અંક_matches);
 			}
 			string_list_clear(&matched_remote_names, 0);
 		}
 
-		if (!strcmp(branch, "HEAD"))
+		જો (!strcmp(branch, "HEAD"))
 			can_use_local_refs(&opts);
 
 	}
 
-	if (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
-		int attempt_hint = !opts.quiet && (ac < 2);
-		if (attempt_hint && used_new_branch_options) {
+	જો (!opts.orphan && !lookup_commit_reference_by_name(branch)) {
+		પૂર્ણાંક attempt_hint = !opts.quiet && (ac < 2);
+		જો (attempt_hint && used_new_branch_options) {
 			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
 				WORKTREE_ADD_ORPHAN_WITH_DASH_B_HINT_TEXT,
 				new_branch, path);
-		} else if (attempt_hint) {
+		} નહીંતર જો (attempt_hint) {
 			advise_if_enabled(ADVICE_WORKTREE_ADD_ORPHAN,
 				WORKTREE_ADD_ORPHAN_NO_DASH_B_HINT_TEXT, path);
 		}
 		die(_("invalid reference: %s"), branch);
 	}
 
-	if (!opts.quiet)
-		print_preparing_worktree_line(opts.detach, branch, new_branch, !!new_branch_force);
+	જો (!opts.quiet)
+		print_preparing_worktree_લીટી(opts.detach, branch, new_branch, !!new_branch_force);
 
-	if (opts.orphan) {
+	જો (opts.orphan) {
 		branch = new_branch;
-	} else if (new_branch) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	} નહીંતર જો (new_branch) {
+		સંરચના child_process cp = CHILD_PROCESS_INIT;
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "branch");
-		if (new_branch_force)
-			strvec_push(&cp.args, "--force");
-		if (opts.quiet)
-			strvec_push(&cp.args, "--quiet");
-		strvec_push(&cp.args, new_branch);
-		strvec_push(&cp.args, branch);
-		if (opt_track)
-			strvec_push(&cp.args, opt_track);
-		if (run_command(&cp)) {
+		strvec_ધકેલો(&cp.args, "branch");
+		જો (new_branch_force)
+			strvec_ધકેલો(&cp.args, "--force");
+		જો (opts.quiet)
+			strvec_ધકેલો(&cp.args, "--quiet");
+		strvec_ધકેલો(&cp.args, new_branch);
+		strvec_ધકેલો(&cp.args, branch);
+		જો (opt_track)
+			strvec_ધકેલો(&cp.args, opt_track);
+		જો (run_command(&cp)) {
 			ret = -1;
-			goto cleanup;
+			જાઓ cleanup;
 		}
 		branch = new_branch;
-	} else if (opt_track) {
+	} નહીંતર જો (opt_track) {
 		die(_("--[no-]track can only be used if a new branch is created"));
 	}
 
 	ret = add_worktree(path, branch, &opts);
 cleanup:
-	free(path);
-	free(opt_track);
-	free(branch_to_free);
-	free(new_branch_to_free);
-	return ret;
+	મુક્ત(path);
+	મુક્ત(opt_track);
+	મુક્ત(branch_to_free);
+	મુક્ત(new_branch_to_free);
+	પાછા ret;
 }
 
-static void show_worktree_porcelain(struct worktree *wt, int line_terminator)
+સ્થિર શૂન્ય show_worktree_porcelain(સંરચના worktree *wt, પૂર્ણાંક લીટી_terminator)
 {
-	const char *reason;
+	અચલ અક્ષર *reason;
 
-	printf("worktree %s%c", wt->path, line_terminator);
-	if (wt->is_bare)
-		printf("bare%c", line_terminator);
-	else {
-		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), line_terminator);
-		if (wt->is_detached)
-			printf("detached%c", line_terminator);
-		else if (wt->head_ref)
-			printf("branch %s%c", wt->head_ref, line_terminator);
+	printf("worktree %s%c", wt->path, લીટી_terminator);
+	જો (wt->is_bare)
+		printf("bare%c", લીટી_terminator);
+	નહીંતર {
+		printf("HEAD %s%c", oid_to_hex(&wt->head_oid), લીટી_terminator);
+		જો (wt->is_detached)
+			printf("detached%c", લીટી_terminator);
+		નહીંતર જો (wt->head_ref)
+			printf("branch %s%c", wt->head_ref, લીટી_terminator);
 	}
 
 	reason = worktree_lock_reason(wt);
-	if (reason) {
+	જો (reason) {
 		fputs("locked", stdout);
-		if (*reason) {
+		જો (*reason) {
 			fputc(' ', stdout);
-			write_name_quoted(reason, stdout, line_terminator);
-		} else {
-			fputc(line_terminator, stdout);
+			write_name_quoted(reason, stdout, લીટી_terminator);
+		} નહીંતર {
+			fputc(લીટી_terminator, stdout);
 		}
 	}
 
 	reason = worktree_prune_reason(wt, expire);
-	if (reason)
-		printf("prunable %s%c", reason, line_terminator);
+	જો (reason)
+		printf("prunable %s%c", reason, લીટી_terminator);
 
-	fputc(line_terminator, stdout);
+	fputc(લીટી_terminator, stdout);
 }
 
-struct worktree_display {
-	char *path;
-	int width;
+સંરચના worktree_display {
+	અક્ષર *path;
+	પૂર્ણાંક width;
 };
 
-static void show_worktree(struct worktree *wt, struct worktree_display *display,
-			  int path_maxwidth, int abbrev_len)
+સ્થિર શૂન્ય show_worktree(સંરચના worktree *wt, સંરચના worktree_display *display,
+			  પૂર્ણાંક path_maxwidth, પૂર્ણાંક abbrev_len)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *reason;
+	સંરચના strbuf sb = STRBUF_INIT;
+	અચલ અક્ષર *reason;
 
 	strbuf_addf(&sb, "%s%*s", display->path, 1 + path_maxwidth - display->width, "");
-	if (wt->is_bare)
+	જો (wt->is_bare)
 		strbuf_addstr(&sb, "(bare)");
-	else {
+	નહીંતર {
 		strbuf_addf(&sb, "%-*s ", abbrev_len,
 				repo_find_unique_abbrev(the_repository, &wt->head_oid, DEFAULT_ABBREV));
-		if (wt->is_detached)
+		જો (wt->is_detached)
 			strbuf_addstr(&sb, "(detached HEAD)");
-		else if (wt->head_ref) {
-			char *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
+		નહીંતર જો (wt->head_ref) {
+			અક્ષર *ref = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 								 wt->head_ref,
 								 0);
 			strbuf_addf(&sb, "[%s]", ref);
-			free(ref);
-		} else
+			મુક્ત(ref);
+		} નહીંતર
 			strbuf_addstr(&sb, "(error)");
 	}
 
 	reason = worktree_lock_reason(wt);
-	if (verbose && reason && *reason)
+	જો (verbose && reason && *reason)
 		strbuf_addf(&sb, "\n\tlocked: %s", reason);
-	else if (reason)
+	નહીંતર જો (reason)
 		strbuf_addstr(&sb, " locked");
 
 	reason = worktree_prune_reason(wt, expire);
-	if (verbose && reason)
+	જો (verbose && reason)
 		strbuf_addf(&sb, "\n\tprunable: %s", reason);
-	else if (reason)
+	નહીંતર જો (reason)
 		strbuf_addstr(&sb, " prunable");
 
 	printf("%s\n", sb.buf);
 	strbuf_release(&sb);
 }
 
-static void measure_widths(struct worktree **wt, int *abbrev,
-			   struct worktree_display **d, int *maxwidth)
+સ્થિર શૂન્ય measure_widths(સંરચના worktree **wt, પૂર્ણાંક *abbrev,
+			   સંરચના worktree_display **d, પૂર્ણાંક *maxwidth)
 {
-	int i, display_alloc = 0;
-	struct worktree_display *display = NULL;
-	struct strbuf buf = STRBUF_INIT;
+	પૂર્ણાંક i, display_alloc = 0;
+	સંરચના worktree_display *display = ખાલી;
+	સંરચના strbuf buf = STRBUF_INIT;
 
-	for (i = 0; wt[i]; i++) {
-		int sha1_len;
+	માટે (i = 0; wt[i]; i++) {
+		પૂર્ણાંક sha1_len;
 		ALLOC_GROW(display, i + 1, display_alloc);
-		quote_path(wt[i]->path, NULL, &buf, 0);
+		quote_path(wt[i]->path, ખાલી, &buf, 0);
 		display[i].width = utf8_strwidth(buf.buf);
-		display[i].path = strbuf_detach(&buf, NULL);
+		display[i].path = strbuf_detach(&buf, ખાલી);
 
-		if (display[i].width > *maxwidth)
+		જો (display[i].width > *maxwidth)
 			*maxwidth = display[i].width;
 		sha1_len = strlen(repo_find_unique_abbrev(the_repository, &wt[i]->head_oid, *abbrev));
-		if (sha1_len > *abbrev)
+		જો (sha1_len > *abbrev)
 			*abbrev = sha1_len;
 	}
 	*d = display;
 }
 
-static int pathcmp(const void *a_, const void *b_)
+સ્થિર પૂર્ણાંક pathcmp(અચલ શૂન્ય *a_, અચલ શૂન્ય *b_)
 {
-	const struct worktree *const *a = a_;
-	const struct worktree *const *b = b_;
-	return fspathcmp((*a)->path, (*b)->path);
+	અચલ સંરચના worktree *અચલ *a = a_;
+	અચલ સંરચના worktree *અચલ *b = b_;
+	પાછા fspathcmp((*a)->path, (*b)->path);
 }
 
-static void pathsort(struct worktree **wt)
+સ્થિર શૂન્ય pathsort(સંરચના worktree **wt)
 {
-	int n = 0;
-	struct worktree **p = wt;
+	પૂર્ણાંક n = 0;
+	સંરચના worktree **p = wt;
 
-	while (*p++)
+	જ્યારે (*p++)
 		n++;
 	QSORT(wt, n, pathcmp);
 }
 
-static int list(int ac, const char **av, const char *prefix,
-		struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક list(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+		સંરચના repository *repo UNUSED)
 {
-	int porcelain = 0;
-	int line_terminator = '\n';
+	પૂર્ણાંક porcelain = 0;
+	પૂર્ણાંક લીટી_terminator = '\n';
 
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT_BOOL(0, "porcelain", &porcelain, N_("machine-readable output")),
 		OPT__VERBOSE(&verbose, N_("show extended annotations and reasons, if available")),
 		OPT_EXPIRY_DATE(0, "expire", &expire,
 				N_("add 'prunable' annotation to missing worktrees older than <time>")),
-		OPT_SET_INT('z', NULL, &line_terminator,
+		OPT_SET_INT('z', ખાલી, &લીટી_terminator,
 			    N_("terminate records with a NUL character"), '\0'),
 		OPT_END()
 	};
 
 	expire = TIME_MAX;
 	ac = parse_options(ac, av, prefix, options, git_worktree_list_usage, 0);
-	if (ac)
+	જો (ac)
 		usage_with_options(git_worktree_list_usage, options);
-	else if (verbose && porcelain)
+	નહીંતર જો (verbose && porcelain)
 		die(_("options '%s' and '%s' cannot be used together"), "--verbose", "--porcelain");
-	else if (!line_terminator && !porcelain)
+	નહીંતર જો (!લીટી_terminator && !porcelain)
 		die(_("the option '%s' requires '%s'"), "-z", "--porcelain");
-	else {
-		struct worktree **worktrees = get_worktrees(the_repository);
-		int path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
-		struct worktree_display *display = NULL;
+	નહીંતર {
+		સંરચના worktree **worktrees = get_worktrees(the_repository);
+		પૂર્ણાંક path_maxwidth = 0, abbrev = DEFAULT_ABBREV, i;
+		સંરચના worktree_display *display = ખાલી;
 
 		/* sort worktrees by path but keep main worktree at top */
 		pathsort(worktrees + 1);
 
-		if (!porcelain)
+		જો (!porcelain)
 			measure_widths(worktrees, &abbrev,
 				       &display, &path_maxwidth);
 
-		for (i = 0; worktrees[i]; i++) {
-			if (porcelain)
+		માટે (i = 0; worktrees[i]; i++) {
+			જો (porcelain)
 				show_worktree_porcelain(worktrees[i],
-							line_terminator);
-			else
+							લીટી_terminator);
+			નહીંતર
 				show_worktree(worktrees[i],
 					      &display[i], path_maxwidth, abbrev);
 		}
-		for (i = 0; display && worktrees[i]; i++)
-			free(display[i].path);
-		free(display);
+		માટે (i = 0; display && worktrees[i]; i++)
+			મુક્ત(display[i].path);
+		મુક્ત(display);
 		free_worktrees(worktrees);
 	}
-	return 0;
+	પાછા 0;
 }
 
-static int lock_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક lock_worktree(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+			 સંરચના repository *repo UNUSED)
 {
-	const char *reason = "", *old_reason;
-	struct option options[] = {
+	અચલ અક્ષર *reason = "", *old_reason;
+	સંરચના option options[] = {
 		OPT_STRING(0, "reason", &reason, N_("string"),
 			   N_("reason for locking")),
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
+	સંરચના worktree **worktrees, *wt;
+	અક્ષર *path;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_lock_usage, 0);
-	if (ac != 1)
+	જો (ac != 1)
 		usage_with_options(git_worktree_lock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	જો (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	જો (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
 
 	old_reason = worktree_lock_reason(wt);
-	if (old_reason) {
-		if (*old_reason)
+	જો (old_reason) {
+		જો (*old_reason)
 			die(_("'%s' is already locked, reason: %s"),
 			    av[0], old_reason);
 		die(_("'%s' is already locked"), av[0]);
@@ -1212,88 +1212,88 @@ static int lock_worktree(int ac, const char **av, const char *prefix,
 	write_file(path, "%s", reason);
 
 	free_worktrees(worktrees);
-	free(path);
-	return 0;
+	મુક્ત(path);
+	પાછા 0;
 }
 
-static int unlock_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક unlock_worktree(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+			   સંરચના repository *repo UNUSED)
 {
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	char *path;
-	int ret;
+	સંરચના worktree **worktrees, *wt;
+	અક્ષર *path;
+	પૂર્ણાંક ret;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_unlock_usage, 0);
-	if (ac != 1)
+	જો (ac != 1)
 		usage_with_options(git_worktree_unlock_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	જો (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	જો (is_main_worktree(wt))
 		die(_("The main working tree cannot be locked or unlocked"));
-	if (!worktree_lock_reason(wt))
+	જો (!worktree_lock_reason(wt))
 		die(_("'%s' is not locked"), av[0]);
 
 	path = repo_common_path(the_repository, "worktrees/%s/locked", wt->id);
 	ret = unlink_or_warn(path);
 
 	free_worktrees(worktrees);
-	free(path);
-	return ret;
+	મુક્ત(path);
+	પાછા ret;
 }
 
-static void validate_no_submodules(const struct worktree *wt)
+સ્થિર શૂન્ય validate_no_submodules(અચલ સંરચના worktree *wt)
 {
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	struct strbuf path = STRBUF_INIT;
-	int i, found_submodules = 0;
-	char *wt_gitdir;
+	સંરચના index_state istate = INDEX_STATE_INIT(the_repository);
+	સંરચના strbuf path = STRBUF_INIT;
+	પૂર્ણાંક i, found_submodules = 0;
+	અક્ષર *wt_gitdir;
 
 	wt_gitdir = get_worktree_git_dir(wt);
 
-	if (is_directory(worktree_git_path(wt, "modules"))) {
+	જો (is_directory(worktree_git_path(wt, "modules"))) {
 		/*
 		 * There could be false positives, e.g. the "modules"
 		 * directory exists but is empty. But it's a rare case and
 		 * this simpler check is probably good enough for now.
 		 */
 		found_submodules = 1;
-	} else if (read_index_from(&istate, worktree_git_path(wt, "index"),
+	} નહીંતર જો (read_index_from(&istate, worktree_git_path(wt, "index"),
 				   wt_gitdir) > 0) {
-		for (i = 0; i < istate.cache_nr; i++) {
-			struct cache_entry *ce = istate.cache[i];
-			int err;
+		માટે (i = 0; i < istate.cache_nr; i++) {
+			સંરચના cache_entry *ce = istate.cache[i];
+			પૂર્ણાંક err;
 
-			if (!S_ISGITLINK(ce->ce_mode))
-				continue;
+			જો (!S_ISGITLINK(ce->ce_mode))
+				ચાલુ;
 
 			strbuf_reset(&path);
 			strbuf_addf(&path, "%s/%s", wt->path, ce->name);
-			if (!is_submodule_populated_gently(path.buf, &err))
-				continue;
+			જો (!is_submodule_populated_gently(path.buf, &err))
+				ચાલુ;
 
 			found_submodules = 1;
-			break;
+			તોડો;
 		}
 	}
 	discard_index(&istate);
 	strbuf_release(&path);
-	free(wt_gitdir);
+	મુક્ત(wt_gitdir);
 
-	if (found_submodules)
+	જો (found_submodules)
 		die(_("working trees containing submodules cannot be moved or removed"));
 }
 
-static int move_worktree(int ac, const char **av, const char *prefix,
-			 struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક move_worktree(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+			 સંરચના repository *repo UNUSED)
 {
-	int force = 0;
-	struct option options[] = {
+	પૂર્ણાંક force = 0;
+	સંરચના option options[] = {
 		OPT__FORCE(&force,
 			 N_("force move even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
@@ -1301,31 +1301,31 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf dst = STRBUF_INIT;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	char *path;
+	સંરચના worktree **worktrees, *wt;
+	સંરચના strbuf dst = STRBUF_INIT;
+	સંરચના strbuf errmsg = STRBUF_INIT;
+	અચલ અક્ષર *reason = ખાલી;
+	અક્ષર *path;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_move_usage,
 			   0);
-	if (ac != 2)
+	જો (ac != 2)
 		usage_with_options(git_worktree_move_usage, options);
 
 	path = prefix_filename(prefix, av[1]);
 	strbuf_addstr(&dst, path);
-	free(path);
+	મુક્ત(path);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	જો (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	જો (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (is_directory(dst.buf)) {
-		const char *sep = find_last_dir_sep(wt->path);
+	જો (is_directory(dst.buf)) {
+		અચલ અક્ષર *sep = find_last_dir_sep(wt->path);
 
-		if (!sep)
+		જો (!sep)
 			die(_("could not figure out destination name from '%s'"),
 			    wt->path);
 		strbuf_trim_trailing_dir_sep(&dst);
@@ -1335,27 +1335,27 @@ static int move_worktree(int ac, const char **av, const char *prefix,
 
 	validate_no_submodules(wt);
 
-	if (force < 2)
+	જો (force < 2)
 		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	જો (reason) {
+		જો (*reason)
 			die(_("cannot move a locked working tree, lock reason: %s\nuse 'move -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot move a locked working tree;\nuse 'move -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, 0))
+	જો (validate_worktree(wt, &errmsg, 0))
 		die(_("validation failed, cannot move working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (rename(wt->path, dst.buf) == -1)
+	જો (rename(wt->path, dst.buf) == -1)
 		die_errno(_("failed to move '%s' to '%s'"), wt->path, dst.buf);
 
 	update_worktree_location(wt, dst.buf, use_relative_paths);
 
 	strbuf_release(&dst);
 	free_worktrees(worktrees);
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -1369,12 +1369,12 @@ static int move_worktree(int ac, const char **av, const char *prefix,
  * it's absolutely safe to do so from _our_ point of view because we
  * know better.
  */
-static void check_clean_worktree(struct worktree *wt,
-				 const char *original_path)
+સ્થિર શૂન્ય check_clean_worktree(સંરચના worktree *wt,
+				 અચલ અક્ષર *original_path)
 {
-	struct child_process cp;
-	char buf[1];
-	int ret;
+	સંરચના child_process cp;
+	અક્ષર buf[1];
+	પૂર્ણાંક ret;
 
 	/*
 	 * Until we sort this out, all submodules are "dirty" and
@@ -1386,85 +1386,85 @@ static void check_clean_worktree(struct worktree *wt,
 	strvec_pushf(&cp.env, "%s=%s/.git",
 		     GIT_DIR_ENVIRONMENT, wt->path);
 	strvec_pushf(&cp.env, "%s=%s",
-		     GIT_WORK_TREE_ENVIRONMENT, wt->path);
+		     GIT_WORK_વૃક્ષ_ENVIRONMENT, wt->path);
 	strvec_pushl(&cp.args, "status",
 		     "--porcelain", "--ignore-submodules=none",
-		     NULL);
+		     ખાલી);
 	cp.git_cmd = 1;
 	cp.dir = wt->path;
 	cp.out = -1;
 	ret = start_command(&cp);
-	if (ret)
+	જો (ret)
 		die_errno(_("failed to run 'git status' on '%s'"),
 			  original_path);
-	ret = xread(cp.out, buf, sizeof(buf));
-	if (ret)
+	ret = xread(cp.out, buf, કદ(buf));
+	જો (ret)
 		die(_("'%s' contains modified or untracked files, use --force to delete it"),
 		    original_path);
 	close(cp.out);
 	ret = finish_command(&cp);
-	if (ret)
+	જો (ret)
 		die_errno(_("failed to run 'git status' on '%s', code %d"),
 			  original_path, ret);
 }
 
-static int delete_git_work_tree(struct worktree *wt)
+સ્થિર પૂર્ણાંક delete_git_work_વૃક્ષ(સંરચના worktree *wt)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	સંરચના strbuf sb = STRBUF_INIT;
+	પૂર્ણાંક ret = 0;
 
 	strbuf_addstr(&sb, wt->path);
-	if (remove_dir_recursively(&sb, 0)) {
+	જો (remove_dir_recursively(&sb, 0)) {
 		error_errno(_("failed to delete '%s'"), sb.buf);
 		ret = -1;
 	}
 	strbuf_release(&sb);
-	return ret;
+	પાછા ret;
 }
 
-static int remove_worktree(int ac, const char **av, const char *prefix,
-			   struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક remove_worktree(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+			   સંરચના repository *repo UNUSED)
 {
-	int force = 0;
-	struct option options[] = {
+	પૂર્ણાંક force = 0;
+	સંરચના option options[] = {
 		OPT__FORCE(&force,
 			 N_("force removal even if worktree is dirty or locked"),
 			 PARSE_OPT_NOCOMPLETE),
 		OPT_END()
 	};
-	struct worktree **worktrees, *wt;
-	struct strbuf errmsg = STRBUF_INIT;
-	const char *reason = NULL;
-	int ret = 0;
+	સંરચના worktree **worktrees, *wt;
+	સંરચના strbuf errmsg = STRBUF_INIT;
+	અચલ અક્ષર *reason = ખાલી;
+	પૂર્ણાંક ret = 0;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_remove_usage, 0);
-	if (ac != 1)
+	જો (ac != 1)
 		usage_with_options(git_worktree_remove_usage, options);
 
 	worktrees = get_worktrees(the_repository);
 	wt = find_worktree(worktrees, prefix, av[0]);
-	if (!wt)
+	જો (!wt)
 		die(_("'%s' is not a working tree"), av[0]);
-	if (is_main_worktree(wt))
+	જો (is_main_worktree(wt))
 		die(_("'%s' is a main working tree"), av[0]);
-	if (force < 2)
+	જો (force < 2)
 		reason = worktree_lock_reason(wt);
-	if (reason) {
-		if (*reason)
+	જો (reason) {
+		જો (*reason)
 			die(_("cannot remove a locked working tree, lock reason: %s\nuse 'remove -f -f' to override or unlock first"),
 			    reason);
 		die(_("cannot remove a locked working tree;\nuse 'remove -f -f' to override or unlock first"));
 	}
-	if (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
+	જો (validate_worktree(wt, &errmsg, WT_VALIDATE_WORKTREE_MISSING_OK))
 		die(_("validation failed, cannot remove working tree: %s"),
 		    errmsg.buf);
 	strbuf_release(&errmsg);
 
-	if (file_exists(wt->path)) {
-		if (!force)
+	જો (file_exists(wt->path)) {
+		જો (!force)
 			check_clean_worktree(wt, av[0]);
 
-		ret |= delete_git_work_tree(wt);
+		ret |= delete_git_work_વૃક્ષ(wt);
 	}
 	/*
 	 * continue on even if ret is non-zero, there's no going back
@@ -1474,48 +1474,48 @@ static int remove_worktree(int ac, const char **av, const char *prefix,
 	delete_worktrees_dir_if_empty();
 
 	free_worktrees(worktrees);
-	return ret;
+	પાછા ret;
 }
 
-static void report_repair(int iserr, const char *path, const char *msg, void *cb_data)
+સ્થિર શૂન્ય report_repair(પૂર્ણાંક iserr, અચલ અક્ષર *path, અચલ અક્ષર *સંદેશ, શૂન્ય *cb_data)
 {
-	if (!iserr) {
-		fprintf_ln(stderr, _("repair: %s: %s"), msg, path);
-	} else {
-		int *exit_status = (int *)cb_data;
-		fprintf_ln(stderr, _("error: %s: %s"), msg, path);
+	જો (!iserr) {
+		fprintf_ln(stderr, _("repair: %s: %s"), સંદેશ, path);
+	} નહીંતર {
+		પૂર્ણાંક *exit_status = (પૂર્ણાંક *)cb_data;
+		fprintf_ln(stderr, _("error: %s: %s"), સંદેશ, path);
 		*exit_status = 1;
 	}
 }
 
-static int repair(int ac, const char **av, const char *prefix,
-		  struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક repair(પૂર્ણાંક ac, અચલ અક્ષર **av, અચલ અક્ષર *prefix,
+		  સંરચના repository *repo UNUSED)
 {
-	const char **p;
-	const char *self[] = { ".", NULL };
-	struct option options[] = {
+	અચલ અક્ષર **p;
+	અચલ અક્ષર *self[] = { ".", ખાલી };
+	સંરચના option options[] = {
 		OPT_BOOL(0, "relative-paths", &use_relative_paths,
 			 N_("use relative paths for worktrees")),
 		OPT_END()
 	};
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_repair_usage, 0);
 	p = ac > 0 ? av : self;
-	for (; *p; p++)
+	માટે (; *p; p++)
 		repair_worktree_at_path(the_repository, *p, report_repair,
 					&rc, use_relative_paths);
 	repair_worktrees(the_repository, report_repair, &rc, use_relative_paths);
-	return rc;
+	પાછા rc;
 }
 
-int cmd_worktree(int ac,
-		 const char **av,
-		 const char *prefix,
-		 struct repository *repo)
+પૂર્ણાંક cmd_worktree(પૂર્ણાંક ac,
+		 અચલ અક્ષર **av,
+		 અચલ અક્ષર *prefix,
+		 સંરચના repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ખાલી;
+	સંરચના option options[] = {
 		OPT_SUBCOMMAND("add", &fn, add),
 		OPT_SUBCOMMAND("prune", &fn, prune),
 		OPT_SUBCOMMAND("list", &fn, list),
@@ -1527,9 +1527,9 @@ int cmd_worktree(int ac,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_worktree_config, NULL);
+	repo_config(the_repository, git_worktree_config, ખાલી);
 
-	if (!prefix)
+	જો (!prefix)
 		prefix = "";
 
 	ac = parse_options(ac, av, prefix, options, git_worktree_usage, 0);
@@ -1537,5 +1537,5 @@ int cmd_worktree(int ac,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	return fn(ac, av, prefix, repo);
+	પાછા fn(ac, av, prefix, repo);
 }

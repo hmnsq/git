@@ -4,144 +4,144 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "branch.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refspec.h"
-#include "run-command.h"
-#include "remote.h"
-#include "transport.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "send-pack.h"
-#include "trace2.h"
-#include "color.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "advice.h"
+#અન્તર્ભાવ "branch.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "dir.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "refspec.h"
+#અન્તર્ભાવ "run-command.h"
+#અન્તર્ભાવ "remote.h"
+#અન્તર્ભાવ "transport.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "pkt-line.h"
+#અન્તર્ભાવ "submodule.h"
+#અન્તર્ભાવ "submodule-config.h"
+#અન્તર્ભાવ "send-pack.h"
+#અન્તર્ભાવ "trace2.h"
+#અન્તર્ભાવ "color.h"
 
-static const char * const push_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ ધકેલો_usage[] = {
 	N_("git push [<options>] [<repository> [<refspec>...]]"),
-	NULL,
+	ખાલી,
 };
 
-static enum git_colorbool push_use_color = GIT_COLOR_UNKNOWN;
-static char push_colors[][COLOR_MAXLEN] = {
+સ્થિર ગણના git_colorbool ધકેલો_use_color = GIT_COLOR_UNKNOWN;
+સ્થિર અક્ષર ધકેલો_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
 	GIT_COLOR_RED,	/* ERROR */
 };
 
-enum color_push {
-	PUSH_COLOR_RESET = 0,
-	PUSH_COLOR_ERROR = 1
+ગણના color_ધકેલો {
+	ધકેલો_COLOR_RESET = 0,
+	ધકેલો_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+સ્થિર પૂર્ણાંક parse_ધકેલો_color_slot(અચલ અક્ષર *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	જો (!strcasecmp(slot, "reset"))
+		પાછા ધકેલો_COLOR_RESET;
+	જો (!strcasecmp(slot, "error"))
+		પાછા ધકેલો_COLOR_ERROR;
+	પાછા -1;
 }
 
-static const char *push_get_color(enum color_push ix)
+સ્થિર અચલ અક્ષર *ધકેલો_get_color(ગણના color_ધકેલો ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	જો (want_color_stderr(ધકેલો_use_color))
+		પાછા ધકેલો_colors[ix];
+	પાછા "";
 }
 
-static int thin = 1;
-static int deleterefs;
-static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static enum transport_family family;
+સ્થિર પૂર્ણાંક thin = 1;
+સ્થિર પૂર્ણાંક deleterefs;
+સ્થિર અચલ અક્ષર *receivepack;
+સ્થિર પૂર્ણાંક verbosity;
+સ્થિર પૂર્ણાંક progress = -1;
+સ્થિર પૂર્ણાંક recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+સ્થિર ગણના transport_family family;
 
-static struct push_cas_option cas;
+સ્થિર સંરચના ધકેલો_cas_option cas;
 
-static struct refspec rs;
+સ્થિર સંરચના refspec rs;
 
-static struct string_list push_options_config = STRING_LIST_INIT_DUP;
+સ્થિર સંરચના string_list ધકેલો_options_config = STRING_LIST_INIT_DUP;
 
-static void refspec_append_mapped(struct refspec *refspec, const char *ref,
-				  struct remote *remote, struct ref *matched)
+સ્થિર શૂન્ય refspec_append_mapped(સંરચના refspec *refspec, અચલ અક્ષર *ref,
+				  સંરચના remote *remote, સંરચના ref *matched)
 {
-	const char *branch_name;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	અચલ અક્ષર *branch_name;
+	સંરચના repo_config_કિંમતો *cfg = repo_config_કિંમતો(the_repository);
 
-	if (remote->push.nr) {
-		struct refspec_item query = {
+	જો (remote->ધકેલો.nr) {
+		સંરચના refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		જો (!refspec_find_match(&remote->ધકેલો, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
-			free(query.dst);
-			return;
+			મુક્ત(query.dst);
+			પાછા;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	જો (cfg->ધકેલો_default == ધકેલો_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
-		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		સંરચના branch *branch = branch_get(branch_name);
+		જો (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			પાછા;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+સ્થિર શૂન્ય set_refspecs(અચલ અક્ષર **refs, પૂર્ણાંક nr, સંરચના remote *remote)
 {
-	struct ref *local_refs = NULL;
-	int i;
+	સંરચના ref *local_refs = ખાલી;
+	પૂર્ણાંક i;
 
-	for (i = 0; i < nr; i++) {
-		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+	માટે (i = 0; i < nr; i++) {
+		અચલ અક્ષર *ref = refs[i];
+		જો (!strcmp("tag", ref)) {
+			જો (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			જો (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			નહીંતર
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} નહીંતર જો (deleterefs) {
+			જો (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
-			struct ref *matched = NULL;
+		} નહીંતર જો (!strchr(ref, ':')) {
+			સંરચના ref *matched = ખાલી;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			જો (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			જો (ગણતરી_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			નહીંતર
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} નહીંતર
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
 }
 
-static NORETURN void die_push_simple(struct branch *branch,
-				     struct remote *remote)
+સ્થિર NORETURN શૂન્ય die_ધકેલો_simple(સંરચના branch *branch,
+				     સંરચના remote *remote)
 {
 	/*
 	 * There's no point in using shorten_unambiguous_ref here,
@@ -151,10 +151,10 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * upstream to a non-branch, we should probably be showing
 	 * them the big ugly fully qualified ref.
 	 */
-	const char *advice_pushdefault_maybe = "";
-	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	અચલ અક્ષર *advice_pushdefault_maybe = "";
+	અચલ અક્ષર *advice_automergesimple_maybe = "";
+	અચલ અક્ષર *short_upstream = branch->merge[0]->src;
+	સંરચના repo_config_કિંમતો *cfg = repo_config_કિંમતો(the_repository);
 
 	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
 
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	જો (cfg->ધકેલો_default == ધકેલો_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	જો (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -188,23 +188,23 @@ static NORETURN void die_push_simple(struct branch *branch,
 	    advice_automergesimple_maybe);
 }
 
-static const char message_detached_head_die[] =
+સ્થિર અચલ અક્ષર message_detached_head_die[] =
 	N_("You are not currently on a branch.\n"
 	   "To push the history leading to the current (detached HEAD)\n"
 	   "state now, use\n"
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+સ્થિર અચલ અક્ષર *get_upstream_ref(પૂર્ણાંક flags, સંરચના branch *branch, અચલ અક્ષર *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	જો (branch->merge_nr == 0 && (flags & TRANSPORT_ધકેલો_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		પાછા branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
-		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	જો (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+		અચલ અક્ષર *advice_autosetup_maybe = "";
+		જો (!(flags & TRANSPORT_ધકેલો_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,61 +221,61 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	જો (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	પાછા branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+સ્થિર શૂન્ય setup_default_ધકેલો_refspecs(પૂર્ણાંક *flags, સંરચના remote *remote)
 {
-	struct branch *branch;
-	const char *dst;
-	int same_remote;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	સંરચના branch *branch;
+	અચલ અક્ષર *dst;
+	પૂર્ણાંક same_remote;
+	સંરચના repo_config_કિંમતો *cfg = repo_config_કિંમતો(the_repository);
 
-	switch (cfg->push_default) {
-	case PUSH_DEFAULT_MATCHING:
+	પસંદગી (cfg->ધકેલો_default) {
+	સ્થિતિ ધકેલો_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		પાછા;
 
-	case PUSH_DEFAULT_NOTHING:
+	સ્થિતિ ધકેલો_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
-	default:
-		break;
+		પાછા;
+	મૂળભૂત:
+		તોડો;
 	}
 
-	branch = branch_get(NULL);
-	if (!branch)
+	branch = branch_get(ખાલી);
+	જો (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
-	same_remote = !strcmp(remote->name, remote_for_branch(branch, NULL));
+	same_remote = !strcmp(remote->name, remote_for_branch(branch, ખાલી));
 
-	switch (cfg->push_default) {
-	default:
-	case PUSH_DEFAULT_UNSPECIFIED:
-	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
-			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
-			die_push_simple(branch, remote);
-		break;
+	પસંદગી (cfg->ધકેલો_default) {
+	મૂળભૂત:
+	સ્થિતિ ધકેલો_DEFAULT_UNSPECIFIED:
+	સ્થિતિ ધકેલો_DEFAULT_SIMPLE:
+		જો (!same_remote)
+			તોડો;
+		જો (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+			die_ધકેલો_simple(branch, remote);
+		તોડો;
 
-	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+	સ્થિતિ ધકેલો_DEFAULT_UPSTREAM:
+		જો (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
 			    remote->name, branch->name);
 		dst = get_upstream_ref(*flags, branch, remote->name);
-		break;
+		તોડો;
 
-	case PUSH_DEFAULT_CURRENT:
-		break;
+	સ્થિતિ ધકેલો_DEFAULT_CURRENT:
+		તોડો;
 	}
 
 	/*
@@ -283,496 +283,496 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
-		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
+	જો ((*flags & TRANSPORT_ધકેલો_AUTO_UPSTREAM) && branch->merge_nr == 0)
+		*flags |= TRANSPORT_ધકેલો_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
 }
 
-static const char message_advice_pull_before_push[] =
+સ્થિર અચલ અક્ષર message_advice_pull_before_ધકેલો[] =
 	N_("Updates were rejected because the tip of your current branch is behind\n"
 	   "its remote counterpart. If you want to integrate the remote changes,\n"
 	   "use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_checkout_pull_push[] =
+સ્થિર અચલ અક્ષર message_advice_checkout_pull_ધકેલો[] =
 	N_("Updates were rejected because a pushed branch tip is behind its remote\n"
 	   "counterpart. If you want to integrate the remote changes, use 'git pull'\n"
 	   "before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_fetch_first[] =
+સ્થિર અચલ અક્ષર message_advice_ref_fetch_first[] =
 	N_("Updates were rejected because the remote contains work that you do not\n"
 	   "have locally. This is usually caused by another repository pushing to\n"
 	   "the same ref. If you want to integrate the remote changes, use\n"
 	   "'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_already_exists[] =
+સ્થિર અચલ અક્ષર message_advice_ref_already_exists[] =
 	N_("Updates were rejected because the tag already exists in the remote.");
 
-static const char message_advice_ref_needs_force[] =
+સ્થિર અચલ અક્ષર message_advice_ref_needs_force[] =
 	N_("You cannot update a remote ref that points at a non-commit object,\n"
 	   "or update a remote ref to make it point at a non-commit object,\n"
 	   "without using the '--force' option.\n");
 
-static const char message_advice_ref_needs_update[] =
+સ્થિર અચલ અક્ષર message_advice_ref_needs_update[] =
 	N_("Updates were rejected because the tip of the remote-tracking branch has\n"
 	   "been updated since the last checkout. If you want to integrate the\n"
 	   "remote changes, use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static void advise_pull_before_push(void)
+સ્થિર શૂન્ય advise_pull_before_ધકેલો(શૂન્ય)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_pull_before_push));
+	જો (!advice_enabled(ADVICE_ધકેલો_NON_FF_CURRENT) || !advice_enabled(ADVICE_ધકેલો_UPDATE_REJECTED))
+		પાછા;
+	advise(_(message_advice_pull_before_ધકેલો));
 }
 
-static void advise_checkout_pull_push(void)
+સ્થિર શૂન્ય advise_checkout_pull_ધકેલો(શૂન્ય)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_checkout_pull_push));
+	જો (!advice_enabled(ADVICE_ધકેલો_NON_FF_MATCHING) || !advice_enabled(ADVICE_ધકેલો_UPDATE_REJECTED))
+		પાછા;
+	advise(_(message_advice_checkout_pull_ધકેલો));
 }
 
-static void advise_ref_already_exists(void)
+સ્થિર શૂન્ય advise_ref_already_exists(શૂન્ય)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	જો (!advice_enabled(ADVICE_ધકેલો_ALREADY_EXISTS) || !advice_enabled(ADVICE_ધકેલો_UPDATE_REJECTED))
+		પાછા;
 	advise(_(message_advice_ref_already_exists));
 }
 
-static void advise_ref_fetch_first(void)
+સ્થિર શૂન્ય advise_ref_fetch_first(શૂન્ય)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	જો (!advice_enabled(ADVICE_ધકેલો_FETCH_FIRST) || !advice_enabled(ADVICE_ધકેલો_UPDATE_REJECTED))
+		પાછા;
 	advise(_(message_advice_ref_fetch_first));
 }
 
-static void advise_ref_needs_force(void)
+સ્થિર શૂન્ય advise_ref_needs_force(શૂન્ય)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	જો (!advice_enabled(ADVICE_ધકેલો_NEEDS_FORCE) || !advice_enabled(ADVICE_ધકેલો_UPDATE_REJECTED))
+		પાછા;
 	advise(_(message_advice_ref_needs_force));
 }
 
-static void advise_ref_needs_update(void)
+સ્થિર શૂન્ય advise_ref_needs_update(શૂન્ય)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	જો (!advice_enabled(ADVICE_ધકેલો_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_ધકેલો_UPDATE_REJECTED))
+		પાછા;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+સ્થિર પૂર્ણાંક ધકેલો_with_options(સંરચના transport *transport, સંરચના refspec *rs,
+			     પૂર્ણાંક flags)
 {
-	int err;
-	unsigned int reject_reasons;
-	char *anon_url = transport_anonymize_url(transport->url);
+	પૂર્ણાંક err;
+	unsigned પૂર્ણાંક reject_reasons;
+	અક્ષર *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	જો (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
-	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
+	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : ખાલી);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	જો (!is_empty_cas(&cas)) {
+		જો (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	જો (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
-	err = transport_push(the_repository, transport,
+	err = transport_ધકેલો(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
+	જો (err != 0) {
+		fprintf(stderr, "%s", ધકેલો_get_color(ધકેલો_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
+		fprintf(stderr, "%s", ધકેલો_get_color(ધકેલો_COLOR_RESET));
 	}
 
 	err |= transport_disconnect(transport);
-	free(anon_url);
-	if (!err)
-		return 0;
+	મુક્ત(anon_url);
+	જો (!err)
+		પાછા 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
-		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
-		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	જો (reject_reasons & REJECT_NON_FF_HEAD) {
+		advise_pull_before_ધકેલો();
+	} નહીંતર જો (reject_reasons & REJECT_NON_FF_OTHER) {
+		advise_checkout_pull_ધકેલો();
+	} નહીંતર જો (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} નહીંતર જો (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} નહીંતર જો (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} નહીંતર જો (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	પાછા 1;
 }
 
-static int do_push(int flags,
-		   const struct string_list *push_options,
-		   struct remote *remote)
+સ્થિર પૂર્ણાંક do_ધકેલો(પૂર્ણાંક flags,
+		   અચલ સંરચના string_list *ધકેલો_options,
+		   સંરચના remote *remote)
 {
-	int errs;
-	struct strvec *url;
-	struct refspec *push_refspec = &rs;
+	પૂર્ણાંક errs;
+	સંરચના strvec *url;
+	સંરચના refspec *ધકેલો_refspec = &rs;
 
-	if (push_options->nr)
-		flags |= TRANSPORT_PUSH_OPTIONS;
+	જો (ધકેલો_options->nr)
+		flags |= TRANSPORT_ધકેલો_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
-			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
-			setup_default_push_refspecs(&flags, remote);
+	જો (!ધકેલો_refspec->nr && !(flags & TRANSPORT_ધકેલો_ALL)) {
+		જો (remote->ધકેલો.nr) {
+			ધકેલો_refspec = &remote->ધકેલો;
+		} નહીંતર જો (!(flags & TRANSPORT_ધકેલો_MIRROR))
+			setup_default_ધકેલો_refspecs(&flags, remote);
 	}
 	errs = 0;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
-		struct transport *transport =
+	url = ધકેલો_url_of_remote(remote);
+	માટે (size_t i = 0; i < url->nr; i++) {
+		સંરચના transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
-			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		જો (flags & TRANSPORT_ધકેલો_OPTIONS)
+			transport->ધકેલો_options = ધકેલો_options;
+		જો (ધકેલો_with_options(transport, ધકેલો_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	પાછા !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+સ્થિર પૂર્ણાંક option_parse_recurse_submodules(અચલ સંરચના option *opt,
+				   અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	int *recurse_submodules = opt->value;
+	પૂર્ણાંક *recurse_submodules = opt->કિંમત;
 
-	if (unset)
+	જો (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	નહીંતર {
+		જો (!strcmp(arg, "only-is-on-demand")) {
+			જો (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
-			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
+		} નહીંતર {
+			*recurse_submodules = parse_ધકેલો_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	પાછા 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+સ્થિર શૂન્ય set_ધકેલો_cert_flags(પૂર્ણાંક *flags, પૂર્ણાંક v)
 {
-	switch (v) {
-	case SEND_PACK_PUSH_CERT_NEVER:
-		*flags &= ~(TRANSPORT_PUSH_CERT_ALWAYS | TRANSPORT_PUSH_CERT_IF_ASKED);
-		break;
-	case SEND_PACK_PUSH_CERT_ALWAYS:
-		*flags |= TRANSPORT_PUSH_CERT_ALWAYS;
-		*flags &= ~TRANSPORT_PUSH_CERT_IF_ASKED;
-		break;
-	case SEND_PACK_PUSH_CERT_IF_ASKED:
-		*flags |= TRANSPORT_PUSH_CERT_IF_ASKED;
-		*flags &= ~TRANSPORT_PUSH_CERT_ALWAYS;
-		break;
+	પસંદગી (v) {
+	સ્થિતિ SEND_PACK_ધકેલો_CERT_NEVER:
+		*flags &= ~(TRANSPORT_ધકેલો_CERT_ALWAYS | TRANSPORT_ધકેલો_CERT_IF_ASKED);
+		તોડો;
+	સ્થિતિ SEND_PACK_ધકેલો_CERT_ALWAYS:
+		*flags |= TRANSPORT_ધકેલો_CERT_ALWAYS;
+		*flags &= ~TRANSPORT_ધકેલો_CERT_IF_ASKED;
+		તોડો;
+	સ્થિતિ SEND_PACK_ધકેલો_CERT_IF_ASKED:
+		*flags |= TRANSPORT_ધકેલો_CERT_IF_ASKED;
+		*flags &= ~TRANSPORT_ધકેલો_CERT_ALWAYS;
+		તોડો;
 	}
 }
 
 
-static int git_push_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+સ્થિર પૂર્ણાંક git_ધકેલો_config(અચલ અક્ષર *k, અચલ અક્ષર *v,
+			   અચલ સંરચના config_context *ctx, શૂન્ય *cb)
 {
-	const char *slot_name;
-	int *flags = cb;
+	અચલ અક્ષર *slot_name;
+	પૂર્ણાંક *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
-			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
-			break;
-		case 1:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+	જો (!strcmp(k, "push.followtags")) {
+		જો (git_config_bool(k, v))
+			*flags |= TRANSPORT_ધકેલો_FOLLOW_TAGS;
+		નહીંતર
+			*flags &= ~TRANSPORT_ધકેલો_FOLLOW_TAGS;
+		પાછા 0;
+	} નહીંતર જો (!strcmp(k, "push.autosetupremote")) {
+		જો (git_config_bool(k, v))
+			*flags |= TRANSPORT_ધકેલો_AUTO_UPSTREAM;
+		પાછા 0;
+	} નહીંતર જો (!strcmp(k, "push.gpgsign")) {
+		પસંદગી (git_parse_maybe_bool(v)) {
+		સ્થિતિ 0:
+			set_ધકેલો_cert_flags(flags, SEND_PACK_ધકેલો_CERT_NEVER);
+			તોડો;
+		સ્થિતિ 1:
+			set_ધકેલો_cert_flags(flags, SEND_PACK_ધકેલો_CERT_ALWAYS);
+			તોડો;
+		મૂળભૂત:
+			જો (!strcasecmp(v, "if-asked"))
+				set_ધકેલો_cert_flags(flags, SEND_PACK_ધકેલો_CERT_IF_ASKED);
+			નહીંતર
+				પાછા error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
-		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} નહીંતર જો (!strcmp(k, "push.recursesubmodules")) {
+		recurse_submodules = parse_ધકેલો_recurse_submodules_arg(k, v);
+	} નહીંતર જો (!strcmp(k, "submodule.recurse")) {
+		પૂર્ણાંક val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
-		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
-			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+	} નહીંતર જો (!strcmp(k, "push.pushoption")) {
+		પાછા parse_transport_option(k, v, &ધકેલો_options_config);
+	} નહીંતર જો (!strcmp(k, "color.push")) {
+		ધકેલો_use_color = git_config_colorbool(k, v);
+		પાછા 0;
+	} નહીંતર જો (skip_prefix(k, "color.push.", &slot_name)) {
+		પૂર્ણાંક slot = parse_ધકેલો_color_slot(slot_name);
+		જો (slot < 0)
+			પાછા 0;
+		જો (!v)
+			પાછા config_error_nonbool(k);
+		પાછા color_parse(v, ધકેલો_colors[slot]);
+	} નહીંતર જો (!strcmp(k, "push.useforceifincludes")) {
+		જો (git_config_bool(k, v))
+			*flags |= TRANSPORT_ધકેલો_FORCE_IF_INCLUDES;
+		નહીંતર
+			*flags &= ~TRANSPORT_ધકેલો_FORCE_IF_INCLUDES;
+		પાછા 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	પાછા git_default_config(k, v, ctx, ખાલી);
 }
 
-static int push_multiple(struct string_list *list,
-			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
-			 const char **refspecs,
-			 int refspec_nr)
+સ્થિર પૂર્ણાંક ધકેલો_multiple(સંરચના string_list *list,
+			 અચલ સંરચના string_list *ધકેલો_options,
+			 પૂર્ણાંક flags,
+			 પૂર્ણાંક tags,
+			 અચલ અક્ષર **refspecs,
+			 પૂર્ણાંક refspec_nr)
 {
-	int result = 0;
+	પૂર્ણાંક result = 0;
 	size_t i;
-	struct strvec argv = STRVEC_INIT;
+	સંરચના strvec argv = STRVEC_INIT;
 
-	strvec_push(&argv, "push");
+	strvec_ધકેલો(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
-		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
-		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
-		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
-		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
-		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
-		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
-		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
-		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
-		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
-		strvec_push(&argv, "--mirror");
+	જો (flags & TRANSPORT_ધકેલો_FORCE)
+		strvec_ધકેલો(&argv, "--force");
+	જો (flags & TRANSPORT_ધકેલો_DRY_RUN)
+		strvec_ધકેલો(&argv, "--dry-run");
+	જો (flags & TRANSPORT_ધકેલો_PORCELAIN)
+		strvec_ધકેલો(&argv, "--porcelain");
+	જો (flags & TRANSPORT_ધકેલો_PRUNE)
+		strvec_ધકેલો(&argv, "--prune");
+	જો (flags & TRANSPORT_ધકેલો_NO_HOOK)
+		strvec_ધકેલો(&argv, "--no-verify");
+	જો (flags & TRANSPORT_ધકેલો_FOLLOW_TAGS)
+		strvec_ધકેલો(&argv, "--follow-tags");
+	જો (flags & TRANSPORT_ધકેલો_SET_UPSTREAM)
+		strvec_ધકેલો(&argv, "--set-upstream");
+	જો (flags & TRANSPORT_ધકેલો_FORCE_IF_INCLUDES)
+		strvec_ધકેલો(&argv, "--force-if-includes");
+	જો (flags & TRANSPORT_ધકેલો_ALL)
+		strvec_ધકેલો(&argv, "--all");
+	જો (flags & TRANSPORT_ધકેલો_MIRROR)
+		strvec_ધકેલો(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
-		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
-		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
-		strvec_push(&argv, "--no-thin");
+	જો (flags & TRANSPORT_ધકેલો_CERT_ALWAYS)
+		strvec_ધકેલો(&argv, "--signed=yes");
+	નહીંતર જો (flags & TRANSPORT_ધકેલો_CERT_IF_ASKED)
+		strvec_ધકેલો(&argv, "--signed=if-asked");
+	જો (!thin)
+		strvec_ધકેલો(&argv, "--no-thin");
 
-	if (deleterefs)
-		strvec_push(&argv, "--delete");
+	જો (deleterefs)
+		strvec_ધકેલો(&argv, "--delete");
 
-	if (receivepack)
+	જો (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
-		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(&argv, "-q");
-	if (progress > 0)
-		strvec_push(&argv, "--progress");
-	else if (progress == 0)
-		strvec_push(&argv, "--no-progress");
+	જો (verbosity >= 2)
+		strvec_ધકેલો(&argv, "-v");
+	જો (verbosity >= 1)
+		strvec_ધકેલો(&argv, "-v");
+	નહીંતર જો (verbosity < 0)
+		strvec_ધકેલો(&argv, "-q");
+	જો (progress > 0)
+		strvec_ધકેલો(&argv, "--progress");
+	નહીંતર જો (progress == 0)
+		strvec_ધકેલો(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(&argv, "--ipv6");
+	જો (family == TRANSPORT_FAMILY_IPV4)
+		strvec_ધકેલો(&argv, "--ipv4");
+	નહીંતર જો (family == TRANSPORT_FAMILY_IPV6)
+		strvec_ધકેલો(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
-		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
-		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(&argv, "--recurse-submodules=no");
+	જો (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+		strvec_ધકેલો(&argv, "--recurse-submodules=check");
+	નહીંતર જો (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_ધકેલો(&argv, "--recurse-submodules=on-demand");
+	નહીંતર જો (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+		strvec_ધકેલો(&argv, "--recurse-submodules=only");
+	નહીંતર જો (recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_ધકેલો(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
-		strvec_push(&argv, "--tags");
+	જો (tags)
+		strvec_ધકેલો(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	માટે (i = 0; i < ધકેલો_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
-			     push_options->items[i].string);
+			     ધકેલો_options->વસ્તુઓ[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	માટે (i = 0; i < cas.nr; i++) {
+		જો (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} નહીંતર જો (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
-			strvec_push(&argv, "--force-with-lease");
+		} નહીંતર {
+			strvec_ધકેલો(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
-		const char *name = list->items[i].string;
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+	માટે (i = 0; i < list->nr; i++) {
+		અચલ અક્ષર *name = list->વસ્તુઓ[i].string;
+		સંરચના child_process cmd = CHILD_PROCESS_INIT;
+		પૂર્ણાંક j;
 
 		strvec_pushv(&cmd.args, argv.v);
-		strvec_push(&cmd.args, name);
+		strvec_ધકેલો(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
-			strvec_push(&cmd.args, refspecs[j]);
+		માટે (j = 0; j < refspec_nr; j++)
+			strvec_ધકેલો(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		જો (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		જો (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	પાછા result;
 }
 
-static void die_if_repo_looks_like_ref(const char *repo)
+સ્થિર શૂન્ય die_if_repo_looks_like_ref(અચલ અક્ષર *repo)
 {
-	const char *slash = strchr(repo, '/');
-	struct strbuf name = STRBUF_INIT;
-	int code;
+	અચલ અક્ષર *slash = strchr(repo, '/');
+	સંરચના strbuf name = STRBUF_INIT;
+	પૂર્ણાંક code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	જો (!slash || !slash[1] || file_exists(repo))
+		પાછા;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	જો (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		પાછા;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
-	advise_if_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF,
+	advise_if_enabled(ADVICE_ધકેલો_REPO_LOOKS_LIKE_REF,
 			  _("Did you mean to use: git push %s %s?"),
 			  name.buf, slash + 1);
 	strbuf_release(&name);
 	exit(code);
 }
 
-int cmd_push(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+પૂર્ણાંક cmd_ધકેલો(પૂર્ણાંક argc,
+	     અચલ અક્ષર **argv,
+	     અચલ અક્ષર *prefix,
+	     સંરચના repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
-	const char *repo = NULL;	/* default repository */
-	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
-	struct string_list remote_group = STRING_LIST_INIT_DUP;
-	struct string_list *push_options;
-	const struct string_list_item *item;
+	પૂર્ણાંક flags = 0;
+	પૂર્ણાંક tags = 0;
+	પૂર્ણાંક ધકેલો_cert = -1;
+	પૂર્ણાંક rc = 0;
+	પૂર્ણાંક base_flags;
+	અચલ અક્ષર *repo = ખાલી;	/* default repository */
+	સંરચના string_list ધકેલો_options_cmdline = STRING_LIST_INIT_DUP;
+	સંરચના string_list remote_group = STRING_LIST_INIT_DUP;
+	સંરચના string_list *ધકેલો_options;
+	અચલ સંરચના string_list_item *item;
 
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_STRING( 0 , "repo", &repo, N_("repository"), N_("repository")),
-		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_PUSH_ALL),
+		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_ધકેલો_ALL),
 		OPT_ALIAS( 0 , "branches", "all"),
 		OPT_BIT( 0 , "mirror", &flags, N_("mirror all refs"),
-			    (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE)),
+			    (TRANSPORT_ધકેલો_MIRROR|TRANSPORT_ધકેલો_FORCE)),
 		OPT_BOOL('d', "delete", &deleterefs, N_("delete refs")),
 		OPT_BOOL( 0 , "tags", &tags, N_("push tags (can't be used with --all or --branches or --mirror)")),
-		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_PUSH_DRY_RUN),
-		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_PUSH_PORCELAIN),
-		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_PUSH_FORCE),
+		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_ધકેલો_DRY_RUN),
+		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_ધકેલો_PORCELAIN),
+		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_ધકેલો_FORCE),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 			       N_("require old value of ref to be at this value"),
-			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_push_cas_option),
+			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_ધકેલો_cas_option),
 		OPT_BIT(0, TRANS_OPT_FORCE_IF_INCLUDES, &flags,
 			N_("require remote updates to be integrated locally"),
-			TRANSPORT_PUSH_FORCE_IF_INCLUDES),
+			TRANSPORT_ધકેલો_FORCE_IF_INCLUDES),
 		OPT_CALLBACK(0, "recurse-submodules", &recurse_submodules, "(check|on-demand|no)",
 			     N_("control recursive pushing of submodules"), option_parse_recurse_submodules),
 		OPT_BOOL_F( 0 , "thin", &thin, N_("use thin pack"), PARSE_OPT_NOCOMPLETE),
 		OPT_STRING( 0 , "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING( 0 , "exec", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_BIT('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
-			TRANSPORT_PUSH_SET_UPSTREAM),
+			TRANSPORT_ધકેલો_SET_UPSTREAM),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
 		OPT_BIT(0, "prune", &flags, N_("prune locally removed refs"),
-			TRANSPORT_PUSH_PRUNE),
-		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_PUSH_NO_HOOK),
+			TRANSPORT_ધકેલો_PRUNE),
+		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_ધકેલો_NO_HOOK),
 		OPT_BIT(0, "follow-tags", &flags, N_("push missing but relevant tags"),
-			TRANSPORT_PUSH_FOLLOW_TAGS),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-				PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_PUSH_ATOMIC),
-		OPT_STRING_LIST('o', "push-option", &push_options_cmdline, N_("server-specific"), N_("option to transmit")),
+			TRANSPORT_ધકેલો_FOLLOW_TAGS),
+		OPT_CALLBACK_F(0, "signed", &ધકેલો_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+				PARSE_OPT_OPTARG, option_parse_ધકેલો_signed),
+		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_ધકેલો_ATOMIC),
+		OPT_STRING_LIST('o', "push-option", &ધકેલો_options_cmdline, N_("server-specific"), N_("option to transmit")),
 		OPT_IPVERSION(&family),
 		OPT_END()
 	};
 
 	packet_trace_identity("push");
-	repo_config(the_repository, git_push_config, &flags);
-	argc = parse_options(argc, argv, prefix, options, push_usage, 0);
-	push_options = (push_options_cmdline.nr
-		? &push_options_cmdline
-		: &push_options_config);
-	set_push_cert_flags(&flags, push_cert);
+	repo_config(the_repository, git_ધકેલો_config, &flags);
+	argc = parse_options(argc, argv, prefix, options, ધકેલો_usage, 0);
+	ધકેલો_options = (ધકેલો_options_cmdline.nr
+		? &ધકેલો_options_cmdline
+		: &ધકેલો_options_config);
+	set_ધકેલો_cert_flags(&flags, ધકેલો_cert);
 
-	refspec_init_push(&rs, the_hash_algo);
+	refspec_init_ધકેલો(&rs, the_hash_algo);
 
 	die_for_incompatible_opt4(deleterefs, "--delete",
 				  tags, "--tags",
-				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
-				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+				  flags & TRANSPORT_ધકેલો_ALL, "--all/--branches",
+				  flags & TRANSPORT_ધકેલો_MIRROR, "--mirror");
+	જો (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	જો (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	નહીંતર જો (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	નહીંતર જો (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	જો (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
-			struct remote *r;
+	જો (repo) {
+		જો (!add_remote_or_group(repo, &remote_group)) {
+			સંરચના remote *r;
 
 			/*
 			 * Check the advice up front to avoid the remote
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			જો (advice_enabled(ADVICE_ધકેલો_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			જો (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
-		struct remote *r = pushremote_get(NULL);
-		if (!r)
+	} નહીંતર {
+		સંરચના remote *r = pushremote_get(ખાલી);
+		જો (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	જો (!is_empty_cas(&cas) && (flags & TRANSPORT_ધકેલો_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
-	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+	for_each_string_list_item(item, ધકેલો_options)
+		જો (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	જો (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
-			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			પૂર્ણાંક inner_flags = base_flags;
+			સંરચના remote *r = pushremote_get(remote_group.વસ્તુઓ[0].string);
+			જો (!r)
 				die(_("no such remote or remote group: %s"),
-				    remote_group.items[0].string);
+				    remote_group.વસ્તુઓ[0].string);
 
-			if (r->mirror)
-				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
+			જો (r->mirror)
+				inner_flags |= (TRANSPORT_ધકેલો_MIRROR|TRANSPORT_ધકેલો_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			જો (inner_flags & TRANSPORT_ધકેલો_ALL) {
+				જો (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			જો (inner_flags & TRANSPORT_ધકેલો_MIRROR) {
+				જો (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
-			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
+			rs = (સંરચના refspec) REFSPEC_INIT_ધકેલો(the_hash_algo);
 
-			if (tags)
+			જો (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			જો (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
-			rc = do_push(inner_flags, push_options, r);
+			rc = do_ધકેલો(inner_flags, ધકેલો_options, r);
 		}
-	} else {
+	} નહીંતર {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,22 +876,22 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		જો (flags & TRANSPORT_ધકેલો_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
-		rc = push_multiple(&remote_group, push_options, flags,
+		rc = ધકેલો_multiple(&remote_group, ધકેલો_options, flags,
 				   tags,
-				   argc > 1 ? argv + 1 : NULL,
+				   argc > 1 ? argv + 1 : ખાલી,
 				   argc > 1 ? argc - 1 : 0);
 	}
 
-	string_list_clear(&push_options_cmdline, 0);
-	string_list_clear(&push_options_config, 0);
+	string_list_clear(&ધકેલો_options_cmdline, 0);
+	string_list_clear(&ધકેલો_options_config, 0);
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
-		usage_with_options(push_usage, options);
-	else
-		return rc;
+	જો (rc == -1)
+		usage_with_options(ધકેલો_usage, options);
+	નહીંતર
+		પાછા rc;
 }

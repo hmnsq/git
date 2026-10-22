@@ -5,146 +5,146 @@
  *
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "string-list.h"
-#include "tempfile.h"
-#include "trailer.h"
-#include "config.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "string-list.h"
+#અન્તર્ભાવ "tempfile.h"
+#અન્તર્ભાવ "trailer.h"
+#અન્તર્ભાવ "config.h"
 
-static const char * const git_interpret_trailers_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ git_interpret_trailers_usage[] = {
 	N_("git interpret-trailers [--in-place] [--trim-empty]\n"
 	   "                       [(--trailer (<key>|<key-alias>)[(=|:)<value>])...]\n"
 	   "                       [--parse] [<file>...]"),
-	NULL
+	ખાલી
 };
 
-static enum trailer_where where;
-static enum trailer_if_exists if_exists;
-static enum trailer_if_missing if_missing;
+સ્થિર ગણના trailer_where where;
+સ્થિર ગણના trailer_if_exists if_exists;
+સ્થિર ગણના trailer_if_missing if_missing;
 
-static int option_parse_where(const struct option *opt,
-			      const char *arg, int unset UNUSED)
+સ્થિર પૂર્ણાંક option_parse_where(અચલ સંરચના option *opt,
+			      અચલ અક્ષર *arg, પૂર્ણાંક unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_where(opt->value, arg);
+	પાછા trailer_set_where(opt->કિંમત, arg);
 }
 
-static int option_parse_if_exists(const struct option *opt,
-				  const char *arg, int unset UNUSED)
+સ્થિર પૂર્ણાંક option_parse_if_exists(અચલ સંરચના option *opt,
+				  અચલ અક્ષર *arg, પૂર્ણાંક unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_exists(opt->value, arg);
+	પાછા trailer_set_if_exists(opt->કિંમત, arg);
 }
 
-static int option_parse_if_missing(const struct option *opt,
-				   const char *arg, int unset UNUSED)
+સ્થિર પૂર્ણાંક option_parse_if_missing(અચલ સંરચના option *opt,
+				   અચલ અક્ષર *arg, પૂર્ણાંક unset UNUSED)
 {
 	/* unset implies NULL arg, which is handled in our helper */
-	return trailer_set_if_missing(opt->value, arg);
+	પાછા trailer_set_if_missing(opt->કિંમત, arg);
 }
 
-static void new_trailers_clear(struct list_head *trailers)
+સ્થિર શૂન્ય new_trailers_clear(સંરચના list_head *trailers)
 {
-	struct list_head *pos, *tmp;
-	struct new_trailer_item *item;
+	સંરચના list_head *pos, *tmp;
+	સંરચના new_trailer_item *item;
 
 	list_for_each_safe(pos, tmp, trailers) {
-		item = list_entry(pos, struct new_trailer_item, list);
+		item = list_entry(pos, સંરચના new_trailer_item, list);
 		list_del(pos);
-		free(item);
+		મુક્ત(item);
 	}
 }
 
-static int option_parse_trailer(const struct option *opt,
-				   const char *arg, int unset)
+સ્થિર પૂર્ણાંક option_parse_trailer(અચલ સંરચના option *opt,
+				   અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct list_head *trailers = opt->value;
-	struct new_trailer_item *item;
+	સંરચના list_head *trailers = opt->કિંમત;
+	સંરચના new_trailer_item *item;
 
-	if (unset) {
+	જો (unset) {
 		new_trailers_clear(trailers);
-		return 0;
+		પાછા 0;
 	}
 
-	if (!arg)
-		return -1;
+	જો (!arg)
+		પાછા -1;
 
-	item = xmalloc(sizeof(*item));
+	item = xmalloc(કદ(*item));
 	item->text = arg;
 	item->where = where;
 	item->if_exists = if_exists;
 	item->if_missing = if_missing;
 	list_add_tail(&item->list, trailers);
-	return 0;
+	પાછા 0;
 }
 
-static int parse_opt_parse(const struct option *opt, const char *arg,
-			   int unset)
+સ્થિર પૂર્ણાંક parse_opt_parse(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+			   પૂર્ણાંક unset)
 {
-	struct process_trailer_options *v = opt->value;
+	સંરચના process_trailer_options *v = opt->કિંમત;
 	v->only_trailers = 1;
-	v->only_input = 1;
+	v->only_આગત = 1;
 	v->unfold = 1;
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return 0;
+	પાછા 0;
 }
 
-static void read_input_file(struct strbuf *sb, const char *file)
+સ્થિર શૂન્ય read_આગત_file(સંરચના strbuf *sb, અચલ અક્ષર *file)
 {
-	if (file) {
-		if (strbuf_read_file(sb, file, 0) < 0)
+	જો (file) {
+		જો (strbuf_read_file(sb, file, 0) < 0)
 			die_errno(_("could not read input file '%s'"), file);
-	} else {
-		if (strbuf_read(sb, fileno(stdin), 0) < 0)
+	} નહીંતર {
+		જો (strbuf_read(sb, fileno(stdin), 0) < 0)
 			die_errno(_("could not read from stdin"));
 	}
-	strbuf_complete_line(sb);
+	strbuf_complete_લીટી(sb);
 }
 
-static void interpret_trailers(const struct process_trailer_options *opts,
-			       struct list_head *new_trailer_head,
-			       const char *file)
+સ્થિર શૂન્ય interpret_trailers(અચલ સંરચના process_trailer_options *opts,
+			       સંરચના list_head *new_trailer_head,
+			       અચલ અક્ષર *file)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
-	struct tempfile *tempfile = NULL;
-	int fd = 1;
+	સંરચના strbuf આગત = STRBUF_INIT;
+	સંરચના strbuf out = STRBUF_INIT;
+	સંરચના tempfile *tempfile = ખાલી;
+	પૂર્ણાંક fd = 1;
 
 	trailer_config_init();
 
-	read_input_file(&input, file);
+	read_આગત_file(&આગત, file);
 
-	if (opts->in_place) {
+	જો (opts->in_place) {
 		tempfile = trailer_create_in_place_tempfile(file);
-		if (!tempfile)
-			die(NULL);
+		જો (!tempfile)
+			die(ખાલી);
 		fd = tempfile->fd;
 	}
-	process_trailers(opts, new_trailer_head, &input, &out);
+	process_trailers(opts, new_trailer_head, &આગત, &out);
 
-	if (write_in_full(fd, out.buf, out.len) < 0)
+	જો (write_in_full(fd, out.buf, out.len) < 0)
 		die_errno(_("could not write to temporary file '%s'"), file);
-	if (opts->in_place)
-		if (rename_tempfile(&tempfile, file))
+	જો (opts->in_place)
+		જો (rename_tempfile(&tempfile, file))
 			die_errno(_("could not rename temporary file to %s"), file);
 
-	strbuf_release(&input);
+	strbuf_release(&આગત);
 	strbuf_release(&out);
 }
 
-int cmd_interpret_trailers(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo UNUSED)
+પૂર્ણાંક cmd_interpret_trailers(પૂર્ણાંક argc,
+			   અચલ અક્ષર **argv,
+			   અચલ અક્ષર *prefix,
+			   સંરચના repository *repo UNUSED)
 {
-	struct process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
+	સંરચના process_trailer_options opts = PROCESS_TRAILER_OPTIONS_INIT;
 	LIST_HEAD(trailers);
 
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT_BOOL(0, "in-place", &opts.in_place, N_("edit files in place")),
 		OPT_BOOL(0, "trim-empty", &opts.trim_empty, N_("trim empty trailers")),
 
@@ -156,9 +156,9 @@ int cmd_interpret_trailers(int argc,
 			     N_("action if trailer is missing"), option_parse_if_missing),
 
 		OPT_BOOL(0, "only-trailers", &opts.only_trailers, N_("output only the trailers")),
-		OPT_BOOL(0, "only-input", &opts.only_input, N_("do not apply trailer.<key-alias> configuration variables")),
+		OPT_BOOL(0, "only-input", &opts.only_આગત, N_("do not apply trailer.<key-alias> configuration variables")),
 		OPT_BOOL(0, "unfold", &opts.unfold, N_("reformat multiline trailer values as single-line values")),
-		OPT_CALLBACK_F(0, "parse", &opts, NULL, N_("alias for --only-trailers --only-input --unfold"),
+		OPT_CALLBACK_F(0, "parse", &opts, ખાલી, N_("alias for --only-trailers --only-input --unfold"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG, parse_opt_parse),
 		OPT_BOOL(0, "no-divider", &opts.no_divider, N_("do not treat \"---\" as the end of input")),
 		OPT_CALLBACK(0, "trailer", &trailers, N_("trailer"),
@@ -166,28 +166,28 @@ int cmd_interpret_trailers(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ખાલી);
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_interpret_trailers_usage, 0);
 
-	if (opts.only_input && !list_empty(&trailers))
-		usage_msg_opt(
+	જો (opts.only_આગત && !list_empty(&trailers))
+		usage_સંદેશ_opt(
 			_("--trailer with --only-input does not make sense"),
 			git_interpret_trailers_usage,
 			options);
 
-	if (argc) {
-		int i;
-		for (i = 0; i < argc; i++)
+	જો (argc) {
+		પૂર્ણાંક i;
+		માટે (i = 0; i < argc; i++)
 			interpret_trailers(&opts, &trailers, argv[i]);
-	} else {
-		if (opts.in_place)
+	} નહીંતર {
+		જો (opts.in_place)
 			die(_("no input file given for in-place editing"));
-		interpret_trailers(&opts, &trailers, NULL);
+		interpret_trailers(&opts, &trailers, ખાલી);
 	}
 
 	new_trailers_clear(&trailers);
 
-	return 0;
+	પાછા 0;
 }

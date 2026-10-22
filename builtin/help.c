@@ -4,49 +4,49 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "config-list.h"
-#include "help.h"
-#include "alias.h"
-#include "setup.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "exec-cmd.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "pager.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "run-command.h"
+#અન્તર્ભાવ "config-list.h"
+#અન્તર્ભાવ "help.h"
+#અન્તર્ભાવ "alias.h"
+#અન્તર્ભાવ "setup.h"
 
 #ifndef DEFAULT_HELP_FORMAT
 #define DEFAULT_HELP_FORMAT "man"
 #endif
 
-static struct man_viewer_list {
-	struct man_viewer_list *next;
-	char name[FLEX_ARRAY];
+સ્થિર સંરચના man_viewer_list {
+	સંરચના man_viewer_list *next;
+	અક્ષર name[FLEX_ARRAY];
 } *man_viewer_list;
 
-static struct man_viewer_info_list {
-	struct man_viewer_info_list *next;
-	const char *info;
-	char name[FLEX_ARRAY];
+સ્થિર સંરચના man_viewer_info_list {
+	સંરચના man_viewer_info_list *next;
+	અચલ અક્ષર *info;
+	અક્ષર name[FLEX_ARRAY];
 } *man_viewer_info_list;
 
-enum help_format {
+ગણના help_format {
 	HELP_FORMAT_NONE,
 	HELP_FORMAT_MAN,
 	HELP_FORMAT_INFO,
 	HELP_FORMAT_WEB
 };
 
-enum show_config_type {
+ગણના show_config_type {
 	SHOW_CONFIG_HUMAN,
 	SHOW_CONFIG_VARS,
 	SHOW_CONFIG_SECTIONS,
 };
 
-static enum help_action {
+સ્થિર ગણના help_action {
 	HELP_ACTION_ALL = 1,
 	HELP_ACTION_GUIDES,
 	HELP_ACTION_CONFIG,
@@ -57,13 +57,13 @@ static enum help_action {
 	HELP_ACTION_ALIASES_FOR_COMPLETION,
 } cmd_mode;
 
-static char *html_path;
-static int verbose = 1;
-static enum help_format help_format = HELP_FORMAT_NONE;
-static int exclude_guides;
-static int show_external_commands = -1;
-static int show_aliases = -1;
-static struct option builtin_help_options[] = {
+સ્થિર અક્ષર *html_path;
+સ્થિર પૂર્ણાંક verbose = 1;
+સ્થિર ગણના help_format help_format = HELP_FORMAT_NONE;
+સ્થિર પૂર્ણાંક exclude_guides;
+સ્થિર પૂર્ણાંક show_external_commands = -1;
+સ્થિર પૂર્ણાંક show_aliases = -1;
+સ્થિર સંરચના option builtin_help_options[] = {
 	OPT_CMDMODE('a', "all", &cmd_mode, N_("print all available commands"),
 		    HELP_ACTION_ALL),
 	OPT_BOOL(0, "external-commands", &show_external_commands,
@@ -97,69 +97,69 @@ static struct option builtin_help_options[] = {
 	OPT_END(),
 };
 
-static const char * const builtin_help_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_help_usage[] = {
 	"git help [-a|--all] [--[no-]verbose] [--[no-]external-commands] [--[no-]aliases]",
 	N_("git help [[-i|--info] [-m|--man] [-w|--web]] [<command>|<doc>]"),
 	"git help [-g|--guides]",
 	"git help [-c|--config]",
 	"git help [--user-interfaces]",
 	"git help [--developer-interfaces]",
-	NULL
+	ખાલી
 };
 
-struct slot_expansion {
-	const char *prefix;
-	const char *placeholder;
-	void (*fn)(struct string_list *list, const char *prefix);
-	int found;
+સંરચના slot_expansion {
+	અચલ અક્ષર *prefix;
+	અચલ અક્ષર *placeholder;
+	શૂન્ય (*fn)(સંરચના string_list *list, અચલ અક્ષર *prefix);
+	પૂર્ણાંક found;
 };
 
-static void set_config_vars(struct string_list *keys_uniq, struct string_list_item *var)
+સ્થિર શૂન્ય set_config_vars(સંરચના string_list *ચાવીઓ_uniq, સંરચના string_list_item *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *wildcard = strchr(str, '*');
-	const char *tag = strchr(str, '<');
-	const char *cut;
+	સંરચના strbuf sb = STRBUF_INIT;
+	અચલ અક્ષર *str = var->string;
+	અચલ અક્ષર *wildcard = strchr(str, '*');
+	અચલ અક્ષર *tag = strchr(str, '<');
+	અચલ અક્ષર *cut;
 
-	if (wildcard && tag)
+	જો (wildcard && tag)
 		cut = wildcard < tag ? wildcard : tag;
-	else if (wildcard)
+	નહીંતર જો (wildcard)
 		cut = wildcard;
-	else if (tag)
+	નહીંતર જો (tag)
 		cut = tag;
-	else {
-		string_list_append(keys_uniq, str);
-		return;
+	નહીંતર {
+		string_list_append(ચાવીઓ_uniq, str);
+		પાછા;
 	}
 
 	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	string_list_append(ચાવીઓ_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void set_config_sections(struct string_list *keys_uniq, struct string_list_item *var)
+સ્થિર શૂન્ય set_config_sections(સંરચના string_list *ચાવીઓ_uniq, સંરચના string_list_item *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *dot = strchr(str, '.');
-	const char *cut;
+	સંરચના strbuf sb = STRBUF_INIT;
+	અચલ અક્ષર *str = var->string;
+	અચલ અક્ષર *dot = strchr(str, '.');
+	અચલ અક્ષર *cut;
 
-	if (dot)
+	જો (dot)
 		cut = dot;
-	else {
-		set_config_vars(keys_uniq, var);
-		return;
+	નહીંતર {
+		set_config_vars(ચાવીઓ_uniq, var);
+		પાછા;
 	}
 
 	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	string_list_append(ચાવીઓ_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void list_config_help(enum show_config_type type)
+સ્થિર શૂન્ય list_config_help(ગણના show_config_type type)
 {
-	struct slot_expansion slot_expansions[] = {
+	સંરચના slot_expansion slot_expansions[] = {
 		{ "advice", "*", list_config_advices },
 		{ "color.branch", "<slot>", list_config_color_branch_slots },
 		{ "color.decorate", "<slot>", list_config_color_decorate_slots },
@@ -168,72 +168,72 @@ static void list_config_help(enum show_config_type type)
 		{ "color.interactive", "<slot>", list_config_color_interactive_slots },
 		{ "color.remote", "<slot>", list_config_color_sideband_slots },
 		{ "color.status", "<slot>", list_config_color_status_slots },
-		{ "fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ "receive.fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ NULL, NULL, NULL }
+		{ "fsck", "<msg-id>", list_config_fsck_સંદેશ_ids },
+		{ "receive.fsck", "<msg-id>", list_config_fsck_સંદેશ_ids },
+		{ ખાલી, ખાલી, ખાલી }
 	};
-	const char **p;
-	struct slot_expansion *e;
-	struct string_list keys = STRING_LIST_INIT_DUP;
-	struct string_list keys_uniq = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	struct strbuf sb = STRBUF_INIT;
+	અચલ અક્ષર **p;
+	સંરચના slot_expansion *e;
+	સંરચના string_list ચાવીઓ = STRING_LIST_INIT_DUP;
+	સંરચના string_list ચાવીઓ_uniq = STRING_LIST_INIT_DUP;
+	સંરચના string_list_item *item;
+	સંરચના strbuf sb = STRBUF_INIT;
 
-	for (p = config_name_list; *p; p++) {
-		const char *var = *p;
+	માટે (p = config_name_list; *p; p++) {
+		અચલ અક્ષર *var = *p;
 
-		for (e = slot_expansions; e->prefix; e++) {
+		માટે (e = slot_expansions; e->prefix; e++) {
 			strbuf_reset(&sb);
 			strbuf_addf(&sb, "%s.%s", e->prefix, e->placeholder);
-			if (!strcasecmp(var, sb.buf)) {
-				e->fn(&keys, e->prefix);
+			જો (!strcasecmp(var, sb.buf)) {
+				e->fn(&ચાવીઓ, e->prefix);
 				e->found++;
-				break;
+				તોડો;
 			}
 		}
 
-		if (!e->prefix)
-			string_list_append(&keys, var);
+		જો (!e->prefix)
+			string_list_append(&ચાવીઓ, var);
 	}
 
 	strbuf_release(&sb);
 
-	for (e = slot_expansions; e->prefix; e++)
-		if (!e->found)
+	માટે (e = slot_expansions; e->prefix; e++)
+		જો (!e->found)
 			BUG("slot_expansion %s.%s is not used",
 			    e->prefix, e->placeholder);
 
-	for (size_t i = 0; i < keys.nr; i++) {
-		switch (type) {
-		case SHOW_CONFIG_HUMAN:
-			string_list_append(&keys_uniq, keys.items[i].string);
-			break;
-		case SHOW_CONFIG_SECTIONS:
-			set_config_sections(&keys_uniq, &keys.items[i]);
-			break;
-		case SHOW_CONFIG_VARS:
-			set_config_vars(&keys_uniq, &keys.items[i]);
-			break;
-		default:
+	માટે (size_t i = 0; i < ચાવીઓ.nr; i++) {
+		પસંદગી (type) {
+		સ્થિતિ SHOW_CONFIG_HUMAN:
+			string_list_append(&ચાવીઓ_uniq, ચાવીઓ.વસ્તુઓ[i].string);
+			તોડો;
+		સ્થિતિ SHOW_CONFIG_SECTIONS:
+			set_config_sections(&ચાવીઓ_uniq, &ચાવીઓ.વસ્તુઓ[i]);
+			તોડો;
+		સ્થિતિ SHOW_CONFIG_VARS:
+			set_config_vars(&ચાવીઓ_uniq, &ચાવીઓ.વસ્તુઓ[i]);
+			તોડો;
+		મૂળભૂત:
 			BUG("%d: unexpected type", type);
 		}
 	}
 
-	string_list_sort_u(&keys_uniq, 0);
-	for_each_string_list_item(item, &keys_uniq)
+	string_list_sort_u(&ચાવીઓ_uniq, 0);
+	for_each_string_list_item(item, &ચાવીઓ_uniq)
 		puts(item->string);
-	string_list_clear(&keys_uniq, 0);
-	string_list_clear(&keys, 0);
+	string_list_clear(&ચાવીઓ_uniq, 0);
+	string_list_clear(&ચાવીઓ, 0);
 }
 
-static enum help_format parse_help_format(const char *format)
+સ્થિર ગણના help_format parse_help_format(અચલ અક્ષર *format)
 {
-	if (!strcmp(format, "man"))
-		return HELP_FORMAT_MAN;
-	if (!strcmp(format, "info"))
-		return HELP_FORMAT_INFO;
-	if (!strcmp(format, "web") || !strcmp(format, "html"))
-		return HELP_FORMAT_WEB;
+	જો (!strcmp(format, "man"))
+		પાછા HELP_FORMAT_MAN;
+	જો (!strcmp(format, "info"))
+		પાછા HELP_FORMAT_INFO;
+	જો (!strcmp(format, "web") || !strcmp(format, "html"))
+		પાછા HELP_FORMAT_WEB;
 	/*
 	 * Please update _repo_config() in git-completion.bash when you
 	 * add new help formats.
@@ -241,30 +241,30 @@ static enum help_format parse_help_format(const char *format)
 	die(_("unrecognized help format '%s'"), format);
 }
 
-static const char *get_man_viewer_info(const char *name)
+સ્થિર અચલ અક્ષર *get_man_viewer_info(અચલ અક્ષર *name)
 {
-	struct man_viewer_info_list *viewer;
+	સંરચના man_viewer_info_list *viewer;
 
-	for (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
+	માટે (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
 	{
-		if (!strcasecmp(name, viewer->name))
-			return viewer->info;
+		જો (!strcasecmp(name, viewer->name))
+			પાછા viewer->info;
 	}
-	return NULL;
+	પાછા ખાલી;
 }
 
-static int check_emacsclient_version(void)
+સ્થિર પૂર્ણાંક check_emacsclient_version(શૂન્ય)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct child_process ec_process = CHILD_PROCESS_INIT;
-	int version;
+	સંરચના strbuf buffer = STRBUF_INIT;
+	સંરચના child_process ec_process = CHILD_PROCESS_INIT;
+	પૂર્ણાંક version;
 
 	/* emacsclient prints its version number on stderr */
-	strvec_pushl(&ec_process.args, "emacsclient", "--version", NULL);
+	strvec_pushl(&ec_process.args, "emacsclient", "--version", ખાલી);
 	ec_process.err = -1;
 	ec_process.stdout_to_stderr = 1;
-	if (start_command(&ec_process))
-		return error(_("Failed to start emacsclient."));
+	જો (start_command(&ec_process))
+		પાછા error(_("Failed to start emacsclient."));
 
 	strbuf_read(&buffer, ec_process.err, 20);
 	close(ec_process.err);
@@ -275,214 +275,214 @@ static int check_emacsclient_version(void)
 	 */
 	finish_command(&ec_process);
 
-	if (!starts_with(buffer.buf, "emacsclient")) {
+	જો (!starts_with(buffer.buf, "emacsclient")) {
 		strbuf_release(&buffer);
-		return error(_("Failed to parse emacsclient version."));
+		પાછા error(_("Failed to parse emacsclient version."));
 	}
 
 	strbuf_remove(&buffer, 0, strlen("emacsclient"));
 	version = atoi(buffer.buf);
 
-	if (version < 22) {
+	જો (version < 22) {
 		strbuf_release(&buffer);
-		return error(_("emacsclient version '%d' too old (< 22)."),
+		પાછા error(_("emacsclient version '%d' too old (< 22)."),
 			version);
 	}
 
 	strbuf_release(&buffer);
-	return 0;
+	પાછા 0;
 }
 
-static void exec_woman_emacs(const char *path, const char *page)
+સ્થિર શૂન્ય exec_woman_emacs(અચલ અક્ષર *path, અચલ અક્ષર *page)
 {
-	if (!check_emacsclient_version()) {
+	જો (!check_emacsclient_version()) {
 		/* This works only with emacsclient version >= 22. */
-		struct strbuf man_page = STRBUF_INIT;
+		સંરચના strbuf man_page = STRBUF_INIT;
 
-		if (!path)
+		જો (!path)
 			path = "emacsclient";
 		strbuf_addf(&man_page, "(woman \"%s\")", page);
-		execlp(path, "emacsclient", "-e", man_page.buf, (char *)NULL);
+		execlp(path, "emacsclient", "-e", man_page.buf, (અક્ષર *)ખાલી);
 		warning_errno(_("failed to exec '%s'"), path);
 		strbuf_release(&man_page);
 	}
 }
 
-static void exec_man_konqueror(const char *path, const char *page)
+સ્થિર શૂન્ય exec_man_konqueror(અચલ અક્ષર *path, અચલ અક્ષર *page)
 {
-	const char *display = getenv("DISPLAY");
-	if (display && *display) {
-		struct strbuf man_page = STRBUF_INIT;
-		const char *filename = "kfmclient";
+	અચલ અક્ષર *display = getenv("DISPLAY");
+	જો (display && *display) {
+		સંરચના strbuf man_page = STRBUF_INIT;
+		અચલ અક્ષર *filename = "kfmclient";
 
 		/* It's simpler to launch konqueror using kfmclient. */
-		if (path) {
+		જો (path) {
 			size_t len;
-			if (strip_suffix(path, "/konqueror", &len))
-				path = xstrfmt("%.*s/kfmclient", (int)len, path);
-			filename = basename((char *)path);
-		} else
+			જો (strip_suffix(path, "/konqueror", &len))
+				path = xstrfmt("%.*s/kfmclient", (પૂર્ણાંક)len, path);
+			filename = basename((અક્ષર *)path);
+		} નહીંતર
 			path = "kfmclient";
 		strbuf_addf(&man_page, "man:%s(1)", page);
-		execlp(path, filename, "newTab", man_page.buf, (char *)NULL);
+		execlp(path, filename, "newTab", man_page.buf, (અક્ષર *)ખાલી);
 		warning_errno(_("failed to exec '%s'"), path);
 		strbuf_release(&man_page);
 	}
 }
 
-static void exec_man_man(const char *path, const char *page)
+સ્થિર શૂન્ય exec_man_man(અચલ અક્ષર *path, અચલ અક્ષર *page)
 {
-	if (!path)
+	જો (!path)
 		path = "man";
-	execlp(path, "man", page, (char *)NULL);
+	execlp(path, "man", page, (અક્ષર *)ખાલી);
 	warning_errno(_("failed to exec '%s'"), path);
 }
 
-static void exec_man_cmd(const char *cmd, const char *page)
+સ્થિર શૂન્ય exec_man_cmd(અચલ અક્ષર *cmd, અચલ અક્ષર *page)
 {
-	struct strbuf shell_cmd = STRBUF_INIT;
+	સંરચના strbuf shell_cmd = STRBUF_INIT;
 	strbuf_addf(&shell_cmd, "%s %s", cmd, page);
-	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (char *)NULL);
+	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (અક્ષર *)ખાલી);
 	warning(_("failed to exec '%s'"), cmd);
 	strbuf_release(&shell_cmd);
 }
 
-static void add_man_viewer(const char *name)
+સ્થિર શૂન્ય add_man_viewer(અચલ અક્ષર *name)
 {
-	struct man_viewer_list **p = &man_viewer_list;
+	સંરચના man_viewer_list **p = &man_viewer_list;
 
-	while (*p)
+	જ્યારે (*p)
 		p = &((*p)->next);
 	FLEX_ALLOC_STR(*p, name, name);
 }
 
-static int supported_man_viewer(const char *name, size_t len)
+સ્થિર પૂર્ણાંક supported_man_viewer(અચલ અક્ષર *name, size_t len)
 {
-	return (!strncasecmp("man", name, len) ||
+	પાછા (!strncasecmp("man", name, len) ||
 		!strncasecmp("woman", name, len) ||
 		!strncasecmp("konqueror", name, len));
 }
 
-static void do_add_man_viewer_info(const char *name,
+સ્થિર શૂન્ય do_add_man_viewer_info(અચલ અક્ષર *name,
 				   size_t len,
-				   const char *value)
+				   અચલ અક્ષર *કિંમત)
 {
-	struct man_viewer_info_list *new_man_viewer;
+	સંરચના man_viewer_info_list *new_man_viewer;
 	FLEX_ALLOC_MEM(new_man_viewer, name, name, len);
-	new_man_viewer->info = xstrdup(value);
+	new_man_viewer->info = xstrdup(કિંમત);
 	new_man_viewer->next = man_viewer_info_list;
 	man_viewer_info_list = new_man_viewer;
 }
 
-static int add_man_viewer_path(const char *name,
+સ્થિર પૂર્ણાંક add_man_viewer_path(અચલ અક્ષર *name,
 			       size_t len,
-			       const char *value)
+			       અચલ અક્ષર *કિંમત)
 {
-	if (supported_man_viewer(name, len))
-		do_add_man_viewer_info(name, len, value);
-	else
+	જો (supported_man_viewer(name, len))
+		do_add_man_viewer_info(name, len, કિંમત);
+	નહીંતર
 		warning(_("'%s': path for unsupported man viewer.\n"
 			  "Please consider using 'man.<tool>.cmd' instead."),
 			name);
 
-	return 0;
+	પાછા 0;
 }
 
-static int add_man_viewer_cmd(const char *name,
+સ્થિર પૂર્ણાંક add_man_viewer_cmd(અચલ અક્ષર *name,
 			      size_t len,
-			      const char *value)
+			      અચલ અક્ષર *કિંમત)
 {
-	if (supported_man_viewer(name, len))
+	જો (supported_man_viewer(name, len))
 		warning(_("'%s': cmd for supported man viewer.\n"
 			  "Please consider using 'man.<tool>.path' instead."),
 			name);
-	else
-		do_add_man_viewer_info(name, len, value);
+	નહીંતર
+		do_add_man_viewer_info(name, len, કિંમત);
 
-	return 0;
+	પાછા 0;
 }
 
-static int add_man_viewer_info(const char *var, const char *value)
+સ્થિર પૂર્ણાંક add_man_viewer_info(અચલ અક્ષર *var, અચલ અક્ષર *કિંમત)
 {
-	const char *name, *subkey;
+	અચલ અક્ષર *name, *subkey;
 	size_t namelen;
 
-	if (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
-		return 0;
+	જો (parse_config_ચાવી(var, "man", &name, &namelen, &subkey) < 0 || !name)
+		પાછા 0;
 
-	if (!strcmp(subkey, "path")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_path(name, namelen, value);
+	જો (!strcmp(subkey, "path")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		પાછા add_man_viewer_path(name, namelen, કિંમત);
 	}
-	if (!strcmp(subkey, "cmd")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_cmd(name, namelen, value);
+	જો (!strcmp(subkey, "cmd")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		પાછા add_man_viewer_cmd(name, namelen, કિંમત);
 	}
 
-	return 0;
+	પાછા 0;
 }
 
-static int git_help_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+સ્થિર પૂર્ણાંક git_help_config(અચલ અક્ષર *var, અચલ અક્ષર *કિંમત,
+			   અચલ સંરચના config_context *ctx, શૂન્ય *cb)
 {
-	if (!strcmp(var, "help.format")) {
-		if (!value)
-			return config_error_nonbool(var);
-		help_format = parse_help_format(value);
-		return 0;
+	જો (!strcmp(var, "help.format")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		help_format = parse_help_format(કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "help.htmlpath")) {
-		if (!value)
-			return config_error_nonbool(var);
-		free(html_path);
-		html_path = xstrdup(value);
-		return 0;
+	જો (!strcmp(var, "help.htmlpath")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		મુક્ત(html_path);
+		html_path = xstrdup(કિંમત);
+		પાછા 0;
 	}
-	if (!strcmp(var, "man.viewer")) {
-		if (!value)
-			return config_error_nonbool(var);
-		add_man_viewer(value);
-		return 0;
+	જો (!strcmp(var, "man.viewer")) {
+		જો (!કિંમત)
+			પાછા config_error_nonbool(var);
+		add_man_viewer(કિંમત);
+		પાછા 0;
 	}
-	if (starts_with(var, "man."))
-		return add_man_viewer_info(var, value);
+	જો (starts_with(var, "man."))
+		પાછા add_man_viewer_info(var, કિંમત);
 
-	return git_default_config(var, value, ctx, cb);
+	પાછા git_default_config(var, કિંમત, ctx, cb);
 }
 
-static struct cmdnames main_cmds, other_cmds;
+સ્થિર સંરચના cmdnames main_cmds, other_cmds;
 
-static int is_git_command(const char *s)
+સ્થિર પૂર્ણાંક is_git_command(અચલ અક્ષર *s)
 {
-	if (is_builtin(s))
-		return 1;
+	જો (is_builtin(s))
+		પાછા 1;
 
 	load_command_list("git-", &main_cmds, &other_cmds);
-	return is_in_cmdlist(&main_cmds, s) ||
+	પાછા is_in_cmdlist(&main_cmds, s) ||
 		is_in_cmdlist(&other_cmds, s);
 }
 
-static const char *cmd_to_page(const char *git_cmd)
+સ્થિર અચલ અક્ષર *cmd_to_page(અચલ અક્ષર *git_cmd)
 {
-	if (!git_cmd)
-		return "git";
-	else if (starts_with(git_cmd, "git"))
-		return git_cmd;
-	else if (is_git_command(git_cmd))
-		return xstrfmt("git-%s", git_cmd);
-	else if (!strcmp("scalar", git_cmd))
-		return xstrdup(git_cmd);
-	else
-		return xstrfmt("git%s", git_cmd);
+	જો (!git_cmd)
+		પાછા "git";
+	નહીંતર જો (starts_with(git_cmd, "git"))
+		પાછા git_cmd;
+	નહીંતર જો (is_git_command(git_cmd))
+		પાછા xstrfmt("git-%s", git_cmd);
+	નહીંતર જો (!strcmp("scalar", git_cmd))
+		પાછા xstrdup(git_cmd);
+	નહીંતર
+		પાછા xstrfmt("git%s", git_cmd);
 }
 
-static void setup_man_path(void)
+સ્થિર શૂન્ય setup_man_path(શૂન્ય)
 {
-	struct strbuf new_path = STRBUF_INIT;
-	const char *old_path = getenv("MANPATH");
-	char *git_man_path = system_path(GIT_MAN_PATH);
+	સંરચના strbuf new_path = STRBUF_INIT;
+	અચલ અક્ષર *old_path = getenv("MANPATH");
+	અક્ષર *git_man_path = system_path(GIT_MAN_PATH);
 
 	/* We should always put ':' after our path. If there is no
 	 * old_path, the ':' at the end will let 'man' to try
@@ -490,68 +490,68 @@ static void setup_man_path(void)
 	 * there is old_path, we need ':' as delimiter. */
 	strbuf_addstr(&new_path, git_man_path);
 	strbuf_addch(&new_path, ':');
-	if (old_path)
+	જો (old_path)
 		strbuf_addstr(&new_path, old_path);
 
-	free(git_man_path);
+	મુક્ત(git_man_path);
 	setenv("MANPATH", new_path.buf, 1);
 
 	strbuf_release(&new_path);
 }
 
-static void exec_viewer(const char *name, const char *page)
+સ્થિર શૂન્ય exec_viewer(અચલ અક્ષર *name, અચલ અક્ષર *page)
 {
-	const char *info = get_man_viewer_info(name);
+	અચલ અક્ષર *info = get_man_viewer_info(name);
 
-	if (!strcasecmp(name, "man"))
+	જો (!strcasecmp(name, "man"))
 		exec_man_man(info, page);
-	else if (!strcasecmp(name, "woman"))
+	નહીંતર જો (!strcasecmp(name, "woman"))
 		exec_woman_emacs(info, page);
-	else if (!strcasecmp(name, "konqueror"))
+	નહીંતર જો (!strcasecmp(name, "konqueror"))
 		exec_man_konqueror(info, page);
-	else if (info)
+	નહીંતર જો (info)
 		exec_man_cmd(info, page);
-	else
+	નહીંતર
 		warning(_("'%s': unknown man viewer."), name);
 }
 
-static void show_man_page(const char *page)
+સ્થિર શૂન્ય show_man_page(અચલ અક્ષર *page)
 {
-	struct man_viewer_list *viewer;
-	const char *fallback = getenv("GIT_MAN_VIEWER");
+	સંરચના man_viewer_list *viewer;
+	અચલ અક્ષર *fallback = getenv("GIT_MAN_VIEWER");
 
 	setup_man_path();
-	for (viewer = man_viewer_list; viewer; viewer = viewer->next)
+	માટે (viewer = man_viewer_list; viewer; viewer = viewer->next)
 	{
 		exec_viewer(viewer->name, page); /* will return when unable */
 	}
-	if (fallback)
+	જો (fallback)
 		exec_viewer(fallback, page);
 	exec_viewer("man", page);
 	die(_("no man viewer handled the request"));
 }
 
-static void show_info_page(const char *page)
+સ્થિર શૂન્ય show_info_page(અચલ અક્ષર *page)
 {
 	setenv("INFOPATH", system_path(GIT_INFO_PATH), 1);
-	execlp("info", "info", "gitman", page, (char *)NULL);
+	execlp("info", "info", "gitman", page, (અક્ષર *)ખાલી);
 	die(_("no info viewer handled the request"));
 }
 
-static void get_html_page_path(struct strbuf *page_path, const char *page)
+સ્થિર શૂન્ય get_html_page_path(સંરચના strbuf *page_path, અચલ અક્ષર *page)
 {
-	struct stat st;
-	const char *path = html_path;
-	char *to_free = NULL;
+	સંરચના stat st;
+	અચલ અક્ષર *path = html_path;
+	અક્ષર *to_free = ખાલી;
 
-	if (!path)
+	જો (!path)
 		path = to_free = system_path(GIT_HTML_PATH);
 
 	/*
 	 * Check that the page we're looking for exists.
 	 */
-	if (!strstr(path, "://")) {
-		if (stat(mkpath("%s/%s.html", path, page), &st)
+	જો (!strstr(path, "://")) {
+		જો (stat(mkpath("%s/%s.html", path, page), &st)
 		    || !S_ISREG(st.st_mode))
 			die("'%s/%s.html': documentation file not found.",
 				path, page);
@@ -559,34 +559,34 @@ static void get_html_page_path(struct strbuf *page_path, const char *page)
 
 	strbuf_init(page_path, 0);
 	strbuf_addf(page_path, "%s/%s.html", path, page);
-	free(to_free);
+	મુક્ત(to_free);
 }
 
-static void open_html(const char *path)
+સ્થિર શૂન્ય open_html(અચલ અક્ષર *path)
 {
-	execl_git_cmd("web--browse", "-c", "help.browser", path, (char *)NULL);
+	execl_git_cmd("web--browse", "-c", "help.browser", path, (અક્ષર *)ખાલી);
 }
 
-static void show_html_page(const char *page)
+સ્થિર શૂન્ય show_html_page(અચલ અક્ષર *page)
 {
-	struct strbuf page_path; /* it leaks but we exec below */
+	સંરચના strbuf page_path; /* it leaks but we exec below */
 
 	get_html_page_path(&page_path, page);
 
 	open_html(page_path.buf);
 }
 
-static char *check_git_cmd(const char *cmd)
+સ્થિર અક્ષર *check_git_cmd(અચલ અક્ષર *cmd)
 {
-	char *alias;
+	અક્ષર *alias;
 
-	if (is_git_command(cmd))
-		return xstrdup(cmd);
+	જો (is_git_command(cmd))
+		પાછા xstrdup(cmd);
 
 	alias = alias_lookup(cmd);
-	if (alias) {
-		const char **argv;
-		int count;
+	જો (alias) {
+		અચલ અક્ષર **argv;
+		પૂર્ણાંક ગણતરી;
 
 		/*
 		 * handle_builtin() in git.c rewrites "git cmd --help"
@@ -596,9 +596,9 @@ static char *check_git_cmd(const char *cmd)
 		 * alias for a shell command, just print the alias
 		 * definition.
 		 */
-		if (!exclude_guides || alias[0] == '!') {
+		જો (!exclude_guides || alias[0] == '!') {
 			printf_ln(_("'%s' is aliased to '%s'"), cmd, alias);
-			free(alias);
+			મુક્ત(alias);
 			exit(0);
 		}
 		/*
@@ -609,161 +609,161 @@ static char *check_git_cmd(const char *cmd)
 		 * used. split_cmdline() modifies alias in-place.
 		 */
 		fprintf_ln(stderr, _("'%s' is aliased to '%s'"), cmd, alias);
-		count = split_cmdline(alias, &argv);
-		if (count < 0)
+		ગણતરી = split_cmdline(alias, &argv);
+		જો (ગણતરી < 0)
 			die(_("bad alias.%s string: %s"), cmd,
-			    split_cmdline_strerror(count));
-		free(argv);
-		return alias;
+			    split_cmdline_strerror(ગણતરી));
+		મુક્ત(argv);
+		પાછા alias;
 	}
 
-	if (exclude_guides)
-		return help_unknown_cmd(cmd);
+	જો (exclude_guides)
+		પાછા help_unknown_cmd(cmd);
 
-	return xstrdup(cmd);
+	પાછા xstrdup(cmd);
 }
 
-static void no_help_format(const char *opt_mode, enum help_format fmt)
+સ્થિર શૂન્ય no_help_format(અચલ અક્ષર *opt_mode, ગણના help_format fmt)
 {
-	const char *opt_fmt;
+	અચલ અક્ષર *opt_fmt;
 
-	switch (fmt) {
-	case HELP_FORMAT_NONE:
-		return;
-	case HELP_FORMAT_MAN:
+	પસંદગી (fmt) {
+	સ્થિતિ HELP_FORMAT_NONE:
+		પાછા;
+	સ્થિતિ HELP_FORMAT_MAN:
 		opt_fmt = "--man";
-		break;
-	case HELP_FORMAT_INFO:
+		તોડો;
+	સ્થિતિ HELP_FORMAT_INFO:
 		opt_fmt = "--info";
-		break;
-	case HELP_FORMAT_WEB:
+		તોડો;
+	સ્થિતિ HELP_FORMAT_WEB:
 		opt_fmt = "--web";
-		break;
-	default:
+		તોડો;
+	મૂળભૂત:
 		BUG("unreachable");
 	}
 
-	usage_msg_optf(_("options '%s' and '%s' cannot be used together"),
+	usage_સંદેશ_optf(_("options '%s' and '%s' cannot be used together"),
 		       builtin_help_usage, builtin_help_options, opt_mode,
 		       opt_fmt);
 }
 
-static void opt_mode_usage(int argc, const char *opt_mode,
-			   enum help_format fmt)
+સ્થિર શૂન્ય opt_mode_usage(પૂર્ણાંક argc, અચલ અક્ષર *opt_mode,
+			   ગણના help_format fmt)
 {
-	if (argc)
-		usage_msg_optf(_("the '%s' option doesn't take any non-option arguments"),
+	જો (argc)
+		usage_સંદેશ_optf(_("the '%s' option doesn't take any non-option arguments"),
 			       builtin_help_usage, builtin_help_options,
 			       opt_mode);
 
 	no_help_format(opt_mode, fmt);
 }
 
-int cmd_help(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+પૂર્ણાંક cmd_help(પૂર્ણાંક argc,
+	     અચલ અક્ષર **argv,
+	     અચલ અક્ષર *prefix,
+	     સંરચના repository *repo UNUSED)
 {
-	int nongit;
-	enum help_format parsed_help_format;
-	char *command = NULL;
-	const char *page;
+	પૂર્ણાંક nongit;
+	ગણના help_format parsed_help_format;
+	અક્ષર *command = ખાલી;
+	અચલ અક્ષર *page;
 
 	argc = parse_options(argc, argv, prefix, builtin_help_options,
 			builtin_help_usage, 0);
 	parsed_help_format = help_format;
 
-	if (cmd_mode != HELP_ACTION_ALL &&
+	જો (cmd_mode != HELP_ACTION_ALL &&
 	    (show_external_commands >= 0 ||
 	     show_aliases >= 0))
-		usage_msg_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
+		usage_સંદેશ_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
 			      builtin_help_usage, builtin_help_options);
 
-	switch (cmd_mode) {
-	case HELP_ACTION_ALL:
+	પસંદગી (cmd_mode) {
+	સ્થિતિ HELP_ACTION_ALL:
 		opt_mode_usage(argc, "--all", help_format);
-		if (verbose) {
+		જો (verbose) {
 			setup_pager(the_repository);
 			list_all_cmds_help(show_external_commands,
 					   show_aliases);
-			return 0;
+			પાછા 0;
 		}
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		load_command_list("git-", &main_cmds, &other_cmds);
 		list_commands(&main_cmds, &other_cmds);
 		printf("%s\n", _(git_more_info_string));
-		break;
-	case HELP_ACTION_GUIDES:
+		તોડો;
+	સ્થિતિ HELP_ACTION_GUIDES:
 		opt_mode_usage(argc, "--guides", help_format);
 		list_guides_help();
 		printf("%s\n", _(git_more_info_string));
-		return 0;
-	case HELP_ACTION_CONFIG_FOR_COMPLETION:
+		પાછા 0;
+	સ્થિતિ HELP_ACTION_CONFIG_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-for-completion", help_format);
 		list_config_help(SHOW_CONFIG_VARS);
-		return 0;
-	case HELP_ACTION_USER_INTERFACES:
+		પાછા 0;
+	સ્થિતિ HELP_ACTION_USER_INTERFACES:
 		opt_mode_usage(argc, "--user-interfaces", help_format);
 		list_user_interfaces_help();
-		return 0;
-	case HELP_ACTION_DEVELOPER_INTERFACES:
+		પાછા 0;
+	સ્થિતિ HELP_ACTION_DEVELOPER_INTERFACES:
 		opt_mode_usage(argc, "--developer-interfaces", help_format);
 		list_developer_interfaces_help();
-		return 0;
-	case HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
+		પાછા 0;
+	સ્થિતિ HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-sections-for-completion",
 			       help_format);
 		list_config_help(SHOW_CONFIG_SECTIONS);
-		return 0;
-	case HELP_ACTION_ALIASES_FOR_COMPLETION: {
-		struct string_list alias_list = STRING_LIST_INIT_DUP;
+		પાછા 0;
+	સ્થિતિ HELP_ACTION_ALIASES_FOR_COMPLETION: {
+		સંરચના string_list alias_list = STRING_LIST_INIT_DUP;
 		opt_mode_usage(argc, "--aliases-for-completion", help_format);
 		list_aliases(&alias_list);
-		for (size_t i = 0; i < alias_list.nr; i++)
-			printf("%s%c%s%c", alias_list.items[i].string, '\n',
-			       (char *)alias_list.items[i].util, '\0');
+		માટે (size_t i = 0; i < alias_list.nr; i++)
+			printf("%s%c%s%c", alias_list.વસ્તુઓ[i].string, '\n',
+			       (અક્ષર *)alias_list.વસ્તુઓ[i].util, '\0');
 		string_list_clear(&alias_list, 1);
-		return 0;
+		પાછા 0;
 	}
-	case HELP_ACTION_CONFIG:
+	સ્થિતિ HELP_ACTION_CONFIG:
 		opt_mode_usage(argc, "--config", help_format);
 		setup_pager(the_repository);
 		list_config_help(SHOW_CONFIG_HUMAN);
 		printf("\n%s\n", _("'git help config' for more information"));
-		return 0;
+		પાછા 0;
 	}
 
-	if (!argv[0]) {
+	જો (!argv[0]) {
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		list_common_cmds_help();
 		printf("\n%s\n", _(git_more_info_string));
-		return 0;
+		પાછા 0;
 	}
 
 	setup_git_directory_gently(the_repository, &nongit);
-	repo_config(the_repository, git_help_config, NULL);
+	repo_config(the_repository, git_help_config, ખાલી);
 
-	if (parsed_help_format != HELP_FORMAT_NONE)
+	જો (parsed_help_format != HELP_FORMAT_NONE)
 		help_format = parsed_help_format;
-	if (help_format == HELP_FORMAT_NONE)
+	જો (help_format == HELP_FORMAT_NONE)
 		help_format = parse_help_format(DEFAULT_HELP_FORMAT);
 
 	command = check_git_cmd(argv[0]);
 
 	page = cmd_to_page(command);
-	switch (help_format) {
-	case HELP_FORMAT_NONE:
-	case HELP_FORMAT_MAN:
+	પસંદગી (help_format) {
+	સ્થિતિ HELP_FORMAT_NONE:
+	સ્થિતિ HELP_FORMAT_MAN:
 		show_man_page(page);
-		break;
-	case HELP_FORMAT_INFO:
+		તોડો;
+	સ્થિતિ HELP_FORMAT_INFO:
 		show_info_page(page);
-		break;
-	case HELP_FORMAT_WEB:
+		તોડો;
+	સ્થિતિ HELP_FORMAT_WEB:
 		show_html_page(page);
-		break;
+		તોડો;
 	}
 
-	free(command);
-	return 0;
+	મુક્ત(command);
+	પાછા 0;
 }

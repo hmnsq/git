@@ -1,12 +1,12 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "setup.h"
-#include "strvec.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "bundle.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "abspath.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "setup.h"
+#અન્તર્ભાવ "strvec.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "pkt-line.h"
+#અન્તર્ભાવ "bundle.h"
 
 /*
  * Basic handler for bundle files to connect repositories via sneakernet.
@@ -25,54 +25,54 @@
 #define BUILTIN_BUNDLE_UNBUNDLE_USAGE \
 	N_("git bundle unbundle [--progress] <file> [<refname>...]")
 
-static char const * const builtin_bundle_usage[] = {
+સ્થિર અક્ષર અચલ * અચલ builtin_bundle_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
 	BUILTIN_BUNDLE_VERIFY_USAGE,
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL,
+	ખાલી,
 };
 
-static const char * const builtin_bundle_create_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_bundle_create_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const builtin_bundle_verify_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_bundle_verify_usage[] = {
 	BUILTIN_BUNDLE_VERIFY_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const builtin_bundle_list_heads_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_bundle_list_heads_usage[] = {
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
-	NULL
+	ખાલી
 };
 
-static const char * const builtin_bundle_unbundle_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_bundle_unbundle_usage[] = {
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL
+	ખાલી
 };
 
-static int parse_options_cmd_bundle(int argc,
-		const char **argv,
-		const char* prefix,
-		const char * const usagestr[],
-		const struct option options[],
-		char **bundle_file) {
-	argc = parse_options(argc, argv, NULL, options, usagestr,
+સ્થિર પૂર્ણાંક parse_options_cmd_bundle(પૂર્ણાંક argc,
+		અચલ અક્ષર **argv,
+		અચલ અક્ષર* prefix,
+		અચલ અક્ષર * અચલ usagestr[],
+		અચલ સંરચના option options[],
+		અક્ષર **bundle_file) {
+	argc = parse_options(argc, argv, ખાલી, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (!argc)
-		usage_msg_opt(_("need a <file> argument"), usagestr, options);
+	જો (!argc)
+		usage_સંદેશ_opt(_("need a <file> argument"), usagestr, options);
 	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
-	return argc;
+	પાછા argc;
 }
 
-static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક cmd_bundle_create(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			     સંરચના repository *repo UNUSED)
 {
-	int progress = isatty(STDERR_FILENO);
-	int version = -1;
-	struct option options[] = {
+	પૂર્ણાંક progress = isatty(STDERR_FILENO);
+	પૂર્ણાંક version = -1;
+	સંરચના option options[] = {
 		OPT_NEGBIT('q', "quiet", &progress,
 			   N_("do not show progress meter"), 1),
 		OPT_BIT(0, "progress", &progress,
@@ -85,152 +85,152 @@ static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
 			    N_("specify bundle format version")),
 		OPT_END()
 	};
-	char *bundle_file;
-	int ret;
+	અક્ષર *bundle_file;
+	પૂર્ણાંક ret;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_create_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	જો (!startup_info->have_repository)
 		die(_("Need a repository to create a bundle."));
 	ret = !!create_bundle(the_repository, bundle_file, argc, argv, version, progress);
-	free(bundle_file);
-	return ret;
+	મુક્ત(bundle_file);
+	પાછા ret;
 }
 
 /*
  * Similar to read_bundle_header(), but handle "-" as stdin.
  */
-static int open_bundle(const char *path, struct bundle_header *header,
-		       const char **name)
+સ્થિર પૂર્ણાંક open_bundle(અચલ અક્ષર *path, સંરચના bundle_header *header,
+		       અચલ અક્ષર **name)
 {
-	if (!strcmp(path, "-")) {
-		if (name)
+	જો (!strcmp(path, "-")) {
+		જો (name)
 			*name = "<stdin>";
-		return read_bundle_header_fd(0, header, "<stdin>");
+		પાછા read_bundle_header_fd(0, header, "<stdin>");
 	}
 
-	if (name)
+	જો (name)
 		*name = path;
-	return read_bundle_header(path, header);
+	પાછા read_bundle_header(path, header);
 }
 
-static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int quiet = 0;
-	int ret;
-	struct option options[] = {
+સ્થિર પૂર્ણાંક cmd_bundle_verify(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			     સંરચના repository *repo UNUSED) {
+	સંરચના bundle_header header = BUNDLE_HEADER_INIT;
+	પૂર્ણાંક bundle_fd = -1;
+	પૂર્ણાંક quiet = 0;
+	પૂર્ણાંક ret;
+	સંરચના option options[] = {
 		OPT_BOOL('q', "quiet", &quiet,
 			    N_("do not show bundle details")),
 		OPT_END()
 	};
-	char *bundle_file;
-	const char *name;
+	અક્ષર *bundle_file;
+	અચલ અક્ષર *name;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_verify_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository) {
+	જો (!startup_info->have_repository) {
 		ret = error(_("need a repository to verify a bundle"));
-		goto cleanup;
+		જાઓ cleanup;
 	}
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
+	જો ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
 		ret = 1;
-		goto cleanup;
+		જાઓ cleanup;
 	}
 	close(bundle_fd);
-	if (verify_bundle(the_repository, &header,
+	જો (verify_bundle(the_repository, &header,
 			  quiet ? VERIFY_BUNDLE_QUIET : VERIFY_BUNDLE_VERBOSE)) {
 		ret = 1;
-		goto cleanup;
+		જાઓ cleanup;
 	}
 
 	fprintf(stderr, _("%s is okay\n"), name);
 	ret = 0;
 cleanup:
-	free(bundle_file);
+	મુક્ત(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	પાછા ret;
 }
 
-static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	struct option options[] = {
+સ્થિર પૂર્ણાંક cmd_bundle_list_heads(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+				 સંરચના repository *repo UNUSED) {
+	સંરચના bundle_header header = BUNDLE_HEADER_INIT;
+	પૂર્ણાંક bundle_fd = -1;
+	પૂર્ણાંક ret;
+	સંરચના option options[] = {
 		OPT_END()
 	};
-	char *bundle_file;
+	અક્ષર *bundle_file;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_list_heads_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	જો ((bundle_fd = open_bundle(bundle_file, &header, ખાલી)) < 0) {
 		ret = 1;
-		goto cleanup;
+		જાઓ cleanup;
 	}
 	close(bundle_fd);
 	ret = !!list_bundle_refs(&header, argc, argv);
 cleanup:
-	free(bundle_file);
+	મુક્ત(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	પાછા ret;
 }
 
-static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
-			       struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	int progress = isatty(2);
+સ્થિર પૂર્ણાંક cmd_bundle_unbundle(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			       સંરચના repository *repo UNUSED) {
+	સંરચના bundle_header header = BUNDLE_HEADER_INIT;
+	પૂર્ણાંક bundle_fd = -1;
+	પૂર્ણાંક ret;
+	પૂર્ણાંક progress = isatty(2);
 
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT_BOOL(0, "progress", &progress,
 			 N_("show progress meter")),
 		OPT_END()
 	};
-	char *bundle_file;
-	struct strvec extra_index_pack_args = STRVEC_INIT;
+	અક્ષર *bundle_file;
+	સંરચના strvec extra_index_pack_args = STRVEC_INIT;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	જો (!startup_info->have_repository)
 		die(_("Need a repository to unbundle."));
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	જો ((bundle_fd = open_bundle(bundle_file, &header, ખાલી)) < 0) {
 		ret = 1;
-		goto cleanup;
+		જાઓ cleanup;
 	}
-	if (progress)
+	જો (progress)
 		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
-			     _("Unbundling objects"), NULL);
+			     _("Unbundling objects"), ખાલી);
 	ret = !!unbundle(the_repository, &header, bundle_fd,
-			 &extra_index_pack_args, NULL) ||
+			 &extra_index_pack_args, ખાલી) ||
 		list_bundle_refs(&header, argc, argv);
 	bundle_header_release(&header);
 
 cleanup:
 	strvec_clear(&extra_index_pack_args);
-	free(bundle_file);
-	return ret;
+	મુક્ત(bundle_file);
+	પાછા ret;
 }
 
-int cmd_bundle(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+પૂર્ણાંક cmd_bundle(પૂર્ણાંક argc,
+	       અચલ અક્ષર **argv,
+	       અચલ અક્ષર *prefix,
+	       સંરચના repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ખાલી;
+	સંરચના option options[] = {
 		OPT_SUBCOMMAND("create", &fn, cmd_bundle_create),
 		OPT_SUBCOMMAND("verify", &fn, cmd_bundle_verify),
 		OPT_SUBCOMMAND("list-heads", &fn, cmd_bundle_list_heads),
@@ -243,5 +243,5 @@ int cmd_bundle(int argc,
 
 	packet_trace_identity("bundle");
 
-	return !!fn(argc, argv, prefix, repo);
+	પાછા !!fn(argc, argv, prefix, repo);
 }

@@ -1,163 +1,163 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "commit-reach.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "commit.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "object-name.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "commit-reach.h"
 
-static int show_merge_base(struct commit **rev, size_t rev_nr, int show_all)
+સ્થિર પૂર્ણાંક show_merge_base(સંરચના commit **rev, size_t rev_nr, પૂર્ણાંક show_all)
 {
-	enum merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
-	struct commit_list *result = NULL, *r;
+	ગણના merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
+	સંરચના commit_list *result = ખાલી, *r;
 
-	if (repo_get_merge_bases_many_dirty(the_repository, rev[0],
+	જો (repo_get_merge_bases_many_dirty(the_repository, rev[0],
 					    rev_nr - 1, rev + 1,
 					    flags, &result) < 0) {
 		commit_list_free(result);
-		return -1;
+		પાછા -1;
 	}
 
-	if (!result)
-		return 1;
+	જો (!result)
+		પાછા 1;
 
-	for (r = result; r; r = r->next) {
+	માટે (r = result; r; r = r->next) {
 		printf("%s\n", oid_to_hex(&r->item->object.oid));
-		if (!show_all)
-			break;
+		જો (!show_all)
+			તોડો;
 	}
 
 	commit_list_free(result);
-	return 0;
+	પાછા 0;
 }
 
-static const char * const merge_base_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ merge_base_usage[] = {
 	N_("git merge-base [-a | --all] <commit> <commit>..."),
 	N_("git merge-base [-a | --all] --octopus <commit>..."),
 	N_("git merge-base --is-ancestor <commit> <commit>"),
 	N_("git merge-base --independent <commit>..."),
 	N_("git merge-base --fork-point <ref> [<commit>]"),
-	NULL
+	ખાલી
 };
 
-static struct commit *get_commit_reference(const char *arg)
+સ્થિર સંરચના commit *get_commit_reference(અચલ અક્ષર *arg)
 {
-	struct object_id revkey;
-	struct commit *r;
+	સંરચના object_id revkey;
+	સંરચના commit *r;
 
-	if (repo_get_oid(the_repository, arg, &revkey))
+	જો (repo_get_oid(the_repository, arg, &revkey))
 		die("Not a valid object name %s", arg);
 	r = lookup_commit_reference(the_repository, &revkey);
-	if (!r)
+	જો (!r)
 		die("Not a valid commit name %s", arg);
 
-	return r;
+	પાછા r;
 }
 
-static int handle_independent(int count, const char **args)
+સ્થિર પૂર્ણાંક handle_independent(પૂર્ણાંક ગણતરી, અચલ અક્ષર **args)
 {
-	struct commit_list *revs = NULL, *rev;
-	int i;
+	સંરચના commit_list *revs = ખાલી, *rev;
+	પૂર્ણાંક i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	માટે (i = ગણતરી - 1; i >= 0; i--)
+		commit_list_ઉમેરો(get_commit_reference(args[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
-	if (!revs)
-		return 1;
+	જો (!revs)
+		પાછા 1;
 
-	for (rev = revs; rev; rev = rev->next)
+	માટે (rev = revs; rev; rev = rev->next)
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
 
 	commit_list_free(revs);
-	return 0;
+	પાછા 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+સ્થિર પૂર્ણાંક handle_octopus(પૂર્ણાંક ગણતરી, અચલ અક્ષર **args, પૂર્ણાંક show_all)
 {
-	struct commit_list *revs = NULL;
-	struct commit_list *result = NULL, *rev;
-	int i;
+	સંરચના commit_list *revs = ખાલી;
+	સંરચના commit_list *result = ખાલી, *rev;
+	પૂર્ણાંક i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	માટે (i = ગણતરી - 1; i >= 0; i--)
+		commit_list_ઉમેરો(get_commit_reference(args[i]), &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0) {
+	જો (get_octopus_merge_bases(revs, &result) < 0) {
 		commit_list_free(revs);
 		commit_list_free(result);
-		return 128;
+		પાછા 128;
 	}
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	જો (!result)
+		પાછા 1;
 
-	for (rev = result; rev; rev = rev->next) {
+	માટે (rev = result; rev; rev = rev->next) {
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
-		if (!show_all)
-			break;
+		જો (!show_all)
+			તોડો;
 	}
 
 	commit_list_free(result);
-	return 0;
+	પાછા 0;
 }
 
-static int handle_is_ancestor(int argc, const char **argv)
+સ્થિર પૂર્ણાંક handle_is_ancestor(પૂર્ણાંક argc, અચલ અક્ષર **argv)
 {
-	struct commit *one, *two;
-	int ret;
+	સંરચના commit *one, *two;
+	પૂર્ણાંક ret;
 
-	if (argc != 2)
+	જો (argc != 2)
 		die("--is-ancestor takes exactly two commits");
 	one = get_commit_reference(argv[0]);
 	two = get_commit_reference(argv[1]);
 	ret = repo_in_merge_bases(the_repository, one, two);
-	if (ret < 0)
+	જો (ret < 0)
 		exit(128);
-	if (ret)
-		return 0;
-	else
-		return 1;
+	જો (ret)
+		પાછા 0;
+	નહીંતર
+		પાછા 1;
 }
 
-static int handle_fork_point(int argc, const char **argv)
+સ્થિર પૂર્ણાંક handle_fork_point(પૂર્ણાંક argc, અચલ અક્ષર **argv)
 {
-	struct object_id oid;
-	struct commit *derived, *fork_point;
-	const char *commitname;
+	સંરચના object_id oid;
+	સંરચના commit *derived, *fork_point;
+	અચલ અક્ષર *commitname;
 
 	commitname = (argc == 2) ? argv[1] : "HEAD";
-	if (repo_get_oid(the_repository, commitname, &oid))
+	જો (repo_get_oid(the_repository, commitname, &oid))
 		die("Not a valid object name: '%s'", commitname);
 
 	derived = lookup_commit_reference(the_repository, &oid);
 
 	fork_point = get_fork_point(argv[0], derived);
 
-	if (!fork_point)
-		return 1;
+	જો (!fork_point)
+		પાછા 1;
 
 	printf("%s\n", oid_to_hex(&fork_point->object.oid));
-	return 0;
+	પાછા 0;
 }
 
-int cmd_merge_base(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+પૂર્ણાંક cmd_merge_base(પૂર્ણાંક argc,
+		   અચલ અક્ષર **argv,
+		   અચલ અક્ષર *prefix,
+		   સંરચના repository *repo UNUSED)
 {
-	struct commit **rev;
+	સંરચના commit **rev;
 	size_t rev_nr = 0;
-	int show_all = 0;
-	int cmdmode = 0;
-	int ret;
+	પૂર્ણાંક show_all = 0;
+	પૂર્ણાંક cmdmode = 0;
+	પૂર્ણાંક ret;
 
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT_BOOL('a', "all", &show_all, N_("output all common ancestors")),
 		OPT_CMDMODE(0, "octopus", &cmdmode,
 			    N_("find ancestors for a single n-way merge"), 'o'),
@@ -170,41 +170,41 @@ int cmd_merge_base(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ખાલી);
 	argc = parse_options(argc, argv, prefix, options, merge_base_usage, 0);
 
-	if (cmdmode == 'a') {
-		if (argc < 2)
+	જો (cmdmode == 'a') {
+		જો (argc < 2)
 			usage_with_options(merge_base_usage, options);
-		if (show_all)
+		જો (show_all)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--is-ancestor", "--all");
-		return handle_is_ancestor(argc, argv);
+		પાછા handle_is_ancestor(argc, argv);
 	}
 
-	if (cmdmode == 'r' && show_all)
+	જો (cmdmode == 'r' && show_all)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--independent", "--all");
 
-	if (cmdmode == 'o')
-		return handle_octopus(argc, argv, show_all);
+	જો (cmdmode == 'o')
+		પાછા handle_octopus(argc, argv, show_all);
 
-	if (cmdmode == 'r')
-		return handle_independent(argc, argv);
+	જો (cmdmode == 'r')
+		પાછા handle_independent(argc, argv);
 
-	if (cmdmode == 'f') {
-		if (argc < 1 || 2 < argc)
+	જો (cmdmode == 'f') {
+		જો (argc < 1 || 2 < argc)
 			usage_with_options(merge_base_usage, options);
-		return handle_fork_point(argc, argv);
+		પાછા handle_fork_point(argc, argv);
 	}
 
-	if (argc < 2)
+	જો (argc < 2)
 		usage_with_options(merge_base_usage, options);
 
 	ALLOC_ARRAY(rev, argc);
-	while (argc-- > 0)
+	જ્યારે (argc-- > 0)
 		rev[rev_nr++] = get_commit_reference(*argv++);
 	ret = show_merge_base(rev, rev_nr, show_all);
-	free(rev);
-	return ret;
+	મુક્ત(rev);
+	પાછા ret;
 }

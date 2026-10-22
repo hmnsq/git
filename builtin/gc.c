@@ -13,123 +13,123 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "date.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "config.h"
-#include "tempfile.h"
-#include "lockfile.h"
-#include "parse-options.h"
-#include "run-command.h"
-#include "sigchain.h"
-#include "strvec.h"
-#include "commit.h"
-#include "commit-graph.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "odb.h"
-#include "path.h"
-#include "reflog.h"
-#include "rerere.h"
-#include "revision.h"
-#include "refs.h"
-#include "remote.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "hook.h"
-#include "setup.h"
-#include "trace2.h"
-#include "worktree.h"
+#અન્તર્ભાવ "builtin.h"
+#અન્તર્ભાવ "abspath.h"
+#અન્તર્ભાવ "date.h"
+#અન્તર્ભાવ "dir.h"
+#અન્તર્ભાવ "environment.h"
+#અન્તર્ભાવ "hex.h"
+#અન્તર્ભાવ "config.h"
+#અન્તર્ભાવ "tempfile.h"
+#અન્તર્ભાવ "lockfile.h"
+#અન્તર્ભાવ "parse-options.h"
+#અન્તર્ભાવ "run-command.h"
+#અન્તર્ભાવ "sigchain.h"
+#અન્તર્ભાવ "strvec.h"
+#અન્તર્ભાવ "commit.h"
+#અન્તર્ભાવ "commit-graph.h"
+#અન્તર્ભાવ "packfile.h"
+#અન્તર્ભાવ "object-file.h"
+#અન્તર્ભાવ "odb.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "reflog.h"
+#અન્તર્ભાવ "rerere.h"
+#અન્તર્ભાવ "revision.h"
+#અન્તર્ભાવ "refs.h"
+#અન્તર્ભાવ "remote.h"
+#અન્તર્ભાવ "exec-cmd.h"
+#અન્તર્ભાવ "gettext.h"
+#અન્તર્ભાવ "hook.h"
+#અન્તર્ભાવ "setup.h"
+#અન્તર્ભાવ "trace2.h"
+#અન્તર્ભાવ "worktree.h"
 
 #define FAILED_RUN "failed to run %s"
 
-static const char * const builtin_gc_usage[] = {
+સ્થિર અચલ અક્ષર * અચલ builtin_gc_usage[] = {
 	N_("git gc [<options>]"),
-	NULL
+	ખાલી
 };
 
-static timestamp_t gc_log_expire_time;
-static struct tempfile *pidfile;
-static struct lock_file log_lock;
-static struct string_list pack_garbage = STRING_LIST_INIT_DUP;
+સ્થિર timestamp_t gc_log_expire_time;
+સ્થિર સંરચના tempfile *pidfile;
+સ્થિર સંરચના lock_file log_lock;
+સ્થિર સંરચના string_list pack_garbage = STRING_LIST_INIT_DUP;
 
-static void clean_pack_garbage(void)
+સ્થિર શૂન્ય clean_pack_garbage(શૂન્ય)
 {
-	int i;
-	for (i = 0; i < pack_garbage.nr; i++)
-		unlink_or_warn(pack_garbage.items[i].string);
+	પૂર્ણાંક i;
+	માટે (i = 0; i < pack_garbage.nr; i++)
+		unlink_or_warn(pack_garbage.વસ્તુઓ[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
-static void report_pack_garbage(unsigned seen_bits, const char *path)
+સ્થિર શૂન્ય report_pack_garbage(unsigned seen_bits, અચલ અક્ષર *path)
 {
-	if (seen_bits == PACKDIR_FILE_IDX)
+	જો (seen_bits == PACKDIR_FILE_IDX)
 		string_list_append(&pack_garbage, path);
 }
 
-static void process_log_file(void)
+સ્થિર શૂન્ય process_log_file(શૂન્ય)
 {
-	struct stat st;
-	if (fstat(get_lock_file_fd(&log_lock), &st)) {
+	સંરચના stat st;
+	જો (fstat(get_lock_file_fd(&log_lock), &st)) {
 		/*
 		 * Perhaps there was an i/o error or another
 		 * unlikely situation.  Try to make a note of
 		 * this in gc.log along with any existing
 		 * messages.
 		 */
-		int saved_errno = errno;
+		પૂર્ણાંક saved_errno = errno;
 		fprintf(stderr, _("Failed to fstat %s: %s"),
 			get_lock_file_path(&log_lock),
 			strerror(saved_errno));
 		fflush(stderr);
 		commit_lock_file(&log_lock);
 		errno = saved_errno;
-	} else if (st.st_size) {
+	} નહીંતર જો (st.st_size) {
 		/* There was some error recorded in the lock file */
 		commit_lock_file(&log_lock);
-	} else {
-		char *path = repo_git_path(the_repository, "gc.log");
+	} નહીંતર {
+		અક્ષર *path = repo_git_path(the_repository, "gc.log");
 		/* No error, clean up any old gc.log */
 		unlink(path);
 		rollback_lock_file(&log_lock);
-		free(path);
+		મુક્ત(path);
 	}
 }
 
-static void process_log_file_at_exit(void)
+સ્થિર શૂન્ય process_log_file_at_exit(શૂન્ય)
 {
 	fflush(stderr);
 	process_log_file();
 }
 
-static int gc_config_is_timestamp_never(const char *var)
+સ્થિર પૂર્ણાંક gc_config_is_timestamp_never(અચલ અક્ષર *var)
 {
-	const char *value;
+	અચલ અક્ષર *કિંમત;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
-			die(_("failed to parse '%s' value '%s'"), var, value);
-		return expire == 0;
+	જો (!repo_config_get_કિંમત(the_repository, var, &કિંમત) && કિંમત) {
+		જો (parse_expiry_date(કિંમત, &expire))
+			die(_("failed to parse '%s' value '%s'"), var, કિંમત);
+		પાછા expire == 0;
 	}
-	return 0;
+	પાછા 0;
 }
 
-struct gc_config {
-	int pack_refs;
-	int prune_reflogs;
-	int cruft_packs;
+સંરચના gc_config {
+	પૂર્ણાંક pack_refs;
+	પૂર્ણાંક prune_reflogs;
+	પૂર્ણાંક cruft_packs;
 	unsigned long max_cruft_size;
-	int aggressive_depth;
-	int aggressive_window;
-	int detach_auto;
-	char *gc_log_expire;
-	char *prune_expire;
-	char *prune_worktrees_expire;
-	char *repack_expire_to;
+	પૂર્ણાંક aggressive_depth;
+	પૂર્ણાંક aggressive_window;
+	પૂર્ણાંક detach_auto;
+	અક્ષર *gc_log_expire;
+	અક્ષર *prune_expire;
+	અક્ષર *prune_worktrees_expire;
+	અક્ષર *repack_expire_to;
 };
 
 #define GC_CONFIG_INIT { \
@@ -144,26 +144,26 @@ struct gc_config {
 	.prune_worktrees_expire = xstrdup("3.months.ago"), \
 }
 
-static void gc_config_release(struct gc_config *cfg)
+સ્થિર શૂન્ય gc_config_release(સંરચના gc_config *cfg)
 {
-	free(cfg->gc_log_expire);
-	free(cfg->prune_expire);
-	free(cfg->prune_worktrees_expire);
+	મુક્ત(cfg->gc_log_expire);
+	મુક્ત(cfg->prune_expire);
+	મુક્ત(cfg->prune_worktrees_expire);
 }
 
-static void gc_config(struct gc_config *cfg)
+સ્થિર શૂન્ય gc_config(સંરચના gc_config *cfg)
 {
-	const char *value;
-	char *owned = NULL;
+	અચલ અક્ષર *કિંમત;
+	અક્ષર *owned = ખાલી;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	જો (!repo_config_get_કિંમત(the_repository, "gc.packrefs", &કિંમત)) {
+		જો (કિંમત && !strcmp(કિંમત, "notbare"))
 			cfg->pack_refs = -1;
-		else
-			cfg->pack_refs = git_config_bool("gc.packrefs", value);
+		નહીંતર
+			cfg->pack_refs = git_config_bool("gc.packrefs", કિંમત);
 	}
 
-	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
+	જો (gc_config_is_timestamp_never("gc.reflogexpire") &&
 	    gc_config_is_timestamp_never("gc.reflogexpireunreachable"))
 		cfg->prune_reflogs = 0;
 
@@ -173,45 +173,45 @@ static void gc_config(struct gc_config *cfg)
 	repo_config_get_bool(the_repository, "gc.cruftpacks", &cfg->cruft_packs);
 	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_size);
 
-	if (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
-		free(cfg->prune_expire);
+	જો (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
+		મુક્ત(cfg->prune_expire);
 		cfg->prune_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
-		free(cfg->prune_worktrees_expire);
+	જો (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
+		મુક્ત(cfg->prune_worktrees_expire);
 		cfg->prune_worktrees_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
-		free(cfg->gc_log_expire);
+	જો (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
+		મુક્ત(cfg->gc_log_expire);
 		cfg->gc_log_expire = owned;
 	}
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ખાલી);
 }
 
-enum schedule_priority {
+ગણના schedule_priority {
 	SCHEDULE_NONE = 0,
 	SCHEDULE_WEEKLY = 1,
 	SCHEDULE_DAILY = 2,
 	SCHEDULE_HOURLY = 3,
 };
 
-static enum schedule_priority parse_schedule(const char *value)
+સ્થિર ગણના schedule_priority parse_schedule(અચલ અક્ષર *કિંમત)
 {
-	if (!value)
-		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
-		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
-		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
-		return SCHEDULE_WEEKLY;
-	return SCHEDULE_NONE;
+	જો (!કિંમત)
+		પાછા SCHEDULE_NONE;
+	જો (!strcasecmp(કિંમત, "hourly"))
+		પાછા SCHEDULE_HOURLY;
+	જો (!strcasecmp(કિંમત, "daily"))
+		પાછા SCHEDULE_DAILY;
+	જો (!strcasecmp(કિંમત, "weekly"))
+		પાછા SCHEDULE_WEEKLY;
+	પાછા SCHEDULE_NONE;
 }
 
-enum maintenance_task_label {
+ગણના maintenance_task_label {
 	TASK_PREFETCH,
 	TASK_LOOSE_OBJECTS,
 	TASK_INCREMENTAL_REPACK,
@@ -224,31 +224,31 @@ enum maintenance_task_label {
 	TASK_RERERE_GC,
 
 	/* Leave as final value */
-	TASK__COUNT
+	TASK_ગણતરી
 };
 
-struct maintenance_run_opts {
-	enum maintenance_task_label *tasks;
+સંરચના maintenance_run_opts {
+	ગણના maintenance_task_label *tasks;
 	size_t tasks_nr, tasks_alloc;
-	int auto_flag;
-	int detach;
-	int quiet;
-	enum schedule_priority schedule;
+	પૂર્ણાંક auto_flag;
+	પૂર્ણાંક detach;
+	પૂર્ણાંક quiet;
+	ગણના schedule_priority schedule;
 };
 #define MAINTENANCE_RUN_OPTS_INIT { \
 	.detach = -1, \
 }
 
-static void maintenance_run_opts_release(struct maintenance_run_opts *opts)
+સ્થિર શૂન્ય maintenance_run_opts_release(સંરચના maintenance_run_opts *opts)
 {
-	free(opts->tasks);
+	મુક્ત(opts->tasks);
 }
 
-static int pack_refs_condition(UNUSED struct gc_config *cfg)
+સ્થિર પૂર્ણાંક pack_refs_condition(UNUSED સંરચના gc_config *cfg)
 {
-	struct string_list included_refs = STRING_LIST_INIT_NODUP;
-	struct ref_exclusions excludes = REF_EXCLUSIONS_INIT;
-	struct refs_optimize_opts optimize_opts = {
+	સંરચના string_list included_refs = STRING_LIST_INIT_NODUP;
+	સંરચના ref_exclusions excludes = REF_EXCLUSIONS_INIT;
+	સંરચના refs_optimize_opts optimize_opts = {
 		.exclusions = &excludes,
 		.includes = &included_refs,
 		.flags = REFS_OPTIMIZE_PRUNE | REFS_OPTIMIZE_AUTO,
@@ -258,153 +258,153 @@ static int pack_refs_condition(UNUSED struct gc_config *cfg)
 	/* Check for all refs, similar to 'git refs optimize --all'. */
 	string_list_append(optimize_opts.includes, "*");
 
-	if (refs_optimize_required(get_main_ref_store(the_repository),
+	જો (refs_optimize_required(get_main_ref_store(the_repository),
 				   &optimize_opts, &required))
-		return 0;
+		પાછા 0;
 
 	clear_ref_exclusions(&excludes);
 	string_list_clear(&included_refs, 0);
 
-	return required;
+	પાછા required;
 }
 
-static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
-				      UNUSED struct gc_config *cfg)
+સ્થિર પૂર્ણાંક maintenance_task_pack_refs(સંરચના maintenance_run_opts *opts,
+				      UNUSED સંરચના gc_config *cfg)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	સંરચના child_process cmd = CHILD_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
-	if (opts->auto_flag)
-		strvec_push(&cmd.args, "--auto");
+	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", ખાલી);
+	જો (opts->auto_flag)
+		strvec_ધકેલો(&cmd.args, "--auto");
 
-	return run_command(&cmd);
+	પાછા run_command(&cmd);
 }
 
-struct count_reflog_entries_data {
-	struct expire_reflog_policy_cb policy;
-	size_t count;
+સંરચના ગણતરી_reflog_entries_data {
+	સંરચના expire_reflog_policy_cb policy;
+	size_t ગણતરી;
 	size_t limit;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
-				struct object_id *old_oid, struct object_id *new_oid,
-				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+સ્થિર પૂર્ણાંક ગણતરી_reflog_entries(અચલ અક્ષર *refname UNUSED,
+				સંરચના object_id *old_oid, સંરચના object_id *new_oid,
+				અચલ અક્ષર *committer, timestamp_t timestamp,
+				પૂર્ણાંક tz, અચલ અક્ષર *સંદેશ, શૂન્ય *cb_data)
 {
-	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
-		data->count++;
-	return data->count >= data->limit;
+	સંરચના ગણતરી_reflog_entries_data *data = cb_data;
+	જો (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, સંદેશ, &data->policy))
+		data->ગણતરી++;
+	પાછા data->ગણતરી >= data->limit;
 }
 
-static int reflog_expire_condition(struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક reflog_expire_condition(સંરચના gc_config *cfg UNUSED)
 {
-	timestamp_t now = time(NULL);
-	struct count_reflog_entries_data data = {
+	timestamp_t now = time(ખાલી);
+	સંરચના ગણતરી_reflog_entries_data data = {
 		.policy = {
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
 	};
-	int limit = 100;
+	પૂર્ણાંક limit = 100;
 
 	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &limit);
-	if (!limit)
-		return 0;
-	if (limit < 0)
-		return 1;
+	જો (!limit)
+		પાછા 0;
+	જો (limit < 0)
+		પાછા 1;
 	data.limit = limit;
 
 	repo_config(the_repository, reflog_expire_config, &data.policy.opts);
 
 	reflog_expire_options_set_refname(&data.policy.opts, "HEAD");
 	refs_for_each_reflog_ent(get_main_ref_store(the_repository), "HEAD",
-				 count_reflog_entries, &data);
+				 ગણતરી_reflog_entries, &data);
 
 	reflog_expiry_cleanup(&data.policy);
 	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	પાછા data.ગણતરી >= data.limit;
 }
 
-static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
-					  struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_reflog_expire(સંરચના maintenance_run_opts *opts UNUSED,
+					  સંરચના gc_config *cfg UNUSED)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	સંરચના child_process cmd = CHILD_PROCESS_INIT;
 	cmd.git_cmd = 1;
-	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
-	return run_command(&cmd);
+	strvec_pushl(&cmd.args, "reflog", "expire", "--all", ખાલી);
+	પાછા run_command(&cmd);
 }
 
-static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
-					   struct gc_config *cfg)
+સ્થિર પૂર્ણાંક maintenance_task_worktree_prune(સંરચના maintenance_run_opts *opts UNUSED,
+					   સંરચના gc_config *cfg)
 {
-	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
+	સંરચના child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
 
 	prune_worktrees_cmd.git_cmd = 1;
-	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
-	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
+	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", ખાલી);
+	strvec_ધકેલો(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
 
-	return run_command(&prune_worktrees_cmd);
+	પાછા run_command(&prune_worktrees_cmd);
 }
 
-static int worktree_prune_condition(struct gc_config *cfg)
+સ્થિર પૂર્ણાંક worktree_prune_condition(સંરચના gc_config *cfg)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int should_prune = 0, limit = 1;
+	સંરચના strbuf buf = STRBUF_INIT;
+	પૂર્ણાંક should_prune = 0, limit = 1;
 	timestamp_t expiry_date;
-	struct dirent *d;
-	DIR *dir = NULL;
+	સંરચના dirent *d;
+	DIR *dir = ખાલી;
 
 	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &limit);
-	if (limit <= 0) {
+	જો (limit <= 0) {
 		should_prune = limit < 0;
-		goto out;
+		જાઓ out;
 	}
 
-	if (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
-		goto out;
+	જો (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
+		જાઓ out;
 
 	dir = opendir(repo_git_path_replace(the_repository, &buf, "worktrees"));
-	if (!dir)
-		goto out;
+	જો (!dir)
+		જાઓ out;
 
-	while (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
-		char *wtpath;
+	જ્યારે (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
+		અક્ષર *wtpath;
 		strbuf_reset(&buf);
-		if (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
+		જો (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
 			limit--;
-		free(wtpath);
+		મુક્ત(wtpath);
 	}
 
 	should_prune = !limit;
 
 out:
-	if (dir)
+	જો (dir)
 		closedir(dir);
 	strbuf_release(&buf);
-	return should_prune;
+	પાછા should_prune;
 }
 
-static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
-				      struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_rerere_gc(સંરચના maintenance_run_opts *opts UNUSED,
+				      સંરચના gc_config *cfg UNUSED)
 {
-	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
+	સંરચના child_process rerere_cmd = CHILD_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
-	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
-	return run_command(&rerere_cmd);
+	strvec_pushl(&rerere_cmd.args, "rerere", "gc", ખાલી);
+	પાછા run_command(&rerere_cmd);
 }
 
-static int rerere_gc_condition(struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક rerere_gc_condition(સંરચના gc_config *cfg UNUSED)
 {
-	int limit = 512;
+	પૂર્ણાંક limit = 512;
 
 	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &limit);
-	if (!limit)
-		return 0; /* never prune */
-	if (limit < 0)
-		return 1; /* always prune */
+	જો (!limit)
+		પાછા 0; /* never prune */
+	જો (limit < 0)
+		પાછા 1; /* always prune */
 
-	return rerere_gc_needed(the_repository, (size_t)limit);
+	પાછા rerere_gc_needed(the_repository, (size_t)limit);
 }
 
 #define OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
@@ -416,38 +416,38 @@ static int rerere_gc_condition(struct gc_config *cfg UNUSED)
 	.depth = (aggressive) ? (cfg)->aggressive_depth : 0
 
 /* return NULL on success, else hostname running the gc */
-static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
+સ્થિર અચલ અક્ષર *lock_repo_for_gc(પૂર્ણાંક force, pid_t* ret_pid)
 {
-	struct lock_file lock = LOCK_INIT;
-	char my_host[HOST_NAME_MAX + 1];
-	struct strbuf sb = STRBUF_INIT;
-	struct stat st;
+	સંરચના lock_file lock = LOCK_INIT;
+	અક્ષર my_host[HOST_NAME_MAX + 1];
+	સંરચના strbuf sb = STRBUF_INIT;
+	સંરચના stat st;
 	uintmax_t pid;
 	FILE *fp;
-	int fd;
-	char *pidfile_path;
+	પૂર્ણાંક fd;
+	અક્ષર *pidfile_path;
 
-	if (is_tempfile_active(pidfile))
+	જો (is_tempfile_active(pidfile))
 		/* already locked */
-		return NULL;
+		પાછા ખાલી;
 
-	if (xgethostname(my_host, sizeof(my_host)))
-		xsnprintf(my_host, sizeof(my_host), "unknown");
+	જો (xgethostname(my_host, કદ(my_host)))
+		xsnprintf(my_host, કદ(my_host), "unknown");
 
 	pidfile_path = repo_git_path(the_repository, "gc.pid");
 	fd = hold_lock_file_for_update(&lock, pidfile_path,
 				       LOCK_DIE_ON_ERROR);
-	if (!force) {
-		static char locking_host[HOST_NAME_MAX + 1];
-		static char *scan_fmt;
-		int should_exit;
+	જો (!force) {
+		સ્થિર અક્ષર locking_host[HOST_NAME_MAX + 1];
+		સ્થિર અક્ષર *scan_fmt;
+		પૂર્ણાંક should_exit;
 
-		if (!scan_fmt)
+		જો (!scan_fmt)
 			scan_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
 		fp = fopen(pidfile_path, "r");
-		memset(locking_host, 0, sizeof(locking_host));
+		memset(locking_host, 0, કદ(locking_host));
 		should_exit =
-			fp != NULL &&
+			fp != ખાલી &&
 			!fstat(fileno(fp), &st) &&
 			/*
 			 * 12 hour limit is very generous as gc should
@@ -458,18 +458,18 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 			 * after the user verifies that no gc is
 			 * running.
 			 */
-			time(NULL) - st.st_mtime <= 12 * 3600 &&
+			time(ખાલી) - st.st_mtime <= 12 * 3600 &&
 			fscanf(fp, scan_fmt, &pid, locking_host) == 2 &&
 			/* be gentle to concurrent "gc" on remote hosts */
 			(strcmp(locking_host, my_host) || !kill(pid, 0) || errno == EPERM);
-		if (fp)
+		જો (fp)
 			fclose(fp);
-		if (should_exit) {
-			if (fd >= 0)
+		જો (should_exit) {
+			જો (fd >= 0)
 				rollback_lock_file(&lock);
 			*ret_pid = pid;
-			free(pidfile_path);
-			return locking_host;
+			મુક્ત(pidfile_path);
+			પાછા locking_host;
 		}
 	}
 
@@ -479,8 +479,8 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 	strbuf_release(&sb);
 	commit_lock_file(&lock);
 	pidfile = register_tempfile(pidfile_path);
-	free(pidfile_path);
-	return NULL;
+	મુક્ત(pidfile_path);
+	પાછા ખાલી;
 }
 
 /*
@@ -489,29 +489,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
  * message and returns with a non-[01] status code if an error occurred
  * while reading gc.log
  */
-static int report_last_gc_error(void)
+સ્થિર પૂર્ણાંક report_last_gc_error(શૂન્ય)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	સંરચના strbuf sb = STRBUF_INIT;
+	પૂર્ણાંક ret = 0;
 	ssize_t len;
-	struct stat st;
-	char *gc_log_path = repo_git_path(the_repository, "gc.log");
+	સંરચના stat st;
+	અક્ષર *gc_log_path = repo_git_path(the_repository, "gc.log");
 
-	if (stat(gc_log_path, &st)) {
-		if (errno == ENOENT)
-			goto done;
+	જો (stat(gc_log_path, &st)) {
+		જો (errno == ENOENT)
+			જાઓ done;
 
 		ret = die_message_errno(_("cannot stat '%s'"), gc_log_path);
-		goto done;
+		જાઓ done;
 	}
 
-	if (st.st_mtime < gc_log_expire_time)
-		goto done;
+	જો (st.st_mtime < gc_log_expire_time)
+		જાઓ done;
 
 	len = strbuf_read_file(&sb, gc_log_path, 0);
-	if (len < 0)
+	જો (len < 0)
 		ret = die_message_errno(_("cannot read '%s'"), gc_log_path);
-	else if (len > 0) {
+	નહીંતર જો (len > 0) {
 		/*
 		 * A previous gc failed.  Report the error, and don't
 		 * bother with an automatic gc run since it is likely
@@ -528,65 +528,65 @@ static int report_last_gc_error(void)
 	}
 	strbuf_release(&sb);
 done:
-	free(gc_log_path);
-	return ret;
+	મુક્ત(gc_log_path);
+	પાછા ret;
 }
 
-static int gc_foreground_tasks(struct maintenance_run_opts *opts,
-			       struct gc_config *cfg)
+સ્થિર પૂર્ણાંક gc_foreground_tasks(સંરચના maintenance_run_opts *opts,
+			       સંરચના gc_config *cfg)
 {
-	if (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
-		return error(FAILED_RUN, "pack-refs");
-	if (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
-		return error(FAILED_RUN, "reflog");
-	return 0;
+	જો (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
+		પાછા error(FAILED_RUN, "pack-refs");
+	જો (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
+		પાછા error(FAILED_RUN, "reflog");
+	પાછા 0;
 }
 
-static int maintenance_task_odb(struct maintenance_run_opts *opts,
-				struct gc_config *cfg,
-				int keep_largest_pack,
-				int aggressive)
+સ્થિર પૂર્ણાંક maintenance_task_odb(સંરચના maintenance_run_opts *opts,
+				સંરચના gc_config *cfg,
+				પૂર્ણાંક keep_largest_pack,
+				પૂર્ણાંક aggressive)
 {
-	struct odb_optimize_options odb_opts = {
+	સંરચના odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		.keep_largest_pack = keep_largest_pack,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive),
 	};
 
-	if (opts->auto_flag)
+	જો (opts->auto_flag)
 		odb_opts.flags |= ODB_OPTIMIZE_AUTO;
-	if (!opts->quiet)
+	જો (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
-	if (aggressive)
+	જો (aggressive)
 		odb_opts.flags |= ODB_OPTIMIZE_NO_REUSE_DELTAS;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	પાછા odb_optimize(the_repository->objects, &odb_opts);
 }
 
-int cmd_gc(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+પૂર્ણાંક cmd_gc(પૂર્ણાંક argc,
+	   અચલ અક્ષર **argv,
+	   અચલ અક્ષર *prefix,
+	   સંરચના repository *repo UNUSED)
 {
-	int aggressive = 0;
-	int force = 0;
-	const char *name;
+	પૂર્ણાંક aggressive = 0;
+	પૂર્ણાંક force = 0;
+	અચલ અક્ષર *name;
 	pid_t pid;
-	int daemonized = 0;
-	int keep_largest_pack = -1;
-	int skip_foreground_tasks = 0;
+	પૂર્ણાંક daemonized = 0;
+	પૂર્ણાંક keep_largest_pack = -1;
+	પૂર્ણાંક skip_foreground_tasks = 0;
 	timestamp_t dummy;
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	const char *prune_expire_sentinel = "sentinel";
-	const char *prune_expire_arg = prune_expire_sentinel;
-	int ret;
-	struct option builtin_gc_options[] = {
+	સંરચના maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	સંરચના gc_config cfg = GC_CONFIG_INIT;
+	અચલ અક્ષર *prune_expire_sentinel = "sentinel";
+	અચલ અક્ષર *prune_expire_arg = prune_expire_sentinel;
+	પૂર્ણાંક ret;
+	સંરચના option builtin_gc_options[] = {
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
 		{
 			.type = OPTION_STRING,
 			.long_name = "prune",
-			.value = &prune_expire_arg,
+			.કિંમત = &prune_expire_arg,
 			.argh = N_("date"),
 			.help = N_("prune unreferenced objects"),
 			.flags = PARSE_OPT_OPTARG,
@@ -617,71 +617,71 @@ int cmd_gc(int argc,
 
 	gc_config(&cfg);
 
-	if (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
+	જો (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
 		die(_("failed to parse gc.logExpiry value %s"), cfg.gc_log_expire);
 
-	if (cfg.pack_refs < 0)
+	જો (cfg.pack_refs < 0)
 		cfg.pack_refs = !is_bare_repository(the_repository);
 
 	argc = parse_options(argc, argv, prefix, builtin_gc_options,
 			     builtin_gc_usage, 0);
-	if (argc > 0)
+	જો (argc > 0)
 		usage_with_options(builtin_gc_usage, builtin_gc_options);
 
-	if (prune_expire_arg != prune_expire_sentinel) {
-		free(cfg.prune_expire);
+	જો (prune_expire_arg != prune_expire_sentinel) {
+		મુક્ત(cfg.prune_expire);
 		cfg.prune_expire = xstrdup_or_null(prune_expire_arg);
 	}
-	if (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
+	જો (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
 		die(_("failed to parse prune expiry value %s"), cfg.prune_expire);
 
-	if (opts.auto_flag) {
-		struct odb_optimize_options optimize_opts = {
+	જો (opts.auto_flag) {
+		સંરચના odb_optimize_options optimize_opts = {
 			.strategy = ODB_OPTIMIZE_INCREMENTAL,
 			OPTIMIZE_FIELDS_FROM_GC_CONFIG(&cfg, 0),
 		};
 
-		if (cfg.detach_auto && opts.detach < 0)
+		જો (cfg.detach_auto && opts.detach < 0)
 			opts.detach = 1;
 
 		/*
 		 * Auto-gc should be least intrusive as possible.
 		 */
-		if (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
+		જો (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
 		    run_hooks(the_repository, "pre-auto-gc")) {
 			ret = 0;
-			goto out;
+			જાઓ out;
 		}
 
-		if (!opts.quiet) {
-			if (opts.detach > 0)
+		જો (!opts.quiet) {
+			જો (opts.detach > 0)
 				fprintf(stderr, _("Auto packing the repository in background for optimum performance.\n"));
-			else
+			નહીંતર
 				fprintf(stderr, _("Auto packing the repository for optimum performance.\n"));
 			fprintf(stderr, _("See \"git help gc\" for manual housekeeping.\n"));
 		}
 	}
 
-	if (opts.detach > 0) {
+	જો (opts.detach > 0) {
 		ret = report_last_gc_error();
-		if (ret == 1) {
+		જો (ret == 1) {
 			/* Last gc --auto failed. Skip this one. */
 			ret = 0;
-			goto out;
+			જાઓ out;
 
-		} else if (ret) {
+		} નહીંતર જો (ret) {
 			/* an I/O error occurred, already reported */
-			goto out;
+			જાઓ out;
 		}
 
-		if (!skip_foreground_tasks) {
-			if (lock_repo_for_gc(force, &pid)) {
+		જો (!skip_foreground_tasks) {
+			જો (lock_repo_for_gc(force, &pid)) {
 				ret = 0;
-				goto out;
+				જાઓ out;
 			}
 
-			if (gc_foreground_tasks(&opts, &cfg) < 0)
-				die(NULL);
+			જો (gc_foreground_tasks(&opts, &cfg) < 0)
+				die(ખાલી);
 			delete_tempfile(&pidfile);
 		}
 
@@ -693,358 +693,358 @@ int cmd_gc(int argc,
 	}
 
 	name = lock_repo_for_gc(force, &pid);
-	if (name) {
-		if (opts.auto_flag) {
+	જો (name) {
+		જો (opts.auto_flag) {
 			ret = 0;
-			goto out; /* be quiet on --auto */
+			જાઓ out; /* be quiet on --auto */
 		}
 
 		die(_("gc is already running on machine '%s' pid %"PRIuMAX" (use --force if not)"),
 		    name, (uintmax_t)pid);
 	}
 
-	if (daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
+	જો (daemonized) {
+		અક્ષર *path = repo_git_path(the_repository, "gc.log");
 		hold_lock_file_for_update(&log_lock, path,
 					  LOCK_DIE_ON_ERROR);
 		dup2(get_lock_file_fd(&log_lock), 2);
 		atexit(process_log_file_at_exit);
-		free(path);
+		મુક્ત(path);
 	}
 
-	if (opts.detach <= 0 && !skip_foreground_tasks)
+	જો (opts.detach <= 0 && !skip_foreground_tasks)
 		gc_foreground_tasks(&opts, &cfg);
 
-	if (cfg.prune_worktrees_expire &&
+	જો (cfg.prune_worktrees_expire &&
 	    maintenance_task_worktree_prune(&opts, &cfg))
 		die(FAILED_RUN, "worktree");
 
-	if (maintenance_task_rerere_gc(&opts, &cfg))
+	જો (maintenance_task_rerere_gc(&opts, &cfg))
 		die(FAILED_RUN, "rerere");
 
-	if (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
-		die(NULL);
+	જો (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
+		die(ખાલી);
 
 	report_garbage = report_pack_garbage;
 	odb_reprepare(the_repository->objects);
-	if (pack_garbage.nr > 0) {
+	જો (pack_garbage.nr > 0) {
 		odb_close(the_repository->objects);
 		clean_pack_garbage();
 	}
 
-	if (the_repository->settings.gc_write_commit_graph == 1)
+	જો (the_repository->settings.gc_write_commit_graph == 1)
 		write_commit_graph_reachable(the_repository,
 					     the_repository->objects->source->path,
 					     !opts.quiet && !daemonized ? COMMIT_GRAPH_WRITE_PROGRESS : 0,
-					     NULL);
+					     ખાલી);
 
-	if (!daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
+	જો (!daemonized) {
+		અક્ષર *path = repo_git_path(the_repository, "gc.log");
 		unlink(path);
-		free(path);
+		મુક્ત(path);
 	}
 
 out:
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return 0;
+	પાછા 0;
 }
 
-static const char *const builtin_maintenance_run_usage[] = {
+સ્થિર અચલ અક્ષર *અચલ builtin_maintenance_run_usage[] = {
 	N_("git maintenance run [--auto] [--[no-]quiet] [--task=<task>] [--schedule]"),
-	NULL
+	ખાલી
 };
 
-static int maintenance_opt_schedule(const struct option *opt, const char *arg,
-				    int unset)
+સ્થિર પૂર્ણાંક maintenance_opt_schedule(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+				    પૂર્ણાંક unset)
 {
-	enum schedule_priority *priority = opt->value;
+	ગણના schedule_priority *priority = opt->કિંમત;
 
-	if (unset)
+	જો (unset)
 		die(_("--no-schedule is not allowed"));
 
 	*priority = parse_schedule(arg);
 
-	if (!*priority)
+	જો (!*priority)
 		die(_("unrecognized --schedule argument '%s'"), arg);
 
-	return 0;
+	પાછા 0;
 }
 
-struct cg_auto_data {
-	int num_not_in_graph;
-	int limit;
+સંરચના cg_auto_data {
+	પૂર્ણાંક અંક_not_in_graph;
+	પૂર્ણાંક limit;
 };
 
-static int dfs_on_ref(const struct reference *ref, void *cb_data)
+સ્થિર પૂર્ણાંક dfs_on_ref(અચલ સંરચના reference *ref, શૂન્ય *cb_data)
 {
-	struct cg_auto_data *data = (struct cg_auto_data *)cb_data;
-	int result = 0;
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct commit_list *stack = NULL;
-	struct commit *commit;
+	સંરચના cg_auto_data *data = (સંરચના cg_auto_data *)cb_data;
+	પૂર્ણાંક result = 0;
+	અચલ સંરચના object_id *maybe_peeled = ref->oid;
+	સંરચના object_id peeled;
+	સંરચના commit_list *ઢગલો = ખાલી;
+	સંરચના commit *commit;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	જો (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
-	if (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
-		return 0;
+	જો (odb_read_object_info(the_repository->objects, maybe_peeled, ખાલી) != OBJ_COMMIT)
+		પાછા 0;
 
 	commit = lookup_commit(the_repository, maybe_peeled);
-	if (!commit || commit->object.flags & SEEN)
-		return 0;
+	જો (!commit || commit->object.flags & SEEN)
+		પાછા 0;
 	commit->object.flags |= SEEN;
 
-	if (repo_parse_commit(the_repository, commit) ||
+	જો (repo_parse_commit(the_repository, commit) ||
 	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
-		return 0;
+		પાછા 0;
 
-	data->num_not_in_graph++;
+	data->અંક_not_in_graph++;
 
-	if (data->num_not_in_graph >= data->limit)
-		return 1;
+	જો (data->અંક_not_in_graph >= data->limit)
+		પાછા 1;
 
-	commit_list_insert(commit, &stack);
+	commit_list_ઉમેરો(commit, &ઢગલો);
 
-	while (!result && stack) {
-		struct commit_list *parent;
+	જ્યારે (!result && ઢગલો) {
+		સંરચના commit_list *parent;
 
-		commit = pop_commit(&stack);
+		commit = કાઢો_commit(&ઢગલો);
 
-		for (parent = commit->parents; parent; parent = parent->next) {
-			if (repo_parse_commit(the_repository, parent->item) ||
+		માટે (parent = commit->parents; parent; parent = parent->next) {
+			જો (repo_parse_commit(the_repository, parent->item) ||
 			    commit_graph_position(parent->item) != COMMIT_NOT_FROM_GRAPH ||
 			    parent->item->object.flags & SEEN)
-				continue;
+				ચાલુ;
 
 			parent->item->object.flags |= SEEN;
-			data->num_not_in_graph++;
+			data->અંક_not_in_graph++;
 
-			if (data->num_not_in_graph >= data->limit) {
+			જો (data->અંક_not_in_graph >= data->limit) {
 				result = 1;
-				break;
+				તોડો;
 			}
 
-			commit_list_insert(parent->item, &stack);
+			commit_list_ઉમેરો(parent->item, &ઢગલો);
 		}
 	}
 
-	commit_list_free(stack);
-	return result;
+	commit_list_free(ઢગલો);
+	પાછા result;
 }
 
-static int should_write_commit_graph(struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક should_write_commit_graph(સંરચના gc_config *cfg UNUSED)
 {
-	int result;
-	struct cg_auto_data data;
+	પૂર્ણાંક result;
+	સંરચના cg_auto_data data;
 
-	data.num_not_in_graph = 0;
+	data.અંક_not_in_graph = 0;
 	data.limit = 100;
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
 			    &data.limit);
 
-	if (!data.limit)
-		return 0;
-	if (data.limit < 0)
-		return 1;
+	જો (!data.limit)
+		પાછા 0;
+	જો (data.limit < 0)
+		પાછા 1;
 
 	result = refs_for_each_ref(get_main_ref_store(the_repository),
 				   dfs_on_ref, &data);
 
 	repo_clear_commit_marks(the_repository, SEEN);
 
-	return result;
+	પાછા result;
 }
 
-static int run_write_commit_graph(struct maintenance_run_opts *opts)
+સ્થિર પૂર્ણાંક run_write_commit_graph(સંરચના maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "commit-graph", "write",
-		     "--split", "--reachable", NULL);
+		     "--split", "--reachable", ખાલી);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--no-progress");
+	નહીંતર
+		strvec_ધકેલો(&child.args, "--progress");
 
-	return !!run_command(&child);
+	પાછા !!run_command(&child);
 }
 
-static int maintenance_task_commit_graph(struct maintenance_run_opts *opts,
-					 struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_commit_graph(સંરચના maintenance_run_opts *opts,
+					 સંરચના gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_commit_graph)
-		return 0;
+	જો (!the_repository->settings.core_commit_graph)
+		પાછા 0;
 
-	if (run_write_commit_graph(opts)) {
+	જો (run_write_commit_graph(opts)) {
 		error(_("failed to write commit-graph"));
-		return 1;
+		પાછા 1;
 	}
 
-	return 0;
+	પાછા 0;
 }
 
-static int fetch_remote(struct remote *remote, void *cbdata)
+સ્થિર પૂર્ણાંક fetch_remote(સંરચના remote *remote, શૂન્ય *cbdata)
 {
-	struct maintenance_run_opts *opts = cbdata;
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના maintenance_run_opts *opts = cbdata;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
-	if (remote->skip_default_update)
-		return 0;
+	જો (remote->skip_default_update)
+		પાછા 0;
 
 	child.git_cmd = 1;
 	strvec_pushl(&child.args, "fetch", remote->name,
 		     "--prefetch", "--prune", "--no-tags",
 		     "--no-write-fetch-head", "--recurse-submodules=no",
-		     NULL);
+		     ખાલી);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	પાછા !!run_command(&child);
 }
 
-static int maintenance_task_prefetch(struct maintenance_run_opts *opts,
-				     struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_prefetch(સંરચના maintenance_run_opts *opts,
+				     સંરચના gc_config *cfg UNUSED)
 {
-	if (for_each_remote(fetch_remote, opts)) {
+	જો (for_each_remote(fetch_remote, opts)) {
 		error(_("failed to prefetch remotes"));
-		return 1;
+		પાછા 1;
 	}
 
-	return 0;
+	પાછા 0;
 }
 
-static int maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg)
+સ્થિર પૂર્ણાંક maintenance_task_gc_foreground(સંરચના maintenance_run_opts *opts,
+					  સંરચના gc_config *cfg)
 {
-	return gc_foreground_tasks(opts, cfg);
+	પાછા gc_foreground_tasks(opts, cfg);
 }
 
-static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_gc_background(સંરચના maintenance_run_opts *opts,
+					  સંરચના gc_config *cfg UNUSED)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_push(&child.args, "gc");
+	strvec_ધકેલો(&child.args, "gc");
 
-	if (opts->auto_flag)
-		strvec_push(&child.args, "--auto");
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
-	else
-		strvec_push(&child.args, "--no-quiet");
-	strvec_push(&child.args, "--no-detach");
-	strvec_push(&child.args, "--skip-foreground-tasks");
+	જો (opts->auto_flag)
+		strvec_ધકેલો(&child.args, "--auto");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--quiet");
+	નહીંતર
+		strvec_ધકેલો(&child.args, "--no-quiet");
+	strvec_ધકેલો(&child.args, "--no-detach");
+	strvec_ધકેલો(&child.args, "--skip-foreground-tasks");
 
-	return run_command(&child);
+	પાછા run_command(&child);
 }
 
-static int gc_condition(struct gc_config *cfg)
+સ્થિર પૂર્ણાંક gc_condition(સંરચના gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	સંરચના odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	પાછા odb_optimize_required(the_repository->objects, &opts);
 }
 
-static int prune_packed(struct maintenance_run_opts *opts)
+સ્થિર પૂર્ણાંક prune_packed(સંરચના maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
-	strvec_push(&child.args, "prune-packed");
+	strvec_ધકેલો(&child.args, "prune-packed");
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--quiet");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	પાછા !!run_command(&child);
 }
 
-struct write_loose_object_data {
+સંરચના write_loose_object_data {
 	FILE *in;
-	int count;
-	int batch_size;
+	પૂર્ણાંક ગણતરી;
+	પૂર્ણાંક batch_size;
 };
 
-static int loose_object_auto_limit = 100;
+સ્થિર પૂર્ણાંક loose_object_auto_limit = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
-			      const char *path UNUSED,
-			      void *data)
+સ્થિર પૂર્ણાંક loose_object_ગણતરી(અચલ સંરચના object_id *oid UNUSED,
+			      અચલ અક્ષર *path UNUSED,
+			      શૂન્ય *data)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
-		return 1;
-	return 0;
+	પૂર્ણાંક *ગણતરી = (પૂર્ણાંક*)data;
+	જો (++(*ગણતરી) >= loose_object_auto_limit)
+		પાછા 1;
+	પાછા 0;
 }
 
-static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક loose_object_auto_condition(સંરચના gc_config *cfg UNUSED)
 {
-	int count = 0;
+	પૂર્ણાંક ગણતરી = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
 			    &loose_object_auto_limit);
 
-	if (!loose_object_auto_limit)
-		return 0;
-	if (loose_object_auto_limit < 0)
-		return 1;
+	જો (!loose_object_auto_limit)
+		પાછા 0;
+	જો (loose_object_auto_limit < 0)
+		પાછા 1;
 
-	return for_each_loose_file_in_source(the_repository->objects->source,
-					     loose_object_count,
-					     NULL, NULL, &count);
+	પાછા for_each_loose_file_in_source(the_repository->objects->source,
+					     loose_object_ગણતરી,
+					     ખાલી, ખાલી, &ગણતરી);
 }
 
-static int bail_on_loose(const struct object_id *oid UNUSED,
-			 const char *path UNUSED,
-			 void *data UNUSED)
+સ્થિર પૂર્ણાંક bail_on_loose(અચલ સંરચના object_id *oid UNUSED,
+			 અચલ અક્ષર *path UNUSED,
+			 શૂન્ય *data UNUSED)
 {
-	return 1;
+	પાછા 1;
 }
 
-static int write_loose_object_to_stdin(const struct object_id *oid,
-				       const char *path UNUSED,
-				       void *data)
+સ્થિર પૂર્ણાંક write_loose_object_to_stdin(અચલ સંરચના object_id *oid,
+				       અચલ અક્ષર *path UNUSED,
+				       શૂન્ય *data)
 {
-	struct write_loose_object_data *d = (struct write_loose_object_data *)data;
+	સંરચના write_loose_object_data *d = (સંરચના write_loose_object_data *)data;
 
 	fprintf(d->in, "%s\n", oid_to_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	પાછા ++(d->ગણતરી) > d->batch_size;
 }
 
-static int pack_loose(struct maintenance_run_opts *opts)
+સ્થિર પૂર્ણાંક pack_loose(સંરચના maintenance_run_opts *opts)
 {
-	struct repository *r = the_repository;
-	int result = 0;
-	struct write_loose_object_data data;
-	struct child_process pack_proc = CHILD_PROCESS_INIT;
+	સંરચના repository *r = the_repository;
+	પૂર્ણાંક result = 0;
+	સંરચના write_loose_object_data data;
+	સંરચના child_process pack_proc = CHILD_PROCESS_INIT;
 
 	/*
 	 * Do not start pack-objects process
 	 * if there are no loose objects.
 	 */
-	if (!for_each_loose_file_in_source(r->objects->source,
+	જો (!for_each_loose_file_in_source(r->objects->source,
 					   bail_on_loose,
-					   NULL, NULL, NULL))
-		return 0;
+					   ખાલી, ખાલી, ખાલી))
+		પાછા 0;
 
 	pack_proc.git_cmd = 1;
 
-	strvec_push(&pack_proc.args, "pack-objects");
-	if (opts->quiet)
-		strvec_push(&pack_proc.args, "--quiet");
-	else
-		strvec_push(&pack_proc.args, "--no-quiet");
+	strvec_ધકેલો(&pack_proc.args, "pack-objects");
+	જો (opts->quiet)
+		strvec_ધકેલો(&pack_proc.args, "--quiet");
+	નહીંતર
+		strvec_ધકેલો(&pack_proc.args, "--no-quiet");
 	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
 
 	pack_proc.in = -1;
@@ -1055,112 +1055,112 @@ static int pack_loose(struct maintenance_run_opts *opts)
 	 */
 	pack_proc.out = -1;
 
-	if (start_command(&pack_proc)) {
+	જો (start_command(&pack_proc)) {
 		error(_("failed to start 'git pack-objects' process"));
-		return 1;
+		પાછા 1;
 	}
 
 	data.in = xfdopen(pack_proc.in, "w");
-	data.count = 0;
+	data.ગણતરી = 0;
 	data.batch_size = 50000;
 
 	repo_config_get_int(r, "maintenance.loose-objects.batchSize",
 			    &data.batch_size);
 
 	/* If configured as 0, then remove limit. */
-	if (!data.batch_size)
+	જો (!data.batch_size)
 		data.batch_size = INT_MAX;
-	else if (data.batch_size > 0)
+	નહીંતર જો (data.batch_size > 0)
 		data.batch_size--; /* Decrease for equality on limit. */
 
 	for_each_loose_file_in_source(r->objects->source,
 				      write_loose_object_to_stdin,
-				      NULL, NULL, &data);
+				      ખાલી, ખાલી, &data);
 
 	fclose(data.in);
 
-	if (finish_command(&pack_proc)) {
+	જો (finish_command(&pack_proc)) {
 		error(_("failed to finish 'git pack-objects' process"));
 		result = 1;
 	}
 
-	return result;
+	પાછા result;
 }
 
-static int maintenance_task_loose_objects(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_loose_objects(સંરચના maintenance_run_opts *opts,
+					  સંરચના gc_config *cfg UNUSED)
 {
-	return prune_packed(opts) || pack_loose(opts);
+	પાછા prune_packed(opts) || pack_loose(opts);
 }
 
-static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક incremental_repack_auto_condition(સંરચના gc_config *cfg UNUSED)
 {
-	struct packed_git *p;
-	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	સંરચના packed_git *p;
+	પૂર્ણાંક incremental_repack_auto_limit = 10;
+	પૂર્ણાંક ગણતરી = 0;
 
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index)
-		return 0;
+	જો (!the_repository->settings.core_multi_pack_index)
+		પાછા 0;
 
 	repo_config_get_int(the_repository, "maintenance.incremental-repack.auto",
 			    &incremental_repack_auto_limit);
 
-	if (!incremental_repack_auto_limit)
-		return 0;
-	if (incremental_repack_auto_limit < 0)
-		return 1;
+	જો (!incremental_repack_auto_limit)
+		પાછા 0;
+	જો (incremental_repack_auto_limit < 0)
+		પાછા 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
-			break;
-		if (!p->multi_pack_index)
-			count++;
+		જો (ગણતરી >= incremental_repack_auto_limit)
+			તોડો;
+		જો (!p->multi_pack_index)
+			ગણતરી++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	પાછા ગણતરી >= incremental_repack_auto_limit;
 }
 
-static int multi_pack_index_write(struct maintenance_run_opts *opts)
+સ્થિર પૂર્ણાંક multi_pack_index_write(સંરચના maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
-	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
+	strvec_pushl(&child.args, "multi-pack-index", "write", ખાલી);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--no-progress");
+	નહીંતર
+		strvec_ધકેલો(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("failed to write multi-pack-index"));
+	જો (run_command(&child))
+		પાછા error(_("failed to write multi-pack-index"));
 
-	return 0;
+	પાછા 0;
 }
 
-static int multi_pack_index_expire(struct maintenance_run_opts *opts)
+સ્થિર પૂર્ણાંક multi_pack_index_expire(સંરચના maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
+	strvec_pushl(&child.args, "multi-pack-index", "expire", ખાલી);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--no-progress");
+	નહીંતર
+		strvec_ધકેલો(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index expire' failed"));
+	જો (run_command(&child))
+		પાછા error(_("'git multi-pack-index expire' failed"));
 
-	return 0;
+	પાછા 0;
 }
 
 #define TWO_GIGABYTES (INT32_MAX)
 
-static off_t get_auto_pack_size(void)
+સ્થિર off_t get_auto_pack_size(શૂન્ય)
 {
 	/*
 	 * The "auto" value is special: we optimize for
@@ -1177,96 +1177,96 @@ static off_t get_auto_pack_size(void)
 	off_t max_size = 0;
 	off_t second_largest_size = 0;
 	off_t result_size;
-	struct packed_git *p;
-	struct repository *r = the_repository;
+	સંરચના packed_git *p;
+	સંરચના repository *r = the_repository;
 
 	odb_reprepare(r->objects);
 	repo_for_each_pack(r, p) {
-		if (p->pack_size > max_size) {
+		જો (p->pack_size > max_size) {
 			second_largest_size = max_size;
 			max_size = p->pack_size;
-		} else if (p->pack_size > second_largest_size)
+		} નહીંતર જો (p->pack_size > second_largest_size)
 			second_largest_size = p->pack_size;
 	}
 
 	result_size = second_largest_size + 1;
 
 	/* But limit ourselves to a batch size of 2g */
-	if (result_size > TWO_GIGABYTES)
+	જો (result_size > TWO_GIGABYTES)
 		result_size = TWO_GIGABYTES;
 
-	return result_size;
+	પાછા result_size;
 }
 
-static int multi_pack_index_repack(struct maintenance_run_opts *opts)
+સ્થિર પૂર્ણાંક multi_pack_index_repack(સંરચના maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
-	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
+	strvec_pushl(&child.args, "multi-pack-index", "repack", ખાલી);
 
-	if (opts->quiet)
-		strvec_push(&child.args, "--no-progress");
-	else
-		strvec_push(&child.args, "--progress");
+	જો (opts->quiet)
+		strvec_ધકેલો(&child.args, "--no-progress");
+	નહીંતર
+		strvec_ધકેલો(&child.args, "--progress");
 
 	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
 				  (uintmax_t)get_auto_pack_size());
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index repack' failed"));
+	જો (run_command(&child))
+		પાછા error(_("'git multi-pack-index repack' failed"));
 
-	return 0;
+	પાછા 0;
 }
 
-static int maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
-					       struct gc_config *cfg UNUSED)
+સ્થિર પૂર્ણાંક maintenance_task_incremental_repack(સંરચના maintenance_run_opts *opts,
+					       સંરચના gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index) {
+	જો (!the_repository->settings.core_multi_pack_index) {
 		warning(_("skipping incremental-repack task because core.multiPackIndex is disabled"));
-		return 0;
+		પાછા 0;
 	}
 
-	if (multi_pack_index_write(opts))
-		return 1;
-	if (multi_pack_index_expire(opts))
-		return 1;
-	if (multi_pack_index_repack(opts))
-		return 1;
-	return 0;
+	જો (multi_pack_index_write(opts))
+		પાછા 1;
+	જો (multi_pack_index_expire(opts))
+		પાછા 1;
+	જો (multi_pack_index_repack(opts))
+		પાછા 1;
+	પાછા 0;
 }
 
-static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
-					     struct gc_config *cfg)
+સ્થિર પૂર્ણાંક maintenance_task_geometric_repack(સંરચના maintenance_run_opts *opts,
+					     સંરચના gc_config *cfg)
 {
-	struct odb_optimize_options odb_opts = {
+	સંરચના odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
 
-	if (!opts->quiet)
+	જો (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	પાછા odb_optimize(the_repository->objects, &odb_opts);
 }
 
-static int geometric_repack_auto_condition(struct gc_config *cfg)
+સ્થિર પૂર્ણાંક geometric_repack_auto_condition(સંરચના gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	સંરચના odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	પાછા odb_optimize_required(the_repository->objects, &opts);
 }
 
-typedef int (*maintenance_task_fn)(struct maintenance_run_opts *opts,
-				   struct gc_config *cfg);
-typedef int (*maintenance_auto_fn)(struct gc_config *cfg);
+પ્રકારવ્યાખ્યા પૂર્ણાંક (*maintenance_task_fn)(સંરચના maintenance_run_opts *opts,
+				   સંરચના gc_config *cfg);
+પ્રકારવ્યાખ્યા પૂર્ણાંક (*maintenance_auto_fn)(સંરચના gc_config *cfg);
 
-struct maintenance_task {
-	const char *name;
+સંરચના maintenance_task {
+	અચલ અક્ષર *name;
 
 	/*
 	 * Work that will be executed before detaching. This should not include
@@ -1288,7 +1288,7 @@ struct maintenance_task {
 	maintenance_auto_fn auto_condition;
 };
 
-static const struct maintenance_task tasks[] = {
+સ્થિર અચલ સંરચના maintenance_task tasks[] = {
 	[TASK_PREFETCH] = {
 		.name = "prefetch",
 		.background = maintenance_task_prefetch,
@@ -1341,65 +1341,65 @@ static const struct maintenance_task tasks[] = {
 	},
 };
 
-enum task_phase {
+ગણના task_phase {
 	TASK_PHASE_FOREGROUND,
 	TASK_PHASE_BACKGROUND,
 };
 
-enum auto_gc_hook_result {
+ગણના auto_gc_hook_result {
 	AUTO_GC_HOOK_UNDECIDED = 0,
 	AUTO_GC_HOOK_RUN = 1,
 	AUTO_GC_HOOK_SKIP = 2,
 };
 
-static int maybe_run_task(const struct maintenance_task *task,
-			  struct repository *repo,
-			  struct maintenance_run_opts *opts,
-			  struct gc_config *cfg,
-			  enum task_phase phase,
-			  enum auto_gc_hook_result *auto_gc_hook_result)
+સ્થિર પૂર્ણાંક maybe_run_task(અચલ સંરચના maintenance_task *task,
+			  સંરચના repository *repo,
+			  સંરચના maintenance_run_opts *opts,
+			  સંરચના gc_config *cfg,
+			  ગણના task_phase phase,
+			  ગણના auto_gc_hook_result *auto_gc_hook_result)
 {
-	int foreground = (phase == TASK_PHASE_FOREGROUND);
+	પૂર્ણાંક foreground = (phase == TASK_PHASE_FOREGROUND);
 	maintenance_task_fn fn = foreground ? task->foreground : task->background;
-	const char *region = foreground ? "maintenance foreground" : "maintenance";
-	int ret = 0;
+	અચલ અક્ષર *region = foreground ? "maintenance foreground" : "maintenance";
+	પૂર્ણાંક ret = 0;
 
-	if (!fn)
-		return 0;
-	if (opts->auto_flag) {
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+	જો (!fn)
+		પાછા 0;
+	જો (opts->auto_flag) {
+		જો (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
+			પાછા 0;
 
-		if (!task->auto_condition || !task->auto_condition(cfg))
-			return 0;
+		જો (!task->auto_condition || !task->auto_condition(cfg))
+			પાછા 0;
 
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
+		જો (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
 			*auto_gc_hook_result = run_hooks(repo, "pre-auto-gc") ?
 				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_RUN;
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+		જો (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
+			પાછા 0;
 	}
 
 	trace2_region_enter(region, task->name, repo);
-	if (fn(opts, cfg)) {
+	જો (fn(opts, cfg)) {
 		error(_("task '%s' failed"), task->name);
 		ret = 1;
 	}
 	trace2_region_leave(region, task->name, repo);
 
-	return ret;
+	પાછા ret;
 }
 
-static int maintenance_run_tasks(struct maintenance_run_opts *opts,
-				 struct gc_config *cfg)
+સ્થિર પૂર્ણાંક maintenance_run_tasks(સંરચના maintenance_run_opts *opts,
+				 સંરચના gc_config *cfg)
 {
-	int result = 0;
-	struct lock_file lk;
-	struct repository *r = the_repository;
-	char *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
-	enum auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
+	પૂર્ણાંક result = 0;
+	સંરચના lock_file lk;
+	સંરચના repository *r = the_repository;
+	અક્ષર *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
+	ગણના auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
 
-	if (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
+	જો (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
 		/*
 		 * Another maintenance command is running.
 		 *
@@ -1407,52 +1407,52 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 		 * recursive process stack. Do not report an error in
 		 * that case.
 		 */
-		if (!opts->auto_flag && !opts->quiet)
+		જો (!opts->auto_flag && !opts->quiet)
 			warning(_("lock file '%s' exists, skipping maintenance"),
 				lock_path);
-		free(lock_path);
-		return 0;
+		મુક્ત(lock_path);
+		પાછા 0;
 	}
-	free(lock_path);
+	મુક્ત(lock_path);
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+	માટે (size_t i = 0; i < opts->tasks_nr; i++)
+		જો (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
 				   TASK_PHASE_FOREGROUND, &auto_gc_hook_result))
 			result = 1;
 
 	/* Failure to daemonize is ok, we'll continue in foreground. */
-	if (opts->detach > 0) {
+	જો (opts->detach > 0) {
 		trace2_region_enter("maintenance", "detach", the_repository);
 		daemonize();
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+	માટે (size_t i = 0; i < opts->tasks_nr; i++)
+		જો (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
 				   TASK_PHASE_BACKGROUND, &auto_gc_hook_result))
 			result = 1;
 
 	rollback_lock_file(&lk);
-	return result;
+	પાછા result;
 }
 
-enum maintenance_type {
+ગણના maintenance_type {
 	/* As invoked via `git maintenance run --schedule=`. */
 	MAINTENANCE_TYPE_SCHEDULED = (1 << 0),
 	/* As invoked via `git maintenance run` and with `--auto`. */
 	MAINTENANCE_TYPE_MANUAL    = (1 << 1),
 };
 
-struct maintenance_strategy {
-	struct {
+સંરચના maintenance_strategy {
+	સંરચના {
 		unsigned type;
-		enum schedule_priority schedule;
-	} tasks[TASK__COUNT];
+		ગણના schedule_priority schedule;
+	} tasks[TASK_ગણતરી];
 };
 
-static const struct maintenance_strategy none_strategy = { 0 };
+સ્થિર અચલ સંરચના maintenance_strategy none_strategy = { 0 };
 
-static const struct maintenance_strategy gc_strategy = {
+સ્થિર અચલ સંરચના maintenance_strategy gc_strategy = {
 	.tasks = {
 		[TASK_GC] = {
 			.type = MAINTENANCE_TYPE_MANUAL | MAINTENANCE_TYPE_SCHEDULED,
@@ -1461,7 +1461,7 @@ static const struct maintenance_strategy gc_strategy = {
 	},
 };
 
-static const struct maintenance_strategy incremental_strategy = {
+સ્થિર અચલ સંરચના maintenance_strategy incremental_strategy = {
 	.tasks = {
 		[TASK_COMMIT_GRAPH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
@@ -1500,7 +1500,7 @@ static const struct maintenance_strategy incremental_strategy = {
 	},
 };
 
-static const struct maintenance_strategy geometric_strategy = {
+સ્થિર અચલ સંરચના maintenance_strategy geometric_strategy = {
 	.tasks = {
 		[TASK_COMMIT_GRAPH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
@@ -1529,38 +1529,38 @@ static const struct maintenance_strategy geometric_strategy = {
 	},
 };
 
-static struct maintenance_strategy parse_maintenance_strategy(const char *name)
+સ્થિર સંરચના maintenance_strategy parse_maintenance_strategy(અચલ અક્ષર *name)
 {
-	if (!strcasecmp(name, "incremental"))
-		return incremental_strategy;
-	if (!strcasecmp(name, "gc"))
-		return gc_strategy;
-	if (!strcasecmp(name, "geometric"))
-		return geometric_strategy;
+	જો (!strcasecmp(name, "incremental"))
+		પાછા incremental_strategy;
+	જો (!strcasecmp(name, "gc"))
+		પાછા gc_strategy;
+	જો (!strcasecmp(name, "geometric"))
+		પાછા geometric_strategy;
 	die(_("unknown maintenance strategy: '%s'"), name);
 }
 
-static void initialize_task_config(struct maintenance_run_opts *opts,
-				   const struct string_list *selected_tasks)
+સ્થિર શૂન્ય initialize_task_config(સંરચના maintenance_run_opts *opts,
+				   અચલ સંરચના string_list *selected_tasks)
 {
-	struct strbuf config_name = STRBUF_INIT;
-	struct maintenance_strategy strategy;
-	enum maintenance_type type;
-	const char *config_str;
+	સંરચના strbuf config_name = STRBUF_INIT;
+	સંરચના maintenance_strategy strategy;
+	ગણના maintenance_type type;
+	અચલ અક્ષર *config_str;
 
 	/*
 	 * In case the user has asked us to run tasks explicitly we only use
 	 * those specified tasks. Specifically, we do _not_ want to consult the
 	 * config or maintenance strategy.
 	 */
-	if (selected_tasks->nr) {
-		for (size_t i = 0; i < selected_tasks->nr; i++) {
-			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
+	જો (selected_tasks->nr) {
+		માટે (size_t i = 0; i < selected_tasks->nr; i++) {
+			ગણના maintenance_task_label label = (intptr_t)selected_tasks->વસ્તુઓ[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
 
-		return;
+		પાછા;
 	}
 
 	/*
@@ -1576,36 +1576,36 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * override specific aspects of our strategy. Furthermore, both
 	 * strategies can be overridden by setting "maintenance.strategy".
 	 */
-	if (opts->schedule) {
+	જો (opts->schedule) {
 		strategy = none_strategy;
 		type = MAINTENANCE_TYPE_SCHEDULED;
-	} else {
+	} નહીંતર {
 		strategy = geometric_strategy;
 		type = MAINTENANCE_TYPE_MANUAL;
 	}
 
-	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
+	જો (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	માટે (size_t i = 0; i < TASK_ગણતરી; i++) {
+		પૂર્ણાંક config_કિંમત;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
-			strategy.tasks[i].type = config_value ? type : 0;
-		if (!(strategy.tasks[i].type & type))
-			continue;
+		જો (!repo_config_get_bool(the_repository, config_name.buf, &config_કિંમત))
+			strategy.tasks[i].type = config_કિંમત ? type : 0;
+		જો (!(strategy.tasks[i].type & type))
+			ચાલુ;
 
-		if (opts->schedule) {
+		જો (opts->schedule) {
 			strbuf_reset(&config_name);
 			strbuf_addf(&config_name, "maintenance.%s.schedule",
 				    tasks[i].name);
-			if (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
+			જો (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
 				strategy.tasks[i].schedule = parse_schedule(config_str);
-			if (strategy.tasks[i].schedule < opts->schedule)
-				continue;
+			જો (strategy.tasks[i].schedule < opts->schedule)
+				ચાલુ;
 		}
 
 		ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
@@ -1615,39 +1615,39 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	strbuf_release(&config_name);
 }
 
-static int task_option_parse(const struct option *opt,
-			     const char *arg, int unset)
+સ્થિર પૂર્ણાંક task_option_parse(અચલ સંરચના option *opt,
+			     અચલ અક્ષર *arg, પૂર્ણાંક unset)
 {
-	struct string_list *selected_tasks = opt->value;
+	સંરચના string_list *selected_tasks = opt->કિંમત;
 	size_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
-		if (!strcasecmp(tasks[i].name, arg))
-			break;
-	if (i >= TASK__COUNT) {
+	માટે (i = 0; i < TASK_ગણતરી; i++)
+		જો (!strcasecmp(tasks[i].name, arg))
+			તોડો;
+	જો (i >= TASK_ગણતરી) {
 		error(_("'%s' is not a valid task"), arg);
-		return 1;
+		પાછા 1;
 	}
 
-	if (unsorted_string_list_has_string(selected_tasks, arg)) {
+	જો (unsorted_string_list_has_string(selected_tasks, arg)) {
 		error(_("task '%s' cannot be selected multiple times"), arg);
-		return 1;
+		પાછા 1;
 	}
 
-	string_list_append(selected_tasks, arg)->util = (void *)(intptr_t)i;
+	string_list_append(selected_tasks, arg)->util = (શૂન્ય *)(intptr_t)i;
 
-	return 0;
+	પાછા 0;
 }
 
-static int maintenance_run(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક maintenance_run(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			   સંરચના repository *repo UNUSED)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option builtin_maintenance_run_options[] = {
+	સંરચના maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	સંરચના string_list selected_tasks = STRING_LIST_INIT_DUP;
+	સંરચના gc_config cfg = GC_CONFIG_INIT;
+	સંરચના option builtin_maintenance_run_options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_BOOL(0, "detach", &opts.detach,
@@ -1662,7 +1662,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 			PARSE_OPT_NONEG, task_option_parse),
 		OPT_END()
 	};
-	int ret;
+	પૂર્ણાંક ret;
 
 	opts.quiet = !isatty(2);
 
@@ -1679,7 +1679,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (argc != 0)
+	જો (argc != 0)
 		usage_with_options(builtin_maintenance_run_usage,
 				   builtin_maintenance_run_options);
 
@@ -1688,41 +1688,41 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	string_list_clear(&selected_tasks, 0);
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return ret;
+	પાછા ret;
 }
 
-static char *get_maintpath(void)
+સ્થિર અક્ષર *get_maintpath(શૂન્ય)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *p = the_repository->worktree ?
+	સંરચના strbuf sb = STRBUF_INIT;
+	અચલ અક્ષર *p = the_repository->worktree ?
 		the_repository->worktree : the_repository->gitdir;
 
 	strbuf_realpath(&sb, p, 1);
-	return strbuf_detach(&sb, NULL);
+	પાછા strbuf_detach(&sb, ખાલી);
 }
 
-static char const * const builtin_maintenance_register_usage[] = {
+સ્થિર અક્ષર અચલ * અચલ builtin_maintenance_register_usage[] = {
 	"git maintenance register [--config-file <path>]",
-	NULL
+	ખાલી
 };
 
-static int maintenance_register(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક maintenance_register(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+				સંરચના repository *repo UNUSED)
 {
-	char *config_file = NULL;
-	struct option options[] = {
+	અક્ષર *config_file = ખાલી;
+	સંરચના option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT_END(),
 	};
-	int found = 0;
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	struct string_list_item *item;
-	const struct string_list *list;
+	પૂર્ણાંક found = 0;
+	અચલ અક્ષર *ચાવી = "maintenance.repo";
+	અક્ષર *maintpath = get_maintpath();
+	સંરચના string_list_item *item;
+	અચલ સંરચના string_list *list;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_register_usage, 0);
-	if (argc)
+	જો (argc)
 		usage_with_options(builtin_maintenance_register_usage,
 				   options);
 
@@ -1730,163 +1730,163 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 	repo_config_set(the_repository, "maintenance.auto", "false");
 
 	/* Set maintenance strategy, if unset */
-	if (repo_config_get(the_repository, "maintenance.strategy"))
+	જો (repo_config_get(the_repository, "maintenance.strategy"))
 		repo_config_set(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
+	જો (!repo_config_get_string_multi(the_repository, ચાવી, &list)) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			જો (!strcmp(maintpath, item->string)) {
 				found = 1;
-				break;
+				તોડો;
 			}
 		}
 	}
 
-	if (!found) {
-		int rc;
-		char *global_config_file = NULL;
+	જો (!found) {
+		પૂર્ણાંક rc;
+		અક્ષર *global_config_file = ખાલી;
 
-		if (!config_file) {
+		જો (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		જો (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
 			config_file, "maintenance.repo", maintpath,
-			CONFIG_REGEX_NONE, NULL, 0);
-		free(global_config_file);
+			CONFIG_REGEX_NONE, ખાલી, 0);
+		મુક્ત(global_config_file);
 
-		if (rc)
+		જો (rc)
 			die(_("unable to add '%s' value of '%s'"),
-			    key, maintpath);
+			    ચાવી, maintpath);
 	}
 
-	free(maintpath);
-	return 0;
+	મુક્ત(maintpath);
+	પાછા 0;
 }
 
-static char const * const builtin_maintenance_unregister_usage[] = {
+સ્થિર અક્ષર અચલ * અચલ builtin_maintenance_unregister_usage[] = {
 	"git maintenance unregister [--config-file <path>] [--force]",
-	NULL
+	ખાલી
 };
 
-static int maintenance_unregister(int argc, const char **argv, const char *prefix,
-				  struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક maintenance_unregister(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+				  સંરચના repository *repo UNUSED)
 {
-	int force = 0;
-	char *config_file = NULL;
-	struct option options[] = {
+	પૂર્ણાંક force = 0;
+	અક્ષર *config_file = ખાલી;
+	સંરચના option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT__FORCE(&force,
 			   N_("return success even if repository was not registered"),
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_END(),
 	};
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	int found = 0;
-	struct string_list_item *item;
-	const struct string_list *list;
-	struct config_set cs = { { 0 } };
+	અચલ અક્ષર *ચાવી = "maintenance.repo";
+	અક્ષર *maintpath = get_maintpath();
+	પૂર્ણાંક found = 0;
+	સંરચના string_list_item *item;
+	અચલ સંરચના string_list *list;
+	સંરચના config_set cs = { { 0 } };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_unregister_usage, 0);
-	if (argc)
+	જો (argc)
 		usage_with_options(builtin_maintenance_unregister_usage,
 				   options);
 
-	if (config_file) {
+	જો (config_file) {
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, config_file);
 	}
-	if (!(config_file
-	      ? git_configset_get_string_multi(&cs, key, &list)
-	      : repo_config_get_string_multi(the_repository, key, &list))) {
+	જો (!(config_file
+	      ? git_configset_get_string_multi(&cs, ચાવી, &list)
+	      : repo_config_get_string_multi(the_repository, ચાવી, &list))) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			જો (!strcmp(maintpath, item->string)) {
 				found = 1;
-				break;
+				તોડો;
 			}
 		}
 	}
 
-	if (found) {
-		int rc;
-		char *global_config_file = NULL;
+	જો (found) {
+		પૂર્ણાંક rc;
+		અક્ષર *global_config_file = ખાલી;
 
-		if (!config_file) {
+		જો (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		જો (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
-			config_file, key, NULL, maintpath, NULL,
-			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
-		free(global_config_file);
+			config_file, ચાવી, ખાલી, maintpath, ખાલી,
+			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_કિંમત);
+		મુક્ત(global_config_file);
 
-		if (rc &&
+		જો (rc &&
 		    (!force || rc == CONFIG_NOTHING_SET))
 			die(_("unable to unset '%s' value of '%s'"),
-			    key, maintpath);
-	} else if (!force) {
+			    ચાવી, maintpath);
+	} નહીંતર જો (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
 
 	git_configset_clear(&cs);
-	free(maintpath);
-	return 0;
+	મુક્ત(maintpath);
+	પાછા 0;
 }
 
-static const char *get_frequency(enum schedule_priority schedule)
+સ્થિર અચલ અક્ષર *get_frequency(ગણના schedule_priority schedule)
 {
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		return "hourly";
-	case SCHEDULE_DAILY:
-		return "daily";
-	case SCHEDULE_WEEKLY:
-		return "weekly";
-	default:
+	પસંદગી (schedule) {
+	સ્થિતિ SCHEDULE_HOURLY:
+		પાછા "hourly";
+	સ્થિતિ SCHEDULE_DAILY:
+		પાછા "daily";
+	સ્થિતિ SCHEDULE_WEEKLY:
+		પાછા "weekly";
+	મૂળભૂત:
 		BUG("invalid schedule %d", schedule);
 	}
 }
 
-static const char *extraconfig[] = {
+સ્થિર અચલ અક્ષર *extraconfig[] = {
 	"credential.interactive=false",
 	"core.askPass=true", /* 'true' returns success, but no output. */
-	NULL
+	ખાલી
 };
 
-static const char *get_extra_config_parameters(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+સ્થિર અચલ અક્ષર *get_extra_config_parameters(શૂન્ય) {
+	સ્થિર અચલ અક્ષર *result = ખાલી;
+	સંરચના strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	જો (result)
+		પાછા result;
 
-	for (const char **s = extraconfig; s && *s; s++)
+	માટે (અચલ અક્ષર **s = extraconfig; s && *s; s++)
 		strbuf_addf(&builder, "-c %s ", *s);
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	result = strbuf_detach(&builder, ખાલી);
+	પાછા result;
 }
 
-static const char *get_extra_launchctl_strings(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+સ્થિર અચલ અક્ષર *get_extra_launchctl_strings(શૂન્ય) {
+	સ્થિર અચલ અક્ષર *result = ખાલી;
+	સંરચના strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	જો (result)
+		પાછા result;
 
-	for (const char **s = extraconfig; s && *s; s++) {
+	માટે (અચલ અક્ષર **s = extraconfig; s && *s; s++) {
 		strbuf_addstr(&builder, "<string>-c</string>\n");
 		strbuf_addf(&builder, "<string>%s</string>\n", *s);
 	}
 
-	result = strbuf_detach(&builder, NULL);
-	return result;
+	result = strbuf_detach(&builder, ખાલી);
+	પાછા result;
 }
 
 /*
@@ -1929,173 +1929,173 @@ static const char *get_extra_launchctl_strings(void) {
  *     | "qux" |    true     | "qux" (allocated) |     false     |
  *     +-------+-------------+-------------------+---------------+
  */
-static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
+સ્થિર પૂર્ણાંક get_schedule_cmd(અચલ અક્ષર *cmd, પૂર્ણાંક *is_available, અક્ષર **out)
 {
-	char *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
-	struct string_list_item *item;
-	struct string_list list = STRING_LIST_INIT_NODUP;
+	અક્ષર *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
+	સંરચના string_list_item *item;
+	સંરચના string_list list = STRING_LIST_INIT_NODUP;
 
-	if (!testing) {
-		if (out)
+	જો (!testing) {
+		જો (out)
 			*out = xstrdup(cmd);
-		return 0;
+		પાછા 0;
 	}
 
-	if (is_available)
+	જો (is_available)
 		*is_available = 0;
 
 	string_list_split_in_place(&list, testing, ",", -1);
 	for_each_string_list_item(item, &list) {
-		struct string_list pair = STRING_LIST_INIT_NODUP;
+		સંરચના string_list pair = STRING_LIST_INIT_NODUP;
 
-		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
-			continue;
+		જો (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
+			ચાલુ;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
-			if (out)
-				*out = xstrdup(pair.items[1].string);
-			if (is_available)
+		જો (!strcmp(cmd, pair.વસ્તુઓ[0].string)) {
+			જો (out)
+				*out = xstrdup(pair.વસ્તુઓ[1].string);
+			જો (is_available)
 				*is_available = 1;
 			string_list_clear(&pair, 0);
-			goto out;
+			જાઓ out;
 		}
 
 		string_list_clear(&pair, 0);
 	}
 
-	if (out)
+	જો (out)
 		*out = xstrdup(cmd);
 
 out:
 	string_list_clear(&list, 0);
-	free(testing);
-	return 1;
+	મુક્ત(testing);
+	પાછા 1;
 }
 
-static int get_random_minute(void)
+સ્થિર પૂર્ણાંક get_random_minute(શૂન્ય)
 {
 	/* Use a static value when under tests. */
-	if (getenv("GIT_TEST_MAINT_SCHEDULER"))
-		return 13;
+	જો (getenv("GIT_TEST_MAINT_SCHEDULER"))
+		પાછા 13;
 
-	return git_rand(0) % 60;
+	પાછા git_rand(0) % 60;
 }
 
-static int is_launchctl_available(void)
+સ્થિર પૂર્ણાંક is_launchctl_available(શૂન્ય)
 {
-	int is_available;
-	if (get_schedule_cmd("launchctl", &is_available, NULL))
-		return is_available;
+	પૂર્ણાંક is_available;
+	જો (get_schedule_cmd("launchctl", &is_available, ખાલી))
+		પાછા is_available;
 
 #ifdef __APPLE__
-	return 1;
-#else
-	return 0;
+	પાછા 1;
+#નહીંતર
+	પાછા 0;
 #endif
 }
 
-static char *launchctl_service_name(const char *frequency)
+સ્થિર અક્ષર *launchctl_service_name(અચલ અક્ષર *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	સંરચના strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "org.git-scm.git.%s", frequency);
-	return strbuf_detach(&label, NULL);
+	પાછા strbuf_detach(&label, ખાલી);
 }
 
-static char *launchctl_service_filename(const char *name)
+સ્થિર અક્ષર *launchctl_service_filename(અચલ અક્ષર *name)
 {
-	char *expanded;
-	struct strbuf filename = STRBUF_INIT;
+	અક્ષર *expanded;
+	સંરચના strbuf filename = STRBUF_INIT;
 	strbuf_addf(&filename, "~/Library/LaunchAgents/%s.plist", name);
 
 	expanded = interpolate_path(filename.buf, 1);
-	if (!expanded)
+	જો (!expanded)
 		die(_("failed to expand path '%s'"), filename.buf);
 
 	strbuf_release(&filename);
-	return expanded;
+	પાછા expanded;
 }
 
-static char *launchctl_get_uid(void)
+સ્થિર અક્ષર *launchctl_get_uid(શૂન્ય)
 {
-	return xstrfmt("gui/%d", getuid());
+	પાછા xstrfmt("gui/%d", getuid());
 }
 
-static int launchctl_boot_plist(int enable, const char *filename)
+સ્થિર પૂર્ણાંક launchctl_boot_plist(પૂર્ણાંક enable, અચલ અક્ષર *filename)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *uid = launchctl_get_uid();
+	અક્ષર *cmd;
+	પૂર્ણાંક result;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
+	અક્ષર *uid = launchctl_get_uid();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
+	get_schedule_cmd("launchctl", ખાલી, &cmd);
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, enable ? "bootstrap" : "bootout", uid,
-		     filename, NULL);
+		     filename, ખાલી);
 
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	જો (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	result = finish_command(&child);
 
-	free(cmd);
-	free(uid);
-	return result;
+	મુક્ત(cmd);
+	મુક્ત(uid);
+	પાછા result;
 }
 
-static int launchctl_remove_plist(enum schedule_priority schedule)
+સ્થિર પૂર્ણાંક launchctl_remove_plist(ગણના schedule_priority schedule)
 {
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	int result = launchctl_boot_plist(0, filename);
+	અચલ અક્ષર *frequency = get_frequency(schedule);
+	અક્ષર *name = launchctl_service_name(frequency);
+	અક્ષર *filename = launchctl_service_filename(name);
+	પૂર્ણાંક result = launchctl_boot_plist(0, filename);
 	unlink(filename);
-	free(filename);
-	free(name);
-	return result;
+	મુક્ત(filename);
+	મુક્ત(name);
+	પાછા result;
 }
 
-static int launchctl_remove_plists(void)
+સ્થિર પૂર્ણાંક launchctl_remove_plists(શૂન્ય)
 {
-	return launchctl_remove_plist(SCHEDULE_HOURLY) ||
+	પાછા launchctl_remove_plist(SCHEDULE_HOURLY) ||
 	       launchctl_remove_plist(SCHEDULE_DAILY) ||
 	       launchctl_remove_plist(SCHEDULE_WEEKLY);
 }
 
-static int launchctl_list_contains_plist(const char *name, const char *cmd)
+સ્થિર પૂર્ણાંક launchctl_list_contains_plist(અચલ અક્ષર *name, અચલ અક્ષર *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "list", name, NULL);
+	strvec_pushl(&child.args, "list", name, ખાલી);
 
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	જો (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	/* Returns failure if 'name' doesn't exist. */
-	return !finish_command(&child);
+	પાછા !finish_command(&child);
 }
 
-static int launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
+સ્થિર પૂર્ણાંક launchctl_schedule_plist(અચલ અક્ષર *exec_path, ગણના schedule_priority schedule)
 {
-	int i, fd;
-	const char *preamble, *repeat;
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	struct lock_file lk = LOCK_INIT;
-	static unsigned long lock_file_timeout_ms = ULONG_MAX;
-	struct strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
-	struct stat st;
-	char *cmd;
-	int minute = get_random_minute();
+	પૂર્ણાંક i, fd;
+	અચલ અક્ષર *preamble, *repeat;
+	અચલ અક્ષર *frequency = get_frequency(schedule);
+	અક્ષર *name = launchctl_service_name(frequency);
+	અક્ષર *filename = launchctl_service_filename(name);
+	સંરચના lock_file lk = LOCK_INIT;
+	સ્થિર unsigned long lock_file_timeout_ms = ULONG_MAX;
+	સંરચના strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
+	સંરચના stat st;
+	અક્ષર *cmd;
+	પૂર્ણાંક minute = get_random_minute();
 
-	get_schedule_cmd("launchctl", NULL, &cmd);
+	get_schedule_cmd("launchctl", ખાલી, &cmd);
 	preamble = "<?xml version=\"1.0\"?>\n"
 		   "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
 		   "<plist version=\"1.0\">"
@@ -2118,27 +2118,27 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	strbuf_addf(&plist, preamble, name, exec_path, exec_path,
 		    get_extra_launchctl_strings(), frequency);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	પસંદગી (schedule) {
+	સ્થિતિ SCHEDULE_HOURLY:
 		repeat = "<dict>\n"
 			 "<key>Hour</key><integer>%d</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 23; i++)
+		માટે (i = 1; i <= 23; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		તોડો;
 
-	case SCHEDULE_DAILY:
+	સ્થિતિ SCHEDULE_DAILY:
 		repeat = "<dict>\n"
 			 "<key>Weekday</key><integer>%d</integer>\n"
 			 "<key>Hour</key><integer>0</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 6; i++)
+		માટે (i = 1; i <= 6; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		તોડો;
 
-	case SCHEDULE_WEEKLY:
+	સ્થિતિ SCHEDULE_WEEKLY:
 		strbuf_addf(&plist,
 			    "<dict>\n"
 			    "<key>Weekday</key><integer>0</integer>\n"
@@ -2146,18 +2146,18 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			    "<key>Minute</key><integer>%d</integer>\n"
 			    "</dict>\n",
 			    minute);
-		break;
+		તોડો;
 
-	default:
+	મૂળભૂત:
 		/* unreachable */
-		break;
+		તોડો;
 	}
 	strbuf_addstr(&plist, "</array>\n</dict>\n</plist>\n");
 
-	if (safe_create_leading_directories(the_repository, filename))
+	જો (safe_create_leading_directories(the_repository, filename))
 		die(_("failed to create directories for '%s'"), filename);
 
-	if ((long)lock_file_timeout_ms < 0 &&
+	જો ((long)lock_file_timeout_ms < 0 &&
 	    repo_config_get_ulong(the_repository, "gc.launchctlplistlocktimeoutms",
 				 &lock_file_timeout_ms))
 		lock_file_timeout_ms = 150;
@@ -2169,110 +2169,110 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	 * Does this file already exist? With the intended contents? Is it
 	 * registered already? Then it does not need to be re-registered.
 	 */
-	if (!stat(filename, &st) && st.st_size == plist.len &&
+	જો (!stat(filename, &st) && st.st_size == plist.len &&
 	    strbuf_read_file(&plist2, filename, plist.len) == plist.len &&
 	    !strbuf_cmp(&plist, &plist2) &&
 	    launchctl_list_contains_plist(name, cmd))
 		rollback_lock_file(&lk);
-	else {
-		if (write_in_full(fd, plist.buf, plist.len) < 0 ||
+	નહીંતર {
+		જો (write_in_full(fd, plist.buf, plist.len) < 0 ||
 		    commit_lock_file(&lk))
 			die_errno(_("could not write '%s'"), filename);
 
 		/* bootout might fail if not already running, so ignore */
 		launchctl_boot_plist(0, filename);
-		if (launchctl_boot_plist(1, filename))
+		જો (launchctl_boot_plist(1, filename))
 			die(_("failed to bootstrap service %s"), filename);
 	}
 
-	free(filename);
-	free(name);
-	free(cmd);
+	મુક્ત(filename);
+	મુક્ત(name);
+	મુક્ત(cmd);
 	strbuf_release(&plist);
 	strbuf_release(&plist2);
-	return 0;
+	પાછા 0;
 }
 
-static int launchctl_add_plists(void)
+સ્થિર પૂર્ણાંક launchctl_add_plists(શૂન્ય)
 {
-	const char *exec_path = git_exec_path();
+	અચલ અક્ષર *exec_path = git_exec_path();
 
-	return launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
+	પાછા launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_DAILY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int launchctl_update_schedule(int run_maintenance, int fd UNUSED)
+સ્થિર પૂર્ણાંક launchctl_update_schedule(પૂર્ણાંક run_maintenance, પૂર્ણાંક fd UNUSED)
 {
-	if (run_maintenance)
-		return launchctl_add_plists();
-	else
-		return launchctl_remove_plists();
+	જો (run_maintenance)
+		પાછા launchctl_add_plists();
+	નહીંતર
+		પાછા launchctl_remove_plists();
 }
 
-static int is_schtasks_available(void)
+સ્થિર પૂર્ણાંક is_schtasks_available(શૂન્ય)
 {
-	int is_available;
-	if (get_schedule_cmd("schtasks", &is_available, NULL))
-		return is_available;
+	પૂર્ણાંક is_available;
+	જો (get_schedule_cmd("schtasks", &is_available, ખાલી))
+		પાછા is_available;
 
 #ifdef GIT_WINDOWS_NATIVE
-	return 1;
-#else
-	return 0;
+	પાછા 1;
+#નહીંતર
+	પાછા 0;
 #endif
 }
 
-static char *schtasks_task_name(const char *frequency)
+સ્થિર અક્ષર *schtasks_task_name(અચલ અક્ષર *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	સંરચના strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "Git Maintenance (%s)", frequency);
-	return strbuf_detach(&label, NULL);
+	પાછા strbuf_detach(&label, ખાલી);
 }
 
-static int schtasks_remove_task(enum schedule_priority schedule)
+સ્થિર પૂર્ણાંક schtasks_remove_task(ગણના schedule_priority schedule)
 {
-	char *cmd;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
+	અક્ષર *cmd;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
+	અચલ અક્ષર *frequency = get_frequency(schedule);
+	અક્ષર *name = schtasks_task_name(frequency);
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
+	get_schedule_cmd("schtasks", ખાલી, &cmd);
 	strvec_split(&child.args, cmd);
-	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", NULL);
-	free(name);
-	free(cmd);
+	strvec_pushl(&child.args, "/delete", "/tn", name, "/f", ખાલી);
+	મુક્ત(name);
+	મુક્ત(cmd);
 
-	return run_command(&child);
+	પાછા run_command(&child);
 }
 
-static int schtasks_remove_tasks(void)
+સ્થિર પૂર્ણાંક schtasks_remove_tasks(શૂન્ય)
 {
-	return schtasks_remove_task(SCHEDULE_HOURLY) ||
+	પાછા schtasks_remove_task(SCHEDULE_HOURLY) ||
 	       schtasks_remove_task(SCHEDULE_DAILY) ||
 	       schtasks_remove_task(SCHEDULE_WEEKLY);
 }
 
-static int schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
+સ્થિર પૂર્ણાંક schtasks_schedule_task(અચલ અક્ષર *exec_path, ગણના schedule_priority schedule)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *xml;
-	struct tempfile *tfile;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
-	struct strbuf tfilename = STRBUF_INIT;
-	int minute = get_random_minute();
+	અક્ષર *cmd;
+	પૂર્ણાંક result;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
+	અચલ અક્ષર *xml;
+	સંરચના tempfile *tfile;
+	અચલ અક્ષર *frequency = get_frequency(schedule);
+	અક્ષર *name = schtasks_task_name(frequency);
+	સંરચના strbuf tfilename = STRBUF_INIT;
+	પૂર્ણાંક minute = get_random_minute();
 
-	get_schedule_cmd("schtasks", NULL, &cmd);
+	get_schedule_cmd("schtasks", ખાલી, &cmd);
 
 	strbuf_addf(&tfilename, "%s/schedule_%s_XXXXXX",
 		    repo_get_common_dir(the_repository), frequency);
 	tfile = xmks_tempfile(tfilename.buf);
 	strbuf_release(&tfilename);
 
-	if (!fdopen_tempfile(tfile, "w"))
+	જો (!fdopen_tempfile(tfile, "w"))
 		die(_("failed to create temp xml file"));
 
 	xml = "<?xml version=\"1.0\" ?>\n"
@@ -2281,8 +2281,8 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	      "<CalendarTrigger>\n";
 	fputs(xml, tfile->fp);
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	પસંદગી (schedule) {
+	સ્થિતિ SCHEDULE_HOURLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T01:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2295,9 +2295,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<StopAtDurationEnd>false</StopAtDurationEnd>\n"
 			"</Repetition>\n",
 			minute);
-		break;
+		તોડો;
 
-	case SCHEDULE_DAILY:
+	સ્થિતિ SCHEDULE_DAILY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2313,9 +2313,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		તોડો;
 
-	case SCHEDULE_WEEKLY:
+	સ્થિતિ SCHEDULE_WEEKLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2326,10 +2326,10 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		તોડો;
 
-	default:
-		break;
+	મૂળભૂત:
+		તોડો;
 	}
 
 	xml = "</CalendarTrigger>\n"
@@ -2360,67 +2360,67 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 		get_extra_config_parameters(), frequency);
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, "/create", "/tn", name, "/f", "/xml",
-				  get_tempfile_path(tfile), NULL);
+				  get_tempfile_path(tfile), ખાલી);
 	close_tempfile_gently(tfile);
 
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 
-	if (start_command(&child))
+	જો (start_command(&child))
 		die(_("failed to start schtasks"));
 	result = finish_command(&child);
 
 	delete_tempfile(&tfile);
-	free(name);
-	free(cmd);
-	return result;
+	મુક્ત(name);
+	મુક્ત(cmd);
+	પાછા result;
 }
 
-static int schtasks_schedule_tasks(void)
+સ્થિર પૂર્ણાંક schtasks_schedule_tasks(શૂન્ય)
 {
-	const char *exec_path = git_exec_path();
+	અચલ અક્ષર *exec_path = git_exec_path();
 
-	return schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
+	પાછા schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_DAILY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int schtasks_update_schedule(int run_maintenance, int fd UNUSED)
+સ્થિર પૂર્ણાંક schtasks_update_schedule(પૂર્ણાંક run_maintenance, પૂર્ણાંક fd UNUSED)
 {
-	if (run_maintenance)
-		return schtasks_schedule_tasks();
-	else
-		return schtasks_remove_tasks();
+	જો (run_maintenance)
+		પાછા schtasks_schedule_tasks();
+	નહીંતર
+		પાછા schtasks_remove_tasks();
 }
 
 MAYBE_UNUSED
-static int check_crontab_process(const char *cmd)
+સ્થિર પૂર્ણાંક check_crontab_process(અચલ અક્ષર *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
 	strvec_split(&child.args, cmd);
-	strvec_push(&child.args, "-l");
+	strvec_ધકેલો(&child.args, "-l");
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
+	જો (start_command(&child))
+		પાછા 0;
 	/* Ignore exit code, as an empty crontab will return error. */
 	finish_command(&child);
-	return 1;
+	પાછા 1;
 }
 
-static int is_crontab_available(void)
+સ્થિર પૂર્ણાંક is_crontab_available(શૂન્ય)
 {
-	char *cmd;
-	int is_available;
-	int ret;
+	અક્ષર *cmd;
+	પૂર્ણાંક is_available;
+	પૂર્ણાંક ret;
 
-	if (get_schedule_cmd("crontab", &is_available, &cmd)) {
+	જો (get_schedule_cmd("crontab", &is_available, &cmd)) {
 		ret = is_available;
-		goto out;
+		જાઓ out;
 	}
 
 #ifdef __APPLE__
@@ -2429,54 +2429,54 @@ static int is_crontab_available(void)
 	 * create a UI alert when attempting to run this command.
 	 */
 	ret = 0;
-#else
+#નહીંતર
 	ret = check_crontab_process(cmd);
 #endif
 
 out:
-	free(cmd);
-	return ret;
+	મુક્ત(cmd);
+	પાછા ret;
 }
 
-#define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
-#define END_LINE "# END GIT MAINTENANCE SCHEDULE"
+#define BEGIN_લીટી "# BEGIN GIT MAINTENANCE SCHEDULE"
+#define END_લીટી "# END GIT MAINTENANCE SCHEDULE"
 
-static int crontab_update_schedule(int run_maintenance, int fd)
+સ્થિર પૂર્ણાંક crontab_update_schedule(પૂર્ણાંક run_maintenance, પૂર્ણાંક fd)
 {
-	char *cmd;
-	int result = 0;
-	int in_old_region = 0;
-	struct child_process crontab_list = CHILD_PROCESS_INIT;
-	struct child_process crontab_edit = CHILD_PROCESS_INIT;
+	અક્ષર *cmd;
+	પૂર્ણાંક result = 0;
+	પૂર્ણાંક in_old_region = 0;
+	સંરચના child_process crontab_list = CHILD_PROCESS_INIT;
+	સંરચના child_process crontab_edit = CHILD_PROCESS_INIT;
 	FILE *cron_list, *cron_in;
-	struct strbuf line = STRBUF_INIT;
-	struct tempfile *tmpedit = NULL;
-	int minute = get_random_minute();
+	સંરચના strbuf લીટી = STRBUF_INIT;
+	સંરચના tempfile *tmpedit = ખાલી;
+	પૂર્ણાંક minute = get_random_minute();
 
-	get_schedule_cmd("crontab", NULL, &cmd);
+	get_schedule_cmd("crontab", ખાલી, &cmd);
 	strvec_split(&crontab_list.args, cmd);
-	strvec_push(&crontab_list.args, "-l");
+	strvec_ધકેલો(&crontab_list.args, "-l");
 	crontab_list.in = -1;
 	crontab_list.out = dup(fd);
 	crontab_list.git_cmd = 0;
 
-	if (start_command(&crontab_list)) {
+	જો (start_command(&crontab_list)) {
 		result = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
-		goto out;
+		જાઓ out;
 	}
 
 	/* Ignore exit code, as an empty crontab will return error. */
 	finish_command(&crontab_list);
 
 	tmpedit = mks_tempfile_t(".git_cron_edit_tmpXXXXXX");
-	if (!tmpedit) {
+	જો (!tmpedit) {
 		result = error(_("failed to create crontab temporary file"));
-		goto out;
+		જાઓ out;
 	}
 	cron_in = fdopen_tempfile(tmpedit, "w");
-	if (!cron_in) {
+	જો (!cron_in) {
 		result = error(_("failed to open temporary file"));
-		goto out;
+		જાઓ out;
 	}
 
 	/*
@@ -2486,120 +2486,120 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
+	જ્યારે (!strbuf_getline_lf(&લીટી, cron_list)) {
+		જો (!in_old_region && !strcmp(લીટી.buf, BEGIN_લીટી))
 			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
+		નહીંતર જો (in_old_region && !strcmp(લીટી.buf, END_લીટી))
 			in_old_region = 0;
-		else if (!in_old_region)
-			fprintf(cron_in, "%s\n", line.buf);
+		નહીંતર જો (!in_old_region)
+			fprintf(cron_in, "%s\n", લીટી.buf);
 	}
-	strbuf_release(&line);
+	strbuf_release(&લીટી);
 
-	if (run_maintenance) {
-		struct strbuf line_format = STRBUF_INIT;
-		const char *exec_path = git_exec_path();
+	જો (run_maintenance) {
+		સંરચના strbuf લીટી_format = STRBUF_INIT;
+		અચલ અક્ષર *exec_path = git_exec_path();
 
-		fprintf(cron_in, "%s\n", BEGIN_LINE);
+		fprintf(cron_in, "%s\n", BEGIN_લીટી);
 		fprintf(cron_in,
 			"# The following schedule was created by Git\n");
 		fprintf(cron_in, "# Any edits made in this region might be\n");
 		fprintf(cron_in,
 			"# replaced in the future by a Git command.\n\n");
 
-		strbuf_addf(&line_format,
+		strbuf_addf(&લીટી_format,
 			    "%%d %%s * * %%s \"%s/git\" --exec-path=\"%s\" %s for-each-repo --keep-going --config=maintenance.repo maintenance run --schedule=%%s\n",
 			    exec_path, exec_path, get_extra_config_parameters());
-		fprintf(cron_in, line_format.buf, minute, "1-23", "*", "hourly");
-		fprintf(cron_in, line_format.buf, minute, "0", "1-6", "daily");
-		fprintf(cron_in, line_format.buf, minute, "0", "0", "weekly");
-		strbuf_release(&line_format);
+		fprintf(cron_in, લીટી_format.buf, minute, "1-23", "*", "hourly");
+		fprintf(cron_in, લીટી_format.buf, minute, "0", "1-6", "daily");
+		fprintf(cron_in, લીટી_format.buf, minute, "0", "0", "weekly");
+		strbuf_release(&લીટી_format);
 
-		fprintf(cron_in, "\n%s\n", END_LINE);
+		fprintf(cron_in, "\n%s\n", END_લીટી);
 	}
 
 	fflush(cron_in);
 
 	strvec_split(&crontab_edit.args, cmd);
-	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
+	strvec_ધકેલો(&crontab_edit.args, get_tempfile_path(tmpedit));
 	crontab_edit.git_cmd = 0;
 
-	if (start_command(&crontab_edit)) {
+	જો (start_command(&crontab_edit)) {
 		result = error(_("failed to run 'crontab'; your system might not support 'cron'"));
-		goto out;
+		જાઓ out;
 	}
 
-	if (finish_command(&crontab_edit))
+	જો (finish_command(&crontab_edit))
 		result = error(_("'crontab' died"));
-	else
+	નહીંતર
 		fclose(cron_list);
 
 out:
 	delete_tempfile(&tmpedit);
-	free(cmd);
-	return result;
+	મુક્ત(cmd);
+	પાછા result;
 }
 
-static int real_is_systemd_timer_available(void)
+સ્થિર પૂર્ણાંક real_is_systemd_timer_available(શૂન્ય)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
 
-	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", NULL);
+	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", ખાલી);
 	child.no_stdin = 1;
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
-	if (finish_command(&child))
-		return 0;
-	return 1;
+	જો (start_command(&child))
+		પાછા 0;
+	જો (finish_command(&child))
+		પાછા 0;
+	પાછા 1;
 }
 
-static int is_systemd_timer_available(void)
+સ્થિર પૂર્ણાંક is_systemd_timer_available(શૂન્ય)
 {
-	int is_available;
+	પૂર્ણાંક is_available;
 
-	if (get_schedule_cmd("systemctl", &is_available, NULL))
-		return is_available;
+	જો (get_schedule_cmd("systemctl", &is_available, ખાલી))
+		પાછા is_available;
 
-	return real_is_systemd_timer_available();
+	પાછા real_is_systemd_timer_available();
 }
 
-static char *xdg_config_home_systemd(const char *filename)
+સ્થિર અક્ષર *xdg_config_home_systemd(અચલ અક્ષર *filename)
 {
-	return xdg_config_home_for("systemd/user", filename);
+	પાછા xdg_config_home_for("systemd/user", filename);
 }
 
 #define SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
 
-static int systemd_timer_delete_timer_file(enum schedule_priority priority)
+સ્થિર પૂર્ણાંક systemd_timer_delete_timer_file(ગણના schedule_priority priority)
 {
-	int ret = 0;
-	const char *frequency = get_frequency(priority);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
-	char *filename = xdg_config_home_systemd(local_timer_name);
+	પૂર્ણાંક ret = 0;
+	અચલ અક્ષર *frequency = get_frequency(priority);
+	અક્ષર *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	અક્ષર *filename = xdg_config_home_systemd(local_timer_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	જો (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_timer_name);
-	return ret;
+	મુક્ત(filename);
+	મુક્ત(local_timer_name);
+	પાછા ret;
 }
 
-static int systemd_timer_delete_service_template(void)
+સ્થિર પૂર્ણાંક systemd_timer_delete_service_template(શૂન્ય)
 {
-	int ret = 0;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
-	char *filename = xdg_config_home_systemd(local_service_name);
-	if (unlink(filename) && !is_missing_file_error(errno))
+	પૂર્ણાંક ret = 0;
+	અક્ષર *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	અક્ષર *filename = xdg_config_home_systemd(local_service_name);
+	જો (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(local_service_name);
-	return ret;
+	મુક્ત(filename);
+	મુક્ત(local_service_name);
+	પાછા ret;
 }
 
 /*
@@ -2607,41 +2607,41 @@ static int systemd_timer_delete_service_template(void)
  * file using a custom minute. This timer file cannot use the templating
  * system, so we generate a specific file for each.
  */
-static int systemd_timer_write_timer_file(enum schedule_priority schedule,
-					  int minute)
+સ્થિર પૂર્ણાંક systemd_timer_write_timer_file(ગણના schedule_priority schedule,
+					  પૂર્ણાંક minute)
 {
-	int res = -1;
-	char *filename;
+	પૂર્ણાંક res = -1;
+	અક્ષર *filename;
 	FILE *file;
-	const char *unit;
-	char *schedule_pattern = NULL;
-	const char *frequency = get_frequency(schedule);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	અચલ અક્ષર *unit;
+	અક્ષર *schedule_pattern = ખાલી;
+	અચલ અક્ષર *frequency = get_frequency(schedule);
+	અક્ષર *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
 	filename = xdg_config_home_systemd(local_timer_name);
 
-	if (safe_create_leading_directories(the_repository, filename)) {
+	જો (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		જાઓ error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	જો (!file)
+		જાઓ error;
 
-	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	પસંદગી (schedule) {
+	સ્થિતિ SCHEDULE_HOURLY:
 		schedule_pattern = xstrfmt("*-*-* 1..23:%02d:00", minute);
-		break;
+		તોડો;
 
-	case SCHEDULE_DAILY:
+	સ્થિતિ SCHEDULE_DAILY:
 		schedule_pattern = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
-		break;
+		તોડો;
 
-	case SCHEDULE_WEEKLY:
+	સ્થિતિ SCHEDULE_WEEKLY:
 		schedule_pattern = xstrfmt("Mon 0:%02d:00", minute);
-		break;
+		તોડો;
 
-	default:
+	મૂળભૂત:
 		BUG("Unhandled schedule_priority");
 	}
 
@@ -2658,23 +2658,23 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 	       "\n"
 	       "[Install]\n"
 	       "WantedBy=timers.target\n";
-	if (fprintf(file, unit, schedule_pattern) < 0) {
+	જો (fprintf(file, unit, schedule_pattern) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		જાઓ error;
 	}
-	if (fclose(file) == EOF) {
+	જો (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		જાઓ error;
 	}
 
 	res = 0;
 
 error:
-	free(schedule_pattern);
-	free(local_timer_name);
-	free(filename);
-	return res;
+	મુક્ત(schedule_pattern);
+	મુક્ત(local_timer_name);
+	મુક્ત(filename);
+	પાછા res;
 }
 
 /*
@@ -2684,22 +2684,22 @@ error:
  * and will use this file and insert the <schedule> into the template at
  * the position of "%i".
  */
-static int systemd_timer_write_service_template(const char *exec_path)
+સ્થિર પૂર્ણાંક systemd_timer_write_service_template(અચલ અક્ષર *exec_path)
 {
-	int res = -1;
-	char *filename;
+	પૂર્ણાંક res = -1;
+	અક્ષર *filename;
 	FILE *file;
-	const char *unit;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	અચલ અક્ષર *unit;
+	અક્ષર *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 
 	filename = xdg_config_home_systemd(local_service_name);
-	if (safe_create_leading_directories(the_repository, filename)) {
+	જો (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
-		goto error;
+		જાઓ error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
-		goto error;
+	જો (!file)
+		જાઓ error;
 
 	unit = "# This file was created and is maintained by Git.\n"
 	       "# Any edits made in this file might be replaced in the future\n"
@@ -2720,32 +2720,32 @@ static int systemd_timer_write_service_template(const char *exec_path)
 	       "RestrictSUIDSGID=yes\n"
 	       "SystemCallArchitectures=native\n"
 	       "SystemCallFilter=@system-service\n";
-	if (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
+	જો (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
-		goto error;
+		જાઓ error;
 	}
-	if (fclose(file) == EOF) {
+	જો (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
-		goto error;
+		જાઓ error;
 	}
 
 	res = 0;
 
 error:
-	free(local_service_name);
-	free(filename);
-	return res;
+	મુક્ત(local_service_name);
+	મુક્ત(filename);
+	પાછા res;
 }
 
-static int systemd_timer_enable_unit(int enable,
-				     enum schedule_priority schedule,
-				     int minute)
+સ્થિર પૂર્ણાંક systemd_timer_enable_unit(પૂર્ણાંક enable,
+				     ગણના schedule_priority schedule,
+				     પૂર્ણાંક minute)
 {
-	char *cmd = NULL;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	int ret;
+	અક્ષર *cmd = ખાલી;
+	સંરચના child_process child = CHILD_PROCESS_INIT;
+	અચલ અક્ષર *frequency = get_frequency(schedule);
+	પૂર્ણાંક ret;
 
 	/*
 	 * Disabling the systemd unit while it is already disabled makes
@@ -2756,25 +2756,25 @@ static int systemd_timer_enable_unit(int enable,
 	 * On the other hand, enabling a systemd unit which is already enabled
 	 * produces no error.
 	 */
-	if (!enable) {
+	જો (!enable) {
 		child.no_stderr = 1;
-	} else if (systemd_timer_write_timer_file(schedule, minute)) {
+	} નહીંતર જો (systemd_timer_write_timer_file(schedule, minute)) {
 		ret = -1;
-		goto out;
+		જાઓ out;
 	}
 
-	get_schedule_cmd("systemctl", NULL, &cmd);
+	get_schedule_cmd("systemctl", ખાલી, &cmd);
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, "--user", enable ? "enable" : "disable",
-		     "--now", NULL);
+		     "--now", ખાલી);
 	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
-	if (start_command(&child)) {
+	જો (start_command(&child)) {
 		ret = error(_("failed to start systemctl"));
-		goto out;
+		જાઓ out;
 	}
 
-	if (finish_command(&child)) {
+	જો (finish_command(&child)) {
 		/*
 		 * Disabling an already disabled systemd unit makes
 		 * systemctl fail.
@@ -2782,83 +2782,83 @@ static int systemd_timer_enable_unit(int enable,
 		 *
 		 * Enabling an enabled systemd unit doesn't fail.
 		 */
-		if (enable) {
+		જો (enable) {
 			ret = error(_("failed to run systemctl"));
-			goto out;
+			જાઓ out;
 		}
 	}
 
 	ret = 0;
 
 out:
-	free(cmd);
-	return ret;
+	મુક્ત(cmd);
+	પાછા ret;
 }
 
 /*
  * A previous version of Git wrote the timer units as template files.
  * Clean these up, if they exist.
  */
-static void systemd_timer_delete_stale_timer_templates(void)
+સ્થિર શૂન્ય systemd_timer_delete_stale_timer_templates(શૂન્ય)
 {
-	char *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
-	char *filename = xdg_config_home_systemd(timer_template_name);
+	અક્ષર *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
+	અક્ષર *filename = xdg_config_home_systemd(timer_template_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	જો (unlink(filename) && !is_missing_file_error(errno))
 		warning(_("failed to delete '%s'"), filename);
 
-	free(filename);
-	free(timer_template_name);
+	મુક્ત(filename);
+	મુક્ત(timer_template_name);
 }
 
-static int systemd_timer_delete_unit_files(void)
+સ્થિર પૂર્ણાંક systemd_timer_delete_unit_files(શૂન્ય)
 {
 	systemd_timer_delete_stale_timer_templates();
 
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
+	પાછા systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_DAILY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_WEEKLY) |
 	       systemd_timer_delete_service_template();
 }
 
-static int systemd_timer_delete_units(void)
+સ્થિર પૂર્ણાંક systemd_timer_delete_units(શૂન્ય)
 {
-	int minute = get_random_minute();
+	પૂર્ણાંક minute = get_random_minute();
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
+	પાછા systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_DAILY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_WEEKLY, minute) |
 	       systemd_timer_delete_unit_files();
 }
 
-static int systemd_timer_setup_units(void)
+સ્થિર પૂર્ણાંક systemd_timer_setup_units(શૂન્ય)
 {
-	int minute = get_random_minute();
-	const char *exec_path = git_exec_path();
+	પૂર્ણાંક minute = get_random_minute();
+	અચલ અક્ષર *exec_path = git_exec_path();
 
-	int ret = systemd_timer_write_service_template(exec_path) ||
+	પૂર્ણાંક ret = systemd_timer_write_service_template(exec_path) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_HOURLY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_DAILY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_WEEKLY, minute);
 
-	if (ret)
+	જો (ret)
 		systemd_timer_delete_units();
-	else
+	નહીંતર
 		systemd_timer_delete_stale_timer_templates();
 
-	return ret;
+	પાછા ret;
 }
 
-static int systemd_timer_update_schedule(int run_maintenance, int fd UNUSED)
+સ્થિર પૂર્ણાંક systemd_timer_update_schedule(પૂર્ણાંક run_maintenance, પૂર્ણાંક fd UNUSED)
 {
-	if (run_maintenance)
-		return systemd_timer_setup_units();
-	else
-		return systemd_timer_delete_units();
+	જો (run_maintenance)
+		પાછા systemd_timer_setup_units();
+	નહીંતર
+		પાછા systemd_timer_delete_units();
 }
 
-enum scheduler {
+ગણના scheduler {
 	SCHEDULER_INVALID = -1,
 	SCHEDULER_AUTO,
 	SCHEDULER_CRON,
@@ -2867,10 +2867,10 @@ enum scheduler {
 	SCHEDULER_SCHTASKS,
 };
 
-static const struct {
-	const char *name;
-	int (*is_available)(void);
-	int (*update_schedule)(int run_maintenance, int fd);
+સ્થિર અચલ સંરચના {
+	અચલ અક્ષર *name;
+	પૂર્ણાંક (*is_available)(શૂન્ય);
+	પૂર્ણાંક (*update_schedule)(પૂર્ણાંક run_maintenance, પૂર્ણાંક fd);
 } scheduler_fn[] = {
 	[SCHEDULER_CRON] = {
 		.name = "crontab",
@@ -2894,182 +2894,182 @@ static const struct {
 	},
 };
 
-static enum scheduler parse_scheduler(const char *value)
+સ્થિર ગણના scheduler parse_scheduler(અચલ અક્ષર *કિંમત)
 {
-	if (!value)
-		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
-		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
-		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
-		 !strcasecmp(value, "systemd-timer"))
-		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
-		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
-		return SCHEDULER_SCHTASKS;
-	else
-		return SCHEDULER_INVALID;
+	જો (!કિંમત)
+		પાછા SCHEDULER_INVALID;
+	નહીંતર જો (!strcasecmp(કિંમત, "auto"))
+		પાછા SCHEDULER_AUTO;
+	નહીંતર જો (!strcasecmp(કિંમત, "cron") || !strcasecmp(કિંમત, "crontab"))
+		પાછા SCHEDULER_CRON;
+	નહીંતર જો (!strcasecmp(કિંમત, "systemd") ||
+		 !strcasecmp(કિંમત, "systemd-timer"))
+		પાછા SCHEDULER_SYSTEMD;
+	નહીંતર જો (!strcasecmp(કિંમત, "launchctl"))
+		પાછા SCHEDULER_LAUNCHCTL;
+	નહીંતર જો (!strcasecmp(કિંમત, "schtasks"))
+		પાછા SCHEDULER_SCHTASKS;
+	નહીંતર
+		પાછા SCHEDULER_INVALID;
 }
 
-static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
-				     int unset)
+સ્થિર પૂર્ણાંક maintenance_opt_scheduler(અચલ સંરચના option *opt, અચલ અક્ષર *arg,
+				     પૂર્ણાંક unset)
 {
-	enum scheduler *scheduler = opt->value;
+	ગણના scheduler *scheduler = opt->કિંમત;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*scheduler = parse_scheduler(arg);
-	if (*scheduler == SCHEDULER_INVALID)
-		return error(_("unrecognized --scheduler argument '%s'"), arg);
-	return 0;
+	જો (*scheduler == SCHEDULER_INVALID)
+		પાછા error(_("unrecognized --scheduler argument '%s'"), arg);
+	પાછા 0;
 }
 
-struct maintenance_start_opts {
-	enum scheduler scheduler;
+સંરચના maintenance_start_opts {
+	ગણના scheduler scheduler;
 };
 
-static enum scheduler resolve_scheduler(enum scheduler scheduler)
+સ્થિર ગણના scheduler resolve_scheduler(ગણના scheduler scheduler)
 {
-	if (scheduler != SCHEDULER_AUTO)
-		return scheduler;
+	જો (scheduler != SCHEDULER_AUTO)
+		પાછા scheduler;
 
-#if defined(__APPLE__)
-	return SCHEDULER_LAUNCHCTL;
+#જો defined(__APPLE__)
+	પાછા SCHEDULER_LAUNCHCTL;
 
-#elif defined(GIT_WINDOWS_NATIVE)
-	return SCHEDULER_SCHTASKS;
+#અથવાજો defined(GIT_WINDOWS_NATIVE)
+	પાછા SCHEDULER_SCHTASKS;
 
-#elif defined(__linux__)
-	if (is_systemd_timer_available())
-		return SCHEDULER_SYSTEMD;
-	else if (is_crontab_available())
-		return SCHEDULER_CRON;
-	else
+#અથવાજો defined(__linux__)
+	જો (is_systemd_timer_available())
+		પાછા SCHEDULER_SYSTEMD;
+	નહીંતર જો (is_crontab_available())
+		પાછા SCHEDULER_CRON;
+	નહીંતર
 		die(_("neither systemd timers nor crontab are available"));
 
-#else
-	return SCHEDULER_CRON;
+#નહીંતર
+	પાછા SCHEDULER_CRON;
 #endif
 }
 
-static void validate_scheduler(enum scheduler scheduler)
+સ્થિર શૂન્ય validate_scheduler(ગણના scheduler scheduler)
 {
-	if (scheduler == SCHEDULER_INVALID)
+	જો (scheduler == SCHEDULER_INVALID)
 		BUG("invalid scheduler");
-	if (scheduler == SCHEDULER_AUTO)
+	જો (scheduler == SCHEDULER_AUTO)
 		BUG("resolve_scheduler should have been called before");
 
-	if (!scheduler_fn[scheduler].is_available())
+	જો (!scheduler_fn[scheduler].is_available())
 		die(_("%s scheduler is not available"),
 		    scheduler_fn[scheduler].name);
 }
 
-static int update_background_schedule(const struct maintenance_start_opts *opts,
-				      int enable)
+સ્થિર પૂર્ણાંક update_background_schedule(અચલ સંરચના maintenance_start_opts *opts,
+				      પૂર્ણાંક enable)
 {
-	unsigned int i;
-	int result = 0;
-	struct lock_file lk;
-	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
+	unsigned પૂર્ણાંક i;
+	પૂર્ણાંક result = 0;
+	સંરચના lock_file lk;
+	અક્ષર *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
 
-	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
-		if (errno == EEXIST)
+	જો (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
+		જો (errno == EEXIST)
 			error(_("unable to create '%s.lock': %s.\n\n"
 			    "Another scheduled git-maintenance(1) process seems to be running in this\n"
 			    "repository. Please make sure no other maintenance processes are running and\n"
 			    "then try again. If it still fails, a git-maintenance(1) process may have\n"
 			    "crashed in this repository earlier: remove the file manually to continue."),
 			    absolute_path(lock_path), strerror(errno));
-		else
+		નહીંતર
 			error_errno(_("cannot acquire lock for scheduled background maintenance"));
-		free(lock_path);
-		return -1;
+		મુક્ત(lock_path);
+		પાછા -1;
 	}
 
-	for (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
-		if (enable && opts->scheduler == i)
-			continue;
-		if (!scheduler_fn[i].is_available())
-			continue;
+	માટે (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
+		જો (enable && opts->scheduler == i)
+			ચાલુ;
+		જો (!scheduler_fn[i].is_available())
+			ચાલુ;
 		scheduler_fn[i].update_schedule(0, get_lock_file_fd(&lk));
 	}
 
-	if (enable)
+	જો (enable)
 		result = scheduler_fn[opts->scheduler].update_schedule(
 			1, get_lock_file_fd(&lk));
 
 	rollback_lock_file(&lk);
 
-	free(lock_path);
-	return result;
+	મુક્ત(lock_path);
+	પાછા result;
 }
 
-static const char *const builtin_maintenance_start_usage[] = {
+સ્થિર અચલ અક્ષર *અચલ builtin_maintenance_start_usage[] = {
 	N_("git maintenance start [--scheduler=<scheduler>]"),
-	NULL
+	ખાલી
 };
 
-static int maintenance_start(int argc, const char **argv, const char *prefix,
-			     struct repository *repo)
+સ્થિર પૂર્ણાંક maintenance_start(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			     સંરચના repository *repo)
 {
-	struct maintenance_start_opts opts = { 0 };
-	struct option options[] = {
+	સંરચના maintenance_start_opts opts = { 0 };
+	સંરચના option options[] = {
 		OPT_CALLBACK_F(
 			0, "scheduler", &opts.scheduler, N_("scheduler"),
 			N_("scheduler to trigger git maintenance run"),
 			PARSE_OPT_NONEG, maintenance_opt_scheduler),
 		OPT_END()
 	};
-	const char *register_args[] = { "register", NULL };
+	અચલ અક્ષર *register_args[] = { "register", ખાલી };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_start_usage, 0);
-	if (argc)
+	જો (argc)
 		usage_with_options(builtin_maintenance_start_usage, options);
 
 	opts.scheduler = resolve_scheduler(opts.scheduler);
 	validate_scheduler(opts.scheduler);
 
-	if (update_background_schedule(&opts, 1))
+	જો (update_background_schedule(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	જો (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, ખાલી, repo))
 		warning(_("failed to add repo to global config"));
-	return 0;
+	પાછા 0;
 }
 
-static const char *const builtin_maintenance_stop_usage[] = {
+સ્થિર અચલ અક્ષર *અચલ builtin_maintenance_stop_usage[] = {
 	"git maintenance stop",
-	NULL
+	ખાલી
 };
 
-static int maintenance_stop(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક maintenance_stop(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+			    સંરચના repository *repo UNUSED)
 {
-	struct option options[] = {
+	સંરચના option options[] = {
 		OPT_END()
 	};
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_stop_usage, 0);
-	if (argc)
+	જો (argc)
 		usage_with_options(builtin_maintenance_stop_usage, options);
-	return update_background_schedule(NULL, 0);
+	પાછા update_background_schedule(ખાલી, 0);
 }
 
-static const char *const builtin_maintenance_is_needed_usage[] = {
+સ્થિર અચલ અક્ષર *અચલ builtin_maintenance_is_needed_usage[] = {
 	"git maintenance is-needed [--task=<task>] [--schedule]",
-	NULL
+	ખાલી
 };
 
-static int maintenance_is_needed(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED)
+સ્થિર પૂર્ણાંક maintenance_is_needed(પૂર્ણાંક argc, અચલ અક્ષર **argv, અચલ અક્ષર *prefix,
+				 સંરચના repository *repo UNUSED)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option options[] = {
+	સંરચના maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	સંરચના string_list selected_tasks = STRING_LIST_INIT_DUP;
+	સંરચના gc_config cfg = GC_CONFIG_INIT;
+	સંરચના option options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
@@ -3082,21 +3082,21 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_is_needed_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc)
+	જો (argc)
 		usage_with_options(builtin_maintenance_is_needed_usage, options);
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (opts.auto_flag) {
-		for (size_t i = 0; i < opts.tasks_nr; i++) {
-			if (tasks[opts.tasks[i]].auto_condition &&
+	જો (opts.auto_flag) {
+		માટે (size_t i = 0; i < opts.tasks_nr; i++) {
+			જો (tasks[opts.tasks[i]].auto_condition &&
 			    tasks[opts.tasks[i]].auto_condition(&cfg)) {
 				is_needed = true;
-				break;
+				તોડો;
 			}
 		}
-	} else {
+	} નહીંતર {
 		/*
 		 * When not using --auto we always require maintenance right now.
 		 *
@@ -3113,23 +3113,23 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
 
-	if (is_needed)
-		return 0;
-	return 1;
+	જો (is_needed)
+		પાછા 0;
+	પાછા 1;
 }
 
-static const char *const builtin_maintenance_usage[] = {
+સ્થિર અચલ અક્ષર *અચલ builtin_maintenance_usage[] = {
 	N_("git maintenance <subcommand> [<options>]"),
-	NULL,
+	ખાલી,
 };
 
-int cmd_maintenance(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+પૂર્ણાંક cmd_maintenance(પૂર્ણાંક argc,
+		    અચલ અક્ષર **argv,
+		    અચલ અક્ષર *prefix,
+		    સંરચના repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_maintenance_options[] = {
+	parse_opt_subcommand_fn *fn = ખાલી;
+	સંરચના option builtin_maintenance_options[] = {
 		OPT_SUBCOMMAND("run", &fn, maintenance_run),
 		OPT_SUBCOMMAND("start", &fn, maintenance_start),
 		OPT_SUBCOMMAND("stop", &fn, maintenance_stop),
@@ -3141,5 +3141,5 @@ int cmd_maintenance(int argc,
 
 	argc = parse_options(argc, argv, prefix, builtin_maintenance_options,
 			     builtin_maintenance_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	પાછા fn(argc, argv, prefix, repo);
 }
