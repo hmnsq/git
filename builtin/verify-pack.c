@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "strbuf.h"
 
 #define VERIFY_PACK_VERBOSE 01
 #define VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ verify_one_pack(സ്ഥിരം അക്ഷരം *path, unsigned പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	ഘടന child_process index_pack = CHILD_PROCESS_INIT;
+	ഘടന strvec *argv = &index_pack.args;
+	ഘടന strbuf arg = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ verbose = flags & VERIFY_PACK_VERBOSE;
+	പൂർണ്ണസംഖ്യ stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	പൂർണ്ണസംഖ്യ err;
 
-	strvec_push(argv, "index-pack");
+	strvec_തള്ളുക(argv, "index-pack");
 
-	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
-		strvec_push(argv, "--verify-stat");
-	else
-		strvec_push(argv, "--verify");
+	എങ്കിൽ (stat_only)
+		strvec_തള്ളുക(argv, "--verify-stat-only");
+	അല്ലെങ്കിൽ എങ്കിൽ (verbose)
+		strvec_തള്ളുക(argv, "--verify-stat");
+	അല്ലെങ്കിൽ
+		strvec_തള്ളുക(argv, "--verify");
 
-	if (hash_algo)
+	എങ്കിൽ (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
@@ -36,43 +36,43 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
 	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
+	എങ്കിൽ (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_തള്ളുക(argv, arg.buf);
 
 	index_pack.git_cmd = 1;
 
 	err = run_command(&index_pack);
 
-	if (verbose || stat_only) {
-		if (err)
+	എങ്കിൽ (verbose || stat_only) {
+		എങ്കിൽ (err)
 			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
+		അല്ലെങ്കിൽ {
+			എങ്കിൽ (!stat_only)
 				printf("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	തിരികെ err;
 }
 
-static const char * const verify_pack_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
-	NULL
+	ശൂന്യ
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_verify_pack(പൂർണ്ണസംഖ്യ argc,
+		    സ്ഥിരം അക്ഷരം **argv,
+		    സ്ഥിരം അക്ഷരം *prefix,
+		    ഘടന repository *repo UNUSED)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
+	പൂർണ്ണസംഖ്യ err = 0;
+	unsigned പൂർണ്ണസംഖ്യ flags = 0;
+	സ്ഥിരം അക്ഷരം *object_format = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ i;
+	സ്ഥിരം ഘടന option verify_pack_options[] = {
 		OPT_BIT('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
 		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
@@ -82,15 +82,15 @@ int cmd_verify_pack(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 	argc = parse_options(argc, argv, prefix, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	എങ്കിൽ (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	വേണ്ടി (i = 0; i < argc; i++) {
+		എങ്കിൽ (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	തിരികെ err;
 }

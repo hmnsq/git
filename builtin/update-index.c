@@ -7,31 +7,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "quote.h"
-#include "cache-tree.h"
-#include "tree-walk.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/transaction.h"
-#include "refs.h"
-#include "resolve-undo.h"
-#include "parse-options.h"
-#include "pathspec.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "split-index.h"
-#include "symlinks.h"
-#include "fsmonitor.h"
-#include "write-or-die.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hash.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "lockfile.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "cache-tree.h"
+#അന്തര്ഭാവ "tree-walk.h"
+#അന്തര്ഭാവ "object-file.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "odb/transaction.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "resolve-undo.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "pathspec.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "read-cache.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "sparse-index.h"
+#അന്തര്ഭാവ "split-index.h"
+#അന്തര്ഭാവ "symlinks.h"
+#അന്തര്ഭാവ "fsmonitor.h"
+#അന്തര്ഭാവ "write-or-die.h"
 
 /*
  * Default to not allowing changes to the list of files. The
@@ -40,22 +40,22 @@
  * like "git update-index *" and suddenly having all the object
  * files be revision controlled.
  */
-static int allow_add;
-static int allow_remove;
-static int allow_replace;
-static int info_only;
-static int force_remove;
-static int verbose;
-static int mark_valid_only;
-static int mark_skip_worktree_only;
-static int mark_fsmonitor_only;
-static int ignore_skip_worktree_entries;
+സ്ഥിതം പൂർണ്ണസംഖ്യ allow_add;
+സ്ഥിതം പൂർണ്ണസംഖ്യ allow_remove;
+സ്ഥിതം പൂർണ്ണസംഖ്യ allow_replace;
+സ്ഥിതം പൂർണ്ണസംഖ്യ info_only;
+സ്ഥിതം പൂർണ്ണസംഖ്യ force_remove;
+സ്ഥിതം പൂർണ്ണസംഖ്യ verbose;
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_valid_only;
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_skip_worktree_only;
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_fsmonitor_only;
+സ്ഥിതം പൂർണ്ണസംഖ്യ ignore_skip_worktree_entries;
 #define MARK_FLAG 1
 #define UNMARK_FLAG 2
-static struct strbuf mtime_dir = STRBUF_INIT;
+സ്ഥിതം ഘടന strbuf mtime_dir = STRBUF_INIT;
 
 /* Untracked cache mode */
-enum uc_mode {
+എണ്ണൽ uc_mode {
 	UC_UNSPECIFIED = -1,
 	UC_DISABLE = 0,
 	UC_ENABLE,
@@ -64,12 +64,12 @@ enum uc_mode {
 };
 
 __attribute__((format (printf, 1, 2)))
-static void report(const char *fmt, ...)
+സ്ഥിതം ശൂന്യം report(സ്ഥിരം അക്ഷരം *fmt, ...)
 {
 	va_list vp;
 
-	if (!verbose)
-		return;
+	എങ്കിൽ (!verbose)
+		തിരികെ;
 
 	va_start(vp, fmt);
 	vprintf(fmt, vp);
@@ -77,57 +77,57 @@ static void report(const char *fmt, ...)
 	va_end(vp);
 }
 
-static void remove_test_directory(void)
+സ്ഥിതം ശൂന്യം remove_test_directory(ശൂന്യം)
 {
-	if (mtime_dir.len)
+	എങ്കിൽ (mtime_dir.len)
 		remove_dir_recursively(&mtime_dir, 0);
 }
 
-static const char *get_mtime_path(const char *path)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_mtime_path(സ്ഥിരം അക്ഷരം *path)
 {
-	static struct strbuf sb = STRBUF_INIT;
+	സ്ഥിതം ഘടന strbuf sb = STRBUF_INIT;
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "%s/%s", mtime_dir.buf, path);
-	return sb.buf;
+	തിരികെ sb.buf;
 }
 
-static void xmkdir(const char *path)
+സ്ഥിതം ശൂന്യം xmkdir(സ്ഥിരം അക്ഷരം *path)
 {
 	path = get_mtime_path(path);
-	if (mkdir(path, 0700))
+	എങ്കിൽ (mkdir(path, 0700))
 		die_errno(_("failed to create directory %s"), path);
 }
 
-static int xstat_mtime_dir(struct stat *st)
+സ്ഥിതം പൂർണ്ണസംഖ്യ xstat_mtime_dir(ഘടന stat *st)
 {
-	if (stat(mtime_dir.buf, st))
+	എങ്കിൽ (stat(mtime_dir.buf, st))
 		die_errno(_("failed to stat %s"), mtime_dir.buf);
-	return 0;
+	തിരികെ 0;
 }
 
-static int create_file(const char *path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ create_file(സ്ഥിരം അക്ഷരം *path)
 {
-	int fd;
+	പൂർണ്ണസംഖ്യ fd;
 	path = get_mtime_path(path);
 	fd = xopen(path, O_CREAT | O_RDWR, 0644);
-	return fd;
+	തിരികെ fd;
 }
 
-static void xunlink(const char *path)
+സ്ഥിതം ശൂന്യം xunlink(സ്ഥിരം അക്ഷരം *path)
 {
 	path = get_mtime_path(path);
-	if (unlink(path))
+	എങ്കിൽ (unlink(path))
 		die_errno(_("failed to delete file %s"), path);
 }
 
-static void xrmdir(const char *path)
+സ്ഥിതം ശൂന്യം xrmdir(സ്ഥിരം അക്ഷരം *path)
 {
 	path = get_mtime_path(path);
-	if (rmdir(path))
+	എങ്കിൽ (rmdir(path))
 		die_errno(_("failed to delete directory %s"), path);
 }
 
-static void avoid_racy(void)
+സ്ഥിതം ശൂന്യം avoid_racy(ശൂന്യം)
 {
 	/*
 	 * not use if we could usleep(10) if core.useNanosec is enabled. The
@@ -137,20 +137,20 @@ static void avoid_racy(void)
 	sleep(1);
 }
 
-static int test_if_untracked_cache_is_supported(void)
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_if_untracked_cache_is_supported(ശൂന്യം)
 {
-	struct stat st;
-	struct stat_data base;
-	int fd, ret = 0;
-	char *cwd;
+	ഘടന stat st;
+	ഘടന stat_data base;
+	പൂർണ്ണസംഖ്യ fd, ret = 0;
+	അക്ഷരം *cwd;
 
 	strbuf_addstr(&mtime_dir, "mtime-test-XXXXXX");
-	if (!mkdtemp(mtime_dir.buf))
+	എങ്കിൽ (!mkdtemp(mtime_dir.buf))
 		die_errno("Could not make temporary directory");
 
 	cwd = xgetcwd();
 	fprintf(stderr, _("Testing mtime in '%s' "), cwd);
-	free(cwd);
+	സ്വതന്ത്രം(cwd);
 
 	atexit(remove_test_directory);
 	xstat_mtime_dir(&st);
@@ -160,12 +160,12 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	fd = create_file("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	എങ്കിൽ (!match_stat_data(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr,_("directory stat info does not "
 				    "change after adding a new file"));
-		goto done;
+		പോകുക done;
 	}
 	fill_stat_data(&base, &st);
 	fputc('.', stderr);
@@ -173,12 +173,12 @@ static int test_if_untracked_cache_is_supported(void)
 	avoid_racy();
 	xmkdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	എങ്കിൽ (!match_stat_data(&base, &st)) {
 		close(fd);
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not change "
 				     "after adding a new directory"));
-		goto done;
+		പോകുക done;
 	}
 	fill_stat_data(&base, &st);
 	fputc('.', stderr);
@@ -187,33 +187,33 @@ static int test_if_untracked_cache_is_supported(void)
 	write_or_die(fd, "data", 4);
 	close(fd);
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	എങ്കിൽ (match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes "
 				     "after updating a file"));
-		goto done;
+		പോകുക done;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	close(create_file("new-dir/new"));
 	xstat_mtime_dir(&st);
-	if (match_stat_data(&base, &st)) {
+	എങ്കിൽ (match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info changes after "
 				     "adding a file inside subdirectory"));
-		goto done;
+		പോകുക done;
 	}
 	fputc('.', stderr);
 
 	avoid_racy();
 	xunlink("newfile");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	എങ്കിൽ (!match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a file"));
-		goto done;
+		പോകുക done;
 	}
 	fill_stat_data(&base, &st);
 	fputc('.', stderr);
@@ -222,48 +222,48 @@ static int test_if_untracked_cache_is_supported(void)
 	xunlink("new-dir/new");
 	xrmdir("new-dir");
 	xstat_mtime_dir(&st);
-	if (!match_stat_data(&base, &st)) {
+	എങ്കിൽ (!match_stat_data(&base, &st)) {
 		fputc('\n', stderr);
 		fprintf_ln(stderr, _("directory stat info does not "
 				     "change after deleting a directory"));
-		goto done;
+		പോകുക done;
 	}
 
-	if (rmdir(mtime_dir.buf))
+	എങ്കിൽ (rmdir(mtime_dir.buf))
 		die_errno(_("failed to delete directory %s"), mtime_dir.buf);
 	fprintf_ln(stderr, _(" OK"));
 	ret = 1;
 
 done:
 	strbuf_release(&mtime_dir);
-	return ret;
+	തിരികെ ret;
 }
 
-static int mark_ce_flags(const char *path, int flag, int mark)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_ce_flags(സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ flag, പൂർണ്ണസംഖ്യ mark)
 {
-	int namelen = strlen(path);
-	int pos = index_name_pos(the_repository->index, path, namelen);
-	if (0 <= pos) {
+	പൂർണ്ണസംഖ്യ namelen = strlen(path);
+	പൂർണ്ണസംഖ്യ pos = index_name_pos(the_repository->index, path, namelen);
+	എങ്കിൽ (0 <= pos) {
 		mark_fsmonitor_invalid(the_repository->index, the_repository->index->cache[pos]);
-		if (mark)
+		എങ്കിൽ (mark)
 			the_repository->index->cache[pos]->ce_flags |= flag;
-		else
+		അല്ലെങ്കിൽ
 			the_repository->index->cache[pos]->ce_flags &= ~flag;
 		the_repository->index->cache[pos]->ce_flags |= CE_UPDATE_IN_BASE;
-		cache_tree_invalidate_path(the_repository->index, path);
+		cache_വൃക്ഷം_invalidate_path(the_repository->index, path);
 		the_repository->index->cache_changed |= CE_ENTRY_CHANGED;
-		return 0;
+		തിരികെ 0;
 	}
-	return -1;
+	തിരികെ -1;
 }
 
-static int remove_one_path(const char *path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ remove_one_path(സ്ഥിരം അക്ഷരം *path)
 {
-	if (!allow_remove)
-		return error("%s: does not exist and --remove not passed", path);
-	if (remove_file_from_index(the_repository->index, path))
-		return error("%s: cannot remove from the index", path);
-	return 0;
+	എങ്കിൽ (!allow_remove)
+		തിരികെ error("%s: does not exist and --remove not passed", path);
+	എങ്കിൽ (remove_file_from_index(the_repository->index, path))
+		തിരികെ error("%s: cannot remove from the index", path);
+	തിരികെ 0;
 }
 
 /*
@@ -273,21 +273,21 @@ static int remove_one_path(const char *path)
  *    succeeds.
  *  - permission error. That's never ok.
  */
-static int process_lstat_error(const char *path, int err)
+സ്ഥിതം പൂർണ്ണസംഖ്യ process_lstat_error(സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ err)
 {
-	if (is_missing_file_error(err))
-		return remove_one_path(path);
-	return error("lstat(\"%s\"): %s", path, strerror(err));
+	എങ്കിൽ (is_missing_file_error(err))
+		തിരികെ remove_one_path(path);
+	തിരികെ error("lstat(\"%s\"): %s", path, strerror(err));
 }
 
-static int add_one_path(const struct cache_entry *old, const char *path, int len, struct stat *st)
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_one_path(സ്ഥിരം ഘടന cache_entry *old, സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ len, ഘടന stat *st)
 {
-	int option;
-	struct cache_entry *ce;
+	പൂർണ്ണസംഖ്യ option;
+	ഘടന cache_entry *ce;
 
 	/* Was the old index entry already up-to-date? */
-	if (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
-		return 0;
+	എങ്കിൽ (old && !ce_stage(old) && !ie_match_stat(the_repository->index, old, st, 0))
+		തിരികെ 0;
 
 	ce = make_empty_cache_entry(the_repository->index, len);
 	memcpy(ce->name, path, len);
@@ -296,18 +296,18 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
 	fill_stat_cache_info(the_repository->index, ce, st);
 	ce->ce_mode = ce_mode_from_stat(the_repository, old, st->st_mode);
 
-	if (index_path(the_repository->index, &ce->oid, path, st,
+	എങ്കിൽ (index_path(the_repository->index, &ce->oid, path, st,
 		       info_only ? 0 : INDEX_WRITE_OBJECT)) {
 		discard_cache_entry(ce);
-		return -1;
+		തിരികെ -1;
 	}
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option)) {
+	എങ്കിൽ (add_index_entry(the_repository->index, ce, option)) {
 		discard_cache_entry(ce);
-		return error("%s: cannot add to the index - missing --add option?", path);
+		തിരികെ error("%s: cannot add to the index - missing --add option?", path);
 	}
-	return 0;
+	തിരികെ 0;
 }
 
 /*
@@ -333,95 +333,95 @@ static int add_one_path(const struct cache_entry *old, const char *path, int len
  *  - it doesn't exist at all in the index, but it is a valid
  *    git directory, and it should be *added* as a gitlink.
  */
-static int process_directory(const char *path, int len, struct stat *st)
+സ്ഥിതം പൂർണ്ണസംഖ്യ process_directory(സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ len, ഘടന stat *st)
 {
-	struct object_id oid;
-	int pos = index_name_pos(the_repository->index, path, len);
+	ഘടന object_id oid;
+	പൂർണ്ണസംഖ്യ pos = index_name_pos(the_repository->index, path, len);
 
 	/* Exact match: file or existing gitlink */
-	if (pos >= 0) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		if (S_ISGITLINK(ce->ce_mode)) {
+	എങ്കിൽ (pos >= 0) {
+		സ്ഥിരം ഘടന cache_entry *ce = the_repository->index->cache[pos];
+		എങ്കിൽ (S_ISGITLINK(ce->ce_mode)) {
 
 			/* Do nothing to the index if there is no HEAD! */
-			if (repo_resolve_gitlink_ref(the_repository, path,
+			എങ്കിൽ (repo_resolve_gitlink_ref(the_repository, path,
 						     "HEAD", &oid) < 0)
-				return 0;
+				തിരികെ 0;
 
-			return add_one_path(ce, path, len, st);
+			തിരികെ add_one_path(ce, path, len, st);
 		}
 		/* Should this be an unconditional error? */
-		return remove_one_path(path);
+		തിരികെ remove_one_path(path);
 	}
 
 	/* Inexact match: is there perhaps a subdirectory match? */
 	pos = -pos-1;
-	while (pos < the_repository->index->cache_nr) {
-		const struct cache_entry *ce = the_repository->index->cache[pos++];
+	ആകുമ്പോൾ (pos < the_repository->index->cache_nr) {
+		സ്ഥിരം ഘടന cache_entry *ce = the_repository->index->cache[pos++];
 
-		if (strncmp(ce->name, path, len))
-			break;
-		if (ce->name[len] > '/')
-			break;
-		if (ce->name[len] < '/')
-			continue;
+		എങ്കിൽ (strncmp(ce->name, path, len))
+			നിർത്തുക;
+		എങ്കിൽ (ce->name[len] > '/')
+			നിർത്തുക;
+		എങ്കിൽ (ce->name[len] < '/')
+			തുടരുക;
 
 		/* Subdirectory match - error out */
-		return error("%s: is a directory - add individual files instead", path);
+		തിരികെ error("%s: is a directory - add individual files instead", path);
 	}
 
 	/* No match - should we add it as a gitlink? */
-	if (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
-		return add_one_path(NULL, path, len, st);
+	എങ്കിൽ (!repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid))
+		തിരികെ add_one_path(ശൂന്യ, path, len, st);
 
 	/* Error out. */
-	return error("%s: is a directory - add files inside instead", path);
+	തിരികെ error("%s: is a directory - add files inside instead", path);
 }
 
-static int process_path(const char *path, struct stat *st, int stat_errno)
+സ്ഥിതം പൂർണ്ണസംഖ്യ process_path(സ്ഥിരം അക്ഷരം *path, ഘടന stat *st, പൂർണ്ണസംഖ്യ stat_errno)
 {
-	int pos, len;
-	const struct cache_entry *ce;
+	പൂർണ്ണസംഖ്യ pos, len;
+	സ്ഥിരം ഘടന cache_entry *ce;
 
 	len = strlen(path);
-	if (has_symlink_leading_path(path, len))
-		return error("'%s' is beyond a symbolic link", path);
+	എങ്കിൽ (has_symlink_leading_path(path, len))
+		തിരികെ error("'%s' is beyond a symbolic link", path);
 
 	pos = index_name_pos(the_repository->index, path, len);
-	ce = pos < 0 ? NULL : the_repository->index->cache[pos];
-	if (ce && ce_skip_worktree(ce)) {
+	ce = pos < 0 ? ശൂന്യ : the_repository->index->cache[pos];
+	എങ്കിൽ (ce && ce_skip_worktree(ce)) {
 		/*
 		 * working directory version is assumed "good"
 		 * so updating it does not make sense.
 		 * On the other hand, removing it from index should work
 		 */
-		if (!ignore_skip_worktree_entries && allow_remove &&
+		എങ്കിൽ (!ignore_skip_worktree_entries && allow_remove &&
 		    remove_file_from_index(the_repository->index, path))
-			return error("%s: cannot remove from the index", path);
-		return 0;
+			തിരികെ error("%s: cannot remove from the index", path);
+		തിരികെ 0;
 	}
 
 	/*
 	 * First things first: get the stat information, to decide
 	 * what to do about the pathname!
 	 */
-	if (stat_errno)
-		return process_lstat_error(path, stat_errno);
+	എങ്കിൽ (stat_errno)
+		തിരികെ process_lstat_error(path, stat_errno);
 
-	if (S_ISDIR(st->st_mode))
-		return process_directory(path, len, st);
+	എങ്കിൽ (S_ISDIR(st->st_mode))
+		തിരികെ process_directory(path, len, st);
 
-	return add_one_path(ce, path, len, st);
+	തിരികെ add_one_path(ce, path, len, st);
 }
 
-static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
-			 const char *path, int stage)
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_cacheinfo(unsigned പൂർണ്ണസംഖ്യ mode, സ്ഥിരം ഘടന object_id *oid,
+			 സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ stage)
 {
-	int len, option;
-	struct cache_entry *ce;
+	പൂർണ്ണസംഖ്യ len, option;
+	ഘടന cache_entry *ce;
 
-	if (!verify_path(path, mode))
-		return error("Invalid path '%s'", path);
+	എങ്കിൽ (!verify_path(path, mode))
+		തിരികെ error("Invalid path '%s'", path);
 
 	len = strlen(path);
 	ce = make_empty_cache_entry(the_repository->index, len);
@@ -431,94 +431,94 @@ static int add_cacheinfo(unsigned int mode, const struct object_id *oid,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = len;
 	ce->ce_mode = create_ce_mode(mode);
-	if (assume_unchanged)
+	എങ്കിൽ (assume_unchanged)
 		ce->ce_flags |= CE_VALID;
 	option = allow_add ? ADD_CACHE_OK_TO_ADD : 0;
 	option |= allow_replace ? ADD_CACHE_OK_TO_REPLACE : 0;
-	if (add_index_entry(the_repository->index, ce, option))
-		return error("%s: cannot add to the index - missing --add option?",
+	എങ്കിൽ (add_index_entry(the_repository->index, ce, option))
+		തിരികെ error("%s: cannot add to the index - missing --add option?",
 			     path);
 	report("add '%s'", path);
-	return 0;
+	തിരികെ 0;
 }
 
-static void chmod_path(char flip, const char *path)
+സ്ഥിതം ശൂന്യം chmod_path(അക്ഷരം flip, സ്ഥിരം അക്ഷരം *path)
 {
-	int pos;
-	struct cache_entry *ce;
+	പൂർണ്ണസംഖ്യ pos;
+	ഘടന cache_entry *ce;
 
 	pos = index_name_pos(the_repository->index, path, strlen(path));
-	if (pos < 0)
-		goto fail;
+	എങ്കിൽ (pos < 0)
+		പോകുക fail;
 	ce = the_repository->index->cache[pos];
-	if (chmod_index_entry(the_repository->index, ce, flip) < 0)
-		goto fail;
+	എങ്കിൽ (chmod_index_entry(the_repository->index, ce, flip) < 0)
+		പോകുക fail;
 
 	report("chmod %cx '%s'", flip, path);
-	return;
+	തിരികെ;
  fail:
 	die("git update-index: cannot chmod %cx '%s'", flip, path);
 }
 
-static void update_one(const char *path)
+സ്ഥിതം ശൂന്യം update_one(സ്ഥിരം അക്ഷരം *path)
 {
-	int stat_errno = 0;
-	struct stat st;
+	പൂർണ്ണസംഖ്യ stat_errno = 0;
+	ഘടന stat st;
 
-	if (mark_valid_only || mark_skip_worktree_only || force_remove ||
+	എങ്കിൽ (mark_valid_only || mark_skip_worktree_only || force_remove ||
 	    mark_fsmonitor_only)
 		st.st_mode = 0;
-	else if (lstat(path, &st) < 0) {
+	അല്ലെങ്കിൽ എങ്കിൽ (lstat(path, &st) < 0) {
 		st.st_mode = 0;
 		stat_errno = errno;
 	} /* else stat is valid */
 
-	if (!verify_path(path, st.st_mode)) {
+	എങ്കിൽ (!verify_path(path, st.st_mode)) {
 		fprintf(stderr, "Ignoring path %s\n", path);
-		return;
+		തിരികെ;
 	}
-	if (mark_valid_only) {
-		if (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
+	എങ്കിൽ (mark_valid_only) {
+		എങ്കിൽ (mark_ce_flags(path, CE_VALID, mark_valid_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		തിരികെ;
 	}
-	if (mark_skip_worktree_only) {
-		if (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
+	എങ്കിൽ (mark_skip_worktree_only) {
+		എങ്കിൽ (mark_ce_flags(path, CE_SKIP_WORKTREE, mark_skip_worktree_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		തിരികെ;
 	}
-	if (mark_fsmonitor_only) {
-		if (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
+	എങ്കിൽ (mark_fsmonitor_only) {
+		എങ്കിൽ (mark_ce_flags(path, CE_FSMONITOR_VALID, mark_fsmonitor_only == MARK_FLAG))
 			die("Unable to mark file %s", path);
-		return;
+		തിരികെ;
 	}
 
-	if (force_remove) {
-		if (remove_file_from_index(the_repository->index, path))
+	എങ്കിൽ (force_remove) {
+		എങ്കിൽ (remove_file_from_index(the_repository->index, path))
 			die("git update-index: unable to remove %s", path);
 		report("remove '%s'", path);
-		return;
+		തിരികെ;
 	}
-	if (process_path(path, &st, stat_errno))
+	എങ്കിൽ (process_path(path, &st, stat_errno))
 		die("Unable to process path %s", path);
 	report("add '%s'", path);
 }
 
-static void read_index_info(int nul_term_line)
+സ്ഥിതം ശൂന്യം read_index_info(പൂർണ്ണസംഖ്യ nul_term_വരി)
 {
-	const int hexsz = the_hash_algo->hexsz;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf uq = STRBUF_INIT;
+	സ്ഥിരം പൂർണ്ണസംഖ്യ hexsz = the_hash_algo->hexsz;
+	ഘടന strbuf buf = STRBUF_INIT;
+	ഘടന strbuf uq = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		char *ptr, *tab;
-		char *path_name;
-		struct object_id oid;
-		unsigned int mode;
+	getline_fn = nul_term_വരി ? strbuf_getline_nul : strbuf_getline_lf;
+	ആകുമ്പോൾ (getline_fn(&buf, stdin) != EOF) {
+		അക്ഷരം *ptr, *tab;
+		അക്ഷരം *path_name;
+		ഘടന object_id oid;
+		unsigned പൂർണ്ണസംഖ്യ mode;
 		unsigned long ul;
-		int stage;
+		പൂർണ്ണസംഖ്യ stage;
 
 		/* This reads lines formatted in one of three formats:
 		 *
@@ -538,90 +538,90 @@ static void read_index_info(int nul_term_line)
 		 */
 		errno = 0;
 		ul = strtoul(buf.buf, &ptr, 8);
-		if (ptr == buf.buf || *ptr != ' '
-		    || errno || (unsigned int) ul != ul)
-			goto bad_line;
+		എങ്കിൽ (ptr == buf.buf || *ptr != ' '
+		    || errno || (unsigned പൂർണ്ണസംഖ്യ) ul != ul)
+			പോകുക bad_വരി;
 		mode = ul;
 
 		tab = strchr(ptr, '\t');
-		if (!tab || tab - ptr < hexsz + 1)
-			goto bad_line;
+		എങ്കിൽ (!tab || tab - ptr < hexsz + 1)
+			പോകുക bad_വരി;
 
-		if (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
+		എങ്കിൽ (tab[-2] == ' ' && '0' <= tab[-1] && tab[-1] <= '3') {
 			stage = tab[-1] - '0';
 			ptr = tab + 1; /* point at the head of path */
 			tab = tab - 2; /* point at tail of sha1 */
 		}
-		else {
+		അല്ലെങ്കിൽ {
 			stage = 0;
 			ptr = tab + 1; /* point at the head of path */
 		}
 
-		if (get_oid_hex(tab - hexsz, &oid) ||
+		എങ്കിൽ (get_oid_hex(tab - hexsz, &oid) ||
 			tab[-(hexsz + 1)] != ' ')
-			goto bad_line;
+			പോകുക bad_വരി;
 
 		path_name = ptr;
-		if (!nul_term_line && path_name[0] == '"') {
+		എങ്കിൽ (!nul_term_വരി && path_name[0] == '"') {
 			strbuf_reset(&uq);
-			if (unquote_c_style(&uq, path_name, NULL)) {
+			എങ്കിൽ (unquote_c_style(&uq, path_name, ശൂന്യ)) {
 				die("git update-index: bad quoting of path name");
 			}
 			path_name = uq.buf;
 		}
 
-		if (!verify_path(path_name, mode)) {
+		എങ്കിൽ (!verify_path(path_name, mode)) {
 			fprintf(stderr, "Ignoring path %s\n", path_name);
-			continue;
+			തുടരുക;
 		}
 
-		if (!mode) {
+		എങ്കിൽ (!mode) {
 			/* mode == 0 means there is no such path -- remove */
-			if (remove_file_from_index(the_repository->index, path_name))
+			എങ്കിൽ (remove_file_from_index(the_repository->index, path_name))
 				die("git update-index: unable to remove %s",
 				    ptr);
 		}
-		else {
+		അല്ലെങ്കിൽ {
 			/* mode ' ' sha1 '\t' name
 			 * ptr[-1] points at tab,
 			 * ptr[-41] is at the beginning of sha1
 			 */
 			ptr[-(hexsz + 2)] = ptr[-1] = 0;
-			if (add_cacheinfo(mode, &oid, path_name, stage))
+			എങ്കിൽ (add_cacheinfo(mode, &oid, path_name, stage))
 				die("git update-index: unable to update %s",
 				    path_name);
 		}
-		continue;
+		തുടരുക;
 
-	bad_line:
+	bad_വരി:
 		die("malformed index info %s", buf.buf);
 	}
 	strbuf_release(&buf);
 	strbuf_release(&uq);
 }
 
-static const char * const update_index_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം update_index_usage[] = {
 	N_("git update-index [<options>] [--] [<file>...]"),
-	NULL
+	ശൂന്യ
 };
 
-static struct cache_entry *read_one_ent(const char *which,
-					struct object_id *ent, const char *path,
-					int namelen, int stage)
+സ്ഥിതം ഘടന cache_entry *read_one_ent(സ്ഥിരം അക്ഷരം *which,
+					ഘടന object_id *ent, സ്ഥിരം അക്ഷരം *path,
+					പൂർണ്ണസംഖ്യ namelen, പൂർണ്ണസംഖ്യ stage)
 {
 	unsigned short mode;
-	struct object_id oid;
-	struct cache_entry *ce;
+	ഘടന object_id oid;
+	ഘടന cache_entry *ce;
 
-	if (get_tree_entry(the_repository, ent, path, &oid, &mode)) {
-		if (which)
+	എങ്കിൽ (get_വൃക്ഷം_entry(the_repository, ent, path, &oid, &mode)) {
+		എങ്കിൽ (which)
 			error("%s: not in %s branch.", path, which);
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
-	if (!the_repository->index->sparse_index && mode == S_IFDIR) {
-		if (which)
+	എങ്കിൽ (!the_repository->index->sparse_index && mode == S_IFDIR) {
+		എങ്കിൽ (which)
 			error("%s: not a blob in %s branch.", path, which);
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 	ce = make_empty_cache_entry(the_repository->index, namelen);
 
@@ -630,84 +630,84 @@ static struct cache_entry *read_one_ent(const char *which,
 	ce->ce_flags = create_ce_flags(stage);
 	ce->ce_namelen = namelen;
 	ce->ce_mode = create_ce_mode(mode);
-	return ce;
+	തിരികെ ce;
 }
 
-static int unresolve_one(const char *path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ unresolve_one(സ്ഥിരം അക്ഷരം *path)
 {
-	struct string_list_item *item;
-	int res = 0;
+	ഘടന string_list_item *item;
+	പൂർണ്ണസംഖ്യ res = 0;
 
-	if (!the_repository->index->resolve_undo)
-		return res;
+	എങ്കിൽ (!the_repository->index->resolve_undo)
+		തിരികെ res;
 	item = string_list_lookup(the_repository->index->resolve_undo, path);
-	if (!item)
-		return res; /* no resolve-undo record for the path */
+	എങ്കിൽ (!item)
+		തിരികെ res; /* no resolve-undo record for the path */
 	res = unmerge_index_entry(the_repository->index, path, item->util, 0);
 	FREE_AND_NULL(item->util);
-	return res;
+	തിരികെ res;
 }
 
-static int do_unresolve(int ac, const char **av,
-			const char *prefix, int prefix_length)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_unresolve(പൂർണ്ണസംഖ്യ ac, സ്ഥിരം അക്ഷരം **av,
+			സ്ഥിരം അക്ഷരം *prefix, പൂർണ്ണസംഖ്യ prefix_length)
 {
-	int i;
-	int err = 0;
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ err = 0;
 
-	for (i = 1; i < ac; i++) {
-		const char *arg = av[i];
-		char *p = prefix_path(the_repository, prefix, prefix_length, arg);
+	വേണ്ടി (i = 1; i < ac; i++) {
+		സ്ഥിരം അക്ഷരം *arg = av[i];
+		അക്ഷരം *p = prefix_path(the_repository, prefix, prefix_length, arg);
 		err |= unresolve_one(p);
-		free(p);
+		സ്വതന്ത്രം(p);
 	}
-	return err;
+	തിരികെ err;
 }
 
-static int do_reupdate(const char **paths,
-		       const char *prefix)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_reupdate(സ്ഥിരം അക്ഷരം **paths,
+		       സ്ഥിരം അക്ഷരം *prefix)
 {
 	/* Read HEAD and run update-index on paths that are
 	 * merged and already different between index and HEAD.
 	 */
-	int pos;
-	int has_head = 1;
-	struct pathspec pathspec;
-	struct object_id head_oid;
+	പൂർണ്ണസംഖ്യ pos;
+	പൂർണ്ണസംഖ്യ has_head = 1;
+	ഘടന pathspec pathspec;
+	ഘടന object_id head_oid;
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
 		       prefix, paths);
 
-	if (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
+	എങ്കിൽ (refs_read_ref(get_main_ref_store(the_repository), "HEAD", &head_oid))
 		/* If there is no HEAD, that means it is an initial
 		 * commit.  Update everything in the index.
 		 */
 		has_head = 0;
  redo:
-	for (pos = 0; pos < the_repository->index->cache_nr; pos++) {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		struct cache_entry *old = NULL;
-		int save_nr;
-		char *path;
+	വേണ്ടി (pos = 0; pos < the_repository->index->cache_nr; pos++) {
+		സ്ഥിരം ഘടന cache_entry *ce = the_repository->index->cache[pos];
+		ഘടന cache_entry *old = ശൂന്യ;
+		പൂർണ്ണസംഖ്യ save_nr;
+		അക്ഷരം *path;
 
-		if (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, NULL))
-			continue;
-		if (has_head)
-			old = read_one_ent(NULL, &head_oid,
+		എങ്കിൽ (ce_stage(ce) || !ce_path_match(the_repository->index, ce, &pathspec, ശൂന്യ))
+			തുടരുക;
+		എങ്കിൽ (has_head)
+			old = read_one_ent(ശൂന്യ, &head_oid,
 					   ce->name, ce_namelen(ce), 0);
-		if (old && ce->ce_mode == old->ce_mode &&
+		എങ്കിൽ (old && ce->ce_mode == old->ce_mode &&
 		    oideq(&ce->oid, &old->oid)) {
 			discard_cache_entry(old);
-			continue; /* unchanged */
+			തുടരുക; /* unchanged */
 		}
 
 		/* At this point, we know the contents of the sparse directory are
 		 * modified with respect to HEAD, so we expand the index and restart
 		 * to process each path individually
 		 */
-		if (S_ISSPARSEDIR(ce->ce_mode)) {
+		എങ്കിൽ (S_ISSPARSEDIR(ce->ce_mode)) {
 			ensure_full_index(the_repository->index);
-			goto redo;
+			പോകുക redo;
 		}
 
 		/* Be careful.  The working tree may not have the
@@ -717,27 +717,27 @@ static int do_reupdate(const char **paths,
 		save_nr = the_repository->index->cache_nr;
 		path = xstrdup(ce->name);
 		update_one(path);
-		free(path);
+		സ്വതന്ത്രം(path);
 		discard_cache_entry(old);
-		if (save_nr != the_repository->index->cache_nr)
-			goto redo;
+		എങ്കിൽ (save_nr != the_repository->index->cache_nr)
+			പോകുക redo;
 	}
 	clear_pathspec(&pathspec);
-	return 0;
+	തിരികെ 0;
 }
 
-struct refresh_params {
-	unsigned int flags;
-	int *has_errors;
+ഘടന refresh_params {
+	unsigned പൂർണ്ണസംഖ്യ flags;
+	പൂർണ്ണസംഖ്യ *has_errors;
 };
 
-static int refresh(struct refresh_params *o, unsigned int flag)
+സ്ഥിതം പൂർണ്ണസംഖ്യ refresh(ഘടന refresh_params *o, unsigned പൂർണ്ണസംഖ്യ flag)
 {
-	setup_work_tree(the_repository);
+	setup_work_വൃക്ഷം(the_repository);
 	repo_read_index(the_repository);
-	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, NULL,
-					NULL, NULL);
-	if (has_racy_timestamp(the_repository->index)) {
+	*o->has_errors |= refresh_index(the_repository->index, o->flags | flag, ശൂന്യ,
+					ശൂന്യ, ശൂന്യ);
+	എങ്കിൽ (has_racy_timestamp(the_repository->index)) {
 		/*
 		 * Even if nothing else has changed, updating the file
 		 * increases the chance that racy timestamps become
@@ -748,134 +748,134 @@ static int refresh(struct refresh_params *o, unsigned int flag)
 		 */
 		the_repository->index->cache_changed |= SOMETHING_CHANGED;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static int refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ refresh_callback(സ്ഥിരം ഘടന option *opt,
+				സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, 0);
+	തിരികെ refresh(opt->മൂല്യം, 0);
 }
 
-static int really_refresh_callback(const struct option *opt,
-				const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ really_refresh_callback(സ്ഥിരം ഘടന option *opt,
+				സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
-	return refresh(opt->value, REFRESH_REALLY);
+	തിരികെ refresh(opt->മൂല്യം, REFRESH_REALLY);
 }
 
-static int chmod_callback(const struct option *opt,
-				const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ chmod_callback(സ്ഥിരം ഘടന option *opt,
+				സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	char *flip = opt->value;
+	അക്ഷരം *flip = opt->മൂല്യം;
 	BUG_ON_OPT_NEG(unset);
-	if ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
-		return error("option 'chmod' expects \"+x\" or \"-x\"");
+	എങ്കിൽ ((arg[0] != '-' && arg[0] != '+') || arg[1] != 'x' || arg[2])
+		തിരികെ error("option 'chmod' expects \"+x\" or \"-x\"");
 	*flip = arg[0];
-	return 0;
+	തിരികെ 0;
 }
 
-static int resolve_undo_clear_callback(const struct option *opt UNUSED,
-				const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ resolve_undo_clear_callback(സ്ഥിരം ഘടന option *opt UNUSED,
+				സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 	resolve_undo_clear_index(the_repository->index);
-	return 0;
+	തിരികെ 0;
 }
 
-static int parse_new_style_cacheinfo(const char *arg,
-				     unsigned int *mode,
-				     struct object_id *oid,
-				     const char **path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_new_style_cacheinfo(സ്ഥിരം അക്ഷരം *arg,
+				     unsigned പൂർണ്ണസംഖ്യ *mode,
+				     ഘടന object_id *oid,
+				     സ്ഥിരം അക്ഷരം **path)
 {
 	unsigned long ul;
-	char *endp;
-	const char *p;
+	അക്ഷരം *endp;
+	സ്ഥിരം അക്ഷരം *p;
 
-	if (!arg)
-		return -1;
+	എങ്കിൽ (!arg)
+		തിരികെ -1;
 
 	errno = 0;
 	ul = strtoul(arg, &endp, 8);
-	if (errno || endp == arg || *endp != ',' || (unsigned int) ul != ul)
-		return -1; /* not a new-style cacheinfo */
+	എങ്കിൽ (errno || endp == arg || *endp != ',' || (unsigned പൂർണ്ണസംഖ്യ) ul != ul)
+		തിരികെ -1; /* not a new-style cacheinfo */
 	*mode = ul;
 	endp++;
-	if (parse_oid_hex(endp, oid, &p) || *p != ',')
-		return -1;
+	എങ്കിൽ (parse_oid_hex(endp, oid, &p) || *p != ',')
+		തിരികെ -1;
 	*path = p + 1;
-	return 0;
+	തിരികെ 0;
 }
 
-static enum parse_opt_result cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt UNUSED,
-	const char *arg, int unset)
+സ്ഥിതം എണ്ണൽ parse_opt_result cacheinfo_callback(
+	ഘടന parse_opt_ctx_t *ctx, സ്ഥിരം ഘടന option *opt UNUSED,
+	സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	struct object_id oid;
-	unsigned int mode;
-	const char *path;
+	ഘടന object_id oid;
+	unsigned പൂർണ്ണസംഖ്യ mode;
+	സ്ഥിരം അക്ഷരം *path;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
-		if (add_cacheinfo(mode, &oid, path, 0))
+	എങ്കിൽ (!parse_new_style_cacheinfo(ctx->argv[1], &mode, &oid, &path)) {
+		എങ്കിൽ (add_cacheinfo(mode, &oid, path, 0))
 			die("git update-index: --cacheinfo cannot add %s", path);
 		ctx->argv++;
 		ctx->argc--;
-		return 0;
+		തിരികെ 0;
 	}
-	if (ctx->argc <= 3)
-		return error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
-	if (strtoul_ui(*++ctx->argv, 8, &mode) ||
+	എങ്കിൽ (ctx->argc <= 3)
+		തിരികെ error("option 'cacheinfo' expects <mode>,<sha1>,<path>");
+	എങ്കിൽ (strtoul_ui(*++ctx->argv, 8, &mode) ||
 	    get_oid_hex(*++ctx->argv, &oid) ||
 	    add_cacheinfo(mode, &oid, *++ctx->argv, 0))
 		die("git update-index: --cacheinfo cannot add %s", *ctx->argv);
 	ctx->argc -= 3;
-	return 0;
+	തിരികെ 0;
 }
 
-static enum parse_opt_result stdin_cacheinfo_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+സ്ഥിതം എണ്ണൽ parse_opt_result stdin_cacheinfo_callback(
+	ഘടന parse_opt_ctx_t *ctx, സ്ഥിരം ഘടന option *opt,
+	സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	int *nul_term_line = opt->value;
+	പൂർണ്ണസംഖ്യ *nul_term_വരി = opt->മൂല്യം;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	എങ്കിൽ (ctx->argc != 1)
+		തിരികെ error("option '%s' must be the last argument", opt->long_name);
 	allow_add = allow_replace = allow_remove = 1;
-	read_index_info(*nul_term_line);
-	return 0;
+	read_index_info(*nul_term_വരി);
+	തിരികെ 0;
 }
 
-static enum parse_opt_result stdin_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+സ്ഥിതം എണ്ണൽ parse_opt_result stdin_callback(
+	ഘടന parse_opt_ctx_t *ctx, സ്ഥിരം ഘടന option *opt,
+	സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	int *read_from_stdin = opt->value;
+	പൂർണ്ണസംഖ്യ *read_from_stdin = opt->മൂല്യം;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
-	if (ctx->argc != 1)
-		return error("option '%s' must be the last argument", opt->long_name);
+	എങ്കിൽ (ctx->argc != 1)
+		തിരികെ error("option '%s' must be the last argument", opt->long_name);
 	*read_from_stdin = 1;
-	return 0;
+	തിരികെ 0;
 }
 
-static enum parse_opt_result unresolve_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+സ്ഥിതം എണ്ണൽ parse_opt_result unresolve_callback(
+	ഘടന parse_opt_ctx_t *ctx, സ്ഥിരം ഘടന option *opt,
+	സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	പൂർണ്ണസംഖ്യ *has_errors = opt->മൂല്യം;
+	സ്ഥിരം അക്ഷരം *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
@@ -883,59 +883,59 @@ static enum parse_opt_result unresolve_callback(
 	/* consume remaining arguments. */
 	*has_errors = do_unresolve(ctx->argc, ctx->argv,
 				prefix, prefix ? strlen(prefix) : 0);
-	if (*has_errors)
+	എങ്കിൽ (*has_errors)
 		the_repository->index->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	തിരികെ 0;
 }
 
-static enum parse_opt_result reupdate_callback(
-	struct parse_opt_ctx_t *ctx, const struct option *opt,
-	const char *arg, int unset)
+സ്ഥിതം എണ്ണൽ parse_opt_result reupdate_callback(
+	ഘടന parse_opt_ctx_t *ctx, സ്ഥിരം ഘടന option *opt,
+	സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	int *has_errors = opt->value;
-	const char *prefix = the_repository->prefix;
+	പൂർണ്ണസംഖ്യ *has_errors = opt->മൂല്യം;
+	സ്ഥിരം അക്ഷരം *prefix = the_repository->prefix;
 
 	BUG_ON_OPT_NEG(unset);
 	BUG_ON_OPT_ARG(arg);
 
 	/* consume remaining arguments. */
-	setup_work_tree(the_repository);
+	setup_work_വൃക്ഷം(the_repository);
 	*has_errors = do_reupdate(ctx->argv + 1, prefix);
-	if (*has_errors)
+	എങ്കിൽ (*has_errors)
 		the_repository->index->cache_changed = 0;
 
 	ctx->argv += ctx->argc - 1;
 	ctx->argc = 1;
-	return 0;
+	തിരികെ 0;
 }
 
-int cmd_update_index(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_update_index(പൂർണ്ണസംഖ്യ argc,
+		     സ്ഥിരം അക്ഷരം **argv,
+		     സ്ഥിരം അക്ഷരം *prefix,
+		     ഘടന repository *repo UNUSED)
 {
-	int newfd, entries, has_errors = 0, nul_term_line = 0;
-	enum uc_mode untracked_cache = UC_UNSPECIFIED;
-	int read_from_stdin = 0;
-	int prefix_length = prefix ? strlen(prefix) : 0;
-	int preferred_index_format = 0;
-	char set_executable_bit = 0;
-	struct refresh_params refresh_args = {0, &has_errors};
-	int lock_error = 0;
-	int split_index = -1;
-	int force_write = 0;
-	int fsmonitor = -1;
-	struct lock_file lock_file = LOCK_INIT;
-	struct parse_opt_ctx_t ctx;
+	പൂർണ്ണസംഖ്യ newfd, entries, has_errors = 0, nul_term_വരി = 0;
+	എണ്ണൽ uc_mode untracked_cache = UC_UNSPECIFIED;
+	പൂർണ്ണസംഖ്യ read_from_stdin = 0;
+	പൂർണ്ണസംഖ്യ prefix_length = prefix ? strlen(prefix) : 0;
+	പൂർണ്ണസംഖ്യ preferred_index_format = 0;
+	അക്ഷരം set_executable_bit = 0;
+	ഘടന refresh_params refresh_args = {0, &has_errors};
+	പൂർണ്ണസംഖ്യ lock_error = 0;
+	പൂർണ്ണസംഖ്യ split_index = -1;
+	പൂർണ്ണസംഖ്യ force_write = 0;
+	പൂർണ്ണസംഖ്യ fsmonitor = -1;
+	ഘടന lock_file lock_file = LOCK_INIT;
+	ഘടന parse_opt_ctx_t ctx;
 	strbuf_getline_fn getline_fn;
-	int parseopt_state = PARSE_OPT_UNKNOWN;
-	struct repository *r = the_repository;
-	struct odb_transaction *transaction;
-	struct option options[] = {
-		OPT_BIT('q', NULL, &refresh_args.flags,
+	പൂർണ്ണസംഖ്യ parseopt_state = PARSE_OPT_UNKNOWN;
+	ഘടന repository *r = the_repository;
+	ഘടന odb_transaction *transaction;
+	ഘടന option options[] = {
+		OPT_BIT('q', ശൂന്യ, &refresh_args.flags,
 			N_("continue refresh even when index needs update"),
 			REFRESH_QUIET),
 		OPT_BIT(0, "ignore-submodules", &refresh_args.flags,
@@ -950,11 +950,11 @@ int cmd_update_index(int argc,
 		OPT_BIT(0, "unmerged", &refresh_args.flags,
 			N_("refresh even if index contains unmerged entries"),
 			REFRESH_UNMERGED),
-		OPT_CALLBACK_F(0, "refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "refresh", &refresh_args, ശൂന്യ,
 			N_("refresh stat information"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			refresh_callback),
-		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, NULL,
+		OPT_CALLBACK_F(0, "really-refresh", &refresh_args, ശൂന്യ,
 			N_("like --refresh, but ignore assume-unchanged setting"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			really_refresh_callback),
@@ -974,8 +974,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "assume-unchanged",
-			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.മൂല്യം = &mark_valid_only,
+			.precision = വലുപ്പം(mark_valid_only),
 			.help = N_("mark files as \"not changing\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -983,8 +983,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-assume-unchanged",
-			.value = &mark_valid_only,
-			.precision = sizeof(mark_valid_only),
+			.മൂല്യം = &mark_valid_only,
+			.precision = വലുപ്പം(mark_valid_only),
 			.help = N_("clear assumed-unchanged bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -992,8 +992,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "skip-worktree",
-			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.മൂല്യം = &mark_skip_worktree_only,
+			.precision = വലുപ്പം(mark_skip_worktree_only),
 			.help = N_("mark files as \"index-only\""),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -1001,8 +1001,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-skip-worktree",
-			.value = &mark_skip_worktree_only,
-			.precision = sizeof(mark_skip_worktree_only),
+			.മൂല്യം = &mark_skip_worktree_only,
+			.precision = വലുപ്പം(mark_skip_worktree_only),
 			.help = N_("clear skip-worktree bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -1013,12 +1013,12 @@ int cmd_update_index(int argc,
 			N_("add to index only; do not add content to object database"), 1),
 		OPT_SET_INT(0, "force-remove", &force_remove,
 			N_("remove named paths even if present in worktree"), 1),
-		OPT_BOOL('z', NULL, &nul_term_line,
+		OPT_BOOL('z', ശൂന്യ, &nul_term_വരി,
 			 N_("with --stdin: input lines are terminated by null bytes")),
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "stdin",
-			.value = &read_from_stdin,
+			.മൂല്യം = &read_from_stdin,
 			.help = N_("read list of paths to be updated from standard input"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_callback,
@@ -1026,7 +1026,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "index-info",
-			.value = &nul_term_line,
+			.മൂല്യം = &nul_term_വരി,
 			.help = N_("add entries from standard input to the index"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = stdin_cacheinfo_callback,
@@ -1034,7 +1034,7 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.long_name = "unresolve",
-			.value = &has_errors,
+			.മൂല്യം = &has_errors,
 			.help = N_("repopulate stages #2 and #3 for the listed paths"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = unresolve_callback,
@@ -1043,7 +1043,7 @@ int cmd_update_index(int argc,
 			.type = OPTION_LOWLEVEL_CALLBACK,
 			.short_name = 'g',
 			.long_name = "again",
-			.value = &has_errors,
+			.മൂല്യം = &has_errors,
 			.help = N_("only update entries that differ from HEAD"),
 			.flags = PARSE_OPT_NONEG | PARSE_OPT_NOARG,
 			.ll_callback = reupdate_callback,
@@ -1053,7 +1053,7 @@ int cmd_update_index(int argc,
 			REFRESH_IGNORE_MISSING),
 		OPT_SET_INT(0, "verbose", &verbose,
 			N_("report actions to standard output"), 1),
-		OPT_CALLBACK_F(0, "clear-resolve-undo", NULL, NULL,
+		OPT_CALLBACK_F(0, "clear-resolve-undo", ശൂന്യ, ശൂന്യ,
 			N_("(for porcelains) forget saved unresolved conflicts"),
 			PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			resolve_undo_clear_callback),
@@ -1076,8 +1076,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.മൂല്യം = &mark_fsmonitor_only,
+			.precision = വലുപ്പം(mark_fsmonitor_only),
 			.help = N_("mark files as fsmonitor valid"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = MARK_FLAG,
@@ -1085,8 +1085,8 @@ int cmd_update_index(int argc,
 		{
 			.type = OPTION_SET_INT,
 			.long_name = "no-fsmonitor-valid",
-			.value = &mark_fsmonitor_only,
-			.precision = sizeof(mark_fsmonitor_only),
+			.മൂല്യം = &mark_fsmonitor_only,
+			.precision = വലുപ്പം(mark_fsmonitor_only),
 			.help = N_("clear fsmonitor valid bit"),
 			.flags = PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			.defval = UNMARK_FLAG,
@@ -1097,18 +1097,18 @@ int cmd_update_index(int argc,
 	show_usage_with_options_if_asked(argc, argv,
 					 update_index_usage, options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
 	prepare_repo_settings(r);
 	the_repository->settings.command_requires_full_index = 0;
 
 	/* we will diagnose later if it turns out that we need to update it */
 	newfd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (newfd < 0)
+	എങ്കിൽ (newfd < 0)
 		lock_error = errno;
 
 	entries = repo_read_index(the_repository);
-	if (entries < 0)
+	എങ്കിൽ (entries < 0)
 		die("cache corrupted");
 
 	the_repository->index->updated_skipworktree = 1;
@@ -1125,25 +1125,25 @@ int cmd_update_index(int argc,
 	 * a batch.
 	 */
 	odb_transaction_begin_or_die(the_repository->objects, &transaction, 0);
-	while (ctx.argc) {
-		if (parseopt_state != PARSE_OPT_DONE)
+	ആകുമ്പോൾ (ctx.argc) {
+		എങ്കിൽ (parseopt_state != PARSE_OPT_DONE)
 			parseopt_state = parse_options_step(&ctx, options,
 							    update_index_usage);
-		if (!ctx.argc)
-			break;
-		switch (parseopt_state) {
-		case PARSE_OPT_HELP:
+		എങ്കിൽ (!ctx.argc)
+			നിർത്തുക;
+		തിരഞ്ഞെടുപ്പ് (parseopt_state) {
+		അവസ്ഥ PARSE_OPT_HELP:
 			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
+		അവസ്ഥ PARSE_OPT_HELP_ERROR:
+		അവസ്ഥ PARSE_OPT_ERROR:
 			exit(129);
-		case PARSE_OPT_COMPLETE:
+		അവസ്ഥ PARSE_OPT_COMPLETE:
 			exit(0);
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_DONE:
+		അവസ്ഥ PARSE_OPT_NON_OPTION:
+		അവസ്ഥ PARSE_OPT_DONE:
 		{
-			const char *path = ctx.argv[0];
-			char *p;
+			സ്ഥിരം അക്ഷരം *path = ctx.argv[0];
+			അക്ഷരം *p;
 
 			/*
 			 * It is possible, though unlikely, that a caller could
@@ -1155,42 +1155,42 @@ int cmd_update_index(int argc,
 			 * update. All further updates are performed outside of
 			 * a transaction.
 			 */
-			if (transaction && verbose) {
+			എങ്കിൽ (transaction && verbose) {
 				odb_transaction_commit_and_finalize_or_die(transaction);
-				transaction = NULL;
+				transaction = ശൂന്യ;
 			}
 
-			setup_work_tree(the_repository);
+			setup_work_വൃക്ഷം(the_repository);
 			p = prefix_path(the_repository, prefix, prefix_length, path);
 			update_one(p);
-			if (set_executable_bit)
+			എങ്കിൽ (set_executable_bit)
 				chmod_path(set_executable_bit, p);
-			free(p);
+			സ്വതന്ത്രം(p);
 			ctx.argc--;
 			ctx.argv++;
-			break;
+			നിർത്തുക;
 		}
-		case PARSE_OPT_UNKNOWN:
-			if (ctx.argv[0][1] == '-')
+		അവസ്ഥ PARSE_OPT_UNKNOWN:
+			എങ്കിൽ (ctx.argv[0][1] == '-')
 				error("unknown option '%s'", ctx.argv[0] + 2);
-			else
+			അല്ലെങ്കിൽ
 				error("unknown switch '%c'", *ctx.opt);
 			usage_with_options(update_index_usage, options);
 		}
 	}
 	argc = parse_options_end(&ctx);
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	if (preferred_index_format) {
-		if (preferred_index_format < 0) {
+	getline_fn = nul_term_വരി ? strbuf_getline_nul : strbuf_getline_lf;
+	എങ്കിൽ (preferred_index_format) {
+		എങ്കിൽ (preferred_index_format < 0) {
 			printf(_("%d\n"), the_repository->index->version);
-		} else if (preferred_index_format < INDEX_FORMAT_LB ||
+		} അല്ലെങ്കിൽ എങ്കിൽ (preferred_index_format < INDEX_FORMAT_LB ||
 			   INDEX_FORMAT_UB < preferred_index_format) {
 			die("index-version %d not in range: %d..%d",
 			    preferred_index_format,
 			    INDEX_FORMAT_LB, INDEX_FORMAT_UB);
-		} else {
-			if (the_repository->index->version != preferred_index_format)
+		} അല്ലെങ്കിൽ {
+			എങ്കിൽ (the_repository->index->version != preferred_index_format)
 				the_repository->index->cache_changed |= SOMETHING_CHANGED;
 			report(_("index-version: was %d, set to %d"),
 			       the_repository->index->version, preferred_index_format);
@@ -1198,24 +1198,24 @@ int cmd_update_index(int argc,
 		}
 	}
 
-	if (read_from_stdin) {
-		struct strbuf buf = STRBUF_INIT;
-		struct strbuf unquoted = STRBUF_INIT;
+	എങ്കിൽ (read_from_stdin) {
+		ഘടന strbuf buf = STRBUF_INIT;
+		ഘടന strbuf unquoted = STRBUF_INIT;
 
-		setup_work_tree(the_repository);
-		while (getline_fn(&buf, stdin) != EOF) {
-			char *p;
-			if (!nul_term_line && buf.buf[0] == '"') {
+		setup_work_വൃക്ഷം(the_repository);
+		ആകുമ്പോൾ (getline_fn(&buf, stdin) != EOF) {
+			അക്ഷരം *p;
+			എങ്കിൽ (!nul_term_വരി && buf.buf[0] == '"') {
 				strbuf_reset(&unquoted);
-				if (unquote_c_style(&unquoted, buf.buf, NULL))
+				എങ്കിൽ (unquote_c_style(&unquoted, buf.buf, ശൂന്യ))
 					die("line is badly quoted");
 				strbuf_swap(&buf, &unquoted);
 			}
 			p = prefix_path(the_repository, prefix, prefix_length, buf.buf);
 			update_one(p);
-			if (set_executable_bit)
+			എങ്കിൽ (set_executable_bit)
 				chmod_path(set_executable_bit, p);
-			free(p);
+			സ്വതന്ത്രം(p);
 		}
 		strbuf_release(&unquoted);
 		strbuf_release(&buf);
@@ -1226,17 +1226,17 @@ int cmd_update_index(int argc,
 	 */
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
-	if (split_index > 0) {
-		if (repo_config_get_split_index(the_repository) == 0)
+	എങ്കിൽ (split_index > 0) {
+		എങ്കിൽ (repo_config_get_split_index(the_repository) == 0)
 			warning(_("core.splitIndex is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable split index"));
-		if (the_repository->index->split_index)
+		എങ്കിൽ (the_repository->index->split_index)
 			the_repository->index->cache_changed |= SPLIT_INDEX_ORDERED;
-		else
+		അല്ലെങ്കിൽ
 			add_split_index(the_repository->index);
-	} else if (!split_index) {
-		if (repo_config_get_split_index(the_repository) == 1)
+	} അല്ലെങ്കിൽ എങ്കിൽ (!split_index) {
+		എങ്കിൽ (repo_config_get_split_index(the_repository) == 1)
 			warning(_("core.splitIndex is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable split index"));
@@ -1244,36 +1244,36 @@ int cmd_update_index(int argc,
 	}
 
 	prepare_repo_settings(r);
-	switch (untracked_cache) {
-	case UC_UNSPECIFIED:
-		break;
-	case UC_DISABLE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
+	തിരഞ്ഞെടുപ്പ് (untracked_cache) {
+	അവസ്ഥ UC_UNSPECIFIED:
+		നിർത്തുക;
+	അവസ്ഥ UC_DISABLE:
+		എങ്കിൽ (r->settings.core_untracked_cache == UNTRACKED_CACHE_WRITE)
 			warning(_("core.untrackedCache is set to true; "
 				  "remove or change it, if you really want to "
 				  "disable the untracked cache"));
 		remove_untracked_cache(the_repository->index);
 		report(_("Untracked cache disabled"));
-		break;
-	case UC_TEST:
-		setup_work_tree(the_repository);
-		return !test_if_untracked_cache_is_supported();
-	case UC_ENABLE:
-	case UC_FORCE:
-		if (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
+		നിർത്തുക;
+	അവസ്ഥ UC_TEST:
+		setup_work_വൃക്ഷം(the_repository);
+		തിരികെ !test_if_untracked_cache_is_supported();
+	അവസ്ഥ UC_ENABLE:
+	അവസ്ഥ UC_FORCE:
+		എങ്കിൽ (r->settings.core_untracked_cache == UNTRACKED_CACHE_REMOVE)
 			warning(_("core.untrackedCache is set to false; "
 				  "remove or change it, if you really want to "
 				  "enable the untracked cache"));
 		add_untracked_cache(the_repository->index);
-		report(_("Untracked cache enabled for '%s'"), repo_get_work_tree(the_repository));
-		break;
-	default:
+		report(_("Untracked cache enabled for '%s'"), repo_get_work_വൃക്ഷം(the_repository));
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		BUG("bad untracked_cache value: %d", untracked_cache);
 	}
 
-	if (fsmonitor > 0) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		enum fsmonitor_reason reason = fsm_settings__get_reason(r);
+	എങ്കിൽ (fsmonitor > 0) {
+		എണ്ണൽ fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
+		എണ്ണൽ fsmonitor_reason reason = fsm_settings__get_reason(r);
 
 		/*
 		 * The user wants to turn on FSMonitor using the command
@@ -1285,20 +1285,20 @@ int cmd_update_index(int argc,
 		 * whether the file system is compatible so that we can stop
 		 * here with a nice error message.
 		 */
-		if (reason > FSMONITOR_REASON_OK)
+		എങ്കിൽ (reason > FSMONITOR_REASON_OK)
 			die("%s",
-			    fsm_settings__get_incompatible_msg(r, reason));
+			    fsm_settings_get_incompatible_സന്ദേശം(r, reason));
 
-		if (fsm_mode == FSMONITOR_MODE_DISABLED) {
+		എങ്കിൽ (fsm_mode == FSMONITOR_MODE_DISABLED) {
 			warning(_("core.fsmonitor is unset; "
 				"set it if you really want to "
 				"enable fsmonitor"));
 		}
 		add_fsmonitor(the_repository->index);
 		report(_("fsmonitor enabled"));
-	} else if (!fsmonitor) {
-		enum fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
-		if (fsm_mode > FSMONITOR_MODE_DISABLED)
+	} അല്ലെങ്കിൽ എങ്കിൽ (!fsmonitor) {
+		എണ്ണൽ fsmonitor_mode fsm_mode = fsm_settings__get_mode(r);
+		എങ്കിൽ (fsm_mode > FSMONITOR_MODE_DISABLED)
 			warning(_("core.fsmonitor is set; "
 				"remove it if you really want to "
 				"disable fsmonitor"));
@@ -1306,17 +1306,17 @@ int cmd_update_index(int argc,
 		report(_("fsmonitor disabled"));
 	}
 
-	if (the_repository->index->cache_changed || force_write) {
-		if (newfd < 0) {
-			if (refresh_args.flags & REFRESH_QUIET)
+	എങ്കിൽ (the_repository->index->cache_changed || force_write) {
+		എങ്കിൽ (newfd < 0) {
+			എങ്കിൽ (refresh_args.flags & REFRESH_QUIET)
 				exit(128);
 			unable_to_lock_die(repo_get_index_file(the_repository), lock_error);
 		}
-		if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		എങ്കിൽ (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
 			die("Unable to write new index file");
 	}
 
 	rollback_lock_file(&lock_file);
 
-	return has_errors ? 1 : 0;
+	തിരികെ has_errors ? 1 : 0;
 }

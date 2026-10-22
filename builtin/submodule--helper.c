@@ -1,65 +1,65 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "abspath.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
 
-#include "config.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "path.h"
-#include "pathspec.h"
-#include "preload-index.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "string-list.h"
-#include "run-command.h"
-#include "remote.h"
-#include "refs.h"
-#include "refspec.h"
-#include "revision.h"
-#include "diffcore.h"
-#include "diff.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "odb/source-files.h"
-#include "advice.h"
-#include "branch.h"
-#include "list-objects-filter-options.h"
-#include "wildmatch.h"
-#include "strbuf.h"
-#include "url.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "pathspec.h"
+#അന്തര്ഭാവ "preload-index.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "read-cache.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "sparse-index.h"
+#അന്തര്ഭാവ "submodule.h"
+#അന്തര്ഭാവ "submodule-config.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "remote.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "refspec.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "diffcore.h"
+#അന്തര്ഭാവ "diff.h"
+#അന്തര്ഭാവ "object-file.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "odb/source.h"
+#അന്തര്ഭാവ "odb/source-files.h"
+#അന്തര്ഭാവ "advice.h"
+#അന്തര്ഭാവ "branch.h"
+#അന്തര്ഭാവ "list-objects-filter-options.h"
+#അന്തര്ഭാവ "wildmatch.h"
+#അന്തര്ഭാവ "strbuf.h"
+#അന്തര്ഭാവ "url.h"
 
 #define OPT_QUIET (1 << 0)
 #define OPT_CACHED (1 << 1)
 #define OPT_RECURSIVE (1 << 2)
 #define OPT_FORCE (1 << 3)
 
-typedef void (*each_submodule_fn)(const struct cache_entry *list_item,
-				  void *cb_data);
+തരനിർവചനം ശൂന്യം (*each_submodule_fn)(സ്ഥിരം ഘടന cache_entry *list_item,
+				  ശൂന്യം *cb_data);
 
-static char *get_default_remote(void)
+സ്ഥിതം അക്ഷരം *get_default_remote(ശൂന്യം)
 {
-	return xstrdup(repo_default_remote(the_repository));
+	തിരികെ xstrdup(repo_default_remote(the_repository));
 }
 
-static char *resolve_relative_url(const char *rel_url, const char *up_path, int quiet)
+സ്ഥിതം അക്ഷരം *resolve_relative_url(സ്ഥിരം അക്ഷരം *rel_url, സ്ഥിരം അക്ഷരം *up_path, പൂർണ്ണസംഖ്യ quiet)
 {
-	char *remoteurl, *resolved_url;
-	char *remote = get_default_remote();
-	struct strbuf remotesb = STRBUF_INIT;
+	അക്ഷരം *remoteurl, *resolved_url;
+	അക്ഷരം *remote = get_default_remote();
+	ഘടന strbuf remotesb = STRBUF_INIT;
 
 	strbuf_addf(&remotesb, "remote.%s.url", remote);
-	if (repo_config_get_string(the_repository, remotesb.buf, &remoteurl)) {
-		if (!quiet)
+	എങ്കിൽ (repo_config_get_string(the_repository, remotesb.buf, &remoteurl)) {
+		എങ്കിൽ (!quiet)
 			warning(_("could not look up configuration '%s'. "
 				  "Assuming this repository is its own "
 				  "authoritative upstream."),
@@ -68,191 +68,191 @@ static char *resolve_relative_url(const char *rel_url, const char *up_path, int 
 	}
 	resolved_url = relative_url(remoteurl, rel_url, up_path);
 
-	free(remote);
-	free(remoteurl);
+	സ്വതന്ത്രം(remote);
+	സ്വതന്ത്രം(remoteurl);
 	strbuf_release(&remotesb);
 
-	return resolved_url;
+	തിരികെ resolved_url;
 }
 
-static int get_default_remote_submodule(const char *module_path, char **default_remote)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_default_remote_submodule(സ്ഥിരം അക്ഷരം *module_path, അക്ഷരം **default_remote)
 {
-	const struct submodule *sub;
-	struct repository subrepo;
-	const char *remote_name = NULL;
-	char *url = NULL;
-	int ret = 0;
+	സ്ഥിരം ഘടന submodule *sub;
+	ഘടന repository subrepo;
+	സ്ഥിരം അക്ഷരം *remote_name = ശൂന്യ;
+	അക്ഷരം *url = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), module_path);
-	if (sub && sub->url) {
+	എങ്കിൽ (sub && sub->url) {
 		url = xstrdup(sub->url);
 
 		/* Possibly a url relative to parent */
-		if (starts_with_dot_dot_slash(url) ||
+		എങ്കിൽ (starts_with_dot_dot_slash(url) ||
 		    starts_with_dot_slash(url)) {
-			char *oldurl = url;
+			അക്ഷരം *oldurl = url;
 
-			url = resolve_relative_url(oldurl, NULL, 1);
-			free(oldurl);
+			url = resolve_relative_url(oldurl, ശൂന്യ, 1);
+			സ്വതന്ത്രം(oldurl);
 		}
 	}
 
-	if (repo_submodule_init(&subrepo, the_repository, module_path,
+	എങ്കിൽ (repo_submodule_init(&subrepo, the_repository, module_path,
 				null_oid(the_hash_algo)) < 0) {
 		ret = die_message(_("could not get a repository handle for submodule '%s'"),
 				   module_path);
-		goto out;
+		പോകുക out;
 	}
 
 	/* Look up by URL first */
-	if (url)
+	എങ്കിൽ (url)
 		remote_name = repo_remote_from_url(&subrepo, url);
-	if (!remote_name)
+	എങ്കിൽ (!remote_name)
 		remote_name = repo_default_remote(&subrepo);
 
 	*default_remote = xstrdup(remote_name);
 
 out:
 	repo_clear(&subrepo);
-	free(url);
+	സ്വതന്ത്രം(url);
 
-	return ret;
+	തിരികെ ret;
 }
 
-static int module_get_default_remote(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_get_default_remote(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+				     ഘടന repository *repo UNUSED)
 {
-	const char *path;
-	char *resolved_path = NULL;
-	char *default_remote = NULL;
-	int code;
-	struct option options[] = {
+	സ്ഥിരം അക്ഷരം *path;
+	അക്ഷരം *resolved_path = ശൂന്യ;
+	അക്ഷരം *default_remote = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ code;
+	ഘടന option options[] = {
 		OPT_END()
 	};
-	const char *const usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം usage[] = {
 		N_("git submodule--helper get-default-remote <path>"),
-		NULL
+		ശൂന്യ
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1)
+	എങ്കിൽ (argc != 1)
 		usage_with_options(usage, options);
 
 	path = argv[0];
-	if (prefix && *prefix && !is_absolute_path(path)) {
+	എങ്കിൽ (prefix && *prefix && !is_absolute_path(path)) {
 		resolved_path = xstrfmt("%s%s", prefix, path);
 		path = resolved_path;
 	}
 
 	code = get_default_remote_submodule(path, &default_remote);
-	if (code) {
-		free(resolved_path);
-		return code;
+	എങ്കിൽ (code) {
+		സ്വതന്ത്രം(resolved_path);
+		തിരികെ code;
 	}
 
 	printf("%s\n", default_remote);
-	free(default_remote);
-	free(resolved_path);
-	return 0;
+	സ്വതന്ത്രം(default_remote);
+	സ്വതന്ത്രം(resolved_path);
+	തിരികെ 0;
 }
 
 /* the result should be freed by the caller. */
-static char *get_submodule_displaypath(const char *path, const char *prefix,
-				       const char *super_prefix)
+സ്ഥിതം അക്ഷരം *get_submodule_displaypath(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *prefix,
+				       സ്ഥിരം അക്ഷരം *super_prefix)
 {
-	if (prefix && super_prefix) {
+	എങ്കിൽ (prefix && super_prefix) {
 		BUG("cannot have prefix '%s' and superprefix '%s'",
 		    prefix, super_prefix);
-	} else if (prefix) {
-		struct strbuf sb = STRBUF_INIT;
-		char *displaypath = xstrdup(relative_path(path, prefix, &sb));
+	} അല്ലെങ്കിൽ എങ്കിൽ (prefix) {
+		ഘടന strbuf sb = STRBUF_INIT;
+		അക്ഷരം *displaypath = xstrdup(relative_path(path, prefix, &sb));
 		strbuf_release(&sb);
-		return displaypath;
-	} else if (super_prefix) {
-		return xstrfmt("%s%s", super_prefix, path);
-	} else {
-		return xstrdup(path);
+		തിരികെ displaypath;
+	} അല്ലെങ്കിൽ എങ്കിൽ (super_prefix) {
+		തിരികെ xstrfmt("%s%s", super_prefix, path);
+	} അല്ലെങ്കിൽ {
+		തിരികെ xstrdup(path);
 	}
 }
 
-static char *compute_rev_name(const char *sub_path, const char* object_id)
+സ്ഥിതം അക്ഷരം *compute_rev_name(സ്ഥിരം അക്ഷരം *sub_path, സ്ഥിരം അക്ഷരം* object_id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char ***d;
+	ഘടന strbuf sb = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം ***d;
 
-	static const char *describe_bare[] = { NULL };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *describe_bare[] = { ശൂന്യ };
 
-	static const char *describe_tags[] = { "--tags", NULL };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *describe_tags[] = { "--tags", ശൂന്യ };
 
-	static const char *describe_contains[] = { "--contains", NULL };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *describe_contains[] = { "--contains", ശൂന്യ };
 
-	static const char *describe_all_always[] = { "--all", "--always", NULL };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *describe_all_always[] = { "--all", "--always", ശൂന്യ };
 
-	static const char **describe_argv[] = { describe_bare, describe_tags,
+	സ്ഥിതം സ്ഥിരം അക്ഷരം **describe_argv[] = { describe_bare, describe_tags,
 						describe_contains,
-						describe_all_always, NULL };
+						describe_all_always, ശൂന്യ };
 
-	for (d = describe_argv; *d; d++) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	വേണ്ടി (d = describe_argv; *d; d++) {
+		ഘടന child_process cp = CHILD_PROCESS_INIT;
 		prepare_submodule_repo_env(&cp.env);
 		cp.dir = sub_path;
 		cp.git_cmd = 1;
 		cp.no_stderr = 1;
 
-		strvec_push(&cp.args, "describe");
+		strvec_തള്ളുക(&cp.args, "describe");
 		strvec_pushv(&cp.args, *d);
-		strvec_push(&cp.args, object_id);
+		strvec_തള്ളുക(&cp.args, object_id);
 
-		if (!capture_command(&cp, &sb, 0)) {
+		എങ്കിൽ (!capture_command(&cp, &sb, 0)) {
 			strbuf_strip_suffix(&sb, "\n");
-			return strbuf_detach(&sb, NULL);
+			തിരികെ strbuf_detach(&sb, ശൂന്യ);
 		}
 	}
 
 	strbuf_release(&sb);
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-struct module_list {
-	const struct cache_entry **entries;
-	int alloc, nr;
+ഘടന module_list {
+	സ്ഥിരം ഘടന cache_entry **entries;
+	പൂർണ്ണസംഖ്യ alloc, nr;
 };
 #define MODULE_LIST_INIT { 0 }
 
-static void module_list_release(struct module_list *ml)
+സ്ഥിതം ശൂന്യം module_list_release(ഘടന module_list *ml)
 {
-	free(ml->entries);
+	സ്വതന്ത്രം(ml->entries);
 }
 
-static int module_list_compute(const char **argv,
-			       const char *prefix,
-			       struct pathspec *pathspec,
-			       struct module_list *list)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_list_compute(സ്ഥിരം അക്ഷരം **argv,
+			       സ്ഥിരം അക്ഷരം *prefix,
+			       ഘടന pathspec *pathspec,
+			       ഘടന module_list *list)
 {
-	int result = 0;
-	char *ps_matched = NULL;
+	പൂർണ്ണസംഖ്യ result = 0;
+	അക്ഷരം *ps_matched = ശൂന്യ;
 
 	parse_pathspec(pathspec, 0,
 		       PATHSPEC_PREFER_FULL,
 		       prefix, argv);
 
-	if (pathspec->nr)
+	എങ്കിൽ (pathspec->nr)
 		ps_matched = xcalloc(pathspec->nr, 1);
 
-	if (repo_read_index(the_repository) < 0)
+	എങ്കിൽ (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	for (size_t i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
+	വേണ്ടി (size_t i = 0; i < the_repository->index->cache_nr; i++) {
+		സ്ഥിരം ഘടന cache_entry *ce = the_repository->index->cache[i];
 
-		if (!match_pathspec(the_repository->index, pathspec, ce->name, ce_namelen(ce),
+		എങ്കിൽ (!match_pathspec(the_repository->index, pathspec, ce->name, ce_namelen(ce),
 				    0, ps_matched, 1) ||
 		    !S_ISGITLINK(ce->ce_mode))
-			continue;
+			തുടരുക;
 
 		ALLOC_GROW(list->entries, list->nr + 1, list->alloc);
 		list->entries[list->nr++] = ce;
-		while (i + 1 < the_repository->index->cache_nr &&
+		ആകുമ്പോൾ (i + 1 < the_repository->index->cache_nr &&
 		       !strcmp(ce->name, the_repository->index->cache[i + 1]->name))
 			/*
 			 * Skip entries with the same name in different stages
@@ -261,24 +261,24 @@ static int module_list_compute(const char **argv,
 			i++;
 	}
 
-	if (ps_matched && report_path_error(ps_matched, pathspec))
+	എങ്കിൽ (ps_matched && report_path_error(ps_matched, pathspec))
 		result = -1;
 
-	free(ps_matched);
+	സ്വതന്ത്രം(ps_matched);
 
-	return result;
+	തിരികെ result;
 }
 
-static void module_list_active(struct module_list *list)
+സ്ഥിതം ശൂന്യം module_list_active(ഘടന module_list *list)
 {
-	int i;
-	struct module_list active_modules = MODULE_LIST_INIT;
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന module_list active_modules = MODULE_LIST_INIT;
 
-	for (i = 0; i < list->nr; i++) {
-		const struct cache_entry *ce = list->entries[i];
+	വേണ്ടി (i = 0; i < list->nr; i++) {
+		സ്ഥിരം ഘടന cache_entry *ce = list->entries[i];
 
-		if (!is_submodule_active(the_repository, ce->name))
-			continue;
+		എങ്കിൽ (!is_submodule_active(the_repository, ce->name))
+			തുടരുക;
 
 		ALLOC_GROW(active_modules.entries,
 			   active_modules.nr + 1,
@@ -290,66 +290,66 @@ static void module_list_active(struct module_list *list)
 	*list = active_modules;
 }
 
-static char *get_up_path(const char *path)
+സ്ഥിതം അക്ഷരം *get_up_path(സ്ഥിരം അക്ഷരം *path)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ഘടന strbuf sb = STRBUF_INIT;
 
-	strbuf_addstrings(&sb, "../", count_slashes(path));
+	strbuf_addstrings(&sb, "../", എണ്ണം_slashes(path));
 
 	/*
 	 * Check if 'path' ends with slash or not
 	 * for having the same output for dir/sub_dir
 	 * and dir/sub_dir/
 	 */
-	if (!is_dir_sep(path[strlen(path) - 1]))
+	എങ്കിൽ (!is_dir_sep(path[strlen(path) - 1]))
 		strbuf_addstr(&sb, "../");
 
-	return strbuf_detach(&sb, NULL);
+	തിരികെ strbuf_detach(&sb, ശൂന്യ);
 }
 
-static void for_each_listed_submodule(const struct module_list *list,
-				      each_submodule_fn fn, void *cb_data)
+സ്ഥിതം ശൂന്യം for_each_listed_submodule(സ്ഥിരം ഘടന module_list *list,
+				      each_submodule_fn fn, ശൂന്യം *cb_data)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < list->nr; i++)
+	വേണ്ടി (i = 0; i < list->nr; i++)
 		fn(list->entries[i], cb_data);
 }
 
-struct foreach_cb {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	const char *super_prefix;
-	int quiet;
-	int recursive;
+ഘടന foreach_cb {
+	പൂർണ്ണസംഖ്യ argc;
+	സ്ഥിരം അക്ഷരം **argv;
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *super_prefix;
+	പൂർണ്ണസംഖ്യ quiet;
+	പൂർണ്ണസംഖ്യ recursive;
 };
 #define FOREACH_CB_INIT { 0 }
 
-static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
-				       void *cb_data)
+സ്ഥിതം ശൂന്യം runcommand_in_submodule_cb(സ്ഥിരം ഘടന cache_entry *list_item,
+				       ശൂന്യം *cb_data)
 {
-	struct foreach_cb *info = cb_data;
-	const char *path = list_item->name;
-	const struct object_id *ce_oid = &list_item->oid;
-	const struct submodule *sub;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	char *displaypath;
+	ഘടന foreach_cb *info = cb_data;
+	സ്ഥിരം അക്ഷരം *path = list_item->name;
+	സ്ഥിരം ഘടന object_id *ce_oid = &list_item->oid;
+	സ്ഥിരം ഘടന submodule *sub;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
+	അക്ഷരം *displaypath;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	എങ്കിൽ (validate_submodule_path(path) < 0)
+		die(ശൂന്യ);
 
 	displaypath = get_submodule_displaypath(path, info->prefix,
 						info->super_prefix);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	എങ്കിൽ (!sub)
 		die(_("No url found for submodule path '%s' in .gitmodules"),
 			displaypath);
 
-	if (!is_submodule_populated_gently(path, NULL))
-		goto cleanup;
+	എങ്കിൽ (!is_submodule_populated_gently(path, ശൂന്യ))
+		പോകുക cleanup;
 
 	prepare_submodule_repo_env(&cp.env);
 
@@ -367,9 +367,9 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 	 * contains a single argument. This is done for maintaining a faithful
 	 * translation from shell script.
 	 */
-	if (info->argc == 1) {
-		char *toplevel = xgetcwd();
-		struct strbuf sb = STRBUF_INIT;
+	എങ്കിൽ (info->argc == 1) {
+		അക്ഷരം *toplevel = xgetcwd();
+		ഘടന strbuf sb = STRBUF_INIT;
 
 		strvec_pushf(&cp.env, "name=%s", sub->name);
 		strvec_pushf(&cp.env, "sm_path=%s", path);
@@ -391,73 +391,73 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 		strvec_pushf(&cp.args, "path=%s; %s",
 			     sb.buf, info->argv[0]);
 		strbuf_release(&sb);
-		free(toplevel);
-	} else {
+		സ്വതന്ത്രം(toplevel);
+	} അല്ലെങ്കിൽ {
 		strvec_pushv(&cp.args, info->argv);
 	}
 
-	if (!info->quiet)
+	എങ്കിൽ (!info->quiet)
 		printf(_("Entering '%s'\n"), displaypath);
 
-	if (info->argv[0]) {
-		if (run_command(&cp))
+	എങ്കിൽ (info->argv[0]) {
+		എങ്കിൽ (run_command(&cp))
 			die(_("run_command returned non-zero status for %s\n."),
 			    displaypath);
-	} else {
+	} അല്ലെങ്കിൽ {
 		child_process_clear(&cp);
 	}
 
-	if (info->recursive) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
+	എങ്കിൽ (info->recursive) {
+		ഘടന child_process cpr = CHILD_PROCESS_INIT;
 
 		cpr.git_cmd = 1;
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
 		strvec_pushl(&cpr.args, "submodule--helper", "foreach", "--recursive",
-			     NULL);
+			     ശൂന്യ);
 		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
 
-		if (info->quiet)
-			strvec_push(&cpr.args, "--quiet");
+		എങ്കിൽ (info->quiet)
+			strvec_തള്ളുക(&cpr.args, "--quiet");
 
-		strvec_push(&cpr.args, "--");
+		strvec_തള്ളുക(&cpr.args, "--");
 		strvec_pushv(&cpr.args, info->argv);
 
-		if (run_command(&cpr))
+		എങ്കിൽ (run_command(&cpr))
 			die(_("run_command returned non-zero status while "
 				"recursing in the nested submodules of %s\n."),
 				displaypath);
 	}
 
 cleanup:
-	free(displaypath);
+	സ്വതന്ത്രം(displaypath);
 }
 
-static int module_foreach(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_foreach(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			  ഘടന repository *repo UNUSED)
 {
-	struct foreach_cb info = FOREACH_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	struct option module_foreach_options[] = {
+	ഘടന foreach_cb info = FOREACH_CB_INIT;
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന module_list list = MODULE_LIST_INIT;
+	ഘടന option module_foreach_options[] = {
 		OPT__SUPER_PREFIX(&info.super_prefix),
 		OPT__QUIET(&info.quiet, N_("suppress output of entering each submodule command")),
 		OPT_BOOL(0, "recursive", &info.recursive,
 			 N_("recurse into nested submodules")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule foreach [--quiet] [--recursive] [--] <command>"),
-		NULL
+		ശൂന്യ
 	};
-	int ret = 1;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_foreach_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(NULL, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	എങ്കിൽ (module_list_compute(ശൂന്യ, prefix, &pathspec, &list) < 0)
+		പോകുക cleanup;
 
 	info.argc = argc;
 	info.argv = argv;
@@ -469,92 +469,92 @@ static int module_foreach(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	തിരികെ ret;
 }
 
-struct init_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+ഘടന init_cb {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *super_prefix;
+	unsigned പൂർണ്ണസംഖ്യ flags;
 };
 #define INIT_CB_INIT { 0 }
 
-static int validate_and_set_submodule_gitdir(struct strbuf *gitdir_path,
-					     const char *submodule_name)
+സ്ഥിതം പൂർണ്ണസംഖ്യ validate_and_set_submodule_gitdir(ഘടന strbuf *gitdir_path,
+					     സ്ഥിരം അക്ഷരം *submodule_name)
 {
-	const char *value;
-	char *key;
+	സ്ഥിരം അക്ഷരം *മൂല്യം;
+	അക്ഷരം *താക്കോൽ;
 
-	if (validate_submodule_git_dir(gitdir_path->buf, submodule_name))
-		return -1;
+	എങ്കിൽ (validate_submodule_git_dir(gitdir_path->buf, submodule_name))
+		തിരികെ -1;
 
-	key = xstrfmt("submodule.%s.gitdir", submodule_name);
+	താക്കോൽ = xstrfmt("submodule.%s.gitdir", submodule_name);
 
 	/* Nothing to do if the config already exists. */
-	if (!repo_config_get_string_tmp(the_repository, key, &value)) {
-		free(key);
-		return 0;
+	എങ്കിൽ (!repo_config_get_string_tmp(the_repository, താക്കോൽ, &മൂല്യം)) {
+		സ്വതന്ത്രം(താക്കോൽ);
+		തിരികെ 0;
 	}
 
-	if (repo_config_set_gently(the_repository, key, gitdir_path->buf)) {
-		free(key);
-		return -1;
+	എങ്കിൽ (repo_config_set_gently(the_repository, താക്കോൽ, gitdir_path->buf)) {
+		സ്വതന്ത്രം(താക്കോൽ);
+		തിരികെ -1;
 	}
 
-	free(key);
-	return 0;
+	സ്വതന്ത്രം(താക്കോൽ);
+	തിരികെ 0;
 }
 
-static void create_default_gitdir_config(const char *submodule_name)
+സ്ഥിതം ശൂന്യം create_default_gitdir_config(സ്ഥിരം അക്ഷരം *submodule_name)
 {
-	struct strbuf gitdir_path = STRBUF_INIT;
-	struct git_hash_ctx ctx;
-	char hex_name_hash[GIT_MAX_HEXSZ + 1], header[128];
-	unsigned char raw_name_hash[GIT_MAX_RAWSZ];
-	int header_len;
+	ഘടന strbuf gitdir_path = STRBUF_INIT;
+	ഘടന git_hash_ctx ctx;
+	അക്ഷരം hex_name_hash[GIT_MAX_HEXSZ + 1], header[128];
+	unsigned അക്ഷരം raw_name_hash[GIT_MAX_RAWSZ];
+	പൂർണ്ണസംഖ്യ header_len;
 
 	/* Case 1: try the plain module name */
 	repo_git_path_append(the_repository, &gitdir_path, "modules/%s", submodule_name);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
+	എങ്കിൽ (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
 		strbuf_release(&gitdir_path);
-		return;
+		തിരികെ;
 	}
 
 	/* Case 2.1: Try URI-safe (RFC3986) encoding first, this fixes nested gitdirs */
 	strbuf_reset(&gitdir_path);
 	repo_git_path_append(the_repository, &gitdir_path, "modules/");
 	strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_rfc3986_unreserved);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
+	എങ്കിൽ (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
 		strbuf_release(&gitdir_path);
-		return;
+		തിരികെ;
 	}
 
 	/* Case 2.2: Try extended uppercase URI (RFC3986) encoding, to fix case-folding */
 	strbuf_reset(&gitdir_path);
 	repo_git_path_append(the_repository, &gitdir_path, "modules/");
 	strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_casefolding_rfc3986_unreserved);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-		return;
+	എങ്കിൽ (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
+		തിരികെ;
 
 	/* Case 2.3: Try some derived gitdir names, see if one sticks */
-	for (char c = '0'; c <= '9'; c++) {
+	വേണ്ടി (അക്ഷരം c = '0'; c <= '9'; c++) {
 		strbuf_reset(&gitdir_path);
 		repo_git_path_append(the_repository, &gitdir_path, "modules/");
 		strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_rfc3986_unreserved);
 		strbuf_addch(&gitdir_path, c);
-		if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-			return;
+		എങ്കിൽ (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
+			തിരികെ;
 
 		strbuf_reset(&gitdir_path);
 		repo_git_path_append(the_repository, &gitdir_path, "modules/");
 		strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_casefolding_rfc3986_unreserved);
 		strbuf_addch(&gitdir_path, c);
-		if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-			return;
+		എങ്കിൽ (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
+			തിരികെ;
 	}
 
 	/* Case 2.4: If all the above failed, try a hash of the name as a last resort */
-	header_len = snprintf(header, sizeof(header),
+	header_len = snprintf(header, വലുപ്പം(header),
 			      "blob %"PRIuMAX, (uintmax_t)strlen(submodule_name));
 	git_hash_init(&ctx, the_hash_algo);
 	git_hash_update(&ctx, header, header_len);
@@ -564,9 +564,9 @@ static void create_default_gitdir_config(const char *submodule_name)
 	hash_to_hex_algop_r(hex_name_hash, raw_name_hash, the_hash_algo);
 	strbuf_reset(&gitdir_path);
 	repo_git_path_append(the_repository, &gitdir_path, "modules/%s", hex_name_hash);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
+	എങ്കിൽ (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
 		strbuf_release(&gitdir_path);
-		return;
+		തിരികെ;
 	}
 
 	/* Case 3: nothing worked, error out */
@@ -576,20 +576,20 @@ static void create_default_gitdir_config(const char *submodule_name)
 	    submodule_name, submodule_name, submodule_name);
 }
 
-static void init_submodule(const char *path, const char *prefix,
-			   const char *super_prefix,
-			   unsigned int flags)
+സ്ഥിതം ശൂന്യം init_submodule(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *prefix,
+			   സ്ഥിരം അക്ഷരം *super_prefix,
+			   unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	const struct submodule *sub;
-	struct strbuf sb = STRBUF_INIT;
-	const char *upd;
-	char *url = NULL, *displaypath;
+	സ്ഥിരം ഘടന submodule *sub;
+	ഘടന strbuf sb = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *upd;
+	അക്ഷരം *url = ശൂന്യ, *displaypath;
 
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	എങ്കിൽ (!sub)
 		die(_("No url found for submodule path '%s' in .gitmodules"),
 			displaypath);
 
@@ -599,7 +599,7 @@ static void init_submodule(const char *path, const char *prefix,
 	 *
 	 * Set active flag for the submodule being initialized
 	 */
-	if (!is_submodule_active(the_repository, path)) {
+	എങ്കിൽ (!is_submodule_active(the_repository, path)) {
 		strbuf_addf(&sb, "submodule.%s.active", sub->name);
 		repo_config_set_gently(the_repository, sb.buf, "true");
 		strbuf_reset(&sb);
@@ -611,26 +611,26 @@ static void init_submodule(const char *path, const char *prefix,
 	 * .gitmodules, so look it up directly.
 	 */
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_get_string(the_repository, sb.buf, &url)) {
-		if (!sub->url)
+	എങ്കിൽ (repo_config_get_string(the_repository, sb.buf, &url)) {
+		എങ്കിൽ (!sub->url)
 			die(_("No url found for submodule path '%s' in .gitmodules"),
 				displaypath);
 
 		url = xstrdup(sub->url);
 
 		/* Possibly a url relative to parent */
-		if (starts_with_dot_dot_slash(url) ||
+		എങ്കിൽ (starts_with_dot_dot_slash(url) ||
 		    starts_with_dot_slash(url)) {
-			char *oldurl = url;
+			അക്ഷരം *oldurl = url;
 
-			url = resolve_relative_url(oldurl, NULL, 0);
-			free(oldurl);
+			url = resolve_relative_url(oldurl, ശൂന്യ, 0);
+			സ്വതന്ത്രം(oldurl);
 		}
 
-		if (repo_config_set_gently(the_repository, sb.buf, url))
+		എങ്കിൽ (repo_config_set_gently(the_repository, sb.buf, url))
 			die(_("Failed to register url for submodule path '%s'"),
 			    displaypath);
-		if (!(flags & OPT_QUIET))
+		എങ്കിൽ (!(flags & OPT_QUIET))
 			fprintf(stderr,
 				_("Submodule '%s' (%s) registered for path '%s'\n"),
 				sub->name, url, displaypath);
@@ -639,68 +639,68 @@ static void init_submodule(const char *path, const char *prefix,
 
 	/* Copy "update" setting when it is not set yet */
 	strbuf_addf(&sb, "submodule.%s.update", sub->name);
-	if (repo_config_get_string_tmp(the_repository, sb.buf, &upd) &&
+	എങ്കിൽ (repo_config_get_string_tmp(the_repository, sb.buf, &upd) &&
 	    sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
-		if (sub->update_strategy.type == SM_UPDATE_COMMAND) {
+		എങ്കിൽ (sub->update_strategy.type == SM_UPDATE_COMMAND) {
 			fprintf(stderr, _("warning: command update mode suggested for submodule '%s'\n"),
 				sub->name);
 			upd = "none";
-		} else {
+		} അല്ലെങ്കിൽ {
 			upd = submodule_update_type_to_string(sub->update_strategy.type);
 		}
 
-		if (repo_config_set_gently(the_repository, sb.buf, upd))
+		എങ്കിൽ (repo_config_set_gently(the_repository, sb.buf, upd))
 			die(_("Failed to register update mode for submodule path '%s'"), displaypath);
 	}
 
-	if (the_repository->repository_format_submodule_path_cfg)
+	എങ്കിൽ (the_repository->repository_format_submodule_path_cfg)
 		create_default_gitdir_config(sub->name);
 
 	strbuf_release(&sb);
-	free(displaypath);
-	free(url);
+	സ്വതന്ത്രം(displaypath);
+	സ്വതന്ത്രം(url);
 }
 
-static void init_submodule_cb(const struct cache_entry *list_item, void *cb_data)
+സ്ഥിതം ശൂന്യം init_submodule_cb(സ്ഥിരം ഘടന cache_entry *list_item, ശൂന്യം *cb_data)
 {
-	struct init_cb *info = cb_data;
+	ഘടന init_cb *info = cb_data;
 
 	init_submodule(list_item->name, info->prefix, info->super_prefix,
 		       info->flags);
 }
 
-static int module_init(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_init(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		       ഘടന repository *repo UNUSED)
 {
-	struct init_cb info = INIT_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	struct option module_init_options[] = {
+	ഘടന init_cb info = INIT_CB_INIT;
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന module_list list = MODULE_LIST_INIT;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	ഘടന option module_init_options[] = {
 		OPT__QUIET(&quiet, N_("suppress output for initializing a submodule")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule init [<options>] [<path>]"),
-		NULL
+		ശൂന്യ
 	};
-	int ret = 1;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_init_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	എങ്കിൽ (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		പോകുക cleanup;
 
 	/*
 	 * If there are no path args and submodule.active is set then,
 	 * by default, only initialize 'active' modules.
 	 */
-	if (!argc && !repo_config_get(the_repository, "submodule.active"))
+	എങ്കിൽ (!argc && !repo_config_get(the_repository, "submodule.active"))
 		module_list_active(&list);
 
 	info.prefix = prefix;
-	if (quiet)
+	എങ്കിൽ (quiet)
 		info.flags |= OPT_QUIET;
 
 	for_each_listed_submodule(&list, init_submodule_cb, &info);
@@ -709,182 +709,182 @@ static int module_init(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	തിരികെ ret;
 }
 
-struct status_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+ഘടന status_cb {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *super_prefix;
+	unsigned പൂർണ്ണസംഖ്യ flags;
 };
 #define STATUS_CB_INIT { 0 }
 
-static void print_status(unsigned int flags, char state, const char *path,
-			 const struct object_id *oid, const char *displaypath)
+സ്ഥിതം ശൂന്യം print_status(unsigned പൂർണ്ണസംഖ്യ flags, അക്ഷരം state, സ്ഥിരം അക്ഷരം *path,
+			 സ്ഥിരം ഘടന object_id *oid, സ്ഥിരം അക്ഷരം *displaypath)
 {
-	if (flags & OPT_QUIET)
-		return;
+	എങ്കിൽ (flags & OPT_QUIET)
+		തിരികെ;
 
 	printf("%c%s %s", state, oid_to_hex(oid), displaypath);
 
-	if (state == ' ' || state == '+') {
-		char *name = compute_rev_name(path, oid_to_hex(oid));
+	എങ്കിൽ (state == ' ' || state == '+') {
+		അക്ഷരം *name = compute_rev_name(path, oid_to_hex(oid));
 
-		if (name)
+		എങ്കിൽ (name)
 			printf(" (%s)", name);
-		free(name);
+		സ്വതന്ത്രം(name);
 	}
 
 	printf("\n");
 }
 
-static int handle_submodule_head_ref(const struct reference *ref, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ handle_submodule_head_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cb_data)
 {
-	struct object_id *output = cb_data;
+	ഘടന object_id *output = cb_data;
 
-	if (ref->oid)
+	എങ്കിൽ (ref->oid)
 		oidcpy(output, ref->oid);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void status_submodule(const char *path, const struct object_id *ce_oid,
-			     unsigned int ce_flags, const char *prefix,
-			     const char *super_prefix, unsigned int flags)
+സ്ഥിതം ശൂന്യം status_submodule(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം ഘടന object_id *ce_oid,
+			     unsigned പൂർണ്ണസംഖ്യ ce_flags, സ്ഥിരം അക്ഷരം *prefix,
+			     സ്ഥിരം അക്ഷരം *super_prefix, unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	char *displaypath;
-	struct strvec diff_files_args = STRVEC_INIT;
-	struct rev_info rev = REV_INFO_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	const char *git_dir;
+	അക്ഷരം *displaypath;
+	ഘടന strvec diff_files_args = STRVEC_INIT;
+	ഘടന rev_info rev = REV_INFO_INIT;
+	ഘടന strbuf buf = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *git_dir;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	എങ്കിൽ (validate_submodule_path(path) < 0)
+		die(ശൂന്യ);
 
-	if (!submodule_from_path(the_repository, null_oid(the_hash_algo), path))
+	എങ്കിൽ (!submodule_from_path(the_repository, null_oid(the_hash_algo), path))
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
 		      path);
 
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
-	if ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
+	എങ്കിൽ ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
 		print_status(flags, 'U', path, null_oid(the_hash_algo), displaypath);
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	strbuf_addf(&buf, "%s/.git", path);
 	git_dir = read_gitfile(buf.buf);
-	if (!git_dir)
+	എങ്കിൽ (!git_dir)
 		git_dir = buf.buf;
 
-	if (!is_submodule_active(the_repository, path) ||
+	എങ്കിൽ (!is_submodule_active(the_repository, path) ||
 	    !is_git_directory(git_dir)) {
 		print_status(flags, '-', path, ce_oid, displaypath);
 		strbuf_release(&buf);
-		goto cleanup;
+		പോകുക cleanup;
 	}
 	strbuf_release(&buf);
 
 	strvec_pushl(&diff_files_args, "diff-files",
 		     "--ignore-submodules=dirty", "--quiet", "--",
-		     path, NULL);
+		     path, ശൂന്യ);
 
-	repo_config(the_repository, git_diff_basic_config, NULL);
+	repo_config(the_repository, git_diff_basic_config, ശൂന്യ);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, ശൂന്യ);
 	rev.abbrev = 0;
-	setup_revisions_from_strvec(&diff_files_args, &rev, NULL);
+	setup_revisions_from_strvec(&diff_files_args, &rev, ശൂന്യ);
 	run_diff_files(&rev, 0);
 
-	if (!diff_result_code(&rev)) {
+	എങ്കിൽ (!diff_result_code(&rev)) {
 		print_status(flags, ' ', path, ce_oid,
 			     displaypath);
-	} else if (!(flags & OPT_CACHED)) {
-		struct object_id oid;
-		struct ref_store *refs = repo_get_submodule_ref_store(the_repository,
+	} അല്ലെങ്കിൽ എങ്കിൽ (!(flags & OPT_CACHED)) {
+		ഘടന object_id oid;
+		ഘടന ref_store *refs = repo_get_submodule_ref_store(the_repository,
 								      path);
 
-		if (!refs) {
+		എങ്കിൽ (!refs) {
 			print_status(flags, '-', path, ce_oid, displaypath);
-			goto cleanup;
+			പോകുക cleanup;
 		}
-		if (refs_head_ref(refs, handle_submodule_head_ref, &oid))
+		എങ്കിൽ (refs_head_ref(refs, handle_submodule_head_ref, &oid))
 			die(_("could not resolve HEAD ref inside the "
 			      "submodule '%s'"), path);
 
 		print_status(flags, '+', path, &oid, displaypath);
-	} else {
+	} അല്ലെങ്കിൽ {
 		print_status(flags, '+', path, ce_oid, displaypath);
 	}
 
-	if (flags & OPT_RECURSIVE) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
-		int res;
+	എങ്കിൽ (flags & OPT_RECURSIVE) {
+		ഘടന child_process cpr = CHILD_PROCESS_INIT;
+		പൂർണ്ണസംഖ്യ res;
 
 		cpr.git_cmd = 1;
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
 		strvec_pushl(&cpr.args, "submodule--helper", "status",
-			     "--recursive", NULL);
+			     "--recursive", ശൂന്യ);
 		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
 
-		if (flags & OPT_CACHED)
-			strvec_push(&cpr.args, "--cached");
+		എങ്കിൽ (flags & OPT_CACHED)
+			strvec_തള്ളുക(&cpr.args, "--cached");
 
-		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+		എങ്കിൽ (flags & OPT_QUIET)
+			strvec_തള്ളുക(&cpr.args, "--quiet");
 
 		res = run_command(&cpr);
-		if (res == SIGPIPE + 128)
-			raise(SIGPIPE);
-		else if (res)
+		എങ്കിൽ (res == SIGPIPE + 128)
+			ഉയർത്തുക(SIGPIPE);
+		അല്ലെങ്കിൽ എങ്കിൽ (res)
 			die(_("failed to recurse into submodule '%s'"), path);
 	}
 
 cleanup:
 	strvec_clear(&diff_files_args);
-	free(displaypath);
+	സ്വതന്ത്രം(displaypath);
 	release_revisions(&rev);
 }
 
-static void status_submodule_cb(const struct cache_entry *list_item,
-				void *cb_data)
+സ്ഥിതം ശൂന്യം status_submodule_cb(സ്ഥിരം ഘടന cache_entry *list_item,
+				ശൂന്യം *cb_data)
 {
-	struct status_cb *info = cb_data;
+	ഘടന status_cb *info = cb_data;
 
 	status_submodule(list_item->name, &list_item->oid, list_item->ce_flags,
 			 info->prefix, info->super_prefix, info->flags);
 }
 
-static int module_status(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_status(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			 ഘടന repository *repo UNUSED)
 {
-	struct status_cb info = STATUS_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	struct option module_status_options[] = {
+	ഘടന status_cb info = STATUS_CB_INIT;
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന module_list list = MODULE_LIST_INIT;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	ഘടന option module_status_options[] = {
 		OPT__SUPER_PREFIX(&info.super_prefix),
 		OPT__QUIET(&quiet, N_("suppress submodule status output")),
 		OPT_BIT(0, "cached", &info.flags, N_("use commit stored in the index instead of the one stored in the submodule HEAD"), OPT_CACHED),
 		OPT_BIT(0, "recursive", &info.flags, N_("recurse into nested submodules"), OPT_RECURSIVE),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule status [--quiet] [--cached] [--recursive] [<path>...]"),
-		NULL
+		ശൂന്യ
 	};
-	int ret = 1;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_status_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	എങ്കിൽ (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		പോകുക cleanup;
 
 	info.prefix = prefix;
-	if (quiet)
+	എങ്കിൽ (quiet)
 		info.flags |= OPT_QUIET;
 
 	for_each_listed_submodule(&list, status_submodule_cb, &info);
@@ -893,168 +893,168 @@ static int module_status(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	തിരികെ ret;
 }
 
-struct module_cb {
-	unsigned int mod_src;
-	unsigned int mod_dst;
-	struct object_id oid_src;
-	struct object_id oid_dst;
-	char status;
-	char *sm_path;
+ഘടന module_cb {
+	unsigned പൂർണ്ണസംഖ്യ mod_src;
+	unsigned പൂർണ്ണസംഖ്യ mod_dst;
+	ഘടന object_id oid_src;
+	ഘടന object_id oid_dst;
+	അക്ഷരം status;
+	അക്ഷരം *sm_path;
 };
 #define MODULE_CB_INIT { 0 }
 
-static void module_cb_release(struct module_cb *mcb)
+സ്ഥിതം ശൂന്യം module_cb_release(ഘടന module_cb *mcb)
 {
-	free(mcb->sm_path);
+	സ്വതന്ത്രം(mcb->sm_path);
 }
 
-struct module_cb_list {
-	struct module_cb **entries;
-	int alloc, nr;
+ഘടന module_cb_list {
+	ഘടന module_cb **entries;
+	പൂർണ്ണസംഖ്യ alloc, nr;
 };
 #define MODULE_CB_LIST_INIT { 0 }
 
-static void module_cb_list_release(struct module_cb_list *mcbl)
+സ്ഥിതം ശൂന്യം module_cb_list_release(ഘടന module_cb_list *mcbl)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < mcbl->nr; i++) {
-		struct module_cb *mcb = mcbl->entries[i];
+	വേണ്ടി (i = 0; i < mcbl->nr; i++) {
+		ഘടന module_cb *mcb = mcbl->entries[i];
 
 		module_cb_release(mcb);
-		free(mcb);
+		സ്വതന്ത്രം(mcb);
 	}
-	free(mcbl->entries);
+	സ്വതന്ത്രം(mcbl->entries);
 }
 
-struct summary_cb {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int cached: 1;
-	unsigned int for_status: 1;
-	unsigned int files: 1;
-	int summary_limit;
+ഘടന summary_cb {
+	പൂർണ്ണസംഖ്യ argc;
+	സ്ഥിരം അക്ഷരം **argv;
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *super_prefix;
+	unsigned പൂർണ്ണസംഖ്യ cached: 1;
+	unsigned പൂർണ്ണസംഖ്യ for_status: 1;
+	unsigned പൂർണ്ണസംഖ്യ files: 1;
+	പൂർണ്ണസംഖ്യ summary_limit;
 };
 #define SUMMARY_CB_INIT { 0 }
 
-enum diff_cmd {
+എണ്ണൽ diff_cmd {
 	DIFF_INDEX,
 	DIFF_FILES
 };
 
-static char *verify_submodule_committish(const char *sm_path,
-					 const char *committish)
+സ്ഥിതം അക്ഷരം *verify_submodule_committish(സ്ഥിരം അക്ഷരം *sm_path,
+					 സ്ഥിരം അക്ഷരം *committish)
 {
-	struct child_process cp_rev_parse = CHILD_PROCESS_INIT;
-	struct strbuf result = STRBUF_INIT;
+	ഘടന child_process cp_rev_parse = CHILD_PROCESS_INIT;
+	ഘടന strbuf result = STRBUF_INIT;
 
 	cp_rev_parse.git_cmd = 1;
 	cp_rev_parse.dir = sm_path;
 	prepare_submodule_repo_env(&cp_rev_parse.env);
-	strvec_pushl(&cp_rev_parse.args, "rev-parse", "-q", "--short", NULL);
+	strvec_pushl(&cp_rev_parse.args, "rev-parse", "-q", "--short", ശൂന്യ);
 	strvec_pushf(&cp_rev_parse.args, "%s^0", committish);
-	strvec_push(&cp_rev_parse.args, "--");
+	strvec_തള്ളുക(&cp_rev_parse.args, "--");
 
-	if (capture_command(&cp_rev_parse, &result, 0))
-		return NULL;
+	എങ്കിൽ (capture_command(&cp_rev_parse, &result, 0))
+		തിരികെ ശൂന്യ;
 
 	strbuf_trim_trailing_newline(&result);
-	return strbuf_detach(&result, NULL);
+	തിരികെ strbuf_detach(&result, ശൂന്യ);
 }
 
-static void print_submodule_summary(struct summary_cb *info, const char *errmsg,
-				    int total_commits, const char *displaypath,
-				    const char *src_abbrev, const char *dst_abbrev,
-				    struct module_cb *p)
+സ്ഥിതം ശൂന്യം print_submodule_summary(ഘടന summary_cb *info, സ്ഥിരം അക്ഷരം *errmsg,
+				    പൂർണ്ണസംഖ്യ total_commits, സ്ഥിരം അക്ഷരം *displaypath,
+				    സ്ഥിരം അക്ഷരം *src_abbrev, സ്ഥിരം അക്ഷരം *dst_abbrev,
+				    ഘടന module_cb *p)
 {
-	if (p->status == 'T') {
-		if (S_ISGITLINK(p->mod_dst))
+	എങ്കിൽ (p->status == 'T') {
+		എങ്കിൽ (S_ISGITLINK(p->mod_dst))
 			printf(_("* %s %s(blob)->%s(submodule)"),
 				 displaypath, src_abbrev, dst_abbrev);
-		else
+		അല്ലെങ്കിൽ
 			printf(_("* %s %s(submodule)->%s(blob)"),
 				 displaypath, src_abbrev, dst_abbrev);
-	} else {
+	} അല്ലെങ്കിൽ {
 		printf("* %s %s...%s",
 			displaypath, src_abbrev, dst_abbrev);
 	}
 
-	if (total_commits < 0)
+	എങ്കിൽ (total_commits < 0)
 		printf(":\n");
-	else
+	അല്ലെങ്കിൽ
 		printf(" (%d):\n", total_commits);
 
-	if (errmsg) {
+	എങ്കിൽ (errmsg) {
 		printf(_("%s"), errmsg);
-	} else if (total_commits > 0) {
-		struct child_process cp_log = CHILD_PROCESS_INIT;
+	} അല്ലെങ്കിൽ എങ്കിൽ (total_commits > 0) {
+		ഘടന child_process cp_log = CHILD_PROCESS_INIT;
 
 		cp_log.git_cmd = 1;
 		cp_log.dir = p->sm_path;
 		prepare_submodule_repo_env(&cp_log.env);
-		strvec_pushl(&cp_log.args, "log", NULL);
+		strvec_pushl(&cp_log.args, "log", ശൂന്യ);
 
-		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
-			if (info->summary_limit > 0)
+		എങ്കിൽ (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
+			എങ്കിൽ (info->summary_limit > 0)
 				strvec_pushf(&cp_log.args, "-%d",
 					     info->summary_limit);
 
 			strvec_pushl(&cp_log.args, "--pretty=  %m %s",
-				     "--first-parent", NULL);
+				     "--first-parent", ശൂന്യ);
 			strvec_pushf(&cp_log.args, "%s...%s",
 				     src_abbrev, dst_abbrev);
-		} else if (S_ISGITLINK(p->mod_dst)) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (S_ISGITLINK(p->mod_dst)) {
 			strvec_pushl(&cp_log.args, "--pretty=  > %s",
-				     "-1", dst_abbrev, NULL);
-		} else {
+				     "-1", dst_abbrev, ശൂന്യ);
+		} അല്ലെങ്കിൽ {
 			strvec_pushl(&cp_log.args, "--pretty=  < %s",
-				     "-1", src_abbrev, NULL);
+				     "-1", src_abbrev, ശൂന്യ);
 		}
 		run_command(&cp_log);
 	}
 	printf("\n");
 }
 
-static void generate_submodule_summary(struct summary_cb *info,
-				       struct module_cb *p)
+സ്ഥിതം ശൂന്യം generate_submodule_summary(ഘടന summary_cb *info,
+				       ഘടന module_cb *p)
 {
-	char *displaypath, *src_abbrev = NULL, *dst_abbrev;
-	int missing_src = 0, missing_dst = 0;
-	struct strbuf errmsg = STRBUF_INIT;
-	int total_commits = -1;
+	അക്ഷരം *displaypath, *src_abbrev = ശൂന്യ, *dst_abbrev;
+	പൂർണ്ണസംഖ്യ missing_src = 0, missing_dst = 0;
+	ഘടന strbuf errmsg = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ total_commits = -1;
 
-	if (!info->cached && oideq(&p->oid_dst, null_oid(the_hash_algo))) {
-		if (S_ISGITLINK(p->mod_dst)) {
-			struct ref_store *refs = repo_get_submodule_ref_store(the_repository,
+	എങ്കിൽ (!info->cached && oideq(&p->oid_dst, null_oid(the_hash_algo))) {
+		എങ്കിൽ (S_ISGITLINK(p->mod_dst)) {
+			ഘടന ref_store *refs = repo_get_submodule_ref_store(the_repository,
 									      p->sm_path);
 
-			if (refs)
+			എങ്കിൽ (refs)
 				refs_head_ref(refs, handle_submodule_head_ref, &p->oid_dst);
-		} else if (S_ISLNK(p->mod_dst) || S_ISREG(p->mod_dst)) {
-			struct stat st;
-			int fd = open(p->sm_path, O_RDONLY);
+		} അല്ലെങ്കിൽ എങ്കിൽ (S_ISLNK(p->mod_dst) || S_ISREG(p->mod_dst)) {
+			ഘടന stat st;
+			പൂർണ്ണസംഖ്യ fd = open(p->sm_path, O_RDONLY);
 
-			if (fd < 0 || fstat(fd, &st) < 0 ||
+			എങ്കിൽ (fd < 0 || fstat(fd, &st) < 0 ||
 			    index_fd(the_repository->index, &p->oid_dst, fd, &st, OBJ_BLOB,
 				     p->sm_path, 0))
 				error(_("couldn't hash object from '%s'"), p->sm_path);
-		} else {
+		} അല്ലെങ്കിൽ {
 			/* for a submodule removal (mode:0000000), don't warn */
-			if (p->mod_dst)
+			എങ്കിൽ (p->mod_dst)
 				warning(_("unexpected mode %o"), p->mod_dst);
 		}
 	}
 
-	if (S_ISGITLINK(p->mod_src)) {
-		if (p->status != 'D')
+	എങ്കിൽ (S_ISGITLINK(p->mod_src)) {
+		എങ്കിൽ (p->status != 'D')
 			src_abbrev = verify_submodule_committish(p->sm_path,
 								 oid_to_hex(&p->oid_src));
-		if (!src_abbrev) {
+		എങ്കിൽ (!src_abbrev) {
 			missing_src = 1;
 			/*
 			 * As `rev-parse` failed, we fallback to getting
@@ -1064,7 +1064,7 @@ static void generate_submodule_summary(struct summary_cb *info,
 			 */
 			src_abbrev = xstrndup(oid_to_hex(&p->oid_src), 7);
 		}
-	} else {
+	} അല്ലെങ്കിൽ {
 		/*
 		 * The source does not point to a submodule.
 		 * So, we fallback to getting the abbreviation using
@@ -1074,10 +1074,10 @@ static void generate_submodule_summary(struct summary_cb *info,
 		src_abbrev = xstrndup(oid_to_hex(&p->oid_src), 7);
 	}
 
-	if (S_ISGITLINK(p->mod_dst)) {
+	എങ്കിൽ (S_ISGITLINK(p->mod_dst)) {
 		dst_abbrev = verify_submodule_committish(p->sm_path,
 							 oid_to_hex(&p->oid_dst));
-		if (!dst_abbrev) {
+		എങ്കിൽ (!dst_abbrev) {
 			missing_dst = 1;
 			/*
 			 * As `rev-parse` failed, we fallback to getting
@@ -1087,7 +1087,7 @@ static void generate_submodule_summary(struct summary_cb *info,
 			 */
 			dst_abbrev = xstrndup(oid_to_hex(&p->oid_dst), 7);
 		}
-	} else {
+	} അല്ലെങ്കിൽ {
 		/*
 		 * The destination does not point to a submodule.
 		 * So, we fallback to getting the abbreviation using
@@ -1100,39 +1100,39 @@ static void generate_submodule_summary(struct summary_cb *info,
 	displaypath = get_submodule_displaypath(p->sm_path, info->prefix,
 						info->super_prefix);
 
-	if (!missing_src && !missing_dst) {
-		struct child_process cp_rev_list = CHILD_PROCESS_INIT;
-		struct strbuf sb_rev_list = STRBUF_INIT;
+	എങ്കിൽ (!missing_src && !missing_dst) {
+		ഘടന child_process cp_rev_list = CHILD_PROCESS_INIT;
+		ഘടന strbuf sb_rev_list = STRBUF_INIT;
 
 		strvec_pushl(&cp_rev_list.args, "rev-list",
-			     "--first-parent", "--count", NULL);
-		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
+			     "--first-parent", "--count", ശൂന്യ);
+		എങ്കിൽ (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
 			strvec_pushf(&cp_rev_list.args, "%s...%s",
 				     src_abbrev, dst_abbrev);
-		else
-			strvec_push(&cp_rev_list.args, S_ISGITLINK(p->mod_src) ?
+		അല്ലെങ്കിൽ
+			strvec_തള്ളുക(&cp_rev_list.args, S_ISGITLINK(p->mod_src) ?
 				    src_abbrev : dst_abbrev);
-		strvec_push(&cp_rev_list.args, "--");
+		strvec_തള്ളുക(&cp_rev_list.args, "--");
 
 		cp_rev_list.git_cmd = 1;
 		cp_rev_list.dir = p->sm_path;
 		prepare_submodule_repo_env(&cp_rev_list.env);
 
-		if (!capture_command(&cp_rev_list, &sb_rev_list, 0))
+		എങ്കിൽ (!capture_command(&cp_rev_list, &sb_rev_list, 0))
 			total_commits = atoi(sb_rev_list.buf);
 
 		strbuf_release(&sb_rev_list);
-	} else {
+	} അല്ലെങ്കിൽ {
 		/*
 		 * Don't give error msg for modification whose dst is not
 		 * submodule, i.e., deleted or changed to blob
 		 */
-		if (S_ISGITLINK(p->mod_dst)) {
-			if (missing_src && missing_dst) {
+		എങ്കിൽ (S_ISGITLINK(p->mod_dst)) {
+			എങ്കിൽ (missing_src && missing_dst) {
 				strbuf_addf(&errmsg, "  Warn: %s doesn't contain commits %s and %s\n",
 					    displaypath, oid_to_hex(&p->oid_src),
 					    oid_to_hex(&p->oid_dst));
-			} else {
+			} അല്ലെങ്കിൽ {
 				strbuf_addf(&errmsg, "  Warn: %s doesn't contain commit %s\n",
 					    displaypath, missing_src ?
 					    oid_to_hex(&p->oid_src) :
@@ -1141,70 +1141,70 @@ static void generate_submodule_summary(struct summary_cb *info,
 		}
 	}
 
-	print_submodule_summary(info, errmsg.len ? errmsg.buf : NULL,
+	print_submodule_summary(info, errmsg.len ? errmsg.buf : ശൂന്യ,
 				total_commits, displaypath, src_abbrev,
 				dst_abbrev, p);
 
-	free(displaypath);
-	free(src_abbrev);
-	free(dst_abbrev);
+	സ്വതന്ത്രം(displaypath);
+	സ്വതന്ത്രം(src_abbrev);
+	സ്വതന്ത്രം(dst_abbrev);
 	strbuf_release(&errmsg);
 }
 
-static void prepare_submodule_summary(struct summary_cb *info,
-				      struct module_cb_list *list)
+സ്ഥിതം ശൂന്യം prepare_submodule_summary(ഘടന summary_cb *info,
+				      ഘടന module_cb_list *list)
 {
-	int i;
-	for (i = 0; i < list->nr; i++) {
-		const struct submodule *sub;
-		struct module_cb *p = list->entries[i];
-		struct strbuf sm_gitdir = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ i;
+	വേണ്ടി (i = 0; i < list->nr; i++) {
+		സ്ഥിരം ഘടന submodule *sub;
+		ഘടന module_cb *p = list->entries[i];
+		ഘടന strbuf sm_gitdir = STRBUF_INIT;
 
-		if (p->status == 'D' || p->status == 'T') {
+		എങ്കിൽ (p->status == 'D' || p->status == 'T') {
 			generate_submodule_summary(info, p);
-			continue;
+			തുടരുക;
 		}
 
-		if (info->for_status && p->status != 'A' &&
+		എങ്കിൽ (info->for_status && p->status != 'A' &&
 		    (sub = submodule_from_path(the_repository,
 					       null_oid(the_hash_algo), p->sm_path))) {
-			char *config_key = NULL;
-			const char *value;
-			int ignore_all = 0;
+			അക്ഷരം *config_താക്കോൽ = ശൂന്യ;
+			സ്ഥിരം അക്ഷരം *മൂല്യം;
+			പൂർണ്ണസംഖ്യ ignore_all = 0;
 
-			config_key = xstrfmt("submodule.%s.ignore",
+			config_താക്കോൽ = xstrfmt("submodule.%s.ignore",
 					     sub->name);
-			if (!repo_config_get_string_tmp(the_repository, config_key, &value))
-				ignore_all = !strcmp(value, "all");
-			else if (sub->ignore)
+			എങ്കിൽ (!repo_config_get_string_tmp(the_repository, config_താക്കോൽ, &മൂല്യം))
+				ignore_all = !strcmp(മൂല്യം, "all");
+			അല്ലെങ്കിൽ എങ്കിൽ (sub->ignore)
 				ignore_all = !strcmp(sub->ignore, "all");
 
-			free(config_key);
-			if (ignore_all)
-				continue;
+			സ്വതന്ത്രം(config_താക്കോൽ);
+			എങ്കിൽ (ignore_all)
+				തുടരുക;
 		}
 
 		/* Also show added or modified modules which are checked out */
 		strbuf_addstr(&sm_gitdir, p->sm_path);
-		if (is_nonbare_repository_dir(&sm_gitdir))
+		എങ്കിൽ (is_nonbare_repository_dir(&sm_gitdir))
 			generate_submodule_summary(info, p);
 		strbuf_release(&sm_gitdir);
 	}
 }
 
-static void submodule_summary_callback(struct diff_queue_struct *q,
-				       struct diff_options *options UNUSED,
-				       void *data)
+സ്ഥിതം ശൂന്യം submodule_summary_callback(ഘടന diff_queue_struct *q,
+				       ഘടന diff_options *options UNUSED,
+				       ശൂന്യം *data)
 {
-	int i;
-	struct module_cb_list *list = data;
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct module_cb *temp;
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന module_cb_list *list = data;
+	വേണ്ടി (i = 0; i < q->nr; i++) {
+		ഘടന diff_filepair *p = q->queue[i];
+		ഘടന module_cb *temp;
 
-		if (!S_ISGITLINK(p->one->mode) && !S_ISGITLINK(p->two->mode))
-			continue;
-		temp = xmalloc(sizeof(*temp));
+		എങ്കിൽ (!S_ISGITLINK(p->one->mode) && !S_ISGITLINK(p->two->mode))
+			തുടരുക;
+		temp = xmalloc(വലുപ്പം(*temp));
 		temp->mod_src = p->one->mode;
 		temp->mod_dst = p->two->mode;
 		temp->oid_src = p->one->oid;
@@ -1217,81 +1217,81 @@ static void submodule_summary_callback(struct diff_queue_struct *q,
 	}
 }
 
-static const char *get_diff_cmd(enum diff_cmd diff_cmd)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_diff_cmd(എണ്ണൽ diff_cmd diff_cmd)
 {
-	switch (diff_cmd) {
-	case DIFF_INDEX: return "diff-index";
-	case DIFF_FILES: return "diff-files";
-	default: BUG("bad diff_cmd value %d", diff_cmd);
+	തിരഞ്ഞെടുപ്പ് (diff_cmd) {
+	അവസ്ഥ DIFF_INDEX: തിരികെ "diff-index";
+	അവസ്ഥ DIFF_FILES: തിരികെ "diff-files";
+	സ്ഥിരസ്ഥിതി: BUG("bad diff_cmd value %d", diff_cmd);
 	}
 }
 
-static int compute_summary_module_list(struct object_id *head_oid,
-				       struct summary_cb *info,
-				       enum diff_cmd diff_cmd)
+സ്ഥിതം പൂർണ്ണസംഖ്യ compute_summary_module_list(ഘടന object_id *head_oid,
+				       ഘടന summary_cb *info,
+				       എണ്ണൽ diff_cmd diff_cmd)
 {
-	struct strvec diff_args = STRVEC_INIT;
-	struct rev_info rev;
-	struct module_cb_list list = MODULE_CB_LIST_INIT;
-	int ret = 0;
+	ഘടന strvec diff_args = STRVEC_INIT;
+	ഘടന rev_info rev;
+	ഘടന module_cb_list list = MODULE_CB_LIST_INIT;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
-	strvec_push(&diff_args, get_diff_cmd(diff_cmd));
-	if (info->cached)
-		strvec_push(&diff_args, "--cached");
-	strvec_pushl(&diff_args, "--ignore-submodules=dirty", "--raw", NULL);
-	if (head_oid)
-		strvec_push(&diff_args, oid_to_hex(head_oid));
-	strvec_push(&diff_args, "--");
-	if (info->argc)
+	strvec_തള്ളുക(&diff_args, get_diff_cmd(diff_cmd));
+	എങ്കിൽ (info->cached)
+		strvec_തള്ളുക(&diff_args, "--cached");
+	strvec_pushl(&diff_args, "--ignore-submodules=dirty", "--raw", ശൂന്യ);
+	എങ്കിൽ (head_oid)
+		strvec_തള്ളുക(&diff_args, oid_to_hex(head_oid));
+	strvec_തള്ളുക(&diff_args, "--");
+	എങ്കിൽ (info->argc)
 		strvec_pushv(&diff_args, info->argv);
 
-	repo_config(the_repository, git_diff_basic_config, NULL);
+	repo_config(the_repository, git_diff_basic_config, ശൂന്യ);
 	repo_init_revisions(the_repository, &rev, info->prefix);
 	rev.abbrev = 0;
-	precompose_argv_prefix(diff_args.nr, diff_args.v, NULL);
-	setup_revisions_from_strvec(&diff_args, &rev, NULL);
+	precompose_argv_prefix(diff_args.nr, diff_args.v, ശൂന്യ);
+	setup_revisions_from_strvec(&diff_args, &rev, ശൂന്യ);
 	rev.diffopt.output_format = DIFF_FORMAT_NO_OUTPUT | DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = submodule_summary_callback;
 	rev.diffopt.format_callback_data = &list;
 
-	if (!info->cached) {
-		if (diff_cmd == DIFF_INDEX)
-			setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	എങ്കിൽ (!info->cached) {
+		എങ്കിൽ (diff_cmd == DIFF_INDEX)
+			setup_work_വൃക്ഷം(the_repository);
+		എങ്കിൽ (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
 			ret = -1;
-			goto cleanup;
+			പോകുക cleanup;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (repo_read_index(the_repository) < 0) {
 		perror("repo_read_cache");
 		ret = -1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
-	if (diff_cmd == DIFF_INDEX)
+	എങ്കിൽ (diff_cmd == DIFF_INDEX)
 		run_diff_index(&rev, info->cached ? DIFF_INDEX_CACHED : 0);
-	else
+	അല്ലെങ്കിൽ
 		run_diff_files(&rev, 0);
 	prepare_submodule_summary(info, &list);
 cleanup:
 	strvec_clear(&diff_args);
 	release_revisions(&rev);
 	module_cb_list_release(&list);
-	return ret;
+	തിരികെ ret;
 }
 
-static int module_summary(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_summary(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			  ഘടന repository *repo UNUSED)
 {
-	struct summary_cb info = SUMMARY_CB_INIT;
-	int cached = 0;
-	int for_status = 0;
-	int files = 0;
-	int summary_limit = -1;
-	enum diff_cmd diff_cmd = DIFF_INDEX;
-	struct object_id head_oid;
-	int ret;
-	struct option module_summary_options[] = {
+	ഘടന summary_cb info = SUMMARY_CB_INIT;
+	പൂർണ്ണസംഖ്യ cached = 0;
+	പൂർണ്ണസംഖ്യ for_status = 0;
+	പൂർണ്ണസംഖ്യ files = 0;
+	പൂർണ്ണസംഖ്യ summary_limit = -1;
+	എണ്ണൽ diff_cmd diff_cmd = DIFF_INDEX;
+	ഘടന object_id head_oid;
+	പൂർണ്ണസംഖ്യ ret;
+	ഘടന option module_summary_options[] = {
 		OPT_BOOL(0, "cached", &cached,
 			 N_("use the commit stored in the index instead of the submodule HEAD")),
 		OPT_BOOL(0, "files", &files,
@@ -1302,36 +1302,36 @@ static int module_summary(int argc, const char **argv, const char *prefix,
 			     N_("limit the summary size")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule summary [<options>] [<commit>] [--] [<path>]"),
-		NULL
+		ശൂന്യ
 	};
 
 	argc = parse_options(argc, argv, prefix, module_summary_options,
 			     git_submodule_helper_usage, 0);
 
-	if (!summary_limit)
-		return 0;
+	എങ്കിൽ (!summary_limit)
+		തിരികെ 0;
 
-	if (!repo_get_oid(the_repository, argc ? argv[0] : "HEAD", &head_oid)) {
-		if (argc) {
+	എങ്കിൽ (!repo_get_oid(the_repository, argc ? argv[0] : "HEAD", &head_oid)) {
+		എങ്കിൽ (argc) {
 			argv++;
 			argc--;
 		}
-	} else if (!argc || !strcmp(argv[0], "HEAD")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!argc || !strcmp(argv[0], "HEAD")) {
 		/* before the first commit: compare with an empty tree */
-		oidcpy(&head_oid, the_hash_algo->empty_tree);
-		if (argc) {
+		oidcpy(&head_oid, the_hash_algo->empty_വൃക്ഷം);
+		എങ്കിൽ (argc) {
 			argv++;
 			argc--;
 		}
-	} else {
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (repo_get_oid(the_repository, "HEAD", &head_oid))
 			die(_("could not fetch a revision for HEAD"));
 	}
 
-	if (files) {
-		if (cached)
+	എങ്കിൽ (files) {
+		എങ്കിൽ (cached)
 			die(_("options '%s' and '%s' cannot be used together"), "--cached", "--files");
 		diff_cmd = DIFF_FILES;
 	}
@@ -1344,17 +1344,17 @@ static int module_summary(int argc, const char **argv, const char *prefix,
 	info.for_status = !!for_status;
 	info.summary_limit = summary_limit;
 
-	ret = compute_summary_module_list((diff_cmd == DIFF_INDEX) ? &head_oid : NULL,
+	ret = compute_summary_module_list((diff_cmd == DIFF_INDEX) ? &head_oid : ശൂന്യ,
 					  &info, diff_cmd);
-	return ret;
+	തിരികെ ret;
 }
 
-static int module_gitdir(int argc, const char **argv, const char *prefix UNUSED,
-			 struct repository *repo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_gitdir(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix UNUSED,
+			 ഘടന repository *repo)
 {
-	struct strbuf gitdir = STRBUF_INIT;
+	ഘടന strbuf gitdir = STRBUF_INIT;
 
-	if (argc != 2)
+	എങ്കിൽ (argc != 2)
 		usage(_("git submodule--helper gitdir <name>"));
 
 	submodule_name_to_gitdir(&gitdir, repo, argv[1]);
@@ -1362,45 +1362,45 @@ static int module_gitdir(int argc, const char **argv, const char *prefix UNUSED,
 	printf("%s\n", gitdir.buf);
 
 	strbuf_release(&gitdir);
-	return 0;
+	തിരികെ 0;
 }
 
-static int module_migrate(int argc UNUSED, const char **argv UNUSED,
-			  const char *prefix UNUSED, struct repository *repo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_migrate(പൂർണ്ണസംഖ്യ argc UNUSED, സ്ഥിരം അക്ഷരം **argv UNUSED,
+			  സ്ഥിരം അക്ഷരം *prefix UNUSED, ഘടന repository *repo)
 {
-	struct strbuf module_dir = STRBUF_INIT;
+	ഘടന strbuf module_dir = STRBUF_INIT;
 	DIR *dir;
-	struct dirent *de;
-	int repo_version = 0;
+	ഘടന dirent *de;
+	പൂർണ്ണസംഖ്യ repo_version = 0;
 
 	repo_git_path_append(repo, &module_dir, "modules/");
 
 	dir = opendir(module_dir.buf);
-	if (!dir)
+	എങ്കിൽ (!dir)
 		die(_("could not open '%s'"), module_dir.buf);
 
-	while ((de = readdir(dir))) {
-		struct strbuf gitdir_path = STRBUF_INIT;
-		char *key;
-		const char *value;
+	ആകുമ്പോൾ ((de = readdir(dir))) {
+		ഘടന strbuf gitdir_path = STRBUF_INIT;
+		അക്ഷരം *താക്കോൽ;
+		സ്ഥിരം അക്ഷരം *മൂല്യം;
 
-		if (is_dot_or_dotdot(de->d_name))
-			continue;
+		എങ്കിൽ (is_dot_or_dotdot(de->d_name))
+			തുടരുക;
 
 		strbuf_addf(&gitdir_path, "%s/%s", module_dir.buf, de->d_name);
-		if (!is_git_directory(gitdir_path.buf)) {
+		എങ്കിൽ (!is_git_directory(gitdir_path.buf)) {
 			strbuf_release(&gitdir_path);
-			continue;
+			തുടരുക;
 		}
 		strbuf_release(&gitdir_path);
 
-		key = xstrfmt("submodule.%s.gitdir", de->d_name);
-		if (!repo_config_get_string_tmp(repo, key, &value)) {
+		താക്കോൽ = xstrfmt("submodule.%s.gitdir", de->d_name);
+		എങ്കിൽ (!repo_config_get_string_tmp(repo, താക്കോൽ, &മൂല്യം)) {
 			/* Already has a gitdir config, nothing to do. */
-			free(key);
-			continue;
+			സ്വതന്ത്രം(താക്കോൽ);
+			തുടരുക;
 		}
-		free(key);
+		സ്വതന്ത്രം(താക്കോൽ);
 
 		create_default_gitdir_config(de->d_name);
 	}
@@ -1409,161 +1409,161 @@ static int module_migrate(int argc UNUSED, const char **argv UNUSED,
 	strbuf_release(&module_dir);
 
 	repo_config_get_int(the_repository, "core.repositoryformatversion", &repo_version);
-	if (repo_version == 0 &&
+	എങ്കിൽ (repo_version == 0 &&
 	    repo_config_set_gently(repo, "core.repositoryformatversion", "1"))
 		die(_("could not set core.repositoryformatversion to 1.\n"
 		      "Please set it for migration to work, for example:\n"
 		      "git config core.repositoryformatversion 1"));
 
-	if (repo_config_set_gently(repo, "extensions.submodulePathConfig", "true"))
+	എങ്കിൽ (repo_config_set_gently(repo, "extensions.submodulePathConfig", "true"))
 		die(_("could not enable submodulePathConfig extension. It is required\n"
 		      "for migration to work. Please enable it in the root repo:\n"
 		      "git config extensions.submodulePathConfig true"));
 
 	repo->repository_format_submodule_path_cfg = 1;
 
-	return 0;
+	തിരികെ 0;
 }
 
-struct sync_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+ഘടന sync_cb {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *super_prefix;
+	unsigned പൂർണ്ണസംഖ്യ flags;
 };
 #define SYNC_CB_INIT { 0 }
 
-static void sync_submodule(const char *path, const char *prefix,
-			   const char *super_prefix, unsigned int flags)
+സ്ഥിതം ശൂന്യം sync_submodule(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *prefix,
+			   സ്ഥിരം അക്ഷരം *super_prefix, unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	const struct submodule *sub;
-	char *remote_key = NULL;
-	char *sub_origin_url, *super_config_url, *displaypath, *default_remote;
-	struct strbuf sb = STRBUF_INIT;
-	char *sub_config_path = NULL;
-	int code;
+	സ്ഥിരം ഘടന submodule *sub;
+	അക്ഷരം *remote_താക്കോൽ = ശൂന്യ;
+	അക്ഷരം *sub_origin_url, *super_config_url, *displaypath, *default_remote;
+	ഘടന strbuf sb = STRBUF_INIT;
+	അക്ഷരം *sub_config_path = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ code;
 
-	if (!is_submodule_active(the_repository, path))
-		return;
+	എങ്കിൽ (!is_submodule_active(the_repository, path))
+		തിരികെ;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	എങ്കിൽ (validate_submodule_path(path) < 0)
+		die(ശൂന്യ);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (sub && sub->url) {
-		if (starts_with_dot_dot_slash(sub->url) ||
+	എങ്കിൽ (sub && sub->url) {
+		എങ്കിൽ (starts_with_dot_dot_slash(sub->url) ||
 		    starts_with_dot_slash(sub->url)) {
-			char *up_path = get_up_path(path);
+			അക്ഷരം *up_path = get_up_path(path);
 
 			sub_origin_url = resolve_relative_url(sub->url, up_path, 1);
-			super_config_url = resolve_relative_url(sub->url, NULL, 1);
-			free(up_path);
-		} else {
+			super_config_url = resolve_relative_url(sub->url, ശൂന്യ, 1);
+			സ്വതന്ത്രം(up_path);
+		} അല്ലെങ്കിൽ {
 			sub_origin_url = xstrdup(sub->url);
 			super_config_url = xstrdup(sub->url);
 		}
-	} else {
+	} അല്ലെങ്കിൽ {
 		sub_origin_url = xstrdup("");
 		super_config_url = xstrdup("");
 	}
 
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
-	if (!(flags & OPT_QUIET))
+	എങ്കിൽ (!(flags & OPT_QUIET))
 		printf(_("Synchronizing submodule url for '%s'\n"),
 			 displaypath);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_set_gently(the_repository, sb.buf, super_config_url))
+	എങ്കിൽ (repo_config_set_gently(the_repository, sb.buf, super_config_url))
 		die(_("failed to register url for submodule path '%s'"),
 		      displaypath);
 
-	if (!is_submodule_populated_gently(path, NULL))
-		goto cleanup;
+	എങ്കിൽ (!is_submodule_populated_gently(path, ശൂന്യ))
+		പോകുക cleanup;
 
 	strbuf_reset(&sb);
 	code = get_default_remote_submodule(path, &default_remote);
-	if (code)
+	എങ്കിൽ (code)
 		exit(code);
 
-	remote_key = xstrfmt("remote.%s.url", default_remote);
-	free(default_remote);
+	remote_താക്കോൽ = xstrfmt("remote.%s.url", default_remote);
+	സ്വതന്ത്രം(default_remote);
 
 	submodule_to_gitdir(the_repository, &sb, path);
 	strbuf_addstr(&sb, "/config");
 
-	if (repo_config_set_in_file_gently(the_repository, sb.buf, remote_key, NULL, sub_origin_url))
+	എങ്കിൽ (repo_config_set_in_file_gently(the_repository, sb.buf, remote_താക്കോൽ, ശൂന്യ, sub_origin_url))
 		die(_("failed to update remote for submodule '%s'"),
 		      path);
 
-	if (flags & OPT_RECURSIVE) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
+	എങ്കിൽ (flags & OPT_RECURSIVE) {
+		ഘടന child_process cpr = CHILD_PROCESS_INIT;
 
 		cpr.git_cmd = 1;
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
 		strvec_pushl(&cpr.args, "submodule--helper", "sync",
-			     "--recursive", NULL);
+			     "--recursive", ശൂന്യ);
 		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
 
-		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+		എങ്കിൽ (flags & OPT_QUIET)
+			strvec_തള്ളുക(&cpr.args, "--quiet");
 
-		if (run_command(&cpr))
+		എങ്കിൽ (run_command(&cpr))
 			die(_("failed to recurse into submodule '%s'"),
 			      path);
 	}
 
 cleanup:
-	free(super_config_url);
-	free(sub_origin_url);
+	സ്വതന്ത്രം(super_config_url);
+	സ്വതന്ത്രം(sub_origin_url);
 	strbuf_release(&sb);
-	free(remote_key);
-	free(displaypath);
-	free(sub_config_path);
+	സ്വതന്ത്രം(remote_താക്കോൽ);
+	സ്വതന്ത്രം(displaypath);
+	സ്വതന്ത്രം(sub_config_path);
 }
 
-static void sync_submodule_cb(const struct cache_entry *list_item, void *cb_data)
+സ്ഥിതം ശൂന്യം sync_submodule_cb(സ്ഥിരം ഘടന cache_entry *list_item, ശൂന്യം *cb_data)
 {
-	struct sync_cb *info = cb_data;
+	ഘടന sync_cb *info = cb_data;
 
 	sync_submodule(list_item->name, info->prefix, info->super_prefix,
 		       info->flags);
 }
 
-static int module_sync(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_sync(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		       ഘടന repository *repo UNUSED)
 {
-	struct sync_cb info = SYNC_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	int recursive = 0;
-	struct option module_sync_options[] = {
+	ഘടന sync_cb info = SYNC_CB_INIT;
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന module_list list = MODULE_LIST_INIT;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ recursive = 0;
+	ഘടന option module_sync_options[] = {
 		OPT__SUPER_PREFIX(&info.super_prefix),
 		OPT__QUIET(&quiet, N_("suppress output of synchronizing submodule url")),
 		OPT_BOOL(0, "recursive", &recursive,
 			N_("recurse into nested submodules")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule sync [--quiet] [--recursive] [<path>]"),
-		NULL
+		ശൂന്യ
 	};
-	int ret = 1;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_sync_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	എങ്കിൽ (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		പോകുക cleanup;
 
 	info.prefix = prefix;
-	if (quiet)
+	എങ്കിൽ (quiet)
 		info.flags |= OPT_QUIET;
-	if (recursive)
+	എങ്കിൽ (recursive)
 		info.flags |= OPT_RECURSIVE;
 
 	for_each_listed_submodule(&list, sync_submodule_cb, &info);
@@ -1572,58 +1572,58 @@ static int module_sync(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	തിരികെ ret;
 }
 
-struct deinit_cb {
-	const char *prefix;
-	unsigned int flags;
+ഘടന deinit_cb {
+	സ്ഥിരം അക്ഷരം *prefix;
+	unsigned പൂർണ്ണസംഖ്യ flags;
 };
 #define DEINIT_CB_INIT { 0 }
 
-static void deinit_submodule(const char *path, const char *prefix,
-			     unsigned int flags)
+സ്ഥിതം ശൂന്യം deinit_submodule(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *prefix,
+			     unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	const struct submodule *sub;
-	char *displaypath = NULL;
-	struct child_process cp_config = CHILD_PROCESS_INIT;
-	struct strbuf sb_config = STRBUF_INIT;
-	char *sub_git_dir = xstrfmt("%s/.git", path);
+	സ്ഥിരം ഘടന submodule *sub;
+	അക്ഷരം *displaypath = ശൂന്യ;
+	ഘടന child_process cp_config = CHILD_PROCESS_INIT;
+	ഘടന strbuf sb_config = STRBUF_INIT;
+	അക്ഷരം *sub_git_dir = xstrfmt("%s/.git", path);
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	എങ്കിൽ (validate_submodule_path(path) < 0)
+		die(ശൂന്യ);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub || !sub->name)
-		goto cleanup;
+	എങ്കിൽ (!sub || !sub->name)
+		പോകുക cleanup;
 
-	displaypath = get_submodule_displaypath(path, prefix, NULL);
+	displaypath = get_submodule_displaypath(path, prefix, ശൂന്യ);
 
 	/* remove the submodule work tree (unless the user already did it) */
-	if (is_directory(path)) {
-		struct strbuf sb_rm = STRBUF_INIT;
-		const char *format;
+	എങ്കിൽ (is_directory(path)) {
+		ഘടന strbuf sb_rm = STRBUF_INIT;
+		സ്ഥിരം അക്ഷരം *format;
 
-		if (is_directory(sub_git_dir)) {
-			if (!(flags & OPT_QUIET))
+		എങ്കിൽ (is_directory(sub_git_dir)) {
+			എങ്കിൽ (!(flags & OPT_QUIET))
 				warning(_("Submodule work tree '%s' contains a .git "
 					  "directory. This will be replaced with a "
 					  ".git file by using absorbgitdirs."),
 					displaypath);
 
-			absorb_git_dir_into_superproject(path, NULL);
+			absorb_git_dir_into_superproject(path, ശൂന്യ);
 
 		}
 
-		if (!(flags & OPT_FORCE)) {
-			struct child_process cp_rm = CHILD_PROCESS_INIT;
+		എങ്കിൽ (!(flags & OPT_FORCE)) {
+			ഘടന child_process cp_rm = CHILD_PROCESS_INIT;
 
 			cp_rm.git_cmd = 1;
 			strvec_pushl(&cp_rm.args, "rm", "-qn",
-				     path, NULL);
+				     path, ശൂന്യ);
 
-			if (run_command(&cp_rm))
+			എങ്കിൽ (run_command(&cp_rm))
 				die(_("Submodule work tree '%s' contains local "
 				      "modifications; use '-f' to discard them"),
 				      displaypath);
@@ -1631,12 +1631,12 @@ static void deinit_submodule(const char *path, const char *prefix,
 
 		strbuf_addstr(&sb_rm, path);
 
-		if (!remove_dir_recursively(&sb_rm, 0))
+		എങ്കിൽ (!remove_dir_recursively(&sb_rm, 0))
 			format = _("Cleared directory '%s'\n");
-		else
+		അല്ലെങ്കിൽ
 			format = _("Could not remove submodule work tree '%s'\n");
 
-		if (!(flags & OPT_QUIET))
+		എങ്കിൽ (!(flags & OPT_QUIET))
 			printf(format, displaypath);
 
 		submodule_unset_core_worktree(sub);
@@ -1644,82 +1644,82 @@ static void deinit_submodule(const char *path, const char *prefix,
 		strbuf_release(&sb_rm);
 	}
 
-	if (mkdir(path, 0777))
+	എങ്കിൽ (mkdir(path, 0777))
 		printf(_("could not create empty submodule directory %s"),
 		      displaypath);
 
 	cp_config.git_cmd = 1;
-	strvec_pushl(&cp_config.args, "config", "--get-regexp", NULL);
+	strvec_pushl(&cp_config.args, "config", "--get-regexp", ശൂന്യ);
 	strvec_pushf(&cp_config.args, "submodule.%s\\.", sub->name);
 
 	/* remove the .git/config entries (unless the user already did it) */
-	if (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
-		char *sub_key = xstrfmt("submodule.%s", sub->name);
+	എങ്കിൽ (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
+		അക്ഷരം *sub_താക്കോൽ = xstrfmt("submodule.%s", sub->name);
 
 		/*
 		 * remove the whole section so we have a clean state when
 		 * the user later decides to init this submodule again
 		 */
-		repo_config_rename_section_in_file(the_repository, NULL, sub_key, NULL);
-		if (!(flags & OPT_QUIET))
+		repo_config_rename_section_in_file(the_repository, ശൂന്യ, sub_താക്കോൽ, ശൂന്യ);
+		എങ്കിൽ (!(flags & OPT_QUIET))
 			printf(_("Submodule '%s' (%s) unregistered for path '%s'\n"),
 				 sub->name, sub->url, displaypath);
-		free(sub_key);
+		സ്വതന്ത്രം(sub_താക്കോൽ);
 	}
 
 cleanup:
-	free(displaypath);
-	free(sub_git_dir);
+	സ്വതന്ത്രം(displaypath);
+	സ്വതന്ത്രം(sub_git_dir);
 	strbuf_release(&sb_config);
 }
 
-static void deinit_submodule_cb(const struct cache_entry *list_item,
-				void *cb_data)
+സ്ഥിതം ശൂന്യം deinit_submodule_cb(സ്ഥിരം ഘടന cache_entry *list_item,
+				ശൂന്യം *cb_data)
 {
-	struct deinit_cb *info = cb_data;
+	ഘടന deinit_cb *info = cb_data;
 	deinit_submodule(list_item->name, info->prefix, info->flags);
 }
 
-static int module_deinit(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_deinit(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			 ഘടന repository *repo UNUSED)
 {
-	struct deinit_cb info = DEINIT_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	int force = 0;
-	int all = 0;
-	struct option module_deinit_options[] = {
+	ഘടന deinit_cb info = DEINIT_CB_INIT;
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന module_list list = MODULE_LIST_INIT;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ force = 0;
+	പൂർണ്ണസംഖ്യ all = 0;
+	ഘടന option module_deinit_options[] = {
 		OPT__QUIET(&quiet, N_("suppress submodule status output")),
 		OPT__FORCE(&force, N_("remove submodule working trees even if they contain local changes"), 0),
 		OPT_BOOL(0, "all", &all, N_("unregister all submodules")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule deinit [--quiet] [-f | --force] [--all | [--] [<path>...]]"),
-		NULL
+		ശൂന്യ
 	};
-	int ret = 1;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_deinit_options,
 			     git_submodule_helper_usage, 0);
 
-	if (all && argc) {
+	എങ്കിൽ (all && argc) {
 		error("pathspec and --all are incompatible");
 		usage_with_options(git_submodule_helper_usage,
 				   module_deinit_options);
 	}
 
-	if (!argc && !all)
+	എങ്കിൽ (!argc && !all)
 		die(_("Use '--all' if you really want to deinitialize all submodules"));
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	എങ്കിൽ (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		പോകുക cleanup;
 
 	info.prefix = prefix;
-	if (quiet)
+	എങ്കിൽ (quiet)
 		info.flags |= OPT_QUIET;
-	if (force)
+	എങ്കിൽ (force)
 		info.flags |= OPT_FORCE;
 
 	for_each_listed_submodule(&list, deinit_submodule_cb, &info);
@@ -1728,66 +1728,66 @@ static int module_deinit(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	തിരികെ ret;
 }
 
-struct module_clone_data {
-	const char *prefix;
-	const char *path;
-	const char *name;
-	const char *url;
-	int depth;
-	struct list_objects_filter_options *filter_options;
-	enum ref_storage_format ref_storage_format;
-	unsigned int quiet: 1;
-	unsigned int progress: 1;
-	unsigned int dissociate: 1;
-	unsigned int require_init: 1;
-	int single_branch;
+ഘടന module_clone_data {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *path;
+	സ്ഥിരം അക്ഷരം *name;
+	സ്ഥിരം അക്ഷരം *url;
+	പൂർണ്ണസംഖ്യ depth;
+	ഘടന list_objects_filter_options *filter_options;
+	എണ്ണൽ ref_storage_format ref_storage_format;
+	unsigned പൂർണ്ണസംഖ്യ quiet: 1;
+	unsigned പൂർണ്ണസംഖ്യ progress: 1;
+	unsigned പൂർണ്ണസംഖ്യ dissociate: 1;
+	unsigned പൂർണ്ണസംഖ്യ require_init: 1;
+	പൂർണ്ണസംഖ്യ single_branch;
 };
 #define MODULE_CLONE_DATA_INIT { \
 	.single_branch = -1, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-struct submodule_alternate_setup {
-	const char *submodule_name;
-	enum SUBMODULE_ALTERNATE_ERROR_MODE {
+ഘടന submodule_alternate_setup {
+	സ്ഥിരം അക്ഷരം *submodule_name;
+	എണ്ണൽ SUBMODULE_ALTERNATE_ERROR_MODE {
 		SUBMODULE_ALTERNATE_ERROR_DIE,
 		SUBMODULE_ALTERNATE_ERROR_INFO,
 		SUBMODULE_ALTERNATE_ERROR_IGNORE
 	} error_mode;
-	struct string_list *reference;
+	ഘടന string_list *reference;
 };
 #define SUBMODULE_ALTERNATE_SETUP_INIT { \
 	.error_mode = SUBMODULE_ALTERNATE_ERROR_IGNORE, \
 }
 
-static const char alternate_error_advice[] = N_(
+സ്ഥിതം സ്ഥിരം അക്ഷരം alternate_error_advice[] = N_(
 "An alternate computed from a superproject's alternate is invalid.\n"
 "To allow Git to clone without an alternate in such a case, set\n"
 "submodule.alternateErrorStrategy to 'info' or, equivalently, clone with\n"
 "'--reference-if-able' instead of '--reference'."
 );
 
-static int add_possible_reference_from_superproject(
-		struct odb_files_dir *alt_odb, void *sas_cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_possible_reference_from_superproject(
+		ഘടന odb_files_dir *alt_odb, ശൂന്യം *sas_cb)
 {
-	struct submodule_alternate_setup *sas = sas_cb;
+	ഘടന submodule_alternate_setup *sas = sas_cb;
 	size_t len;
 
 	/*
 	 * If the alternate object store is another repository, try the
 	 * standard layout with .git/(modules/<name>)+/objects
 	 */
-	if (strip_suffix(alt_odb->abspath, "/objects", &len)) {
-		struct repository alternate;
-		char *sm_alternate;
-		struct strbuf sb = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	എങ്കിൽ (strip_suffix(alt_odb->abspath, "/objects", &len)) {
+		ഘടന repository alternate;
+		അക്ഷരം *sm_alternate;
+		ഘടന strbuf sb = STRBUF_INIT;
+		ഘടന strbuf err = STRBUF_INIT;
 		strbuf_add(&sb, alt_odb->abspath, len);
 
-		if (repo_init(&alternate, sb.buf, NULL) < 0)
+		എങ്കിൽ (repo_init(&alternate, sb.buf, ശൂന്യ) < 0)
 			die(_("could not get a repository handle for gitdir '%s'"),
 			    sb.buf);
 
@@ -1803,22 +1803,22 @@ static int add_possible_reference_from_superproject(
 		repo_clear(&alternate);
 
 		sm_alternate = compute_alternate_path(sb.buf, &err);
-		if (sm_alternate) {
-			char *p = strbuf_detach(&sb, NULL);
+		എങ്കിൽ (sm_alternate) {
+			അക്ഷരം *p = strbuf_detach(&sb, ശൂന്യ);
 
 			string_list_append(sas->reference, p)->util = p;
-			free(sm_alternate);
-		} else {
-			switch (sas->error_mode) {
-			case SUBMODULE_ALTERNATE_ERROR_DIE:
-				if (advice_enabled(ADVICE_SUBMODULE_ALTERNATE_ERROR_STRATEGY_DIE))
+			സ്വതന്ത്രം(sm_alternate);
+		} അല്ലെങ്കിൽ {
+			തിരഞ്ഞെടുപ്പ് (sas->error_mode) {
+			അവസ്ഥ SUBMODULE_ALTERNATE_ERROR_DIE:
+				എങ്കിൽ (advice_enabled(ADVICE_SUBMODULE_ALTERNATE_ERROR_STRATEGY_DIE))
 					advise(_(alternate_error_advice));
 				die(_("submodule '%s' cannot add alternate: %s"),
 				    sas->submodule_name, err.buf);
-			case SUBMODULE_ALTERNATE_ERROR_INFO:
+			അവസ്ഥ SUBMODULE_ALTERNATE_ERROR_INFO:
 				fprintf_ln(stderr, _("submodule '%s' cannot add alternate: %s"),
 					sas->submodule_name, err.buf);
-			case SUBMODULE_ALTERNATE_ERROR_IGNORE:
+			അവസ്ഥ SUBMODULE_ALTERNATE_ERROR_IGNORE:
 				; /* nothing */
 			}
 		}
@@ -1827,170 +1827,170 @@ static int add_possible_reference_from_superproject(
 		strbuf_release(&sb);
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void prepare_possible_alternates(const char *sm_name,
-		struct string_list *reference)
+സ്ഥിതം ശൂന്യം prepare_possible_alternates(സ്ഥിരം അക്ഷരം *sm_name,
+		ഘടന string_list *reference)
 {
-	char *sm_alternate = NULL, *error_strategy = NULL;
-	struct submodule_alternate_setup sas = SUBMODULE_ALTERNATE_SETUP_INIT;
+	അക്ഷരം *sm_alternate = ശൂന്യ, *error_strategy = ശൂന്യ;
+	ഘടന submodule_alternate_setup sas = SUBMODULE_ALTERNATE_SETUP_INIT;
 
 	repo_config_get_string(the_repository, "submodule.alternateLocation", &sm_alternate);
-	if (!sm_alternate)
-		return;
+	എങ്കിൽ (!sm_alternate)
+		തിരികെ;
 
 	repo_config_get_string(the_repository, "submodule.alternateErrorStrategy", &error_strategy);
 
-	if (!error_strategy)
+	എങ്കിൽ (!error_strategy)
 		error_strategy = xstrdup("die");
 
 	sas.submodule_name = sm_name;
 	sas.reference = reference;
-	if (!strcmp(error_strategy, "die"))
+	എങ്കിൽ (!strcmp(error_strategy, "die"))
 		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_DIE;
-	else if (!strcmp(error_strategy, "info"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(error_strategy, "info"))
 		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_INFO;
-	else if (!strcmp(error_strategy, "ignore"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(error_strategy, "ignore"))
 		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_IGNORE;
-	else
+	അല്ലെങ്കിൽ
 		die(_("Value '%s' for submodule.alternateErrorStrategy is not recognized"), error_strategy);
 
-	if (!strcmp(sm_alternate, "superproject"))
+	എങ്കിൽ (!strcmp(sm_alternate, "superproject"))
 		odb_for_each_alternate(the_repository->objects,
 				       add_possible_reference_from_superproject, &sas);
-	else if (!strcmp(sm_alternate, "no"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(sm_alternate, "no"))
 		; /* do nothing */
-	else
+	അല്ലെങ്കിൽ
 		die(_("Value '%s' for submodule.alternateLocation is not recognized"), sm_alternate);
 
-	free(sm_alternate);
-	free(error_strategy);
+	സ്വതന്ത്രം(sm_alternate);
+	സ്വതന്ത്രം(error_strategy);
 }
 
-static char *clone_submodule_sm_gitdir(const char *name)
+സ്ഥിതം അക്ഷരം *clone_submodule_sm_gitdir(സ്ഥിരം അക്ഷരം *name)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *sm_gitdir;
+	ഘടന strbuf sb = STRBUF_INIT;
+	അക്ഷരം *sm_gitdir;
 
 	submodule_name_to_gitdir(&sb, the_repository, name);
 	sm_gitdir = absolute_pathdup(sb.buf);
 	strbuf_release(&sb);
 
-	return sm_gitdir;
+	തിരികെ sm_gitdir;
 }
 
-static int dir_contains_only_dotgit(const char *path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ dir_contains_only_dotgit(സ്ഥിരം അക്ഷരം *path)
 {
 	DIR *dir = opendir(path);
-	struct dirent *e;
-	int ret = 1;
+	ഘടന dirent *e;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
-	if (!dir)
-		return 0;
+	എങ്കിൽ (!dir)
+		തിരികെ 0;
 
 	e = readdir_skip_dot_and_dotdot(dir);
-	if (!e)
+	എങ്കിൽ (!e)
 		ret = 0;
-	else if (strcmp(DEFAULT_GIT_DIR_ENVIRONMENT, e->d_name) ||
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(DEFAULT_GIT_DIR_ENVIRONMENT, e->d_name) ||
 		 (e = readdir_skip_dot_and_dotdot(dir))) {
 		error("unexpected item '%s' in '%s'", e->d_name, path);
 		ret = 0;
 	}
 
 	closedir(dir);
-	return ret;
+	തിരികെ ret;
 }
 
-static int clone_submodule(const struct module_clone_data *clone_data,
-			   struct string_list *reference)
+സ്ഥിതം പൂർണ്ണസംഖ്യ clone_submodule(സ്ഥിരം ഘടന module_clone_data *clone_data,
+			   ഘടന string_list *reference)
 {
-	char *p;
-	char *sm_gitdir = clone_submodule_sm_gitdir(clone_data->name);
-	char *sm_alternate = NULL, *error_strategy = NULL;
-	struct stat st;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	const char *clone_data_path = clone_data->path;
-	char *to_free = NULL;
+	അക്ഷരം *p;
+	അക്ഷരം *sm_gitdir = clone_submodule_sm_gitdir(clone_data->name);
+	അക്ഷരം *sm_alternate = ശൂന്യ, *error_strategy = ശൂന്യ;
+	ഘടന stat st;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
+	സ്ഥിരം അക്ഷരം *clone_data_path = clone_data->path;
+	അക്ഷരം *to_free = ശൂന്യ;
 
-	if (validate_submodule_path(clone_data_path) < 0)
-		die(NULL);
+	എങ്കിൽ (validate_submodule_path(clone_data_path) < 0)
+		die(ശൂന്യ);
 
-	if (!is_absolute_path(clone_data->path))
-		clone_data_path = to_free = xstrfmt("%s/%s", repo_get_work_tree(the_repository),
+	എങ്കിൽ (!is_absolute_path(clone_data->path))
+		clone_data_path = to_free = xstrfmt("%s/%s", repo_get_work_വൃക്ഷം(the_repository),
 						    clone_data->path);
 
-	if (!file_exists(sm_gitdir)) {
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
+	എങ്കിൽ (!file_exists(sm_gitdir)) {
+		എങ്കിൽ (clone_data->require_init && !stat(clone_data_path, &st) &&
 		    !is_empty_dir(clone_data_path))
 			die(_("directory not empty: '%s'"), clone_data_path);
 
-		if (safe_create_leading_directories_const(the_repository, sm_gitdir) < 0)
+		എങ്കിൽ (safe_create_leading_directories_const(the_repository, sm_gitdir) < 0)
 			die(_("could not create directory '%s'"), sm_gitdir);
 
 		prepare_possible_alternates(clone_data->name, reference);
 
-		strvec_push(&cp.args, "clone");
-		strvec_push(&cp.args, "--no-checkout");
-		if (clone_data->quiet)
-			strvec_push(&cp.args, "--quiet");
-		if (clone_data->progress)
-			strvec_push(&cp.args, "--progress");
-		if (clone_data->depth > 0)
+		strvec_തള്ളുക(&cp.args, "clone");
+		strvec_തള്ളുക(&cp.args, "--no-checkout");
+		എങ്കിൽ (clone_data->quiet)
+			strvec_തള്ളുക(&cp.args, "--quiet");
+		എങ്കിൽ (clone_data->progress)
+			strvec_തള്ളുക(&cp.args, "--progress");
+		എങ്കിൽ (clone_data->depth > 0)
 			strvec_pushf(&cp.args, "--depth=%d", clone_data->depth);
-		if (reference->nr) {
-			struct string_list_item *item;
+		എങ്കിൽ (reference->nr) {
+			ഘടന string_list_item *item;
 
 			for_each_string_list_item(item, reference)
 				strvec_pushl(&cp.args, "--reference",
-					     item->string, NULL);
+					     item->string, ശൂന്യ);
 		}
-		if (clone_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+		എങ്കിൽ (clone_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 			strvec_pushf(&cp.args, "--ref-storage-format=%s",
 				     ref_storage_format_to_name(clone_data->ref_storage_format));
-		if (clone_data->dissociate)
-			strvec_push(&cp.args, "--dissociate");
-		if (sm_gitdir && *sm_gitdir)
-			strvec_pushl(&cp.args, "--separate-git-dir", sm_gitdir, NULL);
-		if (clone_data->filter_options && clone_data->filter_options->choice)
+		എങ്കിൽ (clone_data->dissociate)
+			strvec_തള്ളുക(&cp.args, "--dissociate");
+		എങ്കിൽ (sm_gitdir && *sm_gitdir)
+			strvec_pushl(&cp.args, "--separate-git-dir", sm_gitdir, ശൂന്യ);
+		എങ്കിൽ (clone_data->filter_options && clone_data->filter_options->choice)
 			strvec_pushf(&cp.args, "--filter=%s",
 				     expand_list_objects_filter_spec(
 					     clone_data->filter_options));
-		if (clone_data->single_branch >= 0)
-			strvec_push(&cp.args, clone_data->single_branch ?
+		എങ്കിൽ (clone_data->single_branch >= 0)
+			strvec_തള്ളുക(&cp.args, clone_data->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 
-		strvec_push(&cp.args, "--");
-		strvec_push(&cp.args, clone_data->url);
-		strvec_push(&cp.args, clone_data_path);
+		strvec_തള്ളുക(&cp.args, "--");
+		strvec_തള്ളുക(&cp.args, clone_data->url);
+		strvec_തള്ളുക(&cp.args, clone_data_path);
 
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
 		cp.no_stdin = 1;
 
-		if(run_command(&cp))
+		എങ്കിൽ(run_command(&cp))
 			die(_("clone of '%s' into submodule path '%s' failed"),
 			    clone_data->url, clone_data_path);
 
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
+		എങ്കിൽ (clone_data->require_init && !stat(clone_data_path, &st) &&
 		    !dir_contains_only_dotgit(clone_data_path)) {
-			char *dot_git = xstrfmt("%s/.git", clone_data_path);
+			അക്ഷരം *dot_git = xstrfmt("%s/.git", clone_data_path);
 			unlink(dot_git);
-			free(dot_git);
+			സ്വതന്ത്രം(dot_git);
 			die(_("directory not empty: '%s'"), clone_data_path);
 		}
-	} else {
-		char *path;
+	} അല്ലെങ്കിൽ {
+		അക്ഷരം *path;
 
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
+		എങ്കിൽ (clone_data->require_init && !stat(clone_data_path, &st) &&
 		    !is_empty_dir(clone_data_path))
 			die(_("directory not empty: '%s'"), clone_data_path);
-		if (safe_create_leading_directories_const(the_repository, clone_data_path) < 0)
+		എങ്കിൽ (safe_create_leading_directories_const(the_repository, clone_data_path) < 0)
 			die(_("could not create directory '%s'"), clone_data_path);
 		path = xstrfmt("%s/index", sm_gitdir);
 		unlink_or_warn(path);
-		free(path);
+		സ്വതന്ത്രം(path);
 	}
 
 	/*
@@ -2002,51 +2002,51 @@ static int clone_submodule(const struct module_clone_data *clone_data,
 	 * To prevent further harm coming from this unintentionally-nested
 	 * gitdir, let's disable it by deleting the `HEAD` file.
 	 */
-	if (validate_submodule_git_dir(sm_gitdir, clone_data->name) < 0) {
-		char *head = xstrfmt("%s/HEAD", sm_gitdir);
+	എങ്കിൽ (validate_submodule_git_dir(sm_gitdir, clone_data->name) < 0) {
+		അക്ഷരം *head = xstrfmt("%s/HEAD", sm_gitdir);
 		unlink(head);
-		free(head);
+		സ്വതന്ത്രം(head);
 		die(_("refusing to create/use '%s' in another submodule's git dir. "
 		      "Enabling extensions.submodulePathConfig should fix this."),
 		    sm_gitdir);
 	}
 
-	connect_work_tree_and_git_dir(clone_data_path, sm_gitdir, 0);
+	connect_work_വൃക്ഷം_and_git_dir(clone_data_path, sm_gitdir, 0);
 
 	p = repo_submodule_path(the_repository, clone_data_path, "config");
-	if (!p)
+	എങ്കിൽ (!p)
 		die(_("could not get submodule directory for '%s'"), clone_data_path);
 
 	/* setup alternateLocation and alternateErrorStrategy in the cloned submodule if needed */
 	repo_config_get_string(the_repository, "submodule.alternateLocation", &sm_alternate);
-	if (sm_alternate)
+	എങ്കിൽ (sm_alternate)
 		repo_config_set_in_file(the_repository, p, "submodule.alternateLocation",
 					sm_alternate);
 	repo_config_get_string(the_repository, "submodule.alternateErrorStrategy", &error_strategy);
-	if (error_strategy)
+	എങ്കിൽ (error_strategy)
 		repo_config_set_in_file(the_repository, p, "submodule.alternateErrorStrategy",
 					error_strategy);
 
-	free(sm_alternate);
-	free(error_strategy);
+	സ്വതന്ത്രം(sm_alternate);
+	സ്വതന്ത്രം(error_strategy);
 
-	free(sm_gitdir);
-	free(p);
-	free(to_free);
-	return 0;
+	സ്വതന്ത്രം(sm_gitdir);
+	സ്വതന്ത്രം(p);
+	സ്വതന്ത്രം(to_free);
+	തിരികെ 0;
 }
 
-static int module_clone(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_clone(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			ഘടന repository *repo UNUSED)
 {
-	int dissociate = 0, quiet = 0, progress = 0, require_init = 0;
-	struct module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
-	struct string_list reference = STRING_LIST_INIT_NODUP;
-	struct list_objects_filter_options filter_options =
+	പൂർണ്ണസംഖ്യ dissociate = 0, quiet = 0, progress = 0, require_init = 0;
+	ഘടന module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
+	ഘടന string_list reference = STRING_LIST_INIT_NODUP;
+	ഘടന list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	const char *ref_storage_format = NULL;
+	സ്ഥിരം അക്ഷരം *ref_storage_format = ശൂന്യ;
 
-	struct option module_clone_options[] = {
+	ഘടന option module_clone_options[] = {
 		OPT_STRING(0, "prefix", &clone_data.prefix,
 			   N_("path"),
 			   N_("alternative anchor for relative paths")),
@@ -2079,20 +2079,20 @@ static int module_clone(int argc, const char **argv, const char *prefix,
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule--helper clone [--prefix=<path>] [--quiet] "
 		   "[--reference <repository>] [--name <name>] [--depth <depth>] "
 		   "[--single-branch] [--filter <filter-spec>] "
 		   "--url <url> --path <path>"),
-		NULL
+		ശൂന്യ
 	};
 
 	argc = parse_options(argc, argv, prefix, module_clone_options,
 			     git_submodule_helper_usage, 0);
 
-	if (ref_storage_format) {
+	എങ്കിൽ (ref_storage_format) {
 		clone_data.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (clone_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+		എങ്കിൽ (clone_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 	clone_data.dissociate = !!dissociate;
@@ -2101,53 +2101,53 @@ static int module_clone(int argc, const char **argv, const char *prefix,
 	clone_data.require_init = !!require_init;
 	clone_data.filter_options = &filter_options;
 
-	if (argc || !clone_data.url || !clone_data.path || !*(clone_data.path))
+	എങ്കിൽ (argc || !clone_data.url || !clone_data.path || !*(clone_data.path))
 		usage_with_options(git_submodule_helper_usage,
 				   module_clone_options);
 
 	clone_submodule(&clone_data, &reference);
 	list_objects_filter_release(&filter_options);
 	string_list_clear(&reference, 1);
-	return 0;
+	തിരികെ 0;
 }
 
-static int determine_submodule_update_strategy(struct repository *r,
-					       int just_cloned,
-					       const char *path,
-					       enum submodule_update_type update,
-					       struct submodule_update_strategy *out)
+സ്ഥിതം പൂർണ്ണസംഖ്യ determine_submodule_update_strategy(ഘടന repository *r,
+					       പൂർണ്ണസംഖ്യ just_cloned,
+					       സ്ഥിരം അക്ഷരം *path,
+					       എണ്ണൽ submodule_update_type update,
+					       ഘടന submodule_update_strategy *out)
 {
-	const struct submodule *sub = submodule_from_path(r, null_oid(the_hash_algo), path);
-	char *key;
-	const char *val;
-	int ret;
+	സ്ഥിരം ഘടന submodule *sub = submodule_from_path(r, null_oid(the_hash_algo), path);
+	അക്ഷരം *താക്കോൽ;
+	സ്ഥിരം അക്ഷരം *val;
+	പൂർണ്ണസംഖ്യ ret;
 
 	/*
 	 * NEEDSWORK: audit and ensure that update_submodule() has right
 	 * to assume that submodule_from_path() above will always succeed.
 	 */
-	if (!sub)
+	എങ്കിൽ (!sub)
 		BUG("update_submodule assumes a submodule exists at path (%s)",
 		    path);
-	key = xstrfmt("submodule.%s.update", sub->name);
+	താക്കോൽ = xstrfmt("submodule.%s.update", sub->name);
 
-	if (update) {
+	എങ്കിൽ (update) {
 		out->type = update;
-	} else if (!repo_config_get_string_tmp(r, key, &val)) {
-		if (parse_submodule_update_strategy(val, out) < 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!repo_config_get_string_tmp(r, താക്കോൽ, &val)) {
+		എങ്കിൽ (parse_submodule_update_strategy(val, out) < 0) {
 			ret = die_message(_("Invalid update mode '%s' configured for submodule path '%s'"),
 					  val, path);
-			goto cleanup;
+			പോകുക cleanup;
 		}
-	} else if (sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
-		if (sub->update_strategy.type == SM_UPDATE_COMMAND)
+	} അല്ലെങ്കിൽ എങ്കിൽ (sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
+		എങ്കിൽ (sub->update_strategy.type == SM_UPDATE_COMMAND)
 			BUG("how did we read update = !command from .gitmodules?");
 		out->type = sub->update_strategy.type;
 		out->command = sub->update_strategy.command;
-	} else
+	} അല്ലെങ്കിൽ
 		out->type = SM_UPDATE_CHECKOUT;
 
-	if (just_cloned &&
+	എങ്കിൽ (just_cloned &&
 	    (out->type == SM_UPDATE_MERGE ||
 	     out->type == SM_UPDATE_REBASE ||
 	     out->type == SM_UPDATE_NONE))
@@ -2155,72 +2155,72 @@ static int determine_submodule_update_strategy(struct repository *r,
 
 	ret = 0;
 cleanup:
-	free(key);
-	return ret;
+	സ്വതന്ത്രം(താക്കോൽ);
+	തിരികെ ret;
 }
 
-struct update_clone_data {
-	const struct submodule *sub;
-	struct object_id oid;
+ഘടന update_clone_data {
+	സ്ഥിരം ഘടന submodule *sub;
+	ഘടന object_id oid;
 	unsigned just_cloned;
 };
 
-struct submodule_update_clone {
+ഘടന submodule_update_clone {
 	/* index into 'update_data.list', the list of submodules to look into for cloning */
-	int current;
+	പൂർണ്ണസംഖ്യ current;
 
 	/* configuration parameters which are passed on to the children */
-	const struct update_data *update_data;
+	സ്ഥിരം ഘടന update_data *update_data;
 
 	/* to be consumed by update_submodule() */
-	struct update_clone_data *update_clone;
-	int update_clone_nr; int update_clone_alloc;
+	ഘടന update_clone_data *update_clone;
+	പൂർണ്ണസംഖ്യ update_clone_nr; പൂർണ്ണസംഖ്യ update_clone_alloc;
 
 	/* If we want to stop as fast as possible and return an error */
 	unsigned quickstop : 1;
 
 	/* failed clones to be retried again */
-	const struct cache_entry **failed_clones;
-	int failed_clones_nr, failed_clones_alloc;
+	സ്ഥിരം ഘടന cache_entry **failed_clones;
+	പൂർണ്ണസംഖ്യ failed_clones_nr, failed_clones_alloc;
 };
 #define SUBMODULE_UPDATE_CLONE_INIT { 0 }
 
-static void submodule_update_clone_release(struct submodule_update_clone *suc)
+സ്ഥിതം ശൂന്യം submodule_update_clone_release(ഘടന submodule_update_clone *suc)
 {
-	free(suc->update_clone);
-	free(suc->failed_clones);
+	സ്വതന്ത്രം(suc->update_clone);
+	സ്വതന്ത്രം(suc->failed_clones);
 }
 
-struct update_data {
-	const char *prefix;
-	const char *super_prefix;
-	char *displaypath;
-	enum submodule_update_type update_default;
-	struct object_id suboid;
-	struct string_list references;
-	struct submodule_update_strategy update_strategy;
-	struct list_objects_filter_options *filter_options;
-	struct module_list list;
-	enum ref_storage_format ref_storage_format;
-	int depth;
-	int max_jobs;
-	int single_branch;
-	int recommend_shallow;
-	unsigned int require_init;
-	unsigned int force;
-	unsigned int quiet;
-	unsigned int nofetch;
-	unsigned int remote;
-	unsigned int progress;
-	unsigned int dissociate;
-	unsigned int init;
-	unsigned int warn_if_uninitialized;
-	unsigned int recursive;
+ഘടന update_data {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *super_prefix;
+	അക്ഷരം *displaypath;
+	എണ്ണൽ submodule_update_type update_default;
+	ഘടന object_id suboid;
+	ഘടന string_list references;
+	ഘടന submodule_update_strategy update_strategy;
+	ഘടന list_objects_filter_options *filter_options;
+	ഘടന module_list list;
+	എണ്ണൽ ref_storage_format ref_storage_format;
+	പൂർണ്ണസംഖ്യ depth;
+	പൂർണ്ണസംഖ്യ max_jobs;
+	പൂർണ്ണസംഖ്യ single_branch;
+	പൂർണ്ണസംഖ്യ recommend_shallow;
+	unsigned പൂർണ്ണസംഖ്യ require_init;
+	unsigned പൂർണ്ണസംഖ്യ force;
+	unsigned പൂർണ്ണസംഖ്യ quiet;
+	unsigned പൂർണ്ണസംഖ്യ nofetch;
+	unsigned പൂർണ്ണസംഖ്യ remote;
+	unsigned പൂർണ്ണസംഖ്യ progress;
+	unsigned പൂർണ്ണസംഖ്യ dissociate;
+	unsigned പൂർണ്ണസംഖ്യ init;
+	unsigned പൂർണ്ണസംഖ്യ warn_if_uninitialized;
+	unsigned പൂർണ്ണസംഖ്യ recursive;
 
 	/* copied over from update_clone_data */
-	struct object_id oid;
-	unsigned int just_cloned;
-	const char *sm_path;
+	ഘടന object_id oid;
+	unsigned പൂർണ്ണസംഖ്യ just_cloned;
+	സ്ഥിരം അക്ഷരം *sm_path;
 };
 #define UPDATE_DATA_INIT { \
 	.update_strategy = SUBMODULE_UPDATE_STRATEGY_INIT, \
@@ -2232,21 +2232,21 @@ struct update_data {
 	.max_jobs = 1, \
 }
 
-static void update_data_release(struct update_data *ud)
+സ്ഥിതം ശൂന്യം update_data_release(ഘടന update_data *ud)
 {
-	free(ud->displaypath);
+	സ്വതന്ത്രം(ud->displaypath);
 	submodule_update_strategy_release(&ud->update_strategy);
 	module_list_release(&ud->list);
 }
 
-static void next_submodule_warn_missing(struct submodule_update_clone *suc,
-		struct strbuf *out, const char *displaypath)
+സ്ഥിതം ശൂന്യം next_submodule_warn_missing(ഘടന submodule_update_clone *suc,
+		ഘടന strbuf *out, സ്ഥിരം അക്ഷരം *displaypath)
 {
 	/*
 	 * Only mention uninitialized submodules when their
 	 * paths have been specified.
 	 */
-	if (suc->update_data->warn_if_uninitialized) {
+	എങ്കിൽ (suc->update_data->warn_if_uninitialized) {
 		strbuf_addf(out,
 			_("Submodule path '%s' not initialized"),
 			displaypath);
@@ -2261,70 +2261,70 @@ static void next_submodule_warn_missing(struct submodule_update_clone *suc,
  * Determine whether 'ce' needs to be cloned. If so, prepare the 'child' to
  * run the clone. Returns 1 if 'ce' needs to be cloned, 0 otherwise.
  */
-static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
-					   struct child_process *child,
-					   struct submodule_update_clone *suc,
-					   struct strbuf *out)
+സ്ഥിതം പൂർണ്ണസംഖ്യ prepare_to_clone_next_submodule(സ്ഥിരം ഘടന cache_entry *ce,
+					   ഘടന child_process *child,
+					   ഘടന submodule_update_clone *suc,
+					   ഘടന strbuf *out)
 {
-	const struct submodule *sub = NULL;
-	const char *url = NULL;
-	const char *update_string;
-	enum submodule_update_type update_type;
-	char *key;
-	const struct update_data *ud = suc->update_data;
-	char *displaypath = get_submodule_displaypath(ce->name, ud->prefix,
+	സ്ഥിരം ഘടന submodule *sub = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *url = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *update_string;
+	എണ്ണൽ submodule_update_type update_type;
+	അക്ഷരം *താക്കോൽ;
+	സ്ഥിരം ഘടന update_data *ud = suc->update_data;
+	അക്ഷരം *displaypath = get_submodule_displaypath(ce->name, ud->prefix,
 						      ud->super_prefix);
-	struct strbuf sb = STRBUF_INIT;
-	int needs_cloning = 0;
-	int need_free_url = 0;
+	ഘടന strbuf sb = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ needs_cloning = 0;
+	പൂർണ്ണസംഖ്യ need_free_url = 0;
 
-	if (ce_stage(ce)) {
+	എങ്കിൽ (ce_stage(ce)) {
 		strbuf_addf(out, _("Skipping unmerged submodule %s"), displaypath);
 		strbuf_addch(out, '\n');
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), ce->name);
 
-	if (!sub) {
+	എങ്കിൽ (!sub) {
 		next_submodule_warn_missing(suc, out, displaypath);
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
-	key = xstrfmt("submodule.%s.update", sub->name);
-	if (!repo_config_get_string_tmp(the_repository, key, &update_string)) {
+	താക്കോൽ = xstrfmt("submodule.%s.update", sub->name);
+	എങ്കിൽ (!repo_config_get_string_tmp(the_repository, താക്കോൽ, &update_string)) {
 		update_type = parse_submodule_update_type(update_string);
-	} else {
+	} അല്ലെങ്കിൽ {
 		update_type = sub->update_strategy.type;
 	}
-	free(key);
+	സ്വതന്ത്രം(താക്കോൽ);
 
-	if (suc->update_data->update_strategy.type == SM_UPDATE_NONE
+	എങ്കിൽ (suc->update_data->update_strategy.type == SM_UPDATE_NONE
 	    || (suc->update_data->update_strategy.type == SM_UPDATE_UNSPECIFIED
 		&& update_type == SM_UPDATE_NONE)) {
 		strbuf_addf(out, _("Skipping submodule '%s'"), displaypath);
 		strbuf_addch(out, '\n');
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	/* Check if the submodule has been initialized. */
-	if (!is_submodule_active(the_repository, ce->name)) {
+	എങ്കിൽ (!is_submodule_active(the_repository, ce->name)) {
 		next_submodule_warn_missing(suc, out, displaypath);
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_get_string_tmp(the_repository, sb.buf, &url)) {
-		if (sub->url && (starts_with_dot_slash(sub->url) ||
+	എങ്കിൽ (repo_config_get_string_tmp(the_repository, sb.buf, &url)) {
+		എങ്കിൽ (sub->url && (starts_with_dot_slash(sub->url) ||
 				 starts_with_dot_dot_slash(sub->url))) {
-			url = resolve_relative_url(sub->url, NULL, 0);
+			url = resolve_relative_url(sub->url, ശൂന്യ, 0);
 			need_free_url = 1;
-		} else
+		} അല്ലെങ്കിൽ
 			url = sub->url;
 	}
 
-	if (!url)
+	എങ്കിൽ (!url)
 		die(_("cannot clone submodule '%s' without a URL"), sub->name);
 
 	strbuf_reset(&sb);
@@ -2338,76 +2338,76 @@ static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
 	suc->update_clone[suc->update_clone_nr].sub = sub;
 	suc->update_clone_nr++;
 
-	if (!needs_cloning)
-		goto cleanup;
+	എങ്കിൽ (!needs_cloning)
+		പോകുക cleanup;
 
 	child->git_cmd = 1;
 	child->no_stdin = 1;
 	child->stdout_to_stderr = 1;
 	child->err = -1;
-	strvec_push(&child->args, "submodule--helper");
-	strvec_push(&child->args, "clone");
-	if (suc->update_data->progress)
-		strvec_push(&child->args, "--progress");
-	if (suc->update_data->quiet)
-		strvec_push(&child->args, "--quiet");
-	if (suc->update_data->prefix)
-		strvec_pushl(&child->args, "--prefix", suc->update_data->prefix, NULL);
-	if (suc->update_data->recommend_shallow && sub->recommend_shallow == 1)
-		strvec_push(&child->args, "--depth=1");
-	else if (suc->update_data->depth)
+	strvec_തള്ളുക(&child->args, "submodule--helper");
+	strvec_തള്ളുക(&child->args, "clone");
+	എങ്കിൽ (suc->update_data->progress)
+		strvec_തള്ളുക(&child->args, "--progress");
+	എങ്കിൽ (suc->update_data->quiet)
+		strvec_തള്ളുക(&child->args, "--quiet");
+	എങ്കിൽ (suc->update_data->prefix)
+		strvec_pushl(&child->args, "--prefix", suc->update_data->prefix, ശൂന്യ);
+	എങ്കിൽ (suc->update_data->recommend_shallow && sub->recommend_shallow == 1)
+		strvec_തള്ളുക(&child->args, "--depth=1");
+	അല്ലെങ്കിൽ എങ്കിൽ (suc->update_data->depth)
 		strvec_pushf(&child->args, "--depth=%d", suc->update_data->depth);
-	if (suc->update_data->filter_options && suc->update_data->filter_options->choice)
+	എങ്കിൽ (suc->update_data->filter_options && suc->update_data->filter_options->choice)
 		strvec_pushf(&child->args, "--filter=%s",
 			     expand_list_objects_filter_spec(suc->update_data->filter_options));
-	if (suc->update_data->require_init)
-		strvec_push(&child->args, "--require-init");
-	if (suc->update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+	എങ്കിൽ (suc->update_data->require_init)
+		strvec_തള്ളുക(&child->args, "--require-init");
+	എങ്കിൽ (suc->update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 		strvec_pushf(&child->args, "--ref-storage-format=%s",
 			     ref_storage_format_to_name(suc->update_data->ref_storage_format));
-	strvec_pushl(&child->args, "--path", sub->path, NULL);
-	strvec_pushl(&child->args, "--name", sub->name, NULL);
-	strvec_pushl(&child->args, "--url", url, NULL);
-	if (suc->update_data->references.nr) {
-		struct string_list_item *item;
+	strvec_pushl(&child->args, "--path", sub->path, ശൂന്യ);
+	strvec_pushl(&child->args, "--name", sub->name, ശൂന്യ);
+	strvec_pushl(&child->args, "--url", url, ശൂന്യ);
+	എങ്കിൽ (suc->update_data->references.nr) {
+		ഘടന string_list_item *item;
 
 		for_each_string_list_item(item, &suc->update_data->references)
-			strvec_pushl(&child->args, "--reference", item->string, NULL);
+			strvec_pushl(&child->args, "--reference", item->string, ശൂന്യ);
 	}
-	if (suc->update_data->dissociate)
-		strvec_push(&child->args, "--dissociate");
-	if (suc->update_data->single_branch >= 0)
-		strvec_push(&child->args, suc->update_data->single_branch ?
+	എങ്കിൽ (suc->update_data->dissociate)
+		strvec_തള്ളുക(&child->args, "--dissociate");
+	എങ്കിൽ (suc->update_data->single_branch >= 0)
+		strvec_തള്ളുക(&child->args, suc->update_data->single_branch ?
 					      "--single-branch" :
 					      "--no-single-branch");
 
 cleanup:
-	free(displaypath);
+	സ്വതന്ത്രം(displaypath);
 	strbuf_release(&sb);
-	if (need_free_url)
-		free((void*)url);
+	എങ്കിൽ (need_free_url)
+		സ്വതന്ത്രം((ശൂന്യം*)url);
 
-	return needs_cloning;
+	തിരികെ needs_cloning;
 }
 
-static int update_clone_get_next_task(struct child_process *child,
-				      struct strbuf *err,
-				      void *suc_cb,
-				      void **idx_task_cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ update_clone_get_next_task(ഘടന child_process *child,
+				      ഘടന strbuf *err,
+				      ശൂന്യം *suc_cb,
+				      ശൂന്യം **idx_task_cb)
 {
-	struct submodule_update_clone *suc = suc_cb;
-	const struct cache_entry *ce;
-	int index;
+	ഘടന submodule_update_clone *suc = suc_cb;
+	സ്ഥിരം ഘടന cache_entry *ce;
+	പൂർണ്ണസംഖ്യ index;
 
-	for (; suc->current < suc->update_data->list.nr; suc->current++) {
+	വേണ്ടി (; suc->current < suc->update_data->list.nr; suc->current++) {
 		ce = suc->update_data->list.entries[suc->current];
-		if (prepare_to_clone_next_submodule(ce, child, suc, err)) {
-			int *p = xmalloc(sizeof(*p));
+		എങ്കിൽ (prepare_to_clone_next_submodule(ce, child, suc, err)) {
+			പൂർണ്ണസംഖ്യ *p = xmalloc(വലുപ്പം(*p));
 
 			*p = suc->current;
 			*idx_task_cb = p;
 			suc->current++;
-			return 1;
+			തിരികെ 1;
 		}
 	}
 
@@ -2417,53 +2417,53 @@ static int update_clone_get_next_task(struct child_process *child,
 	 * entry list.
 	 */
 	index = suc->current - suc->update_data->list.nr;
-	if (index < suc->failed_clones_nr) {
-		int *p;
+	എങ്കിൽ (index < suc->failed_clones_nr) {
+		പൂർണ്ണസംഖ്യ *p;
 
 		ce = suc->failed_clones[index];
-		if (!prepare_to_clone_next_submodule(ce, child, suc, err)) {
+		എങ്കിൽ (!prepare_to_clone_next_submodule(ce, child, suc, err)) {
 			suc->current ++;
 			strbuf_addstr(err, "BUG: submodule considered for "
 					   "cloning, doesn't need cloning "
 					   "any more?\n");
-			return 0;
+			തിരികെ 0;
 		}
-		p = xmalloc(sizeof(*p));
+		p = xmalloc(വലുപ്പം(*p));
 		*p = suc->current;
 		*idx_task_cb = p;
 		suc->current ++;
-		return 1;
+		തിരികെ 1;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int update_clone_start_failure(struct strbuf *err UNUSED,
-				      void *suc_cb,
-				      void *idx_task_cb UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ update_clone_start_failure(ഘടന strbuf *err UNUSED,
+				      ശൂന്യം *suc_cb,
+				      ശൂന്യം *idx_task_cb UNUSED)
 {
-	struct submodule_update_clone *suc = suc_cb;
+	ഘടന submodule_update_clone *suc = suc_cb;
 
 	suc->quickstop = 1;
-	return 1;
+	തിരികെ 1;
 }
 
-static int update_clone_task_finished(int result,
-				      struct strbuf *err,
-				      void *suc_cb,
-				      void *idx_task_cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ update_clone_task_finished(പൂർണ്ണസംഖ്യ result,
+				      ഘടന strbuf *err,
+				      ശൂന്യം *suc_cb,
+				      ശൂന്യം *idx_task_cb)
 {
-	const struct cache_entry *ce;
-	struct submodule_update_clone *suc = suc_cb;
-	int *idxP = idx_task_cb;
-	int idx = *idxP;
+	സ്ഥിരം ഘടന cache_entry *ce;
+	ഘടന submodule_update_clone *suc = suc_cb;
+	പൂർണ്ണസംഖ്യ *idxP = idx_task_cb;
+	പൂർണ്ണസംഖ്യ idx = *idxP;
 
-	free(idxP);
+	സ്വതന്ത്രം(idxP);
 
-	if (!result)
-		return 0;
+	എങ്കിൽ (!result)
+		തിരികെ 0;
 
-	if (idx < suc->update_data->list.nr) {
+	എങ്കിൽ (idx < suc->update_data->list.nr) {
 		ce  = suc->update_data->list.entries[idx];
 		strbuf_addf(err, _("Failed to clone '%s'. Retry scheduled"),
 			    ce->name);
@@ -2472,189 +2472,189 @@ static int update_clone_task_finished(int result,
 			   suc->failed_clones_nr + 1,
 			   suc->failed_clones_alloc);
 		suc->failed_clones[suc->failed_clones_nr++] = ce;
-		return 0;
-	} else {
+		തിരികെ 0;
+	} അല്ലെങ്കിൽ {
 		idx -= suc->update_data->list.nr;
 		ce  = suc->failed_clones[idx];
 		strbuf_addf(err, _("Failed to clone '%s' a second time, aborting"),
 			    ce->name);
 		strbuf_addch(err, '\n');
 		suc->quickstop = 1;
-		return 1;
+		തിരികെ 1;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int git_update_clone_config(const char *var, const char *value,
-				   const struct config_context *ctx,
-				   void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_update_clone_config(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം,
+				   സ്ഥിരം ഘടന config_context *ctx,
+				   ശൂന്യം *cb)
 {
-	int *max_jobs = cb;
+	പൂർണ്ണസംഖ്യ *max_jobs = cb;
 
-	if (!strcmp(var, "submodule.fetchjobs"))
-		*max_jobs = parse_submodule_fetchjobs(var, value, ctx->kvi);
-	return 0;
+	എങ്കിൽ (!strcmp(var, "submodule.fetchjobs"))
+		*max_jobs = parse_submodule_fetchjobs(var, മൂല്യം, ctx->kvi);
+	തിരികെ 0;
 }
 
-static int is_tip_reachable(const char *path, const struct object_id *oid)
+സ്ഥിതം പൂർണ്ണസംഖ്യ is_tip_reachable(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം ഘടന object_id *oid)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf rev = STRBUF_INIT;
-	char *hex = oid_to_hex(oid);
-	int reachable;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
+	ഘടന strbuf rev = STRBUF_INIT;
+	അക്ഷരം *hex = oid_to_hex(oid);
+	പൂർണ്ണസംഖ്യ reachable;
 
 	cp.git_cmd = 1;
 	cp.dir = path;
 	cp.no_stderr = 1;
-	strvec_pushl(&cp.args, "rev-list", "-n", "1", hex, "--not", "--all", NULL);
+	strvec_pushl(&cp.args, "rev-list", "-n", "1", hex, "--not", "--all", ശൂന്യ);
 
 	prepare_submodule_repo_env(&cp.env);
 
-	if (capture_command(&cp, &rev, GIT_MAX_HEXSZ + 1) || rev.len)
+	എങ്കിൽ (capture_command(&cp, &rev, GIT_MAX_HEXSZ + 1) || rev.len)
 		reachable = 0;
-	else
+	അല്ലെങ്കിൽ
 		reachable = 1;
 
 	strbuf_release(&rev);
-	return reachable;
+	തിരികെ reachable;
 }
 
-static int fetch_in_submodule(const char *module_path, int depth, int quiet,
-			      const struct object_id *oid)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fetch_in_submodule(സ്ഥിരം അക്ഷരം *module_path, പൂർണ്ണസംഖ്യ depth, പൂർണ്ണസംഖ്യ quiet,
+			      സ്ഥിരം ഘടന object_id *oid)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 	prepare_submodule_repo_env(&cp.env);
 	cp.git_cmd = 1;
 	cp.dir = module_path;
 
-	strvec_push(&cp.args, "fetch");
-	if (quiet)
-		strvec_push(&cp.args, "--quiet");
-	if (depth)
+	strvec_തള്ളുക(&cp.args, "fetch");
+	എങ്കിൽ (quiet)
+		strvec_തള്ളുക(&cp.args, "--quiet");
+	എങ്കിൽ (depth)
 		strvec_pushf(&cp.args, "--depth=%d", depth);
-	if (oid) {
-		char *hex = oid_to_hex(oid);
-		char *remote;
-		int code;
+	എങ്കിൽ (oid) {
+		അക്ഷരം *hex = oid_to_hex(oid);
+		അക്ഷരം *remote;
+		പൂർണ്ണസംഖ്യ code;
 
 		code = get_default_remote_submodule(module_path, &remote);
-		if (code) {
+		എങ്കിൽ (code) {
 			child_process_clear(&cp);
-			return code;
+			തിരികെ code;
 		}
 
-		strvec_pushl(&cp.args, remote, hex, NULL);
-		free(remote);
+		strvec_pushl(&cp.args, remote, hex, ശൂന്യ);
+		സ്വതന്ത്രം(remote);
 	}
 
-	return run_command(&cp);
+	തിരികെ run_command(&cp);
 }
 
-static int run_update_command(const struct update_data *ud, int subforce)
+സ്ഥിതം പൂർണ്ണസംഖ്യ run_update_command(സ്ഥിരം ഘടന update_data *ud, പൂർണ്ണസംഖ്യ subforce)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	char *oid = oid_to_hex(&ud->oid);
-	int ret;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
+	അക്ഷരം *oid = oid_to_hex(&ud->oid);
+	പൂർണ്ണസംഖ്യ ret;
 
-	switch (ud->update_strategy.type) {
-	case SM_UPDATE_CHECKOUT:
+	തിരഞ്ഞെടുപ്പ് (ud->update_strategy.type) {
+	അവസ്ഥ SM_UPDATE_CHECKOUT:
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "checkout", "-q", NULL);
-		if (subforce)
-			strvec_push(&cp.args, "-f");
-		break;
-	case SM_UPDATE_REBASE:
+		strvec_pushl(&cp.args, "checkout", "-q", ശൂന്യ);
+		എങ്കിൽ (subforce)
+			strvec_തള്ളുക(&cp.args, "-f");
+		നിർത്തുക;
+	അവസ്ഥ SM_UPDATE_REBASE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "rebase");
-		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
-		break;
-	case SM_UPDATE_MERGE:
+		strvec_തള്ളുക(&cp.args, "rebase");
+		എങ്കിൽ (ud->quiet)
+			strvec_തള്ളുക(&cp.args, "--quiet");
+		നിർത്തുക;
+	അവസ്ഥ SM_UPDATE_MERGE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "merge");
-		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
-		break;
-	case SM_UPDATE_COMMAND:
+		strvec_തള്ളുക(&cp.args, "merge");
+		എങ്കിൽ (ud->quiet)
+			strvec_തള്ളുക(&cp.args, "--quiet");
+		നിർത്തുക;
+	അവസ്ഥ SM_UPDATE_COMMAND:
 		cp.use_shell = 1;
-		strvec_push(&cp.args, ud->update_strategy.command);
-		break;
-	default:
+		strvec_തള്ളുക(&cp.args, ud->update_strategy.command);
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
-	strvec_push(&cp.args, oid);
+	strvec_തള്ളുക(&cp.args, oid);
 
 	cp.dir = ud->sm_path;
 	prepare_submodule_repo_env(&cp.env);
-	if ((ret = run_command(&cp))) {
-		switch (ud->update_strategy.type) {
-		case SM_UPDATE_CHECKOUT:
+	എങ്കിൽ ((ret = run_command(&cp))) {
+		തിരഞ്ഞെടുപ്പ് (ud->update_strategy.type) {
+		അവസ്ഥ SM_UPDATE_CHECKOUT:
 			die_message(_("Unable to checkout '%s' in submodule path '%s'"),
 				    oid, ud->displaypath);
 			/* No "ret" assignment, use "git checkout"'s */
-			break;
-		case SM_UPDATE_REBASE:
+			നിർത്തുക;
+		അവസ്ഥ SM_UPDATE_REBASE:
 			ret = die_message(_("Unable to rebase '%s' in submodule path '%s'"),
 					  oid, ud->displaypath);
-			break;
-		case SM_UPDATE_MERGE:
+			നിർത്തുക;
+		അവസ്ഥ SM_UPDATE_MERGE:
 			ret = die_message(_("Unable to merge '%s' in submodule path '%s'"),
 					  oid, ud->displaypath);
-			break;
-		case SM_UPDATE_COMMAND:
+			നിർത്തുക;
+		അവസ്ഥ SM_UPDATE_COMMAND:
 			ret = die_message(_("Execution of '%s %s' failed in submodule path '%s'"),
 					  ud->update_strategy.command, oid, ud->displaypath);
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			BUG("unexpected update strategy type: %d",
 			    ud->update_strategy.type);
 		}
 
-		return ret;
+		തിരികെ ret;
 	}
 
-	if (ud->quiet)
-		return 0;
+	എങ്കിൽ (ud->quiet)
+		തിരികെ 0;
 
-	switch (ud->update_strategy.type) {
-	case SM_UPDATE_CHECKOUT:
+	തിരഞ്ഞെടുപ്പ് (ud->update_strategy.type) {
+	അവസ്ഥ SM_UPDATE_CHECKOUT:
 		printf(_("Submodule path '%s': checked out '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_REBASE:
+		നിർത്തുക;
+	അവസ്ഥ SM_UPDATE_REBASE:
 		printf(_("Submodule path '%s': rebased into '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_MERGE:
+		നിർത്തുക;
+	അവസ്ഥ SM_UPDATE_MERGE:
 		printf(_("Submodule path '%s': merged in '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_COMMAND:
+		നിർത്തുക;
+	അവസ്ഥ SM_UPDATE_COMMAND:
 		printf(_("Submodule path '%s': '%s %s'\n"),
 		       ud->displaypath, ud->update_strategy.command, oid);
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int run_update_procedure(const struct update_data *ud)
+സ്ഥിതം പൂർണ്ണസംഖ്യ run_update_procedure(സ്ഥിരം ഘടന update_data *ud)
 {
-	int subforce = is_null_oid(&ud->suboid) || ud->force;
+	പൂർണ്ണസംഖ്യ subforce = is_null_oid(&ud->suboid) || ud->force;
 
-	if (!ud->nofetch) {
+	എങ്കിൽ (!ud->nofetch) {
 		/*
 		 * Run fetch only if `oid` isn't present or it
 		 * is not reachable from a ref.
 		 */
-		if (!is_tip_reachable(ud->sm_path, &ud->oid) &&
-		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, NULL) &&
+		എങ്കിൽ (!is_tip_reachable(ud->sm_path, &ud->oid) &&
+		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, ശൂന്യ) &&
 		    !ud->quiet)
 			fprintf_ln(stderr,
 				   _("Unable to fetch in submodule path '%s'; "
@@ -2664,76 +2664,76 @@ static int run_update_procedure(const struct update_data *ud)
 		 * Now we tried the usual fetch, but `oid` may
 		 * not be reachable from any of the refs.
 		 */
-		if (!is_tip_reachable(ud->sm_path, &ud->oid) &&
+		എങ്കിൽ (!is_tip_reachable(ud->sm_path, &ud->oid) &&
 		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, &ud->oid))
-			return die_message(_("Fetched in submodule path '%s', but it did not "
+			തിരികെ die_message(_("Fetched in submodule path '%s', but it did not "
 					     "contain %s. Direct fetching of that commit failed."),
 					   ud->displaypath, oid_to_hex(&ud->oid));
 	}
 
-	return run_update_command(ud, subforce);
+	തിരികെ run_update_command(ud, subforce);
 }
 
-static int remote_submodule_branch(const char *path, const char **branch)
+സ്ഥിതം പൂർണ്ണസംഖ്യ remote_submodule_branch(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം **branch)
 {
-	const struct submodule *sub;
-	char *key;
-	*branch = NULL;
+	സ്ഥിരം ഘടന submodule *sub;
+	അക്ഷരം *താക്കോൽ;
+	*branch = ശൂന്യ;
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
-	if (!sub)
-		return die_message(_("could not initialize submodule at path '%s'"),
+	എങ്കിൽ (!sub)
+		തിരികെ die_message(_("could not initialize submodule at path '%s'"),
 				   path);
 
-	key = xstrfmt("submodule.%s.branch", sub->name);
-	if (repo_config_get_string_tmp(the_repository, key, branch))
+	താക്കോൽ = xstrfmt("submodule.%s.branch", sub->name);
+	എങ്കിൽ (repo_config_get_string_tmp(the_repository, താക്കോൽ, branch))
 		*branch = sub->branch;
-	free(key);
+	സ്വതന്ത്രം(താക്കോൽ);
 
-	if (!*branch) {
+	എങ്കിൽ (!*branch) {
 		*branch = "HEAD";
-		return 0;
+		തിരികെ 0;
 	}
 
-	if (!strcmp(*branch, ".")) {
-		const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-							      "HEAD", 0, NULL,
-							      NULL);
+	എങ്കിൽ (!strcmp(*branch, ".")) {
+		സ്ഥിരം അക്ഷരം *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
+							      "HEAD", 0, ശൂന്യ,
+							      ശൂന്യ);
 
-		if (!refname)
-			return die_message(_("No such ref: %s"), "HEAD");
+		എങ്കിൽ (!refname)
+			തിരികെ die_message(_("No such ref: %s"), "HEAD");
 
 		/* detached HEAD */
-		if (!strcmp(refname, "HEAD"))
-			return die_message(_("Submodule (%s) branch configured to inherit "
+		എങ്കിൽ (!strcmp(refname, "HEAD"))
+			തിരികെ die_message(_("Submodule (%s) branch configured to inherit "
 					     "branch from superproject, but the superproject "
 					     "is not on any branch"), sub->name);
 
-		if (!skip_prefix(refname, "refs/heads/", &refname))
-			return die_message(_("Expecting a full ref name, got %s"),
+		എങ്കിൽ (!skip_prefix(refname, "refs/heads/", &refname))
+			തിരികെ die_message(_("Expecting a full ref name, got %s"),
 					   refname);
 
 		*branch = refname;
-		return 0;
+		തിരികെ 0;
 	}
 
 	/* Our "branch" is coming from repo_config_get_string_tmp() */
-	return 0;
+	തിരികെ 0;
 }
 
-static int ensure_core_worktree(const char *path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ ensure_core_worktree(സ്ഥിരം അക്ഷരം *path)
 {
-	const char *cw;
-	struct repository subrepo;
+	സ്ഥിരം അക്ഷരം *cw;
+	ഘടന repository subrepo;
 
-	if (repo_submodule_init(&subrepo, the_repository, path, null_oid(the_hash_algo)))
-		return die_message(_("could not get a repository handle for submodule '%s'"),
+	എങ്കിൽ (repo_submodule_init(&subrepo, the_repository, path, null_oid(the_hash_algo)))
+		തിരികെ die_message(_("could not get a repository handle for submodule '%s'"),
 				   path);
 
-	if (!repo_config_get_string_tmp(&subrepo, "core.worktree", &cw)) {
-		char *cfg_file, *abs_path;
-		const char *rel_path;
-		struct strbuf sb = STRBUF_INIT;
+	എങ്കിൽ (!repo_config_get_string_tmp(&subrepo, "core.worktree", &cw)) {
+		അക്ഷരം *cfg_file, *abs_path;
+		സ്ഥിരം അക്ഷരം *rel_path;
+		ഘടന strbuf sb = STRBUF_INIT;
 
 		cfg_file = repo_git_path(&subrepo, "config");
 
@@ -2742,158 +2742,158 @@ static int ensure_core_worktree(const char *path)
 
 		repo_config_set_in_file(the_repository, cfg_file, "core.worktree", rel_path);
 
-		free(cfg_file);
-		free(abs_path);
+		സ്വതന്ത്രം(cfg_file);
+		സ്വതന്ത്രം(abs_path);
 		strbuf_release(&sb);
 	}
 
 	repo_clear(&subrepo);
-	return 0;
+	തിരികെ 0;
 }
 
-static const char *submodule_update_type_to_label(enum submodule_update_type type)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *submodule_update_type_to_label(എണ്ണൽ submodule_update_type type)
 {
-	switch (type) {
-	case SM_UPDATE_CHECKOUT:
-		return "checkout";
-	case SM_UPDATE_MERGE:
-		return "merge";
-	case SM_UPDATE_REBASE:
-		return "rebase";
-	case SM_UPDATE_UNSPECIFIED:
-	case SM_UPDATE_NONE:
-	case SM_UPDATE_COMMAND:
-		break;
+	തിരഞ്ഞെടുപ്പ് (type) {
+	അവസ്ഥ SM_UPDATE_CHECKOUT:
+		തിരികെ "checkout";
+	അവസ്ഥ SM_UPDATE_MERGE:
+		തിരികെ "merge";
+	അവസ്ഥ SM_UPDATE_REBASE:
+		തിരികെ "rebase";
+	അവസ്ഥ SM_UPDATE_UNSPECIFIED:
+	അവസ്ഥ SM_UPDATE_NONE:
+	അവസ്ഥ SM_UPDATE_COMMAND:
+		നിർത്തുക;
 	}
 	BUG("unreachable with type %d", type);
 }
 
-static void update_data_to_args(const struct update_data *update_data,
-				struct strvec *args)
+സ്ഥിതം ശൂന്യം update_data_to_args(സ്ഥിരം ഘടന update_data *update_data,
+				ഘടന strvec *args)
 {
-	enum submodule_update_type update_type = update_data->update_default;
+	എണ്ണൽ submodule_update_type update_type = update_data->update_default;
 
-	strvec_pushl(args, "submodule--helper", "update", "--recursive", NULL);
-	if (update_data->displaypath)
+	strvec_pushl(args, "submodule--helper", "update", "--recursive", ശൂന്യ);
+	എങ്കിൽ (update_data->displaypath)
 		strvec_pushf(args, "--super-prefix=%s/",
 			     update_data->displaypath);
 	strvec_pushf(args, "--jobs=%d", update_data->max_jobs);
-	if (update_data->quiet)
-		strvec_push(args, "--quiet");
-	if (update_data->force)
-		strvec_push(args, "--force");
-	if (update_data->init)
-		strvec_push(args, "--init");
-	if (update_data->remote)
-		strvec_push(args, "--remote");
-	if (update_data->nofetch)
-		strvec_push(args, "--no-fetch");
-	if (update_data->dissociate)
-		strvec_push(args, "--dissociate");
-	if (update_data->progress)
-		strvec_push(args, "--progress");
-	if (update_data->require_init)
-		strvec_push(args, "--require-init");
-	if (update_data->depth)
+	എങ്കിൽ (update_data->quiet)
+		strvec_തള്ളുക(args, "--quiet");
+	എങ്കിൽ (update_data->force)
+		strvec_തള്ളുക(args, "--force");
+	എങ്കിൽ (update_data->init)
+		strvec_തള്ളുക(args, "--init");
+	എങ്കിൽ (update_data->remote)
+		strvec_തള്ളുക(args, "--remote");
+	എങ്കിൽ (update_data->nofetch)
+		strvec_തള്ളുക(args, "--no-fetch");
+	എങ്കിൽ (update_data->dissociate)
+		strvec_തള്ളുക(args, "--dissociate");
+	എങ്കിൽ (update_data->progress)
+		strvec_തള്ളുക(args, "--progress");
+	എങ്കിൽ (update_data->require_init)
+		strvec_തള്ളുക(args, "--require-init");
+	എങ്കിൽ (update_data->depth)
 		strvec_pushf(args, "--depth=%d", update_data->depth);
-	if (update_type != SM_UPDATE_UNSPECIFIED)
+	എങ്കിൽ (update_type != SM_UPDATE_UNSPECIFIED)
 		strvec_pushf(args, "--%s",
 			     submodule_update_type_to_label(update_type));
 
-	if (update_data->references.nr) {
-		struct string_list_item *item;
+	എങ്കിൽ (update_data->references.nr) {
+		ഘടന string_list_item *item;
 
 		for_each_string_list_item(item, &update_data->references)
-			strvec_pushl(args, "--reference", item->string, NULL);
+			strvec_pushl(args, "--reference", item->string, ശൂന്യ);
 	}
-	if (update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+	എങ്കിൽ (update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 		strvec_pushf(args, "--ref-storage-format=%s",
 			     ref_storage_format_to_name(update_data->ref_storage_format));
-	if (update_data->filter_options && update_data->filter_options->choice)
+	എങ്കിൽ (update_data->filter_options && update_data->filter_options->choice)
 		strvec_pushf(args, "--filter=%s",
 				expand_list_objects_filter_spec(
 					update_data->filter_options));
-	if (update_data->recommend_shallow == 0)
-		strvec_push(args, "--no-recommend-shallow");
-	else if (update_data->recommend_shallow == 1)
-		strvec_push(args, "--recommend-shallow");
-	if (update_data->single_branch >= 0)
-		strvec_push(args, update_data->single_branch ?
+	എങ്കിൽ (update_data->recommend_shallow == 0)
+		strvec_തള്ളുക(args, "--no-recommend-shallow");
+	അല്ലെങ്കിൽ എങ്കിൽ (update_data->recommend_shallow == 1)
+		strvec_തള്ളുക(args, "--recommend-shallow");
+	എങ്കിൽ (update_data->single_branch >= 0)
+		strvec_തള്ളുക(args, update_data->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 }
 
-static int update_submodule(struct update_data *update_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ update_submodule(ഘടന update_data *update_data)
 {
-	int ret;
+	പൂർണ്ണസംഖ്യ ret;
 
-	if (validate_submodule_path(update_data->sm_path) < 0)
-		return -1;
+	എങ്കിൽ (validate_submodule_path(update_data->sm_path) < 0)
+		തിരികെ -1;
 
 	ret = determine_submodule_update_strategy(the_repository,
 						  update_data->just_cloned,
 						  update_data->sm_path,
 						  update_data->update_default,
 						  &update_data->update_strategy);
-	if (ret)
-		return ret;
+	എങ്കിൽ (ret)
+		തിരികെ ret;
 
-	if (update_data->just_cloned)
+	എങ്കിൽ (update_data->just_cloned)
 		oidcpy(&update_data->suboid, null_oid(the_hash_algo));
-	else if (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
+	അല്ലെങ്കിൽ എങ്കിൽ (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
 					  "HEAD", &update_data->suboid))
-		return die_message(_("Unable to find current revision in submodule path '%s'"),
+		തിരികെ die_message(_("Unable to find current revision in submodule path '%s'"),
 				   update_data->displaypath);
 
-	if (update_data->remote) {
-		char *remote_name;
-		const char *branch;
-		char *remote_ref;
-		int code;
+	എങ്കിൽ (update_data->remote) {
+		അക്ഷരം *remote_name;
+		സ്ഥിരം അക്ഷരം *branch;
+		അക്ഷരം *remote_ref;
+		പൂർണ്ണസംഖ്യ code;
 
 		code = get_default_remote_submodule(update_data->sm_path, &remote_name);
-		if (code)
-			return code;
+		എങ്കിൽ (code)
+			തിരികെ code;
 		code = remote_submodule_branch(update_data->sm_path, &branch);
-		if (code) {
-			free(remote_name);
-			return code;
+		എങ്കിൽ (code) {
+			സ്വതന്ത്രം(remote_name);
+			തിരികെ code;
 		}
 		remote_ref = xstrfmt("refs/remotes/%s/%s", remote_name, branch);
 
-		free(remote_name);
+		സ്വതന്ത്രം(remote_name);
 
-		if (!update_data->nofetch) {
-			if (fetch_in_submodule(update_data->sm_path, update_data->depth,
-					      0, NULL)) {
-				free(remote_ref);
-				return die_message(_("Unable to fetch in submodule path '%s'"),
+		എങ്കിൽ (!update_data->nofetch) {
+			എങ്കിൽ (fetch_in_submodule(update_data->sm_path, update_data->depth,
+					      0, ശൂന്യ)) {
+				സ്വതന്ത്രം(remote_ref);
+				തിരികെ die_message(_("Unable to fetch in submodule path '%s'"),
 						   update_data->sm_path);
 			}
 		}
 
-		if (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
+		എങ്കിൽ (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
 					     remote_ref, &update_data->oid)) {
 			ret = die_message(_("Unable to find %s revision in submodule path '%s'"),
 					  remote_ref, update_data->sm_path);
-			free(remote_ref);
-			return ret;
+			സ്വതന്ത്രം(remote_ref);
+			തിരികെ ret;
 		}
 
-		free(remote_ref);
+		സ്വതന്ത്രം(remote_ref);
 	}
 
-	if (!oideq(&update_data->oid, &update_data->suboid) || update_data->force) {
+	എങ്കിൽ (!oideq(&update_data->oid, &update_data->suboid) || update_data->force) {
 		ret = run_update_procedure(update_data);
-		if (ret)
-			return ret;
+		എങ്കിൽ (ret)
+			തിരികെ ret;
 	}
 
-	if (update_data->recursive) {
-		struct child_process cp = CHILD_PROCESS_INIT;
-		struct update_data next = *update_data;
+	എങ്കിൽ (update_data->recursive) {
+		ഘടന child_process cp = CHILD_PROCESS_INIT;
+		ഘടന update_data next = *update_data;
 
-		next.prefix = NULL;
+		next.prefix = ശൂന്യ;
 		oidcpy(&next.oid, null_oid(the_hash_algo));
 		oidcpy(&next.suboid, null_oid(the_hash_algo));
 
@@ -2903,20 +2903,20 @@ static int update_submodule(struct update_data *update_data)
 		update_data_to_args(&next, &cp.args);
 
 		ret = run_command(&cp);
-		if (ret)
+		എങ്കിൽ (ret)
 			die_message(_("Failed to recurse into submodule path '%s'"),
 				    update_data->displaypath);
-		return ret;
+		തിരികെ ret;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int update_submodules(struct update_data *update_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ update_submodules(ഘടന update_data *update_data)
 {
-	int i, ret = 0;
-	struct submodule_update_clone suc = SUBMODULE_UPDATE_CLONE_INIT;
-	const struct run_process_parallel_opts opts = {
+	പൂർണ്ണസംഖ്യ i, ret = 0;
+	ഘടന submodule_update_clone suc = SUBMODULE_UPDATE_CLONE_INIT;
+	സ്ഥിരം ഘടന run_process_parallel_opts opts = {
 		.tr2_category = "submodule",
 		.tr2_label = "parallel/update",
 
@@ -2939,14 +2939,14 @@ static int update_submodules(struct update_data *update_data)
 	 *   checkout involve more straightforward sequential I/O.
 	 * - the listener can avoid doing any work if fetching failed.
 	 */
-	if (suc.quickstop) {
+	എങ്കിൽ (suc.quickstop) {
 		ret = 1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
-	for (i = 0; i < suc.update_clone_nr; i++) {
-		struct update_clone_data ucd = suc.update_clone[i];
-		int code = 128;
+	വേണ്ടി (i = 0; i < suc.update_clone_nr; i++) {
+		ഘടന update_clone_data ucd = suc.update_clone[i];
+		പൂർണ്ണസംഖ്യ code = 128;
 
 		oidcpy(&update_data->oid, &ucd.oid);
 		update_data->just_cloned = ucd.just_cloned;
@@ -2958,12 +2958,12 @@ static int update_submodules(struct update_data *update_data)
 		 * TODO: allow exempting it via
 		 * `safe.submodule.path` or something
 		 */
-		if (validate_submodule_path(update_data->sm_path) < 0)
-			goto fail;
+		എങ്കിൽ (validate_submodule_path(update_data->sm_path) < 0)
+			പോകുക fail;
 
 		code = ensure_core_worktree(update_data->sm_path);
-		if (code)
-			goto fail;
+		എങ്കിൽ (code)
+			പോകുക fail;
 
 		update_data->displaypath = get_submodule_displaypath(
 			update_data->sm_path, update_data->prefix,
@@ -2971,30 +2971,30 @@ static int update_submodules(struct update_data *update_data)
 		code = update_submodule(update_data);
 		FREE_AND_NULL(update_data->displaypath);
 fail:
-		if (!code)
-			continue;
+		എങ്കിൽ (!code)
+			തുടരുക;
 		ret = code;
-		if (ret == 128)
-			goto cleanup;
+		എങ്കിൽ (ret == 128)
+			പോകുക cleanup;
 	}
 
 cleanup:
 	submodule_update_clone_release(&suc);
 	string_list_clear(&update_data->references, 0);
-	return ret;
+	തിരികെ ret;
 }
 
-static int module_update(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_update(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			 ഘടന repository *repo UNUSED)
 {
-	struct pathspec pathspec = { 0 };
-	struct pathspec pathspec2 = { 0 };
-	struct update_data opt = UPDATE_DATA_INIT;
-	struct list_objects_filter_options filter_options =
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന pathspec pathspec2 = { 0 };
+	ഘടന update_data opt = UPDATE_DATA_INIT;
+	ഘടന list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	const char *ref_storage_format = NULL;
-	int ret;
-	struct option module_update_options[] = {
+	സ്ഥിരം അക്ഷരം *ref_storage_format = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ ret;
+	ഘടന option module_update_options[] = {
 		OPT__SUPER_PREFIX(&opt.super_prefix),
 		OPT__FORCE(&opt.force, N_("force checkout updates"), 0),
 		OPT_BOOL('i', "init", &opt.init,
@@ -3038,14 +3038,14 @@ static int module_update(int argc, const char **argv, const char *prefix,
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule [--quiet] update"
 		" [--init [--filter=<filter-spec>]] [--remote]"
 		" [-N|--no-fetch] [-f|--force]"
 		" [--checkout|--merge|--rebase]"
 		" [--[no-]recommend-shallow] [--reference <repository>]"
 		" [--recursive] [--[no-]single-branch] [--] [<path>...]"),
-		NULL
+		ശൂന്യ
 	};
 
 	update_clone_config_from_gitmodules(the_repository, &opt.max_jobs);
@@ -3054,55 +3054,55 @@ static int module_update(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, module_update_options,
 			     git_submodule_helper_usage, 0);
 
-	if (opt.require_init)
+	എങ്കിൽ (opt.require_init)
 		opt.init = 1;
 
-	if (filter_options.choice && !opt.init) {
+	എങ്കിൽ (filter_options.choice && !opt.init) {
 		usage_with_options(git_submodule_helper_usage,
 				   module_update_options);
 	}
 
-	if (ref_storage_format) {
+	എങ്കിൽ (ref_storage_format) {
 		opt.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (opt.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+		എങ്കിൽ (opt.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 
 	opt.filter_options = &filter_options;
 	opt.prefix = prefix;
 
-	if (opt.update_default)
+	എങ്കിൽ (opt.update_default)
 		opt.update_strategy.type = opt.update_default;
 
-	if (module_list_compute(argv, prefix, &pathspec, &opt.list) < 0) {
+	എങ്കിൽ (module_list_compute(argv, prefix, &pathspec, &opt.list) < 0) {
 		ret = 1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
-	if (pathspec.nr)
+	എങ്കിൽ (pathspec.nr)
 		opt.warn_if_uninitialized = 1;
 
-	if (opt.init) {
-		struct module_list list = MODULE_LIST_INIT;
-		struct init_cb info = INIT_CB_INIT;
+	എങ്കിൽ (opt.init) {
+		ഘടന module_list list = MODULE_LIST_INIT;
+		ഘടന init_cb info = INIT_CB_INIT;
 
-		if (module_list_compute(argv, opt.prefix,
+		എങ്കിൽ (module_list_compute(argv, opt.prefix,
 					&pathspec2, &list) < 0) {
 			module_list_release(&list);
 			ret = 1;
-			goto cleanup;
+			പോകുക cleanup;
 		}
 
 		/*
 		 * If there are no path args and submodule.active is set then,
 		 * by default, only initialize 'active' modules.
 		 */
-		if (!argc && !repo_config_get(the_repository, "submodule.active"))
+		എങ്കിൽ (!argc && !repo_config_get(the_repository, "submodule.active"))
 			module_list_active(&list);
 
 		info.prefix = opt.prefix;
 		info.super_prefix = opt.super_prefix;
-		if (opt.quiet)
+		എങ്കിൽ (opt.quiet)
 			info.flags |= OPT_QUIET;
 
 		for_each_listed_submodule(&list, init_submodule_cb, &info);
@@ -3115,19 +3115,19 @@ cleanup:
 	list_objects_filter_release(&filter_options);
 	clear_pathspec(&pathspec);
 	clear_pathspec(&pathspec2);
-	return ret;
+	തിരികെ ret;
 }
 
-static int push_check(int argc, const char **argv, const char *prefix UNUSED,
-		      struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ തള്ളുക_check(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix UNUSED,
+		      ഘടന repository *repo UNUSED)
 {
-	struct remote *remote;
-	const char *superproject_head;
-	char *head;
-	int detached_head = 0;
-	struct object_id head_oid;
+	ഘടന remote *remote;
+	സ്ഥിരം അക്ഷരം *superproject_head;
+	അക്ഷരം *head;
+	പൂർണ്ണസംഖ്യ detached_head = 0;
+	ഘടന object_id head_oid;
 
-	if (argc < 3)
+	എങ്കിൽ (argc < 3)
 		die("submodule--helper push-check requires at least 2 arguments");
 
 	/*
@@ -3140,10 +3140,10 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 	argc--;
 	/* Get the submodule's head ref and determine if it is detached */
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   0, &head_oid, NULL);
-	if (!head)
+				   0, &head_oid, ശൂന്യ);
+	എങ്കിൽ (!head)
 		die(_("Failed to resolve HEAD as a valid ref."));
-	if (!strcmp(head, "HEAD"))
+	എങ്കിൽ (!strcmp(head, "HEAD"))
 		detached_head = 1;
 
 	/*
@@ -3151,41 +3151,41 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 	 * This is to avoid pushing to the exact same URL as the parent.
 	 */
 	remote = pushremote_get(argv[1]);
-	if (!remote || remote->origin == REMOTE_UNCONFIGURED)
+	എങ്കിൽ (!remote || remote->origin == REMOTE_UNCONFIGURED)
 		die("remote '%s' not configured", argv[1]);
 
 	/* Check the refspec */
-	if (argc > 2) {
-		int i;
-		struct ref *local_refs = get_local_heads();
-		struct refspec refspec = REFSPEC_INIT_PUSH(the_hash_algo);
+	എങ്കിൽ (argc > 2) {
+		പൂർണ്ണസംഖ്യ i;
+		ഘടന ref *local_refs = get_local_heads();
+		ഘടന refspec refspec = REFSPEC_INIT_തള്ളുക(the_hash_algo);
 
 		refspec_appendn(&refspec, argv + 2, argc - 2);
 
-		for (i = 0; i < refspec.nr; i++) {
-			const struct refspec_item *rs = &refspec.items[i];
+		വേണ്ടി (i = 0; i < refspec.nr; i++) {
+			സ്ഥിരം ഘടന refspec_item *rs = &refspec.ഇനങ്ങൾ[i];
 
-			if (rs->pattern || rs->matching)
-				continue;
+			എങ്കിൽ (rs->pattern || rs->matching)
+				തുടരുക;
 
 			/* LHS must match a single ref */
-			switch (count_refspec_match(rs->src, local_refs, NULL)) {
-			case 1:
-				break;
-			case 0:
+			തിരഞ്ഞെടുപ്പ് (എണ്ണം_refspec_match(rs->src, local_refs, ശൂന്യ)) {
+			അവസ്ഥ 1:
+				നിർത്തുക;
+			അവസ്ഥ 0:
 				/*
 				 * If LHS matches 'HEAD' then we need to ensure
 				 * that it matches the same named branch
 				 * checked out in the superproject.
 				 */
-				if (!strcmp(rs->src, "HEAD")) {
-					if (!detached_head &&
+				എങ്കിൽ (!strcmp(rs->src, "HEAD")) {
+					എങ്കിൽ (!detached_head &&
 					    !strcmp(head, superproject_head))
-						break;
+						നിർത്തുക;
 					die("HEAD does not match the named branch in the superproject");
 				}
 				/* fallthrough */
-			default:
+			സ്ഥിരസ്ഥിതി:
 				die("src refspec '%s' must name a ref",
 				    rs->src);
 			}
@@ -3194,35 +3194,35 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 		refspec_clear(&refspec);
 		free_refs(local_refs);
 	}
-	free(head);
+	സ്വതന്ത്രം(head);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int absorb_git_dirs(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ absorb_git_dirs(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			   ഘടന repository *repo UNUSED)
 {
-	int i;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	const char *super_prefix = NULL;
-	struct option embed_gitdir_options[] = {
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന pathspec pathspec = { 0 };
+	ഘടന module_list list = MODULE_LIST_INIT;
+	സ്ഥിരം അക്ഷരം *super_prefix = ശൂന്യ;
+	ഘടന option embed_gitdir_options[] = {
 		OPT__SUPER_PREFIX(&super_prefix),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം git_submodule_helper_usage[] = {
 		N_("git submodule absorbgitdirs [<options>] [<path>...]"),
-		NULL
+		ശൂന്യ
 	};
-	int ret = 1;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, embed_gitdir_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	എങ്കിൽ (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		പോകുക cleanup;
 
-	for (i = 0; i < list.nr; i++)
+	വേണ്ടി (i = 0; i < list.nr; i++)
 		absorb_git_dir_into_superproject(list.entries[i]->name,
 						 super_prefix);
 
@@ -3230,57 +3230,57 @@ static int absorb_git_dirs(int argc, const char **argv, const char *prefix,
 cleanup:
 	clear_pathspec(&pathspec);
 	module_list_release(&list);
-	return ret;
+	തിരികെ ret;
 }
 
-static int module_set_url(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_set_url(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			  ഘടന repository *repo UNUSED)
 {
-	int quiet = 0, ret;
-	const char *newurl;
-	const char *path;
-	char *config_name;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ quiet = 0, ret;
+	സ്ഥിരം അക്ഷരം *newurl;
+	സ്ഥിരം അക്ഷരം *path;
+	അക്ഷരം *config_name;
+	ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("suppress output for setting url of a submodule")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം usage[] = {
 		N_("git submodule set-url [--quiet] <path> <newurl>"),
-		NULL
+		ശൂന്യ
 	};
-	const struct submodule *sub;
+	സ്ഥിരം ഘടന submodule *sub;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (argc != 2 || !(path = argv[0]) || !(newurl = argv[1]))
+	എങ്കിൽ (argc != 2 || !(path = argv[0]) || !(newurl = argv[1]))
 		usage_with_options(usage, options);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	എങ്കിൽ (!sub)
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
 		    path);
 
 	config_name = xstrfmt("submodule.%s.url", sub->name);
 	ret = config_set_in_gitmodules_file_gently(the_repository, config_name, newurl);
 
-	if (!ret) {
+	എങ്കിൽ (!ret) {
 		repo_read_gitmodules(the_repository, 0);
-		sync_submodule(sub->path, prefix, NULL, quiet ? OPT_QUIET : 0);
+		sync_submodule(sub->path, prefix, ശൂന്യ, quiet ? OPT_QUIET : 0);
 	}
 
-	free(config_name);
-	return !!ret;
+	സ്വതന്ത്രം(config_name);
+	തിരികെ !!ret;
 }
 
-static int module_set_branch(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_set_branch(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			     ഘടന repository *repo UNUSED)
 {
-	int opt_default = 0, ret;
-	const char *opt_branch = NULL;
-	const char *path;
-	char *config_name;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ opt_default = 0, ret;
+	സ്ഥിരം അക്ഷരം *opt_branch = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *path;
+	അക്ഷരം *config_name;
+	ഘടന option options[] = {
 		/*
 		 * We accept the `quiet` option for uniformity across subcommands,
 		 * though there is nothing to make less verbose in this subcommand.
@@ -3293,43 +3293,43 @@ static int module_set_branch(int argc, const char **argv, const char *prefix,
 			N_("set the default tracking branch")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം usage[] = {
 		N_("git submodule set-branch [-q|--quiet] (-d|--default) <path>"),
 		N_("git submodule set-branch [-q|--quiet] (-b|--branch) <branch> <path>"),
-		NULL
+		ശൂന്യ
 	};
-	const struct submodule *sub;
+	സ്ഥിരം ഘടന submodule *sub;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (!opt_branch && !opt_default)
+	എങ്കിൽ (!opt_branch && !opt_default)
 		die(_("--branch or --default required"));
 
-	if (opt_branch && opt_default)
+	എങ്കിൽ (opt_branch && opt_default)
 		die(_("options '%s' and '%s' cannot be used together"), "--branch", "--default");
 
-	if (argc != 1 || !(path = argv[0]))
+	എങ്കിൽ (argc != 1 || !(path = argv[0]))
 		usage_with_options(usage, options);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	എങ്കിൽ (!sub)
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
 		    path);
 
 	config_name = xstrfmt("submodule.%s.branch", sub->name);
 	ret = config_set_in_gitmodules_file_gently(the_repository, config_name, opt_branch);
 
-	free(config_name);
-	return !!ret;
+	സ്വതന്ത്രം(config_name);
+	തിരികെ !!ret;
 }
 
-static int module_create_branch(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_create_branch(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+				ഘടന repository *repo UNUSED)
 {
-	enum branch_track track;
-	int quiet = 0, force = 0, reflog = 0, dry_run = 0;
-	struct option options[] = {
+	എണ്ണൽ branch_track track;
+	പൂർണ്ണസംഖ്യ quiet = 0, force = 0, reflog = 0, dry_run = 0;
+	ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("print only error messages")),
 		OPT__FORCE(&force, N_("force creation"), 0),
 		OPT_BOOL(0, "create-reflog", &reflog,
@@ -3342,112 +3342,112 @@ static int module_create_branch(int argc, const char **argv, const char *prefix,
 			     N_("show whether the branch would be created")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം usage[] = {
 		N_("git submodule--helper create-branch [-f|--force] [--create-reflog] [-q|--quiet] [-t|--track] [-n|--dry-run] <name> <start-oid> <start-name>"),
-		NULL
+		ശൂന്യ
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 	track = cfg->branch_track;
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (argc != 3)
+	എങ്കിൽ (argc != 3)
 		usage_with_options(usage, options);
 
-	if (!quiet && !dry_run)
+	എങ്കിൽ (!quiet && !dry_run)
 		printf_ln(_("creating branch '%s'"), argv[0]);
 
 	create_branches_recursively(the_repository, argv[0], argv[1], argv[2],
 				    force, reflog, quiet, track, dry_run);
-	return 0;
+	തിരികെ 0;
 }
 
-struct add_data {
-	const char *prefix;
-	const char *branch;
-	const char *reference_path;
-	char *sm_path;
-	const char *sm_name;
-	const char *repo;
-	const char *realrepo;
-	enum ref_storage_format ref_storage_format;
-	int depth;
-	unsigned int force: 1;
-	unsigned int quiet: 1;
-	unsigned int progress: 1;
-	unsigned int dissociate: 1;
+ഘടന add_data {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *branch;
+	സ്ഥിരം അക്ഷരം *reference_path;
+	അക്ഷരം *sm_path;
+	സ്ഥിരം അക്ഷരം *sm_name;
+	സ്ഥിരം അക്ഷരം *repo;
+	സ്ഥിരം അക്ഷരം *realrepo;
+	എണ്ണൽ ref_storage_format ref_storage_format;
+	പൂർണ്ണസംഖ്യ depth;
+	unsigned പൂർണ്ണസംഖ്യ force: 1;
+	unsigned പൂർണ്ണസംഖ്യ quiet: 1;
+	unsigned പൂർണ്ണസംഖ്യ progress: 1;
+	unsigned പൂർണ്ണസംഖ്യ dissociate: 1;
 };
 #define ADD_DATA_INIT { \
 	.depth = -1, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-static void append_fetch_remotes(struct strbuf *msg, const char *git_dir_path)
+സ്ഥിതം ശൂന്യം append_fetch_remotes(ഘടന strbuf *സന്ദേശം, സ്ഥിരം അക്ഷരം *git_dir_path)
 {
-	struct child_process cp_remote = CHILD_PROCESS_INIT;
-	struct strbuf sb_remote_out = STRBUF_INIT;
+	ഘടന child_process cp_remote = CHILD_PROCESS_INIT;
+	ഘടന strbuf sb_remote_out = STRBUF_INIT;
 
 	cp_remote.git_cmd = 1;
 	strvec_pushf(&cp_remote.env,
 		     "GIT_DIR=%s", git_dir_path);
-	strvec_push(&cp_remote.env, "GIT_WORK_TREE=.");
-	strvec_pushl(&cp_remote.args, "remote", "-v", NULL);
-	if (!capture_command(&cp_remote, &sb_remote_out, 0)) {
-		char *next_line;
-		char *line = sb_remote_out.buf;
+	strvec_തള്ളുക(&cp_remote.env, "GIT_WORK_TREE=.");
+	strvec_pushl(&cp_remote.args, "remote", "-v", ശൂന്യ);
+	എങ്കിൽ (!capture_command(&cp_remote, &sb_remote_out, 0)) {
+		അക്ഷരം *next_വരി;
+		അക്ഷരം *വരി = sb_remote_out.buf;
 
-		while ((next_line = strchr(line, '\n')) != NULL) {
-			size_t len = next_line - line;
+		ആകുമ്പോൾ ((next_വരി = strchr(വരി, '\n')) != ശൂന്യ) {
+			size_t len = next_വരി - വരി;
 
-			if (strip_suffix_mem(line, &len, " (fetch)"))
-				strbuf_addf(msg, "  %.*s\n", (int)len, line);
-			line = next_line + 1;
+			എങ്കിൽ (strip_suffix_mem(വരി, &len, " (fetch)"))
+				strbuf_addf(സന്ദേശം, "  %.*s\n", (പൂർണ്ണസംഖ്യ)len, വരി);
+			വരി = next_വരി + 1;
 		}
 	}
 
 	strbuf_release(&sb_remote_out);
 }
 
-static int add_submodule(const struct add_data *add_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_submodule(സ്ഥിരം ഘടന add_data *add_data)
 {
-	struct module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
-	struct string_list reference = STRING_LIST_INIT_NODUP;
-	int ret = -1;
+	ഘടന module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
+	ഘടന string_list reference = STRING_LIST_INIT_NODUP;
+	പൂർണ്ണസംഖ്യ ret = -1;
 
 	/* perhaps the path already exists and is already a git repo, else clone it */
-	if (is_directory(add_data->sm_path)) {
-		char *submod_gitdir_path;
-		struct strbuf sm_path = STRBUF_INIT;
+	എങ്കിൽ (is_directory(add_data->sm_path)) {
+		അക്ഷരം *submod_gitdir_path;
+		ഘടന strbuf sm_path = STRBUF_INIT;
 		strbuf_addstr(&sm_path, add_data->sm_path);
 		submod_gitdir_path = xstrfmt("%s/.git", add_data->sm_path);
-		if (is_nonbare_repository_dir(&sm_path))
+		എങ്കിൽ (is_nonbare_repository_dir(&sm_path))
 			printf(_("Adding existing repo at '%s' to the index\n"),
 			       add_data->sm_path);
-		else
+		അല്ലെങ്കിൽ
 			die(_("'%s' already exists and is not a valid git repo"),
 			    add_data->sm_path);
 		strbuf_release(&sm_path);
-		free(submod_gitdir_path);
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
-		struct strbuf submod_gitdir = STRBUF_INIT;
+		സ്വതന്ത്രം(submod_gitdir_path);
+	} അല്ലെങ്കിൽ {
+		ഘടന child_process cp = CHILD_PROCESS_INIT;
+		ഘടന strbuf submod_gitdir = STRBUF_INIT;
 
 		submodule_name_to_gitdir(&submod_gitdir, the_repository, add_data->sm_name);
 
-		if (is_directory(submod_gitdir.buf)) {
-			if (!add_data->force) {
-				struct strbuf msg = STRBUF_INIT;
-				char *die_msg;
+		എങ്കിൽ (is_directory(submod_gitdir.buf)) {
+			എങ്കിൽ (!add_data->force) {
+				ഘടന strbuf സന്ദേശം = STRBUF_INIT;
+				അക്ഷരം *die_സന്ദേശം;
 
-				strbuf_addf(&msg, _("A git directory for '%s' is found "
+				strbuf_addf(&സന്ദേശം, _("A git directory for '%s' is found "
 						    "locally with remote(s):\n"),
 					    add_data->sm_name);
 
-				append_fetch_remotes(&msg, submod_gitdir.buf);
+				append_fetch_remotes(&സന്ദേശം, submod_gitdir.buf);
 				strbuf_release(&submod_gitdir);
 
-				strbuf_addf(&msg, _("If you want to reuse this local git "
+				strbuf_addf(&സന്ദേശം, _("If you want to reuse this local git "
 						    "directory instead of cloning again from\n"
 						    "  %s\n"
 						    "use the '--force' option. If the local git "
@@ -3456,9 +3456,9 @@ static int add_submodule(const struct add_data *add_data)
 						    "another name with the '--name' option."),
 					    add_data->realrepo);
 
-				die_msg = strbuf_detach(&msg, NULL);
-				die("%s", die_msg);
-			} else {
+				die_സന്ദേശം = strbuf_detach(&സന്ദേശം, ശൂന്യ);
+				die("%s", die_സന്ദേശം);
+			} അല്ലെങ്കിൽ {
 				printf(_("Reactivating local git directory for "
 					 "submodule '%s'\n"), add_data->sm_name);
 			}
@@ -3471,18 +3471,18 @@ static int add_submodule(const struct add_data *add_data)
 		clone_data.url = add_data->realrepo;
 		clone_data.quiet = add_data->quiet;
 		clone_data.progress = add_data->progress;
-		if (add_data->reference_path) {
-			char *p = xstrdup(add_data->reference_path);
+		എങ്കിൽ (add_data->reference_path) {
+			അക്ഷരം *p = xstrdup(add_data->reference_path);
 
 			string_list_append(&reference, p)->util = p;
 		}
 		clone_data.ref_storage_format = add_data->ref_storage_format;
 		clone_data.dissociate = add_data->dissociate;
-		if (add_data->depth >= 0)
+		എങ്കിൽ (add_data->depth >= 0)
 			clone_data.depth = add_data->depth;
 
-		if (clone_submodule(&clone_data, &reference))
-			goto cleanup;
+		എങ്കിൽ (clone_submodule(&clone_data, &reference))
+			പോകുക cleanup;
 
 		prepare_submodule_repo_env(&cp.env);
 		cp.git_cmd = 1;
@@ -3491,75 +3491,75 @@ static int add_submodule(const struct add_data *add_data)
 		 * NOTE: we only get here if add_data->force is true, so
 		 * passing --force to checkout is reasonable.
 		 */
-		strvec_pushl(&cp.args, "checkout", "-f", "-q", NULL);
+		strvec_pushl(&cp.args, "checkout", "-f", "-q", ശൂന്യ);
 
-		if (add_data->branch) {
-			strvec_pushl(&cp.args, "-B", add_data->branch, NULL);
+		എങ്കിൽ (add_data->branch) {
+			strvec_pushl(&cp.args, "-B", add_data->branch, ശൂന്യ);
 			strvec_pushf(&cp.args, "origin/%s", add_data->branch);
 		}
 
-		if (run_command(&cp))
+		എങ്കിൽ (run_command(&cp))
 			die(_("unable to checkout submodule '%s'"), add_data->sm_path);
 	}
 	ret = 0;
 
 cleanup:
 	string_list_clear(&reference, 1);
-	return ret;
+	തിരികെ ret;
 }
 
-static int config_submodule_in_gitmodules(const char *name, const char *var, const char *value)
+സ്ഥിതം പൂർണ്ണസംഖ്യ config_submodule_in_gitmodules(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	char *key;
-	int ret;
+	അക്ഷരം *താക്കോൽ;
+	പൂർണ്ണസംഖ്യ ret;
 
-	if (!is_writing_gitmodules_ok())
+	എങ്കിൽ (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	key = xstrfmt("submodule.%s.%s", name, var);
-	ret = config_set_in_gitmodules_file_gently(the_repository, key, value);
-	free(key);
+	താക്കോൽ = xstrfmt("submodule.%s.%s", name, var);
+	ret = config_set_in_gitmodules_file_gently(the_repository, താക്കോൽ, മൂല്യം);
+	സ്വതന്ത്രം(താക്കോൽ);
 
-	return ret;
+	തിരികെ ret;
 }
 
-static void configure_added_submodule(struct add_data *add_data)
+സ്ഥിതം ശൂന്യം configure_added_submodule(ഘടന add_data *add_data)
 {
-	char *key;
-	struct child_process add_submod = CHILD_PROCESS_INIT;
-	struct child_process add_gitmodules = CHILD_PROCESS_INIT;
-	const struct string_list *values;
-	int matched = 0;
+	അക്ഷരം *താക്കോൽ;
+	ഘടന child_process add_submod = CHILD_PROCESS_INIT;
+	ഘടന child_process add_gitmodules = CHILD_PROCESS_INIT;
+	സ്ഥിരം ഘടന string_list *മൂല്യങ്ങൾ;
+	പൂർണ്ണസംഖ്യ matched = 0;
 
-	key = xstrfmt("submodule.%s.url", add_data->sm_name);
-	repo_config_set_gently(the_repository, key, add_data->realrepo);
-	free(key);
+	താക്കോൽ = xstrfmt("submodule.%s.url", add_data->sm_name);
+	repo_config_set_gently(the_repository, താക്കോൽ, add_data->realrepo);
+	സ്വതന്ത്രം(താക്കോൽ);
 
 	add_submod.git_cmd = 1;
 	strvec_pushl(&add_submod.args, "add",
-		     "--no-warn-embedded-repo", NULL);
-	if (add_data->force)
-		strvec_push(&add_submod.args, "--force");
-	strvec_pushl(&add_submod.args, "--", add_data->sm_path, NULL);
+		     "--no-warn-embedded-repo", ശൂന്യ);
+	എങ്കിൽ (add_data->force)
+		strvec_തള്ളുക(&add_submod.args, "--force");
+	strvec_pushl(&add_submod.args, "--", add_data->sm_path, ശൂന്യ);
 
-	if (run_command(&add_submod))
+	എങ്കിൽ (run_command(&add_submod))
 		die(_("Failed to add submodule '%s'"), add_data->sm_path);
 
-	if (config_submodule_in_gitmodules(add_data->sm_name, "path", add_data->sm_path) ||
+	എങ്കിൽ (config_submodule_in_gitmodules(add_data->sm_name, "path", add_data->sm_path) ||
 	    config_submodule_in_gitmodules(add_data->sm_name, "url", add_data->repo))
 		die(_("Failed to register submodule '%s'"), add_data->sm_path);
 
-	if (add_data->branch) {
-		if (config_submodule_in_gitmodules(add_data->sm_name,
+	എങ്കിൽ (add_data->branch) {
+		എങ്കിൽ (config_submodule_in_gitmodules(add_data->sm_name,
 						   "branch", add_data->branch))
 			die(_("Failed to register submodule '%s'"), add_data->sm_path);
 	}
 
 	add_gitmodules.git_cmd = 1;
 	strvec_pushl(&add_gitmodules.args,
-		     "add", "--force", "--", ".gitmodules", NULL);
+		     "add", "--force", "--", ".gitmodules", ശൂന്യ);
 
-	if (run_command(&add_gitmodules))
+	എങ്കിൽ (run_command(&add_gitmodules))
 		die(_("Failed to register submodule '%s'"), add_data->sm_path);
 
 	/*
@@ -3572,42 +3572,42 @@ static void configure_added_submodule(struct add_data *add_data)
 	 * is_submodule_active(), since that function needs to find
 	 * out the value of "submodule.active" again anyway.
 	 */
-	if (repo_config_get(the_repository, "submodule.active") || /* key absent */
-	    repo_config_get_string_multi(the_repository, "submodule.active", &values)) {
+	എങ്കിൽ (repo_config_get(the_repository, "submodule.active") || /* key absent */
+	    repo_config_get_string_multi(the_repository, "submodule.active", &മൂല്യങ്ങൾ)) {
 		/*
 		 * If the submodule being added isn't already covered by the
 		 * current configured pathspec, set the submodule's active flag
 		 */
-		key = xstrfmt("submodule.%s.active", add_data->sm_name);
-		repo_config_set_gently(the_repository, key, "true");
-		free(key);
-	} else {
-		for (size_t i = 0; i < values->nr; i++) {
-			const char *pat = values->items[i].string;
-			if (!wildmatch(pat, add_data->sm_path, 0)) { /* match found */
+		താക്കോൽ = xstrfmt("submodule.%s.active", add_data->sm_name);
+		repo_config_set_gently(the_repository, താക്കോൽ, "true");
+		സ്വതന്ത്രം(താക്കോൽ);
+	} അല്ലെങ്കിൽ {
+		വേണ്ടി (size_t i = 0; i < മൂല്യങ്ങൾ->nr; i++) {
+			സ്ഥിരം അക്ഷരം *pat = മൂല്യങ്ങൾ->ഇനങ്ങൾ[i].string;
+			എങ്കിൽ (!wildmatch(pat, add_data->sm_path, 0)) { /* match found */
 				matched = 1;
-				break;
+				നിർത്തുക;
 			}
 		}
-		if (!matched) { /* no pattern matched -> force-enable */
-			key = xstrfmt("submodule.%s.active", add_data->sm_name);
-			repo_config_set_gently(the_repository, key, "true");
-			free(key);
+		എങ്കിൽ (!matched) { /* no pattern matched -> force-enable */
+			താക്കോൽ = xstrfmt("submodule.%s.active", add_data->sm_name);
+			repo_config_set_gently(the_repository, താക്കോൽ, "true");
+			സ്വതന്ത്രം(താക്കോൽ);
 		}
 	}
 }
 
-static void die_on_index_match(const char *path, int force)
+സ്ഥിതം ശൂന്യം die_on_index_match(സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ force)
 {
-	struct pathspec ps;
-	const char *args[] = { path, NULL };
-	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, NULL, args);
+	ഘടന pathspec ps;
+	സ്ഥിരം അക്ഷരം *args[] = { path, ശൂന്യ };
+	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, ശൂന്യ, args);
 
-	if (repo_read_index_preload(the_repository, NULL, 0) < 0)
+	എങ്കിൽ (repo_read_index_preload(the_repository, ശൂന്യ, 0) < 0)
 		die(_("index file corrupt"));
 
-	if (ps.nr) {
-		char *ps_matched = xcalloc(ps.nr, 1);
+	എങ്കിൽ (ps.nr) {
+		അക്ഷരം *ps_matched = xcalloc(ps.nr, 1);
 
 		/* TODO: audit for interaction with sparse-index. */
 		ensure_full_index(the_repository->index);
@@ -3616,48 +3616,48 @@ static void die_on_index_match(const char *path, int force)
 		 * Since there is only one pathspec, we just need to
 		 * check ps_matched[0] to know if a cache entry matched.
 		 */
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++) {
+		വേണ്ടി (size_t i = 0; i < the_repository->index->cache_nr; i++) {
 			ce_path_match(the_repository->index, the_repository->index->cache[i], &ps,
 				      ps_matched);
 
-			if (ps_matched[0]) {
-				if (!force)
+			എങ്കിൽ (ps_matched[0]) {
+				എങ്കിൽ (!force)
 					die(_("'%s' already exists in the index"),
 					    path);
-				if (!S_ISGITLINK(the_repository->index->cache[i]->ce_mode))
+				എങ്കിൽ (!S_ISGITLINK(the_repository->index->cache[i]->ce_mode))
 					die(_("'%s' already exists in the index "
 					      "and is not a submodule"), path);
-				break;
+				നിർത്തുക;
 			}
 		}
-		free(ps_matched);
+		സ്വതന്ത്രം(ps_matched);
 	}
 	clear_pathspec(&ps);
 }
 
-static void die_on_repo_without_commits(const char *path)
+സ്ഥിതം ശൂന്യം die_on_repo_without_commits(സ്ഥിരം അക്ഷരം *path)
 {
-	struct strbuf sb = STRBUF_INIT;
+	ഘടന strbuf sb = STRBUF_INIT;
 	strbuf_addstr(&sb, path);
-	if (is_nonbare_repository_dir(&sb)) {
-		struct object_id oid;
-		if (repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid) < 0)
+	എങ്കിൽ (is_nonbare_repository_dir(&sb)) {
+		ഘടന object_id oid;
+		എങ്കിൽ (repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid) < 0)
 			die(_("'%s' does not have a commit checked out"), path);
 	}
 	strbuf_release(&sb);
 }
 
-static int module_add(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ module_add(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	int force = 0, quiet = 0, progress = 0, dissociate = 0;
-	struct add_data add_data = ADD_DATA_INIT;
-	const char *ref_storage_format = NULL;
-	char *to_free = NULL;
-	const struct submodule *existing;
-	struct strbuf buf = STRBUF_INIT;
-	char *sm_name_to_free = NULL;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ force = 0, quiet = 0, progress = 0, dissociate = 0;
+	ഘടന add_data add_data = ADD_DATA_INIT;
+	സ്ഥിരം അക്ഷരം *ref_storage_format = ശൂന്യ;
+	അക്ഷരം *to_free = ശൂന്യ;
+	സ്ഥിരം ഘടന submodule *existing;
+	ഘടന strbuf buf = STRBUF_INIT;
+	അക്ഷരം *sm_name_to_free = ശൂന്യ;
+	ഘടന option options[] = {
 		OPT_STRING('b', "branch", &add_data.branch, N_("branch"),
 			   N_("branch of repository to add as submodule")),
 		OPT__FORCE(&force, N_("allow adding an otherwise ignored submodule path"),
@@ -3676,56 +3676,56 @@ static int module_add(int argc, const char **argv, const char *prefix,
 		OPT_INTEGER(0, "depth", &add_data.depth, N_("depth for shallow clones")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം usage[] = {
 		N_("git submodule add [<options>] [--] <repository> [<path>]"),
-		NULL
+		ശൂന്യ
 	};
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 1;
+	ഘടന strbuf sb = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ ret = 1;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (!is_writing_gitmodules_ok())
+	എങ്കിൽ (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	if (prefix && *prefix &&
+	എങ്കിൽ (prefix && *prefix &&
 	    add_data.reference_path && !is_absolute_path(add_data.reference_path))
 		add_data.reference_path = xstrfmt("%s%s", prefix, add_data.reference_path);
 
-	if (argc == 0 || argc > 2)
+	എങ്കിൽ (argc == 0 || argc > 2)
 		usage_with_options(usage, options);
 
-	if (ref_storage_format) {
+	എങ്കിൽ (ref_storage_format) {
 		add_data.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (add_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+		എങ്കിൽ (add_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 
 	add_data.repo = argv[0];
-	if (argc == 1)
+	എങ്കിൽ (argc == 1)
 		add_data.sm_path = git_url_basename(add_data.repo, 0, 0);
-	else
+	അല്ലെങ്കിൽ
 		add_data.sm_path = xstrdup(argv[1]);
 
-	if (prefix && *prefix && !is_absolute_path(add_data.sm_path)) {
-		char *sm_path = add_data.sm_path;
+	എങ്കിൽ (prefix && *prefix && !is_absolute_path(add_data.sm_path)) {
+		അക്ഷരം *sm_path = add_data.sm_path;
 
 		add_data.sm_path = xstrfmt("%s%s", prefix, sm_path);
-		free(sm_path);
+		സ്വതന്ത്രം(sm_path);
 	}
 
-	if (starts_with_dot_dot_slash(add_data.repo) ||
+	എങ്കിൽ (starts_with_dot_dot_slash(add_data.repo) ||
 	    starts_with_dot_slash(add_data.repo)) {
-		if (prefix)
+		എങ്കിൽ (prefix)
 			die(_("Relative path can only be used from the toplevel "
 			      "of the working tree"));
 
 		/* dereference source url relative to parent's url */
-		to_free = resolve_relative_url(add_data.repo, NULL, 1);
+		to_free = resolve_relative_url(add_data.repo, ശൂന്യ, 1);
 		add_data.realrepo = to_free;
-	} else if (is_dir_sep(add_data.repo[0]) || strchr(add_data.repo, ':')) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (is_dir_sep(add_data.repo[0]) || strchr(add_data.repo, ':')) {
 		add_data.realrepo = add_data.repo;
-	} else {
+	} അല്ലെങ്കിൽ {
 		die(_("repo URL: '%s' must be absolute or begin with ./|../"),
 		    add_data.repo);
 	}
@@ -3737,53 +3737,53 @@ static int module_add(int argc, const char **argv, const char *prefix,
 	normalize_path_copy(add_data.sm_path, add_data.sm_path);
 	strip_dir_trailing_slashes(add_data.sm_path);
 
-	if (validate_submodule_path(add_data.sm_path) < 0)
-		die(NULL);
+	എങ്കിൽ (validate_submodule_path(add_data.sm_path) < 0)
+		die(ശൂന്യ);
 
 	die_on_index_match(add_data.sm_path, force);
 	die_on_repo_without_commits(add_data.sm_path);
 
-	if (!force) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	എങ്കിൽ (!force) {
+		ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 		cp.git_cmd = 1;
 		cp.no_stdout = 1;
 		strvec_pushl(&cp.args, "add", "--dry-run", "--ignore-missing",
-			     "--no-warn-embedded-repo", add_data.sm_path, NULL);
-		if ((ret = pipe_command(&cp, NULL, 0, NULL, 0, &sb, 0))) {
-			strbuf_complete_line(&sb);
+			     "--no-warn-embedded-repo", add_data.sm_path, ശൂന്യ);
+		എങ്കിൽ ((ret = pipe_command(&cp, ശൂന്യ, 0, ശൂന്യ, 0, &sb, 0))) {
+			strbuf_complete_വരി(&sb);
 			fputs(sb.buf, stderr);
-			goto cleanup;
+			പോകുക cleanup;
 		}
 	}
 
-	if (!add_data.sm_name)
+	എങ്കിൽ (!add_data.sm_name)
 		add_data.sm_name = add_data.sm_path;
 
 	existing = submodule_from_name(the_repository,
 					null_oid(the_hash_algo),
 					add_data.sm_name);
 
-	if (existing && existing->path &&
+	എങ്കിൽ (existing && existing->path &&
 	    strcmp(existing->path, add_data.sm_path)) {
-		if (!force) {
+		എങ്കിൽ (!force) {
 			die(_("submodule name '%s' already used for path '%s'"),
 			    add_data.sm_name, existing->path);
 		}
 		/* --force: build <name><n> until unique */
-		for (int i = 1; ; i++) {
+		വേണ്ടി (പൂർണ്ണസംഖ്യ i = 1; ; i++) {
 			strbuf_reset(&buf);
 			strbuf_addf(&buf, "%s%d", add_data.sm_name, i);
-			if (!submodule_from_name(the_repository,
+			എങ്കിൽ (!submodule_from_name(the_repository,
 						null_oid(the_hash_algo),
 						buf.buf)) {
-				break;
+				നിർത്തുക;
 			}
 		}
-		add_data.sm_name = sm_name_to_free = strbuf_detach(&buf, NULL);
+		add_data.sm_name = sm_name_to_free = strbuf_detach(&buf, ശൂന്യ);
 	}
 
-	if (check_submodule_name(add_data.sm_name))
+	എങ്കിൽ (check_submodule_name(add_data.sm_name))
 		die(_("'%s' is not a valid submodule name"), add_data.sm_name);
 
 	add_data.prefix = prefix;
@@ -3792,34 +3792,34 @@ static int module_add(int argc, const char **argv, const char *prefix,
 	add_data.progress = !!progress;
 	add_data.dissociate = !!dissociate;
 
-	if (the_repository->repository_format_submodule_path_cfg)
+	എങ്കിൽ (the_repository->repository_format_submodule_path_cfg)
 		create_default_gitdir_config(add_data.sm_name);
 
-	if (add_submodule(&add_data))
-		goto cleanup;
+	എങ്കിൽ (add_submodule(&add_data))
+		പോകുക cleanup;
 	configure_added_submodule(&add_data);
 
 	ret = 0;
 cleanup:
-	free(sm_name_to_free);
-	free(add_data.sm_path);
-	free(to_free);
+	സ്വതന്ത്രം(sm_name_to_free);
+	സ്വതന്ത്രം(add_data.sm_path);
+	സ്വതന്ത്രം(to_free);
 	strbuf_release(&sb);
 
-	return ret;
+	തിരികെ ret;
 }
 
-int cmd_submodule__helper(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_submodule__helper(പൂർണ്ണസംഖ്യ argc,
+			  സ്ഥിരം അക്ഷരം **argv,
+			  സ്ഥിരം അക്ഷരം *prefix,
+			  ഘടന repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	const char *const usage[] = {
+	parse_opt_subcommand_fn *fn = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം usage[] = {
 		N_("git submodule--helper <command>"),
-		NULL
+		ശൂന്യ
 	};
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_SUBCOMMAND("migrate-gitdir-configs", &fn, module_migrate),
 		OPT_SUBCOMMAND("gitdir", &fn, module_gitdir),
 		OPT_SUBCOMMAND("clone", &fn, module_clone),
@@ -3831,7 +3831,7 @@ int cmd_submodule__helper(int argc,
 		OPT_SUBCOMMAND("sync", &fn, module_sync),
 		OPT_SUBCOMMAND("deinit", &fn, module_deinit),
 		OPT_SUBCOMMAND("summary", &fn, module_summary),
-		OPT_SUBCOMMAND("push-check", &fn, push_check),
+		OPT_SUBCOMMAND("push-check", &fn, തള്ളുക_check),
 		OPT_SUBCOMMAND("absorbgitdirs", &fn, absorb_git_dirs),
 		OPT_SUBCOMMAND("set-url", &fn, module_set_url),
 		OPT_SUBCOMMAND("set-branch", &fn, module_set_branch),
@@ -3841,5 +3841,5 @@ int cmd_submodule__helper(int argc,
 	};
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	തിരികെ fn(argc, argv, prefix, repo);
 }

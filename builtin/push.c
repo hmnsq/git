@@ -4,144 +4,144 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "branch.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refspec.h"
-#include "run-command.h"
-#include "remote.h"
-#include "transport.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "send-pack.h"
-#include "trace2.h"
-#include "color.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "advice.h"
+#അന്തര്ഭാവ "branch.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "refspec.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "remote.h"
+#അന്തര്ഭാവ "transport.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "pkt-line.h"
+#അന്തര്ഭാവ "submodule.h"
+#അന്തര്ഭാവ "submodule-config.h"
+#അന്തര്ഭാവ "send-pack.h"
+#അന്തര്ഭാവ "trace2.h"
+#അന്തര്ഭാവ "color.h"
 
-static const char * const push_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം തള്ളുക_usage[] = {
 	N_("git push [<options>] [<repository> [<refspec>...]]"),
-	NULL,
+	ശൂന്യ,
 };
 
-static enum git_colorbool push_use_color = GIT_COLOR_UNKNOWN;
-static char push_colors[][COLOR_MAXLEN] = {
+സ്ഥിതം എണ്ണൽ git_colorbool തള്ളുക_use_color = GIT_COLOR_UNKNOWN;
+സ്ഥിതം അക്ഷരം തള്ളുക_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
 	GIT_COLOR_RED,	/* ERROR */
 };
 
-enum color_push {
-	PUSH_COLOR_RESET = 0,
-	PUSH_COLOR_ERROR = 1
+എണ്ണൽ color_തള്ളുക {
+	തള്ളുക_COLOR_RESET = 0,
+	തള്ളുക_COLOR_ERROR = 1
 };
 
-static int parse_push_color_slot(const char *slot)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_തള്ളുക_color_slot(സ്ഥിരം അക്ഷരം *slot)
 {
-	if (!strcasecmp(slot, "reset"))
-		return PUSH_COLOR_RESET;
-	if (!strcasecmp(slot, "error"))
-		return PUSH_COLOR_ERROR;
-	return -1;
+	എങ്കിൽ (!strcasecmp(slot, "reset"))
+		തിരികെ തള്ളുക_COLOR_RESET;
+	എങ്കിൽ (!strcasecmp(slot, "error"))
+		തിരികെ തള്ളുക_COLOR_ERROR;
+	തിരികെ -1;
 }
 
-static const char *push_get_color(enum color_push ix)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *തള്ളുക_get_color(എണ്ണൽ color_തള്ളുക ix)
 {
-	if (want_color_stderr(push_use_color))
-		return push_colors[ix];
-	return "";
+	എങ്കിൽ (want_color_stderr(തള്ളുക_use_color))
+		തിരികെ തള്ളുക_colors[ix];
+	തിരികെ "";
 }
 
-static int thin = 1;
-static int deleterefs;
-static const char *receivepack;
-static int verbosity;
-static int progress = -1;
-static int recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
-static enum transport_family family;
+സ്ഥിതം പൂർണ്ണസംഖ്യ thin = 1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ deleterefs;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *receivepack;
+സ്ഥിതം പൂർണ്ണസംഖ്യ verbosity;
+സ്ഥിതം പൂർണ്ണസംഖ്യ progress = -1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ recurse_submodules = RECURSE_SUBMODULES_DEFAULT;
+സ്ഥിതം എണ്ണൽ transport_family family;
 
-static struct push_cas_option cas;
+സ്ഥിതം ഘടന തള്ളുക_cas_option cas;
 
-static struct refspec rs;
+സ്ഥിതം ഘടന refspec rs;
 
-static struct string_list push_options_config = STRING_LIST_INIT_DUP;
+സ്ഥിതം ഘടന string_list തള്ളുക_options_config = STRING_LIST_INIT_DUP;
 
-static void refspec_append_mapped(struct refspec *refspec, const char *ref,
-				  struct remote *remote, struct ref *matched)
+സ്ഥിതം ശൂന്യം refspec_append_mapped(ഘടന refspec *refspec, സ്ഥിരം അക്ഷരം *ref,
+				  ഘടന remote *remote, ഘടന ref *matched)
 {
-	const char *branch_name;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	സ്ഥിരം അക്ഷരം *branch_name;
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
 
-	if (remote->push.nr) {
-		struct refspec_item query = {
+	എങ്കിൽ (remote->തള്ളുക.nr) {
+		ഘടന refspec_item query = {
 			.src = matched->name,
 		};
 
-		if (!refspec_find_match(&remote->push, &query) && query.dst) {
+		എങ്കിൽ (!refspec_find_match(&remote->തള്ളുക, &query) && query.dst) {
 			refspec_appendf(refspec, "%s%s:%s",
 					query.force ? "+" : "",
 					query.src, query.dst);
-			free(query.dst);
-			return;
+			സ്വതന്ത്രം(query.dst);
+			തിരികെ;
 		}
 	}
 
-	if (cfg->push_default == PUSH_DEFAULT_UPSTREAM &&
+	എങ്കിൽ (cfg->തള്ളുക_default == തള്ളുക_DEFAULT_UPSTREAM &&
 	    skip_prefix(matched->name, "refs/heads/", &branch_name)) {
-		struct branch *branch = branch_get(branch_name);
-		if (branch->merge_nr == 1 && branch->merge[0]->src) {
+		ഘടന branch *branch = branch_get(branch_name);
+		എങ്കിൽ (branch->merge_nr == 1 && branch->merge[0]->src) {
 			refspec_appendf(refspec, "%s:%s",
 					ref, branch->merge[0]->src);
-			return;
+			തിരികെ;
 		}
 	}
 
 	refspec_append(refspec, ref);
 }
 
-static void set_refspecs(const char **refs, int nr, struct remote *remote)
+സ്ഥിതം ശൂന്യം set_refspecs(സ്ഥിരം അക്ഷരം **refs, പൂർണ്ണസംഖ്യ nr, ഘടന remote *remote)
 {
-	struct ref *local_refs = NULL;
-	int i;
+	ഘടന ref *local_refs = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < nr; i++) {
-		const char *ref = refs[i];
-		if (!strcmp("tag", ref)) {
-			if (nr <= ++i)
+	വേണ്ടി (i = 0; i < nr; i++) {
+		സ്ഥിരം അക്ഷരം *ref = refs[i];
+		എങ്കിൽ (!strcmp("tag", ref)) {
+			എങ്കിൽ (nr <= ++i)
 				die(_("tag shorthand without <tag>"));
 			ref = refs[i];
-			if (deleterefs)
+			എങ്കിൽ (deleterefs)
 				refspec_appendf(&rs, ":refs/tags/%s", ref);
-			else
+			അല്ലെങ്കിൽ
 				refspec_appendf(&rs, "refs/tags/%s", ref);
-		} else if (deleterefs) {
-			if (strchr(ref, ':') || !*ref)
+		} അല്ലെങ്കിൽ എങ്കിൽ (deleterefs) {
+			എങ്കിൽ (strchr(ref, ':') || !*ref)
 				die(_("--delete only accepts plain target ref names"));
 			refspec_appendf(&rs, ":%s", ref);
-		} else if (!strchr(ref, ':')) {
-			struct ref *matched = NULL;
+		} അല്ലെങ്കിൽ എങ്കിൽ (!strchr(ref, ':')) {
+			ഘടന ref *matched = ശൂന്യ;
 
 			/* lazily grab local_refs */
-			if (!local_refs)
+			എങ്കിൽ (!local_refs)
 				local_refs = get_local_heads();
 
 			/* Does "ref" uniquely name our ref? */
-			if (count_refspec_match(ref, local_refs, &matched) != 1)
+			എങ്കിൽ (എണ്ണം_refspec_match(ref, local_refs, &matched) != 1)
 				refspec_append(&rs, ref);
-			else
+			അല്ലെങ്കിൽ
 				refspec_append_mapped(&rs, ref, remote, matched);
-		} else
+		} അല്ലെങ്കിൽ
 			refspec_append(&rs, ref);
 	}
 	free_refs(local_refs);
 }
 
-static NORETURN void die_push_simple(struct branch *branch,
-				     struct remote *remote)
+സ്ഥിതം NORETURN ശൂന്യം die_തള്ളുക_simple(ഘടന branch *branch,
+				     ഘടന remote *remote)
 {
 	/*
 	 * There's no point in using shorten_unambiguous_ref here,
@@ -151,10 +151,10 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * upstream to a non-branch, we should probably be showing
 	 * them the big ugly fully qualified ref.
 	 */
-	const char *advice_pushdefault_maybe = "";
-	const char *advice_automergesimple_maybe = "";
-	const char *short_upstream = branch->merge[0]->src;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	സ്ഥിരം അക്ഷരം *advice_pushdefault_maybe = "";
+	സ്ഥിരം അക്ഷരം *advice_automergesimple_maybe = "";
+	സ്ഥിരം അക്ഷരം *short_upstream = branch->merge[0]->src;
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
 
 	skip_prefix(short_upstream, "refs/heads/", &short_upstream);
 
@@ -162,11 +162,11 @@ static NORETURN void die_push_simple(struct branch *branch,
 	 * Don't show advice for people who explicitly set
 	 * push.default.
 	 */
-	if (cfg->push_default == PUSH_DEFAULT_UNSPECIFIED)
+	എങ്കിൽ (cfg->തള്ളുക_default == തള്ളുക_DEFAULT_UNSPECIFIED)
 		advice_pushdefault_maybe = _("\n"
 				 "To choose either option permanently, "
 				 "see push.default in 'git help config'.\n");
-	if (cfg->branch_track != BRANCH_TRACK_SIMPLE)
+	എങ്കിൽ (cfg->branch_track != BRANCH_TRACK_SIMPLE)
 		advice_automergesimple_maybe = _("\n"
 				 "To avoid automatically configuring "
 				 "an upstream branch when its name\n"
@@ -188,23 +188,23 @@ static NORETURN void die_push_simple(struct branch *branch,
 	    advice_automergesimple_maybe);
 }
 
-static const char message_detached_head_die[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_detached_head_die[] =
 	N_("You are not currently on a branch.\n"
 	   "To push the history leading to the current (detached HEAD)\n"
 	   "state now, use\n"
 	   "\n"
 	   "    git push %s HEAD:<name-of-remote-branch>\n");
 
-static const char *get_upstream_ref(int flags, struct branch *branch, const char *remote_name)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_upstream_ref(പൂർണ്ണസംഖ്യ flags, ഘടന branch *branch, സ്ഥിരം അക്ഷരം *remote_name)
 {
-	if (branch->merge_nr == 0 && (flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	എങ്കിൽ (branch->merge_nr == 0 && (flags & TRANSPORT_തള്ളുക_AUTO_UPSTREAM)) {
 		/* if missing, assume same; set_upstream will be defined later */
-		return branch->refname;
+		തിരികെ branch->refname;
 	}
 
-	if (!branch->merge_nr || !branch->merge || !branch->remote_name) {
-		const char *advice_autosetup_maybe = "";
-		if (!(flags & TRANSPORT_PUSH_AUTO_UPSTREAM)) {
+	എങ്കിൽ (!branch->merge_nr || !branch->merge || !branch->remote_name) {
+		സ്ഥിരം അക്ഷരം *advice_autosetup_maybe = "";
+		എങ്കിൽ (!(flags & TRANSPORT_തള്ളുക_AUTO_UPSTREAM)) {
 			advice_autosetup_maybe = _("\n"
 					   "To have this happen automatically for "
 					   "branches without a tracking\n"
@@ -221,61 +221,61 @@ static const char *get_upstream_ref(int flags, struct branch *branch, const char
 		    branch->name,
 		    advice_autosetup_maybe);
 	}
-	if (branch->merge_nr != 1)
+	എങ്കിൽ (branch->merge_nr != 1)
 		die(_("The current branch %s has multiple upstream branches, "
 		    "refusing to push."), branch->name);
 
-	return branch->merge[0]->src;
+	തിരികെ branch->merge[0]->src;
 }
 
-static void setup_default_push_refspecs(int *flags, struct remote *remote)
+സ്ഥിതം ശൂന്യം setup_default_തള്ളുക_refspecs(പൂർണ്ണസംഖ്യ *flags, ഘടന remote *remote)
 {
-	struct branch *branch;
-	const char *dst;
-	int same_remote;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ഘടന branch *branch;
+	സ്ഥിരം അക്ഷരം *dst;
+	പൂർണ്ണസംഖ്യ same_remote;
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
 
-	switch (cfg->push_default) {
-	case PUSH_DEFAULT_MATCHING:
+	തിരഞ്ഞെടുപ്പ് (cfg->തള്ളുക_default) {
+	അവസ്ഥ തള്ളുക_DEFAULT_MATCHING:
 		refspec_append(&rs, ":");
-		return;
+		തിരികെ;
 
-	case PUSH_DEFAULT_NOTHING:
+	അവസ്ഥ തള്ളുക_DEFAULT_NOTHING:
 		die(_("You didn't specify any refspecs to push, and "
 		    "push.default is \"nothing\"."));
-		return;
-	default:
-		break;
+		തിരികെ;
+	സ്ഥിരസ്ഥിതി:
+		നിർത്തുക;
 	}
 
-	branch = branch_get(NULL);
-	if (!branch)
+	branch = branch_get(ശൂന്യ);
+	എങ്കിൽ (!branch)
 		die(_(message_detached_head_die), remote->name);
 
 	dst = branch->refname;
-	same_remote = !strcmp(remote->name, remote_for_branch(branch, NULL));
+	same_remote = !strcmp(remote->name, remote_for_branch(branch, ശൂന്യ));
 
-	switch (cfg->push_default) {
-	default:
-	case PUSH_DEFAULT_UNSPECIFIED:
-	case PUSH_DEFAULT_SIMPLE:
-		if (!same_remote)
-			break;
-		if (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
-			die_push_simple(branch, remote);
-		break;
+	തിരഞ്ഞെടുപ്പ് (cfg->തള്ളുക_default) {
+	സ്ഥിരസ്ഥിതി:
+	അവസ്ഥ തള്ളുക_DEFAULT_UNSPECIFIED:
+	അവസ്ഥ തള്ളുക_DEFAULT_SIMPLE:
+		എങ്കിൽ (!same_remote)
+			നിർത്തുക;
+		എങ്കിൽ (strcmp(branch->refname, get_upstream_ref(*flags, branch, remote->name)))
+			die_തള്ളുക_simple(branch, remote);
+		നിർത്തുക;
 
-	case PUSH_DEFAULT_UPSTREAM:
-		if (!same_remote)
+	അവസ്ഥ തള്ളുക_DEFAULT_UPSTREAM:
+		എങ്കിൽ (!same_remote)
 			die(_("You are pushing to remote '%s', which is not the upstream of\n"
 			      "your current branch '%s', without telling me what to push\n"
 			      "to update which remote branch."),
 			    remote->name, branch->name);
 		dst = get_upstream_ref(*flags, branch, remote->name);
-		break;
+		നിർത്തുക;
 
-	case PUSH_DEFAULT_CURRENT:
-		break;
+	അവസ്ഥ തള്ളുക_DEFAULT_CURRENT:
+		നിർത്തുക;
 	}
 
 	/*
@@ -283,496 +283,496 @@ static void setup_default_push_refspecs(int *flags, struct remote *remote)
 	 * no upstream defined, then set it (with options 'simple', 'upstream',
 	 * and 'current').
 	 */
-	if ((*flags & TRANSPORT_PUSH_AUTO_UPSTREAM) && branch->merge_nr == 0)
-		*flags |= TRANSPORT_PUSH_SET_UPSTREAM;
+	എങ്കിൽ ((*flags & TRANSPORT_തള്ളുക_AUTO_UPSTREAM) && branch->merge_nr == 0)
+		*flags |= TRANSPORT_തള്ളുക_SET_UPSTREAM;
 
 	refspec_appendf(&rs, "%s:%s", branch->refname, dst);
 }
 
-static const char message_advice_pull_before_push[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_advice_pull_before_തള്ളുക[] =
 	N_("Updates were rejected because the tip of your current branch is behind\n"
 	   "its remote counterpart. If you want to integrate the remote changes,\n"
 	   "use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_checkout_pull_push[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_advice_checkout_pull_തള്ളുക[] =
 	N_("Updates were rejected because a pushed branch tip is behind its remote\n"
 	   "counterpart. If you want to integrate the remote changes, use 'git pull'\n"
 	   "before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_fetch_first[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_advice_ref_fetch_first[] =
 	N_("Updates were rejected because the remote contains work that you do not\n"
 	   "have locally. This is usually caused by another repository pushing to\n"
 	   "the same ref. If you want to integrate the remote changes, use\n"
 	   "'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static const char message_advice_ref_already_exists[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_advice_ref_already_exists[] =
 	N_("Updates were rejected because the tag already exists in the remote.");
 
-static const char message_advice_ref_needs_force[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_advice_ref_needs_force[] =
 	N_("You cannot update a remote ref that points at a non-commit object,\n"
 	   "or update a remote ref to make it point at a non-commit object,\n"
 	   "without using the '--force' option.\n");
 
-static const char message_advice_ref_needs_update[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം message_advice_ref_needs_update[] =
 	N_("Updates were rejected because the tip of the remote-tracking branch has\n"
 	   "been updated since the last checkout. If you want to integrate the\n"
 	   "remote changes, use 'git pull' before pushing again.\n"
 	   "See the 'Note about fast-forwards' in 'git push --help' for details.");
 
-static void advise_pull_before_push(void)
+സ്ഥിതം ശൂന്യം advise_pull_before_തള്ളുക(ശൂന്യം)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_CURRENT) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_pull_before_push));
+	എങ്കിൽ (!advice_enabled(ADVICE_തള്ളുക_NON_FF_CURRENT) || !advice_enabled(ADVICE_തള്ളുക_UPDATE_REJECTED))
+		തിരികെ;
+	advise(_(message_advice_pull_before_തള്ളുക));
 }
 
-static void advise_checkout_pull_push(void)
+സ്ഥിതം ശൂന്യം advise_checkout_pull_തള്ളുക(ശൂന്യം)
 {
-	if (!advice_enabled(ADVICE_PUSH_NON_FF_MATCHING) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
-	advise(_(message_advice_checkout_pull_push));
+	എങ്കിൽ (!advice_enabled(ADVICE_തള്ളുക_NON_FF_MATCHING) || !advice_enabled(ADVICE_തള്ളുക_UPDATE_REJECTED))
+		തിരികെ;
+	advise(_(message_advice_checkout_pull_തള്ളുക));
 }
 
-static void advise_ref_already_exists(void)
+സ്ഥിതം ശൂന്യം advise_ref_already_exists(ശൂന്യം)
 {
-	if (!advice_enabled(ADVICE_PUSH_ALREADY_EXISTS) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	എങ്കിൽ (!advice_enabled(ADVICE_തള്ളുക_ALREADY_EXISTS) || !advice_enabled(ADVICE_തള്ളുക_UPDATE_REJECTED))
+		തിരികെ;
 	advise(_(message_advice_ref_already_exists));
 }
 
-static void advise_ref_fetch_first(void)
+സ്ഥിതം ശൂന്യം advise_ref_fetch_first(ശൂന്യം)
 {
-	if (!advice_enabled(ADVICE_PUSH_FETCH_FIRST) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	എങ്കിൽ (!advice_enabled(ADVICE_തള്ളുക_FETCH_FIRST) || !advice_enabled(ADVICE_തള്ളുക_UPDATE_REJECTED))
+		തിരികെ;
 	advise(_(message_advice_ref_fetch_first));
 }
 
-static void advise_ref_needs_force(void)
+സ്ഥിതം ശൂന്യം advise_ref_needs_force(ശൂന്യം)
 {
-	if (!advice_enabled(ADVICE_PUSH_NEEDS_FORCE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	എങ്കിൽ (!advice_enabled(ADVICE_തള്ളുക_NEEDS_FORCE) || !advice_enabled(ADVICE_തള്ളുക_UPDATE_REJECTED))
+		തിരികെ;
 	advise(_(message_advice_ref_needs_force));
 }
 
-static void advise_ref_needs_update(void)
+സ്ഥിതം ശൂന്യം advise_ref_needs_update(ശൂന്യം)
 {
-	if (!advice_enabled(ADVICE_PUSH_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_PUSH_UPDATE_REJECTED))
-		return;
+	എങ്കിൽ (!advice_enabled(ADVICE_തള്ളുക_REF_NEEDS_UPDATE) || !advice_enabled(ADVICE_തള്ളുക_UPDATE_REJECTED))
+		തിരികെ;
 	advise(_(message_advice_ref_needs_update));
 }
 
-static int push_with_options(struct transport *transport, struct refspec *rs,
-			     int flags)
+സ്ഥിതം പൂർണ്ണസംഖ്യ തള്ളുക_with_options(ഘടന transport *transport, ഘടന refspec *rs,
+			     പൂർണ്ണസംഖ്യ flags)
 {
-	int err;
-	unsigned int reject_reasons;
-	char *anon_url = transport_anonymize_url(transport->url);
+	പൂർണ്ണസംഖ്യ err;
+	unsigned പൂർണ്ണസംഖ്യ reject_reasons;
+	അക്ഷരം *anon_url = transport_anonymize_url(transport->url);
 
 	transport_set_verbosity(transport, verbosity, progress);
 	transport->family = family;
 
-	if (receivepack)
+	എങ്കിൽ (receivepack)
 		transport_set_option(transport,
 				     TRANS_OPT_RECEIVEPACK, receivepack);
-	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : NULL);
+	transport_set_option(transport, TRANS_OPT_THIN, thin ? "yes" : ശൂന്യ);
 
-	if (!is_empty_cas(&cas)) {
-		if (!transport->smart_options)
+	എങ്കിൽ (!is_empty_cas(&cas)) {
+		എങ്കിൽ (!transport->smart_options)
 			die("underlying transport does not support --%s option",
 			    "force-with-lease");
 		transport->smart_options->cas = &cas;
 	}
 
-	if (verbosity > 0)
+	എങ്കിൽ (verbosity > 0)
 		fprintf(stderr, _("Pushing to %s\n"), anon_url);
 	trace2_region_enter("push", "transport_push", the_repository);
-	err = transport_push(the_repository, transport,
+	err = transport_തള്ളുക(the_repository, transport,
 			     rs, flags, &reject_reasons);
 	trace2_region_leave("push", "transport_push", the_repository);
-	if (err != 0) {
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_ERROR));
+	എങ്കിൽ (err != 0) {
+		fprintf(stderr, "%s", തള്ളുക_get_color(തള്ളുക_COLOR_ERROR));
 		error(_("failed to push some refs to '%s'"), anon_url);
-		fprintf(stderr, "%s", push_get_color(PUSH_COLOR_RESET));
+		fprintf(stderr, "%s", തള്ളുക_get_color(തള്ളുക_COLOR_RESET));
 	}
 
 	err |= transport_disconnect(transport);
-	free(anon_url);
-	if (!err)
-		return 0;
+	സ്വതന്ത്രം(anon_url);
+	എങ്കിൽ (!err)
+		തിരികെ 0;
 
-	if (reject_reasons & REJECT_NON_FF_HEAD) {
-		advise_pull_before_push();
-	} else if (reject_reasons & REJECT_NON_FF_OTHER) {
-		advise_checkout_pull_push();
-	} else if (reject_reasons & REJECT_ALREADY_EXISTS) {
+	എങ്കിൽ (reject_reasons & REJECT_NON_FF_HEAD) {
+		advise_pull_before_തള്ളുക();
+	} അല്ലെങ്കിൽ എങ്കിൽ (reject_reasons & REJECT_NON_FF_OTHER) {
+		advise_checkout_pull_തള്ളുക();
+	} അല്ലെങ്കിൽ എങ്കിൽ (reject_reasons & REJECT_ALREADY_EXISTS) {
 		advise_ref_already_exists();
-	} else if (reject_reasons & REJECT_FETCH_FIRST) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (reject_reasons & REJECT_FETCH_FIRST) {
 		advise_ref_fetch_first();
-	} else if (reject_reasons & REJECT_NEEDS_FORCE) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (reject_reasons & REJECT_NEEDS_FORCE) {
 		advise_ref_needs_force();
-	} else if (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (reject_reasons & REJECT_REF_NEEDS_UPDATE) {
 		advise_ref_needs_update();
 	}
 
-	return 1;
+	തിരികെ 1;
 }
 
-static int do_push(int flags,
-		   const struct string_list *push_options,
-		   struct remote *remote)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_തള്ളുക(പൂർണ്ണസംഖ്യ flags,
+		   സ്ഥിരം ഘടന string_list *തള്ളുക_options,
+		   ഘടന remote *remote)
 {
-	int errs;
-	struct strvec *url;
-	struct refspec *push_refspec = &rs;
+	പൂർണ്ണസംഖ്യ errs;
+	ഘടന strvec *url;
+	ഘടന refspec *തള്ളുക_refspec = &rs;
 
-	if (push_options->nr)
-		flags |= TRANSPORT_PUSH_OPTIONS;
+	എങ്കിൽ (തള്ളുക_options->nr)
+		flags |= TRANSPORT_തള്ളുക_OPTIONS;
 
-	if (!push_refspec->nr && !(flags & TRANSPORT_PUSH_ALL)) {
-		if (remote->push.nr) {
-			push_refspec = &remote->push;
-		} else if (!(flags & TRANSPORT_PUSH_MIRROR))
-			setup_default_push_refspecs(&flags, remote);
+	എങ്കിൽ (!തള്ളുക_refspec->nr && !(flags & TRANSPORT_തള്ളുക_ALL)) {
+		എങ്കിൽ (remote->തള്ളുക.nr) {
+			തള്ളുക_refspec = &remote->തള്ളുക;
+		} അല്ലെങ്കിൽ എങ്കിൽ (!(flags & TRANSPORT_തള്ളുക_MIRROR))
+			setup_default_തള്ളുക_refspecs(&flags, remote);
 	}
 	errs = 0;
-	url = push_url_of_remote(remote);
-	for (size_t i = 0; i < url->nr; i++) {
-		struct transport *transport =
+	url = തള്ളുക_url_of_remote(remote);
+	വേണ്ടി (size_t i = 0; i < url->nr; i++) {
+		ഘടന transport *transport =
 			transport_get(remote, url->v[i]);
-		if (flags & TRANSPORT_PUSH_OPTIONS)
-			transport->push_options = push_options;
-		if (push_with_options(transport, push_refspec, flags))
+		എങ്കിൽ (flags & TRANSPORT_തള്ളുക_OPTIONS)
+			transport->തള്ളുക_options = തള്ളുക_options;
+		എങ്കിൽ (തള്ളുക_with_options(transport, തള്ളുക_refspec, flags))
 			errs++;
 	}
-	return !!errs;
+	തിരികെ !!errs;
 }
 
-static int option_parse_recurse_submodules(const struct option *opt,
-				   const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_recurse_submodules(സ്ഥിരം ഘടന option *opt,
+				   സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	int *recurse_submodules = opt->value;
+	പൂർണ്ണസംഖ്യ *recurse_submodules = opt->മൂല്യം;
 
-	if (unset)
+	എങ്കിൽ (unset)
 		*recurse_submodules = RECURSE_SUBMODULES_OFF;
-	else {
-		if (!strcmp(arg, "only-is-on-demand")) {
-			if (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
+	അല്ലെങ്കിൽ {
+		എങ്കിൽ (!strcmp(arg, "only-is-on-demand")) {
+			എങ്കിൽ (*recurse_submodules == RECURSE_SUBMODULES_ONLY) {
 				warning(_("recursing into submodule with push.recurseSubmodules=only; using on-demand instead"));
 				*recurse_submodules = RECURSE_SUBMODULES_ON_DEMAND;
 			}
-		} else {
-			*recurse_submodules = parse_push_recurse_submodules_arg(opt->long_name, arg);
+		} അല്ലെങ്കിൽ {
+			*recurse_submodules = parse_തള്ളുക_recurse_submodules_arg(opt->long_name, arg);
 		}
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void set_push_cert_flags(int *flags, int v)
+സ്ഥിതം ശൂന്യം set_തള്ളുക_cert_flags(പൂർണ്ണസംഖ്യ *flags, പൂർണ്ണസംഖ്യ v)
 {
-	switch (v) {
-	case SEND_PACK_PUSH_CERT_NEVER:
-		*flags &= ~(TRANSPORT_PUSH_CERT_ALWAYS | TRANSPORT_PUSH_CERT_IF_ASKED);
-		break;
-	case SEND_PACK_PUSH_CERT_ALWAYS:
-		*flags |= TRANSPORT_PUSH_CERT_ALWAYS;
-		*flags &= ~TRANSPORT_PUSH_CERT_IF_ASKED;
-		break;
-	case SEND_PACK_PUSH_CERT_IF_ASKED:
-		*flags |= TRANSPORT_PUSH_CERT_IF_ASKED;
-		*flags &= ~TRANSPORT_PUSH_CERT_ALWAYS;
-		break;
+	തിരഞ്ഞെടുപ്പ് (v) {
+	അവസ്ഥ SEND_PACK_തള്ളുക_CERT_NEVER:
+		*flags &= ~(TRANSPORT_തള്ളുക_CERT_ALWAYS | TRANSPORT_തള്ളുക_CERT_IF_ASKED);
+		നിർത്തുക;
+	അവസ്ഥ SEND_PACK_തള്ളുക_CERT_ALWAYS:
+		*flags |= TRANSPORT_തള്ളുക_CERT_ALWAYS;
+		*flags &= ~TRANSPORT_തള്ളുക_CERT_IF_ASKED;
+		നിർത്തുക;
+	അവസ്ഥ SEND_PACK_തള്ളുക_CERT_IF_ASKED:
+		*flags |= TRANSPORT_തള്ളുക_CERT_IF_ASKED;
+		*flags &= ~TRANSPORT_തള്ളുക_CERT_ALWAYS;
+		നിർത്തുക;
 	}
 }
 
 
-static int git_push_config(const char *k, const char *v,
-			   const struct config_context *ctx, void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_തള്ളുക_config(സ്ഥിരം അക്ഷരം *k, സ്ഥിരം അക്ഷരം *v,
+			   സ്ഥിരം ഘടന config_context *ctx, ശൂന്യം *cb)
 {
-	const char *slot_name;
-	int *flags = cb;
+	സ്ഥിരം അക്ഷരം *slot_name;
+	പൂർണ്ണസംഖ്യ *flags = cb;
 
-	if (!strcmp(k, "push.followtags")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FOLLOW_TAGS;
-		else
-			*flags &= ~TRANSPORT_PUSH_FOLLOW_TAGS;
-		return 0;
-	} else if (!strcmp(k, "push.autosetupremote")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_AUTO_UPSTREAM;
-		return 0;
-	} else if (!strcmp(k, "push.gpgsign")) {
-		switch (git_parse_maybe_bool(v)) {
-		case 0:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_NEVER);
-			break;
-		case 1:
-			set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_ALWAYS);
-			break;
-		default:
-			if (!strcasecmp(v, "if-asked"))
-				set_push_cert_flags(flags, SEND_PACK_PUSH_CERT_IF_ASKED);
-			else
-				return error(_("invalid value for '%s'"), k);
+	എങ്കിൽ (!strcmp(k, "push.followtags")) {
+		എങ്കിൽ (git_config_bool(k, v))
+			*flags |= TRANSPORT_തള്ളുക_FOLLOW_TAGS;
+		അല്ലെങ്കിൽ
+			*flags &= ~TRANSPORT_തള്ളുക_FOLLOW_TAGS;
+		തിരികെ 0;
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "push.autosetupremote")) {
+		എങ്കിൽ (git_config_bool(k, v))
+			*flags |= TRANSPORT_തള്ളുക_AUTO_UPSTREAM;
+		തിരികെ 0;
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "push.gpgsign")) {
+		തിരഞ്ഞെടുപ്പ് (git_parse_maybe_bool(v)) {
+		അവസ്ഥ 0:
+			set_തള്ളുക_cert_flags(flags, SEND_PACK_തള്ളുക_CERT_NEVER);
+			നിർത്തുക;
+		അവസ്ഥ 1:
+			set_തള്ളുക_cert_flags(flags, SEND_PACK_തള്ളുക_CERT_ALWAYS);
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
+			എങ്കിൽ (!strcasecmp(v, "if-asked"))
+				set_തള്ളുക_cert_flags(flags, SEND_PACK_തള്ളുക_CERT_IF_ASKED);
+			അല്ലെങ്കിൽ
+				തിരികെ error(_("invalid value for '%s'"), k);
 		}
-	} else if (!strcmp(k, "push.recursesubmodules")) {
-		recurse_submodules = parse_push_recurse_submodules_arg(k, v);
-	} else if (!strcmp(k, "submodule.recurse")) {
-		int val = git_config_bool(k, v) ?
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "push.recursesubmodules")) {
+		recurse_submodules = parse_തള്ളുക_recurse_submodules_arg(k, v);
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "submodule.recurse")) {
+		പൂർണ്ണസംഖ്യ val = git_config_bool(k, v) ?
 			RECURSE_SUBMODULES_ON_DEMAND : RECURSE_SUBMODULES_OFF;
 		recurse_submodules = val;
-	} else if (!strcmp(k, "push.pushoption")) {
-		return parse_transport_option(k, v, &push_options_config);
-	} else if (!strcmp(k, "color.push")) {
-		push_use_color = git_config_colorbool(k, v);
-		return 0;
-	} else if (skip_prefix(k, "color.push.", &slot_name)) {
-		int slot = parse_push_color_slot(slot_name);
-		if (slot < 0)
-			return 0;
-		if (!v)
-			return config_error_nonbool(k);
-		return color_parse(v, push_colors[slot]);
-	} else if (!strcmp(k, "push.useforceifincludes")) {
-		if (git_config_bool(k, v))
-			*flags |= TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		else
-			*flags &= ~TRANSPORT_PUSH_FORCE_IF_INCLUDES;
-		return 0;
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "push.pushoption")) {
+		തിരികെ parse_transport_option(k, v, &തള്ളുക_options_config);
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "color.push")) {
+		തള്ളുക_use_color = git_config_colorbool(k, v);
+		തിരികെ 0;
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(k, "color.push.", &slot_name)) {
+		പൂർണ്ണസംഖ്യ slot = parse_തള്ളുക_color_slot(slot_name);
+		എങ്കിൽ (slot < 0)
+			തിരികെ 0;
+		എങ്കിൽ (!v)
+			തിരികെ config_error_nonbool(k);
+		തിരികെ color_parse(v, തള്ളുക_colors[slot]);
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(k, "push.useforceifincludes")) {
+		എങ്കിൽ (git_config_bool(k, v))
+			*flags |= TRANSPORT_തള്ളുക_FORCE_IF_INCLUDES;
+		അല്ലെങ്കിൽ
+			*flags &= ~TRANSPORT_തള്ളുക_FORCE_IF_INCLUDES;
+		തിരികെ 0;
 	}
 
-	return git_default_config(k, v, ctx, NULL);
+	തിരികെ git_default_config(k, v, ctx, ശൂന്യ);
 }
 
-static int push_multiple(struct string_list *list,
-			 const struct string_list *push_options,
-			 int flags,
-			 int tags,
-			 const char **refspecs,
-			 int refspec_nr)
+സ്ഥിതം പൂർണ്ണസംഖ്യ തള്ളുക_multiple(ഘടന string_list *list,
+			 സ്ഥിരം ഘടന string_list *തള്ളുക_options,
+			 പൂർണ്ണസംഖ്യ flags,
+			 പൂർണ്ണസംഖ്യ tags,
+			 സ്ഥിരം അക്ഷരം **refspecs,
+			 പൂർണ്ണസംഖ്യ refspec_nr)
 {
-	int result = 0;
+	പൂർണ്ണസംഖ്യ result = 0;
 	size_t i;
-	struct strvec argv = STRVEC_INIT;
+	ഘടന strvec argv = STRVEC_INIT;
 
-	strvec_push(&argv, "push");
+	strvec_തള്ളുക(&argv, "push");
 
-	if (flags & TRANSPORT_PUSH_FORCE)
-		strvec_push(&argv, "--force");
-	if (flags & TRANSPORT_PUSH_DRY_RUN)
-		strvec_push(&argv, "--dry-run");
-	if (flags & TRANSPORT_PUSH_PORCELAIN)
-		strvec_push(&argv, "--porcelain");
-	if (flags & TRANSPORT_PUSH_PRUNE)
-		strvec_push(&argv, "--prune");
-	if (flags & TRANSPORT_PUSH_NO_HOOK)
-		strvec_push(&argv, "--no-verify");
-	if (flags & TRANSPORT_PUSH_FOLLOW_TAGS)
-		strvec_push(&argv, "--follow-tags");
-	if (flags & TRANSPORT_PUSH_SET_UPSTREAM)
-		strvec_push(&argv, "--set-upstream");
-	if (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES)
-		strvec_push(&argv, "--force-if-includes");
-	if (flags & TRANSPORT_PUSH_ALL)
-		strvec_push(&argv, "--all");
-	if (flags & TRANSPORT_PUSH_MIRROR)
-		strvec_push(&argv, "--mirror");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_FORCE)
+		strvec_തള്ളുക(&argv, "--force");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_DRY_RUN)
+		strvec_തള്ളുക(&argv, "--dry-run");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_PORCELAIN)
+		strvec_തള്ളുക(&argv, "--porcelain");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_PRUNE)
+		strvec_തള്ളുക(&argv, "--prune");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_NO_HOOK)
+		strvec_തള്ളുക(&argv, "--no-verify");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_FOLLOW_TAGS)
+		strvec_തള്ളുക(&argv, "--follow-tags");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_SET_UPSTREAM)
+		strvec_തള്ളുക(&argv, "--set-upstream");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_FORCE_IF_INCLUDES)
+		strvec_തള്ളുക(&argv, "--force-if-includes");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_ALL)
+		strvec_തള്ളുക(&argv, "--all");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_MIRROR)
+		strvec_തള്ളുക(&argv, "--mirror");
 
-	if (flags & TRANSPORT_PUSH_CERT_ALWAYS)
-		strvec_push(&argv, "--signed=yes");
-	else if (flags & TRANSPORT_PUSH_CERT_IF_ASKED)
-		strvec_push(&argv, "--signed=if-asked");
-	if (!thin)
-		strvec_push(&argv, "--no-thin");
+	എങ്കിൽ (flags & TRANSPORT_തള്ളുക_CERT_ALWAYS)
+		strvec_തള്ളുക(&argv, "--signed=yes");
+	അല്ലെങ്കിൽ എങ്കിൽ (flags & TRANSPORT_തള്ളുക_CERT_IF_ASKED)
+		strvec_തള്ളുക(&argv, "--signed=if-asked");
+	എങ്കിൽ (!thin)
+		strvec_തള്ളുക(&argv, "--no-thin");
 
-	if (deleterefs)
-		strvec_push(&argv, "--delete");
+	എങ്കിൽ (deleterefs)
+		strvec_തള്ളുക(&argv, "--delete");
 
-	if (receivepack)
+	എങ്കിൽ (receivepack)
 		strvec_pushf(&argv, "--receive-pack=%s", receivepack);
-	if (verbosity >= 2)
-		strvec_push(&argv, "-v");
-	if (verbosity >= 1)
-		strvec_push(&argv, "-v");
-	else if (verbosity < 0)
-		strvec_push(&argv, "-q");
-	if (progress > 0)
-		strvec_push(&argv, "--progress");
-	else if (progress == 0)
-		strvec_push(&argv, "--no-progress");
+	എങ്കിൽ (verbosity >= 2)
+		strvec_തള്ളുക(&argv, "-v");
+	എങ്കിൽ (verbosity >= 1)
+		strvec_തള്ളുക(&argv, "-v");
+	അല്ലെങ്കിൽ എങ്കിൽ (verbosity < 0)
+		strvec_തള്ളുക(&argv, "-q");
+	എങ്കിൽ (progress > 0)
+		strvec_തള്ളുക(&argv, "--progress");
+	അല്ലെങ്കിൽ എങ്കിൽ (progress == 0)
+		strvec_തള്ളുക(&argv, "--no-progress");
 
-	if (family == TRANSPORT_FAMILY_IPV4)
-		strvec_push(&argv, "--ipv4");
-	else if (family == TRANSPORT_FAMILY_IPV6)
-		strvec_push(&argv, "--ipv6");
+	എങ്കിൽ (family == TRANSPORT_FAMILY_IPV4)
+		strvec_തള്ളുക(&argv, "--ipv4");
+	അല്ലെങ്കിൽ എങ്കിൽ (family == TRANSPORT_FAMILY_IPV6)
+		strvec_തള്ളുക(&argv, "--ipv6");
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
-		strvec_push(&argv, "--recurse-submodules=check");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
-		strvec_push(&argv, "--recurse-submodules=on-demand");
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
-		strvec_push(&argv, "--recurse-submodules=only");
-	else if (recurse_submodules == RECURSE_SUBMODULES_OFF)
-		strvec_push(&argv, "--recurse-submodules=no");
+	എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+		strvec_തള്ളുക(&argv, "--recurse-submodules=check");
+	അല്ലെങ്കിൽ എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+		strvec_തള്ളുക(&argv, "--recurse-submodules=on-demand");
+	അല്ലെങ്കിൽ എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+		strvec_തള്ളുക(&argv, "--recurse-submodules=only");
+	അല്ലെങ്കിൽ എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_OFF)
+		strvec_തള്ളുക(&argv, "--recurse-submodules=no");
 
 
-	if (tags)
-		strvec_push(&argv, "--tags");
+	എങ്കിൽ (tags)
+		strvec_തള്ളുക(&argv, "--tags");
 
-	for (i = 0; i < push_options->nr; i++)
+	വേണ്ടി (i = 0; i < തള്ളുക_options->nr; i++)
 		strvec_pushf(&argv, "--push-option=%s",
-			     push_options->items[i].string);
+			     തള്ളുക_options->ഇനങ്ങൾ[i].string);
 
-	for (i = 0; i < cas.nr; i++) {
-		if (cas.entry[i].use_tracking) {
+	വേണ്ടി (i = 0; i < cas.nr; i++) {
+		എങ്കിൽ (cas.entry[i].use_tracking) {
 			strvec_pushf(&argv, "--force-with-lease=%s",
 				     cas.entry[i].refname);
-		} else if (!is_null_oid(&cas.entry[i].expect)) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!is_null_oid(&cas.entry[i].expect)) {
 			strvec_pushf(&argv, "--force-with-lease=%s:%s",
 				     cas.entry[i].refname,
 				     oid_to_hex(&cas.entry[i].expect));
-		} else {
-			strvec_push(&argv, "--force-with-lease");
+		} അല്ലെങ്കിൽ {
+			strvec_തള്ളുക(&argv, "--force-with-lease");
 		}
 	}
 
-	for (i = 0; i < list->nr; i++) {
-		const char *name = list->items[i].string;
-		struct child_process cmd = CHILD_PROCESS_INIT;
-		int j;
+	വേണ്ടി (i = 0; i < list->nr; i++) {
+		സ്ഥിരം അക്ഷരം *name = list->ഇനങ്ങൾ[i].string;
+		ഘടന child_process cmd = CHILD_PROCESS_INIT;
+		പൂർണ്ണസംഖ്യ j;
 
 		strvec_pushv(&cmd.args, argv.v);
-		strvec_push(&cmd.args, name);
+		strvec_തള്ളുക(&cmd.args, name);
 
-		for (j = 0; j < refspec_nr; j++)
-			strvec_push(&cmd.args, refspecs[j]);
+		വേണ്ടി (j = 0; j < refspec_nr; j++)
+			strvec_തള്ളുക(&cmd.args, refspecs[j]);
 
-		if (verbosity >= 0)
+		എങ്കിൽ (verbosity >= 0)
 			printf(_("Pushing to %s\n"), name);
 
 		cmd.git_cmd = 1;
-		if (run_command(&cmd)) {
+		എങ്കിൽ (run_command(&cmd)) {
 			error(_("could not push to %s"), name);
 			result = 1;
 		}
 	}
 
 	strvec_clear(&argv);
-	return result;
+	തിരികെ result;
 }
 
-static void die_if_repo_looks_like_ref(const char *repo)
+സ്ഥിതം ശൂന്യം die_if_repo_looks_like_ref(സ്ഥിരം അക്ഷരം *repo)
 {
-	const char *slash = strchr(repo, '/');
-	struct strbuf name = STRBUF_INIT;
-	int code;
+	സ്ഥിരം അക്ഷരം *slash = strchr(repo, '/');
+	ഘടന strbuf name = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ code;
 
-	if (!slash || !slash[1] || file_exists(repo))
-		return;
+	എങ്കിൽ (!slash || !slash[1] || file_exists(repo))
+		തിരികെ;
 
 	strbuf_add(&name, repo, slash - repo);
-	if (!remote_is_configured(remote_get(name.buf), 0)) {
+	എങ്കിൽ (!remote_is_configured(remote_get(name.buf), 0)) {
 		strbuf_release(&name);
-		return;
+		തിരികെ;
 	}
 
 	code = die_message(_("'%s' is not a valid push target"), repo);
-	advise_if_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF,
+	advise_if_enabled(ADVICE_തള്ളുക_REPO_LOOKS_LIKE_REF,
 			  _("Did you mean to use: git push %s %s?"),
 			  name.buf, slash + 1);
 	strbuf_release(&name);
 	exit(code);
 }
 
-int cmd_push(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repository UNUSED)
+പൂർണ്ണസംഖ്യ cmd_തള്ളുക(പൂർണ്ണസംഖ്യ argc,
+	     സ്ഥിരം അക്ഷരം **argv,
+	     സ്ഥിരം അക്ഷരം *prefix,
+	     ഘടന repository *repository UNUSED)
 {
-	int flags = 0;
-	int tags = 0;
-	int push_cert = -1;
-	int rc = 0;
-	int base_flags;
-	const char *repo = NULL;	/* default repository */
-	struct string_list push_options_cmdline = STRING_LIST_INIT_DUP;
-	struct string_list remote_group = STRING_LIST_INIT_DUP;
-	struct string_list *push_options;
-	const struct string_list_item *item;
+	പൂർണ്ണസംഖ്യ flags = 0;
+	പൂർണ്ണസംഖ്യ tags = 0;
+	പൂർണ്ണസംഖ്യ തള്ളുക_cert = -1;
+	പൂർണ്ണസംഖ്യ rc = 0;
+	പൂർണ്ണസംഖ്യ base_flags;
+	സ്ഥിരം അക്ഷരം *repo = ശൂന്യ;	/* default repository */
+	ഘടന string_list തള്ളുക_options_cmdline = STRING_LIST_INIT_DUP;
+	ഘടന string_list remote_group = STRING_LIST_INIT_DUP;
+	ഘടന string_list *തള്ളുക_options;
+	സ്ഥിരം ഘടന string_list_item *item;
 
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT__VERBOSITY(&verbosity),
 		OPT_STRING( 0 , "repo", &repo, N_("repository"), N_("repository")),
-		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_PUSH_ALL),
+		OPT_BIT( 0 , "all", &flags, N_("push all branches"), TRANSPORT_തള്ളുക_ALL),
 		OPT_ALIAS( 0 , "branches", "all"),
 		OPT_BIT( 0 , "mirror", &flags, N_("mirror all refs"),
-			    (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE)),
+			    (TRANSPORT_തള്ളുക_MIRROR|TRANSPORT_തള്ളുക_FORCE)),
 		OPT_BOOL('d', "delete", &deleterefs, N_("delete refs")),
 		OPT_BOOL( 0 , "tags", &tags, N_("push tags (can't be used with --all or --branches or --mirror)")),
-		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_PUSH_DRY_RUN),
-		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_PUSH_PORCELAIN),
-		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_PUSH_FORCE),
+		OPT_BIT('n' , "dry-run", &flags, N_("dry run"), TRANSPORT_തള്ളുക_DRY_RUN),
+		OPT_BIT( 0,  "porcelain", &flags, N_("machine-readable output"), TRANSPORT_തള്ളുക_PORCELAIN),
+		OPT_BIT('f', "force", &flags, N_("force updates"), TRANSPORT_തള്ളുക_FORCE),
 		OPT_CALLBACK_F(0, "force-with-lease", &cas, N_("<refname>:<expect>"),
 			       N_("require old value of ref to be at this value"),
-			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_push_cas_option),
+			       PARSE_OPT_OPTARG | PARSE_OPT_LITERAL_ARGHELP, parseopt_തള്ളുക_cas_option),
 		OPT_BIT(0, TRANS_OPT_FORCE_IF_INCLUDES, &flags,
 			N_("require remote updates to be integrated locally"),
-			TRANSPORT_PUSH_FORCE_IF_INCLUDES),
+			TRANSPORT_തള്ളുക_FORCE_IF_INCLUDES),
 		OPT_CALLBACK(0, "recurse-submodules", &recurse_submodules, "(check|on-demand|no)",
 			     N_("control recursive pushing of submodules"), option_parse_recurse_submodules),
 		OPT_BOOL_F( 0 , "thin", &thin, N_("use thin pack"), PARSE_OPT_NOCOMPLETE),
 		OPT_STRING( 0 , "receive-pack", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_STRING( 0 , "exec", &receivepack, "receive-pack", N_("receive pack program")),
 		OPT_BIT('u', "set-upstream", &flags, N_("set upstream for git pull/status"),
-			TRANSPORT_PUSH_SET_UPSTREAM),
+			TRANSPORT_തള്ളുക_SET_UPSTREAM),
 		OPT_BOOL(0, "progress", &progress, N_("force progress reporting")),
 		OPT_BIT(0, "prune", &flags, N_("prune locally removed refs"),
-			TRANSPORT_PUSH_PRUNE),
-		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_PUSH_NO_HOOK),
+			TRANSPORT_തള്ളുക_PRUNE),
+		OPT_BIT(0, "no-verify", &flags, N_("bypass pre-push hook"), TRANSPORT_തള്ളുക_NO_HOOK),
 		OPT_BIT(0, "follow-tags", &flags, N_("push missing but relevant tags"),
-			TRANSPORT_PUSH_FOLLOW_TAGS),
-		OPT_CALLBACK_F(0, "signed", &push_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
-				PARSE_OPT_OPTARG, option_parse_push_signed),
-		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_PUSH_ATOMIC),
-		OPT_STRING_LIST('o', "push-option", &push_options_cmdline, N_("server-specific"), N_("option to transmit")),
+			TRANSPORT_തള്ളുക_FOLLOW_TAGS),
+		OPT_CALLBACK_F(0, "signed", &തള്ളുക_cert, "(yes|no|if-asked)", N_("GPG sign the push"),
+				PARSE_OPT_OPTARG, option_parse_തള്ളുക_signed),
+		OPT_BIT(0, "atomic", &flags, N_("request atomic transaction on remote side"), TRANSPORT_തള്ളുക_ATOMIC),
+		OPT_STRING_LIST('o', "push-option", &തള്ളുക_options_cmdline, N_("server-specific"), N_("option to transmit")),
 		OPT_IPVERSION(&family),
 		OPT_END()
 	};
 
 	packet_trace_identity("push");
-	repo_config(the_repository, git_push_config, &flags);
-	argc = parse_options(argc, argv, prefix, options, push_usage, 0);
-	push_options = (push_options_cmdline.nr
-		? &push_options_cmdline
-		: &push_options_config);
-	set_push_cert_flags(&flags, push_cert);
+	repo_config(the_repository, git_തള്ളുക_config, &flags);
+	argc = parse_options(argc, argv, prefix, options, തള്ളുക_usage, 0);
+	തള്ളുക_options = (തള്ളുക_options_cmdline.nr
+		? &തള്ളുക_options_cmdline
+		: &തള്ളുക_options_config);
+	set_തള്ളുക_cert_flags(&flags, തള്ളുക_cert);
 
-	refspec_init_push(&rs, the_hash_algo);
+	refspec_init_തള്ളുക(&rs, the_hash_algo);
 
 	die_for_incompatible_opt4(deleterefs, "--delete",
 				  tags, "--tags",
-				  flags & TRANSPORT_PUSH_ALL, "--all/--branches",
-				  flags & TRANSPORT_PUSH_MIRROR, "--mirror");
-	if (deleterefs && argc < 2)
+				  flags & TRANSPORT_തള്ളുക_ALL, "--all/--branches",
+				  flags & TRANSPORT_തള്ളുക_MIRROR, "--mirror");
+	എങ്കിൽ (deleterefs && argc < 2)
 		die(_("--delete doesn't make sense without any refs"));
 
-	if (recurse_submodules == RECURSE_SUBMODULES_CHECK)
+	എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_CHECK)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_CHECK;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
+	അല്ലെങ്കിൽ എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_ON_DEMAND)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ON_DEMAND;
-	else if (recurse_submodules == RECURSE_SUBMODULES_ONLY)
+	അല്ലെങ്കിൽ എങ്കിൽ (recurse_submodules == RECURSE_SUBMODULES_ONLY)
 		flags |= TRANSPORT_RECURSE_SUBMODULES_ONLY;
 
-	if (argc > 0)
+	എങ്കിൽ (argc > 0)
 		repo = argv[0];
 
-	if (repo) {
-		if (!add_remote_or_group(repo, &remote_group)) {
-			struct remote *r;
+	എങ്കിൽ (repo) {
+		എങ്കിൽ (!add_remote_or_group(repo, &remote_group)) {
+			ഘടന remote *r;
 
 			/*
 			 * Check the advice up front to avoid the remote
@@ -780,7 +780,7 @@ int cmd_push(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (advice_enabled(ADVICE_PUSH_REPO_LOOKS_LIKE_REF))
+			എങ്കിൽ (advice_enabled(ADVICE_തള്ളുക_REPO_LOOKS_LIKE_REF))
 				die_if_repo_looks_like_ref(repo);
 
 			/*
@@ -793,13 +793,13 @@ int cmd_push(int argc,
 			 * identically to a named remote.
 			 */
 			r = pushremote_get(repo);
-			if (!r)
+			എങ്കിൽ (!r)
 				die(_("bad repository '%s'"), repo);
 			string_list_append(&remote_group, r->name);
 		}
-	} else {
-		struct remote *r = pushremote_get(NULL);
-		if (!r)
+	} അല്ലെങ്കിൽ {
+		ഘടന remote *r = pushremote_get(ശൂന്യ);
+		എങ്കിൽ (!r)
 			die(_("No configured push destination.\n"
 			    "Either specify the URL from the command-line or configure a remote repository using\n"
 			    "\n"
@@ -819,14 +819,14 @@ int cmd_push(int argc,
 		string_list_append(&remote_group, r->name);
 	}
 
-	if (!is_empty_cas(&cas) && (flags & TRANSPORT_PUSH_FORCE_IF_INCLUDES))
+	എങ്കിൽ (!is_empty_cas(&cas) && (flags & TRANSPORT_തള്ളുക_FORCE_IF_INCLUDES))
 		cas.use_force_if_includes = 1;
 
-	for_each_string_list_item(item, push_options)
-		if (strchr(item->string, '\n'))
+	for_each_string_list_item(item, തള്ളുക_options)
+		എങ്കിൽ (strchr(item->string, '\n'))
 			die(_("push options must not have new line characters"));
 
-	if (remote_group.nr == 1) {
+	എങ്കിൽ (remote_group.nr == 1) {
 		/*
 		 * Single remote (the common case): run do_push() directly
 		 * in this process.  The loop runs exactly once.
@@ -840,35 +840,35 @@ int cmd_push(int argc,
 		 */
 		base_flags = flags;
 		{
-			int inner_flags = base_flags;
-			struct remote *r = pushremote_get(remote_group.items[0].string);
-			if (!r)
+			പൂർണ്ണസംഖ്യ inner_flags = base_flags;
+			ഘടന remote *r = pushremote_get(remote_group.ഇനങ്ങൾ[0].string);
+			എങ്കിൽ (!r)
 				die(_("no such remote or remote group: %s"),
-				    remote_group.items[0].string);
+				    remote_group.ഇനങ്ങൾ[0].string);
 
-			if (r->mirror)
-				inner_flags |= (TRANSPORT_PUSH_MIRROR|TRANSPORT_PUSH_FORCE);
+			എങ്കിൽ (r->mirror)
+				inner_flags |= (TRANSPORT_തള്ളുക_MIRROR|TRANSPORT_തള്ളുക_FORCE);
 
-			if (inner_flags & TRANSPORT_PUSH_ALL) {
-				if (argc >= 2)
+			എങ്കിൽ (inner_flags & TRANSPORT_തള്ളുക_ALL) {
+				എങ്കിൽ (argc >= 2)
 					die(_("--all can't be combined with refspecs"));
 			}
-			if (inner_flags & TRANSPORT_PUSH_MIRROR) {
-				if (argc >= 2)
+			എങ്കിൽ (inner_flags & TRANSPORT_തള്ളുക_MIRROR) {
+				എങ്കിൽ (argc >= 2)
 					die(_("--mirror can't be combined with refspecs"));
 			}
 
 			refspec_clear(&rs);
-			rs = (struct refspec) REFSPEC_INIT_PUSH(the_hash_algo);
+			rs = (ഘടന refspec) REFSPEC_INIT_തള്ളുക(the_hash_algo);
 
-			if (tags)
+			എങ്കിൽ (tags)
 				refspec_append(&rs, "refs/tags/*");
-			if (argc > 0)
+			എങ്കിൽ (argc > 0)
 				set_refspecs(argv + 1, argc - 1, r);
 
-			rc = do_push(inner_flags, push_options, r);
+			rc = do_തള്ളുക(inner_flags, തള്ളുക_options, r);
 		}
-	} else {
+	} അല്ലെങ്കിൽ {
 		/*
 		 * Multiple remotes: spawn one "git push <remote> [<refspecs>]"
 		 * subprocess per remote, sequentially.
@@ -876,22 +876,22 @@ int cmd_push(int argc,
 		 * Options that only make sense for a single transport connection
 		 * are rejected here.
 		 */
-		if (flags & TRANSPORT_PUSH_ATOMIC)
+		എങ്കിൽ (flags & TRANSPORT_തള്ളുക_ATOMIC)
 			die(_("--atomic can only be used when pushing to one remote"));
 
-		rc = push_multiple(&remote_group, push_options, flags,
+		rc = തള്ളുക_multiple(&remote_group, തള്ളുക_options, flags,
 				   tags,
-				   argc > 1 ? argv + 1 : NULL,
+				   argc > 1 ? argv + 1 : ശൂന്യ,
 				   argc > 1 ? argc - 1 : 0);
 	}
 
-	string_list_clear(&push_options_cmdline, 0);
-	string_list_clear(&push_options_config, 0);
+	string_list_clear(&തള്ളുക_options_cmdline, 0);
+	string_list_clear(&തള്ളുക_options_config, 0);
 	string_list_clear(&remote_group, 0);
 	clear_cas_option(&cas);
 
-	if (rc == -1)
-		usage_with_options(push_usage, options);
-	else
-		return rc;
+	എങ്കിൽ (rc == -1)
+		usage_with_options(തള്ളുക_usage, options);
+	അല്ലെങ്കിൽ
+		തിരികെ rc;
 }

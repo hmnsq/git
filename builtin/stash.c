@@ -1,37 +1,37 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "refs.h"
-#include "stash.h"
-#include "lockfile.h"
-#include "cache-tree.h"
-#include "unpack-trees.h"
-#include "merge-ort-wrappers.h"
-#include "strvec.h"
-#include "run-command.h"
-#include "dir.h"
-#include "entry.h"
-#include "preload-index.h"
-#include "read-cache.h"
-#include "repository.h"
-#include "rerere.h"
-#include "revision.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "log-tree.h"
-#include "diffcore.h"
-#include "reflog.h"
-#include "reflog-walk.h"
-#include "add-interactive.h"
-#include "commit.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "abspath.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hash.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "stash.h"
+#അന്തര്ഭാവ "lockfile.h"
+#അന്തര്ഭാവ "cache-tree.h"
+#അന്തര്ഭാവ "unpack-trees.h"
+#അന്തര്ഭാവ "merge-ort-wrappers.h"
+#അന്തര്ഭാവ "strvec.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "entry.h"
+#അന്തര്ഭാവ "preload-index.h"
+#അന്തര്ഭാവ "read-cache.h"
+#അന്തര്ഭാവ "repository.h"
+#അന്തര്ഭാവ "rerere.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "sparse-index.h"
+#അന്തര്ഭാവ "log-tree.h"
+#അന്തര്ഭാവ "diffcore.h"
+#അന്തര്ഭാവ "reflog.h"
+#അന്തര്ഭാവ "reflog-walk.h"
+#അന്തര്ഭാവ "add-interactive.h"
+#അന്തര്ഭാവ "commit.h"
 
 #define INCLUDE_ALL_FILES 2
 
@@ -41,7 +41,7 @@
 	N_("git stash show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]")
 #define BUILTIN_STASH_DROP_USAGE \
 	N_("git stash drop [-q | --quiet] [<stash>]")
-#define BUILTIN_STASH_POP_USAGE \
+#define BUILTIN_STASH_എടുക്കുക_USAGE \
 	N_("git stash pop [--index] [-q | --quiet] [<stash>]")
 #define BUILTIN_STASH_APPLY_USAGE \
 	N_("git stash apply [--index] [-q | --quiet] [--label-ours=<label>] [--label-theirs=<label>] [--label-base=<label>] [<stash>]")
@@ -49,7 +49,7 @@
 	N_("git stash branch <branchname> [<stash>]")
 #define BUILTIN_STASH_STORE_USAGE \
 	N_("git stash store [(-m | --message) <message>] [-q | --quiet] <commit>")
-#define BUILTIN_STASH_PUSH_USAGE \
+#define BUILTIN_STASH_തള്ളുക_USAGE \
 	N_("git stash [push] [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]\n" \
 	   "          [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]\n" \
 	   "          [--pathspec-from-file=<file> [--pathspec-file-nul]]\n" \
@@ -66,90 +66,90 @@
 #define BUILTIN_STASH_CLEAR_USAGE \
 	"git stash clear"
 
-static const char * const git_stash_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
 	BUILTIN_STASH_SHOW_USAGE,
 	BUILTIN_STASH_DROP_USAGE,
-	BUILTIN_STASH_POP_USAGE,
+	BUILTIN_STASH_എടുക്കുക_USAGE,
 	BUILTIN_STASH_APPLY_USAGE,
 	BUILTIN_STASH_BRANCH_USAGE,
-	BUILTIN_STASH_PUSH_USAGE,
+	BUILTIN_STASH_തള്ളുക_USAGE,
 	BUILTIN_STASH_SAVE_USAGE,
 	BUILTIN_STASH_CLEAR_USAGE,
 	BUILTIN_STASH_CREATE_USAGE,
 	BUILTIN_STASH_STORE_USAGE,
 	BUILTIN_STASH_EXPORT_USAGE,
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_list_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_list_usage[] = {
 	BUILTIN_STASH_LIST_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_show_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_show_usage[] = {
 	BUILTIN_STASH_SHOW_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_drop_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_drop_usage[] = {
 	BUILTIN_STASH_DROP_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_pop_usage[] = {
-	BUILTIN_STASH_POP_USAGE,
-	NULL
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_എടുക്കുക_usage[] = {
+	BUILTIN_STASH_എടുക്കുക_USAGE,
+	ശൂന്യ
 };
 
-static const char * const git_stash_apply_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_apply_usage[] = {
 	BUILTIN_STASH_APPLY_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_branch_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_branch_usage[] = {
 	BUILTIN_STASH_BRANCH_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_clear_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_clear_usage[] = {
 	BUILTIN_STASH_CLEAR_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_store_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_store_usage[] = {
 	BUILTIN_STASH_STORE_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_push_usage[] = {
-	BUILTIN_STASH_PUSH_USAGE,
-	NULL
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_തള്ളുക_usage[] = {
+	BUILTIN_STASH_തള്ളുക_USAGE,
+	ശൂന്യ
 };
 
-static const char * const git_stash_save_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_save_usage[] = {
 	BUILTIN_STASH_SAVE_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_export_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_export_usage[] = {
 	BUILTIN_STASH_EXPORT_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const git_stash_import_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_stash_import_usage[] = {
 	BUILTIN_STASH_IMPORT_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char ref_stash[] = "refs/stash";
-static struct strbuf stash_index_path = STRBUF_INIT;
+സ്ഥിതം സ്ഥിരം അക്ഷരം ref_stash[] = "refs/stash";
+സ്ഥിതം ഘടന strbuf stash_index_path = STRBUF_INIT;
 
-static int show_stat = 1;
-static int show_patch;
-static int show_include_untracked;
-static int use_index;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_stat = 1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_patch;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_include_untracked;
+സ്ഥിതം പൂർണ്ണസംഖ്യ use_index;
 
 /*
  * w_commit is set to the commit containing the working tree
@@ -162,125 +162,125 @@ static int use_index;
  * i_tree is set to the index tree
  * u_tree is set to the untracked files tree
  */
-struct stash_info {
-	struct object_id w_commit;
-	struct object_id b_commit;
-	struct object_id i_commit;
-	struct object_id u_commit;
-	struct object_id c_commit;
-	struct object_id w_tree;
-	struct object_id b_tree;
-	struct object_id i_tree;
-	struct object_id u_tree;
-	struct strbuf revision;
-	int is_stash_ref;
-	int has_u;
+ഘടന stash_info {
+	ഘടന object_id w_commit;
+	ഘടന object_id b_commit;
+	ഘടന object_id i_commit;
+	ഘടന object_id u_commit;
+	ഘടന object_id c_commit;
+	ഘടന object_id w_വൃക്ഷം;
+	ഘടന object_id b_വൃക്ഷം;
+	ഘടന object_id i_വൃക്ഷം;
+	ഘടന object_id u_വൃക്ഷം;
+	ഘടന strbuf revision;
+	പൂർണ്ണസംഖ്യ is_stash_ref;
+	പൂർണ്ണസംഖ്യ has_u;
 };
 
 #define STASH_INFO_INIT { \
 	.revision = STRBUF_INIT, \
 }
 
-static void free_stash_info(struct stash_info *info)
+സ്ഥിതം ശൂന്യം free_stash_info(ഘടന stash_info *info)
 {
 	strbuf_release(&info->revision);
 }
 
-static int check_stash_topology(struct repository *r, struct commit *stash)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_stash_topology(ഘടന repository *r, ഘടന commit *stash)
 {
-	struct commit *p1, *p2, *p3 = NULL;
+	ഘടന commit *p1, *p2, *p3 = ശൂന്യ;
 
 	/* stash must have two or three parents */
-	if (!stash->parents || !stash->parents->next ||
+	എങ്കിൽ (!stash->parents || !stash->parents->next ||
 			(stash->parents->next->next && stash->parents->next->next->next))
-		return -1;
+		തിരികെ -1;
 	p1 = stash->parents->item;
 	p2 = stash->parents->next->item;
-	if (stash->parents->next->next)
+	എങ്കിൽ (stash->parents->next->next)
 		p3 = stash->parents->next->next->item;
-	if (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
+	എങ്കിൽ (repo_parse_commit(r, p1) || repo_parse_commit(r, p2) ||
 			(p3 && repo_parse_commit(r, p3)))
-		return -1;
+		തിരികെ -1;
 	/* p2 must have a single parent, p3 must have no parents */
-	if (!p2->parents || p2->parents->next || (p3 && p3->parents))
-		return -1;
-	if (repo_parse_commit(r, p2->parents->item))
-		return -1;
+	എങ്കിൽ (!p2->parents || p2->parents->next || (p3 && p3->parents))
+		തിരികെ -1;
+	എങ്കിൽ (repo_parse_commit(r, p2->parents->item))
+		തിരികെ -1;
 	/* p2^1 must equal p1 */
-	if (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
-		return -1;
+	എങ്കിൽ (!oideq(&p1->object.oid, &p2->parents->item->object.oid))
+		തിരികെ -1;
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void assert_stash_like(struct stash_info *info, const char *revision)
+സ്ഥിതം ശൂന്യം assert_stash_like(ഘടന stash_info *info, സ്ഥിരം അക്ഷരം *revision)
 {
-	if (get_oidf(&info->b_commit, "%s^1", revision) ||
-	    get_oidf(&info->w_tree, "%s:", revision) ||
-	    get_oidf(&info->b_tree, "%s^1:", revision) ||
-	    get_oidf(&info->i_tree, "%s^2:", revision))
+	എങ്കിൽ (get_oidf(&info->b_commit, "%s^1", revision) ||
+	    get_oidf(&info->w_വൃക്ഷം, "%s:", revision) ||
+	    get_oidf(&info->b_വൃക്ഷം, "%s^1:", revision) ||
+	    get_oidf(&info->i_വൃക്ഷം, "%s^2:", revision))
 		die(_("'%s' is not a stash-like commit"), revision);
 }
 
-static int parse_stash_revision(struct strbuf *revision, const char *commit, int quiet)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_stash_revision(ഘടന strbuf *revision, സ്ഥിരം അക്ഷരം *commit, പൂർണ്ണസംഖ്യ quiet)
 {
 	strbuf_reset(revision);
-	if (!commit) {
-		if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
-			if (!quiet)
+	എങ്കിൽ (!commit) {
+		എങ്കിൽ (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash)) {
+			എങ്കിൽ (!quiet)
 				fprintf_ln(stderr, _("No stash entries found."));
-			return -1;
+			തിരികെ -1;
 		}
 
 		strbuf_addf(revision, "%s@{0}", ref_stash);
-	} else if (strspn(commit, "0123456789") == strlen(commit)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strspn(commit, "0123456789") == strlen(commit)) {
 		strbuf_addf(revision, "%s@{%s}", ref_stash, commit);
-	} else {
+	} അല്ലെങ്കിൽ {
 		strbuf_addstr(revision, commit);
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static int get_stash_info(struct stash_info *info, int argc, const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_stash_info(ഘടന stash_info *info, പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	int ret;
-	char *end_of_rev;
-	char *expanded_ref;
-	const char *revision;
-	const char *commit = NULL;
-	struct object_id dummy;
-	struct strbuf symbolic = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ ret;
+	അക്ഷരം *end_of_rev;
+	അക്ഷരം *expanded_ref;
+	സ്ഥിരം അക്ഷരം *revision;
+	സ്ഥിരം അക്ഷരം *commit = ശൂന്യ;
+	ഘടന object_id dummy;
+	ഘടന strbuf symbolic = STRBUF_INIT;
 
-	if (argc > 1) {
-		int i;
-		struct strbuf refs_msg = STRBUF_INIT;
+	എങ്കിൽ (argc > 1) {
+		പൂർണ്ണസംഖ്യ i;
+		ഘടന strbuf refs_സന്ദേശം = STRBUF_INIT;
 
-		for (i = 0; i < argc; i++)
-			strbuf_addf(&refs_msg, " '%s'", argv[i]);
+		വേണ്ടി (i = 0; i < argc; i++)
+			strbuf_addf(&refs_സന്ദേശം, " '%s'", argv[i]);
 
 		fprintf_ln(stderr, _("Too many revisions specified:%s"),
-			   refs_msg.buf);
-		strbuf_release(&refs_msg);
+			   refs_സന്ദേശം.buf);
+		strbuf_release(&refs_സന്ദേശം);
 
-		return -1;
+		തിരികെ -1;
 	}
 
-	if (argc == 1)
+	എങ്കിൽ (argc == 1)
 		commit = argv[0];
 
 	strbuf_init(&info->revision, 0);
-	if (parse_stash_revision(&info->revision, commit, 0)) {
-		return -1;
+	എങ്കിൽ (parse_stash_revision(&info->revision, commit, 0)) {
+		തിരികെ -1;
 	}
 
 	revision = info->revision.buf;
 
-	if (repo_get_oid(the_repository, revision, &info->w_commit))
-		return error(_("%s is not a valid reference"), revision);
+	എങ്കിൽ (repo_get_oid(the_repository, revision, &info->w_commit))
+		തിരികെ error(_("%s is not a valid reference"), revision);
 
 	assert_stash_like(info, revision);
 
-	info->has_u = !get_oidf(&info->u_tree, "%s^3:", revision);
+	info->has_u = !get_oidf(&info->u_വൃക്ഷം, "%s^3:", revision);
 
 	end_of_rev = strchrnul(revision, '@');
 	strbuf_add(&symbolic, revision, end_of_rev - revision);
@@ -288,35 +288,35 @@ static int get_stash_info(struct stash_info *info, int argc, const char **argv)
 	ret = repo_dwim_ref(the_repository, symbolic.buf, symbolic.len,
 			    &dummy, &expanded_ref, 0);
 	strbuf_release(&symbolic);
-	switch (ret) {
-	case 0: /* Not found, but valid ref */
+	തിരഞ്ഞെടുപ്പ് (ret) {
+	അവസ്ഥ 0: /* Not found, but valid ref */
 		info->is_stash_ref = 0;
-		break;
-	case 1:
+		നിർത്തുക;
+	അവസ്ഥ 1:
 		info->is_stash_ref = !strcmp(expanded_ref, ref_stash);
-		break;
-	default: /* Invalid or ambiguous */
-		break;
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി: /* Invalid or ambiguous */
+		നിർത്തുക;
 	}
 
-	free(expanded_ref);
-	return !(ret == 0 || ret == 1);
+	സ്വതന്ത്രം(expanded_ref);
+	തിരികെ !(ret == 0 || ret == 1);
 }
 
-static int do_clear_stash(void)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_clear_stash(ശൂന്യം)
 {
-	struct object_id obj;
-	if (repo_get_oid(the_repository, ref_stash, &obj))
-		return 0;
+	ഘടന object_id obj;
+	എങ്കിൽ (repo_get_oid(the_repository, ref_stash, &obj))
+		തിരികെ 0;
 
-	return refs_delete_ref(get_main_ref_store(the_repository), NULL,
+	തിരികെ refs_delete_ref(get_main_ref_store(the_repository), ശൂന്യ,
 			       ref_stash, &obj, 0);
 }
 
-static int clear_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ clear_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		       ഘടന repository *repo UNUSED)
 {
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_END()
 	};
 
@@ -324,34 +324,34 @@ static int clear_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_clear_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (argc)
-		return error(_("git stash clear with arguments is "
+	എങ്കിൽ (argc)
+		തിരികെ error(_("git stash clear with arguments is "
 			       "unimplemented"));
 
-	return do_clear_stash();
+	തിരികെ do_clear_stash();
 }
 
-static int reset_tree(struct object_id *i_tree, int update, int reset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ reset_വൃക്ഷം(ഘടന object_id *i_വൃക്ഷം, പൂർണ്ണസംഖ്യ update, പൂർണ്ണസംഖ്യ reset)
 {
-	int nr_trees = 1;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct lock_file lock_file = LOCK_INIT;
+	പൂർണ്ണസംഖ്യ nr_trees = 1;
+	ഘടന unpack_trees_options opts;
+	ഘടന വൃക്ഷം_desc t[MAX_UNPACK_TREES];
+	ഘടന വൃക്ഷം *വൃക്ഷം;
+	ഘടന lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL))
-		return -1;
+	repo_read_index_preload(the_repository, ശൂന്യ, 0);
+	എങ്കിൽ (refresh_index(the_repository->index, REFRESH_QUIET, ശൂന്യ, ശൂന്യ, ശൂന്യ))
+		തിരികെ -1;
 
 	repo_hold_locked_index(the_repository, &lock_file, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, വലുപ്പം(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, i_tree);
-	if (repo_parse_tree(the_repository, tree))
-		return -1;
+	വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository, i_വൃക്ഷം);
+	എങ്കിൽ (repo_parse_വൃക്ഷം(the_repository, വൃക്ഷം))
+		തിരികെ -1;
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_വൃക്ഷം_desc(t, &വൃക്ഷം->object.oid, വൃക്ഷം->buffer, വൃക്ഷം->size);
 
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
@@ -359,44 +359,44 @@ static int reset_tree(struct object_id *i_tree, int update, int reset)
 	opts.merge = 1;
 	opts.reset = reset ? UNPACK_RESET_PROTECT_UNTRACKED : 0;
 	opts.update = update;
-	if (update)
+	എങ്കിൽ (update)
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts))
-		return -1;
+	എങ്കിൽ (unpack_trees(nr_trees, t, &opts))
+		തിരികെ -1;
 
-	if (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
-		return error(_("unable to write new index file"));
+	എങ്കിൽ (write_locked_index(the_repository->index, &lock_file, COMMIT_LOCK))
+		തിരികെ error(_("unable to write new index file"));
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int create_index_from_tree(const struct object_id *tree_id,
-				  const char *index_path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ create_index_from_വൃക്ഷം(സ്ഥിരം ഘടന object_id *വൃക്ഷം_id,
+				  സ്ഥിരം അക്ഷരം *index_path)
 {
-	int nr_trees = 1;
-	int ret = 0;
-	struct unpack_trees_options opts;
-	struct tree_desc t[MAX_UNPACK_TREES];
-	struct tree *tree;
-	struct index_state dst_istate = INDEX_STATE_INIT(the_repository);
-	struct lock_file lock_file = LOCK_INIT;
+	പൂർണ്ണസംഖ്യ nr_trees = 1;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന unpack_trees_options opts;
+	ഘടന വൃക്ഷം_desc t[MAX_UNPACK_TREES];
+	ഘടന വൃക്ഷം *വൃക്ഷം;
+	ഘടന index_state dst_istate = INDEX_STATE_INIT(the_repository);
+	ഘടന lock_file lock_file = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	refresh_index(the_repository->index, REFRESH_QUIET, NULL, NULL, NULL);
+	repo_read_index_preload(the_repository, ശൂന്യ, 0);
+	refresh_index(the_repository->index, REFRESH_QUIET, ശൂന്യ, ശൂന്യ, ശൂന്യ);
 
 	hold_lock_file_for_update(&lock_file, index_path, LOCK_DIE_ON_ERROR);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, വലുപ്പം(opts));
 
-	tree = repo_parse_tree_indirect(the_repository, tree_id);
-	if (!tree || repo_parse_tree(the_repository, tree)) {
+	വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository, വൃക്ഷം_id);
+	എങ്കിൽ (!വൃക്ഷം || repo_parse_വൃക്ഷം(the_repository, വൃക്ഷം)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	init_tree_desc(t, &tree->object.oid, tree->buffer, tree->size);
+	init_വൃക്ഷം_desc(t, &വൃക്ഷം->object.oid, വൃക്ഷം->buffer, വൃക്ഷം->size);
 
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
@@ -405,43 +405,43 @@ static int create_index_from_tree(const struct object_id *tree_id,
 	opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
 	opts.fn = oneway_merge;
 
-	if (unpack_trees(nr_trees, t, &opts)) {
+	എങ്കിൽ (unpack_trees(nr_trees, t, &opts)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
+	എങ്കിൽ (write_locked_index(&dst_istate, &lock_file, COMMIT_LOCK)) {
 		ret = error(_("unable to write new index file"));
-		goto done;
+		പോകുക done;
 	}
 
 done:
 	release_index(&dst_istate);
-	if (ret)
+	എങ്കിൽ (ret)
 		rollback_lock_file(&lock_file);
-	return ret;
+	തിരികെ ret;
 }
 
-static int is_path_a_directory(const char *path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ is_path_a_directory(സ്ഥിരം അക്ഷരം *path)
 {
 	/*
 	 * This function differs from abspath.c:is_directory() in that
 	 * here we use lstat() instead of stat(); we do not want to
 	 * follow symbolic links here.
 	 */
-	struct stat st;
-	return (!lstat(path, &st) && S_ISDIR(st.st_mode));
+	ഘടന stat st;
+	തിരികെ (!lstat(path, &st) && S_ISDIR(st.st_mode));
 }
 
-static void add_diff_to_buf(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED,
-			    void *data)
+സ്ഥിതം ശൂന്യം add_diff_to_buf(ഘടന diff_queue_struct *q,
+			    ഘടന diff_options *options UNUSED,
+			    ശൂന്യം *data)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < q->nr; i++) {
-		if (is_path_a_directory(q->queue[i]->one->path))
-			continue;
+	വേണ്ടി (i = 0; i < q->nr; i++) {
+		എങ്കിൽ (is_path_a_directory(q->queue[i]->one->path))
+			തുടരുക;
 
 		strbuf_addstr(data, q->queue[i]->one->path);
 
@@ -450,10 +450,10 @@ static void add_diff_to_buf(struct diff_queue_struct *q,
 	}
 }
 
-static int restore_untracked(struct object_id *u_tree)
+സ്ഥിതം പൂർണ്ണസംഖ്യ restore_untracked(ഘടന object_id *u_വൃക്ഷം)
 {
-	int res;
-	struct child_process cp = CHILD_PROCESS_INIT;
+	പൂർണ്ണസംഖ്യ res;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 	/*
 	 * We need to run restore files from a given index, but without
@@ -461,27 +461,27 @@ static int restore_untracked(struct object_id *u_tree)
 	 * run_command to fork processes that will not interfere.
 	 */
 	cp.git_cmd = 1;
-	strvec_push(&cp.args, "read-tree");
-	strvec_push(&cp.args, oid_to_hex(u_tree));
+	strvec_തള്ളുക(&cp.args, "read-tree");
+	strvec_തള്ളുക(&cp.args, oid_to_hex(u_വൃക്ഷം));
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
-	if (run_command(&cp)) {
+	എങ്കിൽ (run_command(&cp)) {
 		remove_path(stash_index_path.buf);
-		return -1;
+		തിരികെ -1;
 	}
 
 	child_process_init(&cp);
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout-index", "--all", NULL);
+	strvec_pushl(&cp.args, "checkout-index", "--all", ശൂന്യ);
 	strvec_pushf(&cp.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
 	res = run_command(&cp);
 	remove_path(stash_index_path.buf);
-	return res;
+	തിരികെ res;
 }
 
-static void unstage_changes_unless_new(struct object_id *orig_tree)
+സ്ഥിതം ശൂന്യം unstage_changes_unless_new(ഘടന object_id *orig_വൃക്ഷം)
 {
 	/*
 	 * When we enter this function, there has been a clean merge of
@@ -494,10 +494,10 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * it to the worktree before unstaging.
 	 */
 
-	struct checkout state = CHECKOUT_INIT;
-	struct diff_options diff_opts;
-	struct lock_file lock = LOCK_INIT;
-	int i;
+	ഘടന checkout state = CHECKOUT_INIT;
+	ഘടന diff_options diff_opts;
+	ഘടന lock_file lock = LOCK_INIT;
+	പൂർണ്ണസംഖ്യ i;
 
 	/* If any entries have skip_worktree set, we'll have to check 'em out */
 	state.force = 1;
@@ -516,14 +516,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	diff_opts.output_format = DIFF_FORMAT_NO_OUTPUT;
 	diff_setup_done(&diff_opts);
 
-	do_diff_cache(orig_tree, &diff_opts);
+	do_diff_cache(orig_വൃക്ഷം, &diff_opts);
 	diffcore_std(&diff_opts);
 
 	/* Iterate over the paths that changed due to the merge... */
-	for (i = 0; i < diff_queued_diff.nr; i++) {
-		struct diff_filepair *p;
-		struct cache_entry *ce;
-		int pos;
+	വേണ്ടി (i = 0; i < diff_queued_diff.nr; i++) {
+		ഘടന diff_filepair *p;
+		ഘടന cache_entry *ce;
+		പൂർണ്ണസംഖ്യ pos;
 
 		/* Look up the path's position in the current index. */
 		p = diff_queued_diff.queue[i];
@@ -538,14 +538,14 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 		 * path, but left it out of the working tree, then clear the
 		 * SKIP_WORKTREE bit and write it to the working tree.
 		 */
-		if (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
-			struct stat st;
+		എങ്കിൽ (pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) {
+			ഘടന stat st;
 
 			ce = the_repository->index->cache[pos];
-			if (!lstat(ce->name, &st)) {
+			എങ്കിൽ (!lstat(ce->name, &st)) {
 				/* Conflicting path present; relocate it */
-				struct strbuf new_path = STRBUF_INIT;
-				int fd;
+				ഘടന strbuf new_path = STRBUF_INIT;
+				പൂർണ്ണസംഖ്യ fd;
 
 				strbuf_addf(&new_path,
 					    "%s.stash.XXXXXX", ce->name);
@@ -556,25 +556,25 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 					 "           %s -> %s\n"
 					 "         to make room.\n"),
 				       ce->name, new_path.buf);
-				if (rename(ce->name, new_path.buf))
+				എങ്കിൽ (rename(ce->name, new_path.buf))
 					die("Failed to move %s to %s",
 					    ce->name, new_path.buf);
 				strbuf_release(&new_path);
 			}
-			checkout_entry(ce, &state, NULL, NULL);
+			checkout_entry(ce, &state, ശൂന്യ, ശൂന്യ);
 			ce->ce_flags &= ~CE_SKIP_WORKTREE;
 		}
 
 		/*
 		 * Step 3: "unstage" changes, as long as they are still tracked
 		 */
-		if (p->one->oid_valid) {
+		എങ്കിൽ (p->one->oid_valid) {
 			/*
 			 * Path existed in orig_tree; restore index entry
 			 * from that tree in order to "unstage" the changes.
 			 */
-			int option = ADD_CACHE_OK_TO_REPLACE;
-			if (pos < 0)
+			പൂർണ്ണസംഖ്യ option = ADD_CACHE_OK_TO_REPLACE;
+			എങ്കിൽ (pos < 0)
 				option = ADD_CACHE_OK_TO_ADD;
 
 			ce = make_cache_entry(the_repository->index,
@@ -591,67 +591,67 @@ static void unstage_changes_unless_new(struct object_id *orig_tree)
 	 * Step 4: write the new index to disk
 	 */
 	repo_hold_locked_index(the_repository, &lock, LOCK_DIE_ON_ERROR);
-	if (write_locked_index(the_repository->index, &lock,
+	എങ്കിൽ (write_locked_index(the_repository->index, &lock,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("could not write index"));
 }
 
-static enum stash_apply_result do_apply_stash(const char *prefix,
-					      struct stash_info *info,
-					      int index, int quiet,
-					      const char *label_ours,
-					      const char *label_theirs,
-					      const char *label_base)
+സ്ഥിതം എണ്ണൽ stash_apply_result do_apply_stash(സ്ഥിരം അക്ഷരം *prefix,
+					      ഘടന stash_info *info,
+					      പൂർണ്ണസംഖ്യ index, പൂർണ്ണസംഖ്യ quiet,
+					      സ്ഥിരം അക്ഷരം *label_ours,
+					      സ്ഥിരം അക്ഷരം *label_theirs,
+					      സ്ഥിരം അക്ഷരം *label_base)
 {
-	int clean, ret;
-	int has_index = index;
-	struct merge_options o;
-	struct object_id c_tree;
-	struct object_id index_tree;
-	struct tree *head, *merge, *merge_base;
-	struct lock_file lock = LOCK_INIT;
+	പൂർണ്ണസംഖ്യ clean, ret;
+	പൂർണ്ണസംഖ്യ has_index = index;
+	ഘടന merge_options o;
+	ഘടന object_id c_വൃക്ഷം;
+	ഘടന object_id index_വൃക്ഷം;
+	ഘടന വൃക്ഷം *head, *merge, *merge_base;
+	ഘടന lock_file lock = LOCK_INIT;
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL))
-		return error(_("could not write index"));
+	repo_read_index_preload(the_repository, ശൂന്യ, 0);
+	എങ്കിൽ (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 ശൂന്യ, ശൂന്യ, ശൂന്യ))
+		തിരികെ error(_("could not write index"));
 
-	if (write_index_as_tree(&c_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL))
-		return error(_("cannot apply a stash in the middle of a merge"));
+	എങ്കിൽ (write_index_as_വൃക്ഷം(&c_വൃക്ഷം, the_repository->index,
+				repo_get_index_file(the_repository), 0, ശൂന്യ))
+		തിരികെ error(_("cannot apply a stash in the middle of a merge"));
 
 	init_ui_merge_options(&o, the_repository);
 
-	if (quiet)
+	എങ്കിൽ (quiet)
 		o.verbosity = 0;
 
-	if (index) {
-		if (oideq(&info->b_tree, &info->i_tree) ||
-		    oideq(&c_tree, &info->i_tree)) {
+	എങ്കിൽ (index) {
+		എങ്കിൽ (oideq(&info->b_വൃക്ഷം, &info->i_വൃക്ഷം) ||
+		    oideq(&c_വൃക്ഷം, &info->i_വൃക്ഷം)) {
 			has_index = 0;
-		} else {
-			struct merge_result result = { 0 };
+		} അല്ലെങ്കിൽ {
+			ഘടന merge_result result = { 0 };
 
 			o.branch1 = "Current index";
 			o.branch2 = "Stashed index changes";
 			o.ancestor = "Stash base";
 
-			head = lookup_tree(o.repo, &c_tree);
-			merge = lookup_tree(o.repo, &info->i_tree);
-			merge_base = lookup_tree(o.repo, &info->b_tree);
+			head = lookup_വൃക്ഷം(o.repo, &c_വൃക്ഷം);
+			merge = lookup_വൃക്ഷം(o.repo, &info->i_വൃക്ഷം);
+			merge_base = lookup_വൃക്ഷം(o.repo, &info->b_വൃക്ഷം);
 
 			merge_incore_nonrecursive(&o, merge_base, head, merge,
 						  &result);
 
-			if (result.clean < 0) {
+			എങ്കിൽ (result.clean < 0) {
 				merge_finalize(&o, &result);
-				return error(_("index merge failed"));
-			} else if (!result.clean) {
+				തിരികെ error(_("index merge failed"));
+			} അല്ലെങ്കിൽ എങ്കിൽ (!result.clean) {
 				merge_finalize(&o, &result);
-				return error(_("conflicts in index. "
+				തിരികെ error(_("conflicts in index. "
 					       "Try without --index."));
-			} else {
-				oidcpy(&index_tree, &result.tree->object.oid);
+			} അല്ലെങ്കിൽ {
+				oidcpy(&index_വൃക്ഷം, &result.വൃക്ഷം->object.oid);
 				merge_finalize(&o, &result);
 			}
 		}
@@ -661,15 +661,15 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	o.branch2 = label_theirs ? label_theirs : "Stashed changes";
 	o.ancestor = label_base ? label_base : "Stash base";
 
-	if (oideq(&info->b_tree, &c_tree))
+	എങ്കിൽ (oideq(&info->b_വൃക്ഷം, &c_വൃക്ഷം))
 		o.branch1 = "Version stash was based on";
 
-	if (o.verbosity >= 3)
+	എങ്കിൽ (o.verbosity >= 3)
 		printf_ln(_("Merging %s with %s"), o.branch1, o.branch2);
 
-	head = lookup_tree(o.repo, &c_tree);
-	merge = lookup_tree(o.repo, &info->w_tree);
-	merge_base = lookup_tree(o.repo, &info->b_tree);
+	head = lookup_വൃക്ഷം(o.repo, &c_വൃക്ഷം);
+	merge = lookup_വൃക്ഷം(o.repo, &info->w_വൃക്ഷം);
+	merge_base = lookup_വൃക്ഷം(o.repo, &info->b_വൃക്ഷം);
 
 	repo_hold_locked_index(o.repo, &lock, LOCK_DIE_ON_ERROR);
 	clean = merge_ort_nonrecursive(&o, head, merge, merge_base);
@@ -681,34 +681,34 @@ static enum stash_apply_result do_apply_stash(const char *prefix,
 	 */
 	ret = clean >= 0 ? !clean : clean;
 
-	if (ret < 0)
+	എങ്കിൽ (ret < 0)
 		rollback_lock_file(&lock);
-	else if (write_locked_index(o.repo->index, &lock,
+	അല്ലെങ്കിൽ എങ്കിൽ (write_locked_index(o.repo->index, &lock,
 				      COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		ret = error(_("could not write index"));
 
-	if (ret) {
+	എങ്കിൽ (ret) {
 		repo_rerere(the_repository, 0);
 
-		if (index)
+		എങ്കിൽ (index)
 			fprintf_ln(stderr, _("Index was not unstashed."));
 
-		goto restore_untracked;
+		പോകുക restore_untracked;
 	}
 
-	if (has_index) {
-		if (reset_tree(&index_tree, 0, 0))
+	എങ്കിൽ (has_index) {
+		എങ്കിൽ (reset_വൃക്ഷം(&index_വൃക്ഷം, 0, 0))
 			ret = -1;
-	} else {
-		unstage_changes_unless_new(&c_tree);
+	} അല്ലെങ്കിൽ {
+		unstage_changes_unless_new(&c_വൃക്ഷം);
 	}
 
 restore_untracked:
-	if (info->has_u && restore_untracked(&info->u_tree))
+	എങ്കിൽ (info->has_u && restore_untracked(&info->u_വൃക്ഷം))
 		ret = error(_("could not restore untracked files from stash"));
 
-	if (!quiet) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	എങ്കിൽ (!quiet) {
+		ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 		/*
 		 * Status is quite simple and could be replaced with calls to
@@ -717,26 +717,26 @@ restore_untracked:
 		 */
 		cp.git_cmd = 1;
 		cp.dir = prefix;
-		strvec_pushf(&cp.env, GIT_WORK_TREE_ENVIRONMENT"=%s",
-			     absolute_path(repo_get_work_tree(the_repository)));
+		strvec_pushf(&cp.env, GIT_WORK_വൃക്ഷം_ENVIRONMENT"=%s",
+			     absolute_path(repo_get_work_വൃക്ഷം(the_repository)));
 		strvec_pushf(&cp.env, GIT_DIR_ENVIRONMENT"=%s",
 			     absolute_path(repo_get_git_dir(the_repository)));
-		strvec_push(&cp.args, "status");
+		strvec_തള്ളുക(&cp.args, "status");
 		run_command(&cp);
 	}
 
-	return ret;
+	തിരികെ ret;
 }
 
-static int apply_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ apply_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		       ഘടന repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	int index = use_index;
-	const char *label_ours = NULL, *label_theirs = NULL, *label_base = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ ret = -1;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ index = use_index;
+	സ്ഥിരം അക്ഷരം *label_ours = ശൂന്യ, *label_theirs = ശൂന്യ, *label_base = ശൂന്യ;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -752,73 +752,73 @@ static int apply_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_apply_usage, 0);
 
-	if (get_stash_info(&info, argc, argv))
-		goto cleanup;
+	എങ്കിൽ (get_stash_info(&info, argc, argv))
+		പോകുക cleanup;
 
 	ret = do_apply_stash(prefix, &info, index, quiet,
 			     label_ours, label_theirs, label_base);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	തിരികെ ret;
 }
 
-static int reject_reflog_ent(const char *refname UNUSED,
-			     struct object_id *ooid UNUSED,
-			     struct object_id *noid UNUSED,
-			     const char *email UNUSED,
+സ്ഥിതം പൂർണ്ണസംഖ്യ reject_reflog_ent(സ്ഥിരം അക്ഷരം *refname UNUSED,
+			     ഘടന object_id *ooid UNUSED,
+			     ഘടന object_id *noid UNUSED,
+			     സ്ഥിരം അക്ഷരം *email UNUSED,
 			     timestamp_t timestamp UNUSED,
-			     int tz UNUSED, const char *message UNUSED,
-			     void *cb_data UNUSED)
+			     പൂർണ്ണസംഖ്യ tz UNUSED, സ്ഥിരം അക്ഷരം *message UNUSED,
+			     ശൂന്യം *cb_data UNUSED)
 {
-	return 1;
+	തിരികെ 1;
 }
 
-static int reflog_is_empty(const char *refname)
+സ്ഥിതം പൂർണ്ണസംഖ്യ reflog_is_empty(സ്ഥിരം അക്ഷരം *refname)
 {
-	return !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
-					 refname, reject_reflog_ent, NULL);
+	തിരികെ !refs_for_each_reflog_ent(get_main_ref_store(the_repository),
+					 refname, reject_reflog_ent, ശൂന്യ);
 }
 
-static int do_drop_stash(struct stash_info *info, int quiet)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_drop_stash(ഘടന stash_info *info, പൂർണ്ണസംഖ്യ quiet)
 {
-	if (!reflog_delete(info->revision.buf,
+	എങ്കിൽ (!reflog_delete(info->revision.buf,
 			   EXPIRE_REFLOGS_REWRITE | EXPIRE_REFLOGS_UPDATE_REF,
 			   0)) {
-		if (!quiet)
+		എങ്കിൽ (!quiet)
 			printf_ln(_("Dropped %s (%s)"), info->revision.buf,
 				  oid_to_hex(&info->w_commit));
-	} else {
-		return error(_("%s: Could not drop stash entry"),
+	} അല്ലെങ്കിൽ {
+		തിരികെ error(_("%s: Could not drop stash entry"),
 			     info->revision.buf);
 	}
 
-	if (reflog_is_empty(ref_stash))
+	എങ്കിൽ (reflog_is_empty(ref_stash))
 		do_clear_stash();
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int get_stash_info_assert(struct stash_info *info, int argc,
-				 const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_stash_info_assert(ഘടന stash_info *info, പൂർണ്ണസംഖ്യ argc,
+				 സ്ഥിരം അക്ഷരം **argv)
 {
-	int ret = get_stash_info(info, argc, argv);
+	പൂർണ്ണസംഖ്യ ret = get_stash_info(info, argc, argv);
 
-	if (ret < 0)
-		return ret;
+	എങ്കിൽ (ret < 0)
+		തിരികെ ret;
 
-	if (!info->is_stash_ref)
-		return error(_("'%s' is not a stash reference"), info->revision.buf);
+	എങ്കിൽ (!info->is_stash_ref)
+		തിരികെ error(_("'%s' is not a stash reference"), info->revision.buf);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int drop_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ drop_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	int ret = -1;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ ret = -1;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_END()
 	};
@@ -826,23 +826,23 @@ static int drop_stash(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_drop_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	എങ്കിൽ (get_stash_info_assert(&info, argc, argv))
+		പോകുക cleanup;
 
 	ret = do_drop_stash(&info, quiet);
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	തിരികെ ret;
 }
 
-static int pop_stash(int argc, const char **argv, const char *prefix,
-		     struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ എടുക്കുക_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		     ഘടന repository *repo UNUSED)
 {
-	int ret = -1;
-	int index = use_index;
-	int quiet = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ ret = -1;
+	പൂർണ്ണസംഖ്യ index = use_index;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "index", &index,
 			 N_("attempt to recreate the index")),
@@ -850,68 +850,68 @@ static int pop_stash(int argc, const char **argv, const char *prefix,
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
-			     git_stash_pop_usage, 0);
+			     git_stash_എടുക്കുക_usage, 0);
 
-	if (get_stash_info_assert(&info, argc, argv))
-		goto cleanup;
+	എങ്കിൽ (get_stash_info_assert(&info, argc, argv))
+		പോകുക cleanup;
 
-	if ((ret = do_apply_stash(prefix, &info, index, quiet,
-				  NULL, NULL, NULL)))
+	എങ്കിൽ ((ret = do_apply_stash(prefix, &info, index, quiet,
+				  ശൂന്യ, ശൂന്യ, ശൂന്യ)))
 		printf_ln(_("The stash entry is kept in case "
 			    "you need it again."));
-	else
+	അല്ലെങ്കിൽ
 		ret = do_drop_stash(&info, quiet);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	തിരികെ ret;
 }
 
-static int branch_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ branch_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			ഘടന repository *repo UNUSED)
 {
-	int ret = -1;
-	const char *branch = NULL;
-	struct stash_info info = STASH_INFO_INIT;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ ret = -1;
+	സ്ഥിരം അക്ഷരം *branch = ശൂന്യ;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
+	ഘടന option options[] = {
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_branch_usage, 0);
 
-	if (!argc) {
+	എങ്കിൽ (!argc) {
 		fprintf_ln(stderr, _("No branch name specified"));
-		return -1;
+		തിരികെ -1;
 	}
 
 	branch = argv[0];
 
-	if (get_stash_info(&info, argc - 1, argv + 1))
-		goto cleanup;
+	എങ്കിൽ (get_stash_info(&info, argc - 1, argv + 1))
+		പോകുക cleanup;
 
 	cp.git_cmd = 1;
-	strvec_pushl(&cp.args, "checkout", "-b", NULL);
-	strvec_push(&cp.args, branch);
-	strvec_push(&cp.args, oid_to_hex(&info.b_commit));
+	strvec_pushl(&cp.args, "checkout", "-b", ശൂന്യ);
+	strvec_തള്ളുക(&cp.args, branch);
+	strvec_തള്ളുക(&cp.args, oid_to_hex(&info.b_commit));
 	ret = run_command(&cp);
-	if (!ret)
+	എങ്കിൽ (!ret)
 		ret = do_apply_stash(prefix, &info, 1, 0,
-				     NULL, NULL, NULL);
-	if (!ret && info.is_stash_ref)
+				     ശൂന്യ, ശൂന്യ, ശൂന്യ);
+	എങ്കിൽ (!ret && info.is_stash_ref)
 		ret = do_drop_stash(&info, 0);
 
 cleanup:
 	free_stash_info(&info);
-	return ret;
+	തിരികെ ret;
 }
 
-static int list_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ list_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct option options[] = {
+	ഘടന child_process cp = CHILD_PROCESS_INIT;
+	ഘടന option options[] = {
 		OPT_END()
 	};
 
@@ -919,82 +919,82 @@ static int list_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_list_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
-		return 0;
+	എങ്കിൽ (!refs_ref_exists(get_main_ref_store(the_repository), ref_stash))
+		തിരികെ 0;
 
 	cp.git_cmd = 1;
 	strvec_pushl(&cp.args, "log", "--format=%gd: %gs", "-g",
-		     "--first-parent", NULL);
+		     "--first-parent", ശൂന്യ);
 	strvec_pushv(&cp.args, argv);
-	strvec_push(&cp.args, ref_stash);
-	strvec_push(&cp.args, "--");
-	return run_command(&cp);
+	strvec_തള്ളുക(&cp.args, ref_stash);
+	strvec_തള്ളുക(&cp.args, "--");
+	തിരികെ run_command(&cp);
 }
 
-static int git_stash_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_stash_config(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം,
+			    സ്ഥിരം ഘടന config_context *ctx, ശൂന്യം *cb)
 {
-	if (!strcmp(var, "stash.showstat")) {
-		show_stat = git_config_bool(var, value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "stash.showstat")) {
+		show_stat = git_config_bool(var, മൂല്യം);
+		തിരികെ 0;
 	}
-	if (!strcmp(var, "stash.showpatch")) {
-		show_patch = git_config_bool(var, value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "stash.showpatch")) {
+		show_patch = git_config_bool(var, മൂല്യം);
+		തിരികെ 0;
 	}
-	if (!strcmp(var, "stash.showincludeuntracked")) {
-		show_include_untracked = git_config_bool(var, value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "stash.showincludeuntracked")) {
+		show_include_untracked = git_config_bool(var, മൂല്യം);
+		തിരികെ 0;
 	}
-	if (!strcmp(var, "stash.index")) {
-		use_index = git_config_bool(var, value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "stash.index")) {
+		use_index = git_config_bool(var, മൂല്യം);
+		തിരികെ 0;
 	}
-	return git_diff_basic_config(var, value, ctx, cb);
+	തിരികെ git_diff_basic_config(var, മൂല്യം, ctx, cb);
 }
 
-static void diff_include_untracked(const struct stash_info *info, struct diff_options *diff_opt)
+സ്ഥിതം ശൂന്യം diff_include_untracked(സ്ഥിരം ഘടന stash_info *info, ഘടന diff_options *diff_opt)
 {
-	const struct object_id *oid[] = { &info->w_commit, &info->u_tree };
-	struct tree *tree[ARRAY_SIZE(oid)];
-	struct tree_desc tree_desc[ARRAY_SIZE(oid)];
-	struct unpack_trees_options unpack_tree_opt = { 0 };
+	സ്ഥിരം ഘടന object_id *oid[] = { &info->w_commit, &info->u_വൃക്ഷം };
+	ഘടന വൃക്ഷം *വൃക്ഷം[ARRAY_SIZE(oid)];
+	ഘടന വൃക്ഷം_desc വൃക്ഷം_desc[ARRAY_SIZE(oid)];
+	ഘടന unpack_trees_options unpack_വൃക്ഷം_opt = { 0 };
 
-	for (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
-		tree[i] = repo_parse_tree_indirect(the_repository, oid[i]);
-		if (repo_parse_tree(the_repository, tree[i]) < 0)
+	വേണ്ടി (size_t i = 0; i < ARRAY_SIZE(oid); i++) {
+		വൃക്ഷം[i] = repo_parse_വൃക്ഷം_indirect(the_repository, oid[i]);
+		എങ്കിൽ (repo_parse_വൃക്ഷം(the_repository, വൃക്ഷം[i]) < 0)
 			die(_("failed to parse tree"));
-		init_tree_desc(&tree_desc[i], &tree[i]->object.oid,
-			       tree[i]->buffer, tree[i]->size);
+		init_വൃക്ഷം_desc(&വൃക്ഷം_desc[i], &വൃക്ഷം[i]->object.oid,
+			       വൃക്ഷം[i]->buffer, വൃക്ഷം[i]->size);
 	}
 
-	unpack_tree_opt.head_idx = -1;
-	unpack_tree_opt.src_index = the_repository->index;
-	unpack_tree_opt.dst_index = the_repository->index;
-	unpack_tree_opt.merge = 1;
-	unpack_tree_opt.fn = stash_worktree_untracked_merge;
+	unpack_വൃക്ഷം_opt.head_idx = -1;
+	unpack_വൃക്ഷം_opt.src_index = the_repository->index;
+	unpack_വൃക്ഷം_opt.dst_index = the_repository->index;
+	unpack_വൃക്ഷം_opt.merge = 1;
+	unpack_വൃക്ഷം_opt.fn = stash_worktree_untracked_merge;
 
-	if (unpack_trees(ARRAY_SIZE(tree_desc), tree_desc, &unpack_tree_opt))
+	എങ്കിൽ (unpack_trees(ARRAY_SIZE(വൃക്ഷം_desc), വൃക്ഷം_desc, &unpack_വൃക്ഷം_opt))
 		die(_("failed to unpack trees"));
 
 	do_diff_cache(&info->b_commit, diff_opt);
 }
 
-static int show_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	int i;
-	int ret = -1;
-	struct stash_info info = STASH_INFO_INIT;
-	struct rev_info rev;
-	struct strvec stash_args = STRVEC_INIT;
-	struct strvec revision_args = STRVEC_INIT;
-	enum {
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ ret = -1;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന rev_info rev;
+	ഘടന strvec stash_args = STRVEC_INIT;
+	ഘടന strvec revision_args = STRVEC_INIT;
+	എണ്ണൽ {
 		UNTRACKED_NONE,
 		UNTRACKED_INCLUDE,
 		UNTRACKED_ONLY
 	} show_untracked = show_include_untracked ? UNTRACKED_INCLUDE : UNTRACKED_NONE;
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_SET_INT('u', "include-untracked", &show_untracked,
 			    N_("include untracked files in the stash"),
 			    UNTRACKED_INCLUDE),
@@ -1003,70 +1003,70 @@ static int show_stash(int argc, const char **argv, const char *prefix,
 			      UNTRACKED_ONLY, PARSE_OPT_NONEG),
 		OPT_END()
 	};
-	int do_usage = 0;
+	പൂർണ്ണസംഖ്യ do_usage = 0;
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, ശൂന്യ);
 	repo_init_revisions(the_repository, &rev, prefix);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_show_usage,
 			     PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT |
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	strvec_push(&revision_args, argv[0]);
-	for (i = 1; i < argc; i++) {
-		if (argv[i][0] != '-')
-			strvec_push(&stash_args, argv[i]);
-		else
-			strvec_push(&revision_args, argv[i]);
+	strvec_തള്ളുക(&revision_args, argv[0]);
+	വേണ്ടി (i = 1; i < argc; i++) {
+		എങ്കിൽ (argv[i][0] != '-')
+			strvec_തള്ളുക(&stash_args, argv[i]);
+		അല്ലെങ്കിൽ
+			strvec_തള്ളുക(&revision_args, argv[i]);
 	}
 
-	if (get_stash_info(&info, stash_args.nr, stash_args.v))
-		goto cleanup;
+	എങ്കിൽ (get_stash_info(&info, stash_args.nr, stash_args.v))
+		പോകുക cleanup;
 
 	/*
 	 * The config settings are applied only if there are not passed
 	 * any options.
 	 */
-	if (revision_args.nr == 1) {
-		if (show_stat)
+	എങ്കിൽ (revision_args.nr == 1) {
+		എങ്കിൽ (show_stat)
 			rev.diffopt.output_format = DIFF_FORMAT_DIFFSTAT;
 
-		if (show_patch)
+		എങ്കിൽ (show_patch)
 			rev.diffopt.output_format |= DIFF_FORMAT_PATCH;
 
-		if (!show_stat && !show_patch) {
+		എങ്കിൽ (!show_stat && !show_patch) {
 			ret = 0;
-			goto cleanup;
+			പോകുക cleanup;
 		}
 	}
 
-	setup_revisions_from_strvec(&revision_args, &rev, NULL);
-	if (revision_args.nr > 1)
-		goto usage;
-	if (!rev.diffopt.output_format) {
+	setup_revisions_from_strvec(&revision_args, &rev, ശൂന്യ);
+	എങ്കിൽ (revision_args.nr > 1)
+		പോകുക usage;
+	എങ്കിൽ (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
 
 	rev.diffopt.flags.recursive = 1;
 	setup_diff_pager(&rev.diffopt);
-	switch (show_untracked) {
-	case UNTRACKED_NONE:
-		diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
-	case UNTRACKED_ONLY:
-		if (info.has_u)
-			diff_root_tree_oid(&info.u_tree, "", &rev.diffopt);
-		break;
-	case UNTRACKED_INCLUDE:
-		if (info.has_u)
+	തിരഞ്ഞെടുപ്പ് (show_untracked) {
+	അവസ്ഥ UNTRACKED_NONE:
+		diff_വൃക്ഷം_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		നിർത്തുക;
+	അവസ്ഥ UNTRACKED_ONLY:
+		എങ്കിൽ (info.has_u)
+			diff_വേര്_വൃക്ഷം_oid(&info.u_വൃക്ഷം, "", &rev.diffopt);
+		നിർത്തുക;
+	അവസ്ഥ UNTRACKED_INCLUDE:
+		എങ്കിൽ (info.has_u)
 			diff_include_untracked(&info, &rev.diffopt);
-		else
-			diff_tree_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
-		break;
+		അല്ലെങ്കിൽ
+			diff_വൃക്ഷം_oid(&info.b_commit, &info.w_commit, "", &rev.diffopt);
+		നിർത്തുക;
 	}
-	log_tree_diff_flush(&rev);
+	log_വൃക്ഷം_diff_flush(&rev);
 
 	ret = diff_result_code(&rev);
 
@@ -1075,86 +1075,86 @@ cleanup:
 	strvec_clear(&stash_args);
 	free_stash_info(&info);
 	release_revisions(&rev);
-	if (do_usage)
+	എങ്കിൽ (do_usage)
 		usage_with_options(git_stash_show_usage, options);
-	return ret;
+	തിരികെ ret;
 usage:
 	do_usage = 1;
-	goto cleanup;
+	പോകുക cleanup;
 }
 
-static int do_store_stash(const struct object_id *w_commit, const char *stash_msg,
-			  int quiet)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_store_stash(സ്ഥിരം ഘടന object_id *w_commit, സ്ഥിരം അക്ഷരം *stash_സന്ദേശം,
+			  പൂർണ്ണസംഖ്യ quiet)
 {
-	struct stash_info info;
-	char revision[GIT_MAX_HEXSZ];
+	ഘടന stash_info info;
+	അക്ഷരം revision[GIT_MAX_HEXSZ];
 
 	oid_to_hex_r(revision, w_commit);
 	assert_stash_like(&info, revision);
 
-	if (!stash_msg)
-		stash_msg = "Created via \"git stash store\".";
+	എങ്കിൽ (!stash_സന്ദേശം)
+		stash_സന്ദേശം = "Created via \"git stash store\".";
 
-	if (refs_update_ref(get_main_ref_store(the_repository), stash_msg, ref_stash, w_commit, NULL,
+	എങ്കിൽ (refs_update_ref(get_main_ref_store(the_repository), stash_സന്ദേശം, ref_stash, w_commit, ശൂന്യ,
 			    REF_FORCE_CREATE_REFLOG,
 			    quiet ? UPDATE_REFS_QUIET_ON_ERR :
-			    UPDATE_REFS_MSG_ON_ERR)) {
-		if (!quiet) {
+			    UPDATE_REFS_സന്ദേശം_ON_ERR)) {
+		എങ്കിൽ (!quiet) {
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 				   ref_stash, oid_to_hex(w_commit));
 		}
-		return -1;
+		തിരികെ -1;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int store_stash(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ store_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		       ഘടന repository *repo UNUSED)
 {
-	int quiet = 0;
-	const char *stash_msg = NULL;
-	struct object_id obj;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	സ്ഥിരം അക്ഷരം *stash_സന്ദേശം = ശൂന്യ;
+	ഘടന object_id obj;
+	ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet")),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_സന്ദേശം, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
-	int ret;
+	പൂർണ്ണസംഖ്യ ret;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     git_stash_store_usage,
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	if (argc != 1) {
-		if (!quiet)
+	എങ്കിൽ (argc != 1) {
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("\"git stash store\" requires one "
 					     "<commit> argument"));
-		return -1;
+		തിരികെ -1;
 	}
 
-	if (repo_get_oid_with_flags(the_repository, argv[0], &obj,
+	എങ്കിൽ (repo_get_oid_with_flags(the_repository, argv[0], &obj,
 				    quiet ? GET_OID_QUIETLY : 0)) {
-		if (!quiet)
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("Cannot update %s with %s"),
 					     ref_stash, argv[0]);
 		ret = -1;
-		goto out;
+		പോകുക out;
 	}
 
-	ret = do_store_stash(&obj, stash_msg, quiet);
+	ret = do_store_stash(&obj, stash_സന്ദേശം, quiet);
 
 out:
-	return ret;
+	തിരികെ ret;
 }
 
-static void add_pathspecs(struct strvec *args,
-			  const struct pathspec *ps) {
-	int i;
+സ്ഥിതം ശൂന്യം add_pathspecs(ഘടന strvec *args,
+			  സ്ഥിരം ഘടന pathspec *ps) {
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < ps->nr; i++)
-		strvec_push(args, ps->items[i].original);
+	വേണ്ടി (i = 0; i < ps->nr; i++)
+		strvec_തള്ളുക(args, ps->ഇനങ്ങൾ[i].original);
 }
 
 /*
@@ -1164,19 +1164,19 @@ static void add_pathspecs(struct strvec *args,
  * = 0 if there are not any untracked files
  * > 0 if there are untracked files
  */
-static int get_untracked_files(const struct pathspec *ps, int include_untracked,
-			       struct strbuf *untracked_files)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_untracked_files(സ്ഥിരം ഘടന pathspec *ps, പൂർണ്ണസംഖ്യ include_untracked,
+			       ഘടന strbuf *untracked_files)
 {
-	int i;
-	int found = 0;
-	struct dir_struct dir = DIR_INIT;
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ found = 0;
+	ഘടന dir_struct dir = DIR_INIT;
 
-	if (include_untracked != INCLUDE_ALL_FILES)
+	എങ്കിൽ (include_untracked != INCLUDE_ALL_FILES)
 		setup_standard_excludes(&dir);
 
 	fill_directory(&dir, the_repository->index, ps);
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
+	വേണ്ടി (i = 0; i < dir.nr; i++) {
+		ഘടന dir_entry *ent = dir.entries[i];
 		found++;
 		strbuf_addstr(untracked_files, ent->name);
 		/* NUL-terminate: will be fed to update-index -z */
@@ -1184,7 +1184,7 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
 	}
 
 	dir_clear(&dir);
-	return found;
+	തിരികെ found;
 }
 
 /*
@@ -1194,20 +1194,20 @@ static int get_untracked_files(const struct pathspec *ps, int include_untracked,
  * = 0 if there are no changes.
  * > 0 if there are changes.
  */
-static int check_changes_tracked_files(const struct pathspec *ps)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_changes_tracked_files(സ്ഥിരം ഘടന pathspec *ps)
 {
-	struct rev_info rev;
-	struct object_id dummy;
-	int ret = 0;
+	ഘടന rev_info rev;
+	ഘടന object_id dummy;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
 	/* No initial commit. */
-	if (repo_get_oid(the_repository, "HEAD", &dummy))
-		return -1;
+	എങ്കിൽ (repo_get_oid(the_repository, "HEAD", &dummy))
+		തിരികെ -1;
 
-	if (repo_read_index(the_repository) < 0)
-		return -1;
+	എങ്കിൽ (repo_read_index(the_repository) < 0)
+		തിരികെ -1;
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, ശൂന്യ);
 	copy_pathspec(&rev.prune_data, ps);
 
 	rev.diffopt.flags.quick = 1;
@@ -1218,140 +1218,140 @@ static int check_changes_tracked_files(const struct pathspec *ps)
 	diff_setup_done(&rev.diffopt);
 
 	run_diff_index(&rev, DIFF_INDEX_CACHED);
-	if (diff_result_code(&rev)) {
+	എങ്കിൽ (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		പോകുക done;
 	}
 
 	run_diff_files(&rev, 0);
-	if (diff_result_code(&rev)) {
+	എങ്കിൽ (diff_result_code(&rev)) {
 		ret = 1;
-		goto done;
+		പോകുക done;
 	}
 
 done:
 	release_revisions(&rev);
-	return ret;
+	തിരികെ ret;
 }
 
 /*
  * The function will fill `untracked_files` with the names of untracked files
  * It will return 1 if there were any changes and 0 if there were not.
  */
-static int check_changes(const struct pathspec *ps, int include_untracked,
-			 struct strbuf *untracked_files)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_changes(സ്ഥിരം ഘടന pathspec *ps, പൂർണ്ണസംഖ്യ include_untracked,
+			 ഘടന strbuf *untracked_files)
 {
-	int ret = 0;
-	if (check_changes_tracked_files(ps))
+	പൂർണ്ണസംഖ്യ ret = 0;
+	എങ്കിൽ (check_changes_tracked_files(ps))
 		ret = 1;
 
-	if (include_untracked && get_untracked_files(ps, include_untracked,
+	എങ്കിൽ (include_untracked && get_untracked_files(ps, include_untracked,
 						     untracked_files))
 		ret = 1;
 
-	return ret;
+	തിരികെ ret;
 }
 
-static int save_untracked_files(struct stash_info *info, struct strbuf *msg,
-				struct strbuf *files)
+സ്ഥിതം പൂർണ്ണസംഖ്യ save_untracked_files(ഘടന stash_info *info, ഘടന strbuf *സന്ദേശം,
+				ഘടന strbuf *files)
 {
-	int ret = 0;
-	struct strbuf untracked_msg = STRBUF_INIT;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന strbuf untracked_സന്ദേശം = STRBUF_INIT;
+	ഘടന child_process cp_upd_index = CHILD_PROCESS_INIT;
+	ഘടന index_state istate = INDEX_STATE_INIT(the_repository);
 
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index", "-z", "--add",
-		     "--remove", "--stdin", NULL);
+		     "--remove", "--stdin", ശൂന്യ);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 			 stash_index_path.buf);
 
-	strbuf_addf(&untracked_msg, "untracked files on %s\n", msg->buf);
-	if (pipe_command(&cp_upd_index, files->buf, files->len, NULL, 0,
-			 NULL, 0)) {
+	strbuf_addf(&untracked_സന്ദേശം, "untracked files on %s\n", സന്ദേശം->buf);
+	എങ്കിൽ (pipe_command(&cp_upd_index, files->buf, files->len, ശൂന്യ, 0,
+			 ശൂന്യ, 0)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (write_index_as_tree(&info->u_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	എങ്കിൽ (write_index_as_വൃക്ഷം(&info->u_വൃക്ഷം, &istate, stash_index_path.buf, 0,
+				ശൂന്യ)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (commit_tree(untracked_msg.buf, untracked_msg.len,
-			&info->u_tree, NULL, &info->u_commit, NULL, NULL)) {
+	എങ്കിൽ (commit_വൃക്ഷം(untracked_സന്ദേശം.buf, untracked_സന്ദേശം.len,
+			&info->u_വൃക്ഷം, ശൂന്യ, &info->u_commit, ശൂന്യ, ശൂന്യ)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 done:
 	release_index(&istate);
-	strbuf_release(&untracked_msg);
+	strbuf_release(&untracked_സന്ദേശം);
 	remove_path(stash_index_path.buf);
-	return ret;
+	തിരികെ ret;
 }
 
-static int stash_staged(struct stash_info *info, struct strbuf *out_patch,
-			int quiet)
+സ്ഥിതം പൂർണ്ണസംഖ്യ stash_staged(ഘടന stash_info *info, ഘടന strbuf *out_patch,
+			പൂർണ്ണസംഖ്യ quiet)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന child_process cp_diff_വൃക്ഷം = CHILD_PROCESS_INIT;
+	ഘടന index_state istate = INDEX_STATE_INIT(the_repository);
 
-	if (write_index_as_tree(&info->w_tree, &istate, the_repository->index_file,
-				0, NULL)) {
+	എങ്കിൽ (write_index_as_വൃക്ഷം(&info->w_വൃക്ഷം, &istate, the_repository->index_file,
+				0, ശൂന്യ)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "--binary",
+	cp_diff_വൃക്ഷം.git_cmd = 1;
+	strvec_pushl(&cp_diff_വൃക്ഷം.args, "diff-tree", "-p", "--binary",
 		     "--no-color",
-		     "-U1", "HEAD", oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     "-U1", "HEAD", oid_to_hex(&info->w_വൃക്ഷം), "--", ശൂന്യ);
+	എങ്കിൽ (pipe_command(&cp_diff_വൃക്ഷം, ശൂന്യ, 0, out_patch, 0, ശൂന്യ, 0)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	എങ്കിൽ (!out_patch->len) {
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("No staged changes"));
 		ret = 1;
 	}
 
 done:
 	release_index(&istate);
-	return ret;
+	തിരികെ ret;
 }
 
-static int stash_patch(struct stash_info *info, const struct pathspec *ps,
-		       struct strbuf *out_patch, int quiet,
-		       struct interactive_options *interactive_opts)
+സ്ഥിതം പൂർണ്ണസംഖ്യ stash_patch(ഘടന stash_info *info, സ്ഥിരം ഘടന pathspec *ps,
+		       ഘടന strbuf *out_patch, പൂർണ്ണസംഖ്യ quiet,
+		       ഘടന interactive_options *interactive_opts)
 {
-	int ret = 0;
-	struct child_process cp_diff_tree = CHILD_PROCESS_INIT;
-	struct commit *head_commit;
-	const struct object_id *head_tree;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
-	char *old_index_env = NULL, *old_repo_index_file;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന child_process cp_diff_വൃക്ഷം = CHILD_PROCESS_INIT;
+	ഘടന commit *head_commit;
+	സ്ഥിരം ഘടന object_id *head_വൃക്ഷം;
+	ഘടന index_state istate = INDEX_STATE_INIT(the_repository);
+	അക്ഷരം *old_index_env = ശൂന്യ, *old_repo_index_file;
 
 	remove_path(stash_index_path.buf);
 
 	head_commit = lookup_commit(the_repository, &info->b_commit);
-	if (!head_commit || repo_parse_commit(the_repository, head_commit)) {
+	എങ്കിൽ (!head_commit || repo_parse_commit(the_repository, head_commit)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
-	head_tree = get_commit_tree_oid(head_commit);
-	if (!head_tree) {
+	head_വൃക്ഷം = get_commit_വൃക്ഷം_oid(head_commit);
+	എങ്കിൽ (!head_വൃക്ഷം) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (create_index_from_tree(head_tree, stash_index_path.buf)) {
+	എങ്കിൽ (create_index_from_വൃക്ഷം(head_വൃക്ഷം, stash_index_path.buf)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 	/* Find out what the user wants. */
@@ -1360,33 +1360,33 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 	old_index_env = xstrdup_or_null(getenv(INDEX_ENVIRONMENT));
 	setenv(INDEX_ENVIRONMENT, the_repository->index_file, 1);
 
-	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, NULL, ps, 0);
+	ret = !!run_add_p(the_repository, ADD_P_STASH, interactive_opts, ശൂന്യ, ps, 0);
 
 	the_repository->index_file = old_repo_index_file;
-	if (old_index_env && *old_index_env)
+	എങ്കിൽ (old_index_env && *old_index_env)
 		setenv(INDEX_ENVIRONMENT, old_index_env, 1);
-	else
+	അല്ലെങ്കിൽ
 		unsetenv(INDEX_ENVIRONMENT);
 	FREE_AND_NULL(old_index_env);
 
 	/* State of the working tree. */
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	എങ്കിൽ (write_index_as_വൃക്ഷം(&info->w_വൃക്ഷം, &istate, stash_index_path.buf, 0,
+				ശൂന്യ)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	cp_diff_tree.git_cmd = 1;
-	strvec_pushl(&cp_diff_tree.args, "diff-tree", "-p", "-U1", "HEAD",
+	cp_diff_വൃക്ഷം.git_cmd = 1;
+	strvec_pushl(&cp_diff_വൃക്ഷം.args, "diff-tree", "-p", "-U1", "HEAD",
 		     "--no-color",
-		     oid_to_hex(&info->w_tree), "--", NULL);
-	if (pipe_command(&cp_diff_tree, NULL, 0, out_patch, 0, NULL, 0)) {
+		     oid_to_hex(&info->w_വൃക്ഷം), "--", ശൂന്യ);
+	എങ്കിൽ (pipe_command(&cp_diff_വൃക്ഷം, ശൂന്യ, 0, out_patch, 0, ശൂന്യ, 0)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (!out_patch->len) {
-		if (!quiet)
+	എങ്കിൽ (!out_patch->len) {
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("No changes selected"));
 		ret = 1;
 	}
@@ -1394,34 +1394,34 @@ static int stash_patch(struct stash_info *info, const struct pathspec *ps,
 done:
 	release_index(&istate);
 	remove_path(stash_index_path.buf);
-	return ret;
+	തിരികെ ret;
 }
 
-static int stash_working_tree(struct stash_info *info, const struct pathspec *ps)
+സ്ഥിതം പൂർണ്ണസംഖ്യ stash_working_വൃക്ഷം(ഘടന stash_info *info, സ്ഥിരം ഘടന pathspec *ps)
 {
-	int ret = 0;
-	struct rev_info rev;
-	struct child_process cp_upd_index = CHILD_PROCESS_INIT;
-	struct strbuf diff_output = STRBUF_INIT;
-	struct index_state istate = INDEX_STATE_INIT(the_repository);
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന rev_info rev;
+	ഘടന child_process cp_upd_index = CHILD_PROCESS_INIT;
+	ഘടന strbuf diff_output = STRBUF_INIT;
+	ഘടന index_state istate = INDEX_STATE_INIT(the_repository);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, ശൂന്യ);
 	copy_pathspec(&rev.prune_data, ps);
 
 	set_alternate_index_output(stash_index_path.buf);
-	if (reset_tree(&info->i_tree, 0, 0)) {
+	എങ്കിൽ (reset_വൃക്ഷം(&info->i_വൃക്ഷം, 0, 0)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
-	set_alternate_index_output(NULL);
+	set_alternate_index_output(ശൂന്യ);
 
 	rev.diffopt.output_format = DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = add_diff_to_buf;
 	rev.diffopt.format_callback_data = &diff_output;
 
-	if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	എങ്കിൽ (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 	add_pending_object(&rev, parse_object(the_repository, &info->b_commit),
@@ -1431,20 +1431,20 @@ static int stash_working_tree(struct stash_info *info, const struct pathspec *ps
 	cp_upd_index.git_cmd = 1;
 	strvec_pushl(&cp_upd_index.args, "update-index",
 		     "--ignore-skip-worktree-entries",
-		     "-z", "--add", "--remove", "--stdin", NULL);
+		     "-z", "--add", "--remove", "--stdin", ശൂന്യ);
 	strvec_pushf(&cp_upd_index.env, "GIT_INDEX_FILE=%s",
 		     stash_index_path.buf);
 
-	if (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
-			 NULL, 0, NULL, 0)) {
+	എങ്കിൽ (pipe_command(&cp_upd_index, diff_output.buf, diff_output.len,
+			 ശൂന്യ, 0, ശൂന്യ, 0)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (write_index_as_tree(&info->w_tree, &istate, stash_index_path.buf, 0,
-				NULL)) {
+	എങ്കിൽ (write_index_as_വൃക്ഷം(&info->w_വൃക്ഷം, &istate, stash_index_path.buf, 0,
+				ശൂന്യ)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 done:
@@ -1452,335 +1452,335 @@ done:
 	release_revisions(&rev);
 	strbuf_release(&diff_output);
 	remove_path(stash_index_path.buf);
-	return ret;
+	തിരികെ ret;
 }
 
-static int do_create_stash(const struct pathspec *ps, struct strbuf *stash_msg_buf,
-			   int include_untracked, int patch_mode,
-			   struct interactive_options *interactive_opts,
-			   int only_staged, struct stash_info *info, struct strbuf *patch,
-			   int quiet)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_create_stash(സ്ഥിരം ഘടന pathspec *ps, ഘടന strbuf *stash_സന്ദേശം_buf,
+			   പൂർണ്ണസംഖ്യ include_untracked, പൂർണ്ണസംഖ്യ patch_mode,
+			   ഘടന interactive_options *interactive_opts,
+			   പൂർണ്ണസംഖ്യ only_staged, ഘടന stash_info *info, ഘടന strbuf *patch,
+			   പൂർണ്ണസംഖ്യ quiet)
 {
-	int ret = 0;
-	int flags = 0;
-	int untracked_commit_option = 0;
-	const char *head_short_sha1 = NULL;
-	const char *branch_ref = NULL;
-	const char *branch_name = "(no branch)";
-	char *branch_name_buf = NULL;
-	struct commit *head_commit = NULL;
-	struct commit_list *parents = NULL;
-	struct strbuf msg = STRBUF_INIT;
-	struct strbuf commit_tree_label = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	പൂർണ്ണസംഖ്യ flags = 0;
+	പൂർണ്ണസംഖ്യ untracked_commit_option = 0;
+	സ്ഥിരം അക്ഷരം *head_short_sha1 = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *branch_ref = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *branch_name = "(no branch)";
+	അക്ഷരം *branch_name_buf = ശൂന്യ;
+	ഘടന commit *head_commit = ശൂന്യ;
+	ഘടന commit_list *parents = ശൂന്യ;
+	ഘടന strbuf സന്ദേശം = STRBUF_INIT;
+	ഘടന strbuf commit_വൃക്ഷം_label = STRBUF_INIT;
+	ഘടന strbuf untracked_files = STRBUF_INIT;
 
 	prepare_fallback_ident("git stash", "git@stash");
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL) < 0) {
+	repo_read_index_preload(the_repository, ശൂന്യ, 0);
+	എങ്കിൽ (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 ശൂന്യ, ശൂന്യ, ശൂന്യ) < 0) {
 		ret = error(_("could not write index"));
-		goto done;
+		പോകുക done;
 	}
 
-	if (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
-		if (!quiet)
+	എങ്കിൽ (repo_get_oid(the_repository, "HEAD", &info->b_commit)) {
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("You do not have "
 					     "the initial commit yet"));
 		ret = -1;
-		goto done;
-	} else {
+		പോകുക done;
+	} അല്ലെങ്കിൽ {
 		head_commit = lookup_commit(the_repository, &info->b_commit);
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
+	എങ്കിൽ (!check_changes(ps, include_untracked, &untracked_files)) {
 		ret = 1;
-		goto done;
+		പോകുക done;
 	}
 
 	branch_ref = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-					     "HEAD", 0, NULL, &flags);
+					     "HEAD", 0, ശൂന്യ, &flags);
 
-	if (flags & REF_ISSYMREF) {
-		if (skip_prefix(branch_ref, "refs/heads/", &branch_name))
+	എങ്കിൽ (flags & REF_ISSYMREF) {
+		എങ്കിൽ (skip_prefix(branch_ref, "refs/heads/", &branch_name))
 			branch_name = branch_name_buf = xstrdup(branch_name);
 	}
 
 	head_short_sha1 = repo_find_unique_abbrev(the_repository,
 						  &head_commit->object.oid,
 						  DEFAULT_ABBREV);
-	strbuf_addf(&msg, "%s: %s ", branch_name, head_short_sha1);
-	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &msg);
+	strbuf_addf(&സന്ദേശം, "%s: %s ", branch_name, head_short_sha1);
+	pp_commit_easy(CMIT_FMT_ONELINE, head_commit, &സന്ദേശം);
 
-	strbuf_addf(&commit_tree_label, "index on %s\n", msg.buf);
-	commit_list_insert(head_commit, &parents);
-	if (write_index_as_tree(&info->i_tree, the_repository->index,
-				repo_get_index_file(the_repository), 0, NULL) ||
-	    commit_tree(commit_tree_label.buf, commit_tree_label.len,
-			&info->i_tree, parents, &info->i_commit, NULL, NULL)) {
-		if (!quiet)
+	strbuf_addf(&commit_വൃക്ഷം_label, "index on %s\n", സന്ദേശം.buf);
+	commit_list_തിരുകുക(head_commit, &parents);
+	എങ്കിൽ (write_index_as_വൃക്ഷം(&info->i_വൃക്ഷം, the_repository->index,
+				repo_get_index_file(the_repository), 0, ശൂന്യ) ||
+	    commit_വൃക്ഷം(commit_വൃക്ഷം_label.buf, commit_വൃക്ഷം_label.len,
+			&info->i_വൃക്ഷം, parents, &info->i_commit, ശൂന്യ, ശൂന്യ)) {
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current "
 					     "index state"));
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 	commit_list_free(parents);
-	parents = NULL;
+	parents = ശൂന്യ;
 
-	if (include_untracked) {
-		if (save_untracked_files(info, &msg, &untracked_files)) {
-			if (!quiet)
+	എങ്കിൽ (include_untracked) {
+		എങ്കിൽ (save_untracked_files(info, &സന്ദേശം, &untracked_files)) {
+			എങ്കിൽ (!quiet)
 				fprintf_ln(stderr, _("Cannot save "
 						     "the untracked files"));
 			ret = -1;
-			goto done;
+			പോകുക done;
 		}
 		untracked_commit_option = 1;
 	}
-	if (patch_mode) {
+	എങ്കിൽ (patch_mode) {
 		ret = stash_patch(info, ps, patch, quiet, interactive_opts);
-		if (ret < 0) {
-			if (!quiet)
+		എങ്കിൽ (ret < 0) {
+			എങ്കിൽ (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			പോകുക done;
+		} അല്ലെങ്കിൽ എങ്കിൽ (ret > 0) {
+			പോകുക done;
 		}
-	} else if (only_staged) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (only_staged) {
 		ret = stash_staged(info, patch, quiet);
-		if (ret < 0) {
-			if (!quiet)
+		എങ്കിൽ (ret < 0) {
+			എങ്കിൽ (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "staged state"));
-			goto done;
-		} else if (ret > 0) {
-			goto done;
+			പോകുക done;
+		} അല്ലെങ്കിൽ എങ്കിൽ (ret > 0) {
+			പോകുക done;
 		}
-	} else {
-		if (stash_working_tree(info, ps)) {
-			if (!quiet)
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (stash_working_വൃക്ഷം(info, ps)) {
+			എങ്കിൽ (!quiet)
 				fprintf_ln(stderr, _("Cannot save the current "
 						     "worktree state"));
 			ret = -1;
-			goto done;
+			പോകുക done;
 		}
 	}
 
-	if (!stash_msg_buf->len)
-		strbuf_addf(stash_msg_buf, "WIP on %s", msg.buf);
-	else
-		strbuf_insertf(stash_msg_buf, 0, "On %s: ", branch_name);
+	എങ്കിൽ (!stash_സന്ദേശം_buf->len)
+		strbuf_addf(stash_സന്ദേശം_buf, "WIP on %s", സന്ദേശം.buf);
+	അല്ലെങ്കിൽ
+		strbuf_insertf(stash_സന്ദേശം_buf, 0, "On %s: ", branch_name);
 
-	if (untracked_commit_option)
-		commit_list_insert(lookup_commit(the_repository,
+	എങ്കിൽ (untracked_commit_option)
+		commit_list_തിരുകുക(lookup_commit(the_repository,
 						 &info->u_commit),
 				   &parents);
-	commit_list_insert(lookup_commit(the_repository, &info->i_commit),
+	commit_list_തിരുകുക(lookup_commit(the_repository, &info->i_commit),
 			   &parents);
-	commit_list_insert(head_commit, &parents);
+	commit_list_തിരുകുക(head_commit, &parents);
 
-	if (commit_tree(stash_msg_buf->buf, stash_msg_buf->len, &info->w_tree,
-			parents, &info->w_commit, NULL, NULL)) {
-		if (!quiet)
+	എങ്കിൽ (commit_വൃക്ഷം(stash_സന്ദേശം_buf->buf, stash_സന്ദേശം_buf->len, &info->w_വൃക്ഷം,
+			parents, &info->w_commit, ശൂന്യ, ശൂന്യ)) {
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("Cannot record "
 					     "working tree state"));
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 done:
-	strbuf_release(&commit_tree_label);
-	strbuf_release(&msg);
+	strbuf_release(&commit_വൃക്ഷം_label);
+	strbuf_release(&സന്ദേശം);
 	strbuf_release(&untracked_files);
 	commit_list_free(parents);
-	free(branch_name_buf);
-	return ret;
+	സ്വതന്ത്രം(branch_name_buf);
+	തിരികെ ret;
 }
 
-static int create_stash(int argc, const char **argv, const char *prefix UNUSED,
-			struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ create_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix UNUSED,
+			ഘടന repository *repo UNUSED)
 {
-	int ret;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct stash_info info = STASH_INFO_INIT;
-	struct pathspec ps;
+	പൂർണ്ണസംഖ്യ ret;
+	ഘടന strbuf stash_സന്ദേശം_buf = STRBUF_INIT;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന pathspec ps;
 
 	/* Starting with argv[1], since argv[0] is "create" */
-	strbuf_join_argv(&stash_msg_buf, argc - 1, ++argv, ' ');
+	strbuf_join_argv(&stash_സന്ദേശം_buf, argc - 1, ++argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
-	if (!check_changes_tracked_files(&ps))
-		return 0;
+	memset(&ps, 0, വലുപ്പം(ps));
+	എങ്കിൽ (!check_changes_tracked_files(&ps))
+		തിരികെ 0;
 
-	ret = do_create_stash(&ps, &stash_msg_buf, 0, 0, NULL, 0, &info,
-			      NULL, 0);
-	if (!ret)
+	ret = do_create_stash(&ps, &stash_സന്ദേശം_buf, 0, 0, ശൂന്യ, 0, &info,
+			      ശൂന്യ, 0);
+	എങ്കിൽ (!ret)
 		printf_ln("%s", oid_to_hex(&info.w_commit));
 
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_സന്ദേശം_buf);
+	തിരികെ ret;
 }
 
-static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int quiet,
-			 int keep_index, int patch_mode,
-			 struct interactive_options *interactive_opts,
-			 int include_untracked, int only_staged)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_തള്ളുക_stash(സ്ഥിരം ഘടന pathspec *ps, സ്ഥിരം അക്ഷരം *stash_സന്ദേശം, പൂർണ്ണസംഖ്യ quiet,
+			 പൂർണ്ണസംഖ്യ keep_index, പൂർണ്ണസംഖ്യ patch_mode,
+			 ഘടന interactive_options *interactive_opts,
+			 പൂർണ്ണസംഖ്യ include_untracked, പൂർണ്ണസംഖ്യ only_staged)
 {
-	int ret = 0;
-	struct stash_info info = STASH_INFO_INIT;
-	struct strbuf patch = STRBUF_INIT;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct strbuf untracked_files = STRBUF_INIT;
-	struct strbuf out = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന stash_info info = STASH_INFO_INIT;
+	ഘടന strbuf patch = STRBUF_INIT;
+	ഘടന strbuf stash_സന്ദേശം_buf = STRBUF_INIT;
+	ഘടന strbuf untracked_files = STRBUF_INIT;
+	ഘടന strbuf out = STRBUF_INIT;
 
-	if (patch_mode && keep_index == -1)
+	എങ്കിൽ (patch_mode && keep_index == -1)
 		keep_index = 1;
 
-	if (patch_mode && include_untracked) {
+	എങ്കിൽ (patch_mode && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --patch and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
 	/* --patch overrides --staged */
-	if (patch_mode)
+	എങ്കിൽ (patch_mode)
 		only_staged = 0;
 
-	if (only_staged && include_untracked) {
+	എങ്കിൽ (only_staged && include_untracked) {
 		fprintf_ln(stderr, _("Can't use --staged and --include-untracked"
 				     " or --all at the same time"));
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	repo_read_index_preload(the_repository, NULL, 0);
-	if (!include_untracked && ps->nr) {
-		char *ps_matched = xcalloc(ps->nr, 1);
+	repo_read_index_preload(the_repository, ശൂന്യ, 0);
+	എങ്കിൽ (!include_untracked && ps->nr) {
+		അക്ഷരം *ps_matched = xcalloc(ps->nr, 1);
 
-		if (pathspec_needs_expanded_index(the_repository->index, ps))
+		എങ്കിൽ (pathspec_needs_expanded_index(the_repository->index, ps))
 			ensure_full_index(the_repository->index);
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++)
+		വേണ്ടി (size_t i = 0; i < the_repository->index->cache_nr; i++)
 			ce_path_match(the_repository->index, the_repository->index->cache[i], ps,
 				      ps_matched);
 
-		if (report_path_error(ps_matched, ps)) {
+		എങ്കിൽ (report_path_error(ps_matched, ps)) {
 			fprintf_ln(stderr, _("Did you forget to 'git add'?"));
 			ret = -1;
-			free(ps_matched);
-			goto done;
+			സ്വതന്ത്രം(ps_matched);
+			പോകുക done;
 		}
-		free(ps_matched);
+		സ്വതന്ത്രം(ps_matched);
 	}
 
-	if (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
-					 NULL, NULL, NULL)) {
+	എങ്കിൽ (repo_refresh_and_write_index(the_repository, REFRESH_QUIET, 0, 0,
+					 ശൂന്യ, ശൂന്യ, ശൂന്യ)) {
 		ret = error(_("could not write index"));
-		goto done;
+		പോകുക done;
 	}
 
-	if (!check_changes(ps, include_untracked, &untracked_files)) {
-		if (!quiet)
+	എങ്കിൽ (!check_changes(ps, include_untracked, &untracked_files)) {
+		എങ്കിൽ (!quiet)
 			printf_ln(_("No local changes to save"));
-		goto done;
+		പോകുക done;
 	}
 
-	if (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
+	എങ്കിൽ (!refs_reflog_exists(get_main_ref_store(the_repository), ref_stash) && do_clear_stash()) {
 		ret = -1;
-		if (!quiet)
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("Cannot initialize stash"));
-		goto done;
+		പോകുക done;
 	}
 
-	if (stash_msg)
-		strbuf_addstr(&stash_msg_buf, stash_msg);
-	if (do_create_stash(ps, &stash_msg_buf, include_untracked, patch_mode,
+	എങ്കിൽ (stash_സന്ദേശം)
+		strbuf_addstr(&stash_സന്ദേശം_buf, stash_സന്ദേശം);
+	എങ്കിൽ (do_create_stash(ps, &stash_സന്ദേശം_buf, include_untracked, patch_mode,
 			    interactive_opts, only_staged, &info, &patch, quiet)) {
 		ret = -1;
-		goto done;
+		പോകുക done;
 	}
 
-	if (do_store_stash(&info.w_commit, stash_msg_buf.buf, 1)) {
+	എങ്കിൽ (do_store_stash(&info.w_commit, stash_സന്ദേശം_buf.buf, 1)) {
 		ret = -1;
-		if (!quiet)
+		എങ്കിൽ (!quiet)
 			fprintf_ln(stderr, _("Cannot save the current status"));
-		goto done;
+		പോകുക done;
 	}
 
-	if (!quiet)
+	എങ്കിൽ (!quiet)
 		printf_ln(_("Saved working directory and index state %s"),
-			  stash_msg_buf.buf);
+			  stash_സന്ദേശം_buf.buf);
 
-	if (!(patch_mode || only_staged)) {
-		if (include_untracked && !ps->nr) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	എങ്കിൽ (!(patch_mode || only_staged)) {
+		എങ്കിൽ (include_untracked && !ps->nr) {
+			ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
-			if (startup_info->original_cwd) {
+			എങ്കിൽ (startup_info->original_cwd) {
 				cp.dir = startup_info->original_cwd;
 				strvec_pushf(&cp.env, "%s=%s",
-					     GIT_WORK_TREE_ENVIRONMENT,
+					     GIT_WORK_വൃക്ഷം_ENVIRONMENT,
 					     the_repository->worktree);
 			}
 			strvec_pushl(&cp.args, "clean", "--force",
-				     "--quiet", "-d", ":/", NULL);
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp.args, "-x");
-			if (run_command(&cp)) {
+				     "--quiet", "-d", ":/", ശൂന്യ);
+			എങ്കിൽ (include_untracked == INCLUDE_ALL_FILES)
+				strvec_തള്ളുക(&cp.args, "-x");
+			എങ്കിൽ (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
 		}
 		discard_index(the_repository->index);
-		if (ps->nr) {
-			struct child_process cp_add = CHILD_PROCESS_INIT;
-			struct child_process cp_diff = CHILD_PROCESS_INIT;
-			struct child_process cp_apply = CHILD_PROCESS_INIT;
+		എങ്കിൽ (ps->nr) {
+			ഘടന child_process cp_add = CHILD_PROCESS_INIT;
+			ഘടന child_process cp_diff = CHILD_PROCESS_INIT;
+			ഘടന child_process cp_apply = CHILD_PROCESS_INIT;
 
 			cp_add.git_cmd = 1;
-			strvec_push(&cp_add.args, "add");
-			if (!include_untracked)
-				strvec_push(&cp_add.args, "-u");
-			if (include_untracked == INCLUDE_ALL_FILES)
-				strvec_push(&cp_add.args, "--force");
-			strvec_push(&cp_add.args, "--");
+			strvec_തള്ളുക(&cp_add.args, "add");
+			എങ്കിൽ (!include_untracked)
+				strvec_തള്ളുക(&cp_add.args, "-u");
+			എങ്കിൽ (include_untracked == INCLUDE_ALL_FILES)
+				strvec_തള്ളുക(&cp_add.args, "--force");
+			strvec_തള്ളുക(&cp_add.args, "--");
 			add_pathspecs(&cp_add.args, ps);
-			if (run_command(&cp_add)) {
+			എങ്കിൽ (run_command(&cp_add)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
 
 			cp_diff.git_cmd = 1;
 			strvec_pushl(&cp_diff.args, "diff-index", "-p",
 				     "--no-color",
 				     "--cached", "--binary", "HEAD", "--",
-				     NULL);
+				     ശൂന്യ);
 			add_pathspecs(&cp_diff.args, ps);
-			if (pipe_command(&cp_diff, NULL, 0, &out, 0, NULL, 0)) {
+			എങ്കിൽ (pipe_command(&cp_diff, ശൂന്യ, 0, &out, 0, ശൂന്യ, 0)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
 
 			cp_apply.git_cmd = 1;
 			strvec_pushl(&cp_apply.args, "apply", "--index",
-				     "-R", NULL);
-			if (pipe_command(&cp_apply, out.buf, out.len, NULL, 0,
-					 NULL, 0)) {
+				     "-R", ശൂന്യ);
+			എങ്കിൽ (pipe_command(&cp_apply, out.buf, out.len, ശൂന്യ, 0,
+					 ശൂന്യ, 0)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
-		} else {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		} അല്ലെങ്കിൽ {
+			ഘടന child_process cp = CHILD_PROCESS_INIT;
 			cp.git_cmd = 1;
 			/* BUG: this nukes untracked files in the way */
 			strvec_pushl(&cp.args, "reset", "--hard", "-q",
-				     "--no-recurse-submodules", NULL);
-			if (run_command(&cp)) {
+				     "--no-recurse-submodules", ശൂന്യ);
+			എങ്കിൽ (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
 		}
 
@@ -1804,76 +1804,76 @@ static int do_push_stash(const struct pathspec *ps, const char *stash_msg, int q
 		 * because running it on an empty tree will cause it to fail
 		 * due to the pathspec not matching anything.
 		 */
-		if (keep_index == 1 && !is_null_oid(&info.i_tree) &&
-		    !is_empty_tree_oid(&info.i_tree, the_repository->hash_algo)) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		എങ്കിൽ (keep_index == 1 && !is_null_oid(&info.i_വൃക്ഷം) &&
+		    !is_empty_വൃക്ഷം_oid(&info.i_വൃക്ഷം, the_repository->hash_algo)) {
+			ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "checkout", "--no-overlay",
-				     oid_to_hex(&info.i_tree), "--", NULL);
-			if (!ps->nr)
-				strvec_push(&cp.args, ":/");
-			else
+				     oid_to_hex(&info.i_വൃക്ഷം), "--", ശൂന്യ);
+			എങ്കിൽ (!ps->nr)
+				strvec_തള്ളുക(&cp.args, ":/");
+			അല്ലെങ്കിൽ
 				add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			എങ്കിൽ (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
 		}
-		goto done;
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
+		പോകുക done;
+	} അല്ലെങ്കിൽ {
+		ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "apply", "-R", NULL);
+		strvec_pushl(&cp.args, "apply", "-R", ശൂന്യ);
 
-		if (pipe_command(&cp, patch.buf, patch.len, NULL, 0, NULL, 0)) {
-			if (!quiet)
+		എങ്കിൽ (pipe_command(&cp, patch.buf, patch.len, ശൂന്യ, 0, ശൂന്യ, 0)) {
+			എങ്കിൽ (!quiet)
 				fprintf_ln(stderr, _("Cannot remove "
 						     "worktree changes"));
 			ret = -1;
-			goto done;
+			പോകുക done;
 		}
 
-		if (keep_index < 1) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+		എങ്കിൽ (keep_index < 1) {
+			ഘടന child_process cp = CHILD_PROCESS_INIT;
 
 			cp.git_cmd = 1;
 			strvec_pushl(&cp.args, "reset", "-q", "--refresh", "--",
-				     NULL);
+				     ശൂന്യ);
 			add_pathspecs(&cp.args, ps);
-			if (run_command(&cp)) {
+			എങ്കിൽ (run_command(&cp)) {
 				ret = -1;
-				goto done;
+				പോകുക done;
 			}
 		}
-		goto done;
+		പോകുക done;
 	}
 
 done:
 	strbuf_release(&patch);
 	strbuf_release(&out);
 	free_stash_info(&info);
-	strbuf_release(&stash_msg_buf);
+	strbuf_release(&stash_സന്ദേശം_buf);
 	strbuf_release(&untracked_files);
-	return ret;
+	തിരികെ ret;
 }
 
-static int push_stash(int argc, const char **argv, const char *prefix,
-		      int push_assumed)
+സ്ഥിതം പൂർണ്ണസംഖ്യ തള്ളുക_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		      പൂർണ്ണസംഖ്യ തള്ളുക_assumed)
 {
-	int force_assume = 0;
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int pathspec_file_nul = 0;
-	const char *stash_msg = NULL;
-	char *pathspec_from_file = NULL;
-	struct pathspec ps;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ force_assume = 0;
+	പൂർണ്ണസംഖ്യ keep_index = -1;
+	പൂർണ്ണസംഖ്യ only_staged = 0;
+	പൂർണ്ണസംഖ്യ patch_mode = 0;
+	പൂർണ്ണസംഖ്യ include_untracked = 0;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ pathspec_file_nul = 0;
+	സ്ഥിരം അക്ഷരം *stash_സന്ദേശം = ശൂന്യ;
+	അക്ഷരം *pathspec_from_file = ശൂന്യ;
+	ഘടന pathspec ps;
+	ഘടന interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	ഘടന option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1889,31 +1889,31 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 			 N_("include untracked files in stash")),
 		OPT_SET_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, N_("message"),
+		OPT_STRING('m', "message", &stash_സന്ദേശം, N_("message"),
 			   N_("stash message")),
 		OPT_PATHSPEC_FROM_FILE(&pathspec_from_file),
 		OPT_PATHSPEC_FILE_NUL(&pathspec_file_nul),
 		OPT_END()
 	};
-	int ret;
+	പൂർണ്ണസംഖ്യ ret;
 
-	if (argc) {
-		int flags = PARSE_OPT_KEEP_DASHDASH;
+	എങ്കിൽ (argc) {
+		പൂർണ്ണസംഖ്യ flags = PARSE_OPT_KEEP_DASHDASH;
 
-		if (push_assumed)
+		എങ്കിൽ (തള്ളുക_assumed)
 			flags |= PARSE_OPT_STOP_AT_NON_OPTION;
 
 		argc = parse_options(argc, argv, prefix, options,
-				     push_assumed ? git_stash_usage :
-				     git_stash_push_usage, flags);
+				     തള്ളുക_assumed ? git_stash_usage :
+				     git_stash_തള്ളുക_usage, flags);
 		force_assume |= patch_mode;
 	}
 
-	if (argc) {
-		if (!strcmp(argv[0], "--")) {
+	എങ്കിൽ (argc) {
+		എങ്കിൽ (!strcmp(argv[0], "--")) {
 			argc--;
 			argv++;
-		} else if (push_assumed && !force_assume) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (തള്ളുക_assumed && !force_assume) {
 			die("subcommand wasn't specified; 'push' can't be assumed due to unexpected token '%s'",
 			    argv[0]);
 		}
@@ -1922,65 +1922,65 @@ static int push_stash(int argc, const char **argv, const char *prefix,
 	parse_pathspec(&ps, 0, PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	എങ്കിൽ (pathspec_from_file) {
+		എങ്കിൽ (patch_mode)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (only_staged)
+		എങ്കിൽ (only_staged)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--staged");
 
-		if (ps.nr)
+		എങ്കിൽ (ps.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&ps, 0,
 				    PATHSPEC_PREFER_FULL | PATHSPEC_PREFIX_ORIGIN,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	എങ്കിൽ (!patch_mode) {
+		എങ്കിൽ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		എങ്കിൽ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		എങ്കിൽ (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	if (interactive_opts.context < -1)
+	എങ്കിൽ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	എങ്കിൽ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index, patch_mode,
+	ret = do_തള്ളുക_stash(&ps, stash_സന്ദേശം, quiet, keep_index, patch_mode,
 			    &interactive_opts, include_untracked, only_staged);
 
 	clear_pathspec(&ps);
-	free(pathspec_from_file);
-	return ret;
+	സ്വതന്ത്രം(pathspec_from_file);
+	തിരികെ ret;
 }
 
-static int push_stash_unassumed(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ തള്ളുക_stash_unassumed(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+				ഘടന repository *repo UNUSED)
 {
-	return push_stash(argc, argv, prefix, 0);
+	തിരികെ തള്ളുക_stash(argc, argv, prefix, 0);
 }
 
-static int save_stash(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ save_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	int keep_index = -1;
-	int only_staged = 0;
-	int patch_mode = 0;
-	int include_untracked = 0;
-	int quiet = 0;
-	int ret = 0;
-	const char *stash_msg = NULL;
-	struct pathspec ps;
-	struct strbuf stash_msg_buf = STRBUF_INIT;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ keep_index = -1;
+	പൂർണ്ണസംഖ്യ only_staged = 0;
+	പൂർണ്ണസംഖ്യ patch_mode = 0;
+	പൂർണ്ണസംഖ്യ include_untracked = 0;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	സ്ഥിരം അക്ഷരം *stash_സന്ദേശം = ശൂന്യ;
+	ഘടന pathspec ps;
+	ഘടന strbuf stash_സന്ദേശം_buf = STRBUF_INIT;
+	ഘടന interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	ഘടന option options[] = {
 		OPT_BOOL('k', "keep-index", &keep_index,
 			 N_("keep index")),
 		OPT_BOOL('S', "staged", &only_staged,
@@ -1996,7 +1996,7 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			 N_("include untracked files in stash")),
 		OPT_SET_INT('a', "all", &include_untracked,
 			    N_("include ignore files"), INCLUDE_ALL_FILES),
-		OPT_STRING('m', "message", &stash_msg, "message",
+		OPT_STRING('m', "message", &stash_സന്ദേശം, "message",
 			   N_("stash message")),
 		OPT_END()
 	};
@@ -2005,132 +2005,132 @@ static int save_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_save_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc)
-		stash_msg = strbuf_join_argv(&stash_msg_buf, argc, argv, ' ');
+	എങ്കിൽ (argc)
+		stash_സന്ദേശം = strbuf_join_argv(&stash_സന്ദേശം_buf, argc, argv, ' ');
 
-	memset(&ps, 0, sizeof(ps));
+	memset(&ps, 0, വലുപ്പം(ps));
 
-	if (interactive_opts.context < -1)
+	എങ്കിൽ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	എങ്കിൽ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (!patch_mode) {
-		if (interactive_opts.context != -1)
+	എങ്കിൽ (!patch_mode) {
+		എങ്കിൽ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		എങ്കിൽ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		എങ്കിൽ (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
-	ret = do_push_stash(&ps, stash_msg, quiet, keep_index,
+	ret = do_തള്ളുക_stash(&ps, stash_സന്ദേശം, quiet, keep_index,
 			    patch_mode, &interactive_opts, include_untracked,
 			    only_staged);
 
-	strbuf_release(&stash_msg_buf);
-	return ret;
+	strbuf_release(&stash_സന്ദേശം_buf);
+	തിരികെ ret;
 }
 
-static int write_commit_with_parents(struct repository *r,
-				     struct object_id *out,
-				     const struct object_id *oid,
-				     struct commit_list *parents)
+സ്ഥിതം പൂർണ്ണസംഖ്യ write_commit_with_parents(ഘടന repository *r,
+				     ഘടന object_id *out,
+				     സ്ഥിരം ഘടന object_id *oid,
+				     ഘടന commit_list *parents)
 {
 	size_t author_len, committer_len;
-	struct commit *this;
-	const char *orig_author, *orig_committer;
-	char *author = NULL, *committer = NULL;
-	const char *buffer;
+	ഘടന commit *this;
+	സ്ഥിരം അക്ഷരം *orig_author, *orig_committer;
+	അക്ഷരം *author = ശൂന്യ, *committer = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *buffer;
 	unsigned long bufsize;
-	const char *p;
-	struct strbuf msg = STRBUF_INIT;
-	int ret = 0;
-	struct ident_split id;
+	സ്ഥിരം അക്ഷരം *p;
+	ഘടന strbuf സന്ദേശം = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	ഘടന ident_split id;
 
 	this = lookup_commit_reference(r, oid);
 	buffer = repo_get_commit_buffer(r, this, &bufsize);
 	orig_author = find_commit_header(buffer, "author", &author_len);
 	orig_committer = find_commit_header(buffer, "committer", &committer_len);
 
-	if (!orig_author || !orig_committer) {
+	എങ്കിൽ (!orig_author || !orig_committer) {
 		ret = error(_("cannot parse commit %s"), oid_to_hex(oid));
-		goto out;
+		പോകുക out;
 	}
 
-	if (split_ident_line(&id, orig_author, author_len) < 0 ||
-	    split_ident_line(&id, orig_committer, committer_len) < 0) {
+	എങ്കിൽ (split_ident_വരി(&id, orig_author, author_len) < 0 ||
+	    split_ident_വരി(&id, orig_committer, committer_len) < 0) {
 		ret = error(_("invalid author or committer for %s"), oid_to_hex(oid));
-		goto out;
+		പോകുക out;
 	}
 
 	p = strstr(buffer, "\n\n");
-	strbuf_addstr(&msg, "git stash: ");
+	strbuf_addstr(&സന്ദേശം, "git stash: ");
 
-	if (p)
-		strbuf_add(&msg, p + 2, bufsize - (p + 2 - buffer));
-	strbuf_complete_line(&msg);
+	എങ്കിൽ (p)
+		strbuf_add(&സന്ദേശം, p + 2, bufsize - (p + 2 - buffer));
+	strbuf_complete_വരി(&സന്ദേശം);
 
 	author = xmemdupz(orig_author, author_len);
 	committer = xmemdupz(orig_committer, committer_len);
 
-	if (commit_tree_extended(msg.buf, msg.len,
-				 r->hash_algo->empty_tree, parents,
+	എങ്കിൽ (commit_വൃക്ഷം_extended(സന്ദേശം.buf, സന്ദേശം.len,
+				 r->hash_algo->empty_വൃക്ഷം, parents,
 				 out, author, committer,
-				 NULL, NULL)) {
+				 ശൂന്യ, ശൂന്യ)) {
 		ret = error(_("could not write commit"));
-		goto out;
+		പോകുക out;
 	}
 out:
-	strbuf_release(&msg);
+	strbuf_release(&സന്ദേശം);
 	repo_unuse_commit_buffer(r, this, buffer);
-	free(author);
-	free(committer);
-	return ret;
+	സ്വതന്ത്രം(author);
+	സ്വതന്ത്രം(committer);
+	തിരികെ ret;
 }
 
-static int do_import_stash(struct repository *r, const char *rev)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_import_stash(ഘടന repository *r, സ്ഥിരം അക്ഷരം *rev)
 {
-	struct object_id chain;
-	int res = 0;
-	const char *buffer = NULL;
+	ഘടന object_id chain;
+	പൂർണ്ണസംഖ്യ res = 0;
+	സ്ഥിരം അക്ഷരം *buffer = ശൂന്യ;
 	unsigned long bufsize;
-	struct commit *this = NULL;
-	struct commit_list *items = NULL, *cur;
-	char *msg = NULL;
+	ഘടന commit *this = ശൂന്യ;
+	ഘടന commit_list *ഇനങ്ങൾ = ശൂന്യ, *cur;
+	അക്ഷരം *സന്ദേശം = ശൂന്യ;
 
-	if (repo_get_oid(r, rev, &chain))
-		return error(_("not a valid revision: %s"), rev);
+	എങ്കിൽ (repo_get_oid(r, rev, &chain))
+		തിരികെ error(_("not a valid revision: %s"), rev);
 
 	this = lookup_commit_reference(r, &chain);
-	if (!this)
-		return error(_("not a commit: %s"), rev);
+	എങ്കിൽ (!this)
+		തിരികെ error(_("not a commit: %s"), rev);
 
 	/*
 	 * Walk the commit history, finding each stash entry, and load data into
 	 * the array.
 	 */
-	for (;;) {
-		const char *author, *committer;
+	വേണ്ടി (;;) {
+		സ്ഥിരം അക്ഷരം *author, *committer;
 		size_t author_len, committer_len;
-		const char *p;
-		const char *expected = "git stash <git@stash> 1000684800 +0000";
-		const char *prefix = "git stash: ";
-		struct commit *stash;
-		struct tree *tree = repo_get_commit_tree(r, this);
+		സ്ഥിരം അക്ഷരം *p;
+		സ്ഥിരം അക്ഷരം *expected = "git stash <git@stash> 1000684800 +0000";
+		സ്ഥിരം അക്ഷരം *prefix = "git stash: ";
+		ഘടന commit *stash;
+		ഘടന വൃക്ഷം *വൃക്ഷം = repo_get_commit_വൃക്ഷം(r, this);
 
-		if (!tree ||
-		    !oideq(&tree->object.oid, r->hash_algo->empty_tree) ||
+		എങ്കിൽ (!വൃക്ഷം ||
+		    !oideq(&വൃക്ഷം->object.oid, r->hash_algo->empty_വൃക്ഷം) ||
 		    (this->parents &&
 		     (!this->parents->next || this->parents->next->next))) {
 			res = error(_("%s is not a valid exported stash commit"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			പോകുക out;
 		}
 
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
 
-		if (!this->parents) {
+		എങ്കിൽ (!this->parents) {
 			/*
 			 * We don't have any parents.  Make sure this is our
 			 * root commit.
@@ -2138,52 +2138,52 @@ static int do_import_stash(struct repository *r, const char *rev)
 			author = find_commit_header(buffer, "author", &author_len);
 			committer = find_commit_header(buffer, "committer", &committer_len);
 
-			if (!author || !committer) {
+			എങ്കിൽ (!author || !committer) {
 				error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-				goto out;
+				പോകുക out;
 			}
 
-			if (author_len != strlen(expected) ||
+			എങ്കിൽ (author_len != strlen(expected) ||
 			    committer_len != strlen(expected) ||
 			    memcmp(author, expected, author_len) ||
 			    memcmp(committer, expected, committer_len)) {
 				res = error(_("found root commit %s with invalid data"), oid_to_hex(&this->object.oid));
-				goto out;
+				പോകുക out;
 			}
-			break;
+			നിർത്തുക;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		എങ്കിൽ (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(&this->object.oid));
-			goto out;
+			പോകുക out;
 		}
 
 		p += 2;
-		if (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
+		എങ്കിൽ (((size_t)(bufsize - (p - buffer)) < strlen(prefix)) ||
 		    memcmp(prefix, p, strlen(prefix))) {
 			res = error(_("found stash commit %s without expected prefix"), oid_to_hex(&this->object.oid));
-			goto out;
+			പോകുക out;
 		}
 
 		stash = this->parents->next->item;
 
-		if (repo_parse_commit(r, this->parents->item) ||
+		എങ്കിൽ (repo_parse_commit(r, this->parents->item) ||
 		    repo_parse_commit(r, stash)) {
 			res = error(_("cannot parse parents of commit: %s"),
 					oid_to_hex(&this->object.oid));
-			goto out;
+			പോകുക out;
 		}
 
-		if (check_stash_topology(r, stash)) {
+		എങ്കിൽ (check_stash_topology(r, stash)) {
 			res = error(_("%s does not look like a stash commit"),
 					oid_to_hex(&stash->object.oid));
-			goto out;
+			പോകുക out;
 		}
 
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
-		items = commit_list_insert(stash, &items);
+		buffer = ശൂന്യ;
+		ഇനങ്ങൾ = commit_list_തിരുകുക(stash, &ഇനങ്ങൾ);
 		this = this->parents->item;
 	}
 
@@ -2191,48 +2191,48 @@ static int do_import_stash(struct repository *r, const char *rev)
 	 * Now, walk each entry, adding it to the stash as a normal stash
 	 * commit.
 	 */
-	for (cur = items; cur; cur = cur->next) {
-		const char *p;
-		struct object_id *oid;
+	വേണ്ടി (cur = ഇനങ്ങൾ; cur; cur = cur->next) {
+		സ്ഥിരം അക്ഷരം *p;
+		ഘടന object_id *oid;
 
 		this = cur->item;
 		oid = &this->object.oid;
 		buffer = repo_get_commit_buffer(r, this, &bufsize);
-		if (!buffer) {
+		എങ്കിൽ (!buffer) {
 			res = error(_("cannot read commit buffer for %s"), oid_to_hex(oid));
-			goto out;
+			പോകുക out;
 		}
 
 		p = strstr(buffer, "\n\n");
-		if (!p) {
+		എങ്കിൽ (!p) {
 			res = error(_("cannot parse commit %s"), oid_to_hex(oid));
-			goto out;
+			പോകുക out;
 		}
 
 		p += 2;
-		msg = xmemdupz(p, bufsize - (p - buffer));
+		സന്ദേശം = xmemdupz(p, bufsize - (p - buffer));
 		repo_unuse_commit_buffer(r, this, buffer);
-		buffer = NULL;
+		buffer = ശൂന്യ;
 
-		if (do_store_stash(oid, msg, 1)) {
+		എങ്കിൽ (do_store_stash(oid, സന്ദേശം, 1)) {
 			res = error(_("cannot save the stash for %s"), oid_to_hex(oid));
-			goto out;
+			പോകുക out;
 		}
-		FREE_AND_NULL(msg);
+		FREE_AND_NULL(സന്ദേശം);
 	}
 out:
-	if (this && buffer)
+	എങ്കിൽ (this && buffer)
 		repo_unuse_commit_buffer(r, this, buffer);
-	commit_list_free(items);
-	free(msg);
+	commit_list_free(ഇനങ്ങൾ);
+	സ്വതന്ത്രം(സന്ദേശം);
 
-	return res;
+	തിരികെ res;
 }
 
-static int import_stash(int argc, const char **argv, const char *prefix,
-			struct repository *repo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ import_stash(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			ഘടന repository *repo)
 {
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_END()
 	};
 
@@ -2240,51 +2240,51 @@ static int import_stash(int argc, const char **argv, const char *prefix,
 			     git_stash_import_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (argc != 1)
-		usage_msg_opt("a revision is required", git_stash_import_usage, options);
+	എങ്കിൽ (argc != 1)
+		usage_സന്ദേശം_opt("a revision is required", git_stash_import_usage, options);
 
-	return do_import_stash(repo, argv[0]);
+	തിരികെ do_import_stash(repo, argv[0]);
 }
 
-struct stash_entry_data {
-	struct repository *r;
-	struct commit_list **items;
-	size_t count;
+ഘടന stash_entry_data {
+	ഘടന repository *r;
+	ഘടന commit_list **ഇനങ്ങൾ;
+	size_t എണ്ണം;
 };
 
-static int collect_stash_entries(const char *refname UNUSED,
-				 struct object_id *old_oid UNUSED,
-				 struct object_id *new_oid,
-				 const char *committer UNUSED,
+സ്ഥിതം പൂർണ്ണസംഖ്യ collect_stash_entries(സ്ഥിരം അക്ഷരം *refname UNUSED,
+				 ഘടന object_id *old_oid UNUSED,
+				 ഘടന object_id *new_oid,
+				 സ്ഥിരം അക്ഷരം *committer UNUSED,
 				 timestamp_t timestamp UNUSED,
-				 int tz UNUSED, const char *msg UNUSED,
-				 void *cb_data)
+				 പൂർണ്ണസംഖ്യ tz UNUSED, സ്ഥിരം അക്ഷരം *സന്ദേശം UNUSED,
+				 ശൂന്യം *cb_data)
 {
-	struct stash_entry_data *data = cb_data;
-	struct commit *stash;
+	ഘടന stash_entry_data *data = cb_data;
+	ഘടന commit *stash;
 
-	data->count++;
+	data->എണ്ണം++;
 	stash = lookup_commit_reference(data->r, new_oid);
-	if (!stash || check_stash_topology(data->r, stash)) {
-		return error(_("%s does not look like a stash commit"),
+	എങ്കിൽ (!stash || check_stash_topology(data->r, stash)) {
+		തിരികെ error(_("%s does not look like a stash commit"),
 			     oid_to_hex(new_oid));
 	}
-	data->items = commit_list_append(stash, data->items);
-	return 0;
+	data->ഇനങ്ങൾ = commit_list_append(stash, data->ഇനങ്ങൾ);
+	തിരികെ 0;
 }
 
-static int do_export_stash(struct repository *r,
-			   const char *ref,
-			   int argc,
-			   const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_export_stash(ഘടന repository *r,
+			   സ്ഥിരം അക്ഷരം *ref,
+			   പൂർണ്ണസംഖ്യ argc,
+			   സ്ഥിരം അക്ഷരം **argv)
 {
-	struct object_id base;
-	struct commit *prev;
-	struct commit_list *items = NULL, **iter = &items, *cur;
-	int res = 0;
-	int i;
-	struct strbuf revision = STRBUF_INIT;
-	const char *author, *committer;
+	ഘടന object_id base;
+	ഘടന commit *prev;
+	ഘടന commit_list *ഇനങ്ങൾ = ശൂന്യ, **iter = &ഇനങ്ങൾ, *cur;
+	പൂർണ്ണസംഖ്യ res = 0;
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന strbuf revision = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *author, *committer;
 
 	/*
 	 * This is an arbitrary, fixed date, specifically the one used by git
@@ -2297,49 +2297,49 @@ static int do_export_stash(struct repository *r,
 			      "2001-09-17T00:00:00Z", 0);
 
 	/* First, we create a single empty commit. */
-	if (commit_tree_extended("", 0, r->hash_algo->empty_tree, NULL,
-				 &base, author, committer, NULL, NULL))
-		return error(_("unable to write base commit"));
+	എങ്കിൽ (commit_വൃക്ഷം_extended("", 0, r->hash_algo->empty_വൃക്ഷം, ശൂന്യ,
+				 &base, author, committer, ശൂന്യ, ശൂന്യ))
+		തിരികെ error(_("unable to write base commit"));
 
 	prev = lookup_commit_reference(r, &base);
 
-	if (argc) {
+	എങ്കിൽ (argc) {
 		/*
 		 * Find each specified stash, and load data into the array.
 		 */
-		for (i = 0; i < argc; i++) {
-			struct object_id oid;
-			struct commit *stash;
+		വേണ്ടി (i = 0; i < argc; i++) {
+			ഘടന object_id oid;
+			ഘടന commit *stash;
 
-			if (parse_stash_revision(&revision, argv[i], 1) ||
+			എങ്കിൽ (parse_stash_revision(&revision, argv[i], 1) ||
 			    repo_get_oid_with_flags(r, revision.buf, &oid,
 						    GET_OID_QUIETLY |
 						    GET_OID_GENTLY)) {
 				res = error(_("unable to find stash entry %s"), argv[i]);
-				goto out;
+				പോകുക out;
 			}
 
 			stash = lookup_commit_reference(r, &oid);
-			if (!stash || check_stash_topology(r, stash)) {
+			എങ്കിൽ (!stash || check_stash_topology(r, stash)) {
 				res = error(_("%s does not look like a stash commit"),
 						revision.buf);
-				goto out;
+				പോകുക out;
 			}
 			iter = commit_list_append(stash, iter);
 		}
-	} else {
+	} അല്ലെങ്കിൽ {
 		/*
 		 * Walk the reflog, finding each stash entry, and load data into the
 		 * array.
 		 */
-		struct stash_entry_data cb_data = {
-			.r = r, .items = iter,
+		ഘടന stash_entry_data cb_data = {
+			.r = r, .ഇനങ്ങൾ = iter,
 		};
-		if (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
+		എങ്കിൽ (refs_for_each_reflog_ent_reverse(get_main_ref_store(r),
 						     "refs/stash",
 						     collect_stash_entries,
-						     &cb_data) && cb_data.count)
-			goto out;
+						     &cb_data) && cb_data.എണ്ണം)
+			പോകുക out;
 	}
 
 	/*
@@ -2347,47 +2347,47 @@ static int do_export_stash(struct repository *r,
 	 * but where their first parents form a chain to our original empty
 	 * base commit.
 	 */
-	items = commit_list_reverse(items);
-	for (cur = items; cur; cur = cur->next) {
-		struct commit_list *parents = NULL;
-		struct commit_list **next = &parents;
-		struct object_id out;
-		struct commit *stash = cur->item;
+	ഇനങ്ങൾ = commit_list_reverse(ഇനങ്ങൾ);
+	വേണ്ടി (cur = ഇനങ്ങൾ; cur; cur = cur->next) {
+		ഘടന commit_list *parents = ശൂന്യ;
+		ഘടന commit_list **next = &parents;
+		ഘടന object_id out;
+		ഘടന commit *stash = cur->item;
 
 		next = commit_list_append(prev, next);
 		next = commit_list_append(stash, next);
 		res = write_commit_with_parents(r, &out, &stash->object.oid, parents);
 		commit_list_free(parents);
-		if (res)
-			goto out;
+		എങ്കിൽ (res)
+			പോകുക out;
 		prev = lookup_commit_reference(r, &out);
 	}
-	if (ref)
-		refs_update_ref(get_main_ref_store(r), NULL, ref,
-				&prev->object.oid, NULL, 0, UPDATE_REFS_DIE_ON_ERR);
-	else
+	എങ്കിൽ (ref)
+		refs_update_ref(get_main_ref_store(r), ശൂന്യ, ref,
+				&prev->object.oid, ശൂന്യ, 0, UPDATE_REFS_DIE_ON_ERR);
+	അല്ലെങ്കിൽ
 		puts(oid_to_hex(&prev->object.oid));
 out:
 	strbuf_release(&revision);
-	commit_list_free(items);
+	commit_list_free(ഇനങ്ങൾ);
 
-	return res;
+	തിരികെ res;
 }
 
-enum export_action {
+എണ്ണൽ export_action {
 	ACTION_NONE,
 	ACTION_PRINT,
 	ACTION_TO_REF,
 };
 
-static int export_stash(int argc,
-			const char **argv,
-			const char *prefix,
-			struct repository *repo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ export_stash(പൂർണ്ണസംഖ്യ argc,
+			സ്ഥിരം അക്ഷരം **argv,
+			സ്ഥിരം അക്ഷരം *prefix,
+			ഘടന repository *repo)
 {
-	const char *ref = NULL;
-	enum export_action action = ACTION_NONE;
-	struct option options[] = {
+	സ്ഥിരം അക്ഷരം *ref = ശൂന്യ;
+	എണ്ണൽ export_action action = ACTION_NONE;
+	ഘടന option options[] = {
 		OPT_CMDMODE(0, "print", &action,
 			    N_("print the object ID instead of writing it to a ref"),
 			    ACTION_PRINT),
@@ -2400,44 +2400,44 @@ static int export_stash(int argc,
 			     git_stash_export_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (ref && action == ACTION_NONE)
+	എങ്കിൽ (ref && action == ACTION_NONE)
 		action = ACTION_TO_REF;
 
-	if (action == ACTION_NONE || (ref && action == ACTION_PRINT))
-		return error(_("exactly one of --print and --to-ref is required"));
+	എങ്കിൽ (action == ACTION_NONE || (ref && action == ACTION_PRINT))
+		തിരികെ error(_("exactly one of --print and --to-ref is required"));
 
-	return do_export_stash(repo, ref, argc, argv);
+	തിരികെ do_export_stash(repo, ref, argc, argv);
 }
 
-int cmd_stash(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_stash(പൂർണ്ണസംഖ്യ argc,
+	      സ്ഥിരം അക്ഷരം **argv,
+	      സ്ഥിരം അക്ഷരം *prefix,
+	      ഘടന repository *repo)
 {
 	pid_t pid = getpid();
-	const char *index_file;
-	struct strvec args = STRVEC_INIT;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	സ്ഥിരം അക്ഷരം *index_file;
+	ഘടന strvec args = STRVEC_INIT;
+	parse_opt_subcommand_fn *fn = ശൂന്യ;
+	ഘടന option options[] = {
 		OPT_SUBCOMMAND("apply", &fn, apply_stash),
 		OPT_SUBCOMMAND("clear", &fn, clear_stash),
 		OPT_SUBCOMMAND("drop", &fn, drop_stash),
-		OPT_SUBCOMMAND("pop", &fn, pop_stash),
+		OPT_SUBCOMMAND("pop", &fn, എടുക്കുക_stash),
 		OPT_SUBCOMMAND("branch", &fn, branch_stash),
 		OPT_SUBCOMMAND("list", &fn, list_stash),
 		OPT_SUBCOMMAND("show", &fn, show_stash),
 		OPT_SUBCOMMAND("store", &fn, store_stash),
 		OPT_SUBCOMMAND("create", &fn, create_stash),
-		OPT_SUBCOMMAND("push", &fn, push_stash_unassumed),
+		OPT_SUBCOMMAND("push", &fn, തള്ളുക_stash_unassumed),
 		OPT_SUBCOMMAND("export", &fn, export_stash),
 		OPT_SUBCOMMAND("import", &fn, import_stash),
-		OPT_SUBCOMMAND_F("save", &fn, save_stash, NULL, PARSE_OPT_NOCOMPLETE),
+		OPT_SUBCOMMAND_F("save", &fn, save_stash, ശൂന്യ, PARSE_OPT_NOCOMPLETE),
 		OPT_END()
 	};
-	const char **args_copy;
-	int ret;
+	സ്ഥിരം അക്ഷരം **args_copy;
+	പൂർണ്ണസംഖ്യ ret;
 
-	repo_config(the_repository, git_stash_config, NULL);
+	repo_config(the_repository, git_stash_config, ശൂന്യ);
 
 	argc = parse_options(argc, argv, prefix, options, git_stash_usage,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
@@ -2451,7 +2451,7 @@ int cmd_stash(int argc,
 	strbuf_addf(&stash_index_path, "%s.stash.%" PRIuMAX, index_file,
 		    (uintmax_t)pid);
 
-	if (fn) {
+	എങ്കിൽ (fn) {
 		ret = fn(argc, argv, prefix, repo);
 
 		/*
@@ -2461,15 +2461,15 @@ int cmd_stash(int argc,
 		 * Map failures to 128, the status die() uses, so that
 		 * exit status 1 unambiguously indicates conflicts.
 		 */
-		if (ret < 0)
-			return 128;
-		return ret;
-	} else if (!argc) {
-		return !!push_stash_unassumed(0, NULL, prefix, repo);
+		എങ്കിൽ (ret < 0)
+			തിരികെ 128;
+		തിരികെ ret;
+	} അല്ലെങ്കിൽ എങ്കിൽ (!argc) {
+		തിരികെ !!തള്ളുക_stash_unassumed(0, ശൂന്യ, prefix, repo);
 	}
 
 	/* Assume 'stash push' */
-	strvec_push(&args, "push");
+	strvec_തള്ളുക(&args, "push");
 	strvec_pushv(&args, argv);
 
 	/*
@@ -2478,9 +2478,9 @@ int cmd_stash(int argc,
 	 */
 	DUP_ARRAY(args_copy, args.v, args.nr);
 
-	ret = !!push_stash(args.nr, args_copy, prefix, 1);
+	ret = !!തള്ളുക_stash(args.nr, args_copy, prefix, 1);
 
 	strvec_clear(&args);
-	free(args_copy);
-	return ret;
+	സ്വതന്ത്രം(args_copy);
+	തിരികെ ret;
 }

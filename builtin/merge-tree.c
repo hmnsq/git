@@ -1,166 +1,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "environment.h"
-#include "tree-walk.h"
-#include "xdiff-interface.h"
-#include "help.h"
-#include "gettext.h"
-#include "hex.h"
-#include "commit.h"
-#include "commit-reach.h"
-#include "merge-ort.h"
-#include "object-name.h"
-#include "odb.h"
-#include "parse-options.h"
-#include "blob.h"
-#include "merge-blobs.h"
-#include "quote.h"
-#include "tree.h"
-#include "config.h"
-#include "strvec.h"
-#include "write-or-die.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "tree-walk.h"
+#അന്തര്ഭാവ "xdiff-interface.h"
+#അന്തര്ഭാവ "help.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "commit-reach.h"
+#അന്തര്ഭാവ "merge-ort.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "blob.h"
+#അന്തര്ഭാവ "merge-blobs.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "strvec.h"
+#അന്തര്ഭാവ "write-or-die.h"
 
-static int line_termination = '\n';
+സ്ഥിതം പൂർണ്ണസംഖ്യ വരി_termination = '\n';
 
-struct merge_list {
-	struct merge_list *next;
-	struct merge_list *link;	/* other stages for this object */
+ഘടന merge_list {
+	ഘടന merge_list *next;
+	ഘടന merge_list *link;	/* other stages for this object */
 
-	unsigned int stage : 2;
-	unsigned int mode;
-	const char *path;
-	struct blob *blob;
+	unsigned പൂർണ്ണസംഖ്യ stage : 2;
+	unsigned പൂർണ്ണസംഖ്യ mode;
+	സ്ഥിരം അക്ഷരം *path;
+	ഘടന blob *blob;
 };
 
-static struct merge_list *merge_result, **merge_result_end = &merge_result;
+സ്ഥിതം ഘടന merge_list *merge_result, **merge_result_end = &merge_result;
 
-static void add_merge_entry(struct merge_list *entry)
+സ്ഥിതം ശൂന്യം add_merge_entry(ഘടന merge_list *entry)
 {
 	*merge_result_end = entry;
 	merge_result_end = &entry->next;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+സ്ഥിതം ശൂന്യം trivial_merge_trees(ഘടന വൃക്ഷം_desc t[3], സ്ഥിരം അക്ഷരം *base);
 
-static const char *explanation(struct merge_list *entry)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *explanation(ഘടന merge_list *entry)
 {
-	switch (entry->stage) {
-	case 0:
-		return "merged";
-	case 3:
-		return "added in remote";
-	case 2:
-		if (entry->link)
-			return "added in both";
-		return "added in local";
+	തിരഞ്ഞെടുപ്പ് (entry->stage) {
+	അവസ്ഥ 0:
+		തിരികെ "merged";
+	അവസ്ഥ 3:
+		തിരികെ "added in remote";
+	അവസ്ഥ 2:
+		എങ്കിൽ (entry->link)
+			തിരികെ "added in both";
+		തിരികെ "added in local";
 	}
 
 	/* Existed in base */
 	entry = entry->link;
-	if (!entry)
-		return "removed in both";
+	എങ്കിൽ (!entry)
+		തിരികെ "removed in both";
 
-	if (entry->link)
-		return "changed in both";
+	എങ്കിൽ (entry->link)
+		തിരികെ "changed in both";
 
-	if (entry->stage == 3)
-		return "removed in local";
-	return "removed in remote";
+	എങ്കിൽ (entry->stage == 3)
+		തിരികെ "removed in local";
+	തിരികെ "removed in remote";
 }
 
-static void *result(struct merge_list *entry, size_t *size)
+സ്ഥിതം ശൂന്യം *result(ഘടന merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	struct blob *base, *our, *their;
-	const char *path = entry->path;
+	എണ്ണൽ object_type type;
+	ഘടന blob *base, *our, *their;
+	സ്ഥിരം അക്ഷരം *path = entry->path;
 
-	if (!entry->stage)
-		return odb_read_object(the_repository->objects,
+	എങ്കിൽ (!entry->stage)
+		തിരികെ odb_read_object(the_repository->objects,
 				       &entry->blob->object.oid, &type,
 				       size);
-	base = NULL;
-	if (entry->stage == 1) {
+	base = ശൂന്യ;
+	എങ്കിൽ (entry->stage == 1) {
 		base = entry->blob;
 		entry = entry->link;
 	}
-	our = NULL;
-	if (entry && entry->stage == 2) {
+	our = ശൂന്യ;
+	എങ്കിൽ (entry && entry->stage == 2) {
 		our = entry->blob;
 		entry = entry->link;
 	}
-	their = NULL;
-	if (entry)
+	their = ശൂന്യ;
+	എങ്കിൽ (entry)
 		their = entry->blob;
-	return merge_blobs(the_repository->index, path,
+	തിരികെ merge_blobs(the_repository->index, path,
 			   base, our, their, size);
 }
 
-static void *origin(struct merge_list *entry, size_t *size)
+സ്ഥിതം ശൂന്യം *origin(ഘടന merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	while (entry) {
-		if (entry->stage == 2)
-			return odb_read_object(the_repository->objects,
+	എണ്ണൽ object_type type;
+	ആകുമ്പോൾ (entry) {
+		എങ്കിൽ (entry->stage == 2)
+			തിരികെ odb_read_object(the_repository->objects,
 					       &entry->blob->object.oid,
 					       &type, size);
 		entry = entry->link;
 	}
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-static int show_outf(void *priv UNUSED, mmfile_t *mb, int nbuf)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_outf(ശൂന്യം *priv UNUSED, mmfile_t *mb, പൂർണ്ണസംഖ്യ nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		printf("%.*s", (int) mb[i].size, mb[i].ptr);
-	return 0;
+	പൂർണ്ണസംഖ്യ i;
+	വേണ്ടി (i = 0; i < nbuf; i++)
+		printf("%.*s", (പൂർണ്ണസംഖ്യ) mb[i].size, mb[i].ptr);
+	തിരികെ 0;
 }
 
-static void show_diff(struct merge_list *entry)
+സ്ഥിതം ശൂന്യം show_diff(ഘടന merge_list *entry)
 {
 	size_t size;
 	mmfile_t src, dst;
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = show_outf };
+	xdemitcb_t ecb = { .out_വരി = show_outf };
 
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, വലുപ്പം(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, വലുപ്പം(xecfg));
 	xecfg.ctxlen = 3;
 
 	src.ptr = origin(entry, &size);
-	if (!src.ptr)
+	എങ്കിൽ (!src.ptr)
 		size = 0;
 	src.size = size;
 	dst.ptr = result(entry, &size);
-	if (!dst.ptr)
+	എങ്കിൽ (!dst.ptr)
 		size = 0;
 	dst.size = size;
-	if (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
+	എങ്കിൽ (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
 		die("unable to generate diff");
-	free(src.ptr);
-	free(dst.ptr);
+	സ്വതന്ത്രം(src.ptr);
+	സ്വതന്ത്രം(dst.ptr);
 }
 
-static void show_result_list(struct merge_list *entry)
+സ്ഥിതം ശൂന്യം show_result_list(ഘടന merge_list *entry)
 {
 	printf("%s\n", explanation(entry));
-	do {
-		struct merge_list *link = entry->link;
-		static const char *desc[4] = { "result", "base", "our", "their" };
+	ചെയ്യുക {
+		ഘടന merge_list *link = entry->link;
+		സ്ഥിതം സ്ഥിരം അക്ഷരം *desc[4] = { "result", "base", "our", "their" };
 		printf("  %-6s %o %s %s\n", desc[entry->stage], entry->mode, oid_to_hex(&entry->blob->object.oid), entry->path);
 		entry = link;
-	} while (entry);
+	} ആകുമ്പോൾ (entry);
 }
 
-static void show_result(void)
+സ്ഥിതം ശൂന്യം show_result(ശൂന്യം)
 {
-	struct merge_list *walk;
+	ഘടന merge_list *walk;
 
 	walk = merge_result;
-	while (walk) {
+	ആകുമ്പോൾ (walk) {
 		show_result_list(walk);
 		show_diff(walk);
 		walk = walk->next;
@@ -168,45 +168,45 @@ static void show_result(void)
 }
 
 /* An empty entry never compares same, not even to another empty entry */
-static int same_entry(struct name_entry *a, struct name_entry *b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ same_entry(ഘടന name_entry *a, ഘടന name_entry *b)
 {
-	return	!is_null_oid(&a->oid) &&
+	തിരികെ	!is_null_oid(&a->oid) &&
 		!is_null_oid(&b->oid) &&
 		oideq(&a->oid, &b->oid) &&
 		a->mode == b->mode;
 }
 
-static int both_empty(struct name_entry *a, struct name_entry *b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ both_empty(ഘടന name_entry *a, ഘടന name_entry *b)
 {
-	return is_null_oid(&a->oid) && is_null_oid(&b->oid);
+	തിരികെ is_null_oid(&a->oid) && is_null_oid(&b->oid);
 }
 
-static struct merge_list *create_entry(unsigned stage, unsigned mode, const struct object_id *oid, const char *path)
+സ്ഥിതം ഘടന merge_list *create_entry(unsigned stage, unsigned mode, സ്ഥിരം ഘടന object_id *oid, സ്ഥിരം അക്ഷരം *path)
 {
-	struct merge_list *res = xcalloc(1, sizeof(*res));
+	ഘടന merge_list *res = xcalloc(1, വലുപ്പം(*res));
 
 	res->stage = stage;
 	res->path = path;
 	res->mode = mode;
 	res->blob = lookup_blob(the_repository, oid);
-	return res;
+	തിരികെ res;
 }
 
-static char *traverse_path(const struct traverse_info *info, const struct name_entry *n)
+സ്ഥിതം അക്ഷരം *traverse_path(സ്ഥിരം ഘടന traverse_info *info, സ്ഥിരം ഘടന name_entry *n)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ഘടന strbuf buf = STRBUF_INIT;
 	strbuf_make_traverse_path(&buf, info, n->path, n->pathlen);
-	return strbuf_detach(&buf, NULL);
+	തിരികെ strbuf_detach(&buf, ശൂന്യ);
 }
 
-static void resolve(const struct traverse_info *info, struct name_entry *ours, struct name_entry *result)
+സ്ഥിതം ശൂന്യം resolve(സ്ഥിരം ഘടന traverse_info *info, ഘടന name_entry *ours, ഘടന name_entry *result)
 {
-	struct merge_list *orig, *final;
-	const char *path;
+	ഘടന merge_list *orig, *final;
+	സ്ഥിരം അക്ഷരം *path;
 
 	/* If it's already ours, don't bother showing it */
-	if (!ours)
-		return;
+	എങ്കിൽ (!ours)
+		തിരികെ;
 
 	path = traverse_path(info, result);
 	orig = create_entry(2, ours->mode, &ours->oid, path);
@@ -217,81 +217,81 @@ static void resolve(const struct traverse_info *info, struct name_entry *ours, s
 	add_merge_entry(final);
 }
 
-static void unresolved_directory(const struct traverse_info *info,
-				 struct name_entry n[3])
+സ്ഥിതം ശൂന്യം unresolved_directory(സ്ഥിരം ഘടന traverse_info *info,
+				 ഘടന name_entry n[3])
 {
-	struct repository *r = the_repository;
-	char *newbase;
-	struct name_entry *p;
-	struct tree_desc t[3];
-	void *buf0, *buf1, *buf2;
+	ഘടന repository *r = the_repository;
+	അക്ഷരം *newbase;
+	ഘടന name_entry *p;
+	ഘടന വൃക്ഷം_desc t[3];
+	ശൂന്യം *buf0, *buf1, *buf2;
 
-	for (p = n; p < n + 3; p++) {
-		if (p->mode && S_ISDIR(p->mode))
-			break;
+	വേണ്ടി (p = n; p < n + 3; p++) {
+		എങ്കിൽ (p->mode && S_ISDIR(p->mode))
+			നിർത്തുക;
 	}
-	if (n + 3 <= p)
-		return; /* there is no tree here */
+	എങ്കിൽ (n + 3 <= p)
+		തിരികെ; /* there is no tree here */
 
 	newbase = traverse_path(info, p);
 
-#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : NULL)
-	buf0 = fill_tree_descriptor(r, t + 0, ENTRY_OID(n + 0));
-	buf1 = fill_tree_descriptor(r, t + 1, ENTRY_OID(n + 1));
-	buf2 = fill_tree_descriptor(r, t + 2, ENTRY_OID(n + 2));
+#define ENTRY_OID(e) (((e)->mode && S_ISDIR((e)->mode)) ? &(e)->oid : ശൂന്യ)
+	buf0 = fill_വൃക്ഷം_descriptor(r, t + 0, ENTRY_OID(n + 0));
+	buf1 = fill_വൃക്ഷം_descriptor(r, t + 1, ENTRY_OID(n + 1));
+	buf2 = fill_വൃക്ഷം_descriptor(r, t + 2, ENTRY_OID(n + 2));
 #undef ENTRY_OID
 
 	trivial_merge_trees(t, newbase);
 
-	free(buf0);
-	free(buf1);
-	free(buf2);
-	free(newbase);
+	സ്വതന്ത്രം(buf0);
+	സ്വതന്ത്രം(buf1);
+	സ്വതന്ത്രം(buf2);
+	സ്വതന്ത്രം(newbase);
 }
 
 
-static struct merge_list *link_entry(unsigned stage, const struct traverse_info *info, struct name_entry *n, struct merge_list *entry)
+സ്ഥിതം ഘടന merge_list *link_entry(unsigned stage, സ്ഥിരം ഘടന traverse_info *info, ഘടന name_entry *n, ഘടന merge_list *entry)
 {
-	const char *path;
-	struct merge_list *link;
+	സ്ഥിരം അക്ഷരം *path;
+	ഘടന merge_list *link;
 
-	if (!n->mode)
-		return entry;
-	if (entry)
+	എങ്കിൽ (!n->mode)
+		തിരികെ entry;
+	എങ്കിൽ (entry)
 		path = entry->path;
-	else
+	അല്ലെങ്കിൽ
 		path = traverse_path(info, n);
 	link = create_entry(stage, n->mode, &n->oid, path);
 	link->link = entry;
-	return link;
+	തിരികെ link;
 }
 
-static void unresolved(const struct traverse_info *info, struct name_entry n[3])
+സ്ഥിതം ശൂന്യം unresolved(സ്ഥിരം ഘടന traverse_info *info, ഘടന name_entry n[3])
 {
-	struct merge_list *entry = NULL;
-	int i;
+	ഘടന merge_list *entry = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ i;
 	unsigned dirmask = 0, mask = 0;
 
-	for (i = 0; i < 3; i++) {
+	വേണ്ടി (i = 0; i < 3; i++) {
 		mask |= (1 << i);
 		/*
 		 * Treat missing entries as directories so that we return
 		 * after unresolved_directory has handled this.
 		 */
-		if (!n[i].mode || S_ISDIR(n[i].mode))
+		എങ്കിൽ (!n[i].mode || S_ISDIR(n[i].mode))
 			dirmask |= (1 << i);
 	}
 
 	unresolved_directory(info, n);
 
-	if (dirmask == mask)
-		return;
+	എങ്കിൽ (dirmask == mask)
+		തിരികെ;
 
-	if (n[2].mode && !S_ISDIR(n[2].mode))
+	എങ്കിൽ (n[2].mode && !S_ISDIR(n[2].mode))
 		entry = link_entry(3, info, n + 2, entry);
-	if (n[1].mode && !S_ISDIR(n[1].mode))
+	എങ്കിൽ (n[1].mode && !S_ISDIR(n[1].mode))
 		entry = link_entry(2, info, n + 1, entry);
-	if (n[0].mode && !S_ISDIR(n[0].mode))
+	എങ്കിൽ (n[0].mode && !S_ISDIR(n[0].mode))
 		entry = link_entry(1, info, n + 0, entry);
 
 	add_merge_entry(entry);
@@ -326,22 +326,22 @@ static void unresolved(const struct traverse_info *info, struct name_entry n[3])
  * The successful merge rules are the same as for the three-way merge
  * in git-read-tree.
  */
-static int threeway_callback(int n UNUSED, unsigned long mask,
+സ്ഥിതം പൂർണ്ണസംഖ്യ threeway_callback(പൂർണ്ണസംഖ്യ n UNUSED, unsigned long mask,
 			     unsigned long dirmask UNUSED,
-			     struct name_entry *entry, struct traverse_info *info)
+			     ഘടന name_entry *entry, ഘടന traverse_info *info)
 {
 	/* Same in both? */
-	if (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
+	എങ്കിൽ (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
 		/* Modified, added or removed identically */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, ശൂന്യ, entry+1);
+		തിരികെ mask;
 	}
 
-	if (same_entry(entry+0, entry+1)) {
-		if (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
+	എങ്കിൽ (same_entry(entry+0, entry+1)) {
+		എങ്കിൽ (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
 			/* We did not touch, they modified -- take theirs */
 			resolve(info, entry+1, entry+2);
-			return mask;
+			തിരികെ mask;
 		}
 		/*
 		 * If we did not touch a directory but they made it
@@ -350,85 +350,85 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 		 */
 	}
 
-	if (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
+	എങ്കിൽ (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
 		/* We added, modified or removed, they did not touch -- take ours */
-		resolve(info, NULL, entry+1);
-		return mask;
+		resolve(info, ശൂന്യ, entry+1);
+		തിരികെ mask;
 	}
 
 	unresolved(info, entry);
-	return mask;
+	തിരികെ mask;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+സ്ഥിതം ശൂന്യം trivial_merge_trees(ഘടന വൃക്ഷം_desc t[3], സ്ഥിരം അക്ഷരം *base)
 {
-	struct traverse_info info;
+	ഘടന traverse_info info;
 
 	setup_traverse_info(&info, base);
 	info.fn = threeway_callback;
 	traverse_trees(the_repository->index, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
-				 const char *rev)
+സ്ഥിതം ശൂന്യം *get_വൃക്ഷം_descriptor(ഘടന repository *r,
+				 ഘടന വൃക്ഷം_desc *desc,
+				 സ്ഥിരം അക്ഷരം *rev)
 {
-	struct object_id oid;
-	void *buf;
+	ഘടന object_id oid;
+	ശൂന്യം *buf;
 
-	if (repo_get_oid(r, rev, &oid))
+	എങ്കിൽ (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
-	buf = fill_tree_descriptor(r, desc, &oid);
-	if (!buf)
+	buf = fill_വൃക്ഷം_descriptor(r, desc, &oid);
+	എങ്കിൽ (!buf)
 		die("%s is not a tree", rev);
-	return buf;
+	തിരികെ buf;
 }
 
-static int trivial_merge(const char *base,
-			 const char *branch1,
-			 const char *branch2)
+സ്ഥിതം പൂർണ്ണസംഖ്യ trivial_merge(സ്ഥിരം അക്ഷരം *base,
+			 സ്ഥിരം അക്ഷരം *branch1,
+			 സ്ഥിരം അക്ഷരം *branch2)
 {
-	struct repository *r = the_repository;
-	struct tree_desc t[3];
-	void *buf1, *buf2, *buf3;
+	ഘടന repository *r = the_repository;
+	ഘടന വൃക്ഷം_desc t[3];
+	ശൂന്യം *buf1, *buf2, *buf3;
 
-	buf1 = get_tree_descriptor(r, t+0, base);
-	buf2 = get_tree_descriptor(r, t+1, branch1);
-	buf3 = get_tree_descriptor(r, t+2, branch2);
+	buf1 = get_വൃക്ഷം_descriptor(r, t+0, base);
+	buf2 = get_വൃക്ഷം_descriptor(r, t+1, branch1);
+	buf3 = get_വൃക്ഷം_descriptor(r, t+2, branch2);
 	trivial_merge_trees(t, "");
-	free(buf1);
-	free(buf2);
-	free(buf3);
+	സ്വതന്ത്രം(buf1);
+	സ്വതന്ത്രം(buf2);
+	സ്വതന്ത്രം(buf3);
 
 	show_result();
-	return 0;
+	തിരികെ 0;
 }
 
-enum mode {
+എണ്ണൽ mode {
 	MODE_UNKNOWN,
 	MODE_TRIVIAL,
 	MODE_REAL,
 };
 
-struct merge_tree_options {
-	int mode;
-	int allow_unrelated_histories;
-	int show_messages;
-	int name_only;
-	int use_stdin;
-	struct merge_options merge_options;
+ഘടന merge_വൃക്ഷം_options {
+	പൂർണ്ണസംഖ്യ mode;
+	പൂർണ്ണസംഖ്യ allow_unrelated_histories;
+	പൂർണ്ണസംഖ്യ show_messages;
+	പൂർണ്ണസംഖ്യ name_only;
+	പൂർണ്ണസംഖ്യ use_stdin;
+	ഘടന merge_options merge_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
-		      const char *merge_base,
-		      const char *branch1, const char *branch2,
-		      const char *prefix)
+സ്ഥിതം പൂർണ്ണസംഖ്യ real_merge(ഘടന merge_വൃക്ഷം_options *o,
+		      സ്ഥിരം അക്ഷരം *merge_base,
+		      സ്ഥിരം അക്ഷരം *branch1, സ്ഥിരം അക്ഷരം *branch2,
+		      സ്ഥിരം അക്ഷരം *prefix)
 {
-	struct commit *parent1, *parent2;
-	struct commit_list *merge_bases = NULL;
-	struct merge_result result = { 0 };
-	int show_messages = o->show_messages;
-	struct merge_options opt;
+	ഘടന commit *parent1, *parent2;
+	ഘടന commit_list *merge_bases = ശൂന്യ;
+	ഘടന merge_result result = { 0 };
+	പൂർണ്ണസംഖ്യ show_messages = o->show_messages;
+	ഘടന merge_options opt;
 
 	copy_merge_options(&opt, &o->merge_options);
 	opt.show_rename_progress = 0;
@@ -436,44 +436,44 @@ static int real_merge(struct merge_tree_options *o,
 	opt.branch1 = branch1;
 	opt.branch2 = branch2;
 
-	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+	എങ്കിൽ (merge_base) {
+		ഘടന വൃക്ഷം *base_വൃക്ഷം, *parent1_വൃക്ഷം, *parent2_വൃക്ഷം;
 
 		/*
 		 * We actually only need the trees because we already
 		 * have a merge base.
 		 */
-		struct object_id base_oid, head_oid, merge_oid;
+		ഘടന object_id base_oid, head_oid, merge_oid;
 
-		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
+		എങ്കിൽ (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
 			die(_("could not parse as tree '%s'"), merge_base);
-		base_tree = repo_parse_tree_indirect(the_repository,
+		base_വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository,
 						     &base_oid);
-		if (!base_tree)
+		എങ്കിൽ (!base_വൃക്ഷം)
 			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
-		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
+		എങ്കിൽ (repo_get_oid_treeish(the_repository, branch1, &head_oid))
 			die(_("could not parse as tree '%s'"), branch1);
-		parent1_tree = repo_parse_tree_indirect(the_repository,
+		parent1_വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository,
 							&head_oid);
-		if (!parent1_tree)
+		എങ്കിൽ (!parent1_വൃക്ഷം)
 			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
-		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
+		എങ്കിൽ (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
 			die(_("could not parse as tree '%s'"), branch2);
-		parent2_tree = repo_parse_tree_indirect(the_repository,
+		parent2_വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository,
 							&merge_oid);
-		if (!parent2_tree)
+		എങ്കിൽ (!parent2_വൃക്ഷം)
 			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
 
 		opt.ancestor = merge_base;
-		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
-	} else {
+		merge_incore_nonrecursive(&opt, base_വൃക്ഷം, parent1_വൃക്ഷം, parent2_വൃക്ഷം, &result);
+	} അല്ലെങ്കിൽ {
 		parent1 = get_merge_parent(branch1);
-		if (!parent1)
+		എങ്കിൽ (!parent1)
 			help_unknown_ref(branch1, "merge-tree",
 					 _("not something we can merge"));
 
 		parent2 = get_merge_parent(branch2);
-		if (!parent2)
+		എങ്കിൽ (!parent2)
 			help_unknown_ref(branch2, "merge-tree",
 					 _("not something we can merge"));
 
@@ -481,80 +481,80 @@ static int real_merge(struct merge_tree_options *o,
 		 * Get the merge bases, in reverse order; see comment above
 		 * merge_incore_recursive in merge-ort.h
 		 */
-		if (repo_get_merge_bases(the_repository, parent1,
+		എങ്കിൽ (repo_get_merge_bases(the_repository, parent1,
 					 parent2, &merge_bases) < 0)
 			exit(128);
-		if (!merge_bases && !o->allow_unrelated_histories)
+		എങ്കിൽ (!merge_bases && !o->allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		merge_bases = commit_list_reverse(merge_bases);
 		merge_incore_recursive(&opt, merge_bases, parent1, parent2, &result);
 		commit_list_free(merge_bases);
 	}
 
-	if (result.clean < 0)
+	എങ്കിൽ (result.clean < 0)
 		die(_("failure to merge"));
 
-	if (o->merge_options.mergeability_only)
-		goto cleanup;
+	എങ്കിൽ (o->merge_options.mergeability_only)
+		പോകുക cleanup;
 
-	if (show_messages == -1)
+	എങ്കിൽ (show_messages == -1)
 		show_messages = !result.clean;
 
-	if (o->use_stdin)
-		printf("%d%c", result.clean, line_termination);
-	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
-	if (!result.clean) {
-		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
-		const char *last = NULL;
+	എങ്കിൽ (o->use_stdin)
+		printf("%d%c", result.clean, വരി_termination);
+	printf("%s%c", oid_to_hex(&result.വൃക്ഷം->object.oid), വരി_termination);
+	എങ്കിൽ (!result.clean) {
+		ഘടന string_list conflicted_files = STRING_LIST_INIT_NODUP;
+		സ്ഥിരം അക്ഷരം *last = ശൂന്യ;
 
 		merge_get_conflicted_files(&result, &conflicted_files);
-		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
-			if (!o->name_only)
+		വേണ്ടി (size_t i = 0; i < conflicted_files.nr; i++) {
+			സ്ഥിരം അക്ഷരം *name = conflicted_files.ഇനങ്ങൾ[i].string;
+			ഘടന stage_info *c = conflicted_files.ഇനങ്ങൾ[i].util;
+			എങ്കിൽ (!o->name_only)
 				printf("%06o %s %d\t",
 				       c->mode, oid_to_hex(&c->oid), c->stage);
-			else if (last && !strcmp(last, name))
-				continue;
+			അല്ലെങ്കിൽ എങ്കിൽ (last && !strcmp(last, name))
+				തുടരുക;
 			write_name_quoted_relative(
-				name, prefix, stdout, line_termination);
+				name, prefix, stdout, വരി_termination);
 			last = name;
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
-	if (show_messages) {
-		putchar(line_termination);
-		merge_display_update_messages(&opt, line_termination == '\0',
+	എങ്കിൽ (show_messages) {
+		putchar(വരി_termination);
+		merge_display_update_messages(&opt, വരി_termination == '\0',
 					      &result);
 	}
-	if (o->use_stdin)
-		putchar(line_termination);
+	എങ്കിൽ (o->use_stdin)
+		putchar(വരി_termination);
 
 cleanup:
 	merge_finalize(&opt, &result);
 	clear_merge_options(&opt);
-	return !result.clean; /* result.clean < 0 handled above */
+	തിരികെ !result.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_merge_വൃക്ഷം(പൂർണ്ണസംഖ്യ argc,
+		   സ്ഥിരം അക്ഷരം **argv,
+		   സ്ഥിരം അക്ഷരം *prefix,
+		   ഘടന repository *repo UNUSED)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
-	struct strvec xopts = STRVEC_INIT;
-	int expected_remaining_argc;
-	int original_argc;
-	const char *merge_base = NULL;
-	int ret;
-	int quiet = 0;
+	ഘടന merge_വൃക്ഷം_options o = { .show_messages = -1 };
+	ഘടന strvec xopts = STRVEC_INIT;
+	പൂർണ്ണസംഖ്യ expected_remaining_argc;
+	പൂർണ്ണസംഖ്യ original_argc;
+	സ്ഥിരം അക്ഷരം *merge_base = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ ret;
+	പൂർണ്ണസംഖ്യ quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	സ്ഥിരം അക്ഷരം * സ്ഥിരം merge_വൃക്ഷം_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
-		NULL
+		ശൂന്യ
 	};
-	struct option mt_options[] = {
+	ഘടന option mt_options[] = {
 		OPT_CMDMODE(0, "write-tree", &o.mode,
 			    N_("do a real merge instead of a trivial merge"),
 			    MODE_REAL),
@@ -566,7 +566,7 @@ int cmd_merge_tree(int argc,
 			   &quiet,
 			   N_("suppress all output; only exit status wanted"),
 			   PARSE_OPT_NONEG),
-		OPT_SET_INT('z', NULL, &line_termination,
+		OPT_SET_INT('z', ശൂന്യ, &വരി_termination,
 			    N_("separate paths with the NUL character"), '\0'),
 		OPT_BOOL_F(0, "name-only",
 			   &o.name_only,
@@ -595,56 +595,56 @@ int cmd_merge_tree(int argc,
 	/* Parse arguments */
 	original_argc = argc - 1; /* ignoring argv[0] */
 	argc = parse_options(argc, argv, prefix, mt_options,
-			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
+			     merge_വൃക്ഷം_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (quiet && o.show_messages == -1)
+	എങ്കിൽ (quiet && o.show_messages == -1)
 		o.show_messages = 0;
 	o.merge_options.mergeability_only = quiet;
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
 	die_for_incompatible_opt2(quiet, "--quiet", o.name_only, "--name-only");
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
-	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
+	die_for_incompatible_opt2(quiet, "--quiet", !വരി_termination, "-z");
 
-	if (xopts.nr && o.mode == MODE_TRIVIAL)
+	എങ്കിൽ (xopts.nr && o.mode == MODE_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
-	for (size_t x = 0; x < xopts.nr; x++)
-		if (parse_merge_opt(&o.merge_options, xopts.v[x]))
+	വേണ്ടി (size_t x = 0; x < xopts.nr; x++)
+		എങ്കിൽ (parse_merge_opt(&o.merge_options, xopts.v[x]))
 			die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 	/* Handle --stdin */
-	if (o.use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
+	എങ്കിൽ (o.use_stdin) {
+		ഘടന strbuf buf = STRBUF_INIT;
 
-		if (o.mode == MODE_TRIVIAL)
+		എങ്കിൽ (o.mode == MODE_TRIVIAL)
 			die(_("--trivial-merge is incompatible with all other options"));
-		if (merge_base)
+		എങ്കിൽ (merge_base)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
-		line_termination = '\0';
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
-			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+		വരി_termination = '\0';
+		ആകുമ്പോൾ (strbuf_getline_lf(&buf, stdin) != EOF) {
+			ഘടന string_list split = STRING_LIST_INIT_NODUP;
+			സ്ഥിരം അക്ഷരം *നിവേശം_merge_base = ശൂന്യ;
 
 			string_list_split_in_place_f(&split, buf.buf, " ", -1,
 						     STRING_LIST_SPLIT_TRIM);
 
-			if (split.nr < 2)
+			എങ്കിൽ (split.nr < 2)
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
-				input_merge_base = split.items[0].string;
+			എങ്കിൽ (!strcmp(split.ഇനങ്ങൾ[1].string, "--")) {
+				നിവേശം_merge_base = split.ഇനങ്ങൾ[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
-				real_merge(&o, input_merge_base,
-					   split.items[2].string, split.items[3].string,
+			എങ്കിൽ (നിവേശം_merge_base && split.nr == 4) {
+				real_merge(&o, നിവേശം_merge_base,
+					   split.ഇനങ്ങൾ[2].string, split.ഇനങ്ങൾ[3].string,
 					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
-				real_merge(&o, NULL,
-					   split.items[0].string, split.items[1].string,
+			} അല്ലെങ്കിൽ എങ്കിൽ (!നിവേശം_merge_base && split.nr == 2) {
+				real_merge(&o, ശൂന്യ,
+					   split.ഇനങ്ങൾ[0].string, split.ഇനങ്ങൾ[1].string,
 					   prefix);
-			} else {
+			} അല്ലെങ്കിൽ {
 				die(_("malformed input line: '%s'."), buf.buf);
 			}
 			maybe_flush_or_die(stdout, "stdout");
@@ -654,50 +654,50 @@ int cmd_merge_tree(int argc,
 		strbuf_release(&buf);
 
 		ret = 0;
-		goto out;
+		പോകുക out;
 	}
 
 	/* Figure out which mode to use */
-	switch (o.mode) {
-	default:
+	തിരഞ്ഞെടുപ്പ് (o.mode) {
+	സ്ഥിരസ്ഥിതി:
 		BUG("unexpected command mode %d", o.mode);
-	case MODE_UNKNOWN:
-		switch (argc) {
-		default:
-			usage_with_options(merge_tree_usage, mt_options);
-		case 2:
+	അവസ്ഥ MODE_UNKNOWN:
+		തിരഞ്ഞെടുപ്പ് (argc) {
+		സ്ഥിരസ്ഥിതി:
+			usage_with_options(merge_വൃക്ഷം_usage, mt_options);
+		അവസ്ഥ 2:
 			o.mode = MODE_REAL;
-			break;
-		case 3:
+			നിർത്തുക;
+		അവസ്ഥ 3:
 			o.mode = MODE_TRIVIAL;
-			break;
+			നിർത്തുക;
 		}
 		expected_remaining_argc = argc;
-		break;
-	case MODE_REAL:
+		നിർത്തുക;
+	അവസ്ഥ MODE_REAL:
 		expected_remaining_argc = 2;
-		break;
-	case MODE_TRIVIAL:
+		നിർത്തുക;
+	അവസ്ഥ MODE_TRIVIAL:
 		expected_remaining_argc = 3;
 		/* Removal of `--trivial-merge` is expected */
 		original_argc--;
-		break;
+		നിർത്തുക;
 	}
-	if (o.mode == MODE_TRIVIAL && argc < original_argc)
+	എങ്കിൽ (o.mode == MODE_TRIVIAL && argc < original_argc)
 		die(_("--trivial-merge is incompatible with all other options"));
 
-	if (argc != expected_remaining_argc)
-		usage_with_options(merge_tree_usage, mt_options);
+	എങ്കിൽ (argc != expected_remaining_argc)
+		usage_with_options(merge_വൃക്ഷം_usage, mt_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
 	/* Do the relevant type of merge */
-	if (o.mode == MODE_REAL)
+	എങ്കിൽ (o.mode == MODE_REAL)
 		ret = real_merge(&o, merge_base, argv[0], argv[1], prefix);
-	else
+	അല്ലെങ്കിൽ
 		ret = trivial_merge(argv[0], argv[1], argv[2]);
 
 out:
 	strvec_clear(&xopts);
-	return ret;
+	തിരികെ ret;
 }

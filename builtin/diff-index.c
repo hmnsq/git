@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "commit.h"
-#include "preload-index.h"
-#include "revision.h"
-#include "setup.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "diff.h"
+#അന്തര്ഭാവ "diff-merges.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "preload-index.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "setup.h"
 
-static const char diff_cache_usage[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം diff_cache_usage[] =
 "git diff-index [-m] [--cached] [--merge-base] "
 "[<common-diff-options>] <tree-ish> [<path>...]"
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-int cmd_diff_index(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_diff_index(പൂർണ്ണസംഖ്യ argc,
+		   സ്ഥിരം അക്ഷരം **argv,
+		   സ്ഥിരം അക്ഷരം *prefix,
+		   ഘടന repository *repo UNUSED)
 {
-	struct rev_info rev;
-	unsigned int option = 0;
-	int i;
-	int result;
+	ഘടന rev_info rev;
+	unsigned പൂർണ്ണസംഖ്യ option = 0;
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ result;
 
 	show_usage_if_asked(argc, argv, diff_cache_usage);
 
-	repo_config(the_repository, git_diff_basic_config, NULL); /* no "diff" UI options */
+	repo_config(the_repository, git_diff_basic_config, ശൂന്യ); /* no "diff" UI options */
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
@@ -43,20 +43,20 @@ int cmd_diff_index(int argc,
 	 */
 	diff_merges_suppress_m_parsing();
 
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	argc = setup_revisions(argc, argv, &rev, ശൂന്യ);
+	വേണ്ടി (i = 1; i < argc; i++) {
+		സ്ഥിരം അക്ഷരം *arg = argv[i];
 
-		if (!strcmp(arg, "--cached"))
+		എങ്കിൽ (!strcmp(arg, "--cached"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else if (!strcmp(arg, "-m"))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(arg, "-m"))
 			rev.match_missing = 1;
-		else
+		അല്ലെങ്കിൽ
 			usage(diff_cache_usage);
 	}
-	if (!rev.diffopt.output_format)
+	എങ്കിൽ (!rev.diffopt.output_format)
 		rev.diffopt.output_format = DIFF_FORMAT_RAW;
 
 	rev.diffopt.rotate_to_strict = 1;
@@ -65,21 +65,21 @@ int cmd_diff_index(int argc,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (rev.pending.nr != 1 ||
-	    rev.max_count != -1 || rev.min_age != -1 || rev.max_age != -1)
+	എങ്കിൽ (rev.pending.nr != 1 ||
+	    rev.max_എണ്ണം != -1 || rev.min_age != -1 || rev.max_age != -1)
 		usage(diff_cache_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+	എങ്കിൽ (!(option & DIFF_INDEX_CACHED)) {
+		setup_work_വൃക്ഷം(the_repository);
+		എങ്കിൽ (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
 			perror("repo_read_index_preload");
-			return -1;
+			തിരികെ -1;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (repo_read_index(the_repository) < 0) {
 		perror("repo_read_index");
-		return -1;
+		തിരികെ -1;
 	}
 	run_diff_index(&rev, option);
 	result = diff_result_code(&rev);
 	release_revisions(&rev);
-	return result;
+	തിരികെ result;
 }

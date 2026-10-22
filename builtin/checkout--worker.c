@@ -1,34 +1,34 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "entry.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parallel-checkout.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "read-cache-ll.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "entry.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parallel-checkout.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "pkt-line.h"
+#അന്തര്ഭാവ "read-cache-ll.h"
 
-static void packet_to_pc_item(const char *buffer, int len,
-			      struct parallel_checkout_item *pc_item)
+സ്ഥിതം ശൂന്യം packet_to_pc_item(സ്ഥിരം അക്ഷരം *buffer, പൂർണ്ണസംഖ്യ len,
+			      ഘടന parallel_checkout_item *pc_item)
 {
-	const struct pc_item_fixed_portion *fixed_portion;
-	const char *variant;
-	char *encoding;
+	സ്ഥിരം ഘടന pc_item_fixed_portion *fixed_portion;
+	സ്ഥിരം അക്ഷരം *variant;
+	അക്ഷരം *encoding;
 
-	if (len < sizeof(struct pc_item_fixed_portion))
+	എങ്കിൽ (len < വലുപ്പം(ഘടന pc_item_fixed_portion))
 		BUG("checkout worker received too short item (got %dB, exp %dB)",
-		    len, (int)sizeof(struct pc_item_fixed_portion));
+		    len, (പൂർണ്ണസംഖ്യ)വലുപ്പം(ഘടന pc_item_fixed_portion));
 
-	fixed_portion = (struct pc_item_fixed_portion *)buffer;
+	fixed_portion = (ഘടന pc_item_fixed_portion *)buffer;
 
-	if (len - sizeof(struct pc_item_fixed_portion) !=
-		fixed_portion->name_len + fixed_portion->working_tree_encoding_len)
+	എങ്കിൽ (len - വലുപ്പം(ഘടന pc_item_fixed_portion) !=
+		fixed_portion->name_len + fixed_portion->working_വൃക്ഷം_encoding_len)
 		BUG("checkout worker received corrupted item");
 
-	variant = buffer + sizeof(struct pc_item_fixed_portion);
+	variant = buffer + വലുപ്പം(ഘടന pc_item_fixed_portion);
 
 	/*
 	 * Note: the main process uses zero length to communicate that the
@@ -36,16 +36,16 @@ static void packet_to_pc_item(const char *buffer, int len,
 	 * actual empty string, since convert_attrs() never sets
 	 * ca.working_tree_enconding to "".
 	 */
-	if (fixed_portion->working_tree_encoding_len) {
+	എങ്കിൽ (fixed_portion->working_വൃക്ഷം_encoding_len) {
 		encoding = xmemdupz(variant,
-				    fixed_portion->working_tree_encoding_len);
-		variant += fixed_portion->working_tree_encoding_len;
-	} else {
-		encoding = NULL;
+				    fixed_portion->working_വൃക്ഷം_encoding_len);
+		variant += fixed_portion->working_വൃക്ഷം_encoding_len;
+	} അല്ലെങ്കിൽ {
+		encoding = ശൂന്യ;
 	}
 
-	memset(pc_item, 0, sizeof(*pc_item));
-	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, NULL);
+	memset(pc_item, 0, വലുപ്പം(*pc_item));
+	pc_item->ce = make_empty_transient_cache_entry(fixed_portion->name_len, ശൂന്യ);
 	pc_item->ce->ce_namelen = fixed_portion->name_len;
 	pc_item->ce->ce_mode = fixed_portion->ce_mode;
 	memcpy(pc_item->ce->name, variant, pc_item->ce->ce_namelen);
@@ -54,54 +54,54 @@ static void packet_to_pc_item(const char *buffer, int len,
 	pc_item->id = fixed_portion->id;
 	pc_item->ca.crlf_action = fixed_portion->crlf_action;
 	pc_item->ca.ident = fixed_portion->ident;
-	pc_item->ca.working_tree_encoding = encoding;
+	pc_item->ca.working_വൃക്ഷം_encoding = encoding;
 }
 
-static void report_result(struct parallel_checkout_item *pc_item)
+സ്ഥിതം ശൂന്യം report_result(ഘടന parallel_checkout_item *pc_item)
 {
-	struct pc_item_result res = { 0 };
+	ഘടന pc_item_result res = { 0 };
 	size_t size;
 
 	res.id = pc_item->id;
 	res.status = pc_item->status;
 
-	if (pc_item->status == PC_ITEM_WRITTEN) {
+	എങ്കിൽ (pc_item->status == PC_ITEM_WRITTEN) {
 		res.st = pc_item->st;
-		size = sizeof(res);
-	} else {
+		size = വലുപ്പം(res);
+	} അല്ലെങ്കിൽ {
 		size = PC_ITEM_RESULT_BASE_SIZE;
 	}
 
-	packet_write(1, (const char *)&res, size);
+	packet_write(1, (സ്ഥിരം അക്ഷരം *)&res, size);
 }
 
 /* Free the worker-side malloced data, but not pc_item itself. */
-static void release_pc_item_data(struct parallel_checkout_item *pc_item)
+സ്ഥിതം ശൂന്യം release_pc_item_data(ഘടന parallel_checkout_item *pc_item)
 {
-	free((char *)pc_item->ca.working_tree_encoding);
+	സ്വതന്ത്രം((അക്ഷരം *)pc_item->ca.working_വൃക്ഷം_encoding);
 	discard_cache_entry(pc_item->ce);
 }
 
-static void worker_loop(struct checkout *state)
+സ്ഥിതം ശൂന്യം worker_loop(ഘടന checkout *state)
 {
-	struct parallel_checkout_item *items = NULL;
+	ഘടന parallel_checkout_item *ഇനങ്ങൾ = ശൂന്യ;
 	size_t i, nr = 0, alloc = 0;
 
-	while (1) {
-		int len = packet_read(0, packet_buffer, sizeof(packet_buffer),
+	ആകുമ്പോൾ (1) {
+		പൂർണ്ണസംഖ്യ len = packet_read(0, packet_buffer, വലുപ്പം(packet_buffer),
 				      0);
 
-		if (len < 0)
+		എങ്കിൽ (len < 0)
 			BUG("packet_read() returned negative value");
-		else if (!len)
-			break;
+		അല്ലെങ്കിൽ എങ്കിൽ (!len)
+			നിർത്തുക;
 
-		ALLOC_GROW(items, nr + 1, alloc);
-		packet_to_pc_item(packet_buffer, len, &items[nr++]);
+		ALLOC_GROW(ഇനങ്ങൾ, nr + 1, alloc);
+		packet_to_pc_item(packet_buffer, len, &ഇനങ്ങൾ[nr++]);
 	}
 
-	for (i = 0; i < nr; i++) {
-		struct parallel_checkout_item *pc_item = &items[i];
+	വേണ്ടി (i = 0; i < nr; i++) {
+		ഘടന parallel_checkout_item *pc_item = &ഇനങ്ങൾ[i];
 		write_pc_item(pc_item, state);
 		report_result(pc_item);
 		release_pc_item_data(pc_item);
@@ -109,21 +109,21 @@ static void worker_loop(struct checkout *state)
 
 	packet_flush(1);
 
-	free(items);
+	സ്വതന്ത്രം(ഇനങ്ങൾ);
 }
 
-static const char * const checkout_worker_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം checkout_worker_usage[] = {
 	N_("git checkout--worker [<options>]"),
-	NULL
+	ശൂന്യ
 };
 
-int cmd_checkout__worker(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_checkout__worker(പൂർണ്ണസംഖ്യ argc,
+			 സ്ഥിരം അക്ഷരം **argv,
+			 സ്ഥിരം അക്ഷരം *prefix,
+			 ഘടന repository *repo UNUSED)
 {
-	struct checkout state = CHECKOUT_INIT;
-	struct option checkout_worker_options[] = {
+	ഘടന checkout state = CHECKOUT_INIT;
+	ഘടന option checkout_worker_options[] = {
 		OPT_STRING(0, "prefix", &state.base_dir, N_("string"),
 			N_("when creating files, prepend <string>")),
 		OPT_END()
@@ -133,13 +133,13 @@ int cmd_checkout__worker(int argc,
 					 checkout_worker_usage,
 					 checkout_worker_options);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 	argc = parse_options(argc, argv, prefix, checkout_worker_options,
 			     checkout_worker_usage, 0);
-	if (argc > 0)
+	എങ്കിൽ (argc > 0)
 		usage_with_options(checkout_worker_usage, checkout_worker_options);
 
-	if (state.base_dir)
+	എങ്കിൽ (state.base_dir)
 		state.base_dir_len = strlen(state.base_dir);
 
 	/*
@@ -150,5 +150,5 @@ int cmd_checkout__worker(int argc,
 	state.refresh_cache = 1;
 
 	worker_loop(&state);
-	return 0;
+	തിരികെ 0;
 }

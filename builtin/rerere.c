@@ -1,68 +1,68 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "rerere.h"
-#include "strbuf.h"
-#include "string-list.h"
-#include "xdiff/xdiff.h"
-#include "xdiff-interface.h"
-#include "pathspec.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "rerere.h"
+#അന്തര്ഭാവ "strbuf.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "xdiff/xdiff.h"
+#അന്തര്ഭാവ "xdiff-interface.h"
+#അന്തര്ഭാവ "pathspec.h"
 
-static const char * const rerere_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം rerere_usage[] = {
 	N_("git rerere [clear | forget <pathspec>... | diff | status | remaining | gc]"),
-	NULL,
+	ശൂന്യ,
 };
 
-static int outf(void *dummy UNUSED, mmfile_t *ptr, int nbuf)
+സ്ഥിതം പൂർണ്ണസംഖ്യ outf(ശൂന്യം *dummy UNUSED, mmfile_t *ptr, പൂർണ്ണസംഖ്യ nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		if (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
-			return -1;
-	return 0;
+	പൂർണ്ണസംഖ്യ i;
+	വേണ്ടി (i = 0; i < nbuf; i++)
+		എങ്കിൽ (write_in_full(1, ptr[i].ptr, ptr[i].size) < 0)
+			തിരികെ -1;
+	തിരികെ 0;
 }
 
-static int diff_two(const char *file1, const char *label1,
-		const char *file2, const char *label2)
+സ്ഥിതം പൂർണ്ണസംഖ്യ diff_two(സ്ഥിരം അക്ഷരം *file1, സ്ഥിരം അക്ഷരം *label1,
+		സ്ഥിരം അക്ഷരം *file2, സ്ഥിരം അക്ഷരം *label2)
 {
 	xpparam_t xpp;
 	xdemitconf_t xecfg;
-	xdemitcb_t ecb = { .out_line = outf };
+	xdemitcb_t ecb = { .out_വരി = outf };
 	mmfile_t minus, plus;
-	int ret;
+	പൂർണ്ണസംഖ്യ ret;
 
-	if (read_mmfile(&minus, file1))
-		return -1;
-	if (read_mmfile(&plus, file2)) {
-		free(minus.ptr);
-		return -1;
+	എങ്കിൽ (read_mmfile(&minus, file1))
+		തിരികെ -1;
+	എങ്കിൽ (read_mmfile(&plus, file2)) {
+		സ്വതന്ത്രം(minus.ptr);
+		തിരികെ -1;
 	}
 
 	printf("--- a/%s\n+++ b/%s\n", label1, label2);
 	fflush(stdout);
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, വലുപ്പം(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, വലുപ്പം(xecfg));
 	xecfg.ctxlen = 3;
 	ret = xdi_diff(&minus, &plus, &xpp, &xecfg, &ecb);
 
-	free(minus.ptr);
-	free(plus.ptr);
-	return ret;
+	സ്വതന്ത്രം(minus.ptr);
+	സ്വതന്ത്രം(plus.ptr);
+	തിരികെ ret;
 }
 
-int cmd_rerere(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_rerere(പൂർണ്ണസംഖ്യ argc,
+	       സ്ഥിരം അക്ഷരം **argv,
+	       സ്ഥിരം അക്ഷരം *prefix,
+	       ഘടന repository *repo UNUSED)
 {
-	struct string_list merge_rr = STRING_LIST_INIT_DUP;
-	int autoupdate = -1, flags = 0;
+	ഘടന string_list merge_rr = STRING_LIST_INIT_DUP;
+	പൂർണ്ണസംഖ്യ autoupdate = -1, flags = 0;
 
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_SET_INT(0, "rerere-autoupdate", &autoupdate,
 			N_("register clean resolutions in index"), 1),
 		OPT_END(),
@@ -70,21 +70,21 @@ int cmd_rerere(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, rerere_usage, 0);
 
-	repo_config(the_repository, git_xmerge_config, NULL);
+	repo_config(the_repository, git_xmerge_config, ശൂന്യ);
 
-	if (autoupdate == 1)
+	എങ്കിൽ (autoupdate == 1)
 		flags = RERERE_AUTOUPDATE;
-	if (autoupdate == 0)
+	എങ്കിൽ (autoupdate == 0)
 		flags = RERERE_NOAUTOUPDATE;
 
-	if (argc < 1)
-		return repo_rerere(the_repository, flags);
+	എങ്കിൽ (argc < 1)
+		തിരികെ repo_rerere(the_repository, flags);
 
-	if (!strcmp(argv[0], "forget")) {
-		struct pathspec pathspec;
-		int ret;
+	എങ്കിൽ (!strcmp(argv[0], "forget")) {
+		ഘടന pathspec pathspec;
+		പൂർണ്ണസംഖ്യ ret;
 
-		if (argc < 2)
+		എങ്കിൽ (argc < 2)
 			warning(_("'git rerere forget' without paths is deprecated"));
 		parse_pathspec(&pathspec, 0, PATHSPEC_PREFER_CWD,
 			       prefix, argv + 1);
@@ -92,45 +92,45 @@ int cmd_rerere(int argc,
 		ret = rerere_forget(the_repository, &pathspec);
 
 		clear_pathspec(&pathspec);
-		return ret;
+		തിരികെ ret;
 	}
 
-	if (!strcmp(argv[0], "clear")) {
+	എങ്കിൽ (!strcmp(argv[0], "clear")) {
 		rerere_clear(the_repository, &merge_rr);
-	} else if (!strcmp(argv[0], "gc"))
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[0], "gc"))
 		rerere_gc(the_repository, &merge_rr);
-	else if (!strcmp(argv[0], "status")) {
-		if (setup_rerere(the_repository, &merge_rr,
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[0], "status")) {
+		എങ്കിൽ (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++)
-			printf("%s\n", merge_rr.items[i].string);
-	} else if (!strcmp(argv[0], "remaining")) {
+			തിരികെ 0;
+		വേണ്ടി (size_t i = 0; i < merge_rr.nr; i++)
+			printf("%s\n", merge_rr.ഇനങ്ങൾ[i].string);
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[0], "remaining")) {
 		rerere_remaining(the_repository, &merge_rr);
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			if (merge_rr.items[i].util != RERERE_RESOLVED)
-				printf("%s\n", merge_rr.items[i].string);
-			else
+		വേണ്ടി (size_t i = 0; i < merge_rr.nr; i++) {
+			എങ്കിൽ (merge_rr.ഇനങ്ങൾ[i].util != RERERE_RESOLVED)
+				printf("%s\n", merge_rr.ഇനങ്ങൾ[i].string);
+			അല്ലെങ്കിൽ
 				/* prepare for later call to
 				 * string_list_clear() */
-				merge_rr.items[i].util = NULL;
+				merge_rr.ഇനങ്ങൾ[i].util = ശൂന്യ;
 		}
-	} else if (!strcmp(argv[0], "diff")) {
-		struct strbuf buf = STRBUF_INIT;
-		if (setup_rerere(the_repository, &merge_rr,
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[0], "diff")) {
+		ഘടന strbuf buf = STRBUF_INIT;
+		എങ്കിൽ (setup_rerere(the_repository, &merge_rr,
 				 flags | RERERE_READONLY) < 0)
-			return 0;
-		for (size_t i = 0; i < merge_rr.nr; i++) {
-			const char *path = merge_rr.items[i].string;
-			const struct rerere_id *id = merge_rr.items[i].util;
-			if (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
-				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, NULL));
+			തിരികെ 0;
+		വേണ്ടി (size_t i = 0; i < merge_rr.nr; i++) {
+			സ്ഥിരം അക്ഷരം *path = merge_rr.ഇനങ്ങൾ[i].string;
+			സ്ഥിരം ഘടന rerere_id *id = merge_rr.ഇനങ്ങൾ[i].util;
+			എങ്കിൽ (diff_two(rerere_path(&buf, id, "preimage"), path, path, path))
+				die(_("unable to generate diff for '%s'"), rerere_path(&buf, id, ശൂന്യ));
 		}
 
 		strbuf_release(&buf);
-	} else
+	} അല്ലെങ്കിൽ
 		usage_with_options(rerere_usage, options);
 
 	string_list_clear(&merge_rr, 1);
-	return 0;
+	തിരികെ 0;
 }

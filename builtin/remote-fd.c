@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "transport.h"
 
-static const char usage_msg[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം usage_സന്ദേശം[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+സ്ഥിതം ശൂന്യം command_loop(പൂർണ്ണസംഖ്യ നിവേശം_fd, പൂർണ്ണസംഖ്യ output_fd)
 {
-	char buffer[MAXCOMMAND];
+	അക്ഷരം buffer[MAXCOMMAND];
 
-	while (1) {
+	ആകുമ്പോൾ (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		എങ്കിൽ (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			എങ്കിൽ (ferror(stdin))
 				die("Input error");
-			return;
+			തിരികെ;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ആകുമ്പോൾ (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		എങ്കിൽ (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			എങ്കിൽ (bidirectional_transfer_loop(നിവേശം_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			തിരികെ;
+		} അല്ലെങ്കിൽ {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_remote_fd(പൂർണ്ണസംഖ്യ argc,
+		  സ്ഥിരം അക്ഷരം **argv,
+		  സ്ഥിരം അക്ഷരം *prefix,
+		  ഘടന repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	പൂർണ്ണസംഖ്യ നിവേശം_fd = -1;
+	പൂർണ്ണസംഖ്യ output_fd = -1;
+	അക്ഷരം *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_സന്ദേശം);
+	എങ്കിൽ (argc != 3)
+		usage(usage_സന്ദേശം);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	നിവേശം_fd = (പൂർണ്ണസംഖ്യ)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	എങ്കിൽ ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	എങ്കിൽ (*end == '/' || !*end) {
+		output_fd = നിവേശം_fd;
+	} അല്ലെങ്കിൽ {
+		അക്ഷരം *end2;
+		output_fd = (പൂർണ്ണസംഖ്യ)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		എങ്കിൽ ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(നിവേശം_fd, output_fd);
+	തിരികെ 0;
 }

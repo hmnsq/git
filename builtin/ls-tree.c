@@ -4,297 +4,297 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
+#അന്തര്ഭാവ "builtin.h"
 
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "odb.h"
-#include "tree.h"
-#include "path.h"
-#include "quote.h"
-#include "parse-options.h"
-#include "pathspec.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "pathspec.h"
 
-static const char * const ls_tree_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം ls_വൃക്ഷം_usage[] = {
 	N_("git ls-tree [<options>] <tree-ish> [<path>...]"),
-	NULL
+	ശൂന്യ
 };
 
-static void expand_objectsize(struct strbuf *line, const struct object_id *oid,
-			      const enum object_type type, unsigned int padded)
+സ്ഥിതം ശൂന്യം expand_objectsize(ഘടന strbuf *വരി, സ്ഥിരം ഘടന object_id *oid,
+			      സ്ഥിരം എണ്ണൽ object_type type, unsigned പൂർണ്ണസംഖ്യ padded)
 {
-	static const char padding[] = "       ";
+	സ്ഥിതം സ്ഥിരം അക്ഷരം padding[] = "       ";
 	size_t min_len = padded ? strlen(padding) : 0;
-	size_t orig_len = line->len;
+	size_t orig_len = വരി->len;
 	size_t len;
 
-	if (type == OBJ_BLOB) {
+	എങ്കിൽ (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) < 0)
+		എങ്കിൽ (odb_read_object_info(the_repository->objects, oid, &size) < 0)
 			die(_("could not get object info about '%s'"),
 			    oid_to_hex(oid));
-		strbuf_add_uint(line, size);
-	} else {
-		strbuf_addstr(line, "-");
+		strbuf_add_uint(വരി, size);
+	} അല്ലെങ്കിൽ {
+		strbuf_addstr(വരി, "-");
 	}
-	len = line->len - orig_len;
-	if (len < min_len)
-		strbuf_insert(line, orig_len, padding, min_len - len);
+	len = വരി->len - orig_len;
+	എങ്കിൽ (len < min_len)
+		strbuf_തിരുകുക(വരി, orig_len, padding, min_len - len);
 }
 
-struct ls_tree_options {
+ഘടന ls_വൃക്ഷം_options {
 	unsigned null_termination:1;
-	int abbrev;
-	enum ls_tree_path_options {
+	പൂർണ്ണസംഖ്യ abbrev;
+	എണ്ണൽ ls_വൃക്ഷം_path_options {
 		LS_RECURSIVE = 1 << 0,
-		LS_TREE_ONLY = 1 << 1,
+		LS_വൃക്ഷം_ONLY = 1 << 1,
 		LS_SHOW_TREES = 1 << 2,
 	} ls_options;
-	struct pathspec pathspec;
-	const char *prefix;
-	const char *format;
+	ഘടന pathspec pathspec;
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *format;
 };
 
-static int show_recursive(struct ls_tree_options *options, const char *base,
-			  size_t baselen, const char *pathname)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_recursive(ഘടന ls_വൃക്ഷം_options *options, സ്ഥിരം അക്ഷരം *base,
+			  size_t baselen, സ്ഥിരം അക്ഷരം *pathname)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	if (options->ls_options & LS_RECURSIVE)
-		return 1;
+	എങ്കിൽ (options->ls_options & LS_RECURSIVE)
+		തിരികെ 1;
 
-	if (!options->pathspec.nr)
-		return 0;
+	എങ്കിൽ (!options->pathspec.nr)
+		തിരികെ 0;
 
-	for (i = 0; i < options->pathspec.nr; i++) {
-		const char *spec = options->pathspec.items[i].match;
+	വേണ്ടി (i = 0; i < options->pathspec.nr; i++) {
+		സ്ഥിരം അക്ഷരം *spec = options->pathspec.ഇനങ്ങൾ[i].match;
 		size_t len, speclen;
 
-		if (strncmp(base, spec, baselen))
-			continue;
+		എങ്കിൽ (strncmp(base, spec, baselen))
+			തുടരുക;
 		len = strlen(pathname);
 		spec += baselen;
 		speclen = strlen(spec);
-		if (speclen <= len)
-			continue;
-		if (spec[len] && spec[len] != '/')
-			continue;
-		if (memcmp(pathname, spec, len))
-			continue;
-		return 1;
+		എങ്കിൽ (speclen <= len)
+			തുടരുക;
+		എങ്കിൽ (spec[len] && spec[len] != '/')
+			തുടരുക;
+		എങ്കിൽ (memcmp(pathname, spec, len))
+			തുടരുക;
+		തിരികെ 1;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static int show_tree_fmt(const struct object_id *oid, struct strbuf *base,
-			 const char *pathname, unsigned mode, void *context)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വൃക്ഷം_fmt(സ്ഥിരം ഘടന object_id *oid, ഘടന strbuf *base,
+			 സ്ഥിരം അക്ഷരം *pathname, unsigned mode, ശൂന്യം *context)
 {
-	struct ls_tree_options *options = context;
-	int recurse = 0;
-	struct strbuf sb = STRBUF_INIT;
-	enum object_type type = object_type(mode);
-	const char *format = options->format;
+	ഘടന ls_വൃക്ഷം_options *options = context;
+	പൂർണ്ണസംഖ്യ recurse = 0;
+	ഘടന strbuf sb = STRBUF_INIT;
+	എണ്ണൽ object_type type = object_type(mode);
+	സ്ഥിരം അക്ഷരം *format = options->format;
 
-	if (type == OBJ_TREE && show_recursive(options, base->buf, base->len, pathname))
-		recurse = READ_TREE_RECURSIVE;
-	if (type == OBJ_TREE && recurse && !(options->ls_options & LS_SHOW_TREES))
-		return recurse;
-	if (type == OBJ_BLOB && (options->ls_options & LS_TREE_ONLY))
-		return 0;
+	എങ്കിൽ (type == OBJ_വൃക്ഷം && show_recursive(options, base->buf, base->len, pathname))
+		recurse = READ_വൃക്ഷം_RECURSIVE;
+	എങ്കിൽ (type == OBJ_വൃക്ഷം && recurse && !(options->ls_options & LS_SHOW_TREES))
+		തിരികെ recurse;
+	എങ്കിൽ (type == OBJ_BLOB && (options->ls_options & LS_വൃക്ഷം_ONLY))
+		തിരികെ 0;
 
-	while (strbuf_expand_step(&sb, &format)) {
+	ആകുമ്പോൾ (strbuf_expand_step(&sb, &format)) {
 		size_t len;
 
-		if (skip_prefix(format, "%", &format))
+		എങ്കിൽ (skip_prefix(format, "%", &format))
 			strbuf_addch(&sb, '%');
-		else if ((len = strbuf_expand_literal(&sb, format)))
+		അല്ലെങ്കിൽ എങ്കിൽ ((len = strbuf_expand_literal(&sb, format)))
 			format += len;
-		else if (skip_prefix(format, "(objectmode)", &format))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(format, "(objectmode)", &format))
 			strbuf_addf(&sb, "%06o", mode);
-		else if (skip_prefix(format, "(objecttype)", &format))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(format, "(objecttype)", &format))
 			strbuf_addstr(&sb, type_name(type));
-		else if (skip_prefix(format, "(objectsize:padded)", &format))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(format, "(objectsize:padded)", &format))
 			expand_objectsize(&sb, oid, type, 1);
-		else if (skip_prefix(format, "(objectsize)", &format))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(format, "(objectsize)", &format))
 			expand_objectsize(&sb, oid, type, 0);
-		else if (skip_prefix(format, "(objectname)", &format))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(format, "(objectname)", &format))
 			strbuf_add_unique_abbrev(&sb, oid, options->abbrev);
-		else if (skip_prefix(format, "(path)", &format)) {
-			const char *name;
-			const char *prefix = options->prefix;
-			struct strbuf sbuf = STRBUF_INIT;
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(format, "(path)", &format)) {
+			സ്ഥിരം അക്ഷരം *name;
+			സ്ഥിരം അക്ഷരം *prefix = options->prefix;
+			ഘടന strbuf sbuf = STRBUF_INIT;
 			size_t baselen = base->len;
 
 			strbuf_addstr(base, pathname);
 			name = relative_path(base->buf, prefix, &sbuf);
-			quote_c_style(name, &sb, NULL, 0);
+			quote_c_style(name, &sb, ശൂന്യ, 0);
 			strbuf_setlen(base, baselen);
 			strbuf_release(&sbuf);
-		} else
+		} അല്ലെങ്കിൽ
 			strbuf_expand_bad_format(format, "ls-tree");
 	}
 	strbuf_addch(&sb, options->null_termination ? '\0' : '\n');
 	fwrite(sb.buf, sb.len, 1, stdout);
 	strbuf_release(&sb);
-	return recurse;
+	തിരികെ recurse;
 }
 
-static int show_tree_common(struct ls_tree_options *options, int *recurse,
-			    struct strbuf *base, const char *pathname,
-			    enum object_type type)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വൃക്ഷം_common(ഘടന ls_വൃക്ഷം_options *options, പൂർണ്ണസംഖ്യ *recurse,
+			    ഘടന strbuf *base, സ്ഥിരം അക്ഷരം *pathname,
+			    എണ്ണൽ object_type type)
 {
-	int ret = -1;
+	പൂർണ്ണസംഖ്യ ret = -1;
 	*recurse = 0;
 
-	if (type == OBJ_BLOB) {
-		if (options->ls_options & LS_TREE_ONLY)
+	എങ്കിൽ (type == OBJ_BLOB) {
+		എങ്കിൽ (options->ls_options & LS_വൃക്ഷം_ONLY)
 			ret = 0;
-	} else if (type == OBJ_TREE &&
+	} അല്ലെങ്കിൽ എങ്കിൽ (type == OBJ_വൃക്ഷം &&
 		   show_recursive(options, base->buf, base->len, pathname)) {
-		*recurse = READ_TREE_RECURSIVE;
-		if (!(options->ls_options & LS_SHOW_TREES))
+		*recurse = READ_വൃക്ഷം_RECURSIVE;
+		എങ്കിൽ (!(options->ls_options & LS_SHOW_TREES))
 			ret = *recurse;
 	}
 
-	return ret;
+	തിരികെ ret;
 }
 
-static void show_tree_common_default_long(struct ls_tree_options *options,
-					  struct strbuf *base,
-					  const char *pathname,
-					  const size_t baselen)
+സ്ഥിതം ശൂന്യം show_വൃക്ഷം_common_default_long(ഘടന ls_വൃക്ഷം_options *options,
+					  ഘടന strbuf *base,
+					  സ്ഥിരം അക്ഷരം *pathname,
+					  സ്ഥിരം size_t baselen)
 {
-	const char *prefix = options->prefix;
+	സ്ഥിരം അക്ഷരം *prefix = options->prefix;
 
 	strbuf_addstr(base, pathname);
 
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	എങ്കിൽ (options->null_termination) {
+		ഘടന strbuf sb = STRBUF_INIT;
+		സ്ഥിരം അക്ഷരം *name = relative_path(base->buf, prefix, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} അല്ലെങ്കിൽ {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 
 	strbuf_setlen(base, baselen);
 }
 
-static int show_tree_default(const struct object_id *oid, struct strbuf *base,
-			     const char *pathname, unsigned mode,
-			     void *context)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വൃക്ഷം_default(സ്ഥിരം ഘടന object_id *oid, ഘടന strbuf *base,
+			     സ്ഥിരം അക്ഷരം *pathname, unsigned mode,
+			     ശൂന്യം *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
+	ഘടന ls_വൃക്ഷം_options *options = context;
+	പൂർണ്ണസംഖ്യ early;
+	പൂർണ്ണസംഖ്യ recurse;
+	എണ്ണൽ object_type type = object_type(mode);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_വൃക്ഷം_common(options, &recurse, base, pathname, type);
+	എങ്കിൽ (early >= 0)
+		തിരികെ early;
 
 	printf("%06o %s %s\t", mode, type_name(object_type(mode)),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev));
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	show_വൃക്ഷം_common_default_long(options, base, pathname, base->len);
+	തിരികെ recurse;
 }
 
-static int show_tree_long(const struct object_id *oid, struct strbuf *base,
-			  const char *pathname, unsigned mode,
-			  void *context)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വൃക്ഷം_long(സ്ഥിരം ഘടന object_id *oid, ഘടന strbuf *base,
+			  സ്ഥിരം അക്ഷരം *pathname, unsigned mode,
+			  ശൂന്യം *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	char size_text[24];
-	enum object_type type = object_type(mode);
+	ഘടന ls_വൃക്ഷം_options *options = context;
+	പൂർണ്ണസംഖ്യ early;
+	പൂർണ്ണസംഖ്യ recurse;
+	അക്ഷരം size_text[24];
+	എണ്ണൽ object_type type = object_type(mode);
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_വൃക്ഷം_common(options, &recurse, base, pathname, type);
+	എങ്കിൽ (early >= 0)
+		തിരികെ early;
 
-	if (type == OBJ_BLOB) {
+	എങ്കിൽ (type == OBJ_BLOB) {
 		size_t size;
-		if (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
-			xsnprintf(size_text, sizeof(size_text), "BAD");
-		else
-			xsnprintf(size_text, sizeof(size_text),
+		എങ്കിൽ (odb_read_object_info(the_repository->objects, oid, &size) == OBJ_BAD)
+			xsnprintf(size_text, വലുപ്പം(size_text), "BAD");
+		അല്ലെങ്കിൽ
+			xsnprintf(size_text, വലുപ്പം(size_text),
 				  "%" PRIuMAX, (uintmax_t)size);
-	} else {
-		xsnprintf(size_text, sizeof(size_text), "-");
+	} അല്ലെങ്കിൽ {
+		xsnprintf(size_text, വലുപ്പം(size_text), "-");
 	}
 
 	printf("%06o %s %s %7s\t", mode, type_name(type),
 	       repo_find_unique_abbrev(the_repository, oid, options->abbrev),
 	       size_text);
-	show_tree_common_default_long(options, base, pathname, base->len);
-	return recurse;
+	show_വൃക്ഷം_common_default_long(options, base, pathname, base->len);
+	തിരികെ recurse;
 }
 
-static int show_tree_name_only(const struct object_id *oid UNUSED,
-			       struct strbuf *base,
-			       const char *pathname, unsigned mode,
-			       void *context)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വൃക്ഷം_name_only(സ്ഥിരം ഘടന object_id *oid UNUSED,
+			       ഘടന strbuf *base,
+			       സ്ഥിരം അക്ഷരം *pathname, unsigned mode,
+			       ശൂന്യം *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	const size_t baselen = base->len;
-	enum object_type type = object_type(mode);
-	const char *prefix;
+	ഘടന ls_വൃക്ഷം_options *options = context;
+	പൂർണ്ണസംഖ്യ early;
+	പൂർണ്ണസംഖ്യ recurse;
+	സ്ഥിരം size_t baselen = base->len;
+	എണ്ണൽ object_type type = object_type(mode);
+	സ്ഥിരം അക്ഷരം *prefix;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_വൃക്ഷം_common(options, &recurse, base, pathname, type);
+	എങ്കിൽ (early >= 0)
+		തിരികെ early;
 
 	prefix = options->prefix;
 	strbuf_addstr(base, pathname);
-	if (options->null_termination) {
-		struct strbuf sb = STRBUF_INIT;
-		const char *name = relative_path(base->buf, prefix, &sb);
+	എങ്കിൽ (options->null_termination) {
+		ഘടന strbuf sb = STRBUF_INIT;
+		സ്ഥിരം അക്ഷരം *name = relative_path(base->buf, prefix, &sb);
 
 		fputs(name, stdout);
 		fputc('\0', stdout);
 
 		strbuf_release(&sb);
-	} else {
+	} അല്ലെങ്കിൽ {
 		write_name_quoted_relative(base->buf, prefix, stdout, '\n');
 	}
 	strbuf_setlen(base, baselen);
-	return recurse;
+	തിരികെ recurse;
 }
 
-static int show_tree_object(const struct object_id *oid, struct strbuf *base,
-			    const char *pathname, unsigned mode,
-			    void *context)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വൃക്ഷം_object(സ്ഥിരം ഘടന object_id *oid, ഘടന strbuf *base,
+			    സ്ഥിരം അക്ഷരം *pathname, unsigned mode,
+			    ശൂന്യം *context)
 {
-	struct ls_tree_options *options = context;
-	int early;
-	int recurse;
-	enum object_type type = object_type(mode);
-	const char *str;
+	ഘടന ls_വൃക്ഷം_options *options = context;
+	പൂർണ്ണസംഖ്യ early;
+	പൂർണ്ണസംഖ്യ recurse;
+	എണ്ണൽ object_type type = object_type(mode);
+	സ്ഥിരം അക്ഷരം *str;
 
-	early = show_tree_common(options, &recurse, base, pathname, type);
-	if (early >= 0)
-		return early;
+	early = show_വൃക്ഷം_common(options, &recurse, base, pathname, type);
+	എങ്കിൽ (early >= 0)
+		തിരികെ early;
 
 	str = repo_find_unique_abbrev(the_repository, oid, options->abbrev);
-	if (options->null_termination) {
+	എങ്കിൽ (options->null_termination) {
 		fputs(str, stdout);
 		fputc('\0', stdout);
-	} else  {
+	} അല്ലെങ്കിൽ  {
 		puts(str);
 	}
-	return recurse;
+	തിരികെ recurse;
 }
 
-enum ls_tree_cmdmode {
+എണ്ണൽ ls_വൃക്ഷം_cmdmode {
 	MODE_DEFAULT = 0,
 	MODE_LONG,
 	MODE_NAME_ONLY,
@@ -302,60 +302,60 @@ enum ls_tree_cmdmode {
 	MODE_OBJECT_ONLY,
 };
 
-struct ls_tree_cmdmode_to_fmt {
-	enum ls_tree_cmdmode mode;
-	const char *const fmt;
-	read_tree_fn_t fn;
+ഘടന ls_വൃക്ഷം_cmdmode_to_fmt {
+	എണ്ണൽ ls_വൃക്ഷം_cmdmode mode;
+	സ്ഥിരം അക്ഷരം *സ്ഥിരം fmt;
+	read_വൃക്ഷം_fn_t fn;
 };
 
-static struct ls_tree_cmdmode_to_fmt ls_tree_cmdmode_format[] = {
+സ്ഥിതം ഘടന ls_വൃക്ഷം_cmdmode_to_fmt ls_വൃക്ഷം_cmdmode_format[] = {
 	{
 		.mode = MODE_DEFAULT,
 		.fmt = "%(objectmode) %(objecttype) %(objectname)%x09%(path)",
-		.fn = show_tree_default,
+		.fn = show_വൃക്ഷം_default,
 	},
 	{
 		.mode = MODE_LONG,
 		.fmt = "%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)",
-		.fn = show_tree_long,
+		.fn = show_വൃക്ഷം_long,
 	},
 	{
 		.mode = MODE_NAME_ONLY, /* And MODE_NAME_STATUS */
 		.fmt = "%(path)",
-		.fn = show_tree_name_only,
+		.fn = show_വൃക്ഷം_name_only,
 	},
 	{
 		.mode = MODE_OBJECT_ONLY,
 		.fmt = "%(objectname)",
-		.fn = show_tree_object
+		.fn = show_വൃക്ഷം_object
 	},
 	{
 		/* fallback */
-		.fn = show_tree_default,
+		.fn = show_വൃക്ഷം_default,
 	},
 };
 
-int cmd_ls_tree(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_ls_വൃക്ഷം(പൂർണ്ണസംഖ്യ argc,
+		സ്ഥിരം അക്ഷരം **argv,
+		സ്ഥിരം അക്ഷരം *prefix,
+		ഘടന repository *repo UNUSED)
 {
-	struct object_id oid;
-	struct tree *tree;
-	int i, full_tree = 0;
-	int full_name = !prefix || !*prefix;
-	read_tree_fn_t fn = NULL;
-	enum ls_tree_cmdmode cmdmode = MODE_DEFAULT;
-	int null_termination = 0;
-	struct ls_tree_options options = { 0 };
-	const struct option ls_tree_options[] = {
-		OPT_BIT('d', NULL, &options.ls_options, N_("only show trees"),
-			LS_TREE_ONLY),
-		OPT_BIT('r', NULL, &options.ls_options, N_("recurse into subtrees"),
+	ഘടന object_id oid;
+	ഘടന വൃക്ഷം *വൃക്ഷം;
+	പൂർണ്ണസംഖ്യ i, full_വൃക്ഷം = 0;
+	പൂർണ്ണസംഖ്യ full_name = !prefix || !*prefix;
+	read_വൃക്ഷം_fn_t fn = ശൂന്യ;
+	എണ്ണൽ ls_വൃക്ഷം_cmdmode cmdmode = MODE_DEFAULT;
+	പൂർണ്ണസംഖ്യ null_termination = 0;
+	ഘടന ls_വൃക്ഷം_options options = { 0 };
+	സ്ഥിരം ഘടന option ls_വൃക്ഷം_options[] = {
+		OPT_BIT('d', ശൂന്യ, &options.ls_options, N_("only show trees"),
+			LS_വൃക്ഷം_ONLY),
+		OPT_BIT('r', ശൂന്യ, &options.ls_options, N_("recurse into subtrees"),
 			LS_RECURSIVE),
-		OPT_BIT('t', NULL, &options.ls_options, N_("show trees when recursing"),
+		OPT_BIT('t', ശൂന്യ, &options.ls_options, N_("show trees when recursing"),
 			LS_SHOW_TREES),
-		OPT_BOOL('z', NULL, &null_termination,
+		OPT_BOOL('z', ശൂന്യ, &null_termination,
 			 N_("terminate entries with NUL byte")),
 		OPT_CMDMODE('l', "long", &cmdmode, N_("include object size"),
 			    MODE_LONG),
@@ -366,7 +366,7 @@ int cmd_ls_tree(int argc,
 		OPT_CMDMODE(0, "object-only", &cmdmode, N_("list only objects"),
 			    MODE_OBJECT_ONLY),
 		OPT_BOOL(0, "full-name", &full_name, N_("use full path names")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_വൃക്ഷം,
 			 N_("list entire tree; not just current directory "
 			    "(implies --full-name)")),
 		OPT_STRING_F(0, "format", &options.format, N_("format"),
@@ -375,39 +375,39 @@ int cmd_ls_tree(int argc,
 		OPT__ABBREV(&options.abbrev),
 		OPT_END()
 	};
-	struct ls_tree_cmdmode_to_fmt *m2f = ls_tree_cmdmode_format;
-	int ret;
+	ഘടന ls_വൃക്ഷം_cmdmode_to_fmt *m2f = ls_വൃക്ഷം_cmdmode_format;
+	പൂർണ്ണസംഖ്യ ret;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
-	argc = parse_options(argc, argv, prefix, ls_tree_options,
-			     ls_tree_usage, 0);
+	argc = parse_options(argc, argv, prefix, ls_വൃക്ഷം_options,
+			     ls_വൃക്ഷം_usage, 0);
 	options.null_termination = null_termination;
 
-	if (full_tree)
-		prefix = NULL;
-	options.prefix = full_name ? NULL : prefix;
+	എങ്കിൽ (full_വൃക്ഷം)
+		prefix = ശൂന്യ;
+	options.prefix = full_name ? ശൂന്യ : prefix;
 
 	/*
 	 * We wanted to detect conflicts between --name-only and
 	 * --name-status, but once we're done with that subsequent
 	 * code should only need to check the primary name.
 	 */
-	if (cmdmode == MODE_NAME_STATUS)
+	എങ്കിൽ (cmdmode == MODE_NAME_STATUS)
 		cmdmode = MODE_NAME_ONLY;
 
 	/* -d -r should imply -t, but -d by itself should not have to. */
-	if ( (LS_TREE_ONLY|LS_RECURSIVE) ==
-	    ((LS_TREE_ONLY|LS_RECURSIVE) & options.ls_options))
+	എങ്കിൽ ( (LS_വൃക്ഷം_ONLY|LS_RECURSIVE) ==
+	    ((LS_വൃക്ഷം_ONLY|LS_RECURSIVE) & options.ls_options))
 		options.ls_options |= LS_SHOW_TREES;
 
-	if (options.format && cmdmode)
-		usage_msg_opt(
+	എങ്കിൽ (options.format && cmdmode)
+		usage_സന്ദേശം_opt(
 			_("--format can't be combined with other format-altering options"),
-			ls_tree_usage, ls_tree_options);
-	if (argc < 1)
-		usage_with_options(ls_tree_usage, ls_tree_options);
-	if (repo_get_oid_with_flags(the_repository, argv[0], &oid,
+			ls_വൃക്ഷം_usage, ls_വൃക്ഷം_options);
+	എങ്കിൽ (argc < 1)
+		usage_with_options(ls_വൃക്ഷം_usage, ls_വൃക്ഷം_options);
+	എങ്കിൽ (repo_get_oid_with_flags(the_repository, argv[0], &oid,
 				    GET_OID_HASH_ANY))
 		die("Not a valid object name %s", argv[0]);
 
@@ -421,32 +421,32 @@ int cmd_ls_tree(int argc,
 		       ~(PATHSPEC_FROMTOP | PATHSPEC_LITERAL),
 		       PATHSPEC_PREFER_CWD,
 		       prefix, argv + 1);
-	for (i = 0; i < options.pathspec.nr; i++)
-		options.pathspec.items[i].nowildcard_len = options.pathspec.items[i].len;
+	വേണ്ടി (i = 0; i < options.pathspec.nr; i++)
+		options.pathspec.ഇനങ്ങൾ[i].nowildcard_len = options.pathspec.ഇനങ്ങൾ[i].len;
 	options.pathspec.has_wildcard = 0;
-	tree = repo_parse_tree_indirect(the_repository, &oid);
-	if (!tree)
+	വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository, &oid);
+	എങ്കിൽ (!വൃക്ഷം)
 		die("not a tree object");
 	/*
 	 * The generic show_tree_fmt() is slower than show_tree(), so
 	 * take the fast path if possible.
 	 */
-	while (m2f) {
-		if (!m2f->fmt) {
-			fn = options.format ? show_tree_fmt : show_tree_default;
-		} else if (options.format && !strcmp(options.format, m2f->fmt)) {
+	ആകുമ്പോൾ (m2f) {
+		എങ്കിൽ (!m2f->fmt) {
+			fn = options.format ? show_വൃക്ഷം_fmt : show_വൃക്ഷം_default;
+		} അല്ലെങ്കിൽ എങ്കിൽ (options.format && !strcmp(options.format, m2f->fmt)) {
 			cmdmode = m2f->mode;
 			fn = m2f->fn;
-		} else if (!options.format && cmdmode == m2f->mode) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!options.format && cmdmode == m2f->mode) {
 			fn = m2f->fn;
-		} else {
+		} അല്ലെങ്കിൽ {
 			m2f++;
-			continue;
+			തുടരുക;
 		}
-		break;
+		നിർത്തുക;
 	}
 
-	ret = !!read_tree(the_repository, tree, &options.pathspec, fn, &options);
+	ret = !!read_വൃക്ഷം(the_repository, വൃക്ഷം, &options.pathspec, fn, &options);
 	clear_pathspec(&options.pathspec);
-	return ret;
+	തിരികെ ret;
 }

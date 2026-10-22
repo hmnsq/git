@@ -5,80 +5,80 @@
  *
  * Based on git-verify-tag
  */
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "commit.h"
-#include "parse-options.h"
-#include "gpg-interface.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "gpg-interface.h"
 
-static const char * const verify_commit_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം verify_commit_usage[] = {
 		N_("git verify-commit [-v | --verbose] [--raw] <commit>..."),
-		NULL
+		ശൂന്യ
 };
 
-static int run_gpg_verify(struct commit *commit, unsigned flags)
+സ്ഥിതം പൂർണ്ണസംഖ്യ run_gpg_verify(ഘടന commit *commit, unsigned flags)
 {
-	struct signature_check signature_check;
-	int ret;
+	ഘടന signature_check signature_check;
+	പൂർണ്ണസംഖ്യ ret;
 
-	memset(&signature_check, 0, sizeof(signature_check));
+	memset(&signature_check, 0, വലുപ്പം(signature_check));
 
 	ret = check_commit_signature(commit, &signature_check);
 	print_signature_buffer(&signature_check, flags);
 
 	signature_check_clear(&signature_check);
-	return ret;
+	തിരികെ ret;
 }
 
-static int verify_commit(struct repository *repo, const char *name, unsigned flags)
+സ്ഥിതം പൂർണ്ണസംഖ്യ verify_commit(ഘടന repository *repo, സ്ഥിരം അക്ഷരം *name, unsigned flags)
 {
-	struct object_id oid;
-	struct object *obj;
+	ഘടന object_id oid;
+	ഘടന object *obj;
 
-	if (repo_get_oid(repo, name, &oid))
-		return error("commit '%s' not found.", name);
+	എങ്കിൽ (repo_get_oid(repo, name, &oid))
+		തിരികെ error("commit '%s' not found.", name);
 
 	obj = parse_object(repo, &oid);
-	if (!obj)
-		return error("%s: unable to read file.", name);
-	if (obj->type != OBJ_COMMIT)
-		return error("%s: cannot verify a non-commit object of type %s.",
+	എങ്കിൽ (!obj)
+		തിരികെ error("%s: unable to read file.", name);
+	എങ്കിൽ (obj->type != OBJ_COMMIT)
+		തിരികെ error("%s: cannot verify a non-commit object of type %s.",
 				name, type_name(obj->type));
 
-	return run_gpg_verify((struct commit *)obj, flags);
+	തിരികെ run_gpg_verify((ഘടന commit *)obj, flags);
 }
 
-int cmd_verify_commit(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_verify_commit(പൂർണ്ണസംഖ്യ argc,
+		      സ്ഥിരം അക്ഷരം **argv,
+		      സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo)
 {
-	int i = 1, verbose = 0, had_error = 0;
+	പൂർണ്ണസംഖ്യ i = 1, verbose = 0, had_error = 0;
 	unsigned flags = 0;
-	const struct option verify_commit_options[] = {
+	സ്ഥിരം ഘടന option verify_commit_options[] = {
 		OPT__VERBOSE(&verbose, N_("print commit contents")),
 		OPT_BIT(0, "raw", &flags, N_("print raw gpg status output"), GPG_VERIFY_RAW),
 		OPT_END()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ശൂന്യ);
 
 	argc = parse_options(argc, argv, prefix, verify_commit_options,
 			     verify_commit_usage, PARSE_OPT_KEEP_ARGV0);
-	if (argc <= i)
+	എങ്കിൽ (argc <= i)
 		usage_with_options(verify_commit_usage, verify_commit_options);
 
-	if (verbose)
+	എങ്കിൽ (verbose)
 		flags |= GPG_VERIFY_VERBOSE;
 
 	/* sometimes the program was terminated because this signal
 	 * was received in the process of writing the gpg input: */
-	signal(SIGPIPE, SIG_IGN);
-	while (i < argc)
-		if (verify_commit(repo, argv[i++], flags))
+	സൂചന(SIGPIPE, SIG_IGN);
+	ആകുമ്പോൾ (i < argc)
+		എങ്കിൽ (verify_commit(repo, argv[i++], flags))
 			had_error = 1;
-	return had_error;
+	തിരികെ had_error;
 }

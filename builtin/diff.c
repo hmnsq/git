@@ -7,29 +7,29 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "ewah/ewok.h"
-#include "lockfile.h"
-#include "color.h"
-#include "commit.h"
-#include "gettext.h"
-#include "tag.h"
-#include "diff.h"
-#include "diff-merges.h"
-#include "diffcore.h"
-#include "preload-index.h"
-#include "read-cache-ll.h"
-#include "revision.h"
-#include "log-tree.h"
-#include "setup.h"
-#include "oid-array.h"
-#include "tree.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "ewah/ewok.h"
+#അന്തര്ഭാവ "lockfile.h"
+#അന്തര്ഭാവ "color.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "tag.h"
+#അന്തര്ഭാവ "diff.h"
+#അന്തര്ഭാവ "diff-merges.h"
+#അന്തര്ഭാവ "diffcore.h"
+#അന്തര്ഭാവ "preload-index.h"
+#അന്തര്ഭാവ "read-cache-ll.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "log-tree.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "oid-array.h"
+#അന്തര്ഭാവ "tree.h"
 
 #define DIFF_NO_INDEX_EXPLICIT 1
 #define DIFF_NO_INDEX_IMPLICIT 2
 
-static const char builtin_diff_usage[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം builtin_diff_usage[] =
 "git diff [<options>] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] --cached [--merge-base] [<commit>] [--] [<path>...]\n"
 "   or: git diff [<options>] [--merge-base] <commit> [<commit>...] <commit> [--] [<path>...]\n"
@@ -39,36 +39,36 @@ static const char builtin_diff_usage[] =
 "\n"
 COMMON_DIFF_OPTIONS_HELP;
 
-static const char *blob_path(struct object_array_entry *entry)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *blob_path(ഘടന object_array_entry *entry)
 {
-	return entry->path ? entry->path : entry->name;
+	തിരികെ entry->path ? entry->path : entry->name;
 }
 
-static void stuff_change(struct diff_options *opt,
+സ്ഥിതം ശൂന്യം stuff_change(ഘടന diff_options *opt,
 			 unsigned old_mode, unsigned new_mode,
-			 const struct object_id *old_oid,
-			 const struct object_id *new_oid,
-			 int old_oid_valid,
-			 int new_oid_valid,
-			 const char *old_path,
-			 const char *new_path)
+			 സ്ഥിരം ഘടന object_id *old_oid,
+			 സ്ഥിരം ഘടന object_id *new_oid,
+			 പൂർണ്ണസംഖ്യ old_oid_valid,
+			 പൂർണ്ണസംഖ്യ new_oid_valid,
+			 സ്ഥിരം അക്ഷരം *old_path,
+			 സ്ഥിരം അക്ഷരം *new_path)
 {
-	struct diff_filespec *one, *two;
+	ഘടന diff_filespec *one, *two;
 
-	if (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
+	എങ്കിൽ (!is_null_oid(old_oid) && !is_null_oid(new_oid) &&
 	    oideq(old_oid, new_oid) && (old_mode == new_mode))
-		return;
+		തിരികെ;
 
-	if (opt->flags.reverse_diff) {
+	എങ്കിൽ (opt->flags.reverse_diff) {
 		SWAP(old_mode, new_mode);
 		SWAP(old_oid, new_oid);
 		SWAP(old_path, new_path);
 	}
 
-	if (opt->prefix &&
+	എങ്കിൽ (opt->prefix &&
 	    (strncmp(old_path, opt->prefix, opt->prefix_length) ||
 	     strncmp(new_path, opt->prefix, opt->prefix_length)))
-		return;
+		തിരികെ;
 
 	one = alloc_filespec(old_path);
 	two = alloc_filespec(new_path);
@@ -78,28 +78,28 @@ static void stuff_change(struct diff_options *opt,
 	diff_queue(&diff_queued_diff, one, two);
 }
 
-static void builtin_diff_b_f(struct rev_info *revs,
-			     int argc, const char **argv UNUSED,
-			     struct object_array_entry **blob)
+സ്ഥിതം ശൂന്യം builtin_diff_b_f(ഘടന rev_info *revs,
+			     പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv UNUSED,
+			     ഘടന object_array_entry **blob)
 {
 	/* Blob vs file in the working tree*/
-	struct stat st;
-	const char *path;
+	ഘടന stat st;
+	സ്ഥിരം അക്ഷരം *path;
 
-	if (argc > 1)
+	എങ്കിൽ (argc > 1)
 		usage(builtin_diff_usage);
 
 	GUARD_PATHSPEC(&revs->prune_data, PATHSPEC_FROMTOP | PATHSPEC_LITERAL);
-	path = revs->prune_data.items[0].match;
+	path = revs->prune_data.ഇനങ്ങൾ[0].match;
 
-	if (lstat(path, &st))
+	എങ്കിൽ (lstat(path, &st))
 		die_errno(_("failed to stat '%s'"), path);
-	if (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
+	എങ്കിൽ (!(S_ISREG(st.st_mode) || S_ISLNK(st.st_mode)))
 		die(_("'%s': not a regular file or symlink"), path);
 
 	diff_set_mnemonic_prefix(&revs->diffopt, "o/", "w/");
 
-	if (blob[0]->mode == S_IFINVALID)
+	എങ്കിൽ (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = canon_mode(st.st_mode);
 
 	stuff_change(&revs->diffopt,
@@ -112,19 +112,19 @@ static void builtin_diff_b_f(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_blobs(struct rev_info *revs,
-			       int argc, const char **argv UNUSED,
-			       struct object_array_entry **blob)
+സ്ഥിതം ശൂന്യം builtin_diff_blobs(ഘടന rev_info *revs,
+			       പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv UNUSED,
+			       ഘടന object_array_entry **blob)
 {
-	const unsigned mode = canon_mode(S_IFREG | 0644);
+	സ്ഥിരം unsigned mode = canon_mode(S_IFREG | 0644);
 
-	if (argc > 1)
+	എങ്കിൽ (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (blob[0]->mode == S_IFINVALID)
+	എങ്കിൽ (blob[0]->mode == S_IFINVALID)
 		blob[0]->mode = mode;
 
-	if (blob[1]->mode == S_IFINVALID)
+	എങ്കിൽ (blob[1]->mode == S_IFINVALID)
 		blob[1]->mode = mode;
 
 	stuff_change(&revs->diffopt,
@@ -136,17 +136,17 @@ static void builtin_diff_blobs(struct rev_info *revs,
 	diff_flush(&revs->diffopt);
 }
 
-static void builtin_diff_index(struct rev_info *revs,
-			       int argc, const char **argv)
+സ്ഥിതം ശൂന്യം builtin_diff_index(ഘടന rev_info *revs,
+			       പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	unsigned int option = 0;
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
+	unsigned പൂർണ്ണസംഖ്യ option = 0;
+	ആകുമ്പോൾ (1 < argc) {
+		സ്ഥിരം അക്ഷരം *arg = argv[1];
+		എങ്കിൽ (!strcmp(arg, "--cached") || !strcmp(arg, "--staged"))
 			option |= DIFF_INDEX_CACHED;
-		else if (!strcmp(arg, "--merge-base"))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(arg, "--merge-base"))
 			option |= DIFF_INDEX_MERGE_BASE;
-		else
+		അല്ലെങ്കിൽ
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
@@ -154,117 +154,117 @@ static void builtin_diff_index(struct rev_info *revs,
 	 * Make sure there is one revision (i.e. pending object),
 	 * and there is no revision filtering parameters.
 	 */
-	if (revs->pending.nr != 1 ||
-	    revs->max_count != -1 || revs->min_age != -1 ||
+	എങ്കിൽ (revs->pending.nr != 1 ||
+	    revs->max_എണ്ണം != -1 || revs->min_age != -1 ||
 	    revs->max_age != -1)
 		usage(builtin_diff_usage);
-	if (!(option & DIFF_INDEX_CACHED)) {
-		setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository,
+	എങ്കിൽ (!(option & DIFF_INDEX_CACHED)) {
+		setup_work_വൃക്ഷം(the_repository);
+		എങ്കിൽ (repo_read_index_preload(the_repository,
 					    &revs->diffopt.pathspec, 0) < 0) {
 			die_errno("repo_read_index_preload");
 		}
-	} else if (repo_read_index(the_repository) < 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (repo_read_index(the_repository) < 0) {
 		die_errno("repo_read_cache");
 	}
 	run_diff_index(revs, option);
 }
 
-static void builtin_diff_tree(struct rev_info *revs,
-			      int argc, const char **argv,
-			      struct object_array_entry *ent0,
-			      struct object_array_entry *ent1)
+സ്ഥിതം ശൂന്യം builtin_diff_വൃക്ഷം(ഘടന rev_info *revs,
+			      പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv,
+			      ഘടന object_array_entry *ent0,
+			      ഘടന object_array_entry *ent1)
 {
-	const struct object_id *(oid[2]);
-	struct object_id mb_oid;
-	int merge_base = 0;
+	സ്ഥിരം ഘടന object_id *(oid[2]);
+	ഘടന object_id mb_oid;
+	പൂർണ്ണസംഖ്യ merge_base = 0;
 
-	while (1 < argc) {
-		const char *arg = argv[1];
-		if (!strcmp(arg, "--merge-base"))
+	ആകുമ്പോൾ (1 < argc) {
+		സ്ഥിരം അക്ഷരം *arg = argv[1];
+		എങ്കിൽ (!strcmp(arg, "--merge-base"))
 			merge_base = 1;
-		else
+		അല്ലെങ്കിൽ
 			usage(builtin_diff_usage);
 		argv++; argc--;
 	}
 
-	if (merge_base) {
+	എങ്കിൽ (merge_base) {
 		diff_get_merge_base(revs, &mb_oid);
 		oid[0] = &mb_oid;
 		oid[1] = &revs->pending.objects[1].item->oid;
-	} else {
-		int swap = 0;
+	} അല്ലെങ്കിൽ {
+		പൂർണ്ണസംഖ്യ swap = 0;
 
 		/*
 		 * We saw two trees, ent0 and ent1.  If ent1 is uninteresting,
 		 * swap them.
 		 */
-		if (ent1->item->flags & UNINTERESTING)
+		എങ്കിൽ (ent1->item->flags & UNINTERESTING)
 			swap = 1;
 		oid[swap] = &ent0->item->oid;
 		oid[1 - swap] = &ent1->item->oid;
 	}
-	diff_tree_oid(oid[0], oid[1], "", &revs->diffopt);
-	log_tree_diff_flush(revs);
+	diff_വൃക്ഷം_oid(oid[0], oid[1], "", &revs->diffopt);
+	log_വൃക്ഷം_diff_flush(revs);
 }
 
-static void builtin_diff_combined(struct rev_info *revs,
-				  int argc, const char **argv UNUSED,
-				  struct object_array_entry *ent,
-				  int ents, int first_non_parent)
+സ്ഥിതം ശൂന്യം builtin_diff_combined(ഘടന rev_info *revs,
+				  പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv UNUSED,
+				  ഘടന object_array_entry *ent,
+				  പൂർണ്ണസംഖ്യ ents, പൂർണ്ണസംഖ്യ first_non_parent)
 {
-	struct oid_array parents = OID_ARRAY_INIT;
-	int i;
+	ഘടന oid_array parents = OID_ARRAY_INIT;
+	പൂർണ്ണസംഖ്യ i;
 
-	if (argc > 1)
+	എങ്കിൽ (argc > 1)
 		usage(builtin_diff_usage);
 
-	if (first_non_parent < 0)
+	എങ്കിൽ (first_non_parent < 0)
 		die(_("no merge given, only parents."));
-	if (first_non_parent >= ents)
+	എങ്കിൽ (first_non_parent >= ents)
 		BUG("first_non_parent out of range: %d", first_non_parent);
 
 	diff_merges_set_dense_combined_if_unset(revs);
 
-	for (i = 0; i < ents; i++) {
-		if (i != first_non_parent)
+	വേണ്ടി (i = 0; i < ents; i++) {
+		എങ്കിൽ (i != first_non_parent)
 			oid_array_append(&parents, &ent[i].item->oid);
 	}
-	diff_tree_combined(&ent[first_non_parent].item->oid, &parents, revs);
+	diff_വൃക്ഷം_combined(&ent[first_non_parent].item->oid, &parents, revs);
 	oid_array_clear(&parents);
 }
 
-static void refresh_index_quietly(void)
+സ്ഥിതം ശൂന്യം refresh_index_quietly(ശൂന്യം)
 {
-	struct lock_file lock_file = LOCK_INIT;
-	int fd;
+	ഘടന lock_file lock_file = LOCK_INIT;
+	പൂർണ്ണസംഖ്യ fd;
 
 	fd = repo_hold_locked_index(the_repository, &lock_file, 0);
-	if (fd < 0)
-		return;
+	എങ്കിൽ (fd < 0)
+		തിരികെ;
 	discard_index(the_repository->index);
 	repo_read_index(the_repository);
-	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, NULL, NULL,
-		      NULL);
+	refresh_index(the_repository->index, REFRESH_QUIET|REFRESH_UNMERGED, ശൂന്യ, ശൂന്യ,
+		      ശൂന്യ);
 	repo_update_index_if_able(the_repository, &lock_file);
 }
 
-static void builtin_diff_files(struct rev_info *revs, int argc, const char **argv)
+സ്ഥിതം ശൂന്യം builtin_diff_files(ഘടന rev_info *revs, പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	unsigned int options = 0;
+	unsigned പൂർണ്ണസംഖ്യ options = 0;
 
-	while (1 < argc && argv[1][0] == '-') {
-		if (!strcmp(argv[1], "--base"))
-			revs->max_count = 1;
-		else if (!strcmp(argv[1], "--ours"))
-			revs->max_count = 2;
-		else if (!strcmp(argv[1], "--theirs"))
-			revs->max_count = 3;
-		else if (!strcmp(argv[1], "-q"))
+	ആകുമ്പോൾ (1 < argc && argv[1][0] == '-') {
+		എങ്കിൽ (!strcmp(argv[1], "--base"))
+			revs->max_എണ്ണം = 1;
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[1], "--ours"))
+			revs->max_എണ്ണം = 2;
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[1], "--theirs"))
+			revs->max_എണ്ണം = 3;
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[1], "-q"))
 			options |= DIFF_SILENT_ON_REMOVED;
-		else if (!strcmp(argv[1], "-h"))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(argv[1], "-h"))
 			usage(builtin_diff_usage);
-		else {
+		അല്ലെങ്കിൽ {
 			error(_("invalid option: %s"), argv[1]);
 			usage(builtin_diff_usage);
 		}
@@ -277,22 +277,22 @@ static void builtin_diff_files(struct rev_info *revs, int argc, const char **arg
 	 * dense one, --cc can be explicitly asked for, or just rely
 	 * on the default).
 	 */
-	if (revs->max_count == -1 &&
+	എങ്കിൽ (revs->max_എണ്ണം == -1 &&
 	    (revs->diffopt.output_format & DIFF_FORMAT_PATCH))
 		diff_merges_set_dense_combined_if_unset(revs);
 
-	setup_work_tree(the_repository);
-	if (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
+	setup_work_വൃക്ഷം(the_repository);
+	എങ്കിൽ (repo_read_index_preload(the_repository, &revs->diffopt.pathspec,
 				    0) < 0) {
 		die_errno("repo_read_index_preload");
 	}
 	run_diff_files(revs, options);
 }
 
-struct symdiff {
-	struct bitmap *skip;
-	int warn;
-	const char *base, *left, *right;
+ഘടന symdiff {
+	ഘടന bitmap *skip;
+	പൂർണ്ണസംഖ്യ warn;
+	സ്ഥിരം അക്ഷരം *base, *ഇടത്, *വലത്;
 };
 
 /*
@@ -314,11 +314,11 @@ struct symdiff {
  * If there is no symmetric diff argument, sym->skip is NULL and
  * sym->warn is cleared.  The remaining fields are not set.
  */
-static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
+സ്ഥിതം ശൂന്യം symdiff_prepare(ഘടന rev_info *rev, ഘടന symdiff *sym)
 {
-	int i, is_symdiff = 0, basecount = 0, othercount = 0;
-	int lpos = -1, rpos = -1, basepos = -1;
-	struct bitmap *map = NULL;
+	പൂർണ്ണസംഖ്യ i, is_symdiff = 0, basecount = 0, othercount = 0;
+	പൂർണ്ണസംഖ്യ lpos = -1, rpos = -1, basepos = -1;
+	ഘടന bitmap *map = ശൂന്യ;
 
 	/*
 	 * Use the whence fields to find merge bases and left and
@@ -335,35 +335,35 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	 * so we must check for SYMMETRIC_LEFT too.  The two arrays
 	 * rev->pending.objects and rev->cmdline.rev are parallel.
 	 */
-	for (i = 0; i < rev->cmdline.nr; i++) {
-		struct object *obj = rev->pending.objects[i].item;
-		switch (rev->cmdline.rev[i].whence) {
-		case REV_CMD_MERGE_BASE:
-			if (basepos < 0)
+	വേണ്ടി (i = 0; i < rev->cmdline.nr; i++) {
+		ഘടന object *obj = rev->pending.objects[i].item;
+		തിരഞ്ഞെടുപ്പ് (rev->cmdline.rev[i].whence) {
+		അവസ്ഥ REV_CMD_MERGE_BASE:
+			എങ്കിൽ (basepos < 0)
 				basepos = i;
 			basecount++;
-			break;		/* do mark all bases */
-		case REV_CMD_LEFT:
-			if (lpos >= 0)
+			നിർത്തുക;		/* do mark all bases */
+		അവസ്ഥ REV_CMD_ഇടത്:
+			എങ്കിൽ (lpos >= 0)
 				usage(builtin_diff_usage);
 			lpos = i;
-			if (obj->flags & SYMMETRIC_LEFT) {
+			എങ്കിൽ (obj->flags & SYMMETRIC_ഇടത്) {
 				is_symdiff = 1;
-				break;	/* do mark A */
+				നിർത്തുക;	/* do mark A */
 			}
-			continue;
-		case REV_CMD_RIGHT:
-			if (rpos >= 0)
+			തുടരുക;
+		അവസ്ഥ REV_CMD_വലത്:
+			എങ്കിൽ (rpos >= 0)
 				usage(builtin_diff_usage);
 			rpos = i;
-			continue;	/* don't mark B */
-		case REV_CMD_PARENTS_ONLY:
-		case REV_CMD_REF:
-		case REV_CMD_REV:
+			തുടരുക;	/* don't mark B */
+		അവസ്ഥ REV_CMD_PARENTS_ONLY:
+		അവസ്ഥ REV_CMD_REF:
+		അവസ്ഥ REV_CMD_REV:
 			othercount++;
-			continue;
+			തുടരുക;
 		}
-		if (!map)
+		എങ്കിൽ (!map)
 			map = bitmap_new();
 		bitmap_set(map, i);
 	}
@@ -371,45 +371,45 @@ static void symdiff_prepare(struct rev_info *rev, struct symdiff *sym)
 	/*
 	 * Forbid any additional revs for both A...B and A..B.
 	 */
-	if (lpos >= 0 && othercount > 0)
+	എങ്കിൽ (lpos >= 0 && othercount > 0)
 		usage(builtin_diff_usage);
 
-	if (!is_symdiff) {
+	എങ്കിൽ (!is_symdiff) {
 		bitmap_free(map);
 		sym->warn = 0;
-		sym->skip = NULL;
-		return;
+		sym->skip = ശൂന്യ;
+		തിരികെ;
 	}
 
-	sym->left = rev->pending.objects[lpos].name;
-	sym->right = rev->pending.objects[rpos].name;
-	if (basecount == 0)
-		die(_("%s...%s: no merge base"), sym->left, sym->right);
+	sym->ഇടത് = rev->pending.objects[lpos].name;
+	sym->വലത് = rev->pending.objects[rpos].name;
+	എങ്കിൽ (basecount == 0)
+		die(_("%s...%s: no merge base"), sym->ഇടത്, sym->വലത്);
 	sym->base = rev->pending.objects[basepos].name;
 	bitmap_unset(map, basepos);	/* unmark the base we want */
 	sym->warn = basecount > 1;
 	sym->skip = map;
 }
 
-static void symdiff_release(struct symdiff *sdiff)
+സ്ഥിതം ശൂന്യം symdiff_release(ഘടന symdiff *sdiff)
 {
 	bitmap_free(sdiff->skip);
 }
 
-int cmd_diff(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_diff(പൂർണ്ണസംഖ്യ argc,
+	     സ്ഥിരം അക്ഷരം **argv,
+	     സ്ഥിരം അക്ഷരം *prefix,
+	     ഘടന repository *repo UNUSED)
 {
-	int i;
-	struct rev_info rev;
-	struct object_array ent = OBJECT_ARRAY_INIT;
-	int first_non_parent = -1;
-	int blobs = 0, paths = 0;
-	struct object_array_entry *blob[2];
-	int nongit = 0, no_index = 0;
-	int result;
-	struct symdiff sdiff;
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന rev_info rev;
+	ഘടന object_array ent = OBJECT_ARRAY_INIT;
+	പൂർണ്ണസംഖ്യ first_non_parent = -1;
+	പൂർണ്ണസംഖ്യ blobs = 0, paths = 0;
+	ഘടന object_array_entry *blob[2];
+	പൂർണ്ണസംഖ്യ nongit = 0, no_index = 0;
+	പൂർണ്ണസംഖ്യ result;
+	ഘടന symdiff sdiff;
 
 	/*
 	 * We could get N tree-ish in the rev.pending_objects list.
@@ -444,25 +444,25 @@ int cmd_diff(int argc,
 	 */
 
 	/* Were we asked to do --no-index explicitly? */
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	വേണ്ടി (i = 1; i < argc; i++) {
+		എങ്കിൽ (!strcmp(argv[i], "--")) {
 			i++;
-			break;
+			നിർത്തുക;
 		}
-		if (!strcmp(argv[i], "--no-index"))
+		എങ്കിൽ (!strcmp(argv[i], "--no-index"))
 			no_index = DIFF_NO_INDEX_EXPLICIT;
-		if (argv[i][0] != '-')
-			break;
+		എങ്കിൽ (argv[i][0] != '-')
+			നിർത്തുക;
 	}
 
 	prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (!nongit) {
+	എങ്കിൽ (!nongit) {
 		prepare_repo_settings(the_repository);
 		the_repository->settings.command_requires_full_index = 0;
 	}
 
-	if (!no_index) {
+	എങ്കിൽ (!no_index) {
 		/*
 		 * Treat git diff with at least one path outside of the
 		 * repo the same as if the command would have been executed
@@ -470,7 +470,7 @@ int cmd_diff(int argc,
 		 * the same way as "git diff --no-index <a> <b>", which acts
 		 * as a colourful "diff" replacement.
 		 */
-		if (nongit || ((argc == i + 2) &&
+		എങ്കിൽ (nongit || ((argc == i + 2) &&
 			       (!path_inside_repo(the_repository, prefix, argv[i]) ||
 				!path_inside_repo(the_repository, prefix, argv[i + 1]))))
 			no_index = DIFF_NO_INDEX_IMPLICIT;
@@ -482,11 +482,11 @@ int cmd_diff(int argc,
 	 * default to SHA1 here, but may eventually want to change this to be
 	 * configurable via a command line option.
 	 */
-	if (nongit)
+	എങ്കിൽ (nongit)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	init_diff_ui_defaults();
-	repo_config(the_repository, git_diff_ui_config, NULL);
+	repo_config(the_repository, git_diff_ui_config, ശൂന്യ);
 
 	/*
 	 * If we are ignoring the fact that our current directory may
@@ -496,10 +496,10 @@ int cmd_diff(int argc,
 	 * the working tree.  Where we came from is recorded in the
 	 * prefix.
 	 */
-	if (no_index && prefix) {
-		if (chdir(prefix))
+	എങ്കിൽ (no_index && prefix) {
+		എങ്കിൽ (chdir(prefix))
 			die(_("cannot come back to cwd"));
-		prefix = NULL;
+		prefix = ശൂന്യ;
 	}
 
 	prefix = precompose_argv_prefix(argc, argv, prefix);
@@ -512,7 +512,7 @@ int cmd_diff(int argc,
 	rev.diffopt.flags.allow_textconv = 1;
 
 	/* If this is a no-index diff, just run it and exit there. */
-	if (no_index)
+	എങ്കിൽ (no_index)
 		exit(diff_no_index(&rev, the_repository->hash_algo,
 				   no_index == DIFF_NO_INDEX_IMPLICIT,
 				   argc, argv));
@@ -531,10 +531,10 @@ int cmd_diff(int argc,
 	 */
 	rev.diffopt.ita_invisible_in_index = 1;
 
-	if (nongit)
+	എങ്കിൽ (nongit)
 		die(_("Not a git repository"));
-	argc = setup_revisions(argc, argv, &rev, NULL);
-	if (!rev.diffopt.output_format) {
+	argc = setup_revisions(argc, argv, &rev, ശൂന്യ);
+	എങ്കിൽ (!rev.diffopt.output_format) {
 		rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 		diff_setup_done(&rev.diffopt);
 	}
@@ -548,108 +548,108 @@ int cmd_diff(int argc,
 	 * Do we have --cached and not have a pending object, then
 	 * default to HEAD by hand.  Eek.
 	 */
-	if (!rev.pending.nr) {
-		int i;
-		for (i = 1; i < argc; i++) {
-			const char *arg = argv[i];
-			if (!strcmp(arg, "--"))
-				break;
-			else if (!strcmp(arg, "--cached") ||
+	എങ്കിൽ (!rev.pending.nr) {
+		പൂർണ്ണസംഖ്യ i;
+		വേണ്ടി (i = 1; i < argc; i++) {
+			സ്ഥിരം അക്ഷരം *arg = argv[i];
+			എങ്കിൽ (!strcmp(arg, "--"))
+				നിർത്തുക;
+			അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(arg, "--cached") ||
 				 !strcmp(arg, "--staged")) {
 				add_head_to_pending(&rev);
-				if (!rev.pending.nr) {
-					struct tree *tree;
-					tree = lookup_tree(the_repository,
-							   the_repository->hash_algo->empty_tree);
-					add_pending_object(&rev, &tree->object, "HEAD");
+				എങ്കിൽ (!rev.pending.nr) {
+					ഘടന വൃക്ഷം *വൃക്ഷം;
+					വൃക്ഷം = lookup_വൃക്ഷം(the_repository,
+							   the_repository->hash_algo->empty_വൃക്ഷം);
+					add_pending_object(&rev, &വൃക്ഷം->object, "HEAD");
 				}
-				break;
+				നിർത്തുക;
 			}
 		}
 	}
 
 	symdiff_prepare(&rev, &sdiff);
-	for (i = 0; i < rev.pending.nr; i++) {
-		struct object_array_entry *entry = &rev.pending.objects[i];
-		struct object *obj = entry->item;
-		const char *name = entry->name;
-		int flags = (obj->flags & UNINTERESTING);
-		if (!obj->parsed)
+	വേണ്ടി (i = 0; i < rev.pending.nr; i++) {
+		ഘടന object_array_entry *entry = &rev.pending.objects[i];
+		ഘടന object *obj = entry->item;
+		സ്ഥിരം അക്ഷരം *name = entry->name;
+		പൂർണ്ണസംഖ്യ flags = (obj->flags & UNINTERESTING);
+		എങ്കിൽ (!obj->parsed)
 			obj = parse_object(the_repository, &obj->oid);
-		obj = deref_tag(the_repository, obj, NULL, 0);
-		if (!obj)
+		obj = deref_tag(the_repository, obj, ശൂന്യ, 0);
+		എങ്കിൽ (!obj)
 			die(_("invalid object '%s' given."), name);
-		if (obj->type == OBJ_COMMIT) {
-			struct tree *tree = repo_get_commit_tree(
-				the_repository, (struct commit *)obj);
-			if (!tree)
+		എങ്കിൽ (obj->type == OBJ_COMMIT) {
+			ഘടന വൃക്ഷം *വൃക്ഷം = repo_get_commit_വൃക്ഷം(
+				the_repository, (ഘടന commit *)obj);
+			എങ്കിൽ (!വൃക്ഷം)
 				die(_("unable to read tree object for commit '%s'"), name);
-			obj = &tree->object;
+			obj = &വൃക്ഷം->object;
 		}
 
-		if (obj->type == OBJ_TREE) {
-			if (sdiff.skip && bitmap_get(sdiff.skip, i))
-				continue;
+		എങ്കിൽ (obj->type == OBJ_വൃക്ഷം) {
+			എങ്കിൽ (sdiff.skip && bitmap_get(sdiff.skip, i))
+				തുടരുക;
 			obj->flags |= flags;
 			add_object_array(obj, name, &ent);
-			if (first_non_parent < 0 &&
+			എങ്കിൽ (first_non_parent < 0 &&
 			    (i >= rev.cmdline.nr || /* HEAD by hand. */
 			     rev.cmdline.rev[i].whence != REV_CMD_PARENTS_ONLY))
 				first_non_parent = ent.nr - 1;
-		} else if (obj->type == OBJ_BLOB) {
-			if (2 <= blobs)
+		} അല്ലെങ്കിൽ എങ്കിൽ (obj->type == OBJ_BLOB) {
+			എങ്കിൽ (2 <= blobs)
 				die(_("more than two blobs given: '%s'"), name);
 			blob[blobs] = entry;
 			blobs++;
 
-		} else {
+		} അല്ലെങ്കിൽ {
 			die(_("unhandled object '%s' given."), name);
 		}
 	}
-	if (rev.prune_data.nr)
+	എങ്കിൽ (rev.prune_data.nr)
 		paths += rev.prune_data.nr;
 
 	/*
 	 * Now, do the arguments look reasonable?
 	 */
-	if (!ent.nr) {
-		switch (blobs) {
-		case 0:
+	എങ്കിൽ (!ent.nr) {
+		തിരഞ്ഞെടുപ്പ് (blobs) {
+		അവസ്ഥ 0:
 			builtin_diff_files(&rev, argc, argv);
-			break;
-		case 1:
-			if (paths != 1)
+			നിർത്തുക;
+		അവസ്ഥ 1:
+			എങ്കിൽ (paths != 1)
 				usage(builtin_diff_usage);
 			builtin_diff_b_f(&rev, argc, argv, blob);
-			break;
-		case 2:
-			if (paths)
+			നിർത്തുക;
+		അവസ്ഥ 2:
+			എങ്കിൽ (paths)
 				usage(builtin_diff_usage);
 			builtin_diff_blobs(&rev, argc, argv, blob);
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			usage(builtin_diff_usage);
 		}
 	}
-	else if (blobs)
+	അല്ലെങ്കിൽ എങ്കിൽ (blobs)
 		usage(builtin_diff_usage);
-	else if (ent.nr == 1)
+	അല്ലെങ്കിൽ എങ്കിൽ (ent.nr == 1)
 		builtin_diff_index(&rev, argc, argv);
-	else if (ent.nr == 2) {
-		if (sdiff.warn)
+	അല്ലെങ്കിൽ എങ്കിൽ (ent.nr == 2) {
+		എങ്കിൽ (sdiff.warn)
 			warning(_("%s...%s: multiple merge bases, using %s"),
-				sdiff.left, sdiff.right, sdiff.base);
-		builtin_diff_tree(&rev, argc, argv,
+				sdiff.ഇടത്, sdiff.വലത്, sdiff.base);
+		builtin_diff_വൃക്ഷം(&rev, argc, argv,
 				  &ent.objects[0], &ent.objects[1]);
-	} else
+	} അല്ലെങ്കിൽ
 		builtin_diff_combined(&rev, argc, argv,
 				      ent.objects, ent.nr,
 				      first_non_parent);
 	result = diff_result_code(&rev);
-	if (1 < rev.diffopt.skip_stat_unmatch)
+	എങ്കിൽ (1 < rev.diffopt.skip_stat_unmatch)
 		refresh_index_quietly();
 	release_revisions(&rev);
 	object_array_clear(&ent);
 	symdiff_release(&sdiff);
-	return result;
+	തിരികെ result;
 }

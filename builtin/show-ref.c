@@ -1,17 +1,17 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs/refs-internal.h"
-#include "object-name.h"
-#include "odb.h"
-#include "object.h"
-#include "string-list.h"
-#include "parse-options.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "refs/refs-internal.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "object.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "parse-options.h"
 
-static const char * const show_ref_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം show_ref_usage[] = {
 	N_("git show-ref [--head] [-d | --dereference]\n"
 	   "             [-s | --hash[=<n>]] [--abbrev[=<n>]] [--branches] [--tags]\n"
 	   "             [--] [<pattern>...]"),
@@ -20,74 +20,74 @@ static const char * const show_ref_usage[] = {
 	   "             [--] [<ref>...]"),
 	N_("git show-ref --exclude-existing[=<pattern>]"),
 	N_("git show-ref --exists <ref>"),
-	NULL
+	ശൂന്യ
 };
 
-struct show_one_options {
-	int quiet;
-	int hash_only;
-	int abbrev;
-	int deref_tags;
+ഘടന show_one_options {
+	പൂർണ്ണസംഖ്യ quiet;
+	പൂർണ്ണസംഖ്യ hash_only;
+	പൂർണ്ണസംഖ്യ abbrev;
+	പൂർണ്ണസംഖ്യ deref_tags;
 };
 
-static void show_one(const struct show_one_options *opts,
-		     const struct reference *ref)
+സ്ഥിതം ശൂന്യം show_one(സ്ഥിരം ഘടന show_one_options *opts,
+		     സ്ഥിരം ഘടന reference *ref)
 {
-	const char *hex;
-	struct object_id peeled;
+	സ്ഥിരം അക്ഷരം *hex;
+	ഘടന object_id peeled;
 
-	if (!odb_has_object(the_repository->objects, ref->oid,
+	എങ്കിൽ (!odb_has_object(the_repository->objects, ref->oid,
 			    ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR))
 		die("git show-ref: bad ref %s (%s)", ref->name,
 		    oid_to_hex(ref->oid));
 
-	if (opts->quiet)
-		return;
+	എങ്കിൽ (opts->quiet)
+		തിരികെ;
 
 	hex = repo_find_unique_abbrev(the_repository, ref->oid, opts->abbrev);
-	if (opts->hash_only)
+	എങ്കിൽ (opts->hash_only)
 		printf("%s\n", hex);
-	else
+	അല്ലെങ്കിൽ
 		printf("%s %s\n", hex, ref->name);
 
-	if (!opts->deref_tags)
-		return;
+	എങ്കിൽ (!opts->deref_tags)
+		തിരികെ;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	എങ്കിൽ (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		hex = repo_find_unique_abbrev(the_repository, &peeled, opts->abbrev);
 		printf("%s %s^{}\n", hex, ref->name);
 	}
 }
 
-struct show_ref_data {
-	const struct show_one_options *show_one_opts;
-	const char **patterns;
-	int found_match;
-	int show_head;
+ഘടന show_ref_data {
+	സ്ഥിരം ഘടന show_one_options *show_one_opts;
+	സ്ഥിരം അക്ഷരം **patterns;
+	പൂർണ്ണസംഖ്യ found_match;
+	പൂർണ്ണസംഖ്യ show_head;
 };
 
-static int show_ref(const struct reference *ref, void *cbdata)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cbdata)
 {
-	struct show_ref_data *data = cbdata;
+	ഘടന show_ref_data *data = cbdata;
 
-	if (data->show_head && !strcmp(ref->name, "HEAD"))
-		goto match;
+	എങ്കിൽ (data->show_head && !strcmp(ref->name, "HEAD"))
+		പോകുക match;
 
-	if (data->patterns) {
-		int reflen = strlen(ref->name);
-		const char **p = data->patterns, *m;
-		while ((m = *p++) != NULL) {
-			int len = strlen(m);
-			if (len > reflen)
-				continue;
-			if (memcmp(m, ref->name + reflen - len, len))
-				continue;
-			if (len == reflen)
-				goto match;
-			if (ref->name[reflen - len - 1] == '/')
-				goto match;
+	എങ്കിൽ (data->patterns) {
+		പൂർണ്ണസംഖ്യ reflen = strlen(ref->name);
+		സ്ഥിരം അക്ഷരം **p = data->patterns, *m;
+		ആകുമ്പോൾ ((m = *p++) != ശൂന്യ) {
+			പൂർണ്ണസംഖ്യ len = strlen(m);
+			എങ്കിൽ (len > reflen)
+				തുടരുക;
+			എങ്കിൽ (memcmp(m, ref->name + reflen - len, len))
+				തുടരുക;
+			എങ്കിൽ (len == reflen)
+				പോകുക match;
+			എങ്കിൽ (ref->name[reflen - len - 1] == '/')
+				പോകുക match;
 		}
-		return 0;
+		തിരികെ 0;
 	}
 
 match:
@@ -95,23 +95,23 @@ match:
 
 	show_one(data->show_one_opts, ref);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int add_existing(const struct reference *ref, void *cbdata)
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_existing(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cbdata)
 {
-	struct string_list *list = (struct string_list *)cbdata;
-	string_list_insert(list, ref->name);
-	return 0;
+	ഘടന string_list *list = (ഘടന string_list *)cbdata;
+	string_list_തിരുകുക(list, ref->name);
+	തിരികെ 0;
 }
 
-struct exclude_existing_options {
+ഘടന exclude_existing_options {
 	/*
 	 * We need an explicit `enabled` field because it is perfectly valid
 	 * for `pattern` to be `NULL` even if `--exclude-existing` was given.
 	 */
-	int enabled;
-	const char *pattern;
+	പൂർണ്ണസംഖ്യ enabled;
+	സ്ഥിരം അക്ഷരം *pattern;
 };
 
 /*
@@ -123,190 +123,190 @@ struct exclude_existing_options {
  * (4) ignore if refname is a ref that exists in the local repository;
  * (5) otherwise output the line.
  */
-static int cmd_show_ref__exclude_existing(const struct exclude_existing_options *opts)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_show_ref__exclude_existing(സ്ഥിരം ഘടന exclude_existing_options *opts)
 {
-	struct string_list existing_refs = STRING_LIST_INIT_DUP;
-	char buf[1024];
-	int patternlen = opts->pattern ? strlen(opts->pattern) : 0;
+	ഘടന string_list existing_refs = STRING_LIST_INIT_DUP;
+	അക്ഷരം buf[1024];
+	പൂർണ്ണസംഖ്യ patternlen = opts->pattern ? strlen(opts->pattern) : 0;
 
 	refs_for_each_ref(get_main_ref_store(the_repository), add_existing,
 			  &existing_refs);
-	while (fgets(buf, sizeof(buf), stdin)) {
-		char *ref;
-		int len = strlen(buf);
+	ആകുമ്പോൾ (fgets(buf, വലുപ്പം(buf), stdin)) {
+		അക്ഷരം *ref;
+		പൂർണ്ണസംഖ്യ len = strlen(buf);
 
-		if (len > 0 && buf[len - 1] == '\n')
+		എങ്കിൽ (len > 0 && buf[len - 1] == '\n')
 			buf[--len] = '\0';
-		if (3 <= len && !strcmp(buf + len - 3, "^{}")) {
+		എങ്കിൽ (3 <= len && !strcmp(buf + len - 3, "^{}")) {
 			len -= 3;
 			buf[len] = '\0';
 		}
-		for (ref = buf + len; buf < ref; ref--)
-			if (isspace(ref[-1]))
-				break;
-		if (opts->pattern) {
-			int reflen = buf + len - ref;
-			if (reflen < patternlen)
-				continue;
-			if (strncmp(ref, opts->pattern, patternlen))
-				continue;
+		വേണ്ടി (ref = buf + len; buf < ref; ref--)
+			എങ്കിൽ (isspace(ref[-1]))
+				നിർത്തുക;
+		എങ്കിൽ (opts->pattern) {
+			പൂർണ്ണസംഖ്യ reflen = buf + len - ref;
+			എങ്കിൽ (reflen < patternlen)
+				തുടരുക;
+			എങ്കിൽ (strncmp(ref, opts->pattern, patternlen))
+				തുടരുക;
 		}
-		if (check_refname_format(ref, 0)) {
+		എങ്കിൽ (check_refname_format(ref, 0)) {
 			warning("ref '%s' ignored", ref);
-			continue;
+			തുടരുക;
 		}
-		if (!string_list_has_string(&existing_refs, ref)) {
+		എങ്കിൽ (!string_list_has_string(&existing_refs, ref)) {
 			printf("%s\n", buf);
 		}
 	}
 
 	string_list_clear(&existing_refs, 0);
-	return 0;
+	തിരികെ 0;
 }
 
-static int cmd_show_ref__verify(const struct show_one_options *show_one_opts,
-				const char **refs)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_show_ref__verify(സ്ഥിരം ഘടന show_one_options *show_one_opts,
+				സ്ഥിരം അക്ഷരം **refs)
 {
-	if (!refs || !*refs)
+	എങ്കിൽ (!refs || !*refs)
 		die("--verify requires a reference");
 
-	while (*refs) {
-		struct object_id oid;
+	ആകുമ്പോൾ (*refs) {
+		ഘടന object_id oid;
 
-		if ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
+		എങ്കിൽ ((starts_with(*refs, "refs/") || refname_is_safe(*refs)) &&
 		    !refs_read_ref(get_main_ref_store(the_repository), *refs, &oid)) {
-			struct reference ref = {
+			ഘടന reference ref = {
 				.name = *refs,
 				.oid = &oid,
 			};
 
 			show_one(show_one_opts, &ref);
-		} else if (!show_one_opts->quiet) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!show_one_opts->quiet) {
 			die("'%s' - not a valid ref", *refs);
-		} else {
-			return 1;
+		} അല്ലെങ്കിൽ {
+			തിരികെ 1;
 		}
 
 		refs++;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-struct patterns_options {
-	int show_head;
-	int branches_only;
-	int tags_only;
+ഘടന patterns_options {
+	പൂർണ്ണസംഖ്യ show_head;
+	പൂർണ്ണസംഖ്യ branches_only;
+	പൂർണ്ണസംഖ്യ tags_only;
 };
 
-static int cmd_show_ref__patterns(const struct patterns_options *opts,
-				  const struct show_one_options *show_one_opts,
-				  const char **patterns)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_show_ref__patterns(സ്ഥിരം ഘടന patterns_options *opts,
+				  സ്ഥിരം ഘടന show_one_options *show_one_opts,
+				  സ്ഥിരം അക്ഷരം **patterns)
 {
-	struct show_ref_data show_ref_data = {
+	ഘടന show_ref_data show_ref_data = {
 		.show_one_opts = show_one_opts,
 		.show_head = opts->show_head,
 	};
 
-	if (patterns && *patterns)
+	എങ്കിൽ (patterns && *patterns)
 		show_ref_data.patterns = patterns;
 
-	if (opts->show_head)
+	എങ്കിൽ (opts->show_head)
 		refs_head_ref(get_main_ref_store(the_repository), show_ref,
 			      &show_ref_data);
-	if (opts->branches_only || opts->tags_only) {
-		struct refs_for_each_ref_options for_each_ref_opts = { 0 };
+	എങ്കിൽ (opts->branches_only || opts->tags_only) {
+		ഘടന refs_for_each_ref_options for_each_ref_opts = { 0 };
 
-		if (opts->branches_only) {
+		എങ്കിൽ (opts->branches_only) {
 			for_each_ref_opts.prefix = "refs/heads/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
 
-		if (opts->tags_only) {
+		എങ്കിൽ (opts->tags_only) {
 			for_each_ref_opts.prefix = "refs/tags/";
 			refs_for_each_ref_ext(get_main_ref_store(the_repository),
 					      show_ref, &show_ref_data, &for_each_ref_opts);
 		}
-	} else {
+	} അല്ലെങ്കിൽ {
 		refs_for_each_ref(get_main_ref_store(the_repository),
 				  show_ref, &show_ref_data);
 	}
-	if (!show_ref_data.found_match)
-		return 1;
+	എങ്കിൽ (!show_ref_data.found_match)
+		തിരികെ 1;
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int cmd_show_ref__exists(const char **refs)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_show_ref__exists(സ്ഥിരം അക്ഷരം **refs)
 {
-	struct strbuf unused_referent = STRBUF_INIT;
-	struct object_id unused_oid;
-	unsigned int unused_type;
-	int failure_errno = 0;
-	const char *ref;
-	int ret = 0;
+	ഘടന strbuf unused_referent = STRBUF_INIT;
+	ഘടന object_id unused_oid;
+	unsigned പൂർണ്ണസംഖ്യ unused_type;
+	പൂർണ്ണസംഖ്യ failure_errno = 0;
+	സ്ഥിരം അക്ഷരം *ref;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
-	if (!refs || !*refs)
+	എങ്കിൽ (!refs || !*refs)
 		die("--exists requires a reference");
 	ref = *refs++;
-	if (*refs)
+	എങ്കിൽ (*refs)
 		die("--exists requires exactly one reference");
 
-	if (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
+	എങ്കിൽ (refs_read_raw_ref(get_main_ref_store(the_repository), ref,
 			      &unused_oid, &unused_referent, &unused_type,
 			      &failure_errno)) {
-		if (failure_errno == ENOENT || failure_errno == EISDIR) {
+		എങ്കിൽ (failure_errno == ENOENT || failure_errno == EISDIR) {
 			error(_("reference does not exist"));
 			ret = 2;
-		} else {
+		} അല്ലെങ്കിൽ {
 			errno = failure_errno;
 			error_errno(_("failed to look up reference"));
 			ret = 1;
 		}
 
-		goto out;
+		പോകുക out;
 	}
 
 out:
 	strbuf_release(&unused_referent);
-	return ret;
+	തിരികെ ret;
 }
 
-static int hash_callback(const struct option *opt, const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ hash_callback(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	struct show_one_options *opts = opt->value;
-	struct option abbrev_opt = *opt;
+	ഘടന show_one_options *opts = opt->മൂല്യം;
+	ഘടന option abbrev_opt = *opt;
 
 	opts->hash_only = 1;
 	/* Use full length SHA1 if no argument */
-	if (!arg)
-		return 0;
+	എങ്കിൽ (!arg)
+		തിരികെ 0;
 
-	abbrev_opt.value = &opts->abbrev;
-	return parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
+	abbrev_opt.മൂല്യം = &opts->abbrev;
+	തിരികെ parse_opt_abbrev_cb(&abbrev_opt, arg, unset);
 }
 
-static int exclude_existing_callback(const struct option *opt, const char *arg,
-				     int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ exclude_existing_callback(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg,
+				     പൂർണ്ണസംഖ്യ unset)
 {
-	struct exclude_existing_options *opts = opt->value;
+	ഘടന exclude_existing_options *opts = opt->മൂല്യം;
 	BUG_ON_OPT_NEG(unset);
 	opts->enabled = 1;
 	opts->pattern = arg;
-	return 0;
+	തിരികെ 0;
 }
 
-int cmd_show_ref(int argc,
-const char **argv,
-const char *prefix,
-struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_show_ref(പൂർണ്ണസംഖ്യ argc,
+സ്ഥിരം അക്ഷരം **argv,
+സ്ഥിരം അക്ഷരം *prefix,
+ഘടന repository *repo UNUSED)
 {
-	struct exclude_existing_options exclude_existing_opts = {0};
-	struct patterns_options patterns_opts = {0};
-	struct show_one_options show_one_opts = {0};
-	int verify = 0, exists = 0;
-	const struct option show_ref_options[] = {
+	ഘടന exclude_existing_options exclude_existing_opts = {0};
+	ഘടന patterns_options patterns_opts = {0};
+	ഘടന show_one_options show_one_opts = {0};
+	പൂർണ്ണസംഖ്യ verify = 0, exists = 0;
+	സ്ഥിരം ഘടന option show_ref_options[] = {
 		OPT_BOOL(0, "tags", &patterns_opts.tags_only, N_("only show tags (can be combined with --branches)")),
 		OPT_BOOL(0, "branches", &patterns_opts.branches_only, N_("only show branches (can be combined with --tags)")),
 		OPT_HIDDEN_BOOL(0, "heads", &patterns_opts.branches_only,
@@ -314,7 +314,7 @@ struct repository *repo UNUSED)
 		OPT_BOOL(0, "exists", &exists, N_("check for reference existence without resolving")),
 		OPT_BOOL(0, "verify", &verify, N_("stricter reference checking, "
 			    "requires exact ref path")),
-		OPT_HIDDEN_BOOL('h', NULL, &patterns_opts.show_head,
+		OPT_HIDDEN_BOOL('h', ശൂന്യ, &patterns_opts.show_head,
 				N_("show the HEAD reference, even if it would be filtered out")),
 		OPT_BOOL(0, "head", &patterns_opts.show_head,
 		  N_("show the HEAD reference, even if it would be filtered out")),
@@ -332,7 +332,7 @@ struct repository *repo UNUSED)
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
 	argc = parse_options(argc, argv, prefix, show_ref_options,
 			     show_ref_usage, 0);
@@ -341,12 +341,12 @@ struct repository *repo UNUSED)
 				  verify, "--verify",
 				  exists, "--exists");
 
-	if (exclude_existing_opts.enabled)
-		return cmd_show_ref__exclude_existing(&exclude_existing_opts);
-	else if (verify)
-		return cmd_show_ref__verify(&show_one_opts, argv);
-	else if (exists)
-		return cmd_show_ref__exists(argv);
-	else
-		return cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
+	എങ്കിൽ (exclude_existing_opts.enabled)
+		തിരികെ cmd_show_ref__exclude_existing(&exclude_existing_opts);
+	അല്ലെങ്കിൽ എങ്കിൽ (verify)
+		തിരികെ cmd_show_ref__verify(&show_one_opts, argv);
+	അല്ലെങ്കിൽ എങ്കിൽ (exists)
+		തിരികെ cmd_show_ref__exists(argv);
+	അല്ലെങ്കിൽ
+		തിരികെ cmd_show_ref__patterns(&patterns_opts, &show_one_opts, argv);
 }

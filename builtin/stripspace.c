@@ -1,73 +1,73 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "setup.h"
-#include "strbuf.h"
-#include "write-or-die.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "strbuf.h"
+#അന്തര്ഭാവ "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+സ്ഥിതം ശൂന്യം comment_വരികൾ(ഘടന strbuf *buf)
 {
-	char *msg;
+	അക്ഷരം *സന്ദേശം;
 	size_t len;
 
-	msg = strbuf_detach(buf, &len);
-	strbuf_add_commented_lines(buf, msg, len, comment_line_str);
-	free(msg);
+	സന്ദേശം = strbuf_detach(buf, &len);
+	strbuf_add_commented_വരികൾ(buf, സന്ദേശം, len, comment_വരി_str);
+	സ്വതന്ത്രം(സന്ദേശം);
 }
 
-static const char * const stripspace_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം stripspace_usage[] = {
 	"git stripspace [-s | --strip-comments]",
 	"git stripspace [-c | --comment-lines]",
-	NULL
+	ശൂന്യ
 };
 
-enum stripspace_mode {
+എണ്ണൽ stripspace_mode {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
-	COMMENT_LINES
+	COMMENT_വരികൾ
 };
 
-int cmd_stripspace(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_stripspace(പൂർണ്ണസംഖ്യ argc,
+		   സ്ഥിരം അക്ഷരം **argv,
+		   സ്ഥിരം അക്ഷരം *prefix,
+		   ഘടന repository *repo UNUSED)
 {
-	struct strbuf buf = STRBUF_INIT;
-	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	ഘടന strbuf buf = STRBUF_INIT;
+	എണ്ണൽ stripspace_mode mode = STRIP_DEFAULT;
+	പൂർണ്ണസംഖ്യ nongit;
 
-	const struct option options[] = {
+	സ്ഥിരം ഘടന option options[] = {
 		OPT_CMDMODE('s', "strip-comments", &mode,
 			    N_("skip and remove all lines starting with comment character"),
 			    STRIP_COMMENTS),
 		OPT_CMDMODE('c', "comment-lines", &mode,
 			    N_("prepend comment character and space to each line"),
-			    COMMENT_LINES),
+			    COMMENT_വരികൾ),
 		OPT_END()
 	};
 
 	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	എങ്കിൽ (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	എങ്കിൽ (mode == STRIP_COMMENTS || mode == COMMENT_വരികൾ) {
 		setup_git_directory_gently(the_repository, &nongit);
-		repo_config(the_repository, git_default_config, NULL);
+		repo_config(the_repository, git_default_config, ശൂന്യ);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	എങ്കിൽ (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	എങ്കിൽ (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
-			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
-		comment_lines(&buf);
+			  mode == STRIP_COMMENTS ? comment_വരി_str : ശൂന്യ);
+	അല്ലെങ്കിൽ
+		comment_വരികൾ(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	തിരികെ 0;
 }

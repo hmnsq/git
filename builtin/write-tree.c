@@ -4,69 +4,69 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "tree.h"
-#include "cache-tree.h"
-#include "parse-options.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "cache-tree.h"
+#അന്തര്ഭാവ "parse-options.h"
 
-static const char * const write_tree_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം write_വൃക്ഷം_usage[] = {
 	N_("git write-tree [--missing-ok] [--prefix=<prefix>/]"),
-	NULL
+	ശൂന്യ
 };
 
-int cmd_write_tree(int argc,
-		   const char **argv,
-		   const char *cmd_prefix,
-		   struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_write_വൃക്ഷം(പൂർണ്ണസംഖ്യ argc,
+		   സ്ഥിരം അക്ഷരം **argv,
+		   സ്ഥിരം അക്ഷരം *cmd_prefix,
+		   ഘടന repository *repo UNUSED)
 {
-	int flags = 0, ret;
-	const char *tree_prefix = NULL;
-	struct object_id oid;
-	const char *me = "git-write-tree";
-	struct option write_tree_options[] = {
+	പൂർണ്ണസംഖ്യ flags = 0, ret;
+	സ്ഥിരം അക്ഷരം *വൃക്ഷം_prefix = ശൂന്യ;
+	ഘടന object_id oid;
+	സ്ഥിരം അക്ഷരം *me = "git-write-tree";
+	ഘടന option write_വൃക്ഷം_options[] = {
 		OPT_BIT(0, "missing-ok", &flags, N_("allow missing objects"),
-			WRITE_TREE_MISSING_OK),
-		OPT_STRING(0, "prefix", &tree_prefix, N_("<prefix>/"),
+			WRITE_വൃക്ഷം_MISSING_OK),
+		OPT_STRING(0, "prefix", &വൃക്ഷം_prefix, N_("<prefix>/"),
 			   N_("write tree object for a subdirectory <prefix>")),
 		{
 			.type = OPTION_BIT,
 			.long_name = "ignore-cache-tree",
-			.value = &flags,
-			.precision = sizeof(flags),
+			.മൂല്യം = &flags,
+			.precision = വലുപ്പം(flags),
 			.help = N_("only useful for debugging"),
 			.flags = PARSE_OPT_HIDDEN | PARSE_OPT_NOARG,
-			.defval = WRITE_TREE_IGNORE_CACHE_TREE,
+			.defval = WRITE_വൃക്ഷം_IGNORE_CACHE_വൃക്ഷം,
 		},
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
-	argc = parse_options(argc, argv, cmd_prefix, write_tree_options,
-			     write_tree_usage, 0);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
+	argc = parse_options(argc, argv, cmd_prefix, write_വൃക്ഷം_options,
+			     write_വൃക്ഷം_usage, 0);
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	ret = write_index_as_tree(&oid, the_repository->index,
+	ret = write_index_as_വൃക്ഷം(&oid, the_repository->index,
 				  repo_get_index_file(the_repository),
-				  flags, tree_prefix);
-	switch (ret) {
-	case 0:
+				  flags, വൃക്ഷം_prefix);
+	തിരഞ്ഞെടുപ്പ് (ret) {
+	അവസ്ഥ 0:
 		printf("%s\n", oid_to_hex(&oid));
-		break;
-	case WRITE_TREE_UNREADABLE_INDEX:
+		നിർത്തുക;
+	അവസ്ഥ WRITE_വൃക്ഷം_UNREADABLE_INDEX:
 		die("%s: error reading the index", me);
-		break;
-	case WRITE_TREE_UNMERGED_INDEX:
+		നിർത്തുക;
+	അവസ്ഥ WRITE_വൃക്ഷം_UNMERGED_INDEX:
 		die("%s: error building trees", me);
-		break;
-	case WRITE_TREE_PREFIX_ERROR:
-		die("%s: prefix %s not found", me, tree_prefix);
-		break;
+		നിർത്തുക;
+	അവസ്ഥ WRITE_വൃക്ഷം_PREFIX_ERROR:
+		die("%s: prefix %s not found", me, വൃക്ഷം_prefix);
+		നിർത്തുക;
 	}
-	return ret;
+	തിരികെ ret;
 }

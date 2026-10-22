@@ -4,49 +4,49 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pager.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "config-list.h"
-#include "help.h"
-#include "alias.h"
-#include "setup.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "exec-cmd.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "pager.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "config-list.h"
+#അന്തര്ഭാവ "help.h"
+#അന്തര്ഭാവ "alias.h"
+#അന്തര്ഭാവ "setup.h"
 
 #ifndef DEFAULT_HELP_FORMAT
 #define DEFAULT_HELP_FORMAT "man"
 #endif
 
-static struct man_viewer_list {
-	struct man_viewer_list *next;
-	char name[FLEX_ARRAY];
+സ്ഥിതം ഘടന man_viewer_list {
+	ഘടന man_viewer_list *next;
+	അക്ഷരം name[FLEX_ARRAY];
 } *man_viewer_list;
 
-static struct man_viewer_info_list {
-	struct man_viewer_info_list *next;
-	const char *info;
-	char name[FLEX_ARRAY];
+സ്ഥിതം ഘടന man_viewer_info_list {
+	ഘടന man_viewer_info_list *next;
+	സ്ഥിരം അക്ഷരം *info;
+	അക്ഷരം name[FLEX_ARRAY];
 } *man_viewer_info_list;
 
-enum help_format {
+എണ്ണൽ help_format {
 	HELP_FORMAT_NONE,
 	HELP_FORMAT_MAN,
 	HELP_FORMAT_INFO,
 	HELP_FORMAT_WEB
 };
 
-enum show_config_type {
+എണ്ണൽ show_config_type {
 	SHOW_CONFIG_HUMAN,
 	SHOW_CONFIG_VARS,
 	SHOW_CONFIG_SECTIONS,
 };
 
-static enum help_action {
+സ്ഥിതം എണ്ണൽ help_action {
 	HELP_ACTION_ALL = 1,
 	HELP_ACTION_GUIDES,
 	HELP_ACTION_CONFIG,
@@ -57,13 +57,13 @@ static enum help_action {
 	HELP_ACTION_ALIASES_FOR_COMPLETION,
 } cmd_mode;
 
-static char *html_path;
-static int verbose = 1;
-static enum help_format help_format = HELP_FORMAT_NONE;
-static int exclude_guides;
-static int show_external_commands = -1;
-static int show_aliases = -1;
-static struct option builtin_help_options[] = {
+സ്ഥിതം അക്ഷരം *html_path;
+സ്ഥിതം പൂർണ്ണസംഖ്യ verbose = 1;
+സ്ഥിതം എണ്ണൽ help_format help_format = HELP_FORMAT_NONE;
+സ്ഥിതം പൂർണ്ണസംഖ്യ exclude_guides;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_external_commands = -1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_aliases = -1;
+സ്ഥിതം ഘടന option builtin_help_options[] = {
 	OPT_CMDMODE('a', "all", &cmd_mode, N_("print all available commands"),
 		    HELP_ACTION_ALL),
 	OPT_BOOL(0, "external-commands", &show_external_commands,
@@ -97,69 +97,69 @@ static struct option builtin_help_options[] = {
 	OPT_END(),
 };
 
-static const char * const builtin_help_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_help_usage[] = {
 	"git help [-a|--all] [--[no-]verbose] [--[no-]external-commands] [--[no-]aliases]",
 	N_("git help [[-i|--info] [-m|--man] [-w|--web]] [<command>|<doc>]"),
 	"git help [-g|--guides]",
 	"git help [-c|--config]",
 	"git help [--user-interfaces]",
 	"git help [--developer-interfaces]",
-	NULL
+	ശൂന്യ
 };
 
-struct slot_expansion {
-	const char *prefix;
-	const char *placeholder;
-	void (*fn)(struct string_list *list, const char *prefix);
-	int found;
+ഘടന slot_expansion {
+	സ്ഥിരം അക്ഷരം *prefix;
+	സ്ഥിരം അക്ഷരം *placeholder;
+	ശൂന്യം (*fn)(ഘടന string_list *list, സ്ഥിരം അക്ഷരം *prefix);
+	പൂർണ്ണസംഖ്യ found;
 };
 
-static void set_config_vars(struct string_list *keys_uniq, struct string_list_item *var)
+സ്ഥിതം ശൂന്യം set_config_vars(ഘടന string_list *താക്കോലുകൾ_uniq, ഘടന string_list_item *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *wildcard = strchr(str, '*');
-	const char *tag = strchr(str, '<');
-	const char *cut;
+	ഘടന strbuf sb = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *str = var->string;
+	സ്ഥിരം അക്ഷരം *wildcard = strchr(str, '*');
+	സ്ഥിരം അക്ഷരം *tag = strchr(str, '<');
+	സ്ഥിരം അക്ഷരം *cut;
 
-	if (wildcard && tag)
+	എങ്കിൽ (wildcard && tag)
 		cut = wildcard < tag ? wildcard : tag;
-	else if (wildcard)
+	അല്ലെങ്കിൽ എങ്കിൽ (wildcard)
 		cut = wildcard;
-	else if (tag)
+	അല്ലെങ്കിൽ എങ്കിൽ (tag)
 		cut = tag;
-	else {
-		string_list_append(keys_uniq, str);
-		return;
+	അല്ലെങ്കിൽ {
+		string_list_append(താക്കോലുകൾ_uniq, str);
+		തിരികെ;
 	}
 
 	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	string_list_append(താക്കോലുകൾ_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void set_config_sections(struct string_list *keys_uniq, struct string_list_item *var)
+സ്ഥിതം ശൂന്യം set_config_sections(ഘടന string_list *താക്കോലുകൾ_uniq, ഘടന string_list_item *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *dot = strchr(str, '.');
-	const char *cut;
+	ഘടന strbuf sb = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *str = var->string;
+	സ്ഥിരം അക്ഷരം *dot = strchr(str, '.');
+	സ്ഥിരം അക്ഷരം *cut;
 
-	if (dot)
+	എങ്കിൽ (dot)
 		cut = dot;
-	else {
-		set_config_vars(keys_uniq, var);
-		return;
+	അല്ലെങ്കിൽ {
+		set_config_vars(താക്കോലുകൾ_uniq, var);
+		തിരികെ;
 	}
 
 	strbuf_add(&sb, str, cut - str);
-	string_list_append(keys_uniq, sb.buf);
+	string_list_append(താക്കോലുകൾ_uniq, sb.buf);
 	strbuf_release(&sb);
 }
 
-static void list_config_help(enum show_config_type type)
+സ്ഥിതം ശൂന്യം list_config_help(എണ്ണൽ show_config_type type)
 {
-	struct slot_expansion slot_expansions[] = {
+	ഘടന slot_expansion slot_expansions[] = {
 		{ "advice", "*", list_config_advices },
 		{ "color.branch", "<slot>", list_config_color_branch_slots },
 		{ "color.decorate", "<slot>", list_config_color_decorate_slots },
@@ -168,72 +168,72 @@ static void list_config_help(enum show_config_type type)
 		{ "color.interactive", "<slot>", list_config_color_interactive_slots },
 		{ "color.remote", "<slot>", list_config_color_sideband_slots },
 		{ "color.status", "<slot>", list_config_color_status_slots },
-		{ "fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ "receive.fsck", "<msg-id>", list_config_fsck_msg_ids },
-		{ NULL, NULL, NULL }
+		{ "fsck", "<msg-id>", list_config_fsck_സന്ദേശം_ids },
+		{ "receive.fsck", "<msg-id>", list_config_fsck_സന്ദേശം_ids },
+		{ ശൂന്യ, ശൂന്യ, ശൂന്യ }
 	};
-	const char **p;
-	struct slot_expansion *e;
-	struct string_list keys = STRING_LIST_INIT_DUP;
-	struct string_list keys_uniq = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	struct strbuf sb = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം **p;
+	ഘടന slot_expansion *e;
+	ഘടന string_list താക്കോലുകൾ = STRING_LIST_INIT_DUP;
+	ഘടന string_list താക്കോലുകൾ_uniq = STRING_LIST_INIT_DUP;
+	ഘടന string_list_item *item;
+	ഘടന strbuf sb = STRBUF_INIT;
 
-	for (p = config_name_list; *p; p++) {
-		const char *var = *p;
+	വേണ്ടി (p = config_name_list; *p; p++) {
+		സ്ഥിരം അക്ഷരം *var = *p;
 
-		for (e = slot_expansions; e->prefix; e++) {
+		വേണ്ടി (e = slot_expansions; e->prefix; e++) {
 			strbuf_reset(&sb);
 			strbuf_addf(&sb, "%s.%s", e->prefix, e->placeholder);
-			if (!strcasecmp(var, sb.buf)) {
-				e->fn(&keys, e->prefix);
+			എങ്കിൽ (!strcasecmp(var, sb.buf)) {
+				e->fn(&താക്കോലുകൾ, e->prefix);
 				e->found++;
-				break;
+				നിർത്തുക;
 			}
 		}
 
-		if (!e->prefix)
-			string_list_append(&keys, var);
+		എങ്കിൽ (!e->prefix)
+			string_list_append(&താക്കോലുകൾ, var);
 	}
 
 	strbuf_release(&sb);
 
-	for (e = slot_expansions; e->prefix; e++)
-		if (!e->found)
+	വേണ്ടി (e = slot_expansions; e->prefix; e++)
+		എങ്കിൽ (!e->found)
 			BUG("slot_expansion %s.%s is not used",
 			    e->prefix, e->placeholder);
 
-	for (size_t i = 0; i < keys.nr; i++) {
-		switch (type) {
-		case SHOW_CONFIG_HUMAN:
-			string_list_append(&keys_uniq, keys.items[i].string);
-			break;
-		case SHOW_CONFIG_SECTIONS:
-			set_config_sections(&keys_uniq, &keys.items[i]);
-			break;
-		case SHOW_CONFIG_VARS:
-			set_config_vars(&keys_uniq, &keys.items[i]);
-			break;
-		default:
+	വേണ്ടി (size_t i = 0; i < താക്കോലുകൾ.nr; i++) {
+		തിരഞ്ഞെടുപ്പ് (type) {
+		അവസ്ഥ SHOW_CONFIG_HUMAN:
+			string_list_append(&താക്കോലുകൾ_uniq, താക്കോലുകൾ.ഇനങ്ങൾ[i].string);
+			നിർത്തുക;
+		അവസ്ഥ SHOW_CONFIG_SECTIONS:
+			set_config_sections(&താക്കോലുകൾ_uniq, &താക്കോലുകൾ.ഇനങ്ങൾ[i]);
+			നിർത്തുക;
+		അവസ്ഥ SHOW_CONFIG_VARS:
+			set_config_vars(&താക്കോലുകൾ_uniq, &താക്കോലുകൾ.ഇനങ്ങൾ[i]);
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			BUG("%d: unexpected type", type);
 		}
 	}
 
-	string_list_sort_u(&keys_uniq, 0);
-	for_each_string_list_item(item, &keys_uniq)
+	string_list_sort_u(&താക്കോലുകൾ_uniq, 0);
+	for_each_string_list_item(item, &താക്കോലുകൾ_uniq)
 		puts(item->string);
-	string_list_clear(&keys_uniq, 0);
-	string_list_clear(&keys, 0);
+	string_list_clear(&താക്കോലുകൾ_uniq, 0);
+	string_list_clear(&താക്കോലുകൾ, 0);
 }
 
-static enum help_format parse_help_format(const char *format)
+സ്ഥിതം എണ്ണൽ help_format parse_help_format(സ്ഥിരം അക്ഷരം *format)
 {
-	if (!strcmp(format, "man"))
-		return HELP_FORMAT_MAN;
-	if (!strcmp(format, "info"))
-		return HELP_FORMAT_INFO;
-	if (!strcmp(format, "web") || !strcmp(format, "html"))
-		return HELP_FORMAT_WEB;
+	എങ്കിൽ (!strcmp(format, "man"))
+		തിരികെ HELP_FORMAT_MAN;
+	എങ്കിൽ (!strcmp(format, "info"))
+		തിരികെ HELP_FORMAT_INFO;
+	എങ്കിൽ (!strcmp(format, "web") || !strcmp(format, "html"))
+		തിരികെ HELP_FORMAT_WEB;
 	/*
 	 * Please update _repo_config() in git-completion.bash when you
 	 * add new help formats.
@@ -241,30 +241,30 @@ static enum help_format parse_help_format(const char *format)
 	die(_("unrecognized help format '%s'"), format);
 }
 
-static const char *get_man_viewer_info(const char *name)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_man_viewer_info(സ്ഥിരം അക്ഷരം *name)
 {
-	struct man_viewer_info_list *viewer;
+	ഘടന man_viewer_info_list *viewer;
 
-	for (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
+	വേണ്ടി (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
 	{
-		if (!strcasecmp(name, viewer->name))
-			return viewer->info;
+		എങ്കിൽ (!strcasecmp(name, viewer->name))
+			തിരികെ viewer->info;
 	}
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-static int check_emacsclient_version(void)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_emacsclient_version(ശൂന്യം)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct child_process ec_process = CHILD_PROCESS_INIT;
-	int version;
+	ഘടന strbuf buffer = STRBUF_INIT;
+	ഘടന child_process ec_process = CHILD_PROCESS_INIT;
+	പൂർണ്ണസംഖ്യ version;
 
 	/* emacsclient prints its version number on stderr */
-	strvec_pushl(&ec_process.args, "emacsclient", "--version", NULL);
+	strvec_pushl(&ec_process.args, "emacsclient", "--version", ശൂന്യ);
 	ec_process.err = -1;
 	ec_process.stdout_to_stderr = 1;
-	if (start_command(&ec_process))
-		return error(_("Failed to start emacsclient."));
+	എങ്കിൽ (start_command(&ec_process))
+		തിരികെ error(_("Failed to start emacsclient."));
 
 	strbuf_read(&buffer, ec_process.err, 20);
 	close(ec_process.err);
@@ -275,214 +275,214 @@ static int check_emacsclient_version(void)
 	 */
 	finish_command(&ec_process);
 
-	if (!starts_with(buffer.buf, "emacsclient")) {
+	എങ്കിൽ (!starts_with(buffer.buf, "emacsclient")) {
 		strbuf_release(&buffer);
-		return error(_("Failed to parse emacsclient version."));
+		തിരികെ error(_("Failed to parse emacsclient version."));
 	}
 
 	strbuf_remove(&buffer, 0, strlen("emacsclient"));
 	version = atoi(buffer.buf);
 
-	if (version < 22) {
+	എങ്കിൽ (version < 22) {
 		strbuf_release(&buffer);
-		return error(_("emacsclient version '%d' too old (< 22)."),
+		തിരികെ error(_("emacsclient version '%d' too old (< 22)."),
 			version);
 	}
 
 	strbuf_release(&buffer);
-	return 0;
+	തിരികെ 0;
 }
 
-static void exec_woman_emacs(const char *path, const char *page)
+സ്ഥിതം ശൂന്യം exec_woman_emacs(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *page)
 {
-	if (!check_emacsclient_version()) {
+	എങ്കിൽ (!check_emacsclient_version()) {
 		/* This works only with emacsclient version >= 22. */
-		struct strbuf man_page = STRBUF_INIT;
+		ഘടന strbuf man_page = STRBUF_INIT;
 
-		if (!path)
+		എങ്കിൽ (!path)
 			path = "emacsclient";
 		strbuf_addf(&man_page, "(woman \"%s\")", page);
-		execlp(path, "emacsclient", "-e", man_page.buf, (char *)NULL);
+		execlp(path, "emacsclient", "-e", man_page.buf, (അക്ഷരം *)ശൂന്യ);
 		warning_errno(_("failed to exec '%s'"), path);
 		strbuf_release(&man_page);
 	}
 }
 
-static void exec_man_konqueror(const char *path, const char *page)
+സ്ഥിതം ശൂന്യം exec_man_konqueror(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *page)
 {
-	const char *display = getenv("DISPLAY");
-	if (display && *display) {
-		struct strbuf man_page = STRBUF_INIT;
-		const char *filename = "kfmclient";
+	സ്ഥിരം അക്ഷരം *display = getenv("DISPLAY");
+	എങ്കിൽ (display && *display) {
+		ഘടന strbuf man_page = STRBUF_INIT;
+		സ്ഥിരം അക്ഷരം *filename = "kfmclient";
 
 		/* It's simpler to launch konqueror using kfmclient. */
-		if (path) {
+		എങ്കിൽ (path) {
 			size_t len;
-			if (strip_suffix(path, "/konqueror", &len))
-				path = xstrfmt("%.*s/kfmclient", (int)len, path);
-			filename = basename((char *)path);
-		} else
+			എങ്കിൽ (strip_suffix(path, "/konqueror", &len))
+				path = xstrfmt("%.*s/kfmclient", (പൂർണ്ണസംഖ്യ)len, path);
+			filename = basename((അക്ഷരം *)path);
+		} അല്ലെങ്കിൽ
 			path = "kfmclient";
 		strbuf_addf(&man_page, "man:%s(1)", page);
-		execlp(path, filename, "newTab", man_page.buf, (char *)NULL);
+		execlp(path, filename, "newTab", man_page.buf, (അക്ഷരം *)ശൂന്യ);
 		warning_errno(_("failed to exec '%s'"), path);
 		strbuf_release(&man_page);
 	}
 }
 
-static void exec_man_man(const char *path, const char *page)
+സ്ഥിതം ശൂന്യം exec_man_man(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *page)
 {
-	if (!path)
+	എങ്കിൽ (!path)
 		path = "man";
-	execlp(path, "man", page, (char *)NULL);
+	execlp(path, "man", page, (അക്ഷരം *)ശൂന്യ);
 	warning_errno(_("failed to exec '%s'"), path);
 }
 
-static void exec_man_cmd(const char *cmd, const char *page)
+സ്ഥിതം ശൂന്യം exec_man_cmd(സ്ഥിരം അക്ഷരം *cmd, സ്ഥിരം അക്ഷരം *page)
 {
-	struct strbuf shell_cmd = STRBUF_INIT;
+	ഘടന strbuf shell_cmd = STRBUF_INIT;
 	strbuf_addf(&shell_cmd, "%s %s", cmd, page);
-	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (char *)NULL);
+	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (അക്ഷരം *)ശൂന്യ);
 	warning(_("failed to exec '%s'"), cmd);
 	strbuf_release(&shell_cmd);
 }
 
-static void add_man_viewer(const char *name)
+സ്ഥിതം ശൂന്യം add_man_viewer(സ്ഥിരം അക്ഷരം *name)
 {
-	struct man_viewer_list **p = &man_viewer_list;
+	ഘടന man_viewer_list **p = &man_viewer_list;
 
-	while (*p)
+	ആകുമ്പോൾ (*p)
 		p = &((*p)->next);
 	FLEX_ALLOC_STR(*p, name, name);
 }
 
-static int supported_man_viewer(const char *name, size_t len)
+സ്ഥിതം പൂർണ്ണസംഖ്യ supported_man_viewer(സ്ഥിരം അക്ഷരം *name, size_t len)
 {
-	return (!strncasecmp("man", name, len) ||
+	തിരികെ (!strncasecmp("man", name, len) ||
 		!strncasecmp("woman", name, len) ||
 		!strncasecmp("konqueror", name, len));
 }
 
-static void do_add_man_viewer_info(const char *name,
+സ്ഥിതം ശൂന്യം do_add_man_viewer_info(സ്ഥിരം അക്ഷരം *name,
 				   size_t len,
-				   const char *value)
+				   സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	struct man_viewer_info_list *new_man_viewer;
+	ഘടന man_viewer_info_list *new_man_viewer;
 	FLEX_ALLOC_MEM(new_man_viewer, name, name, len);
-	new_man_viewer->info = xstrdup(value);
+	new_man_viewer->info = xstrdup(മൂല്യം);
 	new_man_viewer->next = man_viewer_info_list;
 	man_viewer_info_list = new_man_viewer;
 }
 
-static int add_man_viewer_path(const char *name,
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_man_viewer_path(സ്ഥിരം അക്ഷരം *name,
 			       size_t len,
-			       const char *value)
+			       സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	if (supported_man_viewer(name, len))
-		do_add_man_viewer_info(name, len, value);
-	else
+	എങ്കിൽ (supported_man_viewer(name, len))
+		do_add_man_viewer_info(name, len, മൂല്യം);
+	അല്ലെങ്കിൽ
 		warning(_("'%s': path for unsupported man viewer.\n"
 			  "Please consider using 'man.<tool>.cmd' instead."),
 			name);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int add_man_viewer_cmd(const char *name,
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_man_viewer_cmd(സ്ഥിരം അക്ഷരം *name,
 			      size_t len,
-			      const char *value)
+			      സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	if (supported_man_viewer(name, len))
+	എങ്കിൽ (supported_man_viewer(name, len))
 		warning(_("'%s': cmd for supported man viewer.\n"
 			  "Please consider using 'man.<tool>.path' instead."),
 			name);
-	else
-		do_add_man_viewer_info(name, len, value);
+	അല്ലെങ്കിൽ
+		do_add_man_viewer_info(name, len, മൂല്യം);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int add_man_viewer_info(const char *var, const char *value)
+സ്ഥിതം പൂർണ്ണസംഖ്യ add_man_viewer_info(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	const char *name, *subkey;
+	സ്ഥിരം അക്ഷരം *name, *subkey;
 	size_t namelen;
 
-	if (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
-		return 0;
+	എങ്കിൽ (parse_config_താക്കോൽ(var, "man", &name, &namelen, &subkey) < 0 || !name)
+		തിരികെ 0;
 
-	if (!strcmp(subkey, "path")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_path(name, namelen, value);
+	എങ്കിൽ (!strcmp(subkey, "path")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		തിരികെ add_man_viewer_path(name, namelen, മൂല്യം);
 	}
-	if (!strcmp(subkey, "cmd")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_cmd(name, namelen, value);
+	എങ്കിൽ (!strcmp(subkey, "cmd")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		തിരികെ add_man_viewer_cmd(name, namelen, മൂല്യം);
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int git_help_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_help_config(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം,
+			   സ്ഥിരം ഘടന config_context *ctx, ശൂന്യം *cb)
 {
-	if (!strcmp(var, "help.format")) {
-		if (!value)
-			return config_error_nonbool(var);
-		help_format = parse_help_format(value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "help.format")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		help_format = parse_help_format(മൂല്യം);
+		തിരികെ 0;
 	}
-	if (!strcmp(var, "help.htmlpath")) {
-		if (!value)
-			return config_error_nonbool(var);
-		free(html_path);
-		html_path = xstrdup(value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "help.htmlpath")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		സ്വതന്ത്രം(html_path);
+		html_path = xstrdup(മൂല്യം);
+		തിരികെ 0;
 	}
-	if (!strcmp(var, "man.viewer")) {
-		if (!value)
-			return config_error_nonbool(var);
-		add_man_viewer(value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "man.viewer")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		add_man_viewer(മൂല്യം);
+		തിരികെ 0;
 	}
-	if (starts_with(var, "man."))
-		return add_man_viewer_info(var, value);
+	എങ്കിൽ (starts_with(var, "man."))
+		തിരികെ add_man_viewer_info(var, മൂല്യം);
 
-	return git_default_config(var, value, ctx, cb);
+	തിരികെ git_default_config(var, മൂല്യം, ctx, cb);
 }
 
-static struct cmdnames main_cmds, other_cmds;
+സ്ഥിതം ഘടന cmdnames main_cmds, other_cmds;
 
-static int is_git_command(const char *s)
+സ്ഥിതം പൂർണ്ണസംഖ്യ is_git_command(സ്ഥിരം അക്ഷരം *s)
 {
-	if (is_builtin(s))
-		return 1;
+	എങ്കിൽ (is_builtin(s))
+		തിരികെ 1;
 
 	load_command_list("git-", &main_cmds, &other_cmds);
-	return is_in_cmdlist(&main_cmds, s) ||
+	തിരികെ is_in_cmdlist(&main_cmds, s) ||
 		is_in_cmdlist(&other_cmds, s);
 }
 
-static const char *cmd_to_page(const char *git_cmd)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *cmd_to_page(സ്ഥിരം അക്ഷരം *git_cmd)
 {
-	if (!git_cmd)
-		return "git";
-	else if (starts_with(git_cmd, "git"))
-		return git_cmd;
-	else if (is_git_command(git_cmd))
-		return xstrfmt("git-%s", git_cmd);
-	else if (!strcmp("scalar", git_cmd))
-		return xstrdup(git_cmd);
-	else
-		return xstrfmt("git%s", git_cmd);
+	എങ്കിൽ (!git_cmd)
+		തിരികെ "git";
+	അല്ലെങ്കിൽ എങ്കിൽ (starts_with(git_cmd, "git"))
+		തിരികെ git_cmd;
+	അല്ലെങ്കിൽ എങ്കിൽ (is_git_command(git_cmd))
+		തിരികെ xstrfmt("git-%s", git_cmd);
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp("scalar", git_cmd))
+		തിരികെ xstrdup(git_cmd);
+	അല്ലെങ്കിൽ
+		തിരികെ xstrfmt("git%s", git_cmd);
 }
 
-static void setup_man_path(void)
+സ്ഥിതം ശൂന്യം setup_man_path(ശൂന്യം)
 {
-	struct strbuf new_path = STRBUF_INIT;
-	const char *old_path = getenv("MANPATH");
-	char *git_man_path = system_path(GIT_MAN_PATH);
+	ഘടന strbuf new_path = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *old_path = getenv("MANPATH");
+	അക്ഷരം *git_man_path = system_path(GIT_MAN_PATH);
 
 	/* We should always put ':' after our path. If there is no
 	 * old_path, the ':' at the end will let 'man' to try
@@ -490,68 +490,68 @@ static void setup_man_path(void)
 	 * there is old_path, we need ':' as delimiter. */
 	strbuf_addstr(&new_path, git_man_path);
 	strbuf_addch(&new_path, ':');
-	if (old_path)
+	എങ്കിൽ (old_path)
 		strbuf_addstr(&new_path, old_path);
 
-	free(git_man_path);
+	സ്വതന്ത്രം(git_man_path);
 	setenv("MANPATH", new_path.buf, 1);
 
 	strbuf_release(&new_path);
 }
 
-static void exec_viewer(const char *name, const char *page)
+സ്ഥിതം ശൂന്യം exec_viewer(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *page)
 {
-	const char *info = get_man_viewer_info(name);
+	സ്ഥിരം അക്ഷരം *info = get_man_viewer_info(name);
 
-	if (!strcasecmp(name, "man"))
+	എങ്കിൽ (!strcasecmp(name, "man"))
 		exec_man_man(info, page);
-	else if (!strcasecmp(name, "woman"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcasecmp(name, "woman"))
 		exec_woman_emacs(info, page);
-	else if (!strcasecmp(name, "konqueror"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcasecmp(name, "konqueror"))
 		exec_man_konqueror(info, page);
-	else if (info)
+	അല്ലെങ്കിൽ എങ്കിൽ (info)
 		exec_man_cmd(info, page);
-	else
+	അല്ലെങ്കിൽ
 		warning(_("'%s': unknown man viewer."), name);
 }
 
-static void show_man_page(const char *page)
+സ്ഥിതം ശൂന്യം show_man_page(സ്ഥിരം അക്ഷരം *page)
 {
-	struct man_viewer_list *viewer;
-	const char *fallback = getenv("GIT_MAN_VIEWER");
+	ഘടന man_viewer_list *viewer;
+	സ്ഥിരം അക്ഷരം *fallback = getenv("GIT_MAN_VIEWER");
 
 	setup_man_path();
-	for (viewer = man_viewer_list; viewer; viewer = viewer->next)
+	വേണ്ടി (viewer = man_viewer_list; viewer; viewer = viewer->next)
 	{
 		exec_viewer(viewer->name, page); /* will return when unable */
 	}
-	if (fallback)
+	എങ്കിൽ (fallback)
 		exec_viewer(fallback, page);
 	exec_viewer("man", page);
 	die(_("no man viewer handled the request"));
 }
 
-static void show_info_page(const char *page)
+സ്ഥിതം ശൂന്യം show_info_page(സ്ഥിരം അക്ഷരം *page)
 {
 	setenv("INFOPATH", system_path(GIT_INFO_PATH), 1);
-	execlp("info", "info", "gitman", page, (char *)NULL);
+	execlp("info", "info", "gitman", page, (അക്ഷരം *)ശൂന്യ);
 	die(_("no info viewer handled the request"));
 }
 
-static void get_html_page_path(struct strbuf *page_path, const char *page)
+സ്ഥിതം ശൂന്യം get_html_page_path(ഘടന strbuf *page_path, സ്ഥിരം അക്ഷരം *page)
 {
-	struct stat st;
-	const char *path = html_path;
-	char *to_free = NULL;
+	ഘടന stat st;
+	സ്ഥിരം അക്ഷരം *path = html_path;
+	അക്ഷരം *to_free = ശൂന്യ;
 
-	if (!path)
+	എങ്കിൽ (!path)
 		path = to_free = system_path(GIT_HTML_PATH);
 
 	/*
 	 * Check that the page we're looking for exists.
 	 */
-	if (!strstr(path, "://")) {
-		if (stat(mkpath("%s/%s.html", path, page), &st)
+	എങ്കിൽ (!strstr(path, "://")) {
+		എങ്കിൽ (stat(mkpath("%s/%s.html", path, page), &st)
 		    || !S_ISREG(st.st_mode))
 			die("'%s/%s.html': documentation file not found.",
 				path, page);
@@ -559,34 +559,34 @@ static void get_html_page_path(struct strbuf *page_path, const char *page)
 
 	strbuf_init(page_path, 0);
 	strbuf_addf(page_path, "%s/%s.html", path, page);
-	free(to_free);
+	സ്വതന്ത്രം(to_free);
 }
 
-static void open_html(const char *path)
+സ്ഥിതം ശൂന്യം open_html(സ്ഥിരം അക്ഷരം *path)
 {
-	execl_git_cmd("web--browse", "-c", "help.browser", path, (char *)NULL);
+	execl_git_cmd("web--browse", "-c", "help.browser", path, (അക്ഷരം *)ശൂന്യ);
 }
 
-static void show_html_page(const char *page)
+സ്ഥിതം ശൂന്യം show_html_page(സ്ഥിരം അക്ഷരം *page)
 {
-	struct strbuf page_path; /* it leaks but we exec below */
+	ഘടന strbuf page_path; /* it leaks but we exec below */
 
 	get_html_page_path(&page_path, page);
 
 	open_html(page_path.buf);
 }
 
-static char *check_git_cmd(const char *cmd)
+സ്ഥിതം അക്ഷരം *check_git_cmd(സ്ഥിരം അക്ഷരം *cmd)
 {
-	char *alias;
+	അക്ഷരം *alias;
 
-	if (is_git_command(cmd))
-		return xstrdup(cmd);
+	എങ്കിൽ (is_git_command(cmd))
+		തിരികെ xstrdup(cmd);
 
 	alias = alias_lookup(cmd);
-	if (alias) {
-		const char **argv;
-		int count;
+	എങ്കിൽ (alias) {
+		സ്ഥിരം അക്ഷരം **argv;
+		പൂർണ്ണസംഖ്യ എണ്ണം;
 
 		/*
 		 * handle_builtin() in git.c rewrites "git cmd --help"
@@ -596,9 +596,9 @@ static char *check_git_cmd(const char *cmd)
 		 * alias for a shell command, just print the alias
 		 * definition.
 		 */
-		if (!exclude_guides || alias[0] == '!') {
+		എങ്കിൽ (!exclude_guides || alias[0] == '!') {
 			printf_ln(_("'%s' is aliased to '%s'"), cmd, alias);
-			free(alias);
+			സ്വതന്ത്രം(alias);
 			exit(0);
 		}
 		/*
@@ -609,161 +609,161 @@ static char *check_git_cmd(const char *cmd)
 		 * used. split_cmdline() modifies alias in-place.
 		 */
 		fprintf_ln(stderr, _("'%s' is aliased to '%s'"), cmd, alias);
-		count = split_cmdline(alias, &argv);
-		if (count < 0)
+		എണ്ണം = split_cmdline(alias, &argv);
+		എങ്കിൽ (എണ്ണം < 0)
 			die(_("bad alias.%s string: %s"), cmd,
-			    split_cmdline_strerror(count));
-		free(argv);
-		return alias;
+			    split_cmdline_strerror(എണ്ണം));
+		സ്വതന്ത്രം(argv);
+		തിരികെ alias;
 	}
 
-	if (exclude_guides)
-		return help_unknown_cmd(cmd);
+	എങ്കിൽ (exclude_guides)
+		തിരികെ help_unknown_cmd(cmd);
 
-	return xstrdup(cmd);
+	തിരികെ xstrdup(cmd);
 }
 
-static void no_help_format(const char *opt_mode, enum help_format fmt)
+സ്ഥിതം ശൂന്യം no_help_format(സ്ഥിരം അക്ഷരം *opt_mode, എണ്ണൽ help_format fmt)
 {
-	const char *opt_fmt;
+	സ്ഥിരം അക്ഷരം *opt_fmt;
 
-	switch (fmt) {
-	case HELP_FORMAT_NONE:
-		return;
-	case HELP_FORMAT_MAN:
+	തിരഞ്ഞെടുപ്പ് (fmt) {
+	അവസ്ഥ HELP_FORMAT_NONE:
+		തിരികെ;
+	അവസ്ഥ HELP_FORMAT_MAN:
 		opt_fmt = "--man";
-		break;
-	case HELP_FORMAT_INFO:
+		നിർത്തുക;
+	അവസ്ഥ HELP_FORMAT_INFO:
 		opt_fmt = "--info";
-		break;
-	case HELP_FORMAT_WEB:
+		നിർത്തുക;
+	അവസ്ഥ HELP_FORMAT_WEB:
 		opt_fmt = "--web";
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		BUG("unreachable");
 	}
 
-	usage_msg_optf(_("options '%s' and '%s' cannot be used together"),
+	usage_സന്ദേശം_optf(_("options '%s' and '%s' cannot be used together"),
 		       builtin_help_usage, builtin_help_options, opt_mode,
 		       opt_fmt);
 }
 
-static void opt_mode_usage(int argc, const char *opt_mode,
-			   enum help_format fmt)
+സ്ഥിതം ശൂന്യം opt_mode_usage(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം *opt_mode,
+			   എണ്ണൽ help_format fmt)
 {
-	if (argc)
-		usage_msg_optf(_("the '%s' option doesn't take any non-option arguments"),
+	എങ്കിൽ (argc)
+		usage_സന്ദേശം_optf(_("the '%s' option doesn't take any non-option arguments"),
 			       builtin_help_usage, builtin_help_options,
 			       opt_mode);
 
 	no_help_format(opt_mode, fmt);
 }
 
-int cmd_help(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_help(പൂർണ്ണസംഖ്യ argc,
+	     സ്ഥിരം അക്ഷരം **argv,
+	     സ്ഥിരം അക്ഷരം *prefix,
+	     ഘടന repository *repo UNUSED)
 {
-	int nongit;
-	enum help_format parsed_help_format;
-	char *command = NULL;
-	const char *page;
+	പൂർണ്ണസംഖ്യ nongit;
+	എണ്ണൽ help_format parsed_help_format;
+	അക്ഷരം *command = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *page;
 
 	argc = parse_options(argc, argv, prefix, builtin_help_options,
 			builtin_help_usage, 0);
 	parsed_help_format = help_format;
 
-	if (cmd_mode != HELP_ACTION_ALL &&
+	എങ്കിൽ (cmd_mode != HELP_ACTION_ALL &&
 	    (show_external_commands >= 0 ||
 	     show_aliases >= 0))
-		usage_msg_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
+		usage_സന്ദേശം_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
 			      builtin_help_usage, builtin_help_options);
 
-	switch (cmd_mode) {
-	case HELP_ACTION_ALL:
+	തിരഞ്ഞെടുപ്പ് (cmd_mode) {
+	അവസ്ഥ HELP_ACTION_ALL:
 		opt_mode_usage(argc, "--all", help_format);
-		if (verbose) {
+		എങ്കിൽ (verbose) {
 			setup_pager(the_repository);
 			list_all_cmds_help(show_external_commands,
 					   show_aliases);
-			return 0;
+			തിരികെ 0;
 		}
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		load_command_list("git-", &main_cmds, &other_cmds);
 		list_commands(&main_cmds, &other_cmds);
 		printf("%s\n", _(git_more_info_string));
-		break;
-	case HELP_ACTION_GUIDES:
+		നിർത്തുക;
+	അവസ്ഥ HELP_ACTION_GUIDES:
 		opt_mode_usage(argc, "--guides", help_format);
 		list_guides_help();
 		printf("%s\n", _(git_more_info_string));
-		return 0;
-	case HELP_ACTION_CONFIG_FOR_COMPLETION:
+		തിരികെ 0;
+	അവസ്ഥ HELP_ACTION_CONFIG_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-for-completion", help_format);
 		list_config_help(SHOW_CONFIG_VARS);
-		return 0;
-	case HELP_ACTION_USER_INTERFACES:
+		തിരികെ 0;
+	അവസ്ഥ HELP_ACTION_USER_INTERFACES:
 		opt_mode_usage(argc, "--user-interfaces", help_format);
 		list_user_interfaces_help();
-		return 0;
-	case HELP_ACTION_DEVELOPER_INTERFACES:
+		തിരികെ 0;
+	അവസ്ഥ HELP_ACTION_DEVELOPER_INTERFACES:
 		opt_mode_usage(argc, "--developer-interfaces", help_format);
 		list_developer_interfaces_help();
-		return 0;
-	case HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
+		തിരികെ 0;
+	അവസ്ഥ HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-sections-for-completion",
 			       help_format);
 		list_config_help(SHOW_CONFIG_SECTIONS);
-		return 0;
-	case HELP_ACTION_ALIASES_FOR_COMPLETION: {
-		struct string_list alias_list = STRING_LIST_INIT_DUP;
+		തിരികെ 0;
+	അവസ്ഥ HELP_ACTION_ALIASES_FOR_COMPLETION: {
+		ഘടന string_list alias_list = STRING_LIST_INIT_DUP;
 		opt_mode_usage(argc, "--aliases-for-completion", help_format);
 		list_aliases(&alias_list);
-		for (size_t i = 0; i < alias_list.nr; i++)
-			printf("%s%c%s%c", alias_list.items[i].string, '\n',
-			       (char *)alias_list.items[i].util, '\0');
+		വേണ്ടി (size_t i = 0; i < alias_list.nr; i++)
+			printf("%s%c%s%c", alias_list.ഇനങ്ങൾ[i].string, '\n',
+			       (അക്ഷരം *)alias_list.ഇനങ്ങൾ[i].util, '\0');
 		string_list_clear(&alias_list, 1);
-		return 0;
+		തിരികെ 0;
 	}
-	case HELP_ACTION_CONFIG:
+	അവസ്ഥ HELP_ACTION_CONFIG:
 		opt_mode_usage(argc, "--config", help_format);
 		setup_pager(the_repository);
 		list_config_help(SHOW_CONFIG_HUMAN);
 		printf("\n%s\n", _("'git help config' for more information"));
-		return 0;
+		തിരികെ 0;
 	}
 
-	if (!argv[0]) {
+	എങ്കിൽ (!argv[0]) {
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		list_common_cmds_help();
 		printf("\n%s\n", _(git_more_info_string));
-		return 0;
+		തിരികെ 0;
 	}
 
 	setup_git_directory_gently(the_repository, &nongit);
-	repo_config(the_repository, git_help_config, NULL);
+	repo_config(the_repository, git_help_config, ശൂന്യ);
 
-	if (parsed_help_format != HELP_FORMAT_NONE)
+	എങ്കിൽ (parsed_help_format != HELP_FORMAT_NONE)
 		help_format = parsed_help_format;
-	if (help_format == HELP_FORMAT_NONE)
+	എങ്കിൽ (help_format == HELP_FORMAT_NONE)
 		help_format = parse_help_format(DEFAULT_HELP_FORMAT);
 
 	command = check_git_cmd(argv[0]);
 
 	page = cmd_to_page(command);
-	switch (help_format) {
-	case HELP_FORMAT_NONE:
-	case HELP_FORMAT_MAN:
+	തിരഞ്ഞെടുപ്പ് (help_format) {
+	അവസ്ഥ HELP_FORMAT_NONE:
+	അവസ്ഥ HELP_FORMAT_MAN:
 		show_man_page(page);
-		break;
-	case HELP_FORMAT_INFO:
+		നിർത്തുക;
+	അവസ്ഥ HELP_FORMAT_INFO:
 		show_info_page(page);
-		break;
-	case HELP_FORMAT_WEB:
+		നിർത്തുക;
+	അവസ്ഥ HELP_FORMAT_WEB:
 		show_html_page(page);
-		break;
+		നിർത്തുക;
 	}
 
-	free(command);
-	return 0;
+	സ്വതന്ത്രം(command);
+	തിരികെ 0;
 }

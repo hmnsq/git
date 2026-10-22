@@ -1,50 +1,50 @@
 /* We need this macro to access core_apply_sparse_checkout */
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "git-compat-util.h"
-#include "config.h"
-#include "parse-options.h"
-#include "repository.h"
-#include "commit.h"
-#include "dir.h"
-#include "environment.h"
-#include "hex.h"
-#include "tree.h"
-#include "tree-walk.h"
-#include "object.h"
-#include "odb.h"
-#include "oid-array.h"
-#include "oidset.h"
-#include "promisor-remote.h"
-#include "strmap.h"
-#include "string-list.h"
-#include "revision.h"
-#include "trace2.h"
-#include "progress.h"
-#include "packfile.h"
-#include "path-walk.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "git-compat-util.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "repository.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "tree-walk.h"
+#അന്തര്ഭാവ "object.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "oid-array.h"
+#അന്തര്ഭാവ "oidset.h"
+#അന്തര്ഭാവ "promisor-remote.h"
+#അന്തര്ഭാവ "strmap.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "trace2.h"
+#അന്തര്ഭാവ "progress.h"
+#അന്തര്ഭാവ "packfile.h"
+#അന്തര്ഭാവ "path-walk.h"
 
-static const char * const builtin_backfill_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_backfill_usage[] = {
 	N_("git backfill [--min-batch-size=<n>] [--[no-]sparse] [--[no-]include-edges] [<revision-range>]"),
-	NULL
+	ശൂന്യ
 };
 
-struct backfill_context {
-	struct repository *repo;
-	struct oid_array current_batch;
+ഘടന backfill_context {
+	ഘടന repository *repo;
+	ഘടന oid_array current_batch;
 	size_t min_batch_size;
-	int sparse;
-	int include_edges;
-	struct rev_info revs;
+	പൂർണ്ണസംഖ്യ sparse;
+	പൂർണ്ണസംഖ്യ include_edges;
+	ഘടന rev_info revs;
 };
 
-static void backfill_context_clear(struct backfill_context *ctx)
+സ്ഥിതം ശൂന്യം backfill_context_clear(ഘടന backfill_context *ctx)
 {
 	oid_array_clear(&ctx->current_batch);
 }
 
-static void download_batch(struct backfill_context *ctx)
+സ്ഥിതം ശൂന്യം download_batch(ഘടന backfill_context *ctx)
 {
 	promisor_remote_get_direct(ctx->repo,
 				   ctx->current_batch.oid,
@@ -58,68 +58,68 @@ static void download_batch(struct backfill_context *ctx)
 	odb_reprepare(ctx->repo->objects);
 }
 
-static int fill_missing_blobs(const char *path UNUSED,
-			      struct oid_array *list,
-			      enum object_type type,
-			      void *data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fill_missing_blobs(സ്ഥിരം അക്ഷരം *path UNUSED,
+			      ഘടന oid_array *list,
+			      എണ്ണൽ object_type type,
+			      ശൂന്യം *data)
 {
-	struct backfill_context *ctx = data;
+	ഘടന backfill_context *ctx = data;
 
-	if (type != OBJ_BLOB)
-		return 0;
+	എങ്കിൽ (type != OBJ_BLOB)
+		തിരികെ 0;
 
-	for (size_t i = 0; i < list->nr; i++) {
-		if (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
+	വേണ്ടി (size_t i = 0; i < list->nr; i++) {
+		എങ്കിൽ (!odb_has_object(ctx->repo->objects, &list->oid[i], 0))
 			oid_array_append(&ctx->current_batch, &list->oid[i]);
 	}
 
-	if (ctx->current_batch.nr >= ctx->min_batch_size)
+	എങ്കിൽ (ctx->current_batch.nr >= ctx->min_batch_size)
 		download_batch(ctx);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void reject_unsupported_rev_list_options(struct rev_info *revs)
+സ്ഥിതം ശൂന്യം reject_unsupported_rev_list_options(ഘടന rev_info *revs)
 {
-	if (revs->diffopt.pickaxe)
+	എങ്കിൽ (revs->diffopt.pickaxe)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    (revs->diffopt.pickaxe_opts & DIFF_PICKAXE_REGEX) ? "-G" : "-S");
-	if (revs->diffopt.filter || revs->diffopt.filter_not)
+	എങ്കിൽ (revs->diffopt.filter || revs->diffopt.filter_not)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-filter");
-	if (revs->diffopt.flags.follow_renames)
+	എങ്കിൽ (revs->diffopt.flags.follow_renames)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--follow");
-	if (revs->line_level_traverse)
+	എങ്കിൽ (revs->വരി_level_traverse)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "-L");
-	if (revs->explicit_diff_merges)
+	എങ്കിൽ (revs->explicit_diff_merges)
 		die(_("'%s' cannot be used with 'git backfill'"),
 		    "--diff-merges");
-	if (!path_walk_filter_compatible(&revs->filter))
+	എങ്കിൽ (!path_walk_filter_compatible(&revs->filter))
 		die(_("cannot backfill with these filter options"));
-	if (revs->filter.blob_limit_value)
+	എങ്കിൽ (revs->filter.blob_limit_മൂല്യം)
 		die(_("cannot backfill with blob size limits"));
 }
 
-static int do_backfill(struct backfill_context *ctx)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_backfill(ഘടന backfill_context *ctx)
 {
-	struct path_walk_info info = PATH_WALK_INFO_INIT;
-	int ret;
+	ഘടന path_walk_info info = PATH_WALK_INFO_INIT;
+	പൂർണ്ണസംഖ്യ ret;
 
-	if (ctx->sparse) {
+	എങ്കിൽ (ctx->sparse) {
 		CALLOC_ARRAY(info.pl, 1);
 		info.pl_sparse_trees = 1;
-		if (get_sparse_checkout_patterns(info.pl)) {
+		എങ്കിൽ (get_sparse_checkout_patterns(info.pl)) {
 			path_walk_info_clear(&info);
-			return error(_("problem loading sparse-checkout"));
+			തിരികെ error(_("problem loading sparse-checkout"));
 		}
 	}
 
 	/* Walk from HEAD if otherwise unspecified. */
-	if (!ctx->revs.pending.nr)
+	എങ്കിൽ (!ctx->revs.pending.nr)
 		add_head_to_pending(&ctx->revs);
-	if (ctx->include_edges)
+	എങ്കിൽ (ctx->include_edges)
 		ctx->revs.edge_hint = 1;
 
 	info.blobs = 1;
@@ -132,17 +132,17 @@ static int do_backfill(struct backfill_context *ctx)
 	ret = walk_objects_by_path(&info);
 
 	/* Download the objects that did not fill a batch. */
-	if (!ret)
+	എങ്കിൽ (!ret)
 		download_batch(ctx);
 
 	path_walk_info_clear(&info);
-	return ret;
+	തിരികെ ret;
 }
 
-int cmd_backfill(int argc, const char **argv, const char *prefix, struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_backfill(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix, ഘടന repository *repo)
 {
-	int result;
-	struct backfill_context ctx = {
+	പൂർണ്ണസംഖ്യ result;
+	ഘടന backfill_context ctx = {
 		.repo = repo,
 		.current_batch = OID_ARRAY_INIT,
 		.min_batch_size = 50000,
@@ -150,7 +150,7 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 		.revs = REV_INFO_INIT,
 		.include_edges = 1,
 	};
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_UNSIGNED(0, "min-batch-size", &ctx.min_batch_size,
 			     N_("Minimum number of objects to request at a time")),
 		OPT_BOOL(0, "sparse", &ctx.sparse,
@@ -159,7 +159,7 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 			 N_("Include blobs from boundary commits in the backfill")),
 		OPT_END(),
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
 
 	show_usage_with_options_if_asked(argc, argv,
 					 builtin_backfill_usage, options);
@@ -170,19 +170,19 @@ int cmd_backfill(int argc, const char **argv, const char *prefix, struct reposit
 			     PARSE_OPT_KEEP_DASHDASH);
 
 	repo_init_revisions(repo, &ctx.revs, prefix);
-	argc = setup_revisions(argc, argv, &ctx.revs, NULL);
+	argc = setup_revisions(argc, argv, &ctx.revs, ശൂന്യ);
 
-	if (argc > 1)
+	എങ്കിൽ (argc > 1)
 		die(_("unrecognized argument: %s"), argv[1]);
 	reject_unsupported_rev_list_options(&ctx.revs);
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ശൂന്യ);
 
-	if (ctx.sparse < 0)
+	എങ്കിൽ (ctx.sparse < 0)
 		ctx.sparse = cfg->apply_sparse_checkout;
 
 	result = do_backfill(&ctx);
 	backfill_context_clear(&ctx);
 	release_revisions(&ctx.revs);
-	return result;
+	തിരികെ result;
 }

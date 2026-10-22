@@ -1,35 +1,35 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "exec-cmd.h"
-#include "gettext.h"
-#include "pkt-line.h"
-#include "parse-options.h"
-#include "protocol.h"
-#include "replace-object.h"
-#include "upload-pack.h"
-#include "serve.h"
-#include "setup.h"
-#include "commit.h"
-#include "environment.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "exec-cmd.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "pkt-line.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "protocol.h"
+#അന്തര്ഭാവ "replace-object.h"
+#അന്തര്ഭാവ "upload-pack.h"
+#അന്തര്ഭാവ "serve.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "environment.h"
 
-static const char * const upload_pack_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം upload_pack_usage[] = {
 	N_("git-upload-pack [--[no-]strict] [--timeout=<n>] [--stateless-rpc]\n"
 	   "                [--advertise-refs] <directory>"),
-	NULL
+	ശൂന്യ
 };
 
-int cmd_upload_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_upload_pack(പൂർണ്ണസംഖ്യ argc,
+		    സ്ഥിരം അക്ഷരം **argv,
+		    സ്ഥിരം അക്ഷരം *prefix,
+		    ഘടന repository *repo UNUSED)
 {
-	const char *dir;
-	int strict = 0;
-	int advertise_refs = 0;
-	int stateless_rpc = 0;
-	int timeout = 0;
-	struct option options[] = {
+	സ്ഥിരം അക്ഷരം *dir;
+	പൂർണ്ണസംഖ്യ strict = 0;
+	പൂർണ്ണസംഖ്യ advertise_refs = 0;
+	പൂർണ്ണസംഖ്യ stateless_rpc = 0;
+	പൂർണ്ണസംഖ്യ timeout = 0;
+	ഘടന option options[] = {
 		OPT_BOOL(0, "stateless-rpc", &stateless_rpc,
 			 N_("quit after a single request/response exchange")),
 		OPT_HIDDEN_BOOL(0, "http-backend-info-refs", &advertise_refs,
@@ -50,40 +50,40 @@ int cmd_upload_pack(int argc,
 
 	argc = parse_options(argc, argv, prefix, options, upload_pack_usage, 0);
 
-	if (argc != 1)
+	എങ്കിൽ (argc != 1)
 		usage_with_options(upload_pack_usage, options);
 
 	setup_path();
 
 	dir = argv[0];
 
-	if (strict)
+	എങ്കിൽ (strict)
 		enter_repo_flags |= ENTER_REPO_STRICT;
-	if (!enter_repo(the_repository, dir, enter_repo_flags))
+	എങ്കിൽ (!enter_repo(the_repository, dir, enter_repo_flags))
 		die("'%s' does not appear to be a git repository", dir);
 
-	switch (determine_protocol_version_server()) {
-	case protocol_v2:
-		if (advertise_refs)
+	തിരഞ്ഞെടുപ്പ് (determine_protocol_version_server()) {
+	അവസ്ഥ protocol_v2:
+		എങ്കിൽ (advertise_refs)
 			protocol_v2_advertise_capabilities(the_repository);
-		else
+		അല്ലെങ്കിൽ
 			protocol_v2_serve_loop(the_repository, stateless_rpc);
-		break;
-	case protocol_v1:
+		നിർത്തുക;
+	അവസ്ഥ protocol_v1:
 		/*
 		 * v1 is just the original protocol with a version string,
 		 * so just fall through after writing the version string.
 		 */
-		if (advertise_refs || !stateless_rpc)
+		എങ്കിൽ (advertise_refs || !stateless_rpc)
 			packet_write_fmt(1, "version 1\n");
 
 		/* fallthrough */
-	case protocol_v0:
+	അവസ്ഥ protocol_v0:
 		upload_pack(advertise_refs, stateless_rpc, timeout);
-		break;
-	case protocol_unknown_version:
+		നിർത്തുക;
+	അവസ്ഥ protocol_unknown_version:
 		BUG("unknown protocol version");
 	}
 
-	return 0;
+	തിരികെ 0;
 }

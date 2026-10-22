@@ -1,11 +1,11 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hook.h"
-#include "parse-options.h"
-#include "thread-utils.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hook.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "thread-utils.h"
 
 #define BUILTIN_HOOK_RUN_USAGE \
 	N_("git hook run [--allow-unknown-hook-name] [--ignore-missing] [--to-stdin=<path>] [(-j|--jobs) <n>]\n" \
@@ -13,34 +13,34 @@
 #define BUILTIN_HOOK_LIST_USAGE \
 	N_("git hook list [--allow-unknown-hook-name] [-z] [--show-scope] <hook-name>")
 
-static const char * const builtin_hook_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_hook_usage[] = {
 	BUILTIN_HOOK_RUN_USAGE,
 	BUILTIN_HOOK_LIST_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const builtin_hook_run_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_hook_run_usage[] = {
 	BUILTIN_HOOK_RUN_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static int list(int argc, const char **argv, const char *prefix,
-		 struct repository *repo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ list(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		 ഘടന repository *repo)
 {
-	static const char *const builtin_hook_list_usage[] = {
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം builtin_hook_list_usage[] = {
 		BUILTIN_HOOK_LIST_USAGE,
-		NULL
+		ശൂന്യ
 	};
-	struct string_list *head;
-	struct string_list_item *item;
-	const char *hookname = NULL;
-	int line_terminator = '\n';
-	int show_scope = 0;
-	int allow_unknown = 0;
-	int ret = 0;
+	ഘടന string_list *head;
+	ഘടന string_list_item *item;
+	സ്ഥിരം അക്ഷരം *hookname = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ വരി_terminator = '\n';
+	പൂർണ്ണസംഖ്യ show_scope = 0;
+	പൂർണ്ണസംഖ്യ allow_unknown = 0;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
-	struct option list_options[] = {
-		OPT_SET_INT('z', NULL, &line_terminator,
+	ഘടന option list_options[] = {
+		OPT_SET_INT('z', ശൂന്യ, &വരി_terminator,
 			    N_("use NUL as line terminator"), '\0'),
 		OPT_BOOL(0, "show-scope", &show_scope,
 			 N_("show the config scope that defined each hook")),
@@ -56,77 +56,77 @@ static int list(int argc, const char **argv, const char *prefix,
 	 * The only unnamed argument provided should be the hook-name; if we add
 	 * arguments later they probably should be caught by parse_options.
 	 */
-	if (argc != 1)
-		usage_msg_opt(_("you must specify a hook event name to list"),
+	എങ്കിൽ (argc != 1)
+		usage_സന്ദേശം_opt(_("you must specify a hook event name to list"),
 			      builtin_hook_list_usage, list_options);
 
 	hookname = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hookname)) {
+	എങ്കിൽ (!allow_unknown && !is_known_hook(hookname)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hookname);
-		return 1;
+		തിരികെ 1;
 	}
 
-	head = list_hooks(repo, hookname, NULL);
+	head = list_hooks(repo, hookname, ശൂന്യ);
 
-	if (!head->nr) {
+	എങ്കിൽ (!head->nr) {
 		warning(_("no hooks found for event '%s'"), hookname);
 		ret = 1; /* no hooks found */
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	for_each_string_list_item(item, head) {
-		struct hook *h = item->util;
+		ഘടന hook *h = item->util;
 
-		switch (h->kind) {
-		case HOOK_TRADITIONAL:
-			printf("%s%c", _("hook from hookdir"), line_terminator);
-			break;
-		case HOOK_CONFIGURED: {
-			const char *name = h->u.configured.friendly_name;
-			const char *scope = show_scope ?
-				config_scope_name(h->u.configured.scope) : NULL;
+		തിരഞ്ഞെടുപ്പ് (h->kind) {
+		അവസ്ഥ HOOK_TRADITIONAL:
+			printf("%s%c", _("hook from hookdir"), വരി_terminator);
+			നിർത്തുക;
+		അവസ്ഥ HOOK_CONFIGURED: {
+			സ്ഥിരം അക്ഷരം *name = h->u.configured.friendly_name;
+			സ്ഥിരം അക്ഷരം *scope = show_scope ?
+				config_scope_name(h->u.configured.scope) : ശൂന്യ;
 			/*
 			 * Show the most relevant disable reason. Event-level
 			 * takes precedence: if the whole event is off, that
 			 * is what the user needs to know. The per-hook
 			 * "disabled" surfaces once the event is re-enabled.
 			 */
-			const char *disability =
+			സ്ഥിരം അക്ഷരം *disability =
 				h->u.configured.event_disabled ? "event-disabled\t" :
 				h->u.configured.disabled       ? "disabled\t"       :
 								 "";
-			if (scope)
+			എങ്കിൽ (scope)
 				printf("%s\t%s%s%c", scope, disability, name,
-				       line_terminator);
-			else
+				       വരി_terminator);
+			അല്ലെങ്കിൽ
 				printf("%s%s%c", disability, name,
-				       line_terminator);
-			break;
+				       വരി_terminator);
+			നിർത്തുക;
 		}
-		default:
+		സ്ഥിരസ്ഥിതി:
 			BUG("unknown hook kind");
 		}
 	}
 
 cleanup:
 	string_list_clear_func(head, hook_free);
-	free(head);
-	return ret;
+	സ്വതന്ത്രം(head);
+	തിരികെ ret;
 }
 
-static int run(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ run(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+	       ഘടന repository *repo UNUSED)
 {
-	int i;
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	int ignore_missing = 0;
-	int allow_unknown = 0;
-	int jobs = 0;
-	const char *hook_name;
-	struct option run_options[] = {
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
+	പൂർണ്ണസംഖ്യ ignore_missing = 0;
+	പൂർണ്ണസംഖ്യ allow_unknown = 0;
+	പൂർണ്ണസംഖ്യ jobs = 0;
+	സ്ഥിരം അക്ഷരം *hook_name;
+	ഘടന option run_options[] = {
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
 			 N_("allow running a hook with a non-native hook name")),
 		OPT_BOOL(0, "ignore-missing", &ignore_missing,
@@ -137,72 +137,72 @@ static int run(int argc, const char **argv, const char *prefix,
 			    N_("run up to <n> hooks simultaneously (-1 for CPU count)")),
 		OPT_END(),
 	};
-	int ret;
+	പൂർണ്ണസംഖ്യ ret;
 
 	argc = parse_options(argc, argv, prefix, run_options,
 			     builtin_hook_run_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (jobs == -1)
+	എങ്കിൽ (jobs == -1)
 		opt.jobs = online_cpus();
-	else if (jobs < 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (jobs < 0)
 		die(_("invalid value for -j: %d"
 		     " (use -1 for CPU count or a"
 		     " positive integer)"), jobs);
-	else
+	അല്ലെങ്കിൽ
 		opt.jobs = jobs;
 
-	if (!argc)
-		goto usage;
+	എങ്കിൽ (!argc)
+		പോകുക usage;
 
 	/*
 	 * Having a -- for "run" when providing <hook-args> is
 	 * mandatory.
 	 */
-	if (argc > 1 && strcmp(argv[1], "--") &&
+	എങ്കിൽ (argc > 1 && strcmp(argv[1], "--") &&
 	    strcmp(argv[1], "--end-of-options"))
-		goto usage;
+		പോകുക usage;
 
 	/* Add our arguments, start after -- */
-	for (i = 2 ; i < argc; i++)
-		strvec_push(&opt.args, argv[i]);
+	വേണ്ടി (i = 2 ; i < argc; i++)
+		strvec_തള്ളുക(&opt.args, argv[i]);
 
 	/* Need to take into account core.hooksPath */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
 	hook_name = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hook_name)) {
+	എങ്കിൽ (!allow_unknown && !is_known_hook(hook_name)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hook_name);
-		return 1;
+		തിരികെ 1;
 	}
 
-	if (!ignore_missing)
+	എങ്കിൽ (!ignore_missing)
 		opt.error_if_missing = 1;
 	ret = run_hooks_opt(the_repository, hook_name, &opt);
-	if (ret < 0) /* error() return */
+	എങ്കിൽ (ret < 0) /* error() return */
 		ret = 1;
-	return ret;
+	തിരികെ ret;
 usage:
 	usage_with_options(builtin_hook_run_usage, run_options);
 }
 
-int cmd_hook(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_hook(പൂർണ്ണസംഖ്യ argc,
+	     സ്ഥിരം അക്ഷരം **argv,
+	     സ്ഥിരം അക്ഷരം *prefix,
+	     ഘടന repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_hook_options[] = {
+	parse_opt_subcommand_fn *fn = ശൂന്യ;
+	ഘടന option builtin_hook_options[] = {
 		OPT_SUBCOMMAND("run", &fn, run),
 		OPT_SUBCOMMAND("list", &fn, list),
 		OPT_END(),
 	};
 
-	argc = parse_options(argc, argv, NULL, builtin_hook_options,
+	argc = parse_options(argc, argv, ശൂന്യ, builtin_hook_options,
 			     builtin_hook_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	തിരികെ fn(argc, argv, prefix, repo);
 }

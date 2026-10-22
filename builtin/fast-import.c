@@ -1,36 +1,36 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "lockfile.h"
-#include "object.h"
-#include "blob.h"
-#include "tree.h"
-#include "commit.h"
-#include "delta.h"
-#include "pack.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "refs.h"
-#include "csum-file.h"
-#include "quote.h"
-#include "dir.h"
-#include "run-command.h"
-#include "packfile.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "mem-pool.h"
-#include "commit-reach.h"
-#include "khash.h"
-#include "date.h"
-#include "gpg-interface.h"
-#include "parse-options.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "abspath.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "lockfile.h"
+#അന്തര്ഭാവ "object.h"
+#അന്തര്ഭാവ "blob.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "delta.h"
+#അന്തര്ഭാവ "pack.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "read-cache-ll.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "csum-file.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "packfile.h"
+#അന്തര്ഭാവ "object-file.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "mem-pool.h"
+#അന്തര്ഭാവ "commit-reach.h"
+#അന്തര്ഭാവ "khash.h"
+#അന്തര്ഭാവ "date.h"
+#അന്തര്ഭാവ "gpg-interface.h"
+#അന്തര്ഭാവ "parse-options.h"
 
 #define PACK_ID_BITS 16
 #define MAX_PACK_ID ((1<<PACK_ID_BITS)-1)
@@ -49,319 +49,319 @@
  */
 #define PACK_SIZE_THRESHOLD (the_hash_algo->rawsz * 3)
 
-struct object_entry {
-	struct pack_idx_entry idx;
-	struct hashmap_entry ent;
+ഘടന object_entry {
+	ഘടന pack_idx_entry idx;
+	ഘടന hashmap_entry ent;
 	uint32_t type : TYPE_BITS,
 		pack_id : PACK_ID_BITS,
 		depth : DEPTH_BITS;
 };
 
-static int object_entry_hashcmp(const void *map_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+സ്ഥിതം പൂർണ്ണസംഖ്യ object_entry_hashcmp(സ്ഥിരം ശൂന്യം *map_data UNUSED,
+				സ്ഥിരം ഘടന hashmap_entry *eptr,
+				സ്ഥിരം ഘടന hashmap_entry *entry_or_താക്കോൽ,
+				സ്ഥിരം ശൂന്യം *keydata)
 {
-	const struct object_id *oid = keydata;
-	const struct object_entry *e1, *e2;
+	സ്ഥിരം ഘടന object_id *oid = keydata;
+	സ്ഥിരം ഘടന object_entry *e1, *e2;
 
-	e1 = container_of(eptr, const struct object_entry, ent);
-	if (oid)
-		return oidcmp(&e1->idx.oid, oid);
+	e1 = container_of(eptr, സ്ഥിരം ഘടന object_entry, ent);
+	എങ്കിൽ (oid)
+		തിരികെ oidcmp(&e1->idx.oid, oid);
 
-	e2 = container_of(entry_or_key, const struct object_entry, ent);
-	return oidcmp(&e1->idx.oid, &e2->idx.oid);
+	e2 = container_of(entry_or_താക്കോൽ, സ്ഥിരം ഘടന object_entry, ent);
+	തിരികെ oidcmp(&e1->idx.oid, &e2->idx.oid);
 }
 
-struct object_entry_pool {
-	struct object_entry_pool *next_pool;
-	struct object_entry *next_free;
-	struct object_entry *end;
-	struct object_entry entries[FLEX_ARRAY]; /* more */
+ഘടന object_entry_pool {
+	ഘടന object_entry_pool *next_pool;
+	ഘടന object_entry *next_free;
+	ഘടന object_entry *end;
+	ഘടന object_entry entries[FLEX_ARRAY]; /* more */
 };
 
-struct mark_set {
-	union {
-		struct object_id *oids[1024];
-		struct object_entry *marked[1024];
-		struct mark_set *sets[1024];
+ഘടന mark_set {
+	സംഘം {
+		ഘടന object_id *oids[1024];
+		ഘടന object_entry *marked[1024];
+		ഘടന mark_set *sets[1024];
 	} data;
-	unsigned int shift;
+	unsigned പൂർണ്ണസംഖ്യ shift;
 };
 
-struct last_object {
-	struct strbuf data;
+ഘടന last_object {
+	ഘടന strbuf data;
 	off_t offset;
-	unsigned int depth;
+	unsigned പൂർണ്ണസംഖ്യ depth;
 	unsigned no_swap : 1;
 };
 
-struct atom_str {
-	struct atom_str *next_atom;
+ഘടന atom_str {
+	ഘടന atom_str *next_atom;
 	unsigned short str_len;
-	char str_dat[FLEX_ARRAY]; /* more */
+	അക്ഷരം str_dat[FLEX_ARRAY]; /* more */
 };
 
-struct tree_content;
-struct tree_entry {
-	struct tree_content *tree;
-	struct atom_str *name;
-	struct tree_entry_ms {
+ഘടന വൃക്ഷം_content;
+ഘടന വൃക്ഷം_entry {
+	ഘടന വൃക്ഷം_content *വൃക്ഷം;
+	ഘടന atom_str *name;
+	ഘടന വൃക്ഷം_entry_ms {
 		uint16_t mode;
-		struct object_id oid;
+		ഘടന object_id oid;
 	} versions[2];
 };
 
-struct tree_content {
-	unsigned int entry_capacity; /* must match avail_tree_content */
-	unsigned int entry_count;
-	unsigned int delta_depth;
-	struct tree_entry *entries[FLEX_ARRAY]; /* more */
+ഘടന വൃക്ഷം_content {
+	unsigned പൂർണ്ണസംഖ്യ entry_capacity; /* must match avail_tree_content */
+	unsigned പൂർണ്ണസംഖ്യ entry_എണ്ണം;
+	unsigned പൂർണ്ണസംഖ്യ delta_depth;
+	ഘടന വൃക്ഷം_entry *entries[FLEX_ARRAY]; /* more */
 };
 
-struct avail_tree_content {
-	unsigned int entry_capacity; /* must match tree_content */
-	struct avail_tree_content *next_avail;
+ഘടന avail_വൃക്ഷം_content {
+	unsigned പൂർണ്ണസംഖ്യ entry_capacity; /* must match tree_content */
+	ഘടന avail_വൃക്ഷം_content *next_avail;
 };
 
-struct branch {
-	struct branch *table_next_branch;
-	struct branch *active_next_branch;
-	const char *name;
-	struct tree_entry branch_tree;
+ഘടന branch {
+	ഘടന branch *table_next_branch;
+	ഘടന branch *active_next_branch;
+	സ്ഥിരം അക്ഷരം *name;
+	ഘടന വൃക്ഷം_entry branch_വൃക്ഷം;
 	uintmax_t last_commit;
-	uintmax_t num_notes;
+	uintmax_t അക്കം_notes;
 	unsigned active : 1;
 	unsigned delete : 1;
 	unsigned pack_id : PACK_ID_BITS;
-	struct object_id oid;
+	ഘടന object_id oid;
 };
 
-struct tag {
-	struct tag *next_tag;
-	const char *name;
-	unsigned int pack_id;
-	struct object_id oid;
+ഘടന tag {
+	ഘടന tag *next_tag;
+	സ്ഥിരം അക്ഷരം *name;
+	unsigned പൂർണ്ണസംഖ്യ pack_id;
+	ഘടന object_id oid;
 };
 
-struct hash_list {
-	struct hash_list *next;
-	struct object_id oid;
+ഘടന hash_list {
+	ഘടന hash_list *next;
+	ഘടന object_id oid;
 };
 
-typedef enum {
+തരനിർവചനം എണ്ണൽ {
 	WHENSPEC_RAW = 1,
 	WHENSPEC_RAW_PERMISSIVE,
 	WHENSPEC_RFC2822,
 	WHENSPEC_NOW
 } whenspec_type;
 
-struct recent_command {
-	struct recent_command *prev;
-	struct recent_command *next;
-	char *buf;
+ഘടന recent_command {
+	ഘടന recent_command *prev;
+	ഘടന recent_command *next;
+	അക്ഷരം *buf;
 };
 
-typedef void (*mark_set_inserter_t)(struct mark_set **s, struct object_id *oid, uintmax_t mark);
-typedef void (*each_mark_fn_t)(uintmax_t mark, void *obj, void *cbp);
+തരനിർവചനം ശൂന്യം (*mark_set_inserter_t)(ഘടന mark_set **s, ഘടന object_id *oid, uintmax_t mark);
+തരനിർവചനം ശൂന്യം (*each_mark_fn_t)(uintmax_t mark, ശൂന്യം *obj, ശൂന്യം *cbp);
 
 /* Configured limits on output */
-static unsigned long max_depth = 50;
-static off_t max_packsize;
-static int unpack_limit = 100;
-static int force_update;
+സ്ഥിതം unsigned long max_depth = 50;
+സ്ഥിതം off_t max_packsize;
+സ്ഥിതം പൂർണ്ണസംഖ്യ unpack_limit = 100;
+സ്ഥിതം പൂർണ്ണസംഖ്യ force_update;
 
 /* Stats and misc. counters */
-static uintmax_t alloc_count;
-static uintmax_t marks_set_count;
-static uintmax_t object_count_by_type[1 << TYPE_BITS];
-static uintmax_t duplicate_count_by_type[1 << TYPE_BITS];
-static uintmax_t delta_count_by_type[1 << TYPE_BITS];
-static uintmax_t delta_count_attempts_by_type[1 << TYPE_BITS];
-static unsigned long object_count;
-static unsigned long branch_count;
-static unsigned long branch_load_count;
-static int failure;
-static FILE *pack_edges;
-static int show_stats = 1;
-static int quiet;
-static enum sign_mode signed_tag_mode = SIGN_VERBATIM;
-static enum sign_mode signed_commit_mode = SIGN_VERBATIM;
-static const char *signed_commit_keyid;
-static const char *signed_tag_keyid;
+സ്ഥിതം uintmax_t alloc_എണ്ണം;
+സ്ഥിതം uintmax_t marks_set_എണ്ണം;
+സ്ഥിതം uintmax_t object_എണ്ണം_by_type[1 << TYPE_BITS];
+സ്ഥിതം uintmax_t duplicate_എണ്ണം_by_type[1 << TYPE_BITS];
+സ്ഥിതം uintmax_t delta_എണ്ണം_by_type[1 << TYPE_BITS];
+സ്ഥിതം uintmax_t delta_എണ്ണം_attempts_by_type[1 << TYPE_BITS];
+സ്ഥിതം unsigned long object_എണ്ണം;
+സ്ഥിതം unsigned long branch_എണ്ണം;
+സ്ഥിതം unsigned long branch_load_എണ്ണം;
+സ്ഥിതം പൂർണ്ണസംഖ്യ failure;
+സ്ഥിതം FILE *pack_edges;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_stats = 1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ quiet;
+സ്ഥിതം എണ്ണൽ sign_mode signed_tag_mode = SIGN_VERBATIM;
+സ്ഥിതം എണ്ണൽ sign_mode signed_commit_mode = SIGN_VERBATIM;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *signed_commit_keyid;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *signed_tag_keyid;
 
 /* Memory pools */
-static struct mem_pool fi_mem_pool = {
-	.block_alloc = 2*1024*1024 - sizeof(struct mp_block),
+സ്ഥിതം ഘടന mem_pool fi_mem_pool = {
+	.block_alloc = 2*1024*1024 - വലുപ്പം(ഘടന mp_block),
 };
 
 /* Atom management */
-static unsigned int atom_table_sz = 4451;
-static unsigned int atom_cnt;
-static struct atom_str **atom_table;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ atom_table_sz = 4451;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ atom_cnt;
+സ്ഥിതം ഘടന atom_str **atom_table;
 
 /* The .pack file being generated */
-static struct pack_idx_option pack_idx_opts;
-static unsigned int pack_id;
-static struct hashfile *pack_file;
-static struct packed_git *pack_data;
-static struct packed_git **all_packs;
-static off_t pack_size;
+സ്ഥിതം ഘടന pack_idx_option pack_idx_opts;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ pack_id;
+സ്ഥിതം ഘടന hashfile *pack_file;
+സ്ഥിതം ഘടന packed_git *pack_data;
+സ്ഥിതം ഘടന packed_git **all_packs;
+സ്ഥിതം off_t pack_size;
 
 /* Table of objects we've written. */
-static unsigned int object_entry_alloc = 5000;
-static struct object_entry_pool *blocks;
-static struct hashmap object_table;
-static struct mark_set *marks;
-static char *export_marks_file;
-static char *import_marks_file;
-static int import_marks_file_from_stream;
-static int import_marks_file_ignore_missing;
-static int import_marks_file_done;
-static int relative_marks_paths;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ object_entry_alloc = 5000;
+സ്ഥിതം ഘടന object_entry_pool *blocks;
+സ്ഥിതം ഘടന hashmap object_table;
+സ്ഥിതം ഘടന mark_set *marks;
+സ്ഥിതം അക്ഷരം *export_marks_file;
+സ്ഥിതം അക്ഷരം *import_marks_file;
+സ്ഥിതം പൂർണ്ണസംഖ്യ import_marks_file_from_stream;
+സ്ഥിതം പൂർണ്ണസംഖ്യ import_marks_file_ignore_missing;
+സ്ഥിതം പൂർണ്ണസംഖ്യ import_marks_file_done;
+സ്ഥിതം പൂർണ്ണസംഖ്യ relative_marks_paths;
 
 /* Our last blob */
-static struct last_object last_blob = {
+സ്ഥിതം ഘടന last_object last_blob = {
 	.data = STRBUF_INIT,
  };
 
 /* Tree management */
-static unsigned int tree_entry_alloc = 1000;
-static void *avail_tree_entry;
-static unsigned int avail_tree_table_sz = 100;
-static struct avail_tree_content **avail_tree_table;
-static size_t tree_entry_allocd;
-static struct strbuf old_tree = STRBUF_INIT;
-static struct strbuf new_tree = STRBUF_INIT;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ വൃക്ഷം_entry_alloc = 1000;
+സ്ഥിതം ശൂന്യം *avail_വൃക്ഷം_entry;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ avail_വൃക്ഷം_table_sz = 100;
+സ്ഥിതം ഘടന avail_വൃക്ഷം_content **avail_വൃക്ഷം_table;
+സ്ഥിതം size_t വൃക്ഷം_entry_allocd;
+സ്ഥിതം ഘടന strbuf old_വൃക്ഷം = STRBUF_INIT;
+സ്ഥിതം ഘടന strbuf new_വൃക്ഷം = STRBUF_INIT;
 
 /* Branch data */
-static unsigned long max_active_branches = 5;
-static unsigned long cur_active_branches;
-static unsigned long branch_table_sz = 1039;
-static struct branch **branch_table;
-static struct branch *active_branches;
+സ്ഥിതം unsigned long max_active_branches = 5;
+സ്ഥിതം unsigned long cur_active_branches;
+സ്ഥിതം unsigned long branch_table_sz = 1039;
+സ്ഥിതം ഘടന branch **branch_table;
+സ്ഥിതം ഘടന branch *active_branches;
 
 /* Tag data */
-static struct tag *first_tag;
-static struct tag *last_tag;
+സ്ഥിതം ഘടന tag *first_tag;
+സ്ഥിതം ഘടന tag *last_tag;
 
 /* Input stream parsing */
-static whenspec_type whenspec = WHENSPEC_RAW;
-static struct strbuf command_buf = STRBUF_INIT;
-static int unread_command_buf;
-static struct recent_command cmd_hist = {
+സ്ഥിതം whenspec_type whenspec = WHENSPEC_RAW;
+സ്ഥിതം ഘടന strbuf command_buf = STRBUF_INIT;
+സ്ഥിതം പൂർണ്ണസംഖ്യ unread_command_buf;
+സ്ഥിതം ഘടന recent_command cmd_hist = {
 	.prev = &cmd_hist,
 	.next = &cmd_hist,
 };
-static struct recent_command *cmd_tail = &cmd_hist;
-static struct recent_command *rc_free;
-static unsigned int cmd_save = 100;
-static uintmax_t next_mark;
-static struct strbuf new_data = STRBUF_INIT;
-static int require_explicit_termination;
+സ്ഥിതം ഘടന recent_command *cmd_tail = &cmd_hist;
+സ്ഥിതം ഘടന recent_command *rc_free;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ cmd_save = 100;
+സ്ഥിതം uintmax_t next_mark;
+സ്ഥിതം ഘടന strbuf new_data = STRBUF_INIT;
+സ്ഥിതം പൂർണ്ണസംഖ്യ require_explicit_termination;
 
 /* Signal handling */
-static volatile sig_atomic_t checkpoint_requested;
+സ്ഥിതം അസ്ഥിര sig_atomic_t checkpoint_requested;
 
 /* Submodule marks */
-static struct string_list sub_marks_from = STRING_LIST_INIT_DUP;
-static struct string_list sub_marks_to = STRING_LIST_INIT_DUP;
-static kh_oid_map_t *sub_oid_map;
+സ്ഥിതം ഘടന string_list sub_marks_from = STRING_LIST_INIT_DUP;
+സ്ഥിതം ഘടന string_list sub_marks_to = STRING_LIST_INIT_DUP;
+സ്ഥിതം kh_oid_map_t *sub_oid_map;
 
 /* Where to write output of cat-blob commands */
-static int cat_blob_fd = STDOUT_FILENO;
+സ്ഥിതം പൂർണ്ണസംഖ്യ cat_blob_fd = STDOUT_FILENO;
 
 /* Command state */
-struct fast_import_state {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	int seen_data_command;
-	int allow_unsafe_features;
-	struct option *option;
+ഘടന fast_import_state {
+	പൂർണ്ണസംഖ്യ argc;
+	സ്ഥിരം അക്ഷരം **argv;
+	സ്ഥിരം അക്ഷരം *prefix;
+	പൂർണ്ണസംഖ്യ seen_data_command;
+	പൂർണ്ണസംഖ്യ allow_unsafe_features;
+	ഘടന option *option;
 };
 
-static void fast_import_state_init(struct fast_import_state *state,
-				   int argc, const char **argv,
-				   const char *prefix, struct option *option)
+സ്ഥിതം ശൂന്യം fast_import_state_init(ഘടന fast_import_state *state,
+				   പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv,
+				   സ്ഥിരം അക്ഷരം *prefix, ഘടന option *option)
 {
-	memset(state, 0, sizeof(*state));
+	memset(state, 0, വലുപ്പം(*state));
 	state->argc = argc;
 	state->argv = argv;
 	state->prefix = prefix;
 	state->option = option;
 }
 
-static void parse_argv(struct fast_import_state *state);
-static void parse_get_mark(struct fast_import_state *state, const char *p);
-static void parse_cat_blob(struct fast_import_state *state, const char *p);
-static void parse_ls(struct fast_import_state *state,
-		     const char *p,
-		     struct branch *b);
+സ്ഥിതം ശൂന്യം parse_argv(ഘടന fast_import_state *state);
+സ്ഥിതം ശൂന്യം parse_get_mark(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *p);
+സ്ഥിതം ശൂന്യം parse_cat_blob(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *p);
+സ്ഥിതം ശൂന്യം parse_ls(ഘടന fast_import_state *state,
+		     സ്ഥിരം അക്ഷരം *p,
+		     ഘടന branch *b);
 
-static void for_each_mark(struct mark_set *m, uintmax_t base, each_mark_fn_t callback, void *p)
+സ്ഥിതം ശൂന്യം for_each_mark(ഘടന mark_set *m, uintmax_t base, each_mark_fn_t callback, ശൂന്യം *p)
 {
 	uintmax_t k;
-	if (m->shift) {
-		for (k = 0; k < 1024; k++) {
-			if (m->data.sets[k])
+	എങ്കിൽ (m->shift) {
+		വേണ്ടി (k = 0; k < 1024; k++) {
+			എങ്കിൽ (m->data.sets[k])
 				for_each_mark(m->data.sets[k], base + (k << m->shift), callback, p);
 		}
-	} else {
-		for (k = 0; k < 1024; k++) {
-			if (m->data.marked[k])
+	} അല്ലെങ്കിൽ {
+		വേണ്ടി (k = 0; k < 1024; k++) {
+			എങ്കിൽ (m->data.marked[k])
 				callback(base + k, m->data.marked[k], p);
 		}
 	}
 }
 
-static void dump_marks_fn(uintmax_t mark, void *object, void *cbp) {
-	struct object_entry *e = object;
+സ്ഥിതം ശൂന്യം dump_marks_fn(uintmax_t mark, ശൂന്യം *object, ശൂന്യം *cbp) {
+	ഘടന object_entry *e = object;
 	FILE *f = cbp;
 
 	fprintf(f, ":%" PRIuMAX " %s\n", mark, oid_to_hex(&e->idx.oid));
 }
 
-static void write_branch_report(FILE *rpt, struct branch *b)
+സ്ഥിതം ശൂന്യം write_branch_report(FILE *rpt, ഘടന branch *b)
 {
 	fprintf(rpt, "%s:\n", b->name);
 
 	fprintf(rpt, "  status      :");
-	if (b->active)
+	എങ്കിൽ (b->active)
 		fputs(" active", rpt);
-	if (b->branch_tree.tree)
+	എങ്കിൽ (b->branch_വൃക്ഷം.വൃക്ഷം)
 		fputs(" loaded", rpt);
-	if (is_null_oid(&b->branch_tree.versions[1].oid))
+	എങ്കിൽ (is_null_oid(&b->branch_വൃക്ഷം.versions[1].oid))
 		fputs(" dirty", rpt);
 	fputc('\n', rpt);
 
 	fprintf(rpt, "  tip commit  : %s\n", oid_to_hex(&b->oid));
 	fprintf(rpt, "  old tree    : %s\n",
-		oid_to_hex(&b->branch_tree.versions[0].oid));
+		oid_to_hex(&b->branch_വൃക്ഷം.versions[0].oid));
 	fprintf(rpt, "  cur tree    : %s\n",
-		oid_to_hex(&b->branch_tree.versions[1].oid));
+		oid_to_hex(&b->branch_വൃക്ഷം.versions[1].oid));
 	fprintf(rpt, "  commit clock: %" PRIuMAX "\n", b->last_commit);
 
 	fputs("  last pack   : ", rpt);
-	if (b->pack_id < MAX_PACK_ID)
+	എങ്കിൽ (b->pack_id < MAX_PACK_ID)
 		fprintf(rpt, "%u", b->pack_id);
 	fputc('\n', rpt);
 
 	fputc('\n', rpt);
 }
 
-static void write_crash_report(const char *err)
+സ്ഥിതം ശൂന്യം write_crash_report(സ്ഥിരം അക്ഷരം *err)
 {
-	char *loc = repo_git_path(the_repository, "fast_import_crash_%"PRIuMAX, (uintmax_t) getpid());
+	അക്ഷരം *loc = repo_git_path(the_repository, "fast_import_crash_%"PRIuMAX, (uintmax_t) getpid());
 	FILE *rpt = fopen(loc, "w");
-	struct branch *b;
+	ഘടന branch *b;
 	unsigned long lu;
-	struct recent_command *rc;
+	ഘടന recent_command *rc;
 
-	if (!rpt) {
+	എങ്കിൽ (!rpt) {
 		error_errno(_("can't write crash report %s"), loc);
-		free(loc);
-		return;
+		സ്വതന്ത്രം(loc);
+		തിരികെ;
 	}
 
 	fprintf(stderr, _("fast-import: dumping crash report to %s\n"), loc);
@@ -369,7 +369,7 @@ static void write_crash_report(const char *err)
 	fprintf(rpt, "fast-import crash report:\n");
 	fprintf(rpt, "    fast-import process: %"PRIuMAX"\n", (uintmax_t) getpid());
 	fprintf(rpt, "    parent process     : %"PRIuMAX"\n", (uintmax_t) getppid());
-	fprintf(rpt, "    at %s\n", show_date(time(NULL), 0, DATE_MODE(ISO8601)));
+	fprintf(rpt, "    at %s\n", show_date(time(ശൂന്യ), 0, DATE_MODE(ISO8601)));
 	fputc('\n', rpt);
 
 	fputs("fatal: ", rpt);
@@ -379,10 +379,10 @@ static void write_crash_report(const char *err)
 	fputc('\n', rpt);
 	fputs("Most Recent Commands Before Crash\n", rpt);
 	fputs("---------------------------------\n", rpt);
-	for (rc = cmd_hist.next; rc != &cmd_hist; rc = rc->next) {
-		if (rc->next == &cmd_hist)
+	വേണ്ടി (rc = cmd_hist.next; rc != &cmd_hist; rc = rc->next) {
+		എങ്കിൽ (rc->next == &cmd_hist)
 			fputs("* ", rpt);
-		else
+		അല്ലെങ്കിൽ
 			fputs("  ", rpt);
 		fputs(rc->buf, rpt);
 		fputc('\n', rpt);
@@ -397,24 +397,24 @@ static void write_crash_report(const char *err)
 	fputc('\n', rpt);
 	fputs("  pos  clock name\n", rpt);
 	fputs("  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n", rpt);
-	for (b = active_branches, lu = 0; b; b = b->active_next_branch)
+	വേണ്ടി (b = active_branches, lu = 0; b; b = b->active_next_branch)
 		fprintf(rpt, "  %2lu) %6" PRIuMAX" %s\n",
 			++lu, b->last_commit, b->name);
 
 	fputc('\n', rpt);
 	fputs("Inactive Branches\n", rpt);
 	fputs("-----------------\n", rpt);
-	for (lu = 0; lu < branch_table_sz; lu++) {
-		for (b = branch_table[lu]; b; b = b->table_next_branch)
+	വേണ്ടി (lu = 0; lu < branch_table_sz; lu++) {
+		വേണ്ടി (b = branch_table[lu]; b; b = b->table_next_branch)
 			write_branch_report(rpt, b);
 	}
 
-	if (first_tag) {
-		struct tag *tg;
+	എങ്കിൽ (first_tag) {
+		ഘടന tag *tg;
 		fputc('\n', rpt);
 		fputs("Annotated Tags\n", rpt);
 		fputs("--------------\n", rpt);
-		for (tg = first_tag; tg; tg = tg->next_tag) {
+		വേണ്ടി (tg = first_tag; tg; tg = tg->next_tag) {
 			fputs(oid_to_hex(&tg->oid), rpt);
 			fputc(' ', rpt);
 			fputs(tg->name, rpt);
@@ -425,36 +425,36 @@ static void write_crash_report(const char *err)
 	fputc('\n', rpt);
 	fputs("Marks\n", rpt);
 	fputs("-----\n", rpt);
-	if (export_marks_file)
+	എങ്കിൽ (export_marks_file)
 		fprintf(rpt, "  exported to %s\n", export_marks_file);
-	else
+	അല്ലെങ്കിൽ
 		for_each_mark(marks, 0, dump_marks_fn, rpt);
 
 	fputc('\n', rpt);
 	fputs("-------------------\n", rpt);
 	fputs("END OF CRASH REPORT\n", rpt);
 	fclose(rpt);
-	free(loc);
+	സ്വതന്ത്രം(loc);
 }
 
-static void end_packfile(void);
-static void unkeep_all_packs(void);
-static void dump_marks(void);
+സ്ഥിതം ശൂന്യം end_packfile(ശൂന്യം);
+സ്ഥിതം ശൂന്യം unkeep_all_packs(ശൂന്യം);
+സ്ഥിതം ശൂന്യം dump_marks(ശൂന്യം);
 
-static NORETURN void die_nicely(const char *err, va_list params)
+സ്ഥിതം NORETURN ശൂന്യം die_nicely(സ്ഥിരം അക്ഷരം *err, va_list params)
 {
 	va_list cp;
-	static int zombie;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ zombie;
 	report_fn die_message_fn = get_die_message_routine();
 
 	va_copy(cp, params);
 	die_message_fn(err, params);
 
-	if (!zombie) {
-		char message[2 * PATH_MAX];
+	എങ്കിൽ (!zombie) {
+		അക്ഷരം message[2 * PATH_MAX];
 
 		zombie = 1;
-		vsnprintf(message, sizeof(message), err, cp);
+		vsnprintf(message, വലുപ്പം(message), err, cp);
 		write_crash_report(message);
 		end_packfile();
 		unkeep_all_packs();
@@ -465,327 +465,327 @@ static NORETURN void die_nicely(const char *err, va_list params)
 
 #ifndef SIGUSR1	/* Windows, for example */
 
-static void set_checkpoint_signal(void)
+സ്ഥിതം ശൂന്യം set_checkpoint_signal(ശൂന്യം)
 {
 }
 
-#else
+#അല്ലെങ്കിൽ
 
-static void checkpoint_signal(int signo UNUSED)
+സ്ഥിതം ശൂന്യം checkpoint_signal(പൂർണ്ണസംഖ്യ signo UNUSED)
 {
 	checkpoint_requested = 1;
 }
 
-static void set_checkpoint_signal(void)
+സ്ഥിതം ശൂന്യം set_checkpoint_signal(ശൂന്യം)
 {
-	struct sigaction sa;
+	ഘടന sigaction sa;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, വലുപ്പം(sa));
 	sa.sa_handler = checkpoint_signal;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
-	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR1, &sa, ശൂന്യ);
 }
 
 #endif
 
-static void alloc_objects(unsigned int cnt)
+സ്ഥിതം ശൂന്യം alloc_objects(unsigned പൂർണ്ണസംഖ്യ cnt)
 {
-	struct object_entry_pool *b;
+	ഘടന object_entry_pool *b;
 
-	b = xmalloc(sizeof(struct object_entry_pool)
-		+ cnt * sizeof(struct object_entry));
+	b = xmalloc(വലുപ്പം(ഘടന object_entry_pool)
+		+ cnt * വലുപ്പം(ഘടന object_entry));
 	b->next_pool = blocks;
 	b->next_free = b->entries;
 	b->end = b->entries + cnt;
 	blocks = b;
-	alloc_count += cnt;
+	alloc_എണ്ണം += cnt;
 }
 
-static struct object_entry *new_object(struct object_id *oid)
+സ്ഥിതം ഘടന object_entry *new_object(ഘടന object_id *oid)
 {
-	struct object_entry *e;
+	ഘടന object_entry *e;
 
-	if (blocks->next_free == blocks->end)
+	എങ്കിൽ (blocks->next_free == blocks->end)
 		alloc_objects(object_entry_alloc);
 
 	e = blocks->next_free++;
 	oidcpy(&e->idx.oid, oid);
-	return e;
+	തിരികെ e;
 }
 
-static struct object_entry *find_object(struct object_id *oid)
+സ്ഥിതം ഘടന object_entry *find_object(ഘടന object_id *oid)
 {
-	return hashmap_get_entry_from_hash(&object_table, oidhash(oid), oid,
-					   struct object_entry, ent);
+	തിരികെ hashmap_get_entry_from_hash(&object_table, oidhash(oid), oid,
+					   ഘടന object_entry, ent);
 }
 
-static struct object_entry *insert_object(struct object_id *oid)
+സ്ഥിതം ഘടന object_entry *തിരുകുക_object(ഘടന object_id *oid)
 {
-	struct object_entry *e;
-	unsigned int hash = oidhash(oid);
+	ഘടന object_entry *e;
+	unsigned പൂർണ്ണസംഖ്യ hash = oidhash(oid);
 
 	e = hashmap_get_entry_from_hash(&object_table, hash, oid,
-					struct object_entry, ent);
-	if (!e) {
+					ഘടന object_entry, ent);
+	എങ്കിൽ (!e) {
 		e = new_object(oid);
 		e->idx.offset = 0;
 		hashmap_entry_init(&e->ent, hash);
 		hashmap_add(&object_table, &e->ent);
 	}
 
-	return e;
+	തിരികെ e;
 }
 
-static void invalidate_pack_id(unsigned int id)
+സ്ഥിതം ശൂന്യം invalidate_pack_id(unsigned പൂർണ്ണസംഖ്യ id)
 {
 	unsigned long lu;
-	struct tag *t;
-	struct hashmap_iter iter;
-	struct object_entry *e;
+	ഘടന tag *t;
+	ഘടന hashmap_iter iter;
+	ഘടന object_entry *e;
 
 	hashmap_for_each_entry(&object_table, &iter, e, ent) {
-		if (e->pack_id == id)
+		എങ്കിൽ (e->pack_id == id)
 			e->pack_id = MAX_PACK_ID;
 	}
 
-	for (lu = 0; lu < branch_table_sz; lu++) {
-		struct branch *b;
+	വേണ്ടി (lu = 0; lu < branch_table_sz; lu++) {
+		ഘടന branch *b;
 
-		for (b = branch_table[lu]; b; b = b->table_next_branch)
-			if (b->pack_id == id)
+		വേണ്ടി (b = branch_table[lu]; b; b = b->table_next_branch)
+			എങ്കിൽ (b->pack_id == id)
 				b->pack_id = MAX_PACK_ID;
 	}
 
-	for (t = first_tag; t; t = t->next_tag)
-		if (t->pack_id == id)
+	വേണ്ടി (t = first_tag; t; t = t->next_tag)
+		എങ്കിൽ (t->pack_id == id)
 			t->pack_id = MAX_PACK_ID;
 }
 
-static unsigned int hc_str(const char *s, size_t len)
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ hc_str(സ്ഥിരം അക്ഷരം *s, size_t len)
 {
-	unsigned int r = 0;
-	while (len-- > 0)
+	unsigned പൂർണ്ണസംഖ്യ r = 0;
+	ആകുമ്പോൾ (len-- > 0)
 		r = r * 31 + *s++;
-	return r;
+	തിരികെ r;
 }
 
-static void insert_mark(struct mark_set **top, uintmax_t idnum, struct object_entry *oe)
+സ്ഥിതം ശൂന്യം തിരുകുക_mark(ഘടന mark_set **മുകൾ, uintmax_t idnum, ഘടന object_entry *oe)
 {
-	struct mark_set *s = *top;
+	ഘടന mark_set *s = *മുകൾ;
 
-	while ((idnum >> s->shift) >= 1024) {
-		s = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
-		s->shift = (*top)->shift + 10;
-		s->data.sets[0] = *top;
-		*top = s;
+	ആകുമ്പോൾ ((idnum >> s->shift) >= 1024) {
+		s = mem_pool_calloc(&fi_mem_pool, 1, വലുപ്പം(ഘടന mark_set));
+		s->shift = (*മുകൾ)->shift + 10;
+		s->data.sets[0] = *മുകൾ;
+		*മുകൾ = s;
 	}
-	while (s->shift) {
+	ആകുമ്പോൾ (s->shift) {
 		uintmax_t i = idnum >> s->shift;
 		idnum -= i << s->shift;
-		if (!s->data.sets[i]) {
-			s->data.sets[i] = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
+		എങ്കിൽ (!s->data.sets[i]) {
+			s->data.sets[i] = mem_pool_calloc(&fi_mem_pool, 1, വലുപ്പം(ഘടന mark_set));
 			s->data.sets[i]->shift = s->shift - 10;
 		}
 		s = s->data.sets[i];
 	}
-	if (!s->data.marked[idnum])
-		marks_set_count++;
+	എങ്കിൽ (!s->data.marked[idnum])
+		marks_set_എണ്ണം++;
 	s->data.marked[idnum] = oe;
 }
 
-static void *find_mark(struct mark_set *s, uintmax_t idnum)
+സ്ഥിതം ശൂന്യം *find_mark(ഘടന mark_set *s, uintmax_t idnum)
 {
 	uintmax_t orig_idnum = idnum;
-	struct object_entry *oe = NULL;
-	if ((idnum >> s->shift) < 1024) {
-		while (s && s->shift) {
+	ഘടന object_entry *oe = ശൂന്യ;
+	എങ്കിൽ ((idnum >> s->shift) < 1024) {
+		ആകുമ്പോൾ (s && s->shift) {
 			uintmax_t i = idnum >> s->shift;
 			idnum -= i << s->shift;
 			s = s->data.sets[i];
 		}
-		if (s)
+		എങ്കിൽ (s)
 			oe = s->data.marked[idnum];
 	}
-	if (!oe)
+	എങ്കിൽ (!oe)
 		die(_("mark :%" PRIuMAX " not declared"), orig_idnum);
-	return oe;
+	തിരികെ oe;
 }
 
-static struct atom_str *to_atom(const char *s, unsigned short len)
+സ്ഥിതം ഘടന atom_str *to_atom(സ്ഥിരം അക്ഷരം *s, unsigned short len)
 {
-	unsigned int hc = hc_str(s, len) % atom_table_sz;
-	struct atom_str *c;
+	unsigned പൂർണ്ണസംഖ്യ hc = hc_str(s, len) % atom_table_sz;
+	ഘടന atom_str *c;
 
-	for (c = atom_table[hc]; c; c = c->next_atom)
-		if (c->str_len == len && !strncmp(s, c->str_dat, len))
-			return c;
+	വേണ്ടി (c = atom_table[hc]; c; c = c->next_atom)
+		എങ്കിൽ (c->str_len == len && !strncmp(s, c->str_dat, len))
+			തിരികെ c;
 
-	c = mem_pool_alloc(&fi_mem_pool, sizeof(struct atom_str) + len + 1);
+	c = mem_pool_alloc(&fi_mem_pool, വലുപ്പം(ഘടന atom_str) + len + 1);
 	c->str_len = len;
 	memcpy(c->str_dat, s, len);
 	c->str_dat[len] = 0;
 	c->next_atom = atom_table[hc];
 	atom_table[hc] = c;
 	atom_cnt++;
-	return c;
+	തിരികെ c;
 }
 
-static struct branch *lookup_branch(const char *name)
+സ്ഥിതം ഘടന branch *lookup_branch(സ്ഥിരം അക്ഷരം *name)
 {
-	unsigned int hc = hc_str(name, strlen(name)) % branch_table_sz;
-	struct branch *b;
+	unsigned പൂർണ്ണസംഖ്യ hc = hc_str(name, strlen(name)) % branch_table_sz;
+	ഘടന branch *b;
 
-	for (b = branch_table[hc]; b; b = b->table_next_branch)
-		if (!strcmp(name, b->name))
-			return b;
-	return NULL;
+	വേണ്ടി (b = branch_table[hc]; b; b = b->table_next_branch)
+		എങ്കിൽ (!strcmp(name, b->name))
+			തിരികെ b;
+	തിരികെ ശൂന്യ;
 }
 
-static struct branch *new_branch(const char *name)
+സ്ഥിതം ഘടന branch *new_branch(സ്ഥിരം അക്ഷരം *name)
 {
-	unsigned int hc = hc_str(name, strlen(name)) % branch_table_sz;
-	struct branch *b = lookup_branch(name);
+	unsigned പൂർണ്ണസംഖ്യ hc = hc_str(name, strlen(name)) % branch_table_sz;
+	ഘടന branch *b = lookup_branch(name);
 
-	if (b)
+	എങ്കിൽ (b)
 		die(_("invalid attempt to create duplicate branch: %s"), name);
-	if (check_refname_format(name, REFNAME_ALLOW_ONELEVEL))
+	എങ്കിൽ (check_refname_format(name, REFNAME_ALLOW_ONELEVEL))
 		die(_("branch name doesn't conform to Git standards: %s"), name);
 
-	b = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct branch));
+	b = mem_pool_calloc(&fi_mem_pool, 1, വലുപ്പം(ഘടന branch));
 	b->name = mem_pool_strdup(&fi_mem_pool, name);
 	b->table_next_branch = branch_table[hc];
-	b->branch_tree.versions[0].mode = S_IFDIR;
-	b->branch_tree.versions[1].mode = S_IFDIR;
-	b->num_notes = 0;
+	b->branch_വൃക്ഷം.versions[0].mode = S_IFDIR;
+	b->branch_വൃക്ഷം.versions[1].mode = S_IFDIR;
+	b->അക്കം_notes = 0;
 	b->active = 0;
 	b->pack_id = MAX_PACK_ID;
 	branch_table[hc] = b;
-	branch_count++;
-	return b;
+	branch_എണ്ണം++;
+	തിരികെ b;
 }
 
-static unsigned int hc_entries(unsigned int cnt)
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ hc_entries(unsigned പൂർണ്ണസംഖ്യ cnt)
 {
 	cnt = cnt & 7 ? (cnt / 8) + 1 : cnt / 8;
-	return cnt < avail_tree_table_sz ? cnt : avail_tree_table_sz - 1;
+	തിരികെ cnt < avail_വൃക്ഷം_table_sz ? cnt : avail_വൃക്ഷം_table_sz - 1;
 }
 
-static struct tree_content *new_tree_content(unsigned int cnt)
+സ്ഥിതം ഘടന വൃക്ഷം_content *new_വൃക്ഷം_content(unsigned പൂർണ്ണസംഖ്യ cnt)
 {
-	struct avail_tree_content *f, *l = NULL;
-	struct tree_content *t;
-	unsigned int hc = hc_entries(cnt);
+	ഘടന avail_വൃക്ഷം_content *f, *l = ശൂന്യ;
+	ഘടന വൃക്ഷം_content *t;
+	unsigned പൂർണ്ണസംഖ്യ hc = hc_entries(cnt);
 
-	for (f = avail_tree_table[hc]; f; l = f, f = f->next_avail)
-		if (f->entry_capacity >= cnt)
-			break;
+	വേണ്ടി (f = avail_വൃക്ഷം_table[hc]; f; l = f, f = f->next_avail)
+		എങ്കിൽ (f->entry_capacity >= cnt)
+			നിർത്തുക;
 
-	if (f) {
-		if (l)
+	എങ്കിൽ (f) {
+		എങ്കിൽ (l)
 			l->next_avail = f->next_avail;
-		else
-			avail_tree_table[hc] = f->next_avail;
-	} else {
+		അല്ലെങ്കിൽ
+			avail_വൃക്ഷം_table[hc] = f->next_avail;
+	} അല്ലെങ്കിൽ {
 		cnt = cnt & 7 ? ((cnt / 8) + 1) * 8 : cnt;
-		f = mem_pool_alloc(&fi_mem_pool, sizeof(*t) + sizeof(t->entries[0]) * cnt);
+		f = mem_pool_alloc(&fi_mem_pool, വലുപ്പം(*t) + വലുപ്പം(t->entries[0]) * cnt);
 		f->entry_capacity = cnt;
 	}
 
-	t = (struct tree_content*)f;
-	t->entry_count = 0;
+	t = (ഘടന വൃക്ഷം_content*)f;
+	t->entry_എണ്ണം = 0;
 	t->delta_depth = 0;
-	return t;
+	തിരികെ t;
 }
 
-static void release_tree_entry(struct tree_entry *e);
-static void release_tree_content(struct tree_content *t)
+സ്ഥിതം ശൂന്യം release_വൃക്ഷം_entry(ഘടന വൃക്ഷം_entry *e);
+സ്ഥിതം ശൂന്യം release_വൃക്ഷം_content(ഘടന വൃക്ഷം_content *t)
 {
-	struct avail_tree_content *f = (struct avail_tree_content*)t;
-	unsigned int hc = hc_entries(f->entry_capacity);
-	f->next_avail = avail_tree_table[hc];
-	avail_tree_table[hc] = f;
+	ഘടന avail_വൃക്ഷം_content *f = (ഘടന avail_വൃക്ഷം_content*)t;
+	unsigned പൂർണ്ണസംഖ്യ hc = hc_entries(f->entry_capacity);
+	f->next_avail = avail_വൃക്ഷം_table[hc];
+	avail_വൃക്ഷം_table[hc] = f;
 }
 
-static void release_tree_content_recursive(struct tree_content *t)
+സ്ഥിതം ശൂന്യം release_വൃക്ഷം_content_recursive(ഘടന വൃക്ഷം_content *t)
 {
-	unsigned int i;
-	for (i = 0; i < t->entry_count; i++)
-		release_tree_entry(t->entries[i]);
-	release_tree_content(t);
+	unsigned പൂർണ്ണസംഖ്യ i;
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++)
+		release_വൃക്ഷം_entry(t->entries[i]);
+	release_വൃക്ഷം_content(t);
 }
 
-static struct tree_content *grow_tree_content(
-	struct tree_content *t,
-	int amt)
+സ്ഥിതം ഘടന വൃക്ഷം_content *grow_വൃക്ഷം_content(
+	ഘടന വൃക്ഷം_content *t,
+	പൂർണ്ണസംഖ്യ amt)
 {
-	struct tree_content *r = new_tree_content(t->entry_count + amt);
-	r->entry_count = t->entry_count;
+	ഘടന വൃക്ഷം_content *r = new_വൃക്ഷം_content(t->entry_എണ്ണം + amt);
+	r->entry_എണ്ണം = t->entry_എണ്ണം;
 	r->delta_depth = t->delta_depth;
-	COPY_ARRAY(r->entries, t->entries, t->entry_count);
-	release_tree_content(t);
-	return r;
+	COPY_ARRAY(r->entries, t->entries, t->entry_എണ്ണം);
+	release_വൃക്ഷം_content(t);
+	തിരികെ r;
 }
 
-static struct tree_entry *new_tree_entry(void)
+സ്ഥിതം ഘടന വൃക്ഷം_entry *new_വൃക്ഷം_entry(ശൂന്യം)
 {
-	struct tree_entry *e;
+	ഘടന വൃക്ഷം_entry *e;
 
-	if (!avail_tree_entry) {
-		unsigned int n = tree_entry_alloc;
-		tree_entry_allocd += n * sizeof(struct tree_entry);
+	എങ്കിൽ (!avail_വൃക്ഷം_entry) {
+		unsigned പൂർണ്ണസംഖ്യ n = വൃക്ഷം_entry_alloc;
+		വൃക്ഷം_entry_allocd += n * വലുപ്പം(ഘടന വൃക്ഷം_entry);
 		ALLOC_ARRAY(e, n);
-		avail_tree_entry = e;
-		while (n-- > 1) {
-			*((void**)e) = e + 1;
+		avail_വൃക്ഷം_entry = e;
+		ആകുമ്പോൾ (n-- > 1) {
+			*((ശൂന്യം**)e) = e + 1;
 			e++;
 		}
-		*((void**)e) = NULL;
+		*((ശൂന്യം**)e) = ശൂന്യ;
 	}
 
-	e = avail_tree_entry;
-	avail_tree_entry = *((void**)e);
-	return e;
+	e = avail_വൃക്ഷം_entry;
+	avail_വൃക്ഷം_entry = *((ശൂന്യം**)e);
+	തിരികെ e;
 }
 
-static void release_tree_entry(struct tree_entry *e)
+സ്ഥിതം ശൂന്യം release_വൃക്ഷം_entry(ഘടന വൃക്ഷം_entry *e)
 {
-	if (e->tree)
-		release_tree_content_recursive(e->tree);
-	*((void**)e) = avail_tree_entry;
-	avail_tree_entry = e;
+	എങ്കിൽ (e->വൃക്ഷം)
+		release_വൃക്ഷം_content_recursive(e->വൃക്ഷം);
+	*((ശൂന്യം**)e) = avail_വൃക്ഷം_entry;
+	avail_വൃക്ഷം_entry = e;
 }
 
-static struct tree_content *dup_tree_content(struct tree_content *s)
+സ്ഥിതം ഘടന വൃക്ഷം_content *dup_വൃക്ഷം_content(ഘടന വൃക്ഷം_content *s)
 {
-	struct tree_content *d;
-	struct tree_entry *a, *b;
-	unsigned int i;
+	ഘടന വൃക്ഷം_content *d;
+	ഘടന വൃക്ഷം_entry *a, *b;
+	unsigned പൂർണ്ണസംഖ്യ i;
 
-	if (!s)
-		return NULL;
-	d = new_tree_content(s->entry_count);
-	for (i = 0; i < s->entry_count; i++) {
+	എങ്കിൽ (!s)
+		തിരികെ ശൂന്യ;
+	d = new_വൃക്ഷം_content(s->entry_എണ്ണം);
+	വേണ്ടി (i = 0; i < s->entry_എണ്ണം; i++) {
 		a = s->entries[i];
-		b = new_tree_entry();
-		memcpy(b, a, sizeof(*a));
-		if (a->tree && is_null_oid(&b->versions[1].oid))
-			b->tree = dup_tree_content(a->tree);
-		else
-			b->tree = NULL;
+		b = new_വൃക്ഷം_entry();
+		memcpy(b, a, വലുപ്പം(*a));
+		എങ്കിൽ (a->വൃക്ഷം && is_null_oid(&b->versions[1].oid))
+			b->വൃക്ഷം = dup_വൃക്ഷം_content(a->വൃക്ഷം);
+		അല്ലെങ്കിൽ
+			b->വൃക്ഷം = ശൂന്യ;
 		d->entries[i] = b;
 	}
-	d->entry_count = s->entry_count;
+	d->entry_എണ്ണം = s->entry_എണ്ണം;
 	d->delta_depth = s->delta_depth;
 
-	return d;
+	തിരികെ d;
 }
 
-static void start_packfile(void)
+സ്ഥിതം ശൂന്യം start_packfile(ശൂന്യം)
 {
-	struct strbuf tmp_file = STRBUF_INIT;
-	struct packed_git *p;
-	int pack_fd;
+	ഘടന strbuf tmp_file = STRBUF_INIT;
+	ഘടന packed_git *p;
+	പൂർണ്ണസംഖ്യ pack_fd;
 
 	pack_fd = odb_mkstemp(the_repository->objects, &tmp_file,
 			      "pack/tmp_pack_XXXXXX");
@@ -799,121 +799,121 @@ static void start_packfile(void)
 
 	pack_data = p;
 	pack_size = write_pack_header(pack_file, 0);
-	object_count = 0;
+	object_എണ്ണം = 0;
 
 	REALLOC_ARRAY(all_packs, pack_id + 1);
 	all_packs[pack_id] = p;
 }
 
-static const char *create_index(void)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *create_index(ശൂന്യം)
 {
-	const char *tmpfile;
-	struct pack_idx_entry **idx, **c, **last;
-	struct object_entry *e;
-	struct object_entry_pool *o;
+	സ്ഥിരം അക്ഷരം *tmpfile;
+	ഘടന pack_idx_entry **idx, **c, **last;
+	ഘടന object_entry *e;
+	ഘടന object_entry_pool *o;
 
 	/* Build the table of object IDs. */
-	ALLOC_ARRAY(idx, object_count);
+	ALLOC_ARRAY(idx, object_എണ്ണം);
 	c = idx;
-	for (o = blocks; o; o = o->next_pool)
-		for (e = o->next_free; e-- != o->entries;)
-			if (pack_id == e->pack_id)
+	വേണ്ടി (o = blocks; o; o = o->next_pool)
+		വേണ്ടി (e = o->next_free; e-- != o->entries;)
+			എങ്കിൽ (pack_id == e->pack_id)
 				*c++ = &e->idx;
-	last = idx + object_count;
-	if (c != last)
+	last = idx + object_എണ്ണം;
+	എങ്കിൽ (c != last)
 		die(_("internal consistency error creating the index"));
 
-	tmpfile = write_idx_file(the_repository, NULL, idx, object_count,
+	tmpfile = write_idx_file(the_repository, ശൂന്യ, idx, object_എണ്ണം,
 				 &pack_idx_opts, pack_data->hash);
-	free(idx);
-	return tmpfile;
+	സ്വതന്ത്രം(idx);
+	തിരികെ tmpfile;
 }
 
-static char *keep_pack(const char *curr_index_name)
+സ്ഥിതം അക്ഷരം *keep_pack(സ്ഥിരം അക്ഷരം *curr_index_name)
 {
-	static const char *keep_msg = "fast-import";
-	struct strbuf name = STRBUF_INIT;
-	int keep_fd;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *keep_സന്ദേശം = "fast-import";
+	ഘടന strbuf name = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ keep_fd;
 
 	odb_pack_name(pack_data->repo, &name, pack_data->hash, "keep");
 	keep_fd = safe_create_file_with_leading_directories(pack_data->repo,
 							    name.buf);
-	if (keep_fd < 0)
+	എങ്കിൽ (keep_fd < 0)
 		die_errno(_("cannot create keep file"));
-	write_or_die(keep_fd, keep_msg, strlen(keep_msg));
-	if (close(keep_fd))
+	write_or_die(keep_fd, keep_സന്ദേശം, strlen(keep_സന്ദേശം));
+	എങ്കിൽ (close(keep_fd))
 		die_errno(_("failed to write keep file"));
 
 	odb_pack_name(pack_data->repo, &name, pack_data->hash, "pack");
-	if (finalize_object_file(pack_data->repo, pack_data->pack_name, name.buf))
+	എങ്കിൽ (finalize_object_file(pack_data->repo, pack_data->pack_name, name.buf))
 		die(_("cannot store pack file"));
 
 	odb_pack_name(pack_data->repo, &name, pack_data->hash, "idx");
-	if (finalize_object_file(pack_data->repo, curr_index_name, name.buf))
+	എങ്കിൽ (finalize_object_file(pack_data->repo, curr_index_name, name.buf))
 		die(_("cannot store index file"));
-	free((void *)curr_index_name);
-	return strbuf_detach(&name, NULL);
+	സ്വതന്ത്രം((ശൂന്യം *)curr_index_name);
+	തിരികെ strbuf_detach(&name, ശൂന്യ);
 }
 
-static void unkeep_all_packs(void)
+സ്ഥിതം ശൂന്യം unkeep_all_packs(ശൂന്യം)
 {
-	struct strbuf name = STRBUF_INIT;
-	int k;
+	ഘടന strbuf name = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ k;
 
-	for (k = 0; k < pack_id; k++) {
-		struct packed_git *p = all_packs[k];
+	വേണ്ടി (k = 0; k < pack_id; k++) {
+		ഘടന packed_git *p = all_packs[k];
 		odb_pack_name(p->repo, &name, p->hash, "keep");
 		unlink_or_warn(name.buf);
 	}
 	strbuf_release(&name);
 }
 
-static int loosen_small_pack(const struct packed_git *p)
+സ്ഥിതം പൂർണ്ണസംഖ്യ loosen_small_pack(സ്ഥിരം ഘടന packed_git *p)
 {
-	struct child_process unpack = CHILD_PROCESS_INIT;
+	ഘടന child_process unpack = CHILD_PROCESS_INIT;
 
-	if (lseek(p->pack_fd, 0, SEEK_SET) < 0)
+	എങ്കിൽ (lseek(p->pack_fd, 0, SEEK_SET) < 0)
 		die_errno(_("failed seeking to start of '%s'"), p->pack_name);
 
 	unpack.in = p->pack_fd;
 	unpack.git_cmd = 1;
 	unpack.stdout_to_stderr = 1;
-	strvec_push(&unpack.args, "unpack-objects");
-	if (!show_stats)
-		strvec_push(&unpack.args, "-q");
+	strvec_തള്ളുക(&unpack.args, "unpack-objects");
+	എങ്കിൽ (!show_stats)
+		strvec_തള്ളുക(&unpack.args, "-q");
 
-	return run_command(&unpack);
+	തിരികെ run_command(&unpack);
 }
 
-static void end_packfile(void)
+സ്ഥിതം ശൂന്യം end_packfile(ശൂന്യം)
 {
-	static int running;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ running;
 
-	if (running || !pack_data)
-		return;
+	എങ്കിൽ (running || !pack_data)
+		തിരികെ;
 
 	running = 1;
 	clear_delta_base_cache();
-	if (object_count) {
-		struct odb_source_files *files = odb_source_files_downcast(pack_data->repo->objects->source);
-		struct packed_git *new_p;
-		struct object_id cur_pack_oid;
-		char *idx_name;
-		int i;
-		struct branch *b;
-		struct tag *t;
+	എങ്കിൽ (object_എണ്ണം) {
+		ഘടന odb_source_files *files = odb_source_files_downcast(pack_data->repo->objects->source);
+		ഘടന packed_git *new_p;
+		ഘടന object_id cur_pack_oid;
+		അക്ഷരം *idx_name;
+		പൂർണ്ണസംഖ്യ i;
+		ഘടന branch *b;
+		ഘടന tag *t;
 
 		close_pack_windows(pack_data);
 		finalize_hashfile(pack_file, cur_pack_oid.hash, FSYNC_COMPONENT_PACK, 0);
 		fixup_pack_header_footer(the_hash_algo, pack_data->pack_fd,
 					 pack_data->hash, pack_data->pack_name,
-					 object_count, cur_pack_oid.hash,
+					 object_എണ്ണം, cur_pack_oid.hash,
 					 pack_size);
 
-		if (object_count <= unpack_limit) {
-			if (!loosen_small_pack(pack_data)) {
+		എങ്കിൽ (object_എണ്ണം <= unpack_limit) {
+			എങ്കിൽ (!loosen_small_pack(pack_data)) {
 				invalidate_pack_id(pack_id);
-				goto discard_pack;
+				പോകുക discard_pack;
 			}
 		}
 
@@ -922,23 +922,23 @@ static void end_packfile(void)
 
 		/* Register the packfile with core git's machinery. */
 		new_p = packfile_store_load_pack(files->dirs->packed, idx_name, 1);
-		if (!new_p)
+		എങ്കിൽ (!new_p)
 			die(_("core Git rejected index %s"), idx_name);
 		all_packs[pack_id] = new_p;
-		free(idx_name);
+		സ്വതന്ത്രം(idx_name);
 
 		/* Print the boundary */
-		if (pack_edges) {
+		എങ്കിൽ (pack_edges) {
 			fprintf(pack_edges, "%s:", new_p->pack_name);
-			for (i = 0; i < branch_table_sz; i++) {
-				for (b = branch_table[i]; b; b = b->table_next_branch) {
-					if (b->pack_id == pack_id)
+			വേണ്ടി (i = 0; i < branch_table_sz; i++) {
+				വേണ്ടി (b = branch_table[i]; b; b = b->table_next_branch) {
+					എങ്കിൽ (b->pack_id == pack_id)
 						fprintf(pack_edges, " %s",
 							oid_to_hex(&b->oid));
 				}
 			}
-			for (t = first_tag; t; t = t->next_tag) {
-				if (t->pack_id == pack_id)
+			വേണ്ടി (t = first_tag; t; t = t->next_tag) {
+				എങ്കിൽ (t->pack_id == pack_id)
 					fprintf(pack_edges, " %s",
 						oid_to_hex(&t->oid));
 			}
@@ -948,7 +948,7 @@ static void end_packfile(void)
 
 		pack_id++;
 	}
-	else {
+	അല്ലെങ്കിൽ {
 discard_pack:
 		close(pack_data->pack_fd);
 		unlink_or_warn(pack_data->pack_name);
@@ -962,84 +962,84 @@ discard_pack:
 	last_blob.depth = 0;
 }
 
-static void cycle_packfile(void)
+സ്ഥിതം ശൂന്യം cycle_packfile(ശൂന്യം)
 {
 	end_packfile();
 	start_packfile();
 }
 
-static int store_object(
-	enum object_type type,
-	struct strbuf *dat,
-	struct last_object *last,
-	struct object_id *oidout,
+സ്ഥിതം പൂർണ്ണസംഖ്യ store_object(
+	എണ്ണൽ object_type type,
+	ഘടന strbuf *dat,
+	ഘടന last_object *last,
+	ഘടന object_id *oidout,
 	uintmax_t mark)
 {
-	struct odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
-	void *out, *delta;
-	struct object_entry *e;
-	unsigned char hdr[96];
-	struct object_id oid;
+	ഘടന odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
+	ശൂന്യം *out, *delta;
+	ഘടന object_entry *e;
+	unsigned അക്ഷരം hdr[96];
+	ഘടന object_id oid;
 	unsigned long hdrlen, deltalen = 0;
-	struct git_hash_ctx c;
+	ഘടന git_hash_ctx c;
 	git_zstream s;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
 
-	hdrlen = format_object_header((char *)hdr, sizeof(hdr), type,
+	hdrlen = format_object_header((അക്ഷരം *)hdr, വലുപ്പം(hdr), type,
 				      dat->len);
 	git_hash_init(&c, the_hash_algo);
 	git_hash_update(&c, hdr, hdrlen);
 	git_hash_update(&c, dat->buf, dat->len);
 	git_hash_final_oid(&oid, &c);
-	if (oidout)
+	എങ്കിൽ (oidout)
 		oidcpy(oidout, &oid);
 
-	e = insert_object(&oid);
-	if (mark)
-		insert_mark(&marks, mark, e);
-	if (e->idx.offset) {
-		duplicate_count_by_type[type]++;
-		return 1;
+	e = തിരുകുക_object(&oid);
+	എങ്കിൽ (mark)
+		തിരുകുക_mark(&marks, mark, e);
+	എങ്കിൽ (e->idx.offset) {
+		duplicate_എണ്ണം_by_type[type]++;
+		തിരികെ 1;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
-			continue;
+	വേണ്ടി (ഘടന odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
+		എങ്കിൽ (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
+			തുടരുക;
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
 		e->idx.offset = 1; /* just not zero! */
-		duplicate_count_by_type[type]++;
-		return 1;
+		duplicate_എണ്ണം_by_type[type]++;
+		തിരികെ 1;
 	}
 
-	if (last && last->data.len && last->data.buf && last->depth < max_depth
+	എങ്കിൽ (last && last->data.len && last->data.buf && last->depth < max_depth
 		&& dat->len > the_hash_algo->rawsz) {
 		size_t deltalen_st;
 
-		delta_count_attempts_by_type[type]++;
+		delta_എണ്ണം_attempts_by_type[type]++;
 		delta = diff_delta(last->data.buf, last->data.len,
 			dat->buf, dat->len,
 			&deltalen_st, dat->len - the_hash_algo->rawsz);
 		deltalen = cast_size_t_to_ulong(deltalen_st);
-	} else
-		delta = NULL;
+	} അല്ലെങ്കിൽ
+		delta = ശൂന്യ;
 
 	git_deflate_init(&s, cfg->pack_compression_level);
-	if (delta) {
+	എങ്കിൽ (delta) {
 		s.next_in = delta;
 		s.avail_in = deltalen;
-	} else {
-		s.next_in = (void *)dat->buf;
+	} അല്ലെങ്കിൽ {
+		s.next_in = (ശൂന്യം *)dat->buf;
 		s.avail_in = dat->len;
 	}
 	s.avail_out = git_deflate_bound(&s, s.avail_in);
 	s.next_out = out = xmalloc(s.avail_out);
-	while (git_deflate(&s, Z_FINISH) == Z_OK)
+	ആകുമ്പോൾ (git_deflate(&s, Z_FINISH) == Z_OK)
 		; /* nothing */
 	git_deflate_end(&s);
 
 	/* Determine if we should auto-checkpoint. */
-	if ((max_packsize
+	എങ്കിൽ ((max_packsize
 		&& (pack_size + PACK_SIZE_THRESHOLD + s.total_out) > max_packsize)
 		|| (pack_size + PACK_SIZE_THRESHOLD + s.total_out) < pack_size) {
 
@@ -1048,15 +1048,15 @@ static int store_object(
 		cycle_packfile();
 
 		/* We cannot carry a delta into the new pack. */
-		if (delta) {
+		എങ്കിൽ (delta) {
 			FREE_AND_NULL(delta);
 
 			git_deflate_init(&s, cfg->pack_compression_level);
-			s.next_in = (void *)dat->buf;
+			s.next_in = (ശൂന്യം *)dat->buf;
 			s.avail_in = dat->len;
 			s.avail_out = git_deflate_bound(&s, s.avail_in);
 			s.next_out = out = xrealloc(out, s.avail_out);
-			while (git_deflate(&s, Z_FINISH) == Z_OK)
+			ആകുമ്പോൾ (git_deflate(&s, Z_FINISH) == Z_OK)
 				; /* nothing */
 			git_deflate_end(&s);
 		}
@@ -1065,31 +1065,31 @@ static int store_object(
 	e->type = type;
 	e->pack_id = pack_id;
 	e->idx.offset = pack_size;
-	object_count++;
-	object_count_by_type[type]++;
+	object_എണ്ണം++;
+	object_എണ്ണം_by_type[type]++;
 
 	crc32_begin(pack_file);
 
-	if (delta) {
+	എങ്കിൽ (delta) {
 		off_t ofs = e->idx.offset - last->offset;
-		unsigned pos = sizeof(hdr) - 1;
+		unsigned pos = വലുപ്പം(hdr) - 1;
 
-		delta_count_by_type[type]++;
+		delta_എണ്ണം_by_type[type]++;
 		e->depth = last->depth + 1;
 
-		hdrlen = encode_in_pack_object_header(hdr, sizeof(hdr),
+		hdrlen = encode_in_pack_object_header(hdr, വലുപ്പം(hdr),
 						      OBJ_OFS_DELTA, deltalen);
 		hashwrite(pack_file, hdr, hdrlen);
 		pack_size += hdrlen;
 
 		hdr[pos] = ofs & 127;
-		while (ofs >>= 7)
+		ആകുമ്പോൾ (ofs >>= 7)
 			hdr[--pos] = 128 | (--ofs & 127);
-		hashwrite(pack_file, hdr + pos, sizeof(hdr) - pos);
-		pack_size += sizeof(hdr) - pos;
-	} else {
+		hashwrite(pack_file, hdr + pos, വലുപ്പം(hdr) - pos);
+		pack_size += വലുപ്പം(hdr) - pos;
+	} അല്ലെങ്കിൽ {
 		e->depth = 0;
-		hdrlen = encode_in_pack_object_header(hdr, sizeof(hdr),
+		hdrlen = encode_in_pack_object_header(hdr, വലുപ്പം(hdr),
 						      type, dat->len);
 		hashwrite(pack_file, hdr, hdrlen);
 		pack_size += hdrlen;
@@ -1100,45 +1100,45 @@ static int store_object(
 
 	e->idx.crc32 = crc32_end(pack_file);
 
-	free(out);
-	free(delta);
-	if (last) {
-		if (last->no_swap) {
+	സ്വതന്ത്രം(out);
+	സ്വതന്ത്രം(delta);
+	എങ്കിൽ (last) {
+		എങ്കിൽ (last->no_swap) {
 			last->data = *dat;
-		} else {
+		} അല്ലെങ്കിൽ {
 			strbuf_swap(&last->data, dat);
 		}
 		last->offset = e->idx.offset;
 		last->depth = e->depth;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static void truncate_pack(struct hashfile_checkpoint *checkpoint)
+സ്ഥിതം ശൂന്യം truncate_pack(ഘടന hashfile_checkpoint *checkpoint)
 {
-	if (hashfile_truncate(pack_file, checkpoint))
+	എങ്കിൽ (hashfile_truncate(pack_file, checkpoint))
 		die_errno(_("cannot truncate pack to skip duplicate"));
 	pack_size = checkpoint->offset;
 }
 
-static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
+സ്ഥിതം ശൂന്യം stream_blob(uintmax_t len, ഘടന object_id *oidout, uintmax_t mark)
 {
-	struct odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
+	ഘടന odb_source_files *files = odb_source_files_downcast(the_repository->objects->source);
 	size_t in_sz = 64 * 1024, out_sz = 64 * 1024;
-	unsigned char *in_buf = xmalloc(in_sz);
-	unsigned char *out_buf = xmalloc(out_sz);
-	struct object_entry *e;
-	struct object_id oid;
+	unsigned അക്ഷരം *in_buf = xmalloc(in_sz);
+	unsigned അക്ഷരം *out_buf = xmalloc(out_sz);
+	ഘടന object_entry *e;
+	ഘടന object_id oid;
 	unsigned long hdrlen;
 	off_t offset;
-	struct git_hash_ctx c;
+	ഘടന git_hash_ctx c;
 	git_zstream s;
-	struct hashfile_checkpoint checkpoint;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int status = Z_OK;
+	ഘടന hashfile_checkpoint checkpoint;
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
+	പൂർണ്ണസംഖ്യ status = Z_OK;
 
 	/* Determine if we should auto-checkpoint. */
-	if ((max_packsize
+	എങ്കിൽ ((max_packsize
 		&& (pack_size + PACK_SIZE_THRESHOLD + len) > max_packsize)
 		|| (pack_size + PACK_SIZE_THRESHOLD + len) < pack_size)
 		cycle_packfile();
@@ -1147,7 +1147,7 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 	hashfile_checkpoint(pack_file, &checkpoint);
 	offset = checkpoint.offset;
 
-	hdrlen = format_object_header((char *)out_buf, out_sz, OBJ_BLOB, len);
+	hdrlen = format_object_header((അക്ഷരം *)out_buf, out_sz, OBJ_BLOB, len);
 
 	git_hash_init(&c, the_hash_algo);
 	git_hash_update(&c, out_buf, hdrlen);
@@ -1161,11 +1161,11 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 	s.next_out = out_buf + hdrlen;
 	s.avail_out = out_sz - hdrlen;
 
-	while (status != Z_STREAM_END) {
-		if (0 < len && !s.avail_in) {
+	ആകുമ്പോൾ (status != Z_STREAM_END) {
+		എങ്കിൽ (0 < len && !s.avail_in) {
 			size_t cnt = in_sz < len ? in_sz : (size_t)len;
 			size_t n = fread(in_buf, 1, cnt, stdin);
-			if (!n && feof(stdin))
+			എങ്കിൽ (!n && feof(stdin))
 				die(_("EOF in data (%" PRIuMAX " bytes remaining)"), len);
 
 			git_hash_update(&c, in_buf, n);
@@ -1176,7 +1176,7 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 
 		status = git_deflate(&s, len ? 0 : Z_FINISH);
 
-		if (!s.avail_out || status == Z_STREAM_END) {
+		എങ്കിൽ (!s.avail_out || status == Z_STREAM_END) {
 			size_t n = s.next_out - out_buf;
 			hashwrite(pack_file, out_buf, n);
 			pack_size += n;
@@ -1184,41 +1184,41 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 			s.avail_out = out_sz;
 		}
 
-		switch (status) {
-		case Z_OK:
-		case Z_BUF_ERROR:
-		case Z_STREAM_END:
-			continue;
-		default:
+		തിരഞ്ഞെടുപ്പ് (status) {
+		അവസ്ഥ Z_OK:
+		അവസ്ഥ Z_BUF_ERROR:
+		അവസ്ഥ Z_STREAM_END:
+			തുടരുക;
+		സ്ഥിരസ്ഥിതി:
 			die(_("unexpected deflate failure: %d"), status);
 		}
 	}
 	git_deflate_end(&s);
 	git_hash_final_oid(&oid, &c);
 
-	if (oidout)
+	എങ്കിൽ (oidout)
 		oidcpy(oidout, &oid);
 
-	e = insert_object(&oid);
+	e = തിരുകുക_object(&oid);
 
-	if (mark)
-		insert_mark(&marks, mark, e);
+	എങ്കിൽ (mark)
+		തിരുകുക_mark(&marks, mark, e);
 
-	if (e->idx.offset) {
-		duplicate_count_by_type[OBJ_BLOB]++;
+	എങ്കിൽ (e->idx.offset) {
+		duplicate_എണ്ണം_by_type[OBJ_BLOB]++;
 		truncate_pack(&checkpoint);
-		goto out;
+		പോകുക out;
 	}
 
-	for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
-		if (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
-			continue;
+	വേണ്ടി (ഘടന odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
+		എങ്കിൽ (!packfile_list_find_oid(packfile_store_get_packs(dir->packed), &oid))
+			തുടരുക;
 		e->type = OBJ_BLOB;
 		e->pack_id = MAX_PACK_ID;
 		e->idx.offset = 1; /* just not zero! */
-		duplicate_count_by_type[OBJ_BLOB]++;
+		duplicate_എണ്ണം_by_type[OBJ_BLOB]++;
 		truncate_pack(&checkpoint);
-		goto out;
+		പോകുക out;
 	}
 
 	e->depth = 0;
@@ -1226,12 +1226,12 @@ static void stream_blob(uintmax_t len, struct object_id *oidout, uintmax_t mark)
 	e->pack_id = pack_id;
 	e->idx.offset = offset;
 	e->idx.crc32 = crc32_end(pack_file);
-	object_count++;
-	object_count_by_type[OBJ_BLOB]++;
+	object_എണ്ണം++;
+	object_എണ്ണം_by_type[OBJ_BLOB]++;
 
 out:
-	free(in_buf);
-	free(out_buf);
+	സ്വതന്ത്രം(in_buf);
+	സ്വതന്ത്രം(out_buf);
 	hashfile_checkpoint_release(&checkpoint);
 }
 
@@ -1253,15 +1253,15 @@ out:
  * instance did not write out to a packfile.  Callers must test for
  * this condition and use read_sha1_file() instead.
  */
-static void *gfi_unpack_entry(
-	struct object_entry *oe,
+സ്ഥിതം ശൂന്യം *gfi_unpack_entry(
+	ഘടന object_entry *oe,
 	unsigned long *sizep)
 {
-	enum object_type type;
+	എണ്ണൽ object_type type;
 	size_t size_st = 0;
-	void *data;
-	struct packed_git *p = all_packs[oe->pack_id];
-	if (p == pack_data && p->pack_size < (pack_size + the_hash_algo->rawsz)) {
+	ശൂന്യം *data;
+	ഘടന packed_git *p = all_packs[oe->pack_id];
+	എങ്കിൽ (p == pack_data && p->pack_size < (pack_size + the_hash_algo->rawsz)) {
 		/* The object is stored in the packfile we are writing to
 		 * and we have modified it since the last time we scanned
 		 * back to read a previously written object.  If an old
@@ -1282,208 +1282,208 @@ static void *gfi_unpack_entry(
 		p->pack_size = pack_size + the_hash_algo->rawsz;
 	}
 	data = unpack_entry(the_repository, p, oe->idx.offset, &type, &size_st);
-	if (sizep)
+	എങ്കിൽ (sizep)
 		*sizep = cast_size_t_to_ulong(size_st);
-	return data;
+	തിരികെ data;
 }
 
-static void load_tree(struct tree_entry *root)
+സ്ഥിതം ശൂന്യം load_വൃക്ഷം(ഘടന വൃക്ഷം_entry *വേര്)
 {
-	struct object_id *oid = &root->versions[1].oid;
-	struct object_entry *myoe;
-	struct tree_content *t;
+	ഘടന object_id *oid = &വേര്->versions[1].oid;
+	ഘടന object_entry *myoe;
+	ഘടന വൃക്ഷം_content *t;
 	unsigned long size;
-	char *buf;
-	const char *c;
+	അക്ഷരം *buf;
+	സ്ഥിരം അക്ഷരം *c;
 
-	root->tree = t = new_tree_content(8);
-	if (is_null_oid(oid))
-		return;
+	വേര്->വൃക്ഷം = t = new_വൃക്ഷം_content(8);
+	എങ്കിൽ (is_null_oid(oid))
+		തിരികെ;
 
 	myoe = find_object(oid);
-	if (myoe && myoe->pack_id != MAX_PACK_ID) {
-		if (myoe->type != OBJ_TREE)
+	എങ്കിൽ (myoe && myoe->pack_id != MAX_PACK_ID) {
+		എങ്കിൽ (myoe->type != OBJ_വൃക്ഷം)
 			die(_("not a tree: %s"), oid_to_hex(oid));
 		t->delta_depth = myoe->depth;
 		buf = gfi_unpack_entry(myoe, &size);
-		if (!buf)
+		എങ്കിൽ (!buf)
 			die(_("can't load tree %s"), oid_to_hex(oid));
-	} else {
-		enum object_type type;
+	} അല്ലെങ്കിൽ {
+		എണ്ണൽ object_type type;
 		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
 				      &size_st);
 		size = cast_size_t_to_ulong(size_st);
-		if (!buf || type != OBJ_TREE)
+		എങ്കിൽ (!buf || type != OBJ_വൃക്ഷം)
 			die(_("can't load tree %s"), oid_to_hex(oid));
 	}
 
 	c = buf;
-	while (c != (buf + size)) {
-		struct tree_entry *e = new_tree_entry();
+	ആകുമ്പോൾ (c != (buf + size)) {
+		ഘടന വൃക്ഷം_entry *e = new_വൃക്ഷം_entry();
 
-		if (t->entry_count == t->entry_capacity)
-			root->tree = t = grow_tree_content(t, t->entry_count);
-		t->entries[t->entry_count++] = e;
+		എങ്കിൽ (t->entry_എണ്ണം == t->entry_capacity)
+			വേര്->വൃക്ഷം = t = grow_വൃക്ഷം_content(t, t->entry_എണ്ണം);
+		t->entries[t->entry_എണ്ണം++] = e;
 
-		e->tree = NULL;
+		e->വൃക്ഷം = ശൂന്യ;
 		c = parse_mode(c, &e->versions[1].mode);
-		if (!c)
+		എങ്കിൽ (!c)
 			die(_("corrupt mode in %s"), oid_to_hex(oid));
 		e->versions[0].mode = e->versions[1].mode;
 		e->name = to_atom(c, strlen(c));
 		c += e->name->str_len + 1;
-		oidread(&e->versions[0].oid, (unsigned char *)c,
+		oidread(&e->versions[0].oid, (unsigned അക്ഷരം *)c,
 			the_repository->hash_algo);
-		oidread(&e->versions[1].oid, (unsigned char *)c,
+		oidread(&e->versions[1].oid, (unsigned അക്ഷരം *)c,
 			the_repository->hash_algo);
 		c += the_hash_algo->rawsz;
 	}
-	free(buf);
+	സ്വതന്ത്രം(buf);
 }
 
-static int tecmp0 (const void *_a, const void *_b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ tecmp0 (സ്ഥിരം ശൂന്യം *_a, സ്ഥിരം ശൂന്യം *_b)
 {
-	struct tree_entry *a = *((struct tree_entry**)_a);
-	struct tree_entry *b = *((struct tree_entry**)_b);
-	return base_name_compare(
+	ഘടന വൃക്ഷം_entry *a = *((ഘടന വൃക്ഷം_entry**)_a);
+	ഘടന വൃക്ഷം_entry *b = *((ഘടന വൃക്ഷം_entry**)_b);
+	തിരികെ base_name_compare(
 		a->name->str_dat, a->name->str_len, a->versions[0].mode,
 		b->name->str_dat, b->name->str_len, b->versions[0].mode);
 }
 
-static int tecmp1 (const void *_a, const void *_b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ tecmp1 (സ്ഥിരം ശൂന്യം *_a, സ്ഥിരം ശൂന്യം *_b)
 {
-	struct tree_entry *a = *((struct tree_entry**)_a);
-	struct tree_entry *b = *((struct tree_entry**)_b);
-	return base_name_compare(
+	ഘടന വൃക്ഷം_entry *a = *((ഘടന വൃക്ഷം_entry**)_a);
+	ഘടന വൃക്ഷം_entry *b = *((ഘടന വൃക്ഷം_entry**)_b);
+	തിരികെ base_name_compare(
 		a->name->str_dat, a->name->str_len, a->versions[1].mode,
 		b->name->str_dat, b->name->str_len, b->versions[1].mode);
 }
 
-static void mktree(struct tree_content *t, int v, struct strbuf *b)
+സ്ഥിതം ശൂന്യം mktree(ഘടന വൃക്ഷം_content *t, പൂർണ്ണസംഖ്യ v, ഘടന strbuf *b)
 {
 	size_t maxlen = 0;
-	unsigned int i;
+	unsigned പൂർണ്ണസംഖ്യ i;
 
-	if (!v)
-		QSORT(t->entries, t->entry_count, tecmp0);
-	else
-		QSORT(t->entries, t->entry_count, tecmp1);
+	എങ്കിൽ (!v)
+		QSORT(t->entries, t->entry_എണ്ണം, tecmp0);
+	അല്ലെങ്കിൽ
+		QSORT(t->entries, t->entry_എണ്ണം, tecmp1);
 
-	for (i = 0; i < t->entry_count; i++) {
-		if (t->entries[i]->versions[v].mode)
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++) {
+		എങ്കിൽ (t->entries[i]->versions[v].mode)
 			maxlen += t->entries[i]->name->str_len + 34;
 	}
 
 	strbuf_reset(b);
 	strbuf_grow(b, maxlen);
-	for (i = 0; i < t->entry_count; i++) {
-		struct tree_entry *e = t->entries[i];
-		if (!e->versions[v].mode)
-			continue;
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++) {
+		ഘടന വൃക്ഷം_entry *e = t->entries[i];
+		എങ്കിൽ (!e->versions[v].mode)
+			തുടരുക;
 		strbuf_addf(b, "%o %s%c",
-			(unsigned int)(e->versions[v].mode & ~NO_DELTA),
+			(unsigned പൂർണ്ണസംഖ്യ)(e->versions[v].mode & ~NO_DELTA),
 			e->name->str_dat, '\0');
 		strbuf_add(b, e->versions[v].oid.hash, the_hash_algo->rawsz);
 	}
 }
 
-static void store_tree(struct tree_entry *root)
+സ്ഥിതം ശൂന്യം store_വൃക്ഷം(ഘടന വൃക്ഷം_entry *വേര്)
 {
-	struct tree_content *t;
-	unsigned int i, j, del;
-	struct last_object lo = { STRBUF_INIT, 0, 0, /* no_swap */ 1 };
-	struct object_entry *le = NULL;
+	ഘടന വൃക്ഷം_content *t;
+	unsigned പൂർണ്ണസംഖ്യ i, j, del;
+	ഘടന last_object lo = { STRBUF_INIT, 0, 0, /* no_swap */ 1 };
+	ഘടന object_entry *le = ശൂന്യ;
 
-	if (!is_null_oid(&root->versions[1].oid))
-		return;
+	എങ്കിൽ (!is_null_oid(&വേര്->versions[1].oid))
+		തിരികെ;
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
+	എങ്കിൽ (!വേര്->വൃക്ഷം)
+		load_വൃക്ഷം(വേര്);
+	t = വേര്->വൃക്ഷം;
 
-	for (i = 0; i < t->entry_count; i++) {
-		if (t->entries[i]->tree)
-			store_tree(t->entries[i]);
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++) {
+		എങ്കിൽ (t->entries[i]->വൃക്ഷം)
+			store_വൃക്ഷം(t->entries[i]);
 	}
 
-	if (!(root->versions[0].mode & NO_DELTA))
-		le = find_object(&root->versions[0].oid);
-	if (S_ISDIR(root->versions[0].mode) && le && le->pack_id == pack_id) {
-		mktree(t, 0, &old_tree);
-		lo.data = old_tree;
+	എങ്കിൽ (!(വേര്->versions[0].mode & NO_DELTA))
+		le = find_object(&വേര്->versions[0].oid);
+	എങ്കിൽ (S_ISDIR(വേര്->versions[0].mode) && le && le->pack_id == pack_id) {
+		mktree(t, 0, &old_വൃക്ഷം);
+		lo.data = old_വൃക്ഷം;
 		lo.offset = le->idx.offset;
 		lo.depth = t->delta_depth;
 	}
 
-	mktree(t, 1, &new_tree);
-	store_object(OBJ_TREE, &new_tree, &lo, &root->versions[1].oid, 0);
+	mktree(t, 1, &new_വൃക്ഷം);
+	store_object(OBJ_വൃക്ഷം, &new_വൃക്ഷം, &lo, &വേര്->versions[1].oid, 0);
 
 	t->delta_depth = lo.depth;
-	for (i = 0, j = 0, del = 0; i < t->entry_count; i++) {
-		struct tree_entry *e = t->entries[i];
-		if (e->versions[1].mode) {
+	വേണ്ടി (i = 0, j = 0, del = 0; i < t->entry_എണ്ണം; i++) {
+		ഘടന വൃക്ഷം_entry *e = t->entries[i];
+		എങ്കിൽ (e->versions[1].mode) {
 			e->versions[0].mode = e->versions[1].mode;
 			oidcpy(&e->versions[0].oid, &e->versions[1].oid);
 			t->entries[j++] = e;
-		} else {
-			release_tree_entry(e);
+		} അല്ലെങ്കിൽ {
+			release_വൃക്ഷം_entry(e);
 			del++;
 		}
 	}
-	t->entry_count -= del;
+	t->entry_എണ്ണം -= del;
 }
 
-static void tree_content_replace(
-	struct tree_entry *root,
-	const struct object_id *oid,
-	const uint16_t mode,
-	struct tree_content *newtree)
+സ്ഥിതം ശൂന്യം വൃക്ഷം_content_replace(
+	ഘടന വൃക്ഷം_entry *വേര്,
+	സ്ഥിരം ഘടന object_id *oid,
+	സ്ഥിരം uint16_t mode,
+	ഘടന വൃക്ഷം_content *newtree)
 {
-	if (!S_ISDIR(mode))
+	എങ്കിൽ (!S_ISDIR(mode))
 		die(_("root cannot be a non-directory"));
-	oidclr(&root->versions[0].oid, the_repository->hash_algo);
-	oidcpy(&root->versions[1].oid, oid);
-	if (root->tree)
-		release_tree_content_recursive(root->tree);
-	root->tree = newtree;
+	oidclr(&വേര്->versions[0].oid, the_repository->hash_algo);
+	oidcpy(&വേര്->versions[1].oid, oid);
+	എങ്കിൽ (വേര്->വൃക്ഷം)
+		release_വൃക്ഷം_content_recursive(വേര്->വൃക്ഷം);
+	വേര്->വൃക്ഷം = newtree;
 }
 
-static int tree_content_set(
-	struct tree_entry *root,
-	const char *p,
-	const struct object_id *oid,
-	const uint16_t mode,
-	struct tree_content *subtree)
+സ്ഥിതം പൂർണ്ണസംഖ്യ വൃക്ഷം_content_set(
+	ഘടന വൃക്ഷം_entry *വേര്,
+	സ്ഥിരം അക്ഷരം *p,
+	സ്ഥിരം ഘടന object_id *oid,
+	സ്ഥിരം uint16_t mode,
+	ഘടന വൃക്ഷം_content *subtree)
 {
-	struct tree_content *t;
-	const char *slash1;
-	unsigned int i, n;
-	struct tree_entry *e;
+	ഘടന വൃക്ഷം_content *t;
+	സ്ഥിരം അക്ഷരം *slash1;
+	unsigned പൂർണ്ണസംഖ്യ i, n;
+	ഘടന വൃക്ഷം_entry *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
-	if (!n)
+	എങ്കിൽ (!n)
 		die(_("empty path component found in input"));
-	if (!*slash1 && !S_ISDIR(mode) && subtree)
+	എങ്കിൽ (!*slash1 && !S_ISDIR(mode) && subtree)
 		die(_("non-directories cannot have subtrees"));
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	എങ്കിൽ (!വേര്->വൃക്ഷം)
+		load_വൃക്ഷം(വേര്);
+	t = വേര്->വൃക്ഷം;
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
-			if (!*slash1) {
-				if (!S_ISDIR(mode)
+		എങ്കിൽ (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+			എങ്കിൽ (!*slash1) {
+				എങ്കിൽ (!S_ISDIR(mode)
 						&& e->versions[1].mode == mode
 						&& oideq(&e->versions[1].oid, oid))
-					return 0;
+					തിരികെ 0;
 				e->versions[1].mode = mode;
 				oidcpy(&e->versions[1].oid, oid);
-				if (e->tree)
-					release_tree_content_recursive(e->tree);
-				e->tree = subtree;
+				എങ്കിൽ (e->വൃക്ഷം)
+					release_വൃക്ഷം_content_recursive(e->വൃക്ഷം);
+				e->വൃക്ഷം = subtree;
 
 				/*
 				 * We need to leave e->versions[0].sha1 alone
@@ -1498,262 +1498,262 @@ static int tree_content_set(
 				 * So let's just explicitly disable deltas
 				 * for the subtree.
 				 */
-				if (S_ISDIR(e->versions[0].mode))
+				എങ്കിൽ (S_ISDIR(e->versions[0].mode))
 					e->versions[0].mode |= NO_DELTA;
 
-				oidclr(&root->versions[1].oid, the_repository->hash_algo);
-				return 1;
+				oidclr(&വേര്->versions[1].oid, the_repository->hash_algo);
+				തിരികെ 1;
 			}
-			if (!S_ISDIR(e->versions[1].mode)) {
-				e->tree = new_tree_content(8);
+			എങ്കിൽ (!S_ISDIR(e->versions[1].mode)) {
+				e->വൃക്ഷം = new_വൃക്ഷം_content(8);
 				e->versions[1].mode = S_IFDIR;
 			}
-			if (!e->tree)
-				load_tree(e);
-			if (tree_content_set(e, slash1 + 1, oid, mode, subtree)) {
-				oidclr(&root->versions[1].oid, the_repository->hash_algo);
-				return 1;
+			എങ്കിൽ (!e->വൃക്ഷം)
+				load_വൃക്ഷം(e);
+			എങ്കിൽ (വൃക്ഷം_content_set(e, slash1 + 1, oid, mode, subtree)) {
+				oidclr(&വേര്->versions[1].oid, the_repository->hash_algo);
+				തിരികെ 1;
 			}
-			return 0;
+			തിരികെ 0;
 		}
 	}
 
-	if (t->entry_count == t->entry_capacity)
-		root->tree = t = grow_tree_content(t, t->entry_count);
-	e = new_tree_entry();
+	എങ്കിൽ (t->entry_എണ്ണം == t->entry_capacity)
+		വേര്->വൃക്ഷം = t = grow_വൃക്ഷം_content(t, t->entry_എണ്ണം);
+	e = new_വൃക്ഷം_entry();
 	e->name = to_atom(p, n);
 	e->versions[0].mode = 0;
 	oidclr(&e->versions[0].oid, the_repository->hash_algo);
-	t->entries[t->entry_count++] = e;
-	if (*slash1) {
-		e->tree = new_tree_content(8);
+	t->entries[t->entry_എണ്ണം++] = e;
+	എങ്കിൽ (*slash1) {
+		e->വൃക്ഷം = new_വൃക്ഷം_content(8);
 		e->versions[1].mode = S_IFDIR;
-		tree_content_set(e, slash1 + 1, oid, mode, subtree);
-	} else {
-		e->tree = subtree;
+		വൃക്ഷം_content_set(e, slash1 + 1, oid, mode, subtree);
+	} അല്ലെങ്കിൽ {
+		e->വൃക്ഷം = subtree;
 		e->versions[1].mode = mode;
 		oidcpy(&e->versions[1].oid, oid);
 	}
-	oidclr(&root->versions[1].oid, the_repository->hash_algo);
-	return 1;
+	oidclr(&വേര്->versions[1].oid, the_repository->hash_algo);
+	തിരികെ 1;
 }
 
-static int tree_content_remove(
-	struct tree_entry *root,
-	const char *p,
-	struct tree_entry *backup_leaf,
-	int allow_root)
+സ്ഥിതം പൂർണ്ണസംഖ്യ വൃക്ഷം_content_remove(
+	ഘടന വൃക്ഷം_entry *വേര്,
+	സ്ഥിരം അക്ഷരം *p,
+	ഘടന വൃക്ഷം_entry *backup_leaf,
+	പൂർണ്ണസംഖ്യ allow_വേര്)
 {
-	struct tree_content *t;
-	const char *slash1;
-	unsigned int i, n;
-	struct tree_entry *e;
+	ഘടന വൃക്ഷം_content *t;
+	സ്ഥിരം അക്ഷരം *slash1;
+	unsigned പൂർണ്ണസംഖ്യ i, n;
+	ഘടന വൃക്ഷം_entry *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
 
-	if (!root->tree)
-		load_tree(root);
+	എങ്കിൽ (!വേര്->വൃക്ഷം)
+		load_വൃക്ഷം(വേര്);
 
-	if (!*p && allow_root) {
-		e = root;
-		goto del_entry;
+	എങ്കിൽ (!*p && allow_വേര്) {
+		e = വേര്;
+		പോകുക del_entry;
 	}
 
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	t = വേര്->വൃക്ഷം;
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
-			if (*slash1 && !S_ISDIR(e->versions[1].mode))
+		എങ്കിൽ (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+			എങ്കിൽ (*slash1 && !S_ISDIR(e->versions[1].mode))
 				/*
 				 * If p names a file in some subdirectory, and a
 				 * file or symlink matching the name of the
 				 * parent directory of p exists, then p cannot
 				 * exist and need not be deleted.
 				 */
-				return 1;
-			if (!*slash1 || !S_ISDIR(e->versions[1].mode))
-				goto del_entry;
-			if (!e->tree)
-				load_tree(e);
-			if (tree_content_remove(e, slash1 + 1, backup_leaf, 0)) {
-				for (n = 0; n < e->tree->entry_count; n++) {
-					if (e->tree->entries[n]->versions[1].mode) {
-						oidclr(&root->versions[1].oid,
+				തിരികെ 1;
+			എങ്കിൽ (!*slash1 || !S_ISDIR(e->versions[1].mode))
+				പോകുക del_entry;
+			എങ്കിൽ (!e->വൃക്ഷം)
+				load_വൃക്ഷം(e);
+			എങ്കിൽ (വൃക്ഷം_content_remove(e, slash1 + 1, backup_leaf, 0)) {
+				വേണ്ടി (n = 0; n < e->വൃക്ഷം->entry_എണ്ണം; n++) {
+					എങ്കിൽ (e->വൃക്ഷം->entries[n]->versions[1].mode) {
+						oidclr(&വേര്->versions[1].oid,
 						       the_repository->hash_algo);
-						return 1;
+						തിരികെ 1;
 					}
 				}
-				backup_leaf = NULL;
-				goto del_entry;
+				backup_leaf = ശൂന്യ;
+				പോകുക del_entry;
 			}
-			return 0;
+			തിരികെ 0;
 		}
 	}
-	return 0;
+	തിരികെ 0;
 
 del_entry:
-	if (backup_leaf)
-		memcpy(backup_leaf, e, sizeof(*backup_leaf));
-	else if (e->tree)
-		release_tree_content_recursive(e->tree);
-	e->tree = NULL;
+	എങ്കിൽ (backup_leaf)
+		memcpy(backup_leaf, e, വലുപ്പം(*backup_leaf));
+	അല്ലെങ്കിൽ എങ്കിൽ (e->വൃക്ഷം)
+		release_വൃക്ഷം_content_recursive(e->വൃക്ഷം);
+	e->വൃക്ഷം = ശൂന്യ;
 	e->versions[1].mode = 0;
 	oidclr(&e->versions[1].oid, the_repository->hash_algo);
-	oidclr(&root->versions[1].oid, the_repository->hash_algo);
-	return 1;
+	oidclr(&വേര്->versions[1].oid, the_repository->hash_algo);
+	തിരികെ 1;
 }
 
-static int tree_content_get(
-	struct tree_entry *root,
-	const char *p,
-	struct tree_entry *leaf,
-	int allow_root)
+സ്ഥിതം പൂർണ്ണസംഖ്യ വൃക്ഷം_content_get(
+	ഘടന വൃക്ഷം_entry *വേര്,
+	സ്ഥിരം അക്ഷരം *p,
+	ഘടന വൃക്ഷം_entry *leaf,
+	പൂർണ്ണസംഖ്യ allow_വേര്)
 {
-	struct tree_content *t;
-	const char *slash1;
-	unsigned int i, n;
-	struct tree_entry *e;
+	ഘടന വൃക്ഷം_content *t;
+	സ്ഥിരം അക്ഷരം *slash1;
+	unsigned പൂർണ്ണസംഖ്യ i, n;
+	ഘടന വൃക്ഷം_entry *e;
 
 	slash1 = strchrnul(p, '/');
 	n = slash1 - p;
-	if (!n && !allow_root)
+	എങ്കിൽ (!n && !allow_വേര്)
 		die(_("empty path component found in input"));
 
-	if (!root->tree)
-		load_tree(root);
+	എങ്കിൽ (!വേര്->വൃക്ഷം)
+		load_വൃക്ഷം(വേര്);
 
-	if (!n) {
-		e = root;
-		goto found_entry;
+	എങ്കിൽ (!n) {
+		e = വേര്;
+		പോകുക found_entry;
 	}
 
-	t = root->tree;
-	for (i = 0; i < t->entry_count; i++) {
+	t = വേര്->വൃക്ഷം;
+	വേണ്ടി (i = 0; i < t->entry_എണ്ണം; i++) {
 		e = t->entries[i];
-		if (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
-			if (!*slash1)
-				goto found_entry;
-			if (!S_ISDIR(e->versions[1].mode))
-				return 0;
-			if (!e->tree)
-				load_tree(e);
-			return tree_content_get(e, slash1 + 1, leaf, 0);
+		എങ്കിൽ (e->name->str_len == n && !fspathncmp(p, e->name->str_dat, n)) {
+			എങ്കിൽ (!*slash1)
+				പോകുക found_entry;
+			എങ്കിൽ (!S_ISDIR(e->versions[1].mode))
+				തിരികെ 0;
+			എങ്കിൽ (!e->വൃക്ഷം)
+				load_വൃക്ഷം(e);
+			തിരികെ വൃക്ഷം_content_get(e, slash1 + 1, leaf, 0);
 		}
 	}
-	return 0;
+	തിരികെ 0;
 
 found_entry:
-	memcpy(leaf, e, sizeof(*leaf));
-	if (e->tree && is_null_oid(&e->versions[1].oid))
-		leaf->tree = dup_tree_content(e->tree);
-	else
-		leaf->tree = NULL;
-	return 1;
+	memcpy(leaf, e, വലുപ്പം(*leaf));
+	എങ്കിൽ (e->വൃക്ഷം && is_null_oid(&e->versions[1].oid))
+		leaf->വൃക്ഷം = dup_വൃക്ഷം_content(e->വൃക്ഷം);
+	അല്ലെങ്കിൽ
+		leaf->വൃക്ഷം = ശൂന്യ;
+	തിരികെ 1;
 }
 
-static int update_branch(struct branch *b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ update_branch(ഘടന branch *b)
 {
-	static const char *msg = "fast-import";
-	struct ref_transaction *transaction;
-	struct object_id old_oid;
-	struct strbuf err = STRBUF_INIT;
-	static const char *replace_prefix = "refs/replace/";
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *സന്ദേശം = "fast-import";
+	ഘടന ref_transaction *transaction;
+	ഘടന object_id old_oid;
+	ഘടന strbuf err = STRBUF_INIT;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *replace_prefix = "refs/replace/";
 
-	if (starts_with(b->name, replace_prefix) &&
+	എങ്കിൽ (starts_with(b->name, replace_prefix) &&
 	    !strcmp(b->name + strlen(replace_prefix),
 		    oid_to_hex(&b->oid))) {
-		if (!quiet)
+		എങ്കിൽ (!quiet)
 			warning(_("dropping %s since it would point to "
 				  "itself (i.e. to %s)"),
 				b->name, oid_to_hex(&b->oid));
 		refs_delete_ref(get_main_ref_store(the_repository),
-				NULL, b->name, NULL, 0);
-		return 0;
+				ശൂന്യ, b->name, ശൂന്യ, 0);
+		തിരികെ 0;
 	}
-	if (is_null_oid(&b->oid)) {
-		if (b->delete)
+	എങ്കിൽ (is_null_oid(&b->oid)) {
+		എങ്കിൽ (b->delete)
 			refs_delete_ref(get_main_ref_store(the_repository),
-					NULL, b->name, NULL, 0);
-		return 0;
+					ശൂന്യ, b->name, ശൂന്യ, 0);
+		തിരികെ 0;
 	}
-	if (refs_read_ref(get_main_ref_store(the_repository), b->name, &old_oid))
+	എങ്കിൽ (refs_read_ref(get_main_ref_store(the_repository), b->name, &old_oid))
 		oidclr(&old_oid, the_repository->hash_algo);
-	if (!force_update && !is_null_oid(&old_oid)) {
-		struct commit *old_cmit, *new_cmit;
-		int ret;
+	എങ്കിൽ (!force_update && !is_null_oid(&old_oid)) {
+		ഘടന commit *old_cmit, *new_cmit;
+		പൂർണ്ണസംഖ്യ ret;
 
 		old_cmit = lookup_commit_reference_gently(the_repository,
 							  &old_oid, 0);
 		new_cmit = lookup_commit_reference_gently(the_repository,
 							  &b->oid, 0);
-		if (!old_cmit || !new_cmit)
-			return error(_("branch %s is missing commits."), b->name);
+		എങ്കിൽ (!old_cmit || !new_cmit)
+			തിരികെ error(_("branch %s is missing commits."), b->name);
 
 		ret = repo_in_merge_bases(the_repository, old_cmit, new_cmit);
-		if (ret < 0)
+		എങ്കിൽ (ret < 0)
 			exit(128);
-		if (!ret) {
+		എങ്കിൽ (!ret) {
 			warning(_("not updating %s"
 				  " (new tip %s does not contain %s)"),
 				b->name, oid_to_hex(&b->oid),
 				oid_to_hex(&old_oid));
-			return -1;
+			തിരികെ -1;
 		}
 	}
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction ||
+	എങ്കിൽ (!transaction ||
 	    ref_transaction_update(transaction, b->name, &b->oid, &old_oid,
-				   NULL, NULL, 0, msg, &err) ||
+				   ശൂന്യ, ശൂന്യ, 0, സന്ദേശം, &err) ||
 	    ref_transaction_commit(transaction, &err)) {
 		ref_transaction_free(transaction);
 		error("%s", err.buf);
 		strbuf_release(&err);
-		return -1;
+		തിരികെ -1;
 	}
 	ref_transaction_free(transaction);
 	strbuf_release(&err);
-	return 0;
+	തിരികെ 0;
 }
 
-static void dump_branches(void)
+സ്ഥിതം ശൂന്യം dump_branches(ശൂന്യം)
 {
-	unsigned int i;
-	struct branch *b;
+	unsigned പൂർണ്ണസംഖ്യ i;
+	ഘടന branch *b;
 
-	for (i = 0; i < branch_table_sz; i++) {
-		for (b = branch_table[i]; b; b = b->table_next_branch)
+	വേണ്ടി (i = 0; i < branch_table_sz; i++) {
+		വേണ്ടി (b = branch_table[i]; b; b = b->table_next_branch)
 			failure |= update_branch(b);
 	}
 }
 
-static void dump_tags(void)
+സ്ഥിതം ശൂന്യം dump_tags(ശൂന്യം)
 {
-	static const char *msg = "fast-import";
-	struct tag *t;
-	struct strbuf ref_name = STRBUF_INIT;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_transaction *transaction;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *സന്ദേശം = "fast-import";
+	ഘടന tag *t;
+	ഘടന strbuf ref_name = STRBUF_INIT;
+	ഘടന strbuf err = STRBUF_INIT;
+	ഘടന ref_transaction *transaction;
 
 	transaction = ref_store_transaction_begin(get_main_ref_store(the_repository),
 						  0, &err);
-	if (!transaction) {
+	എങ്കിൽ (!transaction) {
 		failure |= error("%s", err.buf);
-		goto cleanup;
+		പോകുക cleanup;
 	}
-	for (t = first_tag; t; t = t->next_tag) {
+	വേണ്ടി (t = first_tag; t; t = t->next_tag) {
 		strbuf_reset(&ref_name);
 		strbuf_addf(&ref_name, "refs/tags/%s", t->name);
 
-		if (ref_transaction_update(transaction, ref_name.buf,
-					   &t->oid, NULL, NULL, NULL,
-					   0, msg, &err)) {
+		എങ്കിൽ (ref_transaction_update(transaction, ref_name.buf,
+					   &t->oid, ശൂന്യ, ശൂന്യ, ശൂന്യ,
+					   0, സന്ദേശം, &err)) {
 			failure |= error("%s", err.buf);
-			goto cleanup;
+			പോകുക cleanup;
 		}
 	}
-	if (ref_transaction_commit(transaction, &err))
+	എങ്കിൽ (ref_transaction_commit(transaction, &err))
 		failure |= error("%s", err.buf);
 
  cleanup:
@@ -1762,138 +1762,138 @@ static void dump_tags(void)
 	strbuf_release(&err);
 }
 
-static void dump_marks(void)
+സ്ഥിതം ശൂന്യം dump_marks(ശൂന്യം)
 {
-	struct lock_file mark_lock = LOCK_INIT;
+	ഘടന lock_file mark_lock = LOCK_INIT;
 	FILE *f;
 
-	if (!export_marks_file || (import_marks_file && !import_marks_file_done))
-		return;
+	എങ്കിൽ (!export_marks_file || (import_marks_file && !import_marks_file_done))
+		തിരികെ;
 
-	if (safe_create_leading_directories_const(the_repository, export_marks_file)) {
+	എങ്കിൽ (safe_create_leading_directories_const(the_repository, export_marks_file)) {
 		failure |= error_errno(_("unable to create leading directories of %s"),
 				       export_marks_file);
-		return;
+		തിരികെ;
 	}
 
-	if (hold_lock_file_for_update(&mark_lock, export_marks_file, 0) < 0) {
+	എങ്കിൽ (hold_lock_file_for_update(&mark_lock, export_marks_file, 0) < 0) {
 		failure |= error_errno(_("unable to write marks file %s"),
 				       export_marks_file);
-		return;
+		തിരികെ;
 	}
 
 	f = fdopen_lock_file(&mark_lock, "w");
-	if (!f) {
-		int saved_errno = errno;
+	എങ്കിൽ (!f) {
+		പൂർണ്ണസംഖ്യ saved_errno = errno;
 		rollback_lock_file(&mark_lock);
 		failure |= error(_("unable to write marks file %s: %s"),
 			export_marks_file, strerror(saved_errno));
-		return;
+		തിരികെ;
 	}
 
 	for_each_mark(marks, 0, dump_marks_fn, f);
-	if (commit_lock_file(&mark_lock)) {
+	എങ്കിൽ (commit_lock_file(&mark_lock)) {
 		failure |= error_errno(_("unable to write file %s"),
 				       export_marks_file);
-		return;
+		തിരികെ;
 	}
 }
 
-static void insert_object_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
+സ്ഥിതം ശൂന്യം തിരുകുക_object_entry(ഘടന mark_set **s, ഘടന object_id *oid, uintmax_t mark)
 {
-	struct object_entry *e;
+	ഘടന object_entry *e;
 	e = find_object(oid);
-	if (!e) {
-		enum object_type type = odb_read_object_info(the_repository->objects,
-							     oid, NULL);
-		if (type < 0)
+	എങ്കിൽ (!e) {
+		എണ്ണൽ object_type type = odb_read_object_info(the_repository->objects,
+							     oid, ശൂന്യ);
+		എങ്കിൽ (type < 0)
 			die(_("object not found: %s"), oid_to_hex(oid));
-		e = insert_object(oid);
+		e = തിരുകുക_object(oid);
 		e->type = type;
 		e->pack_id = MAX_PACK_ID;
 		e->idx.offset = 1; /* just not zero! */
 	}
-	insert_mark(s, mark, e);
+	തിരുകുക_mark(s, mark, e);
 }
 
-static void insert_oid_entry(struct mark_set **s, struct object_id *oid, uintmax_t mark)
+സ്ഥിതം ശൂന്യം തിരുകുക_oid_entry(ഘടന mark_set **s, ഘടന object_id *oid, uintmax_t mark)
 {
-	insert_mark(s, mark, xmemdupz(oid, sizeof(*oid)));
+	തിരുകുക_mark(s, mark, xmemdupz(oid, വലുപ്പം(*oid)));
 }
 
-static void read_mark_file(struct mark_set **s, FILE *f, mark_set_inserter_t inserter)
+സ്ഥിതം ശൂന്യം read_mark_file(ഘടന mark_set **s, FILE *f, mark_set_inserter_t inserter)
 {
-	char line[512];
-	while (fgets(line, sizeof(line), f)) {
+	അക്ഷരം വരി[512];
+	ആകുമ്പോൾ (fgets(വരി, വലുപ്പം(വരി), f)) {
 		uintmax_t mark;
-		char *end;
-		struct object_id oid;
+		അക്ഷരം *end;
+		ഘടന object_id oid;
 
 		/* Ensure SHA-1 objects are padded with zeros. */
-		memset(oid.hash, 0, sizeof(oid.hash));
+		memset(oid.hash, 0, വലുപ്പം(oid.hash));
 
-		end = strchr(line, '\n');
-		if (line[0] != ':' || !end)
-			die(_("corrupt mark line: %s"), line);
+		end = strchr(വരി, '\n');
+		എങ്കിൽ (വരി[0] != ':' || !end)
+			die(_("corrupt mark line: %s"), വരി);
 		*end = 0;
-		mark = strtoumax(line + 1, &end, 10);
-		if (!mark || end == line + 1
+		mark = strtoumax(വരി + 1, &end, 10);
+		എങ്കിൽ (!mark || end == വരി + 1
 			|| *end != ' '
 			|| get_oid_hex_any(end + 1, &oid) == GIT_HASH_UNKNOWN)
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), വരി);
 		inserter(s, &oid, mark);
 	}
 }
 
-static void read_marks(void)
+സ്ഥിതം ശൂന്യം read_marks(ശൂന്യം)
 {
 	FILE *f = fopen(import_marks_file, "r");
-	if (f)
+	എങ്കിൽ (f)
 		;
-	else if (import_marks_file_ignore_missing && errno == ENOENT)
-		goto done; /* Marks file does not exist */
-	else
+	അല്ലെങ്കിൽ എങ്കിൽ (import_marks_file_ignore_missing && errno == ENOENT)
+		പോകുക done; /* Marks file does not exist */
+	അല്ലെങ്കിൽ
 		die_errno(_("cannot read '%s'"), import_marks_file);
-	read_mark_file(&marks, f, insert_object_entry);
+	read_mark_file(&marks, f, തിരുകുക_object_entry);
 	fclose(f);
 done:
 	import_marks_file_done = 1;
 }
 
 
-static int read_next_command(struct fast_import_state *state)
+സ്ഥിതം പൂർണ്ണസംഖ്യ read_next_command(ഘടന fast_import_state *state)
 {
-	static int stdin_eof = 0;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ stdin_eof = 0;
 
-	if (stdin_eof) {
+	എങ്കിൽ (stdin_eof) {
 		unread_command_buf = 0;
-		return EOF;
+		തിരികെ EOF;
 	}
 
-	for (;;) {
-		if (unread_command_buf) {
+	വേണ്ടി (;;) {
+		എങ്കിൽ (unread_command_buf) {
 			unread_command_buf = 0;
-		} else {
-			struct recent_command *rc;
+		} അല്ലെങ്കിൽ {
+			ഘടന recent_command *rc;
 
 			stdin_eof = strbuf_getline_lf(&command_buf, stdin);
-			if (stdin_eof)
-				return EOF;
+			എങ്കിൽ (stdin_eof)
+				തിരികെ EOF;
 
-			if (!state->seen_data_command
+			എങ്കിൽ (!state->seen_data_command
 				&& !starts_with(command_buf.buf, "feature ")
 				&& !starts_with(command_buf.buf, "option ")) {
 				parse_argv(state);
 			}
 
 			rc = rc_free;
-			if (rc)
+			എങ്കിൽ (rc)
 				rc_free = rc->next;
-			else {
+			അല്ലെങ്കിൽ {
 				rc = cmd_hist.next;
 				cmd_hist.next = rc->next;
 				cmd_hist.next->prev = &cmd_hist;
-				free(rc->buf);
+				സ്വതന്ത്രം(rc->buf);
 			}
 
 			rc->buf = xstrdup(command_buf.buf);
@@ -1902,74 +1902,74 @@ static int read_next_command(struct fast_import_state *state)
 			rc->prev->next = rc;
 			cmd_tail = rc;
 		}
-		if (command_buf.buf[0] == '#')
-			continue;
-		return 0;
+		എങ്കിൽ (command_buf.buf[0] == '#')
+			തുടരുക;
+		തിരികെ 0;
 	}
 }
 
-static void skip_optional_lf(void)
+സ്ഥിതം ശൂന്യം skip_optional_lf(ശൂന്യം)
 {
-	int term_char = fgetc(stdin);
-	if (term_char != '\n' && term_char != EOF)
+	പൂർണ്ണസംഖ്യ term_char = fgetc(stdin);
+	എങ്കിൽ (term_char != '\n' && term_char != EOF)
 		ungetc(term_char, stdin);
 }
 
-static void parse_mark(struct fast_import_state *state)
+സ്ഥിതം ശൂന്യം parse_mark(ഘടന fast_import_state *state)
 {
-	const char *v;
-	if (skip_prefix(command_buf.buf, "mark :", &v)) {
-		next_mark = strtoumax(v, NULL, 10);
+	സ്ഥിരം അക്ഷരം *v;
+	എങ്കിൽ (skip_prefix(command_buf.buf, "mark :", &v)) {
+		next_mark = strtoumax(v, ശൂന്യ, 10);
 		read_next_command(state);
 	}
-	else
+	അല്ലെങ്കിൽ
 		next_mark = 0;
 }
 
-static void parse_original_identifier(struct fast_import_state *state)
+സ്ഥിതം ശൂന്യം parse_original_identifier(ഘടന fast_import_state *state)
 {
-	const char *v;
-	if (skip_prefix(command_buf.buf, "original-oid ", &v))
+	സ്ഥിരം അക്ഷരം *v;
+	എങ്കിൽ (skip_prefix(command_buf.buf, "original-oid ", &v))
 		read_next_command(state);
 }
 
-static int parse_data(struct strbuf *sb, uintmax_t limit, uintmax_t *len_res)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_data(ഘടന strbuf *sb, uintmax_t limit, uintmax_t *len_res)
 {
-	const char *data;
+	സ്ഥിരം അക്ഷരം *data;
 	strbuf_reset(sb);
 
-	if (!skip_prefix(command_buf.buf, "data ", &data))
+	എങ്കിൽ (!skip_prefix(command_buf.buf, "data ", &data))
 		die(_("expected 'data n' command, found: %s"), command_buf.buf);
 
-	if (skip_prefix(data, "<<", &data)) {
-		char *term = xstrdup(data);
+	എങ്കിൽ (skip_prefix(data, "<<", &data)) {
+		അക്ഷരം *term = xstrdup(data);
 		size_t term_len = command_buf.len - (data - command_buf.buf);
 
-		for (;;) {
-			if (strbuf_getline_lf(&command_buf, stdin) == EOF)
+		വേണ്ടി (;;) {
+			എങ്കിൽ (strbuf_getline_lf(&command_buf, stdin) == EOF)
 				die(_("EOF in data (terminator '%s' not found)"), term);
-			if (term_len == command_buf.len
+			എങ്കിൽ (term_len == command_buf.len
 				&& !strcmp(term, command_buf.buf))
-				break;
+				നിർത്തുക;
 			strbuf_addbuf(sb, &command_buf);
 			strbuf_addch(sb, '\n');
 		}
-		free(term);
+		സ്വതന്ത്രം(term);
 	}
-	else {
-		uintmax_t len = strtoumax(data, NULL, 10);
+	അല്ലെങ്കിൽ {
+		uintmax_t len = strtoumax(data, ശൂന്യ, 10);
 		size_t n = 0, length = (size_t)len;
 
-		if (limit && limit < len) {
+		എങ്കിൽ (limit && limit < len) {
 			*len_res = len;
-			return 0;
+			തിരികെ 0;
 		}
-		if (length < len)
+		എങ്കിൽ (length < len)
 			die(_("data is too large to use in this context"));
 
-		while (n < length) {
+		ആകുമ്പോൾ (n < length) {
 			size_t s = strbuf_fread(sb, length - n, stdin);
-			if (!s && feof(stdin))
+			എങ്കിൽ (!s && feof(stdin))
 				die(_("EOF in data (%lu bytes remaining)"),
 					(unsigned long)(length - n));
 			n += s;
@@ -1977,104 +1977,104 @@ static int parse_data(struct strbuf *sb, uintmax_t limit, uintmax_t *len_res)
 	}
 
 	skip_optional_lf();
-	return 1;
+	തിരികെ 1;
 }
 
-static int validate_raw_date(const char *src, struct strbuf *result, int strict)
+സ്ഥിതം പൂർണ്ണസംഖ്യ validate_raw_date(സ്ഥിരം അക്ഷരം *src, ഘടന strbuf *result, പൂർണ്ണസംഖ്യ strict)
 {
-	const char *orig_src = src;
-	char *endp;
-	unsigned long num;
+	സ്ഥിരം അക്ഷരം *orig_src = src;
+	അക്ഷരം *endp;
+	unsigned long അക്കം;
 
 	errno = 0;
 
-	num = strtoul(src, &endp, 10);
+	അക്കം = strtoul(src, &endp, 10);
 	/*
 	 * NEEDSWORK: perhaps check for reasonable values? For example, we
 	 *            could error on values representing times more than a
 	 *            day in the future.
 	 */
-	if (errno || endp == src || *endp != ' ')
-		return -1;
+	എങ്കിൽ (errno || endp == src || *endp != ' ')
+		തിരികെ -1;
 
 	src = endp + 1;
-	if (*src != '-' && *src != '+')
-		return -1;
+	എങ്കിൽ (*src != '-' && *src != '+')
+		തിരികെ -1;
 
-	num = strtoul(src + 1, &endp, 10);
+	അക്കം = strtoul(src + 1, &endp, 10);
 	/*
 	 * NEEDSWORK: check for brokenness other than num > 1400, such as
 	 *            (num % 100) >= 60, or ((num % 100) % 15) != 0 ?
 	 */
-	if (errno || endp == src + 1 || *endp || /* did not parse */
-	    (strict && (1400 < num))             /* parsed a broken timezone */
+	എങ്കിൽ (errno || endp == src + 1 || *endp || /* did not parse */
+	    (strict && (1400 < അക്കം))             /* parsed a broken timezone */
 	   )
-		return -1;
+		തിരികെ -1;
 
 	strbuf_addstr(result, orig_src);
-	return 0;
+	തിരികെ 0;
 }
 
-static char *parse_ident(const char *buf)
+സ്ഥിതം അക്ഷരം *parse_ident(സ്ഥിരം അക്ഷരം *buf)
 {
-	const char *ltgt;
+	സ്ഥിരം അക്ഷരം *ltgt;
 	size_t name_len;
-	struct strbuf ident = STRBUF_INIT;
+	ഘടന strbuf ident = STRBUF_INIT;
 
 	/* ensure there is a space delimiter even if there is no name */
-	if (*buf == '<')
+	എങ്കിൽ (*buf == '<')
 		--buf;
 
 	ltgt = buf + strcspn(buf, "<>");
-	if (*ltgt != '<')
+	എങ്കിൽ (*ltgt != '<')
 		die(_("missing < in ident string: %s"), buf);
-	if (ltgt != buf && ltgt[-1] != ' ')
+	എങ്കിൽ (ltgt != buf && ltgt[-1] != ' ')
 		die(_("missing space before < in ident string: %s"), buf);
 	ltgt = ltgt + 1 + strcspn(ltgt + 1, "<>");
-	if (*ltgt != '>')
+	എങ്കിൽ (*ltgt != '>')
 		die(_("missing > in ident string: %s"), buf);
 	ltgt++;
-	if (*ltgt != ' ')
+	എങ്കിൽ (*ltgt != ' ')
 		die(_("missing space after > in ident string: %s"), buf);
 	ltgt++;
 	name_len = ltgt - buf;
 	strbuf_add(&ident, buf, name_len);
 
-	switch (whenspec) {
-	case WHENSPEC_RAW:
-		if (validate_raw_date(ltgt, &ident, 1) < 0)
+	തിരഞ്ഞെടുപ്പ് (whenspec) {
+	അവസ്ഥ WHENSPEC_RAW:
+		എങ്കിൽ (validate_raw_date(ltgt, &ident, 1) < 0)
 			die(_("invalid raw date \"%s\" in ident: %s"), ltgt, buf);
-		break;
-	case WHENSPEC_RAW_PERMISSIVE:
-		if (validate_raw_date(ltgt, &ident, 0) < 0)
+		നിർത്തുക;
+	അവസ്ഥ WHENSPEC_RAW_PERMISSIVE:
+		എങ്കിൽ (validate_raw_date(ltgt, &ident, 0) < 0)
 			die(_("invalid raw date \"%s\" in ident: %s"), ltgt, buf);
-		break;
-	case WHENSPEC_RFC2822:
-		if (parse_date(ltgt, &ident) < 0)
+		നിർത്തുക;
+	അവസ്ഥ WHENSPEC_RFC2822:
+		എങ്കിൽ (parse_date(ltgt, &ident) < 0)
 			die(_("invalid rfc2822 date \"%s\" in ident: %s"), ltgt, buf);
-		break;
-	case WHENSPEC_NOW:
-		if (strcmp("now", ltgt))
+		നിർത്തുക;
+	അവസ്ഥ WHENSPEC_NOW:
+		എങ്കിൽ (strcmp("now", ltgt))
 			die(_("date in ident must be 'now': %s"), buf);
 		datestamp(&ident);
-		break;
+		നിർത്തുക;
 	}
 
-	return strbuf_detach(&ident, NULL);
+	തിരികെ strbuf_detach(&ident, ശൂന്യ);
 }
 
-static void parse_and_store_blob(
-	struct last_object *last,
-	struct object_id *oidout,
+സ്ഥിതം ശൂന്യം parse_and_store_blob(
+	ഘടന last_object *last,
+	ഘടന object_id *oidout,
 	uintmax_t mark)
 {
-	static struct strbuf buf = STRBUF_INIT;
+	സ്ഥിതം ഘടന strbuf buf = STRBUF_INIT;
 	uintmax_t len;
 
-	if (parse_data(&buf, repo_settings_get_big_file_threshold(the_repository), &len))
+	എങ്കിൽ (parse_data(&buf, repo_settings_get_big_file_threshold(the_repository), &len))
 		store_object(OBJ_BLOB, &buf, last, oidout, mark);
-	else {
-		if (last) {
+	അല്ലെങ്കിൽ {
+		എങ്കിൽ (last) {
 			strbuf_release(&last->data);
 			last->offset = 0;
 			last->depth = 0;
@@ -2084,73 +2084,73 @@ static void parse_and_store_blob(
 	}
 }
 
-static void parse_new_blob(struct fast_import_state *state)
+സ്ഥിതം ശൂന്യം parse_new_blob(ഘടന fast_import_state *state)
 {
 	read_next_command(state);
 	parse_mark(state);
 	parse_original_identifier(state);
-	parse_and_store_blob(&last_blob, NULL, next_mark);
+	parse_and_store_blob(&last_blob, ശൂന്യ, next_mark);
 }
 
-static void unload_one_branch(void)
+സ്ഥിതം ശൂന്യം unload_one_branch(ശൂന്യം)
 {
-	while (cur_active_branches
+	ആകുമ്പോൾ (cur_active_branches
 		&& cur_active_branches >= max_active_branches) {
 		uintmax_t min_commit = ULONG_MAX;
-		struct branch *e, *l = NULL, *p = NULL;
+		ഘടന branch *e, *l = ശൂന്യ, *p = ശൂന്യ;
 
-		for (e = active_branches; e; e = e->active_next_branch) {
-			if (e->last_commit < min_commit) {
+		വേണ്ടി (e = active_branches; e; e = e->active_next_branch) {
+			എങ്കിൽ (e->last_commit < min_commit) {
 				p = l;
 				min_commit = e->last_commit;
 			}
 			l = e;
 		}
 
-		if (p) {
+		എങ്കിൽ (p) {
 			e = p->active_next_branch;
 			p->active_next_branch = e->active_next_branch;
-		} else {
+		} അല്ലെങ്കിൽ {
 			e = active_branches;
 			active_branches = e->active_next_branch;
 		}
 		e->active = 0;
-		e->active_next_branch = NULL;
-		if (e->branch_tree.tree) {
-			release_tree_content_recursive(e->branch_tree.tree);
-			e->branch_tree.tree = NULL;
+		e->active_next_branch = ശൂന്യ;
+		എങ്കിൽ (e->branch_വൃക്ഷം.വൃക്ഷം) {
+			release_വൃക്ഷം_content_recursive(e->branch_വൃക്ഷം.വൃക്ഷം);
+			e->branch_വൃക്ഷം.വൃക്ഷം = ശൂന്യ;
 		}
 		cur_active_branches--;
 	}
 }
 
-static void load_branch(struct branch *b)
+സ്ഥിതം ശൂന്യം load_branch(ഘടന branch *b)
 {
-	load_tree(&b->branch_tree);
-	if (!b->active) {
+	load_വൃക്ഷം(&b->branch_വൃക്ഷം);
+	എങ്കിൽ (!b->active) {
 		b->active = 1;
 		b->active_next_branch = active_branches;
 		active_branches = b;
 		cur_active_branches++;
-		branch_load_count++;
+		branch_load_എണ്ണം++;
 	}
 }
 
-static unsigned char convert_num_notes_to_fanout(uintmax_t num_notes)
+സ്ഥിതം unsigned അക്ഷരം convert_അക്കം_notes_to_fanout(uintmax_t അക്കം_notes)
 {
-	unsigned char fanout = 0;
-	while ((num_notes >>= 8))
+	unsigned അക്ഷരം fanout = 0;
+	ആകുമ്പോൾ ((അക്കം_notes >>= 8))
 		fanout++;
-	return fanout;
+	തിരികെ fanout;
 }
 
-static void construct_path_with_fanout(const char *hex_sha1,
-		unsigned char fanout, char *path)
+സ്ഥിതം ശൂന്യം construct_path_with_fanout(സ്ഥിരം അക്ഷരം *hex_sha1,
+		unsigned അക്ഷരം fanout, അക്ഷരം *path)
 {
-	unsigned int i = 0, j = 0;
-	if (fanout >= the_hash_algo->rawsz)
+	unsigned പൂർണ്ണസംഖ്യ i = 0, j = 0;
+	എങ്കിൽ (fanout >= the_hash_algo->rawsz)
 		die(_("too large fanout (%u)"), fanout);
-	while (fanout) {
+	ആകുമ്പോൾ (fanout) {
 		path[i++] = hex_sha1[j++];
 		path[i++] = hex_sha1[j++];
 		path[i++] = '/';
@@ -2160,26 +2160,26 @@ static void construct_path_with_fanout(const char *hex_sha1,
 	path[i + the_hash_algo->hexsz - j] = '\0';
 }
 
-static uintmax_t do_change_note_fanout(
-		struct tree_entry *orig_root, struct tree_entry *root,
-		char *hex_oid, unsigned int hex_oid_len,
-		char *fullpath, unsigned int fullpath_len,
-		unsigned char fanout)
+സ്ഥിതം uintmax_t do_change_note_fanout(
+		ഘടന വൃക്ഷം_entry *orig_വേര്, ഘടന വൃക്ഷം_entry *വേര്,
+		അക്ഷരം *hex_oid, unsigned പൂർണ്ണസംഖ്യ hex_oid_len,
+		അക്ഷരം *fullpath, unsigned പൂർണ്ണസംഖ്യ fullpath_len,
+		unsigned അക്ഷരം fanout)
 {
-	struct tree_content *t;
-	struct tree_entry *e, leaf;
-	unsigned int i, tmp_hex_oid_len, tmp_fullpath_len;
-	uintmax_t num_notes = 0;
-	struct object_id oid;
+	ഘടന വൃക്ഷം_content *t;
+	ഘടന വൃക്ഷം_entry *e, leaf;
+	unsigned പൂർണ്ണസംഖ്യ i, tmp_hex_oid_len, tmp_fullpath_len;
+	uintmax_t അക്കം_notes = 0;
+	ഘടന object_id oid;
 	/* hex oid + '/' between each pair of hex digits + NUL */
-	char realpath[GIT_MAX_HEXSZ + ((GIT_MAX_HEXSZ / 2) - 1) + 1];
-	const unsigned hexsz = the_hash_algo->hexsz;
+	അക്ഷരം realpath[GIT_MAX_HEXSZ + ((GIT_MAX_HEXSZ / 2) - 1) + 1];
+	സ്ഥിരം unsigned hexsz = the_hash_algo->hexsz;
 
-	if (!root->tree)
-		load_tree(root);
-	t = root->tree;
+	എങ്കിൽ (!വേര്->വൃക്ഷം)
+		load_വൃക്ഷം(വേര്);
+	t = വേര്->വൃക്ഷം;
 
-	for (i = 0; t && i < t->entry_count; i++) {
+	വേണ്ടി (i = 0; t && i < t->entry_എണ്ണം; i++) {
 		e = t->entries[i];
 		tmp_hex_oid_len = hex_oid_len + e->name->str_len;
 		tmp_fullpath_len = fullpath_len;
@@ -2192,57 +2192,57 @@ static uintmax_t do_change_note_fanout(
 		 * Also, each path component in a note entry must be a multiple
 		 * of 2 chars.
 		 */
-		if (!e->versions[1].mode ||
+		എങ്കിൽ (!e->versions[1].mode ||
 		    tmp_hex_oid_len > hexsz ||
 		    e->name->str_len % 2)
-			continue;
+			തുടരുക;
 
 		/* This _may_ be a note entry, or a subdir containing notes */
 		memcpy(hex_oid + hex_oid_len, e->name->str_dat,
 		       e->name->str_len);
-		if (tmp_fullpath_len)
+		എങ്കിൽ (tmp_fullpath_len)
 			fullpath[tmp_fullpath_len++] = '/';
 		memcpy(fullpath + tmp_fullpath_len, e->name->str_dat,
 		       e->name->str_len);
 		tmp_fullpath_len += e->name->str_len;
 		fullpath[tmp_fullpath_len] = '\0';
 
-		if (tmp_hex_oid_len == hexsz && !get_oid_hex(hex_oid, &oid)) {
+		എങ്കിൽ (tmp_hex_oid_len == hexsz && !get_oid_hex(hex_oid, &oid)) {
 			/* This is a note entry */
-			if (fanout == 0xff) {
+			എങ്കിൽ (fanout == 0xff) {
 				/* Counting mode, no rename */
-				num_notes++;
-				continue;
+				അക്കം_notes++;
+				തുടരുക;
 			}
 			construct_path_with_fanout(hex_oid, fanout, realpath);
-			if (!strcmp(fullpath, realpath)) {
+			എങ്കിൽ (!strcmp(fullpath, realpath)) {
 				/* Note entry is in correct location */
-				num_notes++;
-				continue;
+				അക്കം_notes++;
+				തുടരുക;
 			}
 
 			/* Rename fullpath to realpath */
-			if (!tree_content_remove(orig_root, fullpath, &leaf, 0))
+			എങ്കിൽ (!വൃക്ഷം_content_remove(orig_വേര്, fullpath, &leaf, 0))
 				die(_("failed to remove path %s"), fullpath);
-			tree_content_set(orig_root, realpath,
+			വൃക്ഷം_content_set(orig_വേര്, realpath,
 				&leaf.versions[1].oid,
 				leaf.versions[1].mode,
-				leaf.tree);
-		} else if (S_ISDIR(e->versions[1].mode)) {
+				leaf.വൃക്ഷം);
+		} അല്ലെങ്കിൽ എങ്കിൽ (S_ISDIR(e->versions[1].mode)) {
 			/* This is a subdir that may contain note entries */
-			num_notes += do_change_note_fanout(orig_root, e,
+			അക്കം_notes += do_change_note_fanout(orig_വേര്, e,
 				hex_oid, tmp_hex_oid_len,
 				fullpath, tmp_fullpath_len, fanout);
 		}
 
 		/* The above may have reallocated the current tree_content */
-		t = root->tree;
+		t = വേര്->വൃക്ഷം;
 	}
-	return num_notes;
+	തിരികെ അക്കം_notes;
 }
 
-static uintmax_t change_note_fanout(struct tree_entry *root,
-		unsigned char fanout)
+സ്ഥിതം uintmax_t change_note_fanout(ഘടന വൃക്ഷം_entry *വേര്,
+		unsigned അക്ഷരം fanout)
 {
 	/*
 	 * The size of path is due to one slash between every two hex digits,
@@ -2250,32 +2250,32 @@ static uintmax_t change_note_fanout(struct tree_entry *root,
 	 * the number of slashes is one less than half the number of hex
 	 * characters.
 	 */
-	char hex_oid[GIT_MAX_HEXSZ], path[GIT_MAX_HEXSZ + (GIT_MAX_HEXSZ / 2) - 1 + 1];
-	return do_change_note_fanout(root, root, hex_oid, 0, path, 0, fanout);
+	അക്ഷരം hex_oid[GIT_MAX_HEXSZ], path[GIT_MAX_HEXSZ + (GIT_MAX_HEXSZ / 2) - 1 + 1];
+	തിരികെ do_change_note_fanout(വേര്, വേര്, hex_oid, 0, path, 0, fanout);
 }
 
-static int parse_mapped_oid_hex(const char *hex, struct object_id *oid, const char **end)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_mapped_oid_hex(സ്ഥിരം അക്ഷരം *hex, ഘടന object_id *oid, സ്ഥിരം അക്ഷരം **end)
 {
-	int algo;
+	പൂർണ്ണസംഖ്യ algo;
 	khiter_t it;
 
 	/* Make SHA-1 object IDs have all-zero padding. */
-	memset(oid->hash, 0, sizeof(oid->hash));
+	memset(oid->hash, 0, വലുപ്പം(oid->hash));
 
 	algo = parse_oid_hex_any(hex, oid, end);
-	if (algo == GIT_HASH_UNKNOWN)
-		return -1;
+	എങ്കിൽ (algo == GIT_HASH_UNKNOWN)
+		തിരികെ -1;
 
 	it = kh_get_oid_map(sub_oid_map, *oid);
 	/* No such object? */
-	if (it == kh_end(sub_oid_map)) {
+	എങ്കിൽ (it == kh_end(sub_oid_map)) {
 		/* If we're using the same algorithm, pass it through. */
-		if (hash_algos[algo].format_id == the_hash_algo->format_id)
-			return 0;
-		return -1;
+		എങ്കിൽ (hash_algos[algo].format_id == the_hash_algo->format_id)
+			തിരികെ 0;
+		തിരികെ -1;
 	}
-	oidcpy(oid, kh_value(sub_oid_map, it));
-	return 0;
+	oidcpy(oid, kh_മൂല്യം(sub_oid_map, it));
+	തിരികെ 0;
 }
 
 /*
@@ -2288,47 +2288,47 @@ static int parse_mapped_oid_hex(const char *hex, struct object_id *oid, const ch
  * Complain if the following character is not what is expected,
  * either a space or end of the string.
  */
-static uintmax_t parse_mark_ref(const char *p, char **endptr)
+സ്ഥിതം uintmax_t parse_mark_ref(സ്ഥിരം അക്ഷരം *p, അക്ഷരം **endptr)
 {
 	uintmax_t mark;
 
-	assert(*p == ':');
+	പ്രതിജ്ഞാ(*p == ':');
 	p++;
 	mark = strtoumax(p, endptr, 10);
-	if (*endptr == p)
+	എങ്കിൽ (*endptr == p)
 		die(_("no value after ':' in mark: %s"), command_buf.buf);
-	return mark;
+	തിരികെ mark;
 }
 
 /*
  * Parse the mark reference, and complain if this is not the end of
  * the string.
  */
-static uintmax_t parse_mark_ref_eol(const char *p)
+സ്ഥിതം uintmax_t parse_mark_ref_eol(സ്ഥിരം അക്ഷരം *p)
 {
-	char *end;
+	അക്ഷരം *end;
 	uintmax_t mark;
 
 	mark = parse_mark_ref(p, &end);
-	if (*end != '\0')
+	എങ്കിൽ (*end != '\0')
 		die(_("garbage after mark: %s"), command_buf.buf);
-	return mark;
+	തിരികെ mark;
 }
 
 /*
  * Parse the mark reference, demanding a trailing space. Update *p to
  * point to the first character after the space.
  */
-static uintmax_t parse_mark_ref_space(const char **p)
+സ്ഥിതം uintmax_t parse_mark_ref_space(സ്ഥിരം അക്ഷരം **p)
 {
 	uintmax_t mark;
-	char *end;
+	അക്ഷരം *end;
 
 	mark = parse_mark_ref(*p, &end);
-	if (*end++ != ' ')
+	എങ്കിൽ (*end++ != ' ')
 		die(_("missing space after mark: %s"), command_buf.buf);
 	*p = end;
-	return mark;
+	തിരികെ mark;
 }
 
 /*
@@ -2337,15 +2337,15 @@ static uintmax_t parse_mark_ref_space(const char **p)
  * contain spaces only if `is_last_field` is nonzero; otherwise, it stops
  * parsing at the first space.
  */
-static void parse_path(struct strbuf *sb, const char *p, const char **endp,
-		int is_last_field, const char *field)
+സ്ഥിതം ശൂന്യം parse_path(ഘടന strbuf *sb, സ്ഥിരം അക്ഷരം *p, സ്ഥിരം അക്ഷരം **endp,
+		പൂർണ്ണസംഖ്യ is_last_field, സ്ഥിരം അക്ഷരം *field)
 {
-	if (*p == '"') {
-		if (unquote_c_style(sb, p, endp))
+	എങ്കിൽ (*p == '"') {
+		എങ്കിൽ (unquote_c_style(sb, p, endp))
 			die(_("invalid %s: %s"), field, command_buf.buf);
-		if (strlen(sb->buf) != sb->len)
+		എങ്കിൽ (strlen(sb->buf) != sb->len)
 			die(_("NUL in %s: %s"), field, command_buf.buf);
-	} else {
+	} അല്ലെങ്കിൽ {
 		/*
 		 * Unless we are parsing the last field of a line,
 		 * SP is the end of this field.
@@ -2361,12 +2361,12 @@ static void parse_path(struct strbuf *sb, const char *p, const char **endp,
  * Parse the path string into the strbuf, and complain if this is not the end of
  * the string. Unquoted strings may contain spaces.
  */
-static void parse_path_eol(struct strbuf *sb, const char *p, const char *field)
+സ്ഥിതം ശൂന്യം parse_path_eol(ഘടന strbuf *sb, സ്ഥിരം അക്ഷരം *p, സ്ഥിരം അക്ഷരം *field)
 {
-	const char *end;
+	സ്ഥിരം അക്ഷരം *end;
 
 	parse_path(sb, p, &end, 1, field);
-	if (*end)
+	എങ്കിൽ (*end)
 		die(_("garbage after %s: %s"), field, command_buf.buf);
 }
 
@@ -2375,53 +2375,53 @@ static void parse_path_eol(struct strbuf *sb, const char *p, const char *field)
  * Unquoted strings may not contain spaces. Update *endp to point to the first
  * character after the space.
  */
-static void parse_path_space(struct strbuf *sb, const char *p,
-		const char **endp, const char *field)
+സ്ഥിതം ശൂന്യം parse_path_space(ഘടന strbuf *sb, സ്ഥിരം അക്ഷരം *p,
+		സ്ഥിരം അക്ഷരം **endp, സ്ഥിരം അക്ഷരം *field)
 {
 	parse_path(sb, p, endp, 0, field);
-	if (**endp != ' ')
+	എങ്കിൽ (**endp != ' ')
 		die(_("missing space after %s: %s"), field, command_buf.buf);
 	(*endp)++;
 }
 
-static void file_change_m(struct fast_import_state *state,
-			  const char *p,
-			  struct branch *b)
+സ്ഥിതം ശൂന്യം file_change_m(ഘടന fast_import_state *state,
+			  സ്ഥിരം അക്ഷരം *p,
+			  ഘടന branch *b)
 {
-	static struct strbuf path = STRBUF_INIT;
-	struct object_entry *oe;
-	struct object_id oid;
+	സ്ഥിതം ഘടന strbuf path = STRBUF_INIT;
+	ഘടന object_entry *oe;
+	ഘടന object_id oid;
 	uint16_t mode, inline_data = 0;
 
 	p = parse_mode(p, &mode);
-	if (!p)
+	എങ്കിൽ (!p)
 		die(_("corrupt mode: %s"), command_buf.buf);
-	switch (mode) {
-	case 0644:
-	case 0755:
+	തിരഞ്ഞെടുപ്പ് (mode) {
+	അവസ്ഥ 0644:
+	അവസ്ഥ 0755:
 		mode |= S_IFREG;
-	case S_IFREG | 0644:
-	case S_IFREG | 0755:
-	case S_IFLNK:
-	case S_IFDIR:
-	case S_IFGITLINK:
+	അവസ്ഥ S_IFREG | 0644:
+	അവസ്ഥ S_IFREG | 0755:
+	അവസ്ഥ S_IFLNK:
+	അവസ്ഥ S_IFDIR:
+	അവസ്ഥ S_IFGITLINK:
 		/* ok */
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		die(_("corrupt mode: %s"), command_buf.buf);
 	}
 
-	if (*p == ':') {
+	എങ്കിൽ (*p == ':') {
 		oe = find_mark(marks, parse_mark_ref_space(&p));
 		oidcpy(&oid, &oe->idx.oid);
-	} else if (skip_prefix(p, "inline ", &p)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(p, "inline ", &p)) {
 		inline_data = 1;
-		oe = NULL; /* not used with inline_data, but makes gcc happy */
-	} else {
-		if (parse_mapped_oid_hex(p, &oid, &p))
+		oe = ശൂന്യ; /* not used with inline_data, but makes gcc happy */
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (parse_mapped_oid_hex(p, &oid, &p))
 			die(_("invalid dataref: %s"), command_buf.buf);
 		oe = find_object(&oid);
-		if (*p++ != ' ')
+		എങ്കിൽ (*p++ != ' ')
 			die(_("missing space after SHA1: %s"), command_buf.buf);
 	}
 
@@ -2429,19 +2429,19 @@ static void file_change_m(struct fast_import_state *state,
 	parse_path_eol(&path, p, "path");
 
 	/* Git does not track empty, non-toplevel directories. */
-	if (S_ISDIR(mode) &&
-	    is_empty_tree_oid(&oid, the_repository->hash_algo) &&
+	എങ്കിൽ (S_ISDIR(mode) &&
+	    is_empty_വൃക്ഷം_oid(&oid, the_repository->hash_algo) &&
 	    *path.buf) {
-		tree_content_remove(&b->branch_tree, path.buf, NULL, 0);
-		return;
+		വൃക്ഷം_content_remove(&b->branch_വൃക്ഷം, path.buf, ശൂന്യ, 0);
+		തിരികെ;
 	}
 
-	if (S_ISGITLINK(mode)) {
-		if (inline_data)
+	എങ്കിൽ (S_ISGITLINK(mode)) {
+		എങ്കിൽ (inline_data)
 			die(_("Git links cannot be specified 'inline': %s"),
 				command_buf.buf);
-		else if (oe) {
-			if (oe->type != OBJ_COMMIT)
+		അല്ലെങ്കിൽ എങ്കിൽ (oe) {
+			എങ്കിൽ (oe->type != OBJ_COMMIT)
 				die(_("not a commit (actually a %s): %s"),
 					type_name(oe->type), command_buf.buf);
 		}
@@ -2449,98 +2449,98 @@ static void file_change_m(struct fast_import_state *state,
 		 * Accept the sha1 without checking; it expected to be in
 		 * another repository.
 		 */
-	} else if (inline_data) {
-		if (S_ISDIR(mode))
+	} അല്ലെങ്കിൽ എങ്കിൽ (inline_data) {
+		എങ്കിൽ (S_ISDIR(mode))
 			die(_("directories cannot be specified 'inline': %s"),
 				command_buf.buf);
-		while (read_next_command(state) != EOF) {
-			const char *v;
-			if (skip_prefix(command_buf.buf, "cat-blob ", &v))
+		ആകുമ്പോൾ (read_next_command(state) != EOF) {
+			സ്ഥിരം അക്ഷരം *v;
+			എങ്കിൽ (skip_prefix(command_buf.buf, "cat-blob ", &v))
 				parse_cat_blob(state, v);
-			else {
+			അല്ലെങ്കിൽ {
 				parse_and_store_blob(&last_blob, &oid, 0);
-				break;
+				നിർത്തുക;
 			}
 		}
-	} else {
-		enum object_type expected = S_ISDIR(mode) ?
-						OBJ_TREE: OBJ_BLOB;
-		enum object_type type = oe ? oe->type :
+	} അല്ലെങ്കിൽ {
+		എണ്ണൽ object_type expected = S_ISDIR(mode) ?
+						OBJ_വൃക്ഷം: OBJ_BLOB;
+		എണ്ണൽ object_type type = oe ? oe->type :
 					odb_read_object_info(the_repository->objects,
-							     &oid, NULL);
-		if (type < 0)
+							     &oid, ശൂന്യ);
+		എങ്കിൽ (type < 0)
 			die(_("%s not found: %s"),
 			    S_ISDIR(mode) ?  _("tree") : _("blob"),
 			    command_buf.buf);
-		if (type != expected)
+		എങ്കിൽ (type != expected)
 			die(_("not a %s (actually a %s): %s"),
 				type_name(expected), type_name(type),
 				command_buf.buf);
 	}
 
-	if (!*path.buf) {
-		tree_content_replace(&b->branch_tree, &oid, mode, NULL);
-		return;
+	എങ്കിൽ (!*path.buf) {
+		വൃക്ഷം_content_replace(&b->branch_വൃക്ഷം, &oid, mode, ശൂന്യ);
+		തിരികെ;
 	}
 
-	if (!verify_path(path.buf, mode))
+	എങ്കിൽ (!verify_path(path.buf, mode))
 		die(_("invalid path '%s'"), path.buf);
-	tree_content_set(&b->branch_tree, path.buf, &oid, mode, NULL);
+	വൃക്ഷം_content_set(&b->branch_വൃക്ഷം, path.buf, &oid, mode, ശൂന്യ);
 }
 
-static void file_change_d(const char *p, struct branch *b)
+സ്ഥിതം ശൂന്യം file_change_d(സ്ഥിരം അക്ഷരം *p, ഘടന branch *b)
 {
-	static struct strbuf path = STRBUF_INIT;
+	സ്ഥിതം ഘടന strbuf path = STRBUF_INIT;
 
 	strbuf_reset(&path);
 	parse_path_eol(&path, p, "path");
-	tree_content_remove(&b->branch_tree, path.buf, NULL, 1);
+	വൃക്ഷം_content_remove(&b->branch_വൃക്ഷം, path.buf, ശൂന്യ, 1);
 }
 
-static void file_change_cr(const char *p, struct branch *b, int rename)
+സ്ഥിതം ശൂന്യം file_change_cr(സ്ഥിരം അക്ഷരം *p, ഘടന branch *b, പൂർണ്ണസംഖ്യ rename)
 {
-	static struct strbuf source = STRBUF_INIT;
-	static struct strbuf dest = STRBUF_INIT;
-	struct tree_entry leaf;
+	സ്ഥിതം ഘടന strbuf source = STRBUF_INIT;
+	സ്ഥിതം ഘടന strbuf dest = STRBUF_INIT;
+	ഘടന വൃക്ഷം_entry leaf;
 
 	strbuf_reset(&source);
 	parse_path_space(&source, p, &p, "source");
 	strbuf_reset(&dest);
 	parse_path_eol(&dest, p, "dest");
 
-	memset(&leaf, 0, sizeof(leaf));
-	if (rename)
-		tree_content_remove(&b->branch_tree, source.buf, &leaf, 1);
-	else
-		tree_content_get(&b->branch_tree, source.buf, &leaf, 1);
-	if (!leaf.versions[1].mode)
+	memset(&leaf, 0, വലുപ്പം(leaf));
+	എങ്കിൽ (rename)
+		വൃക്ഷം_content_remove(&b->branch_വൃക്ഷം, source.buf, &leaf, 1);
+	അല്ലെങ്കിൽ
+		വൃക്ഷം_content_get(&b->branch_വൃക്ഷം, source.buf, &leaf, 1);
+	എങ്കിൽ (!leaf.versions[1].mode)
 		die(_("path %s not in branch"), source.buf);
-	if (!*dest.buf) {	/* C "path/to/subdir" "" */
-		tree_content_replace(&b->branch_tree,
+	എങ്കിൽ (!*dest.buf) {	/* C "path/to/subdir" "" */
+		വൃക്ഷം_content_replace(&b->branch_വൃക്ഷം,
 			&leaf.versions[1].oid,
 			leaf.versions[1].mode,
-			leaf.tree);
-		return;
+			leaf.വൃക്ഷം);
+		തിരികെ;
 	}
-	if (!verify_path(dest.buf, leaf.versions[1].mode))
+	എങ്കിൽ (!verify_path(dest.buf, leaf.versions[1].mode))
 		die(_("invalid path '%s'"), dest.buf);
-	tree_content_set(&b->branch_tree, dest.buf,
+	വൃക്ഷം_content_set(&b->branch_വൃക്ഷം, dest.buf,
 		&leaf.versions[1].oid,
 		leaf.versions[1].mode,
-		leaf.tree);
+		leaf.വൃക്ഷം);
 }
 
-static void note_change_n(struct fast_import_state *state,
-			  const char *p,
-			  struct branch *b,
-			  unsigned char *old_fanout)
+സ്ഥിതം ശൂന്യം note_change_n(ഘടന fast_import_state *state,
+			  സ്ഥിരം അക്ഷരം *p,
+			  ഘടന branch *b,
+			  unsigned അക്ഷരം *old_fanout)
 {
-	struct object_entry *oe;
-	struct branch *s;
-	struct object_id oid, commit_oid;
-	char path[GIT_MAX_RAWSZ * 3];
+	ഘടന object_entry *oe;
+	ഘടന branch *s;
+	ഘടന object_id oid, commit_oid;
+	അക്ഷരം path[GIT_MAX_RAWSZ * 3];
 	uint16_t inline_data = 0;
-	unsigned char new_fanout;
+	unsigned അക്ഷരം new_fanout;
 
 	/*
 	 * When loading a branch, we don't traverse its tree to count the real
@@ -2552,244 +2552,244 @@ static void note_change_n(struct fast_import_state *state,
 	 * when b->num_notes == 0. If the notes tree is truly empty, the
 	 * calculation should not take long.
 	 */
-	if (b->num_notes == 0 && *old_fanout == 0) {
+	എങ്കിൽ (b->അക്കം_notes == 0 && *old_fanout == 0) {
 		/* Invoke change_note_fanout() in "counting mode". */
-		b->num_notes = change_note_fanout(&b->branch_tree, 0xff);
-		*old_fanout = convert_num_notes_to_fanout(b->num_notes);
+		b->അക്കം_notes = change_note_fanout(&b->branch_വൃക്ഷം, 0xff);
+		*old_fanout = convert_അക്കം_notes_to_fanout(b->അക്കം_notes);
 	}
 
 	/* Now parse the notemodify command. */
 	/* <dataref> or 'inline' */
-	if (*p == ':') {
+	എങ്കിൽ (*p == ':') {
 		oe = find_mark(marks, parse_mark_ref_space(&p));
 		oidcpy(&oid, &oe->idx.oid);
-	} else if (skip_prefix(p, "inline ", &p)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(p, "inline ", &p)) {
 		inline_data = 1;
-		oe = NULL; /* not used with inline_data, but makes gcc happy */
-	} else {
-		if (parse_mapped_oid_hex(p, &oid, &p))
+		oe = ശൂന്യ; /* not used with inline_data, but makes gcc happy */
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (parse_mapped_oid_hex(p, &oid, &p))
 			die(_("invalid dataref: %s"), command_buf.buf);
 		oe = find_object(&oid);
-		if (*p++ != ' ')
+		എങ്കിൽ (*p++ != ' ')
 			die(_("missing space after SHA1: %s"), command_buf.buf);
 	}
 
 	/* <commit-ish> */
 	s = lookup_branch(p);
-	if (s) {
-		if (is_null_oid(&s->oid))
+	എങ്കിൽ (s) {
+		എങ്കിൽ (is_null_oid(&s->oid))
 			die(_("can't add a note on empty branch."));
 		oidcpy(&commit_oid, &s->oid);
-	} else if (*p == ':') {
+	} അല്ലെങ്കിൽ എങ്കിൽ (*p == ':') {
 		uintmax_t commit_mark = parse_mark_ref_eol(p);
-		struct object_entry *commit_oe = find_mark(marks, commit_mark);
-		if (commit_oe->type != OBJ_COMMIT)
+		ഘടന object_entry *commit_oe = find_mark(marks, commit_mark);
+		എങ്കിൽ (commit_oe->type != OBJ_COMMIT)
 			die(_("mark :%" PRIuMAX " not a commit"), commit_mark);
 		oidcpy(&commit_oid, &commit_oe->idx.oid);
-	} else if (!repo_get_oid(the_repository, p, &commit_oid)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!repo_get_oid(the_repository, p, &commit_oid)) {
 		size_t size;
-		char *buf = odb_read_object_peeled(the_repository->objects,
+		അക്ഷരം *buf = odb_read_object_peeled(the_repository->objects,
 						   &commit_oid, OBJ_COMMIT, &size,
 						   &commit_oid);
-		if (!buf || size < the_hash_algo->hexsz + 6)
+		എങ്കിൽ (!buf || size < the_hash_algo->hexsz + 6)
 			die(_("not a valid commit: %s"), p);
-		free(buf);
-	} else
+		സ്വതന്ത്രം(buf);
+	} അല്ലെങ്കിൽ
 		die(_("invalid ref name or SHA1 expression: %s"), p);
 
-	if (inline_data) {
+	എങ്കിൽ (inline_data) {
 		read_next_command(state);
 		parse_and_store_blob(&last_blob, &oid, 0);
-	} else if (oe) {
-		if (oe->type != OBJ_BLOB)
+	} അല്ലെങ്കിൽ എങ്കിൽ (oe) {
+		എങ്കിൽ (oe->type != OBJ_BLOB)
 			die(_("not a blob (actually a %s): %s"),
 				type_name(oe->type), command_buf.buf);
-	} else if (!is_null_oid(&oid)) {
-		enum object_type type = odb_read_object_info(the_repository->objects, &oid,
-							NULL);
-		if (type < 0)
+	} അല്ലെങ്കിൽ എങ്കിൽ (!is_null_oid(&oid)) {
+		എണ്ണൽ object_type type = odb_read_object_info(the_repository->objects, &oid,
+							ശൂന്യ);
+		എങ്കിൽ (type < 0)
 			die(_("blob not found: %s"), command_buf.buf);
-		if (type != OBJ_BLOB)
+		എങ്കിൽ (type != OBJ_BLOB)
 			die(_("not a blob (actually a %s): %s"),
 			    type_name(type), command_buf.buf);
 	}
 
 	construct_path_with_fanout(oid_to_hex(&commit_oid), *old_fanout, path);
-	if (tree_content_remove(&b->branch_tree, path, NULL, 0))
-		b->num_notes--;
+	എങ്കിൽ (വൃക്ഷം_content_remove(&b->branch_വൃക്ഷം, path, ശൂന്യ, 0))
+		b->അക്കം_notes--;
 
-	if (is_null_oid(&oid))
-		return; /* nothing to insert */
+	എങ്കിൽ (is_null_oid(&oid))
+		തിരികെ; /* nothing to insert */
 
-	b->num_notes++;
-	new_fanout = convert_num_notes_to_fanout(b->num_notes);
+	b->അക്കം_notes++;
+	new_fanout = convert_അക്കം_notes_to_fanout(b->അക്കം_notes);
 	construct_path_with_fanout(oid_to_hex(&commit_oid), new_fanout, path);
-	tree_content_set(&b->branch_tree, path, &oid, S_IFREG | 0644, NULL);
+	വൃക്ഷം_content_set(&b->branch_വൃക്ഷം, path, &oid, S_IFREG | 0644, ശൂന്യ);
 }
 
-static void file_change_deleteall(struct branch *b)
+സ്ഥിതം ശൂന്യം file_change_deleteall(ഘടന branch *b)
 {
-	release_tree_content_recursive(b->branch_tree.tree);
-	oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-	oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-	load_tree(&b->branch_tree);
-	b->num_notes = 0;
+	release_വൃക്ഷം_content_recursive(b->branch_വൃക്ഷം.വൃക്ഷം);
+	oidclr(&b->branch_വൃക്ഷം.versions[0].oid, the_repository->hash_algo);
+	oidclr(&b->branch_വൃക്ഷം.versions[1].oid, the_repository->hash_algo);
+	load_വൃക്ഷം(&b->branch_വൃക്ഷം);
+	b->അക്കം_notes = 0;
 }
 
-static void parse_from_commit(struct branch *b, char *buf, unsigned long size)
+സ്ഥിതം ശൂന്യം parse_from_commit(ഘടന branch *b, അക്ഷരം *buf, unsigned long size)
 {
-	if (!buf || size < the_hash_algo->hexsz + 6)
+	എങ്കിൽ (!buf || size < the_hash_algo->hexsz + 6)
 		die(_("not a valid commit: %s"), oid_to_hex(&b->oid));
-	if (memcmp("tree ", buf, 5)
-		|| get_oid_hex(buf + 5, &b->branch_tree.versions[1].oid))
+	എങ്കിൽ (memcmp("tree ", buf, 5)
+		|| get_oid_hex(buf + 5, &b->branch_വൃക്ഷം.versions[1].oid))
 		die(_("the commit %s is corrupt"), oid_to_hex(&b->oid));
-	oidcpy(&b->branch_tree.versions[0].oid,
-	       &b->branch_tree.versions[1].oid);
+	oidcpy(&b->branch_വൃക്ഷം.versions[0].oid,
+	       &b->branch_വൃക്ഷം.versions[1].oid);
 }
 
-static void parse_from_existing(struct branch *b)
+സ്ഥിതം ശൂന്യം parse_from_existing(ഘടന branch *b)
 {
-	if (is_null_oid(&b->oid)) {
-		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-	} else {
+	എങ്കിൽ (is_null_oid(&b->oid)) {
+		oidclr(&b->branch_വൃക്ഷം.versions[0].oid, the_repository->hash_algo);
+		oidclr(&b->branch_വൃക്ഷം.versions[1].oid, the_repository->hash_algo);
+	} അല്ലെങ്കിൽ {
 		unsigned long size;
 		size_t size_st = 0;
-		char *buf;
+		അക്ഷരം *buf;
 
 		buf = odb_read_object_peeled(the_repository->objects, &b->oid,
 					     OBJ_COMMIT, &size_st, &b->oid);
 		size = cast_size_t_to_ulong(size_st);
 		parse_from_commit(b, buf, size);
-		free(buf);
+		സ്വതന്ത്രം(buf);
 	}
 }
 
-static int parse_objectish(struct fast_import_state *state,
-			   struct branch *b,
-			   const char *objectish)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_objectish(ഘടന fast_import_state *state,
+			   ഘടന branch *b,
+			   സ്ഥിരം അക്ഷരം *objectish)
 {
-	struct branch *s;
-	struct object_id oid;
+	ഘടന branch *s;
+	ഘടന object_id oid;
 
-	oidcpy(&oid, &b->branch_tree.versions[1].oid);
+	oidcpy(&oid, &b->branch_വൃക്ഷം.versions[1].oid);
 
 	s = lookup_branch(objectish);
-	if (b == s)
+	എങ്കിൽ (b == s)
 		die(_("can't create a branch from itself: %s"), b->name);
-	else if (s) {
-		struct object_id *t = &s->branch_tree.versions[1].oid;
+	അല്ലെങ്കിൽ എങ്കിൽ (s) {
+		ഘടന object_id *t = &s->branch_വൃക്ഷം.versions[1].oid;
 		oidcpy(&b->oid, &s->oid);
-		oidcpy(&b->branch_tree.versions[0].oid, t);
-		oidcpy(&b->branch_tree.versions[1].oid, t);
-	} else if (*objectish == ':') {
+		oidcpy(&b->branch_വൃക്ഷം.versions[0].oid, t);
+		oidcpy(&b->branch_വൃക്ഷം.versions[1].oid, t);
+	} അല്ലെങ്കിൽ എങ്കിൽ (*objectish == ':') {
 		uintmax_t idnum = parse_mark_ref_eol(objectish);
-		struct object_entry *oe = find_mark(marks, idnum);
-		if (oe->type != OBJ_COMMIT)
+		ഘടന object_entry *oe = find_mark(marks, idnum);
+		എങ്കിൽ (oe->type != OBJ_COMMIT)
 			die(_("mark :%" PRIuMAX " not a commit"), idnum);
-		if (!oideq(&b->oid, &oe->idx.oid)) {
+		എങ്കിൽ (!oideq(&b->oid, &oe->idx.oid)) {
 			oidcpy(&b->oid, &oe->idx.oid);
-			if (oe->pack_id != MAX_PACK_ID) {
+			എങ്കിൽ (oe->pack_id != MAX_PACK_ID) {
 				unsigned long size;
-				char *buf = gfi_unpack_entry(oe, &size);
+				അക്ഷരം *buf = gfi_unpack_entry(oe, &size);
 				parse_from_commit(b, buf, size);
-				free(buf);
-			} else
+				സ്വതന്ത്രം(buf);
+			} അല്ലെങ്കിൽ
 				parse_from_existing(b);
 		}
-	} else if (!repo_get_oid(the_repository, objectish, &b->oid)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!repo_get_oid(the_repository, objectish, &b->oid)) {
 		parse_from_existing(b);
-		if (is_null_oid(&b->oid))
+		എങ്കിൽ (is_null_oid(&b->oid))
 			b->delete = 1;
 	}
-	else
+	അല്ലെങ്കിൽ
 		die(_("invalid ref name or SHA1 expression: %s"), objectish);
 
-	if (b->branch_tree.tree && !oideq(&oid, &b->branch_tree.versions[1].oid)) {
-		release_tree_content_recursive(b->branch_tree.tree);
-		b->branch_tree.tree = NULL;
+	എങ്കിൽ (b->branch_വൃക്ഷം.വൃക്ഷം && !oideq(&oid, &b->branch_വൃക്ഷം.versions[1].oid)) {
+		release_വൃക്ഷം_content_recursive(b->branch_വൃക്ഷം.വൃക്ഷം);
+		b->branch_വൃക്ഷം.വൃക്ഷം = ശൂന്യ;
 	}
 
 	read_next_command(state);
-	return 1;
+	തിരികെ 1;
 }
 
-static int parse_from(struct fast_import_state *state, struct branch *b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_from(ഘടന fast_import_state *state, ഘടന branch *b)
 {
-	const char *from;
+	സ്ഥിരം അക്ഷരം *from;
 
-	if (!skip_prefix(command_buf.buf, "from ", &from))
-		return 0;
+	എങ്കിൽ (!skip_prefix(command_buf.buf, "from ", &from))
+		തിരികെ 0;
 
-	return parse_objectish(state, b, from);
+	തിരികെ parse_objectish(state, b, from);
 }
 
-static int parse_objectish_with_prefix(struct fast_import_state *state,
-				       struct branch *b,
-				       const char *prefix)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_objectish_with_prefix(ഘടന fast_import_state *state,
+				       ഘടന branch *b,
+				       സ്ഥിരം അക്ഷരം *prefix)
 {
-	const char *base;
+	സ്ഥിരം അക്ഷരം *base;
 
-	if (!skip_prefix(command_buf.buf, prefix, &base))
-		return 0;
+	എങ്കിൽ (!skip_prefix(command_buf.buf, prefix, &base))
+		തിരികെ 0;
 
-	return parse_objectish(state, b, base);
+	തിരികെ parse_objectish(state, b, base);
 }
 
-static struct hash_list *parse_merge(struct fast_import_state *state,
-				     unsigned int *count)
+സ്ഥിതം ഘടന hash_list *parse_merge(ഘടന fast_import_state *state,
+				     unsigned പൂർണ്ണസംഖ്യ *എണ്ണം)
 {
-	struct hash_list *list = NULL, **tail = &list, *n;
-	const char *from;
-	struct branch *s;
+	ഘടന hash_list *list = ശൂന്യ, **tail = &list, *n;
+	സ്ഥിരം അക്ഷരം *from;
+	ഘടന branch *s;
 
-	*count = 0;
-	while (skip_prefix(command_buf.buf, "merge ", &from)) {
-		n = xmalloc(sizeof(*n));
+	*എണ്ണം = 0;
+	ആകുമ്പോൾ (skip_prefix(command_buf.buf, "merge ", &from)) {
+		n = xmalloc(വലുപ്പം(*n));
 		s = lookup_branch(from);
-		if (s)
+		എങ്കിൽ (s)
 			oidcpy(&n->oid, &s->oid);
-		else if (*from == ':') {
+		അല്ലെങ്കിൽ എങ്കിൽ (*from == ':') {
 			uintmax_t idnum = parse_mark_ref_eol(from);
-			struct object_entry *oe = find_mark(marks, idnum);
-			if (oe->type != OBJ_COMMIT)
+			ഘടന object_entry *oe = find_mark(marks, idnum);
+			എങ്കിൽ (oe->type != OBJ_COMMIT)
 				die(_("mark :%" PRIuMAX " not a commit"), idnum);
 			oidcpy(&n->oid, &oe->idx.oid);
-		} else if (!repo_get_oid(the_repository, from, &n->oid)) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!repo_get_oid(the_repository, from, &n->oid)) {
 			size_t size;
-			char *buf = odb_read_object_peeled(the_repository->objects,
+			അക്ഷരം *buf = odb_read_object_peeled(the_repository->objects,
 							   &n->oid, OBJ_COMMIT,
 							   &size, &n->oid);
-			if (!buf || size < the_hash_algo->hexsz + 6)
+			എങ്കിൽ (!buf || size < the_hash_algo->hexsz + 6)
 				die(_("not a valid commit: %s"), from);
-			free(buf);
-		} else
+			സ്വതന്ത്രം(buf);
+		} അല്ലെങ്കിൽ
 			die(_("invalid ref name or SHA1 expression: %s"), from);
 
-		n->next = NULL;
+		n->next = ശൂന്യ;
 		*tail = n;
 		tail = &n->next;
 
-		(*count)++;
+		(*എണ്ണം)++;
 		read_next_command(state);
 	}
-	return list;
+	തിരികെ list;
 }
 
-struct signature_data {
-	char *hash_algo;      /* "sha1" or "sha256" */
-	char *sig_format;     /* "openpgp", "x509", "ssh", or "unknown" */
-	struct strbuf data;   /* The actual signature data */
+ഘടന signature_data {
+	അക്ഷരം *hash_algo;      /* "sha1" or "sha256" */
+	അക്ഷരം *sig_format;     /* "openpgp", "x509", "ssh", or "unknown" */
+	ഘടന strbuf data;   /* The actual signature data */
 };
 
-static void parse_one_signature(struct fast_import_state *state,
-				struct signature_data *sig,
-				const char *v)
+സ്ഥിതം ശൂന്യം parse_one_signature(ഘടന fast_import_state *state,
+				ഘടന signature_data *sig,
+				സ്ഥിരം അക്ഷരം *v)
 {
-	char *args = xstrdup(v); /* Will be freed when sig->hash_algo is freed */
-	char *space = strchr(args, ' ');
+	അക്ഷരം *args = xstrdup(v); /* Will be freed when sig->hash_algo is freed */
+	അക്ഷരം *space = strchr(args, ' ');
 
-	if (!space)
+	എങ്കിൽ (!space)
 		die(_("expected gpgsig format: 'gpgsig <hash-algo> <signature-format>', "
 		      "got 'gpgsig %s'"), args);
 	*space = '\0';
@@ -2798,38 +2798,38 @@ static void parse_one_signature(struct fast_import_state *state,
 	sig->sig_format = space + 1;
 
 	/* Validate hash algorithm */
-	if (strcmp(sig->hash_algo, "sha1") &&
+	എങ്കിൽ (strcmp(sig->hash_algo, "sha1") &&
 	    strcmp(sig->hash_algo, "sha256"))
 		die(_("unknown git hash algorithm in gpgsig: '%s'"), sig->hash_algo);
 
 	/* Validate signature format */
-	if (!valid_signature_format(sig->sig_format))
+	എങ്കിൽ (!valid_signature_format(sig->sig_format))
 		die(_("invalid signature format in gpgsig: '%s'"), sig->sig_format);
-	if (!strcmp(sig->sig_format, "unknown"))
+	എങ്കിൽ (!strcmp(sig->sig_format, "unknown"))
 		warning(_("'unknown' signature format in gpgsig"));
 
 	/* Read signature data */
 	read_next_command(state);
-	parse_data(&sig->data, 0, NULL);
+	parse_data(&sig->data, 0, ശൂന്യ);
 }
 
-static void discard_one_signature(struct fast_import_state *state)
+സ്ഥിതം ശൂന്യം discard_one_signature(ഘടന fast_import_state *state)
 {
-	struct strbuf data = STRBUF_INIT;
+	ഘടന strbuf data = STRBUF_INIT;
 
 	read_next_command(state);
-	parse_data(&data, 0, NULL);
+	parse_data(&data, 0, ശൂന്യ);
 	strbuf_release(&data);
 }
 
-static void add_gpgsig_to_commit(struct strbuf *commit_data,
-				 const char *header,
-				 struct signature_data *sig)
+സ്ഥിതം ശൂന്യം add_gpgsig_to_commit(ഘടന strbuf *commit_data,
+				 സ്ഥിരം അക്ഷരം *header,
+				 ഘടന signature_data *sig)
 {
-	struct string_list siglines = STRING_LIST_INIT_NODUP;
+	ഘടന string_list siglines = STRING_LIST_INIT_NODUP;
 
-	if (!sig || !sig->hash_algo)
-		return;
+	എങ്കിൽ (!sig || !sig->hash_algo)
+		തിരികെ;
 
 	strbuf_addstr(commit_data, header);
 	string_list_split_in_place(&siglines, sig->data.buf, "\n", -1);
@@ -2837,112 +2837,112 @@ static void add_gpgsig_to_commit(struct strbuf *commit_data,
 	strbuf_addch(commit_data, '\n');
 	string_list_clear(&siglines, 1);
 	strbuf_release(&sig->data);
-	free(sig->hash_algo);
+	സ്വതന്ത്രം(sig->hash_algo);
 }
 
-static void store_signature(struct signature_data *stored_sig,
-			    struct signature_data *new_sig,
-			    const char *hash_type)
+സ്ഥിതം ശൂന്യം store_signature(ഘടന signature_data *stored_sig,
+			    ഘടന signature_data *new_sig,
+			    സ്ഥിരം അക്ഷരം *hash_type)
 {
-	if (stored_sig->hash_algo) {
+	എങ്കിൽ (stored_sig->hash_algo) {
 		warning(_("multiple %s signatures found, "
 			  "ignoring additional signature"),
 			hash_type);
 		strbuf_release(&new_sig->data);
-		free(new_sig->hash_algo);
-	} else {
+		സ്വതന്ത്രം(new_sig->hash_algo);
+	} അല്ലെങ്കിൽ {
 		*stored_sig = *new_sig;
 	}
 }
 
-static void import_one_signature(struct fast_import_state *state,
-				 struct signature_data *sig_sha1,
-				 struct signature_data *sig_sha256,
-				 const char *v)
+സ്ഥിതം ശൂന്യം import_one_signature(ഘടന fast_import_state *state,
+				 ഘടന signature_data *sig_sha1,
+				 ഘടന signature_data *sig_sha256,
+				 സ്ഥിരം അക്ഷരം *v)
 {
-	struct signature_data sig = { NULL, NULL, STRBUF_INIT };
+	ഘടന signature_data sig = { ശൂന്യ, ശൂന്യ, STRBUF_INIT };
 
 	parse_one_signature(state, &sig, v);
 
-	if (!strcmp(sig.hash_algo, "sha1"))
+	എങ്കിൽ (!strcmp(sig.hash_algo, "sha1"))
 		store_signature(sig_sha1, &sig, "SHA-1");
-	else if (!strcmp(sig.hash_algo, "sha256"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(sig.hash_algo, "sha256"))
 		store_signature(sig_sha256, &sig, "SHA-256");
-	else
+	അല്ലെങ്കിൽ
 		die(_("parse_one_signature() returned unknown hash algo"));
 }
 
-static void finalize_commit_buffer(struct strbuf *new_data,
-				   struct signature_data *sig_sha1,
-				   struct signature_data *sig_sha256,
-				   struct strbuf *msg)
+സ്ഥിതം ശൂന്യം finalize_commit_buffer(ഘടന strbuf *new_data,
+				   ഘടന signature_data *sig_sha1,
+				   ഘടന signature_data *sig_sha256,
+				   ഘടന strbuf *സന്ദേശം)
 {
 	add_gpgsig_to_commit(new_data, "gpgsig ", sig_sha1);
 	add_gpgsig_to_commit(new_data, "gpgsig-sha256 ", sig_sha256);
 
 	strbuf_addch(new_data, '\n');
-	strbuf_addbuf(new_data, msg);
+	strbuf_addbuf(new_data, സന്ദേശം);
 }
 
-static void warn_invalid_signature(struct signature_check *check,
-				   const char *msg, enum sign_mode mode)
+സ്ഥിതം ശൂന്യം warn_invalid_signature(ഘടന signature_check *check,
+				   സ്ഥിരം അക്ഷരം *സന്ദേശം, എണ്ണൽ sign_mode mode)
 {
-	const char *signer = check->signer ? check->signer : _("unknown");
-	const char *subject;
-	int subject_len = find_commit_subject(msg, &subject);
+	സ്ഥിരം അക്ഷരം *signer = check->signer ? check->signer : _("unknown");
+	സ്ഥിരം അക്ഷരം *subject;
+	പൂർണ്ണസംഖ്യ subject_len = find_commit_subject(സന്ദേശം, &subject);
 
-	switch (mode) {
-	case SIGN_STRIP_IF_INVALID:
-		if (subject_len > 100)
+	തിരഞ്ഞെടുപ്പ് (mode) {
+	അവസ്ഥ SIGN_STRIP_IF_INVALID:
+		എങ്കിൽ (subject_len > 100)
 			warning(_("stripping invalid signature for commit '%.100s...'\n"
 				  "  allegedly by %s"), subject, signer);
-		else if (subject_len > 0)
+		അല്ലെങ്കിൽ എങ്കിൽ (subject_len > 0)
 			warning(_("stripping invalid signature for commit '%.*s'\n"
 				  "  allegedly by %s"), subject_len, subject, signer);
-		else
+		അല്ലെങ്കിൽ
 			warning(_("stripping invalid signature for commit\n"
 				  "  allegedly by %s"), signer);
-		break;
-	case SIGN_SIGN_IF_INVALID:
-		if (subject_len > 100)
+		നിർത്തുക;
+	അവസ്ഥ SIGN_SIGN_IF_INVALID:
+		എങ്കിൽ (subject_len > 100)
 			warning(_("replacing invalid signature for commit '%.100s...'\n"
 				  "  allegedly by %s"), subject, signer);
-		else if (subject_len > 0)
+		അല്ലെങ്കിൽ എങ്കിൽ (subject_len > 0)
 			warning(_("replacing invalid signature for commit '%.*s'\n"
 				  "  allegedly by %s"), subject_len, subject, signer);
-		else
+		അല്ലെങ്കിൽ
 			warning(_("replacing invalid signature for commit\n"
 				  "  allegedly by %s"), signer);
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		BUG("unsupported signing mode");
 	}
 }
 
-static void handle_signature_if_invalid(struct strbuf *new_data,
-					struct signature_data *sig_sha1,
-					struct signature_data *sig_sha256,
-					struct strbuf *msg,
-					enum sign_mode mode)
+സ്ഥിതം ശൂന്യം handle_signature_if_invalid(ഘടന strbuf *new_data,
+					ഘടന signature_data *sig_sha1,
+					ഘടന signature_data *sig_sha256,
+					ഘടന strbuf *സന്ദേശം,
+					എണ്ണൽ sign_mode mode)
 {
-	struct strbuf tmp_buf = STRBUF_INIT;
-	struct signature_check signature_check = { 0 };
-	int ret;
+	ഘടന strbuf tmp_buf = STRBUF_INIT;
+	ഘടന signature_check signature_check = { 0 };
+	പൂർണ്ണസംഖ്യ ret;
 
 	/* Check signature in a temporary commit buffer */
 	strbuf_addbuf(&tmp_buf, new_data);
-	finalize_commit_buffer(&tmp_buf, sig_sha1, sig_sha256, msg);
+	finalize_commit_buffer(&tmp_buf, sig_sha1, sig_sha256, സന്ദേശം);
 	ret = verify_commit_buffer(tmp_buf.buf, tmp_buf.len, &signature_check);
 
-	if (ret) {
-		if (mode == SIGN_ABORT_IF_INVALID)
+	എങ്കിൽ (ret) {
+		എങ്കിൽ (mode == SIGN_ABORT_IF_INVALID)
 			die(_("aborting due to invalid signature"));
 
-		warn_invalid_signature(&signature_check, msg->buf, mode);
+		warn_invalid_signature(&signature_check, സന്ദേശം->buf, mode);
 
-		if (mode == SIGN_SIGN_IF_INVALID) {
-			struct strbuf signature = STRBUF_INIT;
-			struct strbuf payload = STRBUF_INIT;
+		എങ്കിൽ (mode == SIGN_SIGN_IF_INVALID) {
+			ഘടന strbuf signature = STRBUF_INIT;
+			ഘടന strbuf payload = STRBUF_INIT;
 
 			/*
 			 * NEEDSWORK: To properly support interoperability mode
@@ -2954,12 +2954,12 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 			 * generated. Thus, attempting to sign commit signatures
 			 * in interoperability mode is currently unsupported.
 			 */
-			if (the_repository->compat_hash_algo)
+			എങ്കിൽ (the_repository->compat_hash_algo)
 				die(_("signing commits in interoperability mode is unsupported"));
 
 			strbuf_addstr(&payload, signature_check.payload);
-			if (sign_buffer(&payload, &signature, signed_commit_keyid,
-					SIGN_BUFFER_USE_DEFAULT_KEY))
+			എങ്കിൽ (sign_buffer(&payload, &signature, signed_commit_keyid,
+					SIGN_BUFFER_USE_DEFAULT_താക്കോൽ))
 				die(_("failed to sign commit object"));
 			add_header_signature(new_data, &signature, the_hash_algo);
 
@@ -2967,8 +2967,8 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 			strbuf_release(&payload);
 		}
 
-		finalize_commit_buffer(new_data, NULL, NULL, msg);
-	} else {
+		finalize_commit_buffer(new_data, ശൂന്യ, ശൂന്യ, സന്ദേശം);
+	} അല്ലെങ്കിൽ {
 		strbuf_swap(new_data, &tmp_buf);
 	}
 
@@ -2976,197 +2976,197 @@ static void handle_signature_if_invalid(struct strbuf *new_data,
 	strbuf_release(&tmp_buf);
 }
 
-static void parse_new_commit(struct fast_import_state *state, const char *arg)
+സ്ഥിതം ശൂന്യം parse_new_commit(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *arg)
 {
-	static struct strbuf msg = STRBUF_INIT;
-	struct signature_data sig_sha1 = { NULL, NULL, STRBUF_INIT };
-	struct signature_data sig_sha256 = { NULL, NULL, STRBUF_INIT };
-	struct branch *b;
-	char *author = NULL;
-	char *committer = NULL;
-	char *encoding = NULL;
-	struct hash_list *merge_list = NULL;
-	unsigned int merge_count;
-	unsigned char prev_fanout, new_fanout;
-	const char *v;
+	സ്ഥിതം ഘടന strbuf സന്ദേശം = STRBUF_INIT;
+	ഘടന signature_data sig_sha1 = { ശൂന്യ, ശൂന്യ, STRBUF_INIT };
+	ഘടന signature_data sig_sha256 = { ശൂന്യ, ശൂന്യ, STRBUF_INIT };
+	ഘടന branch *b;
+	അക്ഷരം *author = ശൂന്യ;
+	അക്ഷരം *committer = ശൂന്യ;
+	അക്ഷരം *encoding = ശൂന്യ;
+	ഘടന hash_list *merge_list = ശൂന്യ;
+	unsigned പൂർണ്ണസംഖ്യ merge_എണ്ണം;
+	unsigned അക്ഷരം prev_fanout, new_fanout;
+	സ്ഥിരം അക്ഷരം *v;
 
 	b = lookup_branch(arg);
-	if (!b)
+	എങ്കിൽ (!b)
 		b = new_branch(arg);
 
 	read_next_command(state);
 	parse_mark(state);
 	parse_original_identifier(state);
-	if (skip_prefix(command_buf.buf, "author ", &v)) {
+	എങ്കിൽ (skip_prefix(command_buf.buf, "author ", &v)) {
 		author = parse_ident(v);
 		read_next_command(state);
 	}
-	if (skip_prefix(command_buf.buf, "committer ", &v)) {
+	എങ്കിൽ (skip_prefix(command_buf.buf, "committer ", &v)) {
 		committer = parse_ident(v);
 		read_next_command(state);
 	}
-	if (!committer)
+	എങ്കിൽ (!committer)
 		die(_("expected committer but didn't get one"));
 
-	while (skip_prefix(command_buf.buf, "gpgsig ", &v)) {
-		switch (signed_commit_mode) {
+	ആകുമ്പോൾ (skip_prefix(command_buf.buf, "gpgsig ", &v)) {
+		തിരഞ്ഞെടുപ്പ് (signed_commit_mode) {
 
 		/* First, modes that don't need the signature to be parsed */
-		case SIGN_ABORT:
+		അവസ്ഥ SIGN_ABORT:
 			die(_("encountered signed commit; use "
 			      "--signed-commits=<mode> to handle it"));
-		case SIGN_WARN_STRIP:
+		അവസ്ഥ SIGN_WARN_STRIP:
 			warning(_("stripping a commit signature"));
 			/* fallthru */
-		case SIGN_STRIP:
+		അവസ്ഥ SIGN_STRIP:
 			discard_one_signature(state);
-			break;
+			നിർത്തുക;
 
 		/* Second, modes that parse the signature */
-		case SIGN_WARN_VERBATIM:
+		അവസ്ഥ SIGN_WARN_VERBATIM:
 			warning(_("importing a commit signature verbatim"));
 			/* fallthru */
-		case SIGN_VERBATIM:
-		case SIGN_STRIP_IF_INVALID:
-		case SIGN_SIGN_IF_INVALID:
-		case SIGN_ABORT_IF_INVALID:
+		അവസ്ഥ SIGN_VERBATIM:
+		അവസ്ഥ SIGN_STRIP_IF_INVALID:
+		അവസ്ഥ SIGN_SIGN_IF_INVALID:
+		അവസ്ഥ SIGN_ABORT_IF_INVALID:
 			import_one_signature(state, &sig_sha1, &sig_sha256, v);
-			break;
+			നിർത്തുക;
 
 		/* Third, BUG */
-		default:
+		സ്ഥിരസ്ഥിതി:
 			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 		}
 		read_next_command(state);
 	}
 
-	if (skip_prefix(command_buf.buf, "encoding ", &v)) {
+	എങ്കിൽ (skip_prefix(command_buf.buf, "encoding ", &v)) {
 		encoding = xstrdup(v);
 		read_next_command(state);
 	}
-	parse_data(&msg, 0, NULL);
+	parse_data(&സന്ദേശം, 0, ശൂന്യ);
 	read_next_command(state);
 	parse_from(state, b);
-	merge_list = parse_merge(state, &merge_count);
+	merge_list = parse_merge(state, &merge_എണ്ണം);
 
 	/* ensure the branch is active/loaded */
-	if (!b->branch_tree.tree || !max_active_branches) {
+	എങ്കിൽ (!b->branch_വൃക്ഷം.വൃക്ഷം || !max_active_branches) {
 		unload_one_branch();
 		load_branch(b);
 	}
 
-	prev_fanout = convert_num_notes_to_fanout(b->num_notes);
+	prev_fanout = convert_അക്കം_notes_to_fanout(b->അക്കം_notes);
 
 	/* file_change* */
-	while (command_buf.len > 0) {
-		if (skip_prefix(command_buf.buf, "M ", &v))
+	ആകുമ്പോൾ (command_buf.len > 0) {
+		എങ്കിൽ (skip_prefix(command_buf.buf, "M ", &v))
 			file_change_m(state, v, b);
-		else if (skip_prefix(command_buf.buf, "D ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "D ", &v))
 			file_change_d(v, b);
-		else if (skip_prefix(command_buf.buf, "R ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "R ", &v))
 			file_change_cr(v, b, 1);
-		else if (skip_prefix(command_buf.buf, "C ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "C ", &v))
 			file_change_cr(v, b, 0);
-		else if (skip_prefix(command_buf.buf, "N ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "N ", &v))
 			note_change_n(state, v, b, &prev_fanout);
-		else if (!strcmp("deleteall", command_buf.buf))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp("deleteall", command_buf.buf))
 			file_change_deleteall(b);
-		else if (skip_prefix(command_buf.buf, "ls ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "ls ", &v))
 			parse_ls(state, v, b);
-		else if (skip_prefix(command_buf.buf, "cat-blob ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "cat-blob ", &v))
 			parse_cat_blob(state, v);
-		else {
+		അല്ലെങ്കിൽ {
 			unread_command_buf = 1;
-			break;
+			നിർത്തുക;
 		}
-		if (read_next_command(state) == EOF)
-			break;
+		എങ്കിൽ (read_next_command(state) == EOF)
+			നിർത്തുക;
 	}
 
-	new_fanout = convert_num_notes_to_fanout(b->num_notes);
-	if (new_fanout != prev_fanout)
-		b->num_notes = change_note_fanout(&b->branch_tree, new_fanout);
+	new_fanout = convert_അക്കം_notes_to_fanout(b->അക്കം_notes);
+	എങ്കിൽ (new_fanout != prev_fanout)
+		b->അക്കം_notes = change_note_fanout(&b->branch_വൃക്ഷം, new_fanout);
 
 	/* build the tree and the commit */
-	store_tree(&b->branch_tree);
-	oidcpy(&b->branch_tree.versions[0].oid,
-	       &b->branch_tree.versions[1].oid);
+	store_വൃക്ഷം(&b->branch_വൃക്ഷം);
+	oidcpy(&b->branch_വൃക്ഷം.versions[0].oid,
+	       &b->branch_വൃക്ഷം.versions[1].oid);
 
 	strbuf_reset(&new_data);
 	strbuf_addf(&new_data, "tree %s\n",
-		oid_to_hex(&b->branch_tree.versions[1].oid));
-	if (!is_null_oid(&b->oid))
+		oid_to_hex(&b->branch_വൃക്ഷം.versions[1].oid));
+	എങ്കിൽ (!is_null_oid(&b->oid))
 		strbuf_addf(&new_data, "parent %s\n",
 			    oid_to_hex(&b->oid));
-	while (merge_list) {
-		struct hash_list *next = merge_list->next;
+	ആകുമ്പോൾ (merge_list) {
+		ഘടന hash_list *next = merge_list->next;
 		strbuf_addf(&new_data, "parent %s\n",
 			    oid_to_hex(&merge_list->oid));
-		free(merge_list);
+		സ്വതന്ത്രം(merge_list);
 		merge_list = next;
 	}
 	strbuf_addf(&new_data,
 		"author %s\n"
 		"committer %s\n",
 		author ? author : committer, committer);
-	if (encoding)
+	എങ്കിൽ (encoding)
 		strbuf_addf(&new_data,
 			"encoding %s\n",
 			encoding);
 
-	if ((signed_commit_mode == SIGN_STRIP_IF_INVALID ||
+	എങ്കിൽ ((signed_commit_mode == SIGN_STRIP_IF_INVALID ||
 	     signed_commit_mode == SIGN_SIGN_IF_INVALID ||
 	     signed_commit_mode == SIGN_ABORT_IF_INVALID) &&
 	    (sig_sha1.hash_algo || sig_sha256.hash_algo))
 		handle_signature_if_invalid(&new_data, &sig_sha1, &sig_sha256,
-					    &msg, signed_commit_mode);
-	else
-		finalize_commit_buffer(&new_data, &sig_sha1, &sig_sha256, &msg);
+					    &സന്ദേശം, signed_commit_mode);
+	അല്ലെങ്കിൽ
+		finalize_commit_buffer(&new_data, &sig_sha1, &sig_sha256, &സന്ദേശം);
 
-	free(author);
-	free(committer);
-	free(encoding);
+	സ്വതന്ത്രം(author);
+	സ്വതന്ത്രം(committer);
+	സ്വതന്ത്രം(encoding);
 
-	if (!store_object(OBJ_COMMIT, &new_data, NULL, &b->oid, next_mark))
+	എങ്കിൽ (!store_object(OBJ_COMMIT, &new_data, ശൂന്യ, &b->oid, next_mark))
 		b->pack_id = pack_id;
-	b->last_commit = object_count_by_type[OBJ_COMMIT];
+	b->last_commit = object_എണ്ണം_by_type[OBJ_COMMIT];
 }
 
-static void handle_tag_signature_if_invalid(struct strbuf *buf,
-					    struct strbuf *msg,
+സ്ഥിതം ശൂന്യം handle_tag_signature_if_invalid(ഘടന strbuf *buf,
+					    ഘടന strbuf *സന്ദേശം,
 					    size_t sig_offset)
 {
-	struct strbuf signature = STRBUF_INIT;
-	struct strbuf payload = STRBUF_INIT;
-	struct signature_check sigc = { 0 };
+	ഘടന strbuf signature = STRBUF_INIT;
+	ഘടന strbuf payload = STRBUF_INIT;
+	ഘടന signature_check sigc = { 0 };
 
 	strbuf_addbuf(&payload, buf);
 	strbuf_addch(&payload, '\n');
-	strbuf_add(&payload, msg->buf, sig_offset);
-	strbuf_add(&signature, msg->buf + sig_offset, msg->len - sig_offset);
+	strbuf_add(&payload, സന്ദേശം->buf, sig_offset);
+	strbuf_add(&signature, സന്ദേശം->buf + sig_offset, സന്ദേശം->len - sig_offset);
 
 	sigc.payload_type = SIGNATURE_PAYLOAD_TAG;
 	sigc.payload = strbuf_detach(&payload, &sigc.payload_len);
 
-	if (!check_signature(&sigc, signature.buf, signature.len))
-		goto out;
+	എങ്കിൽ (!check_signature(&sigc, signature.buf, signature.len))
+		പോകുക out;
 
-	if (signed_tag_mode == SIGN_ABORT_IF_INVALID)
+	എങ്കിൽ (signed_tag_mode == SIGN_ABORT_IF_INVALID)
 		die(_("aborting due to invalid signature"));
 
-	strbuf_setlen(msg, sig_offset);
+	strbuf_setlen(സന്ദേശം, sig_offset);
 
-	if (signed_tag_mode == SIGN_SIGN_IF_INVALID) {
+	എങ്കിൽ (signed_tag_mode == SIGN_SIGN_IF_INVALID) {
 		strbuf_attach(&payload, sigc.payload, sigc.payload_len,
 			      sigc.payload_len + 1);
-		sigc.payload = NULL;
+		sigc.payload = ശൂന്യ;
 		strbuf_reset(&signature);
 
-		if (sign_buffer(&payload, &signature, signed_tag_keyid,
-				SIGN_BUFFER_USE_DEFAULT_KEY))
+		എങ്കിൽ (sign_buffer(&payload, &signature, signed_tag_keyid,
+				SIGN_BUFFER_USE_DEFAULT_താക്കോൽ))
 			die(_("failed to sign tag object"));
 
-		strbuf_addbuf(msg, &signature);
+		strbuf_addbuf(സന്ദേശം, &signature);
 	}
 
 out:
@@ -3175,95 +3175,95 @@ out:
 	strbuf_release(&payload);
 }
 
-static void handle_tag_signature(struct strbuf *buf, struct strbuf *msg, const char *name)
+സ്ഥിതം ശൂന്യം handle_tag_signature(ഘടന strbuf *buf, ഘടന strbuf *സന്ദേശം, സ്ഥിരം അക്ഷരം *name)
 {
-	size_t sig_offset = parse_signed_buffer(msg->buf, msg->len);
+	size_t sig_offset = parse_signed_buffer(സന്ദേശം->buf, സന്ദേശം->len);
 
 	/* If there is no signature, there is nothing to do. */
-	if (sig_offset >= msg->len)
-		return;
+	എങ്കിൽ (sig_offset >= സന്ദേശം->len)
+		തിരികെ;
 
-	switch (signed_tag_mode) {
+	തിരഞ്ഞെടുപ്പ് (signed_tag_mode) {
 
 	/* First, modes that don't change anything */
-	case SIGN_WARN_VERBATIM:
+	അവസ്ഥ SIGN_WARN_VERBATIM:
 		warning(_("importing a tag signature verbatim for tag '%s'"), name);
 		/* fallthru */
-	case SIGN_VERBATIM:
+	അവസ്ഥ SIGN_VERBATIM:
 		/* Nothing to do, the signature will be put into the imported tag. */
-		break;
+		നിർത്തുക;
 
 	/* Second, modes that remove the signature */
-	case SIGN_WARN_STRIP:
+	അവസ്ഥ SIGN_WARN_STRIP:
 		warning(_("stripping a tag signature for tag '%s'"), name);
 		/* fallthru */
-	case SIGN_STRIP:
+	അവസ്ഥ SIGN_STRIP:
 		/* Truncate the buffer to remove the signature */
-		strbuf_setlen(msg, sig_offset);
-		break;
-	case SIGN_ABORT_IF_INVALID:
-	case SIGN_SIGN_IF_INVALID:
-	case SIGN_STRIP_IF_INVALID:
-		handle_tag_signature_if_invalid(buf, msg, sig_offset);
-		break;
+		strbuf_setlen(സന്ദേശം, sig_offset);
+		നിർത്തുക;
+	അവസ്ഥ SIGN_ABORT_IF_INVALID:
+	അവസ്ഥ SIGN_SIGN_IF_INVALID:
+	അവസ്ഥ SIGN_STRIP_IF_INVALID:
+		handle_tag_signature_if_invalid(buf, സന്ദേശം, sig_offset);
+		നിർത്തുക;
 
 	/* Third, aborting modes */
-	case SIGN_ABORT:
+	അവസ്ഥ SIGN_ABORT:
 		die(_("encountered signed tag; use "
 		      "--signed-tags=<mode> to handle it"));
-	default:
+	സ്ഥിരസ്ഥിതി:
 		BUG("invalid signed_tag_mode value %d from tag '%s'",
 		    signed_tag_mode, name);
 	}
 }
 
-static void parse_new_tag(struct fast_import_state *state, const char *arg)
+സ്ഥിതം ശൂന്യം parse_new_tag(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *arg)
 {
-	static struct strbuf msg = STRBUF_INIT;
-	const char *from;
-	char *tagger;
-	struct branch *s;
-	struct tag *t;
+	സ്ഥിതം ഘടന strbuf സന്ദേശം = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *from;
+	അക്ഷരം *tagger;
+	ഘടന branch *s;
+	ഘടന tag *t;
 	uintmax_t from_mark = 0;
-	struct object_id oid;
-	enum object_type type;
-	const char *v;
+	ഘടന object_id oid;
+	എണ്ണൽ object_type type;
+	സ്ഥിരം അക്ഷരം *v;
 
-	t = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct tag));
+	t = mem_pool_calloc(&fi_mem_pool, 1, വലുപ്പം(ഘടന tag));
 	t->name = mem_pool_strdup(&fi_mem_pool, arg);
-	if (last_tag)
+	എങ്കിൽ (last_tag)
 		last_tag->next_tag = t;
-	else
+	അല്ലെങ്കിൽ
 		first_tag = t;
 	last_tag = t;
 	read_next_command(state);
 	parse_mark(state);
 
 	/* from ... */
-	if (!skip_prefix(command_buf.buf, "from ", &from))
+	എങ്കിൽ (!skip_prefix(command_buf.buf, "from ", &from))
 		die(_("expected 'from' command, got '%s'"), command_buf.buf);
 	s = lookup_branch(from);
-	if (s) {
-		if (is_null_oid(&s->oid))
+	എങ്കിൽ (s) {
+		എങ്കിൽ (is_null_oid(&s->oid))
 			die(_("can't tag an empty branch."));
 		oidcpy(&oid, &s->oid);
 		type = OBJ_COMMIT;
-	} else if (*from == ':') {
-		struct object_entry *oe;
+	} അല്ലെങ്കിൽ എങ്കിൽ (*from == ':') {
+		ഘടന object_entry *oe;
 		from_mark = parse_mark_ref_eol(from);
 		oe = find_mark(marks, from_mark);
 		type = oe->type;
 		oidcpy(&oid, &oe->idx.oid);
-	} else if (!repo_get_oid(the_repository, from, &oid)) {
-		struct object_entry *oe = find_object(&oid);
-		if (!oe) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!repo_get_oid(the_repository, from, &oid)) {
+		ഘടന object_entry *oe = find_object(&oid);
+		എങ്കിൽ (!oe) {
 			type = odb_read_object_info(the_repository->objects,
-						    &oid, NULL);
-			if (type < 0)
+						    &oid, ശൂന്യ);
+			എങ്കിൽ (type < 0)
 				die(_("not a valid object: %s"), from);
-		} else
+		} അല്ലെങ്കിൽ
 			type = oe->type;
-	} else
+	} അല്ലെങ്കിൽ
 		die(_("invalid ref name or SHA1 expression: %s"), from);
 	read_next_command(state);
 
@@ -3271,14 +3271,14 @@ static void parse_new_tag(struct fast_import_state *state, const char *arg)
 	parse_original_identifier(state);
 
 	/* tagger ... */
-	if (skip_prefix(command_buf.buf, "tagger ", &v)) {
+	എങ്കിൽ (skip_prefix(command_buf.buf, "tagger ", &v)) {
 		tagger = parse_ident(v);
 		read_next_command(state);
-	} else
-		tagger = NULL;
+	} അല്ലെങ്കിൽ
+		tagger = ശൂന്യ;
 
 	/* tag payload/message */
-	parse_data(&msg, 0, NULL);
+	parse_data(&സന്ദേശം, 0, ശൂന്യ);
 
 	/* build the tag object */
 	strbuf_reset(&new_data);
@@ -3288,42 +3288,42 @@ static void parse_new_tag(struct fast_import_state *state, const char *arg)
 		    "type %s\n"
 		    "tag %s\n",
 		    oid_to_hex(&oid), type_name(type), t->name);
-	if (tagger)
+	എങ്കിൽ (tagger)
 		strbuf_addf(&new_data,
 			    "tagger %s\n", tagger);
 
-	handle_tag_signature(&new_data, &msg, t->name);
+	handle_tag_signature(&new_data, &സന്ദേശം, t->name);
 
 	strbuf_addch(&new_data, '\n');
-	strbuf_addbuf(&new_data, &msg);
-	free(tagger);
+	strbuf_addbuf(&new_data, &സന്ദേശം);
+	സ്വതന്ത്രം(tagger);
 
-	if (store_object(OBJ_TAG, &new_data, NULL, &t->oid, next_mark))
+	എങ്കിൽ (store_object(OBJ_TAG, &new_data, ശൂന്യ, &t->oid, next_mark))
 		t->pack_id = MAX_PACK_ID;
-	else
+	അല്ലെങ്കിൽ
 		t->pack_id = pack_id;
 }
 
-static void parse_reset_branch(struct fast_import_state *state, const char *arg)
+സ്ഥിതം ശൂന്യം parse_reset_branch(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *arg)
 {
-	struct branch *b;
-	const char *tag_name;
+	ഘടന branch *b;
+	സ്ഥിരം അക്ഷരം *tag_name;
 
 	b = lookup_branch(arg);
-	if (b) {
+	എങ്കിൽ (b) {
 		oidclr(&b->oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[0].oid, the_repository->hash_algo);
-		oidclr(&b->branch_tree.versions[1].oid, the_repository->hash_algo);
-		if (b->branch_tree.tree) {
-			release_tree_content_recursive(b->branch_tree.tree);
-			b->branch_tree.tree = NULL;
+		oidclr(&b->branch_വൃക്ഷം.versions[0].oid, the_repository->hash_algo);
+		oidclr(&b->branch_വൃക്ഷം.versions[1].oid, the_repository->hash_algo);
+		എങ്കിൽ (b->branch_വൃക്ഷം.വൃക്ഷം) {
+			release_വൃക്ഷം_content_recursive(b->branch_വൃക്ഷം.വൃക്ഷം);
+			b->branch_വൃക്ഷം.വൃക്ഷം = ശൂന്യ;
 		}
 	}
-	else
+	അല്ലെങ്കിൽ
 		b = new_branch(arg);
 	read_next_command(state);
 	parse_from(state, b);
-	if (b->delete && skip_prefix(b->name, "refs/tags/", &tag_name)) {
+	എങ്കിൽ (b->delete && skip_prefix(b->name, "refs/tags/", &tag_name)) {
 		/*
 		 * Elsewhere, we call dump_branches() before dump_tags(),
 		 * and dump_branches() will handle ref deletions first, so
@@ -3333,46 +3333,46 @@ static void parse_reset_branch(struct fast_import_state *state, const char *arg)
 		 * NEEDSWORK: replace list of tags with hashmap for faster
 		 * deletion?
 		 */
-		struct tag *t, *prev = NULL;
-		for (t = first_tag; t; t = t->next_tag) {
-			if (!strcmp(t->name, tag_name))
-				break;
+		ഘടന tag *t, *prev = ശൂന്യ;
+		വേണ്ടി (t = first_tag; t; t = t->next_tag) {
+			എങ്കിൽ (!strcmp(t->name, tag_name))
+				നിർത്തുക;
 			prev = t;
 		}
-		if (t) {
-			if (prev)
+		എങ്കിൽ (t) {
+			എങ്കിൽ (prev)
 				prev->next_tag = t->next_tag;
-			else
+			അല്ലെങ്കിൽ
 				first_tag = t->next_tag;
-			if (!t->next_tag)
+			എങ്കിൽ (!t->next_tag)
 				last_tag = prev;
 			/* There is no mem_pool_free(t) function to call. */
 		}
 	}
-	if (command_buf.len > 0)
+	എങ്കിൽ (command_buf.len > 0)
 		unread_command_buf = 1;
 }
 
-static void cat_blob_write(const char *buf, unsigned long size)
+സ്ഥിതം ശൂന്യം cat_blob_write(സ്ഥിരം അക്ഷരം *buf, unsigned long size)
 {
-	if (write_in_full(cat_blob_fd, buf, size) < 0)
+	എങ്കിൽ (write_in_full(cat_blob_fd, buf, size) < 0)
 		die_errno(_("write to frontend failed"));
 }
 
-static void cat_blob(struct object_entry *oe, struct object_id *oid)
+സ്ഥിതം ശൂന്യം cat_blob(ഘടന object_entry *oe, ഘടന object_id *oid)
 {
-	struct strbuf line = STRBUF_INIT;
-	struct iovec iov[3];
+	ഘടന strbuf വരി = STRBUF_INIT;
+	ഘടന iovec iov[3];
 	unsigned long size;
-	enum object_type type = 0;
-	char *buf;
+	എണ്ണൽ object_type type = 0;
+	അക്ഷരം *buf;
 
-	if (!oe || oe->pack_id == MAX_PACK_ID) {
+	എങ്കിൽ (!oe || oe->pack_id == MAX_PACK_ID) {
 		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
 				      &size_st);
 		size = cast_size_t_to_ulong(size_st);
-	} else {
+	} അല്ലെങ്കിൽ {
 		type = oe->type;
 		buf = gfi_unpack_entry(oe, &size);
 	}
@@ -3380,79 +3380,79 @@ static void cat_blob(struct object_entry *oe, struct object_id *oid)
 	/*
 	 * Output based on batch_one_object() from cat-file.c.
 	 */
-	if (type <= 0) {
-		strbuf_reset(&line);
-		strbuf_addf(&line, "%s missing\n", oid_to_hex(oid));
-		cat_blob_write(line.buf, line.len);
-		strbuf_release(&line);
-		free(buf);
-		return;
+	എങ്കിൽ (type <= 0) {
+		strbuf_reset(&വരി);
+		strbuf_addf(&വരി, "%s missing\n", oid_to_hex(oid));
+		cat_blob_write(വരി.buf, വരി.len);
+		strbuf_release(&വരി);
+		സ്വതന്ത്രം(buf);
+		തിരികെ;
 	}
-	if (!buf)
+	എങ്കിൽ (!buf)
 		die(_("can't read object %s"), oid_to_hex(oid));
-	if (type != OBJ_BLOB)
+	എങ്കിൽ (type != OBJ_BLOB)
 		die(_("object %s is a %s but a blob was expected."),
 		    oid_to_hex(oid), type_name(type));
-	strbuf_reset(&line);
-	strbuf_addf(&line, "%s %s %"PRIuMAX"\n", oid_to_hex(oid),
+	strbuf_reset(&വരി);
+	strbuf_addf(&വരി, "%s %s %"PRIuMAX"\n", oid_to_hex(oid),
 		    type_name(type), (uintmax_t)size);
 
 	/*
 	 * Write the header, the payload and the trailing newline with a
 	 * single writev(3p) call instead of three separate write(3p) calls.
 	 */
-	iov[0].iov_base = line.buf;
-	iov[0].iov_len = line.len;
+	iov[0].iov_base = വരി.buf;
+	iov[0].iov_len = വരി.len;
 	iov[1].iov_base = buf;
 	iov[1].iov_len = size;
-	iov[2].iov_base = (void *) "\n";
+	iov[2].iov_base = (ശൂന്യം *) "\n";
 	iov[2].iov_len = 1;
 
-	if (writev_in_full(cat_blob_fd, iov, ARRAY_SIZE(iov)) < 0)
+	എങ്കിൽ (writev_in_full(cat_blob_fd, iov, ARRAY_SIZE(iov)) < 0)
 		die_errno(_("write to frontend failed"));
-	strbuf_release(&line);
-	if (oe && oe->pack_id == pack_id) {
+	strbuf_release(&വരി);
+	എങ്കിൽ (oe && oe->pack_id == pack_id) {
 		last_blob.offset = oe->idx.offset;
 		strbuf_attach(&last_blob.data, buf, size, size + 1);
 		last_blob.depth = oe->depth;
-	} else
-		free(buf);
+	} അല്ലെങ്കിൽ
+		സ്വതന്ത്രം(buf);
 }
 
-static void parse_get_mark(struct fast_import_state *state UNUSED,
-			   const char *p)
+സ്ഥിതം ശൂന്യം parse_get_mark(ഘടന fast_import_state *state UNUSED,
+			   സ്ഥിരം അക്ഷരം *p)
 {
-	struct object_entry *oe;
-	char output[GIT_MAX_HEXSZ + 2];
+	ഘടന object_entry *oe;
+	അക്ഷരം output[GIT_MAX_HEXSZ + 2];
 
 	/* get-mark SP <object> LF */
-	if (*p != ':')
+	എങ്കിൽ (*p != ':')
 		die(_("not a mark: %s"), p);
 
 	oe = find_mark(marks, parse_mark_ref_eol(p));
-	if (!oe)
+	എങ്കിൽ (!oe)
 		die(_("unknown mark: %s"), command_buf.buf);
 
-	xsnprintf(output, sizeof(output), "%s\n", oid_to_hex(&oe->idx.oid));
+	xsnprintf(output, വലുപ്പം(output), "%s\n", oid_to_hex(&oe->idx.oid));
 	cat_blob_write(output, the_hash_algo->hexsz + 1);
 }
 
-static void parse_cat_blob(struct fast_import_state *state UNUSED,
-			   const char *p)
+സ്ഥിതം ശൂന്യം parse_cat_blob(ഘടന fast_import_state *state UNUSED,
+			   സ്ഥിരം അക്ഷരം *p)
 {
-	struct object_entry *oe;
-	struct object_id oid;
+	ഘടന object_entry *oe;
+	ഘടന object_id oid;
 
 	/* cat-blob SP <object> LF */
-	if (*p == ':') {
+	എങ്കിൽ (*p == ':') {
 		oe = find_mark(marks, parse_mark_ref_eol(p));
-		if (!oe)
+		എങ്കിൽ (!oe)
 			die(_("unknown mark: %s"), command_buf.buf);
 		oidcpy(&oid, &oe->idx.oid);
-	} else {
-		if (parse_mapped_oid_hex(p, &oid, &p))
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (parse_mapped_oid_hex(p, &oid, &p))
 			die(_("invalid dataref: %s"), command_buf.buf);
-		if (*p)
+		എങ്കിൽ (*p)
 			die(_("garbage after SHA1: %s"), command_buf.buf);
 		oe = find_object(&oid);
 	}
@@ -3460,191 +3460,191 @@ static void parse_cat_blob(struct fast_import_state *state UNUSED,
 	cat_blob(oe, &oid);
 }
 
-static struct object_entry *dereference(struct object_entry *oe,
-					struct object_id *oid)
+സ്ഥിതം ഘടന object_entry *dereference(ഘടന object_entry *oe,
+					ഘടന object_id *oid)
 {
 	unsigned long size;
-	char *buf = NULL;
-	const unsigned hexsz = the_hash_algo->hexsz;
+	അക്ഷരം *buf = ശൂന്യ;
+	സ്ഥിരം unsigned hexsz = the_hash_algo->hexsz;
 
-	if (!oe) {
-		enum object_type type = odb_read_object_info(the_repository->objects,
-							     oid, NULL);
-		if (type < 0)
+	എങ്കിൽ (!oe) {
+		എണ്ണൽ object_type type = odb_read_object_info(the_repository->objects,
+							     oid, ശൂന്യ);
+		എങ്കിൽ (type < 0)
 			die(_("object not found: %s"), oid_to_hex(oid));
 		/* cache it! */
-		oe = insert_object(oid);
+		oe = തിരുകുക_object(oid);
 		oe->type = type;
 		oe->pack_id = MAX_PACK_ID;
 		oe->idx.offset = 1;
 	}
-	switch (oe->type) {
-	case OBJ_TREE:	/* easy case. */
-		return oe;
-	case OBJ_COMMIT:
-	case OBJ_TAG:
-		break;
-	default:
+	തിരഞ്ഞെടുപ്പ് (oe->type) {
+	അവസ്ഥ OBJ_വൃക്ഷം:	/* easy case. */
+		തിരികെ oe;
+	അവസ്ഥ OBJ_COMMIT:
+	അവസ്ഥ OBJ_TAG:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		die(_("not a tree-ish: %s"), command_buf.buf);
 	}
 
-	if (oe->pack_id != MAX_PACK_ID) {	/* in a pack being written */
+	എങ്കിൽ (oe->pack_id != MAX_PACK_ID) {	/* in a pack being written */
 		buf = gfi_unpack_entry(oe, &size);
-	} else {
-		enum object_type unused;
+	} അല്ലെങ്കിൽ {
+		എണ്ണൽ object_type unused;
 		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid,
 				      &unused, &size_st);
 		size = cast_size_t_to_ulong(size_st);
 	}
-	if (!buf)
+	എങ്കിൽ (!buf)
 		die(_("can't load object %s"), oid_to_hex(oid));
 
 	/* Peel one layer. */
-	switch (oe->type) {
-	case OBJ_TAG:
-		if (size < hexsz + strlen("object ") ||
+	തിരഞ്ഞെടുപ്പ് (oe->type) {
+	അവസ്ഥ OBJ_TAG:
+		എങ്കിൽ (size < hexsz + strlen("object ") ||
 		    get_oid_hex(buf + strlen("object "), oid))
 			die(_("invalid SHA1 in tag: %s"), command_buf.buf);
-		break;
-	case OBJ_COMMIT:
-		if (size < hexsz + strlen("tree ") ||
+		നിർത്തുക;
+	അവസ്ഥ OBJ_COMMIT:
+		എങ്കിൽ (size < hexsz + strlen("tree ") ||
 		    get_oid_hex(buf + strlen("tree "), oid))
 			die(_("invalid SHA1 in commit: %s"), command_buf.buf);
 	}
 
-	free(buf);
-	return find_object(oid);
+	സ്വതന്ത്രം(buf);
+	തിരികെ find_object(oid);
 }
 
-static void insert_mapped_mark(uintmax_t mark, void *object, void *cbp)
+സ്ഥിതം ശൂന്യം തിരുകുക_mapped_mark(uintmax_t mark, ശൂന്യം *object, ശൂന്യം *cbp)
 {
-	struct object_id *fromoid = object;
-	struct object_id *tooid = find_mark(cbp, mark);
-	int ret;
+	ഘടന object_id *fromoid = object;
+	ഘടന object_id *tooid = find_mark(cbp, mark);
+	പൂർണ്ണസംഖ്യ ret;
 	khiter_t it;
 
 	it = kh_put_oid_map(sub_oid_map, *fromoid, &ret);
 	/* We've already seen this object. */
-	if (ret == 0)
-		return;
-	kh_value(sub_oid_map, it) = tooid;
+	എങ്കിൽ (ret == 0)
+		തിരികെ;
+	kh_മൂല്യം(sub_oid_map, it) = tooid;
 }
 
-static void build_mark_map_one(struct mark_set *from, struct mark_set *to)
+സ്ഥിതം ശൂന്യം build_mark_map_one(ഘടന mark_set *from, ഘടന mark_set *to)
 {
-	for_each_mark(from, 0, insert_mapped_mark, to);
+	for_each_mark(from, 0, തിരുകുക_mapped_mark, to);
 }
 
-static void build_mark_map(struct string_list *from, struct string_list *to)
+സ്ഥിതം ശൂന്യം build_mark_map(ഘടന string_list *from, ഘടന string_list *to)
 {
-	struct string_list_item *fromp, *top;
+	ഘടന string_list_item *fromp, *മുകൾ;
 
 	sub_oid_map = kh_init_oid_map();
 
 	for_each_string_list_item(fromp, from) {
-		top = string_list_lookup(to, fromp->string);
-		if (!fromp->util) {
+		മുകൾ = string_list_lookup(to, fromp->string);
+		എങ്കിൽ (!fromp->util) {
 			die(_("missing from marks for submodule '%s'"), fromp->string);
-		} else if (!top || !top->util) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!മുകൾ || !മുകൾ->util) {
 			die(_("missing to marks for submodule '%s'"), fromp->string);
 		}
-		build_mark_map_one(fromp->util, top->util);
+		build_mark_map_one(fromp->util, മുകൾ->util);
 	}
 }
 
-static struct object_entry *parse_treeish_dataref(const char **p)
+സ്ഥിതം ഘടന object_entry *parse_treeish_dataref(സ്ഥിരം അക്ഷരം **p)
 {
-	struct object_id oid;
-	struct object_entry *e;
+	ഘടന object_id oid;
+	ഘടന object_entry *e;
 
-	if (**p == ':') {	/* <mark> */
+	എങ്കിൽ (**p == ':') {	/* <mark> */
 		e = find_mark(marks, parse_mark_ref_space(p));
-		if (!e)
+		എങ്കിൽ (!e)
 			die(_("unknown mark: %s"), command_buf.buf);
 		oidcpy(&oid, &e->idx.oid);
-	} else {	/* <sha1> */
-		if (parse_mapped_oid_hex(*p, &oid, p))
+	} അല്ലെങ്കിൽ {	/* <sha1> */
+		എങ്കിൽ (parse_mapped_oid_hex(*p, &oid, p))
 			die(_("invalid dataref: %s"), command_buf.buf);
 		e = find_object(&oid);
-		if (*(*p)++ != ' ')
+		എങ്കിൽ (*(*p)++ != ' ')
 			die(_("missing space after tree-ish: %s"), command_buf.buf);
 	}
 
-	while (!e || e->type != OBJ_TREE)
+	ആകുമ്പോൾ (!e || e->type != OBJ_വൃക്ഷം)
 		e = dereference(e, &oid);
-	return e;
+	തിരികെ e;
 }
 
-static void print_ls(int mode, const unsigned char *hash, const char *path)
+സ്ഥിതം ശൂന്യം print_ls(പൂർണ്ണസംഖ്യ mode, സ്ഥിരം unsigned അക്ഷരം *hash, സ്ഥിരം അക്ഷരം *path)
 {
-	static struct strbuf line = STRBUF_INIT;
+	സ്ഥിതം ഘടന strbuf വരി = STRBUF_INIT;
 
 	/* See show_tree(). */
-	const char *type =
+	സ്ഥിരം അക്ഷരം *type =
 		S_ISGITLINK(mode) ? commit_type :
-		S_ISDIR(mode) ? tree_type :
+		S_ISDIR(mode) ? വൃക്ഷം_type :
 		blob_type;
 
-	if (!mode) {
+	എങ്കിൽ (!mode) {
 		/* missing SP path LF */
-		strbuf_reset(&line);
-		strbuf_addstr(&line, "missing ");
-		quote_c_style(path, &line, NULL, 0);
-		strbuf_addch(&line, '\n');
-	} else {
+		strbuf_reset(&വരി);
+		strbuf_addstr(&വരി, "missing ");
+		quote_c_style(path, &വരി, ശൂന്യ, 0);
+		strbuf_addch(&വരി, '\n');
+	} അല്ലെങ്കിൽ {
 		/* mode SP type SP object_name TAB path LF */
-		strbuf_reset(&line);
-		strbuf_addf(&line, "%06o %s %s\t",
+		strbuf_reset(&വരി);
+		strbuf_addf(&വരി, "%06o %s %s\t",
 				mode & ~NO_DELTA, type, hash_to_hex(hash));
-		quote_c_style(path, &line, NULL, 0);
-		strbuf_addch(&line, '\n');
+		quote_c_style(path, &വരി, ശൂന്യ, 0);
+		strbuf_addch(&വരി, '\n');
 	}
-	cat_blob_write(line.buf, line.len);
+	cat_blob_write(വരി.buf, വരി.len);
 }
 
-static void parse_ls(struct fast_import_state *state UNUSED,
-		     const char *p,
-		     struct branch *b)
+സ്ഥിതം ശൂന്യം parse_ls(ഘടന fast_import_state *state UNUSED,
+		     സ്ഥിരം അക്ഷരം *p,
+		     ഘടന branch *b)
 {
-	static struct strbuf path = STRBUF_INIT;
-	struct tree_entry *root = NULL;
-	struct tree_entry leaf = {NULL};
+	സ്ഥിതം ഘടന strbuf path = STRBUF_INIT;
+	ഘടന വൃക്ഷം_entry *വേര് = ശൂന്യ;
+	ഘടന വൃക്ഷം_entry leaf = {ശൂന്യ};
 
 	/* ls SP (<tree-ish> SP)? <path> */
-	if (*p == '"') {
-		if (!b)
+	എങ്കിൽ (*p == '"') {
+		എങ്കിൽ (!b)
 			die(_("not in a commit: %s"), command_buf.buf);
-		root = &b->branch_tree;
-	} else {
-		struct object_entry *e = parse_treeish_dataref(&p);
-		root = new_tree_entry();
-		oidcpy(&root->versions[1].oid, &e->idx.oid);
-		if (!is_null_oid(&root->versions[1].oid))
-			root->versions[1].mode = S_IFDIR;
-		load_tree(root);
+		വേര് = &b->branch_വൃക്ഷം;
+	} അല്ലെങ്കിൽ {
+		ഘടന object_entry *e = parse_treeish_dataref(&p);
+		വേര് = new_വൃക്ഷം_entry();
+		oidcpy(&വേര്->versions[1].oid, &e->idx.oid);
+		എങ്കിൽ (!is_null_oid(&വേര്->versions[1].oid))
+			വേര്->versions[1].mode = S_IFDIR;
+		load_വൃക്ഷം(വേര്);
 	}
 	strbuf_reset(&path);
 	parse_path_eol(&path, p, "path");
-	tree_content_get(root, path.buf, &leaf, 1);
+	വൃക്ഷം_content_get(വേര്, path.buf, &leaf, 1);
 	/*
 	 * A directory in preparation would have a sha1 of zero
 	 * until it is saved.  Save, for simplicity.
 	 */
-	if (S_ISDIR(leaf.versions[1].mode))
-		store_tree(&leaf);
+	എങ്കിൽ (S_ISDIR(leaf.versions[1].mode))
+		store_വൃക്ഷം(&leaf);
 
 	print_ls(leaf.versions[1].mode, leaf.versions[1].oid.hash, path.buf);
-	if (leaf.tree)
-		release_tree_content_recursive(leaf.tree);
-	if (!b || root != &b->branch_tree)
-		release_tree_entry(root);
+	എങ്കിൽ (leaf.വൃക്ഷം)
+		release_വൃക്ഷം_content_recursive(leaf.വൃക്ഷം);
+	എങ്കിൽ (!b || വേര് != &b->branch_വൃക്ഷം)
+		release_വൃക്ഷം_entry(വേര്);
 }
 
-static void checkpoint(void)
+സ്ഥിതം ശൂന്യം checkpoint(ശൂന്യം)
 {
 	checkpoint_requested = 0;
-	if (object_count) {
+	എങ്കിൽ (object_എണ്ണം) {
 		cycle_packfile();
 	}
 	dump_branches();
@@ -3652,13 +3652,13 @@ static void checkpoint(void)
 	dump_marks();
 }
 
-static void parse_checkpoint(struct fast_import_state *state UNUSED)
+സ്ഥിതം ശൂന്യം parse_checkpoint(ഘടന fast_import_state *state UNUSED)
 {
 	checkpoint_requested = 1;
 	skip_optional_lf();
 }
 
-static void parse_progress(struct fast_import_state *state UNUSED)
+സ്ഥിതം ശൂന്യം parse_progress(ഘടന fast_import_state *state UNUSED)
 {
 	fwrite(command_buf.buf, 1, command_buf.len, stdout);
 	fputc('\n', stdout);
@@ -3666,126 +3666,126 @@ static void parse_progress(struct fast_import_state *state UNUSED)
 	skip_optional_lf();
 }
 
-static void parse_alias(struct fast_import_state *state)
+സ്ഥിതം ശൂന്യം parse_alias(ഘടന fast_import_state *state)
 {
-	struct object_entry *e;
-	struct branch b;
+	ഘടന object_entry *e;
+	ഘടന branch b;
 
 	skip_optional_lf();
 	read_next_command(state);
 
 	/* mark ... */
 	parse_mark(state);
-	if (!next_mark)
+	എങ്കിൽ (!next_mark)
 		die(_("expected 'mark' command, got %s"), command_buf.buf);
 
 	/* to ... */
-	memset(&b, 0, sizeof(b));
-	if (!parse_objectish_with_prefix(state, &b, "to "))
+	memset(&b, 0, വലുപ്പം(b));
+	എങ്കിൽ (!parse_objectish_with_prefix(state, &b, "to "))
 		die(_("expected 'to' command, got %s"), command_buf.buf);
 	e = find_object(&b.oid);
-	assert(e);
-	insert_mark(&marks, next_mark, e);
+	പ്രതിജ്ഞാ(e);
+	തിരുകുക_mark(&marks, next_mark, e);
 }
 
-static char* make_fast_import_path(struct fast_import_state *state,
-				   const char *path)
+സ്ഥിതം അക്ഷരം* make_fast_import_path(ഘടന fast_import_state *state,
+				   സ്ഥിരം അക്ഷരം *path)
 {
-	if (!relative_marks_paths || is_absolute_path(path))
-		return prefix_filename(state->prefix, path);
-	return repo_git_path(the_repository, "info/fast-import/%s", path);
+	എങ്കിൽ (!relative_marks_paths || is_absolute_path(path))
+		തിരികെ prefix_filename(state->prefix, path);
+	തിരികെ repo_git_path(the_repository, "info/fast-import/%s", path);
 }
 
-static void option_import_marks(struct fast_import_state *state,
-				const char *marks,
-				int from_stream,
-				int ignore_missing)
+സ്ഥിതം ശൂന്യം option_import_marks(ഘടന fast_import_state *state,
+				സ്ഥിരം അക്ഷരം *marks,
+				പൂർണ്ണസംഖ്യ from_stream,
+				പൂർണ്ണസംഖ്യ ignore_missing)
 {
-	if (import_marks_file) {
-		if (from_stream)
+	എങ്കിൽ (import_marks_file) {
+		എങ്കിൽ (from_stream)
 			die(_("only one import-marks command allowed per stream"));
 
 		/* read previous mark file */
-		if(!import_marks_file_from_stream)
+		എങ്കിൽ(!import_marks_file_from_stream)
 			read_marks();
 	}
 
-	free(import_marks_file);
+	സ്വതന്ത്രം(import_marks_file);
 	import_marks_file = make_fast_import_path(state, marks);
 	import_marks_file_from_stream = from_stream;
 	import_marks_file_ignore_missing = ignore_missing;
 }
 
-static void option_date_format(const char *fmt)
+സ്ഥിതം ശൂന്യം option_date_format(സ്ഥിരം അക്ഷരം *fmt)
 {
-	if (!strcmp(fmt, "raw"))
+	എങ്കിൽ (!strcmp(fmt, "raw"))
 		whenspec = WHENSPEC_RAW;
-	else if (!strcmp(fmt, "raw-permissive"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(fmt, "raw-permissive"))
 		whenspec = WHENSPEC_RAW_PERMISSIVE;
-	else if (!strcmp(fmt, "rfc2822"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(fmt, "rfc2822"))
 		whenspec = WHENSPEC_RFC2822;
-	else if (!strcmp(fmt, "now"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(fmt, "now"))
 		whenspec = WHENSPEC_NOW;
-	else
+	അല്ലെങ്കിൽ
 		die(_("unknown --date-format argument %s"), fmt);
 }
 
-static unsigned long ulong_arg(const char *option, const char *arg)
+സ്ഥിതം unsigned long ulong_arg(സ്ഥിരം അക്ഷരം *option, സ്ഥിരം അക്ഷരം *arg)
 {
-	char *endptr;
+	അക്ഷരം *endptr;
 	unsigned long rv = strtoul(arg, &endptr, 0);
-	if (strchr(arg, '-') || endptr == arg || *endptr)
+	എങ്കിൽ (strchr(arg, '-') || endptr == arg || *endptr)
 		die(_("%s: argument must be a non-negative integer"), option);
-	return rv;
+	തിരികെ rv;
 }
 
-static void option_depth(const char *depth)
+സ്ഥിതം ശൂന്യം option_depth(സ്ഥിരം അക്ഷരം *depth)
 {
 	max_depth = ulong_arg("--depth", depth);
-	if (max_depth > MAX_DEPTH)
+	എങ്കിൽ (max_depth > MAX_DEPTH)
 		die(_("--depth cannot exceed %u"), MAX_DEPTH);
 }
 
-static void option_active_branches(const char *branches)
+സ്ഥിതം ശൂന്യം option_active_branches(സ്ഥിരം അക്ഷരം *branches)
 {
 	max_active_branches = ulong_arg("--active-branches", branches);
 }
 
-static void option_export_marks(struct fast_import_state *state,
-				const char *marks)
+സ്ഥിതം ശൂന്യം option_export_marks(ഘടന fast_import_state *state,
+				സ്ഥിരം അക്ഷരം *marks)
 {
-	free(export_marks_file);
+	സ്വതന്ത്രം(export_marks_file);
 	export_marks_file = make_fast_import_path(state, marks);
 }
 
-static void option_cat_blob_fd(struct fast_import_state *state UNUSED,
-			       const char *fd)
+സ്ഥിതം ശൂന്യം option_cat_blob_fd(ഘടന fast_import_state *state UNUSED,
+			       സ്ഥിരം അക്ഷരം *fd)
 {
 	unsigned long n = ulong_arg("--cat-blob-fd", fd);
-	if (n > (unsigned long) INT_MAX)
+	എങ്കിൽ (n > (unsigned long) INT_MAX)
 		die(_("--cat-blob-fd cannot exceed %d"), INT_MAX);
-	cat_blob_fd = (int) n;
+	cat_blob_fd = (പൂർണ്ണസംഖ്യ) n;
 }
 
-static void option_export_pack_edges(struct fast_import_state *state,
-				     const char *edges)
+സ്ഥിതം ശൂന്യം option_export_pack_edges(ഘടന fast_import_state *state,
+				     സ്ഥിരം അക്ഷരം *edges)
 {
-	char *fn = prefix_filename(state->prefix, edges);
-	if (pack_edges)
+	അക്ഷരം *fn = prefix_filename(state->prefix, edges);
+	എങ്കിൽ (pack_edges)
 		fclose(pack_edges);
 	pack_edges = xfopen(fn, "a");
-	free(fn);
+	സ്വതന്ത്രം(fn);
 }
 
-static void option_rewrite_submodules(struct fast_import_state *state,
-				      const char *arg,
-				      struct string_list *list)
+സ്ഥിതം ശൂന്യം option_rewrite_submodules(ഘടന fast_import_state *state,
+				      സ്ഥിരം അക്ഷരം *arg,
+				      ഘടന string_list *list)
 {
-	struct mark_set *ms;
+	ഘടന mark_set *ms;
 	FILE *fp;
-	char *s = xstrdup(arg);
-	char *f = strchr(s, ':');
-	if (!f)
+	അക്ഷരം *s = xstrdup(arg);
+	അക്ഷരം *f = strchr(s, ':');
+	എങ്കിൽ (!f)
 		die(_("expected format name:filename for submodule rewrite option"));
 	*f = '\0';
 	f++;
@@ -3793,345 +3793,345 @@ static void option_rewrite_submodules(struct fast_import_state *state,
 
 	f = prefix_filename(state->prefix, f);
 	fp = fopen(f, "r");
-	if (!fp)
+	എങ്കിൽ (!fp)
 		die_errno(_("cannot read '%s'"), f);
-	read_mark_file(&ms, fp, insert_oid_entry);
+	read_mark_file(&ms, fp, തിരുകുക_oid_entry);
 	fclose(fp);
-	free(f);
+	സ്വതന്ത്രം(f);
 
-	string_list_insert(list, s)->util = ms;
+	string_list_തിരുകുക(list, s)->util = ms;
 
-	free(s);
+	സ്വതന്ത്രം(s);
 }
 
-static void option_max_pack_size(const char *arg)
+സ്ഥിതം ശൂന്യം option_max_pack_size(സ്ഥിരം അക്ഷരം *arg)
 {
 	unsigned long v;
 
-	if (!git_parse_ulong(arg, &v))
+	എങ്കിൽ (!git_parse_ulong(arg, &v))
 		die(_("--max-pack-size: argument must be a non-negative integer"));
-	if (v < 8192) {
+	എങ്കിൽ (v < 8192) {
 		warning(_("max-pack-size is now in bytes, assuming --max-pack-size=%lum"), v);
 		v *= 1024 * 1024;
-	} else if (v < 1024 * 1024) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (v < 1024 * 1024) {
 		warning(_("minimum max-pack-size is 1 MiB"));
 		v = 1024 * 1024;
 	}
 	max_packsize = v;
 }
 
-static void option_big_file_threshold(const char *arg)
+സ്ഥിതം ശൂന്യം option_big_file_threshold(സ്ഥിരം അക്ഷരം *arg)
 {
 	unsigned long v;
 
-	if (!git_parse_ulong(arg, &v))
+	എങ്കിൽ (!git_parse_ulong(arg, &v))
 		die(_("--big-file-threshold: argument must be a non-negative integer"));
 	repo_settings_set_big_file_threshold(the_repository, v);
 }
 
-static void option_signed_commits(const char *arg)
+സ്ഥിതം ശൂന്യം option_signed_commits(സ്ഥിരം അക്ഷരം *arg)
 {
-	if (parse_sign_mode(arg, &signed_commit_mode, &signed_commit_keyid))
+	എങ്കിൽ (parse_sign_mode(arg, &signed_commit_mode, &signed_commit_keyid))
 		usagef(_("unknown --signed-commits mode '%s'"), arg);
 }
 
-static void option_signed_tags(const char *arg)
+സ്ഥിതം ശൂന്യം option_signed_tags(സ്ഥിരം അക്ഷരം *arg)
 {
-	if (parse_sign_mode(arg, &signed_tag_mode, &signed_tag_keyid))
+	എങ്കിൽ (parse_sign_mode(arg, &signed_tag_mode, &signed_tag_keyid))
 		usagef(_("unknown --signed-tags mode '%s'"), arg);
 }
 
-static void option_quiet(void)
+സ്ഥിതം ശൂന്യം option_quiet(ശൂന്യം)
 {
 	show_stats = 0;
 	quiet = 1;
 }
 
-static int parse_one_option(struct fast_import_state *state, const char *option)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_one_option(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *option)
 {
-	if (skip_prefix(option, "max-pack-size=", &option)) {
+	എങ്കിൽ (skip_prefix(option, "max-pack-size=", &option)) {
 		option_max_pack_size(option);
-	} else if (skip_prefix(option, "big-file-threshold=", &option)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(option, "big-file-threshold=", &option)) {
 		option_big_file_threshold(option);
-	} else if (skip_prefix(option, "depth=", &option)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(option, "depth=", &option)) {
 		option_depth(option);
-	} else if (skip_prefix(option, "active-branches=", &option)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(option, "active-branches=", &option)) {
 		option_active_branches(option);
-	} else if (skip_prefix(option, "export-pack-edges=", &option)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(option, "export-pack-edges=", &option)) {
 		option_export_pack_edges(state, option);
-	} else if (skip_prefix(option, "signed-commits=", &option)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(option, "signed-commits=", &option)) {
 		option_signed_commits(option);
-	} else if (skip_prefix(option, "signed-tags=", &option)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(option, "signed-tags=", &option)) {
 		option_signed_tags(option);
-	} else if (!strcmp(option, "quiet")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(option, "quiet")) {
 		option_quiet();
-	} else if (!strcmp(option, "stats")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(option, "stats")) {
 		show_stats = 1;
-	} else if (!strcmp(option, "allow-unsafe-features")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(option, "allow-unsafe-features")) {
 		; /* already handled during early option parsing */
-	} else {
-		return 0;
+	} അല്ലെങ്കിൽ {
+		തിരികെ 0;
 	}
 
-	return 1;
+	തിരികെ 1;
 }
 
-static void check_unsafe_feature(struct fast_import_state *state,
-				 const char *feature)
+സ്ഥിതം ശൂന്യം check_unsafe_feature(ഘടന fast_import_state *state,
+				 സ്ഥിരം അക്ഷരം *feature)
 {
-	if (!state->allow_unsafe_features)
+	എങ്കിൽ (!state->allow_unsafe_features)
 		die(_("feature '%s' forbidden in input without --allow-unsafe-features"),
 		    feature);
 }
 
-static int parse_one_feature(struct fast_import_state *state,
-			     const char *feature)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_one_feature(ഘടന fast_import_state *state,
+			     സ്ഥിരം അക്ഷരം *feature)
 {
-	const char *arg;
+	സ്ഥിരം അക്ഷരം *arg;
 
-	if (skip_prefix(feature, "date-format=", &arg)) {
+	എങ്കിൽ (skip_prefix(feature, "date-format=", &arg)) {
 		option_date_format(arg);
-	} else if (skip_prefix(feature, "import-marks=", &arg)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(feature, "import-marks=", &arg)) {
 		check_unsafe_feature(state, "import-marks");
 		option_import_marks(state, arg, 1, 0);
-	} else if (skip_prefix(feature, "import-marks-if-exists=", &arg)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(feature, "import-marks-if-exists=", &arg)) {
 		check_unsafe_feature(state, "import-marks-if-exists");
 		option_import_marks(state, arg, 1, 1);
-	} else if (skip_prefix(feature, "export-marks=", &arg)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(feature, "export-marks=", &arg)) {
 		check_unsafe_feature(state, feature);
 		option_export_marks(state, arg);
-	} else if (!strcmp(feature, "alias")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "alias")) {
 		; /* Don't die - this feature is supported */
-	} else if (skip_prefix(feature, "rewrite-submodules-to=", &arg)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(feature, "rewrite-submodules-to=", &arg)) {
 		option_rewrite_submodules(state, arg, &sub_marks_to);
-	} else if (skip_prefix(feature, "rewrite-submodules-from=", &arg)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(feature, "rewrite-submodules-from=", &arg)) {
 		option_rewrite_submodules(state, arg, &sub_marks_from);
-	} else if (!strcmp(feature, "get-mark")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "get-mark")) {
 		; /* Don't die - this feature is supported */
-	} else if (!strcmp(feature, "cat-blob")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "cat-blob")) {
 		; /* Don't die - this feature is supported */
-	} else if (!strcmp(feature, "relative-marks")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "relative-marks")) {
 		relative_marks_paths = 1;
-	} else if (!strcmp(feature, "no-relative-marks")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "no-relative-marks")) {
 		relative_marks_paths = 0;
-	} else if (!strcmp(feature, "done")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "done")) {
 		require_explicit_termination = 1;
-	} else if (!strcmp(feature, "force")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "force")) {
 		force_update = 1;
-	} else if (!strcmp(feature, "notes") || !strcmp(feature, "ls")) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(feature, "notes") || !strcmp(feature, "ls")) {
 		; /* do nothing; we have the feature */
-	} else {
-		return 0;
+	} അല്ലെങ്കിൽ {
+		തിരികെ 0;
 	}
 
-	return 1;
+	തിരികെ 1;
 }
 
-static void parse_feature(struct fast_import_state *state, const char *feature)
+സ്ഥിതം ശൂന്യം parse_feature(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *feature)
 {
-	if (state->seen_data_command)
+	എങ്കിൽ (state->seen_data_command)
 		die(_("got feature command '%s' after data command"), feature);
 
-	if (parse_one_feature(state, feature))
-		return;
+	എങ്കിൽ (parse_one_feature(state, feature))
+		തിരികെ;
 
 	die(_("this version of fast-import does not support feature %s."), feature);
 }
 
-static void parse_option(struct fast_import_state *state, const char *option)
+സ്ഥിതം ശൂന്യം parse_option(ഘടന fast_import_state *state, സ്ഥിരം അക്ഷരം *option)
 {
-	if (state->seen_data_command)
+	എങ്കിൽ (state->seen_data_command)
 		die(_("got option command '%s' after data command"), option);
 
-	if (parse_one_option(state, option))
-		return;
+	എങ്കിൽ (parse_one_option(state, option))
+		തിരികെ;
 
 	die(_("this version of fast-import does not support option: %s"), option);
 }
 
-static void git_pack_config(void)
+സ്ഥിതം ശൂന്യം git_pack_config(ശൂന്യം)
 {
-	int indexversion_value;
-	int limit;
-	unsigned long packsizelimit_value;
+	പൂർണ്ണസംഖ്യ indexversion_മൂല്യം;
+	പൂർണ്ണസംഖ്യ limit;
+	unsigned long packsizelimit_മൂല്യം;
 
-	if (!repo_config_get_ulong(the_repository, "pack.depth", &max_depth)) {
-		if (max_depth > MAX_DEPTH)
+	എങ്കിൽ (!repo_config_get_ulong(the_repository, "pack.depth", &max_depth)) {
+		എങ്കിൽ (max_depth > MAX_DEPTH)
 			max_depth = MAX_DEPTH;
 	}
-	if (!repo_config_get_int(the_repository, "pack.indexversion", &indexversion_value)) {
-		pack_idx_opts.version = indexversion_value;
-		if (pack_idx_opts.version > 2)
+	എങ്കിൽ (!repo_config_get_int(the_repository, "pack.indexversion", &indexversion_മൂല്യം)) {
+		pack_idx_opts.version = indexversion_മൂല്യം;
+		എങ്കിൽ (pack_idx_opts.version > 2)
 			git_die_config(the_repository, "pack.indexversion",
 				       "bad pack.indexVersion=%"PRIu32, pack_idx_opts.version);
 	}
-	if (!repo_config_get_ulong(the_repository, "pack.packsizelimit", &packsizelimit_value))
-		max_packsize = packsizelimit_value;
+	എങ്കിൽ (!repo_config_get_ulong(the_repository, "pack.packsizelimit", &packsizelimit_മൂല്യം))
+		max_packsize = packsizelimit_മൂല്യം;
 
-	if (!repo_config_get_int(the_repository, "fastimport.unpacklimit", &limit))
+	എങ്കിൽ (!repo_config_get_int(the_repository, "fastimport.unpacklimit", &limit))
 		unpack_limit = limit;
-	else if (!repo_config_get_int(the_repository, "transfer.unpacklimit", &limit))
+	അല്ലെങ്കിൽ എങ്കിൽ (!repo_config_get_int(the_repository, "transfer.unpacklimit", &limit))
 		unpack_limit = limit;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 }
 
-static const char *const fast_import_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം fast_import_usage[] = {
 	N_("git fast-import [<options>]"),
-	NULL
+	ശൂന്യ
 };
 
-static void parse_argv(struct fast_import_state *state)
+സ്ഥിതം ശൂന്യം parse_argv(ഘടന fast_import_state *state)
 {
-	int argc = parse_options(state->argc, state->argv, state->prefix,
+	പൂർണ്ണസംഖ്യ argc = parse_options(state->argc, state->argv, state->prefix,
 				 state->option, fast_import_usage,
 				 PARSE_OPT_KEEP_ARGV0);
 
-	if (argc > 1)
+	എങ്കിൽ (argc > 1)
 		usage_with_options(fast_import_usage, state->option);
 
 	state->seen_data_command = 1;
-	if (import_marks_file)
+	എങ്കിൽ (import_marks_file)
 		read_marks();
 	build_mark_map(&sub_marks_from, &sub_marks_to);
 }
 
-static int option_parse_date_format(const struct option *opt UNUSED,
-				    const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_date_format(സ്ഥിരം ഘടന option *opt UNUSED,
+				    സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_date_format(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_export_pack_edges(const struct option *opt,
-					  const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_export_pack_edges(സ്ഥിരം ഘടന option *opt,
+					  സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_export_pack_edges(opt->value, arg);
-	return 0;
+	option_export_pack_edges(opt->മൂല്യം, arg);
+	തിരികെ 0;
 }
 
-static int option_parse_max_pack_size(const struct option *opt UNUSED,
-				      const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_max_pack_size(സ്ഥിരം ഘടന option *opt UNUSED,
+				      സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_max_pack_size(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_big_file_threshold(const struct option *opt UNUSED,
-					   const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_big_file_threshold(സ്ഥിരം ഘടന option *opt UNUSED,
+					   സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_big_file_threshold(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_signed_commits(const struct option *opt UNUSED,
-				       const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_signed_commits(സ്ഥിരം ഘടന option *opt UNUSED,
+				       സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_signed_commits(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_signed_tags(const struct option *opt UNUSED,
-				    const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_signed_tags(സ്ഥിരം ഘടന option *opt UNUSED,
+				    സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_signed_tags(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_rewrite_submodules_from(const struct option *opt,
-						const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_rewrite_submodules_from(സ്ഥിരം ഘടന option *opt,
+						സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_rewrite_submodules(opt->value, arg, &sub_marks_from);
-	return 0;
+	option_rewrite_submodules(opt->മൂല്യം, arg, &sub_marks_from);
+	തിരികെ 0;
 }
 
-static int option_parse_rewrite_submodules_to(const struct option *opt,
-					      const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_rewrite_submodules_to(സ്ഥിരം ഘടന option *opt,
+					      സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_rewrite_submodules(opt->value, arg, &sub_marks_to);
-	return 0;
+	option_rewrite_submodules(opt->മൂല്യം, arg, &sub_marks_to);
+	തിരികെ 0;
 }
 
-static int option_parse_cat_blob_fd(const struct option *opt,
-				    const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_cat_blob_fd(സ്ഥിരം ഘടന option *opt,
+				    സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_cat_blob_fd(opt->value, arg);
-	return 0;
+	option_cat_blob_fd(opt->മൂല്യം, arg);
+	തിരികെ 0;
 }
 
-static int option_parse_import_marks(const struct option *opt,
-				     const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_import_marks(സ്ഥിരം ഘടന option *opt,
+				     സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_import_marks(opt->value, arg, 0, 0);
-	return 0;
+	option_import_marks(opt->മൂല്യം, arg, 0, 0);
+	തിരികെ 0;
 }
 
-static int option_parse_import_marks_if_exists(const struct option *opt,
-					       const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_import_marks_if_exists(സ്ഥിരം ഘടന option *opt,
+					       സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_import_marks(opt->value, arg, 0, 1);
-	return 0;
+	option_import_marks(opt->മൂല്യം, arg, 0, 1);
+	തിരികെ 0;
 }
 
-static int option_parse_export_marks(const struct option *opt,
-				     const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_export_marks(സ്ഥിരം ഘടന option *opt,
+				     സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	option_export_marks(opt->value, arg);
-	return 0;
+	option_export_marks(opt->മൂല്യം, arg);
+	തിരികെ 0;
 }
 
-static int option_parse_depth(const struct option *opt UNUSED,
-			      const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_depth(സ്ഥിരം ഘടന option *opt UNUSED,
+			      സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_depth(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_active_branches(const struct option *opt UNUSED,
-					const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_active_branches(സ്ഥിരം ഘടന option *opt UNUSED,
+					സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_active_branches(arg);
-	return 0;
+	തിരികെ 0;
 }
 
-static int option_parse_quiet(const struct option *opt UNUSED,
-			      const char *arg UNUSED, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ option_parse_quiet(സ്ഥിരം ഘടന option *opt UNUSED,
+			      സ്ഥിരം അക്ഷരം *arg UNUSED, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
 	option_quiet();
-	return 0;
+	തിരികെ 0;
 }
 
-int cmd_fast_import(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_fast_import(പൂർണ്ണസംഖ്യ argc,
+		    സ്ഥിരം അക്ഷരം **argv,
+		    സ്ഥിരം അക്ഷരം *prefix,
+		    ഘടന repository *repo)
 {
-	struct fast_import_state state;
+	ഘടന fast_import_state state;
 
-	struct option fast_import_options[] = {
+	ഘടന option fast_import_options[] = {
 		OPT_GROUP(N_("Common")),
-		OPT_CALLBACK_F(0, "date-format", NULL, N_("fmt"),
+		OPT_CALLBACK_F(0, "date-format", ശൂന്യ, N_("fmt"),
 			       N_("format of the commit/tag dates"),
 			       PARSE_OPT_NONEG, option_parse_date_format),
 		OPT_BOOL_F(0, "stats", &show_stats,
 			   N_("display some basic statistics (objects, packfiles and memory)"),
 			   PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "quiet", NULL, NULL,
+		OPT_CALLBACK_F(0, "quiet", ശൂന്യ, ശൂന്യ,
 			       N_("disable the output shown by --stats"),
 			       PARSE_OPT_NOARG | PARSE_OPT_NONEG,
 			       option_parse_quiet),
@@ -4139,16 +4139,16 @@ int cmd_fast_import(int argc,
 			   N_("force updating modified existing branches"), PARSE_OPT_NONEG),
 		OPT_BOOL_F(0, "done", &require_explicit_termination,
 			   N_("require a terminating 'done' command"), PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "max-pack-size", NULL, N_("n"),
+		OPT_CALLBACK_F(0, "max-pack-size", ശൂന്യ, N_("n"),
 			       N_("maximum size of each output pack file"),
 			       PARSE_OPT_NONEG, option_parse_max_pack_size),
-		OPT_CALLBACK_F(0, "big-file-threshold", NULL, N_("n"),
+		OPT_CALLBACK_F(0, "big-file-threshold", ശൂന്യ, N_("n"),
 			       N_("maximum size of a blob that will be deltified"),
 			       PARSE_OPT_NONEG, option_parse_big_file_threshold),
-		OPT_CALLBACK_F(0, "depth", NULL, N_("n"),
+		OPT_CALLBACK_F(0, "depth", ശൂന്യ, N_("n"),
 			       N_("maximum delta depth"),
 			       PARSE_OPT_NONEG, option_parse_depth),
-		OPT_CALLBACK_F(0, "active-branches", NULL, N_("n"),
+		OPT_CALLBACK_F(0, "active-branches", ശൂന്യ, N_("n"),
 			       N_("maximum number of branches to maintain active"),
 			       PARSE_OPT_NONEG, option_parse_active_branches),
 		OPT_GROUP(N_("Marks")),
@@ -4171,10 +4171,10 @@ int cmd_fast_import(int argc,
 			       N_("rewrite object IDs for submodule <name> to <filename>"),
 			       PARSE_OPT_NONEG, option_parse_rewrite_submodules_to),
 		OPT_GROUP(N_("Signing")),
-		OPT_CALLBACK_F(0, "signed-commits", NULL, N_("mode"),
+		OPT_CALLBACK_F(0, "signed-commits", ശൂന്യ, N_("mode"),
 			       N_("how to handle signed commits"),
 			       PARSE_OPT_NONEG, option_parse_signed_commits),
-		OPT_CALLBACK_F(0, "signed-tags", NULL, N_("mode"),
+		OPT_CALLBACK_F(0, "signed-tags", ശൂന്യ, N_("mode"),
 			       N_("how to handle signed tags"),
 			       PARSE_OPT_NONEG, option_parse_signed_tags),
 		OPT_HIDDEN_GROUP(N_("Advanced")),
@@ -4203,10 +4203,10 @@ int cmd_fast_import(int argc,
 	strbuf_init(&command_buf, 0);
 	CALLOC_ARRAY(atom_table, atom_table_sz);
 	CALLOC_ARRAY(branch_table, branch_table_sz);
-	CALLOC_ARRAY(avail_tree_table, avail_tree_table_sz);
-	marks = mem_pool_calloc(&fi_mem_pool, 1, sizeof(struct mark_set));
+	CALLOC_ARRAY(avail_വൃക്ഷം_table, avail_വൃക്ഷം_table_sz);
+	marks = mem_pool_calloc(&fi_mem_pool, 1, വലുപ്പം(ഘടന mark_set));
 
-	hashmap_init(&object_table, object_entry_hashcmp, NULL, 0);
+	hashmap_init(&object_table, object_entry_hashcmp, ശൂന്യ, 0);
 
 	/*
 	 * We don't parse most options until after we've seen the set of
@@ -4224,64 +4224,64 @@ int cmd_fast_import(int argc,
 	 * still refused. This errs on the safe side, but should be fixed by
 	 * teaching this scan about the options that take a value.
 	 */
-	for (int i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (*arg != '-' || !strcmp(arg, "--"))
-			break;
-		if (!strcmp(arg, "--allow-unsafe-features"))
+	വേണ്ടി (പൂർണ്ണസംഖ്യ i = 1; i < argc; i++) {
+		സ്ഥിരം അക്ഷരം *arg = argv[i];
+		എങ്കിൽ (*arg != '-' || !strcmp(arg, "--"))
+			നിർത്തുക;
+		എങ്കിൽ (!strcmp(arg, "--allow-unsafe-features"))
 			state.allow_unsafe_features = 1;
 	}
 
-	rc_free = mem_pool_alloc(&fi_mem_pool, cmd_save * sizeof(*rc_free));
-	for (unsigned int i = 0; i < (cmd_save - 1); i++)
+	rc_free = mem_pool_alloc(&fi_mem_pool, cmd_save * വലുപ്പം(*rc_free));
+	വേണ്ടി (unsigned പൂർണ്ണസംഖ്യ i = 0; i < (cmd_save - 1); i++)
 		rc_free[i].next = &rc_free[i + 1];
-	rc_free[cmd_save - 1].next = NULL;
+	rc_free[cmd_save - 1].next = ശൂന്യ;
 
 	start_packfile();
 	set_die_routine(die_nicely);
 	set_checkpoint_signal();
-	while (read_next_command(&state) != EOF) {
-		const char *v;
-		if (!strcmp("blob", command_buf.buf))
+	ആകുമ്പോൾ (read_next_command(&state) != EOF) {
+		സ്ഥിരം അക്ഷരം *v;
+		എങ്കിൽ (!strcmp("blob", command_buf.buf))
 			parse_new_blob(&state);
-		else if (skip_prefix(command_buf.buf, "commit ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "commit ", &v))
 			parse_new_commit(&state, v);
-		else if (skip_prefix(command_buf.buf, "tag ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "tag ", &v))
 			parse_new_tag(&state, v);
-		else if (skip_prefix(command_buf.buf, "reset ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "reset ", &v))
 			parse_reset_branch(&state, v);
-		else if (skip_prefix(command_buf.buf, "ls ", &v))
-			parse_ls(&state, v, NULL);
-		else if (skip_prefix(command_buf.buf, "cat-blob ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "ls ", &v))
+			parse_ls(&state, v, ശൂന്യ);
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "cat-blob ", &v))
 			parse_cat_blob(&state, v);
-		else if (skip_prefix(command_buf.buf, "get-mark ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "get-mark ", &v))
 			parse_get_mark(&state, v);
-		else if (!strcmp("checkpoint", command_buf.buf))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp("checkpoint", command_buf.buf))
 			parse_checkpoint(&state);
-		else if (!strcmp("done", command_buf.buf))
-			break;
-		else if (!strcmp("alias", command_buf.buf))
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp("done", command_buf.buf))
+			നിർത്തുക;
+		അല്ലെങ്കിൽ എങ്കിൽ (!strcmp("alias", command_buf.buf))
 			parse_alias(&state);
-		else if (starts_with(command_buf.buf, "progress "))
+		അല്ലെങ്കിൽ എങ്കിൽ (starts_with(command_buf.buf, "progress "))
 			parse_progress(&state);
-		else if (skip_prefix(command_buf.buf, "feature ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "feature ", &v))
 			parse_feature(&state, v);
-		else if (skip_prefix(command_buf.buf, "option git ", &v))
+		അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(command_buf.buf, "option git ", &v))
 			parse_option(&state, v);
-		else if (starts_with(command_buf.buf, "option "))
+		അല്ലെങ്കിൽ എങ്കിൽ (starts_with(command_buf.buf, "option "))
 			/* ignore non-git options*/;
-		else
+		അല്ലെങ്കിൽ
 			die(_("unsupported command: %s"), command_buf.buf);
 
-		if (checkpoint_requested)
+		എങ്കിൽ (checkpoint_requested)
 			checkpoint();
 	}
 
 	/* argv hasn't been parsed yet, do so */
-	if (!state.seen_data_command)
+	എങ്കിൽ (!state.seen_data_command)
 		parse_argv(&state);
 
-	if (require_explicit_termination && feof(stdin))
+	എങ്കിൽ (require_explicit_termination && feof(stdin))
 		die(_("stream ends early"));
 
 	end_packfile();
@@ -4291,35 +4291,35 @@ int cmd_fast_import(int argc,
 	unkeep_all_packs();
 	dump_marks();
 
-	if (pack_edges)
+	എങ്കിൽ (pack_edges)
 		fclose(pack_edges);
 
-	if (show_stats) {
-		uintmax_t total_count = 0, duplicate_count = 0;
-		for (size_t i = 0; i < ARRAY_SIZE(object_count_by_type); i++)
-			total_count += object_count_by_type[i];
-		for (size_t i = 0; i < ARRAY_SIZE(duplicate_count_by_type); i++)
-			duplicate_count += duplicate_count_by_type[i];
+	എങ്കിൽ (show_stats) {
+		uintmax_t total_എണ്ണം = 0, duplicate_എണ്ണം = 0;
+		വേണ്ടി (size_t i = 0; i < ARRAY_SIZE(object_എണ്ണം_by_type); i++)
+			total_എണ്ണം += object_എണ്ണം_by_type[i];
+		വേണ്ടി (size_t i = 0; i < ARRAY_SIZE(duplicate_എണ്ണം_by_type); i++)
+			duplicate_എണ്ണം += duplicate_എണ്ണം_by_type[i];
 
 		fprintf(stderr, "%s statistics:\n", argv[0]);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
-		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_count);
-		fprintf(stderr, "Total objects:   %10" PRIuMAX " (%10" PRIuMAX " duplicates                  )\n", total_count, duplicate_count);
-		fprintf(stderr, "      blobs  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_BLOB], duplicate_count_by_type[OBJ_BLOB], delta_count_by_type[OBJ_BLOB], delta_count_attempts_by_type[OBJ_BLOB]);
-		fprintf(stderr, "      trees  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_TREE], duplicate_count_by_type[OBJ_TREE], delta_count_by_type[OBJ_TREE], delta_count_attempts_by_type[OBJ_TREE]);
-		fprintf(stderr, "      commits:   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_COMMIT], duplicate_count_by_type[OBJ_COMMIT], delta_count_by_type[OBJ_COMMIT], delta_count_attempts_by_type[OBJ_COMMIT]);
-		fprintf(stderr, "      tags   :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_count_by_type[OBJ_TAG], duplicate_count_by_type[OBJ_TAG], delta_count_by_type[OBJ_TAG], delta_count_attempts_by_type[OBJ_TAG]);
-		fprintf(stderr, "Total branches:  %10lu (%10lu loads     )\n", branch_count, branch_load_count);
-		fprintf(stderr, "      marks:     %10" PRIuMAX " (%10" PRIuMAX " unique    )\n", (((uintmax_t)1) << marks->shift) * 1024, marks_set_count);
+		fprintf(stderr, "Alloc'd objects: %10" PRIuMAX "\n", alloc_എണ്ണം);
+		fprintf(stderr, "Total objects:   %10" PRIuMAX " (%10" PRIuMAX " duplicates                  )\n", total_എണ്ണം, duplicate_എണ്ണം);
+		fprintf(stderr, "      blobs  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_എണ്ണം_by_type[OBJ_BLOB], duplicate_എണ്ണം_by_type[OBJ_BLOB], delta_എണ്ണം_by_type[OBJ_BLOB], delta_എണ്ണം_attempts_by_type[OBJ_BLOB]);
+		fprintf(stderr, "      trees  :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_എണ്ണം_by_type[OBJ_വൃക്ഷം], duplicate_എണ്ണം_by_type[OBJ_വൃക്ഷം], delta_എണ്ണം_by_type[OBJ_വൃക്ഷം], delta_എണ്ണം_attempts_by_type[OBJ_വൃക്ഷം]);
+		fprintf(stderr, "      commits:   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_എണ്ണം_by_type[OBJ_COMMIT], duplicate_എണ്ണം_by_type[OBJ_COMMIT], delta_എണ്ണം_by_type[OBJ_COMMIT], delta_എണ്ണം_attempts_by_type[OBJ_COMMIT]);
+		fprintf(stderr, "      tags   :   %10" PRIuMAX " (%10" PRIuMAX " duplicates %10" PRIuMAX " deltas of %10" PRIuMAX" attempts)\n", object_എണ്ണം_by_type[OBJ_TAG], duplicate_എണ്ണം_by_type[OBJ_TAG], delta_എണ്ണം_by_type[OBJ_TAG], delta_എണ്ണം_attempts_by_type[OBJ_TAG]);
+		fprintf(stderr, "Total branches:  %10lu (%10lu loads     )\n", branch_എണ്ണം, branch_load_എണ്ണം);
+		fprintf(stderr, "      marks:     %10" PRIuMAX " (%10" PRIuMAX " unique    )\n", (((uintmax_t)1) << marks->shift) * 1024, marks_set_എണ്ണം);
 		fprintf(stderr, "      atoms:     %10u\n", atom_cnt);
-		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n", (tree_entry_allocd + fi_mem_pool.pool_alloc + alloc_count*sizeof(struct object_entry))/1024);
-		fprintf(stderr, "       pools:    %10lu KiB\n", (unsigned long)((tree_entry_allocd + fi_mem_pool.pool_alloc) /1024));
-		fprintf(stderr, "     objects:    %10" PRIuMAX " KiB\n", (alloc_count*sizeof(struct object_entry))/1024);
+		fprintf(stderr, "Memory total:    %10" PRIuMAX " KiB\n", (വൃക്ഷം_entry_allocd + fi_mem_pool.pool_alloc + alloc_എണ്ണം*വലുപ്പം(ഘടന object_entry))/1024);
+		fprintf(stderr, "       pools:    %10lu KiB\n", (unsigned long)((വൃക്ഷം_entry_allocd + fi_mem_pool.pool_alloc) /1024));
+		fprintf(stderr, "     objects:    %10" PRIuMAX " KiB\n", (alloc_എണ്ണം*വലുപ്പം(ഘടന object_entry))/1024);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
 		pack_report(repo);
 		fprintf(stderr, "---------------------------------------------------------------------\n");
 		fprintf(stderr, "\n");
 	}
 
-	return failure ? 1 : 0;
+	തിരികെ failure ? 1 : 0;
 }

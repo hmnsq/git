@@ -1,30 +1,30 @@
-#include "builtin.h"
-#include "config.h"
-#include "fmt-merge-msg.h"
-#include "gettext.h"
-#include "parse-options.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "fmt-merge-msg.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parse-options.h"
 
-static const char * const fmt_merge_msg_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം fmt_merge_സന്ദേശം_usage[] = {
 	N_("git fmt-merge-msg [-m <message>] [--log[=<n>] | --no-log] [--file <file>]"),
-	NULL
+	ശൂന്യ
 };
 
-int cmd_fmt_merge_msg(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_fmt_merge_സന്ദേശം(പൂർണ്ണസംഖ്യ argc,
+		      സ്ഥിരം അക്ഷരം **argv,
+		      സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo)
 {
-	char *inpath = NULL;
-	const char *message = NULL;
-	char *into_name = NULL;
-	int shortlog_len = -1;
-	int merge_log_config = -1;
-	struct option options[] = {
+	അക്ഷരം *inpath = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *message = ശൂന്യ;
+	അക്ഷരം *into_name = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ shortlog_len = -1;
+	പൂർണ്ണസംഖ്യ merge_log_config = -1;
+	ഘടന option options[] = {
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "log",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.മൂല്യം = &shortlog_len,
+			.precision = വലുപ്പം(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("populate log with at most <n> entries from shortlog"),
 			.flags = PARSE_OPT_OPTARG,
@@ -33,8 +33,8 @@ int cmd_fmt_merge_msg(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "summary",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.മൂല്യം = &shortlog_len,
+			.precision = വലുപ്പം(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("alias for --log (deprecated)"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_HIDDEN,
@@ -49,43 +49,43 @@ int cmd_fmt_merge_msg(int argc,
 	};
 
 	FILE *in = stdin;
-	struct strbuf input = STRBUF_INIT, output = STRBUF_INIT;
-	int ret;
-	struct fmt_merge_msg_opts opts;
+	ഘടന strbuf നിവേശം = STRBUF_INIT, output = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ ret;
+	ഘടന fmt_merge_സന്ദേശം_opts opts;
 
-	repo_config(repo, fmt_merge_msg_config, &merge_log_config);
-	argc = parse_options(argc, argv, prefix, options, fmt_merge_msg_usage,
+	repo_config(repo, fmt_merge_സന്ദേശം_config, &merge_log_config);
+	argc = parse_options(argc, argv, prefix, options, fmt_merge_സന്ദേശം_usage,
 			     0);
-	if (argc > 0)
-		usage_with_options(fmt_merge_msg_usage, options);
-	if (shortlog_len < 0)
+	എങ്കിൽ (argc > 0)
+		usage_with_options(fmt_merge_സന്ദേശം_usage, options);
+	എങ്കിൽ (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
-	if (inpath && strcmp(inpath, "-")) {
+	എങ്കിൽ (inpath && strcmp(inpath, "-")) {
 		in = fopen(inpath, "r");
-		if (!in)
+		എങ്കിൽ (!in)
 			die_errno("cannot open '%s'", inpath);
 	}
 
-	if (strbuf_read(&input, fileno(in), 0) < 0)
+	എങ്കിൽ (strbuf_read(&നിവേശം, fileno(in), 0) < 0)
 		die_errno("could not read input file");
 
-	if (message)
+	എങ്കിൽ (message)
 		strbuf_addstr(&output, message);
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, വലുപ്പം(opts));
 	opts.add_title = !message;
 	opts.credit_people = 1;
 	opts.shortlog_len = shortlog_len;
 	opts.into_name = into_name;
 
-	ret = fmt_merge_msg(&input, &output, &opts);
-	if (ret)
-		return ret;
+	ret = fmt_merge_സന്ദേശം(&നിവേശം, &output, &opts);
+	എങ്കിൽ (ret)
+		തിരികെ ret;
 	write_in_full(STDOUT_FILENO, output.buf, output.len);
 
-	strbuf_release(&input);
+	strbuf_release(&നിവേശം);
 	strbuf_release(&output);
-	free(inpath);
-	return 0;
+	സ്വതന്ത്രം(inpath);
+	തിരികെ 0;
 }

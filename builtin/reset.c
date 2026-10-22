@@ -10,160 +10,160 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "lockfile.h"
-#include "object.h"
-#include "pretty.h"
-#include "refs.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "tree.h"
-#include "branch.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "repository.h"
-#include "unpack-trees.h"
-#include "cache-tree.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "trace.h"
-#include "trace2.h"
-#include "dir.h"
-#include "add-interactive.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "advice.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hash.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "lockfile.h"
+#അന്തര്ഭാവ "object.h"
+#അന്തര്ഭാവ "pretty.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "diff.h"
+#അന്തര്ഭാവ "diffcore.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "branch.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "repository.h"
+#അന്തര്ഭാവ "unpack-trees.h"
+#അന്തര്ഭാവ "cache-tree.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "sparse-index.h"
+#അന്തര്ഭാവ "submodule.h"
+#അന്തര്ഭാവ "trace.h"
+#അന്തര്ഭാവ "trace2.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "add-interactive.h"
 
 #define REFRESH_INDEX_DELAY_WARNING_IN_MS (2 * 1000)
 
-static const char * const git_reset_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം git_reset_usage[] = {
 	N_("git reset [--mixed | --soft | --hard | --merge | --keep] [-q] [<commit>]"),
 	N_("git reset [-q] [<tree-ish>] [--] <pathspec>..."),
 	N_("git reset [-q] [--pathspec-from-file [--pathspec-file-nul]] [<tree-ish>]"),
 	N_("git reset --patch [<tree-ish>] [--] [<pathspec>...]"),
-	NULL
+	ശൂന്യ
 };
 
-enum reset_type { MIXED, SOFT, HARD, MERGE, KEEP, NONE };
-static const char *reset_type_names[] = {
-	N_("mixed"), N_("soft"), N_("hard"), N_("merge"), N_("keep"), NULL
+എണ്ണൽ reset_type { MIXED, SOFT, HARD, MERGE, KEEP, NONE };
+സ്ഥിതം സ്ഥിരം അക്ഷരം *reset_type_names[] = {
+	N_("mixed"), N_("soft"), N_("hard"), N_("merge"), N_("keep"), ശൂന്യ
 };
 
-static inline int is_merge(void)
+സ്ഥിതം വരിയിൽ പൂർണ്ണസംഖ്യ is_merge(ശൂന്യം)
 {
-	return !access(git_path_merge_head(the_repository), F_OK);
+	തിരികെ !access(git_path_merge_head(the_repository), F_OK);
 }
 
-static int reset_index(const char *ref, const struct object_id *oid, int reset_type, int quiet)
+സ്ഥിതം പൂർണ്ണസംഖ്യ reset_index(സ്ഥിരം അക്ഷരം *ref, സ്ഥിരം ഘടന object_id *oid, പൂർണ്ണസംഖ്യ reset_type, പൂർണ്ണസംഖ്യ quiet)
 {
-	int i, nr = 0;
-	struct tree_desc desc[2];
-	struct tree *tree;
-	struct unpack_trees_options opts;
-	int ret = -1;
+	പൂർണ്ണസംഖ്യ i, nr = 0;
+	ഘടന വൃക്ഷം_desc desc[2];
+	ഘടന വൃക്ഷം *വൃക്ഷം;
+	ഘടന unpack_trees_options opts;
+	പൂർണ്ണസംഖ്യ ret = -1;
 
-	memset(&opts, 0, sizeof(opts));
+	memset(&opts, 0, വലുപ്പം(opts));
 	opts.head_idx = 1;
 	opts.src_index = the_repository->index;
 	opts.dst_index = the_repository->index;
 	opts.fn = oneway_merge;
 	opts.merge = 1;
-	init_checkout_metadata(&opts.meta, ref, oid, NULL);
-	if (!quiet)
+	init_checkout_metadata(&opts.meta, ref, oid, ശൂന്യ);
+	എങ്കിൽ (!quiet)
 		opts.verbose_update = 1;
-	switch (reset_type) {
-	case KEEP:
-	case MERGE:
+	തിരഞ്ഞെടുപ്പ് (reset_type) {
+	അവസ്ഥ KEEP:
+	അവസ്ഥ MERGE:
 		opts.update = 1;
 		opts.preserve_ignored = 0; /* FIXME: !overwrite_ignore */
-		break;
-	case HARD:
+		നിർത്തുക;
+	അവസ്ഥ HARD:
 		opts.update = 1;
 		opts.reset = UNPACK_RESET_OVERWRITE_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
-		break;
-	case MIXED:
+		opts.skip_cache_വൃക്ഷം_update = 1;
+		നിർത്തുക;
+	അവസ്ഥ MIXED:
 		opts.reset = UNPACK_RESET_PROTECT_UNTRACKED;
-		opts.skip_cache_tree_update = 1;
+		opts.skip_cache_വൃക്ഷം_update = 1;
 		/* but opts.update=0, so working tree not updated */
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		BUG("invalid reset_type passed to reset_index");
 	}
 
 	repo_read_index_unmerged(the_repository);
 
-	if (reset_type == KEEP) {
-		struct object_id head_oid;
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
-			return error(_("You do not have a valid HEAD."));
-		if (!fill_tree_descriptor(the_repository, desc + nr, &head_oid))
-			return error(_("Failed to find tree of HEAD."));
+	എങ്കിൽ (reset_type == KEEP) {
+		ഘടന object_id head_oid;
+		എങ്കിൽ (repo_get_oid(the_repository, "HEAD", &head_oid))
+			തിരികെ error(_("You do not have a valid HEAD."));
+		എങ്കിൽ (!fill_വൃക്ഷം_descriptor(the_repository, desc + nr, &head_oid))
+			തിരികെ error(_("Failed to find tree of HEAD."));
 		nr++;
 		opts.fn = twoway_merge;
 	}
 
-	if (!fill_tree_descriptor(the_repository, desc + nr, oid)) {
+	എങ്കിൽ (!fill_വൃക്ഷം_descriptor(the_repository, desc + nr, oid)) {
 		error(_("Failed to find tree of %s."), oid_to_hex(oid));
-		goto out;
+		പോകുക out;
 	}
 	nr++;
 
-	if (unpack_trees(nr, desc, &opts))
-		goto out;
+	എങ്കിൽ (unpack_trees(nr, desc, &opts))
+		പോകുക out;
 
-	if (reset_type == MIXED || reset_type == HARD) {
-		tree = repo_parse_tree_indirect(the_repository, oid);
-		if (!tree) {
+	എങ്കിൽ (reset_type == MIXED || reset_type == HARD) {
+		വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository, oid);
+		എങ്കിൽ (!വൃക്ഷം) {
 			error(_("unable to read tree (%s)"), oid_to_hex(oid));
-			goto out;
+			പോകുക out;
 		}
-		prime_cache_tree(the_repository, the_repository->index, tree);
+		അഭാജ്യം_cache_വൃക്ഷം(the_repository, the_repository->index, വൃക്ഷം);
 	}
 
 	ret = 0;
 
 out:
-	for (i = 0; i < nr; i++)
-		free((void *)desc[i].buffer);
-	return ret;
+	വേണ്ടി (i = 0; i < nr; i++)
+		സ്വതന്ത്രം((ശൂന്യം *)desc[i].buffer);
+	തിരികെ ret;
 }
 
-static void print_new_head_line(struct commit *commit)
+സ്ഥിതം ശൂന്യം print_new_head_വരി(ഘടന commit *commit)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ഘടന strbuf buf = STRBUF_INIT;
 
 	printf(_("HEAD is now at %s"),
 		repo_find_unique_abbrev(the_repository, &commit->object.oid, DEFAULT_ABBREV));
 
 	pp_commit_easy(CMIT_FMT_ONELINE, commit, &buf);
-	if (buf.len > 0)
+	എങ്കിൽ (buf.len > 0)
 		printf(" %s", buf.buf);
 	putchar('\n');
 	strbuf_release(&buf);
 }
 
-static void update_index_from_diff(struct diff_queue_struct *q,
-				   struct diff_options *opt UNUSED,
-				   void *data)
+സ്ഥിതം ശൂന്യം update_index_from_diff(ഘടന diff_queue_struct *q,
+				   ഘടന diff_options *opt UNUSED,
+				   ശൂന്യം *data)
 {
-	int i;
-	int intent_to_add = *(int *)data;
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ intent_to_add = *(പൂർണ്ണസംഖ്യ *)data;
 
-	for (i = 0; i < q->nr; i++) {
-		int pos;
-		struct diff_filespec *one = q->queue[i]->one;
-		int is_in_reset_tree = one->mode && !is_null_oid(&one->oid);
-		struct cache_entry *ce;
+	വേണ്ടി (i = 0; i < q->nr; i++) {
+		പൂർണ്ണസംഖ്യ pos;
+		ഘടന diff_filespec *one = q->queue[i]->one;
+		പൂർണ്ണസംഖ്യ is_in_reset_വൃക്ഷം = one->mode && !is_null_oid(&one->oid);
+		ഘടന cache_entry *ce;
 
-		if (!is_in_reset_tree && !intent_to_add) {
+		എങ്കിൽ (!is_in_reset_വൃക്ഷം && !intent_to_add) {
 			remove_file_from_index(the_repository->index, one->path);
-			continue;
+			തുടരുക;
 		}
 
 		ce = make_cache_entry(the_repository->index, one->mode, &one->oid, one->path,
@@ -178,14 +178,14 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 		 * to properly construct the reset sparse directory.
 		 */
 		pos = index_name_pos(the_repository->index, one->path, strlen(one->path));
-		if ((pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) ||
+		എങ്കിൽ ((pos >= 0 && ce_skip_worktree(the_repository->index->cache[pos])) ||
 		    (pos < 0 && !path_in_sparse_checkout(one->path, the_repository->index)))
 			ce->ce_flags |= CE_SKIP_WORKTREE;
 
-		if (!ce)
+		എങ്കിൽ (!ce)
 			die(_("make_cache_entry failed for path '%s'"),
 			    one->path);
-		if (!is_in_reset_tree) {
+		എങ്കിൽ (!is_in_reset_വൃക്ഷം) {
 			ce->ce_flags |= CE_INTENT_TO_ADD;
 			set_object_name_for_intent_to_add_entry(ce);
 		}
@@ -194,13 +194,13 @@ static void update_index_from_diff(struct diff_queue_struct *q,
 	}
 }
 
-static int read_from_tree(const struct pathspec *pathspec,
-			  struct object_id *tree_oid,
-			  int intent_to_add)
+സ്ഥിതം പൂർണ്ണസംഖ്യ read_from_വൃക്ഷം(സ്ഥിരം ഘടന pathspec *pathspec,
+			  ഘടന object_id *വൃക്ഷം_oid,
+			  പൂർണ്ണസംഖ്യ intent_to_add)
 {
-	struct diff_options opt;
+	ഘടന diff_options opt;
 
-	memset(&opt, 0, sizeof(opt));
+	memset(&opt, 0, വലുപ്പം(opt));
 	copy_pathspec(&opt.pathspec, pathspec);
 	opt.output_format = DIFF_FORMAT_CALLBACK;
 	opt.format_callback = update_index_from_diff;
@@ -211,46 +211,46 @@ static int read_from_tree(const struct pathspec *pathspec,
 	opt.change = diff_change;
 	opt.add_remove = diff_addremove;
 
-	if (pathspec->nr && pathspec_needs_expanded_index(the_repository->index, pathspec))
+	എങ്കിൽ (pathspec->nr && pathspec_needs_expanded_index(the_repository->index, pathspec))
 		ensure_full_index(the_repository->index);
 
-	if (do_diff_cache(tree_oid, &opt))
-		return 1;
+	എങ്കിൽ (do_diff_cache(വൃക്ഷം_oid, &opt))
+		തിരികെ 1;
 	diffcore_std(&opt);
 	diff_flush(&opt);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void set_reflog_message(struct strbuf *sb, const char *action,
-			       const char *rev)
+സ്ഥിതം ശൂന്യം set_reflog_message(ഘടന strbuf *sb, സ്ഥിരം അക്ഷരം *action,
+			       സ്ഥിരം അക്ഷരം *rev)
 {
-	const char *rla = getenv("GIT_REFLOG_ACTION");
+	സ്ഥിരം അക്ഷരം *rla = getenv("GIT_REFLOG_ACTION");
 
 	strbuf_reset(sb);
-	if (rla)
+	എങ്കിൽ (rla)
 		strbuf_addf(sb, "%s: %s", rla, action);
-	else if (rev)
+	അല്ലെങ്കിൽ എങ്കിൽ (rev)
 		strbuf_addf(sb, "reset: moving to %s", rev);
-	else
+	അല്ലെങ്കിൽ
 		strbuf_addf(sb, "reset: %s", action);
 }
 
-static void die_if_unmerged_cache(int reset_type)
+സ്ഥിതം ശൂന്യം die_if_unmerged_cache(പൂർണ്ണസംഖ്യ reset_type)
 {
-	if (is_merge() || unmerged_index(the_repository->index))
+	എങ്കിൽ (is_merge() || unmerged_index(the_repository->index))
 		die(_("Cannot do a %s reset in the middle of a merge."),
 		    _(reset_type_names[reset_type]));
 
 }
 
-static void parse_args(struct pathspec *pathspec,
-		       const char **argv, const char *prefix,
-		       int patch_mode,
-		       const char **rev_ret)
+സ്ഥിതം ശൂന്യം parse_args(ഘടന pathspec *pathspec,
+		       സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+		       പൂർണ്ണസംഖ്യ patch_mode,
+		       സ്ഥിരം അക്ഷരം **rev_ret)
 {
-	const char *rev = "HEAD";
-	struct object_id unused;
+	സ്ഥിരം അക്ഷരം *rev = "HEAD";
+	ഘടന object_id unused;
 	/*
 	 * Possible arguments are:
 	 *
@@ -263,10 +263,10 @@ static void parse_args(struct pathspec *pathspec,
 	 * At this point, argv points immediately after [-opts].
 	 */
 
-	if (argv[0]) {
-		if (!strcmp(argv[0], "--")) {
+	എങ്കിൽ (argv[0]) {
+		എങ്കിൽ (!strcmp(argv[0], "--")) {
 			argv++; /* reset to HEAD, possibly with paths */
-		} else if (argv[1] && !strcmp(argv[1], "--")) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (argv[1] && !strcmp(argv[1], "--")) {
 			rev = argv[0];
 			argv += 2;
 		}
@@ -275,7 +275,7 @@ static void parse_args(struct pathspec *pathspec,
 		 * has to be unambiguous. If there is a single argument, it
 		 * can not be a tree
 		 */
-		else if ((!argv[1] && !repo_get_oid_committish(the_repository, argv[0], &unused)) ||
+		അല്ലെങ്കിൽ എങ്കിൽ ((!argv[1] && !repo_get_oid_committish(the_repository, argv[0], &unused)) ||
 			 (argv[1] && !repo_get_oid_treeish(the_repository, argv[0], &unused))) {
 			/*
 			 * Ok, argv[0] looks like a commit/tree; it should not
@@ -283,7 +283,7 @@ static void parse_args(struct pathspec *pathspec,
 			 */
 			verify_non_filename(the_repository, prefix, argv[0]);
 			rev = *argv++;
-		} else {
+		} അല്ലെങ്കിൽ {
 			/* Otherwise we treat this as a filename */
 			verify_filename(the_repository, prefix, argv[0], 1);
 		}
@@ -298,56 +298,56 @@ static void parse_args(struct pathspec *pathspec,
 		       prefix, argv);
 }
 
-static int reset_refs(const char *rev, const struct object_id *oid)
+സ്ഥിതം പൂർണ്ണസംഖ്യ reset_refs(സ്ഥിരം അക്ഷരം *rev, സ്ഥിരം ഘടന object_id *oid)
 {
-	int update_ref_status;
-	struct strbuf msg = STRBUF_INIT;
-	struct object_id *orig = NULL, oid_orig,
-		*old_orig = NULL, oid_old_orig;
+	പൂർണ്ണസംഖ്യ update_ref_status;
+	ഘടന strbuf സന്ദേശം = STRBUF_INIT;
+	ഘടന object_id *orig = ശൂന്യ, oid_orig,
+		*old_orig = ശൂന്യ, oid_old_orig;
 
-	if (!repo_get_oid(the_repository, "ORIG_HEAD", &oid_old_orig))
+	എങ്കിൽ (!repo_get_oid(the_repository, "ORIG_HEAD", &oid_old_orig))
 		old_orig = &oid_old_orig;
-	if (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
+	എങ്കിൽ (!repo_get_oid(the_repository, "HEAD", &oid_orig)) {
 		orig = &oid_orig;
-		set_reflog_message(&msg, "updating ORIG_HEAD", NULL);
-		refs_update_ref(get_main_ref_store(the_repository), msg.buf,
+		set_reflog_message(&സന്ദേശം, "updating ORIG_HEAD", ശൂന്യ);
+		refs_update_ref(get_main_ref_store(the_repository), സന്ദേശം.buf,
 				"ORIG_HEAD", orig, old_orig, 0,
-				UPDATE_REFS_MSG_ON_ERR);
-	} else if (old_orig)
-		refs_delete_ref(get_main_ref_store(the_repository), NULL,
+				UPDATE_REFS_സന്ദേശം_ON_ERR);
+	} അല്ലെങ്കിൽ എങ്കിൽ (old_orig)
+		refs_delete_ref(get_main_ref_store(the_repository), ശൂന്യ,
 				"ORIG_HEAD", old_orig, 0);
-	set_reflog_message(&msg, "updating HEAD", rev);
+	set_reflog_message(&സന്ദേശം, "updating HEAD", rev);
 	update_ref_status = refs_update_ref(get_main_ref_store(the_repository),
-					    msg.buf, "HEAD", oid, orig, 0,
-					    UPDATE_REFS_MSG_ON_ERR);
-	strbuf_release(&msg);
-	return update_ref_status;
+					    സന്ദേശം.buf, "HEAD", oid, orig, 0,
+					    UPDATE_REFS_സന്ദേശം_ON_ERR);
+	strbuf_release(&സന്ദേശം);
+	തിരികെ update_ref_status;
 }
 
-static int git_reset_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_reset_config(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം,
+			    സ്ഥിരം ഘടന config_context *ctx, ശൂന്യം *cb)
 {
-	if (!strcmp(var, "submodule.recurse"))
-		return git_default_submodule_config(var, value, cb);
+	എങ്കിൽ (!strcmp(var, "submodule.recurse"))
+		തിരികെ git_default_submodule_config(var, മൂല്യം, cb);
 
-	return git_default_config(var, value, ctx, cb);
+	തിരികെ git_default_config(var, മൂല്യം, ctx, cb);
 }
 
-int cmd_reset(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_reset(പൂർണ്ണസംഖ്യ argc,
+	      സ്ഥിരം അക്ഷരം **argv,
+	      സ്ഥിരം അക്ഷരം *prefix,
+	      ഘടന repository *repo UNUSED)
 {
-	int reset_type = NONE, update_ref_status = 0, quiet = 0;
-	int no_refresh = 0;
-	int patch_mode = 0, pathspec_file_nul = 0, unborn;
-	const char *rev;
-	char *pathspec_from_file = NULL;
-	struct object_id oid;
-	struct pathspec pathspec;
-	int intent_to_add = 0;
-	struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-	const struct option options[] = {
+	പൂർണ്ണസംഖ്യ reset_type = NONE, update_ref_status = 0, quiet = 0;
+	പൂർണ്ണസംഖ്യ no_refresh = 0;
+	പൂർണ്ണസംഖ്യ patch_mode = 0, pathspec_file_nul = 0, unborn;
+	സ്ഥിരം അക്ഷരം *rev;
+	അക്ഷരം *pathspec_from_file = ശൂന്യ;
+	ഘടന object_id oid;
+	ഘടന pathspec pathspec;
+	പൂർണ്ണസംഖ്യ intent_to_add = 0;
+	ഘടന interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+	സ്ഥിരം ഘടന option options[] = {
 		OPT__QUIET(&quiet, N_("be quiet, only report errors")),
 		OPT_BOOL(0, "no-refresh", &no_refresh,
 				N_("skip refreshing the index after reset")),
@@ -366,7 +366,7 @@ int cmd_reset(int argc,
 		OPT_SET_INT_F(0, "keep", &reset_type,
 			      N_("reset HEAD but keep local changes"),
 			      KEEP, PARSE_OPT_NONEG),
-		OPT_CALLBACK_F(0, "recurse-submodules", NULL,
+		OPT_CALLBACK_F(0, "recurse-submodules", ശൂന്യ,
 			       "reset", "control recursive updating of submodules",
 			       PARSE_OPT_OPTARG,
 			       option_parse_recurse_submodules_worktree_updater),
@@ -382,170 +382,170 @@ int cmd_reset(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_reset_config, NULL);
+	repo_config(the_repository, git_reset_config, ശൂന്യ);
 
 	argc = parse_options(argc, argv, prefix, options, git_reset_usage,
 						PARSE_OPT_KEEP_DASHDASH);
 	parse_args(&pathspec, argv, prefix, patch_mode, &rev);
 
-	if (pathspec_from_file) {
-		if (patch_mode)
+	എങ്കിൽ (pathspec_from_file) {
+		എങ്കിൽ (patch_mode)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--patch");
 
-		if (pathspec.nr)
+		എങ്കിൽ (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_FULL,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
 	unborn = !strcmp(rev, "HEAD") && repo_get_oid(the_repository, "HEAD",
 						      &oid);
-	if (unborn) {
+	എങ്കിൽ (unborn) {
 		/* reset on unborn branch: treat as reset to empty tree */
-		oidcpy(&oid, the_hash_algo->empty_tree);
-	} else if (!pathspec.nr && !patch_mode) {
-		struct commit *commit;
-		if (repo_get_oid_committish(the_repository, rev, &oid))
+		oidcpy(&oid, the_hash_algo->empty_വൃക്ഷം);
+	} അല്ലെങ്കിൽ എങ്കിൽ (!pathspec.nr && !patch_mode) {
+		ഘടന commit *commit;
+		എങ്കിൽ (repo_get_oid_committish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid revision."), rev);
 		commit = lookup_commit_reference(the_repository, &oid);
-		if (!commit)
+		എങ്കിൽ (!commit)
 			die(_("Could not parse object '%s'."), rev);
 		oidcpy(&oid, &commit->object.oid);
-	} else {
-		struct tree *tree;
-		if (repo_get_oid_treeish(the_repository, rev, &oid))
+	} അല്ലെങ്കിൽ {
+		ഘടന വൃക്ഷം *വൃക്ഷം;
+		എങ്കിൽ (repo_get_oid_treeish(the_repository, rev, &oid))
 			die(_("Failed to resolve '%s' as a valid tree."), rev);
-		tree = repo_parse_tree_indirect(the_repository, &oid);
-		if (!tree)
+		വൃക്ഷം = repo_parse_വൃക്ഷം_indirect(the_repository, &oid);
+		എങ്കിൽ (!വൃക്ഷം)
 			die(_("Could not parse object '%s'."), rev);
-		oidcpy(&oid, &tree->object.oid);
+		oidcpy(&oid, &വൃക്ഷം->object.oid);
 	}
 
-	if (interactive_opts.context < -1)
+	എങ്കിൽ (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	എങ്കിൽ (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (patch_mode) {
-		if (reset_type != NONE)
+	എങ്കിൽ (patch_mode) {
+		എങ്കിൽ (reset_type != NONE)
 			die(_("options '%s' and '%s' cannot be used together"), "--patch", "--{hard,mixed,soft}");
 		trace2_cmd_mode("patch-interactive");
 		update_ref_status = !!run_add_p(the_repository, ADD_P_RESET,
 						&interactive_opts, rev, &pathspec, 0);
-		goto cleanup;
-	} else {
-		if (interactive_opts.context != -1)
+		പോകുക cleanup;
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		എങ്കിൽ (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--patch");
-		if (!interactive_opts.auto_advance)
+		എങ്കിൽ (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--patch");
 	}
 
 	/* git reset tree [--] paths... can be used to
 	 * load chosen paths from the tree into the index without
 	 * affecting the working tree nor HEAD. */
-	if (pathspec.nr) {
-		if (reset_type == MIXED)
+	എങ്കിൽ (pathspec.nr) {
+		എങ്കിൽ (reset_type == MIXED)
 			warning(_("--mixed with paths is deprecated; use 'git reset -- <paths>' instead."));
-		else if (reset_type != NONE)
+		അല്ലെങ്കിൽ എങ്കിൽ (reset_type != NONE)
 			die(_("Cannot do %s reset with paths."),
 					_(reset_type_names[reset_type]));
 	}
-	if (reset_type == NONE)
+	എങ്കിൽ (reset_type == NONE)
 		reset_type = MIXED; /* by default */
 
-	if (pathspec.nr)
+	എങ്കിൽ (pathspec.nr)
 		trace2_cmd_mode("path");
-	else
+	അല്ലെങ്കിൽ
 		trace2_cmd_mode(reset_type_names[reset_type]);
 
-	if (reset_type != SOFT && (reset_type != MIXED || repo_get_work_tree(the_repository)))
-		setup_work_tree(the_repository);
+	എങ്കിൽ (reset_type != SOFT && (reset_type != MIXED || repo_get_work_വൃക്ഷം(the_repository)))
+		setup_work_വൃക്ഷം(the_repository);
 
-	if (reset_type == MIXED && is_bare_repository(the_repository))
+	എങ്കിൽ (reset_type == MIXED && is_bare_repository(the_repository))
 		die(_("%s reset is not allowed in a bare repository"),
 		    _(reset_type_names[reset_type]));
 
-	if (intent_to_add && reset_type != MIXED)
+	എങ്കിൽ (intent_to_add && reset_type != MIXED)
 		die(_("the option '%s' requires '%s'"), "-N", "--mixed");
 
-	if (repo_read_index(the_repository) < 0)
+	എങ്കിൽ (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	/* Soft reset does not touch the index file nor the working tree
 	 * at all, but requires them in a good order.  Other resets reset
 	 * the index file to the tree object we are switching to. */
-	if (reset_type == SOFT || reset_type == KEEP)
+	എങ്കിൽ (reset_type == SOFT || reset_type == KEEP)
 		die_if_unmerged_cache(reset_type);
 
-	if (reset_type != SOFT) {
-		struct lock_file lock = LOCK_INIT;
+	എങ്കിൽ (reset_type != SOFT) {
+		ഘടന lock_file lock = LOCK_INIT;
 		repo_hold_locked_index(the_repository, &lock,
 				       LOCK_DIE_ON_ERROR);
-		if (reset_type == MIXED) {
-			int flags = quiet ? REFRESH_QUIET : REFRESH_IN_PORCELAIN;
-			if (read_from_tree(&pathspec, &oid, intent_to_add)) {
+		എങ്കിൽ (reset_type == MIXED) {
+			പൂർണ്ണസംഖ്യ flags = quiet ? REFRESH_QUIET : REFRESH_IN_PORCELAIN;
+			എങ്കിൽ (read_from_വൃക്ഷം(&pathspec, &oid, intent_to_add)) {
 				update_ref_status = 1;
-				goto cleanup;
+				പോകുക cleanup;
 			}
 			the_repository->index->updated_skipworktree = 1;
-			if (!no_refresh && repo_get_work_tree(the_repository)) {
+			എങ്കിൽ (!no_refresh && repo_get_work_വൃക്ഷം(the_repository)) {
 				uint64_t t_begin, t_delta_in_ms;
 
 				t_begin = getnanotime();
-				refresh_index(the_repository->index, flags, NULL, NULL,
+				refresh_index(the_repository->index, flags, ശൂന്യ, ശൂന്യ,
 					      _("Unstaged changes after reset:"));
 				t_delta_in_ms = (getnanotime() - t_begin) / 1000000;
-				if (!quiet && advice_enabled(ADVICE_RESET_NO_REFRESH_WARNING) && t_delta_in_ms > REFRESH_INDEX_DELAY_WARNING_IN_MS) {
+				എങ്കിൽ (!quiet && advice_enabled(ADVICE_RESET_NO_REFRESH_WARNING) && t_delta_in_ms > REFRESH_INDEX_DELAY_WARNING_IN_MS) {
 					advise(_("It took %.2f seconds to refresh the index after reset.  You can use\n"
 						 "'--no-refresh' to avoid this."), t_delta_in_ms / 1000.0);
 				}
 			}
-		} else {
-			struct object_id dummy;
-			char *ref = NULL;
-			int err;
+		} അല്ലെങ്കിൽ {
+			ഘടന object_id dummy;
+			അക്ഷരം *ref = ശൂന്യ;
+			പൂർണ്ണസംഖ്യ err;
 
 			repo_dwim_ref(the_repository, rev, strlen(rev),
 				      &dummy, &ref, 0);
-			if (ref && !starts_with(ref, "refs/"))
+			എങ്കിൽ (ref && !starts_with(ref, "refs/"))
 				FREE_AND_NULL(ref);
 
 			err = reset_index(ref, &oid, reset_type, quiet);
-			if (reset_type == KEEP && !err)
+			എങ്കിൽ (reset_type == KEEP && !err)
 				err = reset_index(ref, &oid, MIXED, quiet);
-			if (err)
+			എങ്കിൽ (err)
 				die(_("Could not reset index file to revision '%s'."), rev);
-			free(ref);
+			സ്വതന്ത്രം(ref);
 		}
 
-		if (write_locked_index(the_repository->index, &lock, COMMIT_LOCK))
+		എങ്കിൽ (write_locked_index(the_repository->index, &lock, COMMIT_LOCK))
 			die(_("Could not write new index file."));
 	}
 
-	if (!pathspec.nr && !unborn) {
+	എങ്കിൽ (!pathspec.nr && !unborn) {
 		/* Any resets without paths update HEAD to the head being
 		 * switched to, saving the previous head in ORIG_HEAD before. */
 		update_ref_status = reset_refs(rev, &oid);
 
-		if (reset_type == HARD && !update_ref_status && !quiet)
-			print_new_head_line(lookup_commit_reference(the_repository, &oid));
+		എങ്കിൽ (reset_type == HARD && !update_ref_status && !quiet)
+			print_new_head_വരി(lookup_commit_reference(the_repository, &oid));
 	}
-	if (!pathspec.nr)
+	എങ്കിൽ (!pathspec.nr)
 		remove_branch_state(the_repository, 0);
 
 	discard_index(the_repository->index);
 
 cleanup:
 	clear_pathspec(&pathspec);
-	free(pathspec_from_file);
-	return update_ref_status;
+	സ്വതന്ത്രം(pathspec_from_file);
+	തിരികെ update_ref_status;
 }

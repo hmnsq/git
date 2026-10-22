@@ -8,264 +8,264 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
 
-#include "packfile.h"
-#include "odb.h"
-#include "strbuf.h"
+#അന്തര്ഭാവ "packfile.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "strbuf.h"
 
 #define BLKSIZE 512
 
-static const char pack_redundant_usage[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം pack_redundant_usage[] =
 "git pack-redundant [--verbose] [--alt-odb] (--all | <pack-filename>...)";
 
-static int load_all_packs, verbose, alt_odb;
+സ്ഥിതം പൂർണ്ണസംഖ്യ load_all_packs, verbose, alt_odb;
 
-struct llist_item {
-	struct llist_item *next;
-	struct object_id oid;
+ഘടന llist_item {
+	ഘടന llist_item *next;
+	ഘടന object_id oid;
 };
-static struct llist {
-	struct llist_item *front;
-	struct llist_item *back;
+സ്ഥിതം ഘടന llist {
+	ഘടന llist_item *front;
+	ഘടന llist_item *back;
 	size_t size;
 } *all_objects; /* all objects which must be present in local packfiles */
 
-static struct pack_list {
-	struct pack_list *next;
-	struct packed_git *pack;
-	struct llist *unique_objects;
-	struct llist *remaining_objects;
+സ്ഥിതം ഘടന pack_list {
+	ഘടന pack_list *next;
+	ഘടന packed_git *pack;
+	ഘടന llist *unique_objects;
+	ഘടന llist *remaining_objects;
 	size_t all_objects_size;
-} *local_packs = NULL, *altodb_packs = NULL;
+} *local_packs = ശൂന്യ, *altodb_packs = ശൂന്യ;
 
-static struct llist_item *free_nodes;
+സ്ഥിതം ഘടന llist_item *free_nodes;
 
-static inline void llist_item_put(struct llist_item *item)
+സ്ഥിതം വരിയിൽ ശൂന്യം llist_item_put(ഘടന llist_item *item)
 {
 	item->next = free_nodes;
 	free_nodes = item;
 }
 
-static inline struct llist_item *llist_item_get(void)
+സ്ഥിതം വരിയിൽ ഘടന llist_item *llist_item_get(ശൂന്യം)
 {
-	struct llist_item *new_item;
-	if ( free_nodes ) {
+	ഘടന llist_item *new_item;
+	എങ്കിൽ ( free_nodes ) {
 		new_item = free_nodes;
 		free_nodes = free_nodes->next;
-	} else {
-		int i = 1;
+	} അല്ലെങ്കിൽ {
+		പൂർണ്ണസംഖ്യ i = 1;
 		ALLOC_ARRAY(new_item, BLKSIZE);
-		for (; i < BLKSIZE; i++)
+		വേണ്ടി (; i < BLKSIZE; i++)
 			llist_item_put(&new_item[i]);
 	}
-	return new_item;
+	തിരികെ new_item;
 }
 
-static inline void llist_init(struct llist **list)
+സ്ഥിതം വരിയിൽ ശൂന്യം llist_init(ഘടന llist **list)
 {
-	*list = xmalloc(sizeof(struct llist));
-	(*list)->front = (*list)->back = NULL;
+	*list = xmalloc(വലുപ്പം(ഘടന llist));
+	(*list)->front = (*list)->back = ശൂന്യ;
 	(*list)->size = 0;
 }
 
-static void llist_free(struct llist *list)
+സ്ഥിതം ശൂന്യം llist_free(ഘടന llist *list)
 {
-	for (struct llist_item *i = list->front, *next; i; i = next) {
+	വേണ്ടി (ഘടന llist_item *i = list->front, *next; i; i = next) {
 		next = i->next;
 		llist_item_put(i);
 	}
-	free(list);
+	സ്വതന്ത്രം(list);
 }
 
-static struct llist * llist_copy(struct llist *list)
+സ്ഥിതം ഘടന llist * llist_copy(ഘടന llist *list)
 {
-	struct llist *ret;
-	struct llist_item *new_item, *old_item, *prev;
+	ഘടന llist *ret;
+	ഘടന llist_item *new_item, *old_item, *prev;
 
 	llist_init(&ret);
 
-	if ((ret->size = list->size) == 0)
-		return ret;
+	എങ്കിൽ ((ret->size = list->size) == 0)
+		തിരികെ ret;
 
 	new_item = ret->front = llist_item_get();
 	new_item->oid = list->front->oid;
 
 	old_item = list->front->next;
-	while (old_item) {
+	ആകുമ്പോൾ (old_item) {
 		prev = new_item;
 		new_item = llist_item_get();
 		prev->next = new_item;
 		new_item->oid = old_item->oid;
 		old_item = old_item->next;
 	}
-	new_item->next = NULL;
+	new_item->next = ശൂന്യ;
 	ret->back = new_item;
 
-	return ret;
+	തിരികെ ret;
 }
 
-static inline struct llist_item *llist_insert(struct llist *list,
-					      struct llist_item *after,
-					      const unsigned char *oid)
+സ്ഥിതം വരിയിൽ ഘടന llist_item *llist_തിരുകുക(ഘടന llist *list,
+					      ഘടന llist_item *after,
+					      സ്ഥിരം unsigned അക്ഷരം *oid)
 {
-	struct llist_item *new_item = llist_item_get();
+	ഘടന llist_item *new_item = llist_item_get();
 	oidread(&new_item->oid, oid, the_repository->hash_algo);
-	new_item->next = NULL;
+	new_item->next = ശൂന്യ;
 
-	if (after) {
+	എങ്കിൽ (after) {
 		new_item->next = after->next;
 		after->next = new_item;
-		if (after == list->back)
+		എങ്കിൽ (after == list->back)
 			list->back = new_item;
-	} else {/* insert in front */
-		if (list->size == 0)
+	} അല്ലെങ്കിൽ {/* insert in front */
+		എങ്കിൽ (list->size == 0)
 			list->back = new_item;
-		else
+		അല്ലെങ്കിൽ
 			new_item->next = list->front;
 		list->front = new_item;
 	}
 	list->size++;
-	return new_item;
+	തിരികെ new_item;
 }
 
-static inline struct llist_item *llist_insert_back(struct llist *list,
-						   const unsigned char *oid)
+സ്ഥിതം വരിയിൽ ഘടന llist_item *llist_തിരുകുക_back(ഘടന llist *list,
+						   സ്ഥിരം unsigned അക്ഷരം *oid)
 {
-	return llist_insert(list, list->back, oid);
+	തിരികെ llist_തിരുകുക(list, list->back, oid);
 }
 
-static inline struct llist_item *llist_insert_sorted_unique(struct llist *list,
-			const struct object_id *oid, struct llist_item *hint)
+സ്ഥിതം വരിയിൽ ഘടന llist_item *llist_തിരുകുക_sorted_unique(ഘടന llist *list,
+			സ്ഥിരം ഘടന object_id *oid, ഘടന llist_item *hint)
 {
-	struct llist_item *prev = NULL, *l;
+	ഘടന llist_item *prev = ശൂന്യ, *l;
 
-	l = (hint == NULL) ? list->front : hint;
-	while (l) {
-		int cmp = oidcmp(&l->oid, oid);
-		if (cmp > 0) { /* we insert before this entry */
-			return llist_insert(list, prev, oid->hash);
+	l = (hint == ശൂന്യ) ? list->front : hint;
+	ആകുമ്പോൾ (l) {
+		പൂർണ്ണസംഖ്യ cmp = oidcmp(&l->oid, oid);
+		എങ്കിൽ (cmp > 0) { /* we insert before this entry */
+			തിരികെ llist_തിരുകുക(list, prev, oid->hash);
 		}
-		if (!cmp) { /* already exists */
-			return l;
+		എങ്കിൽ (!cmp) { /* already exists */
+			തിരികെ l;
 		}
 		prev = l;
 		l = l->next;
 	}
 	/* insert at the end */
-	return llist_insert_back(list, oid->hash);
+	തിരികെ llist_തിരുകുക_back(list, oid->hash);
 }
 
 /* returns a pointer to an item in front of sha1 */
-static inline struct llist_item * llist_sorted_remove(struct llist *list, const unsigned char *oid, struct llist_item *hint)
+സ്ഥിതം വരിയിൽ ഘടന llist_item * llist_sorted_remove(ഘടന llist *list, സ്ഥിരം unsigned അക്ഷരം *oid, ഘടന llist_item *hint)
 {
-	struct llist_item *prev, *l;
+	ഘടന llist_item *prev, *l;
 
 redo_from_start:
-	l = (hint == NULL) ? list->front : hint;
-	prev = NULL;
-	while (l) {
-		const int cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
-		if (cmp > 0) /* not in list, since sorted */
-			return prev;
-		if (!cmp) { /* found */
-			if (!prev) {
-				if (hint != NULL && hint != list->front) {
+	l = (hint == ശൂന്യ) ? list->front : hint;
+	prev = ശൂന്യ;
+	ആകുമ്പോൾ (l) {
+		സ്ഥിരം പൂർണ്ണസംഖ്യ cmp = hashcmp(l->oid.hash, oid, the_repository->hash_algo);
+		എങ്കിൽ (cmp > 0) /* not in list, since sorted */
+			തിരികെ prev;
+		എങ്കിൽ (!cmp) { /* found */
+			എങ്കിൽ (!prev) {
+				എങ്കിൽ (hint != ശൂന്യ && hint != list->front) {
 					/* we don't know the previous element */
-					hint = NULL;
-					goto redo_from_start;
+					hint = ശൂന്യ;
+					പോകുക redo_from_start;
 				}
 				list->front = l->next;
-			} else
+			} അല്ലെങ്കിൽ
 				prev->next = l->next;
-			if (l == list->back)
+			എങ്കിൽ (l == list->back)
 				list->back = prev;
 			llist_item_put(l);
 			list->size--;
-			return prev;
+			തിരികെ prev;
 		}
 		prev = l;
 		l = l->next;
 	}
-	return prev;
+	തിരികെ prev;
 }
 
 /* computes A\B */
-static void llist_sorted_difference_inplace(struct llist *A,
-				     struct llist *B)
+സ്ഥിതം ശൂന്യം llist_sorted_difference_inplace(ഘടന llist *A,
+				     ഘടന llist *B)
 {
-	struct llist_item *hint, *b;
+	ഘടന llist_item *hint, *b;
 
-	hint = NULL;
+	hint = ശൂന്യ;
 	b = B->front;
 
-	while (b) {
+	ആകുമ്പോൾ (b) {
 		hint = llist_sorted_remove(A, b->oid.hash, hint);
 		b = b->next;
 	}
 }
 
-static inline struct pack_list * pack_list_insert(struct pack_list **pl,
-					   struct pack_list *entry)
+സ്ഥിതം വരിയിൽ ഘടന pack_list * pack_list_തിരുകുക(ഘടന pack_list **pl,
+					   ഘടന pack_list *entry)
 {
-	struct pack_list *p = xmalloc(sizeof(struct pack_list));
-	memcpy(p, entry, sizeof(struct pack_list));
+	ഘടന pack_list *p = xmalloc(വലുപ്പം(ഘടന pack_list));
+	memcpy(p, entry, വലുപ്പം(ഘടന pack_list));
 	p->next = *pl;
 	*pl = p;
-	return p;
+	തിരികെ p;
 }
 
-static void pack_list_free(struct pack_list *pl)
+സ്ഥിതം ശൂന്യം pack_list_free(ഘടന pack_list *pl)
 {
-	for (struct pack_list *next; pl; pl = next) {
+	വേണ്ടി (ഘടന pack_list *next; pl; pl = next) {
 		next = pl->next;
-		free(pl);
+		സ്വതന്ത്രം(pl);
 	}
 }
 
-static inline size_t pack_list_size(struct pack_list *pl)
+സ്ഥിതം വരിയിൽ size_t pack_list_size(ഘടന pack_list *pl)
 {
 	size_t ret = 0;
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		ret++;
 		pl = pl->next;
 	}
-	return ret;
+	തിരികെ ret;
 }
 
-static struct pack_list * pack_list_difference(const struct pack_list *A,
-					       const struct pack_list *B)
+സ്ഥിതം ഘടന pack_list * pack_list_difference(സ്ഥിരം ഘടന pack_list *A,
+					       സ്ഥിരം ഘടന pack_list *B)
 {
-	struct pack_list *ret;
-	const struct pack_list *pl;
+	ഘടന pack_list *ret;
+	സ്ഥിരം ഘടന pack_list *pl;
 
-	if (!A)
-		return NULL;
+	എങ്കിൽ (!A)
+		തിരികെ ശൂന്യ;
 
 	pl = B;
-	while (pl != NULL) {
-		if (A->pack == pl->pack)
-			return pack_list_difference(A->next, B);
+	ആകുമ്പോൾ (pl != ശൂന്യ) {
+		എങ്കിൽ (A->pack == pl->pack)
+			തിരികെ pack_list_difference(A->next, B);
 		pl = pl->next;
 	}
-	ret = xmalloc(sizeof(struct pack_list));
-	memcpy(ret, A, sizeof(struct pack_list));
+	ret = xmalloc(വലുപ്പം(ഘടന pack_list));
+	memcpy(ret, A, വലുപ്പം(ഘടന pack_list));
 	ret->next = pack_list_difference(A->next, B);
-	return ret;
+	തിരികെ ret;
 }
 
-static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
+സ്ഥിതം ശൂന്യം cmp_two_packs(ഘടന pack_list *p1, ഘടന pack_list *p2)
 {
 	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	struct llist_item *p1_hint = NULL, *p2_hint = NULL;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	സ്ഥിരം unsigned അക്ഷരം *p1_base, *p2_base;
+	ഘടന llist_item *p1_hint = ശൂന്യ, *p2_hint = ശൂന്യ;
+	സ്ഥിരം unsigned പൂർണ്ണസംഖ്യ hashsz = the_hash_algo->rawsz;
 
-	if (!p1->unique_objects)
+	എങ്കിൽ (!p1->unique_objects)
 		p1->unique_objects = llist_copy(p1->remaining_objects);
-	if (!p2->unique_objects)
+	എങ്കിൽ (!p2->unique_objects)
 		p2->unique_objects = llist_copy(p2->remaining_objects);
 
 	p1_base = p1->pack->index_data;
@@ -275,13 +275,13 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 	p1_step = hashsz + ((p1->pack->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->pack->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->pack->num_objects * p1_step &&
-	       p2_off < p2->pack->num_objects * p2_step)
+	ആകുമ്പോൾ (p1_off < p1->pack->അക്കം_objects * p1_step &&
+	       p2_off < p2->pack->അക്കം_objects * p2_step)
 	{
-		const int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		സ്ഥിരം പൂർണ്ണസംഖ്യ cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 					the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		എങ്കിൽ (cmp == 0) {
 			p1_hint = llist_sorted_remove(p1->unique_objects,
 					p1_base + p1_off,
 					p1_hint);
@@ -290,22 +290,22 @@ static void cmp_two_packs(struct pack_list *p1, struct pack_list *p2)
 					p2_hint);
 			p1_off += p1_step;
 			p2_off += p2_step;
-			continue;
+			തുടരുക;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		എങ്കിൽ (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} അല്ലെങ്കിൽ { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
 }
 
-static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
+സ്ഥിതം size_t sizeof_union(ഘടന packed_git *p1, ഘടന packed_git *p2)
 {
 	size_t ret = 0;
 	size_t p1_off = 0, p2_off = 0, p1_step, p2_step;
-	const unsigned char *p1_base, *p2_base;
-	const unsigned int hashsz = the_hash_algo->rawsz;
+	സ്ഥിരം unsigned അക്ഷരം *p1_base, *p2_base;
+	സ്ഥിരം unsigned പൂർണ്ണസംഖ്യ hashsz = the_hash_algo->rawsz;
 
 	p1_base = p1->index_data;
 	p2_base = p2->index_data;
@@ -314,121 +314,121 @@ static size_t sizeof_union(struct packed_git *p1, struct packed_git *p2)
 	p1_step = hashsz + ((p1->index_version < 2) ? 4 : 0);
 	p2_step = hashsz + ((p2->index_version < 2) ? 4 : 0);
 
-	while (p1_off < p1->num_objects * p1_step &&
-	       p2_off < p2->num_objects * p2_step)
+	ആകുമ്പോൾ (p1_off < p1->അക്കം_objects * p1_step &&
+	       p2_off < p2->അക്കം_objects * p2_step)
 	{
-		int cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
+		പൂർണ്ണസംഖ്യ cmp = hashcmp(p1_base + p1_off, p2_base + p2_off,
 				  the_repository->hash_algo);
 		/* cmp ~ p1 - p2 */
-		if (cmp == 0) {
+		എങ്കിൽ (cmp == 0) {
 			ret++;
 			p1_off += p1_step;
 			p2_off += p2_step;
-			continue;
+			തുടരുക;
 		}
-		if (cmp < 0) { /* p1 has the object, p2 doesn't */
+		എങ്കിൽ (cmp < 0) { /* p1 has the object, p2 doesn't */
 			p1_off += p1_step;
-		} else { /* p2 has the object, p1 doesn't */
+		} അല്ലെങ്കിൽ { /* p2 has the object, p1 doesn't */
 			p2_off += p2_step;
 		}
 	}
-	return ret;
+	തിരികെ ret;
 }
 
 /* another O(n^2) function ... */
-static size_t get_pack_redundancy(struct pack_list *pl)
+സ്ഥിതം size_t get_pack_redundancy(ഘടന pack_list *pl)
 {
-	struct pack_list *subset;
+	ഘടന pack_list *subset;
 	size_t ret = 0;
 
-	if (!pl)
-		return 0;
+	എങ്കിൽ (!pl)
+		തിരികെ 0;
 
-	while ((subset = pl->next)) {
-		while (subset) {
+	ആകുമ്പോൾ ((subset = pl->next)) {
+		ആകുമ്പോൾ (subset) {
 			ret += sizeof_union(pl->pack, subset->pack);
 			subset = subset->next;
 		}
 		pl = pl->next;
 	}
-	return ret;
+	തിരികെ ret;
 }
 
-static inline off_t pack_set_bytecount(struct pack_list *pl)
+സ്ഥിതം വരിയിൽ off_t pack_set_bytecount(ഘടന pack_list *pl)
 {
 	off_t ret = 0;
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		ret += pl->pack->pack_size;
 		ret += pl->pack->index_size;
 		pl = pl->next;
 	}
-	return ret;
+	തിരികെ ret;
 }
 
-static int cmp_remaining_objects(const void *a, const void *b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmp_remaining_objects(സ്ഥിരം ശൂന്യം *a, സ്ഥിരം ശൂന്യം *b)
 {
-	struct pack_list *pl_a = *((struct pack_list **)a);
-	struct pack_list *pl_b = *((struct pack_list **)b);
+	ഘടന pack_list *pl_a = *((ഘടന pack_list **)a);
+	ഘടന pack_list *pl_b = *((ഘടന pack_list **)b);
 
-	if (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
+	എങ്കിൽ (pl_a->remaining_objects->size == pl_b->remaining_objects->size) {
 		/* have the same remaining_objects, big pack first */
-		if (pl_a->all_objects_size == pl_b->all_objects_size)
-			return 0;
-		else if (pl_a->all_objects_size < pl_b->all_objects_size)
-			return 1;
-		else
-			return -1;
-	} else if (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
+		എങ്കിൽ (pl_a->all_objects_size == pl_b->all_objects_size)
+			തിരികെ 0;
+		അല്ലെങ്കിൽ എങ്കിൽ (pl_a->all_objects_size < pl_b->all_objects_size)
+			തിരികെ 1;
+		അല്ലെങ്കിൽ
+			തിരികെ -1;
+	} അല്ലെങ്കിൽ എങ്കിൽ (pl_a->remaining_objects->size < pl_b->remaining_objects->size) {
 		/* sort by remaining objects, more objects first */
-		return 1;
-	} else {
-		return -1;
+		തിരികെ 1;
+	} അല്ലെങ്കിൽ {
+		തിരികെ -1;
 	}
 }
 
 /* Sort pack_list, greater size of remaining_objects first */
-static void sort_pack_list(struct pack_list **pl)
+സ്ഥിതം ശൂന്യം sort_pack_list(ഘടന pack_list **pl)
 {
-	struct pack_list **ary, *p;
+	ഘടന pack_list **ary, *p;
 	size_t n = pack_list_size(*pl);
 
-	if (n < 2)
-		return;
+	എങ്കിൽ (n < 2)
+		തിരികെ;
 
 	/* prepare an array of packed_list for easier sorting */
 	CALLOC_ARRAY(ary, n);
-	for (n = 0, p = *pl; p; p = p->next)
+	വേണ്ടി (n = 0, p = *pl; p; p = p->next)
 		ary[n++] = p;
 
 	QSORT(ary, n, cmp_remaining_objects);
 
 	/* link them back again */
-	for (size_t i = 0; i < n - 1; i++)
+	വേണ്ടി (size_t i = 0; i < n - 1; i++)
 		ary[i]->next = ary[i + 1];
-	ary[n - 1]->next = NULL;
+	ary[n - 1]->next = ശൂന്യ;
 	*pl = ary[0];
 
-	free(ary);
+	സ്വതന്ത്രം(ary);
 }
 
 
-static void minimize(struct pack_list **min)
+സ്ഥിതം ശൂന്യം minimize(ഘടന pack_list **min)
 {
-	struct pack_list *pl, *unique = NULL, *non_unique = NULL;
-	struct llist *missing, *unique_pack_objects;
+	ഘടന pack_list *pl, *unique = ശൂന്യ, *non_unique = ശൂന്യ;
+	ഘടന llist *missing, *unique_pack_objects;
 
 	pl = local_packs;
-	while (pl) {
-		if (pl->unique_objects->size)
-			pack_list_insert(&unique, pl);
-		else
-			pack_list_insert(&non_unique, pl);
+	ആകുമ്പോൾ (pl) {
+		എങ്കിൽ (pl->unique_objects->size)
+			pack_list_തിരുകുക(&unique, pl);
+		അല്ലെങ്കിൽ
+			pack_list_തിരുകുക(&non_unique, pl);
 		pl = pl->next;
 	}
 	/* find out which objects are missing from the set of unique packs */
 	missing = llist_copy(all_objects);
 	pl = unique;
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		llist_sorted_difference_inplace(missing, pl->remaining_objects);
 		pl = pl->next;
 	}
@@ -436,10 +436,10 @@ static void minimize(struct pack_list **min)
 	*min = unique;
 
 	/* return if there are no objects missing from the unique set */
-	if (missing->size == 0) {
+	എങ്കിൽ (missing->size == 0) {
 		llist_free(missing);
 		pack_list_free(non_unique);
-		return;
+		തിരികെ;
 	}
 
 	unique_pack_objects = llist_copy(all_objects);
@@ -447,26 +447,26 @@ static void minimize(struct pack_list **min)
 
 	/* remove unique pack objects from the non_unique packs */
 	pl = non_unique;
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, unique_pack_objects);
 		pl = pl->next;
 	}
 
-	while (non_unique) {
-		struct pack_list *next;
+	ആകുമ്പോൾ (non_unique) {
+		ഘടന pack_list *next;
 
 		/* sort the non_unique packs, greater size of remaining_objects first */
 		sort_pack_list(&non_unique);
-		if (non_unique->remaining_objects->size == 0)
-			break;
+		എങ്കിൽ (non_unique->remaining_objects->size == 0)
+			നിർത്തുക;
 
-		pack_list_insert(min, non_unique);
+		pack_list_തിരുകുക(min, non_unique);
 
-		for (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
+		വേണ്ടി (pl = non_unique->next; pl && pl->remaining_objects->size > 0;  pl = pl->next)
 			llist_sorted_difference_inplace(pl->remaining_objects, non_unique->remaining_objects);
 
 		next = non_unique->next;
-		free(non_unique);
+		സ്വതന്ത്രം(non_unique);
 		non_unique = next;
 	}
 
@@ -475,18 +475,18 @@ static void minimize(struct pack_list **min)
 	llist_free(missing);
 }
 
-static void load_all_objects(void)
+സ്ഥിതം ശൂന്യം load_all_objects(ശൂന്യം)
 {
-	struct pack_list *pl = local_packs;
-	struct llist_item *hint, *l;
+	ഘടന pack_list *pl = local_packs;
+	ഘടന llist_item *hint, *l;
 
 	llist_init(&all_objects);
 
-	while (pl) {
-		hint = NULL;
+	ആകുമ്പോൾ (pl) {
+		hint = ശൂന്യ;
 		l = pl->remaining_objects->front;
-		while (l) {
-			hint = llist_insert_sorted_unique(all_objects,
+		ആകുമ്പോൾ (l) {
+			hint = llist_തിരുകുക_sorted_unique(all_objects,
 							  &l->oid, hint);
 			l = l->next;
 		}
@@ -494,38 +494,38 @@ static void load_all_objects(void)
 	}
 	/* remove objects present in remote packs */
 	pl = altodb_packs;
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		llist_sorted_difference_inplace(all_objects, pl->remaining_objects);
 		pl = pl->next;
 	}
 }
 
 /* this scales like O(n^2) */
-static void cmp_local_packs(void)
+സ്ഥിതം ശൂന്യം cmp_local_packs(ശൂന്യം)
 {
-	struct pack_list *subset, *pl = local_packs;
+	ഘടന pack_list *subset, *pl = local_packs;
 
 	/* only one packfile */
-	if (!pl->next) {
+	എങ്കിൽ (!pl->next) {
 		llist_init(&pl->unique_objects);
-		return;
+		തിരികെ;
 	}
 
-	while ((subset = pl)) {
-		while ((subset = subset->next))
+	ആകുമ്പോൾ ((subset = pl)) {
+		ആകുമ്പോൾ ((subset = subset->next))
 			cmp_two_packs(pl, subset);
 		pl = pl->next;
 	}
 }
 
-static void scan_alt_odb_packs(void)
+സ്ഥിതം ശൂന്യം scan_alt_odb_packs(ശൂന്യം)
 {
-	struct pack_list *local, *alt;
+	ഘടന pack_list *local, *alt;
 
 	alt = altodb_packs;
-	while (alt) {
+	ആകുമ്പോൾ (alt) {
 		local = local_packs;
-		while (local) {
+		ആകുമ്പോൾ (local) {
 			llist_sorted_difference_inplace(local->remaining_objects,
 							alt->remaining_objects);
 			local = local->next;
@@ -534,125 +534,125 @@ static void scan_alt_odb_packs(void)
 	}
 }
 
-static struct pack_list * add_pack(struct packed_git *p)
+സ്ഥിതം ഘടന pack_list * add_pack(ഘടന packed_git *p)
 {
-	struct pack_list l;
+	ഘടന pack_list l;
 	size_t off = 0, step;
-	const unsigned char *base;
+	സ്ഥിരം unsigned അക്ഷരം *base;
 
-	if (!p->pack_local && !(alt_odb || verbose))
-		return NULL;
+	എങ്കിൽ (!p->pack_local && !(alt_odb || verbose))
+		തിരികെ ശൂന്യ;
 
 	l.pack = p;
 	llist_init(&l.remaining_objects);
 
-	if (open_pack_index(p)) {
+	എങ്കിൽ (open_pack_index(p)) {
 		llist_free(l.remaining_objects);
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
 	base = p->index_data;
 	base += 256 * 4 + ((p->index_version < 2) ? 4 : 8);
 	step = the_hash_algo->rawsz + ((p->index_version < 2) ? 4 : 0);
-	while (off < p->num_objects * step) {
-		llist_insert_back(l.remaining_objects, base + off);
+	ആകുമ്പോൾ (off < p->അക്കം_objects * step) {
+		llist_തിരുകുക_back(l.remaining_objects, base + off);
 		off += step;
 	}
 	l.all_objects_size = l.remaining_objects->size;
-	l.unique_objects = NULL;
-	if (p->pack_local)
-		return pack_list_insert(&local_packs, &l);
-	else
-		return pack_list_insert(&altodb_packs, &l);
+	l.unique_objects = ശൂന്യ;
+	എങ്കിൽ (p->pack_local)
+		തിരികെ pack_list_തിരുകുക(&local_packs, &l);
+	അല്ലെങ്കിൽ
+		തിരികെ pack_list_തിരുകുക(&altodb_packs, &l);
 }
 
-static struct pack_list * add_pack_file(const char *filename)
+സ്ഥിതം ഘടന pack_list * add_pack_file(സ്ഥിരം അക്ഷരം *filename)
 {
-	struct packed_git *p;
+	ഘടന packed_git *p;
 
-	if (strlen(filename) < 40)
+	എങ്കിൽ (strlen(filename) < 40)
 		die("Bad pack filename: %s", filename);
 
 	repo_for_each_pack(the_repository, p)
-		if (strstr(p->pack_name, filename))
-			return add_pack(p);
+		എങ്കിൽ (strstr(p->pack_name, filename))
+			തിരികെ add_pack(p);
 	die("Filename %s not found in packed_git", filename);
 }
 
-static void load_all(void)
+സ്ഥിതം ശൂന്യം load_all(ശൂന്യം)
 {
-	struct packed_git *p;
+	ഘടന packed_git *p;
 
 	repo_for_each_pack(the_repository, p)
 		add_pack(p);
 }
 
-int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, struct repository *repo UNUSED) {
-	int i; int i_still_use_this = 0; struct pack_list *min = NULL, *red, *pl;
-	struct llist *ignore;
-	struct strbuf idx_name = STRBUF_INIT;
-	char buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
+പൂർണ്ണസംഖ്യ cmd_pack_redundant(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix UNUSED, ഘടന repository *repo UNUSED) {
+	പൂർണ്ണസംഖ്യ i; പൂർണ്ണസംഖ്യ i_still_use_this = 0; ഘടന pack_list *min = ശൂന്യ, *red, *pl;
+	ഘടന llist *ignore;
+	ഘടന strbuf idx_name = STRBUF_INIT;
+	അക്ഷരം buf[GIT_MAX_HEXSZ + 2]; /* hex hash + \n + \0 */
 
 	show_usage_if_asked(argc, argv, pack_redundant_usage);
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!strcmp(arg, "--")) {
+	വേണ്ടി (i = 1; i < argc; i++) {
+		സ്ഥിരം അക്ഷരം *arg = argv[i];
+		എങ്കിൽ (!strcmp(arg, "--")) {
 			i++;
-			break;
+			നിർത്തുക;
 		}
-		if (!strcmp(arg, "--all")) {
+		എങ്കിൽ (!strcmp(arg, "--all")) {
 			load_all_packs = 1;
-			continue;
+			തുടരുക;
 		}
-		if (!strcmp(arg, "--verbose")) {
+		എങ്കിൽ (!strcmp(arg, "--verbose")) {
 			verbose = 1;
-			continue;
+			തുടരുക;
 		}
-		if (!strcmp(arg, "--alt-odb")) {
+		എങ്കിൽ (!strcmp(arg, "--alt-odb")) {
 			alt_odb = 1;
-			continue;
+			തുടരുക;
 		}
-		if (!strcmp(arg, "--i-still-use-this")) {
+		എങ്കിൽ (!strcmp(arg, "--i-still-use-this")) {
 			i_still_use_this = 1;
-			continue;
+			തുടരുക;
 		}
-		if (*arg == '-')
+		എങ്കിൽ (*arg == '-')
 			usage(pack_redundant_usage);
-		else
-			break;
+		അല്ലെങ്കിൽ
+			നിർത്തുക;
 	}
 
-	if (!i_still_use_this)
-		you_still_use_that("git pack-redundant", NULL);
+	എങ്കിൽ (!i_still_use_this)
+		you_still_use_that("git pack-redundant", ശൂന്യ);
 
-	if (load_all_packs)
+	എങ്കിൽ (load_all_packs)
 		load_all();
-	else
-		while (*(argv + i) != NULL)
+	അല്ലെങ്കിൽ
+		ആകുമ്പോൾ (*(argv + i) != ശൂന്യ)
 			add_pack_file(*(argv + i++));
 
-	if (!local_packs)
+	എങ്കിൽ (!local_packs)
 		die("Zero packs found!");
 
 	load_all_objects();
 
-	if (alt_odb)
+	എങ്കിൽ (alt_odb)
 		scan_alt_odb_packs();
 
 	/* ignore objects given on stdin */
 	llist_init(&ignore);
-	if (!isatty(0)) {
-		struct object_id oid;
-		while (fgets(buf, sizeof(buf), stdin)) {
-			if (get_oid_hex(buf, &oid))
+	എങ്കിൽ (!isatty(0)) {
+		ഘടന object_id oid;
+		ആകുമ്പോൾ (fgets(buf, വലുപ്പം(buf), stdin)) {
+			എങ്കിൽ (get_oid_hex(buf, &oid))
 				die("Bad object ID on stdin: %s", buf);
-			llist_insert_sorted_unique(ignore, &oid, NULL);
+			llist_തിരുകുക_sorted_unique(ignore, &oid, ശൂന്യ);
 		}
 	}
 	llist_sorted_difference_inplace(all_objects, ignore);
 	pl = local_packs;
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		llist_sorted_difference_inplace(pl->remaining_objects, ignore);
 		pl = pl->next;
 	}
@@ -661,12 +661,12 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 
 	minimize(&min);
 
-	if (verbose) {
+	എങ്കിൽ (verbose) {
 		fprintf(stderr, "There are %lu packs available in alt-odbs.\n",
 			(unsigned long)pack_list_size(altodb_packs));
 		fprintf(stderr, "The smallest (bytewise) set of packs is:\n");
 		pl = min;
-		while (pl) {
+		ആകുമ്പോൾ (pl) {
 			fprintf(stderr, "\t%s\n", pl->pack->pack_name);
 			pl = pl->next;
 		}
@@ -679,13 +679,13 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 		fprintf(stderr, "Redundant packs (with indexes):\n");
 	}
 	pl = red = pack_list_difference(local_packs, min);
-	while (pl) {
+	ആകുമ്പോൾ (pl) {
 		printf("%s\n%s\n",
 		       odb_pack_name(pl->pack->repo, &idx_name, pl->pack->hash, "idx"),
 		       pl->pack->pack_name);
 		pl = pl->next;
 	}
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf(stderr, "%luMB of redundant packs in total.\n",
 			(unsigned long)pack_set_bytecount(red)/(1024*1024));
 
@@ -693,5 +693,5 @@ int cmd_pack_redundant(int argc, const char **argv, const char *prefix UNUSED, s
 	pack_list_free(min);
 	llist_free(ignore);
 	strbuf_release(&idx_name);
-	return 0;
+	തിരികെ 0;
 }

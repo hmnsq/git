@@ -1,12 +1,12 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "setup.h"
-#include "strvec.h"
-#include "parse-options.h"
-#include "pkt-line.h"
-#include "bundle.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "abspath.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "strvec.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "pkt-line.h"
+#അന്തര്ഭാവ "bundle.h"
 
 /*
  * Basic handler for bundle files to connect repositories via sneakernet.
@@ -25,54 +25,54 @@
 #define BUILTIN_BUNDLE_UNBUNDLE_USAGE \
 	N_("git bundle unbundle [--progress] <file> [<refname>...]")
 
-static char const * const builtin_bundle_usage[] = {
+സ്ഥിതം അക്ഷരം സ്ഥിരം * സ്ഥിരം builtin_bundle_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
 	BUILTIN_BUNDLE_VERIFY_USAGE,
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL,
+	ശൂന്യ,
 };
 
-static const char * const builtin_bundle_create_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_bundle_create_usage[] = {
 	BUILTIN_BUNDLE_CREATE_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const builtin_bundle_verify_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_bundle_verify_usage[] = {
 	BUILTIN_BUNDLE_VERIFY_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const builtin_bundle_list_heads_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_bundle_list_heads_usage[] = {
 	BUILTIN_BUNDLE_LIST_HEADS_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static const char * const builtin_bundle_unbundle_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_bundle_unbundle_usage[] = {
 	BUILTIN_BUNDLE_UNBUNDLE_USAGE,
-	NULL
+	ശൂന്യ
 };
 
-static int parse_options_cmd_bundle(int argc,
-		const char **argv,
-		const char* prefix,
-		const char * const usagestr[],
-		const struct option options[],
-		char **bundle_file) {
-	argc = parse_options(argc, argv, NULL, options, usagestr,
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_options_cmd_bundle(പൂർണ്ണസംഖ്യ argc,
+		സ്ഥിരം അക്ഷരം **argv,
+		സ്ഥിരം അക്ഷരം* prefix,
+		സ്ഥിരം അക്ഷരം * സ്ഥിരം usagestr[],
+		സ്ഥിരം ഘടന option options[],
+		അക്ഷരം **bundle_file) {
+	argc = parse_options(argc, argv, ശൂന്യ, options, usagestr,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (!argc)
-		usage_msg_opt(_("need a <file> argument"), usagestr, options);
+	എങ്കിൽ (!argc)
+		usage_സന്ദേശം_opt(_("need a <file> argument"), usagestr, options);
 	*bundle_file = prefix_filename_except_for_dash(prefix, argv[0]);
-	return argc;
+	തിരികെ argc;
 }
 
-static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_bundle_create(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			     ഘടന repository *repo UNUSED)
 {
-	int progress = isatty(STDERR_FILENO);
-	int version = -1;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ progress = isatty(STDERR_FILENO);
+	പൂർണ്ണസംഖ്യ version = -1;
+	ഘടന option options[] = {
 		OPT_NEGBIT('q', "quiet", &progress,
 			   N_("do not show progress meter"), 1),
 		OPT_BIT(0, "progress", &progress,
@@ -85,152 +85,152 @@ static int cmd_bundle_create(int argc, const char **argv, const char *prefix,
 			    N_("specify bundle format version")),
 		OPT_END()
 	};
-	char *bundle_file;
-	int ret;
+	അക്ഷരം *bundle_file;
+	പൂർണ്ണസംഖ്യ ret;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_create_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	എങ്കിൽ (!startup_info->have_repository)
 		die(_("Need a repository to create a bundle."));
 	ret = !!create_bundle(the_repository, bundle_file, argc, argv, version, progress);
-	free(bundle_file);
-	return ret;
+	സ്വതന്ത്രം(bundle_file);
+	തിരികെ ret;
 }
 
 /*
  * Similar to read_bundle_header(), but handle "-" as stdin.
  */
-static int open_bundle(const char *path, struct bundle_header *header,
-		       const char **name)
+സ്ഥിതം പൂർണ്ണസംഖ്യ open_bundle(സ്ഥിരം അക്ഷരം *path, ഘടന bundle_header *header,
+		       സ്ഥിരം അക്ഷരം **name)
 {
-	if (!strcmp(path, "-")) {
-		if (name)
+	എങ്കിൽ (!strcmp(path, "-")) {
+		എങ്കിൽ (name)
 			*name = "<stdin>";
-		return read_bundle_header_fd(0, header, "<stdin>");
+		തിരികെ read_bundle_header_fd(0, header, "<stdin>");
 	}
 
-	if (name)
+	എങ്കിൽ (name)
 		*name = path;
-	return read_bundle_header(path, header);
+	തിരികെ read_bundle_header(path, header);
 }
 
-static int cmd_bundle_verify(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int quiet = 0;
-	int ret;
-	struct option options[] = {
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_bundle_verify(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			     ഘടന repository *repo UNUSED) {
+	ഘടന bundle_header header = BUNDLE_HEADER_INIT;
+	പൂർണ്ണസംഖ്യ bundle_fd = -1;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ ret;
+	ഘടന option options[] = {
 		OPT_BOOL('q', "quiet", &quiet,
 			    N_("do not show bundle details")),
 		OPT_END()
 	};
-	char *bundle_file;
-	const char *name;
+	അക്ഷരം *bundle_file;
+	സ്ഥിരം അക്ഷരം *name;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_verify_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository) {
+	എങ്കിൽ (!startup_info->have_repository) {
 		ret = error(_("need a repository to verify a bundle"));
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
+	എങ്കിൽ ((bundle_fd = open_bundle(bundle_file, &header, &name)) < 0) {
 		ret = 1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 	close(bundle_fd);
-	if (verify_bundle(the_repository, &header,
+	എങ്കിൽ (verify_bundle(the_repository, &header,
 			  quiet ? VERIFY_BUNDLE_QUIET : VERIFY_BUNDLE_VERBOSE)) {
 		ret = 1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	fprintf(stderr, _("%s is okay\n"), name);
 	ret = 0;
 cleanup:
-	free(bundle_file);
+	സ്വതന്ത്രം(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	തിരികെ ret;
 }
 
-static int cmd_bundle_list_heads(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	struct option options[] = {
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_bundle_list_heads(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+				 ഘടന repository *repo UNUSED) {
+	ഘടന bundle_header header = BUNDLE_HEADER_INIT;
+	പൂർണ്ണസംഖ്യ bundle_fd = -1;
+	പൂർണ്ണസംഖ്യ ret;
+	ഘടന option options[] = {
 		OPT_END()
 	};
-	char *bundle_file;
+	അക്ഷരം *bundle_file;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_list_heads_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	എങ്കിൽ ((bundle_fd = open_bundle(bundle_file, &header, ശൂന്യ)) < 0) {
 		ret = 1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 	close(bundle_fd);
 	ret = !!list_bundle_refs(&header, argc, argv);
 cleanup:
-	free(bundle_file);
+	സ്വതന്ത്രം(bundle_file);
 	bundle_header_release(&header);
-	return ret;
+	തിരികെ ret;
 }
 
-static int cmd_bundle_unbundle(int argc, const char **argv, const char *prefix,
-			       struct repository *repo UNUSED) {
-	struct bundle_header header = BUNDLE_HEADER_INIT;
-	int bundle_fd = -1;
-	int ret;
-	int progress = isatty(2);
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmd_bundle_unbundle(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, സ്ഥിരം അക്ഷരം *prefix,
+			       ഘടന repository *repo UNUSED) {
+	ഘടന bundle_header header = BUNDLE_HEADER_INIT;
+	പൂർണ്ണസംഖ്യ bundle_fd = -1;
+	പൂർണ്ണസംഖ്യ ret;
+	പൂർണ്ണസംഖ്യ progress = isatty(2);
 
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_BOOL(0, "progress", &progress,
 			 N_("show progress meter")),
 		OPT_END()
 	};
-	char *bundle_file;
-	struct strvec extra_index_pack_args = STRVEC_INIT;
+	അക്ഷരം *bundle_file;
+	ഘടന strvec extra_index_pack_args = STRVEC_INIT;
 
 	argc = parse_options_cmd_bundle(argc, argv, prefix,
 			builtin_bundle_unbundle_usage, options, &bundle_file);
 	/* bundle internals use argv[1] as further parameters */
 
-	if (!startup_info->have_repository)
+	എങ്കിൽ (!startup_info->have_repository)
 		die(_("Need a repository to unbundle."));
 
-	if ((bundle_fd = open_bundle(bundle_file, &header, NULL)) < 0) {
+	എങ്കിൽ ((bundle_fd = open_bundle(bundle_file, &header, ശൂന്യ)) < 0) {
 		ret = 1;
-		goto cleanup;
+		പോകുക cleanup;
 	}
-	if (progress)
+	എങ്കിൽ (progress)
 		strvec_pushl(&extra_index_pack_args, "-v", "--progress-title",
-			     _("Unbundling objects"), NULL);
+			     _("Unbundling objects"), ശൂന്യ);
 	ret = !!unbundle(the_repository, &header, bundle_fd,
-			 &extra_index_pack_args, NULL) ||
+			 &extra_index_pack_args, ശൂന്യ) ||
 		list_bundle_refs(&header, argc, argv);
 	bundle_header_release(&header);
 
 cleanup:
 	strvec_clear(&extra_index_pack_args);
-	free(bundle_file);
-	return ret;
+	സ്വതന്ത്രം(bundle_file);
+	തിരികെ ret;
 }
 
-int cmd_bundle(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_bundle(പൂർണ്ണസംഖ്യ argc,
+	       സ്ഥിരം അക്ഷരം **argv,
+	       സ്ഥിരം അക്ഷരം *prefix,
+	       ഘടന repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = ശൂന്യ;
+	ഘടന option options[] = {
 		OPT_SUBCOMMAND("create", &fn, cmd_bundle_create),
 		OPT_SUBCOMMAND("verify", &fn, cmd_bundle_verify),
 		OPT_SUBCOMMAND("list-heads", &fn, cmd_bundle_list_heads),
@@ -243,5 +243,5 @@ int cmd_bundle(int argc,
 
 	packet_trace_identity("bundle");
 
-	return !!fn(argc, argv, prefix, repo);
+	തിരികെ !!fn(argc, argv, prefix, repo);
 }

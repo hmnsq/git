@@ -4,146 +4,146 @@
  * Copyright (c) 2006 Junio C Hamano
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "path.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "packfile.h"
-#include "object-file.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "packfile.h"
+#അന്തര്ഭാവ "object-file.h"
 
-static unsigned long garbage;
-static off_t size_garbage;
-static int verbose;
-static unsigned long loose, packed, packed_loose;
-static off_t loose_size;
+സ്ഥിതം unsigned long garbage;
+സ്ഥിതം off_t size_garbage;
+സ്ഥിതം പൂർണ്ണസംഖ്യ verbose;
+സ്ഥിതം unsigned long loose, packed, packed_loose;
+സ്ഥിതം off_t loose_size;
 
-static const char *bits_to_msg(unsigned seen_bits)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *bits_to_സന്ദേശം(unsigned seen_bits)
 {
-	switch (seen_bits) {
-	case 0:
-		return "no corresponding .idx or .pack";
-	case PACKDIR_FILE_GARBAGE:
-		return "garbage found";
-	case PACKDIR_FILE_PACK:
-		return "no corresponding .idx";
-	case PACKDIR_FILE_IDX:
-		return "no corresponding .pack";
-	case PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
-	default:
-		return NULL;
+	തിരഞ്ഞെടുപ്പ് (seen_bits) {
+	അവസ്ഥ 0:
+		തിരികെ "no corresponding .idx or .pack";
+	അവസ്ഥ PACKDIR_FILE_GARBAGE:
+		തിരികെ "garbage found";
+	അവസ്ഥ PACKDIR_FILE_PACK:
+		തിരികെ "no corresponding .idx";
+	അവസ്ഥ PACKDIR_FILE_IDX:
+		തിരികെ "no corresponding .pack";
+	അവസ്ഥ PACKDIR_FILE_PACK|PACKDIR_FILE_IDX:
+	സ്ഥിരസ്ഥിതി:
+		തിരികെ ശൂന്യ;
 	}
 }
 
-static void real_report_garbage(unsigned seen_bits, const char *path)
+സ്ഥിതം ശൂന്യം real_report_garbage(unsigned seen_bits, സ്ഥിരം അക്ഷരം *path)
 {
-	struct stat st;
-	const char *desc = bits_to_msg(seen_bits);
+	ഘടന stat st;
+	സ്ഥിരം അക്ഷരം *desc = bits_to_സന്ദേശം(seen_bits);
 
-	if (!desc)
-		return;
+	എങ്കിൽ (!desc)
+		തിരികെ;
 
-	if (!stat(path, &st))
+	എങ്കിൽ (!stat(path, &st))
 		size_garbage += st.st_size;
 	warning("%s: %s", desc, path);
 	garbage++;
 }
 
-static void loose_garbage(const char *path)
+സ്ഥിതം ശൂന്യം loose_garbage(സ്ഥിരം അക്ഷരം *path)
 {
-	if (verbose)
+	എങ്കിൽ (verbose)
 		report_garbage(PACKDIR_FILE_GARBAGE, path);
 }
 
-static int count_loose(const struct object_id *oid, const char *path,
-		       void *data UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ എണ്ണം_loose(സ്ഥിരം ഘടന object_id *oid, സ്ഥിരം അക്ഷരം *path,
+		       ശൂന്യം *data UNUSED)
 {
-	struct stat st;
+	ഘടന stat st;
 
-	if (lstat(path, &st) || !S_ISREG(st.st_mode))
+	എങ്കിൽ (lstat(path, &st) || !S_ISREG(st.st_mode))
 		loose_garbage(path);
-	else {
+	അല്ലെങ്കിൽ {
 		loose_size += on_disk_bytes(st);
 		loose++;
-		if (verbose && has_object_pack(the_repository, oid))
+		എങ്കിൽ (verbose && has_object_pack(the_repository, oid))
 			packed_loose++;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static int count_cruft(const char *basename UNUSED, const char *path,
-		       void *data UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ എണ്ണം_cruft(സ്ഥിരം അക്ഷരം *basename UNUSED, സ്ഥിരം അക്ഷരം *path,
+		       ശൂന്യം *data UNUSED)
 {
 	loose_garbage(path);
-	return 0;
+	തിരികെ 0;
 }
 
-static int print_alternate(struct odb_files_dir *alternate, void *data UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ print_alternate(ഘടന odb_files_dir *alternate, ശൂന്യം *data UNUSED)
 {
 	printf("alternate: ");
-	quote_c_style(alternate->abspath, NULL, stdout, 0);
+	quote_c_style(alternate->abspath, ശൂന്യ, stdout, 0);
 	putchar('\n');
-	return 0;
+	തിരികെ 0;
 }
 
-static char const * const count_objects_usage[] = {
+സ്ഥിതം അക്ഷരം സ്ഥിരം * സ്ഥിരം എണ്ണം_objects_usage[] = {
 	"git count-objects [-v] [-H | --human-readable]",
-	NULL
+	ശൂന്യ
 };
 
-int cmd_count_objects(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_എണ്ണം_objects(പൂർണ്ണസംഖ്യ argc,
+		      സ്ഥിരം അക്ഷരം **argv,
+		      സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	int human_readable = 0;
-	struct option opts[] = {
+	പൂർണ്ണസംഖ്യ human_readable = 0;
+	ഘടന option opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL('H', "human-readable", &human_readable,
 			 N_("print sizes in human readable format")),
 		OPT_END(),
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
-	argc = parse_options(argc, argv, prefix, opts, count_objects_usage, 0);
+	argc = parse_options(argc, argv, prefix, opts, എണ്ണം_objects_usage, 0);
 	/* we do not take arguments other than flags for now */
-	if (argc)
-		usage_with_options(count_objects_usage, opts);
-	if (verbose) {
+	എങ്കിൽ (argc)
+		usage_with_options(എണ്ണം_objects_usage, opts);
+	എങ്കിൽ (verbose) {
 		report_garbage = real_report_garbage;
 		report_linked_checkout_garbage(the_repository);
 	}
 
 	for_each_loose_file_in_source(the_repository->objects->source,
-				      count_loose, count_cruft, NULL, NULL);
+				      എണ്ണം_loose, എണ്ണം_cruft, ശൂന്യ, ശൂന്യ);
 
-	if (verbose) {
-		struct packed_git *p;
-		unsigned long num_pack = 0;
+	എങ്കിൽ (verbose) {
+		ഘടന packed_git *p;
+		unsigned long അക്കം_pack = 0;
 		off_t size_pack = 0;
-		struct strbuf loose_buf = STRBUF_INIT;
-		struct strbuf pack_buf = STRBUF_INIT;
-		struct strbuf garbage_buf = STRBUF_INIT;
+		ഘടന strbuf loose_buf = STRBUF_INIT;
+		ഘടന strbuf pack_buf = STRBUF_INIT;
+		ഘടന strbuf garbage_buf = STRBUF_INIT;
 
 		repo_for_each_pack(the_repository, p) {
-			if (!p->pack_local)
-				continue;
-			if (open_pack_index(p))
-				continue;
-			packed += p->num_objects;
+			എങ്കിൽ (!p->pack_local)
+				തുടരുക;
+			എങ്കിൽ (open_pack_index(p))
+				തുടരുക;
+			packed += p->അക്കം_objects;
 			size_pack += p->pack_size + p->index_size;
-			num_pack++;
+			അക്കം_pack++;
 		}
 
-		if (human_readable) {
+		എങ്കിൽ (human_readable) {
 			strbuf_humanise_bytes(&loose_buf, loose_size);
 			strbuf_humanise_bytes(&pack_buf, size_pack);
 			strbuf_humanise_bytes(&garbage_buf, size_garbage);
-		} else {
+		} അല്ലെങ്കിൽ {
 			strbuf_addf(&loose_buf, "%lu",
 				    (unsigned long)(loose_size / 1024));
 			strbuf_addf(&pack_buf, "%lu",
@@ -155,24 +155,24 @@ int cmd_count_objects(int argc,
 		printf("count: %lu\n", loose);
 		printf("size: %s\n", loose_buf.buf);
 		printf("in-pack: %lu\n", packed);
-		printf("packs: %lu\n", num_pack);
+		printf("packs: %lu\n", അക്കം_pack);
 		printf("size-pack: %s\n", pack_buf.buf);
 		printf("prune-packable: %lu\n", packed_loose);
 		printf("garbage: %lu\n", garbage);
 		printf("size-garbage: %s\n", garbage_buf.buf);
-		odb_for_each_alternate(the_repository->objects, print_alternate, NULL);
+		odb_for_each_alternate(the_repository->objects, print_alternate, ശൂന്യ);
 		strbuf_release(&loose_buf);
 		strbuf_release(&pack_buf);
 		strbuf_release(&garbage_buf);
-	} else {
-		struct strbuf buf = STRBUF_INIT;
-		if (human_readable)
+	} അല്ലെങ്കിൽ {
+		ഘടന strbuf buf = STRBUF_INIT;
+		എങ്കിൽ (human_readable)
 			strbuf_humanise_bytes(&buf, loose_size);
-		else
+		അല്ലെങ്കിൽ
 			strbuf_addf(&buf, "%lu kilobytes",
 				    (unsigned long)(loose_size / 1024));
 		printf("%lu objects, %s\n", loose, buf.buf);
 		strbuf_release(&buf);
 	}
-	return 0;
+	തിരികെ 0;
 }

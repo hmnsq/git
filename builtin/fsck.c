@@ -1,27 +1,27 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "hex.h"
-#include "config.h"
-#include "commit.h"
-#include "tree.h"
-#include "blob.h"
-#include "tag.h"
-#include "refs.h"
-#include "cache-tree.h"
-#include "fsck.h"
-#include "parse-options.h"
-#include "progress.h"
-#include "packfile.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/streaming.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "replace-object.h"
-#include "resolve-undo.h"
-#include "run-command.h"
-#include "sparse-index.h"
-#include "worktree.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "tree.h"
+#അന്തര്ഭാവ "blob.h"
+#അന്തര്ഭാവ "tag.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "cache-tree.h"
+#അന്തര്ഭാവ "fsck.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "progress.h"
+#അന്തര്ഭാവ "packfile.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "odb/streaming.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "read-cache-ll.h"
+#അന്തര്ഭാവ "replace-object.h"
+#അന്തര്ഭാവ "resolve-undo.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "sparse-index.h"
+#അന്തര്ഭാവ "worktree.h"
 
 #define REACHABLE 0x0001
 #define SEEN      0x0002
@@ -29,98 +29,98 @@
 /* This flag is set if something points to this object. */
 #define USED      0x0008
 
-static int show_root;
-static int show_tags;
-static int show_unreachable;
-static int include_reflogs = 1;
-static int connectivity_only;
-static int check_strict;
-static struct fsck_options fsck_walk_options;
-static struct fsck_options fsck_obj_options;
-static int errors_found;
-static int write_lost_and_found;
-static int verbose;
-static int show_progress = -1;
-static int show_dangling = 1;
-static timestamp_t now;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_വേര്;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_tags;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_unreachable;
+സ്ഥിതം പൂർണ്ണസംഖ്യ include_reflogs = 1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ connectivity_only;
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_strict;
+സ്ഥിതം ഘടന fsck_options fsck_walk_options;
+സ്ഥിതം ഘടന fsck_options fsck_obj_options;
+സ്ഥിതം പൂർണ്ണസംഖ്യ errors_found;
+സ്ഥിതം പൂർണ്ണസംഖ്യ write_lost_and_found;
+സ്ഥിതം പൂർണ്ണസംഖ്യ verbose;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_progress = -1;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_dangling = 1;
+സ്ഥിതം timestamp_t now;
 #define ERROR_OBJECT 01
 #define ERROR_REACHABLE 02
 #define ERROR_REFS 010
 #define ERROR_COMMIT_GRAPH 020
 
-static const char *describe_object(const struct object_id *oid)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *describe_object(സ്ഥിരം ഘടന object_id *oid)
 {
-	return fsck_describe_object(&fsck_walk_options, oid);
+	തിരികെ fsck_describe_object(&fsck_walk_options, oid);
 }
 
-static const char *printable_type(struct repository *repo,
-				  const struct object_id *oid,
-				  enum object_type type)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *printable_type(ഘടന repository *repo,
+				  സ്ഥിരം ഘടന object_id *oid,
+				  എണ്ണൽ object_type type)
 {
-	const char *ret;
+	സ്ഥിരം അക്ഷരം *ret;
 
-	if (type == OBJ_NONE)
-		type = odb_read_object_info(repo->objects, oid, NULL);
+	എങ്കിൽ (type == OBJ_NONE)
+		type = odb_read_object_info(repo->objects, oid, ശൂന്യ);
 
 	ret = type_name(type);
-	if (!ret)
+	എങ്കിൽ (!ret)
 		ret = _("unknown");
 
-	return ret;
+	തിരികെ ret;
 }
 
-static int objerror(struct repository *repo, struct object *obj, const char *err)
+സ്ഥിതം പൂർണ്ണസംഖ്യ objerror(ഘടന repository *repo, ഘടന object *obj, സ്ഥിരം അക്ഷരം *err)
 {
 	errors_found |= ERROR_OBJECT;
 	/* TRANSLATORS: e.g. error in tree 01bfda: <more explanation> */
 	fprintf_ln(stderr, _("error in %s %s: %s"),
 		   printable_type(repo, &obj->oid, obj->type),
 		   describe_object(&obj->oid), err);
-	return -1;
+	തിരികെ -1;
 }
 
-static int fsck_objects_error_func(struct fsck_options *o,
-				   void *fsck_report,
-				   enum fsck_msg_type msg_type,
-				   enum fsck_msg_id msg_id UNUSED,
-				   const char *message)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_objects_error_func(ഘടന fsck_options *o,
+				   ശൂന്യം *fsck_report,
+				   എണ്ണൽ fsck_സന്ദേശം_type സന്ദേശം_type,
+				   എണ്ണൽ fsck_സന്ദേശം_id സന്ദേശം_id UNUSED,
+				   സ്ഥിരം അക്ഷരം *message)
 {
-	struct fsck_object_report *report = fsck_report;
-	const struct object_id *oid = report->oid;
-	enum object_type object_type = report->object_type;
+	ഘടന fsck_object_report *report = fsck_report;
+	സ്ഥിരം ഘടന object_id *oid = report->oid;
+	എണ്ണൽ object_type object_type = report->object_type;
 
-	switch (msg_type) {
-	case FSCK_WARN:
+	തിരഞ്ഞെടുപ്പ് (സന്ദേശം_type) {
+	അവസ്ഥ FSCK_WARN:
 		/* TRANSLATORS: e.g. warning in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("warning in %s %s: %s"),
 			   printable_type(o->repo, oid, object_type),
 			   describe_object(oid), message);
-		return 0;
-	case FSCK_ERROR:
+		തിരികെ 0;
+	അവസ്ഥ FSCK_ERROR:
 		/* TRANSLATORS: e.g. error in tree 01bfda: <more explanation> */
 		fprintf_ln(stderr, _("error in %s %s: %s"),
 			   printable_type(o->repo, oid, object_type),
 			   describe_object(oid), message);
-		return 1;
-	default:
+		തിരികെ 1;
+	സ്ഥിരസ്ഥിതി:
 		BUG("%d (FSCK_IGNORE?) should never trigger this callback",
-		    msg_type);
+		    സന്ദേശം_type);
 	}
 }
 
-static struct object_array pending;
+സ്ഥിതം ഘടന object_array pending;
 
-static int mark_object(struct object *obj, enum object_type type,
-		       void *data, struct fsck_options *options)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_object(ഘടന object *obj, എണ്ണൽ object_type type,
+		       ശൂന്യം *data, ഘടന fsck_options *options)
 {
-	struct object *parent = data;
+	ഘടന object *parent = data;
 
 	/*
 	 * The only case data is NULL or type is OBJ_ANY is when
 	 * mark_object_reachable() calls us.  All the callers of
 	 * that function has non-NULL obj hence ...
 	 */
-	if (!obj) {
+	എങ്കിൽ (!obj) {
 		/* ... these references to parent->fld are safe here */
 		printf_ln(_("broken link from %7s %s"),
 			  printable_type(options->repo, &parent->oid, parent->type),
@@ -129,27 +129,27 @@ static int mark_object(struct object *obj, enum object_type type,
 			  (type == OBJ_ANY ? _("unknown") : type_name(type)),
 			  _("unknown"));
 		errors_found |= ERROR_REACHABLE;
-		return 1;
+		തിരികെ 1;
 	}
 
-	if (type != OBJ_ANY && obj->type != type)
+	എങ്കിൽ (type != OBJ_ANY && obj->type != type)
 		/* ... and the reference to parent is safe here */
 		objerror(options->repo, parent, _("wrong object type in link"));
 
-	if (obj->flags & REACHABLE)
-		return 0;
+	എങ്കിൽ (obj->flags & REACHABLE)
+		തിരികെ 0;
 	obj->flags |= REACHABLE;
 
-	if (is_promisor_object(options->repo, &obj->oid))
+	എങ്കിൽ (is_promisor_object(options->repo, &obj->oid))
 		/*
 		 * Further recursion does not need to be performed on this
 		 * object since it is a promisor object (so it does not need to
 		 * be added to "pending").
 		 */
-		return 0;
+		തിരികെ 0;
 
-	if (!(obj->flags & HAS_OBJ)) {
-		if (parent && !odb_has_object(options->repo->objects, &obj->oid,
+	എങ്കിൽ (!(obj->flags & HAS_OBJ)) {
+		എങ്കിൽ (parent && !odb_has_object(options->repo->objects, &obj->oid,
 					      ODB_HAS_OBJECT_RECHECK_PACKED)) {
 			printf_ln(_("broken link from %7s %s\n"
 				    "              to %7s %s"),
@@ -159,114 +159,114 @@ static int mark_object(struct object *obj, enum object_type type,
 				  describe_object(&obj->oid));
 			errors_found |= ERROR_REACHABLE;
 		}
-		return 1;
+		തിരികെ 1;
 	}
 
-	add_object_array(obj, NULL, &pending);
-	return 0;
+	add_object_array(obj, ശൂന്യ, &pending);
+	തിരികെ 0;
 }
 
-static void mark_object_reachable(struct object *obj)
+സ്ഥിതം ശൂന്യം mark_object_reachable(ഘടന object *obj)
 {
-	mark_object(obj, OBJ_ANY, NULL, &fsck_walk_options);
+	mark_object(obj, OBJ_ANY, ശൂന്യ, &fsck_walk_options);
 }
 
-static int traverse_one_object(struct object *obj)
+സ്ഥിതം പൂർണ്ണസംഖ്യ traverse_one_object(ഘടന object *obj)
 {
-	int result = fsck_walk(obj, obj, &fsck_walk_options);
+	പൂർണ്ണസംഖ്യ result = fsck_walk(obj, obj, &fsck_walk_options);
 
-	if (obj->type == OBJ_TREE) {
-		struct tree *tree = (struct tree *)obj;
-		free_tree_buffer(tree);
+	എങ്കിൽ (obj->type == OBJ_വൃക്ഷം) {
+		ഘടന വൃക്ഷം *വൃക്ഷം = (ഘടന വൃക്ഷം *)obj;
+		free_വൃക്ഷം_buffer(വൃക്ഷം);
 	}
-	return result;
+	തിരികെ result;
 }
 
-static int traverse_reachable(struct repository *repo)
+സ്ഥിതം പൂർണ്ണസംഖ്യ traverse_reachable(ഘടന repository *repo)
 {
-	struct progress *progress = NULL;
-	unsigned int nr = 0;
-	int result = 0;
-	if (show_progress)
+	ഘടന progress *progress = ശൂന്യ;
+	unsigned പൂർണ്ണസംഖ്യ nr = 0;
+	പൂർണ്ണസംഖ്യ result = 0;
+	എങ്കിൽ (show_progress)
 		progress = start_delayed_progress(repo,
 						  _("Checking connectivity"), 0);
-	while (pending.nr) {
-		result |= traverse_one_object(object_array_pop(&pending));
+	ആകുമ്പോൾ (pending.nr) {
+		result |= traverse_one_object(object_array_എടുക്കുക(&pending));
 		display_progress(progress, ++nr);
 	}
 	stop_progress(&progress);
-	return !!result;
+	തിരികെ !!result;
 }
 
-static int mark_used(struct object *obj, enum object_type type UNUSED,
-		     void *data UNUSED, struct fsck_options *options UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_used(ഘടന object *obj, എണ്ണൽ object_type type UNUSED,
+		     ശൂന്യം *data UNUSED, ഘടന fsck_options *options UNUSED)
 {
-	if (!obj)
-		return 1;
+	എങ്കിൽ (!obj)
+		തിരികെ 1;
 	obj->flags |= USED;
-	return 0;
+	തിരികെ 0;
 }
 
-static int mark_unreachable_referents(const struct object_id *oid,
-				      struct object_info *oi UNUSED,
-				      void *data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_unreachable_referents(സ്ഥിരം ഘടന object_id *oid,
+				      ഘടന object_info *oi UNUSED,
+				      ശൂന്യം *data)
 {
-	struct repository *repo = data;
-	struct fsck_options options;
-	struct object *obj = lookup_object(data, oid);
+	ഘടന repository *repo = data;
+	ഘടന fsck_options options;
+	ഘടന object *obj = lookup_object(data, oid);
 
-	if (!obj || !(obj->flags & HAS_OBJ))
-		return 0; /* not part of our original set */
-	if (obj->flags & REACHABLE)
-		return 0; /* reachable objects already traversed */
+	എങ്കിൽ (!obj || !(obj->flags & HAS_OBJ))
+		തിരികെ 0; /* not part of our original set */
+	എങ്കിൽ (obj->flags & REACHABLE)
+		തിരികെ 0; /* reachable objects already traversed */
 
 	/*
 	 * Avoid passing OBJ_NONE to fsck_walk, which will parse the object
 	 * (and we want to avoid parsing blobs).
 	 */
-	if (obj->type == OBJ_NONE) {
-		enum object_type type = odb_read_object_info(repo->objects,
-							     &obj->oid, NULL);
-		if (type > 0)
+	എങ്കിൽ (obj->type == OBJ_NONE) {
+		എണ്ണൽ object_type type = odb_read_object_info(repo->objects,
+							     &obj->oid, ശൂന്യ);
+		എങ്കിൽ (type > 0)
 			object_as_type(obj, type, 0);
 	}
 
 	fsck_options_init(&options, repo, FSCK_OPTIONS_DEFAULT);
 	options.walk = mark_used;
-	fsck_walk(obj, NULL, &options);
-	if (obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
+	fsck_walk(obj, ശൂന്യ, &options);
+	എങ്കിൽ (obj->type == OBJ_വൃക്ഷം)
+		free_വൃക്ഷം_buffer((ഘടന വൃക്ഷം *)obj);
 
-	return 0;
+	തിരികെ 0;
 }
 
 /*
  * Check a single reachable object
  */
-static void check_reachable_object(struct repository *repo, struct object *obj)
+സ്ഥിതം ശൂന്യം check_reachable_object(ഘടന repository *repo, ഘടന object *obj)
 {
 	/*
 	 * We obviously want the object to be parsed,
 	 * except if it was in a pack-file and we didn't
 	 * do a full fsck
 	 */
-	if (!(obj->flags & HAS_OBJ)) {
-		if (is_promisor_object(repo, &obj->oid))
-			return;
-		if (has_object_pack(repo, &obj->oid))
-			return; /* it is in pack - forget about it */
+	എങ്കിൽ (!(obj->flags & HAS_OBJ)) {
+		എങ്കിൽ (is_promisor_object(repo, &obj->oid))
+			തിരികെ;
+		എങ്കിൽ (has_object_pack(repo, &obj->oid))
+			തിരികെ; /* it is in pack - forget about it */
 		printf_ln(_("missing %s %s"),
 			  printable_type(repo, &obj->oid, obj->type),
 			  describe_object(&obj->oid));
 		errors_found |= ERROR_REACHABLE;
-		return;
+		തിരികെ;
 	}
 }
 
 /*
  * Check a single unreachable object
  */
-static void check_unreachable_object(struct repository *repo, struct object *obj)
+സ്ഥിതം ശൂന്യം check_unreachable_object(ഘടന repository *repo, ഘടന object *obj)
 {
 	/*
 	 * Missing unreachable object? Ignore it. It's not like
@@ -274,18 +274,18 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 * to complain about it being unreachable (since it does
 	 * not exist).
 	 */
-	if (!(obj->flags & HAS_OBJ))
-		return;
+	എങ്കിൽ (!(obj->flags & HAS_OBJ))
+		തിരികെ;
 
 	/*
 	 * Unreachable object that exists? Show it if asked to,
 	 * since this is something that is prunable.
 	 */
-	if (show_unreachable) {
+	എങ്കിൽ (show_unreachable) {
 		printf_ln(_("unreachable %s %s"),
 			  printable_type(repo, &obj->oid, obj->type),
 			  describe_object(&obj->oid));
-		return;
+		തിരികെ;
 	}
 
 	/*
@@ -300,35 +300,35 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 * deleted a branch by mistake, this is a prime candidate to
 	 * start looking at, for example.
 	 */
-	if (!(obj->flags & USED)) {
-		if (show_dangling)
+	എങ്കിൽ (!(obj->flags & USED)) {
+		എങ്കിൽ (show_dangling)
 			printf_ln(_("dangling %s %s"),
 				  printable_type(repo, &obj->oid, obj->type),
 				  describe_object(&obj->oid));
-		if (write_lost_and_found) {
-			char *filename = repo_git_path(repo, "lost-found/%s/%s",
+		എങ്കിൽ (write_lost_and_found) {
+			അക്ഷരം *filename = repo_git_path(repo, "lost-found/%s/%s",
 				obj->type == OBJ_COMMIT ? "commit" : "other",
 				describe_object(&obj->oid));
 			FILE *f;
 
-			if (safe_create_leading_directories_const(repo, filename)) {
+			എങ്കിൽ (safe_create_leading_directories_const(repo, filename)) {
 				error(_("could not create lost-found"));
-				free(filename);
-				return;
+				സ്വതന്ത്രം(filename);
+				തിരികെ;
 			}
 			f = xfopen(filename, "w");
-			if (obj->type == OBJ_BLOB) {
-				if (odb_stream_blob_to_fd(repo->objects, fileno(f),
-							  &obj->oid, NULL, 1))
+			എങ്കിൽ (obj->type == OBJ_BLOB) {
+				എങ്കിൽ (odb_stream_blob_to_fd(repo->objects, fileno(f),
+							  &obj->oid, ശൂന്യ, 1))
 					die_errno(_("could not write '%s'"), filename);
-			} else
+			} അല്ലെങ്കിൽ
 				fprintf(f, "%s\n", describe_object(&obj->oid));
-			if (fclose(f))
+			എങ്കിൽ (fclose(f))
 				die_errno(_("could not finish '%s'"),
 					  filename);
-			free(filename);
+			സ്വതന്ത്രം(filename);
 		}
-		return;
+		തിരികെ;
 	}
 
 	/*
@@ -338,20 +338,20 @@ static void check_unreachable_object(struct repository *repo, struct object *obj
 	 */
 }
 
-static void check_object(struct repository *repo, struct object *obj)
+സ്ഥിതം ശൂന്യം check_object(ഘടന repository *repo, ഘടന object *obj)
 {
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf_ln(stderr, _("Checking %s"), describe_object(&obj->oid));
 
-	if (obj->flags & REACHABLE)
+	എങ്കിൽ (obj->flags & REACHABLE)
 		check_reachable_object(repo, obj);
-	else
+	അല്ലെങ്കിൽ
 		check_unreachable_object(repo, obj);
 }
 
-static void check_connectivity(struct repository *repo)
+സ്ഥിതം ശൂന്യം check_connectivity(ഘടന repository *repo)
 {
-	int i, max;
+	പൂർണ്ണസംഖ്യ i, max;
 
 	/* Traverse the pending reachable objects */
 	traverse_reachable(repo);
@@ -361,7 +361,7 @@ static void check_connectivity(struct repository *repo)
 	 * unreachable objects with USED. Do that now to make --dangling, etc
 	 * accurate.
 	 */
-	if (connectivity_only && (show_dangling || write_lost_and_found)) {
+	എങ്കിൽ (connectivity_only && (show_dangling || write_lost_and_found)) {
 		/*
 		 * Even though we already have a "struct object" for each of
 		 * these in memory, we must not iterate over the internal
@@ -372,69 +372,69 @@ static void check_connectivity(struct repository *repo)
 		 * and ignore any that weren't present in our earlier
 		 * traversal.
 		 */
-		odb_for_each_object(repo->objects, NULL,
+		odb_for_each_object(repo->objects, ശൂന്യ,
 				    mark_unreachable_referents, repo, 0);
 	}
 
 	/* Look up all the requirements, warn about missing objects.. */
 	max = get_max_object_index(repo);
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf_ln(stderr, _("Checking connectivity (%d objects)"), max);
 
-	for (i = 0; i < max; i++) {
-		struct object *obj = get_indexed_object(repo, i);
+	വേണ്ടി (i = 0; i < max; i++) {
+		ഘടന object *obj = get_indexed_object(repo, i);
 
-		if (obj)
+		എങ്കിൽ (obj)
 			check_object(repo, obj);
 	}
 }
 
-static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
-			   unsigned long size, void *buffer, int *eaten, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_obj_buffer(സ്ഥിരം ഘടന object_id *oid, എണ്ണൽ object_type type,
+			   unsigned long size, ശൂന്യം *buffer, പൂർണ്ണസംഖ്യ *eaten, ശൂന്യം *cb_data)
 {
-	struct repository *repo = cb_data;
-	struct object *obj;
-	int err;
+	ഘടന repository *repo = cb_data;
+	ഘടന object *obj;
+	പൂർണ്ണസംഖ്യ err;
 
 	/*
 	 * Note, buffer may be NULL if type is OBJ_BLOB. See
 	 * verify_packfile(), data_valid variable for details.
 	 */
 	obj = parse_object_buffer(repo, oid, type, size, buffer, eaten);
-	if (!obj) {
+	എങ്കിൽ (!obj) {
 		errors_found |= ERROR_OBJECT;
 		err = error(_("%s: object corrupt or missing"),
 			    oid_to_hex(oid));
-		goto out;
+		പോകുക out;
 	}
 
 	obj->flags &= ~REACHABLE;
 	obj->flags |= HAS_OBJ | SEEN;
 
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf_ln(stderr, _("Checking %s %s"),
 			   printable_type(repo, &obj->oid, obj->type),
 			   describe_object(&obj->oid));
 
-	if (fsck_walk(obj, NULL, &fsck_obj_options))
+	എങ്കിൽ (fsck_walk(obj, ശൂന്യ, &fsck_obj_options))
 		objerror(repo, obj, _("broken links"));
 
 	err = fsck_object(obj, buffer, size, &fsck_obj_options);
-	if (err)
-		goto out;
+	എങ്കിൽ (err)
+		പോകുക out;
 
-	if (obj->type == OBJ_COMMIT) {
-		struct commit *commit = (struct commit *) obj;
+	എങ്കിൽ (obj->type == OBJ_COMMIT) {
+		ഘടന commit *commit = (ഘടന commit *) obj;
 
-		if (!commit->parents && show_root)
+		എങ്കിൽ (!commit->parents && show_വേര്)
 			printf_ln(_("root %s"),
 				  describe_object(&commit->object.oid));
 	}
 
-	if (obj->type == OBJ_TAG) {
-		struct tag *tag = (struct tag *) obj;
+	എങ്കിൽ (obj->type == OBJ_TAG) {
+		ഘടന tag *tag = (ഘടന tag *) obj;
 
-		if (show_tags && tag->tagged) {
+		എങ്കിൽ (show_tags && tag->tagged) {
 			printf_ln(_("tagged %s %s (%s) in %s"),
 				  printable_type(repo, &tag->tagged->oid, tag->tagged->type),
 				  describe_object(&tag->tagged->oid),
@@ -444,29 +444,29 @@ static int fsck_obj_buffer(const struct object_id *oid, enum object_type type,
 	}
 
 out:
-	if (obj && obj->type == OBJ_TREE)
-		free_tree_buffer((struct tree *)obj);
-	return err;
+	എങ്കിൽ (obj && obj->type == OBJ_വൃക്ഷം)
+		free_വൃക്ഷം_buffer((ഘടന വൃക്ഷം *)obj);
+	തിരികെ err;
 }
 
-static int default_refs;
+സ്ഥിതം പൂർണ്ണസംഖ്യ default_refs;
 
-static void fsck_handle_reflog_oid(struct repository *repo,
-				   const char *refname, struct object_id *oid,
+സ്ഥിതം ശൂന്യം fsck_handle_reflog_oid(ഘടന repository *repo,
+				   സ്ഥിരം അക്ഷരം *refname, ഘടന object_id *oid,
 				   timestamp_t timestamp)
 {
-	struct object *obj;
+	ഘടന object *obj;
 
-	if (!is_null_oid(oid)) {
+	എങ്കിൽ (!is_null_oid(oid)) {
 		obj = lookup_object(repo, oid);
-		if (obj && (obj->flags & HAS_OBJ)) {
-			if (timestamp)
+		എങ്കിൽ (obj && (obj->flags & HAS_OBJ)) {
+			എങ്കിൽ (timestamp)
 				fsck_put_object_name(&fsck_walk_options, oid,
 						     "%s@{%"PRItime"}",
 						     refname, timestamp);
 			obj->flags |= USED;
 			mark_object_reachable(obj);
-		} else if (!is_promisor_object(repo, oid)) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!is_promisor_object(repo, oid)) {
 			error(_("%s: invalid reflog entry %s"),
 			      refname, oid_to_hex(oid));
 			errors_found |= ERROR_REACHABLE;
@@ -474,80 +474,80 @@ static void fsck_handle_reflog_oid(struct repository *repo,
 	}
 }
 
-static int fsck_handle_reflog_ent(const char *refname,
-				  struct object_id *ooid, struct object_id *noid,
-				  const char *email UNUSED,
-				  timestamp_t timestamp, int tz UNUSED,
-				  const char *message UNUSED, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_handle_reflog_ent(സ്ഥിരം അക്ഷരം *refname,
+				  ഘടന object_id *ooid, ഘടന object_id *noid,
+				  സ്ഥിരം അക്ഷരം *email UNUSED,
+				  timestamp_t timestamp, പൂർണ്ണസംഖ്യ tz UNUSED,
+				  സ്ഥിരം അക്ഷരം *message UNUSED, ശൂന്യം *cb_data)
 {
-	struct repository *repo = cb_data;
+	ഘടന repository *repo = cb_data;
 
-	if (now && timestamp > now)
-		return 0;
+	എങ്കിൽ (now && timestamp > now)
+		തിരികെ 0;
 
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf_ln(stderr, _("Checking reflog %s->%s"),
 			   oid_to_hex(ooid), oid_to_hex(noid));
 
 	fsck_handle_reflog_oid(repo, refname, ooid, 0);
 	fsck_handle_reflog_oid(repo, refname, noid, timestamp);
-	return 0;
+	തിരികെ 0;
 }
 
-static int fsck_handle_reflog(const char *logname, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_handle_reflog(സ്ഥിരം അക്ഷരം *logname, ശൂന്യം *cb_data)
 {
-	struct strbuf refname = STRBUF_INIT;
-	struct worktree *wt = cb_data;
+	ഘടന strbuf refname = STRBUF_INIT;
+	ഘടന worktree *wt = cb_data;
 
 	strbuf_worktree_ref(wt, &refname, logname);
 	refs_for_each_reflog_ent(get_main_ref_store(wt->repo),
 				 refname.buf, fsck_handle_reflog_ent,
 				 wt->repo);
 	strbuf_release(&refname);
-	return 0;
+	തിരികെ 0;
 }
 
-struct ref_snapshot {
-	char *refname;
-	struct object_id oid;
+ഘടന ref_snapshot {
+	അക്ഷരം *refname;
+	ഘടന object_id oid;
 	/* TODO: Maybe supplement with latest reflog entry info too? */
 };
 
-struct snapshot {
+ഘടന snapshot {
 	size_t nr;
 	size_t alloc;
-	struct ref_snapshot *ref;
+	ഘടന ref_snapshot *ref;
 	/* TODO: Consider also snapshotting the index of each worktree. */
 };
 
-struct snapshot_ref_data {
-	struct repository *repo;
-	struct snapshot *snap;
+ഘടന snapshot_ref_data {
+	ഘടന repository *repo;
+	ഘടന snapshot *snap;
 };
 
-static int snapshot_ref(const struct reference *ref, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ snapshot_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cb_data)
 {
-	struct snapshot_ref_data *data = cb_data;
-	struct snapshot *snap = data->snap;
-	struct object *obj;
+	ഘടന snapshot_ref_data *data = cb_data;
+	ഘടന snapshot *snap = data->snap;
+	ഘടന object *obj;
 
 	obj = parse_object(data->repo, ref->oid);
-	if (!obj) {
-		if (is_promisor_object(data->repo, ref->oid)) {
+	എങ്കിൽ (!obj) {
+		എങ്കിൽ (is_promisor_object(data->repo, ref->oid)) {
 			/*
 			 * Increment default_refs anyway, because this is a
 			 * valid ref.
 			 */
 			 default_refs++;
-			 return 0;
+			 തിരികെ 0;
 		}
 		error(_("%s: invalid sha1 pointer %s"),
 		      ref->name, oid_to_hex(ref->oid));
 		errors_found |= ERROR_REACHABLE;
 		/* We'll continue with the rest despite the error.. */
-		return 0;
+		തിരികെ 0;
 	}
-	if (obj->type != OBJ_COMMIT && is_branch(ref->name)) {
+	എങ്കിൽ (obj->type != OBJ_COMMIT && is_branch(ref->name)) {
 		error(_("%s: not a commit"), ref->name);
 		errors_found |= ERROR_REFS;
 	}
@@ -558,13 +558,13 @@ static int snapshot_ref(const struct reference *ref, void *cb_data)
 	oidcpy(&snap->ref[snap->nr].oid, ref->oid);
 	snap->nr++;
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int fsck_handle_ref(const struct reference *ref, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_handle_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cb_data)
 {
-	struct repository *repo = cb_data;
-	struct object *obj;
+	ഘടന repository *repo = cb_data;
+	ഘടന object *obj;
 
 	obj = parse_object(repo, ref->oid);
 	obj->flags |= USED;
@@ -572,59 +572,59 @@ static int fsck_handle_ref(const struct reference *ref, void *cb_data)
 			     ref->oid, "%s", ref->name);
 	mark_object_reachable(obj);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void snapshot_refs(struct repository *repo,
-			  struct snapshot *snap, int argc, const char **argv)
+സ്ഥിതം ശൂന്യം snapshot_refs(ഘടന repository *repo,
+			  ഘടന snapshot *snap, പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	struct refs_for_each_ref_options opts = {
+	ഘടന refs_for_each_ref_options opts = {
 		.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 	};
-	struct snapshot_ref_data data = {
+	ഘടന snapshot_ref_data data = {
 		.repo = repo,
 		.snap = snap,
 	};
-	struct worktree **worktrees, **p;
-	const char *head_points_at;
-	struct object_id head_oid;
+	ഘടന worktree **worktrees, **p;
+	സ്ഥിരം അക്ഷരം *head_points_at;
+	ഘടന object_id head_oid;
 
-	for (int i = 0; i < argc; i++) {
-		const char *arg = argv[i];
-		struct object_id oid;
-		if (!repo_get_oid(repo, arg, &oid)) {
-			struct reference ref = {
+	വേണ്ടി (പൂർണ്ണസംഖ്യ i = 0; i < argc; i++) {
+		സ്ഥിരം അക്ഷരം *arg = argv[i];
+		ഘടന object_id oid;
+		എങ്കിൽ (!repo_get_oid(repo, arg, &oid)) {
+			ഘടന reference ref = {
 				.name = arg,
 				.oid = &oid,
 			};
 
 			snapshot_ref(&ref, &data);
-			continue;
+			തുടരുക;
 		}
 		error(_("invalid parameter: expected sha1, got '%s'"), arg);
 		errors_found |= ERROR_OBJECT;
 	}
 
-	if (argc) {
+	എങ്കിൽ (argc) {
 		include_reflogs = 0;
-		return;
+		തിരികെ;
 	}
 
 	refs_for_each_ref_ext(get_main_ref_store(repo),
 			      snapshot_ref, &data, &opts);
 
 	worktrees = get_worktrees(repo);
-	for (p = worktrees; *p; p++) {
-		struct worktree *wt = *p;
-		struct strbuf refname = STRBUF_INIT;
+	വേണ്ടി (p = worktrees; *p; p++) {
+		ഘടന worktree *wt = *p;
+		ഘടന strbuf refname = STRBUF_INIT;
 
 		strbuf_worktree_ref(wt, &refname, "HEAD");
 
 		head_points_at = refs_resolve_ref_unsafe(get_main_ref_store(repo),
-							 refname.buf, 0, &head_oid, NULL);
+							 refname.buf, 0, &head_oid, ശൂന്യ);
 
-		if (head_points_at && !is_null_oid(&head_oid)) {
-			struct reference ref = {
+		എങ്കിൽ (head_points_at && !is_null_oid(&head_oid)) {
+			ഘടന reference ref = {
 				.name = refname.buf,
 				.oid = &head_oid,
 			};
@@ -642,33 +642,33 @@ static void snapshot_refs(struct repository *repo,
 	free_worktrees(worktrees);
 
 	/* Ignore reflogs newer than now */
-	now = time(NULL);
+	now = time(ശൂന്യ);
 }
 
 
-static void free_snapshot_refs(struct snapshot *snap)
+സ്ഥിതം ശൂന്യം free_snapshot_refs(ഘടന snapshot *snap)
 {
-	for (size_t i = 0; i < snap->nr; i++)
-		free(snap->ref[i].refname);
-	free(snap->ref);
+	വേണ്ടി (size_t i = 0; i < snap->nr; i++)
+		സ്വതന്ത്രം(snap->ref[i].refname);
+	സ്വതന്ത്രം(snap->ref);
 }
 
-static void process_refs(struct repository *repo, struct snapshot *snap)
+സ്ഥിതം ശൂന്യം process_refs(ഘടന repository *repo, ഘടന snapshot *snap)
 {
-	struct worktree **worktrees, **p;
+	ഘടന worktree **worktrees, **p;
 
-	for (size_t i = 0; i < snap->nr; i++) {
-		struct reference ref = {
+	വേണ്ടി (size_t i = 0; i < snap->nr; i++) {
+		ഘടന reference ref = {
 			.name = snap->ref[i].refname,
 			.oid = &snap->ref[i].oid,
 		};
 		fsck_handle_ref(&ref, repo);
 	}
 
-	if (include_reflogs) {
+	എങ്കിൽ (include_reflogs) {
 		worktrees = get_worktrees(repo);
-		for (p = worktrees; *p; p++) {
-			struct worktree *wt = *p;
+		വേണ്ടി (p = worktrees; *p; p++) {
+			ഘടന worktree *wt = *p;
 
 			refs_for_each_reflog(get_worktree_ref_store(wt),
 					     fsck_handle_reflog, wt);
@@ -688,68 +688,68 @@ static void process_refs(struct repository *repo, struct snapshot *snap)
 	 * So we just print a warning about it, and clear the
 	 * "show_unreachable" flag.
 	 */
-	if (!default_refs) {
+	എങ്കിൽ (!default_refs) {
 		fprintf_ln(stderr, _("notice: No default references"));
 		show_unreachable = 0;
 	}
 }
 
-static int fsck_cache_tree(struct repository *repo, struct cache_tree *it, const char *index_path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_cache_വൃക്ഷം(ഘടന repository *repo, ഘടന cache_വൃക്ഷം *it, സ്ഥിരം അക്ഷരം *index_path)
 {
-	int i;
-	int err = 0;
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ err = 0;
 
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf_ln(stderr, _("Checking cache tree of %s"), index_path);
 
-	if (0 <= it->entry_count) {
-		struct object *obj = parse_object(repo, &it->oid);
-		if (!obj) {
+	എങ്കിൽ (0 <= it->entry_എണ്ണം) {
+		ഘടന object *obj = parse_object(repo, &it->oid);
+		എങ്കിൽ (!obj) {
 			error(_("%s: invalid sha1 pointer in cache-tree of %s"),
 			      oid_to_hex(&it->oid), index_path);
 			errors_found |= ERROR_REFS;
-			return 1;
+			തിരികെ 1;
 		}
 		obj->flags |= USED;
 		fsck_put_object_name(&fsck_walk_options, &it->oid, ":");
 		mark_object_reachable(obj);
-		if (obj->type != OBJ_TREE)
+		എങ്കിൽ (obj->type != OBJ_വൃക്ഷം)
 			err |= objerror(repo, obj, _("non-tree in cache-tree"));
 	}
-	for (i = 0; i < it->subtree_nr; i++)
-		err |= fsck_cache_tree(repo, it->down[i]->cache_tree, index_path);
-	return err;
+	വേണ്ടി (i = 0; i < it->subtree_nr; i++)
+		err |= fsck_cache_വൃക്ഷം(repo, it->down[i]->cache_വൃക്ഷം, index_path);
+	തിരികെ err;
 }
 
-static int fsck_resolve_undo(struct index_state *istate,
-			     const char *index_path)
+സ്ഥിതം പൂർണ്ണസംഖ്യ fsck_resolve_undo(ഘടന index_state *istate,
+			     സ്ഥിരം അക്ഷരം *index_path)
 {
-	struct string_list_item *item;
-	struct string_list *resolve_undo = istate->resolve_undo;
+	ഘടന string_list_item *item;
+	ഘടന string_list *resolve_undo = istate->resolve_undo;
 
-	if (!resolve_undo)
-		return 0;
+	എങ്കിൽ (!resolve_undo)
+		തിരികെ 0;
 
 	for_each_string_list_item(item, resolve_undo) {
-		const char *path = item->string;
-		struct resolve_undo_info *ru = item->util;
-		int i;
+		സ്ഥിരം അക്ഷരം *path = item->string;
+		ഘടന resolve_undo_info *ru = item->util;
+		പൂർണ്ണസംഖ്യ i;
 
-		if (!ru)
-			continue;
-		for (i = 0; i < 3; i++) {
-			struct object *obj;
+		എങ്കിൽ (!ru)
+			തുടരുക;
+		വേണ്ടി (i = 0; i < 3; i++) {
+			ഘടന object *obj;
 
-			if (!ru->mode[i] || !S_ISREG(ru->mode[i]))
-				continue;
+			എങ്കിൽ (!ru->mode[i] || !S_ISREG(ru->mode[i]))
+				തുടരുക;
 
 			obj = parse_object(istate->repo, &ru->oid[i]);
-			if (!obj) {
+			എങ്കിൽ (!obj) {
 				error(_("%s: invalid sha1 pointer in resolve-undo of %s"),
 				      oid_to_hex(&ru->oid[i]),
 				      index_path);
 				errors_found |= ERROR_REFS;
-				continue;
+				തുടരുക;
 			}
 			obj->flags |= USED;
 			fsck_put_object_name(&fsck_walk_options, &ru->oid[i],
@@ -757,28 +757,28 @@ static int fsck_resolve_undo(struct index_state *istate,
 			mark_object_reachable(obj);
 		}
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static void fsck_index(struct index_state *istate, const char *index_path,
-		       int is_current_worktree)
+സ്ഥിതം ശൂന്യം fsck_index(ഘടന index_state *istate, സ്ഥിരം അക്ഷരം *index_path,
+		       പൂർണ്ണസംഖ്യ is_current_worktree)
 {
-	unsigned int i;
+	unsigned പൂർണ്ണസംഖ്യ i;
 
 	/* TODO: audit for interaction with sparse-index. */
 	ensure_full_index(istate);
-	for (i = 0; i < istate->cache_nr; i++) {
-		unsigned int mode;
-		struct blob *blob;
-		struct object *obj;
+	വേണ്ടി (i = 0; i < istate->cache_nr; i++) {
+		unsigned പൂർണ്ണസംഖ്യ mode;
+		ഘടന blob *blob;
+		ഘടന object *obj;
 
 		mode = istate->cache[i]->ce_mode;
-		if (S_ISGITLINK(mode))
-			continue;
+		എങ്കിൽ (S_ISGITLINK(mode))
+			തുടരുക;
 		blob = lookup_blob(istate->repo,
 				   &istate->cache[i]->oid);
-		if (!blob)
-			continue;
+		എങ്കിൽ (!blob)
+			തുടരുക;
 		obj = &blob->object;
 		obj->flags |= USED;
 		fsck_put_object_name(&fsck_walk_options, &obj->oid,
@@ -787,74 +787,74 @@ static void fsck_index(struct index_state *istate, const char *index_path,
 				     istate->cache[i]->name);
 		mark_object_reachable(obj);
 	}
-	if (istate->cache_tree)
-		fsck_cache_tree(istate->repo, istate->cache_tree, index_path);
+	എങ്കിൽ (istate->cache_വൃക്ഷം)
+		fsck_cache_വൃക്ഷം(istate->repo, istate->cache_വൃക്ഷം, index_path);
 	fsck_resolve_undo(istate, index_path);
 }
 
-static int mark_object_for_connectivity(const struct object_id *oid,
-					struct object_info *oi UNUSED,
-					void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_object_for_connectivity(സ്ഥിരം ഘടന object_id *oid,
+					ഘടന object_info *oi UNUSED,
+					ശൂന്യം *cb_data)
 {
-	struct repository *repo = cb_data;
-	struct object *obj = lookup_unknown_object(repo, oid);
+	ഘടന repository *repo = cb_data;
+	ഘടന object *obj = lookup_unknown_object(repo, oid);
 	obj->flags |= HAS_OBJ;
-	return 0;
+	തിരികെ 0;
 }
 
-static void fsck_refs(struct repository *r)
+സ്ഥിതം ശൂന്യം fsck_refs(ഘടന repository *r)
 {
-	struct child_process refs_verify = CHILD_PROCESS_INIT;
-	struct progress *progress = NULL;
+	ഘടന child_process refs_verify = CHILD_PROCESS_INIT;
+	ഘടന progress *progress = ശൂന്യ;
 
-	if (show_progress)
+	എങ്കിൽ (show_progress)
 		progress = start_progress(r, _("Checking ref database"), 1);
 
-	if (verbose)
+	എങ്കിൽ (verbose)
 		fprintf_ln(stderr, _("Checking ref database"));
 
 	child_process_init(&refs_verify);
 	refs_verify.git_cmd = 1;
-	strvec_pushl(&refs_verify.args, "refs", "verify", NULL);
-	if (verbose)
-		strvec_push(&refs_verify.args, "--verbose");
-	if (check_strict)
-		strvec_push(&refs_verify.args, "--strict");
+	strvec_pushl(&refs_verify.args, "refs", "verify", ശൂന്യ);
+	എങ്കിൽ (verbose)
+		strvec_തള്ളുക(&refs_verify.args, "--verbose");
+	എങ്കിൽ (check_strict)
+		strvec_തള്ളുക(&refs_verify.args, "--strict");
 
-	if (run_command(&refs_verify))
+	എങ്കിൽ (run_command(&refs_verify))
 		errors_found |= ERROR_REFS;
 
 	display_progress(progress, 1);
 	stop_progress(&progress);
 }
 
-static char const * const fsck_usage[] = {
+സ്ഥിതം അക്ഷരം സ്ഥിരം * സ്ഥിരം fsck_usage[] = {
 	N_("git fsck [--tags] [--root] [--unreachable] [--cache] [--no-reflogs]\n"
 	   "         [--[no-]full] [--strict] [--verbose] [--lost-found]\n"
 	   "         [--[no-]dangling] [--[no-]progress] [--connectivity-only]\n"
 	   "         [--[no-]name-objects] [--[no-]references] [<object>...]"),
-	NULL
+	ശൂന്യ
 };
 
-int cmd_fsck(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_fsck(പൂർണ്ണസംഖ്യ argc,
+	     സ്ഥിരം അക്ഷരം **argv,
+	     സ്ഥിരം അക്ഷരം *prefix,
+	     ഘടന repository *repo)
 {
-	struct odb_fsck_options odb_fsck_opts = {
+	ഘടന odb_fsck_options odb_fsck_opts = {
 		.flags = ODB_FSCK_FULL,
 		.object_cb = fsck_obj_buffer,
 		.object_payload = repo,
 	};
-	int keep_cache_objects = 0;
-	int name_objects = 0;
-	int check_references = 1;
-	struct option fsck_opts[] = {
+	പൂർണ്ണസംഖ്യ keep_cache_objects = 0;
+	പൂർണ്ണസംഖ്യ name_objects = 0;
+	പൂർണ്ണസംഖ്യ check_references = 1;
+	ഘടന option fsck_opts[] = {
 		OPT__VERBOSE(&verbose, N_("be verbose")),
 		OPT_BOOL(0, "unreachable", &show_unreachable, N_("show unreachable objects")),
 		OPT_BOOL(0, "dangling", &show_dangling, N_("show dangling objects")),
 		OPT_BOOL(0, "tags", &show_tags, N_("report tags")),
-		OPT_BOOL(0, "root", &show_root, N_("report root nodes")),
+		OPT_BOOL(0, "root", &show_വേര്, N_("report root nodes")),
 		OPT_BOOL(0, "cache", &keep_cache_objects, N_("make index objects head nodes")),
 		OPT_BOOL(0, "reflogs", &include_reflogs, N_("make reflogs head nodes (default)")),
 		OPT_BIT(0, "full", &odb_fsck_opts.flags,
@@ -868,10 +868,10 @@ int cmd_fsck(int argc,
 		OPT_BOOL(0, "references", &check_references, N_("check reference database consistency")),
 		OPT_END(),
 	};
-	struct snapshot snap = {
+	ഘടന snapshot snap = {
 		.nr = 0,
 		.alloc = 0,
-		.ref = NULL
+		.ref = ശൂന്യ
 	};
 
 	errors_found = 0;
@@ -889,30 +889,30 @@ int cmd_fsck(int argc,
 	fsck_options_init(&fsck_obj_options, repo, FSCK_OPTIONS_DEFAULT);
 	fsck_obj_options.walk = mark_used;
 	fsck_obj_options.error_func = fsck_objects_error_func;
-	if (check_strict)
+	എങ്കിൽ (check_strict)
 		fsck_obj_options.strict = 1;
 
-	if (show_progress == -1)
+	എങ്കിൽ (show_progress == -1)
 		show_progress = isatty(2);
-	if (verbose) {
+	എങ്കിൽ (verbose) {
 		show_progress = 0;
 		odb_fsck_opts.flags |= ODB_FSCK_VERBOSE;
 	}
-	if (show_progress)
+	എങ്കിൽ (show_progress)
 		odb_fsck_opts.flags |= ODB_FSCK_PROGRESS;
 
-	if (write_lost_and_found) {
+	എങ്കിൽ (write_lost_and_found) {
 		odb_fsck_opts.flags |= ODB_FSCK_FULL;
 		include_reflogs = 0;
 	}
 
-	if (name_objects)
+	എങ്കിൽ (name_objects)
 		fsck_enable_object_names(&fsck_walk_options);
 
 	repo_config(repo, git_fsck_config, &fsck_obj_options);
 	prepare_repo_settings(repo);
 
-	if (check_references)
+	എങ്കിൽ (check_references)
 		fsck_refs(repo);
 
 	/*
@@ -926,14 +926,14 @@ int cmd_fsck(int argc,
 	/* Ensure we get a "fresh" view of the odb */
 	odb_reprepare(repo->objects);
 
-	if (connectivity_only) {
-		odb_for_each_object(repo->objects, NULL,
+	എങ്കിൽ (connectivity_only) {
+		odb_for_each_object(repo->objects, ശൂന്യ,
 				    mark_object_for_connectivity, repo, 0);
-	} else {
-		if (odb_fsck(repo->objects, &odb_fsck_opts) < 0)
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (odb_fsck(repo->objects, &odb_fsck_opts) < 0)
 			errors_found |= ERROR_OBJECT;
 
-		if (fsck_finish(&fsck_obj_options))
+		എങ്കിൽ (fsck_finish(&fsck_obj_options))
 			errors_found |= ERROR_OBJECT;
 	}
 
@@ -941,25 +941,25 @@ int cmd_fsck(int argc,
 	process_refs(repo, &snap);
 
 	/* If not given any explicit objects, process index files too. */
-	if (!argc)
+	എങ്കിൽ (!argc)
 		keep_cache_objects = 1;
-	if (keep_cache_objects) {
+	എങ്കിൽ (keep_cache_objects) {
 		/*
 		 * TODO: Consider first walking these indexes in snapshot_refs,
 		 * to snapshot where the index entries used to point, and then
 		 * check those snapshotted locations here.
 		 */
-		struct worktree **worktrees, **p;
+		ഘടന worktree **worktrees, **p;
 
 		verify_index_checksum = 1;
 		verify_ce_order = 1;
 
 		worktrees = get_worktrees(repo);
-		for (p = worktrees; *p; p++) {
-			struct worktree *wt = *p;
-			struct index_state istate =
+		വേണ്ടി (p = worktrees; *p; p++) {
+			ഘടന worktree *wt = *p;
+			ഘടന index_state istate =
 				INDEX_STATE_INIT(repo);
-			char *path, *wt_gitdir;
+			അക്ഷരം *path, *wt_gitdir;
 
 			/*
 			 * Make a copy since the buffer is reusable
@@ -973,32 +973,32 @@ int cmd_fsck(int argc,
 			fsck_index(&istate, path, wt->is_current);
 
 			discard_index(&istate);
-			free(wt_gitdir);
-			free(path);
+			സ്വതന്ത്രം(wt_gitdir);
+			സ്വതന്ത്രം(path);
 		}
 		free_worktrees(worktrees);
 	}
 
 	check_connectivity(repo);
 
-	if (repo->settings.core_commit_graph) {
-		struct odb_source_files *files = odb_source_files_downcast(repo->objects->source);
-		struct child_process commit_graph_verify = CHILD_PROCESS_INIT;
+	എങ്കിൽ (repo->settings.core_commit_graph) {
+		ഘടന odb_source_files *files = odb_source_files_downcast(repo->objects->source);
+		ഘടന child_process commit_graph_verify = CHILD_PROCESS_INIT;
 
-		for (struct odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
+		വേണ്ടി (ഘടന odb_files_dir *dir = files->dirs; dir; dir = dir->next) {
 			child_process_init(&commit_graph_verify);
 			commit_graph_verify.git_cmd = 1;
 			strvec_pushl(&commit_graph_verify.args, "commit-graph",
-				     "verify", "--object-dir", dir->abspath, NULL);
-			if (show_progress)
-				strvec_push(&commit_graph_verify.args, "--progress");
-			else
-				strvec_push(&commit_graph_verify.args, "--no-progress");
-			if (run_command(&commit_graph_verify))
+				     "verify", "--object-dir", dir->abspath, ശൂന്യ);
+			എങ്കിൽ (show_progress)
+				strvec_തള്ളുക(&commit_graph_verify.args, "--progress");
+			അല്ലെങ്കിൽ
+				strvec_തള്ളുക(&commit_graph_verify.args, "--no-progress");
+			എങ്കിൽ (run_command(&commit_graph_verify))
 				errors_found |= ERROR_COMMIT_GRAPH;
 		}
 	}
 
 	free_snapshot_refs(&snap);
-	return errors_found;
+	തിരികെ errors_found;
 }

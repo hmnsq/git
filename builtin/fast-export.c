@@ -7,166 +7,166 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "refs.h"
-#include "refspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "commit.h"
-#include "object.h"
-#include "tag.h"
-#include "diff.h"
-#include "diffcore.h"
-#include "log-tree.h"
-#include "revision.h"
-#include "decorate.h"
-#include "string-list.h"
-#include "utf8.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "remote.h"
-#include "blob.h"
-#include "gpg-interface.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "refspec.h"
+#അന്തര്ഭാവ "object-file.h"
+#അന്തര്ഭാവ "odb.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "object.h"
+#അന്തര്ഭാവ "tag.h"
+#അന്തര്ഭാവ "diff.h"
+#അന്തര്ഭാവ "diffcore.h"
+#അന്തര്ഭാവ "log-tree.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "decorate.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "utf8.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "remote.h"
+#അന്തര്ഭാവ "blob.h"
+#അന്തര്ഭാവ "gpg-interface.h"
 
-static const char *const fast_export_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം fast_export_usage[] = {
 	N_("git fast-export [<options>] [<revision-range>] [[--] <path>...]"),
-	NULL
+	ശൂന്യ
 };
 
-static int progress;
-static enum sign_mode signed_tag_mode = SIGN_ABORT;
-static enum sign_mode signed_commit_mode = SIGN_STRIP;
-static enum tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
-static enum reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
-static int fake_missing_tagger;
-static int use_done_feature;
-static int no_data;
-static int full_tree;
-static int reference_excluded_commits;
-static int show_original_ids;
-static int mark_tags;
-static struct string_list extra_refs = STRING_LIST_INIT_DUP;
-static struct string_list tag_refs = STRING_LIST_INIT_DUP;
-static struct refspec refspecs;
-static int anonymize;
-static struct hashmap anonymized_seeds;
-static struct revision_sources revision_sources;
+സ്ഥിതം പൂർണ്ണസംഖ്യ progress;
+സ്ഥിതം എണ്ണൽ sign_mode signed_tag_mode = SIGN_ABORT;
+സ്ഥിതം എണ്ണൽ sign_mode signed_commit_mode = SIGN_STRIP;
+സ്ഥിതം എണ്ണൽ tag_of_filtered_mode { TAG_FILTERING_ABORT, DROP, REWRITE } tag_of_filtered_mode = TAG_FILTERING_ABORT;
+സ്ഥിതം എണ്ണൽ reencode_mode { REENCODE_ABORT, REENCODE_YES, REENCODE_NO } reencode_mode = REENCODE_ABORT;
+സ്ഥിതം പൂർണ്ണസംഖ്യ fake_missing_tagger;
+സ്ഥിതം പൂർണ്ണസംഖ്യ use_done_feature;
+സ്ഥിതം പൂർണ്ണസംഖ്യ no_data;
+സ്ഥിതം പൂർണ്ണസംഖ്യ full_വൃക്ഷം;
+സ്ഥിതം പൂർണ്ണസംഖ്യ reference_excluded_commits;
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_original_ids;
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_tags;
+സ്ഥിതം ഘടന string_list extra_refs = STRING_LIST_INIT_DUP;
+സ്ഥിതം ഘടന string_list tag_refs = STRING_LIST_INIT_DUP;
+സ്ഥിതം ഘടന refspec refspecs;
+സ്ഥിതം പൂർണ്ണസംഖ്യ anonymize;
+സ്ഥിതം ഘടന hashmap anonymized_seeds;
+സ്ഥിതം ഘടന revision_sources revision_sources;
 
-static int parse_opt_sign_mode(const struct option *opt,
-			       const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_opt_sign_mode(സ്ഥിരം ഘടന option *opt,
+			       സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	enum sign_mode *val = opt->value;
+	എണ്ണൽ sign_mode *val = opt->മൂല്യം;
 
-	if (unset)
-		return 0;
+	എങ്കിൽ (unset)
+		തിരികെ 0;
 
-	if (parse_sign_mode(arg, val, NULL) || (*val == SIGN_STRIP_IF_INVALID) ||
+	എങ്കിൽ (parse_sign_mode(arg, val, ശൂന്യ) || (*val == SIGN_STRIP_IF_INVALID) ||
 	    (*val == SIGN_SIGN_IF_INVALID) || (*val == SIGN_ABORT_IF_INVALID))
-		return error(_("unknown %s mode: %s"), opt->long_name, arg);
+		തിരികെ error(_("unknown %s mode: %s"), opt->long_name, arg);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static int parse_opt_tag_of_filtered_mode(const struct option *opt,
-					  const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_opt_tag_of_filtered_mode(സ്ഥിരം ഘടന option *opt,
+					  സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	enum tag_of_filtered_mode *val = opt->value;
+	എണ്ണൽ tag_of_filtered_mode *val = opt->മൂല്യം;
 
-	if (unset || !strcmp(arg, "abort"))
+	എങ്കിൽ (unset || !strcmp(arg, "abort"))
 		*val = TAG_FILTERING_ABORT;
-	else if (!strcmp(arg, "drop"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(arg, "drop"))
 		*val = DROP;
-	else if (!strcmp(arg, "rewrite"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcmp(arg, "rewrite"))
 		*val = REWRITE;
-	else
-		return error(_("unknown tag-of-filtered mode: %s"), arg);
-	return 0;
+	അല്ലെങ്കിൽ
+		തിരികെ error(_("unknown tag-of-filtered mode: %s"), arg);
+	തിരികെ 0;
 }
 
-static int parse_opt_reencode_mode(const struct option *opt,
-				   const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_opt_reencode_mode(സ്ഥിരം ഘടന option *opt,
+				   സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	enum reencode_mode *val = opt->value;
+	എണ്ണൽ reencode_mode *val = opt->മൂല്യം;
 
-	if (unset) {
+	എങ്കിൽ (unset) {
 		*val = REENCODE_ABORT;
-		return 0;
+		തിരികെ 0;
 	}
 
-	switch (git_parse_maybe_bool(arg)) {
-	case 0:
+	തിരഞ്ഞെടുപ്പ് (git_parse_maybe_bool(arg)) {
+	അവസ്ഥ 0:
 		*val = REENCODE_NO;
-		break;
-	case 1:
+		നിർത്തുക;
+	അവസ്ഥ 1:
 		*val = REENCODE_YES;
-		break;
-	default:
-		if (!strcasecmp(arg, "abort"))
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
+		എങ്കിൽ (!strcasecmp(arg, "abort"))
 			*val = REENCODE_ABORT;
-		else
-			return error(_("unknown reencoding mode: %s"), arg);
+		അല്ലെങ്കിൽ
+			തിരികെ error(_("unknown reencoding mode: %s"), arg);
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-static struct decoration idnums;
-static uint32_t last_idnum;
-struct anonymized_entry {
-	struct hashmap_entry hash;
-	char *anon;
-	const char orig[FLEX_ARRAY];
+സ്ഥിതം ഘടന decoration idnums;
+സ്ഥിതം uint32_t last_idnum;
+ഘടന anonymized_entry {
+	ഘടന hashmap_entry hash;
+	അക്ഷരം *anon;
+	സ്ഥിരം അക്ഷരം orig[FLEX_ARRAY];
 };
 
-struct anonymized_entry_key {
-	struct hashmap_entry hash;
-	const char *orig;
+ഘടന anonymized_entry_താക്കോൽ {
+	ഘടന hashmap_entry hash;
+	സ്ഥിരം അക്ഷരം *orig;
 	size_t orig_len;
 };
 
-static int anonymized_entry_cmp(const void *cmp_data UNUSED,
-				const struct hashmap_entry *eptr,
-				const struct hashmap_entry *entry_or_key,
-				const void *keydata)
+സ്ഥിതം പൂർണ്ണസംഖ്യ anonymized_entry_cmp(സ്ഥിരം ശൂന്യം *cmp_data UNUSED,
+				സ്ഥിരം ഘടന hashmap_entry *eptr,
+				സ്ഥിരം ഘടന hashmap_entry *entry_or_താക്കോൽ,
+				സ്ഥിരം ശൂന്യം *keydata)
 {
-	const struct anonymized_entry *a, *b;
+	സ്ഥിരം ഘടന anonymized_entry *a, *b;
 
-	a = container_of(eptr, const struct anonymized_entry, hash);
-	if (keydata) {
-		const struct anonymized_entry_key *key = keydata;
-		int equal = !xstrncmpz(a->orig, key->orig, key->orig_len);
-		return !equal;
+	a = container_of(eptr, സ്ഥിരം ഘടന anonymized_entry, hash);
+	എങ്കിൽ (keydata) {
+		സ്ഥിരം ഘടന anonymized_entry_താക്കോൽ *താക്കോൽ = keydata;
+		പൂർണ്ണസംഖ്യ equal = !xstrncmpz(a->orig, താക്കോൽ->orig, താക്കോൽ->orig_len);
+		തിരികെ !equal;
 	}
 
-	b = container_of(entry_or_key, const struct anonymized_entry, hash);
-	return strcmp(a->orig, b->orig);
+	b = container_of(entry_or_താക്കോൽ, സ്ഥിരം ഘടന anonymized_entry, hash);
+	തിരികെ strcmp(a->orig, b->orig);
 }
 
-static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
+സ്ഥിതം ഘടന anonymized_entry *add_anonymized_entry(ഘടന hashmap *map,
 						     unsigned hash,
-						     const char *orig, size_t len,
-						     char *anon)
+						     സ്ഥിരം അക്ഷരം *orig, size_t len,
+						     അക്ഷരം *anon)
 {
-	struct anonymized_entry *ret, *old;
+	ഘടന anonymized_entry *ret, *old;
 
-	if (!map->cmpfn)
-		hashmap_init(map, anonymized_entry_cmp, NULL, 0);
+	എങ്കിൽ (!map->cmpfn)
+		hashmap_init(map, anonymized_entry_cmp, ശൂന്യ, 0);
 
 	FLEX_ALLOC_MEM(ret, orig, orig, len);
 	hashmap_entry_init(&ret->hash, hash);
 	ret->anon = anon;
 	old = hashmap_put_entry(map, ret, hash);
 
-	if (old) {
-		free(old->anon);
-		free(old);
+	എങ്കിൽ (old) {
+		സ്വതന്ത്രം(old->anon);
+		സ്വതന്ത്രം(old);
 	}
 
-	return ret;
+	തിരികെ ret;
 }
 
 /*
@@ -174,30 +174,30 @@ static struct anonymized_entry *add_anonymized_entry(struct hashmap *map,
  * the same anonymized string with another. The actual generation
  * is farmed out to the generate function.
  */
-static const char *anonymize_str(struct hashmap *map,
-				 char *(*generate)(void),
-				 const char *orig, size_t len)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *anonymize_str(ഘടന hashmap *map,
+				 അക്ഷരം *(*generate)(ശൂന്യം),
+				 സ്ഥിരം അക്ഷരം *orig, size_t len)
 {
-	struct anonymized_entry_key key;
-	struct anonymized_entry *ret;
+	ഘടന anonymized_entry_താക്കോൽ താക്കോൽ;
+	ഘടന anonymized_entry *ret;
 
-	hashmap_entry_init(&key.hash, memhash(orig, len));
-	key.orig = orig;
-	key.orig_len = len;
+	hashmap_entry_init(&താക്കോൽ.hash, memhash(orig, len));
+	താക്കോൽ.orig = orig;
+	താക്കോൽ.orig_len = len;
 
 	/* First check if it's a token the user configured manually... */
-	ret = hashmap_get_entry(&anonymized_seeds, &key, hash, &key);
+	ret = hashmap_get_entry(&anonymized_seeds, &താക്കോൽ, hash, &താക്കോൽ);
 
 	/* ...otherwise check if we've already seen it in this context... */
-	if (!ret)
-		ret = hashmap_get_entry(map, &key, hash, &key);
+	എങ്കിൽ (!ret)
+		ret = hashmap_get_entry(map, &താക്കോൽ, hash, &താക്കോൽ);
 
 	/* ...and finally generate a new mapping if necessary */
-	if (!ret)
-		ret = add_anonymized_entry(map, key.hash.hash,
+	എങ്കിൽ (!ret)
+		ret = add_anonymized_entry(map, താക്കോൽ.hash.hash,
 					   orig, len, generate());
 
-	return ret->anon;
+	തിരികെ ret->anon;
 }
 
 /*
@@ -206,71 +206,71 @@ static const char *anonymize_str(struct hashmap *map,
  * The paths are cached via anonymize_mem so that repeated
  * lookups for "a" will yield the same value.
  */
-static void anonymize_path(struct strbuf *out, const char *path,
-			   struct hashmap *map,
-			   char *(*generate)(void))
+സ്ഥിതം ശൂന്യം anonymize_path(ഘടന strbuf *out, സ്ഥിരം അക്ഷരം *path,
+			   ഘടന hashmap *map,
+			   അക്ഷരം *(*generate)(ശൂന്യം))
 {
-	while (*path) {
-		const char *end_of_component = strchrnul(path, '/');
+	ആകുമ്പോൾ (*path) {
+		സ്ഥിരം അക്ഷരം *end_of_component = strchrnul(path, '/');
 		size_t len = end_of_component - path;
-		const char *c = anonymize_str(map, generate, path, len);
+		സ്ഥിരം അക്ഷരം *c = anonymize_str(map, generate, path, len);
 		strbuf_addstr(out, c);
 		path = end_of_component;
-		if (*path)
+		എങ്കിൽ (*path)
 			strbuf_addch(out, *path++);
 	}
 }
 
-static inline void *mark_to_ptr(uint32_t mark)
+സ്ഥിതം വരിയിൽ ശൂന്യം *mark_to_ptr(uint32_t mark)
 {
-	return (void *)(uintptr_t)mark;
+	തിരികെ (ശൂന്യം *)(uintptr_t)mark;
 }
 
-static inline uint32_t ptr_to_mark(void * mark)
+സ്ഥിതം വരിയിൽ uint32_t ptr_to_mark(ശൂന്യം * mark)
 {
-	return (uint32_t)(uintptr_t)mark;
+	തിരികെ (uint32_t)(uintptr_t)mark;
 }
 
-static inline void mark_object(struct object *object, uint32_t mark)
+സ്ഥിതം വരിയിൽ ശൂന്യം mark_object(ഘടന object *object, uint32_t mark)
 {
 	add_decoration(&idnums, object, mark_to_ptr(mark));
 }
 
-static inline void mark_next_object(struct object *object)
+സ്ഥിതം വരിയിൽ ശൂന്യം mark_next_object(ഘടന object *object)
 {
 	mark_object(object, ++last_idnum);
 }
 
-static int get_object_mark(struct object *object)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_object_mark(ഘടന object *object)
 {
-	void *decoration = lookup_decoration(&idnums, object);
-	if (!decoration)
-		return 0;
-	return ptr_to_mark(decoration);
+	ശൂന്യം *decoration = lookup_decoration(&idnums, object);
+	എങ്കിൽ (!decoration)
+		തിരികെ 0;
+	തിരികെ ptr_to_mark(decoration);
 }
 
-static struct commit *rewrite_commit(struct commit *p)
+സ്ഥിതം ഘടന commit *rewrite_commit(ഘടന commit *p)
 {
-	for (;;) {
-		if (p->parents && p->parents->next)
-			break;
-		if (p->object.flags & UNINTERESTING)
-			break;
-		if (!(p->object.flags & TREESAME))
-			break;
-		if (!p->parents)
-			return NULL;
+	വേണ്ടി (;;) {
+		എങ്കിൽ (p->parents && p->parents->next)
+			നിർത്തുക;
+		എങ്കിൽ (p->object.flags & UNINTERESTING)
+			നിർത്തുക;
+		എങ്കിൽ (!(p->object.flags & TREESAME))
+			നിർത്തുക;
+		എങ്കിൽ (!p->parents)
+			തിരികെ ശൂന്യ;
 		p = p->parents->item;
 	}
-	return p;
+	തിരികെ p;
 }
 
-static void show_progress(void)
+സ്ഥിതം ശൂന്യം show_progress(ശൂന്യം)
 {
-	static int counter = 0;
-	if (!progress)
-		return;
-	if ((++counter % progress) == 0)
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter = 0;
+	എങ്കിൽ (!progress)
+		തിരികെ;
+	എങ്കിൽ ((++counter % progress) == 0)
 		printf("progress %d objects\n", counter);
 }
 
@@ -285,78 +285,78 @@ static void show_progress(void)
  * There's no need to cache this result with anonymize_mem, since
  * we already handle blob content caching with marks.
  */
-static char *anonymize_blob(unsigned long *size)
+സ്ഥിതം അക്ഷരം *anonymize_blob(unsigned long *size)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter;
+	ഘടന strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "anonymous blob %d", counter++);
 	*size = out.len;
-	return strbuf_detach(&out, NULL);
+	തിരികെ strbuf_detach(&out, ശൂന്യ);
 }
 
-static void export_blob(const struct object_id *oid)
+സ്ഥിതം ശൂന്യം export_blob(സ്ഥിരം ഘടന object_id *oid)
 {
 	unsigned long size;
-	enum object_type type;
-	char *buf;
-	struct object *object;
-	int eaten;
+	എണ്ണൽ object_type type;
+	അക്ഷരം *buf;
+	ഘടന object *object;
+	പൂർണ്ണസംഖ്യ eaten;
 
-	if (no_data)
-		return;
+	എങ്കിൽ (no_data)
+		തിരികെ;
 
-	if (is_null_oid(oid))
-		return;
+	എങ്കിൽ (is_null_oid(oid))
+		തിരികെ;
 
 	object = lookup_object(the_repository, oid);
-	if (object && object->flags & SHOWN)
-		return;
+	എങ്കിൽ (object && object->flags & SHOWN)
+		തിരികെ;
 
-	if (anonymize) {
+	എങ്കിൽ (anonymize) {
 		buf = anonymize_blob(&size);
-		object = (struct object *)lookup_blob(the_repository, oid);
+		object = (ഘടന object *)lookup_blob(the_repository, oid);
 		eaten = 0;
-	} else {
+	} അല്ലെങ്കിൽ {
 		size_t size_st = 0;
 		buf = odb_read_object(the_repository->objects, oid, &type,
 				      &size_st);
 		size = cast_size_t_to_ulong(size_st);
-		if (!buf)
+		എങ്കിൽ (!buf)
 			die(_("could not read blob %s"), oid_to_hex(oid));
-		if (check_object_signature(the_repository, oid, buf, size,
+		എങ്കിൽ (check_object_signature(the_repository, oid, buf, size,
 					   type) < 0)
 			die(_("oid mismatch in blob %s"), oid_to_hex(oid));
 		object = parse_object_buffer(the_repository, oid, type,
 					     size, buf, &eaten);
 	}
 
-	if (!object)
+	എങ്കിൽ (!object)
 		die(_("could not read blob %s"), oid_to_hex(oid));
 
 	mark_next_object(object);
 
 	printf("blob\nmark :%"PRIu32"\n", last_idnum);
-	if (show_original_ids)
+	എങ്കിൽ (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(oid));
 	printf("data %"PRIuMAX"\n", (uintmax_t)size);
-	if (size && fwrite(buf, size, 1, stdout) != 1)
+	എങ്കിൽ (size && fwrite(buf, size, 1, stdout) != 1)
 		die_errno(_("could not write blob '%s'"), oid_to_hex(oid));
 	printf("\n");
 
 	show_progress();
 
 	object->flags |= SHOWN;
-	if (!eaten)
-		free(buf);
+	എങ്കിൽ (!eaten)
+		സ്വതന്ത്രം(buf);
 }
 
-static int depth_first(const void *a_, const void *b_)
+സ്ഥിതം പൂർണ്ണസംഖ്യ depth_first(സ്ഥിരം ശൂന്യം *a_, സ്ഥിരം ശൂന്യം *b_)
 {
-	const struct diff_filepair *a = *((const struct diff_filepair **)a_);
-	const struct diff_filepair *b = *((const struct diff_filepair **)b_);
-	const char *name_a, *name_b;
-	int len_a, len_b, len;
-	int cmp;
+	സ്ഥിരം ഘടന diff_filepair *a = *((സ്ഥിരം ഘടന diff_filepair **)a_);
+	സ്ഥിരം ഘടന diff_filepair *b = *((സ്ഥിരം ഘടന diff_filepair **)b_);
+	സ്ഥിരം അക്ഷരം *name_a, *name_b;
+	പൂർണ്ണസംഖ്യ len_a, len_b, len;
+	പൂർണ്ണസംഖ്യ cmp;
 
 	name_a = a->one ? a->one->path : a->two->path;
 	name_b = b->one ? b->one->path : b->two->path;
@@ -367,45 +367,45 @@ static int depth_first(const void *a_, const void *b_)
 
 	/* strcmp will sort 'd' before 'd/e', we want 'd/e' before 'd' */
 	cmp = memcmp(name_a, name_b, len);
-	if (cmp)
-		return cmp;
+	എങ്കിൽ (cmp)
+		തിരികെ cmp;
 	cmp = len_b - len_a;
-	if (cmp)
-		return cmp;
+	എങ്കിൽ (cmp)
+		തിരികെ cmp;
 	/*
 	 * Move 'R'ename entries last so that all references of the file
 	 * appear in the output before it is renamed (e.g., when a file
 	 * was copied and renamed in the same commit).
 	 */
-	return (a->status == 'R') - (b->status == 'R');
+	തിരികെ (a->status == 'R') - (b->status == 'R');
 }
 
-static void print_path_1(const char *path)
+സ്ഥിതം ശൂന്യം print_path_1(സ്ഥിരം അക്ഷരം *path)
 {
-	int need_quote = quote_c_style(path, NULL, NULL, 0);
-	if (need_quote)
-		quote_c_style(path, NULL, stdout, 0);
-	else if (strchr(path, ' '))
+	പൂർണ്ണസംഖ്യ need_quote = quote_c_style(path, ശൂന്യ, ശൂന്യ, 0);
+	എങ്കിൽ (need_quote)
+		quote_c_style(path, ശൂന്യ, stdout, 0);
+	അല്ലെങ്കിൽ എങ്കിൽ (strchr(path, ' '))
 		printf("\"%s\"", path);
-	else
+	അല്ലെങ്കിൽ
 		printf("%s", path);
 }
 
-static char *anonymize_path_component(void)
+സ്ഥിതം അക്ഷരം *anonymize_path_component(ശൂന്യം)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter;
+	ഘടന strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "path%d", counter++);
-	return strbuf_detach(&out, NULL);
+	തിരികെ strbuf_detach(&out, ശൂന്യ);
 }
 
-static void print_path(const char *path)
+സ്ഥിതം ശൂന്യം print_path(സ്ഥിരം അക്ഷരം *path)
 {
-	if (!anonymize)
+	എങ്കിൽ (!anonymize)
 		print_path_1(path);
-	else {
-		static struct hashmap paths;
-		static struct strbuf anon = STRBUF_INIT;
+	അല്ലെങ്കിൽ {
+		സ്ഥിതം ഘടന hashmap paths;
+		സ്ഥിതം ഘടന strbuf anon = STRBUF_INIT;
 
 		anonymize_path(&anon, path, &paths, anonymize_path_component);
 		print_path_1(anon.buf);
@@ -413,30 +413,30 @@ static void print_path(const char *path)
 	}
 }
 
-static char *generate_fake_oid(void)
+സ്ഥിതം അക്ഷരം *generate_fake_oid(ശൂന്യം)
 {
-	static uint32_t counter = 1; /* avoid null oid */
-	const unsigned hashsz = the_hash_algo->rawsz;
-	struct object_id oid;
-	char *hex = xmallocz(GIT_MAX_HEXSZ);
+	സ്ഥിതം uint32_t counter = 1; /* avoid null oid */
+	സ്ഥിരം unsigned hashsz = the_hash_algo->rawsz;
+	ഘടന object_id oid;
+	അക്ഷരം *hex = xmallocz(GIT_MAX_HEXSZ);
 
 	oidclr(&oid, the_repository->hash_algo);
 	put_be32(oid.hash + hashsz - 4, counter++);
-	return oid_to_hex_r(hex, &oid);
+	തിരികെ oid_to_hex_r(hex, &oid);
 }
 
-static const char *anonymize_oid(const char *oid_hex)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *anonymize_oid(സ്ഥിരം അക്ഷരം *oid_hex)
 {
-	static struct hashmap objs;
+	സ്ഥിതം ഘടന hashmap objs;
 	size_t len = strlen(oid_hex);
-	return anonymize_str(&objs, generate_fake_oid, oid_hex, len);
+	തിരികെ anonymize_str(&objs, generate_fake_oid, oid_hex, len);
 }
 
-static void show_filemodify(struct diff_queue_struct *q,
-			    struct diff_options *options UNUSED, void *data)
+സ്ഥിതം ശൂന്യം show_filemodify(ഘടന diff_queue_struct *q,
+			    ഘടന diff_options *options UNUSED, ശൂന്യം *data)
 {
-	int i;
-	struct string_list *changed = data;
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന string_list *changed = data;
 
 	/*
 	 * Handle files below a directory first, in case they are all deleted
@@ -444,20 +444,20 @@ static void show_filemodify(struct diff_queue_struct *q,
 	 */
 	QSORT(q->queue, q->nr, depth_first);
 
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filespec *ospec = q->queue[i]->one;
-		struct diff_filespec *spec = q->queue[i]->two;
+	വേണ്ടി (i = 0; i < q->nr; i++) {
+		ഘടന diff_filespec *ospec = q->queue[i]->one;
+		ഘടന diff_filespec *spec = q->queue[i]->two;
 
-		switch (q->queue[i]->status) {
-		case DIFF_STATUS_DELETED:
+		തിരഞ്ഞെടുപ്പ് (q->queue[i]->status) {
+		അവസ്ഥ DIFF_STATUS_DELETED:
 			printf("D ");
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			string_list_തിരുകുക(changed, spec->path);
 			putchar('\n');
-			break;
+			നിർത്തുക;
 
-		case DIFF_STATUS_COPIED:
-		case DIFF_STATUS_RENAMED:
+		അവസ്ഥ DIFF_STATUS_COPIED:
+		അവസ്ഥ DIFF_STATUS_RENAMED:
 			/*
 			 * If a change in the file corresponding to ospec->path
 			 * has been observed, we cannot trust its contents
@@ -465,44 +465,44 @@ static void show_filemodify(struct diff_queue_struct *q,
 			 * contents, not the current contents.  So, declare a
 			 * copy or rename only if there was no change observed.
 			 */
-			if (!string_list_has_string(changed, ospec->path)) {
+			എങ്കിൽ (!string_list_has_string(changed, ospec->path)) {
 				printf("%c ", q->queue[i]->status);
 				print_path(ospec->path);
 				putchar(' ');
 				print_path(spec->path);
-				string_list_insert(changed, spec->path);
+				string_list_തിരുകുക(changed, spec->path);
 				putchar('\n');
 
-				if (oideq(&ospec->oid, &spec->oid) &&
+				എങ്കിൽ (oideq(&ospec->oid, &spec->oid) &&
 				    ospec->mode == spec->mode)
-					break;
+					നിർത്തുക;
 			}
 			/* fallthrough */
 
-		case DIFF_STATUS_TYPE_CHANGED:
-		case DIFF_STATUS_MODIFIED:
-		case DIFF_STATUS_ADDED:
+		അവസ്ഥ DIFF_STATUS_TYPE_CHANGED:
+		അവസ്ഥ DIFF_STATUS_MODIFIED:
+		അവസ്ഥ DIFF_STATUS_ADDED:
 			/*
 			 * Links refer to objects in another repositories;
 			 * output the SHA-1 verbatim.
 			 */
-			if (no_data || S_ISGITLINK(spec->mode))
+			എങ്കിൽ (no_data || S_ISGITLINK(spec->mode))
 				printf("M %06o %s ", spec->mode,
 				       anonymize ?
 				       anonymize_oid(oid_to_hex(&spec->oid)) :
 				       oid_to_hex(&spec->oid));
-			else {
-				struct object *object = lookup_object(the_repository,
+			അല്ലെങ്കിൽ {
+				ഘടന object *object = lookup_object(the_repository,
 								      &spec->oid);
 				printf("M %06o :%d ", spec->mode,
 				       get_object_mark(object));
 			}
 			print_path(spec->path);
-			string_list_insert(changed, spec->path);
+			string_list_തിരുകുക(changed, spec->path);
 			putchar('\n');
-			break;
+			നിർത്തുക;
 
-		default:
+		സ്ഥിരസ്ഥിതി:
 			die(_("unexpected comparison status '%c' for %s, %s"),
 			    q->queue[i]->status,
 			    ospec->path ? ospec->path : _("none"),
@@ -511,59 +511,59 @@ static void show_filemodify(struct diff_queue_struct *q,
 	}
 }
 
-static char *anonymize_ref_component(void)
+സ്ഥിതം അക്ഷരം *anonymize_ref_component(ശൂന്യം)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter;
+	ഘടന strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "ref%d", counter++);
-	return strbuf_detach(&out, NULL);
+	തിരികെ strbuf_detach(&out, ശൂന്യ);
 }
 
-static const char *anonymize_refname(const char *refname)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *anonymize_refname(സ്ഥിരം അക്ഷരം *refname)
 {
 	/*
 	 * If any of these prefixes is found, we will leave it intact
 	 * so that tags remain tags and so forth.
 	 */
-	static const char *prefixes[] = {
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *prefixes[] = {
 		"refs/heads/",
 		"refs/tags/",
 		"refs/remotes/",
 		"refs/"
 	};
-	static struct hashmap refs;
-	static struct strbuf anon = STRBUF_INIT;
-	int i;
+	സ്ഥിതം ഘടന hashmap refs;
+	സ്ഥിതം ഘടന strbuf anon = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ i;
 
 	strbuf_reset(&anon);
-	for (i = 0; i < ARRAY_SIZE(prefixes); i++) {
-		if (skip_prefix(refname, prefixes[i], &refname)) {
+	വേണ്ടി (i = 0; i < ARRAY_SIZE(prefixes); i++) {
+		എങ്കിൽ (skip_prefix(refname, prefixes[i], &refname)) {
 			strbuf_addstr(&anon, prefixes[i]);
-			break;
+			നിർത്തുക;
 		}
 	}
 
 	anonymize_path(&anon, refname, &refs, anonymize_ref_component);
-	return anon.buf;
+	തിരികെ anon.buf;
 }
 
 /*
  * We do not even bother to cache commit messages, as they are unlikely
  * to be repeated verbatim, and it is not that interesting when they are.
  */
-static char *anonymize_commit_message(void)
+സ്ഥിതം അക്ഷരം *anonymize_commit_message(ശൂന്യം)
 {
-	static int counter;
-	return xstrfmt("subject %d\n\nbody\n", counter++);
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter;
+	തിരികെ xstrfmt("subject %d\n\nbody\n", counter++);
 }
 
-static char *anonymize_ident(void)
+സ്ഥിതം അക്ഷരം *anonymize_ident(ശൂന്യം)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter;
+	ഘടന strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "User %d <user%d@example.com>", counter, counter);
 	counter++;
-	return strbuf_detach(&out, NULL);
+	തിരികെ strbuf_detach(&out, ശൂന്യ);
 }
 
 /*
@@ -571,15 +571,15 @@ static char *anonymize_ident(void)
  * but keep timestamps intact, as they influence things like traversal
  * order (and by themselves should not be too revealing).
  */
-static void anonymize_ident_line(const char **beg, const char **end)
+സ്ഥിതം ശൂന്യം anonymize_ident_വരി(സ്ഥിരം അക്ഷരം **beg, സ്ഥിരം അക്ഷരം **end)
 {
-	static struct hashmap idents;
-	static struct strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
-	static unsigned which_buffer;
+	സ്ഥിതം ഘടന hashmap idents;
+	സ്ഥിതം ഘടന strbuf buffers[] = { STRBUF_INIT, STRBUF_INIT };
+	സ്ഥിതം unsigned which_buffer;
 
-	struct strbuf *out;
-	struct ident_split split;
-	const char *end_of_header;
+	ഘടന strbuf *out;
+	ഘടന ident_split split;
+	സ്ഥിരം അക്ഷരം *end_of_header;
 
 	out = &buffers[which_buffer++];
 	which_buffer %= ARRAY_SIZE(buffers);
@@ -587,15 +587,15 @@ static void anonymize_ident_line(const char **beg, const char **end)
 
 	/* skip "committer", "author", "tagger", etc */
 	end_of_header = strchr(*beg, ' ');
-	if (!end_of_header)
+	എങ്കിൽ (!end_of_header)
 		BUG("malformed line fed to anonymize_ident_line: %.*s",
-		    (int)(*end - *beg), *beg);
+		    (പൂർണ്ണസംഖ്യ)(*end - *beg), *beg);
 	end_of_header++;
 	strbuf_add(out, *beg, end_of_header - *beg);
 
-	if (!split_ident_line(&split, end_of_header, *end - end_of_header) &&
+	എങ്കിൽ (!split_ident_വരി(&split, end_of_header, *end - end_of_header) &&
 	    split.date_begin) {
-		const char *ident;
+		സ്ഥിരം അക്ഷരം *ident;
 		size_t len;
 
 		len = split.mail_end - split.name_begin;
@@ -604,7 +604,7 @@ static void anonymize_ident_line(const char **beg, const char **end)
 		strbuf_addstr(out, ident);
 		strbuf_addch(out, ' ');
 		strbuf_add(out, split.date_begin, split.tz_end - split.date_begin);
-	} else {
+	} അല്ലെങ്കിൽ {
 		strbuf_addstr(out, "Malformed Ident <malformed@example.com> 0 -0000");
 	}
 
@@ -624,21 +624,21 @@ static void anonymize_ident_line(const char **beg, const char **end)
  * If the header is found, then *end is set to point at the '\n' in
  * msg that immediately follows the header value.
  */
-static const char *find_commit_multiline_header(const char *msg,
-						const char *key,
-						const char **end)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *find_commit_multiline_header(സ്ഥിരം അക്ഷരം *സന്ദേശം,
+						സ്ഥിരം അക്ഷരം *താക്കോൽ,
+						സ്ഥിരം അക്ഷരം **end)
 {
-	struct strbuf val = STRBUF_INIT;
-	const char *bol, *eol;
+	ഘടന strbuf val = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *bol, *eol;
 	size_t len;
 
-	bol = find_commit_header(msg, key, &len);
-	if (!bol)
-		return NULL;
+	bol = find_commit_header(സന്ദേശം, താക്കോൽ, &len);
+	എങ്കിൽ (!bol)
+		തിരികെ ശൂന്യ;
 	eol = bol + len;
 	strbuf_add(&val, bol, len);
 
-	while (eol[0] == '\n' && eol[1] == ' ') {
+	ആകുമ്പോൾ (eol[0] == '\n' && eol[1] == ' ') {
 		bol = eol + 2;
 		eol = strchrnul(bol, '\n');
 		strbuf_addch(&val, '\n');
@@ -646,13 +646,13 @@ static const char *find_commit_multiline_header(const char *msg,
 	}
 
 	*end = eol;
-	return strbuf_detach(&val, NULL);
+	തിരികെ strbuf_detach(&val, ശൂന്യ);
 }
 
-static void print_signature(const char *signature, const char *object_hash)
+സ്ഥിതം ശൂന്യം print_signature(സ്ഥിരം അക്ഷരം *signature, സ്ഥിരം അക്ഷരം *object_hash)
 {
-	if (!signature)
-		return;
+	എങ്കിൽ (!signature)
+		തിരികെ;
 
 	printf("gpgsig %s %s\ndata %u\n%s\n",
 	       object_hash,
@@ -661,55 +661,55 @@ static void print_signature(const char *signature, const char *object_hash)
 	       signature);
 }
 
-static const char *append_signatures_for_header(struct string_list *signatures,
-						const char *pos,
-						const char *header,
-						const char *object_hash)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *append_signatures_for_header(ഘടന string_list *signatures,
+						സ്ഥിരം അക്ഷരം *pos,
+						സ്ഥിരം അക്ഷരം *header,
+						സ്ഥിരം അക്ഷരം *object_hash)
 {
-	const char *signature;
-	const char *start = pos;
-	const char *end = pos;
+	സ്ഥിരം അക്ഷരം *signature;
+	സ്ഥിരം അക്ഷരം *start = pos;
+	സ്ഥിരം അക്ഷരം *end = pos;
 
-	while ((signature = find_commit_multiline_header(start + 1,
+	ആകുമ്പോൾ ((signature = find_commit_multiline_header(start + 1,
 							 header,
 							 &end))) {
-		string_list_append(signatures, signature)->util = (void *)object_hash;
-		free((char *)signature);
+		string_list_append(signatures, signature)->util = (ശൂന്യം *)object_hash;
+		സ്വതന്ത്രം((അക്ഷരം *)signature);
 		start = end;
 	}
 
-	return end;
+	തിരികെ end;
 }
 
-static void handle_commit(struct commit *commit, struct rev_info *rev,
-			  struct string_list *paths_of_changed_objects)
+സ്ഥിതം ശൂന്യം handle_commit(ഘടന commit *commit, ഘടന rev_info *rev,
+			  ഘടന string_list *paths_of_changed_objects)
 {
-	int saved_output_format = rev->diffopt.output_format;
-	const char *commit_buffer, *commit_buffer_cursor;
-	const char *author, *author_end, *committer, *committer_end;
-	const char *encoding = NULL;
+	പൂർണ്ണസംഖ്യ saved_output_format = rev->diffopt.output_format;
+	സ്ഥിരം അക്ഷരം *commit_buffer, *commit_buffer_cursor;
+	സ്ഥിരം അക്ഷരം *author, *author_end, *committer, *committer_end;
+	സ്ഥിരം അക്ഷരം *encoding = ശൂന്യ;
 	size_t encoding_len;
-	struct string_list signatures = STRING_LIST_INIT_DUP;
-	const char *message;
-	char *reencoded = NULL;
-	struct commit_list *p;
-	const char *refname;
-	int i;
+	ഘടന string_list signatures = STRING_LIST_INIT_DUP;
+	സ്ഥിരം അക്ഷരം *message;
+	അക്ഷരം *reencoded = ശൂന്യ;
+	ഘടന commit_list *p;
+	സ്ഥിരം അക്ഷരം *refname;
+	പൂർണ്ണസംഖ്യ i;
 
 	rev->diffopt.output_format = DIFF_FORMAT_CALLBACK;
 
 	parse_commit_or_die(commit);
-	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, NULL);
+	commit_buffer_cursor = commit_buffer = repo_get_commit_buffer(the_repository, commit, ശൂന്യ);
 
 	author = strstr(commit_buffer_cursor, "\nauthor ");
-	if (!author)
+	എങ്കിൽ (!author)
 		die(_("could not find author in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	author++;
 	commit_buffer_cursor = author_end = strchrnul(author, '\n');
 
 	committer = strstr(commit_buffer_cursor, "\ncommitter ");
-	if (!committer)
+	എങ്കിൽ (!committer)
 		die(_("could not find committer in commit %s"),
 		    oid_to_hex(&commit->object.oid));
 	committer++;
@@ -722,39 +722,39 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * pointer to the beginning of the next line.
 	 */
 
-	if (*commit_buffer_cursor == '\n') {
+	എങ്കിൽ (*commit_buffer_cursor == '\n') {
 		encoding = find_commit_header(commit_buffer_cursor + 1, "encoding", &encoding_len);
-		if (encoding)
+		എങ്കിൽ (encoding)
 			commit_buffer_cursor = encoding + encoding_len;
 	}
 
-	if (*commit_buffer_cursor == '\n') {
-		const char *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+	എങ്കിൽ (*commit_buffer_cursor == '\n') {
+		സ്ഥിരം അക്ഷരം *after_sha1 = append_signatures_for_header(&signatures, commit_buffer_cursor,
 								      "gpgsig", "sha1");
-		const char *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
+		സ്ഥിരം അക്ഷരം *after_sha256 = append_signatures_for_header(&signatures, commit_buffer_cursor,
 									"gpgsig-sha256", "sha256");
 		commit_buffer_cursor = (after_sha1 > after_sha256) ? after_sha1 : after_sha256;
 	}
 
 	message = strstr(commit_buffer_cursor, "\n\n");
-	if (message)
+	എങ്കിൽ (message)
 		message += 2;
 
-	if (commit->parents &&
+	എങ്കിൽ (commit->parents &&
 	    (get_object_mark(&commit->parents->item->object) != 0 ||
 	     reference_excluded_commits) &&
-	    !full_tree) {
+	    !full_വൃക്ഷം) {
 		parse_commit_or_die(commit->parents->item);
-		diff_tree_oid(get_commit_tree_oid(commit->parents->item),
-			      get_commit_tree_oid(commit), "", &rev->diffopt);
+		diff_വൃക്ഷം_oid(get_commit_വൃക്ഷം_oid(commit->parents->item),
+			      get_commit_വൃക്ഷം_oid(commit), "", &rev->diffopt);
 	}
-	else
-		diff_root_tree_oid(get_commit_tree_oid(commit),
+	അല്ലെങ്കിൽ
+		diff_വേര്_വൃക്ഷം_oid(get_commit_വൃക്ഷം_oid(commit),
 				   "", &rev->diffopt);
 
 	/* Export the referenced blobs, and remember the marks. */
-	for (i = 0; i < diff_queued_diff.nr; i++)
-		if (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
+	വേണ്ടി (i = 0; i < diff_queued_diff.nr; i++)
+		എങ്കിൽ (!S_ISGITLINK(diff_queued_diff.queue[i]->two->mode))
 			export_blob(&diff_queued_diff.queue[i]->two->oid);
 
 	refname = *revision_sources_at(&revision_sources, commit);
@@ -765,95 +765,95 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	 * repo may have enough refs for this to become slow.
 	 */
 	string_list_remove(&extra_refs, refname, 0);
-	if (anonymize) {
+	എങ്കിൽ (anonymize) {
 		refname = anonymize_refname(refname);
-		anonymize_ident_line(&committer, &committer_end);
-		anonymize_ident_line(&author, &author_end);
+		anonymize_ident_വരി(&committer, &committer_end);
+		anonymize_ident_വരി(&author, &author_end);
 	}
 
 	mark_next_object(&commit->object);
-	if (anonymize) {
+	എങ്കിൽ (anonymize) {
 		reencoded = anonymize_commit_message();
-	} else if (encoding) {
-		char *buf;
-		switch (reencode_mode) {
-		case REENCODE_YES:
-			buf = xstrfmt("%.*s", (int)encoding_len, encoding);
+	} അല്ലെങ്കിൽ എങ്കിൽ (encoding) {
+		അക്ഷരം *buf;
+		തിരഞ്ഞെടുപ്പ് (reencode_mode) {
+		അവസ്ഥ REENCODE_YES:
+			buf = xstrfmt("%.*s", (പൂർണ്ണസംഖ്യ)encoding_len, encoding);
 			reencoded = reencode_string(message, "UTF-8", buf);
-			free(buf);
-			break;
-		case REENCODE_NO:
-			break;
-		case REENCODE_ABORT:
+			സ്വതന്ത്രം(buf);
+			നിർത്തുക;
+		അവസ്ഥ REENCODE_NO:
+			നിർത്തുക;
+		അവസ്ഥ REENCODE_ABORT:
 			die(_("encountered commit-specific encoding %.*s in commit "
 			      "%s; use --reencode=[yes|no] to handle it"),
-			    (int)encoding_len, encoding,
+			    (പൂർണ്ണസംഖ്യ)encoding_len, encoding,
 			    oid_to_hex(&commit->object.oid));
 		}
 	}
-	if (!commit->parents)
+	എങ്കിൽ (!commit->parents)
 		printf("reset %s\n", refname);
 	printf("commit %s\nmark :%"PRIu32"\n", refname, last_idnum);
-	if (show_original_ids)
+	എങ്കിൽ (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(&commit->object.oid));
 	printf("%.*s\n%.*s\n",
-	       (int)(author_end - author), author,
-	       (int)(committer_end - committer), committer);
-	if (signatures.nr) {
-		switch (signed_commit_mode) {
+	       (പൂർണ്ണസംഖ്യ)(author_end - author), author,
+	       (പൂർണ്ണസംഖ്യ)(committer_end - committer), committer);
+	എങ്കിൽ (signatures.nr) {
+		തിരഞ്ഞെടുപ്പ് (signed_commit_mode) {
 		/* Exporting modes */
-		case SIGN_WARN_VERBATIM:
+		അവസ്ഥ SIGN_WARN_VERBATIM:
 			warning(_("exporting %"PRIuMAX" signature(s) for commit %s"),
 				(uintmax_t)signatures.nr, oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_VERBATIM:
-			for (size_t i = 0; i < signatures.nr; i++) {
-				struct string_list_item *item = &signatures.items[i];
+		അവസ്ഥ SIGN_VERBATIM:
+			വേണ്ടി (size_t i = 0; i < signatures.nr; i++) {
+				ഘടന string_list_item *item = &signatures.ഇനങ്ങൾ[i];
 				print_signature(item->string, item->util);
 			}
-			break;
+			നിർത്തുക;
 
 		/* Stripping modes */
-		case SIGN_WARN_STRIP:
+		അവസ്ഥ SIGN_WARN_STRIP:
 			warning(_("stripping signature(s) from commit %s"),
 				oid_to_hex(&commit->object.oid));
 			/* fallthru */
-		case SIGN_STRIP:
-			break;
+		അവസ്ഥ SIGN_STRIP:
+			നിർത്തുക;
 
 		/* Aborting modes */
-		case SIGN_ABORT:
+		അവസ്ഥ SIGN_ABORT:
 			die(_("encountered signed commit %s; use "
 			      "--signed-commits=<mode> to handle it"),
 			    oid_to_hex(&commit->object.oid));
-		default:
+		സ്ഥിരസ്ഥിതി:
 			BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 		}
 		string_list_clear(&signatures, 0);
 	}
-	if (!reencoded && encoding)
-		printf("encoding %.*s\n", (int)encoding_len, encoding);
+	എങ്കിൽ (!reencoded && encoding)
+		printf("encoding %.*s\n", (പൂർണ്ണസംഖ്യ)encoding_len, encoding);
 	printf("data %u\n%s",
 	       (unsigned)(reencoded
 			  ? strlen(reencoded) : message
 			  ? strlen(message) : 0),
 	       reencoded ? reencoded : message ? message : "");
-	free(reencoded);
+	സ്വതന്ത്രം(reencoded);
 	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
 
-	for (i = 0, p = commit->parents; p; p = p->next) {
-		struct object *obj = &p->item->object;
-		int mark = get_object_mark(obj);
+	വേണ്ടി (i = 0, p = commit->parents; p; p = p->next) {
+		ഘടന object *obj = &p->item->object;
+		പൂർണ്ണസംഖ്യ mark = get_object_mark(obj);
 
-		if (!mark && !reference_excluded_commits)
-			continue;
-		if (i == 0)
+		എങ്കിൽ (!mark && !reference_excluded_commits)
+			തുടരുക;
+		എങ്കിൽ (i == 0)
 			printf("from ");
-		else
+		അല്ലെങ്കിൽ
 			printf("merge ");
-		if (mark)
+		എങ്കിൽ (mark)
 			printf(":%d\n", mark);
-		else
+		അല്ലെങ്കിൽ
 			printf("%s\n",
 			       anonymize ?
 			       anonymize_oid(oid_to_hex(&obj->oid)) :
@@ -861,9 +861,9 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 		i++;
 	}
 
-	if (full_tree)
+	എങ്കിൽ (full_വൃക്ഷം)
 		printf("deleteall\n");
-	log_tree_diff_flush(rev);
+	log_വൃക്ഷം_diff_flush(rev);
 	string_list_clear(paths_of_changed_objects, 0);
 	rev->diffopt.output_format = saved_output_format;
 
@@ -872,69 +872,69 @@ static void handle_commit(struct commit *commit, struct rev_info *rev,
 	show_progress();
 }
 
-static char *anonymize_tag(void)
+സ്ഥിതം അക്ഷരം *anonymize_tag(ശൂന്യം)
 {
-	static int counter;
-	struct strbuf out = STRBUF_INIT;
+	സ്ഥിതം പൂർണ്ണസംഖ്യ counter;
+	ഘടന strbuf out = STRBUF_INIT;
 	strbuf_addf(&out, "tag message %d", counter++);
-	return strbuf_detach(&out, NULL);
+	തിരികെ strbuf_detach(&out, ശൂന്യ);
 }
 
 
-static void handle_tag(const char *name, struct tag *tag)
+സ്ഥിതം ശൂന്യം handle_tag(സ്ഥിരം അക്ഷരം *name, ഘടന tag *tag)
 {
 	size_t size;
-	enum object_type type;
-	char *buf;
-	const char *tagger, *tagger_end, *message;
+	എണ്ണൽ object_type type;
+	അക്ഷരം *buf;
+	സ്ഥിരം അക്ഷരം *tagger, *tagger_end, *message;
 	size_t message_size = 0;
-	struct object *tagged;
-	int tagged_mark;
-	struct commit *p;
+	ഘടന object *tagged;
+	പൂർണ്ണസംഖ്യ tagged_mark;
+	ഘടന commit *p;
 
 	/* Trees have no identifier in fast-export output, thus we have no way
 	 * to output tags of trees, tags of tags of trees, etc.  Simply omit
 	 * such tags.
 	 */
 	tagged = tag->tagged;
-	while (tagged->type == OBJ_TAG) {
-		tagged = ((struct tag *)tagged)->tagged;
+	ആകുമ്പോൾ (tagged->type == OBJ_TAG) {
+		tagged = ((ഘടന tag *)tagged)->tagged;
 	}
-	if (tagged->type == OBJ_TREE) {
+	എങ്കിൽ (tagged->type == OBJ_വൃക്ഷം) {
 		warning(_("omitting tag %s,\nsince tags of trees (or tags "
 			  "of tags of trees, etc.) are not supported."),
 			oid_to_hex(&tag->object.oid));
-		return;
+		തിരികെ;
 	}
 
 	buf = odb_read_object(the_repository->objects, &tag->object.oid,
 			      &type, &size);
-	if (!buf)
+	എങ്കിൽ (!buf)
 		die(_("could not read tag %s"), oid_to_hex(&tag->object.oid));
 	message = memmem(buf, size, "\n\n", 2);
-	if (message) {
+	എങ്കിൽ (message) {
 		message += 2;
 		message_size = strlen(message);
 	}
 	tagger = memmem(buf, message ? message - buf : size, "\ntagger ", 8);
-	if (!tagger) {
-		if (fake_missing_tagger)
+	എങ്കിൽ (!tagger) {
+		എങ്കിൽ (fake_missing_tagger)
 			tagger = "tagger Unspecified Tagger "
 				"<unspecified-tagger> 0 +0000";
-		else
+		അല്ലെങ്കിൽ
 			tagger = "";
 		tagger_end = tagger + strlen(tagger);
-	} else {
+	} അല്ലെങ്കിൽ {
 		tagger++;
 		tagger_end = strchrnul(tagger, '\n');
-		if (anonymize)
-			anonymize_ident_line(&tagger, &tagger_end);
+		എങ്കിൽ (anonymize)
+			anonymize_ident_വരി(&tagger, &tagger_end);
 	}
 
-	if (anonymize) {
+	എങ്കിൽ (anonymize) {
 		name = anonymize_refname(name);
-		if (message) {
-			static struct hashmap tags;
+		എങ്കിൽ (message) {
+			സ്ഥിതം ഘടന hashmap tags;
 			message = anonymize_str(&tags, anonymize_tag,
 						message, message_size);
 			message_size = strlen(message);
@@ -942,33 +942,33 @@ static void handle_tag(const char *name, struct tag *tag)
 	}
 
 	/* handle signed tags */
-	if (message) {
+	എങ്കിൽ (message) {
 		size_t sig_offset = parse_signed_buffer(message, message_size);
-		if (sig_offset < message_size)
-			switch (signed_tag_mode) {
+		എങ്കിൽ (sig_offset < message_size)
+			തിരഞ്ഞെടുപ്പ് (signed_tag_mode) {
 			/* Exporting modes */
-			case SIGN_WARN_VERBATIM:
+			അവസ്ഥ SIGN_WARN_VERBATIM:
 				warning(_("exporting signed tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_VERBATIM:
-				break;
+			അവസ്ഥ SIGN_VERBATIM:
+				നിർത്തുക;
 
 			/* Stripping modes */
-			case SIGN_WARN_STRIP:
+			അവസ്ഥ SIGN_WARN_STRIP:
 				warning(_("stripping signature from tag %s"),
 					oid_to_hex(&tag->object.oid));
 				/* fallthru */
-			case SIGN_STRIP:
+			അവസ്ഥ SIGN_STRIP:
 				message_size = sig_offset;
-				break;
+				നിർത്തുക;
 
 			/* Aborting modes */
-			case SIGN_ABORT:
+			അവസ്ഥ SIGN_ABORT:
 				die(_("encountered signed tag %s; use "
 				      "--signed-tags=<mode> to handle it"),
 				    oid_to_hex(&tag->object.oid));
-			default:
+			സ്ഥിരസ്ഥിതി:
 				BUG("invalid signed_commit_mode value %d", signed_commit_mode);
 			}
 	}
@@ -976,169 +976,169 @@ static void handle_tag(const char *name, struct tag *tag)
 	/* handle tag->tagged having been filtered out due to paths specified */
 	tagged = tag->tagged;
 	tagged_mark = get_object_mark(tagged);
-	if (!tagged_mark) {
-		switch (tag_of_filtered_mode) {
-		case TAG_FILTERING_ABORT:
+	എങ്കിൽ (!tagged_mark) {
+		തിരഞ്ഞെടുപ്പ് (tag_of_filtered_mode) {
+		അവസ്ഥ TAG_FILTERING_ABORT:
 			die(_("tag %s tags unexported object; use "
 			      "--tag-of-filtered-object=<mode> to handle it"),
 			    oid_to_hex(&tag->object.oid));
-		case DROP:
+		അവസ്ഥ DROP:
 			/* Ignore this tag altogether */
-			free(buf);
-			return;
-		case REWRITE:
-			if (tagged->type == OBJ_TAG && !mark_tags) {
+			സ്വതന്ത്രം(buf);
+			തിരികെ;
+		അവസ്ഥ REWRITE:
+			എങ്കിൽ (tagged->type == OBJ_TAG && !mark_tags) {
 				die(_("cannot export nested tags unless --mark-tags is specified."));
-			} else if (tagged->type == OBJ_COMMIT) {
-				p = rewrite_commit((struct commit *)tagged);
-				if (!p) {
+			} അല്ലെങ്കിൽ എങ്കിൽ (tagged->type == OBJ_COMMIT) {
+				p = rewrite_commit((ഘടന commit *)tagged);
+				എങ്കിൽ (!p) {
 					printf("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					free(buf);
-					return;
+					സ്വതന്ത്രം(buf);
+					തിരികെ;
 				}
 				tagged_mark = get_object_mark(&p->object);
-			} else {
+			} അല്ലെങ്കിൽ {
 				/* tagged->type is either OBJ_BLOB or OBJ_TAG */
 				tagged_mark = get_object_mark(tagged);
 			}
 		}
 	}
 
-	if (tagged->type == OBJ_TAG) {
+	എങ്കിൽ (tagged->type == OBJ_TAG) {
 		printf("reset %s\nfrom %s\n\n",
 		       name, oid_to_hex(null_oid(the_hash_algo)));
 	}
 	skip_prefix(name, "refs/tags/", &name);
 	printf("tag %s\n", name);
-	if (mark_tags) {
+	എങ്കിൽ (mark_tags) {
 		mark_next_object(&tag->object);
 		printf("mark :%"PRIu32"\n", last_idnum);
 	}
-	if (tagged_mark)
+	എങ്കിൽ (tagged_mark)
 		printf("from :%d\n", tagged_mark);
-	else
+	അല്ലെങ്കിൽ
 		printf("from %s\n", oid_to_hex(&tagged->oid));
 
-	if (show_original_ids)
+	എങ്കിൽ (show_original_ids)
 		printf("original-oid %s\n", oid_to_hex(&tag->object.oid));
 	printf("%.*s%sdata %d\n%.*s\n",
-	       (int)(tagger_end - tagger), tagger,
+	       (പൂർണ്ണസംഖ്യ)(tagger_end - tagger), tagger,
 	       tagger == tagger_end ? "" : "\n",
-	       (int)message_size, (int)message_size, message ? message : "");
-	free(buf);
+	       (പൂർണ്ണസംഖ്യ)message_size, (പൂർണ്ണസംഖ്യ)message_size, message ? message : "");
+	സ്വതന്ത്രം(buf);
 }
 
-static struct commit *get_commit(struct rev_cmdline_entry *e, const char *full_name)
+സ്ഥിതം ഘടന commit *get_commit(ഘടന rev_cmdline_entry *e, സ്ഥിരം അക്ഷരം *full_name)
 {
-	switch (e->item->type) {
-	case OBJ_COMMIT:
-		return (struct commit *)e->item;
-	case OBJ_TAG: {
-		struct tag *tag = (struct tag *)e->item;
+	തിരഞ്ഞെടുപ്പ് (e->item->type) {
+	അവസ്ഥ OBJ_COMMIT:
+		തിരികെ (ഘടന commit *)e->item;
+	അവസ്ഥ OBJ_TAG: {
+		ഘടന tag *tag = (ഘടന tag *)e->item;
 
 		/* handle nested tags */
-		while (tag && tag->object.type == OBJ_TAG) {
+		ആകുമ്പോൾ (tag && tag->object.type == OBJ_TAG) {
 			parse_object(the_repository, &tag->object.oid);
 			string_list_append(&tag_refs, full_name)->util = tag;
-			tag = (struct tag *)tag->tagged;
+			tag = (ഘടന tag *)tag->tagged;
 		}
-		if (!tag)
+		എങ്കിൽ (!tag)
 			die(_("tag %s points nowhere?"), e->name);
-		return (struct commit *)tag;
+		തിരികെ (ഘടന commit *)tag;
 	}
-	default:
-		return NULL;
+	സ്ഥിരസ്ഥിതി:
+		തിരികെ ശൂന്യ;
 	}
 }
 
-static void get_tags_and_duplicates(struct rev_cmdline_info *info)
+സ്ഥിതം ശൂന്യം get_tags_and_duplicates(ഘടന rev_cmdline_info *info)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < info->nr; i++) {
-		struct rev_cmdline_entry *e = info->rev + i;
-		struct object_id oid;
-		struct commit *commit;
-		char *full_name = NULL;
+	വേണ്ടി (i = 0; i < info->nr; i++) {
+		ഘടന rev_cmdline_entry *e = info->rev + i;
+		ഘടന object_id oid;
+		ഘടന commit *commit;
+		അക്ഷരം *full_name = ശൂന്യ;
 
-		if (e->flags & UNINTERESTING)
-			continue;
+		എങ്കിൽ (e->flags & UNINTERESTING)
+			തുടരുക;
 
-		if (repo_dwim_ref(the_repository, e->name, strlen(e->name),
+		എങ്കിൽ (repo_dwim_ref(the_repository, e->name, strlen(e->name),
 				  &oid, &full_name, 0) != 1) {
-			free(full_name);
-			continue;
+			സ്വതന്ത്രം(full_name);
+			തുടരുക;
 		}
 
-		if (refspecs.nr) {
-			char *private;
-			private = apply_refspecs(&refspecs, full_name);
-			if (private) {
-				free(full_name);
-				full_name = private;
+		എങ്കിൽ (refspecs.nr) {
+			അക്ഷരം *സ്വകാര്യ;
+			സ്വകാര്യ = apply_refspecs(&refspecs, full_name);
+			എങ്കിൽ (സ്വകാര്യ) {
+				സ്വതന്ത്രം(full_name);
+				full_name = സ്വകാര്യ;
 			}
 		}
 
 		commit = get_commit(e, full_name);
-		if (!commit) {
+		എങ്കിൽ (!commit) {
 			warning(_("%s: unexpected object of type %s, skipping."),
 				e->name,
 				type_name(e->item->type));
-			free(full_name);
-			continue;
+			സ്വതന്ത്രം(full_name);
+			തുടരുക;
 		}
 
-		switch (commit->object.type) {
-		case OBJ_COMMIT:
-			break;
-		case OBJ_BLOB:
+		തിരഞ്ഞെടുപ്പ് (commit->object.type) {
+		അവസ്ഥ OBJ_COMMIT:
+			നിർത്തുക;
+		അവസ്ഥ OBJ_BLOB:
 			export_blob(&commit->object.oid);
-			free(full_name);
-			continue;
-		default: /* OBJ_TAG (nested tags) is already handled */
+			സ്വതന്ത്രം(full_name);
+			തുടരുക;
+		സ്ഥിരസ്ഥിതി: /* OBJ_TAG (nested tags) is already handled */
 			warning(_("tag points to object of unexpected type %s, skipping."),
 				type_name(commit->object.type));
-			free(full_name);
-			continue;
+			സ്വതന്ത്രം(full_name);
+			തുടരുക;
 		}
 
 		/*
 		 * Make sure this ref gets properly updated eventually, whether
 		 * through a commit or manually at the end.
 		 */
-		if (e->item->type != OBJ_TAG)
+		എങ്കിൽ (e->item->type != OBJ_TAG)
 			string_list_append(&extra_refs, full_name)->util = commit;
 
-		if (!*revision_sources_at(&revision_sources, commit))
+		എങ്കിൽ (!*revision_sources_at(&revision_sources, commit))
 			*revision_sources_at(&revision_sources, commit) = full_name;
-		else
-			free(full_name);
+		അല്ലെങ്കിൽ
+			സ്വതന്ത്രം(full_name);
 	}
 
 	string_list_sort_u(&extra_refs, 0);
 }
 
-static void handle_tags_and_duplicates(struct string_list *extras)
+സ്ഥിതം ശൂന്യം handle_tags_and_duplicates(ഘടന string_list *extras)
 {
-	struct commit *commit;
-	int i;
+	ഘടന commit *commit;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = extras->nr - 1; i >= 0; i--) {
-		const char *name = extras->items[i].string;
-		struct object *object = extras->items[i].util;
-		int mark;
+	വേണ്ടി (i = extras->nr - 1; i >= 0; i--) {
+		സ്ഥിരം അക്ഷരം *name = extras->ഇനങ്ങൾ[i].string;
+		ഘടന object *object = extras->ഇനങ്ങൾ[i].util;
+		പൂർണ്ണസംഖ്യ mark;
 
-		switch (object->type) {
-		case OBJ_TAG:
-			handle_tag(name, (struct tag *)object);
-			break;
-		case OBJ_COMMIT:
-			if (anonymize)
+		തിരഞ്ഞെടുപ്പ് (object->type) {
+		അവസ്ഥ OBJ_TAG:
+			handle_tag(name, (ഘടന tag *)object);
+			നിർത്തുക;
+		അവസ്ഥ OBJ_COMMIT:
+			എങ്കിൽ (anonymize)
 				name = anonymize_refname(name);
 			/* create refs pointing to already seen commits */
-			commit = rewrite_commit((struct commit *)object);
-			if (!commit) {
+			commit = rewrite_commit((ഘടന commit *)object);
+			എങ്കിൽ (!commit) {
 				/*
 				 * Neither this object nor any of its
 				 * ancestors touch any relevant paths, so
@@ -1147,11 +1147,11 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 */
 				printf("reset %s\nfrom %s\n\n",
 				       name, oid_to_hex(null_oid(the_hash_algo)));
-				continue;
+				തുടരുക;
 			}
 
 			mark = get_object_mark(&commit->object);
-			if (!mark) {
+			എങ്കിൽ (!mark) {
 				/*
 				 * Getting here means we have a commit which
 				 * was excluded by a negative refspec (e.g.
@@ -1162,45 +1162,45 @@ static void handle_tags_and_duplicates(struct string_list *extras)
 				 * in its history to be deleted, which basically
 				 * just means deletion of the ref.
 				 */
-				if (!reference_excluded_commits) {
+				എങ്കിൽ (!reference_excluded_commits) {
 					/* delete the ref */
 					printf("reset %s\nfrom %s\n\n",
 					       name, oid_to_hex(null_oid(the_hash_algo)));
-					continue;
+					തുടരുക;
 				}
 				/* set ref to commit using oid, not mark */
 				printf("reset %s\nfrom %s\n\n", name,
 				       oid_to_hex(&commit->object.oid));
-				continue;
+				തുടരുക;
 			}
 
 			printf("reset %s\nfrom :%d\n\n", name, mark
 			       );
 			show_progress();
-			break;
+			നിർത്തുക;
 		}
 	}
 }
 
-static void export_marks(char *file)
+സ്ഥിതം ശൂന്യം export_marks(അക്ഷരം *file)
 {
-	unsigned int i;
+	unsigned പൂർണ്ണസംഖ്യ i;
 	uint32_t mark;
-	struct decoration_entry *deco = idnums.entries;
+	ഘടന decoration_entry *deco = idnums.entries;
 	FILE *f;
-	int e = 0;
+	പൂർണ്ണസംഖ്യ e = 0;
 
 	f = fopen_for_writing(file);
-	if (!f)
+	എങ്കിൽ (!f)
 		die_errno(_("unable to open marks file %s for writing."), file);
 
-	for (i = 0; i < idnums.size; i++) {
-		if (deco->base && deco->base->type == 1) {
+	വേണ്ടി (i = 0; i < idnums.size; i++) {
+		എങ്കിൽ (deco->base && deco->base->type == 1) {
 			mark = ptr_to_mark(deco->decoration);
-			if (fprintf(f, ":%"PRIu32" %s\n", mark,
+			എങ്കിൽ (fprintf(f, ":%"PRIu32" %s\n", mark,
 				oid_to_hex(&deco->base->oid)) < 0) {
 			    e = 1;
-			    break;
+			    നിർത്തുക;
 			}
 		}
 		deco++;
@@ -1208,56 +1208,56 @@ static void export_marks(char *file)
 
 	e |= ferror(f);
 	e |= fclose(f);
-	if (e)
+	എങ്കിൽ (e)
 		error(_("unable to write marks file %s."), file);
 }
 
-static void import_marks(char *input_file, int check_exists)
+സ്ഥിതം ശൂന്യം import_marks(അക്ഷരം *നിവേശം_file, പൂർണ്ണസംഖ്യ check_exists)
 {
-	char line[512];
+	അക്ഷരം വരി[512];
 	FILE *f;
-	struct stat sb;
+	ഘടന stat sb;
 
-	if (check_exists && stat(input_file, &sb))
-		return;
+	എങ്കിൽ (check_exists && stat(നിവേശം_file, &sb))
+		തിരികെ;
 
-	f = xfopen(input_file, "r");
-	while (fgets(line, sizeof(line), f)) {
+	f = xfopen(നിവേശം_file, "r");
+	ആകുമ്പോൾ (fgets(വരി, വലുപ്പം(വരി), f)) {
 		uint32_t mark;
-		char *line_end, *mark_end;
-		struct object_id oid;
-		struct object *object;
-		struct commit *commit;
-		enum object_type type;
+		അക്ഷരം *വരി_end, *mark_end;
+		ഘടന object_id oid;
+		ഘടന object *object;
+		ഘടന commit *commit;
+		എണ്ണൽ object_type type;
 
-		line_end = strchr(line, '\n');
-		if (line[0] != ':' || !line_end)
-			die(_("corrupt mark line: %s"), line);
-		*line_end = '\0';
+		വരി_end = strchr(വരി, '\n');
+		എങ്കിൽ (വരി[0] != ':' || !വരി_end)
+			die(_("corrupt mark line: %s"), വരി);
+		*വരി_end = '\0';
 
-		mark = strtoumax(line + 1, &mark_end, 10);
-		if (!mark || mark_end == line + 1
+		mark = strtoumax(വരി + 1, &mark_end, 10);
+		എങ്കിൽ (!mark || mark_end == വരി + 1
 			|| *mark_end != ' ' || get_oid_hex(mark_end + 1, &oid))
-			die(_("corrupt mark line: %s"), line);
+			die(_("corrupt mark line: %s"), വരി);
 
-		if (last_idnum < mark)
+		എങ്കിൽ (last_idnum < mark)
 			last_idnum = mark;
 
-		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+		type = odb_read_object_info(the_repository->objects, &oid, ശൂന്യ);
+		എങ്കിൽ (type < 0)
 			die(_("object not found: %s"), oid_to_hex(&oid));
 
-		if (type != OBJ_COMMIT)
+		എങ്കിൽ (type != OBJ_COMMIT)
 			/* only commits */
-			continue;
+			തുടരുക;
 
 		commit = lookup_commit(the_repository, &oid);
-		if (!commit)
+		എങ്കിൽ (!commit)
 			die(_("not a commit? can't happen: %s"), oid_to_hex(&oid));
 
 		object = &commit->object;
 
-		if (object->flags & SHOWN)
+		എങ്കിൽ (object->flags & SHOWN)
 			error(_("object %s already has a mark"), oid_to_hex(&oid));
 
 		mark_object(object, mark);
@@ -1267,60 +1267,60 @@ static void import_marks(char *input_file, int check_exists)
 	fclose(f);
 }
 
-static void handle_deletes(void)
+സ്ഥിതം ശൂന്യം handle_deletes(ശൂന്യം)
 {
-	int i;
-	for (i = 0; i < refspecs.nr; i++) {
-		struct refspec_item *refspec = &refspecs.items[i];
-		if (*refspec->src)
-			continue;
+	പൂർണ്ണസംഖ്യ i;
+	വേണ്ടി (i = 0; i < refspecs.nr; i++) {
+		ഘടന refspec_item *refspec = &refspecs.ഇനങ്ങൾ[i];
+		എങ്കിൽ (*refspec->src)
+			തുടരുക;
 
 		printf("reset %s\nfrom %s\n\n",
 				refspec->dst, oid_to_hex(null_oid(the_hash_algo)));
 	}
 }
 
-static int parse_opt_anonymize_map(const struct option *opt,
-				   const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_opt_anonymize_map(സ്ഥിരം ഘടന option *opt,
+				   സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	struct hashmap *map = opt->value;
-	const char *delim, *value;
+	ഘടന hashmap *map = opt->മൂല്യം;
+	സ്ഥിരം അക്ഷരം *delim, *മൂല്യം;
 	size_t keylen;
 
 	BUG_ON_OPT_NEG(unset);
 
 	delim = strchr(arg, ':');
-	if (delim) {
+	എങ്കിൽ (delim) {
 		keylen = delim - arg;
-		value = delim + 1;
-	} else {
+		മൂല്യം = delim + 1;
+	} അല്ലെങ്കിൽ {
 		keylen = strlen(arg);
-		value = arg;
+		മൂല്യം = arg;
 	}
 
-	if (!keylen || !*value)
-		return error(_("--anonymize-map token cannot be empty"));
+	എങ്കിൽ (!keylen || !*മൂല്യം)
+		തിരികെ error(_("--anonymize-map token cannot be empty"));
 
 	add_anonymized_entry(map, memhash(arg, keylen), arg, keylen,
-			     xstrdup(value));
+			     xstrdup(മൂല്യം));
 
-	return 0;
+	തിരികെ 0;
 }
 
-int cmd_fast_export(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_fast_export(പൂർണ്ണസംഖ്യ argc,
+		    സ്ഥിരം അക്ഷരം **argv,
+		    സ്ഥിരം അക്ഷരം *prefix,
+		    ഘടന repository *repo UNUSED)
 {
-	struct rev_info revs;
-	struct commit *commit;
-	char *export_filename = NULL,
-	     *import_filename = NULL,
-	     *import_filename_if_exists = NULL;
+	ഘടന rev_info revs;
+	ഘടന commit *commit;
+	അക്ഷരം *export_filename = ശൂന്യ,
+	     *import_filename = ശൂന്യ,
+	     *import_filename_if_exists = ശൂന്യ;
 	uint32_t lastimportid;
-	struct string_list refspecs_list = STRING_LIST_INIT_NODUP;
-	struct string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
-	struct option options[] = {
+	ഘടന string_list refspecs_list = STRING_LIST_INIT_NODUP;
+	ഘടന string_list paths_of_changed_objects = STRING_LIST_INIT_DUP;
+	ഘടന option options[] = {
 		OPT_INTEGER(0, "progress", &progress,
 			    N_("show progress after <n> objects")),
 		OPT_CALLBACK(0, "signed-tags", &signed_tag_mode, N_("mode"),
@@ -1345,7 +1345,7 @@ int cmd_fast_export(int argc,
 			     N_("import marks from this file if it exists")),
 		OPT_BOOL(0, "fake-missing-tagger", &fake_missing_tagger,
 			 N_("fake a tagger when tags lack one")),
-		OPT_BOOL(0, "full-tree", &full_tree,
+		OPT_BOOL(0, "full-tree", &full_വൃക്ഷം,
 			 N_("output full tree for each commit")),
 		OPT_BOOL(0, "use-done-feature", &use_done_feature,
 			     N_("use the done feature to terminate the stream")),
@@ -1366,11 +1366,11 @@ int cmd_fast_export(int argc,
 		OPT_END()
 	};
 
-	if (argc == 1)
+	എങ്കിൽ (argc == 1)
 		usage_with_options (fast_export_usage, options);
 
 	/* we handle encodings */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
 	refspec_init_fetch(&refspecs, the_hash_algo);
 
@@ -1381,39 +1381,39 @@ int cmd_fast_export(int argc,
 	revs.rewrite_parents = 1;
 	argc = parse_options(argc, argv, prefix, options, fast_export_usage,
 			PARSE_OPT_KEEP_ARGV0 | PARSE_OPT_KEEP_UNKNOWN_OPT);
-	argc = setup_revisions(argc, argv, &revs, NULL);
-	if (argc > 1)
+	argc = setup_revisions(argc, argv, &revs, ശൂന്യ);
+	എങ്കിൽ (argc > 1)
 		usage_with_options (fast_export_usage, options);
 
-	if (anonymized_seeds.cmpfn && !anonymize)
+	എങ്കിൽ (anonymized_seeds.cmpfn && !anonymize)
 		die(_("the option '%s' requires '%s'"), "--anonymize-map", "--anonymize");
 
-	if (refspecs_list.nr) {
-		int i;
+	എങ്കിൽ (refspecs_list.nr) {
+		പൂർണ്ണസംഖ്യ i;
 
-		for (i = 0; i < refspecs_list.nr; i++)
-			refspec_append(&refspecs, refspecs_list.items[i].string);
+		വേണ്ടി (i = 0; i < refspecs_list.nr; i++)
+			refspec_append(&refspecs, refspecs_list.ഇനങ്ങൾ[i].string);
 
 		string_list_clear(&refspecs_list, 1);
 	}
 
-	if (use_done_feature)
+	എങ്കിൽ (use_done_feature)
 		printf("feature done\n");
 
-	if (import_filename && import_filename_if_exists)
+	എങ്കിൽ (import_filename && import_filename_if_exists)
 		die(_("options '%s' and '%s' cannot be used together"), "--import-marks", "--import-marks-if-exists");
-	if (import_filename)
+	എങ്കിൽ (import_filename)
 		import_marks(import_filename, 0);
-	else if (import_filename_if_exists)
+	അല്ലെങ്കിൽ എങ്കിൽ (import_filename_if_exists)
 		import_marks(import_filename_if_exists, 1);
 	lastimportid = last_idnum;
 
-	if (import_filename && revs.prune_data.nr)
-		full_tree = 1;
+	എങ്കിൽ (import_filename && revs.prune_data.nr)
+		full_വൃക്ഷം = 1;
 
 	get_tags_and_duplicates(&revs.cmdline);
 
-	if (prepare_revision_walk(&revs))
+	എങ്കിൽ (prepare_revision_walk(&revs))
 		die(_("revision walk setup failed"));
 
 	revs.reverse = 1;
@@ -1422,7 +1422,7 @@ int cmd_fast_export(int argc,
 	revs.diffopt.flags.recursive = 1;
 
 	revs.diffopt.no_free = 1;
-	while ((commit = get_revision(&revs)))
+	ആകുമ്പോൾ ((commit = get_revision(&revs)))
 		handle_commit(commit, &revs, &paths_of_changed_objects);
 	revs.diffopt.no_free = 0;
 
@@ -1430,14 +1430,14 @@ int cmd_fast_export(int argc,
 	handle_tags_and_duplicates(&tag_refs);
 	handle_deletes();
 
-	if (export_filename && lastimportid != last_idnum)
+	എങ്കിൽ (export_filename && lastimportid != last_idnum)
 		export_marks(export_filename);
 
-	if (use_done_feature)
+	എങ്കിൽ (use_done_feature)
 		printf("done\n");
 
 	refspec_clear(&refspecs);
 	release_revisions(&revs);
 
-	return 0;
+	തിരികെ 0;
 }

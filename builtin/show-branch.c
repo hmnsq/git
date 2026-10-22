@@ -1,38 +1,38 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "pretty.h"
-#include "refs.h"
-#include "color.h"
-#include "strvec.h"
-#include "object-name.h"
-#include "parse-options.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hash.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "pretty.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "color.h"
+#അന്തര്ഭാവ "strvec.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "parse-options.h"
 
-#include "dir.h"
-#include "commit-slab.h"
-#include "date.h"
-#include "wildmatch.h"
-#include "prio-queue.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "commit-slab.h"
+#അന്തര്ഭാവ "date.h"
+#അന്തര്ഭാവ "wildmatch.h"
+#അന്തര്ഭാവ "prio-queue.h"
 
-static const char*const show_branch_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം*സ്ഥിരം show_branch_usage[] = {
     N_("git show-branch [-a | --all] [-r | --remotes] [--topo-order | --date-order]\n"
        "                [--current] [--color[=<when>] | --no-color] [--sparse]\n"
        "                [--more=<n> | --list | --independent | --merge-base]\n"
        "                [--no-name | --sha1-name] [--topics]\n"
        "                [(<rev> | <glob>)...]"),
     N_("git show-branch (-g | --reflog)[=<n>[,<base>]] [--list] [<ref>]"),
-    NULL
+    ശൂന്യ
 };
 
-static enum git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
+സ്ഥിതം എണ്ണൽ git_colorbool showbranch_use_color = GIT_COLOR_UNKNOWN;
 
-static struct strvec default_args = STRVEC_INIT;
+സ്ഥിതം ഘടന strvec default_args = STRVEC_INIT;
 
 /*
  * TODO: convert this use of commit->object.flags to commit-slab
@@ -46,54 +46,54 @@ static struct strvec default_args = STRVEC_INIT;
 
 #define DEFAULT_REFLOG	4
 
-static const char *get_color_code(int idx)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_color_code(പൂർണ്ണസംഖ്യ idx)
 {
-	if (want_color(showbranch_use_color))
-		return column_colors_ansi[idx % column_colors_ansi_max];
-	return "";
+	എങ്കിൽ (want_color(showbranch_use_color))
+		തിരികെ column_colors_ansi[idx % column_colors_ansi_max];
+	തിരികെ "";
 }
 
-static const char *get_color_reset_code(void)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_color_reset_code(ശൂന്യം)
 {
-	if (want_color(showbranch_use_color))
-		return GIT_COLOR_RESET;
-	return "";
+	എങ്കിൽ (want_color(showbranch_use_color))
+		തിരികെ GIT_COLOR_RESET;
+	തിരികെ "";
 }
 
-static struct commit *interesting(struct prio_queue *queue)
+സ്ഥിതം ഘടന commit *interesting(ഘടന prio_queue *queue)
 {
-	struct commit *commit;
+	ഘടന commit *commit;
 	prio_queue_for_each(queue, commit) {
-		if (!(commit->object.flags & UNINTERESTING))
-			return commit;
+		എങ്കിൽ (!(commit->object.flags & UNINTERESTING))
+			തിരികെ commit;
 	}
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-struct commit_name {
-	const char *head_name; /* which head's ancestor? */
-	int generation; /* how many parents away from head_name */
+ഘടന commit_name {
+	സ്ഥിരം അക്ഷരം *head_name; /* which head's ancestor? */
+	പൂർണ്ണസംഖ്യ generation; /* how many parents away from head_name */
 };
 
-define_commit_slab(commit_name_slab, struct commit_name *);
-static struct commit_name_slab name_slab;
+define_commit_slab(commit_name_slab, ഘടന commit_name *);
+സ്ഥിതം ഘടന commit_name_slab name_slab;
 
-static struct commit_name *commit_to_name(struct commit *commit)
+സ്ഥിതം ഘടന commit_name *commit_to_name(ഘടന commit *commit)
 {
-	return *commit_name_slab_at(&name_slab, commit);
+	തിരികെ *commit_name_slab_at(&name_slab, commit);
 }
 
 
 /* Name the commit as nth generation ancestor of head_name;
  * we count only the first-parent relationship for naming purposes.
  */
-static void name_commit(struct commit *commit, const char *head_name, int nth)
+സ്ഥിതം ശൂന്യം name_commit(ഘടന commit *commit, സ്ഥിരം അക്ഷരം *head_name, പൂർണ്ണസംഖ്യ nth)
 {
-	struct commit_name *name;
+	ഘടന commit_name *name;
 
 	name = *commit_name_slab_at(&name_slab, commit);
-	if (!name) {
-		name = xmalloc(sizeof(*name));
+	എങ്കിൽ (!name) {
+		name = xmalloc(വലുപ്പം(*name));
 		*commit_name_slab_at(&name_slab, commit) = name;
 	}
 	name->head_name = head_name;
@@ -105,153 +105,153 @@ static void name_commit(struct commit *commit, const char *head_name, int nth)
  * commit is nth generation ancestor of, if that generation
  * number is better than the name it already has.
  */
-static void name_parent(struct commit *commit, struct commit *parent)
+സ്ഥിതം ശൂന്യം name_parent(ഘടന commit *commit, ഘടന commit *parent)
 {
-	struct commit_name *commit_name = commit_to_name(commit);
-	struct commit_name *parent_name = commit_to_name(parent);
-	if (!commit_name)
-		return;
-	if (!parent_name ||
+	ഘടന commit_name *commit_name = commit_to_name(commit);
+	ഘടന commit_name *parent_name = commit_to_name(parent);
+	എങ്കിൽ (!commit_name)
+		തിരികെ;
+	എങ്കിൽ (!parent_name ||
 	    commit_name->generation + 1 < parent_name->generation)
 		name_commit(parent, commit_name->head_name,
 			    commit_name->generation + 1);
 }
 
-static int name_first_parent_chain(struct commit *c)
+സ്ഥിതം പൂർണ്ണസംഖ്യ name_first_parent_chain(ഘടന commit *c)
 {
-	int i = 0;
-	while (c) {
-		struct commit *p;
-		if (!commit_to_name(c))
-			break;
-		if (!c->parents)
-			break;
+	പൂർണ്ണസംഖ്യ i = 0;
+	ആകുമ്പോൾ (c) {
+		ഘടന commit *p;
+		എങ്കിൽ (!commit_to_name(c))
+			നിർത്തുക;
+		എങ്കിൽ (!c->parents)
+			നിർത്തുക;
 		p = c->parents->item;
-		if (!commit_to_name(p)) {
+		എങ്കിൽ (!commit_to_name(p)) {
 			name_parent(c, p);
 			i++;
 		}
-		else
-			break;
+		അല്ലെങ്കിൽ
+			നിർത്തുക;
 		c = p;
 	}
-	return i;
+	തിരികെ i;
 }
 
-static void name_commits(struct commit_list *list,
-			 struct commit **rev,
-			 char **ref_name,
-			 int num_rev)
+സ്ഥിതം ശൂന്യം name_commits(ഘടന commit_list *list,
+			 ഘടന commit **rev,
+			 അക്ഷരം **ref_name,
+			 പൂർണ്ണസംഖ്യ അക്കം_rev)
 {
-	struct commit_list *cl;
-	struct commit *c;
-	int i;
+	ഘടന commit_list *cl;
+	ഘടന commit *c;
+	പൂർണ്ണസംഖ്യ i;
 
 	/* First give names to the given heads */
-	for (cl = list; cl; cl = cl->next) {
+	വേണ്ടി (cl = list; cl; cl = cl->next) {
 		c = cl->item;
-		if (commit_to_name(c))
-			continue;
-		for (i = 0; i < num_rev; i++) {
-			if (rev[i] == c) {
+		എങ്കിൽ (commit_to_name(c))
+			തുടരുക;
+		വേണ്ടി (i = 0; i < അക്കം_rev; i++) {
+			എങ്കിൽ (rev[i] == c) {
 				name_commit(c, ref_name[i], 0);
-				break;
+				നിർത്തുക;
 			}
 		}
 	}
 
 	/* Then commits on the first parent ancestry chain */
-	do {
+	ചെയ്യുക {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
+		വേണ്ടി (cl = list; cl; cl = cl->next) {
 			i += name_first_parent_chain(cl->item);
 		}
-	} while (i);
+	} ആകുമ്പോൾ (i);
 
 	/* Finally, any unnamed commits */
-	do {
+	ചെയ്യുക {
 		i = 0;
-		for (cl = list; cl; cl = cl->next) {
-			struct commit_list *parents;
-			struct commit_name *n;
-			int nth;
+		വേണ്ടി (cl = list; cl; cl = cl->next) {
+			ഘടന commit_list *parents;
+			ഘടന commit_name *n;
+			പൂർണ്ണസംഖ്യ nth;
 			c = cl->item;
-			if (!commit_to_name(c))
-				continue;
+			എങ്കിൽ (!commit_to_name(c))
+				തുടരുക;
 			n = commit_to_name(c);
 			parents = c->parents;
 			nth = 0;
-			while (parents) {
-				struct commit *p = parents->item;
-				struct strbuf newname = STRBUF_INIT;
+			ആകുമ്പോൾ (parents) {
+				ഘടന commit *p = parents->item;
+				ഘടന strbuf newname = STRBUF_INIT;
 				parents = parents->next;
 				nth++;
-				if (commit_to_name(p))
-					continue;
-				switch (n->generation) {
-				case 0:
+				എങ്കിൽ (commit_to_name(p))
+					തുടരുക;
+				തിരഞ്ഞെടുപ്പ് (n->generation) {
+				അവസ്ഥ 0:
 					strbuf_addstr(&newname, n->head_name);
-					break;
-				case 1:
+					നിർത്തുക;
+				അവസ്ഥ 1:
 					strbuf_addf(&newname, "%s^", n->head_name);
-					break;
-				default:
+					നിർത്തുക;
+				സ്ഥിരസ്ഥിതി:
 					strbuf_addf(&newname, "%s~%d",
 						    n->head_name, n->generation);
-					break;
+					നിർത്തുക;
 				}
-				if (nth == 1)
+				എങ്കിൽ (nth == 1)
 					strbuf_addch(&newname, '^');
-				else
+				അല്ലെങ്കിൽ
 					strbuf_addf(&newname, "^%d", nth);
-				name_commit(p, strbuf_detach(&newname, NULL), 0);
+				name_commit(p, strbuf_detach(&newname, ശൂന്യ), 0);
 				i++;
 				name_first_parent_chain(p);
 			}
 		}
-	} while (i);
+	} ആകുമ്പോൾ (i);
 }
 
-static int mark_seen(struct commit *commit, struct commit_list **seen_p)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mark_seen(ഘടന commit *commit, ഘടന commit_list **seen_p)
 {
-	if (!commit->object.flags) {
-		commit_list_insert(commit, seen_p);
-		return 1;
+	എങ്കിൽ (!commit->object.flags) {
+		commit_list_തിരുകുക(commit, seen_p);
+		തിരികെ 1;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static void join_revs(struct prio_queue *queue,
-		      struct commit_list **seen_p,
-		      int num_rev, int extra)
+സ്ഥിതം ശൂന്യം join_revs(ഘടന prio_queue *queue,
+		      ഘടന commit_list **seen_p,
+		      പൂർണ്ണസംഖ്യ അക്കം_rev, പൂർണ്ണസംഖ്യ extra)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	struct commit *commit;
+	പൂർണ്ണസംഖ്യ all_mask = ((1u << (REV_SHIFT + അക്കം_rev)) - 1);
+	പൂർണ്ണസംഖ്യ all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	ഘടന commit *commit;
 
-	while ((commit = prio_queue_peek(queue))) {
-		struct commit_list *parents;
-		int still_interesting = !!interesting(queue);
-		int flags = commit->object.flags & all_mask;
+	ആകുമ്പോൾ ((commit = prio_queue_peek(queue))) {
+		ഘടന commit_list *parents;
+		പൂർണ്ണസംഖ്യ still_interesting = !!interesting(queue);
+		പൂർണ്ണസംഖ്യ flags = commit->object.flags & all_mask;
 
-		if (!still_interesting && extra <= 0)
-			break;
+		എങ്കിൽ (!still_interesting && extra <= 0)
+			നിർത്തുക;
 
 		prio_queue_get(queue);
 
 		mark_seen(commit, seen_p);
-		if ((flags & all_revs) == all_revs)
+		എങ്കിൽ ((flags & all_revs) == all_revs)
 			flags |= UNINTERESTING;
 		parents = commit->parents;
 
-		while (parents) {
-			struct commit *p = parents->item;
-			int this_flag = p->object.flags;
+		ആകുമ്പോൾ (parents) {
+			ഘടന commit *p = parents->item;
+			പൂർണ്ണസംഖ്യ this_flag = p->object.flags;
 			parents = parents->next;
-			if ((this_flag & flags) == flags)
-				continue;
+			എങ്കിൽ ((this_flag & flags) == flags)
+				തുടരുക;
 			repo_parse_commit(the_repository, p);
-			if (mark_seen(p, seen_p) && !still_interesting)
+			എങ്കിൽ (mark_seen(p, seen_p) && !still_interesting)
 				extra--;
 			p->object.flags |= flags;
 			prio_queue_put(queue, p);
@@ -265,16 +265,16 @@ static void join_revs(struct prio_queue *queue,
 	 * seen_p list.  Mark anything that can be reached from
 	 * uninteresting commits not interesting.
 	 */
-	for (;;) {
-		int changed = 0;
-		struct commit_list *s;
-		for (s = *seen_p; s; s = s->next) {
-			struct commit *c = s->item;
-			struct commit_list *parents;
+	വേണ്ടി (;;) {
+		പൂർണ്ണസംഖ്യ changed = 0;
+		ഘടന commit_list *s;
+		വേണ്ടി (s = *seen_p; s; s = s->next) {
+			ഘടന commit *c = s->item;
+			ഘടന commit_list *parents;
 
-			if (((c->object.flags & all_revs) != all_revs) &&
+			എങ്കിൽ (((c->object.flags & all_revs) != all_revs) &&
 			    !(c->object.flags & UNINTERESTING))
-				continue;
+				തുടരുക;
 
 			/* The current commit is either a merge base or
 			 * already uninteresting one.  Mark its parents
@@ -283,44 +283,44 @@ static void join_revs(struct prio_queue *queue,
 			 * here.
 			 */
 			parents = c->parents;
-			while (parents) {
-				struct commit *p = parents->item;
+			ആകുമ്പോൾ (parents) {
+				ഘടന commit *p = parents->item;
 				parents = parents->next;
-				if (!(p->object.flags & UNINTERESTING)) {
+				എങ്കിൽ (!(p->object.flags & UNINTERESTING)) {
 					p->object.flags |= UNINTERESTING;
 					changed = 1;
 				}
 			}
 		}
-		if (!changed)
-			break;
+		എങ്കിൽ (!changed)
+			നിർത്തുക;
 	}
 }
 
-static void show_one_commit(struct commit *commit, int no_name)
+സ്ഥിതം ശൂന്യം show_one_commit(ഘടന commit *commit, പൂർണ്ണസംഖ്യ no_name)
 {
-	struct strbuf pretty = STRBUF_INIT;
-	const char *pretty_str = "(unavailable)";
-	struct commit_name *name = commit_to_name(commit);
+	ഘടന strbuf pretty = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *pretty_str = "(unavailable)";
+	ഘടന commit_name *name = commit_to_name(commit);
 
-	if (commit->object.parsed) {
+	എങ്കിൽ (commit->object.parsed) {
 		pp_commit_easy(CMIT_FMT_ONELINE, commit, &pretty);
 		pretty_str = pretty.buf;
 	}
 	skip_prefix(pretty_str, "[PATCH] ", &pretty_str);
 
-	if (!no_name) {
-		if (name && name->head_name) {
+	എങ്കിൽ (!no_name) {
+		എങ്കിൽ (name && name->head_name) {
 			printf("[%s", name->head_name);
-			if (name->generation) {
-				if (name->generation == 1)
+			എങ്കിൽ (name->generation) {
+				എങ്കിൽ (name->generation == 1)
 					printf("^");
-				else
+				അല്ലെങ്കിൽ
 					printf("~%d", name->generation);
 			}
 			printf("] ");
 		}
-		else
+		അല്ലെങ്കിൽ
 			printf("[%s] ",
 			       repo_find_unique_abbrev(the_repository, &commit->object.oid,
 						       DEFAULT_ABBREV));
@@ -329,337 +329,337 @@ static void show_one_commit(struct commit *commit, int no_name)
 	strbuf_release(&pretty);
 }
 
-static char *ref_name[MAX_REVS + 1];
-static int ref_name_cnt;
+സ്ഥിതം അക്ഷരം *ref_name[MAX_REVS + 1];
+സ്ഥിതം പൂർണ്ണസംഖ്യ ref_name_cnt;
 
-static const char *find_digit_prefix(const char *s, int *v)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *find_digit_prefix(സ്ഥിരം അക്ഷരം *s, പൂർണ്ണസംഖ്യ *v)
 {
-	const char *p;
-	int ver;
-	char ch;
+	സ്ഥിരം അക്ഷരം *p;
+	പൂർണ്ണസംഖ്യ ver;
+	അക്ഷരം ch;
 
-	for (p = s, ver = 0;
+	വേണ്ടി (p = s, ver = 0;
 	     '0' <= (ch = *p) && ch <= '9';
 	     p++)
 		ver = ver * 10 + ch - '0';
 	*v = ver;
-	return p;
+	തിരികെ p;
 }
 
 
-static int version_cmp(const char *a, const char *b)
+സ്ഥിതം പൂർണ്ണസംഖ്യ version_cmp(സ്ഥിരം അക്ഷരം *a, സ്ഥിരം അക്ഷരം *b)
 {
-	while (1) {
-		int va, vb;
+	ആകുമ്പോൾ (1) {
+		പൂർണ്ണസംഖ്യ va, vb;
 
 		a = find_digit_prefix(a, &va);
 		b = find_digit_prefix(b, &vb);
-		if (va != vb)
-			return va - vb;
+		എങ്കിൽ (va != vb)
+			തിരികെ va - vb;
 
-		while (1) {
-			int ca = *a;
-			int cb = *b;
-			if ('0' <= ca && ca <= '9')
+		ആകുമ്പോൾ (1) {
+			പൂർണ്ണസംഖ്യ ca = *a;
+			പൂർണ്ണസംഖ്യ cb = *b;
+			എങ്കിൽ ('0' <= ca && ca <= '9')
 				ca = 0;
-			if ('0' <= cb && cb <= '9')
+			എങ്കിൽ ('0' <= cb && cb <= '9')
 				cb = 0;
-			if (ca != cb)
-				return ca - cb;
-			if (!ca)
-				break;
+			എങ്കിൽ (ca != cb)
+				തിരികെ ca - cb;
+			എങ്കിൽ (!ca)
+				നിർത്തുക;
 			a++;
 			b++;
 		}
-		if (!*a && !*b)
-			return 0;
+		എങ്കിൽ (!*a && !*b)
+			തിരികെ 0;
 	}
 }
 
-static int compare_ref_name(const void *a_, const void *b_)
+സ്ഥിതം പൂർണ്ണസംഖ്യ compare_ref_name(സ്ഥിരം ശൂന്യം *a_, സ്ഥിരം ശൂന്യം *b_)
 {
-	const char * const*a = a_, * const*b = b_;
-	return version_cmp(*a, *b);
+	സ്ഥിരം അക്ഷരം * സ്ഥിരം*a = a_, * സ്ഥിരം*b = b_;
+	തിരികെ version_cmp(*a, *b);
 }
 
-static void sort_ref_range(int bottom, int top)
+സ്ഥിതം ശൂന്യം sort_ref_range(പൂർണ്ണസംഖ്യ bottom, പൂർണ്ണസംഖ്യ മുകൾ)
 {
-	QSORT(ref_name + bottom, top - bottom, compare_ref_name);
+	QSORT(ref_name + bottom, മുകൾ - bottom, compare_ref_name);
 }
 
-static int append_ref(const char *refname, const struct object_id *oid,
-		      int allow_dups)
+സ്ഥിതം പൂർണ്ണസംഖ്യ append_ref(സ്ഥിരം അക്ഷരം *refname, സ്ഥിരം ഘടന object_id *oid,
+		      പൂർണ്ണസംഖ്യ allow_dups)
 {
-	struct commit *commit = lookup_commit_reference_gently(the_repository,
+	ഘടന commit *commit = lookup_commit_reference_gently(the_repository,
 							       oid, 1);
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	if (!commit)
-		return 0;
+	എങ്കിൽ (!commit)
+		തിരികെ 0;
 
-	if (!allow_dups) {
+	എങ്കിൽ (!allow_dups) {
 		/* Avoid adding the same thing twice */
-		for (i = 0; i < ref_name_cnt; i++)
-			if (!strcmp(refname, ref_name[i]))
-				return 0;
+		വേണ്ടി (i = 0; i < ref_name_cnt; i++)
+			എങ്കിൽ (!strcmp(refname, ref_name[i]))
+				തിരികെ 0;
 	}
-	if (MAX_REVS <= ref_name_cnt) {
+	എങ്കിൽ (MAX_REVS <= ref_name_cnt) {
 		warning(Q_("ignoring %s; cannot handle more than %d ref",
 			   "ignoring %s; cannot handle more than %d refs",
 			   MAX_REVS), refname, MAX_REVS);
-		return 0;
+		തിരികെ 0;
 	}
 	ref_name[ref_name_cnt++] = xstrdup(refname);
-	ref_name[ref_name_cnt] = NULL;
-	return 0;
+	ref_name[ref_name_cnt] = ശൂന്യ;
+	തിരികെ 0;
 }
 
-static int append_head_ref(const struct reference *ref, void *cb_data UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ append_head_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cb_data UNUSED)
 {
-	struct object_id tmp;
-	int ofs = 11;
-	if (!starts_with(ref->name, "refs/heads/"))
-		return 0;
+	ഘടന object_id tmp;
+	പൂർണ്ണസംഖ്യ ofs = 11;
+	എങ്കിൽ (!starts_with(ref->name, "refs/heads/"))
+		തിരികെ 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	എങ്കിൽ (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	തിരികെ append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_remote_ref(const struct reference *ref, void *cb_data UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ append_remote_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cb_data UNUSED)
 {
-	struct object_id tmp;
-	int ofs = 13;
-	if (!starts_with(ref->name, "refs/remotes/"))
-		return 0;
+	ഘടന object_id tmp;
+	പൂർണ്ണസംഖ്യ ofs = 13;
+	എങ്കിൽ (!starts_with(ref->name, "refs/remotes/"))
+		തിരികെ 0;
 	/* If both heads/foo and tags/foo exists, get_sha1 would
 	 * get confused.
 	 */
-	if (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
+	എങ്കിൽ (repo_get_oid(the_repository, ref->name + ofs, &tmp) || !oideq(&tmp, ref->oid))
 		ofs = 5;
-	return append_ref(ref->name + ofs, ref->oid, 0);
+	തിരികെ append_ref(ref->name + ofs, ref->oid, 0);
 }
 
-static int append_tag_ref(const char *refname, const struct object_id *oid,
-			  int flag UNUSED, void *cb_data UNUSED)
+സ്ഥിതം പൂർണ്ണസംഖ്യ append_tag_ref(സ്ഥിരം അക്ഷരം *refname, സ്ഥിരം ഘടന object_id *oid,
+			  പൂർണ്ണസംഖ്യ flag UNUSED, ശൂന്യം *cb_data UNUSED)
 {
-	if (!starts_with(refname, "refs/tags/"))
-		return 0;
-	return append_ref(refname + 5, oid, 0);
+	എങ്കിൽ (!starts_with(refname, "refs/tags/"))
+		തിരികെ 0;
+	തിരികെ append_ref(refname + 5, oid, 0);
 }
 
-static const char *match_ref_pattern = NULL;
-static int match_ref_slash = 0;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *match_ref_pattern = ശൂന്യ;
+സ്ഥിതം പൂർണ്ണസംഖ്യ match_ref_slash = 0;
 
-static int append_matching_ref(const struct reference *ref, void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ append_matching_ref(സ്ഥിരം ഘടന reference *ref, ശൂന്യം *cb_data)
 {
 	/* we want to allow pattern hold/<asterisk> to show all
 	 * branches under refs/heads/hold/, and v0.99.9? to show
 	 * refs/tags/v0.99.9a and friends.
 	 */
-	const char *tail;
-	int slash = count_slashes(ref->name);
-	for (tail = ref->name; *tail && match_ref_slash < slash; )
-		if (*tail++ == '/')
+	സ്ഥിരം അക്ഷരം *tail;
+	പൂർണ്ണസംഖ്യ slash = എണ്ണം_slashes(ref->name);
+	വേണ്ടി (tail = ref->name; *tail && match_ref_slash < slash; )
+		എങ്കിൽ (*tail++ == '/')
 			slash--;
-	if (!*tail)
-		return 0;
-	if (wildmatch(match_ref_pattern, tail, 0))
-		return 0;
-	if (starts_with(ref->name, "refs/heads/"))
-		return append_head_ref(ref, cb_data);
-	if (starts_with(ref->name, "refs/tags/"))
-		return append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
-	return append_ref(ref->name, ref->oid, 0);
+	എങ്കിൽ (!*tail)
+		തിരികെ 0;
+	എങ്കിൽ (wildmatch(match_ref_pattern, tail, 0))
+		തിരികെ 0;
+	എങ്കിൽ (starts_with(ref->name, "refs/heads/"))
+		തിരികെ append_head_ref(ref, cb_data);
+	എങ്കിൽ (starts_with(ref->name, "refs/tags/"))
+		തിരികെ append_tag_ref(ref->name, ref->oid, ref->flags, cb_data);
+	തിരികെ append_ref(ref->name, ref->oid, 0);
 }
 
-static void snarf_refs(int head, int remotes)
+സ്ഥിതം ശൂന്യം snarf_refs(പൂർണ്ണസംഖ്യ head, പൂർണ്ണസംഖ്യ remotes)
 {
-	if (head) {
-		int orig_cnt = ref_name_cnt;
+	എങ്കിൽ (head) {
+		പൂർണ്ണസംഖ്യ orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_head_ref, NULL);
+				  append_head_ref, ശൂന്യ);
 		sort_ref_range(orig_cnt, ref_name_cnt);
 	}
-	if (remotes) {
-		int orig_cnt = ref_name_cnt;
+	എങ്കിൽ (remotes) {
+		പൂർണ്ണസംഖ്യ orig_cnt = ref_name_cnt;
 
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_remote_ref, NULL);
+				  append_remote_ref, ശൂന്യ);
 		sort_ref_range(orig_cnt, ref_name_cnt);
 	}
 }
 
-static int rev_is_head(const char *head, const char *name)
+സ്ഥിതം പൂർണ്ണസംഖ്യ rev_is_head(സ്ഥിരം അക്ഷരം *head, സ്ഥിരം അക്ഷരം *name)
 {
-	if (!head)
-		return 0;
+	എങ്കിൽ (!head)
+		തിരികെ 0;
 	skip_prefix(head, "refs/heads/", &head);
-	if (!skip_prefix(name, "refs/heads/", &name))
+	എങ്കിൽ (!skip_prefix(name, "refs/heads/", &name))
 		skip_prefix(name, "heads/", &name);
-	return !strcmp(head, name);
+	തിരികെ !strcmp(head, name);
 }
 
-static int show_merge_base(const struct commit_list *seen, int num_rev)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_merge_base(സ്ഥിരം ഘടന commit_list *seen, പൂർണ്ണസംഖ്യ അക്കം_rev)
 {
-	int all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
-	int all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
-	int exit_status = 1;
+	പൂർണ്ണസംഖ്യ all_mask = ((1u << (REV_SHIFT + അക്കം_rev)) - 1);
+	പൂർണ്ണസംഖ്യ all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
+	പൂർണ്ണസംഖ്യ exit_status = 1;
 
-	for (const struct commit_list *s = seen; s; s = s->next) {
-		struct commit *commit = s->item;
-		int flags = commit->object.flags & all_mask;
-		if (!(flags & UNINTERESTING) &&
+	വേണ്ടി (സ്ഥിരം ഘടന commit_list *s = seen; s; s = s->next) {
+		ഘടന commit *commit = s->item;
+		പൂർണ്ണസംഖ്യ flags = commit->object.flags & all_mask;
+		എങ്കിൽ (!(flags & UNINTERESTING) &&
 		    ((flags & all_revs) == all_revs)) {
 			puts(oid_to_hex(&commit->object.oid));
 			exit_status = 0;
 			commit->object.flags |= UNINTERESTING;
 		}
 	}
-	return exit_status;
+	തിരികെ exit_status;
 }
 
-static int show_independent(struct commit **rev,
-			    int num_rev,
-			    unsigned int *rev_mask)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_independent(ഘടന commit **rev,
+			    പൂർണ്ണസംഖ്യ അക്കം_rev,
+			    unsigned പൂർണ്ണസംഖ്യ *rev_mask)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; i < num_rev; i++) {
-		struct commit *commit = rev[i];
-		unsigned int flag = rev_mask[i];
+	വേണ്ടി (i = 0; i < അക്കം_rev; i++) {
+		ഘടന commit *commit = rev[i];
+		unsigned പൂർണ്ണസംഖ്യ flag = rev_mask[i];
 
-		if (commit->object.flags == flag)
+		എങ്കിൽ (commit->object.flags == flag)
 			puts(oid_to_hex(&commit->object.oid));
 		commit->object.flags |= UNINTERESTING;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static void append_one_rev(const char *av)
+സ്ഥിതം ശൂന്യം append_one_rev(സ്ഥിരം അക്ഷരം *av)
 {
-	struct object_id revkey;
-	if (!repo_get_oid(the_repository, av, &revkey)) {
+	ഘടന object_id revkey;
+	എങ്കിൽ (!repo_get_oid(the_repository, av, &revkey)) {
 		append_ref(av, &revkey, 0);
-		return;
+		തിരികെ;
 	}
-	if (strpbrk(av, "*?[")) {
+	എങ്കിൽ (strpbrk(av, "*?[")) {
 		/* glob style match */
-		int saved_matches = ref_name_cnt;
+		പൂർണ്ണസംഖ്യ saved_matches = ref_name_cnt;
 
 		match_ref_pattern = av;
-		match_ref_slash = count_slashes(av);
+		match_ref_slash = എണ്ണം_slashes(av);
 		refs_for_each_ref(get_main_ref_store(the_repository),
-				  append_matching_ref, NULL);
-		if (saved_matches == ref_name_cnt &&
+				  append_matching_ref, ശൂന്യ);
+		എങ്കിൽ (saved_matches == ref_name_cnt &&
 		    ref_name_cnt < MAX_REVS)
 			error(_("no matching refs with %s"), av);
 		sort_ref_range(saved_matches, ref_name_cnt);
-		return;
+		തിരികെ;
 	}
 	die("bad sha1 reference %s", av);
 }
 
-static int git_show_branch_config(const char *var, const char *value,
-				  const struct config_context *ctx, void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_show_branch_config(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം,
+				  സ്ഥിരം ഘടന config_context *ctx, ശൂന്യം *cb)
 {
-	if (!strcmp(var, "showbranch.default")) {
-		if (!value)
-			return config_error_nonbool(var);
+	എങ്കിൽ (!strcmp(var, "showbranch.default")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
 		/*
 		 * default_arg is now passed to parse_options(), so we need to
 		 * mimic the real argv a bit better.
 		 */
-		if (!default_args.nr)
-			strvec_push(&default_args, "show-branch");
-		strvec_push(&default_args, value);
-		return 0;
+		എങ്കിൽ (!default_args.nr)
+			strvec_തള്ളുക(&default_args, "show-branch");
+		strvec_തള്ളുക(&default_args, മൂല്യം);
+		തിരികെ 0;
 	}
 
-	if (!strcmp(var, "color.showbranch")) {
-		showbranch_use_color = git_config_colorbool(var, value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "color.showbranch")) {
+		showbranch_use_color = git_config_colorbool(var, മൂല്യം);
+		തിരികെ 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	എങ്കിൽ (git_color_config(var, മൂല്യം, cb) < 0)
+		തിരികെ -1;
 
-	return git_default_config(var, value, ctx, cb);
+	തിരികെ git_default_config(var, മൂല്യം, ctx, cb);
 }
 
-static int omit_in_dense(struct commit *commit, struct commit **rev, int n)
+സ്ഥിതം പൂർണ്ണസംഖ്യ omit_in_dense(ഘടന commit *commit, ഘടന commit **rev, പൂർണ്ണസംഖ്യ n)
 {
 	/* If the commit is tip of the named branches, do not
 	 * omit it.
 	 * Otherwise, if it is a merge that is reachable from only one
 	 * tip, it is not that interesting.
 	 */
-	int i, flag, count;
-	for (i = 0; i < n; i++)
-		if (rev[i] == commit)
-			return 0;
+	പൂർണ്ണസംഖ്യ i, flag, എണ്ണം;
+	വേണ്ടി (i = 0; i < n; i++)
+		എങ്കിൽ (rev[i] == commit)
+			തിരികെ 0;
 	flag = commit->object.flags;
-	for (i = count = 0; i < n; i++) {
-		if (flag & (1u << (i + REV_SHIFT)))
-			count++;
+	വേണ്ടി (i = എണ്ണം = 0; i < n; i++) {
+		എങ്കിൽ (flag & (1u << (i + REV_SHIFT)))
+			എണ്ണം++;
 	}
-	if (count == 1)
-		return 1;
-	return 0;
+	എങ്കിൽ (എണ്ണം == 1)
+		തിരികെ 1;
+	തിരികെ 0;
 }
 
-static int reflog = 0;
+സ്ഥിതം പൂർണ്ണസംഖ്യ reflog = 0;
 
-static int parse_reflog_param(const struct option *opt, const char *arg,
-			      int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_reflog_param(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg,
+			      പൂർണ്ണസംഖ്യ unset)
 {
-	char *ep;
-	const char **base = (const char **)opt->value;
+	അക്ഷരം *ep;
+	സ്ഥിരം അക്ഷരം **base = (സ്ഥിരം അക്ഷരം **)opt->മൂല്യം;
 	BUG_ON_OPT_NEG(unset);
-	if (!arg)
+	എങ്കിൽ (!arg)
 		arg = "";
 	reflog = strtoul(arg, &ep, 10);
-	if (*ep == ',')
+	എങ്കിൽ (*ep == ',')
 		*base = ep + 1;
-	else if (*ep)
-		return error("unrecognized reflog param '%s'", arg);
-	else
-		*base = NULL;
-	if (reflog <= 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (*ep)
+		തിരികെ error("unrecognized reflog param '%s'", arg);
+	അല്ലെങ്കിൽ
+		*base = ശൂന്യ;
+	എങ്കിൽ (reflog <= 0)
 		reflog = DEFAULT_REFLOG;
-	return 0;
+	തിരികെ 0;
 }
 
-int cmd_show_branch(int ac,
-		const char **av,
-		const char *prefix,
-		struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_show_branch(പൂർണ്ണസംഖ്യ ac,
+		സ്ഥിരം അക്ഷരം **av,
+		സ്ഥിരം അക്ഷരം *prefix,
+		ഘടന repository *repo UNUSED)
 {
-	struct commit *rev[MAX_REVS], *commit;
-	char *reflog_msg[MAX_REVS] = {0};
-	struct commit_list *seen = NULL;
-	struct prio_queue queue = { compare_commits_by_commit_date };
-	unsigned int rev_mask[MAX_REVS];
-	int num_rev, i, extra = 0;
-	int all_heads = 0, all_remotes = 0;
-	int all_mask, all_revs;
-	enum rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
-	char *head;
-	struct object_id head_oid;
-	int merge_base = 0;
-	int independent = 0;
-	int no_name = 0;
-	int sha1_name = 0;
-	int shown_merge_point = 0;
-	int with_current_branch = 0;
-	int head_at = -1;
-	int topics = 0;
-	int sparse = 0;
-	const char *reflog_base = NULL;
-	struct option builtin_show_branch_options[] = {
+	ഘടന commit *rev[MAX_REVS], *commit;
+	അക്ഷരം *reflog_സന്ദേശം[MAX_REVS] = {0};
+	ഘടന commit_list *seen = ശൂന്യ;
+	ഘടന prio_queue queue = { compare_commits_by_commit_date };
+	unsigned പൂർണ്ണസംഖ്യ rev_mask[MAX_REVS];
+	പൂർണ്ണസംഖ്യ അക്കം_rev, i, extra = 0;
+	പൂർണ്ണസംഖ്യ all_heads = 0, all_remotes = 0;
+	പൂർണ്ണസംഖ്യ all_mask, all_revs;
+	എണ്ണൽ rev_sort_order sort_order = REV_SORT_IN_GRAPH_ORDER;
+	അക്ഷരം *head;
+	ഘടന object_id head_oid;
+	പൂർണ്ണസംഖ്യ merge_base = 0;
+	പൂർണ്ണസംഖ്യ independent = 0;
+	പൂർണ്ണസംഖ്യ no_name = 0;
+	പൂർണ്ണസംഖ്യ sha1_name = 0;
+	പൂർണ്ണസംഖ്യ shown_merge_point = 0;
+	പൂർണ്ണസംഖ്യ with_current_branch = 0;
+	പൂർണ്ണസംഖ്യ head_at = -1;
+	പൂർണ്ണസംഖ്യ topics = 0;
+	പൂർണ്ണസംഖ്യ sparse = 0;
+	സ്ഥിരം അക്ഷരം *reflog_base = ശൂന്യ;
+	ഘടന option builtin_show_branch_options[] = {
 		OPT_BOOL('a', "all", &all_heads,
 			 N_("show remote-tracking and local branches")),
 		OPT_BOOL('r', "remotes", &all_remotes,
@@ -669,8 +669,8 @@ int cmd_show_branch(int ac,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "more",
-			.value = &extra,
-			.precision = sizeof(extra),
+			.മൂല്യം = &extra,
+			.precision = വലുപ്പം(extra),
 			.argh = N_("n"),
 			.help = N_("show <n> more commits after the common ancestor"),
 			.flags = PARSE_OPT_OPTARG,
@@ -704,15 +704,15 @@ int cmd_show_branch(int ac,
 			    parse_reflog_param),
 		OPT_END()
 	};
-	const char **args_copy = NULL;
-	int ret;
+	സ്ഥിരം അക്ഷരം **args_copy = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ ret;
 
 	init_commit_name_slab(&name_slab);
 
-	repo_config(the_repository, git_show_branch_config, NULL);
+	repo_config(the_repository, git_show_branch_config, ശൂന്യ);
 
 	/* If nothing is specified, try the default first */
-	if (ac == 1 && default_args.nr) {
+	എങ്കിൽ (ac == 1 && default_args.nr) {
 		DUP_ARRAY(args_copy, default_args.v, default_args.nr);
 		ac = default_args.nr;
 		av = args_copy;
@@ -720,17 +720,17 @@ int cmd_show_branch(int ac,
 
 	ac = parse_options(ac, av, prefix, builtin_show_branch_options,
 			   show_branch_usage, PARSE_OPT_STOP_AT_NON_OPTION);
-	if (all_heads)
+	എങ്കിൽ (all_heads)
 		all_remotes = 1;
 
-	if (extra || reflog) {
+	എങ്കിൽ (extra || reflog) {
 		/* "listing" mode is incompatible with
 		 * independent nor merge-base modes.
 		 */
-		if (independent || merge_base)
+		എങ്കിൽ (independent || merge_base)
 			usage_with_options(show_branch_usage,
 					   builtin_show_branch_options);
-		if (reflog && ((0 < extra) || all_heads || all_remotes))
+		എങ്കിൽ (reflog && ((0 < extra) || all_heads || all_remotes))
 			/*
 			 * Asking for --more in reflog mode does not
 			 * make sense.  --list is Ok.
@@ -741,141 +741,141 @@ int cmd_show_branch(int ac,
 				"--all/--remotes/--independent/--merge-base");
 	}
 
-	if (with_current_branch && reflog)
+	എങ്കിൽ (with_current_branch && reflog)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--reflog", "--current");
 
 	/* If nothing is specified, show all branches by default */
-	if (ac <= topics && all_heads + all_remotes == 0)
+	എങ്കിൽ (ac <= topics && all_heads + all_remotes == 0)
 		all_heads = 1;
 
-	if (reflog) {
-		struct object_id oid;
-		char *ref;
-		int base = 0;
-		unsigned int flags = 0;
+	എങ്കിൽ (reflog) {
+		ഘടന object_id oid;
+		അക്ഷരം *ref;
+		പൂർണ്ണസംഖ്യ base = 0;
+		unsigned പൂർണ്ണസംഖ്യ flags = 0;
 
-		if (ac == 0) {
-			static const char *fake_av[2];
+		എങ്കിൽ (ac == 0) {
+			സ്ഥിതം സ്ഥിരം അക്ഷരം *fake_av[2];
 
 			fake_av[0] = refs_resolve_refdup(get_main_ref_store(the_repository),
 							 "HEAD",
 							 RESOLVE_REF_READING,
 							 &oid,
-							 NULL);
-			fake_av[1] = NULL;
+							 ശൂന്യ);
+			fake_av[1] = ശൂന്യ;
 			av = fake_av;
 			ac = 1;
-			if (!*av)
+			എങ്കിൽ (!*av)
 				die(_("no branches given, and HEAD is not valid"));
 		}
-		if (ac != 1)
+		എങ്കിൽ (ac != 1)
 			die(_("--reflog option needs one branch name"));
 
-		if (MAX_REVS < reflog)
+		എങ്കിൽ (MAX_REVS < reflog)
 			die(Q_("only %d entry can be shown at one time.",
 			       "only %d entries can be shown at one time.",
 			       MAX_REVS), MAX_REVS);
-		if (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
+		എങ്കിൽ (!repo_dwim_ref(the_repository, *av, strlen(*av), &oid,
 				   &ref, 0))
 			die(_("no such ref %s"), *av);
 
 		/* Has the base been specified? */
-		if (reflog_base) {
-			char *ep;
+		എങ്കിൽ (reflog_base) {
+			അക്ഷരം *ep;
 			base = strtoul(reflog_base, &ep, 10);
-			if (*ep) {
+			എങ്കിൽ (*ep) {
 				/* Ah, that is a date spec... */
 				timestamp_t at;
 				at = approxidate(reflog_base);
 				read_ref_at(get_main_ref_store(the_repository),
-					    ref, flags, at, -1, &oid, NULL,
-					    NULL, NULL, &base);
+					    ref, flags, at, -1, &oid, ശൂന്യ,
+					    ശൂന്യ, ശൂന്യ, &base);
 			}
 		}
 
-		for (i = 0; i < reflog; i++) {
-			char *logmsg = NULL;
-			char *nth_desc;
-			const char *msg;
-			char *end;
+		വേണ്ടി (i = 0; i < reflog; i++) {
+			അക്ഷരം *logmsg = ശൂന്യ;
+			അക്ഷരം *nth_desc;
+			സ്ഥിരം അക്ഷരം *സന്ദേശം;
+			അക്ഷരം *end;
 			timestamp_t timestamp;
-			int tz;
+			പൂർണ്ണസംഖ്യ tz;
 
-			if (read_ref_at(get_main_ref_store(the_repository),
+			എങ്കിൽ (read_ref_at(get_main_ref_store(the_repository),
 					ref, flags, 0, base + i, &oid, &logmsg,
-					&timestamp, &tz, NULL)) {
-				free(logmsg);
+					&timestamp, &tz, ശൂന്യ)) {
+				സ്വതന്ത്രം(logmsg);
 				reflog = i;
-				break;
+				നിർത്തുക;
 			}
 
 			end = strchr(logmsg, '\n');
-			if (end)
+			എങ്കിൽ (end)
 				*end = '\0';
 
-			msg = (*logmsg == '\0') ? "(none)" : logmsg;
-			reflog_msg[i] = xstrfmt("(%s) %s",
+			സന്ദേശം = (*logmsg == '\0') ? "(none)" : logmsg;
+			reflog_സന്ദേശം[i] = xstrfmt("(%s) %s",
 						show_date(timestamp, tz,
 							  DATE_MODE(RELATIVE)),
-						msg);
-			free(logmsg);
+						സന്ദേശം);
+			സ്വതന്ത്രം(logmsg);
 
 			nth_desc = xstrfmt("%s@{%d}", *av, base+i);
 			append_ref(nth_desc, &oid, 1);
-			free(nth_desc);
+			സ്വതന്ത്രം(nth_desc);
 		}
-		free(ref);
+		സ്വതന്ത്രം(ref);
 	}
-	else {
-		while (0 < ac) {
+	അല്ലെങ്കിൽ {
+		ആകുമ്പോൾ (0 < ac) {
 			append_one_rev(*av);
 			ac--; av++;
 		}
-		if (all_heads + all_remotes)
+		എങ്കിൽ (all_heads + all_remotes)
 			snarf_refs(all_heads, all_remotes);
 	}
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
 				   RESOLVE_REF_READING,
-				   &head_oid, NULL);
+				   &head_oid, ശൂന്യ);
 
-	if (with_current_branch && head) {
-		int has_head = 0;
-		for (i = 0; !has_head && i < ref_name_cnt; i++) {
+	എങ്കിൽ (with_current_branch && head) {
+		പൂർണ്ണസംഖ്യ has_head = 0;
+		വേണ്ടി (i = 0; !has_head && i < ref_name_cnt; i++) {
 			/* We are only interested in adding the branch
 			 * HEAD points at.
 			 */
-			if (rev_is_head(head, ref_name[i]))
+			എങ്കിൽ (rev_is_head(head, ref_name[i]))
 				has_head++;
 		}
-		if (!has_head) {
-			const char *name = head;
+		എങ്കിൽ (!has_head) {
+			സ്ഥിരം അക്ഷരം *name = head;
 			skip_prefix(name, "refs/heads/", &name);
 			append_one_rev(name);
 		}
 	}
 
-	if (!ref_name_cnt) {
+	എങ്കിൽ (!ref_name_cnt) {
 		fprintf(stderr, "No revs to be shown.\n");
 		ret = 0;
-		goto out;
+		പോകുക out;
 	}
 
-	for (num_rev = 0; ref_name[num_rev]; num_rev++) {
-		struct object_id revkey;
-		unsigned int flag = 1u << (num_rev + REV_SHIFT);
+	വേണ്ടി (അക്കം_rev = 0; ref_name[അക്കം_rev]; അക്കം_rev++) {
+		ഘടന object_id revkey;
+		unsigned പൂർണ്ണസംഖ്യ flag = 1u << (അക്കം_rev + REV_SHIFT);
 
-		if (MAX_REVS <= num_rev)
+		എങ്കിൽ (MAX_REVS <= അക്കം_rev)
 			die(Q_("cannot handle more than %d rev.",
 			       "cannot handle more than %d revs.",
 			       MAX_REVS), MAX_REVS);
-		if (repo_get_oid(the_repository, ref_name[num_rev], &revkey))
-			die(_("'%s' is not a valid ref."), ref_name[num_rev]);
+		എങ്കിൽ (repo_get_oid(the_repository, ref_name[അക്കം_rev], &revkey))
+			die(_("'%s' is not a valid ref."), ref_name[അക്കം_rev]);
 		commit = lookup_commit_reference(the_repository, &revkey);
-		if (!commit)
+		എങ്കിൽ (!commit)
 			die(_("cannot find commit %s (%s)"),
-			    ref_name[num_rev], oid_to_hex(&revkey));
+			    ref_name[അക്കം_rev], oid_to_hex(&revkey));
 		repo_parse_commit(the_repository, commit);
 		mark_seen(commit, &seen);
 
@@ -884,39 +884,39 @@ int cmd_show_branch(int ac,
 		 * internal bookkeeping.
 		 */
 		commit->object.flags |= flag;
-		if (commit->object.flags == flag)
+		എങ്കിൽ (commit->object.flags == flag)
 			prio_queue_put(&queue, commit);
-		rev[num_rev] = commit;
+		rev[അക്കം_rev] = commit;
 	}
-	for (i = 0; i < num_rev; i++)
+	വേണ്ടി (i = 0; i < അക്കം_rev; i++)
 		rev_mask[i] = rev[i]->object.flags;
 
-	if (0 <= extra)
-		join_revs(&queue, &seen, num_rev, extra);
+	എങ്കിൽ (0 <= extra)
+		join_revs(&queue, &seen, അക്കം_rev, extra);
 
 	commit_list_sort_by_date(&seen);
 
-	if (merge_base) {
-		ret = show_merge_base(seen, num_rev);
-		goto out;
+	എങ്കിൽ (merge_base) {
+		ret = show_merge_base(seen, അക്കം_rev);
+		പോകുക out;
 	}
 
-	if (independent) {
-		ret = show_independent(rev, num_rev, rev_mask);
-		goto out;
+	എങ്കിൽ (independent) {
+		ret = show_independent(rev, അക്കം_rev, rev_mask);
+		പോകുക out;
 	}
 
 	/* Show list; --more=-1 means list-only */
-	if (1 < num_rev || extra < 0) {
-		for (i = 0; i < num_rev; i++) {
-			int j;
-			int is_head = rev_is_head(head, ref_name[i]) &&
+	എങ്കിൽ (1 < അക്കം_rev || extra < 0) {
+		വേണ്ടി (i = 0; i < അക്കം_rev; i++) {
+			പൂർണ്ണസംഖ്യ j;
+			പൂർണ്ണസംഖ്യ is_head = rev_is_head(head, ref_name[i]) &&
 				      oideq(&head_oid, &rev[i]->object.oid);
-			if (extra < 0)
+			എങ്കിൽ (extra < 0)
 				printf("%c [%s] ",
 				       is_head ? '*' : ' ', ref_name[i]);
-			else {
-				for (j = 0; j < i; j++)
+			അല്ലെങ്കിൽ {
+				വേണ്ടി (j = 0; j < i; j++)
 					putchar(' ');
 				printf("%s%c%s [%s] ",
 				       get_color_code(i),
@@ -924,67 +924,67 @@ int cmd_show_branch(int ac,
 				       get_color_reset_code(), ref_name[i]);
 			}
 
-			if (!reflog) {
+			എങ്കിൽ (!reflog) {
 				/* header lines never need name */
 				show_one_commit(rev[i], 1);
 			}
-			else
-				puts(reflog_msg[i]);
+			അല്ലെങ്കിൽ
+				puts(reflog_സന്ദേശം[i]);
 
-			if (is_head)
+			എങ്കിൽ (is_head)
 				head_at = i;
 		}
-		if (0 <= extra) {
-			for (i = 0; i < num_rev; i++)
+		എങ്കിൽ (0 <= extra) {
+			വേണ്ടി (i = 0; i < അക്കം_rev; i++)
 				putchar('-');
 			putchar('\n');
 		}
 	}
-	if (extra < 0) {
+	എങ്കിൽ (extra < 0) {
 		ret = 0;
-		goto out;
+		പോകുക out;
 	}
 
 	/* Sort topologically */
 	sort_in_topological_order(&seen, sort_order);
 
 	/* Give names to commits */
-	if (!sha1_name && !no_name)
-		name_commits(seen, rev, ref_name, num_rev);
+	എങ്കിൽ (!sha1_name && !no_name)
+		name_commits(seen, rev, ref_name, അക്കം_rev);
 
-	all_mask = ((1u << (REV_SHIFT + num_rev)) - 1);
+	all_mask = ((1u << (REV_SHIFT + അക്കം_rev)) - 1);
 	all_revs = all_mask & ~((1u << REV_SHIFT) - 1);
 
-	for (struct commit_list *l = seen; l; l = l->next) {
-		struct commit *commit = l->item;
-		int this_flag = commit->object.flags;
-		int is_merge_point = ((this_flag & all_revs) == all_revs);
+	വേണ്ടി (ഘടന commit_list *l = seen; l; l = l->next) {
+		ഘടന commit *commit = l->item;
+		പൂർണ്ണസംഖ്യ this_flag = commit->object.flags;
+		പൂർണ്ണസംഖ്യ is_merge_point = ((this_flag & all_revs) == all_revs);
 
 		shown_merge_point |= is_merge_point;
 
-		if (1 < num_rev) {
-			int is_merge = !!(commit->parents &&
+		എങ്കിൽ (1 < അക്കം_rev) {
+			പൂർണ്ണസംഖ്യ is_merge = !!(commit->parents &&
 					  commit->parents->next);
-			if (topics &&
+			എങ്കിൽ (topics &&
 			    !is_merge_point &&
 			    (this_flag & (1u << REV_SHIFT)))
-				continue;
-			if (!sparse && is_merge &&
-			    omit_in_dense(commit, rev, num_rev))
-				continue;
-			for (i = 0; i < num_rev; i++) {
-				int mark;
-				if (!(this_flag & (1u << (i + REV_SHIFT))))
+				തുടരുക;
+			എങ്കിൽ (!sparse && is_merge &&
+			    omit_in_dense(commit, rev, അക്കം_rev))
+				തുടരുക;
+			വേണ്ടി (i = 0; i < അക്കം_rev; i++) {
+				പൂർണ്ണസംഖ്യ mark;
+				എങ്കിൽ (!(this_flag & (1u << (i + REV_SHIFT))))
 					mark = ' ';
-				else if (is_merge)
+				അല്ലെങ്കിൽ എങ്കിൽ (is_merge)
 					mark = '-';
-				else if (i == head_at)
+				അല്ലെങ്കിൽ എങ്കിൽ (i == head_at)
 					mark = '*';
-				else
+				അല്ലെങ്കിൽ
 					mark = '+';
-				if (mark == ' ')
+				എങ്കിൽ (mark == ' ')
 					putchar(mark);
-				else
+				അല്ലെങ്കിൽ
 					printf("%s%c%s",
 					       get_color_code(i),
 					       mark, get_color_reset_code());
@@ -993,18 +993,18 @@ int cmd_show_branch(int ac,
 		}
 		show_one_commit(commit, no_name);
 
-		if (shown_merge_point && --extra < 0)
-			break;
+		എങ്കിൽ (shown_merge_point && --extra < 0)
+			നിർത്തുക;
 	}
 
 	ret = 0;
 
 out:
-	for (size_t i = 0; i < ARRAY_SIZE(reflog_msg); i++)
-		free(reflog_msg[i]);
+	വേണ്ടി (size_t i = 0; i < ARRAY_SIZE(reflog_സന്ദേശം); i++)
+		സ്വതന്ത്രം(reflog_സന്ദേശം[i]);
 	commit_list_free(seen);
 	clear_prio_queue(&queue);
-	free(args_copy);
-	free(head);
-	return ret;
+	സ്വതന്ത്രം(args_copy);
+	സ്വതന്ത്രം(head);
+	തിരികെ ret;
 }

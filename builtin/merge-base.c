@@ -1,163 +1,163 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "commit-reach.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "hex.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "commit-reach.h"
 
-static int show_merge_base(struct commit **rev, size_t rev_nr, int show_all)
+സ്ഥിതം പൂർണ്ണസംഖ്യ show_merge_base(ഘടന commit **rev, size_t rev_nr, പൂർണ്ണസംഖ്യ show_all)
 {
-	enum merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
-	struct commit_list *result = NULL, *r;
+	എണ്ണൽ merge_base_flags flags = show_all ? MERGE_BASE_FIND_ALL : 0;
+	ഘടന commit_list *result = ശൂന്യ, *r;
 
-	if (repo_get_merge_bases_many_dirty(the_repository, rev[0],
+	എങ്കിൽ (repo_get_merge_bases_many_dirty(the_repository, rev[0],
 					    rev_nr - 1, rev + 1,
 					    flags, &result) < 0) {
 		commit_list_free(result);
-		return -1;
+		തിരികെ -1;
 	}
 
-	if (!result)
-		return 1;
+	എങ്കിൽ (!result)
+		തിരികെ 1;
 
-	for (r = result; r; r = r->next) {
+	വേണ്ടി (r = result; r; r = r->next) {
 		printf("%s\n", oid_to_hex(&r->item->object.oid));
-		if (!show_all)
-			break;
+		എങ്കിൽ (!show_all)
+			നിർത്തുക;
 	}
 
 	commit_list_free(result);
-	return 0;
+	തിരികെ 0;
 }
 
-static const char * const merge_base_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം merge_base_usage[] = {
 	N_("git merge-base [-a | --all] <commit> <commit>..."),
 	N_("git merge-base [-a | --all] --octopus <commit>..."),
 	N_("git merge-base --is-ancestor <commit> <commit>"),
 	N_("git merge-base --independent <commit>..."),
 	N_("git merge-base --fork-point <ref> [<commit>]"),
-	NULL
+	ശൂന്യ
 };
 
-static struct commit *get_commit_reference(const char *arg)
+സ്ഥിതം ഘടന commit *get_commit_reference(സ്ഥിരം അക്ഷരം *arg)
 {
-	struct object_id revkey;
-	struct commit *r;
+	ഘടന object_id revkey;
+	ഘടന commit *r;
 
-	if (repo_get_oid(the_repository, arg, &revkey))
+	എങ്കിൽ (repo_get_oid(the_repository, arg, &revkey))
 		die("Not a valid object name %s", arg);
 	r = lookup_commit_reference(the_repository, &revkey);
-	if (!r)
+	എങ്കിൽ (!r)
 		die("Not a valid commit name %s", arg);
 
-	return r;
+	തിരികെ r;
 }
 
-static int handle_independent(int count, const char **args)
+സ്ഥിതം പൂർണ്ണസംഖ്യ handle_independent(പൂർണ്ണസംഖ്യ എണ്ണം, സ്ഥിരം അക്ഷരം **args)
 {
-	struct commit_list *revs = NULL, *rev;
-	int i;
+	ഘടന commit_list *revs = ശൂന്യ, *rev;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	വേണ്ടി (i = എണ്ണം - 1; i >= 0; i--)
+		commit_list_തിരുകുക(get_commit_reference(args[i]), &revs);
 
 	reduce_heads_replace(&revs);
 
-	if (!revs)
-		return 1;
+	എങ്കിൽ (!revs)
+		തിരികെ 1;
 
-	for (rev = revs; rev; rev = rev->next)
+	വേണ്ടി (rev = revs; rev; rev = rev->next)
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
 
 	commit_list_free(revs);
-	return 0;
+	തിരികെ 0;
 }
 
-static int handle_octopus(int count, const char **args, int show_all)
+സ്ഥിതം പൂർണ്ണസംഖ്യ handle_octopus(പൂർണ്ണസംഖ്യ എണ്ണം, സ്ഥിരം അക്ഷരം **args, പൂർണ്ണസംഖ്യ show_all)
 {
-	struct commit_list *revs = NULL;
-	struct commit_list *result = NULL, *rev;
-	int i;
+	ഘടന commit_list *revs = ശൂന്യ;
+	ഘടന commit_list *result = ശൂന്യ, *rev;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = count - 1; i >= 0; i--)
-		commit_list_insert(get_commit_reference(args[i]), &revs);
+	വേണ്ടി (i = എണ്ണം - 1; i >= 0; i--)
+		commit_list_തിരുകുക(get_commit_reference(args[i]), &revs);
 
-	if (get_octopus_merge_bases(revs, &result) < 0) {
+	എങ്കിൽ (get_octopus_merge_bases(revs, &result) < 0) {
 		commit_list_free(revs);
 		commit_list_free(result);
-		return 128;
+		തിരികെ 128;
 	}
 	commit_list_free(revs);
 	reduce_heads_replace(&result);
 
-	if (!result)
-		return 1;
+	എങ്കിൽ (!result)
+		തിരികെ 1;
 
-	for (rev = result; rev; rev = rev->next) {
+	വേണ്ടി (rev = result; rev; rev = rev->next) {
 		printf("%s\n", oid_to_hex(&rev->item->object.oid));
-		if (!show_all)
-			break;
+		എങ്കിൽ (!show_all)
+			നിർത്തുക;
 	}
 
 	commit_list_free(result);
-	return 0;
+	തിരികെ 0;
 }
 
-static int handle_is_ancestor(int argc, const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ handle_is_ancestor(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	struct commit *one, *two;
-	int ret;
+	ഘടന commit *one, *two;
+	പൂർണ്ണസംഖ്യ ret;
 
-	if (argc != 2)
+	എങ്കിൽ (argc != 2)
 		die("--is-ancestor takes exactly two commits");
 	one = get_commit_reference(argv[0]);
 	two = get_commit_reference(argv[1]);
 	ret = repo_in_merge_bases(the_repository, one, two);
-	if (ret < 0)
+	എങ്കിൽ (ret < 0)
 		exit(128);
-	if (ret)
-		return 0;
-	else
-		return 1;
+	എങ്കിൽ (ret)
+		തിരികെ 0;
+	അല്ലെങ്കിൽ
+		തിരികെ 1;
 }
 
-static int handle_fork_point(int argc, const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ handle_fork_point(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	struct object_id oid;
-	struct commit *derived, *fork_point;
-	const char *commitname;
+	ഘടന object_id oid;
+	ഘടന commit *derived, *fork_point;
+	സ്ഥിരം അക്ഷരം *commitname;
 
 	commitname = (argc == 2) ? argv[1] : "HEAD";
-	if (repo_get_oid(the_repository, commitname, &oid))
+	എങ്കിൽ (repo_get_oid(the_repository, commitname, &oid))
 		die("Not a valid object name: '%s'", commitname);
 
 	derived = lookup_commit_reference(the_repository, &oid);
 
 	fork_point = get_fork_point(argv[0], derived);
 
-	if (!fork_point)
-		return 1;
+	എങ്കിൽ (!fork_point)
+		തിരികെ 1;
 
 	printf("%s\n", oid_to_hex(&fork_point->object.oid));
-	return 0;
+	തിരികെ 0;
 }
 
-int cmd_merge_base(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_merge_base(പൂർണ്ണസംഖ്യ argc,
+		   സ്ഥിരം അക്ഷരം **argv,
+		   സ്ഥിരം അക്ഷരം *prefix,
+		   ഘടന repository *repo UNUSED)
 {
-	struct commit **rev;
+	ഘടന commit **rev;
 	size_t rev_nr = 0;
-	int show_all = 0;
-	int cmdmode = 0;
-	int ret;
+	പൂർണ്ണസംഖ്യ show_all = 0;
+	പൂർണ്ണസംഖ്യ cmdmode = 0;
+	പൂർണ്ണസംഖ്യ ret;
 
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_BOOL('a', "all", &show_all, N_("output all common ancestors")),
 		OPT_CMDMODE(0, "octopus", &cmdmode,
 			    N_("find ancestors for a single n-way merge"), 'o'),
@@ -170,41 +170,41 @@ int cmd_merge_base(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 	argc = parse_options(argc, argv, prefix, options, merge_base_usage, 0);
 
-	if (cmdmode == 'a') {
-		if (argc < 2)
+	എങ്കിൽ (cmdmode == 'a') {
+		എങ്കിൽ (argc < 2)
 			usage_with_options(merge_base_usage, options);
-		if (show_all)
+		എങ്കിൽ (show_all)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--is-ancestor", "--all");
-		return handle_is_ancestor(argc, argv);
+		തിരികെ handle_is_ancestor(argc, argv);
 	}
 
-	if (cmdmode == 'r' && show_all)
+	എങ്കിൽ (cmdmode == 'r' && show_all)
 		die(_("options '%s' and '%s' cannot be used together"),
 		    "--independent", "--all");
 
-	if (cmdmode == 'o')
-		return handle_octopus(argc, argv, show_all);
+	എങ്കിൽ (cmdmode == 'o')
+		തിരികെ handle_octopus(argc, argv, show_all);
 
-	if (cmdmode == 'r')
-		return handle_independent(argc, argv);
+	എങ്കിൽ (cmdmode == 'r')
+		തിരികെ handle_independent(argc, argv);
 
-	if (cmdmode == 'f') {
-		if (argc < 1 || 2 < argc)
+	എങ്കിൽ (cmdmode == 'f') {
+		എങ്കിൽ (argc < 1 || 2 < argc)
 			usage_with_options(merge_base_usage, options);
-		return handle_fork_point(argc, argv);
+		തിരികെ handle_fork_point(argc, argv);
 	}
 
-	if (argc < 2)
+	എങ്കിൽ (argc < 2)
 		usage_with_options(merge_base_usage, options);
 
 	ALLOC_ARRAY(rev, argc);
-	while (argc-- > 0)
+	ആകുമ്പോൾ (argc-- > 0)
 		rev[rev_nr++] = get_commit_reference(*argv++);
 	ret = show_merge_base(rev, rev_nr, show_all);
-	free(rev);
-	return ret;
+	സ്വതന്ത്രം(rev);
+	തിരികെ ret;
 }

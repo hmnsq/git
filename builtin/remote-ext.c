@@ -1,9 +1,9 @@
-#include "builtin.h"
-#include "transport.h"
-#include "run-command.h"
-#include "pkt-line.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "transport.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "pkt-line.h"
 
-static const char usage_msg[] =
+സ്ഥിതം സ്ഥിരം അക്ഷരം usage_സന്ദേശം[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+സ്ഥിതം അക്ഷരം *git_req;
+സ്ഥിതം അക്ഷരം *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+സ്ഥിതം അക്ഷരം *strip_escapes(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *service,
+	സ്ഥിരം അക്ഷരം **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ escape = 0;
+	അക്ഷരം special = 0;
+	സ്ഥിരം അക്ഷരം *service_noprefix = service;
+	ഘടന strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,33 +44,33 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+	ആകുമ്പോൾ (str[rpos] && (escape || str[rpos] != ' ')) {
+		എങ്കിൽ (escape) {
+			തിരഞ്ഞെടുപ്പ് (str[rpos]) {
+			അവസ്ഥ ' ':
+			അവസ്ഥ '%':
+			അവസ്ഥ 's':
+			അവസ്ഥ 'S':
+				നിർത്തുക;
+			അവസ്ഥ 'G':
+			അവസ്ഥ 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				എങ്കിൽ (rpos == 1)
+					നിർത്തുക;
 				/* fallthrough */
-			default:
+			സ്ഥിരസ്ഥിതി:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} അല്ലെങ്കിൽ
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	എങ്കിൽ (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	എങ്കിൽ (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
+	ആകുമ്പോൾ (str[rpos] && (escape || str[rpos] != ' ')) {
+		എങ്കിൽ (escape) {
+			തിരഞ്ഞെടുപ്പ് (str[rpos]) {
+			അവസ്ഥ ' ':
+			അവസ്ഥ '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				നിർത്തുക;
+			അവസ്ഥ 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				നിർത്തുക;
+			അവസ്ഥ 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				നിർത്തുക;
 			}
 			escape = 0;
-		} else
-			switch (str[rpos]) {
-			case '%':
+		} അല്ലെങ്കിൽ
+			തിരഞ്ഞെടുപ്പ് (str[rpos]) {
+			അവസ്ഥ '%':
 				escape = 1;
-				break;
-			default:
+				നിർത്തുക;
+			സ്ഥിരസ്ഥിതി:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				നിർത്തുക;
 			}
 		rpos++;
 	}
-	switch (special) {
-	case 'G':
-		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
-		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
-	default:
-		return strbuf_detach(&ret, NULL);
+	തിരഞ്ഞെടുപ്പ് (special) {
+	അവസ്ഥ 'G':
+		git_req = strbuf_detach(&ret, ശൂന്യ);
+		തിരികെ ശൂന്യ;
+	അവസ്ഥ 'V':
+		git_req_vhost = strbuf_detach(&ret, ശൂന്യ);
+		തിരികെ ശൂന്യ;
+	സ്ഥിരസ്ഥിതി:
+		തിരികെ strbuf_detach(&ret, ശൂന്യ);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+സ്ഥിതം ശൂന്യം parse_argv(ഘടന strvec *out, സ്ഥിരം അക്ഷരം *arg, സ്ഥിരം അക്ഷരം *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
-			strvec_push(out, expanded);
-		free(expanded);
+	ആകുമ്പോൾ (*arg) {
+		അക്ഷരം *expanded = strip_escapes(arg, service, &arg);
+		എങ്കിൽ (expanded)
+			strvec_തള്ളുക(out, expanded);
+		സ്വതന്ത്രം(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+സ്ഥിതം ശൂന്യം send_git_request(പൂർണ്ണസംഖ്യ stdin_fd, സ്ഥിരം അക്ഷരം *serv, സ്ഥിരം അക്ഷരം *repo,
+	സ്ഥിരം അക്ഷരം *vhost)
 {
-	if (!vhost)
+	എങ്കിൽ (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	അല്ലെങ്കിൽ
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+സ്ഥിതം പൂർണ്ണസംഖ്യ run_child(സ്ഥിരം അക്ഷരം *arg, സ്ഥിരം അക്ഷരം *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	പൂർണ്ണസംഖ്യ r;
+	ഘടന child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	എങ്കിൽ (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	എങ്കിൽ (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	എങ്കിൽ (!r)
 		r = finish_command(&child);
-	else
+	അല്ലെങ്കിൽ
 		finish_command(&child);
-	return r;
+	തിരികെ r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+സ്ഥിതം പൂർണ്ണസംഖ്യ command_loop(സ്ഥിരം അക്ഷരം *child)
 {
-	char buffer[MAXCOMMAND];
+	അക്ഷരം buffer[MAXCOMMAND];
 
-	while (1) {
+	ആകുമ്പോൾ (1) {
 		size_t i;
-		const char *arg;
+		സ്ഥിരം അക്ഷരം *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		എങ്കിൽ (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			എങ്കിൽ (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ആകുമ്പോൾ (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		എങ്കിൽ (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			തിരികെ run_child(child, arg);
+		} അല്ലെങ്കിൽ {
 			fprintf(stderr, "Bad command");
-			return 1;
+			തിരികെ 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_remote_ext(പൂർണ്ണസംഖ്യ argc,
+		   സ്ഥിരം അക്ഷരം **argv,
+		   സ്ഥിരം അക്ഷരം *prefix,
+		   ഘടന repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_സന്ദേശം);
 
-	if (argc != 3)
-		usage(usage_msg);
+	എങ്കിൽ (argc != 3)
+		usage(usage_സന്ദേശം);
 
-	return command_loop(argv[2]);
+	തിരികെ command_loop(argv[2]);
 }

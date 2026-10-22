@@ -1,25 +1,25 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "revision.h"
-#include "utf8.h"
-#include "mailmap.h"
-#include "setup.h"
-#include "shortlog.h"
-#include "parse-options.h"
-#include "trailer.h"
-#include "strmap.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "diff.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "revision.h"
+#അന്തര്ഭാവ "utf8.h"
+#അന്തര്ഭാവ "mailmap.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "shortlog.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "trailer.h"
+#അന്തര്ഭാവ "strmap.h"
 
-static char const * const shortlog_usage[] = {
+സ്ഥിതം അക്ഷരം സ്ഥിരം * സ്ഥിരം shortlog_usage[] = {
 	N_("git shortlog [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git log --pretty=short | git shortlog [<options>]"),
-	NULL
+	ശൂന്യ
 };
 
 /*
@@ -35,73 +35,73 @@ static char const * const shortlog_usage[] = {
  */
 #define UTIL_TO_INT(x) ((intptr_t)(x)->util)
 
-static int compare_by_counter(const void *a1, const void *a2)
+സ്ഥിതം പൂർണ്ണസംഖ്യ compare_by_counter(സ്ഥിരം ശൂന്യം *a1, സ്ഥിരം ശൂന്യം *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	return UTIL_TO_INT(i2) - UTIL_TO_INT(i1);
+	സ്ഥിരം ഘടന string_list_item *i1 = a1, *i2 = a2;
+	തിരികെ UTIL_TO_INT(i2) - UTIL_TO_INT(i1);
 }
 
-static int compare_by_list(const void *a1, const void *a2)
+സ്ഥിതം പൂർണ്ണസംഖ്യ compare_by_list(സ്ഥിരം ശൂന്യം *a1, സ്ഥിരം ശൂന്യം *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	const struct string_list *l1 = i1->util, *l2 = i2->util;
+	സ്ഥിരം ഘടന string_list_item *i1 = a1, *i2 = a2;
+	സ്ഥിരം ഘടന string_list *l1 = i1->util, *l2 = i2->util;
 
-	if (l1->nr < l2->nr)
-		return 1;
-	else if (l1->nr == l2->nr)
-		return 0;
-	else
-		return -1;
+	എങ്കിൽ (l1->nr < l2->nr)
+		തിരികെ 1;
+	അല്ലെങ്കിൽ എങ്കിൽ (l1->nr == l2->nr)
+		തിരികെ 0;
+	അല്ലെങ്കിൽ
+		തിരികെ -1;
 }
 
-static void insert_one_record(struct shortlog *log,
-			      const char *ident,
-			      const char *oneline)
+സ്ഥിതം ശൂന്യം തിരുകുക_one_record(ഘടന shortlog *log,
+			      സ്ഥിരം അക്ഷരം *ident,
+			      സ്ഥിരം അക്ഷരം *oneline)
 {
-	struct string_list_item *item;
+	ഘടന string_list_item *item;
 
-	item = string_list_insert(&log->list, ident);
+	item = string_list_തിരുകുക(&log->list, ident);
 
-	if (log->summary)
-		item->util = (void *)(UTIL_TO_INT(item) + 1);
-	else {
-		char *buffer;
-		struct strbuf subject = STRBUF_INIT;
-		const char *eol;
+	എങ്കിൽ (log->summary)
+		item->util = (ശൂന്യം *)(UTIL_TO_INT(item) + 1);
+	അല്ലെങ്കിൽ {
+		അക്ഷരം *buffer;
+		ഘടന strbuf subject = STRBUF_INIT;
+		സ്ഥിരം അക്ഷരം *eol;
 
 		/* Skip any leading whitespace, including any blank lines. */
-		while (*oneline && isspace(*oneline))
+		ആകുമ്പോൾ (*oneline && isspace(*oneline))
 			oneline++;
 		eol = strchr(oneline, '\n');
-		if (!eol)
+		എങ്കിൽ (!eol)
 			eol = oneline + strlen(oneline);
-		if (starts_with(oneline, "[PATCH")) {
-			const char *eob = strchr(oneline, ']');
-			if (eob && (!eol || eob < eol))
+		എങ്കിൽ (starts_with(oneline, "[PATCH")) {
+			സ്ഥിരം അക്ഷരം *eob = strchr(oneline, ']');
+			എങ്കിൽ (eob && (!eol || eob < eol))
 				oneline = eob + 1;
 		}
-		while (*oneline && isspace(*oneline) && *oneline != '\n')
+		ആകുമ്പോൾ (*oneline && isspace(*oneline) && *oneline != '\n')
 			oneline++;
 		format_subject(&subject, oneline, " ");
-		buffer = strbuf_detach(&subject, NULL);
+		buffer = strbuf_detach(&subject, ശൂന്യ);
 
-		if (!item->util) {
-			item->util = xmalloc(sizeof(struct string_list));
+		എങ്കിൽ (!item->util) {
+			item->util = xmalloc(വലുപ്പം(ഘടന string_list));
 			string_list_init_nodup(item->util);
 		}
 		string_list_append(item->util, buffer);
 	}
 }
 
-static int parse_ident(struct shortlog *log,
-		       struct strbuf *out, const char *in)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_ident(ഘടന shortlog *log,
+		       ഘടന strbuf *out, സ്ഥിരം അക്ഷരം *in)
 {
-	const char *mailbuf, *namebuf;
+	സ്ഥിരം അക്ഷരം *mailbuf, *namebuf;
 	size_t namelen, maillen;
-	struct ident_split ident;
+	ഘടന ident_split ident;
 
-	if (split_ident_line(&ident, in, strlen(in)))
-		return -1;
+	എങ്കിൽ (split_ident_വരി(&ident, in, strlen(in)))
+		തിരികെ -1;
 
 	namebuf = ident.name_begin;
 	mailbuf = ident.mail_begin;
@@ -110,99 +110,99 @@ static int parse_ident(struct shortlog *log,
 
 	map_user(&log->mailmap, &mailbuf, &maillen, &namebuf, &namelen);
 	strbuf_add(out, namebuf, namelen);
-	if (log->email)
-		strbuf_addf(out, " <%.*s>", (int)maillen, mailbuf);
+	എങ്കിൽ (log->email)
+		strbuf_addf(out, " <%.*s>", (പൂർണ്ണസംഖ്യ)maillen, mailbuf);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void read_from_stdin(struct shortlog *log)
+സ്ഥിതം ശൂന്യം read_from_stdin(ഘടന shortlog *log)
 {
-	struct strbuf ident = STRBUF_INIT;
-	struct strbuf mapped_ident = STRBUF_INIT;
-	struct strbuf oneline = STRBUF_INIT;
-	static const char *author_match[2] = { "Author: ", "author " };
-	static const char *committer_match[2] = { "Commit: ", "committer " };
-	const char **match;
+	ഘടന strbuf ident = STRBUF_INIT;
+	ഘടന strbuf mapped_ident = STRBUF_INIT;
+	ഘടന strbuf oneline = STRBUF_INIT;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *author_match[2] = { "Author: ", "author " };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *committer_match[2] = { "Commit: ", "committer " };
+	സ്ഥിരം അക്ഷരം **match;
 
-	if (HAS_MULTI_BITS(log->groups))
+	എങ്കിൽ (HAS_MULTI_BITS(log->groups))
 		die(_("using multiple --group options with stdin is not supported"));
 
-	switch (log->groups) {
-	case SHORTLOG_GROUP_AUTHOR:
+	തിരഞ്ഞെടുപ്പ് (log->groups) {
+	അവസ്ഥ SHORTLOG_GROUP_AUTHOR:
 		match = author_match;
-		break;
-	case SHORTLOG_GROUP_COMMITTER:
+		നിർത്തുക;
+	അവസ്ഥ SHORTLOG_GROUP_COMMITTER:
 		match = committer_match;
-		break;
-	case SHORTLOG_GROUP_TRAILER:
+		നിർത്തുക;
+	അവസ്ഥ SHORTLOG_GROUP_TRAILER:
 		die(_("using %s with stdin is not supported"), "--group=trailer");
-	case SHORTLOG_GROUP_FORMAT:
+	അവസ്ഥ SHORTLOG_GROUP_FORMAT:
 		die(_("using %s with stdin is not supported"), "--group=format");
-	default:
+	സ്ഥിരസ്ഥിതി:
 		BUG("unhandled shortlog group");
 	}
 
-	while (strbuf_getline_lf(&ident, stdin) != EOF) {
-		const char *v;
-		if (!skip_prefix(ident.buf, match[0], &v) &&
+	ആകുമ്പോൾ (strbuf_getline_lf(&ident, stdin) != EOF) {
+		സ്ഥിരം അക്ഷരം *v;
+		എങ്കിൽ (!skip_prefix(ident.buf, match[0], &v) &&
 		    !skip_prefix(ident.buf, match[1], &v))
-			continue;
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+			തുടരുക;
+		ആകുമ്പോൾ (strbuf_getline_lf(&oneline, stdin) != EOF &&
 		       oneline.len)
 			; /* discard headers */
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+		ആകുമ്പോൾ (strbuf_getline_lf(&oneline, stdin) != EOF &&
 		       !oneline.len)
 			; /* discard blanks */
 
 		strbuf_reset(&mapped_ident);
-		if (parse_ident(log, &mapped_ident, v) < 0)
-			continue;
+		എങ്കിൽ (parse_ident(log, &mapped_ident, v) < 0)
+			തുടരുക;
 
-		insert_one_record(log, mapped_ident.buf, oneline.buf);
+		തിരുകുക_one_record(log, mapped_ident.buf, oneline.buf);
 	}
 	strbuf_release(&ident);
 	strbuf_release(&mapped_ident);
 	strbuf_release(&oneline);
 }
 
-static void insert_records_from_trailers(struct shortlog *log,
-					 struct strset *dups,
-					 struct commit *commit,
-					 struct pretty_print_context *ctx,
-					 const char *oneline)
+സ്ഥിതം ശൂന്യം തിരുകുക_records_from_trailers(ഘടന shortlog *log,
+					 ഘടന strset *dups,
+					 ഘടന commit *commit,
+					 ഘടന pretty_print_context *ctx,
+					 സ്ഥിരം അക്ഷരം *oneline)
 {
-	struct trailer_iterator iter;
-	const char *commit_buffer, *body;
-	struct strbuf ident = STRBUF_INIT;
+	ഘടന trailer_iterator iter;
+	സ്ഥിരം അക്ഷരം *commit_buffer, *body;
+	ഘടന strbuf ident = STRBUF_INIT;
 
-	if (!log->trailers.nr)
-		return;
+	എങ്കിൽ (!log->trailers.nr)
+		തിരികെ;
 
 	/*
 	 * Using repo_format_commit_message("%B") would be simpler here, but
 	 * this saves us copying the message.
 	 */
-	commit_buffer = repo_logmsg_reencode(the_repository, commit, NULL,
+	commit_buffer = repo_logmsg_reencode(the_repository, commit, ശൂന്യ,
 					     ctx->output_encoding);
 	body = strstr(commit_buffer, "\n\n");
-	if (!body)
-		goto out;
+	എങ്കിൽ (!body)
+		പോകുക out;
 
 	trailer_iterator_init(&iter, body);
-	while (trailer_iterator_advance(&iter)) {
-		const char *value = iter.val.buf;
+	ആകുമ്പോൾ (trailer_iterator_advance(&iter)) {
+		സ്ഥിരം അക്ഷരം *മൂല്യം = iter.val.buf;
 
-		if (!string_list_has_string(&log->trailers, iter.key.buf))
-			continue;
+		എങ്കിൽ (!string_list_has_string(&log->trailers, iter.താക്കോൽ.buf))
+			തുടരുക;
 
 		strbuf_reset(&ident);
-		if (!parse_ident(log, &ident, value))
-			value = ident.buf;
+		എങ്കിൽ (!parse_ident(log, &ident, മൂല്യം))
+			മൂല്യം = ident.buf;
 
-		if (!strset_add(dups, value))
-			continue;
-		insert_one_record(log, value, oneline);
+		എങ്കിൽ (!strset_add(dups, മൂല്യം))
+			തുടരുക;
+		തിരുകുക_one_record(log, മൂല്യം, oneline);
 	}
 	trailer_iterator_release(&iter);
 
@@ -211,19 +211,19 @@ out:
 	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
 }
 
-static int shortlog_needs_dedup(const struct shortlog *log)
+സ്ഥിതം പൂർണ്ണസംഖ്യ shortlog_needs_dedup(സ്ഥിരം ഘടന shortlog *log)
 {
-	return HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
+	തിരികെ HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
 }
 
-static void insert_records_from_format(struct shortlog *log,
-				       struct strset *dups,
-				       struct commit *commit,
-				       struct pretty_print_context *ctx,
-				       const char *oneline)
+സ്ഥിതം ശൂന്യം തിരുകുക_records_from_format(ഘടന shortlog *log,
+				       ഘടന strset *dups,
+				       ഘടന commit *commit,
+				       ഘടന pretty_print_context *ctx,
+				       സ്ഥിരം അക്ഷരം *oneline)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
+	ഘടന strbuf buf = STRBUF_INIT;
+	ഘടന string_list_item *item;
 
 	for_each_string_list_item(item, &log->format) {
 		strbuf_reset(&buf);
@@ -231,131 +231,131 @@ static void insert_records_from_format(struct shortlog *log,
 		repo_format_commit_message(the_repository, commit,
 					   item->string, &buf, ctx);
 
-		if (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
-			insert_one_record(log, buf.buf, oneline);
+		എങ്കിൽ (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
+			തിരുകുക_one_record(log, buf.buf, oneline);
 	}
 
 	strbuf_release(&buf);
 }
 
-void shortlog_add_commit(struct shortlog *log, struct commit *commit)
+ശൂന്യം shortlog_add_commit(ഘടന shortlog *log, ഘടന commit *commit)
 {
-	struct strbuf oneline = STRBUF_INIT;
-	struct strset dups = STRSET_INIT;
-	struct pretty_print_context ctx = {0};
-	const char *oneline_str;
+	ഘടന strbuf oneline = STRBUF_INIT;
+	ഘടന strset dups = STRSET_INIT;
+	ഘടന pretty_print_context ctx = {0};
+	സ്ഥിരം അക്ഷരം *oneline_str;
 
 	ctx.fmt = CMIT_FMT_USERFORMAT;
 	ctx.abbrev = log->abbrev;
 	ctx.date_mode = log->date_mode;
 	ctx.output_encoding = get_log_output_encoding();
 
-	if (!log->summary) {
-		if (log->user_format)
+	എങ്കിൽ (!log->summary) {
+		എങ്കിൽ (log->user_format)
 			pretty_print_commit(&ctx, commit, &oneline);
-		else
+		അല്ലെങ്കിൽ
 			repo_format_commit_message(the_repository, commit,
 						   "%s", &oneline, &ctx);
 	}
 	oneline_str = oneline.len ? oneline.buf : "<none>";
 
-	insert_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
-	insert_records_from_format(log, &dups, commit, &ctx, oneline_str);
+	തിരുകുക_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
+	തിരുകുക_records_from_format(log, &dups, commit, &ctx, oneline_str);
 
 	strset_clear(&dups);
 	strbuf_release(&oneline);
 }
 
-static void get_from_rev(struct rev_info *rev, struct shortlog *log)
+സ്ഥിതം ശൂന്യം get_from_rev(ഘടന rev_info *rev, ഘടന shortlog *log)
 {
-	struct commit *commit;
+	ഘടന commit *commit;
 
-	if (prepare_revision_walk(rev))
+	എങ്കിൽ (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(rev)) != NULL)
+	ആകുമ്പോൾ ((commit = get_revision(rev)) != ശൂന്യ)
 		shortlog_add_commit(log, commit);
 }
 
-static int parse_uint(char const **arg, int comma, int defval)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_uint(അക്ഷരം സ്ഥിരം **arg, പൂർണ്ണസംഖ്യ comma, പൂർണ്ണസംഖ്യ defval)
 {
 	unsigned long ul;
-	int ret;
-	char *endp;
+	പൂർണ്ണസംഖ്യ ret;
+	അക്ഷരം *endp;
 
 	ul = strtoul(*arg, &endp, 10);
-	if (*endp && *endp != comma)
-		return -1;
-	if (ul > INT_MAX)
-		return -1;
-	ret = *arg == endp ? defval : (int)ul;
+	എങ്കിൽ (*endp && *endp != comma)
+		തിരികെ -1;
+	എങ്കിൽ (ul > INT_MAX)
+		തിരികെ -1;
+	ret = *arg == endp ? defval : (പൂർണ്ണസംഖ്യ)ul;
 	*arg = *endp ? endp + 1 : endp;
-	return ret;
+	തിരികെ ret;
 }
 
-static const char wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
+സ്ഥിതം സ്ഥിരം അക്ഷരം wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
 #define DEFAULT_WRAPLEN 76
 #define DEFAULT_INDENT1 6
 #define DEFAULT_INDENT2 9
 
-static int parse_wrap_args(const struct option *opt, const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_wrap_args(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	struct shortlog *log = opt->value;
+	ഘടന shortlog *log = opt->മൂല്യം;
 
-	log->wrap_lines = !unset;
-	if (unset)
-		return 0;
-	if (!arg) {
+	log->wrap_വരികൾ = !unset;
+	എങ്കിൽ (unset)
+		തിരികെ 0;
+	എങ്കിൽ (!arg) {
 		log->wrap = DEFAULT_WRAPLEN;
 		log->in1 = DEFAULT_INDENT1;
 		log->in2 = DEFAULT_INDENT2;
-		return 0;
+		തിരികെ 0;
 	}
 
 	log->wrap = parse_uint(&arg, ',', DEFAULT_WRAPLEN);
 	log->in1 = parse_uint(&arg, ',', DEFAULT_INDENT1);
 	log->in2 = parse_uint(&arg, '\0', DEFAULT_INDENT2);
-	if (log->wrap < 0 || log->in1 < 0 || log->in2 < 0)
-		return error(wrap_arg_usage);
-	if (log->wrap &&
+	എങ്കിൽ (log->wrap < 0 || log->in1 < 0 || log->in2 < 0)
+		തിരികെ error(wrap_arg_usage);
+	എങ്കിൽ (log->wrap &&
 	    ((log->in1 && log->wrap <= log->in1) ||
 	     (log->in2 && log->wrap <= log->in2)))
-		return error(wrap_arg_usage);
-	return 0;
+		തിരികെ error(wrap_arg_usage);
+	തിരികെ 0;
 }
 
-static int parse_group_option(const struct option *opt, const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_group_option(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	struct shortlog *log = opt->value;
-	const char *field;
+	ഘടന shortlog *log = opt->മൂല്യം;
+	സ്ഥിരം അക്ഷരം *field;
 
-	if (unset) {
+	എങ്കിൽ (unset) {
 		log->groups = 0;
 		string_list_clear(&log->trailers, 0);
 		string_list_clear(&log->format, 0);
-	} else if (!strcasecmp(arg, "author"))
+	} അല്ലെങ്കിൽ എങ്കിൽ (!strcasecmp(arg, "author"))
 		log->groups |= SHORTLOG_GROUP_AUTHOR;
-	else if (!strcasecmp(arg, "committer"))
+	അല്ലെങ്കിൽ എങ്കിൽ (!strcasecmp(arg, "committer"))
 		log->groups |= SHORTLOG_GROUP_COMMITTER;
-	else if (skip_prefix(arg, "trailer:", &field)) {
+	അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(arg, "trailer:", &field)) {
 		log->groups |= SHORTLOG_GROUP_TRAILER;
 		string_list_append(&log->trailers, field);
-	} else if (skip_prefix(arg, "format:", &field)) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(arg, "format:", &field)) {
 		log->groups |= SHORTLOG_GROUP_FORMAT;
 		string_list_append(&log->format, field);
-	} else if (strchr(arg, '%')) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strchr(arg, '%')) {
 		log->groups |= SHORTLOG_GROUP_FORMAT;
 		string_list_append(&log->format, arg);
-	} else {
-		return error(_("unknown group type: %s"), arg);
+	} അല്ലെങ്കിൽ {
+		തിരികെ error(_("unknown group type: %s"), arg);
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
 
-void shortlog_init(struct shortlog *log)
+ശൂന്യം shortlog_init(ഘടന shortlog *log)
 {
-	memset(log, 0, sizeof(*log));
+	memset(log, 0, വലുപ്പം(*log));
 
 	read_mailmap(the_repository, &log->mailmap);
 
@@ -368,38 +368,38 @@ void shortlog_init(struct shortlog *log)
 	log->format.strdup_strings = 1;
 }
 
-void shortlog_finish_setup(struct shortlog *log)
+ശൂന്യം shortlog_finish_setup(ഘടന shortlog *log)
 {
-	if (log->groups & SHORTLOG_GROUP_AUTHOR)
+	എങ്കിൽ (log->groups & SHORTLOG_GROUP_AUTHOR)
 		string_list_append(&log->format,
 				   log->email ? "%aN <%aE>" : "%aN");
-	if (log->groups & SHORTLOG_GROUP_COMMITTER)
+	എങ്കിൽ (log->groups & SHORTLOG_GROUP_COMMITTER)
 		string_list_append(&log->format,
 				   log->email ? "%cN <%cE>" : "%cN");
 
 	string_list_sort(&log->trailers);
 }
 
-int cmd_shortlog(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_shortlog(പൂർണ്ണസംഖ്യ argc,
+		 സ്ഥിരം അക്ഷരം **argv,
+		 സ്ഥിരം അക്ഷരം *prefix,
+		 ഘടന repository *repo UNUSED)
 {
-	struct shortlog log = { STRING_LIST_INIT_NODUP };
-	struct rev_info rev;
-	int nongit = !startup_info->have_repository;
+	ഘടന shortlog log = { STRING_LIST_INIT_NODUP };
+	ഘടന rev_info rev;
+	പൂർണ്ണസംഖ്യ nongit = !startup_info->have_repository;
 
-	const struct option options[] = {
+	സ്ഥിരം ഘടന option options[] = {
 		OPT_BIT('c', "committer", &log.groups,
 			N_("group by committer rather than author"),
 			SHORTLOG_GROUP_COMMITTER),
-		OPT_BOOL('n', "numbered", &log.sort_by_number,
+		OPT_BOOL('n', "numbered", &log.sort_by_സംഖ്യ,
 			 N_("sort output according to the number of commits per author")),
 		OPT_BOOL('s', "summary", &log.summary,
 			 N_("suppress commit descriptions, only provides commit count")),
 		OPT_BOOL('e', "email", &log.email,
 			 N_("show the email address of each author")),
-		OPT_CALLBACK_F('w', NULL, &log, N_("<w>[,<i1>[,<i2>]]"),
+		OPT_CALLBACK_F('w', ശൂന്യ, &log, N_("<w>[,<i1>[,<i2>]]"),
 			N_("linewrap output"), PARSE_OPT_OPTARG,
 			&parse_wrap_args),
 		OPT_CALLBACK(0, "group", &log, N_("field"),
@@ -407,7 +407,7 @@ int cmd_shortlog(int argc,
 		OPT_END(),
 	};
 
-	struct parse_opt_ctx_t ctx;
+	ഘടന parse_opt_ctx_t ctx;
 
 	/*
 	 * NEEDSWORK: Later on we'll call parse_revision_opt which relies on
@@ -418,30 +418,30 @@ int cmd_shortlog(int argc,
 	 * SHA1, but ideally the parsing machinery would be split between
 	 * git/nongit so that we do not have to do this.
 	 */
-	if (nongit && !the_hash_algo)
+	എങ്കിൽ (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 	shortlog_init(&log);
 	repo_init_revisions(the_repository, &rev, prefix);
 	parse_options_start(&ctx, argc, argv, prefix, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
 
-	for (;;) {
-		switch (parse_options_step(&ctx, options, shortlog_usage)) {
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_UNKNOWN:
-			break;
-		case PARSE_OPT_HELP:
+	വേണ്ടി (;;) {
+		തിരഞ്ഞെടുപ്പ് (parse_options_step(&ctx, options, shortlog_usage)) {
+		അവസ്ഥ PARSE_OPT_NON_OPTION:
+		അവസ്ഥ PARSE_OPT_UNKNOWN:
+			നിർത്തുക;
+		അവസ്ഥ PARSE_OPT_HELP:
 			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-		case PARSE_OPT_SUBCOMMAND:
+		അവസ്ഥ PARSE_OPT_HELP_ERROR:
+		അവസ്ഥ PARSE_OPT_ERROR:
+		അവസ്ഥ PARSE_OPT_SUBCOMMAND:
 			exit(129);
-		case PARSE_OPT_COMPLETE:
+		അവസ്ഥ PARSE_OPT_COMPLETE:
 			exit(0);
-		case PARSE_OPT_DONE:
-			goto parse_done;
+		അവസ്ഥ PARSE_OPT_DONE:
+			പോകുക parse_done;
 		}
 		parse_revision_opt(&rev, &ctx, options, shortlog_usage);
 	}
@@ -449,12 +449,12 @@ parse_done:
 	revision_opts_finish(&rev);
 	argc = parse_options_end(&ctx);
 
-	if (nongit && argc > 1) {
+	എങ്കിൽ (nongit && argc > 1) {
 		error(_("too many arguments given outside repository"));
 		usage_with_options(shortlog_usage, options);
 	}
 
-	if (!nongit && setup_revisions(argc, argv, &rev, NULL) != 1) {
+	എങ്കിൽ (!nongit && setup_revisions(argc, argv, &rev, ശൂന്യ) != 1) {
 		error(_("unrecognized argument: %s"), argv[1]);
 		usage_with_options(shortlog_usage, options);
 	}
@@ -464,68 +464,68 @@ parse_done:
 	log.file = rev.diffopt.file;
 	log.date_mode = rev.date_mode;
 
-	if (!log.groups)
+	എങ്കിൽ (!log.groups)
 		log.groups = SHORTLOG_GROUP_AUTHOR;
 	shortlog_finish_setup(&log);
 
 	/* assume HEAD if from a tty */
-	if (!nongit && !rev.pending.nr && isatty(0))
+	എങ്കിൽ (!nongit && !rev.pending.nr && isatty(0))
 		add_head_to_pending(&rev);
-	if (rev.pending.nr == 0) {
-		if (isatty(0))
+	എങ്കിൽ (rev.pending.nr == 0) {
+		എങ്കിൽ (isatty(0))
 			fprintf(stderr, _("(reading log message from standard input)\n"));
 		read_from_stdin(&log);
 	}
-	else
+	അല്ലെങ്കിൽ
 		get_from_rev(&rev, &log);
 
 	shortlog_output(&log);
 	release_revisions(&rev);
-	return 0;
+	തിരികെ 0;
 }
 
-static void add_wrapped_shortlog_msg(struct strbuf *sb, const char *s,
-				     const struct shortlog *log)
+സ്ഥിതം ശൂന്യം add_wrapped_shortlog_സന്ദേശം(ഘടന strbuf *sb, സ്ഥിരം അക്ഷരം *s,
+				     സ്ഥിരം ഘടന shortlog *log)
 {
 	strbuf_add_wrapped_text(sb, s, log->in1, log->in2, log->wrap);
 	strbuf_addch(sb, '\n');
 }
 
-void shortlog_output(struct shortlog *log)
+ശൂന്യം shortlog_output(ഘടന shortlog *log)
 {
 	size_t i, j;
-	struct strbuf sb = STRBUF_INIT;
+	ഘടന strbuf sb = STRBUF_INIT;
 
-	if (log->sort_by_number)
-		STABLE_QSORT(log->list.items, log->list.nr,
+	എങ്കിൽ (log->sort_by_സംഖ്യ)
+		STABLE_QSORT(log->list.ഇനങ്ങൾ, log->list.nr,
 		      log->summary ? compare_by_counter : compare_by_list);
-	for (i = 0; i < log->list.nr; i++) {
-		const struct string_list_item *item = &log->list.items[i];
-		if (log->summary) {
+	വേണ്ടി (i = 0; i < log->list.nr; i++) {
+		സ്ഥിരം ഘടന string_list_item *item = &log->list.ഇനങ്ങൾ[i];
+		എങ്കിൽ (log->summary) {
 			fprintf(log->file, "%6d\t%s\n",
-				(int)UTIL_TO_INT(item), item->string);
-		} else {
-			struct string_list *onelines = item->util;
+				(പൂർണ്ണസംഖ്യ)UTIL_TO_INT(item), item->string);
+		} അല്ലെങ്കിൽ {
+			ഘടന string_list *onelines = item->util;
 			fprintf(log->file, "%s (%"PRIuMAX"):\n",
 				item->string, (uintmax_t)onelines->nr);
-			for (j = onelines->nr; j >= 1; j--) {
-				const char *msg = onelines->items[j - 1].string;
+			വേണ്ടി (j = onelines->nr; j >= 1; j--) {
+				സ്ഥിരം അക്ഷരം *സന്ദേശം = onelines->ഇനങ്ങൾ[j - 1].string;
 
-				if (log->wrap_lines) {
+				എങ്കിൽ (log->wrap_വരികൾ) {
 					strbuf_reset(&sb);
-					add_wrapped_shortlog_msg(&sb, msg, log);
+					add_wrapped_shortlog_സന്ദേശം(&sb, സന്ദേശം, log);
 					fwrite(sb.buf, sb.len, 1, log->file);
 				}
-				else
-					fprintf(log->file, "      %s\n", msg);
+				അല്ലെങ്കിൽ
+					fprintf(log->file, "      %s\n", സന്ദേശം);
 			}
 			putc('\n', log->file);
 			onelines->strdup_strings = 1;
 			string_list_clear(onelines, 0);
-			free(onelines);
+			സ്വതന്ത്രം(onelines);
 		}
 
-		log->list.items[i].util = NULL;
+		log->list.ഇനങ്ങൾ[i].util = ശൂന്യ;
 	}
 
 	strbuf_release(&sb);

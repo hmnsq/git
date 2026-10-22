@@ -7,30 +7,30 @@
 
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "color.h"
-#include "editor.h"
-#include "environment.h"
-#include "refs.h"
-#include "commit.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "remote.h"
-#include "parse-options.h"
-#include "branch.h"
-#include "path.h"
-#include "string-list.h"
-#include "strmap.h"
-#include "column.h"
-#include "utf8.h"
-#include "ref-filter.h"
-#include "worktree.h"
-#include "help.h"
-#include "advice.h"
-#include "commit-reach.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "color.h"
+#അന്തര്ഭാവ "editor.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "commit.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "object-name.h"
+#അന്തര്ഭാവ "remote.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "branch.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "string-list.h"
+#അന്തര്ഭാവ "strmap.h"
+#അന്തര്ഭാവ "column.h"
+#അന്തര്ഭാവ "utf8.h"
+#അന്തര്ഭാവ "ref-filter.h"
+#അന്തര്ഭാവ "worktree.h"
+#അന്തര്ഭാവ "help.h"
+#അന്തര്ഭാവ "advice.h"
+#അന്തര്ഭാവ "commit-reach.h"
 
-static const char * const builtin_branch_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം builtin_branch_usage[] = {
 	N_("git branch [<options>] [-r | -a] [--merged] [--no-merged] [(--forked <branch>)...]"),
 	N_("git branch [<options>] [-f] [--recurse-submodules] <branch-name> [<start-point>]"),
 	N_("git branch [<options>] [-l] [<pattern>...]"),
@@ -41,16 +41,16 @@ static const char * const builtin_branch_usage[] = {
 	N_("git branch [<options>] [-r | -a] [--format]"),
 	N_("git branch [<options>] (--delete-merged <pattern>)... "
 	   "[<branch-pattern>...]"),
-	NULL
+	ശൂന്യ
 };
 
-static const char *head;
-static struct object_id head_oid;
-static int recurse_submodules = 0;
-static int submodule_propagate_branches = 0;
+സ്ഥിതം സ്ഥിരം അക്ഷരം *head;
+സ്ഥിതം ഘടന object_id head_oid;
+സ്ഥിതം പൂർണ്ണസംഖ്യ recurse_submodules = 0;
+സ്ഥിതം പൂർണ്ണസംഖ്യ submodule_propagate_branches = 0;
 
-static enum git_colorbool branch_use_color = GIT_COLOR_UNKNOWN;
-static char branch_colors[][COLOR_MAXLEN] = {
+സ്ഥിതം എണ്ണൽ git_colorbool branch_use_color = GIT_COLOR_UNKNOWN;
+സ്ഥിതം അക്ഷരം branch_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_RESET,
 	GIT_COLOR_NORMAL,       /* PLAIN */
 	GIT_COLOR_RED,          /* REMOTE */
@@ -59,7 +59,7 @@ static char branch_colors[][COLOR_MAXLEN] = {
 	GIT_COLOR_BLUE,         /* UPSTREAM */
 	GIT_COLOR_CYAN,         /* WORKTREE */
 };
-enum color_branch {
+എണ്ണൽ color_branch {
 	BRANCH_COLOR_RESET = 0,
 	BRANCH_COLOR_PLAIN = 1,
 	BRANCH_COLOR_REMOTE = 2,
@@ -69,7 +69,7 @@ enum color_branch {
 	BRANCH_COLOR_WORKTREE = 6
 };
 
-static const char *color_branch_slots[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം *color_branch_slots[] = {
 	[BRANCH_COLOR_RESET]	= "reset",
 	[BRANCH_COLOR_PLAIN]	= "plain",
 	[BRANCH_COLOR_REMOTE]	= "remote",
@@ -79,61 +79,61 @@ static const char *color_branch_slots[] = {
 	[BRANCH_COLOR_WORKTREE] = "worktree",
 };
 
-static struct string_list output = STRING_LIST_INIT_DUP;
-static unsigned int colopts;
+സ്ഥിതം ഘടന string_list output = STRING_LIST_INIT_DUP;
+സ്ഥിതം unsigned പൂർണ്ണസംഖ്യ colopts;
 
 define_list_config_array(color_branch_slots);
 
-static int git_branch_config(const char *var, const char *value,
-			     const struct config_context *ctx, void *cb)
+സ്ഥിതം പൂർണ്ണസംഖ്യ git_branch_config(സ്ഥിരം അക്ഷരം *var, സ്ഥിരം അക്ഷരം *മൂല്യം,
+			     സ്ഥിരം ഘടന config_context *ctx, ശൂന്യം *cb)
 {
-	const char *slot_name;
+	സ്ഥിരം അക്ഷരം *slot_name;
 
-	if (!strcmp(var, "branch.sort")) {
-		if (!value)
-			return config_error_nonbool(var);
-		string_list_append(cb, value);
-		return 0;
-	}
-
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "branch", &colopts);
-	if (!strcmp(var, "color.branch")) {
-		branch_use_color = git_config_colorbool(var, value);
-		return 0;
-	}
-	if (skip_prefix(var, "color.branch.", &slot_name)) {
-		int slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
-		if (slot < 0)
-			return 0;
-		if (!value)
-			return config_error_nonbool(var);
-		return color_parse(value, branch_colors[slot]);
-	}
-	if (!strcmp(var, "submodule.recurse")) {
-		recurse_submodules = git_config_bool(var, value);
-		return 0;
-	}
-	if (!strcasecmp(var, "submodule.propagateBranches")) {
-		submodule_propagate_branches = git_config_bool(var, value);
-		return 0;
+	എങ്കിൽ (!strcmp(var, "branch.sort")) {
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		string_list_append(cb, മൂല്യം);
+		തിരികെ 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	എങ്കിൽ (starts_with(var, "column."))
+		തിരികെ git_column_config(var, മൂല്യം, "branch", &colopts);
+	എങ്കിൽ (!strcmp(var, "color.branch")) {
+		branch_use_color = git_config_colorbool(var, മൂല്യം);
+		തിരികെ 0;
+	}
+	എങ്കിൽ (skip_prefix(var, "color.branch.", &slot_name)) {
+		പൂർണ്ണസംഖ്യ slot = LOOKUP_CONFIG(color_branch_slots, slot_name);
+		എങ്കിൽ (slot < 0)
+			തിരികെ 0;
+		എങ്കിൽ (!മൂല്യം)
+			തിരികെ config_error_nonbool(var);
+		തിരികെ color_parse(മൂല്യം, branch_colors[slot]);
+	}
+	എങ്കിൽ (!strcmp(var, "submodule.recurse")) {
+		recurse_submodules = git_config_bool(var, മൂല്യം);
+		തിരികെ 0;
+	}
+	എങ്കിൽ (!strcasecmp(var, "submodule.propagateBranches")) {
+		submodule_propagate_branches = git_config_bool(var, മൂല്യം);
+		തിരികെ 0;
+	}
 
-	return git_default_config(var, value, ctx, cb);
+	എങ്കിൽ (git_color_config(var, മൂല്യം, cb) < 0)
+		തിരികെ -1;
+
+	തിരികെ git_default_config(var, മൂല്യം, ctx, cb);
 }
 
-static const char *branch_get_color(enum color_branch ix)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *branch_get_color(എണ്ണൽ color_branch ix)
 {
-	if (want_color(branch_use_color))
-		return branch_colors[ix];
-	return "";
+	എങ്കിൽ (want_color(branch_use_color))
+		തിരികെ branch_colors[ix];
+	തിരികെ "";
 }
 
-static int branch_merged(int kind, const char *name,
-			 struct commit *rev, struct commit *head_rev)
+സ്ഥിതം പൂർണ്ണസംഖ്യ branch_merged(പൂർണ്ണസംഖ്യ kind, സ്ഥിരം അക്ഷരം *name,
+			 ഘടന commit *rev, ഘടന commit *head_rev)
 {
 	/*
 	 * This checks whether the merge bases of branch and HEAD (or
@@ -141,29 +141,29 @@ static int branch_merged(int kind, const char *name,
 	 * branch, which means that the branch has already been merged
 	 * safely to HEAD (or the other branch).
 	 */
-	struct commit *reference_rev = NULL;
-	const char *reference_name = NULL;
-	void *reference_name_to_free = NULL;
-	int merged;
+	ഘടന commit *reference_rev = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *reference_name = ശൂന്യ;
+	ശൂന്യം *reference_name_to_free = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ merged;
 
-	if (kind == FILTER_REFS_BRANCHES) {
-		struct branch *branch = branch_get(name);
-		const char *upstream = branch_get_upstream(branch, NULL);
-		struct object_id oid;
+	എങ്കിൽ (kind == FILTER_REFS_BRANCHES) {
+		ഘടന branch *branch = branch_get(name);
+		സ്ഥിരം അക്ഷരം *upstream = branch_get_upstream(branch, ശൂന്യ);
+		ഘടന object_id oid;
 
-		if (upstream &&
+		എങ്കിൽ (upstream &&
 		    (reference_name = reference_name_to_free =
 		     refs_resolve_refdup(get_main_ref_store(the_repository), upstream, RESOLVE_REF_READING,
-					 &oid, NULL)) != NULL)
+					 &oid, ശൂന്യ)) != ശൂന്യ)
 			reference_rev = lookup_commit_reference(the_repository,
 								&oid);
 	}
-	if (!reference_rev)
+	എങ്കിൽ (!reference_rev)
 		reference_rev = head_rev;
 
 	merged = reference_rev ? repo_in_merge_bases(the_repository, rev,
 						     reference_rev) : 0;
-	if (merged < 0)
+	എങ്കിൽ (merged < 0)
 		exit(128);
 
 	/*
@@ -176,26 +176,26 @@ static int branch_merged(int kind, const char *name,
 	 * the reminder either: they have already established that the
 	 * branch has an upstream, so HEAD is irrelevant to the decision.
 	 */
-	if (head_rev && head_rev != reference_rev) {
-		int expect = repo_in_merge_bases(the_repository, rev, head_rev);
-		if (expect < 0)
+	എങ്കിൽ (head_rev && head_rev != reference_rev) {
+		പൂർണ്ണസംഖ്യ expect = repo_in_merge_bases(the_repository, rev, head_rev);
+		എങ്കിൽ (expect < 0)
 			exit(128);
-		if (expect == merged)
+		എങ്കിൽ (expect == merged)
 			; /* okay */
-		else if (merged)
+		അല്ലെങ്കിൽ എങ്കിൽ (merged)
 			warning(_("deleting branch '%s' that has been merged to\n"
 				"         '%s', but not yet merged to HEAD"),
 				name, reference_name);
-		else
+		അല്ലെങ്കിൽ
 			warning(_("not deleting branch '%s' that is not yet merged to\n"
 				"         '%s', even though it is merged to HEAD"),
 				name, reference_name);
 	}
-	free(reference_name_to_free);
-	return merged;
+	സ്വതന്ത്രം(reference_name_to_free);
+	തിരികെ merged;
 }
 
-enum delete_branch_flags {
+എണ്ണൽ delete_branch_flags {
 	DELETE_BRANCH_FORCE = (1 << 0),
 	DELETE_BRANCH_QUIET = (1 << 1),
 	DELETE_BRANCH_SKIP_UNMERGED = (1 << 2),
@@ -203,101 +203,101 @@ enum delete_branch_flags {
 	DELETE_BRANCH_DRY_RUN = (1 << 4),
 };
 
-static int check_branch_commit(const char *branchname, const char *refname,
-			       const struct object_id *oid, struct commit *head_rev,
-			       int kinds, unsigned int flags)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_branch_commit(സ്ഥിരം അക്ഷരം *branchname, സ്ഥിരം അക്ഷരം *refname,
+			       സ്ഥിരം ഘടന object_id *oid, ഘടന commit *head_rev,
+			       പൂർണ്ണസംഖ്യ kinds, unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	struct commit *rev = lookup_commit_reference(the_repository, oid);
-	if (!(flags & DELETE_BRANCH_FORCE) && !rev) {
+	ഘടന commit *rev = lookup_commit_reference(the_repository, oid);
+	എങ്കിൽ (!(flags & DELETE_BRANCH_FORCE) && !rev) {
 		error(_("couldn't look up commit object for '%s'"), refname);
-		return -1;
+		തിരികെ -1;
 	}
-	if (!(flags & DELETE_BRANCH_FORCE) &&
+	എങ്കിൽ (!(flags & DELETE_BRANCH_FORCE) &&
 	    !branch_merged(kinds, branchname, rev, head_rev)) {
-		if (!(flags & DELETE_BRANCH_SKIP_UNMERGED)) {
+		എങ്കിൽ (!(flags & DELETE_BRANCH_SKIP_UNMERGED)) {
 			error(_("the branch '%s' is not fully merged"),
 			      branchname);
 			advise_if_enabled(ADVICE_FORCE_DELETE_BRANCH,
 					  _("If you are sure you want to delete it, "
 					  "run 'git branch -D %s'"), branchname);
 		}
-		return -1;
+		തിരികെ -1;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-static void delete_branch_config(const char *branchname)
+സ്ഥിതം ശൂന്യം delete_branch_config(സ്ഥിരം അക്ഷരം *branchname)
 {
-	struct strbuf buf = STRBUF_INIT;
+	ഘടന strbuf buf = STRBUF_INIT;
 	strbuf_addf(&buf, "branch.%s", branchname);
-	if (repo_config_rename_section(the_repository, buf.buf, NULL) < 0)
+	എങ്കിൽ (repo_config_rename_section(the_repository, buf.buf, ശൂന്യ) < 0)
 		warning(_("update of config-file failed"));
 	strbuf_release(&buf);
 }
 
-static int delete_branches(int argc, const char **argv, int kinds,
-			   unsigned int flags)
+സ്ഥിതം പൂർണ്ണസംഖ്യ delete_branches(പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv, പൂർണ്ണസംഖ്യ kinds,
+			   unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	struct commit *head_rev = NULL;
-	struct object_id oid;
-	char *name = NULL;
-	const char *fmt;
-	int i;
-	int ret = 0;
-	int remote_branch = 0;
-	struct strbuf bname = STRBUF_INIT;
-	enum interpret_branch_kind allowed_interpret;
-	struct string_list refs_to_delete = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	int branch_name_pos;
-	const char *fmt_remotes = "refs/remotes/%s";
+	ഘടന commit *head_rev = ശൂന്യ;
+	ഘടന object_id oid;
+	അക്ഷരം *name = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *fmt;
+	പൂർണ്ണസംഖ്യ i;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	പൂർണ്ണസംഖ്യ remote_branch = 0;
+	ഘടന strbuf bname = STRBUF_INIT;
+	എണ്ണൽ interpret_branch_kind allowed_interpret;
+	ഘടന string_list refs_to_delete = STRING_LIST_INIT_DUP;
+	ഘടന string_list_item *item;
+	പൂർണ്ണസംഖ്യ branch_name_pos;
+	സ്ഥിരം അക്ഷരം *fmt_remotes = "refs/remotes/%s";
 
-	switch (kinds) {
-	case FILTER_REFS_REMOTES:
+	തിരഞ്ഞെടുപ്പ് (kinds) {
+	അവസ്ഥ FILTER_REFS_REMOTES:
 		fmt = fmt_remotes;
 		/* For subsequent UI messages */
 		remote_branch = 1;
 		allowed_interpret = INTERPRET_BRANCH_REMOTE;
 
 		flags |= DELETE_BRANCH_FORCE;
-		break;
-	case FILTER_REFS_BRANCHES:
+		നിർത്തുക;
+	അവസ്ഥ FILTER_REFS_BRANCHES:
 		fmt = "refs/heads/%s";
 		allowed_interpret = INTERPRET_BRANCH_LOCAL;
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		die(_("cannot use -a with -d"));
 	}
 	branch_name_pos = strcspn(fmt, "%");
 
-	if (!(flags & DELETE_BRANCH_FORCE) &&
+	എങ്കിൽ (!(flags & DELETE_BRANCH_FORCE) &&
 	    !(flags & DELETE_BRANCH_NO_HEAD_FALLBACK))
 		head_rev = lookup_commit_reference(the_repository, &head_oid);
 
-	for (i = 0; i < argc; i++, strbuf_reset(&bname)) {
-		char *target = NULL;
-		int ref_flags = 0;
+	വേണ്ടി (i = 0; i < argc; i++, strbuf_reset(&bname)) {
+		അക്ഷരം *target = ശൂന്യ;
+		പൂർണ്ണസംഖ്യ ref_flags = 0;
 
 		copy_branchname(the_repository, &bname,
 				argv[i], allowed_interpret);
-		free(name);
+		സ്വതന്ത്രം(name);
 		name = mkpathdup(fmt, bname.buf);
 
-		if (kinds == FILTER_REFS_BRANCHES) {
-			const char *path;
-			if ((path = branch_bisecting(name))) {
+		എങ്കിൽ (kinds == FILTER_REFS_BRANCHES) {
+			സ്ഥിരം അക്ഷരം *path;
+			എങ്കിൽ ((path = branch_bisecting(name))) {
 				error(_("cannot delete branch '%s' "
 					"used by worktree at '%s' for bisect"),
 					      bname.buf, path);
 				ret = 1;
-				continue;
+				തുടരുക;
 			}
-			if ((path = branch_checked_out(name))) {
+			എങ്കിൽ ((path = branch_checked_out(name))) {
 				error(_("cannot delete branch '%s' "
 					"used by worktree at '%s'"),
 				      bname.buf, path);
 				ret = 1;
-				continue;
+				തുടരുക;
 			}
 		}
 
@@ -307,12 +307,12 @@ static int delete_branches(int argc, const char **argv, int kinds,
 					     | RESOLVE_REF_NO_RECURSE
 					     | RESOLVE_REF_ALLOW_BAD_NAME,
 					     &oid, &ref_flags);
-		if (!target) {
-			if (remote_branch) {
+		എങ്കിൽ (!target) {
+			എങ്കിൽ (remote_branch) {
 				error(_("remote-tracking branch '%s' not found"), bname.buf);
-			} else {
-				char *virtual_name = mkpathdup(fmt_remotes, bname.buf);
-				char *virtual_target = refs_resolve_refdup(get_main_ref_store(the_repository),
+			} അല്ലെങ്കിൽ {
+				അക്ഷരം *virtual_name = mkpathdup(fmt_remotes, bname.buf);
+				അക്ഷരം *virtual_target = refs_resolve_refdup(get_main_ref_store(the_repository),
 									   virtual_name,
 									   RESOLVE_REF_READING
 									   | RESOLVE_REF_NO_RECURSE
@@ -321,24 +321,24 @@ static int delete_branches(int argc, const char **argv, int kinds,
 									   &ref_flags);
 				FREE_AND_NULL(virtual_name);
 
-				if (virtual_target)
+				എങ്കിൽ (virtual_target)
 					error(_("branch '%s' not found.\n"
 						"Did you forget --remote?"),
 						bname.buf);
-				else
+				അല്ലെങ്കിൽ
 					error(_("branch '%s' not found"), bname.buf);
 				FREE_AND_NULL(virtual_target);
 			}
 			ret = 1;
-			continue;
+			തുടരുക;
 		}
 
-		if (!(ref_flags & (REF_ISSYMREF|REF_ISBROKEN)) &&
+		എങ്കിൽ (!(ref_flags & (REF_ISSYMREF|REF_ISBROKEN)) &&
 		    check_branch_commit(bname.buf, name, &oid, head_rev, kinds,
 					flags)) {
-			if (!(flags & DELETE_BRANCH_SKIP_UNMERGED))
+			എങ്കിൽ (!(flags & DELETE_BRANCH_SKIP_UNMERGED))
 				ret = 1;
-			goto next;
+			പോകുക next;
 		}
 
 		item = string_list_append(&refs_to_delete, name);
@@ -347,25 +347,25 @@ static int delete_branches(int argc, const char **argv, int kinds,
 				    : repo_find_unique_abbrev(the_repository, &oid, DEFAULT_ABBREV));
 
 	next:
-		free(target);
+		സ്വതന്ത്രം(target);
 	}
 
-	if (!(flags & DELETE_BRANCH_DRY_RUN) &&
-	    refs_delete_refs(get_main_ref_store(the_repository), NULL, &refs_to_delete, REF_NO_DEREF))
+	എങ്കിൽ (!(flags & DELETE_BRANCH_DRY_RUN) &&
+	    refs_delete_refs(get_main_ref_store(the_repository), ശൂന്യ, &refs_to_delete, REF_NO_DEREF))
 		ret = 1;
 
 	for_each_string_list_item(item, &refs_to_delete) {
-		char *describe_ref = item->util;
-		char *name = item->string;
-		if (flags & DELETE_BRANCH_DRY_RUN) {
-			if (!(flags & DELETE_BRANCH_QUIET))
+		അക്ഷരം *describe_ref = item->util;
+		അക്ഷരം *name = item->string;
+		എങ്കിൽ (flags & DELETE_BRANCH_DRY_RUN) {
+			എങ്കിൽ (!(flags & DELETE_BRANCH_QUIET))
 				printf(remote_branch
 					? _("Would delete remote-tracking branch %s (was %s).\n")
 					: _("Would delete branch %s (was %s).\n"),
 					name + branch_name_pos, describe_ref);
-		} else if (!refs_ref_exists(get_main_ref_store(the_repository), name)) {
-			char *refname = name + branch_name_pos;
-			if (!(flags & DELETE_BRANCH_QUIET))
+		} അല്ലെങ്കിൽ എങ്കിൽ (!refs_ref_exists(get_main_ref_store(the_repository), name)) {
+			അക്ഷരം *refname = name + branch_name_pos;
+			എങ്കിൽ (!(flags & DELETE_BRANCH_QUIET))
 				printf(remote_branch
 					? _("Deleted remote-tracking branch %s (was %s).\n")
 					: _("Deleted branch %s (was %s).\n"),
@@ -373,56 +373,56 @@ static int delete_branches(int argc, const char **argv, int kinds,
 
 			delete_branch_config(refname);
 		}
-		free(describe_ref);
+		സ്വതന്ത്രം(describe_ref);
 	}
 	string_list_clear(&refs_to_delete, 0);
 
-	free(name);
+	സ്വതന്ത്രം(name);
 	strbuf_release(&bname);
 
-	return ret;
+	തിരികെ ret;
 }
 
-static int calc_maxwidth(struct ref_array *refs, int remote_bonus)
+സ്ഥിതം പൂർണ്ണസംഖ്യ calc_maxwidth(ഘടന ref_array *refs, പൂർണ്ണസംഖ്യ remote_bonus)
 {
-	int i, max = 0;
-	for (i = 0; i < refs->nr; i++) {
-		struct ref_array_item *it = refs->items[i];
-		const char *desc = it->refname;
-		int w;
+	പൂർണ്ണസംഖ്യ i, max = 0;
+	വേണ്ടി (i = 0; i < refs->nr; i++) {
+		ഘടന ref_array_item *it = refs->ഇനങ്ങൾ[i];
+		സ്ഥിരം അക്ഷരം *desc = it->refname;
+		പൂർണ്ണസംഖ്യ w;
 
 		skip_prefix(it->refname, "refs/heads/", &desc);
 		skip_prefix(it->refname, "refs/remotes/", &desc);
-		if (it->kind == FILTER_REFS_DETACHED_HEAD) {
-			char *head_desc = get_head_description();
+		എങ്കിൽ (it->kind == FILTER_REFS_DETACHED_HEAD) {
+			അക്ഷരം *head_desc = get_head_description();
 			w = utf8_strwidth(head_desc);
-			free(head_desc);
-		} else
+			സ്വതന്ത്രം(head_desc);
+		} അല്ലെങ്കിൽ
 			w = utf8_strwidth(desc);
 
-		if (it->kind == FILTER_REFS_REMOTES)
+		എങ്കിൽ (it->kind == FILTER_REFS_REMOTES)
 			w += remote_bonus;
-		if (w > max)
+		എങ്കിൽ (w > max)
 			max = w;
 	}
-	return max;
+	തിരികെ max;
 }
 
-static const char *quote_literal_for_format(const char *s)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *quote_literal_for_format(സ്ഥിരം അക്ഷരം *s)
 {
-	static struct strbuf buf = STRBUF_INIT;
+	സ്ഥിതം ഘടന strbuf buf = STRBUF_INIT;
 
 	strbuf_reset(&buf);
-	while (strbuf_expand_step(&buf, &s))
+	ആകുമ്പോൾ (strbuf_expand_step(&buf, &s))
 		strbuf_addstr(&buf, "%%");
-	return buf.buf;
+	തിരികെ buf.buf;
 }
 
-static char *build_format(struct ref_filter *filter, int maxwidth, const char *remote_prefix)
+സ്ഥിതം അക്ഷരം *build_format(ഘടന ref_filter *filter, പൂർണ്ണസംഖ്യ maxwidth, സ്ഥിരം അക്ഷരം *remote_prefix)
 {
-	struct strbuf fmt = STRBUF_INIT;
-	struct strbuf local = STRBUF_INIT;
-	struct strbuf remote = STRBUF_INIT;
+	ഘടന strbuf fmt = STRBUF_INIT;
+	ഘടന strbuf local = STRBUF_INIT;
+	ഘടന strbuf remote = STRBUF_INIT;
 
 	strbuf_addf(&local, "%%(if)%%(HEAD)%%(then)* %s%%(else)%%(if)%%(worktreepath)%%(then)+ %s%%(else)  %s%%(end)%%(end)",
 			branch_get_color(BRANCH_COLOR_CURRENT),
@@ -431,21 +431,21 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 	strbuf_addf(&remote, "  %s",
 		    branch_get_color(BRANCH_COLOR_REMOTE));
 
-	if (filter->verbose) {
-		struct strbuf obname = STRBUF_INIT;
+	എങ്കിൽ (filter->verbose) {
+		ഘടന strbuf obname = STRBUF_INIT;
 
-		if (filter->abbrev < 0)
+		എങ്കിൽ (filter->abbrev < 0)
 			strbuf_addf(&obname, "%%(objectname:short)");
-		else if (!filter->abbrev)
+		അല്ലെങ്കിൽ എങ്കിൽ (!filter->abbrev)
 			strbuf_addf(&obname, "%%(objectname)");
-		else
+		അല്ലെങ്കിൽ
 			strbuf_addf(&obname, "%%(objectname:short=%d)", filter->abbrev);
 
 		strbuf_addf(&local, "%%(align:%d,left)%%(refname:lstrip=2)%%(end)", maxwidth);
 		strbuf_addstr(&local, branch_get_color(BRANCH_COLOR_RESET));
 		strbuf_addf(&local, " %s ", obname.buf);
 
-		if (filter->verbose > 1)
+		എങ്കിൽ (filter->verbose > 1)
 		{
 			strbuf_addf(&local, "%%(if:notequals=*)%%(HEAD)%%(then)%%(if)%%(worktreepath)%%(then)(%s%%(worktreepath)%s) %%(end)%%(end)",
 				    branch_get_color(BRANCH_COLOR_WORKTREE), branch_get_color(BRANCH_COLOR_RESET));
@@ -453,7 +453,7 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 				    "%%(then): %%(upstream:track,nobracket)%%(end)] %%(end)%%(contents:subject)",
 				    branch_get_color(BRANCH_COLOR_UPSTREAM), branch_get_color(BRANCH_COLOR_RESET));
 		}
-		else
+		അല്ലെങ്കിൽ
 			strbuf_addf(&local, "%%(if)%%(upstream:track)%%(then)%%(upstream:track) %%(end)%%(contents:subject)");
 
 		strbuf_addf(&remote, "%%(align:%d,left)%s%%(refname:lstrip=2)%%(end)%s"
@@ -462,7 +462,7 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 			    maxwidth, quote_literal_for_format(remote_prefix),
 			    branch_get_color(BRANCH_COLOR_RESET), obname.buf);
 		strbuf_release(&obname);
-	} else {
+	} അല്ലെങ്കിൽ {
 		strbuf_addf(&local, "%%(refname:lstrip=2)%s%%(if)%%(symref)%%(then) -> %%(symref:short)%%(end)",
 			    branch_get_color(BRANCH_COLOR_RESET));
 		strbuf_addf(&remote, "%s%%(refname:lstrip=2)%s%%(if)%%(symref)%%(then) -> %%(symref:short)%%(end)",
@@ -474,52 +474,52 @@ static char *build_format(struct ref_filter *filter, int maxwidth, const char *r
 
 	strbuf_release(&local);
 	strbuf_release(&remote);
-	return strbuf_detach(&fmt, NULL);
+	തിരികെ strbuf_detach(&fmt, ശൂന്യ);
 }
 
-static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sorting,
-			   struct ref_format *format, struct string_list *output)
+സ്ഥിതം ശൂന്യം print_ref_list(ഘടന ref_filter *filter, ഘടന ref_sorting *sorting,
+			   ഘടന ref_format *format, ഘടന string_list *output)
 {
-	int i;
-	struct ref_array array;
-	int maxwidth = 0;
-	const char *remote_prefix = "";
-	char *to_free = NULL;
+	പൂർണ്ണസംഖ്യ i;
+	ഘടന ref_array array;
+	പൂർണ്ണസംഖ്യ maxwidth = 0;
+	സ്ഥിരം അക്ഷരം *remote_prefix = "";
+	അക്ഷരം *to_free = ശൂന്യ;
 
 	/*
 	 * If we are listing more than just remote branches,
 	 * then remote branches will have a "remotes/" prefix.
 	 * We need to account for this in the width.
 	 */
-	if (filter->kind != FILTER_REFS_REMOTES)
+	എങ്കിൽ (filter->kind != FILTER_REFS_REMOTES)
 		remote_prefix = "remotes/";
 
-	memset(&array, 0, sizeof(array));
+	memset(&array, 0, വലുപ്പം(array));
 
 	filter_refs(&array, filter, filter->kind);
 
-	if (filter->verbose)
+	എങ്കിൽ (filter->verbose)
 		maxwidth = calc_maxwidth(&array, strlen(remote_prefix));
 
-	if (!format->format)
+	എങ്കിൽ (!format->format)
 		format->format = to_free = build_format(filter, maxwidth, remote_prefix);
 	format->use_color = branch_use_color;
 
-	if (verify_ref_format(format))
+	എങ്കിൽ (verify_ref_format(format))
 		die(_("unable to parse format string"));
 
 	filter_ahead_behind(the_repository, &array);
 	ref_array_sort(sorting, &array);
 
-	if (column_active(colopts)) {
-		struct strbuf out = STRBUF_INIT, err = STRBUF_INIT;
+	എങ്കിൽ (column_active(colopts)) {
+		ഘടന strbuf out = STRBUF_INIT, err = STRBUF_INIT;
 
-		assert(!filter->verbose && "--column and --verbose are incompatible");
+		പ്രതിജ്ഞാ(!filter->verbose && "--column and --verbose are incompatible");
 
-		for (i = 0; i < array.nr; i++) {
+		വേണ്ടി (i = 0; i < array.nr; i++) {
 			strbuf_reset(&err);
 			strbuf_reset(&out);
-			if (format_ref_array_item(array.items[i], format, &out, &err))
+			എങ്കിൽ (format_ref_array_item(array.ഇനങ്ങൾ[i], format, &out, &err))
 				die("%s", err.buf);
 
 			/* format to a string_list to let print_columns() do its job */
@@ -528,46 +528,46 @@ static void print_ref_list(struct ref_filter *filter, struct ref_sorting *sortin
 
 		strbuf_release(&err);
 		strbuf_release(&out);
-	} else {
+	} അല്ലെങ്കിൽ {
 		print_formatted_ref_array(&array, format);
 	}
 
 	ref_array_clear(&array);
-	free(to_free);
+	സ്വതന്ത്രം(to_free);
 }
 
-static void print_current_branch_name(void)
+സ്ഥിതം ശൂന്യം print_current_branch_name(ശൂന്യം)
 {
-	int flags;
-	const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-						      "HEAD", 0, NULL, &flags);
-	const char *shortname;
-	if (!refname)
+	പൂർണ്ണസംഖ്യ flags;
+	സ്ഥിരം അക്ഷരം *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
+						      "HEAD", 0, ശൂന്യ, &flags);
+	സ്ഥിരം അക്ഷരം *shortname;
+	എങ്കിൽ (!refname)
 		die(_("could not resolve HEAD"));
-	else if (!(flags & REF_ISSYMREF))
-		return;
-	else if (skip_prefix(refname, "refs/heads/", &shortname))
+	അല്ലെങ്കിൽ എങ്കിൽ (!(flags & REF_ISSYMREF))
+		തിരികെ;
+	അല്ലെങ്കിൽ എങ്കിൽ (skip_prefix(refname, "refs/heads/", &shortname))
 		puts(shortname);
-	else
+	അല്ലെങ്കിൽ
 		die(_("HEAD (%s) points outside of refs/heads/"), refname);
 }
 
-static void reject_rebase_or_bisect_branch(struct worktree **worktrees,
-					   const char *target)
+സ്ഥിതം ശൂന്യം reject_rebase_or_bisect_branch(ഘടന worktree **worktrees,
+					   സ്ഥിരം അക്ഷരം *target)
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; worktrees[i]; i++) {
-		struct worktree *wt = worktrees[i];
+	വേണ്ടി (i = 0; worktrees[i]; i++) {
+		ഘടന worktree *wt = worktrees[i];
 
-		if (!wt->is_detached)
-			continue;
+		എങ്കിൽ (!wt->is_detached)
+			തുടരുക;
 
-		if (is_worktree_being_rebased(wt, target))
+		എങ്കിൽ (is_worktree_being_rebased(wt, target))
 			die(_("branch %s is being rebased at %s"),
 			    target, wt->path);
 
-		if (is_worktree_being_bisected(wt, target))
+		എങ്കിൽ (is_worktree_being_bisected(wt, target))
 			die(_("branch %s is being bisected at %s"),
 			    target, wt->path);
 	}
@@ -578,74 +578,74 @@ static void reject_rebase_or_bisect_branch(struct worktree **worktrees,
  * This will be used when renaming a branch. Returns 0 if successful, non-zero
  * otherwise.
  */
-static int replace_each_worktree_head_symref(struct worktree **worktrees,
-					     const char *oldref, const char *newref,
-					     const char *logmsg)
+സ്ഥിതം പൂർണ്ണസംഖ്യ replace_each_worktree_head_symref(ഘടന worktree **worktrees,
+					     സ്ഥിരം അക്ഷരം *oldref, സ്ഥിരം അക്ഷരം *newref,
+					     സ്ഥിരം അക്ഷരം *logmsg)
 {
-	int ret = 0;
-	int i;
+	പൂർണ്ണസംഖ്യ ret = 0;
+	പൂർണ്ണസംഖ്യ i;
 
-	for (i = 0; worktrees[i]; i++) {
-		struct ref_store *refs;
+	വേണ്ടി (i = 0; worktrees[i]; i++) {
+		ഘടന ref_store *refs;
 
-		if (worktrees[i]->is_detached)
-			continue;
-		if (!worktrees[i]->head_ref)
-			continue;
-		if (strcmp(oldref, worktrees[i]->head_ref))
-			continue;
+		എങ്കിൽ (worktrees[i]->is_detached)
+			തുടരുക;
+		എങ്കിൽ (!worktrees[i]->head_ref)
+			തുടരുക;
+		എങ്കിൽ (strcmp(oldref, worktrees[i]->head_ref))
+			തുടരുക;
 
 		refs = get_worktree_ref_store(worktrees[i]);
-		if (refs_update_symref(refs, "HEAD", newref, logmsg))
+		എങ്കിൽ (refs_update_symref(refs, "HEAD", newref, logmsg))
 			ret = error(_("HEAD of working tree %s is not updated"),
 				    worktrees[i]->path);
 	}
 
-	return ret;
+	തിരികെ ret;
 }
 
 #define IS_HEAD 1
 #define IS_ORPHAN 2
 
-static void copy_or_rename_branch(const char *oldname, const char *newname, int copy, int force)
+സ്ഥിതം ശൂന്യം copy_or_rename_branch(സ്ഥിരം അക്ഷരം *oldname, സ്ഥിരം അക്ഷരം *newname, പൂർണ്ണസംഖ്യ copy, പൂർണ്ണസംഖ്യ force)
 {
-	struct strbuf oldref = STRBUF_INIT, newref = STRBUF_INIT, logmsg = STRBUF_INIT;
-	struct strbuf oldsection = STRBUF_INIT, newsection = STRBUF_INIT;
-	const char *interpreted_oldname = NULL;
-	const char *interpreted_newname = NULL;
-	int recovery = 0, oldref_usage = 0;
-	struct worktree **worktrees = get_worktrees(the_repository);
+	ഘടന strbuf oldref = STRBUF_INIT, newref = STRBUF_INIT, logmsg = STRBUF_INIT;
+	ഘടന strbuf oldsection = STRBUF_INIT, newsection = STRBUF_INIT;
+	സ്ഥിരം അക്ഷരം *interpreted_oldname = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *interpreted_newname = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ recovery = 0, oldref_usage = 0;
+	ഘടന worktree **worktrees = get_worktrees(the_repository);
 
-	if (check_branch_ref(the_repository, &oldref, oldname)) {
+	എങ്കിൽ (check_branch_ref(the_repository, &oldref, oldname)) {
 		/*
 		 * Bad name --- this could be an attempt to rename a
 		 * ref that we used to allow to be created by accident.
 		 */
-		if (refs_ref_exists(get_main_ref_store(the_repository), oldref.buf))
+		എങ്കിൽ (refs_ref_exists(get_main_ref_store(the_repository), oldref.buf))
 			recovery = 1;
-		else {
-			int code = die_message(_("invalid branch name: '%s'"), oldname);
+		അല്ലെങ്കിൽ {
+			പൂർണ്ണസംഖ്യ code = die_message(_("invalid branch name: '%s'"), oldname);
 			advise_if_enabled(ADVICE_REF_SYNTAX,
 					  _("See 'git help check-ref-format'"));
 			exit(code);
 		}
 	}
 
-	for (int i = 0; worktrees[i]; i++) {
-		struct worktree *wt = worktrees[i];
+	വേണ്ടി (പൂർണ്ണസംഖ്യ i = 0; worktrees[i]; i++) {
+		ഘടന worktree *wt = worktrees[i];
 
-		if (wt->head_ref && !strcmp(oldref.buf, wt->head_ref)) {
+		എങ്കിൽ (wt->head_ref && !strcmp(oldref.buf, wt->head_ref)) {
 			oldref_usage |= IS_HEAD;
-			if (is_null_oid(&wt->head_oid))
+			എങ്കിൽ (is_null_oid(&wt->head_oid))
 				oldref_usage |= IS_ORPHAN;
-			break;
+			നിർത്തുക;
 		}
 	}
 
-	if ((copy || !(oldref_usage & IS_HEAD)) && !refs_ref_exists(get_main_ref_store(the_repository), oldref.buf)) {
-		if (oldref_usage & IS_HEAD)
+	എങ്കിൽ ((copy || !(oldref_usage & IS_HEAD)) && !refs_ref_exists(get_main_ref_store(the_repository), oldref.buf)) {
+		എങ്കിൽ (oldref_usage & IS_HEAD)
 			die(_("no commit on branch '%s' yet"), oldname);
-		else
+		അല്ലെങ്കിൽ
 			die(_("no branch named '%s'"), oldname);
 	}
 
@@ -653,41 +653,41 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 	 * A command like "git branch -M currentbranch currentbranch" cannot
 	 * cause the worktree to become inconsistent with HEAD, so allow it.
 	 */
-	if (!strcmp(oldname, newname))
+	എങ്കിൽ (!strcmp(oldname, newname))
 		validate_branchname(newname, &newref);
-	else
+	അല്ലെങ്കിൽ
 		validate_new_branchname(newname, &newref, force);
 
 	reject_rebase_or_bisect_branch(worktrees, oldref.buf);
 
-	if (!skip_prefix(oldref.buf, "refs/heads/", &interpreted_oldname) ||
+	എങ്കിൽ (!skip_prefix(oldref.buf, "refs/heads/", &interpreted_oldname) ||
 	    !skip_prefix(newref.buf, "refs/heads/", &interpreted_newname)) {
 		BUG("expected prefix missing for refs");
 	}
 
-	if (copy)
+	എങ്കിൽ (copy)
 		strbuf_addf(&logmsg, "Branch: copied %s to %s",
 			    oldref.buf, newref.buf);
-	else
+	അല്ലെങ്കിൽ
 		strbuf_addf(&logmsg, "Branch: renamed %s to %s",
 			    oldref.buf, newref.buf);
 
-	if (!copy && !(oldref_usage & IS_ORPHAN) &&
+	എങ്കിൽ (!copy && !(oldref_usage & IS_ORPHAN) &&
 	    refs_rename_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
 		die(_("branch rename failed"));
-	if (copy && refs_copy_existing_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
+	എങ്കിൽ (copy && refs_copy_existing_ref(get_main_ref_store(the_repository), oldref.buf, newref.buf, logmsg.buf))
 		die(_("branch copy failed"));
 
-	if (recovery) {
-		if (copy)
+	എങ്കിൽ (recovery) {
+		എങ്കിൽ (copy)
 			warning(_("created a copy of a misnamed branch '%s'"),
 				interpreted_oldname);
-		else
+		അല്ലെങ്കിൽ
 			warning(_("renamed a misnamed branch '%s' away"),
 				interpreted_oldname);
 	}
 
-	if (!copy && (oldref_usage & IS_HEAD) &&
+	എങ്കിൽ (!copy && (oldref_usage & IS_HEAD) &&
 	    replace_each_worktree_head_symref(worktrees, oldref.buf, newref.buf,
 					      logmsg.buf))
 		die(_("branch renamed to %s, but HEAD is not updated"), newname);
@@ -696,9 +696,9 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 
 	strbuf_addf(&oldsection, "branch.%s", interpreted_oldname);
 	strbuf_addf(&newsection, "branch.%s", interpreted_newname);
-	if (!copy && repo_config_rename_section(the_repository, oldsection.buf, newsection.buf) < 0)
+	എങ്കിൽ (!copy && repo_config_rename_section(the_repository, oldsection.buf, newsection.buf) < 0)
 		die(_("branch is renamed, but update of config-file failed"));
-	if (copy && strcmp(interpreted_oldname, interpreted_newname) &&
+	എങ്കിൽ (copy && strcmp(interpreted_oldname, interpreted_newname) &&
 	    repo_config_copy_section(the_repository, oldsection.buf, newsection.buf) < 0)
 		die(_("branch is copied, but update of config-file failed"));
 	strbuf_release(&oldref);
@@ -708,138 +708,138 @@ static void copy_or_rename_branch(const char *oldname, const char *newname, int 
 	free_worktrees(worktrees);
 }
 
-static int parse_opt_forked(const struct option *opt, const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ parse_opt_forked(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
-	struct ref_filter *filter = opt->value;
+	ഘടന ref_filter *filter = opt->മൂല്യം;
 
 	BUG_ON_OPT_NEG(unset);
-	if (ref_filter_forked_add(filter, arg) < 0)
+	എങ്കിൽ (ref_filter_forked_add(filter, arg) < 0)
 		die(_("'%s' is not a valid branch or pattern"), arg);
-	return 0;
+	തിരികെ 0;
 }
 
-struct stacked_branch_data {
-	struct strset *deletable_branch_names;
-	struct strset *protected_branch_names;
+ഘടന stacked_branch_data {
+	ഘടന strset *deletable_branch_names;
+	ഘടന strset *protected_branch_names;
 };
 
-static int collect_stacked_branch_base(const struct reference *ref,
-				       void *cb_data)
+സ്ഥിതം പൂർണ്ണസംഖ്യ collect_stacked_branch_base(സ്ഥിരം ഘടന reference *ref,
+				       ശൂന്യം *cb_data)
 {
-	struct stacked_branch_data *data = cb_data;
-	const char *branch_name;
-	struct branch *branch;
-	const char *upstream_refname;
-	const char *upstream_branch_name;
+	ഘടന stacked_branch_data *data = cb_data;
+	സ്ഥിരം അക്ഷരം *branch_name;
+	ഘടന branch *branch;
+	സ്ഥിരം അക്ഷരം *upstream_refname;
+	സ്ഥിരം അക്ഷരം *upstream_branch_name;
 
-	if (!skip_prefix(ref->name, "refs/heads/", &branch_name))
+	എങ്കിൽ (!skip_prefix(ref->name, "refs/heads/", &branch_name))
 		BUG("expected local branch ref, got '%s'", ref->name);
-	if (strset_contains(data->deletable_branch_names, branch_name))
-		return 0;
+	എങ്കിൽ (strset_contains(data->deletable_branch_names, branch_name))
+		തിരികെ 0;
 
 	branch = branch_get(branch_name);
-	upstream_refname = branch_get_upstream(branch, NULL);
-	if (!upstream_refname ||
+	upstream_refname = branch_get_upstream(branch, ശൂന്യ);
+	എങ്കിൽ (!upstream_refname ||
 	    !skip_prefix(upstream_refname, "refs/heads/",
 			 &upstream_branch_name) ||
 	    !strset_contains(data->deletable_branch_names,
 			    upstream_branch_name))
-		return 0;
+		തിരികെ 0;
 
 	strset_add(data->protected_branch_names, upstream_branch_name);
-	return 0;
+	തിരികെ 0;
 }
 
-static void protect_stacked_branch_bases(struct ref_store *refs,
-					 struct strset *deletable_branch_names,
-					 struct strset *protected_branch_names)
+സ്ഥിതം ശൂന്യം protect_stacked_branch_bases(ഘടന ref_store *refs,
+					 ഘടന strset *deletable_branch_names,
+					 ഘടന strset *protected_branch_names)
 {
-	struct stacked_branch_data data = {
+	ഘടന stacked_branch_data data = {
 		.deletable_branch_names = deletable_branch_names,
 		.protected_branch_names = protected_branch_names,
 	};
-	struct refs_for_each_ref_options opts = {
+	ഘടന refs_for_each_ref_options opts = {
 		.prefix = "refs/heads/",
 	};
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	ഘടന hashmap_iter iter;
+	ഘടന strmap_entry *entry;
 
 	refs_for_each_ref_ext(refs, collect_stacked_branch_base, &data, &opts);
 
 	strset_for_each_entry(protected_branch_names, &iter, entry)
-		strset_remove(deletable_branch_names, entry->key);
+		strset_remove(deletable_branch_names, entry->താക്കോൽ);
 }
 
-static void clear_deleted_upstreams(struct strset *protected_branch_names,
-				    struct strset *deletable_branch_names)
+സ്ഥിതം ശൂന്യം clear_deleted_upstreams(ഘടന strset *protected_branch_names,
+				    ഘടന strset *deletable_branch_names)
 {
-	struct strbuf key = STRBUF_INIT;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
+	ഘടന strbuf താക്കോൽ = STRBUF_INIT;
+	ഘടന hashmap_iter iter;
+	ഘടന strmap_entry *entry;
 
 	strset_for_each_entry(protected_branch_names, &iter, entry) {
-		struct branch *branch = branch_get(entry->key);
-		const char *upstream_refname = branch_get_upstream(branch, NULL);
-		const char *upstream_branch_name;
+		ഘടന branch *branch = branch_get(entry->താക്കോൽ);
+		സ്ഥിരം അക്ഷരം *upstream_refname = branch_get_upstream(branch, ശൂന്യ);
+		സ്ഥിരം അക്ഷരം *upstream_branch_name;
 
-		if (!upstream_refname ||
+		എങ്കിൽ (!upstream_refname ||
 		    !skip_prefix(upstream_refname, "refs/heads/",
 				 &upstream_branch_name) ||
 		    !strset_contains(deletable_branch_names,
 				    upstream_branch_name))
-			continue;
+			തുടരുക;
 
-		strbuf_addf(&key, "branch.%s.merge", branch->name);
-		repo_config_set_gently(the_repository, key.buf, NULL);
-		strbuf_reset(&key);
-		strbuf_addf(&key, "branch.%s.remote", branch->name);
-		repo_config_set_gently(the_repository, key.buf, NULL);
-		strbuf_reset(&key);
+		strbuf_addf(&താക്കോൽ, "branch.%s.merge", branch->name);
+		repo_config_set_gently(the_repository, താക്കോൽ.buf, ശൂന്യ);
+		strbuf_reset(&താക്കോൽ);
+		strbuf_addf(&താക്കോൽ, "branch.%s.remote", branch->name);
+		repo_config_set_gently(the_repository, താക്കോൽ.buf, ശൂന്യ);
+		strbuf_reset(&താക്കോൽ);
 	}
 
-	strbuf_release(&key);
+	strbuf_release(&താക്കോൽ);
 }
 
-static int branch_pushes_to_upstream(struct branch *branch,
-				     const char *upstream)
+സ്ഥിതം പൂർണ്ണസംഖ്യ branch_pushes_to_upstream(ഘടന branch *branch,
+				     സ്ഥിരം അക്ഷരം *upstream)
 {
-	struct remote *remote = remote_get(remote_for_branch(branch, NULL));
-	char *push_refname = NULL;
-	char *tracking = NULL;
-	int ret = 0;
+	ഘടന remote *remote = remote_get(remote_for_branch(branch, ശൂന്യ));
+	അക്ഷരം *തള്ളുക_refname = ശൂന്യ;
+	അക്ഷരം *tracking = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
-	if (!remote)
-		return 0;
-	if (remote->push.nr)
-		push_refname = apply_refspecs(&remote->push, branch->refname);
-	else
-		push_refname = xstrdup(branch->refname);
-	if (push_refname)
-		tracking = apply_refspecs(&remote->fetch, push_refname);
-	if (tracking && !strcmp(tracking, upstream))
+	എങ്കിൽ (!remote)
+		തിരികെ 0;
+	എങ്കിൽ (remote->തള്ളുക.nr)
+		തള്ളുക_refname = apply_refspecs(&remote->തള്ളുക, branch->refname);
+	അല്ലെങ്കിൽ
+		തള്ളുക_refname = xstrdup(branch->refname);
+	എങ്കിൽ (തള്ളുക_refname)
+		tracking = apply_refspecs(&remote->fetch, തള്ളുക_refname);
+	എങ്കിൽ (tracking && !strcmp(tracking, upstream))
 		ret = 1;
 
-	free(push_refname);
-	free(tracking);
-	return ret;
+	സ്വതന്ത്രം(തള്ളുക_refname);
+	സ്വതന്ത്രം(tracking);
+	തിരികെ ret;
 }
 
-static int delete_merged_branches(const struct strvec *upstreams,
-				 const char **argv, unsigned int flags)
+സ്ഥിതം പൂർണ്ണസംഖ്യ delete_merged_branches(സ്ഥിരം ഘടന strvec *upstreams,
+				 സ്ഥിരം അക്ഷരം **argv, unsigned പൂർണ്ണസംഖ്യ flags)
 {
-	struct ref_store *refs = get_main_ref_store(the_repository);
-	struct ref_filter filter = REF_FILTER_INIT;
-	struct ref_array candidates = { 0 };
-	struct strset deletable_branch_names = STRSET_INIT;
-	struct strset protected_branch_names = STRSET_INIT;
-	struct strvec branches_to_delete = STRVEC_INIT;
-	struct strbuf key = STRBUF_INIT;
-	struct hashmap_iter iter;
-	struct strmap_entry *entry;
-	int ret = 0;
+	ഘടന ref_store *refs = get_main_ref_store(the_repository);
+	ഘടന ref_filter filter = REF_FILTER_INIT;
+	ഘടന ref_array candidates = { 0 };
+	ഘടന strset deletable_branch_names = STRSET_INIT;
+	ഘടന strset protected_branch_names = STRSET_INIT;
+	ഘടന strvec branches_to_delete = STRVEC_INIT;
+	ഘടന strbuf താക്കോൽ = STRBUF_INIT;
+	ഘടന hashmap_iter iter;
+	ഘടന strmap_entry *entry;
+	പൂർണ്ണസംഖ്യ ret = 0;
 
-	for (size_t i = 0; i < upstreams->nr; i++)
-		if (ref_filter_forked_add(&filter, upstreams->v[i]) < 0)
+	വേണ്ടി (size_t i = 0; i < upstreams->nr; i++)
+		എങ്കിൽ (ref_filter_forked_add(&filter, upstreams->v[i]) < 0)
 			die(_("'%s' is not a valid branch or pattern"),
 			    upstreams->v[i]);
 
@@ -847,38 +847,38 @@ static int delete_merged_branches(const struct strvec *upstreams,
 	filter.name_patterns = argv;
 	filter_refs(&candidates, &filter, filter.kind);
 
-	for (int i = 0; i < candidates.nr; i++) {
-		const char *branch_refname = candidates.items[i]->refname;
-		const char *branch_name;
-		struct branch *branch;
-		const char *upstream_refname;
-		int opt_out;
+	വേണ്ടി (പൂർണ്ണസംഖ്യ i = 0; i < candidates.nr; i++) {
+		സ്ഥിരം അക്ഷരം *branch_refname = candidates.ഇനങ്ങൾ[i]->refname;
+		സ്ഥിരം അക്ഷരം *branch_name;
+		ഘടന branch *branch;
+		സ്ഥിരം അക്ഷരം *upstream_refname;
+		പൂർണ്ണസംഖ്യ opt_out;
 
-		if (!skip_prefix(branch_refname, "refs/heads/", &branch_name))
+		എങ്കിൽ (!skip_prefix(branch_refname, "refs/heads/", &branch_name))
 			BUG("filter returned non-branch ref '%s'", branch_refname);
-		if (branch_checked_out(branch_refname))
-			continue;
+		എങ്കിൽ (branch_checked_out(branch_refname))
+			തുടരുക;
 
 		branch = branch_get(branch_name);
-		upstream_refname = branch_get_upstream(branch, NULL);
-		if (!upstream_refname || !refs_ref_exists(refs, upstream_refname))
-			continue;
-		if (branch_pushes_to_upstream(branch, upstream_refname))
-			continue;
-		if (check_branch_commit(branch_name, branch_name,
-					&candidates.items[i]->objectname, NULL,
+		upstream_refname = branch_get_upstream(branch, ശൂന്യ);
+		എങ്കിൽ (!upstream_refname || !refs_ref_exists(refs, upstream_refname))
+			തുടരുക;
+		എങ്കിൽ (branch_pushes_to_upstream(branch, upstream_refname))
+			തുടരുക;
+		എങ്കിൽ (check_branch_commit(branch_name, branch_name,
+					&candidates.ഇനങ്ങൾ[i]->objectname, ശൂന്യ,
 					FILTER_REFS_BRANCHES, DELETE_BRANCH_SKIP_UNMERGED))
-			continue;
+			തുടരുക;
 
-		strbuf_reset(&key);
-		strbuf_addf(&key, "branch.%s.deletemerged", branch_name);
-		if (!repo_config_get_bool(the_repository, key.buf, &opt_out) &&
+		strbuf_reset(&താക്കോൽ);
+		strbuf_addf(&താക്കോൽ, "branch.%s.deletemerged", branch_name);
+		എങ്കിൽ (!repo_config_get_bool(the_repository, താക്കോൽ.buf, &opt_out) &&
 		    !opt_out) {
-			if (!(flags & DELETE_BRANCH_QUIET))
+			എങ്കിൽ (!(flags & DELETE_BRANCH_QUIET))
 				fprintf(stderr,
 					_("Skipping '%s' (branch.%s.deleteMerged is false)\n"),
 					branch_name, branch_name);
-			continue;
+			തുടരുക;
 		}
 
 		strset_add(&deletable_branch_names, branch_name);
@@ -888,74 +888,74 @@ static int delete_merged_branches(const struct strvec *upstreams,
 				     &protected_branch_names);
 
 	strset_for_each_entry(&deletable_branch_names, &iter, entry)
-		strvec_push(&branches_to_delete, entry->key);
+		strvec_തള്ളുക(&branches_to_delete, entry->താക്കോൽ);
 
-	if (branches_to_delete.nr)
+	എങ്കിൽ (branches_to_delete.nr)
 		ret = delete_branches(branches_to_delete.nr, branches_to_delete.v,
 				      FILTER_REFS_BRANCHES,
 				      DELETE_BRANCH_SKIP_UNMERGED |
 				      DELETE_BRANCH_NO_HEAD_FALLBACK |
 				      flags);
 
-	if (!ret && !(flags & DELETE_BRANCH_DRY_RUN))
+	എങ്കിൽ (!ret && !(flags & DELETE_BRANCH_DRY_RUN))
 		clear_deleted_upstreams(&protected_branch_names,
 					&deletable_branch_names);
 
-	strbuf_release(&key);
+	strbuf_release(&താക്കോൽ);
 	strvec_clear(&branches_to_delete);
 	strset_clear(&protected_branch_names);
 	strset_clear(&deletable_branch_names);
 	ref_array_clear(&candidates);
 	ref_filter_clear(&filter);
-	return ret;
+	തിരികെ ret;
 }
 
-static GIT_PATH_FUNC(edit_description, "EDIT_DESCRIPTION")
+സ്ഥിതം GIT_PATH_FUNC(edit_description, "EDIT_DESCRIPTION")
 
-static int edit_branch_description(const char *branch_name)
+സ്ഥിതം പൂർണ്ണസംഖ്യ edit_branch_description(സ്ഥിരം അക്ഷരം *branch_name)
 {
-	int exists;
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf name = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ exists;
+	ഘടന strbuf buf = STRBUF_INIT;
+	ഘടന strbuf name = STRBUF_INIT;
 
 	exists = !read_branch_desc(&buf, branch_name);
-	if (!buf.len || buf.buf[buf.len-1] != '\n')
+	എങ്കിൽ (!buf.len || buf.buf[buf.len-1] != '\n')
 		strbuf_addch(&buf, '\n');
-	strbuf_commented_addf(&buf, comment_line_str,
+	strbuf_commented_addf(&buf, comment_വരി_str,
 		    _("Please edit the description for the branch\n"
 		      "  %s\n"
 		      "Lines starting with '%s' will be stripped.\n"),
-		    branch_name, comment_line_str);
+		    branch_name, comment_വരി_str);
 	write_file_buf(edit_description(), buf.buf, buf.len);
 	strbuf_reset(&buf);
-	if (launch_editor(edit_description(), &buf, NULL)) {
+	എങ്കിൽ (launch_editor(edit_description(), &buf, ശൂന്യ)) {
 		strbuf_release(&buf);
-		return -1;
+		തിരികെ -1;
 	}
-	strbuf_stripspace(&buf, comment_line_str);
+	strbuf_stripspace(&buf, comment_വരി_str);
 
 	strbuf_addf(&name, "branch.%s.description", branch_name);
-	if (buf.len || exists)
-		repo_config_set(the_repository, name.buf, buf.len ? buf.buf : NULL);
+	എങ്കിൽ (buf.len || exists)
+		repo_config_set(the_repository, name.buf, buf.len ? buf.buf : ശൂന്യ);
 	strbuf_release(&name);
 	strbuf_release(&buf);
 
-	return 0;
+	തിരികെ 0;
 }
 
-static void die_if_upstream_looks_like_remote(const char *new_upstream, const char *branch_name)
+സ്ഥിതം ശൂന്യം die_if_upstream_looks_like_remote(സ്ഥിരം അക്ഷരം *new_upstream, സ്ഥിരം അക്ഷരം *branch_name)
 {
-	struct strbuf remote_ref = STRBUF_INIT;
-	int code;
+	ഘടന strbuf remote_ref = STRBUF_INIT;
+	പൂർണ്ണസംഖ്യ code;
 
-	if (strchr(new_upstream, '/') ||
+	എങ്കിൽ (strchr(new_upstream, '/') ||
 	    !remote_is_configured(remote_get(new_upstream), 0))
-		return;
+		തിരികെ;
 
 	strbuf_addf(&remote_ref, "refs/remotes/%s/%s", new_upstream, branch_name);
-	if (!refs_ref_exists(get_main_ref_store(the_repository), remote_ref.buf)) {
+	എങ്കിൽ (!refs_ref_exists(get_main_ref_store(the_repository), remote_ref.buf)) {
 		strbuf_release(&remote_ref);
-		return;
+		തിരികെ;
 	}
 
 	code = die_message(_("--set-upstream-to takes a single <remote>/<branch> argument"));
@@ -966,30 +966,30 @@ static void die_if_upstream_looks_like_remote(const char *new_upstream, const ch
 	exit(code);
 }
 
-int cmd_branch(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_branch(പൂർണ്ണസംഖ്യ argc,
+	       സ്ഥിരം അക്ഷരം **argv,
+	       സ്ഥിരം അക്ഷരം *prefix,
+	       ഘടന repository *repo UNUSED)
 {
 	/* possible actions */
-	int delete = 0, rename = 0, copy = 0, list = 0,
+	പൂർണ്ണസംഖ്യ delete = 0, rename = 0, copy = 0, list = 0,
 	    unset_upstream = 0, show_current = 0, edit_description = 0;
-	struct strvec delete_merged = STRVEC_INIT;
-	int dry_run = 0;
-	const char *new_upstream = NULL;
-	int noncreate_actions = 0;
+	ഘടന strvec delete_merged = STRVEC_INIT;
+	പൂർണ്ണസംഖ്യ dry_run = 0;
+	സ്ഥിരം അക്ഷരം *new_upstream = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ noncreate_actions = 0;
 	/* possible options */
-	int reflog = 0, quiet = 0, icase = 0, force = 0,
+	പൂർണ്ണസംഖ്യ reflog = 0, quiet = 0, icase = 0, force = 0,
 	    recurse_submodules_explicit = 0;
-	enum branch_track track;
-	struct ref_filter filter = REF_FILTER_INIT;
-	static struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
-	struct ref_format format = REF_FORMAT_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int ret;
+	എണ്ണൽ branch_track track;
+	ഘടന ref_filter filter = REF_FILTER_INIT;
+	സ്ഥിതം ഘടന ref_sorting *sorting;
+	ഘടന string_list sorting_options = STRING_LIST_INIT_DUP;
+	ഘടന ref_format format = REF_FORMAT_INIT;
+	ഘടന repo_config_മൂല്യങ്ങൾ *cfg = repo_config_മൂല്യങ്ങൾ(the_repository);
+	പൂർണ്ണസംഖ്യ ret;
 
-	struct option options[] = {
+	ഘടന option options[] = {
 		OPT_GROUP(N_("Generic options")),
 		OPT__VERBOSE(&filter.verbose,
 			N_("show hash and subject, give twice for upstream branch")),
@@ -1017,13 +1017,13 @@ int cmd_branch(int argc,
 			      FILTER_REFS_REMOTES | FILTER_REFS_BRANCHES,
 			      PARSE_OPT_NONEG),
 		OPT_BIT('d', "delete", &delete, N_("delete fully merged branch"), 1),
-		OPT_BIT('D', NULL, &delete, N_("delete branch (even if not merged)"), 2),
+		OPT_BIT('D', ശൂന്യ, &delete, N_("delete branch (even if not merged)"), 2),
 		OPT_BIT('m', "move", &rename, N_("move/rename a branch and its reflog"), 1),
-		OPT_BIT('M', NULL, &rename, N_("move/rename a branch, even if target exists"), 2),
+		OPT_BIT('M', ശൂന്യ, &rename, N_("move/rename a branch, even if target exists"), 2),
 		OPT_BOOL(0, "omit-empty",  &format.array_opts.omit_empty,
 			N_("do not output a newline after empty formatted refs")),
 		OPT_BIT('c', "copy", &copy, N_("copy a branch and its reflog"), 1),
-		OPT_BIT('C', NULL, &copy, N_("copy a branch, even if target exists"), 2),
+		OPT_BIT('C', ശൂന്യ, &copy, N_("copy a branch, even if target exists"), 2),
 		OPT_BOOL('l', "list", &list, N_("list branch names")),
 		OPT_BOOL(0, "show-current", &show_current, N_("show current branch name")),
 		OPT_BOOL(0, "create-reflog", &reflog, N_("create the branch's reflog")),
@@ -1050,7 +1050,7 @@ int cmd_branch(int argc,
 		OPT_END(),
 	};
 
-	setup_ref_filter_porcelain_msg();
+	setup_ref_filter_porcelain_സന്ദേശം();
 
 	filter.kind = FILTER_REFS_BRANCHES;
 	filter.abbrev = -1;
@@ -1063,29 +1063,29 @@ int cmd_branch(int argc,
 	 * fall back on default (refname) sorting.
 	 */
 	repo_config(the_repository, git_branch_config, &sorting_options);
-	if (!sorting_options.nr)
+	എങ്കിൽ (!sorting_options.nr)
 		string_list_append(&sorting_options, "refname");
 
 	track = cfg->branch_track;
 
 	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   0, &head_oid, NULL);
-	if (!head)
+				   0, &head_oid, ശൂന്യ);
+	എങ്കിൽ (!head)
 		die(_("failed to resolve HEAD as a valid ref"));
-	if (!strcmp(head, "HEAD"))
+	എങ്കിൽ (!strcmp(head, "HEAD"))
 		filter.detached = 1;
-	else if (!skip_prefix(head, "refs/heads/", &head))
+	അല്ലെങ്കിൽ എങ്കിൽ (!skip_prefix(head, "refs/heads/", &head))
 		die(_("HEAD not found below refs/heads!"));
 
 	argc = parse_options(argc, argv, prefix, options, builtin_branch_usage,
 			     0);
 
-	if (!delete && !rename && !copy && !edit_description && !new_upstream &&
+	എങ്കിൽ (!delete && !rename && !copy && !edit_description && !new_upstream &&
 	    !show_current && !unset_upstream && !delete_merged.nr &&
 	    argc == 0)
 		list = 1;
 
-	if (filter.with_commit || filter.no_commit ||
+	എങ്കിൽ (filter.with_commit || filter.no_commit ||
 	    filter.reachable_from || filter.unreachable_from ||
 	    filter.points_at.nr || filter.forked.nr)
 		list = 1;
@@ -1093,16 +1093,16 @@ int cmd_branch(int argc,
 	noncreate_actions = !!delete + !!rename + !!copy + !!new_upstream +
 			    !!show_current + !!list + !!edit_description +
 			    !!unset_upstream + !!delete_merged.nr;
-	if (noncreate_actions > 1)
+	എങ്കിൽ (noncreate_actions > 1)
 		usage_with_options(builtin_branch_usage, options);
 
-	if (dry_run && !delete_merged.nr)
+	എങ്കിൽ (dry_run && !delete_merged.nr)
 		die(_("--dry-run requires --delete-merged"));
 
-	if (recurse_submodules_explicit) {
-		if (!submodule_propagate_branches)
+	എങ്കിൽ (recurse_submodules_explicit) {
+		എങ്കിൽ (!submodule_propagate_branches)
 			die(_("branch with --recurse-submodules can only be used if submodule.propagateBranches is enabled"));
-		if (noncreate_actions)
+		എങ്കിൽ (noncreate_actions)
 			die(_("--recurse-submodules can only be used to create branches"));
 	}
 
@@ -1110,45 +1110,45 @@ int cmd_branch(int argc,
 		(recurse_submodules || recurse_submodules_explicit) &&
 		submodule_propagate_branches;
 
-	if (filter.abbrev == -1)
+	എങ്കിൽ (filter.abbrev == -1)
 		filter.abbrev = DEFAULT_ABBREV;
 	filter.ignore_case = icase;
 
 	finalize_colopts(&colopts, -1);
-	if (filter.verbose) {
-		if (explicitly_enable_column(colopts))
+	എങ്കിൽ (filter.verbose) {
+		എങ്കിൽ (explicitly_enable_column(colopts))
 			die(_("options '%s' and '%s' cannot be used together"), "--column", "--verbose");
 		colopts = 0;
 	}
 
-	if (force) {
+	എങ്കിൽ (force) {
 		delete *= 2;
 		rename *= 2;
 		copy *= 2;
 	}
 
-	if (list)
+	എങ്കിൽ (list)
 		setup_auto_pager("branch", 1);
 
-	if (delete) {
-		if (!argc)
+	എങ്കിൽ (delete) {
+		എങ്കിൽ (!argc)
 			die(_("branch name required"));
 		ret = delete_branches(argc, argv, filter.kind,
 				      (delete > 1 ? DELETE_BRANCH_FORCE : 0) |
 				      (quiet ? DELETE_BRANCH_QUIET : 0));
-		goto out;
-	} else if (delete_merged.nr) {
+		പോകുക out;
+	} അല്ലെങ്കിൽ എങ്കിൽ (delete_merged.nr) {
 		ret = delete_merged_branches(&delete_merged, argv,
 					     (quiet ? DELETE_BRANCH_QUIET : 0) |
 					     (dry_run ? DELETE_BRANCH_DRY_RUN : 0));
-		goto out;
-	} else if (show_current) {
+		പോകുക out;
+	} അല്ലെങ്കിൽ എങ്കിൽ (show_current) {
 		print_current_branch_name();
 		ret = 0;
-		goto out;
-	} else if (list) {
+		പോകുക out;
+	} അല്ലെങ്കിൽ എങ്കിൽ (list) {
 		/*  git branch --list also shows HEAD when it is detached */
-		if ((filter.kind & FILTER_REFS_BRANCHES) && filter.detached)
+		എങ്കിൽ ((filter.kind & FILTER_REFS_BRANCHES) && filter.detached)
 			filter.kind |= FILTER_REFS_DETACHED_HEAD;
 		filter.name_patterns = argv;
 		/*
@@ -1163,83 +1163,83 @@ int cmd_branch(int argc,
 		ref_sorting_set_sort_flags_all(
 			sorting, REF_SORTING_DETACHED_HEAD_FIRST, 1);
 		print_ref_list(&filter, sorting, &format, &output);
-		print_columns(&output, colopts, NULL);
+		print_columns(&output, colopts, ശൂന്യ);
 		string_list_clear(&output, 0);
 		ref_sorting_release(sorting);
 		ref_filter_clear(&filter);
 
 		ret = 0;
-		goto out;
-	} else if (edit_description) {
-		const char *branch_name;
-		struct strbuf branch_ref = STRBUF_INIT;
-		struct strbuf buf = STRBUF_INIT;
+		പോകുക out;
+	} അല്ലെങ്കിൽ എങ്കിൽ (edit_description) {
+		സ്ഥിരം അക്ഷരം *branch_name;
+		ഘടന strbuf branch_ref = STRBUF_INIT;
+		ഘടന strbuf buf = STRBUF_INIT;
 
-		if (!argc) {
-			if (filter.detached)
+		എങ്കിൽ (!argc) {
+			എങ്കിൽ (filter.detached)
 				die(_("cannot give description to detached HEAD"));
 			branch_name = head;
-		} else if (argc == 1) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch_name = buf.buf;
-		} else {
+		} അല്ലെങ്കിൽ {
 			die(_("cannot edit description of more than one branch"));
 		}
 
 		strbuf_addf(&branch_ref, "refs/heads/%s", branch_name);
-		if (!refs_ref_exists(get_main_ref_store(the_repository), branch_ref.buf)) {
+		എങ്കിൽ (!refs_ref_exists(get_main_ref_store(the_repository), branch_ref.buf)) {
 			error((!argc || branch_checked_out(branch_ref.buf))
 			      ? _("no commit on branch '%s' yet")
 			      : _("no branch named '%s'"),
 			      branch_name);
 			ret = 1;
-		} else if (!edit_branch_description(branch_name)) {
+		} അല്ലെങ്കിൽ എങ്കിൽ (!edit_branch_description(branch_name)) {
 			ret = 0; /* happy */
-		} else {
+		} അല്ലെങ്കിൽ {
 			ret = 1;
 		}
 
 		strbuf_release(&branch_ref);
 		strbuf_release(&buf);
 
-		goto out;
-	} else if (copy || rename) {
-		if (!argc)
+		പോകുക out;
+	} അല്ലെങ്കിൽ എങ്കിൽ (copy || rename) {
+		എങ്കിൽ (!argc)
 			die(_("branch name required"));
-		else if ((argc == 1) && filter.detached)
+		അല്ലെങ്കിൽ എങ്കിൽ ((argc == 1) && filter.detached)
 			die(copy? _("cannot copy the current branch while not on any")
 				: _("cannot rename the current branch while not on any"));
-		else if (argc == 1)
+		അല്ലെങ്കിൽ എങ്കിൽ (argc == 1)
 			copy_or_rename_branch(head, argv[0], copy, copy + rename > 1);
-		else if (argc == 2)
+		അല്ലെങ്കിൽ എങ്കിൽ (argc == 2)
 			copy_or_rename_branch(argv[0], argv[1], copy, copy + rename > 1);
-		else
+		അല്ലെങ്കിൽ
 			die(copy? _("too many branches for a copy operation")
 				: _("too many arguments for a rename operation"));
-	} else if (new_upstream) {
-		struct branch *branch;
-		struct strbuf buf = STRBUF_INIT;
+	} അല്ലെങ്കിൽ എങ്കിൽ (new_upstream) {
+		ഘടന branch *branch;
+		ഘടന strbuf buf = STRBUF_INIT;
 
-		if (!argc)
-			branch = branch_get(NULL);
-		else if (argc == 1) {
+		എങ്കിൽ (!argc)
+			branch = branch_get(ശൂന്യ);
+		അല്ലെങ്കിൽ എങ്കിൽ (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch = branch_get(buf.buf);
-		} else
+		} അല്ലെങ്കിൽ
 			die(_("too many arguments to set new upstream"));
 
-		if (!branch) {
-			if (!argc || !strcmp(argv[0], "HEAD"))
+		എങ്കിൽ (!branch) {
+			എങ്കിൽ (!argc || !strcmp(argv[0], "HEAD"))
 				die(_("could not set upstream of HEAD to %s when "
 				      "it does not point to any branch"),
 				    new_upstream);
 			die(_("no such branch '%s'"), argv[0]);
 		}
 
-		if (!refs_ref_exists(get_main_ref_store(the_repository), branch->refname)) {
-			if (!argc || branch_checked_out(branch->refname))
+		എങ്കിൽ (!refs_ref_exists(get_main_ref_store(the_repository), branch->refname)) {
+			എങ്കിൽ (!argc || branch_checked_out(branch->refname))
 				die(_("no commit on branch '%s' yet"), branch->name);
 			/*
 			 * Check the advice up front to avoid the ref
@@ -1247,7 +1247,7 @@ int cmd_branch(int argc,
 			 * calls advise_if_enabled() so the hint carries the
 			 * standard "disable this message" instructions.
 			 */
-			if (argc == 1 &&
+			എങ്കിൽ (argc == 1 &&
 			    advice_enabled(ADVICE_SET_UPSTREAM_FAILURE))
 				die_if_upstream_looks_like_remote(new_upstream, argv[0]);
 			die(_("branch '%s' does not exist"), branch->name);
@@ -1257,57 +1257,57 @@ int cmd_branch(int argc,
 					new_upstream, BRANCH_TRACK_OVERRIDE,
 					quiet);
 		strbuf_release(&buf);
-	} else if (unset_upstream) {
-		struct branch *branch;
-		struct strbuf buf = STRBUF_INIT;
+	} അല്ലെങ്കിൽ എങ്കിൽ (unset_upstream) {
+		ഘടന branch *branch;
+		ഘടന strbuf buf = STRBUF_INIT;
 
-		if (!argc)
-			branch = branch_get(NULL);
-		else if (argc == 1) {
+		എങ്കിൽ (!argc)
+			branch = branch_get(ശൂന്യ);
+		അല്ലെങ്കിൽ എങ്കിൽ (argc == 1) {
 			copy_branchname(the_repository, &buf, argv[0],
 					INTERPRET_BRANCH_LOCAL);
 			branch = branch_get(buf.buf);
-		} else
+		} അല്ലെങ്കിൽ
 			die(_("too many arguments to unset upstream"));
 
-		if (!branch) {
-			if (!argc || !strcmp(argv[0], "HEAD"))
+		എങ്കിൽ (!branch) {
+			എങ്കിൽ (!argc || !strcmp(argv[0], "HEAD"))
 				die(_("could not unset upstream of HEAD when "
 				      "it does not point to any branch"));
 			die(_("no such branch '%s'"), argv[0]);
 		}
 
-		if (!branch_has_merge_config(branch))
+		എങ്കിൽ (!branch_has_merge_config(branch))
 			die(_("branch '%s' has no upstream information"), branch->name);
 
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "branch.%s.remote", branch->name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
+		repo_config_set_multivar(the_repository, buf.buf, ശൂന്യ, ശൂന്യ, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_reset(&buf);
 		strbuf_addf(&buf, "branch.%s.merge", branch->name);
-		repo_config_set_multivar(the_repository, buf.buf, NULL, NULL, CONFIG_FLAGS_MULTI_REPLACE);
+		repo_config_set_multivar(the_repository, buf.buf, ശൂന്യ, ശൂന്യ, CONFIG_FLAGS_MULTI_REPLACE);
 		strbuf_release(&buf);
-	} else if (!noncreate_actions && argc > 0 && argc <= 2) {
-		const char *branch_name = argv[0];
-		const char *start_name = argc == 2 ? argv[1] : head;
+	} അല്ലെങ്കിൽ എങ്കിൽ (!noncreate_actions && argc > 0 && argc <= 2) {
+		സ്ഥിരം അക്ഷരം *branch_name = argv[0];
+		സ്ഥിരം അക്ഷരം *start_name = argc == 2 ? argv[1] : head;
 
-		if (filter.kind != FILTER_REFS_BRANCHES)
+		എങ്കിൽ (filter.kind != FILTER_REFS_BRANCHES)
 			die(_("the -a, and -r, options to 'git branch' do not take a branch name.\n"
 				  "Did you mean to use: -a|-r --list <pattern>?"));
 
-		if (track == BRANCH_TRACK_OVERRIDE)
+		എങ്കിൽ (track == BRANCH_TRACK_OVERRIDE)
 			die(_("the '--set-upstream' option is no longer supported. Please use '--track' or '--set-upstream-to' instead"));
 
-		if (recurse_submodules) {
+		എങ്കിൽ (recurse_submodules) {
 			create_branches_recursively(the_repository, branch_name,
-						    start_name, NULL, force,
+						    start_name, ശൂന്യ, force,
 						    reflog, quiet, track, 0);
 			ret = 0;
-			goto out;
+			പോകുക out;
 		}
 		create_branch(the_repository, branch_name, start_name, force, 0,
 			      reflog, quiet, track, 0);
-	} else
+	} അല്ലെങ്കിൽ
 		usage_with_options(builtin_branch_usage, options);
 
 	ret = 0;
@@ -1315,5 +1315,5 @@ int cmd_branch(int argc,
 out:
 	strvec_clear(&delete_merged);
 	string_list_clear(&sorting_options, 0);
-	return ret;
+	തിരികെ ret;
 }

@@ -1,32 +1,32 @@
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "server-info.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "server-info.h"
 
-static const char * const update_server_info_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം update_server_info_usage[] = {
 	"git update-server-info [-f | --force]",
-	NULL
+	ശൂന്യ
 };
 
-int cmd_update_server_info(int argc,
-			   const char **argv,
-			   const char *prefix,
-			   struct repository *repo)
+പൂർണ്ണസംഖ്യ cmd_update_server_info(പൂർണ്ണസംഖ്യ argc,
+			   സ്ഥിരം അക്ഷരം **argv,
+			   സ്ഥിരം അക്ഷരം *prefix,
+			   ഘടന repository *repo)
 {
-	int force = 0;
-	struct option options[] = {
+	പൂർണ്ണസംഖ്യ force = 0;
+	ഘടന option options[] = {
 		OPT__FORCE(&force, N_("update the info files from scratch"), 0),
 		OPT_END()
 	};
 
-	repo_config(repo, git_default_config, NULL);
+	repo_config(repo, git_default_config, ശൂന്യ);
 
 	argc = parse_options(argc, argv, prefix, options,
 			     update_server_info_usage, 0);
-	if (argc > 0)
+	എങ്കിൽ (argc > 0)
 		usage_with_options(update_server_info_usage, options);
 
-	return !!update_server_info(repo, force);
+	തിരികെ !!update_server_info(repo, force);
 }

@@ -1,31 +1,31 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "quote.h"
-#include "pathspec.h"
-#include "parse-options.h"
-#include "submodule.h"
-#include "write-or-die.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "dir.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "quote.h"
+#അന്തര്ഭാവ "pathspec.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "submodule.h"
+#അന്തര്ഭാവ "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
-static const char * const check_ignore_usage[] = {
+സ്ഥിതം പൂർണ്ണസംഖ്യ quiet, verbose, stdin_paths, show_non_matching, no_index;
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
-NULL
+ശൂന്യ
 };
 
-static int nul_term_line;
+സ്ഥിതം പൂർണ്ണസംഖ്യ nul_term_വരി;
 
-static const struct option check_ignore_options[] = {
+സ്ഥിതം സ്ഥിരം ഘടന option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
 	OPT_BOOL(0, "stdin", &stdin_paths,
 		 N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', ശൂന്യ, &nul_term_വരി,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_BOOL('n', "non-matching", &show_non_matching,
 		 N_("show non-matching input paths")),
@@ -34,55 +34,55 @@ static const struct option check_ignore_options[] = {
 	OPT_END()
 };
 
-static void output_pattern(const char *path, struct path_pattern *pattern)
+സ്ഥിതം ശൂന്യം output_pattern(സ്ഥിരം അക്ഷരം *path, ഘടന path_pattern *pattern)
 {
-	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
-	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
+	സ്ഥിരം അക്ഷരം *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
+	സ്ഥിരം അക്ഷരം *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
+	എങ്കിൽ (!nul_term_വരി) {
+		എങ്കിൽ (!verbose) {
 			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
-				quote_c_style(pattern->pl->src, NULL, stdout, 0);
+		} അല്ലെങ്കിൽ {
+			എങ്കിൽ (pattern) {
+				quote_c_style(pattern->pl->src, ശൂന്യ, stdout, 0);
 				printf(":%d:%s%s%s\t",
 				       pattern->srcpos,
 				       bang, pattern->pattern, slash);
 			}
-			else {
+			അല്ലെങ്കിൽ {
 				printf("::\t");
 			}
-			quote_c_style(path, NULL, stdout, 0);
+			quote_c_style(path, ശൂന്യ, stdout, 0);
 			fputc('\n', stdout);
 		}
-	} else {
-		if (!verbose) {
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (!verbose) {
 			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
+		} അല്ലെങ്കിൽ {
+			എങ്കിൽ (pattern)
 				printf("%s%c%d%c%s%s%s%c%s%c",
 				       pattern->pl->src, '\0',
 				       pattern->srcpos, '\0',
 				       bang, pattern->pattern, slash, '\0',
 				       path, '\0');
-			else
+			അല്ലെങ്കിൽ
 				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_ignore(ഘടന dir_struct *dir,
+			സ്ഥിരം അക്ഷരം *prefix, പൂർണ്ണസംഖ്യ argc, സ്ഥിരം അക്ഷരം **argv)
 {
-	const char *full_path;
-	char *seen;
-	int num_ignored = 0, i;
-	struct path_pattern *pattern;
-	struct pathspec pathspec;
+	സ്ഥിരം അക്ഷരം *full_path;
+	അക്ഷരം *seen;
+	പൂർണ്ണസംഖ്യ അക്കം_ignored = 0, i;
+	ഘടന path_pattern *pattern;
+	ഘടന pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
+	എങ്കിൽ (!argc) {
+		എങ്കിൽ (!quiet)
 			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+		തിരികെ 0;
 	}
 
 	/*
@@ -104,99 +104,99 @@ static int check_ignore(struct dir_struct *dir,
 	 */
 	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
-		full_path = pathspec.items[i].match;
-		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
+	വേണ്ടി (i = 0; i < pathspec.nr; i++) {
+		full_path = pathspec.ഇനങ്ങൾ[i].match;
+		pattern = ശൂന്യ;
+		എങ്കിൽ (!seen[i]) {
+			പൂർണ്ണസംഖ്യ dtype = DT_UNKNOWN;
 			pattern = last_matching_pattern(dir, the_repository->index,
 							full_path, &dtype);
-			if (!verbose && pattern &&
+			എങ്കിൽ (!verbose && pattern &&
 			    pattern->flags & PATTERN_FLAG_NEGATIVE)
-				pattern = NULL;
+				pattern = ശൂന്യ;
 		}
-		if (!quiet && (pattern || show_non_matching))
-			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
-			num_ignored++;
+		എങ്കിൽ (!quiet && (pattern || show_non_matching))
+			output_pattern(pathspec.ഇനങ്ങൾ[i].original, pattern);
+		എങ്കിൽ (pattern)
+			അക്കം_ignored++;
 	}
-	free(seen);
+	സ്വതന്ത്രം(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	തിരികെ അക്കം_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+സ്ഥിതം പൂർണ്ണസംഖ്യ check_ignore_stdin_paths(ഘടന dir_struct *dir, സ്ഥിരം അക്ഷരം *prefix)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *pathspec[2] = { NULL, NULL };
+	ഘടന strbuf buf = STRBUF_INIT;
+	ഘടന strbuf unquoted = STRBUF_INIT;
+	അക്ഷരം *pathspec[2] = { ശൂന്യ, ശൂന്യ };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	പൂർണ്ണസംഖ്യ അക്കം_ignored = 0;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_term_വരി ? strbuf_getline_nul : strbuf_getline_lf;
+	ആകുമ്പോൾ (getline_fn(&buf, stdin) != EOF) {
+		എങ്കിൽ (!nul_term_വരി && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			എങ്കിൽ (unquote_c_style(&unquoted, buf.buf, ശൂന്യ))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
-		num_ignored += check_ignore(dir, prefix,
-					    1, (const char **)pathspec);
+		അക്കം_ignored += check_ignore(dir, prefix,
+					    1, (സ്ഥിരം അക്ഷരം **)pathspec);
 		maybe_flush_or_die(stdout, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	തിരികെ അക്കം_ignored;
 }
 
-int cmd_check_ignore(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_check_ignore(പൂർണ്ണസംഖ്യ argc,
+		     സ്ഥിരം അക്ഷരം **argv,
+		     സ്ഥിരം അക്ഷരം *prefix,
+		     ഘടന repository *repo UNUSED)
 {
-	int num_ignored;
-	struct dir_struct dir = DIR_INIT;
+	പൂർണ്ണസംഖ്യ അക്കം_ignored;
+	ഘടന dir_struct dir = DIR_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, ശൂന്യ);
 
 	argc = parse_options(argc, argv, prefix, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	എങ്കിൽ (stdin_paths) {
+		എങ്കിൽ (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (nul_term_വരി)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		എങ്കിൽ (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	എങ്കിൽ (quiet) {
+		എങ്കിൽ (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		എങ്കിൽ (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	എങ്കിൽ (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	എങ്കിൽ (!no_index && repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	setup_standard_excludes(&dir);
 
-	if (stdin_paths) {
-		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
-		num_ignored = check_ignore(&dir, prefix, argc, argv);
+	എങ്കിൽ (stdin_paths) {
+		അക്കം_ignored = check_ignore_stdin_paths(&dir, prefix);
+	} അല്ലെങ്കിൽ {
+		അക്കം_ignored = check_ignore(&dir, prefix, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	തിരികെ !അക്കം_ignored;
 }

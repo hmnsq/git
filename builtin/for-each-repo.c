@@ -1,48 +1,48 @@
 #define USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "run-command.h"
-#include "string-list.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "config.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "run-command.h"
+#അന്തര്ഭാവ "string-list.h"
 
-static const char * const for_each_repo_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം * സ്ഥിരം for_each_repo_usage[] = {
 	N_("git for-each-repo --config=<config> [--] <arguments>"),
-	NULL
+	ശൂന്യ
 };
 
-static int run_command_on_repo(const char *path, const char **argv)
+സ്ഥിതം പൂർണ്ണസംഖ്യ run_command_on_repo(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം **argv)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *abspath = interpolate_path(path, 0);
+	ഘടന child_process child = CHILD_PROCESS_INIT;
+	അക്ഷരം *abspath = interpolate_path(path, 0);
 
 	sanitize_repo_env(&child.env);
 
 	child.git_cmd = 1;
-	strvec_pushl(&child.args, "-C", abspath, NULL);
+	strvec_pushl(&child.args, "-C", abspath, ശൂന്യ);
 	strvec_pushv(&child.args, argv);
 
-	free(abspath);
+	സ്വതന്ത്രം(abspath);
 
-	return run_command(&child);
+	തിരികെ run_command(&child);
 }
 
-int cmd_for_each_repo(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_for_each_repo(പൂർണ്ണസംഖ്യ argc,
+		      സ്ഥിരം അക്ഷരം **argv,
+		      സ്ഥിരം അക്ഷരം *prefix,
+		      ഘടന repository *repo UNUSED)
 {
-	static const char *config_key = NULL;
-	int keep_going = 0;
-	int result = 0;
-	const struct string_list *values;
-	int err;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *config_താക്കോൽ = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ keep_going = 0;
+	പൂർണ്ണസംഖ്യ result = 0;
+	സ്ഥിരം ഘടന string_list *മൂല്യങ്ങൾ;
+	പൂർണ്ണസംഖ്യ err;
 
-	const struct option options[] = {
-		OPT_STRING(0, "config", &config_key, N_("config"),
+	സ്ഥിരം ഘടന option options[] = {
+		OPT_STRING(0, "config", &config_താക്കോൽ, N_("config"),
 			   N_("config key storing a list of repository paths")),
 		OPT_BOOL(0, "keep-going", &keep_going,
 			 N_("keep going even if command fails in a repository")),
@@ -52,24 +52,24 @@ int cmd_for_each_repo(int argc,
 	argc = parse_options(argc, argv, prefix, options, for_each_repo_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (!config_key)
+	എങ്കിൽ (!config_താക്കോൽ)
 		die(_("missing --config=<config>"));
 
-	err = repo_config_get_string_multi(the_repository, config_key, &values);
-	if (err < 0)
-		usage_msg_optf(_("got bad config --config=%s"),
-			       for_each_repo_usage, options, config_key);
-	else if (err)
-		return 0;
+	err = repo_config_get_string_multi(the_repository, config_താക്കോൽ, &മൂല്യങ്ങൾ);
+	എങ്കിൽ (err < 0)
+		usage_സന്ദേശം_optf(_("got bad config --config=%s"),
+			       for_each_repo_usage, options, config_താക്കോൽ);
+	അല്ലെങ്കിൽ എങ്കിൽ (err)
+		തിരികെ 0;
 
-	for (size_t i = 0; i < values->nr; i++) {
-		int ret = run_command_on_repo(values->items[i].string, argv);
-		if (ret) {
-			if (!keep_going)
-					return ret;
+	വേണ്ടി (size_t i = 0; i < മൂല്യങ്ങൾ->nr; i++) {
+		പൂർണ്ണസംഖ്യ ret = run_command_on_repo(മൂല്യങ്ങൾ->ഇനങ്ങൾ[i].string, argv);
+		എങ്കിൽ (ret) {
+			എങ്കിൽ (!keep_going)
+					തിരികെ ret;
 			result = 1;
 		}
 	}
 
-	return result;
+	തിരികെ result;
 }

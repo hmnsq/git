@@ -4,63 +4,63 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "refs.h"
-#include "setup.h"
-#include "strbuf.h"
+#അന്തര്ഭാവ "builtin.h"
+#അന്തര്ഭാവ "abspath.h"
+#അന്തര്ഭാവ "environment.h"
+#അന്തര്ഭാവ "gettext.h"
+#അന്തര്ഭാവ "parse-options.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "refs.h"
+#അന്തര്ഭാവ "setup.h"
+#അന്തര്ഭാവ "strbuf.h"
 
-static int guess_repository_type(const char *git_dir)
+സ്ഥിതം പൂർണ്ണസംഖ്യ guess_repository_type(സ്ഥിരം അക്ഷരം *git_dir)
 {
-	const char *slash;
-	char *cwd;
-	int cwd_is_git_dir;
+	സ്ഥിരം അക്ഷരം *slash;
+	അക്ഷരം *cwd;
+	പൂർണ്ണസംഖ്യ cwd_is_git_dir;
 
 	/*
 	 * "GIT_DIR=. git init" is always bare.
 	 * "GIT_DIR=`pwd` git init" too.
 	 */
-	if (!strcmp(".", git_dir))
-		return 1;
+	എങ്കിൽ (!strcmp(".", git_dir))
+		തിരികെ 1;
 	cwd = xgetcwd();
 	cwd_is_git_dir = !strcmp(git_dir, cwd);
-	free(cwd);
-	if (cwd_is_git_dir)
-		return 1;
+	സ്വതന്ത്രം(cwd);
+	എങ്കിൽ (cwd_is_git_dir)
+		തിരികെ 1;
 	/*
 	 * "GIT_DIR=.git or GIT_DIR=something/.git is usually not.
 	 */
-	if (!strcmp(git_dir, ".git"))
-		return 0;
+	എങ്കിൽ (!strcmp(git_dir, ".git"))
+		തിരികെ 0;
 	slash = strrchr(git_dir, '/');
-	if (slash && !strcmp(slash, "/.git"))
-		return 0;
+	എങ്കിൽ (slash && !strcmp(slash, "/.git"))
+		തിരികെ 0;
 
 	/*
 	 * Otherwise it is often bare.  At this point
 	 * we are just guessing.
 	 */
-	return 1;
+	തിരികെ 1;
 }
 
-static int shared_callback(const struct option *opt, const char *arg, int unset)
+സ്ഥിതം പൂർണ്ണസംഖ്യ shared_callback(സ്ഥിരം ഘടന option *opt, സ്ഥിരം അക്ഷരം *arg, പൂർണ്ണസംഖ്യ unset)
 {
 	BUG_ON_OPT_NEG(unset);
-	*((int *) opt->value) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
-	return 0;
+	*((പൂർണ്ണസംഖ്യ *) opt->മൂല്യം) = (arg) ? git_config_perm("arg", arg) : PERM_GROUP;
+	തിരികെ 0;
 }
 
-static const char *const init_db_usage[] = {
+സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം init_db_usage[] = {
 	N_("git init [-q | --quiet] [--bare] [--template=<template-directory>]\n"
 	   "         [--separate-git-dir <git-dir>] [--object-format=<format>]\n"
 	   "         [--ref-storage-format=<format>]\n"
 	   "         [-b <branch-name> | --initial-branch=<branch-name>]\n"
 	   "         [--shared[=<permissions>]] [<directory>]"),
-	NULL
+	ശൂന്യ
 };
 
 /*
@@ -69,25 +69,25 @@ static const char *const init_db_usage[] = {
  * On the other hand, it might just make lookup slower and messier. You
  * be the judge.  The default case is to have one DB per managed directory.
  */
-int cmd_init_db(int argc,
-		const char **argv,
-		const char *prefix,
-		struct repository *repo UNUSED)
+പൂർണ്ണസംഖ്യ cmd_init_db(പൂർണ്ണസംഖ്യ argc,
+		സ്ഥിരം അക്ഷരം **argv,
+		സ്ഥിരം അക്ഷരം *prefix,
+		ഘടന repository *repo UNUSED)
 {
-	char *git_dir;
-	const char *real_git_dir = NULL;
-	char *real_git_dir_to_free = NULL;
-	char *work_tree = NULL;
-	const char *template_dir = NULL;
-	char *template_dir_to_free = NULL;
-	int quiet = 0;
-	int bare = startup_info->force_bare_repository ? 1 : -1;
-	const char *object_format = NULL;
-	const char *ref_storage_format_uri = NULL;
-	const char *initial_branch = NULL;
-	int hash_algo = GIT_HASH_UNKNOWN;
-	int init_shared_repository = -1;
-	const struct option init_db_options[] = {
+	അക്ഷരം *git_dir;
+	സ്ഥിരം അക്ഷരം *real_git_dir = ശൂന്യ;
+	അക്ഷരം *real_git_dir_to_free = ശൂന്യ;
+	അക്ഷരം *work_വൃക്ഷം = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *template_dir = ശൂന്യ;
+	അക്ഷരം *template_dir_to_free = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ quiet = 0;
+	പൂർണ്ണസംഖ്യ bare = startup_info->force_bare_repository ? 1 : -1;
+	സ്ഥിരം അക്ഷരം *object_format = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *ref_storage_format_uri = ശൂന്യ;
+	സ്ഥിരം അക്ഷരം *initial_branch = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ hash_algo = GIT_HASH_UNKNOWN;
+	പൂർണ്ണസംഖ്യ init_shared_repository = -1;
+	സ്ഥിരം ഘടന option init_db_options[] = {
 		OPT_STRING(0, "template", &template_dir, N_("template-directory"),
 				N_("directory from which templates will be used")),
 		OPT_SET_INT(0, "bare", &bare,
@@ -95,7 +95,7 @@ int cmd_init_db(int argc,
 		{
 			.type = OPTION_CALLBACK,
 			.long_name = "shared",
-			.value = &init_shared_repository,
+			.മൂല്യം = &init_shared_repository,
 			.argh = N_("permissions"),
 			.help = N_("specify that the git repository is to be shared amongst several users"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_NONEG,
@@ -113,25 +113,25 @@ int cmd_init_db(int argc,
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_END()
 	};
-	int reinit;
+	പൂർണ്ണസംഖ്യ reinit;
 
 	argc = parse_options(argc, argv, prefix, init_db_options, init_db_usage, 0);
 
-	if (real_git_dir && bare == 1)
+	എങ്കിൽ (real_git_dir && bare == 1)
 		die(_("options '%s' and '%s' cannot be used together"), "--separate-git-dir", "--bare");
 
-	if (real_git_dir && !is_absolute_path(real_git_dir))
+	എങ്കിൽ (real_git_dir && !is_absolute_path(real_git_dir))
 		real_git_dir = real_git_dir_to_free = real_pathdup(real_git_dir, 1);
 
-	if (template_dir && *template_dir && !is_absolute_path(template_dir))
+	എങ്കിൽ (template_dir && *template_dir && !is_absolute_path(template_dir))
 		template_dir = template_dir_to_free = absolute_pathdup(template_dir);
 
-	if (argc == 1) {
-		int mkdir_tried = 0;
+	എങ്കിൽ (argc == 1) {
+		പൂർണ്ണസംഖ്യ mkdir_tried = 0;
 	retry:
-		if (chdir(argv[0]) < 0) {
-			if (!mkdir_tried) {
-				int saved;
+		എങ്കിൽ (chdir(argv[0]) < 0) {
+			എങ്കിൽ (!mkdir_tried) {
+				പൂർണ്ണസംഖ്യ saved;
 				/*
 				 * At this point we haven't read any configuration,
 				 * and we know shared_repository should always be 0;
@@ -139,41 +139,41 @@ int cmd_init_db(int argc,
 				 */
 				saved = repo_settings_get_shared_repository(the_repository);
 				repo_settings_set_shared_repository(the_repository, 0);
-				switch (safe_create_leading_directories_const(the_repository, argv[0])) {
-				case SCLD_OK:
-				case SCLD_PERMS:
-					break;
-				case SCLD_EXISTS:
+				തിരഞ്ഞെടുപ്പ് (safe_create_leading_directories_const(the_repository, argv[0])) {
+				അവസ്ഥ SCLD_OK:
+				അവസ്ഥ SCLD_PERMS:
+					നിർത്തുക;
+				അവസ്ഥ SCLD_EXISTS:
 					errno = EEXIST;
 					/* fallthru */
-				default:
+				സ്ഥിരസ്ഥിതി:
 					die_errno(_("cannot mkdir %s"), argv[0]);
-					break;
+					നിർത്തുക;
 				}
 				repo_settings_set_shared_repository(the_repository, saved);
-				if (mkdir(argv[0], 0777) < 0)
+				എങ്കിൽ (mkdir(argv[0], 0777) < 0)
 					die_errno(_("cannot mkdir %s"), argv[0]);
 				mkdir_tried = 1;
-				goto retry;
+				പോകുക retry;
 			}
 			die_errno(_("cannot chdir to %s"), argv[0]);
 		}
-	} else if (0 < argc) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (0 < argc) {
 		usage(init_db_usage[0]);
 	}
-	if (bare == 1) {
-		char *cwd = xgetcwd();
+	എങ്കിൽ (bare == 1) {
+		അക്ഷരം *cwd = xgetcwd();
 		setenv(GIT_DIR_ENVIRONMENT, cwd, argc > 0);
-		free(cwd);
+		സ്വതന്ത്രം(cwd);
 	}
 
-	if (object_format) {
+	എങ്കിൽ (object_format) {
 		hash_algo = hash_algo_by_name(object_format);
-		if (hash_algo == GIT_HASH_UNKNOWN)
+		എങ്കിൽ (hash_algo == GIT_HASH_UNKNOWN)
 			die(_("unknown hash algorithm '%s'"), object_format);
 	}
 
-	if (init_shared_repository != -1)
+	എങ്കിൽ (init_shared_repository != -1)
 		repo_settings_set_shared_repository(the_repository, init_shared_repository);
 
 	/*
@@ -181,17 +181,17 @@ int cmd_init_db(int argc,
 	 * without --bare.  Catch the error early.
 	 */
 	git_dir = xstrdup_or_null(getenv(GIT_DIR_ENVIRONMENT));
-	work_tree = xstrdup_or_null(getenv(GIT_WORK_TREE_ENVIRONMENT));
-	if ((!git_dir || bare == 1) && work_tree)
+	work_വൃക്ഷം = xstrdup_or_null(getenv(GIT_WORK_വൃക്ഷം_ENVIRONMENT));
+	എങ്കിൽ ((!git_dir || bare == 1) && work_വൃക്ഷം)
 		die(_("%s (or --work-tree=<directory>) not allowed without "
 			  "specifying %s (or --git-dir=<directory>)"),
-		    GIT_WORK_TREE_ENVIRONMENT,
+		    GIT_WORK_വൃക്ഷം_ENVIRONMENT,
 		    GIT_DIR_ENVIRONMENT);
 
 	/*
 	 * Set up the default .git directory contents
 	 */
-	if (!git_dir)
+	എങ്കിൽ (!git_dir)
 		git_dir = xstrdup(DEFAULT_GIT_DIR_ENVIRONMENT);
 
 	/*
@@ -199,72 +199,72 @@ int cmd_init_db(int argc,
 	 * care to ensure that the common .git/ directory is relocated, not
 	 * the worktree-specific .git/worktrees/<id>/ directory.
 	 */
-	if (real_git_dir) {
-		int err;
-		const char *p;
-		struct strbuf sb = STRBUF_INIT;
+	എങ്കിൽ (real_git_dir) {
+		പൂർണ്ണസംഖ്യ err;
+		സ്ഥിരം അക്ഷരം *p;
+		ഘടന strbuf sb = STRBUF_INIT;
 
 		p = read_gitfile_gently(git_dir, &err);
-		if (p && get_common_dir(&sb, p)) {
-			struct strbuf mainwt = STRBUF_INIT;
+		എങ്കിൽ (p && get_common_dir(&sb, p)) {
+			ഘടന strbuf mainwt = STRBUF_INIT;
 
 			strbuf_addbuf(&mainwt, &sb);
 			strbuf_strip_suffix(&mainwt, "/.git");
-			if (chdir(mainwt.buf) < 0)
+			എങ്കിൽ (chdir(mainwt.buf) < 0)
 				die_errno(_("cannot chdir to %s"), mainwt.buf);
 			strbuf_release(&mainwt);
-			free(git_dir);
-			git_dir = strbuf_detach(&sb, NULL);
+			സ്വതന്ത്രം(git_dir);
+			git_dir = strbuf_detach(&sb, ശൂന്യ);
 		}
 		strbuf_release(&sb);
 	}
 
-	if (bare < 0)
+	എങ്കിൽ (bare < 0)
 		bare = guess_repository_type(git_dir);
 
-	if (!bare) {
-		const char *git_dir_parent = strrchr(git_dir, '/');
+	എങ്കിൽ (!bare) {
+		സ്ഥിരം അക്ഷരം *git_dir_parent = strrchr(git_dir, '/');
 
-		if (!work_tree) {
-			if (git_dir_parent) {
-				char *rel = xstrndup(git_dir, git_dir_parent - git_dir);
-				work_tree = real_pathdup(rel, 1);
-				free(rel);
-			} else {
-				work_tree = xgetcwd();
+		എങ്കിൽ (!work_വൃക്ഷം) {
+			എങ്കിൽ (git_dir_parent) {
+				അക്ഷരം *rel = xstrndup(git_dir, git_dir_parent - git_dir);
+				work_വൃക്ഷം = real_pathdup(rel, 1);
+				സ്വതന്ത്രം(rel);
+			} അല്ലെങ്കിൽ {
+				work_വൃക്ഷം = xgetcwd();
 			}
 		}
 
-		if (access(work_tree, X_OK))
-			die_errno (_("Cannot access work tree '%s'"), work_tree);
-	} else if (real_git_dir) {
+		എങ്കിൽ (access(work_വൃക്ഷം, X_OK))
+			die_errno (_("Cannot access work tree '%s'"), work_വൃക്ഷം);
+	} അല്ലെങ്കിൽ എങ്കിൽ (real_git_dir) {
 		die(_("--separate-git-dir incompatible with bare repository"));
 	}
 
-	create_repository(the_repository, git_dir, real_git_dir, work_tree,
+	create_repository(the_repository, git_dir, real_git_dir, work_വൃക്ഷം,
 			  template_dir, hash_algo, ref_storage_format_uri,
 			  init_shared_repository, &reinit);
 	create_reference_database(the_repository, initial_branch, quiet);
-	create_object_database(the_repository, NULL);
+	create_object_database(the_repository, ശൂന്യ);
 
-	if (!quiet) {
-		int len = strlen(git_dir);
+	എങ്കിൽ (!quiet) {
+		പൂർണ്ണസംഖ്യ len = strlen(git_dir);
 
-		if (reinit)
+		എങ്കിൽ (reinit)
 			printf(repo_settings_get_shared_repository(the_repository)
 			       ? _("Reinitialized existing shared Git repository in %s%s\n")
 			       : _("Reinitialized existing Git repository in %s%s\n"),
 			       git_dir, len && git_dir[len-1] != '/' ? "/" : "");
-		else
+		അല്ലെങ്കിൽ
 			printf(repo_settings_get_shared_repository(the_repository)
 			       ? _("Initialized empty shared Git repository in %s%s\n")
 			       : _("Initialized empty Git repository in %s%s\n"),
 			       git_dir, len && git_dir[len-1] != '/' ? "/" : "");
 	}
 
-	free(template_dir_to_free);
-	free(real_git_dir_to_free);
-	free(work_tree);
-	free(git_dir);
-	return 0;
+	സ്വതന്ത്രം(template_dir_to_free);
+	സ്വതന്ത്രം(real_git_dir_to_free);
+	സ്വതന്ത്രം(work_വൃക്ഷം);
+	സ്വതന്ത്രം(git_dir);
+	തിരികെ 0;
 }
