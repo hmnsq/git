@@ -25,68 +25,68 @@
 	   "                       [--changed-paths] [--[no-]max-new-filters <n>] [--[no-]progress]\n" \
 	   "                       <split-options>")
 
-static const char * const builtin_commit_graph_verify_usage[] = {
+static const var_na * const builtin_commit_graph_verify_usage[] = {
 	BUILTIN_COMMIT_GRAPH_VERIFY_USAGE,
 	NULL
 };
 
-static const char * const builtin_commit_graph_write_usage[] = {
+static const var_na * const builtin_commit_graph_write_usage[] = {
 	BUILTIN_COMMIT_GRAPH_WRITE_USAGE,
 	NULL
 };
 
-static char const * const builtin_commit_graph_usage[] = {
+static var_na const * const builtin_commit_graph_usage[] = {
 	BUILTIN_COMMIT_GRAPH_VERIFY_USAGE,
 	BUILTIN_COMMIT_GRAPH_WRITE_USAGE,
 	NULL,
 };
 
-static struct opts_commit_graph {
-	const char *obj_dir;
-	int reachable;
-	int stdin_packs;
-	int stdin_commits;
-	int append;
-	int split;
-	int shallow;
-	int progress;
-	int enable_changed_paths;
+static sa_nracanaa opts_commit_graph {
+	const var_na *obj_dir;
+	จำนวนเต็ม reachable;
+	จำนวนเต็ม stdin_packs;
+	จำนวนเต็ม stdin_commits;
+	จำนวนเต็ม append;
+	จำนวนเต็ม split;
+	จำนวนเต็ม shallow;
+	จำนวนเต็ม progress;
+	จำนวนเต็ม enable_changed_paths;
 } opts;
 
-static struct option common_opts[] = {
+static sa_nracanaa option common_opts[] = {
 	OPT_STRING(0, "object-dir", &opts.obj_dir,
 		   N_("dir"),
 		   N_("the object directory to store the graph")),
 	OPT_END()
 };
 
-static struct option *add_common_options(struct option *to)
+static sa_nracanaa option *add_common_options(sa_nracanaa option *to)
 {
-	return parse_options_concat(common_opts, to);
+	คืน parse_options_concat(common_opts, to);
 }
 
-static int graph_verify(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+static จำนวนเต็ม graph_verify(จำนวนเต็ม argc, const var_na **argv, const var_na *prefix,
+			sa_nracanaa repository *repo UNUSED)
 {
-	struct commit_graph *graph = NULL;
-	struct odb_files_dir *dir = NULL;
-	char *graph_name;
-	char *chain_name;
-	enum { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
-	int fd;
-	struct stat st;
-	int flags = 0;
-	int incomplete_chain = 0;
-	int ret;
+	sa_nracanaa commit_graph *graph = NULL;
+	sa_nracanaa odb_files_dir *dir = NULL;
+	var_na *graph_name;
+	var_na *chain_name;
+	ga_nanaa { OPENED_NONE, OPENED_GRAPH, OPENED_CHAIN } opened = OPENED_NONE;
+	จำนวนเต็ม fd;
+	sa_nracanaa stat st;
+	จำนวนเต็ม flags = 0;
+	จำนวนเต็ม incomplete_chain = 0;
+	จำนวนเต็ม ret;
 
-	static struct option builtin_commit_graph_verify_options[] = {
+	static sa_nracanaa option builtin_commit_graph_verify_options[] = {
 		OPT_BOOL(0, "shallow", &opts.shallow,
 			 N_("if the commit-graph is split, only verify the tip file")),
 		OPT_BOOL(0, "progress", &opts.progress,
 			 N_("force progress reporting")),
 		OPT_END(),
 	};
-	struct option *options = add_common_options(builtin_commit_graph_verify_options);
+	sa_nracanaa option *options = add_common_options(builtin_commit_graph_verify_options);
 
 	trace2_cmd_mode("verify");
 
@@ -94,148 +94,148 @@ static int graph_verify(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_commit_graph_verify_usage, 0);
-	if (argc)
+	ถ้า (argc)
 		usage_with_options(builtin_commit_graph_verify_usage, options);
 
-	if (!opts.obj_dir)
+	ถ้า (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.shallow)
+	ถ้า (opts.shallow)
 		flags |= COMMIT_GRAPH_VERIFY_SHALLOW;
-	if (opts.progress)
+	ถ้า (opts.progress)
 		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
 
 	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	ถ้า (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
 	graph_name = get_commit_graph_filename(dir->abspath);
 	chain_name = get_commit_graph_chain_filename(dir->abspath);
-	if (open_commit_graph(graph_name, &fd, &st))
+	ถ้า (open_commit_graph(graph_name, &fd, &st))
 		opened = OPENED_GRAPH;
-	else if (errno != ENOENT)
+	มิฉะนั้น ถ้า (errno != ENOENT)
 		die_errno(_("Could not open commit-graph '%s'"), graph_name);
-	else if (open_commit_graph_chain(chain_name, &fd, &st,
+	มิฉะนั้น ถ้า (open_commit_graph_chain(chain_name, &fd, &st,
 					 the_repository->hash_algo))
 		opened = OPENED_CHAIN;
-	else if (errno != ENOENT)
+	มิฉะนั้น ถ้า (errno != ENOENT)
 		die_errno(_("could not open commit-graph chain '%s'"), chain_name);
 
 	FREE_AND_NULL(graph_name);
 	FREE_AND_NULL(chain_name);
 	FREE_AND_NULL(options);
 
-	if (opened == OPENED_NONE)
-		return 0;
-	else if (opened == OPENED_GRAPH)
+	ถ้า (opened == OPENED_NONE)
+		คืน 0;
+	มิฉะนั้น ถ้า (opened == OPENED_GRAPH)
 		graph = load_commit_graph_one_fd_st(the_repository, dir->abspath, fd, &st);
-	else
+	มิฉะนั้น
 		graph = load_commit_graph_chain_fd_st(the_repository->objects, fd, &st,
 						      &incomplete_chain);
 
-	if (!graph)
-		return 1;
+	ถ้า (!graph)
+		คืน 1;
 
 	ret = verify_commit_graph(graph, flags);
 	free_commit_graph(graph);
 
-	if (incomplete_chain) {
+	ถ้า (incomplete_chain) {
 		error("one or more commit-graph chain files could not be loaded");
 		ret |= 1;
 	}
 
-	return ret;
+	คืน ret;
 }
 
-extern int read_replace_refs;
-static struct commit_graph_opts write_opts;
+extern จำนวนเต็ม read_replace_refs;
+static sa_nracanaa commit_graph_opts write_opts;
 
-static int write_option_parse_split(const struct option *opt, const char *arg,
-				    int unset)
+static จำนวนเต็ม write_option_parse_split(const sa_nracanaa option *opt, const var_na *arg,
+				    จำนวนเต็ม unset)
 {
-	enum commit_graph_split_flags *flags = opt->value;
+	ga_nanaa commit_graph_split_flags *flags = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
 	opts.split = 1;
-	if (!arg)
-		return 0;
+	ถ้า (!arg)
+		คืน 0;
 
-	if (!strcmp(arg, "no-merge"))
+	ถ้า (!strcmp(arg, "no-merge"))
 		*flags = COMMIT_GRAPH_SPLIT_MERGE_PROHIBITED;
-	else if (!strcmp(arg, "replace"))
+	มิฉะนั้น ถ้า (!strcmp(arg, "replace"))
 		*flags = COMMIT_GRAPH_SPLIT_REPLACE;
-	else
+	มิฉะนั้น
 		die(_("unrecognized --split argument, %s"), arg);
 
-	return 0;
+	คืน 0;
 }
 
-static int read_one_commit(struct oidset *commits, struct progress *progress,
-			   const char *hash)
+static จำนวนเต็ม read_one_commit(sa_nracanaa oidset *commits, sa_nracanaa progress *progress,
+			   const var_na *hash)
 {
-	struct object *result;
-	struct object_id oid;
-	const char *end;
+	sa_nracanaa object *result;
+	sa_nracanaa object_id oid;
+	const var_na *end;
 
-	if (parse_oid_hex(hash, &oid, &end))
-		return error(_("unexpected non-hex object ID: %s"), hash);
+	ถ้า (parse_oid_hex(hash, &oid, &end))
+		คืน error(_("unexpected non-hex object ID: %s"), hash);
 
 	result = deref_tag(the_repository, parse_object(the_repository, &oid),
 			   NULL, 0);
-	if (!result)
-		return error(_("invalid object: %s"), hash);
-	else if (object_as_type(result, OBJ_COMMIT, 1))
+	ถ้า (!result)
+		คืน error(_("invalid object: %s"), hash);
+	มิฉะนั้น ถ้า (object_as_type(result, OBJ_COMMIT, 1))
 		oidset_insert(commits, &result->oid);
 
 	display_progress(progress, oidset_size(commits));
 
-	return 0;
+	คืน 0;
 }
 
-static int write_option_max_new_filters(const struct option *opt,
-					const char *arg,
-					int unset)
+static จำนวนเต็ม write_option_max_new_filters(const sa_nracanaa option *opt,
+					const var_na *arg,
+					จำนวนเต็ม unset)
 {
-	int *to = opt->value;
-	if (unset)
+	จำนวนเต็ม *to = opt->value;
+	ถ้า (unset)
 		*to = -1;
-	else {
-		const char *s;
-		*to = strtol(arg, (char **)&s, 10);
-		if (*s)
-			return error(_("option `%s' expects a numerical value"),
+	มิฉะนั้น {
+		const var_na *s;
+		*to = strtol(arg, (var_na **)&s, 10);
+		ถ้า (*s)
+			คืน error(_("option `%s' expects a numerical value"),
 				     "max-new-filters");
 	}
-	return 0;
+	คืน 0;
 }
 
-static int git_commit_graph_write_config(const char *var, const char *value,
-					 const struct config_context *ctx,
+static จำนวนเต็ม git_commit_graph_write_config(const var_na *var, const var_na *value,
+					 const sa_nracanaa config_context *ctx,
 					 void *cb UNUSED)
 {
-	if (!strcmp(var, "commitgraph.maxnewfilters"))
+	ถ้า (!strcmp(var, "commitgraph.maxnewfilters"))
 		write_opts.max_new_filters = git_config_int(var, value, ctx->kvi);
-	else if (!strcmp(var, "commitgraph.changedpaths"))
+	มิฉะนั้น ถ้า (!strcmp(var, "commitgraph.changedpaths"))
 		opts.enable_changed_paths = git_config_bool(var, value) ? 1 : -1;
 	/*
 	 * No need to fall-back to 'git_default_config', since this was already
 	 * called in 'cmd_commit_graph()'.
 	 */
-	return 0;
+	คืน 0;
 }
 
-static int graph_write(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+static จำนวนเต็ม graph_write(จำนวนเต็ม argc, const var_na **argv, const var_na *prefix,
+		       sa_nracanaa repository *repo UNUSED)
 {
-	struct string_list pack_indexes = STRING_LIST_INIT_DUP;
-	struct strbuf buf = STRBUF_INIT;
-	struct oidset commits = OIDSET_INIT;
-	struct odb_files_dir *dir = NULL;
-	int result = 0;
-	enum commit_graph_write_flags flags = 0;
-	struct progress *progress = NULL;
+	sa_nracanaa string_list pack_indexes = STRING_LIST_INIT_DUP;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	sa_nracanaa oidset commits = OIDSET_INIT;
+	sa_nracanaa odb_files_dir *dir = NULL;
+	จำนวนเต็ม result = 0;
+	ga_nanaa commit_graph_write_flags flags = 0;
+	sa_nracanaa progress *progress = NULL;
 
-	static struct option builtin_commit_graph_write_options[] = {
+	static sa_nracanaa option builtin_commit_graph_write_options[] = {
 		OPT_BOOL(0, "reachable", &opts.reachable,
 			N_("start walk at all refs")),
 		OPT_BOOL(0, "stdin-packs", &opts.stdin_packs,
@@ -263,7 +263,7 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 			 N_("force progress reporting")),
 		OPT_END(),
 	};
-	struct option *options = add_common_options(builtin_commit_graph_write_options);
+	sa_nracanaa option *options = add_common_options(builtin_commit_graph_write_options);
 
 	opts.progress = isatty(2);
 	opts.enable_changed_paths = -1;
@@ -279,58 +279,58 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix,
 			     options,
 			     builtin_commit_graph_write_usage, 0);
-	if (argc)
+	ถ้า (argc)
 		usage_with_options(builtin_commit_graph_write_usage, options);
 
-	if (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
+	ถ้า (opts.reachable + opts.stdin_packs + opts.stdin_commits > 1)
 		die(_("use at most one of --reachable, --stdin-commits, or --stdin-packs"));
-	if (!opts.obj_dir)
+	ถ้า (!opts.obj_dir)
 		opts.obj_dir = repo_get_object_directory(the_repository);
-	if (opts.append)
+	ถ้า (opts.append)
 		flags |= COMMIT_GRAPH_WRITE_APPEND;
-	if (opts.split)
+	ถ้า (opts.split)
 		flags |= COMMIT_GRAPH_WRITE_SPLIT;
-	if (opts.progress)
+	ถ้า (opts.progress)
 		flags |= COMMIT_GRAPH_WRITE_PROGRESS;
-	if (!opts.enable_changed_paths)
+	ถ้า (!opts.enable_changed_paths)
 		flags |= COMMIT_GRAPH_NO_WRITE_BLOOM_FILTERS;
-	if (opts.enable_changed_paths == 1 ||
+	ถ้า (opts.enable_changed_paths == 1 ||
 	    git_env_bool(GIT_TEST_COMMIT_GRAPH_CHANGED_PATHS, 0))
 		flags |= COMMIT_GRAPH_WRITE_BLOOM_FILTERS;
 
 	dir = odb_source_files_find_dir(the_repository->objects, opts.obj_dir);
-	if (!dir)
+	ถ้า (!dir)
 		die(_("could not find object directory matching %s"), opts.obj_dir);
 
-	if (opts.reachable) {
-		if (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
+	ถ้า (opts.reachable) {
+		ถ้า (write_commit_graph_reachable(the_repository, dir->abspath, flags, &write_opts))
 			result = 1;
 		goto cleanup;
 	}
 
-	if (opts.stdin_packs) {
-		struct strbuf packname = STRBUF_INIT;
+	ถ้า (opts.stdin_packs) {
+		sa_nracanaa strbuf packname = STRBUF_INIT;
 		size_t dirlen;
 
 		strbuf_addf(&packname, "%s/pack/", dir->abspath);
 		dirlen = packname.len;
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
+		ขณะ (strbuf_getline(&buf, stdin) != EOF) {
 			strbuf_setlen(&packname, dirlen);
 			strbuf_addbuf(&packname, &buf);
 			string_list_append(&pack_indexes, packname.buf);
 		}
 
 		strbuf_release(&packname);
-	} else if (opts.stdin_commits) {
+	} มิฉะนั้น ถ้า (opts.stdin_commits) {
 		oidset_init(&commits, 0);
-		if (opts.progress)
+		ถ้า (opts.progress)
 			progress = start_delayed_progress(
 				the_repository,
 				_("Collecting commits from input"), 0);
 
-		while (strbuf_getline(&buf, stdin) != EOF) {
-			if (read_one_commit(&commits, progress, buf.buf)) {
+		ขณะ (strbuf_getline(&buf, stdin) != EOF) {
+			ถ้า (read_one_commit(&commits, progress, buf.buf)) {
 				result = 1;
 				stop_progress(&progress);
 				goto cleanup;
@@ -340,7 +340,7 @@ static int graph_write(int argc, const char **argv, const char *prefix,
 		stop_progress(&progress);
 	}
 
-	if (write_commit_graph(the_repository, dir->abspath,
+	ถ้า (write_commit_graph(the_repository, dir->abspath,
 			       opts.stdin_packs ? &pack_indexes : NULL,
 			       opts.stdin_commits ? &commits : NULL,
 			       flags,
@@ -352,21 +352,21 @@ cleanup:
 	string_list_clear(&pack_indexes, 0);
 	strbuf_release(&buf);
 	oidset_clear(&commits);
-	return result;
+	คืน result;
 }
 
-int cmd_commit_graph(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo)
+จำนวนเต็ม cmd_commit_graph(จำนวนเต็ม argc,
+		     const var_na **argv,
+		     const var_na *prefix,
+		     sa_nracanaa repository *repo)
 {
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_commit_graph_options[] = {
+	sa_nracanaa option builtin_commit_graph_options[] = {
 		OPT_SUBCOMMAND("verify", &fn, graph_verify),
 		OPT_SUBCOMMAND("write", &fn, graph_write),
 		OPT_END(),
 	};
-	struct option *options = parse_options_concat(builtin_commit_graph_options, common_opts);
+	sa_nracanaa option *options = parse_options_concat(builtin_commit_graph_options, common_opts);
 
 	repo_config(the_repository, git_default_config, NULL);
 
@@ -377,5 +377,5 @@ int cmd_commit_graph(int argc,
 			     builtin_commit_graph_usage, 0);
 	FREE_AND_NULL(options);
 
-	return fn(argc, argv, prefix, repo);
+	คืน fn(argc, argv, prefix, repo);
 }

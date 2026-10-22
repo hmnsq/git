@@ -10,44 +10,44 @@
 #include "color.h"
 
 
-static const char * const builtin_range_diff_usage[] = {
+static const var_na * const builtin_range_diff_usage[] = {
 N_("git range-diff [<options>] <old-base>..<old-tip> <new-base>..<new-tip>"),
 N_("git range-diff [<options>] <old-tip>...<new-tip>"),
 N_("git range-diff [<options>] <base> <old-tip> <new-tip>"),
 NULL
 };
 
-static int parse_max_memory(const struct option *opt, const char *arg, int unset)
+static จำนวนเต็ม parse_max_memory(const sa_nracanaa option *opt, const var_na *arg, จำนวนเต็ม unset)
 {
 	size_t *max_memory = opt->value;
 	uintmax_t val;
 
-	if (unset)
-		return 0;
+	ถ้า (unset)
+		คืน 0;
 
-	if (!git_parse_unsigned(arg, &val, SIZE_MAX))
-		return error(_("invalid max-memory value: %s"), arg);
+	ถ้า (!git_parse_unsigned(arg, &val, SIZE_MAX))
+		คืน error(_("invalid max-memory value: %s"), arg);
 
 	*max_memory = (size_t)val;
-	return 0;
+	คืน 0;
 }
 
-int cmd_range_diff(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+จำนวนเต็ม cmd_range_diff(จำนวนเต็ม argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	struct diff_options diffopt = { NULL };
-	struct strvec log_arg = STRVEC_INIT;
-	struct strvec diff_merges_arg = STRVEC_INIT;
-	struct range_diff_options range_diff_opts = {
+	sa_nracanaa diff_options diffopt = { NULL };
+	sa_nracanaa strvec log_arg = STRVEC_INIT;
+	sa_nracanaa strvec diff_merges_arg = STRVEC_INIT;
+	sa_nracanaa range_diff_options range_diff_opts = {
 		.creation_factor = RANGE_DIFF_CREATION_FACTOR_DEFAULT,
 		.max_memory = RANGE_DIFF_MAX_MEMORY_DEFAULT,
 		.diffopt = &diffopt,
 		.log_arg = &log_arg
 	};
-	int simple_color = -1, left_only = 0, right_only = 0;
-	struct option range_diff_options[] = {
+	จำนวนเต็ม simple_color = -1, left_only = 0, right_only = 0;
+	sa_nracanaa option range_diff_options[] = {
 		OPT_INTEGER(0, "creation-factor",
 			    &range_diff_opts.creation_factor,
 			    N_("percentage by which creation is weighted")),
@@ -70,11 +70,11 @@ int cmd_range_diff(int argc,
 			 N_("only emit output related to the second range")),
 		OPT_END()
 	};
-	struct option *options;
-	int i, dash_dash = -1, res = 0;
-	struct strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
-	struct object_id oid;
-	const char *three_dots = NULL;
+	sa_nracanaa option *options;
+	จำนวนเต็ม i, dash_dash = -1, res = 0;
+	sa_nracanaa strbuf range1 = STRBUF_INIT, range2 = STRBUF_INIT;
+	sa_nracanaa object_id oid;
+	const var_na *three_dots = NULL;
 
 	repo_config(the_repository, git_diff_ui_config, NULL);
 
@@ -87,37 +87,37 @@ int cmd_range_diff(int argc,
 	diff_setup_done(&diffopt);
 
 	/* force color when --dual-color was used */
-	if (!simple_color)
+	ถ้า (!simple_color)
 		diffopt.use_color = GIT_COLOR_ALWAYS;
 
 	/* If `--diff-merges` was specified, imply `--merges` */
-	if (diff_merges_arg.nr) {
+	ถ้า (diff_merges_arg.nr) {
 		range_diff_opts.include_merges = 1;
 		strvec_pushv(&log_arg, diff_merges_arg.v);
 	}
 
-	for (i = 0; i < argc; i++)
-		if (!strcmp(argv[i], "--")) {
+	สำหรับ (i = 0; i < argc; i++)
+		ถ้า (!strcmp(argv[i], "--")) {
 			dash_dash = i;
-			break;
+			bha_nga;
 		}
 
-	if (dash_dash == 3 ||
+	ถ้า (dash_dash == 3 ||
 	    (dash_dash < 0 && argc > 2 &&
 	     !repo_get_oid_committish(the_repository, argv[0], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[1], &oid) &&
 	     !repo_get_oid_committish(the_repository, argv[2], &oid))) {
-		if (dash_dash < 0)
+		ถ้า (dash_dash < 0)
 			; /* already validated arguments */
-		else if (repo_get_oid_committish(the_repository, argv[0], &oid))
+		มิฉะนั้น ถ้า (repo_get_oid_committish(the_repository, argv[0], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (repo_get_oid_committish(the_repository, argv[1], &oid))
+		มิฉะนั้น ถ้า (repo_get_oid_committish(the_repository, argv[1], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
-		else if (repo_get_oid_committish(the_repository, argv[2], &oid))
+		มิฉะนั้น ถ้า (repo_get_oid_committish(the_repository, argv[2], &oid))
 			usage_msg_optf(_("not a revision: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[2]);
@@ -127,17 +127,17 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 3 : dash_dash));
-	} else if (dash_dash == 2 ||
+	} มิฉะนั้น ถ้า (dash_dash == 2 ||
 		   (dash_dash < 0 && argc > 1 &&
 		    is_range_diff_range(argv[0]) &&
 		    is_range_diff_range(argv[1]))) {
-		if (dash_dash < 0)
+		ถ้า (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!is_range_diff_range(argv[0]))
+		มิฉะนั้น ถ้า (!is_range_diff_range(argv[0]))
 			usage_msg_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[0]);
-		else if (!is_range_diff_range(argv[1]))
+		มิฉะนั้น ถ้า (!is_range_diff_range(argv[1]))
 			usage_msg_optf(_("not a commit range: '%s'"),
 				       builtin_range_diff_usage, options,
 				       argv[1]);
@@ -147,30 +147,30 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 2 : dash_dash));
-	} else if (dash_dash == 1 ||
+	} มิฉะนั้น ถ้า (dash_dash == 1 ||
 		   (dash_dash < 0 && argc > 0 &&
 		    (three_dots = strstr(argv[0], "...")))) {
-		const char *a, *b;
-		int a_len;
+		const var_na *a, *b;
+		จำนวนเต็ม a_len;
 
-		if (dash_dash < 0)
+		ถ้า (dash_dash < 0)
 			; /* already validated arguments */
-		else if (!(three_dots = strstr(argv[0], "...")))
+		มิฉะนั้น ถ้า (!(three_dots = strstr(argv[0], "...")))
 			usage_msg_optf(_("not a symmetric range: '%s'"),
 					 builtin_range_diff_usage, options,
 					 argv[0]);
 
-		if (three_dots == argv[0]) {
+		ถ้า (three_dots == argv[0]) {
 			a = "HEAD";
 			a_len = strlen(a);
-		} else {
+		} มิฉะนั้น {
 			a = argv[0];
-			a_len = (int)(three_dots - a);
+			a_len = (จำนวนเต็ม)(three_dots - a);
 		}
 
-		if (three_dots[3])
+		ถ้า (three_dots[3])
 			b = three_dots + 3;
-		else
+		มิฉะนั้น
 			b = "HEAD";
 
 		strbuf_addf(&range1, "%s..%.*s", b, a_len, a);
@@ -178,7 +178,7 @@ int cmd_range_diff(int argc,
 
 		strvec_pushv(&log_arg, argv +
 			     (dash_dash < 0 ? 1 : dash_dash));
-	} else
+	} มิฉะนั้น
 		usage_msg_opt(_("need two commit ranges"),
 			      builtin_range_diff_usage, options);
 	FREE_AND_NULL(options);
@@ -193,5 +193,5 @@ int cmd_range_diff(int argc,
 	strbuf_release(&range1);
 	strbuf_release(&range2);
 
-	return res;
+	คืน res;
 }

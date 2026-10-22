@@ -46,32 +46,32 @@
 #define MAX_REMOTE_OBJ_INFO_LINE \
 	(MAX_REMOTE_URL_LEN + MAX_ALLOWED_OBJ_LIMIT * (GIT_MAX_HEXSZ + 1))
 
-enum batch_mode {
+ga_nanaa batch_mode {
 	BATCH_MODE_CONTENTS,
 	BATCH_MODE_INFO,
 	BATCH_MODE_QUEUE_AND_DISPATCH,
 };
 
-struct batch_options {
-	struct list_objects_filter_options objects_filter;
-	int enabled;
-	int follow_symlinks;
-	enum batch_mode batch_mode;
-	int buffer_output;
-	int all_objects;
-	int unordered;
-	int transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
-	char input_delim;
-	char output_delim;
-	const char *format;
+sa_nracanaa batch_options {
+	sa_nracanaa list_objects_filter_options objects_filter;
+	จำนวนเต็ม enabled;
+	จำนวนเต็ม follow_symlinks;
+	ga_nanaa batch_mode batch_mode;
+	จำนวนเต็ม buffer_output;
+	จำนวนเต็ม all_objects;
+	จำนวนเต็ม unordered;
+	จำนวนเต็ม transform_mode; /* may be 'w' or 'c' for --filters or --textconv */
+	var_na input_delim;
+	var_na output_delim;
+	const var_na *format;
 };
 
-static const char *force_path;
+static const var_na *force_path;
 
-static struct string_list mailmap = STRING_LIST_INIT_NODUP;
-static int use_mailmap;
+static sa_nracanaa string_list mailmap = STRING_LIST_INIT_NODUP;
+static จำนวนเต็ม use_mailmap;
 
-static char *replace_idents_using_mailmap(char *, size_t *);
+static var_na *replace_idents_using_mailmap(var_na *, size_t *);
 
 /*
  * The mailmap is initialized with .strdup_strings set to 0,
@@ -81,190 +81,190 @@ static char *replace_idents_using_mailmap(char *, size_t *);
  */
 static void load_mailmap(void)
 {
-	if (mailmap.strdup_strings)
-		return;
+	ถ้า (mailmap.strdup_strings)
+		คืน;
 
 	read_mailmap(the_repository, &mailmap);
 }
 
-static char *replace_idents_using_mailmap(char *object_buf, size_t *size)
+static var_na *replace_idents_using_mailmap(var_na *object_buf, size_t *size)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *headers[] = { "author ", "committer ", "tagger ", NULL };
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	const var_na *headers[] = { "author ", "committer ", "tagger ", NULL };
 
 	strbuf_attach(&sb, object_buf, *size, *size + 1);
 	apply_mailmap_to_header(&sb, headers, &mailmap);
 	*size = sb.len;
-	return strbuf_detach(&sb, NULL);
+	คืน strbuf_detach(&sb, NULL);
 }
 
-static int filter_object(const char *path, unsigned mode,
-			 const struct object_id *oid,
-			 char **buf, size_t *size)
+static จำนวนเต็ม filter_object(const var_na *path, unsigned mode,
+			 const sa_nracanaa object_id *oid,
+			 var_na **buf, size_t *size)
 {
-	enum object_type type;
+	ga_nanaa object_type type;
 
 	*buf = odb_read_object(the_repository->objects, oid, &type, size);
-	if (!*buf)
-		return error(_("cannot read object %s '%s'"),
+	ถ้า (!*buf)
+		คืน error(_("cannot read object %s '%s'"),
 			     oid_to_hex(oid), path);
-	if ((type == OBJ_BLOB) && S_ISREG(mode)) {
-		struct strbuf strbuf = STRBUF_INIT;
-		struct checkout_metadata meta;
+	ถ้า ((type == OBJ_BLOB) && S_ISREG(mode)) {
+		sa_nracanaa strbuf strbuf = STRBUF_INIT;
+		sa_nracanaa checkout_metadata meta;
 
 		init_checkout_metadata(&meta, NULL, NULL, oid);
-		if (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
+		ถ้า (convert_to_working_tree(the_repository->index, path, *buf, *size, &strbuf, &meta)) {
 			free(*buf);
 			*size = strbuf.len;
 			*buf = strbuf_detach(&strbuf, NULL);
 		}
 	}
 
-	return 0;
+	คืน 0;
 }
 
-static int stream_blob(const struct object_id *oid)
+static จำนวนเต็ม stream_blob(const sa_nracanaa object_id *oid)
 {
-	if (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
+	ถ้า (odb_stream_blob_to_fd(the_repository->objects, 1, oid, NULL, 0))
 		die("unable to stream %s to stdout", oid_to_hex(oid));
-	return 0;
+	คืน 0;
 }
 
-static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
+static จำนวนเต็ม cat_one_file(จำนวนเต็ม opt, const var_na *exp_type, const var_na *obj_name)
 {
-	int ret;
-	struct object_id oid;
-	enum object_type type;
-	char *buf;
+	จำนวนเต็ม ret;
+	sa_nracanaa object_id oid;
+	ga_nanaa object_type type;
+	var_na *buf;
 	size_t size;
-	struct object_context obj_context = {0};
-	struct object_info oi = OBJECT_INFO_INIT;
+	sa_nracanaa object_context obj_context = {0};
+	sa_nracanaa object_info oi = OBJECT_INFO_INIT;
 	unsigned flags = OBJECT_INFO_LOOKUP_REPLACE;
 	unsigned get_oid_flags =
 		GET_OID_RECORD_PATH |
 		GET_OID_ONLY_TO_DIE |
 		GET_OID_HASH_ANY;
-	const char *path = force_path;
-	const int opt_cw = (opt == 'c' || opt == 'w');
-	if (!path && opt_cw)
+	const var_na *path = force_path;
+	const จำนวนเต็ม opt_cw = (opt == 'c' || opt == 'w');
+	ถ้า (!path && opt_cw)
 		get_oid_flags |= GET_OID_REQUIRE_PATH;
 
-	if (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
+	ถ้า (get_oid_with_context(the_repository, obj_name, get_oid_flags, &oid,
 				 &obj_context))
 		die("Not a valid object name %s", obj_name);
 
-	if (!path)
+	ถ้า (!path)
 		path = obj_context.path;
-	if (obj_context.mode == S_IFINVALID)
+	ถ้า (obj_context.mode == S_IFINVALID)
 		obj_context.mode = 0100644;
 
 	buf = NULL;
 	switch (opt) {
-	case 't':
+	pak_sa 't':
 		oi.typep = &type;
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		ถ้า (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 		printf("%s\n", type_name(type));
 		ret = 0;
 		goto cleanup;
 
-	case 's':
+	pak_sa 's':
 		oi.sizep = &size;
 
-		if (use_mailmap) {
+		ถ้า (use_mailmap) {
 			oi.typep = &type;
 			oi.contentp = (void**)&buf;
 		}
 
-		if (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
+		ถ้า (odb_read_object_info_extended(the_repository->objects, &oid, &oi, flags) < 0)
 			die("git cat-file: could not get object info");
 
-		if (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
+		ถ้า (use_mailmap && (type == OBJ_COMMIT || type == OBJ_TAG))
 			buf = replace_idents_using_mailmap(buf, &size);
 
 		printf("%"PRIuMAX"\n", (uintmax_t)size);
 		ret = 0;
 		goto cleanup;
 
-	case 'e':
+	pak_sa 'e':
 		ret = !odb_has_object(the_repository->objects, &oid,
 				      ODB_HAS_OBJECT_RECHECK_PACKED | ODB_HAS_OBJECT_FETCH_PROMISOR);
 		goto cleanup;
 
-	case 'w':
+	pak_sa 'w':
 
-		if (filter_object(path, obj_context.mode,
+		ถ้า (filter_object(path, obj_context.mode,
 				  &oid, &buf, &size)) {
 			ret = -1;
 			goto cleanup;
 		}
-		break;
+		bha_nga;
 
-	case 'c':
+	pak_sa 'c':
 	{
 		unsigned long size_ul = 0;
-		int textconv_ret = textconv_object(the_repository, path,
+		จำนวนเต็ม textconv_ret = textconv_object(the_repository, path,
 						   obj_context.mode, &oid, 1,
 						   &buf, &size_ul);
 		size = size_ul;
-		if (textconv_ret)
-			break;
+		ถ้า (textconv_ret)
+			bha_nga;
 	}
 		/* else fallthrough */
 
-	case 'p':
+	pak_sa 'p':
 		type = odb_read_object_info(the_repository->objects, &oid, NULL);
-		if (type < 0)
+		ถ้า (type < 0)
 			die("Not a valid object name %s", obj_name);
 
 		/* custom pretty-print here */
-		if (type == OBJ_TREE) {
-			const char *ls_args[3] = { NULL };
+		ถ้า (type == OBJ_TREE) {
+			const var_na *ls_args[3] = { NULL };
 			ls_args[0] =  "ls-tree";
 			ls_args[1] =  obj_name;
 			ret = cmd_ls_tree(2, ls_args, NULL, the_repository);
 			goto cleanup;
 		}
 
-		if (type == OBJ_BLOB) {
+		ถ้า (type == OBJ_BLOB) {
 			ret = stream_blob(&oid);
 			goto cleanup;
 		}
 		buf = odb_read_object(the_repository->objects, &oid,
 				      &type, &size);
-		if (!buf)
+		ถ้า (!buf)
 			die("Cannot read object %s", obj_name);
 
-		if (use_mailmap)
+		ถ้า (use_mailmap)
 			buf = replace_idents_using_mailmap(buf, &size);
 
 		/* otherwise just spit out the data */
-		break;
+		bha_nga;
 
-	case 0:
+	pak_sa 0:
 	{
-		enum object_type exp_type_id = type_from_string(exp_type);
+		ga_nanaa object_type exp_type_id = type_from_string(exp_type);
 
-		if (exp_type_id == OBJ_BLOB) {
-			struct object_id blob_oid;
-			if (odb_read_object_info(the_repository->objects,
+		ถ้า (exp_type_id == OBJ_BLOB) {
+			sa_nracanaa object_id blob_oid;
+			ถ้า (odb_read_object_info(the_repository->objects,
 						 &oid, NULL) == OBJ_TAG) {
-				char *buffer = odb_read_object(the_repository->objects,
+				var_na *buffer = odb_read_object(the_repository->objects,
 							       &oid, &type, &size);
-				const char *target;
+				const var_na *target;
 
-				if (!buffer)
+				ถ้า (!buffer)
 					die(_("unable to read %s"), oid_to_hex(&oid));
 
-				if (!skip_prefix(buffer, "object ", &target) ||
+				ถ้า (!skip_prefix(buffer, "object ", &target) ||
 				    get_oid_hex_algop(target, &blob_oid,
 						      &hash_algos[oid.algo]))
 					die("%s not a valid tag", oid_to_hex(&oid));
 				free(buffer);
-			} else
+			} มิฉะนั้น
 				oidcpy(&blob_oid, &oid);
 
-			if (odb_read_object_info(the_repository->objects,
+			ถ้า (odb_read_object_info(the_repository->objects,
 						 &blob_oid, NULL) == OBJ_BLOB) {
 				ret = stream_blob(&blob_oid);
 				goto cleanup;
@@ -279,15 +279,15 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 		buf = odb_read_object_peeled(the_repository->objects, &oid,
 					     exp_type_id, &size, NULL);
 
-		if (use_mailmap)
+		ถ้า (use_mailmap)
 			buf = replace_idents_using_mailmap(buf, &size);
-		break;
+		bha_nga;
 	}
 	default:
 		die("git cat-file: unknown option: %s", exp_type);
 	}
 
-	if (!buf)
+	ถ้า (!buf)
 		die("git cat-file %s: bad file", obj_name);
 
 	write_or_die(1, buf, size);
@@ -295,37 +295,37 @@ static int cat_one_file(int opt, const char *exp_type, const char *obj_name)
 cleanup:
 	free(buf);
 	object_context_release(&obj_context);
-	return ret;
+	คืน ret;
 }
 
-struct expand_data {
-	struct object_id oid;
-	enum object_type type;
+sa_nracanaa expand_data {
+	sa_nracanaa object_id oid;
+	ga_nanaa object_type type;
 	size_t size;
 	unsigned short mode;
 	off_t disk_size;
-	const char *rest;
-	struct object_id delta_base_oid;
+	const var_na *rest;
+	sa_nracanaa object_id delta_base_oid;
 
 	/*
 	 * If mark_query is true, we do not expand anything, but rather
 	 * just mark the object_info with items we wish to query.
 	 */
-	int mark_query;
+	จำนวนเต็ม mark_query;
 
 	/*
 	 * Whether to split the input on whitespace before feeding it to
 	 * get_sha1; this is decided during the mark_query phase based on
 	 * whether we have a %(rest) token in our format.
 	 */
-	int split_on_whitespace;
+	จำนวนเต็ม split_on_whitespace;
 
 	/*
 	 * After a mark_query run, this object_info is set up to be
 	 * passed to odb_read_object_info_extended. It will point to the data
 	 * elements above, so you can retrieve the response from there.
 	 */
-	struct object_info info;
+	sa_nracanaa object_info info;
 
 	/*
 	 * This flag will be true if the requested batch format and options
@@ -343,7 +343,7 @@ struct expand_data {
 	 * List of atoms (i.e. "objectsize") that the server supports. Built
 	 * from the server's object-info advertised capabilities.
 	 */
-	struct string_list remote_allowed_atoms;
+	sa_nracanaa string_list remote_allowed_atoms;
 };
 
 #define EXPAND_DATA_INIT  {  \
@@ -352,146 +352,146 @@ struct expand_data {
 	.remote_allowed_atoms = STRING_LIST_INIT_NODUP, \
 }
 
-static int is_atom(const char *atom, const char *s, int slen)
+static จำนวนเต็ม is_atom(const var_na *atom, const var_na *s, จำนวนเต็ม slen)
 {
-	int alen = strlen(atom);
-	return alen == slen && !memcmp(atom, s, alen);
+	จำนวนเต็ม alen = strlen(atom);
+	คืน alen == slen && !memcmp(atom, s, alen);
 }
 
-static int expand_atom(struct strbuf *sb, const char *atom, int len,
-		       struct expand_data *data)
+static จำนวนเต็ม expand_atom(sa_nracanaa strbuf *sb, const var_na *atom, จำนวนเต็ม len,
+		       sa_nracanaa expand_data *data)
 {
-	if (data->is_remote) {
+	ถ้า (data->is_remote) {
 		size_t i;
-		for (i = 0; i < data->remote_allowed_atoms.nr; i++)
-			if (is_atom(data->remote_allowed_atoms.items[i].string,
+		สำหรับ (i = 0; i < data->remote_allowed_atoms.nr; i++)
+			ถ้า (is_atom(data->remote_allowed_atoms.items[i].string,
 				    atom, len))
-				break;
-		if (i == data->remote_allowed_atoms.nr)
-			return 1;
+				bha_nga;
+		ถ้า (i == data->remote_allowed_atoms.nr)
+			คืน 1;
 	}
 
-	if (is_atom("objectname", atom, len)) {
-		if (!data->mark_query)
+	ถ้า (is_atom("objectname", atom, len)) {
+		ถ้า (!data->mark_query)
 			strbuf_add_oid_hex(sb, &data->oid);
-	} else if (is_atom("objecttype", atom, len)) {
-		if (data->mark_query) {
+	} มิฉะนั้น ถ้า (is_atom("objecttype", atom, len)) {
+		ถ้า (data->mark_query) {
 			data->info.typep = &data->type;
-		} else {
-			const char *t = type_name(data->type);
+		} มิฉะนั้น {
+			const var_na *t = type_name(data->type);
 			strbuf_addstr(sb, t ? t : "");
 		}
-	} else if (is_atom("objectsize", atom, len)) {
-		if (data->mark_query)
+	} มิฉะนั้น ถ้า (is_atom("objectsize", atom, len)) {
+		ถ้า (data->mark_query)
 			data->info.sizep = &data->size;
-		else
+		มิฉะนั้น
 			strbuf_add_uint(sb, data->size);
-	} else if (is_atom("objectsize:disk", atom, len)) {
-		if (data->mark_query)
+	} มิฉะนั้น ถ้า (is_atom("objectsize:disk", atom, len)) {
+		ถ้า (data->mark_query)
 			data->info.disk_sizep = &data->disk_size;
-		else
+		มิฉะนั้น
 			strbuf_add_uint(sb, data->disk_size);
-	} else if (is_atom("rest", atom, len)) {
-		if (data->mark_query)
+	} มิฉะนั้น ถ้า (is_atom("rest", atom, len)) {
+		ถ้า (data->mark_query)
 			data->split_on_whitespace = 1;
-		else if (data->rest)
+		มิฉะนั้น ถ้า (data->rest)
 			strbuf_addstr(sb, data->rest);
-	} else if (is_atom("deltabase", atom, len)) {
-		if (data->mark_query)
+	} มิฉะนั้น ถ้า (is_atom("deltabase", atom, len)) {
+		ถ้า (data->mark_query)
 			data->info.delta_base_oid = &data->delta_base_oid;
-		else
+		มิฉะนั้น
 			strbuf_add_oid_hex(sb, &data->delta_base_oid);
-	} else if (is_atom("objectmode", atom, len)) {
-		if (!data->mark_query && !(S_IFINVALID == data->mode))
+	} มิฉะนั้น ถ้า (is_atom("objectmode", atom, len)) {
+		ถ้า (!data->mark_query && !(S_IFINVALID == data->mode))
 			strbuf_addf(sb, "%06o", data->mode);
-	} else
-		return 0;
-	return 1;
+	} มิฉะนั้น
+		คืน 0;
+	คืน 1;
 }
 
-static void expand_format(struct strbuf *sb, const char *start,
-			  struct expand_data *data)
+static void expand_format(sa_nracanaa strbuf *sb, const var_na *start,
+			  sa_nracanaa expand_data *data)
 {
-	while (strbuf_expand_step(sb, &start)) {
-		const char *end;
+	ขณะ (strbuf_expand_step(sb, &start)) {
+		const var_na *end;
 
-		if (skip_prefix(start, "%", &start) || *start != '(')
+		ถ้า (skip_prefix(start, "%", &start) || *start != '(')
 			strbuf_addch(sb, '%');
-		else if ((end = strchr(start + 1, ')')) &&
+		มิฉะนั้น ถ้า ((end = strchr(start + 1, ')')) &&
 			 expand_atom(sb, start + 1, end - start - 1, data))
 			start = end + 1;
-		else
+		มิฉะนั้น
 			strbuf_expand_bad_format(start, "cat-file");
 	}
 }
 
-static void batch_write(struct batch_options *opt, const void *data, int len)
+static void batch_write(sa_nracanaa batch_options *opt, const void *data, จำนวนเต็ม len)
 {
-	if (opt->buffer_output) {
-		if (fwrite(data, 1, len, stdout) != len)
+	ถ้า (opt->buffer_output) {
+		ถ้า (fwrite(data, 1, len, stdout) != len)
 			die_errno("unable to write to stdout");
-	} else
+	} มิฉะนั้น
 		write_or_die(1, data, len);
 }
 
-static void print_object_or_die(struct batch_options *opt, struct expand_data *data)
+static void print_object_or_die(sa_nracanaa batch_options *opt, sa_nracanaa expand_data *data)
 {
-	const struct object_id *oid = &data->oid;
+	const sa_nracanaa object_id *oid = &data->oid;
 
 	assert(data->info.typep);
 
-	if (data->type == OBJ_BLOB) {
-		if (opt->buffer_output)
+	ถ้า (data->type == OBJ_BLOB) {
+		ถ้า (opt->buffer_output)
 			fflush(stdout);
-		if (opt->transform_mode) {
-			char *contents;
+		ถ้า (opt->transform_mode) {
+			var_na *contents;
 			size_t size;
 
-			if (!data->rest)
+			ถ้า (!data->rest)
 				die("missing path for '%s'", oid_to_hex(oid));
 
-			if (opt->transform_mode == 'w') {
-				if (filter_object(data->rest, 0100644, oid,
+			ถ้า (opt->transform_mode == 'w') {
+				ถ้า (filter_object(data->rest, 0100644, oid,
 						  &contents, &size))
 					die("could not convert '%s' %s",
 					    oid_to_hex(oid), data->rest);
-			} else if (opt->transform_mode == 'c') {
-				enum object_type type;
+			} มิฉะนั้น ถ้า (opt->transform_mode == 'c') {
+				ga_nanaa object_type type;
 				unsigned long size_ul = 0;
-				if (textconv_object(the_repository,
+				ถ้า (textconv_object(the_repository,
 						    data->rest, 0100644, oid,
 						    1, &contents, &size_ul))
 					size = size_ul;
-				else
+				มิฉะนั้น
 					contents = odb_read_object(the_repository->objects,
 								   oid, &type, &size);
-				if (!contents)
+				ถ้า (!contents)
 					die("could not convert '%s' %s",
 					    oid_to_hex(oid), data->rest);
-			} else
+			} มิฉะนั้น
 				BUG("invalid transform_mode: %c", opt->transform_mode);
 			batch_write(opt, contents, size);
 			free(contents);
-		} else {
+		} มิฉะนั้น {
 			stream_blob(oid);
 		}
 	}
-	else {
-		enum object_type type;
+	มิฉะนั้น {
+		ga_nanaa object_type type;
 		size_t size;
 		void *contents;
 
 		contents = odb_read_object(the_repository->objects, oid,
 					   &type, &size);
-		if (!contents)
+		ถ้า (!contents)
 			die("object %s disappeared", oid_to_hex(oid));
 
-		if (use_mailmap)
+		ถ้า (use_mailmap)
 			contents = replace_idents_using_mailmap(contents, &size);
 
-		if (type != data->type)
+		ถ้า (type != data->type)
 			die("object %s changed type!?", oid_to_hex(oid));
-		if (data->info.sizep && size != data->size && !use_mailmap)
+		ถ้า (data->info.sizep && size != data->size && !use_mailmap)
 			die("object %s changed size!?", oid_to_hex(oid));
 
 		batch_write(opt, contents, size);
@@ -499,8 +499,8 @@ static void print_object_or_die(struct batch_options *opt, struct expand_data *d
 	}
 }
 
-static void print_default_format(struct strbuf *scratch, struct expand_data *data,
-				 struct batch_options *opt)
+static void print_default_format(sa_nracanaa strbuf *scratch, sa_nracanaa expand_data *data,
+				 sa_nracanaa batch_options *opt)
 {
 	strbuf_add_oid_hex(scratch, &data->oid);
 	strbuf_addch(scratch, ' ');
@@ -510,10 +510,10 @@ static void print_default_format(struct strbuf *scratch, struct expand_data *dat
 	strbuf_addch(scratch, opt->output_delim);
 }
 
-static void report_object_status(struct batch_options *opt,
-				 const char *obj_name,
-				 const struct object_id *oid,
-				 const char *status)
+static void report_object_status(sa_nracanaa batch_options *opt,
+				 const var_na *obj_name,
+				 const sa_nracanaa object_id *oid,
+				 const var_na *status)
 {
 	printf("%s %s%c", obj_name ? obj_name : oid_to_hex(oid),
 	       status, opt->output_delim);
@@ -525,76 +525,76 @@ static void report_object_status(struct batch_options *opt,
  * which the object may be accessed (though note that we may also rely on
  * data->oid, too). If "pack" is NULL, then offset is ignored.
  */
-static void batch_object_write(const char *obj_name,
-			       struct strbuf *scratch,
-			       struct batch_options *opt,
-			       struct expand_data *data,
-			       struct packed_git *pack,
+static void batch_object_write(const var_na *obj_name,
+			       sa_nracanaa strbuf *scratch,
+			       sa_nracanaa batch_options *opt,
+			       sa_nracanaa expand_data *data,
+			       sa_nracanaa packed_git *pack,
 			       off_t offset)
 {
-	if (!data->skip_object_info) {
-		int ret;
+	ถ้า (!data->skip_object_info) {
+		จำนวนเต็ม ret;
 
-		if (use_mailmap ||
+		ถ้า (use_mailmap ||
 		    opt->objects_filter.choice == LOFC_BLOB_NONE ||
 		    opt->objects_filter.choice == LOFC_BLOB_LIMIT ||
 		    opt->objects_filter.choice == LOFC_OBJECT_TYPE)
 			data->info.typep = &data->type;
-		if (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
+		ถ้า (opt->objects_filter.choice == LOFC_BLOB_LIMIT)
 			data->info.sizep = &data->size;
 
-		if (pack)
+		ถ้า (pack)
 			ret = packed_object_info(NULL, pack, offset, &data->info);
-		else
+		มิฉะนั้น
 			ret = odb_read_object_info_extended(the_repository->objects,
 							    &data->oid, &data->info,
 							    OBJECT_INFO_LOOKUP_REPLACE);
-		if (ret < 0) {
-			if (data->mode == S_IFGITLINK)
+		ถ้า (ret < 0) {
+			ถ้า (data->mode == S_IFGITLINK)
 				report_object_status(opt, NULL, &data->oid, "submodule");
-			else
+			มิฉะนั้น
 				report_object_status(opt, obj_name, &data->oid, "missing");
-			return;
+			คืน;
 		}
 
 		switch (opt->objects_filter.choice) {
-		case LOFC_DISABLED:
-			break;
-		case LOFC_BLOB_NONE:
-			if (data->type == OBJ_BLOB) {
-				if (!opt->all_objects)
+		pak_sa LOFC_DISABLED:
+			bha_nga;
+		pak_sa LOFC_BLOB_NONE:
+			ถ้า (data->type == OBJ_BLOB) {
+				ถ้า (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				คืน;
 			}
-			break;
-		case LOFC_BLOB_LIMIT:
-			if (data->type == OBJ_BLOB &&
+			bha_nga;
+		pak_sa LOFC_BLOB_LIMIT:
+			ถ้า (data->type == OBJ_BLOB &&
 			    data->size >= opt->objects_filter.blob_limit_value) {
-				if (!opt->all_objects)
+				ถ้า (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				คืน;
 			}
-			break;
-		case LOFC_OBJECT_TYPE:
-			if (data->type != opt->objects_filter.object_type) {
-				if (!opt->all_objects)
+			bha_nga;
+		pak_sa LOFC_OBJECT_TYPE:
+			ถ้า (data->type != opt->objects_filter.object_type) {
+				ถ้า (!opt->all_objects)
 					report_object_status(opt, obj_name,
 							     &data->oid, "excluded");
-				return;
+				คืน;
 			}
-			break;
+			bha_nga;
 		default:
 			BUG("unsupported objects filter");
 		}
 
-		if (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
-			char *buf = NULL;
+		ถ้า (use_mailmap && (data->type == OBJ_COMMIT || data->type == OBJ_TAG)) {
+			var_na *buf = NULL;
 
 			buf = odb_read_object(the_repository->objects, &data->oid,
 					      &data->type, &data->size);
-			if (!buf)
+			ถ้า (!buf)
 				die(_("unable to read %s"), oid_to_hex(&data->oid));
 			buf = replace_idents_using_mailmap(buf, &data->size);
 
@@ -604,68 +604,68 @@ static void batch_object_write(const char *obj_name,
 
 	strbuf_reset(scratch);
 
-	if (!opt->format) {
+	ถ้า (!opt->format) {
 		print_default_format(scratch, data, opt);
-	} else {
+	} มิฉะนั้น {
 		expand_format(scratch, opt->format, data);
 		strbuf_addch(scratch, opt->output_delim);
 	}
 
 	batch_write(opt, scratch->buf, scratch->len);
 
-	if (opt->batch_mode == BATCH_MODE_CONTENTS) {
+	ถ้า (opt->batch_mode == BATCH_MODE_CONTENTS) {
 		print_object_or_die(opt, data);
 		batch_write(opt, &opt->output_delim, 1);
 	}
 }
 
-static void batch_one_object(const char *obj_name,
-			     struct strbuf *scratch,
-			     struct batch_options *opt,
-			     struct expand_data *data)
+static void batch_one_object(const var_na *obj_name,
+			     sa_nracanaa strbuf *scratch,
+			     sa_nracanaa batch_options *opt,
+			     sa_nracanaa expand_data *data)
 {
-	struct object_context ctx = {0};
-	int flags =
+	sa_nracanaa object_context ctx = {0};
+	จำนวนเต็ม flags =
 		GET_OID_HASH_ANY |
 		(opt->follow_symlinks ? GET_OID_FOLLOW_SYMLINKS : 0);
-	enum get_oid_result result;
+	ga_nanaa get_oid_result result;
 
 	result = get_oid_with_context(the_repository, obj_name,
 				      flags, &data->oid, &ctx);
-	if (result != FOUND) {
+	ถ้า (result != FOUND) {
 		switch (result) {
-		case MISSING_OBJECT:
+		pak_sa MISSING_OBJECT:
 			report_object_status(opt, obj_name, &data->oid, "missing");
-			break;
-		case SHORT_NAME_AMBIGUOUS:
+			bha_nga;
+		pak_sa SHORT_NAME_AMBIGUOUS:
 			report_object_status(opt, obj_name, &data->oid, "ambiguous");
-			break;
-		case DANGLING_SYMLINK:
+			bha_nga;
+		pak_sa DANGLING_SYMLINK:
 			printf("dangling %"PRIuMAX"%c%s%c",
 			       (uintmax_t)strlen(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case SYMLINK_LOOP:
+			bha_nga;
+		pak_sa SYMLINK_LOOP:
 			printf("loop %"PRIuMAX"%c%s%c",
 			       (uintmax_t)strlen(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
-		case NOT_DIR:
+			bha_nga;
+		pak_sa NOT_DIR:
 			printf("notdir %"PRIuMAX"%c%s%c",
 			       (uintmax_t)strlen(obj_name),
 			       opt->output_delim, obj_name, opt->output_delim);
-			break;
+			bha_nga;
 		default:
 			BUG("unknown get_sha1_with_context result %d\n",
 			       result);
-			break;
+			bha_nga;
 		}
 		fflush(stdout);
 
 		goto out;
 	}
 
-	if (ctx.mode == 0) {
+	ถ้า (ctx.mode == 0) {
 		printf("symlink %"PRIuMAX"%c%s%c",
 		       (uintmax_t)ctx.symlink_path.len,
 		       opt->output_delim, ctx.symlink_path.buf, opt->output_delim);
@@ -680,46 +680,46 @@ out:
 	object_context_release(&ctx);
 }
 
-static int get_remote_info(int argc,
-			   const char **argv,
-			   struct fetch_object_info_results *results,
-			   struct oid_array *object_info_oids)
+static จำนวนเต็ม get_remote_info(จำนวนเต็ม argc,
+			   const var_na **argv,
+			   sa_nracanaa fetch_object_info_results *results,
+			   sa_nracanaa oid_array *object_info_oids)
 {
-	int retval = 0;
-	struct remote *remote = NULL;
-	struct object_id oid;
-	struct transport *gtransport;
+	จำนวนเต็ม retval = 0;
+	sa_nracanaa remote *remote = NULL;
+	sa_nracanaa object_id oid;
+	sa_nracanaa transport *gtransport;
 
 	remote = remote_get(argv[0]);
-	if (!remote)
+	ถ้า (!remote)
 		die(_("must supply valid remote when using remote-object-info"));
 
 	oid_array_clear(object_info_oids);
-	for (size_t i = 1; i < argc; i++) {
-		if (get_oid_hex(argv[i], &oid)) {
+	สำหรับ (size_t i = 1; i < argc; i++) {
+		ถ้า (get_oid_hex(argv[i], &oid)) {
 			size_t len = strlen(argv[i]);
 
-			if (len < the_hash_algo->hexsz && len >= 4) {
+			ถ้า (len < the_hash_algo->hexsz && len >= 4) {
 				size_t j;
-				for (j = 0; j < len; j++)
-					if (!isxdigit(argv[i][j]))
-						break;
-				if (j == len)
+				สำหรับ (j = 0; j < len; j++)
+					ถ้า (!isxdigit(argv[i][j]))
+						bha_nga;
+				ถ้า (j == len)
 					die(_("remote-object-info does not support "
 					      "short oids, %d characters required"),
-					    (int)the_hash_algo->hexsz);
+					    (จำนวนเต็ม)the_hash_algo->hexsz);
 			}
 			die(_("not a valid object name '%s'"), argv[i]);
 		}
 		oid_array_append(object_info_oids, &oid);
 	}
 
-	if (!object_info_oids->nr)
+	ถ้า (!object_info_oids->nr)
 		die(_("remote-object-info requires objects"));
 
 	gtransport = transport_get(remote, NULL);
 
-	if (!gtransport->smart_options) {
+	ถ้า (!gtransport->smart_options) {
 		retval = -1;
 		goto cleanup;
 	}
@@ -728,135 +728,135 @@ static int get_remote_info(int argc,
 					     results);
 cleanup:
 	transport_disconnect(gtransport);
-	return retval;
+	คืน retval;
 }
 
-struct object_cb_data {
-	struct batch_options *opt;
-	struct expand_data *expand;
-	struct oidset *seen;
-	struct strbuf *scratch;
+sa_nracanaa object_cb_data {
+	sa_nracanaa batch_options *opt;
+	sa_nracanaa expand_data *expand;
+	sa_nracanaa oidset *seen;
+	sa_nracanaa strbuf *scratch;
 };
 
-static int batch_object_cb(const struct object_id *oid, void *vdata)
+static จำนวนเต็ม batch_object_cb(const sa_nracanaa object_id *oid, void *vdata)
 {
-	struct object_cb_data *data = vdata;
+	sa_nracanaa object_cb_data *data = vdata;
 	oidcpy(&data->expand->oid, oid);
 	batch_object_write(NULL, data->scratch, data->opt, data->expand,
 			   NULL, 0);
-	return 0;
+	คืน 0;
 }
 
-static int collect_object(const struct object_id *oid,
-			  struct packed_git *pack UNUSED,
+static จำนวนเต็ม collect_object(const sa_nracanaa object_id *oid,
+			  sa_nracanaa packed_git *pack UNUSED,
 			  off_t offset UNUSED,
 			  void *data)
 {
 	oid_array_append(data, oid);
-	return 0;
+	คืน 0;
 }
 
-static int batch_unordered_object(const struct object_id *oid,
-				  struct packed_git *pack,
+static จำนวนเต็ม batch_unordered_object(const sa_nracanaa object_id *oid,
+				  sa_nracanaa packed_git *pack,
 				  off_t offset,
 				  void *vdata)
 {
-	struct object_cb_data *data = vdata;
+	sa_nracanaa object_cb_data *data = vdata;
 
-	if (oidset_insert(data->seen, oid))
-		return 0;
+	ถ้า (oidset_insert(data->seen, oid))
+		คืน 0;
 
 	oidcpy(&data->expand->oid, oid);
 	batch_object_write(NULL, data->scratch, data->opt, data->expand,
 			   pack, offset);
-	return 0;
+	คืน 0;
 }
 
-typedef void (*parse_cmd_fn_t)(struct batch_options *, const char *,
-			       struct strbuf *, struct expand_data *);
+typedef void (*parse_cmd_fn_t)(sa_nracanaa batch_options *, const var_na *,
+			       sa_nracanaa strbuf *, sa_nracanaa expand_data *);
 
-struct queued_cmd {
+sa_nracanaa queued_cmd {
 	parse_cmd_fn_t fn;
-	char *line;
+	var_na *line;
 };
 
-static void parse_cmd_contents(struct batch_options *opt,
-			     const char *line,
-			     struct strbuf *output,
-			     struct expand_data *data)
+static void parse_cmd_contents(sa_nracanaa batch_options *opt,
+			     const var_na *line,
+			     sa_nracanaa strbuf *output,
+			     sa_nracanaa expand_data *data)
 {
-	enum object_type *saved_typep = data->info.typep;
+	ga_nanaa object_type *saved_typep = data->info.typep;
 	data->info.typep = &data->type;
 	opt->batch_mode = BATCH_MODE_CONTENTS;
 	batch_one_object(line, output, opt, data);
 	data->info.typep = saved_typep;
 }
 
-static void parse_cmd_info(struct batch_options *opt,
-			   const char *line,
-			   struct strbuf *output,
-			   struct expand_data *data)
+static void parse_cmd_info(sa_nracanaa batch_options *opt,
+			   const var_na *line,
+			   sa_nracanaa strbuf *output,
+			   sa_nracanaa expand_data *data)
 {
 	opt->batch_mode = BATCH_MODE_INFO;
 	batch_one_object(line, output, opt, data);
 }
 
-static void parse_cmd_mailmap(struct batch_options *opt UNUSED,
-			      const char *line,
-			      struct strbuf *output UNUSED,
-			      struct expand_data *data UNUSED)
+static void parse_cmd_mailmap(sa_nracanaa batch_options *opt UNUSED,
+			      const var_na *line,
+			      sa_nracanaa strbuf *output UNUSED,
+			      sa_nracanaa expand_data *data UNUSED)
 {
 	use_mailmap = git_parse_maybe_bool(line);
 
-	if (use_mailmap < 0)
+	ถ้า (use_mailmap < 0)
 		die(_("mailmap: invalid boolean '%s'"), line);
 
-	if (use_mailmap)
+	ถ้า (use_mailmap)
 		load_mailmap();
 }
 
-static void parse_cmd_remote_object_info(struct batch_options *opt,
-					 const char *line, struct strbuf *output,
-					 struct expand_data *data)
+static void parse_cmd_remote_object_info(sa_nracanaa batch_options *opt,
+					 const var_na *line, sa_nracanaa strbuf *output,
+					 sa_nracanaa expand_data *data)
 {
-	int count;
-	const char **argv;
-	char *line_to_split;
-	struct fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
-	struct oid_array object_info_oids = OID_ARRAY_INIT;
+	จำนวนเต็ม count;
+	const var_na **argv;
+	var_na *line_to_split;
+	sa_nracanaa fetch_object_info_results results = FETCH_OBJECT_INFO_RESULTS_INIT;
+	sa_nracanaa oid_array object_info_oids = OID_ARRAY_INIT;
 
-	if (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
+	ถ้า (strlen(line) >= MAX_REMOTE_OBJ_INFO_LINE)
 		die(_("remote-object-info command too long"));
 
 	line_to_split = xstrdup(line);
 	count = split_cmdline(line_to_split, &argv);
-	if (count < 0)
+	ถ้า (count < 0)
 		die(_("remote-object-info: failed to parse command line: %s"),
 		    split_cmdline_strerror(count));
-	if (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
+	ถ้า (count - 1 > MAX_ALLOWED_OBJ_LIMIT)
 		die(_("remote-object-info supports at most %d objects"),
 		    MAX_ALLOWED_OBJ_LIMIT);
 
-	if (data->info.sizep)
+	ถ้า (data->info.sizep)
 		results.wants_size = 1;
-	if (data->info.typep)
+	ถ้า (data->info.typep)
 		results.wants_type = 1;
 
-	if (get_remote_info(count, argv, &results, &object_info_oids))
+	ถ้า (get_remote_info(count, argv, &results, &object_info_oids))
 		die(_("failed to get object info from the remote: %s"), argv[0]);
 
 	string_list_clear(&data->remote_allowed_atoms, 0);
 	string_list_append(&data->remote_allowed_atoms, "objectname");
-	if (results.sizes)
+	ถ้า (results.sizes)
 		string_list_append(&data->remote_allowed_atoms, "objectsize");
-	if (results.types)
+	ถ้า (results.types)
 		string_list_append(&data->remote_allowed_atoms, "objecttype");
 
 	data->skip_object_info = 1;
-	for (size_t i = 0; i < results.nr; i++) {
+	สำหรับ (size_t i = 0; i < results.nr; i++) {
 		data->oid = object_info_oids.oid[i];
 
-		if (results.unrecognized[i]) {
+		ถ้า (results.unrecognized[i]) {
 			report_object_status(opt, oid_to_hex(&data->oid),
 					     &data->oid, "missing");
 			continue;
@@ -866,10 +866,10 @@ static void parse_cmd_remote_object_info(struct batch_options *opt,
 		 * When reaching here, it means remote-object-info can retrieve
 		 * information from server without downloading them.
 		 */
-		if (results.sizes)
+		ถ้า (results.sizes)
 			data->size = results.sizes[i];
 
-		if (results.types)
+		ถ้า (results.types)
 			data->type = results.types[i];
 
 		opt->batch_mode = BATCH_MODE_INFO;
@@ -885,32 +885,32 @@ static void parse_cmd_remote_object_info(struct batch_options *opt,
 	oid_array_clear(&object_info_oids);
 }
 
-static void dispatch_calls(struct batch_options *opt,
-		struct strbuf *output,
-		struct expand_data *data,
-		struct queued_cmd *cmd,
+static void dispatch_calls(sa_nracanaa batch_options *opt,
+		sa_nracanaa strbuf *output,
+		sa_nracanaa expand_data *data,
+		sa_nracanaa queued_cmd *cmd,
 		size_t nr)
 {
-	if (!opt->buffer_output)
+	ถ้า (!opt->buffer_output)
 		die(_("flush is only for --buffer mode"));
 
-	for (size_t i = 0; i < nr; i++)
+	สำหรับ (size_t i = 0; i < nr; i++)
 		cmd[i].fn(opt, cmd[i].line, output, data);
 
 	fflush(stdout);
 }
 
-static void free_cmds(struct queued_cmd *cmd, size_t *nr)
+static void free_cmds(sa_nracanaa queued_cmd *cmd, size_t *nr)
 {
-	for (size_t i = 0; i < *nr; i++)
+	สำหรับ (size_t i = 0; i < *nr; i++)
 		FREE_AND_NULL(cmd[i].line);
 
 	*nr = 0;
 }
 
 
-static const struct parse_cmd {
-	const char *name;
+static const sa_nracanaa parse_cmd {
+	const var_na *name;
 	parse_cmd_fn_t fn;
 	unsigned takes_args;
 } commands[] = {
@@ -921,52 +921,52 @@ static const struct parse_cmd {
 	{ "remote-object-info", parse_cmd_remote_object_info, 1 },
 };
 
-static void batch_objects_command(struct batch_options *opt,
-				    struct strbuf *output,
-				    struct expand_data *data)
+static void batch_objects_command(sa_nracanaa batch_options *opt,
+				    sa_nracanaa strbuf *output,
+				    sa_nracanaa expand_data *data)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct queued_cmd *queued_cmd = NULL;
+	sa_nracanaa strbuf input = STRBUF_INIT;
+	sa_nracanaa queued_cmd *queued_cmd = NULL;
 	size_t alloc = 0, nr = 0;
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		const struct parse_cmd *cmd = NULL;
-		const char *p = NULL, *cmd_end;
-		struct queued_cmd call = {0};
+	ขณะ (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
+		const sa_nracanaa parse_cmd *cmd = NULL;
+		const var_na *p = NULL, *cmd_end;
+		sa_nracanaa queued_cmd call = {0};
 
-		if (!input.len)
+		ถ้า (!input.len)
 			die(_("empty command in input"));
-		if (isspace(*input.buf))
+		ถ้า (isspace(*input.buf))
 			die(_("whitespace before command: '%s'"), input.buf);
 
-		for (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
-			if (!skip_prefix(input.buf, commands[i].name, &cmd_end))
+		สำหรับ (size_t i = 0; i < ARRAY_SIZE(commands); i++) {
+			ถ้า (!skip_prefix(input.buf, commands[i].name, &cmd_end))
 				continue;
 
 			cmd = &commands[i];
-			if (cmd->takes_args) {
-				if (*cmd_end != ' ')
+			ถ้า (cmd->takes_args) {
+				ถ้า (*cmd_end != ' ')
 					die(_("%s requires arguments"),
 					    commands[i].name);
 
 				p = cmd_end + 1;
-			} else if (*cmd_end) {
+			} มิฉะนั้น ถ้า (*cmd_end) {
 				die(_("%s takes no arguments"),
 				    commands[i].name);
 			}
 
-			break;
+			bha_nga;
 		}
 
-		if (!cmd)
+		ถ้า (!cmd)
 			die(_("unknown command: '%s'"), input.buf);
 
-		if (!strcmp(cmd->name, "flush")) {
+		ถ้า (!strcmp(cmd->name, "flush")) {
 			dispatch_calls(opt, output, data, queued_cmd, nr);
 			free_cmds(queued_cmd, &nr);
-		} else if (!opt->buffer_output) {
+		} มิฉะนั้น ถ้า (!opt->buffer_output) {
 			cmd->fn(opt, p, output, data);
-		} else {
+		} มิฉะนั้น {
 			ALLOC_GROW(queued_cmd, nr + 1, alloc);
 			call.fn = cmd->fn;
 			call.line = xstrdup_or_null(p);
@@ -974,7 +974,7 @@ static void batch_objects_command(struct batch_options *opt,
 		}
 	}
 
-	if (opt->buffer_output &&
+	ถ้า (opt->buffer_output &&
 	    nr &&
 	    !git_env_bool("GIT_TEST_CAT_FILE_NO_FLUSH_ON_EXIT", 0)) {
 		dispatch_calls(opt, output, data, queued_cmd, nr);
@@ -988,40 +988,40 @@ static void batch_objects_command(struct batch_options *opt,
 
 #define DEFAULT_FORMAT "%(objectname) %(objecttype) %(objectsize)"
 
-typedef int (*for_each_object_fn)(const struct object_id *oid, struct packed_git *pack,
+typedef จำนวนเต็ม (*for_each_object_fn)(const sa_nracanaa object_id *oid, sa_nracanaa packed_git *pack,
 				  off_t offset, void *data);
 
-struct for_each_object_payload {
+sa_nracanaa for_each_object_payload {
 	for_each_object_fn callback;
 	void *payload;
 };
 
-static int batch_one_object_oi(const struct object_id *oid,
-			       struct object_info *oi,
+static จำนวนเต็ม batch_one_object_oi(const sa_nracanaa object_id *oid,
+			       sa_nracanaa object_info *oi,
 			       void *_payload)
 {
-	struct for_each_object_payload *payload = _payload;
-	if (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
-		return payload->callback(oid, oi->source_infop->u.packed.pack,
+	sa_nracanaa for_each_object_payload *payload = _payload;
+	ถ้า (oi && oi->source_infop->source->type == ODB_SOURCE_PACKED)
+		คืน payload->callback(oid, oi->source_infop->u.packed.pack,
 					 oi->source_infop->u.packed.offset,
 					 payload->payload);
-	return payload->callback(oid, NULL, 0, payload->payload);
+	คืน payload->callback(oid, NULL, 0, payload->payload);
 }
 
-static void batch_each_object(struct batch_options *opt,
+static void batch_each_object(sa_nracanaa batch_options *opt,
 			      for_each_object_fn callback,
 			      unsigned flags,
 			      void *_payload)
 {
-	struct for_each_object_payload payload = {
+	sa_nracanaa for_each_object_payload payload = {
 		.callback = callback,
 		.payload = _payload,
 	};
-	struct odb_source_info source_info;
-	struct object_info oi = {
+	sa_nracanaa odb_source_info source_info;
+	sa_nracanaa object_info oi = {
 		.source_infop = &source_info,
 	};
-	struct odb_for_each_object_options opts = {
+	sa_nracanaa odb_for_each_object_options opts = {
 		.flags = flags,
 		.filter = &opt->objects_filter,
 	};
@@ -1030,14 +1030,14 @@ static void batch_each_object(struct batch_options *opt,
 				batch_one_object_oi, &payload, &opts);
 }
 
-static int batch_objects(struct batch_options *opt)
+static จำนวนเต็ม batch_objects(sa_nracanaa batch_options *opt)
 {
-	struct strbuf input = STRBUF_INIT;
-	struct strbuf output = STRBUF_INIT;
-	struct expand_data data = EXPAND_DATA_INIT;
-	struct repo_config_values *cfg = repo_config_values(the_repository);
-	int save_warning;
-	int retval = 0;
+	sa_nracanaa strbuf input = STRBUF_INIT;
+	sa_nracanaa strbuf output = STRBUF_INIT;
+	sa_nracanaa expand_data data = EXPAND_DATA_INIT;
+	sa_nracanaa repo_config_values *cfg = repo_config_values(the_repository);
+	จำนวนเต็ม save_warning;
+	จำนวนเต็ม retval = 0;
 
 	/*
 	 * Expand once with our special mark_query flag, which will prime the
@@ -1050,27 +1050,27 @@ static int batch_objects(struct batch_options *opt)
 		      &data);
 	data.mark_query = 0;
 	strbuf_release(&output);
-	if (opt->transform_mode)
+	ถ้า (opt->transform_mode)
 		data.split_on_whitespace = 1;
 
-	if (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
+	ถ้า (opt->format && !strcmp(opt->format, DEFAULT_FORMAT))
 		opt->format = NULL;
 	/*
 	 * If we are printing out the object, then always fill in the type,
 	 * since we will want to decide whether or not to stream.
 	 */
-	if (opt->batch_mode == BATCH_MODE_CONTENTS)
+	ถ้า (opt->batch_mode == BATCH_MODE_CONTENTS)
 		data.info.typep = &data.type;
 
-	if (opt->all_objects) {
-		struct object_cb_data cb;
-		struct object_info empty = OBJECT_INFO_INIT;
+	ถ้า (opt->all_objects) {
+		sa_nracanaa object_cb_data cb;
+		sa_nracanaa object_info empty = OBJECT_INFO_INIT;
 
-		if (!memcmp(&data.info, &empty, sizeof(empty)) &&
+		ถ้า (!memcmp(&data.info, &empty, parimaa_na(empty)) &&
 		    opt->objects_filter.choice == LOFC_DISABLED)
 			data.skip_object_info = 1;
 
-		if (repo_has_promisor_remote(the_repository))
+		ถ้า (repo_has_promisor_remote(the_repository))
 			warning("This repository uses promisor remotes. Some objects may not be loaded.");
 
 		disable_replace_refs();
@@ -1079,8 +1079,8 @@ static int batch_objects(struct batch_options *opt)
 		cb.expand = &data;
 		cb.scratch = &output;
 
-		if (opt->unordered) {
-			struct oidset seen = OIDSET_INIT;
+		ถ้า (opt->unordered) {
+			sa_nracanaa oidset seen = OIDSET_INIT;
 
 			cb.seen = &seen;
 
@@ -1088,8 +1088,8 @@ static int batch_objects(struct batch_options *opt)
 					  ODB_FOR_EACH_OBJECT_PACK_ORDER, &cb);
 
 			oidset_clear(&seen);
-		} else {
-			struct oid_array sa = OID_ARRAY_INIT;
+		} มิฉะนั้น {
+			sa_nracanaa oid_array sa = OID_ARRAY_INIT;
 
 			batch_each_object(opt, collect_object, 0, &sa);
 			oid_array_for_each_unique(&sa, batch_object_cb, &cb);
@@ -1098,7 +1098,7 @@ static int batch_objects(struct batch_options *opt)
 		}
 
 		strbuf_release(&output);
-		return 0;
+		คืน 0;
 	}
 
 	/*
@@ -1111,21 +1111,21 @@ static int batch_objects(struct batch_options *opt)
 	save_warning = cfg->warn_on_object_refname_ambiguity;
 	cfg->warn_on_object_refname_ambiguity = 0;
 
-	if (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
+	ถ้า (opt->batch_mode == BATCH_MODE_QUEUE_AND_DISPATCH) {
 		batch_objects_command(opt, &output, &data);
 		goto cleanup;
 	}
 
-	while (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
-		if (data.split_on_whitespace) {
+	ขณะ (strbuf_getdelim_strip_crlf(&input, stdin, opt->input_delim) != EOF) {
+		ถ้า (data.split_on_whitespace) {
 			/*
 			 * Split at first whitespace, tying off the beginning
 			 * of the string and saving the remainder (or NULL) in
 			 * data.rest.
 			 */
-			char *p = strpbrk(input.buf, " \t");
-			if (p) {
-				while (*p && strchr(" \t", *p))
+			var_na *p = strpbrk(input.buf, " \t");
+			ถ้า (p) {
+				ขณะ (*p && strchr(" \t", *p))
 					*p++ = '\0';
 			}
 			data.rest = p;
@@ -1139,64 +1139,64 @@ static int batch_objects(struct batch_options *opt)
 	strbuf_release(&output);
 	string_list_clear(&data.remote_allowed_atoms, 0);
 	cfg->warn_on_object_refname_ambiguity = save_warning;
-	return retval;
+	คืน retval;
 }
 
-static int git_cat_file_config(const char *var, const char *value,
-			       const struct config_context *ctx, void *cb)
+static จำนวนเต็ม git_cat_file_config(const var_na *var, const var_na *value,
+			       const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (userdiff_config(var, value) < 0)
-		return -1;
+	ถ้า (userdiff_config(var, value) < 0)
+		คืน -1;
 
-	return git_default_config(var, value, ctx, cb);
+	คืน git_default_config(var, value, ctx, cb);
 }
 
-static int batch_option_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+static จำนวนเต็ม batch_option_callback(const sa_nracanaa option *opt,
+				 const var_na *arg,
+				 จำนวนเต็ม unset)
 {
-	struct batch_options *bo = opt->value;
+	sa_nracanaa batch_options *bo = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (bo->enabled) {
-		return error(_("only one batch option may be specified"));
+	ถ้า (bo->enabled) {
+		คืน error(_("only one batch option may be specified"));
 	}
 
 	bo->enabled = 1;
 
-	if (!strcmp(opt->long_name, "batch"))
+	ถ้า (!strcmp(opt->long_name, "batch"))
 		bo->batch_mode = BATCH_MODE_CONTENTS;
-	else if (!strcmp(opt->long_name, "batch-check"))
+	มิฉะนั้น ถ้า (!strcmp(opt->long_name, "batch-check"))
 		bo->batch_mode = BATCH_MODE_INFO;
-	else if (!strcmp(opt->long_name, "batch-command"))
+	มิฉะนั้น ถ้า (!strcmp(opt->long_name, "batch-command"))
 		bo->batch_mode = BATCH_MODE_QUEUE_AND_DISPATCH;
-	else
+	มิฉะนั้น
 		BUG("%s given to batch-option-callback", opt->long_name);
 
 	bo->format = arg;
 
-	return 0;
+	คืน 0;
 }
 
-int cmd_cat_file(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+จำนวนเต็ม cmd_cat_file(จำนวนเต็ม argc,
+		 const var_na **argv,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED)
 {
-	int opt = 0;
-	int opt_cw = 0;
-	int opt_epts = 0;
-	const char *exp_type = NULL, *obj_name = NULL;
-	struct batch_options batch = {
+	จำนวนเต็ม opt = 0;
+	จำนวนเต็ม opt_cw = 0;
+	จำนวนเต็ม opt_epts = 0;
+	const var_na *exp_type = NULL, *obj_name = NULL;
+	sa_nracanaa batch_options batch = {
 		.objects_filter = LIST_OBJECTS_FILTER_INIT,
 	};
-	int unknown_type = 0;
-	int input_nul_terminated = 0;
-	int nul_terminated = 0;
-	int ret;
+	จำนวนเต็ม unknown_type = 0;
+	จำนวนเต็ม input_nul_terminated = 0;
+	จำนวนเต็ม nul_terminated = 0;
+	จำนวนเต็ม ret;
 
-	const char * const builtin_catfile_usage[] = {
+	const var_na * const builtin_catfile_usage[] = {
 		N_("git cat-file <type> <object>"),
 		N_("git cat-file (-e | -p | -t | -s) <object>"),
 		N_("git cat-file (--textconv | --filters)\n"
@@ -1206,7 +1206,7 @@ int cmd_cat_file(int argc,
 		   "             [--textconv | --filters] [-Z]"),
 		NULL
 	};
-	const struct option options[] = {
+	const sa_nracanaa option options[] = {
 		/* Simple queries */
 		OPT_GROUP(N_("Check object existence or emit object contents")),
 		OPT_CMDMODE('e', NULL, &opt,
@@ -1266,74 +1266,74 @@ int cmd_cat_file(int argc,
 	opt_cw = (opt == 'c' || opt == 'w');
 	opt_epts = (opt == 'e' || opt == 'p' || opt == 't' || opt == 's');
 
-	if (use_mailmap)
+	ถ้า (use_mailmap)
 		load_mailmap();
 
 	switch (batch.objects_filter.choice) {
-	case LOFC_DISABLED:
-		break;
-	case LOFC_BLOB_NONE:
-	case LOFC_BLOB_LIMIT:
-	case LOFC_OBJECT_TYPE:
-		if (!batch.enabled)
+	pak_sa LOFC_DISABLED:
+		bha_nga;
+	pak_sa LOFC_BLOB_NONE:
+	pak_sa LOFC_BLOB_LIMIT:
+	pak_sa LOFC_OBJECT_TYPE:
+		ถ้า (!batch.enabled)
 			usage(_("objects filter only supported in batch mode"));
-		break;
+		bha_nga;
 	default:
 		usagef(_("objects filter not supported: '%s'"),
 		       list_object_filter_config_name(batch.objects_filter.choice));
 	}
 
 	/* --batch-all-objects? */
-	if (opt == 'b')
+	ถ้า (opt == 'b')
 		batch.all_objects = 1;
 
 	/* Option compatibility */
-	if (force_path && !opt_cw)
+	ถ้า (force_path && !opt_cw)
 		usage_msg_optf(_("'%s=<%s>' needs '%s' or '%s'"),
 			       builtin_catfile_usage, options,
 			       "--path", _("path|tree-ish"), "--filters",
 			       "--textconv");
 
 	/* Option compatibility with batch mode */
-	if (batch.enabled)
+	ถ้า (batch.enabled)
 		;
-	else if (batch.follow_symlinks)
+	มิฉะนั้น ถ้า (batch.follow_symlinks)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--follow-symlinks");
-	else if (batch.buffer_output >= 0)
+	มิฉะนั้น ถ้า (batch.buffer_output >= 0)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--buffer");
-	else if (batch.all_objects)
+	มิฉะนั้น ถ้า (batch.all_objects)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "--batch-all-objects");
-	else if (input_nul_terminated)
+	มิฉะนั้น ถ้า (input_nul_terminated)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-z");
-	else if (nul_terminated)
+	มิฉะนั้น ถ้า (nul_terminated)
 		usage_msg_optf(_("'%s' requires a batch mode"), builtin_catfile_usage,
 			       options, "-Z");
 
 	batch.input_delim = batch.output_delim = '\n';
-	if (input_nul_terminated)
+	ถ้า (input_nul_terminated)
 		batch.input_delim = '\0';
-	if (nul_terminated)
+	ถ้า (nul_terminated)
 		batch.input_delim = batch.output_delim = '\0';
 
 	/* Batch defaults */
-	if (batch.buffer_output < 0)
+	ถ้า (batch.buffer_output < 0)
 		batch.buffer_output = batch.all_objects;
 
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
 	/* Return early if we're in batch mode? */
-	if (batch.enabled) {
-		if (opt_cw)
+	ถ้า (batch.enabled) {
+		ถ้า (opt_cw)
 			batch.transform_mode = opt;
-		else if (opt && opt != 'b')
+		มิฉะนั้น ถ้า (opt && opt != 'b')
 			usage_msg_optf(_("'-%c' is incompatible with batch mode"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc)
+		มิฉะนั้น ถ้า (argc)
 			usage_msg_opt(_("batch modes take no arguments"),
 				      builtin_catfile_usage, options);
 
@@ -1341,29 +1341,29 @@ int cmd_cat_file(int argc,
 		goto out;
 	}
 
-	if (opt) {
-		if (!argc && opt == 'c')
+	ถ้า (opt) {
+		ถ้า (!argc && opt == 'c')
 			usage_msg_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--textconv");
-		else if (!argc && opt == 'w')
+		มิฉะนั้น ถ้า (!argc && opt == 'w')
 			usage_msg_optf(_("<rev> required with '%s'"),
 				       builtin_catfile_usage, options,
 				       "--filters");
-		else if (!argc && opt_epts)
+		มิฉะนั้น ถ้า (!argc && opt_epts)
 			usage_msg_optf(_("<object> required with '-%c'"),
 				       builtin_catfile_usage, options, opt);
-		else if (argc == 1)
+		มิฉะนั้น ถ้า (argc == 1)
 			obj_name = argv[0];
-		else
+		มิฉะนั้น
 			usage_msg_opt(_("too many arguments"), builtin_catfile_usage,
 				      options);
-	} else if (!argc) {
+	} มิฉะนั้น ถ้า (!argc) {
 		usage_with_options(builtin_catfile_usage, options);
-	} else if (argc != 2) {
+	} มิฉะนั้น ถ้า (argc != 2) {
 		usage_msg_optf(_("only two arguments allowed in <type> <object> mode, not %d"),
 			      builtin_catfile_usage, options, argc);
-	} else if (argc) {
+	} มิฉะนั้น ถ้า (argc) {
 		exp_type = argv[0];
 		obj_name = argv[1];
 	}
@@ -1372,5 +1372,5 @@ int cmd_cat_file(int argc,
 
 out:
 	list_objects_filter_release(&batch.objects_filter);
-	return ret;
+	คืน ret;
 }

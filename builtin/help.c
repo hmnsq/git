@@ -22,31 +22,31 @@
 #define DEFAULT_HELP_FORMAT "man"
 #endif
 
-static struct man_viewer_list {
-	struct man_viewer_list *next;
-	char name[FLEX_ARRAY];
+static sa_nracanaa man_viewer_list {
+	sa_nracanaa man_viewer_list *next;
+	var_na name[FLEX_ARRAY];
 } *man_viewer_list;
 
-static struct man_viewer_info_list {
-	struct man_viewer_info_list *next;
-	const char *info;
-	char name[FLEX_ARRAY];
+static sa_nracanaa man_viewer_info_list {
+	sa_nracanaa man_viewer_info_list *next;
+	const var_na *info;
+	var_na name[FLEX_ARRAY];
 } *man_viewer_info_list;
 
-enum help_format {
+ga_nanaa help_format {
 	HELP_FORMAT_NONE,
 	HELP_FORMAT_MAN,
 	HELP_FORMAT_INFO,
 	HELP_FORMAT_WEB
 };
 
-enum show_config_type {
+ga_nanaa show_config_type {
 	SHOW_CONFIG_HUMAN,
 	SHOW_CONFIG_VARS,
 	SHOW_CONFIG_SECTIONS,
 };
 
-static enum help_action {
+static ga_nanaa help_action {
 	HELP_ACTION_ALL = 1,
 	HELP_ACTION_GUIDES,
 	HELP_ACTION_CONFIG,
@@ -57,13 +57,13 @@ static enum help_action {
 	HELP_ACTION_ALIASES_FOR_COMPLETION,
 } cmd_mode;
 
-static char *html_path;
-static int verbose = 1;
-static enum help_format help_format = HELP_FORMAT_NONE;
-static int exclude_guides;
-static int show_external_commands = -1;
-static int show_aliases = -1;
-static struct option builtin_help_options[] = {
+static var_na *html_path;
+static จำนวนเต็ม verbose = 1;
+static ga_nanaa help_format help_format = HELP_FORMAT_NONE;
+static จำนวนเต็ม exclude_guides;
+static จำนวนเต็ม show_external_commands = -1;
+static จำนวนเต็ม show_aliases = -1;
+static sa_nracanaa option builtin_help_options[] = {
 	OPT_CMDMODE('a', "all", &cmd_mode, N_("print all available commands"),
 		    HELP_ACTION_ALL),
 	OPT_BOOL(0, "external-commands", &show_external_commands,
@@ -97,7 +97,7 @@ static struct option builtin_help_options[] = {
 	OPT_END(),
 };
 
-static const char * const builtin_help_usage[] = {
+static const var_na * const builtin_help_usage[] = {
 	"git help [-a|--all] [--[no-]verbose] [--[no-]external-commands] [--[no-]aliases]",
 	N_("git help [[-i|--info] [-m|--man] [-w|--web]] [<command>|<doc>]"),
 	"git help [-g|--guides]",
@@ -107,30 +107,30 @@ static const char * const builtin_help_usage[] = {
 	NULL
 };
 
-struct slot_expansion {
-	const char *prefix;
-	const char *placeholder;
-	void (*fn)(struct string_list *list, const char *prefix);
-	int found;
+sa_nracanaa slot_expansion {
+	const var_na *prefix;
+	const var_na *placeholder;
+	void (*fn)(sa_nracanaa string_list *list, const var_na *prefix);
+	จำนวนเต็ม found;
 };
 
-static void set_config_vars(struct string_list *keys_uniq, struct string_list_item *var)
+static void set_config_vars(sa_nracanaa string_list *keys_uniq, sa_nracanaa string_list_item *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *wildcard = strchr(str, '*');
-	const char *tag = strchr(str, '<');
-	const char *cut;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	const var_na *str = var->string;
+	const var_na *wildcard = strchr(str, '*');
+	const var_na *tag = strchr(str, '<');
+	const var_na *cut;
 
-	if (wildcard && tag)
+	ถ้า (wildcard && tag)
 		cut = wildcard < tag ? wildcard : tag;
-	else if (wildcard)
+	มิฉะนั้น ถ้า (wildcard)
 		cut = wildcard;
-	else if (tag)
+	มิฉะนั้น ถ้า (tag)
 		cut = tag;
-	else {
+	มิฉะนั้น {
 		string_list_append(keys_uniq, str);
-		return;
+		คืน;
 	}
 
 	strbuf_add(&sb, str, cut - str);
@@ -138,18 +138,18 @@ static void set_config_vars(struct string_list *keys_uniq, struct string_list_it
 	strbuf_release(&sb);
 }
 
-static void set_config_sections(struct string_list *keys_uniq, struct string_list_item *var)
+static void set_config_sections(sa_nracanaa string_list *keys_uniq, sa_nracanaa string_list_item *var)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *str = var->string;
-	const char *dot = strchr(str, '.');
-	const char *cut;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	const var_na *str = var->string;
+	const var_na *dot = strchr(str, '.');
+	const var_na *cut;
 
-	if (dot)
+	ถ้า (dot)
 		cut = dot;
-	else {
+	มิฉะนั้น {
 		set_config_vars(keys_uniq, var);
-		return;
+		คืน;
 	}
 
 	strbuf_add(&sb, str, cut - str);
@@ -157,9 +157,9 @@ static void set_config_sections(struct string_list *keys_uniq, struct string_lis
 	strbuf_release(&sb);
 }
 
-static void list_config_help(enum show_config_type type)
+static void list_config_help(ga_nanaa show_config_type type)
 {
-	struct slot_expansion slot_expansions[] = {
+	sa_nracanaa slot_expansion slot_expansions[] = {
 		{ "advice", "*", list_config_advices },
 		{ "color.branch", "<slot>", list_config_color_branch_slots },
 		{ "color.decorate", "<slot>", list_config_color_decorate_slots },
@@ -172,48 +172,48 @@ static void list_config_help(enum show_config_type type)
 		{ "receive.fsck", "<msg-id>", list_config_fsck_msg_ids },
 		{ NULL, NULL, NULL }
 	};
-	const char **p;
-	struct slot_expansion *e;
-	struct string_list keys = STRING_LIST_INIT_DUP;
-	struct string_list keys_uniq = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	struct strbuf sb = STRBUF_INIT;
+	const var_na **p;
+	sa_nracanaa slot_expansion *e;
+	sa_nracanaa string_list keys = STRING_LIST_INIT_DUP;
+	sa_nracanaa string_list keys_uniq = STRING_LIST_INIT_DUP;
+	sa_nracanaa string_list_item *item;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
 
-	for (p = config_name_list; *p; p++) {
-		const char *var = *p;
+	สำหรับ (p = config_name_list; *p; p++) {
+		const var_na *var = *p;
 
-		for (e = slot_expansions; e->prefix; e++) {
+		สำหรับ (e = slot_expansions; e->prefix; e++) {
 			strbuf_reset(&sb);
 			strbuf_addf(&sb, "%s.%s", e->prefix, e->placeholder);
-			if (!strcasecmp(var, sb.buf)) {
+			ถ้า (!strcasecmp(var, sb.buf)) {
 				e->fn(&keys, e->prefix);
 				e->found++;
-				break;
+				bha_nga;
 			}
 		}
 
-		if (!e->prefix)
+		ถ้า (!e->prefix)
 			string_list_append(&keys, var);
 	}
 
 	strbuf_release(&sb);
 
-	for (e = slot_expansions; e->prefix; e++)
-		if (!e->found)
+	สำหรับ (e = slot_expansions; e->prefix; e++)
+		ถ้า (!e->found)
 			BUG("slot_expansion %s.%s is not used",
 			    e->prefix, e->placeholder);
 
-	for (size_t i = 0; i < keys.nr; i++) {
+	สำหรับ (size_t i = 0; i < keys.nr; i++) {
 		switch (type) {
-		case SHOW_CONFIG_HUMAN:
+		pak_sa SHOW_CONFIG_HUMAN:
 			string_list_append(&keys_uniq, keys.items[i].string);
-			break;
-		case SHOW_CONFIG_SECTIONS:
+			bha_nga;
+		pak_sa SHOW_CONFIG_SECTIONS:
 			set_config_sections(&keys_uniq, &keys.items[i]);
-			break;
-		case SHOW_CONFIG_VARS:
+			bha_nga;
+		pak_sa SHOW_CONFIG_VARS:
 			set_config_vars(&keys_uniq, &keys.items[i]);
-			break;
+			bha_nga;
 		default:
 			BUG("%d: unexpected type", type);
 		}
@@ -226,14 +226,14 @@ static void list_config_help(enum show_config_type type)
 	string_list_clear(&keys, 0);
 }
 
-static enum help_format parse_help_format(const char *format)
+static ga_nanaa help_format parse_help_format(const var_na *format)
 {
-	if (!strcmp(format, "man"))
-		return HELP_FORMAT_MAN;
-	if (!strcmp(format, "info"))
-		return HELP_FORMAT_INFO;
-	if (!strcmp(format, "web") || !strcmp(format, "html"))
-		return HELP_FORMAT_WEB;
+	ถ้า (!strcmp(format, "man"))
+		คืน HELP_FORMAT_MAN;
+	ถ้า (!strcmp(format, "info"))
+		คืน HELP_FORMAT_INFO;
+	ถ้า (!strcmp(format, "web") || !strcmp(format, "html"))
+		คืน HELP_FORMAT_WEB;
 	/*
 	 * Please update _repo_config() in git-completion.bash when you
 	 * add new help formats.
@@ -241,30 +241,30 @@ static enum help_format parse_help_format(const char *format)
 	die(_("unrecognized help format '%s'"), format);
 }
 
-static const char *get_man_viewer_info(const char *name)
+static const var_na *get_man_viewer_info(const var_na *name)
 {
-	struct man_viewer_info_list *viewer;
+	sa_nracanaa man_viewer_info_list *viewer;
 
-	for (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
+	สำหรับ (viewer = man_viewer_info_list; viewer; viewer = viewer->next)
 	{
-		if (!strcasecmp(name, viewer->name))
-			return viewer->info;
+		ถ้า (!strcasecmp(name, viewer->name))
+			คืน viewer->info;
 	}
-	return NULL;
+	คืน NULL;
 }
 
-static int check_emacsclient_version(void)
+static จำนวนเต็ม check_emacsclient_version(void)
 {
-	struct strbuf buffer = STRBUF_INIT;
-	struct child_process ec_process = CHILD_PROCESS_INIT;
-	int version;
+	sa_nracanaa strbuf buffer = STRBUF_INIT;
+	sa_nracanaa child_process ec_process = CHILD_PROCESS_INIT;
+	จำนวนเต็ม version;
 
 	/* emacsclient prints its version number on stderr */
 	strvec_pushl(&ec_process.args, "emacsclient", "--version", NULL);
 	ec_process.err = -1;
 	ec_process.stdout_to_stderr = 1;
-	if (start_command(&ec_process))
-		return error(_("Failed to start emacsclient."));
+	ถ้า (start_command(&ec_process))
+		คืน error(_("Failed to start emacsclient."));
 
 	strbuf_read(&buffer, ec_process.err, 20);
 	close(ec_process.err);
@@ -275,214 +275,214 @@ static int check_emacsclient_version(void)
 	 */
 	finish_command(&ec_process);
 
-	if (!starts_with(buffer.buf, "emacsclient")) {
+	ถ้า (!starts_with(buffer.buf, "emacsclient")) {
 		strbuf_release(&buffer);
-		return error(_("Failed to parse emacsclient version."));
+		คืน error(_("Failed to parse emacsclient version."));
 	}
 
 	strbuf_remove(&buffer, 0, strlen("emacsclient"));
 	version = atoi(buffer.buf);
 
-	if (version < 22) {
+	ถ้า (version < 22) {
 		strbuf_release(&buffer);
-		return error(_("emacsclient version '%d' too old (< 22)."),
+		คืน error(_("emacsclient version '%d' too old (< 22)."),
 			version);
 	}
 
 	strbuf_release(&buffer);
-	return 0;
+	คืน 0;
 }
 
-static void exec_woman_emacs(const char *path, const char *page)
+static void exec_woman_emacs(const var_na *path, const var_na *page)
 {
-	if (!check_emacsclient_version()) {
+	ถ้า (!check_emacsclient_version()) {
 		/* This works only with emacsclient version >= 22. */
-		struct strbuf man_page = STRBUF_INIT;
+		sa_nracanaa strbuf man_page = STRBUF_INIT;
 
-		if (!path)
+		ถ้า (!path)
 			path = "emacsclient";
 		strbuf_addf(&man_page, "(woman \"%s\")", page);
-		execlp(path, "emacsclient", "-e", man_page.buf, (char *)NULL);
+		execlp(path, "emacsclient", "-e", man_page.buf, (var_na *)NULL);
 		warning_errno(_("failed to exec '%s'"), path);
 		strbuf_release(&man_page);
 	}
 }
 
-static void exec_man_konqueror(const char *path, const char *page)
+static void exec_man_konqueror(const var_na *path, const var_na *page)
 {
-	const char *display = getenv("DISPLAY");
-	if (display && *display) {
-		struct strbuf man_page = STRBUF_INIT;
-		const char *filename = "kfmclient";
+	const var_na *display = getenv("DISPLAY");
+	ถ้า (display && *display) {
+		sa_nracanaa strbuf man_page = STRBUF_INIT;
+		const var_na *filename = "kfmclient";
 
 		/* It's simpler to launch konqueror using kfmclient. */
-		if (path) {
+		ถ้า (path) {
 			size_t len;
-			if (strip_suffix(path, "/konqueror", &len))
-				path = xstrfmt("%.*s/kfmclient", (int)len, path);
-			filename = basename((char *)path);
-		} else
+			ถ้า (strip_suffix(path, "/konqueror", &len))
+				path = xstrfmt("%.*s/kfmclient", (จำนวนเต็ม)len, path);
+			filename = basename((var_na *)path);
+		} มิฉะนั้น
 			path = "kfmclient";
 		strbuf_addf(&man_page, "man:%s(1)", page);
-		execlp(path, filename, "newTab", man_page.buf, (char *)NULL);
+		execlp(path, filename, "newTab", man_page.buf, (var_na *)NULL);
 		warning_errno(_("failed to exec '%s'"), path);
 		strbuf_release(&man_page);
 	}
 }
 
-static void exec_man_man(const char *path, const char *page)
+static void exec_man_man(const var_na *path, const var_na *page)
 {
-	if (!path)
+	ถ้า (!path)
 		path = "man";
-	execlp(path, "man", page, (char *)NULL);
+	execlp(path, "man", page, (var_na *)NULL);
 	warning_errno(_("failed to exec '%s'"), path);
 }
 
-static void exec_man_cmd(const char *cmd, const char *page)
+static void exec_man_cmd(const var_na *cmd, const var_na *page)
 {
-	struct strbuf shell_cmd = STRBUF_INIT;
+	sa_nracanaa strbuf shell_cmd = STRBUF_INIT;
 	strbuf_addf(&shell_cmd, "%s %s", cmd, page);
-	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (char *)NULL);
+	execl(SHELL_PATH, SHELL_PATH, "-c", shell_cmd.buf, (var_na *)NULL);
 	warning(_("failed to exec '%s'"), cmd);
 	strbuf_release(&shell_cmd);
 }
 
-static void add_man_viewer(const char *name)
+static void add_man_viewer(const var_na *name)
 {
-	struct man_viewer_list **p = &man_viewer_list;
+	sa_nracanaa man_viewer_list **p = &man_viewer_list;
 
-	while (*p)
+	ขณะ (*p)
 		p = &((*p)->next);
 	FLEX_ALLOC_STR(*p, name, name);
 }
 
-static int supported_man_viewer(const char *name, size_t len)
+static จำนวนเต็ม supported_man_viewer(const var_na *name, size_t len)
 {
-	return (!strncasecmp("man", name, len) ||
+	คืน (!strncasecmp("man", name, len) ||
 		!strncasecmp("woman", name, len) ||
 		!strncasecmp("konqueror", name, len));
 }
 
-static void do_add_man_viewer_info(const char *name,
+static void do_add_man_viewer_info(const var_na *name,
 				   size_t len,
-				   const char *value)
+				   const var_na *value)
 {
-	struct man_viewer_info_list *new_man_viewer;
+	sa_nracanaa man_viewer_info_list *new_man_viewer;
 	FLEX_ALLOC_MEM(new_man_viewer, name, name, len);
 	new_man_viewer->info = xstrdup(value);
 	new_man_viewer->next = man_viewer_info_list;
 	man_viewer_info_list = new_man_viewer;
 }
 
-static int add_man_viewer_path(const char *name,
+static จำนวนเต็ม add_man_viewer_path(const var_na *name,
 			       size_t len,
-			       const char *value)
+			       const var_na *value)
 {
-	if (supported_man_viewer(name, len))
+	ถ้า (supported_man_viewer(name, len))
 		do_add_man_viewer_info(name, len, value);
-	else
+	มิฉะนั้น
 		warning(_("'%s': path for unsupported man viewer.\n"
 			  "Please consider using 'man.<tool>.cmd' instead."),
 			name);
 
-	return 0;
+	คืน 0;
 }
 
-static int add_man_viewer_cmd(const char *name,
+static จำนวนเต็ม add_man_viewer_cmd(const var_na *name,
 			      size_t len,
-			      const char *value)
+			      const var_na *value)
 {
-	if (supported_man_viewer(name, len))
+	ถ้า (supported_man_viewer(name, len))
 		warning(_("'%s': cmd for supported man viewer.\n"
 			  "Please consider using 'man.<tool>.path' instead."),
 			name);
-	else
+	มิฉะนั้น
 		do_add_man_viewer_info(name, len, value);
 
-	return 0;
+	คืน 0;
 }
 
-static int add_man_viewer_info(const char *var, const char *value)
+static จำนวนเต็ม add_man_viewer_info(const var_na *var, const var_na *value)
 {
-	const char *name, *subkey;
+	const var_na *name, *subkey;
 	size_t namelen;
 
-	if (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
-		return 0;
+	ถ้า (parse_config_key(var, "man", &name, &namelen, &subkey) < 0 || !name)
+		คืน 0;
 
-	if (!strcmp(subkey, "path")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_path(name, namelen, value);
+	ถ้า (!strcmp(subkey, "path")) {
+		ถ้า (!value)
+			คืน config_error_nonbool(var);
+		คืน add_man_viewer_path(name, namelen, value);
 	}
-	if (!strcmp(subkey, "cmd")) {
-		if (!value)
-			return config_error_nonbool(var);
-		return add_man_viewer_cmd(name, namelen, value);
+	ถ้า (!strcmp(subkey, "cmd")) {
+		ถ้า (!value)
+			คืน config_error_nonbool(var);
+		คืน add_man_viewer_cmd(name, namelen, value);
 	}
 
-	return 0;
+	คืน 0;
 }
 
-static int git_help_config(const char *var, const char *value,
-			   const struct config_context *ctx, void *cb)
+static จำนวนเต็ม git_help_config(const var_na *var, const var_na *value,
+			   const sa_nracanaa config_context *ctx, void *cb)
 {
-	if (!strcmp(var, "help.format")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ถ้า (!strcmp(var, "help.format")) {
+		ถ้า (!value)
+			คืน config_error_nonbool(var);
 		help_format = parse_help_format(value);
-		return 0;
+		คืน 0;
 	}
-	if (!strcmp(var, "help.htmlpath")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ถ้า (!strcmp(var, "help.htmlpath")) {
+		ถ้า (!value)
+			คืน config_error_nonbool(var);
 		free(html_path);
 		html_path = xstrdup(value);
-		return 0;
+		คืน 0;
 	}
-	if (!strcmp(var, "man.viewer")) {
-		if (!value)
-			return config_error_nonbool(var);
+	ถ้า (!strcmp(var, "man.viewer")) {
+		ถ้า (!value)
+			คืน config_error_nonbool(var);
 		add_man_viewer(value);
-		return 0;
+		คืน 0;
 	}
-	if (starts_with(var, "man."))
-		return add_man_viewer_info(var, value);
+	ถ้า (starts_with(var, "man."))
+		คืน add_man_viewer_info(var, value);
 
-	return git_default_config(var, value, ctx, cb);
+	คืน git_default_config(var, value, ctx, cb);
 }
 
-static struct cmdnames main_cmds, other_cmds;
+static sa_nracanaa cmdnames main_cmds, other_cmds;
 
-static int is_git_command(const char *s)
+static จำนวนเต็ม is_git_command(const var_na *s)
 {
-	if (is_builtin(s))
-		return 1;
+	ถ้า (is_builtin(s))
+		คืน 1;
 
 	load_command_list("git-", &main_cmds, &other_cmds);
-	return is_in_cmdlist(&main_cmds, s) ||
+	คืน is_in_cmdlist(&main_cmds, s) ||
 		is_in_cmdlist(&other_cmds, s);
 }
 
-static const char *cmd_to_page(const char *git_cmd)
+static const var_na *cmd_to_page(const var_na *git_cmd)
 {
-	if (!git_cmd)
-		return "git";
-	else if (starts_with(git_cmd, "git"))
-		return git_cmd;
-	else if (is_git_command(git_cmd))
-		return xstrfmt("git-%s", git_cmd);
-	else if (!strcmp("scalar", git_cmd))
-		return xstrdup(git_cmd);
-	else
-		return xstrfmt("git%s", git_cmd);
+	ถ้า (!git_cmd)
+		คืน "git";
+	มิฉะนั้น ถ้า (starts_with(git_cmd, "git"))
+		คืน git_cmd;
+	มิฉะนั้น ถ้า (is_git_command(git_cmd))
+		คืน xstrfmt("git-%s", git_cmd);
+	มิฉะนั้น ถ้า (!strcmp("scalar", git_cmd))
+		คืน xstrdup(git_cmd);
+	มิฉะนั้น
+		คืน xstrfmt("git%s", git_cmd);
 }
 
 static void setup_man_path(void)
 {
-	struct strbuf new_path = STRBUF_INIT;
-	const char *old_path = getenv("MANPATH");
-	char *git_man_path = system_path(GIT_MAN_PATH);
+	sa_nracanaa strbuf new_path = STRBUF_INIT;
+	const var_na *old_path = getenv("MANPATH");
+	var_na *git_man_path = system_path(GIT_MAN_PATH);
 
 	/* We should always put ':' after our path. If there is no
 	 * old_path, the ':' at the end will let 'man' to try
@@ -490,7 +490,7 @@ static void setup_man_path(void)
 	 * there is old_path, we need ':' as delimiter. */
 	strbuf_addstr(&new_path, git_man_path);
 	strbuf_addch(&new_path, ':');
-	if (old_path)
+	ถ้า (old_path)
 		strbuf_addstr(&new_path, old_path);
 
 	free(git_man_path);
@@ -499,59 +499,59 @@ static void setup_man_path(void)
 	strbuf_release(&new_path);
 }
 
-static void exec_viewer(const char *name, const char *page)
+static void exec_viewer(const var_na *name, const var_na *page)
 {
-	const char *info = get_man_viewer_info(name);
+	const var_na *info = get_man_viewer_info(name);
 
-	if (!strcasecmp(name, "man"))
+	ถ้า (!strcasecmp(name, "man"))
 		exec_man_man(info, page);
-	else if (!strcasecmp(name, "woman"))
+	มิฉะนั้น ถ้า (!strcasecmp(name, "woman"))
 		exec_woman_emacs(info, page);
-	else if (!strcasecmp(name, "konqueror"))
+	มิฉะนั้น ถ้า (!strcasecmp(name, "konqueror"))
 		exec_man_konqueror(info, page);
-	else if (info)
+	มิฉะนั้น ถ้า (info)
 		exec_man_cmd(info, page);
-	else
+	มิฉะนั้น
 		warning(_("'%s': unknown man viewer."), name);
 }
 
-static void show_man_page(const char *page)
+static void show_man_page(const var_na *page)
 {
-	struct man_viewer_list *viewer;
-	const char *fallback = getenv("GIT_MAN_VIEWER");
+	sa_nracanaa man_viewer_list *viewer;
+	const var_na *fallback = getenv("GIT_MAN_VIEWER");
 
 	setup_man_path();
-	for (viewer = man_viewer_list; viewer; viewer = viewer->next)
+	สำหรับ (viewer = man_viewer_list; viewer; viewer = viewer->next)
 	{
 		exec_viewer(viewer->name, page); /* will return when unable */
 	}
-	if (fallback)
+	ถ้า (fallback)
 		exec_viewer(fallback, page);
 	exec_viewer("man", page);
 	die(_("no man viewer handled the request"));
 }
 
-static void show_info_page(const char *page)
+static void show_info_page(const var_na *page)
 {
 	setenv("INFOPATH", system_path(GIT_INFO_PATH), 1);
-	execlp("info", "info", "gitman", page, (char *)NULL);
+	execlp("info", "info", "gitman", page, (var_na *)NULL);
 	die(_("no info viewer handled the request"));
 }
 
-static void get_html_page_path(struct strbuf *page_path, const char *page)
+static void get_html_page_path(sa_nracanaa strbuf *page_path, const var_na *page)
 {
-	struct stat st;
-	const char *path = html_path;
-	char *to_free = NULL;
+	sa_nracanaa stat st;
+	const var_na *path = html_path;
+	var_na *to_free = NULL;
 
-	if (!path)
+	ถ้า (!path)
 		path = to_free = system_path(GIT_HTML_PATH);
 
 	/*
 	 * Check that the page we're looking for exists.
 	 */
-	if (!strstr(path, "://")) {
-		if (stat(mkpath("%s/%s.html", path, page), &st)
+	ถ้า (!strstr(path, "://")) {
+		ถ้า (stat(mkpath("%s/%s.html", path, page), &st)
 		    || !S_ISREG(st.st_mode))
 			die("'%s/%s.html': documentation file not found.",
 				path, page);
@@ -562,31 +562,31 @@ static void get_html_page_path(struct strbuf *page_path, const char *page)
 	free(to_free);
 }
 
-static void open_html(const char *path)
+static void open_html(const var_na *path)
 {
-	execl_git_cmd("web--browse", "-c", "help.browser", path, (char *)NULL);
+	execl_git_cmd("web--browse", "-c", "help.browser", path, (var_na *)NULL);
 }
 
-static void show_html_page(const char *page)
+static void show_html_page(const var_na *page)
 {
-	struct strbuf page_path; /* it leaks but we exec below */
+	sa_nracanaa strbuf page_path; /* it leaks but we exec below */
 
 	get_html_page_path(&page_path, page);
 
 	open_html(page_path.buf);
 }
 
-static char *check_git_cmd(const char *cmd)
+static var_na *check_git_cmd(const var_na *cmd)
 {
-	char *alias;
+	var_na *alias;
 
-	if (is_git_command(cmd))
-		return xstrdup(cmd);
+	ถ้า (is_git_command(cmd))
+		คืน xstrdup(cmd);
 
 	alias = alias_lookup(cmd);
-	if (alias) {
-		const char **argv;
-		int count;
+	ถ้า (alias) {
+		const var_na **argv;
+		จำนวนเต็ม count;
 
 		/*
 		 * handle_builtin() in git.c rewrites "git cmd --help"
@@ -596,7 +596,7 @@ static char *check_git_cmd(const char *cmd)
 		 * alias for a shell command, just print the alias
 		 * definition.
 		 */
-		if (!exclude_guides || alias[0] == '!') {
+		ถ้า (!exclude_guides || alias[0] == '!') {
 			printf_ln(_("'%s' is aliased to '%s'"), cmd, alias);
 			free(alias);
 			exit(0);
@@ -610,35 +610,35 @@ static char *check_git_cmd(const char *cmd)
 		 */
 		fprintf_ln(stderr, _("'%s' is aliased to '%s'"), cmd, alias);
 		count = split_cmdline(alias, &argv);
-		if (count < 0)
+		ถ้า (count < 0)
 			die(_("bad alias.%s string: %s"), cmd,
 			    split_cmdline_strerror(count));
 		free(argv);
-		return alias;
+		คืน alias;
 	}
 
-	if (exclude_guides)
-		return help_unknown_cmd(cmd);
+	ถ้า (exclude_guides)
+		คืน help_unknown_cmd(cmd);
 
-	return xstrdup(cmd);
+	คืน xstrdup(cmd);
 }
 
-static void no_help_format(const char *opt_mode, enum help_format fmt)
+static void no_help_format(const var_na *opt_mode, ga_nanaa help_format fmt)
 {
-	const char *opt_fmt;
+	const var_na *opt_fmt;
 
 	switch (fmt) {
-	case HELP_FORMAT_NONE:
-		return;
-	case HELP_FORMAT_MAN:
+	pak_sa HELP_FORMAT_NONE:
+		คืน;
+	pak_sa HELP_FORMAT_MAN:
 		opt_fmt = "--man";
-		break;
-	case HELP_FORMAT_INFO:
+		bha_nga;
+	pak_sa HELP_FORMAT_INFO:
 		opt_fmt = "--info";
-		break;
-	case HELP_FORMAT_WEB:
+		bha_nga;
+	pak_sa HELP_FORMAT_WEB:
 		opt_fmt = "--web";
-		break;
+		bha_nga;
 	default:
 		BUG("unreachable");
 	}
@@ -648,10 +648,10 @@ static void no_help_format(const char *opt_mode, enum help_format fmt)
 		       opt_fmt);
 }
 
-static void opt_mode_usage(int argc, const char *opt_mode,
-			   enum help_format fmt)
+static void opt_mode_usage(จำนวนเต็ม argc, const var_na *opt_mode,
+			   ga_nanaa help_format fmt)
 {
-	if (argc)
+	ถ้า (argc)
 		usage_msg_optf(_("the '%s' option doesn't take any non-option arguments"),
 			       builtin_help_usage, builtin_help_options,
 			       opt_mode);
@@ -659,111 +659,111 @@ static void opt_mode_usage(int argc, const char *opt_mode,
 	no_help_format(opt_mode, fmt);
 }
 
-int cmd_help(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo UNUSED)
+จำนวนเต็ม cmd_help(จำนวนเต็ม argc,
+	     const var_na **argv,
+	     const var_na *prefix,
+	     sa_nracanaa repository *repo UNUSED)
 {
-	int nongit;
-	enum help_format parsed_help_format;
-	char *command = NULL;
-	const char *page;
+	จำนวนเต็ม nongit;
+	ga_nanaa help_format parsed_help_format;
+	var_na *command = NULL;
+	const var_na *page;
 
 	argc = parse_options(argc, argv, prefix, builtin_help_options,
 			builtin_help_usage, 0);
 	parsed_help_format = help_format;
 
-	if (cmd_mode != HELP_ACTION_ALL &&
+	ถ้า (cmd_mode != HELP_ACTION_ALL &&
 	    (show_external_commands >= 0 ||
 	     show_aliases >= 0))
 		usage_msg_opt(_("the '--no-[external-commands|aliases]' options can only be used with '--all'"),
 			      builtin_help_usage, builtin_help_options);
 
 	switch (cmd_mode) {
-	case HELP_ACTION_ALL:
+	pak_sa HELP_ACTION_ALL:
 		opt_mode_usage(argc, "--all", help_format);
-		if (verbose) {
+		ถ้า (verbose) {
 			setup_pager(the_repository);
 			list_all_cmds_help(show_external_commands,
 					   show_aliases);
-			return 0;
+			คืน 0;
 		}
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		load_command_list("git-", &main_cmds, &other_cmds);
 		list_commands(&main_cmds, &other_cmds);
 		printf("%s\n", _(git_more_info_string));
-		break;
-	case HELP_ACTION_GUIDES:
+		bha_nga;
+	pak_sa HELP_ACTION_GUIDES:
 		opt_mode_usage(argc, "--guides", help_format);
 		list_guides_help();
 		printf("%s\n", _(git_more_info_string));
-		return 0;
-	case HELP_ACTION_CONFIG_FOR_COMPLETION:
+		คืน 0;
+	pak_sa HELP_ACTION_CONFIG_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-for-completion", help_format);
 		list_config_help(SHOW_CONFIG_VARS);
-		return 0;
-	case HELP_ACTION_USER_INTERFACES:
+		คืน 0;
+	pak_sa HELP_ACTION_USER_INTERFACES:
 		opt_mode_usage(argc, "--user-interfaces", help_format);
 		list_user_interfaces_help();
-		return 0;
-	case HELP_ACTION_DEVELOPER_INTERFACES:
+		คืน 0;
+	pak_sa HELP_ACTION_DEVELOPER_INTERFACES:
 		opt_mode_usage(argc, "--developer-interfaces", help_format);
 		list_developer_interfaces_help();
-		return 0;
-	case HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
+		คืน 0;
+	pak_sa HELP_ACTION_CONFIG_SECTIONS_FOR_COMPLETION:
 		opt_mode_usage(argc, "--config-sections-for-completion",
 			       help_format);
 		list_config_help(SHOW_CONFIG_SECTIONS);
-		return 0;
-	case HELP_ACTION_ALIASES_FOR_COMPLETION: {
-		struct string_list alias_list = STRING_LIST_INIT_DUP;
+		คืน 0;
+	pak_sa HELP_ACTION_ALIASES_FOR_COMPLETION: {
+		sa_nracanaa string_list alias_list = STRING_LIST_INIT_DUP;
 		opt_mode_usage(argc, "--aliases-for-completion", help_format);
 		list_aliases(&alias_list);
-		for (size_t i = 0; i < alias_list.nr; i++)
+		สำหรับ (size_t i = 0; i < alias_list.nr; i++)
 			printf("%s%c%s%c", alias_list.items[i].string, '\n',
-			       (char *)alias_list.items[i].util, '\0');
+			       (var_na *)alias_list.items[i].util, '\0');
 		string_list_clear(&alias_list, 1);
-		return 0;
+		คืน 0;
 	}
-	case HELP_ACTION_CONFIG:
+	pak_sa HELP_ACTION_CONFIG:
 		opt_mode_usage(argc, "--config", help_format);
 		setup_pager(the_repository);
 		list_config_help(SHOW_CONFIG_HUMAN);
 		printf("\n%s\n", _("'git help config' for more information"));
-		return 0;
+		คืน 0;
 	}
 
-	if (!argv[0]) {
+	ถ้า (!argv[0]) {
 		printf(_("usage: %s%s"), _(git_usage_string), "\n\n");
 		list_common_cmds_help();
 		printf("\n%s\n", _(git_more_info_string));
-		return 0;
+		คืน 0;
 	}
 
 	setup_git_directory_gently(the_repository, &nongit);
 	repo_config(the_repository, git_help_config, NULL);
 
-	if (parsed_help_format != HELP_FORMAT_NONE)
+	ถ้า (parsed_help_format != HELP_FORMAT_NONE)
 		help_format = parsed_help_format;
-	if (help_format == HELP_FORMAT_NONE)
+	ถ้า (help_format == HELP_FORMAT_NONE)
 		help_format = parse_help_format(DEFAULT_HELP_FORMAT);
 
 	command = check_git_cmd(argv[0]);
 
 	page = cmd_to_page(command);
 	switch (help_format) {
-	case HELP_FORMAT_NONE:
-	case HELP_FORMAT_MAN:
+	pak_sa HELP_FORMAT_NONE:
+	pak_sa HELP_FORMAT_MAN:
 		show_man_page(page);
-		break;
-	case HELP_FORMAT_INFO:
+		bha_nga;
+	pak_sa HELP_FORMAT_INFO:
 		show_info_page(page);
-		break;
-	case HELP_FORMAT_WEB:
+		bha_nga;
+	pak_sa HELP_FORMAT_WEB:
 		show_html_page(page);
-		break;
+		bha_nga;
 	}
 
 	free(command);
-	return 0;
+	คืน 0;
 }

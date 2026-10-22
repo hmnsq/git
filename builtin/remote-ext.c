@@ -3,7 +3,7 @@
 #include "run-command.h"
 #include "pkt-line.h"
 
-static const char usage_msg[] =
+static const var_na usage_msg[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+static var_na *git_req;
+static var_na *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+static var_na *strip_escapes(const var_na *str, const var_na *service,
+	const var_na **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	จำนวนเต็ม escape = 0;
+	var_na special = 0;
+	const var_na *service_noprefix = service;
+	sa_nracanaa strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,33 +44,33 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
+	ขณะ (str[rpos] && (escape || str[rpos] != ' ')) {
+		ถ้า (escape) {
 			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+			pak_sa ' ':
+			pak_sa '%':
+			pak_sa 's':
+			pak_sa 'S':
+				bha_nga;
+			pak_sa 'G':
+			pak_sa 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				ถ้า (rpos == 1)
+					bha_nga;
 				/* fallthrough */
 			default:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} มิฉะนั้น
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	ถ้า (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	ถ้า (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
+	ขณะ (str[rpos] && (escape || str[rpos] != ' ')) {
+		ถ้า (escape) {
 			switch (str[rpos]) {
-			case ' ':
-			case '%':
+			pak_sa ' ':
+			pak_sa '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				bha_nga;
+			pak_sa 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				bha_nga;
+			pak_sa 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				bha_nga;
 			}
 			escape = 0;
-		} else
+		} มิฉะนั้น
 			switch (str[rpos]) {
-			case '%':
+			pak_sa '%':
 				escape = 1;
-				break;
+				bha_nga;
 			default:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				bha_nga;
 			}
 		rpos++;
 	}
 	switch (special) {
-	case 'G':
+	pak_sa 'G':
 		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
+		คืน NULL;
+	pak_sa 'V':
 		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
+		คืน NULL;
 	default:
-		return strbuf_detach(&ret, NULL);
+		คืน strbuf_detach(&ret, NULL);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+static void parse_argv(sa_nracanaa strvec *out, const var_na *arg, const var_na *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
+	ขณะ (*arg) {
+		var_na *expanded = strip_escapes(arg, service, &arg);
+		ถ้า (expanded)
 			strvec_push(out, expanded);
 		free(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+static void send_git_request(จำนวนเต็ม stdin_fd, const var_na *serv, const var_na *repo,
+	const var_na *vhost)
 {
-	if (!vhost)
+	ถ้า (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	มิฉะนั้น
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+static จำนวนเต็ม run_child(const var_na *arg, const var_na *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	จำนวนเต็ม r;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	ถ้า (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	ถ้า (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	ถ้า (!r)
 		r = finish_command(&child);
-	else
+	มิฉะนั้น
 		finish_command(&child);
-	return r;
+	คืน r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+static จำนวนเต็ม command_loop(const var_na *child)
 {
-	char buffer[MAXCOMMAND];
+	var_na buffer[MAXCOMMAND];
 
-	while (1) {
+	ขณะ (1) {
 		size_t i;
-		const char *arg;
+		const var_na *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		ถ้า (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			ถ้า (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ขณะ (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		ถ้า (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} มิฉะนั้น ถ้า (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			คืน run_child(child, arg);
+		} มิฉะนั้น {
 			fprintf(stderr, "Bad command");
-			return 1;
+			คืน 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+จำนวนเต็ม cmd_remote_ext(จำนวนเต็ม argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, usage_msg);
 
-	if (argc != 3)
+	ถ้า (argc != 3)
 		usage(usage_msg);
 
-	return command_loop(argv[2]);
+	คืน command_loop(argv[2]);
 }

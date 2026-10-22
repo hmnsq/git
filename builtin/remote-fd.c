@@ -1,7 +1,7 @@
 #include "builtin.h"
 #include "transport.h"
 
-static const char usage_msg[] =
+static const var_na usage_msg[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+static void command_loop(จำนวนเต็ม input_fd, จำนวนเต็ม output_fd)
 {
-	char buffer[MAXCOMMAND];
+	var_na buffer[MAXCOMMAND];
 
-	while (1) {
+	ขณะ (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		ถ้า (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			ถ้า (ferror(stdin))
 				die("Input error");
-			return;
+			คืน;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		ขณะ (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		ถ้า (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} มิฉะนั้น ถ้า (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			ถ้า (bidirectional_transfer_loop(input_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			คืน;
+		} มิฉะนั้น {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+จำนวนเต็ม cmd_remote_fd(จำนวนเต็ม argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	จำนวนเต็ม input_fd = -1;
+	จำนวนเต็ม output_fd = -1;
+	var_na *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
 	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
+	ถ้า (argc != 3)
 		usage(usage_msg);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	input_fd = (จำนวนเต็ม)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	ถ้า ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
+	ถ้า (*end == '/' || !*end) {
 		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	} มิฉะนั้น {
+		var_na *end2;
+		output_fd = (จำนวนเต็ม)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		ถ้า ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
 	command_loop(input_fd, output_fd);
-	return 0;
+	คืน 0;
 }

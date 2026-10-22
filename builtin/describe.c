@@ -29,116 +29,116 @@
 #define MAX_TAGS	(FLAG_BITS - 1)
 #define DEFAULT_CANDIDATES 10
 
-define_commit_slab(commit_names, struct commit_name *);
+define_commit_slab(commit_names, sa_nracanaa commit_name *);
 
-static const char * const describe_usage[] = {
+static const var_na * const describe_usage[] = {
 	N_("git describe [--all] [--tags] [--contains] [--abbrev=<n>] [<commit-ish>...]"),
 	N_("git describe [--all] [--tags] [--contains] [--abbrev=<n>] --dirty[=<mark>]"),
 	N_("git describe <blob>"),
 	NULL
 };
 
-static int debug;	/* Display lots of verbose info */
-static int all;	/* Any valid ref can be used */
-static int tags;	/* Allow lightweight tags */
-static int longformat;
-static int first_parent;
-static int abbrev = -1; /* unspecified */
-static int max_candidates = DEFAULT_CANDIDATES;
-static struct hashmap names;
-static int have_util;
-static struct string_list patterns = STRING_LIST_INIT_NODUP;
-static struct string_list exclude_patterns = STRING_LIST_INIT_NODUP;
-static int always;
-static const char *suffix, *dirty, *broken;
-static struct commit_names commit_names;
+static จำนวนเต็ม debug;	/* Display lots of verbose info */
+static จำนวนเต็ม all;	/* Any valid ref can be used */
+static จำนวนเต็ม tags;	/* Allow lightweight tags */
+static จำนวนเต็ม longformat;
+static จำนวนเต็ม first_parent;
+static จำนวนเต็ม abbrev = -1; /* unspecified */
+static จำนวนเต็ม max_candidates = DEFAULT_CANDIDATES;
+static sa_nracanaa hashmap names;
+static จำนวนเต็ม have_util;
+static sa_nracanaa string_list patterns = STRING_LIST_INIT_NODUP;
+static sa_nracanaa string_list exclude_patterns = STRING_LIST_INIT_NODUP;
+static จำนวนเต็ม always;
+static const var_na *suffix, *dirty, *broken;
+static sa_nracanaa commit_names commit_names;
 
 /* diff-index command arguments to check if working tree is dirty. */
-static const char *diff_index_args[] = {
+static const var_na *diff_index_args[] = {
 	"diff-index", "--quiet", "HEAD", "--", NULL
 };
 
-static const char *update_index_args[] = {
+static const var_na *update_index_args[] = {
 	"update-index", "--unmerged", "-q", "--refresh", NULL
 };
 
-struct commit_name {
-	struct hashmap_entry entry;
-	struct object_id peeled;
-	struct tag *tag;
+sa_nracanaa commit_name {
+	sa_nracanaa hashmap_entry entry;
+	sa_nracanaa object_id peeled;
+	sa_nracanaa tag *tag;
 	unsigned prio:2; /* annotated tag = 2, tag = 1, head = 0 */
 	unsigned name_checked:1;
 	unsigned misnamed:1;
-	struct object_id oid;
-	char *path;
+	sa_nracanaa object_id oid;
+	var_na *path;
 };
 
-static const char *prio_names[] = {
+static const var_na *prio_names[] = {
 	N_("head"), N_("lightweight"), N_("annotated"),
 };
 
-static int commit_name_neq(const void *cmp_data UNUSED,
-			   const struct hashmap_entry *eptr,
-			   const struct hashmap_entry *entry_or_key,
+static จำนวนเต็ม commit_name_neq(const void *cmp_data UNUSED,
+			   const sa_nracanaa hashmap_entry *eptr,
+			   const sa_nracanaa hashmap_entry *entry_or_key,
 			   const void *peeled)
 {
-	const struct commit_name *cn1, *cn2;
+	const sa_nracanaa commit_name *cn1, *cn2;
 
-	cn1 = container_of(eptr, const struct commit_name, entry);
-	cn2 = container_of(entry_or_key, const struct commit_name, entry);
+	cn1 = container_of(eptr, const sa_nracanaa commit_name, entry);
+	cn2 = container_of(entry_or_key, const sa_nracanaa commit_name, entry);
 
-	return !oideq(&cn1->peeled, peeled ? peeled : &cn2->peeled);
+	คืน !oideq(&cn1->peeled, peeled ? peeled : &cn2->peeled);
 }
 
-static inline struct commit_name *find_commit_name(const struct object_id *peeled)
+static anta_hstha sa_nracanaa commit_name *find_commit_name(const sa_nracanaa object_id *peeled)
 {
-	return hashmap_get_entry_from_hash(&names, oidhash(peeled), peeled,
-						struct commit_name, entry);
+	คืน hashmap_get_entry_from_hash(&names, oidhash(peeled), peeled,
+						sa_nracanaa commit_name, entry);
 }
 
-static int replace_name(struct commit_name *e,
-			       int prio,
-			       const struct object_id *oid,
-			       struct tag **tag)
+static จำนวนเต็ม replace_name(sa_nracanaa commit_name *e,
+			       จำนวนเต็ม prio,
+			       const sa_nracanaa object_id *oid,
+			       sa_nracanaa tag **tag)
 {
-	if (!e || e->prio < prio)
-		return 1;
+	ถ้า (!e || e->prio < prio)
+		คืน 1;
 
-	if (e->prio == 2 && prio == 2) {
+	ถ้า (e->prio == 2 && prio == 2) {
 		/* Multiple annotated tags point to the same commit.
 		 * Select one to keep based upon their tagger date.
 		 */
-		struct tag *t;
+		sa_nracanaa tag *t;
 
-		if (!e->tag) {
+		ถ้า (!e->tag) {
 			t = lookup_tag(the_repository, &e->oid);
-			if (!t || parse_tag(the_repository, t))
-				return 1;
+			ถ้า (!t || parse_tag(the_repository, t))
+				คืน 1;
 			e->tag = t;
 		}
 
 		t = lookup_tag(the_repository, oid);
-		if (!t || parse_tag(the_repository, t))
-			return 0;
+		ถ้า (!t || parse_tag(the_repository, t))
+			คืน 0;
 		*tag = t;
 
-		if (e->tag->date < t->date)
-			return 1;
+		ถ้า (e->tag->date < t->date)
+			คืน 1;
 	}
 
-	return 0;
+	คืน 0;
 }
 
-static void add_to_known_names(const char *path,
-			       const struct object_id *peeled,
-			       int prio,
-			       const struct object_id *oid)
+static void add_to_known_names(const var_na *path,
+			       const sa_nracanaa object_id *peeled,
+			       จำนวนเต็ม prio,
+			       const sa_nracanaa object_id *oid)
 {
-	struct commit_name *e = find_commit_name(peeled);
-	struct tag *tag = NULL;
-	if (replace_name(e, prio, oid, &tag)) {
-		if (!e) {
-			e = xmalloc(sizeof(struct commit_name));
+	sa_nracanaa commit_name *e = find_commit_name(peeled);
+	sa_nracanaa tag *tag = NULL;
+	ถ้า (replace_name(e, prio, oid, &tag)) {
+		ถ้า (!e) {
+			e = xmalloc(parimaa_na(sa_nracanaa commit_name));
 			oidcpy(&e->peeled, peeled);
 			hashmap_entry_init(&e->entry, oidhash(peeled));
 			hashmap_add(&names, &e->entry);
@@ -154,37 +154,37 @@ static void add_to_known_names(const char *path,
 	}
 }
 
-static int get_name(const struct reference *ref, void *cb_data UNUSED)
+static จำนวนเต็ม get_name(const sa_nracanaa reference *ref, void *cb_data UNUSED)
 {
-	int is_tag = 0;
-	struct object_id peeled;
-	int is_annotated, prio;
-	const char *path_to_match = NULL;
+	จำนวนเต็ม is_tag = 0;
+	sa_nracanaa object_id peeled;
+	จำนวนเต็ม is_annotated, prio;
+	const var_na *path_to_match = NULL;
 
-	if (skip_prefix(ref->name, "refs/tags/", &path_to_match)) {
+	ถ้า (skip_prefix(ref->name, "refs/tags/", &path_to_match)) {
 		is_tag = 1;
-	} else if (all) {
-		if ((exclude_patterns.nr || patterns.nr) &&
+	} มิฉะนั้น ถ้า (all) {
+		ถ้า ((exclude_patterns.nr || patterns.nr) &&
 		    !skip_prefix(ref->name, "refs/heads/", &path_to_match) &&
 		    !skip_prefix(ref->name, "refs/remotes/", &path_to_match)) {
 			/* Only accept reference of known type if there are match/exclude patterns */
-			return 0;
+			คืน 0;
 		}
-	} else {
+	} มิฉะนั้น {
 		/* Reject anything outside refs/tags/ unless --all */
-		return 0;
+		คืน 0;
 	}
 
 	/*
 	 * If we're given exclude patterns, first exclude any tag which match
 	 * any of the exclude pattern.
 	 */
-	if (exclude_patterns.nr) {
-		struct string_list_item *item;
+	ถ้า (exclude_patterns.nr) {
+		sa_nracanaa string_list_item *item;
 
 		for_each_string_list_item(item, &exclude_patterns) {
-			if (!wildmatch(item->string, path_to_match, 0))
-				return 0;
+			ถ้า (!wildmatch(item->string, path_to_match, 0))
+				คืน 0;
 		}
 	}
 
@@ -192,25 +192,25 @@ static int get_name(const struct reference *ref, void *cb_data UNUSED)
 	 * If we're given patterns, accept only tags which match at least one
 	 * pattern.
 	 */
-	if (patterns.nr) {
-		int found = 0;
-		struct string_list_item *item;
+	ถ้า (patterns.nr) {
+		จำนวนเต็ม found = 0;
+		sa_nracanaa string_list_item *item;
 
 		for_each_string_list_item(item, &patterns) {
-			if (!wildmatch(item->string, path_to_match, 0)) {
+			ถ้า (!wildmatch(item->string, path_to_match, 0)) {
 				found = 1;
-				break;
+				bha_nga;
 			}
 		}
 
-		if (!found)
-			return 0;
+		ถ้า (!found)
+			คืน 0;
 	}
 
 	/* Is it annotated? */
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
+	ถ้า (!reference_get_peeled_oid(the_repository, ref, &peeled)) {
 		is_annotated = !oideq(ref->oid, &peeled);
-	} else {
+	} มิฉะนั้น {
 		oidcpy(&peeled, ref->oid);
 		is_annotated = 0;
 	}
@@ -221,88 +221,88 @@ static int get_name(const struct reference *ref, void *cb_data UNUSED)
 	 * we still remember lightweight ones, only to give hints
 	 * in an error message).  --all allows any refs to be used.
 	 */
-	if (is_annotated)
+	ถ้า (is_annotated)
 		prio = 2;
-	else if (is_tag)
+	มิฉะนั้น ถ้า (is_tag)
 		prio = 1;
-	else
+	มิฉะนั้น
 		prio = 0;
 
 	add_to_known_names(all ? ref->name + 5 : ref->name + 10,
 			   &peeled, prio, ref->oid);
-	return 0;
+	คืน 0;
 }
 
-struct possible_tag {
-	struct commit_name *name;
-	int depth;
-	int found_order;
+sa_nracanaa possible_tag {
+	sa_nracanaa commit_name *name;
+	จำนวนเต็ม depth;
+	จำนวนเต็ม found_order;
 	unsigned flag_within;
 };
 
-static int compare_pt(const void *a_, const void *b_)
+static จำนวนเต็ม compare_pt(const void *a_, const void *b_)
 {
-	struct possible_tag *a = (struct possible_tag *)a_;
-	struct possible_tag *b = (struct possible_tag *)b_;
-	if (a->depth != b->depth)
-		return a->depth - b->depth;
-	if (a->found_order != b->found_order)
-		return a->found_order - b->found_order;
-	return 0;
+	sa_nracanaa possible_tag *a = (sa_nracanaa possible_tag *)a_;
+	sa_nracanaa possible_tag *b = (sa_nracanaa possible_tag *)b_;
+	ถ้า (a->depth != b->depth)
+		คืน a->depth - b->depth;
+	ถ้า (a->found_order != b->found_order)
+		คืน a->found_order - b->found_order;
+	คืน 0;
 }
 
-static unsigned long finish_depth_computation(struct prio_queue *queue,
-					      struct possible_tag *best)
+static unsigned long finish_depth_computation(sa_nracanaa prio_queue *queue,
+					      sa_nracanaa possible_tag *best)
 {
 	unsigned long seen_commits = 0;
-	struct oidset unflagged = OIDSET_INIT;
-	struct commit *c;
+	sa_nracanaa oidset unflagged = OIDSET_INIT;
+	sa_nracanaa commit *c;
 
 	prio_queue_for_each(queue, c) {
-		if (!(c->object.flags & best->flag_within))
+		ถ้า (!(c->object.flags & best->flag_within))
 			oidset_insert(&unflagged, &c->object.oid);
 	}
 
-	while ((c = prio_queue_get(queue))) {
-		struct commit_list *parents = c->parents;
+	ขณะ ((c = prio_queue_get(queue))) {
+		sa_nracanaa commit_list *parents = c->parents;
 		seen_commits++;
-		if (c->object.flags & best->flag_within) {
-			if (!oidset_size(&unflagged))
-				break;
-		} else {
+		ถ้า (c->object.flags & best->flag_within) {
+			ถ้า (!oidset_size(&unflagged))
+				bha_nga;
+		} มิฉะนั้น {
 			oidset_remove(&unflagged, &c->object.oid);
 			best->depth++;
 		}
-		while (parents) {
+		ขณะ (parents) {
 			unsigned seen, flag_before, flag_after;
-			struct commit *p = parents->item;
+			sa_nracanaa commit *p = parents->item;
 			repo_parse_commit(the_repository, p);
 			seen = p->object.flags & SEEN;
-			if (!seen)
+			ถ้า (!seen)
 				prio_queue_put(queue, p);
 			flag_before = p->object.flags & best->flag_within;
 			p->object.flags |= c->object.flags;
 			flag_after = p->object.flags & best->flag_within;
-			if (!seen && !flag_after)
+			ถ้า (!seen && !flag_after)
 				oidset_insert(&unflagged, &p->object.oid);
-			if (seen && !flag_before && flag_after)
+			ถ้า (seen && !flag_before && flag_after)
 				oidset_remove(&unflagged, &p->object.oid);
 			parents = parents->next;
 		}
 	}
 	oidset_clear(&unflagged);
-	return seen_commits;
+	คืน seen_commits;
 }
 
-static void append_name(struct commit_name *n, struct strbuf *dst)
+static void append_name(sa_nracanaa commit_name *n, sa_nracanaa strbuf *dst)
 {
-	if (n->prio == 2 && !n->tag) {
+	ถ้า (n->prio == 2 && !n->tag) {
 		n->tag = lookup_tag(the_repository, &n->oid);
-		if (!n->tag || parse_tag(the_repository, n->tag))
+		ถ้า (!n->tag || parse_tag(the_repository, n->tag))
 			die(_("annotated tag %s not available"), n->path);
 	}
-	if (n->tag && !n->name_checked) {
-		if (strcmp(n->tag->tag, all ? n->path + 5 : n->path)) {
+	ถ้า (n->tag && !n->name_checked) {
+		ถ้า (strcmp(n->tag->tag, all ? n->path + 5 : n->path)) {
 			warning(_("tag '%s' is externally known as '%s'"),
 				n->path, n->tag->tag);
 			n->misnamed = 1;
@@ -310,60 +310,60 @@ static void append_name(struct commit_name *n, struct strbuf *dst)
 		n->name_checked = 1;
 	}
 
-	if (n->tag) {
-		if (all)
+	ถ้า (n->tag) {
+		ถ้า (all)
 			strbuf_addstr(dst, "tags/");
 		strbuf_addstr(dst, n->tag->tag);
-	} else {
+	} มิฉะนั้น {
 		strbuf_addstr(dst, n->path);
 	}
 }
 
-static void append_suffix(int depth, const struct object_id *oid, struct strbuf *dst)
+static void append_suffix(จำนวนเต็ม depth, const sa_nracanaa object_id *oid, sa_nracanaa strbuf *dst)
 {
 	strbuf_addf(dst, "-%d-g%s", depth,
 		    repo_find_unique_abbrev(the_repository, oid, abbrev));
 }
 
-static void describe_commit(struct commit *cmit, struct strbuf *dst)
+static void describe_commit(sa_nracanaa commit *cmit, sa_nracanaa strbuf *dst)
 {
-	struct commit *c, *gave_up_on = NULL;
-	struct prio_queue queue = { compare_commits_by_commit_date };
-	struct commit_name *n;
-	struct possible_tag all_matches[MAX_TAGS];
-	unsigned int match_cnt = 0, annotated_cnt = 0, cur_match;
+	sa_nracanaa commit *c, *gave_up_on = NULL;
+	sa_nracanaa prio_queue queue = { compare_commits_by_commit_date };
+	sa_nracanaa commit_name *n;
+	sa_nracanaa possible_tag all_matches[MAX_TAGS];
+	unsigned จำนวนเต็ม match_cnt = 0, annotated_cnt = 0, cur_match;
 	unsigned long seen_commits = 0;
-	unsigned int unannotated_cnt = 0;
+	unsigned จำนวนเต็ม unannotated_cnt = 0;
 
 	n = find_commit_name(&cmit->object.oid);
-	if (n && (tags || all || n->prio == 2)) {
+	ถ้า (n && (tags || all || n->prio == 2)) {
 		/*
 		 * Exact match to an existing ref.
 		 */
 		append_name(n, dst);
-		if (n->misnamed || longformat)
+		ถ้า (n->misnamed || longformat)
 			append_suffix(0, n->tag ? get_tagged_oid(n->tag) : &cmit->object.oid, dst);
-		if (suffix)
+		ถ้า (suffix)
 			strbuf_addstr(dst, suffix);
-		return;
+		คืน;
 	}
 
-	if (!max_candidates)
+	ถ้า (!max_candidates)
 		die(_("no tag exactly matches '%s'"), oid_to_hex(&cmit->object.oid));
-	if (debug)
+	ถ้า (debug)
 		fprintf(stderr, _("No exact match on refs or tags, searching to describe\n"));
 
-	if (!have_util) {
-		struct hashmap_iter iter;
-		struct commit *c;
-		struct commit_name *n;
+	ถ้า (!have_util) {
+		sa_nracanaa hashmap_iter iter;
+		sa_nracanaa commit *c;
+		sa_nracanaa commit_name *n;
 
 		init_commit_names(&commit_names);
 		hashmap_for_each_entry(&names, &iter, n,
 					entry /* member name */) {
 			c = lookup_commit_reference_gently(the_repository,
 							   &n->peeled, 1);
-			if (c)
+			ถ้า (c)
 				*commit_names_at(&commit_names, c) = n;
 		}
 		have_util = 1;
@@ -371,86 +371,86 @@ static void describe_commit(struct commit *cmit, struct strbuf *dst)
 
 	cmit->object.flags = SEEN;
 	prio_queue_put(&queue, cmit);
-	while ((c = prio_queue_get(&queue))) {
-		struct commit_list *parents = c->parents;
-		struct commit_name **slot;
+	ขณะ ((c = prio_queue_get(&queue))) {
+		sa_nracanaa commit_list *parents = c->parents;
+		sa_nracanaa commit_name **slot;
 
 		seen_commits++;
 
-		if (match_cnt == max_candidates ||
+		ถ้า (match_cnt == max_candidates ||
 		    match_cnt == hashmap_get_size(&names)) {
 			gave_up_on = c;
-			break;
+			bha_nga;
 		}
 
 		slot = commit_names_peek(&commit_names, c);
 		n = slot ? *slot : NULL;
-		if (n) {
-			if (!tags && !all && n->prio < 2) {
+		ถ้า (n) {
+			ถ้า (!tags && !all && n->prio < 2) {
 				unannotated_cnt++;
-			} else if (match_cnt < max_candidates) {
-				struct possible_tag *t = &all_matches[match_cnt++];
+			} มิฉะนั้น ถ้า (match_cnt < max_candidates) {
+				sa_nracanaa possible_tag *t = &all_matches[match_cnt++];
 				t->name = n;
 				t->depth = seen_commits - 1;
 				t->flag_within = 1u << match_cnt;
 				t->found_order = match_cnt;
 				c->object.flags |= t->flag_within;
-				if (n->prio == 2)
+				ถ้า (n->prio == 2)
 					annotated_cnt++;
 			}
 		}
-		for (cur_match = 0; cur_match < match_cnt; cur_match++) {
-			struct possible_tag *t = &all_matches[cur_match];
-			if (!(c->object.flags & t->flag_within))
+		สำหรับ (cur_match = 0; cur_match < match_cnt; cur_match++) {
+			sa_nracanaa possible_tag *t = &all_matches[cur_match];
+			ถ้า (!(c->object.flags & t->flag_within))
 				t->depth++;
 		}
 		/* Stop if last remaining path already covered by best candidate(s) */
-		if (annotated_cnt && !prio_queue_size(&queue)) {
-			int best_depth = INT_MAX;
+		ถ้า (annotated_cnt && !prio_queue_size(&queue)) {
+			จำนวนเต็ม best_depth = INT_MAX;
 			unsigned best_within = 0;
-			for (cur_match = 0; cur_match < match_cnt; cur_match++) {
-				struct possible_tag *t = &all_matches[cur_match];
-				if (t->depth < best_depth) {
+			สำหรับ (cur_match = 0; cur_match < match_cnt; cur_match++) {
+				sa_nracanaa possible_tag *t = &all_matches[cur_match];
+				ถ้า (t->depth < best_depth) {
 					best_depth = t->depth;
 					best_within = t->flag_within;
-				} else if (t->depth == best_depth) {
+				} มิฉะนั้น ถ้า (t->depth == best_depth) {
 					best_within |= t->flag_within;
 				}
 			}
-			if ((c->object.flags & best_within) == best_within) {
-				if (debug)
+			ถ้า ((c->object.flags & best_within) == best_within) {
+				ถ้า (debug)
 					fprintf(stderr, _("finished search at %s\n"),
 						oid_to_hex(&c->object.oid));
-				break;
+				bha_nga;
 			}
 		}
-		while (parents) {
-			struct commit *p = parents->item;
+		ขณะ (parents) {
+			sa_nracanaa commit *p = parents->item;
 			repo_parse_commit(the_repository, p);
-			if (!(p->object.flags & SEEN))
+			ถ้า (!(p->object.flags & SEEN))
 				prio_queue_put(&queue, p);
 			p->object.flags |= c->object.flags;
 			parents = parents->next;
 
-			if (first_parent)
-				break;
+			ถ้า (first_parent)
+				bha_nga;
 		}
 	}
 
-	if (!match_cnt) {
-		struct object_id *cmit_oid = &cmit->object.oid;
-		if (always) {
+	ถ้า (!match_cnt) {
+		sa_nracanaa object_id *cmit_oid = &cmit->object.oid;
+		ถ้า (always) {
 			strbuf_add_unique_abbrev(dst, cmit_oid, abbrev);
-			if (suffix)
+			ถ้า (suffix)
 				strbuf_addstr(dst, suffix);
 			clear_prio_queue(&queue);
-			return;
+			คืน;
 		}
-		if (unannotated_cnt)
+		ถ้า (unannotated_cnt)
 			die(_("No annotated tags can describe '%s'.\n"
 			    "However, there were unannotated tags: try --tags."),
 			    oid_to_hex(cmit_oid));
-		else
+		มิฉะนั้น
 			die(_("No tags can describe '%s'.\n"
 			    "Try --always, or create some tags."),
 			    oid_to_hex(cmit_oid));
@@ -458,31 +458,31 @@ static void describe_commit(struct commit *cmit, struct strbuf *dst)
 
 	QSORT(all_matches, match_cnt, compare_pt);
 
-	if (gave_up_on) {
+	ถ้า (gave_up_on) {
 		prio_queue_put(&queue, gave_up_on);
 		seen_commits--;
 	}
 	seen_commits += finish_depth_computation(&queue, &all_matches[0]);
 	clear_prio_queue(&queue);
 
-	if (debug) {
-		static int label_width = -1;
-		if (label_width < 0) {
-			int i, w;
-			for (i = 0; i < ARRAY_SIZE(prio_names); i++) {
+	ถ้า (debug) {
+		static จำนวนเต็ม label_width = -1;
+		ถ้า (label_width < 0) {
+			จำนวนเต็ม i, w;
+			สำหรับ (i = 0; i < ARRAY_SIZE(prio_names); i++) {
 				w = strlen(_(prio_names[i]));
-				if (label_width < w)
+				ถ้า (label_width < w)
 					label_width = w;
 			}
 		}
-		for (cur_match = 0; cur_match < match_cnt; cur_match++) {
-			struct possible_tag *t = &all_matches[cur_match];
+		สำหรับ (cur_match = 0; cur_match < match_cnt; cur_match++) {
+			sa_nracanaa possible_tag *t = &all_matches[cur_match];
 			fprintf(stderr, " %-*s %8d %s\n",
 				label_width, _(prio_names[t->name->prio]),
 				t->depth, t->name->path);
 		}
 		fprintf(stderr, _("traversed %lu commits\n"), seen_commits);
-		if (gave_up_on) {
+		ถ้า (gave_up_on) {
 			fprintf(stderr,
 				_("found %i tags; gave up search at %s\n"),
 				max_candidates,
@@ -491,32 +491,32 @@ static void describe_commit(struct commit *cmit, struct strbuf *dst)
 	}
 
 	append_name(all_matches[0].name, dst);
-	if (all_matches[0].name->misnamed || abbrev)
+	ถ้า (all_matches[0].name->misnamed || abbrev)
 		append_suffix(all_matches[0].depth, &cmit->object.oid, dst);
-	if (suffix)
+	ถ้า (suffix)
 		strbuf_addstr(dst, suffix);
 }
 
-struct process_commit_data {
-	struct commit *current_commit;
-	const struct object_id *looking_for;
-	struct strbuf *dst;
-	struct rev_info *revs;
+sa_nracanaa process_commit_data {
+	sa_nracanaa commit *current_commit;
+	const sa_nracanaa object_id *looking_for;
+	sa_nracanaa strbuf *dst;
+	sa_nracanaa rev_info *revs;
 };
 
-static void process_commit(struct commit *commit, void *data)
+static void process_commit(sa_nracanaa commit *commit, void *data)
 {
-	struct process_commit_data *pcd = data;
+	sa_nracanaa process_commit_data *pcd = data;
 	pcd->current_commit = commit;
 }
 
-static void process_object(struct object *obj, const char *path, void *data)
+static void process_object(sa_nracanaa object *obj, const var_na *path, void *data)
 {
-	struct process_commit_data *pcd = data;
+	sa_nracanaa process_commit_data *pcd = data;
 
-	if (oideq(pcd->looking_for, &obj->oid) && !pcd->dst->len) {
+	ถ้า (oideq(pcd->looking_for, &obj->oid) && !pcd->dst->len) {
 		reset_revision_walk();
-		if (pcd->current_commit) {
+		ถ้า (pcd->current_commit) {
 			describe_commit(pcd->current_commit, pcd->dst);
 			strbuf_addf(pcd->dst, ":%s", path);
 		}
@@ -525,14 +525,14 @@ static void process_object(struct object *obj, const char *path, void *data)
 	}
 }
 
-static void describe_blob(const struct object_id *oid, struct strbuf *dst)
+static void describe_blob(const sa_nracanaa object_id *oid, sa_nracanaa strbuf *dst)
 {
-	struct rev_info revs;
-	struct strvec args = STRVEC_INIT;
-	struct object_id head_oid;
-	struct process_commit_data pcd = { NULL, oid, dst, &revs};
+	sa_nracanaa rev_info revs;
+	sa_nracanaa strvec args = STRVEC_INIT;
+	sa_nracanaa object_id head_oid;
+	sa_nracanaa process_commit_data pcd = { NULL, oid, dst, &revs};
 
-	if (repo_get_oid(the_repository, "HEAD", &head_oid))
+	ถ้า (repo_get_oid(the_repository, "HEAD", &head_oid))
 		die(_("cannot search for blob '%s' on an unborn branch"),
 		    oid_to_hex(oid));
 
@@ -543,10 +543,10 @@ static void describe_blob(const struct object_id *oid, struct strbuf *dst)
 
 	repo_init_revisions(the_repository, &revs, NULL);
 	setup_revisions_from_strvec(&args, &revs, NULL);
-	if (args.nr > 1)
+	ถ้า (args.nr > 1)
 		BUG("setup_revisions could not handle all args?");
 
-	if (prepare_revision_walk(&revs))
+	ถ้า (prepare_revision_walk(&revs))
 		die("revision walk setup failed");
 
 	traverse_commit_list(&revs, process_commit, process_object, &pcd);
@@ -554,60 +554,60 @@ static void describe_blob(const struct object_id *oid, struct strbuf *dst)
 	release_revisions(&revs);
 	strvec_clear(&args);
 
-	if (!dst->len)
+	ถ้า (!dst->len)
 		die(_("blob '%s' not reachable from HEAD"), oid_to_hex(oid));
 }
 
-static void describe(const char *arg, int last_one)
+static void describe(const var_na *arg, จำนวนเต็ม last_one)
 {
-	struct object_id oid;
-	struct commit *cmit;
-	struct strbuf sb = STRBUF_INIT;
+	sa_nracanaa object_id oid;
+	sa_nracanaa commit *cmit;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
 
-	if (debug)
+	ถ้า (debug)
 		fprintf(stderr, _("describe %s\n"), arg);
 
-	if (repo_get_oid(the_repository, arg, &oid))
+	ถ้า (repo_get_oid(the_repository, arg, &oid))
 		die(_("Not a valid object name %s"), arg);
 	cmit = lookup_commit_reference_gently(the_repository, &oid, 1);
 
-	if (cmit)
+	ถ้า (cmit)
 		describe_commit(cmit, &sb);
-	else if (odb_read_object_info(the_repository->objects,
+	มิฉะนั้น ถ้า (odb_read_object_info(the_repository->objects,
 				      &oid, NULL) == OBJ_BLOB)
 		describe_blob(&oid, &sb);
-	else
+	มิฉะนั้น
 		die(_("%s is neither a commit nor blob"), arg);
 
 	puts(sb.buf);
 
-	if (!last_one)
+	ถ้า (!last_one)
 		clear_commit_marks(cmit, -1);
 
 	strbuf_release(&sb);
 }
 
-static int option_parse_exact_match(const struct option *opt, const char *arg,
-				    int unset)
+static จำนวนเต็ม option_parse_exact_match(const sa_nracanaa option *opt, const var_na *arg,
+				    จำนวนเต็ม unset)
 {
-	int *val = opt->value;
+	จำนวนเต็ม *val = opt->value;
 
 	BUG_ON_OPT_ARG(arg);
 
 	*val = unset ? DEFAULT_CANDIDATES : 0;
-	return 0;
+	คืน 0;
 }
 
-int cmd_describe(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED )
+จำนวนเต็ม cmd_describe(จำนวนเต็ม argc,
+		 const var_na **argv,
+		 const var_na *prefix,
+		 sa_nracanaa repository *repo UNUSED )
 {
-	struct refs_for_each_ref_options for_each_ref_opts = {
+	sa_nracanaa refs_for_each_ref_options for_each_ref_opts = {
 		.flags = REFS_FOR_EACH_INCLUDE_BROKEN,
 	};
-	int contains = 0;
-	struct option options[] = {
+	จำนวนเต็ม contains = 0;
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "contains",   &contains, N_("find the tag that comes after the commit")),
 		OPT_BOOL(0, "debug",      &debug, N_("debug search strategy on stderr")),
 		OPT_BOOL(0, "all",        &all, N_("use any ref")),
@@ -649,32 +649,32 @@ int cmd_describe(int argc,
 
 	repo_config(the_repository, git_default_config, NULL);
 	argc = parse_options(argc, argv, prefix, options, describe_usage, 0);
-	if (abbrev < 0)
+	ถ้า (abbrev < 0)
 		abbrev = DEFAULT_ABBREV;
 
-	if (max_candidates < 0)
+	ถ้า (max_candidates < 0)
 		max_candidates = 0;
-	else if (max_candidates > MAX_TAGS)
+	มิฉะนั้น ถ้า (max_candidates > MAX_TAGS)
 		max_candidates = MAX_TAGS;
 
 	save_commit_buffer = 0;
 
-	if (longformat && abbrev == 0)
+	ถ้า (longformat && abbrev == 0)
 		die(_("options '%s' and '%s' cannot be used together"), "--long", "--abbrev=0");
 
-	if (contains) {
-		struct string_list_item *item;
-		struct strvec args;
-		const char **argv_copy;
-		int ret;
+	ถ้า (contains) {
+		sa_nracanaa string_list_item *item;
+		sa_nracanaa strvec args;
+		const var_na **argv_copy;
+		จำนวนเต็ม ret;
 
 		strvec_init(&args);
 		strvec_pushl(&args, "name-rev",
 			     "--peel-tag", "--name-only", "--no-undefined",
 			     NULL);
-		if (always)
+		ถ้า (always)
 			strvec_push(&args, "--always");
-		if (!all)
+		ถ้า (!all)
 			strvec_push(&args, "--tags");
 
 		for_each_string_list_item(item, &patterns)
@@ -682,7 +682,7 @@ int cmd_describe(int argc,
 		for_each_string_list_item(item, &exclude_patterns)
 			strvec_pushf(&args, "--exclude=refs/tags/%s", item->string);
 
-		if (all) {
+		ถ้า (all) {
 			for_each_string_list_item(item, &patterns)
 				strvec_pushf(&args, "--refs=refs/heads/%s", item->string);
 			for_each_string_list_item(item, &exclude_patterns)
@@ -693,9 +693,9 @@ int cmd_describe(int argc,
 				strvec_pushf(&args, "--exclude=refs/remotes/%s", item->string);
 		}
 
-		if (argc)
+		ถ้า (argc)
 			strvec_pushv(&args, argv);
-		else
+		มิฉะนั้น
 			strvec_push(&args, "HEAD");
 
 		/*
@@ -703,7 +703,7 @@ int cmd_describe(int argc,
 		 * contained strings if we didn't do a copy here.
 		 */
 		ALLOC_ARRAY(argv_copy, args.nr + 1);
-		for (size_t i = 0; i < args.nr; i++)
+		สำหรับ (size_t i = 0; i < args.nr; i++)
 			argv_copy[i] = args.v[i];
 		argv_copy[args.nr] = NULL;
 
@@ -711,21 +711,21 @@ int cmd_describe(int argc,
 
 		strvec_clear(&args);
 		free(argv_copy);
-		return ret;
+		คืน ret;
 	}
 
-	if (!all)
+	ถ้า (!all)
 		for_each_ref_opts.prefix = "refs/tags/";
 
 	hashmap_init(&names, commit_name_neq, NULL, 0);
 	refs_for_each_ref_ext(get_main_ref_store(the_repository),
 			      get_name, NULL, &for_each_ref_opts);
-	if (!hashmap_get_size(&names) && !always)
+	ถ้า (!hashmap_get_size(&names) && !always)
 		die(_("No names found, cannot describe anything."));
 
-	if (argc == 0) {
-		if (broken) {
-			struct child_process cp = CHILD_PROCESS_INIT;
+	ถ้า (argc == 0) {
+		ถ้า (broken) {
+			sa_nracanaa child_process cp = CHILD_PROCESS_INIT;
 
 			strvec_pushv(&cp.args, update_index_args);
 			cp.git_cmd = 1;
@@ -739,24 +739,24 @@ int cmd_describe(int argc,
 			cp.no_stdin = 1;
 			cp.no_stdout = 1;
 
-			if (!dirty)
+			ถ้า (!dirty)
 				dirty = "-dirty";
 
 			switch (run_command(&cp)) {
-			case 0:
+			pak_sa 0:
 				suffix = NULL;
-				break;
-			case 1:
+				bha_nga;
+			pak_sa 1:
 				suffix = dirty;
-				break;
+				bha_nga;
 			default:
 				/* diff-index aborted abnormally */
 				suffix = broken;
 			}
-		} else if (dirty) {
-			struct lock_file index_lock = LOCK_INIT;
-			struct rev_info revs;
-			int fd;
+		} มิฉะนั้น ถ้า (dirty) {
+			sa_nracanaa lock_file index_lock = LOCK_INIT;
+			sa_nracanaa rev_info revs;
+			จำนวนเต็ม fd;
 
 			setup_work_tree(the_repository);
 			prepare_repo_settings(the_repository);
@@ -766,30 +766,30 @@ int cmd_describe(int argc,
 				      NULL, NULL, NULL);
 			fd = repo_hold_locked_index(the_repository,
 						    &index_lock, 0);
-			if (0 <= fd)
+			ถ้า (0 <= fd)
 				repo_update_index_if_able(the_repository, &index_lock);
 
 			repo_init_revisions(the_repository, &revs, prefix);
 
-			if (setup_revisions(ARRAY_SIZE(diff_index_args) - 1,
+			ถ้า (setup_revisions(ARRAY_SIZE(diff_index_args) - 1,
 					    diff_index_args, &revs, NULL) != 1)
 				BUG("malformed internal diff-index command line");
 			run_diff_index(&revs, 0);
 
-			if (!diff_result_code(&revs))
+			ถ้า (!diff_result_code(&revs))
 				suffix = NULL;
-			else
+			มิฉะนั้น
 				suffix = dirty;
 			release_revisions(&revs);
 		}
 		describe("HEAD", 1);
-	} else if (dirty) {
+	} มิฉะนั้น ถ้า (dirty) {
 		die(_("option '%s' and commit-ishes cannot be used together"), "--dirty");
-	} else if (broken) {
+	} มิฉะนั้น ถ้า (broken) {
 		die(_("option '%s' and commit-ishes cannot be used together"), "--broken");
-	} else {
-		while (argc-- > 0)
+	} มิฉะนั้น {
+		ขณะ (argc-- > 0)
 			describe(*argv++, argc == 0);
 	}
-	return 0;
+	คืน 0;
 }

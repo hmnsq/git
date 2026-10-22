@@ -10,16 +10,16 @@
 #include "submodule.h"
 #include "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
-static const char * const check_ignore_usage[] = {
+static จำนวนเต็ม quiet, verbose, stdin_paths, show_non_matching, no_index;
+static const var_na * const check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
 NULL
 };
 
-static int nul_term_line;
+static จำนวนเต็ม nul_term_line;
 
-static const struct option check_ignore_options[] = {
+static const sa_nracanaa option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
@@ -34,55 +34,55 @@ static const struct option check_ignore_options[] = {
 	OPT_END()
 };
 
-static void output_pattern(const char *path, struct path_pattern *pattern)
+static void output_pattern(const var_na *path, sa_nracanaa path_pattern *pattern)
 {
-	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
-	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
+	const var_na *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
+	const var_na *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
+	ถ้า (!nul_term_line) {
+		ถ้า (!verbose) {
 			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
+		} มิฉะนั้น {
+			ถ้า (pattern) {
 				quote_c_style(pattern->pl->src, NULL, stdout, 0);
 				printf(":%d:%s%s%s\t",
 				       pattern->srcpos,
 				       bang, pattern->pattern, slash);
 			}
-			else {
+			มิฉะนั้น {
 				printf("::\t");
 			}
 			quote_c_style(path, NULL, stdout, 0);
 			fputc('\n', stdout);
 		}
-	} else {
-		if (!verbose) {
+	} มิฉะนั้น {
+		ถ้า (!verbose) {
 			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
+		} มิฉะนั้น {
+			ถ้า (pattern)
 				printf("%s%c%d%c%s%s%s%c%s%c",
 				       pattern->pl->src, '\0',
 				       pattern->srcpos, '\0',
 				       bang, pattern->pattern, slash, '\0',
 				       path, '\0');
-			else
+			มิฉะนั้น
 				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+static จำนวนเต็ม check_ignore(sa_nracanaa dir_struct *dir,
+			const var_na *prefix, จำนวนเต็ม argc, const var_na **argv)
 {
-	const char *full_path;
-	char *seen;
-	int num_ignored = 0, i;
-	struct path_pattern *pattern;
-	struct pathspec pathspec;
+	const var_na *full_path;
+	var_na *seen;
+	จำนวนเต็ม num_ignored = 0, i;
+	sa_nracanaa path_pattern *pattern;
+	sa_nracanaa pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
+	ถ้า (!argc) {
+		ถ้า (!quiet)
 			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+		คืน 0;
 	}
 
 	/*
@@ -104,99 +104,99 @@ static int check_ignore(struct dir_struct *dir,
 	 */
 	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
+	สำหรับ (i = 0; i < pathspec.nr; i++) {
 		full_path = pathspec.items[i].match;
 		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
+		ถ้า (!seen[i]) {
+			จำนวนเต็ม dtype = DT_UNKNOWN;
 			pattern = last_matching_pattern(dir, the_repository->index,
 							full_path, &dtype);
-			if (!verbose && pattern &&
+			ถ้า (!verbose && pattern &&
 			    pattern->flags & PATTERN_FLAG_NEGATIVE)
 				pattern = NULL;
 		}
-		if (!quiet && (pattern || show_non_matching))
+		ถ้า (!quiet && (pattern || show_non_matching))
 			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
+		ถ้า (pattern)
 			num_ignored++;
 	}
 	free(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	คืน num_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+static จำนวนเต็ม check_ignore_stdin_paths(sa_nracanaa dir_struct *dir, const var_na *prefix)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *pathspec[2] = { NULL, NULL };
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf unquoted = STRBUF_INIT;
+	var_na *pathspec[2] = { NULL, NULL };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	จำนวนเต็ม num_ignored = 0;
 
 	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	ขณะ (getline_fn(&buf, stdin) != EOF) {
+		ถ้า (!nul_term_line && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			ถ้า (unquote_c_style(&unquoted, buf.buf, NULL))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
 		num_ignored += check_ignore(dir, prefix,
-					    1, (const char **)pathspec);
+					    1, (const var_na **)pathspec);
 		maybe_flush_or_die(stdout, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	คืน num_ignored;
 }
 
-int cmd_check_ignore(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+จำนวนเต็ม cmd_check_ignore(จำนวนเต็ม argc,
+		     const var_na **argv,
+		     const var_na *prefix,
+		     sa_nracanaa repository *repo UNUSED)
 {
-	int num_ignored;
-	struct dir_struct dir = DIR_INIT;
+	จำนวนเต็ม num_ignored;
+	sa_nracanaa dir_struct dir = DIR_INIT;
 
 	repo_config(the_repository, git_default_config, NULL);
 
 	argc = parse_options(argc, argv, prefix, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	ถ้า (stdin_paths) {
+		ถ้า (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} มิฉะนั้น {
+		ถ้า (nul_term_line)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		ถ้า (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	ถ้า (quiet) {
+		ถ้า (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		ถ้า (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	ถ้า (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	ถ้า (!no_index && repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	setup_standard_excludes(&dir);
 
-	if (stdin_paths) {
+	ถ้า (stdin_paths) {
 		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
+	} มิฉะนั้น {
 		num_ignored = check_ignore(&dir, prefix, argc, argv);
 		maybe_flush_or_die(stdout, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	คืน !num_ignored;
 }
