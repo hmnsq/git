@@ -1,30 +1,30 @@
-#include "builtin.h"
-#include "config.h"
-#include "fmt-merge-msg.h"
-#include "gettext.h"
-#include "parse-options.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "fmt-merge-msg.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "parse-options.h"
 
-static const char * const fmt_merge_msg_usage[] = {
+स्थिर ध्रुव वर्ण * ध्रुव fmt_merge_संदेश_usage[] = {
 	N_("git fmt-merge-msg [-m <message>] [--log[=<n>] | --no-log] [--file <file>]"),
-	NULL
+	रिक्त
 };
 
-int cmd_fmt_merge_msg(int argc,
-		      const char **argv,
-		      const char *prefix,
-		      struct repository *repo)
+पूर्णाङ्क cmd_fmt_merge_संदेश(पूर्णाङ्क argc,
+		      ध्रुव वर्ण **argv,
+		      ध्रुव वर्ण *prefix,
+		      संरचना repository *repo)
 {
-	char *inpath = NULL;
-	const char *message = NULL;
-	char *into_name = NULL;
-	int shortlog_len = -1;
-	int merge_log_config = -1;
-	struct option options[] = {
+	वर्ण *inpath = रिक्त;
+	ध्रुव वर्ण *message = रिक्त;
+	वर्ण *into_name = रिक्त;
+	पूर्णाङ्क shortlog_len = -1;
+	पूर्णाङ्क merge_log_config = -1;
+	संरचना option options[] = {
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "log",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.मूल्य = &shortlog_len,
+			.precision = परिमाण(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("populate log with at most <n> entries from shortlog"),
 			.flags = PARSE_OPT_OPTARG,
@@ -33,8 +33,8 @@ int cmd_fmt_merge_msg(int argc,
 		{
 			.type = OPTION_INTEGER,
 			.long_name = "summary",
-			.value = &shortlog_len,
-			.precision = sizeof(shortlog_len),
+			.मूल्य = &shortlog_len,
+			.precision = परिमाण(shortlog_len),
 			.argh = N_("n"),
 			.help = N_("alias for --log (deprecated)"),
 			.flags = PARSE_OPT_OPTARG | PARSE_OPT_HIDDEN,
@@ -48,44 +48,44 @@ int cmd_fmt_merge_msg(int argc,
 		OPT_END()
 	};
 
-	FILE *in = stdin;
-	struct strbuf input = STRBUF_INIT, output = STRBUF_INIT;
-	int ret;
-	struct fmt_merge_msg_opts opts;
+	खाता *in = मानक_निवेश;
+	संरचना strbuf निवेश = STRBUF_INIT, output = STRBUF_INIT;
+	पूर्णाङ्क ret;
+	संरचना fmt_merge_संदेश_opts opts;
 
-	repo_config(repo, fmt_merge_msg_config, &merge_log_config);
-	argc = parse_options(argc, argv, prefix, options, fmt_merge_msg_usage,
+	repo_config(repo, fmt_merge_संदेश_config, &merge_log_config);
+	argc = parse_options(argc, argv, prefix, options, fmt_merge_संदेश_usage,
 			     0);
-	if (argc > 0)
-		usage_with_options(fmt_merge_msg_usage, options);
-	if (shortlog_len < 0)
+	यदि (argc > 0)
+		usage_with_options(fmt_merge_संदेश_usage, options);
+	यदि (shortlog_len < 0)
 		shortlog_len = (merge_log_config > 0) ? merge_log_config : 0;
 
-	if (inpath && strcmp(inpath, "-")) {
-		in = fopen(inpath, "r");
-		if (!in)
+	यदि (inpath && म_भेद(inpath, "-")) {
+		in = ख_खोलो(inpath, "r");
+		यदि (!in)
 			die_errno("cannot open '%s'", inpath);
 	}
 
-	if (strbuf_read(&input, fileno(in), 0) < 0)
+	यदि (strbuf_read(&निवेश, fileno(in), 0) < 0)
 		die_errno("could not read input file");
 
-	if (message)
+	यदि (message)
 		strbuf_addstr(&output, message);
 
-	memset(&opts, 0, sizeof(opts));
+	स_रखो(&opts, 0, परिमाण(opts));
 	opts.add_title = !message;
 	opts.credit_people = 1;
 	opts.shortlog_len = shortlog_len;
 	opts.into_name = into_name;
 
-	ret = fmt_merge_msg(&input, &output, &opts);
-	if (ret)
-		return ret;
+	ret = fmt_merge_संदेश(&निवेश, &output, &opts);
+	यदि (ret)
+		प्रत्यागम ret;
 	write_in_full(STDOUT_FILENO, output.buf, output.len);
 
-	strbuf_release(&input);
+	strbuf_release(&निवेश);
 	strbuf_release(&output);
-	free(inpath);
-	return 0;
+	मुक्त(inpath);
+	प्रत्यागम 0;
 }

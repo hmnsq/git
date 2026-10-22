@@ -1,125 +1,125 @@
 #define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "attr.h"
-#include "environment.h"
-#include "gettext.h"
-#include "object-name.h"
-#include "quote.h"
-#include "setup.h"
-#include "parse-options.h"
-#include "write-or-die.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "attr.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "object-name.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "write-or-die.h"
 
-static int all_attrs;
-static int cached_attrs;
-static int stdin_paths;
-static char *source;
-static const char * const check_attr_usage[] = {
+स्थिर पूर्णाङ्क all_attrs;
+स्थिर पूर्णाङ्क cached_attrs;
+स्थिर पूर्णाङ्क stdin_paths;
+स्थिर वर्ण *source;
+स्थिर ध्रुव वर्ण * ध्रुव check_attr_usage[] = {
 N_("git check-attr [--source <tree-ish>] [-a | --all | <attr>...] [--] <pathname>..."),
 N_("git check-attr --stdin [-z] [--source <tree-ish>] [-a | --all | <attr>...]"),
-NULL
+रिक्त
 };
 
-static int nul_term_line;
+स्थिर पूर्णाङ्क nul_term_पंक्ति;
 
-static const struct option check_attr_options[] = {
+स्थिर ध्रुव संरचना option check_attr_options[] = {
 	OPT_BOOL('a', "all", &all_attrs, N_("report all attributes set on file")),
 	OPT_BOOL(0,  "cached", &cached_attrs, N_("use .gitattributes only from the index")),
 	OPT_BOOL(0 , "stdin", &stdin_paths, N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', रिक्त, &nul_term_पंक्ति,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_STRING(0, "source", &source, N_("<tree-ish>"), N_("which tree-ish to check attributes at")),
 	OPT_END()
 };
 
-static void output_attr(struct attr_check *check, const char *file)
+स्थिर शून्य output_attr(संरचना attr_check *check, ध्रुव वर्ण *file)
 {
-	int j;
-	int cnt = check->nr;
+	पूर्णाङ्क j;
+	पूर्णाङ्क cnt = check->nr;
 
-	for (j = 0; j < cnt; j++) {
-		const char *value = check->items[j].value;
+	प्रति (j = 0; j < cnt; j++) {
+		ध्रुव वर्ण *मूल्य = check->वस्तुएँ[j].मूल्य;
 
-		if (ATTR_TRUE(value))
-			value = "set";
-		else if (ATTR_FALSE(value))
-			value = "unset";
-		else if (ATTR_UNSET(value))
-			value = "unspecified";
+		यदि (ATTR_TRUE(मूल्य))
+			मूल्य = "set";
+		अन्यथा यदि (ATTR_FALSE(मूल्य))
+			मूल्य = "unset";
+		अन्यथा यदि (ATTR_UNSET(मूल्य))
+			मूल्य = "unspecified";
 
-		if (nul_term_line) {
-			printf("%s%c" /* path */
+		यदि (nul_term_पंक्ति) {
+			म_लिखो("%s%c" /* path */
 			       "%s%c" /* attrname */
 			       "%s%c" /* attrvalue */,
 			       file, 0,
-			       git_attr_name(check->items[j].attr), 0, value, 0);
-		} else {
-			quote_c_style(file, NULL, stdout, 0);
-			printf(": %s: %s\n",
-			       git_attr_name(check->items[j].attr), value);
+			       git_attr_name(check->वस्तुएँ[j].attr), 0, मूल्य, 0);
+		} अन्यथा {
+			quote_c_style(file, रिक्त, मानक_निकास, 0);
+			म_लिखो(": %s: %s\n",
+			       git_attr_name(check->वस्तुएँ[j].attr), मूल्य);
 		}
 	}
 }
 
-static void check_attr(const char *prefix, struct attr_check *check,
-		       int collect_all,
-		       const char *file)
+स्थिर शून्य check_attr(ध्रुव वर्ण *prefix, संरचना attr_check *check,
+		       पूर्णाङ्क collect_all,
+		       ध्रुव वर्ण *file)
 
 {
-	char *full_path =
-		prefix_path(the_repository, prefix, prefix ? strlen(prefix) : 0, file);
+	वर्ण *full_path =
+		prefix_path(the_repository, prefix, prefix ? म_माप(prefix) : 0, file);
 
-	if (collect_all) {
+	यदि (collect_all) {
 		git_all_attrs(the_repository->index, full_path, check);
-	} else {
+	} अन्यथा {
 		git_check_attr(the_repository->index, full_path, check);
 	}
 	output_attr(check, file);
 
-	free(full_path);
+	मुक्त(full_path);
 }
 
-static void check_attr_stdin_paths(const char *prefix, struct attr_check *check,
-				   int collect_all)
+स्थिर शून्य check_attr_stdin_paths(ध्रुव वर्ण *prefix, संरचना attr_check *check,
+				   पूर्णाङ्क collect_all)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना strbuf unquoted = STRBUF_INIT;
 	strbuf_getline_fn getline_fn;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_term_पंक्ति ? strbuf_getline_nul : strbuf_getline_lf;
+	यावत् (getline_fn(&buf, मानक_निवेश) != खातापूर्ण) {
+		यदि (!nul_term_पंक्ति && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			यदि (unquote_c_style(&unquoted, buf.buf, रिक्त))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		check_attr(prefix, check, collect_all, buf.buf);
-		maybe_flush_or_die(stdout, "attribute to stdout");
+		maybe_flush_or_die(मानक_निकास, "attribute to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
 }
 
-static NORETURN void error_with_usage(const char *msg)
+स्थिर NORETURN शून्य error_with_usage(ध्रुव वर्ण *संदेश)
 {
-	error("%s", msg);
+	error("%s", संदेश);
 	usage_with_options(check_attr_usage, check_attr_options);
 }
 
-int cmd_check_attr(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_check_attr(पूर्णाङ्क argc,
+		   ध्रुव वर्ण **argv,
+		   ध्रुव वर्ण *prefix,
+		   संरचना repository *repo UNUSED)
 {
-	struct attr_check *check;
-	struct object_id initialized_oid;
-	int cnt, i, doubledash, filei;
+	संरचना attr_check *check;
+	संरचना object_id initialized_oid;
+	पूर्णाङ्क cnt, i, doubledash, filei;
 
-	if (!is_bare_repository(the_repository))
-		setup_work_tree(the_repository);
+	यदि (!is_bare_repository(the_repository))
+		setup_work_वृक्ष(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, check_attr_options,
 			     check_attr_usage, PARSE_OPT_KEEP_DASHDASH);
@@ -127,81 +127,81 @@ int cmd_check_attr(int argc,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(the_repository) < 0) {
+	यदि (repo_read_index(the_repository) < 0) {
 		die("invalid cache");
 	}
 
-	if (cached_attrs)
+	यदि (cached_attrs)
 		git_attr_set_direction(GIT_ATTR_INDEX);
 
 	doubledash = -1;
-	for (i = 0; doubledash < 0 && i < argc; i++) {
-		if (!strcmp(argv[i], "--"))
+	प्रति (i = 0; doubledash < 0 && i < argc; i++) {
+		यदि (!म_भेद(argv[i], "--"))
 			doubledash = i;
 	}
 
 	/* Process --all and/or attribute arguments: */
-	if (all_attrs) {
-		if (doubledash >= 1)
+	यदि (all_attrs) {
+		यदि (doubledash >= 1)
 			error_with_usage("Attributes and --all both specified");
 
 		cnt = 0;
 		filei = doubledash + 1;
-	} else if (doubledash == 0) {
+	} अन्यथा यदि (doubledash == 0) {
 		error_with_usage("No attribute specified");
-	} else if (doubledash < 0) {
-		if (!argc)
+	} अन्यथा यदि (doubledash < 0) {
+		यदि (!argc)
 			error_with_usage("No attribute specified");
 
-		if (stdin_paths) {
+		यदि (stdin_paths) {
 			/* Treat all arguments as attribute names. */
 			cnt = argc;
 			filei = argc;
-		} else {
+		} अन्यथा {
 			/* Treat exactly one argument as an attribute name. */
 			cnt = 1;
 			filei = 1;
 		}
-	} else {
+	} अन्यथा {
 		cnt = doubledash;
 		filei = doubledash + 1;
 	}
 
 	/* Check file argument(s): */
-	if (stdin_paths) {
-		if (filei < argc)
+	यदि (stdin_paths) {
+		यदि (filei < argc)
 			error_with_usage("Can't specify files with --stdin");
-	} else {
-		if (filei >= argc)
+	} अन्यथा {
+		यदि (filei >= argc)
 			error_with_usage("No file specified");
 	}
 
 	check = attr_check_alloc();
-	if (!all_attrs) {
-		for (i = 0; i < cnt; i++) {
-			const struct git_attr *a = git_attr(argv[i]);
+	यदि (!all_attrs) {
+		प्रति (i = 0; i < cnt; i++) {
+			ध्रुव संरचना git_attr *a = git_attr(argv[i]);
 
-			if (!a)
-				return error("%s: not a valid attribute name",
+			यदि (!a)
+				प्रत्यागम error("%s: not a valid attribute name",
 					     argv[i]);
 			attr_check_append(check, a);
 		}
 	}
 
-	if (source) {
-		if (repo_get_oid_tree(the_repository, source, &initialized_oid))
+	यदि (source) {
+		यदि (repo_get_oid_वृक्ष(the_repository, source, &initialized_oid))
 			die("%s: not a valid tree-ish source", source);
 		set_git_attr_source(source);
 	}
 
-	if (stdin_paths)
+	यदि (stdin_paths)
 		check_attr_stdin_paths(prefix, check, all_attrs);
-	else {
-		for (i = filei; i < argc; i++)
+	अन्यथा {
+		प्रति (i = filei; i < argc; i++)
 			check_attr(prefix, check, all_attrs, argv[i]);
-		maybe_flush_or_die(stdout, "attribute to stdout");
+		maybe_flush_or_die(मानक_निकास, "attribute to stdout");
 	}
 
 	attr_check_free(check);
-	return 0;
+	प्रत्यागम 0;
 }
