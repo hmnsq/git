@@ -9,44 +9,44 @@
 #define USE_THE_REPOSITORY_VARIABLE
 #define DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "read-cache-ll.h"
-#include "setup.h"
-#include "string-list.h"
-#include "quote.h"
-#include "column.h"
-#include "color.h"
-#include "pathspec.h"
-#include "help.h"
-#include "prompt.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "abspath.h"
+#अन्तर्भाव "config.h"
+#अन्तर्भाव "dir.h"
+#अन्तर्भाव "environment.h"
+#अन्तर्भाव "gettext.h"
+#अन्तर्भाव "parse-options.h"
+#अन्तर्भाव "path.h"
+#अन्तर्भाव "read-cache-ll.h"
+#अन्तर्भाव "setup.h"
+#अन्तर्भाव "string-list.h"
+#अन्तर्भाव "quote.h"
+#अन्तर्भाव "column.h"
+#अन्तर्भाव "color.h"
+#अन्तर्भाव "pathspec.h"
+#अन्तर्भाव "help.h"
+#अन्तर्भाव "prompt.h"
 
-static int require_force = -1; /* unset */
-static int interactive;
-static struct string_list del_list = STRING_LIST_INIT_DUP;
-static unsigned int colopts;
+स्थिर पूर्णाङ्क require_force = -1; /* unset */
+स्थिर पूर्णाङ्क interactive;
+स्थिर संरचना string_list del_list = STRING_LIST_INIT_DUP;
+स्थिर unsigned पूर्णाङ्क colopts;
 
-static const char *const builtin_clean_usage[] = {
+स्थिर ध्रुव वर्ण *ध्रुव builtin_clean_usage[] = {
 	N_("git clean [-d] [-f] [-i] [-n] [-q] [-e <pattern>] [-x | -X] [--] [<pathspec>...]"),
-	NULL
+	रिक्त
 };
 
-static const char *msg_remove = N_("Removing %s\n");
-static const char *msg_would_remove = N_("Would remove %s\n");
-static const char *msg_skip_git_dir = N_("Skipping repository %s\n");
-static const char *msg_would_skip_git_dir = N_("Would skip repository %s\n");
-static const char *msg_warn_remove_failed = N_("failed to remove %s");
-static const char *msg_warn_lstat_failed = N_("could not lstat %s\n");
-static const char *msg_skip_cwd = N_("Refusing to remove current working directory\n");
-static const char *msg_would_skip_cwd = N_("Would refuse to remove current working directory\n");
+स्थिर ध्रुव वर्ण *सन्देशः_remove = N_("Removing %s\n");
+स्थिर ध्रुव वर्ण *सन्देशः_would_remove = N_("Would remove %s\n");
+स्थिर ध्रुव वर्ण *सन्देशः_skip_git_dir = N_("Skipping repository %s\n");
+स्थिर ध्रुव वर्ण *सन्देशः_would_skip_git_dir = N_("Would skip repository %s\n");
+स्थिर ध्रुव वर्ण *सन्देशः_warn_remove_failed = N_("failed to remove %s");
+स्थिर ध्रुव वर्ण *सन्देशः_warn_lstat_failed = N_("could not lstat %s\n");
+स्थिर ध्रुव वर्ण *सन्देशः_skip_cwd = N_("Refusing to remove current working directory\n");
+स्थिर ध्रुव वर्ण *सन्देशः_would_skip_cwd = N_("Would refuse to remove current working directory\n");
 
-enum color_clean {
+गणना color_clean {
 	CLEAN_COLOR_RESET = 0,
 	CLEAN_COLOR_PLAIN = 1,
 	CLEAN_COLOR_PROMPT = 2,
@@ -55,7 +55,7 @@ enum color_clean {
 	CLEAN_COLOR_ERROR = 5
 };
 
-static const char *color_interactive_slots[] = {
+स्थिर ध्रुव वर्ण *color_interactive_slots[] = {
 	[CLEAN_COLOR_ERROR]  = "error",
 	[CLEAN_COLOR_HEADER] = "header",
 	[CLEAN_COLOR_HELP]   = "help",
@@ -64,8 +64,8 @@ static const char *color_interactive_slots[] = {
 	[CLEAN_COLOR_RESET]  = "reset",
 };
 
-static enum git_colorbool clean_use_color = GIT_COLOR_UNKNOWN;
-static char clean_colors[][COLOR_MAXLEN] = {
+स्थिर गणना git_colorbool clean_use_color = GIT_COLOR_UNKNOWN;
+स्थिर वर्ण clean_colors[][COLOR_MAXLEN] = {
 	[CLEAN_COLOR_ERROR] = GIT_COLOR_BOLD_RED,
 	[CLEAN_COLOR_HEADER] = GIT_COLOR_BOLD,
 	[CLEAN_COLOR_HELP] = GIT_COLOR_BOLD_RED,
@@ -78,173 +78,173 @@ static char clean_colors[][COLOR_MAXLEN] = {
 #define MENU_OPTS_IMMEDIATE		02
 #define MENU_OPTS_LIST_ONLY		04
 
-struct menu_opts {
-	const char *header;
-	const char *prompt;
-	int flags;
+संरचना menu_opts {
+	ध्रुव वर्ण *header;
+	ध्रुव वर्ण *prompt;
+	पूर्णाङ्क flags;
 };
 
 #define MENU_RETURN_NO_LOOP		10
 
-struct menu_item {
-	char hotkey;
-	const char *title;
-	int selected;
-	int (*fn)(void);
+संरचना menu_item {
+	वर्ण hotkey;
+	ध्रुव वर्ण *title;
+	पूर्णाङ्क selected;
+	पूर्णाङ्क (*fn)(शून्य);
 };
 
-enum menu_stuff_type {
+गणना menu_stuff_type {
 	MENU_STUFF_TYPE_STRING_LIST = 1,
 	MENU_STUFF_TYPE_MENU_ITEM
 };
 
-struct menu_stuff {
-	enum menu_stuff_type type;
-	int nr;
-	void *stuff;
+संरचना menu_stuff {
+	गणना menu_stuff_type type;
+	पूर्णाङ्क nr;
+	शून्य *stuff;
 };
 
 define_list_config_array(color_interactive_slots);
 
-static int git_clean_config(const char *var, const char *value,
-			    const struct config_context *ctx, void *cb)
+स्थिर पूर्णाङ्क git_clean_config(ध्रुव वर्ण *var, ध्रुव वर्ण *मानम्,
+			    ध्रुव संरचना config_context *ctx, शून्य *cb)
 {
-	const char *slot_name;
+	ध्रुव वर्ण *slot_name;
 
-	if (starts_with(var, "column."))
-		return git_column_config(var, value, "clean", &colopts);
+	सचे (starts_with(var, "column."))
+		पटिनिवत्त git_column_config(var, मानम्, "clean", &colopts);
 
 	/* honors the color.interactive* config variables which also
 	   applied in git-add--interactive and git-stash */
-	if (!strcmp(var, "color.interactive")) {
-		clean_use_color = git_config_colorbool(var, value);
-		return 0;
+	सचे (!strcmp(var, "color.interactive")) {
+		clean_use_color = git_config_colorbool(var, मानम्);
+		पटिनिवत्त 0;
 	}
-	if (skip_prefix(var, "color.interactive.", &slot_name)) {
-		int slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
-		if (slot < 0)
-			return 0;
-		if (!value)
-			return config_error_nonbool(var);
-		return color_parse(value, clean_colors[slot]);
-	}
-
-	if (!strcmp(var, "clean.requireforce")) {
-		require_force = git_config_bool(var, value);
-		return 0;
+	सचे (skip_prefix(var, "color.interactive.", &slot_name)) {
+		पूर्णाङ्क slot = LOOKUP_CONFIG(color_interactive_slots, slot_name);
+		सचे (slot < 0)
+			पटिनिवत्त 0;
+		सचे (!मानम्)
+			पटिनिवत्त config_error_nonbool(var);
+		पटिनिवत्त color_parse(मानम्, clean_colors[slot]);
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	सचे (!strcmp(var, "clean.requireforce")) {
+		require_force = git_config_bool(var, मानम्);
+		पटिनिवत्त 0;
+	}
 
-	return git_default_config(var, value, ctx, cb);
+	सचे (git_color_config(var, मानम्, cb) < 0)
+		पटिनिवत्त -1;
+
+	पटिनिवत्त git_default_config(var, मानम्, ctx, cb);
 }
 
-static const char *clean_get_color(enum color_clean ix)
+स्थिर ध्रुव वर्ण *clean_get_color(गणना color_clean ix)
 {
-	if (want_color(clean_use_color))
-		return clean_colors[ix];
-	return "";
+	सचे (want_color(clean_use_color))
+		पटिनिवत्त clean_colors[ix];
+	पटिनिवत्त "";
 }
 
-static void clean_print_color(enum color_clean ix)
+स्थिर शून्य clean_print_color(गणना color_clean ix)
 {
 	printf("%s", clean_get_color(ix));
 }
 
-static int exclude_cb(const struct option *opt, const char *arg, int unset)
+स्थिर पूर्णाङ्क exclude_cb(ध्रुव संरचना option *opt, ध्रुव वर्ण *arg, पूर्णाङ्क unset)
 {
-	struct string_list *exclude_list = opt->value;
+	संरचना string_list *exclude_list = opt->मानम्;
 	BUG_ON_OPT_NEG(unset);
 	string_list_append(exclude_list, arg);
-	return 0;
+	पटिनिवत्त 0;
 }
 
-static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
-		int dry_run, int quiet, int *dir_gone)
+स्थिर पूर्णाङ्क remove_dirs(संरचना strbuf *path, ध्रुव वर्ण *prefix, पूर्णाङ्क force_flag,
+		पूर्णाङ्क dry_run, पूर्णाङ्क quiet, पूर्णाङ्क *dir_gone)
 {
 	DIR *dir;
-	struct strbuf quoted = STRBUF_INIT;
-	struct strbuf realpath = STRBUF_INIT;
-	struct strbuf real_ocwd = STRBUF_INIT;
-	struct dirent *e;
-	int res = 0, ret = 0, gone = 1, original_len = path->len, len;
-	struct string_list dels = STRING_LIST_INIT_DUP;
+	संरचना strbuf quoted = STRBUF_INIT;
+	संरचना strbuf realpath = STRBUF_INIT;
+	संरचना strbuf real_ocwd = STRBUF_INIT;
+	संरचना dirent *e;
+	पूर्णाङ्क res = 0, ret = 0, gone = 1, original_len = path->len, len;
+	संरचना string_list dels = STRING_LIST_INIT_DUP;
 
 	*dir_gone = 1;
 
-	if ((force_flag & REMOVE_DIR_KEEP_NESTED_GIT) &&
+	सचे ((force_flag & REMOVE_DIR_KEEP_NESTED_GIT) &&
 	    is_nonbare_repository_dir(path)) {
-		if (!quiet) {
+		सचे (!quiet) {
 			quote_path(path->buf, prefix, &quoted, 0);
-			printf(dry_run ?  _(msg_would_skip_git_dir) : _(msg_skip_git_dir),
+			printf(dry_run ?  _(सन्देशः_would_skip_git_dir) : _(सन्देशः_skip_git_dir),
 					quoted.buf);
 		}
 
 		*dir_gone = 0;
-		goto out;
+		गच्छ out;
 	}
 
 	dir = opendir(path->buf);
-	if (!dir) {
+	सचे (!dir) {
 		/* an empty dir could be removed even if it is unreadble */
 		res = dry_run ? 0 : rmdir(path->buf);
-		if (res) {
-			int saved_errno = errno;
+		सचे (res) {
+			पूर्णाङ्क saved_errno = errno;
 			quote_path(path->buf, prefix, &quoted, 0);
 			errno = saved_errno;
-			warning_errno(_(msg_warn_remove_failed), quoted.buf);
+			warning_errno(_(सन्देशः_warn_remove_failed), quoted.buf);
 			*dir_gone = 0;
 		}
 		ret = res;
-		goto out;
+		गच्छ out;
 	}
 
 	strbuf_complete(path, '/');
 
 	len = path->len;
-	while ((e = readdir_skip_dot_and_dotdot(dir)) != NULL) {
-		struct stat st;
+	याव ((e = readdir_skip_dot_and_dotdot(dir)) != रिक्त) {
+		संरचना stat st;
 
 		strbuf_setlen(path, len);
 		strbuf_addstr(path, e->d_name);
-		if (lstat(path->buf, &st))
-			warning_errno(_(msg_warn_lstat_failed), path->buf);
-		else if (S_ISDIR(st.st_mode)) {
-			if (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
+		सचे (lstat(path->buf, &st))
+			warning_errno(_(सन्देशः_warn_lstat_failed), path->buf);
+		अञ्ञथा सचे (S_ISDIR(st.st_mode)) {
+			सचे (remove_dirs(path, prefix, force_flag, dry_run, quiet, &gone))
 				ret = 1;
-			if (gone) {
+			सचे (gone) {
 				quote_path(path->buf, prefix, &quoted, 0);
 				string_list_append(&dels, quoted.buf);
-			} else
+			} अञ्ञथा
 				*dir_gone = 0;
-			continue;
-		} else {
+			अनुवर्त;
+		} अञ्ञथा {
 			res = dry_run ? 0 : unlink(path->buf);
-			if (!res) {
+			सचे (!res) {
 				quote_path(path->buf, prefix, &quoted, 0);
 				string_list_append(&dels, quoted.buf);
-			} else {
-				int saved_errno = errno;
+			} अञ्ञथा {
+				पूर्णाङ्क saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), quoted.buf);
+				warning_errno(_(सन्देशः_warn_remove_failed), quoted.buf);
 				*dir_gone = 0;
 				ret = 1;
 			}
-			continue;
+			अनुवर्त;
 		}
 
 		/* path too long, stat fails, or non-directory still exists */
 		*dir_gone = 0;
 		ret = 1;
-		break;
+		भङ्ग;
 	}
 	closedir(dir);
 
 	strbuf_setlen(path, original_len);
 
-	if (*dir_gone) {
+	सचे (*dir_gone) {
 		/*
 		 * Normalize path components in path->buf, e.g. change '\' to
 		 * '/' on Windows.
@@ -256,51 +256,51 @@ static int remove_dirs(struct strbuf *path, const char *prefix, int force_flag,
 		 * like to transform startup_info->original_cwd to an absolute
 		 * path too.
 		 */
-		 if (startup_info->original_cwd)
+		 सचे (startup_info->original_cwd)
 			 strbuf_realpath(&real_ocwd,
 					 startup_info->original_cwd, 1);
 
-		if (!strbuf_cmp(&realpath, &real_ocwd)) {
-			printf("%s", dry_run ? _(msg_would_skip_cwd) : _(msg_skip_cwd));
+		सचे (!strbuf_cmp(&realpath, &real_ocwd)) {
+			printf("%s", dry_run ? _(सन्देशः_would_skip_cwd) : _(सन्देशः_skip_cwd));
 			*dir_gone = 0;
-		} else {
+		} अञ्ञथा {
 			res = dry_run ? 0 : rmdir(path->buf);
-			if (!res)
+			सचे (!res)
 				*dir_gone = 1;
-			else {
-				int saved_errno = errno;
+			अञ्ञथा {
+				पूर्णाङ्क saved_errno = errno;
 				quote_path(path->buf, prefix, &quoted, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), quoted.buf);
+				warning_errno(_(सन्देशः_warn_remove_failed), quoted.buf);
 				*dir_gone = 0;
 				ret = 1;
 			}
 		}
 	}
 
-	if (!*dir_gone && !quiet) {
-		int i;
-		for (i = 0; i < dels.nr; i++)
-			printf(dry_run ?  _(msg_would_remove) : _(msg_remove), dels.items[i].string);
+	सचे (!*dir_gone && !quiet) {
+		पूर्णाङ्क i;
+		अत्थाय (i = 0; i < dels.nr; i++)
+			printf(dry_run ?  _(सन्देशः_would_remove) : _(सन्देशः_remove), dels.वस्तूनि[i].string);
 	}
 out:
 	strbuf_release(&realpath);
 	strbuf_release(&real_ocwd);
 	strbuf_release(&quoted);
 	string_list_clear(&dels, 0);
-	return ret;
+	पटिनिवत्त ret;
 }
 
-static void pretty_print_dels(void)
+स्थिर शून्य pretty_print_dels(शून्य)
 {
-	struct string_list list = STRING_LIST_INIT_DUP;
-	struct string_list_item *item;
-	struct strbuf buf = STRBUF_INIT;
-	const char *qname;
-	struct column_options copts;
+	संरचना string_list list = STRING_LIST_INIT_DUP;
+	संरचना string_list_item *item;
+	संरचना strbuf buf = STRBUF_INIT;
+	ध्रुव वर्ण *qname;
+	संरचना column_options copts;
 
 	for_each_string_list_item(item, &del_list) {
-		qname = quote_path(item->string, NULL, &buf, 0);
+		qname = quote_path(item->string, रिक्त, &buf, 0);
 		string_list_append(&list, qname);
 	}
 
@@ -309,7 +309,7 @@ static void pretty_print_dels(void)
 	 * about layout strategy and stuff
 	 */
 	colopts = (colopts & ~COL_ENABLE_MASK) | COL_ENABLED;
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, परिमाण(copts));
 	copts.indent = "  ";
 	copts.padding = 2;
 	print_columns(&list, colopts, &copts);
@@ -317,19 +317,19 @@ static void pretty_print_dels(void)
 	string_list_clear(&list, 0);
 }
 
-static void pretty_print_menus(struct string_list *menu_list)
+स्थिर शून्य pretty_print_menus(संरचना string_list *menu_list)
 {
-	unsigned int local_colopts = 0;
-	struct column_options copts;
+	unsigned पूर्णाङ्क local_colopts = 0;
+	संरचना column_options copts;
 
 	local_colopts = COL_ENABLED | COL_ROW;
-	memset(&copts, 0, sizeof(copts));
+	memset(&copts, 0, परिमाण(copts));
 	copts.indent = "  ";
 	copts.padding = 2;
 	print_columns(menu_list, local_colopts, &copts);
 }
 
-static void prompt_help_cmd(int singleton)
+स्थिर शून्य prompt_help_cmd(पूर्णाङ्क singleton)
 {
 	clean_print_color(CLEAN_COLOR_HELP);
 	printf(singleton ?
@@ -351,45 +351,45 @@ static void prompt_help_cmd(int singleton)
 /*
  * display menu stuff with number prefix and hotkey highlight
  */
-static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
+स्थिर शून्य print_highlight_menu_stuff(संरचना menu_stuff *stuff, पूर्णाङ्क **chosen)
 {
-	struct string_list menu_list = STRING_LIST_INIT_DUP;
-	struct strbuf menu = STRBUF_INIT;
-	struct menu_item *menu_item;
-	struct string_list_item *string_list_item;
-	int i;
+	संरचना string_list menu_list = STRING_LIST_INIT_DUP;
+	संरचना strbuf menu = STRBUF_INIT;
+	संरचना menu_item *menu_item;
+	संरचना string_list_item *string_list_item;
+	पूर्णाङ्क i;
 
-	switch (stuff->type) {
-	default:
+	विकल्प (stuff->type) {
+	स्वभाव:
 		die("Bad type of menu_stuff when print menu");
-	case MENU_STUFF_TYPE_MENU_ITEM:
-		menu_item = (struct menu_item *)stuff->stuff;
-		for (i = 0; i < stuff->nr; i++, menu_item++) {
-			const char *p;
-			int highlighted = 0;
+	पक्ष MENU_STUFF_TYPE_MENU_ITEM:
+		menu_item = (संरचना menu_item *)stuff->stuff;
+		अत्थाय (i = 0; i < stuff->nr; i++, menu_item++) {
+			ध्रुव वर्ण *p;
+			पूर्णाङ्क highlighted = 0;
 
 			p = menu_item->title;
-			if ((*chosen)[i] < 0)
+			सचे ((*chosen)[i] < 0)
 				(*chosen)[i] = menu_item->selected ? 1 : 0;
 			strbuf_addf(&menu, "%s%2d: ", (*chosen)[i] ? "*" : " ", i+1);
-			for (; *p; p++) {
-				if (!highlighted && *p == menu_item->hotkey) {
+			अत्थाय (; *p; p++) {
+				सचे (!highlighted && *p == menu_item->hotkey) {
 					strbuf_addstr(&menu, clean_get_color(CLEAN_COLOR_PROMPT));
 					strbuf_addch(&menu, *p);
 					strbuf_addstr(&menu, clean_get_color(CLEAN_COLOR_RESET));
 					highlighted = 1;
-				} else {
+				} अञ्ञथा {
 					strbuf_addch(&menu, *p);
 				}
 			}
 			string_list_append(&menu_list, menu.buf);
 			strbuf_reset(&menu);
 		}
-		break;
-	case MENU_STUFF_TYPE_STRING_LIST:
+		भङ्ग;
+	पक्ष MENU_STUFF_TYPE_STRING_LIST:
 		i = 0;
-		for_each_string_list_item(string_list_item, (struct string_list *)stuff->stuff) {
-			if ((*chosen)[i] < 0)
+		for_each_string_list_item(string_list_item, (संरचना string_list *)stuff->stuff) {
+			सचे ((*chosen)[i] < 0)
 				(*chosen)[i] = 0;
 			strbuf_addf(&menu, "%s%2d: %s",
 				    (*chosen)[i] ? "*" : " ", i+1, string_list_item->string);
@@ -397,7 +397,7 @@ static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 			strbuf_reset(&menu);
 			i++;
 		}
-		break;
+		भङ्ग;
 	}
 
 	pretty_print_menus(&menu_list);
@@ -406,53 +406,53 @@ static void print_highlight_menu_stuff(struct menu_stuff *stuff, int **chosen)
 	string_list_clear(&menu_list, 0);
 }
 
-static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
+स्थिर पूर्णाङ्क find_unique(ध्रुव वर्ण *choice, संरचना menu_stuff *menu_stuff)
 {
-	struct menu_item *menu_item;
-	struct string_list_item *string_list_item;
-	int i, len, found = 0;
+	संरचना menu_item *menu_item;
+	संरचना string_list_item *string_list_item;
+	पूर्णाङ्क i, len, found = 0;
 
 	len = strlen(choice);
-	switch (menu_stuff->type) {
-	default:
+	विकल्प (menu_stuff->type) {
+	स्वभाव:
 		die("Bad type of menu_stuff when parse choice");
-	case MENU_STUFF_TYPE_MENU_ITEM:
+	पक्ष MENU_STUFF_TYPE_MENU_ITEM:
 
-		menu_item = (struct menu_item *)menu_stuff->stuff;
-		for (i = 0; i < menu_stuff->nr; i++, menu_item++) {
-			if (len == 1 && *choice == menu_item->hotkey) {
+		menu_item = (संरचना menu_item *)menu_stuff->stuff;
+		अत्थाय (i = 0; i < menu_stuff->nr; i++, menu_item++) {
+			सचे (len == 1 && *choice == menu_item->hotkey) {
 				found = i + 1;
-				break;
+				भङ्ग;
 			}
-			if (!strncasecmp(choice, menu_item->title, len)) {
-				if (found) {
-					if (len == 1) {
+			सचे (!strncasecmp(choice, menu_item->title, len)) {
+				सचे (found) {
+					सचे (len == 1) {
 						/* continue for hotkey matching */
 						found = -1;
-					} else {
+					} अञ्ञथा {
 						found = 0;
-						break;
+						भङ्ग;
 					}
-				} else {
+				} अञ्ञथा {
 					found = i + 1;
 				}
 			}
 		}
-		break;
-	case MENU_STUFF_TYPE_STRING_LIST:
-		string_list_item = ((struct string_list *)menu_stuff->stuff)->items;
-		for (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
-			if (!strncasecmp(choice, string_list_item->string, len)) {
-				if (found) {
+		भङ्ग;
+	पक्ष MENU_STUFF_TYPE_STRING_LIST:
+		string_list_item = ((संरचना string_list *)menu_stuff->stuff)->वस्तूनि;
+		अत्थाय (i = 0; i < menu_stuff->nr; i++, string_list_item++) {
+			सचे (!strncasecmp(choice, string_list_item->string, len)) {
+				सचे (found) {
 					found = 0;
-					break;
+					भङ्ग;
 				}
 				found = i + 1;
 			}
 		}
-		break;
+		भङ्ग;
 	}
-	return found;
+	पटिनिवत्त found;
 }
 
 /*
@@ -476,92 +476,92 @@ static int find_unique(const char *choice, struct menu_stuff *menu_stuff)
  * The parse result will be saved in array **chosen, and
  * return number of total selections.
  */
-static int parse_choice(struct menu_stuff *menu_stuff,
-			int is_single,
-			char *input,
-			int **chosen)
+स्थिर पूर्णाङ्क parse_choice(संरचना menu_stuff *menu_stuff,
+			पूर्णाङ्क is_single,
+			वर्ण *निवेशः,
+			पूर्णाङ्क **chosen)
 {
-	struct string_list choice = STRING_LIST_INIT_NODUP;
-	struct string_list_item *item;
-	int nr = 0;
-	int i;
+	संरचना string_list choice = STRING_LIST_INIT_NODUP;
+	संरचना string_list_item *item;
+	पूर्णाङ्क nr = 0;
+	पूर्णाङ्क i;
 
-	string_list_split_in_place_f(&choice, input,
+	string_list_split_in_place_f(&choice, निवेशः,
 				     is_single ? "\n" : ", ", -1,
 				     STRING_LIST_SPLIT_TRIM);
 
 	for_each_string_list_item(item, &choice) {
-		const char *string;
-		int choose;
-		int bottom = 0, top = 0;
-		int is_range, is_number;
+		ध्रुव वर्ण *string;
+		पूर्णाङ्क choose;
+		पूर्णाङ्क bottom = 0, शिखरम् = 0;
+		पूर्णाङ्क is_range, is_सङ्ख्या;
 
 		string = item->string;
-		if (!*string)
-			continue;
+		सचे (!*string)
+			अनुवर्त;
 
 		/* Input that begins with '-'; unchoose */
-		if (string[0] == '-') {
+		सचे (string[0] == '-') {
 			choose = 0;
 			string++;
-		} else {
+		} अञ्ञथा {
 			choose = 1;
 		}
 
 		is_range = 0;
-		is_number = 1;
-		for (const char *p = string; *p; p++) {
-			if ('-' == *p) {
-				if (!is_range) {
+		is_सङ्ख्या = 1;
+		अत्थाय (ध्रुव वर्ण *p = string; *p; p++) {
+			सचे ('-' == *p) {
+				सचे (!is_range) {
 					is_range = 1;
-					is_number = 0;
-				} else {
-					is_number = 0;
+					is_सङ्ख्या = 0;
+				} अञ्ञथा {
+					is_सङ्ख्या = 0;
 					is_range = 0;
-					break;
+					भङ्ग;
 				}
-			} else if (!isdigit(*p)) {
-				is_number = 0;
+			} अञ्ञथा सचे (!isdigit(*p)) {
+				is_सङ्ख्या = 0;
 				is_range = 0;
-				break;
+				भङ्ग;
 			}
 		}
 
-		if (is_number) {
+		सचे (is_सङ्ख्या) {
 			bottom = atoi(string);
-			top = bottom;
-		} else if (is_range) {
+			शिखरम् = bottom;
+		} अञ्ञथा सचे (is_range) {
 			bottom = atoi(string);
 			/* a range can be specified like 5-7 or 5- */
-			if (!*(strchr(string, '-') + 1))
-				top = menu_stuff->nr;
-			else
-				top = atoi(strchr(string, '-') + 1);
-		} else if (!strcmp(string, "*")) {
+			सचे (!*(strchr(string, '-') + 1))
+				शिखरम् = menu_stuff->nr;
+			अञ्ञथा
+				शिखरम् = atoi(strchr(string, '-') + 1);
+		} अञ्ञथा सचे (!strcmp(string, "*")) {
 			bottom = 1;
-			top = menu_stuff->nr;
-		} else {
+			शिखरम् = menu_stuff->nr;
+		} अञ्ञथा {
 			bottom = find_unique(string, menu_stuff);
-			top = bottom;
+			शिखरम् = bottom;
 		}
 
-		if (top <= 0 || bottom <= 0 || top > menu_stuff->nr || bottom > top ||
-		    (is_single && bottom != top)) {
+		सचे (शिखरम् <= 0 || bottom <= 0 || शिखरम् > menu_stuff->nr || bottom > शिखरम् ||
+		    (is_single && bottom != शिखरम्)) {
 			clean_print_color(CLEAN_COLOR_ERROR);
 			printf(_("Huh (%s)?\n"), string);
 			clean_print_color(CLEAN_COLOR_RESET);
-			continue;
+			अनुवर्त;
 		}
 
-		for (i = bottom; i <= top; i++)
+		अत्थाय (i = bottom; i <= शिखरम्; i++)
 			(*chosen)[i-1] = choose;
 	}
 
 	string_list_clear(&choice, 0);
 
-	for (i = 0; i < menu_stuff->nr; i++)
+	अत्थाय (i = 0; i < menu_stuff->nr; i++)
 		nr += (*chosen)[i];
-	return nr;
+	पटिनिवत्त nr;
 }
 
 /*
@@ -575,21 +575,21 @@ static int parse_choice(struct menu_stuff *menu_stuff,
  *   - The array ends with EOF.
  *   - If user pressed CTRL-D (i.e. EOF), no selection returned.
  */
-static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
+स्थिर पूर्णाङ्क *list_and_choose(संरचना menu_opts *opts, संरचना menu_stuff *stuff)
 {
-	struct strbuf choice = STRBUF_INIT;
-	int *chosen, *result;
-	int nr = 0;
-	int eof = 0;
-	int i;
+	संरचना strbuf choice = STRBUF_INIT;
+	पूर्णाङ्क *chosen, *result;
+	पूर्णाङ्क nr = 0;
+	पूर्णाङ्क eof = 0;
+	पूर्णाङ्क i;
 
 	ALLOC_ARRAY(chosen, stuff->nr);
 	/* set chosen as uninitialized */
-	for (i = 0; i < stuff->nr; i++)
+	अत्थाय (i = 0; i < stuff->nr; i++)
 		chosen[i] = -1;
 
-	for (;;) {
-		if (opts->header) {
+	अत्थाय (;;) {
+		सचे (opts->header) {
 			printf_ln("%s%s%s",
 				  clean_get_color(CLEAN_COLOR_HEADER),
 				  _(opts->header),
@@ -599,10 +599,10 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 		/* chosen will be initialized by print_highlight_menu_stuff */
 		print_highlight_menu_stuff(stuff, &chosen);
 
-		if (opts->flags & MENU_OPTS_LIST_ONLY)
-			break;
+		सचे (opts->flags & MENU_OPTS_LIST_ONLY)
+			भङ्ग;
 
-		if (opts->prompt) {
+		सचे (opts->prompt) {
 			printf("%s%s%s%s",
 			       clean_get_color(CLEAN_COLOR_PROMPT),
 			       _(opts->prompt),
@@ -610,119 +610,119 @@ static int *list_and_choose(struct menu_opts *opts, struct menu_stuff *stuff)
 			       clean_get_color(CLEAN_COLOR_RESET));
 		}
 
-		if (git_read_line_interactively(&choice) == EOF) {
+		सचे (git_read_पङ्क्तिः_interactively(&choice) == EOF) {
 			eof = 1;
-			break;
+			भङ्ग;
 		}
 
 		/* help for prompt */
-		if (!strcmp(choice.buf, "?")) {
+		सचे (!strcmp(choice.buf, "?")) {
 			prompt_help_cmd(opts->flags & MENU_OPTS_SINGLETON);
-			continue;
+			अनुवर्त;
 		}
 
 		/* for a multiple-choice menu, press ENTER (empty) will return back */
-		if (!(opts->flags & MENU_OPTS_SINGLETON) && !choice.len)
-			break;
+		सचे (!(opts->flags & MENU_OPTS_SINGLETON) && !choice.len)
+			भङ्ग;
 
 		nr = parse_choice(stuff,
 				  opts->flags & MENU_OPTS_SINGLETON,
 				  choice.buf,
 				  &chosen);
 
-		if (opts->flags & MENU_OPTS_SINGLETON) {
-			if (nr)
-				break;
-		} else if (opts->flags & MENU_OPTS_IMMEDIATE) {
-			break;
+		सचे (opts->flags & MENU_OPTS_SINGLETON) {
+			सचे (nr)
+				भङ्ग;
+		} अञ्ञथा सचे (opts->flags & MENU_OPTS_IMMEDIATE) {
+			भङ्ग;
 		}
 	}
 
-	if (eof) {
-		result = xmalloc(sizeof(int));
+	सचे (eof) {
+		result = xmalloc(परिमाण(पूर्णाङ्क));
 		*result = EOF;
-	} else {
-		int j = 0;
+	} अञ्ञथा {
+		पूर्णाङ्क j = 0;
 
 		/*
 		 * recalculate nr, if return back from menu directly with
 		 * default selections.
 		 */
-		if (!nr) {
-			for (i = 0; i < stuff->nr; i++)
+		सचे (!nr) {
+			अत्थाय (i = 0; i < stuff->nr; i++)
 				nr += chosen[i];
 		}
 
 		CALLOC_ARRAY(result, st_add(nr, 1));
-		for (i = 0; i < stuff->nr && j < nr; i++) {
-			if (chosen[i])
+		अत्थाय (i = 0; i < stuff->nr && j < nr; i++) {
+			सचे (chosen[i])
 				result[j++] = i;
 		}
 		result[j] = EOF;
 	}
 
-	free(chosen);
+	मुक्त(chosen);
 	strbuf_release(&choice);
-	return result;
+	पटिनिवत्त result;
 }
 
-static int clean_cmd(void)
+स्थिर पूर्णाङ्क clean_cmd(शून्य)
 {
-	return MENU_RETURN_NO_LOOP;
+	पटिनिवत्त MENU_RETURN_NO_LOOP;
 }
 
-static int filter_by_patterns_cmd(void)
+स्थिर पूर्णाङ्क filter_by_patterns_cmd(शून्य)
 {
-	struct dir_struct dir = DIR_INIT;
-	struct strbuf confirm = STRBUF_INIT;
-	struct pattern_list *pl;
-	int changed = -1, i;
+	संरचना dir_struct dir = DIR_INIT;
+	संरचना strbuf confirm = STRBUF_INIT;
+	संरचना pattern_list *pl;
+	पूर्णाङ्क changed = -1, i;
 
-	for (;;) {
-		struct string_list ignore_list = STRING_LIST_INIT_NODUP;
-		struct string_list_item *item;
+	अत्थाय (;;) {
+		संरचना string_list ignore_list = STRING_LIST_INIT_NODUP;
+		संरचना string_list_item *item;
 
-		if (!del_list.nr)
-			break;
+		सचे (!del_list.nr)
+			भङ्ग;
 
-		if (changed)
+		सचे (changed)
 			pretty_print_dels();
 
 		clean_print_color(CLEAN_COLOR_PROMPT);
 		printf(_("Input ignore patterns>> "));
 		clean_print_color(CLEAN_COLOR_RESET);
-		if (git_read_line_interactively(&confirm) == EOF)
+		सचे (git_read_पङ्क्तिः_interactively(&confirm) == EOF)
 			putchar('\n');
 
 		/* quit filter_by_pattern mode if press ENTER or Ctrl-D */
-		if (!confirm.len)
-			break;
+		सचे (!confirm.len)
+			भङ्ग;
 
 		pl = add_pattern_list(&dir, EXC_CMDL, "manual exclude");
 
 		string_list_split_in_place_f(&ignore_list, confirm.buf, " ", -1,
 					     STRING_LIST_SPLIT_TRIM);
 
-		for (i = 0; i < ignore_list.nr; i++) {
-			item = &ignore_list.items[i];
-			if (!*item->string)
-				continue;
+		अत्थाय (i = 0; i < ignore_list.nr; i++) {
+			item = &ignore_list.वस्तूनि[i];
+			सचे (!*item->string)
+				अनुवर्त;
 			add_pattern(item->string, "", 0, pl, -(i+1));
 		}
 
 		changed = 0;
 		for_each_string_list_item(item, &del_list) {
-			int dtype = DT_UNKNOWN;
+			पूर्णाङ्क dtype = DT_UNKNOWN;
 
-			if (is_excluded(&dir, the_repository->index, item->string, &dtype)) {
+			सचे (is_excluded(&dir, the_repository->index, item->string, &dtype)) {
 				*item->string = '\0';
 				changed++;
 			}
 		}
 
-		if (changed) {
-			string_list_remove_empty_items(&del_list, 0);
-		} else {
+		सचे (changed) {
+			string_list_remove_empty_वस्तूनि(&del_list, 0);
+		} अञ्ञथा {
 			clean_print_color(CLEAN_COLOR_ERROR);
 			printf_ln(_("WARNING: Cannot find items matched by: %s"), confirm.buf);
 			clean_print_color(CLEAN_COLOR_RESET);
@@ -733,18 +733,18 @@ static int filter_by_patterns_cmd(void)
 	}
 
 	strbuf_release(&confirm);
-	return 0;
+	पटिनिवत्त 0;
 }
 
-static int select_by_numbers_cmd(void)
+स्थिर पूर्णाङ्क select_by_numbers_cmd(शून्य)
 {
-	struct menu_opts menu_opts;
-	struct menu_stuff menu_stuff;
-	struct string_list_item *items;
-	int *chosen;
-	int i, j;
+	संरचना menu_opts menu_opts;
+	संरचना menu_stuff menu_stuff;
+	संरचना string_list_item *वस्तूनि;
+	पूर्णाङ्क *chosen;
+	पूर्णाङ्क i, j;
 
-	menu_opts.header = NULL;
+	menu_opts.header = रिक्त;
 	menu_opts.prompt = N_("Select items to delete");
 	menu_opts.flags = 0;
 
@@ -753,67 +753,67 @@ static int select_by_numbers_cmd(void)
 	menu_stuff.nr = del_list.nr;
 
 	chosen = list_and_choose(&menu_opts, &menu_stuff);
-	items = del_list.items;
-	for (i = 0, j = 0; i < del_list.nr; i++) {
-		if (i < chosen[j]) {
-			*(items[i].string) = '\0';
-		} else if (i == chosen[j]) {
+	वस्तूनि = del_list.वस्तूनि;
+	अत्थाय (i = 0, j = 0; i < del_list.nr; i++) {
+		सचे (i < chosen[j]) {
+			*(वस्तूनि[i].string) = '\0';
+		} अञ्ञथा सचे (i == chosen[j]) {
 			/* delete selected item */
 			j++;
-			continue;
-		} else {
+			अनुवर्त;
+		} अञ्ञथा {
 			/* end of chosen (chosen[j] == EOF), won't delete */
-			*(items[i].string) = '\0';
+			*(वस्तूनि[i].string) = '\0';
 		}
 	}
 
-	string_list_remove_empty_items(&del_list, 0);
+	string_list_remove_empty_वस्तूनि(&del_list, 0);
 
-	free(chosen);
-	return 0;
+	मुक्त(chosen);
+	पटिनिवत्त 0;
 }
 
-static int ask_each_cmd(void)
+स्थिर पूर्णाङ्क ask_each_cmd(शून्य)
 {
-	struct strbuf confirm = STRBUF_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
-	const char *qname;
-	int changed = 0, eof = 0;
+	संरचना strbuf confirm = STRBUF_INIT;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना string_list_item *item;
+	ध्रुव वर्ण *qname;
+	पूर्णाङ्क changed = 0, eof = 0;
 
 	for_each_string_list_item(item, &del_list) {
 		/* Ctrl-D should stop removing files */
-		if (!eof) {
-			qname = quote_path(item->string, NULL, &buf, 0);
+		सचे (!eof) {
+			qname = quote_path(item->string, रिक्त, &buf, 0);
 			/* TRANSLATORS: Make sure to keep [y/N] as is */
 			printf(_("Remove %s [y/N]? "), qname);
-			if (git_read_line_interactively(&confirm) == EOF) {
+			सचे (git_read_पङ्क्तिः_interactively(&confirm) == EOF) {
 				putchar('\n');
 				eof = 1;
 			}
 		}
-		if (!confirm.len || strncasecmp(confirm.buf, "yes", confirm.len)) {
+		सचे (!confirm.len || strncasecmp(confirm.buf, "yes", confirm.len)) {
 			*item->string = '\0';
 			changed++;
 		}
 	}
 
-	if (changed)
-		string_list_remove_empty_items(&del_list, 0);
+	सचे (changed)
+		string_list_remove_empty_वस्तूनि(&del_list, 0);
 
 	strbuf_release(&buf);
 	strbuf_release(&confirm);
-	return MENU_RETURN_NO_LOOP;
+	पटिनिवत्त MENU_RETURN_NO_LOOP;
 }
 
-static int quit_cmd(void)
+स्थिर पूर्णाङ्क quit_cmd(शून्य)
 {
 	string_list_clear(&del_list, 0);
 	printf(_("Bye.\n"));
-	return MENU_RETURN_NO_LOOP;
+	पटिनिवत्त MENU_RETURN_NO_LOOP;
 }
 
-static int help_cmd(void)
+स्थिर पूर्णाङ्क help_cmd(शून्य)
 {
 	clean_print_color(CLEAN_COLOR_HELP);
 	printf_ln(_(
@@ -826,15 +826,15 @@ static int help_cmd(void)
 		    "?                   - help for prompt selection"
 		   ));
 	clean_print_color(CLEAN_COLOR_RESET);
-	return 0;
+	पटिनिवत्त 0;
 }
 
-static void interactive_main_loop(void)
+स्थिर शून्य interactive_main_loop(शून्य)
 {
-	while (del_list.nr) {
-		struct menu_opts menu_opts;
-		struct menu_stuff menu_stuff;
-		struct menu_item menus[] = {
+	याव (del_list.nr) {
+		संरचना menu_opts menu_opts;
+		संरचना menu_stuff menu_stuff;
+		संरचना menu_item menus[] = {
 			{'c', "clean",			0, clean_cmd},
 			{'f', "filter by pattern",	0, filter_by_patterns_cmd},
 			{'s', "select by numbers",	0, select_by_numbers_cmd},
@@ -842,7 +842,7 @@ static void interactive_main_loop(void)
 			{'q', "quit",			0, quit_cmd},
 			{'h', "help",			0, help_cmd},
 		};
-		int *chosen;
+		पूर्णाङ्क *chosen;
 
 		menu_opts.header = N_("*** Commands ***");
 		menu_opts.prompt = N_("What now");
@@ -850,7 +850,7 @@ static void interactive_main_loop(void)
 
 		menu_stuff.type = MENU_STUFF_TYPE_MENU_ITEM;
 		menu_stuff.stuff = menus;
-		menu_stuff.nr = sizeof(menus) / sizeof(struct menu_item);
+		menu_stuff.nr = परिमाण(menus) / परिमाण(संरचना menu_item);
 
 		clean_print_color(CLEAN_COLOR_HEADER);
 		printf_ln(Q_("Would remove the following item:",
@@ -862,52 +862,52 @@ static void interactive_main_loop(void)
 
 		chosen = list_and_choose(&menu_opts, &menu_stuff);
 
-		if (*chosen != EOF) {
-			int ret;
+		सचे (*chosen != EOF) {
+			पूर्णाङ्क ret;
 			ret = menus[*chosen].fn();
-			if (ret != MENU_RETURN_NO_LOOP) {
+			सचे (ret != MENU_RETURN_NO_LOOP) {
 				FREE_AND_NULL(chosen);
-				if (!del_list.nr) {
+				सचे (!del_list.nr) {
 					clean_print_color(CLEAN_COLOR_ERROR);
 					printf_ln(_("No more files to clean, exiting."));
 					clean_print_color(CLEAN_COLOR_RESET);
-					break;
+					भङ्ग;
 				}
-				continue;
+				अनुवर्त;
 			}
-		} else {
+		} अञ्ञथा {
 			quit_cmd();
 		}
 
 		FREE_AND_NULL(chosen);
-		break;
+		भङ्ग;
 	}
 }
 
-static void correct_untracked_entries(struct dir_struct *dir)
+स्थिर शून्य correct_untracked_entries(संरचना dir_struct *dir)
 {
-	int src, dst, ign;
+	पूर्णाङ्क src, dst, ign;
 
-	for (src = dst = ign = 0; src < dir->nr; src++) {
+	अत्थाय (src = dst = ign = 0; src < dir->nr; src++) {
 		/* skip paths in ignored[] that cannot be inside entries[src] */
-		while (ign < dir->ignored_nr &&
+		याव (ign < dir->ignored_nr &&
 		       0 <= cmp_dir_entry(&dir->entries[src], &dir->ignored[ign]))
 			ign++;
 
-		if (ign < dir->ignored_nr &&
+		सचे (ign < dir->ignored_nr &&
 		    check_dir_entry_contains(dir->entries[src], dir->ignored[ign])) {
 			/* entries[src] contains an ignored path, so we drop it */
-			free(dir->entries[src]);
-		} else {
-			struct dir_entry *ent = dir->entries[src++];
+			मुक्त(dir->entries[src]);
+		} अञ्ञथा {
+			संरचना dir_entry *ent = dir->entries[src++];
 
 			/* entries[src] does not contain an ignored path, so we keep it */
 			dir->entries[dst++] = ent;
 
 			/* then discard paths in entries[] contained inside entries[src] */
-			while (src < dir->nr &&
+			याव (src < dir->nr &&
 			       check_dir_entry_contains(ent, dir->entries[src]))
-				free(dir->entries[src++]);
+				मुक्त(dir->entries[src++]);
 
 			/* compensate for the outer loop's loop control */
 			src--;
@@ -916,61 +916,61 @@ static void correct_untracked_entries(struct dir_struct *dir)
 	dir->nr = dst;
 }
 
-int cmd_clean(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo UNUSED)
+पूर्णाङ्क cmd_clean(पूर्णाङ्क argc,
+	      ध्रुव वर्ण **argv,
+	      ध्रुव वर्ण *prefix,
+	      संरचना repository *repo UNUSED)
 {
-	int i, res;
-	int dry_run = 0, remove_directories = 0, quiet = 0, ignored = 0;
-	int ignored_only = 0, force = 0, errors = 0, gone = 1;
-	int rm_flags = REMOVE_DIR_KEEP_NESTED_GIT;
-	struct strbuf abs_path = STRBUF_INIT;
-	struct dir_struct dir = DIR_INIT;
-	struct pathspec pathspec;
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list exclude_list = STRING_LIST_INIT_NODUP;
-	struct pattern_list *pl;
-	struct string_list_item *item;
-	const char *qname;
-	struct option options[] = {
+	पूर्णाङ्क i, res;
+	पूर्णाङ्क dry_run = 0, remove_directories = 0, quiet = 0, ignored = 0;
+	पूर्णाङ्क ignored_only = 0, force = 0, errors = 0, gone = 1;
+	पूर्णाङ्क rm_flags = REMOVE_DIR_KEEP_NESTED_GIT;
+	संरचना strbuf abs_path = STRBUF_INIT;
+	संरचना dir_struct dir = DIR_INIT;
+	संरचना pathspec pathspec;
+	संरचना strbuf buf = STRBUF_INIT;
+	संरचना string_list exclude_list = STRING_LIST_INIT_NODUP;
+	संरचना pattern_list *pl;
+	संरचना string_list_item *item;
+	ध्रुव वर्ण *qname;
+	संरचना option options[] = {
 		OPT__QUIET(&quiet, N_("do not print names of files removed")),
 		OPT__DRY_RUN(&dry_run, N_("dry run")),
 		OPT__FORCE(&force, N_("force"), PARSE_OPT_NOCOMPLETE),
 		OPT_BOOL('i', "interactive", &interactive, N_("interactive cleaning")),
-		OPT_BOOL('d', NULL, &remove_directories,
+		OPT_BOOL('d', रिक्त, &remove_directories,
 				N_("remove whole directories")),
 		OPT_CALLBACK_F('e', "exclude", &exclude_list, N_("pattern"),
 		  N_("add <pattern> to ignore rules"), PARSE_OPT_NONEG, exclude_cb),
-		OPT_BOOL('x', NULL, &ignored, N_("remove ignored files, too")),
-		OPT_BOOL('X', NULL, &ignored_only,
+		OPT_BOOL('x', रिक्त, &ignored, N_("remove ignored files, too")),
+		OPT_BOOL('X', रिक्त, &ignored_only,
 				N_("remove only ignored files")),
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_clean_config, NULL);
+	repo_config(the_repository, git_clean_config, रिक्त);
 
 	argc = parse_options(argc, argv, prefix, options, builtin_clean_usage,
 			     0);
 
-	if (require_force != 0 && !force && !interactive && !dry_run)
+	सचे (require_force != 0 && !force && !interactive && !dry_run)
 		die(_("clean.requireForce is true and -f not given: refusing to clean"));
 
-	if (force > 1)
+	सचे (force > 1)
 		rm_flags = 0;
-	else
+	अञ्ञथा
 		dir.flags |= DIR_SKIP_NESTED_GIT;
 
 	dir.flags |= DIR_SHOW_OTHER_DIRECTORIES;
 
-	if (ignored && ignored_only)
+	सचे (ignored && ignored_only)
 		die(_("options '%s' and '%s' cannot be used together"), "-x", "-X");
-	if (!ignored)
+	सचे (!ignored)
 		setup_standard_excludes(&dir);
-	if (ignored_only)
+	सचे (ignored_only)
 		dir.flags |= DIR_SHOW_IGNORED;
 
-	if (argc) {
+	सचे (argc) {
 		/*
 		 * Remaining args implies pathspecs specified, and we should
 		 * recurse within those.
@@ -978,7 +978,7 @@ int cmd_clean(int argc,
 		remove_directories = 1;
 	}
 
-	if (remove_directories && !ignored_only) {
+	सचे (remove_directories && !ignored_only) {
 		/*
 		 * We need to know about ignored files too:
 		 *
@@ -995,7 +995,7 @@ int cmd_clean(int argc,
 		 * recursing into a directory which is itself ignored.
 		 */
 		dir.flags |= DIR_SHOW_IGNORED_TOO;
-		if (!ignored)
+		सचे (!ignored)
 			dir.flags |= DIR_SHOW_IGNORED_TOO_MODE_MATCHING;
 
 		/*
@@ -1013,12 +1013,12 @@ int cmd_clean(int argc,
 	prepare_repo_settings(the_repository);
 	the_repository->settings.command_requires_full_index = 0;
 
-	if (repo_read_index(the_repository) < 0)
+	सचे (repo_read_index(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	pl = add_pattern_list(&dir, EXC_CMDL, "--exclude option");
-	for (i = 0; i < exclude_list.nr; i++)
-		add_pattern(exclude_list.items[i].string, "", 0, pl, -(i+1));
+	अत्थाय (i = 0; i < exclude_list.nr; i++)
+		add_pattern(exclude_list.वस्तूनि[i].string, "", 0, pl, -(i+1));
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_CWD,
@@ -1027,19 +1027,19 @@ int cmd_clean(int argc,
 	fill_directory(&dir, the_repository->index, &pathspec);
 	correct_untracked_entries(&dir);
 
-	for (i = 0; i < dir.nr; i++) {
-		struct dir_entry *ent = dir.entries[i];
-		struct stat st;
-		const char *rel;
+	अत्थाय (i = 0; i < dir.nr; i++) {
+		संरचना dir_entry *ent = dir.entries[i];
+		संरचना stat st;
+		ध्रुव वर्ण *rel;
 
-		if (!index_name_is_other(the_repository->index, ent->name, ent->len))
-			continue;
+		सचे (!index_name_is_other(the_repository->index, ent->name, ent->len))
+			अनुवर्त;
 
-		if (lstat(ent->name, &st))
+		सचे (lstat(ent->name, &st))
 			die_errno("Cannot lstat '%s'", ent->name);
 
-		if (S_ISDIR(st.st_mode) && !remove_directories)
-			continue;
+		सचे (S_ISDIR(st.st_mode) && !remove_directories)
+			अनुवर्त;
 
 		rel = relative_path(ent->name, prefix, &buf);
 		string_list_append(&del_list, rel);
@@ -1047,14 +1047,14 @@ int cmd_clean(int argc,
 
 	dir_clear(&dir);
 
-	if (interactive && del_list.nr > 0)
+	सचे (interactive && del_list.nr > 0)
 		interactive_main_loop();
 
 	for_each_string_list_item(item, &del_list) {
-		struct stat st;
+		संरचना stat st;
 
 		strbuf_reset(&abs_path);
-		if (prefix)
+		सचे (prefix)
 			strbuf_addstr(&abs_path, prefix);
 
 		strbuf_addstr(&abs_path, item->string);
@@ -1064,27 +1064,27 @@ int cmd_clean(int argc,
 		 * recursive directory removal, so lstat() here could
 		 * fail with ENOENT.
 		 */
-		if (lstat(abs_path.buf, &st))
-			continue;
+		सचे (lstat(abs_path.buf, &st))
+			अनुवर्त;
 
-		if (S_ISDIR(st.st_mode)) {
-			if (remove_dirs(&abs_path, prefix, rm_flags, dry_run, quiet, &gone))
+		सचे (S_ISDIR(st.st_mode)) {
+			सचे (remove_dirs(&abs_path, prefix, rm_flags, dry_run, quiet, &gone))
 				errors++;
-			if (gone && !quiet) {
-				qname = quote_path(item->string, NULL, &buf, 0);
-				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
+			सचे (gone && !quiet) {
+				qname = quote_path(item->string, रिक्त, &buf, 0);
+				printf(dry_run ? _(सन्देशः_would_remove) : _(सन्देशः_remove), qname);
 			}
-		} else {
+		} अञ्ञथा {
 			res = dry_run ? 0 : unlink(abs_path.buf);
-			if (res) {
-				int saved_errno = errno;
-				qname = quote_path(item->string, NULL, &buf, 0);
+			सचे (res) {
+				पूर्णाङ्क saved_errno = errno;
+				qname = quote_path(item->string, रिक्त, &buf, 0);
 				errno = saved_errno;
-				warning_errno(_(msg_warn_remove_failed), qname);
+				warning_errno(_(सन्देशः_warn_remove_failed), qname);
 				errors++;
-			} else if (!quiet) {
-				qname = quote_path(item->string, NULL, &buf, 0);
-				printf(dry_run ? _(msg_would_remove) : _(msg_remove), qname);
+			} अञ्ञथा सचे (!quiet) {
+				qname = quote_path(item->string, रिक्त, &buf, 0);
+				printf(dry_run ? _(सन्देशः_would_remove) : _(सन्देशः_remove), qname);
 			}
 		}
 	}
@@ -1094,5 +1094,5 @@ int cmd_clean(int argc,
 	string_list_clear(&del_list, 0);
 	string_list_clear(&exclude_list, 0);
 	clear_pathspec(&pathspec);
-	return (errors != 0);
+	पटिनिवत्त (errors != 0);
 }

@@ -1,9 +1,9 @@
-#include "builtin.h"
-#include "transport.h"
-#include "run-command.h"
-#include "pkt-line.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "transport.h"
+#अन्तर्भाव "run-command.h"
+#अन्तर्भाव "pkt-line.h"
 
-static const char usage_msg[] =
+स्थिर ध्रुव वर्ण usage_सन्देशः[] =
 	"git remote-ext <remote> <url>";
 
 /*
@@ -25,17 +25,17 @@ static const char usage_msg[] =
  *		not activate sending git:// style request).
  */
 
-static char *git_req;
-static char *git_req_vhost;
+स्थिर वर्ण *git_req;
+स्थिर वर्ण *git_req_vhost;
 
-static char *strip_escapes(const char *str, const char *service,
-	const char **next)
+स्थिर वर्ण *strip_escapes(ध्रुव वर्ण *str, ध्रुव वर्ण *service,
+	ध्रुव वर्ण **next)
 {
 	size_t rpos = 0;
-	int escape = 0;
-	char special = 0;
-	const char *service_noprefix = service;
-	struct strbuf ret = STRBUF_INIT;
+	पूर्णाङ्क escape = 0;
+	वर्ण special = 0;
+	ध्रुव वर्ण *service_noprefix = service;
+	संरचना strbuf ret = STRBUF_INIT;
 
 	skip_prefix(service_noprefix, "git-", &service_noprefix);
 
@@ -44,33 +44,33 @@ static char *strip_escapes(const char *str, const char *service,
 	setenv("GIT_EXT_SERVICE_NOPREFIX", service_noprefix, 1);
 
 	/* Scan the length of argument. */
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
-			case 's':
-			case 'S':
-				break;
-			case 'G':
-			case 'V':
+	याव (str[rpos] && (escape || str[rpos] != ' ')) {
+		सचे (escape) {
+			विकल्प (str[rpos]) {
+			पक्ष ' ':
+			पक्ष '%':
+			पक्ष 's':
+			पक्ष 'S':
+				भङ्ग;
+			पक्ष 'G':
+			पक्ष 'V':
 				special = str[rpos];
-				if (rpos == 1)
-					break;
+				सचे (rpos == 1)
+					भङ्ग;
 				/* fallthrough */
-			default:
+			स्वभाव:
 				die("Bad remote-ext placeholder '%%%c'.",
 					str[rpos]);
 			}
 			escape = 0;
-		} else
+		} अञ्ञथा
 			escape = (str[rpos] == '%');
 		rpos++;
 	}
-	if (escape && !str[rpos])
+	सचे (escape && !str[rpos])
 		die("remote-ext command has incomplete placeholder");
 	*next = str + rpos;
-	if (**next == ' ')
+	सचे (**next == ' ')
 		++*next;	/* Skip over space */
 
 	/*
@@ -79,133 +79,133 @@ static char *strip_escapes(const char *str, const char *service,
 	 */
 	rpos = special ? 2 : 0;		/* Skip first 2 bytes in specials. */
 	escape = 0;
-	while (str[rpos] && (escape || str[rpos] != ' ')) {
-		if (escape) {
-			switch (str[rpos]) {
-			case ' ':
-			case '%':
+	याव (str[rpos] && (escape || str[rpos] != ' ')) {
+		सचे (escape) {
+			विकल्प (str[rpos]) {
+			पक्ष ' ':
+			पक्ष '%':
 				strbuf_addch(&ret, str[rpos]);
-				break;
-			case 's':
+				भङ्ग;
+			पक्ष 's':
 				strbuf_addstr(&ret, service_noprefix);
-				break;
-			case 'S':
+				भङ्ग;
+			पक्ष 'S':
 				strbuf_addstr(&ret, service);
-				break;
+				भङ्ग;
 			}
 			escape = 0;
-		} else
-			switch (str[rpos]) {
-			case '%':
+		} अञ्ञथा
+			विकल्प (str[rpos]) {
+			पक्ष '%':
 				escape = 1;
-				break;
-			default:
+				भङ्ग;
+			स्वभाव:
 				strbuf_addch(&ret, str[rpos]);
-				break;
+				भङ्ग;
 			}
 		rpos++;
 	}
-	switch (special) {
-	case 'G':
-		git_req = strbuf_detach(&ret, NULL);
-		return NULL;
-	case 'V':
-		git_req_vhost = strbuf_detach(&ret, NULL);
-		return NULL;
-	default:
-		return strbuf_detach(&ret, NULL);
+	विकल्प (special) {
+	पक्ष 'G':
+		git_req = strbuf_detach(&ret, रिक्त);
+		पटिनिवत्त रिक्त;
+	पक्ष 'V':
+		git_req_vhost = strbuf_detach(&ret, रिक्त);
+		पटिनिवत्त रिक्त;
+	स्वभाव:
+		पटिनिवत्त strbuf_detach(&ret, रिक्त);
 	}
 }
 
-static void parse_argv(struct strvec *out, const char *arg, const char *service)
+स्थिर शून्य parse_argv(संरचना strvec *out, ध्रुव वर्ण *arg, ध्रुव वर्ण *service)
 {
-	while (*arg) {
-		char *expanded = strip_escapes(arg, service, &arg);
-		if (expanded)
-			strvec_push(out, expanded);
-		free(expanded);
+	याव (*arg) {
+		वर्ण *expanded = strip_escapes(arg, service, &arg);
+		सचे (expanded)
+			strvec_प्रक्षिप(out, expanded);
+		मुक्त(expanded);
 	}
 }
 
-static void send_git_request(int stdin_fd, const char *serv, const char *repo,
-	const char *vhost)
+स्थिर शून्य send_git_request(पूर्णाङ्क stdin_fd, ध्रुव वर्ण *serv, ध्रुव वर्ण *repo,
+	ध्रुव वर्ण *vhost)
 {
-	if (!vhost)
+	सचे (!vhost)
 		packet_write_fmt(stdin_fd, "%s %s%c", serv, repo, 0);
-	else
+	अञ्ञथा
 		packet_write_fmt(stdin_fd, "%s %s%chost=%s%c", serv, repo, 0,
 			     vhost, 0);
 }
 
-static int run_child(const char *arg, const char *service)
+स्थिर पूर्णाङ्क run_child(ध्रुव वर्ण *arg, ध्रुव वर्ण *service)
 {
-	int r;
-	struct child_process child = CHILD_PROCESS_INIT;
+	पूर्णाङ्क r;
+	संरचना child_process child = CHILD_PROCESS_INIT;
 
 	child.in = -1;
 	child.out = -1;
 	child.err = 0;
 	parse_argv(&child.args, arg, service);
 
-	if (start_command(&child) < 0)
+	सचे (start_command(&child) < 0)
 		die("Can't run specified command");
 
-	if (git_req)
+	सचे (git_req)
 		send_git_request(child.in, service, git_req, git_req_vhost);
 
 	r = bidirectional_transfer_loop(child.out, child.in);
-	if (!r)
+	सचे (!r)
 		r = finish_command(&child);
-	else
+	अञ्ञथा
 		finish_command(&child);
-	return r;
+	पटिनिवत्त r;
 }
 
 #define MAXCOMMAND 4096
 
-static int command_loop(const char *child)
+स्थिर पूर्णाङ्क command_loop(ध्रुव वर्ण *child)
 {
-	char buffer[MAXCOMMAND];
+	वर्ण buffer[MAXCOMMAND];
 
-	while (1) {
+	याव (1) {
 		size_t i;
-		const char *arg;
+		ध्रुव वर्ण *arg;
 
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		सचे (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			सचे (ferror(stdin))
 				die("Command input error");
 			exit(0);
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		याव (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		सचे (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (skip_prefix(buffer, "connect ", &arg)) {
+		} अञ्ञथा सचे (skip_prefix(buffer, "connect ", &arg)) {
 			printf("\n");
 			fflush(stdout);
-			return run_child(child, arg);
-		} else {
+			पटिनिवत्त run_child(child, arg);
+		} अञ्ञथा {
 			fprintf(stderr, "Bad command");
-			return 1;
+			पटिनिवत्त 1;
 		}
 	}
 }
 
-int cmd_remote_ext(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+पूर्णाङ्क cmd_remote_ext(पूर्णाङ्क argc,
+		   ध्रुव वर्ण **argv,
+		   ध्रुव वर्ण *prefix,
+		   संरचना repository *repo UNUSED)
 {
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
+	show_usage_if_asked(argc, argv, usage_सन्देशः);
 
-	if (argc != 3)
-		usage(usage_msg);
+	सचे (argc != 3)
+		usage(usage_सन्देशः);
 
-	return command_loop(argv[2]);
+	पटिनिवत्त command_loop(argv[2]);
 }

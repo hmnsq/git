@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#अन्तर्भाव "builtin.h"
+#अन्तर्भाव "transport.h"
 
-static const char usage_msg[] =
+स्थिर ध्रुव वर्ण usage_सन्देशः[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -21,68 +21,68 @@ static const char usage_msg[] =
 
 #define MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+स्थिर शून्य command_loop(पूर्णाङ्क निवेशः_fd, पूर्णाङ्क output_fd)
 {
-	char buffer[MAXCOMMAND];
+	वर्ण buffer[MAXCOMMAND];
 
-	while (1) {
+	याव (1) {
 		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+		सचे (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			सचे (ferror(stdin))
 				die("Input error");
-			return;
+			पटिनिवत्त;
 		}
 		/* Strip end of line characters. */
 		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
+		याव (i > 0 && isspace(buffer[i - 1]))
 			buffer[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
+		सचे (!strcmp(buffer, "capabilities")) {
 			printf("*connect\n\n");
 			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
+		} अञ्ञथा सचे (starts_with(buffer, "connect ")) {
 			printf("\n");
 			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+			सचे (bidirectional_transfer_loop(निवेशः_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
+			पटिनिवत्त;
+		} अञ्ञथा {
 			die("Bad command: %s", buffer);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णाङ्क cmd_remote_fd(पूर्णाङ्क argc,
+		  ध्रुव वर्ण **argv,
+		  ध्रुव वर्ण *prefix,
+		  संरचना repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	पूर्णाङ्क निवेशः_fd = -1;
+	पूर्णाङ्क output_fd = -1;
+	वर्ण *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_सन्देशः);
+	सचे (argc != 3)
+		usage(usage_सन्देशः);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	निवेशः_fd = (पूर्णाङ्क)strtoul(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	सचे ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	सचे (*end == '/' || !*end) {
+		output_fd = निवेशः_fd;
+	} अञ्ञथा {
+		वर्ण *end2;
+		output_fd = (पूर्णाङ्क)strtoul(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		सचे ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(निवेशः_fd, output_fd);
+	पटिनिवत्त 0;
 }
