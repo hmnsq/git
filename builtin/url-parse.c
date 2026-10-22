@@ -1,23 +1,23 @@
-#include "builtin.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "url.h"
-#include "urlmatch.h"
+#समावेश "builtin.h"
+#समावेश "gettext.h"
+#समावेश "parse-options.h"
+#समावेश "url.h"
+#समावेश "urlmatch.h"
 
-static const char * const builtin_url_parse_usage[] = {
+अटल स्थिर अक्षर * स्थिर builtin_url_parse_usage[] = {
 	N_("git url-parse [-c <component>] [--] <url>..."),
-	NULL
+	शून्य
 };
 
-static char *component_arg;
+अटल अक्षर *component_arg;
 
-static struct option builtin_url_parse_options[] = {
+अटल काष्ठा option builtin_url_parse_options[] = {
 	OPT_STRING('c', "component", &component_arg, N_("component"),
 		N_("which URL component to extract")),
 	OPT_END(),
 };
 
-enum url_component {
+क्रमागत url_component {
 	URL_NONE = 0,
 	URL_SCHEME,
 	URL_USER,
@@ -27,109 +27,109 @@ enum url_component {
 	URL_PATH,
 };
 
-static void parse_or_die(const char *url, struct url_info *info)
+अटल व्योम parse_or_die(स्थिर अक्षर *url, काष्ठा url_info *info)
 {
-	if (url_is_local_not_ssh(url)) {
-		if (*url == '/')
+	अगर (url_is_local_not_ssh(url)) {
+		अगर (*url == '/')
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file://%s'", url, url);
-		if (has_dos_drive_prefix(url))
+		अगर (has_dos_drive_prefix(url))
 			die("'%s' is not a URL; if you meant a local "
 			    "repository, use 'file:///%s'", url, url);
 		die("'%s' is not a URL; if you meant a local repository, "
 		    "use a 'file://' URL with an absolute path", url);
 	}
-	if (!url_parse(url, info))
+	अगर (!url_parse(url, info))
 		die("invalid git URL '%s': %s", url, info->err);
 }
 
-static enum url_component get_component_or_die(const char *arg)
+अटल क्रमागत url_component get_component_or_die(स्थिर अक्षर *arg)
 {
-	if (!strcmp("path", arg))
-		return URL_PATH;
-	if (!strcmp("host", arg))
-		return URL_HOST;
-	if (!strcmp("scheme", arg))
-		return URL_SCHEME;
-	if (!strcmp("user", arg))
-		return URL_USER;
-	if (!strcmp("password", arg))
-		return URL_PASSWORD;
-	if (!strcmp("port", arg))
-		return URL_PORT;
+	अगर (!म_भेद("path", arg))
+		वापस URL_PATH;
+	अगर (!म_भेद("host", arg))
+		वापस URL_HOST;
+	अगर (!म_भेद("scheme", arg))
+		वापस URL_SCHEME;
+	अगर (!म_भेद("user", arg))
+		वापस URL_USER;
+	अगर (!म_भेद("password", arg))
+		वापस URL_PASSWORD;
+	अगर (!म_भेद("port", arg))
+		वापस URL_PORT;
 	die("invalid git URL component '%s'", arg);
 }
 
-static char *extract_component(enum url_component component,
-			       struct url_info *info)
+अटल अक्षर *extract_component(क्रमागत url_component component,
+			       काष्ठा url_info *info)
 {
-	size_t offset, length;
+	माप_प्रकार offset, लंबाई;
 
-	switch (component) {
-	case URL_SCHEME:
+	चयन (component) {
+	हाल URL_SCHEME:
 		offset = 0;
-		length = info->scheme_len;
-		break;
-	case URL_USER:
+		लंबाई = info->scheme_len;
+		अवरोध;
+	हाल URL_USER:
 		offset = info->user_off;
-		length = info->user_len;
-		break;
-	case URL_PASSWORD:
+		लंबाई = info->user_len;
+		अवरोध;
+	हाल URL_PASSWORD:
 		offset = info->passwd_off;
-		length = info->passwd_len;
-		break;
-	case URL_HOST:
+		लंबाई = info->passwd_len;
+		अवरोध;
+	हाल URL_HOST:
 		offset = info->host_off;
-		length = info->host_len;
-		break;
-	case URL_PORT:
+		लंबाई = info->host_len;
+		अवरोध;
+	हाल URL_PORT:
 		offset = info->port_off;
-		length = info->port_len;
-		break;
-	case URL_PATH:
+		लंबाई = info->port_len;
+		अवरोध;
+	हाल URL_PATH:
 		offset = info->path_off;
-		length = info->path_len;
-		break;
-	case URL_NONE:
-		return NULL;
+		लंबाई = info->path_len;
+		अवरोध;
+	हाल URL_NONE:
+		वापस शून्य;
 	}
 
-	return xstrndup(info->url + offset, length);
+	वापस xstrndup(info->url + offset, लंबाई);
 }
 
-int cmd_url_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णांक cmd_url_parse(पूर्णांक argc,
+		  स्थिर अक्षर **argv,
+		  स्थिर अक्षर *prefix,
+		  काष्ठा repository *repo UNUSED)
 {
-	struct url_info info;
-	enum url_component selected = URL_NONE;
-	char *extracted;
-	int i;
+	काष्ठा url_info info;
+	क्रमागत url_component selected = URL_NONE;
+	अक्षर *extracted;
+	पूर्णांक i;
 
 	argc = parse_options(argc, argv, prefix, builtin_url_parse_options,
 			     builtin_url_parse_usage, 0);
 
-	if (argc == 0)
+	अगर (argc == 0)
 		usage_with_options(builtin_url_parse_usage,
 				   builtin_url_parse_options);
 
-	if (component_arg)
+	अगर (component_arg)
 		selected = get_component_or_die(component_arg);
 
-	for (i = 0; i < argc; i++) {
+	क्रम (i = 0; i < argc; i++) {
 		parse_or_die(argv[i], &info);
 
-		if (selected != URL_NONE) {
+		अगर (selected != URL_NONE) {
 			extracted = extract_component(selected, &info);
-			if (extracted) {
-				puts(extracted);
-				free(extracted);
+			अगर (extracted) {
+				माला_दो(extracted);
+				मुक्त(extracted);
 			}
 		}
 
-		free(info.url);
+		मुक्त(info.url);
 	}
 
-	return 0;
+	वापस 0;
 }

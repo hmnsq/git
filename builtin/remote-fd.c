@@ -1,7 +1,7 @@
-#include "builtin.h"
-#include "transport.h"
+#समावेश "builtin.h"
+#समावेश "transport.h"
 
-static const char usage_msg[] =
+अटल स्थिर अक्षर usage_संदेश[] =
 	"git remote-fd <remote> <url>";
 
 /*
@@ -19,70 +19,70 @@ static const char usage_msg[] =
  *
  */
 
-#define MAXCOMMAND 4096
+#घोषणा MAXCOMMAND 4096
 
-static void command_loop(int input_fd, int output_fd)
+अटल व्योम command_loop(पूर्णांक निवेश_fd, पूर्णांक output_fd)
 {
-	char buffer[MAXCOMMAND];
+	अक्षर बफर[MAXCOMMAND];
 
-	while (1) {
-		size_t i;
-		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
-			if (ferror(stdin))
+	जबतक (1) {
+		माप_प्रकार i;
+		अगर (!ख_माला_लो(बफर, MAXCOMMAND - 1, मानक_निवेश)) {
+			अगर (ख_त्रुटि(मानक_निवेश))
 				die("Input error");
-			return;
+			वापस;
 		}
 		/* Strip end of line characters. */
-		i = strlen(buffer);
-		while (i > 0 && isspace(buffer[i - 1]))
-			buffer[--i] = 0;
+		i = म_माप(बफर);
+		जबतक (i > 0 && है_खाली(बफर[i - 1]))
+			बफर[--i] = 0;
 
-		if (!strcmp(buffer, "capabilities")) {
-			printf("*connect\n\n");
-			fflush(stdout);
-		} else if (starts_with(buffer, "connect ")) {
-			printf("\n");
-			fflush(stdout);
-			if (bidirectional_transfer_loop(input_fd,
+		अगर (!म_भेद(बफर, "capabilities")) {
+			म_लिखो("*connect\n\n");
+			ख_साफ(मानक_निकास);
+		} अन्यथा अगर (starts_with(बफर, "connect ")) {
+			म_लिखो("\n");
+			ख_साफ(मानक_निकास);
+			अगर (bidirectional_transfer_loop(निवेश_fd,
 				output_fd))
 				die("Copying data between file descriptors failed");
-			return;
-		} else {
-			die("Bad command: %s", buffer);
+			वापस;
+		} अन्यथा {
+			die("Bad command: %s", बफर);
 		}
 	}
 }
 
-int cmd_remote_fd(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णांक cmd_remote_fd(पूर्णांक argc,
+		  स्थिर अक्षर **argv,
+		  स्थिर अक्षर *prefix,
+		  काष्ठा repository *repo UNUSED)
 {
-	int input_fd = -1;
-	int output_fd = -1;
-	char *end;
+	पूर्णांक निवेश_fd = -1;
+	पूर्णांक output_fd = -1;
+	अक्षर *end;
 
 	BUG_ON_NON_EMPTY_PREFIX(prefix);
 
-	show_usage_if_asked(argc, argv, usage_msg);
-	if (argc != 3)
-		usage(usage_msg);
+	show_usage_if_asked(argc, argv, usage_संदेश);
+	अगर (argc != 3)
+		usage(usage_संदेश);
 
-	input_fd = (int)strtoul(argv[2], &end, 10);
+	निवेश_fd = (पूर्णांक)म_से_अदीर्घ(argv[2], &end, 10);
 
-	if ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
+	अगर ((end == argv[2]) || (*end != ',' && *end != '/' && *end))
 		die("Bad URL syntax");
 
-	if (*end == '/' || !*end) {
-		output_fd = input_fd;
-	} else {
-		char *end2;
-		output_fd = (int)strtoul(end + 1, &end2, 10);
+	अगर (*end == '/' || !*end) {
+		output_fd = निवेश_fd;
+	} अन्यथा {
+		अक्षर *end2;
+		output_fd = (पूर्णांक)म_से_अदीर्घ(end + 1, &end2, 10);
 
-		if ((end2 == end + 1) || (*end2 != '/' && *end2))
+		अगर ((end2 == end + 1) || (*end2 != '/' && *end2))
 			die("Bad URL syntax");
 	}
 
-	command_loop(input_fd, output_fd);
-	return 0;
+	command_loop(निवेश_fd, output_fd);
+	वापस 0;
 }

@@ -1,34 +1,34 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "run-command.h"
-#include "parse-options.h"
-#include "strbuf.h"
+#घोषणा USE_THE_REPOSITORY_VARIABLE
+#समावेश "builtin.h"
+#समावेश "config.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "run-command.h"
+#समावेश "parse-options.h"
+#समावेश "strbuf.h"
 
-#define VERIFY_PACK_VERBOSE 01
-#define VERIFY_PACK_STAT_ONLY 02
+#घोषणा VERIFY_PACK_VERBOSE 01
+#घोषणा VERIFY_PACK_STAT_ONLY 02
 
-static int verify_one_pack(const char *path, unsigned int flags, const char *hash_algo)
+अटल पूर्णांक verify_one_pack(स्थिर अक्षर *path, अचिन्हित पूर्णांक flags, स्थिर अक्षर *hash_algo)
 {
-	struct child_process index_pack = CHILD_PROCESS_INIT;
-	struct strvec *argv = &index_pack.args;
-	struct strbuf arg = STRBUF_INIT;
-	int verbose = flags & VERIFY_PACK_VERBOSE;
-	int stat_only = flags & VERIFY_PACK_STAT_ONLY;
-	int err;
+	काष्ठा child_process सूचकांक_pack = CHILD_PROCESS_INIT;
+	काष्ठा strvec *argv = &सूचकांक_pack.args;
+	काष्ठा strbuf arg = STRBUF_INIT;
+	पूर्णांक verbose = flags & VERIFY_PACK_VERBOSE;
+	पूर्णांक stat_only = flags & VERIFY_PACK_STAT_ONLY;
+	पूर्णांक err;
 
-	strvec_push(argv, "index-pack");
+	strvec_धकेलो(argv, "index-pack");
 
-	if (stat_only)
-		strvec_push(argv, "--verify-stat-only");
-	else if (verbose)
-		strvec_push(argv, "--verify-stat");
-	else
-		strvec_push(argv, "--verify");
+	अगर (stat_only)
+		strvec_धकेलो(argv, "--verify-stat-only");
+	अन्यथा अगर (verbose)
+		strvec_धकेलो(argv, "--verify-stat");
+	अन्यथा
+		strvec_धकेलो(argv, "--verify");
 
-	if (hash_algo)
+	अगर (hash_algo)
 		strvec_pushf(argv, "--object-format=%s", hash_algo);
 
 	/*
@@ -36,43 +36,43 @@ static int verify_one_pack(const char *path, unsigned int flags, const char *has
 	 * normalize these forms to "foo.pack" for "index-pack --verify".
 	 */
 	strbuf_addstr(&arg, path);
-	if (strbuf_strip_suffix(&arg, ".idx") ||
+	अगर (strbuf_strip_suffix(&arg, ".idx") ||
 	    !ends_with(arg.buf, ".pack"))
 		strbuf_addstr(&arg, ".pack");
-	strvec_push(argv, arg.buf);
+	strvec_धकेलो(argv, arg.buf);
 
-	index_pack.git_cmd = 1;
+	सूचकांक_pack.git_cmd = 1;
 
-	err = run_command(&index_pack);
+	err = run_command(&सूचकांक_pack);
 
-	if (verbose || stat_only) {
-		if (err)
-			printf("%s: bad\n", arg.buf);
-		else {
-			if (!stat_only)
-				printf("%s: ok\n", arg.buf);
+	अगर (verbose || stat_only) {
+		अगर (err)
+			म_लिखो("%s: bad\n", arg.buf);
+		अन्यथा {
+			अगर (!stat_only)
+				म_लिखो("%s: ok\n", arg.buf);
 		}
 	}
 	strbuf_release(&arg);
 
-	return err;
+	वापस err;
 }
 
-static const char * const verify_pack_usage[] = {
+अटल स्थिर अक्षर * स्थिर verify_pack_usage[] = {
 	N_("git verify-pack [-v | --verbose] [-s | --stat-only] [--] <pack>.idx..."),
-	NULL
+	शून्य
 };
 
-int cmd_verify_pack(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+पूर्णांक cmd_verify_pack(पूर्णांक argc,
+		    स्थिर अक्षर **argv,
+		    स्थिर अक्षर *prefix,
+		    काष्ठा repository *repo UNUSED)
 {
-	int err = 0;
-	unsigned int flags = 0;
-	const char *object_format = NULL;
-	int i;
-	const struct option verify_pack_options[] = {
+	पूर्णांक err = 0;
+	अचिन्हित पूर्णांक flags = 0;
+	स्थिर अक्षर *object_format = शून्य;
+	पूर्णांक i;
+	स्थिर काष्ठा option verify_pack_options[] = {
 		OPT_BIT('v', "verbose", &flags, N_("verbose"),
 			VERIFY_PACK_VERBOSE),
 		OPT_BIT('s', "stat-only", &flags, N_("show statistics only"),
@@ -82,15 +82,15 @@ int cmd_verify_pack(int argc,
 		OPT_END()
 	};
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, शून्य);
 	argc = parse_options(argc, argv, prefix, verify_pack_options,
 			     verify_pack_usage, 0);
-	if (argc < 1)
+	अगर (argc < 1)
 		usage_with_options(verify_pack_usage, verify_pack_options);
-	for (i = 0; i < argc; i++) {
-		if (verify_one_pack(argv[i], flags, object_format))
+	क्रम (i = 0; i < argc; i++) {
+		अगर (verify_one_pack(argv[i], flags, object_format))
 			err = 1;
 	}
 
-	return err;
+	वापस err;
 }

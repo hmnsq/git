@@ -1,65 +1,65 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#घोषणा USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hex.h"
+#समावेश "builtin.h"
+#समावेश "abspath.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "hex.h"
 
-#include "config.h"
-#include "parse-options.h"
-#include "quote.h"
-#include "path.h"
-#include "pathspec.h"
-#include "preload-index.h"
-#include "dir.h"
-#include "read-cache.h"
-#include "setup.h"
-#include "sparse-index.h"
-#include "submodule.h"
-#include "submodule-config.h"
-#include "string-list.h"
-#include "run-command.h"
-#include "remote.h"
-#include "refs.h"
-#include "refspec.h"
-#include "revision.h"
-#include "diffcore.h"
-#include "diff.h"
-#include "object-file.h"
-#include "object-name.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "odb/source-files.h"
-#include "advice.h"
-#include "branch.h"
-#include "list-objects-filter-options.h"
-#include "wildmatch.h"
-#include "strbuf.h"
-#include "url.h"
+#समावेश "config.h"
+#समावेश "parse-options.h"
+#समावेश "quote.h"
+#समावेश "path.h"
+#समावेश "pathspec.h"
+#समावेश "preload-index.h"
+#समावेश "dir.h"
+#समावेश "read-cache.h"
+#समावेश "setup.h"
+#समावेश "sparse-index.h"
+#समावेश "submodule.h"
+#समावेश "submodule-config.h"
+#समावेश "string-list.h"
+#समावेश "run-command.h"
+#समावेश "remote.h"
+#समावेश "refs.h"
+#समावेश "refspec.h"
+#समावेश "revision.h"
+#समावेश "diffcore.h"
+#समावेश "diff.h"
+#समावेश "object-file.h"
+#समावेश "object-name.h"
+#समावेश "odb.h"
+#समावेश "odb/source.h"
+#समावेश "odb/source-files.h"
+#समावेश "advice.h"
+#समावेश "branch.h"
+#समावेश "list-objects-filter-options.h"
+#समावेश "wildmatch.h"
+#समावेश "strbuf.h"
+#समावेश "url.h"
 
-#define OPT_QUIET (1 << 0)
-#define OPT_CACHED (1 << 1)
-#define OPT_RECURSIVE (1 << 2)
-#define OPT_FORCE (1 << 3)
+#घोषणा OPT_QUIET (1 << 0)
+#घोषणा OPT_CACHED (1 << 1)
+#घोषणा OPT_RECURSIVE (1 << 2)
+#घोषणा OPT_FORCE (1 << 3)
 
-typedef void (*each_submodule_fn)(const struct cache_entry *list_item,
-				  void *cb_data);
+प्रकार व्योम (*each_submodule_fn)(स्थिर काष्ठा cache_entry *list_item,
+				  व्योम *cb_तथ्य);
 
-static char *get_default_remote(void)
+अटल अक्षर *get_default_remote(व्योम)
 {
-	return xstrdup(repo_default_remote(the_repository));
+	वापस xstrdup(repo_default_remote(the_repository));
 }
 
-static char *resolve_relative_url(const char *rel_url, const char *up_path, int quiet)
+अटल अक्षर *resolve_relative_url(स्थिर अक्षर *rel_url, स्थिर अक्षर *up_path, पूर्णांक quiet)
 {
-	char *remoteurl, *resolved_url;
-	char *remote = get_default_remote();
-	struct strbuf remotesb = STRBUF_INIT;
+	अक्षर *remoteurl, *resolved_url;
+	अक्षर *remote = get_default_remote();
+	काष्ठा strbuf remotesb = STRBUF_INIT;
 
 	strbuf_addf(&remotesb, "remote.%s.url", remote);
-	if (repo_config_get_string(the_repository, remotesb.buf, &remoteurl)) {
-		if (!quiet)
+	अगर (repo_config_get_string(the_repository, remotesb.buf, &remoteurl)) {
+		अगर (!quiet)
 			warning(_("could not look up configuration '%s'. "
 				  "Assuming this repository is its own "
 				  "authoritative upstream."),
@@ -68,192 +68,192 @@ static char *resolve_relative_url(const char *rel_url, const char *up_path, int 
 	}
 	resolved_url = relative_url(remoteurl, rel_url, up_path);
 
-	free(remote);
-	free(remoteurl);
+	मुक्त(remote);
+	मुक्त(remoteurl);
 	strbuf_release(&remotesb);
 
-	return resolved_url;
+	वापस resolved_url;
 }
 
-static int get_default_remote_submodule(const char *module_path, char **default_remote)
+अटल पूर्णांक get_default_remote_submodule(स्थिर अक्षर *module_path, अक्षर **default_remote)
 {
-	const struct submodule *sub;
-	struct repository subrepo;
-	const char *remote_name = NULL;
-	char *url = NULL;
-	int ret = 0;
+	स्थिर काष्ठा submodule *sub;
+	काष्ठा repository subrepo;
+	स्थिर अक्षर *remote_name = शून्य;
+	अक्षर *url = शून्य;
+	पूर्णांक ret = 0;
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), module_path);
-	if (sub && sub->url) {
+	अगर (sub && sub->url) {
 		url = xstrdup(sub->url);
 
 		/* Possibly a url relative to parent */
-		if (starts_with_dot_dot_slash(url) ||
+		अगर (starts_with_dot_dot_slash(url) ||
 		    starts_with_dot_slash(url)) {
-			char *oldurl = url;
+			अक्षर *oldurl = url;
 
-			url = resolve_relative_url(oldurl, NULL, 1);
-			free(oldurl);
+			url = resolve_relative_url(oldurl, शून्य, 1);
+			मुक्त(oldurl);
 		}
 	}
 
-	if (repo_submodule_init(&subrepo, the_repository, module_path,
+	अगर (repo_submodule_init(&subrepo, the_repository, module_path,
 				null_oid(the_hash_algo)) < 0) {
 		ret = die_message(_("could not get a repository handle for submodule '%s'"),
 				   module_path);
-		goto out;
+		जाओ out;
 	}
 
 	/* Look up by URL first */
-	if (url)
+	अगर (url)
 		remote_name = repo_remote_from_url(&subrepo, url);
-	if (!remote_name)
+	अगर (!remote_name)
 		remote_name = repo_default_remote(&subrepo);
 
 	*default_remote = xstrdup(remote_name);
 
 out:
 	repo_clear(&subrepo);
-	free(url);
+	मुक्त(url);
 
-	return ret;
+	वापस ret;
 }
 
-static int module_get_default_remote(int argc, const char **argv, const char *prefix,
-				     struct repository *repo UNUSED)
+अटल पूर्णांक module_get_default_remote(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+				     काष्ठा repository *repo UNUSED)
 {
-	const char *path;
-	char *resolved_path = NULL;
-	char *default_remote = NULL;
-	int code;
-	struct option options[] = {
+	स्थिर अक्षर *path;
+	अक्षर *resolved_path = शून्य;
+	अक्षर *default_remote = शून्य;
+	पूर्णांक code;
+	काष्ठा option options[] = {
 		OPT_END()
 	};
-	const char *const usage[] = {
+	स्थिर अक्षर *स्थिर usage[] = {
 		N_("git submodule--helper get-default-remote <path>"),
-		NULL
+		शून्य
 	};
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
-	if (argc != 1)
+	अगर (argc != 1)
 		usage_with_options(usage, options);
 
 	path = argv[0];
-	if (prefix && *prefix && !is_absolute_path(path)) {
+	अगर (prefix && *prefix && !is_absolute_path(path)) {
 		resolved_path = xstrfmt("%s%s", prefix, path);
 		path = resolved_path;
 	}
 
 	code = get_default_remote_submodule(path, &default_remote);
-	if (code) {
-		free(resolved_path);
-		return code;
+	अगर (code) {
+		मुक्त(resolved_path);
+		वापस code;
 	}
 
-	printf("%s\n", default_remote);
-	free(default_remote);
-	free(resolved_path);
-	return 0;
+	म_लिखो("%s\n", default_remote);
+	मुक्त(default_remote);
+	मुक्त(resolved_path);
+	वापस 0;
 }
 
 /* the result should be freed by the caller. */
-static char *get_submodule_displaypath(const char *path, const char *prefix,
-				       const char *super_prefix)
+अटल अक्षर *get_submodule_displaypath(स्थिर अक्षर *path, स्थिर अक्षर *prefix,
+				       स्थिर अक्षर *super_prefix)
 {
-	if (prefix && super_prefix) {
+	अगर (prefix && super_prefix) {
 		BUG("cannot have prefix '%s' and superprefix '%s'",
 		    prefix, super_prefix);
-	} else if (prefix) {
-		struct strbuf sb = STRBUF_INIT;
-		char *displaypath = xstrdup(relative_path(path, prefix, &sb));
+	} अन्यथा अगर (prefix) {
+		काष्ठा strbuf sb = STRBUF_INIT;
+		अक्षर *displaypath = xstrdup(relative_path(path, prefix, &sb));
 		strbuf_release(&sb);
-		return displaypath;
-	} else if (super_prefix) {
-		return xstrfmt("%s%s", super_prefix, path);
-	} else {
-		return xstrdup(path);
+		वापस displaypath;
+	} अन्यथा अगर (super_prefix) {
+		वापस xstrfmt("%s%s", super_prefix, path);
+	} अन्यथा {
+		वापस xstrdup(path);
 	}
 }
 
-static char *compute_rev_name(const char *sub_path, const char* object_id)
+अटल अक्षर *compute_rev_name(स्थिर अक्षर *sub_path, स्थिर अक्षर* object_id)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char ***d;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	स्थिर अक्षर ***d;
 
-	static const char *describe_bare[] = { NULL };
+	अटल स्थिर अक्षर *describe_bare[] = { शून्य };
 
-	static const char *describe_tags[] = { "--tags", NULL };
+	अटल स्थिर अक्षर *describe_tags[] = { "--tags", शून्य };
 
-	static const char *describe_contains[] = { "--contains", NULL };
+	अटल स्थिर अक्षर *describe_contains[] = { "--contains", शून्य };
 
-	static const char *describe_all_always[] = { "--all", "--always", NULL };
+	अटल स्थिर अक्षर *describe_all_always[] = { "--all", "--always", शून्य };
 
-	static const char **describe_argv[] = { describe_bare, describe_tags,
+	अटल स्थिर अक्षर **describe_argv[] = { describe_bare, describe_tags,
 						describe_contains,
-						describe_all_always, NULL };
+						describe_all_always, शून्य };
 
-	for (d = describe_argv; *d; d++) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	क्रम (d = describe_argv; *d; d++) {
+		काष्ठा child_process cp = CHILD_PROCESS_INIT;
 		prepare_submodule_repo_env(&cp.env);
 		cp.dir = sub_path;
 		cp.git_cmd = 1;
 		cp.no_stderr = 1;
 
-		strvec_push(&cp.args, "describe");
+		strvec_धकेलो(&cp.args, "describe");
 		strvec_pushv(&cp.args, *d);
-		strvec_push(&cp.args, object_id);
+		strvec_धकेलो(&cp.args, object_id);
 
-		if (!capture_command(&cp, &sb, 0)) {
+		अगर (!capture_command(&cp, &sb, 0)) {
 			strbuf_strip_suffix(&sb, "\n");
-			return strbuf_detach(&sb, NULL);
+			वापस strbuf_detach(&sb, शून्य);
 		}
 	}
 
 	strbuf_release(&sb);
-	return NULL;
+	वापस शून्य;
 }
 
-struct module_list {
-	const struct cache_entry **entries;
-	int alloc, nr;
+काष्ठा module_list {
+	स्थिर काष्ठा cache_entry **entries;
+	पूर्णांक alloc, nr;
 };
-#define MODULE_LIST_INIT { 0 }
+#घोषणा MODULE_LIST_INIT { 0 }
 
-static void module_list_release(struct module_list *ml)
+अटल व्योम module_list_release(काष्ठा module_list *ml)
 {
-	free(ml->entries);
+	मुक्त(ml->entries);
 }
 
-static int module_list_compute(const char **argv,
-			       const char *prefix,
-			       struct pathspec *pathspec,
-			       struct module_list *list)
+अटल पूर्णांक module_list_compute(स्थिर अक्षर **argv,
+			       स्थिर अक्षर *prefix,
+			       काष्ठा pathspec *pathspec,
+			       काष्ठा module_list *list)
 {
-	int result = 0;
-	char *ps_matched = NULL;
+	पूर्णांक परिणाम = 0;
+	अक्षर *ps_matched = शून्य;
 
 	parse_pathspec(pathspec, 0,
 		       PATHSPEC_PREFER_FULL,
 		       prefix, argv);
 
-	if (pathspec->nr)
+	अगर (pathspec->nr)
 		ps_matched = xcalloc(pathspec->nr, 1);
 
-	if (repo_read_index(the_repository) < 0)
+	अगर (repo_read_सूचकांक(the_repository) < 0)
 		die(_("index file corrupt"));
 
-	for (size_t i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
+	क्रम (माप_प्रकार i = 0; i < the_repository->सूचकांक->cache_nr; i++) {
+		स्थिर काष्ठा cache_entry *ce = the_repository->सूचकांक->cache[i];
 
-		if (!match_pathspec(the_repository->index, pathspec, ce->name, ce_namelen(ce),
+		अगर (!match_pathspec(the_repository->सूचकांक, pathspec, ce->name, ce_namelen(ce),
 				    0, ps_matched, 1) ||
 		    !S_ISGITLINK(ce->ce_mode))
-			continue;
+			जारी;
 
 		ALLOC_GROW(list->entries, list->nr + 1, list->alloc);
 		list->entries[list->nr++] = ce;
-		while (i + 1 < the_repository->index->cache_nr &&
-		       !strcmp(ce->name, the_repository->index->cache[i + 1]->name))
+		जबतक (i + 1 < the_repository->सूचकांक->cache_nr &&
+		       !म_भेद(ce->name, the_repository->सूचकांक->cache[i + 1]->name))
 			/*
 			 * Skip entries with the same name in different stages
 			 * to make sure an entry is returned only once.
@@ -261,24 +261,24 @@ static int module_list_compute(const char **argv,
 			i++;
 	}
 
-	if (ps_matched && report_path_error(ps_matched, pathspec))
-		result = -1;
+	अगर (ps_matched && report_path_error(ps_matched, pathspec))
+		परिणाम = -1;
 
-	free(ps_matched);
+	मुक्त(ps_matched);
 
-	return result;
+	वापस परिणाम;
 }
 
-static void module_list_active(struct module_list *list)
+अटल व्योम module_list_active(काष्ठा module_list *list)
 {
-	int i;
-	struct module_list active_modules = MODULE_LIST_INIT;
+	पूर्णांक i;
+	काष्ठा module_list active_modules = MODULE_LIST_INIT;
 
-	for (i = 0; i < list->nr; i++) {
-		const struct cache_entry *ce = list->entries[i];
+	क्रम (i = 0; i < list->nr; i++) {
+		स्थिर काष्ठा cache_entry *ce = list->entries[i];
 
-		if (!is_submodule_active(the_repository, ce->name))
-			continue;
+		अगर (!is_submodule_active(the_repository, ce->name))
+			जारी;
 
 		ALLOC_GROW(active_modules.entries,
 			   active_modules.nr + 1,
@@ -290,66 +290,66 @@ static void module_list_active(struct module_list *list)
 	*list = active_modules;
 }
 
-static char *get_up_path(const char *path)
+अटल अक्षर *get_up_path(स्थिर अक्षर *path)
 {
-	struct strbuf sb = STRBUF_INIT;
+	काष्ठा strbuf sb = STRBUF_INIT;
 
-	strbuf_addstrings(&sb, "../", count_slashes(path));
+	strbuf_addstrings(&sb, "../", गिनती_slashes(path));
 
 	/*
 	 * Check if 'path' ends with slash or not
 	 * for having the same output for dir/sub_dir
 	 * and dir/sub_dir/
 	 */
-	if (!is_dir_sep(path[strlen(path) - 1]))
+	अगर (!is_dir_sep(path[म_माप(path) - 1]))
 		strbuf_addstr(&sb, "../");
 
-	return strbuf_detach(&sb, NULL);
+	वापस strbuf_detach(&sb, शून्य);
 }
 
-static void for_each_listed_submodule(const struct module_list *list,
-				      each_submodule_fn fn, void *cb_data)
+अटल व्योम for_each_listed_submodule(स्थिर काष्ठा module_list *list,
+				      each_submodule_fn fn, व्योम *cb_तथ्य)
 {
-	int i;
+	पूर्णांक i;
 
-	for (i = 0; i < list->nr; i++)
-		fn(list->entries[i], cb_data);
+	क्रम (i = 0; i < list->nr; i++)
+		fn(list->entries[i], cb_तथ्य);
 }
 
-struct foreach_cb {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	const char *super_prefix;
-	int quiet;
-	int recursive;
+काष्ठा foreach_cb {
+	पूर्णांक argc;
+	स्थिर अक्षर **argv;
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *super_prefix;
+	पूर्णांक quiet;
+	पूर्णांक recursive;
 };
-#define FOREACH_CB_INIT { 0 }
+#घोषणा FOREACH_CB_INIT { 0 }
 
-static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
-				       void *cb_data)
+अटल व्योम runcommand_in_submodule_cb(स्थिर काष्ठा cache_entry *list_item,
+				       व्योम *cb_तथ्य)
 {
-	struct foreach_cb *info = cb_data;
-	const char *path = list_item->name;
-	const struct object_id *ce_oid = &list_item->oid;
-	const struct submodule *sub;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	char *displaypath;
+	काष्ठा foreach_cb *info = cb_तथ्य;
+	स्थिर अक्षर *path = list_item->name;
+	स्थिर काष्ठा object_id *ce_oid = &list_item->oid;
+	स्थिर काष्ठा submodule *sub;
+	काष्ठा child_process cp = CHILD_PROCESS_INIT;
+	अक्षर *displaypath;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	अगर (validate_submodule_path(path) < 0)
+		die(शून्य);
 
 	displaypath = get_submodule_displaypath(path, info->prefix,
 						info->super_prefix);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	अगर (!sub)
 		die(_("No url found for submodule path '%s' in .gitmodules"),
 			displaypath);
 
-	if (!is_submodule_populated_gently(path, NULL))
-		goto cleanup;
+	अगर (!is_submodule_populated_gently(path, शून्य))
+		जाओ cleanup;
 
 	prepare_submodule_repo_env(&cp.env);
 
@@ -367,9 +367,9 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 	 * contains a single argument. This is done for maintaining a faithful
 	 * translation from shell script.
 	 */
-	if (info->argc == 1) {
-		char *toplevel = xgetcwd();
-		struct strbuf sb = STRBUF_INIT;
+	अगर (info->argc == 1) {
+		अक्षर *toplevel = xgetcwd();
+		काष्ठा strbuf sb = STRBUF_INIT;
 
 		strvec_pushf(&cp.env, "name=%s", sub->name);
 		strvec_pushf(&cp.env, "sm_path=%s", path);
@@ -391,73 +391,73 @@ static void runcommand_in_submodule_cb(const struct cache_entry *list_item,
 		strvec_pushf(&cp.args, "path=%s; %s",
 			     sb.buf, info->argv[0]);
 		strbuf_release(&sb);
-		free(toplevel);
-	} else {
+		मुक्त(toplevel);
+	} अन्यथा {
 		strvec_pushv(&cp.args, info->argv);
 	}
 
-	if (!info->quiet)
-		printf(_("Entering '%s'\n"), displaypath);
+	अगर (!info->quiet)
+		म_लिखो(_("Entering '%s'\n"), displaypath);
 
-	if (info->argv[0]) {
-		if (run_command(&cp))
+	अगर (info->argv[0]) {
+		अगर (run_command(&cp))
 			die(_("run_command returned non-zero status for %s\n."),
 			    displaypath);
-	} else {
+	} अन्यथा {
 		child_process_clear(&cp);
 	}
 
-	if (info->recursive) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
+	अगर (info->recursive) {
+		काष्ठा child_process cpr = CHILD_PROCESS_INIT;
 
 		cpr.git_cmd = 1;
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
 		strvec_pushl(&cpr.args, "submodule--helper", "foreach", "--recursive",
-			     NULL);
+			     शून्य);
 		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
 
-		if (info->quiet)
-			strvec_push(&cpr.args, "--quiet");
+		अगर (info->quiet)
+			strvec_धकेलो(&cpr.args, "--quiet");
 
-		strvec_push(&cpr.args, "--");
+		strvec_धकेलो(&cpr.args, "--");
 		strvec_pushv(&cpr.args, info->argv);
 
-		if (run_command(&cpr))
+		अगर (run_command(&cpr))
 			die(_("run_command returned non-zero status while "
 				"recursing in the nested submodules of %s\n."),
 				displaypath);
 	}
 
 cleanup:
-	free(displaypath);
+	मुक्त(displaypath);
 }
 
-static int module_foreach(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+अटल पूर्णांक module_foreach(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			  काष्ठा repository *repo UNUSED)
 {
-	struct foreach_cb info = FOREACH_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	struct option module_foreach_options[] = {
+	काष्ठा foreach_cb info = FOREACH_CB_INIT;
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा module_list list = MODULE_LIST_INIT;
+	काष्ठा option module_foreach_options[] = {
 		OPT__SUPER_PREFIX(&info.super_prefix),
 		OPT__QUIET(&info.quiet, N_("suppress output of entering each submodule command")),
 		OPT_BOOL(0, "recursive", &info.recursive,
 			 N_("recurse into nested submodules")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule foreach [--quiet] [--recursive] [--] <command>"),
-		NULL
+		शून्य
 	};
-	int ret = 1;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_foreach_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(NULL, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	अगर (module_list_compute(शून्य, prefix, &pathspec, &list) < 0)
+		जाओ cleanup;
 
 	info.argc = argc;
 	info.argv = argv;
@@ -469,104 +469,104 @@ static int module_foreach(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	वापस ret;
 }
 
-struct init_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+काष्ठा init_cb {
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *super_prefix;
+	अचिन्हित पूर्णांक flags;
 };
-#define INIT_CB_INIT { 0 }
+#घोषणा INIT_CB_INIT { 0 }
 
-static int validate_and_set_submodule_gitdir(struct strbuf *gitdir_path,
-					     const char *submodule_name)
+अटल पूर्णांक validate_and_set_submodule_gitdir(काष्ठा strbuf *gitdir_path,
+					     स्थिर अक्षर *submodule_name)
 {
-	const char *value;
-	char *key;
+	स्थिर अक्षर *मूल्य;
+	अक्षर *कुंजी;
 
-	if (validate_submodule_git_dir(gitdir_path->buf, submodule_name))
-		return -1;
+	अगर (validate_submodule_git_dir(gitdir_path->buf, submodule_name))
+		वापस -1;
 
-	key = xstrfmt("submodule.%s.gitdir", submodule_name);
+	कुंजी = xstrfmt("submodule.%s.gitdir", submodule_name);
 
 	/* Nothing to do if the config already exists. */
-	if (!repo_config_get_string_tmp(the_repository, key, &value)) {
-		free(key);
-		return 0;
+	अगर (!repo_config_get_string_tmp(the_repository, कुंजी, &मूल्य)) {
+		मुक्त(कुंजी);
+		वापस 0;
 	}
 
-	if (repo_config_set_gently(the_repository, key, gitdir_path->buf)) {
-		free(key);
-		return -1;
+	अगर (repo_config_set_gently(the_repository, कुंजी, gitdir_path->buf)) {
+		मुक्त(कुंजी);
+		वापस -1;
 	}
 
-	free(key);
-	return 0;
+	मुक्त(कुंजी);
+	वापस 0;
 }
 
-static void create_default_gitdir_config(const char *submodule_name)
+अटल व्योम create_default_gitdir_config(स्थिर अक्षर *submodule_name)
 {
-	struct strbuf gitdir_path = STRBUF_INIT;
-	struct git_hash_ctx ctx;
-	char hex_name_hash[GIT_MAX_HEXSZ + 1], header[128];
-	unsigned char raw_name_hash[GIT_MAX_RAWSZ];
-	int header_len;
+	काष्ठा strbuf gitdir_path = STRBUF_INIT;
+	काष्ठा git_hash_ctx ctx;
+	अक्षर hex_name_hash[GIT_MAX_HEXSZ + 1], header[128];
+	अचिन्हित अक्षर raw_name_hash[GIT_MAX_RAWSZ];
+	पूर्णांक header_len;
 
 	/* Case 1: try the plain module name */
 	repo_git_path_append(the_repository, &gitdir_path, "modules/%s", submodule_name);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
+	अगर (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
 		strbuf_release(&gitdir_path);
-		return;
+		वापस;
 	}
 
 	/* Case 2.1: Try URI-safe (RFC3986) encoding first, this fixes nested gitdirs */
 	strbuf_reset(&gitdir_path);
 	repo_git_path_append(the_repository, &gitdir_path, "modules/");
 	strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_rfc3986_unreserved);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
+	अगर (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
 		strbuf_release(&gitdir_path);
-		return;
+		वापस;
 	}
 
 	/* Case 2.2: Try extended uppercase URI (RFC3986) encoding, to fix case-folding */
 	strbuf_reset(&gitdir_path);
 	repo_git_path_append(the_repository, &gitdir_path, "modules/");
 	strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_casefolding_rfc3986_unreserved);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-		return;
+	अगर (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
+		वापस;
 
 	/* Case 2.3: Try some derived gitdir names, see if one sticks */
-	for (char c = '0'; c <= '9'; c++) {
+	क्रम (अक्षर c = '0'; c <= '9'; c++) {
 		strbuf_reset(&gitdir_path);
 		repo_git_path_append(the_repository, &gitdir_path, "modules/");
 		strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_rfc3986_unreserved);
 		strbuf_addch(&gitdir_path, c);
-		if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-			return;
+		अगर (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
+			वापस;
 
 		strbuf_reset(&gitdir_path);
 		repo_git_path_append(the_repository, &gitdir_path, "modules/");
 		strbuf_addstr_urlencode(&gitdir_path, submodule_name, is_casefolding_rfc3986_unreserved);
 		strbuf_addch(&gitdir_path, c);
-		if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
-			return;
+		अगर (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name))
+			वापस;
 	}
 
 	/* Case 2.4: If all the above failed, try a hash of the name as a last resort */
-	header_len = snprintf(header, sizeof(header),
-			      "blob %"PRIuMAX, (uintmax_t)strlen(submodule_name));
+	header_len = snprintf(header, माप(header),
+			      "blob %"PRIuMAX, (uintmax_t)म_माप(submodule_name));
 	git_hash_init(&ctx, the_hash_algo);
 	git_hash_update(&ctx, header, header_len);
 	git_hash_update(&ctx, "\0", 1);
-	git_hash_update(&ctx, submodule_name, strlen(submodule_name));
+	git_hash_update(&ctx, submodule_name, म_माप(submodule_name));
 	git_hash_final(raw_name_hash, &ctx);
 	hash_to_hex_algop_r(hex_name_hash, raw_name_hash, the_hash_algo);
 	strbuf_reset(&gitdir_path);
 	repo_git_path_append(the_repository, &gitdir_path, "modules/%s", hex_name_hash);
-	if (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
+	अगर (!validate_and_set_submodule_gitdir(&gitdir_path, submodule_name)) {
 		strbuf_release(&gitdir_path);
-		return;
+		वापस;
 	}
 
 	/* Case 3: nothing worked, error out */
@@ -576,20 +576,20 @@ static void create_default_gitdir_config(const char *submodule_name)
 	    submodule_name, submodule_name, submodule_name);
 }
 
-static void init_submodule(const char *path, const char *prefix,
-			   const char *super_prefix,
-			   unsigned int flags)
+अटल व्योम init_submodule(स्थिर अक्षर *path, स्थिर अक्षर *prefix,
+			   स्थिर अक्षर *super_prefix,
+			   अचिन्हित पूर्णांक flags)
 {
-	const struct submodule *sub;
-	struct strbuf sb = STRBUF_INIT;
-	const char *upd;
-	char *url = NULL, *displaypath;
+	स्थिर काष्ठा submodule *sub;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	स्थिर अक्षर *upd;
+	अक्षर *url = शून्य, *displaypath;
 
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	अगर (!sub)
 		die(_("No url found for submodule path '%s' in .gitmodules"),
 			displaypath);
 
@@ -599,7 +599,7 @@ static void init_submodule(const char *path, const char *prefix,
 	 *
 	 * Set active flag for the submodule being initialized
 	 */
-	if (!is_submodule_active(the_repository, path)) {
+	अगर (!is_submodule_active(the_repository, path)) {
 		strbuf_addf(&sb, "submodule.%s.active", sub->name);
 		repo_config_set_gently(the_repository, sb.buf, "true");
 		strbuf_reset(&sb);
@@ -611,27 +611,27 @@ static void init_submodule(const char *path, const char *prefix,
 	 * .gitmodules, so look it up directly.
 	 */
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_get_string(the_repository, sb.buf, &url)) {
-		if (!sub->url)
+	अगर (repo_config_get_string(the_repository, sb.buf, &url)) {
+		अगर (!sub->url)
 			die(_("No url found for submodule path '%s' in .gitmodules"),
 				displaypath);
 
 		url = xstrdup(sub->url);
 
 		/* Possibly a url relative to parent */
-		if (starts_with_dot_dot_slash(url) ||
+		अगर (starts_with_dot_dot_slash(url) ||
 		    starts_with_dot_slash(url)) {
-			char *oldurl = url;
+			अक्षर *oldurl = url;
 
-			url = resolve_relative_url(oldurl, NULL, 0);
-			free(oldurl);
+			url = resolve_relative_url(oldurl, शून्य, 0);
+			मुक्त(oldurl);
 		}
 
-		if (repo_config_set_gently(the_repository, sb.buf, url))
+		अगर (repo_config_set_gently(the_repository, sb.buf, url))
 			die(_("Failed to register url for submodule path '%s'"),
 			    displaypath);
-		if (!(flags & OPT_QUIET))
-			fprintf(stderr,
+		अगर (!(flags & OPT_QUIET))
+			ख_लिखो(मानक_त्रुटि,
 				_("Submodule '%s' (%s) registered for path '%s'\n"),
 				sub->name, url, displaypath);
 	}
@@ -639,68 +639,68 @@ static void init_submodule(const char *path, const char *prefix,
 
 	/* Copy "update" setting when it is not set yet */
 	strbuf_addf(&sb, "submodule.%s.update", sub->name);
-	if (repo_config_get_string_tmp(the_repository, sb.buf, &upd) &&
+	अगर (repo_config_get_string_tmp(the_repository, sb.buf, &upd) &&
 	    sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
-		if (sub->update_strategy.type == SM_UPDATE_COMMAND) {
-			fprintf(stderr, _("warning: command update mode suggested for submodule '%s'\n"),
+		अगर (sub->update_strategy.type == SM_UPDATE_COMMAND) {
+			ख_लिखो(मानक_त्रुटि, _("warning: command update mode suggested for submodule '%s'\n"),
 				sub->name);
 			upd = "none";
-		} else {
+		} अन्यथा {
 			upd = submodule_update_type_to_string(sub->update_strategy.type);
 		}
 
-		if (repo_config_set_gently(the_repository, sb.buf, upd))
+		अगर (repo_config_set_gently(the_repository, sb.buf, upd))
 			die(_("Failed to register update mode for submodule path '%s'"), displaypath);
 	}
 
-	if (the_repository->repository_format_submodule_path_cfg)
+	अगर (the_repository->repository_format_submodule_path_cfg)
 		create_default_gitdir_config(sub->name);
 
 	strbuf_release(&sb);
-	free(displaypath);
-	free(url);
+	मुक्त(displaypath);
+	मुक्त(url);
 }
 
-static void init_submodule_cb(const struct cache_entry *list_item, void *cb_data)
+अटल व्योम init_submodule_cb(स्थिर काष्ठा cache_entry *list_item, व्योम *cb_तथ्य)
 {
-	struct init_cb *info = cb_data;
+	काष्ठा init_cb *info = cb_तथ्य;
 
 	init_submodule(list_item->name, info->prefix, info->super_prefix,
 		       info->flags);
 }
 
-static int module_init(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+अटल पूर्णांक module_init(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+		       काष्ठा repository *repo UNUSED)
 {
-	struct init_cb info = INIT_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	struct option module_init_options[] = {
+	काष्ठा init_cb info = INIT_CB_INIT;
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा module_list list = MODULE_LIST_INIT;
+	पूर्णांक quiet = 0;
+	काष्ठा option module_init_options[] = {
 		OPT__QUIET(&quiet, N_("suppress output for initializing a submodule")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule init [<options>] [<path>]"),
-		NULL
+		शून्य
 	};
-	int ret = 1;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_init_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	अगर (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		जाओ cleanup;
 
 	/*
 	 * If there are no path args and submodule.active is set then,
 	 * by default, only initialize 'active' modules.
 	 */
-	if (!argc && !repo_config_get(the_repository, "submodule.active"))
+	अगर (!argc && !repo_config_get(the_repository, "submodule.active"))
 		module_list_active(&list);
 
 	info.prefix = prefix;
-	if (quiet)
+	अगर (quiet)
 		info.flags |= OPT_QUIET;
 
 	for_each_listed_submodule(&list, init_submodule_cb, &info);
@@ -709,182 +709,182 @@ static int module_init(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	वापस ret;
 }
 
-struct status_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+काष्ठा status_cb {
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *super_prefix;
+	अचिन्हित पूर्णांक flags;
 };
-#define STATUS_CB_INIT { 0 }
+#घोषणा STATUS_CB_INIT { 0 }
 
-static void print_status(unsigned int flags, char state, const char *path,
-			 const struct object_id *oid, const char *displaypath)
+अटल व्योम print_status(अचिन्हित पूर्णांक flags, अक्षर state, स्थिर अक्षर *path,
+			 स्थिर काष्ठा object_id *oid, स्थिर अक्षर *displaypath)
 {
-	if (flags & OPT_QUIET)
-		return;
+	अगर (flags & OPT_QUIET)
+		वापस;
 
-	printf("%c%s %s", state, oid_to_hex(oid), displaypath);
+	म_लिखो("%c%s %s", state, oid_to_hex(oid), displaypath);
 
-	if (state == ' ' || state == '+') {
-		char *name = compute_rev_name(path, oid_to_hex(oid));
+	अगर (state == ' ' || state == '+') {
+		अक्षर *name = compute_rev_name(path, oid_to_hex(oid));
 
-		if (name)
-			printf(" (%s)", name);
-		free(name);
+		अगर (name)
+			म_लिखो(" (%s)", name);
+		मुक्त(name);
 	}
 
-	printf("\n");
+	म_लिखो("\n");
 }
 
-static int handle_submodule_head_ref(const struct reference *ref, void *cb_data)
+अटल पूर्णांक handle_submodule_शीर्ष_ref(स्थिर काष्ठा reference *ref, व्योम *cb_तथ्य)
 {
-	struct object_id *output = cb_data;
+	काष्ठा object_id *output = cb_तथ्य;
 
-	if (ref->oid)
+	अगर (ref->oid)
 		oidcpy(output, ref->oid);
 
-	return 0;
+	वापस 0;
 }
 
-static void status_submodule(const char *path, const struct object_id *ce_oid,
-			     unsigned int ce_flags, const char *prefix,
-			     const char *super_prefix, unsigned int flags)
+अटल व्योम status_submodule(स्थिर अक्षर *path, स्थिर काष्ठा object_id *ce_oid,
+			     अचिन्हित पूर्णांक ce_flags, स्थिर अक्षर *prefix,
+			     स्थिर अक्षर *super_prefix, अचिन्हित पूर्णांक flags)
 {
-	char *displaypath;
-	struct strvec diff_files_args = STRVEC_INIT;
-	struct rev_info rev = REV_INFO_INIT;
-	struct strbuf buf = STRBUF_INIT;
-	const char *git_dir;
+	अक्षर *displaypath;
+	काष्ठा strvec diff_files_args = STRVEC_INIT;
+	काष्ठा rev_info rev = REV_INFO_INIT;
+	काष्ठा strbuf buf = STRBUF_INIT;
+	स्थिर अक्षर *git_dir;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	अगर (validate_submodule_path(path) < 0)
+		die(शून्य);
 
-	if (!submodule_from_path(the_repository, null_oid(the_hash_algo), path))
+	अगर (!submodule_from_path(the_repository, null_oid(the_hash_algo), path))
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
 		      path);
 
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
-	if ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
+	अगर ((CE_STAGEMASK & ce_flags) >> CE_STAGESHIFT) {
 		print_status(flags, 'U', path, null_oid(the_hash_algo), displaypath);
-		goto cleanup;
+		जाओ cleanup;
 	}
 
 	strbuf_addf(&buf, "%s/.git", path);
 	git_dir = read_gitfile(buf.buf);
-	if (!git_dir)
+	अगर (!git_dir)
 		git_dir = buf.buf;
 
-	if (!is_submodule_active(the_repository, path) ||
+	अगर (!is_submodule_active(the_repository, path) ||
 	    !is_git_directory(git_dir)) {
 		print_status(flags, '-', path, ce_oid, displaypath);
 		strbuf_release(&buf);
-		goto cleanup;
+		जाओ cleanup;
 	}
 	strbuf_release(&buf);
 
 	strvec_pushl(&diff_files_args, "diff-files",
 		     "--ignore-submodules=dirty", "--quiet", "--",
-		     path, NULL);
+		     path, शून्य);
 
-	repo_config(the_repository, git_diff_basic_config, NULL);
+	repo_config(the_repository, git_diff_basic_config, शून्य);
 
-	repo_init_revisions(the_repository, &rev, NULL);
+	repo_init_revisions(the_repository, &rev, शून्य);
 	rev.abbrev = 0;
-	setup_revisions_from_strvec(&diff_files_args, &rev, NULL);
+	setup_revisions_from_strvec(&diff_files_args, &rev, शून्य);
 	run_diff_files(&rev, 0);
 
-	if (!diff_result_code(&rev)) {
+	अगर (!diff_परिणाम_code(&rev)) {
 		print_status(flags, ' ', path, ce_oid,
 			     displaypath);
-	} else if (!(flags & OPT_CACHED)) {
-		struct object_id oid;
-		struct ref_store *refs = repo_get_submodule_ref_store(the_repository,
+	} अन्यथा अगर (!(flags & OPT_CACHED)) {
+		काष्ठा object_id oid;
+		काष्ठा ref_store *refs = repo_get_submodule_ref_store(the_repository,
 								      path);
 
-		if (!refs) {
+		अगर (!refs) {
 			print_status(flags, '-', path, ce_oid, displaypath);
-			goto cleanup;
+			जाओ cleanup;
 		}
-		if (refs_head_ref(refs, handle_submodule_head_ref, &oid))
+		अगर (refs_शीर्ष_ref(refs, handle_submodule_शीर्ष_ref, &oid))
 			die(_("could not resolve HEAD ref inside the "
 			      "submodule '%s'"), path);
 
 		print_status(flags, '+', path, &oid, displaypath);
-	} else {
+	} अन्यथा {
 		print_status(flags, '+', path, ce_oid, displaypath);
 	}
 
-	if (flags & OPT_RECURSIVE) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
-		int res;
+	अगर (flags & OPT_RECURSIVE) {
+		काष्ठा child_process cpr = CHILD_PROCESS_INIT;
+		पूर्णांक res;
 
 		cpr.git_cmd = 1;
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
 		strvec_pushl(&cpr.args, "submodule--helper", "status",
-			     "--recursive", NULL);
+			     "--recursive", शून्य);
 		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
 
-		if (flags & OPT_CACHED)
-			strvec_push(&cpr.args, "--cached");
+		अगर (flags & OPT_CACHED)
+			strvec_धकेलो(&cpr.args, "--cached");
 
-		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+		अगर (flags & OPT_QUIET)
+			strvec_धकेलो(&cpr.args, "--quiet");
 
 		res = run_command(&cpr);
-		if (res == SIGPIPE + 128)
-			raise(SIGPIPE);
-		else if (res)
+		अगर (res == SIGPIPE + 128)
+			उठाओ(SIGPIPE);
+		अन्यथा अगर (res)
 			die(_("failed to recurse into submodule '%s'"), path);
 	}
 
 cleanup:
 	strvec_clear(&diff_files_args);
-	free(displaypath);
+	मुक्त(displaypath);
 	release_revisions(&rev);
 }
 
-static void status_submodule_cb(const struct cache_entry *list_item,
-				void *cb_data)
+अटल व्योम status_submodule_cb(स्थिर काष्ठा cache_entry *list_item,
+				व्योम *cb_तथ्य)
 {
-	struct status_cb *info = cb_data;
+	काष्ठा status_cb *info = cb_तथ्य;
 
 	status_submodule(list_item->name, &list_item->oid, list_item->ce_flags,
 			 info->prefix, info->super_prefix, info->flags);
 }
 
-static int module_status(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+अटल पूर्णांक module_status(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			 काष्ठा repository *repo UNUSED)
 {
-	struct status_cb info = STATUS_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	struct option module_status_options[] = {
+	काष्ठा status_cb info = STATUS_CB_INIT;
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा module_list list = MODULE_LIST_INIT;
+	पूर्णांक quiet = 0;
+	काष्ठा option module_status_options[] = {
 		OPT__SUPER_PREFIX(&info.super_prefix),
 		OPT__QUIET(&quiet, N_("suppress submodule status output")),
 		OPT_BIT(0, "cached", &info.flags, N_("use commit stored in the index instead of the one stored in the submodule HEAD"), OPT_CACHED),
 		OPT_BIT(0, "recursive", &info.flags, N_("recurse into nested submodules"), OPT_RECURSIVE),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule status [--quiet] [--cached] [--recursive] [<path>...]"),
-		NULL
+		शून्य
 	};
-	int ret = 1;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_status_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	अगर (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		जाओ cleanup;
 
 	info.prefix = prefix;
-	if (quiet)
+	अगर (quiet)
 		info.flags |= OPT_QUIET;
 
 	for_each_listed_submodule(&list, status_submodule_cb, &info);
@@ -893,168 +893,168 @@ static int module_status(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	वापस ret;
 }
 
-struct module_cb {
-	unsigned int mod_src;
-	unsigned int mod_dst;
-	struct object_id oid_src;
-	struct object_id oid_dst;
-	char status;
-	char *sm_path;
+काष्ठा module_cb {
+	अचिन्हित पूर्णांक mod_src;
+	अचिन्हित पूर्णांक mod_dst;
+	काष्ठा object_id oid_src;
+	काष्ठा object_id oid_dst;
+	अक्षर status;
+	अक्षर *sm_path;
 };
-#define MODULE_CB_INIT { 0 }
+#घोषणा MODULE_CB_INIT { 0 }
 
-static void module_cb_release(struct module_cb *mcb)
+अटल व्योम module_cb_release(काष्ठा module_cb *mcb)
 {
-	free(mcb->sm_path);
+	मुक्त(mcb->sm_path);
 }
 
-struct module_cb_list {
-	struct module_cb **entries;
-	int alloc, nr;
+काष्ठा module_cb_list {
+	काष्ठा module_cb **entries;
+	पूर्णांक alloc, nr;
 };
-#define MODULE_CB_LIST_INIT { 0 }
+#घोषणा MODULE_CB_LIST_INIT { 0 }
 
-static void module_cb_list_release(struct module_cb_list *mcbl)
+अटल व्योम module_cb_list_release(काष्ठा module_cb_list *mcbl)
 {
-	int i;
+	पूर्णांक i;
 
-	for (i = 0; i < mcbl->nr; i++) {
-		struct module_cb *mcb = mcbl->entries[i];
+	क्रम (i = 0; i < mcbl->nr; i++) {
+		काष्ठा module_cb *mcb = mcbl->entries[i];
 
 		module_cb_release(mcb);
-		free(mcb);
+		मुक्त(mcb);
 	}
-	free(mcbl->entries);
+	मुक्त(mcbl->entries);
 }
 
-struct summary_cb {
-	int argc;
-	const char **argv;
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int cached: 1;
-	unsigned int for_status: 1;
-	unsigned int files: 1;
-	int summary_limit;
+काष्ठा summary_cb {
+	पूर्णांक argc;
+	स्थिर अक्षर **argv;
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *super_prefix;
+	अचिन्हित पूर्णांक cached: 1;
+	अचिन्हित पूर्णांक for_status: 1;
+	अचिन्हित पूर्णांक files: 1;
+	पूर्णांक summary_limit;
 };
-#define SUMMARY_CB_INIT { 0 }
+#घोषणा SUMMARY_CB_INIT { 0 }
 
-enum diff_cmd {
-	DIFF_INDEX,
+क्रमागत diff_cmd {
+	DIFF_सूचकांक,
 	DIFF_FILES
 };
 
-static char *verify_submodule_committish(const char *sm_path,
-					 const char *committish)
+अटल अक्षर *verify_submodule_committish(स्थिर अक्षर *sm_path,
+					 स्थिर अक्षर *committish)
 {
-	struct child_process cp_rev_parse = CHILD_PROCESS_INIT;
-	struct strbuf result = STRBUF_INIT;
+	काष्ठा child_process cp_rev_parse = CHILD_PROCESS_INIT;
+	काष्ठा strbuf परिणाम = STRBUF_INIT;
 
 	cp_rev_parse.git_cmd = 1;
 	cp_rev_parse.dir = sm_path;
 	prepare_submodule_repo_env(&cp_rev_parse.env);
-	strvec_pushl(&cp_rev_parse.args, "rev-parse", "-q", "--short", NULL);
+	strvec_pushl(&cp_rev_parse.args, "rev-parse", "-q", "--short", शून्य);
 	strvec_pushf(&cp_rev_parse.args, "%s^0", committish);
-	strvec_push(&cp_rev_parse.args, "--");
+	strvec_धकेलो(&cp_rev_parse.args, "--");
 
-	if (capture_command(&cp_rev_parse, &result, 0))
-		return NULL;
+	अगर (capture_command(&cp_rev_parse, &परिणाम, 0))
+		वापस शून्य;
 
-	strbuf_trim_trailing_newline(&result);
-	return strbuf_detach(&result, NULL);
+	strbuf_trim_trailing_newline(&परिणाम);
+	वापस strbuf_detach(&परिणाम, शून्य);
 }
 
-static void print_submodule_summary(struct summary_cb *info, const char *errmsg,
-				    int total_commits, const char *displaypath,
-				    const char *src_abbrev, const char *dst_abbrev,
-				    struct module_cb *p)
+अटल व्योम print_submodule_summary(काष्ठा summary_cb *info, स्थिर अक्षर *errmsg,
+				    पूर्णांक योग_commits, स्थिर अक्षर *displaypath,
+				    स्थिर अक्षर *src_abbrev, स्थिर अक्षर *dst_abbrev,
+				    काष्ठा module_cb *p)
 {
-	if (p->status == 'T') {
-		if (S_ISGITLINK(p->mod_dst))
-			printf(_("* %s %s(blob)->%s(submodule)"),
+	अगर (p->status == 'T') {
+		अगर (S_ISGITLINK(p->mod_dst))
+			म_लिखो(_("* %s %s(blob)->%s(submodule)"),
 				 displaypath, src_abbrev, dst_abbrev);
-		else
-			printf(_("* %s %s(submodule)->%s(blob)"),
+		अन्यथा
+			म_लिखो(_("* %s %s(submodule)->%s(blob)"),
 				 displaypath, src_abbrev, dst_abbrev);
-	} else {
-		printf("* %s %s...%s",
+	} अन्यथा {
+		म_लिखो("* %s %s...%s",
 			displaypath, src_abbrev, dst_abbrev);
 	}
 
-	if (total_commits < 0)
-		printf(":\n");
-	else
-		printf(" (%d):\n", total_commits);
+	अगर (योग_commits < 0)
+		म_लिखो(":\n");
+	अन्यथा
+		म_लिखो(" (%d):\n", योग_commits);
 
-	if (errmsg) {
-		printf(_("%s"), errmsg);
-	} else if (total_commits > 0) {
-		struct child_process cp_log = CHILD_PROCESS_INIT;
+	अगर (errmsg) {
+		म_लिखो(_("%s"), errmsg);
+	} अन्यथा अगर (योग_commits > 0) {
+		काष्ठा child_process cp_log = CHILD_PROCESS_INIT;
 
 		cp_log.git_cmd = 1;
 		cp_log.dir = p->sm_path;
 		prepare_submodule_repo_env(&cp_log.env);
-		strvec_pushl(&cp_log.args, "log", NULL);
+		strvec_pushl(&cp_log.args, "log", शून्य);
 
-		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
-			if (info->summary_limit > 0)
+		अगर (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst)) {
+			अगर (info->summary_limit > 0)
 				strvec_pushf(&cp_log.args, "-%d",
 					     info->summary_limit);
 
 			strvec_pushl(&cp_log.args, "--pretty=  %m %s",
-				     "--first-parent", NULL);
+				     "--first-parent", शून्य);
 			strvec_pushf(&cp_log.args, "%s...%s",
 				     src_abbrev, dst_abbrev);
-		} else if (S_ISGITLINK(p->mod_dst)) {
+		} अन्यथा अगर (S_ISGITLINK(p->mod_dst)) {
 			strvec_pushl(&cp_log.args, "--pretty=  > %s",
-				     "-1", dst_abbrev, NULL);
-		} else {
+				     "-1", dst_abbrev, शून्य);
+		} अन्यथा {
 			strvec_pushl(&cp_log.args, "--pretty=  < %s",
-				     "-1", src_abbrev, NULL);
+				     "-1", src_abbrev, शून्य);
 		}
 		run_command(&cp_log);
 	}
-	printf("\n");
+	म_लिखो("\n");
 }
 
-static void generate_submodule_summary(struct summary_cb *info,
-				       struct module_cb *p)
+अटल व्योम generate_submodule_summary(काष्ठा summary_cb *info,
+				       काष्ठा module_cb *p)
 {
-	char *displaypath, *src_abbrev = NULL, *dst_abbrev;
-	int missing_src = 0, missing_dst = 0;
-	struct strbuf errmsg = STRBUF_INIT;
-	int total_commits = -1;
+	अक्षर *displaypath, *src_abbrev = शून्य, *dst_abbrev;
+	पूर्णांक missing_src = 0, missing_dst = 0;
+	काष्ठा strbuf errmsg = STRBUF_INIT;
+	पूर्णांक योग_commits = -1;
 
-	if (!info->cached && oideq(&p->oid_dst, null_oid(the_hash_algo))) {
-		if (S_ISGITLINK(p->mod_dst)) {
-			struct ref_store *refs = repo_get_submodule_ref_store(the_repository,
+	अगर (!info->cached && oideq(&p->oid_dst, null_oid(the_hash_algo))) {
+		अगर (S_ISGITLINK(p->mod_dst)) {
+			काष्ठा ref_store *refs = repo_get_submodule_ref_store(the_repository,
 									      p->sm_path);
 
-			if (refs)
-				refs_head_ref(refs, handle_submodule_head_ref, &p->oid_dst);
-		} else if (S_ISLNK(p->mod_dst) || S_ISREG(p->mod_dst)) {
-			struct stat st;
-			int fd = open(p->sm_path, O_RDONLY);
+			अगर (refs)
+				refs_शीर्ष_ref(refs, handle_submodule_शीर्ष_ref, &p->oid_dst);
+		} अन्यथा अगर (S_ISLNK(p->mod_dst) || S_ISREG(p->mod_dst)) {
+			काष्ठा stat st;
+			पूर्णांक fd = खोलो(p->sm_path, O_RDONLY);
 
-			if (fd < 0 || fstat(fd, &st) < 0 ||
-			    index_fd(the_repository->index, &p->oid_dst, fd, &st, OBJ_BLOB,
+			अगर (fd < 0 || ख_स्थिति(fd, &st) < 0 ||
+			    सूचकांक_fd(the_repository->सूचकांक, &p->oid_dst, fd, &st, OBJ_BLOB,
 				     p->sm_path, 0))
 				error(_("couldn't hash object from '%s'"), p->sm_path);
-		} else {
+		} अन्यथा {
 			/* for a submodule removal (mode:0000000), don't warn */
-			if (p->mod_dst)
+			अगर (p->mod_dst)
 				warning(_("unexpected mode %o"), p->mod_dst);
 		}
 	}
 
-	if (S_ISGITLINK(p->mod_src)) {
-		if (p->status != 'D')
+	अगर (S_ISGITLINK(p->mod_src)) {
+		अगर (p->status != 'D')
 			src_abbrev = verify_submodule_committish(p->sm_path,
 								 oid_to_hex(&p->oid_src));
-		if (!src_abbrev) {
+		अगर (!src_abbrev) {
 			missing_src = 1;
 			/*
 			 * As `rev-parse` failed, we fallback to getting
@@ -1064,7 +1064,7 @@ static void generate_submodule_summary(struct summary_cb *info,
 			 */
 			src_abbrev = xstrndup(oid_to_hex(&p->oid_src), 7);
 		}
-	} else {
+	} अन्यथा {
 		/*
 		 * The source does not point to a submodule.
 		 * So, we fallback to getting the abbreviation using
@@ -1074,10 +1074,10 @@ static void generate_submodule_summary(struct summary_cb *info,
 		src_abbrev = xstrndup(oid_to_hex(&p->oid_src), 7);
 	}
 
-	if (S_ISGITLINK(p->mod_dst)) {
+	अगर (S_ISGITLINK(p->mod_dst)) {
 		dst_abbrev = verify_submodule_committish(p->sm_path,
 							 oid_to_hex(&p->oid_dst));
-		if (!dst_abbrev) {
+		अगर (!dst_abbrev) {
 			missing_dst = 1;
 			/*
 			 * As `rev-parse` failed, we fallback to getting
@@ -1087,7 +1087,7 @@ static void generate_submodule_summary(struct summary_cb *info,
 			 */
 			dst_abbrev = xstrndup(oid_to_hex(&p->oid_dst), 7);
 		}
-	} else {
+	} अन्यथा {
 		/*
 		 * The destination does not point to a submodule.
 		 * So, we fallback to getting the abbreviation using
@@ -1100,39 +1100,39 @@ static void generate_submodule_summary(struct summary_cb *info,
 	displaypath = get_submodule_displaypath(p->sm_path, info->prefix,
 						info->super_prefix);
 
-	if (!missing_src && !missing_dst) {
-		struct child_process cp_rev_list = CHILD_PROCESS_INIT;
-		struct strbuf sb_rev_list = STRBUF_INIT;
+	अगर (!missing_src && !missing_dst) {
+		काष्ठा child_process cp_rev_list = CHILD_PROCESS_INIT;
+		काष्ठा strbuf sb_rev_list = STRBUF_INIT;
 
 		strvec_pushl(&cp_rev_list.args, "rev-list",
-			     "--first-parent", "--count", NULL);
-		if (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
+			     "--first-parent", "--count", शून्य);
+		अगर (S_ISGITLINK(p->mod_src) && S_ISGITLINK(p->mod_dst))
 			strvec_pushf(&cp_rev_list.args, "%s...%s",
 				     src_abbrev, dst_abbrev);
-		else
-			strvec_push(&cp_rev_list.args, S_ISGITLINK(p->mod_src) ?
+		अन्यथा
+			strvec_धकेलो(&cp_rev_list.args, S_ISGITLINK(p->mod_src) ?
 				    src_abbrev : dst_abbrev);
-		strvec_push(&cp_rev_list.args, "--");
+		strvec_धकेलो(&cp_rev_list.args, "--");
 
 		cp_rev_list.git_cmd = 1;
 		cp_rev_list.dir = p->sm_path;
 		prepare_submodule_repo_env(&cp_rev_list.env);
 
-		if (!capture_command(&cp_rev_list, &sb_rev_list, 0))
-			total_commits = atoi(sb_rev_list.buf);
+		अगर (!capture_command(&cp_rev_list, &sb_rev_list, 0))
+			योग_commits = म_से_प(sb_rev_list.buf);
 
 		strbuf_release(&sb_rev_list);
-	} else {
+	} अन्यथा {
 		/*
 		 * Don't give error msg for modification whose dst is not
 		 * submodule, i.e., deleted or changed to blob
 		 */
-		if (S_ISGITLINK(p->mod_dst)) {
-			if (missing_src && missing_dst) {
+		अगर (S_ISGITLINK(p->mod_dst)) {
+			अगर (missing_src && missing_dst) {
 				strbuf_addf(&errmsg, "  Warn: %s doesn't contain commits %s and %s\n",
 					    displaypath, oid_to_hex(&p->oid_src),
 					    oid_to_hex(&p->oid_dst));
-			} else {
+			} अन्यथा {
 				strbuf_addf(&errmsg, "  Warn: %s doesn't contain commit %s\n",
 					    displaypath, missing_src ?
 					    oid_to_hex(&p->oid_src) :
@@ -1141,157 +1141,157 @@ static void generate_submodule_summary(struct summary_cb *info,
 		}
 	}
 
-	print_submodule_summary(info, errmsg.len ? errmsg.buf : NULL,
-				total_commits, displaypath, src_abbrev,
+	print_submodule_summary(info, errmsg.len ? errmsg.buf : शून्य,
+				योग_commits, displaypath, src_abbrev,
 				dst_abbrev, p);
 
-	free(displaypath);
-	free(src_abbrev);
-	free(dst_abbrev);
+	मुक्त(displaypath);
+	मुक्त(src_abbrev);
+	मुक्त(dst_abbrev);
 	strbuf_release(&errmsg);
 }
 
-static void prepare_submodule_summary(struct summary_cb *info,
-				      struct module_cb_list *list)
+अटल व्योम prepare_submodule_summary(काष्ठा summary_cb *info,
+				      काष्ठा module_cb_list *list)
 {
-	int i;
-	for (i = 0; i < list->nr; i++) {
-		const struct submodule *sub;
-		struct module_cb *p = list->entries[i];
-		struct strbuf sm_gitdir = STRBUF_INIT;
+	पूर्णांक i;
+	क्रम (i = 0; i < list->nr; i++) {
+		स्थिर काष्ठा submodule *sub;
+		काष्ठा module_cb *p = list->entries[i];
+		काष्ठा strbuf sm_gitdir = STRBUF_INIT;
 
-		if (p->status == 'D' || p->status == 'T') {
+		अगर (p->status == 'D' || p->status == 'T') {
 			generate_submodule_summary(info, p);
-			continue;
+			जारी;
 		}
 
-		if (info->for_status && p->status != 'A' &&
+		अगर (info->for_status && p->status != 'A' &&
 		    (sub = submodule_from_path(the_repository,
 					       null_oid(the_hash_algo), p->sm_path))) {
-			char *config_key = NULL;
-			const char *value;
-			int ignore_all = 0;
+			अक्षर *config_कुंजी = शून्य;
+			स्थिर अक्षर *मूल्य;
+			पूर्णांक ignore_all = 0;
 
-			config_key = xstrfmt("submodule.%s.ignore",
+			config_कुंजी = xstrfmt("submodule.%s.ignore",
 					     sub->name);
-			if (!repo_config_get_string_tmp(the_repository, config_key, &value))
-				ignore_all = !strcmp(value, "all");
-			else if (sub->ignore)
-				ignore_all = !strcmp(sub->ignore, "all");
+			अगर (!repo_config_get_string_tmp(the_repository, config_कुंजी, &मूल्य))
+				ignore_all = !म_भेद(मूल्य, "all");
+			अन्यथा अगर (sub->ignore)
+				ignore_all = !म_भेद(sub->ignore, "all");
 
-			free(config_key);
-			if (ignore_all)
-				continue;
+			मुक्त(config_कुंजी);
+			अगर (ignore_all)
+				जारी;
 		}
 
 		/* Also show added or modified modules which are checked out */
 		strbuf_addstr(&sm_gitdir, p->sm_path);
-		if (is_nonbare_repository_dir(&sm_gitdir))
+		अगर (is_nonbare_repository_dir(&sm_gitdir))
 			generate_submodule_summary(info, p);
 		strbuf_release(&sm_gitdir);
 	}
 }
 
-static void submodule_summary_callback(struct diff_queue_struct *q,
-				       struct diff_options *options UNUSED,
-				       void *data)
+अटल व्योम submodule_summary_callback(काष्ठा diff_queue_struct *q,
+				       काष्ठा diff_options *options UNUSED,
+				       व्योम *तथ्य)
 {
-	int i;
-	struct module_cb_list *list = data;
-	for (i = 0; i < q->nr; i++) {
-		struct diff_filepair *p = q->queue[i];
-		struct module_cb *temp;
+	पूर्णांक i;
+	काष्ठा module_cb_list *list = तथ्य;
+	क्रम (i = 0; i < q->nr; i++) {
+		काष्ठा diff_filepair *p = q->queue[i];
+		काष्ठा module_cb *अस्थायी;
 
-		if (!S_ISGITLINK(p->one->mode) && !S_ISGITLINK(p->two->mode))
-			continue;
-		temp = xmalloc(sizeof(*temp));
-		temp->mod_src = p->one->mode;
-		temp->mod_dst = p->two->mode;
-		temp->oid_src = p->one->oid;
-		temp->oid_dst = p->two->oid;
-		temp->status = p->status;
-		temp->sm_path = xstrdup(p->one->path);
+		अगर (!S_ISGITLINK(p->one->mode) && !S_ISGITLINK(p->two->mode))
+			जारी;
+		अस्थायी = xmalloc(माप(*अस्थायी));
+		अस्थायी->mod_src = p->one->mode;
+		अस्थायी->mod_dst = p->two->mode;
+		अस्थायी->oid_src = p->one->oid;
+		अस्थायी->oid_dst = p->two->oid;
+		अस्थायी->status = p->status;
+		अस्थायी->sm_path = xstrdup(p->one->path);
 
 		ALLOC_GROW(list->entries, list->nr + 1, list->alloc);
-		list->entries[list->nr++] = temp;
+		list->entries[list->nr++] = अस्थायी;
 	}
 }
 
-static const char *get_diff_cmd(enum diff_cmd diff_cmd)
+अटल स्थिर अक्षर *get_diff_cmd(क्रमागत diff_cmd diff_cmd)
 {
-	switch (diff_cmd) {
-	case DIFF_INDEX: return "diff-index";
-	case DIFF_FILES: return "diff-files";
-	default: BUG("bad diff_cmd value %d", diff_cmd);
+	चयन (diff_cmd) {
+	हाल DIFF_सूचकांक: वापस "diff-index";
+	हाल DIFF_FILES: वापस "diff-files";
+	शेष: BUG("bad diff_cmd value %d", diff_cmd);
 	}
 }
 
-static int compute_summary_module_list(struct object_id *head_oid,
-				       struct summary_cb *info,
-				       enum diff_cmd diff_cmd)
+अटल पूर्णांक compute_summary_module_list(काष्ठा object_id *शीर्ष_oid,
+				       काष्ठा summary_cb *info,
+				       क्रमागत diff_cmd diff_cmd)
 {
-	struct strvec diff_args = STRVEC_INIT;
-	struct rev_info rev;
-	struct module_cb_list list = MODULE_CB_LIST_INIT;
-	int ret = 0;
+	काष्ठा strvec diff_args = STRVEC_INIT;
+	काष्ठा rev_info rev;
+	काष्ठा module_cb_list list = MODULE_CB_LIST_INIT;
+	पूर्णांक ret = 0;
 
-	strvec_push(&diff_args, get_diff_cmd(diff_cmd));
-	if (info->cached)
-		strvec_push(&diff_args, "--cached");
-	strvec_pushl(&diff_args, "--ignore-submodules=dirty", "--raw", NULL);
-	if (head_oid)
-		strvec_push(&diff_args, oid_to_hex(head_oid));
-	strvec_push(&diff_args, "--");
-	if (info->argc)
+	strvec_धकेलो(&diff_args, get_diff_cmd(diff_cmd));
+	अगर (info->cached)
+		strvec_धकेलो(&diff_args, "--cached");
+	strvec_pushl(&diff_args, "--ignore-submodules=dirty", "--raw", शून्य);
+	अगर (शीर्ष_oid)
+		strvec_धकेलो(&diff_args, oid_to_hex(शीर्ष_oid));
+	strvec_धकेलो(&diff_args, "--");
+	अगर (info->argc)
 		strvec_pushv(&diff_args, info->argv);
 
-	repo_config(the_repository, git_diff_basic_config, NULL);
+	repo_config(the_repository, git_diff_basic_config, शून्य);
 	repo_init_revisions(the_repository, &rev, info->prefix);
 	rev.abbrev = 0;
-	precompose_argv_prefix(diff_args.nr, diff_args.v, NULL);
-	setup_revisions_from_strvec(&diff_args, &rev, NULL);
+	precompose_argv_prefix(diff_args.nr, diff_args.v, शून्य);
+	setup_revisions_from_strvec(&diff_args, &rev, शून्य);
 	rev.diffopt.output_format = DIFF_FORMAT_NO_OUTPUT | DIFF_FORMAT_CALLBACK;
 	rev.diffopt.format_callback = submodule_summary_callback;
-	rev.diffopt.format_callback_data = &list;
+	rev.diffopt.format_callback_तथ्य = &list;
 
-	if (!info->cached) {
-		if (diff_cmd == DIFF_INDEX)
-			setup_work_tree(the_repository);
-		if (repo_read_index_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
-			perror("repo_read_index_preload");
+	अगर (!info->cached) {
+		अगर (diff_cmd == DIFF_सूचकांक)
+			setup_work_वृक्ष(the_repository);
+		अगर (repo_read_सूचकांक_preload(the_repository, &rev.diffopt.pathspec, 0) < 0) {
+			लिखो_त्रुटि("repo_read_index_preload");
 			ret = -1;
-			goto cleanup;
+			जाओ cleanup;
 		}
-	} else if (repo_read_index(the_repository) < 0) {
-		perror("repo_read_cache");
+	} अन्यथा अगर (repo_read_सूचकांक(the_repository) < 0) {
+		लिखो_त्रुटि("repo_read_cache");
 		ret = -1;
-		goto cleanup;
+		जाओ cleanup;
 	}
 
-	if (diff_cmd == DIFF_INDEX)
-		run_diff_index(&rev, info->cached ? DIFF_INDEX_CACHED : 0);
-	else
+	अगर (diff_cmd == DIFF_सूचकांक)
+		run_diff_सूचकांक(&rev, info->cached ? DIFF_सूचकांक_CACHED : 0);
+	अन्यथा
 		run_diff_files(&rev, 0);
 	prepare_submodule_summary(info, &list);
 cleanup:
 	strvec_clear(&diff_args);
 	release_revisions(&rev);
 	module_cb_list_release(&list);
-	return ret;
+	वापस ret;
 }
 
-static int module_summary(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+अटल पूर्णांक module_summary(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			  काष्ठा repository *repo UNUSED)
 {
-	struct summary_cb info = SUMMARY_CB_INIT;
-	int cached = 0;
-	int for_status = 0;
-	int files = 0;
-	int summary_limit = -1;
-	enum diff_cmd diff_cmd = DIFF_INDEX;
-	struct object_id head_oid;
-	int ret;
-	struct option module_summary_options[] = {
+	काष्ठा summary_cb info = SUMMARY_CB_INIT;
+	पूर्णांक cached = 0;
+	पूर्णांक for_status = 0;
+	पूर्णांक files = 0;
+	पूर्णांक summary_limit = -1;
+	क्रमागत diff_cmd diff_cmd = DIFF_सूचकांक;
+	काष्ठा object_id शीर्ष_oid;
+	पूर्णांक ret;
+	काष्ठा option module_summary_options[] = {
 		OPT_BOOL(0, "cached", &cached,
 			 N_("use the commit stored in the index instead of the submodule HEAD")),
 		OPT_BOOL(0, "files", &files,
@@ -1302,36 +1302,36 @@ static int module_summary(int argc, const char **argv, const char *prefix,
 			     N_("limit the summary size")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule summary [<options>] [<commit>] [--] [<path>]"),
-		NULL
+		शून्य
 	};
 
 	argc = parse_options(argc, argv, prefix, module_summary_options,
 			     git_submodule_helper_usage, 0);
 
-	if (!summary_limit)
-		return 0;
+	अगर (!summary_limit)
+		वापस 0;
 
-	if (!repo_get_oid(the_repository, argc ? argv[0] : "HEAD", &head_oid)) {
-		if (argc) {
+	अगर (!repo_get_oid(the_repository, argc ? argv[0] : "HEAD", &शीर्ष_oid)) {
+		अगर (argc) {
 			argv++;
 			argc--;
 		}
-	} else if (!argc || !strcmp(argv[0], "HEAD")) {
+	} अन्यथा अगर (!argc || !म_भेद(argv[0], "HEAD")) {
 		/* before the first commit: compare with an empty tree */
-		oidcpy(&head_oid, the_hash_algo->empty_tree);
-		if (argc) {
+		oidcpy(&शीर्ष_oid, the_hash_algo->empty_वृक्ष);
+		अगर (argc) {
 			argv++;
 			argc--;
 		}
-	} else {
-		if (repo_get_oid(the_repository, "HEAD", &head_oid))
+	} अन्यथा {
+		अगर (repo_get_oid(the_repository, "HEAD", &शीर्ष_oid))
 			die(_("could not fetch a revision for HEAD"));
 	}
 
-	if (files) {
-		if (cached)
+	अगर (files) {
+		अगर (cached)
 			die(_("options '%s' and '%s' cannot be used together"), "--cached", "--files");
 		diff_cmd = DIFF_FILES;
 	}
@@ -1344,226 +1344,226 @@ static int module_summary(int argc, const char **argv, const char *prefix,
 	info.for_status = !!for_status;
 	info.summary_limit = summary_limit;
 
-	ret = compute_summary_module_list((diff_cmd == DIFF_INDEX) ? &head_oid : NULL,
+	ret = compute_summary_module_list((diff_cmd == DIFF_सूचकांक) ? &शीर्ष_oid : शून्य,
 					  &info, diff_cmd);
-	return ret;
+	वापस ret;
 }
 
-static int module_gitdir(int argc, const char **argv, const char *prefix UNUSED,
-			 struct repository *repo)
+अटल पूर्णांक module_gitdir(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix UNUSED,
+			 काष्ठा repository *repo)
 {
-	struct strbuf gitdir = STRBUF_INIT;
+	काष्ठा strbuf gitdir = STRBUF_INIT;
 
-	if (argc != 2)
+	अगर (argc != 2)
 		usage(_("git submodule--helper gitdir <name>"));
 
 	submodule_name_to_gitdir(&gitdir, repo, argv[1]);
 
-	printf("%s\n", gitdir.buf);
+	म_लिखो("%s\n", gitdir.buf);
 
 	strbuf_release(&gitdir);
-	return 0;
+	वापस 0;
 }
 
-static int module_migrate(int argc UNUSED, const char **argv UNUSED,
-			  const char *prefix UNUSED, struct repository *repo)
+अटल पूर्णांक module_migrate(पूर्णांक argc UNUSED, स्थिर अक्षर **argv UNUSED,
+			  स्थिर अक्षर *prefix UNUSED, काष्ठा repository *repo)
 {
-	struct strbuf module_dir = STRBUF_INIT;
-	DIR *dir;
-	struct dirent *de;
-	int repo_version = 0;
+	काष्ठा strbuf module_dir = STRBUF_INIT;
+	सूची *dir;
+	काष्ठा dirent *de;
+	पूर्णांक repo_version = 0;
 
 	repo_git_path_append(repo, &module_dir, "modules/");
 
-	dir = opendir(module_dir.buf);
-	if (!dir)
+	dir = सूची_खोलो(module_dir.buf);
+	अगर (!dir)
 		die(_("could not open '%s'"), module_dir.buf);
 
-	while ((de = readdir(dir))) {
-		struct strbuf gitdir_path = STRBUF_INIT;
-		char *key;
-		const char *value;
+	जबतक ((de = सूची_पढ़ो(dir))) {
+		काष्ठा strbuf gitdir_path = STRBUF_INIT;
+		अक्षर *कुंजी;
+		स्थिर अक्षर *मूल्य;
 
-		if (is_dot_or_dotdot(de->d_name))
-			continue;
+		अगर (is_dot_or_dotdot(de->d_name))
+			जारी;
 
 		strbuf_addf(&gitdir_path, "%s/%s", module_dir.buf, de->d_name);
-		if (!is_git_directory(gitdir_path.buf)) {
+		अगर (!is_git_directory(gitdir_path.buf)) {
 			strbuf_release(&gitdir_path);
-			continue;
+			जारी;
 		}
 		strbuf_release(&gitdir_path);
 
-		key = xstrfmt("submodule.%s.gitdir", de->d_name);
-		if (!repo_config_get_string_tmp(repo, key, &value)) {
+		कुंजी = xstrfmt("submodule.%s.gitdir", de->d_name);
+		अगर (!repo_config_get_string_tmp(repo, कुंजी, &मूल्य)) {
 			/* Already has a gitdir config, nothing to do. */
-			free(key);
-			continue;
+			मुक्त(कुंजी);
+			जारी;
 		}
-		free(key);
+		मुक्त(कुंजी);
 
 		create_default_gitdir_config(de->d_name);
 	}
 
-	closedir(dir);
+	बंद_सूची(dir);
 	strbuf_release(&module_dir);
 
 	repo_config_get_int(the_repository, "core.repositoryformatversion", &repo_version);
-	if (repo_version == 0 &&
+	अगर (repo_version == 0 &&
 	    repo_config_set_gently(repo, "core.repositoryformatversion", "1"))
 		die(_("could not set core.repositoryformatversion to 1.\n"
 		      "Please set it for migration to work, for example:\n"
 		      "git config core.repositoryformatversion 1"));
 
-	if (repo_config_set_gently(repo, "extensions.submodulePathConfig", "true"))
+	अगर (repo_config_set_gently(repo, "extensions.submodulePathConfig", "true"))
 		die(_("could not enable submodulePathConfig extension. It is required\n"
 		      "for migration to work. Please enable it in the root repo:\n"
 		      "git config extensions.submodulePathConfig true"));
 
 	repo->repository_format_submodule_path_cfg = 1;
 
-	return 0;
+	वापस 0;
 }
 
-struct sync_cb {
-	const char *prefix;
-	const char *super_prefix;
-	unsigned int flags;
+काष्ठा sync_cb {
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *super_prefix;
+	अचिन्हित पूर्णांक flags;
 };
-#define SYNC_CB_INIT { 0 }
+#घोषणा SYNC_CB_INIT { 0 }
 
-static void sync_submodule(const char *path, const char *prefix,
-			   const char *super_prefix, unsigned int flags)
+अटल व्योम sync_submodule(स्थिर अक्षर *path, स्थिर अक्षर *prefix,
+			   स्थिर अक्षर *super_prefix, अचिन्हित पूर्णांक flags)
 {
-	const struct submodule *sub;
-	char *remote_key = NULL;
-	char *sub_origin_url, *super_config_url, *displaypath, *default_remote;
-	struct strbuf sb = STRBUF_INIT;
-	char *sub_config_path = NULL;
-	int code;
+	स्थिर काष्ठा submodule *sub;
+	अक्षर *remote_कुंजी = शून्य;
+	अक्षर *sub_origin_url, *super_config_url, *displaypath, *default_remote;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	अक्षर *sub_config_path = शून्य;
+	पूर्णांक code;
 
-	if (!is_submodule_active(the_repository, path))
-		return;
+	अगर (!is_submodule_active(the_repository, path))
+		वापस;
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	अगर (validate_submodule_path(path) < 0)
+		die(शून्य);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (sub && sub->url) {
-		if (starts_with_dot_dot_slash(sub->url) ||
+	अगर (sub && sub->url) {
+		अगर (starts_with_dot_dot_slash(sub->url) ||
 		    starts_with_dot_slash(sub->url)) {
-			char *up_path = get_up_path(path);
+			अक्षर *up_path = get_up_path(path);
 
 			sub_origin_url = resolve_relative_url(sub->url, up_path, 1);
-			super_config_url = resolve_relative_url(sub->url, NULL, 1);
-			free(up_path);
-		} else {
+			super_config_url = resolve_relative_url(sub->url, शून्य, 1);
+			मुक्त(up_path);
+		} अन्यथा {
 			sub_origin_url = xstrdup(sub->url);
 			super_config_url = xstrdup(sub->url);
 		}
-	} else {
+	} अन्यथा {
 		sub_origin_url = xstrdup("");
 		super_config_url = xstrdup("");
 	}
 
 	displaypath = get_submodule_displaypath(path, prefix, super_prefix);
 
-	if (!(flags & OPT_QUIET))
-		printf(_("Synchronizing submodule url for '%s'\n"),
+	अगर (!(flags & OPT_QUIET))
+		म_लिखो(_("Synchronizing submodule url for '%s'\n"),
 			 displaypath);
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_set_gently(the_repository, sb.buf, super_config_url))
+	अगर (repo_config_set_gently(the_repository, sb.buf, super_config_url))
 		die(_("failed to register url for submodule path '%s'"),
 		      displaypath);
 
-	if (!is_submodule_populated_gently(path, NULL))
-		goto cleanup;
+	अगर (!is_submodule_populated_gently(path, शून्य))
+		जाओ cleanup;
 
 	strbuf_reset(&sb);
 	code = get_default_remote_submodule(path, &default_remote);
-	if (code)
-		exit(code);
+	अगर (code)
+		निकास(code);
 
-	remote_key = xstrfmt("remote.%s.url", default_remote);
-	free(default_remote);
+	remote_कुंजी = xstrfmt("remote.%s.url", default_remote);
+	मुक्त(default_remote);
 
 	submodule_to_gitdir(the_repository, &sb, path);
 	strbuf_addstr(&sb, "/config");
 
-	if (repo_config_set_in_file_gently(the_repository, sb.buf, remote_key, NULL, sub_origin_url))
+	अगर (repo_config_set_in_file_gently(the_repository, sb.buf, remote_कुंजी, शून्य, sub_origin_url))
 		die(_("failed to update remote for submodule '%s'"),
 		      path);
 
-	if (flags & OPT_RECURSIVE) {
-		struct child_process cpr = CHILD_PROCESS_INIT;
+	अगर (flags & OPT_RECURSIVE) {
+		काष्ठा child_process cpr = CHILD_PROCESS_INIT;
 
 		cpr.git_cmd = 1;
 		cpr.dir = path;
 		prepare_submodule_repo_env(&cpr.env);
 
 		strvec_pushl(&cpr.args, "submodule--helper", "sync",
-			     "--recursive", NULL);
+			     "--recursive", शून्य);
 		strvec_pushf(&cpr.args, "--super-prefix=%s/", displaypath);
 
-		if (flags & OPT_QUIET)
-			strvec_push(&cpr.args, "--quiet");
+		अगर (flags & OPT_QUIET)
+			strvec_धकेलो(&cpr.args, "--quiet");
 
-		if (run_command(&cpr))
+		अगर (run_command(&cpr))
 			die(_("failed to recurse into submodule '%s'"),
 			      path);
 	}
 
 cleanup:
-	free(super_config_url);
-	free(sub_origin_url);
+	मुक्त(super_config_url);
+	मुक्त(sub_origin_url);
 	strbuf_release(&sb);
-	free(remote_key);
-	free(displaypath);
-	free(sub_config_path);
+	मुक्त(remote_कुंजी);
+	मुक्त(displaypath);
+	मुक्त(sub_config_path);
 }
 
-static void sync_submodule_cb(const struct cache_entry *list_item, void *cb_data)
+अटल व्योम sync_submodule_cb(स्थिर काष्ठा cache_entry *list_item, व्योम *cb_तथ्य)
 {
-	struct sync_cb *info = cb_data;
+	काष्ठा sync_cb *info = cb_तथ्य;
 
 	sync_submodule(list_item->name, info->prefix, info->super_prefix,
 		       info->flags);
 }
 
-static int module_sync(int argc, const char **argv, const char *prefix,
-		       struct repository *repo UNUSED)
+अटल पूर्णांक module_sync(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+		       काष्ठा repository *repo UNUSED)
 {
-	struct sync_cb info = SYNC_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	int recursive = 0;
-	struct option module_sync_options[] = {
+	काष्ठा sync_cb info = SYNC_CB_INIT;
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा module_list list = MODULE_LIST_INIT;
+	पूर्णांक quiet = 0;
+	पूर्णांक recursive = 0;
+	काष्ठा option module_sync_options[] = {
 		OPT__SUPER_PREFIX(&info.super_prefix),
 		OPT__QUIET(&quiet, N_("suppress output of synchronizing submodule url")),
 		OPT_BOOL(0, "recursive", &recursive,
 			N_("recurse into nested submodules")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule sync [--quiet] [--recursive] [<path>]"),
-		NULL
+		शून्य
 	};
-	int ret = 1;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_sync_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	अगर (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		जाओ cleanup;
 
 	info.prefix = prefix;
-	if (quiet)
+	अगर (quiet)
 		info.flags |= OPT_QUIET;
-	if (recursive)
+	अगर (recursive)
 		info.flags |= OPT_RECURSIVE;
 
 	for_each_listed_submodule(&list, sync_submodule_cb, &info);
@@ -1572,58 +1572,58 @@ static int module_sync(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	वापस ret;
 }
 
-struct deinit_cb {
-	const char *prefix;
-	unsigned int flags;
+काष्ठा deinit_cb {
+	स्थिर अक्षर *prefix;
+	अचिन्हित पूर्णांक flags;
 };
-#define DEINIT_CB_INIT { 0 }
+#घोषणा DEINIT_CB_INIT { 0 }
 
-static void deinit_submodule(const char *path, const char *prefix,
-			     unsigned int flags)
+अटल व्योम deinit_submodule(स्थिर अक्षर *path, स्थिर अक्षर *prefix,
+			     अचिन्हित पूर्णांक flags)
 {
-	const struct submodule *sub;
-	char *displaypath = NULL;
-	struct child_process cp_config = CHILD_PROCESS_INIT;
-	struct strbuf sb_config = STRBUF_INIT;
-	char *sub_git_dir = xstrfmt("%s/.git", path);
+	स्थिर काष्ठा submodule *sub;
+	अक्षर *displaypath = शून्य;
+	काष्ठा child_process cp_config = CHILD_PROCESS_INIT;
+	काष्ठा strbuf sb_config = STRBUF_INIT;
+	अक्षर *sub_git_dir = xstrfmt("%s/.git", path);
 
-	if (validate_submodule_path(path) < 0)
-		die(NULL);
+	अगर (validate_submodule_path(path) < 0)
+		die(शून्य);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub || !sub->name)
-		goto cleanup;
+	अगर (!sub || !sub->name)
+		जाओ cleanup;
 
-	displaypath = get_submodule_displaypath(path, prefix, NULL);
+	displaypath = get_submodule_displaypath(path, prefix, शून्य);
 
 	/* remove the submodule work tree (unless the user already did it) */
-	if (is_directory(path)) {
-		struct strbuf sb_rm = STRBUF_INIT;
-		const char *format;
+	अगर (is_directory(path)) {
+		काष्ठा strbuf sb_rm = STRBUF_INIT;
+		स्थिर अक्षर *format;
 
-		if (is_directory(sub_git_dir)) {
-			if (!(flags & OPT_QUIET))
+		अगर (is_directory(sub_git_dir)) {
+			अगर (!(flags & OPT_QUIET))
 				warning(_("Submodule work tree '%s' contains a .git "
 					  "directory. This will be replaced with a "
 					  ".git file by using absorbgitdirs."),
 					displaypath);
 
-			absorb_git_dir_into_superproject(path, NULL);
+			absorb_git_dir_into_superproject(path, शून्य);
 
 		}
 
-		if (!(flags & OPT_FORCE)) {
-			struct child_process cp_rm = CHILD_PROCESS_INIT;
+		अगर (!(flags & OPT_FORCE)) {
+			काष्ठा child_process cp_rm = CHILD_PROCESS_INIT;
 
 			cp_rm.git_cmd = 1;
 			strvec_pushl(&cp_rm.args, "rm", "-qn",
-				     path, NULL);
+				     path, शून्य);
 
-			if (run_command(&cp_rm))
+			अगर (run_command(&cp_rm))
 				die(_("Submodule work tree '%s' contains local "
 				      "modifications; use '-f' to discard them"),
 				      displaypath);
@@ -1631,95 +1631,95 @@ static void deinit_submodule(const char *path, const char *prefix,
 
 		strbuf_addstr(&sb_rm, path);
 
-		if (!remove_dir_recursively(&sb_rm, 0))
+		अगर (!remove_dir_recursively(&sb_rm, 0))
 			format = _("Cleared directory '%s'\n");
-		else
+		अन्यथा
 			format = _("Could not remove submodule work tree '%s'\n");
 
-		if (!(flags & OPT_QUIET))
-			printf(format, displaypath);
+		अगर (!(flags & OPT_QUIET))
+			म_लिखो(format, displaypath);
 
 		submodule_unset_core_worktree(sub);
 
 		strbuf_release(&sb_rm);
 	}
 
-	if (mkdir(path, 0777))
-		printf(_("could not create empty submodule directory %s"),
+	अगर (सूची_गढ़ो(path, 0777))
+		म_लिखो(_("could not create empty submodule directory %s"),
 		      displaypath);
 
 	cp_config.git_cmd = 1;
-	strvec_pushl(&cp_config.args, "config", "--get-regexp", NULL);
+	strvec_pushl(&cp_config.args, "config", "--get-regexp", शून्य);
 	strvec_pushf(&cp_config.args, "submodule.%s\\.", sub->name);
 
 	/* remove the .git/config entries (unless the user already did it) */
-	if (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
-		char *sub_key = xstrfmt("submodule.%s", sub->name);
+	अगर (!capture_command(&cp_config, &sb_config, 0) && sb_config.len) {
+		अक्षर *sub_कुंजी = xstrfmt("submodule.%s", sub->name);
 
 		/*
 		 * remove the whole section so we have a clean state when
 		 * the user later decides to init this submodule again
 		 */
-		repo_config_rename_section_in_file(the_repository, NULL, sub_key, NULL);
-		if (!(flags & OPT_QUIET))
-			printf(_("Submodule '%s' (%s) unregistered for path '%s'\n"),
+		repo_config_rename_section_in_file(the_repository, शून्य, sub_कुंजी, शून्य);
+		अगर (!(flags & OPT_QUIET))
+			म_लिखो(_("Submodule '%s' (%s) unregistered for path '%s'\n"),
 				 sub->name, sub->url, displaypath);
-		free(sub_key);
+		मुक्त(sub_कुंजी);
 	}
 
 cleanup:
-	free(displaypath);
-	free(sub_git_dir);
+	मुक्त(displaypath);
+	मुक्त(sub_git_dir);
 	strbuf_release(&sb_config);
 }
 
-static void deinit_submodule_cb(const struct cache_entry *list_item,
-				void *cb_data)
+अटल व्योम deinit_submodule_cb(स्थिर काष्ठा cache_entry *list_item,
+				व्योम *cb_तथ्य)
 {
-	struct deinit_cb *info = cb_data;
+	काष्ठा deinit_cb *info = cb_तथ्य;
 	deinit_submodule(list_item->name, info->prefix, info->flags);
 }
 
-static int module_deinit(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+अटल पूर्णांक module_deinit(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			 काष्ठा repository *repo UNUSED)
 {
-	struct deinit_cb info = DEINIT_CB_INIT;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	int quiet = 0;
-	int force = 0;
-	int all = 0;
-	struct option module_deinit_options[] = {
+	काष्ठा deinit_cb info = DEINIT_CB_INIT;
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा module_list list = MODULE_LIST_INIT;
+	पूर्णांक quiet = 0;
+	पूर्णांक force = 0;
+	पूर्णांक all = 0;
+	काष्ठा option module_deinit_options[] = {
 		OPT__QUIET(&quiet, N_("suppress submodule status output")),
 		OPT__FORCE(&force, N_("remove submodule working trees even if they contain local changes"), 0),
 		OPT_BOOL(0, "all", &all, N_("unregister all submodules")),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule deinit [--quiet] [-f | --force] [--all | [--] [<path>...]]"),
-		NULL
+		शून्य
 	};
-	int ret = 1;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, module_deinit_options,
 			     git_submodule_helper_usage, 0);
 
-	if (all && argc) {
+	अगर (all && argc) {
 		error("pathspec and --all are incompatible");
 		usage_with_options(git_submodule_helper_usage,
 				   module_deinit_options);
 	}
 
-	if (!argc && !all)
+	अगर (!argc && !all)
 		die(_("Use '--all' if you really want to deinitialize all submodules"));
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	अगर (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		जाओ cleanup;
 
 	info.prefix = prefix;
-	if (quiet)
+	अगर (quiet)
 		info.flags |= OPT_QUIET;
-	if (force)
+	अगर (force)
 		info.flags |= OPT_FORCE;
 
 	for_each_listed_submodule(&list, deinit_submodule_cb, &info);
@@ -1728,66 +1728,66 @@ static int module_deinit(int argc, const char **argv, const char *prefix,
 cleanup:
 	module_list_release(&list);
 	clear_pathspec(&pathspec);
-	return ret;
+	वापस ret;
 }
 
-struct module_clone_data {
-	const char *prefix;
-	const char *path;
-	const char *name;
-	const char *url;
-	int depth;
-	struct list_objects_filter_options *filter_options;
-	enum ref_storage_format ref_storage_format;
-	unsigned int quiet: 1;
-	unsigned int progress: 1;
-	unsigned int dissociate: 1;
-	unsigned int require_init: 1;
-	int single_branch;
+काष्ठा module_clone_तथ्य {
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *path;
+	स्थिर अक्षर *name;
+	स्थिर अक्षर *url;
+	पूर्णांक depth;
+	काष्ठा list_objects_filter_options *filter_options;
+	क्रमागत ref_storage_format ref_storage_format;
+	अचिन्हित पूर्णांक quiet: 1;
+	अचिन्हित पूर्णांक progress: 1;
+	अचिन्हित पूर्णांक dissociate: 1;
+	अचिन्हित पूर्णांक require_init: 1;
+	पूर्णांक single_branch;
 };
-#define MODULE_CLONE_DATA_INIT { \
+#घोषणा MODULE_CLONE_तथ्य_INIT { \
 	.single_branch = -1, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-struct submodule_alternate_setup {
-	const char *submodule_name;
-	enum SUBMODULE_ALTERNATE_ERROR_MODE {
+काष्ठा submodule_alternate_setup {
+	स्थिर अक्षर *submodule_name;
+	क्रमागत SUBMODULE_ALTERNATE_ERROR_MODE {
 		SUBMODULE_ALTERNATE_ERROR_DIE,
 		SUBMODULE_ALTERNATE_ERROR_INFO,
 		SUBMODULE_ALTERNATE_ERROR_IGNORE
 	} error_mode;
-	struct string_list *reference;
+	काष्ठा string_list *reference;
 };
-#define SUBMODULE_ALTERNATE_SETUP_INIT { \
+#घोषणा SUBMODULE_ALTERNATE_SETUP_INIT { \
 	.error_mode = SUBMODULE_ALTERNATE_ERROR_IGNORE, \
 }
 
-static const char alternate_error_advice[] = N_(
+अटल स्थिर अक्षर alternate_error_advice[] = N_(
 "An alternate computed from a superproject's alternate is invalid.\n"
 "To allow Git to clone without an alternate in such a case, set\n"
 "submodule.alternateErrorStrategy to 'info' or, equivalently, clone with\n"
 "'--reference-if-able' instead of '--reference'."
 );
 
-static int add_possible_reference_from_superproject(
-		struct odb_files_dir *alt_odb, void *sas_cb)
+अटल पूर्णांक add_possible_reference_from_superproject(
+		काष्ठा odb_files_dir *alt_odb, व्योम *sas_cb)
 {
-	struct submodule_alternate_setup *sas = sas_cb;
-	size_t len;
+	काष्ठा submodule_alternate_setup *sas = sas_cb;
+	माप_प्रकार len;
 
 	/*
 	 * If the alternate object store is another repository, try the
 	 * standard layout with .git/(modules/<name>)+/objects
 	 */
-	if (strip_suffix(alt_odb->abspath, "/objects", &len)) {
-		struct repository alternate;
-		char *sm_alternate;
-		struct strbuf sb = STRBUF_INIT;
-		struct strbuf err = STRBUF_INIT;
+	अगर (strip_suffix(alt_odb->abspath, "/objects", &len)) {
+		काष्ठा repository alternate;
+		अक्षर *sm_alternate;
+		काष्ठा strbuf sb = STRBUF_INIT;
+		काष्ठा strbuf err = STRBUF_INIT;
 		strbuf_add(&sb, alt_odb->abspath, len);
 
-		if (repo_init(&alternate, sb.buf, NULL) < 0)
+		अगर (repo_init(&alternate, sb.buf, शून्य) < 0)
 			die(_("could not get a repository handle for gitdir '%s'"),
 			    sb.buf);
 
@@ -1803,22 +1803,22 @@ static int add_possible_reference_from_superproject(
 		repo_clear(&alternate);
 
 		sm_alternate = compute_alternate_path(sb.buf, &err);
-		if (sm_alternate) {
-			char *p = strbuf_detach(&sb, NULL);
+		अगर (sm_alternate) {
+			अक्षर *p = strbuf_detach(&sb, शून्य);
 
 			string_list_append(sas->reference, p)->util = p;
-			free(sm_alternate);
-		} else {
-			switch (sas->error_mode) {
-			case SUBMODULE_ALTERNATE_ERROR_DIE:
-				if (advice_enabled(ADVICE_SUBMODULE_ALTERNATE_ERROR_STRATEGY_DIE))
+			मुक्त(sm_alternate);
+		} अन्यथा {
+			चयन (sas->error_mode) {
+			हाल SUBMODULE_ALTERNATE_ERROR_DIE:
+				अगर (advice_enabled(ADVICE_SUBMODULE_ALTERNATE_ERROR_STRATEGY_DIE))
 					advise(_(alternate_error_advice));
 				die(_("submodule '%s' cannot add alternate: %s"),
 				    sas->submodule_name, err.buf);
-			case SUBMODULE_ALTERNATE_ERROR_INFO:
-				fprintf_ln(stderr, _("submodule '%s' cannot add alternate: %s"),
+			हाल SUBMODULE_ALTERNATE_ERROR_INFO:
+				fprintf_ln(मानक_त्रुटि, _("submodule '%s' cannot add alternate: %s"),
 					sas->submodule_name, err.buf);
-			case SUBMODULE_ALTERNATE_ERROR_IGNORE:
+			हाल SUBMODULE_ALTERNATE_ERROR_IGNORE:
 				; /* nothing */
 			}
 		}
@@ -1827,170 +1827,170 @@ static int add_possible_reference_from_superproject(
 		strbuf_release(&sb);
 	}
 
-	return 0;
+	वापस 0;
 }
 
-static void prepare_possible_alternates(const char *sm_name,
-		struct string_list *reference)
+अटल व्योम prepare_possible_alternates(स्थिर अक्षर *sm_name,
+		काष्ठा string_list *reference)
 {
-	char *sm_alternate = NULL, *error_strategy = NULL;
-	struct submodule_alternate_setup sas = SUBMODULE_ALTERNATE_SETUP_INIT;
+	अक्षर *sm_alternate = शून्य, *error_strategy = शून्य;
+	काष्ठा submodule_alternate_setup sas = SUBMODULE_ALTERNATE_SETUP_INIT;
 
 	repo_config_get_string(the_repository, "submodule.alternateLocation", &sm_alternate);
-	if (!sm_alternate)
-		return;
+	अगर (!sm_alternate)
+		वापस;
 
 	repo_config_get_string(the_repository, "submodule.alternateErrorStrategy", &error_strategy);
 
-	if (!error_strategy)
+	अगर (!error_strategy)
 		error_strategy = xstrdup("die");
 
 	sas.submodule_name = sm_name;
 	sas.reference = reference;
-	if (!strcmp(error_strategy, "die"))
+	अगर (!म_भेद(error_strategy, "die"))
 		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_DIE;
-	else if (!strcmp(error_strategy, "info"))
+	अन्यथा अगर (!म_भेद(error_strategy, "info"))
 		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_INFO;
-	else if (!strcmp(error_strategy, "ignore"))
+	अन्यथा अगर (!म_भेद(error_strategy, "ignore"))
 		sas.error_mode = SUBMODULE_ALTERNATE_ERROR_IGNORE;
-	else
+	अन्यथा
 		die(_("Value '%s' for submodule.alternateErrorStrategy is not recognized"), error_strategy);
 
-	if (!strcmp(sm_alternate, "superproject"))
+	अगर (!म_भेद(sm_alternate, "superproject"))
 		odb_for_each_alternate(the_repository->objects,
 				       add_possible_reference_from_superproject, &sas);
-	else if (!strcmp(sm_alternate, "no"))
+	अन्यथा अगर (!म_भेद(sm_alternate, "no"))
 		; /* do nothing */
-	else
+	अन्यथा
 		die(_("Value '%s' for submodule.alternateLocation is not recognized"), sm_alternate);
 
-	free(sm_alternate);
-	free(error_strategy);
+	मुक्त(sm_alternate);
+	मुक्त(error_strategy);
 }
 
-static char *clone_submodule_sm_gitdir(const char *name)
+अटल अक्षर *clone_submodule_sm_gitdir(स्थिर अक्षर *name)
 {
-	struct strbuf sb = STRBUF_INIT;
-	char *sm_gitdir;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	अक्षर *sm_gitdir;
 
 	submodule_name_to_gitdir(&sb, the_repository, name);
 	sm_gitdir = absolute_pathdup(sb.buf);
 	strbuf_release(&sb);
 
-	return sm_gitdir;
+	वापस sm_gitdir;
 }
 
-static int dir_contains_only_dotgit(const char *path)
+अटल पूर्णांक dir_contains_only_dotgit(स्थिर अक्षर *path)
 {
-	DIR *dir = opendir(path);
-	struct dirent *e;
-	int ret = 1;
+	सूची *dir = सूची_खोलो(path);
+	काष्ठा dirent *e;
+	पूर्णांक ret = 1;
 
-	if (!dir)
-		return 0;
+	अगर (!dir)
+		वापस 0;
 
 	e = readdir_skip_dot_and_dotdot(dir);
-	if (!e)
+	अगर (!e)
 		ret = 0;
-	else if (strcmp(DEFAULT_GIT_DIR_ENVIRONMENT, e->d_name) ||
+	अन्यथा अगर (म_भेद(DEFAULT_GIT_DIR_ENVIRONMENT, e->d_name) ||
 		 (e = readdir_skip_dot_and_dotdot(dir))) {
 		error("unexpected item '%s' in '%s'", e->d_name, path);
 		ret = 0;
 	}
 
-	closedir(dir);
-	return ret;
+	बंद_सूची(dir);
+	वापस ret;
 }
 
-static int clone_submodule(const struct module_clone_data *clone_data,
-			   struct string_list *reference)
+अटल पूर्णांक clone_submodule(स्थिर काष्ठा module_clone_तथ्य *clone_तथ्य,
+			   काष्ठा string_list *reference)
 {
-	char *p;
-	char *sm_gitdir = clone_submodule_sm_gitdir(clone_data->name);
-	char *sm_alternate = NULL, *error_strategy = NULL;
-	struct stat st;
-	struct child_process cp = CHILD_PROCESS_INIT;
-	const char *clone_data_path = clone_data->path;
-	char *to_free = NULL;
+	अक्षर *p;
+	अक्षर *sm_gitdir = clone_submodule_sm_gitdir(clone_तथ्य->name);
+	अक्षर *sm_alternate = शून्य, *error_strategy = शून्य;
+	काष्ठा stat st;
+	काष्ठा child_process cp = CHILD_PROCESS_INIT;
+	स्थिर अक्षर *clone_तथ्य_path = clone_तथ्य->path;
+	अक्षर *to_free = शून्य;
 
-	if (validate_submodule_path(clone_data_path) < 0)
-		die(NULL);
+	अगर (validate_submodule_path(clone_तथ्य_path) < 0)
+		die(शून्य);
 
-	if (!is_absolute_path(clone_data->path))
-		clone_data_path = to_free = xstrfmt("%s/%s", repo_get_work_tree(the_repository),
-						    clone_data->path);
+	अगर (!is_absolute_path(clone_तथ्य->path))
+		clone_तथ्य_path = to_free = xstrfmt("%s/%s", repo_get_work_वृक्ष(the_repository),
+						    clone_तथ्य->path);
 
-	if (!file_exists(sm_gitdir)) {
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
-		    !is_empty_dir(clone_data_path))
-			die(_("directory not empty: '%s'"), clone_data_path);
+	अगर (!file_exists(sm_gitdir)) {
+		अगर (clone_तथ्य->require_init && !stat(clone_तथ्य_path, &st) &&
+		    !is_empty_dir(clone_तथ्य_path))
+			die(_("directory not empty: '%s'"), clone_तथ्य_path);
 
-		if (safe_create_leading_directories_const(the_repository, sm_gitdir) < 0)
+		अगर (safe_create_leading_directories_const(the_repository, sm_gitdir) < 0)
 			die(_("could not create directory '%s'"), sm_gitdir);
 
-		prepare_possible_alternates(clone_data->name, reference);
+		prepare_possible_alternates(clone_तथ्य->name, reference);
 
-		strvec_push(&cp.args, "clone");
-		strvec_push(&cp.args, "--no-checkout");
-		if (clone_data->quiet)
-			strvec_push(&cp.args, "--quiet");
-		if (clone_data->progress)
-			strvec_push(&cp.args, "--progress");
-		if (clone_data->depth > 0)
-			strvec_pushf(&cp.args, "--depth=%d", clone_data->depth);
-		if (reference->nr) {
-			struct string_list_item *item;
+		strvec_धकेलो(&cp.args, "clone");
+		strvec_धकेलो(&cp.args, "--no-checkout");
+		अगर (clone_तथ्य->quiet)
+			strvec_धकेलो(&cp.args, "--quiet");
+		अगर (clone_तथ्य->progress)
+			strvec_धकेलो(&cp.args, "--progress");
+		अगर (clone_तथ्य->depth > 0)
+			strvec_pushf(&cp.args, "--depth=%d", clone_तथ्य->depth);
+		अगर (reference->nr) {
+			काष्ठा string_list_item *item;
 
 			for_each_string_list_item(item, reference)
 				strvec_pushl(&cp.args, "--reference",
-					     item->string, NULL);
+					     item->string, शून्य);
 		}
-		if (clone_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+		अगर (clone_तथ्य->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 			strvec_pushf(&cp.args, "--ref-storage-format=%s",
-				     ref_storage_format_to_name(clone_data->ref_storage_format));
-		if (clone_data->dissociate)
-			strvec_push(&cp.args, "--dissociate");
-		if (sm_gitdir && *sm_gitdir)
-			strvec_pushl(&cp.args, "--separate-git-dir", sm_gitdir, NULL);
-		if (clone_data->filter_options && clone_data->filter_options->choice)
+				     ref_storage_format_to_name(clone_तथ्य->ref_storage_format));
+		अगर (clone_तथ्य->dissociate)
+			strvec_धकेलो(&cp.args, "--dissociate");
+		अगर (sm_gitdir && *sm_gitdir)
+			strvec_pushl(&cp.args, "--separate-git-dir", sm_gitdir, शून्य);
+		अगर (clone_तथ्य->filter_options && clone_तथ्य->filter_options->choice)
 			strvec_pushf(&cp.args, "--filter=%s",
 				     expand_list_objects_filter_spec(
-					     clone_data->filter_options));
-		if (clone_data->single_branch >= 0)
-			strvec_push(&cp.args, clone_data->single_branch ?
+					     clone_तथ्य->filter_options));
+		अगर (clone_तथ्य->single_branch >= 0)
+			strvec_धकेलो(&cp.args, clone_तथ्य->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 
-		strvec_push(&cp.args, "--");
-		strvec_push(&cp.args, clone_data->url);
-		strvec_push(&cp.args, clone_data_path);
+		strvec_धकेलो(&cp.args, "--");
+		strvec_धकेलो(&cp.args, clone_तथ्य->url);
+		strvec_धकेलो(&cp.args, clone_तथ्य_path);
 
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
 		cp.no_stdin = 1;
 
-		if(run_command(&cp))
+		अगर(run_command(&cp))
 			die(_("clone of '%s' into submodule path '%s' failed"),
-			    clone_data->url, clone_data_path);
+			    clone_तथ्य->url, clone_तथ्य_path);
 
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
-		    !dir_contains_only_dotgit(clone_data_path)) {
-			char *dot_git = xstrfmt("%s/.git", clone_data_path);
+		अगर (clone_तथ्य->require_init && !stat(clone_तथ्य_path, &st) &&
+		    !dir_contains_only_dotgit(clone_तथ्य_path)) {
+			अक्षर *dot_git = xstrfmt("%s/.git", clone_तथ्य_path);
 			unlink(dot_git);
-			free(dot_git);
-			die(_("directory not empty: '%s'"), clone_data_path);
+			मुक्त(dot_git);
+			die(_("directory not empty: '%s'"), clone_तथ्य_path);
 		}
-	} else {
-		char *path;
+	} अन्यथा {
+		अक्षर *path;
 
-		if (clone_data->require_init && !stat(clone_data_path, &st) &&
-		    !is_empty_dir(clone_data_path))
-			die(_("directory not empty: '%s'"), clone_data_path);
-		if (safe_create_leading_directories_const(the_repository, clone_data_path) < 0)
-			die(_("could not create directory '%s'"), clone_data_path);
+		अगर (clone_तथ्य->require_init && !stat(clone_तथ्य_path, &st) &&
+		    !is_empty_dir(clone_तथ्य_path))
+			die(_("directory not empty: '%s'"), clone_तथ्य_path);
+		अगर (safe_create_leading_directories_const(the_repository, clone_तथ्य_path) < 0)
+			die(_("could not create directory '%s'"), clone_तथ्य_path);
 		path = xstrfmt("%s/index", sm_gitdir);
 		unlink_or_warn(path);
-		free(path);
+		मुक्त(path);
 	}
 
 	/*
@@ -2002,61 +2002,61 @@ static int clone_submodule(const struct module_clone_data *clone_data,
 	 * To prevent further harm coming from this unintentionally-nested
 	 * gitdir, let's disable it by deleting the `HEAD` file.
 	 */
-	if (validate_submodule_git_dir(sm_gitdir, clone_data->name) < 0) {
-		char *head = xstrfmt("%s/HEAD", sm_gitdir);
-		unlink(head);
-		free(head);
+	अगर (validate_submodule_git_dir(sm_gitdir, clone_तथ्य->name) < 0) {
+		अक्षर *शीर्ष = xstrfmt("%s/HEAD", sm_gitdir);
+		unlink(शीर्ष);
+		मुक्त(शीर्ष);
 		die(_("refusing to create/use '%s' in another submodule's git dir. "
 		      "Enabling extensions.submodulePathConfig should fix this."),
 		    sm_gitdir);
 	}
 
-	connect_work_tree_and_git_dir(clone_data_path, sm_gitdir, 0);
+	connect_work_वृक्ष_and_git_dir(clone_तथ्य_path, sm_gitdir, 0);
 
-	p = repo_submodule_path(the_repository, clone_data_path, "config");
-	if (!p)
-		die(_("could not get submodule directory for '%s'"), clone_data_path);
+	p = repo_submodule_path(the_repository, clone_तथ्य_path, "config");
+	अगर (!p)
+		die(_("could not get submodule directory for '%s'"), clone_तथ्य_path);
 
 	/* setup alternateLocation and alternateErrorStrategy in the cloned submodule if needed */
 	repo_config_get_string(the_repository, "submodule.alternateLocation", &sm_alternate);
-	if (sm_alternate)
+	अगर (sm_alternate)
 		repo_config_set_in_file(the_repository, p, "submodule.alternateLocation",
 					sm_alternate);
 	repo_config_get_string(the_repository, "submodule.alternateErrorStrategy", &error_strategy);
-	if (error_strategy)
+	अगर (error_strategy)
 		repo_config_set_in_file(the_repository, p, "submodule.alternateErrorStrategy",
 					error_strategy);
 
-	free(sm_alternate);
-	free(error_strategy);
+	मुक्त(sm_alternate);
+	मुक्त(error_strategy);
 
-	free(sm_gitdir);
-	free(p);
-	free(to_free);
-	return 0;
+	मुक्त(sm_gitdir);
+	मुक्त(p);
+	मुक्त(to_free);
+	वापस 0;
 }
 
-static int module_clone(int argc, const char **argv, const char *prefix,
-			struct repository *repo UNUSED)
+अटल पूर्णांक module_clone(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			काष्ठा repository *repo UNUSED)
 {
-	int dissociate = 0, quiet = 0, progress = 0, require_init = 0;
-	struct module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
-	struct string_list reference = STRING_LIST_INIT_NODUP;
-	struct list_objects_filter_options filter_options =
+	पूर्णांक dissociate = 0, quiet = 0, progress = 0, require_init = 0;
+	काष्ठा module_clone_तथ्य clone_तथ्य = MODULE_CLONE_तथ्य_INIT;
+	काष्ठा string_list reference = STRING_LIST_INIT_NODUP;
+	काष्ठा list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	const char *ref_storage_format = NULL;
+	स्थिर अक्षर *ref_storage_format = शून्य;
 
-	struct option module_clone_options[] = {
-		OPT_STRING(0, "prefix", &clone_data.prefix,
+	काष्ठा option module_clone_options[] = {
+		OPT_STRING(0, "prefix", &clone_तथ्य.prefix,
 			   N_("path"),
 			   N_("alternative anchor for relative paths")),
-		OPT_STRING(0, "path", &clone_data.path,
+		OPT_STRING(0, "path", &clone_तथ्य.path,
 			   N_("path"),
 			   N_("where the new submodule will be cloned to")),
-		OPT_STRING(0, "name", &clone_data.name,
+		OPT_STRING(0, "name", &clone_तथ्य.name,
 			   N_("string"),
 			   N_("name of the new submodule")),
-		OPT_STRING(0, "url", &clone_data.url,
+		OPT_STRING(0, "url", &clone_तथ्य.url,
 			   N_("string"),
 			   N_("url where to clone the submodule from")),
 		OPT_STRING_LIST(0, "reference", &reference,
@@ -2067,87 +2067,87 @@ static int module_clone(int argc, const char **argv, const char *prefix,
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "dissociate", &dissociate,
 			   N_("use --reference only while cloning")),
-		OPT_INTEGER(0, "depth", &clone_data.depth,
+		OPT_INTEGER(0, "depth", &clone_तथ्य.depth,
 			   N_("depth for shallow clones")),
 		OPT__QUIET(&quiet, "suppress output for cloning a submodule"),
 		OPT_BOOL(0, "progress", &progress,
 			   N_("force cloning progress")),
 		OPT_BOOL(0, "require-init", &require_init,
 			   N_("disallow cloning into non-empty directory")),
-		OPT_BOOL(0, "single-branch", &clone_data.single_branch,
+		OPT_BOOL(0, "single-branch", &clone_तथ्य.single_branch,
 			 N_("clone only one branch, HEAD or --branch")),
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule--helper clone [--prefix=<path>] [--quiet] "
 		   "[--reference <repository>] [--name <name>] [--depth <depth>] "
 		   "[--single-branch] [--filter <filter-spec>] "
 		   "--url <url> --path <path>"),
-		NULL
+		शून्य
 	};
 
 	argc = parse_options(argc, argv, prefix, module_clone_options,
 			     git_submodule_helper_usage, 0);
 
-	if (ref_storage_format) {
-		clone_data.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (clone_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	अगर (ref_storage_format) {
+		clone_तथ्य.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
+		अगर (clone_तथ्य.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
-	clone_data.dissociate = !!dissociate;
-	clone_data.quiet = !!quiet;
-	clone_data.progress = !!progress;
-	clone_data.require_init = !!require_init;
-	clone_data.filter_options = &filter_options;
+	clone_तथ्य.dissociate = !!dissociate;
+	clone_तथ्य.quiet = !!quiet;
+	clone_तथ्य.progress = !!progress;
+	clone_तथ्य.require_init = !!require_init;
+	clone_तथ्य.filter_options = &filter_options;
 
-	if (argc || !clone_data.url || !clone_data.path || !*(clone_data.path))
+	अगर (argc || !clone_तथ्य.url || !clone_तथ्य.path || !*(clone_तथ्य.path))
 		usage_with_options(git_submodule_helper_usage,
 				   module_clone_options);
 
-	clone_submodule(&clone_data, &reference);
+	clone_submodule(&clone_तथ्य, &reference);
 	list_objects_filter_release(&filter_options);
 	string_list_clear(&reference, 1);
-	return 0;
+	वापस 0;
 }
 
-static int determine_submodule_update_strategy(struct repository *r,
-					       int just_cloned,
-					       const char *path,
-					       enum submodule_update_type update,
-					       struct submodule_update_strategy *out)
+अटल पूर्णांक determine_submodule_update_strategy(काष्ठा repository *r,
+					       पूर्णांक just_cloned,
+					       स्थिर अक्षर *path,
+					       क्रमागत submodule_update_type update,
+					       काष्ठा submodule_update_strategy *out)
 {
-	const struct submodule *sub = submodule_from_path(r, null_oid(the_hash_algo), path);
-	char *key;
-	const char *val;
-	int ret;
+	स्थिर काष्ठा submodule *sub = submodule_from_path(r, null_oid(the_hash_algo), path);
+	अक्षर *कुंजी;
+	स्थिर अक्षर *val;
+	पूर्णांक ret;
 
 	/*
 	 * NEEDSWORK: audit and ensure that update_submodule() has right
 	 * to assume that submodule_from_path() above will always succeed.
 	 */
-	if (!sub)
+	अगर (!sub)
 		BUG("update_submodule assumes a submodule exists at path (%s)",
 		    path);
-	key = xstrfmt("submodule.%s.update", sub->name);
+	कुंजी = xstrfmt("submodule.%s.update", sub->name);
 
-	if (update) {
+	अगर (update) {
 		out->type = update;
-	} else if (!repo_config_get_string_tmp(r, key, &val)) {
-		if (parse_submodule_update_strategy(val, out) < 0) {
+	} अन्यथा अगर (!repo_config_get_string_tmp(r, कुंजी, &val)) {
+		अगर (parse_submodule_update_strategy(val, out) < 0) {
 			ret = die_message(_("Invalid update mode '%s' configured for submodule path '%s'"),
 					  val, path);
-			goto cleanup;
+			जाओ cleanup;
 		}
-	} else if (sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
-		if (sub->update_strategy.type == SM_UPDATE_COMMAND)
+	} अन्यथा अगर (sub->update_strategy.type != SM_UPDATE_UNSPECIFIED) {
+		अगर (sub->update_strategy.type == SM_UPDATE_COMMAND)
 			BUG("how did we read update = !command from .gitmodules?");
 		out->type = sub->update_strategy.type;
 		out->command = sub->update_strategy.command;
-	} else
+	} अन्यथा
 		out->type = SM_UPDATE_CHECKOUT;
 
-	if (just_cloned &&
+	अगर (just_cloned &&
 	    (out->type == SM_UPDATE_MERGE ||
 	     out->type == SM_UPDATE_REBASE ||
 	     out->type == SM_UPDATE_NONE))
@@ -2155,74 +2155,74 @@ static int determine_submodule_update_strategy(struct repository *r,
 
 	ret = 0;
 cleanup:
-	free(key);
-	return ret;
+	मुक्त(कुंजी);
+	वापस ret;
 }
 
-struct update_clone_data {
-	const struct submodule *sub;
-	struct object_id oid;
-	unsigned just_cloned;
+काष्ठा update_clone_तथ्य {
+	स्थिर काष्ठा submodule *sub;
+	काष्ठा object_id oid;
+	अचिन्हित just_cloned;
 };
 
-struct submodule_update_clone {
+काष्ठा submodule_update_clone {
 	/* index into 'update_data.list', the list of submodules to look into for cloning */
-	int current;
+	पूर्णांक current;
 
 	/* configuration parameters which are passed on to the children */
-	const struct update_data *update_data;
+	स्थिर काष्ठा update_तथ्य *update_तथ्य;
 
 	/* to be consumed by update_submodule() */
-	struct update_clone_data *update_clone;
-	int update_clone_nr; int update_clone_alloc;
+	काष्ठा update_clone_तथ्य *update_clone;
+	पूर्णांक update_clone_nr; पूर्णांक update_clone_alloc;
 
 	/* If we want to stop as fast as possible and return an error */
-	unsigned quickstop : 1;
+	अचिन्हित quickstop : 1;
 
 	/* failed clones to be retried again */
-	const struct cache_entry **failed_clones;
-	int failed_clones_nr, failed_clones_alloc;
+	स्थिर काष्ठा cache_entry **failed_clones;
+	पूर्णांक failed_clones_nr, failed_clones_alloc;
 };
-#define SUBMODULE_UPDATE_CLONE_INIT { 0 }
+#घोषणा SUBMODULE_UPDATE_CLONE_INIT { 0 }
 
-static void submodule_update_clone_release(struct submodule_update_clone *suc)
+अटल व्योम submodule_update_clone_release(काष्ठा submodule_update_clone *suc)
 {
-	free(suc->update_clone);
-	free(suc->failed_clones);
+	मुक्त(suc->update_clone);
+	मुक्त(suc->failed_clones);
 }
 
-struct update_data {
-	const char *prefix;
-	const char *super_prefix;
-	char *displaypath;
-	enum submodule_update_type update_default;
-	struct object_id suboid;
-	struct string_list references;
-	struct submodule_update_strategy update_strategy;
-	struct list_objects_filter_options *filter_options;
-	struct module_list list;
-	enum ref_storage_format ref_storage_format;
-	int depth;
-	int max_jobs;
-	int single_branch;
-	int recommend_shallow;
-	unsigned int require_init;
-	unsigned int force;
-	unsigned int quiet;
-	unsigned int nofetch;
-	unsigned int remote;
-	unsigned int progress;
-	unsigned int dissociate;
-	unsigned int init;
-	unsigned int warn_if_uninitialized;
-	unsigned int recursive;
+काष्ठा update_तथ्य {
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *super_prefix;
+	अक्षर *displaypath;
+	क्रमागत submodule_update_type update_default;
+	काष्ठा object_id suboid;
+	काष्ठा string_list references;
+	काष्ठा submodule_update_strategy update_strategy;
+	काष्ठा list_objects_filter_options *filter_options;
+	काष्ठा module_list list;
+	क्रमागत ref_storage_format ref_storage_format;
+	पूर्णांक depth;
+	पूर्णांक max_jobs;
+	पूर्णांक single_branch;
+	पूर्णांक recommend_shallow;
+	अचिन्हित पूर्णांक require_init;
+	अचिन्हित पूर्णांक force;
+	अचिन्हित पूर्णांक quiet;
+	अचिन्हित पूर्णांक nofetch;
+	अचिन्हित पूर्णांक remote;
+	अचिन्हित पूर्णांक progress;
+	अचिन्हित पूर्णांक dissociate;
+	अचिन्हित पूर्णांक init;
+	अचिन्हित पूर्णांक warn_if_uninitialized;
+	अचिन्हित पूर्णांक recursive;
 
 	/* copied over from update_clone_data */
-	struct object_id oid;
-	unsigned int just_cloned;
-	const char *sm_path;
+	काष्ठा object_id oid;
+	अचिन्हित पूर्णांक just_cloned;
+	स्थिर अक्षर *sm_path;
 };
-#define UPDATE_DATA_INIT { \
+#घोषणा UPDATE_तथ्य_INIT { \
 	.update_strategy = SUBMODULE_UPDATE_STRATEGY_INIT, \
 	.list = MODULE_LIST_INIT, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
@@ -2232,21 +2232,21 @@ struct update_data {
 	.max_jobs = 1, \
 }
 
-static void update_data_release(struct update_data *ud)
+अटल व्योम update_तथ्य_release(काष्ठा update_तथ्य *ud)
 {
-	free(ud->displaypath);
+	मुक्त(ud->displaypath);
 	submodule_update_strategy_release(&ud->update_strategy);
 	module_list_release(&ud->list);
 }
 
-static void next_submodule_warn_missing(struct submodule_update_clone *suc,
-		struct strbuf *out, const char *displaypath)
+अटल व्योम अग्र_submodule_warn_missing(काष्ठा submodule_update_clone *suc,
+		काष्ठा strbuf *out, स्थिर अक्षर *displaypath)
 {
 	/*
 	 * Only mention uninitialized submodules when their
 	 * paths have been specified.
 	 */
-	if (suc->update_data->warn_if_uninitialized) {
+	अगर (suc->update_तथ्य->warn_if_uninitialized) {
 		strbuf_addf(out,
 			_("Submodule path '%s' not initialized"),
 			displaypath);
@@ -2261,70 +2261,70 @@ static void next_submodule_warn_missing(struct submodule_update_clone *suc,
  * Determine whether 'ce' needs to be cloned. If so, prepare the 'child' to
  * run the clone. Returns 1 if 'ce' needs to be cloned, 0 otherwise.
  */
-static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
-					   struct child_process *child,
-					   struct submodule_update_clone *suc,
-					   struct strbuf *out)
+अटल पूर्णांक prepare_to_clone_अग्र_submodule(स्थिर काष्ठा cache_entry *ce,
+					   काष्ठा child_process *child,
+					   काष्ठा submodule_update_clone *suc,
+					   काष्ठा strbuf *out)
 {
-	const struct submodule *sub = NULL;
-	const char *url = NULL;
-	const char *update_string;
-	enum submodule_update_type update_type;
-	char *key;
-	const struct update_data *ud = suc->update_data;
-	char *displaypath = get_submodule_displaypath(ce->name, ud->prefix,
+	स्थिर काष्ठा submodule *sub = शून्य;
+	स्थिर अक्षर *url = शून्य;
+	स्थिर अक्षर *update_string;
+	क्रमागत submodule_update_type update_type;
+	अक्षर *कुंजी;
+	स्थिर काष्ठा update_तथ्य *ud = suc->update_तथ्य;
+	अक्षर *displaypath = get_submodule_displaypath(ce->name, ud->prefix,
 						      ud->super_prefix);
-	struct strbuf sb = STRBUF_INIT;
-	int needs_cloning = 0;
-	int need_free_url = 0;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	पूर्णांक needs_cloning = 0;
+	पूर्णांक need_free_url = 0;
 
-	if (ce_stage(ce)) {
+	अगर (ce_stage(ce)) {
 		strbuf_addf(out, _("Skipping unmerged submodule %s"), displaypath);
 		strbuf_addch(out, '\n');
-		goto cleanup;
+		जाओ cleanup;
 	}
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), ce->name);
 
-	if (!sub) {
-		next_submodule_warn_missing(suc, out, displaypath);
-		goto cleanup;
+	अगर (!sub) {
+		अग्र_submodule_warn_missing(suc, out, displaypath);
+		जाओ cleanup;
 	}
 
-	key = xstrfmt("submodule.%s.update", sub->name);
-	if (!repo_config_get_string_tmp(the_repository, key, &update_string)) {
+	कुंजी = xstrfmt("submodule.%s.update", sub->name);
+	अगर (!repo_config_get_string_tmp(the_repository, कुंजी, &update_string)) {
 		update_type = parse_submodule_update_type(update_string);
-	} else {
+	} अन्यथा {
 		update_type = sub->update_strategy.type;
 	}
-	free(key);
+	मुक्त(कुंजी);
 
-	if (suc->update_data->update_strategy.type == SM_UPDATE_NONE
-	    || (suc->update_data->update_strategy.type == SM_UPDATE_UNSPECIFIED
+	अगर (suc->update_तथ्य->update_strategy.type == SM_UPDATE_NONE
+	    || (suc->update_तथ्य->update_strategy.type == SM_UPDATE_UNSPECIFIED
 		&& update_type == SM_UPDATE_NONE)) {
 		strbuf_addf(out, _("Skipping submodule '%s'"), displaypath);
 		strbuf_addch(out, '\n');
-		goto cleanup;
+		जाओ cleanup;
 	}
 
 	/* Check if the submodule has been initialized. */
-	if (!is_submodule_active(the_repository, ce->name)) {
-		next_submodule_warn_missing(suc, out, displaypath);
-		goto cleanup;
+	अगर (!is_submodule_active(the_repository, ce->name)) {
+		अग्र_submodule_warn_missing(suc, out, displaypath);
+		जाओ cleanup;
 	}
 
 	strbuf_reset(&sb);
 	strbuf_addf(&sb, "submodule.%s.url", sub->name);
-	if (repo_config_get_string_tmp(the_repository, sb.buf, &url)) {
-		if (sub->url && (starts_with_dot_slash(sub->url) ||
+	अगर (repo_config_get_string_tmp(the_repository, sb.buf, &url)) {
+		अगर (sub->url && (starts_with_dot_slash(sub->url) ||
 				 starts_with_dot_dot_slash(sub->url))) {
-			url = resolve_relative_url(sub->url, NULL, 0);
+			url = resolve_relative_url(sub->url, शून्य, 0);
 			need_free_url = 1;
-		} else
+		} अन्यथा
 			url = sub->url;
 	}
 
-	if (!url)
+	अगर (!url)
 		die(_("cannot clone submodule '%s' without a URL"), sub->name);
 
 	strbuf_reset(&sb);
@@ -2338,76 +2338,76 @@ static int prepare_to_clone_next_submodule(const struct cache_entry *ce,
 	suc->update_clone[suc->update_clone_nr].sub = sub;
 	suc->update_clone_nr++;
 
-	if (!needs_cloning)
-		goto cleanup;
+	अगर (!needs_cloning)
+		जाओ cleanup;
 
 	child->git_cmd = 1;
 	child->no_stdin = 1;
 	child->stdout_to_stderr = 1;
 	child->err = -1;
-	strvec_push(&child->args, "submodule--helper");
-	strvec_push(&child->args, "clone");
-	if (suc->update_data->progress)
-		strvec_push(&child->args, "--progress");
-	if (suc->update_data->quiet)
-		strvec_push(&child->args, "--quiet");
-	if (suc->update_data->prefix)
-		strvec_pushl(&child->args, "--prefix", suc->update_data->prefix, NULL);
-	if (suc->update_data->recommend_shallow && sub->recommend_shallow == 1)
-		strvec_push(&child->args, "--depth=1");
-	else if (suc->update_data->depth)
-		strvec_pushf(&child->args, "--depth=%d", suc->update_data->depth);
-	if (suc->update_data->filter_options && suc->update_data->filter_options->choice)
+	strvec_धकेलो(&child->args, "submodule--helper");
+	strvec_धकेलो(&child->args, "clone");
+	अगर (suc->update_तथ्य->progress)
+		strvec_धकेलो(&child->args, "--progress");
+	अगर (suc->update_तथ्य->quiet)
+		strvec_धकेलो(&child->args, "--quiet");
+	अगर (suc->update_तथ्य->prefix)
+		strvec_pushl(&child->args, "--prefix", suc->update_तथ्य->prefix, शून्य);
+	अगर (suc->update_तथ्य->recommend_shallow && sub->recommend_shallow == 1)
+		strvec_धकेलो(&child->args, "--depth=1");
+	अन्यथा अगर (suc->update_तथ्य->depth)
+		strvec_pushf(&child->args, "--depth=%d", suc->update_तथ्य->depth);
+	अगर (suc->update_तथ्य->filter_options && suc->update_तथ्य->filter_options->choice)
 		strvec_pushf(&child->args, "--filter=%s",
-			     expand_list_objects_filter_spec(suc->update_data->filter_options));
-	if (suc->update_data->require_init)
-		strvec_push(&child->args, "--require-init");
-	if (suc->update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+			     expand_list_objects_filter_spec(suc->update_तथ्य->filter_options));
+	अगर (suc->update_तथ्य->require_init)
+		strvec_धकेलो(&child->args, "--require-init");
+	अगर (suc->update_तथ्य->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 		strvec_pushf(&child->args, "--ref-storage-format=%s",
-			     ref_storage_format_to_name(suc->update_data->ref_storage_format));
-	strvec_pushl(&child->args, "--path", sub->path, NULL);
-	strvec_pushl(&child->args, "--name", sub->name, NULL);
-	strvec_pushl(&child->args, "--url", url, NULL);
-	if (suc->update_data->references.nr) {
-		struct string_list_item *item;
+			     ref_storage_format_to_name(suc->update_तथ्य->ref_storage_format));
+	strvec_pushl(&child->args, "--path", sub->path, शून्य);
+	strvec_pushl(&child->args, "--name", sub->name, शून्य);
+	strvec_pushl(&child->args, "--url", url, शून्य);
+	अगर (suc->update_तथ्य->references.nr) {
+		काष्ठा string_list_item *item;
 
-		for_each_string_list_item(item, &suc->update_data->references)
-			strvec_pushl(&child->args, "--reference", item->string, NULL);
+		for_each_string_list_item(item, &suc->update_तथ्य->references)
+			strvec_pushl(&child->args, "--reference", item->string, शून्य);
 	}
-	if (suc->update_data->dissociate)
-		strvec_push(&child->args, "--dissociate");
-	if (suc->update_data->single_branch >= 0)
-		strvec_push(&child->args, suc->update_data->single_branch ?
+	अगर (suc->update_तथ्य->dissociate)
+		strvec_धकेलो(&child->args, "--dissociate");
+	अगर (suc->update_तथ्य->single_branch >= 0)
+		strvec_धकेलो(&child->args, suc->update_तथ्य->single_branch ?
 					      "--single-branch" :
 					      "--no-single-branch");
 
 cleanup:
-	free(displaypath);
+	मुक्त(displaypath);
 	strbuf_release(&sb);
-	if (need_free_url)
-		free((void*)url);
+	अगर (need_free_url)
+		मुक्त((व्योम*)url);
 
-	return needs_cloning;
+	वापस needs_cloning;
 }
 
-static int update_clone_get_next_task(struct child_process *child,
-				      struct strbuf *err,
-				      void *suc_cb,
-				      void **idx_task_cb)
+अटल पूर्णांक update_clone_get_अग्र_task(काष्ठा child_process *child,
+				      काष्ठा strbuf *err,
+				      व्योम *suc_cb,
+				      व्योम **idx_task_cb)
 {
-	struct submodule_update_clone *suc = suc_cb;
-	const struct cache_entry *ce;
-	int index;
+	काष्ठा submodule_update_clone *suc = suc_cb;
+	स्थिर काष्ठा cache_entry *ce;
+	पूर्णांक सूचकांक;
 
-	for (; suc->current < suc->update_data->list.nr; suc->current++) {
-		ce = suc->update_data->list.entries[suc->current];
-		if (prepare_to_clone_next_submodule(ce, child, suc, err)) {
-			int *p = xmalloc(sizeof(*p));
+	क्रम (; suc->current < suc->update_तथ्य->list.nr; suc->current++) {
+		ce = suc->update_तथ्य->list.entries[suc->current];
+		अगर (prepare_to_clone_अग्र_submodule(ce, child, suc, err)) {
+			पूर्णांक *p = xmalloc(माप(*p));
 
 			*p = suc->current;
 			*idx_task_cb = p;
 			suc->current++;
-			return 1;
+			वापस 1;
 		}
 	}
 
@@ -2416,55 +2416,55 @@ static int update_clone_get_next_task(struct child_process *child,
 	 * stragglers again, which we can imagine as an extension of the
 	 * entry list.
 	 */
-	index = suc->current - suc->update_data->list.nr;
-	if (index < suc->failed_clones_nr) {
-		int *p;
+	सूचकांक = suc->current - suc->update_तथ्य->list.nr;
+	अगर (सूचकांक < suc->failed_clones_nr) {
+		पूर्णांक *p;
 
-		ce = suc->failed_clones[index];
-		if (!prepare_to_clone_next_submodule(ce, child, suc, err)) {
+		ce = suc->failed_clones[सूचकांक];
+		अगर (!prepare_to_clone_अग्र_submodule(ce, child, suc, err)) {
 			suc->current ++;
 			strbuf_addstr(err, "BUG: submodule considered for "
 					   "cloning, doesn't need cloning "
 					   "any more?\n");
-			return 0;
+			वापस 0;
 		}
-		p = xmalloc(sizeof(*p));
+		p = xmalloc(माप(*p));
 		*p = suc->current;
 		*idx_task_cb = p;
 		suc->current ++;
-		return 1;
+		वापस 1;
 	}
 
-	return 0;
+	वापस 0;
 }
 
-static int update_clone_start_failure(struct strbuf *err UNUSED,
-				      void *suc_cb,
-				      void *idx_task_cb UNUSED)
+अटल पूर्णांक update_clone_start_failure(काष्ठा strbuf *err UNUSED,
+				      व्योम *suc_cb,
+				      व्योम *idx_task_cb UNUSED)
 {
-	struct submodule_update_clone *suc = suc_cb;
+	काष्ठा submodule_update_clone *suc = suc_cb;
 
 	suc->quickstop = 1;
-	return 1;
+	वापस 1;
 }
 
-static int update_clone_task_finished(int result,
-				      struct strbuf *err,
-				      void *suc_cb,
-				      void *idx_task_cb)
+अटल पूर्णांक update_clone_task_finished(पूर्णांक परिणाम,
+				      काष्ठा strbuf *err,
+				      व्योम *suc_cb,
+				      व्योम *idx_task_cb)
 {
-	const struct cache_entry *ce;
-	struct submodule_update_clone *suc = suc_cb;
-	int *idxP = idx_task_cb;
-	int idx = *idxP;
+	स्थिर काष्ठा cache_entry *ce;
+	काष्ठा submodule_update_clone *suc = suc_cb;
+	पूर्णांक *idxP = idx_task_cb;
+	पूर्णांक idx = *idxP;
 
-	free(idxP);
+	मुक्त(idxP);
 
-	if (!result)
-		return 0;
+	अगर (!परिणाम)
+		वापस 0;
 
-	if (idx < suc->update_data->list.nr) {
-		ce  = suc->update_data->list.entries[idx];
+	अगर (idx < suc->update_तथ्य->list.nr) {
+		ce  = suc->update_तथ्य->list.entries[idx];
 		strbuf_addf(err, _("Failed to clone '%s'. Retry scheduled"),
 			    ce->name);
 		strbuf_addch(err, '\n');
@@ -2472,191 +2472,191 @@ static int update_clone_task_finished(int result,
 			   suc->failed_clones_nr + 1,
 			   suc->failed_clones_alloc);
 		suc->failed_clones[suc->failed_clones_nr++] = ce;
-		return 0;
-	} else {
-		idx -= suc->update_data->list.nr;
+		वापस 0;
+	} अन्यथा {
+		idx -= suc->update_तथ्य->list.nr;
 		ce  = suc->failed_clones[idx];
 		strbuf_addf(err, _("Failed to clone '%s' a second time, aborting"),
 			    ce->name);
 		strbuf_addch(err, '\n');
 		suc->quickstop = 1;
-		return 1;
+		वापस 1;
 	}
 
-	return 0;
+	वापस 0;
 }
 
-static int git_update_clone_config(const char *var, const char *value,
-				   const struct config_context *ctx,
-				   void *cb)
+अटल पूर्णांक git_update_clone_config(स्थिर अक्षर *var, स्थिर अक्षर *मूल्य,
+				   स्थिर काष्ठा config_context *ctx,
+				   व्योम *cb)
 {
-	int *max_jobs = cb;
+	पूर्णांक *max_jobs = cb;
 
-	if (!strcmp(var, "submodule.fetchjobs"))
-		*max_jobs = parse_submodule_fetchjobs(var, value, ctx->kvi);
-	return 0;
+	अगर (!म_भेद(var, "submodule.fetchjobs"))
+		*max_jobs = parse_submodule_fetchjobs(var, मूल्य, ctx->kvi);
+	वापस 0;
 }
 
-static int is_tip_reachable(const char *path, const struct object_id *oid)
+अटल पूर्णांक is_tip_reachable(स्थिर अक्षर *path, स्थिर काष्ठा object_id *oid)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	struct strbuf rev = STRBUF_INIT;
-	char *hex = oid_to_hex(oid);
-	int reachable;
+	काष्ठा child_process cp = CHILD_PROCESS_INIT;
+	काष्ठा strbuf rev = STRBUF_INIT;
+	अक्षर *hex = oid_to_hex(oid);
+	पूर्णांक reachable;
 
 	cp.git_cmd = 1;
 	cp.dir = path;
 	cp.no_stderr = 1;
-	strvec_pushl(&cp.args, "rev-list", "-n", "1", hex, "--not", "--all", NULL);
+	strvec_pushl(&cp.args, "rev-list", "-n", "1", hex, "--not", "--all", शून्य);
 
 	prepare_submodule_repo_env(&cp.env);
 
-	if (capture_command(&cp, &rev, GIT_MAX_HEXSZ + 1) || rev.len)
+	अगर (capture_command(&cp, &rev, GIT_MAX_HEXSZ + 1) || rev.len)
 		reachable = 0;
-	else
+	अन्यथा
 		reachable = 1;
 
 	strbuf_release(&rev);
-	return reachable;
+	वापस reachable;
 }
 
-static int fetch_in_submodule(const char *module_path, int depth, int quiet,
-			      const struct object_id *oid)
+अटल पूर्णांक fetch_in_submodule(स्थिर अक्षर *module_path, पूर्णांक depth, पूर्णांक quiet,
+			      स्थिर काष्ठा object_id *oid)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
+	काष्ठा child_process cp = CHILD_PROCESS_INIT;
 
 	prepare_submodule_repo_env(&cp.env);
 	cp.git_cmd = 1;
 	cp.dir = module_path;
 
-	strvec_push(&cp.args, "fetch");
-	if (quiet)
-		strvec_push(&cp.args, "--quiet");
-	if (depth)
+	strvec_धकेलो(&cp.args, "fetch");
+	अगर (quiet)
+		strvec_धकेलो(&cp.args, "--quiet");
+	अगर (depth)
 		strvec_pushf(&cp.args, "--depth=%d", depth);
-	if (oid) {
-		char *hex = oid_to_hex(oid);
-		char *remote;
-		int code;
+	अगर (oid) {
+		अक्षर *hex = oid_to_hex(oid);
+		अक्षर *remote;
+		पूर्णांक code;
 
 		code = get_default_remote_submodule(module_path, &remote);
-		if (code) {
+		अगर (code) {
 			child_process_clear(&cp);
-			return code;
+			वापस code;
 		}
 
-		strvec_pushl(&cp.args, remote, hex, NULL);
-		free(remote);
+		strvec_pushl(&cp.args, remote, hex, शून्य);
+		मुक्त(remote);
 	}
 
-	return run_command(&cp);
+	वापस run_command(&cp);
 }
 
-static int run_update_command(const struct update_data *ud, int subforce)
+अटल पूर्णांक run_update_command(स्थिर काष्ठा update_तथ्य *ud, पूर्णांक subforce)
 {
-	struct child_process cp = CHILD_PROCESS_INIT;
-	char *oid = oid_to_hex(&ud->oid);
-	int ret;
+	काष्ठा child_process cp = CHILD_PROCESS_INIT;
+	अक्षर *oid = oid_to_hex(&ud->oid);
+	पूर्णांक ret;
 
-	switch (ud->update_strategy.type) {
-	case SM_UPDATE_CHECKOUT:
+	चयन (ud->update_strategy.type) {
+	हाल SM_UPDATE_CHECKOUT:
 		cp.git_cmd = 1;
-		strvec_pushl(&cp.args, "checkout", "-q", NULL);
-		if (subforce)
-			strvec_push(&cp.args, "-f");
-		break;
-	case SM_UPDATE_REBASE:
+		strvec_pushl(&cp.args, "checkout", "-q", शून्य);
+		अगर (subforce)
+			strvec_धकेलो(&cp.args, "-f");
+		अवरोध;
+	हाल SM_UPDATE_REBASE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "rebase");
-		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
-		break;
-	case SM_UPDATE_MERGE:
+		strvec_धकेलो(&cp.args, "rebase");
+		अगर (ud->quiet)
+			strvec_धकेलो(&cp.args, "--quiet");
+		अवरोध;
+	हाल SM_UPDATE_MERGE:
 		cp.git_cmd = 1;
-		strvec_push(&cp.args, "merge");
-		if (ud->quiet)
-			strvec_push(&cp.args, "--quiet");
-		break;
-	case SM_UPDATE_COMMAND:
+		strvec_धकेलो(&cp.args, "merge");
+		अगर (ud->quiet)
+			strvec_धकेलो(&cp.args, "--quiet");
+		अवरोध;
+	हाल SM_UPDATE_COMMAND:
 		cp.use_shell = 1;
-		strvec_push(&cp.args, ud->update_strategy.command);
-		break;
-	default:
+		strvec_धकेलो(&cp.args, ud->update_strategy.command);
+		अवरोध;
+	शेष:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
-	strvec_push(&cp.args, oid);
+	strvec_धकेलो(&cp.args, oid);
 
 	cp.dir = ud->sm_path;
 	prepare_submodule_repo_env(&cp.env);
-	if ((ret = run_command(&cp))) {
-		switch (ud->update_strategy.type) {
-		case SM_UPDATE_CHECKOUT:
+	अगर ((ret = run_command(&cp))) {
+		चयन (ud->update_strategy.type) {
+		हाल SM_UPDATE_CHECKOUT:
 			die_message(_("Unable to checkout '%s' in submodule path '%s'"),
 				    oid, ud->displaypath);
 			/* No "ret" assignment, use "git checkout"'s */
-			break;
-		case SM_UPDATE_REBASE:
+			अवरोध;
+		हाल SM_UPDATE_REBASE:
 			ret = die_message(_("Unable to rebase '%s' in submodule path '%s'"),
 					  oid, ud->displaypath);
-			break;
-		case SM_UPDATE_MERGE:
+			अवरोध;
+		हाल SM_UPDATE_MERGE:
 			ret = die_message(_("Unable to merge '%s' in submodule path '%s'"),
 					  oid, ud->displaypath);
-			break;
-		case SM_UPDATE_COMMAND:
+			अवरोध;
+		हाल SM_UPDATE_COMMAND:
 			ret = die_message(_("Execution of '%s %s' failed in submodule path '%s'"),
 					  ud->update_strategy.command, oid, ud->displaypath);
-			break;
-		default:
+			अवरोध;
+		शेष:
 			BUG("unexpected update strategy type: %d",
 			    ud->update_strategy.type);
 		}
 
-		return ret;
+		वापस ret;
 	}
 
-	if (ud->quiet)
-		return 0;
+	अगर (ud->quiet)
+		वापस 0;
 
-	switch (ud->update_strategy.type) {
-	case SM_UPDATE_CHECKOUT:
-		printf(_("Submodule path '%s': checked out '%s'\n"),
+	चयन (ud->update_strategy.type) {
+	हाल SM_UPDATE_CHECKOUT:
+		म_लिखो(_("Submodule path '%s': checked out '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_REBASE:
-		printf(_("Submodule path '%s': rebased into '%s'\n"),
+		अवरोध;
+	हाल SM_UPDATE_REBASE:
+		म_लिखो(_("Submodule path '%s': rebased into '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_MERGE:
-		printf(_("Submodule path '%s': merged in '%s'\n"),
+		अवरोध;
+	हाल SM_UPDATE_MERGE:
+		म_लिखो(_("Submodule path '%s': merged in '%s'\n"),
 		       ud->displaypath, oid);
-		break;
-	case SM_UPDATE_COMMAND:
-		printf(_("Submodule path '%s': '%s %s'\n"),
+		अवरोध;
+	हाल SM_UPDATE_COMMAND:
+		म_लिखो(_("Submodule path '%s': '%s %s'\n"),
 		       ud->displaypath, ud->update_strategy.command, oid);
-		break;
-	default:
+		अवरोध;
+	शेष:
 		BUG("unexpected update strategy type: %d",
 		    ud->update_strategy.type);
 	}
 
-	return 0;
+	वापस 0;
 }
 
-static int run_update_procedure(const struct update_data *ud)
+अटल पूर्णांक run_update_procedure(स्थिर काष्ठा update_तथ्य *ud)
 {
-	int subforce = is_null_oid(&ud->suboid) || ud->force;
+	पूर्णांक subforce = is_null_oid(&ud->suboid) || ud->force;
 
-	if (!ud->nofetch) {
+	अगर (!ud->nofetch) {
 		/*
 		 * Run fetch only if `oid` isn't present or it
 		 * is not reachable from a ref.
 		 */
-		if (!is_tip_reachable(ud->sm_path, &ud->oid) &&
-		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, NULL) &&
+		अगर (!is_tip_reachable(ud->sm_path, &ud->oid) &&
+		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, शून्य) &&
 		    !ud->quiet)
-			fprintf_ln(stderr,
+			fprintf_ln(मानक_त्रुटि,
 				   _("Unable to fetch in submodule path '%s'; "
 				     "trying to directly fetch %s:"),
 				   ud->displaypath, oid_to_hex(&ud->oid));
@@ -2664,76 +2664,76 @@ static int run_update_procedure(const struct update_data *ud)
 		 * Now we tried the usual fetch, but `oid` may
 		 * not be reachable from any of the refs.
 		 */
-		if (!is_tip_reachable(ud->sm_path, &ud->oid) &&
+		अगर (!is_tip_reachable(ud->sm_path, &ud->oid) &&
 		    fetch_in_submodule(ud->sm_path, ud->depth, ud->quiet, &ud->oid))
-			return die_message(_("Fetched in submodule path '%s', but it did not "
+			वापस die_message(_("Fetched in submodule path '%s', but it did not "
 					     "contain %s. Direct fetching of that commit failed."),
 					   ud->displaypath, oid_to_hex(&ud->oid));
 	}
 
-	return run_update_command(ud, subforce);
+	वापस run_update_command(ud, subforce);
 }
 
-static int remote_submodule_branch(const char *path, const char **branch)
+अटल पूर्णांक remote_submodule_branch(स्थिर अक्षर *path, स्थिर अक्षर **branch)
 {
-	const struct submodule *sub;
-	char *key;
-	*branch = NULL;
+	स्थिर काष्ठा submodule *sub;
+	अक्षर *कुंजी;
+	*branch = शून्य;
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
-	if (!sub)
-		return die_message(_("could not initialize submodule at path '%s'"),
+	अगर (!sub)
+		वापस die_message(_("could not initialize submodule at path '%s'"),
 				   path);
 
-	key = xstrfmt("submodule.%s.branch", sub->name);
-	if (repo_config_get_string_tmp(the_repository, key, branch))
+	कुंजी = xstrfmt("submodule.%s.branch", sub->name);
+	अगर (repo_config_get_string_tmp(the_repository, कुंजी, branch))
 		*branch = sub->branch;
-	free(key);
+	मुक्त(कुंजी);
 
-	if (!*branch) {
+	अगर (!*branch) {
 		*branch = "HEAD";
-		return 0;
+		वापस 0;
 	}
 
-	if (!strcmp(*branch, ".")) {
-		const char *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
-							      "HEAD", 0, NULL,
-							      NULL);
+	अगर (!म_भेद(*branch, ".")) {
+		स्थिर अक्षर *refname = refs_resolve_ref_unsafe(get_main_ref_store(the_repository),
+							      "HEAD", 0, शून्य,
+							      शून्य);
 
-		if (!refname)
-			return die_message(_("No such ref: %s"), "HEAD");
+		अगर (!refname)
+			वापस die_message(_("No such ref: %s"), "HEAD");
 
 		/* detached HEAD */
-		if (!strcmp(refname, "HEAD"))
-			return die_message(_("Submodule (%s) branch configured to inherit "
+		अगर (!म_भेद(refname, "HEAD"))
+			वापस die_message(_("Submodule (%s) branch configured to inherit "
 					     "branch from superproject, but the superproject "
 					     "is not on any branch"), sub->name);
 
-		if (!skip_prefix(refname, "refs/heads/", &refname))
-			return die_message(_("Expecting a full ref name, got %s"),
+		अगर (!skip_prefix(refname, "refs/heads/", &refname))
+			वापस die_message(_("Expecting a full ref name, got %s"),
 					   refname);
 
 		*branch = refname;
-		return 0;
+		वापस 0;
 	}
 
 	/* Our "branch" is coming from repo_config_get_string_tmp() */
-	return 0;
+	वापस 0;
 }
 
-static int ensure_core_worktree(const char *path)
+अटल पूर्णांक ensure_core_worktree(स्थिर अक्षर *path)
 {
-	const char *cw;
-	struct repository subrepo;
+	स्थिर अक्षर *cw;
+	काष्ठा repository subrepo;
 
-	if (repo_submodule_init(&subrepo, the_repository, path, null_oid(the_hash_algo)))
-		return die_message(_("could not get a repository handle for submodule '%s'"),
+	अगर (repo_submodule_init(&subrepo, the_repository, path, null_oid(the_hash_algo)))
+		वापस die_message(_("could not get a repository handle for submodule '%s'"),
 				   path);
 
-	if (!repo_config_get_string_tmp(&subrepo, "core.worktree", &cw)) {
-		char *cfg_file, *abs_path;
-		const char *rel_path;
-		struct strbuf sb = STRBUF_INIT;
+	अगर (!repo_config_get_string_tmp(&subrepo, "core.worktree", &cw)) {
+		अक्षर *cfg_file, *abs_path;
+		स्थिर अक्षर *rel_path;
+		काष्ठा strbuf sb = STRBUF_INIT;
 
 		cfg_file = repo_git_path(&subrepo, "config");
 
@@ -2742,193 +2742,193 @@ static int ensure_core_worktree(const char *path)
 
 		repo_config_set_in_file(the_repository, cfg_file, "core.worktree", rel_path);
 
-		free(cfg_file);
-		free(abs_path);
+		मुक्त(cfg_file);
+		मुक्त(abs_path);
 		strbuf_release(&sb);
 	}
 
 	repo_clear(&subrepo);
-	return 0;
+	वापस 0;
 }
 
-static const char *submodule_update_type_to_label(enum submodule_update_type type)
+अटल स्थिर अक्षर *submodule_update_type_to_label(क्रमागत submodule_update_type type)
 {
-	switch (type) {
-	case SM_UPDATE_CHECKOUT:
-		return "checkout";
-	case SM_UPDATE_MERGE:
-		return "merge";
-	case SM_UPDATE_REBASE:
-		return "rebase";
-	case SM_UPDATE_UNSPECIFIED:
-	case SM_UPDATE_NONE:
-	case SM_UPDATE_COMMAND:
-		break;
+	चयन (type) {
+	हाल SM_UPDATE_CHECKOUT:
+		वापस "checkout";
+	हाल SM_UPDATE_MERGE:
+		वापस "merge";
+	हाल SM_UPDATE_REBASE:
+		वापस "rebase";
+	हाल SM_UPDATE_UNSPECIFIED:
+	हाल SM_UPDATE_NONE:
+	हाल SM_UPDATE_COMMAND:
+		अवरोध;
 	}
 	BUG("unreachable with type %d", type);
 }
 
-static void update_data_to_args(const struct update_data *update_data,
-				struct strvec *args)
+अटल व्योम update_तथ्य_to_args(स्थिर काष्ठा update_तथ्य *update_तथ्य,
+				काष्ठा strvec *args)
 {
-	enum submodule_update_type update_type = update_data->update_default;
+	क्रमागत submodule_update_type update_type = update_तथ्य->update_default;
 
-	strvec_pushl(args, "submodule--helper", "update", "--recursive", NULL);
-	if (update_data->displaypath)
+	strvec_pushl(args, "submodule--helper", "update", "--recursive", शून्य);
+	अगर (update_तथ्य->displaypath)
 		strvec_pushf(args, "--super-prefix=%s/",
-			     update_data->displaypath);
-	strvec_pushf(args, "--jobs=%d", update_data->max_jobs);
-	if (update_data->quiet)
-		strvec_push(args, "--quiet");
-	if (update_data->force)
-		strvec_push(args, "--force");
-	if (update_data->init)
-		strvec_push(args, "--init");
-	if (update_data->remote)
-		strvec_push(args, "--remote");
-	if (update_data->nofetch)
-		strvec_push(args, "--no-fetch");
-	if (update_data->dissociate)
-		strvec_push(args, "--dissociate");
-	if (update_data->progress)
-		strvec_push(args, "--progress");
-	if (update_data->require_init)
-		strvec_push(args, "--require-init");
-	if (update_data->depth)
-		strvec_pushf(args, "--depth=%d", update_data->depth);
-	if (update_type != SM_UPDATE_UNSPECIFIED)
+			     update_तथ्य->displaypath);
+	strvec_pushf(args, "--jobs=%d", update_तथ्य->max_jobs);
+	अगर (update_तथ्य->quiet)
+		strvec_धकेलो(args, "--quiet");
+	अगर (update_तथ्य->force)
+		strvec_धकेलो(args, "--force");
+	अगर (update_तथ्य->init)
+		strvec_धकेलो(args, "--init");
+	अगर (update_तथ्य->remote)
+		strvec_धकेलो(args, "--remote");
+	अगर (update_तथ्य->nofetch)
+		strvec_धकेलो(args, "--no-fetch");
+	अगर (update_तथ्य->dissociate)
+		strvec_धकेलो(args, "--dissociate");
+	अगर (update_तथ्य->progress)
+		strvec_धकेलो(args, "--progress");
+	अगर (update_तथ्य->require_init)
+		strvec_धकेलो(args, "--require-init");
+	अगर (update_तथ्य->depth)
+		strvec_pushf(args, "--depth=%d", update_तथ्य->depth);
+	अगर (update_type != SM_UPDATE_UNSPECIFIED)
 		strvec_pushf(args, "--%s",
 			     submodule_update_type_to_label(update_type));
 
-	if (update_data->references.nr) {
-		struct string_list_item *item;
+	अगर (update_तथ्य->references.nr) {
+		काष्ठा string_list_item *item;
 
-		for_each_string_list_item(item, &update_data->references)
-			strvec_pushl(args, "--reference", item->string, NULL);
+		for_each_string_list_item(item, &update_तथ्य->references)
+			strvec_pushl(args, "--reference", item->string, शून्य);
 	}
-	if (update_data->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
+	अगर (update_तथ्य->ref_storage_format != REF_STORAGE_FORMAT_UNKNOWN)
 		strvec_pushf(args, "--ref-storage-format=%s",
-			     ref_storage_format_to_name(update_data->ref_storage_format));
-	if (update_data->filter_options && update_data->filter_options->choice)
+			     ref_storage_format_to_name(update_तथ्य->ref_storage_format));
+	अगर (update_तथ्य->filter_options && update_तथ्य->filter_options->choice)
 		strvec_pushf(args, "--filter=%s",
 				expand_list_objects_filter_spec(
-					update_data->filter_options));
-	if (update_data->recommend_shallow == 0)
-		strvec_push(args, "--no-recommend-shallow");
-	else if (update_data->recommend_shallow == 1)
-		strvec_push(args, "--recommend-shallow");
-	if (update_data->single_branch >= 0)
-		strvec_push(args, update_data->single_branch ?
+					update_तथ्य->filter_options));
+	अगर (update_तथ्य->recommend_shallow == 0)
+		strvec_धकेलो(args, "--no-recommend-shallow");
+	अन्यथा अगर (update_तथ्य->recommend_shallow == 1)
+		strvec_धकेलो(args, "--recommend-shallow");
+	अगर (update_तथ्य->single_branch >= 0)
+		strvec_धकेलो(args, update_तथ्य->single_branch ?
 				    "--single-branch" :
 				    "--no-single-branch");
 }
 
-static int update_submodule(struct update_data *update_data)
+अटल पूर्णांक update_submodule(काष्ठा update_तथ्य *update_तथ्य)
 {
-	int ret;
+	पूर्णांक ret;
 
-	if (validate_submodule_path(update_data->sm_path) < 0)
-		return -1;
+	अगर (validate_submodule_path(update_तथ्य->sm_path) < 0)
+		वापस -1;
 
 	ret = determine_submodule_update_strategy(the_repository,
-						  update_data->just_cloned,
-						  update_data->sm_path,
-						  update_data->update_default,
-						  &update_data->update_strategy);
-	if (ret)
-		return ret;
+						  update_तथ्य->just_cloned,
+						  update_तथ्य->sm_path,
+						  update_तथ्य->update_default,
+						  &update_तथ्य->update_strategy);
+	अगर (ret)
+		वापस ret;
 
-	if (update_data->just_cloned)
-		oidcpy(&update_data->suboid, null_oid(the_hash_algo));
-	else if (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
-					  "HEAD", &update_data->suboid))
-		return die_message(_("Unable to find current revision in submodule path '%s'"),
-				   update_data->displaypath);
+	अगर (update_तथ्य->just_cloned)
+		oidcpy(&update_तथ्य->suboid, null_oid(the_hash_algo));
+	अन्यथा अगर (repo_resolve_gitlink_ref(the_repository, update_तथ्य->sm_path,
+					  "HEAD", &update_तथ्य->suboid))
+		वापस die_message(_("Unable to find current revision in submodule path '%s'"),
+				   update_तथ्य->displaypath);
 
-	if (update_data->remote) {
-		char *remote_name;
-		const char *branch;
-		char *remote_ref;
-		int code;
+	अगर (update_तथ्य->remote) {
+		अक्षर *remote_name;
+		स्थिर अक्षर *branch;
+		अक्षर *remote_ref;
+		पूर्णांक code;
 
-		code = get_default_remote_submodule(update_data->sm_path, &remote_name);
-		if (code)
-			return code;
-		code = remote_submodule_branch(update_data->sm_path, &branch);
-		if (code) {
-			free(remote_name);
-			return code;
+		code = get_default_remote_submodule(update_तथ्य->sm_path, &remote_name);
+		अगर (code)
+			वापस code;
+		code = remote_submodule_branch(update_तथ्य->sm_path, &branch);
+		अगर (code) {
+			मुक्त(remote_name);
+			वापस code;
 		}
 		remote_ref = xstrfmt("refs/remotes/%s/%s", remote_name, branch);
 
-		free(remote_name);
+		मुक्त(remote_name);
 
-		if (!update_data->nofetch) {
-			if (fetch_in_submodule(update_data->sm_path, update_data->depth,
-					      0, NULL)) {
-				free(remote_ref);
-				return die_message(_("Unable to fetch in submodule path '%s'"),
-						   update_data->sm_path);
+		अगर (!update_तथ्य->nofetch) {
+			अगर (fetch_in_submodule(update_तथ्य->sm_path, update_तथ्य->depth,
+					      0, शून्य)) {
+				मुक्त(remote_ref);
+				वापस die_message(_("Unable to fetch in submodule path '%s'"),
+						   update_तथ्य->sm_path);
 			}
 		}
 
-		if (repo_resolve_gitlink_ref(the_repository, update_data->sm_path,
-					     remote_ref, &update_data->oid)) {
+		अगर (repo_resolve_gitlink_ref(the_repository, update_तथ्य->sm_path,
+					     remote_ref, &update_तथ्य->oid)) {
 			ret = die_message(_("Unable to find %s revision in submodule path '%s'"),
-					  remote_ref, update_data->sm_path);
-			free(remote_ref);
-			return ret;
+					  remote_ref, update_तथ्य->sm_path);
+			मुक्त(remote_ref);
+			वापस ret;
 		}
 
-		free(remote_ref);
+		मुक्त(remote_ref);
 	}
 
-	if (!oideq(&update_data->oid, &update_data->suboid) || update_data->force) {
-		ret = run_update_procedure(update_data);
-		if (ret)
-			return ret;
+	अगर (!oideq(&update_तथ्य->oid, &update_तथ्य->suboid) || update_तथ्य->force) {
+		ret = run_update_procedure(update_तथ्य);
+		अगर (ret)
+			वापस ret;
 	}
 
-	if (update_data->recursive) {
-		struct child_process cp = CHILD_PROCESS_INIT;
-		struct update_data next = *update_data;
+	अगर (update_तथ्य->recursive) {
+		काष्ठा child_process cp = CHILD_PROCESS_INIT;
+		काष्ठा update_तथ्य अग्र = *update_तथ्य;
 
-		next.prefix = NULL;
-		oidcpy(&next.oid, null_oid(the_hash_algo));
-		oidcpy(&next.suboid, null_oid(the_hash_algo));
+		अग्र.prefix = शून्य;
+		oidcpy(&अग्र.oid, null_oid(the_hash_algo));
+		oidcpy(&अग्र.suboid, null_oid(the_hash_algo));
 
-		cp.dir = update_data->sm_path;
+		cp.dir = update_तथ्य->sm_path;
 		cp.git_cmd = 1;
 		prepare_submodule_repo_env(&cp.env);
-		update_data_to_args(&next, &cp.args);
+		update_तथ्य_to_args(&अग्र, &cp.args);
 
 		ret = run_command(&cp);
-		if (ret)
+		अगर (ret)
 			die_message(_("Failed to recurse into submodule path '%s'"),
-				    update_data->displaypath);
-		return ret;
+				    update_तथ्य->displaypath);
+		वापस ret;
 	}
 
-	return 0;
+	वापस 0;
 }
 
-static int update_submodules(struct update_data *update_data)
+अटल पूर्णांक update_submodules(काष्ठा update_तथ्य *update_तथ्य)
 {
-	int i, ret = 0;
-	struct submodule_update_clone suc = SUBMODULE_UPDATE_CLONE_INIT;
-	const struct run_process_parallel_opts opts = {
+	पूर्णांक i, ret = 0;
+	काष्ठा submodule_update_clone suc = SUBMODULE_UPDATE_CLONE_INIT;
+	स्थिर काष्ठा run_process_parallel_opts opts = {
 		.tr2_category = "submodule",
 		.tr2_label = "parallel/update",
 
-		.processes = update_data->max_jobs,
+		.processes = update_तथ्य->max_jobs,
 
-		.get_next_task = update_clone_get_next_task,
+		.get_अग्र_task = update_clone_get_अग्र_task,
 		.start_failure = update_clone_start_failure,
 		.task_finished = update_clone_task_finished,
-		.data = &suc,
+		.तथ्य = &suc,
 	};
 
-	suc.update_data = update_data;
+	suc.update_तथ्य = update_तथ्य;
 	run_processes_parallel(&opts);
 
 	/*
@@ -2939,18 +2939,18 @@ static int update_submodules(struct update_data *update_data)
 	 *   checkout involve more straightforward sequential I/O.
 	 * - the listener can avoid doing any work if fetching failed.
 	 */
-	if (suc.quickstop) {
+	अगर (suc.quickstop) {
 		ret = 1;
-		goto cleanup;
+		जाओ cleanup;
 	}
 
-	for (i = 0; i < suc.update_clone_nr; i++) {
-		struct update_clone_data ucd = suc.update_clone[i];
-		int code = 128;
+	क्रम (i = 0; i < suc.update_clone_nr; i++) {
+		काष्ठा update_clone_तथ्य ucd = suc.update_clone[i];
+		पूर्णांक code = 128;
 
-		oidcpy(&update_data->oid, &ucd.oid);
-		update_data->just_cloned = ucd.just_cloned;
-		update_data->sm_path = ucd.sub->path;
+		oidcpy(&update_तथ्य->oid, &ucd.oid);
+		update_तथ्य->just_cloned = ucd.just_cloned;
+		update_तथ्य->sm_path = ucd.sub->path;
 
 		/*
 		 * Verify that the submodule path does not contain any
@@ -2958,43 +2958,43 @@ static int update_submodules(struct update_data *update_data)
 		 * TODO: allow exempting it via
 		 * `safe.submodule.path` or something
 		 */
-		if (validate_submodule_path(update_data->sm_path) < 0)
-			goto fail;
+		अगर (validate_submodule_path(update_तथ्य->sm_path) < 0)
+			जाओ fail;
 
-		code = ensure_core_worktree(update_data->sm_path);
-		if (code)
-			goto fail;
+		code = ensure_core_worktree(update_तथ्य->sm_path);
+		अगर (code)
+			जाओ fail;
 
-		update_data->displaypath = get_submodule_displaypath(
-			update_data->sm_path, update_data->prefix,
-			update_data->super_prefix);
-		code = update_submodule(update_data);
-		FREE_AND_NULL(update_data->displaypath);
+		update_तथ्य->displaypath = get_submodule_displaypath(
+			update_तथ्य->sm_path, update_तथ्य->prefix,
+			update_तथ्य->super_prefix);
+		code = update_submodule(update_तथ्य);
+		FREE_AND_NULL(update_तथ्य->displaypath);
 fail:
-		if (!code)
-			continue;
+		अगर (!code)
+			जारी;
 		ret = code;
-		if (ret == 128)
-			goto cleanup;
+		अगर (ret == 128)
+			जाओ cleanup;
 	}
 
 cleanup:
 	submodule_update_clone_release(&suc);
-	string_list_clear(&update_data->references, 0);
-	return ret;
+	string_list_clear(&update_तथ्य->references, 0);
+	वापस ret;
 }
 
-static int module_update(int argc, const char **argv, const char *prefix,
-			 struct repository *repo UNUSED)
+अटल पूर्णांक module_update(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			 काष्ठा repository *repo UNUSED)
 {
-	struct pathspec pathspec = { 0 };
-	struct pathspec pathspec2 = { 0 };
-	struct update_data opt = UPDATE_DATA_INIT;
-	struct list_objects_filter_options filter_options =
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा pathspec pathspec2 = { 0 };
+	काष्ठा update_तथ्य opt = UPDATE_तथ्य_INIT;
+	काष्ठा list_objects_filter_options filter_options =
 		LIST_OBJECTS_FILTER_INIT;
-	const char *ref_storage_format = NULL;
-	int ret;
-	struct option module_update_options[] = {
+	स्थिर अक्षर *ref_storage_format = शून्य;
+	पूर्णांक ret;
+	काष्ठा option module_update_options[] = {
 		OPT__SUPER_PREFIX(&opt.super_prefix),
 		OPT__FORCE(&opt.force, N_("force checkout updates"), 0),
 		OPT_BOOL('i', "init", &opt.init,
@@ -3038,14 +3038,14 @@ static int module_update(int argc, const char **argv, const char *prefix,
 		OPT_PARSE_LIST_OBJECTS_FILTER(&filter_options),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule [--quiet] update"
 		" [--init [--filter=<filter-spec>]] [--remote]"
 		" [-N|--no-fetch] [-f|--force]"
 		" [--checkout|--merge|--rebase]"
 		" [--[no-]recommend-shallow] [--reference <repository>]"
 		" [--recursive] [--[no-]single-branch] [--] [<path>...]"),
-		NULL
+		शून्य
 	};
 
 	update_clone_config_from_gitmodules(the_repository, &opt.max_jobs);
@@ -3054,55 +3054,55 @@ static int module_update(int argc, const char **argv, const char *prefix,
 	argc = parse_options(argc, argv, prefix, module_update_options,
 			     git_submodule_helper_usage, 0);
 
-	if (opt.require_init)
+	अगर (opt.require_init)
 		opt.init = 1;
 
-	if (filter_options.choice && !opt.init) {
+	अगर (filter_options.choice && !opt.init) {
 		usage_with_options(git_submodule_helper_usage,
 				   module_update_options);
 	}
 
-	if (ref_storage_format) {
+	अगर (ref_storage_format) {
 		opt.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (opt.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+		अगर (opt.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 
 	opt.filter_options = &filter_options;
 	opt.prefix = prefix;
 
-	if (opt.update_default)
+	अगर (opt.update_default)
 		opt.update_strategy.type = opt.update_default;
 
-	if (module_list_compute(argv, prefix, &pathspec, &opt.list) < 0) {
+	अगर (module_list_compute(argv, prefix, &pathspec, &opt.list) < 0) {
 		ret = 1;
-		goto cleanup;
+		जाओ cleanup;
 	}
 
-	if (pathspec.nr)
+	अगर (pathspec.nr)
 		opt.warn_if_uninitialized = 1;
 
-	if (opt.init) {
-		struct module_list list = MODULE_LIST_INIT;
-		struct init_cb info = INIT_CB_INIT;
+	अगर (opt.init) {
+		काष्ठा module_list list = MODULE_LIST_INIT;
+		काष्ठा init_cb info = INIT_CB_INIT;
 
-		if (module_list_compute(argv, opt.prefix,
+		अगर (module_list_compute(argv, opt.prefix,
 					&pathspec2, &list) < 0) {
 			module_list_release(&list);
 			ret = 1;
-			goto cleanup;
+			जाओ cleanup;
 		}
 
 		/*
 		 * If there are no path args and submodule.active is set then,
 		 * by default, only initialize 'active' modules.
 		 */
-		if (!argc && !repo_config_get(the_repository, "submodule.active"))
+		अगर (!argc && !repo_config_get(the_repository, "submodule.active"))
 			module_list_active(&list);
 
 		info.prefix = opt.prefix;
 		info.super_prefix = opt.super_prefix;
-		if (opt.quiet)
+		अगर (opt.quiet)
 			info.flags |= OPT_QUIET;
 
 		for_each_listed_submodule(&list, init_submodule_cb, &info);
@@ -3111,23 +3111,23 @@ static int module_update(int argc, const char **argv, const char *prefix,
 
 	ret = update_submodules(&opt);
 cleanup:
-	update_data_release(&opt);
+	update_तथ्य_release(&opt);
 	list_objects_filter_release(&filter_options);
 	clear_pathspec(&pathspec);
 	clear_pathspec(&pathspec2);
-	return ret;
+	वापस ret;
 }
 
-static int push_check(int argc, const char **argv, const char *prefix UNUSED,
-		      struct repository *repo UNUSED)
+अटल पूर्णांक धकेलो_check(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix UNUSED,
+		      काष्ठा repository *repo UNUSED)
 {
-	struct remote *remote;
-	const char *superproject_head;
-	char *head;
-	int detached_head = 0;
-	struct object_id head_oid;
+	काष्ठा remote *remote;
+	स्थिर अक्षर *superproject_शीर्ष;
+	अक्षर *शीर्ष;
+	पूर्णांक detached_शीर्ष = 0;
+	काष्ठा object_id शीर्ष_oid;
 
-	if (argc < 3)
+	अगर (argc < 3)
 		die("submodule--helper push-check requires at least 2 arguments");
 
 	/*
@@ -3135,57 +3135,57 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 	 * if HEAD then the superproject is in a detached head state, otherwise
 	 * it will be the resolved head ref.
 	 */
-	superproject_head = argv[1];
+	superproject_शीर्ष = argv[1];
 	argv++;
 	argc--;
 	/* Get the submodule's head ref and determine if it is detached */
-	head = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
-				   0, &head_oid, NULL);
-	if (!head)
+	शीर्ष = refs_resolve_refdup(get_main_ref_store(the_repository), "HEAD",
+				   0, &शीर्ष_oid, शून्य);
+	अगर (!शीर्ष)
 		die(_("Failed to resolve HEAD as a valid ref."));
-	if (!strcmp(head, "HEAD"))
-		detached_head = 1;
+	अगर (!म_भेद(शीर्ष, "HEAD"))
+		detached_शीर्ष = 1;
 
 	/*
 	 * The remote must be configured.
 	 * This is to avoid pushing to the exact same URL as the parent.
 	 */
 	remote = pushremote_get(argv[1]);
-	if (!remote || remote->origin == REMOTE_UNCONFIGURED)
+	अगर (!remote || remote->origin == REMOTE_UNCONFIGURED)
 		die("remote '%s' not configured", argv[1]);
 
 	/* Check the refspec */
-	if (argc > 2) {
-		int i;
-		struct ref *local_refs = get_local_heads();
-		struct refspec refspec = REFSPEC_INIT_PUSH(the_hash_algo);
+	अगर (argc > 2) {
+		पूर्णांक i;
+		काष्ठा ref *local_refs = get_local_heads();
+		काष्ठा refspec refspec = REFSPEC_INIT_धकेलो(the_hash_algo);
 
 		refspec_appendn(&refspec, argv + 2, argc - 2);
 
-		for (i = 0; i < refspec.nr; i++) {
-			const struct refspec_item *rs = &refspec.items[i];
+		क्रम (i = 0; i < refspec.nr; i++) {
+			स्थिर काष्ठा refspec_item *rs = &refspec.वस्तुएँ[i];
 
-			if (rs->pattern || rs->matching)
-				continue;
+			अगर (rs->pattern || rs->matching)
+				जारी;
 
 			/* LHS must match a single ref */
-			switch (count_refspec_match(rs->src, local_refs, NULL)) {
-			case 1:
-				break;
-			case 0:
+			चयन (गिनती_refspec_match(rs->src, local_refs, शून्य)) {
+			हाल 1:
+				अवरोध;
+			हाल 0:
 				/*
 				 * If LHS matches 'HEAD' then we need to ensure
 				 * that it matches the same named branch
 				 * checked out in the superproject.
 				 */
-				if (!strcmp(rs->src, "HEAD")) {
-					if (!detached_head &&
-					    !strcmp(head, superproject_head))
-						break;
+				अगर (!म_भेद(rs->src, "HEAD")) {
+					अगर (!detached_शीर्ष &&
+					    !म_भेद(शीर्ष, superproject_शीर्ष))
+						अवरोध;
 					die("HEAD does not match the named branch in the superproject");
 				}
 				/* fallthrough */
-			default:
+			शेष:
 				die("src refspec '%s' must name a ref",
 				    rs->src);
 			}
@@ -3194,35 +3194,35 @@ static int push_check(int argc, const char **argv, const char *prefix UNUSED,
 		refspec_clear(&refspec);
 		free_refs(local_refs);
 	}
-	free(head);
+	मुक्त(शीर्ष);
 
-	return 0;
+	वापस 0;
 }
 
-static int absorb_git_dirs(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+अटल पूर्णांक absorb_git_dirs(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			   काष्ठा repository *repo UNUSED)
 {
-	int i;
-	struct pathspec pathspec = { 0 };
-	struct module_list list = MODULE_LIST_INIT;
-	const char *super_prefix = NULL;
-	struct option embed_gitdir_options[] = {
+	पूर्णांक i;
+	काष्ठा pathspec pathspec = { 0 };
+	काष्ठा module_list list = MODULE_LIST_INIT;
+	स्थिर अक्षर *super_prefix = शून्य;
+	काष्ठा option embed_gitdir_options[] = {
 		OPT__SUPER_PREFIX(&super_prefix),
 		OPT_END()
 	};
-	const char *const git_submodule_helper_usage[] = {
+	स्थिर अक्षर *स्थिर git_submodule_helper_usage[] = {
 		N_("git submodule absorbgitdirs [<options>] [<path>...]"),
-		NULL
+		शून्य
 	};
-	int ret = 1;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, embed_gitdir_options,
 			     git_submodule_helper_usage, 0);
 
-	if (module_list_compute(argv, prefix, &pathspec, &list) < 0)
-		goto cleanup;
+	अगर (module_list_compute(argv, prefix, &pathspec, &list) < 0)
+		जाओ cleanup;
 
-	for (i = 0; i < list.nr; i++)
+	क्रम (i = 0; i < list.nr; i++)
 		absorb_git_dir_into_superproject(list.entries[i]->name,
 						 super_prefix);
 
@@ -3230,57 +3230,57 @@ static int absorb_git_dirs(int argc, const char **argv, const char *prefix,
 cleanup:
 	clear_pathspec(&pathspec);
 	module_list_release(&list);
-	return ret;
+	वापस ret;
 }
 
-static int module_set_url(int argc, const char **argv, const char *prefix,
-			  struct repository *repo UNUSED)
+अटल पूर्णांक module_set_url(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			  काष्ठा repository *repo UNUSED)
 {
-	int quiet = 0, ret;
-	const char *newurl;
-	const char *path;
-	char *config_name;
-	struct option options[] = {
+	पूर्णांक quiet = 0, ret;
+	स्थिर अक्षर *newurl;
+	स्थिर अक्षर *path;
+	अक्षर *config_name;
+	काष्ठा option options[] = {
 		OPT__QUIET(&quiet, N_("suppress output for setting url of a submodule")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	स्थिर अक्षर *स्थिर usage[] = {
 		N_("git submodule set-url [--quiet] <path> <newurl>"),
-		NULL
+		शून्य
 	};
-	const struct submodule *sub;
+	स्थिर काष्ठा submodule *sub;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (argc != 2 || !(path = argv[0]) || !(newurl = argv[1]))
+	अगर (argc != 2 || !(path = argv[0]) || !(newurl = argv[1]))
 		usage_with_options(usage, options);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	अगर (!sub)
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
 		    path);
 
 	config_name = xstrfmt("submodule.%s.url", sub->name);
 	ret = config_set_in_gitmodules_file_gently(the_repository, config_name, newurl);
 
-	if (!ret) {
+	अगर (!ret) {
 		repo_read_gitmodules(the_repository, 0);
-		sync_submodule(sub->path, prefix, NULL, quiet ? OPT_QUIET : 0);
+		sync_submodule(sub->path, prefix, शून्य, quiet ? OPT_QUIET : 0);
 	}
 
-	free(config_name);
-	return !!ret;
+	मुक्त(config_name);
+	वापस !!ret;
 }
 
-static int module_set_branch(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+अटल पूर्णांक module_set_branch(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			     काष्ठा repository *repo UNUSED)
 {
-	int opt_default = 0, ret;
-	const char *opt_branch = NULL;
-	const char *path;
-	char *config_name;
-	struct option options[] = {
+	पूर्णांक opt_default = 0, ret;
+	स्थिर अक्षर *opt_branch = शून्य;
+	स्थिर अक्षर *path;
+	अक्षर *config_name;
+	काष्ठा option options[] = {
 		/*
 		 * We accept the `quiet` option for uniformity across subcommands,
 		 * though there is nothing to make less verbose in this subcommand.
@@ -3293,43 +3293,43 @@ static int module_set_branch(int argc, const char **argv, const char *prefix,
 			N_("set the default tracking branch")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	स्थिर अक्षर *स्थिर usage[] = {
 		N_("git submodule set-branch [-q|--quiet] (-d|--default) <path>"),
 		N_("git submodule set-branch [-q|--quiet] (-b|--branch) <branch> <path>"),
-		NULL
+		शून्य
 	};
-	const struct submodule *sub;
+	स्थिर काष्ठा submodule *sub;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (!opt_branch && !opt_default)
+	अगर (!opt_branch && !opt_default)
 		die(_("--branch or --default required"));
 
-	if (opt_branch && opt_default)
+	अगर (opt_branch && opt_default)
 		die(_("options '%s' and '%s' cannot be used together"), "--branch", "--default");
 
-	if (argc != 1 || !(path = argv[0]))
+	अगर (argc != 1 || !(path = argv[0]))
 		usage_with_options(usage, options);
 
 	sub = submodule_from_path(the_repository, null_oid(the_hash_algo), path);
 
-	if (!sub)
+	अगर (!sub)
 		die(_("no submodule mapping found in .gitmodules for path '%s'"),
 		    path);
 
 	config_name = xstrfmt("submodule.%s.branch", sub->name);
 	ret = config_set_in_gitmodules_file_gently(the_repository, config_name, opt_branch);
 
-	free(config_name);
-	return !!ret;
+	मुक्त(config_name);
+	वापस !!ret;
 }
 
-static int module_create_branch(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+अटल पूर्णांक module_create_branch(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+				काष्ठा repository *repo UNUSED)
 {
-	enum branch_track track;
-	int quiet = 0, force = 0, reflog = 0, dry_run = 0;
-	struct option options[] = {
+	क्रमागत branch_track track;
+	पूर्णांक quiet = 0, force = 0, reflog = 0, dry_run = 0;
+	काष्ठा option options[] = {
 		OPT__QUIET(&quiet, N_("print only error messages")),
 		OPT__FORCE(&force, N_("force creation"), 0),
 		OPT_BOOL(0, "create-reflog", &reflog,
@@ -3342,225 +3342,225 @@ static int module_create_branch(int argc, const char **argv, const char *prefix,
 			     N_("show whether the branch would be created")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	स्थिर अक्षर *स्थिर usage[] = {
 		N_("git submodule--helper create-branch [-f|--force] [--create-reflog] [-q|--quiet] [-t|--track] [-n|--dry-run] <name> <start-oid> <start-name>"),
-		NULL
+		शून्य
 	};
-	struct repo_config_values *cfg = repo_config_values(the_repository);
+	काष्ठा repo_config_मूल्यावली *cfg = repo_config_मूल्यावली(the_repository);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, शून्य);
 	track = cfg->branch_track;
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (argc != 3)
+	अगर (argc != 3)
 		usage_with_options(usage, options);
 
-	if (!quiet && !dry_run)
+	अगर (!quiet && !dry_run)
 		printf_ln(_("creating branch '%s'"), argv[0]);
 
 	create_branches_recursively(the_repository, argv[0], argv[1], argv[2],
 				    force, reflog, quiet, track, dry_run);
-	return 0;
+	वापस 0;
 }
 
-struct add_data {
-	const char *prefix;
-	const char *branch;
-	const char *reference_path;
-	char *sm_path;
-	const char *sm_name;
-	const char *repo;
-	const char *realrepo;
-	enum ref_storage_format ref_storage_format;
-	int depth;
-	unsigned int force: 1;
-	unsigned int quiet: 1;
-	unsigned int progress: 1;
-	unsigned int dissociate: 1;
+काष्ठा add_तथ्य {
+	स्थिर अक्षर *prefix;
+	स्थिर अक्षर *branch;
+	स्थिर अक्षर *reference_path;
+	अक्षर *sm_path;
+	स्थिर अक्षर *sm_name;
+	स्थिर अक्षर *repo;
+	स्थिर अक्षर *realrepo;
+	क्रमागत ref_storage_format ref_storage_format;
+	पूर्णांक depth;
+	अचिन्हित पूर्णांक force: 1;
+	अचिन्हित पूर्णांक quiet: 1;
+	अचिन्हित पूर्णांक progress: 1;
+	अचिन्हित पूर्णांक dissociate: 1;
 };
-#define ADD_DATA_INIT { \
+#घोषणा ADD_तथ्य_INIT { \
 	.depth = -1, \
 	.ref_storage_format = REF_STORAGE_FORMAT_UNKNOWN, \
 }
 
-static void append_fetch_remotes(struct strbuf *msg, const char *git_dir_path)
+अटल व्योम append_fetch_remotes(काष्ठा strbuf *संदेश, स्थिर अक्षर *git_dir_path)
 {
-	struct child_process cp_remote = CHILD_PROCESS_INIT;
-	struct strbuf sb_remote_out = STRBUF_INIT;
+	काष्ठा child_process cp_remote = CHILD_PROCESS_INIT;
+	काष्ठा strbuf sb_remote_out = STRBUF_INIT;
 
 	cp_remote.git_cmd = 1;
 	strvec_pushf(&cp_remote.env,
 		     "GIT_DIR=%s", git_dir_path);
-	strvec_push(&cp_remote.env, "GIT_WORK_TREE=.");
-	strvec_pushl(&cp_remote.args, "remote", "-v", NULL);
-	if (!capture_command(&cp_remote, &sb_remote_out, 0)) {
-		char *next_line;
-		char *line = sb_remote_out.buf;
+	strvec_धकेलो(&cp_remote.env, "GIT_WORK_TREE=.");
+	strvec_pushl(&cp_remote.args, "remote", "-v", शून्य);
+	अगर (!capture_command(&cp_remote, &sb_remote_out, 0)) {
+		अक्षर *अग्र_पंक्ति;
+		अक्षर *पंक्ति = sb_remote_out.buf;
 
-		while ((next_line = strchr(line, '\n')) != NULL) {
-			size_t len = next_line - line;
+		जबतक ((अग्र_पंक्ति = म_अक्षर(पंक्ति, '\n')) != शून्य) {
+			माप_प्रकार len = अग्र_पंक्ति - पंक्ति;
 
-			if (strip_suffix_mem(line, &len, " (fetch)"))
-				strbuf_addf(msg, "  %.*s\n", (int)len, line);
-			line = next_line + 1;
+			अगर (strip_suffix_mem(पंक्ति, &len, " (fetch)"))
+				strbuf_addf(संदेश, "  %.*s\n", (पूर्णांक)len, पंक्ति);
+			पंक्ति = अग्र_पंक्ति + 1;
 		}
 	}
 
 	strbuf_release(&sb_remote_out);
 }
 
-static int add_submodule(const struct add_data *add_data)
+अटल पूर्णांक add_submodule(स्थिर काष्ठा add_तथ्य *add_तथ्य)
 {
-	struct module_clone_data clone_data = MODULE_CLONE_DATA_INIT;
-	struct string_list reference = STRING_LIST_INIT_NODUP;
-	int ret = -1;
+	काष्ठा module_clone_तथ्य clone_तथ्य = MODULE_CLONE_तथ्य_INIT;
+	काष्ठा string_list reference = STRING_LIST_INIT_NODUP;
+	पूर्णांक ret = -1;
 
 	/* perhaps the path already exists and is already a git repo, else clone it */
-	if (is_directory(add_data->sm_path)) {
-		char *submod_gitdir_path;
-		struct strbuf sm_path = STRBUF_INIT;
-		strbuf_addstr(&sm_path, add_data->sm_path);
-		submod_gitdir_path = xstrfmt("%s/.git", add_data->sm_path);
-		if (is_nonbare_repository_dir(&sm_path))
-			printf(_("Adding existing repo at '%s' to the index\n"),
-			       add_data->sm_path);
-		else
+	अगर (is_directory(add_तथ्य->sm_path)) {
+		अक्षर *submod_gitdir_path;
+		काष्ठा strbuf sm_path = STRBUF_INIT;
+		strbuf_addstr(&sm_path, add_तथ्य->sm_path);
+		submod_gitdir_path = xstrfmt("%s/.git", add_तथ्य->sm_path);
+		अगर (is_nonbare_repository_dir(&sm_path))
+			म_लिखो(_("Adding existing repo at '%s' to the index\n"),
+			       add_तथ्य->sm_path);
+		अन्यथा
 			die(_("'%s' already exists and is not a valid git repo"),
-			    add_data->sm_path);
+			    add_तथ्य->sm_path);
 		strbuf_release(&sm_path);
-		free(submod_gitdir_path);
-	} else {
-		struct child_process cp = CHILD_PROCESS_INIT;
-		struct strbuf submod_gitdir = STRBUF_INIT;
+		मुक्त(submod_gitdir_path);
+	} अन्यथा {
+		काष्ठा child_process cp = CHILD_PROCESS_INIT;
+		काष्ठा strbuf submod_gitdir = STRBUF_INIT;
 
-		submodule_name_to_gitdir(&submod_gitdir, the_repository, add_data->sm_name);
+		submodule_name_to_gitdir(&submod_gitdir, the_repository, add_तथ्य->sm_name);
 
-		if (is_directory(submod_gitdir.buf)) {
-			if (!add_data->force) {
-				struct strbuf msg = STRBUF_INIT;
-				char *die_msg;
+		अगर (is_directory(submod_gitdir.buf)) {
+			अगर (!add_तथ्य->force) {
+				काष्ठा strbuf संदेश = STRBUF_INIT;
+				अक्षर *die_संदेश;
 
-				strbuf_addf(&msg, _("A git directory for '%s' is found "
+				strbuf_addf(&संदेश, _("A git directory for '%s' is found "
 						    "locally with remote(s):\n"),
-					    add_data->sm_name);
+					    add_तथ्य->sm_name);
 
-				append_fetch_remotes(&msg, submod_gitdir.buf);
+				append_fetch_remotes(&संदेश, submod_gitdir.buf);
 				strbuf_release(&submod_gitdir);
 
-				strbuf_addf(&msg, _("If you want to reuse this local git "
+				strbuf_addf(&संदेश, _("If you want to reuse this local git "
 						    "directory instead of cloning again from\n"
 						    "  %s\n"
 						    "use the '--force' option. If the local git "
 						    "directory is not the correct repo\n"
 						    "or you are unsure what this means choose "
 						    "another name with the '--name' option."),
-					    add_data->realrepo);
+					    add_तथ्य->realrepo);
 
-				die_msg = strbuf_detach(&msg, NULL);
-				die("%s", die_msg);
-			} else {
-				printf(_("Reactivating local git directory for "
-					 "submodule '%s'\n"), add_data->sm_name);
+				die_संदेश = strbuf_detach(&संदेश, शून्य);
+				die("%s", die_संदेश);
+			} अन्यथा {
+				म_लिखो(_("Reactivating local git directory for "
+					 "submodule '%s'\n"), add_तथ्य->sm_name);
 			}
 		}
 		strbuf_release(&submod_gitdir);
 
-		clone_data.prefix = add_data->prefix;
-		clone_data.path = add_data->sm_path;
-		clone_data.name = add_data->sm_name;
-		clone_data.url = add_data->realrepo;
-		clone_data.quiet = add_data->quiet;
-		clone_data.progress = add_data->progress;
-		if (add_data->reference_path) {
-			char *p = xstrdup(add_data->reference_path);
+		clone_तथ्य.prefix = add_तथ्य->prefix;
+		clone_तथ्य.path = add_तथ्य->sm_path;
+		clone_तथ्य.name = add_तथ्य->sm_name;
+		clone_तथ्य.url = add_तथ्य->realrepo;
+		clone_तथ्य.quiet = add_तथ्य->quiet;
+		clone_तथ्य.progress = add_तथ्य->progress;
+		अगर (add_तथ्य->reference_path) {
+			अक्षर *p = xstrdup(add_तथ्य->reference_path);
 
 			string_list_append(&reference, p)->util = p;
 		}
-		clone_data.ref_storage_format = add_data->ref_storage_format;
-		clone_data.dissociate = add_data->dissociate;
-		if (add_data->depth >= 0)
-			clone_data.depth = add_data->depth;
+		clone_तथ्य.ref_storage_format = add_तथ्य->ref_storage_format;
+		clone_तथ्य.dissociate = add_तथ्य->dissociate;
+		अगर (add_तथ्य->depth >= 0)
+			clone_तथ्य.depth = add_तथ्य->depth;
 
-		if (clone_submodule(&clone_data, &reference))
-			goto cleanup;
+		अगर (clone_submodule(&clone_तथ्य, &reference))
+			जाओ cleanup;
 
 		prepare_submodule_repo_env(&cp.env);
 		cp.git_cmd = 1;
-		cp.dir = add_data->sm_path;
+		cp.dir = add_तथ्य->sm_path;
 		/*
 		 * NOTE: we only get here if add_data->force is true, so
 		 * passing --force to checkout is reasonable.
 		 */
-		strvec_pushl(&cp.args, "checkout", "-f", "-q", NULL);
+		strvec_pushl(&cp.args, "checkout", "-f", "-q", शून्य);
 
-		if (add_data->branch) {
-			strvec_pushl(&cp.args, "-B", add_data->branch, NULL);
-			strvec_pushf(&cp.args, "origin/%s", add_data->branch);
+		अगर (add_तथ्य->branch) {
+			strvec_pushl(&cp.args, "-B", add_तथ्य->branch, शून्य);
+			strvec_pushf(&cp.args, "origin/%s", add_तथ्य->branch);
 		}
 
-		if (run_command(&cp))
-			die(_("unable to checkout submodule '%s'"), add_data->sm_path);
+		अगर (run_command(&cp))
+			die(_("unable to checkout submodule '%s'"), add_तथ्य->sm_path);
 	}
 	ret = 0;
 
 cleanup:
 	string_list_clear(&reference, 1);
-	return ret;
+	वापस ret;
 }
 
-static int config_submodule_in_gitmodules(const char *name, const char *var, const char *value)
+अटल पूर्णांक config_submodule_in_gitmodules(स्थिर अक्षर *name, स्थिर अक्षर *var, स्थिर अक्षर *मूल्य)
 {
-	char *key;
-	int ret;
+	अक्षर *कुंजी;
+	पूर्णांक ret;
 
-	if (!is_writing_gitmodules_ok())
+	अगर (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	key = xstrfmt("submodule.%s.%s", name, var);
-	ret = config_set_in_gitmodules_file_gently(the_repository, key, value);
-	free(key);
+	कुंजी = xstrfmt("submodule.%s.%s", name, var);
+	ret = config_set_in_gitmodules_file_gently(the_repository, कुंजी, मूल्य);
+	मुक्त(कुंजी);
 
-	return ret;
+	वापस ret;
 }
 
-static void configure_added_submodule(struct add_data *add_data)
+अटल व्योम configure_added_submodule(काष्ठा add_तथ्य *add_तथ्य)
 {
-	char *key;
-	struct child_process add_submod = CHILD_PROCESS_INIT;
-	struct child_process add_gitmodules = CHILD_PROCESS_INIT;
-	const struct string_list *values;
-	int matched = 0;
+	अक्षर *कुंजी;
+	काष्ठा child_process add_submod = CHILD_PROCESS_INIT;
+	काष्ठा child_process add_gitmodules = CHILD_PROCESS_INIT;
+	स्थिर काष्ठा string_list *मूल्यावली;
+	पूर्णांक matched = 0;
 
-	key = xstrfmt("submodule.%s.url", add_data->sm_name);
-	repo_config_set_gently(the_repository, key, add_data->realrepo);
-	free(key);
+	कुंजी = xstrfmt("submodule.%s.url", add_तथ्य->sm_name);
+	repo_config_set_gently(the_repository, कुंजी, add_तथ्य->realrepo);
+	मुक्त(कुंजी);
 
 	add_submod.git_cmd = 1;
 	strvec_pushl(&add_submod.args, "add",
-		     "--no-warn-embedded-repo", NULL);
-	if (add_data->force)
-		strvec_push(&add_submod.args, "--force");
-	strvec_pushl(&add_submod.args, "--", add_data->sm_path, NULL);
+		     "--no-warn-embedded-repo", शून्य);
+	अगर (add_तथ्य->force)
+		strvec_धकेलो(&add_submod.args, "--force");
+	strvec_pushl(&add_submod.args, "--", add_तथ्य->sm_path, शून्य);
 
-	if (run_command(&add_submod))
-		die(_("Failed to add submodule '%s'"), add_data->sm_path);
+	अगर (run_command(&add_submod))
+		die(_("Failed to add submodule '%s'"), add_तथ्य->sm_path);
 
-	if (config_submodule_in_gitmodules(add_data->sm_name, "path", add_data->sm_path) ||
-	    config_submodule_in_gitmodules(add_data->sm_name, "url", add_data->repo))
-		die(_("Failed to register submodule '%s'"), add_data->sm_path);
+	अगर (config_submodule_in_gitmodules(add_तथ्य->sm_name, "path", add_तथ्य->sm_path) ||
+	    config_submodule_in_gitmodules(add_तथ्य->sm_name, "url", add_तथ्य->repo))
+		die(_("Failed to register submodule '%s'"), add_तथ्य->sm_path);
 
-	if (add_data->branch) {
-		if (config_submodule_in_gitmodules(add_data->sm_name,
-						   "branch", add_data->branch))
-			die(_("Failed to register submodule '%s'"), add_data->sm_path);
+	अगर (add_तथ्य->branch) {
+		अगर (config_submodule_in_gitmodules(add_तथ्य->sm_name,
+						   "branch", add_तथ्य->branch))
+			die(_("Failed to register submodule '%s'"), add_तथ्य->sm_path);
 	}
 
 	add_gitmodules.git_cmd = 1;
 	strvec_pushl(&add_gitmodules.args,
-		     "add", "--force", "--", ".gitmodules", NULL);
+		     "add", "--force", "--", ".gitmodules", शून्य);
 
-	if (run_command(&add_gitmodules))
-		die(_("Failed to register submodule '%s'"), add_data->sm_path);
+	अगर (run_command(&add_gitmodules))
+		die(_("Failed to register submodule '%s'"), add_तथ्य->sm_path);
 
 	/*
 	 * NEEDSWORK: In a multi-working-tree world this needs to be
@@ -3572,254 +3572,254 @@ static void configure_added_submodule(struct add_data *add_data)
 	 * is_submodule_active(), since that function needs to find
 	 * out the value of "submodule.active" again anyway.
 	 */
-	if (repo_config_get(the_repository, "submodule.active") || /* key absent */
-	    repo_config_get_string_multi(the_repository, "submodule.active", &values)) {
+	अगर (repo_config_get(the_repository, "submodule.active") || /* key absent */
+	    repo_config_get_string_multi(the_repository, "submodule.active", &मूल्यावली)) {
 		/*
 		 * If the submodule being added isn't already covered by the
 		 * current configured pathspec, set the submodule's active flag
 		 */
-		key = xstrfmt("submodule.%s.active", add_data->sm_name);
-		repo_config_set_gently(the_repository, key, "true");
-		free(key);
-	} else {
-		for (size_t i = 0; i < values->nr; i++) {
-			const char *pat = values->items[i].string;
-			if (!wildmatch(pat, add_data->sm_path, 0)) { /* match found */
+		कुंजी = xstrfmt("submodule.%s.active", add_तथ्य->sm_name);
+		repo_config_set_gently(the_repository, कुंजी, "true");
+		मुक्त(कुंजी);
+	} अन्यथा {
+		क्रम (माप_प्रकार i = 0; i < मूल्यावली->nr; i++) {
+			स्थिर अक्षर *pat = मूल्यावली->वस्तुएँ[i].string;
+			अगर (!wildmatch(pat, add_तथ्य->sm_path, 0)) { /* match found */
 				matched = 1;
-				break;
+				अवरोध;
 			}
 		}
-		if (!matched) { /* no pattern matched -> force-enable */
-			key = xstrfmt("submodule.%s.active", add_data->sm_name);
-			repo_config_set_gently(the_repository, key, "true");
-			free(key);
+		अगर (!matched) { /* no pattern matched -> force-enable */
+			कुंजी = xstrfmt("submodule.%s.active", add_तथ्य->sm_name);
+			repo_config_set_gently(the_repository, कुंजी, "true");
+			मुक्त(कुंजी);
 		}
 	}
 }
 
-static void die_on_index_match(const char *path, int force)
+अटल व्योम die_on_सूचकांक_match(स्थिर अक्षर *path, पूर्णांक force)
 {
-	struct pathspec ps;
-	const char *args[] = { path, NULL };
-	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, NULL, args);
+	काष्ठा pathspec ps;
+	स्थिर अक्षर *args[] = { path, शून्य };
+	parse_pathspec(&ps, 0, PATHSPEC_PREFER_CWD, शून्य, args);
 
-	if (repo_read_index_preload(the_repository, NULL, 0) < 0)
+	अगर (repo_read_सूचकांक_preload(the_repository, शून्य, 0) < 0)
 		die(_("index file corrupt"));
 
-	if (ps.nr) {
-		char *ps_matched = xcalloc(ps.nr, 1);
+	अगर (ps.nr) {
+		अक्षर *ps_matched = xcalloc(ps.nr, 1);
 
 		/* TODO: audit for interaction with sparse-index. */
-		ensure_full_index(the_repository->index);
+		ensure_full_सूचकांक(the_repository->सूचकांक);
 
 		/*
 		 * Since there is only one pathspec, we just need to
 		 * check ps_matched[0] to know if a cache entry matched.
 		 */
-		for (size_t i = 0; i < the_repository->index->cache_nr; i++) {
-			ce_path_match(the_repository->index, the_repository->index->cache[i], &ps,
+		क्रम (माप_प्रकार i = 0; i < the_repository->सूचकांक->cache_nr; i++) {
+			ce_path_match(the_repository->सूचकांक, the_repository->सूचकांक->cache[i], &ps,
 				      ps_matched);
 
-			if (ps_matched[0]) {
-				if (!force)
+			अगर (ps_matched[0]) {
+				अगर (!force)
 					die(_("'%s' already exists in the index"),
 					    path);
-				if (!S_ISGITLINK(the_repository->index->cache[i]->ce_mode))
+				अगर (!S_ISGITLINK(the_repository->सूचकांक->cache[i]->ce_mode))
 					die(_("'%s' already exists in the index "
 					      "and is not a submodule"), path);
-				break;
+				अवरोध;
 			}
 		}
-		free(ps_matched);
+		मुक्त(ps_matched);
 	}
 	clear_pathspec(&ps);
 }
 
-static void die_on_repo_without_commits(const char *path)
+अटल व्योम die_on_repo_without_commits(स्थिर अक्षर *path)
 {
-	struct strbuf sb = STRBUF_INIT;
+	काष्ठा strbuf sb = STRBUF_INIT;
 	strbuf_addstr(&sb, path);
-	if (is_nonbare_repository_dir(&sb)) {
-		struct object_id oid;
-		if (repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid) < 0)
+	अगर (is_nonbare_repository_dir(&sb)) {
+		काष्ठा object_id oid;
+		अगर (repo_resolve_gitlink_ref(the_repository, path, "HEAD", &oid) < 0)
 			die(_("'%s' does not have a commit checked out"), path);
 	}
 	strbuf_release(&sb);
 }
 
-static int module_add(int argc, const char **argv, const char *prefix,
-		      struct repository *repo UNUSED)
+अटल पूर्णांक module_add(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+		      काष्ठा repository *repo UNUSED)
 {
-	int force = 0, quiet = 0, progress = 0, dissociate = 0;
-	struct add_data add_data = ADD_DATA_INIT;
-	const char *ref_storage_format = NULL;
-	char *to_free = NULL;
-	const struct submodule *existing;
-	struct strbuf buf = STRBUF_INIT;
-	char *sm_name_to_free = NULL;
-	struct option options[] = {
-		OPT_STRING('b', "branch", &add_data.branch, N_("branch"),
+	पूर्णांक force = 0, quiet = 0, progress = 0, dissociate = 0;
+	काष्ठा add_तथ्य add_तथ्य = ADD_तथ्य_INIT;
+	स्थिर अक्षर *ref_storage_format = शून्य;
+	अक्षर *to_free = शून्य;
+	स्थिर काष्ठा submodule *existing;
+	काष्ठा strbuf buf = STRBUF_INIT;
+	अक्षर *sm_name_to_free = शून्य;
+	काष्ठा option options[] = {
+		OPT_STRING('b', "branch", &add_तथ्य.branch, N_("branch"),
 			   N_("branch of repository to add as submodule")),
 		OPT__FORCE(&force, N_("allow adding an otherwise ignored submodule path"),
 			   PARSE_OPT_NOCOMPLETE),
 		OPT__QUIET(&quiet, N_("print only error messages")),
 		OPT_BOOL(0, "progress", &progress, N_("force cloning progress")),
-		OPT_STRING(0, "reference", &add_data.reference_path, N_("repository"),
+		OPT_STRING(0, "reference", &add_तथ्य.reference_path, N_("repository"),
 			   N_("reference repository")),
 		OPT_STRING(0, "ref-storage-format", &ref_storage_format, N_("format"),
 			   N_("specify the reference storage format to use")),
 		OPT_ALIAS_F(0, "ref-format", "ref-storage-format", PARSE_OPT_HIDDEN),
 		OPT_BOOL(0, "dissociate", &dissociate, N_("borrow the objects from reference repositories")),
-		OPT_STRING(0, "name", &add_data.sm_name, N_("name"),
+		OPT_STRING(0, "name", &add_तथ्य.sm_name, N_("name"),
 			   N_("sets the submodule's name to the given string "
 			      "instead of defaulting to its path")),
-		OPT_INTEGER(0, "depth", &add_data.depth, N_("depth for shallow clones")),
+		OPT_INTEGER(0, "depth", &add_तथ्य.depth, N_("depth for shallow clones")),
 		OPT_END()
 	};
-	const char *const usage[] = {
+	स्थिर अक्षर *स्थिर usage[] = {
 		N_("git submodule add [<options>] [--] <repository> [<path>]"),
-		NULL
+		शून्य
 	};
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 1;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	पूर्णांक ret = 1;
 
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	if (!is_writing_gitmodules_ok())
+	अगर (!is_writing_gitmodules_ok())
 		die(_("please make sure that the .gitmodules file is in the working tree"));
 
-	if (prefix && *prefix &&
-	    add_data.reference_path && !is_absolute_path(add_data.reference_path))
-		add_data.reference_path = xstrfmt("%s%s", prefix, add_data.reference_path);
+	अगर (prefix && *prefix &&
+	    add_तथ्य.reference_path && !is_absolute_path(add_तथ्य.reference_path))
+		add_तथ्य.reference_path = xstrfmt("%s%s", prefix, add_तथ्य.reference_path);
 
-	if (argc == 0 || argc > 2)
+	अगर (argc == 0 || argc > 2)
 		usage_with_options(usage, options);
 
-	if (ref_storage_format) {
-		add_data.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
-		if (add_data.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
+	अगर (ref_storage_format) {
+		add_तथ्य.ref_storage_format = ref_storage_format_by_name(ref_storage_format);
+		अगर (add_तथ्य.ref_storage_format == REF_STORAGE_FORMAT_UNKNOWN)
 			die(_("unknown ref storage format '%s'"), ref_storage_format);
 	}
 
-	add_data.repo = argv[0];
-	if (argc == 1)
-		add_data.sm_path = git_url_basename(add_data.repo, 0, 0);
-	else
-		add_data.sm_path = xstrdup(argv[1]);
+	add_तथ्य.repo = argv[0];
+	अगर (argc == 1)
+		add_तथ्य.sm_path = git_url_basename(add_तथ्य.repo, 0, 0);
+	अन्यथा
+		add_तथ्य.sm_path = xstrdup(argv[1]);
 
-	if (prefix && *prefix && !is_absolute_path(add_data.sm_path)) {
-		char *sm_path = add_data.sm_path;
+	अगर (prefix && *prefix && !is_absolute_path(add_तथ्य.sm_path)) {
+		अक्षर *sm_path = add_तथ्य.sm_path;
 
-		add_data.sm_path = xstrfmt("%s%s", prefix, sm_path);
-		free(sm_path);
+		add_तथ्य.sm_path = xstrfmt("%s%s", prefix, sm_path);
+		मुक्त(sm_path);
 	}
 
-	if (starts_with_dot_dot_slash(add_data.repo) ||
-	    starts_with_dot_slash(add_data.repo)) {
-		if (prefix)
+	अगर (starts_with_dot_dot_slash(add_तथ्य.repo) ||
+	    starts_with_dot_slash(add_तथ्य.repo)) {
+		अगर (prefix)
 			die(_("Relative path can only be used from the toplevel "
 			      "of the working tree"));
 
 		/* dereference source url relative to parent's url */
-		to_free = resolve_relative_url(add_data.repo, NULL, 1);
-		add_data.realrepo = to_free;
-	} else if (is_dir_sep(add_data.repo[0]) || strchr(add_data.repo, ':')) {
-		add_data.realrepo = add_data.repo;
-	} else {
+		to_free = resolve_relative_url(add_तथ्य.repo, शून्य, 1);
+		add_तथ्य.realrepo = to_free;
+	} अन्यथा अगर (is_dir_sep(add_तथ्य.repo[0]) || म_अक्षर(add_तथ्य.repo, ':')) {
+		add_तथ्य.realrepo = add_तथ्य.repo;
+	} अन्यथा {
 		die(_("repo URL: '%s' must be absolute or begin with ./|../"),
-		    add_data.repo);
+		    add_तथ्य.repo);
 	}
 
 	/*
 	 * normalize path:
 	 * multiple //; leading ./; /./; /../;
 	 */
-	normalize_path_copy(add_data.sm_path, add_data.sm_path);
-	strip_dir_trailing_slashes(add_data.sm_path);
+	normalize_path_copy(add_तथ्य.sm_path, add_तथ्य.sm_path);
+	strip_dir_trailing_slashes(add_तथ्य.sm_path);
 
-	if (validate_submodule_path(add_data.sm_path) < 0)
-		die(NULL);
+	अगर (validate_submodule_path(add_तथ्य.sm_path) < 0)
+		die(शून्य);
 
-	die_on_index_match(add_data.sm_path, force);
-	die_on_repo_without_commits(add_data.sm_path);
+	die_on_सूचकांक_match(add_तथ्य.sm_path, force);
+	die_on_repo_without_commits(add_तथ्य.sm_path);
 
-	if (!force) {
-		struct child_process cp = CHILD_PROCESS_INIT;
+	अगर (!force) {
+		काष्ठा child_process cp = CHILD_PROCESS_INIT;
 
 		cp.git_cmd = 1;
 		cp.no_stdout = 1;
 		strvec_pushl(&cp.args, "add", "--dry-run", "--ignore-missing",
-			     "--no-warn-embedded-repo", add_data.sm_path, NULL);
-		if ((ret = pipe_command(&cp, NULL, 0, NULL, 0, &sb, 0))) {
-			strbuf_complete_line(&sb);
-			fputs(sb.buf, stderr);
-			goto cleanup;
+			     "--no-warn-embedded-repo", add_तथ्य.sm_path, शून्य);
+		अगर ((ret = pipe_command(&cp, शून्य, 0, शून्य, 0, &sb, 0))) {
+			strbuf_complete_पंक्ति(&sb);
+			ख_माला_दो(sb.buf, मानक_त्रुटि);
+			जाओ cleanup;
 		}
 	}
 
-	if (!add_data.sm_name)
-		add_data.sm_name = add_data.sm_path;
+	अगर (!add_तथ्य.sm_name)
+		add_तथ्य.sm_name = add_तथ्य.sm_path;
 
 	existing = submodule_from_name(the_repository,
 					null_oid(the_hash_algo),
-					add_data.sm_name);
+					add_तथ्य.sm_name);
 
-	if (existing && existing->path &&
-	    strcmp(existing->path, add_data.sm_path)) {
-		if (!force) {
+	अगर (existing && existing->path &&
+	    म_भेद(existing->path, add_तथ्य.sm_path)) {
+		अगर (!force) {
 			die(_("submodule name '%s' already used for path '%s'"),
-			    add_data.sm_name, existing->path);
+			    add_तथ्य.sm_name, existing->path);
 		}
 		/* --force: build <name><n> until unique */
-		for (int i = 1; ; i++) {
+		क्रम (पूर्णांक i = 1; ; i++) {
 			strbuf_reset(&buf);
-			strbuf_addf(&buf, "%s%d", add_data.sm_name, i);
-			if (!submodule_from_name(the_repository,
+			strbuf_addf(&buf, "%s%d", add_तथ्य.sm_name, i);
+			अगर (!submodule_from_name(the_repository,
 						null_oid(the_hash_algo),
 						buf.buf)) {
-				break;
+				अवरोध;
 			}
 		}
-		add_data.sm_name = sm_name_to_free = strbuf_detach(&buf, NULL);
+		add_तथ्य.sm_name = sm_name_to_free = strbuf_detach(&buf, शून्य);
 	}
 
-	if (check_submodule_name(add_data.sm_name))
-		die(_("'%s' is not a valid submodule name"), add_data.sm_name);
+	अगर (check_submodule_name(add_तथ्य.sm_name))
+		die(_("'%s' is not a valid submodule name"), add_तथ्य.sm_name);
 
-	add_data.prefix = prefix;
-	add_data.force = !!force;
-	add_data.quiet = !!quiet;
-	add_data.progress = !!progress;
-	add_data.dissociate = !!dissociate;
+	add_तथ्य.prefix = prefix;
+	add_तथ्य.force = !!force;
+	add_तथ्य.quiet = !!quiet;
+	add_तथ्य.progress = !!progress;
+	add_तथ्य.dissociate = !!dissociate;
 
-	if (the_repository->repository_format_submodule_path_cfg)
-		create_default_gitdir_config(add_data.sm_name);
+	अगर (the_repository->repository_format_submodule_path_cfg)
+		create_default_gitdir_config(add_तथ्य.sm_name);
 
-	if (add_submodule(&add_data))
-		goto cleanup;
-	configure_added_submodule(&add_data);
+	अगर (add_submodule(&add_तथ्य))
+		जाओ cleanup;
+	configure_added_submodule(&add_तथ्य);
 
 	ret = 0;
 cleanup:
-	free(sm_name_to_free);
-	free(add_data.sm_path);
-	free(to_free);
+	मुक्त(sm_name_to_free);
+	मुक्त(add_तथ्य.sm_path);
+	मुक्त(to_free);
 	strbuf_release(&sb);
 
-	return ret;
+	वापस ret;
 }
 
-int cmd_submodule__helper(int argc,
-			  const char **argv,
-			  const char *prefix,
-			  struct repository *repo)
+पूर्णांक cmd_submodule__helper(पूर्णांक argc,
+			  स्थिर अक्षर **argv,
+			  स्थिर अक्षर *prefix,
+			  काष्ठा repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	const char *const usage[] = {
+	parse_opt_subcommand_fn *fn = शून्य;
+	स्थिर अक्षर *स्थिर usage[] = {
 		N_("git submodule--helper <command>"),
-		NULL
+		शून्य
 	};
-	struct option options[] = {
+	काष्ठा option options[] = {
 		OPT_SUBCOMMAND("migrate-gitdir-configs", &fn, module_migrate),
 		OPT_SUBCOMMAND("gitdir", &fn, module_gitdir),
 		OPT_SUBCOMMAND("clone", &fn, module_clone),
@@ -3831,7 +3831,7 @@ int cmd_submodule__helper(int argc,
 		OPT_SUBCOMMAND("sync", &fn, module_sync),
 		OPT_SUBCOMMAND("deinit", &fn, module_deinit),
 		OPT_SUBCOMMAND("summary", &fn, module_summary),
-		OPT_SUBCOMMAND("push-check", &fn, push_check),
+		OPT_SUBCOMMAND("push-check", &fn, धकेलो_check),
 		OPT_SUBCOMMAND("absorbgitdirs", &fn, absorb_git_dirs),
 		OPT_SUBCOMMAND("set-url", &fn, module_set_url),
 		OPT_SUBCOMMAND("set-branch", &fn, module_set_branch),
@@ -3841,5 +3841,5 @@ int cmd_submodule__helper(int argc,
 	};
 	argc = parse_options(argc, argv, prefix, options, usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	वापस fn(argc, argv, prefix, repo);
 }

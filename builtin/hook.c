@@ -1,46 +1,46 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hook.h"
-#include "parse-options.h"
-#include "thread-utils.h"
+#घोषणा USE_THE_REPOSITORY_VARIABLE
+#समावेश "builtin.h"
+#समावेश "config.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "hook.h"
+#समावेश "parse-options.h"
+#समावेश "thread-utils.h"
 
-#define BUILTIN_HOOK_RUN_USAGE \
+#घोषणा BUILTIN_HOOK_RUN_USAGE \
 	N_("git hook run [--allow-unknown-hook-name] [--ignore-missing] [--to-stdin=<path>] [(-j|--jobs) <n>]\n" \
 	   "<hook-name> [-- <hook-args>]")
-#define BUILTIN_HOOK_LIST_USAGE \
+#घोषणा BUILTIN_HOOK_LIST_USAGE \
 	N_("git hook list [--allow-unknown-hook-name] [-z] [--show-scope] <hook-name>")
 
-static const char * const builtin_hook_usage[] = {
+अटल स्थिर अक्षर * स्थिर builtin_hook_usage[] = {
 	BUILTIN_HOOK_RUN_USAGE,
 	BUILTIN_HOOK_LIST_USAGE,
-	NULL
+	शून्य
 };
 
-static const char * const builtin_hook_run_usage[] = {
+अटल स्थिर अक्षर * स्थिर builtin_hook_run_usage[] = {
 	BUILTIN_HOOK_RUN_USAGE,
-	NULL
+	शून्य
 };
 
-static int list(int argc, const char **argv, const char *prefix,
-		 struct repository *repo)
+अटल पूर्णांक list(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+		 काष्ठा repository *repo)
 {
-	static const char *const builtin_hook_list_usage[] = {
+	अटल स्थिर अक्षर *स्थिर builtin_hook_list_usage[] = {
 		BUILTIN_HOOK_LIST_USAGE,
-		NULL
+		शून्य
 	};
-	struct string_list *head;
-	struct string_list_item *item;
-	const char *hookname = NULL;
-	int line_terminator = '\n';
-	int show_scope = 0;
-	int allow_unknown = 0;
-	int ret = 0;
+	काष्ठा string_list *शीर्ष;
+	काष्ठा string_list_item *item;
+	स्थिर अक्षर *hookname = शून्य;
+	पूर्णांक पंक्ति_terminator = '\n';
+	पूर्णांक show_scope = 0;
+	पूर्णांक allow_unknown = 0;
+	पूर्णांक ret = 0;
 
-	struct option list_options[] = {
-		OPT_SET_INT('z', NULL, &line_terminator,
+	काष्ठा option list_options[] = {
+		OPT_SET_INT('z', शून्य, &पंक्ति_terminator,
 			    N_("use NUL as line terminator"), '\0'),
 		OPT_BOOL(0, "show-scope", &show_scope,
 			 N_("show the config scope that defined each hook")),
@@ -56,77 +56,77 @@ static int list(int argc, const char **argv, const char *prefix,
 	 * The only unnamed argument provided should be the hook-name; if we add
 	 * arguments later they probably should be caught by parse_options.
 	 */
-	if (argc != 1)
-		usage_msg_opt(_("you must specify a hook event name to list"),
+	अगर (argc != 1)
+		usage_संदेश_opt(_("you must specify a hook event name to list"),
 			      builtin_hook_list_usage, list_options);
 
 	hookname = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hookname)) {
+	अगर (!allow_unknown && !is_known_hook(hookname)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hookname);
-		return 1;
+		वापस 1;
 	}
 
-	head = list_hooks(repo, hookname, NULL);
+	शीर्ष = list_hooks(repo, hookname, शून्य);
 
-	if (!head->nr) {
+	अगर (!शीर्ष->nr) {
 		warning(_("no hooks found for event '%s'"), hookname);
 		ret = 1; /* no hooks found */
-		goto cleanup;
+		जाओ cleanup;
 	}
 
-	for_each_string_list_item(item, head) {
-		struct hook *h = item->util;
+	for_each_string_list_item(item, शीर्ष) {
+		काष्ठा hook *h = item->util;
 
-		switch (h->kind) {
-		case HOOK_TRADITIONAL:
-			printf("%s%c", _("hook from hookdir"), line_terminator);
-			break;
-		case HOOK_CONFIGURED: {
-			const char *name = h->u.configured.friendly_name;
-			const char *scope = show_scope ?
-				config_scope_name(h->u.configured.scope) : NULL;
+		चयन (h->kind) {
+		हाल HOOK_TRADITIONAL:
+			म_लिखो("%s%c", _("hook from hookdir"), पंक्ति_terminator);
+			अवरोध;
+		हाल HOOK_CONFIGURED: {
+			स्थिर अक्षर *name = h->u.configured.friendly_name;
+			स्थिर अक्षर *scope = show_scope ?
+				config_scope_name(h->u.configured.scope) : शून्य;
 			/*
 			 * Show the most relevant disable reason. Event-level
 			 * takes precedence: if the whole event is off, that
 			 * is what the user needs to know. The per-hook
 			 * "disabled" surfaces once the event is re-enabled.
 			 */
-			const char *disability =
+			स्थिर अक्षर *disability =
 				h->u.configured.event_disabled ? "event-disabled\t" :
 				h->u.configured.disabled       ? "disabled\t"       :
 								 "";
-			if (scope)
-				printf("%s\t%s%s%c", scope, disability, name,
-				       line_terminator);
-			else
-				printf("%s%s%c", disability, name,
-				       line_terminator);
-			break;
+			अगर (scope)
+				म_लिखो("%s\t%s%s%c", scope, disability, name,
+				       पंक्ति_terminator);
+			अन्यथा
+				म_लिखो("%s%s%c", disability, name,
+				       पंक्ति_terminator);
+			अवरोध;
 		}
-		default:
+		शेष:
 			BUG("unknown hook kind");
 		}
 	}
 
 cleanup:
-	string_list_clear_func(head, hook_free);
-	free(head);
-	return ret;
+	string_list_clear_func(शीर्ष, hook_free);
+	मुक्त(शीर्ष);
+	वापस ret;
 }
 
-static int run(int argc, const char **argv, const char *prefix,
-	       struct repository *repo UNUSED)
+अटल पूर्णांक run(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+	       काष्ठा repository *repo UNUSED)
 {
-	int i;
-	struct run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
-	int ignore_missing = 0;
-	int allow_unknown = 0;
-	int jobs = 0;
-	const char *hook_name;
-	struct option run_options[] = {
+	पूर्णांक i;
+	काष्ठा run_hooks_opt opt = RUN_HOOKS_OPT_INIT;
+	पूर्णांक ignore_missing = 0;
+	पूर्णांक allow_unknown = 0;
+	पूर्णांक jobs = 0;
+	स्थिर अक्षर *hook_name;
+	काष्ठा option run_options[] = {
 		OPT_BOOL(0, "allow-unknown-hook-name", &allow_unknown,
 			 N_("allow running a hook with a non-native hook name")),
 		OPT_BOOL(0, "ignore-missing", &ignore_missing,
@@ -137,72 +137,72 @@ static int run(int argc, const char **argv, const char *prefix,
 			    N_("run up to <n> hooks simultaneously (-1 for CPU count)")),
 		OPT_END(),
 	};
-	int ret;
+	पूर्णांक ret;
 
 	argc = parse_options(argc, argv, prefix, run_options,
 			     builtin_hook_run_usage,
 			     PARSE_OPT_KEEP_DASHDASH);
 
-	if (jobs == -1)
+	अगर (jobs == -1)
 		opt.jobs = online_cpus();
-	else if (jobs < 0)
+	अन्यथा अगर (jobs < 0)
 		die(_("invalid value for -j: %d"
 		     " (use -1 for CPU count or a"
 		     " positive integer)"), jobs);
-	else
+	अन्यथा
 		opt.jobs = jobs;
 
-	if (!argc)
-		goto usage;
+	अगर (!argc)
+		जाओ usage;
 
 	/*
 	 * Having a -- for "run" when providing <hook-args> is
 	 * mandatory.
 	 */
-	if (argc > 1 && strcmp(argv[1], "--") &&
-	    strcmp(argv[1], "--end-of-options"))
-		goto usage;
+	अगर (argc > 1 && म_भेद(argv[1], "--") &&
+	    म_भेद(argv[1], "--end-of-options"))
+		जाओ usage;
 
 	/* Add our arguments, start after -- */
-	for (i = 2 ; i < argc; i++)
-		strvec_push(&opt.args, argv[i]);
+	क्रम (i = 2 ; i < argc; i++)
+		strvec_धकेलो(&opt.args, argv[i]);
 
 	/* Need to take into account core.hooksPath */
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, शून्य);
 
 	hook_name = argv[0];
 
-	if (!allow_unknown && !is_known_hook(hook_name)) {
+	अगर (!allow_unknown && !is_known_hook(hook_name)) {
 		error(_("unknown hook event '%s';\n"
 			"use --allow-unknown-hook-name to allow non-native hook names"),
 		      hook_name);
-		return 1;
+		वापस 1;
 	}
 
-	if (!ignore_missing)
+	अगर (!ignore_missing)
 		opt.error_if_missing = 1;
 	ret = run_hooks_opt(the_repository, hook_name, &opt);
-	if (ret < 0) /* error() return */
+	अगर (ret < 0) /* error() return */
 		ret = 1;
-	return ret;
+	वापस ret;
 usage:
 	usage_with_options(builtin_hook_run_usage, run_options);
 }
 
-int cmd_hook(int argc,
-	     const char **argv,
-	     const char *prefix,
-	     struct repository *repo)
+पूर्णांक cmd_hook(पूर्णांक argc,
+	     स्थिर अक्षर **argv,
+	     स्थिर अक्षर *prefix,
+	     काष्ठा repository *repo)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_hook_options[] = {
+	parse_opt_subcommand_fn *fn = शून्य;
+	काष्ठा option builtin_hook_options[] = {
 		OPT_SUBCOMMAND("run", &fn, run),
 		OPT_SUBCOMMAND("list", &fn, list),
 		OPT_END(),
 	};
 
-	argc = parse_options(argc, argv, NULL, builtin_hook_options,
+	argc = parse_options(argc, argv, शून्य, builtin_hook_options,
 			     builtin_hook_usage, 0);
 
-	return fn(argc, argv, prefix, repo);
+	वापस fn(argc, argv, prefix, repo);
 }

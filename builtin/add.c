@@ -4,168 +4,168 @@
  * Copyright (C) 2006 Linus Torvalds
  */
 
-#include "builtin.h"
-#include "advice.h"
-#include "config.h"
-#include "environment.h"
-#include "lockfile.h"
-#include "editor.h"
-#include "dir.h"
-#include "gettext.h"
-#include "pathspec.h"
-#include "object-file.h"
-#include "odb.h"
-#include "odb/transaction.h"
-#include "parse-options.h"
-#include "path.h"
-#include "preload-index.h"
-#include "diff.h"
-#include "read-cache.h"
-#include "revision.h"
-#include "submodule.h"
-#include "add-interactive.h"
-#include "merge-ll.h"
-#include "apply.h"
+#समावेश "builtin.h"
+#समावेश "advice.h"
+#समावेश "config.h"
+#समावेश "environment.h"
+#समावेश "lockfile.h"
+#समावेश "editor.h"
+#समावेश "dir.h"
+#समावेश "gettext.h"
+#समावेश "pathspec.h"
+#समावेश "object-file.h"
+#समावेश "odb.h"
+#समावेश "odb/transaction.h"
+#समावेश "parse-options.h"
+#समावेश "path.h"
+#समावेश "preload-index.h"
+#समावेश "diff.h"
+#समावेश "read-cache.h"
+#समावेश "revision.h"
+#समावेश "submodule.h"
+#समावेश "add-interactive.h"
+#समावेश "merge-ll.h"
+#समावेश "apply.h"
 
-static const char * const builtin_add_usage[] = {
+अटल स्थिर अक्षर * स्थिर builtin_add_usage[] = {
 	N_("git add [<options>] [--] <pathspec>..."),
-	NULL
+	शून्य
 };
-static int patch_interactive, add_interactive, edit_interactive;
-static struct interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
-static int take_worktree_changes;
-static int add_renormalize;
-static int add_resolved;
-static int pathspec_file_nul;
-static int include_sparse;
-static const char *pathspec_from_file;
+अटल पूर्णांक patch_interactive, add_interactive, edit_interactive;
+अटल काष्ठा interactive_options interactive_opts = INTERACTIVE_OPTIONS_INIT;
+अटल पूर्णांक take_worktree_changes;
+अटल पूर्णांक add_renormalize;
+अटल पूर्णांक add_resolved;
+अटल पूर्णांक pathspec_file_nul;
+अटल पूर्णांक include_sparse;
+अटल स्थिर अक्षर *pathspec_from_file;
 
-static int chmod_pathspec(struct repository *repo,
-			  struct pathspec *pathspec,
-			  char flip,
-			  int show_only)
+अटल पूर्णांक chmod_pathspec(काष्ठा repository *repo,
+			  काष्ठा pathspec *pathspec,
+			  अक्षर flip,
+			  पूर्णांक show_only)
 {
-	int ret = 0;
+	पूर्णांक ret = 0;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
-		struct cache_entry *ce = repo->index->cache[i];
-		int err;
+	क्रम (माप_प्रकार i = 0; i < repo->सूचकांक->cache_nr; i++) {
+		काष्ठा cache_entry *ce = repo->सूचकांक->cache[i];
+		पूर्णांक err;
 
-		if (!include_sparse &&
+		अगर (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
-		     !path_in_sparse_checkout(ce->name, repo->index)))
-			continue;
+		     !path_in_sparse_checkout(ce->name, repo->सूचकांक)))
+			जारी;
 
-		if (pathspec && !ce_path_match(repo->index, ce, pathspec, NULL))
-			continue;
+		अगर (pathspec && !ce_path_match(repo->सूचकांक, ce, pathspec, शून्य))
+			जारी;
 
-		if (!show_only)
-			err = chmod_index_entry(repo->index, ce, flip);
-		else
+		अगर (!show_only)
+			err = chmod_सूचकांक_entry(repo->सूचकांक, ce, flip);
+		अन्यथा
 			err = S_ISREG(ce->ce_mode) ? 0 : -1;
 
-		if (err < 0)
+		अगर (err < 0)
 			ret = error(_("cannot chmod %cx '%s'"), flip, ce->name);
 	}
 
-	return ret;
+	वापस ret;
 }
 
-static int renormalize_tracked_files(struct repository *repo,
-				     const struct pathspec *pathspec,
-				     int flags)
+अटल पूर्णांक renormalize_tracked_files(काष्ठा repository *repo,
+				     स्थिर काष्ठा pathspec *pathspec,
+				     पूर्णांक flags)
 {
-	int retval = 0;
+	पूर्णांक retval = 0;
 
-	for (size_t i = 0; i < repo->index->cache_nr; i++) {
-		struct cache_entry *ce = repo->index->cache[i];
+	क्रम (माप_प्रकार i = 0; i < repo->सूचकांक->cache_nr; i++) {
+		काष्ठा cache_entry *ce = repo->सूचकांक->cache[i];
 
-		if (!include_sparse &&
+		अगर (!include_sparse &&
 		    (ce_skip_worktree(ce) ||
-		     !path_in_sparse_checkout(ce->name, repo->index)))
-			continue;
-		if (ce_stage(ce))
-			continue; /* do not touch unmerged paths */
-		if (!S_ISREG(ce->ce_mode) && !S_ISLNK(ce->ce_mode))
-			continue; /* do not touch non blobs */
-		if (pathspec && !ce_path_match(repo->index, ce, pathspec, NULL))
-			continue;
-		retval |= add_file_to_index(repo->index, ce->name,
+		     !path_in_sparse_checkout(ce->name, repo->सूचकांक)))
+			जारी;
+		अगर (ce_stage(ce))
+			जारी; /* do not touch unmerged paths */
+		अगर (!S_ISREG(ce->ce_mode) && !S_ISLNK(ce->ce_mode))
+			जारी; /* do not touch non blobs */
+		अगर (pathspec && !ce_path_match(repo->सूचकांक, ce, pathspec, शून्य))
+			जारी;
+		retval |= add_file_to_सूचकांक(repo->सूचकांक, ce->name,
 					    flags | ADD_CACHE_RENORMALIZE);
 	}
 
-	return retval;
+	वापस retval;
 }
 
-static char *prune_directory(struct repository *repo,
-			     struct dir_struct *dir,
-			     struct pathspec *pathspec,
-			     int prefix)
+अटल अक्षर *prune_directory(काष्ठा repository *repo,
+			     काष्ठा dir_struct *dir,
+			     काष्ठा pathspec *pathspec,
+			     पूर्णांक prefix)
 {
-	char *seen;
-	int i;
-	struct dir_entry **src, **dst;
+	अक्षर *seen;
+	पूर्णांक i;
+	काष्ठा dir_entry **src, **dst;
 
 	seen = xcalloc(pathspec->nr, 1);
 
 	src = dst = dir->entries;
 	i = dir->nr;
-	while (--i >= 0) {
-		struct dir_entry *entry = *src++;
-		if (dir_path_match(repo->index, entry, pathspec, prefix, seen))
+	जबतक (--i >= 0) {
+		काष्ठा dir_entry *entry = *src++;
+		अगर (dir_path_match(repo->सूचकांक, entry, pathspec, prefix, seen))
 			*dst++ = entry;
 	}
 	dir->nr = dst - dir->entries;
-	add_pathspec_matches_against_index(pathspec, repo->index, seen,
+	add_pathspec_matches_against_सूचकांक(pathspec, repo->सूचकांक, seen,
 					   PS_IGNORE_SKIP_WORKTREE);
-	return seen;
+	वापस seen;
 }
 
-static int refresh(struct repository *repo, int verbose, const struct pathspec *pathspec)
+अटल पूर्णांक refresh(काष्ठा repository *repo, पूर्णांक verbose, स्थिर काष्ठा pathspec *pathspec)
 {
-	char *seen;
-	int i, ret = 0;
-	char *skip_worktree_seen = NULL;
-	struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
-	unsigned int flags = REFRESH_IGNORE_SKIP_WORKTREE |
+	अक्षर *seen;
+	पूर्णांक i, ret = 0;
+	अक्षर *skip_worktree_seen = शून्य;
+	काष्ठा string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	अचिन्हित पूर्णांक flags = REFRESH_IGNORE_SKIP_WORKTREE |
 		    (verbose ? REFRESH_IN_PORCELAIN : REFRESH_QUIET);
 
 	seen = xcalloc(pathspec->nr, 1);
-	refresh_index(repo->index, flags, pathspec, seen,
+	refresh_सूचकांक(repo->सूचकांक, flags, pathspec, seen,
 		      _("Unstaged changes after refreshing the index:"));
-	for (i = 0; i < pathspec->nr; i++) {
-		if (!seen[i]) {
-			const char *path = pathspec->items[i].original;
+	क्रम (i = 0; i < pathspec->nr; i++) {
+		अगर (!seen[i]) {
+			स्थिर अक्षर *path = pathspec->वस्तुएँ[i].original;
 
-			if (matches_skip_worktree(pathspec, i, &skip_worktree_seen) ||
-			    !path_in_sparse_checkout(path, repo->index)) {
+			अगर (matches_skip_worktree(pathspec, i, &skip_worktree_seen) ||
+			    !path_in_sparse_checkout(path, repo->सूचकांक)) {
 				string_list_append(&only_match_skip_worktree,
-						   pathspec->items[i].original);
-			} else {
+						   pathspec->वस्तुएँ[i].original);
+			} अन्यथा {
 				die(_("pathspec '%s' did not match any files"),
-				    pathspec->items[i].original);
+				    pathspec->वस्तुएँ[i].original);
 			}
 		}
 	}
 
-	if (only_match_skip_worktree.nr) {
+	अगर (only_match_skip_worktree.nr) {
 		advise_on_updating_sparse_paths(&only_match_skip_worktree);
 		ret = 1;
 	}
 
-	free(seen);
-	free(skip_worktree_seen);
+	मुक्त(seen);
+	मुक्त(skip_worktree_seen);
 	string_list_clear(&only_match_skip_worktree, 0);
-	return ret;
+	वापस ret;
 }
 
-int interactive_add(struct repository *repo,
-		    const char **argv,
-		    const char *prefix,
-		    int patch, struct interactive_options *interactive_opts)
+पूर्णांक interactive_add(काष्ठा repository *repo,
+		    स्थिर अक्षर **argv,
+		    स्थिर अक्षर *prefix,
+		    पूर्णांक patch, काष्ठा interactive_options *interactive_opts)
 {
-	struct pathspec pathspec;
-	int ret;
+	काष्ठा pathspec pathspec;
+	पूर्णांक ret;
 
 	parse_pathspec(&pathspec, 0,
 		       PATHSPEC_PREFER_FULL |
@@ -173,36 +173,36 @@ int interactive_add(struct repository *repo,
 		       PATHSPEC_PREFIX_ORIGIN,
 		       prefix, argv);
 
-	if (patch)
-		ret = !!run_add_p(repo, ADD_P_ADD, interactive_opts, NULL, &pathspec, 0);
-	else
+	अगर (patch)
+		ret = !!run_add_p(repo, ADD_P_ADD, interactive_opts, शून्य, &pathspec, 0);
+	अन्यथा
 		ret = !!run_add_i(repo, &pathspec, interactive_opts);
 
 	clear_pathspec(&pathspec);
-	return ret;
+	वापस ret;
 }
 
-static int edit_patch(struct repository *repo,
-		      int argc,
-		      const char **argv,
-		      const char *prefix)
+अटल पूर्णांक edit_patch(काष्ठा repository *repo,
+		      पूर्णांक argc,
+		      स्थिर अक्षर **argv,
+		      स्थिर अक्षर *prefix)
 {
-	char *file = repo_git_path(repo, "ADD_EDIT.patch");
-	struct apply_state state;
-	const char *apply_argv[2];
-	struct rev_info rev;
-	int out;
-	struct stat st;
+	अक्षर *file = repo_git_path(repo, "ADD_EDIT.patch");
+	काष्ठा apply_state state;
+	स्थिर अक्षर *apply_argv[2];
+	काष्ठा rev_info rev;
+	पूर्णांक out;
+	काष्ठा stat st;
 
-	repo_config(repo, git_diff_basic_config, NULL);
+	repo_config(repo, git_diff_basic_config, शून्य);
 
-	if (repo_read_index(repo) < 0)
+	अगर (repo_read_सूचकांक(repo) < 0)
 		die(_("could not read the index"));
 
 	repo_init_revisions(repo, &rev, prefix);
 	rev.diffopt.context = 7;
 
-	argc = setup_revisions(argc, argv, &rev, NULL);
+	argc = setup_revisions(argc, argv, &rev, शून्य);
 	rev.diffopt.output_format = DIFF_FORMAT_PATCH;
 	rev.diffopt.use_color = GIT_COLOR_NEVER;
 	rev.diffopt.flags.ignore_dirty_submodules = 1;
@@ -211,54 +211,54 @@ static int edit_patch(struct repository *repo,
 	rev.diffopt.close_file = 1;
 	run_diff_files(&rev, 0);
 
-	if (launch_editor(file, NULL, NULL))
+	अगर (launch_editor(file, शून्य, शून्य))
 		die(_("editing patch failed"));
 
-	if (stat(file, &st))
+	अगर (stat(file, &st))
 		die_errno(_("could not stat '%s'"), file);
-	if (!st.st_size)
+	अगर (!st.st_आकार)
 		die(_("empty patch. aborted"));
 
 	apply_argv[0] = file;
-	apply_argv[1] = NULL;
-	if (init_apply_state(&state, repo, NULL))
+	apply_argv[1] = शून्य;
+	अगर (init_apply_state(&state, repo, शून्य))
 		die(_("could not initialize apply state"));
 	state.cached = 1;
-	if (check_apply_state(&state, 0))
+	अगर (check_apply_state(&state, 0))
 		die(_("could not check apply state"));
-	if (apply_all_patches(&state, 1, apply_argv, APPLY_OPT_RECOUNT))
+	अगर (apply_all_patches(&state, 1, apply_argv, APPLY_OPT_RECOUNT))
 		die(_("could not apply '%s'"), file);
 	clear_apply_state(&state);
 
 	unlink(file);
-	free(file);
+	मुक्त(file);
 	release_revisions(&rev);
-	return 0;
+	वापस 0;
 }
 
-static const char ignore_error[] =
+अटल स्थिर अक्षर ignore_error[] =
 N_("The following paths are ignored by one of your .gitignore files:\n");
 
-static int verbose, show_only, ignored_too, refresh_only;
-static int ignore_add_errors, intent_to_add, ignore_missing;
-static int warn_on_embedded_repo = 1;
+अटल पूर्णांक verbose, show_only, ignored_too, refresh_only;
+अटल पूर्णांक ignore_add_errors, intent_to_add, ignore_missing;
+अटल पूर्णांक warn_on_embedded_repo = 1;
 
-#define ADDREMOVE_DEFAULT 1
-static int addremove = ADDREMOVE_DEFAULT;
-static int addremove_explicit = -1; /* unspecified */
+#घोषणा ADDREMOVE_DEFAULT 1
+अटल पूर्णांक addremove = ADDREMOVE_DEFAULT;
+अटल पूर्णांक addremove_explicit = -1; /* unspecified */
 
-static char *chmod_arg;
+अटल अक्षर *chmod_arg;
 
-static int ignore_removal_cb(const struct option *opt, const char *arg, int unset)
+अटल पूर्णांक ignore_removal_cb(स्थिर काष्ठा option *opt, स्थिर अक्षर *arg, पूर्णांक unset)
 {
 	BUG_ON_OPT_ARG(arg);
 
 	/* if we are told to ignore, we are not adding removals */
-	*(int *)opt->value = !unset ? 0 : 1;
-	return 0;
+	*(पूर्णांक *)opt->मूल्य = !unset ? 0 : 1;
+	वापस 0;
 }
 
-static struct option builtin_add_options[] = {
+अटल काष्ठा option builtin_add_options[] = {
 	OPT__DRY_RUN(&show_only, N_("dry run")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
@@ -276,7 +276,7 @@ static struct option builtin_add_options[] = {
 	OPT_BOOL('N', "intent-to-add", &intent_to_add, N_("record only the fact that the path will be added later")),
 	OPT_BOOL('A', "all", &addremove_explicit, N_("add changes from all tracked and untracked files")),
 	OPT_CALLBACK_F(0, "ignore-removal", &addremove_explicit,
-	  NULL /* takes no arguments */,
+	  शून्य /* takes no arguments */,
 	  N_("ignore paths removed in the working tree (same as --no-all)"),
 	  PARSE_OPT_NOARG, ignore_removal_cb),
 	OPT_BOOL( 0 , "refresh", &refresh_only, N_("don't add, only refresh the index")),
@@ -292,22 +292,22 @@ static struct option builtin_add_options[] = {
 	OPT_END(),
 };
 
-static int add_config(const char *var, const char *value,
-		      const struct config_context *ctx, void *cb)
+अटल पूर्णांक add_config(स्थिर अक्षर *var, स्थिर अक्षर *मूल्य,
+		      स्थिर काष्ठा config_context *ctx, व्योम *cb)
 {
-	if (!strcmp(var, "add.ignoreerrors") ||
-	    !strcmp(var, "add.ignore-errors")) {
-		ignore_add_errors = git_config_bool(var, value);
-		return 0;
+	अगर (!म_भेद(var, "add.ignoreerrors") ||
+	    !म_भेद(var, "add.ignore-errors")) {
+		ignore_add_errors = git_config_bool(var, मूल्य);
+		वापस 0;
 	}
 
-	if (git_color_config(var, value, cb) < 0)
-		return -1;
+	अगर (git_color_config(var, मूल्य, cb) < 0)
+		वापस -1;
 
-	return git_default_config(var, value, ctx, cb);
+	वापस git_default_config(var, मूल्य, ctx, cb);
 }
 
-static const char embedded_advice[] = N_(
+अटल स्थिर अक्षर embedded_advice[] = N_(
 "You've added another git repository inside your current repository.\n"
 "Clones of the outer repository will not contain the contents of\n"
 "the embedded repository and will not know how to obtain it.\n"
@@ -323,22 +323,22 @@ static const char embedded_advice[] = N_(
 "See \"git help submodule\" for more information."
 );
 
-static void check_embedded_repo(const char *path)
+अटल व्योम check_embedded_repo(स्थिर अक्षर *path)
 {
-	struct strbuf name = STRBUF_INIT;
-	static int adviced_on_embedded_repo = 0;
+	काष्ठा strbuf name = STRBUF_INIT;
+	अटल पूर्णांक adviced_on_embedded_repo = 0;
 
-	if (!warn_on_embedded_repo)
-		return;
-	if (!ends_with(path, "/"))
-		return;
+	अगर (!warn_on_embedded_repo)
+		वापस;
+	अगर (!ends_with(path, "/"))
+		वापस;
 
 	/* Drop trailing slash for aesthetics */
 	strbuf_addstr(&name, path);
 	strbuf_strip_suffix(&name, "/");
 
 	warning(_("adding embedded git repository: %s"), name.buf);
-	if (!adviced_on_embedded_repo) {
+	अगर (!adviced_on_embedded_repo) {
 		advise_if_enabled(ADVICE_ADD_EMBEDDED_REPO,
 				  embedded_advice, name.buf, name.buf);
 		adviced_on_embedded_repo = 1;
@@ -347,183 +347,183 @@ static void check_embedded_repo(const char *path)
 	strbuf_release(&name);
 }
 
-static int add_files(struct repository *repo, struct dir_struct *dir, int flags)
+अटल पूर्णांक add_files(काष्ठा repository *repo, काष्ठा dir_struct *dir, पूर्णांक flags)
 {
-	int i, exit_status = 0;
-	struct string_list matched_sparse_paths = STRING_LIST_INIT_NODUP;
+	पूर्णांक i, exit_status = 0;
+	काष्ठा string_list matched_sparse_paths = STRING_LIST_INIT_NODUP;
 
-	if (dir->ignored_nr) {
-		fprintf(stderr, _(ignore_error));
-		for (i = 0; i < dir->ignored_nr; i++)
-			fprintf(stderr, "%s\n", dir->ignored[i]->name);
+	अगर (dir->ignored_nr) {
+		ख_लिखो(मानक_त्रुटि, _(ignore_error));
+		क्रम (i = 0; i < dir->ignored_nr; i++)
+			ख_लिखो(मानक_त्रुटि, "%s\n", dir->ignored[i]->name);
 		advise_if_enabled(ADVICE_ADD_IGNORED_FILE,
 				  _("Use -f if you really want to add them."));
 		exit_status = 1;
 	}
 
-	for (i = 0; i < dir->nr; i++) {
-		if (!include_sparse &&
-		    !path_in_sparse_checkout(dir->entries[i]->name, repo->index)) {
+	क्रम (i = 0; i < dir->nr; i++) {
+		अगर (!include_sparse &&
+		    !path_in_sparse_checkout(dir->entries[i]->name, repo->सूचकांक)) {
 			string_list_append(&matched_sparse_paths,
 					   dir->entries[i]->name);
-			continue;
+			जारी;
 		}
-		if (add_file_to_index(repo->index, dir->entries[i]->name, flags)) {
-			if (!ignore_add_errors)
+		अगर (add_file_to_सूचकांक(repo->सूचकांक, dir->entries[i]->name, flags)) {
+			अगर (!ignore_add_errors)
 				die(_("adding files failed"));
 			exit_status = 1;
-		} else {
+		} अन्यथा {
 			check_embedded_repo(dir->entries[i]->name);
 		}
 	}
 
-	if (matched_sparse_paths.nr) {
+	अगर (matched_sparse_paths.nr) {
 		advise_on_updating_sparse_paths(&matched_sparse_paths);
 		exit_status = 1;
 	}
 
 	string_list_clear(&matched_sparse_paths, 0);
 
-	return exit_status;
+	वापस exit_status;
 }
 
-static int failed_to_add(int flags, const char *path)
+अटल पूर्णांक failed_to_add(पूर्णांक flags, स्थिर अक्षर *path)
 {
-	if (!(flags & ADD_CACHE_IGNORE_ERRORS))
+	अगर (!(flags & ADD_CACHE_IGNORE_ERRORS))
 		die(_("updating file '%s' failed"), path);
-	return 1;
+	वापस 1;
 }
 
-static int add_resolved_files(struct repository *repo,
-			      const struct pathspec *pathspec,
-			      int flags)
+अटल पूर्णांक add_resolved_files(काष्ठा repository *repo,
+			      स्थिर काष्ठा pathspec *pathspec,
+			      पूर्णांक flags)
 {
-	struct index_state *istate = repo->index;
-	struct string_list unmerged_paths = STRING_LIST_INIT_DUP;
-	struct string_list unresolved_paths = STRING_LIST_INIT_DUP;
-	int exit_status = 0;
-	size_t i;
+	काष्ठा सूचकांक_state *istate = repo->सूचकांक;
+	काष्ठा string_list unmerged_paths = STRING_LIST_INIT_DUP;
+	काष्ठा string_list unresolved_paths = STRING_LIST_INIT_DUP;
+	पूर्णांक exit_status = 0;
+	माप_प्रकार i;
 
-	for (i = 0; i < istate->cache_nr; i++) {
-		struct cache_entry *ce = istate->cache[i];
-		if (!ce_stage(ce))
-			continue;
-		if (pathspec->nr && !ce_path_match(istate, ce, pathspec, NULL))
-			continue;
-		if (!unmerged_paths.nr ||
-		    strcmp(unmerged_paths.items[unmerged_paths.nr - 1].string, ce->name))
+	क्रम (i = 0; i < istate->cache_nr; i++) {
+		काष्ठा cache_entry *ce = istate->cache[i];
+		अगर (!ce_stage(ce))
+			जारी;
+		अगर (pathspec->nr && !ce_path_match(istate, ce, pathspec, शून्य))
+			जारी;
+		अगर (!unmerged_paths.nr ||
+		    म_भेद(unmerged_paths.वस्तुएँ[unmerged_paths.nr - 1].string, ce->name))
 			string_list_append(&unmerged_paths, ce->name);
 	}
 
-	if (!unmerged_paths.nr) {
+	अगर (!unmerged_paths.nr) {
 		string_list_clear(&unmerged_paths, 0);
-		return 0;
+		वापस 0;
 	}
 
-	for (i = 0; i < unmerged_paths.nr; i++) {
-		const char *path = unmerged_paths.items[i].string;
-		struct stat st;
+	क्रम (i = 0; i < unmerged_paths.nr; i++) {
+		स्थिर अक्षर *path = unmerged_paths.वस्तुएँ[i].string;
+		काष्ठा stat st;
 
-		if (!lstat(path, &st) && S_ISREG(st.st_mode)) {
-			if (has_conflict_markers(istate, path))
+		अगर (!lstat(path, &st) && S_ISREG(st.st_mode)) {
+			अगर (has_conflict_markers(istate, path))
 				string_list_append(&unresolved_paths, path);
 		}
 	}
 
-	if (unresolved_paths.nr) {
-		struct strbuf sb = STRBUF_INIT;
-		for (i = 0; i < unresolved_paths.nr; i++)
-			strbuf_addf(&sb, "\t%s\n", unresolved_paths.items[i].string);
+	अगर (unresolved_paths.nr) {
+		काष्ठा strbuf sb = STRBUF_INIT;
+		क्रम (i = 0; i < unresolved_paths.nr; i++)
+			strbuf_addf(&sb, "\t%s\n", unresolved_paths.वस्तुएँ[i].string);
 		die(_("the following paths still have conflict markers:\n%s"), sb.buf);
 	}
 
-	for (i = 0; i < unmerged_paths.nr; i++) {
-		const char *path = unmerged_paths.items[i].string;
-		struct stat st;
+	क्रम (i = 0; i < unmerged_paths.nr; i++) {
+		स्थिर अक्षर *path = unmerged_paths.वस्तुएँ[i].string;
+		काष्ठा stat st;
 
-		if (lstat(path, &st)) {
-			if (errno != ENOENT)
+		अगर (lstat(path, &st)) {
+			अगर (त्रुटि_सं != ENOENT)
 				die_errno(_("cannot lstat: '%s'"), path);
-			if (remove_file_from_index_with_flags(istate, path, flags))
+			अगर (remove_file_from_सूचकांक_with_flags(istate, path, flags))
 				exit_status = failed_to_add(flags, path);
-		} else {
-			if (add_file_to_index(istate, path, flags))
+		} अन्यथा {
+			अगर (add_file_to_सूचकांक(istate, path, flags))
 				exit_status = failed_to_add(flags, path);
 		}
 	}
 
 	string_list_clear(&unmerged_paths, 0);
 	string_list_clear(&unresolved_paths, 0);
-	return exit_status;
+	वापस exit_status;
 }
 
-int cmd_add(int argc,
-	    const char **argv,
-	    const char *prefix,
-	    struct repository *repo)
+पूर्णांक cmd_add(पूर्णांक argc,
+	    स्थिर अक्षर **argv,
+	    स्थिर अक्षर *prefix,
+	    काष्ठा repository *repo)
 {
-	int exit_status = 0;
-	struct pathspec pathspec;
-	struct dir_struct dir = DIR_INIT;
-	int flags;
-	int add_new_files;
-	int require_pathspec;
-	char *seen = NULL;
-	char *ps_matched = NULL;
-	struct lock_file lock_file = LOCK_INIT;
-	struct odb_transaction *transaction = NULL;
+	पूर्णांक exit_status = 0;
+	काष्ठा pathspec pathspec;
+	काष्ठा dir_struct dir = DIR_INIT;
+	पूर्णांक flags;
+	पूर्णांक add_new_files;
+	पूर्णांक require_pathspec;
+	अक्षर *seen = शून्य;
+	अक्षर *ps_matched = शून्य;
+	काष्ठा lock_file lock_file = LOCK_INIT;
+	काष्ठा odb_transaction *transaction = शून्य;
 
-	repo_config(repo, add_config, NULL);
+	repo_config(repo, add_config, शून्य);
 
 	argc = parse_options(argc, argv, prefix, builtin_add_options,
 			  builtin_add_usage, PARSE_OPT_KEEP_ARGV0);
 
 	prepare_repo_settings(repo);
-	repo->settings.command_requires_full_index = 0;
+	repo->settings.command_requires_full_सूचकांक = 0;
 
-	if (interactive_opts.context < -1)
+	अगर (interactive_opts.context < -1)
 		die(_("'%s' cannot be negative"), "--unified");
-	if (interactive_opts.interhunkcontext < -1)
+	अगर (interactive_opts.interhunkcontext < -1)
 		die(_("'%s' cannot be negative"), "--inter-hunk-context");
 
-	if (patch_interactive)
+	अगर (patch_interactive)
 		add_interactive = 1;
-	if (add_interactive) {
-		if (show_only)
+	अगर (add_interactive) {
+		अगर (show_only)
 			die(_("options '%s' and '%s' cannot be used together"), "--dry-run", "--interactive/--patch");
-		if (pathspec_from_file)
+		अगर (pathspec_from_file)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--interactive/--patch");
-		exit(interactive_add(repo, argv + 1, prefix, patch_interactive, &interactive_opts));
-	} else {
-		if (interactive_opts.context != -1)
+		निकास(interactive_add(repo, argv + 1, prefix, patch_interactive, &interactive_opts));
+	} अन्यथा {
+		अगर (interactive_opts.context != -1)
 			die(_("the option '%s' requires '%s'"), "--unified", "--interactive/--patch");
-		if (interactive_opts.interhunkcontext != -1)
+		अगर (interactive_opts.interhunkcontext != -1)
 			die(_("the option '%s' requires '%s'"), "--inter-hunk-context", "--interactive/--patch");
-		if (!interactive_opts.auto_advance)
+		अगर (!interactive_opts.auto_advance)
 			die(_("the option '%s' requires '%s'"), "--no-auto-advance", "--interactive/--patch");
 	}
 
-	if (edit_interactive) {
-		if (pathspec_from_file)
+	अगर (edit_interactive) {
+		अगर (pathspec_from_file)
 			die(_("options '%s' and '%s' cannot be used together"), "--pathspec-from-file", "--edit");
-		return(edit_patch(repo, argc, argv, prefix));
+		वापस(edit_patch(repo, argc, argv, prefix));
 	}
 	argc--;
 	argv++;
 
-	if (0 <= addremove_explicit)
+	अगर (0 <= addremove_explicit)
 		addremove = addremove_explicit;
-	else if (take_worktree_changes && ADDREMOVE_DEFAULT)
+	अन्यथा अगर (take_worktree_changes && ADDREMOVE_DEFAULT)
 		addremove = 0; /* "-u" was given but not "-A" */
 
 	die_for_incompatible_opt3(take_worktree_changes, "-u/--update",
 				  0 < addremove_explicit, "-A/--all",
 				  add_resolved, "--resolved");
 
-	if (!show_only && ignore_missing)
+	अगर (!show_only && ignore_missing)
 		die(_("the option '%s' requires '%s'"), "--ignore-missing", "--dry-run");
 
-	if (chmod_arg && ((chmod_arg[0] != '-' && chmod_arg[0] != '+') ||
+	अगर (chmod_arg && ((chmod_arg[0] != '-' && chmod_arg[0] != '+') ||
 			  chmod_arg[1] != 'x' || chmod_arg[2]))
 		die(_("--chmod param '%s' must be either -x or +x"), chmod_arg);
 
@@ -533,7 +533,7 @@ int cmd_add(int argc,
 			     (0 < addremove_explicit) ||
 			     add_resolved);
 
-	repo_hold_locked_index(repo, &lock_file, LOCK_DIE_ON_ERROR);
+	repo_hold_locked_सूचकांक(repo, &lock_file, LOCK_DIE_ON_ERROR);
 
 	/*
 	 * Check the "pathspec '%s' did not match any files" block
@@ -544,26 +544,26 @@ int cmd_add(int argc,
 		       PATHSPEC_SYMLINK_LEADING_PATH,
 		       prefix, argv);
 
-	if (pathspec_from_file) {
-		if (pathspec.nr)
+	अगर (pathspec_from_file) {
+		अगर (pathspec.nr)
 			die(_("'%s' and pathspec arguments cannot be used together"), "--pathspec-from-file");
 
 		parse_pathspec_file(&pathspec, 0,
 				    PATHSPEC_PREFER_FULL |
 				    PATHSPEC_SYMLINK_LEADING_PATH,
 				    prefix, pathspec_from_file, pathspec_file_nul);
-	} else if (pathspec_file_nul) {
+	} अन्यथा अगर (pathspec_file_nul) {
 		die(_("the option '%s' requires '%s'"), "--pathspec-file-nul", "--pathspec-from-file");
 	}
 
-	if (require_pathspec && pathspec.nr == 0) {
-		fprintf(stderr, _("Nothing specified, nothing added.\n"));
+	अगर (require_pathspec && pathspec.nr == 0) {
+		ख_लिखो(मानक_त्रुटि, _("Nothing specified, nothing added.\n"));
 		advise_if_enabled(ADVICE_ADD_EMPTY_PATHSPEC,
 				  _("Maybe you wanted to say 'git add .'?"));
-		return 0;
+		वापस 0;
 	}
 
-	if (!take_worktree_changes && !add_resolved &&
+	अगर (!take_worktree_changes && !add_resolved &&
 	    addremove_explicit < 0 && pathspec.nr)
 		/* Turn "git add pathspec..." to "git add -A pathspec..." */
 		addremove = 1;
@@ -575,40 +575,40 @@ int cmd_add(int argc,
 		 (!(addremove || take_worktree_changes)
 		  ? ADD_CACHE_IGNORE_REMOVAL : 0));
 
-	if (repo_read_index_preload(repo, &pathspec, 0) < 0)
+	अगर (repo_read_सूचकांक_preload(repo, &pathspec, 0) < 0)
 		die(_("index file corrupt"));
 
-	die_in_unpopulated_submodule(repo->index, prefix);
-	die_path_inside_submodule(repo->index, &pathspec);
+	die_in_unpopulated_submodule(repo->सूचकांक, prefix);
+	die_path_inside_submodule(repo->सूचकांक, &pathspec);
 
-	if (add_new_files) {
-		int baselen;
+	अगर (add_new_files) {
+		पूर्णांक baselen;
 
 		/* Set up the default git porcelain excludes */
-		if (!ignored_too) {
+		अगर (!ignored_too) {
 			dir.flags |= DIR_COLLECT_IGNORED;
 			setup_standard_excludes(&dir);
 		}
 
 		/* This picks up the paths that are not tracked */
-		baselen = fill_directory(&dir, repo->index, &pathspec);
-		if (pathspec.nr)
+		baselen = fill_directory(&dir, repo->सूचकांक, &pathspec);
+		अगर (pathspec.nr)
 			seen = prune_directory(repo, &dir, &pathspec, baselen);
 	}
 
-	if (refresh_only) {
+	अगर (refresh_only) {
 		exit_status |= refresh(repo, verbose, &pathspec);
-		goto finish;
+		जाओ finish;
 	}
 
-	if (pathspec.nr) {
-		int i;
-		char *skip_worktree_seen = NULL;
-		struct string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
+	अगर (pathspec.nr) {
+		पूर्णांक i;
+		अक्षर *skip_worktree_seen = शून्य;
+		काष्ठा string_list only_match_skip_worktree = STRING_LIST_INIT_NODUP;
 
-		if (!seen)
-			seen = find_pathspecs_matching_against_index(&pathspec,
-					repo->index, PS_IGNORE_SKIP_WORKTREE);
+		अगर (!seen)
+			seen = find_pathspecs_matching_against_सूचकांक(&pathspec,
+					repo->सूचकांक, PS_IGNORE_SKIP_WORKTREE);
 
 		/*
 		 * file_exists() assumes exact match
@@ -621,79 +621,79 @@ int cmd_add(int argc,
 			       PATHSPEC_EXCLUDE |
 			       PATHSPEC_ATTR);
 
-		for (i = 0; i < pathspec.nr; i++) {
-			const char *path = pathspec.items[i].match;
+		क्रम (i = 0; i < pathspec.nr; i++) {
+			स्थिर अक्षर *path = pathspec.वस्तुएँ[i].match;
 
-			if (pathspec.items[i].magic & PATHSPEC_EXCLUDE)
-				continue;
-			if (seen[i])
-				continue;
+			अगर (pathspec.वस्तुएँ[i].magic & PATHSPEC_EXCLUDE)
+				जारी;
+			अगर (seen[i])
+				जारी;
 
-			if (!include_sparse &&
+			अगर (!include_sparse &&
 			    matches_skip_worktree(&pathspec, i, &skip_worktree_seen)) {
 				string_list_append(&only_match_skip_worktree,
-						   pathspec.items[i].original);
-				continue;
+						   pathspec.वस्तुएँ[i].original);
+				जारी;
 			}
 
 			/* Don't complain at 'git add .' on empty repo */
-			if (!path[0])
-				continue;
+			अगर (!path[0])
+				जारी;
 
-			if ((pathspec.items[i].magic & (PATHSPEC_GLOB | PATHSPEC_ICASE)) ||
+			अगर ((pathspec.वस्तुएँ[i].magic & (PATHSPEC_GLOB | PATHSPEC_ICASE)) ||
 			    !file_exists(path)) {
-				if (ignore_missing) {
-					int dtype = DT_UNKNOWN;
-					if (is_excluded(&dir, repo->index, path, &dtype))
-						dir_add_ignored(&dir, repo->index,
-								path, pathspec.items[i].len);
-				} else
+				अगर (ignore_missing) {
+					पूर्णांक dtype = DT_UNKNOWN;
+					अगर (is_excluded(&dir, repo->सूचकांक, path, &dtype))
+						dir_add_ignored(&dir, repo->सूचकांक,
+								path, pathspec.वस्तुएँ[i].len);
+				} अन्यथा
 					die(_("pathspec '%s' did not match any files"),
-					    pathspec.items[i].original);
+					    pathspec.वस्तुएँ[i].original);
 			}
 		}
 
 
-		if (only_match_skip_worktree.nr) {
+		अगर (only_match_skip_worktree.nr) {
 			advise_on_updating_sparse_paths(&only_match_skip_worktree);
 			exit_status = 1;
 		}
 
-		free(seen);
-		free(skip_worktree_seen);
+		मुक्त(seen);
+		मुक्त(skip_worktree_seen);
 		string_list_clear(&only_match_skip_worktree, 0);
 	}
 
 	odb_transaction_begin_or_die(repo->objects, &transaction, 0);
 
 	ps_matched = xcalloc(pathspec.nr, 1);
-	if (add_resolved)
+	अगर (add_resolved)
 		exit_status |= add_resolved_files(repo, &pathspec, flags);
-	else if (add_renormalize)
+	अन्यथा अगर (add_renormalize)
 		exit_status |= renormalize_tracked_files(repo, &pathspec, flags);
-	else
+	अन्यथा
 		exit_status |= add_files_to_cache(repo, prefix,
 						  &pathspec, ps_matched,
 						  include_sparse, flags, ignored_too);
 
-	if (take_worktree_changes && !add_renormalize && !ignore_add_errors &&
+	अगर (take_worktree_changes && !add_renormalize && !ignore_add_errors &&
 	    report_path_error(ps_matched, &pathspec))
-		exit(128);
+		निकास(128);
 
-	if (add_new_files)
+	अगर (add_new_files)
 		exit_status |= add_files(repo, &dir, flags);
 
-	if (chmod_arg && pathspec.nr)
+	अगर (chmod_arg && pathspec.nr)
 		exit_status |= chmod_pathspec(repo, &pathspec, chmod_arg[0], show_only);
 	odb_transaction_commit_and_finalize_or_die(transaction);
 
 finish:
-	if (write_locked_index(repo->index, &lock_file,
+	अगर (write_locked_सूचकांक(repo->सूचकांक, &lock_file,
 			       COMMIT_LOCK | SKIP_IF_UNCHANGED))
 		die(_("unable to write new index file"));
 
-	free(ps_matched);
+	मुक्त(ps_matched);
 	dir_clear(&dir);
 	clear_pathspec(&pathspec);
-	return exit_status;
+	वापस exit_status;
 }

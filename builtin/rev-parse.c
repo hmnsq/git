@@ -4,67 +4,67 @@
  * Copyright (C) Linus Torvalds, 2005
  */
 
-#define USE_THE_REPOSITORY_VARIABLE
-#define DISABLE_SIGN_COMPARE_WARNINGS
+#घोषणा USE_THE_REPOSITORY_VARIABLE
+#घोषणा DISABLE_SIGN_COMPARE_WARNINGS
 
-#include "builtin.h"
+#समावेश "builtin.h"
 
-#include "abspath.h"
-#include "bisect.h"
-#include "config.h"
-#include "commit.h"
-#include "environment.h"
-#include "gettext.h"
-#include "hash.h"
-#include "hex.h"
-#include "refs.h"
-#include "quote.h"
-#include "object-name.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diff.h"
-#include "read-cache-ll.h"
-#include "repo-settings.h"
-#include "repository.h"
-#include "revision.h"
-#include "setup.h"
-#include "split-index.h"
-#include "submodule.h"
-#include "commit-reach.h"
-#include "shallow.h"
-#include "object-file-convert.h"
+#समावेश "abspath.h"
+#समावेश "bisect.h"
+#समावेश "config.h"
+#समावेश "commit.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "hash.h"
+#समावेश "hex.h"
+#समावेश "refs.h"
+#समावेश "quote.h"
+#समावेश "object-name.h"
+#समावेश "parse-options.h"
+#समावेश "path.h"
+#समावेश "diff.h"
+#समावेश "read-cache-ll.h"
+#समावेश "repo-settings.h"
+#समावेश "repository.h"
+#समावेश "revision.h"
+#समावेश "setup.h"
+#समावेश "split-index.h"
+#समावेश "submodule.h"
+#समावेश "commit-reach.h"
+#समावेश "shallow.h"
+#समावेश "object-file-convert.h"
 
-#define DO_REVS		1
-#define DO_NOREV	2
-#define DO_FLAGS	4
-#define DO_NONFLAGS	8
-static int filter = ~0;
+#घोषणा DO_REVS		1
+#घोषणा DO_NOREV	2
+#घोषणा DO_FLAGS	4
+#घोषणा DO_NONFLAGS	8
+अटल पूर्णांक filter = ~0;
 
-static const char *def;
+अटल स्थिर अक्षर *def;
 
-#define NORMAL 0
-#define REVERSED 1
-static int show_type = NORMAL;
+#घोषणा NORMAL 0
+#घोषणा REVERSED 1
+अटल पूर्णांक show_type = NORMAL;
 
-#define SHOW_SYMBOLIC_ASIS 1
-#define SHOW_SYMBOLIC_FULL 2
-static int symbolic;
-static int abbrev;
-static int abbrev_ref;
-static int abbrev_ref_strict;
-static int output_sq;
+#घोषणा SHOW_SYMBOLIC_ASIS 1
+#घोषणा SHOW_SYMBOLIC_FULL 2
+अटल पूर्णांक symbolic;
+अटल पूर्णांक abbrev;
+अटल पूर्णांक abbrev_ref;
+अटल पूर्णांक abbrev_ref_strict;
+अटल पूर्णांक output_sq;
 
-static int stuck_long;
-static struct ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
+अटल पूर्णांक stuck_long;
+अटल काष्ठा ref_exclusions ref_excludes = REF_EXCLUSIONS_INIT;
 
 /*
  * Some arguments are relevant "revision" arguments,
  * others are about output format or other details.
  * This sorts it all out.
  */
-static int is_rev_argument(const char *arg)
+अटल पूर्णांक is_rev_argument(स्थिर अक्षर *arg)
 {
-	static const char *rev_args[] = {
+	अटल स्थिर अक्षर *rev_args[] = {
 		"--all",
 		"--bisect",
 		"--dense",
@@ -93,69 +93,69 @@ static int is_rev_argument(const char *arg)
 		"--topo-order",
 		"--date-order",
 		"--unpacked",
-		NULL
+		शून्य
 	};
-	const char **p = rev_args;
+	स्थिर अक्षर **p = rev_args;
 
 	/* accept -<digit>, like traditional "head" */
-	if ((*arg == '-') && isdigit(arg[1]))
-		return 1;
+	अगर ((*arg == '-') && है_अंक(arg[1]))
+		वापस 1;
 
-	for (;;) {
-		const char *str = *p++;
-		int len;
-		if (!str)
-			return 0;
-		len = strlen(str);
-		if (!strcmp(arg, str) ||
-		    (str[len-1] == '=' && !strncmp(arg, str, len)))
-			return 1;
+	क्रम (;;) {
+		स्थिर अक्षर *str = *p++;
+		पूर्णांक len;
+		अगर (!str)
+			वापस 0;
+		len = म_माप(str);
+		अगर (!म_भेद(arg, str) ||
+		    (str[len-1] == '=' && !म_भेदन(arg, str, len)))
+			वापस 1;
 	}
 }
 
 /* Output argument as a string, either SQ or normal */
-static void show(const char *arg)
+अटल व्योम show(स्थिर अक्षर *arg)
 {
-	if (output_sq) {
-		int sq = '\'', ch;
+	अगर (output_sq) {
+		पूर्णांक sq = '\'', ch;
 
-		putchar(sq);
-		while ((ch = *arg++)) {
-			if (ch == sq)
-				fputs("'\\'", stdout);
-			putchar(ch);
+		अक्षर_दो(sq);
+		जबतक ((ch = *arg++)) {
+			अगर (ch == sq)
+				ख_माला_दो("'\\'", मानक_निकास);
+			अक्षर_दो(ch);
 		}
-		putchar(sq);
-		putchar(' ');
+		अक्षर_दो(sq);
+		अक्षर_दो(' ');
 	}
-	else
-		puts(arg);
+	अन्यथा
+		माला_दो(arg);
 }
 
 /* Like show(), but with a negation prefix according to type */
-static void show_with_type(int type, const char *arg)
+अटल व्योम show_with_type(पूर्णांक type, स्थिर अक्षर *arg)
 {
-	if (type != show_type)
-		putchar('^');
+	अगर (type != show_type)
+		अक्षर_दो('^');
 	show(arg);
 }
 
 /* Output a revision, only if filter allows it */
-static void show_rev(int type, const struct object_id *oid, const char *name)
+अटल व्योम show_rev(पूर्णांक type, स्थिर काष्ठा object_id *oid, स्थिर अक्षर *name)
 {
-	if (!(filter & DO_REVS))
-		return;
-	def = NULL;
+	अगर (!(filter & DO_REVS))
+		वापस;
+	def = शून्य;
 
-	if ((symbolic || abbrev_ref) && name) {
-		if (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
-			struct object_id discard;
-			char *full;
+	अगर ((symbolic || abbrev_ref) && name) {
+		अगर (symbolic == SHOW_SYMBOLIC_FULL || abbrev_ref) {
+			काष्ठा object_id discard;
+			अक्षर *full;
 
-			switch (repo_dwim_ref(the_repository, name,
-					      strlen(name), &discard, &full,
+			चयन (repo_dwim_ref(the_repository, name,
+					      म_माप(name), &discard, &full,
 					      0)) {
-			case 0:
+			हाल 0:
 				/*
 				 * Not found -- not a ref.  We could
 				 * emit "name" here, but symbolic-full
@@ -163,277 +163,277 @@ static void show_rev(int type, const struct object_id *oid, const char *name)
 				 * refs spelled in full, and they would
 				 * need to filter non-refs if we did so.
 				 */
-				break;
-			case 1: /* happy */
-				if (abbrev_ref) {
-					char *old = full;
+				अवरोध;
+			हाल 1: /* happy */
+				अगर (abbrev_ref) {
+					अक्षर *old = full;
 					full = refs_shorten_unambiguous_ref(get_main_ref_store(the_repository),
 									    full,
 									    abbrev_ref_strict);
-					free(old);
+					मुक्त(old);
 				}
 				show_with_type(type, full);
-				break;
-			default: /* ambiguous */
+				अवरोध;
+			शेष: /* ambiguous */
 				error("refname '%s' is ambiguous", name);
-				break;
+				अवरोध;
 			}
-			free(full);
-		} else {
+			मुक्त(full);
+		} अन्यथा {
 			show_with_type(type, name);
 		}
 	}
-	else if (abbrev)
+	अन्यथा अगर (abbrev)
 		show_with_type(type,
 			       repo_find_unique_abbrev(the_repository, oid, abbrev));
-	else
+	अन्यथा
 		show_with_type(type, oid_to_hex(oid));
 }
 
 /* Output a flag, only if filter allows it. */
-static int show_flag(const char *arg)
+अटल पूर्णांक show_flag(स्थिर अक्षर *arg)
 {
-	if (!(filter & DO_FLAGS))
-		return 0;
-	if (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
+	अगर (!(filter & DO_FLAGS))
+		वापस 0;
+	अगर (filter & (is_rev_argument(arg) ? DO_REVS : DO_NOREV)) {
 		show(arg);
-		return 1;
+		वापस 1;
 	}
-	return 0;
+	वापस 0;
 }
 
-static int show_default(void)
+अटल पूर्णांक show_default(व्योम)
 {
-	const char *s = def;
+	स्थिर अक्षर *s = def;
 
-	if (s) {
-		struct object_id oid;
+	अगर (s) {
+		काष्ठा object_id oid;
 
-		def = NULL;
-		if (!repo_get_oid(the_repository, s, &oid)) {
+		def = शून्य;
+		अगर (!repo_get_oid(the_repository, s, &oid)) {
 			show_rev(NORMAL, &oid, s);
-			return 1;
+			वापस 1;
 		}
 	}
-	return 0;
+	वापस 0;
 }
 
-static int show_reference(const struct reference *ref, void *cb_data UNUSED)
+अटल पूर्णांक show_reference(स्थिर काष्ठा reference *ref, व्योम *cb_तथ्य UNUSED)
 {
-	if (ref_excluded(&ref_excludes, ref->name))
-		return 0;
+	अगर (ref_excluded(&ref_excludes, ref->name))
+		वापस 0;
 	show_rev(NORMAL, ref->oid, ref->name);
-	return 0;
+	वापस 0;
 }
 
-static int anti_reference(const struct reference *ref, void *cb_data UNUSED)
+अटल पूर्णांक anti_reference(स्थिर काष्ठा reference *ref, व्योम *cb_तथ्य UNUSED)
 {
 	show_rev(REVERSED, ref->oid, ref->name);
-	return 0;
+	वापस 0;
 }
 
-static int show_abbrev(const struct object_id *oid, void *cb_data UNUSED)
+अटल पूर्णांक show_abbrev(स्थिर काष्ठा object_id *oid, व्योम *cb_तथ्य UNUSED)
 {
-	show_rev(NORMAL, oid, NULL);
-	return 0;
+	show_rev(NORMAL, oid, शून्य);
+	वापस 0;
 }
 
-static void show_datestring(const char *flag, const char *datestr)
+अटल व्योम show_datestring(स्थिर अक्षर *flag, स्थिर अक्षर *datestr)
 {
-	char *buffer;
+	अक्षर *बफर;
 
 	/* date handling requires both flags and revs */
-	if ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
-		return;
-	buffer = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
-	show(buffer);
-	free(buffer);
+	अगर ((filter & (DO_FLAGS | DO_REVS)) != (DO_FLAGS | DO_REVS))
+		वापस;
+	बफर = xstrfmt("%s%"PRItime, flag, approxidate(datestr));
+	show(बफर);
+	मुक्त(बफर);
 }
 
-static int show_file(const char *arg, int output_prefix)
+अटल पूर्णांक show_file(स्थिर अक्षर *arg, पूर्णांक output_prefix)
 {
 	show_default();
-	if ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
-		if (output_prefix) {
-			const char *prefix = the_repository->prefix;
-			char *fname = prefix_filename(prefix, arg);
+	अगर ((filter & (DO_NONFLAGS|DO_NOREV)) == (DO_NONFLAGS|DO_NOREV)) {
+		अगर (output_prefix) {
+			स्थिर अक्षर *prefix = the_repository->prefix;
+			अक्षर *fname = prefix_filename(prefix, arg);
 			show(fname);
-			free(fname);
-		} else
+			मुक्त(fname);
+		} अन्यथा
 			show(arg);
-		return 1;
+		वापस 1;
 	}
-	return 0;
+	वापस 0;
 }
 
-static int try_difference(const char *arg)
+अटल पूर्णांक try_difference(स्थिर अक्षर *arg)
 {
-	const char *dotdot;
-	struct object_id start_oid;
-	struct object_id end_oid;
-	const char *end;
-	const char *start;
-	char *to_free;
-	int symmetric;
-	static const char head_by_default[] = "HEAD";
+	स्थिर अक्षर *dotdot;
+	काष्ठा object_id start_oid;
+	काष्ठा object_id end_oid;
+	स्थिर अक्षर *end;
+	स्थिर अक्षर *start;
+	अक्षर *to_free;
+	पूर्णांक symmetric;
+	अटल स्थिर अक्षर शीर्ष_by_default[] = "HEAD";
 
-	if (!(dotdot = strstr(arg, "..")))
-		return 0;
+	अगर (!(dotdot = म_माला(arg, "..")))
+		वापस 0;
 	start = to_free = xmemdupz(arg, dotdot - arg);
 	end = dotdot + 2;
 	symmetric = (*end == '.');
 	end += symmetric;
 
-	if (!*end)
-		end = head_by_default;
-	if (dotdot == arg)
-		start = head_by_default;
+	अगर (!*end)
+		end = शीर्ष_by_default;
+	अगर (dotdot == arg)
+		start = शीर्ष_by_default;
 
-	if (start == head_by_default && end == head_by_default &&
+	अगर (start == शीर्ष_by_default && end == शीर्ष_by_default &&
 	    !symmetric) {
 		/*
 		 * Just ".."?  That is not a range but the
 		 * pathspec for the parent directory.
 		 */
-		free(to_free);
-		return 0;
+		मुक्त(to_free);
+		वापस 0;
 	}
 
-	if (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
+	अगर (!repo_get_oid_committish(the_repository, start, &start_oid) && !repo_get_oid_committish(the_repository, end, &end_oid)) {
 		show_rev(NORMAL, &end_oid, end);
 		show_rev(symmetric ? NORMAL : REVERSED, &start_oid, start);
-		if (symmetric) {
-			struct commit_list *exclude = NULL;
-			struct commit *a, *b;
+		अगर (symmetric) {
+			काष्ठा commit_list *exclude = शून्य;
+			काष्ठा commit *a, *b;
 			a = lookup_commit_reference(the_repository, &start_oid);
 			b = lookup_commit_reference(the_repository, &end_oid);
-			if (!a || !b) {
-				free(to_free);
-				return 0;
+			अगर (!a || !b) {
+				मुक्त(to_free);
+				वापस 0;
 			}
-			if (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
-				exit(128);
-			while (exclude) {
-				struct commit *commit = pop_commit(&exclude);
-				show_rev(REVERSED, &commit->object.oid, NULL);
+			अगर (repo_get_merge_bases(the_repository, a, b, &exclude) < 0)
+				निकास(128);
+			जबतक (exclude) {
+				काष्ठा commit *commit = निकालो_commit(&exclude);
+				show_rev(REVERSED, &commit->object.oid, शून्य);
 			}
 		}
-		free(to_free);
-		return 1;
+		मुक्त(to_free);
+		वापस 1;
 	}
-	free(to_free);
-	return 0;
+	मुक्त(to_free);
+	वापस 0;
 }
 
-static int try_parent_shorthands(const char *arg)
+अटल पूर्णांक try_parent_shorthands(स्थिर अक्षर *arg)
 {
-	const char *mark;
-	struct object_id oid;
-	struct commit *commit;
-	struct commit_list *parents;
-	int parent_number;
-	int include_rev = 0;
-	int include_parents = 0;
-	int exclude_parent = 0;
-	char *to_free;
+	स्थिर अक्षर *mark;
+	काष्ठा object_id oid;
+	काष्ठा commit *commit;
+	काष्ठा commit_list *parents;
+	पूर्णांक parent_संख्या;
+	पूर्णांक include_rev = 0;
+	पूर्णांक include_parents = 0;
+	पूर्णांक exclude_parent = 0;
+	अक्षर *to_free;
 
-	if ((mark = strstr(arg, "^!"))) {
+	अगर ((mark = म_माला(arg, "^!"))) {
 		include_rev = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^@"))) {
+		अगर (mark[2])
+			वापस 0;
+	} अन्यथा अगर ((mark = म_माला(arg, "^@"))) {
 		include_parents = 1;
-		if (mark[2])
-			return 0;
-	} else if ((mark = strstr(arg, "^-"))) {
+		अगर (mark[2])
+			वापस 0;
+	} अन्यथा अगर ((mark = म_माला(arg, "^-"))) {
 		include_rev = 1;
 		exclude_parent = 1;
 
-		if (mark[2]) {
-			char *end;
-			exclude_parent = strtoul(mark + 2, &end, 10);
-			if (*end != '\0' || !exclude_parent)
-				return 0;
+		अगर (mark[2]) {
+			अक्षर *end;
+			exclude_parent = म_से_अदीर्घ(mark + 2, &end, 10);
+			अगर (*end != '\0' || !exclude_parent)
+				वापस 0;
 		}
-	} else
-		return 0;
+	} अन्यथा
+		वापस 0;
 
 	arg = to_free = xmemdupz(arg, mark - arg);
-	if (repo_get_oid_committish(the_repository, arg, &oid) ||
+	अगर (repo_get_oid_committish(the_repository, arg, &oid) ||
 	    !(commit = lookup_commit_reference(the_repository, &oid))) {
-		free(to_free);
-		return 0;
+		मुक्त(to_free);
+		वापस 0;
 	}
 
-	if (exclude_parent &&
-	    exclude_parent > commit_list_count(commit->parents)) {
-		free(to_free);
-		return 0;
+	अगर (exclude_parent &&
+	    exclude_parent > commit_list_गिनती(commit->parents)) {
+		मुक्त(to_free);
+		वापस 0;
 	}
 
-	if (include_rev)
+	अगर (include_rev)
 		show_rev(NORMAL, &oid, arg);
-	for (parents = commit->parents, parent_number = 1;
+	क्रम (parents = commit->parents, parent_संख्या = 1;
 	     parents;
-	     parents = parents->next, parent_number++) {
-		char *name = NULL;
+	     parents = parents->अग्र, parent_संख्या++) {
+		अक्षर *name = शून्य;
 
-		if (exclude_parent && parent_number != exclude_parent)
-			continue;
+		अगर (exclude_parent && parent_संख्या != exclude_parent)
+			जारी;
 
-		if (symbolic)
-			name = xstrfmt("%s^%d", arg, parent_number);
+		अगर (symbolic)
+			name = xstrfmt("%s^%d", arg, parent_संख्या);
 		show_rev(include_parents ? NORMAL : REVERSED,
 			 &parents->item->object.oid, name);
-		free(name);
+		मुक्त(name);
 	}
 
-	free(to_free);
-	return 1;
+	मुक्त(to_free);
+	वापस 1;
 }
 
-static int parseopt_dump(const struct option *o, const char *arg, int unset)
+अटल पूर्णांक parseopt_dump(स्थिर काष्ठा option *o, स्थिर अक्षर *arg, पूर्णांक unset)
 {
-	struct strbuf *parsed = o->value;
-	if (unset)
+	काष्ठा strbuf *parsed = o->मूल्य;
+	अगर (unset)
 		strbuf_addf(parsed, " --no-%s", o->long_name);
-	else if (o->short_name && (o->long_name == NULL || !stuck_long))
+	अन्यथा अगर (o->short_name && (o->long_name == शून्य || !stuck_long))
 		strbuf_addf(parsed, " -%c", o->short_name);
-	else
+	अन्यथा
 		strbuf_addf(parsed, " --%s", o->long_name);
-	if (arg) {
-		if (!stuck_long)
+	अगर (arg) {
+		अगर (!stuck_long)
 			strbuf_addch(parsed, ' ');
-		else if (o->long_name)
+		अन्यथा अगर (o->long_name)
 			strbuf_addch(parsed, '=');
 		sq_quote_buf(parsed, arg);
 	}
-	return 0;
+	वापस 0;
 }
 
-static const char *skipspaces(const char *s)
+अटल स्थिर अक्षर *skipspaces(स्थिर अक्षर *s)
 {
-	while (isspace(*s))
+	जबतक (है_खाली(*s))
 		s++;
-	return s;
+	वापस s;
 }
 
-static char *findspace(const char *s)
+अटल अक्षर *findspace(स्थिर अक्षर *s)
 {
-	for (; *s; s++)
-		if (isspace(*s))
-			return (char*)s;
-	return NULL;
+	क्रम (; *s; s++)
+		अगर (है_खाली(*s))
+			वापस (अक्षर*)s;
+	वापस शून्य;
 }
 
-static int cmd_parseopt(int argc, const char **argv, const char *prefix)
+अटल पूर्णांक cmd_parseopt(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix)
 {
-	int keep_dashdash = 0, stop_at_non_option = 0;
-	char const * const parseopt_usage[] = {
+	पूर्णांक keep_dashdash = 0, stop_at_non_option = 0;
+	अक्षर स्थिर * स्थिर parseopt_usage[] = {
 		N_("git rev-parse --parseopt [<options>] -- [<args>...]"),
-		NULL
+		शून्य
 	};
-	struct option parseopt_opts[] = {
+	काष्ठा option parseopt_opts[] = {
 		OPT_BOOL(0, "keep-dashdash", &keep_dashdash,
 					N_("keep the `--` passed as an arg")),
 		OPT_BOOL(0, "stop-at-non-option", &stop_at_non_option,
@@ -443,108 +443,108 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 					N_("output in stuck long form")),
 		OPT_END(),
 	};
-	struct strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
-	struct strvec longnames = STRVEC_INIT;
-	struct strvec usage = STRVEC_INIT;
-	struct option *opts = NULL;
-	size_t opts_nr = 0, opts_alloc = 0;
+	काष्ठा strbuf sb = STRBUF_INIT, parsed = STRBUF_INIT;
+	काष्ठा strvec longnames = STRVEC_INIT;
+	काष्ठा strvec usage = STRVEC_INIT;
+	काष्ठा option *opts = शून्य;
+	माप_प्रकार opts_nr = 0, opts_alloc = 0;
 
 	strbuf_addstr(&parsed, "set --");
 	argc = parse_options(argc, argv, prefix, parseopt_opts, parseopt_usage,
 	                     PARSE_OPT_KEEP_DASHDASH);
-	if (argc < 1 || strcmp(argv[0], "--"))
+	अगर (argc < 1 || म_भेद(argv[0], "--"))
 		usage_with_options(parseopt_usage, parseopt_opts);
 
 	/* get the usage up to the first line with a -- on it */
-	for (;;) {
+	क्रम (;;) {
 		strbuf_reset(&sb);
-		if (strbuf_getline(&sb, stdin) == EOF)
+		अगर (strbuf_getline(&sb, मानक_निवेश) == खातापूर्ण)
 			die(_("premature end of input"));
-		if (!strcmp("--", sb.buf)) {
-			if (!usage.nr)
+		अगर (!म_भेद("--", sb.buf)) {
+			अगर (!usage.nr)
 				die(_("no usage string given before the `--' separator"));
-			break;
+			अवरोध;
 		}
 
-		strvec_push(&usage, sb.buf);
+		strvec_धकेलो(&usage, sb.buf);
 	}
 
 	/* parse: (<short>|<short>,<long>|<long>)[*=?!]*<arghint>? SP+ <help> */
-	while (strbuf_getline(&sb, stdin) != EOF) {
-		const char *s;
-		char *help;
-		struct option *o;
+	जबतक (strbuf_getline(&sb, मानक_निवेश) != खातापूर्ण) {
+		स्थिर अक्षर *s;
+		अक्षर *help;
+		काष्ठा option *o;
 
-		if (!sb.len)
-			continue;
+		अगर (!sb.len)
+			जारी;
 
 		ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-		memset(opts + opts_nr, 0, sizeof(*opts));
+		स_रखो(opts + opts_nr, 0, माप(*opts));
 
 		o = &opts[opts_nr++];
 		help = findspace(sb.buf);
-		if (!help || sb.buf == help) {
+		अगर (!help || sb.buf == help) {
 			o->type = OPTION_GROUP;
 			o->help = xstrdup(skipspaces(sb.buf));
-			continue;
+			जारी;
 		}
 
 		*help = '\0';
 
 		o->type = OPTION_CALLBACK;
 		o->help = xstrdup(skipspaces(help+1));
-		o->value = &parsed;
+		o->मूल्य = &parsed;
 		o->flags = PARSE_OPT_NOARG;
 		o->callback = &parseopt_dump;
 
 		/* name(s) */
 		s = strpbrk(sb.buf, "*=?!");
-		if (!s)
+		अगर (!s)
 			s = help;
 
-		if (s == sb.buf)
+		अगर (s == sb.buf)
 			die(_("missing opt-spec before option flags"));
 
-		if (s - sb.buf == 1) { /* short option only */
+		अगर (s - sb.buf == 1) { /* short option only */
 			o->short_name = *sb.buf;
-		} else if (sb.buf[1] != ',') { /* long option only */
+		} अन्यथा अगर (sb.buf[1] != ',') { /* long option only */
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf), sb.buf);
-		} else {
+						    (पूर्णांक)(s - sb.buf), sb.buf);
+		} अन्यथा {
 			o->short_name = *sb.buf;
 			o->long_name = strvec_pushf(&longnames, "%.*s",
-						    (int)(s - sb.buf - 2), sb.buf + 2);
+						    (पूर्णांक)(s - sb.buf - 2), sb.buf + 2);
 		}
 
 		/* flags */
-		while (s < help) {
-			switch (*s++) {
-			case '=':
+		जबतक (s < help) {
+			चयन (*s++) {
+			हाल '=':
 				o->flags &= ~PARSE_OPT_NOARG;
-				continue;
-			case '?':
+				जारी;
+			हाल '?':
 				o->flags &= ~PARSE_OPT_NOARG;
 				o->flags |= PARSE_OPT_OPTARG;
-				continue;
-			case '!':
+				जारी;
+			हाल '!':
 				o->flags |= PARSE_OPT_NONEG;
-				continue;
-			case '*':
+				जारी;
+			हाल '*':
 				o->flags |= PARSE_OPT_HIDDEN;
-				continue;
+				जारी;
 			}
 			s--;
-			break;
+			अवरोध;
 		}
 
-		if (s < help)
+		अगर (s < help)
 			o->argh = xmemdupz(s, help - s);
 	}
 	strbuf_release(&sb);
 
 	/* put an OPT_END() */
 	ALLOC_GROW(opts, opts_nr + 1, opts_alloc);
-	memset(opts + opts_nr, 0, sizeof(*opts));
+	स_रखो(opts + opts_nr, 0, माप(*opts));
 	argc = parse_options(argc, argv, prefix, opts, usage.v,
 			(keep_dashdash ? PARSE_OPT_KEEP_DASHDASH : 0) |
 			(stop_at_non_option ? PARSE_OPT_STOP_AT_NON_OPTION : 0) |
@@ -552,41 +552,41 @@ static int cmd_parseopt(int argc, const char **argv, const char *prefix)
 
 	strbuf_addstr(&parsed, " --");
 	sq_quote_argv(&parsed, argv);
-	puts(parsed.buf);
+	माला_दो(parsed.buf);
 
 	strbuf_release(&parsed);
 	strbuf_release(&sb);
 	strvec_clear(&longnames);
 	strvec_clear(&usage);
-	for (size_t i = 0; i < opts_nr; i++) {
-		free((char *) opts[i].help);
-		free((char *) opts[i].argh);
+	क्रम (माप_प्रकार i = 0; i < opts_nr; i++) {
+		मुक्त((अक्षर *) opts[i].help);
+		मुक्त((अक्षर *) opts[i].argh);
 	}
-	free(opts);
-	return 0;
+	मुक्त(opts);
+	वापस 0;
 }
 
-static int cmd_sq_quote(int argc, const char **argv)
+अटल पूर्णांक cmd_sq_quote(पूर्णांक argc, स्थिर अक्षर **argv)
 {
-	struct strbuf buf = STRBUF_INIT;
+	काष्ठा strbuf buf = STRBUF_INIT;
 
-	if (argc)
+	अगर (argc)
 		sq_quote_argv(&buf, argv);
-	printf("%s\n", buf.buf);
+	म_लिखो("%s\n", buf.buf);
 	strbuf_release(&buf);
 
-	return 0;
+	वापस 0;
 }
 
-static void die_no_single_rev(int quiet)
+अटल व्योम die_no_single_rev(पूर्णांक quiet)
 {
-	if (quiet)
-		exit(1);
-	else
+	अगर (quiet)
+		निकास(1);
+	अन्यथा
 		die(_("Needed a single revision"));
 }
 
-static const char builtin_rev_parse_usage[] =
+अटल स्थिर अक्षर builtin_rev_parse_usage[] =
 N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
    "   or: git rev-parse --sq-quote [<arg>...]\n"
    "   or: git rev-parse [<options>] [<arg>...]\n"
@@ -597,43 +597,43 @@ N_("git rev-parse --parseopt [<options>] -- [<args>...]\n"
  * Parse "opt" or "opt=<value>", setting value respectively to either
  * NULL or the string after "=".
  */
-static int opt_with_value(const char *arg, const char *opt, const char **value)
+अटल पूर्णांक opt_with_मूल्य(स्थिर अक्षर *arg, स्थिर अक्षर *opt, स्थिर अक्षर **मूल्य)
 {
-	if (skip_prefix(arg, opt, &arg)) {
-		if (!*arg) {
-			*value = NULL;
-			return 1;
+	अगर (skip_prefix(arg, opt, &arg)) {
+		अगर (!*arg) {
+			*मूल्य = शून्य;
+			वापस 1;
 		}
-		if (*arg++ == '=') {
-			*value = arg;
-			return 1;
+		अगर (*arg++ == '=') {
+			*मूल्य = arg;
+			वापस 1;
 		}
 	}
-	return 0;
+	वापस 0;
 }
 
-static void handle_ref_opt(const char *pattern, const char *prefix)
+अटल व्योम handle_ref_opt(स्थिर अक्षर *pattern, स्थिर अक्षर *prefix)
 {
-	if (pattern) {
-		struct refs_for_each_ref_options opts = {
+	अगर (pattern) {
+		काष्ठा refs_for_each_ref_options opts = {
 			.pattern = pattern,
 			.prefix = prefix,
-			.trim_prefix = prefix ? strlen(prefix) : 0,
+			.trim_prefix = prefix ? म_माप(prefix) : 0,
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      show_reference, NULL, &opts);
-	} else {
-		struct refs_for_each_ref_options opts = {
+				      show_reference, शून्य, &opts);
+	} अन्यथा {
+		काष्ठा refs_for_each_ref_options opts = {
 			.prefix = prefix,
-			.trim_prefix = strlen(prefix),
+			.trim_prefix = म_माप(prefix),
 		};
 		refs_for_each_ref_ext(get_main_ref_store(the_repository),
-				      show_reference, NULL, &opts);
+				      show_reference, शून्य, &opts);
 	}
 	clear_ref_exclusions(&ref_excludes);
 }
 
-enum format_type {
+क्रमागत format_type {
 	/* We would like a relative path. */
 	FORMAT_RELATIVE,
 	/* We would like a canonical absolute path. */
@@ -642,7 +642,7 @@ enum format_type {
 	FORMAT_DEFAULT,
 };
 
-enum default_type {
+क्रमागत default_type {
 	/* Our default is a relative path. */
 	DEFAULT_RELATIVE,
 	/* Our default is a relative path if there's a shared root. */
@@ -653,542 +653,542 @@ enum default_type {
 	DEFAULT_UNMODIFIED,
 };
 
-static void print_path(const char *path, const char *prefix,
-		       enum format_type format, enum default_type def)
+अटल व्योम print_path(स्थिर अक्षर *path, स्थिर अक्षर *prefix,
+		       क्रमागत format_type format, क्रमागत default_type def)
 {
-	struct strbuf sb = STRBUF_INIT;
-	enum path_format fmt;
+	काष्ठा strbuf sb = STRBUF_INIT;
+	क्रमागत path_format fmt;
 
-	if (format == FORMAT_DEFAULT) {
-		switch (def) {
-		case DEFAULT_RELATIVE:
+	अगर (format == FORMAT_DEFAULT) {
+		चयन (def) {
+		हाल DEFAULT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case DEFAULT_RELATIVE_IF_SHARED:
+			अवरोध;
+		हाल DEFAULT_RELATIVE_IF_SHARED:
 			fmt = PATH_FORMAT_RELATIVE_IF_SHARED;
-			break;
-		case DEFAULT_CANONICAL:
+			अवरोध;
+		हाल DEFAULT_CANONICAL:
 			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		case DEFAULT_UNMODIFIED:
-		default:
+			अवरोध;
+		हाल DEFAULT_UNMODIFIED:
+		शेष:
 			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+			अवरोध;
 		}
-	} else {
-		switch (format) {
-		case FORMAT_RELATIVE:
+	} अन्यथा {
+		चयन (format) {
+		हाल FORMAT_RELATIVE:
 			fmt = PATH_FORMAT_RELATIVE;
-			break;
-		case FORMAT_CANONICAL:
+			अवरोध;
+		हाल FORMAT_CANONICAL:
 			fmt = PATH_FORMAT_CANONICAL;
-			break;
-		default:
+			अवरोध;
+		शेष:
 			fmt = PATH_FORMAT_UNMODIFIED;
-			break;
+			अवरोध;
 		}
 	}
 
 	format_path(&sb, path, prefix, fmt);
-	puts(sb.buf);
+	माला_दो(sb.buf);
 
 	strbuf_release(&sb);
 }
 
-int cmd_rev_parse(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+पूर्णांक cmd_rev_parse(पूर्णांक argc,
+		  स्थिर अक्षर **argv,
+		  स्थिर अक्षर *prefix,
+		  काष्ठा repository *repo UNUSED)
 {
-	int i, as_is = 0, verify = 0, quiet = 0, revs_count = 0, type = 0;
-	const struct git_hash_algo *output_algo = NULL;
-	const struct git_hash_algo *compat = NULL;
-	int did_repo_setup = 0;
-	int has_dashdash = 0;
-	int output_prefix = 0;
-	struct object_id oid;
-	unsigned int flags = 0;
-	const char *name = NULL;
-	struct strbuf buf = STRBUF_INIT;
-	int seen_end_of_options = 0;
-	enum format_type format = FORMAT_DEFAULT;
+	पूर्णांक i, as_is = 0, verify = 0, quiet = 0, revs_गिनती = 0, type = 0;
+	स्थिर काष्ठा git_hash_algo *output_algo = शून्य;
+	स्थिर काष्ठा git_hash_algo *compat = शून्य;
+	पूर्णांक did_repo_setup = 0;
+	पूर्णांक has_dashdash = 0;
+	पूर्णांक output_prefix = 0;
+	काष्ठा object_id oid;
+	अचिन्हित पूर्णांक flags = 0;
+	स्थिर अक्षर *name = शून्य;
+	काष्ठा strbuf buf = STRBUF_INIT;
+	पूर्णांक seen_end_of_options = 0;
+	क्रमागत format_type format = FORMAT_DEFAULT;
 
 	show_usage_if_asked(argc, argv, builtin_rev_parse_usage);
 
-	if (argc > 1 && !strcmp("--parseopt", argv[1]))
-		return cmd_parseopt(argc - 1, argv + 1, prefix);
+	अगर (argc > 1 && !म_भेद("--parseopt", argv[1]))
+		वापस cmd_parseopt(argc - 1, argv + 1, prefix);
 
-	if (argc > 1 && !strcmp("--sq-quote", argv[1]))
-		return cmd_sq_quote(argc - 2, argv + 2);
+	अगर (argc > 1 && !म_भेद("--sq-quote", argv[1]))
+		वापस cmd_sq_quote(argc - 2, argv + 2);
 
-	if (argc > 1 && !strcmp("-h", argv[1]))
+	अगर (argc > 1 && !म_भेद("-h", argv[1]))
 		usage(builtin_rev_parse_usage);
 
-	for (i = 1; i < argc; i++) {
-		if (!strcmp(argv[i], "--")) {
+	क्रम (i = 1; i < argc; i++) {
+		अगर (!म_भेद(argv[i], "--")) {
 			has_dashdash = 1;
-			break;
+			अवरोध;
 		}
 	}
 
 	/* No options; just report on whether we're in a git repo or not. */
-	if (argc == 1) {
+	अगर (argc == 1) {
 		setup_git_directory(the_repository);
-		repo_config(the_repository, git_default_config, NULL);
-		return 0;
+		repo_config(the_repository, git_default_config, शून्य);
+		वापस 0;
 	}
 
-	for (i = 1; i < argc; i++) {
-		const char *arg = argv[i];
+	क्रम (i = 1; i < argc; i++) {
+		स्थिर अक्षर *arg = argv[i];
 
-		if (as_is) {
-			if (show_file(arg, output_prefix) && as_is < 2)
+		अगर (as_is) {
+			अगर (show_file(arg, output_prefix) && as_is < 2)
 				verify_filename(the_repository, prefix, arg, 0);
-			continue;
+			जारी;
 		}
 
-		if (!seen_end_of_options) {
-			if (!strcmp(arg, "--local-env-vars")) {
-				int i;
-				for (i = 0; local_repo_env[i]; i++)
-					printf("%s\n", local_repo_env[i]);
-				continue;
+		अगर (!seen_end_of_options) {
+			अगर (!म_भेद(arg, "--local-env-vars")) {
+				पूर्णांक i;
+				क्रम (i = 0; local_repo_env[i]; i++)
+					म_लिखो("%s\n", local_repo_env[i]);
+				जारी;
 			}
-			if (!strcmp(arg, "--resolve-git-dir")) {
-				const char *gitdir = argv[++i];
-				if (!gitdir)
+			अगर (!म_भेद(arg, "--resolve-git-dir")) {
+				स्थिर अक्षर *gitdir = argv[++i];
+				अगर (!gitdir)
 					die(_("--resolve-git-dir requires an argument"));
 				gitdir = resolve_gitdir(gitdir);
-				if (!gitdir)
+				अगर (!gitdir)
 					die(_("not a gitdir '%s'"), argv[i]);
-				puts(gitdir);
-				continue;
+				माला_दो(gitdir);
+				जारी;
 			}
 		}
 
 		/* The rest of the options require a git repository. */
-		if (!did_repo_setup) {
+		अगर (!did_repo_setup) {
 			prefix = setup_git_directory(the_repository);
-			repo_config(the_repository, git_default_config, NULL);
+			repo_config(the_repository, git_default_config, शून्य);
 			did_repo_setup = 1;
 
 			prepare_repo_settings(the_repository);
-			the_repository->settings.command_requires_full_index = 0;
+			the_repository->settings.command_requires_full_सूचकांक = 0;
 			compat = the_repository->compat_hash_algo;
 		}
 
-		if (!strcmp(arg, "--")) {
+		अगर (!म_भेद(arg, "--")) {
 			as_is = 2;
 			/* Pass on the "--" if we show anything but files.. */
-			if (filter & (DO_FLAGS | DO_REVS))
+			अगर (filter & (DO_FLAGS | DO_REVS))
 				show_file(arg, 0);
-			continue;
+			जारी;
 		}
 
-		if (!seen_end_of_options && *arg == '-') {
-			if (!strcmp(arg, "--git-path")) {
-				if (!argv[i + 1])
+		अगर (!seen_end_of_options && *arg == '-') {
+			अगर (!म_भेद(arg, "--git-path")) {
+				अगर (!argv[i + 1])
 					die(_("--git-path requires an argument"));
 				print_path(repo_git_path_replace(the_repository, &buf,
 								 "%s", argv[i + 1]), prefix,
 						format,
 						DEFAULT_RELATIVE_IF_SHARED);
 				i++;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg,"-n")) {
-				if (++i >= argc)
+			अगर (!म_भेद(arg,"-n")) {
+				अगर (++i >= argc)
 					die(_("-n requires an argument"));
-				if ((filter & DO_FLAGS) && (filter & DO_REVS)) {
+				अगर ((filter & DO_FLAGS) && (filter & DO_REVS)) {
 					show(arg);
 					show(argv[i]);
 				}
-				continue;
+				जारी;
 			}
-			if (starts_with(arg, "-n")) {
-				if ((filter & DO_FLAGS) && (filter & DO_REVS))
+			अगर (starts_with(arg, "-n")) {
+				अगर ((filter & DO_FLAGS) && (filter & DO_REVS))
 					show(arg);
-				continue;
+				जारी;
 			}
-			if (opt_with_value(arg, "--path-format", &arg)) {
-				if (!arg)
+			अगर (opt_with_मूल्य(arg, "--path-format", &arg)) {
+				अगर (!arg)
 					die(_("--path-format requires an argument"));
-				if (!strcmp(arg, "absolute")) {
+				अगर (!म_भेद(arg, "absolute")) {
 					format = FORMAT_CANONICAL;
-				} else if (!strcmp(arg, "relative")) {
+				} अन्यथा अगर (!म_भेद(arg, "relative")) {
 					format = FORMAT_RELATIVE;
-				} else {
+				} अन्यथा {
 					die(_("unknown argument to --path-format: %s"), arg);
 				}
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--default")) {
+			अगर (!म_भेद(arg, "--default")) {
 				def = argv[++i];
-				if (!def)
+				अगर (!def)
 					die(_("--default requires an argument"));
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--prefix")) {
+			अगर (!म_भेद(arg, "--prefix")) {
 				prefix = argv[++i];
-				if (!prefix)
+				अगर (!prefix)
 					die(_("--prefix requires an argument"));
 				FREE_AND_NULL(the_repository->prefix);
 				the_repository->prefix = xstrdup(prefix);
 				output_prefix = 1;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--revs-only")) {
+			अगर (!म_भेद(arg, "--revs-only")) {
 				filter &= ~DO_NOREV;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--no-revs")) {
+			अगर (!म_भेद(arg, "--no-revs")) {
 				filter &= ~DO_REVS;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--flags")) {
+			अगर (!म_भेद(arg, "--flags")) {
 				filter &= ~DO_NONFLAGS;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--no-flags")) {
+			अगर (!म_भेद(arg, "--no-flags")) {
 				filter &= ~DO_FLAGS;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--verify")) {
+			अगर (!म_भेद(arg, "--verify")) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--quiet") || !strcmp(arg, "-q")) {
+			अगर (!म_भेद(arg, "--quiet") || !म_भेद(arg, "-q")) {
 				quiet = 1;
 				flags |= GET_OID_QUIETLY;
-				continue;
+				जारी;
 			}
-			if (opt_with_value(arg, "--output-object-format", &arg)) {
-				if (!arg)
+			अगर (opt_with_मूल्य(arg, "--output-object-format", &arg)) {
+				अगर (!arg)
 					die(_("no object format specified"));
-				if (!strcmp(arg, the_hash_algo->name) ||
-				    !strcmp(arg, "storage")) {
+				अगर (!म_भेद(arg, the_hash_algo->name) ||
+				    !म_भेद(arg, "storage")) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = the_hash_algo;
-					continue;
+					जारी;
 				}
-				else if (compat && !strcmp(arg, compat->name)) {
+				अन्यथा अगर (compat && !म_भेद(arg, compat->name)) {
 					flags |= GET_OID_HASH_ANY;
 					output_algo = compat;
-					continue;
+					जारी;
 				}
-				else die(_("unsupported object format: %s"), arg);
+				अन्यथा die(_("unsupported object format: %s"), arg);
 			}
-			if (opt_with_value(arg, "--short", &arg)) {
+			अगर (opt_with_मूल्य(arg, "--short", &arg)) {
 				filter &= ~(DO_FLAGS|DO_NOREV);
 				verify = 1;
 				abbrev = DEFAULT_ABBREV;
-				if (!arg)
-					continue;
-				abbrev = strtoul(arg, NULL, 10);
-				if (abbrev < MINIMUM_ABBREV)
+				अगर (!arg)
+					जारी;
+				abbrev = म_से_अदीर्घ(arg, शून्य, 10);
+				अगर (abbrev < MINIMUM_ABBREV)
 					abbrev = MINIMUM_ABBREV;
-				else if ((int)the_hash_algo->hexsz <= abbrev)
+				अन्यथा अगर ((पूर्णांक)the_hash_algo->hexsz <= abbrev)
 					abbrev = the_hash_algo->hexsz;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--sq")) {
+			अगर (!म_भेद(arg, "--sq")) {
 				output_sq = 1;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--not")) {
+			अगर (!म_भेद(arg, "--not")) {
 				show_type ^= REVERSED;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--symbolic")) {
+			अगर (!म_भेद(arg, "--symbolic")) {
 				symbolic = SHOW_SYMBOLIC_ASIS;
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--symbolic-full-name")) {
+			अगर (!म_भेद(arg, "--symbolic-full-name")) {
 				symbolic = SHOW_SYMBOLIC_FULL;
-				continue;
+				जारी;
 			}
-			if (opt_with_value(arg, "--abbrev-ref", &arg)) {
+			अगर (opt_with_मूल्य(arg, "--abbrev-ref", &arg)) {
 				abbrev_ref = 1;
 				abbrev_ref_strict =
 					repo_settings_get_warn_ambiguous_refs(the_repository);
-				if (arg) {
-					if (!strcmp(arg, "strict"))
+				अगर (arg) {
+					अगर (!म_भेद(arg, "strict"))
 						abbrev_ref_strict = 1;
-					else if (!strcmp(arg, "loose"))
+					अन्यथा अगर (!म_भेद(arg, "loose"))
 						abbrev_ref_strict = 0;
-					else
+					अन्यथा
 						die(_("unknown mode for --abbrev-ref: %s"),
 						    arg);
 				}
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--all")) {
+			अगर (!म_भेद(arg, "--all")) {
 				refs_for_each_ref(get_main_ref_store(the_repository),
-						  show_reference, NULL);
+						  show_reference, शून्य);
 				clear_ref_exclusions(&ref_excludes);
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--disambiguate=", &arg)) {
+			अगर (skip_prefix(arg, "--disambiguate=", &arg)) {
 				repo_for_each_abbrev(the_repository, arg, the_hash_algo,
-						     show_abbrev, NULL);
-				continue;
+						     show_abbrev, शून्य);
+				जारी;
 			}
-			if (!strcmp(arg, "--bisect")) {
-				char *prefix;
-				char *term_bad = NULL;
-				char *term_good = NULL;
-				struct refs_for_each_ref_options opts = { 0 };
+			अगर (!म_भेद(arg, "--bisect")) {
+				अक्षर *prefix;
+				अक्षर *term_bad = शून्य;
+				अक्षर *term_good = शून्य;
+				काष्ठा refs_for_each_ref_options opts = { 0 };
 				read_bisect_terms(&term_bad, &term_good);
 				prefix = xstrfmt("refs/bisect/%s", term_bad);
 				opts.prefix = prefix;
 				refs_for_each_ref_ext(get_main_ref_store(the_repository),
-						      show_reference, NULL, &opts);
-				free(prefix);
+						      show_reference, शून्य, &opts);
+				मुक्त(prefix);
 				prefix = xstrfmt("refs/bisect/%s", term_good);
 				opts.prefix = prefix;
 				refs_for_each_ref_ext(get_main_ref_store(the_repository),
-						      anti_reference, NULL, &opts);
-				free(prefix);
-				free(term_good);
-				free(term_bad);
-				continue;
+						      anti_reference, शून्य, &opts);
+				मुक्त(prefix);
+				मुक्त(term_good);
+				मुक्त(term_bad);
+				जारी;
 			}
-			if (opt_with_value(arg, "--branches", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			अगर (opt_with_मूल्य(arg, "--branches", &arg)) {
+				अगर (ref_excludes.hidden_refs_configured)
+					वापस error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--branches");
 				handle_ref_opt(arg, "refs/heads/");
-				continue;
+				जारी;
 			}
-			if (opt_with_value(arg, "--tags", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			अगर (opt_with_मूल्य(arg, "--tags", &arg)) {
+				अगर (ref_excludes.hidden_refs_configured)
+					वापस error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--tags");
 				handle_ref_opt(arg, "refs/tags/");
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--glob=", &arg)) {
-				handle_ref_opt(arg, NULL);
-				continue;
+			अगर (skip_prefix(arg, "--glob=", &arg)) {
+				handle_ref_opt(arg, शून्य);
+				जारी;
 			}
-			if (opt_with_value(arg, "--remotes", &arg)) {
-				if (ref_excludes.hidden_refs_configured)
-					return error(_("options '%s' and '%s' cannot be used together"),
+			अगर (opt_with_मूल्य(arg, "--remotes", &arg)) {
+				अगर (ref_excludes.hidden_refs_configured)
+					वापस error(_("options '%s' and '%s' cannot be used together"),
 						     "--exclude-hidden", "--remotes");
 				handle_ref_opt(arg, "refs/remotes/");
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--exclude=", &arg)) {
+			अगर (skip_prefix(arg, "--exclude=", &arg)) {
 				add_ref_exclusion(&ref_excludes, arg);
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--exclude-hidden=", &arg)) {
+			अगर (skip_prefix(arg, "--exclude-hidden=", &arg)) {
 				exclude_hidden_refs(&ref_excludes, arg);
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--show-toplevel")) {
-				const char *work_tree = repo_get_work_tree(the_repository);
-				if (work_tree)
-					print_path(work_tree, prefix, format, DEFAULT_UNMODIFIED);
-				else
+			अगर (!म_भेद(arg, "--show-toplevel")) {
+				स्थिर अक्षर *work_वृक्ष = repo_get_work_वृक्ष(the_repository);
+				अगर (work_वृक्ष)
+					print_path(work_वृक्ष, prefix, format, DEFAULT_UNMODIFIED);
+				अन्यथा
 					die(_("this operation must be run in a work tree"));
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--show-superproject-working-tree")) {
-				struct strbuf superproject = STRBUF_INIT;
-				if (get_superproject_working_tree(&superproject))
+			अगर (!म_भेद(arg, "--show-superproject-working-tree")) {
+				काष्ठा strbuf superproject = STRBUF_INIT;
+				अगर (get_superproject_working_वृक्ष(&superproject))
 					print_path(superproject.buf, prefix, format, DEFAULT_UNMODIFIED);
 				strbuf_release(&superproject);
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--show-prefix")) {
-				if (prefix)
-					puts(prefix);
-				else
-					putchar('\n');
-				continue;
+			अगर (!म_भेद(arg, "--show-prefix")) {
+				अगर (prefix)
+					माला_दो(prefix);
+				अन्यथा
+					अक्षर_दो('\n');
+				जारी;
 			}
-			if (!strcmp(arg, "--show-cdup")) {
-				const char *pfx = prefix;
-				if (!is_inside_work_tree(the_repository)) {
-					const char *work_tree =
-						repo_get_work_tree(the_repository);
-					if (work_tree)
-						printf("%s\n", work_tree);
-					continue;
+			अगर (!म_भेद(arg, "--show-cdup")) {
+				स्थिर अक्षर *pfx = prefix;
+				अगर (!is_inside_work_वृक्ष(the_repository)) {
+					स्थिर अक्षर *work_वृक्ष =
+						repo_get_work_वृक्ष(the_repository);
+					अगर (work_वृक्ष)
+						म_लिखो("%s\n", work_वृक्ष);
+					जारी;
 				}
-				while (pfx) {
-					pfx = strchr(pfx, '/');
-					if (pfx) {
+				जबतक (pfx) {
+					pfx = म_अक्षर(pfx, '/');
+					अगर (pfx) {
 						pfx++;
-						printf("../");
+						म_लिखो("../");
 					}
 				}
-				putchar('\n');
-				continue;
+				अक्षर_दो('\n');
+				जारी;
 			}
-			if (!strcmp(arg, "--git-dir") ||
-			    !strcmp(arg, "--absolute-git-dir")) {
-				const char *gitdir = getenv(GIT_DIR_ENVIRONMENT);
-				char *cwd;
-				int len;
-				enum format_type wanted = format;
-				if (arg[2] == 'g') {	/* --git-dir */
-					if (gitdir) {
+			अगर (!म_भेद(arg, "--git-dir") ||
+			    !म_भेद(arg, "--absolute-git-dir")) {
+				स्थिर अक्षर *gitdir = दो_पर्या(GIT_DIR_ENVIRONMENT);
+				अक्षर *cwd;
+				पूर्णांक len;
+				क्रमागत format_type wanted = format;
+				अगर (arg[2] == 'g') {	/* --git-dir */
+					अगर (gitdir) {
 						print_path(gitdir, prefix, format, DEFAULT_UNMODIFIED);
-						continue;
+						जारी;
 					}
-					if (!prefix) {
+					अगर (!prefix) {
 						print_path(".git", prefix, format, DEFAULT_UNMODIFIED);
-						continue;
+						जारी;
 					}
-				} else {		/* --absolute-git-dir */
+				} अन्यथा {		/* --absolute-git-dir */
 					wanted = FORMAT_CANONICAL;
-					if (!gitdir && !prefix)
+					अगर (!gitdir && !prefix)
 						gitdir = ".git";
-					if (gitdir) {
-						struct strbuf realpath = STRBUF_INIT;
+					अगर (gitdir) {
+						काष्ठा strbuf realpath = STRBUF_INIT;
 						strbuf_realpath(&realpath, gitdir, 1);
-						puts(realpath.buf);
+						माला_दो(realpath.buf);
 						strbuf_release(&realpath);
-						continue;
+						जारी;
 					}
 				}
 				cwd = xgetcwd();
-				len = strlen(cwd);
+				len = म_माप(cwd);
 				strbuf_reset(&buf);
 				strbuf_addf(&buf, "%s%s.git", cwd, len && cwd[len-1] != '/' ? "/" : "");
-				free(cwd);
+				मुक्त(cwd);
 				print_path(buf.buf, prefix, wanted, DEFAULT_CANONICAL);
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--git-common-dir")) {
+			अगर (!म_भेद(arg, "--git-common-dir")) {
 				print_path(repo_get_common_dir(the_repository), prefix, format, DEFAULT_RELATIVE_IF_SHARED);
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--is-inside-git-dir")) {
-				printf("%s\n", is_inside_git_dir(the_repository) ? "true"
+			अगर (!म_भेद(arg, "--is-inside-git-dir")) {
+				म_लिखो("%s\n", is_inside_git_dir(the_repository) ? "true"
 						: "false");
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--is-inside-work-tree")) {
-				printf("%s\n", is_inside_work_tree(the_repository) ? "true"
+			अगर (!म_भेद(arg, "--is-inside-work-tree")) {
+				म_लिखो("%s\n", is_inside_work_वृक्ष(the_repository) ? "true"
 						: "false");
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--is-bare-repository")) {
-				printf("%s\n", is_bare_repository(the_repository) ? "true"
+			अगर (!म_भेद(arg, "--is-bare-repository")) {
+				म_लिखो("%s\n", is_bare_repository(the_repository) ? "true"
 						: "false");
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--is-shallow-repository")) {
-				printf("%s\n",
+			अगर (!म_भेद(arg, "--is-shallow-repository")) {
+				म_लिखो("%s\n",
 						is_repository_shallow(the_repository) ? "true"
 						: "false");
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--shared-index-path")) {
-				if (repo_read_index(the_repository) < 0)
+			अगर (!म_भेद(arg, "--shared-index-path")) {
+				अगर (repo_read_सूचकांक(the_repository) < 0)
 					die(_("Could not read the index"));
-				if (the_repository->index->split_index) {
-					const struct object_id *oid = &the_repository->index->split_index->base_oid;
-					const char *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
+				अगर (the_repository->सूचकांक->split_सूचकांक) {
+					स्थिर काष्ठा object_id *oid = &the_repository->सूचकांक->split_सूचकांक->base_oid;
+					स्थिर अक्षर *path = repo_git_path_replace(the_repository, &buf, "sharedindex.%s", oid_to_hex(oid));
 					print_path(path, prefix, format, DEFAULT_RELATIVE);
 				}
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--since=", &arg)) {
+			अगर (skip_prefix(arg, "--since=", &arg)) {
 				show_datestring("--max-age=", arg);
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--after=", &arg)) {
+			अगर (skip_prefix(arg, "--after=", &arg)) {
 				show_datestring("--max-age=", arg);
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--before=", &arg)) {
+			अगर (skip_prefix(arg, "--before=", &arg)) {
 				show_datestring("--min-age=", arg);
-				continue;
+				जारी;
 			}
-			if (skip_prefix(arg, "--until=", &arg)) {
+			अगर (skip_prefix(arg, "--until=", &arg)) {
 				show_datestring("--min-age=", arg);
-				continue;
+				जारी;
 			}
-			if (opt_with_value(arg, "--show-object-format", &arg)) {
-				const char *val = arg ? arg : "storage";
+			अगर (opt_with_मूल्य(arg, "--show-object-format", &arg)) {
+				स्थिर अक्षर *val = arg ? arg : "storage";
 
-				if (strcmp(val, "storage") &&
-				    strcmp(val, "compat") &&
-				    strcmp(val, "input") &&
-				    strcmp(val, "output"))
+				अगर (म_भेद(val, "storage") &&
+				    म_भेद(val, "compat") &&
+				    म_भेद(val, "input") &&
+				    म_भेद(val, "output"))
 					die(_("unknown mode for --show-object-format: %s"),
 					    arg);
 
-				if (!strcmp(val, "compat")) {
-					if (the_repository->compat_hash_algo)
-						puts(the_repository->compat_hash_algo->name);
-					else
-						putchar('\n');
-				} else {
-					puts(the_hash_algo->name);
+				अगर (!म_भेद(val, "compat")) {
+					अगर (the_repository->compat_hash_algo)
+						माला_दो(the_repository->compat_hash_algo->name);
+					अन्यथा
+						अक्षर_दो('\n');
+				} अन्यथा {
+					माला_दो(the_hash_algo->name);
 				}
-				continue;
+				जारी;
 			}
-			if (!strcmp(arg, "--show-ref-format") || !strcmp(arg, "--show-ref-storage-format")) {
-				puts(ref_storage_format_to_name(the_repository->ref_storage_format));
-				continue;
+			अगर (!म_भेद(arg, "--show-ref-format") || !म_भेद(arg, "--show-ref-storage-format")) {
+				माला_दो(ref_storage_format_to_name(the_repository->ref_storage_format));
+				जारी;
 			}
-			if (!strcmp(arg, "--end-of-options")) {
+			अगर (!म_भेद(arg, "--end-of-options")) {
 				seen_end_of_options = 1;
-				if (filter & (DO_FLAGS | DO_REVS))
+				अगर (filter & (DO_FLAGS | DO_REVS))
 					show_file(arg, 0);
-				continue;
+				जारी;
 			}
-			if (show_flag(arg) && verify)
+			अगर (show_flag(arg) && verify)
 				die_no_single_rev(quiet);
-			continue;
+			जारी;
 		}
 
 		/* Not a flag argument */
-		if (try_difference(arg))
-			continue;
-		if (try_parent_shorthands(arg))
-			continue;
+		अगर (try_difference(arg))
+			जारी;
+		अगर (try_parent_shorthands(arg))
+			जारी;
 		name = arg;
 		type = NORMAL;
-		if (*arg == '^') {
+		अगर (*arg == '^') {
 			name++;
 			type = REVERSED;
 		}
-		if (!repo_get_oid_with_flags(the_repository, name, &oid,
+		अगर (!repo_get_oid_with_flags(the_repository, name, &oid,
 					     flags)) {
-			if (output_algo)
+			अगर (output_algo)
 				repo_oid_to_algop(the_repository, &oid,
 						  output_algo, &oid);
-			if (verify)
-				revs_count++;
-			else
+			अगर (verify)
+				revs_गिनती++;
+			अन्यथा
 				show_rev(type, &oid, name);
-			continue;
+			जारी;
 		}
-		if (verify)
+		अगर (verify)
 			die_no_single_rev(quiet);
-		if (has_dashdash)
+		अगर (has_dashdash)
 			die(_("bad revision '%s'"), arg);
 		as_is = 1;
-		if (!show_file(arg, output_prefix))
-			continue;
+		अगर (!show_file(arg, output_prefix))
+			जारी;
 		verify_filename(the_repository, prefix, arg, 1);
 	}
 	strbuf_release(&buf);
-	if (verify) {
-		if (revs_count == 1) {
+	अगर (verify) {
+		अगर (revs_गिनती == 1) {
 			show_rev(type, &oid, name);
-			return 0;
-		} else if (revs_count == 0 && show_default())
-			return 0;
+			वापस 0;
+		} अन्यथा अगर (revs_गिनती == 0 && show_default())
+			वापस 0;
 		die_no_single_rev(quiet);
-	} else
+	} अन्यथा
 		show_default();
-	return 0;
+	वापस 0;
 }

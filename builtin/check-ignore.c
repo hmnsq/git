@@ -1,88 +1,88 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "config.h"
-#include "dir.h"
-#include "environment.h"
-#include "gettext.h"
-#include "quote.h"
-#include "pathspec.h"
-#include "parse-options.h"
-#include "submodule.h"
-#include "write-or-die.h"
+#घोषणा USE_THE_REPOSITORY_VARIABLE
+#समावेश "builtin.h"
+#समावेश "config.h"
+#समावेश "dir.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "quote.h"
+#समावेश "pathspec.h"
+#समावेश "parse-options.h"
+#समावेश "submodule.h"
+#समावेश "write-or-die.h"
 
-static int quiet, verbose, stdin_paths, show_non_matching, no_index;
-static const char * const check_ignore_usage[] = {
+अटल पूर्णांक quiet, verbose, stdin_paths, show_non_matching, no_सूचकांक;
+अटल स्थिर अक्षर * स्थिर check_ignore_usage[] = {
 "git check-ignore [<options>] <pathname>...",
 "git check-ignore [<options>] --stdin",
-NULL
+शून्य
 };
 
-static int nul_term_line;
+अटल पूर्णांक nul_term_पंक्ति;
 
-static const struct option check_ignore_options[] = {
+अटल स्थिर काष्ठा option check_ignore_options[] = {
 	OPT__QUIET(&quiet, N_("suppress progress reporting")),
 	OPT__VERBOSE(&verbose, N_("be verbose")),
 	OPT_GROUP(""),
 	OPT_BOOL(0, "stdin", &stdin_paths,
 		 N_("read file names from stdin")),
-	OPT_BOOL('z', NULL, &nul_term_line,
+	OPT_BOOL('z', शून्य, &nul_term_पंक्ति,
 		 N_("terminate input and output records by a NUL character")),
 	OPT_BOOL('n', "non-matching", &show_non_matching,
 		 N_("show non-matching input paths")),
-	OPT_BOOL(0, "no-index", &no_index,
+	OPT_BOOL(0, "no-index", &no_सूचकांक,
 		 N_("ignore index when checking")),
 	OPT_END()
 };
 
-static void output_pattern(const char *path, struct path_pattern *pattern)
+अटल व्योम output_pattern(स्थिर अक्षर *path, काष्ठा path_pattern *pattern)
 {
-	const char *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
-	const char *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
-	if (!nul_term_line) {
-		if (!verbose) {
-			write_name_quoted(path, stdout, '\n');
-		} else {
-			if (pattern) {
-				quote_c_style(pattern->pl->src, NULL, stdout, 0);
-				printf(":%d:%s%s%s\t",
+	स्थिर अक्षर *bang  = (pattern && pattern->flags & PATTERN_FLAG_NEGATIVE)  ? "!" : "";
+	स्थिर अक्षर *slash = (pattern && pattern->flags & PATTERN_FLAG_MUSTBEDIR) ? "/" : "";
+	अगर (!nul_term_पंक्ति) {
+		अगर (!verbose) {
+			write_name_quoted(path, मानक_निकास, '\n');
+		} अन्यथा {
+			अगर (pattern) {
+				quote_c_style(pattern->pl->src, शून्य, मानक_निकास, 0);
+				म_लिखो(":%d:%s%s%s\t",
 				       pattern->srcpos,
 				       bang, pattern->pattern, slash);
 			}
-			else {
-				printf("::\t");
+			अन्यथा {
+				म_लिखो("::\t");
 			}
-			quote_c_style(path, NULL, stdout, 0);
-			fputc('\n', stdout);
+			quote_c_style(path, शून्य, मानक_निकास, 0);
+			ख_अक्षर_दो('\n', मानक_निकास);
 		}
-	} else {
-		if (!verbose) {
-			printf("%s%c", path, '\0');
-		} else {
-			if (pattern)
-				printf("%s%c%d%c%s%s%s%c%s%c",
+	} अन्यथा {
+		अगर (!verbose) {
+			म_लिखो("%s%c", path, '\0');
+		} अन्यथा {
+			अगर (pattern)
+				म_लिखो("%s%c%d%c%s%s%s%c%s%c",
 				       pattern->pl->src, '\0',
 				       pattern->srcpos, '\0',
 				       bang, pattern->pattern, slash, '\0',
 				       path, '\0');
-			else
-				printf("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
+			अन्यथा
+				म_लिखो("%c%c%c%s%c", '\0', '\0', '\0', path, '\0');
 		}
 	}
 }
 
-static int check_ignore(struct dir_struct *dir,
-			const char *prefix, int argc, const char **argv)
+अटल पूर्णांक check_ignore(काष्ठा dir_struct *dir,
+			स्थिर अक्षर *prefix, पूर्णांक argc, स्थिर अक्षर **argv)
 {
-	const char *full_path;
-	char *seen;
-	int num_ignored = 0, i;
-	struct path_pattern *pattern;
-	struct pathspec pathspec;
+	स्थिर अक्षर *full_path;
+	अक्षर *seen;
+	पूर्णांक अंक_ignored = 0, i;
+	काष्ठा path_pattern *pattern;
+	काष्ठा pathspec pathspec;
 
-	if (!argc) {
-		if (!quiet)
-			fprintf(stderr, "no pathspec given.\n");
-		return 0;
+	अगर (!argc) {
+		अगर (!quiet)
+			ख_लिखो(मानक_त्रुटि, "no pathspec given.\n");
+		वापस 0;
 	}
 
 	/*
@@ -95,108 +95,108 @@ static int check_ignore(struct dir_struct *dir,
 		       PATHSPEC_KEEP_ORDER,
 		       prefix, argv);
 
-	die_path_inside_submodule(the_repository->index, &pathspec);
+	die_path_inside_submodule(the_repository->सूचकांक, &pathspec);
 
 	/*
 	 * look for pathspecs matching entries in the index, since these
 	 * should not be ignored, in order to be consistent with
 	 * 'git status', 'git add' etc.
 	 */
-	seen = find_pathspecs_matching_against_index(&pathspec, the_repository->index,
+	seen = find_pathspecs_matching_against_सूचकांक(&pathspec, the_repository->सूचकांक,
 						     PS_HEED_SKIP_WORKTREE);
-	for (i = 0; i < pathspec.nr; i++) {
-		full_path = pathspec.items[i].match;
-		pattern = NULL;
-		if (!seen[i]) {
-			int dtype = DT_UNKNOWN;
-			pattern = last_matching_pattern(dir, the_repository->index,
+	क्रम (i = 0; i < pathspec.nr; i++) {
+		full_path = pathspec.वस्तुएँ[i].match;
+		pattern = शून्य;
+		अगर (!seen[i]) {
+			पूर्णांक dtype = DT_UNKNOWN;
+			pattern = last_matching_pattern(dir, the_repository->सूचकांक,
 							full_path, &dtype);
-			if (!verbose && pattern &&
+			अगर (!verbose && pattern &&
 			    pattern->flags & PATTERN_FLAG_NEGATIVE)
-				pattern = NULL;
+				pattern = शून्य;
 		}
-		if (!quiet && (pattern || show_non_matching))
-			output_pattern(pathspec.items[i].original, pattern);
-		if (pattern)
-			num_ignored++;
+		अगर (!quiet && (pattern || show_non_matching))
+			output_pattern(pathspec.वस्तुएँ[i].original, pattern);
+		अगर (pattern)
+			अंक_ignored++;
 	}
-	free(seen);
+	मुक्त(seen);
 	clear_pathspec(&pathspec);
 
-	return num_ignored;
+	वापस अंक_ignored;
 }
 
-static int check_ignore_stdin_paths(struct dir_struct *dir, const char *prefix)
+अटल पूर्णांक check_ignore_stdin_paths(काष्ठा dir_struct *dir, स्थिर अक्षर *prefix)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
-	char *pathspec[2] = { NULL, NULL };
+	काष्ठा strbuf buf = STRBUF_INIT;
+	काष्ठा strbuf unquoted = STRBUF_INIT;
+	अक्षर *pathspec[2] = { शून्य, शून्य };
 	strbuf_getline_fn getline_fn;
-	int num_ignored = 0;
+	पूर्णांक अंक_ignored = 0;
 
-	getline_fn = nul_term_line ? strbuf_getline_nul : strbuf_getline_lf;
-	while (getline_fn(&buf, stdin) != EOF) {
-		if (!nul_term_line && buf.buf[0] == '"') {
+	getline_fn = nul_term_पंक्ति ? strbuf_getline_nul : strbuf_getline_lf;
+	जबतक (getline_fn(&buf, मानक_निवेश) != खातापूर्ण) {
+		अगर (!nul_term_पंक्ति && buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			अगर (unquote_c_style(&unquoted, buf.buf, शून्य))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
 		pathspec[0] = buf.buf;
-		num_ignored += check_ignore(dir, prefix,
-					    1, (const char **)pathspec);
-		maybe_flush_or_die(stdout, "check-ignore to stdout");
+		अंक_ignored += check_ignore(dir, prefix,
+					    1, (स्थिर अक्षर **)pathspec);
+		maybe_flush_or_die(मानक_निकास, "check-ignore to stdout");
 	}
 	strbuf_release(&buf);
 	strbuf_release(&unquoted);
-	return num_ignored;
+	वापस अंक_ignored;
 }
 
-int cmd_check_ignore(int argc,
-		     const char **argv,
-		     const char *prefix,
-		     struct repository *repo UNUSED)
+पूर्णांक cmd_check_ignore(पूर्णांक argc,
+		     स्थिर अक्षर **argv,
+		     स्थिर अक्षर *prefix,
+		     काष्ठा repository *repo UNUSED)
 {
-	int num_ignored;
-	struct dir_struct dir = DIR_INIT;
+	पूर्णांक अंक_ignored;
+	काष्ठा dir_struct dir = DIR_INIT;
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, शून्य);
 
 	argc = parse_options(argc, argv, prefix, check_ignore_options,
 			     check_ignore_usage, 0);
 
-	if (stdin_paths) {
-		if (argc > 0)
+	अगर (stdin_paths) {
+		अगर (argc > 0)
 			die(_("cannot specify pathnames with --stdin"));
-	} else {
-		if (nul_term_line)
+	} अन्यथा {
+		अगर (nul_term_पंक्ति)
 			die(_("-z only makes sense with --stdin"));
-		if (argc == 0)
+		अगर (argc == 0)
 			die(_("no path specified"));
 	}
-	if (quiet) {
-		if (argc > 1)
+	अगर (quiet) {
+		अगर (argc > 1)
 			die(_("--quiet is only valid with a single pathname"));
-		if (verbose)
+		अगर (verbose)
 			die(_("cannot have both --quiet and --verbose"));
 	}
-	if (show_non_matching && !verbose)
+	अगर (show_non_matching && !verbose)
 		die(_("--non-matching is only valid with --verbose"));
 
 	/* read_cache() is only necessary so we can watch out for submodules. */
-	if (!no_index && repo_read_index(the_repository) < 0)
+	अगर (!no_सूचकांक && repo_read_सूचकांक(the_repository) < 0)
 		die(_("index file corrupt"));
 
 	setup_standard_excludes(&dir);
 
-	if (stdin_paths) {
-		num_ignored = check_ignore_stdin_paths(&dir, prefix);
-	} else {
-		num_ignored = check_ignore(&dir, prefix, argc, argv);
-		maybe_flush_or_die(stdout, "ignore to stdout");
+	अगर (stdin_paths) {
+		अंक_ignored = check_ignore_stdin_paths(&dir, prefix);
+	} अन्यथा {
+		अंक_ignored = check_ignore(&dir, prefix, argc, argv);
+		maybe_flush_or_die(मानक_निकास, "ignore to stdout");
 	}
 
 	dir_clear(&dir);
 
-	return !num_ignored;
+	वापस !अंक_ignored;
 }

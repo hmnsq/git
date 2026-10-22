@@ -1,32 +1,32 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#घोषणा USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "abspath.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "path.h"
-#include "diagnose.h"
+#समावेश "builtin.h"
+#समावेश "abspath.h"
+#समावेश "gettext.h"
+#समावेश "parse-options.h"
+#समावेश "path.h"
+#समावेश "diagnose.h"
 
-static const char * const diagnose_usage[] = {
+अटल स्थिर अक्षर * स्थिर diagnose_usage[] = {
 	N_("git diagnose [(-o | --output-directory) <path>] [(-s | --suffix) <format>]\n"
 	   "             [--mode=<mode>]"),
-	NULL
+	शून्य
 };
 
-int cmd_diagnose(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+पूर्णांक cmd_diagnose(पूर्णांक argc,
+		 स्थिर अक्षर **argv,
+		 स्थिर अक्षर *prefix,
+		 काष्ठा repository *repo UNUSED)
 {
-	struct strbuf zip_path = STRBUF_INIT;
-	time_t now = time(NULL);
-	struct tm tm;
-	enum diagnose_mode mode = DIAGNOSE_STATS;
-	char *option_output = NULL;
-	const char *option_suffix = "%Y-%m-%d-%H%M";
-	char *prefixed_filename;
+	काष्ठा strbuf zip_path = STRBUF_INIT;
+	समय_प्रकार now = समय(शून्य);
+	काष्ठा पंचांग पंचांग;
+	क्रमागत diagnose_mode mode = DIAGNOSE_STATS;
+	अक्षर *option_output = शून्य;
+	स्थिर अक्षर *option_suffix = "%Y-%m-%d-%H%M";
+	अक्षर *prefixed_filename;
 
-	const struct option diagnose_options[] = {
+	स्थिर काष्ठा option diagnose_options[] = {
 		OPT_STRING('o', "output-directory", &option_output, N_("path"),
 			   N_("specify a destination for the diagnostics archive")),
 		OPT_STRING('s', "suffix", &option_suffix, N_("format"),
@@ -47,24 +47,24 @@ int cmd_diagnose(int argc,
 	strbuf_complete(&zip_path, '/');
 
 	strbuf_addstr(&zip_path, "git-diagnostics-");
-	strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &tm), 0, 0);
+	strbuf_addftime(&zip_path, option_suffix, localtime_r(&now, &पंचांग), 0, 0);
 	strbuf_addstr(&zip_path, ".zip");
 
-	switch (safe_create_leading_directories(the_repository, zip_path.buf)) {
-	case SCLD_OK:
-	case SCLD_EXISTS:
-		break;
-	default:
+	चयन (safe_create_leading_directories(the_repository, zip_path.buf)) {
+	हाल SCLD_OK:
+	हाल SCLD_EXISTS:
+		अवरोध;
+	शेष:
 		die_errno(_("could not create leading directories for '%s'"),
 			  zip_path.buf);
 	}
 
 	/* Prepare diagnostics */
-	if (create_diagnostics_archive(the_repository, &zip_path, mode))
+	अगर (create_diagnostics_archive(the_repository, &zip_path, mode))
 		die_errno(_("unable to create diagnostics archive %s"),
 			  zip_path.buf);
 
-	free(prefixed_filename);
+	मुक्त(prefixed_filename);
 	strbuf_release(&zip_path);
-	return 0;
+	वापस 0;
 }

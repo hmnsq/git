@@ -1,25 +1,25 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#घोषणा USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "commit.h"
-#include "diff.h"
-#include "environment.h"
-#include "gettext.h"
-#include "string-list.h"
-#include "revision.h"
-#include "utf8.h"
-#include "mailmap.h"
-#include "setup.h"
-#include "shortlog.h"
-#include "parse-options.h"
-#include "trailer.h"
-#include "strmap.h"
+#समावेश "builtin.h"
+#समावेश "config.h"
+#समावेश "commit.h"
+#समावेश "diff.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "string-list.h"
+#समावेश "revision.h"
+#समावेश "utf8.h"
+#समावेश "mailmap.h"
+#समावेश "setup.h"
+#समावेश "shortlog.h"
+#समावेश "parse-options.h"
+#समावेश "trailer.h"
+#समावेश "strmap.h"
 
-static char const * const shortlog_usage[] = {
+अटल अक्षर स्थिर * स्थिर shortlog_usage[] = {
 	N_("git shortlog [<options>] [<revision-range>] [[--] <path>...]"),
 	N_("git log --pretty=short | git shortlog [<options>]"),
-	NULL
+	शून्य
 };
 
 /*
@@ -33,75 +33,75 @@ static char const * const shortlog_usage[] = {
  *
  *  This macro accesses the latter.
  */
-#define UTIL_TO_INT(x) ((intptr_t)(x)->util)
+#घोषणा UTIL_TO_INT(x) ((intptr_t)(x)->util)
 
-static int compare_by_counter(const void *a1, const void *a2)
+अटल पूर्णांक compare_by_गणक(स्थिर व्योम *a1, स्थिर व्योम *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	return UTIL_TO_INT(i2) - UTIL_TO_INT(i1);
+	स्थिर काष्ठा string_list_item *i1 = a1, *i2 = a2;
+	वापस UTIL_TO_INT(i2) - UTIL_TO_INT(i1);
 }
 
-static int compare_by_list(const void *a1, const void *a2)
+अटल पूर्णांक compare_by_list(स्थिर व्योम *a1, स्थिर व्योम *a2)
 {
-	const struct string_list_item *i1 = a1, *i2 = a2;
-	const struct string_list *l1 = i1->util, *l2 = i2->util;
+	स्थिर काष्ठा string_list_item *i1 = a1, *i2 = a2;
+	स्थिर काष्ठा string_list *l1 = i1->util, *l2 = i2->util;
 
-	if (l1->nr < l2->nr)
-		return 1;
-	else if (l1->nr == l2->nr)
-		return 0;
-	else
-		return -1;
+	अगर (l1->nr < l2->nr)
+		वापस 1;
+	अन्यथा अगर (l1->nr == l2->nr)
+		वापस 0;
+	अन्यथा
+		वापस -1;
 }
 
-static void insert_one_record(struct shortlog *log,
-			      const char *ident,
-			      const char *oneline)
+अटल व्योम जोड़ो_one_record(काष्ठा shortlog *log,
+			      स्थिर अक्षर *ident,
+			      स्थिर अक्षर *oneline)
 {
-	struct string_list_item *item;
+	काष्ठा string_list_item *item;
 
-	item = string_list_insert(&log->list, ident);
+	item = string_list_जोड़ो(&log->list, ident);
 
-	if (log->summary)
-		item->util = (void *)(UTIL_TO_INT(item) + 1);
-	else {
-		char *buffer;
-		struct strbuf subject = STRBUF_INIT;
-		const char *eol;
+	अगर (log->summary)
+		item->util = (व्योम *)(UTIL_TO_INT(item) + 1);
+	अन्यथा {
+		अक्षर *बफर;
+		काष्ठा strbuf subject = STRBUF_INIT;
+		स्थिर अक्षर *eol;
 
 		/* Skip any leading whitespace, including any blank lines. */
-		while (*oneline && isspace(*oneline))
+		जबतक (*oneline && है_खाली(*oneline))
 			oneline++;
-		eol = strchr(oneline, '\n');
-		if (!eol)
-			eol = oneline + strlen(oneline);
-		if (starts_with(oneline, "[PATCH")) {
-			const char *eob = strchr(oneline, ']');
-			if (eob && (!eol || eob < eol))
+		eol = म_अक्षर(oneline, '\n');
+		अगर (!eol)
+			eol = oneline + म_माप(oneline);
+		अगर (starts_with(oneline, "[PATCH")) {
+			स्थिर अक्षर *eob = म_अक्षर(oneline, ']');
+			अगर (eob && (!eol || eob < eol))
 				oneline = eob + 1;
 		}
-		while (*oneline && isspace(*oneline) && *oneline != '\n')
+		जबतक (*oneline && है_खाली(*oneline) && *oneline != '\n')
 			oneline++;
 		format_subject(&subject, oneline, " ");
-		buffer = strbuf_detach(&subject, NULL);
+		बफर = strbuf_detach(&subject, शून्य);
 
-		if (!item->util) {
-			item->util = xmalloc(sizeof(struct string_list));
+		अगर (!item->util) {
+			item->util = xmalloc(माप(काष्ठा string_list));
 			string_list_init_nodup(item->util);
 		}
-		string_list_append(item->util, buffer);
+		string_list_append(item->util, बफर);
 	}
 }
 
-static int parse_ident(struct shortlog *log,
-		       struct strbuf *out, const char *in)
+अटल पूर्णांक parse_ident(काष्ठा shortlog *log,
+		       काष्ठा strbuf *out, स्थिर अक्षर *in)
 {
-	const char *mailbuf, *namebuf;
-	size_t namelen, maillen;
-	struct ident_split ident;
+	स्थिर अक्षर *mailbuf, *namebuf;
+	माप_प्रकार namelen, maillen;
+	काष्ठा ident_split ident;
 
-	if (split_ident_line(&ident, in, strlen(in)))
-		return -1;
+	अगर (split_ident_पंक्ति(&ident, in, म_माप(in)))
+		वापस -1;
 
 	namebuf = ident.name_begin;
 	mailbuf = ident.mail_begin;
@@ -110,120 +110,120 @@ static int parse_ident(struct shortlog *log,
 
 	map_user(&log->mailmap, &mailbuf, &maillen, &namebuf, &namelen);
 	strbuf_add(out, namebuf, namelen);
-	if (log->email)
-		strbuf_addf(out, " <%.*s>", (int)maillen, mailbuf);
+	अगर (log->email)
+		strbuf_addf(out, " <%.*s>", (पूर्णांक)maillen, mailbuf);
 
-	return 0;
+	वापस 0;
 }
 
-static void read_from_stdin(struct shortlog *log)
+अटल व्योम read_from_stdin(काष्ठा shortlog *log)
 {
-	struct strbuf ident = STRBUF_INIT;
-	struct strbuf mapped_ident = STRBUF_INIT;
-	struct strbuf oneline = STRBUF_INIT;
-	static const char *author_match[2] = { "Author: ", "author " };
-	static const char *committer_match[2] = { "Commit: ", "committer " };
-	const char **match;
+	काष्ठा strbuf ident = STRBUF_INIT;
+	काष्ठा strbuf mapped_ident = STRBUF_INIT;
+	काष्ठा strbuf oneline = STRBUF_INIT;
+	अटल स्थिर अक्षर *author_match[2] = { "Author: ", "author " };
+	अटल स्थिर अक्षर *committer_match[2] = { "Commit: ", "committer " };
+	स्थिर अक्षर **match;
 
-	if (HAS_MULTI_BITS(log->groups))
+	अगर (HAS_MULTI_BITS(log->groups))
 		die(_("using multiple --group options with stdin is not supported"));
 
-	switch (log->groups) {
-	case SHORTLOG_GROUP_AUTHOR:
+	चयन (log->groups) {
+	हाल SHORTLOG_GROUP_AUTHOR:
 		match = author_match;
-		break;
-	case SHORTLOG_GROUP_COMMITTER:
+		अवरोध;
+	हाल SHORTLOG_GROUP_COMMITTER:
 		match = committer_match;
-		break;
-	case SHORTLOG_GROUP_TRAILER:
+		अवरोध;
+	हाल SHORTLOG_GROUP_TRAILER:
 		die(_("using %s with stdin is not supported"), "--group=trailer");
-	case SHORTLOG_GROUP_FORMAT:
+	हाल SHORTLOG_GROUP_FORMAT:
 		die(_("using %s with stdin is not supported"), "--group=format");
-	default:
+	शेष:
 		BUG("unhandled shortlog group");
 	}
 
-	while (strbuf_getline_lf(&ident, stdin) != EOF) {
-		const char *v;
-		if (!skip_prefix(ident.buf, match[0], &v) &&
+	जबतक (strbuf_getline_lf(&ident, मानक_निवेश) != खातापूर्ण) {
+		स्थिर अक्षर *v;
+		अगर (!skip_prefix(ident.buf, match[0], &v) &&
 		    !skip_prefix(ident.buf, match[1], &v))
-			continue;
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+			जारी;
+		जबतक (strbuf_getline_lf(&oneline, मानक_निवेश) != खातापूर्ण &&
 		       oneline.len)
 			; /* discard headers */
-		while (strbuf_getline_lf(&oneline, stdin) != EOF &&
+		जबतक (strbuf_getline_lf(&oneline, मानक_निवेश) != खातापूर्ण &&
 		       !oneline.len)
 			; /* discard blanks */
 
 		strbuf_reset(&mapped_ident);
-		if (parse_ident(log, &mapped_ident, v) < 0)
-			continue;
+		अगर (parse_ident(log, &mapped_ident, v) < 0)
+			जारी;
 
-		insert_one_record(log, mapped_ident.buf, oneline.buf);
+		जोड़ो_one_record(log, mapped_ident.buf, oneline.buf);
 	}
 	strbuf_release(&ident);
 	strbuf_release(&mapped_ident);
 	strbuf_release(&oneline);
 }
 
-static void insert_records_from_trailers(struct shortlog *log,
-					 struct strset *dups,
-					 struct commit *commit,
-					 struct pretty_print_context *ctx,
-					 const char *oneline)
+अटल व्योम जोड़ो_records_from_trailers(काष्ठा shortlog *log,
+					 काष्ठा strset *dups,
+					 काष्ठा commit *commit,
+					 काष्ठा pretty_print_context *ctx,
+					 स्थिर अक्षर *oneline)
 {
-	struct trailer_iterator iter;
-	const char *commit_buffer, *body;
-	struct strbuf ident = STRBUF_INIT;
+	काष्ठा trailer_iterator iter;
+	स्थिर अक्षर *commit_बफर, *body;
+	काष्ठा strbuf ident = STRBUF_INIT;
 
-	if (!log->trailers.nr)
-		return;
+	अगर (!log->trailers.nr)
+		वापस;
 
 	/*
 	 * Using repo_format_commit_message("%B") would be simpler here, but
 	 * this saves us copying the message.
 	 */
-	commit_buffer = repo_logmsg_reencode(the_repository, commit, NULL,
+	commit_बफर = repo_logmsg_reencode(the_repository, commit, शून्य,
 					     ctx->output_encoding);
-	body = strstr(commit_buffer, "\n\n");
-	if (!body)
-		goto out;
+	body = म_माला(commit_बफर, "\n\n");
+	अगर (!body)
+		जाओ out;
 
 	trailer_iterator_init(&iter, body);
-	while (trailer_iterator_advance(&iter)) {
-		const char *value = iter.val.buf;
+	जबतक (trailer_iterator_advance(&iter)) {
+		स्थिर अक्षर *मूल्य = iter.val.buf;
 
-		if (!string_list_has_string(&log->trailers, iter.key.buf))
-			continue;
+		अगर (!string_list_has_string(&log->trailers, iter.कुंजी.buf))
+			जारी;
 
 		strbuf_reset(&ident);
-		if (!parse_ident(log, &ident, value))
-			value = ident.buf;
+		अगर (!parse_ident(log, &ident, मूल्य))
+			मूल्य = ident.buf;
 
-		if (!strset_add(dups, value))
-			continue;
-		insert_one_record(log, value, oneline);
+		अगर (!strset_add(dups, मूल्य))
+			जारी;
+		जोड़ो_one_record(log, मूल्य, oneline);
 	}
 	trailer_iterator_release(&iter);
 
 out:
 	strbuf_release(&ident);
-	repo_unuse_commit_buffer(the_repository, commit, commit_buffer);
+	repo_unuse_commit_बफर(the_repository, commit, commit_बफर);
 }
 
-static int shortlog_needs_dedup(const struct shortlog *log)
+अटल पूर्णांक shortlog_needs_dedup(स्थिर काष्ठा shortlog *log)
 {
-	return HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
+	वापस HAS_MULTI_BITS(log->groups) || log->format.nr > 1 || log->trailers.nr;
 }
 
-static void insert_records_from_format(struct shortlog *log,
-				       struct strset *dups,
-				       struct commit *commit,
-				       struct pretty_print_context *ctx,
-				       const char *oneline)
+अटल व्योम जोड़ो_records_from_format(काष्ठा shortlog *log,
+				       काष्ठा strset *dups,
+				       काष्ठा commit *commit,
+				       काष्ठा pretty_print_context *ctx,
+				       स्थिर अक्षर *oneline)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct string_list_item *item;
+	काष्ठा strbuf buf = STRBUF_INIT;
+	काष्ठा string_list_item *item;
 
 	for_each_string_list_item(item, &log->format) {
 		strbuf_reset(&buf);
@@ -231,131 +231,131 @@ static void insert_records_from_format(struct shortlog *log,
 		repo_format_commit_message(the_repository, commit,
 					   item->string, &buf, ctx);
 
-		if (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
-			insert_one_record(log, buf.buf, oneline);
+		अगर (!shortlog_needs_dedup(log) || strset_add(dups, buf.buf))
+			जोड़ो_one_record(log, buf.buf, oneline);
 	}
 
 	strbuf_release(&buf);
 }
 
-void shortlog_add_commit(struct shortlog *log, struct commit *commit)
+व्योम shortlog_add_commit(काष्ठा shortlog *log, काष्ठा commit *commit)
 {
-	struct strbuf oneline = STRBUF_INIT;
-	struct strset dups = STRSET_INIT;
-	struct pretty_print_context ctx = {0};
-	const char *oneline_str;
+	काष्ठा strbuf oneline = STRBUF_INIT;
+	काष्ठा strset dups = STRSET_INIT;
+	काष्ठा pretty_print_context ctx = {0};
+	स्थिर अक्षर *oneline_str;
 
 	ctx.fmt = CMIT_FMT_USERFORMAT;
 	ctx.abbrev = log->abbrev;
 	ctx.date_mode = log->date_mode;
 	ctx.output_encoding = get_log_output_encoding();
 
-	if (!log->summary) {
-		if (log->user_format)
+	अगर (!log->summary) {
+		अगर (log->user_format)
 			pretty_print_commit(&ctx, commit, &oneline);
-		else
+		अन्यथा
 			repo_format_commit_message(the_repository, commit,
 						   "%s", &oneline, &ctx);
 	}
 	oneline_str = oneline.len ? oneline.buf : "<none>";
 
-	insert_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
-	insert_records_from_format(log, &dups, commit, &ctx, oneline_str);
+	जोड़ो_records_from_trailers(log, &dups, commit, &ctx, oneline_str);
+	जोड़ो_records_from_format(log, &dups, commit, &ctx, oneline_str);
 
 	strset_clear(&dups);
 	strbuf_release(&oneline);
 }
 
-static void get_from_rev(struct rev_info *rev, struct shortlog *log)
+अटल व्योम get_from_rev(काष्ठा rev_info *rev, काष्ठा shortlog *log)
 {
-	struct commit *commit;
+	काष्ठा commit *commit;
 
-	if (prepare_revision_walk(rev))
+	अगर (prepare_revision_walk(rev))
 		die(_("revision walk setup failed"));
-	while ((commit = get_revision(rev)) != NULL)
+	जबतक ((commit = get_revision(rev)) != शून्य)
 		shortlog_add_commit(log, commit);
 }
 
-static int parse_uint(char const **arg, int comma, int defval)
+अटल पूर्णांक parse_uint(अक्षर स्थिर **arg, पूर्णांक comma, पूर्णांक defval)
 {
-	unsigned long ul;
-	int ret;
-	char *endp;
+	अचिन्हित दीर्घ ul;
+	पूर्णांक ret;
+	अक्षर *endp;
 
-	ul = strtoul(*arg, &endp, 10);
-	if (*endp && *endp != comma)
-		return -1;
-	if (ul > INT_MAX)
-		return -1;
-	ret = *arg == endp ? defval : (int)ul;
+	ul = म_से_अदीर्घ(*arg, &endp, 10);
+	अगर (*endp && *endp != comma)
+		वापस -1;
+	अगर (ul > पूर्णांक_उच्च)
+		वापस -1;
+	ret = *arg == endp ? defval : (पूर्णांक)ul;
 	*arg = *endp ? endp + 1 : endp;
-	return ret;
+	वापस ret;
 }
 
-static const char wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
-#define DEFAULT_WRAPLEN 76
-#define DEFAULT_INDENT1 6
-#define DEFAULT_INDENT2 9
+अटल स्थिर अक्षर wrap_arg_usage[] = "-w[<width>[,<indent1>[,<indent2>]]]";
+#घोषणा DEFAULT_WRAPLEN 76
+#घोषणा DEFAULT_INDENT1 6
+#घोषणा DEFAULT_INDENT2 9
 
-static int parse_wrap_args(const struct option *opt, const char *arg, int unset)
+अटल पूर्णांक parse_wrap_args(स्थिर काष्ठा option *opt, स्थिर अक्षर *arg, पूर्णांक unset)
 {
-	struct shortlog *log = opt->value;
+	काष्ठा shortlog *log = opt->मूल्य;
 
-	log->wrap_lines = !unset;
-	if (unset)
-		return 0;
-	if (!arg) {
+	log->wrap_पंक्तियाँ = !unset;
+	अगर (unset)
+		वापस 0;
+	अगर (!arg) {
 		log->wrap = DEFAULT_WRAPLEN;
 		log->in1 = DEFAULT_INDENT1;
 		log->in2 = DEFAULT_INDENT2;
-		return 0;
+		वापस 0;
 	}
 
 	log->wrap = parse_uint(&arg, ',', DEFAULT_WRAPLEN);
 	log->in1 = parse_uint(&arg, ',', DEFAULT_INDENT1);
 	log->in2 = parse_uint(&arg, '\0', DEFAULT_INDENT2);
-	if (log->wrap < 0 || log->in1 < 0 || log->in2 < 0)
-		return error(wrap_arg_usage);
-	if (log->wrap &&
+	अगर (log->wrap < 0 || log->in1 < 0 || log->in2 < 0)
+		वापस error(wrap_arg_usage);
+	अगर (log->wrap &&
 	    ((log->in1 && log->wrap <= log->in1) ||
 	     (log->in2 && log->wrap <= log->in2)))
-		return error(wrap_arg_usage);
-	return 0;
+		वापस error(wrap_arg_usage);
+	वापस 0;
 }
 
-static int parse_group_option(const struct option *opt, const char *arg, int unset)
+अटल पूर्णांक parse_group_option(स्थिर काष्ठा option *opt, स्थिर अक्षर *arg, पूर्णांक unset)
 {
-	struct shortlog *log = opt->value;
-	const char *field;
+	काष्ठा shortlog *log = opt->मूल्य;
+	स्थिर अक्षर *field;
 
-	if (unset) {
+	अगर (unset) {
 		log->groups = 0;
 		string_list_clear(&log->trailers, 0);
 		string_list_clear(&log->format, 0);
-	} else if (!strcasecmp(arg, "author"))
+	} अन्यथा अगर (!strcasecmp(arg, "author"))
 		log->groups |= SHORTLOG_GROUP_AUTHOR;
-	else if (!strcasecmp(arg, "committer"))
+	अन्यथा अगर (!strcasecmp(arg, "committer"))
 		log->groups |= SHORTLOG_GROUP_COMMITTER;
-	else if (skip_prefix(arg, "trailer:", &field)) {
+	अन्यथा अगर (skip_prefix(arg, "trailer:", &field)) {
 		log->groups |= SHORTLOG_GROUP_TRAILER;
 		string_list_append(&log->trailers, field);
-	} else if (skip_prefix(arg, "format:", &field)) {
+	} अन्यथा अगर (skip_prefix(arg, "format:", &field)) {
 		log->groups |= SHORTLOG_GROUP_FORMAT;
 		string_list_append(&log->format, field);
-	} else if (strchr(arg, '%')) {
+	} अन्यथा अगर (म_अक्षर(arg, '%')) {
 		log->groups |= SHORTLOG_GROUP_FORMAT;
 		string_list_append(&log->format, arg);
-	} else {
-		return error(_("unknown group type: %s"), arg);
+	} अन्यथा {
+		वापस error(_("unknown group type: %s"), arg);
 	}
 
-	return 0;
+	वापस 0;
 }
 
 
-void shortlog_init(struct shortlog *log)
+व्योम shortlog_init(काष्ठा shortlog *log)
 {
-	memset(log, 0, sizeof(*log));
+	स_रखो(log, 0, माप(*log));
 
 	read_mailmap(the_repository, &log->mailmap);
 
@@ -368,38 +368,38 @@ void shortlog_init(struct shortlog *log)
 	log->format.strdup_strings = 1;
 }
 
-void shortlog_finish_setup(struct shortlog *log)
+व्योम shortlog_finish_setup(काष्ठा shortlog *log)
 {
-	if (log->groups & SHORTLOG_GROUP_AUTHOR)
+	अगर (log->groups & SHORTLOG_GROUP_AUTHOR)
 		string_list_append(&log->format,
 				   log->email ? "%aN <%aE>" : "%aN");
-	if (log->groups & SHORTLOG_GROUP_COMMITTER)
+	अगर (log->groups & SHORTLOG_GROUP_COMMITTER)
 		string_list_append(&log->format,
 				   log->email ? "%cN <%cE>" : "%cN");
 
 	string_list_sort(&log->trailers);
 }
 
-int cmd_shortlog(int argc,
-		 const char **argv,
-		 const char *prefix,
-		 struct repository *repo UNUSED)
+पूर्णांक cmd_shortlog(पूर्णांक argc,
+		 स्थिर अक्षर **argv,
+		 स्थिर अक्षर *prefix,
+		 काष्ठा repository *repo UNUSED)
 {
-	struct shortlog log = { STRING_LIST_INIT_NODUP };
-	struct rev_info rev;
-	int nongit = !startup_info->have_repository;
+	काष्ठा shortlog log = { STRING_LIST_INIT_NODUP };
+	काष्ठा rev_info rev;
+	पूर्णांक nongit = !startup_info->have_repository;
 
-	const struct option options[] = {
+	स्थिर काष्ठा option options[] = {
 		OPT_BIT('c', "committer", &log.groups,
 			N_("group by committer rather than author"),
 			SHORTLOG_GROUP_COMMITTER),
-		OPT_BOOL('n', "numbered", &log.sort_by_number,
+		OPT_BOOL('n', "numbered", &log.sort_by_संख्या,
 			 N_("sort output according to the number of commits per author")),
 		OPT_BOOL('s', "summary", &log.summary,
 			 N_("suppress commit descriptions, only provides commit count")),
 		OPT_BOOL('e', "email", &log.email,
 			 N_("show the email address of each author")),
-		OPT_CALLBACK_F('w', NULL, &log, N_("<w>[,<i1>[,<i2>]]"),
+		OPT_CALLBACK_F('w', शून्य, &log, N_("<w>[,<i1>[,<i2>]]"),
 			N_("linewrap output"), PARSE_OPT_OPTARG,
 			&parse_wrap_args),
 		OPT_CALLBACK(0, "group", &log, N_("field"),
@@ -407,7 +407,7 @@ int cmd_shortlog(int argc,
 		OPT_END(),
 	};
 
-	struct parse_opt_ctx_t ctx;
+	काष्ठा parse_opt_ctx_t ctx;
 
 	/*
 	 * NEEDSWORK: Later on we'll call parse_revision_opt which relies on
@@ -418,30 +418,30 @@ int cmd_shortlog(int argc,
 	 * SHA1, but ideally the parsing machinery would be split between
 	 * git/nongit so that we do not have to do this.
 	 */
-	if (nongit && !the_hash_algo)
+	अगर (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, शून्य);
 	shortlog_init(&log);
 	repo_init_revisions(the_repository, &rev, prefix);
 	parse_options_start(&ctx, argc, argv, prefix, options,
 			    PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0);
 
-	for (;;) {
-		switch (parse_options_step(&ctx, options, shortlog_usage)) {
-		case PARSE_OPT_NON_OPTION:
-		case PARSE_OPT_UNKNOWN:
-			break;
-		case PARSE_OPT_HELP:
-			exit(0);
-		case PARSE_OPT_HELP_ERROR:
-		case PARSE_OPT_ERROR:
-		case PARSE_OPT_SUBCOMMAND:
-			exit(129);
-		case PARSE_OPT_COMPLETE:
-			exit(0);
-		case PARSE_OPT_DONE:
-			goto parse_done;
+	क्रम (;;) {
+		चयन (parse_options_step(&ctx, options, shortlog_usage)) {
+		हाल PARSE_OPT_NON_OPTION:
+		हाल PARSE_OPT_UNKNOWN:
+			अवरोध;
+		हाल PARSE_OPT_HELP:
+			निकास(0);
+		हाल PARSE_OPT_HELP_ERROR:
+		हाल PARSE_OPT_ERROR:
+		हाल PARSE_OPT_SUBCOMMAND:
+			निकास(129);
+		हाल PARSE_OPT_COMPLETE:
+			निकास(0);
+		हाल PARSE_OPT_DONE:
+			जाओ parse_done;
 		}
 		parse_revision_opt(&rev, &ctx, options, shortlog_usage);
 	}
@@ -449,12 +449,12 @@ parse_done:
 	revision_opts_finish(&rev);
 	argc = parse_options_end(&ctx);
 
-	if (nongit && argc > 1) {
+	अगर (nongit && argc > 1) {
 		error(_("too many arguments given outside repository"));
 		usage_with_options(shortlog_usage, options);
 	}
 
-	if (!nongit && setup_revisions(argc, argv, &rev, NULL) != 1) {
+	अगर (!nongit && setup_revisions(argc, argv, &rev, शून्य) != 1) {
 		error(_("unrecognized argument: %s"), argv[1]);
 		usage_with_options(shortlog_usage, options);
 	}
@@ -464,68 +464,68 @@ parse_done:
 	log.file = rev.diffopt.file;
 	log.date_mode = rev.date_mode;
 
-	if (!log.groups)
+	अगर (!log.groups)
 		log.groups = SHORTLOG_GROUP_AUTHOR;
 	shortlog_finish_setup(&log);
 
 	/* assume HEAD if from a tty */
-	if (!nongit && !rev.pending.nr && isatty(0))
-		add_head_to_pending(&rev);
-	if (rev.pending.nr == 0) {
-		if (isatty(0))
-			fprintf(stderr, _("(reading log message from standard input)\n"));
+	अगर (!nongit && !rev.pending.nr && isatty(0))
+		add_शीर्ष_to_pending(&rev);
+	अगर (rev.pending.nr == 0) {
+		अगर (isatty(0))
+			ख_लिखो(मानक_त्रुटि, _("(reading log message from standard input)\n"));
 		read_from_stdin(&log);
 	}
-	else
+	अन्यथा
 		get_from_rev(&rev, &log);
 
 	shortlog_output(&log);
 	release_revisions(&rev);
-	return 0;
+	वापस 0;
 }
 
-static void add_wrapped_shortlog_msg(struct strbuf *sb, const char *s,
-				     const struct shortlog *log)
+अटल व्योम add_wrapped_shortlog_संदेश(काष्ठा strbuf *sb, स्थिर अक्षर *s,
+				     स्थिर काष्ठा shortlog *log)
 {
 	strbuf_add_wrapped_text(sb, s, log->in1, log->in2, log->wrap);
 	strbuf_addch(sb, '\n');
 }
 
-void shortlog_output(struct shortlog *log)
+व्योम shortlog_output(काष्ठा shortlog *log)
 {
-	size_t i, j;
-	struct strbuf sb = STRBUF_INIT;
+	माप_प्रकार i, j;
+	काष्ठा strbuf sb = STRBUF_INIT;
 
-	if (log->sort_by_number)
-		STABLE_QSORT(log->list.items, log->list.nr,
-		      log->summary ? compare_by_counter : compare_by_list);
-	for (i = 0; i < log->list.nr; i++) {
-		const struct string_list_item *item = &log->list.items[i];
-		if (log->summary) {
-			fprintf(log->file, "%6d\t%s\n",
-				(int)UTIL_TO_INT(item), item->string);
-		} else {
-			struct string_list *onelines = item->util;
-			fprintf(log->file, "%s (%"PRIuMAX"):\n",
+	अगर (log->sort_by_संख्या)
+		STABLE_QSORT(log->list.वस्तुएँ, log->list.nr,
+		      log->summary ? compare_by_गणक : compare_by_list);
+	क्रम (i = 0; i < log->list.nr; i++) {
+		स्थिर काष्ठा string_list_item *item = &log->list.वस्तुएँ[i];
+		अगर (log->summary) {
+			ख_लिखो(log->file, "%6d\t%s\n",
+				(पूर्णांक)UTIL_TO_INT(item), item->string);
+		} अन्यथा {
+			काष्ठा string_list *onelines = item->util;
+			ख_लिखो(log->file, "%s (%"PRIuMAX"):\n",
 				item->string, (uintmax_t)onelines->nr);
-			for (j = onelines->nr; j >= 1; j--) {
-				const char *msg = onelines->items[j - 1].string;
+			क्रम (j = onelines->nr; j >= 1; j--) {
+				स्थिर अक्षर *संदेश = onelines->वस्तुएँ[j - 1].string;
 
-				if (log->wrap_lines) {
+				अगर (log->wrap_पंक्तियाँ) {
 					strbuf_reset(&sb);
-					add_wrapped_shortlog_msg(&sb, msg, log);
-					fwrite(sb.buf, sb.len, 1, log->file);
+					add_wrapped_shortlog_संदेश(&sb, संदेश, log);
+					ख_डालो(sb.buf, sb.len, 1, log->file);
 				}
-				else
-					fprintf(log->file, "      %s\n", msg);
+				अन्यथा
+					ख_लिखो(log->file, "      %s\n", संदेश);
 			}
-			putc('\n', log->file);
+			अ_दो('\n', log->file);
 			onelines->strdup_strings = 1;
 			string_list_clear(onelines, 0);
-			free(onelines);
+			मुक्त(onelines);
 		}
 
-		log->list.items[i].util = NULL;
+		log->list.वस्तुएँ[i].util = शून्य;
 	}
 
 	strbuf_release(&sb);

@@ -1,78 +1,78 @@
-#define USE_THE_REPOSITORY_VARIABLE
+#घोषणा USE_THE_REPOSITORY_VARIABLE
 
-#include "builtin.h"
-#include "config.h"
-#include "gettext.h"
-#include "hex.h"
-#include "odb.h"
-#include "revision.h"
-#include "reachable.h"
-#include "wildmatch.h"
-#include "worktree.h"
-#include "reflog.h"
-#include "refs.h"
-#include "parse-options.h"
+#समावेश "builtin.h"
+#समावेश "config.h"
+#समावेश "gettext.h"
+#समावेश "hex.h"
+#समावेश "odb.h"
+#समावेश "revision.h"
+#समावेश "reachable.h"
+#समावेश "wildmatch.h"
+#समावेश "worktree.h"
+#समावेश "reflog.h"
+#समावेश "refs.h"
+#समावेश "parse-options.h"
 
-#define BUILTIN_REFLOG_SHOW_USAGE \
+#घोषणा BUILTIN_REFLOG_SHOW_USAGE \
 	N_("git reflog [show] [<log-options>] [<ref>]")
 
-#define BUILTIN_REFLOG_LIST_USAGE \
+#घोषणा BUILTIN_REFLOG_LIST_USAGE \
 	N_("git reflog list")
 
-#define BUILTIN_REFLOG_EXISTS_USAGE \
+#घोषणा BUILTIN_REFLOG_EXISTS_USAGE \
 	N_("git reflog exists <ref>")
 
-#define BUILTIN_REFLOG_WRITE_USAGE \
+#घोषणा BUILTIN_REFLOG_WRITE_USAGE \
 	N_("git reflog write <ref> <old-oid> <new-oid> <message>")
 
-#define BUILTIN_REFLOG_DELETE_USAGE \
+#घोषणा BUILTIN_REFLOG_DELETE_USAGE \
 	N_("git reflog delete [--rewrite] [--updateref]\n" \
 	   "                  [--dry-run | -n] [--verbose] <ref>@{<specifier>}...")
 
-#define BUILTIN_REFLOG_DROP_USAGE \
+#घोषणा BUILTIN_REFLOG_DROP_USAGE \
 	N_("git reflog drop [--all [--single-worktree] | <refs>...]")
 
-#define BUILTIN_REFLOG_EXPIRE_USAGE \
+#घोषणा BUILTIN_REFLOG_EXPIRE_USAGE \
 	N_("git reflog expire [--expire=<time>] [--expire-unreachable=<time>]\n" \
 	   "                  [--rewrite] [--updateref] [--stale-fix]\n" \
 	   "                  [--dry-run | -n] [--verbose] [--all [--single-worktree] | <refs>...]")
 
-static const char *const reflog_show_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_show_usage[] = {
 	BUILTIN_REFLOG_SHOW_USAGE,
-	NULL,
+	शून्य,
 };
 
-static const char *const reflog_list_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_list_usage[] = {
 	BUILTIN_REFLOG_LIST_USAGE,
-	NULL,
+	शून्य,
 };
 
-static const char *const reflog_exists_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_exists_usage[] = {
 	BUILTIN_REFLOG_EXISTS_USAGE,
-	NULL,
+	शून्य,
 };
 
-static const char *const reflog_write_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_write_usage[] = {
 	BUILTIN_REFLOG_WRITE_USAGE,
-	NULL,
+	शून्य,
 };
 
-static const char *const reflog_delete_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_delete_usage[] = {
 	BUILTIN_REFLOG_DELETE_USAGE,
-	NULL
+	शून्य
 };
 
-static const char *const reflog_drop_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_drop_usage[] = {
 	BUILTIN_REFLOG_DROP_USAGE,
-	NULL,
+	शून्य,
 };
 
-static const char *const reflog_expire_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_expire_usage[] = {
 	BUILTIN_REFLOG_EXPIRE_USAGE,
-	NULL
+	शून्य
 };
 
-static const char *const reflog_usage[] = {
+अटल स्थिर अक्षर *स्थिर reflog_usage[] = {
 	BUILTIN_REFLOG_SHOW_USAGE,
 	BUILTIN_REFLOG_LIST_USAGE,
 	BUILTIN_REFLOG_EXISTS_USAGE,
@@ -80,70 +80,70 @@ static const char *const reflog_usage[] = {
 	BUILTIN_REFLOG_DELETE_USAGE,
 	BUILTIN_REFLOG_DROP_USAGE,
 	BUILTIN_REFLOG_EXPIRE_USAGE,
-	NULL
+	शून्य
 };
 
-struct worktree_reflogs {
-	struct worktree *worktree;
-	struct string_list reflogs;
+काष्ठा worktree_reflogs {
+	काष्ठा worktree *worktree;
+	काष्ठा string_list reflogs;
 };
 
-static int collect_reflog(const char *ref, void *cb_data)
+अटल पूर्णांक collect_reflog(स्थिर अक्षर *ref, व्योम *cb_तथ्य)
 {
-	struct worktree_reflogs *cb = cb_data;
-	struct worktree *worktree = cb->worktree;
-	struct strbuf newref = STRBUF_INIT;
+	काष्ठा worktree_reflogs *cb = cb_तथ्य;
+	काष्ठा worktree *worktree = cb->worktree;
+	काष्ठा strbuf newref = STRBUF_INIT;
 
 	/*
 	 * Avoid collecting the same shared ref multiple times because
 	 * they are available via all worktrees.
 	 */
-	if (!worktree->is_current &&
-	    parse_worktree_ref(ref, NULL, NULL, NULL) == REF_WORKTREE_SHARED)
-		return 0;
+	अगर (!worktree->is_current &&
+	    parse_worktree_ref(ref, शून्य, शून्य, शून्य) == REF_WORKTREE_SHARED)
+		वापस 0;
 
 	strbuf_worktree_ref(worktree, &newref, ref);
-	string_list_append_nodup(&cb->reflogs, strbuf_detach(&newref, NULL));
+	string_list_append_nodup(&cb->reflogs, strbuf_detach(&newref, शून्य));
 
-	return 0;
+	वापस 0;
 }
 
-static int expire_unreachable_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+अटल पूर्णांक expire_unreachable_callback(स्थिर काष्ठा option *opt,
+				 स्थिर अक्षर *arg,
+				 पूर्णांक unset)
 {
-	struct reflog_expire_options *opts = opt->value;
+	काष्ठा reflog_expire_options *opts = opt->मूल्य;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (parse_expiry_date(arg, &opts->expire_unreachable))
+	अगर (parse_expiry_date(arg, &opts->expire_unreachable))
 		die(_("invalid timestamp '%s' given to '--%s'"),
 		    arg, opt->long_name);
 
 	opts->explicit_expiry |= REFLOG_EXPIRE_UNREACH;
-	return 0;
+	वापस 0;
 }
 
-static int expire_total_callback(const struct option *opt,
-				 const char *arg,
-				 int unset)
+अटल पूर्णांक expire_योग_callback(स्थिर काष्ठा option *opt,
+				 स्थिर अक्षर *arg,
+				 पूर्णांक unset)
 {
-	struct reflog_expire_options *opts = opt->value;
+	काष्ठा reflog_expire_options *opts = opt->मूल्य;
 
 	BUG_ON_OPT_NEG(unset);
 
-	if (parse_expiry_date(arg, &opts->expire_total))
+	अगर (parse_expiry_date(arg, &opts->expire_योग))
 		die(_("invalid timestamp '%s' given to '--%s'"),
 		    arg, opt->long_name);
 
-	opts->explicit_expiry |= REFLOG_EXPIRE_TOTAL;
-	return 0;
+	opts->explicit_expiry |= REFLOG_EXPIRE_योग;
+	वापस 0;
 }
 
-static int cmd_reflog_show(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+अटल पूर्णांक cmd_reflog_show(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			   काष्ठा repository *repo UNUSED)
 {
-	struct option options[] = {
+	काष्ठा option options[] = {
 		OPT_END()
 	};
 
@@ -151,43 +151,43 @@ static int cmd_reflog_show(int argc, const char **argv, const char *prefix,
 		      PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0 |
 		      PARSE_OPT_KEEP_UNKNOWN_OPT);
 
-	return cmd_log_reflog(argc, argv, prefix, the_repository);
+	वापस cmd_log_reflog(argc, argv, prefix, the_repository);
 }
 
-static int show_reflog(const char *refname, void *cb_data UNUSED)
+अटल पूर्णांक show_reflog(स्थिर अक्षर *refname, व्योम *cb_तथ्य UNUSED)
 {
-	printf("%s\n", refname);
-	return 0;
+	म_लिखो("%s\n", refname);
+	वापस 0;
 }
 
-static int cmd_reflog_list(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+अटल पूर्णांक cmd_reflog_list(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			   काष्ठा repository *repo UNUSED)
 {
-	struct option options[] = {
+	काष्ठा option options[] = {
 		OPT_END()
 	};
-	struct ref_store *ref_store;
+	काष्ठा ref_store *ref_store;
 
 	argc = parse_options(argc, argv, prefix, options, reflog_list_usage, 0);
-	if (argc)
-		return error(_("%s does not accept arguments: '%s'"),
+	अगर (argc)
+		वापस error(_("%s does not accept arguments: '%s'"),
 			     "list", argv[0]);
 
 	ref_store = get_main_ref_store(the_repository);
 
-	return refs_for_each_reflog(ref_store, show_reflog, NULL);
+	वापस refs_for_each_reflog(ref_store, show_reflog, शून्य);
 }
 
-static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+अटल पूर्णांक cmd_reflog_expire(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			     काष्ठा repository *repo UNUSED)
 {
-	timestamp_t now = time(NULL);
-	struct reflog_expire_options opts = REFLOG_EXPIRE_OPTIONS_INIT(now);
-	int i, status, do_all, single_worktree = 0;
-	unsigned int flags = 0;
-	int verbose = 0;
+	timestamp_t now = समय(शून्य);
+	काष्ठा reflog_expire_options opts = REFLOG_EXPIRE_OPTIONS_INIT(now);
+	पूर्णांक i, status, do_all, single_worktree = 0;
+	अचिन्हित पूर्णांक flags = 0;
+	पूर्णांक verbose = 0;
 	reflog_expiry_should_prune_fn *should_prune_fn = should_expire_reflog_ent;
-	const struct option options[] = {
+	स्थिर काष्ठा option options[] = {
 		OPT_BIT('n', "dry-run", &flags, N_("do not actually prune any entries"),
 			EXPIRE_REFLOGS_DRY_RUN),
 		OPT_BIT(0, "rewrite", &flags,
@@ -200,7 +200,7 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		OPT_CALLBACK_F(0, "expire", &opts, N_("timestamp"),
 			       N_("prune entries older than the specified time"),
 			       PARSE_OPT_NONEG,
-			       expire_total_callback),
+			       expire_योग_callback),
 		OPT_CALLBACK_F(0, "expire-unreachable", &opts, N_("timestamp"),
 			       N_("prune entries older than <time> that are not reachable from the current tip of the branch"),
 			       PARSE_OPT_NONEG,
@@ -215,12 +215,12 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 
 	repo_config(the_repository, reflog_expire_config, &opts);
 
-	save_commit_buffer = 0;
+	save_commit_बफर = 0;
 	do_all = status = 0;
 
 	argc = parse_options(argc, argv, prefix, options, reflog_expire_usage, 0);
 
-	if (verbose)
+	अगर (verbose)
 		should_prune_fn = should_expire_reflog_ent_verbose;
 
 	/*
@@ -228,32 +228,32 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 	 * even in older repository.  We cannot trust what's reachable
 	 * from reflog if the repository was pruned with older git.
 	 */
-	if (opts.stalefix) {
-		struct rev_info revs;
+	अगर (opts.stalefix) {
+		काष्ठा rev_info revs;
 
 		repo_init_revisions(the_repository, &revs, prefix);
 		revs.do_not_die_on_missing_objects = 1;
 		revs.ignore_missing = 1;
 		revs.ignore_missing_links = 1;
-		if (verbose)
-			printf(_("Marking reachable objects..."));
-		mark_reachable_objects(&revs, 0, 0, NULL);
+		अगर (verbose)
+			म_लिखो(_("Marking reachable objects..."));
+		mark_reachable_objects(&revs, 0, 0, शून्य);
 		release_revisions(&revs);
-		if (verbose)
-			putchar('\n');
+		अगर (verbose)
+			अक्षर_दो('\n');
 	}
 
-	if (do_all) {
-		struct worktree_reflogs collected = {
+	अगर (do_all) {
+		काष्ठा worktree_reflogs collected = {
 			.reflogs = STRING_LIST_INIT_DUP,
 		};
-		struct string_list_item *item;
-		struct worktree **worktrees, **p;
+		काष्ठा string_list_item *item;
+		काष्ठा worktree **worktrees, **p;
 
 		worktrees = get_worktrees(the_repository);
-		for (p = worktrees; *p; p++) {
-			if (single_worktree && !(*p)->is_current)
-				continue;
+		क्रम (p = worktrees; *p; p++) {
+			अगर (single_worktree && !(*p)->is_current)
+				जारी;
 			collected.worktree = *p;
 			refs_for_each_reflog(get_worktree_ref_store(*p),
 					     collect_reflog, &collected);
@@ -261,7 +261,7 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		free_worktrees(worktrees);
 
 		for_each_string_list_item(item, &collected.reflogs) {
-			struct expire_reflog_policy_cb cb = {
+			काष्ठा expire_reflog_policy_cb cb = {
 				.opts = opts,
 				.dry_run = !!(flags & EXPIRE_REFLOGS_DRY_RUN),
 			};
@@ -277,13 +277,13 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 		string_list_clear(&collected.reflogs, 0);
 	}
 
-	for (i = 0; i < argc; i++) {
-		char *ref;
-		struct expire_reflog_policy_cb cb = { .opts = opts };
+	क्रम (i = 0; i < argc; i++) {
+		अक्षर *ref;
+		काष्ठा expire_reflog_policy_cb cb = { .opts = opts };
 
-		if (!repo_dwim_log(the_repository, argv[i], strlen(argv[i]), NULL, &ref)) {
+		अगर (!repo_dwim_log(the_repository, argv[i], म_माप(argv[i]), शून्य, &ref)) {
 			status |= error(_("reflog could not be found: '%s'"), argv[i]);
-			continue;
+			जारी;
 		}
 		reflog_expire_options_set_refname(&cb.opts, ref);
 		status |= refs_reflog_expire(get_main_ref_store(the_repository),
@@ -292,22 +292,22 @@ static int cmd_reflog_expire(int argc, const char **argv, const char *prefix,
 					     should_prune_fn,
 					     reflog_expiry_cleanup,
 					     &cb);
-		free(ref);
+		मुक्त(ref);
 	}
 
 	reflog_clear_expire_config(&opts);
 
-	return status;
+	वापस status;
 }
 
-static int cmd_reflog_delete(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+अटल पूर्णांक cmd_reflog_delete(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			     काष्ठा repository *repo UNUSED)
 {
-	int i, status = 0;
-	unsigned int flags = 0;
-	int verbose = 0;
+	पूर्णांक i, status = 0;
+	अचिन्हित पूर्णांक flags = 0;
+	पूर्णांक verbose = 0;
 
-	const struct option options[] = {
+	स्थिर काष्ठा option options[] = {
 		OPT_BIT('n', "dry-run", &flags, N_("do not actually prune any entries"),
 			EXPIRE_REFLOGS_DRY_RUN),
 		OPT_BIT(0, "rewrite", &flags,
@@ -322,40 +322,40 @@ static int cmd_reflog_delete(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_delete_usage, 0);
 
-	if (argc < 1)
-		return error(_("no reflog specified to delete"));
+	अगर (argc < 1)
+		वापस error(_("no reflog specified to delete"));
 
-	for (i = 0; i < argc; i++)
+	क्रम (i = 0; i < argc; i++)
 		status |= reflog_delete(argv[i], flags, verbose);
 
-	return status;
+	वापस status;
 }
 
-static int cmd_reflog_exists(int argc, const char **argv, const char *prefix,
-			     struct repository *repo UNUSED)
+अटल पूर्णांक cmd_reflog_exists(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			     काष्ठा repository *repo UNUSED)
 {
-	struct option options[] = {
+	काष्ठा option options[] = {
 		OPT_END()
 	};
-	const char *refname;
+	स्थिर अक्षर *refname;
 
 	argc = parse_options(argc, argv, prefix, options, reflog_exists_usage,
 			     0);
-	if (!argc)
+	अगर (!argc)
 		usage_with_options(reflog_exists_usage, options);
 
 	refname = argv[0];
-	if (check_refname_format(refname, REFNAME_ALLOW_ONELEVEL))
+	अगर (check_refname_format(refname, REFNAME_ALLOW_ONELEVEL))
 		die(_("invalid ref format: %s"), refname);
-	return !refs_reflog_exists(get_main_ref_store(the_repository),
+	वापस !refs_reflog_exists(get_main_ref_store(the_repository),
 				   refname);
 }
 
-static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
-			   struct repository *repo)
+अटल पूर्णांक cmd_reflog_drop(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			   काष्ठा repository *repo)
 {
-	int ret = 0, do_all = 0, single_worktree = 0;
-	const struct option options[] = {
+	पूर्णांक ret = 0, do_all = 0, single_worktree = 0;
+	स्थिर काष्ठा option options[] = {
 		OPT_BOOL(0, "all", &do_all, N_("drop the reflogs of all references")),
 		OPT_BOOL(0, "single-worktree", &single_worktree,
 			 N_("drop reflogs from the current worktree only")),
@@ -364,20 +364,20 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 
 	argc = parse_options(argc, argv, prefix, options, reflog_drop_usage, 0);
 
-	if (argc && do_all)
+	अगर (argc && do_all)
 		usage(_("references specified along with --all"));
 
-	if (do_all) {
-		struct worktree_reflogs collected = {
+	अगर (do_all) {
+		काष्ठा worktree_reflogs collected = {
 			.reflogs = STRING_LIST_INIT_DUP,
 		};
-		struct string_list_item *item;
-		struct worktree **worktrees, **p;
+		काष्ठा string_list_item *item;
+		काष्ठा worktree **worktrees, **p;
 
 		worktrees = get_worktrees(the_repository);
-		for (p = worktrees; *p; p++) {
-			if (single_worktree && !(*p)->is_current)
-				continue;
+		क्रम (p = worktrees; *p; p++) {
+			अगर (single_worktree && !(*p)->is_current)
+				जारी;
 			collected.worktree = *p;
 			refs_for_each_reflog(get_worktree_ref_store(*p),
 					     collect_reflog, &collected);
@@ -389,88 +389,88 @@ static int cmd_reflog_drop(int argc, const char **argv, const char *prefix,
 						     item->string);
 		string_list_clear(&collected.reflogs, 0);
 
-		return ret;
+		वापस ret;
 	}
 
-	for (int i = 0; i < argc; i++) {
-		char *ref;
-		if (!repo_dwim_log(repo, argv[i], strlen(argv[i]), NULL, &ref)) {
+	क्रम (पूर्णांक i = 0; i < argc; i++) {
+		अक्षर *ref;
+		अगर (!repo_dwim_log(repo, argv[i], म_माप(argv[i]), शून्य, &ref)) {
 			ret |= error(_("reflog could not be found: '%s'"), argv[i]);
-			continue;
+			जारी;
 		}
 
 		ret |= refs_delete_reflog(get_main_ref_store(repo), ref);
-		free(ref);
+		मुक्त(ref);
 	}
 
-	return ret;
+	वापस ret;
 }
 
-static int cmd_reflog_write(int argc, const char **argv, const char *prefix,
-			    struct repository *repo)
+अटल पूर्णांक cmd_reflog_write(पूर्णांक argc, स्थिर अक्षर **argv, स्थिर अक्षर *prefix,
+			    काष्ठा repository *repo)
 {
-	const struct option options[] = {
+	स्थिर काष्ठा option options[] = {
 		OPT_END()
 	};
-	struct object_id old_oid, new_oid;
-	struct strbuf err = STRBUF_INIT;
-	struct ref_transaction *tx;
-	const char *ref, *message;
-	int ret;
+	काष्ठा object_id old_oid, new_oid;
+	काष्ठा strbuf err = STRBUF_INIT;
+	काष्ठा ref_transaction *tx;
+	स्थिर अक्षर *ref, *message;
+	पूर्णांक ret;
 
-	repo_config(repo, git_ident_config, NULL);
+	repo_config(repo, git_ident_config, शून्य);
 
 	argc = parse_options(argc, argv, prefix, options, reflog_write_usage, 0);
-	if (argc != 4)
+	अगर (argc != 4)
 		usage_with_options(reflog_write_usage, options);
 
 	ref = argv[0];
-	if (!is_root_ref(ref) && check_refname_format(ref, 0))
+	अगर (!is_मूल_ref(ref) && check_refname_format(ref, 0))
 		die(_("invalid reference name: %s"), ref);
 
 	ret = get_oid_hex_algop(argv[1], &old_oid, repo->hash_algo);
-	if (ret)
+	अगर (ret)
 		die(_("invalid old object ID: '%s'"), argv[1]);
-	if (!is_null_oid(&old_oid) && !odb_has_object(repo->objects, &old_oid, 0))
+	अगर (!is_null_oid(&old_oid) && !odb_has_object(repo->objects, &old_oid, 0))
 		die(_("old object '%s' does not exist"), argv[1]);
 
 	ret = get_oid_hex_algop(argv[2], &new_oid, repo->hash_algo);
-	if (ret)
+	अगर (ret)
 		die(_("invalid new object ID: '%s'"), argv[2]);
-	if (!is_null_oid(&new_oid) && !odb_has_object(repo->objects, &new_oid, 0))
+	अगर (!is_null_oid(&new_oid) && !odb_has_object(repo->objects, &new_oid, 0))
 		die(_("new object '%s' does not exist"), argv[2]);
 
 	message = argv[3];
 
 	tx = ref_store_transaction_begin(get_main_ref_store(repo), 0, &err);
-	if (!tx)
+	अगर (!tx)
 		die(_("cannot start transaction: %s"), err.buf);
 
 	ret = ref_transaction_update_reflog(tx, ref, &new_oid, &old_oid,
 					    git_committer_info(0),
 					    message, 0, &err);
-	if (ret)
+	अगर (ret)
 		die(_("cannot queue reflog update: %s"), err.buf);
 
 	ret = ref_transaction_commit(tx, &err);
-	if (ret)
+	अगर (ret)
 		die(_("cannot commit reflog update: %s"), err.buf);
 
 	ref_transaction_free(tx);
 	strbuf_release(&err);
-	return 0;
+	वापस 0;
 }
 
 /*
  * main "reflog"
  */
-int cmd_reflog(int argc,
-	       const char **argv,
-	       const char *prefix,
-	       struct repository *repository)
+पूर्णांक cmd_reflog(पूर्णांक argc,
+	       स्थिर अक्षर **argv,
+	       स्थिर अक्षर *prefix,
+	       काष्ठा repository *repository)
 {
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option options[] = {
+	parse_opt_subcommand_fn *fn = शून्य;
+	काष्ठा option options[] = {
 		OPT_SUBCOMMAND("show", &fn, cmd_reflog_show),
 		OPT_SUBCOMMAND("list", &fn, cmd_reflog_list),
 		OPT_SUBCOMMAND("exists", &fn, cmd_reflog_exists),
@@ -485,8 +485,8 @@ int cmd_reflog(int argc,
 			     PARSE_OPT_SUBCOMMAND_OPTIONAL |
 			     PARSE_OPT_KEEP_DASHDASH | PARSE_OPT_KEEP_ARGV0 |
 			     PARSE_OPT_KEEP_UNKNOWN_OPT);
-	if (fn)
-		return fn(argc - 1, argv + 1, prefix, repository);
-	else
-		return cmd_log_reflog(argc, argv, prefix, repository);
+	अगर (fn)
+		वापस fn(argc - 1, argv + 1, prefix, repository);
+	अन्यथा
+		वापस cmd_log_reflog(argc, argv, prefix, repository);
 }

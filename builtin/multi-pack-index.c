@@ -1,101 +1,101 @@
-#define USE_THE_REPOSITORY_VARIABLE
-#include "builtin.h"
-#include "abspath.h"
-#include "config.h"
-#include "environment.h"
-#include "gettext.h"
-#include "parse-options.h"
-#include "midx.h"
-#include "strbuf.h"
-#include "trace2.h"
-#include "odb.h"
-#include "odb/source.h"
-#include "odb/source-files.h"
-#include "replace-object.h"
-#include "repository.h"
+#घोषणा USE_THE_REPOSITORY_VARIABLE
+#समावेश "builtin.h"
+#समावेश "abspath.h"
+#समावेश "config.h"
+#समावेश "environment.h"
+#समावेश "gettext.h"
+#समावेश "parse-options.h"
+#समावेश "midx.h"
+#समावेश "strbuf.h"
+#समावेश "trace2.h"
+#समावेश "odb.h"
+#समावेश "odb/source.h"
+#समावेश "odb/source-files.h"
+#समावेश "replace-object.h"
+#समावेश "repository.h"
 
-#define BUILTIN_MIDX_WRITE_USAGE \
+#घोषणा BUILTIN_MIDX_WRITE_USAGE \
 	N_("git multi-pack-index [<options>] write [--preferred-pack=<pack>]\n" \
 	   "  [--[no-]bitmap] [--[no-]incremental] [--[no-]stdin-packs]\n" \
 	   "  [--refs-snapshot=<path>] [--[no-]write-chain-file]\n" \
 	   "  [--base=<checksum>]")
 
-#define BUILTIN_MIDX_COMPACT_USAGE \
+#घोषणा BUILTIN_MIDX_COMPACT_USAGE \
 	N_("git multi-pack-index [<options>] compact [--[no-]incremental]\n" \
 	   "  [--[no-]bitmap] [--base=<checksum>] [--[no-]write-chain-file]\n" \
 	   "  <from> <to>")
 
-#define BUILTIN_MIDX_VERIFY_USAGE \
+#घोषणा BUILTIN_MIDX_VERIFY_USAGE \
 	N_("git multi-pack-index [<options>] verify")
 
-#define BUILTIN_MIDX_EXPIRE_USAGE \
+#घोषणा BUILTIN_MIDX_EXPIRE_USAGE \
 	N_("git multi-pack-index [<options>] expire")
 
-#define BUILTIN_MIDX_REPACK_USAGE \
+#घोषणा BUILTIN_MIDX_REPACK_USAGE \
 	N_("git multi-pack-index [<options>] repack [--batch-size=<size>]")
 
-static char const * const builtin_multi_pack_index_write_usage[] = {
+अटल अक्षर स्थिर * स्थिर builtin_multi_pack_सूचकांक_write_usage[] = {
 	BUILTIN_MIDX_WRITE_USAGE,
-	NULL
+	शून्य
 };
-static char const * const builtin_multi_pack_index_compact_usage[] = {
+अटल अक्षर स्थिर * स्थिर builtin_multi_pack_सूचकांक_compact_usage[] = {
 	BUILTIN_MIDX_COMPACT_USAGE,
-	NULL
+	शून्य
 };
-static char const * const builtin_multi_pack_index_verify_usage[] = {
+अटल अक्षर स्थिर * स्थिर builtin_multi_pack_सूचकांक_verify_usage[] = {
 	BUILTIN_MIDX_VERIFY_USAGE,
-	NULL
+	शून्य
 };
-static char const * const builtin_multi_pack_index_expire_usage[] = {
+अटल अक्षर स्थिर * स्थिर builtin_multi_pack_सूचकांक_expire_usage[] = {
 	BUILTIN_MIDX_EXPIRE_USAGE,
-	NULL
+	शून्य
 };
-static char const * const builtin_multi_pack_index_repack_usage[] = {
+अटल अक्षर स्थिर * स्थिर builtin_multi_pack_सूचकांक_repack_usage[] = {
 	BUILTIN_MIDX_REPACK_USAGE,
-	NULL
+	शून्य
 };
-static char const * const builtin_multi_pack_index_usage[] = {
+अटल अक्षर स्थिर * स्थिर builtin_multi_pack_सूचकांक_usage[] = {
 	BUILTIN_MIDX_WRITE_USAGE,
 	BUILTIN_MIDX_COMPACT_USAGE,
 	BUILTIN_MIDX_VERIFY_USAGE,
 	BUILTIN_MIDX_EXPIRE_USAGE,
 	BUILTIN_MIDX_REPACK_USAGE,
-	NULL
+	शून्य
 };
 
-static struct opts_multi_pack_index {
-	char *object_dir;
-	const char *preferred_pack;
-	const char *incremental_base;
-	char *refs_snapshot;
-	unsigned long batch_size;
-	unsigned flags;
-	int stdin_packs;
+अटल काष्ठा opts_multi_pack_सूचकांक {
+	अक्षर *object_dir;
+	स्थिर अक्षर *preferred_pack;
+	स्थिर अक्षर *incremental_base;
+	अक्षर *refs_snapshot;
+	अचिन्हित दीर्घ batch_आकार;
+	अचिन्हित flags;
+	पूर्णांक stdin_packs;
 } opts;
 
 
-static int parse_object_dir(const struct option *opt, const char *arg,
-			    int unset)
+अटल पूर्णांक parse_object_dir(स्थिर काष्ठा option *opt, स्थिर अक्षर *arg,
+			    पूर्णांक unset)
 {
-	char **value = opt->value;
-	free(*value);
-	if (unset)
-		*value = xstrdup(the_repository->objects->source->path);
-	else
-		*value = real_pathdup(arg, 1);
-	return 0;
+	अक्षर **मूल्य = opt->मूल्य;
+	मुक्त(*मूल्य);
+	अगर (unset)
+		*मूल्य = xstrdup(the_repository->objects->source->path);
+	अन्यथा
+		*मूल्य = real_pathdup(arg, 1);
+	वापस 0;
 }
 
-static struct odb_source_packed *handle_object_dir_option(struct repository *repo)
+अटल काष्ठा odb_source_packed *handle_object_dir_option(काष्ठा repository *repo)
 {
-	struct odb_files_dir *dir = odb_source_files_find_dir(repo->objects, opts.object_dir);
-	if (!dir)
+	काष्ठा odb_files_dir *dir = odb_source_files_find_dir(repo->objects, opts.object_dir);
+	अगर (!dir)
 		die(_("object directory is not an alternate of the current repository: '%s'"),
 		    opts.object_dir);
-	return dir->packed;
+	वापस dir->packed;
 }
 
-static struct option common_opts[] = {
+अटल काष्ठा option common_opts[] = {
 	OPT_CALLBACK(0, "object-dir", &opts.object_dir,
 	  N_("directory"),
 	  N_("object directory containing set of packfile and pack-index pairs"),
@@ -105,26 +105,26 @@ static struct option common_opts[] = {
 	OPT_END(),
 };
 
-static struct option *add_common_options(struct option *prev)
+अटल काष्ठा option *add_common_options(काष्ठा option *पूर्व)
 {
-	return parse_options_concat(common_opts, prev);
+	वापस parse_options_concat(common_opts, पूर्व);
 }
 
-static int git_multi_pack_index_write_config(const char *var, const char *value,
-					     const struct config_context *ctx UNUSED,
-					     void *cb UNUSED)
+अटल पूर्णांक git_multi_pack_सूचकांक_write_config(स्थिर अक्षर *var, स्थिर अक्षर *मूल्य,
+					     स्थिर काष्ठा config_context *ctx UNUSED,
+					     व्योम *cb UNUSED)
 {
-	if (!strcmp(var, "pack.writebitmaphashcache")) {
-		if (git_config_bool(var, value))
+	अगर (!म_भेद(var, "pack.writebitmaphashcache")) {
+		अगर (git_config_bool(var, मूल्य))
 			opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
-		else
+		अन्यथा
 			opts.flags &= ~MIDX_WRITE_BITMAP_HASH_CACHE;
 	}
 
-	if (!strcmp(var, "pack.writebitmaplookuptable")) {
-		if (git_config_bool(var, value))
+	अगर (!म_भेद(var, "pack.writebitmaplookuptable")) {
+		अगर (git_config_bool(var, मूल्य))
 			opts.flags |= MIDX_WRITE_BITMAP_LOOKUP_TABLE;
-		else
+		अन्यथा
 			opts.flags &= ~MIDX_WRITE_BITMAP_LOOKUP_TABLE;
 	}
 
@@ -132,30 +132,30 @@ static int git_multi_pack_index_write_config(const char *var, const char *value,
 	 * We should never make a fall-back call to 'git_default_config', since
 	 * this was already called in 'cmd_multi_pack_index()'.
 	 */
-	return 0;
+	वापस 0;
 }
 
-static void read_packs_from_stdin(struct string_list *to)
+अटल व्योम read_packs_from_stdin(काष्ठा string_list *to)
 {
-	struct strbuf buf = STRBUF_INIT;
-	while (strbuf_getline(&buf, stdin) != EOF)
+	काष्ठा strbuf buf = STRBUF_INIT;
+	जबतक (strbuf_getline(&buf, मानक_निवेश) != खातापूर्ण)
 		string_list_append(to, buf.buf);
 	string_list_sort(to);
 
 	strbuf_release(&buf);
 }
 
-static int cmd_multi_pack_index_write(int argc, const char **argv,
-				      const char *prefix,
-				      struct repository *repo)
+अटल पूर्णांक cmd_multi_pack_सूचकांक_write(पूर्णांक argc, स्थिर अक्षर **argv,
+				      स्थिर अक्षर *prefix,
+				      काष्ठा repository *repo)
 {
-	struct option *options;
-	static struct option builtin_multi_pack_index_write_options[] = {
+	काष्ठा option *options;
+	अटल काष्ठा option builtin_multi_pack_सूचकांक_write_options[] = {
 		OPT_STRING(0, "preferred-pack", &opts.preferred_pack,
 			   N_("preferred-pack"),
 			   N_("pack for reuse when computing a multi-pack bitmap")),
 		OPT_BIT(0, "bitmap", &opts.flags, N_("write multi-pack bitmap"),
-			MIDX_WRITE_BITMAP | MIDX_WRITE_REV_INDEX),
+			MIDX_WRITE_BITMAP | MIDX_WRITE_REV_सूचकांक),
 		OPT_STRING(0, "base", &opts.incremental_base, N_("checksum"),
 			   N_("base MIDX for incremental writes")),
 		OPT_BIT(0, "incremental", &opts.flags,
@@ -169,38 +169,38 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 			     N_("refs snapshot for selecting bitmap commits")),
 		OPT_END(),
 	};
-	struct odb_source_packed *packed_source;
-	int ret;
+	काष्ठा odb_source_packed *packed_source;
+	पूर्णांक ret;
 
 	opts.flags |= MIDX_WRITE_BITMAP_HASH_CACHE;
 
-	repo_config(the_repository, git_multi_pack_index_write_config, NULL);
+	repo_config(the_repository, git_multi_pack_सूचकांक_write_config, शून्य);
 
-	options = add_common_options(builtin_multi_pack_index_write_options);
+	options = add_common_options(builtin_multi_pack_सूचकांक_write_options);
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	अगर (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
-			     options, builtin_multi_pack_index_write_usage,
+			     options, builtin_multi_pack_सूचकांक_write_usage,
 			     0);
-	if (argc)
-		usage_with_options(builtin_multi_pack_index_write_usage,
+	अगर (argc)
+		usage_with_options(builtin_multi_pack_सूचकांक_write_usage,
 				   options);
 
-	if (opts.flags & MIDX_WRITE_NO_CHAIN &&
+	अगर (opts.flags & MIDX_WRITE_NO_CHAIN &&
 	    !(opts.flags & MIDX_WRITE_INCREMENTAL)) {
 		error(_("cannot use %s without %s"),
 		      "--no-write-chain-file", "--incremental");
-		usage_with_options(builtin_multi_pack_index_write_usage,
+		usage_with_options(builtin_multi_pack_सूचकांक_write_usage,
 				   options);
 	}
 
-	if (opts.incremental_base &&
+	अगर (opts.incremental_base &&
 	    !(opts.flags & MIDX_WRITE_NO_CHAIN)) {
 		error(_("cannot use --base without --no-write-chain-file"));
-		usage_with_options(builtin_multi_pack_index_write_usage,
+		usage_with_options(builtin_multi_pack_सूचकांक_write_usage,
 				   options);
 	}
 
@@ -208,8 +208,8 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 
 	FREE_AND_NULL(options);
 
-	if (opts.stdin_packs) {
-		struct string_list packs = STRING_LIST_INIT_DUP;
+	अगर (opts.stdin_packs) {
+		काष्ठा string_list packs = STRING_LIST_INIT_DUP;
 
 		read_packs_from_stdin(&packs);
 
@@ -219,35 +219,35 @@ static int cmd_multi_pack_index_write(int argc, const char **argv,
 					   opts.incremental_base, opts.flags);
 
 		string_list_clear(&packs, 0);
-		free(opts.refs_snapshot);
+		मुक्त(opts.refs_snapshot);
 
-		return ret;
+		वापस ret;
 
 	}
 
 	ret = write_midx_file(packed_source, opts.preferred_pack,
 			      opts.refs_snapshot, opts.flags);
 
-	free(opts.refs_snapshot);
-	return ret;
+	मुक्त(opts.refs_snapshot);
+	वापस ret;
 }
 
-static int cmd_multi_pack_index_compact(int argc, const char **argv,
-					const char *prefix,
-					struct repository *repo)
+अटल पूर्णांक cmd_multi_pack_सूचकांक_compact(पूर्णांक argc, स्थिर अक्षर **argv,
+					स्थिर अक्षर *prefix,
+					काष्ठा repository *repo)
 {
-	struct multi_pack_index *m, *cur;
-	struct multi_pack_index *from_midx = NULL;
-	struct multi_pack_index *to_midx = NULL;
-	struct odb_source_packed *packed_source;
-	int ret;
+	काष्ठा multi_pack_सूचकांक *m, *cur;
+	काष्ठा multi_pack_सूचकांक *from_midx = शून्य;
+	काष्ठा multi_pack_सूचकांक *to_midx = शून्य;
+	काष्ठा odb_source_packed *packed_source;
+	पूर्णांक ret;
 
-	struct option *options;
-	static struct option builtin_multi_pack_index_compact_options[] = {
+	काष्ठा option *options;
+	अटल काष्ठा option builtin_multi_pack_सूचकांक_compact_options[] = {
 		OPT_STRING(0, "base", &opts.incremental_base, N_("checksum"),
 			   N_("base MIDX for incremental writes")),
 		OPT_BIT(0, "bitmap", &opts.flags, N_("write multi-pack bitmap"),
-			MIDX_WRITE_BITMAP | MIDX_WRITE_REV_INDEX),
+			MIDX_WRITE_BITMAP | MIDX_WRITE_REV_सूचकांक),
 		OPT_BIT(0, "incremental", &opts.flags,
 			N_("write a new incremental MIDX"), MIDX_WRITE_INCREMENTAL),
 		OPT_NEGBIT(0, "write-chain-file", &opts.flags,
@@ -256,27 +256,27 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 		OPT_END(),
 	};
 
-	repo_config(repo, git_multi_pack_index_write_config, NULL);
+	repo_config(repo, git_multi_pack_सूचकांक_write_config, शून्य);
 
-	options = add_common_options(builtin_multi_pack_index_compact_options);
+	options = add_common_options(builtin_multi_pack_सूचकांक_compact_options);
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	अगर (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
-			     options, builtin_multi_pack_index_compact_usage,
+			     options, builtin_multi_pack_सूचकांक_compact_usage,
 			     0);
 
-	if (argc != 2)
-		usage_with_options(builtin_multi_pack_index_compact_usage,
+	अगर (argc != 2)
+		usage_with_options(builtin_multi_pack_सूचकांक_compact_usage,
 				   options);
 
-	if (opts.flags & MIDX_WRITE_NO_CHAIN &&
+	अगर (opts.flags & MIDX_WRITE_NO_CHAIN &&
 	    !(opts.flags & MIDX_WRITE_INCREMENTAL)) {
 		error(_("cannot use %s without %s"),
 		      "--no-write-chain-file", "--incremental");
-		usage_with_options(builtin_multi_pack_index_compact_usage,
+		usage_with_options(builtin_multi_pack_सूचकांक_compact_usage,
 				   options);
 	}
 
@@ -284,157 +284,157 @@ static int cmd_multi_pack_index_compact(int argc, const char **argv,
 
 	FREE_AND_NULL(options);
 
-	m = get_multi_pack_index(packed_source);
+	m = get_multi_pack_सूचकांक(packed_source);
 
-	for (cur = m; cur && !(from_midx && to_midx); cur = cur->base_midx) {
-		const char *midx_csum = midx_get_checksum_hex(cur);
+	क्रम (cur = m; cur && !(from_midx && to_midx); cur = cur->base_midx) {
+		स्थिर अक्षर *midx_csum = midx_get_checksum_hex(cur);
 
-		if (!from_midx && !strcmp(midx_csum, argv[0]))
+		अगर (!from_midx && !म_भेद(midx_csum, argv[0]))
 			from_midx = cur;
-		if (!to_midx && !strcmp(midx_csum, argv[1]))
+		अगर (!to_midx && !म_भेद(midx_csum, argv[1]))
 			to_midx = cur;
 	}
 
-	if (!from_midx)
+	अगर (!from_midx)
 		die(_("could not find MIDX: %s"), argv[0]);
-	if (!to_midx)
+	अगर (!to_midx)
 		die(_("could not find MIDX: %s"), argv[1]);
-	if (from_midx == to_midx)
+	अगर (from_midx == to_midx)
 		die(_("MIDX compaction endpoints must be unique"));
 
-	for (m = from_midx; m; m = m->base_midx) {
-		if (m == to_midx)
+	क्रम (m = from_midx; m; m = m->base_midx) {
+		अगर (m == to_midx)
 			die(_("MIDX %s must be an ancestor of %s"), argv[0], argv[1]);
 	}
 
 	ret = write_midx_file_compact(packed_source, from_midx, to_midx,
 				      opts.incremental_base, opts.flags);
 
-	return ret;
+	वापस ret;
 }
 
-static int cmd_multi_pack_index_verify(int argc, const char **argv,
-				       const char *prefix,
-				       struct repository *repo UNUSED)
+अटल पूर्णांक cmd_multi_pack_सूचकांक_verify(पूर्णांक argc, स्थिर अक्षर **argv,
+				       स्थिर अक्षर *prefix,
+				       काष्ठा repository *repo UNUSED)
 {
-	struct option *options;
-	static struct option builtin_multi_pack_index_verify_options[] = {
+	काष्ठा option *options;
+	अटल काष्ठा option builtin_multi_pack_सूचकांक_verify_options[] = {
 		OPT_END(),
 	};
-	struct odb_source_packed *packed_source;
+	काष्ठा odb_source_packed *packed_source;
 
-	options = add_common_options(builtin_multi_pack_index_verify_options);
+	options = add_common_options(builtin_multi_pack_सूचकांक_verify_options);
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	अगर (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
-			     options, builtin_multi_pack_index_verify_usage,
+			     options, builtin_multi_pack_सूचकांक_verify_usage,
 			     0);
-	if (argc)
-		usage_with_options(builtin_multi_pack_index_verify_usage,
+	अगर (argc)
+		usage_with_options(builtin_multi_pack_सूचकांक_verify_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return verify_midx_file(packed_source, opts.flags);
+	वापस verify_midx_file(packed_source, opts.flags);
 }
 
-static int cmd_multi_pack_index_expire(int argc, const char **argv,
-				       const char *prefix,
-				       struct repository *repo UNUSED)
+अटल पूर्णांक cmd_multi_pack_सूचकांक_expire(पूर्णांक argc, स्थिर अक्षर **argv,
+				       स्थिर अक्षर *prefix,
+				       काष्ठा repository *repo UNUSED)
 {
-	struct option *options;
-	static struct option builtin_multi_pack_index_expire_options[] = {
+	काष्ठा option *options;
+	अटल काष्ठा option builtin_multi_pack_सूचकांक_expire_options[] = {
 		OPT_END(),
 	};
-	struct odb_source_packed *packed_source;
+	काष्ठा odb_source_packed *packed_source;
 
-	options = add_common_options(builtin_multi_pack_index_expire_options);
+	options = add_common_options(builtin_multi_pack_सूचकांक_expire_options);
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	अगर (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
-			     options, builtin_multi_pack_index_expire_usage,
+			     options, builtin_multi_pack_सूचकांक_expire_usage,
 			     0);
-	if (argc)
-		usage_with_options(builtin_multi_pack_index_expire_usage,
+	अगर (argc)
+		usage_with_options(builtin_multi_pack_सूचकांक_expire_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return expire_midx_packs(packed_source, opts.flags);
+	वापस expire_midx_packs(packed_source, opts.flags);
 }
 
-static int cmd_multi_pack_index_repack(int argc, const char **argv,
-				       const char *prefix,
-				       struct repository *repo UNUSED)
+अटल पूर्णांक cmd_multi_pack_सूचकांक_repack(पूर्णांक argc, स्थिर अक्षर **argv,
+				       स्थिर अक्षर *prefix,
+				       काष्ठा repository *repo UNUSED)
 {
-	struct option *options;
-	static struct option builtin_multi_pack_index_repack_options[] = {
-		OPT_UNSIGNED(0, "batch-size", &opts.batch_size,
+	काष्ठा option *options;
+	अटल काष्ठा option builtin_multi_pack_सूचकांक_repack_options[] = {
+		OPT_UNSIGNED(0, "batch-size", &opts.batch_आकार,
 		  N_("during repack, collect pack-files of smaller size into a batch that is larger than this size")),
 		OPT_END(),
 	};
-	struct odb_source_packed *packed_source;
+	काष्ठा odb_source_packed *packed_source;
 
-	options = add_common_options(builtin_multi_pack_index_repack_options);
+	options = add_common_options(builtin_multi_pack_सूचकांक_repack_options);
 
 	trace2_cmd_mode(argv[0]);
 
-	if (isatty(2))
+	अगर (isatty(2))
 		opts.flags |= MIDX_PROGRESS;
 	argc = parse_options(argc, argv, prefix,
 			     options,
-			     builtin_multi_pack_index_repack_usage,
+			     builtin_multi_pack_सूचकांक_repack_usage,
 			     0);
-	if (argc)
-		usage_with_options(builtin_multi_pack_index_repack_usage,
+	अगर (argc)
+		usage_with_options(builtin_multi_pack_सूचकांक_repack_usage,
 				   options);
 	packed_source = handle_object_dir_option(the_repository);
 
 	FREE_AND_NULL(options);
 
-	return midx_repack(packed_source, (size_t)opts.batch_size, opts.flags);
+	वापस midx_repack(packed_source, (माप_प्रकार)opts.batch_आकार, opts.flags);
 }
 
-int cmd_multi_pack_index(int argc,
-			 const char **argv,
-			 const char *prefix,
-			 struct repository *repo)
+पूर्णांक cmd_multi_pack_सूचकांक(पूर्णांक argc,
+			 स्थिर अक्षर **argv,
+			 स्थिर अक्षर *prefix,
+			 काष्ठा repository *repo)
 {
-	int res;
-	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_multi_pack_index_options[] = {
-		OPT_SUBCOMMAND("repack", &fn, cmd_multi_pack_index_repack),
-		OPT_SUBCOMMAND("write", &fn, cmd_multi_pack_index_write),
-		OPT_SUBCOMMAND("compact", &fn, cmd_multi_pack_index_compact),
-		OPT_SUBCOMMAND("verify", &fn, cmd_multi_pack_index_verify),
-		OPT_SUBCOMMAND("expire", &fn, cmd_multi_pack_index_expire),
+	पूर्णांक res;
+	parse_opt_subcommand_fn *fn = शून्य;
+	काष्ठा option builtin_multi_pack_सूचकांक_options[] = {
+		OPT_SUBCOMMAND("repack", &fn, cmd_multi_pack_सूचकांक_repack),
+		OPT_SUBCOMMAND("write", &fn, cmd_multi_pack_सूचकांक_write),
+		OPT_SUBCOMMAND("compact", &fn, cmd_multi_pack_सूचकांक_compact),
+		OPT_SUBCOMMAND("verify", &fn, cmd_multi_pack_सूचकांक_verify),
+		OPT_SUBCOMMAND("expire", &fn, cmd_multi_pack_सूचकांक_expire),
 		OPT_END(),
 	};
-	struct option *options = parse_options_concat(builtin_multi_pack_index_options, common_opts);
+	काष्ठा option *options = parse_options_concat(builtin_multi_pack_सूचकांक_options, common_opts);
 
 	disable_replace_refs();
 
-	repo_config(the_repository, git_default_config, NULL);
+	repo_config(the_repository, git_default_config, शून्य);
 
-	if (the_repository &&
+	अगर (the_repository &&
 	    the_repository->objects &&
 	    the_repository->objects->source)
 		opts.object_dir = xstrdup(the_repository->objects->source->path);
 
 	argc = parse_options(argc, argv, prefix, options,
-			     builtin_multi_pack_index_usage, 0);
+			     builtin_multi_pack_सूचकांक_usage, 0);
 	FREE_AND_NULL(options);
 
 	res = fn(argc, argv, prefix, repo);
 
-	free(opts.object_dir);
-	return res;
+	मुक्त(opts.object_dir);
+	वापस res;
 }
