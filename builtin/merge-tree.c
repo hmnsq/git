@@ -21,103 +21,103 @@
 #include "strvec.h"
 #include "write-or-die.h"
 
-static int line_termination = '\n';
+static ចំនួនគត់ line_termination = '\n';
 
-struct merge_list {
-	struct merge_list *next;
-	struct merge_list *link;	/* other stages for this object */
+sa_nracanaa merge_list {
+	sa_nracanaa merge_list *next;
+	sa_nracanaa merge_list *link;	/* other stages for this object */
 
-	unsigned int stage : 2;
-	unsigned int mode;
-	const char *path;
-	struct blob *blob;
+	unsigned ចំនួនគត់ stage : 2;
+	unsigned ចំនួនគត់ mode;
+	const var_na *path;
+	sa_nracanaa blob *blob;
 };
 
-static struct merge_list *merge_result, **merge_result_end = &merge_result;
+static sa_nracanaa merge_list *merge_result, **merge_result_end = &merge_result;
 
-static void add_merge_entry(struct merge_list *entry)
+static void add_merge_entry(sa_nracanaa merge_list *entry)
 {
 	*merge_result_end = entry;
 	merge_result_end = &entry->next;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base);
+static void trivial_merge_trees(sa_nracanaa tree_desc t[3], const var_na *base);
 
-static const char *explanation(struct merge_list *entry)
+static const var_na *explanation(sa_nracanaa merge_list *entry)
 {
 	switch (entry->stage) {
-	case 0:
-		return "merged";
-	case 3:
-		return "added in remote";
-	case 2:
-		if (entry->link)
-			return "added in both";
-		return "added in local";
+	pak_sa 0:
+		ត្រឡប់ "merged";
+	pak_sa 3:
+		ត្រឡប់ "added in remote";
+	pak_sa 2:
+		ប្រសិនបើ (entry->link)
+			ត្រឡប់ "added in both";
+		ត្រឡប់ "added in local";
 	}
 
 	/* Existed in base */
 	entry = entry->link;
-	if (!entry)
-		return "removed in both";
+	ប្រសិនបើ (!entry)
+		ត្រឡប់ "removed in both";
 
-	if (entry->link)
-		return "changed in both";
+	ប្រសិនបើ (entry->link)
+		ត្រឡប់ "changed in both";
 
-	if (entry->stage == 3)
-		return "removed in local";
-	return "removed in remote";
+	ប្រសិនបើ (entry->stage == 3)
+		ត្រឡប់ "removed in local";
+	ត្រឡប់ "removed in remote";
 }
 
-static void *result(struct merge_list *entry, size_t *size)
+static void *result(sa_nracanaa merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	struct blob *base, *our, *their;
-	const char *path = entry->path;
+	ga_nanaa object_type type;
+	sa_nracanaa blob *base, *our, *their;
+	const var_na *path = entry->path;
 
-	if (!entry->stage)
-		return odb_read_object(the_repository->objects,
+	ប្រសិនបើ (!entry->stage)
+		ត្រឡប់ odb_read_object(the_repository->objects,
 				       &entry->blob->object.oid, &type,
 				       size);
 	base = NULL;
-	if (entry->stage == 1) {
+	ប្រសិនបើ (entry->stage == 1) {
 		base = entry->blob;
 		entry = entry->link;
 	}
 	our = NULL;
-	if (entry && entry->stage == 2) {
+	ប្រសិនបើ (entry && entry->stage == 2) {
 		our = entry->blob;
 		entry = entry->link;
 	}
 	their = NULL;
-	if (entry)
+	ប្រសិនបើ (entry)
 		their = entry->blob;
-	return merge_blobs(the_repository->index, path,
+	ត្រឡប់ merge_blobs(the_repository->index, path,
 			   base, our, their, size);
 }
 
-static void *origin(struct merge_list *entry, size_t *size)
+static void *origin(sa_nracanaa merge_list *entry, size_t *size)
 {
-	enum object_type type;
-	while (entry) {
-		if (entry->stage == 2)
-			return odb_read_object(the_repository->objects,
+	ga_nanaa object_type type;
+	ខណៈពេល (entry) {
+		ប្រសិនបើ (entry->stage == 2)
+			ត្រឡប់ odb_read_object(the_repository->objects,
 					       &entry->blob->object.oid,
 					       &type, size);
 		entry = entry->link;
 	}
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
-static int show_outf(void *priv UNUSED, mmfile_t *mb, int nbuf)
+static ចំនួនគត់ show_outf(void *priv UNUSED, mmfile_t *mb, ចំនួនគត់ nbuf)
 {
-	int i;
-	for (i = 0; i < nbuf; i++)
-		printf("%.*s", (int) mb[i].size, mb[i].ptr);
-	return 0;
+	ចំនួនគត់ i;
+	សម្រាប់ (i = 0; i < nbuf; i++)
+		printf("%.*s", (ចំនួនគត់) mb[i].size, mb[i].ptr);
+	ត្រឡប់ 0;
 }
 
-static void show_diff(struct merge_list *entry)
+static void show_diff(sa_nracanaa merge_list *entry)
 {
 	size_t size;
 	mmfile_t src, dst;
@@ -125,42 +125,42 @@ static void show_diff(struct merge_list *entry)
 	xdemitconf_t xecfg;
 	xdemitcb_t ecb = { .out_line = show_outf };
 
-	memset(&xpp, 0, sizeof(xpp));
+	memset(&xpp, 0, parimaa_na(xpp));
 	xpp.flags = 0;
-	memset(&xecfg, 0, sizeof(xecfg));
+	memset(&xecfg, 0, parimaa_na(xecfg));
 	xecfg.ctxlen = 3;
 
 	src.ptr = origin(entry, &size);
-	if (!src.ptr)
+	ប្រសិនបើ (!src.ptr)
 		size = 0;
 	src.size = size;
 	dst.ptr = result(entry, &size);
-	if (!dst.ptr)
+	ប្រសិនបើ (!dst.ptr)
 		size = 0;
 	dst.size = size;
-	if (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
+	ប្រសិនបើ (xdi_diff(&src, &dst, &xpp, &xecfg, &ecb))
 		die("unable to generate diff");
 	free(src.ptr);
 	free(dst.ptr);
 }
 
-static void show_result_list(struct merge_list *entry)
+static void show_result_list(sa_nracanaa merge_list *entry)
 {
 	printf("%s\n", explanation(entry));
 	do {
-		struct merge_list *link = entry->link;
-		static const char *desc[4] = { "result", "base", "our", "their" };
+		sa_nracanaa merge_list *link = entry->link;
+		static const var_na *desc[4] = { "result", "base", "our", "their" };
 		printf("  %-6s %o %s %s\n", desc[entry->stage], entry->mode, oid_to_hex(&entry->blob->object.oid), entry->path);
 		entry = link;
-	} while (entry);
+	} ខណៈពេល (entry);
 }
 
 static void show_result(void)
 {
-	struct merge_list *walk;
+	sa_nracanaa merge_list *walk;
 
 	walk = merge_result;
-	while (walk) {
+	ខណៈពេល (walk) {
 		show_result_list(walk);
 		show_diff(walk);
 		walk = walk->next;
@@ -168,45 +168,45 @@ static void show_result(void)
 }
 
 /* An empty entry never compares same, not even to another empty entry */
-static int same_entry(struct name_entry *a, struct name_entry *b)
+static ចំនួនគត់ same_entry(sa_nracanaa name_entry *a, sa_nracanaa name_entry *b)
 {
-	return	!is_null_oid(&a->oid) &&
+	ត្រឡប់	!is_null_oid(&a->oid) &&
 		!is_null_oid(&b->oid) &&
 		oideq(&a->oid, &b->oid) &&
 		a->mode == b->mode;
 }
 
-static int both_empty(struct name_entry *a, struct name_entry *b)
+static ចំនួនគត់ both_empty(sa_nracanaa name_entry *a, sa_nracanaa name_entry *b)
 {
-	return is_null_oid(&a->oid) && is_null_oid(&b->oid);
+	ត្រឡប់ is_null_oid(&a->oid) && is_null_oid(&b->oid);
 }
 
-static struct merge_list *create_entry(unsigned stage, unsigned mode, const struct object_id *oid, const char *path)
+static sa_nracanaa merge_list *create_entry(unsigned stage, unsigned mode, const sa_nracanaa object_id *oid, const var_na *path)
 {
-	struct merge_list *res = xcalloc(1, sizeof(*res));
+	sa_nracanaa merge_list *res = xcalloc(1, parimaa_na(*res));
 
 	res->stage = stage;
 	res->path = path;
 	res->mode = mode;
 	res->blob = lookup_blob(the_repository, oid);
-	return res;
+	ត្រឡប់ res;
 }
 
-static char *traverse_path(const struct traverse_info *info, const struct name_entry *n)
+static var_na *traverse_path(const sa_nracanaa traverse_info *info, const sa_nracanaa name_entry *n)
 {
-	struct strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
 	strbuf_make_traverse_path(&buf, info, n->path, n->pathlen);
-	return strbuf_detach(&buf, NULL);
+	ត្រឡប់ strbuf_detach(&buf, NULL);
 }
 
-static void resolve(const struct traverse_info *info, struct name_entry *ours, struct name_entry *result)
+static void resolve(const sa_nracanaa traverse_info *info, sa_nracanaa name_entry *ours, sa_nracanaa name_entry *result)
 {
-	struct merge_list *orig, *final;
-	const char *path;
+	sa_nracanaa merge_list *orig, *final;
+	const var_na *path;
 
 	/* If it's already ours, don't bother showing it */
-	if (!ours)
-		return;
+	ប្រសិនបើ (!ours)
+		ត្រឡប់;
 
 	path = traverse_path(info, result);
 	orig = create_entry(2, ours->mode, &ours->oid, path);
@@ -217,21 +217,21 @@ static void resolve(const struct traverse_info *info, struct name_entry *ours, s
 	add_merge_entry(final);
 }
 
-static void unresolved_directory(const struct traverse_info *info,
-				 struct name_entry n[3])
+static void unresolved_directory(const sa_nracanaa traverse_info *info,
+				 sa_nracanaa name_entry n[3])
 {
-	struct repository *r = the_repository;
-	char *newbase;
-	struct name_entry *p;
-	struct tree_desc t[3];
+	sa_nracanaa repository *r = the_repository;
+	var_na *newbase;
+	sa_nracanaa name_entry *p;
+	sa_nracanaa tree_desc t[3];
 	void *buf0, *buf1, *buf2;
 
-	for (p = n; p < n + 3; p++) {
-		if (p->mode && S_ISDIR(p->mode))
-			break;
+	សម្រាប់ (p = n; p < n + 3; p++) {
+		ប្រសិនបើ (p->mode && S_ISDIR(p->mode))
+			bha_nga;
 	}
-	if (n + 3 <= p)
-		return; /* there is no tree here */
+	ប្រសិនបើ (n + 3 <= p)
+		ត្រឡប់; /* there is no tree here */
 
 	newbase = traverse_path(info, p);
 
@@ -250,48 +250,48 @@ static void unresolved_directory(const struct traverse_info *info,
 }
 
 
-static struct merge_list *link_entry(unsigned stage, const struct traverse_info *info, struct name_entry *n, struct merge_list *entry)
+static sa_nracanaa merge_list *link_entry(unsigned stage, const sa_nracanaa traverse_info *info, sa_nracanaa name_entry *n, sa_nracanaa merge_list *entry)
 {
-	const char *path;
-	struct merge_list *link;
+	const var_na *path;
+	sa_nracanaa merge_list *link;
 
-	if (!n->mode)
-		return entry;
-	if (entry)
+	ប្រសិនបើ (!n->mode)
+		ត្រឡប់ entry;
+	ប្រសិនបើ (entry)
 		path = entry->path;
-	else
+	បើមិនដូច្នេះ
 		path = traverse_path(info, n);
 	link = create_entry(stage, n->mode, &n->oid, path);
 	link->link = entry;
-	return link;
+	ត្រឡប់ link;
 }
 
-static void unresolved(const struct traverse_info *info, struct name_entry n[3])
+static void unresolved(const sa_nracanaa traverse_info *info, sa_nracanaa name_entry n[3])
 {
-	struct merge_list *entry = NULL;
-	int i;
+	sa_nracanaa merge_list *entry = NULL;
+	ចំនួនគត់ i;
 	unsigned dirmask = 0, mask = 0;
 
-	for (i = 0; i < 3; i++) {
+	សម្រាប់ (i = 0; i < 3; i++) {
 		mask |= (1 << i);
 		/*
 		 * Treat missing entries as directories so that we return
 		 * after unresolved_directory has handled this.
 		 */
-		if (!n[i].mode || S_ISDIR(n[i].mode))
+		ប្រសិនបើ (!n[i].mode || S_ISDIR(n[i].mode))
 			dirmask |= (1 << i);
 	}
 
 	unresolved_directory(info, n);
 
-	if (dirmask == mask)
-		return;
+	ប្រសិនបើ (dirmask == mask)
+		ត្រឡប់;
 
-	if (n[2].mode && !S_ISDIR(n[2].mode))
+	ប្រសិនបើ (n[2].mode && !S_ISDIR(n[2].mode))
 		entry = link_entry(3, info, n + 2, entry);
-	if (n[1].mode && !S_ISDIR(n[1].mode))
+	ប្រសិនបើ (n[1].mode && !S_ISDIR(n[1].mode))
 		entry = link_entry(2, info, n + 1, entry);
-	if (n[0].mode && !S_ISDIR(n[0].mode))
+	ប្រសិនបើ (n[0].mode && !S_ISDIR(n[0].mode))
 		entry = link_entry(1, info, n + 0, entry);
 
 	add_merge_entry(entry);
@@ -326,22 +326,22 @@ static void unresolved(const struct traverse_info *info, struct name_entry n[3])
  * The successful merge rules are the same as for the three-way merge
  * in git-read-tree.
  */
-static int threeway_callback(int n UNUSED, unsigned long mask,
+static ចំនួនគត់ threeway_callback(ចំនួនគត់ n UNUSED, unsigned long mask,
 			     unsigned long dirmask UNUSED,
-			     struct name_entry *entry, struct traverse_info *info)
+			     sa_nracanaa name_entry *entry, sa_nracanaa traverse_info *info)
 {
 	/* Same in both? */
-	if (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
+	ប្រសិនបើ (same_entry(entry+1, entry+2) || both_empty(entry+1, entry+2)) {
 		/* Modified, added or removed identically */
 		resolve(info, NULL, entry+1);
-		return mask;
+		ត្រឡប់ mask;
 	}
 
-	if (same_entry(entry+0, entry+1)) {
-		if (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
+	ប្រសិនបើ (same_entry(entry+0, entry+1)) {
+		ប្រសិនបើ (!is_null_oid(&entry[2].oid) && !S_ISDIR(entry[2].mode)) {
 			/* We did not touch, they modified -- take theirs */
 			resolve(info, entry+1, entry+2);
-			return mask;
+			ត្រឡប់ mask;
 		}
 		/*
 		 * If we did not touch a directory but they made it
@@ -350,46 +350,46 @@ static int threeway_callback(int n UNUSED, unsigned long mask,
 		 */
 	}
 
-	if (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
+	ប្រសិនបើ (same_entry(entry+0, entry+2) || both_empty(entry+0, entry+2)) {
 		/* We added, modified or removed, they did not touch -- take ours */
 		resolve(info, NULL, entry+1);
-		return mask;
+		ត្រឡប់ mask;
 	}
 
 	unresolved(info, entry);
-	return mask;
+	ត្រឡប់ mask;
 }
 
-static void trivial_merge_trees(struct tree_desc t[3], const char *base)
+static void trivial_merge_trees(sa_nracanaa tree_desc t[3], const var_na *base)
 {
-	struct traverse_info info;
+	sa_nracanaa traverse_info info;
 
 	setup_traverse_info(&info, base);
 	info.fn = threeway_callback;
 	traverse_trees(the_repository->index, 3, t, &info);
 }
 
-static void *get_tree_descriptor(struct repository *r,
-				 struct tree_desc *desc,
-				 const char *rev)
+static void *get_tree_descriptor(sa_nracanaa repository *r,
+				 sa_nracanaa tree_desc *desc,
+				 const var_na *rev)
 {
-	struct object_id oid;
+	sa_nracanaa object_id oid;
 	void *buf;
 
-	if (repo_get_oid(r, rev, &oid))
+	ប្រសិនបើ (repo_get_oid(r, rev, &oid))
 		die("unknown rev %s", rev);
 	buf = fill_tree_descriptor(r, desc, &oid);
-	if (!buf)
+	ប្រសិនបើ (!buf)
 		die("%s is not a tree", rev);
-	return buf;
+	ត្រឡប់ buf;
 }
 
-static int trivial_merge(const char *base,
-			 const char *branch1,
-			 const char *branch2)
+static ចំនួនគត់ trivial_merge(const var_na *base,
+			 const var_na *branch1,
+			 const var_na *branch2)
 {
-	struct repository *r = the_repository;
-	struct tree_desc t[3];
+	sa_nracanaa repository *r = the_repository;
+	sa_nracanaa tree_desc t[3];
 	void *buf1, *buf2, *buf3;
 
 	buf1 = get_tree_descriptor(r, t+0, base);
@@ -401,34 +401,34 @@ static int trivial_merge(const char *base,
 	free(buf3);
 
 	show_result();
-	return 0;
+	ត្រឡប់ 0;
 }
 
-enum mode {
+ga_nanaa mode {
 	MODE_UNKNOWN,
 	MODE_TRIVIAL,
 	MODE_REAL,
 };
 
-struct merge_tree_options {
-	int mode;
-	int allow_unrelated_histories;
-	int show_messages;
-	int name_only;
-	int use_stdin;
-	struct merge_options merge_options;
+sa_nracanaa merge_tree_options {
+	ចំនួនគត់ mode;
+	ចំនួនគត់ allow_unrelated_histories;
+	ចំនួនគត់ show_messages;
+	ចំនួនគត់ name_only;
+	ចំនួនគត់ use_stdin;
+	sa_nracanaa merge_options merge_options;
 };
 
-static int real_merge(struct merge_tree_options *o,
-		      const char *merge_base,
-		      const char *branch1, const char *branch2,
-		      const char *prefix)
+static ចំនួនគត់ real_merge(sa_nracanaa merge_tree_options *o,
+		      const var_na *merge_base,
+		      const var_na *branch1, const var_na *branch2,
+		      const var_na *prefix)
 {
-	struct commit *parent1, *parent2;
-	struct commit_list *merge_bases = NULL;
-	struct merge_result result = { 0 };
-	int show_messages = o->show_messages;
-	struct merge_options opt;
+	sa_nracanaa commit *parent1, *parent2;
+	sa_nracanaa commit_list *merge_bases = NULL;
+	sa_nracanaa merge_result result = { 0 };
+	ចំនួនគត់ show_messages = o->show_messages;
+	sa_nracanaa merge_options opt;
 
 	copy_merge_options(&opt, &o->merge_options);
 	opt.show_rename_progress = 0;
@@ -436,44 +436,44 @@ static int real_merge(struct merge_tree_options *o,
 	opt.branch1 = branch1;
 	opt.branch2 = branch2;
 
-	if (merge_base) {
-		struct tree *base_tree, *parent1_tree, *parent2_tree;
+	ប្រសិនបើ (merge_base) {
+		sa_nracanaa tree *base_tree, *parent1_tree, *parent2_tree;
 
 		/*
 		 * We actually only need the trees because we already
 		 * have a merge base.
 		 */
-		struct object_id base_oid, head_oid, merge_oid;
+		sa_nracanaa object_id base_oid, head_oid, merge_oid;
 
-		if (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
+		ប្រសិនបើ (repo_get_oid_treeish(the_repository, merge_base, &base_oid))
 			die(_("could not parse as tree '%s'"), merge_base);
 		base_tree = repo_parse_tree_indirect(the_repository,
 						     &base_oid);
-		if (!base_tree)
+		ប្រសិនបើ (!base_tree)
 			die(_("unable to read tree (%s)"), oid_to_hex(&base_oid));
-		if (repo_get_oid_treeish(the_repository, branch1, &head_oid))
+		ប្រសិនបើ (repo_get_oid_treeish(the_repository, branch1, &head_oid))
 			die(_("could not parse as tree '%s'"), branch1);
 		parent1_tree = repo_parse_tree_indirect(the_repository,
 							&head_oid);
-		if (!parent1_tree)
+		ប្រសិនបើ (!parent1_tree)
 			die(_("unable to read tree (%s)"), oid_to_hex(&head_oid));
-		if (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
+		ប្រសិនបើ (repo_get_oid_treeish(the_repository, branch2, &merge_oid))
 			die(_("could not parse as tree '%s'"), branch2);
 		parent2_tree = repo_parse_tree_indirect(the_repository,
 							&merge_oid);
-		if (!parent2_tree)
+		ប្រសិនបើ (!parent2_tree)
 			die(_("unable to read tree (%s)"), oid_to_hex(&merge_oid));
 
 		opt.ancestor = merge_base;
 		merge_incore_nonrecursive(&opt, base_tree, parent1_tree, parent2_tree, &result);
-	} else {
+	} បើមិនដូច្នេះ {
 		parent1 = get_merge_parent(branch1);
-		if (!parent1)
+		ប្រសិនបើ (!parent1)
 			help_unknown_ref(branch1, "merge-tree",
 					 _("not something we can merge"));
 
 		parent2 = get_merge_parent(branch2);
-		if (!parent2)
+		ប្រសិនបើ (!parent2)
 			help_unknown_ref(branch2, "merge-tree",
 					 _("not something we can merge"));
 
@@ -481,40 +481,40 @@ static int real_merge(struct merge_tree_options *o,
 		 * Get the merge bases, in reverse order; see comment above
 		 * merge_incore_recursive in merge-ort.h
 		 */
-		if (repo_get_merge_bases(the_repository, parent1,
+		ប្រសិនបើ (repo_get_merge_bases(the_repository, parent1,
 					 parent2, &merge_bases) < 0)
 			exit(128);
-		if (!merge_bases && !o->allow_unrelated_histories)
+		ប្រសិនបើ (!merge_bases && !o->allow_unrelated_histories)
 			die(_("refusing to merge unrelated histories"));
 		merge_bases = commit_list_reverse(merge_bases);
 		merge_incore_recursive(&opt, merge_bases, parent1, parent2, &result);
 		commit_list_free(merge_bases);
 	}
 
-	if (result.clean < 0)
+	ប្រសិនបើ (result.clean < 0)
 		die(_("failure to merge"));
 
-	if (o->merge_options.mergeability_only)
+	ប្រសិនបើ (o->merge_options.mergeability_only)
 		goto cleanup;
 
-	if (show_messages == -1)
+	ប្រសិនបើ (show_messages == -1)
 		show_messages = !result.clean;
 
-	if (o->use_stdin)
+	ប្រសិនបើ (o->use_stdin)
 		printf("%d%c", result.clean, line_termination);
 	printf("%s%c", oid_to_hex(&result.tree->object.oid), line_termination);
-	if (!result.clean) {
-		struct string_list conflicted_files = STRING_LIST_INIT_NODUP;
-		const char *last = NULL;
+	ប្រសិនបើ (!result.clean) {
+		sa_nracanaa string_list conflicted_files = STRING_LIST_INIT_NODUP;
+		const var_na *last = NULL;
 
 		merge_get_conflicted_files(&result, &conflicted_files);
-		for (size_t i = 0; i < conflicted_files.nr; i++) {
-			const char *name = conflicted_files.items[i].string;
-			struct stage_info *c = conflicted_files.items[i].util;
-			if (!o->name_only)
+		សម្រាប់ (size_t i = 0; i < conflicted_files.nr; i++) {
+			const var_na *name = conflicted_files.items[i].string;
+			sa_nracanaa stage_info *c = conflicted_files.items[i].util;
+			ប្រសិនបើ (!o->name_only)
 				printf("%06o %s %d\t",
 				       c->mode, oid_to_hex(&c->oid), c->stage);
-			else if (last && !strcmp(last, name))
+			បើមិនដូច្នេះ ប្រសិនបើ (last && !strcmp(last, name))
 				continue;
 			write_name_quoted_relative(
 				name, prefix, stdout, line_termination);
@@ -522,39 +522,39 @@ static int real_merge(struct merge_tree_options *o,
 		}
 		string_list_clear(&conflicted_files, 1);
 	}
-	if (show_messages) {
+	ប្រសិនបើ (show_messages) {
 		putchar(line_termination);
 		merge_display_update_messages(&opt, line_termination == '\0',
 					      &result);
 	}
-	if (o->use_stdin)
+	ប្រសិនបើ (o->use_stdin)
 		putchar(line_termination);
 
 cleanup:
 	merge_finalize(&opt, &result);
 	clear_merge_options(&opt);
-	return !result.clean; /* result.clean < 0 handled above */
+	ត្រឡប់ !result.clean; /* result.clean < 0 handled above */
 }
 
-int cmd_merge_tree(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ចំនួនគត់ cmd_merge_tree(ចំនួនគត់ argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	struct merge_tree_options o = { .show_messages = -1 };
-	struct strvec xopts = STRVEC_INIT;
-	int expected_remaining_argc;
-	int original_argc;
-	const char *merge_base = NULL;
-	int ret;
-	int quiet = 0;
+	sa_nracanaa merge_tree_options o = { .show_messages = -1 };
+	sa_nracanaa strvec xopts = STRVEC_INIT;
+	ចំនួនគត់ expected_remaining_argc;
+	ចំនួនគត់ original_argc;
+	const var_na *merge_base = NULL;
+	ចំនួនគត់ ret;
+	ចំនួនគត់ quiet = 0;
 
-	const char * const merge_tree_usage[] = {
+	const var_na * const merge_tree_usage[] = {
 		N_("git merge-tree [--write-tree] [<options>] <branch1> <branch2>"),
 		N_("git merge-tree [--trivial-merge] <base-tree> <branch1> <branch2>"),
 		NULL
 	};
-	struct option mt_options[] = {
+	sa_nracanaa option mt_options[] = {
 		OPT_CMDMODE(0, "write-tree", &o.mode,
 			    N_("do a real merge instead of a trivial merge"),
 			    MODE_REAL),
@@ -597,7 +597,7 @@ int cmd_merge_tree(int argc,
 	argc = parse_options(argc, argv, prefix, mt_options,
 			     merge_tree_usage, PARSE_OPT_STOP_AT_NON_OPTION);
 
-	if (quiet && o.show_messages == -1)
+	ប្រសិនបើ (quiet && o.show_messages == -1)
 		o.show_messages = 0;
 	o.merge_options.mergeability_only = quiet;
 	die_for_incompatible_opt2(quiet, "--quiet", o.show_messages, "--messages");
@@ -605,46 +605,46 @@ int cmd_merge_tree(int argc,
 	die_for_incompatible_opt2(quiet, "--quiet", o.use_stdin, "--stdin");
 	die_for_incompatible_opt2(quiet, "--quiet", !line_termination, "-z");
 
-	if (xopts.nr && o.mode == MODE_TRIVIAL)
+	ប្រសិនបើ (xopts.nr && o.mode == MODE_TRIVIAL)
 		die(_("--trivial-merge is incompatible with all other options"));
-	for (size_t x = 0; x < xopts.nr; x++)
-		if (parse_merge_opt(&o.merge_options, xopts.v[x]))
+	សម្រាប់ (size_t x = 0; x < xopts.nr; x++)
+		ប្រសិនបើ (parse_merge_opt(&o.merge_options, xopts.v[x]))
 			die(_("unknown strategy option: -X%s"), xopts.v[x]);
 
 	/* Handle --stdin */
-	if (o.use_stdin) {
-		struct strbuf buf = STRBUF_INIT;
+	ប្រសិនបើ (o.use_stdin) {
+		sa_nracanaa strbuf buf = STRBUF_INIT;
 
-		if (o.mode == MODE_TRIVIAL)
+		ប្រសិនបើ (o.mode == MODE_TRIVIAL)
 			die(_("--trivial-merge is incompatible with all other options"));
-		if (merge_base)
+		ប្រសិនបើ (merge_base)
 			die(_("options '%s' and '%s' cannot be used together"),
 			    "--merge-base", "--stdin");
 		line_termination = '\0';
-		while (strbuf_getline_lf(&buf, stdin) != EOF) {
-			struct string_list split = STRING_LIST_INIT_NODUP;
-			const char *input_merge_base = NULL;
+		ខណៈពេល (strbuf_getline_lf(&buf, stdin) != EOF) {
+			sa_nracanaa string_list split = STRING_LIST_INIT_NODUP;
+			const var_na *input_merge_base = NULL;
 
 			string_list_split_in_place_f(&split, buf.buf, " ", -1,
 						     STRING_LIST_SPLIT_TRIM);
 
-			if (split.nr < 2)
+			ប្រសិនបើ (split.nr < 2)
 				die(_("malformed input line: '%s'."), buf.buf);
 
 			/* parse the merge-base */
-			if (!strcmp(split.items[1].string, "--")) {
+			ប្រសិនបើ (!strcmp(split.items[1].string, "--")) {
 				input_merge_base = split.items[0].string;
 			}
 
-			if (input_merge_base && split.nr == 4) {
+			ប្រសិនបើ (input_merge_base && split.nr == 4) {
 				real_merge(&o, input_merge_base,
 					   split.items[2].string, split.items[3].string,
 					   prefix);
-			} else if (!input_merge_base && split.nr == 2) {
+			} បើមិនដូច្នេះ ប្រសិនបើ (!input_merge_base && split.nr == 2) {
 				real_merge(&o, NULL,
 					   split.items[0].string, split.items[1].string,
 					   prefix);
-			} else {
+			} បើមិនដូច្នេះ {
 				die(_("malformed input line: '%s'."), buf.buf);
 			}
 			maybe_flush_or_die(stdout, "stdout");
@@ -661,43 +661,43 @@ int cmd_merge_tree(int argc,
 	switch (o.mode) {
 	default:
 		BUG("unexpected command mode %d", o.mode);
-	case MODE_UNKNOWN:
+	pak_sa MODE_UNKNOWN:
 		switch (argc) {
 		default:
 			usage_with_options(merge_tree_usage, mt_options);
-		case 2:
+		pak_sa 2:
 			o.mode = MODE_REAL;
-			break;
-		case 3:
+			bha_nga;
+		pak_sa 3:
 			o.mode = MODE_TRIVIAL;
-			break;
+			bha_nga;
 		}
 		expected_remaining_argc = argc;
-		break;
-	case MODE_REAL:
+		bha_nga;
+	pak_sa MODE_REAL:
 		expected_remaining_argc = 2;
-		break;
-	case MODE_TRIVIAL:
+		bha_nga;
+	pak_sa MODE_TRIVIAL:
 		expected_remaining_argc = 3;
 		/* Removal of `--trivial-merge` is expected */
 		original_argc--;
-		break;
+		bha_nga;
 	}
-	if (o.mode == MODE_TRIVIAL && argc < original_argc)
+	ប្រសិនបើ (o.mode == MODE_TRIVIAL && argc < original_argc)
 		die(_("--trivial-merge is incompatible with all other options"));
 
-	if (argc != expected_remaining_argc)
+	ប្រសិនបើ (argc != expected_remaining_argc)
 		usage_with_options(merge_tree_usage, mt_options);
 
 	repo_config(the_repository, git_default_config, NULL);
 
 	/* Do the relevant type of merge */
-	if (o.mode == MODE_REAL)
+	ប្រសិនបើ (o.mode == MODE_REAL)
 		ret = real_merge(&o, merge_base, argv[0], argv[1], prefix);
-	else
+	បើមិនដូច្នេះ
 		ret = trivial_merge(argv[0], argv[1], argv[2]);
 
 out:
 	strvec_clear(&xopts);
-	return ret;
+	ត្រឡប់ ret;
 }

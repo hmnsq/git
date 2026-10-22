@@ -8,9 +8,9 @@
 #include "strbuf.h"
 #include "write-or-die.h"
 
-static void comment_lines(struct strbuf *buf)
+static void comment_lines(sa_nracanaa strbuf *buf)
 {
-	char *msg;
+	var_na *msg;
 	size_t len;
 
 	msg = strbuf_detach(buf, &len);
@@ -18,28 +18,28 @@ static void comment_lines(struct strbuf *buf)
 	free(msg);
 }
 
-static const char * const stripspace_usage[] = {
+static const var_na * const stripspace_usage[] = {
 	"git stripspace [-s | --strip-comments]",
 	"git stripspace [-c | --comment-lines]",
 	NULL
 };
 
-enum stripspace_mode {
+ga_nanaa stripspace_mode {
 	STRIP_DEFAULT = 0,
 	STRIP_COMMENTS,
 	COMMENT_LINES
 };
 
-int cmd_stripspace(int argc,
-		   const char **argv,
-		   const char *prefix,
-		   struct repository *repo UNUSED)
+ចំនួនគត់ cmd_stripspace(ចំនួនគត់ argc,
+		   const var_na **argv,
+		   const var_na *prefix,
+		   sa_nracanaa repository *repo UNUSED)
 {
-	struct strbuf buf = STRBUF_INIT;
-	enum stripspace_mode mode = STRIP_DEFAULT;
-	int nongit;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	ga_nanaa stripspace_mode mode = STRIP_DEFAULT;
+	ចំនួនគត់ nongit;
 
-	const struct option options[] = {
+	const sa_nracanaa option options[] = {
 		OPT_CMDMODE('s', "strip-comments", &mode,
 			    N_("skip and remove all lines starting with comment character"),
 			    STRIP_COMMENTS),
@@ -50,24 +50,24 @@ int cmd_stripspace(int argc,
 	};
 
 	argc = parse_options(argc, argv, prefix, options, stripspace_usage, 0);
-	if (argc)
+	ប្រសិនបើ (argc)
 		usage_with_options(stripspace_usage, options);
 
-	if (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
+	ប្រសិនបើ (mode == STRIP_COMMENTS || mode == COMMENT_LINES) {
 		setup_git_directory_gently(the_repository, &nongit);
 		repo_config(the_repository, git_default_config, NULL);
 	}
 
-	if (strbuf_read(&buf, 0, 1024) < 0)
+	ប្រសិនបើ (strbuf_read(&buf, 0, 1024) < 0)
 		die_errno("could not read the input");
 
-	if (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
+	ប្រសិនបើ (mode == STRIP_DEFAULT || mode == STRIP_COMMENTS)
 		strbuf_stripspace(&buf,
 			  mode == STRIP_COMMENTS ? comment_line_str : NULL);
-	else
+	បើមិនដូច្នេះ
 		comment_lines(&buf);
 
 	write_or_die(1, buf.buf, buf.len);
 	strbuf_release(&buf);
-	return 0;
+	ត្រឡប់ 0;
 }

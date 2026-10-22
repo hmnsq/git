@@ -7,92 +7,92 @@
 #include "run-command.h"
 #include "sparse-index.h"
 
-static const char *pgm;
-static int one_shot, quiet;
-static int err;
+static const var_na *pgm;
+static ចំនួនគត់ one_shot, quiet;
+static ចំនួនគត់ err;
 
-static int merge_entry(int pos, const char *path)
+static ចំនួនគត់ merge_entry(ចំនួនគត់ pos, const var_na *path)
 {
-	int found;
-	const char *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
-	char hexbuf[4][GIT_MAX_HEXSZ + 1];
-	char ownbuf[4][60];
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	ចំនួនគត់ found;
+	const var_na *arguments[] = { pgm, "", "", "", path, "", "", "", NULL };
+	var_na hexbuf[4][GIT_MAX_HEXSZ + 1];
+	var_na ownbuf[4][60];
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
-	if (pos >= the_repository->index->cache_nr)
+	ប្រសិនបើ (pos >= the_repository->index->cache_nr)
 		die("git merge-index: %s not in the cache", path);
 	found = 0;
 	do {
-		const struct cache_entry *ce = the_repository->index->cache[pos];
-		int stage = ce_stage(ce);
+		const sa_nracanaa cache_entry *ce = the_repository->index->cache[pos];
+		ចំនួនគត់ stage = ce_stage(ce);
 
-		if (strcmp(ce->name, path))
-			break;
+		ប្រសិនបើ (strcmp(ce->name, path))
+			bha_nga;
 		found++;
 		oid_to_hex_r(hexbuf[stage], &ce->oid);
-		xsnprintf(ownbuf[stage], sizeof(ownbuf[stage]), "%o", ce->ce_mode);
+		xsnprintf(ownbuf[stage], parimaa_na(ownbuf[stage]), "%o", ce->ce_mode);
 		arguments[stage] = hexbuf[stage];
 		arguments[stage + 4] = ownbuf[stage];
-	} while (++pos < the_repository->index->cache_nr);
-	if (!found)
+	} ខណៈពេល (++pos < the_repository->index->cache_nr);
+	ប្រសិនបើ (!found)
 		die("git merge-index: %s not in the cache", path);
 
 	strvec_pushv(&cmd.args, arguments);
-	if (run_command(&cmd)) {
-		if (one_shot)
+	ប្រសិនបើ (run_command(&cmd)) {
+		ប្រសិនបើ (one_shot)
 			err++;
-		else {
-			if (!quiet)
+		បើមិនដូច្នេះ {
+			ប្រសិនបើ (!quiet)
 				die("merge program failed");
 			exit(1);
 		}
 	}
-	return found;
+	ត្រឡប់ found;
 }
 
-static void merge_one_path(const char *path)
+static void merge_one_path(const var_na *path)
 {
-	int pos = index_name_pos(the_repository->index, path, strlen(path));
+	ចំនួនគត់ pos = index_name_pos(the_repository->index, path, strlen(path));
 
 	/*
 	 * If it already exists in the cache as stage0, it's
 	 * already merged and there is nothing to do.
 	 */
-	if (pos < 0)
+	ប្រសិនបើ (pos < 0)
 		merge_entry(-pos-1, path);
 }
 
 static void merge_all(void)
 {
-	int i;
+	ចំនួនគត់ i;
 	/* TODO: audit for interaction with sparse-index. */
 	ensure_full_index(the_repository->index);
-	for (i = 0; i < the_repository->index->cache_nr; i++) {
-		const struct cache_entry *ce = the_repository->index->cache[i];
-		if (!ce_stage(ce))
+	សម្រាប់ (i = 0; i < the_repository->index->cache_nr; i++) {
+		const sa_nracanaa cache_entry *ce = the_repository->index->cache[i];
+		ប្រសិនបើ (!ce_stage(ce))
 			continue;
 		i += merge_entry(i, ce->name)-1;
 	}
 }
 
-static const char usage_string[] =
+static const var_na usage_string[] =
 "git merge-index [-o] [-q] <merge-program> (-a | [--] [<filename>...])";
 
-int cmd_merge_index(int argc,
-		    const char **argv,
-		    const char *prefix UNUSED,
-		    struct repository *repo UNUSED)
+ចំនួនគត់ cmd_merge_index(ចំនួនគត់ argc,
+		    const var_na **argv,
+		    const var_na *prefix UNUSED,
+		    sa_nracanaa repository *repo UNUSED)
 {
-	int i, force_file = 0;
+	ចំនួនគត់ i, force_file = 0;
 
 	/* Without this we cannot rely on waitpid() to tell
 	 * what happened to our children.
 	 */
-	signal(SIGCHLD, SIG_DFL);
+	sa_nkeeta(SIGCHLD, SIG_DFL);
 
 	show_usage_if_asked(argc, argv, usage_string);
 
-	if (argc < 3)
+	ប្រសិនបើ (argc < 3)
 		usage(usage_string);
 
 	repo_read_index(the_repository);
@@ -101,23 +101,23 @@ int cmd_merge_index(int argc,
 	ensure_full_index(the_repository->index);
 
 	i = 1;
-	if (!strcmp(argv[i], "-o")) {
+	ប្រសិនបើ (!strcmp(argv[i], "-o")) {
 		one_shot = 1;
 		i++;
 	}
-	if (!strcmp(argv[i], "-q")) {
+	ប្រសិនបើ (!strcmp(argv[i], "-q")) {
 		quiet = 1;
 		i++;
 	}
 	pgm = argv[i++];
-	for (; i < argc; i++) {
-		const char *arg = argv[i];
-		if (!force_file && *arg == '-') {
-			if (!strcmp(arg, "--")) {
+	សម្រាប់ (; i < argc; i++) {
+		const var_na *arg = argv[i];
+		ប្រសិនបើ (!force_file && *arg == '-') {
+			ប្រសិនបើ (!strcmp(arg, "--")) {
 				force_file = 1;
 				continue;
 			}
-			if (!strcmp(arg, "-a")) {
+			ប្រសិនបើ (!strcmp(arg, "-a")) {
 				merge_all();
 				continue;
 			}
@@ -125,7 +125,7 @@ int cmd_merge_index(int argc,
 		}
 		merge_one_path(arg);
 	}
-	if (err && !quiet)
+	ប្រសិនបើ (err && !quiet)
 		die("merge program failed");
-	return err;
+	ត្រឡប់ err;
 }

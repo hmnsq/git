@@ -19,50 +19,50 @@
 #include "odb.h"
 #include "shallow.h"
 
-static const char * const prune_usage[] = {
+static const var_na * const prune_usage[] = {
 	N_("git prune [-n] [-v] [--progress] [--expire <time>] [--] [<head>...]"),
 	NULL
 };
-static int show_only;
-static int verbose;
+static ចំនួនគត់ show_only;
+static ចំនួនគត់ verbose;
 static timestamp_t expire;
-static int show_progress = -1;
+static ចំនួនគត់ show_progress = -1;
 
-static int prune_tmp_file(const char *fullpath)
+static ចំនួនគត់ prune_tmp_file(const var_na *fullpath)
 {
-	struct stat st;
-	if (lstat(fullpath, &st))
-		return error("Could not stat '%s'", fullpath);
-	if (st.st_mtime > expire)
-		return 0;
-	if (S_ISDIR(st.st_mode)) {
-		if (show_only || verbose)
+	sa_nracanaa stat st;
+	ប្រសិនបើ (lstat(fullpath, &st))
+		ត្រឡប់ error("Could not stat '%s'", fullpath);
+	ប្រសិនបើ (st.st_mtime > expire)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (S_ISDIR(st.st_mode)) {
+		ប្រសិនបើ (show_only || verbose)
 			printf("Removing stale temporary directory %s\n", fullpath);
-		if (!show_only) {
-			struct strbuf remove_dir_buf = STRBUF_INIT;
+		ប្រសិនបើ (!show_only) {
+			sa_nracanaa strbuf remove_dir_buf = STRBUF_INIT;
 
 			strbuf_addstr(&remove_dir_buf, fullpath);
 			remove_dir_recursively(&remove_dir_buf, 0);
 			strbuf_release(&remove_dir_buf);
 		}
-	} else {
-		if (show_only || verbose)
+	} បើមិនដូច្នេះ {
+		ប្រសិនបើ (show_only || verbose)
 			printf("Removing stale temporary file %s\n", fullpath);
-		if (!show_only)
+		ប្រសិនបើ (!show_only)
 			unlink_or_warn(fullpath);
 	}
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static void perform_reachability_traversal(struct rev_info *revs)
+static void perform_reachability_traversal(sa_nracanaa rev_info *revs)
 {
-	static int initialized;
-	struct progress *progress = NULL;
+	static ចំនួនគត់ initialized;
+	sa_nracanaa progress *progress = NULL;
 
-	if (initialized)
-		return;
+	ប្រសិនបើ (initialized)
+		ត្រឡប់;
 
-	if (show_progress)
+	ប្រសិនបើ (show_progress)
 		progress = start_delayed_progress(revs->repo,
 						  _("Checking connectivity"), 0);
 	mark_reachable_objects(revs, 1, expire, progress);
@@ -70,60 +70,60 @@ static void perform_reachability_traversal(struct rev_info *revs)
 	initialized = 1;
 }
 
-static int is_object_reachable(const struct object_id *oid,
-			       struct rev_info *revs)
+static ចំនួនគត់ is_object_reachable(const sa_nracanaa object_id *oid,
+			       sa_nracanaa rev_info *revs)
 {
-	struct object *obj;
+	sa_nracanaa object *obj;
 
 	perform_reachability_traversal(revs);
 
 	obj = lookup_object(revs->repo, oid);
-	return obj && (obj->flags & SEEN);
+	ត្រឡប់ obj && (obj->flags & SEEN);
 }
 
-static int prune_object(const struct object_id *oid, const char *fullpath,
+static ចំនួនគត់ prune_object(const sa_nracanaa object_id *oid, const var_na *fullpath,
 			void *data)
 {
-	struct rev_info *revs = data;
-	struct stat st;
+	sa_nracanaa rev_info *revs = data;
+	sa_nracanaa stat st;
 
-	if (is_object_reachable(oid, revs))
-		return 0;
+	ប្រសិនបើ (is_object_reachable(oid, revs))
+		ត្រឡប់ 0;
 
-	if (lstat(fullpath, &st)) {
+	ប្រសិនបើ (lstat(fullpath, &st)) {
 		/* report errors, but do not stop pruning */
 		error("Could not stat '%s'", fullpath);
-		return 0;
+		ត្រឡប់ 0;
 	}
-	if (st.st_mtime > expire)
-		return 0;
-	if (show_only || verbose) {
-		enum object_type type =
+	ប្រសិនបើ (st.st_mtime > expire)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (show_only || verbose) {
+		ga_nanaa object_type type =
 			odb_read_object_info(revs->repo->objects, oid, NULL);
 		printf("%s %s\n", oid_to_hex(oid),
 		       (type > 0) ? type_name(type) : "unknown");
 	}
-	if (!show_only)
+	ប្រសិនបើ (!show_only)
 		unlink_or_warn(fullpath);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int prune_cruft(const char *basename, const char *path,
+static ចំនួនគត់ prune_cruft(const var_na *basename, const var_na *path,
 		       void *data UNUSED)
 {
-	if (starts_with(basename, "tmp_obj_"))
+	ប្រសិនបើ (starts_with(basename, "tmp_obj_"))
 		prune_tmp_file(path);
-	else
+	បើមិនដូច្នេះ
 		fprintf(stderr, "bad sha1 file: %s\n", path);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int prune_subdir(unsigned int nr UNUSED, const char *path,
+static ចំនួនគត់ prune_subdir(unsigned ចំនួនគត់ nr UNUSED, const var_na *path,
 			void *data UNUSED)
 {
-	if (!show_only)
+	ប្រសិនបើ (!show_only)
 		rmdir(path);
-	return 0;
+	ត្រឡប់ 0;
 }
 
 /*
@@ -132,32 +132,32 @@ static int prune_subdir(unsigned int nr UNUSED, const char *path,
  * files beginning with "tmp_") accumulating in the object
  * and the pack directories.
  */
-static void remove_temporary_files(const char *path)
+static void remove_temporary_files(const var_na *path)
 {
 	DIR *dir;
-	struct dirent *de;
+	sa_nracanaa dirent *de;
 
 	dir = opendir(path);
-	if (!dir) {
-		if (errno != ENOENT)
+	ប្រសិនបើ (!dir) {
+		ប្រសិនបើ (errno != ENOENT)
 			fprintf(stderr, "Unable to open directory %s: %s\n",
 				path, strerror(errno));
-		return;
+		ត្រឡប់;
 	}
-	while ((de = readdir(dir)) != NULL)
-		if (starts_with(de->d_name, "tmp_"))
+	ខណៈពេល ((de = readdir(dir)) != NULL)
+		ប្រសិនបើ (starts_with(de->d_name, "tmp_"))
 			prune_tmp_file(mkpath("%s/%s", path, de->d_name));
 	closedir(dir);
 }
 
-int cmd_prune(int argc,
-	      const char **argv,
-	      const char *prefix,
-	      struct repository *repo)
+ចំនួនគត់ cmd_prune(ចំនួនគត់ argc,
+	      const var_na **argv,
+	      const var_na *prefix,
+	      sa_nracanaa repository *repo)
 {
-	struct rev_info revs;
-	int exclude_promisor_objects = 0;
-	const struct option options[] = {
+	sa_nracanaa rev_info revs;
+	ចំនួនគត់ exclude_promisor_objects = 0;
+	const sa_nracanaa option options[] = {
 		OPT__DRY_RUN(&show_only, N_("do not remove, show only")),
 		OPT__VERBOSE(&verbose, N_("report pruned objects")),
 		OPT_BOOL(0, "progress", &show_progress, N_("show progress")),
@@ -167,7 +167,7 @@ int cmd_prune(int argc,
 			 N_("limit traversal to objects outside promisor packfiles")),
 		OPT_END()
 	};
-	char *s;
+	var_na *s;
 
 	expire = TIME_MAX;
 	save_commit_buffer = 0;
@@ -176,24 +176,24 @@ int cmd_prune(int argc,
 	argc = parse_options(argc, argv, prefix, options, prune_usage, 0);
 
 	repo_init_revisions(repo, &revs, prefix);
-	if (repo->repository_format_precious_objects)
+	ប្រសិនបើ (repo->repository_format_precious_objects)
 		die(_("cannot prune in a precious-objects repo"));
 
-	while (argc--) {
-		struct object_id oid;
-		const char *name = *argv++;
+	ខណៈពេល (argc--) {
+		sa_nracanaa object_id oid;
+		const var_na *name = *argv++;
 
-		if (!repo_get_oid(repo, name, &oid)) {
-			struct object *object = parse_object_or_die(repo, &oid, name);
+		ប្រសិនបើ (!repo_get_oid(repo, name, &oid)) {
+			sa_nracanaa object *object = parse_object_or_die(repo, &oid, name);
 			add_pending_object(&revs, object, "");
 		}
-		else
+		បើមិនដូច្នេះ
 			die("unrecognized argument: %s", name);
 	}
 
-	if (show_progress == -1)
+	ប្រសិនបើ (show_progress == -1)
 		show_progress = isatty(2);
-	if (exclude_promisor_objects) {
+	ប្រសិនបើ (exclude_promisor_objects) {
 		repo->fetch_if_missing = 0;
 		revs.exclude_promisor_objects = 1;
 	}
@@ -207,11 +207,11 @@ int cmd_prune(int argc,
 	remove_temporary_files(s);
 	free(s);
 
-	if (is_repository_shallow(repo)) {
+	ប្រសិនបើ (is_repository_shallow(repo)) {
 		perform_reachability_traversal(&revs);
 		prune_shallow(show_only ? PRUNE_SHOW_ONLY : 0);
 	}
 
 	release_revisions(&revs);
-	return 0;
+	ត្រឡប់ 0;
 }

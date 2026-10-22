@@ -20,12 +20,12 @@
 #include "strbuf.h"
 #include "write-or-die.h"
 
-static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
+static void hash_fd(ចំនួនគត់ fd, const var_na *type, const var_na *path, unsigned flags)
 {
-	struct stat st;
-	struct object_id oid;
+	sa_nracanaa stat st;
+	sa_nracanaa object_id oid;
 
-	if (fstat(fd, &st) < 0 ||
+	ប្រសិនបើ (fstat(fd, &st) < 0 ||
 	    index_fd(the_repository->index, &oid, fd, &st,
 		     type_from_string(type), path, flags))
 		die((flags & INDEX_WRITE_OBJECT)
@@ -35,23 +35,23 @@ static void hash_fd(int fd, const char *type, const char *path, unsigned flags)
 	maybe_flush_or_die(stdout, "hash to stdout");
 }
 
-static void hash_object(const char *path, const char *type, const char *vpath,
+static void hash_object(const var_na *path, const var_na *type, const var_na *vpath,
 			unsigned flags)
 {
-	int fd;
+	ចំនួនគត់ fd;
 	fd = xopen(path, O_RDONLY);
 	hash_fd(fd, type, vpath, flags);
 }
 
-static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
+static void hash_stdin_paths(const var_na *type, ចំនួនគត់ no_filters, unsigned flags)
 {
-	struct strbuf buf = STRBUF_INIT;
-	struct strbuf unquoted = STRBUF_INIT;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	sa_nracanaa strbuf unquoted = STRBUF_INIT;
 
-	while (strbuf_getline(&buf, stdin) != EOF) {
-		if (buf.buf[0] == '"') {
+	ខណៈពេល (strbuf_getline(&buf, stdin) != EOF) {
+		ប្រសិនបើ (buf.buf[0] == '"') {
 			strbuf_reset(&unquoted);
-			if (unquote_c_style(&unquoted, buf.buf, NULL))
+			ប្រសិនបើ (unquote_c_style(&unquoted, buf.buf, NULL))
 				die("line is badly quoted");
 			strbuf_swap(&buf, &unquoted);
 		}
@@ -61,26 +61,26 @@ static void hash_stdin_paths(const char *type, int no_filters, unsigned flags)
 	strbuf_release(&unquoted);
 }
 
-int cmd_hash_object(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo UNUSED)
+ចំនួនគត់ cmd_hash_object(ចំនួនគត់ argc,
+		    const var_na **argv,
+		    const var_na *prefix,
+		    sa_nracanaa repository *repo UNUSED)
 {
-	static const char * const hash_object_usage[] = {
+	static const var_na * const hash_object_usage[] = {
 		N_("git hash-object [-t <type>] [-w] [--path=<file> | --no-filters]\n"
 		   "                [--stdin [--literally]] [--] <file>..."),
 		N_("git hash-object [-t <type>] [-w] --stdin-paths [--no-filters]"),
 		NULL
 	};
-	const char *type = blob_type;
-	int hashstdin = 0;
-	int stdin_paths = 0;
-	int no_filters = 0;
-	int nongit = 0;
+	const var_na *type = blob_type;
+	ចំនួនគត់ hashstdin = 0;
+	ចំនួនគត់ stdin_paths = 0;
+	ចំនួនគត់ no_filters = 0;
+	ចំនួនគត់ nongit = 0;
 	unsigned flags = INDEX_FORMAT_CHECK;
-	const char *vpath = NULL;
-	char *vpath_free = NULL;
-	const struct option hash_object_options[] = {
+	const var_na *vpath = NULL;
+	var_na *vpath_free = NULL;
+	const sa_nracanaa option hash_object_options[] = {
 		OPT_STRING('t', NULL, &type, N_("type"), N_("object type")),
 		OPT_BIT('w', NULL, &flags, N_("write the object into the object database"),
 			INDEX_WRITE_OBJECT),
@@ -93,65 +93,65 @@ int cmd_hash_object(int argc,
 		OPT_STRING( 0 , "path", &vpath, N_("file"), N_("process file as it were from this path")),
 		OPT_END()
 	};
-	int i;
-	const char *errstr = NULL;
+	ចំនួនគត់ i;
+	const var_na *errstr = NULL;
 
 	argc = parse_options(argc, argv, prefix, hash_object_options,
 			     hash_object_usage, 0);
 
-	if (flags & INDEX_WRITE_OBJECT)
+	ប្រសិនបើ (flags & INDEX_WRITE_OBJECT)
 		prefix = setup_git_directory(the_repository);
-	else
+	បើមិនដូច្នេះ
 		prefix = setup_git_directory_gently(the_repository, &nongit);
 
-	if (nongit && !the_hash_algo)
+	ប្រសិនបើ (nongit && !the_hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
-	if (vpath && prefix) {
+	ប្រសិនបើ (vpath && prefix) {
 		vpath_free = prefix_filename(prefix, vpath);
 		vpath = vpath_free;
 	}
 
 	repo_config(the_repository, git_default_config, NULL);
 
-	if (stdin_paths) {
-		if (hashstdin)
+	ប្រសិនបើ (stdin_paths) {
+		ប្រសិនបើ (hashstdin)
 			errstr = "Can't use --stdin-paths with --stdin";
-		else if (argc)
+		បើមិនដូច្នេះ ប្រសិនបើ (argc)
 			errstr = "Can't specify files with --stdin-paths";
-		else if (vpath)
+		បើមិនដូច្នេះ ប្រសិនបើ (vpath)
 			errstr = "Can't use --stdin-paths with --path";
 	}
-	else {
-		if (hashstdin > 1)
+	បើមិនដូច្នេះ {
+		ប្រសិនបើ (hashstdin > 1)
 			errstr = "Multiple --stdin arguments are not supported";
-		if (vpath && no_filters)
+		ប្រសិនបើ (vpath && no_filters)
 			errstr = "Can't use --path with --no-filters";
 	}
 
-	if (errstr) {
+	ប្រសិនបើ (errstr) {
 		error("%s", errstr);
 		usage_with_options(hash_object_usage, hash_object_options);
 	}
 
-	if (hashstdin)
+	ប្រសិនបើ (hashstdin)
 		hash_fd(0, type, vpath, flags);
 
-	for (i = 0 ; i < argc; i++) {
-		const char *arg = argv[i];
-		char *to_free = NULL;
+	សម្រាប់ (i = 0 ; i < argc; i++) {
+		const var_na *arg = argv[i];
+		var_na *to_free = NULL;
 
-		if (prefix)
+		ប្រសិនបើ (prefix)
 			arg = to_free = prefix_filename(prefix, arg);
 		hash_object(arg, type, no_filters ? NULL : vpath ? vpath : arg,
 			    flags);
 		free(to_free);
 	}
 
-	if (stdin_paths)
+	ប្រសិនបើ (stdin_paths)
 		hash_stdin_paths(type, no_filters, flags);
 
 	free(vpath_free);
 
-	return 0;
+	ត្រឡប់ 0;
 }

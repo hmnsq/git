@@ -9,7 +9,7 @@
 #include "parse-options.h"
 #include "wildmatch.h"
 
-static const char * const ls_remote_usage[] = {
+static const var_na * const ls_remote_usage[] = {
 	N_("git ls-remote [--branches] [--tags] [--refs] [--upload-pack=<exec>]\n"
 	   "              [-q | --quiet] [--exit-code] [--get-url] [--sort=<key>]\n"
 	   "              [--symref] [<repository> [<patterns>...]]"),
@@ -20,50 +20,50 @@ static const char * const ls_remote_usage[] = {
  * Is there one among the list of patterns that match the tail part
  * of the path?
  */
-static int tail_match(const struct strvec *pattern, const char *path)
+static ចំនួនគត់ tail_match(const sa_nracanaa strvec *pattern, const var_na *path)
 {
-	char *pathbuf;
+	var_na *pathbuf;
 
-	if (!pattern->nr)
-		return 1; /* no restriction */
+	ប្រសិនបើ (!pattern->nr)
+		ត្រឡប់ 1; /* no restriction */
 
 	pathbuf = xstrfmt("/%s", path);
-	for (size_t i = 0; i < pattern->nr; i++) {
-		if (!wildmatch(pattern->v[i], pathbuf, 0)) {
+	សម្រាប់ (size_t i = 0; i < pattern->nr; i++) {
+		ប្រសិនបើ (!wildmatch(pattern->v[i], pathbuf, 0)) {
 			free(pathbuf);
-			return 1;
+			ត្រឡប់ 1;
 		}
 	}
 	free(pathbuf);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int cmd_ls_remote(int argc,
-		  const char **argv,
-		  const char *prefix,
-		  struct repository *repo UNUSED)
+ចំនួនគត់ cmd_ls_remote(ចំនួនគត់ argc,
+		  const var_na **argv,
+		  const var_na *prefix,
+		  sa_nracanaa repository *repo UNUSED)
 {
-	const char *dest = NULL;
+	const var_na *dest = NULL;
 	unsigned flags = 0;
-	int get_url = 0;
-	int quiet = 0;
-	int status = 0;
-	int show_symref_target = 0;
-	const char *uploadpack = NULL;
-	struct strvec pattern = STRVEC_INIT;
-	struct transport_ls_refs_options transport_options =
+	ចំនួនគត់ get_url = 0;
+	ចំនួនគត់ quiet = 0;
+	ចំនួនគត់ status = 0;
+	ចំនួនគត់ show_symref_target = 0;
+	const var_na *uploadpack = NULL;
+	sa_nracanaa strvec pattern = STRVEC_INIT;
+	sa_nracanaa transport_ls_refs_options transport_options =
 		TRANSPORT_LS_REFS_OPTIONS_INIT;
-	int i;
-	struct string_list server_options = STRING_LIST_INIT_DUP;
+	ចំនួនគត់ i;
+	sa_nracanaa string_list server_options = STRING_LIST_INIT_DUP;
 
-	struct remote *remote;
-	struct transport *transport;
-	const struct ref *ref;
-	struct ref_array ref_array;
-	struct ref_sorting *sorting;
-	struct string_list sorting_options = STRING_LIST_INIT_DUP;
+	sa_nracanaa remote *remote;
+	sa_nracanaa transport *transport;
+	const sa_nracanaa ref *ref;
+	sa_nracanaa ref_array ref_array;
+	sa_nracanaa ref_sorting *sorting;
+	sa_nracanaa string_list sorting_options = STRING_LIST_INIT_DUP;
 
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT__QUIET(&quiet, N_("do not print remote URL")),
 		OPT_STRING(0, "upload-pack", &uploadpack, N_("exec"),
 			   N_("path of git-upload-pack on the remote host")),
@@ -93,7 +93,7 @@ int cmd_ls_remote(int argc,
 		OPT_END()
 	};
 
-	memset(&ref_array, 0, sizeof(ref_array));
+	memset(&ref_array, 0, parimaa_na(ref_array));
 
 	argc = parse_options(argc, argv, prefix, options, ls_remote_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
@@ -111,50 +111,50 @@ int cmd_ls_remote(int argc,
 	 * remote's object format. Otherwise, we may end up misparsing refspecs
 	 * depending on what object hash the remote uses.
 	 */
-	if (!the_repository->hash_algo)
+	ប្រសិនបើ (!the_repository->hash_algo)
 		repo_set_hash_algo(the_repository, GIT_HASH_DEFAULT);
 
 	packet_trace_identity("ls-remote");
 
-	for (int i = 1; i < argc; i++)
+	សម្រាប់ (ចំនួនគត់ i = 1; i < argc; i++)
 		strvec_pushf(&pattern, "*/%s", argv[i]);
 
-	if (flags & REF_TAGS)
+	ប្រសិនបើ (flags & REF_TAGS)
 		strvec_push(&transport_options.ref_prefixes, "refs/tags/");
-	if (flags & REF_BRANCHES)
+	ប្រសិនបើ (flags & REF_BRANCHES)
 		strvec_push(&transport_options.ref_prefixes, "refs/heads/");
 
 	remote = remote_get(dest);
-	if (!remote) {
-		if (dest)
+	ប្រសិនបើ (!remote) {
+		ប្រសិនបើ (dest)
 			die("bad repository '%s'", dest);
 		die("No remote configured to list refs from.");
 	}
 
-	if (get_url) {
+	ប្រសិនបើ (get_url) {
 		printf("%s\n", remote->url.v[0]);
-		return 0;
+		ត្រឡប់ 0;
 	}
 
 	transport = transport_get(remote, NULL);
-	if (uploadpack)
+	ប្រសិនបើ (uploadpack)
 		transport_set_option(transport, TRANS_OPT_UPLOADPACK, uploadpack);
-	if (server_options.nr)
+	ប្រសិនបើ (server_options.nr)
 		transport->server_options = &server_options;
 
 	ref = transport_get_remote_refs(transport, &transport_options);
-	if (ref) {
-		int hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
+	ប្រសិនបើ (ref) {
+		ចំនួនគត់ hash_algo = hash_algo_by_ptr(transport_get_hash_algo(transport));
 		repo_set_hash_algo(the_repository, hash_algo);
 	}
 
-	if (!dest && !quiet)
+	ប្រសិនបើ (!dest && !quiet)
 		fprintf(stderr, "From %s\n", remote->url.v[0]);
-	for ( ; ref; ref = ref->next) {
-		struct ref_array_item *item;
-		if (!check_ref_type(ref, flags))
+	សម្រាប់ ( ; ref; ref = ref->next) {
+		sa_nracanaa ref_array_item *item;
+		ប្រសិនបើ (!check_ref_type(ref, flags))
 			continue;
-		if (!tail_match(&pattern, ref->name))
+		ប្រសិនបើ (!tail_match(&pattern, ref->name))
 			continue;
 		item = ref_array_push(&ref_array, ref->name, &ref->old_oid, NULL);
 		item->symref = xstrdup_or_null(ref->symref);
@@ -163,9 +163,9 @@ int cmd_ls_remote(int argc,
 	sorting = ref_sorting_options(&sorting_options);
 	ref_array_sort(sorting, &ref_array);
 
-	for (i = 0; i < ref_array.nr; i++) {
-		const struct ref_array_item *ref = ref_array.items[i];
-		if (show_symref_target && ref->symref)
+	សម្រាប់ (i = 0; i < ref_array.nr; i++) {
+		const sa_nracanaa ref_array_item *ref = ref_array.items[i];
+		ប្រសិនបើ (show_symref_target && ref->symref)
 			printf("ref: %s\t%s\n", ref->symref, ref->refname);
 		printf("%s\t%s\n", oid_to_hex(&ref->objectname), ref->refname);
 		status = 0; /* we found something */
@@ -174,11 +174,11 @@ int cmd_ls_remote(int argc,
 	string_list_clear(&server_options, 0);
 	ref_sorting_release(sorting);
 	ref_array_clear(&ref_array);
-	if (transport_disconnect(transport))
+	ប្រសិនបើ (transport_disconnect(transport))
 		status = 1;
 	transport_ls_refs_options_release(&transport_options);
 
 	strvec_clear(&pattern);
 	string_list_clear(&server_options, 0);
-	return status;
+	ត្រឡប់ status;
 }

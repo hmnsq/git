@@ -46,52 +46,52 @@
 
 #define FAILED_RUN "failed to run %s"
 
-static const char * const builtin_gc_usage[] = {
+static const var_na * const builtin_gc_usage[] = {
 	N_("git gc [<options>]"),
 	NULL
 };
 
 static timestamp_t gc_log_expire_time;
-static struct tempfile *pidfile;
-static struct lock_file log_lock;
-static struct string_list pack_garbage = STRING_LIST_INIT_DUP;
+static sa_nracanaa tempfile *pidfile;
+static sa_nracanaa lock_file log_lock;
+static sa_nracanaa string_list pack_garbage = STRING_LIST_INIT_DUP;
 
 static void clean_pack_garbage(void)
 {
-	int i;
-	for (i = 0; i < pack_garbage.nr; i++)
+	ចំនួនគត់ i;
+	សម្រាប់ (i = 0; i < pack_garbage.nr; i++)
 		unlink_or_warn(pack_garbage.items[i].string);
 	string_list_clear(&pack_garbage, 0);
 }
 
-static void report_pack_garbage(unsigned seen_bits, const char *path)
+static void report_pack_garbage(unsigned seen_bits, const var_na *path)
 {
-	if (seen_bits == PACKDIR_FILE_IDX)
+	ប្រសិនបើ (seen_bits == PACKDIR_FILE_IDX)
 		string_list_append(&pack_garbage, path);
 }
 
 static void process_log_file(void)
 {
-	struct stat st;
-	if (fstat(get_lock_file_fd(&log_lock), &st)) {
+	sa_nracanaa stat st;
+	ប្រសិនបើ (fstat(get_lock_file_fd(&log_lock), &st)) {
 		/*
 		 * Perhaps there was an i/o error or another
 		 * unlikely situation.  Try to make a note of
 		 * this in gc.log along with any existing
 		 * messages.
 		 */
-		int saved_errno = errno;
+		ចំនួនគត់ saved_errno = errno;
 		fprintf(stderr, _("Failed to fstat %s: %s"),
 			get_lock_file_path(&log_lock),
 			strerror(saved_errno));
 		fflush(stderr);
 		commit_lock_file(&log_lock);
 		errno = saved_errno;
-	} else if (st.st_size) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (st.st_size) {
 		/* There was some error recorded in the lock file */
 		commit_lock_file(&log_lock);
-	} else {
-		char *path = repo_git_path(the_repository, "gc.log");
+	} បើមិនដូច្នេះ {
+		var_na *path = repo_git_path(the_repository, "gc.log");
 		/* No error, clean up any old gc.log */
 		unlink(path);
 		rollback_lock_file(&log_lock);
@@ -105,31 +105,31 @@ static void process_log_file_at_exit(void)
 	process_log_file();
 }
 
-static int gc_config_is_timestamp_never(const char *var)
+static ចំនួនគត់ gc_config_is_timestamp_never(const var_na *var)
 {
-	const char *value;
+	const var_na *value;
 	timestamp_t expire;
 
-	if (!repo_config_get_value(the_repository, var, &value) && value) {
-		if (parse_expiry_date(value, &expire))
+	ប្រសិនបើ (!repo_config_get_value(the_repository, var, &value) && value) {
+		ប្រសិនបើ (parse_expiry_date(value, &expire))
 			die(_("failed to parse '%s' value '%s'"), var, value);
-		return expire == 0;
+		ត្រឡប់ expire == 0;
 	}
-	return 0;
+	ត្រឡប់ 0;
 }
 
-struct gc_config {
-	int pack_refs;
-	int prune_reflogs;
-	int cruft_packs;
+sa_nracanaa gc_config {
+	ចំនួនគត់ pack_refs;
+	ចំនួនគត់ prune_reflogs;
+	ចំនួនគត់ cruft_packs;
 	unsigned long max_cruft_size;
-	int aggressive_depth;
-	int aggressive_window;
-	int detach_auto;
-	char *gc_log_expire;
-	char *prune_expire;
-	char *prune_worktrees_expire;
-	char *repack_expire_to;
+	ចំនួនគត់ aggressive_depth;
+	ចំនួនគត់ aggressive_window;
+	ចំនួនគត់ detach_auto;
+	var_na *gc_log_expire;
+	var_na *prune_expire;
+	var_na *prune_worktrees_expire;
+	var_na *repack_expire_to;
 };
 
 #define GC_CONFIG_INIT { \
@@ -144,26 +144,26 @@ struct gc_config {
 	.prune_worktrees_expire = xstrdup("3.months.ago"), \
 }
 
-static void gc_config_release(struct gc_config *cfg)
+static void gc_config_release(sa_nracanaa gc_config *cfg)
 {
 	free(cfg->gc_log_expire);
 	free(cfg->prune_expire);
 	free(cfg->prune_worktrees_expire);
 }
 
-static void gc_config(struct gc_config *cfg)
+static void gc_config(sa_nracanaa gc_config *cfg)
 {
-	const char *value;
-	char *owned = NULL;
+	const var_na *value;
+	var_na *owned = NULL;
 
-	if (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
-		if (value && !strcmp(value, "notbare"))
+	ប្រសិនបើ (!repo_config_get_value(the_repository, "gc.packrefs", &value)) {
+		ប្រសិនបើ (value && !strcmp(value, "notbare"))
 			cfg->pack_refs = -1;
-		else
+		បើមិនដូច្នេះ
 			cfg->pack_refs = git_config_bool("gc.packrefs", value);
 	}
 
-	if (gc_config_is_timestamp_never("gc.reflogexpire") &&
+	ប្រសិនបើ (gc_config_is_timestamp_never("gc.reflogexpire") &&
 	    gc_config_is_timestamp_never("gc.reflogexpireunreachable"))
 		cfg->prune_reflogs = 0;
 
@@ -173,17 +173,17 @@ static void gc_config(struct gc_config *cfg)
 	repo_config_get_bool(the_repository, "gc.cruftpacks", &cfg->cruft_packs);
 	repo_config_get_ulong(the_repository, "gc.maxcruftsize", &cfg->max_cruft_size);
 
-	if (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
+	ប្រសិនបើ (!repo_config_get_expiry(the_repository, "gc.pruneexpire", &owned)) {
 		free(cfg->prune_expire);
 		cfg->prune_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
+	ប្រសិនបើ (!repo_config_get_expiry(the_repository, "gc.worktreepruneexpire", &owned)) {
 		free(cfg->prune_worktrees_expire);
 		cfg->prune_worktrees_expire = owned;
 	}
 
-	if (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
+	ប្រសិនបើ (!repo_config_get_expiry(the_repository, "gc.logexpiry", &owned)) {
 		free(cfg->gc_log_expire);
 		cfg->gc_log_expire = owned;
 	}
@@ -191,27 +191,27 @@ static void gc_config(struct gc_config *cfg)
 	repo_config(the_repository, git_default_config, NULL);
 }
 
-enum schedule_priority {
+ga_nanaa schedule_priority {
 	SCHEDULE_NONE = 0,
 	SCHEDULE_WEEKLY = 1,
 	SCHEDULE_DAILY = 2,
 	SCHEDULE_HOURLY = 3,
 };
 
-static enum schedule_priority parse_schedule(const char *value)
+static ga_nanaa schedule_priority parse_schedule(const var_na *value)
 {
-	if (!value)
-		return SCHEDULE_NONE;
-	if (!strcasecmp(value, "hourly"))
-		return SCHEDULE_HOURLY;
-	if (!strcasecmp(value, "daily"))
-		return SCHEDULE_DAILY;
-	if (!strcasecmp(value, "weekly"))
-		return SCHEDULE_WEEKLY;
-	return SCHEDULE_NONE;
+	ប្រសិនបើ (!value)
+		ត្រឡប់ SCHEDULE_NONE;
+	ប្រសិនបើ (!strcasecmp(value, "hourly"))
+		ត្រឡប់ SCHEDULE_HOURLY;
+	ប្រសិនបើ (!strcasecmp(value, "daily"))
+		ត្រឡប់ SCHEDULE_DAILY;
+	ប្រសិនបើ (!strcasecmp(value, "weekly"))
+		ត្រឡប់ SCHEDULE_WEEKLY;
+	ត្រឡប់ SCHEDULE_NONE;
 }
 
-enum maintenance_task_label {
+ga_nanaa maintenance_task_label {
 	TASK_PREFETCH,
 	TASK_LOOSE_OBJECTS,
 	TASK_INCREMENTAL_REPACK,
@@ -227,28 +227,28 @@ enum maintenance_task_label {
 	TASK__COUNT
 };
 
-struct maintenance_run_opts {
-	enum maintenance_task_label *tasks;
+sa_nracanaa maintenance_run_opts {
+	ga_nanaa maintenance_task_label *tasks;
 	size_t tasks_nr, tasks_alloc;
-	int auto_flag;
-	int detach;
-	int quiet;
-	enum schedule_priority schedule;
+	ចំនួនគត់ auto_flag;
+	ចំនួនគត់ detach;
+	ចំនួនគត់ quiet;
+	ga_nanaa schedule_priority schedule;
 };
 #define MAINTENANCE_RUN_OPTS_INIT { \
 	.detach = -1, \
 }
 
-static void maintenance_run_opts_release(struct maintenance_run_opts *opts)
+static void maintenance_run_opts_release(sa_nracanaa maintenance_run_opts *opts)
 {
 	free(opts->tasks);
 }
 
-static int pack_refs_condition(UNUSED struct gc_config *cfg)
+static ចំនួនគត់ pack_refs_condition(UNUSED sa_nracanaa gc_config *cfg)
 {
-	struct string_list included_refs = STRING_LIST_INIT_NODUP;
-	struct ref_exclusions excludes = REF_EXCLUSIONS_INIT;
-	struct refs_optimize_opts optimize_opts = {
+	sa_nracanaa string_list included_refs = STRING_LIST_INIT_NODUP;
+	sa_nracanaa ref_exclusions excludes = REF_EXCLUSIONS_INIT;
+	sa_nracanaa refs_optimize_opts optimize_opts = {
 		.exclusions = &excludes,
 		.includes = &included_refs,
 		.flags = REFS_OPTIMIZE_PRUNE | REFS_OPTIMIZE_AUTO,
@@ -258,61 +258,61 @@ static int pack_refs_condition(UNUSED struct gc_config *cfg)
 	/* Check for all refs, similar to 'git refs optimize --all'. */
 	string_list_append(optimize_opts.includes, "*");
 
-	if (refs_optimize_required(get_main_ref_store(the_repository),
+	ប្រសិនបើ (refs_optimize_required(get_main_ref_store(the_repository),
 				   &optimize_opts, &required))
-		return 0;
+		ត្រឡប់ 0;
 
 	clear_ref_exclusions(&excludes);
 	string_list_clear(&included_refs, 0);
 
-	return required;
+	ត្រឡប់ required;
 }
 
-static int maintenance_task_pack_refs(struct maintenance_run_opts *opts,
-				      UNUSED struct gc_config *cfg)
+static ចំនួនគត់ maintenance_task_pack_refs(sa_nracanaa maintenance_run_opts *opts,
+				      UNUSED sa_nracanaa gc_config *cfg)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 
 	cmd.git_cmd = 1;
 	strvec_pushl(&cmd.args, "pack-refs", "--all", "--prune", NULL);
-	if (opts->auto_flag)
+	ប្រសិនបើ (opts->auto_flag)
 		strvec_push(&cmd.args, "--auto");
 
-	return run_command(&cmd);
+	ត្រឡប់ run_command(&cmd);
 }
 
-struct count_reflog_entries_data {
-	struct expire_reflog_policy_cb policy;
+sa_nracanaa count_reflog_entries_data {
+	sa_nracanaa expire_reflog_policy_cb policy;
 	size_t count;
 	size_t limit;
 };
 
-static int count_reflog_entries(const char *refname UNUSED,
-				struct object_id *old_oid, struct object_id *new_oid,
-				const char *committer, timestamp_t timestamp,
-				int tz, const char *msg, void *cb_data)
+static ចំនួនគត់ count_reflog_entries(const var_na *refname UNUSED,
+				sa_nracanaa object_id *old_oid, sa_nracanaa object_id *new_oid,
+				const var_na *committer, timestamp_t timestamp,
+				ចំនួនគត់ tz, const var_na *msg, void *cb_data)
 {
-	struct count_reflog_entries_data *data = cb_data;
-	if (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
+	sa_nracanaa count_reflog_entries_data *data = cb_data;
+	ប្រសិនបើ (should_expire_reflog_ent(old_oid, new_oid, committer, timestamp, tz, msg, &data->policy))
 		data->count++;
-	return data->count >= data->limit;
+	ត្រឡប់ data->count >= data->limit;
 }
 
-static int reflog_expire_condition(struct gc_config *cfg UNUSED)
+static ចំនួនគត់ reflog_expire_condition(sa_nracanaa gc_config *cfg UNUSED)
 {
 	timestamp_t now = time(NULL);
-	struct count_reflog_entries_data data = {
+	sa_nracanaa count_reflog_entries_data data = {
 		.policy = {
 			.opts = REFLOG_EXPIRE_OPTIONS_INIT(now),
 		},
 	};
-	int limit = 100;
+	ចំនួនគត់ limit = 100;
 
 	repo_config_get_int(the_repository, "maintenance.reflog-expire.auto", &limit);
-	if (!limit)
-		return 0;
-	if (limit < 0)
-		return 1;
+	ប្រសិនបើ (!limit)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (limit < 0)
+		ត្រឡប់ 1;
 	data.limit = limit;
 
 	repo_config(the_repository, reflog_expire_config, &data.policy.opts);
@@ -323,55 +323,55 @@ static int reflog_expire_condition(struct gc_config *cfg UNUSED)
 
 	reflog_expiry_cleanup(&data.policy);
 	reflog_clear_expire_config(&data.policy.opts);
-	return data.count >= data.limit;
+	ត្រឡប់ data.count >= data.limit;
 }
 
-static int maintenance_task_reflog_expire(struct maintenance_run_opts *opts UNUSED,
-					  struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_reflog_expire(sa_nracanaa maintenance_run_opts *opts UNUSED,
+					  sa_nracanaa gc_config *cfg UNUSED)
 {
-	struct child_process cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process cmd = CHILD_PROCESS_INIT;
 	cmd.git_cmd = 1;
 	strvec_pushl(&cmd.args, "reflog", "expire", "--all", NULL);
-	return run_command(&cmd);
+	ត្រឡប់ run_command(&cmd);
 }
 
-static int maintenance_task_worktree_prune(struct maintenance_run_opts *opts UNUSED,
-					   struct gc_config *cfg)
+static ចំនួនគត់ maintenance_task_worktree_prune(sa_nracanaa maintenance_run_opts *opts UNUSED,
+					   sa_nracanaa gc_config *cfg)
 {
-	struct child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process prune_worktrees_cmd = CHILD_PROCESS_INIT;
 
 	prune_worktrees_cmd.git_cmd = 1;
 	strvec_pushl(&prune_worktrees_cmd.args, "worktree", "prune", "--expire", NULL);
 	strvec_push(&prune_worktrees_cmd.args, cfg->prune_worktrees_expire);
 
-	return run_command(&prune_worktrees_cmd);
+	ត្រឡប់ run_command(&prune_worktrees_cmd);
 }
 
-static int worktree_prune_condition(struct gc_config *cfg)
+static ចំនួនគត់ worktree_prune_condition(sa_nracanaa gc_config *cfg)
 {
-	struct strbuf buf = STRBUF_INIT;
-	int should_prune = 0, limit = 1;
+	sa_nracanaa strbuf buf = STRBUF_INIT;
+	ចំនួនគត់ should_prune = 0, limit = 1;
 	timestamp_t expiry_date;
-	struct dirent *d;
+	sa_nracanaa dirent *d;
 	DIR *dir = NULL;
 
 	repo_config_get_int(the_repository, "maintenance.worktree-prune.auto", &limit);
-	if (limit <= 0) {
+	ប្រសិនបើ (limit <= 0) {
 		should_prune = limit < 0;
 		goto out;
 	}
 
-	if (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
+	ប្រសិនបើ (parse_expiry_date(cfg->prune_worktrees_expire, &expiry_date))
 		goto out;
 
 	dir = opendir(repo_git_path_replace(the_repository, &buf, "worktrees"));
-	if (!dir)
+	ប្រសិនបើ (!dir)
 		goto out;
 
-	while (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
-		char *wtpath;
+	ខណៈពេល (limit && (d = readdir_skip_dot_and_dotdot(dir))) {
+		var_na *wtpath;
 		strbuf_reset(&buf);
-		if (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
+		ប្រសិនបើ (should_prune_worktree(the_repository, d->d_name, &buf, &wtpath, expiry_date))
 			limit--;
 		free(wtpath);
 	}
@@ -379,32 +379,32 @@ static int worktree_prune_condition(struct gc_config *cfg)
 	should_prune = !limit;
 
 out:
-	if (dir)
+	ប្រសិនបើ (dir)
 		closedir(dir);
 	strbuf_release(&buf);
-	return should_prune;
+	ត្រឡប់ should_prune;
 }
 
-static int maintenance_task_rerere_gc(struct maintenance_run_opts *opts UNUSED,
-				      struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_rerere_gc(sa_nracanaa maintenance_run_opts *opts UNUSED,
+				      sa_nracanaa gc_config *cfg UNUSED)
 {
-	struct child_process rerere_cmd = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process rerere_cmd = CHILD_PROCESS_INIT;
 	rerere_cmd.git_cmd = 1;
 	strvec_pushl(&rerere_cmd.args, "rerere", "gc", NULL);
-	return run_command(&rerere_cmd);
+	ត្រឡប់ run_command(&rerere_cmd);
 }
 
-static int rerere_gc_condition(struct gc_config *cfg UNUSED)
+static ចំនួនគត់ rerere_gc_condition(sa_nracanaa gc_config *cfg UNUSED)
 {
-	int limit = 512;
+	ចំនួនគត់ limit = 512;
 
 	repo_config_get_int(the_repository, "maintenance.rerere-gc.auto", &limit);
-	if (!limit)
-		return 0; /* never prune */
-	if (limit < 0)
-		return 1; /* always prune */
+	ប្រសិនបើ (!limit)
+		ត្រឡប់ 0; /* never prune */
+	ប្រសិនបើ (limit < 0)
+		ត្រឡប់ 1; /* always prune */
 
-	return rerere_gc_needed(the_repository, (size_t)limit);
+	ត្រឡប់ rerere_gc_needed(the_repository, (size_t)limit);
 }
 
 #define OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive) \
@@ -416,36 +416,36 @@ static int rerere_gc_condition(struct gc_config *cfg UNUSED)
 	.depth = (aggressive) ? (cfg)->aggressive_depth : 0
 
 /* return NULL on success, else hostname running the gc */
-static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
+static const var_na *lock_repo_for_gc(ចំនួនគត់ force, pid_t* ret_pid)
 {
-	struct lock_file lock = LOCK_INIT;
-	char my_host[HOST_NAME_MAX + 1];
-	struct strbuf sb = STRBUF_INIT;
-	struct stat st;
+	sa_nracanaa lock_file lock = LOCK_INIT;
+	var_na my_host[HOST_NAME_MAX + 1];
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	sa_nracanaa stat st;
 	uintmax_t pid;
 	FILE *fp;
-	int fd;
-	char *pidfile_path;
+	ចំនួនគត់ fd;
+	var_na *pidfile_path;
 
-	if (is_tempfile_active(pidfile))
+	ប្រសិនបើ (is_tempfile_active(pidfile))
 		/* already locked */
-		return NULL;
+		ត្រឡប់ NULL;
 
-	if (xgethostname(my_host, sizeof(my_host)))
-		xsnprintf(my_host, sizeof(my_host), "unknown");
+	ប្រសិនបើ (xgethostname(my_host, parimaa_na(my_host)))
+		xsnprintf(my_host, parimaa_na(my_host), "unknown");
 
 	pidfile_path = repo_git_path(the_repository, "gc.pid");
 	fd = hold_lock_file_for_update(&lock, pidfile_path,
 				       LOCK_DIE_ON_ERROR);
-	if (!force) {
-		static char locking_host[HOST_NAME_MAX + 1];
-		static char *scan_fmt;
-		int should_exit;
+	ប្រសិនបើ (!force) {
+		static var_na locking_host[HOST_NAME_MAX + 1];
+		static var_na *scan_fmt;
+		ចំនួនគត់ should_exit;
 
-		if (!scan_fmt)
+		ប្រសិនបើ (!scan_fmt)
 			scan_fmt = xstrfmt("%s %%%ds", "%"SCNuMAX, HOST_NAME_MAX);
 		fp = fopen(pidfile_path, "r");
-		memset(locking_host, 0, sizeof(locking_host));
+		memset(locking_host, 0, parimaa_na(locking_host));
 		should_exit =
 			fp != NULL &&
 			!fstat(fileno(fp), &st) &&
@@ -462,14 +462,14 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 			fscanf(fp, scan_fmt, &pid, locking_host) == 2 &&
 			/* be gentle to concurrent "gc" on remote hosts */
 			(strcmp(locking_host, my_host) || !kill(pid, 0) || errno == EPERM);
-		if (fp)
+		ប្រសិនបើ (fp)
 			fclose(fp);
-		if (should_exit) {
-			if (fd >= 0)
+		ប្រសិនបើ (should_exit) {
+			ប្រសិនបើ (fd >= 0)
 				rollback_lock_file(&lock);
 			*ret_pid = pid;
 			free(pidfile_path);
-			return locking_host;
+			ត្រឡប់ locking_host;
 		}
 	}
 
@@ -480,7 +480,7 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
 	commit_lock_file(&lock);
 	pidfile = register_tempfile(pidfile_path);
 	free(pidfile_path);
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 /*
@@ -489,29 +489,29 @@ static const char *lock_repo_for_gc(int force, pid_t* ret_pid)
  * message and returns with a non-[01] status code if an error occurred
  * while reading gc.log
  */
-static int report_last_gc_error(void)
+static ចំនួនគត់ report_last_gc_error(void)
 {
-	struct strbuf sb = STRBUF_INIT;
-	int ret = 0;
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	ចំនួនគត់ ret = 0;
 	ssize_t len;
-	struct stat st;
-	char *gc_log_path = repo_git_path(the_repository, "gc.log");
+	sa_nracanaa stat st;
+	var_na *gc_log_path = repo_git_path(the_repository, "gc.log");
 
-	if (stat(gc_log_path, &st)) {
-		if (errno == ENOENT)
+	ប្រសិនបើ (stat(gc_log_path, &st)) {
+		ប្រសិនបើ (errno == ENOENT)
 			goto done;
 
 		ret = die_message_errno(_("cannot stat '%s'"), gc_log_path);
 		goto done;
 	}
 
-	if (st.st_mtime < gc_log_expire_time)
+	ប្រសិនបើ (st.st_mtime < gc_log_expire_time)
 		goto done;
 
 	len = strbuf_read_file(&sb, gc_log_path, 0);
-	if (len < 0)
+	ប្រសិនបើ (len < 0)
 		ret = die_message_errno(_("cannot read '%s'"), gc_log_path);
-	else if (len > 0) {
+	បើមិនដូច្នេះ ប្រសិនបើ (len > 0) {
 		/*
 		 * A previous gc failed.  Report the error, and don't
 		 * bother with an automatic gc run since it is likely
@@ -529,59 +529,59 @@ static int report_last_gc_error(void)
 	strbuf_release(&sb);
 done:
 	free(gc_log_path);
-	return ret;
+	ត្រឡប់ ret;
 }
 
-static int gc_foreground_tasks(struct maintenance_run_opts *opts,
-			       struct gc_config *cfg)
+static ចំនួនគត់ gc_foreground_tasks(sa_nracanaa maintenance_run_opts *opts,
+			       sa_nracanaa gc_config *cfg)
 {
-	if (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
-		return error(FAILED_RUN, "pack-refs");
-	if (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
-		return error(FAILED_RUN, "reflog");
-	return 0;
+	ប្រសិនបើ (cfg->pack_refs && maintenance_task_pack_refs(opts, cfg))
+		ត្រឡប់ error(FAILED_RUN, "pack-refs");
+	ប្រសិនបើ (cfg->prune_reflogs && maintenance_task_reflog_expire(opts, cfg))
+		ត្រឡប់ error(FAILED_RUN, "reflog");
+	ត្រឡប់ 0;
 }
 
-static int maintenance_task_odb(struct maintenance_run_opts *opts,
-				struct gc_config *cfg,
-				int keep_largest_pack,
-				int aggressive)
+static ចំនួនគត់ maintenance_task_odb(sa_nracanaa maintenance_run_opts *opts,
+				sa_nracanaa gc_config *cfg,
+				ចំនួនគត់ keep_largest_pack,
+				ចំនួនគត់ aggressive)
 {
-	struct odb_optimize_options odb_opts = {
+	sa_nracanaa odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		.keep_largest_pack = keep_largest_pack,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, aggressive),
 	};
 
-	if (opts->auto_flag)
+	ប្រសិនបើ (opts->auto_flag)
 		odb_opts.flags |= ODB_OPTIMIZE_AUTO;
-	if (!opts->quiet)
+	ប្រសិនបើ (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
-	if (aggressive)
+	ប្រសិនបើ (aggressive)
 		odb_opts.flags |= ODB_OPTIMIZE_NO_REUSE_DELTAS;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	ត្រឡប់ odb_optimize(the_repository->objects, &odb_opts);
 }
 
-int cmd_gc(int argc,
-	   const char **argv,
-	   const char *prefix,
-	   struct repository *repo UNUSED)
+ចំនួនគត់ cmd_gc(ចំនួនគត់ argc,
+	   const var_na **argv,
+	   const var_na *prefix,
+	   sa_nracanaa repository *repo UNUSED)
 {
-	int aggressive = 0;
-	int force = 0;
-	const char *name;
+	ចំនួនគត់ aggressive = 0;
+	ចំនួនគត់ force = 0;
+	const var_na *name;
 	pid_t pid;
-	int daemonized = 0;
-	int keep_largest_pack = -1;
-	int skip_foreground_tasks = 0;
+	ចំនួនគត់ daemonized = 0;
+	ចំនួនគត់ keep_largest_pack = -1;
+	ចំនួនគត់ skip_foreground_tasks = 0;
 	timestamp_t dummy;
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	const char *prune_expire_sentinel = "sentinel";
-	const char *prune_expire_arg = prune_expire_sentinel;
-	int ret;
-	struct option builtin_gc_options[] = {
+	sa_nracanaa maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	sa_nracanaa gc_config cfg = GC_CONFIG_INIT;
+	const var_na *prune_expire_sentinel = "sentinel";
+	const var_na *prune_expire_arg = prune_expire_sentinel;
+	ចំនួនគត់ ret;
+	sa_nracanaa option builtin_gc_options[] = {
 		OPT__QUIET(&opts.quiet, N_("suppress progress reporting")),
 		{
 			.type = OPTION_STRING,
@@ -617,70 +617,70 @@ int cmd_gc(int argc,
 
 	gc_config(&cfg);
 
-	if (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
+	ប្រសិនបើ (parse_expiry_date(cfg.gc_log_expire, &gc_log_expire_time))
 		die(_("failed to parse gc.logExpiry value %s"), cfg.gc_log_expire);
 
-	if (cfg.pack_refs < 0)
+	ប្រសិនបើ (cfg.pack_refs < 0)
 		cfg.pack_refs = !is_bare_repository(the_repository);
 
 	argc = parse_options(argc, argv, prefix, builtin_gc_options,
 			     builtin_gc_usage, 0);
-	if (argc > 0)
+	ប្រសិនបើ (argc > 0)
 		usage_with_options(builtin_gc_usage, builtin_gc_options);
 
-	if (prune_expire_arg != prune_expire_sentinel) {
+	ប្រសិនបើ (prune_expire_arg != prune_expire_sentinel) {
 		free(cfg.prune_expire);
 		cfg.prune_expire = xstrdup_or_null(prune_expire_arg);
 	}
-	if (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
+	ប្រសិនបើ (cfg.prune_expire && parse_expiry_date(cfg.prune_expire, &dummy))
 		die(_("failed to parse prune expiry value %s"), cfg.prune_expire);
 
-	if (opts.auto_flag) {
-		struct odb_optimize_options optimize_opts = {
+	ប្រសិនបើ (opts.auto_flag) {
+		sa_nracanaa odb_optimize_options optimize_opts = {
 			.strategy = ODB_OPTIMIZE_INCREMENTAL,
 			OPTIMIZE_FIELDS_FROM_GC_CONFIG(&cfg, 0),
 		};
 
-		if (cfg.detach_auto && opts.detach < 0)
+		ប្រសិនបើ (cfg.detach_auto && opts.detach < 0)
 			opts.detach = 1;
 
 		/*
 		 * Auto-gc should be least intrusive as possible.
 		 */
-		if (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
+		ប្រសិនបើ (!odb_optimize_required(the_repository->objects, &optimize_opts) ||
 		    run_hooks(the_repository, "pre-auto-gc")) {
 			ret = 0;
 			goto out;
 		}
 
-		if (!opts.quiet) {
-			if (opts.detach > 0)
+		ប្រសិនបើ (!opts.quiet) {
+			ប្រសិនបើ (opts.detach > 0)
 				fprintf(stderr, _("Auto packing the repository in background for optimum performance.\n"));
-			else
+			បើមិនដូច្នេះ
 				fprintf(stderr, _("Auto packing the repository for optimum performance.\n"));
 			fprintf(stderr, _("See \"git help gc\" for manual housekeeping.\n"));
 		}
 	}
 
-	if (opts.detach > 0) {
+	ប្រសិនបើ (opts.detach > 0) {
 		ret = report_last_gc_error();
-		if (ret == 1) {
+		ប្រសិនបើ (ret == 1) {
 			/* Last gc --auto failed. Skip this one. */
 			ret = 0;
 			goto out;
 
-		} else if (ret) {
+		} បើមិនដូច្នេះ ប្រសិនបើ (ret) {
 			/* an I/O error occurred, already reported */
 			goto out;
 		}
 
-		if (!skip_foreground_tasks) {
-			if (lock_repo_for_gc(force, &pid)) {
+		ប្រសិនបើ (!skip_foreground_tasks) {
+			ប្រសិនបើ (lock_repo_for_gc(force, &pid)) {
 				ret = 0;
 				goto out;
 			}
 
-			if (gc_foreground_tasks(&opts, &cfg) < 0)
+			ប្រសិនបើ (gc_foreground_tasks(&opts, &cfg) < 0)
 				die(NULL);
 			delete_tempfile(&pidfile);
 		}
@@ -693,8 +693,8 @@ int cmd_gc(int argc,
 	}
 
 	name = lock_repo_for_gc(force, &pid);
-	if (name) {
-		if (opts.auto_flag) {
+	ប្រសិនបើ (name) {
+		ប្រសិនបើ (opts.auto_flag) {
 			ret = 0;
 			goto out; /* be quiet on --auto */
 		}
@@ -703,8 +703,8 @@ int cmd_gc(int argc,
 		    name, (uintmax_t)pid);
 	}
 
-	if (daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
+	ប្រសិនបើ (daemonized) {
+		var_na *path = repo_git_path(the_repository, "gc.log");
 		hold_lock_file_for_update(&log_lock, path,
 					  LOCK_DIE_ON_ERROR);
 		dup2(get_lock_file_fd(&log_lock), 2);
@@ -712,34 +712,34 @@ int cmd_gc(int argc,
 		free(path);
 	}
 
-	if (opts.detach <= 0 && !skip_foreground_tasks)
+	ប្រសិនបើ (opts.detach <= 0 && !skip_foreground_tasks)
 		gc_foreground_tasks(&opts, &cfg);
 
-	if (cfg.prune_worktrees_expire &&
+	ប្រសិនបើ (cfg.prune_worktrees_expire &&
 	    maintenance_task_worktree_prune(&opts, &cfg))
 		die(FAILED_RUN, "worktree");
 
-	if (maintenance_task_rerere_gc(&opts, &cfg))
+	ប្រសិនបើ (maintenance_task_rerere_gc(&opts, &cfg))
 		die(FAILED_RUN, "rerere");
 
-	if (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
+	ប្រសិនបើ (maintenance_task_odb(&opts, &cfg, keep_largest_pack, aggressive))
 		die(NULL);
 
 	report_garbage = report_pack_garbage;
 	odb_reprepare(the_repository->objects);
-	if (pack_garbage.nr > 0) {
+	ប្រសិនបើ (pack_garbage.nr > 0) {
 		odb_close(the_repository->objects);
 		clean_pack_garbage();
 	}
 
-	if (the_repository->settings.gc_write_commit_graph == 1)
+	ប្រសិនបើ (the_repository->settings.gc_write_commit_graph == 1)
 		write_commit_graph_reachable(the_repository,
 					     the_repository->objects->source->path,
 					     !opts.quiet && !daemonized ? COMMIT_GRAPH_WRITE_PROGRESS : 0,
 					     NULL);
 
-	if (!daemonized) {
-		char *path = repo_git_path(the_repository, "gc.log");
+	ប្រសិនបើ (!daemonized) {
+		var_na *path = repo_git_path(the_repository, "gc.log");
 		unlink(path);
 		free(path);
 	}
@@ -747,72 +747,72 @@ int cmd_gc(int argc,
 out:
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static const char *const builtin_maintenance_run_usage[] = {
+static const var_na *const builtin_maintenance_run_usage[] = {
 	N_("git maintenance run [--auto] [--[no-]quiet] [--task=<task>] [--schedule]"),
 	NULL
 };
 
-static int maintenance_opt_schedule(const struct option *opt, const char *arg,
-				    int unset)
+static ចំនួនគត់ maintenance_opt_schedule(const sa_nracanaa option *opt, const var_na *arg,
+				    ចំនួនគត់ unset)
 {
-	enum schedule_priority *priority = opt->value;
+	ga_nanaa schedule_priority *priority = opt->value;
 
-	if (unset)
+	ប្រសិនបើ (unset)
 		die(_("--no-schedule is not allowed"));
 
 	*priority = parse_schedule(arg);
 
-	if (!*priority)
+	ប្រសិនបើ (!*priority)
 		die(_("unrecognized --schedule argument '%s'"), arg);
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
-struct cg_auto_data {
-	int num_not_in_graph;
-	int limit;
+sa_nracanaa cg_auto_data {
+	ចំនួនគត់ num_not_in_graph;
+	ចំនួនគត់ limit;
 };
 
-static int dfs_on_ref(const struct reference *ref, void *cb_data)
+static ចំនួនគត់ dfs_on_ref(const sa_nracanaa reference *ref, void *cb_data)
 {
-	struct cg_auto_data *data = (struct cg_auto_data *)cb_data;
-	int result = 0;
-	const struct object_id *maybe_peeled = ref->oid;
-	struct object_id peeled;
-	struct commit_list *stack = NULL;
-	struct commit *commit;
+	sa_nracanaa cg_auto_data *data = (sa_nracanaa cg_auto_data *)cb_data;
+	ចំនួនគត់ result = 0;
+	const sa_nracanaa object_id *maybe_peeled = ref->oid;
+	sa_nracanaa object_id peeled;
+	sa_nracanaa commit_list *stack = NULL;
+	sa_nracanaa commit *commit;
 
-	if (!reference_get_peeled_oid(the_repository, ref, &peeled))
+	ប្រសិនបើ (!reference_get_peeled_oid(the_repository, ref, &peeled))
 		maybe_peeled = &peeled;
-	if (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
-		return 0;
+	ប្រសិនបើ (odb_read_object_info(the_repository->objects, maybe_peeled, NULL) != OBJ_COMMIT)
+		ត្រឡប់ 0;
 
 	commit = lookup_commit(the_repository, maybe_peeled);
-	if (!commit || commit->object.flags & SEEN)
-		return 0;
+	ប្រសិនបើ (!commit || commit->object.flags & SEEN)
+		ត្រឡប់ 0;
 	commit->object.flags |= SEEN;
 
-	if (repo_parse_commit(the_repository, commit) ||
+	ប្រសិនបើ (repo_parse_commit(the_repository, commit) ||
 	    commit_graph_position(commit) != COMMIT_NOT_FROM_GRAPH)
-		return 0;
+		ត្រឡប់ 0;
 
 	data->num_not_in_graph++;
 
-	if (data->num_not_in_graph >= data->limit)
-		return 1;
+	ប្រសិនបើ (data->num_not_in_graph >= data->limit)
+		ត្រឡប់ 1;
 
 	commit_list_insert(commit, &stack);
 
-	while (!result && stack) {
-		struct commit_list *parent;
+	ខណៈពេល (!result && stack) {
+		sa_nracanaa commit_list *parent;
 
 		commit = pop_commit(&stack);
 
-		for (parent = commit->parents; parent; parent = parent->next) {
-			if (repo_parse_commit(the_repository, parent->item) ||
+		សម្រាប់ (parent = commit->parents; parent; parent = parent->next) {
+			ប្រសិនបើ (repo_parse_commit(the_repository, parent->item) ||
 			    commit_graph_position(parent->item) != COMMIT_NOT_FROM_GRAPH ||
 			    parent->item->object.flags & SEEN)
 				continue;
@@ -820,9 +820,9 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 			parent->item->object.flags |= SEEN;
 			data->num_not_in_graph++;
 
-			if (data->num_not_in_graph >= data->limit) {
+			ប្រសិនបើ (data->num_not_in_graph >= data->limit) {
 				result = 1;
-				break;
+				bha_nga;
 			}
 
 			commit_list_insert(parent->item, &stack);
@@ -830,71 +830,71 @@ static int dfs_on_ref(const struct reference *ref, void *cb_data)
 	}
 
 	commit_list_free(stack);
-	return result;
+	ត្រឡប់ result;
 }
 
-static int should_write_commit_graph(struct gc_config *cfg UNUSED)
+static ចំនួនគត់ should_write_commit_graph(sa_nracanaa gc_config *cfg UNUSED)
 {
-	int result;
-	struct cg_auto_data data;
+	ចំនួនគត់ result;
+	sa_nracanaa cg_auto_data data;
 
 	data.num_not_in_graph = 0;
 	data.limit = 100;
 	repo_config_get_int(the_repository, "maintenance.commit-graph.auto",
 			    &data.limit);
 
-	if (!data.limit)
-		return 0;
-	if (data.limit < 0)
-		return 1;
+	ប្រសិនបើ (!data.limit)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (data.limit < 0)
+		ត្រឡប់ 1;
 
 	result = refs_for_each_ref(get_main_ref_store(the_repository),
 				   dfs_on_ref, &data);
 
 	repo_clear_commit_marks(the_repository, SEEN);
 
-	return result;
+	ត្រឡប់ result;
 }
 
-static int run_write_commit_graph(struct maintenance_run_opts *opts)
+static ចំនួនគត់ run_write_commit_graph(sa_nracanaa maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "commit-graph", "write",
 		     "--split", "--reachable", NULL);
 
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	បើមិនដូច្នេះ
 		strvec_push(&child.args, "--progress");
 
-	return !!run_command(&child);
+	ត្រឡប់ !!run_command(&child);
 }
 
-static int maintenance_task_commit_graph(struct maintenance_run_opts *opts,
-					 struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_commit_graph(sa_nracanaa maintenance_run_opts *opts,
+					 sa_nracanaa gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_commit_graph)
-		return 0;
+	ប្រសិនបើ (!the_repository->settings.core_commit_graph)
+		ត្រឡប់ 0;
 
-	if (run_write_commit_graph(opts)) {
+	ប្រសិនបើ (run_write_commit_graph(opts)) {
 		error(_("failed to write commit-graph"));
-		return 1;
+		ត្រឡប់ 1;
 	}
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int fetch_remote(struct remote *remote, void *cbdata)
+static ចំនួនគត់ fetch_remote(sa_nracanaa remote *remote, void *cbdata)
 {
-	struct maintenance_run_opts *opts = cbdata;
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa maintenance_run_opts *opts = cbdata;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
-	if (remote->skip_default_update)
-		return 0;
+	ប្រសិនបើ (remote->skip_default_update)
+		ត្រឡប់ 0;
 
 	child.git_cmd = 1;
 	strvec_pushl(&child.args, "fetch", remote->name,
@@ -902,148 +902,148 @@ static int fetch_remote(struct remote *remote, void *cbdata)
 		     "--no-write-fetch-head", "--recurse-submodules=no",
 		     NULL);
 
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	ត្រឡប់ !!run_command(&child);
 }
 
-static int maintenance_task_prefetch(struct maintenance_run_opts *opts,
-				     struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_prefetch(sa_nracanaa maintenance_run_opts *opts,
+				     sa_nracanaa gc_config *cfg UNUSED)
 {
-	if (for_each_remote(fetch_remote, opts)) {
+	ប្រសិនបើ (for_each_remote(fetch_remote, opts)) {
 		error(_("failed to prefetch remotes"));
-		return 1;
+		ត្រឡប់ 1;
 	}
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int maintenance_task_gc_foreground(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg)
+static ចំនួនគត់ maintenance_task_gc_foreground(sa_nracanaa maintenance_run_opts *opts,
+					  sa_nracanaa gc_config *cfg)
 {
-	return gc_foreground_tasks(opts, cfg);
+	ត្រឡប់ gc_foreground_tasks(opts, cfg);
 }
 
-static int maintenance_task_gc_background(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_gc_background(sa_nracanaa maintenance_run_opts *opts,
+					  sa_nracanaa gc_config *cfg UNUSED)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
 	strvec_push(&child.args, "gc");
 
-	if (opts->auto_flag)
+	ប្រសិនបើ (opts->auto_flag)
 		strvec_push(&child.args, "--auto");
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--quiet");
-	else
+	បើមិនដូច្នេះ
 		strvec_push(&child.args, "--no-quiet");
 	strvec_push(&child.args, "--no-detach");
 	strvec_push(&child.args, "--skip-foreground-tasks");
 
-	return run_command(&child);
+	ត្រឡប់ run_command(&child);
 }
 
-static int gc_condition(struct gc_config *cfg)
+static ចំនួនគត់ gc_condition(sa_nracanaa gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	sa_nracanaa odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_INCREMENTAL,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	ត្រឡប់ odb_optimize_required(the_repository->objects, &opts);
 }
 
-static int prune_packed(struct maintenance_run_opts *opts)
+static ចំនួនគត់ prune_packed(sa_nracanaa maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	strvec_push(&child.args, "prune-packed");
 
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--quiet");
 
-	return !!run_command(&child);
+	ត្រឡប់ !!run_command(&child);
 }
 
-struct write_loose_object_data {
+sa_nracanaa write_loose_object_data {
 	FILE *in;
-	int count;
-	int batch_size;
+	ចំនួនគត់ count;
+	ចំនួនគត់ batch_size;
 };
 
-static int loose_object_auto_limit = 100;
+static ចំនួនគត់ loose_object_auto_limit = 100;
 
-static int loose_object_count(const struct object_id *oid UNUSED,
-			      const char *path UNUSED,
+static ចំនួនគត់ loose_object_count(const sa_nracanaa object_id *oid UNUSED,
+			      const var_na *path UNUSED,
 			      void *data)
 {
-	int *count = (int*)data;
-	if (++(*count) >= loose_object_auto_limit)
-		return 1;
-	return 0;
+	ចំនួនគត់ *count = (ចំនួនគត់*)data;
+	ប្រសិនបើ (++(*count) >= loose_object_auto_limit)
+		ត្រឡប់ 1;
+	ត្រឡប់ 0;
 }
 
-static int loose_object_auto_condition(struct gc_config *cfg UNUSED)
+static ចំនួនគត់ loose_object_auto_condition(sa_nracanaa gc_config *cfg UNUSED)
 {
-	int count = 0;
+	ចំនួនគត់ count = 0;
 
 	repo_config_get_int(the_repository, "maintenance.loose-objects.auto",
 			    &loose_object_auto_limit);
 
-	if (!loose_object_auto_limit)
-		return 0;
-	if (loose_object_auto_limit < 0)
-		return 1;
+	ប្រសិនបើ (!loose_object_auto_limit)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (loose_object_auto_limit < 0)
+		ត្រឡប់ 1;
 
-	return for_each_loose_file_in_source(the_repository->objects->source,
+	ត្រឡប់ for_each_loose_file_in_source(the_repository->objects->source,
 					     loose_object_count,
 					     NULL, NULL, &count);
 }
 
-static int bail_on_loose(const struct object_id *oid UNUSED,
-			 const char *path UNUSED,
+static ចំនួនគត់ bail_on_loose(const sa_nracanaa object_id *oid UNUSED,
+			 const var_na *path UNUSED,
 			 void *data UNUSED)
 {
-	return 1;
+	ត្រឡប់ 1;
 }
 
-static int write_loose_object_to_stdin(const struct object_id *oid,
-				       const char *path UNUSED,
+static ចំនួនគត់ write_loose_object_to_stdin(const sa_nracanaa object_id *oid,
+				       const var_na *path UNUSED,
 				       void *data)
 {
-	struct write_loose_object_data *d = (struct write_loose_object_data *)data;
+	sa_nracanaa write_loose_object_data *d = (sa_nracanaa write_loose_object_data *)data;
 
 	fprintf(d->in, "%s\n", oid_to_hex(oid));
 
 	/* If batch_size is INT_MAX, then this will return 0 always. */
-	return ++(d->count) > d->batch_size;
+	ត្រឡប់ ++(d->count) > d->batch_size;
 }
 
-static int pack_loose(struct maintenance_run_opts *opts)
+static ចំនួនគត់ pack_loose(sa_nracanaa maintenance_run_opts *opts)
 {
-	struct repository *r = the_repository;
-	int result = 0;
-	struct write_loose_object_data data;
-	struct child_process pack_proc = CHILD_PROCESS_INIT;
+	sa_nracanaa repository *r = the_repository;
+	ចំនួនគត់ result = 0;
+	sa_nracanaa write_loose_object_data data;
+	sa_nracanaa child_process pack_proc = CHILD_PROCESS_INIT;
 
 	/*
 	 * Do not start pack-objects process
 	 * if there are no loose objects.
 	 */
-	if (!for_each_loose_file_in_source(r->objects->source,
+	ប្រសិនបើ (!for_each_loose_file_in_source(r->objects->source,
 					   bail_on_loose,
 					   NULL, NULL, NULL))
-		return 0;
+		ត្រឡប់ 0;
 
 	pack_proc.git_cmd = 1;
 
 	strvec_push(&pack_proc.args, "pack-objects");
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&pack_proc.args, "--quiet");
-	else
+	បើមិនដូច្នេះ
 		strvec_push(&pack_proc.args, "--no-quiet");
 	strvec_pushf(&pack_proc.args, "%s/pack/loose", r->objects->source->path);
 
@@ -1055,9 +1055,9 @@ static int pack_loose(struct maintenance_run_opts *opts)
 	 */
 	pack_proc.out = -1;
 
-	if (start_command(&pack_proc)) {
+	ប្រសិនបើ (start_command(&pack_proc)) {
 		error(_("failed to start 'git pack-objects' process"));
-		return 1;
+		ត្រឡប់ 1;
 	}
 
 	data.in = xfdopen(pack_proc.in, "w");
@@ -1068,9 +1068,9 @@ static int pack_loose(struct maintenance_run_opts *opts)
 			    &data.batch_size);
 
 	/* If configured as 0, then remove limit. */
-	if (!data.batch_size)
+	ប្រសិនបើ (!data.batch_size)
 		data.batch_size = INT_MAX;
-	else if (data.batch_size > 0)
+	បើមិនដូច្នេះ ប្រសិនបើ (data.batch_size > 0)
 		data.batch_size--; /* Decrease for equality on limit. */
 
 	for_each_loose_file_in_source(r->objects->source,
@@ -1079,83 +1079,83 @@ static int pack_loose(struct maintenance_run_opts *opts)
 
 	fclose(data.in);
 
-	if (finish_command(&pack_proc)) {
+	ប្រសិនបើ (finish_command(&pack_proc)) {
 		error(_("failed to finish 'git pack-objects' process"));
 		result = 1;
 	}
 
-	return result;
+	ត្រឡប់ result;
 }
 
-static int maintenance_task_loose_objects(struct maintenance_run_opts *opts,
-					  struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_loose_objects(sa_nracanaa maintenance_run_opts *opts,
+					  sa_nracanaa gc_config *cfg UNUSED)
 {
-	return prune_packed(opts) || pack_loose(opts);
+	ត្រឡប់ prune_packed(opts) || pack_loose(opts);
 }
 
-static int incremental_repack_auto_condition(struct gc_config *cfg UNUSED)
+static ចំនួនគត់ incremental_repack_auto_condition(sa_nracanaa gc_config *cfg UNUSED)
 {
-	struct packed_git *p;
-	int incremental_repack_auto_limit = 10;
-	int count = 0;
+	sa_nracanaa packed_git *p;
+	ចំនួនគត់ incremental_repack_auto_limit = 10;
+	ចំនួនគត់ count = 0;
 
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index)
-		return 0;
+	ប្រសិនបើ (!the_repository->settings.core_multi_pack_index)
+		ត្រឡប់ 0;
 
 	repo_config_get_int(the_repository, "maintenance.incremental-repack.auto",
 			    &incremental_repack_auto_limit);
 
-	if (!incremental_repack_auto_limit)
-		return 0;
-	if (incremental_repack_auto_limit < 0)
-		return 1;
+	ប្រសិនបើ (!incremental_repack_auto_limit)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (incremental_repack_auto_limit < 0)
+		ត្រឡប់ 1;
 
 	repo_for_each_pack(the_repository, p) {
-		if (count >= incremental_repack_auto_limit)
-			break;
-		if (!p->multi_pack_index)
+		ប្រសិនបើ (count >= incremental_repack_auto_limit)
+			bha_nga;
+		ប្រសិនបើ (!p->multi_pack_index)
 			count++;
 	}
 
-	return count >= incremental_repack_auto_limit;
+	ត្រឡប់ count >= incremental_repack_auto_limit;
 }
 
-static int multi_pack_index_write(struct maintenance_run_opts *opts)
+static ចំនួនគត់ multi_pack_index_write(sa_nracanaa maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	strvec_pushl(&child.args, "multi-pack-index", "write", NULL);
 
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	បើមិនដូច្នេះ
 		strvec_push(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("failed to write multi-pack-index"));
+	ប្រសិនបើ (run_command(&child))
+		ត្រឡប់ error(_("failed to write multi-pack-index"));
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int multi_pack_index_expire(struct maintenance_run_opts *opts)
+static ចំនួនគត់ multi_pack_index_expire(sa_nracanaa maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "multi-pack-index", "expire", NULL);
 
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	បើមិនដូច្នេះ
 		strvec_push(&child.args, "--progress");
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index expire' failed"));
+	ប្រសិនបើ (run_command(&child))
+		ត្រឡប់ error(_("'git multi-pack-index expire' failed"));
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
 #define TWO_GIGABYTES (INT32_MAX)
@@ -1177,96 +1177,96 @@ static off_t get_auto_pack_size(void)
 	off_t max_size = 0;
 	off_t second_largest_size = 0;
 	off_t result_size;
-	struct packed_git *p;
-	struct repository *r = the_repository;
+	sa_nracanaa packed_git *p;
+	sa_nracanaa repository *r = the_repository;
 
 	odb_reprepare(r->objects);
 	repo_for_each_pack(r, p) {
-		if (p->pack_size > max_size) {
+		ប្រសិនបើ (p->pack_size > max_size) {
 			second_largest_size = max_size;
 			max_size = p->pack_size;
-		} else if (p->pack_size > second_largest_size)
+		} បើមិនដូច្នេះ ប្រសិនបើ (p->pack_size > second_largest_size)
 			second_largest_size = p->pack_size;
 	}
 
 	result_size = second_largest_size + 1;
 
 	/* But limit ourselves to a batch size of 2g */
-	if (result_size > TWO_GIGABYTES)
+	ប្រសិនបើ (result_size > TWO_GIGABYTES)
 		result_size = TWO_GIGABYTES;
 
-	return result_size;
+	ត្រឡប់ result_size;
 }
 
-static int multi_pack_index_repack(struct maintenance_run_opts *opts)
+static ចំនួនគត់ multi_pack_index_repack(sa_nracanaa maintenance_run_opts *opts)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	child.git_cmd = 1;
 	child.odb_to_close = the_repository->objects;
 	strvec_pushl(&child.args, "multi-pack-index", "repack", NULL);
 
-	if (opts->quiet)
+	ប្រសិនបើ (opts->quiet)
 		strvec_push(&child.args, "--no-progress");
-	else
+	បើមិនដូច្នេះ
 		strvec_push(&child.args, "--progress");
 
 	strvec_pushf(&child.args, "--batch-size=%"PRIuMAX,
 				  (uintmax_t)get_auto_pack_size());
 
-	if (run_command(&child))
-		return error(_("'git multi-pack-index repack' failed"));
+	ប្រសិនបើ (run_command(&child))
+		ត្រឡប់ error(_("'git multi-pack-index repack' failed"));
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int maintenance_task_incremental_repack(struct maintenance_run_opts *opts,
-					       struct gc_config *cfg UNUSED)
+static ចំនួនគត់ maintenance_task_incremental_repack(sa_nracanaa maintenance_run_opts *opts,
+					       sa_nracanaa gc_config *cfg UNUSED)
 {
 	prepare_repo_settings(the_repository);
-	if (!the_repository->settings.core_multi_pack_index) {
+	ប្រសិនបើ (!the_repository->settings.core_multi_pack_index) {
 		warning(_("skipping incremental-repack task because core.multiPackIndex is disabled"));
-		return 0;
+		ត្រឡប់ 0;
 	}
 
-	if (multi_pack_index_write(opts))
-		return 1;
-	if (multi_pack_index_expire(opts))
-		return 1;
-	if (multi_pack_index_repack(opts))
-		return 1;
-	return 0;
+	ប្រសិនបើ (multi_pack_index_write(opts))
+		ត្រឡប់ 1;
+	ប្រសិនបើ (multi_pack_index_expire(opts))
+		ត្រឡប់ 1;
+	ប្រសិនបើ (multi_pack_index_repack(opts))
+		ត្រឡប់ 1;
+	ត្រឡប់ 0;
 }
 
-static int maintenance_task_geometric_repack(struct maintenance_run_opts *opts,
-					     struct gc_config *cfg)
+static ចំនួនគត់ maintenance_task_geometric_repack(sa_nracanaa maintenance_run_opts *opts,
+					     sa_nracanaa gc_config *cfg)
 {
-	struct odb_optimize_options odb_opts = {
+	sa_nracanaa odb_optimize_options odb_opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
 
-	if (!opts->quiet)
+	ប្រសិនបើ (!opts->quiet)
 		odb_opts.flags |= ODB_OPTIMIZE_VERBOSE;
 
-	return odb_optimize(the_repository->objects, &odb_opts);
+	ត្រឡប់ odb_optimize(the_repository->objects, &odb_opts);
 }
 
-static int geometric_repack_auto_condition(struct gc_config *cfg)
+static ចំនួនគត់ geometric_repack_auto_condition(sa_nracanaa gc_config *cfg)
 {
-	struct odb_optimize_options opts = {
+	sa_nracanaa odb_optimize_options opts = {
 		.strategy = ODB_OPTIMIZE_GEOMETRIC,
 		OPTIMIZE_FIELDS_FROM_GC_CONFIG(cfg, 0),
 	};
-	return odb_optimize_required(the_repository->objects, &opts);
+	ត្រឡប់ odb_optimize_required(the_repository->objects, &opts);
 }
 
-typedef int (*maintenance_task_fn)(struct maintenance_run_opts *opts,
-				   struct gc_config *cfg);
-typedef int (*maintenance_auto_fn)(struct gc_config *cfg);
+typedef ចំនួនគត់ (*maintenance_task_fn)(sa_nracanaa maintenance_run_opts *opts,
+				   sa_nracanaa gc_config *cfg);
+typedef ចំនួនគត់ (*maintenance_auto_fn)(sa_nracanaa gc_config *cfg);
 
-struct maintenance_task {
-	const char *name;
+sa_nracanaa maintenance_task {
+	const var_na *name;
 
 	/*
 	 * Work that will be executed before detaching. This should not include
@@ -1288,7 +1288,7 @@ struct maintenance_task {
 	maintenance_auto_fn auto_condition;
 };
 
-static const struct maintenance_task tasks[] = {
+static const sa_nracanaa maintenance_task tasks[] = {
 	[TASK_PREFETCH] = {
 		.name = "prefetch",
 		.background = maintenance_task_prefetch,
@@ -1341,65 +1341,65 @@ static const struct maintenance_task tasks[] = {
 	},
 };
 
-enum task_phase {
+ga_nanaa task_phase {
 	TASK_PHASE_FOREGROUND,
 	TASK_PHASE_BACKGROUND,
 };
 
-enum auto_gc_hook_result {
+ga_nanaa auto_gc_hook_result {
 	AUTO_GC_HOOK_UNDECIDED = 0,
 	AUTO_GC_HOOK_RUN = 1,
 	AUTO_GC_HOOK_SKIP = 2,
 };
 
-static int maybe_run_task(const struct maintenance_task *task,
-			  struct repository *repo,
-			  struct maintenance_run_opts *opts,
-			  struct gc_config *cfg,
-			  enum task_phase phase,
-			  enum auto_gc_hook_result *auto_gc_hook_result)
+static ចំនួនគត់ maybe_run_task(const sa_nracanaa maintenance_task *task,
+			  sa_nracanaa repository *repo,
+			  sa_nracanaa maintenance_run_opts *opts,
+			  sa_nracanaa gc_config *cfg,
+			  ga_nanaa task_phase phase,
+			  ga_nanaa auto_gc_hook_result *auto_gc_hook_result)
 {
-	int foreground = (phase == TASK_PHASE_FOREGROUND);
+	ចំនួនគត់ foreground = (phase == TASK_PHASE_FOREGROUND);
 	maintenance_task_fn fn = foreground ? task->foreground : task->background;
-	const char *region = foreground ? "maintenance foreground" : "maintenance";
-	int ret = 0;
+	const var_na *region = foreground ? "maintenance foreground" : "maintenance";
+	ចំនួនគត់ ret = 0;
 
-	if (!fn)
-		return 0;
-	if (opts->auto_flag) {
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+	ប្រសិនបើ (!fn)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (opts->auto_flag) {
+		ប្រសិនបើ (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
+			ត្រឡប់ 0;
 
-		if (!task->auto_condition || !task->auto_condition(cfg))
-			return 0;
+		ប្រសិនបើ (!task->auto_condition || !task->auto_condition(cfg))
+			ត្រឡប់ 0;
 
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
+		ប្រសិនបើ (*auto_gc_hook_result == AUTO_GC_HOOK_UNDECIDED)
 			*auto_gc_hook_result = run_hooks(repo, "pre-auto-gc") ?
 				AUTO_GC_HOOK_SKIP : AUTO_GC_HOOK_RUN;
-		if (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
-			return 0;
+		ប្រសិនបើ (*auto_gc_hook_result == AUTO_GC_HOOK_SKIP)
+			ត្រឡប់ 0;
 	}
 
 	trace2_region_enter(region, task->name, repo);
-	if (fn(opts, cfg)) {
+	ប្រសិនបើ (fn(opts, cfg)) {
 		error(_("task '%s' failed"), task->name);
 		ret = 1;
 	}
 	trace2_region_leave(region, task->name, repo);
 
-	return ret;
+	ត្រឡប់ ret;
 }
 
-static int maintenance_run_tasks(struct maintenance_run_opts *opts,
-				 struct gc_config *cfg)
+static ចំនួនគត់ maintenance_run_tasks(sa_nracanaa maintenance_run_opts *opts,
+				 sa_nracanaa gc_config *cfg)
 {
-	int result = 0;
-	struct lock_file lk;
-	struct repository *r = the_repository;
-	char *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
-	enum auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
+	ចំនួនគត់ result = 0;
+	sa_nracanaa lock_file lk;
+	sa_nracanaa repository *r = the_repository;
+	var_na *lock_path = xstrfmt("%s/maintenance", r->objects->source->path);
+	ga_nanaa auto_gc_hook_result auto_gc_hook_result = AUTO_GC_HOOK_UNDECIDED;
 
-	if (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
+	ប្រសិនបើ (repo_hold_lock_file_for_update(r, &lk, lock_path, LOCK_NO_DEREF) < 0) {
 		/*
 		 * Another maintenance command is running.
 		 *
@@ -1407,52 +1407,52 @@ static int maintenance_run_tasks(struct maintenance_run_opts *opts,
 		 * recursive process stack. Do not report an error in
 		 * that case.
 		 */
-		if (!opts->auto_flag && !opts->quiet)
+		ប្រសិនបើ (!opts->auto_flag && !opts->quiet)
 			warning(_("lock file '%s' exists, skipping maintenance"),
 				lock_path);
 		free(lock_path);
-		return 0;
+		ត្រឡប់ 0;
 	}
 	free(lock_path);
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+	សម្រាប់ (size_t i = 0; i < opts->tasks_nr; i++)
+		ប្រសិនបើ (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
 				   TASK_PHASE_FOREGROUND, &auto_gc_hook_result))
 			result = 1;
 
 	/* Failure to daemonize is ok, we'll continue in foreground. */
-	if (opts->detach > 0) {
+	ប្រសិនបើ (opts->detach > 0) {
 		trace2_region_enter("maintenance", "detach", the_repository);
 		daemonize();
 		trace2_region_leave("maintenance", "detach", the_repository);
 	}
 
-	for (size_t i = 0; i < opts->tasks_nr; i++)
-		if (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
+	សម្រាប់ (size_t i = 0; i < opts->tasks_nr; i++)
+		ប្រសិនបើ (maybe_run_task(&tasks[opts->tasks[i]], r, opts, cfg,
 				   TASK_PHASE_BACKGROUND, &auto_gc_hook_result))
 			result = 1;
 
 	rollback_lock_file(&lk);
-	return result;
+	ត្រឡប់ result;
 }
 
-enum maintenance_type {
+ga_nanaa maintenance_type {
 	/* As invoked via `git maintenance run --schedule=`. */
 	MAINTENANCE_TYPE_SCHEDULED = (1 << 0),
 	/* As invoked via `git maintenance run` and with `--auto`. */
 	MAINTENANCE_TYPE_MANUAL    = (1 << 1),
 };
 
-struct maintenance_strategy {
-	struct {
+sa_nracanaa maintenance_strategy {
+	sa_nracanaa {
 		unsigned type;
-		enum schedule_priority schedule;
+		ga_nanaa schedule_priority schedule;
 	} tasks[TASK__COUNT];
 };
 
-static const struct maintenance_strategy none_strategy = { 0 };
+static const sa_nracanaa maintenance_strategy none_strategy = { 0 };
 
-static const struct maintenance_strategy gc_strategy = {
+static const sa_nracanaa maintenance_strategy gc_strategy = {
 	.tasks = {
 		[TASK_GC] = {
 			.type = MAINTENANCE_TYPE_MANUAL | MAINTENANCE_TYPE_SCHEDULED,
@@ -1461,7 +1461,7 @@ static const struct maintenance_strategy gc_strategy = {
 	},
 };
 
-static const struct maintenance_strategy incremental_strategy = {
+static const sa_nracanaa maintenance_strategy incremental_strategy = {
 	.tasks = {
 		[TASK_COMMIT_GRAPH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED,
@@ -1500,7 +1500,7 @@ static const struct maintenance_strategy incremental_strategy = {
 	},
 };
 
-static const struct maintenance_strategy geometric_strategy = {
+static const sa_nracanaa maintenance_strategy geometric_strategy = {
 	.tasks = {
 		[TASK_COMMIT_GRAPH] = {
 			.type = MAINTENANCE_TYPE_SCHEDULED | MAINTENANCE_TYPE_MANUAL,
@@ -1529,38 +1529,38 @@ static const struct maintenance_strategy geometric_strategy = {
 	},
 };
 
-static struct maintenance_strategy parse_maintenance_strategy(const char *name)
+static sa_nracanaa maintenance_strategy parse_maintenance_strategy(const var_na *name)
 {
-	if (!strcasecmp(name, "incremental"))
-		return incremental_strategy;
-	if (!strcasecmp(name, "gc"))
-		return gc_strategy;
-	if (!strcasecmp(name, "geometric"))
-		return geometric_strategy;
+	ប្រសិនបើ (!strcasecmp(name, "incremental"))
+		ត្រឡប់ incremental_strategy;
+	ប្រសិនបើ (!strcasecmp(name, "gc"))
+		ត្រឡប់ gc_strategy;
+	ប្រសិនបើ (!strcasecmp(name, "geometric"))
+		ត្រឡប់ geometric_strategy;
 	die(_("unknown maintenance strategy: '%s'"), name);
 }
 
-static void initialize_task_config(struct maintenance_run_opts *opts,
-				   const struct string_list *selected_tasks)
+static void initialize_task_config(sa_nracanaa maintenance_run_opts *opts,
+				   const sa_nracanaa string_list *selected_tasks)
 {
-	struct strbuf config_name = STRBUF_INIT;
-	struct maintenance_strategy strategy;
-	enum maintenance_type type;
-	const char *config_str;
+	sa_nracanaa strbuf config_name = STRBUF_INIT;
+	sa_nracanaa maintenance_strategy strategy;
+	ga_nanaa maintenance_type type;
+	const var_na *config_str;
 
 	/*
 	 * In case the user has asked us to run tasks explicitly we only use
 	 * those specified tasks. Specifically, we do _not_ want to consult the
 	 * config or maintenance strategy.
 	 */
-	if (selected_tasks->nr) {
-		for (size_t i = 0; i < selected_tasks->nr; i++) {
-			enum maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
+	ប្រសិនបើ (selected_tasks->nr) {
+		សម្រាប់ (size_t i = 0; i < selected_tasks->nr; i++) {
+			ga_nanaa maintenance_task_label label = (intptr_t)selected_tasks->items[i].util;;
 			ALLOC_GROW(opts->tasks, opts->tasks_nr + 1, opts->tasks_alloc);
 			opts->tasks[opts->tasks_nr++] = label;
 		}
 
-		return;
+		ត្រឡប់;
 	}
 
 	/*
@@ -1576,35 +1576,35 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	 * override specific aspects of our strategy. Furthermore, both
 	 * strategies can be overridden by setting "maintenance.strategy".
 	 */
-	if (opts->schedule) {
+	ប្រសិនបើ (opts->schedule) {
 		strategy = none_strategy;
 		type = MAINTENANCE_TYPE_SCHEDULED;
-	} else {
+	} បើមិនដូច្នេះ {
 		strategy = geometric_strategy;
 		type = MAINTENANCE_TYPE_MANUAL;
 	}
 
-	if (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
+	ប្រសិនបើ (!repo_config_get_string_tmp(the_repository, "maintenance.strategy", &config_str))
 		strategy = parse_maintenance_strategy(config_str);
 
-	for (size_t i = 0; i < TASK__COUNT; i++) {
-		int config_value;
+	សម្រាប់ (size_t i = 0; i < TASK__COUNT; i++) {
+		ចំនួនគត់ config_value;
 
 		strbuf_reset(&config_name);
 		strbuf_addf(&config_name, "maintenance.%s.enabled",
 			    tasks[i].name);
-		if (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
+		ប្រសិនបើ (!repo_config_get_bool(the_repository, config_name.buf, &config_value))
 			strategy.tasks[i].type = config_value ? type : 0;
-		if (!(strategy.tasks[i].type & type))
+		ប្រសិនបើ (!(strategy.tasks[i].type & type))
 			continue;
 
-		if (opts->schedule) {
+		ប្រសិនបើ (opts->schedule) {
 			strbuf_reset(&config_name);
 			strbuf_addf(&config_name, "maintenance.%s.schedule",
 				    tasks[i].name);
-			if (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
+			ប្រសិនបើ (!repo_config_get_string_tmp(the_repository, config_name.buf, &config_str))
 				strategy.tasks[i].schedule = parse_schedule(config_str);
-			if (strategy.tasks[i].schedule < opts->schedule)
+			ប្រសិនបើ (strategy.tasks[i].schedule < opts->schedule)
 				continue;
 		}
 
@@ -1615,39 +1615,39 @@ static void initialize_task_config(struct maintenance_run_opts *opts,
 	strbuf_release(&config_name);
 }
 
-static int task_option_parse(const struct option *opt,
-			     const char *arg, int unset)
+static ចំនួនគត់ task_option_parse(const sa_nracanaa option *opt,
+			     const var_na *arg, ចំនួនគត់ unset)
 {
-	struct string_list *selected_tasks = opt->value;
+	sa_nracanaa string_list *selected_tasks = opt->value;
 	size_t i;
 
 	BUG_ON_OPT_NEG(unset);
 
-	for (i = 0; i < TASK__COUNT; i++)
-		if (!strcasecmp(tasks[i].name, arg))
-			break;
-	if (i >= TASK__COUNT) {
+	សម្រាប់ (i = 0; i < TASK__COUNT; i++)
+		ប្រសិនបើ (!strcasecmp(tasks[i].name, arg))
+			bha_nga;
+	ប្រសិនបើ (i >= TASK__COUNT) {
 		error(_("'%s' is not a valid task"), arg);
-		return 1;
+		ត្រឡប់ 1;
 	}
 
-	if (unsorted_string_list_has_string(selected_tasks, arg)) {
+	ប្រសិនបើ (unsorted_string_list_has_string(selected_tasks, arg)) {
 		error(_("task '%s' cannot be selected multiple times"), arg);
-		return 1;
+		ត្រឡប់ 1;
 	}
 
 	string_list_append(selected_tasks, arg)->util = (void *)(intptr_t)i;
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int maintenance_run(int argc, const char **argv, const char *prefix,
-			   struct repository *repo UNUSED)
+static ចំនួនគត់ maintenance_run(ចំនួនគត់ argc, const var_na **argv, const var_na *prefix,
+			   sa_nracanaa repository *repo UNUSED)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option builtin_maintenance_run_options[] = {
+	sa_nracanaa maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	sa_nracanaa string_list selected_tasks = STRING_LIST_INIT_DUP;
+	sa_nracanaa gc_config cfg = GC_CONFIG_INIT;
+	sa_nracanaa option builtin_maintenance_run_options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_BOOL(0, "detach", &opts.detach,
@@ -1662,7 +1662,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 			PARSE_OPT_NONEG, task_option_parse),
 		OPT_END()
 	};
-	int ret;
+	ចំនួនគត់ ret;
 
 	opts.quiet = !isatty(2);
 
@@ -1679,7 +1679,7 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (argc != 0)
+	ប្រសិនបើ (argc != 0)
 		usage_with_options(builtin_maintenance_run_usage,
 				   builtin_maintenance_run_options);
 
@@ -1688,41 +1688,41 @@ static int maintenance_run(int argc, const char **argv, const char *prefix,
 	string_list_clear(&selected_tasks, 0);
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
-	return ret;
+	ត្រឡប់ ret;
 }
 
-static char *get_maintpath(void)
+static var_na *get_maintpath(void)
 {
-	struct strbuf sb = STRBUF_INIT;
-	const char *p = the_repository->worktree ?
+	sa_nracanaa strbuf sb = STRBUF_INIT;
+	const var_na *p = the_repository->worktree ?
 		the_repository->worktree : the_repository->gitdir;
 
 	strbuf_realpath(&sb, p, 1);
-	return strbuf_detach(&sb, NULL);
+	ត្រឡប់ strbuf_detach(&sb, NULL);
 }
 
-static char const * const builtin_maintenance_register_usage[] = {
+static var_na const * const builtin_maintenance_register_usage[] = {
 	"git maintenance register [--config-file <path>]",
 	NULL
 };
 
-static int maintenance_register(int argc, const char **argv, const char *prefix,
-				struct repository *repo UNUSED)
+static ចំនួនគត់ maintenance_register(ចំនួនគត់ argc, const var_na **argv, const var_na *prefix,
+				sa_nracanaa repository *repo UNUSED)
 {
-	char *config_file = NULL;
-	struct option options[] = {
+	var_na *config_file = NULL;
+	sa_nracanaa option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT_END(),
 	};
-	int found = 0;
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	struct string_list_item *item;
-	const struct string_list *list;
+	ចំនួនគត់ found = 0;
+	const var_na *key = "maintenance.repo";
+	var_na *maintpath = get_maintpath();
+	sa_nracanaa string_list_item *item;
+	const sa_nracanaa string_list *list;
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_register_usage, 0);
-	if (argc)
+	ប្រសិនបើ (argc)
 		usage_with_options(builtin_maintenance_register_usage,
 				   options);
 
@@ -1730,163 +1730,163 @@ static int maintenance_register(int argc, const char **argv, const char *prefix,
 	repo_config_set(the_repository, "maintenance.auto", "false");
 
 	/* Set maintenance strategy, if unset */
-	if (repo_config_get(the_repository, "maintenance.strategy"))
+	ប្រសិនបើ (repo_config_get(the_repository, "maintenance.strategy"))
 		repo_config_set(the_repository, "maintenance.strategy", "incremental");
 
-	if (!repo_config_get_string_multi(the_repository, key, &list)) {
+	ប្រសិនបើ (!repo_config_get_string_multi(the_repository, key, &list)) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			ប្រសិនបើ (!strcmp(maintpath, item->string)) {
 				found = 1;
-				break;
+				bha_nga;
 			}
 		}
 	}
 
-	if (!found) {
-		int rc;
-		char *global_config_file = NULL;
+	ប្រសិនបើ (!found) {
+		ចំនួនគត់ rc;
+		var_na *global_config_file = NULL;
 
-		if (!config_file) {
+		ប្រសិនបើ (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		ប្រសិនបើ (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
 			config_file, "maintenance.repo", maintpath,
 			CONFIG_REGEX_NONE, NULL, 0);
 		free(global_config_file);
 
-		if (rc)
+		ប្រសិនបើ (rc)
 			die(_("unable to add '%s' value of '%s'"),
 			    key, maintpath);
 	}
 
 	free(maintpath);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static char const * const builtin_maintenance_unregister_usage[] = {
+static var_na const * const builtin_maintenance_unregister_usage[] = {
 	"git maintenance unregister [--config-file <path>] [--force]",
 	NULL
 };
 
-static int maintenance_unregister(int argc, const char **argv, const char *prefix,
-				  struct repository *repo UNUSED)
+static ចំនួនគត់ maintenance_unregister(ចំនួនគត់ argc, const var_na **argv, const var_na *prefix,
+				  sa_nracanaa repository *repo UNUSED)
 {
-	int force = 0;
-	char *config_file = NULL;
-	struct option options[] = {
+	ចំនួនគត់ force = 0;
+	var_na *config_file = NULL;
+	sa_nracanaa option options[] = {
 		OPT_STRING(0, "config-file", &config_file, N_("file"), N_("use given config file")),
 		OPT__FORCE(&force,
 			   N_("return success even if repository was not registered"),
 			   PARSE_OPT_NOCOMPLETE),
 		OPT_END(),
 	};
-	const char *key = "maintenance.repo";
-	char *maintpath = get_maintpath();
-	int found = 0;
-	struct string_list_item *item;
-	const struct string_list *list;
-	struct config_set cs = { { 0 } };
+	const var_na *key = "maintenance.repo";
+	var_na *maintpath = get_maintpath();
+	ចំនួនគត់ found = 0;
+	sa_nracanaa string_list_item *item;
+	const sa_nracanaa string_list *list;
+	sa_nracanaa config_set cs = { { 0 } };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_unregister_usage, 0);
-	if (argc)
+	ប្រសិនបើ (argc)
 		usage_with_options(builtin_maintenance_unregister_usage,
 				   options);
 
-	if (config_file) {
+	ប្រសិនបើ (config_file) {
 		git_configset_init(&cs);
 		git_configset_add_file(&cs, config_file);
 	}
-	if (!(config_file
+	ប្រសិនបើ (!(config_file
 	      ? git_configset_get_string_multi(&cs, key, &list)
 	      : repo_config_get_string_multi(the_repository, key, &list))) {
 		for_each_string_list_item(item, list) {
-			if (!strcmp(maintpath, item->string)) {
+			ប្រសិនបើ (!strcmp(maintpath, item->string)) {
 				found = 1;
-				break;
+				bha_nga;
 			}
 		}
 	}
 
-	if (found) {
-		int rc;
-		char *global_config_file = NULL;
+	ប្រសិនបើ (found) {
+		ចំនួនគត់ rc;
+		var_na *global_config_file = NULL;
 
-		if (!config_file) {
+		ប្រសិនបើ (!config_file) {
 			global_config_file = git_global_config();
 			config_file = global_config_file;
 		}
-		if (!config_file)
+		ប្រសិនបើ (!config_file)
 			die(_("$HOME not set"));
 		rc = repo_config_set_multivar_in_file_gently(the_repository,
 			config_file, key, NULL, maintpath, NULL,
 			CONFIG_FLAGS_MULTI_REPLACE | CONFIG_FLAGS_FIXED_VALUE);
 		free(global_config_file);
 
-		if (rc &&
+		ប្រសិនបើ (rc &&
 		    (!force || rc == CONFIG_NOTHING_SET))
 			die(_("unable to unset '%s' value of '%s'"),
 			    key, maintpath);
-	} else if (!force) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (!force) {
 		die(_("repository '%s' is not registered"), maintpath);
 	}
 
 	git_configset_clear(&cs);
 	free(maintpath);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static const char *get_frequency(enum schedule_priority schedule)
+static const var_na *get_frequency(ga_nanaa schedule_priority schedule)
 {
 	switch (schedule) {
-	case SCHEDULE_HOURLY:
-		return "hourly";
-	case SCHEDULE_DAILY:
-		return "daily";
-	case SCHEDULE_WEEKLY:
-		return "weekly";
+	pak_sa SCHEDULE_HOURLY:
+		ត្រឡប់ "hourly";
+	pak_sa SCHEDULE_DAILY:
+		ត្រឡប់ "daily";
+	pak_sa SCHEDULE_WEEKLY:
+		ត្រឡប់ "weekly";
 	default:
 		BUG("invalid schedule %d", schedule);
 	}
 }
 
-static const char *extraconfig[] = {
+static const var_na *extraconfig[] = {
 	"credential.interactive=false",
 	"core.askPass=true", /* 'true' returns success, but no output. */
 	NULL
 };
 
-static const char *get_extra_config_parameters(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+static const var_na *get_extra_config_parameters(void) {
+	static const var_na *result = NULL;
+	sa_nracanaa strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	ប្រសិនបើ (result)
+		ត្រឡប់ result;
 
-	for (const char **s = extraconfig; s && *s; s++)
+	សម្រាប់ (const var_na **s = extraconfig; s && *s; s++)
 		strbuf_addf(&builder, "-c %s ", *s);
 
 	result = strbuf_detach(&builder, NULL);
-	return result;
+	ត្រឡប់ result;
 }
 
-static const char *get_extra_launchctl_strings(void) {
-	static const char *result = NULL;
-	struct strbuf builder = STRBUF_INIT;
+static const var_na *get_extra_launchctl_strings(void) {
+	static const var_na *result = NULL;
+	sa_nracanaa strbuf builder = STRBUF_INIT;
 
-	if (result)
-		return result;
+	ប្រសិនបើ (result)
+		ត្រឡប់ result;
 
-	for (const char **s = extraconfig; s && *s; s++) {
+	សម្រាប់ (const var_na **s = extraconfig; s && *s; s++) {
 		strbuf_addstr(&builder, "<string>-c</string>\n");
 		strbuf_addf(&builder, "<string>%s</string>\n", *s);
 	}
 
 	result = strbuf_detach(&builder, NULL);
-	return result;
+	ត្រឡប់ result;
 }
 
 /*
@@ -1929,32 +1929,32 @@ static const char *get_extra_launchctl_strings(void) {
  *     | "qux" |    true     | "qux" (allocated) |     false     |
  *     +-------+-------------+-------------------+---------------+
  */
-static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
+static ចំនួនគត់ get_schedule_cmd(const var_na *cmd, ចំនួនគត់ *is_available, var_na **out)
 {
-	char *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
-	struct string_list_item *item;
-	struct string_list list = STRING_LIST_INIT_NODUP;
+	var_na *testing = xstrdup_or_null(getenv("GIT_TEST_MAINT_SCHEDULER"));
+	sa_nracanaa string_list_item *item;
+	sa_nracanaa string_list list = STRING_LIST_INIT_NODUP;
 
-	if (!testing) {
-		if (out)
+	ប្រសិនបើ (!testing) {
+		ប្រសិនបើ (out)
 			*out = xstrdup(cmd);
-		return 0;
+		ត្រឡប់ 0;
 	}
 
-	if (is_available)
+	ប្រសិនបើ (is_available)
 		*is_available = 0;
 
 	string_list_split_in_place(&list, testing, ",", -1);
 	for_each_string_list_item(item, &list) {
-		struct string_list pair = STRING_LIST_INIT_NODUP;
+		sa_nracanaa string_list pair = STRING_LIST_INIT_NODUP;
 
-		if (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
+		ប្រសិនបើ (string_list_split_in_place(&pair, item->string, ":", 2) != 2)
 			continue;
 
-		if (!strcmp(cmd, pair.items[0].string)) {
-			if (out)
+		ប្រសិនបើ (!strcmp(cmd, pair.items[0].string)) {
+			ប្រសិនបើ (out)
 				*out = xstrdup(pair.items[1].string);
-			if (is_available)
+			ប្រសិនបើ (is_available)
 				*is_available = 1;
 			string_list_clear(&pair, 0);
 			goto out;
@@ -1963,69 +1963,69 @@ static int get_schedule_cmd(const char *cmd, int *is_available, char **out)
 		string_list_clear(&pair, 0);
 	}
 
-	if (out)
+	ប្រសិនបើ (out)
 		*out = xstrdup(cmd);
 
 out:
 	string_list_clear(&list, 0);
 	free(testing);
-	return 1;
+	ត្រឡប់ 1;
 }
 
-static int get_random_minute(void)
+static ចំនួនគត់ get_random_minute(void)
 {
 	/* Use a static value when under tests. */
-	if (getenv("GIT_TEST_MAINT_SCHEDULER"))
-		return 13;
+	ប្រសិនបើ (getenv("GIT_TEST_MAINT_SCHEDULER"))
+		ត្រឡប់ 13;
 
-	return git_rand(0) % 60;
+	ត្រឡប់ git_rand(0) % 60;
 }
 
-static int is_launchctl_available(void)
+static ចំនួនគត់ is_launchctl_available(void)
 {
-	int is_available;
-	if (get_schedule_cmd("launchctl", &is_available, NULL))
-		return is_available;
+	ចំនួនគត់ is_available;
+	ប្រសិនបើ (get_schedule_cmd("launchctl", &is_available, NULL))
+		ត្រឡប់ is_available;
 
 #ifdef __APPLE__
-	return 1;
-#else
-	return 0;
+	ត្រឡប់ 1;
+#បើមិនដូច្នេះ
+	ត្រឡប់ 0;
 #endif
 }
 
-static char *launchctl_service_name(const char *frequency)
+static var_na *launchctl_service_name(const var_na *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	sa_nracanaa strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "org.git-scm.git.%s", frequency);
-	return strbuf_detach(&label, NULL);
+	ត្រឡប់ strbuf_detach(&label, NULL);
 }
 
-static char *launchctl_service_filename(const char *name)
+static var_na *launchctl_service_filename(const var_na *name)
 {
-	char *expanded;
-	struct strbuf filename = STRBUF_INIT;
+	var_na *expanded;
+	sa_nracanaa strbuf filename = STRBUF_INIT;
 	strbuf_addf(&filename, "~/Library/LaunchAgents/%s.plist", name);
 
 	expanded = interpolate_path(filename.buf, 1);
-	if (!expanded)
+	ប្រសិនបើ (!expanded)
 		die(_("failed to expand path '%s'"), filename.buf);
 
 	strbuf_release(&filename);
-	return expanded;
+	ត្រឡប់ expanded;
 }
 
-static char *launchctl_get_uid(void)
+static var_na *launchctl_get_uid(void)
 {
-	return xstrfmt("gui/%d", getuid());
+	ត្រឡប់ xstrfmt("gui/%d", getuid());
 }
 
-static int launchctl_boot_plist(int enable, const char *filename)
+static ចំនួនគត់ launchctl_boot_plist(ចំនួនគត់ enable, const var_na *filename)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	char *uid = launchctl_get_uid();
+	var_na *cmd;
+	ចំនួនគត់ result;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
+	var_na *uid = launchctl_get_uid();
 
 	get_schedule_cmd("launchctl", NULL, &cmd);
 	strvec_split(&child.args, cmd);
@@ -2035,38 +2035,38 @@ static int launchctl_boot_plist(int enable, const char *filename)
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	ប្រសិនបើ (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	result = finish_command(&child);
 
 	free(cmd);
 	free(uid);
-	return result;
+	ត្រឡប់ result;
 }
 
-static int launchctl_remove_plist(enum schedule_priority schedule)
+static ចំនួនគត់ launchctl_remove_plist(ga_nanaa schedule_priority schedule)
 {
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	int result = launchctl_boot_plist(0, filename);
+	const var_na *frequency = get_frequency(schedule);
+	var_na *name = launchctl_service_name(frequency);
+	var_na *filename = launchctl_service_filename(name);
+	ចំនួនគត់ result = launchctl_boot_plist(0, filename);
 	unlink(filename);
 	free(filename);
 	free(name);
-	return result;
+	ត្រឡប់ result;
 }
 
-static int launchctl_remove_plists(void)
+static ចំនួនគត់ launchctl_remove_plists(void)
 {
-	return launchctl_remove_plist(SCHEDULE_HOURLY) ||
+	ត្រឡប់ launchctl_remove_plist(SCHEDULE_HOURLY) ||
 	       launchctl_remove_plist(SCHEDULE_DAILY) ||
 	       launchctl_remove_plist(SCHEDULE_WEEKLY);
 }
 
-static int launchctl_list_contains_plist(const char *name, const char *cmd)
+static ចំនួនគត់ launchctl_list_contains_plist(const var_na *name, const var_na *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	strvec_split(&child.args, cmd);
 	strvec_pushl(&child.args, "list", name, NULL);
@@ -2074,26 +2074,26 @@ static int launchctl_list_contains_plist(const char *name, const char *cmd)
 	child.no_stderr = 1;
 	child.no_stdout = 1;
 
-	if (start_command(&child))
+	ប្រសិនបើ (start_command(&child))
 		die(_("failed to start launchctl"));
 
 	/* Returns failure if 'name' doesn't exist. */
-	return !finish_command(&child);
+	ត្រឡប់ !finish_command(&child);
 }
 
-static int launchctl_schedule_plist(const char *exec_path, enum schedule_priority schedule)
+static ចំនួនគត់ launchctl_schedule_plist(const var_na *exec_path, ga_nanaa schedule_priority schedule)
 {
-	int i, fd;
-	const char *preamble, *repeat;
-	const char *frequency = get_frequency(schedule);
-	char *name = launchctl_service_name(frequency);
-	char *filename = launchctl_service_filename(name);
-	struct lock_file lk = LOCK_INIT;
+	ចំនួនគត់ i, fd;
+	const var_na *preamble, *repeat;
+	const var_na *frequency = get_frequency(schedule);
+	var_na *name = launchctl_service_name(frequency);
+	var_na *filename = launchctl_service_filename(name);
+	sa_nracanaa lock_file lk = LOCK_INIT;
 	static unsigned long lock_file_timeout_ms = ULONG_MAX;
-	struct strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
-	struct stat st;
-	char *cmd;
-	int minute = get_random_minute();
+	sa_nracanaa strbuf plist = STRBUF_INIT, plist2 = STRBUF_INIT;
+	sa_nracanaa stat st;
+	var_na *cmd;
+	ចំនួនគត់ minute = get_random_minute();
 
 	get_schedule_cmd("launchctl", NULL, &cmd);
 	preamble = "<?xml version=\"1.0\"?>\n"
@@ -2119,26 +2119,26 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 		    get_extra_launchctl_strings(), frequency);
 
 	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	pak_sa SCHEDULE_HOURLY:
 		repeat = "<dict>\n"
 			 "<key>Hour</key><integer>%d</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 23; i++)
+		សម្រាប់ (i = 1; i <= 23; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		bha_nga;
 
-	case SCHEDULE_DAILY:
+	pak_sa SCHEDULE_DAILY:
 		repeat = "<dict>\n"
 			 "<key>Weekday</key><integer>%d</integer>\n"
 			 "<key>Hour</key><integer>0</integer>\n"
 			 "<key>Minute</key><integer>%d</integer>\n"
 			 "</dict>\n";
-		for (i = 1; i <= 6; i++)
+		សម្រាប់ (i = 1; i <= 6; i++)
 			strbuf_addf(&plist, repeat, i, minute);
-		break;
+		bha_nga;
 
-	case SCHEDULE_WEEKLY:
+	pak_sa SCHEDULE_WEEKLY:
 		strbuf_addf(&plist,
 			    "<dict>\n"
 			    "<key>Weekday</key><integer>0</integer>\n"
@@ -2146,18 +2146,18 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 			    "<key>Minute</key><integer>%d</integer>\n"
 			    "</dict>\n",
 			    minute);
-		break;
+		bha_nga;
 
 	default:
 		/* unreachable */
-		break;
+		bha_nga;
 	}
 	strbuf_addstr(&plist, "</array>\n</dict>\n</plist>\n");
 
-	if (safe_create_leading_directories(the_repository, filename))
+	ប្រសិនបើ (safe_create_leading_directories(the_repository, filename))
 		die(_("failed to create directories for '%s'"), filename);
 
-	if ((long)lock_file_timeout_ms < 0 &&
+	ប្រសិនបើ ((long)lock_file_timeout_ms < 0 &&
 	    repo_config_get_ulong(the_repository, "gc.launchctlplistlocktimeoutms",
 				 &lock_file_timeout_ms))
 		lock_file_timeout_ms = 150;
@@ -2169,19 +2169,19 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	 * Does this file already exist? With the intended contents? Is it
 	 * registered already? Then it does not need to be re-registered.
 	 */
-	if (!stat(filename, &st) && st.st_size == plist.len &&
+	ប្រសិនបើ (!stat(filename, &st) && st.st_size == plist.len &&
 	    strbuf_read_file(&plist2, filename, plist.len) == plist.len &&
 	    !strbuf_cmp(&plist, &plist2) &&
 	    launchctl_list_contains_plist(name, cmd))
 		rollback_lock_file(&lk);
-	else {
-		if (write_in_full(fd, plist.buf, plist.len) < 0 ||
+	បើមិនដូច្នេះ {
+		ប្រសិនបើ (write_in_full(fd, plist.buf, plist.len) < 0 ||
 		    commit_lock_file(&lk))
 			die_errno(_("could not write '%s'"), filename);
 
 		/* bootout might fail if not already running, so ignore */
 		launchctl_boot_plist(0, filename);
-		if (launchctl_boot_plist(1, filename))
+		ប្រសិនបើ (launchctl_boot_plist(1, filename))
 			die(_("failed to bootstrap service %s"), filename);
 	}
 
@@ -2190,52 +2190,52 @@ static int launchctl_schedule_plist(const char *exec_path, enum schedule_priorit
 	free(cmd);
 	strbuf_release(&plist);
 	strbuf_release(&plist2);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static int launchctl_add_plists(void)
+static ចំនួនគត់ launchctl_add_plists(void)
 {
-	const char *exec_path = git_exec_path();
+	const var_na *exec_path = git_exec_path();
 
-	return launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
+	ត្រឡប់ launchctl_schedule_plist(exec_path, SCHEDULE_HOURLY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_DAILY) ||
 	       launchctl_schedule_plist(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int launchctl_update_schedule(int run_maintenance, int fd UNUSED)
+static ចំនួនគត់ launchctl_update_schedule(ចំនួនគត់ run_maintenance, ចំនួនគត់ fd UNUSED)
 {
-	if (run_maintenance)
-		return launchctl_add_plists();
-	else
-		return launchctl_remove_plists();
+	ប្រសិនបើ (run_maintenance)
+		ត្រឡប់ launchctl_add_plists();
+	បើមិនដូច្នេះ
+		ត្រឡប់ launchctl_remove_plists();
 }
 
-static int is_schtasks_available(void)
+static ចំនួនគត់ is_schtasks_available(void)
 {
-	int is_available;
-	if (get_schedule_cmd("schtasks", &is_available, NULL))
-		return is_available;
+	ចំនួនគត់ is_available;
+	ប្រសិនបើ (get_schedule_cmd("schtasks", &is_available, NULL))
+		ត្រឡប់ is_available;
 
 #ifdef GIT_WINDOWS_NATIVE
-	return 1;
-#else
-	return 0;
+	ត្រឡប់ 1;
+#បើមិនដូច្នេះ
+	ត្រឡប់ 0;
 #endif
 }
 
-static char *schtasks_task_name(const char *frequency)
+static var_na *schtasks_task_name(const var_na *frequency)
 {
-	struct strbuf label = STRBUF_INIT;
+	sa_nracanaa strbuf label = STRBUF_INIT;
 	strbuf_addf(&label, "Git Maintenance (%s)", frequency);
-	return strbuf_detach(&label, NULL);
+	ត្រឡប់ strbuf_detach(&label, NULL);
 }
 
-static int schtasks_remove_task(enum schedule_priority schedule)
+static ចំនួនគត់ schtasks_remove_task(ga_nanaa schedule_priority schedule)
 {
-	char *cmd;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
+	var_na *cmd;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
+	const var_na *frequency = get_frequency(schedule);
+	var_na *name = schtasks_task_name(frequency);
 
 	get_schedule_cmd("schtasks", NULL, &cmd);
 	strvec_split(&child.args, cmd);
@@ -2243,27 +2243,27 @@ static int schtasks_remove_task(enum schedule_priority schedule)
 	free(name);
 	free(cmd);
 
-	return run_command(&child);
+	ត្រឡប់ run_command(&child);
 }
 
-static int schtasks_remove_tasks(void)
+static ចំនួនគត់ schtasks_remove_tasks(void)
 {
-	return schtasks_remove_task(SCHEDULE_HOURLY) ||
+	ត្រឡប់ schtasks_remove_task(SCHEDULE_HOURLY) ||
 	       schtasks_remove_task(SCHEDULE_DAILY) ||
 	       schtasks_remove_task(SCHEDULE_WEEKLY);
 }
 
-static int schtasks_schedule_task(const char *exec_path, enum schedule_priority schedule)
+static ចំនួនគត់ schtasks_schedule_task(const var_na *exec_path, ga_nanaa schedule_priority schedule)
 {
-	char *cmd;
-	int result;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *xml;
-	struct tempfile *tfile;
-	const char *frequency = get_frequency(schedule);
-	char *name = schtasks_task_name(frequency);
-	struct strbuf tfilename = STRBUF_INIT;
-	int minute = get_random_minute();
+	var_na *cmd;
+	ចំនួនគត់ result;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
+	const var_na *xml;
+	sa_nracanaa tempfile *tfile;
+	const var_na *frequency = get_frequency(schedule);
+	var_na *name = schtasks_task_name(frequency);
+	sa_nracanaa strbuf tfilename = STRBUF_INIT;
+	ចំនួនគត់ minute = get_random_minute();
 
 	get_schedule_cmd("schtasks", NULL, &cmd);
 
@@ -2272,7 +2272,7 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	tfile = xmks_tempfile(tfilename.buf);
 	strbuf_release(&tfilename);
 
-	if (!fdopen_tempfile(tfile, "w"))
+	ប្រសិនបើ (!fdopen_tempfile(tfile, "w"))
 		die(_("failed to create temp xml file"));
 
 	xml = "<?xml version=\"1.0\" ?>\n"
@@ -2282,7 +2282,7 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	fputs(xml, tfile->fp);
 
 	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	pak_sa SCHEDULE_HOURLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T01:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2295,9 +2295,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<StopAtDurationEnd>false</StopAtDurationEnd>\n"
 			"</Repetition>\n",
 			minute);
-		break;
+		bha_nga;
 
-	case SCHEDULE_DAILY:
+	pak_sa SCHEDULE_DAILY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2313,9 +2313,9 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		bha_nga;
 
-	case SCHEDULE_WEEKLY:
+	pak_sa SCHEDULE_WEEKLY:
 		fprintf(tfile->fp,
 			"<StartBoundary>2020-01-01T00:%02d:00</StartBoundary>\n"
 			"<Enabled>true</Enabled>\n"
@@ -2326,10 +2326,10 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 			"<WeeksInterval>1</WeeksInterval>\n"
 			"</ScheduleByWeek>\n",
 			minute);
-		break;
+		bha_nga;
 
 	default:
-		break;
+		bha_nga;
 	}
 
 	xml = "</CalendarTrigger>\n"
@@ -2366,37 +2366,37 @@ static int schtasks_schedule_task(const char *exec_path, enum schedule_priority 
 	child.no_stdout = 1;
 	child.no_stderr = 1;
 
-	if (start_command(&child))
+	ប្រសិនបើ (start_command(&child))
 		die(_("failed to start schtasks"));
 	result = finish_command(&child);
 
 	delete_tempfile(&tfile);
 	free(name);
 	free(cmd);
-	return result;
+	ត្រឡប់ result;
 }
 
-static int schtasks_schedule_tasks(void)
+static ចំនួនគត់ schtasks_schedule_tasks(void)
 {
-	const char *exec_path = git_exec_path();
+	const var_na *exec_path = git_exec_path();
 
-	return schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
+	ត្រឡប់ schtasks_schedule_task(exec_path, SCHEDULE_HOURLY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_DAILY) ||
 	       schtasks_schedule_task(exec_path, SCHEDULE_WEEKLY);
 }
 
-static int schtasks_update_schedule(int run_maintenance, int fd UNUSED)
+static ចំនួនគត់ schtasks_update_schedule(ចំនួនគត់ run_maintenance, ចំនួនគត់ fd UNUSED)
 {
-	if (run_maintenance)
-		return schtasks_schedule_tasks();
-	else
-		return schtasks_remove_tasks();
+	ប្រសិនបើ (run_maintenance)
+		ត្រឡប់ schtasks_schedule_tasks();
+	បើមិនដូច្នេះ
+		ត្រឡប់ schtasks_remove_tasks();
 }
 
 MAYBE_UNUSED
-static int check_crontab_process(const char *cmd)
+static ចំនួនគត់ check_crontab_process(const var_na *cmd)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	strvec_split(&child.args, cmd);
 	strvec_push(&child.args, "-l");
@@ -2405,20 +2405,20 @@ static int check_crontab_process(const char *cmd)
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
+	ប្រសិនបើ (start_command(&child))
+		ត្រឡប់ 0;
 	/* Ignore exit code, as an empty crontab will return error. */
 	finish_command(&child);
-	return 1;
+	ត្រឡប់ 1;
 }
 
-static int is_crontab_available(void)
+static ចំនួនគត់ is_crontab_available(void)
 {
-	char *cmd;
-	int is_available;
-	int ret;
+	var_na *cmd;
+	ចំនួនគត់ is_available;
+	ចំនួនគត់ ret;
 
-	if (get_schedule_cmd("crontab", &is_available, &cmd)) {
+	ប្រសិនបើ (get_schedule_cmd("crontab", &is_available, &cmd)) {
 		ret = is_available;
 		goto out;
 	}
@@ -2429,29 +2429,29 @@ static int is_crontab_available(void)
 	 * create a UI alert when attempting to run this command.
 	 */
 	ret = 0;
-#else
+#បើមិនដូច្នេះ
 	ret = check_crontab_process(cmd);
 #endif
 
 out:
 	free(cmd);
-	return ret;
+	ត្រឡប់ ret;
 }
 
 #define BEGIN_LINE "# BEGIN GIT MAINTENANCE SCHEDULE"
 #define END_LINE "# END GIT MAINTENANCE SCHEDULE"
 
-static int crontab_update_schedule(int run_maintenance, int fd)
+static ចំនួនគត់ crontab_update_schedule(ចំនួនគត់ run_maintenance, ចំនួនគត់ fd)
 {
-	char *cmd;
-	int result = 0;
-	int in_old_region = 0;
-	struct child_process crontab_list = CHILD_PROCESS_INIT;
-	struct child_process crontab_edit = CHILD_PROCESS_INIT;
+	var_na *cmd;
+	ចំនួនគត់ result = 0;
+	ចំនួនគត់ in_old_region = 0;
+	sa_nracanaa child_process crontab_list = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process crontab_edit = CHILD_PROCESS_INIT;
 	FILE *cron_list, *cron_in;
-	struct strbuf line = STRBUF_INIT;
-	struct tempfile *tmpedit = NULL;
-	int minute = get_random_minute();
+	sa_nracanaa strbuf line = STRBUF_INIT;
+	sa_nracanaa tempfile *tmpedit = NULL;
+	ចំនួនគត់ minute = get_random_minute();
 
 	get_schedule_cmd("crontab", NULL, &cmd);
 	strvec_split(&crontab_list.args, cmd);
@@ -2460,7 +2460,7 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	crontab_list.out = dup(fd);
 	crontab_list.git_cmd = 0;
 
-	if (start_command(&crontab_list)) {
+	ប្រសិនបើ (start_command(&crontab_list)) {
 		result = error(_("failed to run 'crontab -l'; your system might not support 'cron'"));
 		goto out;
 	}
@@ -2469,12 +2469,12 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	finish_command(&crontab_list);
 
 	tmpedit = mks_tempfile_t(".git_cron_edit_tmpXXXXXX");
-	if (!tmpedit) {
+	ប្រសិនបើ (!tmpedit) {
 		result = error(_("failed to create crontab temporary file"));
 		goto out;
 	}
 	cron_in = fdopen_tempfile(tmpedit, "w");
-	if (!cron_in) {
+	ប្រសិនបើ (!cron_in) {
 		result = error(_("failed to open temporary file"));
 		goto out;
 	}
@@ -2486,19 +2486,19 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	cron_list = fdopen(fd, "r");
 	rewind(cron_list);
 
-	while (!strbuf_getline_lf(&line, cron_list)) {
-		if (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
+	ខណៈពេល (!strbuf_getline_lf(&line, cron_list)) {
+		ប្រសិនបើ (!in_old_region && !strcmp(line.buf, BEGIN_LINE))
 			in_old_region = 1;
-		else if (in_old_region && !strcmp(line.buf, END_LINE))
+		បើមិនដូច្នេះ ប្រសិនបើ (in_old_region && !strcmp(line.buf, END_LINE))
 			in_old_region = 0;
-		else if (!in_old_region)
+		បើមិនដូច្នេះ ប្រសិនបើ (!in_old_region)
 			fprintf(cron_in, "%s\n", line.buf);
 	}
 	strbuf_release(&line);
 
-	if (run_maintenance) {
-		struct strbuf line_format = STRBUF_INIT;
-		const char *exec_path = git_exec_path();
+	ប្រសិនបើ (run_maintenance) {
+		sa_nracanaa strbuf line_format = STRBUF_INIT;
+		const var_na *exec_path = git_exec_path();
 
 		fprintf(cron_in, "%s\n", BEGIN_LINE);
 		fprintf(cron_in,
@@ -2524,25 +2524,25 @@ static int crontab_update_schedule(int run_maintenance, int fd)
 	strvec_push(&crontab_edit.args, get_tempfile_path(tmpedit));
 	crontab_edit.git_cmd = 0;
 
-	if (start_command(&crontab_edit)) {
+	ប្រសិនបើ (start_command(&crontab_edit)) {
 		result = error(_("failed to run 'crontab'; your system might not support 'cron'"));
 		goto out;
 	}
 
-	if (finish_command(&crontab_edit))
+	ប្រសិនបើ (finish_command(&crontab_edit))
 		result = error(_("'crontab' died"));
-	else
+	បើមិនដូច្នេះ
 		fclose(cron_list);
 
 out:
 	delete_tempfile(&tmpedit);
 	free(cmd);
-	return result;
+	ត្រឡប់ result;
 }
 
-static int real_is_systemd_timer_available(void)
+static ចំនួនគត់ real_is_systemd_timer_available(void)
 {
-	struct child_process child = CHILD_PROCESS_INIT;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
 
 	strvec_pushl(&child.args, "systemctl", "--user", "list-timers", NULL);
 	child.no_stdin = 1;
@@ -2550,56 +2550,56 @@ static int real_is_systemd_timer_available(void)
 	child.no_stderr = 1;
 	child.silent_exec_failure = 1;
 
-	if (start_command(&child))
-		return 0;
-	if (finish_command(&child))
-		return 0;
-	return 1;
+	ប្រសិនបើ (start_command(&child))
+		ត្រឡប់ 0;
+	ប្រសិនបើ (finish_command(&child))
+		ត្រឡប់ 0;
+	ត្រឡប់ 1;
 }
 
-static int is_systemd_timer_available(void)
+static ចំនួនគត់ is_systemd_timer_available(void)
 {
-	int is_available;
+	ចំនួនគត់ is_available;
 
-	if (get_schedule_cmd("systemctl", &is_available, NULL))
-		return is_available;
+	ប្រសិនបើ (get_schedule_cmd("systemctl", &is_available, NULL))
+		ត្រឡប់ is_available;
 
-	return real_is_systemd_timer_available();
+	ត្រឡប់ real_is_systemd_timer_available();
 }
 
-static char *xdg_config_home_systemd(const char *filename)
+static var_na *xdg_config_home_systemd(const var_na *filename)
 {
-	return xdg_config_home_for("systemd/user", filename);
+	ត្រឡប់ xdg_config_home_for("systemd/user", filename);
 }
 
 #define SYSTEMD_UNIT_FORMAT "git-maintenance@%s.%s"
 
-static int systemd_timer_delete_timer_file(enum schedule_priority priority)
+static ចំនួនគត់ systemd_timer_delete_timer_file(ga_nanaa schedule_priority priority)
 {
-	int ret = 0;
-	const char *frequency = get_frequency(priority);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
-	char *filename = xdg_config_home_systemd(local_timer_name);
+	ចំនួនគត់ ret = 0;
+	const var_na *frequency = get_frequency(priority);
+	var_na *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	var_na *filename = xdg_config_home_systemd(local_timer_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	ប្រសិនបើ (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
 	free(filename);
 	free(local_timer_name);
-	return ret;
+	ត្រឡប់ ret;
 }
 
-static int systemd_timer_delete_service_template(void)
+static ចំនួនគត់ systemd_timer_delete_service_template(void)
 {
-	int ret = 0;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
-	char *filename = xdg_config_home_systemd(local_service_name);
-	if (unlink(filename) && !is_missing_file_error(errno))
+	ចំនួនគត់ ret = 0;
+	var_na *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	var_na *filename = xdg_config_home_systemd(local_service_name);
+	ប្រសិនបើ (unlink(filename) && !is_missing_file_error(errno))
 		ret = error_errno(_("failed to delete '%s'"), filename);
 
 	free(filename);
 	free(local_service_name);
-	return ret;
+	ត្រឡប់ ret;
 }
 
 /*
@@ -2607,39 +2607,39 @@ static int systemd_timer_delete_service_template(void)
  * file using a custom minute. This timer file cannot use the templating
  * system, so we generate a specific file for each.
  */
-static int systemd_timer_write_timer_file(enum schedule_priority schedule,
-					  int minute)
+static ចំនួនគត់ systemd_timer_write_timer_file(ga_nanaa schedule_priority schedule,
+					  ចំនួនគត់ minute)
 {
-	int res = -1;
-	char *filename;
+	ចំនួនគត់ res = -1;
+	var_na *filename;
 	FILE *file;
-	const char *unit;
-	char *schedule_pattern = NULL;
-	const char *frequency = get_frequency(schedule);
-	char *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
+	const var_na *unit;
+	var_na *schedule_pattern = NULL;
+	const var_na *frequency = get_frequency(schedule);
+	var_na *local_timer_name = xstrfmt(SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
 	filename = xdg_config_home_systemd(local_timer_name);
 
-	if (safe_create_leading_directories(the_repository, filename)) {
+	ប្រសិនបើ (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
 		goto error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
+	ប្រសិនបើ (!file)
 		goto error;
 
 	switch (schedule) {
-	case SCHEDULE_HOURLY:
+	pak_sa SCHEDULE_HOURLY:
 		schedule_pattern = xstrfmt("*-*-* 1..23:%02d:00", minute);
-		break;
+		bha_nga;
 
-	case SCHEDULE_DAILY:
+	pak_sa SCHEDULE_DAILY:
 		schedule_pattern = xstrfmt("Tue..Sun *-*-* 0:%02d:00", minute);
-		break;
+		bha_nga;
 
-	case SCHEDULE_WEEKLY:
+	pak_sa SCHEDULE_WEEKLY:
 		schedule_pattern = xstrfmt("Mon 0:%02d:00", minute);
-		break;
+		bha_nga;
 
 	default:
 		BUG("Unhandled schedule_priority");
@@ -2658,12 +2658,12 @@ static int systemd_timer_write_timer_file(enum schedule_priority schedule,
 	       "\n"
 	       "[Install]\n"
 	       "WantedBy=timers.target\n";
-	if (fprintf(file, unit, schedule_pattern) < 0) {
+	ប្រសិនបើ (fprintf(file, unit, schedule_pattern) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
 		goto error;
 	}
-	if (fclose(file) == EOF) {
+	ប្រសិនបើ (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
 		goto error;
 	}
@@ -2674,7 +2674,7 @@ error:
 	free(schedule_pattern);
 	free(local_timer_name);
 	free(filename);
-	return res;
+	ត្រឡប់ res;
 }
 
 /*
@@ -2684,21 +2684,21 @@ error:
  * and will use this file and insert the <schedule> into the template at
  * the position of "%i".
  */
-static int systemd_timer_write_service_template(const char *exec_path)
+static ចំនួនគត់ systemd_timer_write_service_template(const var_na *exec_path)
 {
-	int res = -1;
-	char *filename;
+	ចំនួនគត់ res = -1;
+	var_na *filename;
 	FILE *file;
-	const char *unit;
-	char *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
+	const var_na *unit;
+	var_na *local_service_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "service");
 
 	filename = xdg_config_home_systemd(local_service_name);
-	if (safe_create_leading_directories(the_repository, filename)) {
+	ប្រសិនបើ (safe_create_leading_directories(the_repository, filename)) {
 		error(_("failed to create directories for '%s'"), filename);
 		goto error;
 	}
 	file = fopen_or_warn(filename, "w");
-	if (!file)
+	ប្រសិនបើ (!file)
 		goto error;
 
 	unit = "# This file was created and is maintained by Git.\n"
@@ -2720,12 +2720,12 @@ static int systemd_timer_write_service_template(const char *exec_path)
 	       "RestrictSUIDSGID=yes\n"
 	       "SystemCallArchitectures=native\n"
 	       "SystemCallFilter=@system-service\n";
-	if (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
+	ប្រសិនបើ (fprintf(file, unit, exec_path, exec_path, get_extra_config_parameters()) < 0) {
 		error(_("failed to write to '%s'"), filename);
 		fclose(file);
 		goto error;
 	}
-	if (fclose(file) == EOF) {
+	ប្រសិនបើ (fclose(file) == EOF) {
 		error_errno(_("failed to flush '%s'"), filename);
 		goto error;
 	}
@@ -2735,17 +2735,17 @@ static int systemd_timer_write_service_template(const char *exec_path)
 error:
 	free(local_service_name);
 	free(filename);
-	return res;
+	ត្រឡប់ res;
 }
 
-static int systemd_timer_enable_unit(int enable,
-				     enum schedule_priority schedule,
-				     int minute)
+static ចំនួនគត់ systemd_timer_enable_unit(ចំនួនគត់ enable,
+				     ga_nanaa schedule_priority schedule,
+				     ចំនួនគត់ minute)
 {
-	char *cmd = NULL;
-	struct child_process child = CHILD_PROCESS_INIT;
-	const char *frequency = get_frequency(schedule);
-	int ret;
+	var_na *cmd = NULL;
+	sa_nracanaa child_process child = CHILD_PROCESS_INIT;
+	const var_na *frequency = get_frequency(schedule);
+	ចំនួនគត់ ret;
 
 	/*
 	 * Disabling the systemd unit while it is already disabled makes
@@ -2756,9 +2756,9 @@ static int systemd_timer_enable_unit(int enable,
 	 * On the other hand, enabling a systemd unit which is already enabled
 	 * produces no error.
 	 */
-	if (!enable) {
+	ប្រសិនបើ (!enable) {
 		child.no_stderr = 1;
-	} else if (systemd_timer_write_timer_file(schedule, minute)) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (systemd_timer_write_timer_file(schedule, minute)) {
 		ret = -1;
 		goto out;
 	}
@@ -2769,12 +2769,12 @@ static int systemd_timer_enable_unit(int enable,
 		     "--now", NULL);
 	strvec_pushf(&child.args, SYSTEMD_UNIT_FORMAT, frequency, "timer");
 
-	if (start_command(&child)) {
+	ប្រសិនបើ (start_command(&child)) {
 		ret = error(_("failed to start systemctl"));
 		goto out;
 	}
 
-	if (finish_command(&child)) {
+	ប្រសិនបើ (finish_command(&child)) {
 		/*
 		 * Disabling an already disabled systemd unit makes
 		 * systemctl fail.
@@ -2782,7 +2782,7 @@ static int systemd_timer_enable_unit(int enable,
 		 *
 		 * Enabling an enabled systemd unit doesn't fail.
 		 */
-		if (enable) {
+		ប្រសិនបើ (enable) {
 			ret = error(_("failed to run systemctl"));
 			goto out;
 		}
@@ -2792,7 +2792,7 @@ static int systemd_timer_enable_unit(int enable,
 
 out:
 	free(cmd);
-	return ret;
+	ត្រឡប់ ret;
 }
 
 /*
@@ -2801,64 +2801,64 @@ out:
  */
 static void systemd_timer_delete_stale_timer_templates(void)
 {
-	char *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
-	char *filename = xdg_config_home_systemd(timer_template_name);
+	var_na *timer_template_name = xstrfmt(SYSTEMD_UNIT_FORMAT, "", "timer");
+	var_na *filename = xdg_config_home_systemd(timer_template_name);
 
-	if (unlink(filename) && !is_missing_file_error(errno))
+	ប្រសិនបើ (unlink(filename) && !is_missing_file_error(errno))
 		warning(_("failed to delete '%s'"), filename);
 
 	free(filename);
 	free(timer_template_name);
 }
 
-static int systemd_timer_delete_unit_files(void)
+static ចំនួនគត់ systemd_timer_delete_unit_files(void)
 {
 	systemd_timer_delete_stale_timer_templates();
 
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
+	ត្រឡប់ systemd_timer_delete_timer_file(SCHEDULE_HOURLY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_DAILY) |
 	       systemd_timer_delete_timer_file(SCHEDULE_WEEKLY) |
 	       systemd_timer_delete_service_template();
 }
 
-static int systemd_timer_delete_units(void)
+static ចំនួនគត់ systemd_timer_delete_units(void)
 {
-	int minute = get_random_minute();
+	ចំនួនគត់ minute = get_random_minute();
 	/* Purposefully not short-circuited to make sure all are called. */
-	return systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
+	ត្រឡប់ systemd_timer_enable_unit(0, SCHEDULE_HOURLY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_DAILY, minute) |
 	       systemd_timer_enable_unit(0, SCHEDULE_WEEKLY, minute) |
 	       systemd_timer_delete_unit_files();
 }
 
-static int systemd_timer_setup_units(void)
+static ចំនួនគត់ systemd_timer_setup_units(void)
 {
-	int minute = get_random_minute();
-	const char *exec_path = git_exec_path();
+	ចំនួនគត់ minute = get_random_minute();
+	const var_na *exec_path = git_exec_path();
 
-	int ret = systemd_timer_write_service_template(exec_path) ||
+	ចំនួនគត់ ret = systemd_timer_write_service_template(exec_path) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_HOURLY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_DAILY, minute) ||
 		  systemd_timer_enable_unit(1, SCHEDULE_WEEKLY, minute);
 
-	if (ret)
+	ប្រសិនបើ (ret)
 		systemd_timer_delete_units();
-	else
+	បើមិនដូច្នេះ
 		systemd_timer_delete_stale_timer_templates();
 
-	return ret;
+	ត្រឡប់ ret;
 }
 
-static int systemd_timer_update_schedule(int run_maintenance, int fd UNUSED)
+static ចំនួនគត់ systemd_timer_update_schedule(ចំនួនគត់ run_maintenance, ចំនួនគត់ fd UNUSED)
 {
-	if (run_maintenance)
-		return systemd_timer_setup_units();
-	else
-		return systemd_timer_delete_units();
+	ប្រសិនបើ (run_maintenance)
+		ត្រឡប់ systemd_timer_setup_units();
+	បើមិនដូច្នេះ
+		ត្រឡប់ systemd_timer_delete_units();
 }
 
-enum scheduler {
+ga_nanaa scheduler {
 	SCHEDULER_INVALID = -1,
 	SCHEDULER_AUTO,
 	SCHEDULER_CRON,
@@ -2867,10 +2867,10 @@ enum scheduler {
 	SCHEDULER_SCHTASKS,
 };
 
-static const struct {
-	const char *name;
-	int (*is_available)(void);
-	int (*update_schedule)(int run_maintenance, int fd);
+static const sa_nracanaa {
+	const var_na *name;
+	ចំនួនគត់ (*is_available)(void);
+	ចំនួនគត់ (*update_schedule)(ចំនួនគត់ run_maintenance, ចំនួនគត់ fd);
 } scheduler_fn[] = {
 	[SCHEDULER_CRON] = {
 		.name = "crontab",
@@ -2894,182 +2894,182 @@ static const struct {
 	},
 };
 
-static enum scheduler parse_scheduler(const char *value)
+static ga_nanaa scheduler parse_scheduler(const var_na *value)
 {
-	if (!value)
-		return SCHEDULER_INVALID;
-	else if (!strcasecmp(value, "auto"))
-		return SCHEDULER_AUTO;
-	else if (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
-		return SCHEDULER_CRON;
-	else if (!strcasecmp(value, "systemd") ||
+	ប្រសិនបើ (!value)
+		ត្រឡប់ SCHEDULER_INVALID;
+	បើមិនដូច្នេះ ប្រសិនបើ (!strcasecmp(value, "auto"))
+		ត្រឡប់ SCHEDULER_AUTO;
+	បើមិនដូច្នេះ ប្រសិនបើ (!strcasecmp(value, "cron") || !strcasecmp(value, "crontab"))
+		ត្រឡប់ SCHEDULER_CRON;
+	បើមិនដូច្នេះ ប្រសិនបើ (!strcasecmp(value, "systemd") ||
 		 !strcasecmp(value, "systemd-timer"))
-		return SCHEDULER_SYSTEMD;
-	else if (!strcasecmp(value, "launchctl"))
-		return SCHEDULER_LAUNCHCTL;
-	else if (!strcasecmp(value, "schtasks"))
-		return SCHEDULER_SCHTASKS;
-	else
-		return SCHEDULER_INVALID;
+		ត្រឡប់ SCHEDULER_SYSTEMD;
+	បើមិនដូច្នេះ ប្រសិនបើ (!strcasecmp(value, "launchctl"))
+		ត្រឡប់ SCHEDULER_LAUNCHCTL;
+	បើមិនដូច្នេះ ប្រសិនបើ (!strcasecmp(value, "schtasks"))
+		ត្រឡប់ SCHEDULER_SCHTASKS;
+	បើមិនដូច្នេះ
+		ត្រឡប់ SCHEDULER_INVALID;
 }
 
-static int maintenance_opt_scheduler(const struct option *opt, const char *arg,
-				     int unset)
+static ចំនួនគត់ maintenance_opt_scheduler(const sa_nracanaa option *opt, const var_na *arg,
+				     ចំនួនគត់ unset)
 {
-	enum scheduler *scheduler = opt->value;
+	ga_nanaa scheduler *scheduler = opt->value;
 
 	BUG_ON_OPT_NEG(unset);
 
 	*scheduler = parse_scheduler(arg);
-	if (*scheduler == SCHEDULER_INVALID)
-		return error(_("unrecognized --scheduler argument '%s'"), arg);
-	return 0;
+	ប្រសិនបើ (*scheduler == SCHEDULER_INVALID)
+		ត្រឡប់ error(_("unrecognized --scheduler argument '%s'"), arg);
+	ត្រឡប់ 0;
 }
 
-struct maintenance_start_opts {
-	enum scheduler scheduler;
+sa_nracanaa maintenance_start_opts {
+	ga_nanaa scheduler scheduler;
 };
 
-static enum scheduler resolve_scheduler(enum scheduler scheduler)
+static ga_nanaa scheduler resolve_scheduler(ga_nanaa scheduler scheduler)
 {
-	if (scheduler != SCHEDULER_AUTO)
-		return scheduler;
+	ប្រសិនបើ (scheduler != SCHEDULER_AUTO)
+		ត្រឡប់ scheduler;
 
-#if defined(__APPLE__)
-	return SCHEDULER_LAUNCHCTL;
+#ប្រសិនបើ defined(__APPLE__)
+	ត្រឡប់ SCHEDULER_LAUNCHCTL;
 
 #elif defined(GIT_WINDOWS_NATIVE)
-	return SCHEDULER_SCHTASKS;
+	ត្រឡប់ SCHEDULER_SCHTASKS;
 
 #elif defined(__linux__)
-	if (is_systemd_timer_available())
-		return SCHEDULER_SYSTEMD;
-	else if (is_crontab_available())
-		return SCHEDULER_CRON;
-	else
+	ប្រសិនបើ (is_systemd_timer_available())
+		ត្រឡប់ SCHEDULER_SYSTEMD;
+	បើមិនដូច្នេះ ប្រសិនបើ (is_crontab_available())
+		ត្រឡប់ SCHEDULER_CRON;
+	បើមិនដូច្នេះ
 		die(_("neither systemd timers nor crontab are available"));
 
-#else
-	return SCHEDULER_CRON;
+#បើមិនដូច្នេះ
+	ត្រឡប់ SCHEDULER_CRON;
 #endif
 }
 
-static void validate_scheduler(enum scheduler scheduler)
+static void validate_scheduler(ga_nanaa scheduler scheduler)
 {
-	if (scheduler == SCHEDULER_INVALID)
+	ប្រសិនបើ (scheduler == SCHEDULER_INVALID)
 		BUG("invalid scheduler");
-	if (scheduler == SCHEDULER_AUTO)
+	ប្រសិនបើ (scheduler == SCHEDULER_AUTO)
 		BUG("resolve_scheduler should have been called before");
 
-	if (!scheduler_fn[scheduler].is_available())
+	ប្រសិនបើ (!scheduler_fn[scheduler].is_available())
 		die(_("%s scheduler is not available"),
 		    scheduler_fn[scheduler].name);
 }
 
-static int update_background_schedule(const struct maintenance_start_opts *opts,
-				      int enable)
+static ចំនួនគត់ update_background_schedule(const sa_nracanaa maintenance_start_opts *opts,
+				      ចំនួនគត់ enable)
 {
-	unsigned int i;
-	int result = 0;
-	struct lock_file lk;
-	char *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
+	unsigned ចំនួនគត់ i;
+	ចំនួនគត់ result = 0;
+	sa_nracanaa lock_file lk;
+	var_na *lock_path = xstrfmt("%s/schedule", the_repository->objects->source->path);
 
-	if (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
-		if (errno == EEXIST)
+	ប្រសិនបើ (hold_lock_file_for_update(&lk, lock_path, LOCK_NO_DEREF) < 0) {
+		ប្រសិនបើ (errno == EEXIST)
 			error(_("unable to create '%s.lock': %s.\n\n"
 			    "Another scheduled git-maintenance(1) process seems to be running in this\n"
 			    "repository. Please make sure no other maintenance processes are running and\n"
 			    "then try again. If it still fails, a git-maintenance(1) process may have\n"
 			    "crashed in this repository earlier: remove the file manually to continue."),
 			    absolute_path(lock_path), strerror(errno));
-		else
+		បើមិនដូច្នេះ
 			error_errno(_("cannot acquire lock for scheduled background maintenance"));
 		free(lock_path);
-		return -1;
+		ត្រឡប់ -1;
 	}
 
-	for (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
-		if (enable && opts->scheduler == i)
+	សម្រាប់ (i = 1; i < ARRAY_SIZE(scheduler_fn); i++) {
+		ប្រសិនបើ (enable && opts->scheduler == i)
 			continue;
-		if (!scheduler_fn[i].is_available())
+		ប្រសិនបើ (!scheduler_fn[i].is_available())
 			continue;
 		scheduler_fn[i].update_schedule(0, get_lock_file_fd(&lk));
 	}
 
-	if (enable)
+	ប្រសិនបើ (enable)
 		result = scheduler_fn[opts->scheduler].update_schedule(
 			1, get_lock_file_fd(&lk));
 
 	rollback_lock_file(&lk);
 
 	free(lock_path);
-	return result;
+	ត្រឡប់ result;
 }
 
-static const char *const builtin_maintenance_start_usage[] = {
+static const var_na *const builtin_maintenance_start_usage[] = {
 	N_("git maintenance start [--scheduler=<scheduler>]"),
 	NULL
 };
 
-static int maintenance_start(int argc, const char **argv, const char *prefix,
-			     struct repository *repo)
+static ចំនួនគត់ maintenance_start(ចំនួនគត់ argc, const var_na **argv, const var_na *prefix,
+			     sa_nracanaa repository *repo)
 {
-	struct maintenance_start_opts opts = { 0 };
-	struct option options[] = {
+	sa_nracanaa maintenance_start_opts opts = { 0 };
+	sa_nracanaa option options[] = {
 		OPT_CALLBACK_F(
 			0, "scheduler", &opts.scheduler, N_("scheduler"),
 			N_("scheduler to trigger git maintenance run"),
 			PARSE_OPT_NONEG, maintenance_opt_scheduler),
 		OPT_END()
 	};
-	const char *register_args[] = { "register", NULL };
+	const var_na *register_args[] = { "register", NULL };
 
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_start_usage, 0);
-	if (argc)
+	ប្រសិនបើ (argc)
 		usage_with_options(builtin_maintenance_start_usage, options);
 
 	opts.scheduler = resolve_scheduler(opts.scheduler);
 	validate_scheduler(opts.scheduler);
 
-	if (update_background_schedule(&opts, 1))
+	ប្រសិនបើ (update_background_schedule(&opts, 1))
 		die(_("failed to set up maintenance schedule"));
 
-	if (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
+	ប្រសិនបើ (maintenance_register(ARRAY_SIZE(register_args)-1, register_args, NULL, repo))
 		warning(_("failed to add repo to global config"));
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static const char *const builtin_maintenance_stop_usage[] = {
+static const var_na *const builtin_maintenance_stop_usage[] = {
 	"git maintenance stop",
 	NULL
 };
 
-static int maintenance_stop(int argc, const char **argv, const char *prefix,
-			    struct repository *repo UNUSED)
+static ចំនួនគត់ maintenance_stop(ចំនួនគត់ argc, const var_na **argv, const var_na *prefix,
+			    sa_nracanaa repository *repo UNUSED)
 {
-	struct option options[] = {
+	sa_nracanaa option options[] = {
 		OPT_END()
 	};
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_stop_usage, 0);
-	if (argc)
+	ប្រសិនបើ (argc)
 		usage_with_options(builtin_maintenance_stop_usage, options);
-	return update_background_schedule(NULL, 0);
+	ត្រឡប់ update_background_schedule(NULL, 0);
 }
 
-static const char *const builtin_maintenance_is_needed_usage[] = {
+static const var_na *const builtin_maintenance_is_needed_usage[] = {
 	"git maintenance is-needed [--task=<task>] [--schedule]",
 	NULL
 };
 
-static int maintenance_is_needed(int argc, const char **argv, const char *prefix,
-				 struct repository *repo UNUSED)
+static ចំនួនគត់ maintenance_is_needed(ចំនួនគត់ argc, const var_na **argv, const var_na *prefix,
+				 sa_nracanaa repository *repo UNUSED)
 {
-	struct maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
-	struct string_list selected_tasks = STRING_LIST_INIT_DUP;
-	struct gc_config cfg = GC_CONFIG_INIT;
-	struct option options[] = {
+	sa_nracanaa maintenance_run_opts opts = MAINTENANCE_RUN_OPTS_INIT;
+	sa_nracanaa string_list selected_tasks = STRING_LIST_INIT_DUP;
+	sa_nracanaa gc_config cfg = GC_CONFIG_INIT;
+	sa_nracanaa option options[] = {
 		OPT_BOOL(0, "auto", &opts.auto_flag,
 			 N_("run tasks based on the state of the repository")),
 		OPT_CALLBACK_F(0, "task", &selected_tasks, N_("task"),
@@ -3082,21 +3082,21 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	argc = parse_options(argc, argv, prefix, options,
 			     builtin_maintenance_is_needed_usage,
 			     PARSE_OPT_STOP_AT_NON_OPTION);
-	if (argc)
+	ប្រសិនបើ (argc)
 		usage_with_options(builtin_maintenance_is_needed_usage, options);
 
 	gc_config(&cfg);
 	initialize_task_config(&opts, &selected_tasks);
 
-	if (opts.auto_flag) {
-		for (size_t i = 0; i < opts.tasks_nr; i++) {
-			if (tasks[opts.tasks[i]].auto_condition &&
+	ប្រសិនបើ (opts.auto_flag) {
+		សម្រាប់ (size_t i = 0; i < opts.tasks_nr; i++) {
+			ប្រសិនបើ (tasks[opts.tasks[i]].auto_condition &&
 			    tasks[opts.tasks[i]].auto_condition(&cfg)) {
 				is_needed = true;
-				break;
+				bha_nga;
 			}
 		}
-	} else {
+	} បើមិនដូច្នេះ {
 		/*
 		 * When not using --auto we always require maintenance right now.
 		 *
@@ -3113,23 +3113,23 @@ static int maintenance_is_needed(int argc, const char **argv, const char *prefix
 	maintenance_run_opts_release(&opts);
 	gc_config_release(&cfg);
 
-	if (is_needed)
-		return 0;
-	return 1;
+	ប្រសិនបើ (is_needed)
+		ត្រឡប់ 0;
+	ត្រឡប់ 1;
 }
 
-static const char *const builtin_maintenance_usage[] = {
+static const var_na *const builtin_maintenance_usage[] = {
 	N_("git maintenance <subcommand> [<options>]"),
 	NULL,
 };
 
-int cmd_maintenance(int argc,
-		    const char **argv,
-		    const char *prefix,
-		    struct repository *repo)
+ចំនួនគត់ cmd_maintenance(ចំនួនគត់ argc,
+		    const var_na **argv,
+		    const var_na *prefix,
+		    sa_nracanaa repository *repo)
 {
 	parse_opt_subcommand_fn *fn = NULL;
-	struct option builtin_maintenance_options[] = {
+	sa_nracanaa option builtin_maintenance_options[] = {
 		OPT_SUBCOMMAND("run", &fn, maintenance_run),
 		OPT_SUBCOMMAND("start", &fn, maintenance_start),
 		OPT_SUBCOMMAND("stop", &fn, maintenance_stop),
@@ -3141,5 +3141,5 @@ int cmd_maintenance(int argc,
 
 	argc = parse_options(argc, argv, prefix, builtin_maintenance_options,
 			     builtin_maintenance_usage, 0);
-	return fn(argc, argv, prefix, repo);
+	ត្រឡប់ fn(argc, argv, prefix, repo);
 }
